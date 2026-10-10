@@ -1,0 +1,15 @@
+# Nada de esto hace falta para construir la imagen, y los .env no deben entrar
+# nunca en ella.
+.git
+.github
+**/node_modules
+**/dist
+**/coverage
+**/data
+**/.env
+**/.env.*
+!**/.env.example
+apps/api/tests
+infra
+docs
+*.md

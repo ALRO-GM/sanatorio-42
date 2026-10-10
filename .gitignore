@@ -1,0 +1,25 @@
+# Credenciales: nunca a git
+.env
+.env.*
+!.env.example
+!.env.mock
+
+# Node
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+npm-debug.log*
+
+# Base de datos local y copias
+data/
+backups/
+*.db
+*.db-shm
+*.db-wal
+
+# Editores / SO
+.DS_Store
+.idea/
+.vscode/
+*.swp

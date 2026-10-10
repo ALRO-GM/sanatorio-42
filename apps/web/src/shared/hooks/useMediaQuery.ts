@@ -1,0 +1,22 @@
+import { useEffect, useState } from 'react'
+
+/** `true` mientras la ventana cumpla esa consulta de CSS (`(max-width: 700px)`). */
+export function useMediaQuery(query: string): boolean {
+  const [matches, setMatches] = useState(() => window.matchMedia(query).matches)
+
+  useEffect(() => {
+    const media = window.matchMedia(query)
+    const onChange = (): void => {
+      setMatches(media.matches)
+    }
+
+    onChange()
+    media.addEventListener('change', onChange)
+
+    return () => {
+      media.removeEventListener('change', onChange)
+    }
+  }, [query])
+
+  return matches
+}

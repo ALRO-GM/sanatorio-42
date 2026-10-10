@@ -1,0 +1,40 @@
+{
+  "name": "sanatorio-42",
+  "version": "1.0.0",
+  "description": "Sanatorio 42: quién puede ayudarte con tu proyecto, terapias de grupo, tablón de dudas y pizarras",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev:api & npm run dev:web & wait",
+    "dev:api": "npm run dev -w @sanatorio/api",
+    "dev:web": "npm run dev -w @sanatorio/web",
+    "dev:mock": "npm run dev:mock -w @sanatorio/web",
+    "build": "npm run build -w @sanatorio/api && npm run build -w @sanatorio/web",
+    "start": "npm run start -w @sanatorio/api",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "npm run test --workspaces --if-present",
+    "check": "npm run typecheck && npm run lint && npm run format:check && npm run test",
+    "sync:status": "npm run sync:status -w @sanatorio/api",
+    "sync:run": "npm run sync:run -w @sanatorio/api"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.18.0",
+    "eslint": "^9.18.0",
+    "eslint-plugin-react-hooks": "^5.1.0",
+    "globals": "^15.14.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.20.0"
+  }
+}

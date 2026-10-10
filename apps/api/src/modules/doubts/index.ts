@@ -1,0 +1,43 @@
+/**
+ * Módulo `doubts`: el tablón de dudas (post-its por proyecto) y la guía corta
+ * que mantienen quienes ya lo aprobaron.
+ */
+
+import type { Db } from '../../core/db/database.js'
+import type { AppModule } from '../../core/module.js'
+import type { XpService } from '../profile/index.js'
+import type { ReplicaRepository } from '../replica/index.js'
+import { createDoubtsRepository } from './doubts.repository.js'
+import { createGuideChangesRepository } from './guide-changes.repository.js'
+import { registerDoubtsRoutes } from './doubts.routes.js'
+import { createDoubtsService } from './doubts.service.js'
+import type { DoubtsService } from './doubts.service.js'
+
+export type DoubtsModuleDeps = {
+  db: Db
+  replica: ReplicaRepository
+  xp: XpService
+  now?: () => number
+}
+
+export type DoubtsModule = AppModule & { service: DoubtsService }
+
+export function createDoubtsModule(deps: DoubtsModuleDeps): DoubtsModule {
+  const service = createDoubtsService({
+    doubts: createDoubtsRepository(deps.db),
+    changes: createGuideChangesRepository(deps.db),
+    xp: deps.xp,
+    replica: deps.replica,
+    ...(deps.now === undefined ? {} : { now: deps.now }),
+  })
+
+  return {
+    name: 'doubts',
+    service,
+    routes: (app, context) => {
+      registerDoubtsRoutes(app, context, service)
+    },
+  }
+}
+
+export type { DoubtsService } from './doubts.service.js'

@@ -1,0 +1,16 @@
+{
+  "name": "@sanatorio/contracts",
+  "version": "1.0.0",
+  "description": "Contrato HTTP de Sanatorio 42: los tipos de lo que la API devuelve y la web consume",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  }
+}

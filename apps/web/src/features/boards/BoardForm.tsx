@@ -1,0 +1,131 @@
+import { useState } from 'react'
+import type { ChangeEvent, SyntheticEvent } from 'react'
+
+import { api } from '../../shared/api'
+import { useAction } from '../../shared/hooks/useAsync'
+import { useI18n } from '../../shared/i18n'
+import { ErrorNote } from '../../shared/ui/ErrorNote'
+
+type BoardFormProps = {
+  /** Día con el que se abre el formulario, como `2026-10-10`. */
+  defaultDay: string
+  onCancel: () => void
+  onCreated: () => void
+}
+
+export function BoardForm({ defaultDay, onCancel, onCreated }: BoardFormProps) {
+  const { t } = useI18n()
+  const { busy, error, run } = useAction()
+  const [form, setForm] = useState({
+    title: '',
+    topic: '',
+    place: '',
+    day: defaultDay,
+    start: '17:00',
+    end: '18:30',
+    capacity: '20',
+    description: '',
+  })
+  const set =
+    (field: keyof typeof form) =>
+    (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
+      setForm((current) => ({ ...current, [field]: event.target.value }))
+    }
+
+  const submit = async (event: SyntheticEvent): Promise<void> => {
+    event.preventDefault()
+    // El día y las horas son las del navegador, que es la hora del campus para
+    // quien está allí; a la API viajan como instantes con su zona.
+    const at = (time: string): string => new Date(`${form.day}T${time}:00`).toISOString()
+    const ok = await run(() =>
+      api.createBoard({
+        title: form.title,
+        topic: form.topic,
+        place: form.place,
+        description: form.description,
+        capacity: Number(form.capacity),
+        startsAt: at(form.start),
+        endsAt: at(form.end),
+      }),
+    )
+    if (ok) onCreated()
+  }
+
+  return (
+    <form className="card form" onSubmit={(event) => void submit(event)}>
+      <h3>{t('cal.proposeBtn')}</h3>
+      <div className="form-grid">
+        <label className="span-2">
+          {t('cal.f.title')}
+          <input
+            value={form.title}
+            onChange={set('title')}
+            placeholder={t('cal.f.titleHint')}
+            maxLength={80}
+            required
+          />
+        </label>
+        <label>
+          {t('cal.f.topic')}
+          <input
+            value={form.topic}
+            onChange={set('topic')}
+            placeholder={t('cal.f.topicHint')}
+            maxLength={30}
+          />
+        </label>
+        <label>
+          {t('cal.f.place')}
+          <input
+            value={form.place}
+            onChange={set('place')}
+            placeholder={t('cal.f.placeHint')}
+            maxLength={80}
+            required
+          />
+        </label>
+        <label>
+          {t('cal.f.date')}
+          <input type="date" value={form.day} onChange={set('day')} required />
+        </label>
+        <label>
+          {t('cal.f.capacity')}
+          <input
+            type="number"
+            min={2}
+            max={100}
+            value={form.capacity}
+            onChange={set('capacity')}
+            required
+          />
+        </label>
+        <label>
+          {t('cal.f.start')}
+          <input type="time" value={form.start} onChange={set('start')} required />
+        </label>
+        <label>
+          {t('cal.f.end')}
+          <input type="time" value={form.end} onChange={set('end')} required />
+        </label>
+        <label className="span-2">
+          {t('cal.f.description')}
+          <textarea
+            rows={2}
+            value={form.description}
+            onChange={set('description')}
+            maxLength={400}
+          />
+        </label>
+      </div>
+      <ErrorNote error={error} />
+      <div className="actions">
+        <button type="submit" className="primary small" disabled={busy}>
+          {t('cal.f.create')}
+        </button>
+        <button type="button" className="pill" onClick={onCancel}>
+          {t('board.cancel')}
+        </button>
+      </div>
+    </form>
+  )
+}

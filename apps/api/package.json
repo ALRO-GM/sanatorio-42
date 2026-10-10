@@ -1,0 +1,34 @@
+{
+  "name": "@sanatorio/api",
+  "version": "1.0.0",
+  "description": "API de Sanatorio 42: réplica incremental de la API de 42 y funciones de comunidad",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "tsx watch --env-file=.env src/main.ts",
+    "build": "tsc --project tsconfig.build.json",
+    "start": "node --env-file-if-exists=.env dist/main.js",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "db:migrate": "tsx --env-file=.env src/cli/migrate.ts",
+    "sync:status": "tsx --env-file=.env src/cli/sync-status.ts",
+    "sync:run": "tsx --env-file=.env src/cli/sync-run.ts"
+  },
+  "dependencies": {
+    "@libsql/client": "^0.18.0",
+    "fastify": "^5.2.1",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@sanatorio/contracts": "*",
+    "@types/node": "^22.10.6",
+    "@vitest/coverage-v8": "^2.1.8",
+    "tsx": "^4.19.2",
+    "vitest": "^2.1.8"
+  }
+}

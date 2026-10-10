@@ -1,0 +1,19 @@
+# Caddy pide y renueva el certificado él solo. Basta con que el dominio apunte
+# a esta máquina y los puertos 80 y 443 estén abiertos.
+{$DOMAIN} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		# La web no se incrusta en ninguna otra.
+		X-Frame-Options "DENY"
+		-Server
+	}
+
+	reverse_proxy app:3000 {
+		health_uri /health
+		health_interval 30s
+	}
+}

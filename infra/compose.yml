@@ -1,0 +1,58 @@
+# Sanatorio 42 en una máquina: la app y Caddy delante con HTTPS automático.
+#
+#   cp .env.example .env && chmod 600 .env     # y rellénalo
+#   docker compose up -d --build               # construye en la propia máquina
+#
+# o, si la imagen la publica el workflow de despliegue (APP_IMAGE en .env):
+#
+#   docker compose pull && docker compose up -d
+#
+# Todo el estado está en dos volúmenes: `data` (la base SQLite) y `caddy_data`
+# (los certificados). Lo demás se puede tirar y reconstruir.
+
+name: sanatorio
+
+services:
+  app:
+    image: ${APP_IMAGE:-sanatorio-42:local}
+    build:
+      context: ..
+      dockerfile: infra/docker/Dockerfile
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - data:/data
+    # No publica puertos: solo Caddy habla con ella, por la red interna.
+    # La app es pequeña; el tope evita que un fallo se coma la máquina.
+    mem_limit: 512m
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '3'
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    depends_on:
+      - app
+    ports:
+      - '80:80'
+      - '443:443'
+      - '443:443/udp'
+    environment:
+      DOMAIN: ${DOMAIN:?Pon DOMAIN en infra/.env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '3'
+
+volumes:
+  data:
+  caddy_data:
+  caddy_config:

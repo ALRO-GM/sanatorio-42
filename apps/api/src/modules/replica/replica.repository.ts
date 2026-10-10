@@ -1,0 +1,613 @@
+/**
+ * Repositorio de la réplica de 42.
+ *
+ * Aquí se escribe lo que llega de la API y se lee lo que pide la web. Las dos
+ * mitades están en el mismo fichero a propósito: lo que se guarda existe solo
+ * porque alguna consulta de abajo lo necesita.
+ *
+ * Todas las escrituras son `INSERT … ON CONFLICT DO UPDATE` y van en un `batch`,
+ * que es atómico y, hablando con Turso, un único viaje de red. Recibir dos veces
+ * la misma fila no hace daño: por eso la sincronización puede solapar ventanas
+ * sin llevar la cuenta de qué ha visto ya.
+ */
+
+import type { InStatement } from '@libsql/client'
+
+import type { Db } from '../../core/db/database.js'
+import { nowIso } from '../../core/db/database.js'
+import { toNumber, toText } from '../../core/db/rows.js'
+import { avatarUrlOf } from '../../integrations/forty-two/avatar.js'
+import { PROJECT_STATUS } from './replica.domain.js'
+import type {
+  ApiCampus,
+  ApiLocation,
+  ApiProjectUser,
+  ApiUser,
+} from '../../integrations/forty-two/types.js'
+import type { CampusSummary, ProjectStatus, ProjectSummary } from '@sanatorio/contracts'
+
+/** Una persona del proyecto, tal y como sale del JOIN. */
+export type PeerRow = {
+  login: string
+  image: string | null
+  location: string | null
+  available: boolean
+  status: ProjectStatus
+}
+
+/** Filas por `batch`. Muy por debajo del límite de sentencias de libSQL. */
+const BATCH_SIZE = 400
+
+export function createReplicaRepository(db: Db) {
+  /** Ejecuta las sentencias en lotes atómicos. */
+  async function run(statements: InStatement[]): Promise<void> {
+    for (let index = 0; index < statements.length; index += BATCH_SIZE) {
+      await db.batch(statements.slice(index, index + BATCH_SIZE), 'write')
+    }
+  }
+
+  return {
+    // --- Escritura ---------------------------------------------------------
+
+    /**
+     * Guarda una página de `projects_users`.
+     *
+     * De cada fila salen cuatro cosas: la persona, su pertenencia al campus, el
+     * proyecto y el estado. Las filas sin id o sin persona se saltan: sin eso no
+     * hay clave con la que guardarlas.
+     *
+     * @param campusId Campus por el que se filtró la petición, o `undefined` si
+     *   las filas vienen del perfil de alguien y no dicen nada del campus.
+     * @returns Cuántas filas se han guardado.
+     */
+    async ingestProjectUsers(
+      rows: readonly ApiProjectUser[],
+      campusId?: number,
+      owner?: ApiUser,
+    ): Promise<number> {
+      const now = nowIso()
+      const statements: InStatement[] = []
+      let saved = 0
+
+      for (const row of rows) {
+        const user = row.user ?? owner
+        const project = row.project
+
+        // Los tipos dicen que los ids son números, pero esto viene de fuera: una
+        // fila sin ellos no tiene clave con la que guardarse.
+        if (
+          !isId(row.id) ||
+          user === undefined ||
+          !isId(user.id) ||
+          project === undefined ||
+          project === null ||
+          !isId(project.id)
+        ) {
+          continue
+        }
+
+        // Si la persona viene anidada se actualiza; si es la dueña del perfil,
+        // ya la guardó quien llamó.
+        if (row.user !== undefined && row.user !== null) {
+          statements.push(upsertUser(user, now))
+        }
+        if (campusId !== undefined) {
+          statements.push(upsertMember(campusId, user.id))
+        }
+        if (typeof project.name === 'string' && project.name !== '') {
+          statements.push({
+            sql: `INSERT INTO projects (id, name, slug) VALUES (?, ?, ?)
+                  ON CONFLICT (id) DO UPDATE SET name = excluded.name, slug = excluded.slug`,
+            args: [project.id, project.name, project.slug ?? null],
+          })
+        }
+
+        statements.push({
+          sql: `INSERT INTO project_users
+                  (id, user_id, project_id, status, validated, final_mark, updated_at_42, synced_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT (id) DO UPDATE SET
+                  status        = excluded.status,
+                  validated     = excluded.validated,
+                  final_mark    = excluded.final_mark,
+                  updated_at_42 = excluded.updated_at_42,
+                  synced_at     = excluded.synced_at`,
+          args: [
+            row.id,
+            user.id,
+            project.id,
+            row.status,
+            triState(row['validated?']),
+            typeof row.final_mark === 'number' ? Math.round(row.final_mark) : null,
+            row.updated_at ?? null,
+            now,
+          ],
+        })
+        saved += 1
+      }
+
+      await run(statements)
+
+      return saved
+    },
+
+    /** Guarda a una persona suelta (la que acaba de entrar) y su campus. */
+    async ingestUser(user: ApiUser, campusIds: readonly number[]): Promise<void> {
+      const now = nowIso()
+
+      await run([
+        upsertUser(user, now),
+        ...campusIds.map((campusId) => upsertMember(campusId, user.id)),
+      ])
+    },
+
+    /**
+     * Sustituye la foto de puestos de un campus.
+     *
+     * Borrar y volver a insertar dentro del mismo `batch` es lo que hace que
+     * quien se ha levantado desaparezca: la API solo manda a los que siguen
+     * sentados, así que no hay "fila de salida" que procesar.
+     */
+    async replacePresence(campusId: number, locations: readonly ApiLocation[]): Promise<number> {
+      const now = nowIso()
+      const statements: InStatement[] = [
+        { sql: 'DELETE FROM presence WHERE campus_id = ?', args: [campusId] },
+      ]
+      let saved = 0
+
+      for (const location of locations) {
+        const user = location.user
+
+        if (user === undefined || user === null || !isId(user.id) || !isText(location.host)) {
+          continue
+        }
+
+        statements.push(upsertUser(user, now), {
+          // `ON CONFLICT` por si alguien tiene dos sesiones abiertas: gana la
+          // última que venga, que es tan buena como la otra para ir a buscarle.
+          sql: `INSERT INTO presence (user_id, campus_id, host, begin_at, seen_at)
+                VALUES (?, ?, ?, ?, ?)
+                ON CONFLICT (user_id) DO UPDATE SET
+                  campus_id = excluded.campus_id,
+                  host      = excluded.host,
+                  begin_at  = excluded.begin_at,
+                  seen_at   = excluded.seen_at`,
+          args: [user.id, campusId, location.host, location.begin_at ?? null, now],
+        })
+        // El plano del campus no lo da la API: se aprende de dónde se sienta la gente.
+        statements.push({
+          sql: `INSERT INTO seats (campus_id, host, seen_at) VALUES (?, ?, ?)
+                ON CONFLICT (campus_id, host) DO UPDATE SET seen_at = excluded.seen_at`,
+          args: [campusId, location.host, now],
+        })
+        saved += 1
+      }
+
+      await run(statements)
+
+      return saved
+    },
+
+    /** Proyectos de la réplica con alguno de esos slugs. */
+    async projectsBySlugs(slugs: readonly string[]): Promise<{ id: number; slug: string }[]> {
+      if (slugs.length === 0) {
+        return []
+      }
+
+      const result = await db.execute({
+        sql: `SELECT id, slug FROM projects WHERE slug IN (${slugs.map(() => '?').join(', ')})`,
+        args: [...slugs],
+      })
+
+      return result.rows.map((row) => ({ id: toNumber(row.id), slug: toText(row.slug) }))
+    },
+
+    /** Puestos del campus que se han visto ocupados alguna vez. */
+    async knownSeats(campusId: number): Promise<string[]> {
+      const result = await db.execute({
+        sql: 'SELECT host FROM seats WHERE campus_id = ?',
+        args: [campusId],
+      })
+
+      return result.rows.map((row) => toText(row.host))
+    },
+
+    /**
+     * Quién está sentado dónde en un campus, según la última foto de puestos.
+     *
+     * @param since Las filas más viejas que esto no se creen. Ver `LOCATION_MAX_AGE_MS`.
+     */
+    async presenceIn(
+      campusId: number,
+      since: string,
+    ): Promise<{ login: string; image: string | null; host: string }[]> {
+      const result = await db.execute({
+        sql: `SELECT u.login, u.image, p.host
+              FROM presence p JOIN users u ON u.id = p.user_id
+              WHERE p.campus_id = ? AND p.seen_at >= ?`,
+        args: [campusId, since],
+      })
+
+      return result.rows.map((row) => ({
+        login: toText(row.login),
+        image: typeof row.image === 'string' ? row.image : null,
+        host: toText(row.host),
+      }))
+    },
+
+    /** Guarda el catálogo de campus. */
+    async upsertCampuses(campuses: readonly ApiCampus[]): Promise<void> {
+      const now = nowIso()
+
+      await run(
+        campuses
+          .filter((campus) => isId(campus.id) && isText(campus.name))
+          .map((campus) => ({
+            sql: `INSERT INTO campuses (id, name, city, country, time_zone, users_count, synced_at)
+                  VALUES (?, ?, ?, ?, ?, ?, ?)
+                  ON CONFLICT (id) DO UPDATE SET
+                    name        = excluded.name,
+                    city        = excluded.city,
+                    country     = excluded.country,
+                    time_zone   = excluded.time_zone,
+                    users_count = excluded.users_count,
+                    synced_at   = excluded.synced_at`,
+            args: [
+              campus.id,
+              campus.name,
+              campus.city ?? null,
+              campus.country ?? null,
+              campus.time_zone ?? null,
+              campus.users_count ?? null,
+              now,
+            ],
+          })),
+      )
+    },
+
+    // --- Lectura -----------------------------------------------------------
+
+    /**
+     * Quién puede atender en un proyecto, ya filtrado y ordenado.
+     *
+     * Todo lo que antes eran 21 peticiones a la API es este JOIN. Se devuelven
+     * solo los accionables:
+     *
+     * - quien lo está haciendo (`in_progress`) y sigue activo en 42, y
+     * - quien lo aprobó (`finished` y validado) **y** está de guardia: disponible
+     *   y con puesto. Un especialista fuera de turno no aporta a la lista, y en
+     *   proyectos comunes son cientos.
+     *
+     * El puesto solo se cree si la foto del campus es posterior a
+     * `presenceSince`; si no, sale `null` antes que afirmar algo viejo.
+     */
+    async findPeers(params: {
+      projectId: number
+      campusId: number
+      excludeLogin?: string | undefined
+      presenceSince: string
+      limit?: number
+    }): Promise<PeerRow[]> {
+      const result = await db.execute({
+        sql: `SELECT u.login                    AS login,
+                     u.image                    AS image,
+                     pr.host                    AS location,
+                     COALESCE(a.available, 0)   AS available,
+                     pu.status                  AS status
+              FROM project_users pu
+              JOIN users u            ON u.id = pu.user_id
+              JOIN campus_members cm  ON cm.user_id = u.id AND cm.campus_id = ?
+              LEFT JOIN presence pr   ON pr.user_id = u.id AND pr.seen_at >= ?
+              LEFT JOIN availability a ON a.login = u.login
+              WHERE pu.project_id = ?
+                AND u.login <> ?
+                AND (
+                  (pu.status = 'in_progress' AND u.active = 1)
+                  OR (pu.status = 'finished' AND pu.validated = 1
+                      AND a.available = 1 AND pr.host IS NOT NULL)
+                )
+              ORDER BY (pr.host IS NOT NULL AND COALESCE(a.available, 0) = 1) DESC,
+                       (pr.host IS NOT NULL) DESC,
+                       pu.updated_at_42 DESC
+              LIMIT ?`,
+        args: [
+          params.campusId,
+          params.presenceSince,
+          params.projectId,
+          params.excludeLogin ?? '',
+          params.limit ?? 300,
+        ],
+      })
+
+      // Una persona puede tener más de una fila en el mismo proyecto (un
+      // reintento). Se queda la primera, que por el orden es la más útil.
+      const seen = new Set<string>()
+      const peers: PeerRow[] = []
+
+      for (const row of result.rows) {
+        const login = toText(row.login)
+
+        if (seen.has(login)) {
+          continue
+        }
+        seen.add(login)
+
+        peers.push({
+          login,
+          image: typeof row.image === 'string' ? row.image : null,
+          location: typeof row.location === 'string' ? row.location : null,
+          available: Number(row.available) === 1,
+          status:
+            row.status === PROJECT_STATUS.FINISHED
+              ? PROJECT_STATUS.FINISHED
+              : PROJECT_STATUS.IN_PROGRESS,
+        })
+      }
+
+      return peers
+    },
+
+    /** Personas del campus con alguna fila en el proyecto, hagan lo que hagan. */
+    async countParticipants(projectId: number, campusId: number): Promise<number> {
+      const result = await db.execute({
+        sql: `SELECT COUNT(DISTINCT pu.user_id) AS total
+              FROM project_users pu
+              JOIN campus_members cm ON cm.user_id = pu.user_id AND cm.campus_id = ?
+              WHERE pu.project_id = ?`,
+        args: [campusId, projectId],
+      })
+
+      return toNumber(result.rows[0]?.total)
+    },
+
+    /**
+     * Proyectos de una persona.
+     *
+     * `in_progress` siempre; con `includeFinished`, también los aprobados, que
+     * son en los que puede responder como especialista.
+     */
+    async projectsOf(login: string, includeFinished = false): Promise<ProjectSummary[]> {
+      const result = await db.execute({
+        sql: `SELECT p.id AS id, p.name AS name,
+                     MAX(CASE WHEN pu.status = 'in_progress' THEN 1 ELSE 0 END) AS doing
+              FROM project_users pu
+              JOIN users u    ON u.id = pu.user_id
+              JOIN projects p ON p.id = pu.project_id
+              WHERE u.login = ?
+                AND (pu.status = 'in_progress'
+                     OR (? = 1 AND pu.status = 'finished' AND pu.validated = 1))
+              GROUP BY p.id, p.name
+              ORDER BY doing DESC, p.name COLLATE NOCASE`,
+        args: [login, includeFinished ? 1 : 0],
+      })
+
+      return result.rows.map((row) => ({
+        id: toNumber(row.id),
+        name: toText(row.name),
+        ...(includeFinished
+          ? {
+              status:
+                toNumber(row.doing) === 1 ? PROJECT_STATUS.IN_PROGRESS : PROJECT_STATUS.FINISHED,
+            }
+          : {}),
+      }))
+    },
+
+    /** `true` si ya hay alguna fila de proyectos de esta persona. */
+    async hasProjectsOf(login: string): Promise<boolean> {
+      const result = await db.execute({
+        sql: `SELECT 1 FROM project_users pu JOIN users u ON u.id = pu.user_id
+              WHERE u.login = ? LIMIT 1`,
+        args: [login],
+      })
+
+      return result.rows.length > 0
+    },
+
+    /** `true` si la persona aprobó el proyecto: es "especialista" en él. */
+    async isSpecialist(login: string, projectId: number): Promise<boolean> {
+      const result = await db.execute({
+        sql: `SELECT 1 FROM project_users pu JOIN users u ON u.id = pu.user_id
+              WHERE u.login = ? AND pu.project_id = ?
+                AND pu.status = 'finished' AND pu.validated = 1
+              LIMIT 1`,
+        args: [login, projectId],
+      })
+
+      return result.rows.length > 0
+    },
+
+    /** Nombre de un proyecto, o `null` si aún no se ha visto ninguna fila suya. */
+    async projectName(projectId: number): Promise<string | null> {
+      const result = await db.execute({
+        sql: 'SELECT name FROM projects WHERE id = ?',
+        args: [projectId],
+      })
+      const name = result.rows[0]?.name
+
+      return typeof name === 'string' ? name : null
+    },
+
+    /** `true` si conocemos a alguien con ese login. */
+    async userExists(login: string): Promise<boolean> {
+      const result = await db.execute({
+        sql: 'SELECT 1 FROM users WHERE login = ? LIMIT 1',
+        args: [login],
+      })
+
+      return result.rows.length > 0
+    },
+
+    /** Avatares de una lista de logins, para pintar grupos y dudas. */
+    async imagesOf(logins: readonly string[]): Promise<Map<string, string | null>> {
+      const images = new Map<string, string | null>()
+      const unique = [...new Set(logins)]
+
+      if (unique.length === 0) {
+        return images
+      }
+
+      const result = await db.execute({
+        sql: `SELECT login, image FROM users WHERE login IN (${unique.map(() => '?').join(', ')})`,
+        args: unique,
+      })
+
+      for (const row of result.rows) {
+        images.set(toText(row.login), typeof row.image === 'string' ? row.image : null)
+      }
+
+      return images
+    },
+
+    /**
+     * Puesto actual de una persona, o `null`.
+     *
+     * Con la misma regla de frescura que la lista de compañeros.
+     */
+    async locationOf(login: string, presenceSince: string): Promise<string | null> {
+      const result = await db.execute({
+        sql: `SELECT pr.host AS host FROM presence pr JOIN users u ON u.id = pr.user_id
+              WHERE u.login = ? AND pr.seen_at >= ?`,
+        args: [login, presenceSince],
+      })
+      const host = result.rows[0]?.host
+
+      return typeof host === 'string' ? host : null
+    },
+
+    /** Campus conocidos, con los replicados primero. */
+    async listCampuses(tracked: readonly number[]): Promise<CampusSummary[]> {
+      const result = await db.execute('SELECT id, name, city, country FROM campuses ORDER BY name')
+      const campuses = result.rows.map((row) => ({
+        id: toNumber(row.id),
+        name: toText(row.name),
+        city: typeof row.city === 'string' ? row.city : null,
+        country: typeof row.country === 'string' ? row.country : null,
+        tracked: tracked.includes(toNumber(row.id)),
+      }))
+
+      return campuses.sort((a, b) => Number(b.tracked) - Number(a.tracked))
+    },
+
+    /** Zona horaria de un campus, o `undefined` si no se conoce. */
+    async timeZoneOf(campusId: number): Promise<string | undefined> {
+      const result = await db.execute({
+        sql: 'SELECT time_zone FROM campuses WHERE id = ?',
+        args: [campusId],
+      })
+      const zone = result.rows[0]?.time_zone
+
+      return typeof zone === 'string' && zone !== '' ? zone : undefined
+    },
+
+    /** Tamaño de la réplica, para el panel de estado. */
+    async counts(): Promise<{
+      users: number
+      projectUsers: number
+      projects: number
+      present: number
+    }> {
+      const result = await db.execute(
+        `SELECT (SELECT COUNT(*) FROM users)         AS users,
+                (SELECT COUNT(*) FROM project_users) AS project_users,
+                (SELECT COUNT(*) FROM projects)      AS projects,
+                (SELECT COUNT(*) FROM presence)      AS present`,
+      )
+      const row = result.rows[0]
+
+      return {
+        users: toNumber(row?.users),
+        projectUsers: toNumber(row?.project_users),
+        projects: toNumber(row?.projects),
+        present: toNumber(row?.present),
+      }
+    },
+
+    // --- Estado de la sincronización ----------------------------------------
+
+    /** Lee el estado de una tarea, o `undefined` si nunca ha corrido. */
+    async getState<T>(key: string): Promise<T | undefined> {
+      const result = await db.execute({
+        sql: 'SELECT value FROM sync_state WHERE key = ?',
+        args: [key],
+      })
+      const value = result.rows[0]?.value
+
+      if (typeof value !== 'string') {
+        return undefined
+      }
+
+      try {
+        return JSON.parse(value) as T
+      } catch {
+        // Un estado ilegible se trata como si no existiera: la tarea vuelve a
+        // empezar, que es más lento pero nunca incorrecto.
+        return undefined
+      }
+    },
+
+    /** Guarda el estado de una tarea. */
+    async setState(key: string, value: unknown): Promise<void> {
+      await db.execute({
+        sql: `INSERT INTO sync_state (key, value, updated_at) VALUES (?, ?, ?)
+              ON CONFLICT (key) DO UPDATE SET
+                value = excluded.value, updated_at = excluded.updated_at`,
+        args: [key, JSON.stringify(value), nowIso()],
+      })
+    },
+  }
+}
+
+export type ReplicaRepository = ReturnType<typeof createReplicaRepository>
+
+/**
+ * `INSERT` de una persona.
+ *
+ * Solo se guardan login, nombre, avatar y si sigue activa. El resto de lo que
+ * manda la API (email, teléfono, wallet…) no llega a tocar la base.
+ */
+function upsertUser(user: ApiUser, now: string): InStatement {
+  return {
+    // `OR REPLACE` y no `ON CONFLICT (id)`: el login también es único, y 42
+    // recicla logins al anonimizar cuentas. Si llega un id nuevo con un login
+    // que ya teníamos, la fila vieja se va en vez de tumbar el lote entero.
+    sql: `INSERT OR REPLACE INTO users (id, login, name, image, active, synced_at)
+          VALUES (?, ?, ?, ?, ?, ?)`,
+    args: [
+      user.id,
+      user.login,
+      typeof user.usual_full_name === 'string' ? user.usual_full_name : null,
+      avatarUrlOf(user.image),
+      // Solo `false` explícito cuenta como inactiva: si el campo no viene, no se
+      // puede afirmar que lo sea.
+      user['active?'] === false ? 0 : 1,
+      now,
+    ],
+  }
+}
+
+function upsertMember(campusId: number, userId: number): InStatement {
+  return {
+    sql: 'INSERT INTO campus_members (campus_id, user_id) VALUES (?, ?) ON CONFLICT DO NOTHING',
+    args: [campusId, userId],
+  }
+}
+
+/** `true`/`false`/`null` de la API a `1`/`0`/`NULL` de SQLite. */
+function triState(value: boolean | null | undefined): number | null {
+  if (value === true) {
+    return 1
+  }
+
+  return value === false ? 0 : null
+}
+
+/** `true` si el valor sirve como id: un entero positivo. */
+function isId(value: unknown): value is number {
+  return typeof value === 'number' && Number.isInteger(value) && value > 0
+}
+
+/** `true` si el valor es un texto con algo dentro. */
+function isText(value: unknown): value is string {
+  return typeof value === 'string' && value !== ''
+}

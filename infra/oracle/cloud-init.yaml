@@ -1,0 +1,48 @@
+#cloud-config
+# Prepara una máquina Ubuntu de Oracle Cloud (Always Free) para Sanatorio 42.
+#
+# Se pega en "Advanced options → Management → Cloud-init script" al crear la
+# instancia. Deja instalado Docker, abre los puertos web en el cortafuegos de la
+# propia máquina y añade swap. Los pasos que quedan (clonar, rellenar el .env y
+# arrancar) están en docs/deploy-oracle.md.
+
+package_update: true
+package_upgrade: true
+
+packages:
+  - docker.io
+  - docker-compose-v2
+  - git
+  - iptables-persistent
+  - unattended-upgrades
+
+# La forma x86 gratuita (E2.1.Micro) tiene 1 GB de RAM: sin swap, construir la
+# imagen puede quedarse sin memoria. En las ARM sobra, pero no molesta.
+swap:
+  filename: /swapfile
+  size: 2G
+  maxsize: 2G
+
+write_files:
+  # Copia de seguridad cada noche a las 04:00.
+  - path: /etc/cron.d/sanatorio-backup
+    permissions: '0644'
+    content: |
+      0 4 * * * ubuntu /opt/sanatorio/infra/scripts/backup.sh >> /var/log/sanatorio-backup.log 2>&1
+
+runcmd:
+  # Las imágenes de Ubuntu de Oracle traen un iptables que rechaza todo salvo
+  # SSH. Abrir los puertos en la consola (Security List) no basta: hay que
+  # abrirlos también aquí. Las reglas van antes del REJECT final.
+  - iptables -I INPUT 6 -m state --state NEW -p tcp --dport 80 -j ACCEPT
+  - iptables -I INPUT 6 -m state --state NEW -p tcp --dport 443 -j ACCEPT
+  - iptables -I INPUT 6 -m state --state NEW -p udp --dport 443 -j ACCEPT
+  - netfilter-persistent save
+
+  - usermod -aG docker ubuntu
+  - systemctl enable --now docker
+
+  - mkdir -p /opt/sanatorio
+  - chown ubuntu:ubuntu /opt/sanatorio
+  - touch /var/log/sanatorio-backup.log
+  - chown ubuntu:ubuntu /var/log/sanatorio-backup.log
