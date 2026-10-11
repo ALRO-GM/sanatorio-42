@@ -172,6 +172,10 @@ export function createDoubtsRepository(db: Db) {
       return toNumber(result.lastInsertRowid)
     },
 
+    async updateBody(id: number, body: string): Promise<void> {
+      await db.execute({ sql: 'UPDATE doubts SET body = ? WHERE id = ?', args: [body, id] })
+    },
+
     /**
      * Da la duda por resuelta con esa respuesta, o la reabre (`answerId: null`).
      */

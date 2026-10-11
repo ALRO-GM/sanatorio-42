@@ -19,7 +19,8 @@ import type { PeersService } from '../peers/index.js'
 import { LOCATION_MAX_AGE_MS } from '../replica/index.js'
 import type { ReplicaRepository, Syncer } from '../replica/index.js'
 import type { TherapyService } from '../therapy/index.js'
-import { parseHost } from './seat-layout.js'
+import { hostAt, parseHost } from './seat-layout.js'
+import type { SeatPosition } from './seat-layout.js'
 
 export type MapServiceOptions = {
   replica: ReplicaRepository
@@ -28,6 +29,12 @@ export type MapServiceOptions = {
   therapy: TherapyService
   now?: () => number
 }
+
+/** Un puesto con lo que hace falta para colocarlo, además de lo que se devuelve. */
+type PlacedSeat = MapSeat & Pick<SeatPosition, 'cluster' | 'separator'>
+
+/** Proyectos en curso que se enseñan de cada persona, como mucho. */
+const MAX_PROJECTS = 4
 
 export function createMapService(options: MapServiceOptions) {
   const { replica, sync, peers, therapy } = options
@@ -69,11 +76,11 @@ export function createMapService(options: MapServiceOptions) {
         }
       }
 
-      const seats = new Map<string, MapSeat & { cluster: string }>()
+      const seats = new Map<string, PlacedSeat>()
       const unplaced: ClusterMap['unplaced'] = []
 
       /** El puesto con ese nombre, creándolo vacío si aún no estaba. */
-      const seatAt = (host: string): (MapSeat & { cluster: string }) | null => {
+      const seatAt = (host: string): PlacedSeat | null => {
         const existing = seats.get(host)
 
         if (existing !== undefined) {
@@ -86,7 +93,7 @@ export function createMapService(options: MapServiceOptions) {
           return null
         }
 
-        const seat = { host, ...position, occupant: null, reservation: null }
+        const seat: PlacedSeat = { host, ...position, occupant: null, reservation: null }
 
         seats.set(host, seat)
 
@@ -105,6 +112,8 @@ export function createMapService(options: MapServiceOptions) {
         }
       }
 
+      const activeProjects = await replica.activeProjectsOf(present.map((person) => person.login))
+
       for (const person of present) {
         const seat = seatAt(person.host)
         const personDuty = duty.get(person.login) ?? null
@@ -117,6 +126,7 @@ export function createMapService(options: MapServiceOptions) {
         seat.occupant = {
           login: person.login,
           image: person.image,
+          projects: (activeProjects.get(person.login) ?? []).slice(0, MAX_PROJECTS),
           duty: personDuty,
           me: person.login === actor.login,
         }
@@ -124,7 +134,32 @@ export function createMapService(options: MapServiceOptions) {
 
       const clusters = new Map<string, MapCluster>()
 
-      for (const { cluster: id, ...seat } of seats.values()) {
+      // El plano se completa: dentro del rectángulo que forman los puestos
+      // conocidos de cada cluster, las casillas que faltan se dan por puestos
+      // libres. Así se pueden elegir para una terapia aunque nadie se haya
+      // sentado nunca en ellos. El nombre sigue la forma que usa ese cluster.
+      const bounds = new Map<string, SeatPosition>()
+
+      for (const seat of seats.values()) {
+        const known = bounds.get(seat.cluster)
+
+        bounds.set(seat.cluster, {
+          cluster: seat.cluster,
+          separator: seat.separator,
+          row: Math.max(known?.row ?? 0, seat.row),
+          seat: Math.max(known?.seat ?? 0, seat.seat),
+        })
+      }
+
+      for (const limit of bounds.values()) {
+        for (let row = 1; row <= limit.row; row += 1) {
+          for (let seat = 1; seat <= limit.seat; seat += 1) {
+            seatAt(hostAt({ ...limit, row, seat }))
+          }
+        }
+      }
+
+      for (const { cluster: id, separator: _separator, ...seat } of seats.values()) {
         const cluster = clusters.get(id) ?? {
           id,
           rows: 0,

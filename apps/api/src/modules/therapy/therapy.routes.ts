@@ -32,6 +32,17 @@ export function registerTherapyRoutes(
     return reply.code(201).send(await therapy.create(await session.actor(request), request.body))
   })
 
+  /** `PUT /groups/:id` → cambia el grupo. Solo quien lo abrió, o quien modera. */
+  app.put<IdParams>('/groups/:id', async (request, reply) => {
+    return reply.send(
+      await therapy.update(
+        await session.actor(request),
+        idParam(request.params.id, 'El grupo'),
+        request.body,
+      ),
+    )
+  })
+
   app.post<IdParams>('/groups/:id/join', async (request, reply) => {
     await therapy.join(await session.actor(request), idParam(request.params.id, 'El grupo'))
 

@@ -68,10 +68,10 @@ para elegir puestos al abrir un grupo de terapia.
       "seats": [
         {
           "host": "c1r2s4", "row": 2, "seat": 4,
-          "occupant": { "login": "anavarro", "image": null, "duty": "patient", "me": false },
+          "occupant": { "login": "anavarro", "image": null, "projects": ["ft_printf"], "duty": "patient", "me": false },
           "reservation": {
             "groupId": 1, "projectName": "ft_printf",
-            "days": [2, 4], "start": "16:00", "end": "18:00", "inSession": true
+            "dates": ["2026-10-13", "2026-10-15"], "start": "16:00", "end": "18:00", "inSession": true
           }
         }
       ]
@@ -84,10 +84,11 @@ para elegir puestos al abrir un grupo de terapia.
 - `duty`: `"specialist"` (aprobó el proyecto, dorado), `"patient"` (lo está
   haciendo, verde) o `null` si no está de guardia para ese proyecto.
 - `reservation`: grupo de terapia que tiene reservado el puesto (azul), o `null`.
-- `seats` trae solo los puestos que se conocen: ocupados ahora, vistos ocupados
-  alguna vez o reservados. La API de 42 no publica el plano de un campus, así que
-  se aprende de dónde se sienta la gente; el resto de la cuadrícula
-  (`rows` × `seatsPerRow`) puede no existir.
+- `seats` trae **todos** los puestos de la cuadrícula (`rows` × `seatsPerRow`),
+  ocupados o libres. La API de 42 no publica el plano de un campus, así que se
+  deduce de los puestos en los que se ha visto a alguien y el rectángulo se
+  completa con puestos libres; alguno puede corresponder a un pasillo.
+- `occupant.projects`: nombres de los proyectos que tiene en curso (hasta cuatro).
 - `unplaced`: gente en puestos cuyo nombre no sigue el patrón sala-fila-puesto.
 
 No gasta peticiones de 42: usa la misma foto de puestos que la lista de gente.
@@ -121,7 +122,8 @@ GET /me/profile
   "titles": [{ "id": "paciente", "level": 1, "unlocked": true }, …],
   "achievements": [{ "id": "first_duty", "progress": 1, "goal": 1, "unlocked": true }, …],
   "reactions": { "bug": 7, "code": 5, "concept": 9, "patient": 4 },
-  "rules": { "therapy_session": 20, "specialist_help": 40, "peer_help": 15, "board_host": 50, "first_duty": 0 }
+  "rules": { "therapy_session": 20, "specialist_help": 40, "peer_help": 15, "board_host": 50, "first_duty": 0 },
+  "earned": { "specialist_help": { "xp": 80, "times": 2 }, "peer_help": { "xp": 0, "times": 0 } }
 }
 
 Ids de título: `paciente`, `interno`, `residente`, `especialista`, `jefe`.
@@ -137,7 +139,7 @@ GET /groups → grupos abiertos del campus. Con `?project=1314`, los de ese proy
 [{
   "id": 7, "projectId": 1314, "projectName": "ft_printf", "creator": "legomez",
   "place": "Cluster 1 · Planta 2", "note": "Puestos c1r2s1 a c1r2s4",
-  "days": [2, 4],                    // 1 lunes … 7 domingo
+  "dates": ["2026-10-13", "2026-10-15"],   // días concretos, en la hora del campus
   "start": "16:00", "end": "18:00", "capacity": 5,
   "members": [{ "login": "legomez", "image": null }],
   "joined": true,                    // estoy dentro
@@ -149,25 +151,49 @@ POST /groups → 201 con el grupo. `capacity` (2-12, por defecto 5), `note` y `s
 son opcionales. `seats` es la lista de puestos que reserva el grupo
 (`["c1r2s3", "c1r2s4"]`, como mucho tantos como plazas); cada grupo los devuelve
 en `seats` y en el mapa salen en azul.
-{ "projectId": 1314, "place": "Cluster 1 · Planta 2", "days": [2, 4], "start": "16:00", "end": "18:00" }
+{ "projectId": 1314, "place": "Cluster 1 · Planta 2", "dates": ["2026-10-13", "2026-10-15"], "start": "16:00", "end": "18:00" }
 
 - POST /groups/:id/join → 204 (409 si está completo)
 - DELETE /groups/:id/join → 204. Si era la última persona, el grupo se cierra.
 - DELETE /groups/:id → 204. Solo quien lo abrió.
 
+Las terapias son para **días concretos** (`dates`, de uno a catorce), no se
+repiten cada semana. Un grupo se cierra solo cuando pasa su último día o cuando
+se queda sin nadie, y entonces deja de salir en la lista, en el calendario y en
+el mapa.
+
+### Editar lo que has creado
+
+Quien creó algo puede cambiarlo (y quien modera, también):
+
+- PUT /groups/:id → el grupo entero, con el mismo cuerpo que al crearlo. Los
+  días que ya tenía se pueden conservar aunque hayan pasado; los nuevos tienen
+  que ser de hoy en adelante. Las plazas no pueden quedar por debajo de la gente
+  apuntada.
+- PUT /boards/:id → la pizarra, mientras no haya terminado. Mismas condiciones
+  con las plazas.
+- PUT /doubts/:id → `{ "body" }`. Mientras no esté resuelta: si lo está, hay que
+  reabrirla (alguien ganó XP por responder a lo que decía).
+
 ## Tablón de dudas
-GET /doubts/graph → el common core por círculos (0 a 6), para elegir proyecto.
-La piscina no está.
+GET /doubts/graph → **tu plan** del common core, por círculos: los proyectos
+que tienes o tendrás disponibles. No es un catálogo: quien sigue el plan nuevo
+ve sus módulos de Python y no los proyectos de C que ya no le tocan, y al
+revés. La piscina no sale nunca.
 
 ```json
 {
+  "track": "next",
+  "level": 3.66,
+  "currentCircle": 3,
+  "knownUpTo": 3,
   "circles": [
     {
       "circle": 1,
       "projects": [
         {
-          "key": "ft_printf", "name": "ft_printf", "short": "printf",
-          "projectId": 1316, "status": "in_progress",
+          "projectId": 1316, "name": "ft_printf", "short": "printf",
+          "status": "finished", "perfect": true, "hours": 55, "series": null, "locked": false,
           "signals": { "unanswered": 1, "proposals": 0, "missingGuide": false }
         }
       ]
@@ -176,15 +202,38 @@ La piscina no está.
 }
 ```
 
-- `status`: cómo va quien pregunta: `"todo"`, `"in_progress"` o `"finished"`.
-- `projectId`: `null` si nadie del campus ha tocado aún ese proyecto (no hay
-  tablón al que entrar).
+- `track`: `"classic"` (todo en C) o `"next"` (C y luego Python). Lo marca 42
+  con el hito `42next`.
+- `currentCircle`: el círculo en el que estás (el siguiente al último rango
+  `common-core-rank-0N` que validaste).
+- `knownUpTo`: hasta qué círculo se conoce tu plan. Menor que 6 significa que lo
+  de después aún no se sabe.
+- `status`: `"todo"`, `"in_progress"` o `"finished"`. `locked` es `true` si el
+  proyecto es de un círculo al que aún no has llegado.
+- `level`: nivel en el 42cursus, del perfil del último login. `null` si no se sabe.
+- `perfect`: lo aprobó con la nota máxima, 125.
+- `hours`: horas que 42 estima para el proyecto (`estimate_time` de su
+  `project_session`: "55 hours"). Un día cuenta 8 h y una semana 40. Se piden
+  todas las del campus de una vez (2 peticiones) y se guardan una semana.
+- `series`: `"Python"` o `"CPP"` si es uno de varios módulos numerados; la web
+  los agrupa en una sola burbuja.
 - `signals` solo trae lo que le sirve a quien pregunta. Quien **aprobó** el
   proyecto ve las dudas sin responder, las propuestas a la guía pendientes y si
   falta la guía. Quien lo tiene **en curso** ve solo las dudas sin responder.
   Quien **no ha llegado** no ve nada. Las dudas y propuestas propias no cuentan.
-- En qué círculo va cada proyecto no lo da la API de 42: está en
-  `apps/api/src/modules/replica/common-core.ts`.
+
+**De dónde sale el círculo de cada proyecto.** La API de 42 no lo dice. Se
+deduce de dos cosas que sí da de cada persona: cuándo validó cada rango y cuándo
+se apuntó a cada proyecto (nadie se apunta a uno antes de tenerlo disponible).
+Con cada persona que abre el grafo se aprende un poco más, y de cada proyecto se
+guarda el círculo más bajo visto. La tabla de partida (plan clásico entero y
+círculos 0 a 3 del nuevo) y la lógica están en
+`apps/api/src/modules/replica/curriculum.ts`. Cuesta una petición a 42 por
+persona y día.
+
+**Piscina.** En todas las listas de proyectos de una persona (sala de espera,
+mapa, grafo) solo cuentan los del 42cursus (`cursus_ids` con `21`). De quien
+todavía está en la piscina se enseñan los suyos, que es lo único que tiene.
 
 GET /projects/:id/doubts
 {
@@ -286,6 +335,8 @@ ayudar en persona.
   `bookings`, `mustRate` y `blocked`.
 - PUT /help/today → `{ "windows": [{ "start": "17:00", "end": "19:00" }], "maxMinutes": 60 }`.
   Las franjas que se pisan se juntan. `[]` retira la oferta.
+  Las medias horas que ya han empezado se descartan, salvo las que ya tenías
+  abiertas; la respuesta trae lo que ha quedado.
 - GET /help/offers → quién se ofrece hoy y aún tiene hueco:
   `[{ "login": "jdoe", "freeStarts": ["17:00", "17:30"], "remainingMinutes": 60 }]`.
 - POST /help/bookings → `{ "helper", "start", "minutes", "projectId"?, "note"? }`
@@ -310,8 +361,42 @@ Reglas:
 - Una pareja puntúa una vez al día, y solo puede tener una reserva al día.
 - Con una sesión terminada sin valorar (`mustRate`) no se puede reservar ni
   ofrecerse.
+- Una **corrección de 42** manda sobre la guardia: mientras dura no se te puede
+  reservar, aunque caiga en una franja abierta. `GET /help/today` las trae en
+  `busy`. Los **slots abiertos** para corregir no se pueden leer ni cerrar: 42
+  los reserva al permiso `projects`, que esta web no pide.
 - A quien bloqueas no le sales en `/help/offers` ni puede reservarte; recibe la
   misma respuesta que si no te ofrecieras.
+
+## Estado de salud
+
+GET /me/health → las fechas para saber cómo vas de tiempo en el common core.
+
+```json
+{
+  "startedAt": "2026-05-18T07:42:00.000Z",
+  "blackholedAt": "2027-04-03T07:42:00.000Z",
+  "currentCircle": 3,
+  "milestones": [
+    "2026-05-19T11:37:22.148Z",
+    "2026-06-18T14:40:03.509Z",
+    "2026-08-20T21:31:21.769Z"
+  ]
+}
+```
+
+- `startedAt` y `blackholedAt` salen del `cursus_users` del 42cursus (id `21`)
+  de tu perfil, que se guarda cada vez que entras. `blackholedAt` es la fecha
+  oficial de 42 y puede ser `null`.
+- `milestones[n]` es cuándo validaste el `common-core-rank-0n`
+  (`/v2/users/:id/quests_users`, como mucho una petición al día por persona).
+- La API solo da hechos. A qué pace vas, cuándo caerías al siguiente y la
+  calculadora los hace la web con la tabla de plazos
+  (`apps/web/src/shared/pace.ts`): tu pace es el más rápido cuyo plazo para el
+  círculo en el que estás no ha pasado.
+- Si `blackholedAt` es posterior a lo que sale de la tabla, es la fecha real:
+  la diferencia son días extra (bonus, compensación o *freeze*) y la web
+  retrasa con ellos todos los plazos del círculo actual.
 
 ## Ranking
 

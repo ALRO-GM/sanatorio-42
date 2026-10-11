@@ -15,7 +15,12 @@
 
 import { FortyTwoClient } from '../../src/integrations/forty-two/client.js'
 import { createThrottle } from '../../src/integrations/forty-two/throttle.js'
-import type { ApiLocation, ApiProjectUser } from '../../src/integrations/forty-two/types.js'
+import type {
+  ApiLocation,
+  ApiProjectUser,
+  ApiCursusUser,
+  ApiQuestUser,
+} from '../../src/integrations/forty-two/types.js'
 import { createFakeSleep, stubAppTokens } from './fake-api.js'
 
 export type Fake42 = {
@@ -24,6 +29,10 @@ export type Fake42 = {
   rows: Map<number, ApiProjectUser[]>
   /** Puestos ocupados por campus. */
   locations: Map<number, ApiLocation[]>
+  /** Hitos (rangos, plan) por id de persona. */
+  quests: Map<number, ApiQuestUser[]>
+  /** Paso por cada cursus, por id de persona. */
+  cursus: Map<number, ApiCursusUser[]>
   /** Rutas pedidas, en orden, sin el host. */
   calls: string[]
   /** Lo que dirá `x-hourly-ratelimit-remaining` en la próxima respuesta. */
@@ -37,6 +46,8 @@ export function createFake42(pageSize = 2): Fake42 {
     client: undefined as unknown as FortyTwoClient,
     rows: new Map(),
     locations: new Map(),
+    quests: new Map(),
+    cursus: new Map(),
     calls: [],
     hourlyRemaining: 1200,
     failOn: null,
@@ -76,6 +87,10 @@ export function createFake42(pageSize = 2): Fake42 {
             ((row.updated_at ?? '') >= (range[0] ?? '') &&
               (row.updated_at ?? '') <= (range[1] ?? ''))),
       )
+    } else if (/^\/users\/\d+\/quests_users$/.test(path)) {
+      items = state.quests.get(Number(path.split('/')[2])) ?? []
+    } else if (/^\/users\/\d+\/cursus_users$/.test(path)) {
+      items = state.cursus.get(Number(path.split('/')[2])) ?? []
     } else if (path === '/campus') {
       items = [{ id: 22, name: 'Madrid', time_zone: 'Europe/Madrid' }]
     }

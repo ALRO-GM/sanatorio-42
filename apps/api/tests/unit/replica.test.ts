@@ -128,6 +128,7 @@ describe('réplica', () => {
           location: null,
           available: false,
           status: 'in_progress',
+          perfect: false,
         },
       ])
     })

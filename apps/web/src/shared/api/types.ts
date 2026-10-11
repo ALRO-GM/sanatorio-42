@@ -31,6 +31,7 @@ import type {
   HelpReputation,
   HelperTag,
   HolyGraph,
+  Health,
   Leaderboard,
   LeaderboardPeriod,
   Peer,
@@ -81,6 +82,8 @@ export type Api = {
   getSyncStatus: () => Promise<SyncStatus>
 
   getLeaderboard: (period: LeaderboardPeriod) => Promise<Leaderboard>
+  /** Fechas para el estado de salud: inicio, círculos completados y black hole. */
+  getHealth: () => Promise<Health>
 
   // --- Ayuda reservada (guardia)
   getHelpDay: () => Promise<HelpDay>
@@ -99,6 +102,8 @@ export type Api = {
   // --- Terapias de grupo
   getGroups: (projectId?: number | null) => Promise<GroupView[]>
   createGroup: (group: GroupInput) => Promise<GroupView>
+  /** Solo quien lo abrió. */
+  updateGroup: (id: number, group: GroupInput) => Promise<GroupView>
   joinGroup: (id: number) => Promise<void>
   leaveGroup: (id: number) => Promise<void>
   closeGroup: (id: number) => Promise<void>
@@ -108,6 +113,8 @@ export type Api = {
   getDoubtGraph: () => Promise<HolyGraph>
   getDoubtBoard: (projectId: number) => Promise<DoubtBoard>
   createDoubt: (projectId: number, body: string) => Promise<DoubtView>
+  /** Solo quien la puso, y mientras no esté resuelta. */
+  updateDoubt: (id: number, body: string) => Promise<DoubtView>
   getDoubt: (id: number) => Promise<DoubtDetail>
   answerDoubt: (id: number, body: string) => Promise<DoubtAnswer[]>
   /** Para resolverla hay que decir qué respuesta lo consiguió; sin `answerId`, la reabre. */
@@ -123,6 +130,8 @@ export type Api = {
   /** `from` y `to` en ISO-8601. */
   getBoards: (from: string, to: string) => Promise<BoardView[]>
   createBoard: (board: BoardInput) => Promise<BoardView>
+  /** Solo quien la imparte, y mientras no haya terminado. */
+  updateBoard: (id: number, board: BoardInput) => Promise<BoardView>
   joinBoard: (id: number) => Promise<void>
   leaveBoard: (id: number) => Promise<void>
   cancelBoard: (id: number) => Promise<void>

@@ -56,7 +56,7 @@ export function TherapyGroups({ projects, initialProject }: TherapyGroupsProps) 
           onCancel={() => {
             setCreating(false)
           }}
-          onCreated={() => {
+          onSaved={() => {
             setCreating(false)
             void groups.reload()
           }}
@@ -70,7 +70,7 @@ export function TherapyGroups({ projects, initialProject }: TherapyGroupsProps) 
       <ul className="stack">
         {(groups.data ?? []).map((group) => (
           <li key={group.id}>
-            <GroupCard group={group} onChange={() => void groups.reload()} />
+            <GroupCard group={group} projects={doing} onChange={() => void groups.reload()} />
           </li>
         ))}
       </ul>

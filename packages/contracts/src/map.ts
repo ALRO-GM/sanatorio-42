@@ -9,8 +9,8 @@ export type SeatDuty =
 export type SeatReservation = {
   groupId: number
   projectName: string | null
-  /** Días de quedada: 1 = lunes … 7 = domingo. */
-  days: number[]
+  /** Días concretos de quedada (`YYYY-MM-DD`). */
+  dates: string[]
   start: string
   end: string
   /** `true` si el grupo está reunido ahora mismo. */
@@ -26,6 +26,8 @@ export type MapSeat = {
   occupant: {
     login: string
     image: string | null
+    /** Proyectos que tiene en curso, por nombre. */
+    projects: string[]
     /** `null` si no está de guardia para este proyecto. */
     duty: SeatDuty | null
     /** `true` si es quien pregunta. */
@@ -41,8 +43,9 @@ export type MapCluster = {
   rows: number
   seatsPerRow: number
   /**
-   * Puestos que se conocen: ocupados ahora, vistos ocupados alguna vez o
-   * reservados. El resto de la cuadrícula puede no existir.
+   * Todos los puestos de la cuadrícula (`rows` × `seatsPerRow`), ocupados o
+   * libres. El plano se deduce de los puestos en los que se ha visto a alguien,
+   * así que alguna casilla puede corresponder a un pasillo.
    */
   seats: MapSeat[]
   occupied: number

@@ -92,14 +92,23 @@ export function createXpRepository(db: Db) {
       return toNumber(result.rows[0]?.total)
     },
 
-    /** Cuántas veces ha ganado cada cosa. Es de donde salen los logros. */
-    async countsByKind(login: string): Promise<Map<string, number>> {
+    /**
+     * Cuántas veces ha ganado cada cosa y cuánta XP suma. De las veces salen
+     * los logros; de las dos, el desglose del expediente.
+     */
+    async earnedByKind(login: string): Promise<Map<string, { xp: number; times: number }>> {
       const result = await db.execute({
-        sql: 'SELECT kind, COUNT(*) AS total FROM xp_events WHERE login = ? GROUP BY kind',
+        sql: `SELECT kind, COUNT(*) AS times, COALESCE(SUM(amount), 0) AS xp
+              FROM xp_events WHERE login = ? GROUP BY kind`,
         args: [login],
       })
 
-      return new Map(result.rows.map((row) => [toText(row.kind), toNumber(row.total)]))
+      return new Map(
+        result.rows.map((row) => [
+          toText(row.kind),
+          { xp: toNumber(row.xp), times: toNumber(row.times) },
+        ]),
+      )
     },
 
     /**

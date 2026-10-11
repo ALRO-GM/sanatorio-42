@@ -27,6 +27,7 @@ import {
   CAMPUSES,
   CLUSTER_SIZES,
   CORE,
+  CURRENT_CIRCLE,
   offers,
   RANKING,
   today,
@@ -38,6 +39,7 @@ import {
   TITLES,
 } from './data'
 import { calendarEvents } from './calendar'
+import { portrait } from './portrait'
 import type { StoredBoard, StoredDoubt, StoredGroup } from './data'
 
 const LOGGED_KEY = 'mock_logged_in'
@@ -112,8 +114,8 @@ function groupView(group: StoredGroup): GroupView {
     members: group.members.map((login) => ({ login, image: null })),
     joined: group.members.includes(ME.login),
     mine: group.creator === ME.login,
-    // Aquí todos los grupos están "en sesión", para poder probar el fichaje.
-    inSession: true,
+    // Reunido si hoy es uno de sus días (aquí no se mira la hora).
+    inSession: group.dates.includes(today()),
   }
 }
 
@@ -141,20 +143,34 @@ function boardView(board: StoredBoard): BoardView {
   }
 }
 
+/** Proyectos en curso de alguien, según las listas de mentira. */
+function projectsOf(login: string): string[] {
+  return PROJECTS.filter((project) =>
+    (PEERS[project.id] ?? []).some((peer) => peer.login === login && peer.status === 'in_progress'),
+  ).map((project) => project.name)
+}
+
 /** El plano de mentira: todos los puestos de `CLUSTER_SIZES`, con quien toque sentado. */
 function buildMap(projectId?: number): ClusterMap {
   const peers = projectId === undefined ? [] : (PEERS[projectId] ?? [])
   const seated = new Map<string, NonNullable<MapSeat['occupant']>>()
 
   for (const { login, host } of BYSTANDERS) {
-    seated.set(host, { login, image: null, duty: null, me: login === ME.login })
+    seated.set(host, {
+      login,
+      image: portrait(login),
+      projects: projectsOf(login),
+      duty: null,
+      me: login === ME.login,
+    })
   }
 
   for (const peer of peers) {
     if (peer.location !== null) {
       seated.set(peer.location, {
         login: peer.login,
-        image: null,
+        image: portrait(peer.login),
+        projects: projectsOf(peer.login),
         duty: peer.available ? (peer.status === 'finished' ? 'specialist' : 'patient') : null,
         me: false,
       })
@@ -181,10 +197,10 @@ function buildMap(projectId?: number): ClusterMap {
                 : {
                     groupId: group.id,
                     projectName: group.projectName,
-                    days: group.days,
+                    dates: group.dates,
                     start: group.start,
                     end: group.end,
-                    inSession: true,
+                    inSession: group.dates.includes(today()),
                   },
           })
         }
@@ -204,6 +220,19 @@ function buildMap(projectId?: number): ClusterMap {
   }
 }
 
+/**
+ * Una corrección de mentira para hoy, hora y media después de ahora, para que se
+ * vea cómo bloquea la guardia. Si ya es muy tarde, ninguna.
+ */
+function busyToday(): { start: string; end: string }[] {
+  const date = new Date()
+  const start = Math.ceil((date.getHours() * 60 + date.getMinutes()) / 30) * 30 + 90
+  const time = (minutes: number): string =>
+    `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`
+
+  return start + 30 <= 24 * 60 ? [{ start: time(start), end: time(start + 30) }] : []
+}
+
 /** Tu guardia de hoy, a partir de lo que hay en memoria. */
 function helpDay(): HelpDay {
   const date = new Date()
@@ -215,6 +244,7 @@ function helpDay(): HelpDay {
     now: `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`,
     windows,
     maxMinutes,
+    busy: busyToday(),
     bookedMinutes: live
       .filter(
         (booking) =>
@@ -367,6 +397,20 @@ export const mockApi: Api = {
         guide_review: 5,
         first_duty: 0,
       },
+      // Reparto de ejemplo: lo que no cuadra con el total se atribuye a las terapias.
+      earned: {
+        specialist_help: { xp: 160, times: 4 },
+        peer_help: { xp: 45, times: 3 },
+        doubt_solved: { xp: 50, times: 2 },
+        guide_proposal: { xp: 15, times: 1 },
+        guide_review: { xp: 10, times: 2 },
+        board_host: { xp: 0, times: 0 },
+        therapy_session: {
+          xp: Math.max(0, state.xp - 280),
+          times: Math.floor(Math.max(0, state.xp - 280) / 10),
+        },
+        first_duty: { xp: 0, times: 1 },
+      },
     }
   },
 
@@ -397,6 +441,21 @@ export const mockApi: Api = {
           backfill: { phase: 'done', rows: 156_671, total: 156_671 },
         },
       ],
+    }
+  },
+
+  async getHealth() {
+    await delay()
+
+    // Alguien en el círculo 3 que empezó hace 146 días: ya no llega a pace 12.
+    const start = Date.now() - 146 * 86_400_000
+    const at = (days: number): string => new Date(start + days * 86_400_000).toISOString()
+
+    return {
+      startedAt: at(0),
+      blackholedAt: at(320),
+      currentCircle: 3,
+      milestones: [at(1), at(31), at(94)],
     }
   },
 
@@ -569,7 +628,7 @@ export const mockApi: Api = {
       projectId: group.projectId,
       projectName: projectName(group.projectId),
       place: group.place,
-      days: [...group.days].sort((a, b) => a - b),
+      dates: [...new Set(group.dates)].sort(),
       start: group.start,
       end: group.end,
       capacity: group.capacity ?? 5,
@@ -580,6 +639,29 @@ export const mockApi: Api = {
     state.groups.unshift(created)
 
     return groupView(created)
+  },
+
+  async updateGroup(id, group) {
+    await delay()
+    const current = find(state.groups, id, 'Ese grupo')
+
+    if (current.creator !== ME.login) {
+      throw fail(403, 'Solo quien abrió el grupo puede cambiarlo')
+    }
+
+    Object.assign(current, {
+      projectId: group.projectId,
+      projectName: projectName(group.projectId),
+      place: group.place,
+      dates: [...new Set(group.dates)].sort(),
+      start: group.start,
+      end: group.end,
+      capacity: group.capacity ?? current.capacity,
+      note: emptyToNull(group.note),
+      seats: [...new Set((group.seats ?? []).map((host) => host.toLowerCase()))],
+    })
+
+    return groupView(current)
   },
 
   async joinGroup(id) {
@@ -615,9 +697,15 @@ export const mockApi: Api = {
     await delay()
 
     return {
+      track: 'next',
+      level: 1.42,
+      // Empezó hace algo más de mes y medio.
+      startedAt: new Date(Date.now() - 50 * 86_400_000).toISOString(),
+      currentCircle: CURRENT_CIRCLE,
+      knownUpTo: CORE.length - 1,
       circles: CORE.map(({ circle, projects }) => ({
         circle,
-        projects: projects.map(({ id, name, short }) => {
+        projects: projects.map(({ id, name, short, hours }) => {
           const status = PROJECTS.find((project) => project.id === id)?.status ?? 'todo'
           const unanswered = state.doubts.filter(
             (doubt) =>
@@ -629,11 +717,15 @@ export const mockApi: Api = {
 
           // Mismas reglas que la API: cada aviso solo a quien le sirve.
           return {
-            key: name.toLowerCase().replaceAll(' ', '-'),
+            projectId: id,
             name,
             short,
-            projectId: id,
             status,
+            // Libft, con todos los bonus.
+            perfect: id === 1312,
+            hours,
+            series: /^(.+) Module \d+$/.exec(name)?.[1] ?? null,
+            locked: status === 'todo' && circle > CURRENT_CIRCLE,
             signals: {
               unanswered: status === 'todo' ? 0 : unanswered,
               proposals:
@@ -701,6 +793,19 @@ export const mockApi: Api = {
     }
 
     state.doubts.push(doubt)
+
+    return doubtView(doubt)
+  },
+
+  async updateDoubt(id, body) {
+    await delay()
+    const doubt = find(state.doubts, id, 'Esa duda')
+
+    if (doubt.resolved) {
+      throw fail(409, 'Para cambiar una duda resuelta, primero reábrela')
+    }
+
+    doubt.body = body
 
     return doubtView(doubt)
   },
@@ -853,6 +958,27 @@ export const mockApi: Api = {
     state.boards.push(created)
 
     return boardView(created)
+  },
+
+  async updateBoard(id, board) {
+    await delay()
+    const current = find(state.boards, id, 'Esa pizarra')
+
+    if (current.host !== ME.login) {
+      throw fail(403, 'Solo quien imparte la pizarra puede cambiarla')
+    }
+
+    Object.assign(current, {
+      title: board.title,
+      topic: emptyToNull(board.topic),
+      description: emptyToNull(board.description),
+      place: board.place,
+      startsAt: board.startsAt,
+      endsAt: board.endsAt,
+      capacity: board.capacity ?? current.capacity,
+    })
+
+    return boardView(current)
   },
 
   async joinBoard(id) {

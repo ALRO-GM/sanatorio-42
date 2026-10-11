@@ -29,14 +29,18 @@ export type TherapyServiceOptions = {
 
 const TIME = /^([01]\d|2[0-3]):[0-5]\d$/
 
+/** Días que puede tener un grupo. */
+const MAX_DATES = 14
+
 const groupSchema = z
   .object({
     projectId: id,
     place: text(80),
-    days: z
-      .array(z.number().int().min(1).max(7))
+    dates: z
+      .array(z.iso.date('día no válido'))
       .min(1, 'elige al menos un día')
-      .transform((days) => [...new Set(days)].sort((a, b) => a - b)),
+      .max(MAX_DATES, `como mucho ${MAX_DATES} días`)
+      .transform((dates) => [...new Set(dates)].sort()),
     start: z.string().regex(TIME, 'hora no válida'),
     end: z.string().regex(TIME, 'hora no válida'),
     capacity: z.number().int().min(2).max(12).default(5),
@@ -88,11 +92,26 @@ export function createTherapyService(options: TherapyServiceOptions) {
   async function inSession(group: GroupRow): Promise<{ active: boolean; day: string }> {
     const moment = localMoment(now(), await replica.timeZoneOf(group.campusId))
     const active =
-      group.days.includes(moment.weekday) &&
+      group.dates.includes(moment.day) &&
       moment.minutes >= minutesOf(group.start) - CHECKIN_EARLY_MINUTES &&
       moment.minutes <= minutesOf(group.end)
 
     return { active, day: moment.day }
+  }
+
+  /** El día de hoy en un campus, `YYYY-MM-DD`. */
+  async function todayIn(campusId: number): Promise<string> {
+    return localMoment(now(), await replica.timeZoneOf(campusId)).day
+  }
+
+  /** Ningún día puede ser anterior a hoy: no se queda en el pasado. */
+  async function mustBeUpcoming(dates: readonly string[], campusId: number): Promise<void> {
+    const today = await todayIn(campusId)
+    const past = dates.find((date) => date < today)
+
+    if (past !== undefined) {
+      throw domainError('invalid_input', `dates: el ${past} ya ha pasado`)
+    }
   }
 
   async function view(groups: readonly GroupRow[], actor: Actor): Promise<GroupView[]> {
@@ -142,7 +161,7 @@ export function createTherapyService(options: TherapyServiceOptions) {
         const reservation: SeatReservation = {
           groupId: group.id,
           projectName: group.projectName,
-          days: group.days,
+          dates: group.dates,
           start: group.start,
           end: group.end,
           inSession: (await inSession(group)).active,
@@ -160,6 +179,10 @@ export function createTherapyService(options: TherapyServiceOptions) {
 
     /** Grupos abiertos del campus; con `projectId`, los de ese proyecto. */
     async list(actor: Actor, projectId?: number): Promise<GroupView[]> {
+      // Un grupo cuyo último día ya pasó se cierra solo: no tiene sentido
+      // seguir enseñándolo ni que ocupe un hueco de los de quien lo abrió.
+      await therapy.closeFinished(actor.campusId, await todayIn(actor.campusId))
+
       return view(await therapy.listOpen(actor.campusId, projectId), actor)
     },
 
@@ -170,6 +193,10 @@ export function createTherapyService(options: TherapyServiceOptions) {
       if ((await replica.projectName(group.projectId)) === null) {
         throw domainError('not_found', `El proyecto ${group.projectId} no existe en 42`)
       }
+
+      await mustBeUpcoming(group.dates, actor.campusId)
+      await therapy.closeFinished(actor.campusId, await todayIn(actor.campusId))
+
       if ((await therapy.countOpenBy(actor.login)) >= MAX_OPEN_GROUPS) {
         throw domainError('conflict', 'Ya tienes varios grupos abiertos. Cierra alguno antes')
       }
@@ -186,6 +213,51 @@ export function createTherapyService(options: TherapyServiceOptions) {
       }
 
       return created
+    },
+
+    /**
+     * Cambia un grupo: sitio, días, horario, plazas, nota o puestos. Solo quien
+     * lo abrió, o quien modera.
+     *
+     * Los días que el grupo ya tenía se pueden conservar aunque hayan pasado;
+     * los que se añadan tienen que ser de hoy en adelante. Las plazas no pueden
+     * quedar por debajo de la gente que ya está apuntada.
+     */
+    async update(actor: Actor, groupId: number, input: unknown): Promise<GroupView> {
+      const current = await mustGet(groupId, actor)
+
+      if (current.creator !== actor.login && !actor.admin) {
+        throw domainError('forbidden', 'Solo quien abrió el grupo puede cambiarlo')
+      }
+      if (current.closed) {
+        throw domainError('conflict', 'Ese grupo ya está cerrado')
+      }
+
+      const group = parse(groupSchema, input)
+
+      if ((await replica.projectName(group.projectId)) === null) {
+        throw domainError('not_found', `El proyecto ${group.projectId} no existe en 42`)
+      }
+      if (group.capacity < current.members.length) {
+        throw domainError(
+          'conflict',
+          `Ya hay ${current.members.length} personas apuntadas: no puedes dejar menos plazas`,
+        )
+      }
+
+      await mustBeUpcoming(
+        group.dates.filter((date) => !current.dates.includes(date)),
+        actor.campusId,
+      )
+      await therapy.update(groupId, group)
+
+      const [updated] = await view([await mustGet(groupId, actor)], actor)
+
+      if (updated === undefined) {
+        throw domainError('not_found', 'Ese grupo no existe')
+      }
+
+      return updated
     },
 
     /** Se apunta. `409` si ya no quedan plazas. */
@@ -255,7 +327,7 @@ export function createTherapyService(options: TherapyServiceOptions) {
         const slot = Math.floor((moment.minutes - minutesOf(group.start)) / SLOT_MINUTES)
 
         if (
-          !group.days.includes(moment.weekday) ||
+          !group.dates.includes(moment.day) ||
           slot < 1 ||
           moment.minutes > minutesOf(group.end) + CHECK_GRACE_MINUTES
         ) {

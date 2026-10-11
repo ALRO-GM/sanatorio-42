@@ -7,6 +7,7 @@ import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { LangSelect } from './LangSelect'
+import { ThemeSelect } from './ThemeSelect'
 
 type SettingsProps = {
   /** Campus que se está mirando. `undefined` mientras carga el perfil. */
@@ -37,6 +38,7 @@ export function Settings({ campusId, onCampusChange }: SettingsProps) {
   return (
     <div className="settings" aria-label={t('settings.label')}>
       <LangSelect />
+      <ThemeSelect />
       {campuses.data !== undefined && campuses.data.length > 0 && campusId !== undefined && (
         <label className="setting">
           <span>{t('settings.campus')}</span>

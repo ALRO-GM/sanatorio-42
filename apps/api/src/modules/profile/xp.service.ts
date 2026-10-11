@@ -9,6 +9,7 @@
 
 import type {
   Expediente,
+  Health,
   Leaderboard,
   LeaderboardEntry,
   LeaderboardPeriod,
@@ -18,7 +19,8 @@ import { z } from 'zod'
 
 import type { ProfilesRepository } from './profiles.repository.js'
 import type { XpRepository } from './xp.repository.js'
-import type { ReplicaRepository } from '../replica/index.js'
+import { LAST_CIRCLE } from '../replica/index.js'
+import type { Curriculum, ReplicaRepository } from '../replica/index.js'
 import { domainError } from '../../core/errors.js'
 import {
   ACHIEVEMENTS,
@@ -37,6 +39,8 @@ export type XpServiceOptions = {
   xp: XpRepository
   profiles: ProfilesRepository
   replica: ReplicaRepository
+  /** Plan de estudios: de ahí salen los rangos validados y sus fechas. */
+  curriculum: Curriculum
   now?: () => number
 }
 
@@ -47,7 +51,7 @@ const settingsSchema = z.object({
 })
 
 export function createXpService(options: XpServiceOptions) {
-  const { xp, profiles, replica } = options
+  const { xp, profiles, replica, curriculum } = options
   const now = options.now ?? Date.now
 
   /** Día UTC de hoy, que es la unidad de "una reacción por pareja y día". */
@@ -66,14 +70,17 @@ export function createXpService(options: XpServiceOptions) {
 
     /** Expediente completo de quien pregunta. */
     async expediente(actor: Actor): Promise<Expediente> {
-      const [total, counts, received, profile] = await Promise.all([
+      const [total, earned, received, profile] = await Promise.all([
         xp.total(actor.login),
-        xp.countsByKind(actor.login),
+        xp.earnedByKind(actor.login),
         xp.reactionsReceived(actor.login),
         profiles.get(actor.login),
       ])
       const level = levelFor(total)
-      const count = (kind: XpKind): number => counts.get(kind) ?? 0
+      const count = (kind: XpKind): number => earned.get(kind)?.times ?? 0
+
+      const earnedOf = (kind: XpKind): { xp: number; times: number } =>
+        earned.get(kind) ?? { xp: 0, times: 0 }
 
       const progress: Record<AchievementId, number> = {
         first_duty: count(XP_KIND.FIRST_DUTY),
@@ -110,6 +117,16 @@ export function createXpService(options: XpServiceOptions) {
           patient: received.get('patient') ?? 0,
         },
         rules: XP_AMOUNT,
+        earned: {
+          therapy_session: earnedOf(XP_KIND.THERAPY_SESSION),
+          specialist_help: earnedOf(XP_KIND.SPECIALIST_HELP),
+          peer_help: earnedOf(XP_KIND.PEER_HELP),
+          board_host: earnedOf(XP_KIND.BOARD_HOST),
+          doubt_solved: earnedOf(XP_KIND.DOUBT_SOLVED),
+          guide_proposal: earnedOf(XP_KIND.GUIDE_PROPOSAL),
+          guide_review: earnedOf(XP_KIND.GUIDE_REVIEW),
+          first_duty: earnedOf(XP_KIND.FIRST_DUTY),
+        },
       }
     },
 
@@ -151,6 +168,29 @@ export function createXpService(options: XpServiceOptions) {
       await xp.award(help.to, kind, XP_AMOUNT[kind], help.ref)
 
       return XP_AMOUNT[kind]
+    },
+
+    /**
+     * Los datos del "estado de salud": cuándo empezó el 42cursus, cuándo
+     * completó cada círculo y la fecha de black hole que dé 42.
+     *
+     * Son solo los hechos; los plazos de cada pace los calcula la web. Cuesta,
+     * como mucho, una petición a 42 por persona y día (sus hitos).
+     *
+     * @param userId Su id en 42, para preguntar por sus rangos.
+     */
+    async health(actor: Actor, userId: number | null): Promise<Health> {
+      const [{ rank, ranks }, cursus] = await Promise.all([
+        curriculum.trackOf(actor.login, userId),
+        curriculum.cursusOf(actor.login, userId),
+      ])
+
+      return {
+        startedAt: cursus.startedAt,
+        blackholedAt: cursus.blackholedAt,
+        currentCircle: Math.min(LAST_CIRCLE, (rank ?? -1) + 1),
+        milestones: ranks,
+      }
     },
 
     /** Retira XP ya dada, cuando lo que la ganó se da por malo. */

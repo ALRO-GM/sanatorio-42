@@ -5,8 +5,8 @@ export type GroupView = {
   projectName: string | null
   creator: string
   place: string
-  /** Días de quedada: 1 = lunes … 7 = domingo. */
-  days: number[]
+  /** Días concretos de quedada (`YYYY-MM-DD`, en la hora local del campus), en orden. */
+  dates: string[]
   /** `HH:MM`, en la hora local del campus. */
   start: string
   end: string
@@ -27,7 +27,8 @@ export type GroupView = {
 export type GroupInput = {
   projectId: number
   place: string
-  days: number[]
+  /** Días concretos (`YYYY-MM-DD`). De uno a catorce. */
+  dates: string[]
   start: string
   end: string
   capacity?: number

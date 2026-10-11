@@ -49,6 +49,7 @@ export const realApi: Api = {
   getSyncStatus: () => getJson('/sync/status'),
 
   getLeaderboard: (period) => getJson(`/leaderboard?period=${period}`),
+  getHealth: () => getJson('/me/health'),
 
   getHelpDay: () => getJson('/help/today'),
   setHelpDay: (day) => sendJson('PUT', '/help/today', day),
@@ -67,6 +68,7 @@ export const realApi: Api = {
       projectId === undefined || projectId === null ? '/groups' : `/groups?project=${projectId}`,
     ),
   createGroup: (group) => sendJson('POST', '/groups', group),
+  updateGroup: (id, group) => sendJson('PUT', `/groups/${id}`, group),
   joinGroup: (id) => send('POST', `/groups/${id}/join`),
   leaveGroup: (id) => send('DELETE', `/groups/${id}/join`),
   closeGroup: (id) => send('DELETE', `/groups/${id}`),
@@ -74,6 +76,7 @@ export const realApi: Api = {
   getDoubtGraph: () => getJson('/doubts/graph'),
   getDoubtBoard: (projectId) => getJson(`/projects/${projectId}/doubts`),
   createDoubt: (projectId, body) => sendJson('POST', `/projects/${projectId}/doubts`, { body }),
+  updateDoubt: (id, body) => sendJson('PUT', `/doubts/${id}`, { body }),
   getDoubt: (id) => getJson(`/doubts/${id}`),
   answerDoubt: (id, body) => sendJson('POST', `/doubts/${id}/answers`, { body }),
   setDoubtResolved: (id, answerId) =>
@@ -93,6 +96,7 @@ export const realApi: Api = {
   getBoards: (from, to) =>
     getJson(`/boards?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`),
   createBoard: (board) => sendJson('POST', '/boards', board),
+  updateBoard: (id, board) => sendJson('PUT', `/boards/${id}`, board),
   joinBoard: (id) => send('POST', `/boards/${id}/join`),
   leaveBoard: (id) => send('DELETE', `/boards/${id}/join`),
   cancelBoard: (id) => send('DELETE', `/boards/${id}`),

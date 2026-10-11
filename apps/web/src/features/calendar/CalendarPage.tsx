@@ -203,7 +203,7 @@ export function CalendarPage({ onGo }: CalendarPageProps) {
         )}
 
         {data !== undefined && view !== 'month' && (
-          <div className={`day-columns ${view}`}>
+          <div className={`day-columns view-${view}`}>
             {days.map((day) => {
               const events = eventsOn(visible, day)
 

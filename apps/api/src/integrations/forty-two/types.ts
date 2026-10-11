@@ -67,6 +67,8 @@ export type ApiUser = {
   updated_at?: string | null
   /** Solo en el perfil completo (`/v2/me`, `/v2/users/:login`). */
   campus_users?: readonly ApiCampusUser[] | null
+  /** Su paso por cada cursus, con el nivel. El `21` es el 42cursus. */
+  cursus_users?: readonly ApiCursusUser[] | null
   /** Solo en el perfil completo: todos sus proyectos, con estado y nota. */
   projects_users?: readonly ApiProjectUser[] | null
   /**
@@ -91,6 +93,13 @@ export type ApiProjectUser = {
   'validated?'?: boolean | null
   final_mark?: number | null
   updated_at?: string | null
+  /** Cuándo se apuntó al proyecto: es cuando lo tuvo disponible. */
+  created_at?: string | null
+  /**
+   * Cursus a los que pertenece la fila. `21` es el 42cursus (el common core y lo
+   * que viene después); la piscina es el `9` y la C-piscine-reloaded el `66`.
+   */
+  cursus_ids?: number[] | null
   project?: { id: number; name?: string | null; slug?: string | null } | null
   /**
    * La persona, anidada.
@@ -128,6 +137,15 @@ export type ApiLocation = {
   end_at?: string | null
   campus_id?: number
   user?: ApiUser | null
+}
+
+/** El paso de alguien por un cursus, de `GET /v2/users/:id/cursus_users` o del perfil. */
+export type ApiCursusUser = {
+  cursus_id: number
+  level?: number | null
+  begin_at?: string | null
+  /** Fecha en la que el black hole alcanzaría a la persona, si 42 la da. */
+  blackholed_at?: string | null
 }
 
 /** Un campus, de `GET /v2/campus`. */
@@ -193,4 +211,28 @@ export type ApiScaleTeam = {
   correcteds?: { id: number; login: string }[] | string | null
   scale?: { duration?: number | null } | null
   team?: { project_id?: number | null } | null
+}
+
+/**
+ * Un hito de alguien en 42, de `GET /v2/users/:id/quests_users`.
+ *
+ * Los que interesan: `common-core-rank-00`…`06` (uno por círculo del common
+ * core, validado al completarlo) y `42next`, que marca a quien sigue el plan
+ * nuevo, el que pasa de C a Python.
+ */
+export type ApiQuestUser = {
+  quest_id: number
+  validated_at?: string | null
+  quest?: { slug?: string | null; kind?: string | null } | null
+}
+
+/**
+ * La edición de un proyecto en un campus, de `GET /v2/project_sessions`.
+ *
+ * De aquí salen las horas estimadas: `estimate_time` es un texto como
+ * `"55 hours"`, `"2 days"` o `"1 week"`.
+ */
+export type ApiProjectSession = {
+  project_id: number
+  estimate_time?: string | null
 }

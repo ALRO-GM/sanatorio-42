@@ -133,7 +133,7 @@ export function BoardsCalendar() {
               onCancel={() => {
                 setProposing(false)
               }}
-              onCreated={() => {
+              onSaved={() => {
                 setProposing(false)
                 void boards.reload()
               }}

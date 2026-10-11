@@ -33,10 +33,37 @@ export type PeerRow = {
   location: string | null
   available: boolean
   status: ProjectStatus
+  /** `true` si lo aprobó con la nota máxima. */
+  perfect: boolean
 }
 
 /** Filas por `batch`. Muy por debajo del límite de sentencias de libSQL. */
 const BATCH_SIZE = 400
+
+/** La nota de quien lo hace todo, bonus incluidos. */
+const PERFECT_MARK = 125
+
+/** Id del 42cursus en 42: el common core y lo que viene después. */
+const CORE_CURSUS_ID = 21
+
+/**
+ * `p` es del 42cursus. Si aún no se sabe (`core` nulo, filas copiadas antes de
+ * guardarlo), vale el nombre: los de la piscina empiezan todos igual.
+ */
+const IS_CORE = `(p.core = 1 OR (p.core IS NULL
+                  AND p.slug NOT LIKE 'c-piscine%' AND p.slug NOT LIKE 'piscine%'))`
+
+/**
+ * Condición SQL: el proyecto `p` cuenta como proyecto de la persona `u`.
+ *
+ * De quien ya es estudiante solo cuentan los del 42cursus: los de la piscina
+ * que hizo para entrar no son "sus proyectos". De quien todavía está en la
+ * piscina cuentan todos, que es lo único que tiene.
+ */
+const STUDENT_PROJECT = `(${IS_CORE} OR NOT EXISTS (
+    SELECT 1 FROM project_users other JOIN projects p ON p.id = other.project_id
+    WHERE other.user_id = u.id AND ${IS_CORE}
+  ))`
 
 export function createReplicaRepository(db: Db) {
   /** Ejecuta las sentencias en lotes atómicos. */
@@ -95,18 +122,24 @@ export function createReplicaRepository(db: Db) {
           statements.push(upsertMember(campusId, user.id))
         }
         if (typeof project.name === 'string' && project.name !== '') {
+          // `core` solo se pisa si esta fila dice a qué cursus pertenece.
           statements.push({
-            sql: `INSERT INTO projects (id, name, slug) VALUES (?, ?, ?)
-                  ON CONFLICT (id) DO UPDATE SET name = excluded.name, slug = excluded.slug`,
-            args: [project.id, project.name, project.slug ?? null],
+            sql: `INSERT INTO projects (id, name, slug, core) VALUES (?, ?, ?, ?)
+                  ON CONFLICT (id) DO UPDATE SET
+                    name = excluded.name,
+                    slug = excluded.slug,
+                    core = COALESCE(excluded.core, projects.core)`,
+            args: [project.id, project.name, project.slug ?? null, coreOf(row)],
           })
         }
 
         statements.push({
           sql: `INSERT INTO project_users
-                  (id, user_id, project_id, status, validated, final_mark, updated_at_42, synced_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                  (id, user_id, project_id, status, validated, final_mark, updated_at_42,
+                   created_at_42, synced_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT (id) DO UPDATE SET
+                  created_at_42 = COALESCE(excluded.created_at_42, project_users.created_at_42),
                   status        = excluded.status,
                   validated     = excluded.validated,
                   final_mark    = excluded.final_mark,
@@ -120,6 +153,7 @@ export function createReplicaRepository(db: Db) {
             triState(row['validated?']),
             typeof row.final_mark === 'number' ? Math.round(row.final_mark) : null,
             row.updated_at ?? null,
+            row.created_at ?? null,
             now,
           ],
         })
@@ -135,9 +169,23 @@ export function createReplicaRepository(db: Db) {
     async ingestUser(user: ApiUser, campusIds: readonly number[]): Promise<void> {
       const now = nowIso()
 
+      const core = user.cursus_users?.find((entry) => entry.cursus_id === CORE_CURSUS_ID)
+      const level = core?.level
+
       await run([
         upsertUser(user, now),
         ...campusIds.map((campusId) => upsertMember(campusId, user.id)),
+        // El nivel solo viene en el perfil completo (el del login).
+        ...(typeof level === 'number'
+          ? [
+              {
+                sql: `INSERT OR REPLACE INTO user_levels
+                        (login, level, begin_at, blackholed_at, updated_at)
+                      VALUES (?, ?, ?, ?, ?)`,
+                args: [user.login, level, core?.begin_at ?? null, core?.blackholed_at ?? null, now],
+              },
+            ]
+          : []),
       ])
     },
 
@@ -188,18 +236,100 @@ export function createReplicaRepository(db: Db) {
       return saved
     },
 
-    /** Proyectos de la réplica con alguno de esos slugs. */
-    async projectsBySlugs(slugs: readonly string[]): Promise<{ id: number; slug: string }[]> {
-      if (slugs.length === 0) {
-        return []
+    /** Id en 42 de una persona, o `null` si no está en la réplica. */
+    async userIdOf(login: string): Promise<number | null> {
+      const result = await db.execute({
+        sql: 'SELECT id FROM users WHERE login = ?',
+        args: [login],
+      })
+      const row = result.rows[0]
+
+      return row === undefined ? null : toNumber(row.id)
+    },
+
+    /** Nombre y horas estimadas de cada uno de esos proyectos. Los que no se conocen no salen. */
+    async projectInfo(
+      ids: readonly number[],
+    ): Promise<Map<number, { name: string; hours: number | null }>> {
+      if (ids.length === 0) {
+        return new Map()
       }
 
       const result = await db.execute({
-        sql: `SELECT id, slug FROM projects WHERE slug IN (${slugs.map(() => '?').join(', ')})`,
-        args: [...slugs],
+        sql: `SELECT id, name, hours FROM projects WHERE id IN (${ids.map(() => '?').join(', ')})`,
+        args: [...ids],
       })
 
-      return result.rows.map((row) => ({ id: toNumber(row.id), slug: toText(row.slug) }))
+      return new Map(
+        result.rows.map((row) => [
+          toNumber(row.id),
+          { name: toText(row.name), hours: row.hours === null ? null : toNumber(row.hours) },
+        ]),
+      )
+    },
+
+    /** Ids de los proyectos que alguien aprobó con la nota máxima. */
+    async perfectProjectsOf(login: string): Promise<Set<number>> {
+      const result = await db.execute({
+        sql: `SELECT DISTINCT pu.project_id FROM project_users pu
+              JOIN users u ON u.id = pu.user_id
+              WHERE u.login = ? AND pu.status = 'finished' AND pu.validated = 1
+                AND pu.final_mark >= ?`,
+        args: [login, PERFECT_MARK],
+      })
+
+      return new Set(result.rows.map((row) => toNumber(row.project_id)))
+    },
+
+    /**
+     * Nivel de alguien en el 42cursus y cuándo lo empezó. Los dos a `null` si no
+     * ha entrado desde que se guardan.
+     */
+    async cursusOf(login: string): Promise<{
+      level: number | null
+      startedAt: string | null
+      blackholedAt: string | null
+    }> {
+      const result = await db.execute({
+        sql: 'SELECT level, begin_at, blackholed_at FROM user_levels WHERE login = ?',
+        args: [login],
+      })
+      const row = result.rows[0]
+
+      return row === undefined
+        ? { level: null, startedAt: null, blackholedAt: null }
+        : {
+            level: toNumber(row.level),
+            startedAt: typeof row.begin_at === 'string' ? row.begin_at : null,
+            blackholedAt: typeof row.blackholed_at === 'string' ? row.blackholed_at : null,
+          }
+    },
+
+    /** Nombres de los proyectos que tiene en curso cada una de esas personas. */
+    async activeProjectsOf(logins: readonly string[]): Promise<Map<string, string[]>> {
+      const projects = new Map<string, string[]>()
+
+      for (let from = 0; from < logins.length; from += BATCH_SIZE) {
+        const batch = logins.slice(from, from + BATCH_SIZE)
+        const result = await db.execute({
+          sql: `SELECT u.login, p.name
+                FROM users u
+                JOIN project_users pu ON pu.user_id = u.id AND pu.status = 'in_progress'
+                JOIN projects p ON p.id = pu.project_id
+                WHERE u.login IN (${batch.map(() => '?').join(', ')})
+                  AND ${STUDENT_PROJECT}
+                ORDER BY pu.updated_at_42 DESC`,
+          args: [...batch],
+        })
+
+        for (const row of result.rows) {
+          const login = toText(row.login)
+
+          projects.set(login, [...(projects.get(login) ?? []), toText(row.name)])
+        }
+      }
+
+      return projects
     },
 
     /** Puestos del campus que se han visto ocupados alguna vez. */
@@ -293,7 +423,8 @@ export function createReplicaRepository(db: Db) {
                      u.image                    AS image,
                      pr.host                    AS location,
                      COALESCE(a.available, 0)   AS available,
-                     pu.status                  AS status
+                     pu.status                  AS status,
+                     pu.final_mark              AS mark
               FROM project_users pu
               JOIN users u            ON u.id = pu.user_id
               JOIN campus_members cm  ON cm.user_id = u.id AND cm.campus_id = ?
@@ -341,6 +472,7 @@ export function createReplicaRepository(db: Db) {
             row.status === PROJECT_STATUS.FINISHED
               ? PROJECT_STATUS.FINISHED
               : PROJECT_STATUS.IN_PROGRESS,
+          perfect: row.status === PROJECT_STATUS.FINISHED && toNumber(row.mark) >= PERFECT_MARK,
         })
       }
 
@@ -376,6 +508,7 @@ export function createReplicaRepository(db: Db) {
               WHERE u.login = ?
                 AND (pu.status = 'in_progress'
                      OR (? = 1 AND pu.status = 'finished' AND pu.validated = 1))
+                AND ${STUDENT_PROJECT}
               GROUP BY p.id, p.name
               ORDER BY doing DESC, p.name COLLATE NOCASE`,
         args: [login, includeFinished ? 1 : 0],
@@ -566,6 +699,15 @@ export type ReplicaRepository = ReturnType<typeof createReplicaRepository>
  * Solo se guardan login, nombre, avatar y si sigue activa. El resto de lo que
  * manda la API (email, teléfono, wallet…) no llega a tocar la base.
  */
+/** `1` si la fila es del 42cursus, `0` si es de otro cursus, `null` si no lo dice. */
+function coreOf(row: ApiProjectUser): number | null {
+  if (!Array.isArray(row.cursus_ids)) {
+    return null
+  }
+
+  return row.cursus_ids.includes(CORE_CURSUS_ID) ? 1 : 0
+}
+
 function upsertUser(user: ApiUser, now: string): InStatement {
   return {
     // `OR REPLACE` y no `ON CONFLICT (id)`: el login también es único, y 42

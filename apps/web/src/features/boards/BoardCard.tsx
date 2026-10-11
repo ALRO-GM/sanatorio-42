@@ -1,3 +1,5 @@
+import { useState } from 'react'
+
 import type { BoardView } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
@@ -5,7 +7,8 @@ import { useAction } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { Avatar } from '../../shared/ui/Avatar'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
-import { hhmm } from './dates'
+import { BoardForm } from './BoardForm'
+import { dayKey, hhmm } from './dates'
 
 type BoardCardProps = {
   board: BoardView
@@ -17,11 +20,28 @@ type BoardCardProps = {
 export function BoardCard({ board, featured, onChange }: BoardCardProps) {
   const { t } = useI18n()
   const { busy, error, run } = useAction()
+  const [editing, setEditing] = useState(false)
   const start = new Date(board.startsAt)
   const past = Date.parse(board.endsAt) <= Date.now()
   const full = board.attendees >= board.capacity
   const act = async (fn: () => Promise<unknown>): Promise<void> => {
     if (await run(fn)) onChange()
+  }
+
+  if (editing) {
+    return (
+      <BoardForm
+        defaultDay={dayKey(start)}
+        board={board}
+        onCancel={() => {
+          setEditing(false)
+        }}
+        onSaved={() => {
+          setEditing(false)
+          onChange()
+        }}
+      />
+    )
   }
 
   return (
@@ -52,13 +72,23 @@ export function BoardCard({ board, featured, onChange }: BoardCardProps) {
         {past ? (
           <span className="badge off">{t('cal.past')}</span>
         ) : board.mine ? (
-          <button
-            className="pill"
-            disabled={busy}
-            onClick={() => void act(() => api.cancelBoard(board.id))}
-          >
-            {t('cal.cancel')}
-          </button>
+          <>
+            <button
+              className="pill"
+              onClick={() => {
+                setEditing(true)
+              }}
+            >
+              {t('edit.edit')}
+            </button>
+            <button
+              className="pill"
+              disabled={busy}
+              onClick={() => void act(() => api.cancelBoard(board.id))}
+            >
+              {t('cal.cancel')}
+            </button>
+          </>
         ) : board.joined ? (
           <button
             className="pill"

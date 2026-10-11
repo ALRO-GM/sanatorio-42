@@ -6,7 +6,7 @@
 import type { Db } from '../../core/db/database.js'
 import type { AppModule } from '../../core/module.js'
 import type { XpService } from '../profile/index.js'
-import type { ReplicaRepository } from '../replica/index.js'
+import type { Curriculum, ReplicaRepository } from '../replica/index.js'
 import { createDoubtsRepository } from './doubts.repository.js'
 import { createGuideChangesRepository } from './guide-changes.repository.js'
 import { registerDoubtsRoutes } from './doubts.routes.js'
@@ -16,6 +16,7 @@ import type { DoubtsService } from './doubts.service.js'
 export type DoubtsModuleDeps = {
   db: Db
   replica: ReplicaRepository
+  curriculum: Curriculum
   xp: XpService
   now?: () => number
 }
@@ -26,6 +27,7 @@ export function createDoubtsModule(deps: DoubtsModuleDeps): DoubtsModule {
   const service = createDoubtsService({
     doubts: createDoubtsRepository(deps.db),
     changes: createGuideChangesRepository(deps.db),
+    curriculum: deps.curriculum,
     xp: deps.xp,
     replica: deps.replica,
     ...(deps.now === undefined ? {} : { now: deps.now }),

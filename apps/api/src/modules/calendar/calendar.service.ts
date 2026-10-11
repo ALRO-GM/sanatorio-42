@@ -24,7 +24,7 @@ import type { Calendar, CalendarEvent } from '@sanatorio/contracts'
 
 import type { Actor } from '../../core/actor.js'
 import { domainError } from '../../core/errors.js'
-import { localMoment, minutesOf, zonedInstant } from '../../core/time.js'
+import { minutesOf, zonedInstant } from '../../core/time.js'
 import type { BoardsService } from '../boards/index.js'
 import type { HelpService } from '../help/index.js'
 import type { Agenda, ReplicaRepository } from '../replica/index.js'
@@ -109,23 +109,15 @@ export function createCalendarService(options: CalendarServiceOptions) {
     const groups = (await therapy.list(actor)).filter((group) => group.joined)
     const events: CalendarEvent[] = []
 
-    // Se recorre día a día en la hora del campus, con un día de margen por si
-    // el intervalo y la zona horaria no cuadran en la medianoche.
-    for (let at = from - DAY; at <= to; at += DAY) {
-      const moment = localMoment(at, timeZone)
-
-      for (const group of groups) {
-        if (!group.days.includes(moment.weekday)) {
-          continue
-        }
-
-        const start = zonedInstant(moment.day, minutesOf(group.start), timeZone)
-        const end = zonedInstant(moment.day, minutesOf(group.end), timeZone)
+    for (const group of groups) {
+      for (const day of group.dates) {
+        const start = zonedInstant(day, minutesOf(group.start), timeZone)
+        const end = zonedInstant(day, minutesOf(group.end), timeZone)
 
         if (start < to && end > from) {
           events.push({
             ...BASE,
-            id: `therapy:${group.id}:${moment.day}`,
+            id: `therapy:${group.id}:${day}`,
             kind: 'therapy',
             title: `Terapia de ${group.projectName ?? 'grupo'}`,
             start: iso(start),

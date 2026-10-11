@@ -9,7 +9,7 @@
 import type { Db } from '../../core/db/database.js'
 import type { EventBus } from '../../core/events.js'
 import type { AppModule } from '../../core/module.js'
-import type { ReplicaRepository } from '../replica/index.js'
+import type { Curriculum, ReplicaRepository } from '../replica/index.js'
 import { registerProfileRoutes } from './profile.routes.js'
 import { createProfilesRepository } from './profiles.repository.js'
 import type { ProfilesRepository } from './profiles.repository.js'
@@ -20,6 +20,7 @@ import type { XpService } from './xp.service.js'
 export type ProfileModuleDeps = {
   db: Db
   replica: ReplicaRepository
+  curriculum: Curriculum
   events: EventBus
   now?: () => number
 }
@@ -35,6 +36,7 @@ export function createProfileModule(deps: ProfileModuleDeps): ProfileModule {
     xp: createXpRepository(deps.db),
     profiles,
     replica: deps.replica,
+    curriculum: deps.curriculum,
     ...(deps.now === undefined ? {} : { now: deps.now }),
   })
 

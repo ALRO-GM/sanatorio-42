@@ -1,25 +1,30 @@
 import { useState } from 'react'
 
-import type { GroupView } from '@sanatorio/contracts'
+import { seatName } from '../map/seats'
+import type { GroupView, ProjectSummary } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
 import { useAction } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { Avatar } from '../../shared/ui/Avatar'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
-import { dayNames } from './days'
+import { shortDay, today } from './days'
+import { GroupForm } from './GroupForm'
 
 type GroupCardProps = {
   group: GroupView
+  /** Proyectos entre los que se puede elegir al editar el grupo. */
+  projects: readonly ProjectSummary[]
   /** Algo ha cambiado (alguien entra, sale o se cierra): hay que volver a pedir la lista. */
   onChange: () => void
 }
 
-export function GroupCard({ group, onChange }: GroupCardProps) {
-  const { t } = useI18n()
+export function GroupCard({ group, projects, onChange }: GroupCardProps) {
+  const { t, lang } = useI18n()
   const { busy, error, run } = useAction()
   const [copied, setCopied] = useState(false)
-  const shortDays = t('days.short').split(',')
+  const [editing, setEditing] = useState(false)
+  const now = today()
   const full = group.members.length >= group.capacity
 
   const act = async (fn: () => Promise<unknown>): Promise<void> => {
@@ -32,6 +37,31 @@ export function GroupCard({ group, onChange }: GroupCardProps) {
     setTimeout(() => {
       setCopied(false)
     }, 2000)
+  }
+
+  if (editing) {
+    return (
+      <GroupForm
+        // Que no falte en la lista el proyecto del propio grupo.
+        projects={
+          projects.some((project) => project.id === group.projectId)
+            ? projects
+            : [
+                ...projects,
+                { id: group.projectId, name: group.projectName ?? `#${group.projectId}` },
+              ]
+        }
+        defaultProject={group.projectId}
+        group={group}
+        onCancel={() => {
+          setEditing(false)
+        }}
+        onSaved={() => {
+          setEditing(false)
+          onChange()
+        }}
+      />
+    )
   }
 
   return (
@@ -59,26 +89,27 @@ export function GroupCard({ group, onChange }: GroupCardProps) {
       </div>
 
       <span className="eyebrow">{t('therapy.days')}</span>
-      <div className="days">
-        {shortDays.map((label, index) => (
-          <span
-            key={label}
-            className={`day ${group.days.includes(index + 1) ? 'active' : ''}`}
-            aria-hidden="true"
-          >
-            {label}
-          </span>
-        ))}
-        <span className="days-text">{dayNames(group.days, t)}</span>
-      </div>
+      {group.dates.length === 0 ? (
+        <p className="hint">{t('therapy.noDates')}</p>
+      ) : (
+        <ul className="date-chips">
+          {group.dates.map((day) => (
+            <li key={day}>
+              <span className={`chip date-chip ${day < now ? 'past' : day === now ? 'today' : ''}`}>
+                {shortDay(day, lang)}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
 
       {group.seats.length > 0 && (
         <>
           <span className="eyebrow">{t('therapy.seats')}</span>
           <div className="chips">
             {group.seats.map((host) => (
-              <span key={host} className="chip seat-chip">
-                {host}
+              <span key={host} className="chip seat-chip" title={host}>
+                {seatName(host, t)}
               </span>
             ))}
           </div>
@@ -123,13 +154,23 @@ export function GroupCard({ group, onChange }: GroupCardProps) {
           {copied ? t('therapy.copied') : t('therapy.copy')}
         </button>
         {group.mine && (
-          <button
-            className="pill"
-            disabled={busy}
-            onClick={() => void act(() => api.closeGroup(group.id))}
-          >
-            {t('therapy.close')}
-          </button>
+          <>
+            <button
+              className="pill"
+              onClick={() => {
+                setEditing(true)
+              }}
+            >
+              {t('edit.edit')}
+            </button>
+            <button
+              className="pill"
+              disabled={busy}
+              onClick={() => void act(() => api.closeGroup(group.id))}
+            >
+              {t('therapy.close')}
+            </button>
+          </>
         )}
       </div>
       <ErrorNote error={error} />

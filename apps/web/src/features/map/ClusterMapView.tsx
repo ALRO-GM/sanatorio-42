@@ -1,10 +1,18 @@
 import { useMemo, useState } from 'react'
+import type { FocusEvent, MouseEvent } from 'react'
 
-import type { ClusterMap, MapCluster, MapSeat } from '@sanatorio/contracts'
+import type { ClusterMap, MapCluster, MapSeat, SeatReservation } from '@sanatorio/contracts'
 
 import { useI18n } from '../../shared/i18n'
 import type { Translate } from '../../shared/i18n'
 import { Avatar } from '../../shared/ui/Avatar'
+import { SeatFace } from './SeatFace'
+import { SeatHoverCard } from './SeatHoverCard'
+import type { Hovered } from './SeatHoverCard'
+import { clusterName, seatName } from './seats'
+
+// Quien pinta el mapa suele necesitar también el nombre de la sala.
+export { clusterName }
 
 type ClusterMapViewProps = {
   map: ClusterMap
@@ -15,11 +23,18 @@ type ClusterMapViewProps = {
   onPick?: (host: string) => void
   /** Puestos elegidos, en modo elegir. */
   picked?: readonly string[]
+  /**
+   * Cuándo una reserva de terapia se pinta en azul. Por defecto, solo mientras
+   * el grupo está reunido: un puesto reservado para el jueves no tiene por qué
+   * salir marcado el martes. Al elegir puestos se pasa otra regla (la que dice
+   * si choca con los días y horas que se están eligiendo).
+   */
+  showReservation?: (reservation: SeatReservation) => boolean
   /** Qué colores explica la leyenda. En modo elegir sobran los de guardia. */
   legend?: readonly LegendItem[]
 }
 
-type LegendItem = 'patient' | 'specialist' | 'reserved' | 'occupied' | 'free' | 'picked'
+type LegendItem = 'patient' | 'specialist' | 'reserved' | 'clash' | 'occupied' | 'free' | 'picked'
 
 const DEFAULT_LEGEND: readonly LegendItem[] = [
   'specialist',
@@ -29,13 +44,6 @@ const DEFAULT_LEGEND: readonly LegendItem[] = [
   'free',
 ]
 
-/** "Cluster 1" para `c1`; el nombre tal cual si el campus los llama de otra forma. */
-export function clusterName(id: string, t: Translate): string {
-  const match = /^c(\d+)$/.exec(id)
-
-  return match === null ? id : t('map.cluster', { n: match[1] ?? '' })
-}
-
 /** El cluster que más interesa abrir: donde hay alguien de guardia, o si no, donde hay más gente. */
 function mostRelevant(clusters: readonly MapCluster[]): string | null {
   const best = [...clusters].sort((a, b) => b.onDuty - a.onDuty || b.occupied - a.occupied)[0]
@@ -44,14 +52,14 @@ function mostRelevant(clusters: readonly MapCluster[]): string | null {
 }
 
 /** Clases de color de un puesto. El orden de prioridad lo pone el CSS. */
-function seatClasses(seat: MapSeat, picked: boolean): string {
+function seatClasses(seat: MapSeat, picked: boolean, reserved: boolean): string {
   return [
     'seat',
     seat.occupant === null ? 'free' : 'occupied',
     seat.occupant?.duty ?? '',
     seat.occupant?.me === true ? 'me' : '',
-    seat.reservation === null ? '' : 'reserved',
-    seat.reservation?.inSession === true ? 'in-session' : '',
+    reserved ? 'reserved' : '',
+    reserved && seat.reservation?.inSession === true ? 'in-session' : '',
     picked ? 'picked' : '',
   ]
     .filter((name) => name !== '')
@@ -59,8 +67,8 @@ function seatClasses(seat: MapSeat, picked: boolean): string {
 }
 
 /** Lo que lee un lector de pantalla (y el `title`) en cada puesto. */
-function seatLabel(seat: MapSeat, t: Translate): string {
-  const parts = [seat.host]
+function seatLabel(seat: MapSeat, t: Translate, reserved: boolean): string {
+  const parts = [seatName(seat.host, t)]
 
   if (seat.occupant === null) {
     parts.push(t('map.seatFree'))
@@ -69,7 +77,7 @@ function seatLabel(seat: MapSeat, t: Translate): string {
     if (seat.occupant.duty !== null) parts.push(t(`map.duty.${seat.occupant.duty}`))
   }
 
-  if (seat.reservation !== null) parts.push(t('map.seatReserved'))
+  if (reserved) parts.push(t('map.seatReserved'))
 
   return parts.join(' · ')
 }
@@ -84,11 +92,23 @@ export function ClusterMapView({
   map,
   onPick,
   picked = [],
+  showReservation = (reservation) => reservation.inSession,
   legend = DEFAULT_LEGEND,
 }: ClusterMapViewProps) {
   const { t } = useI18n()
   const [chosenCluster, setChosenCluster] = useState<string | null>(null)
   const [openHost, setOpenHost] = useState<string | null>(null)
+  // Puesto sobre el que está el ratón (o el foco): su ficha flota al lado.
+  const [hovered, setHovered] = useState<Hovered | null>(null)
+
+  const hover = (seat: MapSeat) => (event: MouseEvent | FocusEvent) => {
+    if (seat.occupant !== null) {
+      setHovered({ seat, rect: event.currentTarget.getBoundingClientRect() })
+    }
+  }
+  const unhover = (): void => {
+    setHovered(null)
+  }
 
   const fallback = useMemo(() => mostRelevant(map.clusters), [map.clusters])
   const cluster =
@@ -142,22 +162,28 @@ export function ClusterMapView({
               {columns.map((column) => {
                 const seat = byPosition.get(`${row}:${column}`)
 
-                // Dentro de la cuadrícula pero nunca visto: puede ser un pasillo.
+                // El plano llega completo; esto solo cubre un hueco inesperado.
                 if (seat === undefined) {
                   return <span key={column} className="seat ghost" aria-hidden="true" />
                 }
 
                 const isPicked = picked.includes(seat.host)
-                const label = seatLabel(seat, t)
+                const reserved = seat.reservation !== null && showReservation(seat.reservation)
+                const label = seatLabel(seat, t, reserved)
 
                 return (
                   <button
                     key={column}
                     type="button"
-                    className={`${seatClasses(seat, isPicked)} ${seat.host === openHost ? 'open' : ''}`}
+                    className={`${seatClasses(seat, isPicked, reserved)} ${seat.host === openHost ? 'open' : ''}`}
                     aria-label={label}
                     aria-pressed={onPick === undefined ? seat.host === openHost : isPicked}
-                    title={label}
+                    // Los ocupados ya enseñan su ficha al pasar: el `title` la taparía.
+                    title={seat.occupant === null ? label : undefined}
+                    onMouseEnter={hover(seat)}
+                    onMouseLeave={unhover}
+                    onFocus={hover(seat)}
+                    onBlur={unhover}
                     onClick={() => {
                       if (onPick === undefined) {
                         setOpenHost(seat.host === openHost ? null : seat.host)
@@ -166,7 +192,9 @@ export function ClusterMapView({
                       }
                     }}
                   >
-                    {seat.occupant === null ? '' : seat.occupant.login.charAt(0).toUpperCase()}
+                    {seat.occupant !== null && (
+                      <SeatFace login={seat.occupant.login} image={seat.occupant.image} />
+                    )}
                   </button>
                 )
               })}
@@ -175,13 +203,19 @@ export function ClusterMapView({
         </div>
       </div>
 
-      {open !== null && <SeatDetail seat={open} />}
+      {hovered !== null && <SeatHoverCard hovered={hovered} />}
+      {open !== null && (
+        <SeatDetail
+          seat={open}
+          reserved={open.reservation !== null && showReservation(open.reservation)}
+        />
+      )}
 
       <ul className="map-legend">
         {legend.map((item) => (
           <li key={item}>
             <span
-              className={`seat sample ${item === 'free' ? 'free' : item === 'occupied' ? 'occupied' : item}`}
+              className={`seat sample ${item === 'clash' ? 'reserved free' : item === 'reserved' ? 'reserved free' : item}`}
             />
             {t(`map.legend.${item}`)}
           </li>
@@ -191,7 +225,7 @@ export function ClusterMapView({
       {map.unplaced.length > 0 && (
         <p className="hint">
           {t('map.unplaced')}{' '}
-          {map.unplaced.map((entry) => `${entry.login} (${entry.host})`).join(', ')}
+          {map.unplaced.map((entry) => `${entry.login} (${seatName(entry.host, t)})`).join(', ')}
         </p>
       )}
     </div>
@@ -199,14 +233,15 @@ export function ClusterMapView({
 }
 
 /** Quién está en el puesto pulsado y si está reservado. */
-function SeatDetail({ seat }: { seat: MapSeat }) {
-  const { t } = useI18n()
+function SeatDetail({ seat, reserved }: { seat: MapSeat; reserved: boolean }) {
+  const { t, lang } = useI18n()
   const { occupant, reservation } = seat
-  const shortDays = t('days.short').split(',')
 
   return (
     <div className="seat-detail" role="status">
-      <strong className="seat-host">{seat.host}</strong>
+      <strong className="seat-host" title={seat.host}>
+        {seatName(seat.host, t)}
+      </strong>
       {occupant === null ? (
         <span>{t('map.seatFree')}</span>
       ) : (
@@ -226,13 +261,25 @@ function SeatDetail({ seat }: { seat: MapSeat }) {
               {t(`map.duty.${occupant.duty}`)}
             </span>
           )}
+          {occupant.projects.map((project) => (
+            <span key={project} className="chip">
+              {project}
+            </span>
+          ))}
         </span>
       )}
-      {reservation !== null && (
+      {reservation !== null && reserved && (
         <span className="seat-reservation">
           {t('map.reservedFor', {
             project: reservation.projectName ?? '?',
-            days: reservation.days.map((day) => shortDays[day - 1] ?? '').join(' '),
+            days: reservation.dates
+              .map((day) =>
+                new Date(`${day}T12:00:00`).toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-GB', {
+                  day: 'numeric',
+                  month: 'short',
+                }),
+              )
+              .join(', '),
             start: reservation.start,
             end: reservation.end,
           })}

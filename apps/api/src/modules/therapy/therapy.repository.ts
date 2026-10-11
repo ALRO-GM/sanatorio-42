@@ -13,7 +13,8 @@ export type GroupRow = {
   projectName: string | null
   creator: string
   place: string
-  days: number[]
+  /** Días concretos de quedada (`YYYY-MM-DD`), en orden. */
+  dates: string[]
   start: string
   end: string
   capacity: number
@@ -23,6 +24,15 @@ export type GroupRow = {
   closed: boolean
   members: string[]
 }
+
+/**
+ * Condición SQL de "grupo abierto": sin cerrar y con alguien dentro.
+ *
+ * Un grupo se cierra al salir su última persona, pero la condición lo exige
+ * además aquí: un grupo vacío no tiene que salir en ninguna lista, ni en el
+ * calendario, ni reservar puestos en el mapa, pase lo que pase.
+ */
+const OPEN = `g.closed = 0 AND EXISTS (SELECT 1 FROM therapy_members m WHERE m.group_id = g.id)`
 
 export function createTherapyRepository(db: Db) {
   async function membersOf(groupIds: readonly number[]): Promise<Map<number, string[]>> {
@@ -64,7 +74,9 @@ export function createTherapyRepository(db: Db) {
       projectName: typeof row.project_name === 'string' ? row.project_name : null,
       creator: toText(row.creator),
       place: toText(row.place),
-      days: toText(row.days).split(',').map(Number),
+      dates: toText(row.dates)
+        .split(',')
+        .filter((date) => date !== ''),
       start: toText(row.start_time),
       end: toText(row.end_time),
       capacity: toNumber(row.capacity),
@@ -81,13 +93,13 @@ export function createTherapyRepository(db: Db) {
     /** Grupos abiertos de un campus; con `projectId`, solo los de ese proyecto. */
     async listOpen(campusId: number, projectId?: number): Promise<GroupRow[]> {
       return projectId === undefined
-        ? select('g.campus_id = ? AND g.closed = 0', [campusId])
-        : select('g.campus_id = ? AND g.closed = 0 AND g.project_id = ?', [campusId, projectId])
+        ? select(`g.campus_id = ? AND ${OPEN}`, [campusId])
+        : select(`g.campus_id = ? AND ${OPEN} AND g.project_id = ?`, [campusId, projectId])
     },
 
     /** Grupos abiertos de todos los campus, para la comprobación de asistencia. */
     async listAllOpen(): Promise<GroupRow[]> {
-      return select('g.closed = 0', [])
+      return select(OPEN, [])
     },
 
     /**
@@ -121,7 +133,7 @@ export function createTherapyRepository(db: Db) {
       projectId: number
       creator: string
       place: string
-      days: readonly number[]
+      dates: readonly string[]
       start: string
       end: string
       capacity: number
@@ -131,14 +143,16 @@ export function createTherapyRepository(db: Db) {
       const now = nowIso()
       const result = await db.execute({
         sql: `INSERT INTO therapy_groups
-                (campus_id, project_id, creator, place, days, start_time, end_time, capacity, note, seats, created_at)
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                (campus_id, project_id, creator, place, dates, last_date, start_time, end_time,
+                 capacity, note, seats, created_at)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         args: [
           group.campusId,
           group.projectId,
           group.creator,
           group.place,
-          group.days.join(','),
+          group.dates.join(','),
+          group.dates.at(-1) ?? null,
           group.start,
           group.end,
           group.capacity,
@@ -155,6 +169,53 @@ export function createTherapyRepository(db: Db) {
       })
 
       return id
+    },
+
+    /** Cambia los datos de un grupo. Quién puede y qué vale lo decide el servicio. */
+    async update(
+      id: number,
+      group: {
+        projectId: number
+        place: string
+        dates: readonly string[]
+        start: string
+        end: string
+        capacity: number
+        note: string | null
+        seats: readonly string[]
+      },
+    ): Promise<void> {
+      await db.execute({
+        sql: `UPDATE therapy_groups SET
+                project_id = ?, place = ?, dates = ?, last_date = ?, start_time = ?,
+                end_time = ?, capacity = ?, note = ?, seats = ?
+              WHERE id = ?`,
+        args: [
+          group.projectId,
+          group.place,
+          group.dates.join(','),
+          group.dates.at(-1) ?? null,
+          group.start,
+          group.end,
+          group.capacity,
+          group.note,
+          group.seats.join(','),
+          id,
+        ],
+      })
+    },
+
+    /**
+     * Cierra los grupos cuyo último día ya ha pasado.
+     *
+     * @param today El día de hoy en el campus, `YYYY-MM-DD`.
+     */
+    async closeFinished(campusId: number, today: string): Promise<void> {
+      await db.execute({
+        sql: `UPDATE therapy_groups SET closed = 1
+              WHERE campus_id = ? AND closed = 0 AND last_date IS NOT NULL AND last_date < ?`,
+        args: [campusId, today],
+      })
     },
 
     /**

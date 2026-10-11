@@ -6,7 +6,7 @@
 import type { Db } from '../../core/db/database.js'
 import type { AppModule } from '../../core/module.js'
 import type { XpService } from '../profile/index.js'
-import type { ReplicaRepository, Syncer } from '../replica/index.js'
+import type { Agenda, ReplicaRepository, Syncer } from '../replica/index.js'
 import { createHelpRepository } from './help.repository.js'
 import { registerHelpRoutes } from './help.routes.js'
 import { createHelpService } from './help.service.js'
@@ -15,6 +15,7 @@ import type { HelpService } from './help.service.js'
 export type HelpModuleDeps = {
   db: Db
   replica: ReplicaRepository
+  agenda: Agenda
   sync: Syncer
   xp: XpService
   now?: () => number
@@ -26,6 +27,7 @@ export function createHelpModule(deps: HelpModuleDeps): HelpModule {
   const service = createHelpService({
     help: createHelpRepository(deps.db),
     replica: deps.replica,
+    agenda: deps.agenda,
     sync: deps.sync,
     xp: deps.xp,
     ...(deps.now === undefined ? {} : { now: deps.now }),

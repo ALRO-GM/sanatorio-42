@@ -1,3 +1,5 @@
+import type { SeatReservation } from '@sanatorio/contracts'
+
 import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
@@ -13,6 +15,11 @@ type SeatPickerProps = {
    * pisan, porque cada una parte del estado más reciente.
    */
   onToggle: (host: string) => void
+  /**
+   * Días y horas para los que se están eligiendo los puestos. Un puesto que otro
+   * grupo tiene reservado solo estorba si coincide en día y hora.
+   */
+  when: { dates: readonly string[]; start: string; end: string }
 }
 
 /**
@@ -20,7 +27,7 @@ type SeatPickerProps = {
  *
  * No deja elegir un puesto que ya tiene reservado otro grupo.
  */
-export function SeatPicker({ value, onToggle }: SeatPickerProps) {
+export function SeatPicker({ value, onToggle, when }: SeatPickerProps) {
   const { t } = useI18n()
   const { data, error, loading, reload } = useAsync(() => api.getCampusMap(), [])
 
@@ -32,10 +39,16 @@ export function SeatPicker({ value, onToggle }: SeatPickerProps) {
     return <ErrorNote error={error} onRetry={() => void reload()} />
   }
 
+  /** `true` si esa reserva coincide en algún día y se pisa en la hora con lo que se elige. */
+  const clashes = (reservation: SeatReservation): boolean =>
+    reservation.dates.some((day) => when.dates.includes(day)) &&
+    reservation.start < when.end &&
+    when.start < reservation.end
+
   const reserved = new Set(
     data.clusters
       .flatMap((cluster) => cluster.seats)
-      .filter((seat) => seat.reservation !== null)
+      .filter((seat) => seat.reservation !== null && clashes(seat.reservation))
       .map((seat) => seat.host),
   )
 
@@ -49,7 +62,8 @@ export function SeatPicker({ value, onToggle }: SeatPickerProps) {
       map={data}
       picked={value}
       onPick={toggle}
-      legend={['picked', 'reserved', 'occupied', 'free']}
+      showReservation={clashes}
+      legend={['picked', 'clash', 'occupied', 'free']}
     />
   )
 }

@@ -1,31 +1,50 @@
 import { useState } from 'react'
 import type { ChangeEvent, SyntheticEvent } from 'react'
 
+import type { BoardView } from '@sanatorio/contracts'
+
 import { api } from '../../shared/api'
 import { useAction } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { dayKey, hhmm } from './dates'
 
 type BoardFormProps = {
   /** Día con el que se abre el formulario, como `2026-10-10`. */
   defaultDay: string
+  /** Si viene, el formulario cambia esa pizarra en vez de proponer una nueva. */
+  board?: BoardView
   onCancel: () => void
-  onCreated: () => void
+  onSaved: () => void
 }
 
-export function BoardForm({ defaultDay, onCancel, onCreated }: BoardFormProps) {
+/** Proponer una pizarra, o cambiar una que ya existe (`board`). */
+export function BoardForm({ defaultDay, board, onCancel, onSaved }: BoardFormProps) {
   const { t } = useI18n()
   const { busy, error, run } = useAction()
-  const [form, setForm] = useState({
-    title: '',
-    topic: '',
-    place: '',
-    day: defaultDay,
-    start: '17:00',
-    end: '18:30',
-    capacity: '20',
-    description: '',
-  })
+  const [form, setForm] = useState(() =>
+    board === undefined
+      ? {
+          title: '',
+          topic: '',
+          place: '',
+          day: defaultDay,
+          start: '17:00',
+          end: '18:30',
+          capacity: '20',
+          description: '',
+        }
+      : {
+          title: board.title,
+          topic: board.topic ?? '',
+          place: board.place,
+          day: dayKey(new Date(board.startsAt)),
+          start: hhmm(board.startsAt),
+          end: hhmm(board.endsAt),
+          capacity: String(board.capacity),
+          description: board.description ?? '',
+        },
+  )
   const set =
     (field: keyof typeof form) =>
     (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
@@ -37,23 +56,24 @@ export function BoardForm({ defaultDay, onCancel, onCreated }: BoardFormProps) {
     // El día y las horas son las del navegador, que es la hora del campus para
     // quien está allí; a la API viajan como instantes con su zona.
     const at = (time: string): string => new Date(`${form.day}T${time}:00`).toISOString()
+    const input = {
+      title: form.title,
+      topic: form.topic,
+      place: form.place,
+      description: form.description,
+      capacity: Number(form.capacity),
+      startsAt: at(form.start),
+      endsAt: at(form.end),
+    }
     const ok = await run(() =>
-      api.createBoard({
-        title: form.title,
-        topic: form.topic,
-        place: form.place,
-        description: form.description,
-        capacity: Number(form.capacity),
-        startsAt: at(form.start),
-        endsAt: at(form.end),
-      }),
+      board === undefined ? api.createBoard(input) : api.updateBoard(board.id, input),
     )
-    if (ok) onCreated()
+    if (ok) onSaved()
   }
 
   return (
     <form className="card form" onSubmit={(event) => void submit(event)}>
-      <h3>{t('cal.proposeBtn')}</h3>
+      <h3>{t(board === undefined ? 'cal.proposeBtn' : 'cal.editTitle')}</h3>
       <div className="form-grid">
         <label className="span-2">
           {t('cal.f.title')}
@@ -120,7 +140,7 @@ export function BoardForm({ defaultDay, onCancel, onCreated }: BoardFormProps) {
       <ErrorNote error={error} />
       <div className="actions">
         <button type="submit" className="primary small" disabled={busy}>
-          {t('cal.f.create')}
+          {t(board === undefined ? 'cal.f.create' : 'edit.save')}
         </button>
         <button type="button" className="pill" onClick={onCancel}>
           {t('board.cancel')}

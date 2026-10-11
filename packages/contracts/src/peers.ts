@@ -33,6 +33,11 @@ export type Peer = {
   /** De guardia. Lo pone Sanatorio, no la API de 42. */
   available: boolean
   status: ProjectStatus
+  /**
+   * `true` si lo aprobó con la nota máxima, 125: todo el proyecto y todos los
+   * bonus. Es más que especialista: una "eminencia".
+   */
+  perfect: boolean
 }
 
 /** `GET` y `PUT /me/availability`. */

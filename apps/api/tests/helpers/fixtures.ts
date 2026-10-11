@@ -64,6 +64,10 @@ export function projectUser(
     projectId?: number
     projectName?: string
     slug?: string
+    /** Cursus de la fila. Por defecto, el 42cursus (`21`). */
+    cursusIds?: number[]
+    /** Cuándo se apuntó al proyecto. */
+    createdAt?: string
     status?: string
     validated?: boolean | null
     updatedAt?: string
@@ -80,6 +84,8 @@ export function projectUser(
       options.validated === undefined ? (status === 'finished' ? true : null) : options.validated,
     final_mark: status === 'finished' ? 100 : null,
     updated_at: options.updatedAt ?? '2026-10-01T10:00:00.000Z',
+    created_at: options.createdAt ?? '2026-09-01T10:00:00.000Z',
+    cursus_ids: options.cursusIds ?? [21],
     project: {
       id: options.projectId ?? 10,
       name: options.projectName ?? 'ft_printf',

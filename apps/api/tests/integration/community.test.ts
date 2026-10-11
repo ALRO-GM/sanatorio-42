@@ -59,6 +59,10 @@ function client(built: TestApp, cookie: string) {
   }
 }
 
+/** Dentro de `days` días, como `YYYY-MM-DD` (UTC, que es la zona del campus de los tests). */
+const dayIn = (days: number): string =>
+  new Date(Date.now() + days * 86_400_000).toISOString().slice(0, 10)
+
 describe('réplica vista desde fuera', () => {
   it('la sala de espera sale del login, sin pedir nada más a 42', async () => {
     const built = await app()
@@ -87,6 +91,7 @@ describe('réplica vista desde fuera', () => {
         location: 'c3r7p7',
         available: false,
         status: 'in_progress',
+        perfect: false,
       },
     ])
     // En el proyecto hay tres personas de Madrid, aunque solo una sea accionable.
@@ -171,6 +176,7 @@ describe('réplica vista desde fuera', () => {
       '/help/today',
       '/help/offers',
       '/leaderboard',
+      '/me/health',
       '/calendar?from=2026-10-01T00:00:00Z&to=2026-10-08T00:00:00Z',
       '/projects/10/doubts',
     ]) {
@@ -239,7 +245,7 @@ describe('comunidad por HTTP', () => {
     const created = await http.post('/groups', {
       projectId: 10,
       place: 'Cluster 1 · Planta 2',
-      days: [2, 4],
+      dates: [dayIn(1), dayIn(3)],
       start: '16:00',
       end: '18:00',
     })
@@ -258,7 +264,7 @@ describe('comunidad por HTTP', () => {
     const built = await app()
     const http = client(built, await built.login())
 
-    const response = await http.post('/groups', { projectId: 10, place: '', days: [9] })
+    const response = await http.post('/groups', { projectId: 10, place: '', dates: ['ayer'] })
 
     expect(response.statusCode).toBe(400)
     expect(json(response)).toMatchObject({ error: 'invalid_input' })
@@ -418,22 +424,37 @@ describe('mapa de clusters', () => {
       occupied: 2,
       onDuty: 1,
     })
-    expect(map.clusters[0]?.seats).toEqual([
-      {
-        host: 'c1r1s1',
-        row: 1,
-        seat: 1,
-        occupant: expect.objectContaining({ login: 'jdoe', duty: 'specialist', me: false }),
-        reservation: null,
-      },
-      {
-        host: 'c1r2s3',
-        row: 2,
-        seat: 3,
-        occupant: expect.objectContaining({ login: 'mgomez', duty: null }),
-        reservation: null,
-      },
+    const seats = map.clusters[0]?.seats ?? []
+
+    // El plano se completa: 2 filas × 3 puestos, ocupados o no.
+    expect(seats.map((seat) => seat.host)).toEqual([
+      'c1r1s1',
+      'c1r1s2',
+      'c1r1s3',
+      'c1r2s1',
+      'c1r2s2',
+      'c1r2s3',
     ])
+    expect(seats[0]).toMatchObject({
+      row: 1,
+      seat: 1,
+      occupant: { login: 'jdoe', duty: 'specialist', me: false, projects: [] },
+      reservation: null,
+    })
+    // `mgomez` tiene ft_printf en curso: sale en su ficha.
+    expect(seats[5]?.occupant).toMatchObject({
+      login: 'mgomez',
+      duty: null,
+      projects: ['ft_printf'],
+    })
+    // Los que nadie ha ocupado nunca salen libres, y se pueden reservar.
+    expect(seats[1]).toEqual({
+      host: 'c1r1s2',
+      row: 1,
+      seat: 2,
+      occupant: null,
+      reservation: null,
+    })
     // Un puesto cuyo nombre no encaja en una cuadrícula no se pierde.
     expect(map.unplaced).toEqual([expect.objectContaining({ host: 'sala-rara', duty: null })])
   })
@@ -464,7 +485,7 @@ describe('mapa de clusters', () => {
     const created = await http.post('/groups', {
       projectId: 10,
       place: 'Cluster 1',
-      days: [2],
+      dates: [dayIn(1)],
       start: '16:00',
       end: '18:00',
       capacity: 3,
@@ -499,7 +520,7 @@ describe('mapa de clusters', () => {
     const response = await http.post('/groups', {
       projectId: 10,
       place: 'Cluster 1',
-      days: [2],
+      dates: [dayIn(1)],
       start: '16:00',
       end: '18:00',
       capacity: 2,
@@ -677,7 +698,7 @@ describe('calendario', () => {
     await http.post('/groups', {
       projectId: 10,
       place: 'Cluster 1',
-      days: [1, 2, 3, 4, 5, 6, 7],
+      dates: [dayIn(1), dayIn(2), dayIn(3)],
       start: '16:00',
       end: '18:00',
     })
@@ -686,8 +707,8 @@ describe('calendario', () => {
     const kinds = (kind: string) => calendar.events.filter((event) => event.kind === kind)
 
     expect(kinds('help')).toMatchObject([{ title: 'Te ofreces a ayudar', section: 'guardia' }])
-    // Un grupo diario, en ocho días de intervalo: una sesión por día.
-    expect(kinds('therapy').length).toBeGreaterThanOrEqual(7)
+    // Tres días concretos: tres sesiones, una por día.
+    expect(kinds('therapy')).toHaveLength(3)
     expect(kinds('therapy')[0]).toMatchObject({
       title: 'Terapia de ft_printf',
       place: 'Cluster 1',

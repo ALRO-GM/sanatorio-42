@@ -10,6 +10,8 @@ import type { AppModule } from '../../core/module.js'
 import type { FortyTwoClient } from '../../integrations/forty-two/client.js'
 import { createAgenda } from './agenda.js'
 import type { Agenda } from './agenda.js'
+import { createCurriculum } from './curriculum.js'
+import type { Curriculum } from './curriculum.js'
 import { createCampusesService } from './campuses.service.js'
 import type { CampusesService } from './campuses.service.js'
 import { createReplicaRepository } from './replica.repository.js'
@@ -34,6 +36,8 @@ export type ReplicaModule = AppModule & {
   campuses: CampusesService
   /** Eventos, exámenes y correcciones de 42, bajo demanda. */
   agenda: Agenda
+  /** Plan de estudios: el de cada persona y el círculo de cada proyecto. */
+  curriculum: Curriculum
 }
 
 export function createReplicaModule(deps: ReplicaModuleDeps): ReplicaModule {
@@ -59,10 +63,19 @@ export function createReplicaModule(deps: ReplicaModuleDeps): ReplicaModule {
     ...(deps.log === undefined ? {} : { log: deps.log }),
   })
 
+  const curriculum = createCurriculum({
+    db: deps.db,
+    client: deps.client,
+    hourlyReserve: deps.config.hourlyReserve,
+    ...(deps.now === undefined ? {} : { now: deps.now }),
+    ...(deps.log === undefined ? {} : { log: deps.log }),
+  })
+
   return {
     name: 'replica',
     repository,
     agenda,
+    curriculum,
     sync,
     campuses,
     routes: (app, context) => {
@@ -78,8 +91,8 @@ export function createReplicaModule(deps: ReplicaModuleDeps): ReplicaModule {
 }
 
 export type { Agenda, AgendaEvaluation, AgendaEvent, UserAgenda } from './agenda.js'
-export { COMMON_CORE } from './common-core.js'
-export type { CoreProject } from './common-core.js'
+export { LAST_CIRCLE, parseHours } from './curriculum.js'
+export type { Curriculum, Track } from './curriculum.js'
 export { syncConfigFrom } from './sync-config.js'
 export { LOCATION_MAX_AGE_MS, PROJECT_STATUS } from './replica.domain.js'
 export type { ReplicaRepository } from './replica.repository.js'

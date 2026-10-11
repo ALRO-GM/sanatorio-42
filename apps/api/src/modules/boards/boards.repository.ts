@@ -100,6 +100,31 @@ export function createBoardsRepository(db: Db) {
       return toNumber(result.lastInsertRowid)
     },
 
+    /** Cambia los datos de una pizarra. Quién puede lo decide el servicio. */
+    async update(
+      id: number,
+      board: Pick<
+        BoardRow,
+        'title' | 'topic' | 'description' | 'place' | 'startsAt' | 'endsAt' | 'capacity'
+      >,
+    ): Promise<void> {
+      await db.execute({
+        sql: `UPDATE boards SET title = ?, topic = ?, description = ?, place = ?,
+                starts_at = ?, ends_at = ?, capacity = ?
+              WHERE id = ?`,
+        args: [
+          board.title,
+          board.topic,
+          board.description,
+          board.place,
+          board.startsAt,
+          board.endsAt,
+          board.capacity,
+          id,
+        ],
+      })
+    },
+
     /** Reserva plaza **solo si queda**, en una sola sentencia. */
     async join(id: number, login: string): Promise<boolean> {
       const result = await db.execute({

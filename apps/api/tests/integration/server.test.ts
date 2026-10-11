@@ -272,6 +272,7 @@ describe('compañeros', () => {
         'image',
         'location',
         'login',
+        'perfect',
         'status',
       ])
       expect(typeof peer.available).toBe('boolean')

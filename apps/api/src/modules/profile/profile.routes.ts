@@ -40,6 +40,11 @@ export function registerProfileRoutes(
     return reply.code(204).send()
   })
 
+  /** `GET /me/health` → fechas para saber cómo vas de tiempo: inicio, círculos completados y black hole. */
+  app.get('/me/health', async (request, reply) => {
+    return reply.send(await xp.health(await session.actor(request), session.user(request).id))
+  })
+
   /** `GET /leaderboard?period=month|all` → quién ayuda más en el campus. */
   app.get<{ Querystring: { period?: string } }>('/leaderboard', async (request, reply) => {
     return reply.send(

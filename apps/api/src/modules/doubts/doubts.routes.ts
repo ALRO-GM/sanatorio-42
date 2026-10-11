@@ -19,7 +19,7 @@ export function registerDoubtsRoutes(
    * pregunta en cada proyecto y dónde hace falta una mano.
    */
   app.get('/doubts/graph', async (request, reply) => {
-    return reply.send(await doubts.graph(await session.actor(request)))
+    return reply.send(await doubts.graph(await session.actor(request), session.user(request).id))
   })
 
   /** `GET /projects/:id/doubts` → guía, propuestas y post-its del proyecto. */
@@ -46,6 +46,17 @@ export function registerDoubtsRoutes(
   app.get<IdParams>('/doubts/:id', async (request, reply) => {
     return reply.send(
       await doubts.detail(await session.actor(request), idParam(request.params.id, 'La duda')),
+    )
+  })
+
+  /** `PUT /doubts/:id` → `{ body }`. Cambia el texto. Solo quien la puso, y si no está resuelta. */
+  app.put<IdParams>('/doubts/:id', async (request, reply) => {
+    return reply.send(
+      await doubts.update(
+        await session.actor(request),
+        idParam(request.params.id, 'La duda'),
+        request.body,
+      ),
     )
   })
 

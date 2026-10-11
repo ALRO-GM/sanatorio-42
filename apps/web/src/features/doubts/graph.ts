@@ -24,6 +24,15 @@ export function mainSignal(signals: GraphSignals): Signal | null {
   return SIGNALS.find((signal) => hasSignal(signals, signal)) ?? null
 }
 
+/** Los avisos de varios proyectos juntos, para la burbuja de una serie. */
+export function mergeSignals(projects: readonly GraphProject[]): GraphSignals {
+  return {
+    unanswered: projects.reduce((sum, project) => sum + project.signals.unanswered, 0),
+    proposals: projects.reduce((sum, project) => sum + project.signals.proposals, 0),
+    missingGuide: projects.some((project) => project.signals.missingGuide),
+  }
+}
+
 /** Cuántos proyectos tienen cada aviso, para el resumen de arriba. */
 export function countSignals(graph: HolyGraph): Record<Signal, number> {
   const projects = graph.circles.flatMap((circle) => circle.projects)
@@ -40,5 +49,91 @@ export function countSignals(graph: HolyGraph): Record<Signal, number> {
 export function firstInProgress(graph: HolyGraph): GraphProject | undefined {
   return graph.circles
     .flatMap((circle) => circle.projects)
-    .find((project) => project.status === 'in_progress' && project.projectId !== null)
+    .find((project) => project.status === 'in_progress')
+}
+
+/** Cómo se pinta un proyecto: su estado, o "cerrado" si aún no lo tiene disponible. */
+export type NodeLook = GraphProject['status'] | 'locked'
+
+export const lookOf = (project: GraphProject): NodeLook =>
+  project.locked ? 'locked' : project.status
+
+/** Módulos que tiene que haber de una serie en un círculo para que merezca agruparlos. */
+const MIN_SERIES = 3
+
+/**
+ * Lo que se dibuja en un círculo: proyectos sueltos y series.
+ *
+ * Una serie son varios módulos numerados (`Python Module 00`…`10`): once
+ * burbujas iguales saturan el círculo, así que van en una sola, que se puede
+ * abrir para verlos uno a uno.
+ */
+export type RingItem =
+  | { kind: 'project'; project: GraphProject }
+  | { kind: 'series'; series: string; projects: GraphProject[] }
+
+/**
+ * Agrupa los proyectos de un círculo.
+ *
+ * @param expanded Series abiertas: sus módulos salen sueltos.
+ */
+export function itemsOf(
+  projects: readonly GraphProject[],
+  expanded: ReadonlySet<string>,
+): RingItem[] {
+  const items: RingItem[] = []
+  const bySeries = new Map<string, GraphProject[]>()
+
+  for (const project of projects) {
+    if (project.series !== null) {
+      bySeries.set(project.series, [...(bySeries.get(project.series) ?? []), project])
+    }
+  }
+
+  for (const project of projects) {
+    const members = project.series === null ? undefined : bySeries.get(project.series)
+
+    if (
+      project.series === null ||
+      members === undefined ||
+      members.length < MIN_SERIES ||
+      expanded.has(project.series)
+    ) {
+      items.push({ kind: 'project', project })
+    } else if (members[0] === project) {
+      // La serie ocupa el sitio de su primer módulo.
+      items.push({ kind: 'series', series: project.series, projects: members })
+    }
+  }
+
+  return items
+}
+
+/** Las series que hay en el grafo (las que tienen módulos suficientes), con su círculo. */
+export function seriesIn(graph: HolyGraph): { series: string; circle: number; total: number }[] {
+  return graph.circles.flatMap(({ circle, projects }) =>
+    itemsOf(projects, new Set()).flatMap((item) =>
+      item.kind === 'series' ? [{ series: item.series, circle, total: item.projects.length }] : [],
+    ),
+  )
+}
+
+/**
+ * Cuánto de un círculo lleva aprobado la persona, de 0 a 1.
+ *
+ * Cuenta por horas, no por número de proyectos: aprobar el de 120 horas avanza
+ * más que aprobar un módulo de 6. Los que no tienen horas cuentan como la media
+ * de los que sí.
+ */
+export function completion(projects: readonly GraphProject[]): number {
+  const known = projects.flatMap((project) => (project.hours === null ? [] : [project.hours]))
+  const average =
+    known.length === 0 ? 1 : known.reduce((sum, hours) => sum + hours, 0) / known.length
+  const weight = (project: GraphProject): number => project.hours ?? average
+  const total = projects.reduce((sum, project) => sum + weight(project), 0)
+  const done = projects
+    .filter((project) => project.status === 'finished')
+    .reduce((sum, project) => sum + weight(project), 0)
+
+  return total === 0 ? 0 : done / total
 }

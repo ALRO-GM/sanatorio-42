@@ -85,10 +85,14 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
   })
   const common = { db, replica: replica.repository, ...clock }
 
-  const profile = createProfileModule({ ...common, events })
+  const profile = createProfileModule({ ...common, curriculum: replica.curriculum, events })
   const peers = createPeersModule({ ...common, sync: replica.sync, events })
   const therapy = createTherapyModule({ ...common, sync: replica.sync, xp: profile.xp })
-  const doubts = createDoubtsModule({ ...common, xp: profile.xp })
+  const doubts = createDoubtsModule({
+    ...common,
+    curriculum: replica.curriculum,
+    xp: profile.xp,
+  })
   const boards = createBoardsModule({ ...common, xp: profile.xp, events })
   const map = createMapModule({
     replica: replica.repository,
@@ -98,7 +102,12 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     ...clock,
   })
 
-  const help = createHelpModule({ ...common, sync: replica.sync, xp: profile.xp })
+  const help = createHelpModule({
+    ...common,
+    agenda: replica.agenda,
+    sync: replica.sync,
+    xp: profile.xp,
+  })
   const calendar = createCalendarModule({
     replica: replica.repository,
     agenda: replica.agenda,

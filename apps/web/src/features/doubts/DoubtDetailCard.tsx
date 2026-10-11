@@ -19,6 +19,8 @@ export function DoubtDetailCard({ doubtId, onClose, onChange }: DoubtDetailCardP
   const detail = useAsync(() => api.getDoubt(doubtId), [doubtId])
   const { busy, error, run } = useAction()
   const [reply, setReply] = useState('')
+  // Texto de la duda mientras se está cambiando; `null` si no se está editando.
+  const [draft, setDraft] = useState<string | null>(null)
 
   if (detail.loading) {
     return (
@@ -60,6 +62,15 @@ export function DoubtDetailCard({ doubtId, onClose, onChange }: DoubtDetailCardP
 
   const resolved = doubt.status === 'resolved'
 
+  const saveBody = async (event: SyntheticEvent): Promise<void> => {
+    event.preventDefault()
+
+    if (draft !== null && (await run(() => api.updateDoubt(doubtId, draft)))) {
+      setDraft(null)
+      refresh()
+    }
+  }
+
   const remove = async (): Promise<void> => {
     if (await run(() => api.removeDoubt(doubtId))) {
       onChange()
@@ -70,7 +81,41 @@ export function DoubtDetailCard({ doubtId, onClose, onChange }: DoubtDetailCardP
   return (
     <article className="card doubt-detail">
       <header className="card-head">
-        <h3>{doubt.body}</h3>
+        {draft === null ? (
+          <h3>{doubt.body}</h3>
+        ) : (
+          <form className="edit-doubt" onSubmit={(event) => void saveBody(event)}>
+            <textarea
+              value={draft}
+              onChange={(event) => {
+                setDraft(event.target.value)
+              }}
+              aria-label={t('board.editDoubt')}
+              maxLength={280}
+              rows={3}
+              autoFocus
+              required
+            />
+            <div className="actions">
+              <button
+                type="submit"
+                className="primary small"
+                disabled={busy || draft.trim().length < 5}
+              >
+                {t('edit.save')}
+              </button>
+              <button
+                type="button"
+                className="pill"
+                onClick={() => {
+                  setDraft(null)
+                }}
+              >
+                {t('board.cancel')}
+              </button>
+            </div>
+          </form>
+        )}
         <span className={`postit-status ${doubt.status}`}>{t(`board.status.${doubt.status}`)}</span>
       </header>
       <p className="hint">{doubt.author}</p>
@@ -133,6 +178,18 @@ export function DoubtDetailCard({ doubtId, onClose, onChange }: DoubtDetailCardP
           </button>
           {doubt.mine && (
             <>
+              {!resolved && draft === null && (
+                <button
+                  type="button"
+                  className="pill"
+                  disabled={busy}
+                  onClick={() => {
+                    setDraft(doubt.body)
+                  }}
+                >
+                  {t('edit.edit')}
+                </button>
+              )}
               {resolved && (
                 <button
                   type="button"

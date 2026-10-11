@@ -1,6 +1,7 @@
 import { useI18n } from '../../shared/i18n'
 import { Logo } from '../../shared/ui/Logo'
 import { LangSelect } from '../settings/LangSelect'
+import { ThemeSelect } from '../settings/ThemeSelect'
 
 type LoginProps = {
   onLogin: () => void
@@ -42,6 +43,7 @@ export function Login({ onLogin, notice }: LoginProps) {
       </section>
       <footer className="footer">
         <LangSelect />
+        <ThemeSelect />
         <p>{t('app.footer')}</p>
       </footer>
     </main>

@@ -42,6 +42,8 @@ export type Expediente = {
   reactions: Record<ReactionKind, number>
   /** Cuánto vale cada cosa, para que la web no lo tenga escrito a mano. */
   rules: Record<XpKind, number>
+  /** Lo ganado con cada cosa: cuánta XP en total y cuántas veces. */
+  earned: Record<XpKind, { xp: number; times: number }>
 }
 
 /** `GET /me/profile`. */
@@ -75,4 +77,23 @@ export type Leaderboard = {
   entries: LeaderboardEntry[]
   /** Dónde está quien pregunta, aunque no entre en la lista. `null` si aún no ha ayudado. */
   me: LeaderboardEntry | null
+}
+
+/**
+ * `GET /me/health`: lo que hace falta para saber cómo vas de tiempo en el common
+ * core. Los cálculos (a qué pace vas, cuándo caerías al siguiente, cuándo te
+ * alcanzaría el black hole) los hace la web con la tabla de plazos.
+ */
+export type Health = {
+  /** Cuándo empezaste el 42cursus (ISO-8601), o `null` si no se sabe. */
+  startedAt: string | null
+  /** La fecha de black hole que da 42 en tu perfil, si la da. */
+  blackholedAt: string | null
+  /** Círculo en el que estás: el siguiente al último que completaste. */
+  currentCircle: number
+  /**
+   * Cuándo completaste cada círculo: `milestones[2]` es la fecha en que
+   * validaste el rango 2. Solo los que llevas.
+   */
+  milestones: string[]
 }

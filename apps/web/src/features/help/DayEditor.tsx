@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import type { HelpDay } from '@sanatorio/contracts'
 
@@ -18,7 +18,8 @@ const MAX_OPTIONS = Array.from({ length: 16 }, (_, index) => (index + 1) * SLOT)
 
 /**
  * El calendario de hoy: se marcan las medias horas en las que te ofreces y el
- * tope de tiempo que quieres ayudar. Las que ya han pasado no se pueden marcar.
+ * tope de tiempo que quieres ayudar. Las medias horas que ya han empezado no se
+ * pueden marcar ni desmarcar: nadie podría reservarlas enteras.
  */
 export function DayEditor({ day, onSaved }: DayEditorProps) {
   const { t } = useI18n()
@@ -27,7 +28,26 @@ export function DayEditor({ day, onSaved }: DayEditorProps) {
   const [maxMinutes, setMaxMinutes] = useState(day.maxMinutes)
   const [saved, setSaved] = useState(false)
 
-  const now = toMinutes(day.now)
+  // La hora del campus, que sigue corriendo con la página abierta: la de la API
+  // más lo que ha pasado desde que llegó.
+  const [elapsed, setElapsed] = useState(0)
+
+  useEffect(() => {
+    const since = Date.now()
+    const timer = setInterval(() => {
+      setElapsed(Math.floor((Date.now() - since) / 60_000))
+    }, 20_000)
+
+    setElapsed(0)
+
+    return () => {
+      clearInterval(timer)
+    }
+  }, [day.now])
+
+  const now = toMinutes(day.now) + elapsed
+  // Medias horas que pisa una corrección de 42: ahí no se te puede reservar.
+  const evaluationSlots = slotsOf(day.busy)
   const offered = slots.size * SLOT
   // Primera hora que se enseña: la de ahora, para no gastar pantalla en el pasado.
   const first = Math.max(DAY_START, Math.floor(now / 60) * 60)
@@ -49,7 +69,11 @@ export function DayEditor({ day, onSaved }: DayEditorProps) {
 
   const save = async (): Promise<void> => {
     const ok = await run(async () => {
-      onSaved(await api.setHelpDay({ windows: windowsOf(slots), maxMinutes }))
+      const result = await api.setHelpDay({ windows: windowsOf(slots), maxMinutes })
+
+      // La API descarta lo que ya ha empezado: se enseña lo que ha quedado.
+      setSlots(slotsOf(result.windows))
+      onSaved(result)
     })
 
     setSaved(ok)
@@ -62,20 +86,23 @@ export function DayEditor({ day, onSaved }: DayEditorProps) {
 
       <div className="slot-grid" role="group" aria-label={t('help.today')}>
         {starts.map((start) => {
-          const past = start + SLOT <= now
+          const past = start <= now
           const active = slots.has(start)
+          const taken = evaluationSlots.has(start)
 
           return (
             <button
               key={start}
               type="button"
-              className={`slot ${active ? 'active' : ''}`}
+              className={`slot ${active ? 'active' : ''} ${taken ? 'busy' : ''} ${past ? 'past' : ''}`}
               aria-pressed={active}
+              title={past ? t('help.pastSlot') : taken ? t('help.busySlot') : undefined}
               disabled={past || day.mustRate}
               onClick={() => {
                 toggle(start)
               }}
             >
+              {taken && <span aria-hidden="true">🔎 </span>}
               {toTime(start)}
             </button>
           )
@@ -111,6 +138,13 @@ export function DayEditor({ day, onSaved }: DayEditorProps) {
         </p>
       </div>
 
+      {day.busy.length > 0 && (
+        <p className="hint" role="status">
+          {t('help.busy', {
+            ranges: day.busy.map((range) => `${range.start}–${range.end}`).join(', '),
+          })}
+        </p>
+      )}
       {day.mustRate && <p className="estado aviso">{t('help.mustRate')}</p>}
       <ErrorNote error={error} />
       <div className="actions">

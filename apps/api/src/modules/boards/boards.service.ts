@@ -149,6 +149,54 @@ export function createBoardsService(options: BoardsServiceOptions) {
       return created
     },
 
+    /**
+     * Cambia una pizarra que aún no ha terminado. Solo quien la imparte, o quien
+     * modera. Las plazas no pueden quedar por debajo de las ya reservadas.
+     */
+    async update(actor: Actor, boardId: number, input: unknown): Promise<BoardView> {
+      const current = await mustGet(boardId, actor)
+
+      if (current.host !== actor.login && !actor.admin) {
+        throw domainError('forbidden', 'Solo quien imparte la pizarra puede cambiarla')
+      }
+      if (Date.parse(current.endsAt) <= now()) {
+        throw domainError('conflict', 'Esa pizarra ya ha terminado')
+      }
+
+      const board = parse(boardSchema, input)
+      const startsAt = Date.parse(board.startsAt)
+      const endsAt = Date.parse(board.endsAt)
+
+      // Se puede retocar una pizarra que ya ha empezado sin moverle la hora;
+      // lo que no se puede es llevársela al pasado.
+      if (startsAt < now() && startsAt !== Date.parse(current.startsAt)) {
+        throw domainError('invalid_input', 'La pizarra tiene que ser en el futuro')
+      }
+      if (endsAt <= startsAt || endsAt - startsAt > 4 * HOUR) {
+        throw domainError('invalid_input', 'Una pizarra dura entre unos minutos y cuatro horas')
+      }
+      if (board.capacity < current.attendees.length) {
+        throw domainError(
+          'conflict',
+          `Ya hay ${current.attendees.length} plazas reservadas: no puedes dejar menos`,
+        )
+      }
+
+      await boards.update(boardId, {
+        ...board,
+        startsAt: new Date(startsAt).toISOString(),
+        endsAt: new Date(endsAt).toISOString(),
+      })
+
+      const [updated] = await view([await mustGet(boardId, actor)], actor)
+
+      if (updated === undefined) {
+        throw domainError('not_found', 'Esa pizarra no existe')
+      }
+
+      return updated
+    },
+
     /** Reserva plaza. `409` si está completa o ya ha pasado. */
     async join(actor: Actor, boardId: number): Promise<void> {
       const board = await mustGet(boardId, actor)

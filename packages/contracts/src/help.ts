@@ -67,6 +67,11 @@ export type HelpDay = {
   windows: TimeRange[]
   /** Tope de minutos que quieres ayudar hoy. */
   maxMinutes: number
+  /**
+   * Correcciones de 42 que tienes hoy. Mientras duran no se te puede reservar
+   * ayuda, aunque caigan dentro de una franja que hayas abierto.
+   */
+  busy: TimeRange[]
   /** Minutos ya reservados (pendientes o aceptados). */
   bookedMinutes: number
   /** Reservas de hoy y las anteriores que aún esperan tu valoración. */

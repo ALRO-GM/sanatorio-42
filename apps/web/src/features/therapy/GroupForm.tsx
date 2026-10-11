@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { ChangeEvent, SyntheticEvent } from 'react'
 
-import type { ProjectSummary } from '@sanatorio/contracts'
+import type { GroupView, ProjectSummary } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
 import { useAction } from '../../shared/hooks/useAsync'
@@ -10,18 +10,22 @@ import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { clusterName } from '../map/ClusterMapView'
 import { SeatPicker } from '../map/SeatPicker'
 import { parseSeat } from '../map/seats'
+import { shortDay, today } from './days'
 
 type GroupFormProps = {
   projects: readonly ProjectSummary[]
   defaultProject: number | undefined
+  /** Si viene, el formulario cambia ese grupo en vez de abrir uno nuevo. */
+  group?: GroupView
   onCancel: () => void
-  onCreated: () => void
+  onSaved: () => void
 }
 
 type GroupFormState = {
   projectId: string
   place: string
-  days: number[]
+  /** Días concretos de quedada, `YYYY-MM-DD`. */
+  dates: string[]
   /** Puestos elegidos en el mapa. */
   seats: string[]
   /** `true` mientras el sitio lo escribe el mapa y no la persona. */
@@ -33,28 +37,53 @@ type GroupFormState = {
 }
 
 /** Campos que son texto tal cual sale del `<input>`. */
-type TextField = Exclude<keyof GroupFormState, 'days' | 'seats' | 'autoPlace'>
+type TextField = Exclude<keyof GroupFormState, 'dates' | 'seats' | 'autoPlace'>
 
 /** Plazas mínimas y máximas de un grupo. Las mismas que valida la API. */
 const MIN_CAPACITY = 2
 const MAX_CAPACITY = 12
 
-export function GroupForm({ projects, defaultProject, onCancel, onCreated }: GroupFormProps) {
-  const { t } = useI18n()
+/** Días que puede tener un grupo. El mismo tope que la API. */
+const MAX_DATES = 14
+
+/**
+ * Abrir un grupo de terapia, o cambiar uno que ya existe (`group`).
+ *
+ * Los días son fechas concretas: se añaden una a una.
+ */
+export function GroupForm({ projects, defaultProject, group, onCancel, onSaved }: GroupFormProps) {
+  const { t, lang } = useI18n()
   const { busy, error, run } = useAction()
-  const [form, setForm] = useState<GroupFormState>({
-    projectId: defaultProject === undefined ? '' : String(defaultProject),
-    place: '',
-    days: [],
-    seats: [],
-    autoPlace: true,
-    start: '16:00',
-    end: '18:00',
-    capacity: '5',
-    note: '',
-  })
-  const shortDays = t('days.short').split(',')
-  const longDays = t('days.long').split(',')
+  const [form, setForm] = useState<GroupFormState>(() =>
+    group === undefined
+      ? {
+          projectId: defaultProject === undefined ? '' : String(defaultProject),
+          place: '',
+          dates: [],
+          seats: [],
+          autoPlace: true,
+          start: '16:00',
+          end: '18:00',
+          capacity: '5',
+          note: '',
+        }
+      : {
+          projectId: String(group.projectId),
+          place: group.place,
+          dates: group.dates,
+          seats: group.seats,
+          // Al editar, el sitio ya lo escribió alguien: el mapa no lo pisa.
+          autoPlace: false,
+          start: group.start,
+          end: group.end,
+          capacity: String(group.capacity),
+          note: group.note ?? '',
+        },
+  )
+  // El día que se está eligiendo para añadir.
+  const [nextDate, setNextDate] = useState('')
+  // Lo que se está tecleando en el campo de puestos; `null` si no se está editando.
+  const [seatsText, setSeatsText] = useState<string | null>(null)
   const set =
     (field: TextField) =>
     (event: ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
@@ -113,13 +142,18 @@ export function GroupForm({ projects, defaultProject, onCancel, onCreated }: Gro
       : clusters.join(', ')
   }
 
-  const toggleDay = (day: number): void => {
+  const addDate = (): void => {
+    if (nextDate === '') return
+
     setForm((current) => ({
       ...current,
-      days: current.days.includes(day)
-        ? current.days.filter((other) => other !== day)
-        : [...current.days, day],
+      dates: [...new Set([...current.dates, nextDate])].sort().slice(0, MAX_DATES),
     }))
+    setNextDate('')
+  }
+
+  const removeDate = (day: string): void => {
+    setForm((current) => ({ ...current, dates: current.dates.filter((other) => other !== day) }))
   }
 
   if (projects.length === 0) {
@@ -135,29 +169,57 @@ export function GroupForm({ projects, defaultProject, onCancel, onCreated }: Gro
 
   const submit = async (event: SyntheticEvent): Promise<void> => {
     event.preventDefault()
+    const input = {
+      projectId: Number(form.projectId),
+      place: form.place,
+      dates: form.dates,
+      start: form.start,
+      end: form.end,
+      capacity: Number(form.capacity),
+      note: form.note,
+      seats: form.seats,
+    }
     const ok = await run(() =>
-      api.createGroup({
-        projectId: Number(form.projectId),
-        place: form.place,
-        days: form.days,
-        start: form.start,
-        end: form.end,
-        capacity: Number(form.capacity),
-        note: form.note,
-        seats: form.seats,
-      }),
+      group === undefined ? api.createGroup(input) : api.updateGroup(group.id, input),
     )
-    if (ok) onCreated()
+    if (ok) onSaved()
   }
 
   return (
     <form className="card form" onSubmit={(event) => void submit(event)}>
-      <h3>{t('therapy.new')}</h3>
-      <p className="hint">{t('therapy.newHint')}</p>
+      <h3>{t(group === undefined ? 'therapy.new' : 'therapy.editTitle')}</h3>
+      {group === undefined && <p className="hint">{t('therapy.newHint')}</p>}
       <fieldset className="seat-field">
         <legend>{t('therapy.pickSeats')}</legend>
         <p className="hint">{t('therapy.pickSeatsHint')}</p>
-        <SeatPicker value={form.seats} onToggle={toggleSeat} />
+        <SeatPicker
+          value={form.seats}
+          onToggle={toggleSeat}
+          when={{ dates: form.dates, start: form.start, end: form.end }}
+        />
+        <label className="seat-manual">
+          {t('therapy.seatsManual')}
+          <input
+            value={seatsText ?? form.seats.join(', ')}
+            onChange={(event) => {
+              setSeatsText(event.target.value)
+            }}
+            onBlur={() => {
+              // Se interpreta al salir del campo, no a cada tecla: si no, la coma
+              // que se acaba de escribir desaparecería antes de teclear lo siguiente.
+              if (seatsText !== null) {
+                const typed = seatsText
+                  .split(/[\s,;]+/)
+                  .map((host) => host.trim().toLowerCase())
+                  .filter((host) => host !== '')
+
+                updateSeats(() => [...new Set(typed)].slice(0, MAX_CAPACITY))
+                setSeatsText(null)
+              }
+            }}
+            placeholder="c1r2s3, c1r2s4"
+          />
+        </label>
         {form.seats.length > 0 && (
           <p className="picked-seats" role="status">
             <span>{t('therapy.pickedSeats', { n: form.seats.length })}</span>
@@ -230,27 +292,51 @@ export function GroupForm({ projects, defaultProject, onCancel, onCreated }: Gro
       </div>
       <fieldset className="days-field">
         <legend>{t('therapy.days')}</legend>
-        <div className="days">
-          {shortDays.map((label, index) => (
-            <button
-              type="button"
-              key={label}
-              className={`day ${form.days.includes(index + 1) ? 'active' : ''}`}
-              aria-pressed={form.days.includes(index + 1)}
-              aria-label={longDays[index]}
-              onClick={() => {
-                toggleDay(index + 1)
-              }}
-            >
-              {label}
-            </button>
-          ))}
+        <p className="hint">{t('therapy.datesHint')}</p>
+        <div className="date-add">
+          <input
+            type="date"
+            value={nextDate}
+            min={today()}
+            aria-label={t('therapy.addDate')}
+            onChange={(event) => {
+              setNextDate(event.target.value)
+            }}
+          />
+          <button
+            type="button"
+            className="pill"
+            disabled={nextDate === '' || form.dates.length >= MAX_DATES}
+            onClick={addDate}
+          >
+            {t('therapy.addDate')}
+          </button>
         </div>
+        {form.dates.length > 0 && (
+          <ul className="date-chips">
+            {form.dates.map((day) => (
+              <li key={day}>
+                <span className="chip date-chip">
+                  {shortDay(day, lang)}
+                  <button
+                    type="button"
+                    aria-label={t('therapy.removeDate', { day: shortDay(day, lang) })}
+                    onClick={() => {
+                      removeDate(day)
+                    }}
+                  >
+                    ✕
+                  </button>
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
       </fieldset>
       <ErrorNote error={error} />
       <div className="actions">
-        <button type="submit" className="primary small" disabled={busy || form.days.length === 0}>
-          {t('therapy.create')}
+        <button type="submit" className="primary small" disabled={busy || form.dates.length === 0}>
+          {t(group === undefined ? 'therapy.create' : 'therapy.saveEdit')}
         </button>
         <button type="button" className="pill" onClick={onCancel}>
           {t('therapy.cancel')}

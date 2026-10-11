@@ -1,14 +1,23 @@
-import type { Translate } from '../../shared/i18n'
+/**
+ * Los días de un grupo de terapia, que son fechas concretas (`YYYY-MM-DD`).
+ */
 
-/** "Martes y jueves" a partir de `[2, 4]`. */
-export function dayNames(days: readonly number[], t: Translate): string {
-  const names = t('days.long').split(',')
-  const list = days.map((day) => names[day - 1] ?? '')
-  const last = list.at(-1)
+/** La fecha de ese día a mediodía, para que ninguna zona horaria la mueva de día. */
+const dateOf = (day: string): Date => new Date(`${day}T12:00:00`)
 
-  if (list.length <= 1 || last === undefined) {
-    return list.join('')
-  }
+/** `mar 13 oct`. */
+export function shortDay(day: string, lang: string): string {
+  return dateOf(day).toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-GB', {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+  })
+}
 
-  return `${list.slice(0, -1).join(', ')}${t('days.and')}${last.toLowerCase()}`
+/** Hoy, como `YYYY-MM-DD`, en la hora del navegador. */
+export function today(): string {
+  const date = new Date()
+  const pad = (value: number): string => String(value).padStart(2, '0')
+
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
 }

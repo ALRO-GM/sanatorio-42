@@ -25,8 +25,8 @@ import { z } from 'zod'
 import type { AnswerRow, DoubtRow, DoubtsRepository, GuideRow } from './doubts.repository.js'
 import { XP_KIND } from '../profile/index.js'
 import type { XpService } from '../profile/index.js'
-import { COMMON_CORE } from '../replica/index.js'
-import type { CoreProject, ReplicaRepository } from '../replica/index.js'
+import { LAST_CIRCLE } from '../replica/index.js'
+import type { Curriculum, ReplicaRepository } from '../replica/index.js'
 import { domainError } from '../../core/errors.js'
 import { parse, startOfDayIso, text } from '../../core/validation.js'
 import type { GuideChangesRepository, StrikeRole } from './guide-changes.repository.js'
@@ -35,6 +35,7 @@ import type { Actor } from '../../core/actor.js'
 export type DoubtsServiceOptions = {
   doubts: DoubtsRepository
   changes: GuideChangesRepository
+  curriculum: Curriculum
   xp: XpService
   replica: ReplicaRepository
   now?: () => number
@@ -85,8 +86,47 @@ const proposalSchema = z.object({
   body: line,
 })
 
+/** Nombres que no caben en un nodo, y cómo se abrevian. */
+const SHORT_NAMES: Record<string, string> = {
+  get_next_line: 'GNL',
+  Born2beroot: 'B2BR',
+  ft_printf: 'printf',
+  Philosophers: 'Philo',
+  NetPractice: 'NetPrac',
+  ft_transcendence: 'transc.',
+  'A-Maze-ing': 'Maze',
+  'Call Me Maybe': 'CallMe',
+}
+
+/**
+ * Serie de un proyecto, si es uno de varios módulos numerados: `"Python"` para
+ * `Python Module 05`, `"CPP"` para `CPP Module 03`. `null` para el resto.
+ */
+export function seriesOf(name: string): string | null {
+  return /^(.+) Module \d+$/.exec(name)?.[1] ?? null
+}
+
+/** Nombre corto de un proyecto, para que quepa dentro de su nodo. */
+export function shortName(name: string): string {
+  const known = SHORT_NAMES[name]
+
+  if (known !== undefined) {
+    return known
+  }
+
+  const numbered = /^(Python|CPP) Module (\d+)$/.exec(name) ?? /^(Exam) Rank (\d+)$/.exec(name)
+
+  if (numbered !== null) {
+    const prefix = { Python: 'Py', CPP: 'C++', Exam: 'Exam' }[numbered[1] ?? ''] ?? ''
+
+    return `${prefix} ${numbered[2] ?? ''}`
+  }
+
+  return name.length <= 9 ? name : `${name.slice(0, 8)}…`
+}
+
 export function createDoubtsService(options: DoubtsServiceOptions) {
-  const { doubts, changes, replica, xp } = options
+  const { doubts, changes, curriculum, replica, xp } = options
   const now = options.now ?? Date.now
 
   function statusOf(doubt: DoubtRow): DoubtStatus {
@@ -173,54 +213,100 @@ export function createDoubtsService(options: DoubtsServiceOptions) {
 
   return {
     /**
-     * El common core por círculos, con cómo va quien pregunta en cada proyecto y
-     * dónde hace falta una mano.
+     * El grafo del tablón: los proyectos del common core que quien pregunta
+     * tiene o tendrá disponibles, por círculos, con cómo va en cada uno y dónde
+     * hace falta una mano.
+     *
+     * Es **su** plan, no un catálogo: quien sigue el plan nuevo ve sus módulos
+     * de Python y no los proyectos de C que ya no le tocan, y al revés. La
+     * piscina no sale nunca (no es del 42cursus).
      *
      * Los avisos se filtran aquí, no en la web: quien aprobó un proyecto ve sus
      * dudas sin responder, las propuestas a la guía y si falta la guía (es
      * quien puede hacer algo con las tres cosas); quien lo está haciendo, solo
      * las dudas sin responder; quien aún no ha llegado, nada. Las dudas y
      * propuestas propias no cuentan.
+     *
+     * @param userId Su id en 42, para preguntar por su plan y su rango.
      */
-    async graph(actor: Actor): Promise<HolyGraph> {
-      const slugs = COMMON_CORE.flatMap((circle) => circle.flatMap((entry) => entry.slugs))
-      const [known, mine, activity] = await Promise.all([
-        replica.projectsBySlugs(slugs),
+    async graph(actor: Actor, userId: number | null): Promise<HolyGraph> {
+      const { track, rank } = await curriculum.trackOf(actor.login, userId)
+
+      await curriculum.ensureHours(actor.campusId)
+
+      const [circles, mine, activity, perfect, cursus] = await Promise.all([
+        curriculum.circles(track),
         replica.projectsOf(actor.login, true),
         doubts.activity(actor.campusId, actor.login),
+        replica.perfectProjectsOf(actor.login),
+        curriculum.cursusOf(actor.login, userId),
       ])
-      const idBySlug = new Map(known.map((project) => [project.slug, project.id]))
       const statusById = new Map(mine.map((project) => [project.id, project.status]))
 
-      const node = (entry: CoreProject): GraphProject => {
-        // Un proyecto puede existir dos veces (plan de siempre y plan nuevo).
-        // Manda el que la persona tenga; si no tiene ninguno, el más usado.
-        const ids = entry.slugs.flatMap((slug) => idBySlug.get(slug) ?? [])
-        const projectId =
-          ids.find((id) => statusById.get(id) === 'finished') ??
-          ids.find((id) => statusById.has(id)) ??
-          ids[0] ??
-          null
-        const status: GraphStatus =
-          (projectId === null ? undefined : statusById.get(projectId)) ?? 'todo'
-        const pending = projectId === null ? undefined : activity.get(projectId)
+      // Si 42 no ha dicho por qué rango va, se deduce: está en el círculo más
+      // alto en el que tiene algún proyecto.
+      const reached = Math.max(-1, ...mine.map((project) => circles.get(project.id) ?? -1))
+      const currentCircle = Math.min(LAST_CIRCLE, rank === null ? Math.max(0, reached) : rank + 1)
 
-        return {
-          key: entry.key,
-          name: entry.name,
-          short: entry.short,
-          projectId,
-          status,
-          signals: {
-            unanswered: status === 'todo' ? 0 : (pending?.unanswered ?? 0),
-            proposals: status === 'finished' ? (pending?.proposals ?? 0) : 0,
-            missingGuide: status === 'finished' && projectId !== null && pending?.hasGuide !== true,
-          },
+      // Un proyecto suyo que aún no está en la tabla del plan (nadie lo había
+      // hecho antes aquí) se coloca en el círculo en el que está. Si ya terminó
+      // el common core, lo que haga después no es de este grafo.
+      if (rank === null || rank < LAST_CIRCLE) {
+        for (const project of mine) {
+          if (!circles.has(project.id)) circles.set(project.id, currentCircle)
         }
       }
 
+      const info = await replica.projectInfo([...circles.keys()])
+      const byCircle = new Map<number, GraphProject[]>()
+
+      for (const [projectId, circle] of circles) {
+        const project = info.get(projectId)
+
+        if (project === undefined) {
+          continue
+        }
+
+        const { name, hours } = project
+
+        const status: GraphStatus = statusById.get(projectId) ?? 'todo'
+        const pending = activity.get(projectId)
+
+        byCircle.set(circle, [
+          ...(byCircle.get(circle) ?? []),
+          {
+            projectId,
+            name,
+            short: shortName(name),
+            status,
+            perfect: perfect.has(projectId),
+            hours,
+            series: seriesOf(name),
+            // Lo que ya tiene (aunque sea de un círculo posterior) nunca está cerrado.
+            locked: status === 'todo' && circle > currentCircle,
+            signals: {
+              unanswered: status === 'todo' ? 0 : (pending?.unanswered ?? 0),
+              proposals: status === 'finished' ? (pending?.proposals ?? 0) : 0,
+              missingGuide: status === 'finished' && pending?.hasGuide !== true,
+            },
+          },
+        ])
+      }
+
+      const knownUpTo = Math.max(0, ...byCircle.keys())
+
       return {
-        circles: COMMON_CORE.map((projects, circle) => ({ circle, projects: projects.map(node) })),
+        track,
+        level: cursus.level,
+        startedAt: cursus.startedAt,
+        currentCircle,
+        knownUpTo,
+        circles: Array.from({ length: knownUpTo + 1 }, (_, circle) => ({
+          circle,
+          projects: (byCircle.get(circle) ?? []).sort((a, b) =>
+            a.name.localeCompare(b.name, 'en', { numeric: true, sensitivity: 'base' }),
+          ),
+        })),
       }
     },
 
@@ -289,6 +375,28 @@ export function createDoubtsService(options: DoubtsServiceOptions) {
         body,
         color: Math.floor(Math.random() * COLORS),
       })
+
+      return view(await mustGet(doubtId, actor), actor)
+    },
+
+    /**
+     * Cambia el texto de una duda. Solo quien la puso, o quien modera.
+     *
+     * Una duda resuelta no se puede cambiar: alguien ganó XP por responder a lo
+     * que decía. Para corregirla hay que reabrirla.
+     */
+    async update(actor: Actor, doubtId: number, input: unknown): Promise<DoubtView> {
+      const { body } = parse(doubtSchema, input)
+      const doubt = await mustGet(doubtId, actor)
+
+      if (doubt.author !== actor.login && !actor.admin) {
+        throw domainError('forbidden', 'Solo quien puso la duda puede cambiarla')
+      }
+      if (doubt.resolved) {
+        throw domainError('conflict', 'Para cambiar una duda resuelta, primero reábrela')
+      }
+
+      await doubts.updateBody(doubtId, body)
 
       return view(await mustGet(doubtId, actor), actor)
     },

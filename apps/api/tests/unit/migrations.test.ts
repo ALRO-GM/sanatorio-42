@@ -50,6 +50,7 @@ describe('migraciones', () => {
       'boards',
       'campus_members',
       'campuses',
+      'curriculum',
       'doubt_answers',
       'doubts',
       'guide_change_flags',
@@ -70,6 +71,8 @@ describe('migraciones', () => {
       'therapy_checks',
       'therapy_groups',
       'therapy_members',
+      'user_levels',
+      'user_tracks',
       'users',
       'xp_events',
     ])

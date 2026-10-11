@@ -34,12 +34,14 @@ import { localMoment } from '../../core/time.js'
 import { id, optionalText, parse } from '../../core/validation.js'
 import type { XpService } from '../profile/index.js'
 import { LOCATION_MAX_AGE_MS } from '../replica/index.js'
-import type { ReplicaRepository, Syncer } from '../replica/index.js'
+import type { Agenda, ReplicaRepository, Syncer } from '../replica/index.js'
 import type { BookingRow, HelpRepository, Span } from './help.repository.js'
 
 export type HelpServiceOptions = {
   help: HelpRepository
   replica: ReplicaRepository
+  /** Agenda de 42: de ahí salen las correcciones que pisan la guardia. */
+  agenda: Agenda
   sync: Syncer
   xp: XpService
   now?: () => number
@@ -144,12 +146,51 @@ const bookedMinutes = (bookings: readonly BookingRow[]): number =>
   bookings.reduce((sum, booking) => sum + booking.minutes, 0)
 
 export function createHelpService(options: HelpServiceOptions) {
-  const { help, replica, sync, xp } = options
+  const { help, replica, agenda, sync, xp } = options
   const now = options.now ?? Date.now
 
   /** Día y minuto actuales en la hora local de un campus. */
   async function momentIn(campusId: number): Promise<{ day: string; minutes: number }> {
     return localMoment(now(), await replica.timeZoneOf(campusId))
+  }
+
+  /**
+   * Ratos de hoy en los que alguien tiene una corrección de 42, en minutos del
+   * día en su campus.
+   *
+   * Una corrección manda sobre la guardia: mientras dura, esa persona no puede
+   * estar ayudando, aunque el rato caiga dentro de una franja que abrió.
+   *
+   * @param refresh Si es `true` y lo guardado es viejo, se pregunta a 42 (tres
+   *   peticiones). Con `false` vale lo último que se supo: es lo que se usa al
+   *   listar a todo el campus, donde preguntar por cada persona saldría caro.
+   */
+  async function busyOf(
+    login: string,
+    campusId: number,
+    day: string,
+    refresh: boolean,
+  ): Promise<Span[]> {
+    const mine = refresh
+      ? await agenda.userAgenda(login, await replica.userIdOf(login))
+      : await agenda.userAgenda(login, null)
+    const timeZone = await replica.timeZoneOf(campusId)
+    const spans: Span[] = []
+
+    for (const evaluation of mine?.evaluations ?? []) {
+      const start = localMoment(Date.parse(evaluation.beginAt), timeZone)
+      const end = localMoment(Date.parse(evaluation.endAt), timeZone)
+
+      // Solo lo que toca el día: lo que empieza antes o acaba después se recorta.
+      if (start.day <= day && end.day >= day) {
+        spans.push({
+          start: start.day < day ? 0 : start.minutes,
+          end: end.day > day ? 24 * 60 : end.minutes,
+        })
+      }
+    }
+
+    return merge(spans.filter((span) => span.end > span.start))
   }
 
   /** `true` si la franja de la reserva ya ha terminado. */
@@ -229,6 +270,7 @@ export function createHelpService(options: HelpServiceOptions) {
     windows: readonly Span[],
     maxMinutes: number,
     active: readonly BookingRow[],
+    busy: readonly Span[],
     from: number,
   ): { starts: number[]; remaining: number } {
     const remaining = Math.max(0, maxMinutes - bookedMinutes(active))
@@ -239,7 +281,11 @@ export function createHelpService(options: HelpServiceOptions) {
         for (let start = window.start; start + SLOT <= window.end; start += SLOT) {
           const slot = { start, end: start + SLOT }
 
-          if (slot.end > from && !active.some((booking) => overlaps(slot, spanOf(booking)))) {
+          if (
+            slot.end > from &&
+            !active.some((booking) => overlaps(slot, spanOf(booking))) &&
+            !busy.some((span) => overlaps(slot, span))
+          ) {
             starts.push(start)
           }
         }
@@ -249,14 +295,40 @@ export function createHelpService(options: HelpServiceOptions) {
     return { starts, remaining }
   }
 
+  /**
+   * Las franjas pedidas, sin las medias horas que ya han empezado, salvo las
+   * que esa persona ya tenía abiertas.
+   */
+  const stillOpen = async (
+    login: string,
+    windows: readonly Span[],
+    moment: { day: string; minutes: number },
+  ): Promise<Span[]> => {
+    const before = (await help.day(login, moment.day))?.windows ?? []
+    const kept: Span[] = []
+
+    for (const window of windows) {
+      for (let start = window.start; start < window.end; start += SLOT) {
+        const had = before.some((span) => start >= span.start && start + SLOT <= span.end)
+
+        if (start > moment.minutes || had) {
+          kept.push({ start, end: Math.min(window.end, start + SLOT) })
+        }
+      }
+    }
+
+    return kept
+  }
+
   return {
     /** Tu guardia de hoy: lo que ofreces, tus reservas y a quién has bloqueado. */
     async today(actor: Actor): Promise<HelpDay> {
       const moment = await momentIn(actor.campusId)
-      const [day, relevant, blocked] = await Promise.all([
+      const [day, relevant, blocked, busy] = await Promise.all([
         help.day(actor.login, moment.day),
         help.relevantTo(actor.login, moment.day),
         help.blockedBy(actor.login),
+        busyOf(actor.login, actor.campusId, moment.day, true),
       ])
       const asHelper = relevant.filter(
         (booking) =>
@@ -273,6 +345,7 @@ export function createHelpService(options: HelpServiceOptions) {
           end: toTime(span.end),
         })),
         maxMinutes: day?.maxMinutes ?? 60,
+        busy: busy.map((span) => ({ start: toTime(span.start), end: toTime(span.end) })),
         bookedMinutes: bookedMinutes(asHelper),
         bookings: await view(relevant, actor, moment),
         mustRate: relevant.some(
@@ -288,6 +361,10 @@ export function createHelpService(options: HelpServiceOptions) {
      * Las franjas van en medias horas; las que se pisan se juntan. El tope no
      * puede quedar por debajo de lo que ya tienes reservado. Una lista vacía
      * retira la oferta.
+     *
+     * Una media hora que ya ha empezado no se puede abrir: nadie podría
+     * reservarla entera. Las que ya estaban abiertas se respetan, para que
+     * guardar a media tarde no borre la franja en la que estás.
      */
     async setToday(actor: Actor, input: unknown): Promise<HelpDay> {
       const { windows, maxMinutes } = parse(daySchema, input)
@@ -310,7 +387,7 @@ export function createHelpService(options: HelpServiceOptions) {
         login: actor.login,
         campusId: actor.campusId,
         day: moment.day,
-        windows: merge(windows),
+        windows: merge(await stillOpen(actor.login, windows, moment)),
         maxMinutes,
       })
 
@@ -342,6 +419,7 @@ export function createHelpService(options: HelpServiceOptions) {
           day.windows,
           day.maxMinutes,
           active.filter((booking) => booking.helper === day.login),
+          await busyOf(day.login, actor.campusId, moment.day, false),
           moment.minutes,
         )
 
@@ -411,6 +489,15 @@ export function createHelpService(options: HelpServiceOptions) {
       }
       if (active.some((booking) => overlaps(slot, spanOf(booking)))) {
         throw domainError('conflict', 'Esa franja ya está cogida')
+      }
+      // Aquí sí se pregunta a 42 si hace falta: es una sola persona, y reservar
+      // encima de una corrección dejaría plantada a una de las dos partes.
+      if (
+        (await busyOf(request.helper, actor.campusId, moment.day, true)).some((span) =>
+          overlaps(slot, span),
+        )
+      ) {
+        throw domainError('conflict', `${request.helper} tiene una corrección a esa hora`)
       }
 
       const remaining = day.maxMinutes - bookedMinutes(active)

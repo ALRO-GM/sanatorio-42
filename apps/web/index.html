@@ -6,6 +6,20 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <meta name="theme-color" content="#00babc" />
+    <script>
+      // Tema antes de pintar, para que el modo nocturno no arranque con un fogonazo
+      // blanco. Es la misma lógica que `src/shared/theme`.
+      ;(function () {
+        var choice = null
+        try {
+          choice = localStorage.getItem('sanatorio_theme')
+        } catch (error) {}
+        var dark =
+          choice === 'dark' ||
+          (choice !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches)
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light'
+      })()
+    </script>
     <meta
       name="description"
       content="¿Te has atascado en un proyecto de 42? Mira quién está de guardia, únete a una terapia de grupo o pega tu duda en el tablón."

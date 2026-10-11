@@ -41,11 +41,12 @@ const peer = (
   location: string | null,
   available: boolean,
   status: Peer['status'],
-): Peer => ({ login, image: null, location, available, status })
+  perfect = false,
+): Peer => ({ login, image: null, location, available, status, perfect })
 
 export const PEERS: Record<number, Peer[]> = {
   1314: [
-    peer('jdoe', 'c2r4s6', true, 'finished'),
+    peer('jdoe', 'c2r4s6', true, 'finished', true),
     peer('mgarcia', 'c1r2s1', false, 'in_progress'),
     peer('anavarro', 'c1r2s4', true, 'in_progress'),
     peer('llorente', 'c5r3s2', true, 'in_progress'),
@@ -64,59 +65,50 @@ export const PEERS: Record<number, Peer[]> = {
 }
 
 /**
- * El common core por círculos, como lo devuelve la API: nombre, nombre corto y
- * un id. Los cuatro proyectos de `PROJECTS` llevan su id; el resto, uno inventado.
+ * El plan de mentira: el nuevo (C y luego Python), conocido hasta el círculo 3,
+ * como le saldría a alguien que va por el círculo 1. Los proyectos de
+ * `PROJECTS` llevan su id; el resto, uno inventado.
  */
-const CORE_NAMES: [name: string, short: string, id?: number][][] = [
-  [['Libft', 'Libft', 1312]],
+const CORE_NAMES: [name: string, short: string, id?: number | undefined, hours?: number][][] = [
+  [['Libft', 'Libft', 1312, 70]],
   [
-    ['ft_printf', 'printf', 1314],
-    ['get_next_line', 'GNL', 1337],
-    ['Born2beroot', 'B2BR'],
+    ['Born2beroot', 'B2BR', 3102, 50],
+    ['ft_printf', 'printf', 1314, 55],
+    ['get_next_line', 'GNL', 1337, 60],
+    ['push_swap', 'push_swap', 1420, 80],
   ],
   [
-    ['push_swap', 'push_swap', 1420],
-    ['so_long', 'so_long'],
-    ['FdF', 'FdF'],
-    ['fract-ol', 'fract-ol'],
-    ['pipex', 'pipex'],
-    ['minitalk', 'minitalk'],
-    ['Exam Rank 02', 'Exam 02'],
+    ['A-Maze-ing', 'Maze', undefined, 70],
+    ['Exam Rank 02', 'Exam 02', undefined, 4],
+    ...Array.from({ length: 11 }, (_, index): [string, string, undefined, number] => {
+      const n = String(index).padStart(2, '0')
+
+      return [`Python Module ${n}`, `Py ${n}`, undefined, 6 + (index % 4) * 3]
+    }),
   ],
   [
-    ['Philosophers', 'Philo'],
-    ['minishell', 'minishell'],
-    ['Exam Rank 03', 'Exam 03'],
-  ],
-  [
-    ['NetPractice', 'NetPractice'],
-    ['cub3d', 'cub3d'],
-    ['miniRT', 'miniRT'],
-    ...['00', '01', '02', '03', '04'].map((n): [string, string] => [`CPP Module ${n}`, `CPP ${n}`]),
-    ['Exam Rank 04', 'Exam 04'],
-  ],
-  [
-    ...['05', '06', '07', '08', '09'].map((n): [string, string] => [`CPP Module ${n}`, `CPP ${n}`]),
-    ['ft_irc', 'ft_irc'],
-    ['webserv', 'webserv'],
-    ['Inception', 'Inception'],
-    ['Exam Rank 05', 'Exam 05'],
-  ],
-  [
-    ['ft_transcendence', 'transc.'],
-    ['Exam Rank 06', 'Exam 06'],
+    ['Call Me Maybe', 'CallMe', undefined, 80],
+    ['Codexion', 'Codexion', undefined, 60],
+    ['Exam Rank 03', 'Exam 03', undefined, 4],
+    ['Fly-in', 'Fly-in', undefined, 120],
   ],
 ]
 
-export const CORE: { circle: number; projects: { id: number; name: string; short: string }[] }[] =
-  CORE_NAMES.map((projects, circle) => ({
-    circle,
-    projects: projects.map(([name, short, id], index) => ({
-      id: id ?? 3000 + circle * 100 + index,
-      name,
-      short,
-    })),
-  }))
+/** Círculo por el que va la persona de mentira. */
+export const CURRENT_CIRCLE = 1
+
+export const CORE: {
+  circle: number
+  projects: { id: number; name: string; short: string; hours: number | null }[]
+}[] = CORE_NAMES.map((projects, circle) => ({
+  circle,
+  projects: projects.map(([name, short, id, hours], index) => ({
+    id: id ?? 3000 + circle * 100 + index + 10,
+    name,
+    short,
+    hours: hours ?? null,
+  })),
+}))
 
 export const CAMPUSES: CampusSummary[] = [
   { id: 22, name: 'Madrid', city: 'Madrid', country: 'Spain', tracked: true },
@@ -224,6 +216,16 @@ export function today(): string {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
 }
 
+/** El día de dentro de `days` días, como `YYYY-MM-DD`, en la hora del navegador. */
+export function dayIn(days: number): string {
+  const date = new Date()
+  const pad = (value: number): string => String(value).padStart(2, '0')
+
+  date.setDate(date.getDate() + days)
+
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
+}
+
 /** Fecha ISO dentro de `days` días a esa hora local. */
 export function inDays(days: number, hour: number, minutes = 0): string {
   const date = new Date()
@@ -247,7 +249,7 @@ export function initialState(): MockState {
         projectName: 'ft_printf',
         creator: 'anavarro',
         place: 'Cluster 1 · Planta 2',
-        days: [2, 4],
+        dates: [dayIn(0), dayIn(2), dayIn(7)],
         start: '16:00',
         end: '18:00',
         capacity: 5,
@@ -261,7 +263,7 @@ export function initialState(): MockState {
         projectName: 'get_next_line',
         creator: 'lruiz',
         place: 'Cluster 2',
-        days: [1],
+        dates: [dayIn(1), dayIn(8)],
         start: '10:00',
         end: '12:00',
         capacity: 5,

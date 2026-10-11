@@ -12,6 +12,11 @@ import { communitySchema } from './0003-community.js'
 import { mapSchema } from './0004-map.js'
 import { helpSchema } from './0005-help.js'
 import { agendaSchema } from './0006-agenda.js'
+import { curriculumSchema } from './0007-curriculum.js'
+import { therapyDatesSchema } from './0008-therapy-dates.js'
+import { hoursAndLevelSchema } from './0009-hours-and-level.js'
+import { cursusStartSchema } from './0010-cursus-start.js'
+import { healthSchema } from './0011-health.js'
 import type { Migration } from './types.js'
 
 export type { Migration } from './types.js'
@@ -23,6 +28,11 @@ export const MIGRATIONS: readonly Migration[] = [
   mapSchema,
   helpSchema,
   agendaSchema,
+  curriculumSchema,
+  therapyDatesSchema,
+  hoursAndLevelSchema,
+  cursusStartSchema,
+  healthSchema,
 ]
 
 /** Versión más alta que existe en el código. */

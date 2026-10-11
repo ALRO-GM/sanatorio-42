@@ -36,6 +36,8 @@ Monorepo con workspaces de npm. Ver `README.md` y `docs/architecture.md`.
 
 ## Reglas de producto
 
+- "Eminencia" es quien aprobó un proyecto con 125; está por encima de
+  "especialista" y se enseña en dorado.
 - Regla de guardia: alguien está "de guardia" solo si `available: true` y
   `location` no es `null`. Está en `onDuty`, en `features/peers/PeerList.tsx`.
 - Tono: clínica cálida y con humor amable. Vocabulario: "de guardia", "fuera de
@@ -47,13 +49,19 @@ Monorepo con workspaces de npm. Ver `README.md` y `docs/architecture.md`.
   expediente no está en esa fila: se abre con la cruz de la cabecera. El
   idioma y campus van en el pie.
 - Mapa de clusters: dorado = especialista de guardia, verde = paciente de
-  guardia, azul = puesto reservado para terapia, gris = ocupado sin más.
-- Grafo del tablón: turquesa = aprobado, blanco = en curso, gris = sin hacer.
-  Cada proyecto enseña como mucho una marca (la más urgente) y solo a quien
-  puede hacer algo con ella; esa regla está en `doubts.service.ts` (`graph`).
+  guardia, gris = ocupado sin más. El azul de terapia solo se pinta mientras el
+  grupo está reunido (o, al elegir puestos, si choca con el día y la hora).
+- Grafo del tablón: es el plan de cada persona, no un catálogo. Turquesa =
+  aprobado, blanco = en curso, gris = disponible, gris con candado = aún no.
+  Cada proyecto enseña como mucho una marca y solo a quien puede hacer algo con
+  ella (`graph` en `doubts.service.ts`). La piscina no sale en ningún sitio.
 - Calendario: cada tipo de evento tiene su color e icono (`features/calendar/kinds.ts`
   y las clases `kind-*`). Lo de Sanatorio en tonos fríos, lo de 42 en cálidos;
   borde discontinuo = no estás apuntado.
+- Colores: todos salen de las variables de tema de `styles/global.css`
+  (`--surface`, `--text`, `--border`…). Un hexadecimal suelto no cambiaría con el
+  modo nocturno; solo vale para lo que es igual en los dos temas (post-its,
+  códigos de color del mapa y del grafo).
 - Paleta: fondo crema, verdes menta y salvia, turquesa de 42 como acento. "No
   disponible" en gris neutro, nunca en rojo.
 - La cabecera tiene que caber en una sola fila y todo verse bien en móvil.

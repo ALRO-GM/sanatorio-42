@@ -19,9 +19,14 @@ import type { Services } from '../../src/app/composition.js'
 import type { Actor } from '../../src/core/actor.js'
 import { createFakeClock } from '../helpers/fake-api.js'
 import { createFake42 } from '../helpers/fake-42.js'
-import { activeLocation, projectUser } from '../helpers/fixtures.js'
+import { activeLocation, projectUser, userId } from '../helpers/fixtures.js'
+import { shortName } from '../../src/modules/doubts/doubts.service.js'
+import { parseHours } from '../../src/modules/replica/index.js'
 
 const MADRID = 22
+
+/** Peticiones de la agenda de 42: eventos y exámenes del campus, y lo de cada persona. */
+const AGENDA_CALL = /^\/(users\/\d+\/(events_users|exams|scale_teams)|campus\/\d+\/(events|exams))/
 const MINUTE = 60_000
 const HOUR = 60 * MINUTE
 
@@ -85,8 +90,9 @@ describe('comunidad', () => {
 
   afterEach(() => {
     closeDatabase(db)
-    // Ni una sola petición a 42 en todo lo que hace la comunidad.
-    expect(api.calls).toHaveLength(0)
+    // La comunidad no le pregunta nada a 42, con una excepción: la guardia mira
+    // la agenda de quien ayuda (sus correcciones), que se guarda un cuarto de hora.
+    expect(api.calls.filter((call) => !AGENDA_CALL.test(call))).toHaveLength(0)
   })
 
   describe('niveles y títulos', () => {
@@ -206,6 +212,29 @@ describe('comunidad', () => {
       expect((await xp.expediente(actor('eva'))).xp.total).toBe(0)
     })
 
+    it('no deja abrir medias horas que ya han empezado', async () => {
+      const { help } = services
+
+      // Son las 16:30: la de las 16:00 ya pasó y la de las 16:30 acaba de empezar.
+      const day = await help.setToday(actor('eva'), {
+        windows: [{ start: '16:00', end: '18:00' }],
+        maxMinutes: 120,
+      })
+
+      expect(day.windows).toEqual([{ start: '17:00', end: '18:00' }])
+
+      // A las 17:40 se puede ampliar por detrás sin perder la franja en curso.
+      clock.advance(70 * MINUTE)
+      expect(
+        (
+          await help.setToday(actor('eva'), {
+            windows: [{ start: '16:00', end: '19:00' }],
+            maxMinutes: 120,
+          })
+        ).windows,
+      ).toEqual([{ start: '17:00', end: '19:00' }])
+    })
+
     it('la reserva la tiene que aceptar quien ayuda', async () => {
       const { help } = services
 
@@ -319,6 +348,47 @@ describe('comunidad', () => {
       )
     })
 
+    it('una corrección de 42 manda sobre la guardia: ese rato no se puede reservar', async () => {
+      const { help } = services
+
+      // `eva` tiene una corrección hoy de 17:30 a 18:00 (15:30 UTC). La agenda se
+      // da por recién leída, así que no hace falta preguntar a 42.
+      await db.execute({
+        sql: `INSERT INTO agenda_users (login, events, exams, evaluations, fetched_at)
+              VALUES ('eva', '[]', '[]', ?, ?)`,
+        args: [
+          JSON.stringify([
+            {
+              id: 1,
+              beginAt: '2026-10-06T15:30:00.000Z',
+              endAt: '2026-10-06T16:00:00.000Z',
+              projectId: 10,
+              role: 'corrector',
+            },
+          ]),
+          new Date(clock.now()).toISOString(),
+        ],
+      })
+      await help.setToday(actor('eva'), { ...tarde, maxMinutes: 120 })
+
+      // Ella lo ve en su guardia, y a los demás ese hueco no les sale.
+      expect((await help.today(actor('eva'))).busy).toEqual([{ start: '17:30', end: '18:00' }])
+      expect((await help.offers(actor('ana')))[0]?.freeStarts).toEqual(['17:00', '18:00', '18:30'])
+
+      // Ni se puede reservar encima, entero o a medias.
+      await expectCode(
+        help.book(actor('ana'), { helper: 'eva', start: '17:30', minutes: 30 }),
+        'conflict',
+      )
+      await expectCode(
+        help.book(actor('ana'), { helper: 'eva', start: '17:00', minutes: 60 }),
+        'conflict',
+      )
+      await expect(
+        help.book(actor('ana'), { helper: 'eva', start: '17:00', minutes: 30 }),
+      ).resolves.toMatchObject({ status: 'pending' })
+    })
+
     it('quien tiene una sesión sin valorar no puede reservar ni ofrecerse', async () => {
       const { help } = services
 
@@ -402,6 +472,21 @@ describe('comunidad', () => {
       ).toEqual([1, 1])
       expect((await xp.leaderboard(actor('ana', { campusId: 58 }), 'all')).entries).toEqual([])
     })
+
+    it('el expediente desglosa la XP: cuánta y cuántas veces por cada cosa', async () => {
+      const { xp } = services
+
+      await xp.award('ana', 'doubt_solved', 'doubt:1')
+      await xp.award('ana', 'doubt_solved', 'doubt:2')
+      await xp.award('ana', 'guide_review', 'change:1')
+
+      const { earned, xp: level } = await xp.expediente(actor('ana'))
+
+      expect(earned.doubt_solved).toEqual({ xp: 50, times: 2 })
+      expect(earned.guide_review).toEqual({ xp: 5, times: 1 })
+      expect(earned.board_host).toEqual({ xp: 0, times: 0 })
+      expect(Object.values(earned).reduce((sum, kind) => sum + kind.xp, 0)).toBe(level.total)
+    })
   })
 
   describe('expediente', () => {
@@ -453,7 +538,8 @@ describe('comunidad', () => {
     const martesYJueves = {
       projectId: 10,
       place: 'Cluster 1 · Planta 2',
-      days: [4, 2],
+      // Martes 6 (hoy) y jueves 8 de octubre.
+      dates: ['2026-10-08', '2026-10-06'],
       start: '16:00',
       end: '18:00',
       capacity: 2,
@@ -465,7 +551,7 @@ describe('comunidad', () => {
 
       expect(group).toMatchObject({
         projectName: 'ft_printf',
-        days: [2, 4],
+        dates: ['2026-10-06', '2026-10-08'],
         joined: true,
         mine: true,
         inSession: true,
@@ -495,7 +581,7 @@ describe('comunidad', () => {
         'invalid_input',
       )
       await expectCode(
-        therapy.create(actor('ana'), { ...martesYJueves, days: [] }),
+        therapy.create(actor('ana'), { ...martesYJueves, dates: [] }),
         'invalid_input',
       )
       await expectCode(
@@ -566,6 +652,132 @@ describe('comunidad', () => {
       expect(await therapy.checkAttendance()).toBe(0)
     })
 
+    it('los días son concretos: ni fechas pasadas ni cosas que no son un día', async () => {
+      const { therapy } = services
+
+      await expectCode(
+        therapy.create(actor('ana'), { ...martesYJueves, dates: ['2026-10-05'] }),
+        'invalid_input',
+      )
+      await expectCode(
+        therapy.create(actor('ana'), { ...martesYJueves, dates: ['martes'] }),
+        'invalid_input',
+      )
+      // Repetidos fuera, y en orden.
+      const group = await therapy.create(actor('ana'), {
+        ...martesYJueves,
+        dates: ['2026-10-20', '2026-10-06', '2026-10-20'],
+      })
+      expect(group.dates).toEqual(['2026-10-06', '2026-10-20'])
+    })
+
+    it('quien lo abrió puede cambiarlo; nadie más', async () => {
+      const { therapy } = services
+      const group = await therapy.create(actor('ana'), martesYJueves)
+      await therapy.join(actor('leo'), group.id)
+
+      await expectCode(therapy.update(actor('leo'), group.id, martesYJueves), 'forbidden')
+
+      const updated = await therapy.update(actor('ana'), group.id, {
+        ...martesYJueves,
+        place: 'Cluster 3',
+        dates: ['2026-10-06', '2026-10-09'],
+        end: '19:00',
+        capacity: 4,
+        seats: ['c3r1s1'],
+      })
+
+      expect(updated).toMatchObject({
+        id: group.id,
+        place: 'Cluster 3',
+        dates: ['2026-10-06', '2026-10-09'],
+        end: '19:00',
+        capacity: 4,
+        seats: ['c3r1s1'],
+      })
+      // La gente apuntada sigue apuntada.
+      expect(updated.members.map((member) => member.login)).toEqual(['ana', 'leo'])
+      // Quien modera también puede.
+      await expect(
+        therapy.update(actor('moderadora', { admin: true }), group.id, martesYJueves),
+      ).resolves.toMatchObject({ place: 'Cluster 1 · Planta 2' })
+    })
+
+    it('al cambiarlo no caben menos plazas que gente, ni días nuevos en el pasado', async () => {
+      const { therapy } = services
+      const group = await therapy.create(actor('ana'), { ...martesYJueves, capacity: 3 })
+      await therapy.join(actor('leo'), group.id)
+      await therapy.join(actor('eva'), group.id)
+
+      await expectCode(
+        therapy.update(actor('ana'), group.id, { ...martesYJueves, capacity: 2 }),
+        'conflict',
+      )
+
+      // El jueves, el martes 6 ya pasó: se puede conservar, pero no añadir el lunes 5.
+      clock.advance(48 * HOUR)
+      await expect(
+        therapy.update(actor('ana'), group.id, {
+          ...martesYJueves,
+          capacity: 3,
+          dates: ['2026-10-06', '2026-10-08', '2026-10-12'],
+        }),
+      ).resolves.toMatchObject({ dates: ['2026-10-06', '2026-10-08', '2026-10-12'] })
+      await expectCode(
+        therapy.update(actor('ana'), group.id, {
+          ...martesYJueves,
+          capacity: 3,
+          dates: ['2026-10-05', '2026-10-08'],
+        }),
+        'invalid_input',
+      )
+    })
+
+    it('un grupo que se queda vacío desaparece de todas partes', async () => {
+      const { therapy, calendar, map, repositories } = services
+      const week = ['2026-10-05T00:00:00.000Z', '2026-10-12T00:00:00.000Z'] as const
+      const sessions = async (login: string) =>
+        (await calendar.between(actor(login), null, ...week)).events.filter(
+          (event) => event.kind === 'therapy',
+        )
+      const reserved = async () =>
+        (await map.forCampus(actor('leo'))).clusters
+          .flatMap((cluster) => cluster.seats)
+          .filter((seat) => seat.reservation !== null)
+
+      const group = await therapy.create(actor('ana'), {
+        ...martesYJueves,
+        seats: ['c1r2s1', 'c1r2s2'],
+      })
+      await repositories.replica.setState(`locations:${MADRID}`, { at: clock.now(), count: 0 })
+
+      expect(await sessions('ana')).toHaveLength(2)
+      expect(await reserved()).toHaveLength(2)
+
+      // `ana` se sale y no queda nadie.
+      await therapy.leave(actor('ana'), group.id)
+
+      expect(await therapy.list(actor('leo'))).toEqual([])
+      expect(await sessions('ana')).toEqual([])
+      expect(await reserved()).toEqual([])
+      // Y no ocupa hueco de los grupos que `ana` puede tener abiertos.
+      await expectCode(therapy.join(actor('leo'), group.id), 'conflict')
+
+      // El mapa pone al día la réplica al abrirse: esas peticiones no son de la comunidad.
+      api.calls.length = 0
+    })
+
+    it('un grupo se cierra solo cuando pasa su último día', async () => {
+      const { therapy } = services
+      await therapy.create(actor('ana'), martesYJueves)
+
+      // El jueves 8 sigue ahí; el viernes 9 ya no.
+      clock.advance(48 * HOUR)
+      expect(await therapy.list(actor('leo'))).toHaveLength(1)
+      clock.advance(24 * HOUR)
+      expect(await therapy.list(actor('leo'))).toEqual([])
+    })
+
     it('solo cierra quien lo abrió, y se cierra solo al quedarse vacío', async () => {
       const { therapy } = services
       const group = await therapy.create(actor('ana'), martesYJueves)
@@ -630,6 +842,29 @@ describe('comunidad', () => {
 
       await doubts.remove(actor('moderadora', { admin: true }), doubt.id)
       expect((await doubts.board(actor('ana'), 10)).doubts).toEqual([])
+    })
+
+    it('quien puso la duda puede cambiar el texto, mientras no esté resuelta', async () => {
+      const { doubts } = services
+      const doubt = await doubts.create(actor('ana'), 10, { body: '¿Cómo pruevo sin tester?' })
+
+      await expectCode(
+        doubts.update(actor('leo'), doubt.id, { body: 'Otra cosa distinta' }),
+        'forbidden',
+      )
+      await expectCode(doubts.update(actor('ana'), doubt.id, { body: '?' }), 'invalid_input')
+
+      expect(
+        await doubts.update(actor('ana'), doubt.id, { body: '¿Cómo pruebo sin tester?' }),
+      ).toMatchObject({ id: doubt.id, body: '¿Cómo pruebo sin tester?', mine: true })
+
+      // Resuelta, alguien ganó XP por responder a lo que decía: no se toca.
+      const [answer] = await doubts.answer(actor('eva'), doubt.id, { body: 'Con un main propio' })
+      await doubts.setResolved(actor('ana'), doubt.id, { resolved: true, answerId: answer?.id })
+      await expectCode(
+        doubts.update(actor('ana'), doubt.id, { body: 'Ahora pregunto otra cosa' }),
+        'conflict',
+      )
     })
 
     it('valida el texto y el proyecto', async () => {
@@ -906,22 +1141,30 @@ describe('comunidad', () => {
     })
   })
 
-  describe('grafo del common core', () => {
-    const node = async (login: string, key: string) => {
-      const graph = await services.doubts.graph(actor(login))
-      const found = graph.circles.flatMap((circle) => circle.projects).find((p) => p.key === key)
+  describe('grafo del tablón', () => {
+    const { replica } = { replica: () => services.repositories.replica }
+    const all = (graph: Awaited<ReturnType<typeof services.doubts.graph>>) =>
+      graph.circles.flatMap(({ circle, projects }) => projects.map((p) => ({ ...p, circle })))
+
+    /** El nodo de ese proyecto en el grafo de esa persona. */
+    const node = async (login: string, name: string) => {
+      const found = all(await services.doubts.graph(actor(login), null)).find(
+        (project) => project.name === name,
+      )
 
       if (found === undefined) {
-        throw new Error(`no hay ${key} en el grafo`)
+        throw new Error(`no hay ${name} en el grafo de ${login}`)
       }
 
       return found
     }
 
     beforeEach(async () => {
-      // ft_printf pasa a tener su slug de verdad, y `ana` ya aprobó Libft.
-      await services.repositories.replica.ingestProjectUsers(
+      // Las horas de los proyectos se dan por pedidas: el grafo no pregunta a 42.
+      await replica().setState(`hours:${MADRID}`, {})
+      await replica().ingestProjectUsers(
         [
+          // Plan clásico: `ana` aprobó Libft y hace ft_printf; `leo` ya va por push_swap.
           projectUser('ana', { slug: '42cursus-ft_printf' }),
           projectUser('ana', {
             projectId: 20,
@@ -929,58 +1172,235 @@ describe('comunidad', () => {
             slug: '42cursus-libft',
             status: 'finished',
           }),
-        ],
-        MADRID,
-      )
-    })
-
-    it('reparte el common core en siete círculos, sin la piscina', async () => {
-      const graph = await services.doubts.graph(actor('ana'))
-
-      expect(graph.circles.map((circle) => circle.circle)).toEqual([0, 1, 2, 3, 4, 5, 6])
-      expect(graph.circles[0]?.projects.map((p) => p.name)).toEqual(['Libft'])
-      expect(graph.circles[6]?.projects.map((p) => p.key)).toEqual([
-        'ft_transcendence',
-        'exam-rank-06',
-      ])
-
-      const names = graph.circles.flatMap((circle) => circle.projects.map((p) => p.name))
-      expect(names.some((name) => /piscine/i.test(name))).toBe(false)
-      expect(new Set(names).size).toBe(names.length)
-    })
-
-    it('dice cómo va cada persona con cada proyecto', async () => {
-      expect(await node('ana', 'libft')).toMatchObject({ status: 'finished', projectId: 20 })
-      expect(await node('ana', 'ft_printf')).toMatchObject({ status: 'in_progress', projectId: 10 })
-      expect(await node('eva', 'ft_printf')).toMatchObject({ status: 'finished' })
-      // Nadie del campus lo ha tocado: sale, pero sin tablón al que entrar.
-      expect(await node('ana', 'minishell')).toMatchObject({ status: 'todo', projectId: null })
-    })
-
-    it('usa el proyecto del plan que tenga cada persona', async () => {
-      await services.repositories.replica.ingestProjectUsers(
-        [
-          projectUser('leo', { projectId: 1994, projectName: 'Born2beroot', slug: 'born2beroot' }),
-          projectUser('ana', {
-            projectId: 2686,
-            projectName: 'Born2beroot',
-            slug: '42next-born2beroot',
+          projectUser('leo', {
+            projectId: 40,
+            projectName: 'push_swap',
+            slug: '42cursus-push_swap',
+          }),
+          // Plan nuevo: `nex` aprobó Libft, hace un módulo de Python y viene de la piscina.
+          projectUser('nex', {
+            projectId: 20,
+            projectName: 'Libft',
+            slug: '42cursus-libft',
             status: 'finished',
+            createdAt: '2026-05-01T10:00:00.000Z',
+          }),
+          projectUser('nex', {
+            projectId: 30,
+            projectName: 'Python Module 00',
+            slug: 'python-module-00',
+            createdAt: '2026-06-20T10:00:00.000Z',
+          }),
+          projectUser('nex', {
+            projectId: 90,
+            projectName: 'C Piscine C 00',
+            slug: 'c-piscine-c-00',
+            status: 'finished',
+            cursusIds: [9],
+          }),
+          // `pis` sigue en la piscina.
+          projectUser('pis', {
+            projectId: 90,
+            projectName: 'C Piscine C 00',
+            slug: 'c-piscine-c-00',
+            cursusIds: [9],
           }),
         ],
         MADRID,
       )
+    })
 
-      expect(await node('ana', 'born2beroot')).toMatchObject({
-        projectId: 2686,
-        status: 'finished',
-      })
-      expect(await node('leo', 'born2beroot')).toMatchObject({
-        projectId: 1994,
+    it('cada persona ve su plan: clásico en C o nuevo con Python', async () => {
+      const classic = await services.doubts.graph(actor('ana'), null)
+      const next = await services.doubts.graph(actor('nex'), null)
+
+      expect(classic.track).toBe('classic')
+      expect(all(classic).map((p) => `${p.circle}:${p.name}`)).toEqual([
+        '0:Libft',
+        '1:ft_printf',
+        '2:push_swap',
+      ])
+
+      // El plan nuevo comparte los primeros proyectos, pero tiene sus módulos
+      // de Python y no el push_swap del plan clásico.
+      expect(next.track).toBe('next')
+      expect(all(next).map((p) => `${p.circle}:${p.name}`)).toEqual([
+        '0:Libft',
+        '1:ft_printf',
+        '2:Python Module 00',
+      ])
+    })
+
+    it('la piscina no sale, ni en el grafo ni entre los proyectos de quien ya es estudiante', async () => {
+      const names = all(await services.doubts.graph(actor('nex'), null)).map((p) => p.name)
+
+      expect(names.some((name) => /piscine/i.test(name))).toBe(false)
+      expect((await replica().projectsOf('nex', true)).map((p) => p.name)).toEqual([
+        'Python Module 00',
+        'Libft',
+      ])
+      // Quien todavía está en la piscina sí ve los suyos: es lo único que tiene.
+      expect((await replica().projectsOf('pis', true)).map((p) => p.name)).toEqual([
+        'C Piscine C 00',
+      ])
+    })
+
+    it('dice cómo va con cada proyecto y cuáles aún no tiene disponibles', async () => {
+      const graph = await services.doubts.graph(actor('ana'), null)
+
+      // Va por el círculo 1: es el más alto en el que tiene algo.
+      expect(graph.currentCircle).toBe(1)
+      expect(graph.knownUpTo).toBe(2)
+      expect(await node('ana', 'Libft')).toMatchObject({ status: 'finished', locked: false })
+      expect(await node('ana', 'ft_printf')).toMatchObject({
         status: 'in_progress',
+        locked: false,
+        short: 'printf',
       })
-      // Quien no tiene ninguno ve el de siempre.
-      expect(await node('eva', 'born2beroot')).toMatchObject({ projectId: 1994, status: 'todo' })
+      // push_swap es del círculo 2: lo tendrá, pero todavía no.
+      expect(await node('ana', 'push_swap')).toMatchObject({ status: 'todo', locked: true })
+      expect(await node('leo', 'push_swap')).toMatchObject({ status: 'in_progress', locked: false })
+    })
+
+    it('aprende el plan de los rangos y las fechas de cada persona', async () => {
+      // `nex` validó el rango 0 en mayo y el 1 en junio, y después se apuntó a
+      // un proyecto que no está en ninguna tabla.
+      await replica().ingestProjectUsers(
+        [
+          projectUser('nex', {
+            projectId: 77,
+            projectName: 'Proyecto Nuevo',
+            slug: 'proyecto-nuevo',
+            createdAt: '2026-06-25T10:00:00.000Z',
+          }),
+          projectUser('otra', {
+            projectId: 20,
+            projectName: 'Libft',
+            slug: '42cursus-libft',
+            createdAt: '2026-09-01T10:00:00.000Z',
+          }),
+          projectUser('otra', {
+            projectId: 30,
+            projectName: 'Python Module 00',
+            slug: 'python-module-00',
+          }),
+        ],
+        MADRID,
+      )
+      api.quests.set(userId('nex'), [
+        { quest_id: 128, validated_at: '2026-03-12T10:00:00.000Z', quest: { slug: '42next' } },
+        {
+          quest_id: 44,
+          validated_at: '2026-05-10T10:00:00.000Z',
+          quest: { slug: 'common-core-rank-00' },
+        },
+        {
+          quest_id: 45,
+          validated_at: '2026-06-15T10:00:00.000Z',
+          quest: { slug: 'common-core-rank-01' },
+        },
+        { quest_id: 37, validated_at: null, quest: { slug: 'common-core' } },
+      ])
+
+      const graph = await services.doubts.graph(actor('nex'), userId('nex'))
+
+      expect(graph).toMatchObject({ track: 'next', currentCircle: 2 })
+      expect(all(graph).find((p) => p.name === 'Proyecto Nuevo')).toMatchObject({ circle: 2 })
+
+      // Solo se pregunta por sus hitos y su cursus, y no se repite al volver a abrir el grafo.
+      const asked = api.calls.length
+
+      await services.doubts.graph(actor('nex'), userId('nex'))
+      expect(api.calls).toHaveLength(asked)
+      expect(
+        api.calls.every(
+          (call) =>
+            /^\/users\/\d+\/(quests_users|cursus_users)/.test(call) &&
+            call.startsWith(`/users/${userId('nex')}/`),
+        ),
+      ).toBe(true)
+      api.calls.length = 0
+
+      // Lo aprendido vale para quien venga detrás en el mismo plan: lo verá
+      // como algo que tendrá, aún cerrado.
+      expect(await node('otra', 'Proyecto Nuevo')).toMatchObject({
+        circle: 2,
+        status: 'todo',
+        locked: false,
+      })
+      expect(
+        (await services.doubts.graph(actor('ana'), null)).circles.flatMap((c) => c.projects),
+      ).not.toContainEqual(expect.objectContaining({ name: 'Proyecto Nuevo' }))
+    })
+
+    it('da las fechas del estado de salud: inicio, círculos completados y black hole', async () => {
+      await replica().ingestUser(
+        {
+          id: userId('nex'),
+          login: 'nex',
+          cursus_users: [
+            { cursus_id: 9, level: 7, begin_at: '2026-01-26T09:00:00.000Z' },
+            {
+              cursus_id: 21,
+              level: 3.66,
+              begin_at: '2026-05-18T07:42:00.000Z',
+              blackholed_at: '2027-04-03T07:42:00.000Z',
+            },
+          ],
+        },
+        [MADRID],
+      )
+      api.quests.set(userId('nex'), [
+        {
+          quest_id: 45,
+          validated_at: '2026-06-18T14:40:00.000Z',
+          quest: { slug: 'common-core-rank-01' },
+        },
+        {
+          quest_id: 44,
+          validated_at: '2026-05-19T11:37:00.000Z',
+          quest: { slug: 'common-core-rank-00' },
+        },
+        { quest_id: 37, validated_at: null, quest: { slug: 'common-core' } },
+      ])
+
+      // Las fechas son las del 42cursus, no las de la piscina.
+      expect(await services.xp.health(actor('nex'), userId('nex'))).toEqual({
+        startedAt: '2026-05-18T07:42:00.000Z',
+        blackholedAt: '2027-04-03T07:42:00.000Z',
+        currentCircle: 2,
+        milestones: ['2026-05-19T11:37:00.000Z', '2026-06-18T14:40:00.000Z'],
+      })
+
+      // Quien entró antes de que se guardasen las fechas no las tiene: se piden
+      // a 42 una vez y quedan guardadas.
+      api.cursus.set(userId('eva'), [
+        { cursus_id: 9, level: 6, begin_at: '2026-01-26T09:00:00.000Z' },
+        {
+          cursus_id: 21,
+          level: 2.1,
+          begin_at: '2026-06-01T08:00:00.000Z',
+          blackholed_at: '2027-02-01T08:00:00.000Z',
+        },
+      ])
+      expect(await services.xp.health(actor('eva'), userId('eva'))).toMatchObject({
+        startedAt: '2026-06-01T08:00:00.000Z',
+        blackholedAt: '2027-02-01T08:00:00.000Z',
+      })
+      const asked = api.calls.filter((call) => call.includes('cursus_users')).length
+
+      await services.xp.health(actor('eva'), userId('eva'))
+      expect(api.calls.filter((call) => call.includes('cursus_users'))).toHaveLength(asked)
+
+      // De quien no se sabe nada no se inventa nada: empieza en el círculo 0.
+      api.calls.length = 0
+      expect(await services.xp.health(actor('leo'), null)).toEqual({
+        startedAt: null,
+        blackholedAt: null,
+        currentCircle: 0,
+        milestones: [],
+      })
+      expect(api.calls).toHaveLength(0)
     })
 
     it('avisa de las dudas sin responder a quien puede responderlas', async () => {
@@ -1000,13 +1420,13 @@ describe('comunidad', () => {
     it('no avisa de nada en proyectos a los que aún no se ha llegado', async () => {
       await services.doubts.create(actor('eva'), 20, { body: '¿Qué hace ft_lstmap?' })
 
-      // `leo` no ha empezado Libft; `ana` la aprobó.
-      expect((await node('leo', 'libft')).signals).toEqual({
+      // `leo` no tiene Libft; `ana` la aprobó.
+      expect((await node('leo', 'Libft')).signals).toEqual({
         unanswered: 0,
         proposals: 0,
         missingGuide: false,
       })
-      expect((await node('ana', 'libft')).signals.unanswered).toBe(1)
+      expect((await node('ana', 'Libft')).signals.unanswered).toBe(1)
     })
 
     it('la guía que falta y las propuestas solo llegan a quien aprobó el proyecto', async () => {
@@ -1028,6 +1448,53 @@ describe('comunidad', () => {
       })
 
       expect((await node('eva', 'ft_printf')).signals.missingGuide).toBe(false)
+    })
+
+    it('dice las horas, la serie y si lo bordó con un 125', async () => {
+      const { replica: repo } = services.repositories
+
+      await repo.ingestProjectUsers(
+        [
+          {
+            ...projectUser('ana', {
+              projectId: 20,
+              projectName: 'Libft',
+              slug: '42cursus-libft',
+              status: 'finished',
+            }),
+            final_mark: 125,
+          },
+        ],
+        MADRID,
+      )
+      await db.execute('UPDATE projects SET hours = 55 WHERE id = 10')
+      // Las horas ya se han pedido esta semana: no hay que preguntar a 42.
+      await repo.setState(`hours:${MADRID}`, {})
+
+      expect(await node('ana', 'Libft')).toMatchObject({ perfect: true, series: null, hours: null })
+      expect(await node('ana', 'ft_printf')).toMatchObject({ perfect: false, hours: 55 })
+      expect(await node('nex', 'Python Module 00')).toMatchObject({ series: 'Python' })
+      expect((await services.doubts.graph(actor('ana'), null)).level).toBeNull()
+    })
+
+    it('entiende las estimaciones de 42', () => {
+      expect(
+        ['55 hours', '1 hour', 'about 2 days', '1 week', '', null, 'pronto'].map(parseHours),
+      ).toEqual([55, 1, 16, 40, null, null, null])
+    })
+
+    it('abrevia los nombres para que quepan en el nodo', () => {
+      expect(
+        [
+          'Libft',
+          'get_next_line',
+          'Python Module 07',
+          'CPP Module 03',
+          'Exam Rank 02',
+          'Call Me Maybe',
+          'Inception-of-Things',
+        ].map(shortName),
+      ).toEqual(['Libft', 'GNL', 'Py 07', 'C++ 03', 'Exam 02', 'CallMe', 'Inceptio…'])
     })
   })
 
@@ -1059,6 +1526,41 @@ describe('comunidad', () => {
       await boards.join(actor('ana'), board.id)
       await boards.join(actor('leo'), board.id)
       await expectCode(boards.join(actor('otro'), board.id), 'conflict')
+    })
+
+    it('quien la imparte puede cambiarla mientras no haya terminado', async () => {
+      const { boards } = services
+      const board = await boards.create(actor('eva'), { ...malloc(), capacity: 3 })
+
+      for (const login of ['ana', 'leo', 'sol']) {
+        await boards.join(actor(login), board.id)
+      }
+
+      await expectCode(boards.update(actor('ana'), board.id, malloc()), 'forbidden')
+
+      const updated = await boards.update(actor('eva'), board.id, {
+        ...malloc(),
+        capacity: 3,
+        title: 'malloc y free, con dibujos',
+        place: 'Cluster 2',
+      })
+      expect(updated).toMatchObject({
+        id: board.id,
+        title: 'malloc y free, con dibujos',
+        place: 'Cluster 2',
+        attendees: 3,
+      })
+
+      // No caben menos plazas que gente apuntada, ni se manda al pasado.
+      await expectCode(
+        boards.update(actor('eva'), board.id, { ...malloc(), capacity: 2 }),
+        'conflict',
+      )
+      await expectCode(boards.update(actor('eva'), board.id, malloc(-48)), 'invalid_input')
+
+      // Cuando ya ha terminado, se queda como está.
+      clock.advance(72 * HOUR)
+      await expectCode(boards.update(actor('eva'), board.id, malloc()), 'conflict')
     })
 
     it('rechaza pizarras en el pasado o de duración absurda', async () => {

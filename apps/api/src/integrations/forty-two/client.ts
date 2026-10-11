@@ -26,11 +26,14 @@ import type { Throttle } from './throttle.js'
 import { ApiError, apiErrorFromNetwork, apiErrorFromResponse, endpointFromUrl } from './errors.js'
 import type {
   ApiCampus,
+  ApiCursusUser,
   ApiEvent,
   ApiEventsUser,
   ApiExam,
   ApiLocation,
+  ApiProjectSession,
   ApiProjectUser,
+  ApiQuestUser,
   ApiScaleTeam,
 } from './types.js'
 
@@ -178,6 +181,26 @@ export class FortyTwoClient {
   /** `GET /v2/campus`: el catálogo de campus. 54 filas, una página. */
   async getCampuses(): Promise<ApiCampus[]> {
     return this.fetchAllPages<ApiCampus>('/campus?sort=id')
+  }
+
+  /** `GET /v2/users/:id/cursus_users`: nivel, inicio y black hole en cada cursus. */
+  async getUserCursus(userId: number): Promise<ApiCursusUser[]> {
+    return this.fetchAllPages<ApiCursusUser>(`/users/${userId}/cursus_users`)
+  }
+
+  /** `GET /v2/users/:id/quests_users`: los hitos de alguien (rangos del common core, plan). */
+  async getUserQuests(userId: number): Promise<ApiQuestUser[]> {
+    return this.fetchAllPages<ApiQuestUser>(`/users/${userId}/quests_users`)
+  }
+
+  /**
+   * `GET /v2/project_sessions` de un campus en el 42cursus: todos sus proyectos,
+   * con las horas estimadas. Son un par de páginas.
+   */
+  async getProjectSessions(campusId: number): Promise<ApiProjectSession[]> {
+    return this.fetchAllPages<ApiProjectSession>(
+      `/project_sessions?filter[campus_id]=${campusId}&filter[cursus_id]=21`,
+    )
   }
 
   // --- Agenda: eventos, exámenes y correcciones ---------------------------------

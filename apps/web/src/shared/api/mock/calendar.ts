@@ -135,26 +135,17 @@ export function calendarEvents(state: MockState): CalendarEvent[] {
     })
   }
 
-  // Cada sesión de los grupos en los que estás, tres semanas atrás y seis adelante.
+  // Cada sesión de los grupos en los que estás, en sus días concretos.
   for (const group of state.groups.filter((entry) => entry.members.includes(ME.login))) {
-    const [startHour = '0', startMinute = '0'] = group.start.split(':')
-    const [endHour = '0', endMinute = '0'] = group.end.split(':')
-
-    for (let offset = -21; offset <= 42; offset += 1) {
-      const date = new Date()
-
-      date.setDate(date.getDate() + offset)
-
-      // `getDay()` empieza en domingo; los grupos, en lunes = 1.
-      if (!group.days.includes(((date.getDay() + 6) % 7) + 1)) continue
-
+    for (const day of group.dates) {
       events.push({
         ...BASE,
-        id: `therapy:${group.id}:${offset}`,
+        id: `therapy:${group.id}:${day}`,
         kind: 'therapy',
         title: `Terapia de ${group.projectName ?? 'grupo'}`,
-        start: inDays(offset, Number(startHour), Number(startMinute)),
-        end: inDays(offset, Number(endHour), Number(endMinute)),
+        // Sin zona: el navegador lo toma como hora local, que es lo que se quiere.
+        start: new Date(`${day}T${group.start}:00`).toISOString(),
+        end: new Date(`${day}T${group.end}:00`).toISOString(),
         place: group.place,
         description: group.note,
         joined: true,

@@ -106,6 +106,11 @@ por prioridad:
 
 `npm run sync:status` enseña por dónde va.
 
+El **plan de estudios** (`replica/curriculum.ts`) tampoco viene de la API: qué
+plan sigue cada persona y en qué círculo va cada proyecto se deduce de sus rangos
+y de las fechas en que se apuntó a cada proyecto, y se va completando con cada
+persona que abre el grafo del tablón.
+
 La **agenda de 42** (eventos, exámenes y correcciones, `replica/agenda.ts`) va
 aparte: no la mantiene el bucle, se pide cuando alguien abre su calendario y se
 guarda un rato. Si nadie mira el calendario, no gasta nada.

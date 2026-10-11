@@ -26,6 +26,17 @@ export function registerBoardsRoutes(
     return reply.code(201).send(await boards.create(await session.actor(request), request.body))
   })
 
+  /** `PUT /boards/:id` → cambia la pizarra. Solo quien la imparte, o quien modera. */
+  app.put<IdParams>('/boards/:id', async (request, reply) => {
+    return reply.send(
+      await boards.update(
+        await session.actor(request),
+        idParam(request.params.id, 'La pizarra'),
+        request.body,
+      ),
+    )
+  })
+
   app.post<IdParams>('/boards/:id/join', async (request, reply) => {
     await boards.join(await session.actor(request), idParam(request.params.id, 'La pizarra'))
 
