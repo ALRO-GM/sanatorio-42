@@ -209,3 +209,4 @@ automático. Guía paso a paso para Oracle Cloud Always Free en
 - [docs/deploy-oracle.md](docs/deploy-oracle.md): despliegue, copias y mantenimiento.
 - [AGENTS.md](AGENTS.md): normas del proyecto para asistentes de código.
 - [docs/contexto.md](docs/contexto.md): estado del trabajo y decisiones tomadas, para retomarlo.
+- [docs/tareas-tras-compactar.md](docs/tareas-tras-compactar.md): lo que hay que hacer al retomar, en orden.

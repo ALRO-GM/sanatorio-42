@@ -8,6 +8,10 @@ va lo que no está en el código.
 
 Última puesta al día: 2026-10-11.
 
+**Al retomar con el contexto vacío, lo primero es
+[tareas-tras-compactar.md](tareas-tras-compactar.md)**: es la lista de lo que hay
+que hacer, en orden. Este documento es el porqué; aquel, el qué.
+
 ## Quién y cómo
 
 - Autor: Alberto (`albrodri` en 42, `ALRO-GM` en GitHub). Se trabaja en español.
@@ -98,8 +102,9 @@ conviene agotar la sesión en otras tareas si él avisa de que va justa.
 - **Mapa**: los puestos de una terapia solo se pintan en azul mientras el grupo
   está reunido.
 - **Terapias**: por fechas concretas, no por día de la semana. Un grupo que se
-  queda vacío desaparece. Puestos: de 2 a 6, mismo cluster, dos filas como mucho
-  entre el primero y el último; las plazas son los puestos.
+  queda vacío desaparece. Puestos: de 2 a 6 que se tocan (mismo cluster y cada
+  uno pegado a otro, también en diagonal), para poder hablarse; las plazas son
+  los puestos.
 - **Grupos de repaso**: "terminado al 100 %" es lo que declara cada persona, no
   lo que conste en 42.
 - **Pace**: tabla de plazos por círculo (`apps/web/src/shared/pace.ts`). Si 42
@@ -112,21 +117,26 @@ conviene agotar la sesión en otras tareas si él avisa de que va justa.
   corregido se enseñan siempre por separado.
 - **Franjas para corregir de 42**: descartado por ahora; exigiría el permiso
   `projects` y guardar tokens de cada persona.
-- **Expediente ajeno**: no enseña estado de salud ni desglose de XP.
+- **Expediente ajeno**: enseña el estado de salud; no el desglose de XP ni las
+  preferencias.
+- **Asistencia y XP**: la XP de pizarras y ayuda tiene que depender de los
+  códigos de inicio y fin, con un cálculo de tiempo robusto: Alberto quiere
+  usarlo para negociar *compensation days* con el staff de 42. Pendiente de hacer.
+- **Consumo**: el presupuesto de peticiones tiene que ser dinámico (según lo que
+  quede del día y la gente conectada) y regulable a mano, para no llegar nunca
+  al máximo. Un límite mensual se reparte entre los días que quedan hasta que
+  se renueve. Si la API de 42 va justa: aviso a los estudiantes, solo pasan las
+  llamadas críticas y el resto espera en una cola por orden de llegada, que
+  enseña a cada quien su número y por cuál va, como un tique de sala de espera
+  de hospital. Pendiente de hacer.
 - **Administración**: `albrodri` es admin (`ADMIN_LOGINS` en local y producción).
 
 ## Pendiente de confirmar o de hacer
 
-- Que los códigos de asistencia decidan la XP (ahora solo se guardan).
-- Si la separación de puestos debe ser de filas contiguas en vez de dos.
-- Si el estado de salud de los demás debe verse en su expediente.
-- El presupuesto de 30 000 peticiones por hora es una constante
-  (`apps/api/src/app/composition.ts`); debería ser un ajuste.
-- Trocear en bloques ordenables las páginas que hoy son una sola lista.
-- Alberto comentó que una terapia recién creada "no aparecía": en la base está
-  bien y sale en lista, calendario y mapa. Se corrigió el filtro de proyecto de
-  la pestaña Terapia; falta saber si era eso.
-- Rotar el secreto de la app de 42: se llegó a ver en una conversación.
+El plan con sus casillas está en [tareas-tras-compactar.md](tareas-tras-compactar.md).
+En resumen: la XP por códigos y el presupuesto dinámico, y después la revisión de
+seguridad, rendimiento y simplificación antes de desplegar. Sigue pendiente rotar
+el secreto de la app de 42, que se llegó a ver en una conversación.
 
 ## Cosas que conviene saber
 

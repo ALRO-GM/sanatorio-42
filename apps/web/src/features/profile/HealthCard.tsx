@@ -30,9 +30,18 @@ function inputDay(date: Date): string {
  * La API solo da los hechos (inicio, círculos completados, black hole según
  * 42); las cuentas se hacen aquí con la tabla de plazos.
  */
-export function HealthCard() {
+type HealthCardProps = {
+  /** El de otra persona, ya cargado con su expediente. Sin él, se pide el tuyo. */
+  health?: Health
+}
+
+export function HealthCard({ health }: HealthCardProps) {
   const { t } = useI18n()
-  const { data, error, loading, reload } = useAsync(() => api.getHealth(), [])
+  const own = useAsync(
+    () => (health === undefined ? api.getHealth() : Promise.resolve(health)),
+    [health],
+  )
+  const { data, error, loading, reload } = own
 
   return (
     <article className="card health">

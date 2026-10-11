@@ -83,8 +83,13 @@ export function createXpService(options: XpServiceOptions) {
       }
 
       // El campus y los permisos no influyen en lo que se devuelve.
-      const full = await this.expediente({ login: wanted, campusId: 0, admin: false })
-      const images = await replica.imagesOf([wanted])
+      const person = { login: wanted, campusId: 0, admin: false }
+      const [full, images, health] = await Promise.all([
+        this.expediente(person),
+        replica.imagesOf([wanted]),
+        // Sus hitos se piden a 42 con su id, como mucho una vez al día.
+        this.health(person, await replica.userIdOf(wanted)),
+      ])
 
       return {
         login: full.login,
@@ -93,6 +98,7 @@ export function createXpService(options: XpServiceOptions) {
         title: full.title,
         achievements: full.achievements,
         reactions: full.reactions,
+        health,
       }
     },
 

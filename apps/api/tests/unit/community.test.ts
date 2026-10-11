@@ -634,9 +634,11 @@ describe('comunidad', () => {
       expect(record.achievements.find((entry) => entry.id === 'selfless_help')).toMatchObject({
         progress: 1,
       })
-      // Nada de preferencias ni del desglose de XP.
+      // Lleva su estado de salud, pero nada de preferencias ni del desglose de XP.
+      expect(record.health).toMatchObject({ currentCircle: 0, milestones: [] })
       expect(Object.keys(record).sort()).toEqual([
         'achievements',
+        'health',
         'image',
         'login',
         'reactions',
@@ -645,6 +647,8 @@ describe('comunidad', () => {
       ])
       await expectCode(xp.publicProfile('nadie'), 'not_found')
       await expectCode(xp.publicProfile('../etc'), 'not_found')
+      // Su estado de salud sí pregunta a 42 por sus hitos, una vez al día.
+      api.calls.length = 0
     })
 
     it('quien empata comparte puesto, y cada campus tiene el suyo', async () => {
@@ -857,7 +861,7 @@ describe('comunidad', () => {
       expect(group.dates).toEqual(['2026-10-06', '2026-10-20'])
     })
 
-    it('los puestos van juntos, son como mucho seis y de ellos salen las plazas', async () => {
+    it('los puestos se tocan, son como mucho seis y de ellos salen las plazas', async () => {
       const { therapy } = services
       const con = (seats: string[]) => therapy.create(actor('ana'), { ...martesYJueves, seats })
 
@@ -869,6 +873,11 @@ describe('comunidad', () => {
           seats: ['c1r2s1', 'c1r2s2', 'c1r3s1', 'c1r4s1'],
         }),
       ).toMatchObject({ capacity: 4 })
+      // Un hueco en medio de la fila o una fila sin nadie entre medias: no se tocan.
+      await expectCode(con(['c1r1s1', 'c1r1s3']), 'invalid_input')
+      await expectCode(con(['c1r1s1', 'c1r3s1']), 'invalid_input')
+      // En diagonal sí se tocan.
+      await expect(con(['c1r5s1', 'c1r6s2'])).resolves.toMatchObject({ capacity: 2 })
       // Tres filas de separación, dos clusters, un solo puesto o siete: no.
       await expectCode(con(['c1r1s1', 'c1r4s1']), 'invalid_input')
       await expectCode(con(['c1r1s1', 'c2r1s1']), 'invalid_input')

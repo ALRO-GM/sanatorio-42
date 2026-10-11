@@ -105,7 +105,7 @@ export const es: Record<string, string> = {
   'therapy.seats': 'Puestos reservados',
   'therapy.pickSeats': '¿Dónde y cuántas plazas?',
   'therapy.pickSeatsHint':
-    'Pulsa en el mapa los puestos que vais a ocupar. El sitio y las plazas se rellenan solos; luego puedes corregirlos.',
+    'Elige puestos que se toquen (de 2 a 6): cada uno al lado, delante, detrás o en diagonal de otro del grupo. Las plazas del grupo son los puestos que elijas.',
   'therapy.pickedSeats': 'Puestos elegidos ({n}):',
   'therapy.clearSeats': 'Quitar todos',
   'map.title': 'Mapa de clusters',

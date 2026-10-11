@@ -45,18 +45,26 @@ type TextField = Exclude<
   'dates' | 'seats' | 'autoPlace' | 'kind' | 'progress'
 >
 
-/** Puestos que puede reservar un grupo, y filas que puede haber entre el primero y el último. Lo mismo que valida la API. */
+/** Puestos que puede reservar un grupo. Lo mismo que valida la API. */
 const MAX_SEATS = 6
-const MAX_ROW_SPAN = 2
 
-/** `true` si ese puesto puede añadirse: mismo cluster y sin alejarse más de dos filas del resto. */
+/**
+ * `true` si ese puesto puede añadirse: es el primero, o toca a alguno de los ya
+ * elegidos (al lado, delante, detrás o en diagonal, en el mismo cluster).
+ */
 function fits(seats: readonly string[], host: string): boolean {
-  const places = [...seats, host].map(parseSeat).filter((place) => place !== null)
-  const rows = places.map((place) => place.row)
+  const place = parseSeat(host)
+  const chosen = seats.map(parseSeat).filter((other) => other !== null)
 
-  return (
-    new Set(places.map((place) => place.cluster)).size <= 1 &&
-    (rows.length === 0 || Math.max(...rows) - Math.min(...rows) <= MAX_ROW_SPAN)
+  if (place === null || chosen.length === 0) {
+    return true
+  }
+
+  return chosen.some(
+    (other) =>
+      other.cluster === place.cluster &&
+      Math.abs(other.row - place.row) <= 1 &&
+      Math.abs(other.seat - place.seat) <= 1,
   )
 }
 
@@ -140,7 +148,7 @@ export function GroupForm({ projects, defaultProject, group, onCancel, onSaved }
         return seats.filter((other) => other !== host)
       }
 
-      // Lleno, o demasiado lejos del resto: no se añade.
+      // Lleno, o sin tocar a ninguno de los elegidos: no se añade.
       return seats.length < MAX_SEATS && fits(seats, host) ? [...seats, host] : [...seats]
     })
   }

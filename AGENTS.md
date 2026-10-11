@@ -86,3 +86,10 @@ Monorepo con workspaces de npm. Ver `README.md` y `docs/architecture.md`.
 - Guardar el idioma elegido también en el servidor (`PUT /me/settings` ya lo admite).
 - Traducir los mensajes de error de la API; fuera del español se enseña uno genérico.
 - Tests de la web (no tiene).
+
+## Al limpiar o compactar el contexto
+
+- Antes: actualiza `docs/tareas-tras-compactar.md` (lo hecho, el plan de lo
+  siguiente y lo que queda a medias) y `docs/contexto.md`.
+- Después, cuando te digan "revisa y ejecuta las tareas tras compactar": lee ese
+  fichero y haz lo que dice, en orden, marcando cada tarea al terminarla.

@@ -135,8 +135,8 @@ reservada»). Ya no existe `POST /reactions`: la XP por ayudar sale solo de una
 sesión reservada.
 
 GET /users/:login/profile → el expediente público de otra persona: `login`,
-`image`, `xp`, `title`, `achievements` y `reactions`, con la misma forma que en
-`/me/profile`. No lleva preferencias, desglose de XP ni estado de salud. `404`
+`image`, `xp`, `title`, `achievements`, `reactions` y `health` (como
+`/me/health`). No lleva preferencias ni desglose de XP. `404`
 si no conocemos a nadie con ese login.
 
 ## Avisos, chat y asistencia de un evento
@@ -245,8 +245,8 @@ Quien creó algo puede cambiarlo (y quien modera, también):
 
 Cambios en los grupos (`POST /groups`, `PUT /groups/:id`, `POST /groups/:id/join`):
 
-- `seats`: de dos a seis puestos, en el mismo cluster y con dos filas como mucho
-  entre el primero y el último. Con puestos, `capacity` son los puestos y lo que
+- `seats`: de dos a seis puestos que se tocan: mismo cluster y cada uno al lado,
+  delante, detrás o en diagonal de otro del grupo. Con puestos, `capacity` son los puestos y lo que
   se mande se ignora; sin puestos (campus sin plano) vale `capacity` (2-12, 5).
 - `kind`: `study` (por defecto) o `review`, un grupo de repaso para quien ya
   tiene el proyecto terminado. Abrirlo o apuntarse a él exige `progress: 100`.

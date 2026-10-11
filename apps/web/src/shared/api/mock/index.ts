@@ -747,6 +747,7 @@ export const mockApi: Api = {
         achievement('campus_guardian', seed % 25, 25),
       ],
       reactions: { bug: seed % 6, code: seed % 4, concept: seed % 8, patient: seed % 5 },
+      health: await this.getHealth(),
     }
   },
 

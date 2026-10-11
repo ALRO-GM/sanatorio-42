@@ -101,7 +101,7 @@ export const en: Record<string, string> = {
   'therapy.seats': 'Reserved seats',
   'therapy.pickSeats': 'Where, and how many seats?',
   'therapy.pickSeatsHint':
-    'Tap the seats you will use on the map. Place and group size fill in by themselves; you can fix them afterwards.',
+    'Pick seats that touch (2 to 6): each one next to, in front of, behind or diagonal to another of the group. The group has as many places as seats you pick.',
   'therapy.pickedSeats': 'Chosen seats ({n}):',
   'therapy.clearSeats': 'Clear all',
   'map.title': 'Cluster map',

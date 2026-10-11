@@ -6,6 +6,7 @@ import { useI18n } from '../../shared/i18n'
 import { REACTIONS } from '../../shared/reactions'
 import { Avatar } from '../../shared/ui/Avatar'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { HealthCard } from './HealthCard'
 import { NetworkCard } from './NetworkCard'
 
 const ACHIEVEMENT_ICONS: Record<AchievementId, string> = {
@@ -20,8 +21,8 @@ const ACHIEVEMENT_ICONS: Record<AchievementId, string> = {
  * El expediente de otra persona: su nivel, su título, sus logros, las
  * reacciones que ha recibido y su red de correcciones.
  *
- * Es de solo lectura y enseña menos que el propio: ni el desglose de XP, ni el
- * estado de salud, ni las preferencias. Se abre con `#/expediente/<login>`.
+ * Es de solo lectura y enseña menos que el propio: ni el desglose de XP ni las
+ * preferencias. El estado de salud sí. Se abre con `#/expediente/<login>`.
  */
 export function PublicRecord({ login }: { login: string }) {
   const { t } = useI18n()
@@ -91,6 +92,7 @@ export function PublicRecord({ login }: { login: string }) {
         </div>
       </article>
 
+      <HealthCard health={data.health} />
       <NetworkCard me={data.login} />
 
       <div className="two-col">

@@ -35,37 +35,54 @@ const MAX_DATES = 14
 /** Puestos que puede reservar un grupo: es lo que cabe hablando sin molestar al resto. */
 const MAX_SEATS = 6
 
-/** Filas que puede haber, como mucho, entre el primer puesto y el último. */
-const MAX_ROW_SPAN = 2
-
 /** Cómo lleva alguien el proyecto, de 0 a 100. */
 const progress = z.number().int().min(0).max(100)
 
 const joinSchema = z.object({ progress: progress.optional() }).default({})
 
 /**
- * `true` si los puestos están juntos: todos en el mismo cluster y sin más de
- * `MAX_ROW_SPAN` filas entre el primero y el último. Un puesto cuyo nombre no
- * se entiende (un campus que los llama de otra forma) no se puede comprobar y
- * se da por bueno.
+ * `true` si los puestos se tocan: todos en el mismo cluster y formando un solo
+ * bloque, en el que cada puesto tiene otro del grupo al lado, delante, detrás o
+ * en diagonal. Es lo que hace falta para hablarse sin levantarse.
+ *
+ * Un puesto cuyo nombre no se entiende (un campus que los llama de otra forma)
+ * no se puede comprobar y se da por bueno.
  */
 function seatsTogether(seats: readonly string[]): boolean {
   const places = seats.flatMap((seat) => {
-    const match = /^(.+?)r(\d{1,2})[sp]\d{1,2}$/.exec(seat)
+    const match = /^(.+?)r(\d{1,2})[sp](\d{1,2})$/.exec(seat)
 
-    return match === null ? [] : [{ cluster: match[1] ?? '', row: Number(match[2]) }]
+    return match === null
+      ? []
+      : [{ cluster: match[1] ?? '', row: Number(match[2]), seat: Number(match[3]) }]
   })
+  const [first, ...rest] = places
 
-  if (places.length < 2) {
+  if (first === undefined || rest.length === 0) {
     return true
   }
 
-  const rows = places.map((place) => place.row)
+  // Se parte de un puesto y se va llegando a los que tocan a alguno ya alcanzado.
+  const reached = [first]
+  let pending = rest
 
-  return (
-    new Set(places.map((place) => place.cluster)).size === 1 &&
-    Math.max(...rows) - Math.min(...rows) <= MAX_ROW_SPAN
-  )
+  for (;;) {
+    const next = pending.filter((place) =>
+      reached.some(
+        (other) =>
+          other.cluster === place.cluster &&
+          Math.abs(other.row - place.row) <= 1 &&
+          Math.abs(other.seat - place.seat) <= 1,
+      ),
+    )
+
+    if (next.length === 0) {
+      return pending.length === 0
+    }
+
+    reached.push(...next)
+    pending = pending.filter((place) => !next.includes(place))
+  }
 }
 
 const groupSchema = z
@@ -100,7 +117,7 @@ const groupSchema = z
     path: ['seats'],
   })
   .refine((group) => seatsTogether(group.seats), {
-    message: `los puestos tienen que estar en el mismo cluster y a ${MAX_ROW_SPAN} filas como mucho`,
+    message: 'los puestos tienen que tocarse: mismo cluster y cada uno pegado a otro del grupo',
     path: ['seats'],
   })
   // Con puestos elegidos, las plazas son los puestos: no se piden aparte.

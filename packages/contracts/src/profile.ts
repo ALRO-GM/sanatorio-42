@@ -50,14 +50,15 @@ export type Expediente = {
 
 /**
  * `GET /users/:login/profile`: el expediente de otra persona, tal como lo ve
- * cualquiera. Solo lo que ya es público en la web (nivel, título, logros y
- * reacciones): ni preferencias, ni desglose de XP, ni estado de salud.
+ * cualquiera: nivel, título, logros, reacciones y estado de salud (a qué pace va
+ * y cuándo le alcanzaría el black hole). Sin preferencias ni desglose de XP.
  */
 export type PublicProfile = Pick<
   Expediente,
   'login' | 'xp' | 'title' | 'achievements' | 'reactions'
 > & {
   image: string | null
+  health: Health
 }
 
 /** `GET /me/profile`. */
