@@ -6,7 +6,7 @@ import { api } from '../../shared/api'
 import { useI18n } from '../../shared/i18n'
 
 /** Cada cuánto se pregunta: a menudo si esperas turno, poco si todo va bien. */
-const EVERY_MS = { waiting: 20_000, tight: 60_000, ok: 180_000 }
+const EVERY_MS = { waiting: 20_000, tight: 60_000, ok: 300_000 }
 
 /**
  * Aviso de que la API de 42 va justa y, si te toca esperar, tu turno en la

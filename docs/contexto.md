@@ -23,13 +23,13 @@ que hacer, en orden. Este documento es el porqué; aquel, el qué.
 
 ## Estado a 2026-10-11
 
-- **En local y sin subir** (2026-10-11, tarde): la XP por códigos con informe
+- **Todo subido a GitHub** a 2026-10-11 (tarde): la XP por códigos con informe
   de horas (módulo `attendance`), el presupuesto dinámico de peticiones, la
-  cuota de 42 con rótulo y cola de turnos, y las pasadas de seguridad y de
-  rendimiento. `npm run check` pasa (335 tests de la API). Detalle en
-  [tareas-tras-compactar.md](tareas-tras-compactar.md), apartados 2.0 a 2.2.
-  Queda la de simplificar (2.3), que conviene hacer con esto ya subido.
-- **Subido a GitHub** antes de eso. Lo último que entró:
+  cuota de 42 con rótulo y cola de turnos, las pasadas de seguridad, rendimiento
+  y simplificación, y el borrado a plazo de mensajes. `npm run check` pasa (336
+  tests de la API). El antes y el después, en [rendimiento.md](rendimiento.md).
+  **Solo queda desplegar**, cuando Oracle dé la máquina.
+- Antes de eso había entrado:
   expediente público de otras personas; cabecera fija, guardia desde "De
   guardia" y personalización; módulo `usage` y mapa de calor; avisos, chat de
   evento y asistencia con códigos (`meet`); panel de gestión ampliado (`admin`);
@@ -143,8 +143,9 @@ conviene agotar la sesión en otras tareas si él avisa de que va justa.
 ## Pendiente de confirmar o de hacer
 
 El plan con sus casillas está en [tareas-tras-compactar.md](tareas-tras-compactar.md).
-En resumen: queda la revisión de seguridad, rendimiento y simplificación antes
-de desplegar, y que Alberto confirme las cifras de los límites y de los códigos. Sigue pendiente rotar
+En resumen: queda desplegar. Alberto dio por buenos los valores propuestos de
+los códigos y de los límites (2026-10-11); el tope de la app de 42 sigue vacío
+hasta que lo mire en la intra. Sigue pendiente rotar
 el secreto de la app de 42, que se llegó a ver en una conversación.
 
 ## Cosas que conviene saber
