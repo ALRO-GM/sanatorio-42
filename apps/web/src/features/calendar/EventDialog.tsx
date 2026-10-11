@@ -3,14 +3,25 @@ import { useEffect, useRef } from 'react'
 import type { CalendarEvent, CalendarSection } from '@sanatorio/contracts'
 
 import { useI18n } from '../../shared/i18n'
+import { hasCodes, hasRoom } from '../alerts/eligible'
+import { EventRoom } from '../alerts/EventRoom'
 import { whenText } from './dates'
 import { iconOf } from './kinds'
+
+/** Minutos que faltan para un instante, redondeando hacia arriba. */
+function minutesTo(iso: string): number {
+  return Math.ceil((Date.parse(iso) - Date.now()) / 60_000)
+}
 
 type EventDialogProps = {
   event: CalendarEvent
   onClose: () => void
   /** Ir a la sección de la web donde se gestiona un evento propio. */
   onGo: (section: CalendarSection) => void
+  /** Login de quien mira, para distinguir sus mensajes en el chat. */
+  me: string
+  /** `true` si la ficha ha saltado sola como aviso de que el evento está al caer. */
+  alert?: boolean
 }
 
 /**
@@ -22,7 +33,7 @@ type EventDialogProps = {
  *
  * Lo de 42 lleva un enlace a su página en la intra; lo propio, a su sección.
  */
-export function EventDialog({ event, onClose, onGo }: EventDialogProps) {
+export function EventDialog({ event, onClose, onGo, me, alert = false }: EventDialogProps) {
   const { t, lang } = useI18n()
   const ref = useRef<HTMLDialogElement>(null)
 
@@ -63,6 +74,11 @@ export function EventDialog({ event, onClose, onGo }: EventDialogProps) {
           </button>
         </header>
 
+        {alert && (
+          <p className="event-alert" role="alert">
+            🔔 {t('meet.alert', { minutes: Math.max(0, minutesTo(event.start)) })}
+          </p>
+        )}
         <h3 id="event-dialog-title">{event.title}</h3>
 
         <dl className="event-facts">
@@ -101,6 +117,8 @@ export function EventDialog({ event, onClose, onGo }: EventDialogProps) {
         {event.description !== null && event.description !== '' && (
           <p className="event-description">{event.description}</p>
         )}
+
+        {hasRoom(event) && <EventRoom eventId={event.id} me={me} codes={hasCodes(event)} />}
 
         <footer className="actions">
           {event.url !== null && (

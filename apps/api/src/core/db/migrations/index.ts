@@ -19,6 +19,10 @@ import { cursusStartSchema } from './0010-cursus-start.js'
 import { healthSchema } from './0011-health.js'
 import { correctionsSchema } from './0012-corrections.js'
 import { verdictsSchema } from './0013-verdicts.js'
+import { usageSchema } from './0014-usage.js'
+import { meetSchema } from './0015-meet.js'
+import { adminSchema } from './0016-admin.js'
+import { therapyReviewSchema } from './0017-therapy-review.js'
 import type { Migration } from './types.js'
 
 export type { Migration } from './types.js'
@@ -37,6 +41,10 @@ export const MIGRATIONS: readonly Migration[] = [
   healthSchema,
   correctionsSchema,
   verdictsSchema,
+  usageSchema,
+  meetSchema,
+  adminSchema,
+  therapyReviewSchema,
 ]
 
 /** Versión más alta que existe en el código. */

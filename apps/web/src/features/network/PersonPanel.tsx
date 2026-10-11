@@ -108,6 +108,10 @@ export function PersonPanel({
         {focused ? t('net.backToAll') : t('net.onlyThis')}
       </button>
 
+      <a className="link" href={`#/expediente/${node.login}`}>
+        {t('record.open', { login: node.login })}
+      </a>
+
       {partners.length > 0 && (
         <>
           <span className="eyebrow">{t('net.mostWith')}</span>

@@ -23,6 +23,9 @@ export type GroupRow = {
   seats: string[]
   closed: boolean
   members: string[]
+  /** Cómo llevaba el proyecto cada persona al apuntarse (0-100), si lo dijo. */
+  progress: Record<string, number | null>
+  kind: 'study' | 'review'
 }
 
 /**
@@ -35,15 +38,17 @@ export type GroupRow = {
 const OPEN = `g.closed = 0 AND EXISTS (SELECT 1 FROM therapy_members m WHERE m.group_id = g.id)`
 
 export function createTherapyRepository(db: Db) {
-  async function membersOf(groupIds: readonly number[]): Promise<Map<number, string[]>> {
-    const members = new Map<number, string[]>()
+  async function membersOf(
+    groupIds: readonly number[],
+  ): Promise<Map<number, { login: string; progress: number | null }[]>> {
+    const members = new Map<number, { login: string; progress: number | null }[]>()
 
     if (groupIds.length === 0) {
       return members
     }
 
     const result = await db.execute({
-      sql: `SELECT group_id, login FROM therapy_members
+      sql: `SELECT group_id, login, progress FROM therapy_members
             WHERE group_id IN (${groupIds.map(() => '?').join(', ')})
             ORDER BY joined_at`,
       args: [...groupIds],
@@ -51,7 +56,14 @@ export function createTherapyRepository(db: Db) {
 
     for (const row of result.rows) {
       const id = toNumber(row.group_id)
-      members.set(id, [...(members.get(id) ?? []), toText(row.login)])
+
+      members.set(id, [
+        ...(members.get(id) ?? []),
+        {
+          login: toText(row.login),
+          progress: row.progress === null ? null : toNumber(row.progress),
+        },
+      ])
     }
 
     return members
@@ -85,7 +97,11 @@ export function createTherapyRepository(db: Db) {
         .split(',')
         .filter((host) => host !== ''),
       closed: toNumber(row.closed) === 1,
-      members: members.get(toNumber(row.id)) ?? [],
+      members: (members.get(toNumber(row.id)) ?? []).map((member) => member.login),
+      progress: Object.fromEntries(
+        (members.get(toNumber(row.id)) ?? []).map((member) => [member.login, member.progress]),
+      ),
+      kind: toText(row.kind) === 'review' ? 'review' : 'study',
     }))
   }
 
@@ -139,13 +155,16 @@ export function createTherapyRepository(db: Db) {
       capacity: number
       note: string | null
       seats: readonly string[]
+      kind: 'study' | 'review'
+      /** Cómo lleva el proyecto quien lo abre. */
+      progress: number | null
     }): Promise<number> {
       const now = nowIso()
       const result = await db.execute({
         sql: `INSERT INTO therapy_groups
                 (campus_id, project_id, creator, place, dates, last_date, start_time, end_time,
-                 capacity, note, seats, created_at)
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                 capacity, note, seats, kind, created_at)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         args: [
           group.campusId,
           group.projectId,
@@ -158,14 +177,16 @@ export function createTherapyRepository(db: Db) {
           group.capacity,
           group.note,
           group.seats.join(','),
+          group.kind,
           now,
         ],
       })
       const id = toNumber(result.lastInsertRowid)
 
       await db.execute({
-        sql: 'INSERT INTO therapy_members (group_id, login, joined_at) VALUES (?, ?, ?)',
-        args: [id, group.creator, now],
+        sql: `INSERT INTO therapy_members (group_id, login, joined_at, progress)
+              VALUES (?, ?, ?, ?)`,
+        args: [id, group.creator, now, group.progress],
       })
 
       return id
@@ -224,13 +245,13 @@ export function createTherapyRepository(db: Db) {
      * La comprobación va en la misma sentencia que el `INSERT`: con dos
      * peticiones a la vez por la última plaza, solo una la consigue.
      */
-    async join(id: number, login: string): Promise<boolean> {
+    async join(id: number, login: string, progress: number | null = null): Promise<boolean> {
       const result = await db.execute({
-        sql: `INSERT OR IGNORE INTO therapy_members (group_id, login, joined_at)
-              SELECT g.id, ?, ? FROM therapy_groups g
+        sql: `INSERT OR IGNORE INTO therapy_members (group_id, login, joined_at, progress)
+              SELECT g.id, ?, ?, ? FROM therapy_groups g
               WHERE g.id = ? AND g.closed = 0
                 AND (SELECT COUNT(*) FROM therapy_members m WHERE m.group_id = g.id) < g.capacity`,
-        args: [login, nowIso(), id],
+        args: [login, nowIso(), progress, id],
       })
 
       return result.rowsAffected > 0

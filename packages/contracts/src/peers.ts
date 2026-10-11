@@ -38,6 +38,11 @@ export type Peer = {
    * bonus. Es más que especialista: una "eminencia".
    */
   perfect: boolean
+  /**
+   * `true` si ya lo aprobó y se ofrece a preevaluar proyectos terminados: una
+   * corrección de prueba antes de la de verdad.
+   */
+  preReview: boolean
 }
 
 /** `GET` y `PUT /me/availability`. */

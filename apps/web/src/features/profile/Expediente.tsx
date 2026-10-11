@@ -6,6 +6,7 @@ import { api } from '../../shared/api'
 import { useAction } from '../../shared/hooks/useAsync'
 import type { AsyncState } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
+import { Blocks } from '../../shared/layout/Blocks'
 import { REACTIONS } from '../../shared/reactions'
 import { Avatar } from '../../shared/ui/Avatar'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
@@ -73,138 +74,160 @@ export function Expediente({ me, profile }: ExpedienteProps) {
     <section>
       <h2>{t('xp.title')}</h2>
 
-      <article className="card record">
-        <div className="banner" />
-        <div className="record-head">
-          <Avatar login={me.login} image={me.image} size={72} />
-          <div className="record-name">
-            <strong>{me.login}</strong>
-            <span className="record-title">{t(`title.${title}`)}</span>
-          </div>
-          <div className="level">
-            <span className="eyebrow">{t('xp.level')}</span>
-            <strong>{xp.level}</strong>
-          </div>
-        </div>
+      <Blocks
+        page="expediente"
+        blocks={[
+          {
+            id: 'record',
+            content: (
+              <article className="card record">
+                <div className="banner" />
+                <div className="record-head">
+                  <Avatar login={me.login} image={me.image} size={72} />
+                  <div className="record-name">
+                    <strong>{me.login}</strong>
+                    <span className="record-title">{t(`title.${title}`)}</span>
+                  </div>
+                  <div className="level">
+                    <span className="eyebrow">{t('xp.level')}</span>
+                    <strong>{xp.level}</strong>
+                  </div>
+                </div>
 
-        <div className="xp-line">
-          <span>
-            {xp.next === null
-              ? t('xp.max', { xp: xp.total })
-              : t('xp.progress', { xp: xp.total, next: xp.next })}
-          </span>
-          {nextTitle && <span>{t('xp.nextTitle', { title: t(`title.${nextTitle.id}`) })}</span>}
-        </div>
-        <div className="xp-row">
-          <div
-            className="xp-bar"
-            role="progressbar"
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-valuenow={pct}
-            aria-label={t('xp.level')}
-          >
-            <span style={{ width: `${pct}%` }} />
-          </div>
-          <button
-            type="button"
-            className={`xp-toggle ${showRules ? 'open' : ''}`}
-            aria-expanded={showRules}
-            aria-controls="xp-breakdown"
-            aria-label={t('xp.howTo')}
-            title={t('xp.howTo')}
-            onClick={() => {
-              setShowRules((open) => !open)
-            }}
-          >
-            <span aria-hidden="true">▾</span>
-          </button>
-        </div>
+                <div className="xp-line">
+                  <span>
+                    {xp.next === null
+                      ? t('xp.max', { xp: xp.total })
+                      : t('xp.progress', { xp: xp.total, next: xp.next })}
+                  </span>
+                  {nextTitle && (
+                    <span>{t('xp.nextTitle', { title: t(`title.${nextTitle.id}`) })}</span>
+                  )}
+                </div>
+                <div className="xp-row">
+                  <div
+                    className="xp-bar"
+                    role="progressbar"
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-valuenow={pct}
+                    aria-label={t('xp.level')}
+                  >
+                    <span style={{ width: `${pct}%` }} />
+                  </div>
+                  <button
+                    type="button"
+                    className={`xp-toggle ${showRules ? 'open' : ''}`}
+                    aria-expanded={showRules}
+                    aria-controls="xp-breakdown"
+                    aria-label={t('xp.howTo')}
+                    title={t('xp.howTo')}
+                    onClick={() => {
+                      setShowRules((open) => !open)
+                    }}
+                  >
+                    <span aria-hidden="true">▾</span>
+                  </button>
+                </div>
 
-        {showRules && (
-          <ul id="xp-breakdown" className="xp-breakdown">
-            {RULES.map((kind) => (
-              <li key={kind} className={earned[kind].times === 0 ? 'none' : ''}>
-                <span className="xp-what">{t(`xp.rule.${kind}`, { xp: rules[kind] })}</span>
-                <span className="xp-meter" aria-hidden="true">
-                  <span style={{ width: `${(earned[kind].xp / most) * 100}%` }} />
-                </span>
-                <span className="xp-got">
-                  <strong>{t('xp.gotXp', { xp: earned[kind].xp })}</strong>
-                  <small>
-                    {t(earned[kind].times === 1 ? 'xp.gotOnce' : 'xp.gotTimes', {
-                      n: earned[kind].times,
-                    })}
-                  </small>
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
+                {showRules && (
+                  <ul id="xp-breakdown" className="xp-breakdown">
+                    {RULES.map((kind) => (
+                      <li key={kind} className={earned[kind].times === 0 ? 'none' : ''}>
+                        <span className="xp-what">{t(`xp.rule.${kind}`, { xp: rules[kind] })}</span>
+                        <span className="xp-meter" aria-hidden="true">
+                          <span style={{ width: `${(earned[kind].xp / most) * 100}%` }} />
+                        </span>
+                        <span className="xp-got">
+                          <strong>{t('xp.gotXp', { xp: earned[kind].xp })}</strong>
+                          <small>
+                            {t(earned[kind].times === 1 ? 'xp.gotOnce' : 'xp.gotTimes', {
+                              n: earned[kind].times,
+                            })}
+                          </small>
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
 
-        <span className="eyebrow">{t('xp.titles')}</span>
-        <div className="filter-pills">
-          {titles.map((entry) => (
-            <button
-              key={entry.id}
-              className={`pill ${entry.id === title ? 'active' : ''}`}
-              disabled={!entry.unlocked || busy}
-              aria-pressed={entry.id === title}
-              onClick={() => void choose(entry.id)}
-            >
-              {t(`title.${entry.id}`)}
-              {!entry.unlocked && ` · ${t('xp.locked', { level: entry.level })}`}
-            </button>
-          ))}
-        </div>
-        <ErrorNote error={error} />
-      </article>
+                <span className="eyebrow">{t('xp.titles')}</span>
+                <div className="filter-pills">
+                  {titles.map((entry) => (
+                    <button
+                      key={entry.id}
+                      className={`pill ${entry.id === title ? 'active' : ''}`}
+                      disabled={!entry.unlocked || busy}
+                      aria-pressed={entry.id === title}
+                      onClick={() => void choose(entry.id)}
+                    >
+                      {t(`title.${entry.id}`)}
+                      {!entry.unlocked && ` · ${t('xp.locked', { level: entry.level })}`}
+                    </button>
+                  ))}
+                </div>
+                <ErrorNote error={error} />
+              </article>
+            ),
+          },
+          { id: 'health', content: <HealthCard /> },
+          { id: 'network', content: <NetworkCard me={me.login} /> },
+          {
+            id: 'achievements',
+            content: (
+              <div className="two-col">
+                <article className="card">
+                  <span className="eyebrow">{t('xp.achievements')}</span>
+                  <ul className="rows">
+                    {achievements.map((entry) => (
+                      <li
+                        key={entry.id}
+                        className={`row ${entry.unlocked ? 'unlocked' : 'locked'}`}
+                      >
+                        <span className="row-icon" aria-hidden="true">
+                          {ACHIEVEMENT_ICONS[entry.id]}
+                        </span>
+                        <span>
+                          <strong>{t(`ach.${entry.id}`)}</strong>
+                          <small>
+                            {entry.unlocked
+                              ? t(`ach.${entry.id}.d`, { goal: entry.goal })
+                              : t('xp.lockedAt', { progress: entry.progress, goal: entry.goal })}
+                          </small>
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </article>
 
-      <HealthCard />
-      <NetworkCard me={me.login} />
-
-      <div className="two-col">
-        <article className="card">
-          <span className="eyebrow">{t('xp.achievements')}</span>
-          <ul className="rows">
-            {achievements.map((entry) => (
-              <li key={entry.id} className={`row ${entry.unlocked ? 'unlocked' : 'locked'}`}>
-                <span className="row-icon" aria-hidden="true">
-                  {ACHIEVEMENT_ICONS[entry.id]}
-                </span>
-                <span>
-                  <strong>{t(`ach.${entry.id}`)}</strong>
-                  <small>
-                    {entry.unlocked
-                      ? t(`ach.${entry.id}.d`, { goal: entry.goal })
-                      : t('xp.lockedAt', { progress: entry.progress, goal: entry.goal })}
-                  </small>
-                </span>
-              </li>
-            ))}
-          </ul>
-        </article>
-
-        <article className="card">
-          <span className="eyebrow">{t('xp.reactions')}</span>
-          <ul className="rows">
-            {REACTIONS.map(({ kind, emoji }) => (
-              <li key={kind} className="row plain">
-                <span className="row-icon" aria-hidden="true">
-                  {emoji}
-                </span>
-                <span>{t(`react.${kind}`)}</span>
-                <strong className="row-count">{reactions[kind]}</strong>
-              </li>
-            ))}
-          </ul>
-        </article>
-      </div>
-
-      <div className="two-col">
-        <LeaderboardCard me={me.login} />
-        <AskedCard />
-      </div>
+                <article className="card">
+                  <span className="eyebrow">{t('xp.reactions')}</span>
+                  <ul className="rows">
+                    {REACTIONS.map(({ kind, emoji }) => (
+                      <li key={kind} className="row plain">
+                        <span className="row-icon" aria-hidden="true">
+                          {emoji}
+                        </span>
+                        <span>{t(`react.${kind}`)}</span>
+                        <strong className="row-count">{reactions[kind]}</strong>
+                      </li>
+                    ))}
+                  </ul>
+                </article>
+              </div>
+            ),
+          },
+          {
+            id: 'ranking',
+            content: (
+              <div className="two-col">
+                <LeaderboardCard me={me.login} />
+                <AskedCard />
+              </div>
+            ),
+          },
+        ]}
+      />
     </section>
   )
 }

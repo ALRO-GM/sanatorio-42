@@ -42,7 +42,16 @@ const peer = (
   available: boolean,
   status: Peer['status'],
   perfect = false,
-): Peer => ({ login, image: null, location, available, status, perfect })
+): Peer => ({
+  login,
+  image: null,
+  location,
+  available,
+  status,
+  perfect,
+  // Quien lo bordó se ofrece a preevaluar.
+  preReview: perfect,
+})
 
 export const PEERS: Record<number, Peer[]> = {
   1314: [
@@ -150,6 +159,8 @@ export const CLUSTER_SIZES: Record<string, [rows: number, seats: number]> = {
 
 export type StoredGroup = Omit<GroupView, 'members' | 'joined' | 'mine' | 'inSession'> & {
   members: string[]
+  /** Cómo llevaba el proyecto cada persona al apuntarse. */
+  progress: Record<string, number>
 }
 
 export type StoredDoubt = {
@@ -191,6 +202,8 @@ export type StoredBoard = Omit<BoardView, 'attendees' | 'joined' | 'mine'> & {
 
 export type MockState = {
   campusId: number
+  /** Te ofreces a preevaluar proyectos terminados. */
+  preReview: boolean
   title: TitleId
   xp: number
   reactions: Record<ReactionKind, number>
@@ -239,6 +252,7 @@ export function inDays(days: number, hour: number, minutes = 0): string {
 export function initialState(): MockState {
   return {
     campusId: 22,
+    preReview: false,
     title: 'residente',
     xp: 340,
     reactions: { bug: 7, code: 5, concept: 9, patient: 4 },
@@ -256,6 +270,8 @@ export function initialState(): MockState {
         note: 'Junto a la ventana',
         seats: ['c1r2s3', 'c1r2s4', 'c1r2s5'],
         members: ['anavarro', 'mgarcia', 'llorente'],
+        progress: { anavarro: 60, mgarcia: 35 },
+        kind: 'study',
       },
       {
         id: 2,
@@ -270,6 +286,8 @@ export function initialState(): MockState {
         note: null,
         seats: [],
         members: ['lruiz', 'gmoreno', 'plopez-l'],
+        progress: {},
+        kind: 'review',
       },
     ],
     guides: {

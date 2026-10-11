@@ -45,6 +45,27 @@ export const realApi: Api = {
 
   getCampuses: () => getJson('/campuses'),
   getProfile: () => getJson('/me/profile'),
+  getEventThread: (id) => getJson(`/events/thread?id=${encodeURIComponent(id)}`),
+  sendEventMessage: (message) => sendJson('POST', '/events/messages', message),
+  getEventAttendance: (id) => getJson(`/events/attendance?id=${encodeURIComponent(id)}`),
+  checkinEvent: (id, code) => sendJson('POST', '/events/checkin', { id, code }),
+  openTicket: (ticket) => sendJson('POST', '/tickets', ticket),
+  getMyTickets: () => getJson('/tickets/mine'),
+  getAdminConsumption: () => getJson('/admin/consumption'),
+  getAdminPeople: () => getJson('/admin/people'),
+  setAdminRole: (login, admin) => send('PUT', '/admin/roles', { login, admin }),
+  blockUser: (login, reason, days) =>
+    send('PUT', '/admin/blocks', { login, reason, ...(days === null ? {} : { days }) }),
+  unblockUser: (login) => send('DELETE', `/admin/blocks/${encodeURIComponent(login)}`),
+  setUserLimit: (login, perHour) => send('PUT', '/admin/limits', { login, perHour }),
+  getAdminTickets: () => getJson('/admin/tickets'),
+  answerTicket: (id, answer, status) =>
+    sendJson('POST', `/admin/tickets/${id}/answer`, { answer, status }),
+  getAdminMessages: () => getJson('/admin/messages'),
+  getUsage: () => getJson('/usage'),
+  sendUsage: (counts) => send('POST', '/usage', { counts }),
+  getUsageHeatmap: (by) => getJson(`/usage/heatmap?by=${by}`),
+  getPublicProfile: (login) => getJson(`/users/${encodeURIComponent(login)}/profile`),
   updateSettings: (settings) => send('PUT', '/me/settings', settings),
   getSyncStatus: () => getJson('/sync/status'),
 
@@ -100,7 +121,8 @@ export const realApi: Api = {
     ),
   createGroup: (group) => sendJson('POST', '/groups', group),
   updateGroup: (id, group) => sendJson('PUT', `/groups/${id}`, group),
-  joinGroup: (id) => send('POST', `/groups/${id}/join`),
+  joinGroup: (id, progress) =>
+    send('POST', `/groups/${id}/join`, progress === undefined ? {} : { progress }),
   leaveGroup: (id) => send('DELETE', `/groups/${id}/join`),
   closeGroup: (id) => send('DELETE', `/groups/${id}`),
 

@@ -26,6 +26,10 @@ export type AuthModuleDeps = {
   onLogin: (profile: ApiUser) => Promise<{ campusId: number }>
   /** Aviso de actividad, para que la sincronización sepa que hay alguien mirando. */
   onActivity?: () => void
+  /** Permisos y bloqueos del panel de administración. */
+  access?: (
+    login: string,
+  ) => Promise<{ admin: boolean; block: { reason: string; until: string | null } | null }>
 }
 
 export type AuthModule = AppModule & {
@@ -59,6 +63,7 @@ export function createAuthModule(deps: AuthModuleDeps): AuthModule {
     profiles: deps.profiles,
     defaultCampusId: env.DEFAULT_CAMPUS_ID,
     adminLogins: env.adminLogins,
+    ...(deps.access === undefined ? {} : { access: deps.access }),
     ...(deps.onActivity === undefined ? {} : { onActivity: deps.onActivity }),
   })
 

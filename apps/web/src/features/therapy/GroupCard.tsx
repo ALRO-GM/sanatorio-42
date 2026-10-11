@@ -8,6 +8,7 @@ import { useAction } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { Avatar } from '../../shared/ui/Avatar'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { EventRoom } from '../alerts/EventRoom'
 import { shortDay, today } from './days'
 import { GroupForm } from './GroupForm'
 
@@ -17,13 +18,19 @@ type GroupCardProps = {
   projects: readonly ProjectSummary[]
   /** Algo ha cambiado (alguien entra, sale o se cierra): hay que volver a pedir la lista. */
   onChange: () => void
+  /** Login de quien mira, para su chat. */
+  me: string
 }
 
-export function GroupCard({ group, projects, onChange }: GroupCardProps) {
+export function GroupCard({ group, projects, onChange, me }: GroupCardProps) {
   const { t, lang } = useI18n()
   const { busy, error, run } = useAction()
   const [copied, setCopied] = useState(false)
   const [editing, setEditing] = useState(false)
+  // Al apuntarse se pregunta cómo se lleva el proyecto; en uno de repaso, ya está al 100.
+  const [joining, setJoining] = useState(false)
+  const [progress, setProgress] = useState(group.kind === 'review' ? 100 : 50)
+  const [chat, setChat] = useState(false)
   const now = today()
   const full = group.members.length >= group.capacity
 
@@ -68,6 +75,11 @@ export function GroupCard({ group, projects, onChange }: GroupCardProps) {
     <article className="card group-card">
       <header className="card-head">
         <h3>{group.projectName ?? `#${group.projectId}`}</h3>
+        {group.kind === 'review' && (
+          <span className="badge specialist" title={t('therapy.kind.review.hint')}>
+            {t('therapy.kind.review')}
+          </span>
+        )}
         <span className={`badge ${full ? 'off' : 'on plain'}`}>
           {full
             ? t('therapy.full', { capacity: group.capacity })
@@ -122,6 +134,12 @@ export function GroupCard({ group, projects, onChange }: GroupCardProps) {
           <li key={member.login}>
             <Avatar login={member.login} image={member.image} size={32} />
             <strong>{member.login}</strong>
+            {member.progress !== null && (
+              <span className="member-progress" title={t('therapy.progress')}>
+                <span style={{ width: `${member.progress}%` }} />
+                <small>{member.progress} %</small>
+              </span>
+            )}
           </li>
         ))}
       </ul>
@@ -129,6 +147,47 @@ export function GroupCard({ group, projects, onChange }: GroupCardProps) {
       <p className="hint">
         {t(group.seats.length > 0 ? 'therapy.attendance' : 'therapy.attendanceNoSeats')}
       </p>
+
+      {joining && !group.joined && (
+        <div className="join-box">
+          <label>
+            {t('therapy.progressAsk', { n: progress })}
+            <input
+              type="range"
+              min={0}
+              max={100}
+              step={5}
+              value={progress}
+              disabled={group.kind === 'review'}
+              onChange={(event) => {
+                setProgress(Number(event.target.value))
+              }}
+            />
+          </label>
+          {group.kind === 'review' && <p className="hint">{t('therapy.kind.review.join')}</p>}
+          <button
+            className="primary small"
+            disabled={busy}
+            onClick={() => void act(() => api.joinGroup(group.id, progress))}
+          >
+            {t('therapy.joinConfirm')}
+          </button>
+        </div>
+      )}
+
+      {group.joined && (
+        <button
+          type="button"
+          className="link"
+          aria-expanded={chat}
+          onClick={() => {
+            setChat(!chat)
+          }}
+        >
+          💬 {t(chat ? 'therapy.chatHide' : 'therapy.chatShow')}
+        </button>
+      )}
+      {group.joined && chat && <EventRoom eventId={`group:${group.id}`} me={me} replies={false} />}
 
       <div className="actions">
         {group.joined ? (
@@ -145,7 +204,10 @@ export function GroupCard({ group, projects, onChange }: GroupCardProps) {
           <button
             className="primary small"
             disabled={busy || full}
-            onClick={() => void act(() => api.joinGroup(group.id))}
+            aria-expanded={joining}
+            onClick={() => {
+              setJoining(!joining)
+            }}
           >
             {t('therapy.join')}
           </button>

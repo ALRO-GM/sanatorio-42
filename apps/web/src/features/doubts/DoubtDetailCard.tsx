@@ -5,6 +5,7 @@ import { api } from '../../shared/api'
 import { useAction, useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { ReportButton } from '../admin/ReportButton'
 
 type DoubtDetailCardProps = {
   doubtId: number
@@ -80,6 +81,7 @@ export function DoubtDetailCard({ doubtId, onClose, onChange }: DoubtDetailCardP
 
   return (
     <article className="card doubt-detail">
+      <ReportButton target={`doubt:${doubt.id}`} summary={doubt.body} />
       <header className="card-head">
         {draft === null ? (
           <h3>{doubt.body}</h3>

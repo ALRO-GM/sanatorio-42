@@ -22,6 +22,13 @@ export type SessionReaderOptions = {
   defaultCampusId: number
   /** Logins con permiso de moderación, en minúsculas. */
   adminLogins: readonly string[]
+  /**
+   * Permisos y bloqueos puestos desde el panel de administración. Sin esto,
+   * solo administran los de `adminLogins` y nadie está bloqueado.
+   */
+  access?: (
+    login: string,
+  ) => Promise<{ admin: boolean; block: { reason: string; until: string | null } | null }>
   /** Aviso de actividad, para que la sincronización sepa que hay alguien mirando. */
   onActivity?: () => void
 }
@@ -61,12 +68,19 @@ export function createSessionReader(options: SessionReaderOptions): SessionReade
      */
     async actor(request: FastifyRequest): Promise<Actor> {
       const session = user(request)
-      const profile = await options.profiles.get(session.login)
+      const [profile, access] = await Promise.all([
+        options.profiles.get(session.login),
+        options.access?.(session.login),
+      ])
+
+      if (access !== undefined && access.block !== null) {
+        throw new DomainError('forbidden', `Tu cuenta está bloqueada: ${access.block.reason}`)
+      }
 
       return {
         login: session.login,
         campusId: profile?.campusId ?? homeCampus(session),
-        admin: options.adminLogins.includes(session.login.toLowerCase()),
+        admin: access?.admin ?? options.adminLogins.includes(session.login.toLowerCase()),
       }
     },
   }

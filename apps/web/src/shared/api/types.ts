@@ -41,10 +41,22 @@ import type {
   LeaderboardPeriod,
   Peer,
   Profile,
+  PublicProfile,
   ProjectSummary,
   RequesterTag,
   SettingsInput,
   SyncStatus,
+  UsageCounts,
+  UsageHeatmap,
+  MeetAttendance,
+  MeetCheckin,
+  MeetMessageInput,
+  MeetThread,
+  AdminPeople,
+  Consumption,
+  LoggedMessage,
+  Ticket,
+  TicketInput,
 } from '@sanatorio/contracts'
 
 /** `GET /projects/:id/peers`, con lo que viaja en cabeceras ya leído. */
@@ -101,6 +113,41 @@ export type Api = {
   // --- Campus, preferencias y estado de la réplica
   getCampuses: () => Promise<CampusSummary[]>
   getProfile: () => Promise<Profile>
+
+  // --- Avisos, chat y asistencia de un evento
+  getEventThread: (eventId: string) => Promise<MeetThread>
+  /** Manda un aviso o un mensaje; devuelve el chat ya con él. */
+  sendEventMessage: (message: MeetMessageInput) => Promise<MeetThread>
+  getEventAttendance: (eventId: string) => Promise<MeetAttendance>
+  /** Valida el código de inicio o el de fin de un evento. */
+  checkinEvent: (eventId: string, code: string) => Promise<MeetCheckin>
+
+  // --- Buzón y administración
+  /** Manda una incidencia, una sugerencia o una denuncia. */
+  openTicket: (ticket: TicketInput) => Promise<Ticket>
+  getMyTickets: () => Promise<Ticket[]>
+  getAdminConsumption: () => Promise<Consumption>
+  getAdminPeople: () => Promise<AdminPeople>
+  setAdminRole: (login: string, admin: boolean) => Promise<void>
+  /** `days: null` bloquea sin fecha de fin. */
+  blockUser: (login: string, reason: string, days: number | null) => Promise<void>
+  unblockUser: (login: string) => Promise<void>
+  /** `perHour: null` devuelve a esa persona al tope automático. */
+  setUserLimit: (login: string, perHour: number | null) => Promise<void>
+  getAdminTickets: () => Promise<Ticket[]>
+  answerTicket: (id: number, answer: string, status: 'answered' | 'closed') => Promise<Ticket>
+  getAdminMessages: () => Promise<LoggedMessage[]>
+
+  // --- Uso de la web
+  /** Cuánto usa la comunidad cada elemento, para el orden automático. */
+  getUsage: () => Promise<UsageCounts>
+  /** Suma lo que has usado desde el último envío. */
+  sendUsage: (counts: Record<string, number>) => Promise<void>
+  /** Mapa de calor del uso por grupos de personas. Solo admins. */
+  getUsageHeatmap: (by: UsageHeatmap['by']) => Promise<UsageHeatmap>
+
+  /** El expediente público de otra persona. */
+  getPublicProfile: (login: string) => Promise<PublicProfile>
   updateSettings: (settings: SettingsInput) => Promise<void>
   getSyncStatus: () => Promise<SyncStatus>
 
@@ -143,7 +190,8 @@ export type Api = {
   createGroup: (group: GroupInput) => Promise<GroupView>
   /** Solo quien lo abrió. */
   updateGroup: (id: number, group: GroupInput) => Promise<GroupView>
-  joinGroup: (id: number) => Promise<void>
+  /** `progress`: cómo llevas el proyecto, de 0 a 100. */
+  joinGroup: (id: number, progress?: number) => Promise<void>
   leaveGroup: (id: number) => Promise<void>
   closeGroup: (id: number) => Promise<void>
 

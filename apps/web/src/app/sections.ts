@@ -6,16 +6,22 @@
  *
  * `inNav: false` la deja fuera de la fila de pestañas: se llega a ella desde
  * otro sitio (el expediente se abre con la cruz de la cabecera).
+ *
+ * El orden en que salen las pestañas no es el de esta lista: lo decide la
+ * personalización (`shared/layout`).
  */
 export const SECTIONS = [
   { id: 'consulta', icon: '🩺', inNav: true },
-  { id: 'guardia', icon: '🛟', inNav: true },
-  { id: 'calendario', icon: '📅', inNav: true },
-  { id: 'terapia', icon: '🫂', inNav: true },
   { id: 'tablon', icon: '📌', inNav: true },
+  { id: 'terapia', icon: '🫂', inNav: true },
   { id: 'pizarras', icon: '🧑‍🏫', inNav: true },
+  { id: 'calendario', icon: '📅', inNav: true },
   { id: 'red', icon: '🕸️', inNav: true },
+  // La guardia se abre desde "De guardia", en la cabecera.
+  { id: 'guardia', icon: '🛟', inNav: false },
   { id: 'expediente', icon: '📋', inNav: false },
+  // Panel de gestión: solo para quien administra la web.
+  { id: 'gestion', icon: '📊', inNav: false },
 ] as const
 
 export type Section = (typeof SECTIONS)[number]['id']

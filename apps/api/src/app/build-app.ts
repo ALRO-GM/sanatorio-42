@@ -64,6 +64,7 @@ export async function buildApp(options: BuildOptions = {}): Promise<BuiltApp> {
   const { services, modules: domainModules } = compose(db, createApiClient(env, fetchImpl), {
     sync: syncConfigFrom(env),
     backgroundSync: env.SYNC_ENABLED === 'true',
+    admins: env.adminLogins,
     // A stderr y no al log de Fastify: el sincronizador vive fuera de las
     // peticiones. Lo que importa es que quede rastro, porque la web sigue
     // funcionando con datos viejos y sin esto no habría forma de saberlo.
@@ -88,6 +89,7 @@ export async function buildApp(options: BuildOptions = {}): Promise<BuiltApp> {
     onActivity: () => {
       services.sync.touch()
     },
+    access: (login) => services.admin.accessOf(login),
   })
 
   const modules: AppModule[] = [auth, ...domainModules]

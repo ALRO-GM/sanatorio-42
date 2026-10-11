@@ -13,6 +13,8 @@ export type ProfileRow = {
   campusId: number | null
   lang: string | null
   title: string | null
+  /** Se ofrece a preevaluar proyectos terminados. */
+  preReview: boolean
 }
 
 export function createProfilesRepository(db: Db) {
@@ -20,7 +22,7 @@ export function createProfilesRepository(db: Db) {
     /** Preferencias de una persona, o `undefined` si nunca ha entrado. */
     async get(login: string): Promise<ProfileRow | undefined> {
       const result = await db.execute({
-        sql: 'SELECT login, campus_id, lang, title FROM profiles WHERE login = ?',
+        sql: 'SELECT login, campus_id, lang, title, pre_review FROM profiles WHERE login = ?',
         args: [login],
       })
       const row = result.rows[0]
@@ -34,6 +36,7 @@ export function createProfilesRepository(db: Db) {
         campusId: row.campus_id === null ? null : toNumber(row.campus_id),
         lang: typeof row.lang === 'string' ? row.lang : null,
         title: typeof row.title === 'string' ? row.title : null,
+        preReview: toNumber(row.pre_review) === 1,
       }
     },
 
@@ -55,25 +58,31 @@ export function createProfilesRepository(db: Db) {
         campusId?: number | undefined
         lang?: string | undefined
         title?: string | undefined
+        preReview?: boolean | undefined
       },
     ): Promise<void> {
       const now = nowIso()
+      // `null` deja la columna como estaba.
+      const flag = changes.preReview === undefined ? null : Number(changes.preReview)
 
       await db.execute({
-        sql: `INSERT INTO profiles (login, campus_id, lang, title, created_at, seen_at)
-              VALUES (?, ?, ?, ?, ?, ?)
+        sql: `INSERT INTO profiles (login, campus_id, lang, title, pre_review, created_at, seen_at)
+              VALUES (?, ?, ?, ?, COALESCE(?, 0), ?, ?)
               ON CONFLICT (login) DO UPDATE SET
                 campus_id = COALESCE(excluded.campus_id, campus_id),
                 lang      = COALESCE(excluded.lang, lang),
                 title     = COALESCE(excluded.title, title),
+                pre_review = COALESCE(?, pre_review),
                 seen_at   = excluded.seen_at`,
         args: [
           login,
           changes.campusId ?? null,
           changes.lang ?? null,
           changes.title ?? null,
+          flag,
           now,
           now,
+          flag,
         ],
       })
     },

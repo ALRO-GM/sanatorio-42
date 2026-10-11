@@ -35,6 +35,8 @@ export type PeerRow = {
   status: ProjectStatus
   /** `true` si lo aprobó con la nota máxima. */
   perfect: boolean
+  /** `true` si lo aprobó y se ofrece a preevaluar proyectos terminados. */
+  preReview: boolean
 }
 
 /** Filas por `batch`. Muy por debajo del límite de sentencias de libSQL. */
@@ -424,12 +426,14 @@ export function createReplicaRepository(db: Db) {
                      pr.host                    AS location,
                      COALESCE(a.available, 0)   AS available,
                      pu.status                  AS status,
-                     pu.final_mark              AS mark
+                     pu.final_mark              AS mark,
+                     COALESCE(pf.pre_review, 0) AS pre_review
               FROM project_users pu
               JOIN users u            ON u.id = pu.user_id
               JOIN campus_members cm  ON cm.user_id = u.id AND cm.campus_id = ?
               LEFT JOIN presence pr   ON pr.user_id = u.id AND pr.seen_at >= ?
               LEFT JOIN availability a ON a.login = u.login
+              LEFT JOIN profiles pf    ON pf.login = u.login
               WHERE pu.project_id = ?
                 AND u.login <> ?
                 AND (
@@ -473,6 +477,8 @@ export function createReplicaRepository(db: Db) {
               ? PROJECT_STATUS.FINISHED
               : PROJECT_STATUS.IN_PROGRESS,
           perfect: row.status === PROJECT_STATUS.FINISHED && toNumber(row.mark) >= PERFECT_MARK,
+          // Preevaluar solo tiene sentido en lo que ya se aprobó.
+          preReview: row.status === PROJECT_STATUS.FINISHED && Number(row.pre_review) === 1,
         })
       }
 
@@ -602,6 +608,30 @@ export function createReplicaRepository(db: Db) {
         mark: toNumber(row.final_mark),
         people: toNumber(row.people),
       }))
+    },
+
+    /**
+     * Año en que empezó el 42cursus y plan de estudios de cada persona de la que
+     * se sabe. Para agrupar a la gente en las estadísticas de uso.
+     */
+    async cohorts(): Promise<Map<string, { year: number | null; track: string | null }>> {
+      const result = await db.execute(
+        `SELECT login, MAX(begin_at) AS begin_at, MAX(track) AS track FROM (
+           SELECT login, begin_at, NULL AS track FROM user_levels
+           UNION ALL
+           SELECT login, NULL AS begin_at, track FROM user_tracks
+         ) GROUP BY login`,
+      )
+
+      return new Map(
+        result.rows.map((row) => [
+          toText(row.login),
+          {
+            year: typeof row.begin_at === 'string' ? Number(row.begin_at.slice(0, 4)) : null,
+            track: typeof row.track === 'string' ? row.track : null,
+          },
+        ]),
+      )
     },
 
     /** Logins de toda la gente de un campus, con su avatar. */

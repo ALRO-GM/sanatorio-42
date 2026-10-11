@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { ChangeEvent, SyntheticEvent } from 'react'
 
-import type { GroupView, ProjectSummary } from '@sanatorio/contracts'
+import type { GroupKind, GroupView, ProjectSummary } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
 import { useAction } from '../../shared/hooks/useAsync'
@@ -32,16 +32,33 @@ type GroupFormState = {
   autoPlace: boolean
   start: string
   end: string
-  capacity: string
   note: string
+  /** `review`: grupo de repaso, para quien ya lo tiene terminado. */
+  kind: GroupKind
+  /** Cómo lleva el proyecto quien abre el grupo (0-100). */
+  progress: number
 }
 
 /** Campos que son texto tal cual sale del `<input>`. */
-type TextField = Exclude<keyof GroupFormState, 'dates' | 'seats' | 'autoPlace'>
+type TextField = Exclude<
+  keyof GroupFormState,
+  'dates' | 'seats' | 'autoPlace' | 'kind' | 'progress'
+>
 
-/** Plazas mínimas y máximas de un grupo. Las mismas que valida la API. */
-const MIN_CAPACITY = 2
-const MAX_CAPACITY = 12
+/** Puestos que puede reservar un grupo, y filas que puede haber entre el primero y el último. Lo mismo que valida la API. */
+const MAX_SEATS = 6
+const MAX_ROW_SPAN = 2
+
+/** `true` si ese puesto puede añadirse: mismo cluster y sin alejarse más de dos filas del resto. */
+function fits(seats: readonly string[], host: string): boolean {
+  const places = [...seats, host].map(parseSeat).filter((place) => place !== null)
+  const rows = places.map((place) => place.row)
+
+  return (
+    new Set(places.map((place) => place.cluster)).size <= 1 &&
+    (rows.length === 0 || Math.max(...rows) - Math.min(...rows) <= MAX_ROW_SPAN)
+  )
+}
 
 /** Días que puede tener un grupo. El mismo tope que la API. */
 const MAX_DATES = 14
@@ -64,8 +81,9 @@ export function GroupForm({ projects, defaultProject, group, onCancel, onSaved }
           autoPlace: true,
           start: '16:00',
           end: '18:00',
-          capacity: '5',
           note: '',
+          kind: 'study',
+          progress: 50,
         }
       : {
           projectId: String(group.projectId),
@@ -76,8 +94,9 @@ export function GroupForm({ projects, defaultProject, group, onCancel, onSaved }
           autoPlace: false,
           start: group.start,
           end: group.end,
-          capacity: String(group.capacity),
           note: group.note ?? '',
+          kind: group.kind,
+          progress: 100,
         },
   )
   // El día que se está eligiendo para añadir.
@@ -110,8 +129,6 @@ export function GroupForm({ projects, defaultProject, group, onCancel, onSaved }
         ...current,
         seats,
         place: current.autoPlace ? describePlace(seats) : current.place,
-        capacity:
-          seats.length === 0 ? current.capacity : String(Math.max(MIN_CAPACITY, seats.length)),
       }
     })
   }
@@ -123,7 +140,8 @@ export function GroupForm({ projects, defaultProject, group, onCancel, onSaved }
         return seats.filter((other) => other !== host)
       }
 
-      return seats.length < MAX_CAPACITY ? [...seats, host] : [...seats]
+      // Lleno, o demasiado lejos del resto: no se añade.
+      return seats.length < MAX_SEATS && fits(seats, host) ? [...seats, host] : [...seats]
     })
   }
 
@@ -175,9 +193,10 @@ export function GroupForm({ projects, defaultProject, group, onCancel, onSaved }
       dates: form.dates,
       start: form.start,
       end: form.end,
-      capacity: Number(form.capacity),
       note: form.note,
       seats: form.seats,
+      kind: form.kind,
+      progress: form.kind === 'review' ? 100 : form.progress,
     }
     const ok = await run(() =>
       group === undefined ? api.createGroup(input) : api.updateGroup(group.id, input),
@@ -189,6 +208,42 @@ export function GroupForm({ projects, defaultProject, group, onCancel, onSaved }
     <form className="card form" onSubmit={(event) => void submit(event)}>
       <h3>{t(group === undefined ? 'therapy.new' : 'therapy.editTitle')}</h3>
       {group === undefined && <p className="hint">{t('therapy.newHint')}</p>}
+      {group === undefined && (
+        <fieldset className="kind-field">
+          <legend>{t('therapy.kind')}</legend>
+          <div className="filter-pills">
+            {(['study', 'review'] as const).map((kind) => (
+              <button
+                key={kind}
+                type="button"
+                className={`pill ${form.kind === kind ? 'active' : ''}`}
+                aria-pressed={form.kind === kind}
+                onClick={() => {
+                  setForm((current) => ({ ...current, kind }))
+                }}
+              >
+                {t(`therapy.kind.${kind}`)}
+              </button>
+            ))}
+          </div>
+          <p className="hint">{t(`therapy.kind.${form.kind}.hint`)}</p>
+          {form.kind === 'study' && (
+            <label>
+              {t('therapy.progressAsk', { n: form.progress })}
+              <input
+                type="range"
+                min={0}
+                max={100}
+                step={5}
+                value={form.progress}
+                onChange={(event) => {
+                  setForm((current) => ({ ...current, progress: Number(event.target.value) }))
+                }}
+              />
+            </label>
+          )}
+        </fieldset>
+      )}
       <fieldset className="seat-field">
         <legend>{t('therapy.pickSeats')}</legend>
         <p className="hint">{t('therapy.pickSeatsHint')}</p>
@@ -213,7 +268,7 @@ export function GroupForm({ projects, defaultProject, group, onCancel, onSaved }
                   .map((host) => host.trim().toLowerCase())
                   .filter((host) => host !== '')
 
-                updateSeats(() => [...new Set(typed)].slice(0, MAX_CAPACITY))
+                updateSeats(() => [...new Set(typed)].slice(0, MAX_SEATS))
                 setSeatsText(null)
               }
             }}
@@ -270,17 +325,6 @@ export function GroupForm({ projects, defaultProject, group, onCancel, onSaved }
           <input type="time" value={form.end} onChange={set('end')} required />
         </label>
         <label>
-          {t('therapy.capacity')}
-          <input
-            type="number"
-            min={Math.max(MIN_CAPACITY, form.seats.length)}
-            max={MAX_CAPACITY}
-            value={form.capacity}
-            onChange={set('capacity')}
-            required
-          />
-        </label>
-        <label>
           {t('therapy.note')}
           <input
             value={form.note}
@@ -335,7 +379,11 @@ export function GroupForm({ projects, defaultProject, group, onCancel, onSaved }
       </fieldset>
       <ErrorNote error={error} />
       <div className="actions">
-        <button type="submit" className="primary small" disabled={busy || form.dates.length === 0}>
+        <button
+          type="submit"
+          className="primary small"
+          disabled={busy || form.dates.length === 0 || form.seats.length === 1}
+        >
           {t(group === undefined ? 'therapy.create' : 'therapy.saveEdit')}
         </button>
         <button type="button" className="pill" onClick={onCancel}>

@@ -10,7 +10,7 @@ import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import type {
   Calendar,
@@ -33,6 +33,9 @@ async function app(...args: Parameters<typeof makeApp>): Promise<TestApp> {
 }
 
 afterEach(async () => {
+  // Por si algún test fijó el reloj.
+  vi.useRealTimers()
+
   for (const built of apps.splice(0)) {
     await built.close()
   }
@@ -92,6 +95,7 @@ describe('réplica vista desde fuera', () => {
         available: false,
         status: 'in_progress',
         perfect: false,
+        preReview: false,
       },
     ])
     // En el proyecto hay tres personas de Madrid, aunque solo una sea accionable.
@@ -177,6 +181,15 @@ describe('réplica vista desde fuera', () => {
       '/help/offers',
       '/leaderboard',
       '/me/health',
+      '/users/eva/profile',
+      '/usage',
+      '/tickets/mine',
+      '/admin/consumption',
+      '/admin/people',
+      '/admin/tickets',
+      '/admin/messages',
+      '/events/thread?id=board:1',
+      '/events/attendance?id=board:1',
       '/network',
       '/network/mine',
       '/network/strictest',
@@ -203,6 +216,11 @@ describe('comunidad por HTTP', () => {
   })
 
   it('la guardia de hoy: abrir franjas, verlas y no poder reservarse a uno mismo', async () => {
+    // A primera hora: las franjas del test (de 10 a 12) aún no han empezado. Sin
+    // fijar el reloj, el test fallaría según la hora a la que se lanzara.
+    vi.useFakeTimers({ toFake: ['Date'] })
+    vi.setSystemTime(new Date('2026-10-06T06:00:00.000Z'))
+
     const built = await app()
     const http = client(built, await built.login())
 
@@ -518,22 +536,31 @@ describe('mapa de clusters', () => {
     ).toBe(false)
   })
 
-  it('no deja reservar más puestos que plazas', async () => {
+  it('las plazas de un grupo salen de sus puestos, que tienen que estar juntos', async () => {
     const built = await app()
     const http = client(built, await built.login())
-
-    const response = await http.post('/groups', {
+    const group = {
       projectId: 10,
       place: 'Cluster 1',
       dates: [dayIn(1)],
       start: '16:00',
       end: '18:00',
+    }
+
+    const created = await http.post('/groups', {
+      ...group,
       capacity: 2,
       seats: ['c1r1s1', 'c1r1s2', 'c1r1s3'],
     })
 
-    expect(response.statusCode).toBe(400)
-    expect((json(response) as { message: string }).message).toContain('seats')
+    expect(created.statusCode).toBe(201)
+    expect(json(created)).toMatchObject({ capacity: 3 })
+
+    // Puestos a cuatro filas de distancia: no son un grupo.
+    const apart = await http.post('/groups', { ...group, seats: ['c1r1s1', 'c1r5s1'] })
+
+    expect(apart.statusCode).toBe(400)
+    expect((json(apart) as { message: string }).message).toContain('seats')
   })
 
   it('un proyecto que no existe es un 404', async () => {

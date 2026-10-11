@@ -14,6 +14,8 @@ import { createEventBus } from '../core/events.js'
 import type { EventBus } from '../core/events.js'
 import type { AppModule } from '../core/module.js'
 import type { FortyTwoClient } from '../integrations/forty-two/client.js'
+import { createAdminModule } from '../modules/admin/index.js'
+import type { AdminModule } from '../modules/admin/index.js'
 import { createBoardsModule } from '../modules/boards/index.js'
 import type { BoardsModule } from '../modules/boards/index.js'
 import { createCalendarModule } from '../modules/calendar/index.js'
@@ -24,6 +26,8 @@ import { createHelpModule } from '../modules/help/index.js'
 import type { HelpModule } from '../modules/help/index.js'
 import { createMapModule } from '../modules/map/index.js'
 import type { MapModule } from '../modules/map/index.js'
+import { createMeetModule } from '../modules/meet/index.js'
+import type { MeetModule } from '../modules/meet/index.js'
 import { createNetworkModule } from '../modules/network/index.js'
 import type { NetworkModule } from '../modules/network/index.js'
 import { createPeersModule } from '../modules/peers/index.js'
@@ -32,6 +36,8 @@ import { createProfileModule } from '../modules/profile/index.js'
 import type { ProfileModule } from '../modules/profile/index.js'
 import { createReplicaModule } from '../modules/replica/index.js'
 import type { ReplicaModule, SyncerConfig } from '../modules/replica/index.js'
+import { createUsageModule } from '../modules/usage/index.js'
+import type { UsageModule } from '../modules/usage/index.js'
 import { createTherapyModule } from '../modules/therapy/index.js'
 import type { TherapyModule } from '../modules/therapy/index.js'
 
@@ -41,9 +47,20 @@ export type CompositionConfig = {
   backgroundSync?: boolean
   /** Rastro de la sincronización y de los fallos de la 42. */
   log?: (message: string) => void
+  /** Logins que administran por configuración (`ADMIN_LOGINS`). */
+  admins?: readonly string[]
+  /** Peticiones por hora que la web se permite servir en total. */
+  hourlyRequestBudget?: number
   /** Reloj inyectable, para los tests. */
   now?: () => number
 }
+
+/**
+ * Peticiones por hora que la web sirve en total si no se dice otra cosa. Es lo
+ * que una máquina pequeña atiende con holgura; el tope de cada persona sale de
+ * repartirlo entre quienes están conectados.
+ */
+const DEFAULT_HOURLY_BUDGET = 30_000
 
 /** Los servicios de todos los módulos, a mano para los tests y los comandos. */
 export type Services = {
@@ -65,6 +82,9 @@ export type Services = {
   calendar: CalendarModule['service']
   network: NetworkModule['service']
   corrections: NetworkModule['sync']
+  usage: UsageModule['service']
+  meet: MeetModule['service']
+  admin: AdminModule['service']
 }
 
 export type Composition = {
@@ -131,9 +151,43 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     ...clock,
   })
 
+  const meet = createMeetModule({
+    db,
+    calendar: calendar.service,
+    boards: boards.service,
+    help: help.service,
+    therapy: therapy.service,
+    replica: replica.repository,
+    ...clock,
+  })
+  const admin = createAdminModule({
+    db,
+    fixedAdmins: config.admins ?? [],
+    hourlyBudget: config.hourlyRequestBudget ?? DEFAULT_HOURLY_BUDGET,
+    fortyTwoRemaining: () => client.hourlyRemaining(),
+    ...clock,
+  })
+  const usage = createUsageModule({ db, replica: replica.repository, ...clock })
+
   return {
     events,
-    modules: [replica, peers, profile, therapy, doubts, boards, map, help, calendar, network],
+    // `admin` va el primero: sus ganchos de consumo solo ven las rutas que se
+    // registran después.
+    modules: [
+      admin,
+      replica,
+      peers,
+      profile,
+      therapy,
+      doubts,
+      boards,
+      map,
+      help,
+      calendar,
+      network,
+      usage,
+      meet,
+    ],
     services: {
       repositories: {
         availability: peers.availabilityRepository,
@@ -153,6 +207,9 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
       calendar: calendar.service,
       network: network.service,
       corrections: network.sync,
+      usage: usage.service,
+      meet: meet.service,
+      admin: admin.service,
     },
   }
 }

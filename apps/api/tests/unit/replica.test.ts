@@ -129,6 +129,7 @@ describe('réplica', () => {
           available: false,
           status: 'in_progress',
           perfect: false,
+          preReview: false,
         },
       ])
     })

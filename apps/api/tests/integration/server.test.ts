@@ -273,6 +273,7 @@ describe('compañeros', () => {
         'location',
         'login',
         'perfect',
+        'preReview',
         'status',
       ])
       expect(typeof peer.available).toBe('boolean')

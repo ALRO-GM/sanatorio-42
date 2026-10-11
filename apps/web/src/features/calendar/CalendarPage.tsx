@@ -15,6 +15,8 @@ import type { View } from './kinds'
 type CalendarPageProps = {
   /** Ir a otra sección de la web, desde la ficha de un evento propio. */
   onGo: (section: CalendarSection) => void
+  /** Login de quien mira, para el chat de los eventos. */
+  me: string
 }
 
 /** Eventos que caben en cada casilla del mes antes de resumir el resto en "+N". */
@@ -25,7 +27,7 @@ const MONTH_CELL_EVENTS = 3
  * (correcciones, eventos, exámenes), por día, semana o mes. Cada tipo tiene su
  * color y su icono, y se puede ocultar.
  */
-export function CalendarPage({ onGo }: CalendarPageProps) {
+export function CalendarPage({ onGo, me }: CalendarPageProps) {
   const { t, lang } = useI18n()
   const [view, setView] = useState<View>(loadView)
   const [cursor, setCursor] = useState(() => startOfDay(new Date()))
@@ -249,6 +251,7 @@ export function CalendarPage({ onGo }: CalendarPageProps) {
         <EventDialog
           key={open.id}
           event={open}
+          me={me}
           onClose={() => {
             setOpen(null)
           }}

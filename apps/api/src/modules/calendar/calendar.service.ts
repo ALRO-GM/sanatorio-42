@@ -68,15 +68,19 @@ export function createCalendarService(options: CalendarServiceOptions) {
       iso(zonedInstant(date, minutesOf(time), timeZone))
 
     return [
-      ...day.windows.map((window): CalendarEvent => ({
-        ...BASE,
-        id: `help:window:${day.day}:${window.start}`,
-        kind: 'help',
-        title: 'Te ofreces a ayudar',
-        start: at(day.day, window.start),
-        end: at(day.day, window.end),
-        section: 'guardia',
-      })),
+      // Una franja que ya ha terminado no pinta nada en el calendario, y de la
+      // que está en curso solo queda lo que falta.
+      ...day.windows
+        .filter((window) => window.end > day.now)
+        .map((window): CalendarEvent => ({
+          ...BASE,
+          id: `help:window:${day.day}:${window.start}`,
+          kind: 'help',
+          title: 'Te ofreces a ayudar',
+          start: at(day.day, window.start > day.now ? window.start : day.now),
+          end: at(day.day, window.end),
+          section: 'guardia',
+        })),
       ...day.bookings
         .filter((booking) => booking.status === 'pending' || booking.status === 'confirmed')
         .map((booking): CalendarEvent => ({

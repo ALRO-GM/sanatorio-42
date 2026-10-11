@@ -45,6 +45,8 @@ export function PeerList({ project, onOpenTherapy }: PeerListProps) {
   const groups = useAsync(() => api.getGroups(project.id), [project.id])
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('all')
   const [onlyOnDuty, setOnlyOnDuty] = useState(false)
+  // Solo especialistas que se ofrecen a preevaluar un proyecto ya terminado.
+  const [onlyPreReview, setOnlyPreReview] = useState(false)
   // Quién se ofrece hoy con hueco: a esas personas se les puede reservar un rato.
   const offers = useAsync(() => api.getHelpOffers(), [])
   const [booking, setBooking] = useState<string | null>(null)
@@ -93,7 +95,9 @@ export function PeerList({ project, onOpenTherapy }: PeerListProps) {
   const byDuty = onlyOnDuty ? sorted.filter(onDuty) : sorted
   const specialistsCount = byDuty.filter((p) => p.status === 'finished').length
   const inProgressCount = byDuty.filter((p) => p.status === 'in_progress').length
-  const filtered = typeFilter === 'all' ? byDuty : byDuty.filter((p) => p.status === typeFilter)
+  const byType = typeFilter === 'all' ? byDuty : byDuty.filter((p) => p.status === typeFilter)
+  const filtered = onlyPreReview ? byType.filter((p) => p.preReview) : byType
+  const preReviewers = peers.filter((p) => p.preReview).length
 
   const inProgressOnDuty = peers.filter((p) => onDuty(p) && p.status === 'in_progress')
   const openGroups = groups.data?.length ?? 0
@@ -165,6 +169,18 @@ export function PeerList({ project, onOpenTherapy }: PeerListProps) {
           />
           {t('peers.onlyOnDuty')}
         </label>
+        {preReviewers > 0 && (
+          <label className="duty-check" title={t('peers.preReview.hint')}>
+            <input
+              type="checkbox"
+              checked={onlyPreReview}
+              onChange={(event) => {
+                setOnlyPreReview(event.target.checked)
+              }}
+            />
+            {t('peers.preReview.only', { n: preReviewers })}
+          </label>
+        )}
       </div>
       {filtered.length === 0 && peers.length > 0 && <p>{t('peers.noneFilter')}</p>}
       {(openGroups > 0 || inProgressOnDuty.length >= 2) && (
@@ -192,7 +208,9 @@ export function PeerList({ project, onOpenTherapy }: PeerListProps) {
             <li key={peer.login} className="peer-card">
               <Avatar login={peer.login} image={peer.image} />
               <div>
-                <strong>{peer.login}</strong>
+                <a className="record-link" href={`#/expediente/${peer.login}`}>
+                  <strong>{peer.login}</strong>
+                </a>
                 <p>
                   {peer.location !== null
                     ? t('peers.attendsAt', { location: peer.location })
@@ -206,6 +224,11 @@ export function PeerList({ project, onOpenTherapy }: PeerListProps) {
                   <span className="badge specialist">{t('peers.specialist')}</span>
                 ) : (
                   <span className="badge subtle">{t('peers.patient')}</span>
+                )}
+                {peer.preReview && (
+                  <span className="badge on plain" title={t('peers.preReview.hint')}>
+                    {t('peers.preReview')}
+                  </span>
                 )}
                 {crossed !== undefined ? (
                   <small className="peer-crossed">

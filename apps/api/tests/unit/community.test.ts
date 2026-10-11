@@ -461,6 +461,192 @@ describe('comunidad', () => {
       expect((await xp.leaderboard(actor('ana'), 'all')).me).toBeNull()
     })
 
+    it('el uso de la comunidad suma a todos, sin que una persona lo decida sola', async () => {
+      const { usage } = services
+
+      await usage.record(actor('ana'), { counts: { 'nav.tablon': 3, 'expediente.health': 1 } })
+      await usage.record(actor('ana'), { counts: { 'nav.tablon': 2 } })
+      // `leo` pulsa sin parar: de él cuentan como mucho 50.
+      await usage.record(actor('leo'), { counts: { 'nav.red': 200 } })
+      await usage.record(actor('leo'), { counts: { 'nav.tablon': 1 } })
+
+      expect(await usage.community()).toEqual({
+        counts: { 'nav.tablon': 6, 'expediente.health': 1, 'nav.red': 50 },
+      })
+      await expectCode(usage.record(actor('ana'), { counts: { 'DROP TABLE': 1 } }), 'invalid_input')
+      await expectCode(usage.record(actor('ana'), { counts: { 'nav.red': 9999 } }), 'invalid_input')
+    })
+
+    it('administración: permisos, bloqueos y buzón con respuesta', async () => {
+      const { admin } = services
+      const boss = actor('eva', { admin: true })
+
+      // Nada de esto es para quien no administra.
+      await expectCode(admin.people(actor('ana')), 'forbidden')
+      await expectCode(admin.tickets(actor('ana')), 'forbidden')
+      await expectCode(admin.setRole(actor('ana'), { login: 'ana', admin: true }), 'forbidden')
+
+      // Dar permiso y bloquear se nota al momento en lo que ve la sesión.
+      await admin.setRole(boss, { login: 'Leo', admin: true })
+      await admin.block(boss, { login: 'ana', reason: 'Spam en los chats', days: 7 })
+      expect(await admin.accessOf('leo')).toEqual({ admin: true, block: null })
+      expect(await admin.accessOf('ana')).toMatchObject({
+        admin: false,
+        block: { reason: 'Spam en los chats' },
+      })
+      expect(await admin.people(boss)).toMatchObject({
+        admins: [{ login: 'leo', fixed: false, grantedBy: 'eva' }],
+        blocks: [{ login: 'ana', blockedBy: 'eva' }],
+      })
+      // No se puede bloquear uno a sí mismo.
+      await expectCode(admin.block(boss, { login: 'eva', reason: 'porque sí' }), 'conflict')
+
+      // El bloqueo caduca solo.
+      clock.advance(8 * 24 * 60 * MINUTE)
+      expect((await admin.accessOf('ana')).block).toBeNull()
+      await admin.unblock(boss, 'ana')
+
+      // Buzón: una sugerencia y una denuncia; la denuncia tiene que decir de qué.
+      const idea = await admin.openTicket(actor('ana'), {
+        kind: 'idea',
+        subject: 'Modo compacto',
+        body: 'Estaría bien poder ver más cosas a la vez.',
+      })
+
+      await expectCode(
+        admin.openTicket(actor('ana'), {
+          kind: 'report',
+          subject: 'Insultos',
+          body: 'En el chat.',
+        }),
+        'invalid_input',
+      )
+      await admin.openTicket(actor('ana'), {
+        kind: 'report',
+        subject: 'Insultos',
+        body: 'Mensaje fuera de lugar en el chat.',
+        target: 'message:12',
+      })
+      expect(await admin.tickets(boss)).toHaveLength(2)
+
+      const answered = await admin.answerTicket(boss, idea.id, {
+        answer: 'Apuntado para la próxima.',
+      })
+
+      expect(answered).toMatchObject({ status: 'answered', answeredBy: 'eva' })
+      // Quien lo mandó ve la respuesta; lo pendiente va primero en el buzón.
+      expect(
+        (await admin.myTickets(actor('ana'))).find((ticket) => ticket.id === idea.id),
+      ).toMatchObject({
+        answer: 'Apuntado para la próxima.',
+      })
+      expect((await admin.tickets(boss))[0]).toMatchObject({ kind: 'report', status: 'open' })
+      await expectCode(admin.answerTicket(boss, 9999, { answer: 'x' }), 'not_found')
+    })
+
+    it('el consumo se cuenta por persona y el tope se reparte entre quienes están', async () => {
+      const { admin } = services
+      const boss = actor('eva', { admin: true })
+
+      // Con el presupuesto de fábrica y poca gente, el tope es el máximo (3000).
+      for (let request = 0; request < 3000; request += 1) {
+        expect(await admin.allow('ana', false)).toBe(true)
+      }
+      expect(await admin.allow('ana', false)).toBe(false)
+      // Quien administra no se queda fuera, y un tope a mano manda sobre el automático.
+      expect(await admin.allow('eva', true)).toBe(true)
+      await admin.setLimit(boss, { login: 'leo', perHour: 10 })
+      for (let request = 0; request < 10; request += 1) await admin.allow('leo', false)
+      expect(await admin.allow('leo', false)).toBe(false)
+
+      admin.count('ana', 1500)
+      admin.count('ana', 500)
+      admin.count('leo', 100)
+
+      const report = await admin.consumption(boss)
+
+      expect(report.limit).toMatchObject({ budget: 30_000, activePeople: 3, perPerson: 3000 })
+      expect(report.top[0]).toMatchObject({ login: 'ana', requests: 2, bytes: 2000, limited: 1 })
+      expect(report.top.find((entry) => entry.login === 'leo')).toMatchObject({
+        limited: 1,
+        manualLimit: 10,
+      })
+      expect(report.recent).toMatchObject([{ requests: 3, bytes: 2100, people: 2 }])
+      expect(report.pattern).toMatchObject([{ weekday: 2, hour: 14, requests: 3 }])
+      // Tres peticiones no llegan ni de lejos al 80 % del presupuesto.
+      expect(report.warnings).toEqual([])
+
+      // A la hora siguiente el contador empieza de cero.
+      clock.advance(61 * MINUTE)
+      expect(await admin.allow('ana', false)).toBe(true)
+      await expectCode(admin.consumption(actor('ana')), 'forbidden')
+    })
+
+    it('el mapa de calor del uso es solo para admins y agrupa a la gente', async () => {
+      const { usage } = services
+
+      await usage.record(actor('ana'), { counts: { 'nav.tablon': 3 } })
+      await usage.record(actor('leo'), { counts: { 'nav.tablon': 40, 'nav.red': 5 } })
+
+      await expectCode(usage.heatmap(actor('ana'), {}), 'forbidden')
+
+      const admin = actor('eva', { admin: true })
+
+      expect(await usage.heatmap(admin, {})).toEqual({
+        by: 'total',
+        groups: [{ id: 'all', people: 2 }],
+        rows: [
+          { key: 'nav.red', counts: [5] },
+          { key: 'nav.tablon', counts: [43] },
+        ],
+      })
+      // Por actividad: `ana` es ocasional y `leo` habitual.
+      expect(await usage.heatmap(admin, { by: 'activity' })).toMatchObject({
+        groups: [
+          { id: 'casual', people: 1 },
+          { id: 'regular', people: 1 },
+        ],
+        rows: [
+          { key: 'nav.red', counts: [0, 5] },
+          { key: 'nav.tablon', counts: [3, 40] },
+        ],
+      })
+      // De nadie se sabe aquí el plan ni el año: todos al mismo grupo.
+      expect((await usage.heatmap(admin, { by: 'cohort' })).groups).toEqual([
+        { id: 'unknown', people: 2 },
+      ])
+      await expectCode(usage.heatmap(admin, { by: 'altura' }), 'invalid_input')
+    })
+
+    it('el expediente de otra persona solo enseña su parte pública', async () => {
+      const { xp } = services
+
+      await xp.award('eva', 'specialist_help', 'help:1')
+
+      const record = await xp.publicProfile('EVA')
+
+      expect(record).toMatchObject({
+        login: 'eva',
+        image: expect.any(String),
+        xp: { total: 40, level: 1 },
+        title: 'paciente',
+      })
+      expect(record.achievements.find((entry) => entry.id === 'selfless_help')).toMatchObject({
+        progress: 1,
+      })
+      // Nada de preferencias ni del desglose de XP.
+      expect(Object.keys(record).sort()).toEqual([
+        'achievements',
+        'image',
+        'login',
+        'reactions',
+        'title',
+        'xp',
+      ])
+      await expectCode(xp.publicProfile('nadie'), 'not_found')
+      await expectCode(xp.publicProfile('../etc'), 'not_found')
+    })
+
     it('quien empata comparte puesto, y cada campus tiene el suyo', async () => {
       const { xp } = services
 
@@ -671,6 +857,104 @@ describe('comunidad', () => {
       expect(group.dates).toEqual(['2026-10-06', '2026-10-20'])
     })
 
+    it('los puestos van juntos, son como mucho seis y de ellos salen las plazas', async () => {
+      const { therapy } = services
+      const con = (seats: string[]) => therapy.create(actor('ana'), { ...martesYJueves, seats })
+
+      // Cuatro puestos en dos filas seguidas: cuatro plazas, se pida lo que se pida.
+      expect(
+        await therapy.create(actor('ana'), {
+          ...martesYJueves,
+          capacity: 12,
+          seats: ['c1r2s1', 'c1r2s2', 'c1r3s1', 'c1r4s1'],
+        }),
+      ).toMatchObject({ capacity: 4 })
+      // Tres filas de separación, dos clusters, un solo puesto o siete: no.
+      await expectCode(con(['c1r1s1', 'c1r4s1']), 'invalid_input')
+      await expectCode(con(['c1r1s1', 'c2r1s1']), 'invalid_input')
+      await expectCode(con(['c1r1s1']), 'invalid_input')
+      await expectCode(
+        con(['1', '2', '3', '4', '5', '6', '7'].map((n) => `c1r1s${n}`)),
+        'invalid_input',
+      )
+    })
+
+    it('al apuntarte dices cómo llevas el proyecto, y un grupo de repaso pide el 100 %', async () => {
+      const { therapy } = services
+
+      // Abrir uno de repaso sin tenerlo terminado no tiene sentido.
+      await expectCode(
+        therapy.create(actor('ana'), { ...martesYJueves, kind: 'review', progress: 80 }),
+        'conflict',
+      )
+
+      const review = await therapy.create(actor('ana'), {
+        ...martesYJueves,
+        kind: 'review',
+        progress: 100,
+      })
+
+      expect(review).toMatchObject({
+        kind: 'review',
+        members: [{ login: 'ana', progress: 100 }],
+      })
+      await expectCode(therapy.join(actor('leo'), review.id, { progress: 90 }), 'conflict')
+      await expectCode(therapy.join(actor('leo'), review.id), 'conflict')
+      await therapy.join(actor('leo'), review.id, { progress: 100 })
+
+      // En uno normal vale cualquier porcentaje, o no decirlo.
+      const study = await therapy.create(actor('eva'), { ...martesYJueves, capacity: 4 })
+
+      await therapy.join(actor('leo'), study.id, { progress: 35 })
+      await therapy.join(actor('ana'), study.id)
+      expect(
+        (await therapy.list(actor('eva'))).find((group) => group.id === study.id),
+      ).toMatchObject({
+        kind: 'study',
+        members: expect.arrayContaining([
+          expect.objectContaining({ login: 'eva', progress: null }),
+          expect.objectContaining({ login: 'leo', progress: 35 }),
+          expect.objectContaining({ login: 'ana', progress: null }),
+        ]),
+      })
+      await expectCode(therapy.join(actor('sol'), study.id, { progress: 150 }), 'invalid_input')
+    })
+
+    it('cada grupo tiene su chat, solo para quien está dentro', async () => {
+      const { therapy, meet } = services
+      const group = await therapy.create(actor('ana'), martesYJueves)
+      const id = `group:${group.id}`
+
+      await therapy.join(actor('leo'), group.id, { progress: 40 })
+      await meet.send(actor('leo'), null, { id, kind: 'text', body: '¿Hay que llevar algo?' })
+
+      expect((await meet.thread(actor('ana'), null, id)).messages).toMatchObject([
+        { login: 'leo', body: '¿Hay que llevar algo?' },
+      ])
+      await expectCode(meet.thread(actor('eva'), null, id), 'forbidden')
+    })
+
+    it('un especialista puede ofrecerse a preevaluar; quien aún lo hace, no', async () => {
+      await services.xp.updateSettings(actor('eva'), { preReview: true })
+      // `ana` lo marca también, pero aún lo está haciendo: no cuenta.
+      await services.xp.updateSettings(actor('ana'), { preReview: true })
+
+      expect((await services.xp.expediente(actor('eva'))).preReview).toBe(true)
+
+      // En la sala de espera solo cuenta para quien ya aprobó el proyecto.
+      const peers = await services.repositories.replica.findPeers({
+        projectId: 10,
+        campusId: MADRID,
+        presenceSince: new Date(0).toISOString(),
+      })
+      const flags = Object.fromEntries(peers.map((peer) => [peer.login, peer.preReview]))
+
+      expect(flags.ana).toBe(false)
+      // Cambiar otra preferencia no borra la marca.
+      await services.xp.updateSettings(actor('eva'), { lang: 'en' })
+      expect((await services.xp.expediente(actor('eva'))).preReview).toBe(true)
+    })
+
     it('quien lo abrió puede cambiarlo; nadie más', async () => {
       const { therapy } = services
       const group = await therapy.create(actor('ana'), martesYJueves)
@@ -683,8 +967,7 @@ describe('comunidad', () => {
         place: 'Cluster 3',
         dates: ['2026-10-06', '2026-10-09'],
         end: '19:00',
-        capacity: 4,
-        seats: ['c3r1s1'],
+        seats: ['c3r1s1', 'c3r1s2', 'c3r2s1'],
       })
 
       expect(updated).toMatchObject({
@@ -692,8 +975,9 @@ describe('comunidad', () => {
         place: 'Cluster 3',
         dates: ['2026-10-06', '2026-10-09'],
         end: '19:00',
-        capacity: 4,
-        seats: ['c3r1s1'],
+        // Las plazas son los puestos elegidos.
+        capacity: 3,
+        seats: ['c3r1s1', 'c3r1s2', 'c3r2s1'],
       })
       // La gente apuntada sigue apuntada.
       expect(updated.members.map((member) => member.login)).toEqual(['ana', 'leo'])
@@ -1517,6 +1801,94 @@ describe('comunidad', () => {
       expect(await boards.list(actor('ana'))).toMatchObject([
         { id: board.id, host: 'eva', attendees: 1, joined: true, mine: false },
       ])
+    })
+
+    it('quien participa en un evento puede avisar y chatear; quien no, no', async () => {
+      const { boards, meet } = services
+      const board = await boards.create(actor('eva'), malloc())
+      const id = `board:${board.id}`
+
+      await boards.join(actor('ana'), board.id)
+
+      await meet.send(actor('ana'), null, { id, kind: 'seen' })
+      await meet.send(actor('ana'), null, {
+        id,
+        kind: 'late',
+        minutes: 10,
+        reason: 'evaluation',
+        body: 'Salgo de una corrección',
+      })
+      const thread = await meet.send(actor('eva'), null, { id, kind: 'text', body: 'Te espero' })
+
+      // Las dos ven lo mismo, en orden.
+      expect(thread.messages).toMatchObject([
+        { login: 'ana', kind: 'seen', minutes: null, reason: null },
+        { login: 'ana', kind: 'late', minutes: 10, reason: 'evaluation' },
+        { login: 'eva', kind: 'text', body: 'Te espero' },
+      ])
+      expect((await meet.thread(actor('ana'), null, id)).messages).toHaveLength(3)
+
+      // `leo` no se ha apuntado: ni lee ni escribe.
+      await expectCode(meet.thread(actor('leo'), null, id), 'forbidden')
+      await expectCode(meet.send(actor('leo'), null, { id, kind: 'seen' }), 'forbidden')
+      // Un retraso sin minutos o un mensaje vacío no valen.
+      await expectCode(meet.send(actor('ana'), null, { id, kind: 'late' }), 'invalid_input')
+      await expectCode(
+        meet.send(actor('ana'), null, { id, kind: 'text', body: ' ' }),
+        'invalid_input',
+      )
+    })
+
+    it('la asistencia se valida con dos códigos: uno al empezar y otro al terminar', async () => {
+      const { boards, meet } = services
+      const board = await boards.create(actor('eva'), malloc())
+      const id = `board:${board.id}`
+
+      await boards.join(actor('ana'), board.id)
+
+      // Quien la imparte ve los dos códigos, de cuatro caracteres y distintos.
+      const host = await meet.attendance(actor('eva'), id)
+      const codes = host.codes ?? { start: '', end: '' }
+
+      expect(host).toMatchObject({ role: 'host', mine: null, people: [] })
+      expect(codes.start).toMatch(/^[A-Z2-9]{4}$/)
+      expect(codes.end).toMatch(/^[A-Z2-9]{4}$/)
+      expect(codes.start).not.toBe(codes.end)
+      // Y son siempre los mismos para ese evento.
+      expect((await meet.attendance(actor('eva'), id)).codes).toEqual(codes)
+
+      // Quien asiste no los ve.
+      expect(await meet.attendance(actor('ana'), id)).toEqual({
+        role: 'guest',
+        codes: null,
+        mine: null,
+        people: [],
+      })
+
+      // No se puede terminar sin haber empezado, ni con un código inventado.
+      await expectCode(meet.checkin(actor('ana'), { id, code: codes.end }), 'conflict')
+      await expectCode(meet.checkin(actor('ana'), { id, code: 'ZZZZ' }), 'invalid_input')
+      // Ni validar quien la imparte, ni quien no está apuntado.
+      await expectCode(meet.checkin(actor('eva'), { id, code: codes.start }), 'conflict')
+      await expectCode(meet.checkin(actor('leo'), { id, code: codes.start }), 'forbidden')
+
+      const started = await meet.checkin(actor('ana'), { id, code: codes.start.toLowerCase() })
+
+      // Con solo el de inicio todavía no hay duración: no vale.
+      expect(started).toMatchObject({ phase: 'start', presence: { endedAt: null, minutes: null } })
+
+      clock.advance(50 * MINUTE)
+      // Volver a escribir el de inicio no mueve la hora a la que empezó.
+      await meet.checkin(actor('ana'), { id, code: codes.start })
+
+      const ended = await meet.checkin(actor('ana'), { id, code: codes.end })
+
+      expect(ended).toMatchObject({ phase: 'end', presence: { login: 'ana', minutes: 50 } })
+      expect((await meet.attendance(actor('eva'), id)).people).toMatchObject([
+        { login: 'ana', minutes: 50 },
+      ])
+      // Los códigos son solo para pizarras y sesiones de ayuda.
+      await expectCode(meet.attendance(actor('ana'), 'therapy:1:2026-10-06'), 'invalid_input')
     })
 
     it('no hay más plazas de las que hay', async () => {

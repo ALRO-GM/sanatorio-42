@@ -26,6 +26,8 @@ export type Expediente = {
   campusId: number
   lang: string | null
   admin: boolean
+  /** `true` si te ofreces a preevaluar proyectos terminados de los que ya aprobaste. */
+  preReview: boolean
   xp: {
     total: number
     level: number
@@ -46,6 +48,18 @@ export type Expediente = {
   earned: Record<XpKind, { xp: number; times: number }>
 }
 
+/**
+ * `GET /users/:login/profile`: el expediente de otra persona, tal como lo ve
+ * cualquiera. Solo lo que ya es público en la web (nivel, título, logros y
+ * reacciones): ni preferencias, ni desglose de XP, ni estado de salud.
+ */
+export type PublicProfile = Pick<
+  Expediente,
+  'login' | 'xp' | 'title' | 'achievements' | 'reactions'
+> & {
+  image: string | null
+}
+
 /** `GET /me/profile`. */
 export type Profile = Expediente & {
   /** Campus principal en 42, para poder volver a él desde el selector. */
@@ -57,6 +71,8 @@ export type SettingsInput = {
   campusId?: number
   lang?: Lang
   title?: string
+  /** Ofrecerte (o dejar de hacerlo) a preevaluar proyectos terminados. */
+  preReview?: boolean
 }
 
 /** De cuándo es el ranking. */

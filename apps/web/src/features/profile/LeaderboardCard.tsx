@@ -64,7 +64,9 @@ export function LeaderboardCard({ me }: { me: string }) {
               {MEDALS[entry.rank - 1] ?? entry.rank}
             </span>
             <Avatar login={entry.login} image={entry.image} size={28} />
-            <span>{entry.login}</span>
+            <a className="record-link" href={`#/expediente/${entry.login}`}>
+              {entry.login}
+            </a>
             <strong className="row-count">{t('rank.xp', { xp: entry.xp })}</strong>
           </li>
         ))}

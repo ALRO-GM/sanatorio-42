@@ -6,10 +6,14 @@ import { useI18n } from '../../shared/i18n'
 type AvailabilityToggleProps = {
   /** Se acaba de poner de guardia: buen momento para abrir sus franjas de hoy. */
   onTurnedOn?: () => void
+  /** Abre el panel de guardia: es lo que hace el propio texto "De guardia". */
+  onOpen: () => void
+  /** `true` si el panel de guardia es lo que se está viendo. */
+  active: boolean
 }
 
 /** El interruptor "de guardia" de la cabecera. */
-export function AvailabilityToggle({ onTurnedOn }: AvailabilityToggleProps) {
+export function AvailabilityToggle({ onTurnedOn, onOpen, active }: AvailabilityToggleProps) {
   const { t } = useI18n()
   // Arranca apagado y se hidrata después: quien no ha marcado nunca no está de
   // guardia, y es el mismo criterio que aplica la API.
@@ -59,12 +63,21 @@ export function AvailabilityToggle({ onTurnedOn }: AvailabilityToggleProps) {
 
   return (
     <span className="switch-wrap">
-      <label className="switch-row">
-        <span>{t('duty.label')}</span>
+      <span className="switch-row">
+        <button
+          type="button"
+          className={`duty-open ${active ? 'active' : ''}`}
+          aria-current={active ? 'page' : undefined}
+          title={t('duty.open')}
+          onClick={onOpen}
+        >
+          {t('duty.label')}
+        </button>
         <input
           type="checkbox"
           className="switch"
           checked={available}
+          aria-label={t('duty.switch')}
           onChange={() => void toggle()}
           disabled={saving}
         />
@@ -75,9 +88,9 @@ export function AvailabilityToggle({ onTurnedOn }: AvailabilityToggleProps) {
           aria-label={t('duty.hint')}
           data-tooltip={t('duty.hint')}
         >
-          ⓘ
+          i
         </span>
-      </label>
+      </span>
       {notice !== null && (
         <span className="estado error switch-aviso" role="status">
           {notice}

@@ -15,10 +15,12 @@ type TherapyGroupsProps = {
   projects: readonly ProjectSummary[]
   /** Proyecto con el que se abre el filtro, si se llega desde la consulta. */
   initialProject: number | null
+  /** Login de quien mira, para el chat de sus grupos. */
+  me: string
 }
 
 /** Terapias de grupo: grupos abiertos del campus y formulario para abrir uno. */
-export function TherapyGroups({ projects, initialProject }: TherapyGroupsProps) {
+export function TherapyGroups({ projects, initialProject, me }: TherapyGroupsProps) {
   const { t } = useI18n()
   const doing = projects.filter((project) => project.status !== 'finished')
   const [projectId, setProjectId] = useState<number | null>(initialProject)
@@ -58,7 +60,10 @@ export function TherapyGroups({ projects, initialProject }: TherapyGroupsProps) 
           }}
           onSaved={() => {
             setCreating(false)
-            void groups.reload()
+            // El grupo nuevo puede ser de otro proyecto que el del filtro: se quita
+            // el filtro para que se vea seguro. Si ya estaba quitado, se recarga.
+            if (projectId === null) void groups.reload()
+            else setProjectId(null)
           }}
         />
       )}
@@ -70,7 +75,12 @@ export function TherapyGroups({ projects, initialProject }: TherapyGroupsProps) 
       <ul className="stack">
         {(groups.data ?? []).map((group) => (
           <li key={group.id}>
-            <GroupCard group={group} projects={doing} onChange={() => void groups.reload()} />
+            <GroupCard
+              group={group}
+              projects={doing}
+              me={me}
+              onChange={() => void groups.reload()}
+            />
           </li>
         ))}
       </ul>

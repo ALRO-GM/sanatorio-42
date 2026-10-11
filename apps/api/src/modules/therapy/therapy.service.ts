@@ -32,6 +32,42 @@ const TIME = /^([01]\d|2[0-3]):[0-5]\d$/
 /** Días que puede tener un grupo. */
 const MAX_DATES = 14
 
+/** Puestos que puede reservar un grupo: es lo que cabe hablando sin molestar al resto. */
+const MAX_SEATS = 6
+
+/** Filas que puede haber, como mucho, entre el primer puesto y el último. */
+const MAX_ROW_SPAN = 2
+
+/** Cómo lleva alguien el proyecto, de 0 a 100. */
+const progress = z.number().int().min(0).max(100)
+
+const joinSchema = z.object({ progress: progress.optional() }).default({})
+
+/**
+ * `true` si los puestos están juntos: todos en el mismo cluster y sin más de
+ * `MAX_ROW_SPAN` filas entre el primero y el último. Un puesto cuyo nombre no
+ * se entiende (un campus que los llama de otra forma) no se puede comprobar y
+ * se da por bueno.
+ */
+function seatsTogether(seats: readonly string[]): boolean {
+  const places = seats.flatMap((seat) => {
+    const match = /^(.+?)r(\d{1,2})[sp]\d{1,2}$/.exec(seat)
+
+    return match === null ? [] : [{ cluster: match[1] ?? '', row: Number(match[2]) }]
+  })
+
+  if (places.length < 2) {
+    return true
+  }
+
+  const rows = places.map((place) => place.row)
+
+  return (
+    new Set(places.map((place) => place.cluster)).size === 1 &&
+    Math.max(...rows) - Math.min(...rows) <= MAX_ROW_SPAN
+  )
+}
+
 const groupSchema = z
   .object({
     projectId: id,
@@ -53,14 +89,25 @@ const groupSchema = z
           .toLowerCase()
           .regex(/^[a-z0-9-]{2,24}$/, 'no parece un puesto (ejemplo: c1r2s4)'),
       )
-      .max(12, 'máximo 12 puestos')
+      .max(MAX_SEATS, `máximo ${MAX_SEATS} puestos`)
       .default([])
       .transform((seats) => [...new Set(seats)]),
+    kind: z.enum(['study', 'review']).default('study'),
+    progress: progress.optional(),
   })
-  .refine((group) => group.seats.length <= group.capacity, {
-    message: 'no puedes reservar más puestos que plazas tiene el grupo',
+  .refine((group) => group.seats.length !== 1, {
+    message: 'un grupo son al menos dos puestos',
     path: ['seats'],
   })
+  .refine((group) => seatsTogether(group.seats), {
+    message: `los puestos tienen que estar en el mismo cluster y a ${MAX_ROW_SPAN} filas como mucho`,
+    path: ['seats'],
+  })
+  // Con puestos elegidos, las plazas son los puestos: no se piden aparte.
+  .transform((group) => ({
+    ...group,
+    capacity: group.seats.length > 0 ? group.seats.length : group.capacity,
+  }))
   .refine((group) => minutesOf(group.end) > minutesOf(group.start), {
     message: 'la hora de fin tiene que ser posterior a la de inicio',
     path: ['end'],
@@ -119,11 +166,15 @@ export function createTherapyService(options: TherapyServiceOptions) {
     const views: GroupView[] = []
 
     for (const group of groups) {
-      const { members, campusId: _campusId, closed: _closed, ...rest } = group
+      const { members, progress: given, campusId: _campusId, closed: _closed, ...rest } = group
 
       views.push({
         ...rest,
-        members: members.map((login) => ({ login, image: images.get(login) ?? null })),
+        members: members.map((login) => ({
+          login,
+          image: images.get(login) ?? null,
+          progress: given[login] ?? null,
+        })),
         joined: members.includes(actor.login),
         mine: group.creator === actor.login || actor.admin,
         inSession: (await inSession(group)).active,
@@ -194,6 +245,14 @@ export function createTherapyService(options: TherapyServiceOptions) {
         throw domainError('not_found', `El proyecto ${group.projectId} no existe en 42`)
       }
 
+      // Un grupo de repaso es de quien ya lo tiene terminado, empezando por quien lo abre.
+      if (group.kind === 'review' && group.progress !== 100) {
+        throw domainError(
+          'conflict',
+          'Un grupo de repaso es para quien ya tiene el proyecto terminado al 100 %',
+        )
+      }
+
       await mustBeUpcoming(group.dates, actor.campusId)
       await therapy.closeFinished(actor.campusId, await todayIn(actor.campusId))
 
@@ -203,6 +262,7 @@ export function createTherapyService(options: TherapyServiceOptions) {
 
       const groupId = await therapy.create({
         ...group,
+        progress: group.progress ?? null,
         campusId: actor.campusId,
         creator: actor.login,
       })
@@ -260,14 +320,24 @@ export function createTherapyService(options: TherapyServiceOptions) {
       return updated
     },
 
-    /** Se apunta. `409` si ya no quedan plazas. */
-    async join(actor: Actor, groupId: number): Promise<void> {
+    /**
+     * Se apunta, diciendo cómo lleva el proyecto. `409` si ya no quedan plazas o
+     * si el grupo es de repaso y no lo tiene terminado.
+     */
+    async join(actor: Actor, groupId: number, input?: unknown): Promise<void> {
       const group = await mustGet(groupId, actor)
+      const { progress: mine } = parse(joinSchema, input ?? {})
 
       if (group.members.includes(actor.login)) {
         return
       }
-      if (group.closed || !(await therapy.join(groupId, actor.login))) {
+      if (group.kind === 'review' && mine !== 100) {
+        throw domainError(
+          'conflict',
+          'Este grupo es de repaso: es para quien ya tiene el proyecto terminado al 100 %',
+        )
+      }
+      if (group.closed || !(await therapy.join(groupId, actor.login, mine ?? null))) {
         throw domainError('conflict', 'El grupo está completo')
       }
     },

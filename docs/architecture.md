@@ -178,6 +178,11 @@ shared/     api/ (cliente real y simulado), i18n/, hooks/, ui/
 - La navegación va en el hash de la URL (`#/tablon`); no hay router. Solo la
   portada viaja con la web: cada una de las demás secciones se descarga al
   abrirla (`lazy` en `Clinic.tsx`), y la API simulada, solo en `dev:mock`.
+- El orden de las pestañas y de los bloques de cada página, y cuáles salen
+  plegados, es personalizable (`shared/layout`): manual, o automático según lo
+  que más usa la persona o la comunidad. Para que un bloque entre en ese juego
+  se apunta en `registry.ts` y se pinta dentro de `<Blocks>`. La personalización
+  vive en el navegador; el uso se cuenta en cada clic y se manda al módulo `usage`.
 - Los estilos están en `styles/`, un fichero por sección, y se juntan en
   `styles/index.css`. El orden de ese fichero es el de la cascada.
 - Los textos están en `shared/i18n`; el español es la referencia.

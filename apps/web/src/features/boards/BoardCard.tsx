@@ -6,6 +6,7 @@ import { api } from '../../shared/api'
 import { useAction } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { Avatar } from '../../shared/ui/Avatar'
+import { ReportButton } from '../admin/ReportButton'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { BoardForm } from './BoardForm'
 import { dayKey, hhmm } from './dates'
@@ -107,6 +108,9 @@ export function BoardCard({ board, featured, onChange }: BoardCardProps) {
           </button>
         )}
       </div>
+      {!board.mine && (
+        <ReportButton target={`board:${board.id}`} summary={`${board.host}: ${board.title}`} />
+      )}
     </article>
   )
 }

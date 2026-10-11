@@ -44,7 +44,11 @@ export function registerTherapyRoutes(
   })
 
   app.post<IdParams>('/groups/:id/join', async (request, reply) => {
-    await therapy.join(await session.actor(request), idParam(request.params.id, 'El grupo'))
+    await therapy.join(
+      await session.actor(request),
+      idParam(request.params.id, 'El grupo'),
+      request.body,
+    )
 
     return reply.code(204).send()
   })

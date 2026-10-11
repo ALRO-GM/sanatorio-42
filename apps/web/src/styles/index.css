@@ -26,3 +26,5 @@
 @import './profile.css';
 /* Red de correcciones: filtros, grafo, fichas, línea de tiempo y detalle de pareja. */
 @import './network.css';
+/* Cabecera fija, bloques plegables, ventana de personalización y mapa de calor de uso. */
+@import './layout.css';

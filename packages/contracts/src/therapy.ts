@@ -1,3 +1,5 @@
+export type GroupKind = 'study' | 'review'
+
 /** Un grupo de terapia tal y como lo ve quien pregunta (`GET /groups`). */
 export type GroupView = {
   id: number
@@ -14,7 +16,13 @@ export type GroupView = {
   note: string | null
   /** Puestos reservados para el grupo (`c1r2s4`). En el mapa salen en azul. */
   seats: string[]
-  members: { login: string; image: string | null }[]
+  /** Cada persona, con cómo llevaba el proyecto al apuntarse (0-100), si lo dijo. */
+  members: { login: string; image: string | null; progress: number | null }[]
+  /**
+   * `study`: para sacar el proyecto adelante · `review`: de quien ya lo tiene
+   * terminado y queda para repasarlo y buscarle fallos antes de presentarlo.
+   */
+  kind: GroupKind
   /** `true` si quien pregunta está dentro. */
   joined: boolean
   /** `true` si es quien lo abrió (o modera) y puede cerrarlo. */
@@ -31,8 +39,21 @@ export type GroupInput = {
   dates: string[]
   start: string
   end: string
+  /** Solo cuenta si no se eligen puestos: con puestos, las plazas son los puestos. */
   capacity?: number
   note?: string | null
-  /** Puestos que reserva el grupo. Como mucho, tantos como plazas. */
+  /**
+   * Puestos que reserva el grupo: de dos a seis, en el mismo cluster y sin más
+   * de dos filas entre el primero y el último. De ellos salen las plazas.
+   */
   seats?: string[]
+  kind?: GroupKind
+  /** Cómo lleva el proyecto quien abre el grupo, de 0 a 100. */
+  progress?: number
+}
+
+/** Cuerpo de `POST /groups/:id/join`. */
+export type JoinInput = {
+  /** Cómo llevas el proyecto, de 0 a 100. En un grupo de repaso tiene que ser 100. */
+  progress?: number
 }

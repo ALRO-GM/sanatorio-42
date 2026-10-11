@@ -9,6 +9,7 @@
 
 import type {
   Expediente,
+  PublicProfile,
   Health,
   Leaderboard,
   LeaderboardEntry,
@@ -48,6 +49,7 @@ const settingsSchema = z.object({
   campusId: id.optional(),
   lang: z.enum(['es', 'en']).optional(),
   title: z.string().optional(),
+  preReview: z.boolean().optional(),
 })
 
 export function createXpService(options: XpServiceOptions) {
@@ -66,6 +68,32 @@ export function createXpService(options: XpServiceOptions) {
     /** Anota la primera vez que alguien se pone de guardia. */
     async markFirstDuty(login: string): Promise<void> {
       await xp.award(login, XP_KIND.FIRST_DUTY, XP_AMOUNT.first_duty, 'first')
+    },
+
+    /**
+     * El expediente de otra persona, en su versión pública.
+     *
+     * @throws {DomainError} `not_found` si no conocemos a nadie con ese login.
+     */
+    async publicProfile(login: string): Promise<PublicProfile> {
+      const wanted = login.trim().toLowerCase()
+
+      if (!/^[a-z0-9-]{1,30}$/.test(wanted) || !(await replica.userExists(wanted))) {
+        throw domainError('not_found', 'No conocemos a nadie con ese login')
+      }
+
+      // El campus y los permisos no influyen en lo que se devuelve.
+      const full = await this.expediente({ login: wanted, campusId: 0, admin: false })
+      const images = await replica.imagesOf([wanted])
+
+      return {
+        login: full.login,
+        image: images.get(wanted) ?? null,
+        xp: full.xp,
+        title: full.title,
+        achievements: full.achievements,
+        reactions: full.reactions,
+      }
     },
 
     /** Expediente completo de quien pregunta. */
@@ -101,6 +129,7 @@ export function createXpService(options: XpServiceOptions) {
         campusId: actor.campusId,
         lang: profile?.lang ?? null,
         admin: actor.admin,
+        preReview: profile?.preReview ?? false,
         xp: { total, ...level },
         title,
         titles: TITLES.map((entry) => ({ ...entry, unlocked: level.level >= entry.level })),

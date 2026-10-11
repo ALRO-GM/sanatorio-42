@@ -1,12 +1,12 @@
-import { useState } from 'react'
 import type { ReactNode } from 'react'
 
 import { useI18n } from '../../shared/i18n'
+import { toggleFold, usePageLayout } from '../../shared/layout/store'
 
 export type Order = 'asc' | 'desc'
 
 type RankCardProps = {
-  /** Nombre corto y estable: con él se recuerda si la tarjeta está plegada. */
+  /** El id del bloque en la personalización de la página (`shared/layout/registry`). */
   id: string
   title: string
   /** Sentido en que está ordenada la lista. Lo lleva quien la usa. */
@@ -21,8 +21,6 @@ type RankCardProps = {
   /** Las filas: elementos `<li>`. La tarjeta pone la lista y el desplazamiento. */
   children: ReactNode
 }
-
-const STORAGE_PREFIX = 'sanatorio_net_fold_'
 
 /**
  * Una lista ordenada del panel de la red (más endogamia, parejas, estrictos,
@@ -44,14 +42,11 @@ export function RankCard({
   children,
 }: RankCardProps) {
   const { t } = useI18n()
-  const [open, setOpen] = useState(() => localStorage.getItem(STORAGE_PREFIX + id) !== '0')
+  // Plegada o no lo dice la personalización de la página, igual que el orden.
+  const open = !usePageLayout('red').folded.includes(id)
 
   const toggle = (): void => {
-    setOpen((current) => {
-      localStorage.setItem(STORAGE_PREFIX + id, current ? '0' : '1')
-
-      return !current
-    })
+    toggleFold('red', id)
   }
 
   return (

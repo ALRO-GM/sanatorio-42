@@ -134,6 +134,74 @@ Los textos de unos y otros los pone el front (`apps/web/src/shared/i18n/`).
 reservada»). Ya no existe `POST /reactions`: la XP por ayudar sale solo de una
 sesión reservada.
 
+GET /users/:login/profile → el expediente público de otra persona: `login`,
+`image`, `xp`, `title`, `achievements` y `reactions`, con la misma forma que en
+`/me/profile`. No lleva preferencias, desglose de XP ni estado de salud. `404`
+si no conocemos a nadie con ese login.
+
+## Avisos, chat y asistencia de un evento
+
+Un evento se nombra con su id del calendario (`board:12`, `help:booking:7`,
+`therapy:3:2026-10-12`, `evaluation:9690094`). Solo quien lo tiene en su
+calendario (y va a ir) puede leer o escribir; el resto recibe `403`.
+
+- GET /events/thread?id= → `{ "messages": [{ "id", "login", "image", "kind", "minutes", "reason", "body", "at" }] }`.
+- POST /events/messages → `{ "id", "kind", "minutes"?, "reason"?, "body"? }`; devuelve el chat.
+  `kind`: `seen` (he visto el aviso), `late` (pide `minutes`), `absent` o `text`
+  (pide `body`). `reason`: `evaluation`, `other_event`, `on_my_way`, `transport`, `other`.
+- GET /events/attendance?id= → solo pizarras y sesiones de ayuda. Quien organiza
+  recibe `codes: { start, end }` (cuatro caracteres cada uno) y lo validado por
+  cada persona; quien asiste, lo suyo en `mine`.
+- POST /events/checkin → `{ "id", "code" }`. El de inicio marca cuándo empezaste;
+  el de fin, cuándo terminaste, y solo vale si antes validaste el de inicio
+  (`409`). `minutes` es `null` mientras falte uno: sin los dos no hay asistencia.
+
+## Buzón y administración
+
+- POST /tickets → `{ "kind": "issue" | "idea" | "report", "subject", "body", "target"? }`.
+  Una denuncia (`report`) lleva `target`: `message:12`, `board:3`, `doubt:5`.
+- GET /tickets/mine → lo que has mandado, con su `answer` si la tiene.
+
+Solo admins (`403` para el resto). Administra quien está en `ADMIN_LOGINS` o
+quien haya recibido el permiso desde el panel:
+
+- GET /admin/consumption → tope actual, últimas 48 h, media por día de la semana
+  y hora (UTC), avisos de los tramos por encima del 80 % del presupuesto y quién
+  más consume.
+- GET /admin/people · PUT /admin/roles `{ login, admin }` · PUT /admin/blocks
+  `{ login, reason, days? }` · DELETE /admin/blocks/:login · PUT /admin/limits
+  `{ login, perHour }` (`null` vuelve al tope automático).
+- GET /admin/tickets · POST /admin/tickets/:id/answer `{ answer, status? }`.
+- GET /admin/messages → los últimos mensajes de los chats de eventos.
+
+Toda petición con sesión cuenta para el consumo de esa persona. Si se pasa de su
+tope de la hora (el presupuesto repartido entre quienes están conectados, entre
+240 y 3 000, o el que se le haya puesto a mano) recibe `429` con `Retry-After`.
+Una cuenta bloqueada recibe `403` en todo.
+
+## Uso de la web
+
+Las claves son `<página>.<elemento>`: `nav.tablon`, `expediente.health`.
+
+- POST /usage → `{ "counts": { "nav.tablon": 3 } }`. Suma lo que has usado desde
+  el último envío (la web lo manda cada minuto). 204.
+- GET /usage → `{ "counts": { "nav.tablon": 420 } }`: el total de la comunidad,
+  para la ordenación automática. De cada persona cuentan como mucho 50 usos por
+  elemento.
+- GET /usage/heatmap?by=total|activity|track|cohort → solo admins (`403` si no):
+
+```json
+{
+  "by": "activity",
+  "groups": [{ "id": "casual", "people": 38 }, { "id": "regular", "people": 20 }],
+  "rows": [{ "key": "nav.tablon", "counts": [120, 300] }]
+}
+```
+
+  `activity` agrupa por cuánto usa la web cada quien (`casual` < 30 usos,
+  `regular`, `heavy` ≥ 150); `track`, por plan de estudios; `cohort`, por año
+  en que empezó el 42cursus.
+
 ## Terapias de grupo
 GET /groups → grupos abiertos del campus. Con `?project=1314`, los de ese proyecto.
 [{
@@ -174,6 +242,22 @@ Quien creó algo puede cambiarlo (y quien modera, también):
   con las plazas.
 - PUT /doubts/:id → `{ "body" }`. Mientras no esté resuelta: si lo está, hay que
   reabrirla (alguien ganó XP por responder a lo que decía).
+
+Cambios en los grupos (`POST /groups`, `PUT /groups/:id`, `POST /groups/:id/join`):
+
+- `seats`: de dos a seis puestos, en el mismo cluster y con dos filas como mucho
+  entre el primero y el último. Con puestos, `capacity` son los puestos y lo que
+  se mande se ignora; sin puestos (campus sin plano) vale `capacity` (2-12, 5).
+- `kind`: `study` (por defecto) o `review`, un grupo de repaso para quien ya
+  tiene el proyecto terminado. Abrirlo o apuntarse a él exige `progress: 100`.
+- `progress` (0-100): cómo lleva el proyecto quien abre el grupo o se apunta
+  (`POST /groups/:id/join` → `{ "progress": 35 }`). Sale en cada `members[]`.
+- El chat del grupo es el de los eventos, con id `group:<id>`
+  (`GET /events/thread?id=group:3`): solo para quien está dentro.
+
+`PUT /me/settings` acepta además `preReview` (te ofreces a preevaluar proyectos
+terminados); `GET /projects/:id/peers` lo devuelve en cada persona que ya aprobó
+ese proyecto.
 
 ## Tablón de dudas
 GET /doubts/graph → **tu plan** del common core, por círculos: los proyectos
