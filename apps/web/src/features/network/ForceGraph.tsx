@@ -51,6 +51,10 @@ type Scene = {
 /** Con cuánta fuerza tira de cada burbuja el centro de su comunidad. */
 const COMMUNITY_PULL = 0.16
 
+/** Sitio que ocupan los rótulos de arriba y la leyenda de abajo, en píxeles. */
+const FIT_TOP = 34
+const FIT_BOTTOM = 64
+
 const MIN_ZOOM = 0.08
 const MAX_ZOOM = 6
 
@@ -217,15 +221,18 @@ export function ForceGraph({
         maxY = Math.max(maxY, (node.y ?? 0) + node.r)
       }
 
+      // Arriba y abajo hay rótulos flotando (contador, leyenda): el grafo se
+      // encaja en lo que queda libre entre ellos.
+      const free = Math.max(120, height - FIT_TOP - FIT_BOTTOM)
       const k = Math.max(
         MIN_ZOOM,
-        Math.min(1.6, 0.92 * Math.min(width / (maxX - minX || 1), height / (maxY - minY || 1))),
+        Math.min(1.6, 0.94 * Math.min(width / (maxX - minX || 1), free / (maxY - minY || 1))),
       )
 
       state.view = {
         k,
         x: width / 2 - ((minX + maxX) / 2) * k,
-        y: height / 2 - ((minY + maxY) / 2) * k,
+        y: FIT_TOP + free / 2 - ((minY + maxY) / 2) * k,
       }
     }
 

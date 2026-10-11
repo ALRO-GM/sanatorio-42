@@ -46,8 +46,8 @@ describe('colores de la red', () => {
     expect(colorOf(node({ given: 20, received: 0 }), 'balance')).not.toBe(
       colorOf(node({ given: 0, received: 20 }), 'balance'),
     )
-    // Quien suspende la mitad o más sale igual de rojo.
-    expect(colorOf(node({ passRate: 0.5 }), 'strictness')).toBe(
+    // Quien suspende una de cada cuatro o más sale igual de rojo.
+    expect(colorOf(node({ passRate: 0.75 }), 'strictness')).toBe(
       colorOf(node({ passRate: 0.1 }), 'strictness'),
     )
   })

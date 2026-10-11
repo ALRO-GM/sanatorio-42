@@ -20,8 +20,12 @@ const COMMUNITY_HUES = [186, 28, 262, 138, 340, 48, 212, 96, 300, 12]
 
 const OTHER = 'hsl(160 6% 62%)'
 
-/** Parte de suspensos a partir de la cual alguien ya sale en rojo del todo. */
-const STRICTEST = 0.5
+/**
+ * Parte de suspensos a partir de la cual alguien ya sale en rojo del todo. En
+ * los datos reales se aprueba más del 90 %: con una escala hasta la mitad todo
+ * el mundo saldría verde.
+ */
+const STRICTEST = 0.25
 
 /** Verde → ámbar → rojo, para un valor de 0 a 1. */
 function heat(value: number): string {
@@ -35,7 +39,7 @@ function yearColor(year: number): string {
   return `hsl(${(year * 67) % 360} 58% 55%)`
 }
 
-/** Color de un porcentaje de aprobados: rojo si aprueba la mitad o menos, verde si casi todo. */
+/** Color de un porcentaje de aprobados: rojo si suspende una de cada cuatro o más, verde si casi nada. */
 export function passColor(passRate: number): string {
   return heat((1 - passRate) / STRICTEST)
 }
