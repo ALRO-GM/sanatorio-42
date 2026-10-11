@@ -17,7 +17,7 @@ este fichero y se hace lo que dice, en orden.
 - Si una tarea necesita una decisión de Alberto, se le pregunta antes de seguir
   con esa; las demás no esperan.
 
-Última puesta al día: 2026-10-11, con 2.0, 2.1 y 2.2 hechos y sin subir. Queda 2.3.
+Última puesta al día: 2026-10-11, con todo el apartado 2 hecho y subido. Queda desplegar.
 
 ## 1. Arranque (siempre, en cada sesión nueva)
 
@@ -56,15 +56,14 @@ No es una reescritura: no se cambia el comportamiento salvo donde se diga.
       "Reglas de los códigos".
 
 - [x] **Presupuesto de peticiones de la web, dinámico y regulable a mano.**
-      Hecho el 2026-10-11, sin subir. `modules/admin/budget.rules.ts` y
+      Hecho el 2026-10-11. `modules/admin/budget.rules.ts` y
       migración 19 (`settings`): día ← mes (bytes de salida, 10 TB de fábrica),
       hora ← día, persona ← gente conectada; colchón del 85 %, mínimo y máximo
       por persona, modo ahorro (un cuarto). `PUT /admin/budget` y tarjeta en la
       pestaña "Consumo" con lo gastado, lo que queda y la previsión. El contador
       se recupera de `request_stats` al arrancar (cierra el punto de 2.1).
 
-- [x] **Lo mismo para la API de 42, con aviso y cola.** Hecho el 2026-10-11, sin
-      subir. `modules/replica/quota.ts` y migración 20: tres escalones (fondo,
+- [x] **Lo mismo para la API de 42, con aviso y cola.** Hecho el 2026-10-11. `modules/replica/quota.ts` y migración 20: tres escalones (fondo,
       aplazable, crítico), tope diario o mensual regulable (`PUT /admin/quota`),
       cola por orden de llegada guardada en la base, `GET /quota`, rótulo y
       tique de turno en la web (`features/alerts/QuotaNotice.tsx`) y tarjeta en
@@ -72,7 +71,7 @@ No es una reescritura: no se cambia el comportamiento salvo donde se diga.
 
 ### 2.1 Seguridad
 
-Hecho el 2026-10-11, sin subir, salvo lo que espera a Alberto:
+Hecho el 2026-10-11, salvo lo que espera a Alberto:
 
 - [x] **Bloqueo de cuentas en todas las rutas.** Lo corta el gancho de `admin`
       antes de llegar a ninguna ruta (`modules/admin/index.ts`); solo quedan las
@@ -84,8 +83,8 @@ Hecho el 2026-10-11, sin subir, salvo lo que espera a Alberto:
       confirmar (`AlertCenter.tsx`), porque un enlace con un código equivocado
       gastaba un intento. Cinco fallos por persona y evento.
 - [x] **Tope de uso tras un reinicio.** Se recupera de `request_stats`.
-- [ ] **Registro de mensajes para admins.** Espera a Alberto (ver apartado 3):
-      plazo de borrado y aviso en la web.
+- [x] **Registro de mensajes para admins.** Los mensajes se borran a los 90
+      días y el registro de intentos de códigos al año; lo dice cada chat.
 - [x] **Entradas de texto libre**: nada se pinta como HTML salvo el QR. El CSV
       del informe de horas desactiva las fórmulas.
 - [x] **Cabeceras y cookies.** Política de contenido y de permisos en
@@ -99,7 +98,7 @@ Hecho el 2026-10-11, sin subir, salvo lo que espera a Alberto:
 
 ### 2.2 Rendimiento
 
-Hecho el 2026-10-11, sin subir:
+Hecho el 2026-10-11:
 
 - [x] **Avisos**: el calendario se pide cada cinco minutos y se mira en el
       navegador cada treinta segundos si algo está a punto de empezar.
@@ -122,23 +121,20 @@ Hecho el 2026-10-11, sin subir:
 
 ### 2.3 Simplificar
 
-**Sin empezar, a propósito**: son mudanzas de ficheros que tocan los mismos
-sitios que todo lo anterior (`community.test.ts`, `layout.css`, `mock/index.ts`,
-`Clinic.tsx`). Conviene hacerlas después de que Alberto revise y suba lo de 2.0,
-2.1 y 2.2, para que el diff de cada cosa se pueda leer.
+Hecho el 2026-10-11:
 
-- [ ] Partir `apps/web/src/app/Clinic.tsx` (cabecera, secciones y pie).
-- [ ] Partir `apps/web/src/shared/api/mock/index.ts` por funcionalidad.
-- [ ] `apps/web/src/styles/layout.css` se ha vuelto cajón de sastre: repartir en
-      `alerts.css`, `admin.css` y `therapy.css`, manteniendo el orden de la cascada
-      (comprobar que el CSS generado no cambia, como se hizo con `global.css`).
-      Ahora lleva también lo del presupuesto, el informe de horas y el tique.
-- [ ] Partir `apps/api/tests/unit/community.test.ts` (unas 2 500 líneas) en un
-      fichero por módulo.
-- [ ] `EventRoom` hace de sala de evento y de chat de grupo: separar el chat en su
-      propio componente.
-- [x] Repasar `docs/api.md` contra las rutas reales: las 77 están; faltaban las
-      de salud y se han añadido (2026-10-11).
+- [x] `Clinic.tsx` partido en `Header.tsx`, `SectionView.tsx` y `Footer.tsx`.
+- [x] `shared/api/mock/index.ts` partido por funcionalidad (`peers`, `meet`,
+      `admin`, `profile`, `replica`, `help`, `therapy`, `doubts`, `boards`), con
+      el estado compartido en `state.ts`.
+- [x] `layout.css` repartido en `layout.css`, `alerts.css`, `admin.css` y
+      `therapy.css`. Comprobado que el CSS generado tiene las mismas reglas.
+- [x] `community.test.ts` partido en un fichero por módulo (`profile`, `admin`,
+      `help`, `therapy`, `doubts`, `boards`), con el montaje en
+      `tests/helpers/community.ts`. Siguen siendo los mismos tests.
+- [x] El chat sale de `EventRoom`: `useThread.ts` y `Chat.tsx` (`ChatRoom` para
+      los grupos de terapia).
+- [x] `docs/api.md` repasado contra las rutas reales.
 
 ## 3. A medias o por confirmar con Alberto
 
@@ -151,11 +147,6 @@ sitios que todo lo anterior (`community.test.ts`, `layout.css`, `mock/index.ts`,
   (`attendance.rules.ts`): margen de 10 min, inicio válido hasta 30 min tarde
   (o media sesión), 10 min mínimos entre códigos, fin válido hasta 30 min
   después, cinco fallos.
-- **Registro de mensajes, decisión de Alberto**: hoy lo lee cualquier admin
-  (`GET /admin/messages`) y no se borra nunca. Propuesta: borrar los mensajes
-  de chat a los 90 días y el registro de intentos de códigos al año (es la
-  prueba de las horas), y decirlo en el chat con una línea ("quien administra
-  puede leer este chat si hay una denuncia; se borra a los 90 días").
 - En el rótulo de cuota no se dice de cuándo es cada dato, solo que es lo último
   guardado. Si se quiere la fecha exacta, `agenda_users.fetched_at` y
   `sync_state.updated_at` ya la tienen.

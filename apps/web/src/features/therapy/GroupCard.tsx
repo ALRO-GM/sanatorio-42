@@ -8,7 +8,7 @@ import { useAction } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { Avatar } from '../../shared/ui/Avatar'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
-import { EventRoom } from '../alerts/EventRoom'
+import { ChatRoom } from '../alerts/Chat'
 import { shortDay, today } from './days'
 import { GroupForm } from './GroupForm'
 
@@ -187,7 +187,7 @@ export function GroupCard({ group, projects, onChange, me }: GroupCardProps) {
           💬 {t(chat ? 'therapy.chatHide' : 'therapy.chatShow')}
         </button>
       )}
-      {group.joined && chat && <EventRoom eventId={`group:${group.id}`} me={me} replies={false} />}
+      {group.joined && chat && <ChatRoom chatId={`group:${group.id}`} me={me} />}
 
       <div className="actions">
         {group.joined ? (

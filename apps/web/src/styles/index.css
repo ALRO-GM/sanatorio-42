@@ -26,5 +26,11 @@
 @import './profile.css';
 /* Red de correcciones: filtros, grafo, fichas, línea de tiempo y detalle de pareja. */
 @import './network.css';
-/* Cabecera fija, bloques plegables, ventana de personalización y mapa de calor de uso. */
+/* Cabecera fija, bloques plegables y ventana de personalización. */
 @import './layout.css';
+/* Avisos, chat del evento, asistencia con códigos y tique de la cuota de 42. */
+@import './alerts.css';
+/* Panel de gestión: consumo, presupuesto, buzón y denuncias. */
+@import './admin.css';
+/* Terapias: tipo, progreso y apuntarse. */
+@import './therapy.css';

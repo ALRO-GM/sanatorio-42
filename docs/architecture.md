@@ -185,7 +185,7 @@ shared/     api/ (cliente real y simulado), i18n/, hooks/, ui/
   `Api`: la real y una en memoria para trabajar sin servidor (`npm run dev:mock`).
 - La navegación va en el hash de la URL (`#/tablon`); no hay router. Solo la
   portada viaja con la web: cada una de las demás secciones se descarga al
-  abrirla (`lazy` en `Clinic.tsx`), y la API simulada, solo en `dev:mock`.
+  abrirla (`lazy` en `SectionView.tsx`), y la API simulada, solo en `dev:mock`.
 - El orden de las pestañas y de los bloques de cada página, y cuáles salen
   plegados, es personalizable (`shared/layout`): manual, o automático según lo
   que más usa la persona o la comunidad. Para que un bloque entre en ese juego
@@ -209,7 +209,7 @@ Por ejemplo, "avisos":
    a `modules`.
 5. **Web**: métodos nuevos en `shared/api/types.ts`, `client.ts` y `mock/`;
    pantalla en `features/notices/`; si es una sección, apuntarla en
-   `app/sections.ts` y pintarla en `app/Clinic.tsx`; textos en `es.ts` y `en.ts`.
+   `app/sections.ts` y pintarla en `app/SectionView.tsx`; textos en `es.ts` y `en.ts`.
 6. **Tests** en `apps/api/tests/`, y documentar las rutas en `docs/api.md`.
 
 Ningún otro módulo se toca.

@@ -1,0 +1,56 @@
+/* ── Terapias: tipo, progreso y apuntarse ──────────────────────────────────── */
+.kind-field,
+.join-box {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0.4rem 0;
+  padding: 0.7rem;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+}
+.kind-field label,
+.join-box label {
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+  color: var(--text-2);
+}
+.kind-field input[type='range'],
+.join-box input[type='range'] {
+  width: 100%;
+  accent-color: var(--accent);
+}
+.kind-field .hint,
+.join-box .hint {
+  margin: 0;
+}
+.member-progress {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 4.5rem;
+  height: 1.05rem;
+  margin-left: 0.4rem;
+  border-radius: 999px;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+.member-progress > span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: color-mix(in srgb, var(--accent) 45%, transparent);
+}
+.member-progress small {
+  position: relative;
+  width: 100%;
+  text-align: center;
+  font-size: 0.68rem;
+  color: var(--text);
+}
+.pre-review {
+  margin-top: 0.6rem;
+}
+.pre-review .hint {
+  margin: 0.2rem 0 0;
+  font-size: 0.8rem;
+}
