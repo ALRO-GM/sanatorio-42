@@ -37,6 +37,7 @@ import type {
   NetworkMine,
   NetworkPairDetail,
   NetworkPerson,
+  NetworkStrictest,
   LeaderboardPeriod,
   Peer,
   Profile,
@@ -109,6 +110,12 @@ export type Api = {
   getNetwork: (params: NetworkParams) => Promise<NetworkGraph>
   /** Las correcciones que se han hecho dos personas, con los filtros de fecha y proyecto. */
   getNetworkPair: (a: string, b: string, params: NetworkParams) => Promise<NetworkPairDetail>
+  /** Quién suspende más al corregir, entre quienes han evaluado al menos `min` proyectos. */
+  getNetworkStrictest: (
+    min: number,
+    order: 'asc' | 'desc',
+    params: NetworkParams,
+  ) => Promise<NetworkStrictest>
   /** Con quién te has corregido tú, en todo el histórico. */
   getNetworkMine: () => Promise<NetworkMine>
   /** Logins que empiezan por lo escrito, para el buscador de la red. */

@@ -12,6 +12,7 @@ import type {
   NetworkNode,
   NetworkPairDetail,
   NetworkPerson,
+  NetworkStrictest,
 } from '@sanatorio/contracts'
 
 import type { NetworkParams } from '../types'
@@ -119,7 +120,8 @@ function statsOf(person: Person, links: readonly NetworkLink[]): NetworkNode {
     reciprocity,
     endogamy: Math.round(50 * (repetition + reciprocity)),
     // Cada quien aprueba más o menos: sale de su login, siempre igual.
-    passRate: given < 3 ? null : 0.55 + ((person.login.charCodeAt(0) * 7) % 45) / 100,
+    givenPassRate: given < 3 ? null : 0.55 + ((person.login.charCodeAt(0) * 7) % 45) / 100,
+    receivedPassRate: received < 3 ? null : 0.6 + ((person.login.charCodeAt(1) * 5) % 40) / 100,
     community: person.group,
     cohort: person.cohort,
   }
@@ -207,7 +209,7 @@ export function mockNetwork(me: string, params: NetworkParams): NetworkGraph {
         : null,
     topPairs: [...all]
       .sort((a, b) => Math.min(b.forth, b.back) - Math.min(a.forth, a.back))
-      .slice(0, 12),
+      .slice(0, 100),
     timeline: Array.from({ length: 30 }, (_, index) => {
       const date = new Date(Date.UTC(2024, 4 + index, 1))
 
@@ -279,5 +281,35 @@ export function mockPair(me: string, a: string, b: string): NetworkPairDetail {
         positive: mark > 0,
       }
     }).sort((x, y) => (x.at < y.at ? 1 : -1)),
+  }
+}
+
+export function mockStrictest(me: string, min: number, order: 'asc' | 'desc'): NetworkStrictest {
+  const { people, links } = world(me)
+  // En el campus de mentira se evalúa poco: se multiplica para que el mínimo tenga juego.
+  const everyone = people
+    .filter((person) => !person.external)
+    .map((person) => {
+      const stats = statsOf(person, links)
+      const judged = stats.given * 6
+      const failed = Math.round(judged * (1 - (stats.givenPassRate ?? 0.9)))
+
+      return { login: person.login, image: stats.image, judged, failed }
+    })
+  const eligible = everyone.filter((person) => person.judged >= min)
+
+  return {
+    min,
+    order,
+    eligible: eligible.length,
+    campusFailRate: 0.11,
+    people: eligible
+      .map((person) => ({ ...person, failRate: person.failed / person.judged }))
+      .sort(
+        (a, b) =>
+          (order === 'desc' ? b.failRate - a.failRate : a.failRate - b.failRate) ||
+          b.judged - a.judged,
+      )
+      .slice(0, 100),
   }
 }

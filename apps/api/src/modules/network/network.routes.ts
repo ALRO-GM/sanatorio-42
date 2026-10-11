@@ -36,6 +36,19 @@ export function registerNetworkRoutes(
     },
   )
 
+  /**
+   * `GET /network/strictest?min=&from=&to=&projectId=` → quién suspende más de
+   * lo que evalúa, entre quienes han evaluado al menos `min` proyectos.
+   */
+  app.get<{ Querystring: Record<string, string | undefined> }>(
+    '/network/strictest',
+    async (request, reply) => {
+      reply.header('Cache-Control', 'private, max-age=30')
+
+      return reply.send(await network.strictest(await session.actor(request), request.query))
+    },
+  )
+
   /** `GET /network/mine` → con quién te has corregido tú, en todo el histórico. */
   app.get('/network/mine', async (request, reply) => {
     reply.header('Cache-Control', 'private, max-age=60')

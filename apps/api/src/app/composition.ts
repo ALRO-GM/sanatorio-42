@@ -126,6 +126,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     replica: replica.repository,
     campusIds: config.sync.trackedCampusIds,
     hourlyReserve: config.sync.hourlyReserve,
+    isActive: () => replica.sync.isActive(),
     ...(config.log === undefined ? {} : { log: config.log }),
     ...clock,
   })

@@ -234,3 +234,15 @@
 .health-calc.open .health-calc-arrow {
   transform: rotate(180deg);
 }
+
+/* Estado de salud plegado: solo el pace y el resumen; la flecha abre el resto. */
+.health-head .health-summary {
+  flex: 1;
+}
+.health-head .xp-toggle {
+  flex: none;
+}
+.health-detail {
+  display: grid;
+  gap: 0.75rem;
+}

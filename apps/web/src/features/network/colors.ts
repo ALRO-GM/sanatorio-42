@@ -7,7 +7,8 @@ import type { NetworkNode } from '@sanatorio/contracts'
 export const COLOR_MODES = [
   'community',
   'endogamy',
-  'strictness',
+  'failsGiven',
+  'failsReceived',
   'cohort',
   'balance',
   'origin',
@@ -53,9 +54,12 @@ export function colorOf(node: NetworkNode, mode: ColorMode): string {
     }
     case 'endogamy':
       return heat(node.endogamy / 100)
-    case 'strictness':
-      // Rojo quien más suspende; gris quien no ha corregido lo bastante para saberlo.
-      return node.passRate === null ? OTHER : heat((1 - node.passRate) / STRICTEST)
+    case 'failsGiven':
+      // Como corrector: rojo quien más suspende a otros; gris si ha evaluado muy poco.
+      return node.givenPassRate === null ? OTHER : passColor(node.givenPassRate)
+    case 'failsReceived':
+      // Como corregido: rojo a quien más le suspenden sus proyectos.
+      return node.receivedPassRate === null ? OTHER : passColor(node.receivedPassRate)
     case 'cohort':
       return node.cohort === null ? OTHER : yearColor(node.cohort)
     case 'balance': {
@@ -130,11 +134,12 @@ export function legendOf(
         color: heat(value),
         label: String(Math.round(value * 100)),
       }))
-    case 'strictness':
+    case 'failsGiven':
+    case 'failsReceived':
       return [
         ...[0, 0.5, 1].map((value) => ({
           color: heat(value),
-          label: t('net.legend.fails', { pct: Math.round(value * STRICTEST * 100) }),
+          label: t(`net.legend.${mode}`, { pct: Math.round(value * STRICTEST * 100) }),
         })),
         { color: OTHER, label: t('net.legend.unknown') },
       ]

@@ -8,6 +8,7 @@ import { useI18n } from '../../shared/i18n'
 import { Avatar } from '../../shared/ui/Avatar'
 import { Meter } from './Meter'
 import { PairDetail } from './PairDetail'
+import { VerdictStats } from './VerdictStats'
 
 type PersonPanelProps = {
   node: NetworkNode
@@ -87,11 +88,7 @@ export function PersonPanel({
         </div>
       </dl>
 
-      {node.passRate !== null && (
-        <p className="net-passrate">
-          {t('net.passRate', { pct: Math.round(node.passRate * 100) })}
-        </p>
-      )}
+      <VerdictStats node={node} />
 
       <Meter label={t('net.endogamy')} value={node.endogamy} />
       <p className="hint">

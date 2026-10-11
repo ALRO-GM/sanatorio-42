@@ -588,3 +588,138 @@
   background: var(--accent-soft);
   font-weight: 700;
 }
+
+/* Las dos caras de una persona: lo que evalúa y lo que le evalúan. */
+.net-verdicts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+.net-verdict {
+  display: grid;
+  gap: 0.2rem;
+  align-content: start;
+  padding: 0.55rem 0.6rem;
+  border-radius: 10px;
+  background: var(--surface-2);
+  font-size: 0.78rem;
+  min-width: 0;
+}
+.net-verdict strong {
+  font-size: 0.85rem;
+}
+.net-verdict small {
+  color: var(--text-3);
+  line-height: 1.25;
+}
+.net-verdict-count {
+  margin-top: 0.15rem;
+  font-weight: 700;
+}
+.net-verdict-bar {
+  height: 6px;
+  border-radius: 999px;
+  /* Lo que no es aprobado es suspenso: el fondo de la barra es su parte. */
+  background: color-mix(in srgb, #d9534f 55%, var(--surface));
+  overflow: hidden;
+}
+.net-verdict-bar span {
+  display: block;
+  height: 100%;
+  background: #3fae74;
+}
+.net-verdict-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.4rem;
+}
+
+/* Ranking de estrictos: el deslizador del mínimo y filas con foto. */
+.net-strict-min {
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  color: var(--text-2);
+}
+.net-strict-min input {
+  width: 100%;
+  accent-color: var(--accent);
+}
+ol.net-rows button {
+  justify-content: flex-start;
+}
+ol.net-rows .net-row-name {
+  flex: 1;
+}
+
+/* Listas del panel: se pliegan, se ordenan y se recorren con su propia barra. */
+.rank-card {
+  gap: 0.5rem;
+}
+.rank-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.rank-title {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+.rank-arrow {
+  color: var(--text-3);
+  transition: transform 0.2s;
+  transform: rotate(-90deg);
+}
+.rank-card.open .rank-arrow {
+  transform: none;
+}
+.rank-count {
+  padding: 0 0.4rem;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--text-3);
+  font-size: 0.7rem;
+}
+.rank-order {
+  flex: none;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--text-2);
+  font-size: 0.72rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.rank-order:hover {
+  border-color: var(--accent);
+  color: var(--accent-text);
+}
+.rank-body {
+  display: grid;
+  gap: 0.5rem;
+}
+.rank-list {
+  max-height: 17.5rem;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--fill-muted) transparent;
+}
+.rank-list:empty {
+  display: none;
+}
+.rank-body .hint {
+  margin: 0;
+  font-size: 0.75rem;
+}

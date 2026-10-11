@@ -70,6 +70,8 @@ export function projectUser(
     createdAt?: string
     status?: string
     validated?: boolean | null
+    /** Nota final. Por defecto, 100 si está terminado. */
+    finalMark?: number
     updatedAt?: string
     id?: number
     user?: Partial<ApiUser>
@@ -82,7 +84,7 @@ export function projectUser(
     status,
     'validated?':
       options.validated === undefined ? (status === 'finished' ? true : null) : options.validated,
-    final_mark: status === 'finished' ? 100 : null,
+    final_mark: options.finalMark ?? (status === 'finished' ? 100 : null),
     updated_at: options.updatedAt ?? '2026-10-01T10:00:00.000Z',
     created_at: options.createdAt ?? '2026-09-01T10:00:00.000Z',
     cursus_ids: options.cursusIds ?? [21],

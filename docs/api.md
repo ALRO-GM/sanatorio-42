@@ -414,7 +414,7 @@ GET /network?from=&to=&login=&projectId=&min=&limit= → el grafo. Todo opcional
   suspendieron). `mutual=1`: solo las uniones en las que las dos personas se han
   corregido mutuamente.
 - `min` (1-100, por defecto 1): correcciones mínimas entre dos personas para que
-  salga su unión. `limit` (10-2000, por defecto 300): tope de personas, las más
+  salga su unión. `limit` (10-20000, por defecto 300): tope de personas, las más
   activas primero.
 
 ```json
@@ -425,7 +425,7 @@ GET /network?from=&to=&login=&projectId=&min=&limit= → el grafo. Todo opcional
       "login": "jdoe", "image": "https://…", "external": false,
       "given": 41, "received": 38, "partners": 52,
       "endogamy": 31, "repetition": 0.342, "reciprocity": 0.278,
-      "passRate": 0.829, "community": 0, "cohort": 2024
+      "givenPassRate": 0.829, "receivedPassRate": 0.947, "community": 0, "cohort": 2024
     }
   ],
   "links": [{ "source": "jdoe", "target": "mgomez", "forth": 3, "back": 2 }],
@@ -449,8 +449,10 @@ GET /network?from=&to=&login=&projectId=&min=&limit= → el grafo. Todo opcional
   recibidas) repartidas entre `P` personas: la media de `repetition = (W − P) / W`
   y `reciprocity = Σ 2·min(a→b, b→a) / W`. La del campus es la media ponderada
   por actividad de su gente.
-- `passRate`: parte de las correcciones que ha hecho en las que aprobó el
-  proyecto; `null` con menos de tres veredictos.
+- `givenPassRate`: como corrector, parte de los proyectos ajenos que ha evaluado
+  y ha aprobado. `receivedPassRate`: como corregido, parte de las evaluaciones
+  de sus propios proyectos en las que se los aprobaron. Cada uno es `null` con
+  menos de tres veredictos.
 - `community`: grupo al que pertenece (`0` es el mayor), por el método de Louvain
   sobre las correcciones filtradas. `cohort`: año de su primera corrección.
 - `external`: no es del campus. Solo sale como vecino de alguien de dentro.
@@ -469,7 +471,23 @@ GET /network/pair?a=&b=&from=&to=&projectId= → las correcciones entre dos pers
 }
 ```
 
-Las más recientes primero; como mucho, 60.
+Las más recientes primero; como mucho, 60. `positive` es el veredicto de esa corrección:
+aprobó si la marca de quien corrigió es buena **y** la nota llega a la mínima
+del proyecto (un 0 con marca de «Ok» es un suspenso).
+
+GET /network/strictest?min=&order=&from=&to=&projectId= → quién suspende más al corregir.
+
+```json
+{
+  "min": 20, "order": "desc", "eligible": 812, "campusFailRate": 0.109,
+  "people": [{ "login": "jdoe", "image": "https://…", "judged": 64, "failed": 21, "failRate": 0.328 }]
+}
+```
+
+Solo gente del campus que ha evaluado al menos `min` proyectos ajenos (1-500, por
+defecto 20). Hasta 100 personas, por parte de suspensos: de más a menos con
+`order=desc` (por defecto) o de menos a más con `order=asc`; a igualdad, quien
+más ha evaluado.
 
 GET /network/mine → con quién te has corregido tú, en todo el histórico:
 `{ "partners": [{ "login": "mgomez", "gave": 2, "got": 3 }] }`.

@@ -18,7 +18,8 @@ const node = (extra: Partial<NetworkNode> = {}): NetworkNode => ({
   endogamy: 40,
   reciprocity: 0.4,
   repetition: 0.4,
-  passRate: 0.8,
+  givenPassRate: 0.8,
+  receivedPassRate: 0.9,
   community: 0,
   cohort: 2025,
   ...extra,
@@ -31,7 +32,12 @@ describe('colores de la red', () => {
   it('cada modo da un color a cualquier persona', () => {
     for (const mode of COLOR_MODES) {
       expect(colorOf(node(), mode)).toMatch(/^hsl\(/)
-      expect(colorOf(node({ passRate: null, cohort: null, community: 99 }), mode)).toMatch(/^hsl\(/)
+      expect(
+        colorOf(
+          node({ givenPassRate: null, receivedPassRate: null, cohort: null, community: 99 }),
+          mode,
+        ),
+      ).toMatch(/^hsl\(/)
     }
   })
 
@@ -47,8 +53,15 @@ describe('colores de la red', () => {
       colorOf(node({ given: 0, received: 20 }), 'balance'),
     )
     // Quien suspende una de cada cuatro o más sale igual de rojo.
-    expect(colorOf(node({ passRate: 0.75 }), 'strictness')).toBe(
-      colorOf(node({ passRate: 0.1 }), 'strictness'),
+    expect(colorOf(node({ givenPassRate: 0.75 }), 'failsGiven')).toBe(
+      colorOf(node({ givenPassRate: 0.1 }), 'failsGiven'),
+    )
+    // Lo que alguien suspende al corregir y lo que le suspenden van por separado.
+    const strictButGood = node({ givenPassRate: 0.5, receivedPassRate: 1 })
+
+    expect(colorOf(strictButGood, 'failsGiven')).not.toBe(colorOf(strictButGood, 'failsReceived'))
+    expect(colorOf(strictButGood, 'failsReceived')).toBe(
+      colorOf(node({ givenPassRate: 1, receivedPassRate: 1 }), 'failsReceived'),
     )
   })
 

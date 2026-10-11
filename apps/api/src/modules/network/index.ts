@@ -21,6 +21,8 @@ export type NetworkModuleDeps = {
   /** Campus de los que se copian las correcciones. */
   campusIds: readonly number[]
   hourlyReserve: number
+  /** `true` si alguien está usando la web: el repaso completo espera. */
+  isActive?: () => boolean
   log?: (message: string) => void
   now?: () => number
 }
@@ -39,6 +41,7 @@ export function createNetworkModule(deps: NetworkModuleDeps): NetworkModule {
     replica: deps.replica,
     campusIds: deps.campusIds,
     hourlyReserve: deps.hourlyReserve,
+    ...(deps.isActive === undefined ? {} : { isActive: deps.isActive }),
     ...(deps.log === undefined ? {} : { log: deps.log }),
     ...clock,
   })

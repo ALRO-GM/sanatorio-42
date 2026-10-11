@@ -70,6 +70,15 @@ export const realApi: Api = {
 
     return getJson(`/network/pair?${query.toString()}`)
   },
+  getNetworkStrictest: (min, order, params) => {
+    const query = new URLSearchParams({ min: String(min), order })
+
+    if (params.from !== undefined) query.set('from', params.from)
+    if (params.to !== undefined) query.set('to', params.to)
+    if (params.projectId !== undefined) query.set('projectId', String(params.projectId))
+
+    return getJson(`/network/strictest?${query.toString()}`)
+  },
   getNetworkMine: () => getJson('/network/mine'),
   searchNetworkPeople: (q) => getJson(`/network/people?q=${encodeURIComponent(q)}`),
 

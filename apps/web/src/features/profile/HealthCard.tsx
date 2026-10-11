@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import type { ReactNode } from 'react'
 
 import type { Health } from '@sanatorio/contracts'
 
@@ -52,6 +53,8 @@ function HealthBody({ health, startedAt }: { health: Health; startedAt: string }
   const { t, lang } = useI18n()
   // Se fija al montar: las cuentas no deben bailar entre un render y el siguiente.
   const [now] = useState(() => Date.now())
+  // Plegado por defecto: de un vistazo, el pace y hasta cuándo; el resto, al abrir.
+  const [open, setOpen] = useState(false)
   const circle = health.currentCircle
   const finished = health.milestones.length > LAST_CIRCLE
 
@@ -78,6 +81,8 @@ function HealthBody({ health, startedAt }: { health: Health; startedAt: string }
   const hole = steps.at(-1)?.date ?? null
   const holeLeft = hole === null ? null : daysBetween(now, hole.getTime())
 
+  const detail = open ? detailOf() : null
+
   return (
     <>
       <div className="health-head">
@@ -103,71 +108,103 @@ function HealthBody({ health, startedAt }: { health: Health; startedAt: string }
             })}
           </small>
         </p>
+        <button
+          type="button"
+          className={`xp-toggle ${open ? 'open' : ''}`}
+          aria-expanded={open}
+          aria-controls="health-detail"
+          aria-label={t('health.toggle')}
+          title={t('health.toggle')}
+          onClick={() => {
+            setOpen((current) => !current)
+          }}
+        >
+          <span aria-hidden="true">▾</span>
+        </button>
       </div>
 
-      {!finished && (
-        <>
-          <span className="eyebrow">{t('health.drops', { circle })}</span>
-          <ol className="health-steps">
-            {steps.map((step, index) => (
-              <StepRow
-                key={step.pace}
-                step={step}
-                next={steps[index + 1]?.pace ?? null}
-                current={step.pace === current?.pace}
-                day={day}
-              />
-            ))}
-            {hole !== null && holeLeft !== null && (
-              <li className="health-step hole">
-                <span className="health-badge" aria-hidden="true">
-                  🕳
-                </span>
-                <span>
-                  <strong>{t('health.hole', { date: day(hole) })}</strong>
-                  <small>
-                    {extraDays > 0
-                      ? t('health.holeOfficial', { n: extraDays })
-                      : t('health.holeTable')}
-                  </small>
-                </span>
-                <span className="health-left">
-                  {holeLeft >= 0
-                    ? t('pace.left', { n: holeLeft })
-                    : t('pace.late', { n: -holeLeft })}
-                </span>
-              </li>
-            )}
-          </ol>
-        </>
+      {open && (
+        <div id="health-detail" className="health-detail">
+          {detail}
+        </div>
       )}
-
-      {health.milestones.length > 0 && (
-        <>
-          <span className="eyebrow">{t('health.history')}</span>
-          <ul className="health-history">
-            {health.milestones.map((date, done) => {
-              const pace = paceOn(startedAt, done, Date.parse(date))
-
-              return (
-                <li key={date} className="chip">
-                  {t('health.historyRow', { circle: done, date: day(date) })}
-                  <strong>{pace === null ? '—' : t('pace.option', { n: pace })}</strong>
-                </li>
-              )
-            })}
-          </ul>
-        </>
-      )}
-
-      {!finished && (
-        <Calculator startedAt={startedAt} from={circle} now={now} extraDays={extraDays} day={day} />
-      )}
-      <p className="hint">
-        {t(extraDays > 0 ? 'health.noteExtra' : 'health.note', { n: extraDays })}
-      </p>
     </>
   )
+
+  // Lo que queda plegado: plazos, black hole, historial y calculadora.
+  function detailOf(): ReactNode {
+    return (
+      <>
+        {!finished && (
+          <>
+            <span className="eyebrow">{t('health.drops', { circle })}</span>
+            <ol className="health-steps">
+              {steps.map((step, index) => (
+                <StepRow
+                  key={step.pace}
+                  step={step}
+                  next={steps[index + 1]?.pace ?? null}
+                  current={step.pace === current?.pace}
+                  day={day}
+                />
+              ))}
+              {hole !== null && holeLeft !== null && (
+                <li className="health-step hole">
+                  <span className="health-badge" aria-hidden="true">
+                    🕳
+                  </span>
+                  <span>
+                    <strong>{t('health.hole', { date: day(hole) })}</strong>
+                    <small>
+                      {extraDays > 0
+                        ? t('health.holeOfficial', { n: extraDays })
+                        : t('health.holeTable')}
+                    </small>
+                  </span>
+                  <span className="health-left">
+                    {holeLeft >= 0
+                      ? t('pace.left', { n: holeLeft })
+                      : t('pace.late', { n: -holeLeft })}
+                  </span>
+                </li>
+              )}
+            </ol>
+          </>
+        )}
+
+        {health.milestones.length > 0 && (
+          <>
+            <span className="eyebrow">{t('health.history')}</span>
+            <ul className="health-history">
+              {health.milestones.map((date, done) => {
+                const pace = paceOn(startedAt, done, Date.parse(date))
+
+                return (
+                  <li key={date} className="chip">
+                    {t('health.historyRow', { circle: done, date: day(date) })}
+                    <strong>{pace === null ? '—' : t('pace.option', { n: pace })}</strong>
+                  </li>
+                )
+              })}
+            </ul>
+          </>
+        )}
+
+        {!finished && (
+          <Calculator
+            startedAt={startedAt}
+            from={circle}
+            now={now}
+            extraDays={extraDays}
+            day={day}
+          />
+        )}
+        <p className="hint">
+          {t(extraDays > 0 ? 'health.noteExtra' : 'health.note', { n: extraDays })}
+        </p>
+      </>
+    )
+  }
 }
 
 type StepRowProps = {

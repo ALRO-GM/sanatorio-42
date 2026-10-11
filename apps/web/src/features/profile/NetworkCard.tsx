@@ -3,6 +3,7 @@ import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { Meter } from '../network/Meter'
+import { VerdictStats } from '../network/VerdictStats'
 
 /** Con cuántas personas se resume tu red. */
 const SHOWN = 5
@@ -59,14 +60,13 @@ export function NetworkCard({ me }: { me: string }) {
               <dd>{mine.partners}</dd>
             </div>
           </dl>
+          <VerdictStats node={mine} />
           <Meter label={t('net.endogamy')} value={mine.endogamy} />
           <p className="hint">
             {t('net.personBreakdown', {
               repetition: Math.round(mine.repetition * 100),
               reciprocity: Math.round(mine.reciprocity * 100),
             })}
-            {mine.passRate !== null &&
-              ` · ${t('net.passRate', { pct: Math.round(mine.passRate * 100) })}`}
           </p>
           {partners.length > 0 && (
             <>

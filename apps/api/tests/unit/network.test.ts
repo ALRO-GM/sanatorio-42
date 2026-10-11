@@ -11,7 +11,12 @@ import type { Actor } from '../../src/core/actor.js'
 import { closeDatabase, openDatabase } from '../../src/core/db/database.js'
 import type { Db } from '../../src/core/db/database.js'
 import type { ApiScaleTeam } from '../../src/integrations/forty-two/types.js'
-import { analyse, mergePairs, select } from '../../src/modules/network/network.analysis.js'
+import {
+  analyse,
+  mergePairs,
+  passMarkOf,
+  select,
+} from '../../src/modules/network/network.analysis.js'
 import { rowsOf } from '../../src/modules/network/network.sync.js'
 import { createFake42 } from '../helpers/fake-42.js'
 import { createFakeClock } from '../helpers/fake-api.js'
@@ -130,6 +135,24 @@ describe('red de correcciones', () => {
       expect(group('a').size).toBe(1)
       expect(group('b').size).toBe(1)
       expect(group('a')).not.toEqual(group('b'))
+    })
+
+    it('deduce la nota mínima de un proyecto de cómo ha acabado la gente', () => {
+      const marks = (...pairs: [number, number][]) =>
+        pairs.map(([mark, people]) => ({ mark, people }))
+
+      // Nadie valida por debajo de 100 y hay suspensos con 93: la mínima es 100.
+      expect(passMarkOf(marks([100, 300], [125, 80]), marks([0, 40], [93, 3]))).toBe(100)
+      // Se valida desde 91 y nadie suspende cerca: es la habitual de 80.
+      expect(passMarkOf(marks([91, 5], [100, 200]), marks([0, 30]))).toBe(80)
+      // Una validación a mano con un 0 entre quinientas no baja la mínima.
+      expect(passMarkOf(marks([0, 1], [100, 500]), marks([60, 10]))).toBe(100)
+      // Si con la habitual habría suspensos "aprobados", se queda la nota vista.
+      expect(passMarkOf(marks([90, 50], [100, 50]), marks([85, 20]))).toBe(90)
+      // Proyectos que se validan a mano con cualquier nota: nunca menos de 50.
+      expect(passMarkOf(marks([0, 20], [30, 5]), [])).toBe(50)
+      // Sin nadie que lo haya validado no hay de dónde sacarla.
+      expect(passMarkOf([], marks([0, 3]))).toBeNull()
     })
 
     it('elige qué pintar: los más activos, o una persona y su entorno', () => {
@@ -402,9 +425,14 @@ describe('red de correcciones', () => {
       expect(graph.projects).toEqual([
         { id: 10, name: 'ft_printf', corrections: 4, passRate: 0.75 },
       ])
-      // `eva` aprobó dos de las tres que hizo; `ana` no llega al mínimo para opinar.
-      expect(graph.nodes.find((node) => node.login === 'eva')?.passRate).toBe(0.667)
-      expect(graph.nodes.find((node) => node.login === 'ana')?.passRate).toBeNull()
+      const eva = graph.nodes.find((node) => node.login === 'eva')
+      const ana = graph.nodes.find((node) => node.login === 'ana')
+
+      // Como correctora, `eva` aprobó dos de los tres proyectos ajenos que evaluó;
+      // a ella solo la han evaluado una vez, que no llega para opinar.
+      expect(eva).toMatchObject({ givenPassRate: 0.667, receivedPassRate: null })
+      // A `ana` le evaluaron dos veces su proyecto: tampoco llega al mínimo.
+      expect(ana).toMatchObject({ givenPassRate: null, receivedPassRate: null })
     })
 
     it('dice con quién te has corregido tú', async () => {
@@ -424,6 +452,140 @@ describe('red de correcciones', () => {
         ],
       })
       expect(await services.network.mine(actor('nadie'))).toEqual({ partners: [] })
+    })
+
+    it('el veredicto sale de la nota: un 0 con marca de "Ok" es un suspenso', async () => {
+      // Así lo manda 42: la marca es buena aunque la nota sea 0 o no llegue.
+      api.scaleTeams.set(MADRID, [
+        scaleTeam('eva', 'ana', { final_mark: 0 }),
+        scaleTeam('eva', 'ana', { final_mark: 10 }),
+        scaleTeam('eva', 'ana', { final_mark: 100 }),
+        scaleTeam('eva', 'ana', { final_mark: 125 }),
+        // Y una marca mala suspende por alta que sea la nota.
+        scaleTeam('leo', 'ana', { final_mark: 100, flag: { name: 'Cheat', positive: false } }),
+      ])
+      await copyAll()
+
+      const detail = await services.network.pair(actor('ana'), { a: 'eva', b: 'ana' })
+
+      expect(detail.corrections.map((row) => [row.mark, row.positive]).sort()).toEqual([
+        [0, false],
+        [10, false],
+        [100, true],
+        [125, true],
+      ])
+
+      const graph = await services.network.graph(actor('ana'), {})
+
+      // A `ana` le han aprobado dos de cinco; `eva` aprobó dos de las cuatro que hizo.
+      expect(graph.nodes.find((node) => node.login === 'ana')?.receivedPassRate).toBe(0.4)
+      expect(graph.nodes.find((node) => node.login === 'eva')?.givenPassRate).toBe(0.5)
+      expect(
+        (await services.network.graph(actor('ana'), { verdict: 'fail' })).totals,
+      ).toMatchObject({
+        corrections: 3,
+      })
+    })
+
+    it('la nota mínima de cada proyecto se aprende de la réplica', async () => {
+      // En el proyecto 10 se valida con 100 y se suspende con 90: un 85 no aprueba.
+      await services.repositories.replica.ingestProjectUsers(
+        [
+          projectUser('uno', { status: 'finished', validated: true, finalMark: 100 }),
+          projectUser('dos', { status: 'finished', validated: false, finalMark: 90 }),
+        ],
+        MADRID,
+      )
+      api.scaleTeams.set(MADRID, [
+        scaleTeam('eva', 'ana', { final_mark: 85 }),
+        // De un proyecto del que no se sabe nada vale la mínima habitual, 80.
+        scaleTeam('eva', 'ana', { final_mark: 85, team: { project_id: 555 } }),
+      ])
+      await copyAll()
+      // El histórico se copió antes de saber las notas mínimas: una vuelta más las aplica.
+      await services.corrections.step()
+
+      const detail = await services.network.pair(actor('ana'), { a: 'eva', b: 'ana' })
+
+      expect(detail.corrections.find((row) => row.project === 'ft_printf')?.positive).toBe(false)
+      expect(detail.corrections.find((row) => row.project === null)?.positive).toBe(true)
+    })
+
+    it('repasa el histórico entero una vez al día, solo si nadie usa la web', async () => {
+      const rows = [
+        scaleTeam('eva', 'ana'),
+        scaleTeam('ana', 'eva'),
+        scaleTeam('leo', 'ana'),
+      ] as const
+
+      api.scaleTeams.set(MADRID, [...rows])
+      await copyAll()
+
+      // 42 anula la segunda y le cambia la nota a la tercera sin avisar por `updated_at`.
+      const [first, , third] = rows
+
+      api.scaleTeams.set(MADRID, [first, { ...third, final_mark: 0 }])
+      clock.advance(25 * 60 * MINUTE)
+
+      // Con alguien dentro, solo se piden las novedades (una petición).
+      services.sync.touch()
+      api.calls.length = 0
+      await services.corrections.step()
+      expect(api.calls).toHaveLength(1)
+      expect(await services.corrections.status(MADRID)).toMatchObject({ rows: 3 })
+
+      // Cuando ya no hay nadie, el repaso recorre todo, corrige y borra.
+      clock.advance(11 * MINUTE)
+      await services.corrections.step()
+      expect(await services.corrections.status(MADRID)).toMatchObject({ rows: 2 })
+      expect(
+        (await services.network.pair(actor('ana'), { a: 'leo', b: 'ana' })).corrections[0],
+      ).toMatchObject({ mark: 0, positive: false })
+
+      // Y no se repite hasta el día siguiente.
+      clock.advance(11 * MINUTE)
+      api.calls.length = 0
+      await services.corrections.step()
+      expect(api.calls.every((call) => call.includes('range[updated_at]'))).toBe(true)
+    })
+
+    it('ordena a los más estrictos, a partir de un mínimo de evaluaciones', async () => {
+      api.scaleTeams.set(MADRID, [
+        // `eva` evalúa cuatro y suspende una; `leo`, dos y las suspende; `ana`, una que aprueba.
+        scaleTeam('eva', 'ana'),
+        scaleTeam('eva', 'ana'),
+        scaleTeam('eva', 'leo'),
+        scaleTeam('eva', 'leo', { final_mark: 0 }),
+        scaleTeam('leo', 'ana', { final_mark: 0 }),
+        scaleTeam('leo', 'eva', { final_mark: 10 }),
+        scaleTeam('ana', 'eva'),
+      ])
+      await copyAll()
+
+      const all = await services.network.strictest(actor('ana'), { min: '1' })
+
+      expect(all).toMatchObject({ min: 1, eligible: 3, campusFailRate: 0.429 })
+      expect(
+        all.people.map((person) => [person.login, person.judged, person.failed, person.failRate]),
+      ).toEqual([
+        ['leo', 2, 2, 1],
+        ['eva', 4, 1, 0.25],
+        ['ana', 1, 0, 0],
+      ])
+      // Al revés, los que menos suspenden primero.
+      expect(
+        (await services.network.strictest(actor('ana'), { min: '1', order: 'asc' })).people.map(
+          (person) => person.login,
+        ),
+      ).toEqual(['ana', 'eva', 'leo'])
+      // Subir el mínimo deja fuera a quien ha evaluado poco.
+      const steady = await services.network.strictest(actor('ana'), { min: '3' })
+
+      expect(steady.eligible).toBe(1)
+      expect(steady.people.map((person) => person.login)).toEqual(['eva'])
+      await expect(services.network.strictest(actor('ana'), { min: '0' })).rejects.toMatchObject({
+        code: 'invalid_input',
+      })
     })
 
     it('busca personas por el principio del login', async () => {

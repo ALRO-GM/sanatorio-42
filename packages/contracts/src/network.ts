@@ -37,10 +37,15 @@ export type NetworkNode = {
   /** Parte de sus correcciones que repiten con alguien ya visto (0-1). */
   repetition: number
   /**
-   * Parte de las correcciones que ha hecho en las que dio el proyecto por bueno
-   * (0-1), o `null` si no ha hecho ninguna con veredicto.
+   * Como corrector: parte de los proyectos ajenos que ha evaluado y ha dado por
+   * buenos (0-1). `null` si ha evaluado demasiado pocos para decirlo.
    */
-  passRate: number | null
+  givenPassRate: number | null
+  /**
+   * Como corregido: parte de las evaluaciones de sus propios proyectos en las
+   * que se los dieron por buenos (0-1). `null` si le han evaluado demasiado poco.
+   */
+  receivedPassRate: number | null
   /** Comunidad a la que pertenece: `0` es la mayor. Sale de quién corrige a quién. */
   community: number
   /** Año de su primera corrección en el campus: una pista de su promoción. */
@@ -146,4 +151,29 @@ export type NetworkPairDetail = {
 export type NetworkMine = {
   /** Las personas con más correcciones cruzadas primero. */
   partners: { login: string; gave: number; got: number }[]
+}
+
+/** Una persona del ranking de quién suspende más al corregir. */
+export type NetworkStrict = {
+  login: string
+  image: string | null
+  /** Proyectos ajenos que ha evaluado (con veredicto) y cuántos suspendió. */
+  judged: number
+  failed: number
+  /** Parte que suspende (0-1). */
+  failRate: number
+}
+
+/** `GET /network/strictest?min=`: quién suspende más de lo que evalúa. */
+export type NetworkStrictest = {
+  /** Evaluaciones mínimas para entrar en la lista. */
+  min: number
+  /** `desc`: los que más suspenden primero; `asc`: los que menos. */
+  order: 'asc' | 'desc'
+  /** Cuánta gente del campus llega a ese mínimo. */
+  eligible: number
+  /** Parte que suspende el campus entero, para comparar (0-1). */
+  campusFailRate: number
+  /** En el orden pedido. Como mucho, 100. */
+  people: NetworkStrict[]
 }

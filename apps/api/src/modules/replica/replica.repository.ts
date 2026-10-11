@@ -582,6 +582,28 @@ export function createReplicaRepository(db: Db) {
       return names
     },
 
+    /**
+     * Con qué notas ha acabado la gente cada proyecto, separando los que se
+     * dieron por buenos de los que no. De aquí se deduce la nota mínima de cada
+     * proyecto, que la API no publica.
+     */
+    async finalMarks(): Promise<
+      { projectId: number; validated: boolean; mark: number; people: number }[]
+    > {
+      const result = await db.execute(
+        `SELECT project_id, validated, final_mark, COUNT(*) AS people FROM project_users
+         WHERE status = 'finished' AND final_mark IS NOT NULL AND validated IS NOT NULL
+         GROUP BY project_id, validated, final_mark`,
+      )
+
+      return result.rows.map((row) => ({
+        projectId: toNumber(row.project_id),
+        validated: toNumber(row.validated) === 1,
+        mark: toNumber(row.final_mark),
+        people: toNumber(row.people),
+      }))
+    },
+
     /** Logins de toda la gente de un campus, con su avatar. */
     async membersOf(campusId: number): Promise<Map<string, string | null>> {
       const result = await db.execute({

@@ -123,11 +123,24 @@ El módulo `network` copia de 42 las correcciones del 42cursus de cada campus
 seguido (`GET /v2/scale_teams?filter[campus_id]=…&filter[cursus_id]=21`; Madrid
 son unas 82 000, 820 peticiones una sola vez) y calcula sobre ellas el grafo.
 
-- **Copia** (`network.sync.ts`): primero todo el histórico, ordenado por id y con
-  un cursor guardado en `sync_state`, así que un reinicio sigue donde se dejó.
-  Después, cada diez minutos, solo lo cambiado (`range[updated_at]`). Nunca gasta
-  la reserva horaria de la API. Se guarda quién, a quién, qué proyecto, cuándo y
-  la nota; los comentarios y el feedback no llegan a la base.
+- **Copia** (`network.sync.ts`), en tres ritmos:
+  - *Histórico*: una vez, ordenado por id y con un cursor guardado en
+    `sync_state`, así que un reinicio sigue donde se dejó.
+  - *Novedades*: cada diez minutos, solo lo cambiado (`range[updated_at]`). Una
+    petición casi siempre.
+  - *Repaso*: una vez al día vuelve a recorrer el histórico entero para recoger
+    lo que `updated_at` no avise y borrar lo que 42 haya quitado. Solo corre si
+    nadie ha usado la web en los últimos diez minutos y sobra cuota, de modo que
+    gasta la que de otro modo se perdería; si alguien entra, se para y sigue luego.
+
+  Nunca toca la reserva horaria de la API. Se guarda quién, a quién, qué
+  proyecto, cuándo, la nota y la marca; los comentarios y el feedback no llegan
+  a la base.
+- **Veredicto**: la marca que pone quien corrige no vale sola, porque 42 guarda
+  "Ok" también en correcciones con un 0. Una corrección aprueba si la marca es
+  buena y la nota llega a la mínima del proyecto. Esa mínima no está en la API:
+  se deduce de con qué notas ha validado y suspendido la gente cada proyecto
+  (`passMarkOf`), y se recalcula cada seis horas.
 - **Cuentas** (`network.analysis.ts`, funciones puras): SQLite junta las
   correcciones por pareja y sentido; con eso se calculan la endogamia de cada
   persona (media de cuánto repite con la misma gente y cuánto de lo que corrige

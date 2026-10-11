@@ -26,7 +26,10 @@ import type { PairRow } from './network.repository.js'
 export type Pair = { a: string; b: string; ab: number; ba: number }
 
 /** Lo que se sabe de cada persona antes de pintarla. */
-export type PersonStats = Omit<NetworkNode, 'image' | 'cohort' | 'passRate'>
+export type PersonStats = Omit<
+  NetworkNode,
+  'image' | 'cohort' | 'givenPassRate' | 'receivedPassRate'
+>
 
 export type Analysis = {
   pairs: Pair[]
@@ -242,6 +245,63 @@ function communitiesOf(pairs: readonly Pair[], logins: readonly string[]): Map<s
 
 const round3 = (value: number): number => Math.round(value * 1000) / 1000
 
+/** Notas mínimas habituales en 42, de más a menos exigente. */
+const USUAL_PASS_MARKS = [100, 80, 75, 50] as const
+
+/** Ningún proyecto se da por bueno con menos que esto. */
+const LOWEST_PASS_MARK = 50
+
+/** Nota mínima que se supone a un proyecto del que no hay ningún dato. */
+export const DEFAULT_PASS_MARK = 80
+
+/** La nota que deja por debajo a esa parte (0-1) de la gente. */
+function percentile(marks: readonly { mark: number; people: number }[], share: number): number {
+  const sorted = [...marks].sort((a, b) => a.mark - b.mark)
+  const target = share * sorted.reduce((sum, entry) => sum + entry.people, 0)
+  let seen = 0
+
+  for (const entry of sorted) {
+    seen += entry.people
+
+    if (seen > target) {
+      return entry.mark
+    }
+  }
+
+  return sorted.at(-1)?.mark ?? 0
+}
+
+/**
+ * La nota mínima de un proyecto, deducida de cómo ha acabado la gente.
+ *
+ * La API no la publica, pero se ve en los datos: nadie valida por debajo de
+ * ella. Se toma la nota más baja con la que se ha validado (sin el 1 % de casos
+ * raros: validaciones a mano del staff) y se baja a la mínima habitual más
+ * cercana, porque que nadie haya validado con un 85 no significa que no se
+ * pueda. Si con eso habría suspensos "aprobados", se queda la nota tal cual.
+ *
+ * @param validated Notas finales de quien lo validó, con cuánta gente cada una.
+ * @param failed    Notas finales de quien lo terminó sin validarlo.
+ * @returns `null` si nadie lo ha validado: no hay de dónde deducirla.
+ */
+export function passMarkOf(
+  validated: readonly { mark: number; people: number }[],
+  failed: readonly { mark: number; people: number }[],
+): number | null {
+  if (validated.length === 0) {
+    return null
+  }
+
+  const lowest = percentile(validated, 0.01)
+  const usual = USUAL_PASS_MARKS.find((mark) => mark <= lowest) ?? lowest
+  // Lo más alto con lo que se ha suspendido, sin el 1 % de casos raros.
+  const highestFail = failed.length === 0 ? -1 : percentile(failed, 0.99)
+
+  // Por debajo de 50 no hay mínima que valga: son proyectos que se validan a
+  // mano (prácticas, exámenes antiguos) y su nota final no dice nada.
+  return Math.max(LOWEST_PASS_MARK, usual > highestFail ? usual : lowest)
+}
+
 /** Todas las cuentas de un conjunto de parejas. */
 export function analyse(pairs: readonly Pair[], members: ReadonlySet<string>): Analysis {
   type Tally = { given: number; received: number; partners: number; mutual: number }
@@ -338,6 +398,12 @@ export function toLink(pair: Pair): NetworkLink {
 const weightOf = (pair: Pair): number => pair.ab + pair.ba
 
 /**
+ * Uniones que se mandan como mucho, por muchas personas que se pidan. Más no se
+ * distinguen en pantalla y el navegador las pinta en cada fotograma.
+ */
+const MAX_LINKS = 20_000
+
+/**
  * Qué se pinta de un análisis.
  *
  * Con `focus`, la persona, quienes se han cruzado con ella y las uniones entre
@@ -384,7 +450,7 @@ export function select(
   const shown = new Set(logins)
   const inside = strong.filter((pair) => shown.has(pair.a) && shown.has(pair.b))
   // Tope de uniones: con demasiadas el grafo es una mancha y el navegador sufre.
-  const maxLinks = Math.max(200, limit * 6)
+  const maxLinks = Math.min(MAX_LINKS, Math.max(200, limit * 6))
   const kept =
     inside.length > maxLinks
       ? [...inside].sort((x, y) => weightOf(y) - weightOf(x)).slice(0, maxLinks)

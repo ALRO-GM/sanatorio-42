@@ -14,19 +14,22 @@ import { PERIODS, startOf } from './period'
 import type { Period } from './period'
 import { PersonPanel } from './PersonPanel'
 import { PersonSearch } from './PersonSearch'
+import { RankCard, ranked } from './RankCard'
+import type { Order } from './RankCard'
+import { StrictestCard } from './StrictestCard'
 import { Timeline } from './Timeline'
 
 /** Topes de personas que se pueden pedir. */
-const LIMITS = [150, 300, 600, 1000, 2000] as const
+const LIMITS = [150, 300, 600, 1000, 2000, 20_000] as const
+
+/** El tope más alto es, en la práctica, el campus entero. */
+const ALL_PEOPLE = 20_000
 
 /** Espera antes de pedir de nuevo al mover un control (el deslizador sobre todo). */
 const DEBOUNCE_MS = 250
 
 /** Cada cuánto se refresca mientras la copia desde 42 sigue en marcha. */
 const REFRESH_WHILE_COPYING_MS = 45_000
-
-/** Proyectos que se listan en el panel. */
-const PROJECTS_SHOWN = 10
 
 /** Actividad mínima para salir en el ranking: con dos correcciones cualquier índice engaña. */
 const RANKING_MIN_ACTIVITY = 12
@@ -165,6 +168,12 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
       <>
         <strong>{node.login}</strong>
         <span>{t('net.tip.counts', { given: node.given, received: node.received })}</span>
+        {node.givenPassRate !== null && (
+          <span>{t('net.tip.given', { pct: Math.round(node.givenPassRate * 100) })}</span>
+        )}
+        {node.receivedPassRate !== null && (
+          <span>{t('net.tip.received', { pct: Math.round(node.receivedPassRate * 100) })}</span>
+        )}
         <span>{t('net.tip.endogamy', { n: node.endogamy, partners: node.partners })}</span>
       </>
     ),
@@ -177,13 +186,39 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
   const nodes = graph?.nodes
   const legend = useMemo(() => legendOf(nodes ?? [], mode, t), [nodes, mode, t])
   const chosen = nodes?.find((node) => node.login === selected) ?? null
+  // Sentido de cada lista del panel: de mayor a menor mientras no se cambie.
+  const [orders, setOrders] = useState<Record<'endogamy' | 'pairs' | 'projects', Order>>({
+    endogamy: 'desc',
+    pairs: 'desc',
+    projects: 'desc',
+  })
   const ranking = useMemo(
     () =>
-      (nodes ?? [])
-        .filter((node) => !node.external && node.given + node.received >= RANKING_MIN_ACTIVITY)
-        .sort((a, b) => b.endogamy - a.endogamy || b.given + b.received - (a.given + a.received))
-        .slice(0, 8),
-    [nodes],
+      ranked(
+        (nodes ?? []).filter(
+          (node) => !node.external && node.given + node.received >= RANKING_MIN_ACTIVITY,
+        ),
+        // La actividad desempata sin cambiar el orden entre endogamias distintas.
+        (node) => node.endogamy + (node.given + node.received) / 1e6,
+        orders.endogamy,
+      ),
+    [nodes, orders.endogamy],
+  )
+  const topPairs = graph?.topPairs
+  const pairs = useMemo(
+    () =>
+      ranked(
+        topPairs ?? [],
+        // Primero lo que se devuelven; después, el total.
+        (pair) => Math.min(pair.forth, pair.back) + (pair.forth + pair.back) / 1e4,
+        orders.pairs,
+      ),
+    [topPairs, orders.pairs],
+  )
+  const allProjects = graph?.projects
+  const projects = useMemo(
+    () => ranked(allProjects ?? [], (project) => project.corrections, orders.projects),
+    [allProjects, orders.projects],
   )
 
   return (
@@ -317,7 +352,7 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
               >
                 {LIMITS.map((limit) => (
                   <option key={limit} value={limit}>
-                    {limit}
+                    {limit === ALL_PEOPLE ? t('net.limit.all') : limit}
                   </option>
                 ))}
               </select>
@@ -474,93 +509,113 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
 
               {chosen === null && (
                 <>
-                  <article className="card net-panel">
-                    <span className="eyebrow">{t('net.ranking')}</span>
-                    {ranking.length === 0 ? (
-                      <p className="hint">{t('net.rankingEmpty')}</p>
-                    ) : (
-                      <ul className="net-rows">
-                        {ranking.map((node) => (
-                          <li key={node.login}>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setSelected(node.login)
-                              }}
-                            >
-                              <span className="net-row-name">{node.login}</span>
-                              <span
-                                className="net-row-badge"
-                                style={{ background: colorOf(node, 'endogamy') }}
-                              >
-                                {node.endogamy}
-                              </span>
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </article>
-                  <article className="card net-panel">
-                    <span className="eyebrow">{t('net.topPairs')}</span>
-                    <ul className="net-rows">
-                      {graph.topPairs.map((pair) => (
-                        <li key={`${pair.source}-${pair.target}`}>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              focusOn(pair.source)
-                            }}
-                          >
-                            <span className="net-row-name">
-                              {pair.source} ⇄ {pair.target}
-                            </span>
-                            <span className="net-row-count">
-                              {pair.forth} · {pair.back}
-                            </span>
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  </article>
-                </>
-              )}
-
-              {chosen === null && graph.projects.length > 0 && (
-                <article className="card net-panel">
-                  <span className="eyebrow">{t('net.projects')}</span>
-                  <ul className="net-rows">
-                    {graph.projects.slice(0, PROJECTS_SHOWN).map((project) => (
-                      <li key={project.id}>
+                  <RankCard
+                    id="endogamy"
+                    title={t('net.ranking')}
+                    order={orders.endogamy}
+                    onOrder={(order) => {
+                      setOrders((current) => ({ ...current, endogamy: order }))
+                    }}
+                    count={ranking.length}
+                    footer={
+                      <p className="hint">
+                        {ranking.length === 0 ? t('net.rankingEmpty') : t('net.rankingHint')}
+                      </p>
+                    }
+                  >
+                    {ranking.map((node) => (
+                      <li key={node.login}>
                         <button
                           type="button"
-                          aria-pressed={filters.projectId === project.id}
-                          className={filters.projectId === project.id ? 'active' : ''}
                           onClick={() => {
-                            change({
-                              projectId: filters.projectId === project.id ? null : project.id,
-                            })
+                            setSelected(node.login)
                           }}
                         >
-                          <span className="net-row-name">{project.name}</span>
-                          <span className="net-row-count">
-                            {project.corrections.toLocaleString()}
-                            {project.passRate !== null && (
-                              <span
-                                className="net-row-badge"
-                                title={t('net.projects.pass')}
-                                style={{ background: passColor(project.passRate) }}
-                              >
-                                {Math.round(project.passRate * 100)} %
-                              </span>
-                            )}
+                          <span className="net-row-name">{node.login}</span>
+                          <span
+                            className="net-row-badge"
+                            style={{ background: colorOf(node, 'endogamy') }}
+                          >
+                            {node.endogamy}
                           </span>
                         </button>
                       </li>
                     ))}
-                  </ul>
-                  <p className="hint">{t('net.projects.hint')}</p>
-                </article>
+                  </RankCard>
+
+                  <RankCard
+                    id="pairs"
+                    title={t('net.topPairs')}
+                    order={orders.pairs}
+                    onOrder={(order) => {
+                      setOrders((current) => ({ ...current, pairs: order }))
+                    }}
+                    count={pairs.length}
+                    footer={<p className="hint">{t('net.topPairsHint')}</p>}
+                  >
+                    {pairs.map((pair) => (
+                      <li key={`${pair.source}-${pair.target}`}>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            focusOn(pair.source)
+                          }}
+                        >
+                          <span className="net-row-name">
+                            {pair.source} ⇄ {pair.target}
+                          </span>
+                          <span className="net-row-count">
+                            {pair.forth} · {pair.back}
+                          </span>
+                        </button>
+                      </li>
+                    ))}
+                  </RankCard>
+
+                  <StrictestCard params={params} onSelect={focusOn} />
+
+                  {projects.length > 0 && (
+                    <RankCard
+                      id="projects"
+                      title={t('net.projects')}
+                      order={orders.projects}
+                      onOrder={(order) => {
+                        setOrders((current) => ({ ...current, projects: order }))
+                      }}
+                      count={projects.length}
+                      footer={<p className="hint">{t('net.projects.hint')}</p>}
+                    >
+                      {projects.map((project) => (
+                        <li key={project.id}>
+                          <button
+                            type="button"
+                            aria-pressed={filters.projectId === project.id}
+                            className={filters.projectId === project.id ? 'active' : ''}
+                            onClick={() => {
+                              change({
+                                projectId: filters.projectId === project.id ? null : project.id,
+                              })
+                            }}
+                          >
+                            <span className="net-row-name">{project.name}</span>
+                            <span className="net-row-count">
+                              {project.corrections.toLocaleString()}
+                              {project.passRate !== null && (
+                                <span
+                                  className="net-row-badge"
+                                  title={t('net.projects.pass')}
+                                  style={{ background: passColor(project.passRate) }}
+                                >
+                                  {Math.round(project.passRate * 100)} %
+                                </span>
+                              )}
+                            </span>
+                          </button>
+                        </li>
+                      ))}
+                    </RankCard>
+                  )}
+                </>
               )}
 
               <details className="card net-about">

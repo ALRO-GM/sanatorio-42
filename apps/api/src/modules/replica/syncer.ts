@@ -584,6 +584,9 @@ export function createSyncer(options: SyncerOptions) {
       lastActivityAt = now()
     },
 
+    /** `true` si alguien ha usado la web hace poco. El trabajo pesado de fondo espera a que no. */
+    isActive,
+
     /**
      * Guarda lo que trae el login, que es gratis.
      *

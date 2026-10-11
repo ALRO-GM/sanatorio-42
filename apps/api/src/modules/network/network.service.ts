@@ -12,6 +12,7 @@ import type {
   NetworkNode,
   NetworkPairDetail,
   NetworkPerson,
+  NetworkStrictest,
 } from '@sanatorio/contracts'
 import { z } from 'zod'
 
@@ -40,11 +41,12 @@ const CATALOGUE_TTL_MS = 5 * 60_000
 /** Análisis distintos que se recuerdan a la vez. */
 const CACHE_SIZE = 12
 
-/** Parejas que se enseñan en "quién se corrige más". */
-const TOP_PAIRS = 12
+/** Parejas que se mandan en "quién se corrige más": la lista se puede recorrer entera. */
+const TOP_PAIRS = 100
 
 const DEFAULT_LIMIT = 300
-const MAX_LIMIT = 2000
+/** Con esto cabe el campus entero: es la opción "todas" de la web. */
+const MAX_LIMIT = 20_000
 
 /** Una fecha (`2026-10-11`) o un instante ISO-8601. */
 const moment = z
@@ -69,6 +71,20 @@ const pairSchema = z.object({
   verdict: z.enum(['pass', 'fail']).optional(),
 })
 
+const strictSchema = z.object({
+  min: z.coerce.number().int().min(1).max(500).default(20),
+  // `desc`: los que más suspenden primero; `asc`: los que menos.
+  order: z.enum(['asc', 'desc']).default('desc'),
+  from: moment.optional(),
+  to: moment.optional(),
+  projectId: z.coerce.number().int().positive().optional(),
+})
+
+/** Personas que salen en el ranking de estrictos. */
+const STRICTEST_SHOWN = 100
+
+const round3 = (value: number): number => Math.round(value * 1000) / 1000
+
 /** Correcciones que se listan de una pareja. */
 const PAIR_LIMIT = 60
 
@@ -85,7 +101,7 @@ function endOf(to: string | undefined): string | null {
 }
 
 /** El veredicto del filtro, como lo guarda la base. */
-function positiveOf(verdict: 'pass' | 'fail' | undefined): boolean | null {
+function passedOf(verdict: 'pass' | 'fail' | undefined): boolean | null {
   return verdict === undefined ? null : verdict === 'pass'
 }
 
@@ -112,8 +128,9 @@ const querySchema = z.object({
 
 type Cached = {
   analysis: Analysis
-  /** Veredictos de cada corrector, para saber cuánto aprueba. */
-  verdicts: Map<string, { judged: number; passed: number }>
+  /** Veredictos que ha dado cada quien como corrector, y los que han recibido sus proyectos. */
+  given: Map<string, { judged: number; passed: number }>
+  received: Map<string, { judged: number; passed: number }>
   timeline: { month: string; corrections: number }[]
   /** Avatar de cada persona del campus. Quien no está aquí es de fuera. */
   members: Map<string, string | null>
@@ -141,15 +158,16 @@ export function createNetworkService(options: NetworkServiceOptions) {
     from: string | null,
     to: string | null,
     projectId: number | null,
-    positive: boolean | null,
+    passed: boolean | null,
   ): Promise<Cached> =>
     analyses.get(
-      `${campusId}|${from ?? ''}|${to ?? ''}|${projectId ?? ''}|${positive ?? ''}`,
+      `${campusId}|${from ?? ''}|${to ?? ''}|${projectId ?? ''}|${passed ?? ''}`,
       async () => {
-        const [rows, members, verdicts, timeline] = await Promise.all([
-          corrections.pairs({ campusId, from, to, projectId, positive }),
+        const [rows, members, given, received, timeline] = await Promise.all([
+          corrections.pairs({ campusId, from, to, projectId, passed }),
           replica.membersOf(campusId),
-          corrections.verdicts({ campusId, from, to, projectId }),
+          corrections.verdicts({ campusId, from, to, projectId }, 'corrector'),
+          corrections.verdicts({ campusId, from, to, projectId }, 'corrected'),
           // La línea de tiempo no lleva fechas: enseña todo para poder elegirlas.
           corrections.timeline({ campusId, projectId }),
         ])
@@ -161,7 +179,13 @@ export function createNetworkService(options: NetworkServiceOptions) {
             ? new Set(everyone)
             : new Set([...members.keys(), ...everyone.filter(isAnonymised)])
 
-        return { analysis: analyse(mergePairs(rows, inside), inside), members, verdicts, timeline }
+        return {
+          analysis: analyse(mergePairs(rows, inside), inside),
+          members,
+          given,
+          received,
+          timeline,
+        }
       },
     )
 
@@ -198,9 +222,9 @@ export function createNetworkService(options: NetworkServiceOptions) {
       const projectId = query.projectId ?? null
       const focus = query.login ?? null
 
-      const [{ analysis, members, verdicts, timeline }, { years, projects }, status] =
+      const [{ analysis, members, given, received, timeline }, { years, projects }, status] =
         await Promise.all([
-          analysisFor(actor.campusId, from, to, projectId, positiveOf(query.verdict)),
+          analysisFor(actor.campusId, from, to, projectId, passedOf(query.verdict)),
           catalogueOf(actor.campusId),
           sync.status(actor.campusId),
         ])
@@ -226,7 +250,8 @@ export function createNetworkService(options: NetworkServiceOptions) {
               {
                 ...person,
                 image: members.get(login) ?? images.get(login) ?? null,
-                passRate: passRateOf(verdicts.get(login)),
+                givenPassRate: passRateOf(given.get(login)),
+                receivedPassRate: passRateOf(received.get(login)),
                 cohort: years.get(login) ?? null,
               },
             ]
@@ -270,7 +295,7 @@ export function createNetworkService(options: NetworkServiceOptions) {
         from: query.from ?? null,
         to: endOf(query.to),
         projectId: query.projectId ?? null,
-        positive: positiveOf(query.verdict),
+        passed: passedOf(query.verdict),
       }
       const [rows, counts] = await Promise.all([
         corrections.between(filter, query.a, query.b, PAIR_LIMIT),
@@ -291,7 +316,7 @@ export function createNetworkService(options: NetworkServiceOptions) {
           project: row.projectId === null ? null : (names.get(row.projectId) ?? null),
           at: row.beginAt,
           mark: row.finalMark,
-          positive: row.positive,
+          positive: row.passed,
         })),
       }
     },
@@ -303,6 +328,53 @@ export function createNetworkService(options: NetworkServiceOptions) {
      */
     async mine(actor: Actor): Promise<NetworkMine> {
       return { partners: await corrections.partnersOf(actor.campusId, actor.login) }
+    },
+
+    /**
+     * Quién suspende más al corregir, entre quienes han evaluado al menos `min`
+     * proyectos ajenos. Con los mismos filtros de fecha y proyecto que el grafo.
+     *
+     * El mínimo importa: con tres evaluaciones, suspender una ya es un 33 %.
+     */
+    async strictest(actor: Actor, input: unknown): Promise<NetworkStrictest> {
+      const query = parse(strictSchema, input)
+      const { analysis, members, given } = await analysisFor(
+        actor.campusId,
+        query.from ?? null,
+        endOf(query.to),
+        query.projectId ?? null,
+        null,
+      )
+      // Solo gente del campus: de quien viene de fuera se ve una parte mínima.
+      const insiders = [...given].filter(
+        ([login]) => analysis.people.get(login)?.external === false,
+      )
+      const eligible = insiders.filter(([, verdict]) => verdict.judged >= query.min)
+      const judged = insiders.reduce((sum, [, verdict]) => sum + verdict.judged, 0)
+      const passed = insiders.reduce((sum, [, verdict]) => sum + verdict.passed, 0)
+
+      return {
+        min: query.min,
+        order: query.order,
+        eligible: eligible.length,
+        campusFailRate: judged === 0 ? 0 : round3((judged - passed) / judged),
+        people: eligible
+          .map(([login, verdict]) => ({
+            login,
+            image: members.get(login) ?? null,
+            judged: verdict.judged,
+            failed: verdict.judged - verdict.passed,
+            failRate: round3((verdict.judged - verdict.passed) / verdict.judged),
+          }))
+          // A igual porcentaje, primero quien más ha evaluado: su dato es más firme.
+          .sort(
+            (a, b) =>
+              (query.order === 'desc' ? b.failRate - a.failRate : a.failRate - b.failRate) ||
+              b.judged - a.judged ||
+              (a.login < b.login ? -1 : 1),
+          )
+          .slice(0, STRICTEST_SHOWN),
+      }
     },
 
     /** Logins que empiezan por lo escrito, para el buscador de personas. */

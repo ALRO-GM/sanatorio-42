@@ -14,10 +14,17 @@ export type CorrectionRow = {
   projectId: number | null
   beginAt: string
   finalMark: number | null
+  /** La marca que puso quien corrigió. Sola no decide: ver `passed`. */
   positive: boolean | null
 }
 
 /** Cuántas veces ha corregido una persona a otra. */
+/** Una corrección leída de la base, ya con su veredicto. */
+export type StoredCorrection = CorrectionRow & {
+  /** `true` si aprobó; `null` si aún no se ha calculado. */
+  passed: boolean | null
+}
+
 export type PairRow = { corrector: string; corrected: string; count: number }
 
 /** Qué correcciones se miran. */
@@ -27,7 +34,7 @@ export type CorrectionFilter = {
   to?: string | null
   projectId?: number | null
   /** `true`: solo las que aprobaron; `false`: solo las que suspendieron. */
-  positive?: boolean | null
+  passed?: boolean | null
 }
 
 /** Filas por sentencia al guardar: 8 columnas × 100 queda lejos del tope de SQLite. */
@@ -52,9 +59,9 @@ export function createNetworkRepository(db: Db) {
       args.push(filter.projectId)
     }
 
-    if (filter.positive !== null && filter.positive !== undefined) {
-      clauses.push('positive = ?')
-      args.push(Number(filter.positive))
+    if (filter.passed !== null && filter.passed !== undefined) {
+      clauses.push('passed = ?')
+      args.push(Number(filter.passed))
     }
 
     return { sql: clauses.join(' AND '), args }
@@ -91,6 +98,73 @@ export function createNetworkRepository(db: Db) {
           ]),
         })
       }
+    },
+
+    /** Sustituye las notas mínimas de los proyectos. */
+    async savePassMarks(marks: ReadonlyMap<number, number>): Promise<void> {
+      const rows = [...marks]
+
+      await db.batch(
+        [
+          'DELETE FROM project_pass_marks',
+          ...Array.from({ length: Math.ceil(rows.length / BATCH) }, (_, index) => {
+            const batch = rows.slice(index * BATCH, (index + 1) * BATCH)
+
+            return {
+              sql: `INSERT INTO project_pass_marks (project_id, pass_mark)
+                    VALUES ${batch.map(() => '(?, ?)').join(', ')}`,
+              args: batch.flat(),
+            }
+          }),
+        ],
+        'write',
+      )
+    },
+
+    /**
+     * Calcula el veredicto de las correcciones cuyo id está entre `fromId` y
+     * `toId` (todas, si no se pasan).
+     *
+     * Aprueba la que tiene buena marca **y** una nota que llega a la mínima de
+     * su proyecto. Una marca mala suspende siempre, por alta que sea la nota.
+     *
+     * @param fallback Nota mínima de los proyectos de los que no se sabe nada.
+     */
+    async judge(fallback: number, fromId = 0, toId = Number.MAX_SAFE_INTEGER): Promise<void> {
+      await db.execute({
+        sql: `UPDATE corrections SET passed = CASE
+                WHEN positive = 0 THEN 0
+                WHEN final_mark >= COALESCE(
+                  (SELECT pass_mark FROM project_pass_marks m
+                   WHERE m.project_id = corrections.project_id), ?) THEN 1
+                ELSE 0
+              END
+              WHERE id BETWEEN ? AND ?`,
+        args: [fallback, fromId, toId],
+      })
+    },
+
+    /**
+     * Borra las correcciones de un tramo de ids que ya no están en 42 (citas
+     * anuladas, cuentas borradas).
+     *
+     * @param keep Ids que 42 sí ha devuelto en ese tramo.
+     * @returns Cuántas filas se han borrado.
+     */
+    async prune(
+      campusId: number,
+      afterId: number,
+      upToId: number,
+      keep: readonly number[],
+    ): Promise<number> {
+      const result = await db.execute({
+        sql: `DELETE FROM corrections
+              WHERE campus_id = ? AND id > ? AND id <= ?
+                ${keep.length === 0 ? '' : `AND id NOT IN (${keep.map(() => '?').join(', ')})`}`,
+        args: [campusId, afterId, upToId, ...keep],
+      })
+
+      return result.rowsAffected
     },
 
     /** Cuántas hay copiadas y entre qué fechas. */
@@ -133,20 +207,27 @@ export function createNetworkRepository(db: Db) {
       }))
     },
 
-    /** Cuántas correcciones con veredicto ha hecho cada persona y cuántas aprobó. */
+    /**
+     * Correcciones con veredicto de cada persona y cuántas aprobaron, vistas
+     * desde un lado: las que hizo como corrector (`corrector`) o las que
+     * recibieron sus propios proyectos (`corrected`).
+     */
     async verdicts(
       filter: CorrectionFilter,
+      side: 'corrector' | 'corrected',
     ): Promise<Map<string, { judged: number; passed: number }>> {
       const { sql, args } = where(filter)
+      // `side` solo puede ser uno de los dos nombres de columna: no viene de fuera.
       const result = await db.execute({
-        sql: `SELECT corrector, COUNT(positive) AS judged, COALESCE(SUM(positive), 0) AS passed
-              FROM corrections WHERE ${sql} GROUP BY corrector`,
+        sql: `SELECT ${side} AS login, COUNT(passed) AS judged,
+                     COALESCE(SUM(passed), 0) AS passed
+              FROM corrections WHERE ${sql} GROUP BY ${side}`,
         args,
       })
 
       return new Map(
         result.rows.map((row) => [
-          toText(row.corrector),
+          toText(row.login),
           { judged: toNumber(row.judged), passed: toNumber(row.passed) },
         ]),
       )
@@ -173,10 +254,11 @@ export function createNetworkRepository(db: Db) {
       a: string,
       b: string,
       limit: number,
-    ): Promise<CorrectionRow[]> {
+    ): Promise<StoredCorrection[]> {
       const { sql, args } = where(filter)
       const result = await db.execute({
-        sql: `SELECT id, campus_id, corrector, corrected, project_id, begin_at, final_mark, positive
+        sql: `SELECT id, campus_id, corrector, corrected, project_id, begin_at, final_mark, positive,
+                     passed
               FROM corrections
               WHERE ${sql} AND ((corrector = ? AND corrected = ?) OR (corrector = ? AND corrected = ?))
               ORDER BY begin_at DESC LIMIT ?`,
@@ -192,6 +274,7 @@ export function createNetworkRepository(db: Db) {
         beginAt: toText(row.begin_at),
         finalMark: row.final_mark === null ? null : toNumber(row.final_mark),
         positive: row.positive === null ? null : toNumber(row.positive) === 1,
+        passed: row.passed === null ? null : toNumber(row.passed) === 1,
       }))
     },
 
@@ -260,7 +343,7 @@ export function createNetworkRepository(db: Db) {
       campusId: number,
     ): Promise<{ id: number; corrections: number; passRate: number | null }[]> {
       const result = await db.execute({
-        sql: `SELECT project_id, COUNT(*) AS total, AVG(positive) AS pass_rate FROM corrections
+        sql: `SELECT project_id, COUNT(*) AS total, AVG(passed) AS pass_rate FROM corrections
               WHERE campus_id = ? AND project_id IS NOT NULL
               GROUP BY project_id ORDER BY total DESC`,
         args: [campusId],
