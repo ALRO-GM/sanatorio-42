@@ -11,7 +11,21 @@ import type { AttendanceService, AttendanceServiceOptions } from './attendance.s
 export type AttendanceModule = AppModule & { service: AttendanceService }
 
 export function createAttendanceModule(deps: AttendanceServiceOptions): AttendanceModule {
-  return { name: 'attendance', service: createAttendanceService(deps) }
+  const service = createAttendanceService(deps)
+
+  return {
+    name: 'attendance',
+    service,
+    jobs: [
+      {
+        name: 'borrado de intentos de códigos antiguos',
+        everyMs: 24 * 60 * 60_000,
+        run: async () => {
+          await service.purge()
+        },
+      },
+    ],
+  }
 }
 
 export { closed } from './attendance.rules.js'

@@ -63,6 +63,13 @@ const THREAD_LIMIT = 200
  * Mensajes que puede mandar una persona en un minuto: a un mismo evento y en
  * total. Un chat de quedar no necesita más, y así nadie lo inunda.
  */
+/**
+ * Días que se guardan los mensajes de un chat. Son para quedar, no un archivo:
+ * pasado ese plazo ya no hacen falta ni para revisar una denuncia. La web lo
+ * dice en cada chat.
+ */
+export const MESSAGE_RETENTION_DAYS = 90
+
 const MAX_PER_MINUTE_EVENT = 8
 const MAX_PER_MINUTE_TOTAL = 20
 
@@ -317,6 +324,20 @@ export function createMeetService(options: MeetServiceOptions) {
         body: typeof row.body === 'string' ? row.body : null,
         at: toText(row.created_at),
       }))
+    },
+
+    /**
+     * Borra los mensajes que ya han cumplido el plazo. Lo lanza un trabajo periódico.
+     *
+     * @returns Cuántos ha borrado.
+     */
+    async purge(): Promise<number> {
+      const result = await db.execute({
+        sql: 'DELETE FROM event_messages WHERE created_at < ?',
+        args: [new Date(now() - MESSAGE_RETENTION_DAYS * 24 * HOUR).toISOString()],
+      })
+
+      return result.rowsAffected
     },
 
     /** La asistencia de un evento: los códigos para quien organiza, lo validado para quien asiste. */

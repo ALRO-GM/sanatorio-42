@@ -149,6 +149,8 @@ calendario (y va a ir) puede leer o escribir; el resto recibe `403`.
 - POST /events/messages → `{ "id", "kind", "minutes"?, "reason"?, "body"? }`; devuelve el chat.
   `kind`: `seen` (he visto el aviso), `late` (pide `minutes`), `absent` o `text`
   (pide `body`). `reason`: `evaluation`, `other_event`, `on_my_way`, `transport`, `other`.
+- Los mensajes se borran a los 90 días; el registro de intentos de códigos
+  (`/admin/checkins`), al año. El tiempo validado no se borra.
 - GET /events/attendance?id= → solo pizarras y sesiones de ayuda aceptadas. Quien
   organiza recibe `codes: { start, end }` (cuatro caracteres cada uno) y lo
   validado por cada persona; quien asiste, lo suyo en `mine`. Las dos partes

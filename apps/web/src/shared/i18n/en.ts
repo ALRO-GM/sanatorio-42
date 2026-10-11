@@ -718,6 +718,8 @@ export const en: Record<string, string> = {
   'meet.said.late': 'Will be {n} min late',
   'meet.said.absent': "Can't make it",
   'meet.chat': 'Event chat',
+  'meet.chatNotice':
+    'Messages are deleted after 90 days. Whoever runs the site can read them if there is a report.',
   'meet.chatEmpty': 'Nobody has written yet. Everyone in the event sees what you post.',
   'meet.write': 'Write a message…',
   'meet.sendText': 'Send',
@@ -891,7 +893,7 @@ export const en: Record<string, string> = {
   'admin.inbox.status.answered': 'Answered',
   'admin.inbox.status.closed': 'Closed',
   'admin.messages.hint':
-    'The latest messages from event chats, to review a report. The number (#) is the one shown in it.',
+    'The latest messages from event chats, to review a report. The number (#) is the one shown in it. They are deleted after 90 days.',
   'admin.messages.filter': 'Filter by login, event or text',
   'admin.messages.empty': 'No messages.',
   'therapy.kind': 'Group type',

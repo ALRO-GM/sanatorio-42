@@ -728,6 +728,8 @@ export const es: Record<string, string> = {
   'meet.said.late': 'Se retrasa {n} min',
   'meet.said.absent': 'No va a poder ir',
   'meet.chat': 'Chat del evento',
+  'meet.chatNotice':
+    'Los mensajes se borran a los 90 días. Quien administra la web puede leerlos si hay una denuncia.',
   'meet.chatEmpty': 'Nadie ha escrito todavía. Lo que pongas lo ven todos los del evento.',
   'meet.write': 'Escribe un mensaje…',
   'meet.sendText': 'Enviar',
@@ -902,7 +904,7 @@ export const es: Record<string, string> = {
   'admin.inbox.status.answered': 'Respondido',
   'admin.inbox.status.closed': 'Cerrado',
   'admin.messages.hint':
-    'Los últimos mensajes de los chats de eventos, para revisar una denuncia. El número (#) es el que aparece en ella.',
+    'Los últimos mensajes de los chats de eventos, para revisar una denuncia. El número (#) es el que aparece en ella. Se borran a los 90 días.',
   'admin.messages.filter': 'Filtrar por login, evento o texto',
   'admin.messages.empty': 'No hay mensajes.',
   'therapy.kind': 'Tipo de grupo',

@@ -85,6 +85,13 @@ const CODE_LENGTH = 4
 const REPORT_DEFAULT_DAYS = 30
 const REPORT_MAX_DAYS = 366
 
+/**
+ * Días que se guarda el registro de intentos. Es la prueba de las horas, así que
+ * dura más que un chat: un año, que es también lo máximo que abarca un informe.
+ * El tiempo validado (`event_attendance`) no se borra.
+ */
+export const CHECKIN_RETENTION_DAYS = 365
+
 const day = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'el día va como AAAA-MM-DD')
 
 const reportSchema = z.object({ from: day.optional(), to: day.optional() })
@@ -562,6 +569,21 @@ export function createAttendanceService(options: AttendanceServiceOptions) {
       }
 
       return `${BOM}${lines.join('\r\n')}\r\n`
+    },
+
+    /**
+     * Borra del registro los intentos que ya han cumplido el plazo. Lo lanza un
+     * trabajo periódico.
+     *
+     * @returns Cuántos ha borrado.
+     */
+    async purge(): Promise<number> {
+      const result = await db.execute({
+        sql: 'DELETE FROM event_checkins WHERE created_at < ?',
+        args: [iso(now() - CHECKIN_RETENTION_DAYS * DAY)],
+      })
+
+      return result.rowsAffected
     },
 
     /** Los intentos de validar códigos de un evento, del más antiguo al más reciente. */

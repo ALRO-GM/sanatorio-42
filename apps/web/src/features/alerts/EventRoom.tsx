@@ -266,6 +266,7 @@ export function EventRoom({ eventId, me, replies = true, codes = false }: EventR
           ))}
         </ol>
       )}
+      <p className="hint meet-notice">{t('meet.chatNotice')}</p>
       <form className="meet-write" onSubmit={submit}>
         <input
           value={text}

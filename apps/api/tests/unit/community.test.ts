@@ -2061,6 +2061,38 @@ describe('comunidad', () => {
       )
     })
 
+    it('los mensajes se borran a los 90 días, y el registro de códigos al año', async () => {
+      const { boards, meet, attendance } = services
+      const board = await boards.create(actor('eva'), malloc())
+      const id = `board:${board.id}`
+      const admin = actor('eva', { admin: true })
+
+      await boards.join(actor('ana'), board.id)
+      await meet.send(actor('ana'), null, { id, kind: 'text', body: 'viejo' })
+      clock.advance(24 * HOUR)
+      await validate(id, 'eva', 'ana', 'start')
+      clock.advance(60 * MINUTE)
+      await validate(id, 'eva', 'ana', 'end')
+
+      clock.advance(88 * 24 * HOUR)
+      // La primera pizarra ya pasó: el mensaje reciente va en otra.
+      const later = await boards.create(actor('eva'), malloc(24 * 92))
+
+      await meet.send(actor('eva'), null, { id: `board:${later.id}`, kind: 'text', body: 'nuevo' })
+      expect(await meet.purge()).toBe(0)
+
+      clock.advance(2 * 24 * HOUR)
+      expect(await meet.purge()).toBe(1)
+      expect((await meet.log(admin)).map((message) => message.body)).toEqual(['nuevo'])
+
+      // El registro de intentos dura un año; el tiempo validado no se borra nunca.
+      expect(await attendance.purge()).toBe(0)
+      clock.advance(280 * 24 * HOUR)
+      expect(await attendance.purge()).toBe(2)
+      expect(await meet.checkins(admin, id)).toEqual([])
+      expect(await attendance.attended(id)).toEqual(['ana'])
+    })
+
     it('nadie inunda un chat: ocho mensajes por minuto y evento', async () => {
       const { boards, meet } = services
       const board = await boards.create(actor('eva'), malloc())

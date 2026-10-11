@@ -83,6 +83,15 @@ export function createMeetModule(deps: MeetServiceOptions): MeetModule {
         return reply.send(await service.checkins(await session.actor(request), request.query.id))
       })
     },
+    jobs: [
+      {
+        name: 'borrado de mensajes antiguos',
+        everyMs: 6 * 60 * 60_000,
+        run: async () => {
+          await service.purge()
+        },
+      },
+    ],
   }
 }
 
