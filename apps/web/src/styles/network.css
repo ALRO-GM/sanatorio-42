@@ -188,19 +188,24 @@
   touch-action: none;
 }
 /* La clave del grafo: qué significa cada color y, si es un degradado, entre
-   qué valores se reparte. Va encima del dibujo, abajo a la izquierda. */
+   qué valores se reparte. Va pegada debajo del dibujo, dentro del mismo marco,
+   y no encima: así no tapa a nadie. El dibujo se queda con el resto del alto. */
+.net-stage {
+  display: flex;
+  flex-direction: column;
+}
+.net-stage > .force-wrap {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+}
 .net-key {
-  position: absolute;
-  left: 0.7rem;
-  bottom: 0.7rem;
+  flex: 0 0 auto;
   display: grid;
   gap: 0.5rem;
-  max-width: min(26rem, calc(100% - 4.5rem));
-  padding: 0.55rem 0.7rem;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  background: color-mix(in srgb, var(--surface) 92%, transparent);
-  backdrop-filter: blur(6px);
+  padding: 0.6rem 0.8rem;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
   font-size: 0.75rem;
   color: var(--text-2);
 }
@@ -761,4 +766,19 @@ ol.net-rows .net-row-name {
 .rank-body .hint {
   margin: 0;
   font-size: 0.75rem;
+}
+
+/* La escala, en una fila: la barra, los dos mandos y los botones. */
+.net-scale {
+  grid-template-columns: minmax(8rem, 1fr) minmax(0, 1.4fr) minmax(0, 1.4fr) auto;
+  align-items: center;
+  gap: 0.4rem 0.9rem;
+}
+.net-scale label {
+  grid-template-columns: auto 1fr;
+}
+@media (max-width: 900px) {
+  .net-scale {
+    grid-template-columns: 1fr;
+  }
 }
