@@ -421,17 +421,33 @@ function PeopleTab() {
 function InboxTab() {
   const { t } = useI18n()
   const { data, error, loading, reload } = useAsync(() => api.getAdminTickets(), [])
+  // A quién se acaba de responder: se dice dónde va a ver la respuesta.
+  const [answered, setAnswered] = useState<string | null>(null)
 
   if (loading) return <p className="estado">{t('app.loading')}</p>
   if (data === undefined) return <ErrorNote error={error} onRetry={() => void reload()} />
   if (data.length === 0) return <p className="estado">{t('admin.inbox.empty')}</p>
 
   return (
-    <ul className="ticket-list">
-      {data.map((ticket) => (
-        <TicketRow key={ticket.id} ticket={ticket} onDone={() => void reload()} />
-      ))}
-    </ul>
+    <>
+      {answered !== null && (
+        <p className="reaction-done" role="status">
+          {t('admin.inbox.sent', { login: answered })}
+        </p>
+      )}
+      <ul className="ticket-list">
+        {data.map((ticket) => (
+          <TicketRow
+            key={ticket.id}
+            ticket={ticket}
+            onDone={() => {
+              setAnswered(ticket.login)
+              void reload()
+            }}
+          />
+        ))}
+      </ul>
+    </>
   )
 }
 

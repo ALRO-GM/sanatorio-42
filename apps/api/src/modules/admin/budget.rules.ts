@@ -9,13 +9,61 @@
  * Los días y las horas van en UTC, como `request_stats`.
  */
 
-import type { BudgetSettings } from '@sanatorio/contracts'
+import type { BudgetSettings, LimitLevel } from '@sanatorio/contracts'
 
 import { periodOf } from '../../core/period.js'
 
 export { periodOf } from '../../core/period.js'
 
 const DAY = 24 * 60 * 60_000
+
+/**
+ * **Reglas que no se regulan desde el panel.** Con la cuenta de Oracle en "Pay
+ * As You Go", pasarse del límite gratuito se cobra, así que hay dos cortes:
+ *
+ * - Al **90 %** (`STOP_SHARE`) se corta todo salvo el acceso de quien
+ *   administra: nadie más entra y no corre ningún trabajo de fondo. Es también
+ *   hasta donde se reparte el tráfico entre los días del mes.
+ * - Al **95 %** (`HARD_STOP_SHARE`) se corta todo, también a quien administra.
+ *   Desde ahí solo se entra por SSH.
+ *
+ * El 5 % que queda es margen para lo que la web no ve (cabeceras, TLS,
+ * reintentos de red). Los dos cortes se levantan solos al renovarse el límite.
+ */
+export const STOP_SHARE = 0.9
+export const HARD_STOP_SHARE = 0.95
+
+/** Los bytes a partir de los que solo entra quien administra, para un límite mensual. */
+export function stopAt(monthlyBytes: number): number {
+  return Math.floor(monthlyBytes * STOP_SHARE)
+}
+
+/** Los bytes a partir de los que no entra nadie. */
+export function hardStopAt(monthlyBytes: number): number {
+  return Math.floor(monthlyBytes * HARD_STOP_SHARE)
+}
+
+/** En qué punto está el servicio con ese tráfico gastado en el mes. */
+export function levelOf(settings: BudgetSettings, bytesPeriod: number): LimitLevel {
+  if (settings.monthlyBytes === null || bytesPeriod < stopAt(settings.monthlyBytes)) {
+    return 'ok'
+  }
+
+  return bytesPeriod < hardStopAt(settings.monthlyBytes) ? 'admin_only' : 'stopped'
+}
+
+/** El peor de dos niveles: el que manda cuando la web y la máquina no coinciden. */
+export function worst(a: LimitLevel, b: LimitLevel): LimitLevel {
+  const order: LimitLevel[] = ['ok', 'admin_only', 'stopped']
+
+  return order[Math.max(order.indexOf(a), order.indexOf(b))] ?? 'stopped'
+}
+
+/**
+ * Lo que se suma a cada respuesta por lo que no sale en su `content-length`:
+ * cabeceras y el envoltorio de TLS. Redondeado hacia arriba a propósito.
+ */
+export const RESPONSE_OVERHEAD_BYTES = 1000
 
 /**
  * De fábrica: lo que una máquina pequeña sirve con holgura (30 000 a la hora) y
@@ -25,7 +73,7 @@ export const DEFAULT_BUDGET: BudgetSettings = {
   dailyRequests: 720_000,
   monthlyBytes: 10_000_000_000_000,
   renewDay: 1,
-  share: 0.85,
+  share: STOP_SHARE,
   minPerPerson: 240,
   maxPerPerson: 3000,
   saving: false,
@@ -50,15 +98,18 @@ export type DayPlan = {
 /**
  * Lo que se puede servir hoy.
  *
- * El límite mensual es de bytes (tráfico de salida), no de peticiones: lo que
- * queda del mes se reparte entre los días que faltan para que se renueve y se
- * pasa a peticiones con lo que viene pesando cada una este mes.
+ * El límite mensual es de bytes (tráfico de salida), no de peticiones. Solo se
+ * cuenta con la parte del plan que hay antes del corte (`STOP_SHARE`): lo que
+ * queda de ella se reparte entre los días que faltan para que se renueve y se
+ * pasa a peticiones con lo que viene pesando cada una este mes. Repartido así,
+ * aunque todos los días se gaste lo permitido, el mes no llega al corte.
  */
 export function planDay(
   settings: BudgetSettings,
   used: { bytesPeriod: number; requestsPeriod: number },
   at: number,
 ): DayPlan {
+  const byDay = settings.dailyRequests * settings.share
   let byMonth = Infinity
 
   if (settings.monthlyBytes !== null) {
@@ -66,17 +117,14 @@ export function planDay(
       used.requestsPeriod >= ENOUGH_REQUESTS
         ? Math.max(1, used.bytesPeriod / used.requestsPeriod)
         : DEFAULT_BYTES_PER_REQUEST
-    const bytesLeft = Math.max(0, settings.monthlyBytes - used.bytesPeriod)
+    const bytesLeft = Math.max(0, stopAt(settings.monthlyBytes) - used.bytesPeriod)
 
     byMonth = bytesLeft / periodOf(at, settings.renewDay).daysLeft / perRequest
   }
 
-  const limitedBy = byMonth < settings.dailyRequests ? 'month' : 'day'
-  const allowed = Math.min(settings.dailyRequests, byMonth)
-
   return {
-    requests: Math.floor(allowed * settings.share * (settings.saving ? SAVING_FACTOR : 1)),
-    limitedBy,
+    requests: Math.floor(Math.min(byDay, byMonth) * (settings.saving ? SAVING_FACTOR : 1)),
+    limitedBy: byMonth < byDay ? 'month' : 'day',
   }
 }
 

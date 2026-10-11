@@ -4,7 +4,7 @@
  */
 
 import type { Db } from '../../core/db/database.js'
-import type { EventBus } from '../../core/events.js'
+import type { EventBus, Notify } from '../../core/events.js'
 import type { AppModule } from '../../core/module.js'
 import type { AttendanceService } from '../attendance/index.js'
 import type { XpService } from '../profile/index.js'
@@ -20,6 +20,7 @@ export type BoardsModuleDeps = {
   xp: XpService
   attendance: AttendanceService
   events: EventBus
+  notify?: Notify
   now?: () => number
 }
 
@@ -31,6 +32,7 @@ export function createBoardsModule(deps: BoardsModuleDeps): BoardsModule {
     replica: deps.replica,
     xp: deps.xp,
     attendance: deps.attendance,
+    ...(deps.notify === undefined ? {} : { notify: deps.notify }),
     ...(deps.now === undefined ? {} : { now: deps.now }),
   })
 

@@ -30,6 +30,7 @@ import type {
 import { z } from 'zod'
 
 import type { Actor } from '../../core/actor.js'
+import type { Notify } from '../../core/events.js'
 import { domainError } from '../../core/errors.js'
 import { localMoment, zonedInstant } from '../../core/time.js'
 import { id, optionalText, parse } from '../../core/validation.js'
@@ -47,6 +48,8 @@ export type HelpServiceOptions = {
   xp: XpService
   /** Los códigos que valida quien recibe la ayuda: de ahí sale si hubo sesión. */
   attendance: AttendanceService
+  /** Para dejar un aviso en el buzón de quien tiene que enterarse. Sin él, no se avisa. */
+  notify?: Notify
   now?: () => number
 }
 
@@ -151,6 +154,7 @@ const bookedMinutes = (bookings: readonly BookingRow[]): number =>
 export function createHelpService(options: HelpServiceOptions) {
   const { help, replica, agenda, xp, attendance } = options
   const now = options.now ?? Date.now
+  const notify: Notify = options.notify ?? (() => Promise.resolve())
 
   /** Día y minuto actuales en la hora local de un campus. */
   async function momentIn(campusId: number): Promise<{ day: string; minutes: number }> {
@@ -399,7 +403,7 @@ export function createHelpService(options: HelpServiceOptions) {
     async session(
       actor: Actor,
       bookingId: number,
-    ): Promise<{ role: 'host' | 'guest'; event: AttendanceEvent }> {
+    ): Promise<{ role: 'host' | 'guest'; event: AttendanceEvent; guest: string }> {
       const booking = await mustGet(bookingId, actor)
 
       if (booking.status !== 'confirmed') {
@@ -409,6 +413,7 @@ export function createHelpService(options: HelpServiceOptions) {
       return {
         // Quien ayuda enseña los códigos; quien pidió la ayuda los escribe.
         role: booking.helper === actor.login ? 'host' : 'guest',
+        guest: booking.requester,
         event: {
           id: EVENT_ID.help(booking.id),
           campusId: booking.campusId,
@@ -640,6 +645,14 @@ export function createHelpService(options: HelpServiceOptions) {
         throw domainError('not_found', 'Esa reserva no existe')
       }
 
+      await notify({
+        to: [request.helper],
+        kind: 'booking_requested',
+        ref: EVENT_ID.help(bookingId),
+        from: actor.login,
+        text: `${created.start}–${created.end}${created.projectName === null ? '' : ` · ${created.projectName}`}`,
+      })
+
       return created
     },
 
@@ -655,6 +668,13 @@ export function createHelpService(options: HelpServiceOptions) {
       }
 
       await help.setStatus(bookingId, accept ? 'confirmed' : 'declined')
+      await notify({
+        to: [booking.requester],
+        kind: accept ? 'booking_accepted' : 'booking_declined',
+        ref: EVENT_ID.help(bookingId),
+        from: actor.login,
+        text: `${toTime(booking.start)}–${toTime(booking.start + booking.minutes)}`,
+      })
     },
 
     /**
@@ -669,6 +689,13 @@ export function createHelpService(options: HelpServiceOptions) {
       }
 
       await help.setStatus(bookingId, 'cancelled')
+      await notify({
+        to: [booking.helper, booking.requester],
+        kind: 'booking_cancelled',
+        ref: EVENT_ID.help(bookingId),
+        from: actor.login,
+        text: `${toTime(booking.start)}–${toTime(booking.start + booking.minutes)}`,
+      })
     },
 
     /**

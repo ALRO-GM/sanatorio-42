@@ -31,6 +31,7 @@ import { domainError } from '../../core/errors.js'
 import { parse, startOfDayIso, text } from '../../core/validation.js'
 import type { GuideChangesRepository, StrikeRole } from './guide-changes.repository.js'
 import type { Actor } from '../../core/actor.js'
+import type { Notify } from '../../core/events.js'
 
 export type DoubtsServiceOptions = {
   doubts: DoubtsRepository
@@ -38,6 +39,8 @@ export type DoubtsServiceOptions = {
   curriculum: Curriculum
   xp: XpService
   replica: ReplicaRepository
+  /** Para dejar un aviso en el buzón de quien tiene que enterarse. Sin él, no se avisa. */
+  notify?: Notify
   now?: () => number
 }
 
@@ -128,6 +131,7 @@ export function shortName(name: string): string {
 export function createDoubtsService(options: DoubtsServiceOptions) {
   const { doubts, changes, curriculum, replica, xp } = options
   const now = options.now ?? Date.now
+  const notify: Notify = options.notify ?? (() => Promise.resolve())
 
   function statusOf(doubt: DoubtRow): DoubtStatus {
     if (doubt.resolved) {
@@ -428,6 +432,13 @@ export function createDoubtsService(options: DoubtsServiceOptions) {
         body,
         specialist: await replica.isSpecialist(actor.login, doubt.projectId),
       })
+      await notify({
+        to: [doubt.author],
+        kind: 'doubt_answered',
+        ref: `doubt:${doubtId}`,
+        from: actor.login,
+        text: doubt.body,
+      })
 
       return doubts.answers(doubtId)
     },
@@ -486,6 +497,14 @@ export function createDoubtsService(options: DoubtsServiceOptions) {
       if (rewardable) {
         await xp.award(solver.author, XP_KIND.DOUBT_SOLVED, ref)
       }
+
+      await notify({
+        to: [solver.author],
+        kind: 'doubt_solved',
+        ref,
+        from: actor.login,
+        text: doubt.body,
+      })
     },
 
     /** Quita el post-it. Solo quien lo puso, o quien modera. */
@@ -559,6 +578,14 @@ export function createDoubtsService(options: DoubtsServiceOptions) {
       await mustNotBeBlocked(actor.login, 'validator')
 
       const at = iso(now())
+
+      await notify({
+        to: [proposal.author],
+        kind: accept ? 'proposal_accepted' : 'proposal_rejected',
+        ref: `proposal:${proposalId}`,
+        from: actor.login,
+        text: proposal.body,
+      })
 
       if (!accept) {
         await changes.addStrike(proposal.author, 'proposer', at)

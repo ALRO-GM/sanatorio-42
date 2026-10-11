@@ -15,6 +15,9 @@ type HeaderProps = {
   section: Section
   /** Si quien mira administra la web: le sale el botón del panel. */
   admin: boolean
+  /** Avisos sin leer: el número rojo del buzón. */
+  unread: number
+  onMailbox: () => void
   onGo: (section: Section) => void
   onCustomize: () => void
   onLogout: () => void
@@ -24,7 +27,16 @@ type HeaderProps = {
  * La cabecera y, debajo, la fila de secciones. Se quedan arriba al bajar por la
  * página, más estrechas.
  */
-export function Header({ me, section, admin, onGo, onCustomize, onLogout }: HeaderProps) {
+export function Header({
+  me,
+  section,
+  admin,
+  unread,
+  onMailbox,
+  onGo,
+  onCustomize,
+  onLogout,
+}: HeaderProps) {
   const { t } = useI18n()
   const [compact, setCompact] = useState(false)
 
@@ -81,6 +93,20 @@ export function Header({ me, section, admin, onGo, onCustomize, onLogout }: Head
             📊
           </button>
         )}
+        <button
+          type="button"
+          className="icon-btn mailbox-btn"
+          aria-label={unread === 0 ? t('notices.open') : t('notices.openUnread', { n: unread })}
+          title={t('notices.title')}
+          onClick={onMailbox}
+        >
+          ✉
+          {unread > 0 && (
+            <span className="count-badge" aria-hidden="true">
+              {unread > 99 ? '99+' : unread}
+            </span>
+          )}
+        </button>
         <button
           type="button"
           className="icon-btn"

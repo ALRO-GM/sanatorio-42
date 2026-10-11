@@ -10,12 +10,34 @@
  * en la petición que lo provocó en vez de perderse.
  */
 
+import type { NoticeKind } from '@sanatorio/contracts'
+
+/**
+ * Algo que una o varias personas tienen que saber. Lo emite el módulo donde
+ * pasa y lo recoge `notices`, que lo deja en el buzón de cada una.
+ */
+export type NoticeEvent = {
+  /** A quién. Quien lo provoca (`from`) nunca se avisa a sí.  */
+  to: readonly string[]
+  kind: NoticeKind
+  /** De qué va: `ticket:5`, `board:12`, `help:booking:3`. */
+  ref: string
+  from?: string
+  /** Título, asunto o trozo del mensaje. */
+  text?: string | null
+}
+
+/** Lo que recibe un servicio para avisar, sin saber que existe un buzón. */
+export type Notify = (notice: NoticeEvent) => Promise<void>
+
 /** Todos los eventos que existen, con lo que lleva cada uno. */
 export type AppEvents = {
   /** Alguien se ha marcado como de guardia. */
   'duty.started': { login: string }
   /** Alguien va a ver su expediente: buen momento para cerrar cuentas pendientes. */
   'profile.viewed': { login: string }
+  /** Hay algo que contar a alguien: acaba en su buzón. */
+  notice: NoticeEvent
 }
 
 type Handler<T> = (payload: T) => Promise<void> | void

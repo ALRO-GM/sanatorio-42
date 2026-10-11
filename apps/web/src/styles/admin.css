@@ -226,3 +226,13 @@
 .report-sent {
   color: var(--accent-text);
 }
+
+/* El servicio está parado por la regla del 90 %: que no pase desapercibido. */
+.budget-stopped {
+  margin: 0.6rem 0 0;
+  padding: 0.6rem 0.8rem;
+  border-radius: 10px;
+  background: #e5484d;
+  color: #fff;
+  font-weight: 700;
+}

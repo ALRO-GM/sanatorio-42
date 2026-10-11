@@ -35,6 +35,21 @@ Monorepo con workspaces de npm. Ver `README.md` y `docs/architecture.md`.
   nuevo va en `shared/i18n/es.ts` y su traducción en `en.ts`.
 - Web: solo `shared/api/` habla con la API. Lo que se añada al cliente real se
   añade también al simulado (`mock/`); el tipo `Api` obliga a ello.
+- API: cuando algo que hace una persona le toca a otra (le responden, le
+  reservan, le escriben), el servicio llama a `notify` con un `kind` de
+  `packages/contracts/src/notices.ts`. No se escribe en el buzón directamente:
+  lo hace `notices` al oír el evento. El texto del aviso va en `es.ts` y `en.ts`
+  (`notices.kind.*`).
+- Web: lo que haya que preguntar de fondo va en `GET /pulse` (`usePulse`), no en
+  un sondeo nuevo.
+- **Límites del plan**: al 90 % de un límite gratuito de Oracle solo entra quien
+  administra y no corre nada de fondo; al 95 % no entra nadie (`STOP_SHARE` y
+  `HARD_STOP_SHARE` en `modules/admin/budget.rules.ts`, y
+  `infra/scripts/limits-guard.sh`). No lo hagas regulable ni añadas excepciones.
+  Un trabajo periódico nuevo va en `jobs` de su módulo, que es lo que se pausa
+  con el corte; lo que se instale en la máquina y hable con internet se añade a
+  `QUIET_UNITS` de la guardia. Nada de `infra/` puede pedir a Oracle recursos
+  que no sean de la capa gratuita o que pasen del 90 % de ella.
 - Comentarios en español, explicando el porqué.
 
 ## Reglas de producto

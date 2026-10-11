@@ -5,21 +5,22 @@
 
 import type {
   AchievementId,
-  BoardView,
-  HelpDay,
-  ClusterMap,
-  MapSeat,
-  DoubtView,
-  Expediente,
-  GroupView,
-  Guide,
   AdminPeople,
+  BoardView,
   BudgetSettings,
   BudgetStatus,
+  ClusterMap,
+  DoubtView,
+  Expediente,
   FortyTwoQuota,
   FortyTwoQuotaSettings,
+  GroupView,
+  Guide,
+  HelpDay,
+  MapSeat,
   MeetMessage,
   MeetPresence,
+  Notice,
   Ticket,
 } from '@sanatorio/contracts'
 import { ApiError } from '../http'
@@ -321,7 +322,7 @@ export const budgetSettings: BudgetSettings = {
   dailyRequests: 720_000,
   monthlyBytes: 10_000_000_000_000,
   renewDay: 1,
-  share: 0.85,
+  share: 0.9,
   minPerPerson: 240,
   maxPerPerson: 3000,
   saving: false,
@@ -335,6 +336,7 @@ export function budgetStatus(): BudgetStatus {
 
   return {
     settings: { ...budgetSettings },
+    level: 'ok',
     day: {
       allowance,
       used,
@@ -344,8 +346,12 @@ export function budgetStatus(): BudgetStatus {
     },
     month: {
       bytesUsed: 38_000_000_000,
+      stopAt: budgetSettings.monthlyBytes === null ? null : budgetSettings.monthlyBytes * 0.9,
+      hardStopAt: budgetSettings.monthlyBytes === null ? null : budgetSettings.monthlyBytes * 0.95,
       bytesLeft:
-        budgetSettings.monthlyBytes === null ? null : budgetSettings.monthlyBytes - 38_000_000_000,
+        budgetSettings.monthlyBytes === null
+          ? null
+          : budgetSettings.monthlyBytes * 0.9 - 38_000_000_000,
       daysLeft: 21,
       renewsOn: '2026-11-01',
     },
@@ -362,4 +368,49 @@ export function newId(): number {
 /** Vuelve al estado de recién abierta, como al cerrar sesión. */
 export function resetState(): void {
   state = initialState()
+}
+
+/** El buzón de avisos de la web de mentira: un par de cosas sin leer para que se vea el número. */
+export const notices: Notice[] = [
+  {
+    id: 3,
+    kind: 'chat',
+    ref: 'board:1',
+    from: 'jdoe',
+    text: '¿Hace falta traer algo?',
+    count: 2,
+    at: new Date(Date.now() - 4 * 60_000).toISOString(),
+    read: false,
+  },
+  {
+    id: 2,
+    kind: 'booking_requested',
+    ref: 'help:booking:1',
+    from: 'mgarcia',
+    text: '17:00–17:30 · ft_printf',
+    count: 1,
+    at: new Date(Date.now() - 50 * 60_000).toISOString(),
+    read: false,
+  },
+  {
+    id: 1,
+    kind: 'doubt_solved',
+    ref: 'doubt:1',
+    from: 'lruiz',
+    text: '¿Cómo pruebo ft_printf sin tester?',
+    count: 1,
+    at: new Date(Date.now() - 26 * 3_600_000).toISOString(),
+    read: true,
+  },
+]
+
+/** Deja un aviso nuevo, sin leer, arriba del buzón de mentira. */
+export function addNotice(notice: Pick<Notice, 'kind' | 'ref' | 'from' | 'text'>): void {
+  notices.unshift({
+    ...notice,
+    id: newId(),
+    count: 1,
+    at: new Date().toISOString(),
+    read: false,
+  })
 }

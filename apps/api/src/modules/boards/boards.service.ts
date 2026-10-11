@@ -21,6 +21,7 @@ import { XP_KIND } from '../profile/index.js'
 import type { XpService } from '../profile/index.js'
 import { optionalText, parse, text } from '../../core/validation.js'
 import type { Actor } from '../../core/actor.js'
+import type { Notify } from '../../core/events.js'
 
 export type BoardsServiceOptions = {
   boards: BoardsRepository
@@ -28,6 +29,8 @@ export type BoardsServiceOptions = {
   xp: XpService
   /** Quién validó su asistencia con los códigos: de ahí sale si hay XP. */
   attendance: AttendanceService
+  /** Para dejar un aviso en el buzón de quien tiene que enterarse. Sin él, no se avisa. */
+  notify?: Notify
   now?: () => number
 }
 
@@ -51,6 +54,7 @@ const MAX_UPCOMING_BOARDS = 5
 export function createBoardsService(options: BoardsServiceOptions) {
   const { boards, replica, xp, attendance } = options
   const now = options.now ?? Date.now
+  const notify: Notify = options.notify ?? (() => Promise.resolve())
 
   async function view(rows: readonly BoardRow[], actor: Actor): Promise<BoardView[]> {
     const images = await replica.imagesOf(rows.map((board) => board.host))
@@ -209,6 +213,21 @@ export function createBoardsService(options: BoardsServiceOptions) {
         throw domainError('not_found', 'Esa pizarra no existe')
       }
 
+      // Solo se avisa de lo que cambia el plan de quien va: cuándo o dónde.
+      if (
+        updated.startsAt !== current.startsAt ||
+        updated.endsAt !== current.endsAt ||
+        updated.place !== current.place
+      ) {
+        await notify({
+          to: current.attendees,
+          kind: 'board_changed',
+          ref: EVENT_ID.board(boardId),
+          from: actor.login,
+          text: updated.title,
+        })
+      }
+
       return updated
     },
 
@@ -242,6 +261,20 @@ export function createBoardsService(options: BoardsServiceOptions) {
       }
 
       await boards.remove(boardId)
+      await notify({
+        to: [board.host, ...board.attendees],
+        kind: 'board_cancelled',
+        ref: EVENT_ID.board(boardId),
+        from: actor.login,
+        text: board.title,
+      })
+    },
+
+    /** Quién está en una pizarra: quien la imparte y quien tiene plaza. Para avisar del chat. */
+    async people(boardId: number): Promise<string[]> {
+      const board = await boards.get(boardId)
+
+      return board === undefined ? [] : [board.host, ...board.attendees]
     },
   }
 }

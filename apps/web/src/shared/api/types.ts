@@ -56,7 +56,8 @@ import type {
   BudgetSettings,
   FortyTwoQuota,
   FortyTwoQuotaSettings,
-  QuotaStatus,
+  Notices,
+  Pulse,
   BudgetStatus,
   Consumption,
   LoggedMessage,
@@ -163,8 +164,12 @@ export type Api = {
   getPublicProfile: (login: string) => Promise<PublicProfile>
   updateSettings: (settings: SettingsInput) => Promise<void>
   getSyncStatus: () => Promise<SyncStatus>
-  /** Si la cuota de 42 va justa y, si te toca esperar, tu turno en la cola. */
-  getQuota: () => Promise<QuotaStatus>
+  /** Avisos sin leer y estado de la cuota de 42: lo que se pregunta de fondo. */
+  getPulse: () => Promise<Pulse>
+  /** Tu buzón de avisos, lo que no has leído primero. */
+  getNotices: () => Promise<Notices>
+  /** Da por leídos esos avisos, o todos si no se dice cuáles. Devuelve el buzón. */
+  readNotices: (ids?: number[]) => Promise<Notices>
   getAdminQuota: () => Promise<FortyTwoQuota>
   /** Cambia los ajustes de la cuota de 42; solo hace falta mandar lo que cambia. */
   setAdminQuota: (changes: Partial<FortyTwoQuotaSettings>) => Promise<FortyTwoQuota>

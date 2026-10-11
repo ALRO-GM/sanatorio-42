@@ -46,6 +46,11 @@ export type QuotaOptions = {
   client: Pick<FortyTwoClient, 'hourlyRemaining' | 'requestCount'>
   /** Cuota horaria que no tocan ni el trabajo de fondo ni lo aplazable. */
   hourlyReserve: number
+  /**
+   * `true` si el servicio está cortado por el límite del plan: entonces no se
+   * pide nada a 42, ni lo crítico. Que no corra nada aunque no haya nadie.
+   */
+  halted?: () => boolean
   /** Quién no hace cola (quien administra). */
   priority?: (login: string) => boolean
   log?: (message: string) => void
@@ -167,6 +172,10 @@ export function createQuota(options: QuotaOptions) {
    */
   function allows(tier: QuotaTier, reserve?: number): boolean {
     sample()
+
+    if (options.halted?.() === true) {
+      return false
+    }
 
     const remaining = hourlyRemaining()
     // Antes de la primera respuesta no se sabe cuánto queda; se asume que sí,

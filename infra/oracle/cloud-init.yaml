@@ -29,6 +29,14 @@ write_files:
     permissions: '0644'
     content: |
       0 4 * * * ubuntu /opt/sanatorio/infra/scripts/backup.sh >> /var/log/sanatorio-backup.log 2>&1
+  # Guardia de los límites del plan gratuito, cada cinco minutos: al 90 % del
+  # tráfico del mes deja entrar solo a quien administra y para lo automático; al
+  # 95 % para los contenedores. Como root: lee la tarjeta de red y maneja Docker
+  # y systemd. Hasta que el repositorio está clonado no hay guion que lanzar.
+  - path: /etc/cron.d/sanatorio-limits
+    permissions: '0644'
+    content: |
+      */5 * * * * root [ -x /opt/sanatorio/infra/scripts/limits-guard.sh ] && /opt/sanatorio/infra/scripts/limits-guard.sh >> /var/log/sanatorio-limits.log 2>&1
 
 runcmd:
   # Las imágenes de Ubuntu de Oracle traen un iptables que rechaza todo salvo

@@ -4,6 +4,7 @@
  */
 
 import type { Db } from '../../core/db/database.js'
+import type { Notify } from '../../core/events.js'
 import type { AppModule } from '../../core/module.js'
 import type { XpService } from '../profile/index.js'
 import type { Curriculum, ReplicaRepository } from '../replica/index.js'
@@ -18,6 +19,7 @@ export type DoubtsModuleDeps = {
   replica: ReplicaRepository
   curriculum: Curriculum
   xp: XpService
+  notify?: Notify
   now?: () => number
 }
 
@@ -30,6 +32,7 @@ export function createDoubtsModule(deps: DoubtsModuleDeps): DoubtsModule {
     curriculum: deps.curriculum,
     xp: deps.xp,
     replica: deps.replica,
+    ...(deps.notify === undefined ? {} : { notify: deps.notify }),
     ...(deps.now === undefined ? {} : { now: deps.now }),
   })
 

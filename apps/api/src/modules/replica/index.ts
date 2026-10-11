@@ -29,6 +29,8 @@ export type ReplicaModuleDeps = {
   config: SyncerConfig
   /** `false` para no arrancar el bucle de fondo aunque se llame a `start`. */
   backgroundSync?: boolean
+  /** `true` si el servicio está cortado por el límite del plan: no se pide nada a 42. */
+  halted?: () => boolean
   /** Quién no hace cola cuando la cuota de 42 va justa (quien administra). */
   priority?: (login: string) => boolean
   log?: (message: string) => void
@@ -54,6 +56,7 @@ export function createReplicaModule(deps: ReplicaModuleDeps): ReplicaModule {
     client: deps.client,
     hourlyReserve: deps.config.hourlyReserve,
     ...(deps.priority === undefined ? {} : { priority: deps.priority }),
+    ...(deps.halted === undefined ? {} : { halted: deps.halted }),
     ...(deps.now === undefined ? {} : { now: deps.now }),
     ...(deps.log === undefined ? {} : { log: deps.log }),
   })

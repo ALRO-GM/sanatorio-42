@@ -67,7 +67,9 @@ Dos formas, según quién necesita a quién:
    pasado. `peers` emite `duty.started` al ponerse alguien de guardia y
    `profile` apunta el logro, sin que `peers` sepa que existe la XP.
 
-Los eventos y lo que lleva cada uno están declarados en `AppEvents`.
+Los eventos y lo que lleva cada uno están declarados en `AppEvents`. El evento
+`notice` es el del buzón: lo emite cualquier módulo con `notify` cuando algo le
+toca a otra persona, y lo recoge `notices`.
 
 ## Trabajos periódicos
 

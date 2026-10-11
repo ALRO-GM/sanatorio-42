@@ -51,7 +51,7 @@ export type BudgetSettings = {
   monthlyBytes: number | null
   /** Día del mes (1-28) en que se renueva el límite mensual. */
   renewDay: number
-  /** Colchón: la parte del presupuesto que se gasta como mucho (0,5 a 1). */
+  /** Colchón: la parte del tope diario que se gasta como mucho (0,5 a 1). */
   share: number
   /** El tope por persona y hora nunca baja ni sube de aquí. */
   minPerPerson: number
@@ -60,9 +60,21 @@ export type BudgetSettings = {
   saving: boolean
 }
 
+/**
+ * En qué punto está el servicio respecto al límite mensual del plan:
+ *
+ * - `ok`: normal.
+ * - `admin_only`: se ha llegado al 90 %. Solo entra quien administra y no corre
+ *   ningún trabajo de fondo.
+ * - `stopped`: se ha llegado al 95 %. No entra nadie; solo queda el SSH.
+ */
+export type LimitLevel = 'ok' | 'admin_only' | 'stopped'
+
 /** Cómo va el presupuesto de peticiones ahora mismo. Días y horas en UTC. */
 export type BudgetStatus = {
   settings: BudgetSettings
+  /** Si el servicio está cortado por el límite mensual. No se regula: vuelve solo al renovarse. */
+  level: LimitLevel
   day: {
     /** Lo que se puede servir hoy, ya con el colchón. */
     allowance: number
@@ -75,7 +87,11 @@ export type BudgetStatus = {
   }
   month: {
     bytesUsed: number
-    /** `null` si no hay límite mensual. */
+    /** Bytes a partir de los que solo entra quien administra (el 90 % del límite), o `null` si no hay límite. */
+    stopAt: number | null
+    /** Bytes a partir de los que no entra nadie (el 95 %). */
+    hardStopAt: number | null
+    /** Lo que queda hasta el corte, o `null` si no hay límite mensual. */
     bytesLeft: number | null
     /** Días que quedan hasta que se renueve, contando hoy. */
     daysLeft: number

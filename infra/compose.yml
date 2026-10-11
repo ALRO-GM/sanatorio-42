@@ -20,6 +20,10 @@ services:
       dockerfile: infra/docker/Dockerfile
     restart: unless-stopped
     env_file: .env
+    environment:
+      # Donde la guardia de la máquina deja escrito si hay corte por los límites
+      # del plan (infra/scripts/limits-guard.sh). Está en el volumen de datos.
+      GUARD_LEVEL_FILE: /data/guard-level
     volumes:
       - data:/data
     # No publica puertos: solo Caddy habla con ella, por la red interna.

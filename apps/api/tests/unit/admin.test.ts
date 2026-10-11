@@ -10,13 +10,28 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { compose } from '../../src/app/composition.js'
 import {
   forecast,
+  levelOf,
   perPerson,
   periodOf,
   planDay,
   planHour,
+  stopAt,
+  worst,
 } from '../../src/modules/admin/budget.rules.js'
-import { MADRID, MINUTE, actor, expectCode, useCommunity } from '../helpers/community.js'
+import { HOUR, MADRID, MINUTE, actor, expectCode, useCommunity } from '../helpers/community.js'
 import type { Community } from '../helpers/community.js'
+
+const SYNC = {
+  trackedCampusIds: [MADRID],
+  defaultCampusId: MADRID,
+  hourlyReserve: 300,
+  backfillIntervalMs: 0,
+  locationsTtlMs: 2 * MINUTE,
+  locationsIdleMs: 15 * MINUTE,
+  deltaTtlMs: 5 * MINUTE,
+  deltaIdleMs: 30 * MINUTE,
+  requestPageBudget: 2,
+}
 
 describe('comunidad', () => {
   const community = useCommunity()
@@ -142,12 +157,12 @@ describe('comunidad', () => {
 
       const report = await admin.consumption(boss)
 
-      // Son las 14:30 UTC: quedan diez horas para repartir el 85 % de 720 000.
-      expect(report.limit).toMatchObject({ budget: 61_200, activePeople: 3, perPerson: 3000 })
+      // Son las 14:30 UTC: quedan diez horas para repartir el 90 % de 720 000.
+      expect(report.limit).toMatchObject({ budget: 64_800, activePeople: 3, perPerson: 3000 })
       expect(report.budget.day).toMatchObject({
-        allowance: 612_000,
+        allowance: 648_000,
         used: 3013,
-        left: 608_987,
+        left: 644_987,
         limitedBy: 'day',
       })
       expect(report.top[0]).toMatchObject({ login: 'ana', requests: 2, bytes: 2000, limited: 1 })
@@ -192,11 +207,14 @@ describe('comunidad', () => {
         const used = { bytesPeriod: 4_000_000_000, requestsPeriod: 40_000 }
 
         expect(planDay(month, used, at('2026-10-06T14:30:00Z'))).toEqual({
-          requests: 10_000,
+          requests: 8846,
           limitedBy: 'month',
         })
         // El último día del periodo se puede gastar todo lo que queda.
-        expect(planDay(month, used, at('2026-10-31T23:00:00Z')).requests).toBe(240_000)
+        expect(planDay(month, used, at('2026-10-31T23:00:00Z'))).toEqual({
+          requests: 230_000,
+          limitedBy: 'month',
+        })
         // Con el mes agotado no queda nada, y el modo ahorro lo deja todo en un cuarto.
         expect(
           planDay(month, { ...used, bytesPeriod: 31_000_000_000 }, at('2026-10-06T00:00:00Z'))
@@ -263,8 +281,108 @@ describe('comunidad', () => {
         expect(await admin.allow('ana', false)).toBe(false)
 
         // El modo ahorro deja el día en un cuarto.
-        expect((await admin.setBudget(boss, { saving: true })).day.allowance).toBe(153_000)
+        expect((await admin.setBudget(boss, { saving: true })).day.allowance).toBe(162_000)
         expect((await admin.consumption(boss)).budget.settings.saving).toBe(true)
+      })
+
+      it('gastando cada día todo lo permitido, el mes nunca llega al corte del 90 %', () => {
+        const month = { ...settings, dailyRequests: 10_000_000, monthlyBytes: 30_000_000_000 }
+        let bytes = 0
+        let requests = 0
+
+        // Octubre entero, a 100 kB por petición y sin dejar nada sin gastar.
+        for (let day = 1; day <= 31; day += 1) {
+          const allowed = planDay(
+            month,
+            { bytesPeriod: bytes, requestsPeriod: requests },
+            at(`2026-10-${String(day).padStart(2, '0')}T00:00:00Z`),
+          ).requests
+
+          requests += allowed
+          bytes = requests * 100_000
+        }
+
+        expect(bytes).toBeLessThanOrEqual(stopAt(month.monthlyBytes))
+        expect(bytes).toBeGreaterThan(0.89 * month.monthlyBytes)
+        // Como mucho se llega justo al corte el último día, nunca se pasa.
+        // Al 90 % solo entra quien administra; al 95 %, nadie. Sin límite no hay corte.
+        expect(levelOf(month, 26_999_999_999)).toBe('ok')
+        expect(levelOf(month, 27_000_000_000)).toBe('admin_only')
+        expect(levelOf(month, 28_499_999_999)).toBe('admin_only')
+        expect(levelOf(month, 28_500_000_000)).toBe('stopped')
+        expect(levelOf({ ...month, monthlyBytes: null }, 1e15)).toBe('ok')
+        // Entre lo que cuenta la web y lo que dice la máquina, manda lo peor.
+        expect(worst('ok', 'admin_only')).toBe('admin_only')
+        expect(worst('stopped', 'admin_only')).toBe('stopped')
+      })
+
+      it('al 90 % del tráfico del mes solo queda quien administra; al 95 %, nadie; y vuelve al renovarse', async () => {
+        const { admin, quota } = services
+        const boss = actor('eva', { admin: true })
+
+        // Un límite de 10 MB: los cortes están en 9 y en 9,5 MB.
+        await admin.setBudget(boss, { monthlyBytes: 10_000_000 })
+        expect(await admin.level()).toBe('ok')
+        expect(admin.halted()).toBe(false)
+        expect(quota.allows('critical')).toBe(true)
+
+        admin.count('ana', 8_000_000)
+        expect(await admin.level()).toBe('ok')
+        // Lo que sale sin sesión cuenta igual.
+        admin.count('(sin sesión)', 1_000_000)
+        expect(await admin.level()).toBe('admin_only')
+
+        expect((await admin.consumption(boss)).budget).toMatchObject({
+          level: 'admin_only',
+          month: {
+            bytesUsed: 9_000_000,
+            stopAt: 9_000_000,
+            hardStopAt: 9_500_000,
+            bytesLeft: 0,
+          },
+        })
+        expect(admin.renewsAt()).toBe('2026-11-01T00:00:00.000Z')
+        // Con un corte no se pide nada a 42, ni lo crítico: no corre nada de fondo.
+        expect(admin.halted()).toBe(true)
+        expect(quota.allows('critical')).toBe(false)
+        expect(quota.allows('background')).toBe(false)
+
+        // Lo que gasta quien administra también cuenta: al 95 % se acaba para todos.
+        admin.count('eva', 500_000)
+        expect(await admin.level()).toBe('stopped')
+
+        // Un reinicio no lo levanta: lo servido está en la base.
+        await admin.flush()
+        const restarted = compose(db, api.client, { now: clock.now, sync: SYNC }).services.admin
+
+        expect(await restarted.level()).toBe('stopped')
+
+        // El 1 de noviembre el límite se renueva y el servicio vuelve solo.
+        clock.advance(26 * 24 * HOUR)
+        expect(await admin.level()).toBe('ok')
+        expect(await restarted.level()).toBe('ok')
+        expect(quota.allows('critical')).toBe(true)
+      })
+
+      it('si la guardia de la máquina va por delante de la cuenta de la web, manda ella', async () => {
+        let guard: 'ok' | 'admin_only' | 'stopped' = 'ok'
+        const guarded = compose(db, api.client, {
+          now: clock.now,
+          sync: SYNC,
+          guardLevel: () => Promise.resolve(guard),
+        }).services.admin
+
+        expect(await guarded.level()).toBe('ok')
+
+        // Lo que dice la guardia se relee cada minuto.
+        guard = 'admin_only'
+        clock.advance(61_000)
+        expect(await guarded.level()).toBe('admin_only')
+
+        guard = 'stopped'
+        clock.advance(61_000)
+        expect(await guarded.level()).toBe('stopped')
+        expect(guarded.halted()).toBe(true)
       })
 
       it('un reinicio no pone el contador a cero', async () => {

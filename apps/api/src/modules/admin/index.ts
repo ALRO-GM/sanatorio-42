@@ -11,7 +11,8 @@ import type { FastifyRequest } from 'fastify'
 
 import type { AppModule } from '../../core/module.js'
 import type { SessionReader } from '../../core/session.js'
-import { createAdminService } from './admin.service.js'
+import { ANONYMOUS, createAdminService } from './admin.service.js'
+import { RESPONSE_OVERHEAD_BYTES } from './budget.rules.js'
 import type { AdminService, AdminServiceOptions } from './admin.service.js'
 
 export type AdminModule = AppModule & { service: AdminService }
@@ -34,6 +35,35 @@ export function createAdminModule(deps: AdminServiceOptions): AdminModule {
     routes: (app, { session }) => {
       // --- Consumo: tope antes de servir, cuenta después ----------------------
       app.addHook('onRequest', async (request, reply) => {
+        // Reglas del plan. Al 90 % del tráfico del mes solo entra quien
+        // administra (y las rutas de sesión, para que pueda identificarse); al
+        // 95 %, nadie. Siempre queda la comprobación de salud, que es lo que
+        // mira Caddy y no pesa nada.
+        const level = request.url.startsWith('/health') ? 'ok' : await service.level()
+        const session_ = level === 'admin_only' ? loginOf(session, request) : null
+        const passes =
+          level === 'ok' ||
+          (level === 'admin_only' &&
+            (request.url.startsWith('/auth/') ||
+              (session_ !== null && (await service.accessOf(session_)).admin)))
+
+        if (!passes) {
+          const renews = service.renewsAt()
+
+          await reply
+            .code(503)
+            .header(
+              'Retry-After',
+              String(Math.max(60, Math.ceil((Date.parse(renews) - Date.now()) / 1000))),
+            )
+            .send({
+              error: 'service_stopped',
+              message: `Sanatorio 42 está parado hasta el ${renews.slice(0, 10)}: se ha llegado al tope de tráfico del mes.`,
+            })
+
+          return
+        }
+
         const who = loginOf(session, request)
 
         if (who === null) return
@@ -60,11 +90,12 @@ export function createAdminModule(deps: AdminServiceOptions): AdminModule {
         }
       })
       app.addHook('onResponse', (request, reply, done) => {
-        const who = loginOf(session, request)
-
-        if (who !== null && reply.statusCode !== 429) {
-          service.count(who, Number(reply.getHeader('content-length') ?? 0) || 0)
-        }
+        // Se cuenta todo lo que sale, también lo rechazado y lo que no tiene
+        // sesión: es tráfico de salida igual, y es lo que tiene límite.
+        service.count(
+          loginOf(session, request) ?? ANONYMOUS,
+          (Number(reply.getHeader('content-length') ?? 0) || 0) + RESPONSE_OVERHEAD_BYTES,
+        )
 
         done()
       })

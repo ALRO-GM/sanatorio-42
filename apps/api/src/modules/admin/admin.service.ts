@@ -19,6 +19,7 @@ import type {
   AdminPeople,
   BudgetSettings,
   BudgetStatus,
+  LimitLevel,
   Consumption,
   Ticket,
   TicketKind,
@@ -27,12 +28,24 @@ import type {
 import { z } from 'zod'
 
 import type { Actor } from '../../core/actor.js'
+import type { Notify } from '../../core/events.js'
 import type { Db } from '../../core/db/database.js'
 import { toNumber, toText } from '../../core/db/rows.js'
 import { domainError } from '../../core/errors.js'
 import { createTtlCache } from '../../core/ttl-cache.js'
 import { parse } from '../../core/validation.js'
-import { DEFAULT_BUDGET, forecast, perPerson, periodOf, planDay, planHour } from './budget.rules.js'
+import {
+  DEFAULT_BUDGET,
+  forecast,
+  hardStopAt,
+  levelOf,
+  perPerson,
+  periodOf,
+  planDay,
+  planHour,
+  stopAt,
+  worst,
+} from './budget.rules.js'
 import type { DayPlan } from './budget.rules.js'
 
 export type AdminServiceOptions = {
@@ -41,6 +54,13 @@ export type AdminServiceOptions = {
   fixedAdmins: readonly string[]
   /** Peticiones a la API de 42 que quedan esta hora. */
   fortyTwoRemaining: () => number | undefined
+  /**
+   * Lo que dice la guardia de la máquina, que cuenta el tráfico de verdad. Si
+   * va por delante de la cuenta de la web, manda ella.
+   */
+  guardLevel?: () => Promise<LimitLevel>
+  /** Para dejar un aviso en el buzón de quien tiene que enterarse. Sin él, no se avisa. */
+  notify?: Notify
   now?: () => number
 }
 
@@ -48,6 +68,9 @@ const HOUR = 60 * 60_000
 
 /** A partir de qué parte del presupuesto un tramo horario merece un aviso. */
 const WARN_SHARE = 0.8
+
+/** A nombre de quién se apunta lo servido sin sesión: la web en sí, el login, lo rechazado. */
+export const ANONYMOUS = '(sin sesión)'
 
 /** Cada cuánto se releen los ajustes y los topes a mano: cambian poco. */
 const SETTINGS_TTL_MS = 60_000
@@ -134,6 +157,7 @@ function toTicket(row: Record<string, unknown>): Ticket {
 export function createAdminService(options: AdminServiceOptions) {
   const { db, fixedAdmins } = options
   const now = options.now ?? Date.now
+  const notify: Notify = options.notify ?? (() => Promise.resolve())
   const iso = (): string => new Date(now()).toISOString()
   // Permisos y bloqueos se miran en cada petición con sesión: se recuerdan medio minuto.
   const access = createTtlCache<{
@@ -153,6 +177,10 @@ export function createAdminService(options: AdminServiceOptions) {
   let before = { requestsToday: 0, bytesPeriod: 0, requestsPeriod: 0 }
   /** Peticiones de todo el mundo en la hora en curso. */
   let hourTotal = 0
+  /** Bytes servidos desde la última vez que se leyó de la base lo del periodo. */
+  let bytesSince = 0
+  /** Lo último que dijo la guardia de la máquina. */
+  let guard: LimitLevel = 'ok'
   let dayPlan: DayPlan = { requests: 0, limitedBy: 'day' }
   let hourBudget = 0
 
@@ -184,6 +212,8 @@ export function createAdminService(options: AdminServiceOptions) {
     ])
 
     manual = new Map(limits.rows.map((row) => [toText(row.login), toNumber(row.per_hour)]))
+    // Si no se puede leer lo que dice la guardia, se queda lo último que dijo.
+    guard = (await options.guardLevel?.().catch(() => guard)) ?? 'ok'
     settings = { ...DEFAULT_BUDGET }
 
     try {
@@ -216,6 +246,8 @@ export function createAdminService(options: AdminServiceOptions) {
       ])
 
       hourKey = key
+      // Lo contado y aún sin volcar no está en lo que se acaba de leer.
+      bytesSince = [...pending.values()].reduce((total, entry) => total + entry.bytes, 0)
       thisHour = new Map(people.rows.map((row) => [toText(row.login), toNumber(row.requests)]))
       hourTotal = [...thisHour.values()].reduce((total, requests) => total + requests, 0)
       before = {
@@ -238,12 +270,19 @@ export function createAdminService(options: AdminServiceOptions) {
   /** Tope automático: lo de esta hora repartido entre quienes están usando la web. */
   const automaticLimit = (): number => perPerson(settings, hourBudget, thisHour.size)
 
+  /** El corte que toca con lo que se sabe ahora mismo. */
+  const currentLevel = (): LimitLevel =>
+    worst(levelOf(settings, before.bytesPeriod + bytesSince), guard)
+
   const budgetStatus = (): BudgetStatus => {
     const period = periodOf(now(), settings.renewDay)
     const used = before.requestsToday + hourTotal
+    const bytesUsed = before.bytesPeriod + bytesSince
+    const limit = settings.monthlyBytes === null ? null : stopAt(settings.monthlyBytes)
 
     return {
       settings,
+      level: currentLevel(),
       day: {
         allowance: dayPlan.requests,
         used,
@@ -252,11 +291,10 @@ export function createAdminService(options: AdminServiceOptions) {
         limitedBy: dayPlan.limitedBy,
       },
       month: {
-        bytesUsed: before.bytesPeriod,
-        bytesLeft:
-          settings.monthlyBytes === null
-            ? null
-            : Math.max(0, settings.monthlyBytes - before.bytesPeriod),
+        bytesUsed,
+        stopAt: limit,
+        hardStopAt: settings.monthlyBytes === null ? null : hardStopAt(settings.monthlyBytes),
+        bytesLeft: limit === null ? null : Math.max(0, limit - bytesUsed),
         daysLeft: period.daysLeft,
         renewsOn: new Date(period.end).toISOString().slice(0, 10),
       },
@@ -458,12 +496,41 @@ export function createAdminService(options: AdminServiceOptions) {
       return allowed
     },
 
-    /** Apunta lo que ha pesado una respuesta ya servida. */
+    /**
+     * En qué punto está el servicio respecto al límite mensual: `ok`, solo
+     * quien administra (90 %) o nadie (95 %). Es el peor entre lo que cuenta la
+     * web y lo que dice la guardia de la máquina. No se levanta desde el panel:
+     * vuelve solo cuando el límite se renueva.
+     */
+    async level(): Promise<LimitLevel> {
+      await refresh()
+
+      return currentLevel()
+    },
+
+    /**
+     * `true` si hay algún corte puesto, según lo último que se sabe. Sin esperar
+     * a nada: es lo que miran los trabajos de fondo antes de hacer cualquier cosa.
+     */
+    halted(): boolean {
+      return currentLevel() !== 'ok'
+    },
+
+    /** Cuándo se renueva el límite mensual (ISO-8601): hasta entonces dura una parada. */
+    renewsAt(): string {
+      return new Date(periodOf(now(), settings.renewDay).end).toISOString()
+    },
+
+    /**
+     * Apunta lo que ha pesado una respuesta ya servida. Se cuentan todas, con o
+     * sin sesión (`ANONYMOUS`): el tráfico de salida se paga igual.
+     */
     count(who: string, bytes: number): void {
       const entry = pending.get(who) ?? { requests: 0, bytes: 0, limited: 0 }
 
       entry.requests += 1
       entry.bytes += bytes
+      bytesSince += bytes
       pending.set(who, entry)
     },
 
@@ -499,9 +566,10 @@ export function createAdminService(options: AdminServiceOptions) {
       const since = (ms: number): string => new Date(now() - ms).toISOString().slice(0, 10)
       const [recent, pattern, top, limits] = await Promise.all([
         db.execute({
-          sql: `SELECT day, hour, SUM(requests) AS requests, SUM(bytes) AS bytes, COUNT(*) AS people
+          sql: `SELECT day, hour, SUM(requests) AS requests, SUM(bytes) AS bytes,
+                       SUM(login <> ?) AS people
                 FROM request_stats WHERE day >= ? GROUP BY day, hour ORDER BY day, hour`,
-          args: [since(2 * 24 * HOUR)],
+          args: [ANONYMOUS, since(2 * 24 * HOUR)],
         }),
         // Primero el total de cada hora concreta; después, la media por día de la semana y hora.
         db.execute({
@@ -598,8 +666,19 @@ export function createAdminService(options: AdminServiceOptions) {
               VALUES (?, ?, ?, ?, ?, ?) RETURNING *`,
         args: [actor.login, ticket.kind, ticket.subject, ticket.body, ticket.target ?? null, iso()],
       })
+      const created = toTicket(result.rows[0] ?? {})
+      const granted = await db.execute('SELECT login FROM user_roles')
 
-      return toTicket(result.rows[0] ?? {})
+      // A quien administra, para que no dependa de que alguien abra el panel.
+      await notify({
+        to: [...fixedAdmins, ...granted.rows.map((row) => toText(row.login))],
+        kind: 'ticket_new',
+        ref: `ticket:${created.id}`,
+        from: actor.login,
+        text: created.subject,
+      })
+
+      return created
     },
 
     /** Lo que ha mandado quien pregunta, con sus respuestas. */
@@ -638,7 +717,18 @@ export function createAdminService(options: AdminServiceOptions) {
         throw domainError('not_found', 'Ese aviso no existe')
       }
 
-      return toTicket(row)
+      const ticket = toTicket(row)
+
+      // Sin esto, quien escribió solo veía la respuesta si volvía a abrir el buzón por su cuenta.
+      await notify({
+        to: [ticket.login],
+        kind: 'ticket_answered',
+        ref: `ticket:${ticket.id}`,
+        from: actor.login,
+        text: ticket.subject,
+      })
+
+      return ticket
     },
   }
 }

@@ -190,6 +190,13 @@ const envSchema = z.object({
    */
   STATIC_DIR: z.string().default(''),
 
+  /**
+   * Fichero donde la guardia de la máquina (`infra/scripts/limits-guard.sh`)
+   * escribe a qué porcentaje del tráfico del mes se ha llegado cuando hay corte:
+   * `90` o `95`. Vacío donde no hay guardia.
+   */
+  GUARD_LEVEL_FILE: z.string().default(''),
+
   /** Registra cada petición HTTP en la salida. */
   LOG_REQUESTS: z.enum(['true', 'false']).default('false'),
 

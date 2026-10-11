@@ -87,6 +87,76 @@ y ARM, la publica en GHCR y lanza ese mismo script por SSH. Necesita:
 - En `infra/.env` de la máquina: `APP_IMAGE=ghcr.io/<usuario>/<repositorio>:latest`.
 - Si el paquete es privado, un `docker login ghcr.io` en la máquina.
 
+## Pay As You Go: no pasar nunca de lo gratuito
+
+Con la cuenta en "Pay As You Go" suele haber capacidad para crear la máquina,
+pero lo que pase de la capa gratuita se cobra. Las reglas son fijas y no se
+regulan desde ningún panel. Hay dos cortes, y los dos se levantan solos cuando
+el límite se renueva:
+
+| Al llegar al | Quién entra | Qué sigue corriendo |
+| --- | --- | --- |
+| **90 %** | Solo quien administra la web | La web y Caddy, para atenderle. Nada más: ni copia de 42, ni trabajos de fondo, ni actualizaciones automáticas, ni snaps, ni el agente de Oracle, ni la subida de copias |
+| **95 %** | Nadie. Solo SSH | Nada: contenedores parados, y también la sincronización de la hora |
+
+Los límites de la capa gratuita y lo que gasta Sanatorio:
+
+| Límite gratuito | 90 % | Qué gasta Sanatorio | Cómo se respeta |
+| --- | --- | --- | --- |
+| Tráfico de salida: 10 TB al mes | 9 TB | Lo que sirve la web | Los dos cortes de arriba |
+| Cómputo ARM: 3 000 h de OCPU al mes | 3 OCPU todo el mes | 1 OCPU (25 %) | `create-instance.sh` se niega a pedir más |
+| Memoria ARM: 18 000 h de GB al mes | 21 GB todo el mes | 6 GB (25 %) | Lo mismo |
+| Disco: 200 GB entre todos los volúmenes | 180 GB | El de arranque, unos 47 GB | La guardia avisa en su registro |
+
+El tráfico es el único que depende de cuánta gente use la web, y tiene dos
+barreras que no dependen una de otra. Entre las dos manda la más estricta.
+
+1. **La web** cuenta todo lo que sirve (con y sin sesión, más un margen por
+   respuesta para cabeceras y TLS). Reparte lo que queda hasta el 90 % entre los
+   días que faltan del mes, de modo que gastando cada día todo lo permitido no
+   se llega. Si aun así se llega, responde `503` a todo el que no administre
+   (menos `/health` y las rutas de sesión), deja de hablar con 42 y no lanza
+   ningún trabajo de fondo; al 95 %, `503` también a quien administra. Reglas en
+   `apps/api/src/modules/admin/budget.rules.ts`.
+2. **La máquina** (`infra/scripts/limits-guard.sh`, cada cinco minutos por cron)
+   cuenta lo que sale de verdad por la tarjeta de red, también lo que la web no
+   ve (Caddy, SSH, actualizaciones). Al 90 % se lo dice a la web
+   (`/data/guard-level`) y para y bloquea todo lo que corre solo en la máquina;
+   al 95 % para los contenedores. El día 1 lo deshace todo.
+
+Con el corte del 90 %, quien administra y no tenga la sesión abierta no verá la
+web: tiene que entrar directamente por `https://<dominio>/api/auth/login`.
+
+```sh
+sudo infra/scripts/limits-guard.sh status     # cómo va el mes y si hay corte
+tail /var/log/sanatorio-limits.log            # qué ha hecho la guardia
+cat /var/lib/sanatorio-guard/quieted          # qué ha parado y volverá a arrancar
+```
+
+El cloud-init instala el cron. En una máquina creada antes de que existiera:
+
+```sh
+echo '*/5 * * * * root /opt/sanatorio/infra/scripts/limits-guard.sh >> /var/log/sanatorio-limits.log 2>&1' \
+  | sudo tee /etc/cron.d/sanatorio-limits
+```
+
+**Lo que sigue saliendo con todo cortado**, porque sin ello no se podría entrar
+a arreglarlo: el SSH, la renovación de la dirección de red (DHCP) y, entre el
+90 y el 95 %, lo que pida quien administra y la renovación del certificado de
+Caddy. Son kilobytes; para eso está el 5 % de margen.
+
+Para levantar un corte antes de tiempo (solo si la cuenta estaba mal), por SSH:
+la web, subiendo `monthlyBytes` en la fila `budget` de la tabla `settings`; la
+guardia, poniendo a cero el segundo número de `/var/lib/sanatorio-guard/egress`
+y lanzándola a mano, que lo deshace todo ella.
+
+**Lo que no cubre nada de esto**: lo que se cree a mano en la consola de Oracle
+(otra máquina, un balanceador, más disco, una base de datos). Conviene poner
+además un **presupuesto con alerta** en la consola (Billing → Budgets): 1 € al
+mes con aviso por correo al primer céntimo. Oracle no para nada por su cuenta,
+pero así te enteras el mismo día. No crear recursos que no sean "Always Free
+eligible".
+
 ## Copias de seguridad
 
 ```sh

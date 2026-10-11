@@ -4,6 +4,7 @@
  */
 
 import type { Db } from '../../core/db/database.js'
+import type { Notify } from '../../core/events.js'
 import type { AppModule } from '../../core/module.js'
 import type { AttendanceService } from '../attendance/index.js'
 import type { XpService } from '../profile/index.js'
@@ -19,6 +20,7 @@ export type HelpModuleDeps = {
   agenda: Agenda
   xp: XpService
   attendance: AttendanceService
+  notify?: Notify
   now?: () => number
 }
 
@@ -31,6 +33,7 @@ export function createHelpModule(deps: HelpModuleDeps): HelpModule {
     agenda: deps.agenda,
     xp: deps.xp,
     attendance: deps.attendance,
+    ...(deps.notify === undefined ? {} : { notify: deps.notify }),
     ...(deps.now === undefined ? {} : { now: deps.now }),
   })
 

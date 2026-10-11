@@ -8,6 +8,8 @@
  * módulos (`composition.ts`) y se le pide a cada uno que registre lo suyo.
  */
 
+import { readFile } from 'node:fs/promises'
+
 import Fastify from 'fastify'
 import type { FastifyInstance } from 'fastify'
 
@@ -65,6 +67,18 @@ export async function buildApp(options: BuildOptions = {}): Promise<BuiltApp> {
     sync: syncConfigFrom(env),
     backgroundSync: env.SYNC_ENABLED === 'true',
     admins: env.adminLogins,
+    ...(env.GUARD_LEVEL_FILE === ''
+      ? {}
+      : {
+          // Sin fichero, o vacío, no hay corte de la guardia.
+          guardLevel: async () => {
+            const percent = Number(
+              (await readFile(env.GUARD_LEVEL_FILE, 'utf8').catch(() => '0')).trim(),
+            )
+
+            return percent >= 95 ? 'stopped' : percent >= 90 ? 'admin_only' : 'ok'
+          },
+        }),
     // A stderr y no al log de Fastify: el sincronizador vive fuera de las
     // peticiones. Lo que importa es que quede rastro, porque la web sigue
     // funcionando con datos viejos y sin esto no habría forma de saberlo.
@@ -132,6 +146,11 @@ export async function buildApp(options: BuildOptions = {}): Promise<BuiltApp> {
         for (const job of module.jobs ?? []) {
           timers.push(
             setInterval(() => {
+              // Con un corte por el límite del plan no corre nada de fondo: no
+              // tiene que salir tráfico aunque no haya nadie. Lo de `admin` sí:
+              // es quien guarda la cuenta de lo servido.
+              if (module.name !== 'admin' && services.admin.halted()) return
+
               job.run().catch((error: unknown) => {
                 const message = error instanceof Error ? error.message : String(error)
                 process.stderr.write(`[${job.name}] ${message}\n`)

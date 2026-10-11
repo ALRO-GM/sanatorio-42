@@ -195,13 +195,22 @@ no llegar nunca a un máximo que deje la web parada:
 
 - Lo de **hoy** es el tope diario o, si es menos, lo que queda del límite
   mensual (bytes de salida) entre los días que faltan para que se renueve,
-  pasado a peticiones con lo que viene pesando cada una este mes. De eso se
-  gasta como mucho el colchón (`share`, 85 %).
+  pasado a peticiones con lo que viene pesando cada una este mes. Del tope
+  diario se gasta como mucho el colchón (`share`, 90 %); del mes solo se cuenta
+  con lo que hay hasta el corte.
 - Lo de **esta hora** es lo que queda del día entre las horas que faltan.
 - Lo de **cada persona** es lo de la hora entre quienes están conectados, entre
   un mínimo y un máximo. El mínimo se respeta siempre.
 - El **modo ahorro** lo deja todo en un cuarto mientras esté puesto.
 - Días y horas en UTC. Al arrancar se recupera de la base lo ya servido.
+- **Reglas fijas, que no se regulan**. Al 90 % del límite mensual
+  (`STOP_SHARE`) solo entra quien administra: el resto recibe `503` con
+  `{ "error": "service_stopped" }` y `Retry-After` en todo menos `/health` y
+  `/auth/*`, no se pide nada a 42 y no corre ningún trabajo de fondo. Al 95 %
+  (`HARD_STOP_SHARE`), `503` para todo el mundo menos `/health`. `budget.level`
+  dice en cuál se está (`ok`, `admin_only`, `stopped`); manda lo peor entre lo
+  que cuenta la web y lo que dice la guardia de la máquina. Se levantan solos
+  al renovarse el límite. Se cuenta todo lo que sale, con o sin sesión.
 
 Cuota de la API de 42 (`modules/replica/quota.ts`). 42 da 1 200 peticiones por
 hora a toda la aplicación; se puede añadir un tope diario o mensual (lo de cada
@@ -695,6 +704,39 @@ La de asistir a terapias no cuenta. `me` es `null` si aún no has ayudado.
 - **Terapias**: no hay fichaje. Cada media hora desde el inicio se mira quién de
   los apuntados está en un puesto reservado del grupo; hacen falta al menos dos,
   y el grupo tiene que tener puestos reservados.
+
+## Buzón de avisos
+
+Lo que cada persona tiene que saber porque otra ha hecho algo que le toca.
+Ningún módulo escribe en el buzón: cada uno emite un evento `notice` y el módulo
+`notices` lo guarda. El texto lo redacta la web a partir de `kind`.
+
+- GET /pulse → `{ "unread": 2, "quota": { "level", "ticket" } }`. Lo único que
+  la web pregunta de fondo además del calendario: avisos sin leer y cuota de 42.
+- GET /notices → `{ "unread", "items": [{ "id", "kind", "ref", "from", "text",
+  "count", "at", "read" }] }`, lo que no se ha leído primero.
+- POST /notices/read → `{ "ids"? }`: da por leídos esos avisos, o todos. Devuelve
+  el buzón.
+
+| `kind` | A quién | Cuándo |
+| ------ | ------- | ------ |
+| `ticket_answered` | Quien escribió | Responden a lo que mandó al buzón de incidencias |
+| `ticket_new` | Quien administra | Alguien manda una incidencia, sugerencia o denuncia |
+| `chat` | El resto del evento o del grupo | Un mensaje o un aviso de retraso o ausencia (no "lo he visto") |
+| `booking_requested` | Quien ayuda | Le piden un rato |
+| `booking_accepted` · `booking_declined` | Quien pidió | Contestan a su reserva |
+| `booking_cancelled` | La otra parte | Se anula una reserva |
+| `doubt_answered` | Quien puso la duda | Le responden |
+| `doubt_solved` | Quien respondió | Su respuesta se marca como la que la resolvió |
+| `proposal_accepted` · `proposal_rejected` | Quien propuso | Validan o rechazan su cambio en una guía |
+| `board_changed` · `board_cancelled` | Quien tiene plaza | Cambia la hora o el sitio, o se cancela |
+| `group_joined` | Quien abrió el grupo | Alguien se apunta |
+| `group_closed` | Quien estaba apuntado | Se cierra el grupo |
+
+Quien provoca un aviso no se avisa a sí. Mientras un aviso sigue sin leer, lo
+mismo que vuelve a pasar (otro mensaje en el mismo chat) no crea otro: sube
+`count`. Abrir un chat da por leído su aviso. Los leídos se borran al mes; los
+que nadie lee, a los tres.
 
 ## Salud del servicio
 

@@ -5,11 +5,11 @@
 import { ME, PEERS } from './data'
 import { mockNetwork, mockPair, mockPeople, mockStrictest } from './network'
 import type { Api } from '../types'
-import { delay, quotaSettings, quotaQueue, quotaStatus } from './state'
+import { delay, notices, quotaSettings, quotaQueue, quotaStatus } from './state'
 
 export const replicaMock: Pick<
   Api,
-  | 'getQuota'
+  | 'getPulse'
   | 'getAdminQuota'
   | 'setAdminQuota'
   | 'getSyncStatus'
@@ -21,13 +21,15 @@ export const replicaMock: Pick<
 > = {
   // En la web de mentira la cuota va bien hasta que se pone el modo ahorro en
   // el panel: entonces hay cola, y avanza un turno cada vez que se pregunta.
-  async getQuota() {
+  async getPulse() {
     await delay(100)
+
+    const unread = notices.filter((notice) => !notice.read).length
 
     if (!quotaSettings.saving) {
       quotaQueue.ahead = 5
 
-      return { level: 'ok', ticket: null }
+      return { unread, quota: { level: 'ok', ticket: null } }
     }
 
     const ahead = quotaQueue.ahead
@@ -35,13 +37,16 @@ export const replicaMock: Pick<
     quotaQueue.ahead = Math.max(0, quotaQueue.ahead - 1)
 
     return {
-      level: 'tight',
-      ticket: {
-        number: 'A-042',
-        serving: `A-${String(41 - ahead).padStart(3, '0')}`,
-        ahead,
-        etaMinutes: ahead + 1,
-        since: new Date(Date.now() - 120_000).toISOString(),
+      unread,
+      quota: {
+        level: 'tight',
+        ticket: {
+          number: 'A-042',
+          serving: `A-${String(41 - ahead).padStart(3, '0')}`,
+          ahead,
+          etaMinutes: ahead + 1,
+          since: new Date(Date.now() - 120_000).toISOString(),
+        },
       },
     }
   },

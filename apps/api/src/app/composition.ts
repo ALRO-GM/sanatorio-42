@@ -11,7 +11,9 @@
 
 import type { Db } from '../core/db/database.js'
 import { createEventBus } from '../core/events.js'
-import type { EventBus } from '../core/events.js'
+import type { LimitLevel } from '@sanatorio/contracts'
+
+import type { EventBus, Notify } from '../core/events.js'
 import type { AppModule } from '../core/module.js'
 import type { FortyTwoClient } from '../integrations/forty-two/client.js'
 import { createAdminModule } from '../modules/admin/index.js'
@@ -31,6 +33,8 @@ import type { MapModule } from '../modules/map/index.js'
 import { createMeetModule } from '../modules/meet/index.js'
 import type { MeetModule } from '../modules/meet/index.js'
 import { createNetworkModule } from '../modules/network/index.js'
+import { createNoticesModule } from '../modules/notices/index.js'
+import type { NoticesModule } from '../modules/notices/index.js'
 import type { NetworkModule } from '../modules/network/index.js'
 import { createPeersModule } from '../modules/peers/index.js'
 import type { PeersModule } from '../modules/peers/index.js'
@@ -51,6 +55,8 @@ export type CompositionConfig = {
   log?: (message: string) => void
   /** Logins que administran por configuración (`ADMIN_LOGINS`). */
   admins?: readonly string[]
+  /** Lo que dice la guardia de la máquina sobre los límites del plan, si la hay. */
+  guardLevel?: () => Promise<LimitLevel>
   /** Reloj inyectable, para los tests. */
   now?: () => number
 }
@@ -80,6 +86,7 @@ export type Services = {
   meet: MeetModule['service']
   attendance: AttendanceModule['service']
   admin: AdminModule['service']
+  notices: NoticesModule['service']
 }
 
 export type Composition = {
@@ -94,24 +101,33 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
   const events = createEventBus()
   const clock = config.now === undefined ? {} : { now: config.now }
 
+  // Con un corte por el límite del plan no se pide nada a 42. Quien lo sabe es
+  // `admin`, que se monta después: de momento, nadie está cortado.
+  let halted = (): boolean => false
+
   const replica = createReplicaModule({
     db,
     client,
     config: config.sync,
     ...(config.backgroundSync === undefined ? {} : { backgroundSync: config.backgroundSync }),
     priority: (login) => (config.admins ?? []).includes(login),
+    halted: () => halted(),
     ...(config.log === undefined ? {} : { log: config.log }),
     ...clock,
   })
+  // Los módulos avisan sin saber que hay un buzón: `notices` es quien escucha.
+  const notify: Notify = (notice) => events.emit('notice', notice)
   const common = { db, replica: replica.repository, ...clock }
+  const notices = createNoticesModule({ db, events, quota: replica.quota, ...clock })
 
   const profile = createProfileModule({ ...common, curriculum: replica.curriculum, events })
   const peers = createPeersModule({ ...common, sync: replica.sync, events })
-  const therapy = createTherapyModule({ ...common, sync: replica.sync, xp: profile.xp })
+  const therapy = createTherapyModule({ ...common, sync: replica.sync, xp: profile.xp, notify })
   const doubts = createDoubtsModule({
     ...common,
     curriculum: replica.curriculum,
     xp: profile.xp,
+    notify,
   })
   const attendance = createAttendanceModule({
     db,
@@ -123,6 +139,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     xp: profile.xp,
     attendance: attendance.service,
     events,
+    notify,
   })
   const map = createMapModule({
     replica: replica.repository,
@@ -137,6 +154,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     agenda: replica.agenda,
     xp: profile.xp,
     attendance: attendance.service,
+    notify,
   })
   const calendar = createCalendarModule({
     replica: replica.repository,
@@ -166,14 +184,20 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     attendance: attendance.service,
     therapy: therapy.service,
     replica: replica.repository,
+    notify,
+    onRead: (login, eventId) => notices.service.readAbout(login, 'chat', eventId),
     ...clock,
   })
   const admin = createAdminModule({
     db,
     fixedAdmins: config.admins ?? [],
     fortyTwoRemaining: () => client.hourlyRemaining(),
+    ...(config.guardLevel === undefined ? {} : { guardLevel: config.guardLevel }),
+    notify,
     ...clock,
   })
+
+  halted = () => admin.service.halted()
   const usage = createUsageModule({ db, replica: replica.repository, ...clock })
 
   return {
@@ -195,6 +219,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
       network,
       usage,
       meet,
+      notices,
     ],
     services: {
       repositories: {
@@ -220,6 +245,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
       meet: meet.service,
       attendance: attendance.service,
       admin: admin.service,
+      notices: notices.service,
     },
   }
 }

@@ -72,7 +72,17 @@ INSTANCE=$(id_of oci compute instance list -c "$C" --display-name "$NAME" --life
 if ! found "$INSTANCE"; then
   SIZE=()
   # Solo las formas "Flex" dejan (y obligan a) decir cuánta CPU y memoria.
-  case "$SHAPE" in *Flex) SIZE=(--shape-config '{"ocpus":1,"memoryInGBs":6}') ;; esac
+  #
+  # Regla del plan: no pasar del 90 % de lo gratuito. Una máquina encendida todo
+  # el mes gasta 744 horas por OCPU y por GB, y lo gratuito son 3 000 horas de
+  # OCPU y 18 000 de GB: el tope es 3 OCPU y 21 GB. Esta pide 1 y 6 (un 25 %).
+  OCPUS=1
+  MEMORY_GB=6
+  if [ "$OCPUS" -gt 3 ] || [ "$MEMORY_GB" -gt 21 ]; then
+    echo "Esa máquina pasa del 90 % del cómputo gratuito (máximo 3 OCPU y 21 GB)" >&2
+    exit 1
+  fi
+  case "$SHAPE" in *Flex) SIZE=(--shape-config "{\"ocpus\":$OCPUS,\"memoryInGBs\":$MEMORY_GB}") ;; esac
 
   INSTANCE=$(oci compute instance launch -c "$C" --availability-domain "$AD" --shape "$SHAPE" \
     "${SIZE[@]}" --image-id "$IMAGE" --subnet-id "$SUBNET" --assign-public-ip true \

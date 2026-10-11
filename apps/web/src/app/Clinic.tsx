@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useState } from 'react'
 
 import type { CurrentUser } from '@sanatorio/contracts'
 
@@ -6,6 +6,7 @@ import { AlertCenter } from '../features/alerts/AlertCenter'
 import { QuotaNotice } from '../features/alerts/QuotaNotice'
 import { api } from '../shared/api'
 import { useAsync } from '../shared/hooks/useAsync'
+import { usePulse } from '../shared/hooks/usePulse'
 import { LayoutSettings } from '../shared/layout/LayoutSettings'
 import { startUsage } from '../shared/layout/store'
 import { Footer } from './Footer'
@@ -13,6 +14,12 @@ import { Header } from './Header'
 import { SectionView } from './SectionView'
 import type { Section } from './sections'
 import { useRoute } from './useRoute'
+
+// Los dos buzones se descargan cuando alguien los abre.
+const Mailbox = lazy(() =>
+  import('../features/notices/Mailbox').then((m) => ({ default: m.Mailbox })),
+)
+const Inbox = lazy(() => import('../features/admin/Inbox').then((m) => ({ default: m.Inbox })))
 
 type ClinicProps = {
   me: CurrentUser
@@ -35,6 +42,9 @@ export function Clinic({ me, onLogout }: ClinicProps) {
   // Cambia al elegir otro campus: todo lo que depende del campus se vuelve a montar.
   const [campusVersion, setCampusVersion] = useState(0)
   const [customizing, setCustomizing] = useState(false)
+  // Qué buzón está abierto: el de avisos, o el de escribir a quien administra.
+  const [box, setBox] = useState<'notices' | 'inbox' | null>(null)
+  const { pulse, refresh } = usePulse()
 
   useEffect(() => {
     startUsage()
@@ -74,6 +84,10 @@ export function Clinic({ me, onLogout }: ClinicProps) {
         me={me}
         section={section}
         admin={profile.data?.admin === true}
+        unread={pulse?.unread ?? 0}
+        onMailbox={() => {
+          setBox('notices')
+        }}
         onGo={(next) => {
           openSection(next)
         }}
@@ -83,7 +97,7 @@ export function Clinic({ me, onLogout }: ClinicProps) {
         onLogout={onLogout}
       />
 
-      <QuotaNotice />
+      <QuotaNotice status={pulse?.quota ?? null} />
       <AlertCenter
         me={me.login}
         onGo={(next) => {
@@ -112,7 +126,42 @@ export function Clinic({ me, onLogout }: ClinicProps) {
         />
       </div>
 
-      <Footer campusId={profile.data?.campusId} onCampusChange={onCampusChange} />
+      <Footer
+        campusId={profile.data?.campusId}
+        onCampusChange={onCampusChange}
+        onInbox={() => {
+          setBox('inbox')
+        }}
+      />
+
+      <Suspense fallback={null}>
+        {box === 'notices' && (
+          <Mailbox
+            onClose={() => {
+              setBox(null)
+              refresh()
+            }}
+            onChange={refresh}
+            onOpen={(target) => {
+              // Lo que te han respondido está en el buzón de incidencias; lo demás, en su sección.
+              if (target === 'inbox') {
+                setBox('inbox')
+              } else {
+                setBox(null)
+                openSection(target)
+              }
+            }}
+          />
+        )}
+        {box === 'inbox' && (
+          <Inbox
+            onClose={() => {
+              setBox(null)
+              refresh()
+            }}
+          />
+        )}
+      </Suspense>
     </main>
   )
 }

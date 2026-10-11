@@ -137,6 +137,7 @@ Módulos de la API (`apps/api/src/modules/`):
 | `network` | Red de correcciones: quién ha corregido a quién, comunidades y endogamia |
 | `usage`   | Cuánto se usa cada elemento: orden automático y mapa de calor para admins |
 | `meet`    | Avisos y chat de cada evento, y las rutas de la asistencia con códigos |
+| `notices` | Buzón de avisos de cada persona y el pulso que la web pregunta de fondo |
 | `attendance` | Códigos de inicio y fin, tiempo validado, registro de intentos e informe de horas |
 | `admin`   | Permisos, bloqueos, buzón de incidencias y denuncias, consumo y presupuesto de peticiones |
 

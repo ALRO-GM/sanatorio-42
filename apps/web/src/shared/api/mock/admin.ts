@@ -15,6 +15,8 @@ import {
   limits,
   budgetSettings,
   budgetStatus,
+  addNotice,
+  notices,
 } from './state'
 
 export const adminMock: Pick<
@@ -23,6 +25,8 @@ export const adminMock: Pick<
   | 'getMyTickets'
   | 'getAdminTickets'
   | 'answerTicket'
+  | 'getNotices'
+  | 'readNotices'
   | 'setAdminBudget'
   | 'getAdminConsumption'
   | 'getAdminPeople'
@@ -69,6 +73,25 @@ export const adminMock: Pick<
     return [...tickets].sort((a, b) => Number(b.status === 'open') - Number(a.status === 'open'))
   },
 
+  async getNotices() {
+    await delay(120)
+
+    return {
+      unread: notices.filter((notice) => !notice.read).length,
+      items: [...notices].sort((a, b) => Number(a.read) - Number(b.read)),
+    }
+  },
+
+  async readNotices(ids) {
+    await delay(100)
+
+    for (const notice of notices) {
+      if (ids === undefined || ids.includes(notice.id)) notice.read = true
+    }
+
+    return this.getNotices()
+  },
+
   async answerTicket(id, answer, status) {
     await delay(150)
 
@@ -81,6 +104,13 @@ export const adminMock: Pick<
       status,
       answeredBy: ME.login,
       answeredAt: new Date().toISOString(),
+    })
+    // En la web de mentira eres quien pregunta y quien responde: el aviso te llega a ti.
+    addNotice({
+      kind: 'ticket_answered',
+      ref: `ticket:${ticket.id}`,
+      from: ME.login,
+      text: ticket.subject,
     })
 
     return ticket

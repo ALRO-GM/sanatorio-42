@@ -26,9 +26,10 @@ que hacer, en orden. Este documento es el porqué; aquel, el qué.
 - **Todo subido a GitHub** a 2026-10-11 (tarde): la XP por códigos con informe
   de horas (módulo `attendance`), el presupuesto dinámico de peticiones, la
   cuota de 42 con rótulo y cola de turnos, las pasadas de seguridad, rendimiento
-  y simplificación, y el borrado a plazo de mensajes. `npm run check` pasa (336
+  y simplificación, y el borrado a plazo de mensajes. `npm run check` pasa (343
   tests de la API). El antes y el después, en [rendimiento.md](rendimiento.md).
-  **Solo queda desplegar**, cuando Oracle dé la máquina.
+  También el buzón de avisos con el número de sin leer en la cabecera (módulo
+  `notices`). **Solo queda desplegar**, cuando Oracle dé la máquina.
 - Antes de eso había entrado:
   expediente público de otras personas; cabecera fija, guardia desde "De
   guardia" y personalización; módulo `usage` y mapa de calor; avisos, chat de
@@ -58,8 +59,11 @@ que hacer, en orden. Este documento es el porqué; aquel, el qué.
   clonar en `/opt/sanatorio` → copiar `infra/.env` → `docker compose up -d --build`
   → comprobar `https://sanatorio42.duckdns.org/api/health/db`. La copia inicial
   de 42 tarda unas horas; la web funciona desde el primer minuto.
-- Alternativa si no entra: pasar la cuenta a "Pay As You Go" (las máquinas
-  Always Free siguen gratis y suele haber capacidad).
+- Alberto va a pasar la cuenta a "Pay As You Go" (2026-10-11) para tener
+  capacidad. Condición suya, **estricta**: no pagar nunca. Al 90 % de cualquier
+  límite gratuito solo entra quien administra y se para todo lo automático; al
+  95 % no entra nadie y hay que ir por SSH. Está en la web y en una guardia de
+  la máquina. Ver `docs/deploy-oracle.md`, "Pay As You Go".
 
 ## Tareas recurrentes al retomar una sesión
 

@@ -27,6 +27,7 @@ import { attendanceSchema } from './0018-attendance.js'
 import { settingsSchema } from './0019-settings.js'
 import { quotaSchema } from './0020-quota.js'
 import { messageRateSchema } from './0021-message-rate.js'
+import { noticesSchema } from './0022-notices.js'
 import type { Migration } from './types.js'
 
 export type { Migration } from './types.js'
@@ -53,6 +54,7 @@ export const MIGRATIONS: readonly Migration[] = [
   settingsSchema,
   quotaSchema,
   messageRateSchema,
+  noticesSchema,
 ]
 
 /** Versión más alta que existe en el código. */

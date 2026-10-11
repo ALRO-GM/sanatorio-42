@@ -15,6 +15,15 @@ set -eu
 
 cd "$(dirname "$0")/.."
 
+# Con un corte por los límites del plan no sale nada de la máquina: al 95 % no
+# hay ni contenedores a los que pedir la copia, y al 90 % la copia se hace pero
+# no se sube. Lo dice la guardia (infra/scripts/limits-guard.sh).
+guard_level=$(cat /var/lib/sanatorio-guard/level 2> /dev/null || echo 0)
+if [ "$guard_level" -ge 95 ]; then
+  echo "Servicio parado por los límites del plan: no se hace copia."
+  exit 0
+fi
+
 stamp=$(date +%Y%m%d-%H%M%S)
 file="backups/sanatorio-$stamp.db"
 mkdir -p backups
@@ -34,7 +43,9 @@ gzip "$file"
 ls -1t backups/sanatorio-*.db.gz | tail -n +15 | xargs -r rm --
 echo "Copia guardada en infra/$file.gz"
 
-if [ -n "${BACKUP_REMOTE:-}" ]; then
+if [ -n "${BACKUP_REMOTE:-}" ] && [ "$guard_level" -ge 90 ]; then
+  echo "Corte por los límites del plan: la copia no se sube a $BACKUP_REMOTE."
+elif [ -n "${BACKUP_REMOTE:-}" ]; then
   rclone copy "$file.gz" "$BACKUP_REMOTE"
   echo "Copia subida a $BACKUP_REMOTE"
 fi

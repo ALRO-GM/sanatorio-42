@@ -1,52 +1,16 @@
-import { useEffect, useState } from 'react'
-
 import type { QuotaStatus } from '@sanatorio/contracts'
 
-import { api } from '../../shared/api'
 import { useI18n } from '../../shared/i18n'
-
-/** Cada cuánto se pregunta: a menudo si esperas turno, poco si todo va bien. */
-const EVERY_MS = { waiting: 20_000, tight: 60_000, ok: 300_000 }
 
 /**
  * Aviso de que la API de 42 va justa y, si te toca esperar, tu turno en la
  * cola, como el tique de una sala de espera: tu número, por cuál van y cuánto
- * se calcula que falta. Se actualiza solo.
+ * se calcula que falta. El estado llega con el pulso de la web (`usePulse`).
  *
  * Con la cuota bien y sin turno no pinta nada.
  */
-export function QuotaNotice() {
+export function QuotaNotice({ status }: { status: QuotaStatus | null }) {
   const { t } = useI18n()
-  const [status, setStatus] = useState<QuotaStatus | null>(null)
-  const waiting = status !== null && status.ticket !== null
-  const pace = waiting ? 'waiting' : status !== null && status.level !== 'ok' ? 'tight' : 'ok'
-
-  useEffect(() => {
-    let alive = true
-    const ask = (): void => {
-      // Con la pestaña en segundo plano no se gasta una petición en un rótulo que nadie ve.
-      if (document.hidden) return
-
-      api.getQuota().then(
-        (next) => {
-          if (alive) setStatus(next)
-        },
-        () => undefined,
-      )
-    }
-
-    ask()
-
-    const timer = window.setInterval(ask, EVERY_MS[pace])
-
-    document.addEventListener('visibilitychange', ask)
-
-    return () => {
-      alive = false
-      window.clearInterval(timer)
-      document.removeEventListener('visibilitychange', ask)
-    }
-  }, [pace])
 
   if (status === null || (status.level === 'ok' && status.ticket === null)) return null
 

@@ -25,6 +25,7 @@ import type {
 import { z } from 'zod'
 
 import type { Actor } from '../../core/actor.js'
+import type { Notify } from '../../core/events.js'
 import type { Db } from '../../core/db/database.js'
 import { toNumber, toText } from '../../core/db/rows.js'
 import { domainError } from '../../core/errors.js'
@@ -47,6 +48,10 @@ export type MeetServiceOptions = {
   /** Para el chat de cada grupo de terapia (`group:<id>`), que no es un evento del calendario. */
   therapy: TherapyService
   replica: ReplicaRepository
+  /** Para dejar un aviso en el buzón de quien tiene que enterarse. Sin él, no se avisa. */
+  notify?: Notify
+  /** Para dar por leído el aviso de un chat cuando esa persona lo abre. */
+  onRead?: (login: string, eventId: string) => Promise<void>
   now?: () => number
 }
 
@@ -110,6 +115,7 @@ const reportSchema = z.object({
 export function createMeetService(options: MeetServiceOptions) {
   const { db, calendar, boards, help, attendance, therapy, replica } = options
   const now = options.now ?? Date.now
+  const notify: Notify = options.notify ?? (() => Promise.resolve())
   // Preguntar al calendario en cada mensaje del chat sería caro: se recuerda un rato.
   const membership = createTtlCache<boolean>({ ttlMs: 5 * 60_000, maxEntries: 500, now })
 
@@ -206,6 +212,30 @@ export function createMeetService(options: MeetServiceOptions) {
     throw domainError('invalid_input', 'Ese tipo de evento no valida la asistencia con códigos')
   }
 
+  /**
+   * Quién más está en un evento, para avisarle de que hay mensajes. De lo de 42
+   * (correcciones, eventos) no se sabe: ahí no se avisa a nadie.
+   */
+  const peopleIn = async (actor: Actor, id: string): Promise<string[]> => {
+    const [kind, second, third] = id.split(':')
+
+    if (kind === 'board') {
+      return boards.people(Number(second))
+    }
+    if (kind === 'group' || kind === 'therapy') {
+      return (
+        (await therapy.list(actor)).find((group) => group.id === Number(second))?.members ?? []
+      ).map((member) => member.login)
+    }
+    if (kind === 'help' && second === 'booking') {
+      const { event, guest } = await help.session(actor, Number(third))
+
+      return [event.host, guest]
+    }
+
+    return []
+  }
+
   /** De quién puede pedir `actor` el informe de horas: `null` es de todo el mundo. */
   const reportOf = (actor: Actor, login: string | undefined): string | null => {
     if (login === undefined || login === actor.login) {
@@ -235,6 +265,8 @@ export function createMeetService(options: MeetServiceOptions) {
       const since = after === undefined ? 0 : parse(z.coerce.number().int().min(0), after)
 
       await assertParticipant(actor, userId, event)
+      // Quien abre el chat ya ha visto lo que había: su aviso deja de contar.
+      await options.onRead?.(actor.login, event)
 
       const result = await db.execute({
         sql: `SELECT id, login, kind, minutes, reason, body, created_at FROM (
@@ -297,6 +329,17 @@ export function createMeetService(options: MeetServiceOptions) {
           new Date(now()).toISOString(),
         ],
       })
+
+      // "Lo he visto" no merece un aviso: lo demás, sí.
+      if (message.kind !== 'seen') {
+        await notify({
+          to: await peopleIn(actor, message.id),
+          kind: 'chat',
+          ref: message.id,
+          from: actor.login,
+          text: message.body ?? null,
+        })
+      }
 
       return this.thread(actor, userId, message.id)
     },

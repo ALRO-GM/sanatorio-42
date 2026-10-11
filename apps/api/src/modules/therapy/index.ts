@@ -4,6 +4,7 @@
  */
 
 import type { Db } from '../../core/db/database.js'
+import type { Notify } from '../../core/events.js'
 import type { AppModule } from '../../core/module.js'
 import type { XpService } from '../profile/index.js'
 import type { ReplicaRepository, Syncer } from '../replica/index.js'
@@ -17,6 +18,7 @@ export type TherapyModuleDeps = {
   replica: ReplicaRepository
   sync: Syncer
   xp: XpService
+  notify?: Notify
   now?: () => number
 }
 
@@ -28,6 +30,7 @@ export function createTherapyModule(deps: TherapyModuleDeps): TherapyModule {
     replica: deps.replica,
     sync: deps.sync,
     xp: deps.xp,
+    ...(deps.notify === undefined ? {} : { notify: deps.notify }),
     ...(deps.now === undefined ? {} : { now: deps.now }),
   })
 

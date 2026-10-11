@@ -136,11 +136,39 @@ Hecho el 2026-10-11:
       los grupos de terapia).
 - [x] `docs/api.md` repasado contra las rutas reales.
 
+### 2.4 Buzón de avisos (pedido el 2026-10-11)
+
+- [x] Buzón con todo lo que alguien puede recibir (respuestas del buzón de
+      incidencias, reservas, dudas, cambios de guía, chats, pizarras, terapias),
+      con el número de avisos sin leer en rojo en la cabecera. Módulo `notices`
+      (migración 22), `GET /pulse`, `features/notices/Mailbox.tsx`. Los módulos
+      avisan con `notify`; el rótulo de cuota y el buzón comparten un solo
+      sondeo (`usePulse`).
+- [x] `docs/rendimiento.md` cuenta de cada mejora qué se hacía antes, qué se
+      hace ahora y por qué es más rápido.
+
+### 2.5 Pay As You Go sin pasar de lo gratuito (pedido el 2026-10-11)
+
+- [x] Reglas fijas: al 90 % del tráfico del mes solo entra quien administra, la
+      web deja de hablar con 42 y de lanzar trabajos, y la guardia de la máquina
+      (`infra/scripts/limits-guard.sh`, cron cada cinco minutos) para y bloquea
+      actualizaciones automáticas, snaps, el agente de Oracle y la subida de
+      copias. Al 95 % no entra nadie y se paran los contenedores: solo SSH. El
+      reparto diario llega hasta el 90 %. `create-instance.sh` no pide más del
+      90 % del cómputo gratuito. Explicado en `docs/deploy-oracle.md`.
+- [ ] **Al desplegar**: comprobar que existe `/etc/cron.d/sanatorio-limits` y
+      que `sudo infra/scripts/limits-guard.sh status` da el tráfico del mes. La
+      guardia solo se ha probado con una máquina de mentira: mirar con
+      `systemctl list-timers` que las unidades de `QUIET_UNITS` existen con esos
+      nombres en la imagen de Ubuntu de Oracle, y añadir las que falten.
+- [ ] **Alberto, en la consola de Oracle**: pasar a Pay As You Go y crear un
+      presupuesto de 1 € con alerta por correo.
+
 ## 3. A medias o por confirmar con Alberto
 
-- **Cifras de los límites, por confirmar por Alberto** (se cambian desde el
-  panel, pestaña "Consumo", sin tocar código): el tráfico de salida de Oracle
-  está puesto a 10 TB al mes y se renueva el día 1; el tope diario o mensual de
+- **Cifras de los límites** (se cambian desde el panel, pestaña "Consumo"): el
+  tráfico de salida de Oracle está puesto a 10 TB al mes y se renueva el día 1,
+  con el corte fijo al 90 % (9 TB); el tope diario o mensual de
   la app de 42 está vacío (solo cuenta la cuota horaria) porque hay que mirarlo
   en la intra.
 - **Valores de los códigos de asistencia, por confirmar por Alberto**

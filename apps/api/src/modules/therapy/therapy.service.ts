@@ -18,12 +18,15 @@ import { XP_KIND } from '../profile/index.js'
 import type { XpService } from '../profile/index.js'
 import { id, optionalText, parse, startOfDayIso, text } from '../../core/validation.js'
 import type { Actor } from '../../core/actor.js'
+import type { Notify } from '../../core/events.js'
 
 export type TherapyServiceOptions = {
   therapy: TherapyRepository
   replica: ReplicaRepository
   sync: Syncer
   xp: XpService
+  /** Para dejar un aviso en el buzón de quien tiene que enterarse. Sin él, no se avisa. */
+  notify?: Notify
   now?: () => number
 }
 
@@ -151,6 +154,7 @@ const MAX_SLOTS_PER_DAY = 8
 export function createTherapyService(options: TherapyServiceOptions) {
   const { therapy, replica, sync, xp } = options
   const now = options.now ?? Date.now
+  const notify: Notify = options.notify ?? (() => Promise.resolve())
 
   /** `true` si ahora, en la hora del campus, el grupo está reunido. */
   async function inSession(group: GroupRow): Promise<{ active: boolean; day: string }> {
@@ -357,6 +361,14 @@ export function createTherapyService(options: TherapyServiceOptions) {
       if (group.closed || !(await therapy.join(groupId, actor.login, mine ?? null))) {
         throw domainError('conflict', 'El grupo está completo')
       }
+
+      await notify({
+        to: [group.creator],
+        kind: 'group_joined',
+        ref: `group:${groupId}`,
+        from: actor.login,
+        text: group.projectName,
+      })
     },
 
     /** Se va. Si era la última persona, el grupo se cierra solo. */
@@ -379,6 +391,13 @@ export function createTherapyService(options: TherapyServiceOptions) {
       }
 
       await therapy.close(groupId)
+      await notify({
+        to: group.members,
+        kind: 'group_closed',
+        ref: `group:${groupId}`,
+        from: actor.login,
+        text: group.projectName,
+      })
     },
 
     /**

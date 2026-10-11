@@ -74,7 +74,9 @@ export const realApi: Api = {
   getPublicProfile: (login) => getJson(`/users/${encodeURIComponent(login)}/profile`),
   updateSettings: (settings) => send('PUT', '/me/settings', settings),
   getSyncStatus: () => getJson('/sync/status'),
-  getQuota: () => getJson('/quota'),
+  getPulse: () => getJson('/pulse'),
+  getNotices: () => getJson('/notices'),
+  readNotices: (ids) => sendJson('POST', '/notices/read', ids === undefined ? {} : { ids }),
   getAdminQuota: () => getJson('/admin/quota'),
   setAdminQuota: (changes) => sendJson('PUT', '/admin/quota', changes),
 

@@ -182,6 +182,8 @@ describe('réplica vista desde fuera', () => {
       '/sync/status',
       '/usage',
       '/quota',
+      '/pulse',
+      '/notices',
       '/users/eva/profile',
       '/me/profile',
       '/boards',
@@ -197,6 +199,44 @@ describe('réplica vista desde fuera', () => {
 
     await built.services.admin.unblock({ login: 'jefa', campusId: 22, admin: true }, 'albrodri')
     expect((await http.get('/campuses')).statusCode).toBe(200)
+  })
+
+  it('al 90 % del tráfico del mes solo entra quien administra; al 95 %, ni eso', async () => {
+    // `albrodri` no administra en esta app; en la otra, sí.
+    const plain = await app()
+    const student = client(plain, await plain.login())
+    const managed = await app({ ADMIN_LOGINS: 'albrodri' })
+    const admin = client(managed, await managed.login())
+    const boss = { login: 'jefa', campusId: 22, admin: true }
+
+    for (const built of [plain, managed]) {
+      await built.services.admin.setBudget(boss, { monthlyBytes: 1_000_000 })
+      built.services.admin.count('alguien', 900_000)
+    }
+
+    // Quien no administra: fuera, con sesión o sin ella. Le quedan las rutas de sesión.
+    for (const url of ['/campuses', '/pulse', '/admin/consumption']) {
+      const response = await student.get(url)
+
+      expect([url, response.statusCode]).toEqual([url, 503])
+      expect(json(response)).toMatchObject({ error: 'service_stopped' })
+      expect(Number(response.headers['retry-after'])).toBeGreaterThan(0)
+    }
+    expect((await plain.app.inject({ method: 'GET', url: '/campuses' })).statusCode).toBe(503)
+    expect((await student.get('/auth/me')).statusCode).toBe(200)
+
+    // Quien administra sigue entrando, y puede identificarse si no tenía sesión.
+    expect((await admin.get('/campuses')).statusCode).toBe(200)
+    expect((await admin.get('/admin/consumption')).statusCode).toBe(200)
+    expect((await managed.app.inject({ method: 'GET', url: '/auth/login' })).statusCode).toBe(302)
+
+    // Al 95 % ya no entra nadie: solo queda la comprobación de salud.
+    managed.services.admin.count('alguien', 50_000)
+    for (const url of ['/campuses', '/admin/consumption', '/auth/me']) {
+      expect([url, (await admin.get(url)).statusCode]).toEqual([url, 503])
+    }
+    expect((await managed.app.inject({ method: 'GET', url: '/auth/login' })).statusCode).toBe(503)
+    expect((await managed.app.inject({ method: 'GET', url: '/health' })).statusCode).toBe(200)
   })
 
   it('todo esto pide sesión', async () => {

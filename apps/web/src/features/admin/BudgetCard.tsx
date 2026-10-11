@@ -73,6 +73,11 @@ export function BudgetCard({ status, onChange }: { status: BudgetStatus; onChang
   return (
     <article className={`card budget ${settings.saving ? 'saving' : ''}`}>
       <span className="eyebrow">{t('admin.budget.title')}</span>
+      {status.level !== 'ok' && (
+        <p className="budget-stopped" role="alert">
+          {t(`admin.budget.level.${status.level}`, { day: month.renewsOn })}
+        </p>
+      )}
       <div className="tiles">
         <div className="tile">
           <span className="eyebrow">{t('admin.budget.today')}</span>
@@ -97,11 +102,14 @@ export function BudgetCard({ status, onChange }: { status: BudgetStatus; onChang
         <div className="tile">
           <span className="eyebrow">{t('admin.budget.month')}</span>
           <strong>
-            {month.bytesLeft === null
+            {month.stopAt === null
               ? traffic(month.bytesUsed)
-              : `${traffic(month.bytesUsed)} / ${traffic(month.bytesUsed + month.bytesLeft)}`}
+              : `${traffic(month.bytesUsed)} / ${traffic(month.stopAt)}`}
           </strong>
-          <small>{t('admin.budget.renews', { n: month.daysLeft, day: month.renewsOn })}</small>
+          <small>
+            {month.stopAt !== null && `${t('admin.budget.stopAt')} `}
+            {t('admin.budget.renews', { n: month.daysLeft, day: month.renewsOn })}
+          </small>
         </div>
       </div>
 
