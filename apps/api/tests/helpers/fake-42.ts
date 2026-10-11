@@ -20,6 +20,7 @@ import type {
   ApiProjectUser,
   ApiCursusUser,
   ApiQuestUser,
+  ApiScaleTeam,
 } from '../../src/integrations/forty-two/types.js'
 import { createFakeSleep, stubAppTokens } from './fake-api.js'
 
@@ -33,6 +34,8 @@ export type Fake42 = {
   quests: Map<number, ApiQuestUser[]>
   /** Paso por cada cursus, por id de persona. */
   cursus: Map<number, ApiCursusUser[]>
+  /** Correcciones por campus. `updated_at` solo lo usa el filtro de novedades. */
+  scaleTeams: Map<number, (ApiScaleTeam & { updated_at?: string })[]>
   /** Rutas pedidas, en orden, sin el host. */
   calls: string[]
   /** Lo que dirá `x-hourly-ratelimit-remaining` en la próxima respuesta. */
@@ -48,6 +51,7 @@ export function createFake42(pageSize = 2): Fake42 {
     locations: new Map(),
     quests: new Map(),
     cursus: new Map(),
+    scaleTeams: new Map(),
     calls: [],
     hourlyRemaining: 1200,
     failOn: null,
@@ -91,6 +95,19 @@ export function createFake42(pageSize = 2): Fake42 {
       items = state.quests.get(Number(path.split('/')[2])) ?? []
     } else if (/^\/users\/\d+\/cursus_users$/.test(path)) {
       items = state.cursus.get(Number(path.split('/')[2])) ?? []
+    } else if (path === '/scale_teams') {
+      const ids = url.searchParams.get('range[id]')?.split(',').map(Number)
+      const updated = url.searchParams.get('range[updated_at]')?.split(',')
+
+      items = (state.scaleTeams.get(Number(url.searchParams.get('filter[campus_id]'))) ?? [])
+        .filter(
+          (row) =>
+            (ids === undefined || (row.id >= (ids[0] ?? 0) && row.id <= (ids[1] ?? Infinity))) &&
+            (updated === undefined ||
+              ((row.updated_at ?? '') >= (updated[0] ?? '') &&
+                (row.updated_at ?? '') <= (updated[1] ?? ''))),
+        )
+        .sort((a, b) => a.id - b.id)
     } else if (path === '/campus') {
       items = [{ id: 22, name: 'Madrid', time_zone: 'Europe/Madrid' }]
     }

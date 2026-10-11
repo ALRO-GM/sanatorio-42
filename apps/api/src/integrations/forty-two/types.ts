@@ -199,7 +199,7 @@ export type ApiExam = {
 }
 
 /**
- * Una corrección concertada, de `GET /v2/users/:id/scale_teams`.
+ * Una corrección, de `GET /v2/users/:id/scale_teams` o `GET /v2/scale_teams`.
  *
  * Antes de la corrección 42 oculta a la otra parte: `corrector` y `correcteds`
  * pueden venir como el texto `"invisible"` en vez de como personas.
@@ -211,6 +211,10 @@ export type ApiScaleTeam = {
   correcteds?: { id: number; login: string }[] | string | null
   scale?: { duration?: number | null } | null
   team?: { project_id?: number | null } | null
+  /** Nota que puso quien corrigió. `null` si aún no se ha hecho. */
+  final_mark?: number | null
+  /** El veredicto: `positive` dice si dio el proyecto por bueno. */
+  flag?: { name?: string | null; positive?: boolean | null } | null
 }
 
 /**

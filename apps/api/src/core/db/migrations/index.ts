@@ -17,6 +17,7 @@ import { therapyDatesSchema } from './0008-therapy-dates.js'
 import { hoursAndLevelSchema } from './0009-hours-and-level.js'
 import { cursusStartSchema } from './0010-cursus-start.js'
 import { healthSchema } from './0011-health.js'
+import { correctionsSchema } from './0012-corrections.js'
 import type { Migration } from './types.js'
 
 export type { Migration } from './types.js'
@@ -33,6 +34,7 @@ export const MIGRATIONS: readonly Migration[] = [
   hoursAndLevelSchema,
   cursusStartSchema,
   healthSchema,
+  correctionsSchema,
 ]
 
 /** Versión más alta que existe en el código. */

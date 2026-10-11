@@ -24,6 +24,8 @@ import { createHelpModule } from '../modules/help/index.js'
 import type { HelpModule } from '../modules/help/index.js'
 import { createMapModule } from '../modules/map/index.js'
 import type { MapModule } from '../modules/map/index.js'
+import { createNetworkModule } from '../modules/network/index.js'
+import type { NetworkModule } from '../modules/network/index.js'
 import { createPeersModule } from '../modules/peers/index.js'
 import type { PeersModule } from '../modules/peers/index.js'
 import { createProfileModule } from '../modules/profile/index.js'
@@ -61,6 +63,8 @@ export type Services = {
   map: MapModule['service']
   help: HelpModule['service']
   calendar: CalendarModule['service']
+  network: NetworkModule['service']
+  corrections: NetworkModule['sync']
 }
 
 export type Composition = {
@@ -116,9 +120,19 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     boards: boards.service,
   })
 
+  const network = createNetworkModule({
+    db,
+    client,
+    replica: replica.repository,
+    campusIds: config.sync.trackedCampusIds,
+    hourlyReserve: config.sync.hourlyReserve,
+    ...(config.log === undefined ? {} : { log: config.log }),
+    ...clock,
+  })
+
   return {
     events,
-    modules: [replica, peers, profile, therapy, doubts, boards, map, help, calendar],
+    modules: [replica, peers, profile, therapy, doubts, boards, map, help, calendar, network],
     services: {
       repositories: {
         availability: peers.availabilityRepository,
@@ -136,6 +150,8 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
       map: map.service,
       help: help.service,
       calendar: calendar.service,
+      network: network.service,
+      corrections: network.sync,
     },
   }
 }

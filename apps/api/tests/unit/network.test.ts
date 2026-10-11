@@ -1,0 +1,333 @@
+/**
+ * Red de correcciones: las cuentas (endogamia, comunidades), la copia desde 42
+ * y lo que devuelve el servicio.
+ */
+
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+
+import { compose } from '../../src/app/composition.js'
+import type { Services } from '../../src/app/composition.js'
+import type { Actor } from '../../src/core/actor.js'
+import { closeDatabase, openDatabase } from '../../src/core/db/database.js'
+import type { Db } from '../../src/core/db/database.js'
+import type { ApiScaleTeam } from '../../src/integrations/forty-two/types.js'
+import { analyse, mergePairs, select } from '../../src/modules/network/network.analysis.js'
+import { rowsOf } from '../../src/modules/network/network.sync.js'
+import { createFake42 } from '../helpers/fake-42.js'
+import { createFakeClock } from '../helpers/fake-api.js'
+import { projectUser, userId } from '../helpers/fixtures.js'
+
+const MADRID = 22
+const MINUTE = 60_000
+const NOW = Date.parse('2026-10-06T14:30:00.000Z')
+
+const actor = (login: string): Actor => ({ login, campusId: MADRID, admin: false })
+
+let nextId = 1
+
+/** Una corrección ya hecha, como la manda 42. */
+function scaleTeam(
+  corrector: string,
+  corrected: string | string[],
+  extra: Partial<ApiScaleTeam & { updated_at: string }> = {},
+): ApiScaleTeam & { updated_at?: string } {
+  return {
+    id: nextId++,
+    begin_at: '2026-09-01T10:00:00.000Z',
+    corrector: { id: userId(corrector), login: corrector },
+    correcteds: [corrected].flat().map((login) => ({ id: userId(login), login })),
+    team: { project_id: 10 },
+    final_mark: 100,
+    flag: { name: 'Ok', positive: true },
+    ...extra,
+  }
+}
+
+const pair = (corrector: string, corrected: string, count = 1) => ({ corrector, corrected, count })
+
+describe('red de correcciones', () => {
+  describe('cuentas', () => {
+    const members = new Set(['ana', 'eva', 'leo', 'sol'])
+
+    it('junta los dos sentidos y descarta las parejas de dos personas de fuera', () => {
+      const pairs = mergePairs(
+        [pair('eva', 'ana', 3), pair('ana', 'eva', 2), pair('ana', 'x1'), pair('x1', 'x2', 9)],
+        members,
+      )
+
+      expect(pairs).toEqual([
+        { a: 'ana', b: 'eva', ab: 2, ba: 3 },
+        { a: 'ana', b: 'x1', ab: 1, ba: 0 },
+      ])
+    })
+
+    it('la endogamia sube con la repetición y con las correcciones devueltas', () => {
+      // `ana` y `eva` se corrigen entre sí cinco veces; `leo` y `sol`, una sola
+      // y en un sentido.
+      const { people, totals } = analyse(
+        mergePairs([pair('ana', 'eva', 3), pair('eva', 'ana', 2), pair('leo', 'sol')], members),
+        members,
+      )
+
+      // 5 correcciones con 1 persona: repite 4/5; devueltas 2·min(3,2)=4 de 5.
+      expect(people.get('ana')).toMatchObject({
+        given: 3,
+        received: 2,
+        partners: 1,
+        repetition: 0.8,
+        reciprocity: 0.8,
+        endogamy: 80,
+      })
+      expect(people.get('leo')).toMatchObject({ given: 1, received: 0, endogamy: 0 })
+      expect(totals).toMatchObject({ corrections: 6, people: 4, pairs: 2, mutualPairs: 1 })
+      // Media ponderada por actividad: (5·0,8 + 5·0,8 + 0 + 0) / 12.
+      expect(totals.endogamy).toBe(67)
+    })
+
+    it('quien es de fuera sale marcado y no cuenta en la media del campus', () => {
+      const { people, totals } = analyse(
+        mergePairs([pair('ana', 'x1', 4), pair('x1', 'ana', 4)], members),
+        members,
+      )
+
+      expect(people.get('x1')).toMatchObject({ external: true })
+      expect(people.get('ana')).toMatchObject({ external: false, endogamy: 94 })
+      expect(totals.endogamy).toBe(94)
+    })
+
+    it('separa en comunidades los grupos que no se cruzan', () => {
+      const rows = [
+        pair('ana', 'eva', 4),
+        pair('eva', 'leo', 4),
+        pair('leo', 'ana', 4),
+        pair('sol', 'x1', 2),
+      ]
+      const { people, totals } = analyse(mergePairs(rows, members), members)
+
+      expect(totals.communities).toBe(2)
+      expect(new Set(['ana', 'eva', 'leo'].map((login) => people.get(login)?.community))).toEqual(
+        new Set([0]),
+      )
+      expect(people.get('sol')?.community).toBe(1)
+    })
+
+    it('elige qué pintar: los más activos, o una persona y su entorno', () => {
+      const analysis = analyse(
+        mergePairs(
+          [pair('ana', 'eva', 5), pair('eva', 'leo', 2), pair('leo', 'sol'), pair('sol', 'ana')],
+          members,
+        ),
+        members,
+      )
+
+      // Con un mínimo de 2 desaparecen las uniones de una sola corrección.
+      expect(select(analysis, { focus: null, min: 2, limit: 10 })).toMatchObject({
+        logins: ['eva', 'ana', 'leo'],
+        hidden: null,
+      })
+      // Centrado en `leo`: él primero, y solo quien se ha cruzado con él.
+      const around = select(analysis, { focus: 'leo', min: 1, limit: 10 })
+
+      expect(around.logins).toEqual(['leo', 'eva', 'sol'])
+      expect(around.links).toHaveLength(2)
+      // El tope avisa de lo que deja fuera.
+      expect(select(analysis, { focus: null, min: 1, limit: 2 }).hidden).toMatchObject({ nodes: 2 })
+      expect(select(analysis, { focus: 'nadie', min: 1, limit: 10 }).logins).toEqual([])
+    })
+  })
+
+  describe('copia desde 42', () => {
+    it('una corrección de grupo da una fila por persona; las ocultas y sin nota, ninguna', () => {
+      expect(rowsOf(scaleTeam('eva', ['ana', 'leo']), MADRID)).toHaveLength(2)
+      expect(rowsOf(scaleTeam('eva', 'ana', { final_mark: null }), MADRID)).toEqual([])
+      expect(rowsOf(scaleTeam('eva', 'ana', { corrector: 'invisible' }), MADRID)).toEqual([])
+      expect(rowsOf(scaleTeam('eva', 'ana', { correcteds: 'invisible' }), MADRID)).toEqual([])
+    })
+  })
+
+  describe('servicio', () => {
+    let db: Db
+    let services: Services
+    let clock: ReturnType<typeof createFakeClock>
+    let api: ReturnType<typeof createFake42>
+
+    beforeEach(async () => {
+      nextId = 1
+      db = await openDatabase({ url: 'file::memory:' })
+      clock = createFakeClock(NOW)
+      api = createFake42()
+      services = compose(db, api.client, {
+        now: clock.now,
+        sync: {
+          trackedCampusIds: [MADRID],
+          defaultCampusId: MADRID,
+          hourlyReserve: 300,
+          backfillIntervalMs: 0,
+          locationsTtlMs: 2 * MINUTE,
+          locationsIdleMs: 15 * MINUTE,
+          deltaTtlMs: 5 * MINUTE,
+          deltaIdleMs: 30 * MINUTE,
+          requestPageBudget: 2,
+        },
+      }).services
+
+      await services.repositories.replica.ingestProjectUsers(
+        [projectUser('ana'), projectUser('leo'), projectUser('eva')],
+        MADRID,
+      )
+    })
+
+    afterEach(() => {
+      closeDatabase(db)
+    })
+
+    /** Da vueltas hasta que el histórico está copiado. */
+    const copyAll = async (): Promise<void> => {
+      for (let turn = 0; turn < 10; turn += 1) {
+        await services.corrections.step()
+
+        if ((await services.corrections.status(MADRID)).phase === 'done') {
+          return
+        }
+      }
+    }
+
+    it('copia el histórico por páginas, sigue donde lo dejó y luego solo pide lo nuevo', async () => {
+      // 13 correcciones con páginas de 2: siete peticiones, en dos vueltas.
+      api.scaleTeams.set(
+        MADRID,
+        Array.from({ length: 13 }, (_, index) =>
+          scaleTeam(index % 2 === 0 ? 'eva' : 'ana', index % 2 === 0 ? 'ana' : 'eva'),
+        ),
+      )
+
+      expect(await services.corrections.status(MADRID)).toMatchObject({ phase: 'pending', rows: 0 })
+
+      await services.corrections.step()
+      expect(await services.corrections.status(MADRID)).toMatchObject({
+        phase: 'copying',
+        rows: 10,
+        total: 13,
+      })
+      expect(api.calls).toHaveLength(5)
+      expect(api.calls[1]).toContain('range[id]=3,')
+
+      await services.corrections.step()
+      expect(await services.corrections.status(MADRID)).toMatchObject({ phase: 'done', rows: 13 })
+
+      // Con el histórico hecho y sin que pase el tiempo, no se pide nada.
+      api.calls.length = 0
+      await services.corrections.step()
+      expect(api.calls).toHaveLength(0)
+
+      // A los diez minutos pide solo lo cambiado: una nueva y una que cambia de nota.
+      clock.advance(11 * MINUTE)
+      const changedAt = new Date(clock.now() - MINUTE).toISOString()
+      const rows = api.scaleTeams.get(MADRID) ?? []
+
+      rows.push(scaleTeam('leo', 'ana', { updated_at: changedAt }))
+      const first = rows[0]
+
+      if (first !== undefined) {
+        rows[0] = { ...first, final_mark: 0, updated_at: changedAt }
+      }
+
+      await services.corrections.step()
+      expect(api.calls).toHaveLength(2)
+      expect(api.calls[0]).toContain('range[updated_at]=')
+      expect(await services.corrections.status(MADRID)).toMatchObject({ rows: 14 })
+    })
+
+    it('no gasta la reserva horaria de la API', async () => {
+      api.scaleTeams.set(MADRID, [
+        scaleTeam('eva', 'ana'),
+        scaleTeam('ana', 'eva'),
+        scaleTeam('leo', 'ana'),
+      ])
+      api.hourlyRemaining = 320
+
+      // La primera petición se hace sin saber cuánto queda; al verlo, para.
+      await services.corrections.step()
+      await services.corrections.step()
+      expect(api.calls).toHaveLength(1)
+    })
+
+    it('devuelve el grafo con filtros de fecha, proyecto, persona y mínimo', async () => {
+      api.scaleTeams.set(MADRID, [
+        scaleTeam('eva', 'ana'),
+        scaleTeam('ana', 'eva'),
+        scaleTeam('eva', 'ana', { begin_at: '2026-03-01T10:00:00.000Z' }),
+        scaleTeam('leo', 'ana', { team: { project_id: 99 } }),
+        scaleTeam('fuera', 'leo'),
+        scaleTeam('fuera', 'otra'),
+      ])
+      await copyAll()
+      api.calls.length = 0
+
+      const all = await services.network.graph(actor('ana'), {})
+
+      expect(all.totals).toMatchObject({ corrections: 5, people: 4, pairs: 3, mutualPairs: 1 })
+      expect(all.nodes.map((node) => node.login)).toEqual(['ana', 'eva', 'leo', 'fuera'])
+      expect(all.nodes.find((node) => node.login === 'fuera')).toMatchObject({ external: true })
+      expect(all.nodes.find((node) => node.login === 'ana')).toMatchObject({
+        external: false,
+        image: 'https://img/ana-medium.png',
+        cohort: 2026,
+        given: 1,
+        received: 3,
+      })
+      expect(all.topPairs[0]).toEqual({ source: 'ana', target: 'eva', forth: 1, back: 2 })
+      expect(all.sync).toMatchObject({ phase: 'done', rows: 6 })
+
+      expect(
+        (await services.network.graph(actor('ana'), { from: '2026-08-01' })).totals,
+      ).toMatchObject({
+        corrections: 4,
+      })
+      expect(
+        (await services.network.graph(actor('ana'), { to: '2026-03-01' })).totals,
+      ).toMatchObject({
+        corrections: 1,
+      })
+      expect(
+        (await services.network.graph(actor('ana'), { projectId: '99' })).totals,
+      ).toMatchObject({
+        corrections: 1,
+        people: 2,
+      })
+      expect(
+        (await services.network.graph(actor('ana'), { login: 'LEO' })).nodes.map(
+          (node) => node.login,
+        ),
+      ).toEqual(['leo', 'ana', 'fuera'])
+      expect(
+        (await services.network.graph(actor('ana'), { min: '3' })).nodes.map((node) => node.login),
+      ).toEqual(['ana', 'eva'])
+
+      // Otro campus no ve nada de este, y nada de esto pregunta a 42.
+      expect((await services.network.graph({ ...actor('ana'), campusId: 58 }, {})).nodes).toEqual(
+        [],
+      )
+      expect(api.calls).toHaveLength(0)
+
+      await expect(services.network.graph(actor('ana'), { from: 'ayer' })).rejects.toMatchObject({
+        code: 'invalid_input',
+      })
+    })
+
+    it('busca personas por el principio del login', async () => {
+      api.scaleTeams.set(MADRID, [
+        scaleTeam('eva', 'ana'),
+        scaleTeam('eva', 'leo'),
+        scaleTeam('ana', 'eva'),
+      ])
+      await copyAll()
+
+      expect(await services.network.people(actor('ana'), 'e')).toEqual([
+        { login: 'eva', image: 'https://img/eva-medium.png', corrections: 3 },
+      ])
+      expect(await services.network.people(actor('ana'), '%')).toEqual([])
+      expect(await services.network.people(actor('ana'), undefined)).toEqual([])
+    })
+  })
+})

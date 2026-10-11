@@ -1,0 +1,203 @@
+/**
+ * La red de correcciones de un campus: el grafo, sus cuentas y el buscador.
+ *
+ * Las cuentas se hacen sobre todo lo que cumple los filtros (fechas, proyecto)
+ * y se guardan un rato en memoria: mover el tope de personas o elegir a alguien
+ * no vuelve a leer la base.
+ */
+
+import type { NetworkGraph, NetworkNode, NetworkPerson } from '@sanatorio/contracts'
+import { z } from 'zod'
+
+import type { Actor } from '../../core/actor.js'
+import { parse } from '../../core/validation.js'
+import type { ReplicaRepository } from '../replica/index.js'
+import { analyse, mergePairs, select, toLink } from './network.analysis.js'
+import type { Analysis } from './network.analysis.js'
+import type { NetworkRepository } from './network.repository.js'
+import type { CorrectionSync } from './network.sync.js'
+
+export type NetworkServiceOptions = {
+  corrections: NetworkRepository
+  replica: ReplicaRepository
+  sync: CorrectionSync
+  now?: () => number
+}
+
+/** Cuánto vale un análisis guardado. La copia avanza por detrás: no hace falta más fresco. */
+const CACHE_TTL_MS = 60_000
+
+/** Análisis distintos que se recuerdan a la vez. */
+const CACHE_SIZE = 12
+
+/** Parejas que se enseñan en "quién se corrige más". */
+const TOP_PAIRS = 12
+
+const DEFAULT_LIMIT = 300
+const MAX_LIMIT = 2000
+
+/** Una fecha (`2026-10-11`) o un instante ISO-8601. */
+const moment = z
+  .string()
+  .trim()
+  .refine((value) => /^\d{4}-\d{2}-\d{2}/.test(value) && !Number.isNaN(Date.parse(value)), {
+    message: 'fecha no válida',
+  })
+
+const querySchema = z.object({
+  from: moment.optional(),
+  to: moment.optional(),
+  login: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .regex(/^[a-z0-9-]{1,30}$/, 'login no válido')
+    .optional(),
+  projectId: z.coerce.number().int().positive().optional(),
+  min: z.coerce.number().int().min(1).max(100).default(1),
+  limit: z.coerce.number().int().min(10).max(MAX_LIMIT).default(DEFAULT_LIMIT),
+})
+
+type Cached = {
+  at: number
+  analysis: Analysis
+  /** Avatar de cada persona del campus. Quien no está aquí es de fuera. */
+  members: Map<string, string | null>
+}
+
+export function createNetworkService(options: NetworkServiceOptions) {
+  const { corrections, replica, sync } = options
+  const now = options.now ?? Date.now
+  const cache = new Map<string, Cached>()
+
+  /** El análisis de unos filtros, del caché si es reciente. */
+  const analysisFor = async (
+    campusId: number,
+    from: string | null,
+    to: string | null,
+    projectId: number | null,
+  ): Promise<Cached> => {
+    const key = `${campusId}|${from ?? ''}|${to ?? ''}|${projectId ?? ''}`
+    const known = cache.get(key)
+
+    if (known !== undefined && now() - known.at < CACHE_TTL_MS) {
+      return known
+    }
+
+    const [rows, members] = await Promise.all([
+      corrections.pairs({ campusId, from, to, projectId }),
+      replica.membersOf(campusId),
+    ])
+    // Sin réplica del campus no se sabe quién es de fuera: se trata a todo el
+    // mundo como de dentro en vez de enseñar un grafo vacío.
+    const inside: ReadonlySet<string> =
+      members.size === 0
+        ? new Set(rows.flatMap((row) => [row.corrector, row.corrected]))
+        : new Set(members.keys())
+    const entry: Cached = {
+      at: now(),
+      analysis: analyse(mergePairs(rows, inside), inside),
+      members,
+    }
+
+    cache.delete(key)
+    cache.set(key, entry)
+
+    // Se tira el más antiguo: un `Map` recuerda el orden de inserción.
+    if (cache.size > CACHE_SIZE) {
+      const oldest = cache.keys().next().value
+
+      if (oldest !== undefined) {
+        cache.delete(oldest)
+      }
+    }
+
+    return entry
+  }
+
+  return {
+    /**
+     * El grafo de correcciones del campus que mira `actor`.
+     *
+     * @param input `from`, `to`, `login`, `projectId`, `min`, `limit`: todo opcional.
+     */
+    async graph(actor: Actor, input: unknown): Promise<NetworkGraph> {
+      const query = parse(querySchema, input)
+      const from = query.from ?? null
+      // Una fecha sin hora como límite superior incluye ese día entero.
+      const to =
+        query.to === undefined
+          ? null
+          : query.to.length === 10
+            ? `${query.to}T23:59:59.999Z`
+            : query.to
+      const projectId = query.projectId ?? null
+      const focus = query.login ?? null
+
+      const [{ analysis, members }, years, projects, status] = await Promise.all([
+        analysisFor(actor.campusId, from, to, projectId),
+        corrections.firstYears(actor.campusId),
+        corrections.projects(actor.campusId),
+        sync.status(actor.campusId),
+      ])
+      const names = await replica.projectNames(projects.map((project) => project.id))
+      const shown = select(analysis, { focus, min: query.min, limit: query.limit })
+      // Quien viene de fuera no está en la réplica del campus: su foto se busca aparte.
+      const strangers = shown.logins.filter((login) => !members.has(login))
+      const images =
+        strangers.length === 0
+          ? new Map<string, string | null>()
+          : await replica.imagesOf(strangers)
+
+      const nodes = shown.logins.flatMap((login): NetworkNode[] => {
+        const person = analysis.people.get(login)
+
+        return person === undefined
+          ? []
+          : [
+              {
+                ...person,
+                image: members.get(login) ?? images.get(login) ?? null,
+                cohort: years.get(login) ?? null,
+              },
+            ]
+      })
+
+      return {
+        query: { from, to, login: focus, projectId, min: query.min, limit: query.limit },
+        nodes,
+        links: shown.links,
+        totals: analysis.totals,
+        hidden: shown.hidden,
+        topPairs: [...analysis.pairs]
+          .sort(
+            (x, y) => Math.min(y.ab, y.ba) - Math.min(x.ab, x.ba) || y.ab + y.ba - (x.ab + x.ba),
+          )
+          .slice(0, TOP_PAIRS)
+          .map(toLink),
+        projects: projects.flatMap((project) => {
+          const name = names.get(project.id)
+
+          return name === undefined ? [] : [{ ...project, name }]
+        }),
+        sync: status,
+      }
+    },
+
+    /** Logins que empiezan por lo escrito, para el buscador de personas. */
+    async people(actor: Actor, q: unknown): Promise<NetworkPerson[]> {
+      const prefix = typeof q === 'string' ? q.trim().toLowerCase() : ''
+
+      if (!/^[a-z0-9-]{1,30}$/.test(prefix)) {
+        return []
+      }
+
+      const found = await corrections.search(actor.campusId, prefix, 8)
+      const images = await replica.imagesOf(found.map((person) => person.login))
+
+      return found.map((person) => ({ ...person, image: images.get(person.login) ?? null }))
+    },
+  }
+}
+
+export type NetworkService = ReturnType<typeof createNetworkService>

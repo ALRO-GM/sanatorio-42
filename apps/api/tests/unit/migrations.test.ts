@@ -50,6 +50,7 @@ describe('migraciones', () => {
       'boards',
       'campus_members',
       'campuses',
+      'corrections',
       'curriculum',
       'doubt_answers',
       'doubts',

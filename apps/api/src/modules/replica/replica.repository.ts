@@ -561,6 +561,43 @@ export function createReplicaRepository(db: Db) {
       return typeof name === 'string' ? name : null
     },
 
+    /** Nombres de varios proyectos de una vez. Los que no se conocen no salen. */
+    async projectNames(projectIds: readonly number[]): Promise<Map<number, string>> {
+      const names = new Map<number, string>()
+
+      if (projectIds.length === 0) {
+        return names
+      }
+
+      const result = await db.execute({
+        sql: `SELECT id, name FROM projects
+              WHERE id IN (${projectIds.map(() => '?').join(', ')})`,
+        args: [...projectIds],
+      })
+
+      for (const row of result.rows) {
+        names.set(toNumber(row.id), toText(row.name))
+      }
+
+      return names
+    },
+
+    /** Logins de toda la gente de un campus, con su avatar. */
+    async membersOf(campusId: number): Promise<Map<string, string | null>> {
+      const result = await db.execute({
+        sql: `SELECT u.login, u.image FROM campus_members m
+              JOIN users u ON u.id = m.user_id WHERE m.campus_id = ?`,
+        args: [campusId],
+      })
+
+      return new Map(
+        result.rows.map((row) => [
+          toText(row.login),
+          typeof row.image === 'string' ? row.image : null,
+        ]),
+      )
+    },
+
     /** `true` si conocemos a alguien con ese login. */
     async userExists(login: string): Promise<boolean> {
       const result = await db.execute({

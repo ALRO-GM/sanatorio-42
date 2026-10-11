@@ -82,6 +82,23 @@ export type ProjectUsersQuery = {
   page?: number | undefined
 }
 
+/** Filtros de `getCampusScaleTeamsPage`. */
+export type ScaleTeamsQuery = {
+  campusId: number
+  /** Solo las de id mayor que este, ordenadas por id. */
+  afterId?: number | undefined
+  /** Límites de `updated_at`, en ISO-8601. Van los dos o ninguno. */
+  updatedFrom?: string | undefined
+  updatedTo?: string | undefined
+  page?: number | undefined
+}
+
+/** El 42cursus. Las correcciones de la piscina no interesan. */
+const CORE_CURSUS_ID = 21
+
+/** Tope superior de un `range[id]` abierto. */
+const MAX_ID = 2_000_000_000
+
 /** Tope de elementos acumulados al paginar. Cinturón de seguridad. */
 const MAX_ITEMS = 20_000
 
@@ -181,6 +198,30 @@ export class FortyTwoClient {
   /** `GET /v2/campus`: el catálogo de campus. 54 filas, una página. */
   async getCampuses(): Promise<ApiCampus[]> {
     return this.fetchAllPages<ApiCampus>('/campus?sort=id')
+  }
+
+  /**
+   * `GET /v2/scale_teams` de un campus en el 42cursus, **una página**.
+   *
+   * Dos formas de pedirlo, las dos comprobadas contra la API real:
+   *
+   *  - `afterId`: ordenado por id a partir de uno dado. Sirve para copiar todo
+   *    de una vez y poder seguir donde se dejó.
+   *  - `updatedFrom`/`updatedTo`: lo que ha cambiado en una ventana. Sirve para
+   *    mantenerlo al día (correcciones nuevas y las que por fin tienen nota).
+   */
+  async getCampusScaleTeamsPage(query: ScaleTeamsQuery): Promise<Page<ApiScaleTeam>> {
+    const params = [`filter[campus_id]=${query.campusId}`, `filter[cursus_id]=${CORE_CURSUS_ID}`]
+
+    if (query.afterId !== undefined) {
+      params.push('sort=id', `range[id]=${query.afterId + 1},${MAX_ID}`)
+    }
+    if (query.updatedFrom !== undefined && query.updatedTo !== undefined) {
+      params.push(`range[updated_at]=${query.updatedFrom},${query.updatedTo}`)
+    }
+    params.push(`page=${query.page ?? 1}`, `per_page=${this.pageSize}`)
+
+    return this.requestPage<ApiScaleTeam>(`/scale_teams?${params.join('&')}`)
   }
 
   /** `GET /v2/users/:id/cursus_users`: nivel, inicio y black hole en cada cursus. */
