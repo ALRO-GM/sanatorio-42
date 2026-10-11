@@ -177,6 +177,10 @@ describe('réplica vista desde fuera', () => {
       '/help/offers',
       '/leaderboard',
       '/me/health',
+      '/network',
+      '/network/mine',
+      '/network/pair?a=ana&b=eva',
+      '/network/people?q=a',
       '/calendar?from=2026-10-01T00:00:00Z&to=2026-10-08T00:00:00Z',
       '/projects/10/doubts',
     ]) {

@@ -457,6 +457,22 @@ export const mockApi: Api = {
     return mockPair(ME.login, a, b)
   },
 
+  async getNetworkMine() {
+    await delay(150)
+
+    // Con media sala de espera ya te has corregido; con la otra media, no.
+    return {
+      partners: Object.values(PEERS)
+        .flat()
+        .filter((_, index) => index % 2 === 0)
+        .map((peer, index) => ({
+          login: peer.login,
+          gave: 1 + (index % 3),
+          got: index % 2,
+        })),
+    }
+  },
+
   async searchNetworkPeople(q) {
     await delay(120)
 

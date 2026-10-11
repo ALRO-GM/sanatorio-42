@@ -587,4 +587,10 @@ export const es: Record<string, string> = {
   'net.color.strictness': 'Exigencia al corregir',
   'net.legend.fails': 'Suspende el {pct} %',
   'net.legend.unknown': 'Sin datos',
+  'net.card.title': 'Tu red de correcciones',
+  'net.card.open': 'Ver el grafo →',
+  'net.card.empty': 'Todavía no tienes correcciones en el 42cursus de este campus.',
+  'net.card.copying': 'Aún se está copiando el historial de correcciones de 42. Vuelve en un rato.',
+  'peers.crossed': 'Ya os conocéis: le has corregido {gave} y te ha corregido {got}',
+  'peers.neverCrossed': 'Cara nueva: nunca os habéis corregido',
 }

@@ -73,9 +73,11 @@ Los eventos y lo que lleva cada uno están declarados en `AppEvents`.
 
 Un módulo puede declarar `jobs` (nombre, cada cuánto y qué hacer). La app los
 lanza al arrancar y los para al cerrar; un fallo se registra y se reintenta en la
-siguiente vuelta. Hoy hay dos, cada minuto: la asistencia a terapias (`therapy`)
-y la comprobación de sesiones de ayuda (`help`). Los dos usan la foto de puestos
-de 42, que refrescan con `sync.ensureLocations` si se ha quedado vieja.
+siguiente vuelta. Hoy hay tres. Dos cada minuto: la asistencia a terapias
+(`therapy`) y la comprobación de sesiones de ayuda (`help`), que usan la foto de
+puestos de 42 y la refrescan con `sync.ensureLocations` si se ha quedado vieja.
+Y la copia de correcciones (`network`), cada veinte segundos, que casi siempre
+no tiene nada que hacer.
 
 ## XP que no se puede puentear
 
@@ -114,6 +116,29 @@ persona que abre el grafo del tablón.
 La **agenda de 42** (eventos, exámenes y correcciones, `replica/agenda.ts`) va
 aparte: no la mantiene el bucle, se pide cuando alguien abre su calendario y se
 guarda un rato. Si nadie mira el calendario, no gasta nada.
+
+## Red de correcciones
+
+El módulo `network` copia de 42 las correcciones del 42cursus de cada campus
+seguido (`GET /v2/scale_teams?filter[campus_id]=…&filter[cursus_id]=21`; Madrid
+son unas 82 000, 820 peticiones una sola vez) y calcula sobre ellas el grafo.
+
+- **Copia** (`network.sync.ts`): primero todo el histórico, ordenado por id y con
+  un cursor guardado en `sync_state`, así que un reinicio sigue donde se dejó.
+  Después, cada diez minutos, solo lo cambiado (`range[updated_at]`). Nunca gasta
+  la reserva horaria de la API. Se guarda quién, a quién, qué proyecto, cuándo y
+  la nota; los comentarios y el feedback no llegan a la base.
+- **Cuentas** (`network.analysis.ts`, funciones puras): SQLite junta las
+  correcciones por pareja y sentido; con eso se calculan la endogamia de cada
+  persona (media de cuánto repite con la misma gente y cuánto de lo que corrige
+  se lo devuelven) y las comunidades (método de Louvain, sin azar).
+- **Quién es de fuera**: quien no está en la réplica del campus. Solo sale como
+  vecino de alguien de dentro; una pareja de dos personas de fuera se descarta.
+  Las cuentas borradas (`3b3-…`) fueron estudiantes del campus y cuentan como tales.
+- **Rendimiento**: el análisis de cada combinación de filtros se guarda un minuto
+  en memoria (`core/ttl-cache.ts`), así que cambiar el tope de personas o elegir a
+  alguien no vuelve a leer la base. La web lo pinta en un `<canvas>` con
+  `d3-force` y solo descarga esa parte al abrir la sección.
 
 ## Base de datos
 

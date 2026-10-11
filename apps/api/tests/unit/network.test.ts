@@ -389,6 +389,25 @@ describe('red de correcciones', () => {
       expect(graph.nodes.find((node) => node.login === 'ana')?.passRate).toBeNull()
     })
 
+    it('dice con quién te has corregido tú', async () => {
+      api.scaleTeams.set(MADRID, [
+        scaleTeam('ana', 'eva'),
+        scaleTeam('eva', 'ana'),
+        scaleTeam('eva', 'ana'),
+        scaleTeam('leo', 'ana'),
+        scaleTeam('eva', 'leo'),
+      ])
+      await copyAll()
+
+      expect(await services.network.mine(actor('ana'))).toEqual({
+        partners: [
+          { login: 'eva', gave: 1, got: 2 },
+          { login: 'leo', gave: 0, got: 1 },
+        ],
+      })
+      expect(await services.network.mine(actor('nadie'))).toEqual({ partners: [] })
+    })
+
     it('busca personas por el principio del login', async () => {
       api.scaleTeams.set(MADRID, [
         scaleTeam('eva', 'ana'),

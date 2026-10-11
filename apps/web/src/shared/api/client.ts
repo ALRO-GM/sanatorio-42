@@ -69,6 +69,7 @@ export const realApi: Api = {
 
     return getJson(`/network/pair?${query.toString()}`)
   },
+  getNetworkMine: () => getJson('/network/mine'),
   searchNetworkPeople: (q) => getJson(`/network/people?q=${encodeURIComponent(q)}`),
 
   getHelpDay: () => getJson('/help/today'),

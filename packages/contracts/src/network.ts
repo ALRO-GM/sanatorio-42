@@ -134,3 +134,9 @@ export type NetworkPairDetail = {
   /** Las más recientes primero. Como mucho, las últimas 60. */
   corrections: NetworkCorrection[]
 }
+
+/** `GET /network/mine`: con quién se ha corregido quien pregunta, en todo el histórico. */
+export type NetworkMine = {
+  /** Las personas con más correcciones cruzadas primero. */
+  partners: { login: string; gave: number; got: number }[]
+}

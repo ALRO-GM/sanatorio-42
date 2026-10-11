@@ -8,6 +8,7 @@
 
 import type {
   NetworkGraph,
+  NetworkMine,
   NetworkNode,
   NetworkPairDetail,
   NetworkPerson,
@@ -15,6 +16,7 @@ import type {
 import { z } from 'zod'
 
 import type { Actor } from '../../core/actor.js'
+import { createTtlCache } from '../../core/ttl-cache.js'
 import { parse } from '../../core/validation.js'
 import type { ReplicaRepository } from '../replica/index.js'
 import { analyse, isAnonymised, mergePairs, select, toLink } from './network.analysis.js'
@@ -31,6 +33,9 @@ export type NetworkServiceOptions = {
 
 /** Cuánto vale un análisis guardado. La copia avanza por detrás: no hace falta más fresco. */
 const CACHE_TTL_MS = 60_000
+
+/** Cuánto vale el catálogo (años de llegada, proyectos): cambia con cuentagotas. */
+const CATALOGUE_TTL_MS = 5 * 60_000
 
 /** Análisis distintos que se recuerdan a la vez. */
 const CACHE_SIZE = 12
@@ -94,7 +99,6 @@ const querySchema = z.object({
 })
 
 type Cached = {
-  at: number
   analysis: Analysis
   /** Veredictos de cada corrector, para saber cuánto aprueba. */
   verdicts: Map<string, { judged: number; passed: number }>
@@ -103,61 +107,66 @@ type Cached = {
   members: Map<string, string | null>
 }
 
+type Catalogue = {
+  /** Año de la primera corrección de cada persona. */
+  years: Map<string, number>
+  projects: { id: number; name: string; corrections: number }[]
+}
+
 export function createNetworkService(options: NetworkServiceOptions) {
   const { corrections, replica, sync } = options
   const now = options.now ?? Date.now
-  const cache = new Map<string, Cached>()
+  const analyses = createTtlCache<Cached>({ ttlMs: CACHE_TTL_MS, maxEntries: CACHE_SIZE, now })
+  const catalogues = createTtlCache<Catalogue>({
+    ttlMs: CATALOGUE_TTL_MS,
+    maxEntries: CACHE_SIZE,
+    now,
+  })
 
   /** El análisis de unos filtros, del caché si es reciente. */
-  const analysisFor = async (
+  const analysisFor = (
     campusId: number,
     from: string | null,
     to: string | null,
     projectId: number | null,
-  ): Promise<Cached> => {
-    const key = `${campusId}|${from ?? ''}|${to ?? ''}|${projectId ?? ''}`
-    const known = cache.get(key)
+  ): Promise<Cached> =>
+    analyses.get(`${campusId}|${from ?? ''}|${to ?? ''}|${projectId ?? ''}`, async () => {
+      const [rows, members, verdicts, timeline] = await Promise.all([
+        corrections.pairs({ campusId, from, to, projectId }),
+        replica.membersOf(campusId),
+        corrections.verdicts({ campusId, from, to, projectId }),
+        // La línea de tiempo no lleva fechas: enseña todo para poder elegirlas.
+        corrections.timeline({ campusId, projectId }),
+      ])
+      // Sin réplica del campus no se sabe quién es de fuera: se trata a todo el
+      // mundo como de dentro en vez de enseñar un grafo vacío.
+      const everyone = rows.flatMap((row) => [row.corrector, row.corrected])
+      const inside: ReadonlySet<string> =
+        members.size === 0
+          ? new Set(everyone)
+          : new Set([...members.keys(), ...everyone.filter(isAnonymised)])
 
-    if (known !== undefined && now() - known.at < CACHE_TTL_MS) {
-      return known
-    }
+      return { analysis: analyse(mergePairs(rows, inside), inside), members, verdicts, timeline }
+    })
 
-    const [rows, members, verdicts, timeline] = await Promise.all([
-      corrections.pairs({ campusId, from, to, projectId }),
-      replica.membersOf(campusId),
-      corrections.verdicts({ campusId, from, to, projectId }),
-      // La línea de tiempo no lleva fechas: enseña todo para poder elegirlas.
-      corrections.timeline({ campusId, projectId }),
-    ])
-    // Sin réplica del campus no se sabe quién es de fuera: se trata a todo el
-    // mundo como de dentro en vez de enseñar un grafo vacío.
-    const everyone = rows.flatMap((row) => [row.corrector, row.corrected])
-    const inside: ReadonlySet<string> =
-      members.size === 0
-        ? new Set(everyone)
-        : new Set([...members.keys(), ...everyone.filter(isAnonymised)])
-    const entry: Cached = {
-      at: now(),
-      analysis: analyse(mergePairs(rows, inside), inside),
-      members,
-      verdicts,
-      timeline,
-    }
+  /** Lo que no depende de los filtros: año de llegada de cada quien y proyectos con correcciones. */
+  const catalogueOf = (campusId: number): Promise<Catalogue> =>
+    catalogues.get(String(campusId), async () => {
+      const [years, projects] = await Promise.all([
+        corrections.firstYears(campusId),
+        corrections.projects(campusId),
+      ])
+      const names = await replica.projectNames(projects.map((project) => project.id))
 
-    cache.delete(key)
-    cache.set(key, entry)
+      return {
+        years,
+        projects: projects.flatMap((project) => {
+          const name = names.get(project.id)
 
-    // Se tira el más antiguo: un `Map` recuerda el orden de inserción.
-    if (cache.size > CACHE_SIZE) {
-      const oldest = cache.keys().next().value
-
-      if (oldest !== undefined) {
-        cache.delete(oldest)
+          return name === undefined ? [] : [{ ...project, name }]
+        }),
       }
-    }
-
-    return entry
-  }
+    })
 
   return {
     /**
@@ -173,14 +182,12 @@ export function createNetworkService(options: NetworkServiceOptions) {
       const projectId = query.projectId ?? null
       const focus = query.login ?? null
 
-      const [{ analysis, members, verdicts, timeline }, years, projects, status] =
+      const [{ analysis, members, verdicts, timeline }, { years, projects }, status] =
         await Promise.all([
           analysisFor(actor.campusId, from, to, projectId),
-          corrections.firstYears(actor.campusId),
-          corrections.projects(actor.campusId),
+          catalogueOf(actor.campusId),
           sync.status(actor.campusId),
         ])
-      const names = await replica.projectNames(projects.map((project) => project.id))
       const shown = select(analysis, { focus, min: query.min, limit: query.limit })
       // Quien viene de fuera no está en la réplica del campus: su foto se busca aparte.
       const strangers = shown.logins.filter((login) => !members.has(login))
@@ -217,11 +224,7 @@ export function createNetworkService(options: NetworkServiceOptions) {
           .slice(0, TOP_PAIRS)
           .map(toLink),
         timeline,
-        projects: projects.flatMap((project) => {
-          const name = names.get(project.id)
-
-          return name === undefined ? [] : [{ ...project, name }]
-        }),
+        projects,
         sync: status,
       }
     },
@@ -260,6 +263,15 @@ export function createNetworkService(options: NetworkServiceOptions) {
           positive: row.positive,
         })),
       }
+    },
+
+    /**
+     * Con quién se ha corregido quien pregunta, en todo el histórico: cuántas
+     * veces en cada sentido. Para que otras pantallas sepan si dos personas ya
+     * se conocen de corregirse.
+     */
+    async mine(actor: Actor): Promise<NetworkMine> {
+      return { partners: await corrections.partnersOf(actor.campusId, actor.login) }
     },
 
     /** Logins que empiezan por lo escrito, para el buscador de personas. */

@@ -48,6 +48,8 @@ export function PeerList({ project, onOpenTherapy }: PeerListProps) {
   // Quién se ofrece hoy con hueco: a esas personas se les puede reservar un rato.
   const offers = useAsync(() => api.getHelpOffers(), [])
   const [booking, setBooking] = useState<string | null>(null)
+  // Con quién te has corregido ya: sirve para animar a buscar caras nuevas.
+  const network = useAsync(() => api.getNetworkMine(), [])
 
   const partial = data?.partial === true
 
@@ -182,6 +184,9 @@ export function PeerList({ project, onOpenTherapy }: PeerListProps) {
       <ul className="peer-list">
         {filtered.map((peer) => {
           const offer = offers.data?.find((entry) => entry.login === peer.login)
+          const crossed = network.data?.partners.find((entry) => entry.login === peer.login)
+          // Sin ninguna corrección tuya copiada no se puede decir que alguien sea nuevo.
+          const known = (network.data?.partners.length ?? 0) > 0
 
           return (
             <li key={peer.login} className="peer-card">
@@ -201,6 +206,13 @@ export function PeerList({ project, onOpenTherapy }: PeerListProps) {
                   <span className="badge specialist">{t('peers.specialist')}</span>
                 ) : (
                   <span className="badge subtle">{t('peers.patient')}</span>
+                )}
+                {crossed !== undefined ? (
+                  <small className="peer-crossed">
+                    {t('peers.crossed', { gave: crossed.gave, got: crossed.got })}
+                  </small>
+                ) : (
+                  known && <small className="peer-crossed new">{t('peers.neverCrossed')}</small>
                 )}
               </div>
               {onDuty(peer) ? (

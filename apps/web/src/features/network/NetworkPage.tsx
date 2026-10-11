@@ -38,6 +38,13 @@ type Filters = {
   limit: number
 }
 
+/** Login de un enlace directo `#/red/<login>`, o `null`. */
+function loginInUrl(): string | null {
+  const login = window.location.hash.replace(/^#\/?/, '').split('/')[1]?.toLowerCase() ?? ''
+
+  return /^[a-z0-9-]{1,30}$/.test(login) ? login : null
+}
+
 function paramsOf(filters: Filters): NetworkParams {
   const from = filters.period === 'custom' ? filters.from : startOf(filters.period)
 
@@ -58,16 +65,18 @@ function paramsOf(filters: Filters): NetworkParams {
 export function NetworkPage({ me }: { me: CurrentUser }) {
   const { t } = useI18n()
   const [filters, setFilters] = useState<Filters>({
-    period: 'year',
+    // Un enlace a una persona enseña su historia entera; el campus, el último año.
+    period: loginInUrl() === null ? 'year' : 'all',
     from: '',
     to: '',
-    login: null,
+    login: loginInUrl(),
     projectId: null,
-    min: 2,
+    // Con una persona elegida interesa toda su red, no solo sus uniones fuertes.
+    min: loginInUrl() === null ? 2 : 1,
     limit: 300,
   })
   const [mode, setMode] = useState<ColorMode>('community')
-  const [selected, setSelected] = useState<string | null>(null)
+  const [selected, setSelected] = useState<string | null>(loginInUrl)
   // El grafo anterior se sigue viendo mientras llega el nuevo: así se recoloca
   // en vez de desaparecer y volver a aparecer.
   const [graph, setGraph] = useState<NetworkGraph | null>(null)
@@ -76,6 +85,16 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
   const [reloads, setReloads] = useState(0)
 
   const params = useMemo(() => paramsOf(filters), [filters])
+
+  // La persona elegida va en la URL (`#/red/<login>`): el enlace se puede compartir.
+  useEffect(() => {
+    const wanted = filters.login === null ? '#/red' : `#/red/${filters.login}`
+
+    if (window.location.hash !== wanted) {
+      // `replaceState` no dispara `hashchange`: la sección no se vuelve a montar.
+      window.history.replaceState(null, '', wanted)
+    }
+  }, [filters.login])
 
   useEffect(() => {
     let current = true

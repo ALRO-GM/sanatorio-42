@@ -580,4 +580,10 @@ export const en: Record<string, string> = {
   'net.color.strictness': 'Strictness',
   'net.legend.fails': 'Fails {pct}%',
   'net.legend.unknown': 'No data',
+  'net.card.title': 'Your evaluation network',
+  'net.card.open': 'Open the graph →',
+  'net.card.empty': 'You have no 42cursus evaluations on this campus yet.',
+  'net.card.copying': 'The evaluation history is still being copied from 42. Come back in a while.',
+  'peers.crossed': 'You know each other: you evaluated them {gave} and they evaluated you {got}',
+  'peers.neverCrossed': 'New face: you have never evaluated each other',
 }

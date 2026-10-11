@@ -398,6 +398,82 @@ GET /me/health → las fechas para saber cómo vas de tiempo en el common core.
   la diferencia son días extra (bonus, compensación o *freeze*) y la web
   retrasa con ellos todos los plazos del círculo actual.
 
+## Red de correcciones
+
+Quién ha corregido a quién en el 42cursus del campus que miras. Sale de una
+copia local de las correcciones de 42 que se va completando sola.
+
+GET /network?from=&to=&login=&projectId=&min=&limit= → el grafo. Todo opcional.
+
+- `from`, `to`: fecha (`2026-10-11`) o instante ISO-8601. `to` sin hora incluye
+  ese día entero.
+- `login`: se centra en esa persona: ella, quien se ha cruzado con ella y las
+  uniones entre todos.
+- `projectId`: solo las correcciones de ese proyecto.
+- `min` (1-100, por defecto 1): correcciones mínimas entre dos personas para que
+  salga su unión. `limit` (10-2000, por defecto 300): tope de personas, las más
+  activas primero.
+
+```json
+{
+  "query": { "from": "2025-10-11", "to": null, "login": null, "projectId": null, "min": 2, "limit": 300 },
+  "nodes": [
+    {
+      "login": "jdoe", "image": "https://…", "external": false,
+      "given": 41, "received": 38, "partners": 52,
+      "endogamy": 31, "repetition": 0.342, "reciprocity": 0.278,
+      "passRate": 0.829, "community": 0, "cohort": 2024
+    }
+  ],
+  "links": [{ "source": "jdoe", "target": "mgomez", "forth": 3, "back": 2 }],
+  "totals": {
+    "corrections": 13301, "people": 525, "pairs": 11143, "mutualPairs": 1081,
+    "endogamy": 17, "repetition": 0.162, "reciprocity": 0.175, "communities": 8
+  },
+  "hidden": { "nodes": 34, "links": 0 },
+  "topPairs": [{ "source": "estina", "target": "gsanchez", "forth": 5, "back": 5 }],
+  "timeline": [{ "month": "2026-09", "corrections": 1310 }],
+  "projects": [{ "id": 1314, "name": "Libft", "corrections": 4200 }],
+  "sync": { "phase": "copying", "rows": 13301, "total": 81723, "first": "2019-02-25T09:00:00.000Z", "last": "2021-09-27T08:00:00.000Z" }
+}
+```
+
+- Una unión junta los dos sentidos: `forth` son las veces que `source` ha
+  corregido a `target`, y `back` al revés.
+- `totals` se calcula sobre todo lo que cumple los filtros, no solo sobre lo que
+  cabe en `limit`; `hidden` dice cuánto se ha quedado fuera, o es `null`.
+- **Endogamia** (0-100) de una persona con `W` correcciones (hechas más
+  recibidas) repartidas entre `P` personas: la media de `repetition = (W − P) / W`
+  y `reciprocity = Σ 2·min(a→b, b→a) / W`. La del campus es la media ponderada
+  por actividad de su gente.
+- `passRate`: parte de las correcciones que ha hecho en las que aprobó el
+  proyecto; `null` con menos de tres veredictos.
+- `community`: grupo al que pertenece (`0` es el mayor), por el método de Louvain
+  sobre las correcciones filtradas. `cohort`: año de su primera corrección.
+- `external`: no es del campus. Solo sale como vecino de alguien de dentro.
+- `timeline` no lleva el filtro de fechas: es para elegirlas.
+- `sync.phase`: `pending` (no ha empezado), `copying` (histórico a medias) o
+  `done`. Mientras se copia, el grafo solo llega hasta `sync.last`.
+
+GET /network/pair?a=&b=&from=&to=&projectId= → las correcciones entre dos personas.
+
+```json
+{
+  "a": "jdoe", "b": "mgomez", "forth": 3, "back": 2,
+  "corrections": [
+    { "id": 8123456, "corrector": "mgomez", "corrected": "jdoe", "project": "ft_printf", "at": "2026-09-20T10:00:00.000Z", "mark": 100, "positive": true }
+  ]
+}
+```
+
+Las más recientes primero; como mucho, 60.
+
+GET /network/mine → con quién te has corregido tú, en todo el histórico:
+`{ "partners": [{ "login": "mgomez", "gave": 2, "got": 3 }] }`.
+
+GET /network/people?q=jd → hasta 8 logins que empiezan así, los más activos
+primero: `[{ "login": "jdoe", "image": "https://…", "corrections": 79 }]`.
+
 ## Ranking
 
 GET /leaderboard?period=month|all → quién ayuda más en el campus que miro.

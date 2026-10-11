@@ -3,7 +3,7 @@
 Web para estudiantes de 42. Cuando te atascas en un proyecto ves quién puede
 ayudarte (quién lo está haciendo, quién ya lo aprobó, dónde está sentado y si
 está de guardia), y alrededor de eso: terapias de grupo, tablón de dudas,
-calendario de pizarras y un expediente con XP.
+calendario de pizarras, un expediente con XP y la red de correcciones del campus.
 
 Los datos de 42 se copian poco a poco a una base local, así que abrir cualquier
 pantalla no gasta peticiones de la API de 42.
@@ -49,6 +49,7 @@ Módulos de la API (`apps/api/src/modules/`):
 | `calendar`| Calendario personal: lo de Sanatorio y lo de 42 (eventos, exámenes, correcciones) |
 | `help`    | Guardia: franjas en las que te ofreces, reservas, valoraciones, bloqueos |
 | `map`     | Mapa de clusters: ocupación, gente de guardia y puestos reservados  |
+| `network` | Red de correcciones: quién ha corregido a quién, comunidades y endogamia |
 
 Cómo encajan las piezas y cómo añadir una funcionalidad:
 [docs/architecture.md](docs/architecture.md).

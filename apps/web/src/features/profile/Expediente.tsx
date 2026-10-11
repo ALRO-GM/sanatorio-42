@@ -12,6 +12,7 @@ import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { AskedCard } from './AskedCard'
 import { HealthCard } from './HealthCard'
 import { LeaderboardCard } from './LeaderboardCard'
+import { NetworkCard } from './NetworkCard'
 
 /** Lo que da XP, en el orden en que se explica. */
 const RULES = [
@@ -160,6 +161,7 @@ export function Expediente({ me, profile }: ExpedienteProps) {
       </article>
 
       <HealthCard />
+      <NetworkCard me={me.login} />
 
       <div className="two-col">
         <article className="card">

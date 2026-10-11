@@ -3814,3 +3814,28 @@ a.button {
   font-size: 0.8rem;
   color: var(--text-2);
 }
+
+/* Tu red, en el expediente, y el aviso de la sala de espera. */
+.net-card {
+  display: grid;
+  gap: 0.6rem;
+}
+.net-card .card-head {
+  justify-content: space-between;
+}
+.net-rows.static li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.25rem 0.45rem;
+  font-size: 0.85rem;
+}
+.peer-crossed {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.75rem;
+  color: var(--text-3);
+}
+.peer-crossed.new {
+  color: var(--accent-text);
+}

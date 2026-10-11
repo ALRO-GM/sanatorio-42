@@ -34,6 +34,7 @@ import type {
   Health,
   Leaderboard,
   NetworkGraph,
+  NetworkMine,
   NetworkPairDetail,
   NetworkPerson,
   LeaderboardPeriod,
@@ -104,6 +105,8 @@ export type Api = {
   getNetwork: (params: NetworkParams) => Promise<NetworkGraph>
   /** Las correcciones que se han hecho dos personas, con los filtros de fecha y proyecto. */
   getNetworkPair: (a: string, b: string, params: NetworkParams) => Promise<NetworkPairDetail>
+  /** Con quién te has corregido tú, en todo el histórico. */
+  getNetworkMine: () => Promise<NetworkMine>
   /** Logins que empiezan por lo escrito, para el buscador de la red. */
   searchNetworkPeople: (q: string) => Promise<NetworkPerson[]>
 

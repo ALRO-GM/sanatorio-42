@@ -36,6 +36,13 @@ export function registerNetworkRoutes(
     },
   )
 
+  /** `GET /network/mine` → con quién te has corregido tú, en todo el histórico. */
+  app.get('/network/mine', async (request, reply) => {
+    reply.header('Cache-Control', 'private, max-age=60')
+
+    return reply.send(await network.mine(await session.actor(request)))
+  })
+
   /** `GET /network/people?q=` → logins que empiezan así, los más activos primero. */
   app.get<{ Querystring: { q?: string } }>('/network/people', async (request, reply) => {
     return reply.send(await network.people(await session.actor(request), request.query.q))

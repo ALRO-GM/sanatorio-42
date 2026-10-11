@@ -207,6 +207,29 @@ export function createNetworkRepository(db: Db) {
       return { forth: count(a), back: count(b) }
     },
 
+    /** Con quién se ha corregido alguien: veces que corrigió (`gave`) y que le corrigieron (`got`). */
+    async partnersOf(
+      campusId: number,
+      login: string,
+    ): Promise<{ login: string; gave: number; got: number }[]> {
+      const result = await db.execute({
+        sql: `SELECT other, SUM(gave) AS gave, SUM(got) AS got FROM (
+                SELECT corrected AS other, COUNT(*) AS gave, 0 AS got FROM corrections
+                WHERE campus_id = ? AND corrector = ? GROUP BY corrected
+                UNION ALL
+                SELECT corrector AS other, 0 AS gave, COUNT(*) AS got FROM corrections
+                WHERE campus_id = ? AND corrected = ? GROUP BY corrector
+              ) WHERE other <> ? GROUP BY other ORDER BY gave + got DESC, other`,
+        args: [campusId, login, campusId, login, login],
+      })
+
+      return result.rows.map((row) => ({
+        login: toText(row.other),
+        gave: toNumber(row.gave),
+        got: toNumber(row.got),
+      }))
+    },
+
     /** Año de la primera corrección de cada persona, hecha o recibida. */
     async firstYears(campusId: number): Promise<Map<string, number>> {
       const result = await db.execute({

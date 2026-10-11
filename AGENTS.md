@@ -55,6 +55,9 @@ Monorepo con workspaces de npm. Ver `README.md` y `docs/architecture.md`.
   aprobado, blanco = en curso, gris = disponible, gris con candado = aún no.
   Cada proyecto enseña como mucho una marca y solo a quien puede hacer algo con
   ella (`graph` en `doubts.service.ts`). La piscina no sale en ningún sitio.
+- Red de correcciones: el grafo se pinta en `<canvas>` (`features/network/ForceGraph.tsx`),
+  no en SVG, y todo lo que cambia a cada fotograma vive en un `ref`, no en estado
+  de React. Las cuentas (endogamia, comunidades) son de la API: la web no las repite.
 - Calendario: cada tipo de evento tiene su color e icono (`features/calendar/kinds.ts`
   y las clases `kind-*`). Lo de Sanatorio en tonos fríos, lo de 42 en cálidos;
   borde discontinuo = no estás apuntado.
