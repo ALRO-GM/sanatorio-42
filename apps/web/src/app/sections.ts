@@ -1,32 +1,35 @@
+import type { IconName } from '../shared/ui/Icon'
 /**
- * Secciones de la web. La primera es la portada.
+ * Secciones de la web. La portada (`HOME`) es el expediente: lo primero que se
+ * ve al entrar es lo tuyo.
  *
  * Añadir una sección es añadirla aquí (con su icono y su clave `nav.<id>` en
  * los idiomas) y decir qué se pinta en `Clinic.tsx`.
  *
- * `inNav: false` la deja fuera de la fila de pestañas: se llega a ella desde
- * otro sitio (el expediente se abre con la cruz de la cabecera).
+ * `inNav: false` la deja fuera de las pestañas que se pueden reordenar: el
+ * expediente va siempre el primero, y a la guardia y al panel se llega desde
+ * la cabecera.
  *
  * El orden en que salen las pestañas no es el de esta lista: lo decide la
  * personalización (`shared/layout`).
  */
 export const SECTIONS = [
-  { id: 'consulta', icon: '🩺', inNav: true },
-  { id: 'tablon', icon: '📌', inNav: true },
-  { id: 'terapia', icon: '🫂', inNav: true },
-  { id: 'pizarras', icon: '🧑‍🏫', inNav: true },
-  { id: 'calendario', icon: '📅', inNav: true },
-  { id: 'red', icon: '🕸️', inNav: true },
+  { id: 'consulta', icon: 'consulta', inNav: true },
+  { id: 'tablon', icon: 'tablon', inNav: true },
+  { id: 'terapia', icon: 'terapia', inNav: true },
+  { id: 'pizarras', icon: 'pizarras', inNav: true },
+  { id: 'calendario', icon: 'calendario', inNav: true },
+  { id: 'red', icon: 'red', inNav: true },
   // La guardia se abre desde "De guardia", en la cabecera.
-  { id: 'guardia', icon: '🛟', inNav: false },
-  { id: 'expediente', icon: '📋', inNav: false },
+  { id: 'guardia', icon: 'guardia', inNav: false },
+  { id: 'expediente', icon: 'expediente', inNav: false },
   // Panel de gestión: solo para quien administra la web.
-  { id: 'gestion', icon: '📊', inNav: false },
-] as const
+  { id: 'gestion', icon: 'gestion', inNav: false },
+] as const satisfies readonly { id: string; icon: IconName; inNav: boolean }[]
 
 export type Section = (typeof SECTIONS)[number]['id']
 
-export const HOME: Section = SECTIONS[0].id
+export const HOME: Section = 'expediente'
 
 export function isSection(name: string): name is Section {
   return SECTIONS.some((section) => section.id === name)

@@ -26,7 +26,7 @@
 }
 
 .tab.active {
-  background: #00babc;
+  background: var(--accent);
   color: var(--on-accent);
   font-weight: 600;
 }
@@ -69,7 +69,7 @@ button.primary.small {
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #4d7f73;
+  color: var(--text-3);
   margin: 1rem 0 0.4rem;
 }
 
@@ -165,7 +165,7 @@ button.primary.small {
   font-weight: 600;
 }
 .day.active {
-  background: #00babc;
+  background: var(--accent);
   color: var(--on-accent);
 }
 .days-text {
@@ -264,7 +264,7 @@ input[type='checkbox'] {
   background: var(--surface-2);
 }
 .reaction:hover:not(:disabled) {
-  background: #00babc;
+  background: var(--accent);
 }
 .reaction-done {
   margin: 0;
@@ -470,7 +470,7 @@ input[type='checkbox'] {
   padding: 0.6rem 0.8rem;
 }
 .replies li.by-specialist {
-  border-left: 3px solid #00babc;
+  border-left: 3px solid var(--accent);
 }
 .replies p {
   margin: 0.2rem 0 0;
@@ -540,7 +540,7 @@ input[type='checkbox'] {
   background: var(--accent-text);
 }
 .cal-day.today {
-  background: #00babc;
+  background: var(--accent);
   color: var(--on-accent);
   font-weight: 700;
 }
@@ -681,7 +681,7 @@ input[type='checkbox'] {
 .xp-bar span {
   display: block;
   height: 100%;
-  background: #00babc;
+  background: var(--accent);
   border-radius: 999px;
   transition: width 0.4s;
 }

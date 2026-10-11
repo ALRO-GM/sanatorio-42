@@ -2,6 +2,8 @@ import { useI18n } from '../../shared/i18n'
 import { Logo } from '../../shared/ui/Logo'
 import { LangSelect } from '../settings/LangSelect'
 import { ThemeSelect } from '../settings/ThemeSelect'
+import { Icon } from '../../shared/ui/Icon'
+import type { IconName } from '../../shared/ui/Icon'
 
 type LoginProps = {
   onLogin: () => void
@@ -9,10 +11,10 @@ type LoginProps = {
   notice: string | null
 }
 
-const STEPS = [
-  { emoji: '🩺', title: 'login.step1', text: 'login.step1d' },
-  { emoji: '👀', title: 'login.step2', text: 'login.step2d' },
-  { emoji: '🤝', title: 'login.step3', text: 'login.step3d' },
+const STEPS: readonly { icon: IconName; title: string; text: string }[] = [
+  { icon: 'consulta', title: 'login.step1', text: 'login.step1d' },
+  { icon: 'visto', title: 'login.step2', text: 'login.step2d' },
+  { icon: 'corazon', title: 'login.step3', text: 'login.step3d' },
 ] as const
 
 export function Login({ onLogin, notice }: LoginProps) {
@@ -33,7 +35,7 @@ export function Login({ onLogin, notice }: LoginProps) {
           {STEPS.map((step) => (
             <div key={step.title} className="step-card">
               <span className="step-emoji" aria-hidden="true">
-                {step.emoji}
+                <Icon name={step.icon} size={30} />
               </span>
               <strong>{t(step.title)}</strong>
               <p>{t(step.text)}</p>

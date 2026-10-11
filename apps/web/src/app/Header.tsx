@@ -5,27 +5,33 @@ import type { CurrentUser } from '@sanatorio/contracts'
 import { AvailabilityToggle } from '../features/peers/AvailabilityToggle'
 import { useI18n } from '../shared/i18n'
 import { track } from '../shared/layout/store'
-import { Avatar } from '../shared/ui/Avatar'
-import { Logo } from '../shared/ui/Logo'
+import { Icon } from '../shared/ui/Icon'
 import { Nav } from './Nav'
 import type { Section } from './sections'
+import { UserMenu } from './UserMenu'
 
 type HeaderProps = {
   me: CurrentUser
   section: Section
-  /** Si quien mira administra la web: le sale el botón del panel. */
+  /** Si quien mira administra la web: le sale el panel en su menú. */
   admin: boolean
   /** Avisos sin leer: el número rojo del buzón. */
   unread: number
   onMailbox: () => void
   onGo: (section: Section) => void
   onCustomize: () => void
+  /** Abre el formulario de incidencias y sugerencias. */
+  onInbox: () => void
   onLogout: () => void
 }
 
 /**
- * La cabecera y, debajo, la fila de secciones. Se quedan arriba al bajar por la
- * página, más estrechas.
+ * La barra de arriba, a todo lo ancho y pegada al borde al bajar por la página.
+ *
+ * Dos filas: en la primera, la marca a la izquierda y a la derecha lo que es de
+ * la persona (su guardia, su buzón y su menú); en la segunda, las secciones.
+ * Lo que antes eran botones sueltos (panel, personalizar, salir, incidencias)
+ * está recogido en el menú de la cuenta.
  */
 export function Header({
   me,
@@ -35,15 +41,16 @@ export function Header({
   onMailbox,
   onGo,
   onCustomize,
+  onInbox,
   onLogout,
 }: HeaderProps) {
   const { t } = useI18n()
-  const [compact, setCompact] = useState(false)
+  // Al bajar, la barra gana una raya que la separa de lo que pasa por debajo.
+  const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
     const onScroll = (): void => {
-      // Con margen entre encoger y volver a crecer, para que no tiemble en el límite.
-      setCompact((current) => (current ? window.scrollY > 12 : window.scrollY > 56))
+      setScrolled(window.scrollY > 4)
     }
 
     window.addEventListener('scroll', onScroll, { passive: true })
@@ -54,72 +61,102 @@ export function Header({
   }, [])
 
   return (
-    <div className={`top-sticky ${compact ? 'compact' : ''}`}>
-      <header className="topbar">
-        <div className="topbar-brand">
-          <Logo
-            onMarkClick={() => {
+    <div className={`appbar ${scrolled ? 'scrolled' : ''}`}>
+      <div className="appbar-inner">
+        <header className="appbar-row">
+          <button
+            type="button"
+            className="brand"
+            aria-label={t('nav.openRecord')}
+            aria-current={section === 'expediente' ? 'page' : undefined}
+            onClick={() => {
               track('nav.expediente')
               onGo('expediente')
             }}
-            markLabel={t('nav.openRecord')}
-            markActive={section === 'expediente'}
-          />
-        </div>
-        <div className="topbar-user">
-          <Avatar login={me.login} image={me.image} size={compact ? 30 : 40} />
-          <span className="user-login">{me.login}</span>
-        </div>
-        <AvailabilityToggle
-          active={section === 'guardia'}
-          onOpen={() => {
-            track('nav.guardia')
-            onGo('guardia')
-          }}
-          onTurnedOn={() => {
-            onGo('guardia')
-          }}
-        />
-        {admin && (
-          <button
-            type="button"
-            className={`icon-btn ${section === 'gestion' ? 'active' : ''}`}
-            aria-label={t('admin.usage.open')}
-            title={t('admin.usage.open')}
-            onClick={() => {
-              onGo('gestion')
-            }}
           >
-            📊
-          </button>
-        )}
-        <button
-          type="button"
-          className="icon-btn mailbox-btn"
-          aria-label={unread === 0 ? t('notices.open') : t('notices.openUnread', { n: unread })}
-          title={t('notices.title')}
-          onClick={onMailbox}
-        >
-          ✉
-          {unread > 0 && (
-            <span className="count-badge" aria-hidden="true">
-              {unread > 99 ? '99+' : unread}
+            <span className="brand-mark" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="18" height="18">
+                <path
+                  d="M12 5v14M5 12h14"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                />
+              </svg>
             </span>
-          )}
-        </button>
-        <button
-          type="button"
-          className="icon-btn"
-          aria-label={t('layout.open')}
-          title={t('layout.open')}
-          onClick={onCustomize}
-        >
-          ⚙
-        </button>
-        <button onClick={onLogout}>{t('app.logout')}</button>
-      </header>
+            <span className="brand-name">
+              Sanatorio <b>42</b>
+            </span>
+          </button>
 
-      <Nav section={section} onGo={onGo} />
+          <div className="appbar-actions">
+            <AvailabilityToggle
+              active={section === 'guardia'}
+              onOpen={() => {
+                track('nav.guardia')
+                onGo('guardia')
+              }}
+              onTurnedOn={() => {
+                onGo('guardia')
+              }}
+            />
+            <button
+              type="button"
+              className="icon-btn mailbox-btn"
+              aria-label={unread === 0 ? t('notices.open') : t('notices.openUnread', { n: unread })}
+              title={t('notices.title')}
+              onClick={onMailbox}
+            >
+              <Icon name="buzon" size={20} />
+              {unread > 0 && (
+                <span className="count-badge" aria-hidden="true">
+                  {unread > 99 ? '99+' : unread}
+                </span>
+              )}
+            </button>
+            <UserMenu
+              me={me}
+              items={[
+                {
+                  id: 'expediente',
+                  icon: 'expediente',
+                  label: t('menu.record'),
+                  run: () => {
+                    onGo('expediente')
+                  },
+                },
+                {
+                  id: 'guardia',
+                  icon: 'guardia',
+                  label: t('menu.duty'),
+                  run: () => {
+                    onGo('guardia')
+                  },
+                },
+                ...(admin
+                  ? [
+                      {
+                        id: 'gestion',
+                        icon: 'gestion' as const,
+                        label: t('admin.usage.open'),
+                        run: () => {
+                          onGo('gestion')
+                        },
+                      },
+                    ]
+                  : []),
+                null,
+                { id: 'personalizar', icon: 'ajustes', label: t('layout.open'), run: onCustomize },
+                { id: 'incidencias', icon: 'lapiz', label: t('inbox.open'), run: onInbox },
+                null,
+                { id: 'salir', icon: 'salir', label: t('app.logout'), run: onLogout, danger: true },
+              ]}
+            />
+          </div>
+        </header>
+
+        <Nav section={section} onGo={onGo} />
+      </div>
     </div>
   )
 }

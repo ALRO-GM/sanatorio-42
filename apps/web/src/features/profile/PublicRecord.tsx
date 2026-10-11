@@ -8,13 +8,15 @@ import { Avatar } from '../../shared/ui/Avatar'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { HealthCard } from './HealthCard'
 import { NetworkCard } from './NetworkCard'
+import { Icon } from '../../shared/ui/Icon'
+import type { IconName } from '../../shared/ui/Icon'
 
-const ACHIEVEMENT_ICONS: Record<AchievementId, string> = {
-  first_duty: '⭐',
-  group_therapy: '🫂',
-  selfless_help: '💚',
-  board_teacher: '🧑‍🏫',
-  campus_guardian: '🛡️',
+const ACHIEVEMENT_ICONS: Record<AchievementId, IconName> = {
+  first_duty: 'estrella',
+  group_therapy: 'terapia',
+  selfless_help: 'corazon',
+  board_teacher: 'pizarras',
+  campus_guardian: 'escudo',
 }
 
 /**
@@ -102,7 +104,7 @@ export function PublicRecord({ login }: { login: string }) {
             {achievements.map((entry) => (
               <li key={entry.id} className={`row ${entry.unlocked ? 'unlocked' : 'locked'}`}>
                 <span className="row-icon" aria-hidden="true">
-                  {ACHIEVEMENT_ICONS[entry.id]}
+                  <Icon name={ACHIEVEMENT_ICONS[entry.id]} size={20} />
                 </span>
                 <span>
                   <strong>{t(`ach.${entry.id}`)}</strong>
@@ -123,7 +125,7 @@ export function PublicRecord({ login }: { login: string }) {
             {REACTIONS.map(({ kind, emoji }) => (
               <li key={kind} className="row plain">
                 <span className="row-icon" aria-hidden="true">
-                  {emoji}
+                  <Icon name={emoji} size={20} />
                 </span>
                 <span>{t(`react.${kind}`)}</span>
                 <strong className="row-count">{reactions[kind]}</strong>

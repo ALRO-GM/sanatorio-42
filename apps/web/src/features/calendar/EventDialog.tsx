@@ -7,6 +7,7 @@ import { hasCodes, hasRoom } from '../alerts/eligible'
 import { EventRoom } from '../alerts/EventRoom'
 import { whenText } from './dates'
 import { iconOf } from './kinds'
+import { Icon } from '../../shared/ui/Icon'
 
 /** Minutos que faltan para un instante, redondeando hacia arriba. */
 function minutesTo(iso: string): number {
@@ -22,6 +23,18 @@ type EventDialogProps = {
   me: string
   /** `true` si la ficha ha saltado sola como aviso de que el evento está al caer. */
   alert?: boolean
+  /**
+   * Cómo de obligatorio es el aviso:
+   *
+   * - `reply`: es con más gente y hay que decir si vas, si te retrasas o si no.
+   *   La ventana no se cierra con Escape ni pulsando fuera, y no tiene botón de
+   *   cerrar: solo se va al contestar (`onReplied`).
+   * - `missed`: no contestaste y ya se te dio por no asistido. Se cierra con su botón.
+   */
+  must?: 'reply' | 'missed'
+  onReplied?: () => void
+  /** Cuántos avisos más esperan detrás de este. */
+  queued?: number
 }
 
 /**
@@ -33,7 +46,16 @@ type EventDialogProps = {
  *
  * Lo de 42 lleva un enlace a su página en la intra; lo propio, a su sección.
  */
-export function EventDialog({ event, onClose, onGo, me, alert = false }: EventDialogProps) {
+export function EventDialog({
+  event,
+  onClose,
+  onGo,
+  me,
+  alert = false,
+  must,
+  onReplied,
+  queued = 0,
+}: EventDialogProps) {
   const { t, lang } = useI18n()
   const ref = useRef<HTMLDialogElement>(null)
 
@@ -53,30 +75,61 @@ export function EventDialog({ event, onClose, onGo, me, alert = false }: EventDi
       ref={ref}
       className={`event-dialog kind-${event.kind}`}
       aria-labelledby="event-dialog-title"
-      onClose={onClose}
+      onClose={() => {
+        // El navegador deja cerrar con Escape a la segunda, aunque se le diga que
+        // no. Un aviso que pide respuesta se vuelve a abrir.
+        if (must === 'reply') {
+          ref.current?.showModal()
+
+          return
+        }
+
+        onClose()
+      }}
+      onCancel={(cancel) => {
+        // Un aviso que pide respuesta no se quita con Escape.
+        if (must !== undefined) cancel.preventDefault()
+      }}
       onClick={(click) => {
-        // El propio `<dialog>` es el fondo: un clic en él (y no en su contenido) cierra.
-        if (click.target === ref.current) onClose()
+        // El propio `<dialog>` es el fondo: un clic en él (y no en su contenido) cierra,
+        // salvo que el aviso pida respuesta.
+        if (must === undefined && click.target === ref.current) onClose()
       }}
     >
       <article className="event-sheet">
         <header className="event-sheet-head">
           <span className="event-kind">
-            <span aria-hidden="true">{iconOf(event.kind)}</span> {t(`agenda.kind.${event.kind}`)}
+            <Icon name={iconOf(event.kind)} /> {t(`agenda.kind.${event.kind}`)}
           </span>
-          <button
-            type="button"
-            className="icon-btn"
-            aria-label={t('agenda.back')}
-            onClick={onClose}
-          >
-            ✕
-          </button>
+          {must === undefined ? (
+            <button
+              type="button"
+              className="icon-btn"
+              aria-label={t('agenda.back')}
+              onClick={onClose}
+            >
+              <Icon name="cerrar" />
+            </button>
+          ) : (
+            queued > 0 && <span className="badge">{t('meet.queued', { n: queued })}</span>
+          )}
         </header>
 
-        {alert && (
+        {must === 'missed' && (
+          <p className="event-alert missed" role="alert">
+            <Icon name="aviso" /> {t('meet.missed')}
+          </p>
+        )}
+        {must === 'reply' && (
+          <p className="event-alert must" role="alert">
+            <Icon name="campana" /> {t('meet.mustReply')}
+          </p>
+        )}
+
+        {alert && must !== 'missed' && minutesTo(event.start) > 0 && (
           <p className="event-alert" role="alert">
-            🔔 {t('meet.alert', { minutes: Math.max(0, minutesTo(event.start)) })}
+            <Icon name="campana" />{' '}
+            {t('meet.alert', { minutes: Math.max(0, minutesTo(event.start)) })}
           </p>
         )}
         <h3 id="event-dialog-title">{event.title}</h3>
@@ -118,9 +171,26 @@ export function EventDialog({ event, onClose, onGo, me, alert = false }: EventDi
           <p className="event-description">{event.description}</p>
         )}
 
-        {hasRoom(event) && <EventRoom eventId={event.id} me={me} codes={hasCodes(event)} />}
+        {must === 'reply' ? (
+          <EventRoom
+            eventId={event.id}
+            me={me}
+            replyOnly
+            {...(onReplied === undefined ? {} : { onReplied })}
+          />
+        ) : (
+          must === undefined &&
+          hasRoom(event) && <EventRoom eventId={event.id} me={me} codes={hasCodes(event)} />
+        )}
 
-        <footer className="actions">
+        {must === 'missed' && (
+          <footer className="actions">
+            <button type="button" className="primary small" onClick={onClose}>
+              {t('meet.missedOk')}
+            </button>
+          </footer>
+        )}
+        <footer className="actions" hidden={must !== undefined}>
           {event.url !== null && (
             <a className="button primary small" href={event.url} target="_blank" rel="noreferrer">
               {t('agenda.open42')} ↗

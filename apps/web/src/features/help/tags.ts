@@ -1,4 +1,5 @@
 import type { RequesterTag } from '@sanatorio/contracts'
+import type { IconName } from '../../shared/ui/Icon'
 
 /**
  * Cómo llegó quien pedía ayuda. Lo elige quien ayudó.
@@ -7,9 +8,9 @@ import type { RequesterTag } from '@sanatorio/contracts'
  * en `help.tag.<tag>`. Las de quien ayuda (cómo ayudó) son las de
  * `shared/reactions.ts`.
  */
-export const REQUESTER_TAGS: readonly { tag: RequesterTag; emoji: string }[] = [
-  { tag: 'prepared', emoji: '📝' },
-  { tag: 'curious', emoji: '🙋' },
-  { tag: 'autonomous', emoji: '🚀' },
-  { tag: 'basics', emoji: '🧱' },
+export const REQUESTER_TAGS: readonly { tag: RequesterTag; emoji: IconName }[] = [
+  { tag: 'prepared', emoji: 'lapiz' },
+  { tag: 'curious', emoji: 'pregunta' },
+  { tag: 'autonomous', emoji: 'despegue' },
+  { tag: 'basics', emoji: 'capas' },
 ]

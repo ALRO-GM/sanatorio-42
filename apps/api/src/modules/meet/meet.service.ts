@@ -14,6 +14,9 @@
 
 import type {
   AttendanceReport,
+  CalendarEvent,
+  EventAlert,
+  EventAlerts,
   CheckinLogEntry,
   LoggedMessage,
   MeetAttendance,
@@ -79,6 +82,29 @@ const MAX_PER_MINUTE_EVENT = 8
 const MAX_PER_MINUTE_TOTAL = 20
 
 const REASONS = ['evaluation', 'other_event', 'on_my_way', 'transport', 'other'] as const
+
+/**
+ * Minutos desde el inicio de un evento a partir de los que, si esa persona no
+ * ha dicho nada, se le da por no asistida.
+ */
+export const MISSED_AFTER_MINUTES = 30
+
+/** Hasta dónde se mira por delante al pedir los avisos: de sobra para el aviso más largo. */
+const ALERTS_AHEAD_MS = 3 * HOUR
+/** Y hacia atrás: lo que empezó hace más ya no avisa ni se da por perdido. */
+const ALERTS_BACK_MS = 12 * HOUR
+
+/** `true` si el evento es con más gente y vas: hay que decir si vas, si te retrasas o si no. */
+function needsReply(event: CalendarEvent): boolean {
+  if (event.joined === false) return false
+
+  return (
+    event.id.startsWith('help:booking:') ||
+    event.kind === 'therapy' ||
+    event.kind === 'board' ||
+    event.kind === 'evaluation'
+  )
+}
 
 const eventId = z.string().regex(/^[a-z_]+(:[A-Za-z0-9-]+){1,3}$/, 'evento no válido')
 
@@ -375,12 +401,108 @@ export function createMeetService(options: MeetServiceOptions) {
      * @returns Cuántos ha borrado.
      */
     async purge(): Promise<number> {
+      const before = new Date(now() - MESSAGE_RETENTION_DAYS * 24 * HOUR).toISOString()
       const result = await db.execute({
         sql: 'DELETE FROM event_messages WHERE created_at < ?',
-        args: [new Date(now() - MESSAGE_RETENTION_DAYS * 24 * HOUR).toISOString()],
+        args: [before],
       })
 
+      await db.execute({ sql: 'DELETE FROM event_alerts WHERE missed_at < ?', args: [before] })
+
       return result.rowsAffected
+    },
+
+    /**
+     * Los avisos de quien pregunta, por orden de inicio.
+     *
+     * De paso da por no asistido a quien no dijo nada de un evento que empezó
+     * hace más de media hora: queda apuntado en su chat (para que los demás lo
+     * sepan) y se le enseña una vez como aviso que se le pasó.
+     */
+    async alerts(actor: Actor, userId: number | null): Promise<EventAlerts> {
+      const at = now()
+      const { events } = await calendar.between(
+        actor,
+        userId,
+        new Date(at - ALERTS_BACK_MS).toISOString(),
+        new Date(at + ALERTS_AHEAD_MS).toISOString(),
+      )
+      const mine = events.filter((event) => event.joined !== false && event.kind !== 'event_open')
+      const replied = new Set<string>()
+
+      if (mine.length > 0) {
+        const result = await db.execute({
+          sql: `SELECT DISTINCT event_id FROM event_messages
+                WHERE login = ? AND kind IN ('seen', 'late', 'absent')
+                  AND event_id IN (${mine.map(() => '?').join(', ')})`,
+          args: [actor.login, ...mine.map((event) => event.id)],
+        })
+
+        for (const row of result.rows) replied.add(toText(row.event_id))
+      }
+
+      const alerts: EventAlert[] = []
+
+      for (const event of mine) {
+        const start = Date.parse(event.start)
+
+        if (!needsReply(event)) {
+          // Lo que no pide respuesta solo avisa antes de empezar.
+          if (start > at) alerts.push({ event, state: 'info' })
+        } else if (!replied.has(event.id)) {
+          if (at <= start + MISSED_AFTER_MINUTES * 60_000) {
+            alerts.push({ event, state: 'pending' })
+          } else {
+            // Se le pasó: no asistido, y a su lista de avisos por cerrar.
+            await db.batch(
+              [
+                {
+                  sql: `INSERT INTO event_messages (event_id, login, kind, reason, created_at)
+                        VALUES (?, ?, 'absent', 'missed', ?)`,
+                  args: [event.id, actor.login, new Date(at).toISOString()],
+                },
+                {
+                  sql: `INSERT OR IGNORE INTO event_alerts (event_id, login, event, starts_at, missed_at)
+                        VALUES (?, ?, ?, ?, ?)`,
+                  args: [
+                    event.id,
+                    actor.login,
+                    JSON.stringify(event),
+                    event.start,
+                    new Date(at).toISOString(),
+                  ],
+                },
+              ],
+              'write',
+            )
+          }
+        }
+      }
+
+      const missed = await db.execute({
+        sql: `SELECT event FROM event_alerts WHERE login = ? AND acked_at IS NULL
+              ORDER BY starts_at`,
+        args: [actor.login],
+      })
+
+      for (const row of missed.rows) {
+        try {
+          alerts.push({ event: JSON.parse(toText(row.event)) as CalendarEvent, state: 'missed' })
+        } catch {
+          // Un aviso ilegible no se puede enseñar: se queda sin salir.
+        }
+      }
+
+      return { alerts: alerts.sort((a, b) => a.event.start.localeCompare(b.event.start)) }
+    },
+
+    /** Cierra el aviso de un evento que se le pasó a quien pregunta. */
+    async ackAlert(actor: Actor, id: unknown): Promise<void> {
+      await db.execute({
+        sql: `UPDATE event_alerts SET acked_at = ? WHERE event_id = ? AND login = ?
+              AND acked_at IS NULL`,
+        args: [new Date(now()).toISOString(), parse(eventId, id), actor.login],
+      })
     },
 
     /** La asistencia de un evento: los códigos para quien organiza, lo validado para quien asiste. */

@@ -1,33 +1,34 @@
 import type { Notice } from '@sanatorio/contracts'
+import type { IconName } from '../../shared/ui/Icon'
 
 /** Dónde lleva un aviso: una sección de la web, o el buzón de incidencias. */
 export type NoticeTarget =
   'inbox' | 'gestion' | 'guardia' | 'tablon' | 'pizarras' | 'terapia' | 'calendario'
 
 /** Un icono por familia de avisos, para distinguirlos de un vistazo. */
-export function iconOf(notice: Notice): string {
+export function iconOf(notice: Notice): IconName {
   switch (notice.kind) {
     case 'ticket_answered':
     case 'ticket_new':
-      return '✉'
+      return 'buzon'
     case 'chat':
-      return '💬'
+      return 'chat'
     case 'booking_requested':
     case 'booking_accepted':
     case 'booking_declined':
     case 'booking_cancelled':
-      return '🛟'
+      return 'guardia'
     case 'doubt_answered':
     case 'doubt_solved':
     case 'proposal_accepted':
     case 'proposal_rejected':
-      return '📌'
+      return 'tablon'
     case 'board_changed':
     case 'board_cancelled':
-      return '🧑‍🏫'
+      return 'pizarras'
     case 'group_joined':
     case 'group_closed':
-      return '🫂'
+      return 'terapia'
   }
 }
 

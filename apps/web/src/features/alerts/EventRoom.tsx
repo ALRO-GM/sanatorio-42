@@ -3,9 +3,11 @@ import { useState } from 'react'
 import type { MeetReason } from '@sanatorio/contracts'
 
 import { useI18n } from '../../shared/i18n'
+import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { Attendance } from './Attendance'
 import { Chat } from './Chat'
 import { useThread } from './useThread'
+import { Icon } from '../../shared/ui/Icon'
 
 const DELAYS = [5, 10, 15, 30] as const
 const REASONS = [
@@ -22,6 +24,13 @@ type EventRoomProps = {
   me: string
   /** Asistencia con códigos: solo pizarras y sesiones de ayuda. */
   codes?: boolean
+  /** Se ha contestado al aviso (voy, me retraso o no voy). */
+  onReplied?: () => void
+  /**
+   * `true` si lo único que toca es contestar: sin chat ni códigos, que ya se
+   * verán al abrir el evento. Es el aviso que no se puede cerrar sin responder.
+   */
+  replyOnly?: boolean
 }
 
 /**
@@ -29,7 +38,13 @@ type EventRoomProps = {
  * visto, me retraso, no puedo ir), el chat que comparten todos los del evento
  * y, en pizarras y sesiones de ayuda, la asistencia con códigos.
  */
-export function EventRoom({ eventId, me, codes = false }: EventRoomProps) {
+export function EventRoom({
+  eventId,
+  me,
+  codes = false,
+  onReplied,
+  replyOnly = false,
+}: EventRoomProps) {
   const { t } = useI18n()
   const thread = useThread(eventId)
   // Qué respuesta se está detallando: los minutos del retraso o el motivo de no ir.
@@ -42,7 +57,14 @@ export function EventRoom({ eventId, me, codes = false }: EventRoomProps) {
       detail === 'late' ? { kind: 'late', minutes, reason } : { kind: 'absent', reason },
     )
 
-    if (sent) setDetail(null)
+    if (sent) {
+      setDetail(null)
+      onReplied?.()
+    }
+  }
+
+  const going = async (): Promise<void> => {
+    if (await thread.send({ kind: 'seen' })) onReplied?.()
   }
 
   return (
@@ -53,9 +75,9 @@ export function EventRoom({ eventId, me, codes = false }: EventRoomProps) {
           type="button"
           className="pill"
           disabled={thread.sending}
-          onClick={() => void thread.send({ kind: 'seen' })}
+          onClick={() => void going()}
         >
-          👍 {t('meet.seen')}
+          <Icon name="hecho" /> {t('meet.seen')}
         </button>
         <button
           type="button"
@@ -65,7 +87,7 @@ export function EventRoom({ eventId, me, codes = false }: EventRoomProps) {
             setDetail(detail === 'late' ? null : 'late')
           }}
         >
-          ⏳ {t('meet.late')}
+          <Icon name="reloj" /> {t('meet.late')}
         </button>
         <button
           type="button"
@@ -75,7 +97,7 @@ export function EventRoom({ eventId, me, codes = false }: EventRoomProps) {
             setDetail(detail === 'absent' ? null : 'absent')
           }}
         >
-          🚫 {t('meet.absent')}
+          <Icon name="ausente" /> {t('meet.absent')}
         </button>
       </div>
 
@@ -124,9 +146,14 @@ export function EventRoom({ eventId, me, codes = false }: EventRoomProps) {
         </div>
       )}
 
-      <Chat thread={thread} me={me} />
-
-      {codes && <Attendance eventId={eventId} />}
+      {replyOnly ? (
+        <ErrorNote error={thread.sendError} />
+      ) : (
+        <>
+          <Chat thread={thread} me={me} />
+          {codes && <Attendance eventId={eventId} />}
+        </>
+      )}
     </section>
   )
 }

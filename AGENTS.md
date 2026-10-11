@@ -63,9 +63,21 @@ Monorepo con workspaces de npm. Ver `README.md` y `docs/architecture.md`.
   espera", "terapia de grupo".
 - Textos en segunda persona y con lenguaje inclusivo (evitar formas con género
   cuando se pueda).
-- La navegación entre secciones va en su propia fila, debajo de la cabecera. El
-  expediente no está en esa fila: se abre con la cruz de la cabecera. El
+- Lo primero que se ve al entrar es el expediente: es la portada y la primera
+  pestaña. La navegación entre secciones va en su propia fila, debajo de la
+  marca. Arriba a la derecha solo hay tres cosas: la guardia, el buzón y el
+  menú de la cuenta, que recoge lo demás (panel, personalizar, incidencias y
+  sugerencias, salir). No añadas botones sueltos a la cabecera: van al menú. El
   idioma y campus van en el pie.
+- Iconos: solo los de `shared/ui/Icon.tsx`, nunca emojis. Uno nuevo se dibuja en
+  la misma rejilla (24 × 24, solo trazos, sin colores) y se apunta ahí.
+- Aspecto: las reglas están en `styles/system.css`. Una superficie se separa del
+  fondo con una raya, no con sombra; dentro de una tarjeta no va otra tarjeta
+  con borde; el color es del acento y de los estados (`--ok`, `--warn`,
+  `--danger`). Compruébalo siempre en claro y en oscuro.
+- Un aviso de un evento con más gente no se puede cerrar sin contestar (voy, me
+  retraso, no voy). Lo pendiente lo guarda la API (`GET /events/alerts`), no el
+  navegador. No añadas una forma de saltárselo.
 - Mapa de clusters: dorado = especialista de guardia, verde = paciente de
   guardia, gris = ocupado sin más. El azul de terapia solo se pinta mientras el
   grupo está reunido (o, al elegir puestos, si choca con el día y la hora).
@@ -79,6 +91,9 @@ Monorepo con workspaces de npm. Ver `README.md` y `docs/architecture.md`.
 - Calendario: cada tipo de evento tiene su color e icono (`features/calendar/kinds.ts`
   y las clases `kind-*`). Lo de Sanatorio en tonos fríos, lo de 42 en cálidos;
   borde discontinuo = no estás apuntado.
+- Tablón: el grafo va en perspectiva (`features/doubts/iso.ts`). Cada círculo es
+  una bandeja que se levanta al pasar por ella y se queda arriba si tiene el
+  proyecto abierto; los tonos van seguidos de un círculo al siguiente.
 - Colores: todos salen de las variables de tema de `styles/theme.css`
   (`--surface`, `--text`, `--border`…). Un hexadecimal suelto no cambiaría con el
   modo nocturno; solo vale para lo que es igual en los dos temas (post-its,

@@ -11,6 +11,7 @@ import { HoursReport } from '../profile/HoursReport'
 import { BudgetCard } from './BudgetCard'
 import { QuotaCard } from './QuotaCard'
 import { UsageHeatmap } from './UsageHeatmap'
+import { Icon } from '../../shared/ui/Icon'
 
 const TABS = ['consumption', 'people', 'inbox', 'messages', 'usage'] as const
 
@@ -119,8 +120,8 @@ function ConsumptionTab() {
           <ul className="admin-warnings">
             {data.warnings.map((warning) => (
               <li key={`${warning.weekday}-${warning.hour}`}>
-                ⚠ {t(`admin.weekday.${warning.weekday}`)} {String(warning.hour).padStart(2, '0')}:00
-                ·{' '}
+                <Icon name="aviso" /> {t(`admin.weekday.${warning.weekday}`)}{' '}
+                {String(warning.hour).padStart(2, '0')}:00 ·{' '}
                 {t('admin.cons.warning', {
                   n: warning.requests.toLocaleString(),
                   pct: Math.round(warning.share * 100),

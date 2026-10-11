@@ -35,6 +35,60 @@ function heat(value: number): string {
   return `hsl(${Math.round(150 - 150 * clamped)} 68% ${Math.round(48 + 6 * clamped)}%)`
 }
 
+/** Los modos que pintan un porcentaje con el degradado, y por tanto tienen escala. */
+export const SCALE_MODES = ['endogamy', 'failsGiven', 'failsReceived'] as const
+
+export type ScaleMode = (typeof SCALE_MODES)[number]
+
+export const isScaleMode = (mode: ColorMode): mode is ScaleMode =>
+  (SCALE_MODES as readonly ColorMode[]).includes(mode)
+
+/**
+ * Entre qué porcentajes se reparte el degradado: por debajo de `min` todo es
+ * verde y por encima de `max` todo es rojo. Estrechar el tramo es lo que deja
+ * ver diferencias cuando casi todo el mundo cae en la misma zona.
+ */
+export type Scale = { min: number; max: number }
+
+/** La escala de fábrica de cada modo. */
+export const DEFAULT_SCALES: Record<ScaleMode, Scale> = {
+  endogamy: { min: 0, max: 100 },
+  failsGiven: { min: 0, max: STRICTEST * 100 },
+  failsReceived: { min: 0, max: STRICTEST * 100 },
+}
+
+/** El porcentaje (0 a 100) que pinta ese modo para una persona, o `null` si no hay dato. */
+export function valueOf(node: NetworkNode, mode: ScaleMode): number | null {
+  switch (mode) {
+    case 'endogamy':
+      return node.endogamy
+    case 'failsGiven':
+      return node.givenPassRate === null ? null : (1 - node.givenPassRate) * 100
+    case 'failsReceived':
+      return node.receivedPassRate === null ? null : (1 - node.receivedPassRate) * 100
+  }
+}
+
+/** El color de un porcentaje dentro de una escala. */
+export function scaleColor(percent: number, scale: Scale): string {
+  return heat((percent - scale.min) / Math.max(1, scale.max - scale.min))
+}
+
+/**
+ * La escala que mejor separa a las personas que se están pintando: de la que
+ * menos tiene a la que más, con un punto de margen.
+ */
+export function fitScale(nodes: readonly NetworkNode[], mode: ScaleMode): Scale {
+  const values = nodes.flatMap((node) => valueOf(node, mode) ?? [])
+
+  if (values.length === 0) return DEFAULT_SCALES[mode]
+
+  const min = Math.max(0, Math.floor(Math.min(...values)))
+  const max = Math.min(100, Math.ceil(Math.max(...values)))
+
+  return max > min ? { min, max } : { min: Math.max(0, min - 1), max: Math.min(100, min + 1) }
+}
+
 /** Color estable para un año: los años seguidos quedan lejos en el círculo. */
 function yearColor(year: number): string {
   return `hsl(${(year * 67) % 360} 58% 55%)`
@@ -45,21 +99,24 @@ export function passColor(passRate: number): string {
   return heat((1 - passRate) / STRICTEST)
 }
 
-export function colorOf(node: NetworkNode, mode: ColorMode): string {
+/**
+ * @param scale Entre qué porcentajes se reparte el degradado, en los modos que
+ *   lo usan. Sin ella, la de fábrica.
+ */
+export function colorOf(node: NetworkNode, mode: ColorMode, scale?: Scale): string {
+  if (isScaleMode(mode)) {
+    const value = valueOf(node, mode)
+
+    // Gris si no hay dato (ha evaluado o le han evaluado muy poco).
+    return value === null ? OTHER : scaleColor(value, scale ?? DEFAULT_SCALES[mode])
+  }
+
   switch (mode) {
     case 'community': {
       const hue = COMMUNITY_HUES[node.community]
 
       return hue === undefined ? OTHER : `hsl(${hue} 62% 52%)`
     }
-    case 'endogamy':
-      return heat(node.endogamy / 100)
-    case 'failsGiven':
-      // Como corrector: rojo quien más suspende a otros; gris si ha evaluado muy poco.
-      return node.givenPassRate === null ? OTHER : passColor(node.givenPassRate)
-    case 'failsReceived':
-      // Como corregido: rojo a quien más le suspenden sus proyectos.
-      return node.receivedPassRate === null ? OTHER : passColor(node.receivedPassRate)
     case 'cohort':
       return node.cohort === null ? OTHER : yearColor(node.cohort)
     case 'balance': {
@@ -85,7 +142,28 @@ export function legendOf(
   nodes: readonly NetworkNode[],
   mode: ColorMode,
   t: (key: string, vars?: Record<string, string | number>) => string,
+  scale?: Scale,
 ): LegendEntry[] {
+  if (isScaleMode(mode)) {
+    const range = scale ?? DEFAULT_SCALES[mode]
+    // Cinco pasos repartidos por la escala, sin repetir si el tramo es muy corto.
+    const stops = [
+      ...new Set(
+        [0, 0.25, 0.5, 0.75, 1].map((step) =>
+          Math.round(range.min + (range.max - range.min) * step),
+        ),
+      ),
+    ]
+
+    return [
+      ...stops.map((percent) => ({
+        color: scaleColor(percent, range),
+        label: mode === 'endogamy' ? `${percent} %` : t(`net.legend.${mode}`, { pct: percent }),
+      })),
+      ...(mode === 'endogamy' ? [] : [{ color: OTHER, label: t('net.legend.unknown') }]),
+    ]
+  }
+
   switch (mode) {
     case 'community': {
       const sizes = new Map<number, number>()
@@ -129,20 +207,6 @@ export function legendOf(
         ? main
         : [...main, { color: OTHER, label: t('net.legend.others', { size: rest }) }]
     }
-    case 'endogamy':
-      return [0, 0.25, 0.5, 0.75, 1].map((value) => ({
-        color: heat(value),
-        label: String(Math.round(value * 100)),
-      }))
-    case 'failsGiven':
-    case 'failsReceived':
-      return [
-        ...[0, 0.5, 1].map((value) => ({
-          color: heat(value),
-          label: t(`net.legend.${mode}`, { pct: Math.round(value * STRICTEST * 100) }),
-        })),
-        { color: OTHER, label: t('net.legend.unknown') },
-      ]
     case 'cohort': {
       const years = [
         ...new Set(nodes.flatMap((node) => (node.cohort === null ? [] : [node.cohort]))),

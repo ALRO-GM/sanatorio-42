@@ -4,12 +4,7 @@ import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
-
-const EMOJIS: Record<string, string> = {
-  ft_printf: '🖨️',
-  get_next_line: '🧵',
-  push_swap: '🔀',
-}
+import { Icon } from '../../shared/ui/Icon'
 
 type ProjectSelectProps = {
   onSelect: (project: ProjectSummary) => void
@@ -46,8 +41,8 @@ export function ProjectSelect({ onSelect }: ProjectSelectProps) {
                 onSelect(project)
               }}
             >
-              <span className="emoji" aria-hidden="true">
-                {EMOJIS[project.name] ?? '🩺'}
+              <span className="project-icon">
+                <Icon name="terminal" size={26} />
               </span>
               {project.name}
             </button>

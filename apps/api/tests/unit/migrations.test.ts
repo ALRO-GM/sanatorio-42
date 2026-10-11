@@ -54,6 +54,7 @@ describe('migraciones', () => {
       'curriculum',
       'doubt_answers',
       'doubts',
+      'event_alerts',
       'event_attendance',
       'event_checkins',
       'event_codes',

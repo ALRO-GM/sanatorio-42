@@ -183,6 +183,7 @@ describe('réplica vista desde fuera', () => {
       '/usage',
       '/quota',
       '/pulse',
+      '/events/alerts',
       '/notices',
       '/users/eva/profile',
       '/me/profile',

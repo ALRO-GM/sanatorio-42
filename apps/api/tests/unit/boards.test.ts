@@ -125,6 +125,60 @@ describe('comunidad', () => {
       expect(await attendance.attended(id)).toEqual(['ana'])
     })
 
+    it('un aviso de evento hay que contestarlo: si no, a la media hora se da por no asistido', async () => {
+      const { boards, meet } = services
+      const first = await boards.create(actor('eva'), { ...malloc(1), capacity: 5 })
+      const second = await boards.create(actor('eva'), { ...malloc(2), capacity: 5 })
+      const ids = [`board:${first.id}`, `board:${second.id}`]
+      const states = async (login: string): Promise<string[]> =>
+        (await meet.alerts(actor(login), null)).alerts.map(
+          (alert) => `${alert.event.id} ${alert.state}`,
+        )
+
+      await boards.join(actor('ana'), first.id)
+      await boards.join(actor('ana'), second.id)
+      // `leo` no va a ninguna: no tiene nada que contestar.
+      expect(await states('leo')).toEqual([])
+
+      // Las dos pendientes, por orden de inicio: la primera que llega, la primera que sale.
+      expect(await states('ana')).toEqual([`${ids[0]} pending`, `${ids[1]} pending`])
+      // Se pregunte las veces que se pregunte (otra pestaña, otro día), siguen ahí.
+      expect(await states('ana')).toHaveLength(2)
+
+      // Contestar a una la quita de la lista; vale cualquiera de las tres respuestas.
+      await meet.send(actor('ana'), null, { id: ids[0], kind: 'late', minutes: 10 })
+      expect(await states('ana')).toEqual([`${ids[1]} pending`])
+      // Un mensaje de texto no es una respuesta.
+      await meet.send(actor('ana'), null, { id: ids[1], kind: 'text', body: 'a ver si llego' })
+      expect(await states('ana')).toEqual([`${ids[1]} pending`])
+
+      // Empieza la segunda (a las dos horas) y pasan 29 minutos: todavía se puede contestar.
+      clock.advance(2 * HOUR + 29 * MINUTE)
+      expect(await states('ana')).toEqual([`${ids[1]} pending`])
+
+      // A los 31 ya no: se le da por no asistida y se le dice.
+      clock.advance(2 * MINUTE)
+      expect(await states('ana')).toEqual([`${ids[1]} missed`])
+      expect((await meet.thread(actor('eva'), null, ids[1])).messages.at(-1)).toMatchObject({
+        login: 'ana',
+        kind: 'absent',
+        reason: 'missed',
+      })
+      // Sigue saliendo hasta que lo cierra, y solo se apunta una vez.
+      expect(await states('ana')).toEqual([`${ids[1]} missed`])
+      expect(
+        (await meet.thread(actor('eva'), null, ids[1])).messages.filter(
+          (message) => message.kind === 'absent',
+        ),
+      ).toHaveLength(1)
+
+      // Nadie cierra el aviso de otra persona.
+      await meet.ackAlert(actor('leo'), ids[1])
+      expect(await states('ana')).toHaveLength(1)
+      await meet.ackAlert(actor('ana'), ids[1])
+      expect(await states('ana')).toEqual([])
+    })
+
     it('nadie inunda un chat: ocho mensajes por minuto y evento', async () => {
       const { boards, meet } = services
       const board = await boards.create(actor('eva'), malloc())

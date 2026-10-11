@@ -9,6 +9,7 @@ import { REACTIONS } from '../../shared/reactions'
 import { Avatar } from '../../shared/ui/Avatar'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { REQUESTER_TAGS } from './tags'
+import { Icon } from '../../shared/ui/Icon'
 
 type BookingCardProps = {
   booking: Booking
@@ -81,7 +82,7 @@ export function BookingCard({ booking, today, onChange }: BookingCardProps) {
                     disabled={busy}
                     onClick={() => void rate(tag)}
                   >
-                    <span aria-hidden="true">{emoji}</span> {t(`help.tag.${tag}`)}
+                    <Icon name={emoji} /> {t(`help.tag.${tag}`)}
                   </button>
                 ))
               : REACTIONS.map(({ kind, emoji }) => (
@@ -92,7 +93,7 @@ export function BookingCard({ booking, today, onChange }: BookingCardProps) {
                     disabled={busy}
                     onClick={() => void rate(kind)}
                   >
-                    <span aria-hidden="true">{emoji}</span> {t(`react.${kind}`)}
+                    <Icon name={emoji} /> {t(`react.${kind}`)}
                   </button>
                 ))}
           </div>

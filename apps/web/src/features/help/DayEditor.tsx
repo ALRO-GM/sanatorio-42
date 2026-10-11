@@ -7,6 +7,7 @@ import { useAction } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { DAY_END, DAY_START, duration, SLOT, slotsOf, toMinutes, toTime, windowsOf } from './time'
+import { Icon } from '../../shared/ui/Icon'
 
 type DayEditorProps = {
   day: HelpDay
@@ -102,7 +103,7 @@ export function DayEditor({ day, onSaved }: DayEditorProps) {
                 toggle(start)
               }}
             >
-              {taken && <span aria-hidden="true">🔎 </span>}
+              {taken && <Icon name="lupa" size={13} />}
               {toTime(start)}
             </button>
           )

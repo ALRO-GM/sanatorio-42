@@ -45,6 +45,8 @@ export const realApi: Api = {
 
   getCampuses: () => getJson('/campuses'),
   getProfile: () => getJson('/me/profile'),
+  getEventAlerts: () => getJson('/events/alerts'),
+  ackEventAlert: (id) => send('POST', '/events/alerts/ack', { id }),
   getEventThread: (id, after) =>
     getJson(
       `/events/thread?id=${encodeURIComponent(id)}${after === undefined ? '' : `&after=${after}`}`,

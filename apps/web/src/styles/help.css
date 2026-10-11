@@ -19,8 +19,8 @@ button.slot {
   font-variant-numeric: tabular-nums;
 }
 button.slot.active {
-  background: #00babc;
-  border-color: #00babc;
+  background: var(--accent);
+  border-color: var(--accent);
   color: var(--on-accent);
   font-weight: 700;
 }

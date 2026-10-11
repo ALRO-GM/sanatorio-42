@@ -15,6 +15,8 @@ import { HealthCard } from './HealthCard'
 import { HoursReport } from './HoursReport'
 import { LeaderboardCard } from './LeaderboardCard'
 import { NetworkCard } from './NetworkCard'
+import { Icon } from '../../shared/ui/Icon'
+import type { IconName } from '../../shared/ui/Icon'
 
 /** Lo que da XP, en el orden en que se explica. */
 const RULES = [
@@ -27,12 +29,12 @@ const RULES = [
   'therapy_session',
 ] as const satisfies readonly XpKind[]
 
-const ACHIEVEMENT_ICONS: Record<AchievementId, string> = {
-  first_duty: '⭐',
-  group_therapy: '🫂',
-  selfless_help: '💚',
-  board_teacher: '🧑‍🏫',
-  campus_guardian: '🛡️',
+const ACHIEVEMENT_ICONS: Record<AchievementId, IconName> = {
+  first_duty: 'estrella',
+  group_therapy: 'terapia',
+  selfless_help: 'corazon',
+  board_teacher: 'pizarras',
+  campus_guardian: 'escudo',
 }
 
 type ExpedienteProps = {
@@ -187,7 +189,7 @@ export function Expediente({ me, profile }: ExpedienteProps) {
                         className={`row ${entry.unlocked ? 'unlocked' : 'locked'}`}
                       >
                         <span className="row-icon" aria-hidden="true">
-                          {ACHIEVEMENT_ICONS[entry.id]}
+                          <Icon name={ACHIEVEMENT_ICONS[entry.id]} size={20} />
                         </span>
                         <span>
                           <strong>{t(`ach.${entry.id}`)}</strong>
@@ -208,7 +210,7 @@ export function Expediente({ me, profile }: ExpedienteProps) {
                     {REACTIONS.map(({ kind, emoji }) => (
                       <li key={kind} className="row plain">
                         <span className="row-icon" aria-hidden="true">
-                          {emoji}
+                          <Icon name={emoji} size={20} />
                         </span>
                         <span>{t(`react.${kind}`)}</span>
                         <strong className="row-count">{reactions[kind]}</strong>

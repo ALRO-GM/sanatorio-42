@@ -11,6 +11,7 @@ import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { ChatRoom } from '../alerts/Chat'
 import { shortDay, today } from './days'
 import { GroupForm } from './GroupForm'
+import { Icon } from '../../shared/ui/Icon'
 
 type GroupCardProps = {
   group: GroupView
@@ -184,7 +185,7 @@ export function GroupCard({ group, projects, onChange, me }: GroupCardProps) {
             setChat(!chat)
           }}
         >
-          💬 {t(chat ? 'therapy.chatHide' : 'therapy.chatShow')}
+          <Icon name="chat" /> {t(chat ? 'therapy.chatHide' : 'therapy.chatShow')}
         </button>
       )}
       {group.joined && chat && <ChatRoom chatId={`group:${group.id}`} me={me} />}

@@ -164,6 +164,21 @@ Hecho el 2026-10-11:
 - [ ] **Alberto, en la consola de Oracle**: pasar a Pay As You Go y crear un
       presupuesto de 1 € con alerta por correo.
 
+### 2.6 Rediseño (pedido el 2026-10-11)
+
+- [x] El expediente es la portada. Cabecera nueva (`app/Header.tsx`,
+      `app/UserMenu.tsx`): marca, guardia, buzón y menú de la cuenta.
+- [x] Juego de iconos propio (`shared/ui/Icon.tsx`) en vez de emojis.
+- [x] Paleta nueva (`styles/theme.css`) y capa de sistema (`styles/system.css`):
+      superficies planas con raya, sin manchas de fondo, estados con su color.
+- [x] Tablón en perspectiva, con bandejas que se elevan (`features/doubts/iso.ts`).
+- [x] Red: escala del degradado regulable de punto en punto, con ajuste a los datos.
+- [x] Avisos de evento con respuesta obligatoria, cola por orden de inicio y
+      falta automática a la media hora (migración 23, `GET /events/alerts`).
+- [ ] Repasar a ojo, con Alberto, las secciones que no se han mirado una a una
+      en los dos temas (sala de espera con proyecto abierto, pizarras, calendario,
+      ventanas de terapia) y el móvil.
+
 ## 3. A medias o por confirmar con Alberto
 
 - **Cifras de los límites** (se cambian desde el panel, pestaña "Consumo"): el

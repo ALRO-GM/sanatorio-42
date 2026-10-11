@@ -1,0 +1,587 @@
+/* ── Sistema visual ──────────────────────────────────────────────────────────
+   La capa que da a toda la web el mismo aspecto: página, barra de arriba,
+   superficies, botones, campos y ventanas. Va la última, así que manda sobre lo
+   que cada sección traía de antes.
+
+   Tres reglas:
+   1. Una superficie se separa del fondo con una raya fina, no con sombra. La
+      sombra queda para lo que flota de verdad (menús, ventanas, avisos).
+   2. Dentro de una superficie no hay otra "ventana": lo de dentro se agrupa con
+      un fondo más hundido (`--surface-2`) y sin borde.
+   3. El color es del acento y de los estados. Lo demás, grises del tema.
+   ──────────────────────────────────────────────────────────────────────────── */
+
+/* --- Página ----------------------------------------------------------------- */
+body {
+  background: radial-gradient(1100px 420px at 50% -180px, var(--glow), transparent 70%), var(--bg);
+  background-attachment: fixed;
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+}
+/* Las manchas de color del fondo competían con el contenido. */
+body::before,
+body::after {
+  display: none;
+}
+
+.container {
+  max-width: 1000px;
+  padding: 1.75rem 1.25rem 2.5rem;
+}
+h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+.lead {
+  color: var(--text-3);
+}
+.eyebrow {
+  color: var(--text-3);
+  font-weight: 600;
+  letter-spacing: 0.07em;
+}
+.icon {
+  flex: 0 0 auto;
+  vertical-align: -0.18em;
+}
+
+/* --- Barra de arriba -------------------------------------------------------- */
+.appbar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  backdrop-filter: saturate(1.4) blur(14px);
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s;
+}
+.appbar.scrolled {
+  border-bottom-color: var(--border);
+}
+.appbar-inner {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 1.25rem;
+}
+.appbar-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  height: 56px;
+}
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.25rem 0.5rem 0.25rem 0.25rem;
+  background: none;
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.brand:hover {
+  background: var(--surface-2);
+}
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.brand-name b {
+  color: var(--accent-text);
+  font-weight: 700;
+}
+.appbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+/* El interruptor de guardia: una pastilla con su texto y su interruptor dentro. */
+.appbar .switch-wrap {
+  position: relative;
+  margin: 0;
+}
+.appbar .switch-row {
+  gap: 0.45rem;
+  margin: 0;
+  padding: 0.2rem 0.5rem 0.2rem 0.3rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  font-size: 0.85rem;
+}
+.duty-open {
+  padding: 0.2rem 0.45rem;
+  background: none;
+  border-radius: 999px;
+  color: var(--text-2);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+.duty-open:hover,
+.duty-open.active {
+  background: var(--surface-2);
+  color: var(--text);
+}
+.switch {
+  width: 38px;
+  height: 22px;
+  border: 0;
+  padding: 0;
+  background: var(--border-strong);
+}
+.switch::after {
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+.switch:checked {
+  background: var(--accent);
+}
+.switch:checked::after {
+  transform: translateX(16px);
+}
+.duty-info {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border: 1px solid var(--border-strong);
+  border-radius: 50%;
+  background: none;
+  color: var(--text-3);
+  font-size: 0.7rem;
+  font-style: italic;
+  font-weight: 700;
+}
+.duty-info::after {
+  background: var(--text);
+  color: var(--bg);
+}
+
+/* Botones de un solo icono. */
+.icon-btn {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0 !important;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--text-2);
+  font-size: 1rem;
+}
+.icon-btn:hover,
+.icon-btn.active {
+  background: var(--surface-2);
+  color: var(--text);
+}
+.mailbox-btn .count-badge {
+  top: 1px;
+  right: 0;
+  box-shadow: 0 0 0 2px var(--bg);
+}
+
+/* Menú de la cuenta. */
+.user-menu {
+  position: relative;
+}
+.user-menu-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.2rem 0.55rem 0.2rem 0.2rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+.user-menu-btn:hover,
+.user-menu-btn[aria-expanded='true'] {
+  border-color: var(--border-strong);
+  background: var(--surface-2);
+}
+.user-menu-btn .icon {
+  color: var(--text-3);
+}
+.user-menu-list {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 50;
+  display: grid;
+  gap: 2px;
+  min-width: 240px;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: 0 16px 40px var(--shadow);
+}
+.user-menu-list button {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+  padding: 0.5rem 0.65rem;
+  border-radius: 8px;
+  background: none;
+  color: var(--text-2);
+  font-size: 0.9rem;
+  text-align: left;
+}
+.user-menu-list button:hover,
+.user-menu-list button:focus-visible {
+  background: var(--surface-2);
+  color: var(--text);
+}
+.user-menu-list button.danger:hover {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+.user-menu-list hr {
+  width: 100%;
+  margin: 4px 0;
+  border: 0;
+  border-top: 1px solid var(--border);
+}
+
+/* Secciones: pestañas con una raya debajo de la que está abierta. */
+.tabs {
+  justify-content: flex-start;
+  gap: 0.15rem;
+  margin: 0;
+  padding: 0;
+}
+.tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem 0.7rem 0.75rem;
+  border-radius: 8px 8px 0 0;
+  background: none;
+  color: var(--text-3);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+.tab:hover {
+  color: var(--text);
+}
+.tab.active {
+  background: none;
+  color: var(--text);
+  font-weight: 600;
+}
+.tab.active .icon {
+  color: var(--accent-text);
+}
+.tab.active::after {
+  content: '';
+  position: absolute;
+  right: 0.7rem;
+  bottom: 0;
+  left: 0.7rem;
+  height: 2px;
+  border-radius: 2px 2px 0 0;
+  background: var(--accent);
+}
+
+/* --- Superficies ------------------------------------------------------------ */
+.card,
+.project,
+.peer-card,
+.step-card,
+.group-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: none;
+}
+.project:hover,
+.peer-card:hover {
+  border-color: var(--border-strong);
+  box-shadow: 0 8px 24px var(--shadow-soft);
+  transform: translateY(-2px);
+}
+/* Una tarjeta dentro de otra no es otra ventana: se queda en un fondo hundido. */
+.card .card,
+.card .tile,
+.layout-dialog .card {
+  border: 0;
+  background: var(--surface-2);
+}
+.tile {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text-2);
+}
+.tile strong {
+  color: var(--text);
+  font-size: 1.25rem;
+  letter-spacing: -0.01em;
+}
+.tile small {
+  color: var(--text-3);
+}
+.tile .eyebrow {
+  color: var(--text-3);
+}
+.project-icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+
+/* --- Botones, pastillas y campos -------------------------------------------- */
+button {
+  border: 1px solid transparent;
+  background: var(--surface-2);
+  color: var(--text);
+  font-weight: 500;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    color 0.15s;
+}
+button:hover:not(:disabled) {
+  background: var(--surface-3);
+}
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+button.primary {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+button.primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+button.link,
+button.link:hover:not(:disabled) {
+  border: 0;
+  background: none;
+  color: var(--accent-text);
+}
+a,
+.link,
+.profile-link,
+.record-link {
+  color: var(--accent-text);
+}
+.back-btn {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: none;
+  color: var(--text-2);
+}
+.back-btn:hover {
+  box-shadow: none;
+}
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-2);
+}
+.pill:hover:not(:disabled) {
+  border-color: var(--border-strong);
+  background: var(--surface-2);
+  color: var(--text);
+}
+.pill.active,
+.pill.active:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-text);
+  font-weight: 600;
+}
+.badge {
+  background: var(--surface-2);
+  color: var(--text-2);
+}
+input,
+select,
+textarea {
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+}
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-4);
+}
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* --- Avisos de estado ------------------------------------------------------- */
+.estado.error,
+.error-note {
+  border: 1px solid color-mix(in srgb, var(--danger) 35%, transparent);
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+.reaction-done {
+  color: var(--ok);
+}
+.count-badge,
+.notice-dot,
+.budget-stopped {
+  background: var(--danger);
+  color: #fff;
+}
+
+/* --- Ventanas --------------------------------------------------------------- */
+dialog.layout-dialog,
+dialog.event-dialog {
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--surface);
+  box-shadow: 0 24px 70px var(--shadow);
+}
+dialog::backdrop {
+  background: rgba(8, 14, 12, 0.55);
+  backdrop-filter: blur(3px);
+}
+.notice {
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+.notice.unread {
+  border-color: var(--border-strong);
+  background: var(--surface-2);
+}
+.meet-toast,
+.quota-notice {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: 0 12px 32px var(--shadow);
+}
+
+/* --- Pie -------------------------------------------------------------------- */
+.footer {
+  max-width: 1000px;
+  margin: 3rem auto 0;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border);
+  color: var(--text-3);
+}
+
+/* --- Ranking: los tres primeros puestos ------------------------------------- */
+.medal {
+  display: inline-grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.medal-1 {
+  background: #f1cf6b;
+  color: #5a4306;
+}
+.medal-2 {
+  background: #ced6d2;
+  color: #36423d;
+}
+.medal-3 {
+  background: #e3ad84;
+  color: #5b3413;
+}
+
+/* --- Móvil ------------------------------------------------------------------ */
+@media (max-width: 640px) {
+  .appbar-inner {
+    padding: 0 0.75rem;
+  }
+  .brand-name,
+  .user-menu-btn .user-login,
+  .appbar .duty-info {
+    display: none;
+  }
+  .container {
+    padding: 1.25rem 0.9rem 2rem;
+  }
+  .tab {
+    padding-inline: 0.55rem;
+  }
+}
+
+/* Lo que se marca como oculto, se oculta, tenga el `display` que tenga. */
+[hidden] {
+  display: none !important;
+}
+.event-alert {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  width: fit-content;
+  margin: 0 0 0.5rem;
+  border-radius: var(--radius-sm);
+}
+.event-alert.must {
+  width: auto;
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+.event-alert.missed {
+  width: auto;
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+/* --- Expediente y panel ------------------------------------------------------ */
+/* La franja de arriba del expediente: un degradado suave del acento, igual de
+   discreto en claro y en oscuro. */
+.banner {
+  background: linear-gradient(120deg, var(--accent-soft), var(--surface-2) 70%);
+  border-bottom: 1px solid var(--border);
+}
+.budget-form {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+@media (max-width: 640px) {
+  .budget-form {
+    grid-template-columns: 1fr;
+  }
+}
+.record {
+  overflow: hidden;
+}
+.record .banner {
+  height: 72px;
+  margin: -1.25rem -1.25rem 0;
+}

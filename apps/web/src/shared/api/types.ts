@@ -54,6 +54,7 @@ import type {
   MeetThread,
   AdminPeople,
   BudgetSettings,
+  EventAlerts,
   FortyTwoQuota,
   FortyTwoQuotaSettings,
   Notices,
@@ -121,6 +122,10 @@ export type Api = {
   getProfile: () => Promise<Profile>
 
   // --- Avisos, chat y asistencia de un evento
+  /** Tus avisos de evento, por orden de inicio: los que piden respuesta, los que se te pasaron y los demás. */
+  getEventAlerts: () => Promise<EventAlerts>
+  /** Cierra el aviso de un evento que se te pasó. */
+  ackEventAlert: (eventId: string) => Promise<void>
   /** El chat de un evento. Con `after`, solo los mensajes posteriores a ese `id`. */
   getEventThread: (eventId: string, after?: number) => Promise<MeetThread>
   /** Manda un aviso o un mensaje; devuelve el chat ya con él. */

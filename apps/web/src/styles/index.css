@@ -34,3 +34,5 @@
 @import './admin.css';
 /* Terapias: tipo, progreso y apuntarse. */
 @import './therapy.css';
+/* El sistema visual: lo último, para que mande sobre lo de cada sección. */
+@import './system.css';

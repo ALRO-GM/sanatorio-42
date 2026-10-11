@@ -5,6 +5,7 @@ import type { NetworkPerson } from '@sanatorio/contracts'
 import { api } from '../../shared/api'
 import { useI18n } from '../../shared/i18n'
 import { Avatar } from '../../shared/ui/Avatar'
+import { Icon } from '../../shared/ui/Icon'
 
 type PersonSearchProps = {
   /** Persona en la que está centrado el grafo, o `null`. */
@@ -68,7 +69,7 @@ export function PersonSearch({ value, me, onChange }: PersonSearchProps) {
               choose(null)
             }}
           >
-            ✕
+            <Icon name="cerrar" />
           </button>
         </span>
       </div>

@@ -9,6 +9,7 @@ import { useI18n } from '../../shared/i18n'
 import { daysBetween, paceOn, SLOWEST, stepsFor } from '../../shared/pace'
 import type { PaceStep } from '../../shared/pace'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { Icon } from '../../shared/ui/Icon'
 
 /** El último círculo del common core. */
 const LAST_CIRCLE = 6
@@ -97,7 +98,7 @@ function HealthBody({ health, startedAt }: { health: Health; startedAt: string }
       <div className="health-head">
         <div className={`health-pace ${finished ? 'safe' : current === null ? 'gone' : ''}`}>
           <span className="eyebrow">{t('health.pace')}</span>
-          <strong>{finished ? '✓' : (current?.pace ?? '🕳')}</strong>
+          <strong>{finished ? '✓' : (current?.pace ?? <Icon name="pozo" size={26} />)}</strong>
         </div>
         <p className="health-summary">
           {finished
@@ -159,8 +160,8 @@ function HealthBody({ health, startedAt }: { health: Health; startedAt: string }
               ))}
               {hole !== null && holeLeft !== null && (
                 <li className="health-step hole">
-                  <span className="health-badge" aria-hidden="true">
-                    🕳
+                  <span className="health-badge">
+                    <Icon name="pozo" size={16} />
                   </span>
                   <span>
                     <strong>{t('health.hole', { date: day(hole) })}</strong>

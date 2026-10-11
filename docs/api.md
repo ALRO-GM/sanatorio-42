@@ -149,6 +149,12 @@ calendario (y va a ir) puede leer o escribir; el resto recibe `403`.
 - POST /events/messages → `{ "id", "kind", "minutes"?, "reason"?, "body"? }`; devuelve el chat.
   `kind`: `seen` (he visto el aviso), `late` (pide `minutes`), `absent` o `text`
   (pide `body`). `reason`: `evaluation`, `other_event`, `on_my_way`, `transport`, `other`.
+- GET /events/alerts → `{ "alerts": [{ "event", "state" }] }`, por orden de
+  inicio. `pending`: es con más gente y no has dicho si vas (la web no deja
+  cerrar el aviso hasta que contestes con `seen`, `late` o `absent`); `missed`:
+  pasó media hora desde el inicio sin respuesta y quedaste como no asistido
+  (se apunta en el chat con `reason: "missed"`); `info`: no pide respuesta.
+- POST /events/alerts/ack → `{ "id" }`: cierra un aviso `missed`. 204.
 - Los mensajes se borran a los 90 días; el registro de intentos de códigos
   (`/admin/checkins`), al año. El tiempo validado no se borra.
 - GET /events/attendance?id= → solo pizarras y sesiones de ayuda aceptadas. Quien

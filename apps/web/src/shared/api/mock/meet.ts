@@ -4,16 +4,74 @@
 
 import { ME } from './data'
 import type { Api } from '../types'
-import { delay, fail, threads, presences } from './state'
+import { delay, fail, state, threads, presences } from './state'
+import { calendarEvents } from './calendar'
 
 export const meetMock: Pick<
   Api,
+  | 'getEventAlerts'
+  | 'ackEventAlert'
   | 'getEventThread'
   | 'sendEventMessage'
   | 'getEventAttendance'
   | 'checkinEvent'
   | 'attendanceReportUrl'
 > = {
+  // En la web de mentira avisa lo que empieza en las próximas horas y es con más
+  // gente; contestar en su chat lo quita de la lista, como en la de verdad.
+  async getEventAlerts() {
+    await delay(120)
+
+    const now = Date.now()
+
+    // Para enseñar el aviso obligatorio sin esperar a que toque: con `?avisos`
+    // en la dirección, los dos próximos eventos con más gente "empiezan" ya.
+    if (new URLSearchParams(window.location.search).has('avisos')) {
+      return {
+        alerts: calendarEvents(state)
+          .filter((event) => event.kind === 'therapy' || event.kind === 'board')
+          .filter(
+            (event) =>
+              !(threads.get(event.id) ?? []).some(
+                (message) => message.login === ME.login && message.kind !== 'text',
+              ),
+          )
+          .slice(0, 2)
+          .map((event, index) => ({
+            event: { ...event, start: new Date(now + (index + 2) * 60_000).toISOString() },
+            state: 'pending' as const,
+          })),
+      }
+    }
+
+    return {
+      alerts: calendarEvents(state)
+        .filter((event) => {
+          const start = Date.parse(event.start)
+
+          return start > now - 30 * 60_000 && start < now + 3 * 3_600_000
+        })
+        .filter((event) => event.joined !== false && event.kind !== 'event_open')
+        .filter(
+          (event) =>
+            !(threads.get(event.id) ?? []).some(
+              (message) => message.login === ME.login && message.kind !== 'text',
+            ),
+        )
+        .map((event) => ({
+          event,
+          state:
+            event.kind === 'therapy' || event.kind === 'board' || event.kind === 'evaluation'
+              ? ('pending' as const)
+              : ('info' as const),
+        })),
+    }
+  },
+
+  async ackEventAlert() {
+    await delay(80)
+  },
+
   async getEventThread(id, after = 0) {
     await delay(120)
 

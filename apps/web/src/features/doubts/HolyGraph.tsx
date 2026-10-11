@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { KeyboardEvent, ReactNode } from 'react'
 
 import type { GraphProject, HolyGraph as HolyGraphData } from '@sanatorio/contracts'
@@ -6,6 +6,7 @@ import type { GraphProject, HolyGraph as HolyGraphData } from '@sanatorio/contra
 import { useMediaQuery } from '../../shared/hooks/useMediaQuery'
 import { useI18n } from '../../shared/i18n'
 import type { Translate } from '../../shared/i18n'
+import { Icon } from '../../shared/ui/Icon'
 import {
   completion,
   countSignals,
@@ -19,7 +20,9 @@ import {
   SIGNALS,
 } from './graph'
 import type { NodeLook, RingItem, Signal } from './graph'
-import { layoutOf, radiusFor, wedgePath } from './layout'
+import { isoOf } from './iso'
+import type { Half } from './iso'
+import { layoutOf, radiusFor } from './layout'
 import { deadlinesFor, loadPace, PACES, savePace } from '../../shared/pace'
 import type { Pace } from '../../shared/pace'
 
@@ -37,10 +40,66 @@ const LAST_CIRCLE = 6
 const SERIES_RADIUS = 40
 
 /**
- * Tono de cada círculo (matiz HSL), para distinguirlos de un vistazo. Los
- * colores concretos (pastel en claro, apagados en oscuro) los ponen los estilos.
+ * Tono de cada círculo (matiz HSL). Van seguidos, del turquesa al violeta, para
+ * que de un círculo al siguiente el color avance un paso y no dé un salto: se
+ * lee como un degradado de dentro afuera. Los colores concretos (pastel en
+ * claro, apagados en oscuro) los ponen los estilos.
  */
-const HUES = [172, 200, 262, 330, 22, 46, 140] as const
+const HUES = [172, 190, 208, 226, 244, 262, 280] as const
+
+/** Alturas de las bandejas: todas tienen grosor, cada una un escalón más que la de fuera. */
+const PLATE_BASE = 9
+const PLATE_STEP = 6
+/** Lo que sube una bandeja al pasar por ella o al tener abierto uno de sus proyectos. */
+const PLATE_LIFT = 30
+/** Lo que encogen las burbujas en la vista en perspectiva. */
+const ORB_SCALE = 0.84
+
+/**
+ * Lleva unas alturas hacia sus destinos poco a poco, fotograma a fotograma, para
+ * que una bandeja suba y baje en vez de saltar. Sin animaciones (preferencia
+ * del sistema), salta.
+ */
+function useEased(targets: readonly number[]): readonly number[] {
+  const [values, setValues] = useState(targets)
+  const current = useRef(targets)
+  const key = targets.join(',')
+
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      current.current = targets
+      setValues(targets)
+
+      return undefined
+    }
+
+    let frame = 0
+    const step = (): void => {
+      const next = targets.map((target, index) => {
+        const value = current.current[index] ?? target
+        const left = target - value
+
+        return Math.abs(left) < 0.4 ? target : value + left * 0.24
+      })
+
+      current.current = next
+      setValues(next)
+
+      // Mientras alguna no haya llegado, otro fotograma.
+      if (next.some((value, index) => value !== targets[index])) frame = requestAnimationFrame(step)
+    }
+
+    frame = requestAnimationFrame(step)
+
+    return () => {
+      cancelAnimationFrame(frame)
+    }
+    // `key` resume `targets`: la lista es nueva en cada pintado aunque no cambie.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key])
+
+  return values
+}
 
 const hueOf = (circle: number): number => HUES[circle % HUES.length] ?? 172
 
@@ -113,8 +172,10 @@ function describeSeries(series: string, projects: readonly GraphProject[], t: Tr
 /**
  * El grafo del tablón: **tu** plan del common core, por círculos.
  *
- * - Cada círculo es una bandeja que se va **rellenando** según lo que llevas
- *   aprobado en él (por horas); su etiqueta dice el porcentaje.
+ * - Cada círculo es una bandeja con grosor, vista en perspectiva, que se va
+ *   **rellenando** según lo que llevas aprobado en él (por horas); su etiqueta
+ *   dice el porcentaje. Al pasar por una bandeja, **se levanta** con sus
+ *   proyectos por encima de las demás; la del proyecto abierto se queda arriba.
  * - Cada proyecto es una burbuja, más grande cuantas más horas estima 42 para él.
  *   Turquesa si lo aprobaste (con aro dorado si fue con 125), blanca si lo estás
  *   haciendo, gris si lo tienes disponible y gris con candado si todavía no.
@@ -135,6 +196,8 @@ export function HolyGraph({ graph, selected, onSelect }: HolyGraphProps) {
   // Series abiertas. Por defecto, todas cerradas: es lo que deja respirar al grafo.
   const [expanded, setExpanded] = useState<ReadonlySet<string>>(new Set())
   const [pace, setPace] = useState<Pace | null>(loadPace)
+  // Círculo bajo el ratón o con el foco: su bandeja se levanta.
+  const [raised, setRaised] = useState<number | null>(null)
 
   const rings = useMemo(
     () =>
@@ -147,6 +210,7 @@ export function HolyGraph({ graph, selected, onSelect }: HolyGraphProps) {
     [graph.circles, expanded],
   )
   const layout = useMemo(() => layoutOf(rings.map((ring) => ring.items.map(sizeOf))), [rings])
+  const iso = useMemo(() => isoOf(layout), [layout])
   const allSeries = useMemo(() => seriesIn(graph), [graph])
 
   const totals = countSignals(graph)
@@ -157,6 +221,16 @@ export function HolyGraph({ graph, selected, onSelect }: HolyGraphProps) {
   const looks = new Set(everything.map(({ project }) => lookOf(project)))
   const anyPerfect = everything.some(({ project }) => project.perfect)
   const selectedEntry = everything.find(({ project }) => project.projectId === selected)
+
+  // Cada bandeja, un escalón más alta que la de fuera; la del ratón y la del
+  // proyecto abierto, levantadas.
+  const lifted = (circle: number): boolean => circle === raised || circle === selectedEntry?.circle
+  const heights = useEased(
+    rings.map(
+      ({ circle }, index) =>
+        PLATE_BASE + (rings.length - 1 - index) * PLATE_STEP + (lifted(circle) ? PLATE_LIFT : 0),
+    ),
+  )
 
   const deadlines =
     pace === null || graph.startedAt === null ? [] : deadlinesFor(graph.startedAt, pace)
@@ -176,6 +250,23 @@ export function HolyGraph({ graph, selected, onSelect }: HolyGraphProps) {
 
   const dimmed = (projects: readonly GraphProject[]): boolean =>
     focus !== null && !projects.some((project) => hasSignal(project.signals, focus))
+
+  // El orden en que se pinta: mitades de atrás de fuera adentro, y de delante al revés.
+  const halves: { circle: number; index: number; half: Half }[] = [
+    ...rings.map(({ circle }, index) => ({ circle, index, half: 'back' as const })).reverse(),
+    ...rings.map(({ circle }, index) => ({ circle, index, half: 'front' as const })),
+  ]
+
+  /** Las burbujas de un círculo que caen en esa mitad, de la más lejana a la más cercana. */
+  const nodesOf = (index: number, half: Half) =>
+    (rings[index]?.items ?? [])
+      .flatMap((item, at) => {
+        const point = layout.rings[index]?.nodes[at]
+
+        return point === undefined ? [] : [{ item, point }]
+      })
+      .filter(({ point }) => point.y >= layout.center === (half === 'front'))
+      .sort((a, b) => a.point.y - b.point.y)
 
   /** Texto de la barra de detalle: lo que hay bajo el ratón, o lo que está abierto. */
   const detail = (): string => {
@@ -350,7 +441,7 @@ export function HolyGraph({ graph, selected, onSelect }: HolyGraphProps) {
                         onSelect(item.project.projectId)
                       }}
                     >
-                      {item.project.locked && <span aria-hidden="true">🔒</span>}
+                      {item.project.locked && <Icon name="candado" size={13} />}
                       {item.project.perfect && <span aria-hidden="true">★</span>}
                       {item.project.name}
                       {mainSignal(item.project.signals) !== null && (
@@ -372,11 +463,14 @@ export function HolyGraph({ graph, selected, onSelect }: HolyGraphProps) {
         </ol>
       ) : (
         <svg
-          className="graph-svg"
-          viewBox={`0 0 ${layout.size} ${layout.size}`}
-          style={{ maxWidth: Math.min(720, layout.size * 1.3) }}
+          className={`graph-svg ${raised === null ? '' : 'focusing'}`}
+          viewBox={`0 0 ${iso.width} ${iso.height.toFixed(0)}`}
+          style={{ maxWidth: Math.min(760, iso.width * 1.3) }}
           role="group"
           aria-label={t('graph.title')}
+          onMouseLeave={() => {
+            setRaised(null)
+          }}
         >
           <defs>
             {/* La luz viene de arriba a la izquierda: es lo que da volumen a cada burbuja. */}
@@ -390,190 +484,254 @@ export function HolyGraph({ graph, selected, onSelect }: HolyGraphProps) {
               <stop offset="0%" className="orb-light series" />
               <stop offset="100%" className="orb-dark series" />
             </radialGradient>
+            {/* Las paredes: más oscuras hacia los lados, como un cilindro iluminado de frente. */}
+            <linearGradient id="wall-shade" x1="0" x2="1" y1="0" y2="0">
+              <stop offset="0%" stopColor="#000" stopOpacity="0.2" />
+              <stop offset="45%" stopColor="#000" stopOpacity="0" />
+              <stop offset="100%" stopColor="#000" stopOpacity="0.26" />
+            </linearGradient>
             <filter id="orb-shadow" x="-40%" y="-40%" width="180%" height="200%">
               <feDropShadow dx="0" dy="3" stdDeviation="3" floodOpacity="0.28" />
             </filter>
-            <filter id="plate-shadow" x="-10%" y="-10%" width="120%" height="125%">
-              <feDropShadow dx="0" dy="4" stdDeviation="6" floodOpacity="0.14" />
-            </filter>
           </defs>
 
-          {/* Las bandejas, de fuera adentro, para que cada una monte sobre la anterior. */}
-          {[...rings].reverse().map(({ circle, done }) => {
-            const ring = layout.rings[circle]
+          {/* La sombra de todo el conjunto sobre el suelo. */}
+          <path
+            className="graph-ground"
+            d={`${iso.top(layout.rings.at(-1)?.outer ?? 0, 0, -6, 'back')} ${iso.top(layout.rings.at(-1)?.outer ?? 0, 0, -6, 'front')}`}
+          />
 
-            if (ring === undefined) return null
+          {/* Primero las mitades de atrás, de fuera adentro; después las de delante, de dentro afuera. */}
+          {halves.map(({ circle, index, half }) => {
+            const ring = layout.rings[index]
+            const entry = rings[index]
 
+            if (ring === undefined || entry === undefined) return null
+
+            const z = heights[index] ?? PLATE_BASE
+            const inner = layout.rings[index - 1]?.outer ?? 0
             const state =
               circle === graph.currentCircle
                 ? 'current'
                 : circle < graph.currentCircle
                   ? 'done'
                   : 'ahead'
+            const tag = iso.point(ring.tag.x, ring.tag.y, z)
+            // La etiqueta va con la mitad en la que cae, para que no la tape la otra.
+            const tagHere = ring.radius > 0 && ring.tag.y >= layout.center === (half === 'front')
 
             return (
               <g
-                key={circle}
-                className={`graph-plate ${state}`}
-                style={{ ['--hue' as string]: hueOf(circle) }}
-                aria-hidden="true"
+                key={`${circle}-${half}`}
+                className={`graph-ring ${lifted(circle) ? 'lifted' : ''}`}
+                onMouseEnter={() => {
+                  setRaised(circle)
+                }}
+                onFocus={() => {
+                  setRaised(circle)
+                }}
+                onBlur={() => {
+                  setRaised(null)
+                }}
               >
-                <circle
-                  className="plate"
-                  cx={layout.center}
-                  cy={layout.center}
-                  r={ring.outer}
-                  filter="url(#plate-shadow)"
-                />
-                {/* El relleno: la porción del círculo que ya está aprobada. */}
-                {done > 0 && (
-                  <path className="fill" d={wedgePath(layout, ring.outer, ring.start, done)} />
-                )}
-                <circle className="rim" cx={layout.center} cy={layout.center} r={ring.outer} />
-                {ring.radius > 0 && (
-                  <g transform={`translate(${ring.tag.x.toFixed(1)} ${ring.tag.y.toFixed(1)})`}>
-                    {/* A un círculo al que aún no se ha llegado le basta su número. */}
-                    {state === 'ahead' ? (
-                      <>
-                        <circle className="ring-tag" r="10" />
-                        <text className="ring-number">{circle}</text>
-                      </>
-                    ) : (
-                      <>
-                        <rect className="ring-tag" x="-26" y="-10" width="52" height="20" rx="10" />
-                        <text className="ring-number">
-                          {circle} · {percent(done)}
+                <g
+                  className={`graph-plate ${state}`}
+                  style={{ ['--hue' as string]: hueOf(circle) }}
+                  aria-hidden="true"
+                >
+                  {/* Atrás se ve la pared de dentro; delante, la de fuera. */}
+                  {half === 'back' && inner > 0 && (
+                    <>
+                      <path className="wall inner" d={iso.wall(inner, z, 'back')} />
+                      <path className="wall-shade" d={iso.wall(inner, z, 'back')} />
+                    </>
+                  )}
+                  {half === 'front' && (
+                    <>
+                      <path className="wall" d={iso.wall(ring.outer, z, 'front')} />
+                      <path className="wall-shade" d={iso.wall(ring.outer, z, 'front')} />
+                    </>
+                  )}
+                  <path className="plate" d={iso.top(ring.outer, inner, z, half)} />
+                  {/* El canto se pinta aparte: si fuera el borde de la cara, se vería la costura entre las dos mitades. */}
+                  <path className="rim" d={iso.rim(ring.outer, z, half)} />
+                  {/* El relleno: la porción del círculo que ya está aprobada. */}
+                  {entry.done > 0 && (
+                    <path
+                      className="fill"
+                      d={iso.sector(ring.outer, inner, z, ring.start, entry.done, half)}
+                    />
+                  )}
+                  {tagHere && (
+                    <g transform={`translate(${tag.x.toFixed(1)} ${tag.y.toFixed(1)})`}>
+                      {/* A un círculo al que aún no se ha llegado le basta su número. */}
+                      {state === 'ahead' ? (
+                        <>
+                          <circle className="ring-tag" r="10" />
+                          <text className="ring-number">{circle}</text>
+                        </>
+                      ) : (
+                        <>
+                          <rect
+                            className="ring-tag"
+                            x="-26"
+                            y="-10"
+                            width="52"
+                            height="20"
+                            rx="10"
+                          />
+                          <text className="ring-number">
+                            {circle} · {percent(entry.done)}
+                          </text>
+                        </>
+                      )}
+                    </g>
+                  )}
+                </g>
+
+                {nodesOf(index, half).map(({ item, point }) => {
+                  // En perspectiva lo profundo se aprieta: las burbujas, algo más pequeñas, para que no se pisen.
+                  const size = sizeOf(item) * ORB_SCALE
+                  // La burbuja se apoya en la bandeja: su centro queda un poco por encima.
+                  const at = iso.point(point.x, point.y, z)
+                  const place = `translate(${at.x.toFixed(1)} ${(at.y - size * 0.62).toFixed(1)})`
+                  const shadow = (
+                    <ellipse
+                      className="orb-ground"
+                      cy={size * 0.62}
+                      rx={size * 0.7}
+                      ry={size * 0.2}
+                    />
+                  )
+
+                  if (item.kind === 'series') {
+                    const key = `series:${item.series}`
+                    const holdsSelected = item.projects.some(
+                      (project) => project.projectId === selected,
+                    )
+                    const look = seriesLook(item.projects)
+                    const hours = hoursOf(item.projects)
+
+                    return (
+                      <g
+                        key={key}
+                        transform={place}
+                        className={`graph-node series ${look} ${holdsSelected ? 'selected' : ''} ${dimmed(item.projects) ? 'dimmed' : ''}`}
+                        {...bubble(
+                          key,
+                          describeSeries(item.series, item.projects, t),
+                          false,
+                          () => {
+                            toggleSeries(item.series)
+                          },
+                        )}
+                        aria-expanded={false}
+                      >
+                        {shadow}
+                        <g className="orb">
+                          <circle className="halo" r={size + 6} />
+                          <circle
+                            className="disc"
+                            r={size}
+                            // Aprobada entera, se pinta como cualquier proyecto aprobado.
+                            fill={look === 'finished' ? 'url(#orb-finished)' : 'url(#orb-series)'}
+                            filter="url(#orb-shadow)"
+                          />
+                          {/* El mini grafo: un punto por módulo, con el color de su estado. */}
+                          {item.projects.map((project, dot) => {
+                            const angle = -Math.PI / 2 + (dot * 2 * Math.PI) / item.projects.length
+
+                            return (
+                              <circle
+                                key={project.projectId}
+                                className={`series-dot ${lookOf(project)}`}
+                                cx={((size - 9) * Math.cos(angle)).toFixed(1)}
+                                cy={((size - 9) * Math.sin(angle)).toFixed(1)}
+                                r="4.6"
+                              />
+                            )
+                          })}
+                          <text className="series-name" y={hours > 0 ? -10 : -4}>
+                            {item.series}
+                          </text>
+                          <text className="series-count" y={hours > 0 ? 2 : 9}>
+                            {
+                              item.projects.filter((project) => project.status === 'finished')
+                                .length
+                            }
+                            /{item.projects.length}
+                          </text>
+                          {hours > 0 && (
+                            <text className="series-hours" y="13">
+                              {Math.round(hours)} h
+                            </text>
+                          )}
+                          {markOf(mergeSignals(item.projects), size)}
+                        </g>
+                      </g>
+                    )
+                  }
+
+                  const { project } = item
+                  const key = `project:${project.projectId}`
+
+                  return (
+                    <g
+                      key={key}
+                      transform={place}
+                      className={`graph-node ${lookOf(project)} ${project.perfect ? 'perfect' : ''} ${project.projectId === selected ? 'selected' : ''} ${dimmed([project]) ? 'dimmed' : ''}`}
+                      {...bubble(
+                        key,
+                        describe(project, circle, t),
+                        project.projectId === selected,
+                        () => {
+                          onSelect(project.projectId)
+                        },
+                      )}
+                    >
+                      {shadow}
+                      {/* Capa aparte para la animación: el `<g>` de fuera ya lleva la posición. */}
+                      <g className="orb">
+                        <circle className="halo" r={size + 6} />
+                        <circle
+                          className="disc"
+                          r={size}
+                          fill={`url(#orb-${lookOf(project)})`}
+                          filter="url(#orb-shadow)"
+                        />
+                        {project.perfect && <circle className="laurel" r={size + 2.5} />}
+                        <text
+                          className="graph-label"
+                          style={{ fontSize: size < 24 ? 8.5 : size > 34 ? 12 : 10 }}
+                          // Los nombres largos se aprietan para no salirse de la burbuja.
+                          {...(project.short.length > 7
+                            ? { textLength: size * 2 - 8, lengthAdjust: 'spacingAndGlyphs' }
+                            : {})}
+                        >
+                          {project.short}
                         </text>
-                      </>
-                    )}
-                  </g>
-                )}
+                        {project.locked && (
+                          <g
+                            className="graph-lock"
+                            transform={`translate(${(-size * 0.7 - 6).toFixed(1)} ${(-size * 0.7 - 6).toFixed(1)})`}
+                          >
+                            <circle cx="6" cy="6" r="8" />
+                            <Icon name="candado" size={12} />
+                          </g>
+                        )}
+                        {project.perfect && (
+                          <text className="graph-star" y={size * 0.62}>
+                            ★
+                          </text>
+                        )}
+                        {markOf(project.signals, size)}
+                      </g>
+                    </g>
+                  )
+                })}
               </g>
             )
           })}
-
-          {rings.flatMap(({ circle, items }) =>
-            items.map((item, index) => {
-              const point = layout.rings[circle]?.nodes[index]
-
-              if (point === undefined) return null
-
-              const at = `translate(${point.x.toFixed(1)} ${point.y.toFixed(1)})`
-
-              if (item.kind === 'series') {
-                const key = `series:${item.series}`
-                const holdsSelected = item.projects.some(
-                  (project) => project.projectId === selected,
-                )
-                const look = seriesLook(item.projects)
-                const radius = seriesRadius(item.projects)
-                const hours = hoursOf(item.projects)
-
-                return (
-                  <g
-                    key={key}
-                    transform={at}
-                    className={`graph-node series ${look} ${holdsSelected ? 'selected' : ''} ${dimmed(item.projects) ? 'dimmed' : ''}`}
-                    {...bubble(key, describeSeries(item.series, item.projects, t), false, () => {
-                      toggleSeries(item.series)
-                    })}
-                    aria-expanded={false}
-                  >
-                    <g className="orb">
-                      <circle className="halo" r={radius + 6} />
-                      <circle
-                        className="disc"
-                        r={radius}
-                        // Aprobada entera, se pinta como cualquier proyecto aprobado.
-                        fill={look === 'finished' ? 'url(#orb-finished)' : 'url(#orb-series)'}
-                        filter="url(#orb-shadow)"
-                      />
-                      {/* El mini grafo: un punto por módulo, con el color de su estado. */}
-                      {item.projects.map((project, dot) => {
-                        const angle = -Math.PI / 2 + (dot * 2 * Math.PI) / item.projects.length
-
-                        return (
-                          <circle
-                            key={project.projectId}
-                            className={`series-dot ${lookOf(project)}`}
-                            cx={((radius - 9) * Math.cos(angle)).toFixed(1)}
-                            cy={((radius - 9) * Math.sin(angle)).toFixed(1)}
-                            r="4.6"
-                          />
-                        )
-                      })}
-                      <text className="series-name" y={hours > 0 ? -10 : -4}>
-                        {item.series}
-                      </text>
-                      <text className="series-count" y={hours > 0 ? 2 : 9}>
-                        {item.projects.filter((project) => project.status === 'finished').length}/
-                        {item.projects.length}
-                      </text>
-                      {hours > 0 && (
-                        <text className="series-hours" y="13">
-                          {Math.round(hours)} h
-                        </text>
-                      )}
-                      {markOf(mergeSignals(item.projects), radius)}
-                    </g>
-                  </g>
-                )
-              }
-
-              const { project } = item
-              const radius = radiusFor(project.hours)
-              const key = `project:${project.projectId}`
-
-              return (
-                <g
-                  key={key}
-                  transform={at}
-                  className={`graph-node ${lookOf(project)} ${project.perfect ? 'perfect' : ''} ${project.projectId === selected ? 'selected' : ''} ${dimmed([project]) ? 'dimmed' : ''}`}
-                  {...bubble(
-                    key,
-                    describe(project, circle, t),
-                    project.projectId === selected,
-                    () => {
-                      onSelect(project.projectId)
-                    },
-                  )}
-                >
-                  {/* Capa aparte para la animación: el `<g>` de fuera ya lleva la posición. */}
-                  <g className="orb">
-                    <circle className="halo" r={radius + 6} />
-                    <circle
-                      className="disc"
-                      r={radius}
-                      fill={`url(#orb-${lookOf(project)})`}
-                      filter="url(#orb-shadow)"
-                    />
-                    {project.perfect && <circle className="laurel" r={radius + 2.5} />}
-                    <text
-                      className="graph-label"
-                      style={{ fontSize: radius < 24 ? 8.5 : radius > 34 ? 12 : 10 }}
-                      // Los nombres largos se aprietan para no salirse de la burbuja.
-                      {...(project.short.length > 7
-                        ? { textLength: radius * 2 - 8, lengthAdjust: 'spacingAndGlyphs' }
-                        : {})}
-                    >
-                      {project.short}
-                    </text>
-                    {project.locked && (
-                      <text className="graph-lock" x={-radius * 0.7} y={-radius * 0.66}>
-                        🔒
-                      </text>
-                    )}
-                    {project.perfect && (
-                      <text className="graph-star" y={radius * 0.62}>
-                        ★
-                      </text>
-                    )}
-                    {markOf(project.signals, radius)}
-                  </g>
-                </g>
-              )
-            }),
-          )}
         </svg>
       )}
 

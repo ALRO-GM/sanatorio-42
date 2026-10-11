@@ -6,6 +6,7 @@ import type { OrderMode } from './order'
 import { NAV_DEFAULT, PAGE_IDS, PAGES } from './registry'
 import type { PageId } from './registry'
 import { resetPrefs, toggleFold, updatePrefs, usePrefs } from './store'
+import { Icon } from '../ui/Icon'
 
 /** Antelaciones del aviso que se pueden elegir, en minutos. `0` es sin avisos. */
 const LEADS = [0, 2, 5, 10, 15, 30, 60] as const
@@ -58,7 +59,7 @@ export function LayoutSettings({ onClose }: { onClose: () => void }) {
       <div className="layout-head">
         <h3>{t('layout.title')}</h3>
         <button type="button" className="link" aria-label={t('layout.close')} onClick={onClose}>
-          ✕
+          <Icon name="cerrar" />
         </button>
       </div>
 

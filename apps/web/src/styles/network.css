@@ -187,23 +187,62 @@
   cursor: grab;
   touch-action: none;
 }
-.net-legend {
+/* La clave del grafo: qué significa cada color y, si es un degradado, entre
+   qué valores se reparte. Va encima del dibujo, abajo a la izquierda. */
+.net-key {
   position: absolute;
   left: 0.7rem;
   bottom: 0.7rem;
+  display: grid;
+  gap: 0.5rem;
+  max-width: min(26rem, calc(100% - 4.5rem));
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  backdrop-filter: blur(6px);
+  font-size: 0.75rem;
+  color: var(--text-2);
+}
+.net-legend {
   display: flex;
   flex-wrap: wrap;
   gap: 0.25rem 0.7rem;
-  max-width: calc(100% - 1.4rem);
   margin: 0;
-  padding: 0.4rem 0.6rem;
+  padding: 0;
   list-style: none;
-  border-radius: 10px;
-  background: color-mix(in srgb, var(--surface) 86%, transparent);
-  backdrop-filter: blur(4px);
+}
+.net-scale {
+  display: grid;
+  gap: 0.35rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border);
+}
+.net-scale-bar {
+  height: 8px;
+  border-radius: 999px;
+}
+.net-scale label {
+  display: grid;
+  grid-template-columns: 9.5rem 1fr;
+  align-items: center;
+  gap: 0.5rem;
+}
+.net-scale input[type='range'] {
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  accent-color: var(--accent);
+}
+.net-scale-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.net-scale-actions .pill {
+  padding: 0.15rem 0.6rem;
   font-size: 0.72rem;
-  color: var(--text-2);
-  pointer-events: none;
 }
 .net-legend li {
   display: inline-flex;

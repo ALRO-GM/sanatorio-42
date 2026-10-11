@@ -5,48 +5,93 @@
 
    Para añadir un color, usa una de estas variables; un hexadecimal suelto no
    cambiaría con el modo nocturno.
+
+   El criterio: superficies planas separadas por una raya fina, no por sombras;
+   un solo acento (el turquesa de 42); y el mismo contraste en claro y en oscuro,
+   para que nada destaque en un tema y se pierda en el otro.
    ──────────────────────────────────────────────────────────────────────────── */
 :root {
   color-scheme: light;
-  --bg: #faf8f3;
-  --surface: #fff;
-  --surface-2: #f6f8f4;
-  --border: #d9e3dc;
+
+  /* Fondos, de atrás adelante: la página, lo que se apoya en ella y lo que se
+     hunde dentro de una superficie (campos, fichas de datos). */
+  --bg: #f6f8f7;
+  --surface: #ffffff;
+  --surface-2: #f0f4f2;
+  --surface-3: #e7edea;
+
+  /* Un solo color de raya para todo lo que tiene borde. */
+  --border: #dfe6e2;
+  --border-strong: #c5d0ca;
   --fill-muted: #cfd8d2;
-  --text: #3d4a44;
-  --text-2: #5c6a63;
-  --text-3: #7a8b82;
-  --text-4: #a9b5ae;
-  --accent: #00babc;
-  --accent-soft: #e6f7f7;
-  --accent-text: #00898b;
-  /* Texto sobre un fondo de color (botones, insignias): blanco en los dos temas. */
-  --on-accent: #fff;
-  --shadow-soft: rgba(61, 74, 68, 0.06);
-  --shadow: rgba(61, 74, 68, 0.12);
-  --blob-1: #a8dcc8;
-  --blob-2: #8fd8da;
-  --blob-opacity: 0.75;
+
+  /* Texto: cuatro pasos, del que se lee al que apenas acompaña. */
+  --text: #17211d;
+  --text-2: #3f4d47;
+  --text-3: #66756e;
+  --text-4: #98a59f;
+
+  /* El turquesa de 42. `--accent-text` es el mismo tono, oscurecido para que se
+     lea como texto sobre fondo claro. */
+  --accent: #00a9ab;
+  --accent-hover: #009093;
+  --accent-soft: #e2f5f4;
+  --accent-text: #007a7d;
+  --on-accent: #ffffff;
+
+  /* Estados. Cada uno con su fondo suave, para avisos y etiquetas. */
+  --ok: #2f8f5b;
+  --ok-soft: #e3f3ea;
+  --warn: #b7791f;
+  --warn-soft: #fbf0d9;
+  --danger: #d6403f;
+  --danger-soft: #fbe6e5;
+  --gold: #b8861c;
+
+  /* La sombra es solo para lo que flota (menús, ventanas, avisos). */
+  --shadow-soft: rgba(23, 33, 29, 0.05);
+  --shadow: rgba(23, 33, 29, 0.14);
+  --glow: rgba(0, 169, 171, 0.1);
+
+  --radius: 14px;
+  --radius-sm: 10px;
 }
 
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --bg: #111715;
-  --surface: #1a2320;
-  --surface-2: #222d29;
-  --border: #35443e;
+
+  --bg: #0c1110;
+  --surface: #131a18;
+  --surface-2: #1a2320;
+  --surface-3: #222d29;
+
+  --border: #26322e;
+  --border-strong: #3a4944;
   --fill-muted: #46554f;
-  --text: #e7eeea;
+
+  --text: #e9efec;
   --text-2: #bcc8c2;
-  --text-3: #97a59e;
-  --text-4: #6c7a73;
-  --accent-soft: #143a3b;
-  --accent-text: #63dadb;
-  --shadow-soft: rgba(0, 0, 0, 0.25);
-  --shadow: rgba(0, 0, 0, 0.45);
-  --blob-1: #0e4a44;
-  --blob-2: #0b3f52;
-  --blob-opacity: 0.55;
+  --text-3: #8d9b94;
+  --text-4: #5f6d66;
+
+  /* En oscuro el acento sube de luz: el de claro se apagaría sobre el fondo. */
+  --accent: #22c7c8;
+  --accent-hover: #4ad6d7;
+  --accent-soft: #0f2b2b;
+  --accent-text: #5fdfe0;
+  --on-accent: #04201f;
+
+  --ok: #4cc38a;
+  --ok-soft: #12291f;
+  --warn: #e0a84a;
+  --warn-soft: #2c2312;
+  --danger: #f0605f;
+  --danger-soft: #331817;
+  --gold: #e0b44a;
+
+  --shadow-soft: rgba(0, 0, 0, 0.3);
+  --shadow: rgba(0, 0, 0, 0.55);
+  --glow: rgba(34, 199, 200, 0.08);
 }
 
 * {

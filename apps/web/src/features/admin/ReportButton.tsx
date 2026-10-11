@@ -5,6 +5,7 @@ import { api } from '../../shared/api'
 import { useAction } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { Icon } from '../../shared/ui/Icon'
 
 type ReportButtonProps = {
   /** Qué se denuncia: `message:12`, `board:3`, `doubt:5`. */
@@ -37,7 +38,7 @@ export function ReportButton({ target, summary }: ReportButtonProps) {
           setOpen(true)
         }}
       >
-        ⚑ {t('report.button')}
+        <Icon name="bandera" size={13} /> {t('report.button')}
       </button>
     )
   }

@@ -39,6 +39,22 @@ export function createMeetModule(deps: MeetServiceOptions): MeetModule {
         )
       })
 
+      /** `GET /events/alerts` → tus avisos de evento, por orden de inicio. */
+      app.get('/events/alerts', async (request, reply) => {
+        reply.header('Cache-Control', 'private, no-store')
+
+        return reply.send(
+          await service.alerts(await session.actor(request), session.user(request).id),
+        )
+      })
+
+      /** `POST /events/alerts/ack` → `{ id }`: cierra el aviso de un evento que se te pasó. 204. */
+      app.post<{ Body: { id?: string } }>('/events/alerts/ack', async (request, reply) => {
+        await service.ackAlert(await session.actor(request), request.body.id)
+
+        return reply.code(204).send()
+      })
+
       /** `GET /admin/messages` → los últimos mensajes de todos los chats. Solo admins. */
       app.get('/admin/messages', async (request, reply) => {
         return reply.send(await service.log(await session.actor(request)))

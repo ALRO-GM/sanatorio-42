@@ -13,7 +13,7 @@
    Por debajo de 700 px los círculos pasan a ser filas (`.graph-rows`).
    ──────────────────────────────────────────────────────────────────────────── */
 .holy-graph {
-  --graph-done: #00babc;
+  --graph-done: var(--accent);
   --mark-unanswered: #e8952c;
   --mark-proposals: #7a6fd0;
   --mark-missingGuide: #6b7a72;
@@ -251,11 +251,11 @@ svg .graph-node {
   stroke-width: 1;
 }
 .series-dot.finished {
-  fill: #00babc;
+  fill: var(--accent);
 }
 .series-dot.in_progress {
   fill: #fff;
-  stroke: #00babc;
+  stroke: var(--accent);
   stroke-width: 2;
 }
 .series-dot.todo {
@@ -583,4 +583,99 @@ button.graph-node.selected {
   svg .graph-node.selected .orb {
     transform: none;
   }
+}
+
+/* ── Vista isométrica ────────────────────────────────────────────────────────
+   Cada círculo es una bandeja con grosor: cara de arriba, pared de fuera y, si
+   la de fuera está más alta, pared de dentro. El tono avanza un paso de un
+   círculo al siguiente, así que de dentro afuera se lee como un degradado.
+   ──────────────────────────────────────────────────────────────────────────── */
+.holy-graph {
+  --plate-s: 58%;
+  --plate-l: 91%;
+  --slice-s: 62%;
+  --slice-l: 76%;
+  --edge-l: 58%;
+  --wall-l: 72%;
+}
+:root[data-theme='dark'] .holy-graph {
+  --plate-s: 30%;
+  --plate-l: 20%;
+  --slice-s: 46%;
+  --slice-l: 34%;
+  --edge-l: 44%;
+  --wall-l: 13%;
+}
+.graph-ground {
+  fill: var(--text);
+  opacity: 0.07;
+  filter: blur(6px);
+}
+.graph-plate .plate {
+  fill: hsl(var(--hue) var(--plate-s) var(--plate-l));
+  stroke: none;
+  transition: fill 0.2s;
+}
+.graph-plate .rim {
+  fill: none;
+  stroke: hsl(var(--hue) 40% var(--edge-l));
+  stroke-width: 1.2;
+  stroke-dasharray: none;
+  opacity: 1;
+}
+.graph-plate .wall {
+  fill: hsl(var(--hue) calc(var(--plate-s) - 6%) var(--wall-l));
+}
+.graph-plate .wall.inner {
+  fill: hsl(var(--hue) calc(var(--plate-s) - 10%) calc(var(--wall-l) - 6%));
+}
+.graph-plate .wall-shade {
+  fill: url(#wall-shade);
+  pointer-events: none;
+}
+.graph-plate .fill {
+  stroke: none;
+}
+.graph-plate.ahead .plate {
+  stroke-dasharray: none;
+}
+.graph-plate.current .rim {
+  stroke: hsl(var(--hue) 62% 44%);
+  stroke-width: 2.5;
+}
+.graph-plate.ahead .rim {
+  stroke-dasharray: none;
+  opacity: 1;
+}
+/* La bandeja levantada: más color, para que se vea cuál es. */
+.graph-ring.lifted .graph-plate .plate {
+  fill: hsl(var(--hue) calc(var(--plate-s) + 14%) calc(var(--plate-l) - 3%));
+}
+.graph-ring.lifted .graph-plate .fill {
+  fill: hsl(var(--hue) calc(var(--slice-s) + 10%) calc(var(--slice-l) - 4%));
+}
+/* Con una levantada, las demás se apagan un poco y sus proyectos también. */
+.graph-svg.focusing .graph-ring:not(.lifted) .graph-plate {
+  opacity: 0.72;
+}
+.graph-svg.focusing .graph-ring:not(.lifted) .graph-node:not(.selected) {
+  opacity: 0.45;
+}
+.graph-svg.focusing .graph-ring.lifted .graph-node .halo {
+  opacity: 0.35;
+}
+.orb-ground {
+  fill: #000;
+  opacity: 0.1;
+  pointer-events: none;
+}
+.graph-node .disc {
+  filter: none;
+}
+.graph-lock circle {
+  fill: var(--surface);
+  stroke: var(--border-strong);
+}
+.graph-lock .icon {
+  color: var(--text-3);
 }

@@ -70,7 +70,7 @@ button {
 }
 
 button.primary {
-  background: #00babc;
+  background: var(--accent);
   color: var(--on-accent);
   font-weight: 600;
   padding: 0.8rem 1.8rem;
@@ -83,7 +83,7 @@ button.primary {
   min-height: 40px;
   padding: 0.55rem 1.1rem;
   background: var(--surface);
-  color: #00babc;
+  color: var(--accent);
   font-weight: 600;
   box-shadow: 0 2px 12px var(--shadow-soft);
   margin-bottom: 1.25rem;
@@ -98,14 +98,14 @@ button.primary {
 }
 
 .back-btn:focus-visible {
-  outline: 2px solid #00babc;
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
 button.link {
   background: none;
   padding: 0;
-  color: #00babc;
+  color: var(--accent);
   margin-bottom: 1.25rem;
 }
 
@@ -304,7 +304,7 @@ button.link {
 
 .profile-link {
   font-size: 0.85rem;
-  color: #00babc;
+  color: var(--accent);
   text-decoration: none;
 }
 .profile-link:hover {
@@ -359,8 +359,8 @@ button.link {
   cursor: pointer;
 }
 .pill.active {
-  background: #00babc;
-  border-color: #00babc;
+  background: var(--accent);
+  border-color: var(--accent);
   color: var(--on-accent);
 }
 .duty-check {
@@ -424,7 +424,7 @@ button.link {
   width: 34px;
   height: 34px;
   border-radius: 10px;
-  background: #00babc;
+  background: var(--accent);
   color: var(--on-accent);
   font-size: 1.5rem;
   font-weight: 700;
@@ -447,7 +447,7 @@ button.link {
     box-shadow 0.15s ease;
 }
 .logo .logo-mark-btn:hover {
-  background: #00babc;
+  background: var(--accent);
   transform: scale(1.06);
 }
 .logo .logo-mark-btn:focus-visible {
@@ -535,7 +535,7 @@ button.link {
 }
 
 .switch:checked {
-  background: #00babc;
+  background: var(--accent);
 }
 .switch:checked::after {
   transform: translateX(20px);

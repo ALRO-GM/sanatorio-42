@@ -7,6 +7,7 @@ import { api } from '../../shared/api'
 import { useAction, useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { Icon } from '../../shared/ui/Icon'
 
 const KINDS = ['issue', 'idea'] as const satisfies readonly TicketKind[]
 
@@ -43,7 +44,7 @@ export function Inbox({ onClose }: { onClose: () => void }) {
       <div className="layout-head">
         <h3>{t('inbox.title')}</h3>
         <button type="button" className="link" aria-label={t('layout.close')} onClick={onClose}>
-          ✕
+          <Icon name="cerrar" />
         </button>
       </div>
       <p className="hint">{t('inbox.hint')}</p>

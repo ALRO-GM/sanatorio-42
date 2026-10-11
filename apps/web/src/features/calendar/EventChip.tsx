@@ -3,6 +3,7 @@ import type { CalendarEvent } from '@sanatorio/contracts'
 import { useI18n } from '../../shared/i18n'
 import { timeOn } from './dates'
 import { iconOf } from './kinds'
+import { Icon } from '../../shared/ui/Icon'
 
 type EventChipProps = {
   event: CalendarEvent
@@ -33,7 +34,7 @@ export function EventChip({ event, day, compact = false, onOpen }: EventChipProp
       }}
     >
       <span className="event-icon" aria-hidden="true">
-        {iconOf(event.kind)}
+        <Icon name={iconOf(event.kind)} size={14} />
       </span>
       {hour !== '' && <span className="event-time">{hour}</span>}
       <span className="event-title">{event.title}</span>

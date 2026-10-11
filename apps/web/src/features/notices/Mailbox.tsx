@@ -8,6 +8,7 @@ import { useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { iconOf, targetOf } from './routes'
 import type { NoticeTarget } from './routes'
+import { Icon } from '../../shared/ui/Icon'
 
 type MailboxProps = {
   onClose: () => void
@@ -79,7 +80,7 @@ export function Mailbox({ onClose, onOpen, onChange }: MailboxProps) {
           {unread > 0 && <span className="count-badge">{unread}</span>}
         </h3>
         <button type="button" className="link" aria-label={t('layout.close')} onClick={onClose}>
-          ✕
+          <Icon name="cerrar" />
         </button>
       </div>
       <p className="hint">{t('notices.hint')}</p>
@@ -98,7 +99,7 @@ export function Mailbox({ onClose, onOpen, onChange }: MailboxProps) {
               onClick={() => void open(notice)}
             >
               <span className="notice-icon" aria-hidden="true">
-                {iconOf(notice)}
+                <Icon name={iconOf(notice)} size={20} />
               </span>
               <span className="notice-body">
                 <strong>
@@ -136,7 +137,7 @@ export function Mailbox({ onClose, onOpen, onChange }: MailboxProps) {
             onOpen('inbox')
           }}
         >
-          ✉ {t('notices.write')}
+          <Icon name="lapiz" /> {t('notices.write')}
         </button>
       </div>
     </dialog>

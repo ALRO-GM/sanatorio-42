@@ -1,4 +1,5 @@
 import type { CalendarKind } from '@sanatorio/contracts'
+import type { IconName } from '../../shared/ui/Icon'
 
 /**
  * Los tipos de evento, en el orden en que salen en los filtros: primero lo de
@@ -7,18 +8,18 @@ import type { CalendarKind } from '@sanatorio/contracts'
  * Cada uno tiene su icono y su color (`--kind`, en `styles/calendar.css`, por la clase
  * `kind-<tipo>`). Los textos, en `agenda.kind.<tipo>`.
  */
-export const KINDS: readonly { kind: CalendarKind; icon: string; fortyTwo: boolean }[] = [
-  { kind: 'help', icon: '🛟', fortyTwo: false },
-  { kind: 'therapy', icon: '🫂', fortyTwo: false },
-  { kind: 'board', icon: '🧑‍🏫', fortyTwo: false },
-  { kind: 'evaluation', icon: '🔎', fortyTwo: true },
-  { kind: 'event_joined', icon: '🎟️', fortyTwo: true },
-  { kind: 'event_open', icon: '📣', fortyTwo: true },
-  { kind: 'exam', icon: '📝', fortyTwo: true },
+export const KINDS: readonly { kind: CalendarKind; icon: IconName; fortyTwo: boolean }[] = [
+  { kind: 'help', icon: 'guardia', fortyTwo: false },
+  { kind: 'therapy', icon: 'terapia', fortyTwo: false },
+  { kind: 'board', icon: 'pizarras', fortyTwo: false },
+  { kind: 'evaluation', icon: 'lupa', fortyTwo: true },
+  { kind: 'event_joined', icon: 'hecho', fortyTwo: true },
+  { kind: 'event_open', icon: 'campana', fortyTwo: true },
+  { kind: 'exam', icon: 'lapiz', fortyTwo: true },
 ]
 
-export const iconOf = (kind: CalendarKind): string =>
-  KINDS.find((entry) => entry.kind === kind)?.icon ?? ''
+export const iconOf = (kind: CalendarKind): IconName =>
+  KINDS.find((entry) => entry.kind === kind)?.icon ?? 'calendario'
 
 const HIDDEN_KEY = 'sanatorio_calendar_hidden'
 const VIEW_KEY = 'sanatorio_calendar_view'

@@ -78,8 +78,7 @@ export function Clinic({ me, onLogout }: ClinicProps) {
   }, [])
 
   return (
-    // La red de correcciones necesita sitio: es la única sección a todo lo ancho.
-    <main className={`container ${section === 'red' ? 'wide' : ''}`}>
+    <>
       <Header
         me={me}
         section={section}
@@ -94,74 +93,74 @@ export function Clinic({ me, onLogout }: ClinicProps) {
         onCustomize={() => {
           setCustomizing(true)
         }}
-        onLogout={onLogout}
-      />
-
-      <QuotaNotice status={pulse?.quota ?? null} />
-      <AlertCenter
-        me={me.login}
-        onGo={(next) => {
-          openSection(next)
-        }}
-      />
-
-      {customizing && (
-        <LayoutSettings
-          onClose={() => {
-            setCustomizing(false)
-          }}
-        />
-      )}
-
-      {/* Con otro campus, la sección se monta de nuevo: también se olvida el proyecto elegido. */}
-      <div key={campusVersion}>
-        <SectionView
-          section={section}
-          me={me}
-          profile={profile}
-          projects={projects.data ?? []}
-          focusProject={focusProject}
-          otherRecord={otherRecord}
-          onGo={openSection}
-        />
-      </div>
-
-      <Footer
-        campusId={profile.data?.campusId}
-        onCampusChange={onCampusChange}
         onInbox={() => {
           setBox('inbox')
         }}
+        onLogout={onLogout}
       />
 
-      <Suspense fallback={null}>
-        {box === 'notices' && (
-          <Mailbox
+      {/* La red de correcciones necesita sitio: es la única sección a todo lo ancho. */}
+      <main className={`container ${section === 'red' ? 'wide' : ''}`}>
+        <QuotaNotice status={pulse?.quota ?? null} />
+        <AlertCenter
+          me={me.login}
+          onGo={(next) => {
+            openSection(next)
+          }}
+        />
+
+        {customizing && (
+          <LayoutSettings
             onClose={() => {
-              setBox(null)
-              refresh()
+              setCustomizing(false)
             }}
-            onChange={refresh}
-            onOpen={(target) => {
-              // Lo que te han respondido está en el buzón de incidencias; lo demás, en su sección.
-              if (target === 'inbox') {
-                setBox('inbox')
-              } else {
+          />
+        )}
+
+        {/* Con otro campus, la sección se monta de nuevo: también se olvida el proyecto elegido. */}
+        <div key={campusVersion}>
+          <SectionView
+            section={section}
+            me={me}
+            profile={profile}
+            projects={projects.data ?? []}
+            focusProject={focusProject}
+            otherRecord={otherRecord}
+            onGo={openSection}
+          />
+        </div>
+
+        <Footer campusId={profile.data?.campusId} onCampusChange={onCampusChange} />
+
+        <Suspense fallback={null}>
+          {box === 'notices' && (
+            <Mailbox
+              onClose={() => {
                 setBox(null)
-                openSection(target)
-              }
-            }}
-          />
-        )}
-        {box === 'inbox' && (
-          <Inbox
-            onClose={() => {
-              setBox(null)
-              refresh()
-            }}
-          />
-        )}
-      </Suspense>
-    </main>
+                refresh()
+              }}
+              onChange={refresh}
+              onOpen={(target) => {
+                // Lo que te han respondido está en el buzón de incidencias; lo demás, en su sección.
+                if (target === 'inbox') {
+                  setBox('inbox')
+                } else {
+                  setBox(null)
+                  openSection(target)
+                }
+              }}
+            />
+          )}
+          {box === 'inbox' && (
+            <Inbox
+              onClose={() => {
+                setBox(null)
+                refresh()
+              }}
+            />
+          )}
+        </Suspense>
+      </main>
+    </>
   )
 }

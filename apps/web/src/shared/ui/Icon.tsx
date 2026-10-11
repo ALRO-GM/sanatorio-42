@@ -1,0 +1,276 @@
+import type { ReactNode } from 'react'
+
+/**
+ * Los iconos de la web: un solo juego, dibujado a propósito, en vez de emojis.
+ *
+ * Los emojis cambian de aspecto en cada sistema, no siguen el color del tema y
+ * mezclados parecen un collage. Estos comparten rejilla (24 × 24), grosor y
+ * remates redondos, y se pintan con `currentColor`, así que toman el color del
+ * texto que los rodea en claro y en oscuro.
+ *
+ * El motivo mezcla las dos cosas que es Sanatorio 42: la clínica (fonendo,
+ * expediente con su pulso, salvavidas) y lo que se estudia (corchetes de
+ * código en la pizarra, nodos de un grafo, el cursor de una terminal).
+ *
+ * Para añadir uno: dibújalo en la misma rejilla, solo con trazos, y apúntalo
+ * aquí. No pongas colores dentro.
+ */
+const PATHS = {
+  // --- Secciones -------------------------------------------------------------
+  /** Sala de espera: un fonendo. */
+  consulta: (
+    <>
+      <path d="M5 3v5a4 4 0 0 0 8 0V3" />
+      <path d="M3.8 3h2.4M11.8 3h2.4" />
+      <path d="M9 12v3a5 5 0 0 0 10 0v-2" />
+      <circle cx="19" cy="11" r="2" />
+    </>
+  ),
+  /** Tablón: una nota con la esquina doblada. */
+  tablon: (
+    <>
+      <path d="M5 4h14v9l-6 6H5z" />
+      <path d="M13 19v-6h6" />
+      <path d="M8.5 8.5h7M8.5 12h2.5" />
+    </>
+  ),
+  /** Terapia de grupo: tres personas. */
+  terapia: (
+    <>
+      <circle cx="12" cy="8" r="3" />
+      <path d="M6.5 20a5.5 5.5 0 0 1 11 0" />
+      <circle cx="4.8" cy="10.5" r="1.9" />
+      <circle cx="19.2" cy="10.5" r="1.9" />
+      <path d="M2 18.5a3.4 3.4 0 0 1 2.8-3.3M22 18.5a3.4 3.4 0 0 0-2.8-3.3" />
+    </>
+  ),
+  /** Pizarras: una pizarra con código. */
+  pizarras: (
+    <>
+      <rect x="3" y="4" width="18" height="12" rx="1.5" />
+      <path d="M12 16v4M8 20h8" />
+      <path d="M10 8l-2 2 2 2M14 8l2 2-2 2" />
+    </>
+  ),
+  calendario: (
+    <>
+      <rect x="4" y="5" width="16" height="15" rx="2" />
+      <path d="M4 10h16M8 3v4M16 3v4" />
+      <path d="M8 14h3M8 17h6" />
+    </>
+  ),
+  /** Red de correcciones: nodos unidos. */
+  red: (
+    <>
+      <circle cx="6" cy="6" r="2.3" />
+      <circle cx="18" cy="8" r="2.3" />
+      <circle cx="11" cy="18" r="2.3" />
+      <path d="M8.3 6.4l7.4 1.2M7 8.1l3 7.8M16.6 9.9l-4.2 6.2" />
+    </>
+  ),
+  /** De guardia: un salvavidas. */
+  guardia: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <circle cx="12" cy="12" r="3.6" />
+      <path d="M5.6 5.6l3.8 3.8M14.6 14.6l3.8 3.8M18.4 5.6l-3.8 3.8M9.4 14.6l-3.8 3.8" />
+    </>
+  ),
+  /** Expediente: la carpeta de la consulta, con su pulso. */
+  expediente: (
+    <>
+      <path d="M8 5.5H7a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-11a2 2 0 0 0-2-2h-1" />
+      <rect x="8" y="3.5" width="8" height="4" rx="1" />
+      <path d="M7.5 14h2l1.5-3 2 5 1.5-2h2" />
+    </>
+  ),
+  /** Panel de gestión. */
+  gestion: (
+    <>
+      <path d="M4 20h16" />
+      <path d="M7 20v-6M12 20V7M17 20v-9" />
+    </>
+  ),
+
+  // --- Cabecera y acciones ---------------------------------------------------
+  buzon: (
+    <>
+      <rect x="3" y="5" width="18" height="14" rx="2" />
+      <path d="M3.5 7.5l8.5 6 8.5-6" />
+    </>
+  ),
+  ajustes: (
+    <>
+      <path d="M4 6h9M19 6h1M4 12h3M13 12h7M4 18h8M18 18h2" />
+      <circle cx="16" cy="6" r="2" />
+      <circle cx="10" cy="12" r="2" />
+      <circle cx="15" cy="18" r="2" />
+    </>
+  ),
+  salir: (
+    <>
+      <path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4" />
+      <path d="M15 8l4 4-4 4M19 12H9" />
+    </>
+  ),
+  persona: (
+    <>
+      <circle cx="12" cy="8" r="3.5" />
+      <path d="M5 20a7 7 0 0 1 14 0" />
+    </>
+  ),
+  cerrar: <path d="M6 6l12 12M18 6L6 18" />,
+  abajo: <path d="M6 9l6 6 6-6" />,
+  mas: <path d="M12 5v14M5 12h14" />,
+  hecho: <path d="M5 12.5l4.5 4.5L19 7.5" />,
+  info: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 11v5M12 8h.01" />
+    </>
+  ),
+  aviso: (
+    <>
+      <path d="M12 4l9 15.5H3z" />
+      <path d="M12 10v4M12 17h.01" />
+    </>
+  ),
+  campana: (
+    <>
+      <path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15z" />
+      <path d="M10 20.5a2 2 0 0 0 4 0" />
+    </>
+  ),
+  chat: (
+    <path d="M5 5h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-7l-4 3v-3H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z" />
+  ),
+  lapiz: (
+    <>
+      <path d="M4 20h4L18.5 9.5l-4-4L4 16z" />
+      <path d="M13 7l4 4" />
+    </>
+  ),
+  bandera: (
+    <>
+      <path d="M5 21V4" />
+      <path d="M5 4h11l-2 4 2 4H5" />
+    </>
+  ),
+  candado: (
+    <>
+      <rect x="5" y="11" width="14" height="9" rx="2" />
+      <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+    </>
+  ),
+  estrella: <path d="M12 3.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8-5.3-2.8-5.3 2.8 1-5.8L3.5 9.7l5.9-.9z" />,
+  lupa: (
+    <>
+      <circle cx="11" cy="11" r="6" />
+      <path d="M20 20l-4.6-4.6" />
+    </>
+  ),
+  terminal: (
+    <>
+      <rect x="3" y="4" width="18" height="16" rx="2" />
+      <path d="M7 9l3 3-3 3M12.5 15H17" />
+    </>
+  ),
+
+  // --- Avisos de un evento ---------------------------------------------------
+  visto: (
+    <>
+      <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6z" />
+      <circle cx="12" cy="12" r="2.6" />
+    </>
+  ),
+  reloj: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3.2 2" />
+    </>
+  ),
+  ausente: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M5.7 5.7l12.6 12.6" />
+    </>
+  ),
+
+  // --- Cómo te ayudaron y cómo llegaste --------------------------------------
+  bicho: (
+    <>
+      <path d="M8 10a4 4 0 0 1 8 0v4a4 4 0 0 1-8 0z" />
+      <path d="M8 12H4.5M19.5 12H16M8 15l-3 2M16 15l3 2M9.5 7L7.5 5M14.5 7l2-2M12 10v8" />
+    </>
+  ),
+  idea: (
+    <>
+      <path d="M8 14a6 6 0 1 1 8 0c-.7.7-1 1.5-1 3H9c0-1.5-.3-2.3-1-3z" />
+      <path d="M10 20.5h4" />
+    </>
+  ),
+  corazon: <path d="M12 20s-7-4.5-7-9.6A4 4 0 0 1 12 8a4 4 0 0 1 7 2.4C19 15.5 12 20 12 20z" />,
+  pregunta: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M9.6 9.6a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1.1 1-1.1 1.8M12 17h.01" />
+    </>
+  ),
+  despegue: <path d="M7 17L17 7M9 7h8v8" />,
+  capas: (
+    <>
+      <path d="M12 4l8 4-8 4-8-4z" />
+      <path d="M4 12l8 4 8-4M4 16l8 4 8-4" />
+    </>
+  ),
+
+  // --- Logros ----------------------------------------------------------------
+  escudo: <path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z" />,
+  medalla: (
+    <>
+      <circle cx="12" cy="14.5" r="5" />
+      <path d="M8.5 3l3.5 6.5L15.5 3" />
+    </>
+  ),
+  /** El black hole: un pozo. */
+  pozo: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <circle cx="12" cy="12" r="4.5" />
+      <path d="M12 11.5v1" />
+    </>
+  ),
+} satisfies Record<string, ReactNode>
+
+export type IconName = keyof typeof PATHS
+
+type IconProps = {
+  name: IconName
+  /** Lado, en píxeles. Por defecto, el del texto que lo rodea. */
+  size?: number
+  className?: string
+}
+
+/**
+ * Un icono del juego de la web. Es decorativo: el nombre accesible lo pone el
+ * botón o el texto que lo acompaña.
+ */
+export function Icon({ name, size, className }: IconProps) {
+  return (
+    <svg
+      className={`icon ${className ?? ''}`}
+      viewBox="0 0 24 24"
+      width={size ?? '1.15em'}
+      height={size ?? '1.15em'}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      focusable="false"
+    >
+      {PATHS[name]}
+    </svg>
+  )
+}

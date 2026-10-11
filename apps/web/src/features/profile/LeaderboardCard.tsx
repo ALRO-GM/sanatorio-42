@@ -9,7 +9,6 @@ import { Avatar } from '../../shared/ui/Avatar'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 
 const PERIODS = ['month', 'all'] as const satisfies readonly LeaderboardPeriod[]
-const MEDALS = ['🥇', '🥈', '🥉']
 
 /** Cuántos se enseñan. Si quien mira queda por debajo, se le añade al final. */
 const SHOWN = 10
@@ -61,7 +60,9 @@ export function LeaderboardCard({ me }: { me: string }) {
         {rows.map((entry) => (
           <li key={entry.login} className={`row plain ${entry.login === me ? 'me' : ''}`}>
             <span className="rank" aria-label={t('rank.place', { n: entry.rank })}>
-              {MEDALS[entry.rank - 1] ?? entry.rank}
+              <span className={entry.rank <= 3 ? `medal medal-${entry.rank}` : undefined}>
+                {entry.rank}
+              </span>
             </span>
             <Avatar login={entry.login} image={entry.image} size={28} />
             <a className="record-link" href={`#/expediente/${entry.login}`}>

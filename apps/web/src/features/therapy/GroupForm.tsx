@@ -11,6 +11,7 @@ import { clusterName } from '../map/ClusterMapView'
 import { SeatPicker } from '../map/SeatPicker'
 import { parseSeat } from '../map/seats'
 import { shortDay, today } from './days'
+import { Icon } from '../../shared/ui/Icon'
 
 type GroupFormProps = {
   projects: readonly ProjectSummary[]
@@ -377,7 +378,7 @@ export function GroupForm({ projects, defaultProject, group, onCancel, onSaved }
                       removeDate(day)
                     }}
                   >
-                    ✕
+                    <Icon name="cerrar" />
                   </button>
                 </span>
               </li>

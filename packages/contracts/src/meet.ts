@@ -7,7 +7,14 @@
  */
 
 /** Por qué alguien se retrasa o no va. */
-export type MeetReason = 'evaluation' | 'other_event' | 'on_my_way' | 'transport' | 'other'
+import type { CalendarEvent } from './calendar.js'
+
+/**
+ * Por qué alguien se retrasa o no va. `missed` no lo elige nadie: lo pone la web
+ * cuando pasa media hora desde el inicio sin que esa persona haya dicho nada.
+ */
+export type MeetReason =
+  'evaluation' | 'other_event' | 'on_my_way' | 'transport' | 'other' | 'missed'
 
 /**
  * Qué dice un mensaje: `seen` (he visto el aviso), `late` (me retraso),
@@ -133,4 +140,28 @@ export type CheckinLogEntry = {
   phase: 'start' | 'end' | null
   outcome: 'ok' | 'repeat' | 'wrong_code' | 'locked' | 'too_early' | 'too_late' | 'no_start'
   at: string
+}
+
+/**
+ * Un aviso de evento.
+ *
+ * - `pending`: es con más gente y aún no has dicho si vas, si te retrasas o si
+ *   no vas. La web no deja cerrar el aviso hasta que lo digas.
+ * - `missed`: no dijiste nada y pasó media hora desde el inicio: se te dio por
+ *   no asistido. Se enseña una vez, y se puede cerrar.
+ * - `info`: un evento tuyo que no necesita respuesta (un examen, un evento de
+ *   42). Avisa y se cierra sin más.
+ */
+export type EventAlert = {
+  event: CalendarEvent
+  state: 'pending' | 'missed' | 'info'
+}
+
+/**
+ * `GET /events/alerts`: tus avisos, por orden de inicio (el primero que llega
+ * es el primero que se enseña). Trae también los de las próximas horas, para
+ * que la web sepa cuándo le toca saltar a cada uno sin volver a preguntar.
+ */
+export type EventAlerts = {
+  alerts: EventAlert[]
 }

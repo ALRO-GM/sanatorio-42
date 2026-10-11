@@ -11,6 +11,7 @@ import { EventChip } from './EventChip'
 import { EventDialog } from './EventDialog'
 import { KINDS, loadHidden, loadView, saveHidden, saveView, VIEWS } from './kinds'
 import type { View } from './kinds'
+import { Icon } from '../../shared/ui/Icon'
 
 type CalendarPageProps = {
   /** Ir a otra sección de la web, desde la ficha de un evento propio. */
@@ -141,7 +142,7 @@ export function CalendarPage({ onGo, me }: CalendarPageProps) {
               }}
             >
               <span className="kind-dot" aria-hidden="true" />
-              <span aria-hidden="true">{icon}</span>
+              <Icon name={icon} />
               {t(`agenda.kind.${kind}`)}
               {(counts.get(kind) ?? 0) > 0 && (
                 <span className="kind-count">{counts.get(kind)}</span>

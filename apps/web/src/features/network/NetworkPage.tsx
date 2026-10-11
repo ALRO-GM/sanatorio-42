@@ -7,7 +7,17 @@ import type { NetworkParams } from '../../shared/api/types'
 import { useI18n } from '../../shared/i18n'
 import { Blocks } from '../../shared/layout/Blocks'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
-import { COLOR_MODES, colorOf, legendOf, passColor } from './colors'
+import {
+  COLOR_MODES,
+  colorOf,
+  DEFAULT_SCALES,
+  fitScale,
+  isScaleMode,
+  legendOf,
+  passColor,
+  scaleColor,
+} from './colors'
+import type { Scale, ScaleMode } from './colors'
 import type { ColorMode } from './colors'
 import { ForceGraph } from './ForceGraph'
 import { Meter } from './Meter'
@@ -163,7 +173,10 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
     [change],
   )
 
-  const paint = useCallback((node: NetworkNode) => colorOf(node, mode), [mode])
+  // Entre qué porcentajes se reparte el degradado de cada modo que lo usa.
+  const [scales, setScales] = useState<Record<ScaleMode, Scale>>(DEFAULT_SCALES)
+  const scale = isScaleMode(mode) ? scales[mode] : undefined
+  const paint = useCallback((node: NetworkNode) => colorOf(node, mode, scale), [mode, scale])
   const tooltip = useCallback(
     (node: NetworkNode) => (
       <>
@@ -185,7 +198,7 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
     [t],
   )
   const nodes = graph?.nodes
-  const legend = useMemo(() => legendOf(nodes ?? [], mode, t), [nodes, mode, t])
+  const legend = useMemo(() => legendOf(nodes ?? [], mode, t, scale), [nodes, mode, t, scale])
   const chosen = nodes?.find((node) => node.login === selected) ?? null
   // Sentido de cada lista del panel: de mayor a menor mientras no se cambie.
   const [orders, setOrders] = useState<Record<'endogamy' | 'pairs' | 'projects', Order>>({
@@ -440,14 +453,92 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
                   controls={controls}
                 />
               )}
-              <ul className="net-legend">
-                {legend.map((entry) => (
-                  <li key={entry.label}>
-                    <span style={{ background: entry.color }} />
-                    {entry.label}
-                  </li>
-                ))}
-              </ul>
+              <div className="net-key">
+                <ul className="net-legend">
+                  {legend.map((entry) => (
+                    <li key={entry.label}>
+                      <span style={{ background: entry.color }} />
+                      {entry.label}
+                    </li>
+                  ))}
+                </ul>
+                {/* La escala: entre qué porcentajes se reparte el degradado, de punto en punto. */}
+                {isScaleMode(mode) && scale !== undefined && (
+                  <div className="net-scale">
+                    <span
+                      className="net-scale-bar"
+                      aria-hidden="true"
+                      style={{
+                        background: `linear-gradient(90deg, ${[0, 0.25, 0.5, 0.75, 1]
+                          .map((step) =>
+                            scaleColor(scale.min + (scale.max - scale.min) * step, scale),
+                          )
+                          .join(', ')})`,
+                      }}
+                    />
+                    <label>
+                      <span>{t('net.scale.from', { n: scale.min })}</span>
+                      <input
+                        type="range"
+                        min={0}
+                        max={99}
+                        step={1}
+                        value={scale.min}
+                        onChange={(event) => {
+                          const min = Number(event.target.value)
+
+                          // El mínimo empuja al máximo si lo alcanza: siempre queda un punto de tramo.
+                          setScales((current) => ({
+                            ...current,
+                            [mode]: { min, max: Math.max(min + 1, scale.max) },
+                          }))
+                        }}
+                      />
+                    </label>
+                    <label>
+                      <span>{t('net.scale.to', { n: scale.max })}</span>
+                      <input
+                        type="range"
+                        min={1}
+                        max={100}
+                        step={1}
+                        value={scale.max}
+                        onChange={(event) => {
+                          const max = Number(event.target.value)
+
+                          setScales((current) => ({
+                            ...current,
+                            [mode]: { min: Math.min(max - 1, scale.min), max },
+                          }))
+                        }}
+                      />
+                    </label>
+                    <div className="net-scale-actions">
+                      <button
+                        type="button"
+                        className="pill"
+                        onClick={() => {
+                          setScales((current) => ({
+                            ...current,
+                            [mode]: fitScale(graph.nodes, mode),
+                          }))
+                        }}
+                      >
+                        {t('net.scale.fit')}
+                      </button>
+                      <button
+                        type="button"
+                        className="pill"
+                        onClick={() => {
+                          setScales((current) => ({ ...current, [mode]: DEFAULT_SCALES[mode] }))
+                        }}
+                      >
+                        {t('net.scale.reset')}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
               <p className="net-help">{t('net.help')}</p>
               <p className="net-shown" role="status">
                 {t('net.shown', { people: graph.nodes.length, links: graph.links.length })}
@@ -552,7 +643,9 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
                                     <span className="net-row-name">{node.login}</span>
                                     <span
                                       className="net-row-badge"
-                                      style={{ background: colorOf(node, 'endogamy') }}
+                                      style={{
+                                        background: colorOf(node, 'endogamy', scales.endogamy),
+                                      }}
                                     >
                                       {node.endogamy}
                                     </span>

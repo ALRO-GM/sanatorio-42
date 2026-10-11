@@ -1,14 +1,14 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
-import type { CalendarEvent, CalendarSection, MeetCheckin } from '@sanatorio/contracts'
+import type { CalendarSection, EventAlert, MeetCheckin } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
 import { useAction } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { usePrefs } from '../../shared/layout/store'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { Icon } from '../../shared/ui/Icon'
 import { EventDialog } from '../calendar/EventDialog'
-import { alerts } from './eligible'
 
 type AlertCenterProps = {
   me: string
@@ -22,9 +22,6 @@ type AlertCenterProps = {
  */
 const FETCH_MS = 5 * 60_000
 const TICK_MS = 30_000
-
-/** Hasta dónde se mira por delante: de sobra para el aviso más largo. */
-const AHEAD_MS = 3 * 60 * 60_000
 
 const SEEN_KEY = 'sanatorio_alerts_seen'
 
@@ -47,8 +44,13 @@ function checkinInUrl(): { id: string; code: string } | null {
 
 /**
  * Los avisos: una ventana que sale sola unos minutos antes de cada evento tuyo
- * (los que hayas elegido; cinco por defecto) con qué es, dónde y a qué hora, y,
- * si es con más gente, las respuestas rápidas y el chat.
+ * (los que hayas elegido; cinco por defecto) con qué es, dónde y a qué hora.
+ *
+ * Si el evento es con más gente, **hay que contestar**: voy, me retraso o no
+ * voy. La ventana no se cierra de otra forma, y como lo pendiente lo guarda la
+ * API, vuelve a salir aunque se recargue o se abra otra pestaña. Si hay varios
+ * avisos esperando salen de uno en uno, por orden de inicio. Quien no contesta
+ * en media hora desde el inicio queda como no asistido, y se le dice una vez.
  *
  * También recoge los enlaces de los QR de asistencia: al abrir uno, enseña el
  * código y pide confirmarlo antes de validarlo. No se valida solo: un enlace
@@ -57,79 +59,79 @@ function checkinInUrl(): { id: string; code: string } | null {
 export function AlertCenter({ me, onGo }: AlertCenterProps) {
   const { t } = useI18n()
   const lead = usePrefs().alertLead ?? 5
-  const [event, setEvent] = useState<CalendarEvent | null>(null)
   const [checkin, setCheckin] = useState<MeetCheckin | null>(null)
   const [link, setLink] = useState<{ id: string; code: string } | null>(null)
   const validation = useAction()
 
+  // Lo último que dijo la API, y una marca que cambia cada medio minuto para
+  // volver a mirar la hora sin pedir nada.
+  const [alerts, setAlerts] = useState<EventAlert[]>([])
+  const [, setTick] = useState(0)
+  const [dismissed, setDismissed] = useState<readonly string[]>(seenIds)
+
+  const refresh = useCallback((): void => {
+    api.getEventAlerts().then(
+      (next) => {
+        setAlerts(next.alerts)
+      },
+      () => {
+        // Sin lista nueva se sigue con la anterior; se reintenta en la siguiente vuelta.
+      },
+    )
+  }, [])
+
   useEffect(() => {
-    // Con el aviso apagado no se mira nada.
-    if (lead <= 0) return undefined
+    refresh()
 
-    let current = true
-    let upcoming: CalendarEvent[] = []
-    let fetchedAt = -Infinity
-
-    /** Avisa de lo que ya toca, con lo que se sabe: no pide nada. */
-    const look = (): void => {
-      const now = Date.now()
-      const seen = seenIds()
-      const due = upcoming
-        .filter((entry) => alerts(entry) && !seen.includes(entry.id))
-        .filter((entry) => {
-          const start = Date.parse(entry.start)
-
-          // Ya toca avisar y aún no ha empezado (o acaba de hacerlo).
-          return start - now <= lead * 60_000 && start - now > -2 * 60_000
-        })
-        .sort((a, b) => a.start.localeCompare(b.start))[0]
-
-      if (due !== undefined) {
-        sessionStorage.setItem(SEEN_KEY, JSON.stringify([...seen, due.id].slice(-50)))
-        setEvent(due)
-
-        // Si la web está en otra pestaña, que se entere el sistema también.
-        if (document.hidden && 'Notification' in window && Notification.permission === 'granted') {
-          new Notification(due.title, { body: due.place ?? '', tag: due.id })
-        }
-      }
-    }
-
-    /** Pide el calendario si lo que hay ya es viejo, y mira. */
-    const tick = (): void => {
-      const now = Date.now()
-
-      if (now - fetchedAt < FETCH_MS) {
-        look()
-
-        return
-      }
-
-      fetchedAt = now
-      api.getCalendar(new Date(now).toISOString(), new Date(now + AHEAD_MS).toISOString()).then(
-        (calendar) => {
-          if (!current) return
-
-          upcoming = calendar.events
-          look()
-        },
-        () => {
-          // Sin calendario nuevo se sigue avisando con el anterior; se reintenta a la siguiente.
-          fetchedAt = -Infinity
-          look()
-        },
-      )
-    }
-
-    tick()
-
-    const timer = setInterval(tick, TICK_MS)
+    const fetching = setInterval(refresh, FETCH_MS)
+    const ticking = setInterval(() => {
+      setTick((tick) => tick + 1)
+    }, TICK_MS)
 
     return () => {
-      current = false
-      clearInterval(timer)
+      clearInterval(fetching)
+      clearInterval(ticking)
     }
-  }, [lead])
+  }, [refresh])
+
+  // Los que ya toca enseñar, por orden de inicio. Lo que pide respuesta sale
+  // aunque los avisos estén apagados: entonces, a la hora de empezar.
+  const now = Date.now()
+  const due = alerts.filter(({ event, state }) => {
+    const start = Date.parse(event.start)
+
+    if (state === 'missed') return true
+    if (state === 'pending') return start - now <= Math.max(0, lead) * 60_000
+    // Lo que solo informa: si los avisos están encendidos, una vez, y mientras no haya empezado.
+    return (
+      lead > 0 &&
+      !dismissed.includes(event.id) &&
+      start - now <= lead * 60_000 &&
+      start - now > -2 * 60_000
+    )
+  })
+  const current = due[0] ?? null
+  const currentId = current?.event.id ?? null
+
+  // Si la web está en otra pestaña, que se entere el sistema también: una vez por aviso.
+  useEffect(() => {
+    if (current === null || !document.hidden) return
+    if (!('Notification' in window) || Notification.permission !== 'granted') return
+
+    new Notification(current.event.title, {
+      body: current.event.place ?? '',
+      tag: current.event.id,
+    })
+    // Solo al cambiar de aviso: `current` es un objeto nuevo en cada pintado.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentId])
+
+  const dismiss = (id: string): void => {
+    const next = [...seenIds(), id].slice(-50)
+
+    sessionStorage.setItem(SEEN_KEY, JSON.stringify(next))
+    setDismissed(next)
+  }
 
   // Un QR de asistencia abre la web con el código en la dirección.
   useEffect(() => {
@@ -163,16 +165,28 @@ export function AlertCenter({ me, onGo }: AlertCenterProps) {
 
   return (
     <>
-      {event !== null && (
+      {current !== null && (
         <EventDialog
-          event={event}
+          // Con otra clave, la ventana del siguiente aviso es nueva: se abre sola.
+          key={`${current.event.id}-${current.state}`}
+          event={current.event}
           me={me}
           alert
+          queued={due.length - 1}
+          {...(current.state === 'pending'
+            ? { must: 'reply' as const, onReplied: refresh }
+            : current.state === 'missed'
+              ? { must: 'missed' as const }
+              : {})}
           onClose={() => {
-            setEvent(null)
+            if (current.state === 'missed') {
+              void api.ackEventAlert(current.event.id).then(refresh, refresh)
+            } else if (current.state === 'info') {
+              dismiss(current.event.id)
+            }
           }}
           onGo={(section) => {
-            setEvent(null)
+            if (current.state === 'info') dismiss(current.event.id)
             onGo(section)
           }}
         />
@@ -199,7 +213,7 @@ export function AlertCenter({ me, onGo }: AlertCenterProps) {
               validation.clearError()
             }}
           >
-            ✕
+            <Icon name="cerrar" />
           </button>
         </div>
       )}
@@ -217,7 +231,7 @@ export function AlertCenter({ me, onGo }: AlertCenterProps) {
               setCheckin(null)
             }}
           >
-            ✕
+            <Icon name="cerrar" />
           </button>
         </div>
       )}
