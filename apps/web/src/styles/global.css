@@ -3325,13 +3325,18 @@ a.button {
 .container.wide {
   max-width: 1320px;
 }
+.net-head {
+  grid-area: head;
+  display: grid;
+  gap: 0.5rem;
+}
+.net-head h2 {
+  margin: 0;
+}
 .net-sync {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.25rem 0.75rem;
+  display: grid;
+  gap: 0.15rem;
   padding: 0.6rem 0.9rem;
-  margin-bottom: 0.8rem;
   border-radius: 12px;
   background: var(--accent-soft);
   color: var(--accent-text);
@@ -3340,11 +3345,23 @@ a.button {
 .net-sync small {
   color: var(--text-3);
 }
-.net-filters {
+.net-layout {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 0.9rem 1.4rem;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  grid-template-areas:
+    'stage head'
+    'stage filters'
+    'stage side';
+  grid-template-rows: auto auto 1fr;
+  gap: 0.9rem;
   align-items: start;
+}
+.net-filters {
+  grid-area: filters;
+  display: grid;
+  gap: 0.8rem;
+  margin: 0;
+  padding: 1rem;
 }
 .net-filter {
   display: grid;
@@ -3353,9 +3370,8 @@ a.button {
 }
 .net-filter-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 0.6rem 0.9rem;
-  grid-column: 1 / -1;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem 0.8rem;
 }
 .net-filter-grid label,
 .net-dates label {
@@ -3434,24 +3450,26 @@ a.button {
 }
 .net-totals {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-  gap: 0.6rem;
-  margin: 0.9rem 0;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+.net-totals .tile {
+  padding: 0.55rem 0.7rem;
+}
+.net-totals .tile.wide {
+  grid-column: 1 / -1;
 }
 .net-totals .tile small {
   color: var(--text-3);
   font-size: 0.75rem;
 }
-.net-body {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 300px;
-  gap: 0.9rem;
-  align-items: start;
-}
 .net-stage {
-  position: relative;
-  height: min(72vh, 760px);
-  min-height: 420px;
+  grid-area: stage;
+  position: sticky;
+  top: 0.75rem;
+  /* Lo que queda de pantalla bajo la cabecera y las pestañas. */
+  height: calc(100vh - 11.5rem);
+  min-height: 460px;
   border-radius: 18px;
   border: 1.5px solid var(--border);
   background: radial-gradient(circle at 50% 45%, var(--surface) 0%, var(--surface-2) 100%);
@@ -3539,8 +3557,10 @@ a.button {
   left: 0.7rem;
 }
 .net-side {
+  grid-area: side;
   display: grid;
   gap: 0.9rem;
+  min-width: 0;
 }
 .net-panel {
   display: grid;
@@ -3658,7 +3678,7 @@ a.button {
   text-align: center;
 }
 .net-about {
-  margin-top: 0.9rem;
+  margin: 0;
 }
 .net-about summary {
   cursor: pointer;
@@ -3668,14 +3688,129 @@ a.button {
   color: var(--text-2);
   font-size: 0.9rem;
 }
-@media (max-width: 900px) {
-  .net-body {
+@media (max-width: 960px) {
+  .net-layout {
     grid-template-columns: 1fr;
+    grid-template-areas:
+      'head'
+      'filters'
+      'stage'
+      'side';
   }
   .net-stage {
-    height: 62vh;
+    position: relative;
+    top: 0;
+    height: 68vh;
   }
   .net-help {
     display: none;
   }
+}
+
+/* Línea de tiempo de la red: una barra por mes. */
+.net-timeline {
+  display: grid;
+  gap: 0.3rem;
+}
+.net-timeline-bars {
+  display: flex;
+  align-items: stretch;
+  gap: 1px;
+  height: 56px;
+  touch-action: none;
+  user-select: none;
+}
+.net-timeline-bars button {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: flex-end;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+.net-timeline-bars button span {
+  width: 100%;
+  border-radius: 2px 2px 0 0;
+  background: var(--fill-muted);
+  transition: background 0.15s;
+}
+.net-timeline-bars button.on span {
+  background: var(--accent);
+}
+.net-timeline-bars button:hover span,
+.net-timeline-bars button:focus-visible span {
+  background: var(--accent-text);
+}
+.net-timeline-years {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.68rem;
+  color: var(--text-3);
+}
+.net-timeline .hint {
+  margin: 0;
+  font-size: 0.72rem;
+}
+/* Correcciones de una pareja, dentro de la ficha. */
+.net-pair-box {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0.2rem 0 0.5rem;
+  padding: 0.5rem 0.6rem;
+  border-radius: 10px;
+  background: var(--surface-2);
+}
+.net-pair ol {
+  display: grid;
+  gap: 0.3rem;
+  max-height: 240px;
+  margin: 0.3rem 0 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+.net-pair li {
+  display: grid;
+  grid-template-columns: 4.6rem 1fr auto;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+}
+.net-pair time {
+  color: var(--text-3);
+}
+.net-pair-what {
+  display: grid;
+  min-width: 0;
+}
+.net-pair-what strong,
+.net-pair-what small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.net-pair-what small {
+  color: var(--text-3);
+}
+.net-pair-mark {
+  min-width: 2.2rem;
+  padding: 0.05rem 0.35rem;
+  border-radius: 999px;
+  background: var(--fill-muted);
+  font-weight: 700;
+  text-align: center;
+}
+.net-pair-mark.pass {
+  background: color-mix(in srgb, #3fae74 28%, var(--surface));
+}
+.net-pair-mark.fail {
+  background: color-mix(in srgb, #d9534f 30%, var(--surface));
+}
+.net-pair .hint,
+.net-passrate {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-2);
 }

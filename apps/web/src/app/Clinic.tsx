@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useState } from 'react'
 
 import type { CurrentUser, ProjectSummary } from '@sanatorio/contracts'
 
@@ -6,7 +6,6 @@ import { BoardsCalendar } from '../features/boards/BoardsCalendar'
 import { CalendarPage } from '../features/calendar/CalendarPage'
 import { DoubtBoard } from '../features/doubts/DoubtBoard'
 import { Guardia } from '../features/help/Guardia'
-import { NetworkPage } from '../features/network/NetworkPage'
 import { AvailabilityToggle } from '../features/peers/AvailabilityToggle'
 import { PeerList } from '../features/peers/PeerList'
 import { ProjectSelect } from '../features/peers/ProjectSelect'
@@ -21,6 +20,12 @@ import { Logo } from '../shared/ui/Logo'
 import { Nav } from './Nav'
 import type { Section } from './sections'
 import { useRoute } from './useRoute'
+
+// La red de correcciones trae su propia librería de física: se descarga solo
+// cuando alguien abre esa sección, no con el resto de la web.
+const NetworkPage = lazy(() =>
+  import('../features/network/NetworkPage').then((module) => ({ default: module.NetworkPage })),
+)
 
 type ClinicProps = {
   me: CurrentUser
@@ -134,7 +139,11 @@ export function Clinic({ me, onLogout }: ClinicProps) {
           />
         )}
         {section === 'pizarras' && <BoardsCalendar />}
-        {section === 'red' && <NetworkPage me={me} />}
+        {section === 'red' && (
+          <Suspense fallback={<p className="estado">{t('net.loading')}</p>}>
+            <NetworkPage me={me} />
+          </Suspense>
+        )}
         {section === 'expediente' && <Expediente me={me} profile={profile} />}
       </div>
 

@@ -36,6 +36,11 @@ export type NetworkNode = {
   reciprocity: number
   /** Parte de sus correcciones que repiten con alguien ya visto (0-1). */
   repetition: number
+  /**
+   * Parte de las correcciones que ha hecho en las que dio el proyecto por bueno
+   * (0-1), o `null` si no ha hecho ninguna con veredicto.
+   */
+  passRate: number | null
   /** Comunidad a la que pertenece: `0` es la mayor. Sale de quién corrige a quién. */
   community: number
   /** Año de su primera corrección en el campus: una pista de su promoción. */
@@ -95,6 +100,8 @@ export type NetworkGraph = {
   hidden: { nodes: number; links: number } | null
   /** Las parejas que más se han corregido entre sí. */
   topPairs: NetworkLink[]
+  /** Correcciones por mes en todo el histórico (del proyecto, si se filtra por uno). */
+  timeline: { month: string; corrections: number }[]
   /** Proyectos con correcciones, para el filtro. */
   projects: { id: number; name: string; corrections: number }[]
   sync: NetworkSync
@@ -102,3 +109,28 @@ export type NetworkGraph = {
 
 /** `GET /network/people?q=`: logins que empiezan así, para el buscador. */
 export type NetworkPerson = { login: string; image: string | null; corrections: number }
+
+/** Una corrección entre dos personas. */
+export type NetworkCorrection = {
+  id: number
+  corrector: string
+  corrected: string
+  /** Nombre del proyecto, o `null` si no se conoce. */
+  project: string | null
+  /** Cuándo fue (ISO-8601). */
+  at: string
+  mark: number | null
+  /** `true` si dio el proyecto por bueno; `null` si no se sabe. */
+  positive: boolean | null
+}
+
+/** `GET /network/pair?a=&b=`: las correcciones que se han hecho dos personas. */
+export type NetworkPairDetail = {
+  a: string
+  b: string
+  /** Veces que `a` ha corregido a `b`, y al revés. Sobre todo, no solo sobre lo listado. */
+  forth: number
+  back: number
+  /** Las más recientes primero. Como mucho, las últimas 60. */
+  corrections: NetworkCorrection[]
+}

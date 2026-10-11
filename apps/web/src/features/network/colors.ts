@@ -4,7 +4,14 @@
 
 import type { NetworkNode } from '@sanatorio/contracts'
 
-export const COLOR_MODES = ['community', 'endogamy', 'cohort', 'balance', 'origin'] as const
+export const COLOR_MODES = [
+  'community',
+  'endogamy',
+  'strictness',
+  'cohort',
+  'balance',
+  'origin',
+] as const
 
 export type ColorMode = (typeof COLOR_MODES)[number]
 
@@ -12,6 +19,9 @@ export type ColorMode = (typeof COLOR_MODES)[number]
 const COMMUNITY_HUES = [186, 28, 262, 138, 340, 48, 212, 96, 300, 12]
 
 const OTHER = 'hsl(160 6% 62%)'
+
+/** Parte de suspensos a partir de la cual alguien ya sale en rojo del todo. */
+const STRICTEST = 0.5
 
 /** Verde → ámbar → rojo, para un valor de 0 a 1. */
 function heat(value: number): string {
@@ -34,6 +44,9 @@ export function colorOf(node: NetworkNode, mode: ColorMode): string {
     }
     case 'endogamy':
       return heat(node.endogamy / 100)
+    case 'strictness':
+      // Rojo quien más suspende; gris quien no ha corregido lo bastante para saberlo.
+      return node.passRate === null ? OTHER : heat((1 - node.passRate) / STRICTEST)
     case 'cohort':
       return node.cohort === null ? OTHER : yearColor(node.cohort)
     case 'balance': {
@@ -88,6 +101,14 @@ export function legendOf(
         color: heat(value),
         label: String(Math.round(value * 100)),
       }))
+    case 'strictness':
+      return [
+        ...[0, 0.5, 1].map((value) => ({
+          color: heat(value),
+          label: t('net.legend.fails', { pct: Math.round(value * STRICTEST * 100) }),
+        })),
+        { color: OTHER, label: t('net.legend.unknown') },
+      ]
     case 'cohort': {
       const years = [
         ...new Set(nodes.flatMap((node) => (node.cohort === null ? [] : [node.cohort]))),

@@ -574,4 +574,17 @@ export const es: Record<string, string> = {
     'La endogamia va de 0 a 100 y es la media de dos cosas: cuánto repites con gente con la que ya te habías cruzado, y qué parte de tus correcciones son devueltas (corriges a quien te corrige). Quien siempre se corrige con las mismas dos personas se acerca a 100; quien nunca repite, a 0. La del campus pondera por actividad.',
   'net.about.external':
     'Solo se cuentan las correcciones del 42cursus (no las de la piscina). Quien viene de otro campus sale con un aro discontinuo y solo como vecino de alguien de aquí: no se sigue su red más allá.',
+  'net.total.communities': 'Comunidades',
+  'net.timeline': 'Actividad por mes',
+  'net.timeline.month': '{month}: {n} correcciones',
+  'net.timeline.hint': 'Pulsa un mes o arrastra sobre varios para elegir el periodo.',
+  'net.pair.loading': 'Buscando sus correcciones…',
+  'net.pair.summary': '{a} ha corregido a {b} {forth} veces y {b} a {a} {back}.',
+  'net.pair.unknownProject': 'Proyecto sin nombre',
+  'net.pair.more': 'Se enseñan las {n} más recientes.',
+  'net.pair.open': 'Abrir la ficha de {login}',
+  'net.passRate': 'Aprueba el {pct} % de lo que corrige',
+  'net.color.strictness': 'Exigencia al corregir',
+  'net.legend.fails': 'Suspende el {pct} %',
+  'net.legend.unknown': 'Sin datos',
 }

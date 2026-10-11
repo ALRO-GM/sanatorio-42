@@ -111,6 +111,27 @@ describe('red de correcciones', () => {
       expect(people.get('sol')?.community).toBe(1)
     })
 
+    it('encuentra los grupos aunque estén unidos por algún puente', () => {
+      // Dos pandillas de cuatro que se corrigen mucho, y un cruce suelto entre ellas.
+      const gang = (names: string[]) =>
+        names.flatMap((a, index) => names.slice(index + 1).map((b) => pair(a, b, 5)))
+      const everyone = new Set(['a1', 'a2', 'a3', 'a4', 'b1', 'b2', 'b3', 'b4'])
+      const { people, totals } = analyse(
+        mergePairs(
+          [...gang(['a1', 'a2', 'a3', 'a4']), ...gang(['b1', 'b2', 'b3', 'b4']), pair('a1', 'b1')],
+          everyone,
+        ),
+        everyone,
+      )
+      const group = (prefix: string) =>
+        new Set([1, 2, 3, 4].map((n) => people.get(`${prefix}${n}`)?.community))
+
+      expect(totals.communities).toBe(2)
+      expect(group('a').size).toBe(1)
+      expect(group('b').size).toBe(1)
+      expect(group('a')).not.toEqual(group('b'))
+    })
+
     it('elige qué pintar: los más activos, o una persona y su entorno', () => {
       const analysis = analyse(
         mergePairs(
@@ -329,6 +350,43 @@ describe('red de correcciones', () => {
       await expect(services.network.graph(actor('ana'), { from: 'ayer' })).rejects.toMatchObject({
         code: 'invalid_input',
       })
+    })
+
+    it('da el detalle de una pareja, la línea de tiempo y cuánto aprueba cada quien', async () => {
+      api.scaleTeams.set(MADRID, [
+        scaleTeam('eva', 'ana'),
+        scaleTeam('eva', 'ana', { final_mark: 0, flag: { name: 'Crash', positive: false } }),
+        scaleTeam('eva', 'leo', { begin_at: '2026-08-10T10:00:00.000Z' }),
+        scaleTeam('ana', 'eva', { begin_at: '2026-09-20T10:00:00.000Z' }),
+      ])
+      await copyAll()
+
+      const detail = await services.network.pair(actor('ana'), { a: 'ANA', b: 'eva' })
+
+      expect(detail).toMatchObject({ a: 'ana', b: 'eva', forth: 1, back: 2 })
+      expect(detail.corrections).toHaveLength(3)
+      // La más reciente primero, con el nombre del proyecto y el veredicto.
+      expect(detail.corrections[0]).toMatchObject({
+        corrector: 'ana',
+        corrected: 'eva',
+        project: 'ft_printf',
+        mark: 100,
+        positive: true,
+      })
+      expect(detail.corrections.filter((row) => row.positive === false)).toHaveLength(1)
+      await expect(services.network.pair(actor('ana'), { a: 'ana' })).rejects.toMatchObject({
+        code: 'invalid_input',
+      })
+
+      const graph = await services.network.graph(actor('ana'), {})
+
+      expect(graph.timeline).toEqual([
+        { month: '2026-08', corrections: 1 },
+        { month: '2026-09', corrections: 3 },
+      ])
+      // `eva` aprobó dos de las tres que hizo; `ana` no llega al mínimo para opinar.
+      expect(graph.nodes.find((node) => node.login === 'eva')?.passRate).toBe(0.667)
+      expect(graph.nodes.find((node) => node.login === 'ana')?.passRate).toBeNull()
     })
 
     it('busca personas por el principio del login', async () => {

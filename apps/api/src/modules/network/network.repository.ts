@@ -126,6 +126,87 @@ export function createNetworkRepository(db: Db) {
       }))
     },
 
+    /** Cuántas correcciones con veredicto ha hecho cada persona y cuántas aprobó. */
+    async verdicts(
+      filter: CorrectionFilter,
+    ): Promise<Map<string, { judged: number; passed: number }>> {
+      const { sql, args } = where(filter)
+      const result = await db.execute({
+        sql: `SELECT corrector, COUNT(positive) AS judged, COALESCE(SUM(positive), 0) AS passed
+              FROM corrections WHERE ${sql} GROUP BY corrector`,
+        args,
+      })
+
+      return new Map(
+        result.rows.map((row) => [
+          toText(row.corrector),
+          { judged: toNumber(row.judged), passed: toNumber(row.passed) },
+        ]),
+      )
+    },
+
+    /** Correcciones por mes (`YYYY-MM`), en orden. */
+    async timeline(filter: CorrectionFilter): Promise<{ month: string; corrections: number }[]> {
+      const { sql, args } = where(filter)
+      const result = await db.execute({
+        sql: `SELECT substr(begin_at, 1, 7) AS month, COUNT(*) AS total
+              FROM corrections WHERE ${sql} GROUP BY month ORDER BY month`,
+        args,
+      })
+
+      return result.rows.map((row) => ({
+        month: toText(row.month),
+        corrections: toNumber(row.total),
+      }))
+    },
+
+    /** Las correcciones entre dos personas, en los dos sentidos, las últimas primero. */
+    async between(
+      filter: CorrectionFilter,
+      a: string,
+      b: string,
+      limit: number,
+    ): Promise<CorrectionRow[]> {
+      const { sql, args } = where(filter)
+      const result = await db.execute({
+        sql: `SELECT id, campus_id, corrector, corrected, project_id, begin_at, final_mark, positive
+              FROM corrections
+              WHERE ${sql} AND ((corrector = ? AND corrected = ?) OR (corrector = ? AND corrected = ?))
+              ORDER BY begin_at DESC LIMIT ?`,
+        args: [...args, a, b, b, a, limit],
+      })
+
+      return result.rows.map((row) => ({
+        id: toNumber(row.id),
+        campusId: toNumber(row.campus_id),
+        corrector: toText(row.corrector),
+        corrected: toText(row.corrected),
+        projectId: row.project_id === null ? null : toNumber(row.project_id),
+        beginAt: toText(row.begin_at),
+        finalMark: row.final_mark === null ? null : toNumber(row.final_mark),
+        positive: row.positive === null ? null : toNumber(row.positive) === 1,
+      }))
+    },
+
+    /** Cuántas veces ha corregido `a` a `b` (`forth`) y `b` a `a` (`back`). */
+    async countBetween(
+      filter: CorrectionFilter,
+      a: string,
+      b: string,
+    ): Promise<{ forth: number; back: number }> {
+      const { sql, args } = where(filter)
+      const result = await db.execute({
+        sql: `SELECT corrector, COUNT(*) AS total FROM corrections
+              WHERE ${sql} AND ((corrector = ? AND corrected = ?) OR (corrector = ? AND corrected = ?))
+              GROUP BY corrector`,
+        args: [...args, a, b, b, a],
+      })
+      const count = (login: string): number =>
+        toNumber(result.rows.find((row) => toText(row.corrector) === login)?.total ?? 0)
+
+      return { forth: count(a), back: count(b) }
+    },
+
     /** Año de la primera corrección de cada persona, hecha o recibida. */
     async firstYears(campusId: number): Promise<Map<string, number>> {
       const result = await db.execute({

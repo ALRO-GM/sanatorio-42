@@ -14,6 +14,7 @@ import { PERIODS, startOf } from './period'
 import type { Period } from './period'
 import { PersonPanel } from './PersonPanel'
 import { PersonSearch } from './PersonSearch'
+import { Timeline } from './Timeline'
 
 /** Topes de personas que se pueden pedir. */
 const LIMITS = [150, 300, 600, 1000, 2000] as const
@@ -143,189 +144,177 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
 
   return (
     <section className="network">
-      <h2>{t('net.title')}</h2>
-      <p className="lead">{t('net.subtitle')}</p>
+      <div className="net-layout">
+        <div className="net-head">
+          <h2>{t('net.title')}</h2>
 
-      {graph !== null && graph.sync.phase !== 'done' && (
-        <div className="net-sync" role="status">
-          <span>
-            {graph.sync.total === null
-              ? t('net.sync.pending')
-              : t('net.sync.copying', {
-                  rows: graph.sync.rows.toLocaleString(),
-                  total: graph.sync.total.toLocaleString(),
-                })}
-          </span>
-          {graph.sync.first !== null && graph.sync.last !== null && (
-            <small>
-              {t('net.sync.range', {
-                from: graph.sync.first.slice(0, 10),
-                to: graph.sync.last.slice(0, 10),
-              })}
-            </small>
-          )}
-        </div>
-      )}
-
-      <div className="card net-filters">
-        <div className="net-filter">
-          <span className="eyebrow">{t('net.period')}</span>
-          <div className="filter-pills" role="group" aria-label={t('net.period')}>
-            {PERIODS.map((period) => (
-              <button
-                key={period}
-                type="button"
-                className={`pill ${filters.period === period ? 'active' : ''}`}
-                aria-pressed={filters.period === period}
-                onClick={() => {
-                  change({ period })
-                }}
-              >
-                {t(`net.period.${period}`)}
-              </button>
-            ))}
-          </div>
-          {filters.period === 'custom' && (
-            <div className="net-dates">
-              <label>
-                {t('net.from')}
-                <input
-                  type="date"
-                  value={filters.from}
-                  max={filters.to === '' ? undefined : filters.to}
-                  onChange={(event) => {
-                    change({ from: event.target.value })
-                  }}
-                />
-              </label>
-              <label>
-                {t('net.to')}
-                <input
-                  type="date"
-                  value={filters.to}
-                  min={filters.from === '' ? undefined : filters.from}
-                  onChange={(event) => {
-                    change({ to: event.target.value })
-                  }}
-                />
-              </label>
+          {graph !== null && graph.sync.phase !== 'done' && (
+            <div className="net-sync" role="status">
+              <span>
+                {graph.sync.total === null
+                  ? t('net.sync.pending')
+                  : t('net.sync.copying', {
+                      rows: graph.sync.rows.toLocaleString(),
+                      total: graph.sync.total.toLocaleString(),
+                    })}
+              </span>
+              {graph.sync.first !== null && graph.sync.last !== null && (
+                <small>
+                  {t('net.sync.range', {
+                    from: graph.sync.first.slice(0, 10),
+                    to: graph.sync.last.slice(0, 10),
+                  })}
+                </small>
+              )}
             </div>
           )}
         </div>
 
-        <div className="net-filter">
-          <span className="eyebrow">{t('net.person')}</span>
-          <PersonSearch value={filters.login} me={me.login} onChange={focusOn} />
-        </div>
-
-        <div className="net-filter-grid">
-          <label>
-            {t('net.project')}
-            <select
-              value={filters.projectId ?? ''}
-              onChange={(event) => {
-                change({ projectId: event.target.value === '' ? null : Number(event.target.value) })
-              }}
-            >
-              <option value="">{t('net.project.all')}</option>
-              {(graph?.projects ?? []).map((project) => (
-                <option key={project.id} value={project.id}>
-                  {project.name} ({project.corrections})
-                </option>
+        <div className="card net-filters">
+          <div className="net-filter">
+            <span className="eyebrow">{t('net.period')}</span>
+            <div className="filter-pills" role="group" aria-label={t('net.period')}>
+              {PERIODS.map((period) => (
+                <button
+                  key={period}
+                  type="button"
+                  className={`pill ${filters.period === period ? 'active' : ''}`}
+                  aria-pressed={filters.period === period}
+                  onClick={() => {
+                    change({ period })
+                  }}
+                >
+                  {t(`net.period.${period}`)}
+                </button>
               ))}
-            </select>
-          </label>
-          <label>
-            {t('net.min', { n: filters.min })}
-            <input
-              type="range"
-              min={1}
-              max={12}
-              value={filters.min}
-              onChange={(event) => {
-                change({ min: Number(event.target.value) })
+            </div>
+            {filters.period === 'custom' && (
+              <div className="net-dates">
+                <label>
+                  {t('net.from')}
+                  <input
+                    type="date"
+                    value={filters.from}
+                    max={filters.to === '' ? undefined : filters.to}
+                    onChange={(event) => {
+                      change({ from: event.target.value })
+                    }}
+                  />
+                </label>
+                <label>
+                  {t('net.to')}
+                  <input
+                    type="date"
+                    value={filters.to}
+                    min={filters.from === '' ? undefined : filters.from}
+                    onChange={(event) => {
+                      change({ to: event.target.value })
+                    }}
+                  />
+                </label>
+              </div>
+            )}
+          </div>
+
+          {graph !== null && (
+            <Timeline
+              months={graph.timeline}
+              from={params.from ?? null}
+              to={params.to ?? null}
+              onSelect={(from, to) => {
+                change({ period: 'custom', from, to })
               }}
             />
-          </label>
-          <label>
-            {t('net.limit')}
-            <select
-              value={filters.limit}
-              onChange={(event) => {
-                change({ limit: Number(event.target.value) })
-              }}
-            >
-              {LIMITS.map((limit) => (
-                <option key={limit} value={limit}>
-                  {limit}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            {t('net.color')}
-            <select
-              value={mode}
-              onChange={(event) => {
-                setMode(COLOR_MODES.find((option) => option === event.target.value) ?? 'community')
-              }}
-            >
-              {COLOR_MODES.map((option) => (
-                <option key={option} value={option}>
-                  {t(`net.color.${option}`)}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-      </div>
+          )}
 
-      {graph === null && error !== null && (
-        <ErrorNote
-          error={error}
-          onRetry={() => {
-            setReloads((count) => count + 1)
-          }}
-        />
-      )}
-      {graph === null && error === null && <p className="estado">{t('net.loading')}</p>}
-
-      {graph !== null && (
-        <>
-          <div className="net-totals">
-            <div className="tile">
-              <span className="eyebrow">{t('net.total.corrections')}</span>
-              <strong>{graph.totals.corrections.toLocaleString()}</strong>
-            </div>
-            <div className="tile">
-              <span className="eyebrow">{t('net.total.people')}</span>
-              <strong>{graph.totals.people.toLocaleString()}</strong>
-            </div>
-            <div className="tile">
-              <span className="eyebrow">{t('net.total.pairs')}</span>
-              <strong>{graph.totals.pairs.toLocaleString()}</strong>
-              <small>
-                {t('net.total.mutual', {
-                  n: graph.totals.mutualPairs.toLocaleString(),
-                  pct:
-                    graph.totals.pairs === 0
-                      ? 0
-                      : Math.round((100 * graph.totals.mutualPairs) / graph.totals.pairs),
-                })}
-              </small>
-            </div>
-            <div className="tile">
-              <Meter label={t('net.total.endogamy')} value={graph.totals.endogamy} />
-              <small>
-                {t('net.personBreakdown', {
-                  repetition: Math.round(graph.totals.repetition * 100),
-                  reciprocity: Math.round(graph.totals.reciprocity * 100),
-                })}
-              </small>
-            </div>
+          <div className="net-filter">
+            <span className="eyebrow">{t('net.person')}</span>
+            <PersonSearch value={filters.login} me={me.login} onChange={focusOn} />
           </div>
 
-          <div className="net-body">
+          <div className="net-filter-grid">
+            <label>
+              {t('net.project')}
+              <select
+                value={filters.projectId ?? ''}
+                onChange={(event) => {
+                  change({
+                    projectId: event.target.value === '' ? null : Number(event.target.value),
+                  })
+                }}
+              >
+                <option value="">{t('net.project.all')}</option>
+                {(graph?.projects ?? []).map((project) => (
+                  <option key={project.id} value={project.id}>
+                    {project.name} ({project.corrections})
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              {t('net.min', { n: filters.min })}
+              <input
+                type="range"
+                min={1}
+                max={12}
+                value={filters.min}
+                onChange={(event) => {
+                  change({ min: Number(event.target.value) })
+                }}
+              />
+            </label>
+            <label>
+              {t('net.limit')}
+              <select
+                value={filters.limit}
+                onChange={(event) => {
+                  change({ limit: Number(event.target.value) })
+                }}
+              >
+                {LIMITS.map((limit) => (
+                  <option key={limit} value={limit}>
+                    {limit}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              {t('net.color')}
+              <select
+                value={mode}
+                onChange={(event) => {
+                  setMode(
+                    COLOR_MODES.find((option) => option === event.target.value) ?? 'community',
+                  )
+                }}
+              >
+                {COLOR_MODES.map((option) => (
+                  <option key={option} value={option}>
+                    {t(`net.color.${option}`)}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+        </div>
+
+        {graph === null && (
+          <div className="net-stage">
+            {error === null ? (
+              <p className="estado">{t('net.loading')}</p>
+            ) : (
+              <ErrorNote
+                error={error}
+                onRetry={() => {
+                  setReloads((count) => count + 1)
+                }}
+              />
+            )}
+          </div>
+        )}
+
+        {graph !== null && (
+          <>
             <div className={`net-stage ${loading ? 'loading' : ''}`}>
               {graph.nodes.length === 0 ? (
                 <p className="estado">
@@ -361,10 +350,11 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
             </div>
 
             <aside className="net-side">
-              {chosen !== null ? (
+              {chosen !== null && (
                 <PersonPanel
                   node={chosen}
                   links={graph.links}
+                  params={params}
                   focused={graph.query.login === chosen.login}
                   onFocus={focusOn}
                   onSelect={setSelected}
@@ -372,7 +362,46 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
                     setSelected(null)
                   }}
                 />
-              ) : (
+              )}
+
+              <div className="net-totals">
+                <div className="tile">
+                  <span className="eyebrow">{t('net.total.corrections')}</span>
+                  <strong>{graph.totals.corrections.toLocaleString()}</strong>
+                </div>
+                <div className="tile">
+                  <span className="eyebrow">{t('net.total.people')}</span>
+                  <strong>{graph.totals.people.toLocaleString()}</strong>
+                </div>
+                <div className="tile">
+                  <span className="eyebrow">{t('net.total.pairs')}</span>
+                  <strong>{graph.totals.pairs.toLocaleString()}</strong>
+                  <small>
+                    {t('net.total.mutual', {
+                      n: graph.totals.mutualPairs.toLocaleString(),
+                      pct:
+                        graph.totals.pairs === 0
+                          ? 0
+                          : Math.round((100 * graph.totals.mutualPairs) / graph.totals.pairs),
+                    })}
+                  </small>
+                </div>
+                <div className="tile">
+                  <span className="eyebrow">{t('net.total.communities')}</span>
+                  <strong>{graph.totals.communities.toLocaleString()}</strong>
+                </div>
+                <div className="tile wide">
+                  <Meter label={t('net.total.endogamy')} value={graph.totals.endogamy} />
+                  <small>
+                    {t('net.personBreakdown', {
+                      repetition: Math.round(graph.totals.repetition * 100),
+                      reciprocity: Math.round(graph.totals.reciprocity * 100),
+                    })}
+                  </small>
+                </div>
+              </div>
+
+              {chosen === null && (
                 <>
                   <article className="card net-panel">
                     <span className="eyebrow">{t('net.ranking')}</span>
@@ -425,17 +454,17 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
                   </article>
                 </>
               )}
-            </aside>
-          </div>
 
-          <details className="card net-about">
-            <summary>{t('net.about')}</summary>
-            <p>{t('net.about.graph')}</p>
-            <p>{t('net.about.endogamy')}</p>
-            <p>{t('net.about.external')}</p>
-          </details>
-        </>
-      )}
+              <details className="card net-about">
+                <summary>{t('net.about')}</summary>
+                <p>{t('net.about.graph')}</p>
+                <p>{t('net.about.endogamy')}</p>
+                <p>{t('net.about.external')}</p>
+              </details>
+            </aside>
+          </>
+        )}
+      </div>
     </section>
   )
 }

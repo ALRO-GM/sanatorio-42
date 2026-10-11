@@ -26,7 +26,7 @@ import type { PairRow } from './network.repository.js'
 export type Pair = { a: string; b: string; ab: number; ba: number }
 
 /** Lo que se sabe de cada persona antes de pintarla. */
-export type PersonStats = Omit<NetworkNode, 'image' | 'cohort'>
+export type PersonStats = Omit<NetworkNode, 'image' | 'cohort' | 'passRate'>
 
 export type Analysis = {
   pairs: Pair[]
@@ -34,8 +34,21 @@ export type Analysis = {
   totals: NetworkTotals
 }
 
-/** Vueltas de la propagación de etiquetas. Converge mucho antes casi siempre. */
-const COMMUNITY_ROUNDS = 12
+/** Niveles de agrupación y pasadas por nivel de Louvain. Converge mucho antes casi siempre. */
+const LOUVAIN_LEVELS = 12
+const LOUVAIN_PASSES = 24
+
+/** Por debajo de esto dos ganancias se consideran iguales (errores de coma flotante). */
+const EPSILON = 1e-9
+
+/**
+ * Login de una cuenta borrada: 42 lo sustituye por `3b3-` y un número. Fueron
+ * estudiantes del campus (sus correcciones se hicieron aquí), así que no se
+ * tratan como gente de fuera aunque ya no estén en la réplica.
+ */
+export function isAnonymised(login: string): boolean {
+  return /^3b3-\d+$/.test(login)
+}
 
 /**
  * Junta los dos sentidos de cada pareja.
@@ -69,66 +82,152 @@ export function mergePairs(rows: readonly PairRow[], members: ReadonlySet<string
   return [...pairs.values()]
 }
 
-/** Comunidades por propagación de etiquetas, con el peso de cada unión. */
+/**
+ * Comunidades por el método de Louvain: grupos de gente que se corrige más
+ * entre sí de lo que tocaría por azar.
+ *
+ * Dos pasos que se repiten: mover cada persona a la comunidad vecina que más
+ * sube la modularidad, y después tratar cada comunidad como una sola burbuja y
+ * volver a empezar. Para cuando ya no hay movimiento que mejore.
+ *
+ * Sin azar: el orden es siempre el alfabético y los empates los gana el número
+ * menor, así que el mismo grafo da siempre las mismas comunidades.
+ */
 function communitiesOf(pairs: readonly Pair[], logins: readonly string[]): Map<string, number> {
-  const neighbours = new Map<string, { login: string; weight: number }[]>()
-  const link = (from: string, to: string, weight: number): void => {
-    const list = neighbours.get(from)
+  const order = [...logins].sort()
+  const indexOf = new Map(order.map((login, index) => [login, index]))
+  // A qué burbuja del nivel actual pertenece cada persona.
+  const membership = order.map((_, index) => index)
+  let size = order.length
+  let edges = new Map<number, number>()
+  const key = (a: number, b: number): number => (a < b ? a * size + b : b * size + a)
 
-    if (list === undefined) {
-      neighbours.set(from, [{ login: to, weight }])
-    } else {
-      list.push({ login: to, weight })
+  for (const pair of pairs) {
+    const a = indexOf.get(pair.a)
+    const b = indexOf.get(pair.b)
+
+    if (a !== undefined && b !== undefined) {
+      edges.set(key(a, b), (edges.get(key(a, b)) ?? 0) + pair.ab + pair.ba)
     }
   }
 
-  for (const pair of pairs) {
-    link(pair.a, pair.b, pair.ab + pair.ba)
-    link(pair.b, pair.a, pair.ab + pair.ba)
-  }
+  for (let level = 0; level < LOUVAIN_LEVELS; level += 1) {
+    const neighbours: { to: number; weight: number }[][] = Array.from({ length: size }, () => [])
+    // Peso que toca cada burbuja; un lazo (peso dentro de ella) cuenta doble.
+    const degree = new Array<number>(size).fill(0)
+    let total = 0
 
-  // Orden fijo (alfabético) para que el mismo grafo dé siempre lo mismo.
-  const order = [...logins].sort()
-  const label = new Map(order.map((login, index) => [login, index]))
+    for (const [code, weight] of edges) {
+      const a = Math.floor(code / size)
+      const b = code % size
 
-  for (let round = 0; round < COMMUNITY_ROUNDS; round += 1) {
-    let changed = 0
+      total += weight
 
-    for (const login of order) {
-      const votes = new Map<number, number>()
-
-      for (const neighbour of neighbours.get(login) ?? []) {
-        const theirs = label.get(neighbour.login) ?? 0
-
-        votes.set(theirs, (votes.get(theirs) ?? 0) + neighbour.weight)
+      if (a === b) {
+        degree[a] = (degree[a] ?? 0) + 2 * weight
+      } else {
+        neighbours[a]?.push({ to: b, weight })
+        neighbours[b]?.push({ to: a, weight })
+        degree[a] = (degree[a] ?? 0) + weight
+        degree[b] = (degree[b] ?? 0) + weight
       }
+    }
 
-      let best = label.get(login) ?? 0
-      let bestWeight = votes.get(best) ?? 0
+    if (total === 0) {
+      break
+    }
 
-      for (const [candidate, weight] of votes) {
-        // A igualdad de votos gana la etiqueta menor: sin azar.
-        if (weight > bestWeight || (weight === bestWeight && candidate < best)) {
-          best = candidate
-          bestWeight = weight
+    const community = Array.from({ length: size }, (_, index) => index)
+    const weightIn = [...degree]
+    let moved = false
+
+    for (let pass = 0; pass < LOUVAIN_PASSES; pass += 1) {
+      let changes = 0
+
+      for (let node = 0; node < size; node += 1) {
+        const own = community[node] ?? node
+        const mine = degree[node] ?? 0
+        const towards = new Map<number, number>()
+
+        for (const neighbour of neighbours[node] ?? []) {
+          const theirs = community[neighbour.to] ?? neighbour.to
+
+          towards.set(theirs, (towards.get(theirs) ?? 0) + neighbour.weight)
+        }
+
+        // Se saca de su comunidad y se mira dónde ganaría más (puede ser la misma).
+        weightIn[own] = (weightIn[own] ?? 0) - mine
+
+        let best = own
+        let bestGain = (towards.get(own) ?? 0) - ((weightIn[own] ?? 0) * mine) / (2 * total)
+
+        for (const [candidate, weight] of towards) {
+          const gain = weight - ((weightIn[candidate] ?? 0) * mine) / (2 * total)
+
+          if (
+            gain > bestGain + EPSILON ||
+            (Math.abs(gain - bestGain) <= EPSILON && candidate < best)
+          ) {
+            best = candidate
+            bestGain = gain
+          }
+        }
+
+        weightIn[best] = (weightIn[best] ?? 0) + mine
+
+        if (best !== own) {
+          community[node] = best
+          changes += 1
         }
       }
 
-      if (best !== label.get(login)) {
-        label.set(login, best)
-        changed += 1
+      if (changes === 0) {
+        break
+      }
+
+      moved = true
+    }
+
+    if (!moved) {
+      break
+    }
+
+    // Cada comunidad pasa a ser una burbuja del nivel siguiente.
+    const renumber = new Map<number, number>()
+
+    for (const value of community) {
+      if (!renumber.has(value)) {
+        renumber.set(value, renumber.size)
       }
     }
 
-    if (changed === 0) {
+    const nextSize = renumber.size
+    const next = new Map<number, number>()
+
+    for (const [code, weight] of edges) {
+      const a = renumber.get(community[Math.floor(code / size)] ?? 0) ?? 0
+      const b = renumber.get(community[code % size] ?? 0) ?? 0
+      const merged = a < b ? a * nextSize + b : b * nextSize + a
+
+      next.set(merged, (next.get(merged) ?? 0) + weight)
+    }
+
+    for (let person = 0; person < membership.length; person += 1) {
+      membership[person] = renumber.get(community[membership[person] ?? 0] ?? 0) ?? 0
+    }
+
+    if (nextSize === size) {
       break
     }
+
+    edges = next
+    size = nextSize
   }
 
   // Se renumeran por tamaño: la 0 es la mayor.
   const sizes = new Map<number, number>()
 
-  for (const value of label.values()) {
+  for (const value of membership) {
     sizes.set(value, (sizes.get(value) ?? 0) + 1)
   }
 
@@ -138,7 +237,7 @@ function communitiesOf(pairs: readonly Pair[], logins: readonly string[]): Map<s
       .map(([value], index) => [value, index]),
   )
 
-  return new Map([...label].map(([login, value]) => [login, rank.get(value) ?? 0]))
+  return new Map(order.map((login, index) => [login, rank.get(membership[index] ?? 0) ?? 0]))
 }
 
 const round3 = (value: number): number => Math.round(value * 1000) / 1000

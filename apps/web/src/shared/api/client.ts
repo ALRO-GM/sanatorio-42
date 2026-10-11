@@ -60,6 +60,15 @@ export const realApi: Api = {
 
     return getJson(`/network?${query.toString()}`)
   },
+  getNetworkPair: (a, b, params) => {
+    const query = new URLSearchParams({ a, b })
+
+    if (params.from !== undefined) query.set('from', params.from)
+    if (params.to !== undefined) query.set('to', params.to)
+    if (params.projectId !== undefined) query.set('projectId', String(params.projectId))
+
+    return getJson(`/network/pair?${query.toString()}`)
+  },
   searchNetworkPeople: (q) => getJson(`/network/people?q=${encodeURIComponent(q)}`),
 
   getHelpDay: () => getJson('/help/today'),

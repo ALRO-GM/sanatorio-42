@@ -18,7 +18,12 @@ type ForceGraphProps = {
 
 /** Una persona dentro de la simulación: los datos y dónde está. */
 type SimNode = SimulationNodeDatum & { login: string; data: NetworkNode; r: number }
-type SimLink = SimulationLinkDatum<SimNode> & { weight: number; mutual: boolean }
+type SimLink = SimulationLinkDatum<SimNode> & {
+  weight: number
+  mutual: boolean
+  /** `true` si une a dos personas de la misma comunidad. */
+  inner: boolean
+}
 
 /** Desplazamiento y escala de la vista. */
 type View = { x: number; y: number; k: number }
@@ -38,15 +43,60 @@ type Scene = {
   frame: number
 }
 
+/** Con cuánta fuerza tira de cada burbuja el centro de su comunidad. */
+const COMMUNITY_PULL = 0.16
+
 const MIN_ZOOM = 0.08
 const MAX_ZOOM = 6
 
-/** Radio de una burbuja: crece con la raíz de su actividad, para que el área sea proporcional. */
-function radiusOf(node: NetworkNode): number {
-  return Math.min(34, 5 + Math.sqrt(node.given + node.received) * 0.9)
+/**
+ * Radio de una burbuja. El área es proporcional a su actividad, y la escala es
+ * relativa a la persona más activa de lo que se ve: así las diferencias se
+ * notan igual en un mes (pocas correcciones) que en todo el histórico.
+ */
+function radiusOf(node: NetworkNode, busiest: number): number {
+  const activity = node.given + node.received
+
+  return Math.min(
+    4.5 + 24 * Math.sqrt(activity / busiest),
+    // Con muy poca actividad en total, nadie se hace enorme por tener tres.
+    4.5 + Math.sqrt(activity) * 3,
+  )
 }
 
 const weightOf = (link: NetworkLink): number => link.forth + link.back
+
+/**
+ * Fuerza que junta a cada persona con su comunidad: tira de cada burbuja hacia
+ * el centro de las de su grupo. Con ella los grupos se separan a la vista en
+ * vez de quedar mezclados en una sola nube.
+ */
+function communityForce(nodes: readonly SimNode[]): (alpha: number) => void {
+  return (alpha) => {
+    const centres = new Map<number, { x: number; y: number; n: number }>()
+
+    for (const node of nodes) {
+      const centre = centres.get(node.data.community) ?? { x: 0, y: 0, n: 0 }
+
+      centre.x += node.x ?? 0
+      centre.y += node.y ?? 0
+      centre.n += 1
+      centres.set(node.data.community, centre)
+    }
+
+    for (const node of nodes) {
+      const centre = centres.get(node.data.community)
+
+      // Una comunidad de una sola persona no tiene a dónde ir.
+      if (centre === undefined || centre.n < 2) {
+        continue
+      }
+
+      node.vx = (node.vx ?? 0) + (centre.x / centre.n - (node.x ?? 0)) * COMMUNITY_PULL * alpha
+      node.vy = (node.vy ?? 0) + (centre.y / centre.n - (node.y ?? 0)) * COMMUNITY_PULL * alpha
+    }
+  }
+}
 
 /** Fotos ya pedidas, entre montajes: cambiar un filtro no las vuelve a descargar. */
 const pictures = new Map<string, HTMLImageElement | null>()
@@ -167,6 +217,11 @@ export function ForceGraph({ nodes, links, colorOf, selected, onSelect, label }:
       // Lo que manda: la burbuja bajo el ratón, o si no la elegida.
       const focus = hover?.login ?? chosen
       const around = focus === null ? null : (state.neighbours.get(focus) ?? new Set<string>())
+      // Con muchas uniones por persona, cada una se pinta más tenue.
+      const density = Math.min(
+        1,
+        2.2 / Math.sqrt(state.links.length / (state.nodes.length || 1) || 1),
+      )
       const lit = (login: string): boolean =>
         around === null || login === focus || around.has(login)
 
@@ -190,12 +245,14 @@ export function ForceGraph({ nodes, links, colorOf, selected, onSelect, label }:
           context.moveTo(source.x ?? 0, source.y ?? 0)
           context.lineTo(target.x ?? 0, target.y ?? 0)
           context.lineWidth = (0.5 + Math.sqrt(link.weight) * 0.75) / Math.sqrt(view.k)
-          context.strokeStyle = link.mutual ? palette.accent : palette.link
+          // En reposo, todas del mismo gris: el color es para las burbujas. Al
+          // elegir a alguien, las suyas se encienden, en turquesa las mutuas.
+          context.strokeStyle = around !== null && on && link.mutual ? palette.accent : palette.link
           context.globalAlpha = on
             ? around === null
-              ? Math.min(0.75, 0.16 + link.weight * 0.07)
-              : 0.85
-            : 0.05
+              ? Math.min(0.7, (0.1 + link.weight * 0.05) * density)
+              : 0.9
+            : 0.04
           context.stroke()
         }
       }
@@ -480,6 +537,7 @@ export function ForceGraph({ nodes, links, colorOf, selected, onSelect, label }:
     const before = new Map(state.nodes.map((node) => [node.login, node]))
     // Quien ya estaba conserva su sitio: el grafo se recoloca, no salta.
     const spread = 30 * Math.sqrt(nodes.length)
+    const busiest = Math.max(1, ...nodes.map((node) => node.given + node.received))
     const simNodes: SimNode[] = nodes.map((data, index) => {
       const old = before.get(data.login)
       // Espiral de girasol para los nuevos: repartidos, sin azar.
@@ -489,7 +547,7 @@ export function ForceGraph({ nodes, links, colorOf, selected, onSelect, label }:
       return {
         login: data.login,
         data,
-        r: radiusOf(data),
+        r: radiusOf(data, busiest),
         x: old?.x ?? Math.cos(angle) * distance,
         y: old?.y ?? Math.sin(angle) * distance,
         ...(old === undefined ? {} : { vx: old.vx ?? 0, vy: old.vy ?? 0 }),
@@ -512,6 +570,7 @@ export function ForceGraph({ nodes, links, colorOf, selected, onSelect, label }:
         target,
         weight: weightOf(link),
         mutual: link.forth > 0 && link.back > 0,
+        inner: source.data.community === target.data.community,
       })
 
       for (const [from, to] of [
@@ -568,13 +627,16 @@ export function ForceGraph({ nodes, links, colorOf, selected, onSelect, label }:
               degree.get((link.target as SimNode).login) ?? 1,
             )
 
-            return Math.min(1, (0.35 + 0.12 * Math.sqrt(link.weight)) / Math.sqrt(least))
+            const pull = Math.min(1, (0.35 + 0.12 * Math.sqrt(link.weight)) / Math.sqrt(least))
+
+            // Entre comunidades se tira menos: si no, todo acaba en una sola bola.
+            return link.inner ? pull : pull * 0.25
           }),
       )
       .force(
         'charge',
         forceManyBody<SimNode>()
-          .strength((node) => -28 - node.r * 9)
+          .strength((node) => -40 - node.r * 12)
           .theta(0.95)
           .distanceMax(900),
       )
@@ -582,6 +644,7 @@ export function ForceGraph({ nodes, links, colorOf, selected, onSelect, label }:
         'collide',
         forceCollide<SimNode>((node) => node.r + 2.5).iterations(simNodes.length > 800 ? 1 : 2),
       )
+      .force('community', communityForce(simNodes))
       // Una gravedad suave hacia el centro: los grupos sueltos no se escapan.
       .force('x', forceX<SimNode>(0).strength(0.035))
       .force('y', forceY<SimNode>(0).strength(0.035))

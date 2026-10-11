@@ -6,13 +6,18 @@
  * no vuelve a leer la base.
  */
 
-import type { NetworkGraph, NetworkNode, NetworkPerson } from '@sanatorio/contracts'
+import type {
+  NetworkGraph,
+  NetworkNode,
+  NetworkPairDetail,
+  NetworkPerson,
+} from '@sanatorio/contracts'
 import { z } from 'zod'
 
 import type { Actor } from '../../core/actor.js'
 import { parse } from '../../core/validation.js'
 import type { ReplicaRepository } from '../replica/index.js'
-import { analyse, mergePairs, select, toLink } from './network.analysis.js'
+import { analyse, isAnonymised, mergePairs, select, toLink } from './network.analysis.js'
 import type { Analysis } from './network.analysis.js'
 import type { NetworkRepository } from './network.repository.js'
 import type { CorrectionSync } from './network.sync.js'
@@ -44,15 +49,45 @@ const moment = z
     message: 'fecha no válida',
   })
 
+const login = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .regex(/^[a-z0-9-]{1,30}$/, 'login no válido')
+
+const pairSchema = z.object({
+  a: login,
+  b: login,
+  from: moment.optional(),
+  to: moment.optional(),
+  projectId: z.coerce.number().int().positive().optional(),
+})
+
+/** Correcciones que se listan de una pareja. */
+const PAIR_LIMIT = 60
+
+/** Con menos veredictos que esto, el porcentaje de aprobados no dice nada. */
+const MIN_VERDICTS = 3
+
+/** Límite superior de un filtro: una fecha sin hora incluye ese día entero. */
+function endOf(to: string | undefined): string | null {
+  if (to === undefined) {
+    return null
+  }
+
+  return to.length === 10 ? `${to}T23:59:59.999Z` : to
+}
+
+function passRateOf(verdict: { judged: number; passed: number } | undefined): number | null {
+  return verdict === undefined || verdict.judged < MIN_VERDICTS
+    ? null
+    : Math.round((1000 * verdict.passed) / verdict.judged) / 1000
+}
+
 const querySchema = z.object({
   from: moment.optional(),
   to: moment.optional(),
-  login: z
-    .string()
-    .trim()
-    .toLowerCase()
-    .regex(/^[a-z0-9-]{1,30}$/, 'login no válido')
-    .optional(),
+  login: login.optional(),
   projectId: z.coerce.number().int().positive().optional(),
   min: z.coerce.number().int().min(1).max(100).default(1),
   limit: z.coerce.number().int().min(10).max(MAX_LIMIT).default(DEFAULT_LIMIT),
@@ -61,6 +96,9 @@ const querySchema = z.object({
 type Cached = {
   at: number
   analysis: Analysis
+  /** Veredictos de cada corrector, para saber cuánto aprueba. */
+  verdicts: Map<string, { judged: number; passed: number }>
+  timeline: { month: string; corrections: number }[]
   /** Avatar de cada persona del campus. Quien no está aquí es de fuera. */
   members: Map<string, string | null>
 }
@@ -84,20 +122,26 @@ export function createNetworkService(options: NetworkServiceOptions) {
       return known
     }
 
-    const [rows, members] = await Promise.all([
+    const [rows, members, verdicts, timeline] = await Promise.all([
       corrections.pairs({ campusId, from, to, projectId }),
       replica.membersOf(campusId),
+      corrections.verdicts({ campusId, from, to, projectId }),
+      // La línea de tiempo no lleva fechas: enseña todo para poder elegirlas.
+      corrections.timeline({ campusId, projectId }),
     ])
     // Sin réplica del campus no se sabe quién es de fuera: se trata a todo el
     // mundo como de dentro en vez de enseñar un grafo vacío.
+    const everyone = rows.flatMap((row) => [row.corrector, row.corrected])
     const inside: ReadonlySet<string> =
       members.size === 0
-        ? new Set(rows.flatMap((row) => [row.corrector, row.corrected]))
-        : new Set(members.keys())
+        ? new Set(everyone)
+        : new Set([...members.keys(), ...everyone.filter(isAnonymised)])
     const entry: Cached = {
       at: now(),
       analysis: analyse(mergePairs(rows, inside), inside),
       members,
+      verdicts,
+      timeline,
     }
 
     cache.delete(key)
@@ -125,21 +169,17 @@ export function createNetworkService(options: NetworkServiceOptions) {
       const query = parse(querySchema, input)
       const from = query.from ?? null
       // Una fecha sin hora como límite superior incluye ese día entero.
-      const to =
-        query.to === undefined
-          ? null
-          : query.to.length === 10
-            ? `${query.to}T23:59:59.999Z`
-            : query.to
+      const to = endOf(query.to)
       const projectId = query.projectId ?? null
       const focus = query.login ?? null
 
-      const [{ analysis, members }, years, projects, status] = await Promise.all([
-        analysisFor(actor.campusId, from, to, projectId),
-        corrections.firstYears(actor.campusId),
-        corrections.projects(actor.campusId),
-        sync.status(actor.campusId),
-      ])
+      const [{ analysis, members, verdicts, timeline }, years, projects, status] =
+        await Promise.all([
+          analysisFor(actor.campusId, from, to, projectId),
+          corrections.firstYears(actor.campusId),
+          corrections.projects(actor.campusId),
+          sync.status(actor.campusId),
+        ])
       const names = await replica.projectNames(projects.map((project) => project.id))
       const shown = select(analysis, { focus, min: query.min, limit: query.limit })
       // Quien viene de fuera no está en la réplica del campus: su foto se busca aparte.
@@ -158,6 +198,7 @@ export function createNetworkService(options: NetworkServiceOptions) {
               {
                 ...person,
                 image: members.get(login) ?? images.get(login) ?? null,
+                passRate: passRateOf(verdicts.get(login)),
                 cohort: years.get(login) ?? null,
               },
             ]
@@ -175,12 +216,49 @@ export function createNetworkService(options: NetworkServiceOptions) {
           )
           .slice(0, TOP_PAIRS)
           .map(toLink),
+        timeline,
         projects: projects.flatMap((project) => {
           const name = names.get(project.id)
 
           return name === undefined ? [] : [{ ...project, name }]
         }),
         sync: status,
+      }
+    },
+
+    /**
+     * Las correcciones que se han hecho dos personas, con los mismos filtros de
+     * fecha y proyecto que el grafo.
+     */
+    async pair(actor: Actor, input: unknown): Promise<NetworkPairDetail> {
+      const query = parse(pairSchema, input)
+      const filter = {
+        campusId: actor.campusId,
+        from: query.from ?? null,
+        to: endOf(query.to),
+        projectId: query.projectId ?? null,
+      }
+      const [rows, counts] = await Promise.all([
+        corrections.between(filter, query.a, query.b, PAIR_LIMIT),
+        corrections.countBetween(filter, query.a, query.b),
+      ])
+      const names = await replica.projectNames([
+        ...new Set(rows.flatMap((row) => (row.projectId === null ? [] : [row.projectId]))),
+      ])
+
+      return {
+        a: query.a,
+        b: query.b,
+        ...counts,
+        corrections: rows.map((row) => ({
+          id: row.id,
+          corrector: row.corrector,
+          corrected: row.corrected,
+          project: row.projectId === null ? null : (names.get(row.projectId) ?? null),
+          at: row.beginAt,
+          mark: row.finalMark,
+          positive: row.positive,
+        })),
       }
     },
 

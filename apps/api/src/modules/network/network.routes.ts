@@ -25,6 +25,17 @@ export function registerNetworkRoutes(
     },
   )
 
+  /**
+   * `GET /network/pair?a=&b=&from=&to=&projectId=` → las correcciones que se
+   * han hecho dos personas, las últimas primero.
+   */
+  app.get<{ Querystring: Record<string, string | undefined> }>(
+    '/network/pair',
+    async (request, reply) => {
+      return reply.send(await network.pair(await session.actor(request), request.query))
+    },
+  )
+
   /** `GET /network/people?q=` → logins que empiezan así, los más activos primero. */
   app.get<{ Querystring: { q?: string } }>('/network/people', async (request, reply) => {
     return reply.send(await network.people(await session.actor(request), request.query.q))

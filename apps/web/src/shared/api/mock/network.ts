@@ -6,7 +6,13 @@
  * versión mínima, lo justo para que la pantalla se pueda probar sin servidor.
  */
 
-import type { NetworkGraph, NetworkLink, NetworkNode, NetworkPerson } from '@sanatorio/contracts'
+import type {
+  NetworkGraph,
+  NetworkLink,
+  NetworkNode,
+  NetworkPairDetail,
+  NetworkPerson,
+} from '@sanatorio/contracts'
 
 import type { NetworkParams } from '../types'
 import { portrait } from './portrait'
@@ -112,6 +118,8 @@ function statsOf(person: Person, links: readonly NetworkLink[]): NetworkNode {
     repetition,
     reciprocity,
     endogamy: Math.round(50 * (repetition + reciprocity)),
+    // Cada quien aprueba más o menos: sale de su login, siempre igual.
+    passRate: given < 3 ? null : 0.55 + ((person.login.charCodeAt(0) * 7) % 45) / 100,
     community: person.group,
     cohort: person.cohort,
   }
@@ -191,6 +199,14 @@ export function mockNetwork(me: string, params: NetworkParams): NetworkGraph {
     topPairs: [...all]
       .sort((a, b) => Math.min(b.forth, b.back) - Math.min(a.forth, a.back))
       .slice(0, 12),
+    timeline: Array.from({ length: 30 }, (_, index) => {
+      const date = new Date(Date.UTC(2024, 4 + index, 1))
+
+      return {
+        month: date.toISOString().slice(0, 7),
+        corrections: Math.round(180 + 140 * Math.sin(index / 2.2) + (index % 5) * 30),
+      }
+    }),
     projects: [
       { id: 10, name: 'ft_printf', corrections: 420 },
       { id: 11, name: 'get_next_line', corrections: 380 },
@@ -220,4 +236,37 @@ export function mockPeople(me: string, q: string): NetworkPerson[] {
 
       return { login: person.login, image: stats.image, corrections: stats.given + stats.received }
     })
+}
+
+const PROJECTS = ['Libft', 'ft_printf', 'get_next_line', 'push_swap', 'minishell']
+
+export function mockPair(me: string, a: string, b: string): NetworkPairDetail {
+  const link = world(me).links.find(
+    (candidate) =>
+      (candidate.source === a && candidate.target === b) ||
+      (candidate.source === b && candidate.target === a),
+  )
+  const forth = link === undefined ? 0 : link.source === a ? link.forth : link.back
+  const back = link === undefined ? 0 : link.source === a ? link.back : link.forth
+  const day = 24 * 60 * 60_000
+
+  return {
+    a,
+    b,
+    forth,
+    back,
+    corrections: Array.from({ length: forth + back }, (_, index) => {
+      const mark = index % 4 === 3 ? 0 : 100 + (index % 3 === 0 ? 25 : 0)
+
+      return {
+        id: index + 1,
+        corrector: index < forth ? a : b,
+        corrected: index < forth ? b : a,
+        project: PROJECTS[index % PROJECTS.length] ?? null,
+        at: new Date(Date.now() - (index * 17 + 3) * day).toISOString(),
+        mark,
+        positive: mark > 0,
+      }
+    }).sort((x, y) => (x.at < y.at ? 1 : -1)),
+  }
 }

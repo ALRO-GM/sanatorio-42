@@ -1,12 +1,19 @@
+import { useState } from 'react'
+
 import type { NetworkLink, NetworkNode } from '@sanatorio/contracts'
+
+import type { NetworkParams } from '../../shared/api/types'
 
 import { useI18n } from '../../shared/i18n'
 import { Avatar } from '../../shared/ui/Avatar'
 import { Meter } from './Meter'
+import { PairDetail } from './PairDetail'
 
 type PersonPanelProps = {
   node: NetworkNode
   links: readonly NetworkLink[]
+  /** Filtros del grafo: el detalle de una pareja cuenta lo mismo. */
+  params: NetworkParams
   /** `true` si el grafo ya está centrado en esta persona. */
   focused: boolean
   onFocus: (login: string | null) => void
@@ -21,12 +28,15 @@ const SHOWN = 8
 export function PersonPanel({
   node,
   links,
+  params,
   focused,
   onFocus,
   onSelect,
   onClose,
 }: PersonPanelProps) {
   const { t } = useI18n()
+  // Pareja de la que se están viendo las correcciones una a una.
+  const [open, setOpen] = useState<string | null>(null)
   const partners = links
     .flatMap((link) => {
       if (link.source === node.login) {
@@ -77,6 +87,12 @@ export function PersonPanel({
         </div>
       </dl>
 
+      {node.passRate !== null && (
+        <p className="net-passrate">
+          {t('net.passRate', { pct: Math.round(node.passRate * 100) })}
+        </p>
+      )}
+
       <Meter label={t('net.endogamy')} value={node.endogamy} />
       <p className="hint">
         {t('net.personBreakdown', {
@@ -103,8 +119,9 @@ export function PersonPanel({
               <li key={partner.login}>
                 <button
                   type="button"
+                  aria-expanded={open === partner.login}
                   onClick={() => {
-                    onSelect(partner.login)
+                    setOpen(open === partner.login ? null : partner.login)
                   }}
                 >
                   <span className="net-row-name">{partner.login}</span>
@@ -112,6 +129,20 @@ export function PersonPanel({
                     {partner.gave} → · ← {partner.got}
                   </span>
                 </button>
+                {open === partner.login && (
+                  <div className="net-pair-box">
+                    <PairDetail a={node.login} b={partner.login} params={params} />
+                    <button
+                      type="button"
+                      className="link"
+                      onClick={() => {
+                        onSelect(partner.login)
+                      }}
+                    >
+                      {t('net.pair.open', { login: partner.login })}
+                    </button>
+                  </div>
+                )}
               </li>
             ))}
           </ul>

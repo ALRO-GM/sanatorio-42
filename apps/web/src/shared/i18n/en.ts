@@ -567,4 +567,17 @@ export const en: Record<string, string> = {
     'Inbreeding goes from 0 to 100 and averages two things: how much you repeat with people you had already met, and what share of your evaluations are returned (you evaluate who evaluates you). Someone who always trades with the same two people approaches 100; someone who never repeats, 0. The campus figure is weighted by activity.',
   'net.about.external':
     'Only 42cursus evaluations count (not the piscine). People from another campus have a dashed ring and only appear as neighbours of someone from here: their network is not followed further.',
+  'net.total.communities': 'Communities',
+  'net.timeline': 'Activity by month',
+  'net.timeline.month': '{month}: {n} evaluations',
+  'net.timeline.hint': 'Click a month or drag across several to pick the period.',
+  'net.pair.loading': 'Looking up their evaluations…',
+  'net.pair.summary': '{a} has evaluated {b} {forth} times and {b} has evaluated {a} {back}.',
+  'net.pair.unknownProject': 'Unnamed project',
+  'net.pair.more': 'Showing the {n} most recent.',
+  'net.pair.open': "Open {login}'s card",
+  'net.passRate': 'Passes {pct}% of what they evaluate',
+  'net.color.strictness': 'Strictness',
+  'net.legend.fails': 'Fails {pct}%',
+  'net.legend.unknown': 'No data',
 }
