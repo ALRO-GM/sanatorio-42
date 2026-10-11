@@ -82,7 +82,7 @@ Además: español e inglés, modo nocturno y varios campus.
   lo vigila el linter. Un contrato de tipos compartido evita que API y web se
   desincronicen.
 - **XP que no se puede puentear.** Cada punto sale de un hecho comprobable (una
-  respuesta que resuelve, una sesión verificada y valorada por los dos), una sola
+  respuesta que resuelve, una sesión con sus dos códigos y valorada por los dos), una sola
   vez por referencia y con topes.
 - **SQLite y una sola máquina.** Sin servicios que mantener: un fichero, copias
   con un script y Caddy delante. Cabe en la capa gratuita de Oracle.
@@ -136,8 +136,9 @@ Módulos de la API (`apps/api/src/modules/`):
 | `map`     | Mapa de clusters: ocupación, gente de guardia y puestos reservados  |
 | `network` | Red de correcciones: quién ha corregido a quién, comunidades y endogamia |
 | `usage`   | Cuánto se usa cada elemento: orden automático y mapa de calor para admins |
-| `meet`    | Avisos y chat de cada evento, y asistencia validada con códigos de inicio y fin |
-| `admin`   | Permisos, bloqueos, buzón de incidencias y denuncias, consumo y límites de uso |
+| `meet`    | Avisos y chat de cada evento, y las rutas de la asistencia con códigos |
+| `attendance` | Códigos de inicio y fin, tiempo validado, registro de intentos e informe de horas |
+| `admin`   | Permisos, bloqueos, buzón de incidencias y denuncias, consumo y presupuesto de peticiones |
 
 Cómo encajan las piezas y cómo añadir una funcionalidad:
 [docs/architecture.md](docs/architecture.md).

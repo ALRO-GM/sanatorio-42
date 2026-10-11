@@ -45,8 +45,8 @@ function hour(iso: string | null, lang: string): string {
  *
  * Quien organiza ve el código de inicio y el de fin (con su QR) y quién los ha
  * validado. Quien asiste escribe el que le enseñen: el de inicio al empezar y el
- * de fin al terminar. Solo con los dos hay asistencia válida, y de la diferencia
- * sale lo que duró.
+ * de fin al terminar. Solo con los dos hay asistencia válida. Cuándo vale cada
+ * código y cuánto tiempo cuenta lo decide la API; aquí solo se enseña.
  */
 export function Attendance({ eventId }: { eventId: string }) {
   const { t, lang } = useI18n()
@@ -75,6 +75,16 @@ export function Attendance({ eventId }: { eventId: string }) {
     </li>
   )
 
+  const { window } = data
+  const startWindow = t('meet.att.windowStart', {
+    from: hour(window.startFrom, lang),
+    to: hour(window.startUntil, lang),
+  })
+  const endWindow = t('meet.att.windowEnd', {
+    n: window.minStay,
+    to: hour(window.endUntil, lang),
+  })
+
   if (data.role === 'host' && data.codes !== null) {
     const current = data.codes[shown]
 
@@ -82,6 +92,7 @@ export function Attendance({ eventId }: { eventId: string }) {
       <div className="meet-att">
         <span className="eyebrow">{t('meet.att.title')}</span>
         <p className="hint">{t('meet.att.hostHint')}</p>
+        <p className="hint">{shown === 'start' ? startWindow : endWindow}</p>
         <div className="filter-pills" role="group" aria-label={t('meet.att.title')}>
           {(['start', 'end'] as const).map((phase) => (
             <button
@@ -135,6 +146,14 @@ export function Attendance({ eventId }: { eventId: string }) {
             ? t('meet.att.guestEnd', { time: hour(mine.startedAt, lang) })
             : t('meet.att.guestDone', { n: mine.minutes })}
       </p>
+      {!validated && <p className="hint">{mine === null ? startWindow : endWindow}</p>}
+      {!validated && data.attemptsLeft < 5 && (
+        <p className="hint" role="status">
+          {data.attemptsLeft === 0
+            ? t('meet.att.locked')
+            : t('meet.att.attempts', { n: data.attemptsLeft })}
+        </p>
+      )}
       {!validated && (
         <form className="meet-code-form" onSubmit={(event) => void submit(event)}>
           <input

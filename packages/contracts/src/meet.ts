@@ -49,8 +49,24 @@ export type MeetPresence = {
   login: string
   startedAt: string | null
   endedAt: string | null
-  /** Minutos entre un código y otro, o `null` si falta alguno: sin los dos no vale. */
+  /**
+   * Minutos validados: el rato entre un código y otro, recortado al horario del
+   * evento y nunca más que su duración. `null` si falta algún código: sin los
+   * dos no vale.
+   */
   minutes: number | null
+}
+
+/** Cuándo se puede validar cada código de un evento (ISO-8601). */
+export type MeetWindow = {
+  /** Desde cuándo vale el código de inicio. */
+  startFrom: string
+  /** Hasta cuándo vale el código de inicio: después ya no se puede empezar. */
+  startUntil: string
+  /** Hasta cuándo vale el código de fin. */
+  endUntil: string
+  /** Minutos que tienen que pasar entre validar el de inicio y el de fin. */
+  minStay: number
 }
 
 /**
@@ -66,10 +82,55 @@ export type MeetAttendance = {
   mine: MeetPresence | null
   /** Lo que ha validado cada persona. Solo para quien organiza. */
   people: MeetPresence[]
+  window: MeetWindow
+  /** Códigos equivocados que aún puede escribir quien pregunta antes de quedarse sin intentos. */
+  attemptsLeft: number
 }
 
 /** `POST /events/checkin` → qué código era y cómo queda tu asistencia. */
 export type MeetCheckin = {
   phase: 'start' | 'end'
   presence: MeetPresence
+}
+
+/** Una fila del informe de horas: una persona en un evento. */
+export type AttendanceReportRow = {
+  login: string
+  /** `host`: impartió o ayudó · `guest`: asistió o recibió la ayuda. */
+  role: 'host' | 'guest'
+  eventId: string
+  kind: 'board' | 'help'
+  title: string
+  /** Día del evento en la hora del campus (`YYYY-MM-DD`). */
+  day: string
+  /** Principio y fin del rato validado (ISO-8601). */
+  from: string
+  to: string
+  /** Minutos validados. Para quien organiza, el rato en que tuvo a alguien validado. */
+  minutes: number
+  /** Duración prevista del evento, en minutos. */
+  scheduledMinutes: number
+  /** Con quién: quien organizaba, o quienes asistieron. */
+  with: string[]
+}
+
+/** `GET /events/report?from=&to=&login=`: las horas validadas con códigos. */
+export type AttendanceReport = {
+  /** Periodo pedido, en días (`YYYY-MM-DD`), los dos incluidos. */
+  from: string
+  to: string
+  rows: AttendanceReportRow[]
+  totalMinutes: number
+}
+
+/** `GET /admin/checkins?id=`: un intento de validar un código. */
+export type CheckinLogEntry = {
+  id: number
+  eventId: string
+  login: string
+  /** Lo que se escribió. */
+  code: string
+  phase: 'start' | 'end' | null
+  outcome: 'ok' | 'repeat' | 'wrong_code' | 'locked' | 'too_early' | 'too_late' | 'no_start'
+  at: string
 }

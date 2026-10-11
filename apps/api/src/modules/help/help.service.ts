@@ -6,8 +6,9 @@
  * para que no se pueda cobrar sin haber ayudado:
  *
  * 1. Quien ayuda tiene que **aceptar** la reserva: nadie se apunta XP ajena.
- * 2. Durante la franja se comprueba, con la foto de puestos de 42, que **las
- *    dos personas están en el campus**. Sin eso, la sesión se cierra sin XP.
+ * 2. Quien recibe la ayuda **valida dos códigos** que le enseña quien ayuda:
+ *    uno al empezar y otro al terminar (módulo `attendance`). Sin los dos, la
+ *    sesión se cierra sin XP y sin tiempo contado.
  * 3. Al terminar, **las dos se valoran**. La XP solo se reparte cuando están
  *    las dos valoraciones.
  * 4. Una pareja solo puntúa **una vez al día** (lo garantiza `xp.creditHelp`).
@@ -30,11 +31,12 @@ import { z } from 'zod'
 
 import type { Actor } from '../../core/actor.js'
 import { domainError } from '../../core/errors.js'
-import { localMoment } from '../../core/time.js'
+import { localMoment, zonedInstant } from '../../core/time.js'
 import { id, optionalText, parse } from '../../core/validation.js'
+import { EVENT_ID, closed } from '../attendance/index.js'
+import type { AttendanceEvent, AttendanceService } from '../attendance/index.js'
 import type { XpService } from '../profile/index.js'
-import { LOCATION_MAX_AGE_MS } from '../replica/index.js'
-import type { Agenda, ReplicaRepository, Syncer } from '../replica/index.js'
+import type { Agenda, ReplicaRepository } from '../replica/index.js'
 import type { BookingRow, HelpRepository, Span } from './help.repository.js'
 
 export type HelpServiceOptions = {
@@ -42,8 +44,9 @@ export type HelpServiceOptions = {
   replica: ReplicaRepository
   /** Agenda de 42: de ahí salen las correcciones que pisan la guardia. */
   agenda: Agenda
-  sync: Syncer
   xp: XpService
+  /** Los códigos que valida quien recibe la ayuda: de ahí sale si hubo sesión. */
+  attendance: AttendanceService
   now?: () => number
 }
 
@@ -146,7 +149,7 @@ const bookedMinutes = (bookings: readonly BookingRow[]): number =>
   bookings.reduce((sum, booking) => sum + booking.minutes, 0)
 
 export function createHelpService(options: HelpServiceOptions) {
-  const { help, replica, agenda, sync, xp } = options
+  const { help, replica, agenda, xp, attendance } = options
   const now = options.now ?? Date.now
 
   /** Día y minuto actuales en la hora local de un campus. */
@@ -213,6 +216,68 @@ export function createHelpService(options: HelpServiceOptions) {
     )
   }
 
+  /** El horario de una reserva, en instantes. */
+  async function scheduleOf(booking: BookingRow): Promise<{ startsAt: number; endsAt: number }> {
+    const startsAt = zonedInstant(
+      booking.day,
+      booking.start,
+      await replica.timeZoneOf(booking.campusId),
+    )
+
+    return { startsAt, endsAt: startsAt + booking.minutes * 60_000 }
+  }
+
+  /** `true` si quien pidió la ayuda validó los dos códigos de esa sesión. */
+  const attended = async (booking: BookingRow): Promise<boolean> =>
+    booking.verified ||
+    (await attendance.attended(EVENT_ID.help(booking.id))).includes(booking.requester)
+
+  /**
+   * Cierra una sesión valorada por las dos partes y reparte su XP.
+   *
+   * Con los dos códigos validados, quien ayudó gana XP. Sin ellos se cierra a
+   * cero, pero solo cuando el código de fin ya ha caducado: hasta entonces
+   * todavía se puede validar, y la sesión se queda abierta.
+   *
+   * @returns La XP repartida, o `null` si la sesión sigue abierta.
+   */
+  async function close(booking: BookingRow): Promise<number | null> {
+    if (
+      booking.status !== 'confirmed' ||
+      booking.xp !== null ||
+      booking.helperTag === null ||
+      booking.requesterTag === null
+    ) {
+      return booking.xp
+    }
+
+    let earned = 0
+
+    if (await attended(booking)) {
+      await help.setVerified(booking.id)
+      earned = await xp.creditHelp({
+        from: booking.requester,
+        to: booking.helper,
+        kind: booking.helperTag as HelperTag,
+        projectId: booking.projectId,
+        ref: `help:${booking.id}`,
+      })
+    } else if (!closed(await scheduleOf(booking), now())) {
+      return null
+    }
+
+    await help.setXp(booking.id, earned)
+
+    return earned
+  }
+
+  /** Cierra las sesiones valoradas que estaban esperando a los códigos. Idempotente. */
+  async function settle(): Promise<void> {
+    for (const booking of await help.ratedAndOpen()) {
+      await close(booking)
+    }
+  }
+
   async function view(
     rows: readonly BookingRow[],
     actor: Actor,
@@ -241,7 +306,7 @@ export function createHelpService(options: HelpServiceOptions) {
         note: row.note,
         status: row.status,
         finished: finished(row, moment),
-        verified: row.verified,
+        verified: row.status === 'confirmed' && (await attended(row)),
         ratedByMe: role === 'helper' ? row.requesterTag !== null : row.helperTag !== null,
         ratedByPeer: role === 'helper' ? row.helperTag !== null : row.requesterTag !== null,
         xp: row.xp,
@@ -321,8 +386,45 @@ export function createHelpService(options: HelpServiceOptions) {
   }
 
   return {
+    settle,
+
+    /**
+     * Lo que `meet` necesita para validar la asistencia a una sesión: el papel
+     * de quien pregunta y el horario. Los códigos solo existen para una reserva
+     * aceptada.
+     *
+     * @throws {DomainError} `not_found` si la reserva no es suya; `conflict` si
+     *   no está aceptada.
+     */
+    async session(
+      actor: Actor,
+      bookingId: number,
+    ): Promise<{ role: 'host' | 'guest'; event: AttendanceEvent }> {
+      const booking = await mustGet(bookingId, actor)
+
+      if (booking.status !== 'confirmed') {
+        throw domainError('conflict', 'Los códigos son para las reservas aceptadas')
+      }
+
+      return {
+        // Quien ayuda enseña los códigos; quien pidió la ayuda los escribe.
+        role: booking.helper === actor.login ? 'host' : 'guest',
+        event: {
+          id: EVENT_ID.help(booking.id),
+          campusId: booking.campusId,
+          host: booking.helper,
+          title:
+            (booking.projectId === null ? null : await replica.projectName(booking.projectId)) ??
+            'Sesión de ayuda',
+          ...(await scheduleOf(booking)),
+        },
+      }
+    },
+
     /** Tu guardia de hoy: lo que ofreces, tus reservas y a quién has bloqueado. */
     async today(actor: Actor): Promise<HelpDay> {
+      await settle()
+
       const moment = await momentIn(actor.campusId)
       const [day, relevant, blocked, busy] = await Promise.all([
         help.day(actor.login, moment.day),
@@ -574,9 +676,10 @@ export function createHelpService(options: HelpServiceOptions) {
      *
      * Quien recibió la ayuda elige cómo le ayudaron; quien ayudó, cómo llegó la
      * otra persona. Cuando están las dos valoraciones la sesión se cierra, y si
-     * se comprobó que las dos personas estaban en el campus, quien ayudó gana XP.
+     * quien recibió la ayuda validó los dos códigos, quien ayudó gana XP.
      *
-     * @returns La XP repartida, o `null` si todavía falta la otra valoración.
+     * @returns La XP repartida, o `null` si todavía falta la otra valoración o
+     *   aún se puede validar el código de fin.
      */
     async rate(actor: Actor, bookingId: number, input: unknown): Promise<{ xp: number | null }> {
       const booking = await mustGet(bookingId, actor)
@@ -599,71 +702,13 @@ export function createHelpService(options: HelpServiceOptions) {
 
       await help.setTag(bookingId, about, tag)
 
-      const helperTag = about === 'helper' ? tag : booking.helperTag
-      const requesterTag = about === 'requester' ? tag : booking.requesterTag
-
-      if (helperTag === null || requesterTag === null) {
-        return { xp: null }
+      return {
+        xp: await close({
+          ...booking,
+          helperTag: about === 'helper' ? tag : booking.helperTag,
+          requesterTag: about === 'requester' ? tag : booking.requesterTag,
+        }),
       }
-
-      // Están las dos valoraciones: se cierra. Sin comprobación de presencia, a cero.
-      const earned = booking.verified
-        ? await xp.creditHelp({
-            from: booking.requester,
-            to: booking.helper,
-            kind: helperTag as HelperTag,
-            projectId: booking.projectId,
-            ref: `help:${bookingId}`,
-          })
-        : 0
-
-      await help.setXp(bookingId, earned)
-
-      return { xp: earned }
-    },
-
-    /**
-     * Comprueba que las sesiones en curso se están haciendo de verdad: que las
-     * dos personas tienen puesto en el campus durante la franja.
-     *
-     * La llama el trabajo periódico del módulo, cada minuto.
-     *
-     * @returns Cuántas sesiones se han dado por comprobadas en esta pasada.
-     */
-    async verify(): Promise<number> {
-      const yesterday = new Date(now() - 24 * 60 * 60_000).toISOString().slice(0, 10)
-      const since = new Date(now() - LOCATION_MAX_AGE_MS).toISOString()
-      const fresh = new Set<number>()
-      let verified = 0
-
-      for (const booking of await help.unverifiedSince(yesterday)) {
-        const moment = await momentIn(booking.campusId)
-
-        if (
-          booking.day !== moment.day ||
-          moment.minutes < booking.start ||
-          moment.minutes > booking.start + booking.minutes
-        ) {
-          continue
-        }
-
-        if (!fresh.has(booking.campusId)) {
-          await sync.ensureLocations(booking.campusId)
-          fresh.add(booking.campusId)
-        }
-
-        const [helperSeat, requesterSeat] = await Promise.all([
-          replica.locationOf(booking.helper, since),
-          replica.locationOf(booking.requester, since),
-        ])
-
-        if (helperSeat !== null && requesterSeat !== null) {
-          await help.setVerified(booking.id)
-          verified += 1
-        }
-      }
-
-      return verified
     },
 
     /**

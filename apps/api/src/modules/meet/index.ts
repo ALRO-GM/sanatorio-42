@@ -15,18 +15,22 @@ export function createMeetModule(deps: MeetServiceOptions): MeetModule {
     name: 'meet',
     service,
     routes: (app, { session }) => {
-      /** `GET /events/thread?id=` → el chat de un evento en el que participas. */
-      app.get<{ Querystring: { id?: string } }>('/events/thread', async (request, reply) => {
-        reply.header('Cache-Control', 'private, no-store')
+      /** `GET /events/thread?id=&after=` → el chat de un evento en el que participas. */
+      app.get<{ Querystring: { id?: string; after?: string } }>(
+        '/events/thread',
+        async (request, reply) => {
+          reply.header('Cache-Control', 'private, no-store')
 
-        return reply.send(
-          await service.thread(
-            await session.actor(request),
-            session.user(request).id,
-            request.query.id,
-          ),
-        )
-      })
+          return reply.send(
+            await service.thread(
+              await session.actor(request),
+              session.user(request).id,
+              request.query.id,
+              request.query.after,
+            ),
+          )
+        },
+      )
 
       /** `POST /events/messages` → manda un aviso o un mensaje; devuelve el chat. */
       app.post('/events/messages', async (request, reply) => {
@@ -50,6 +54,33 @@ export function createMeetModule(deps: MeetServiceOptions): MeetModule {
       /** `POST /events/checkin` → `{ id, code }`: valida el código de inicio o el de fin. */
       app.post('/events/checkin', async (request, reply) => {
         return reply.send(await service.checkin(await session.actor(request), request.body))
+      })
+
+      /**
+       * `GET /events/report?from=&to=&login=&format=` → las horas validadas con
+       * códigos. Con `format=csv`, como fichero para una hoja de cálculo.
+       */
+      app.get<{ Querystring: { format?: string } }>('/events/report', async (request, reply) => {
+        const { format, ...query } = request.query
+        const actor = await session.actor(request)
+
+        reply.header('Cache-Control', 'private, no-store')
+
+        if (format !== 'csv') {
+          return reply.send(await service.report(actor, query))
+        }
+
+        return reply
+          .header('Content-Type', 'text/csv; charset=utf-8')
+          .header('Content-Disposition', 'attachment; filename="horas-validadas.csv"')
+          .send(await service.reportCsv(actor, query))
+      })
+
+      /** `GET /admin/checkins?id=` → cada intento de validar un código de un evento. Solo admins. */
+      app.get<{ Querystring: { id?: string } }>('/admin/checkins', async (request, reply) => {
+        reply.header('Cache-Control', 'private, no-store')
+
+        return reply.send(await service.checkins(await session.actor(request), request.query.id))
       })
     },
   }

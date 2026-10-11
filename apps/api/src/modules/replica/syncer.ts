@@ -33,6 +33,8 @@
 import type { BackfillPhase, SyncStatus } from '@sanatorio/contracts'
 
 import type { FortyTwoClient } from '../../integrations/forty-two/client.js'
+import { hourlyQuota } from './quota.js'
+import type { QuotaGate } from './quota.js'
 import type { ReplicaRepository } from './replica.repository.js'
 import type { ApiLocation, ApiUser } from '../../integrations/forty-two/types.js'
 
@@ -57,6 +59,8 @@ export type SyncerOptions = {
   client: FortyTwoClient
   replica: ReplicaRepository
   config: SyncerConfig
+  /** Quién puede gastar cuota de 42. Sin ella, solo cuenta lo que queda en la hora. */
+  quota?: QuotaGate
   now?: () => number
   sleep?: (ms: number) => Promise<void>
   /** Rastro de lo que hace y de lo que falla. Por defecto, a ninguna parte. */
@@ -148,13 +152,6 @@ const BACKFILL_RECENT_WINDOWS = 24
 /** Páginas por sondeo de puestos. 1 000 personas sentadas a la vez no las hay. */
 const LOCATIONS_MAX_PAGES = 10
 
-/**
- * Peticiones de la hora por debajo de las cuales una visita ya no provoca
- * ninguna llamada a 42. Es lo que impide que alguien abriendo proyectos de
- * campus sin réplica deje a los demás sin poder iniciar sesión.
- */
-const CRITICAL_FLOOR = 40
-
 /** Espera del bucle cuando no hay nada que hacer. */
 const IDLE_SLEEP_MS = 5_000
 
@@ -228,6 +225,7 @@ export function createSyncer(options: SyncerOptions) {
     return true
   }
 
+  const quota = options.quota ?? hourlyQuota(client, config.hourlyReserve)
   const isTracked = (campusId: number): boolean => config.trackedCampusIds.includes(campusId)
   const isActive = (): boolean => now() - lastActivityAt < ACTIVITY_WINDOW_MS
   const iso = (ms: number): string => new Date(ms).toISOString()
@@ -240,10 +238,15 @@ export function createSyncer(options: SyncerOptions) {
    * cuenta.
    */
   function canSpend(reserve = config.hourlyReserve): boolean {
-    const remaining = client.hourlyRemaining()
-
-    return remaining === undefined || remaining > reserve
+    return quota.allows('background', reserve)
   }
+
+  /**
+   * `true` si una visita puede provocar una llamada a 42. Con la cuota de la
+   * hora casi agotada ya no: es lo que impide que alguien abriendo proyectos de
+   * campus sin réplica deje a los demás sin poder iniciar sesión.
+   */
+  const canServe = (): boolean => quota.allows('critical')
 
   // --- Tareas ---------------------------------------------------------------
 
@@ -645,7 +648,7 @@ export function createSyncer(options: SyncerOptions) {
       // Con la cuota de la hora casi agotada ya no se pide nada desde una
       // visita: lo poco que queda es para que la gente pueda seguir entrando
       // (el login son dos peticiones). Se sirve lo que haya en la réplica.
-      if (!canSpend(CRITICAL_FLOOR)) {
+      if (!canServe()) {
         log(`campus ${campusId}: cuota casi agotada, se sirve la réplica tal cual`)
         return { partial }
       }
@@ -698,7 +701,7 @@ export function createSyncer(options: SyncerOptions) {
      * resto de la réplica.
      */
     async ensureLocations(campusId: number): Promise<void> {
-      if (!canSpend(CRITICAL_FLOOR) || (await locationsAge(campusId)) < config.locationsTtlMs) {
+      if (!canServe() || (await locationsAge(campusId)) < config.locationsTtlMs) {
         return
       }
 

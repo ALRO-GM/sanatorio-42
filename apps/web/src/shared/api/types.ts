@@ -53,6 +53,11 @@ import type {
   MeetMessageInput,
   MeetThread,
   AdminPeople,
+  BudgetSettings,
+  FortyTwoQuota,
+  FortyTwoQuotaSettings,
+  QuotaStatus,
+  BudgetStatus,
   Consumption,
   LoggedMessage,
   Ticket,
@@ -115,18 +120,26 @@ export type Api = {
   getProfile: () => Promise<Profile>
 
   // --- Avisos, chat y asistencia de un evento
-  getEventThread: (eventId: string) => Promise<MeetThread>
+  /** El chat de un evento. Con `after`, solo los mensajes posteriores a ese `id`. */
+  getEventThread: (eventId: string, after?: number) => Promise<MeetThread>
   /** Manda un aviso o un mensaje; devuelve el chat ya con él. */
   sendEventMessage: (message: MeetMessageInput) => Promise<MeetThread>
   getEventAttendance: (eventId: string) => Promise<MeetAttendance>
   /** Valida el código de inicio o el de fin de un evento. */
   checkinEvent: (eventId: string, code: string) => Promise<MeetCheckin>
+  /**
+   * Dirección del CSV con las horas validadas con códigos en un periodo (días
+   * `YYYY-MM-DD`). Sin `login`, las tuyas; `all` es para quien administra.
+   */
+  attendanceReportUrl: (query: { from?: string; to?: string; login?: string }) => string
 
   // --- Buzón y administración
   /** Manda una incidencia, una sugerencia o una denuncia. */
   openTicket: (ticket: TicketInput) => Promise<Ticket>
   getMyTickets: () => Promise<Ticket[]>
   getAdminConsumption: () => Promise<Consumption>
+  /** Cambia los ajustes del presupuesto de peticiones; solo hace falta mandar lo que cambia. */
+  setAdminBudget: (changes: Partial<BudgetSettings>) => Promise<BudgetStatus>
   getAdminPeople: () => Promise<AdminPeople>
   setAdminRole: (login: string, admin: boolean) => Promise<void>
   /** `days: null` bloquea sin fecha de fin. */
@@ -150,6 +163,11 @@ export type Api = {
   getPublicProfile: (login: string) => Promise<PublicProfile>
   updateSettings: (settings: SettingsInput) => Promise<void>
   getSyncStatus: () => Promise<SyncStatus>
+  /** Si la cuota de 42 va justa y, si te toca esperar, tu turno en la cola. */
+  getQuota: () => Promise<QuotaStatus>
+  getAdminQuota: () => Promise<FortyTwoQuota>
+  /** Cambia los ajustes de la cuota de 42; solo hace falta mandar lo que cambia. */
+  setAdminQuota: (changes: Partial<FortyTwoQuotaSettings>) => Promise<FortyTwoQuota>
 
   getLeaderboard: (period: LeaderboardPeriod) => Promise<Leaderboard>
   // --- Red de correcciones

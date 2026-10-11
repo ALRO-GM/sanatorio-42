@@ -3,6 +3,7 @@ import { lazy, Suspense, useCallback, useEffect, useState } from 'react'
 import type { CurrentUser, ProjectSummary } from '@sanatorio/contracts'
 
 import { AlertCenter } from '../features/alerts/AlertCenter'
+import { QuotaNotice } from '../features/alerts/QuotaNotice'
 import { AvailabilityToggle } from '../features/peers/AvailabilityToggle'
 import { PeerList } from '../features/peers/PeerList'
 import { ProjectSelect } from '../features/peers/ProjectSelect'
@@ -181,6 +182,7 @@ export function Clinic({ me, onLogout }: ClinicProps) {
         />
       </div>
 
+      <QuotaNotice />
       <AlertCenter
         me={me.login}
         onGo={(next) => {

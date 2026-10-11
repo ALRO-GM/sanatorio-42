@@ -13,7 +13,8 @@ import type { NetworkSync } from '@sanatorio/contracts'
 
 import type { FortyTwoClient } from '../../integrations/forty-two/client.js'
 import type { ApiScaleTeam } from '../../integrations/forty-two/types.js'
-import type { ReplicaRepository } from '../replica/index.js'
+import { hourlyQuota } from '../replica/index.js'
+import type { QuotaGate, ReplicaRepository } from '../replica/index.js'
 import { DEFAULT_PASS_MARK, passMarkOf } from './network.analysis.js'
 import type { CorrectionRow, NetworkRepository } from './network.repository.js'
 
@@ -25,6 +26,8 @@ export type CorrectionSyncOptions = {
   campusIds: readonly number[]
   /** Peticiones por hora que no se tocan. */
   hourlyReserve: number
+  /** Quién puede gastar cuota de 42. Sin ella, solo cuenta lo que queda en la hora. */
+  quota?: QuotaGate
   /**
    * `true` si alguien está usando la web. El repaso completo solo corre cuando
    * no: así gasta la cuota que de otro modo se perdería sin quitársela a nadie.
@@ -128,11 +131,9 @@ export function createCorrectionSync(options: CorrectionSyncOptions) {
   const isActive = options.isActive ?? (() => false)
   let running = false
 
-  const canSpend = (): boolean => {
-    const remaining = client.hourlyRemaining()
+  const quota = options.quota ?? hourlyQuota(client, hourlyReserve)
 
-    return remaining === undefined || remaining > hourlyReserve + BUDGET_MARGIN
-  }
+  const canSpend = (): boolean => quota.allows('background', hourlyReserve + BUDGET_MARGIN)
 
   const load = async (campusId: number): Promise<State> =>
     (await replica.getState<State>(stateKey(campusId))) ?? {
@@ -208,11 +209,7 @@ export function createCorrectionSync(options: CorrectionSyncOptions) {
 
     let cursor = state.sweepCursor
     const deadline = Date.now() + STEP_BUDGET_MS
-    const roomy = (): boolean => {
-      const remaining = client.hourlyRemaining()
-
-      return remaining === undefined || remaining > hourlyReserve + SWEEP_MARGIN
-    }
+    const roomy = (): boolean => quota.allows('background', hourlyReserve + SWEEP_MARGIN)
 
     for (let page = 0; (page === 0 || Date.now() < deadline) && roomy() && !isActive(); page += 1) {
       const from = cursor

@@ -45,13 +45,19 @@ export const realApi: Api = {
 
   getCampuses: () => getJson('/campuses'),
   getProfile: () => getJson('/me/profile'),
-  getEventThread: (id) => getJson(`/events/thread?id=${encodeURIComponent(id)}`),
+  getEventThread: (id, after) =>
+    getJson(
+      `/events/thread?id=${encodeURIComponent(id)}${after === undefined ? '' : `&after=${after}`}`,
+    ),
   sendEventMessage: (message) => sendJson('POST', '/events/messages', message),
   getEventAttendance: (id) => getJson(`/events/attendance?id=${encodeURIComponent(id)}`),
   checkinEvent: (id, code) => sendJson('POST', '/events/checkin', { id, code }),
+  attendanceReportUrl: (query) =>
+    apiUrl(`/events/report?${new URLSearchParams({ ...query, format: 'csv' }).toString()}`),
   openTicket: (ticket) => sendJson('POST', '/tickets', ticket),
   getMyTickets: () => getJson('/tickets/mine'),
   getAdminConsumption: () => getJson('/admin/consumption'),
+  setAdminBudget: (changes) => sendJson('PUT', '/admin/budget', changes),
   getAdminPeople: () => getJson('/admin/people'),
   setAdminRole: (login, admin) => send('PUT', '/admin/roles', { login, admin }),
   blockUser: (login, reason, days) =>
@@ -68,6 +74,9 @@ export const realApi: Api = {
   getPublicProfile: (login) => getJson(`/users/${encodeURIComponent(login)}/profile`),
   updateSettings: (settings) => send('PUT', '/me/settings', settings),
   getSyncStatus: () => getJson('/sync/status'),
+  getQuota: () => getJson('/quota'),
+  getAdminQuota: () => getJson('/admin/quota'),
+  setAdminQuota: (changes) => sendJson('PUT', '/admin/quota', changes),
 
   getLeaderboard: (period) => getJson(`/leaderboard?period=${period}`),
   getHealth: () => getJson('/me/health'),

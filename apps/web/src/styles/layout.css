@@ -444,6 +444,114 @@ dialog.layout-dialog::backdrop {
   text-transform: uppercase;
   text-align: center;
 }
+/* Aviso de cuota y tique de turno. El tique es papel: se ve igual en los dos temas. */
+.quota-notice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  margin: 0.8rem 0;
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+}
+.quota-notice p {
+  flex: 1 1 16rem;
+  margin: 0;
+  font-size: 0.9rem;
+}
+.quota-ticket {
+  flex: 0 0 auto;
+  width: 13.5rem;
+  padding: 0.7rem 0.8rem;
+  background: #fffdf5;
+  color: #2f3a35;
+  border: 1px dashed #b9c4bd;
+  border-radius: 4px;
+  font-family: ui-monospace, monospace;
+  text-align: center;
+  box-shadow: 0 2px 6px var(--shadow-soft);
+}
+.quota-ticket-head {
+  display: block;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px dashed #b9c4bd;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.quota-ticket-turn small {
+  display: block;
+  margin-top: 0.4rem;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+}
+.quota-ticket-turn strong {
+  display: block;
+  font-size: 2rem;
+  line-height: 1.1;
+  letter-spacing: 0.08em;
+}
+.quota-ticket dl {
+  margin: 0.4rem 0;
+  padding: 0.4rem 0;
+  border-top: 1px dashed #b9c4bd;
+  border-bottom: 1px dashed #b9c4bd;
+  font-size: 0.78rem;
+}
+.quota-ticket dl div {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.quota-ticket dd {
+  margin: 0;
+  font-weight: 700;
+}
+.quota-ticket-foot {
+  display: block;
+  font-size: 0.65rem;
+}
+.budget-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 0.6rem;
+  align-items: end;
+  margin-top: 0.8rem;
+}
+.budget-form label {
+  display: grid;
+  gap: 0.2rem;
+  font-size: 0.85rem;
+}
+.budget-form input {
+  width: 100%;
+}
+.budget-form .actions {
+  grid-column: 1 / -1;
+}
+.budget.saving {
+  border-color: var(--accent);
+}
+.hours-report {
+  display: grid;
+  gap: 0.4rem;
+  margin-top: 0.8rem;
+}
+.hours-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 0.6rem;
+}
+.hours-form label {
+  display: grid;
+  gap: 0.2rem;
+  font-size: 0.85rem;
+}
 .meet-people {
   display: grid;
   gap: 0.2rem;

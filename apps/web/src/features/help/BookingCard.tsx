@@ -104,7 +104,9 @@ export function BookingCard({ booking, today, onChange }: BookingCardProps) {
         booking.ratedByMe &&
         closedXp === null && (
           <p className="hint" role="status">
-            {t('help.waitingPeer', { login: booking.peer.login })}
+            {booking.ratedByPeer
+              ? t('help.waitingCode')
+              : t('help.waitingPeer', { login: booking.peer.login })}
           </p>
         )}
       {closedXp !== null && (

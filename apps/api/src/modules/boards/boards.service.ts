@@ -2,9 +2,10 @@
  * Calendario de pizarras: sesiones para explicar un concepto delante de una
  * pizarra, propuestas por estudiantes.
  *
- * Quien imparte gana XP, pero solo cuando la pizarra ya ha pasado y fue alguien
- * más: proponer una sesión a la que no va nadie no da puntos. Ese reparto se
- * hace al leer el calendario (`settle`), que es idempotente, en vez de con un
+ * Quien imparte gana XP, pero solo cuando la pizarra ya ha pasado y alguien
+ * validó su asistencia con los dos códigos (inicio y fin): proponer una sesión
+ * a la que no va nadie, o apuntarse sin ir, no da puntos. Ese reparto se hace
+ * al leer el calendario (`settle`), que es idempotente, en vez de con un
  * temporizador: así funciona igual con o sin proceso de fondo.
  */
 
@@ -12,6 +13,8 @@ import type { BoardView } from '@sanatorio/contracts'
 import { z } from 'zod'
 
 import type { BoardRow, BoardsRepository } from './boards.repository.js'
+import { EVENT_ID, closed } from '../attendance/index.js'
+import type { AttendanceService } from '../attendance/index.js'
 import type { ReplicaRepository } from '../replica/index.js'
 import { domainError } from '../../core/errors.js'
 import { XP_KIND } from '../profile/index.js'
@@ -23,6 +26,8 @@ export type BoardsServiceOptions = {
   boards: BoardsRepository
   replica: ReplicaRepository
   xp: XpService
+  /** Quién validó su asistencia con los códigos: de ahí sale si hay XP. */
+  attendance: AttendanceService
   now?: () => number
 }
 
@@ -44,7 +49,7 @@ const HOUR = 3_600_000
 const MAX_UPCOMING_BOARDS = 5
 
 export function createBoardsService(options: BoardsServiceOptions) {
-  const { boards, replica, xp } = options
+  const { boards, replica, xp, attendance } = options
   const now = options.now ?? Date.now
 
   async function view(rows: readonly BoardRow[], actor: Actor): Promise<BoardView[]> {
@@ -77,12 +82,22 @@ export function createBoardsService(options: BoardsServiceOptions) {
   /**
    * Reparte la XP de las pizarras que ya han terminado.
    *
-   * Se marca como repartida haya ido alguien o no, para no volver a mirarla.
+   * Se espera a que caduque el código de fin: hasta entonces alguien puede
+   * estar todavía validando. Se marca como repartida haya ido alguien o no,
+   * para no volver a mirarla.
    */
   async function settle(): Promise<void> {
     for (const board of await boards.unsettledEndedBefore(new Date(now()).toISOString())) {
-      if (board.attendees.some((login) => login !== board.host)) {
-        await xp.award(board.host, XP_KIND.BOARD_HOST, `board:${board.id}`)
+      const schedule = { startsAt: Date.parse(board.startsAt), endsAt: Date.parse(board.endsAt) }
+
+      if (!closed(schedule, now())) {
+        continue
+      }
+
+      const attended = await attendance.attended(EVENT_ID.board(board.id))
+
+      if (attended.some((login) => login !== board.host)) {
+        await xp.award(board.host, XP_KIND.BOARD_HOST, EVENT_ID.board(board.id))
       }
 
       await boards.markSettled(board.id)

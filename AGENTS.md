@@ -26,6 +26,9 @@ Monorepo con workspaces de npm. Ver `README.md` y `docs/architecture.md`.
   se importa su `index.ts`. El linter lo comprueba.
 - API: ningún módulo llama a la API de 42 salvo `replica`. Los demás leen de la
   réplica.
+- API: antes de pedir algo a 42 se pregunta a `replica.quota` con su escalón
+  (`background`, `deferrable` o `critical`). Lo que es de una persona y puede
+  esperar usa `quota.defer`, que le da turno en la cola si no hay cuota.
 - API: un cambio de esquema es una migración nueva en
   `src/core/db/migrations/`; las existentes no se editan.
 - Web: los componentes no llevan texto escrito, usan `t('clave')`. Cada texto
@@ -73,8 +76,12 @@ Monorepo con workspaces de npm. Ver `README.md` y `docs/architecture.md`.
 ## XP y anti-trampas
 
 - La XP por ayudar en persona solo sale de una sesión reservada, aceptada,
-  comprobada (las dos personas en el campus) y valorada por las dos partes. No
+  con los dos códigos validados (inicio y fin) y valorada por las dos partes. No
   añadas atajos que den XP con un clic.
+- Pizarras y sesiones de ayuda: sin los dos códigos no hay XP ni tiempo
+  contado. Las reglas (cuándo vale cada código, cuánto tiempo cuenta) están en
+  `modules/attendance/attendance.rules.ts`; ese tiempo se enseña al staff, así
+  que ante la duda se cuenta menos.
 - Las valoraciones no son notas: describen cómo fue la sesión. No añadas
   opciones negativas, positivas ni neutras.
 - Los topes (pareja/día, pareja/semana, diarios) y las faltas están en

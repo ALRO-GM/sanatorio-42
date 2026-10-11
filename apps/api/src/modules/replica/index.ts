@@ -5,6 +5,7 @@
  * aquí. El único que gasta peticiones es el sincronizador.
  */
 
+import { maintain } from '../../core/db/database.js'
 import type { Db } from '../../core/db/database.js'
 import type { AppModule } from '../../core/module.js'
 import type { FortyTwoClient } from '../../integrations/forty-two/client.js'
@@ -13,6 +14,8 @@ import type { Agenda } from './agenda.js'
 import { createCurriculum } from './curriculum.js'
 import type { Curriculum } from './curriculum.js'
 import { createCampusesService } from './campuses.service.js'
+import { DRAIN_EVERY_MS, createQuota } from './quota.js'
+import type { Quota } from './quota.js'
 import type { CampusesService } from './campuses.service.js'
 import { createReplicaRepository } from './replica.repository.js'
 import type { ReplicaRepository } from './replica.repository.js'
@@ -26,6 +29,8 @@ export type ReplicaModuleDeps = {
   config: SyncerConfig
   /** `false` para no arrancar el bucle de fondo aunque se llame a `start`. */
   backgroundSync?: boolean
+  /** Quién no hace cola cuando la cuota de 42 va justa (quien administra). */
+  priority?: (login: string) => boolean
   log?: (message: string) => void
   now?: () => number
 }
@@ -38,14 +43,25 @@ export type ReplicaModule = AppModule & {
   agenda: Agenda
   /** Plan de estudios: el de cada persona y el círculo de cada proyecto. */
   curriculum: Curriculum
+  /** La cuota de 42: quién puede gastarla y la cola de quien espera. */
+  quota: Quota
 }
 
 export function createReplicaModule(deps: ReplicaModuleDeps): ReplicaModule {
   const repository = createReplicaRepository(deps.db)
+  const quota = createQuota({
+    db: deps.db,
+    client: deps.client,
+    hourlyReserve: deps.config.hourlyReserve,
+    ...(deps.priority === undefined ? {} : { priority: deps.priority }),
+    ...(deps.now === undefined ? {} : { now: deps.now }),
+    ...(deps.log === undefined ? {} : { log: deps.log }),
+  })
   const sync = createSyncer({
     client: deps.client,
     replica: repository,
     config: deps.config,
+    quota,
     ...(deps.now === undefined ? {} : { now: deps.now }),
     ...(deps.log === undefined ? {} : { log: deps.log }),
   })
@@ -59,6 +75,7 @@ export function createReplicaModule(deps: ReplicaModuleDeps): ReplicaModule {
     db: deps.db,
     client: deps.client,
     hourlyReserve: deps.config.hourlyReserve,
+    quota,
     ...(deps.now === undefined ? {} : { now: deps.now }),
     ...(deps.log === undefined ? {} : { log: deps.log }),
   })
@@ -67,9 +84,22 @@ export function createReplicaModule(deps: ReplicaModuleDeps): ReplicaModule {
     db: deps.db,
     client: deps.client,
     hourlyReserve: deps.config.hourlyReserve,
+    quota,
     ...(deps.now === undefined ? {} : { now: deps.now }),
     ...(deps.log === undefined ? {} : { log: deps.log }),
   })
+
+  // Lo que se hace cuando le llega el turno a quien esperaba: lo mismo que se
+  // habría hecho en su visita si hubiera habido cuota.
+  quota.register('agenda', async (login) =>
+    agenda.userAgenda(login, await repository.userIdOf(login)),
+  )
+  quota.register('cursus', async (login) =>
+    curriculum.cursusOf(login, await repository.userIdOf(login)),
+  )
+  quota.register('track', async (login) =>
+    curriculum.trackOf(login, await repository.userIdOf(login)),
+  )
 
   return {
     name: 'replica',
@@ -78,9 +108,26 @@ export function createReplicaModule(deps: ReplicaModuleDeps): ReplicaModule {
     curriculum,
     sync,
     campuses,
+    quota,
     routes: (app, context) => {
-      registerReplicaRoutes(app, context, { campuses, sync })
+      registerReplicaRoutes(app, context, { campuses, sync, quota })
     },
+    jobs: [
+      {
+        name: 'cola de la cuota de 42',
+        everyMs: DRAIN_EVERY_MS,
+        run: async () => {
+          await quota.drain()
+        },
+      },
+      {
+        // Es de toda la base, no solo de la réplica: va aquí porque este módulo
+        // es el que más escribe y el que está siempre.
+        name: 'estadísticas de la base',
+        everyMs: 6 * 60 * 60_000,
+        run: () => maintain(deps.db),
+      },
+    ],
     start: () => {
       if (deps.backgroundSync ?? true) {
         sync.start()
@@ -93,6 +140,8 @@ export function createReplicaModule(deps: ReplicaModuleDeps): ReplicaModule {
 export type { Agenda, AgendaEvaluation, AgendaEvent, UserAgenda } from './agenda.js'
 export { LAST_CIRCLE, parseHours } from './curriculum.js'
 export type { Curriculum, Track } from './curriculum.js'
+export { hourlyQuota } from './quota.js'
+export type { Quota, QuotaGate } from './quota.js'
 export { syncConfigFrom } from './sync-config.js'
 export { LOCATION_MAX_AGE_MS, PROJECT_STATUS } from './replica.domain.js'
 export type { ReplicaRepository } from './replica.repository.js'

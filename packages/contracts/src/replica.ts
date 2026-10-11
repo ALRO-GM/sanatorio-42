@@ -29,3 +29,61 @@ export type SyncStatus = {
     backfill: { phase: BackfillPhase; rows: number; total: number | null }
   }[]
 }
+
+/**
+ * Cómo anda la cuota de la API de 42.
+ *
+ * - `ok`: todo se pide con normalidad.
+ * - `tight`: va justa. Solo pasa lo crítico (entrar, ver quién puede ayudarte y
+ *   dónde está); lo demás se sirve con lo último guardado y espera turno.
+ * - `critical`: casi agotada. No se pide nada: se sirve lo que hay.
+ */
+export type QuotaLevel = 'ok' | 'tight' | 'critical'
+
+/** El turno de alguien en la cola de la cuota de 42, como un tique de sala de espera. */
+export type QuotaTicket = {
+  /** El número del turno: `A-042`. */
+  number: string
+  /** El último turno atendido, o `null` si aún no se ha atendido ninguno. */
+  serving: string | null
+  /** Turnos que hay delante. */
+  ahead: number
+  /** Minutos que se calcula que faltan, o `null` si no se puede saber. */
+  etaMinutes: number | null
+  /** Desde cuándo espera (ISO-8601). */
+  since: string
+}
+
+/** `GET /quota`: si la cuota de 42 va justa y, si te toca esperar, tu turno. */
+export type QuotaStatus = {
+  level: QuotaLevel
+  ticket: QuotaTicket | null
+}
+
+/** Los ajustes de la cuota de 42, que se cambian desde el panel. */
+export type FortyTwoQuotaSettings = {
+  /** Peticiones a 42 que se permiten al día, o `null` si solo cuenta la cuota horaria. */
+  dailyRequests: number | null
+  /** Tope mensual de la aplicación en 42, o `null` si no tiene o no se sabe. */
+  monthlyRequests: number | null
+  /** Día del mes (1-28) en que se renueva el tope mensual. */
+  renewDay: number
+  /** Modo ahorro: mientras esté puesto, solo pasa lo crítico. */
+  saving: boolean
+}
+
+/** La cuota de 42, para el panel. Días en UTC. */
+export type FortyTwoQuota = {
+  settings: FortyTwoQuotaSettings
+  level: QuotaLevel
+  /** Peticiones que quedan esta hora según 42, o `null` si aún no se ha hecho ninguna. */
+  hourlyRemaining: number | null
+  day: {
+    spent: number
+    /** Lo que se puede gastar hoy, o `null` si no hay tope diario ni mensual. */
+    allowance: number | null
+  }
+  month: { spent: number; daysLeft: number; renewsOn: string }
+  /** Personas esperando turno. */
+  queued: number
+}

@@ -5,13 +5,20 @@
  * - **Buzón**: incidencias, sugerencias y denuncias de la gente, con respuesta.
  * - **Consumo**: peticiones y bytes por persona y hora, y un tope por persona
  *   que se ajusta solo para que la suma de todos quepa en el presupuesto.
+ * - **Presupuesto**: se regula desde el panel y es dinámico: lo de hoy sale de
+ *   lo que queda del mes, lo de esta hora de lo que queda del día y lo de cada
+ *   persona de cuánta gente hay (`budget.rules.ts`).
  *
  * El contador de consumo vive en memoria y se vuelca a la base cada minuto:
- * apuntar cada petición en SQLite costaría más que la propia petición.
+ * apuntar cada petición en SQLite costaría más que la propia petición. Al
+ * cambiar de hora, y al arrancar, se recupera de la base lo ya servido: un
+ * reinicio no pone el tope a cero.
  */
 
 import type {
   AdminPeople,
+  BudgetSettings,
+  BudgetStatus,
   Consumption,
   Ticket,
   TicketKind,
@@ -25,13 +32,13 @@ import { toNumber, toText } from '../../core/db/rows.js'
 import { domainError } from '../../core/errors.js'
 import { createTtlCache } from '../../core/ttl-cache.js'
 import { parse } from '../../core/validation.js'
+import { DEFAULT_BUDGET, forecast, perPerson, periodOf, planDay, planHour } from './budget.rules.js'
+import type { DayPlan } from './budget.rules.js'
 
 export type AdminServiceOptions = {
   db: Db
   /** Admins fijos (`ADMIN_LOGINS`): no se pueden quitar desde el panel. */
   fixedAdmins: readonly string[]
-  /** Peticiones por hora que la web se permite servir en total. */
-  hourlyBudget: number
   /** Peticiones a la API de 42 que quedan esta hora. */
   fortyTwoRemaining: () => number | undefined
   now?: () => number
@@ -39,12 +46,11 @@ export type AdminServiceOptions = {
 
 const HOUR = 60 * 60_000
 
-/** El tope automático por persona nunca baja ni sube de aquí. */
-const MIN_PER_PERSON = 240
-const MAX_PER_PERSON = 3000
-
 /** A partir de qué parte del presupuesto un tramo horario merece un aviso. */
 const WARN_SHARE = 0.8
+
+/** Cada cuánto se releen los ajustes y los topes a mano: cambian poco. */
+const SETTINGS_TTL_MS = 60_000
 
 const login = z
   .string()
@@ -64,6 +70,28 @@ const limitSchema = z.object({
   /** `null` devuelve a esa persona al tope automático. */
   perHour: z.number().int().min(10).max(100_000).nullable(),
 })
+const budgetSchema = z
+  .object({
+    dailyRequests: z.number().int().min(1000).max(100_000_000),
+    monthlyBytes: z.number().int().min(1_000_000).max(1e15).nullable(),
+    renewDay: z.number().int().min(1).max(28),
+    share: z.number().min(0.5).max(1),
+    minPerPerson: z.number().int().min(10).max(100_000),
+    maxPerPerson: z.number().int().min(10).max(100_000),
+    saving: z.boolean(),
+  })
+  .partial()
+
+/** Los ajustes con lo que traiga `patch` encima; lo que no venga se queda como estaba. */
+function withChanges(base: BudgetSettings, patch: z.infer<typeof budgetSchema>): BudgetSettings {
+  return {
+    ...base,
+    ...(Object.fromEntries(
+      Object.entries(patch).filter(([, value]) => value !== undefined),
+    ) as Partial<BudgetSettings>),
+  }
+}
+
 const ticketSchema = z.object({
   kind: z.enum(['issue', 'idea', 'report']),
   subject: z.string().trim().min(3, 'ponle un título').max(120),
@@ -80,6 +108,10 @@ const answerSchema = z.object({
 
 /** Tickets abiertos que puede tener una persona a la vez: el buzón no es un chat. */
 const MAX_OPEN_TICKETS = 10
+
+/** Y los que puede mandar en diez minutos, abiertos o no. */
+const MAX_TICKETS_PER_WINDOW = 3
+const TICKET_WINDOW_MS = 10 * 60_000
 
 function toTicket(row: Record<string, unknown>): Ticket {
   const text = (value: unknown): string | null => (typeof value === 'string' ? value : null)
@@ -100,7 +132,7 @@ function toTicket(row: Record<string, unknown>): Ticket {
 }
 
 export function createAdminService(options: AdminServiceOptions) {
-  const { db, fixedAdmins, hourlyBudget } = options
+  const { db, fixedAdmins } = options
   const now = options.now ?? Date.now
   const iso = (): string => new Date(now()).toISOString()
   // Permisos y bloqueos se miran en cada petición con sesión: se recuerdan medio minuto.
@@ -115,7 +147,14 @@ export function createAdminService(options: AdminServiceOptions) {
   let hourKey = ''
   let thisHour = new Map<string, number>()
   let manual = new Map<string, number>()
-  let manualAt = -Infinity
+  let settings: BudgetSettings = DEFAULT_BUDGET
+  let syncedAt = -Infinity
+  /** Lo servido hasta que empezó esta hora: hoy, y en el periodo mensual en curso. */
+  let before = { requestsToday: 0, bytesPeriod: 0, requestsPeriod: 0 }
+  /** Peticiones de todo el mundo en la hora en curso. */
+  let hourTotal = 0
+  let dayPlan: DayPlan = { requests: 0, limitedBy: 'day' }
+  let hourBudget = 0
 
   const slot = (): { day: string; hour: number; key: string } => {
     const at = new Date(now())
@@ -124,13 +163,70 @@ export function createAdminService(options: AdminServiceOptions) {
     return { day, hour: at.getUTCHours(), key: `${day}|${at.getUTCHours()}` }
   }
 
-  const roll = (): void => {
-    const { key } = slot()
+  const sum = (row: Record<string, unknown> | undefined, column: string): number =>
+    toNumber(row?.[column] ?? 0)
 
-    if (key !== hourKey) {
-      hourKey = key
-      thisHour = new Map()
+  /**
+   * Pone al día lo que hace falta para decidir un tope: los ajustes (cada
+   * minuto) y, al cambiar de hora o al arrancar, lo ya servido según la base.
+   */
+  const refresh = async (): Promise<void> => {
+    const { key, day, hour } = slot()
+    const rolled = key !== hourKey
+
+    if (!rolled && now() - syncedAt <= SETTINGS_TTL_MS) return
+
+    syncedAt = now()
+
+    const [stored, limits] = await Promise.all([
+      db.execute("SELECT value FROM settings WHERE key = 'budget'"),
+      db.execute('SELECT login, per_hour FROM user_limits'),
+    ])
+
+    manual = new Map(limits.rows.map((row) => [toText(row.login), toNumber(row.per_hour)]))
+    settings = { ...DEFAULT_BUDGET }
+
+    try {
+      const value = stored.rows[0]?.value
+
+      if (typeof value === 'string') {
+        settings = withChanges(DEFAULT_BUDGET, parse(budgetSchema, JSON.parse(value)))
+      }
+    } catch {
+      // Ajustes ilegibles: valen los de fábrica.
     }
+
+    if (rolled) {
+      const since = new Date(periodOf(now(), settings.renewDay).start).toISOString().slice(0, 10)
+      const [people, today, period] = await Promise.all([
+        // Lo de esta hora solo está en la base si el servidor se ha reiniciado a media hora.
+        db.execute({
+          sql: 'SELECT login, requests FROM request_stats WHERE day = ? AND hour = ?',
+          args: [day, hour],
+        }),
+        db.execute({
+          sql: 'SELECT SUM(requests) AS requests FROM request_stats WHERE day = ? AND hour < ?',
+          args: [day, hour],
+        }),
+        db.execute({
+          sql: `SELECT SUM(requests) AS requests, SUM(bytes) AS bytes FROM request_stats
+                WHERE day >= ?`,
+          args: [since],
+        }),
+      ])
+
+      hourKey = key
+      thisHour = new Map(people.rows.map((row) => [toText(row.login), toNumber(row.requests)]))
+      hourTotal = [...thisHour.values()].reduce((total, requests) => total + requests, 0)
+      before = {
+        requestsToday: sum(today.rows[0], 'requests'),
+        requestsPeriod: sum(period.rows[0], 'requests'),
+        bytesPeriod: sum(period.rows[0], 'bytes'),
+      }
+    }
+
+    dayPlan = planDay(settings, before, now())
+    hourBudget = planHour(dayPlan.requests, before.requestsToday, now())
   }
 
   const assertAdmin = (actor: Actor): void => {
@@ -139,12 +235,33 @@ export function createAdminService(options: AdminServiceOptions) {
     }
   }
 
-  /** Tope automático: el presupuesto repartido entre quienes están usando la web esta hora. */
-  const automaticLimit = (): number =>
-    Math.max(
-      MIN_PER_PERSON,
-      Math.min(MAX_PER_PERSON, Math.floor(hourlyBudget / Math.max(1, thisHour.size))),
-    )
+  /** Tope automático: lo de esta hora repartido entre quienes están usando la web. */
+  const automaticLimit = (): number => perPerson(settings, hourBudget, thisHour.size)
+
+  const budgetStatus = (): BudgetStatus => {
+    const period = periodOf(now(), settings.renewDay)
+    const used = before.requestsToday + hourTotal
+
+    return {
+      settings,
+      day: {
+        allowance: dayPlan.requests,
+        used,
+        left: Math.max(0, dayPlan.requests - used),
+        forecast: forecast(used, now()),
+        limitedBy: dayPlan.limitedBy,
+      },
+      month: {
+        bytesUsed: before.bytesPeriod,
+        bytesLeft:
+          settings.monthlyBytes === null
+            ? null
+            : Math.max(0, settings.monthlyBytes - before.bytesPeriod),
+        daysLeft: period.daysLeft,
+        renewsOn: new Date(period.end).toISOString().slice(0, 10),
+      },
+    }
+  }
 
   return {
     // --- Permisos y bloqueos ------------------------------------------------
@@ -282,7 +399,35 @@ export function createAdminService(options: AdminServiceOptions) {
             sql: 'INSERT OR REPLACE INTO user_limits (login, per_hour) VALUES (?, ?)',
             args: [change.login, change.perHour],
           }))
-      manualAt = -Infinity
+      syncedAt = -Infinity
+    },
+
+    /**
+     * Cambia los ajustes del presupuesto. Solo hace falta mandar lo que cambia;
+     * vale desde la siguiente petición.
+     */
+    async setBudget(actor: Actor, input: unknown): Promise<BudgetStatus> {
+      assertAdmin(actor)
+      await refresh()
+
+      const next = withChanges(settings, parse(budgetSchema, input))
+
+      if (next.minPerPerson > next.maxPerPerson) {
+        throw domainError('invalid_input', 'El mínimo por persona no puede pasar del máximo')
+      }
+
+      await db.execute({
+        sql: `INSERT OR REPLACE INTO settings (key, value, updated_by, updated_at)
+              VALUES ('budget', ?, ?, ?)`,
+        args: [JSON.stringify(next), actor.login, iso()],
+      })
+      // El día de renovación cambia desde cuándo se cuenta el mes: se vuelve a
+      // leer todo de la base, con lo de esta hora ya volcado.
+      await this.flush()
+      hourKey = ''
+      await refresh()
+
+      return budgetStatus()
     },
 
     // --- Consumo --------------------------------------------------------------
@@ -293,22 +438,12 @@ export function createAdminService(options: AdminServiceOptions) {
      * @returns `false` si se ha pasado: la petición se rechaza con un `429`.
      */
     async allow(who: string, admin: boolean): Promise<boolean> {
-      roll()
-
-      // Los topes a mano cambian poco: se releen cada minuto.
-      if (now() - manualAt > 60_000) {
-        manualAt = now()
-        manual = new Map(
-          (await db.execute('SELECT login, per_hour FROM user_limits')).rows.map((row) => [
-            toText(row.login),
-            toNumber(row.per_hour),
-          ]),
-        )
-      }
+      await refresh()
 
       const used = (thisHour.get(who) ?? 0) + 1
 
       thisHour.set(who, used)
+      hourTotal += 1
 
       // Quien administra no se queda fuera de su propio panel.
       const allowed = admin || used <= (manual.get(who) ?? automaticLimit())
@@ -359,7 +494,7 @@ export function createAdminService(options: AdminServiceOptions) {
     async consumption(actor: Actor): Promise<Consumption> {
       assertAdmin(actor)
       await this.flush()
-      roll()
+      await refresh()
 
       const since = (ms: number): string => new Date(now() - ms).toISOString().slice(0, 10)
       const [recent, pattern, top, limits] = await Promise.all([
@@ -386,6 +521,8 @@ export function createAdminService(options: AdminServiceOptions) {
       const manualLimits = new Map(
         limits.rows.map((row) => [toText(row.login), toNumber(row.per_hour)]),
       )
+      // Para los avisos se compara con una hora cualquiera: el día repartido a partes iguales.
+      const evenHour = Math.max(1, dayPlan.requests / 24)
       const cells = pattern.rows.map((row) => ({
         weekday: toNumber(row.weekday),
         hour: toNumber(row.hour),
@@ -393,8 +530,9 @@ export function createAdminService(options: AdminServiceOptions) {
       }))
 
       return {
+        budget: budgetStatus(),
         limit: {
-          budget: hourlyBudget,
+          budget: hourBudget,
           activePeople: thisHour.size,
           perPerson: automaticLimit(),
           fortyTwoRemaining: options.fortyTwoRemaining() ?? null,
@@ -408,10 +546,10 @@ export function createAdminService(options: AdminServiceOptions) {
         })),
         pattern: cells,
         warnings: cells
-          .filter((cell) => cell.requests >= hourlyBudget * WARN_SHARE)
+          .filter((cell) => cell.requests >= evenHour * WARN_SHARE)
           .map((cell) => ({
             ...cell,
-            share: Math.round((100 * cell.requests) / hourlyBudget) / 100,
+            share: Math.round((100 * cell.requests) / evenHour) / 100,
           }))
           .sort((a, b) => b.requests - a.requests),
         top: top.rows.map((row) => ({
@@ -444,6 +582,15 @@ export function createAdminService(options: AdminServiceOptions) {
           'conflict',
           'Tienes demasiados avisos sin responder: espera a que se resuelvan',
         )
+      }
+
+      const recent = await db.execute({
+        sql: 'SELECT COUNT(*) AS total FROM tickets WHERE login = ? AND created_at > ?',
+        args: [actor.login, new Date(now() - TICKET_WINDOW_MS).toISOString()],
+      })
+
+      if (toNumber(recent.rows[0]?.total) >= MAX_TICKETS_PER_WINDOW) {
+        throw domainError('conflict', 'Has mandado varios avisos seguidos: espera unos minutos')
       }
 
       const result = await db.execute({

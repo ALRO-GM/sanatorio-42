@@ -27,6 +27,8 @@
 import type { Db } from '../../core/db/database.js'
 import { toNumber, toText } from '../../core/db/rows.js'
 import type { FortyTwoClient } from '../../integrations/forty-two/client.js'
+import { hourlyQuota } from './quota.js'
+import type { QuotaGate } from './quota.js'
 import { COMMON_CORE } from './common-core.js'
 
 export type Track = 'classic' | 'next'
@@ -44,6 +46,8 @@ export type CurriculumOptions = {
   client: FortyTwoClient
   /** Peticiones de la hora que no se tocan: son para los logins. */
   hourlyReserve: number
+  /** Quién puede gastar cuota de 42 y la cola de quien espera. Sin ella, solo cuenta la hora. */
+  quota?: QuotaGate
   now?: () => number
   log?: (message: string) => void
 }
@@ -135,11 +139,10 @@ export function createCurriculum(options: CurriculumOptions) {
   /** Cuándo se preguntó por última vez a 42 por el cursus de cada persona. */
   const cursusAsked = new Map<string, number>()
 
-  const canSpend = (): boolean => {
-    const remaining = client.hourlyRemaining()
+  const quota = options.quota ?? hourlyQuota(client, options.hourlyReserve)
 
-    return remaining === undefined || remaining > options.hourlyReserve
-  }
+  /** `true` si queda cuota para algo que puede esperar y no es de nadie en concreto. */
+  const canSpend = (): boolean => quota.allows('deferrable')
 
   async function stored(login: string): Promise<(UserTrack & { fetchedAt: number }) | null> {
     const result = await db.execute({
@@ -313,7 +316,8 @@ export function createCurriculum(options: CurriculumOptions) {
       // 42cursus no tiene nada que guardar y no debe costar una petición cada vez.
       const tried = now() - (cursusAsked.get(login) ?? -Infinity) < TRACK_TTL_MS
 
-      if (fresh || tried || userId === null || !canSpend()) {
+      // Si la cuota va justa, se queda con lo guardado y coge turno en la cola.
+      if (fresh || tried || userId === null || !(await quota.defer(login, 'cursus'))) {
         return known
       }
 
@@ -374,7 +378,7 @@ export function createCurriculum(options: CurriculumOptions) {
         return known
       }
 
-      if (userId !== null && canSpend()) {
+      if (userId !== null && (await quota.defer(login, 'track'))) {
         try {
           return await learn(login, userId)
         } catch (error) {

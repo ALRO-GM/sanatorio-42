@@ -155,8 +155,9 @@ export function CalendarPage({ onGo, me }: CalendarPageProps) {
 
         {data !== undefined && view === 'month' && (
           <div className="month-grid">
-            {weekdays.map((name) => (
-              <span key={name} className="month-dow" aria-hidden="true">
+            {/* Por posición: en inglés martes y jueves empiezan igual, y sábado y domingo. */}
+            {weekdays.map((name, index) => (
+              <span key={index} className="month-dow" aria-hidden="true">
                 {name}
               </span>
             ))}

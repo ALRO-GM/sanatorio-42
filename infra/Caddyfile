@@ -9,6 +9,12 @@
 		Referrer-Policy "strict-origin-when-cross-origin"
 		# La web no se incrusta en ninguna otra.
 		X-Frame-Options "DENY"
+		# Solo se ejecuta y se carga lo que sirve esta misma máquina. Las fotos
+		# de perfil vienen de 42 (cualquier https); los estilos en línea son los
+		# `style` que pone React (anchos de barras, colores del mapa).
+		Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self'; font-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+		# La web no usa cámara, micrófono ni ubicación: el QR lo lee la cámara del móvil, no la página.
+		Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
 		-Server
 	}
 

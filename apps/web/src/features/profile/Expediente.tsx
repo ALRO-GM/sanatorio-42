@@ -12,6 +12,7 @@ import { Avatar } from '../../shared/ui/Avatar'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { AskedCard } from './AskedCard'
 import { HealthCard } from './HealthCard'
+import { HoursReport } from './HoursReport'
 import { LeaderboardCard } from './LeaderboardCard'
 import { NetworkCard } from './NetworkCard'
 
@@ -167,6 +168,7 @@ export function Expediente({ me, profile }: ExpedienteProps) {
                   ))}
                 </div>
                 <ErrorNote error={error} />
+                <HoursReport />
               </article>
             ),
           },

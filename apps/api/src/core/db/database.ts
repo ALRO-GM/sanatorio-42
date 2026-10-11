@@ -45,7 +45,44 @@ export async function openDatabase(options: DatabaseOptions): Promise<Db> {
 
   await migrate(db)
 
+  if (options.url.startsWith('file:') && !options.url.includes(':memory:')) {
+    await tune(db)
+  }
+
   return db
+}
+
+/**
+ * Ajustes de un SQLite en disco, que no valen para uno en memoria ni remoto.
+ *
+ * - **WAL**: con el diario clásico, cada escritura del sincronizador deja a los
+ *   lectores esperando; con WAL se lee mientras se escribe. Queda guardado en el
+ *   fichero. Las copias (`VACUUM INTO`) y la restauración ya cuentan con él.
+ * - **`synchronous = NORMAL`**: con WAL es seguro ante un corte del proceso, y
+ *   ahorra un `fsync` por escritura.
+ * - **Estadísticas**: sin `ANALYZE`, el planificador elige índices a ciegas
+ *   (medido: la consulta de una pareja en la red recorría todo el campus). Se
+ *   calculan una vez si faltan; después las mantiene `maintain`.
+ */
+async function tune(db: Db): Promise<void> {
+  await db.execute('PRAGMA journal_mode = WAL')
+  await db.execute('PRAGMA synchronous = NORMAL')
+
+  const stats = await db.execute(
+    "SELECT COUNT(*) AS total FROM sqlite_master WHERE name = 'sqlite_stat1'",
+  )
+
+  if (Number(stats.rows[0]?.total ?? 0) === 0) {
+    await db.execute('ANALYZE')
+  }
+}
+
+/**
+ * Pone al día las estadísticas de las tablas que más han cambiado. Es barato:
+ * SQLite solo vuelve a medir lo que hace falta. Lo lanza un trabajo periódico.
+ */
+export async function maintain(db: Db): Promise<void> {
+  await db.execute('PRAGMA optimize')
 }
 
 /**

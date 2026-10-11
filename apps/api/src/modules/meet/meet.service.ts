@@ -5,21 +5,20 @@
  *   "llego tarde" o "no voy", y escribir. Todos los del evento ven lo mismo.
  * - **Asistencia con códigos** (pizarras y sesiones de ayuda): quien organiza
  *   tiene dos códigos de cuatro caracteres, uno para el principio y otro para el
- *   final. Quien asiste los escribe (o escanea su QR) y queda guardado cuándo.
- *   Solo con los dos hay asistencia válida, y de la diferencia sale cuánto duró.
+ *   final. Quien asiste los escribe (o escanea su QR). Aquí solo se decide quién
+ *   es quién en cada evento; las reglas y el tiempo son del módulo `attendance`.
  *
- * Quién participa en qué lo dice el calendario de cada persona: aquí no se
- * duplica esa regla.
+ * Quién participa en qué lo dice el módulo de cada cosa (pizarras, ayuda,
+ * terapias); para lo de 42, el calendario de cada persona.
  */
 
-import { randomInt } from 'node:crypto'
-
 import type {
+  AttendanceReport,
+  CheckinLogEntry,
   LoggedMessage,
   MeetAttendance,
   MeetCheckin,
   MeetMessage,
-  MeetPresence,
   MeetReason,
   MeetThread,
 } from '@sanatorio/contracts'
@@ -31,6 +30,8 @@ import { toNumber, toText } from '../../core/db/rows.js'
 import { domainError } from '../../core/errors.js'
 import { createTtlCache } from '../../core/ttl-cache.js'
 import { parse } from '../../core/validation.js'
+import { EVENT_ID } from '../attendance/index.js'
+import type { AttendanceEvent, AttendanceService } from '../attendance/index.js'
 import type { BoardsService } from '../boards/index.js'
 import type { CalendarService } from '../calendar/index.js'
 import type { HelpService } from '../help/index.js'
@@ -42,6 +43,7 @@ export type MeetServiceOptions = {
   calendar: CalendarService
   boards: BoardsService
   help: HelpService
+  attendance: AttendanceService
   /** Para el chat de cada grupo de terapia (`group:<id>`), que no es un evento del calendario. */
   therapy: TherapyService
   replica: ReplicaRepository
@@ -57,9 +59,12 @@ const LOOK_AHEAD_MS = 14 * 24 * HOUR
 /** Mensajes que se devuelven de un evento: los últimos. */
 const THREAD_LIMIT = 200
 
-/** Sin letras ni números que se confundan al leerlos en voz alta o en una pizarra. */
-const CODE_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'
-const CODE_LENGTH = 4
+/**
+ * Mensajes que puede mandar una persona en un minuto: a un mismo evento y en
+ * total. Un chat de quedar no necesita más, y así nadie lo inunda.
+ */
+const MAX_PER_MINUTE_EVENT = 8
+const MAX_PER_MINUTE_TOTAL = 20
 
 const REASONS = ['evaluation', 'other_event', 'on_my_way', 'transport', 'other'] as const
 
@@ -89,35 +94,14 @@ const checkinSchema = z.object({
     .regex(/^[A-Z0-9]{4}$/, 'el código son cuatro letras o números'),
 })
 
-/** Un código nuevo, distinto de `other`. */
-function newCode(other?: string): string {
-  for (;;) {
-    const code = Array.from(
-      { length: CODE_LENGTH },
-      () => CODE_ALPHABET[randomInt(CODE_ALPHABET.length)],
-    ).join('')
-
-    if (code !== other) return code
-  }
-}
-
-function presenceOf(login: string, startedAt: unknown, endedAt: unknown): MeetPresence {
-  const start = typeof startedAt === 'string' ? startedAt : null
-  const end = typeof endedAt === 'string' ? endedAt : null
-
-  return {
-    login,
-    startedAt: start,
-    endedAt: end,
-    minutes:
-      start === null || end === null
-        ? null
-        : Math.max(0, Math.round((Date.parse(end) - Date.parse(start)) / 60_000)),
-  }
-}
+const reportSchema = z.object({
+  login: z.string().trim().toLowerCase().max(40).optional(),
+  from: z.string().optional(),
+  to: z.string().optional(),
+})
 
 export function createMeetService(options: MeetServiceOptions) {
-  const { db, calendar, boards, help, therapy, replica } = options
+  const { db, calendar, boards, help, attendance, therapy, replica } = options
   const now = options.now ?? Date.now
   // Preguntar al calendario en cada mensaje del chat sería caro: se recuerda un rato.
   const membership = createTtlCache<boolean>({ ttlMs: 5 * 60_000, maxEntries: 500, now })
@@ -133,13 +117,34 @@ export function createMeetService(options: MeetServiceOptions) {
     id: string,
   ): Promise<void> => {
     const takesPart = await membership.get(`${actor.login}|${actor.campusId}|${id}`, async () => {
-      // El chat de un grupo de terapia es de quien está dentro, haya o no sesión pronto.
-      if (id.startsWith('group:')) {
-        const groupId = Number(id.slice('group:'.length))
+      const [kind, second, third] = id.split(':')
 
-        return (await therapy.list(actor)).some((group) => group.id === groupId && group.joined)
+      // Lo de Sanatorio se pregunta a quien lo sabe: calcular el calendario
+      // entero (con la agenda de 42 incluida) para saber si alguien está en una
+      // pizarra sale caro, y esto se mira en cada mensaje.
+      // El chat de un grupo de terapia es de quien está dentro, haya o no sesión pronto.
+      if (kind === 'group' || kind === 'therapy') {
+        return (await therapy.list(actor)).some(
+          (group) =>
+            group.id === Number(second) &&
+            group.joined &&
+            (kind === 'group' || group.dates.includes(third ?? '')),
+        )
+      }
+      if (kind === 'board') {
+        return (await boards.list(actor)).some(
+          (board) => board.id === Number(second) && (board.joined || board.host === actor.login),
+        )
+      }
+      if (kind === 'help' && second === 'booking') {
+        // Una reserva sin aceptar todavía no es un compromiso: no tiene chat.
+        return help.session(actor, Number(third)).then(
+          () => true,
+          () => false,
+        )
       }
 
+      // El resto es de 42 (correcciones, eventos, exámenes): lo dice su agenda.
       const { events } = await calendar.between(
         actor,
         userId,
@@ -157,65 +162,79 @@ export function createMeetService(options: MeetServiceOptions) {
   }
 
   /**
-   * Qué papel tiene `actor` en un evento con asistencia por códigos.
+   * Qué papel tiene `actor` en un evento con asistencia por códigos, y lo que
+   * hace falta saber del evento para validarla.
    *
    * @throws {DomainError} `invalid_input` si ese tipo de evento no los usa.
    */
-  const roleIn = async (actor: Actor, id: string): Promise<'host' | 'guest'> => {
+  const resolve = async (
+    actor: Actor,
+    id: string,
+  ): Promise<{ role: 'host' | 'guest'; event: AttendanceEvent }> => {
     const [kind, second, third] = id.split(':')
 
     if (kind === 'board') {
       const board = (await boards.list(actor)).find((entry) => entry.id === Number(second))
 
       if (board !== undefined && (board.joined || board.host === actor.login)) {
-        return board.host === actor.login ? 'host' : 'guest'
+        return {
+          role: board.host === actor.login ? 'host' : 'guest',
+          event: {
+            id: EVENT_ID.board(board.id),
+            campusId: actor.campusId,
+            host: board.host,
+            title: board.title,
+            startsAt: Date.parse(board.startsAt),
+            endsAt: Date.parse(board.endsAt),
+          },
+        }
       }
-    } else if (kind === 'help' && second === 'booking') {
-      const booking = (await help.today(actor)).bookings.find((entry) => entry.id === Number(third))
 
-      if (booking !== undefined) {
-        // Quien ayuda enseña los códigos; quien pidió la ayuda los escribe.
-        return booking.role === 'helper' ? 'host' : 'guest'
-      }
-    } else {
-      throw domainError('invalid_input', 'Ese tipo de evento no valida la asistencia con códigos')
+      throw domainError('forbidden', 'Ese evento no está en tu calendario')
+    }
+    if (kind === 'help' && second === 'booking') {
+      return help.session(actor, Number(third))
     }
 
-    throw domainError('forbidden', 'Ese evento no está en tu calendario')
+    throw domainError('invalid_input', 'Ese tipo de evento no valida la asistencia con códigos')
   }
 
-  /** Los códigos de un evento. Se crean la primera vez que alguien los pide. */
-  const codesOf = async (id: string): Promise<{ start: string; end: string }> => {
-    const start = newCode()
+  /** De quién puede pedir `actor` el informe de horas: `null` es de todo el mundo. */
+  const reportOf = (actor: Actor, login: string | undefined): string | null => {
+    if (login === undefined || login === actor.login) {
+      return actor.login
+    }
+    if (!actor.admin) {
+      throw domainError('forbidden', 'Solo puedes pedir tus propias horas')
+    }
 
-    await db.execute({
-      sql: `INSERT OR IGNORE INTO event_codes (event_id, start_code, end_code, created_at)
-            VALUES (?, ?, ?, ?)`,
-      args: [id, start, newCode(start), new Date(now()).toISOString()],
-    })
-
-    const row = (
-      await db.execute({
-        sql: 'SELECT start_code, end_code FROM event_codes WHERE event_id = ?',
-        args: [id],
-      })
-    ).rows[0]
-
-    return { start: toText(row?.start_code), end: toText(row?.end_code) }
+    return login === 'all' ? null : login
   }
 
   return {
-    /** El chat de un evento, del mensaje más antiguo al más reciente. */
-    async thread(actor: Actor, userId: number | null, id: unknown): Promise<MeetThread> {
+    /**
+     * El chat de un evento, del mensaje más antiguo al más reciente.
+     *
+     * @param after Si se da, solo los mensajes posteriores a ese `id`: es lo
+     *   que pide la web al refrescar, para no traerse el chat entero cada vez.
+     */
+    async thread(
+      actor: Actor,
+      userId: number | null,
+      id: unknown,
+      after?: unknown,
+    ): Promise<MeetThread> {
       const event = parse(eventId, id)
+      const since = after === undefined ? 0 : parse(z.coerce.number().int().min(0), after)
 
       await assertParticipant(actor, userId, event)
 
       const result = await db.execute({
         sql: `SELECT id, login, kind, minutes, reason, body, created_at FROM (
-                SELECT * FROM event_messages WHERE event_id = ? ORDER BY id DESC LIMIT ?
+                SELECT * FROM event_messages WHERE event_id = ? AND id > ?
+                ORDER BY id DESC LIMIT ?
               ) ORDER BY id`,
-        args: [event, THREAD_LIMIT],
+        args: [event, since, THREAD_LIMIT],
       })
       const images = await replica.imagesOf(result.rows.map((row) => toText(row.login)))
 
@@ -233,11 +252,31 @@ export function createMeetService(options: MeetServiceOptions) {
       }
     },
 
-    /** Manda un aviso o un mensaje al chat de un evento. */
+    /**
+     * Manda un aviso o un mensaje al chat de un evento.
+     *
+     * @throws {DomainError} `conflict` si esa persona lleva demasiados en el último minuto.
+     */
     async send(actor: Actor, userId: number | null, input: unknown): Promise<MeetThread> {
       const message = parse(messageSchema, input)
 
       await assertParticipant(actor, userId, message.id)
+
+      const recent = (
+        await db.execute({
+          sql: `SELECT COUNT(*) AS total, SUM(event_id = ?) AS here FROM event_messages
+                WHERE login = ? AND created_at > ?`,
+          args: [message.id, actor.login, new Date(now() - 60_000).toISOString()],
+        })
+      ).rows[0]
+
+      if (
+        toNumber(recent?.here ?? 0) >= MAX_PER_MINUTE_EVENT ||
+        toNumber(recent?.total) >= MAX_PER_MINUTE_TOTAL
+      ) {
+        throw domainError('conflict', 'Demasiados mensajes seguidos: espera un minuto')
+      }
+
       await db.execute({
         sql: `INSERT INTO event_messages (event_id, login, kind, minutes, reason, body, created_at)
               VALUES (?, ?, ?, ?, ?, ?, ?)`,
@@ -282,21 +321,18 @@ export function createMeetService(options: MeetServiceOptions) {
 
     /** La asistencia de un evento: los códigos para quien organiza, lo validado para quien asiste. */
     async attendance(actor: Actor, id: unknown): Promise<MeetAttendance> {
-      const event = parse(eventId, id)
-      const role = await roleIn(actor, event)
-      const result = await db.execute({
-        sql: `SELECT login, started_at, ended_at FROM event_attendance
-              WHERE event_id = ? ORDER BY login`,
-        args: [event],
-      })
-      const people = result.rows.map((row) =>
-        presenceOf(toText(row.login), row.started_at, row.ended_at),
-      )
+      const { role, event } = await resolve(actor, parse(eventId, id))
+      const people = await attendance.presences(event.id)
+      const common = {
+        role,
+        window: attendance.window(event),
+        attemptsLeft: await attendance.attemptsLeft(event.id, actor.login),
+      }
 
       return role === 'host'
-        ? { role, codes: await codesOf(event), mine: null, people }
+        ? { ...common, codes: await attendance.codes(event.id), mine: null, people }
         : {
-            role,
+            ...common,
             codes: null,
             mine: people.find((entry) => entry.login === actor.login) ?? null,
             people: [],
@@ -306,54 +342,55 @@ export function createMeetService(options: MeetServiceOptions) {
     /**
      * Valida un código de asistencia. El de inicio marca cuándo empezaste; el
      * de fin, cuándo terminaste, y solo vale si antes validaste el de inicio.
+     * Cuándo vale cada uno y cuánto tiempo cuenta lo decide `attendance`.
      *
-     * @throws {DomainError} `invalid_input` si el código no es de ese evento,
-     *   `conflict` si se intenta terminar sin haber empezado.
+     * @throws {DomainError} `invalid_input` si el código no es de ese evento;
+     *   `conflict` si no es el momento de ese código; `forbidden` si ya has
+     *   fallado demasiadas veces.
      */
     async checkin(actor: Actor, input: unknown): Promise<MeetCheckin> {
       const { id, code } = parse(checkinSchema, input)
+      const { role, event } = await resolve(actor, id)
 
-      if ((await roleIn(actor, id)) === 'host') {
+      if (role === 'host') {
         throw domainError('conflict', 'Los códigos los valida quien asiste, no quien organiza')
       }
 
-      const codes = await codesOf(id)
-      const phase = code === codes.start ? 'start' : code === codes.end ? 'end' : null
+      const result = await attendance.checkin(event, actor.login, code)
 
-      if (phase === null) {
-        throw domainError('invalid_input', 'Ese código no es de este evento')
+      // Una sesión de ayuda ya valorada puede estar esperando solo a este código.
+      if (result.phase === 'end' && id.startsWith('help:')) {
+        await help.settle()
       }
 
-      const at = new Date(now()).toISOString()
+      return result
+    },
 
-      if (phase === 'start') {
-        // El primer momento es el que cuenta: volver a escribirlo no lo mueve.
-        await db.execute({
-          sql: `INSERT INTO event_attendance (event_id, login, started_at) VALUES (?, ?, ?)
-                ON CONFLICT (event_id, login) DO UPDATE SET
-                  started_at = COALESCE(event_attendance.started_at, excluded.started_at)`,
-          args: [id, actor.login, at],
-        })
-      } else {
-        const updated = await db.execute({
-          sql: `UPDATE event_attendance SET ended_at = COALESCE(ended_at, ?)
-                WHERE event_id = ? AND login = ? AND started_at IS NOT NULL`,
-          args: [at, id, actor.login],
-        })
+    /**
+     * Las horas validadas con códigos en un periodo. Cada quien puede pedir las
+     * suyas; quien administra, las de cualquiera (`login`) o las de todo el
+     * mundo (`login=all`).
+     */
+    async report(actor: Actor, query: unknown): Promise<AttendanceReport> {
+      const { login, ...period } = parse(reportSchema, query)
 
-        if (updated.rowsAffected === 0) {
-          throw domainError('conflict', 'Valida primero el código de inicio')
-        }
+      return attendance.report(reportOf(actor, login), period)
+    },
+
+    /** El mismo informe en CSV, para llevárselo a una hoja de cálculo. */
+    async reportCsv(actor: Actor, query: unknown): Promise<string> {
+      const { login, ...period } = parse(reportSchema, query)
+
+      return attendance.reportCsv(reportOf(actor, login), period)
+    },
+
+    /** Cada intento de validar un código de un evento. Solo para quien administra la web. */
+    async checkins(actor: Actor, id: unknown): Promise<CheckinLogEntry[]> {
+      if (!actor.admin) {
+        throw domainError('forbidden', 'Solo para quien administra la web')
       }
 
-      const row = (
-        await db.execute({
-          sql: 'SELECT started_at, ended_at FROM event_attendance WHERE event_id = ? AND login = ?',
-          args: [id, actor.login],
-        })
-      ).rows[0]
-
-      return { phase, presence: presenceOf(actor.login, row?.started_at, row?.ended_at) }
+      return attendance.log(parse(eventId, id))
     },
   }
 }

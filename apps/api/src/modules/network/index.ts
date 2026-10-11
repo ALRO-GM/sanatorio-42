@@ -6,7 +6,7 @@
 import type { Db } from '../../core/db/database.js'
 import type { AppModule } from '../../core/module.js'
 import type { FortyTwoClient } from '../../integrations/forty-two/client.js'
-import type { ReplicaRepository } from '../replica/index.js'
+import type { QuotaGate, ReplicaRepository } from '../replica/index.js'
 import { createNetworkRepository } from './network.repository.js'
 import { registerNetworkRoutes } from './network.routes.js'
 import { createNetworkService } from './network.service.js'
@@ -21,6 +21,7 @@ export type NetworkModuleDeps = {
   /** Campus de los que se copian las correcciones. */
   campusIds: readonly number[]
   hourlyReserve: number
+  quota?: QuotaGate
   /** `true` si alguien está usando la web: el repaso completo espera. */
   isActive?: () => boolean
   log?: (message: string) => void
@@ -41,6 +42,7 @@ export function createNetworkModule(deps: NetworkModuleDeps): NetworkModule {
     replica: deps.replica,
     campusIds: deps.campusIds,
     hourlyReserve: deps.hourlyReserve,
+    ...(deps.quota === undefined ? {} : { quota: deps.quota }),
     ...(deps.isActive === undefined ? {} : { isActive: deps.isActive }),
     ...(deps.log === undefined ? {} : { log: deps.log }),
     ...clock,

@@ -172,9 +172,13 @@ export function createHelpRepository(db: Db) {
       )
     },
 
-    /** Reservas aceptadas y sin comprobar de ese día en adelante. */
-    async unverifiedSince(day: string): Promise<BookingRow[]> {
-      return bookings(`status = 'confirmed' AND verified = 0 AND day >= ?`, [day])
+    /** Sesiones que las dos partes ya han valorado y siguen sin cerrar. */
+    async ratedAndOpen(): Promise<BookingRow[]> {
+      return bookings(
+        `status = 'confirmed' AND xp IS NULL
+           AND helper_tag IS NOT NULL AND requester_tag IS NOT NULL`,
+        [],
+      )
     },
 
     async create(booking: {
@@ -214,6 +218,7 @@ export function createHelpRepository(db: Db) {
       })
     },
 
+    /** Apunta que quien pidió la ayuda validó los dos códigos. */
     async setVerified(id: number): Promise<void> {
       await db.execute({ sql: 'UPDATE help_bookings SET verified = 1 WHERE id = ?', args: [id] })
     },

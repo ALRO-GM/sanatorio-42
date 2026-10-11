@@ -165,6 +165,40 @@ describe('réplica vista desde fuera', () => {
     expect(status.campuses[0]).toMatchObject({ id: 22, present: 2 })
   })
 
+  it('una cuenta bloqueada no pasa por ninguna ruta, pida o no permisos', async () => {
+    const built = await app()
+    const http = client(built, await built.login())
+
+    expect((await http.get('/campuses')).statusCode).toBe(200)
+
+    await built.services.admin.block(
+      { login: 'jefa', campusId: 22, admin: true },
+      { login: 'albrodri', reason: 'pruebas' },
+    )
+
+    // Rutas que solo leen la cookie, rutas que piden el "actor" y escrituras.
+    for (const url of [
+      '/campuses',
+      '/sync/status',
+      '/usage',
+      '/quota',
+      '/users/eva/profile',
+      '/me/profile',
+      '/boards',
+    ]) {
+      const response = await http.get(url)
+
+      expect([url, response.statusCode]).toEqual([url, 403])
+      expect(json(response)).toMatchObject({ error: 'forbidden' })
+    }
+    expect((await http.put('/me/availability', { available: true })).statusCode).toBe(403)
+    // Las de sesión siguen: tiene que poder ver quién es y salir.
+    expect((await http.get('/auth/me')).statusCode).toBe(200)
+
+    await built.services.admin.unblock({ login: 'jefa', campusId: 22, admin: true }, 'albrodri')
+    expect((await http.get('/campuses')).statusCode).toBe(200)
+  })
+
   it('todo esto pide sesión', async () => {
     const built = await app()
 
@@ -190,6 +224,11 @@ describe('réplica vista desde fuera', () => {
       '/admin/messages',
       '/events/thread?id=board:1',
       '/events/attendance?id=board:1',
+      '/events/report',
+      '/quota',
+      '/admin/quota',
+      '/events/report?format=csv',
+      '/admin/checkins?id=board:1',
       '/network',
       '/network/mine',
       '/network/strictest',

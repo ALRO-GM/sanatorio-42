@@ -43,10 +43,52 @@ export type UsageHour = {
   people: number
 }
 
+/** Los ajustes del presupuesto de peticiones, que se cambian desde el panel. */
+export type BudgetSettings = {
+  /** Peticiones que la web se permite servir en un día, como mucho. */
+  dailyRequests: number
+  /** Bytes de salida al mes (el límite del alojamiento), o `null` si no hay. */
+  monthlyBytes: number | null
+  /** Día del mes (1-28) en que se renueva el límite mensual. */
+  renewDay: number
+  /** Colchón: la parte del presupuesto que se gasta como mucho (0,5 a 1). */
+  share: number
+  /** El tope por persona y hora nunca baja ni sube de aquí. */
+  minPerPerson: number
+  maxPerPerson: number
+  /** Modo ahorro: lo baja todo de golpe mientras esté puesto. */
+  saving: boolean
+}
+
+/** Cómo va el presupuesto de peticiones ahora mismo. Días y horas en UTC. */
+export type BudgetStatus = {
+  settings: BudgetSettings
+  day: {
+    /** Lo que se puede servir hoy, ya con el colchón. */
+    allowance: number
+    used: number
+    left: number
+    /** Con cuántas peticiones acabaría el día al ritmo que lleva. */
+    forecast: number
+    /** Qué manda hoy: el tope diario o lo que queda del mes. */
+    limitedBy: 'day' | 'month'
+  }
+  month: {
+    bytesUsed: number
+    /** `null` si no hay límite mensual. */
+    bytesLeft: number | null
+    /** Días que quedan hasta que se renueve, contando hoy. */
+    daysLeft: number
+    /** Día en que se renueva (`YYYY-MM-DD`). */
+    renewsOn: string
+  }
+}
+
 /** `GET /admin/consumption`: cuánto se usa la web y cómo de cerca está de sus límites. */
 export type Consumption = {
+  budget: BudgetStatus
   limit: {
-    /** Peticiones por hora que se reparten entre quienes están usando la web. */
+    /** Peticiones de esta hora que se reparten entre quienes están usando la web. */
     budget: number
     /** Personas activas en la última hora. */
     activePeople: number

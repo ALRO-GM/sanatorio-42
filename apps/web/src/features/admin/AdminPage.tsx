@@ -7,6 +7,9 @@ import { api } from '../../shared/api'
 import { useAction, useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { HoursReport } from '../profile/HoursReport'
+import { BudgetCard } from './BudgetCard'
+import { QuotaCard } from './QuotaCard'
 import { UsageHeatmap } from './UsageHeatmap'
 
 const TABS = ['consumption', 'people', 'inbox', 'messages', 'usage'] as const
@@ -49,6 +52,11 @@ export function AdminPage() {
       </div>
       {tab === 'consumption' && <ConsumptionTab />}
       {tab === 'people' && <PeopleTab />}
+      {tab === 'people' && (
+        <article className="card">
+          <HoursReport everyone />
+        </article>
+      )}
       {tab === 'inbox' && <InboxTab />}
       {tab === 'messages' && <MessagesTab />}
       {tab === 'usage' && <UsageHeatmap />}
@@ -83,6 +91,8 @@ function ConsumptionTab() {
 
   return (
     <>
+      <BudgetCard status={data.budget} onChange={() => void reload()} />
+      <QuotaCard />
       <div className="tiles">
         <div className="tile">
           <span className="eyebrow">{t('admin.cons.perPerson')}</span>

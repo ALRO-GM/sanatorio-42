@@ -16,6 +16,8 @@ import type { AppModule } from '../core/module.js'
 import type { FortyTwoClient } from '../integrations/forty-two/client.js'
 import { createAdminModule } from '../modules/admin/index.js'
 import type { AdminModule } from '../modules/admin/index.js'
+import { createAttendanceModule } from '../modules/attendance/index.js'
+import type { AttendanceModule } from '../modules/attendance/index.js'
 import { createBoardsModule } from '../modules/boards/index.js'
 import type { BoardsModule } from '../modules/boards/index.js'
 import { createCalendarModule } from '../modules/calendar/index.js'
@@ -49,18 +51,9 @@ export type CompositionConfig = {
   log?: (message: string) => void
   /** Logins que administran por configuración (`ADMIN_LOGINS`). */
   admins?: readonly string[]
-  /** Peticiones por hora que la web se permite servir en total. */
-  hourlyRequestBudget?: number
   /** Reloj inyectable, para los tests. */
   now?: () => number
 }
-
-/**
- * Peticiones por hora que la web sirve en total si no se dice otra cosa. Es lo
- * que una máquina pequeña atiende con holgura; el tope de cada persona sale de
- * repartirlo entre quienes están conectados.
- */
-const DEFAULT_HOURLY_BUDGET = 30_000
 
 /** Los servicios de todos los módulos, a mano para los tests y los comandos. */
 export type Services = {
@@ -71,6 +64,7 @@ export type Services = {
   }
   sync: ReplicaModule['sync']
   campuses: ReplicaModule['campuses']
+  quota: ReplicaModule['quota']
   peers: PeersModule['peers']
   availability: PeersModule['availability']
   xp: ProfileModule['xp']
@@ -84,6 +78,7 @@ export type Services = {
   corrections: NetworkModule['sync']
   usage: UsageModule['service']
   meet: MeetModule['service']
+  attendance: AttendanceModule['service']
   admin: AdminModule['service']
 }
 
@@ -104,6 +99,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     client,
     config: config.sync,
     ...(config.backgroundSync === undefined ? {} : { backgroundSync: config.backgroundSync }),
+    priority: (login) => (config.admins ?? []).includes(login),
     ...(config.log === undefined ? {} : { log: config.log }),
     ...clock,
   })
@@ -117,7 +113,17 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     curriculum: replica.curriculum,
     xp: profile.xp,
   })
-  const boards = createBoardsModule({ ...common, xp: profile.xp, events })
+  const attendance = createAttendanceModule({
+    db,
+    timeZoneOf: (campusId) => replica.repository.timeZoneOf(campusId),
+    ...clock,
+  })
+  const boards = createBoardsModule({
+    ...common,
+    xp: profile.xp,
+    attendance: attendance.service,
+    events,
+  })
   const map = createMapModule({
     replica: replica.repository,
     sync: replica.sync,
@@ -129,8 +135,8 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
   const help = createHelpModule({
     ...common,
     agenda: replica.agenda,
-    sync: replica.sync,
     xp: profile.xp,
+    attendance: attendance.service,
   })
   const calendar = createCalendarModule({
     replica: replica.repository,
@@ -146,6 +152,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     replica: replica.repository,
     campusIds: config.sync.trackedCampusIds,
     hourlyReserve: config.sync.hourlyReserve,
+    quota: replica.quota,
     isActive: () => replica.sync.isActive(),
     ...(config.log === undefined ? {} : { log: config.log }),
     ...clock,
@@ -156,6 +163,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     calendar: calendar.service,
     boards: boards.service,
     help: help.service,
+    attendance: attendance.service,
     therapy: therapy.service,
     replica: replica.repository,
     ...clock,
@@ -163,7 +171,6 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
   const admin = createAdminModule({
     db,
     fixedAdmins: config.admins ?? [],
-    hourlyBudget: config.hourlyRequestBudget ?? DEFAULT_HOURLY_BUDGET,
     fortyTwoRemaining: () => client.hourlyRemaining(),
     ...clock,
   })
@@ -180,6 +187,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
       profile,
       therapy,
       doubts,
+      attendance,
       boards,
       map,
       help,
@@ -196,6 +204,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
       },
       sync: replica.sync,
       campuses: replica.campuses,
+      quota: replica.quota,
       peers: peers.peers,
       availability: peers.availability,
       xp: profile.xp,
@@ -209,6 +218,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
       corrections: network.sync,
       usage: usage.service,
       meet: meet.service,
+      attendance: attendance.service,
       admin: admin.service,
     },
   }

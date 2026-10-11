@@ -6,6 +6,7 @@
 import type { Db } from '../../core/db/database.js'
 import type { EventBus } from '../../core/events.js'
 import type { AppModule } from '../../core/module.js'
+import type { AttendanceService } from '../attendance/index.js'
 import type { XpService } from '../profile/index.js'
 import type { ReplicaRepository } from '../replica/index.js'
 import { createBoardsRepository } from './boards.repository.js'
@@ -17,6 +18,7 @@ export type BoardsModuleDeps = {
   db: Db
   replica: ReplicaRepository
   xp: XpService
+  attendance: AttendanceService
   events: EventBus
   now?: () => number
 }
@@ -28,6 +30,7 @@ export function createBoardsModule(deps: BoardsModuleDeps): BoardsModule {
     boards: createBoardsRepository(deps.db),
     replica: deps.replica,
     xp: deps.xp,
+    attendance: deps.attendance,
     ...(deps.now === undefined ? {} : { now: deps.now }),
   })
 

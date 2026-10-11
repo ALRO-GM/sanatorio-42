@@ -149,14 +149,87 @@ calendario (y va a ir) puede leer o escribir; el resto recibe `403`.
 - POST /events/messages → `{ "id", "kind", "minutes"?, "reason"?, "body"? }`; devuelve el chat.
   `kind`: `seen` (he visto el aviso), `late` (pide `minutes`), `absent` o `text`
   (pide `body`). `reason`: `evaluation`, `other_event`, `on_my_way`, `transport`, `other`.
-- GET /events/attendance?id= → solo pizarras y sesiones de ayuda. Quien organiza
-  recibe `codes: { start, end }` (cuatro caracteres cada uno) y lo validado por
-  cada persona; quien asiste, lo suyo en `mine`.
+- GET /events/attendance?id= → solo pizarras y sesiones de ayuda aceptadas. Quien
+  organiza recibe `codes: { start, end }` (cuatro caracteres cada uno) y lo
+  validado por cada persona; quien asiste, lo suyo en `mine`. Las dos partes
+  reciben `window: { startFrom, startUntil, endUntil, minStay }` (cuándo vale
+  cada código) y `attemptsLeft`.
 - POST /events/checkin → `{ "id", "code" }`. El de inicio marca cuándo empezaste;
-  el de fin, cuándo terminaste, y solo vale si antes validaste el de inicio
-  (`409`). `minutes` es `null` mientras falte uno: sin los dos no hay asistencia.
+  el de fin, cuándo terminaste, y solo vale si antes validaste el de inicio.
+  `minutes` es `null` mientras falte uno: sin los dos no hay asistencia. `409`
+  si no es el momento de ese código, `400` si el código no es de ese evento,
+  `403` si ya has agotado los intentos.
+- GET /events/report?from=&to=&login=&format= → las horas validadas con códigos
+  en un periodo (días `YYYY-MM-DD`, los dos incluidos; por defecto, los últimos
+  treinta): `{ "from", "to", "totalMinutes", "rows": [{ "login", "role", "eventId",
+  "kind", "title", "day", "from", "to", "minutes", "scheduledMinutes", "with" }] }`.
+  Sin `login`, las tuyas; las de otra persona o las de todo el mundo
+  (`login=all`), solo quien administra. Con `format=csv` es un fichero para una
+  hoja de cálculo, con las horas del campus.
+- GET /admin/checkins?id= → cada intento de validar un código de ese evento, con
+  su resultado (`ok`, `repeat`, `wrong_code`, `locked`, `too_early`, `too_late`,
+  `no_start`). Solo admins.
+
+Reglas de los códigos (`modules/attendance/attendance.rules.ts`):
+
+- **Sin los dos códigos no hay nada**: ni XP ni tiempo contado.
+- El de **inicio** vale desde 10 minutos antes de la hora hasta 30 después (o
+  la mitad del evento, si dura menos de una hora). Quien llega dentro de ese
+  margen cuenta desde que llega; quien llega más tarde ya no puede empezar.
+- El de **fin** vale cuando han pasado 10 minutos desde el de inicio y hasta 30
+  minutos después de la hora de fin. Quien se va antes cuenta hasta que se va.
+- El **tiempo validado** es el rato entre los dos códigos, recortado al horario
+  previsto con 10 minutos de margen por cada lado, y nunca más que la duración
+  prevista. Se guarda ya calculado, con el horario del evento en ese momento.
+- El tiempo de **quien organiza** es el rato en que tuvo a alguien validado
+  delante, sin contar dos veces a quienes coinciden.
+- **Cinco códigos equivocados** por persona y evento, y ya no se puede validar.
+- Repetir un código ya validado no cambia nada.
 
 ## Buzón y administración
+
+Presupuesto de peticiones (`modules/admin/budget.rules.ts`). Nada es fijo, para
+no llegar nunca a un máximo que deje la web parada:
+
+- Lo de **hoy** es el tope diario o, si es menos, lo que queda del límite
+  mensual (bytes de salida) entre los días que faltan para que se renueve,
+  pasado a peticiones con lo que viene pesando cada una este mes. De eso se
+  gasta como mucho el colchón (`share`, 85 %).
+- Lo de **esta hora** es lo que queda del día entre las horas que faltan.
+- Lo de **cada persona** es lo de la hora entre quienes están conectados, entre
+  un mínimo y un máximo. El mínimo se respeta siempre.
+- El **modo ahorro** lo deja todo en un cuarto mientras esté puesto.
+- Días y horas en UTC. Al arrancar se recupera de la base lo ya servido.
+
+Cuota de la API de 42 (`modules/replica/quota.ts`). 42 da 1 200 peticiones por
+hora a toda la aplicación; se puede añadir un tope diario o mensual (lo de cada
+día es lo que queda del mes entre los días que faltan). Lo que se pide a 42 va
+en tres escalones, que se frenan en este orden:
+
+| Escalón      | Qué es                                                   | Cuándo para |
+| ------------ | -------------------------------------------------------- | ----------- |
+| `background` | La copia y el repaso                                     | Cuota horaria por debajo de la reserva, o 70 % del tope del día |
+| `deferrable` | Agenda de 42, hitos y cursus de cada persona, horas de los proyectos | Reserva horaria, o 90 % del tope del día |
+| `critical`   | Entrar, y ver quién puede ayudarte y dónde está          | Solo con menos de 40 peticiones en la hora |
+
+Lo aplazable se sirve con lo último guardado. Si es de una persona, coge turno
+en una **cola por orden de llegada** guardada en la base: avanza sola (cinco
+turnos cada veinte segundos) cuando vuelve a haber cuota, y mientras haya
+alguien esperando nadie se cuela. Quien administra por configuración no hace
+cola. El modo ahorro deja pasar solo lo crítico.
+
+- GET /quota → `{ "level": "ok" | "tight" | "critical", "ticket": { "number":
+  "A-042", "serving": "A-037", "ahead": 4, "etaMinutes": 5, "since" } | null }`.
+  Es lo que pinta el rótulo de aviso y el tique de turno.
+- GET /admin/quota → `{ "settings", "level", "hourlyRemaining", "day": { "spent",
+  "allowance" }, "month": { "spent", "daysLeft", "renewsOn" }, "queued" }`. Solo admins.
+- PUT /admin/quota → los ajustes que cambien de `{ "dailyRequests" (o `null`),
+  "monthlyRequests" (o `null`), "renewDay" (1-28), "saving" }`. Solo admins.
+
+- PUT /admin/budget → los ajustes que cambien de `{ "dailyRequests",
+  "monthlyBytes" (o `null`), "renewDay" (1-28), "share" (0,5-1), "minPerPerson",
+  "maxPerPerson", "saving" }`. Devuelve el estado (`budget` de
+  `GET /admin/consumption`: `settings`, `day` y `month`). Solo admins.
 
 - POST /tickets → `{ "kind": "issue" | "idea" | "report", "subject", "body", "target"? }`.
   Una denuncia (`report`) lleva `target`: `message:12`, `board:3`, `doubt:5`.
@@ -360,7 +433,8 @@ POST /boards → 201 con la pizarra. `topic`, `description` y `capacity` (por de
 - DELETE /boards/:id/join → 204
 - DELETE /boards/:id → 204. Solo quien la imparte.
 
-Quien imparte gana 50 XP cuando la pizarra ya ha terminado y fue al menos otra persona.
+Quien imparte gana 50 XP cuando la pizarra ya ha terminado y al menos otra persona
+validó los dos códigos de asistencia (ver "Reglas de los códigos").
 
 ## Calendario personal
 
@@ -429,15 +503,16 @@ ayudar en persona.
 - DELETE /help/bookings/:id → 204. Cualquiera de las dos personas, antes o
   después de la hora ("al final no quedamos").
 - POST /help/bookings/:id/rating → `{ "tag" }`. Devuelve `{ "xp" }`: `null` si
-  falta la otra valoración.
+  falta la otra valoración, o si faltan los códigos y aún se pueden validar.
 - POST /help/blocks → `{ "login" }` · DELETE /help/blocks/:login → 204.
 - GET /help/reputation → `{ "asked": { "prepared": 4, "curious": 6, "autonomous": 2, "basics": 1 } }`.
 
 Reglas:
 
 - La reserva la tiene que **aceptar** quien ayuda.
-- Durante la franja se comprueba que **las dos personas tienen puesto en el
-  campus** (`verified`). Sin eso, la sesión se cierra con 0 XP.
+- Quien recibe la ayuda **valida los dos códigos** (inicio y fin) que le enseña
+  quien ayuda; `verified` dice si lo ha hecho. Sin ellos, la sesión se cierra
+  con 0 XP cuando caduca el código de fin.
 - La XP se reparte cuando **las dos partes han valorado**. Quien pidió ayuda
   elige cómo le ayudaron (`bug`, `code`, `concept`, `patient`); quien ayudó,
   cómo llegó la otra persona (`prepared`, `curious`, `autonomous`, `basics`).
@@ -598,12 +673,12 @@ La de asistir a terapias no cuenta. `me` es `null` si aún no has ayudado.
 
 | Motivo (`kind`)   | XP | Cuándo |
 | ----------------- | -- | ------ |
-| `specialist_help` | 40 | Sesión de ayuda cerrada, en un proyecto que ya aprobaste |
-| `peer_help`       | 15 | Sesión de ayuda cerrada, en cualquier otro proyecto |
+| `specialist_help` | 40 | Sesión de ayuda con sus dos códigos y cerrada, en un proyecto que ya aprobaste |
+| `peer_help`       | 15 | Sesión de ayuda con sus dos códigos y cerrada, en cualquier otro proyecto |
 | `doubt_solved`    | 25 | Tu respuesta es la que resuelve una duda ajena |
 | `guide_proposal`  | 15 | Te validan un cambio en una guía |
 | `guide_review`    | 5  | Validas el cambio de otra persona |
-| `board_host`      | 50 | Impartes una pizarra a la que va alguien |
+| `board_host`      | 50 | Impartes una pizarra en la que alguien valida los dos códigos |
 | `therapy_session` | 10 | Cada media hora en tu puesto reservado de una terapia |
 
 - **Dudas**: `PUT /doubts/:id/resolved` exige `{ "resolved": true, "answerId" }`.
@@ -618,3 +693,10 @@ La de asistir a terapias no cuenta. `me` es `null` si aún no has ayudado.
 - **Terapias**: no hay fichaje. Cada media hora desde el inicio se mira quién de
   los apuntados está en un puesto reservado del grupo; hacen falta al menos dos,
   y el grupo tiene que tener puestos reservados.
+
+## Salud del servicio
+
+Sin sesión: las usan Caddy y quien despliega.
+
+- GET /health → `{ "status": "ok" }` si el proceso responde.
+- GET /health/db → lo mismo si además la base contesta; `503` si no.

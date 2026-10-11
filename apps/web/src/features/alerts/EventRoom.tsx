@@ -20,8 +20,13 @@ const REASONS = [
   'other',
 ] as const satisfies readonly MeetReason[]
 
-/** Cada cuánto se mira si hay mensajes nuevos, con la sala abierta. */
-const POLL_MS = 8000
+/**
+ * Cada cuánto se mira si hay mensajes nuevos, con la sala abierta. Mientras
+ * nadie escribe, la espera se va alargando hasta el máximo; en cuanto llega
+ * algo, vuelve al mínimo. Con la pestaña en segundo plano no se mira.
+ */
+const POLL_MIN_MS = 8000
+const POLL_MAX_MS = 30_000
 
 /**
  * La "sala" de un evento con otras personas: respuestas rápidas al aviso (lo he
@@ -52,27 +57,51 @@ export function EventRoom({ eventId, me, replies = true, codes = false }: EventR
 
   useEffect(() => {
     let current = true
+    let timer: number | undefined
+    let wait = POLL_MIN_MS
+    // El último mensaje que ya se tiene: al refrescar solo se piden los posteriores.
+    let last: number | undefined
+
     const load = (): void => {
-      api.getEventThread(eventId).then(
-        (thread) => {
-          if (current) {
-            setMessages(thread.messages)
+      window.clearTimeout(timer)
+
+      // Con la pestaña en segundo plano no se pregunta: al volver se pone al día.
+      if (document.hidden) return
+
+      api
+        .getEventThread(eventId, last)
+        .then(
+          (thread) => {
+            if (!current) return
+
+            const fresh = thread.messages
+
+            wait = fresh.length > 0 ? POLL_MIN_MS : Math.min(POLL_MAX_MS, wait * 1.5)
+            last = fresh.at(-1)?.id ?? last ?? 0
             setLoadError(null)
-          }
-        },
-        (cause: unknown) => {
-          if (current) setLoadError(cause)
-        },
-      )
+            setMessages((known) => {
+              const seen = new Set((known ?? []).map((message) => message.id))
+
+              return [...(known ?? []), ...fresh.filter((message) => !seen.has(message.id))]
+            })
+          },
+          (cause: unknown) => {
+            if (current) setLoadError(cause)
+          },
+        )
+        .finally(() => {
+          if (current) timer = window.setTimeout(load, wait)
+        })
     }
 
+    setMessages(null)
     load()
-
-    const timer = setInterval(load, POLL_MS)
+    document.addEventListener('visibilitychange', load)
 
     return () => {
       current = false
-      clearInterval(timer)
+      window.clearTimeout(timer)
+      document.removeEventListener('visibilitychange', load)
     }
   }, [eventId])
 

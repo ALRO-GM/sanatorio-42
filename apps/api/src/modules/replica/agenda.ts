@@ -13,6 +13,8 @@
 import type { Db } from '../../core/db/database.js'
 import { toNumber, toText } from '../../core/db/rows.js'
 import type { FortyTwoClient } from '../../integrations/forty-two/client.js'
+import { hourlyQuota } from './quota.js'
+import type { QuotaGate } from './quota.js'
 import type { ApiEvent, ApiExam, ApiScaleTeam } from '../../integrations/forty-two/types.js'
 
 export type AgendaEvent = {
@@ -53,6 +55,8 @@ export type AgendaOptions = {
   client: FortyTwoClient
   /** Peticiones de la hora que no se tocan: son para los logins. */
   hourlyReserve: number
+  /** Quién puede gastar cuota de 42 y la cola de quien espera. Sin ella, solo cuenta la hora. */
+  quota?: QuotaGate
   now?: () => number
   log?: (message: string) => void
 }
@@ -94,12 +98,10 @@ export function createAgenda(options: AgendaOptions) {
     iso(now() + FUTURE_DAYS * DAY),
   ]
 
-  /** `true` si queda cuota para gastar en algo que no es imprescindible. */
-  const canSpend = (): boolean => {
-    const remaining = client.hourlyRemaining()
+  const quota = options.quota ?? hourlyQuota(client, options.hourlyReserve)
 
-    return remaining === undefined || remaining > options.hourlyReserve
-  }
+  /** `true` si queda cuota para gastar en algo que no es imprescindible. */
+  const canSpend = (): boolean => quota.allows('deferrable')
 
   const describe = (error: unknown): string =>
     error instanceof Error ? error.message : String(error)
@@ -228,7 +230,8 @@ export function createAgenda(options: AgendaOptions) {
       const stored = await read()
       const fresh = stored !== null && now() - Date.parse(stored.fetchedAt) < USER_TTL_MS
 
-      if (fresh || userId === null || !canSpend()) {
+      // Si la cuota va justa, se sirve lo guardado y esa persona coge turno en la cola.
+      if (fresh || userId === null || !(await quota.defer(login, 'agenda'))) {
         return stored
       }
 

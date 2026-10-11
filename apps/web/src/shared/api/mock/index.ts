@@ -19,6 +19,10 @@ import type {
   GroupView,
   Guide,
   AdminPeople,
+  BudgetSettings,
+  BudgetStatus,
+  FortyTwoQuota,
+  FortyTwoQuotaSettings,
   MeetMessage,
   MeetPresence,
   Ticket,
@@ -306,6 +310,61 @@ const admins: string[] = []
 const blocks: AdminPeople['blocks'] = []
 const limits = new Map<string, number>()
 
+const quotaSettings: FortyTwoQuotaSettings = {
+  dailyRequests: null,
+  monthlyRequests: null,
+  renewDay: 1,
+  saving: false,
+}
+let quotaAhead = 5
+
+function quotaStatus(): FortyTwoQuota {
+  return {
+    settings: { ...quotaSettings },
+    level: quotaSettings.saving ? 'tight' : 'ok',
+    hourlyRemaining: 874,
+    day: { spent: 3120, allowance: quotaSettings.dailyRequests },
+    month: { spent: 41_800, daysLeft: 21, renewsOn: '2026-11-01' },
+    queued: quotaSettings.saving ? quotaAhead + 1 : 0,
+  }
+}
+
+/** Los ajustes del presupuesto en la web de mentira, y unas cuentas que se parecen a las de verdad. */
+const budgetSettings: BudgetSettings = {
+  dailyRequests: 720_000,
+  monthlyBytes: 10_000_000_000_000,
+  renewDay: 1,
+  share: 0.85,
+  minPerPerson: 240,
+  maxPerPerson: 3000,
+  saving: false,
+}
+
+function budgetStatus(): BudgetStatus {
+  const allowance = Math.floor(
+    budgetSettings.dailyRequests * budgetSettings.share * (budgetSettings.saving ? 0.25 : 1),
+  )
+  const used = 96_400
+
+  return {
+    settings: { ...budgetSettings },
+    day: {
+      allowance,
+      used,
+      left: Math.max(0, allowance - used),
+      forecast: 171_000,
+      limitedBy: 'day',
+    },
+    month: {
+      bytesUsed: 38_000_000_000,
+      bytesLeft:
+        budgetSettings.monthlyBytes === null ? null : budgetSettings.monthlyBytes - 38_000_000_000,
+      daysLeft: 21,
+      renewsOn: '2026-11-01',
+    },
+  }
+}
+
 export const mockApi: Api = {
   // --- Sesión ------------------------------------------------------------------
 
@@ -400,10 +459,10 @@ export const mockApi: Api = {
     return CAMPUSES
   },
 
-  async getEventThread(id) {
+  async getEventThread(id, after = 0) {
     await delay(120)
 
-    return { messages: threads.get(id) ?? [] }
+    return { messages: (threads.get(id) ?? []).filter((message) => message.id > after) }
   },
 
   async sendEventMessage(message) {
@@ -429,9 +488,20 @@ export const mockApi: Api = {
   async getEventAttendance(id) {
     await delay(150)
 
+    const common = {
+      window: {
+        startFrom: new Date(Date.now() - 10 * 60_000).toISOString(),
+        startUntil: new Date(Date.now() + 30 * 60_000).toISOString(),
+        endUntil: new Date(Date.now() + 120 * 60_000).toISOString(),
+        minStay: 10,
+      },
+      attemptsLeft: 5,
+    }
+
     // En la web de mentira impartes las pizarras y pides las sesiones de ayuda.
     return id.startsWith('board:')
       ? {
+          ...common,
           role: 'host',
           codes: { start: 'K7QM', end: 'R3XD' },
           mine: null,
@@ -450,8 +520,17 @@ export const mockApi: Api = {
             },
           ],
         }
-      : { role: 'guest', codes: null, mine: presences.get(id) ?? null, people: [] }
+      : { ...common, role: 'guest', codes: null, mine: presences.get(id) ?? null, people: [] }
   },
+
+  attendanceReportUrl: ({ from = '', to = '' }) =>
+    `data:text/csv;charset=utf-8,${encodeURIComponent(
+      [
+        'login;rol;tipo;evento;titulo;fecha;inicio;fin;minutos_validados;minutos_previstos;con',
+        `${ME.login};organiza;pizarra;board:1;Ejemplo de ${from} a ${to};${to};16:30;18:00;90;90;jdoe mgarcia`,
+        '',
+      ].join('\r\n'),
+    )}`,
 
   async checkinEvent(id, code) {
     await delay(200)
@@ -533,6 +612,13 @@ export const mockApi: Api = {
     return ticket
   },
 
+  async setAdminBudget(changes) {
+    await delay(200)
+    Object.assign(budgetSettings, changes)
+
+    return budgetStatus()
+  },
+
   async getAdminConsumption() {
     await delay(200)
 
@@ -549,6 +635,7 @@ export const mockApi: Api = {
     })
 
     return {
+      budget: budgetStatus(),
       limit: {
         budget,
         activePeople: 42,
@@ -810,6 +897,46 @@ export const mockApi: Api = {
     const title = TITLES.find((candidate) => candidate.id === settings.title)
 
     if (title !== undefined) state.title = title.id
+  },
+
+  // En la web de mentira la cuota va bien hasta que se pone el modo ahorro en
+  // el panel: entonces hay cola, y avanza un turno cada vez que se pregunta.
+  async getQuota() {
+    await delay(100)
+
+    if (!quotaSettings.saving) {
+      quotaAhead = 5
+
+      return { level: 'ok', ticket: null }
+    }
+
+    const ahead = quotaAhead
+
+    quotaAhead = Math.max(0, quotaAhead - 1)
+
+    return {
+      level: 'tight',
+      ticket: {
+        number: 'A-042',
+        serving: `A-${String(41 - ahead).padStart(3, '0')}`,
+        ahead,
+        etaMinutes: ahead + 1,
+        since: new Date(Date.now() - 120_000).toISOString(),
+      },
+    }
+  },
+
+  async getAdminQuota() {
+    await delay(150)
+
+    return quotaStatus()
+  },
+
+  async setAdminQuota(changes) {
+    await delay(150)
+    Object.assign(quotaSettings, changes)
+
+    return quotaStatus()
   },
 
   async getSyncStatus() {

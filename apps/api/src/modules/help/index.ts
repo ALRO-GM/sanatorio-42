@@ -5,8 +5,9 @@
 
 import type { Db } from '../../core/db/database.js'
 import type { AppModule } from '../../core/module.js'
+import type { AttendanceService } from '../attendance/index.js'
 import type { XpService } from '../profile/index.js'
-import type { Agenda, ReplicaRepository, Syncer } from '../replica/index.js'
+import type { Agenda, ReplicaRepository } from '../replica/index.js'
 import { createHelpRepository } from './help.repository.js'
 import { registerHelpRoutes } from './help.routes.js'
 import { createHelpService } from './help.service.js'
@@ -16,8 +17,8 @@ export type HelpModuleDeps = {
   db: Db
   replica: ReplicaRepository
   agenda: Agenda
-  sync: Syncer
   xp: XpService
+  attendance: AttendanceService
   now?: () => number
 }
 
@@ -28,8 +29,8 @@ export function createHelpModule(deps: HelpModuleDeps): HelpModule {
     help: createHelpRepository(deps.db),
     replica: deps.replica,
     agenda: deps.agenda,
-    sync: deps.sync,
     xp: deps.xp,
+    attendance: deps.attendance,
     ...(deps.now === undefined ? {} : { now: deps.now }),
   })
 
@@ -39,15 +40,6 @@ export function createHelpModule(deps: HelpModuleDeps): HelpModule {
     routes: (app, context) => {
       registerHelpRoutes(app, context, service)
     },
-    jobs: [
-      {
-        name: 'comprobación de sesiones de ayuda',
-        everyMs: 60_000,
-        run: async () => {
-          await service.verify()
-        },
-      },
-    ],
   }
 }
 

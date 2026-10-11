@@ -23,14 +23,22 @@ que hacer, en orden. Este documento es el porqué; aquel, el qué.
 
 ## Estado a 2026-10-11
 
-- **Subido a GitHub**, sin nada pendiente en local a 2026-10-11. Lo último que entró:
+- **En local y sin subir** (2026-10-11, tarde): la XP por códigos con informe
+  de horas (módulo `attendance`), el presupuesto dinámico de peticiones, la
+  cuota de 42 con rótulo y cola de turnos, y las pasadas de seguridad y de
+  rendimiento. `npm run check` pasa (335 tests de la API). Detalle en
+  [tareas-tras-compactar.md](tareas-tras-compactar.md), apartados 2.0 a 2.2.
+  Queda la de simplificar (2.3), que conviene hacer con esto ya subido.
+- **Subido a GitHub** antes de eso. Lo último que entró:
   expediente público de otras personas; cabecera fija, guardia desde "De
   guardia" y personalización; módulo `usage` y mapa de calor; avisos, chat de
   evento y asistencia con códigos (`meet`); panel de gestión ampliado (`admin`);
   terapias con chat, progreso, puestos juntos y grupos de repaso; preevaluación;
   franjas pasadas fuera del calendario; README y este documento.
 - **Base local** (`apps/api/data/sanatorio.db`): esquema en la versión 17, con
-  las 85 915 correcciones del 42cursus de Madrid ya copiadas.
+  las 85 915 correcciones del 42cursus de Madrid ya copiadas. El código va por la
+  versión 21: al arrancar el servidor se aplican las migraciones nuevas, la base
+  pasa a WAL y se calculan sus estadísticas.
 
 ## Despliegue: pendiente de que Oracle dé una máquina
 
@@ -119,23 +127,24 @@ conviene agotar la sesión en otras tareas si él avisa de que va justa.
   `projects` y guardar tokens de cada persona.
 - **Expediente ajeno**: enseña el estado de salud; no el desglose de XP ni las
   preferencias.
-- **Asistencia y XP**: la XP de pizarras y ayuda tiene que depender de los
-  códigos de inicio y fin, con un cálculo de tiempo robusto: Alberto quiere
-  usarlo para negociar *compensation days* con el staff de 42. Pendiente de hacer.
+- **Asistencia y XP**: la XP de pizarras y ayuda depende de los códigos de
+  inicio y fin, con un cálculo de tiempo robusto: Alberto quiere usarlo para
+  negociar *compensation days* con el staff de 42. Hecho; ante la duda se cuenta
+  menos. Ya no se comprueba por puestos que las dos personas estén en el campus.
 - **Consumo**: el presupuesto de peticiones tiene que ser dinámico (según lo que
   quede del día y la gente conectada) y regulable a mano, para no llegar nunca
   al máximo. Un límite mensual se reparte entre los días que quedan hasta que
   se renueve. Si la API de 42 va justa: aviso a los estudiantes, solo pasan las
   llamadas críticas y el resto espera en una cola por orden de llegada, que
   enseña a cada quien su número y por cuál va, como un tique de sala de espera
-  de hospital. Pendiente de hacer.
+  de hospital. Hecho.
 - **Administración**: `albrodri` es admin (`ADMIN_LOGINS` en local y producción).
 
 ## Pendiente de confirmar o de hacer
 
 El plan con sus casillas está en [tareas-tras-compactar.md](tareas-tras-compactar.md).
-En resumen: la XP por códigos y el presupuesto dinámico, y después la revisión de
-seguridad, rendimiento y simplificación antes de desplegar. Sigue pendiente rotar
+En resumen: queda la revisión de seguridad, rendimiento y simplificación antes
+de desplegar, y que Alberto confirme las cifras de los límites y de los códigos. Sigue pendiente rotar
 el secreto de la app de 42, que se llegó a ver en una conversación.
 
 ## Cosas que conviene saber
@@ -151,3 +160,7 @@ el secreto de la app de 42, que se llegó a ver en una conversación.
 - Vite puede quedarse sirviendo un módulo vacío si lee un fichero a medio
   escribir: se arregla tocándolo otra vez.
 - Los tests de la API no pueden depender de la hora real: usan un reloj falso.
+- La base va en WAL: junto a `sanatorio.db` hay un `-wal` y un `-shm`. Para
+  copiarla a mano, `VACUUM INTO` o `sqlite3 … ".backup"`, no `cp`.
+- La web lleva política de contenido (`infra/Caddyfile`): nada de scripts en
+  línea ni de recursos de otros dominios, salvo imágenes por https.

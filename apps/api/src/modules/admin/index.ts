@@ -2,8 +2,9 @@
  * Módulo `admin`: permisos, bloqueos, buzón y consumo.
  *
  * Además de sus rutas, cuelga dos ganchos de todas las peticiones con sesión:
- * uno antes, que aplica el tope de uso, y otro después, que apunta lo servido.
- * Por eso tiene que registrarse antes que los demás módulos.
+ * uno antes, que corta a las cuentas bloqueadas y aplica el tope de uso, y otro
+ * después, que apunta lo servido. Por eso tiene que registrarse antes que los
+ * demás módulos.
  */
 
 import type { FastifyRequest } from 'fastify'
@@ -37,7 +38,18 @@ export function createAdminModule(deps: AdminServiceOptions): AdminModule {
 
         if (who === null) return
 
-        const { admin } = await service.accessOf(who)
+        const { admin, block } = await service.accessOf(who)
+
+        // Una cuenta bloqueada no pasa por ninguna ruta, pida o no el "actor".
+        // Solo le quedan las de sesión, para saber que lo está y poder salir.
+        if (block !== null && !request.url.startsWith('/auth/')) {
+          await reply.code(403).send({
+            error: 'forbidden',
+            message: `Tu cuenta está bloqueada: ${block.reason}`,
+          })
+
+          return
+        }
 
         if (!(await service.allow(who, admin))) {
           await reply.code(429).header('Retry-After', '600').send({
@@ -107,6 +119,11 @@ export function createAdminModule(deps: AdminServiceOptions): AdminModule {
         await service.setLimit(await session.actor(request), request.body)
 
         return reply.code(204).send()
+      })
+
+      /** `PUT /admin/budget` → los ajustes del presupuesto que cambian; devuelve cómo queda. */
+      app.put('/admin/budget', async (request, reply) => {
+        return reply.send(await service.setBudget(await session.actor(request), request.body))
       })
 
       /** `GET /admin/tickets` → el buzón entero, lo pendiente primero. */

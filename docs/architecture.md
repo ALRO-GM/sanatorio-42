@@ -73,11 +73,19 @@ Los eventos y lo que lleva cada uno están declarados en `AppEvents`.
 
 Un módulo puede declarar `jobs` (nombre, cada cuánto y qué hacer). La app los
 lanza al arrancar y los para al cerrar; un fallo se registra y se reintenta en la
-siguiente vuelta. Hoy hay tres. Dos cada minuto: la asistencia a terapias
-(`therapy`) y la comprobación de sesiones de ayuda (`help`), que usan la foto de
-puestos de 42 y la refrescan con `sync.ensureLocations` si se ha quedado vieja.
-Y la copia de correcciones (`network`), cada veinte segundos, que casi siempre
-no tiene nada que hacer.
+siguiente vuelta. Hoy hay cuatro. La asistencia a terapias (`therapy`), cada
+minuto, que usa la foto de puestos de 42 y la refresca con
+`sync.ensureLocations` si se ha quedado vieja. La copia de correcciones
+(`network`) y la cola de la cuota de 42 (`replica`), cada veinte segundos, que
+casi siempre no tienen nada que hacer. Y el volcado del consumo (`admin`), cada
+minuto.
+
+Nadie decide por su cuenta si puede gastar cuota de 42: lo pregunta a
+`replica.quota` diciendo su escalón (fondo, aplazable o crítico). Ver
+`docs/api.md`, "Cuota de la API de 42".
+
+Las pizarras y las sesiones de ayuda no tienen trabajo periódico: su asistencia
+se valida con códigos (`attendance`) y su XP se reparte al leer (`settle`).
 
 ## XP que no se puede puentear
 
