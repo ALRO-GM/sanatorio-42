@@ -1,0 +1,108 @@
+/* ── Eminencia: aprobó el proyecto con 125 ───────────────────────────────── */
+.badge.eminence {
+  background: linear-gradient(180deg, #f6d37a, #e0a92e);
+  box-shadow:
+    0 1px 0 #b8861c,
+    0 2px 6px var(--shadow);
+  color: #3d2f05;
+  font-weight: 800;
+}
+
+/* ── Días concretos de una terapia y edición en el sitio ─────────────────────── */
+.date-add {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+.date-add input[type='date'] {
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+}
+.date-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0 0 0.75rem;
+  padding: 0;
+  list-style: none;
+}
+.date-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  text-transform: capitalize;
+}
+.date-chip.today {
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 700;
+}
+.date-chip.past {
+  opacity: 0.5;
+  text-decoration: line-through;
+}
+.date-chip button {
+  padding: 0 0.15rem;
+  background: none;
+  color: inherit;
+  font-size: 0.75rem;
+  line-height: 1;
+}
+.edit-doubt {
+  display: flex;
+  flex: 1 1 100%;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* ── Ajustes del modo nocturno ───────────────────────────────────────────────
+   Casi todo sale solo de las variables de `:root`. Aquí va lo que no. */
+
+/* Los fondos suaves de cada tipo de evento se derivan de su color, y el color
+   se aclara un punto para que el texto se lea sobre oscuro. */
+:root[data-theme='dark'] [class*='kind-'] {
+  --kind-soft: color-mix(in srgb, var(--kind) 24%, var(--surface));
+}
+:root[data-theme='dark'] .kind-help {
+  --kind: #35cfd1;
+}
+:root[data-theme='dark'] .kind-therapy {
+  --kind: #6fa8e8;
+}
+:root[data-theme='dark'] .kind-board {
+  --kind: #a69df0;
+}
+:root[data-theme='dark'] .kind-evaluation {
+  --kind: #f0a657;
+}
+:root[data-theme='dark'] .kind-event_joined {
+  --kind: #5ec78e;
+}
+:root[data-theme='dark'] .kind-event_open {
+  --kind: #a3b0a9;
+}
+:root[data-theme='dark'] .kind-exam {
+  --kind: #ef7fa2;
+}
+:root[data-theme='dark'] button.event-chip,
+:root[data-theme='dark'] button.kind-toggle:not(.off) {
+  color: var(--text);
+}
+:root[data-theme='dark'] button.event-chip.not-joined {
+  background: transparent;
+}
+
+/* El post-it vacío no es papel: es un hueco en el corcho. */
+.postit.empty {
+  --text: inherit;
+  --text-2: inherit;
+  --text-3: inherit;
+  --surface: inherit;
+  --border: inherit;
+}

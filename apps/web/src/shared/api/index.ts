@@ -6,10 +6,13 @@
  */
 
 import { realApi } from './client'
-import { mockApi } from './mock'
 import type { Api } from './types'
 
-export const api: Api = import.meta.env.VITE_USE_MOCK === 'true' ? mockApi : realApi
+// La de mentira se importa solo si se va a usar: así sus datos de ejemplo no
+// viajan en la web de verdad. El `await` de módulo retrasa el arranque lo que
+// tarda en llegar ese trozo, y solo en `dev:mock`.
+export const api: Api =
+  import.meta.env.VITE_USE_MOCK === 'true' ? (await import('./mock')).mockApi : realApi
 
 export { ApiError } from './http'
 export type { Api, PeersResult } from './types'

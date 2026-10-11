@@ -4,7 +4,7 @@ import type { CalendarKind } from '@sanatorio/contracts'
  * Los tipos de evento, en el orden en que salen en los filtros: primero lo de
  * Sanatorio, luego lo de 42.
  *
- * Cada uno tiene su icono y su color (`--kind`, en `global.css`, por la clase
+ * Cada uno tiene su icono y su color (`--kind`, en `styles/calendar.css`, por la clase
  * `kind-<tipo>`). Los textos, en `agenda.kind.<tipo>`.
  */
 export const KINDS: readonly { kind: CalendarKind; icon: string; fortyTwo: boolean }[] = [

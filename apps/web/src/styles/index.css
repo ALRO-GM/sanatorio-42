@@ -1,0 +1,28 @@
+/**
+ * Estilos de la web, por partes.
+ *
+ * El orden importa: lo de abajo gana a lo de arriba cuando dos reglas pesan lo
+ * mismo. Una regla nueva va en el fichero de su sección; solo los retoques que
+ * tienen que ganar a todo lo anterior van en `tweaks.css` o detrás.
+ */
+
+/* Temas: las variables de color de la web, en claro y en nocturno. */
+@import './theme.css';
+/* Lo común a toda la web: fondo, tipografía, cabecera, botones, tarjetas y estados. */
+@import './base.css';
+/* Secciones de comunidad: terapias, formularios, tablón, pizarras, expediente y pie. */
+@import './sections.css';
+/* Mapa de clusters: la sala, los puestos y la ficha de quien está sentado. */
+@import './map.css';
+/* Grafo del tablón: círculos, esferas, series y plazos del pace. */
+@import './doubt-graph.css';
+/* Guardia (franjas, reservas, valoraciones), ranking y respuesta que resuelve una duda. */
+@import './help.css';
+/* Calendario personal: vistas de mes, semana y día, y la ficha del evento. */
+@import './calendar.css';
+/* Retoques que van encima de lo anterior: eminencia, días de terapia y ajustes del modo nocturno. */
+@import './tweaks.css';
+/* Expediente: estado de salud y desglose de XP. */
+@import './profile.css';
+/* Red de correcciones: filtros, grafo, fichas, línea de tiempo y detalle de pareja. */
+@import './network.css';

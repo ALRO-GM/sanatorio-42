@@ -1,0 +1,236 @@
+/* --- Estado de salud: pace, caídas y black hole */
+.health {
+  display: grid;
+  gap: 0.75rem;
+}
+.health-head {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.health-pace {
+  display: grid;
+  justify-items: center;
+  min-width: 4.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 14px;
+  background: var(--accent-soft);
+  box-shadow: 0 2px 0 color-mix(in srgb, var(--accent) 30%, transparent);
+}
+.health-pace strong {
+  font-size: 1.9rem;
+  line-height: 1.1;
+}
+.health-pace.gone {
+  background: color-mix(in srgb, #c0392b 18%, var(--surface));
+}
+.health-summary {
+  margin: 0;
+  display: grid;
+  gap: 0.2rem;
+}
+.health-summary small,
+.health-step small {
+  color: var(--text-3);
+}
+.health-steps {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.health-step {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.4rem 0.7rem 0.4rem 0.45rem;
+  border-radius: 12px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+}
+.health-step > span:nth-child(2) {
+  display: grid;
+}
+.health-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+.health-left {
+  font-size: 0.8rem;
+  color: var(--text-3);
+  white-space: nowrap;
+}
+.health-step.lost {
+  opacity: 0.55;
+}
+.health-step.lost strong {
+  font-weight: 400;
+  text-decoration: line-through;
+}
+.health-step.current {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 25%, transparent);
+}
+.health-step.current .health-badge {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.health-step.current .health-left {
+  color: var(--text);
+  font-weight: 700;
+}
+.health-step.hole {
+  border-color: #6b55a0;
+  background: color-mix(in srgb, #6b55a0 14%, var(--surface));
+}
+.health-step.hole .health-badge {
+  background: #1d1530;
+}
+.health-history {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.health-history .chip {
+  display: inline-flex;
+  gap: 0.4rem;
+}
+.health-calc {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--accent) 6%, var(--surface));
+  border: 1.5px dashed var(--border);
+}
+.health-calc-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+.health-calc-form label {
+  display: grid;
+  gap: 0.2rem;
+  font-size: 0.8rem;
+  color: var(--text-3);
+}
+.health-result {
+  margin: 0;
+}
+.health-result.gone {
+  color: #c0392b;
+  font-weight: 700;
+}
+
+/* --- Expediente: desglose de XP, plegado tras la flecha de la barra */
+.xp-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.xp-row .xp-bar {
+  flex: 1;
+}
+.xp-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  padding: 0;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--text-2);
+  cursor: pointer;
+  box-shadow: 0 2px 0 var(--shadow-soft);
+}
+.xp-toggle span {
+  transition: transform 0.2s;
+}
+.xp-toggle.open span {
+  transform: rotate(180deg);
+}
+.xp-toggle:hover,
+.xp-toggle.open {
+  border-color: var(--accent);
+  color: var(--accent-text);
+}
+.xp-breakdown {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0.9rem 0 0.4rem;
+  padding: 0;
+  list-style: none;
+}
+.xp-breakdown li {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(60px, 1fr) 5.5rem;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.85rem;
+}
+.xp-breakdown li.none {
+  color: var(--text-3);
+}
+.xp-meter {
+  height: 10px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+.xp-meter span {
+  display: block;
+  height: 100%;
+  min-width: 0;
+  border-radius: 999px;
+  background: var(--accent);
+}
+.xp-got {
+  display: grid;
+  justify-items: end;
+  line-height: 1.2;
+}
+.xp-got small {
+  color: var(--text-3);
+}
+@media (max-width: 560px) {
+  .xp-breakdown li {
+    grid-template-columns: 1fr 5.5rem;
+  }
+  .xp-breakdown .xp-what {
+    grid-column: 1 / -1;
+  }
+}
+
+.health-calc-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+.health-calc-arrow {
+  color: var(--text-2);
+  transition: transform 0.2s;
+}
+.health-calc.open .health-calc-arrow {
+  transform: rotate(180deg);
+}

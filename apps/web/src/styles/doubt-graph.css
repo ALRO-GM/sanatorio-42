@@ -1,0 +1,586 @@
+/* ── Grafo del tablón ────────────────────────────────────────────────────────
+   Tu plan del common core, por círculos. Cada círculo es una bandeja apoyada
+   sobre la anterior; cada proyecto, una esfera con la luz arriba a la izquierda.
+
+     turquesa  aprobado        blanco  en curso
+     gris      disponible      gris apagado con candado  aún no disponible
+
+   Como mucho una marca por proyecto:
+     ámbar "n" dudas sin responder · violeta "✎" propuestas · pizarra "+" sin guía
+
+   Los colores de los estados son los mismos en los dos temas (son un código);
+   lo que cambia con el tema son las bandejas y el texto de alrededor.
+   Por debajo de 700 px los círculos pasan a ser filas (`.graph-rows`).
+   ──────────────────────────────────────────────────────────────────────────── */
+.holy-graph {
+  --graph-done: #00babc;
+  --mark-unanswered: #e8952c;
+  --mark-proposals: #7a6fd0;
+  --mark-missingGuide: #6b7a72;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+.graph-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+}
+.graph-track {
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent-text);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.graph-here {
+  font-size: 0.9rem;
+  color: var(--text-2);
+}
+.graph-level {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text);
+}
+.graph-level-bar {
+  display: block;
+  width: 90px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  box-shadow: inset 0 1px 2px var(--shadow);
+  overflow: hidden;
+}
+.graph-level-bar span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #2fd0d2, var(--graph-done));
+}
+.graph-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.graph-summary .filter-pills {
+  align-items: center;
+}
+.graph-summary .pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.graph-svg {
+  display: block;
+  width: 100%;
+  margin: 0 auto;
+  overflow: visible;
+}
+
+/* Bandejas: cada círculo, un disco apoyado sobre el de fuera, con su propio
+   tono pastel (`--hue`, que pone el componente). Sobre él se pinta, como una
+   porción de tarta, lo que llevas aprobado: el mismo tono, más intenso.
+
+   Las tres variables de abajo son lo único que cambia con el tema. */
+.holy-graph {
+  --plate-s: 62%;
+  --plate-l: 94%;
+  --slice-s: 66%;
+  --slice-l: 80%;
+  --edge-l: 62%;
+}
+:root[data-theme='dark'] .holy-graph {
+  --plate-s: 24%;
+  --plate-l: 17%;
+  --slice-s: 42%;
+  --slice-l: 33%;
+  --edge-l: 46%;
+}
+.graph-plate .plate {
+  fill: hsl(var(--hue) var(--plate-s) var(--plate-l));
+}
+.graph-plate .fill {
+  fill: hsl(var(--hue) var(--slice-s) var(--slice-l));
+  stroke: hsl(var(--hue) 46% var(--edge-l));
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
+.graph-plate .rim {
+  fill: none;
+  stroke: hsl(var(--hue) 42% var(--edge-l));
+  stroke-width: 1.5;
+}
+/* Los círculos a los que aún no has llegado, más tenues. */
+.graph-plate.ahead .plate {
+  fill: hsl(var(--hue) calc(var(--plate-s) * 0.55) var(--plate-l));
+}
+.graph-plate.ahead .rim {
+  stroke-dasharray: 2 5;
+  opacity: 0.8;
+}
+.graph-plate.current .rim {
+  stroke: hsl(var(--hue) 62% 44%);
+  stroke-width: 3;
+}
+.ring-tag {
+  fill: var(--surface);
+  stroke: hsl(var(--hue) 42% var(--edge-l));
+  stroke-width: 1.5;
+}
+.graph-plate.current .ring-tag {
+  fill: hsl(var(--hue) 62% 40%);
+  stroke: hsl(var(--hue) 62% 40%);
+}
+.ring-number {
+  font-size: 9.5px;
+  font-weight: 800;
+  fill: var(--text-2);
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+.graph-plate.current .ring-number {
+  fill: #fff;
+}
+
+/* Esferas. Los dos colores de cada degradado: el de la luz y el de la sombra. */
+.orb-light.finished {
+  stop-color: #5fe3e4;
+}
+.orb-dark.finished {
+  stop-color: #009fa1;
+}
+.orb-light.in_progress {
+  stop-color: #ffffff;
+}
+.orb-dark.in_progress {
+  stop-color: #dfe9e4;
+}
+.orb-light.todo {
+  stop-color: #f1f4f2;
+}
+.orb-dark.todo {
+  stop-color: #bcc7c1;
+}
+.orb-light.locked {
+  stop-color: #dfe4e1;
+}
+.orb-dark.locked {
+  stop-color: #aab4ae;
+}
+/* La burbuja de una serie: más clara, para que se vean dentro los puntos. */
+.orb-light.series {
+  stop-color: #ffffff;
+}
+.orb-dark.series {
+  stop-color: #e3ebe6;
+}
+svg .graph-node {
+  cursor: pointer;
+  outline: none;
+  transition: opacity 0.2s ease;
+}
+.graph-node .orb {
+  transition: transform 0.18s ease;
+}
+.graph-node .disc {
+  stroke: rgba(255, 255, 255, 0.55);
+  stroke-width: 1;
+}
+.graph-node.in_progress .disc {
+  stroke: var(--graph-done);
+  stroke-width: 2.5;
+}
+.graph-node.series .disc {
+  stroke: #b9c6bf;
+  stroke-width: 1.5;
+  stroke-dasharray: 3 3;
+}
+.graph-node .halo {
+  fill: none;
+  stroke: var(--graph-done);
+  stroke-width: 3;
+  opacity: 0;
+  transition: opacity 0.18s ease;
+}
+/* Aprobado con 125: un aro dorado y una estrella. */
+.graph-node .laurel {
+  fill: none;
+  stroke: #e0a92e;
+  stroke-width: 3;
+}
+.graph-star {
+  font-size: 9px;
+  fill: #ffe08a;
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
+}
+.graph-label {
+  font-size: 10px;
+  font-weight: 800;
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
+  fill: #46544d;
+}
+.graph-node.finished .graph-label {
+  fill: #fff;
+}
+.graph-node.in_progress .graph-label {
+  fill: #2c3a34;
+}
+.graph-node.locked .graph-label {
+  fill: #6f7c75;
+}
+.graph-lock {
+  font-size: 9px;
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
+}
+/* El mini grafo de una serie: un punto por módulo, con el color de su estado. */
+.series-dot {
+  stroke: #fff;
+  stroke-width: 1;
+}
+.series-dot.finished {
+  fill: #00babc;
+}
+.series-dot.in_progress {
+  fill: #fff;
+  stroke: #00babc;
+  stroke-width: 2;
+}
+.series-dot.todo {
+  fill: #bcc7c1;
+}
+.series-dot.locked {
+  fill: #d5dcd8;
+}
+.series-name {
+  font-size: 10.5px;
+  font-weight: 800;
+  fill: #2c3a34;
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
+}
+.graph-node.series.finished .series-name,
+.graph-node.series.finished .series-count,
+.graph-node.series.finished .series-hours {
+  fill: #fff;
+}
+.graph-node.series.finished .disc {
+  stroke: rgba(255, 255, 255, 0.55);
+  stroke-dasharray: none;
+}
+.graph-node.series.finished .series-dot {
+  fill: #fff;
+  stroke: none;
+}
+.graph-node.series.in_progress .disc {
+  stroke: var(--graph-done);
+  stroke-width: 2.5;
+  stroke-dasharray: none;
+}
+.series-hours {
+  font-size: 8.5px;
+  font-weight: 700;
+  fill: #6f7c75;
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
+}
+.series-count {
+  font-size: 9px;
+  font-weight: 700;
+  fill: #6f7c75;
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
+}
+svg .graph-node.locked {
+  opacity: 0.62;
+}
+svg .graph-node:hover .orb,
+svg .graph-node:focus-visible .orb {
+  transform: scale(1.1);
+}
+svg .graph-node:hover,
+svg .graph-node:focus-visible {
+  opacity: 1;
+}
+svg .graph-node:focus-visible .halo {
+  opacity: 0.5;
+}
+svg .graph-node.selected .halo {
+  opacity: 1;
+}
+svg .graph-node.selected .orb {
+  transform: scale(1.08);
+}
+.graph-node.dimmed {
+  opacity: 0.22;
+}
+
+/* La marca: la misma clase vale dentro del SVG (círculo + texto) y fuera, como
+   pastilla, en el resumen, la leyenda y las filas del móvil. */
+svg .graph-mark circle {
+  stroke: var(--surface);
+  stroke-width: 2;
+}
+svg .graph-mark text {
+  fill: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
+}
+svg .graph-mark.unanswered circle {
+  fill: var(--mark-unanswered);
+}
+svg .graph-mark.proposals circle {
+  fill: var(--mark-proposals);
+}
+svg .graph-mark.missingGuide circle {
+  fill: var(--mark-missingGuide);
+}
+span.graph-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 800;
+  line-height: 1;
+}
+span.graph-mark.unanswered {
+  background: var(--mark-unanswered);
+}
+span.graph-mark.proposals {
+  background: var(--mark-proposals);
+}
+span.graph-mark.missingGuide {
+  background: var(--mark-missingGuide);
+}
+
+/* Plazos del pace: tu ritmo y la fecha límite de cada círculo, con su tono. */
+.graph-pace {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem 1rem;
+}
+.pace-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.pace-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.55rem 0.2rem 0.25rem;
+  border-radius: 999px;
+  background: hsl(var(--hue) var(--plate-s) var(--plate-l));
+  border: 1.5px solid hsl(var(--hue) 42% var(--edge-l));
+  font-size: 0.75rem;
+  color: var(--text);
+}
+.pace-chip strong {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.3rem;
+  height: 1.3rem;
+  border-radius: 50%;
+  background: hsl(var(--hue) 62% 40%);
+  color: #fff;
+  font-size: 0.7rem;
+}
+.pace-left {
+  color: var(--text-3);
+}
+.pace-chip.done {
+  opacity: 0.6;
+}
+.pace-chip.current {
+  box-shadow: 0 0 0 2px hsl(var(--hue) 62% 44% / 0.4);
+  font-weight: 700;
+}
+.pace-chip.current .pace-left {
+  color: var(--text);
+}
+.pace-chip.late {
+  border-color: #d9822b;
+  background: color-mix(in srgb, #d9822b 16%, var(--surface));
+}
+.pace-chip.late .pace-left {
+  color: #b3621a;
+  font-weight: 700;
+}
+
+/* Barra de detalle: el proyecto bajo el ratón, o el que está abierto. */
+.graph-detail {
+  min-height: 2.6em;
+  margin: 0;
+  padding: 0.55rem 0.9rem;
+  border-radius: 12px;
+  background: var(--surface-2);
+  font-size: 0.9rem;
+  text-align: center;
+  color: var(--text-2);
+}
+.graph-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.4rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.8rem;
+  color: var(--text-2);
+}
+.graph-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.graph-swatch {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  box-shadow: 0 1px 2px var(--shadow);
+}
+.graph-swatch.finished {
+  background: radial-gradient(circle at 35% 28%, #5fe3e4, #009fa1);
+}
+.graph-swatch.in_progress {
+  background: radial-gradient(circle at 35% 28%, #fff, #dfe9e4);
+  box-shadow:
+    0 0 0 2px var(--graph-done),
+    0 1px 2px var(--shadow);
+}
+.graph-swatch.todo {
+  background: radial-gradient(circle at 35% 28%, #f1f4f2, #bcc7c1);
+}
+.graph-swatch.perfect {
+  box-shadow:
+    0 0 0 2.5px #e0a92e,
+    0 1px 2px var(--shadow);
+}
+.graph-swatch.locked {
+  background: radial-gradient(circle at 35% 28%, #dfe4e1, #aab4ae);
+  opacity: 0.62;
+}
+.graph-partial {
+  margin: 0;
+  text-align: center;
+}
+
+/* Móvil: un círculo por fila. */
+.graph-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.graph-rows > li {
+  padding: 0.6rem 0.7rem;
+  border-radius: 14px;
+  /* Se rellena de izquierda a derecha según lo aprobado (`--done`). */
+  background: linear-gradient(
+    90deg,
+    hsl(var(--hue) var(--slice-s) var(--slice-l)) var(--done, 0%),
+    hsl(var(--hue) var(--plate-s) var(--plate-l)) var(--done, 0%)
+  );
+}
+.graph-rows > li.current {
+  box-shadow: inset 0 0 0 2px hsl(var(--hue) 62% 44%);
+}
+.graph-ring-name {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.graph-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+button.graph-node {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.7rem;
+  border: 2px solid transparent;
+  background: linear-gradient(180deg, #f1f4f2, #cdd6d1);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.12);
+  color: #46544d;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+button.graph-node.finished {
+  background: linear-gradient(180deg, #2fd0d2, #00a5a7);
+  color: #fff;
+}
+button.graph-node.in_progress {
+  background: #fff;
+  border-color: var(--graph-done);
+  color: #2c3a34;
+}
+button.graph-node.series {
+  background: var(--surface);
+  border: 2px dashed var(--border);
+  box-shadow: none;
+  color: var(--text);
+}
+button.graph-node.perfect {
+  box-shadow:
+    0 0 0 2px #e0a92e,
+    0 2px 0 rgba(0, 0, 0, 0.12);
+}
+button.graph-node.locked {
+  opacity: 0.6;
+}
+button.graph-node.selected {
+  border-color: var(--text);
+}
+.board-anchor {
+  scroll-margin-top: 1rem;
+}
+@media (prefers-reduced-motion: reduce) {
+  svg .graph-node,
+  .graph-node .orb,
+  .graph-node .halo {
+    transition: none;
+  }
+  svg .graph-node:hover .orb,
+  svg .graph-node:focus-visible .orb,
+  svg .graph-node.selected .orb {
+    transform: none;
+  }
+}

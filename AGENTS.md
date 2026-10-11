@@ -61,7 +61,7 @@ Monorepo con workspaces de npm. Ver `README.md` y `docs/architecture.md`.
 - Calendario: cada tipo de evento tiene su color e icono (`features/calendar/kinds.ts`
   y las clases `kind-*`). Lo de Sanatorio en tonos fríos, lo de 42 en cálidos;
   borde discontinuo = no estás apuntado.
-- Colores: todos salen de las variables de tema de `styles/global.css`
+- Colores: todos salen de las variables de tema de `styles/theme.css`
   (`--surface`, `--text`, `--border`…). Un hexadecimal suelto no cambiaría con el
   modo nocturno; solo vale para lo que es igual en los dos temas (post-its,
   códigos de color del mapa y del grafo).

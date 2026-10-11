@@ -596,4 +596,5 @@ export const en: Record<string, string> = {
   'net.zoomIn': 'Zoom in',
   'net.zoomOut': 'Zoom out',
   'net.fit': 'Fit everything',
+  'app.loadingSection': 'Opening…',
 }

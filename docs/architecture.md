@@ -162,7 +162,11 @@ shared/     api/ (cliente real y simulado), i18n/, hooks/, ui/
 
 - Solo `shared/api` habla con la API. Tiene dos implementaciones del mismo tipo
   `Api`: la real y una en memoria para trabajar sin servidor (`npm run dev:mock`).
-- La navegación va en el hash de la URL (`#/tablon`); no hay router.
+- La navegación va en el hash de la URL (`#/tablon`); no hay router. Solo la
+  portada viaja con la web: cada una de las demás secciones se descarga al
+  abrirla (`lazy` en `Clinic.tsx`), y la API simulada, solo en `dev:mock`.
+- Los estilos están en `styles/`, un fichero por sección, y se juntan en
+  `styles/index.css`. El orden de ese fichero es el de la cascada.
 - Los textos están en `shared/i18n`; el español es la referencia.
 
 ## Añadir una funcionalidad
@@ -188,5 +192,8 @@ Ningún otro módulo se toca.
 
 `apps/api/tests/unit` prueba cada pieza con una base en memoria y un reloj
 falso; `tests/integration` levanta la app entera con la API de 42 simulada
-(`tests/helpers/fake-42.ts`). Ningún test sale a la red. La web no tiene tests
-todavía.
+(`tests/helpers/fake-42.ts`). Ningún test sale a la red.
+
+`apps/web/tests` prueba las funciones puras de la web (plazos por pace, nombres
+de puestos, franjas, colores y periodos de la red): lo que se puede romper sin
+que se note en pantalla. Los componentes no tienen tests.

@@ -603,4 +603,5 @@ export const es: Record<string, string> = {
   'net.zoomIn': 'Acercar',
   'net.zoomOut': 'Alejar',
   'net.fit': 'Encajar todo',
+  'app.loadingSection': 'Abriendo…',
 }

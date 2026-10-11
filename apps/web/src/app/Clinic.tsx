@@ -2,16 +2,10 @@ import { lazy, Suspense, useCallback, useEffect, useState } from 'react'
 
 import type { CurrentUser, ProjectSummary } from '@sanatorio/contracts'
 
-import { BoardsCalendar } from '../features/boards/BoardsCalendar'
-import { CalendarPage } from '../features/calendar/CalendarPage'
-import { DoubtBoard } from '../features/doubts/DoubtBoard'
-import { Guardia } from '../features/help/Guardia'
 import { AvailabilityToggle } from '../features/peers/AvailabilityToggle'
 import { PeerList } from '../features/peers/PeerList'
 import { ProjectSelect } from '../features/peers/ProjectSelect'
-import { Expediente } from '../features/profile/Expediente'
 import { Settings } from '../features/settings/Settings'
-import { TherapyGroups } from '../features/therapy/TherapyGroups'
 import { api } from '../shared/api'
 import { useAsync } from '../shared/hooks/useAsync'
 import { useI18n } from '../shared/i18n'
@@ -21,10 +15,27 @@ import { Nav } from './Nav'
 import type { Section } from './sections'
 import { useRoute } from './useRoute'
 
-// La red de correcciones trae su propia librería de física: se descarga solo
-// cuando alguien abre esa sección, no con el resto de la web.
+// Solo la portada (la sala de espera) viaja con la web. El resto de secciones se
+// descarga cuando alguien las abre: quien entra a mirar quién le puede ayudar no
+// paga el calendario, el grafo del tablón ni la física de la red.
+const BoardsCalendar = lazy(() =>
+  import('../features/boards/BoardsCalendar').then((m) => ({ default: m.BoardsCalendar })),
+)
+const CalendarPage = lazy(() =>
+  import('../features/calendar/CalendarPage').then((m) => ({ default: m.CalendarPage })),
+)
+const DoubtBoard = lazy(() =>
+  import('../features/doubts/DoubtBoard').then((m) => ({ default: m.DoubtBoard })),
+)
+const Guardia = lazy(() => import('../features/help/Guardia').then((m) => ({ default: m.Guardia })))
+const Expediente = lazy(() =>
+  import('../features/profile/Expediente').then((m) => ({ default: m.Expediente })),
+)
 const NetworkPage = lazy(() =>
-  import('../features/network/NetworkPage').then((module) => ({ default: module.NetworkPage })),
+  import('../features/network/NetworkPage').then((m) => ({ default: m.NetworkPage })),
+)
+const TherapyGroups = lazy(() =>
+  import('../features/therapy/TherapyGroups').then((m) => ({ default: m.TherapyGroups })),
 )
 
 type ClinicProps = {
@@ -105,46 +116,44 @@ export function Clinic({ me, onLogout }: ClinicProps) {
       />
 
       <div key={campusVersion}>
-        {section === 'consulta' &&
-          (project === null ? (
-            <ProjectSelect onSelect={setProject} />
-          ) : (
-            <>
-              <button
-                className="back-btn"
-                onClick={() => {
-                  setProject(null)
-                }}
-              >
-                {t('app.back')}
-              </button>
-              <PeerList
-                project={project}
-                onOpenTherapy={() => {
-                  openSection('terapia', project.id)
-                }}
-              />
-            </>
-          ))}
-        {section === 'terapia' && (
-          <TherapyGroups projects={myProjects} initialProject={focusProject} />
-        )}
-        {section === 'tablon' && <DoubtBoard initialProject={focusProject} />}
-        {section === 'guardia' && <Guardia />}
-        {section === 'calendario' && (
-          <CalendarPage
-            onGo={(next) => {
-              openSection(next)
-            }}
-          />
-        )}
-        {section === 'pizarras' && <BoardsCalendar />}
-        {section === 'red' && (
-          <Suspense fallback={<p className="estado">{t('net.loading')}</p>}>
-            <NetworkPage me={me} />
-          </Suspense>
-        )}
-        {section === 'expediente' && <Expediente me={me} profile={profile} />}
+        <Suspense fallback={<p className="estado">{t('app.loadingSection')}</p>}>
+          {section === 'consulta' &&
+            (project === null ? (
+              <ProjectSelect onSelect={setProject} />
+            ) : (
+              <>
+                <button
+                  className="back-btn"
+                  onClick={() => {
+                    setProject(null)
+                  }}
+                >
+                  {t('app.back')}
+                </button>
+                <PeerList
+                  project={project}
+                  onOpenTherapy={() => {
+                    openSection('terapia', project.id)
+                  }}
+                />
+              </>
+            ))}
+          {section === 'terapia' && (
+            <TherapyGroups projects={myProjects} initialProject={focusProject} />
+          )}
+          {section === 'tablon' && <DoubtBoard initialProject={focusProject} />}
+          {section === 'guardia' && <Guardia />}
+          {section === 'calendario' && (
+            <CalendarPage
+              onGo={(next) => {
+                openSection(next)
+              }}
+            />
+          )}
+          {section === 'pizarras' && <BoardsCalendar />}
+          {section === 'red' && <NetworkPage me={me} />}
+          {section === 'expediente' && <Expediente me={me} profile={profile} />}
+        </Suspense>
       </div>
 
       <footer className="footer">

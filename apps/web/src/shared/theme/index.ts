@@ -2,7 +2,7 @@
  * Tema de la web: claro, nocturno o el que diga el sistema.
  *
  * El tema efectivo se escribe en `data-theme` de `<html>`, que es lo que miran
- * los estilos (`styles/global.css`). La elección se guarda en el navegador.
+ * los estilos (`styles/theme.css`). La elección se guarda en el navegador.
  *
  * `index.html` lleva una copia mínima de `resolve` que se ejecuta antes de
  * pintar, para que al cargar en modo nocturno no se vea un fogonazo blanco. Si

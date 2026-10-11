@@ -1,0 +1,119 @@
+/* ── Guardia: franjas, reservas y valoraciones ───────────────────────────── */
+.section-sub {
+  margin: 1.5rem 0 0.6rem;
+  font-size: 1rem;
+}
+.slot-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(62px, 1fr));
+  gap: 0.35rem;
+  margin: 0.75rem 0 1rem;
+}
+button.slot {
+  padding: 0.4rem 0;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+button.slot.active {
+  background: #00babc;
+  border-color: #00babc;
+  color: var(--on-accent);
+  font-weight: 700;
+}
+/* Una corrección de 42 pisa esa media hora: naranja, como en el calendario. */
+button.slot.busy {
+  border-color: #d9822b;
+  border-style: dashed;
+  background: color-mix(in srgb, #d9822b 16%, var(--surface));
+  color: var(--text);
+}
+button.slot.busy.active {
+  background: color-mix(in srgb, #d9822b 30%, var(--surface));
+  text-decoration: line-through;
+}
+button.slot:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.help-summary {
+  align-self: end;
+  margin: 0;
+}
+.booking .card-head h3 {
+  margin: 0;
+  flex: 1 1 auto;
+  font-size: 1rem;
+}
+.booking.to-rate {
+  box-shadow: 0 0 0 2px rgba(0, 186, 188, 0.35);
+}
+.rating {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-top: 0.6rem;
+  padding: 0.75rem;
+  background: var(--surface-2);
+  border-radius: 12px;
+}
+.rating-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.book-help {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 0.6rem;
+  background: var(--surface-2);
+  border-radius: 12px;
+  text-align: left;
+  font-size: 0.85rem;
+}
+.book-help label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.book-help select,
+.book-help input {
+  min-width: 0;
+  padding: 0.3rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font: inherit;
+}
+
+/* ── Ranking ─────────────────────────────────────────────────────────────── */
+.ranking {
+  padding: 0;
+  list-style: none;
+}
+.ranking .rank {
+  flex: none;
+  width: 1.8rem;
+  text-align: center;
+  font-weight: 700;
+  color: var(--text-3);
+}
+.ranking .row.me {
+  background: var(--accent-soft);
+  font-weight: 700;
+}
+
+/* ── Tablón: la respuesta que resolvió la duda ───────────────────────────── */
+.replies li.solution {
+  box-shadow: inset 3px 0 0 #3fae74;
+  background: var(--accent-soft);
+}
+.replies li .pill {
+  margin-top: 0.3rem;
+}
