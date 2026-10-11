@@ -14,6 +14,7 @@ export const SECTIONS = [
   { id: 'terapia', icon: '🫂', inNav: true },
   { id: 'tablon', icon: '📌', inNav: true },
   { id: 'pizarras', icon: '🧑‍🏫', inNav: true },
+  { id: 'red', icon: '🕸️', inNav: true },
   { id: 'expediente', icon: '📋', inNav: false },
 ] as const
 

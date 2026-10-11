@@ -40,8 +40,11 @@ type State = {
   deltaAt: string | null
 }
 
-/** Páginas del histórico por vuelta: avanza rápido sin acaparar el cliente. */
-const PAGES_PER_STEP = 5
+/**
+ * Cuánto dura una vuelta del histórico. Cada página pesa (unos 700 kB) y tarda
+ * varios segundos: se encadenan hasta casi llenar el hueco entre dos vueltas.
+ */
+const STEP_BUDGET_MS = 16_000
 
 /** Margen sobre la reserva: el sincronizador principal también gasta. */
 const BUDGET_MARGIN = 60
@@ -112,7 +115,10 @@ export function createCorrectionSync(options: CorrectionSyncOptions) {
 
   /** Copia unas páginas del histórico. */
   const backfill = async (campusId: number, state: State): Promise<void> => {
-    for (let page = 0; page < PAGES_PER_STEP && canSpend(); page += 1) {
+    const deadline = Date.now() + STEP_BUDGET_MS
+
+    // El reloj de verdad, no el inyectado: mide lo que tarda la red.
+    for (let page = 0; (page === 0 || Date.now() < deadline) && canSpend(); page += 1) {
       const startedAt = new Date(now()).toISOString()
       const result = await client.getCampusScaleTeamsPage({ campusId, afterId: state.cursor })
 

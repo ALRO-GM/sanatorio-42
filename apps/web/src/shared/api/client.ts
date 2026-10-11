@@ -51,6 +51,17 @@ export const realApi: Api = {
   getLeaderboard: (period) => getJson(`/leaderboard?period=${period}`),
   getHealth: () => getJson('/me/health'),
 
+  getNetwork: (params) => {
+    const query = new URLSearchParams()
+
+    for (const [key, value] of Object.entries(params)) {
+      query.set(key, String(value))
+    }
+
+    return getJson(`/network?${query.toString()}`)
+  },
+  searchNetworkPeople: (q) => getJson(`/network/people?q=${encodeURIComponent(q)}`),
+
   getHelpDay: () => getJson('/help/today'),
   setHelpDay: (day) => sendJson('PUT', '/help/today', day),
   getHelpOffers: () => getJson('/help/offers'),

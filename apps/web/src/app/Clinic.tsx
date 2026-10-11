@@ -6,6 +6,7 @@ import { BoardsCalendar } from '../features/boards/BoardsCalendar'
 import { CalendarPage } from '../features/calendar/CalendarPage'
 import { DoubtBoard } from '../features/doubts/DoubtBoard'
 import { Guardia } from '../features/help/Guardia'
+import { NetworkPage } from '../features/network/NetworkPage'
 import { AvailabilityToggle } from '../features/peers/AvailabilityToggle'
 import { PeerList } from '../features/peers/PeerList'
 import { ProjectSelect } from '../features/peers/ProjectSelect'
@@ -67,7 +68,8 @@ export function Clinic({ me, onLogout }: ClinicProps) {
   const myProjects = projects.data ?? []
 
   return (
-    <main className="container">
+    // La red de correcciones necesita sitio: es la única sección a todo lo ancho.
+    <main className={`container ${section === 'red' ? 'wide' : ''}`}>
       <header className="topbar">
         <div className="topbar-brand">
           <Logo
@@ -132,6 +134,7 @@ export function Clinic({ me, onLogout }: ClinicProps) {
           />
         )}
         {section === 'pizarras' && <BoardsCalendar />}
+        {section === 'red' && <NetworkPage me={me} />}
         {section === 'expediente' && <Expediente me={me} profile={profile} />}
       </div>
 

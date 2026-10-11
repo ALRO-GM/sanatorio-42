@@ -33,6 +33,8 @@ import type {
   HolyGraph,
   Health,
   Leaderboard,
+  NetworkGraph,
+  NetworkPerson,
   LeaderboardPeriod,
   Peer,
   Profile,
@@ -49,6 +51,20 @@ export type PeersResult = {
   total: number | null
   /** `true` si aún faltan participantes por copiar de 42. */
   partial: boolean
+}
+
+/** Filtros de la red de correcciones. Lo que no se pasa, no filtra. */
+export type NetworkParams = {
+  /** `YYYY-MM-DD`. */
+  from?: string
+  to?: string
+  /** Persona en la que se centra el grafo. */
+  login?: string
+  projectId?: number
+  /** Correcciones mínimas entre dos personas para pintar su unión. */
+  min?: number
+  /** Tope de personas. */
+  limit?: number
 }
 
 export type Api = {
@@ -82,6 +98,12 @@ export type Api = {
   getSyncStatus: () => Promise<SyncStatus>
 
   getLeaderboard: (period: LeaderboardPeriod) => Promise<Leaderboard>
+  // --- Red de correcciones
+  /** Quién ha corregido a quién en el campus, con los filtros que se pasen. */
+  getNetwork: (params: NetworkParams) => Promise<NetworkGraph>
+  /** Logins que empiezan por lo escrito, para el buscador de la red. */
+  searchNetworkPeople: (q: string) => Promise<NetworkPerson[]>
+
   /** Fechas para el estado de salud: inicio, círculos completados y black hole. */
   getHealth: () => Promise<Health>
 

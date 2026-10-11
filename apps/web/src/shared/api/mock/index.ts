@@ -39,6 +39,7 @@ import {
   TITLES,
 } from './data'
 import { calendarEvents } from './calendar'
+import { mockNetwork, mockPeople } from './network'
 import { portrait } from './portrait'
 import type { StoredBoard, StoredDoubt, StoredGroup } from './data'
 
@@ -442,6 +443,18 @@ export const mockApi: Api = {
         },
       ],
     }
+  },
+
+  async getNetwork(params) {
+    await delay(350)
+
+    return mockNetwork(ME.login, params)
+  },
+
+  async searchNetworkPeople(q) {
+    await delay(120)
+
+    return mockPeople(ME.login, q)
   },
 
   async getHealth() {

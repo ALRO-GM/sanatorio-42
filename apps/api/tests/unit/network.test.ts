@@ -192,8 +192,8 @@ describe('red de correcciones', () => {
       }
     }
 
-    it('copia el histórico por páginas, sigue donde lo dejó y luego solo pide lo nuevo', async () => {
-      // 13 correcciones con páginas de 2: siete peticiones, en dos vueltas.
+    it('copia el histórico por páginas y luego solo pide lo nuevo', async () => {
+      // 13 correcciones con páginas de 2.
       api.scaleTeams.set(
         MADRID,
         Array.from({ length: 13 }, (_, index) =>
@@ -203,17 +203,16 @@ describe('red de correcciones', () => {
 
       expect(await services.corrections.status(MADRID)).toMatchObject({ phase: 'pending', rows: 0 })
 
+      // Con una API que responde al instante, una vuelta se lo lleva todo:
+      // siete peticiones, cada una a partir del último id de la anterior.
       await services.corrections.step()
       expect(await services.corrections.status(MADRID)).toMatchObject({
-        phase: 'copying',
-        rows: 10,
+        phase: 'done',
+        rows: 13,
         total: 13,
       })
-      expect(api.calls).toHaveLength(5)
+      expect(api.calls).toHaveLength(7)
       expect(api.calls[1]).toContain('range[id]=3,')
-
-      await services.corrections.step()
-      expect(await services.corrections.status(MADRID)).toMatchObject({ phase: 'done', rows: 13 })
 
       // Con el histórico hecho y sin que pase el tiempo, no se pide nada.
       api.calls.length = 0
@@ -236,6 +235,23 @@ describe('red de correcciones', () => {
       expect(api.calls).toHaveLength(2)
       expect(api.calls[0]).toContain('range[updated_at]=')
       expect(await services.corrections.status(MADRID)).toMatchObject({ rows: 14 })
+    })
+
+    it('si se corta a medias, sigue donde lo dejó', async () => {
+      api.scaleTeams.set(
+        MADRID,
+        Array.from({ length: 6 }, () => scaleTeam('eva', 'ana')),
+      )
+      // Falla la tercera página (la que empieza tras el id 4).
+      api.failOn = { match: 'range[id]=5,', status: 500 }
+      await services.corrections.step().catch(() => undefined)
+      expect(await services.corrections.status(MADRID)).toMatchObject({ phase: 'copying', rows: 4 })
+
+      api.failOn = null
+      api.calls.length = 0
+      await services.corrections.step()
+      expect(api.calls[0]).toContain('range[id]=5,')
+      expect(await services.corrections.status(MADRID)).toMatchObject({ phase: 'done', rows: 6 })
     })
 
     it('no gasta la reserva horaria de la API', async () => {
