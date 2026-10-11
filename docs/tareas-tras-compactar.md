@@ -156,11 +156,11 @@ Hecho el 2026-10-11:
       copias. Al 95 % no entra nadie y se paran los contenedores: solo SSH. El
       reparto diario llega hasta el 90 %. `create-instance.sh` no pide más del
       90 % del cómputo gratuito. Explicado en `docs/deploy-oracle.md`.
-- [ ] **Al desplegar**: comprobar que existe `/etc/cron.d/sanatorio-limits` y
-      que `sudo infra/scripts/limits-guard.sh status` da el tráfico del mes. La
-      guardia solo se ha probado con una máquina de mentira: mirar con
-      `systemctl list-timers` que las unidades de `QUIET_UNITS` existen con esos
-      nombres en la imagen de Ubuntu de Oracle, y añadir las que falten.
+- [x] **Al desplegar** (2026-10-11): la máquina nació con `/etc/cron.d/sanatorio-limits`
+      y la guardia da el tráfico del mes. Las unidades de `QUIET_UNITS` existen
+      con esos nombres en la imagen de Oracle (menos `chrony`, que no está: usa
+      `systemd-timesyncd`, también en la lista). Añadido el envío automático de
+      informes de fallos (`apport-autoreport`), que faltaba.
 - [ ] **Alberto, en la consola de Oracle**: pasar a Pay As You Go y crear un
       presupuesto de 1 € con alerta por correo.
 

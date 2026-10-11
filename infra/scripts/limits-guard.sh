@@ -59,6 +59,7 @@ QUIET_UNITS="
   snap.oracle-cloud-agent.oracle-cloud-agent-updater.service
   motd-news.timer fwupd-refresh.timer ua-timer.timer esm-cache.service
   update-notifier-download.timer update-notifier-motd.timer
+  apport-autoreport.timer apport-autoreport.service whoopsie.service
 "
 # Y con el corte total, también la hora: un mes sin sincronizarla no rompe nada.
 STOP_UNITS="chrony.service systemd-timesyncd.service"

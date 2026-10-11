@@ -41,7 +41,28 @@ que hacer, en orden. Este documento es el porqué; aquel, el qué.
   versión 21: al arrancar el servidor se aplican las migraciones nuevas, la base
   pasa a WAL y se calculan sus estadísticas.
 
-## Despliegue: pendiente de que Oracle dé una máquina
+## Despliegue: en producción desde el 2026-10-11
+
+- **https://sanatorio42.duckdns.org** → `51.170.34.214` (Oracle, ARM, 1 OCPU,
+  6 GB, 46,6 GB de disco; cuenta en Pay As You Go). DuckDNS solo con IPv4: la
+  máquina no tiene IPv6 pública.
+- Código en `/opt/sanatorio`, `infra/.env` copiado desde el equipo de Alberto.
+  Para actualizar: `ssh ubuntu@51.170.34.214`, y en `/opt/sanatorio`
+  `infra/scripts/deploy.sh` (o `git pull` y `docker compose up -d --build` en `infra/`).
+- Los datos de 42 no se bajaron de cero: se importaron los ya copiados en local
+  (solo las tablas de la réplica; lo propio de producción no se tocó). La copia
+  de antes está en `/opt/sanatorio/infra/backups/antes-de-importar.db`.
+- La guardia de límites corre por cron cada cinco minutos
+  (`sudo infra/scripts/limits-guard.sh status`).
+- **Secreto de 42**: rotado el 2026-10-11, pero el que está puesto se pegó en
+  una conversación. Pendiente de rotarlo otra vez, escribiéndolo Alberto
+  directamente en `infra/.env` y `apps/api/.env`.
+- **Por comprobar con sesión iniciada**: que la consola no dé errores de la
+  política de contenido (fotos de perfil, QR, descarga del CSV).
+- Los reintentos de Oracle están parados (`oracle-stop`) y ya no hacen falta: las
+  "Tareas recurrentes" de más abajo sobre Oracle ya no aplican.
+
+## Cómo se llegó hasta aquí (histórico)
 
 - Dominio: `sanatorio42.duckdns.org`. La URL de retorno ya está en la app de 42.
   En DuckDNS falta poner la IP de la máquina (ahora apunta a la casa de Alberto).
