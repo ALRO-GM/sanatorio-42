@@ -81,18 +81,38 @@ export function legendOf(
   switch (mode) {
     case 'community': {
       const sizes = new Map<number, number>()
+      // Cuánta gente de cada año hay en cada comunidad, para ponerle fecha.
+      const years = new Map<number, Map<number, number>>()
 
       for (const node of nodes) {
         sizes.set(node.community, (sizes.get(node.community) ?? 0) + 1)
+
+        if (node.cohort !== null) {
+          const tally = years.get(node.community) ?? new Map<number, number>()
+
+          tally.set(node.cohort, (tally.get(node.cohort) ?? 0) + 1)
+          years.set(node.community, tally)
+        }
       }
+
+      /** El año de llegada más repetido en una comunidad: suelen ser promociones. */
+      const mainYear = (community: number): number | null =>
+        [...(years.get(community) ?? [])].sort((a, b) => b[1] - a[1] || a[0] - b[0])[0]?.[0] ?? null
 
       const main = [...sizes.entries()]
         .filter(([community]) => community < COMMUNITY_HUES.length)
         .sort((a, b) => a[0] - b[0])
-        .map(([community, size]) => ({
-          color: `hsl(${COMMUNITY_HUES[community] ?? 0} 62% 52%)`,
-          label: t('net.legend.community', { n: community + 1, size }),
-        }))
+        .map(([community, size]) => {
+          const year = mainYear(community)
+
+          return {
+            color: `hsl(${COMMUNITY_HUES[community] ?? 0} 62% 52%)`,
+            label:
+              year === null
+                ? t('net.legend.community', { n: community + 1, size })
+                : t('net.legend.communityYear', { n: community + 1, size, year }),
+          }
+        })
       const rest = [...sizes.entries()]
         .filter(([community]) => community >= COMMUNITY_HUES.length)
         .reduce((sum, [, size]) => sum + size, 0)

@@ -608,4 +608,5 @@ export const es: Record<string, string> = {
   'net.projects.pass': 'Correcciones que aprobaron',
   'net.projects.hint':
     'Número de correcciones y cuántas aprobaron, en todo el histórico. Pulsa uno para ver solo su red.',
+  'net.legend.communityYear': 'Grupo {n} \u00b7 {year} ({size})',
 }

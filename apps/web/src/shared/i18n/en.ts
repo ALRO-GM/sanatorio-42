@@ -601,4 +601,5 @@ export const en: Record<string, string> = {
   'net.projects.pass': 'Evaluations that passed',
   'net.projects.hint':
     'Number of evaluations and how many passed, all time. Click one to see only its network.',
+  'net.legend.communityYear': 'Group {n} \u00b7 {year} ({size})',
 }

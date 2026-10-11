@@ -52,18 +52,20 @@ describe('colores de la red', () => {
     )
   })
 
-  it('la leyenda de comunidades cuenta a la gente y junta las pequeñas', () => {
+  it('la leyenda de comunidades cuenta a la gente, les pone año y junta las pequeñas', () => {
     const nodes = [
-      node({ community: 0 }),
-      node({ community: 0 }),
-      node({ community: 1 }),
+      node({ community: 0, cohort: 2024 }),
+      node({ community: 0, cohort: 2024 }),
+      node({ community: 0, cohort: 2026 }),
+      node({ community: 1, cohort: null }),
       node({ community: 14 }),
       node({ community: 15 }),
     ]
     const legend = legendOf(nodes, 'community', t)
 
+    // Cada comunidad lleva el año de llegada que más se repite en ella, si se sabe.
     expect(legend.map((entry) => entry.label)).toEqual([
-      'net.legend.community:1,2',
+      'net.legend.communityYear:1,3,2024',
       'net.legend.community:2,1',
       'net.legend.others:2',
     ])
