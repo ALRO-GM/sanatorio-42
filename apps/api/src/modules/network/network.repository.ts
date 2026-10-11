@@ -26,6 +26,8 @@ export type CorrectionFilter = {
   from?: string | null
   to?: string | null
   projectId?: number | null
+  /** `true`: solo las que aprobaron; `false`: solo las que suspendieron. */
+  positive?: boolean | null
 }
 
 /** Filas por sentencia al guardar: 8 columnas × 100 queda lejos del tope de SQLite. */
@@ -48,6 +50,11 @@ export function createNetworkRepository(db: Db) {
     if (filter.projectId !== null && filter.projectId !== undefined) {
       clauses.push('project_id = ?')
       args.push(filter.projectId)
+    }
+
+    if (filter.positive !== null && filter.positive !== undefined) {
+      clauses.push('positive = ?')
+      args.push(Number(filter.positive))
     }
 
     return { sql: clauses.join(' AND '), args }

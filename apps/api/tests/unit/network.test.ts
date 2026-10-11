@@ -341,6 +341,20 @@ describe('red de correcciones', () => {
         (await services.network.graph(actor('ana'), { min: '3' })).nodes.map((node) => node.login),
       ).toEqual(['ana', 'eva'])
 
+      // Solo las uniones mutuas: de las tres parejas, solo `ana` y `eva` se devuelven.
+      expect(
+        (await services.network.graph(actor('ana'), { mutual: '1' })).nodes.map(
+          (node) => node.login,
+        ),
+      ).toEqual(['ana', 'eva'])
+      // Por veredicto: todas estas aprobaron, así que suspendidas no hay ninguna.
+      expect(
+        (await services.network.graph(actor('ana'), { verdict: 'pass' })).totals,
+      ).toMatchObject({
+        corrections: 5,
+      })
+      expect((await services.network.graph(actor('ana'), { verdict: 'fail' })).nodes).toEqual([])
+
       // Otro campus no ve nada de este, y nada de esto pregunta a 42.
       expect((await services.network.graph({ ...actor('ana'), campusId: 58 }, {})).nodes).toEqual(
         [],

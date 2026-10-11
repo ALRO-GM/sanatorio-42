@@ -66,6 +66,7 @@ const pairSchema = z.object({
   from: moment.optional(),
   to: moment.optional(),
   projectId: z.coerce.number().int().positive().optional(),
+  verdict: z.enum(['pass', 'fail']).optional(),
 })
 
 /** Correcciones que se listan de una pareja. */
@@ -83,6 +84,11 @@ function endOf(to: string | undefined): string | null {
   return to.length === 10 ? `${to}T23:59:59.999Z` : to
 }
 
+/** El veredicto del filtro, como lo guarda la base. */
+function positiveOf(verdict: 'pass' | 'fail' | undefined): boolean | null {
+  return verdict === undefined ? null : verdict === 'pass'
+}
+
 function passRateOf(verdict: { judged: number; passed: number } | undefined): number | null {
   return verdict === undefined || verdict.judged < MIN_VERDICTS
     ? null
@@ -94,6 +100,12 @@ const querySchema = z.object({
   to: moment.optional(),
   login: login.optional(),
   projectId: z.coerce.number().int().positive().optional(),
+  verdict: z.enum(['pass', 'fail']).optional(),
+  // Llega como texto en la URL: `1` o `true` lo activan.
+  mutual: z
+    .enum(['1', 'true', '0', 'false'])
+    .optional()
+    .transform((value) => value === '1' || value === 'true'),
   min: z.coerce.number().int().min(1).max(100).default(1),
   limit: z.coerce.number().int().min(10).max(MAX_LIMIT).default(DEFAULT_LIMIT),
 })
@@ -129,25 +141,29 @@ export function createNetworkService(options: NetworkServiceOptions) {
     from: string | null,
     to: string | null,
     projectId: number | null,
+    positive: boolean | null,
   ): Promise<Cached> =>
-    analyses.get(`${campusId}|${from ?? ''}|${to ?? ''}|${projectId ?? ''}`, async () => {
-      const [rows, members, verdicts, timeline] = await Promise.all([
-        corrections.pairs({ campusId, from, to, projectId }),
-        replica.membersOf(campusId),
-        corrections.verdicts({ campusId, from, to, projectId }),
-        // La línea de tiempo no lleva fechas: enseña todo para poder elegirlas.
-        corrections.timeline({ campusId, projectId }),
-      ])
-      // Sin réplica del campus no se sabe quién es de fuera: se trata a todo el
-      // mundo como de dentro en vez de enseñar un grafo vacío.
-      const everyone = rows.flatMap((row) => [row.corrector, row.corrected])
-      const inside: ReadonlySet<string> =
-        members.size === 0
-          ? new Set(everyone)
-          : new Set([...members.keys(), ...everyone.filter(isAnonymised)])
+    analyses.get(
+      `${campusId}|${from ?? ''}|${to ?? ''}|${projectId ?? ''}|${positive ?? ''}`,
+      async () => {
+        const [rows, members, verdicts, timeline] = await Promise.all([
+          corrections.pairs({ campusId, from, to, projectId, positive }),
+          replica.membersOf(campusId),
+          corrections.verdicts({ campusId, from, to, projectId }),
+          // La línea de tiempo no lleva fechas: enseña todo para poder elegirlas.
+          corrections.timeline({ campusId, projectId }),
+        ])
+        // Sin réplica del campus no se sabe quién es de fuera: se trata a todo el
+        // mundo como de dentro en vez de enseñar un grafo vacío.
+        const everyone = rows.flatMap((row) => [row.corrector, row.corrected])
+        const inside: ReadonlySet<string> =
+          members.size === 0
+            ? new Set(everyone)
+            : new Set([...members.keys(), ...everyone.filter(isAnonymised)])
 
-      return { analysis: analyse(mergePairs(rows, inside), inside), members, verdicts, timeline }
-    })
+        return { analysis: analyse(mergePairs(rows, inside), inside), members, verdicts, timeline }
+      },
+    )
 
   /** Lo que no depende de los filtros: año de llegada de cada quien y proyectos con correcciones. */
   const catalogueOf = (campusId: number): Promise<Catalogue> =>
@@ -184,11 +200,16 @@ export function createNetworkService(options: NetworkServiceOptions) {
 
       const [{ analysis, members, verdicts, timeline }, { years, projects }, status] =
         await Promise.all([
-          analysisFor(actor.campusId, from, to, projectId),
+          analysisFor(actor.campusId, from, to, projectId, positiveOf(query.verdict)),
           catalogueOf(actor.campusId),
           sync.status(actor.campusId),
         ])
-      const shown = select(analysis, { focus, min: query.min, limit: query.limit })
+      const shown = select(analysis, {
+        focus,
+        min: query.min,
+        limit: query.limit,
+        mutual: query.mutual,
+      })
       // Quien viene de fuera no está en la réplica del campus: su foto se busca aparte.
       const strangers = shown.logins.filter((login) => !members.has(login))
       const images =
@@ -212,7 +233,16 @@ export function createNetworkService(options: NetworkServiceOptions) {
       })
 
       return {
-        query: { from, to, login: focus, projectId, min: query.min, limit: query.limit },
+        query: {
+          from,
+          to,
+          login: focus,
+          projectId,
+          verdict: query.verdict ?? null,
+          mutual: query.mutual,
+          min: query.min,
+          limit: query.limit,
+        },
         nodes,
         links: shown.links,
         totals: analysis.totals,
@@ -240,6 +270,7 @@ export function createNetworkService(options: NetworkServiceOptions) {
         from: query.from ?? null,
         to: endOf(query.to),
         projectId: query.projectId ?? null,
+        positive: positiveOf(query.verdict),
       }
       const [rows, counts] = await Promise.all([
         corrections.between(filter, query.a, query.b, PAIR_LIMIT),

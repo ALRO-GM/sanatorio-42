@@ -342,14 +342,17 @@ const weightOf = (pair: Pair): number => pair.ab + pair.ba
  *
  * Con `focus`, la persona, quienes se han cruzado con ella y las uniones entre
  * todos. Sin él, las personas más activas. En los dos casos, solo las uniones
- * con al menos `min` correcciones, y como mucho `limit` personas.
+ * con al menos `min` correcciones (y, con `mutual`, solo las que van en los dos
+ * sentidos), y como mucho `limit` personas.
  */
 export function select(
   analysis: Analysis,
-  options: { focus: string | null; min: number; limit: number },
+  options: { focus: string | null; min: number; limit: number; mutual?: boolean },
 ): { logins: string[]; links: NetworkLink[]; hidden: { nodes: number; links: number } | null } {
   const { focus, min, limit } = options
-  const strong = analysis.pairs.filter((pair) => weightOf(pair) >= min)
+  const strong = analysis.pairs.filter(
+    (pair) => weightOf(pair) >= min && (options.mutual !== true || (pair.ab > 0 && pair.ba > 0)),
+  )
   const activity = (login: string): number => {
     const person = analysis.people.get(login)
 

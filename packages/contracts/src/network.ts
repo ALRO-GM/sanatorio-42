@@ -83,6 +83,10 @@ export type NetworkQuery = {
   /** Persona en la que se centra, o `null` si es todo el campus. */
   login: string | null
   projectId: number | null
+  /** Solo las correcciones que aprobaron (`pass`) o que suspendieron (`fail`); `null` es todas. */
+  verdict: 'pass' | 'fail' | null
+  /** `true`: solo las uniones en las que las dos personas se han corregido mutuamente. */
+  mutual: boolean
   /** Correcciones mínimas entre dos personas para pintar su unión. */
   min: number
   /** Tope de personas que se devuelven. */

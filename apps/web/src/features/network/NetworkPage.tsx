@@ -34,6 +34,10 @@ type Filters = {
   to: string
   login: string | null
   projectId: number | null
+  /** `''` es todas las correcciones. */
+  verdict: '' | 'pass' | 'fail'
+  /** Solo las uniones en las que las dos personas se han corregido. */
+  mutual: boolean
   min: number
   limit: number
 }
@@ -53,6 +57,8 @@ function paramsOf(filters: Filters): NetworkParams {
     ...(filters.period === 'custom' && filters.to !== '' ? { to: filters.to } : {}),
     ...(filters.login === null ? {} : { login: filters.login }),
     ...(filters.projectId === null ? {} : { projectId: filters.projectId }),
+    ...(filters.verdict === '' ? {} : { verdict: filters.verdict }),
+    ...(filters.mutual ? { mutual: true } : {}),
     min: filters.min,
     limit: filters.limit,
   }
@@ -71,6 +77,8 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
     to: '',
     login: loginInUrl(),
     projectId: null,
+    verdict: '',
+    mutual: false,
     // Con una persona elegida interesa toda su red, no solo sus uniones fuertes.
     min: loginInUrl() === null ? 2 : 1,
     limit: 300,
@@ -149,6 +157,20 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
   )
 
   const paint = useCallback((node: NetworkNode) => colorOf(node, mode), [mode])
+  const tooltip = useCallback(
+    (node: NetworkNode) => (
+      <>
+        <strong>{node.login}</strong>
+        <span>{t('net.tip.counts', { given: node.given, received: node.received })}</span>
+        <span>{t('net.tip.endogamy', { n: node.endogamy, partners: node.partners })}</span>
+      </>
+    ),
+    [t],
+  )
+  const controls = useMemo(
+    () => ({ zoomIn: t('net.zoomIn'), zoomOut: t('net.zoomOut'), fit: t('net.fit') }),
+    [t],
+  )
   const nodes = graph?.nodes
   const legend = useMemo(() => legendOf(nodes ?? [], mode, t), [nodes, mode, t])
   const chosen = nodes?.find((node) => node.login === selected) ?? null
@@ -314,6 +336,31 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
                 ))}
               </select>
             </label>
+            <label>
+              {t('net.verdict')}
+              <select
+                value={filters.verdict}
+                onChange={(event) => {
+                  const verdict = event.target.value
+
+                  change({ verdict: verdict === 'pass' || verdict === 'fail' ? verdict : '' })
+                }}
+              >
+                <option value="">{t('net.verdict.all')}</option>
+                <option value="pass">{t('net.verdict.pass')}</option>
+                <option value="fail">{t('net.verdict.fail')}</option>
+              </select>
+            </label>
+            <label className="net-check">
+              <input
+                type="checkbox"
+                checked={filters.mutual}
+                onChange={(event) => {
+                  change({ mutual: event.target.checked })
+                }}
+              />
+              {t('net.mutualOnly')}
+            </label>
           </div>
         </div>
 
@@ -350,6 +397,8 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
                     people: graph.nodes.length,
                     links: graph.links.length,
                   })}
+                  tooltip={tooltip}
+                  controls={controls}
                 />
               )}
               <ul className="net-legend">

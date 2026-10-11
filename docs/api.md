@@ -410,13 +410,16 @@ GET /network?from=&to=&login=&projectId=&min=&limit= → el grafo. Todo opcional
 - `login`: se centra en esa persona: ella, quien se ha cruzado con ella y las
   uniones entre todos.
 - `projectId`: solo las correcciones de ese proyecto.
+- `verdict`: `pass` (solo las correcciones que aprobaron) o `fail` (solo las que
+  suspendieron). `mutual=1`: solo las uniones en las que las dos personas se han
+  corregido mutuamente.
 - `min` (1-100, por defecto 1): correcciones mínimas entre dos personas para que
   salga su unión. `limit` (10-2000, por defecto 300): tope de personas, las más
   activas primero.
 
 ```json
 {
-  "query": { "from": "2025-10-11", "to": null, "login": null, "projectId": null, "min": 2, "limit": 300 },
+  "query": { "from": "2025-10-11", "to": null, "login": null, "projectId": null, "verdict": null, "mutual": false, "min": 2, "limit": 300 },
   "nodes": [
     {
       "login": "jdoe", "image": "https://…", "external": false,

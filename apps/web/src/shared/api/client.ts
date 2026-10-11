@@ -66,6 +66,7 @@ export const realApi: Api = {
     if (params.from !== undefined) query.set('from', params.from)
     if (params.to !== undefined) query.set('to', params.to)
     if (params.projectId !== undefined) query.set('projectId', String(params.projectId))
+    if (params.verdict !== undefined) query.set('verdict', params.verdict)
 
     return getJson(`/network/pair?${query.toString()}`)
   },

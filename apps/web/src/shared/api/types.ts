@@ -63,6 +63,10 @@ export type NetworkParams = {
   /** Persona en la que se centra el grafo. */
   login?: string
   projectId?: number
+  /** Solo las que aprobaron o las que suspendieron. */
+  verdict?: 'pass' | 'fail'
+  /** Solo las uniones en las que las dos personas se han corregido mutuamente. */
+  mutual?: boolean
   /** Correcciones mínimas entre dos personas para pintar su unión. */
   min?: number
   /** Tope de personas. */

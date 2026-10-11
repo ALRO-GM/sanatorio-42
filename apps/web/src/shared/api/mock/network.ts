@@ -139,10 +139,17 @@ export function mockNetwork(me: string, params: NetworkParams): NetworkGraph {
   const limit = params.limit ?? 300
   const focus = params.login ?? null
   // Un periodo o un proyecto dejan una parte de las correcciones, siempre la misma.
-  const share = (params.from === undefined ? 1 : 0.45) * (params.projectId === undefined ? 1 : 0.35)
+  const share =
+    (params.from === undefined ? 1 : 0.45) *
+    (params.projectId === undefined ? 1 : 0.35) *
+    (params.verdict === undefined ? 1 : params.verdict === 'pass' ? 0.8 : 0.2)
   const random = seeded(7)
   const all = every.filter(() => random() < share)
-  const strong = all.filter((link) => link.forth + link.back >= min)
+  const strong = all.filter(
+    (link) =>
+      link.forth + link.back >= min &&
+      (params.mutual !== true || (link.forth > 0 && link.back > 0)),
+  )
   const around = new Set<string>(
     focus === null ? strong.flatMap((link) => [link.source, link.target]) : [focus],
   )
@@ -177,6 +184,8 @@ export function mockNetwork(me: string, params: NetworkParams): NetworkGraph {
       to: params.to ?? null,
       login: focus,
       projectId: params.projectId ?? null,
+      verdict: params.verdict ?? null,
+      mutual: params.mutual ?? false,
       min,
       limit,
     },

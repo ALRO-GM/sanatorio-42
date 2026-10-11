@@ -3839,3 +3839,65 @@ a.button {
 .peer-crossed.new {
   color: var(--accent-text);
 }
+
+/* Lo que flota sobre el grafo: etiqueta de la burbuja y botones de zoom. */
+.force-wrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.force-tip {
+  position: absolute;
+  z-index: 2;
+  display: grid;
+  gap: 0.1rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: 10px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  box-shadow: 0 6px 18px var(--shadow);
+  font-size: 0.75rem;
+  color: var(--text-2);
+  white-space: nowrap;
+  pointer-events: none;
+  transform: translate(-50%, calc(-100% - 8px));
+}
+.force-tip strong {
+  color: var(--text);
+  font-size: 0.85rem;
+}
+.force-controls {
+  position: absolute;
+  right: 0.7rem;
+  bottom: 0.7rem;
+  display: grid;
+  gap: 0.3rem;
+}
+.force-controls button {
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border-radius: 10px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--text-2);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 2px 0 var(--shadow-soft);
+}
+.force-controls button:hover {
+  border-color: var(--accent);
+  color: var(--accent-text);
+}
+.net-legend {
+  max-width: calc(100% - 4.4rem);
+}
+.net-filter-grid .net-check {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  grid-column: 1 / -1;
+  color: var(--text-2);
+  font-size: 0.82rem;
+}

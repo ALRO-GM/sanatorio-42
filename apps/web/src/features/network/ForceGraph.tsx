@@ -1,4 +1,5 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import type { ReactNode } from 'react'
 
 import type { NetworkLink, NetworkNode } from '@sanatorio/contracts'
 import { forceCollide, forceLink, forceManyBody, forceSimulation, forceX, forceY } from 'd3-force'
@@ -14,6 +15,10 @@ type ForceGraphProps = {
   onSelect: (login: string | null) => void
   /** Texto para lectores de pantalla: el grafo en sí es un dibujo. */
   label: string
+  /** Lo que se enseña junto a la burbuja bajo el ratón. */
+  tooltip: (node: NetworkNode) => ReactNode
+  /** Nombres de los botones de zoom. */
+  controls: { zoomIn: string; zoomOut: string; fit: string }
 }
 
 /** Una persona dentro de la simulación: los datos y dónde está. */
@@ -130,7 +135,23 @@ function pictureOf(url: string, onLoad: () => void): HTMLImageElement | null {
  *
  * Rueda: zoom. Arrastrar el fondo: mover. Arrastrar una burbuja: recolocarla.
  */
-export function ForceGraph({ nodes, links, colorOf, selected, onSelect, label }: ForceGraphProps) {
+export function ForceGraph({
+  nodes,
+  links,
+  colorOf,
+  selected,
+  onSelect,
+  label,
+  tooltip,
+  controls,
+}: ForceGraphProps) {
+  // La burbuja bajo el ratón y dónde está en pantalla, para su etiqueta flotante.
+  const [tip, setTip] = useState<{ node: NetworkNode; x: number; y: number } | null>(null)
+  /** Acciones de los botones, que viven dentro del efecto del dibujo. */
+  const actions = useRef({
+    zoomBy: (_factor: number): void => undefined,
+    fit: (): void => undefined,
+  })
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const scene = useRef<Scene>({
     nodes: [],
@@ -395,6 +416,7 @@ export function ForceGraph({ nodes, links, colorOf, selected, onSelect, label }:
       const point = toGraph(event)
 
       drag = { node: nodeAt(point), x: event.clientX, y: event.clientY, moved: false }
+      setTip(null)
       canvas.setPointerCapture(event.pointerId)
     }
 
@@ -407,6 +429,15 @@ export function ForceGraph({ nodes, links, colorOf, selected, onSelect, label }:
         if (hover !== state.hover) {
           state.hover = hover
           canvas.style.cursor = hover === null ? 'grab' : 'pointer'
+          setTip(
+            hover === null
+              ? null
+              : {
+                  node: hover.data,
+                  x: (hover.x ?? 0) * state.view.k + state.view.x,
+                  y: ((hover.y ?? 0) - hover.r) * state.view.k + state.view.y,
+                },
+          )
           schedule.current()
         }
 
@@ -460,32 +491,43 @@ export function ForceGraph({ nodes, links, colorOf, selected, onSelect, label }:
     const onLeave = (): void => {
       if (state.hover !== null && drag === null) {
         state.hover = null
+        setTip(null)
         schedule.current()
       }
+    }
+
+    /** Cambia el zoom dejando quieto el punto (`px`, `py`) del lienzo. */
+    const zoomAt = (factor: number, px: number, py: number): void => {
+      const k = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, state.view.k * factor))
+      const scale = k / state.view.k
+
+      state.view = { k, x: px - (px - state.view.x) * scale, y: py - (py - state.view.y) * scale }
+      state.touched = true
+      setTip(null)
+      schedule.current()
     }
 
     const onWheel = (event: WheelEvent): void => {
       event.preventDefault()
 
       const box = canvas.getBoundingClientRect()
-      const px = event.clientX - box.left
-      const py = event.clientY - box.top
-      const k = Math.max(
-        MIN_ZOOM,
-        Math.min(MAX_ZOOM, state.view.k * Math.exp(-event.deltaY * 0.0015)),
-      )
-      const scale = k / state.view.k
 
       // El punto bajo el ratón no se mueve al hacer zoom.
-      state.view = { k, x: px - (px - state.view.x) * scale, y: py - (py - state.view.y) * scale }
-      state.touched = true
-      schedule.current()
+      zoomAt(Math.exp(-event.deltaY * 0.0015), event.clientX - box.left, event.clientY - box.top)
     }
 
     const onDoubleClick = (): void => {
       state.touched = false
       fit()
       schedule.current()
+    }
+
+    actions.current = {
+      // Los botones hacen zoom sobre el centro de lo que se ve.
+      zoomBy: (factor) => {
+        zoomAt(factor, width / 2, height / 2)
+      },
+      fit: onDoubleClick,
     }
 
     const observer = new ResizeObserver(resize)
@@ -679,5 +721,46 @@ export function ForceGraph({ nodes, links, colorOf, selected, onSelect, label }:
     schedule.current()
   }, [colorOf, selected])
 
-  return <canvas ref={canvasRef} className="force-graph" role="img" aria-label={label} />
+  return (
+    <div className="force-wrap">
+      <canvas ref={canvasRef} className="force-graph" role="img" aria-label={label} />
+      {tip !== null && (
+        <div className="force-tip" style={{ left: tip.x, top: tip.y }}>
+          {tooltip(tip.node)}
+        </div>
+      )}
+      <div className="force-controls">
+        <button
+          type="button"
+          aria-label={controls.zoomIn}
+          title={controls.zoomIn}
+          onClick={() => {
+            actions.current.zoomBy(1.4)
+          }}
+        >
+          +
+        </button>
+        <button
+          type="button"
+          aria-label={controls.zoomOut}
+          title={controls.zoomOut}
+          onClick={() => {
+            actions.current.zoomBy(1 / 1.4)
+          }}
+        >
+          −
+        </button>
+        <button
+          type="button"
+          aria-label={controls.fit}
+          title={controls.fit}
+          onClick={() => {
+            actions.current.fit()
+          }}
+        >
+          ⤢
+        </button>
+      </div>
+    </div>
+  )
 }
