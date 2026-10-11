@@ -557,22 +557,42 @@ GET /me/health → las fechas para saber cómo vas de tiempo en el common core.
     "2026-05-19T11:37:22.148Z",
     "2026-06-18T14:40:03.509Z",
     "2026-08-20T21:31:21.769Z"
-  ]
+  ],
+  "declared": {
+    "pace": 15,
+    "circle": 3,
+    "deadline": "2026-11-11",
+    "updatedAt": "2026-10-12T09:00:00.000Z"
+  }
 }
 ```
 
+PUT /me/health/pace → anota el pace y el *Milestone Deadline* que ves en tu
+perfil de la intra, y devuelve lo mismo que `GET /me/health`.
+
+```json
+{ "pace": 15, "deadline": "2026-11-11" }
+```
+
+`400 invalid_input` si el pace no es 8, 12, 15, 18, 22 o 24, si la fecha no va
+como `AAAA-MM-DD` o queda a más de 800 días, o si ya completaste el common core.
+
 - `startedAt` y `blackholedAt` salen del `cursus_users` del 42cursus (id `21`)
   de tu perfil, que se guarda cada vez que entras. `blackholedAt` es la fecha
-  oficial de 42 y puede ser `null`.
+  que 42 puso al crear el cursus: no cuenta los días de bonus ni el avance, así
+  que la web no calcula con ella. Puede ser `null`.
 - `milestones[n]` es cuándo validaste el `common-core-rank-0n`
   (`/v2/users/:id/quests_users`, como mucho una petición al día por persona).
-- La API solo da hechos. A qué pace vas, cuándo caerías al siguiente y la
-  calculadora los hace la web con la tabla de plazos
-  (`apps/web/src/shared/pace.ts`): tu pace es el más rápido cuyo plazo para el
-  círculo en el que estás no ha pasado.
-- Si `blackholedAt` es posterior a lo que sale de la tabla, es la fecha real:
-  la diferencia son días extra (bonus, compensación o *freeze*) y la web
-  retrasa con ellos todos los plazos del círculo actual.
+- `declared` es lo que la persona anotó, o `null`. 42 no publica en su API ni el
+  pace ni el plazo de cada milestone, y son los únicos datos con los que las
+  fechas salen exactas. `circle` es el círculo en el que estaba al anotarlo.
+- La API solo da hechos. Las cuentas las hace la web con la tabla del pace
+  system (`apps/web/src/shared/pace.ts`): el día cero de la persona es
+  `deadline` menos los días que la tabla da a ese pace para ese círculo, y de
+  él salen los plazos de todos los paces, el black hole (el plazo del pace 24)
+  y la calculadora. Sin `declared` no se calcula nada: la web lo pregunta.
+- Si 42 da más días de bonus, el plazo del perfil cambia y hay que anotarlo otra
+  vez; por eso se enseña `updatedAt`.
 
 ## Red de correcciones
 

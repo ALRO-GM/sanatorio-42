@@ -89,7 +89,7 @@ describe('comunidad', () => {
         progress: 1,
       })
       // Lleva su estado de salud, pero nada de preferencias ni del desglose de XP.
-      expect(record.health).toMatchObject({ currentCircle: 0, milestones: [] })
+      expect(record.health).toMatchObject({ currentCircle: 0, milestones: [], declared: null })
       expect(Object.keys(record).sort()).toEqual([
         'achievements',
         'health',
@@ -102,6 +102,44 @@ describe('comunidad', () => {
       await expectCode(xp.publicProfile('nadie'), 'not_found')
       await expectCode(xp.publicProfile('../etc'), 'not_found')
       // Su estado de salud sí pregunta a 42 por sus hitos, una vez al día.
+      api.calls.length = 0
+    })
+
+    it('el pace y el plazo anotados se guardan con el círculo en el que se está', async () => {
+      const { xp } = services
+      const eva = actor('eva')
+
+      expect((await xp.health(eva, null)).declared).toBeNull()
+
+      const health = await xp.declarePace(eva, null, { pace: 15, deadline: '2026-11-11' })
+
+      expect(health.declared).toMatchObject({ pace: 15, circle: 0, deadline: '2026-11-11' })
+      expect(health.declared?.updatedAt).toEqual(expect.any(String))
+      // Anotarlo otra vez sustituye lo anterior, y lo ve quien mire su expediente.
+      await xp.declarePace(eva, null, { pace: 18, deadline: '2026-12-14' })
+      expect((await xp.publicProfile('eva')).health.declared).toMatchObject({
+        pace: 18,
+        deadline: '2026-12-14',
+      })
+
+      // Ni paces que no existen, ni fechas mal escritas, imposibles o absurdas.
+      await expectCode(
+        xp.declarePace(eva, null, { pace: 16, deadline: '2026-11-11' }),
+        'invalid_input',
+      )
+      await expectCode(
+        xp.declarePace(eva, null, { pace: 15, deadline: '11/11/2026' }),
+        'invalid_input',
+      )
+      await expectCode(
+        xp.declarePace(eva, null, { pace: 15, deadline: '2026-13-40' }),
+        'invalid_input',
+      )
+      await expectCode(
+        xp.declarePace(eva, null, { pace: 15, deadline: '2031-01-01' }),
+        'invalid_input',
+      )
+      // Mirar su expediente pregunta a 42 por sus hitos, una vez al día.
       api.calls.length = 0
     })
 

@@ -69,6 +69,7 @@ describe('migraciones', () => {
       'help_bookings',
       'help_days',
       'notices',
+      'pace_refs',
       'presence',
       'profiles',
       'project_pass_marks',

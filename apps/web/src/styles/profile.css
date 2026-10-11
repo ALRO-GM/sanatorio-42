@@ -129,6 +129,21 @@
 .health-result {
   margin: 0;
 }
+.health-ask {
+  display: grid;
+  gap: 0.5rem;
+}
+.health-ask .hint {
+  margin: 0;
+}
+.health-form {
+  align-items: end;
+}
+.health-form-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
 .health-result.gone {
   color: #c0392b;
   font-weight: 700;

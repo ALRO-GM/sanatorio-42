@@ -8,6 +8,15 @@ import type { Db } from '../../core/db/database.js'
 import { nowIso } from '../../core/db/database.js'
 import { toNumber } from '../../core/db/rows.js'
 
+/** Pace y plazo del milestone que alguien ha copiado de su perfil de la intra. */
+export type PaceRefRow = {
+  pace: number
+  circle: number
+  /** `YYYY-MM-DD`. */
+  deadline: string
+  updatedAt: string
+}
+
 export type ProfileRow = {
   login: string
   campusId: number | null
@@ -84,6 +93,40 @@ export function createProfilesRepository(db: Db) {
           now,
           flag,
         ],
+      })
+    },
+
+    /** El pace y el plazo que anotó una persona, o `undefined` si no lo ha hecho. */
+    async paceRef(login: string): Promise<PaceRefRow | undefined> {
+      const result = await db.execute({
+        sql: 'SELECT pace, circle, deadline, updated_at FROM pace_refs WHERE login = ?',
+        args: [login],
+      })
+      const row = result.rows[0]
+
+      if (row === undefined) {
+        return undefined
+      }
+
+      return {
+        pace: toNumber(row.pace),
+        circle: toNumber(row.circle),
+        deadline: typeof row.deadline === 'string' ? row.deadline : '',
+        updatedAt: typeof row.updated_at === 'string' ? row.updated_at : '',
+      }
+    },
+
+    /** Anota (o sustituye) el pace y el plazo de una persona. */
+    async savePaceRef(login: string, ref: Omit<PaceRefRow, 'updatedAt'>): Promise<void> {
+      await db.execute({
+        sql: `INSERT INTO pace_refs (login, pace, circle, deadline, updated_at)
+              VALUES (?, ?, ?, ?, ?)
+              ON CONFLICT (login) DO UPDATE SET
+                pace = excluded.pace,
+                circle = excluded.circle,
+                deadline = excluded.deadline,
+                updated_at = excluded.updated_at`,
+        args: [login, ref.pace, ref.circle, ref.deadline, nowIso()],
       })
     },
   }

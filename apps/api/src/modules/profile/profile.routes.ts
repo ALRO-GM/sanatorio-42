@@ -53,6 +53,13 @@ export function registerProfileRoutes(
     return reply.send(await xp.health(await session.actor(request), session.user(request).id))
   })
 
+  /** `PUT /me/health/pace` → `{ pace, deadline }`: el pace y el plazo que ves en tu perfil de la intra. */
+  app.put('/me/health/pace', async (request, reply) => {
+    return reply.send(
+      await xp.declarePace(await session.actor(request), session.user(request).id, request.body),
+    )
+  })
+
   /** `GET /leaderboard?period=month|all` → quién ayuda más en el campus. */
   app.get<{ Querystring: { period?: string } }>('/leaderboard', async (request, reply) => {
     return reply.send(

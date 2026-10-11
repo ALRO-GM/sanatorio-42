@@ -32,6 +32,7 @@ import type {
   HelperTag,
   HolyGraph,
   Health,
+  PaceRefInput,
   Leaderboard,
   NetworkGraph,
   NetworkMine,
@@ -198,6 +199,8 @@ export type Api = {
 
   /** Fechas para el estado de salud: inicio, círculos completados y black hole. */
   getHealth: () => Promise<Health>
+  /** Anota el pace y el plazo que ves en tu perfil de la intra. */
+  declarePace: (ref: PaceRefInput) => Promise<Health>
 
   // --- Ayuda reservada (guardia)
   getHelpDay: () => Promise<HelpDay>

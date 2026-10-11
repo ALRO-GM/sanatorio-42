@@ -45,6 +45,20 @@ export type XpServiceOptions = {
   now?: () => number
 }
 
+/** Los paces que existen: los meses en los que se prevé acabar el common core. */
+const PACES = [8, 12, 15, 18, 22, 24]
+/** Un plazo no puede caer más lejos que esto de hoy: el pace más lento dura dos años. */
+const MAX_DEADLINE_DAYS = 800
+const DAY_MS = 24 * 60 * 60_000
+
+const paceRefSchema = z.object({
+  pace: z.number().refine((pace) => PACES.includes(pace), 'Ese pace no existe'),
+  deadline: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, 'La fecha va como AAAA-MM-DD')
+    .refine((day) => !Number.isNaN(Date.parse(`${day}T00:00:00Z`)), 'Esa fecha no existe'),
+})
+
 const settingsSchema = z.object({
   campusId: id.optional(),
   lang: z.enum(['es', 'en']).optional(),
@@ -215,9 +229,10 @@ export function createXpService(options: XpServiceOptions) {
      * @param userId Su id en 42, para preguntar por sus rangos.
      */
     async health(actor: Actor, userId: number | null): Promise<Health> {
-      const [{ rank, ranks }, cursus] = await Promise.all([
+      const [{ rank, ranks }, cursus, declared] = await Promise.all([
         curriculum.trackOf(actor.login, userId),
         curriculum.cursusOf(actor.login, userId),
+        profiles.paceRef(actor.login),
       ])
 
       return {
@@ -225,7 +240,38 @@ export function createXpService(options: XpServiceOptions) {
         blackholedAt: cursus.blackholedAt,
         currentCircle: Math.min(LAST_CIRCLE, (rank ?? -1) + 1),
         milestones: ranks,
+        declared: declared ?? null,
       }
+    },
+
+    /**
+     * Anota el pace y el *Milestone Deadline* que la persona ve en su perfil de
+     * la intra. Con eso la web deduce su día cero (con los días de bonus
+     * dentro) y saca de la tabla el resto de fechas.
+     *
+     * El plazo se guarda junto al círculo en el que está ahora: es el de ese
+     * círculo, y sigue valiendo cuando pase al siguiente.
+     *
+     * @throws {DomainError} `invalid_input` si el pace no existe, la fecha no es
+     *   razonable o ya ha completado el common core.
+     */
+    async declarePace(actor: Actor, userId: number | null, input: unknown): Promise<Health> {
+      const { pace, deadline } = parse(paceRefSchema, input)
+      const away = Math.abs(Date.parse(`${deadline}T00:00:00Z`) - now()) / DAY_MS
+
+      if (away > MAX_DEADLINE_DAYS) {
+        throw domainError('invalid_input', 'Esa fecha queda demasiado lejos para ser un plazo')
+      }
+
+      const current = await this.health(actor, userId)
+
+      if (current.milestones.length > LAST_CIRCLE) {
+        throw domainError('invalid_input', 'Ya has completado el common core: no te quedan plazos')
+      }
+
+      await profiles.savePaceRef(actor.login, { pace, circle: current.currentCircle, deadline })
+
+      return this.health(actor, userId)
     },
 
     /** Retira XP ya dada, cuando lo que la ganó se da por malo. */

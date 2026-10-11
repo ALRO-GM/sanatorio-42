@@ -84,6 +84,7 @@ export const realApi: Api = {
 
   getLeaderboard: (period) => getJson(`/leaderboard?period=${period}`),
   getHealth: () => getJson('/me/health'),
+  declarePace: (ref) => sendJson('PUT', '/me/health/pace', ref),
 
   getNetwork: (params) => {
     const query = new URLSearchParams()

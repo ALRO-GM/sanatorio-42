@@ -97,15 +97,43 @@ export type Leaderboard = {
 }
 
 /**
+ * Lo que cada persona copia de su perfil de la intra para que las fechas salgan
+ * exactas: a qué pace va y cuándo le vence el milestone en el que está.
+ *
+ * 42 no publica esas dos cosas en su API, y la fecha de black hole que sí da
+ * (`blackholedAt`) no incluye los días de bonus. Con un plazo real y la tabla
+ * de plazos se deduce el día cero de esa persona, y de ahí todo lo demás.
+ */
+export type PaceRef = {
+  /** Pace al que iba al anotarlo: 8, 12, 15, 18, 22 o 24. */
+  pace: number
+  /** Círculo en el que estaba entonces: el plazo es el de ese círculo. */
+  circle: number
+  /** El *Milestone Deadline* de su perfil, `YYYY-MM-DD`. */
+  deadline: string
+  /** Cuándo lo anotó (ISO-8601): si 42 da más días de bonus, hay que repetirlo. */
+  updatedAt: string
+}
+
+/** Cuerpo de `PUT /me/health/pace`. */
+export type PaceRefInput = Pick<PaceRef, 'pace' | 'deadline'>
+
+/**
  * `GET /me/health`: lo que hace falta para saber cómo vas de tiempo en el common
- * core. Los cálculos (a qué pace vas, cuándo caerías al siguiente, cuándo te
- * alcanzaría el black hole) los hace la web con la tabla de plazos.
+ * core. Los cálculos (cuándo caerías al siguiente pace, cuándo te alcanzaría el
+ * black hole) los hace la web con la tabla de plazos y `declared`.
  */
 export type Health = {
   /** Cuándo empezaste el 42cursus (ISO-8601), o `null` si no se sabe. */
   startedAt: string | null
-  /** La fecha de black hole que da 42 en tu perfil, si la da. */
+  /**
+   * La fecha de black hole que da la API de 42, si la da. Es la que se puso al
+   * crear el cursus: no cuenta los días de bonus ni el avance, así que la web
+   * no calcula con ella.
+   */
   blackholedAt: string | null
+  /** Pace y plazo que ha anotado la persona, o `null` si aún no lo ha hecho. */
+  declared: PaceRef | null
   /** Círculo en el que estás: el siguiente al último que completaste. */
   currentCircle: number
   /**

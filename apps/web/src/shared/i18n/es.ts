@@ -482,7 +482,6 @@ export const es: Record<string, string> = {
   'health.thenHole': 'después, black hole',
   'health.lost': 'perdido',
   'health.hole': 'Black hole el {date}',
-  'health.holeOfficial': 'fecha oficial de 42 · incluye {n} d extra (bonus, compensación o freeze)',
   'health.holeTable': 'te absorbe y sales del cursus',
   'health.history': 'Círculos completados',
   'health.historyRow': 'Círculo {circle} · {date}',
@@ -495,12 +494,27 @@ export const es: Record<string, string> = {
   'health.calcFaster': 'Para pace {pace} llegas {n} d tarde.',
   'health.calcSlowest': 'Es el más lento: lo siguiente es el black hole.',
   'health.calcGone': 'Black hole: el último plazo del círculo {circle} acaba el {date}.',
-  'health.noteExtra':
-    'Los plazos ya incluyen tus {n} días extra (bonus, compensación o freeze): la diferencia entre la fecha oficial de black hole de 42 y la de la tabla. Los paces de círculos ya completados se calculan sin ellos.',
-  'health.note':
-    'Calculado con la tabla de plazos por pace, contando desde que empezaste el 42cursus. Si 42 te da días extra (bonus, compensación o freeze), los plazos se retrasan y manda la fecha oficial de tu perfil.',
+  'health.source':
+    'Calculado con la tabla del pace system a partir de lo que anotaste el {updated}: pace {pace} y plazo del círculo {circle} el {deadline}.',
+  'health.bonus':
+    'Incluye {n} d de bonus sobre tu fecha de inicio. Si 42 te da más, actualiza el plazo.',
+  'health.update': 'Actualizar pace y plazo',
+  'health.ask': '¿Quieres ver todas tus fechas del pace system y tu black hole?',
+  'health.askHow':
+    'Copia dos datos de tu perfil de la intra: el pace al que vas y tu Milestone Deadline. Con ellos y la tabla del pace system salen el resto de plazos y el black hole, con tus días de bonus incluidos.',
+  'health.askYes': 'Anotar mi pace',
+  'health.askNo': 'Ahora no',
+  'health.skipped': 'Sin tu pace y tu Milestone Deadline no se pueden calcular tus fechas.',
+  'health.undeclared':
+    'Está en el círculo {circle}. Todavía no ha anotado su pace, así que no hay fechas que enseñar.',
+  'health.formPace': 'Tu pace',
+  'health.formDeadline': 'Milestone Deadline (círculo {circle})',
+  'health.formSave': 'Guardar y calcular',
+  'health.formCancel': 'Cancelar',
   'pace.label': 'Tu pace',
   'pace.none': 'Sin elegir',
+  'pace.needsRef':
+    'Anota tu pace y tu Milestone Deadline en el estado de salud del expediente para ver los plazos.',
   'pace.option': 'Pace {n}',
   'pace.deadlines': 'Fecha límite de cada círculo',
   'pace.done': 'hecho',

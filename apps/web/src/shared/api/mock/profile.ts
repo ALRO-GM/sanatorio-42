@@ -2,14 +2,24 @@
  * API de mentira: expediente, preferencias, estado de salud y ranking.
  */
 
+import type { PaceRef } from '@sanatorio/contracts'
+
 import { LEVEL_FLOORS, ME, RANKING, TITLES } from './data'
 import { portrait } from './portrait'
 import type { Api } from '../types'
 import { AVAILABLE_KEY, state, delay, levelFor, achievement } from './state'
 
+/** Lo que se anota en la tarjeta de salud: dura lo que dure la pestaña. */
+let declared: PaceRef | null = null
+
 export const profileMock: Pick<
   Api,
-  'getPublicProfile' | 'getProfile' | 'updateSettings' | 'getHealth' | 'getLeaderboard'
+  | 'getPublicProfile'
+  | 'getProfile'
+  | 'updateSettings'
+  | 'getHealth'
+  | 'declarePace'
+  | 'getLeaderboard'
 > = {
   async getPublicProfile(login) {
     await delay()
@@ -114,7 +124,15 @@ export const profileMock: Pick<
       blackholedAt: at(320),
       currentCircle: 3,
       milestones: [at(1), at(31), at(94)],
+      declared,
     }
+  },
+
+  async declarePace(ref) {
+    await delay(100)
+    declared = { ...ref, circle: 3, updatedAt: new Date().toISOString() }
+
+    return this.getHealth()
   },
 
   async getLeaderboard(period) {

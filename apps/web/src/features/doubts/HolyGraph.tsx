@@ -23,7 +23,9 @@ import type { NodeLook, RingItem, Signal } from './graph'
 import { isoOf } from './iso'
 import type { Half } from './iso'
 import { layoutOf, radiusFor } from './layout'
-import { deadlinesFor, loadPace, PACES, savePace } from '../../shared/pace'
+import { api } from '../../shared/api'
+import { useAsync } from '../../shared/hooks/useAsync'
+import { deadlinesFor, loadPace, originOf, PACES, savePace } from '../../shared/pace'
 import type { Pace } from '../../shared/pace'
 
 type HolyGraphProps = {
@@ -195,7 +197,13 @@ export function HolyGraph({ graph, selected, onSelect }: HolyGraphProps) {
   const [hovered, setHovered] = useState<string | null>(null)
   // Series abiertas. Por defecto, todas cerradas: es lo que deja respirar al grafo.
   const [expanded, setExpanded] = useState<ReadonlySet<string>>(new Set())
-  const [pace, setPace] = useState<Pace | null>(loadPace)
+  const [chosen, setPace] = useState<Pace | null>(loadPace)
+  // Los plazos cuelgan del pace y el plazo anotados en el estado de salud.
+  const health = useAsync(() => api.getHealth(), [])
+  const declared = health.data?.declared ?? null
+  const origin = declared === null ? null : originOf(declared)
+  // Sin elegir otro, se enseñan los plazos del pace al que se va.
+  const pace = chosen ?? PACES.find((option) => option === declared?.pace) ?? null
   // Círculo bajo el ratón o con el foco: su bandeja se levanta.
   const [raised, setRaised] = useState<number | null>(null)
 
@@ -232,8 +240,7 @@ export function HolyGraph({ graph, selected, onSelect }: HolyGraphProps) {
     ),
   )
 
-  const deadlines =
-    pace === null || graph.startedAt === null ? [] : deadlinesFor(graph.startedAt, pace)
+  const deadlines = pace === null || origin === null ? [] : deadlinesFor(origin, pace)
 
   const choosePace = (next: Pace | null): void => {
     savePace(next)
@@ -735,7 +742,10 @@ export function HolyGraph({ graph, selected, onSelect }: HolyGraphProps) {
         </svg>
       )}
 
-      {graph.startedAt !== null && (
+      {graph.startedAt !== null && origin === null && health.data !== undefined && (
+        <p className="hint">{t('pace.needsRef')}</p>
+      )}
+      {origin !== null && (
         <div className="graph-pace">
           <label className="setting">
             <span>{t('pace.label')}</span>

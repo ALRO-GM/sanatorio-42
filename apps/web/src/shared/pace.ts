@@ -2,16 +2,18 @@
  * Tiempo límite de cada círculo según el *pace*.
  *
  * El *pace* es el ritmo al que alguien se compromete a ir: los meses en los que
- * prevé acabar el common core. Cada ritmo fija cuántos días, contados desde que
- * se empieza el 42cursus, hay para completar cada círculo (cada *milestone*).
+ * prevé acabar el common core. Cada ritmo fija cuántos días hay para completar
+ * cada círculo (cada *milestone*), contados desde el día cero de esa persona.
  *
  * El pace no es fijo: es el más rápido cuyo plazo todavía cumples. Si se te pasa
  * el plazo de tu pace para el círculo en el que estás, caes al siguiente más
  * lento; si se te pasa el del más lento, te alcanza el black hole. Y al revés:
  * quien termina un círculo antes del plazo de un pace más rápido, sube a él.
  *
- * 42 no publica en su API qué pace lleva cada persona: se deduce de cuándo
- * completó cada círculo (`paceOn`), o se elige a mano en el grafo.
+ * El día cero no es el día en que se empezó el 42cursus: 42 lo va retrasando
+ * con los días de bonus, y no publica en su API ni esos días ni el pace. Por
+ * eso cada persona anota el pace y el *Milestone Deadline* que ve en su perfil
+ * de la intra, y de ese plazo real se deduce el día cero (`originOf`).
  */
 
 export const PACES = [8, 12, 15, 18, 22, 24] as const
@@ -45,6 +47,28 @@ export function savePace(pace: Pace | null): void {
   }
 }
 
+/**
+ * El día cero de alguien, en milisegundos: el plazo que anotó menos los días
+ * que la tabla da a ese pace para ese círculo. `null` si el pace no existe.
+ *
+ * Cae a mediodía, hora local: así un cambio de hora no mueve ninguna fecha de
+ * día.
+ */
+export function originOf(ref: { pace: number; circle: number; deadline: string }): number | null {
+  const pace = PACES.find((option) => option === ref.pace)
+  const days = pace === undefined ? undefined : DAYS[pace][ref.circle]
+  const deadline = Date.parse(`${ref.deadline}T12:00:00`)
+
+  return days === undefined || Number.isNaN(deadline) ? null : deadline - days * DAY_MS
+}
+
+/** Un plazo vale hasta que acaba su día: las fechas están a mediodía. */
+const HALF_DAY_MS = DAY_MS / 2
+
+function daysLeft(date: number, now: number): number {
+  return Math.floor((date + HALF_DAY_MS - now) / DAY_MS)
+}
+
 export type Deadline = {
   circle: number
   /** El último día para completar ese círculo. */
@@ -53,14 +77,12 @@ export type Deadline = {
   daysLeft: number
 }
 
-/** La fecha límite de cada círculo, del 0 al 6, para quien empezó en `startedAt` con ese pace. */
-export function deadlinesFor(startedAt: string, pace: Pace, now = Date.now()): Deadline[] {
-  const start = Date.parse(startedAt)
-
+/** La fecha límite de cada círculo, del 0 al 6, a ese pace y desde ese día cero. */
+export function deadlinesFor(origin: number, pace: Pace, now = Date.now()): Deadline[] {
   return DAYS[pace].map((days, circle) => {
-    const date = new Date(start + days * DAY_MS)
+    const date = origin + days * DAY_MS
 
-    return { circle, date, daysLeft: Math.ceil((date.getTime() - now) / DAY_MS) }
+    return { circle, date: new Date(date), daysLeft: daysLeft(date, now) }
   })
 }
 
@@ -72,10 +94,10 @@ export const SLOWEST: Pace = 24
  * rápido cuyo plazo aún no ha pasado. `null` si se ha pasado hasta el del más
  * lento, es decir, black hole.
  */
-export function paceOn(startedAt: string, circle: number, at: number, extraDays = 0): Pace | null {
-  const start = Date.parse(startedAt) + extraDays * DAY_MS
-
-  return PACES.find((pace) => at <= start + (DAYS[pace][circle] ?? 0) * DAY_MS) ?? null
+export function paceOn(origin: number, circle: number, at: number): Pace | null {
+  return (
+    PACES.find((pace) => at <= origin + (DAYS[pace][circle] ?? 0) * DAY_MS + HALF_DAY_MS) ?? null
+  )
 }
 
 export type PaceStep = {
@@ -90,22 +112,12 @@ export type PaceStep = {
  * El plazo de cada pace para un mismo círculo, del más rápido al más lento.
  * Leído en orden es el calendario de caídas: pasada cada fecha se cae al pace
  * siguiente, y pasada la última, al black hole.
- *
- * `extraDays` son los días que 42 ha añadido a esa persona (bonus,
- * compensación o *freeze*, que para el reloj): retrasan todos los plazos.
  */
-export function stepsFor(
-  startedAt: string,
-  circle: number,
-  now = Date.now(),
-  extraDays = 0,
-): PaceStep[] {
-  const start = Date.parse(startedAt) + extraDays * DAY_MS
-
+export function stepsFor(origin: number, circle: number, now = Date.now()): PaceStep[] {
   return PACES.map((pace) => {
-    const date = new Date(start + (DAYS[pace][circle] ?? 0) * DAY_MS)
+    const date = origin + (DAYS[pace][circle] ?? 0) * DAY_MS
 
-    return { pace, date, daysLeft: Math.ceil((date.getTime() - now) / DAY_MS) }
+    return { pace, date: new Date(date), daysLeft: daysLeft(date, now) }
   })
 }
 

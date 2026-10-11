@@ -596,6 +596,7 @@ describe('comunidad', () => {
         blackholedAt: '2027-04-03T07:42:00.000Z',
         currentCircle: 2,
         milestones: ['2026-05-19T11:37:00.000Z', '2026-06-18T14:40:00.000Z'],
+        declared: null,
       })
 
       // Quien entró antes de que se guardasen las fechas no las tiene: se piden
@@ -625,6 +626,7 @@ describe('comunidad', () => {
         blackholedAt: null,
         currentCircle: 0,
         milestones: [],
+        declared: null,
       })
       expect(api.calls).toHaveLength(0)
     })
