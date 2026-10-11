@@ -255,10 +255,12 @@ export function createNetworkRepository(db: Db) {
       )
     },
 
-    /** Proyectos con correcciones y cuántas tiene cada uno. */
-    async projects(campusId: number): Promise<{ id: number; corrections: number }[]> {
+    /** Proyectos con correcciones: cuántas tiene cada uno y qué parte aprobó. */
+    async projects(
+      campusId: number,
+    ): Promise<{ id: number; corrections: number; passRate: number | null }[]> {
       const result = await db.execute({
-        sql: `SELECT project_id, COUNT(*) AS total FROM corrections
+        sql: `SELECT project_id, COUNT(*) AS total, AVG(positive) AS pass_rate FROM corrections
               WHERE campus_id = ? AND project_id IS NOT NULL
               GROUP BY project_id ORDER BY total DESC`,
         args: [campusId],
@@ -267,6 +269,7 @@ export function createNetworkRepository(db: Db) {
       return result.rows.map((row) => ({
         id: toNumber(row.project_id),
         corrections: toNumber(row.total),
+        passRate: row.pass_rate === null ? null : Math.round(Number(row.pass_rate) * 1000) / 1000,
       }))
     },
 

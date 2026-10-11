@@ -122,7 +122,7 @@ type Cached = {
 type Catalogue = {
   /** Año de la primera corrección de cada persona. */
   years: Map<string, number>
-  projects: { id: number; name: string; corrections: number }[]
+  projects: { id: number; name: string; corrections: number; passRate: number | null }[]
 }
 
 export function createNetworkService(options: NetworkServiceOptions) {

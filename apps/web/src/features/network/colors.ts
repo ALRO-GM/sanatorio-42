@@ -35,6 +35,11 @@ function yearColor(year: number): string {
   return `hsl(${(year * 67) % 360} 58% 55%)`
 }
 
+/** Color de un porcentaje de aprobados: rojo si aprueba la mitad o menos, verde si casi todo. */
+export function passColor(passRate: number): string {
+  return heat((1 - passRate) / STRICTEST)
+}
+
 export function colorOf(node: NetworkNode, mode: ColorMode): string {
   switch (mode) {
     case 'community': {

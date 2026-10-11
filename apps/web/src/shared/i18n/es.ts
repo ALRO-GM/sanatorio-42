@@ -604,4 +604,8 @@ export const es: Record<string, string> = {
   'net.zoomOut': 'Alejar',
   'net.fit': 'Encajar todo',
   'app.loadingSection': 'Abriendo…',
+  'net.projects': 'Proyectos más corregidos',
+  'net.projects.pass': 'Correcciones que aprobaron',
+  'net.projects.hint':
+    'Número de correcciones y cuántas aprobaron, en todo el histórico. Pulsa uno para ver solo su red.',
 }

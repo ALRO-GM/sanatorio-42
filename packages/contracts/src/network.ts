@@ -106,8 +106,11 @@ export type NetworkGraph = {
   topPairs: NetworkLink[]
   /** Correcciones por mes en todo el histórico (del proyecto, si se filtra por uno). */
   timeline: { month: string; corrections: number }[]
-  /** Proyectos con correcciones, para el filtro. */
-  projects: { id: number; name: string; corrections: number }[]
+  /**
+   * Proyectos con correcciones, los más corregidos primero. `passRate` es la
+   * parte de sus correcciones que aprobaron (0-1), o `null` si no se sabe.
+   */
+  projects: { id: number; name: string; corrections: number; passRate: number | null }[]
   sync: NetworkSync
 }
 

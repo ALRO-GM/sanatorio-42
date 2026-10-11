@@ -398,6 +398,10 @@ describe('red de correcciones', () => {
         { month: '2026-08', corrections: 1 },
         { month: '2026-09', corrections: 3 },
       ])
+      // De las cuatro de ft_printf aprobaron tres.
+      expect(graph.projects).toEqual([
+        { id: 10, name: 'ft_printf', corrections: 4, passRate: 0.75 },
+      ])
       // `eva` aprobó dos de las tres que hizo; `ana` no llega al mínimo para opinar.
       expect(graph.nodes.find((node) => node.login === 'eva')?.passRate).toBe(0.667)
       expect(graph.nodes.find((node) => node.login === 'ana')?.passRate).toBeNull()

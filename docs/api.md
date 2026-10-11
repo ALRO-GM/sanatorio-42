@@ -436,7 +436,7 @@ GET /network?from=&to=&login=&projectId=&min=&limit= → el grafo. Todo opcional
   "hidden": { "nodes": 34, "links": 0 },
   "topPairs": [{ "source": "estina", "target": "gsanchez", "forth": 5, "back": 5 }],
   "timeline": [{ "month": "2026-09", "corrections": 1310 }],
-  "projects": [{ "id": 1314, "name": "Libft", "corrections": 4200 }],
+  "projects": [{ "id": 1314, "name": "Libft", "corrections": 4200, "passRate": 0.861 }],
   "sync": { "phase": "copying", "rows": 13301, "total": 81723, "first": "2019-02-25T09:00:00.000Z", "last": "2021-09-27T08:00:00.000Z" }
 }
 ```

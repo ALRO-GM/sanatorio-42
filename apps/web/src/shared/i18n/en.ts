@@ -597,4 +597,8 @@ export const en: Record<string, string> = {
   'net.zoomOut': 'Zoom out',
   'net.fit': 'Fit everything',
   'app.loadingSection': 'Opening…',
+  'net.projects': 'Most evaluated projects',
+  'net.projects.pass': 'Evaluations that passed',
+  'net.projects.hint':
+    'Number of evaluations and how many passed, all time. Click one to see only its network.',
 }

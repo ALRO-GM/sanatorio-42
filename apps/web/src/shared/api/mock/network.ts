@@ -217,9 +217,11 @@ export function mockNetwork(me: string, params: NetworkParams): NetworkGraph {
       }
     }),
     projects: [
-      { id: 10, name: 'ft_printf', corrections: 420 },
-      { id: 11, name: 'get_next_line', corrections: 380 },
-      { id: 12, name: 'push_swap', corrections: 260 },
+      { id: 10, name: 'ft_printf', corrections: 420, passRate: 0.81 },
+      { id: 11, name: 'get_next_line', corrections: 380, passRate: 0.74 },
+      { id: 12, name: 'push_swap', corrections: 260, passRate: 0.62 },
+      { id: 13, name: 'minishell', corrections: 190, passRate: 0.48 },
+      { id: 14, name: 'Libft', corrections: 150, passRate: 0.86 },
     ],
     sync: {
       phase: 'copying',

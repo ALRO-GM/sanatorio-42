@@ -6,7 +6,7 @@ import { api } from '../../shared/api'
 import type { NetworkParams } from '../../shared/api/types'
 import { useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
-import { COLOR_MODES, colorOf, legendOf } from './colors'
+import { COLOR_MODES, colorOf, legendOf, passColor } from './colors'
 import type { ColorMode } from './colors'
 import { ForceGraph } from './ForceGraph'
 import { Meter } from './Meter'
@@ -24,6 +24,9 @@ const DEBOUNCE_MS = 250
 
 /** Cada cuánto se refresca mientras la copia desde 42 sigue en marcha. */
 const REFRESH_WHILE_COPYING_MS = 45_000
+
+/** Proyectos que se listan en el panel. */
+const PROJECTS_SHOWN = 10
 
 /** Actividad mínima para salir en el ranking: con dos correcciones cualquier índice engaña. */
 const RANKING_MIN_ACTIVITY = 12
@@ -521,6 +524,43 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
                     </ul>
                   </article>
                 </>
+              )}
+
+              {chosen === null && graph.projects.length > 0 && (
+                <article className="card net-panel">
+                  <span className="eyebrow">{t('net.projects')}</span>
+                  <ul className="net-rows">
+                    {graph.projects.slice(0, PROJECTS_SHOWN).map((project) => (
+                      <li key={project.id}>
+                        <button
+                          type="button"
+                          aria-pressed={filters.projectId === project.id}
+                          className={filters.projectId === project.id ? 'active' : ''}
+                          onClick={() => {
+                            change({
+                              projectId: filters.projectId === project.id ? null : project.id,
+                            })
+                          }}
+                        >
+                          <span className="net-row-name">{project.name}</span>
+                          <span className="net-row-count">
+                            {project.corrections.toLocaleString()}
+                            {project.passRate !== null && (
+                              <span
+                                className="net-row-badge"
+                                title={t('net.projects.pass')}
+                                style={{ background: passColor(project.passRate) }}
+                              >
+                                {Math.round(project.passRate * 100)} %
+                              </span>
+                            )}
+                          </span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="hint">{t('net.projects.hint')}</p>
+                </article>
               )}
 
               <details className="card net-about">

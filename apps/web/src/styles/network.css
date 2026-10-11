@@ -578,3 +578,13 @@
   color: var(--text-2);
   font-size: 0.82rem;
 }
+
+/* Filas con un número y su porcentaje al lado (proyectos). */
+.net-row-count .net-row-badge {
+  display: inline-block;
+  margin-left: 0.4rem;
+}
+.net-rows button.active {
+  background: var(--accent-soft);
+  font-weight: 700;
+}
