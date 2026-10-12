@@ -36,6 +36,7 @@ import type {
   ApiQuestUser,
   ApiScaleTeam,
 } from './types.js'
+import { defaultSleep, readInt } from './headers.js'
 
 /** Configuración del cliente. */
 export type FortyTwoClientOptions = {
@@ -461,23 +462,4 @@ export class FortyTwoClient {
 
     return Math.min(exponential + jitter, this.backoffMaxMs)
   }
-}
-
-/** Lee una cabecera como entero. `undefined` si no está o no es un número. */
-function readInt(headers: Headers, name: string): number | undefined {
-  const raw = headers.get(name)
-
-  if (raw === null || raw.trim() === '') {
-    return undefined
-  }
-
-  const parsed = Number(raw)
-
-  return Number.isNaN(parsed) ? undefined : parsed
-}
-
-function defaultSleep(ms: number): Promise<void> {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms)
-  })
 }

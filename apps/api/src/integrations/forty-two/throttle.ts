@@ -25,6 +25,8 @@
  * que pase el segundo, o la API responde `429`.
  */
 
+import { defaultSleep, readInt } from './headers.js'
+
 /** Cabeceras que manda la API de 42 con su cuota. */
 const SECONDLY_REMAINING = 'x-secondly-ratelimit-remaining'
 const HOURLY_REMAINING = 'x-hourly-ratelimit-remaining'
@@ -138,23 +140,4 @@ export function createThrottle(options: ThrottleOptions): Throttle {
 
     pendingDelayMs: () => forcedDelayMs,
   }
-}
-
-/** Lee una cabecera como entero. `undefined` si no está o no es un número. */
-function readInt(headers: Headers, name: string): number | undefined {
-  const raw = headers.get(name)
-
-  if (raw === null || raw.trim() === '') {
-    return undefined
-  }
-
-  const parsed = Number(raw)
-
-  return Number.isNaN(parsed) ? undefined : parsed
-}
-
-function defaultSleep(ms: number): Promise<void> {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms)
-  })
 }

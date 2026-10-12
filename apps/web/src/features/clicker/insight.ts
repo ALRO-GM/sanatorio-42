@@ -7,7 +7,7 @@
  */
 
 import type { BuildingId } from './data'
-import { baseCps, clickPower, cpsOf, globalMult, priceOf, unitCps } from './engine'
+import { baseCps, clickPower, cpsOf, globalMult, unitCps } from './engine'
 import type { Game } from './engine'
 
 /** Lo que sube la producción por segundo y cada pulsación al comprar una mejora. */
@@ -58,15 +58,6 @@ export const payback = (price: number, gain: number): number | null =>
 /** Cuánto de lleno está el camino a poder pagar algo, de 0 a 1. */
 export const reach = (game: Game, price: number): number =>
   price <= 0 ? 1 : Math.max(0, Math.min(1, game.code / price))
-
-/** El precio de las siguientes `count` unidades y lo que suben la producción. */
-export function buildingDeal(
-  game: Game,
-  id: BuildingId,
-  count: number,
-): { price: number; gain: number } {
-  return { price: priceOf(game, id, count), gain: buildingGain(game, id, count) }
-}
 
 /**
  * Parte recorrida hacia el siguiente nivel, de 0 a 1. El nivel es

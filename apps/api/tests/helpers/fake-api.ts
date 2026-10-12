@@ -60,20 +60,6 @@ function buildResponse(spec: FakeResponse): Response {
 }
 
 /**
- * Cabeceras de cuota que devuelve la API real.
- *
- * Se añaden a todas las respuestas del `fetch` falso por defecto porque el
- * `Throttle` las lee en cada respuesta: sin ellas, cada petición parece la
- * primera y no hay forma de probar el ritmo.
- */
-export const QUOTA_HEADERS: Record<string, string> = {
-  'x-secondly-ratelimit-limit': '2',
-  'x-secondly-ratelimit-remaining': '2',
-  'x-hourly-ratelimit-limit': '1200',
-  'x-hourly-ratelimit-remaining': '1197',
-}
-
-/**
  * Crea un `fetch` falso.
  *
  * @param queue Respuestas por orden. Se recyclean: si se acaba la lista, la

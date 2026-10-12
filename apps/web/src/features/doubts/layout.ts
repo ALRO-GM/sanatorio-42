@@ -116,26 +116,3 @@ export function layoutOf(rings: readonly (readonly number[])[]): Layout {
     }),
   }
 }
-
-/**
- * Trazo SVG de la porción de un disco de radio `radius` que cubre esa fracción
- * de la vuelta, en sentido horario desde `start`. Es el relleno de un círculo
- * según lo que se lleva completado.
- */
-export function wedgePath(layout: Layout, radius: number, start: number, fraction: number): string {
-  const { center } = layout
-
-  if (fraction >= 0.9999) {
-    // Una vuelta entera no se puede dibujar con un solo arco: son dos medias.
-    return `M ${center - radius} ${center} a ${radius} ${radius} 0 1 0 ${2 * radius} 0 a ${radius} ${radius} 0 1 0 ${-2 * radius} 0 Z`
-  }
-
-  const sweep = fraction * 2 * Math.PI
-  const from = { x: center + radius * Math.cos(start), y: center + radius * Math.sin(start) }
-  const to = {
-    x: center + radius * Math.cos(start + sweep),
-    y: center + radius * Math.sin(start + sweep),
-  }
-
-  return `M ${center} ${center} L ${from.x.toFixed(1)} ${from.y.toFixed(1)} A ${radius.toFixed(1)} ${radius.toFixed(1)} 0 ${sweep > Math.PI ? 1 : 0} 1 ${to.x.toFixed(1)} ${to.y.toFixed(1)} Z`
-}

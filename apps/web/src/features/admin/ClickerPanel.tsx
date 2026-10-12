@@ -9,8 +9,7 @@ import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { CapitalChart } from '../clicker/CapitalChart'
 import { CapitalHistory } from '../clicker/CapitalHistory'
 import { duration } from './StatsPanel'
-
-const RANGES = [1, 7, 30, 90] as const
+import { RangePills } from './RangePills'
 
 /**
  * Uso de Code Clicker: cuánta gente encuentra el secreto y qué elige, cuánto
@@ -45,20 +44,7 @@ export function ClickerPanel() {
         {one === undefined ? t('admin.clicker.title') : t('admin.clicker.of', { login: one.login })}
       </h2>
 
-      <div className="filter-pills" role="group" aria-label={t('admin.stats.range')}>
-        {RANGES.map((option) => (
-          <button
-            key={option}
-            type="button"
-            className={`pill ${days === option ? 'active' : ''}`}
-            aria-pressed={days === option}
-            onClick={() => {
-              setDays(option)
-            }}
-          >
-            {t('admin.stats.days', { n: option })}
-          </button>
-        ))}
+      <RangePills value={days} onChange={setDays}>
         {one !== undefined && (
           <button
             type="button"
@@ -70,7 +56,7 @@ export function ClickerPanel() {
             {t('admin.stats.everyone')}
           </button>
         )}
-      </div>
+      </RangePills>
 
       {loading && <p className="estado">{t('app.loading')}</p>}
       {data === undefined ? (

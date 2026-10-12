@@ -8,8 +8,8 @@ import { localeOf, useI18n } from '../../shared/i18n'
 import { Avatar } from '../../shared/ui/Avatar'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { EVERYONE, SegmentSlider } from './SegmentSlider'
+import { RangePills } from './RangePills'
 
-const RANGES = [1, 7, 30, 90] as const
 const DAY_MS = 24 * 60 * 60_000
 
 /** `YYYY-MM-DD` en UTC: los días de las estadísticas van en UTC. */
@@ -106,20 +106,7 @@ export function StatsPanel() {
     <section>
       <h2>{login === null ? t('admin.stats.title') : t('admin.stats.of', { login })}</h2>
 
-      <div className="filter-pills" role="group" aria-label={t('admin.stats.range')}>
-        {RANGES.map((option) => (
-          <button
-            key={option}
-            type="button"
-            className={`pill ${days === option ? 'active' : ''}`}
-            aria-pressed={days === option}
-            onClick={() => {
-              setDays(option)
-            }}
-          >
-            {t('admin.stats.days', { n: option })}
-          </button>
-        ))}
+      <RangePills value={days} onChange={setDays}>
         {login !== null && (
           <button
             type="button"
@@ -131,7 +118,7 @@ export function StatsPanel() {
             {t('admin.stats.everyone')}
           </button>
         )}
-      </div>
+      </RangePills>
 
       {login === null && (
         <SegmentSlider value={segment} onChange={setSegment} told={data?.segment} />

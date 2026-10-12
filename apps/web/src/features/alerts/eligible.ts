@@ -20,8 +20,3 @@ export function hasRoom(event: CalendarEvent): boolean {
 export function hasCodes(event: CalendarEvent): boolean {
   return event.kind === 'board' || event.id.startsWith('help:booking:')
 }
-
-/** Los eventos que avisan antes de empezar: todo lo tuyo, sea o no con más gente. */
-export function alerts(event: CalendarEvent): boolean {
-  return event.joined !== false && event.kind !== 'event_open'
-}

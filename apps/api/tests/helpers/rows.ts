@@ -29,18 +29,3 @@ export function textOf(row: RowLike, column: string): string {
 
   throw new Error(`La columna ${column} no es texto: ${typeof value}`)
 }
-
-/** Una columna numérica. `COUNT(*)` puede venir como `bigint` o como texto. */
-export function numberOf(row: RowLike, column: string): number {
-  const value = row?.[column]
-
-  if (typeof value === 'number') {
-    return value
-  }
-
-  if (typeof value === 'bigint' || typeof value === 'string') {
-    return Number(value)
-  }
-
-  throw new Error(`La columna ${column} no es un número: ${typeof value}`)
-}

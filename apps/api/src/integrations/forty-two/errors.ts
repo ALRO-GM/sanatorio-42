@@ -178,17 +178,6 @@ export function apiErrorFromNetwork(endpoint: string, cause: unknown): ApiError 
 }
 
 /**
- * ¿El error es de credenciales?
- *
- * Una respuesta 401 o 403 con el token de la aplicación significa que el UID o
- * el secreto ya no valen. Reintentar solo gastaría cuota de la API, así que
- * quien lo reciba debe parar y avisar.
- */
-export function isUnauthorized(error: unknown): boolean {
-  return error instanceof ApiError && (error.code === 'unauthorized' || error.code === 'forbidden')
-}
-
-/**
  * Extrae la ruta de una URL para los logs y los errores.
  *
  * Se quita la query: `?page=2&per_page=100` solo añade ruido al mensaje, y la

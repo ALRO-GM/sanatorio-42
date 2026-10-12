@@ -9,8 +9,8 @@ import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { SegmentSlider } from './SegmentSlider'
 import type { SegmentRange } from './SegmentSlider'
 import { duration } from './StatsPanel'
+import { RangePills } from './RangePills'
 
-const RANGES = [1, 7, 30, 90] as const
 const DAY_MS = 24 * 60 * 60_000
 const dayOf = (at: number): string => new Date(at).toISOString().slice(0, 10)
 
@@ -62,21 +62,7 @@ export function FlowsPanel({
 
   return (
     <>
-      <div className="filter-pills" role="group" aria-label={t('admin.stats.range')}>
-        {RANGES.map((option) => (
-          <button
-            key={option}
-            type="button"
-            className={`pill ${days === option ? 'active' : ''}`}
-            aria-pressed={days === option}
-            onClick={() => {
-              setDays(option)
-            }}
-          >
-            {t('admin.stats.days', { n: option })}
-          </button>
-        ))}
-      </div>
+      <RangePills value={days} onChange={setDays} />
 
       <SegmentSlider value={segment} onChange={onSegment} told={data?.segment} />
 
