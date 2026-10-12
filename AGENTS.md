@@ -24,6 +24,25 @@ Monorepo con workspaces de npm. Ver `README.md` y `docs/architecture.md`.
   refleja en `docs/api.md`.
 - API: `core/` e `integrations/` no importan de `modules/`; de otro módulo solo
   se importa su `index.ts`. El linter lo comprueba.
+- API: quién administra se comprueba con `assertAdmin(actor)` (`core/actor.ts`),
+  no con un `if` propio. Lo que sea solo de admins cuelga de `/admin/…`: la app
+  rechaza esa ruta entera a quien no administra, además de lo que compruebe el
+  servicio. No pongas una ruta de admins fuera de `/admin/`.
+- API: lo que llega en la ruta, la consulta o el cuerpo pasa por un esquema de
+  zod o por `idParam` antes de usarse. Un día es el esquema `day` de
+  `core/validation.ts`, que exige que la fecha exista. Nada de `Number(…)` ni de
+  `request.body.algo` sin validar.
+- API: lo que no tiene sesión y cuesta algo (un login, una clave) lleva un tope
+  por IP con `createRateLimit` (`core/rate-limit.ts`).
+- API: una sesión de staff (`role: 'staff'`) solo llega a `/staff/…`.
+  `session.user` y `session.actor` la rechazan; las rutas de staff usan
+  `session.staff`. No añadas excepciones.
+- API: una ruta nueva entra sola en `tests/integration/routes.test.ts`, que la
+  recorre con entradas extremas. Si hace falta que sea pública, se apunta en su
+  lista `OPEN`, con el porqué.
+- Tests: cada cosa se prueba con lo esperado y después con el borde: el valor
+  justo en el límite y el siguiente, lo vacío, lo enorme, lo negativo y lo que no
+  es del tipo que toca.
 - API: ningún módulo llama a la API de 42 salvo `replica`. Los demás leen de la
   réplica.
 - API: antes de pedir algo a 42 se pregunta a `replica.quota` con su escalón
@@ -33,6 +52,11 @@ Monorepo con workspaces de npm. Ver `README.md` y `docs/architecture.md`.
   `src/core/db/migrations/`; las existentes no se editan.
 - Web: los componentes no llevan texto escrito, usan `t('clave')`. Cada texto
   nuevo va en `shared/i18n/es.ts` y su traducción en `en.ts`.
+- Web: las direcciones se construyen con `shared/links.ts` (`recordHref`,
+  `networkHref`, `intraHref`) y se leen con `decodePart`. Nada de montar un
+  `#/…/${login}` a mano.
+- Web: lo que se añada a la API de mentira sale también en la demostración
+  pública (`/demo/`): logins y datos inventados, nunca de gente real.
 - Web: solo `shared/api/` habla con la API. Lo que se añada al cliente real se
   añade también al simulado (`mock/`); el tipo `Api` obliga a ello.
 - API: cuando algo que hace una persona le toca a otra (le responden, le
@@ -130,7 +154,7 @@ Monorepo con workspaces de npm. Ver `README.md` y `docs/architecture.md`.
 - Probar las secciones con gente real y ajustar textos y límites (plazas, XP).
 - Guardar el idioma elegido también en el servidor (`PUT /me/settings` ya lo admite).
 - Traducir los mensajes de error de la API; fuera del español se enseña uno genérico.
-- Tests de la web (no tiene).
+- Tests de componentes de la web (tiene de sus funciones puras).
 
 ## Al limpiar o compactar el contexto
 

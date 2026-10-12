@@ -12,6 +12,10 @@ su proyecto, y dónde está sentado.** En producción en
 [sanatorio42.duckdns.org](https://sanatorio42.duckdns.org) (se entra con la
 cuenta de 42).
 
+**¿No tienes cuenta de 42?** Hay una
+[demostración con datos inventados](https://sanatorio42.duckdns.org/demo/): la
+web entera, sin registrarte y sin que salga nadie real.
+
 ![Sala de espera, red de correcciones, tablón y el estilo Espacial](docs/img/portada.webp)
 
 ## En un minuto
@@ -29,8 +33,9 @@ hecho de principio a fin: producto, diseño, código, despliegue y operación.
 | ----------------------- | ----------------------------------------------------------------------------------------------------- |
 | **Qué es**              | Aplicación web completa: API, web, base de datos y despliegue                                         |
 | **Tecnología**          | TypeScript de punta a punta · Node 22 y Fastify · React 19 y Vite · SQLite · Docker y Caddy           |
-| **Tamaño**              | 19 módulos de API, 103 rutas, 32 migraciones, 15 secciones de web, 5 estilos visuales, 4 idiomas      |
-| **Calidad**             | 497 tests automáticos, tipos estrictos, lint con fronteras entre módulos y CI en cada subida          |
+| **Tamaño** | 20 módulos de API, 113 rutas, 33 migraciones, 15 secciones de web, 5 estilos visuales, 4 idiomas |
+| **Calidad** | 608 tests automáticos (cobertura del 97 % en la API), tipos estrictos, lint con fronteras entre módulos y CI en cada subida |
+| **Seguridad** | Revisión completa documentada: permisos con doble cerradura, topes de intentos y un test que recorre todas las rutas con entradas imposibles |
 | **Datos**               | 193 784 correcciones y 15 032 personas de 4 campus copiadas de la API de 42                           |
 | **Rendimiento**         | Consultas hasta 100 veces más rápidas tras la revisión; la portada llega en unos 33 ms                |
 | **Coste**               | 0 € al mes. La web se corta sola antes de pasar de la capa gratuita                                   |
@@ -68,6 +73,8 @@ Lo que este proyecto enseña de quien lo ha hecho:
   - [Personalizar y estilos](#personalizar-y-estilos)
   - [En el móvil](#en-el-móvil)
   - [Panel de gestión](#panel-de-gestión)
+  - [Validar documentos](#validar-documentos)
+  - [Demostración sin cuenta](#demostración-sin-cuenta)
   - [Code Clicker](#code-clicker)
 - [Problemas que surgieron y cómo se resolvieron](#problemas-que-surgieron-y-cómo-se-resolvieron)
 - [Cómo está hecho](#cómo-está-hecho)
@@ -76,6 +83,7 @@ Lo que este proyecto enseña de quien lo ha hecho:
   - [Módulos de la API](#módulos-de-la-api)
   - [Decisiones de implementación](#decisiones-de-implementación)
 - [Cómo se protege el código](#cómo-se-protege-el-código)
+- [Revisión de seguridad](#revisión-de-seguridad)
 - [Despliegue](#despliegue)
 - [Coste cero garantizado](#coste-cero-garantizado)
 - [Rendimiento](#rendimiento)
@@ -226,7 +234,7 @@ Solo para quien administra. Nueve pestañas:
 | Pestaña              | Qué enseña                                                                                             |
 | -------------------- | ------------------------------------------------------------------------------------------------------ |
 | Consumo              | Peticiones y datos por persona y por hora, avisos de exceso y el presupuesto que se reparte solo       |
-| Permisos y bloqueos  | Quién administra y quién no puede entrar                                                               |
+| Permisos y bloqueos | Quién administra, quién no puede entrar y las cuentas de staff |
 | Buzón                | Incidencias, sugerencias y denuncias, con respuesta                                                    |
 | Mensajes             | Registro de lo que se escribe en los chats                                                             |
 | Qué se usa           | Mapa de calor de cada elemento y grafo de recorridos entre secciones                                   |
@@ -256,6 +264,30 @@ la media.
 ![Limpiar datos](docs/img/panel-datos.webp)
 
 </details>
+
+### Validar documentos
+
+Las horas validadas se descargan en un CSV para enseñárselas al staff de 42. Un
+CSV lo edita cualquiera, así que cada descarga lleva un **código de cuatro
+caracteres** en el nombre del fichero (`horas-validadas_jdoe_…_K7QF.csv`) y la
+web guarda la copia. El staff entra en `/#/validar` con una cuenta que solo
+sirve para eso, escribe el código y ve el documento tal como se emitió; si sube
+el fichero que le han dado, la web le dice si es idéntico.
+
+![Pantalla del staff con un documento comprobado](docs/img/staff-documento.webp)
+
+Las cuentas de staff las crea quien administra desde el panel. No son de 42, se
+entra con una clave que se enseña una sola vez y no llegan a ninguna otra parte
+de la web.
+
+![Cuentas de staff en el panel](docs/img/staff-cuentas.webp)
+
+### Demostración sin cuenta
+
+En [`/demo/`](https://sanatorio42.duckdns.org/demo/) está la web entera con
+datos inventados: calendario, proyectos, gente, red de correcciones y panel de
+gestión. No habla con el servidor y nada de lo que se hace se guarda. Una
+cuenta de prueba dentro de la web de verdad enseñaría a la gente real; esto no.
 
 ### Code Clicker
 
@@ -303,6 +335,11 @@ administra puede ver la copia e indultar. El detalle, en
 | El juego se paraba al cambiar de sección                                                                             | Sigue corriendo en toda la web para quien lo ha encontrado, con una ventanita que se puede cerrar                                                                           |
 | Las ruedas del tablón en perspectiva no terminaban de leerse bien                                                    | Menos solape entre bandejas, subida más suave y los círculos aún no alcanzados quedan quietos y con candado                                                                     |
 | La textura de papel era un filtro SVG que el navegador recalculaba en cada repintado                                 | Imagen PNG ya hecha y fondos que se mueven con la página                                                                                                                    |
+| Un CSV de horas se puede retocar antes de entregarlo | Cada descarga lleva un código de verificación y la web guarda la copia: el staff la ve con una cuenta que solo sirve para eso |
+| Quien no es de 42 no podía ver la web | Demostración pública con datos inventados, que no habla con el servidor |
+| Un JSON mal escrito o una fecha imposible daban un error interno | Un test recorre todas las rutas con entradas extremas: encontró cinco casos y ya no queda ninguno |
+| La comprobación de admin estaba copiada en siete sitios | Una sola función y una barrera global para todo `/admin` |
+| La vuelta del login no tenía tope y se podía usar para machacar a 42 | Tope de intentos por IP |
 | **Abierto**: en un ordenador de escritorio, trozos rectangulares de la página dejan de pintarse durante un instante  | Sin resolver. En el móvil no pasa y no se reproduce sin tarjeta gráfica. Lo probado y lo que queda por probar, en [docs/bug-trozos-sin-pintar.md](docs/bug-trozos-sin-pintar.md) |
 
 ## Cómo está hecho
@@ -316,7 +353,7 @@ La base es un fichero de SQLite.
 ```mermaid
 flowchart LR
   P["Navegador<br/>React 19"] -->|HTTPS| C["Caddy<br/>TLS, CSP, HSTS"]
-  C --> A["API Fastify<br/>19 módulos"]
+  C --> A["API Fastify<br/>20 módulos"]
   A --> D[("SQLite en WAL<br/>datos propios y réplica")]
   S["Sincronizador<br/>trabajos de fondo"] --> D
   S -->|"cuota de 1 200/h<br/>con tres escalones"| Q["API de 42"]
@@ -371,12 +408,12 @@ Tamaño a 12 de octubre de 2026 (líneas en `src` y en `tests`):
 
 ```mermaid
 pie showData title Líneas por parte
-  "Web" : 44703
-  "API" : 22673
-  "Tests de la API" : 9856
-  "Documentación" : 5422
+  "Web" : 45710
+  "API" : 23838
+  "Tests de la API" : 11702
+  "Documentación" : 3729
   "Contrato compartido" : 1903
-  "Tests de la web" : 1359
+  "Tests de la web" : 1439
   "Infraestructura" : 613
 ```
 
@@ -402,6 +439,7 @@ pie showData title Líneas por parte
 | `broadcasts` | Comunicados de quien administra para todo el mundo                                |
 | `tours`      | Velocidad de las demostraciones: la de cada persona y la que vota la comunidad    |
 | `clicker`    | Partidas del juego, comprobación de trampas e historial de capital                |
+| `staff` | Documentos con código de verificación y las cuentas de staff que los comprueban |
 | `admin`      | Permisos, bloqueos, buzón, consumo, presupuesto de peticiones y limpieza de datos |
 
 Cómo encajan las piezas y cómo añadir una funcionalidad:
@@ -447,32 +485,75 @@ Lo que impide que una funcionalidad nueva rompa otra, por orden de cuándo actú
    (`no-restricted-imports` en `eslint.config.js`). Solo `replica` habla con 42.
 4. **Entradas validadas.** Las variables de entorno se validan al arrancar y el
    cuerpo de cada petición, con zod en la ruta.
-5. **Migraciones inmutables.** Un cambio de esquema es un fichero nuevo; los 32
+5. **Migraciones inmutables.** Un cambio de esquema es un fichero nuevo; los 33
    existentes no se editan. Se aplican solas al arrancar.
 6. **Reglas en funciones puras.** Lo delicado (XP, asistencia, presupuesto,
    trampas, recorridos) vive en ficheros `*.rules.ts` sin base de datos ni
    reloj, con sus tests. Los tests usan un reloj falso: no dependen de la hora.
-7. **Tests.** 381 de la API (unidad e integración sobre SQLite en memoria, con
-   la API de 42 simulada) y 116 de la web. Uno de ellos comprueba que cada
-   idioma tiene las claves que le tocan.
-8. **`npm run check`** antes de dar nada por terminado: tipos, lint, formato y
+7. **Tests.** 483 de la API (unidad e integración sobre SQLite en memoria, con
+   la API de 42 simulada; cubren el 97 % de las sentencias) y 125 de la web.
+   Prueban lo esperado y después el borde: el valor justo en el límite y el
+   siguiente, lo vacío, lo enorme y lo que no es del tipo que toca.
+8. **Un test que recorre todas las rutas.** Saca la lista de la propia app, así
+   que una ruta nueva entra sola: sin sesión tiene que dar 401, lo de `/admin`
+   403 a quien no administra, y ninguna entrada puede acabar en un error interno.
+9. **Doble cerradura en los permisos.** Lo de admin y lo de staff lo comprueba
+   cada servicio y, además, una barrera por la que pasan todas las peticiones.
+10. **`npm run check`** antes de dar nada por terminado: tipos, lint, formato y
    tests. Es lo mismo que pasa la CI.
-9. **CI en cada subida** (`.github/workflows/ci.yml`): tipos, lint, formato,
+11. **CI en cada subida** (`.github/workflows/ci.yml`): tipos, lint, formato,
    tests, compilación y que la imagen de Docker construye.
-10. **El despliegue se comprueba a sí mismo.** `deploy.sh` no da el despliegue
+12. **El despliegue se comprueba a sí mismo.** `deploy.sh` no da el despliegue
     por bueno hasta que la app contesta a `/health/db`.
-11. **Normas escritas** en [AGENTS.md](AGENTS.md): reglas de código y de
+13. **Normas escritas** en [AGENTS.md](AGENTS.md): reglas de código y de
     producto que cualquier persona o asistente lee antes de tocar nada.
 
 Y en producción:
 
-- Contenedor sin privilegios de administrador, con tope de 512 MiB y
-  comprobación de salud.
+- Contenedor sin root, sin capacidades del sistema y sin escalada de
+  privilegios, con tope de 512 MiB y comprobación de salud.
 - Política de contenido estricta: ni scripts en línea ni recursos de otros
   dominios, salvo imágenes por HTTPS. HSTS y `frame-ancestors 'none'`.
-- Cookie de sesión firmada. Secretos fuera de git, en ficheros con permisos 600.
+- Cookie de sesión firmada, `HttpOnly`, `Secure` y `__Host-`. Secretos fuera de
+  git, en ficheros con permisos 600.
+- Topes de intentos para lo que no tiene sesión (login, clave de staff) y
+  presupuesto de peticiones para lo que sí.
+- Las respuestas de la API no se guardan en ningún navegador ni caché
+  (`no-store`).
 - Copias de la base con `VACUUM INTO` (`infra/scripts/backup.sh`) y guion de
   restauración.
+
+## Revisión de seguridad
+
+En octubre de 2026 se revisó todo el código: quién puede entrar a qué, qué pasa
+con entradas imposibles, qué código sobraba y si la arquitectura era la adecuada
+(lo era, y se dejó). El detalle, con cada hallazgo, su gravedad y su arreglo,
+está en [docs/revision-seguridad.md](docs/revision-seguridad.md).
+
+| Qué | Antes | Ahora |
+| --- | --- | --- |
+| Formas encontradas de provocar un error interno | 5 | 0 |
+| Copias de la comprobación de admin | 7 | 1, más una barrera global |
+| Sitios donde se validaba una fecha, cada uno a su manera | 5 | 1 |
+| Topes para lo que no tiene sesión | ninguno | login y clave de staff, por IP |
+| Tests automáticos | 497 | 608 |
+| Código duplicado (bloques de 12 líneas o más) | 0,14 % | 0,05 % |
+| Vulnerabilidades conocidas en dependencias | 0 | 0 |
+
+Quién llega a qué:
+
+| Quién | Cómo entra | A qué llega |
+| --- | --- | --- |
+| Sin sesión | — | La web, la demostración y empezar un login |
+| Estudiante | OAuth de 42 | Todo menos `/admin` y `/staff` |
+| Cuenta bloqueada | OAuth de 42 | Solo a saber que lo está y a salir |
+| Admin | OAuth de 42 y el rol | Lo de estudiante y `/admin` |
+| Staff | Clave que crea un admin | **Solo** a validar documentos |
+
+Sobre las direcciones: la sección y la persona van en el hash (`#/expediente/jdoe`),
+que el navegador no manda al servidor ni a otras webs. Los logins no se cifran
+porque en 42 son públicos; se codifican siempre, para que un valor raro no
+pueda cambiar la ruta.
 
 ## Despliegue
 
@@ -679,6 +760,7 @@ npm run dev:mock
 
 - [docs/architecture.md](docs/architecture.md): capas, módulos, réplica de 42 y cómo ampliar.
 - [docs/api.md](docs/api.md): contrato HTTP.
+- [docs/revision-seguridad.md](docs/revision-seguridad.md): la revisión de seguridad, con cada hallazgo y su arreglo.
 - [docs/rendimiento.md](docs/rendimiento.md): cada mejora con su antes, su después y cómo se midió.
 - [docs/deploy-oracle.md](docs/deploy-oracle.md): despliegue, copias, límites y mantenimiento.
 - [docs/code-clicker.md](docs/code-clicker.md): el juego y sus reglas.

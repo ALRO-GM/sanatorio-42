@@ -6,7 +6,7 @@ hace la web está en el [README](../README.md); cómo está montada, en
 [architecture.md](architecture.md); el contrato HTTP, en [api.md](api.md). Aquí
 va lo que no está en el código.
 
-Última puesta al día: 2026-10-11.
+Última puesta al día: 2026-10-12.
 
 **Al retomar con el contexto vacío, lo primero es
 [tareas-tras-compactar.md](tareas-tras-compactar.md)**: es la lista de lo que hay
@@ -20,6 +20,28 @@ que hacer, en orden. Este documento es el porqué; aquel, el qué.
   de respaldo anterior a la red de correcciones: `punto-guardado-2026-10-11`.
 - Antes de dar algo por hecho: `npm run check` (tipos, lint, formato y tests).
 - Los cambios de la web se prueban con `npm run dev:mock` y Chrome sin ventana.
+
+## Estado a 2026-10-12
+
+- **Revisión de seguridad y refactorización hecha y desplegada** (commits
+  `384daf8` a `4eb13fe`). Todo está en [revision-seguridad.md](revision-seguridad.md).
+  En corto: una sola comprobación de admin más una barrera global para `/admin`,
+  topes por IP en el login, un esquema único de fecha, un test que recorre todas
+  las rutas, código muerto fuera, y dos cosas nuevas:
+  - **Documentos verificables y cuenta de staff** (módulo `staff`, migración 33,
+    pantalla `#/validar`). Las cuentas se crean en el panel, en «Permisos y
+    bloqueos». **Aún no hay ninguna creada en producción**: la clave se enseña
+    una sola vez y tiene que copiarla Alberto.
+  - **Demostración pública** en `/demo/`: la web compilada con la API de mentira
+    (`npm run build:demo`, que ya lanza `npm run build`). Sus ajustes van en
+    `vite.config.ts`, no en un `.env.demo`: los `.env.*` no entran en git ni en
+    la imagen.
+- `npm run check` pasa con 483 tests de la API y 125 de la web.
+- El aviso `[oauth] /oauth/token respondió 401 … invalid_grant` que sale al
+  pasar los tests **no es un fallo**: lo escribe un test que simula a propósito
+  que 42 rechaza el canje.
+- La imagen se probó en local antes de desplegar con las restricciones nuevas
+  del contenedor (`cap_drop: ALL`, `no-new-privileges`).
 
 ## Estado a 2026-10-11
 
