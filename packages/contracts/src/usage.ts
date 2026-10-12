@@ -23,6 +23,19 @@ export type UsageSend = {
   flows?: Record<string, number>
 }
 
+/**
+ * El tramo de gente que cubre una respuesta, por lo activa que es: del `low` %
+ * al `high` %, de la menos a la más activa. Del 0 al 100 es todo el mundo. Sirve
+ * para dejar fuera a quien más usa la web, a quien menos, o a los dos.
+ */
+export type Segment = {
+  low: number
+  high: number
+  /** Cuántas personas entran en el tramo, y de cuántas. */
+  people: number
+  of: number
+}
+
 /** Lo que se mide de un tramo: pulsaciones, tiempo y tráfico con la API. */
 export type StatTotals = {
   clicks: number
@@ -47,6 +60,8 @@ export type UsageStats = {
   to: string
   /** De quién son; `null` si son las de todo el mundo. */
   login: string | null
+  /** El tramo de gente, por el tiempo que ha pasado mirando la web en el periodo. */
+  segment: Segment
   totals: StatTotals & { people: number }
   /** Una fila por hora con actividad. El día y la hora van en UTC. */
   hours: ({ day: string; hour: number; people: number } & StatTotals)[]
@@ -66,6 +81,8 @@ export type UsageStats = {
 /** `GET /usage/heatmap?by=`: uso de cada elemento por grupo de personas. Solo admins. */
 export type UsageHeatmap = {
   by: 'total' | 'activity' | 'track' | 'cohort'
+  /** El tramo de gente, por sus usos de siempre. */
+  segment: Segment
   /** Los grupos, en el orden de las columnas, con cuánta gente tiene cada uno. */
   groups: { id: string; people: number }[]
   /** Un elemento por fila; `counts[i]` son los usos del grupo `groups[i]`. */
@@ -80,6 +97,8 @@ export type UsageFlows = {
   from: string
   to: string
   login: string | null
+  /** El tramo de gente, por el tiempo que ha pasado mirando la web en el periodo. */
+  segment: Segment
   /** Veces que se ha entrado en la web. */
   sessions: number
   /** Una fila por sección, la más visitada primero. */

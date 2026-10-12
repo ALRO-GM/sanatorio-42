@@ -167,6 +167,57 @@ describe('comunidad', () => {
       )
     })
 
+    it('se puede dejar fuera a quien más usa la web, a quien menos, o a los dos', async () => {
+      const { usage } = services
+      const boss = actor('eva', { admin: true })
+      // Diez personas, cada una más activa que la anterior; la última, muchísimo.
+      const people = Array.from({ length: 10 }, (_, index) => `p${index}`)
+
+      for (const [index, login] of people.entries()) {
+        await usage.record(actor(login), {
+          counts: {},
+          time: { 'nav.tablon': [index === 9 ? 900 : (index + 1) * 10, 0, 0] },
+          flows: { 'start>tablon': index + 1 },
+        })
+      }
+
+      const all = await usage.stats(boss, {})
+
+      expect(all.segment).toEqual({ low: 0, high: 100, people: 10, of: 10 })
+      expect(all.totals).toMatchObject({ seen: 450 + 900, people: 10 })
+
+      // Sin el 10 % más activo: se va quien lo desfiguraba todo.
+      const calm = await usage.stats(boss, { high: '90' })
+
+      expect(calm.segment).toEqual({ low: 0, high: 90, people: 9, of: 10 })
+      expect(calm.totals).toMatchObject({ seen: 450, people: 9 })
+      expect(calm.users.map((user) => user.login)).not.toContain('p9')
+
+      // Solo el centro: sin el 20 % de cada extremo.
+      const middle = await usage.stats(boss, { low: '20', high: '80' })
+
+      expect(middle.segment).toMatchObject({ people: 6, of: 10 })
+      expect(middle.users.map((user) => user.login).sort()).toEqual([
+        'p2',
+        'p3',
+        'p4',
+        'p5',
+        'p6',
+        'p7',
+      ])
+
+      // Los recorridos, con el mismo tramo.
+      const flows = await usage.flows(boss, { low: '20', high: '80' })
+
+      expect(flows.segment).toMatchObject({ people: 6, of: 10 })
+      expect(flows.sessions).toBe(3 + 4 + 5 + 6 + 7 + 8)
+      expect(flows.sections[0]).toMatchObject({ key: 'tablon', seen: 30 + 40 + 50 + 60 + 70 + 80 })
+
+      // Al mirar a una sola persona no hay tramo que valga.
+      expect((await usage.stats(boss, { login: 'p9', high: '50' })).totals.seen).toBe(900)
+      await expectCode(usage.stats(boss, { low: '120' }), 'invalid_input')
+    })
+
     it('quien administra ve quién está conectado y cuánto lleva su sesión', async () => {
       const { usage, repositories } = services
       const boss = actor('eva', { admin: true })
@@ -627,8 +678,15 @@ describe('comunidad', () => {
 
       const admin = actor('eva', { admin: true })
 
+      // Sin la mitad más activa, queda solo `ana`.
+      expect(await usage.heatmap(admin, { high: '50' })).toMatchObject({
+        segment: { low: 0, high: 50, people: 1, of: 2 },
+        rows: [{ key: 'nav.tablon', counts: [3] }],
+      })
+
       expect(await usage.heatmap(admin, {})).toEqual({
         by: 'total',
+        segment: { low: 0, high: 100, people: 2, of: 2 },
         groups: [{ id: 'all', people: 2 }],
         rows: [
           { key: 'nav.red', counts: [5] },

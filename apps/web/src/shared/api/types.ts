@@ -112,6 +112,12 @@ export type NetworkParams = {
   limit?: number
 }
 
+/** El tramo de gente que se pide, por lo activa que es: del `low` % al `high` %. */
+export type SegmentQuery = { low?: number; high?: number }
+
+/** Lo que se pide a las estadísticas y a los recorridos: periodo, persona y tramo de gente. */
+export type UsageQuery = SegmentQuery & { from?: string; to?: string; login?: string }
+
 export type Api = {
   // --- Sesión
   getMe: () => Promise<CurrentUser>
@@ -188,13 +194,13 @@ export type Api = {
     flows?: UsageSend['flows'],
   ) => Promise<void>
   /** Cómo se navega entre secciones en un periodo. Solo admins. */
-  getFlows: (query: { from?: string; to?: string; login?: string }) => Promise<UsageFlows>
+  getFlows: (query: UsageQuery) => Promise<UsageFlows>
   /** Quién tiene la web abierta ahora y cuánto lleva. Solo admins. */
   getOnline: () => Promise<OnlineUsers>
   /** Estadísticas de uso de un periodo, de toda la web o de una persona. Solo admins. */
-  getStats: (query: { from?: string; to?: string; login?: string }) => Promise<UsageStats>
+  getStats: (query: UsageQuery) => Promise<UsageStats>
   /** Mapa de calor del uso por grupos de personas. Solo admins. */
-  getUsageHeatmap: (by: UsageHeatmap['by']) => Promise<UsageHeatmap>
+  getUsageHeatmap: (by: UsageHeatmap['by'], segment?: SegmentQuery) => Promise<UsageHeatmap>
 
   /** El expediente público de otra persona. */
   getPublicProfile: (login: string) => Promise<PublicProfile>

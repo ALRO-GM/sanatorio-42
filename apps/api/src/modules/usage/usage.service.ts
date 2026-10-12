@@ -8,6 +8,7 @@
 
 import type {
   OnlineUsers,
+  Segment,
   StatTotals,
   UsageCounts,
   UsageFlows,
@@ -63,7 +64,15 @@ const sendSchema = z.object({
 
 const DAY = /^\d{4}-\d{2}-\d{2}$/
 
+/**
+ * El tramo de gente que se mira, por lo activa que es: del `low` % al `high` %
+ * de menos a más activa. Del 0 al 100 es todo el mundo.
+ */
+const share = z.coerce.number().int().min(0).max(100)
+const segmentFields = { low: share.default(0), high: share.default(100) }
+
 const statsSchema = z.object({
+  ...segmentFields,
   from: z.string().regex(DAY).optional(),
   to: z.string().regex(DAY).optional(),
   login: z
@@ -93,8 +102,36 @@ const TRAFFIC_FIELDS = ['requests', 'bytes'] as const
 const zero = (): StatTotals => ({ clicks: 0, seen: 0, back: 0, hidden: 0, requests: 0, bytes: 0 })
 
 const heatmapSchema = z.object({
+  ...segmentFields,
   by: z.enum(['total', 'activity', 'track', 'cohort']).default('total'),
 })
+
+/**
+ * Quién cae en un tramo de actividad.
+ *
+ * @param activity Lo activa que es cada persona (tiempo mirando la web, o usos).
+ * @returns Los logins del tramo y de cuántos se ha elegido. Con el tramo entero
+ *   no se quita a nadie, tampoco a quien no tiene actividad apuntada.
+ */
+export function segmentOf(
+  activity: ReadonlyMap<string, number>,
+  low: number,
+  high: number,
+): { keep: (login: string) => boolean; people: number; of: number } {
+  const of = activity.size
+
+  if (low <= 0 && high >= 100) return { keep: () => true, people: of, of }
+
+  // De menos a más activa; a igualdad, por login, para que salga siempre igual.
+  const ranked = [...activity].sort(([a, x], [b, y]) => x - y || (a < b ? -1 : 1))
+  const chosen = new Set(
+    ranked
+      .slice(Math.floor((of * low) / 100), Math.ceil((of * Math.max(low, high)) / 100))
+      .map(([login]) => login),
+  )
+
+  return { keep: (login) => chosen.has(login), people: chosen.size, of }
+}
 
 /** Usos totales a partir de los cuales alguien es "habitual" o "intensivo". */
 const REGULAR_FROM = 30
@@ -130,7 +167,9 @@ export function createUsageService(options: {
   })
 
   /** El periodo que se pide: por defecto la última semana, y nunca más de `STATS_MAX_DAYS`. */
-  const period = (input: unknown): { from: string; to: string; login: string | null } => {
+  const period = (
+    input: unknown,
+  ): { from: string; to: string; login: string | null; low: number; high: number } => {
     const asked = parse(statsSchema, input)
     const to = asked.to ?? dayOf(now())
     const earliest = dayOf(Date.parse(`${to}T00:00:00Z`) - (STATS_MAX_DAYS - 1) * DAY_MS)
@@ -138,8 +177,40 @@ export function createUsageService(options: {
     // Ni un periodo al revés ni uno tan largo que pese.
     const from = wanted > to ? to : wanted < earliest ? earliest : wanted
 
-    return { from, to, login: asked.login ?? null }
+    return { from, to, login: asked.login ?? null, low: asked.low, high: asked.high }
   }
+
+  /**
+   * El tramo de gente de un periodo, por el tiempo que ha pasado mirando la web
+   * en él. Si se pide una sola persona no hay tramo que valga: es ella.
+   */
+  const segment = async (asked: {
+    from: string
+    to: string
+    login: string | null
+    low: number
+    high: number
+  }): Promise<ReturnType<typeof segmentOf> & { low: number; high: number }> => {
+    if (asked.login !== null) {
+      return { keep: () => true, people: 1, of: 1, low: 0, high: 100 }
+    }
+
+    const result = await db.execute({
+      sql: `SELECT login, SUM(seen_s) AS seen FROM usage_time
+            WHERE day >= ? AND day <= ? GROUP BY login`,
+      args: [asked.from, asked.to],
+    })
+    const activity = new Map(result.rows.map((row) => [toText(row.login), toNumber(row.seen)]))
+
+    return { ...segmentOf(activity, asked.low, asked.high), low: asked.low, high: asked.high }
+  }
+  /** Lo que se cuenta del tramo en la respuesta. */
+  const told = ({ low, high, people, of }: Awaited<ReturnType<typeof segment>>): Segment => ({
+    low,
+    high,
+    people,
+    of,
+  })
 
   return {
     /** Suma lo que la web ha contado desde el último envío. */
@@ -208,16 +279,20 @@ export function createUsageService(options: {
         throw domainError('forbidden', 'Solo para quien administra la web')
       }
 
-      const { from, to, login } = period(input)
+      const asked = period(input)
+      const { from, to, login } = asked
 
-      const [used, traffic] = await Promise.all([
+      const [all, everyTraffic, chosen] = await Promise.all([
         db.execute({
           sql: `SELECT login, day, hour, key, clicks, seen_s, back_s, hidden_s FROM usage_time
                 WHERE day >= ? AND day <= ? AND (? IS NULL OR login = ?)`,
           args: [from, to, login, login],
         }),
         options.traffic?.(from, to, login ?? undefined) ?? [],
+        segment(asked),
       ])
+      const used = { rows: all.rows.filter((row) => chosen.keep(toText(row.login))) }
+      const traffic = everyTraffic.filter((row) => chosen.keep(row.login))
 
       type Hour = UsageStats['hours'][number] & { who: Set<string> }
       type Key = UsageStats['keys'][number] & { who: Set<string> }
@@ -288,6 +363,7 @@ export function createUsageService(options: {
         from,
         to,
         login,
+        segment: told(chosen),
         totals: { ...totals, people: everyone.size },
         hours: [...hours.entries()]
           .sort(([a], [b]) => (a < b ? -1 : 1))
@@ -337,36 +413,60 @@ export function createUsageService(options: {
         throw domainError('forbidden', 'Solo para quien administra la web')
       }
 
-      const { from, to, login } = period(input)
-      const [steps, time] = await Promise.all([
+      const asked = period(input)
+      const { from, to, login } = asked
+      const [steps, time, chosen] = await Promise.all([
         db.execute({
-          sql: `SELECT from_key, to_key, SUM(count) AS count, COUNT(DISTINCT login) AS people
-                FROM usage_flows WHERE day >= ? AND day <= ? AND (? IS NULL OR login = ?)
-                GROUP BY from_key, to_key ORDER BY count DESC`,
+          sql: `SELECT login, from_key, to_key, SUM(count) AS count FROM usage_flows
+                WHERE day >= ? AND day <= ? AND (? IS NULL OR login = ?)
+                GROUP BY login, from_key, to_key`,
           args: [from, to, login, login],
         }),
         db.execute({
-          sql: `SELECT key, SUM(seen_s) AS seen FROM usage_time
+          sql: `SELECT login, key, SUM(seen_s) AS seen FROM usage_time
                 WHERE day >= ? AND day <= ? AND (? IS NULL OR login = ?) AND key LIKE 'nav.%'
-                GROUP BY key`,
+                GROUP BY login, key`,
           args: [from, to, login, login],
         }),
+        segment(asked),
       ])
-      const flows = steps.rows.map((row) => ({
-        from: toText(row.from_key),
-        to: toText(row.to_key),
-        count: toNumber(row.count),
-        people: toNumber(row.people),
-      }))
-      const sections = sectionsOf(
-        flows,
-        new Map(time.rows.map((row) => [toText(row.key).slice('nav.'.length), toNumber(row.seen)])),
+      // Se suma aquí, y no en la consulta, para poder dejar fuera a quien no toca.
+      const byStep = new Map<string, UsageFlows['flows'][number]>()
+      const seen = new Map<string, number>()
+
+      for (const row of steps.rows) {
+        if (!chosen.keep(toText(row.login))) continue
+
+        const [origin, target] = [toText(row.from_key), toText(row.to_key)]
+        const step = byStep.get(`${origin}>${target}`) ?? {
+          from: origin,
+          to: target,
+          count: 0,
+          people: 0,
+        }
+
+        step.count += toNumber(row.count)
+        step.people += 1
+        byStep.set(`${origin}>${target}`, step)
+      }
+      for (const row of time.rows) {
+        if (!chosen.keep(toText(row.login))) continue
+
+        const key = toText(row.key).slice('nav.'.length)
+
+        seen.set(key, (seen.get(key) ?? 0) + toNumber(row.seen))
+      }
+
+      const flows = [...byStep.values()].sort(
+        (a, b) => b.count - a.count || (a.from + a.to < b.from + b.to ? -1 : 1),
       )
+      const sections = sectionsOf(flows, seen)
 
       return {
         from,
         to,
         login,
+        segment: told(chosen),
         // Cada entrada es una visita a la web.
         sessions: flows.reduce((sum, flow) => sum + (flow.from === START ? flow.count : 0), 0),
         sections,
@@ -423,21 +523,25 @@ export function createUsageService(options: {
         throw domainError('forbidden', 'Solo para quien administra la web')
       }
 
-      const { by } = parse(heatmapSchema, input)
+      const { by, low, high } = parse(heatmapSchema, input)
       const [result, cohorts] = await Promise.all([
         db.execute('SELECT key, login, count FROM usage_counts'),
         by === 'track' || by === 'cohort' ? replica.cohorts() : Promise.resolve(new Map()),
       ])
-      const rows = result.rows.map((row) => ({
+      const everyRow = result.rows.map((row) => ({
         key: toText(row.key),
         login: toText(row.login),
         count: toNumber(row.count),
       }))
       const perPerson = new Map<string, number>()
 
-      for (const row of rows) {
+      for (const row of everyRow) {
         perPerson.set(row.login, (perPerson.get(row.login) ?? 0) + row.count)
       }
+
+      // Aquí los usos son los de siempre, así que la actividad también.
+      const chosen = segmentOf(perPerson, low, high)
+      const rows = everyRow.filter((row) => chosen.keep(row.login))
 
       const groupOf = (login: string): string => {
         switch (by) {
@@ -476,6 +580,7 @@ export function createUsageService(options: {
 
       return {
         by,
+        segment: { low, high, people: chosen.people, of: chosen.of },
         groups: groups.map((id) => ({ id, people: people.get(id)?.size ?? 0 })),
         rows: [...cells]
           .map(([key, line]) => ({ key, counts: groups.map((id) => line.get(id) ?? 0) }))

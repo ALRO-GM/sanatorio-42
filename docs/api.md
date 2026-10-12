@@ -714,6 +714,14 @@ POST /usage acepta, además de `counts`, el tiempo pasado en cada sección:
   envío.
 - Se guarda por persona, día, hora (UTC) y elemento. No se borra solo.
 
+Tramo de gente. `/admin/stats`, `/admin/flows` y `/usage/heatmap` admiten
+`low` y `high` (de 0 a 100): se ordena a la gente de menos a más activa y se
+mira solo la que cae entre esos tantos por ciento, para dejar fuera a quien más
+usa la web, a quien menos, o a los dos. En las dos primeras la actividad es el
+tiempo mirando la web en el periodo; en el mapa de calor, los usos de siempre.
+La respuesta trae `segment: { low, high, people, of }`. Si se pide un `login`,
+el tramo no se aplica.
+
 GET /admin/online → `{ now, people: [{ login, image, since, seenAt }] }`: quién
 tiene la web abierta ahora. `since` es cuándo empezó su sesión (más de diez
 minutos sin señales de vida y la siguiente ya es otra) y `now`, la hora de la

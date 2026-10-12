@@ -7,6 +7,8 @@ import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { InfoTip } from '../../shared/ui/InfoTip'
+import { SegmentSlider } from './SegmentSlider'
+import type { SegmentRange } from './SegmentSlider'
 
 const GROUPINGS = [
   'total',
@@ -23,10 +25,19 @@ const GROUPINGS = [
  * que se lleva el elemento, así que grupos de tamaños distintos se comparan bien.
  * Solo lo ve quien administra la web.
  */
-export function UsageHeatmap() {
+export function UsageHeatmap({
+  segment,
+  onSegment,
+}: {
+  segment: SegmentRange
+  onSegment: (next: SegmentRange) => void
+}) {
   const { t } = useI18n()
   const [by, setBy] = useState<Heatmap['by']>('total')
-  const { data, error, loading, reload } = useAsync(() => api.getUsageHeatmap(by), [by])
+  const { data, error, loading, reload } = useAsync(
+    () => api.getUsageHeatmap(by, segment),
+    [by, segment.low, segment.high],
+  )
 
   /** Nombre legible de un elemento: la pestaña o el bloque, con su página delante. */
   const nameOf = (key: string): string => {
@@ -64,6 +75,8 @@ export function UsageHeatmap() {
           </button>
         ))}
       </div>
+
+      <SegmentSlider value={segment} onChange={onSegment} told={data?.segment} />
 
       {loading && <p className="estado">{t('app.loading')}</p>}
       {!loading && data === undefined && <ErrorNote error={error} onRetry={() => void reload()} />}

@@ -6,6 +6,8 @@ import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { SegmentSlider } from './SegmentSlider'
+import type { SegmentRange } from './SegmentSlider'
 import { duration } from './StatsPanel'
 
 const RANGES = [1, 7, 30, 90] as const
@@ -36,13 +38,25 @@ const pct = (part: number, total: number): number =>
  * cada una es el tiempo que se la mira; el grosor de cada flecha, las veces que
  * se da ese paso. Las cuentas vienen hechas de la API.
  */
-export function FlowsPanel() {
+export function FlowsPanel({
+  segment,
+  onSegment,
+}: {
+  segment: SegmentRange
+  onSegment: (next: SegmentRange) => void
+}) {
   const { t } = useI18n()
   const [days, setDays] = useState<number>(7)
   const [picked, setPicked] = useState<string | null>(null)
   const { data, error, loading, reload } = useAsync(
-    () => api.getFlows({ from: dayOf(Date.now() - (days - 1) * DAY_MS), to: dayOf(Date.now()) }),
-    [days],
+    () =>
+      api.getFlows({
+        from: dayOf(Date.now() - (days - 1) * DAY_MS),
+        to: dayOf(Date.now()),
+        low: segment.low,
+        high: segment.high,
+      }),
+    [days, segment.low, segment.high],
   )
   const name = (key: string): string => (key === START ? t('admin.flows.start') : t(`nav.${key}`))
 
@@ -63,6 +77,8 @@ export function FlowsPanel() {
           </button>
         ))}
       </div>
+
+      <SegmentSlider value={segment} onChange={onSegment} told={data?.segment} />
 
       {loading && <p className="estado">{t('app.loading')}</p>}
       {data === undefined ? (

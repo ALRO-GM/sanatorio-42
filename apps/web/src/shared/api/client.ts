@@ -7,6 +7,14 @@ import type { AvailabilityResponse, Peer } from '@sanatorio/contracts'
 import { apiUrl, fetchApi, getJson, intHeader, send, sendJson } from './http'
 import type { Api } from './types'
 
+/** Los parámetros de una dirección, sin los que no vengan. */
+const search = (query: Record<string, string | number | undefined>): string =>
+  new URLSearchParams(
+    Object.entries(query).flatMap(([key, value]) =>
+      value === undefined ? [] : [[key, String(value)]],
+    ),
+  ).toString()
+
 export const realApi: Api = {
   getMe: () => getJson('/auth/me'),
 
@@ -73,10 +81,10 @@ export const realApi: Api = {
   getAdminMessages: () => getJson('/admin/messages'),
   getUsage: () => getJson('/usage'),
   sendUsage: (counts, time, flows) => send('POST', '/usage', { counts, time, flows }),
-  getFlows: (query) => getJson(`/admin/flows?${new URLSearchParams(query).toString()}`),
+  getFlows: (query) => getJson(`/admin/flows?${search(query)}`),
   getOnline: () => getJson('/admin/online'),
-  getStats: (query) => getJson(`/admin/stats?${new URLSearchParams(query).toString()}`),
-  getUsageHeatmap: (by) => getJson(`/usage/heatmap?by=${by}`),
+  getStats: (query) => getJson(`/admin/stats?${search(query)}`),
+  getUsageHeatmap: (by, segment = {}) => getJson(`/usage/heatmap?${search({ by, ...segment })}`),
   getPublicProfile: (login) => getJson(`/users/${encodeURIComponent(login)}/profile`),
   updateSettings: (settings) => send('PUT', '/me/settings', settings),
   getSyncStatus: () => getJson('/sync/status'),

@@ -914,6 +914,13 @@ export const en: Record<string, string> = {
   'admin.flows.share': 'Of what leaves the origin',
   'admin.flows.shareHint':
     'Destination: two minutes or more per visit. Pass-through: under twenty seconds and people nearly always move on. End of the path: six in ten visits end there.',
+  'admin.segment.all': 'Everyone',
+  'admin.segment.some': 'People from {low}% to {high}% by activity',
+  'admin.segment.people': '{n} of {of}',
+  'admin.segment.low': 'Leave out the least active',
+  'admin.segment.high': 'Leave out the most active',
+  'admin.segment.least': 'Least active',
+  'admin.segment.most': 'Most active',
   'admin.tab.clicker': 'Code Clicker',
   'admin.clicker.title': 'Code Clicker usage',
   'admin.clicker.of': "{login}'s Code Clicker",

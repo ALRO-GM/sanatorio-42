@@ -7,6 +7,7 @@ import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { Avatar } from '../../shared/ui/Avatar'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { EVERYONE, SegmentSlider } from './SegmentSlider'
 
 const RANGES = [1, 7, 30, 90] as const
 const DAY_MS = 24 * 60 * 60_000
@@ -82,14 +83,15 @@ export function StatsPanel() {
   const { t } = useI18n()
   const [days, setDays] = useState<number>(7)
   const [login, setLogin] = useState<string | null>(null)
+  const [segment, setSegment] = useState(EVERYONE)
   const { data, error, loading, reload } = useAsync(
     () =>
       api.getStats({
         from: dayOf(Date.now() - (days - 1) * DAY_MS),
         to: dayOf(Date.now()),
-        ...(login === null ? {} : { login }),
+        ...(login === null ? { low: segment.low, high: segment.high } : { login }),
       }),
-    [days, login],
+    [days, login, segment.low, segment.high],
   )
 
   const sectionName = (key: string): string => {
@@ -131,6 +133,9 @@ export function StatsPanel() {
         )}
       </div>
 
+      {login === null && (
+        <SegmentSlider value={segment} onChange={setSegment} told={data?.segment} />
+      )}
       {login === null && <OnlineCard onPick={setLogin} />}
 
       {loading && <p className="estado">{t('app.loading')}</p>}

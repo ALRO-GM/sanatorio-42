@@ -1163,6 +1163,13 @@ export const es: Record<string, string> = {
   'admin.flows.share': 'De lo que sale del origen',
   'admin.flows.shareHint':
     'De estancia: dos minutos o más por visita. De paso: menos de veinte segundos y casi siempre se sigue a otra. Final de trayecto: seis de cada diez visitas acaban ahí.',
+  'admin.segment.all': 'Todas las personas',
+  'admin.segment.some': 'Personas del {low} % al {high} % por actividad',
+  'admin.segment.people': '{n} de {of}',
+  'admin.segment.low': 'Dejar fuera a las menos activas',
+  'admin.segment.high': 'Dejar fuera a las más activas',
+  'admin.segment.least': 'Menos activas',
+  'admin.segment.most': 'Más activas',
   'admin.tab.clicker': 'Code Clicker',
   'admin.clicker.title': 'Uso de Code Clicker',
   'admin.clicker.of': 'Code Clicker de {login}',

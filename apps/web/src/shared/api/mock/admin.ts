@@ -270,10 +270,13 @@ export const adminMock: Pick<
   async getStats(query) {
     await delay()
 
+    const segment = segmentOf(query, query.login === undefined ? 4 : 1)
+
     const today = new Date().toISOString().slice(0, 10)
     // Una tarde cualquiera: sube hacia las seis y cae por la noche.
     const hours = Array.from({ length: 14 }, (_, index) => {
-      const weight = 14 - Math.abs(index - 8)
+      // El tramo de gente se nota: con menos gente, menos de todo.
+      const weight = Math.max(1, Math.round((14 - Math.abs(index - 8)) * segment.part))
 
       return {
         day: today,
@@ -308,7 +311,8 @@ export const adminMock: Pick<
       from: query.from ?? today,
       to: query.to ?? today,
       login: query.login ?? null,
-      totals: { ...totals, people: query.login === undefined ? 4 : 1 },
+      segment: segment.told,
+      totals: { ...totals, people: segment.told.people },
       hours,
       keys: [
         { key: 'nav.consulta', ...share(0.4), people: 4 },
@@ -329,8 +333,10 @@ export const adminMock: Pick<
     }
   },
 
-  async getUsageHeatmap(by) {
+  async getUsageHeatmap(by, query = {}) {
     await delay(200)
+
+    const segment = segmentOf(query, 9)
 
     const groups =
       by === 'total'
@@ -370,6 +376,7 @@ export const adminMock: Pick<
 
     return {
       by,
+      segment: segment.told,
       groups,
       rows: keys.map((key, row) => ({
         key,
@@ -385,7 +392,8 @@ export const adminMock: Pick<
     await delay()
 
     const today = new Date().toISOString().slice(0, 10)
-    const part = query.login === undefined ? 1 : 0.25
+    const segment = segmentOf(query, query.login === undefined ? 9 : 1)
+    const part = (query.login === undefined ? 1 : 0.25) * segment.part
     // Se entra por el expediente, que es la portada, y de ahí se reparte.
     const steps: [string, string, number][] = [
       ['start', 'expediente', 120],
@@ -456,6 +464,7 @@ export const adminMock: Pick<
       from: query.from ?? today,
       to: query.to ?? today,
       login: query.login ?? null,
+      segment: segment.told,
       sessions: flows.reduce((sum, flow) => sum + (flow.from === 'start' ? flow.count : 0), 0),
       sections,
       flows: flows.sort((a, b) => b.count - a.count),
@@ -498,6 +507,17 @@ export const adminMock: Pick<
 
     return { rows }
   },
+}
+
+/** El tramo de gente que se pide, sobre `of` personas, y la parte que es del total. */
+function segmentOf(
+  query: { low?: number; high?: number },
+  of: number,
+): { told: { low: number; high: number; people: number; of: number }; part: number } {
+  const [low, high] = [query.low ?? 0, query.high ?? 100]
+  const people = Math.ceil((of * high) / 100) - Math.floor((of * low) / 100)
+
+  return { told: { low, high, people, of }, part: of === 0 ? 0 : people / of }
 }
 
 /** Filas de cada tipo de dato en la web de mentira. */

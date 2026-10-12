@@ -528,3 +528,21 @@ dialog.broadcast-dialog .actions {
 .stat-table tr.picked td {
   background: var(--accent-soft);
 }
+
+/* El tramo de gente que se mira, por lo activa que es. */
+.segment-slider {
+  display: grid;
+  gap: 0.3rem;
+  max-width: 28rem;
+  margin: 0.75rem 0;
+  color: var(--text-2);
+  font-size: 0.85rem;
+}
+.segment-slider small {
+  color: var(--text-3);
+}
+.segment-ends {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.72rem;
+}

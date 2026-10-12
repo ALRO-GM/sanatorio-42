@@ -2,6 +2,7 @@ import { useState } from 'react'
 
 import { useI18n } from '../../shared/i18n'
 import { FlowsPanel } from './FlowsPanel'
+import { EVERYONE } from './SegmentSlider'
 import { UsageHeatmap } from './UsageHeatmap'
 
 const VIEWS = ['heat', 'flows'] as const
@@ -10,6 +11,8 @@ const VIEWS = ['heat', 'flows'] as const
 export function UsageTab() {
   const { t } = useI18n()
   const [view, setView] = useState<(typeof VIEWS)[number]>('heat')
+  // El tramo de gente vale para las dos vistas: se cambia de una a otra sin perderlo.
+  const [segment, setSegment] = useState(EVERYONE)
 
   return (
     <section>
@@ -30,11 +33,11 @@ export function UsageTab() {
         ))}
       </div>
       {view === 'heat' ? (
-        <UsageHeatmap />
+        <UsageHeatmap segment={segment} onSegment={setSegment} />
       ) : (
         <>
           <h2>{t('admin.flows.title')}</h2>
-          <FlowsPanel />
+          <FlowsPanel segment={segment} onSegment={setSegment} />
         </>
       )}
     </section>
