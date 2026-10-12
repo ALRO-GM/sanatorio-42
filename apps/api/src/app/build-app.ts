@@ -73,13 +73,8 @@ export async function buildApp(options: BuildOptions = {}): Promise<BuiltApp> {
       ? {}
       : {
           // Sin fichero, o vacío, no hay corte de la guardia.
-          guardLevel: async () => {
-            const percent = Number(
-              (await readFile(env.GUARD_LEVEL_FILE, 'utf8').catch(() => '0')).trim(),
-            )
-
-            return percent >= 95 ? 'stopped' : percent >= 90 ? 'admin_only' : 'ok'
-          },
+          guardLevel: async () =>
+            guardLevelFrom(await readFile(env.GUARD_LEVEL_FILE, 'utf8').catch(() => '')),
         }),
     // A stderr y no al log de Fastify: el sincronizador vive fuera de las
     // peticiones. Lo que importa es que quede rastro, porque la web sigue
@@ -202,4 +197,18 @@ export function stripApiPrefix(url: string): string {
   }
 
   return url.startsWith('/api/') ? url.slice('/api'.length) : url
+}
+
+/**
+ * El corte que pide la guardia de la máquina, a partir de lo que deja escrito
+ * en su fichero: el porcentaje del límite más gastado.
+ *
+ * Al 90 % solo entra quien administra; al 95 %, nadie. Un fichero vacío, que no
+ * existe o que no trae un número no corta nada: la web lleva además su propia
+ * cuenta del tráfico, y manda el peor de los dos.
+ */
+export function guardLevelFrom(text: string): 'ok' | 'admin_only' | 'stopped' {
+  const percent = Number(text.trim())
+
+  return percent >= 95 ? 'stopped' : percent >= 90 ? 'admin_only' : 'ok'
 }
