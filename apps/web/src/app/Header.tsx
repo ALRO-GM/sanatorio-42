@@ -9,6 +9,7 @@ import { Icon } from '../shared/ui/Icon'
 import { Nav } from './Nav'
 import type { Section } from './sections'
 import { UserMenu } from './UserMenu'
+import { pressPlus, useEgg } from '../features/clicker/egg'
 
 type HeaderProps = {
   me: CurrentUser
@@ -45,6 +46,7 @@ export function Header({
   onLogout,
 }: HeaderProps) {
   const { t } = useI18n()
+  const egg = useEgg()
   // Al bajar, la barra gana una raya que la separa de lo que pasa por debajo.
   const [scrolled, setScrolled] = useState(false)
 
@@ -71,6 +73,8 @@ export function Header({
             aria-current={section === 'expediente' ? 'page' : undefined}
             onClick={() => {
               track('nav.expediente')
+              // Y cuenta para el secreto: a las cien, pasa algo.
+              pressPlus()
               onGo('expediente')
             }}
           >
@@ -141,6 +145,19 @@ export function Header({
                         label: t('admin.usage.open'),
                         run: () => {
                           onGo('gestion')
+                        },
+                      },
+                    ]
+                  : []),
+                // Solo para quien eligió la pastilla roja.
+                ...(egg.pill === 'red'
+                  ? [
+                      {
+                        id: 'clicker',
+                        icon: 'terminal' as const,
+                        label: t('nav.clicker'),
+                        run: () => {
+                          onGo('clicker')
                         },
                       },
                     ]

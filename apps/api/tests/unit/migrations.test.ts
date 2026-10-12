@@ -52,6 +52,7 @@ describe('migraciones', () => {
       'broadcasts',
       'campus_members',
       'campuses',
+      'clicker',
       'corrections',
       'curriculum',
       'doubt_answers',

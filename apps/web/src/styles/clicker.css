@@ -1,0 +1,678 @@
+/* ── Code Clicker ────────────────────────────────────────────────────────────
+   La sección secreta. Tiene su propia paleta, siempre oscura, para que al
+   entrar se note que se ha cruzado a otro sitio. Cuatro decorados, según la
+   fase de la singularidad (`stage-0` a `stage-3`): del turquesa de siempre a
+   un rojo en el que la tecla te mira.
+   ──────────────────────────────────────────────────────────────────────────── */
+.cc {
+  --cc-bg: #0a1211;
+  --cc-panel: #101b19;
+  --cc-line: #1e302c;
+  --cc-ink: #e6f3ef;
+  --cc-dim: #8aa39b;
+  --cc-main: #22c7c8;
+  --cc-gold: #f2c94c;
+  position: relative;
+  padding: 1rem;
+  border: 1px solid var(--cc-line);
+  border-radius: 18px;
+  background:
+    radial-gradient(
+      120% 80% at 20% 0%,
+      color-mix(in srgb, var(--cc-main) 14%, transparent),
+      transparent 60%
+    ),
+    var(--cc-bg);
+  color: var(--cc-ink);
+  font-family: 'JetBrains Mono Variable', ui-monospace, monospace;
+  overflow: hidden;
+}
+.cc.stage-1 {
+  --cc-main: #e0a84a;
+  --cc-bg: #14110a;
+  --cc-panel: #1c1810;
+  --cc-line: #33291a;
+}
+.cc.stage-2 {
+  --cc-main: #f0605f;
+  --cc-bg: #150b0b;
+  --cc-panel: #1e1010;
+  --cc-line: #3a1c1c;
+}
+.cc.stage-3 {
+  --cc-main: #ff3b3b;
+  --cc-bg: #0d0505;
+  --cc-panel: #170808;
+  --cc-line: #4a1414;
+}
+/* El pacto: líneas de barrido por encima de todo, como una pantalla vieja. */
+.cc.stage-3::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(0deg, rgba(255, 60, 60, 0.05) 0 1px, transparent 1px 3px);
+  pointer-events: none;
+}
+.cc.patched {
+  filter: saturate(0.55);
+}
+.cc-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.cc h2.cc-title {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  color: var(--cc-main);
+  font-family: inherit;
+  font-size: 1.4rem;
+  letter-spacing: -0.02em;
+}
+.cc h2.cc-title::before {
+  content: '> ';
+  opacity: 0.6;
+}
+.cc.stage-3 .cc-title {
+  animation: cc-glitch 2.4s steps(1) infinite;
+}
+.cc .pill {
+  border-color: var(--cc-line);
+  background: transparent;
+  color: var(--cc-dim);
+}
+.cc .pill.active {
+  border-color: var(--cc-main);
+  background: color-mix(in srgb, var(--cc-main) 18%, transparent);
+  color: var(--cc-ink);
+}
+.cc-news {
+  min-height: 2.8em;
+  margin: 0.75rem 0;
+  padding: 0.5rem 0.9rem;
+  border: 1px solid var(--cc-line);
+  border-radius: 10px;
+  background: var(--cc-panel);
+  color: var(--cc-dim);
+  font-size: 0.85rem;
+}
+.cc-news span {
+  display: inline-block;
+  animation: cc-rise 0.4s ease-out;
+}
+.cc-grid {
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) minmax(0, 1.3fr) minmax(260px, 1fr);
+  gap: 0.75rem;
+  align-items: start;
+}
+.cc-bank,
+.cc-middle,
+.cc-store {
+  position: relative;
+  border: 1px solid var(--cc-line);
+  border-radius: 14px;
+  background: var(--cc-panel);
+}
+.cc-middle,
+.cc-store {
+  padding: 0.8rem;
+  max-height: 78vh;
+  overflow-y: auto;
+}
+
+/* --- La tecla y el contador -------------------------------------------------- */
+.cc-bank {
+  display: grid;
+  justify-items: center;
+  gap: 0.15rem;
+  min-height: 520px;
+  padding: 1rem 0.75rem 1.25rem;
+  overflow: hidden;
+  text-align: center;
+}
+.cc-bank > * {
+  position: relative;
+  z-index: 1;
+}
+.cc-repo {
+  color: var(--cc-dim);
+  font-size: 0.8rem;
+}
+.cc-count {
+  font-size: clamp(1.3rem, 2.6vw, 2rem);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.15;
+}
+.cc-unit {
+  color: var(--cc-main);
+  font-weight: 700;
+}
+.cc-cps {
+  color: var(--cc-dim);
+  font-size: 0.85rem;
+}
+.cc-key {
+  position: relative;
+  width: min(230px, 70%);
+  margin: 0.6rem 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.cc-key-art {
+  display: block;
+  width: 100%;
+  height: auto;
+  transition: transform 0.12s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+.cc-key:hover .cc-key-art {
+  transform: scale(1.04);
+}
+.cc-key-face {
+  transition: transform 0.07s ease-out;
+}
+/* Al pulsar, la cara baja sobre el cuerpo de la tecla. */
+.cc-key:active .cc-key-art {
+  transform: scale(0.98);
+}
+.cc-key:active .cc-key-face {
+  transform: translateY(9px);
+}
+.cc-pop {
+  position: absolute;
+  z-index: 3;
+  color: #fff;
+  font-weight: 800;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.7);
+  white-space: nowrap;
+  pointer-events: none;
+  animation: cc-float 0.9s ease-out forwards;
+}
+/* La lluvia de código por detrás, y el café que sube con los logros. */
+.cc-rain,
+.cc-coffee {
+  position: absolute !important;
+  z-index: 0 !important;
+  pointer-events: none;
+}
+.cc-rain {
+  inset: 0;
+}
+.cc-rain i {
+  position: absolute;
+  top: -1.5em;
+  color: var(--cc-main);
+  font-style: normal;
+  opacity: 0.22;
+  animation: cc-fall linear infinite;
+}
+.cc-coffee {
+  inset: auto 0 0;
+  background: linear-gradient(180deg, rgba(133, 86, 52, 0.5), rgba(64, 38, 22, 0.75));
+  border-top: 2px solid rgba(190, 140, 100, 0.55);
+  border-radius: 40% 60% 0 0 / 14px 18px 0 0;
+  transition: height 1.2s ease-out;
+  pointer-events: auto;
+}
+.cc-buffs {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.35rem;
+}
+.cc-buff {
+  padding: 0.2rem 0.6rem;
+  border-radius: 2rem;
+  background: color-mix(in srgb, var(--cc-gold) 25%, transparent);
+  border: 1px solid var(--cc-gold);
+  font-size: 0.75rem;
+}
+.cc-buff.clot {
+  background: rgba(240, 96, 95, 0.2);
+  border-color: #f0605f;
+}
+.cc-bugs {
+  display: grid;
+  gap: 0.35rem;
+  justify-items: center;
+}
+.cc-bugs small {
+  color: var(--cc-dim);
+  font-size: 0.72rem;
+}
+.cc-bug {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  animation: cc-wiggle 0.9s ease-in-out infinite;
+}
+.cc-hotfix {
+  padding: 0.35rem 0.8rem;
+  border: 1px solid var(--cc-line);
+  border-radius: 2rem;
+  background: var(--cc-bg);
+  color: var(--cc-ink);
+  font: inherit;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+.cc-hotfix:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.cc-golden {
+  position: absolute !important;
+  z-index: 4 !important;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  filter: drop-shadow(0 0 14px var(--cc-gold));
+  animation: cc-pulse 1.4s ease-in-out infinite;
+}
+.cc-golden.wrath {
+  filter: drop-shadow(0 0 14px #ff3b3b);
+}
+
+/* --- El centro: filas, estadísticas, logros y clasificación ------------------ */
+.cc-rows {
+  display: grid;
+  gap: 0.45rem;
+}
+.cc-row {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.45rem 0.6rem;
+  border-radius: 10px;
+  background: var(--cc-bg);
+}
+.cc-row-name {
+  color: var(--cc-dim);
+  font-size: 0.78rem;
+}
+.cc-row-name b {
+  color: var(--cc-ink);
+}
+.cc-row-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+}
+.cc-hint {
+  margin: 0.4rem 0;
+  color: var(--cc-dim);
+  font-size: 0.8rem;
+}
+.cc-stats dl {
+  display: grid;
+  gap: 0.3rem;
+  margin: 0;
+}
+.cc-stats dl div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.35rem 0.6rem;
+  border-radius: 8px;
+  background: var(--cc-bg);
+}
+.cc-stats dt {
+  color: var(--cc-dim);
+}
+.cc-stats dd {
+  margin: 0;
+  font-weight: 700;
+  text-align: right;
+}
+.cc-recompile {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--cc-main);
+  border-radius: 2rem;
+  background: color-mix(in srgb, var(--cc-main) 20%, transparent);
+  color: var(--cc-ink);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.cc-achievements {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.cc-tile.dim {
+  filter: grayscale(1) brightness(0.45);
+}
+.cc-board ol {
+  display: grid;
+  gap: 0.3rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.cc-board li {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: 10px;
+  background: var(--cc-bg);
+}
+.cc-board li.me {
+  outline: 1px solid var(--cc-main);
+}
+.cc-board li > b {
+  min-width: 1.6em;
+  color: var(--cc-main);
+  text-align: right;
+}
+.cc-board li > span {
+  display: grid;
+}
+.cc-board small {
+  display: flex;
+  align-items: center;
+  gap: 0.25em;
+  color: var(--cc-dim);
+}
+
+/* --- La tienda --------------------------------------------------------------- */
+.cc .eyebrow {
+  color: var(--cc-dim);
+  font-family: inherit;
+}
+.cc .eyebrow::before {
+  content: none;
+}
+.cc-upgrades {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 0.35rem;
+}
+.cc-upgrade {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+.cc-upgrade:hover {
+  transform: translateY(-2px);
+}
+.cc-upgrade.poor {
+  opacity: 0.4;
+}
+.cc-detail {
+  min-height: 3.6em;
+  margin: 0.4rem 0 0.6rem;
+  color: var(--cc-dim);
+  font-size: 0.78rem;
+}
+.cc-detail strong {
+  color: var(--cc-ink);
+}
+.cc-store-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
+}
+.cc-amounts {
+  display: inline-flex;
+  gap: 2px;
+}
+.cc-amounts button {
+  padding: 0.15rem 0.5rem;
+  border: 1px solid var(--cc-line);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--cc-dim);
+  font: inherit;
+  font-size: 0.72rem;
+  cursor: pointer;
+}
+.cc-amounts button.on {
+  border-color: var(--cc-main);
+  color: var(--cc-ink);
+}
+.cc-buildings {
+  display: grid;
+  gap: 0.3rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.cc-building {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.35rem 0.6rem 0.35rem 0.35rem;
+  border: 1px solid var(--cc-line);
+  border-radius: 12px;
+  background: var(--cc-bg);
+  color: var(--cc-ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform 0.08s,
+    border-color 0.15s;
+}
+.cc-building:hover:not(:disabled) {
+  border-color: var(--cc-main);
+  transform: translateX(-2px);
+}
+.cc-building:disabled {
+  cursor: default;
+}
+.cc-building.poor {
+  opacity: 0.55;
+}
+.cc-building > span {
+  display: grid;
+  min-width: 0;
+}
+.cc-building strong {
+  overflow: hidden;
+  font-size: 0.86rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cc-building small.can {
+  color: #6fe3a0;
+}
+.cc-building small.cannot {
+  color: #f0807f;
+}
+.cc-building > b {
+  color: color-mix(in srgb, var(--cc-ink) 30%, transparent);
+  font-size: 1.5rem;
+}
+
+/* --- Avisos ------------------------------------------------------------------ */
+.cc-toasts {
+  position: fixed;
+  z-index: 70;
+  right: 1rem;
+  bottom: 1rem;
+  display: grid;
+  gap: 0.4rem;
+  max-width: min(340px, calc(100vw - 2rem));
+}
+.cc-toast,
+.cc-egg-toast {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.55rem 0.8rem;
+  border: 1px solid #2a3f3a;
+  border-radius: 12px;
+  background: #101b19;
+  color: #e6f3ef;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+  animation: cc-rise 0.3s ease-out;
+}
+.cc-toast span,
+.cc-egg-toast > span {
+  display: grid;
+}
+.cc-toast small,
+.cc-egg-toast small {
+  color: #8aa39b;
+}
+/* El de las cincuenta pulsaciones: un poco más turbio que los anteriores. */
+.cc-egg-toast.dark {
+  border-color: #6a1616;
+  background: #140606;
+  color: #ffd9d9;
+  animation: cc-shake 0.5s ease-in-out;
+}
+
+/* La ventana de las pastillas: no se parece a nada del resto de la web. */
+dialog.cc-pill-dialog {
+  width: min(560px, calc(100vw - 1.5rem));
+  padding: 1.6rem;
+  border: 1px solid #1d3a2c;
+  border-radius: 6px !important;
+  background: #030705;
+  color: #7dffb0;
+  font-family: 'JetBrains Mono Variable', ui-monospace, monospace;
+  box-shadow:
+    0 0 0 1px #0a1f14,
+    0 0 80px rgba(0, 255, 120, 0.18);
+}
+dialog.cc-pill-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.92);
+  backdrop-filter: blur(6px);
+}
+dialog.cc-pill-dialog h3 {
+  margin: 0 0 0.6rem;
+  font-family: inherit;
+  outline: none;
+}
+dialog.cc-pill-dialog h3::before {
+  content: '> ';
+}
+.cc-pills {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.8rem;
+  margin-top: 1.2rem;
+}
+.cc-pill {
+  display: grid;
+  gap: 0.35rem;
+  padding: 1.1rem 1.6rem;
+  border: 2px solid var(--pill);
+  border-radius: 999px !important;
+  background: color-mix(in srgb, var(--pill) 16%, #000);
+  color: #fff;
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
+  transition:
+    transform 0.15s,
+    box-shadow 0.15s;
+}
+.cc-pill:hover:not(:disabled) {
+  transform: translateY(-3px);
+  box-shadow: 0 0 34px color-mix(in srgb, var(--pill) 60%, transparent);
+}
+.cc-pill small {
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.74rem;
+}
+.cc-pill.blue {
+  --pill: #2f7df6;
+}
+.cc-pill.red {
+  --pill: #e6322e;
+}
+
+@keyframes cc-float {
+  to {
+    transform: translateY(-90px);
+    opacity: 0;
+  }
+}
+@keyframes cc-fall {
+  to {
+    transform: translateY(620px);
+  }
+}
+@keyframes cc-rise {
+  from {
+    transform: translateY(8px);
+    opacity: 0;
+  }
+}
+@keyframes cc-pulse {
+  50% {
+    transform: translate(-50%, -50%) scale(1.12) rotate(6deg);
+  }
+}
+@keyframes cc-wiggle {
+  50% {
+    transform: rotate(12deg);
+  }
+}
+@keyframes cc-shake {
+  20%,
+  60% {
+    transform: translateX(-50%) translateX(-5px);
+  }
+  40%,
+  80% {
+    transform: translateX(-50%) translateX(5px);
+  }
+}
+@keyframes cc-glitch {
+  0%,
+  92% {
+    text-shadow: none;
+    transform: none;
+  }
+  93% {
+    text-shadow:
+      2px 0 #0ff,
+      -2px 0 #f0f;
+    transform: translateX(2px);
+  }
+  96% {
+    text-shadow:
+      -2px 0 #0ff,
+      2px 0 #f0f;
+    transform: translateX(-2px);
+  }
+}
+@media (max-width: 980px) {
+  .cc-grid {
+    grid-template-columns: 1fr;
+  }
+  .cc-middle,
+  .cc-store {
+    max-height: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cc-rain,
+  .cc-pop {
+    display: none;
+  }
+  .cc *,
+  .cc-pill-dialog * {
+    animation: none !important;
+  }
+}

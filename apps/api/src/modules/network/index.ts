@@ -28,7 +28,11 @@ export type NetworkModuleDeps = {
   now?: () => number
 }
 
-export type NetworkModule = AppModule & { service: NetworkService; sync: CorrectionSync }
+export type NetworkModule = AppModule & {
+  service: NetworkService
+  sync: CorrectionSync /** Quién corrige más en un campus: lo usan las noticias del juego secreto. */
+  topCorrectors: (campusId: number, limit: number) => Promise<string[]>
+}
 
 /** Cada cuánto avanza la copia. Con el histórico hecho, casi todas las vueltas no piden nada. */
 const SYNC_EVERY_MS = 20_000
@@ -53,6 +57,7 @@ export function createNetworkModule(deps: NetworkModuleDeps): NetworkModule {
     name: 'network',
     service,
     sync,
+    topCorrectors: (campusId, limit) => corrections.topCorrectors(campusId, limit),
     routes: (app, context) => {
       registerNetworkRoutes(app, context, service)
     },

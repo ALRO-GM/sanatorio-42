@@ -24,6 +24,8 @@ export const SECTIONS = [
   // La guardia se abre desde "De guardia", en la cabecera.
   { id: 'guardia', icon: 'guardia', inNav: false },
   { id: 'expediente', icon: 'expediente', inNav: false },
+  // La sección secreta: solo existe para quien eligió la pastilla roja.
+  { id: 'clicker', icon: 'terminal', inNav: false },
   // Panel de gestión: solo para quien administra la web.
   { id: 'gestion', icon: 'gestion', inNav: false },
 ] as const satisfies readonly { id: string; icon: IconName; inNav: boolean }[]

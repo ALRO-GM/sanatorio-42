@@ -35,7 +35,11 @@ import type {
   BroadcastAnswer,
   BroadcastInput,
   BroadcastReport,
+  ClickerBoard,
+  ClickerSaveInput,
+  ClickerState,
   DirectChat,
+  Pill,
   UsageSend,
   UsageStats,
   Health,
@@ -183,6 +187,12 @@ export type Api = {
   getSyncStatus: () => Promise<SyncStatus>
   /** Avisos sin leer y estado de la cuota de 42: lo que se pregunta de fondo. */
   getPulse: () => Promise<Pulse>
+  /** El secreto de la cruz: pulsaciones, pastilla y partida guardada. */
+  getClicker: () => Promise<ClickerState>
+  pressPlus: (count: number) => Promise<{ plus: number; pill: Pill | null }>
+  choosePill: (pill: Pill) => Promise<ClickerState>
+  saveClicker: (save: ClickerSaveInput) => Promise<void>
+  getClickerBoard: () => Promise<ClickerBoard>
   /** Los comunicados que tienes por leer, el más antiguo primero. */
   getBroadcasts: () => Promise<Broadcast[]>
   /** Contesta a uno (o lo cierra sin elegir) y devuelve los que quedan. */

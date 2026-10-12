@@ -7,12 +7,16 @@ import { ProjectSelect } from '../features/peers/ProjectSelect'
 import type { AsyncState } from '../shared/hooks/useAsync'
 import { useI18n } from '../shared/i18n'
 import type { Section } from './sections'
+import { useEgg } from '../features/clicker/egg'
 
 // Solo la portada (la sala de espera) viaja con la web. El resto de secciones se
 // descarga cuando alguien las abre: quien entra a mirar quién le puede ayudar no
 // paga el calendario, el grafo del tablón ni la física de la red.
 const ClustersPage = lazy(() =>
   import('../features/map/ClustersPage').then((m) => ({ default: m.ClustersPage })),
+)
+const CodeClicker = lazy(() =>
+  import('../features/clicker/CodeClicker').then((m) => ({ default: m.CodeClicker })),
 )
 const BoardsCalendar = lazy(() =>
   import('../features/boards/BoardsCalendar').then((m) => ({ default: m.BoardsCalendar })),
@@ -67,6 +71,7 @@ export function SectionView({
   onGo,
 }: SectionViewProps) {
   const { t } = useI18n()
+  const egg = useEgg()
   // El proyecto elegido en la sala de espera.
   const [project, setProject] = useState<ProjectSummary | null>(null)
 
@@ -108,6 +113,18 @@ export function SectionView({
       )}
       {section === 'pizarras' && <BoardsCalendar />}
       {section === 'red' && <NetworkPage me={me} />}
+      {section === 'clicker' &&
+        // Para quien no eligió la roja, esta sección no existe.
+        (egg.pill === 'red' ? (
+          <CodeClicker
+            me={me.login}
+            onExit={() => {
+              onGo('expediente')
+            }}
+          />
+        ) : (
+          egg.ready && <p className="estado">{t('error.404')}</p>
+        ))}
       {section === 'clusters' && <ClustersPage me={me.login} initialPeer={chatWith} />}
       {section === 'gestion' &&
         (profile.data?.admin === true ? (

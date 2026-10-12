@@ -546,6 +546,30 @@ Reglas:
 - A quien bloqueas no le sales en `/help/offers` ni puede reservarte; recibe la
   misma respuesta que si no te ofrecieras.
 
+## Code Clicker (sección secreta)
+
+Se llega pulsando cien veces la cruz de la cabecera y eligiendo la pastilla
+roja. La API no juega: cuenta pulsaciones, guarda qué pastilla se eligió y
+custodia la partida. Las reglas están en `apps/web/src/features/clicker`.
+
+GET /clicker → por dónde vas y tu partida: `{ plus, pill, save, names }`.
+
+- `names` son los logins que más corrigen en tu campus, para las noticias del
+  juego. Solo viene con la pastilla roja.
+
+POST /clicker/plus → `{ "count": 3 }`: pulsaciones de la cruz desde el último
+envío (25 como mucho). Devuelve `{ plus, pill }`. Con pastilla elegida ya no suma.
+
+POST /clicker/pill → `{ "pill": "red" }` o `"blue"`. Una sola vez, y solo con
+cien pulsaciones: `409` si falta o si ya se eligió. La azul no tiene vuelta atrás.
+
+PUT /clicker/save → `204`. `{ save, total, perSecond, achievements, prestige }`.
+`403` sin la pastilla roja. La partida pesa 80 kB como mucho; las cifras no se
+comprueban, y el `total` de la clasificación nunca baja.
+
+GET /clicker/board → `{ entries, me }`: quién ha escrito más código, de
+cualquier campus. `level` es `floor(3 · log10(1 + total))`. `403` sin la roja.
+
 ## Comunicados
 
 Mensajes de quien administra que salen en pantalla a quien le toquen.

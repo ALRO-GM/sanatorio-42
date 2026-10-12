@@ -1053,4 +1053,14 @@ export const en: Record<string, string> = {
   'broadcast.must': 'Pick an option to close this message.',
   'broadcast.ok': 'Got it',
   'broadcast.later': 'Not now',
+  'egg.achievement': 'Achievement unlocked',
+  'egg.title': 'You knocked a hundred times',
+  'egg.body':
+    'Someone opened. They offer you two pills, and will not let you leave without choosing.',
+  'egg.blue': 'The blue pill',
+  'egg.blueAbout':
+    'This never happened. The cross is just a cross again, and you can never come back here.',
+  'egg.red': 'The red pill',
+  'egg.redAbout': 'You stay, and see how deep the rabbit hole goes. At your own risk.',
+  'nav.clicker': 'Code Clicker',
 }

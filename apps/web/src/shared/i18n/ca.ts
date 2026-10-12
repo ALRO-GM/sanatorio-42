@@ -902,4 +902,13 @@ export const ca: Record<string, string> = {
   'broadcast.must': 'Tria una opció per tancar aquest missatge.',
   'broadcast.ok': 'Entesos',
   'broadcast.later': 'Ara no',
+  'egg.achievement': 'Assoliment aconseguit',
+  'egg.title': 'Has trucat cent vegades',
+  'egg.body': "Algú ha obert. T'ofereix dues pastilles, i no et deixa marxar sense triar.",
+  'egg.blue': 'La pastilla blava',
+  'egg.blueAbout':
+    'Això no ha passat. La creu torna a ser només una creu, i mai més podràs tornar aquí.',
+  'egg.red': 'La pastilla vermella',
+  'egg.redAbout': 'Et quedes, i veus fins on arriba el cau. Sota la teva responsabilitat.',
+  'nav.clicker': 'Code Clicker',
 }

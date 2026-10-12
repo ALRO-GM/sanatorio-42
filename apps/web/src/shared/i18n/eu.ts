@@ -907,4 +907,15 @@ export const eu: Record<string, string> = {
   'broadcast.must': 'Aukeratu aukera bat mezu hau ixteko.',
   'broadcast.ok': 'Ulertuta',
   'broadcast.later': 'Orain ez',
+  'egg.achievement': 'Lorpena lortuta',
+  'egg.title': 'Ehun aldiz jo duzu atea',
+  'egg.body':
+    'Norbaitek ireki du. Bi pilula eskaintzen dizkizu, eta ez dizu aukeratu gabe joaten uzten.',
+  'egg.blue': 'Pilula urdina',
+  'egg.blueAbout':
+    'Hau ez da gertatu. Gurutzea gurutze hutsa da berriro, eta ezingo zara inoiz hona itzuli.',
+  'egg.red': 'Pilula gorria',
+  'egg.redAbout':
+    'Geratu egiten zara, eta zuloa noraino iristen den ikusiko duzu. Zure ardurapean.',
+  'nav.clicker': 'Code Clicker',
 }

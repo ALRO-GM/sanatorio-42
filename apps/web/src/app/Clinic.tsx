@@ -4,6 +4,7 @@ import type { CurrentUser } from '@sanatorio/contracts'
 
 import { BroadcastGate } from '../features/admin/BroadcastGate'
 import { AlertCenter } from '../features/alerts/AlertCenter'
+import { EasterEgg } from '../features/clicker/EasterEgg'
 import { QuotaNotice } from '../features/alerts/QuotaNotice'
 import { api } from '../shared/api'
 import { useAsync } from '../shared/hooks/useAsync'
@@ -106,9 +107,14 @@ export function Clinic({ me, onLogout }: ClinicProps) {
       />
 
       {/* La red de correcciones necesita sitio: es la única sección a todo lo ancho. */}
-      <main className={`container ${section === 'red' ? 'wide' : ''}`}>
+      <main className={`container ${section === 'red' || section === 'clicker' ? 'wide' : ''}`}>
         <QuotaNotice status={pulse?.quota ?? null} />
         <BroadcastGate pending={pulse?.broadcasts ?? 0} onChange={refresh} />
+        <EasterEgg
+          onRed={() => {
+            openSection('clicker')
+          }}
+        />
         <AlertCenter
           me={me.login}
           onGo={(next) => {

@@ -297,6 +297,17 @@ export function createNetworkRepository(db: Db) {
       return { forth: count(a), back: count(b) }
     },
 
+    /** Los logins que más correcciones han hecho en un campus, el que más primero. */
+    async topCorrectors(campusId: number, limit: number): Promise<string[]> {
+      const result = await db.execute({
+        sql: `SELECT corrector FROM corrections WHERE campus_id = ? AND corrector <> corrected
+              GROUP BY corrector ORDER BY COUNT(*) DESC, corrector LIMIT ?`,
+        args: [campusId, limit],
+      })
+
+      return result.rows.map((row) => toText(row.corrector))
+    },
+
     /** Con quién se ha corregido alguien: veces que corrigió (`gave`) y que le corrigieron (`got`). */
     async partnersOf(
       campusId: number,

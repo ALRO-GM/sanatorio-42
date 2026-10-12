@@ -10,6 +10,7 @@
 import type { Api } from '../types'
 import { adminMock } from './admin'
 import { boardsMock } from './boards'
+import { clickerMock } from './clicker'
 import { doubtsMock } from './doubts'
 import { helpMock } from './help'
 import { meetMock } from './meet'
@@ -29,4 +30,5 @@ export const mockApi: Api = {
   ...therapyMock,
   ...doubtsMock,
   ...boardsMock,
+  ...clickerMock,
 }

@@ -36,6 +36,8 @@
 @import './therapy.css';
 /* Los tres estilos (letra, acento, esquinas e iconos) que se eligen en Personalizar. */
 @import './styles.css';
+/* Code Clicker, la sección secreta: su propia paleta y sus animaciones. */
+@import './clicker.css';
 /* El icono de información, su ventana y las demostraciones animadas. */
 @import './tour.css';
 /* El sistema visual: lo último, para que mande sobre lo de cada sección. */

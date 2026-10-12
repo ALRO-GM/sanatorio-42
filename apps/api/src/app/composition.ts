@@ -26,6 +26,8 @@ import { createBroadcastsModule } from '../modules/broadcasts/index.js'
 import type { BroadcastsModule } from '../modules/broadcasts/index.js'
 import { createCalendarModule } from '../modules/calendar/index.js'
 import type { CalendarModule } from '../modules/calendar/index.js'
+import { createClickerModule } from '../modules/clicker/index.js'
+import type { ClickerModule } from '../modules/clicker/index.js'
 import { createDoubtsModule } from '../modules/doubts/index.js'
 import type { DoubtsModule } from '../modules/doubts/index.js'
 import { createHelpModule } from '../modules/help/index.js'
@@ -95,6 +97,7 @@ export type Services = {
   admin: AdminModule['service']
   notices: NoticesModule['service']
   broadcasts: BroadcastsModule['service']
+  clicker: ClickerModule['service']
 }
 
 export type Composition = {
@@ -229,6 +232,13 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     ...clock,
   })
 
+  const clicker = createClickerModule({
+    db,
+    replica: replica.repository,
+    topCorrectors: (campusId, limit) => network.topCorrectors(campusId, limit),
+    ...clock,
+  })
+
   halted = () => admin.service.halted()
   const usage = createUsageModule({
     db,
@@ -258,6 +268,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
       meet,
       notices,
       broadcasts,
+      clicker,
     ],
     services: {
       repositories: {
@@ -285,6 +296,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
       admin: admin.service,
       notices: notices.service,
       broadcasts: broadcasts.service,
+      clicker: clicker.service,
     },
   }
 }

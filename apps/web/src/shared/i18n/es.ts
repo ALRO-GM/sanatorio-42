@@ -1099,4 +1099,14 @@ export const es: Record<string, string> = {
   'admin.cast.remove': 'Retirar',
   'admin.cast.wasRequired': 'había que elegir',
   'admin.cast.wasOptional': 'se podía cerrar sin elegir',
+  'egg.achievement': 'Logro conseguido',
+  'egg.title': 'Has llamado cien veces',
+  'egg.body': 'Alguien ha abierto. Te ofrece dos pastillas, y no deja que te vayas sin elegir.',
+  'egg.blue': 'La pastilla azul',
+  'egg.blueAbout':
+    'Esto no ha pasado. La cruz vuelve a ser solo una cruz, y nunca más podrás volver aquí.',
+  'egg.red': 'La pastilla roja',
+  'egg.redAbout':
+    'Te quedas, y ves hasta dónde llega la madriguera. Bajo tu propia responsabilidad.',
+  'nav.clicker': 'Code Clicker',
 }
