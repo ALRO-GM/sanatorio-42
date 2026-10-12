@@ -1383,4 +1383,10 @@ export const es: Record<string, string> = {
     'Cada código que ha comprobado una cuenta de staff y con qué resultado.',
   'admin.data.kind.staff_checks.detail':
     'Es solo un registro: borrarlo no cambia ningún documento ni ninguna cuenta.',
+  'login.demo': 'Ver una demostración sin cuenta',
+  'demo.title': 'Demostración',
+  'demo.about': 'Datos inventados. Nada de lo que hagas aquí se guarda.',
+  'demo.real': 'Ir a la web de verdad',
+  'demo.staff':
+    'En la demostración vale cualquier clave que empiece por «s42-», y el documento de ejemplo tiene el código K7QF.',
 }

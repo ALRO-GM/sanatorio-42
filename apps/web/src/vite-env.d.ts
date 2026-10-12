@@ -10,6 +10,8 @@ interface ImportMetaEnv {
   readonly VITE_USE_MOCK?: string
   /** Con la API de mentira: empezar con la sesión iniciada. */
   readonly VITE_MOCK_LOGGED_IN?: string
+  /** `true` en la web de demostración pública (`/demo/`). */
+  readonly VITE_DEMO?: string
 }
 
 interface ImportMeta {

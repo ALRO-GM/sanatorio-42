@@ -502,6 +502,50 @@ describe('un solo proceso para la web y la API', () => {
       404,
     )
   })
+
+  it('la demostración se sirve desde /demo, con su propia portada', async () => {
+    const folder = mkdtempSync(join(tmpdir(), 'sanatorio-web-'))
+    folders.push(folder)
+    mkdirSync(join(folder, 'demo', 'assets'), { recursive: true })
+    writeFileSync(join(folder, 'index.html'), '<!doctype html><title>Sanatorio 42</title>')
+    writeFileSync(join(folder, 'demo', 'index.html'), '<!doctype html><title>Demo</title>')
+    writeFileSync(join(folder, 'demo', 'assets', 'index-abc123.js'), 'console.log("demo")')
+
+    const built = await app({ STATIC_DIR: folder })
+    const get = (url: string) => built.app.inject({ method: 'GET', url })
+
+    for (const url of ['/demo', '/demo/', '/demo/?x=1', '/demo/index.html', '/demo/lo-que-sea']) {
+      const page = await get(url)
+
+      expect(page.statusCode, url).toBe(200)
+      expect(page.body, url).toContain('<title>Demo</title>')
+      expect(page.headers['cache-control'], url).toBe('no-cache')
+    }
+
+    const asset = await get('/demo/assets/index-abc123.js')
+    expect(asset.headers['cache-control']).toContain('immutable')
+    expect(asset.body).toBe('console.log("demo")')
+
+    // Lo que solo se le parece es de la web de verdad, y lo que no existe, un 404.
+    expect((await get('/demostracion')).body).toContain('<title>Sanatorio 42</title>')
+    expect((await get('/')).body).toContain('<title>Sanatorio 42</title>')
+    expect((await get('/demo/assets/viejo.js')).statusCode).toBe(404)
+    expect((await get('/demo/../index.html')).body).not.toContain('<title>Demo</title>')
+    // Y la demo no abre ninguna puerta a la API: sin sesión sigue siendo 401.
+    expect((await get('/api/me/projects')).statusCode).toBe(401)
+    expect((await get('/demo/api/me/projects')).body).toContain('<title>Demo</title>')
+  })
+
+  it('sin demostración compilada, /demo es un 404 y lo demás sigue igual', async () => {
+    const folder = mkdtempSync(join(tmpdir(), 'sanatorio-web-'))
+    folders.push(folder)
+    writeFileSync(join(folder, 'index.html'), '<!doctype html><title>Sanatorio 42</title>')
+
+    const built = await app({ STATIC_DIR: folder })
+
+    expect((await built.app.inject({ method: 'GET', url: '/demo/' })).statusCode).toBe(404)
+    expect((await built.app.inject({ method: 'GET', url: '/' })).statusCode).toBe(200)
+  })
 })
 
 describe('mapa de clusters', () => {

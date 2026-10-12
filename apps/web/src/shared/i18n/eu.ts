@@ -966,4 +966,10 @@ export const eu: Record<string, string> = {
     'Ez dator bat igorritako dokumentuarekin: aldatu egin dute edo beste fitxategi bat da. Fidatu hemen behean ikusten duzunaz.',
   'staff.original': 'Jatorrizko dokumentua',
   'staff.empty': 'Dokumentuak ez zuen lerrorik: aldi horretan ez zegoen balidatutako ordurik.',
+  'login.demo': 'Ikusi erakustaldi bat konturik gabe',
+  'demo.title': 'Erakustaldia',
+  'demo.about': 'Asmatutako datuak. Hemen egiten duzun ezer ez da gordetzen.',
+  'demo.real': 'Joan benetako webgunera',
+  'demo.staff':
+    'Erakustaldian «s42-» hasten den edozein gakok balio du, eta adibideko dokumentuak K7QF kodea du.',
 }

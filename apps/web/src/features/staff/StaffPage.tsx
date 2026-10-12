@@ -76,6 +76,7 @@ function KeyForm({ onEnter }: { onEnter: () => void }) {
     <form className="card staff-card" onSubmit={enter}>
       <span className="eyebrow">{t('staff.enter')}</span>
       <p className="hint">{t('staff.enterHint')}</p>
+      {import.meta.env.VITE_DEMO === 'true' && <p className="estado aviso">{t('demo.staff')}</p>}
       <label>
         {t('staff.key')}
         <input

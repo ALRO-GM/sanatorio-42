@@ -29,6 +29,12 @@ export function Login({ onLogin, notice }: LoginProps) {
       <button className="primary" onClick={onLogin}>
         {t('login.button')}
       </button>
+      {/* Quien no es de 42 no puede entrar: que pueda al menos ver cómo es. */}
+      {import.meta.env.VITE_DEMO !== 'true' && (
+        <a className="link" href="/demo/">
+          {t('login.demo')}
+        </a>
+      )}
       <section className="howto">
         <h2>{t('login.how')}</h2>
         <div className="steps">

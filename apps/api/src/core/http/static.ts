@@ -28,6 +28,12 @@ const TYPES: Record<string, string> = {
   '.txt': 'text/plain; charset=utf-8',
 }
 
+/**
+ * La demostración pública: la misma web compilada con los datos de mentira, en
+ * su propia carpeta. No habla con la API, así que se puede enseñar a cualquiera.
+ */
+const DEMO = '/demo'
+
 type StaticFile = { body: Buffer; type: string; immutable: boolean }
 
 /** Lee una carpeta entera a memoria, indexada por su ruta web. */
@@ -50,7 +56,7 @@ function loadFiles(root: string): Map<string, StaticFile> {
         type: TYPES[extname(name)] ?? 'application/octet-stream',
         // Vite pone un hash en el nombre de todo lo que va en `assets/`: si el
         // contenido cambia, cambia el nombre, así que se puede cachear para siempre.
-        immutable: route.startsWith('/assets/'),
+        immutable: route.startsWith('/assets/') || route.startsWith(`${DEMO}/assets/`),
       })
     }
   }
@@ -71,6 +77,7 @@ function loadFiles(root: string): Map<string, StaticFile> {
 export function registerStatic(app: FastifyInstance, root: string): number {
   const files = loadFiles(root)
   const index = files.get('/index.html')
+  const demoIndex = files.get(`${DEMO}/index.html`)
 
   app.setNotFoundHandler((request, reply) => {
     const path = request.url.split('?')[0] ?? '/'
@@ -92,11 +99,13 @@ export function registerStatic(app: FastifyInstance, root: string): number {
     // lo que se pidió bajo `/api` es una ruta de la API que no existe.
     const isApi = request.originalUrl.startsWith('/api/')
 
-    if (wantsPage && !isApi && index !== undefined && extname(path) === '') {
+    const page = path === DEMO || path.startsWith(`${DEMO}/`) ? demoIndex : index
+
+    if (wantsPage && !isApi && page !== undefined && extname(path) === '') {
       return reply
-        .header('Content-Type', index.type)
+        .header('Content-Type', page.type)
         .header('Cache-Control', 'no-cache')
-        .send(index.body)
+        .send(page.body)
     }
 
     return reply.code(404).send({ error: 'not_found', message: `No existe ${path}` })

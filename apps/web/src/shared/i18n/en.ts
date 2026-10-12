@@ -1335,4 +1335,10 @@ export const en: Record<string, string> = {
   'admin.data.kind.staff_checks.summary': 'Every code a staff account has checked, and the result.',
   'admin.data.kind.staff_checks.detail':
     'It is only a log: deleting it changes no document and no account.',
+  'login.demo': 'See a demo without an account',
+  'demo.title': 'Demo',
+  'demo.about': 'Made-up data. Nothing you do here is saved.',
+  'demo.real': 'Go to the real site',
+  'demo.staff':
+    'In the demo any key starting with “s42-” works, and the sample document has the code K7QF.',
 }

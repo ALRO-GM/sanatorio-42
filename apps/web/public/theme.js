@@ -11,6 +11,31 @@
 // Va en un fichero y no escrito dentro de `index.html` para que la política de
 // contenido (`infra/Caddyfile`) pueda prohibir todo script en línea.
 ;(function () {
+  // La demostración (`/demo/`) vive en el mismo dominio que la web de verdad, y
+  // el navegador les daría el mismo almacenamiento: lo que alguien tocara en la
+  // demo (el estilo, la partida de mentira) pisaría lo suyo de verdad. Aquí,
+  // antes de que arranque nada, se le pone un prefijo a todo lo que la demo
+  // guarde o lea.
+  if (/^\/demo(\/|$)/.test(window.location.pathname)) {
+    try {
+      var storage = Object.getPrototypeOf(localStorage)
+
+      ;['getItem', 'setItem', 'removeItem'].forEach(function (name) {
+        var original = storage[name]
+
+        storage[name] = function (key) {
+          var args = Array.prototype.slice.call(arguments)
+
+          args[0] = 'demo:' + key
+
+          return original.apply(this, args)
+        }
+      })
+    } catch {
+      // Sin almacenamiento no hay nada que separar.
+    }
+  }
+
   var choice = null
   var style = null
   var vars = null

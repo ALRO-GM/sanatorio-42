@@ -6,6 +6,7 @@ import { StaffPage } from '../features/staff/StaffPage'
 import { useI18n } from '../shared/i18n'
 import { Logo } from '../shared/ui/Logo'
 import { Clinic } from './Clinic'
+import { DemoBadge } from './DemoBadge'
 
 const BASE_TITLE = 'Sanatorio 42'
 
@@ -47,7 +48,12 @@ export function App() {
 
   // La pantalla del staff no es de la web de la gente: tiene su propia entrada
   // y no pregunta por la sesión de nadie.
-  return staff ? <StaffPage /> : <StudentApp />
+  return (
+    <>
+      {staff ? <StaffPage /> : <StudentApp />}
+      <DemoBadge />
+    </>
+  )
 }
 
 /** `true` mientras la dirección sea la de validar documentos (`#/validar`). */

@@ -106,3 +106,40 @@
   --surface: inherit;
   --border: inherit;
 }
+
+/* ── La etiqueta de la demostración (/demo/) ─────────────────────────────────
+   Pequeña y en una esquina: avisa de que los datos son inventados sin tapar la
+   web que se está enseñando. */
+.demo-badge {
+  position: fixed;
+  left: 0.75rem;
+  bottom: 0.75rem;
+  z-index: 60;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.6rem;
+  max-width: min(30rem, calc(100vw - 1.5rem));
+  padding: 0.45rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: 0 6px 20px var(--shadow);
+  font-size: 0.8rem;
+  color: var(--text-2);
+}
+.demo-badge-toggle {
+  padding: 0.15rem 0.55rem;
+  border: 0;
+  border-radius: 999px;
+  background: var(--warn);
+  color: #1b1300;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.demo-badge.folded {
+  padding: 0.3rem;
+}

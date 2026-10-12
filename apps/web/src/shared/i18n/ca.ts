@@ -959,4 +959,10 @@ export const ca: Record<string, string> = {
     "No coincideix amb el document emès: l'han modificat o és un altre fitxer. Fia't del que veus aquí sota.",
   'staff.original': 'El document original',
   'staff.empty': 'El document no tenia cap fila: en aquest període no hi havia hores validades.',
+  'login.demo': 'Mira una demostració sense compte',
+  'demo.title': 'Demostració',
+  'demo.about': 'Dades inventades. Res del que facis aquí es desa.',
+  'demo.real': 'Ves al web de veritat',
+  'demo.staff':
+    "A la demostració val qualsevol clau que comenci per «s42-», i el document d'exemple té el codi K7QF.",
 }
