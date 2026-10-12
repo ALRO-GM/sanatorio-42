@@ -54,6 +54,11 @@ type Texts = {
     one: string[]
     two: string[]
     three: string[]
+    /**
+     * Las de cada ciclo: se añaden al recompilar la realidad, una tanda nueva
+     * (y más desmedida) según el prestigio que se lleve. Ver `CYCLE_AT`.
+     */
+    cycles: string[][]
   }
 }
 
@@ -156,6 +161,8 @@ const es: Texts = {
       'El juego sigue mientras tengas la web abierta. La ventanita enseña cuánto llevas cuando estás en otra sección.',
     miniOpen: 'Volver a Code Clicker',
     miniClose: 'Quitar la ventanita',
+    newsTag: 'Última hora',
+    newsPrefix: 'Noticias: ',
     bustEyebrow: 'Sistema antitrampas',
     bustOk: 'Entendido',
     bustSold: 'Vendido todo lo de la tienda por {n} líneas.',
@@ -427,6 +434,14 @@ const es: Texts = {
       'Noticias: {name} corrige tres proyectos antes de desayunar.',
       'Tu Makefile hace relink, pero nadie se ha dado cuenta todavía.',
       'Noticias: estudiante encuentra un punto y coma que llevaba tres días buscando.',
+      'Noticias: tu primer «hola, mundo» sale en el boletín del campus. Tirada: un ejemplar.',
+      'Noticias: {name} te presta su cargador. Los expertos lo califican de «gesto histórico».',
+      'Has escrito {n} líneas. La mitad son comentarios pidiendo perdón.',
+      'Noticias: un pisciner descubre que el fallo estaba en la línea de arriba. Siempre está en la línea de arriba.',
+      'Tu código funciona y no sabes por qué. Nadie pregunta.',
+      'Noticias: la máquina de café y tú ya os tuteáis.',
+      'Noticias: {name} dice «en mi máquina funciona» y la sala entera asiente con tristeza.',
+      'Noticias: récord del campus: cuarenta pestañas de documentación abiertas y ninguna leída.',
     ],
     mid: [
       'Noticias: {name} avisa de que tus funciones tienen más de 25 líneas; nadie le escucha ya.',
@@ -437,6 +452,14 @@ const es: Texts = {
       'Noticias: los clusters no se apagan por la noche. Dicen que «tienen trabajo».',
       'Noticias: {name} y {name2} montan una pizarra sobre tu código. Dura nueve horas.',
       'Tus {n} líneas ocupan más que el resto de internet.',
+      'Noticias: tu repositorio pesa tanto que el campus se inclina dos grados hacia el oeste.',
+      'Noticias: {name} abre una terapia de grupo para quienes han leído tu código. Hay lista de espera.',
+      'Noticias: los inversores preguntan qué hace tu programa. Tú también.',
+      'Noticias: se agotan las teclas de punto y coma en toda la provincia.',
+      'Noticias: {name} encuentra un warning en tu código y lo adopta.',
+      'Tu Makefile ya tiene más reglas que una comunidad de vecinos.',
+      'Noticias: {name2} jura haber visto tu código compilar a la primera. Nadie le cree.',
+      'Noticias: el conserje pide que dejes de escribir a partir de las tres de la mañana. «Es por el ruido».',
     ],
     late: [
       'Noticias: 42 abre un campus en cada ciudad. Luego, en cada barrio.',
@@ -447,6 +470,14 @@ const es: Texts = {
       'Noticias: la luna tiene ya su propio cluster. Sin ventanas, como debe ser.',
       'Noticias: el black hole deja de ser una metáfora.',
       'Noticias: se prohíbe hablar sin indentar.',
+      'Noticias: la ONU aprueba la Norma por unanimidad. El acta tiene exactamente 25 líneas.',
+      'Noticias: los océanos se miden ya en líneas de código. Hay más de las tuyas.',
+      'Noticias: {name} corrige el PIB de tres países y les pone un 0 por fuga de memoria.',
+      'Noticias: la Real Academia admite «segfault» como interjección.',
+      'Noticias: los bebés nacen sabiendo hacer git push. El --force lo aprenden solos.',
+      'Noticias: el Sol pide una pull request para seguir saliendo por el este.',
+      'Noticias: se inaugura el campus de la Antártida. Los pingüinos ya van por el círculo tres.',
+      'Noticias: la humanidad entera está de guardia. Nadie sabe para quién.',
     ],
     one: [
       'Los pisciners han dejado de usar el chat. No lo necesitan.',
@@ -455,6 +486,10 @@ const es: Texts = {
       'Te miran cuando pasas. Todos. A la vez.',
       'Noticias: nadie recuerda haber escrito la última versión de la Norma.',
       '«Escribe», dicen los pisciners. No mueven la boca.',
+      'Noticias: los pisciners terminan las frases de los demás. Y los proyectos.',
+      'Noticias: {name} asiente. En el otro extremo del campus, cuatrocientos pisciners asienten también.',
+      'Ya no hacen cola en la cafetera. Beben por turnos. Nadie ha organizado los turnos.',
+      'Noticias: la piscina está llena y nadie sale a respirar.',
     ],
     two: [
       'Noticias: los pisciners ya no duermen. Tampoco parpadean.',
@@ -463,6 +498,10 @@ const es: Texts = {
       'El compilador ha empezado a devolver cosas que no le has pedido.',
       'Noticias: los relojes del campus marcan todos 42:42.',
       '«Más», dice algo desde dentro de los clusters.',
+      'Noticias: {name} encuentra su login escrito en un fichero que no ha abierto nadie.',
+      'Noticias: el campus vibra a 42 hercios. Los vecinos lo llaman «el zumbido».',
+      'Noticias: las correcciones duran cero segundos. Todas aprueban. Nadie las recuerda.',
+      'Los pisciners ya no teclean. El código se escribe igual.',
     ],
     three: [
       'Noticias: la gravedad pasa a ser un parámetro de configuración. Alguien lo ha tocado.',
@@ -473,6 +512,52 @@ const es: Texts = {
       'Ya no hay noticias. Solo logs.',
       'undefined behavior: la realidad no garantiza el resultado.',
       'Todo es código. Tú también. Sigue escribiendo.',
+      'Noticias: el lunes devuelve NULL. Se recomienda comprobar el martes antes de usarlo.',
+      'Noticias: {name} libera el universo dos veces. Double free.',
+      'Noticias: los puntos cardinales pasan a ser argv[1], argv[2], argv[3] y argv[4].',
+      'Noticias: la Moulinette pregunta si tú has pasado la Moulinette.',
+    ],
+    cycles: [
+      [
+        'Noticias: la realidad ha sido recompilada. Los expertos notan «un regusto a código nuevo».',
+        'Noticias: tras la recompilación, {name} conserva todos sus recuerdos menos la contraseña.',
+        'Has vuelto a empezar. El universo anterior queda en una rama que nadie va a mezclar.',
+        'Noticias: historiadores hallan restos de una civilización anterior: un Makefile y una taza.',
+        'Noticias: el Big Bang, rebautizado como «primer commit». El mensaje era «init».',
+        'Noticias: {name} asegura que esto ya lo ha vivido. Le dan la razón por escrito y por duplicado.',
+        'Noticias: la gravedad vuelve con otro número de versión. Los pájaros tardan una mañana en adaptarse.',
+        'Segunda vuelta. Esta vez seguro que sale limpio.',
+      ],
+      [
+        'Noticias: se convoca la primera Cumbre Intergaláctica de Indentación. Hay disturbios por los tabuladores.',
+        'Noticias: {name}, proclamado Archievaluador Supremo de Todas las Realidades Conocidas y de Dos por Conocer.',
+        'Noticias: una civilización remota adora tu .gitignore como texto sagrado. Tienen razón en casi todo.',
+        'Noticias: los agujeros negros reconocen que solo son fugas de memoria con buena prensa.',
+        'Noticias: el Parlamento del Multiverso aprueba, tras nueve eones de debate, una función de 26 líneas. Cae el Gobierno.',
+        'Has recompilado tantas veces que el tiempo te trata de usted.',
+        'Noticias: {name2} funda una orden de monjes que copian tu código a mano. Van por la línea cuatro.',
+        'Noticias: las constelaciones se reordenan para formar tu login. La Osa Mayor ha presentado queja.',
+      ],
+      [
+        'Noticias: el Gran Consejo de las Realidades te nombra Compilador Emérito del Todo. El cargo viene sin sueldo.',
+        'Noticias: los dioses antiguos abren una incidencia: «no nos funciona el rayo desde tu último cambio».',
+        'Noticias: {name} evalúa la Creación. «Funciona, pero no pasa la Norma». Se repite el domingo.',
+        'Noticias: se descubre que el destino era un switch sin default.',
+        'Noticias: el infinito pide que dejes de escribir. Dice que se le está quedando pequeño.',
+        'Noticias: tres universos vecinos se mudan por el ruido de tu teclado.',
+        'Noticias: la eternidad ya tiene fecha de entrega. Es el viernes.',
+        'Noticias: la Muerte se apunta a la piscina. Suspende el examen del primer viernes y promete volver.',
+      ],
+      [
+        'Noticias: ya no queda nada que no hayas escrito tú. Incluida esta noticia.',
+        'Noticias: el Todo y la Nada firman la paz en un fichero de cabecera.',
+        'Noticias: {name} te corrige a ti. Tras deliberar con todos los universos posibles, te pone un 125.',
+        'Noticias: la existencia es, oficialmente, un proyecto en grupo. Solo trabajas tú.',
+        'Noticias: el lenguaje C pide la jubilación. Se la deniegas con cariño.',
+        'Noticias: los físicos confirman que la última partícula elemental es un punto y coma.',
+        'Has recompilado la realidad tantas veces que la realidad ya te recompila a ti.',
+        'Noticias: el Fin de los Tiempos se aplaza. Motivo: «sigue escribiendo».',
+      ],
     ],
   },
 }
@@ -577,6 +662,8 @@ const en: Texts = {
       'The game keeps going while the site is open. The mini window shows your count when you are in another section.',
     miniOpen: 'Back to Code Clicker',
     miniClose: 'Hide the mini window',
+    newsTag: 'Breaking',
+    newsPrefix: 'News: ',
     bustEyebrow: 'Anti-cheat system',
     bustOk: 'Got it',
     bustSold: 'Everything from the shop sold for {n} lines.',
@@ -840,6 +927,14 @@ const en: Texts = {
       'News: {name} evaluates three projects before breakfast.',
       'Your Makefile relinks, but nobody has noticed yet.',
       'News: student finds a semicolon they had been hunting for three days.',
+      "News: your first 'hello, world' makes the campus newsletter. Print run: one copy.",
+      "News: {name} lends you a charger. Experts call it 'a historic gesture'.",
+      'You have written {n} lines. Half are comments saying sorry.',
+      'News: a pisciner finds the bug was on the line above. It is always on the line above.',
+      'Your code works and you do not know why. Nobody asks.',
+      'News: you and the coffee machine are now on first-name terms.',
+      "News: {name} says 'it works on my machine' and the whole room nods sadly.",
+      'News: campus record: forty documentation tabs open, none of them read.',
     ],
     mid: [
       'News: {name} warns your functions run over 25 lines; nobody listens any more.',
@@ -850,6 +945,14 @@ const en: Texts = {
       "News: the clusters no longer switch off at night. They say they 'have work to do'.",
       'News: {name} and {name2} run a whiteboard session on your code. It lasts nine hours.',
       'Your {n} lines take up more than the rest of the internet.',
+      'News: your repository is so heavy the campus tilts two degrees to the west.',
+      'News: {name} starts a group therapy for people who have read your code. There is a waiting list.',
+      'News: investors ask what your program does. So do you.',
+      'News: semicolon keys sell out across the province.',
+      'News: {name} finds a warning in your code and adopts it.',
+      "Your Makefile now has more rules than a homeowners' association.",
+      'News: {name2} swears they saw your code compile first time. Nobody believes them.',
+      "News: the caretaker asks you to stop typing after three in the morning. 'It is the noise.'",
     ],
     late: [
       'News: 42 opens a campus in every city. Then in every neighbourhood.',
@@ -860,6 +963,14 @@ const en: Texts = {
       'News: the moon now has its own cluster. No windows, as it should be.',
       'News: the black hole stops being a metaphor.',
       'News: speaking without indenting is banned.',
+      'News: the UN passes the Norm unanimously. The minutes are exactly 25 lines long.',
+      'News: oceans are now measured in lines of code. There are more of yours.',
+      'News: {name} evaluates the GDP of three countries and gives them a 0 for memory leaks.',
+      "News: dictionaries admit 'segfault' as an interjection.",
+      'News: babies are born knowing how to git push. They learn --force on their own.',
+      'News: the Sun opens a pull request to keep rising in the east.',
+      'News: the Antarctic campus opens. The penguins are already on circle three.',
+      'News: all of humanity is on duty. Nobody knows who for.',
     ],
     one: [
       'The pisciners have stopped using the chat. They do not need it.',
@@ -868,6 +979,10 @@ const en: Texts = {
       'They look at you when you walk by. All of them. At once.',
       'News: nobody remembers writing the latest version of the Norm.',
       "'Write,' say the pisciners. Their mouths do not move.",
+      "News: pisciners finish each other's sentences. And projects.",
+      'News: {name} nods. At the other end of campus, four hundred pisciners nod too.',
+      'They no longer queue at the coffee machine. They drink in turns. Nobody arranged the turns.',
+      'News: the piscine is full and nobody comes up for air.',
     ],
     two: [
       'News: pisciners no longer sleep. Nor blink.',
@@ -876,6 +991,10 @@ const en: Texts = {
       'The compiler has started returning things you did not ask for.',
       'News: every clock on campus reads 42:42.',
       "'More,' says something from inside the clusters.",
+      'News: {name} finds their login written in a file nobody has opened.',
+      "News: the campus hums at 42 hertz. The neighbours call it 'the buzz'.",
+      'News: evaluations take zero seconds. They all pass. Nobody remembers them.',
+      'The pisciners no longer type. The code gets written anyway.',
     ],
     three: [
       'News: gravity becomes a configuration parameter. Someone has changed it.',
@@ -886,6 +1005,52 @@ const en: Texts = {
       'There is no more news. Only logs.',
       'undefined behavior: reality does not guarantee the result.',
       'Everything is code. So are you. Keep writing.',
+      'News: Monday returns NULL. Please check Tuesday before using it.',
+      'News: {name} frees the universe twice. Double free.',
+      'News: the points of the compass are now argv[1], argv[2], argv[3] and argv[4].',
+      'News: the Moulinette asks whether you have passed the Moulinette.',
+    ],
+    cycles: [
+      [
+        "News: reality has been recompiled. Experts report 'a hint of new code'.",
+        'News: after the recompile, {name} keeps every memory except the password.',
+        'You have started again. The previous universe stays on a branch nobody will merge.',
+        'News: historians find remains of an earlier civilisation: a Makefile and a mug.',
+        "News: the Big Bang, renamed 'first commit'. The message was 'init'.",
+        'News: {name} insists they have lived this before. They are told so in writing, in duplicate.',
+        'News: gravity returns with a new version number. Birds take a morning to adjust.',
+        'Second lap. This time it will surely come out clean.',
+      ],
+      [
+        'News: the first Intergalactic Indentation Summit is called. There are riots over tabs.',
+        'News: {name}, proclaimed Supreme Arch-evaluator of All Known Realities and Two Yet to Be Known.',
+        'News: a distant civilisation worships your .gitignore as scripture. They are right about most things.',
+        'News: black holes admit they are just memory leaks with good publicity.',
+        'News: after nine aeons of debate, the Multiverse Parliament passes a 26-line function. The government falls.',
+        "You have recompiled so many times that time now calls you 'sir'.",
+        'News: {name2} founds an order of monks who copy your code by hand. They are on line four.',
+        'News: the constellations rearrange to spell your login. The Great Bear has filed a complaint.',
+      ],
+      [
+        'News: the Grand Council of Realities names you Compiler Emeritus of Everything. The post is unpaid.',
+        "News: the old gods open a ticket: 'lightning has not worked since your last change'.",
+        "News: {name} evaluates Creation. 'It works, but it fails the Norm.' The retake is on Sunday.",
+        'News: fate turns out to be a switch with no default.',
+        'News: infinity asks you to stop writing. It says it is running out of room.',
+        'News: three neighbouring universes move away because of your keyboard.',
+        'News: eternity now has a deadline. It is Friday.',
+        'News: Death joins the piscine. It fails the first Friday exam and promises to be back.',
+      ],
+      [
+        'News: there is nothing left that you did not write. Including this headline.',
+        'News: Everything and Nothing sign a peace treaty in a header file.',
+        'News: {name} evaluates you. After consulting every possible universe, you get 125.',
+        'News: existence is officially a group project. Only you are working.',
+        'News: the C language asks to retire. You kindly refuse.',
+        'News: physicists confirm the last elementary particle is a semicolon.',
+        'You have recompiled reality so often that reality now recompiles you.',
+        "News: the End of Time is postponed. Reason: 'keep writing'.",
+      ],
     ],
   },
 }
@@ -1045,12 +1210,26 @@ const capital = (text: string): string => text.charAt(0).toUpperCase() + text.sl
  * Las noticias que tocan según cómo va la partida: mandan las de la
  * singularidad; si no ha empezado, las del tamaño de lo escrito.
  */
-export function newsFor(lang: Lang, stage: number, total: number): string[] {
+/** Prestigio a partir del cual entra cada tanda de noticias de `cycles`. */
+const CYCLE_AT = [1, 5, 25, 100]
+
+/**
+ * Las noticias que tocan. Con la singularidad en marcha mandan las suyas. Si
+ * no, las de la época de esta partida y, si ya se ha recompilado la realidad,
+ * las de ese ciclo, que salen el doble: son las que cuentan lo que ha cambiado.
+ *
+ * @param total Líneas escritas en esta partida, no desde siempre.
+ */
+export function newsFor(lang: Lang, stage: number, total: number, prestige = 0): string[] {
   const { news } = textsOf(lang)
 
   if (stage >= 3) return news.three
   if (stage === 2) return news.two
   if (stage === 1) return news.one
 
-  return total < 1e6 ? news.early : total < 1e12 ? news.mid : news.late
+  const era = total < 1e6 ? news.early : total < 1e12 ? news.mid : news.late
+  const tier = CYCLE_AT.findLastIndex((from) => prestige >= from)
+  const cycle = news.cycles[tier] ?? []
+
+  return [...cycle, ...cycle, ...era]
 }

@@ -78,7 +78,7 @@ const SERVER_SAVE_MS = 60_000
 const RETRY_MS = 30_000
 /** Tras un guardado rechazado, lo que se espera antes de volver a recargar por otro. */
 const REFUSED_WAIT_MS = 10_000
-const NEWS_MS = 13_500
+const NEWS_MS = 20_250
 /** Lo que se queda en pantalla un aviso (un logro, el efecto de una pull request). */
 const TOAST_MS = 7500
 /** Fichas que se pintan en la fila de un edificio, por muchas que se tengan. */
@@ -157,6 +157,8 @@ export function CodeClicker({
   const [pops, setPops] = useState<Pop[]>([])
   const [toasts, setToasts] = useState<Toast[]>([])
   const [news, setNews] = useState('')
+  // Las noticias que quedan por salir de la tanda en curso.
+  const newsDeck = useRef<{ key: string; left: string[] }>({ key: '', left: [] })
   const [board, setBoard] = useState<ClickerBoard | null>(null)
   const [bursts, setBursts] = useState<Burst[]>([])
   // La ficha que se enseña: lo que hay bajo el ratón (o lo último que se tocó).
@@ -394,14 +396,24 @@ export function CodeClicker({
 
       if (current === null) return
 
-      const pool = newsFor(lang, reachedStage(current), current.before + current.total)
+      const pool = newsFor(lang, reachedStage(current), current.total, current.prestige)
       const people = names.current.length > 0 ? names.current : ['norminet', 'moulinette']
       const pick = <T,>(list: readonly T[]): T | undefined =>
         list[Math.floor(Math.random() * list.length)]
       const name = pick(people) ?? ''
+      // Las noticias salen barajadas y no se repite ninguna hasta haberlas
+      // dado todas. Si cambian las que tocan (otra época, otro ciclo), se baraja
+      // de nuevo.
+      const deck = newsDeck.current
+      const key = `${lang}|${pool.length}|${pool[0] ?? ''}`
+
+      if (deck.key !== key || deck.left.length === 0) {
+        deck.key = key
+        deck.left = [...new Set(pool)].sort(() => Math.random() - 0.5)
+      }
 
       setNews(
-        fill(pick(pool) ?? '', {
+        fill(deck.left.pop() ?? '', {
           name,
           name2: pick(people.filter((other) => other !== name)) ?? name,
           n: short(current.before + current.total, lang, 1),
@@ -712,8 +724,14 @@ export function CodeClicker({
         </p>
       )}
 
+      {/* El rótulo de noticias, como el de un informativo: una etiqueta, el
+          titular y una raya que dice cuánto queda para el siguiente. */}
       <p className="cc-news" role="status">
-        <span key={news}>{news}</span>
+        <b className="cc-news-tag">{ui('newsTag')}</b>
+        <span key={news}>
+          {news.startsWith(ui('newsPrefix')) ? news.slice(ui('newsPrefix').length) : news}
+        </span>
+        <i key={`bar-${news}`} className="cc-news-bar" aria-hidden="true" />
       </p>
 
       <div className="cc-grid">
@@ -735,6 +753,7 @@ export function CodeClicker({
           </div>
           <Coffee
             achievements={current.achieved.length}
+            ducks={current.bought.filter((id) => id.startsWith('duck:')).length}
             title={`${ui(`drink${drinkOf(current.achieved.length)}`)} · ${ui('caffeine', { pct: Math.round(caffeine(current) * 100) })}. ${ui('caffeineAbout')}`}
           />
 

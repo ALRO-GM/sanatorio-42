@@ -165,3 +165,16 @@ basta) y guardando, y abajo a la izquierda sale una ventanita con las líneas qu
 se llevan. Pulsarla lleva al juego; la cruz la quita, y se vuelve a poner con el
 botón «Ventanita» del juego. Las pull requests doradas siguen saliendo solo
 dentro del juego: fuera no se ven, así que se pierden.
+
+## Noticias y café
+
+El rótulo de noticias va en grande, como el de un informativo, con una raya que
+dice cuánto falta para la siguiente (unos veinte segundos). Salen barajadas y no
+se repite ninguna hasta haberlas dado todas. Hay una tanda por época de la
+partida, otra por cada fase de la singularidad y cuatro más que entran al
+recompilar la realidad, según el prestigio que se lleve (1, 5, 25 y 100): cada
+una más desmedida que la anterior.
+
+El café del fondo es líquido de verdad: tres olas que se cruzan, burbujas y, de
+vez en cuando, un chorro que cae y salpica. Cada patito de goma comprado flota
+en él (hasta cuatro a la vez).

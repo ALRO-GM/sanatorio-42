@@ -400,11 +400,38 @@ describe('code clicker: textos', () => {
   it('las noticias cambian con la partida: del presente a un mundo escrito en código', () => {
     const { news } = textsOf('es')
 
-    expect(newsFor('es', 0, 10)).toBe(news.early)
-    expect(newsFor('es', 0, 1e9)).toBe(news.mid)
-    expect(newsFor('es', 0, 1e15)).toBe(news.late)
+    expect(newsFor('es', 0, 10)).toEqual(news.early)
+    expect(newsFor('es', 0, 1e9)).toEqual(news.mid)
+    expect(newsFor('es', 0, 1e15)).toEqual(news.late)
     expect(newsFor('es', 1, 10)).toBe(news.one)
     expect(newsFor('es', 3, 10)).toBe(news.three)
+
+    // Hay bastantes de cada época para que tarden en repetirse.
+    for (const era of ['early', 'mid', 'late'] as const) {
+      expect(news[era].length).toBeGreaterThanOrEqual(16)
+      expect(new Set(news[era]).size).toBe(news[era].length)
+    }
+
+    // Al recompilar la realidad entran las de ese ciclo, que salen el doble
+    // que las de la época; con más prestigio, otra tanda distinta.
+    const [first = [], second = [], third = [], fourth = []] = news.cycles
+    const count = (pool: string[], item: string | undefined): number =>
+      pool.filter((other) => other === item).length
+
+    expect(news.cycles).toHaveLength(4)
+    expect(count(newsFor('es', 0, 10, 0), first[0])).toBe(0)
+    expect(count(newsFor('es', 0, 10, 1), first[0])).toBe(2)
+    expect(count(newsFor('es', 0, 10, 1), news.early[0])).toBe(1)
+    expect(count(newsFor('es', 0, 10, 4), first[0])).toBe(2)
+    expect(count(newsFor('es', 0, 10, 5), second[0])).toBe(2)
+    expect(count(newsFor('es', 0, 10, 5), first[0])).toBe(0)
+    expect(count(newsFor('es', 0, 10, 30), third[0])).toBe(2)
+    expect(count(newsFor('es', 0, 10, 5000), fourth[0])).toBe(2)
+    // La singularidad manda aunque se haya recompilado.
+    expect(newsFor('es', 2, 10, 30)).toBe(news.two)
+    textsOf('en').news.cycles.forEach((tier, index) => {
+      expect(tier).toHaveLength(news.cycles[index]?.length ?? -1)
+    })
 
     // Los dos idiomas tienen las mismas noticias, una a una.
     for (const era of ['early', 'mid', 'late', 'one', 'two', 'three'] as const) {

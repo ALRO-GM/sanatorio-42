@@ -1230,11 +1230,6 @@ small.cc-bugs {
     transform: rotate(var(--a)) translateY(-31cqw) rotate(10deg);
   }
 }
-@keyframes cc-wave {
-  to {
-    transform: translateX(-50%);
-  }
-}
 @keyframes cc-blink {
   0%,
   86% {
@@ -1555,4 +1550,250 @@ dialog.cc-bust:not([open]) {
 }
 .cc-mini-close:hover {
   color: var(--text) !important;
+}
+
+/* ── Las noticias, en grande ─────────────────────────────────────────────────
+   El rótulo de un informativo: etiqueta, titular a buen tamaño y una raya que
+   se va llenando hasta la siguiente. */
+.cc-news {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  min-height: 3.6em;
+  margin: 0.9rem 0;
+  padding: 0.75rem 1rem 0.9rem;
+  border: 1px solid color-mix(in srgb, var(--cc-main) 45%, var(--cc-line));
+  border-left: 4px solid var(--cc-main);
+  border-radius: 10px;
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--cc-main) 14%, transparent), transparent 60%),
+    var(--cc-panel);
+  color: var(--cc-ink);
+  font-size: 1.05rem;
+  line-height: 1.35;
+  overflow: hidden;
+}
+.cc-news-tag {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+  background: var(--cc-main);
+  color: var(--cc-bg);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.cc-news-tag::before {
+  content: '';
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: currentColor;
+  animation: cc-live 1.6s ease-in-out infinite;
+}
+.cc-news span {
+  animation: cc-headline 0.6s cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+.cc-news-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: var(--cc-main);
+  opacity: 0.55;
+  transform-origin: left;
+  /* Lo mismo que tarda en cambiar la noticia (`NEWS_MS`). */
+  animation: cc-news-bar 20.25s linear forwards;
+}
+@keyframes cc-live {
+  50% {
+    opacity: 0.25;
+  }
+}
+@keyframes cc-headline {
+  from {
+    opacity: 0;
+    transform: translateY(0.6em);
+  }
+}
+@keyframes cc-news-bar {
+  from {
+    transform: scaleX(0);
+  }
+}
+@media (max-width: 600px) {
+  .cc-news {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+    font-size: 0.95rem;
+  }
+}
+
+/* ── El café, líquido ────────────────────────────────────────────────────────
+   Tres olas que se cruzan y suben y bajan, burbujas, patitos de goma flotando
+   y, de vez en cuando, un chorro que cae y salpica. */
+.cc-wave {
+  top: -26px;
+  height: 30px;
+  animation:
+    cc-wave 6s linear infinite,
+    cc-swell 3.4s ease-in-out infinite;
+  transform-origin: bottom;
+}
+.cc-wave.mid {
+  top: -30px;
+  animation-duration: 9s, 4.3s;
+  animation-direction: reverse, normal;
+}
+.cc-wave.back {
+  top: -35px;
+  animation-duration: 13s, 5.2s;
+}
+/* El oleaje va en `translate` y el vaivén en `scale`: propiedades distintas,
+   para que una animación no pise a la otra. */
+@keyframes cc-wave {
+  to {
+    translate: -50% 0;
+  }
+}
+@keyframes cc-swell {
+  50% {
+    scale: 1 0.62;
+  }
+}
+.cc-bubble {
+  position: absolute;
+  bottom: -8px;
+  width: 6px;
+  height: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 50%;
+  animation: cc-bubble 8.5s ease-in infinite;
+}
+.cc-bubble:nth-child(even) {
+  width: 4px;
+  height: 4px;
+  animation-duration: 6.5s;
+}
+@keyframes cc-bubble {
+  0% {
+    opacity: 0;
+    translate: 0 0;
+  }
+  15% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 0;
+    translate: 6px -220px;
+  }
+}
+.cc-duck {
+  position: absolute;
+  /* Asoma casi entero: la ola de delante solo le moja la panza. */
+  top: -44px;
+  left: var(--from);
+  line-height: 0;
+  animation:
+    cc-duck-drift 34s ease-in-out infinite alternate,
+    cc-duck-bob 2.4s ease-in-out infinite;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.35));
+}
+@keyframes cc-duck-drift {
+  to {
+    left: var(--to);
+  }
+}
+@keyframes cc-duck-bob {
+  0%,
+  100% {
+    translate: 0 0;
+    rotate: -5deg;
+  }
+  50% {
+    translate: 0 5px;
+    rotate: 6deg;
+  }
+}
+/* El chorro: casi siempre no está; cada medio minuto largo cae un par de
+   segundos. Sale de arriba del todo (el marco lo recorta) y llega al café. */
+.cc-pour {
+  position: absolute;
+  bottom: calc(100% - 4px);
+  left: 21%;
+  width: 7px;
+  height: 900px;
+  border-radius: 4px;
+  transform-origin: top;
+  animation: cc-pour 38s linear infinite;
+}
+.cc-splash {
+  position: absolute;
+  top: -8px;
+  left: calc(21% - 13px);
+  width: 32px;
+  height: 12px;
+  border: 2px solid;
+  border-radius: 50%;
+  opacity: 0;
+  animation: cc-splash 38s linear infinite;
+}
+@keyframes cc-pour {
+  0%,
+  88% {
+    scale: 1 0;
+    transform-origin: top;
+  }
+  90% {
+    scale: 1 1;
+    transform-origin: top;
+  }
+  96% {
+    scale: 1 1;
+    transform-origin: bottom;
+  }
+  99%,
+  100% {
+    scale: 1 0;
+    transform-origin: bottom;
+  }
+}
+@keyframes cc-splash {
+  0%,
+  89.5% {
+    opacity: 0;
+    scale: 0.3;
+  }
+  91% {
+    opacity: 0.9;
+    scale: 0.8;
+  }
+  94% {
+    opacity: 0.5;
+    scale: 1.5;
+  }
+  97% {
+    opacity: 0.6;
+    scale: 1;
+  }
+  99%,
+  100% {
+    opacity: 0;
+    scale: 1.8;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cc-pour,
+  .cc-splash,
+  .cc-bubble,
+  .cc-news-bar {
+    display: none;
+  }
 }
