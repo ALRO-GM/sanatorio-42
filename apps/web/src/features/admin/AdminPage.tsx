@@ -16,6 +16,7 @@ import { DataPanel } from './DataPanel'
 import { StatsPanel } from './StatsPanel'
 import { UsageTab } from './UsageTab'
 import { Icon } from '../../shared/ui/Icon'
+import { recordHref } from '../../shared/links'
 
 const TABS = [
   'consumption',
@@ -178,7 +179,7 @@ function ConsumptionTab() {
             {data.top.map((row) => (
               <tr key={row.login}>
                 <th scope="row">
-                  <a className="record-link" href={`#/expediente/${row.login}`}>
+                  <a className="record-link" href={recordHref(row.login)}>
                     {row.login}
                   </a>
                 </th>

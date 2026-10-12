@@ -9,6 +9,7 @@ import { usePrefs } from '../../shared/layout/store'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { Icon } from '../../shared/ui/Icon'
 import { EventDialog } from '../calendar/EventDialog'
+import { decodePart } from '../../shared/links'
 
 type AlertCenterProps = {
   me: string
@@ -38,7 +39,7 @@ function checkinInUrl(): { id: string; code: string } | null {
   const [section, id, code] = window.location.hash.replace(/^#\/?/, '').split('/')
 
   return section === 'asistencia' && id !== undefined && code !== undefined
-    ? { id: decodeURIComponent(id), code }
+    ? { id: decodePart(id) ?? '', code }
     : null
 }
 

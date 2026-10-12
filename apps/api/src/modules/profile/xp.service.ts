@@ -35,7 +35,7 @@ import {
   titleUnlocked,
 } from './xp.rules.js'
 import type { AchievementId, XpKind } from './xp.rules.js'
-import { id, parse } from '../../core/validation.js'
+import { day, id, parse } from '../../core/validation.js'
 import type { Actor } from '../../core/actor.js'
 
 export type XpServiceOptions = {
@@ -62,10 +62,7 @@ const SEARCH_LIMIT = 8
 
 const paceRefSchema = z.object({
   pace: z.number().refine((pace) => PACES.includes(pace), 'Ese pace no existe'),
-  deadline: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, 'La fecha va como AAAA-MM-DD')
-    .refine((day) => !Number.isNaN(Date.parse(`${day}T00:00:00Z`)), 'Esa fecha no existe'),
+  deadline: day,
 })
 
 const settingsSchema = z.object({

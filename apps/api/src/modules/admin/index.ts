@@ -10,6 +10,7 @@
 import type { FastifyRequest } from 'fastify'
 
 import { tableStore } from '../../core/db/data-store.js'
+import { idParam } from '../../core/http/params.js'
 import type { AppModule } from '../../core/module.js'
 import type { SessionReader } from '../../core/session.js'
 import { ANONYMOUS, createAdminService } from './admin.service.js'
@@ -66,8 +67,21 @@ export function createAdminModule(deps: AdminServiceOptions): AdminModule {
         }
 
         const who = loginOf(session, request)
+        const path = request.url.split('?')[0] ?? ''
+        // Todo lo que cuelga de `/admin` es de quien administra. Cada servicio
+        // lo comprueba también por su cuenta; esto es la segunda cerradura, para
+        // que una ruta nueva a la que se le olvide no quede abierta.
+        const adminOnly = path === '/admin' || path.startsWith('/admin/')
 
-        if (who === null) return
+        if (who === null) {
+          if (adminOnly) {
+            await reply
+              .code(401)
+              .send({ error: 'unauthenticated', message: 'No hay sesión iniciada' })
+          }
+
+          return
+        }
 
         const { admin, block } = await service.accessOf(who)
 
@@ -82,6 +96,15 @@ export function createAdminModule(deps: AdminServiceOptions): AdminModule {
           return
         }
 
+        if (adminOnly && !admin) {
+          await reply.code(403).send({
+            error: 'forbidden',
+            message: 'Solo para quien administra la web',
+          })
+
+          return
+        }
+
         if (!(await service.allow(who, admin))) {
           await reply.code(429).header('Retry-After', '600').send({
             error: 'rate_limited',
@@ -89,6 +112,16 @@ export function createAdminModule(deps: AdminServiceOptions): AdminModule {
               'Has usado la web más de lo que toca esta hora. Vuelve en unos minutos: el tope se reparte entre todos.',
           })
         }
+      })
+      // Lo que devuelve la API es de quien lo pide: ni el navegador ni nada
+      // intermedio lo guarda, salvo que la ruta diga otra cosa (lo que es igual
+      // para todo el mundo lleva su propio `Cache-Control`).
+      app.addHook('onSend', (_request, reply, payload, done) => {
+        if (reply.getHeader('cache-control') === undefined) {
+          reply.header('Cache-Control', 'private, no-store')
+        }
+
+        done(null, payload)
       })
       app.addHook('onResponse', (request, reply, done) => {
         // Se cuenta todo lo que sale, también lo rechazado y lo que no tiene
@@ -190,7 +223,7 @@ export function createAdminModule(deps: AdminServiceOptions): AdminModule {
         return reply.send(
           await service.answerTicket(
             await session.actor(request),
-            Number(request.params.id),
+            idParam(request.params.id, 'El mensaje'),
             request.body,
           ),
         )

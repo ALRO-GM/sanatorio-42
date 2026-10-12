@@ -57,8 +57,9 @@ export function createMeetModule(deps: MeetServiceOptions): MeetModule {
       })
 
       /** `POST /events/alerts/ack` → `{ id }`: cierra el aviso de un evento que se te pasó. 204. */
-      app.post<{ Body: { id?: string } }>('/events/alerts/ack', async (request, reply) => {
-        await service.ackAlert(await session.actor(request), request.body.id)
+      app.post<{ Body?: { id?: unknown } }>('/events/alerts/ack', async (request, reply) => {
+        // Sin cuerpo no hay `id`: que lo rechace la validación, no un error interno.
+        await service.ackAlert(await session.actor(request), request.body?.id)
 
         return reply.code(204).send()
       })

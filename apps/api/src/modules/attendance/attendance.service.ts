@@ -37,7 +37,7 @@ import type { Db } from '../../core/db/database.js'
 import { toNumber, toText } from '../../core/db/rows.js'
 import { domainError } from '../../core/errors.js'
 import { localMoment } from '../../core/time.js'
-import { parse } from '../../core/validation.js'
+import { day, parse } from '../../core/validation.js'
 import {
   MAX_FAILED_ATTEMPTS,
   MIN_STAY_MS,
@@ -84,8 +84,6 @@ const CODE_LENGTH = 4
 /** Días que abarca el informe si no se dice otra cosa, y lo máximo que se puede pedir. */
 const REPORT_DEFAULT_DAYS = 30
 const REPORT_MAX_DAYS = 366
-
-const day = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'el día va como AAAA-MM-DD')
 
 const reportSchema = z.object({ from: day.optional(), to: day.optional() })
 

@@ -9,6 +9,7 @@ import { Avatar } from '../../shared/ui/Avatar'
 import { Meter } from './Meter'
 import { PairDetail } from './PairDetail'
 import { VerdictStats } from './VerdictStats'
+import { intraHref, recordHref } from '../../shared/links'
 
 type PersonPanelProps = {
   node: NetworkNode
@@ -55,12 +56,7 @@ export function PersonPanel({
       <div className="net-panel-head">
         <Avatar login={node.login} image={node.image} size={48} />
         <div>
-          <a
-            className="profile-link"
-            href={`https://profile.intra.42.fr/users/${node.login}`}
-            target="_blank"
-            rel="noreferrer"
-          >
+          <a className="profile-link" href={intraHref(node.login)} target="_blank" rel="noreferrer">
             {node.login}
           </a>
           <small>
@@ -108,7 +104,7 @@ export function PersonPanel({
         {focused ? t('net.backToAll') : t('net.onlyThis')}
       </button>
 
-      <a className="link" href={`#/expediente/${node.login}`}>
+      <a className="link" href={recordHref(node.login)}>
         {t('record.open', { login: node.login })}
       </a>
 

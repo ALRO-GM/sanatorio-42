@@ -4,6 +4,7 @@ import { useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { Meter } from '../network/Meter'
 import { VerdictStats } from '../network/VerdictStats'
+import { networkHref } from '../../shared/links'
 
 /** Con cuántas personas se resume tu red. */
 const SHOWN = 5
@@ -33,7 +34,7 @@ export function NetworkCard({ me }: { me: string }) {
     <article className="card net-card">
       <div className="card-head">
         <span className="eyebrow">{t('net.card.title')}</span>
-        <a className="link" href={`#/red/${me}`}>
+        <a className="link" href={networkHref(me)}>
           {t('net.card.open')}
         </a>
       </div>

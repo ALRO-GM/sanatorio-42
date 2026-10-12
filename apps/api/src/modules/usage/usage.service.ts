@@ -17,12 +17,12 @@ import type {
 } from '@sanatorio/contracts'
 import { z } from 'zod'
 
+import { assertAdmin } from '../../core/actor.js'
 import type { Actor } from '../../core/actor.js'
 import type { Db } from '../../core/db/database.js'
 import { toNumber, toText } from '../../core/db/rows.js'
-import { domainError } from '../../core/errors.js'
 import { createTtlCache } from '../../core/ttl-cache.js'
-import { parse } from '../../core/validation.js'
+import { day, parse } from '../../core/validation.js'
 import type { ReplicaRepository } from '../replica/index.js'
 import { sectionsOf, START } from './flows.rules.js'
 
@@ -62,8 +62,6 @@ const sendSchema = z.object({
     .optional(),
 })
 
-const DAY = /^\d{4}-\d{2}-\d{2}$/
-
 /**
  * El tramo de gente que se mira, por lo activa que es: del `low` % al `high` %
  * de menos a más activa. Del 0 al 100 es todo el mundo.
@@ -73,8 +71,8 @@ const segmentFields = { low: share.default(0), high: share.default(100) }
 
 const statsSchema = z.object({
   ...segmentFields,
-  from: z.string().regex(DAY).optional(),
-  to: z.string().regex(DAY).optional(),
+  from: day.optional(),
+  to: day.optional(),
   login: z
     .string()
     .regex(/^[a-z0-9-]{1,30}$/)
@@ -275,9 +273,7 @@ export function createUsageService(options: {
      * @throws {DomainError} `forbidden` si quien pregunta no es admin.
      */
     async stats(actor: Actor, input: unknown): Promise<UsageStats> {
-      if (!actor.admin) {
-        throw domainError('forbidden', 'Solo para quien administra la web')
-      }
+      assertAdmin(actor)
 
       const asked = period(input)
       const { from, to, login } = asked
@@ -409,9 +405,7 @@ export function createUsageService(options: {
      * @throws {DomainError} `forbidden` si quien pregunta no es admin.
      */
     async flows(actor: Actor, input: unknown): Promise<UsageFlows> {
-      if (!actor.admin) {
-        throw domainError('forbidden', 'Solo para quien administra la web')
-      }
+      assertAdmin(actor)
 
       const asked = period(input)
       const { from, to, login } = asked
@@ -481,9 +475,7 @@ export function createUsageService(options: {
      * @throws {DomainError} `forbidden` si quien pregunta no es admin.
      */
     async online(actor: Actor): Promise<OnlineUsers> {
-      if (!actor.admin) {
-        throw domainError('forbidden', 'Solo para quien administra la web')
-      }
+      assertAdmin(actor)
 
       const people = (await options.online?.()) ?? []
       const images = await replica.imagesOf(people.map((person) => person.login))
@@ -519,9 +511,7 @@ export function createUsageService(options: {
      * @throws {DomainError} `forbidden` si quien pregunta no es admin.
      */
     async heatmap(actor: Actor, input: unknown): Promise<UsageHeatmap> {
-      if (!actor.admin) {
-        throw domainError('forbidden', 'Solo para quien administra la web')
-      }
+      assertAdmin(actor)
 
       const { by, low, high } = parse(heatmapSchema, input)
       const [result, cohorts] = await Promise.all([

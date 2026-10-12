@@ -6,6 +6,7 @@ import { api } from '../../shared/api'
 import { useI18n } from '../../shared/i18n'
 import { Avatar } from '../../shared/ui/Avatar'
 import { Icon } from '../../shared/ui/Icon'
+import { recordHref } from '../../shared/links'
 
 /** Lo que se espera tras la última tecla antes de preguntar a la API. */
 const WAIT_MS = 180
@@ -77,7 +78,7 @@ export function PersonFinder() {
     input.current?.blur()
   }
   const go = (login: string): void => {
-    window.location.hash = `#/expediente/${login}`
+    window.location.hash = recordHref(login)
     close()
   }
 

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 
 import { HOME, isSection } from './sections'
 import type { Section } from './sections'
+import { decodePart } from '../shared/links'
 
 /** Sección que dice la URL (`#/tablon`), o la portada si no dice ninguna válida. */
 function current(): Section {
@@ -14,7 +15,7 @@ function current(): Section {
 function currentParam(): string | null {
   const param = window.location.hash.replace(/^#\/?/, '').split('/')[1] ?? ''
 
-  return param === '' ? null : decodeURIComponent(param)
+  return param === '' ? null : decodePart(param)
 }
 
 /**

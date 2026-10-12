@@ -28,6 +28,7 @@ import type {
 } from '@sanatorio/contracts'
 import { z } from 'zod'
 
+import { assertAdmin } from '../../core/actor.js'
 import type { Actor } from '../../core/actor.js'
 import type { Notify } from '../../core/events.js'
 import type { Db } from '../../core/db/database.js'
@@ -432,9 +433,7 @@ export function createMeetService(options: MeetServiceOptions) {
      * denuncia. Solo para quien administra la web.
      */
     async log(actor: Actor, limit = 200): Promise<LoggedMessage[]> {
-      if (!actor.admin) {
-        throw domainError('forbidden', 'Solo para quien administra la web')
-      }
+      assertAdmin(actor)
 
       const result = await db.execute({
         sql: `SELECT id, event_id, login, kind, body, created_at FROM event_messages
@@ -612,9 +611,7 @@ export function createMeetService(options: MeetServiceOptions) {
 
     /** Cada intento de validar un código de un evento. Solo para quien administra la web. */
     async checkins(actor: Actor, id: unknown): Promise<CheckinLogEntry[]> {
-      if (!actor.admin) {
-        throw domainError('forbidden', 'Solo para quien administra la web')
-      }
+      assertAdmin(actor)
 
       return attendance.log(parse(eventId, id))
     },

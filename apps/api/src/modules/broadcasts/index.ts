@@ -3,6 +3,7 @@
  * a quien le toquen, con opciones entre las que elegir si hace falta.
  */
 
+import { idParam } from '../../core/http/params.js'
 import { tableStore } from '../../core/db/data-store.js'
 import type { AppModule } from '../../core/module.js'
 import { createBroadcastsService } from './broadcasts.service.js'
@@ -39,7 +40,7 @@ export function createBroadcastsModule(deps: BroadcastsServiceOptions): Broadcas
         return reply.send(
           await service.answer(
             await session.actor(request),
-            Number(request.params.id),
+            idParam(request.params.id, 'El comunicado'),
             request.body,
           ),
         )
@@ -59,7 +60,10 @@ export function createBroadcastsModule(deps: BroadcastsServiceOptions): Broadcas
 
       /** `DELETE /admin/broadcasts/:id` → lo retira. Solo admins. 204. */
       app.delete<{ Params: { id: string } }>('/admin/broadcasts/:id', async (request, reply) => {
-        await service.remove(await session.actor(request), Number(request.params.id))
+        await service.remove(
+          await session.actor(request),
+          idParam(request.params.id, 'El comunicado'),
+        )
 
         return reply.code(204).send()
       })

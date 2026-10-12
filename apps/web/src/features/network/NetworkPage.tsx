@@ -32,6 +32,7 @@ import { StrictestCard } from './StrictestCard'
 import { Timeline } from './Timeline'
 import { InfoTip } from '../../shared/ui/InfoTip'
 import { NetworkTour } from './NetworkTour'
+import { decodePart, networkHref } from '../../shared/links'
 
 /** Topes de personas que se pueden pedir. */
 const LIMITS = [150, 300, 600, 1000, 2000, 20_000] as const
@@ -66,7 +67,9 @@ type Filters = {
 
 /** Login de un enlace directo `#/red/<login>`, o `null`. */
 function loginInUrl(): string | null {
-  const login = window.location.hash.replace(/^#\/?/, '').split('/')[1]?.toLowerCase() ?? ''
+  const login = (
+    decodePart(window.location.hash.replace(/^#\/?/, '').split('/')[1] ?? '') ?? ''
+  ).toLowerCase()
 
   return /^[a-z0-9-]{1,30}$/.test(login) ? login : null
 }
@@ -122,7 +125,7 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
 
   // La persona elegida va en la URL (`#/red/<login>`): el enlace se puede compartir.
   useEffect(() => {
-    const wanted = filters.login === null ? '#/red' : `#/red/${filters.login}`
+    const wanted = networkHref(filters.login)
 
     if (window.location.hash !== wanted) {
       // `replaceState` no dispara `hashchange`: la sección no se vuelve a montar.

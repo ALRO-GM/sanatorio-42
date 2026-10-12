@@ -6,6 +6,7 @@ import { useI18n } from '../../shared/i18n'
 import { Avatar } from '../../shared/ui/Avatar'
 import { Icon } from '../../shared/ui/Icon'
 import { seatName } from './seats'
+import { recordHref } from '../../shared/links'
 
 /** Un puesto y el botón que lo pinta: la ficha se coloca junto a él. */
 export type Hovered = {
@@ -116,7 +117,7 @@ export function SeatHoverCard({ hovered, pinned }: SeatHoverCardProps) {
               <Icon name="chat" /> {t('clusters.write')}
             </button>
           )}
-          <a className="pill" href={`#/expediente/${occupant.login}`}>
+          <a className="pill" href={recordHref(occupant.login)}>
             <Icon name="expediente" /> {t('map.profile')}
           </a>
         </span>

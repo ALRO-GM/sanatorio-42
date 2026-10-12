@@ -29,6 +29,14 @@ services:
     # No publica puertos: solo Caddy habla con ella, por la red interna.
     # La app es pequeña; el tope evita que un fallo se coma la máquina.
     mem_limit: 512m
+    # La app no necesita ningún privilegio del sistema: escucha en un puerto
+    # alto y escribe en su volumen. Sin capacidades y sin poder ganarlas, un
+    # fallo en la app se queda dentro de la app.
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 256
     logging:
       driver: json-file
       options:

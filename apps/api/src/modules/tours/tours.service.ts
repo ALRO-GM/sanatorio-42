@@ -14,10 +14,10 @@
 import type { TourSpeeds, TourSpeedStats } from '@sanatorio/contracts'
 import { z } from 'zod'
 
+import { assertAdmin } from '../../core/actor.js'
 import type { Actor } from '../../core/actor.js'
 import type { Db } from '../../core/db/database.js'
 import { toNumber, toText } from '../../core/db/rows.js'
-import { domainError } from '../../core/errors.js'
 import { parse } from '../../core/validation.js'
 
 /** Lo más lento y lo más rápido que puede poner alguien el deslizador. */
@@ -116,9 +116,7 @@ export function createToursService(options: { db: Db; now?: () => number }) {
      * @throws {DomainError} `forbidden` si quien pregunta no es admin.
      */
     async stats(actor: Actor): Promise<TourSpeedStats> {
-      if (!actor.admin) {
-        throw domainError('forbidden', 'Solo para quien administra la web')
-      }
+      assertAdmin(actor)
 
       const [speeds, votes] = await Promise.all([
         db.execute('SELECT name, speed, updated_at FROM tour_speeds'),

@@ -20,6 +20,7 @@ import type {
 } from '@sanatorio/contracts'
 import { z } from 'zod'
 
+import { assertAdmin } from '../../core/actor.js'
 import type { Actor } from '../../core/actor.js'
 import type { Db } from '../../core/db/database.js'
 import { toNumber, toText } from '../../core/db/rows.js'
@@ -408,7 +409,7 @@ export function createClickerService(options: ClickerServiceOptions) {
      * @throws {DomainError} `forbidden` si quien pregunta no es admin.
      */
     async capitalFor(actor: Actor, input: unknown): Promise<ClickerCapital> {
-      if (!actor.admin) throw domainError('forbidden', 'Solo para quien administra la web')
+      assertAdmin(actor)
 
       return this.capitalOf(parse(loginSchema.loose(), input).login, input)
     },
@@ -425,7 +426,7 @@ export function createClickerService(options: ClickerServiceOptions) {
      *   `not_found` si esa copia no existe.
      */
     async pardon(actor: Actor, input: unknown): Promise<void> {
-      if (!actor.admin) throw domainError('forbidden', 'Solo para quien administra la web')
+      assertAdmin(actor)
 
       const id = parse(idSchema, input)
       const copy = (
@@ -475,7 +476,7 @@ export function createClickerService(options: ClickerServiceOptions) {
      * @throws {DomainError} `forbidden` si quien pregunta no es admin.
      */
     async dismiss(actor: Actor, input: unknown): Promise<void> {
-      if (!actor.admin) throw domainError('forbidden', 'Solo para quien administra la web')
+      assertAdmin(actor)
 
       await db.execute({
         sql: 'DELETE FROM clicker_alerts WHERE id = ?',
@@ -561,9 +562,7 @@ export function createClickerService(options: ClickerServiceOptions) {
      * @throws {DomainError} `forbidden` si quien pregunta no es admin.
      */
     async usage(actor: Actor, input: unknown): Promise<ClickerUsage> {
-      if (!actor.admin) {
-        throw domainError('forbidden', 'Solo para quien administra la web')
-      }
+      assertAdmin(actor)
 
       const { days } = parse(usageSchema, input)
       const dayOf = (at: number): string => new Date(at).toISOString().slice(0, 10)

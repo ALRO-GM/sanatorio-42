@@ -29,6 +29,7 @@ import type {
 } from '@sanatorio/contracts'
 import { z } from 'zod'
 
+import { assertAdmin } from '../../core/actor.js'
 import type { Actor } from '../../core/actor.js'
 import type { Notify } from '../../core/events.js'
 import type { DataStore } from '../../core/db/data-store.js'
@@ -36,7 +37,7 @@ import type { Db } from '../../core/db/database.js'
 import { toNumber, toText } from '../../core/db/rows.js'
 import { domainError } from '../../core/errors.js'
 import { createTtlCache } from '../../core/ttl-cache.js'
-import { parse } from '../../core/validation.js'
+import { day, parse } from '../../core/validation.js'
 import {
   DEFAULT_BUDGET,
   forecast,
@@ -87,7 +88,6 @@ const login = z
   .regex(/^[a-z0-9-]{1,30}$/, 'login no válido')
 
 const roleSchema = z.object({ login, admin: z.boolean() })
-const day = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'La fecha va como AAAA-MM-DD')
 /** Filas que se enseñan de lo que se va a borrar. */
 const PREVIEW_ROWS = 50
 const dataSchema = z.object({
@@ -275,12 +275,6 @@ export function createAdminService(options: AdminServiceOptions) {
     hourBudget = planHour(dayPlan.requests, before.requestsToday, now())
   }
 
-  const assertAdmin = (actor: Actor): void => {
-    if (!actor.admin) {
-      throw domainError('forbidden', 'Solo para quien administra la web')
-    }
-  }
-
   /** Tope automático: lo de esta hora repartido entre quienes están usando la web. */
   const automaticLimit = (): number => perPerson(settings, hourBudget, thisHour.size)
 
@@ -329,7 +323,10 @@ export function createAdminService(options: AdminServiceOptions) {
 
       return access.get(wanted, async () => {
         const [role, block] = await Promise.all([
-          db.execute({ sql: 'SELECT 1 FROM user_roles WHERE login = ?', args: [wanted] }),
+          db.execute({
+            sql: "SELECT 1 FROM user_roles WHERE login = ? AND role = 'admin'",
+            args: [wanted],
+          }),
           db.execute({
             sql: 'SELECT reason, until FROM user_blocks WHERE login = ?',
             args: [wanted],

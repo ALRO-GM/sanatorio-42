@@ -44,6 +44,8 @@ export type BuiltApp = {
   env: Env
   db: Db
   services: Services
+  /** Todas las rutas registradas. Para los tests que las recorren una a una. */
+  routes: readonly { method: string; url: string }[]
   /** Arranca el trabajo de fondo de los módulos (la sincronización con 42). */
   start: () => void
   close: () => Promise<void>
@@ -122,6 +124,15 @@ export async function buildApp(options: BuildOptions = {}): Promise<BuiltApp> {
     rewriteUrl: (request) => stripApiPrefix(request.url ?? '/'),
   })
 
+  const routes: { method: string; url: string }[] = []
+
+  app.addHook('onRoute', (route) => {
+    for (const method of [route.method].flat()) {
+      // Fastify añade un HEAD por cada GET: es la misma ruta.
+      if (method !== 'HEAD') routes.push({ method, url: route.url })
+    }
+  })
+
   registerCors(app, env.allowedOrigins)
   registerErrorHandler(app)
   registerHealth(app, db)
@@ -139,6 +150,7 @@ export async function buildApp(options: BuildOptions = {}): Promise<BuiltApp> {
     env,
     db,
     services,
+    routes,
     start: () => {
       for (const module of modules) {
         module.start?.()

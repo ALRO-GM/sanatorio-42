@@ -10,6 +10,7 @@
 import type { Broadcast, BroadcastAudience, BroadcastReport } from '@sanatorio/contracts'
 import { z } from 'zod'
 
+import { assertAdmin } from '../../core/actor.js'
 import type { Actor } from '../../core/actor.js'
 import type { Db } from '../../core/db/database.js'
 import { toNumber, toText } from '../../core/db/rows.js'
@@ -65,12 +66,6 @@ export function createBroadcastsService(options: BroadcastsServiceOptions) {
   const { db } = options
   const now = options.now ?? Date.now
   const iso = (at: number): string => new Date(at).toISOString()
-
-  const assertAdmin = (actor: Actor): void => {
-    if (!actor.admin) {
-      throw domainError('forbidden', 'Solo para quien administra la web')
-    }
-  }
 
   type Stored = Broadcast & { audience: BroadcastAudience }
 

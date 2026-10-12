@@ -9,6 +9,7 @@ import { Avatar } from '../../shared/ui/Avatar'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { BookHelp } from '../help/BookHelp'
 import { ProjectMap } from '../map/ProjectMap'
+import { intraHref, recordHref } from '../../shared/links'
 
 // 0: especialista de guardia · 1: paciente como tú de guardia
 // 2: especialista que no está de guardia · 3: paciente como tú que no está de guardia
@@ -208,7 +209,7 @@ export function PeerList({ project, onOpenTherapy }: PeerListProps) {
             <li key={peer.login} className="peer-card">
               <Avatar login={peer.login} image={peer.image} />
               <div>
-                <a className="record-link" href={`#/expediente/${peer.login}`}>
+                <a className="record-link" href={recordHref(peer.login)}>
                   <strong>{peer.login}</strong>
                 </a>
                 <p>
@@ -266,7 +267,7 @@ export function PeerList({ project, onOpenTherapy }: PeerListProps) {
                   )}
                   <a
                     className="profile-link"
-                    href={`https://profile.intra.42.fr/users/${peer.login}`}
+                    href={intraHref(peer.login)}
                     target="_blank"
                     rel="noreferrer"
                   >

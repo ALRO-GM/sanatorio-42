@@ -8,6 +8,7 @@ import { useI18n } from '../../shared/i18n'
 import { Avatar } from '../../shared/ui/Avatar'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { InfoTip } from '../../shared/ui/InfoTip'
+import { recordHref } from '../../shared/links'
 
 const PERIODS = ['month', 'all'] as const satisfies readonly LeaderboardPeriod[]
 
@@ -70,7 +71,7 @@ export function LeaderboardCard({ me }: { me: string }) {
               </span>
             </span>
             <Avatar login={entry.login} image={entry.image} size={28} />
-            <a className="record-link" href={`#/expediente/${entry.login}`}>
+            <a className="record-link" href={recordHref(entry.login)}>
               {entry.login}
             </a>
             <strong className="row-count">{t('rank.xp', { xp: entry.xp })}</strong>

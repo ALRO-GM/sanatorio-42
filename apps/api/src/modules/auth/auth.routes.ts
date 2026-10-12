@@ -8,6 +8,8 @@
 import type { FastifyInstance, FastifyRequest } from 'fastify'
 
 import { DomainError } from '../../core/errors.js'
+import { createRateLimit } from '../../core/rate-limit.js'
+import type { RateLimit } from '../../core/rate-limit.js'
 import type { AuthService } from './auth.service.js'
 import { mapError } from '../../core/http/errors.js'
 import {
@@ -25,11 +27,24 @@ export type AuthRoutesOptions = {
   frontendUrl: string
   /** Vida de la cookie de estado, para borrarla con la misma caducidad. */
   stateTtlMs?: number
+  /** Tope de entradas por IP. Por defecto, `LOGIN_ATTEMPTS` cada diez minutos. */
+  attempts?: RateLimit
 }
+
+/**
+ * Pasos de login que caben por IP cada diez minutos. Un login son dos (ir a 42
+ * y volver), así que son cien logins: de sobra para un campus entero que sale
+ * por la misma dirección, y muy poco para quien quiera usar la vuelta de 42
+ * (que canjea un código contra su servidor) como martillo.
+ */
+export const LOGIN_ATTEMPTS = 200
+const LOGIN_WINDOW_MS = 10 * 60 * 1000
 
 export function registerAuthRoutes(app: FastifyInstance, options: AuthRoutesOptions) {
   const { auth } = options
   const stateTtlMs = options.stateTtlMs ?? 10 * 60 * 1000
+  const attempts =
+    options.attempts ?? createRateLimit({ max: LOGIN_ATTEMPTS, windowMs: LOGIN_WINDOW_MS })
 
   function cookieOf(request: FastifyRequest, name: string): string | undefined {
     return readCookie(request.headers.cookie, name)
@@ -83,7 +98,11 @@ export function registerAuthRoutes(app: FastifyInstance, options: AuthRoutesOpti
    * login fallaría siempre. `Lax` sí la manda en navegaciones de primer nivel,
    * que es justo el caso del callback.
    */
-  app.get('/auth/login', async (_request, reply) => {
+  app.get('/auth/login', async (request, reply) => {
+    if (!attempts.hit(request.ip)) {
+      return await reply.redirect(frontWithError(options.frontendUrl, 'rate_limited', 429), 302)
+    }
+
     const start = auth.startLogin()
 
     setCookies(reply, [
@@ -106,6 +125,13 @@ export function registerAuthRoutes(app: FastifyInstance, options: AuthRoutesOpti
     '/auth/callback',
     async (request, reply) => {
       const stateCookie = cookieOf(request, OAUTH_STATE_COOKIE_NAME)
+
+      // Antes de canjear nada: cada vuelta le cuesta una petición a 42.
+      if (!attempts.hit(request.ip)) {
+        setCookies(reply, [forgetState()])
+
+        return await reply.redirect(frontWithError(options.frontendUrl, 'rate_limited', 429), 302)
+      }
 
       try {
         if (request.query.code === undefined || request.query.state === undefined) {

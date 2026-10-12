@@ -2,10 +2,10 @@
  * Rutas de la réplica: catálogo de campus y estado de la sincronización.
  */
 
+import { assertAdmin } from '../../core/actor.js'
 import type { FastifyInstance } from 'fastify'
 
 import type { RouteContext } from '../../core/module.js'
-import { domainError } from '../../core/errors.js'
 import type { CampusesService } from './campuses.service.js'
 import type { Quota } from './quota.js'
 import type { Syncer } from './syncer.js'
@@ -53,9 +53,7 @@ export function registerReplicaRoutes(
 
   /** `GET /admin/quota` → la cuota de 42, para el panel. Solo admins. */
   app.get('/admin/quota', async (request, reply) => {
-    if (!(await session.actor(request)).admin) {
-      throw domainError('forbidden', 'Solo para quien administra la web')
-    }
+    assertAdmin(await session.actor(request))
 
     return reply.send(await quota.status())
   })
@@ -64,9 +62,7 @@ export function registerReplicaRoutes(
   app.put('/admin/quota', async (request, reply) => {
     const actor = await session.actor(request)
 
-    if (!actor.admin) {
-      throw domainError('forbidden', 'Solo para quien administra la web')
-    }
+    assertAdmin(actor)
 
     return reply.send(await quota.configure(request.body, actor.login))
   })

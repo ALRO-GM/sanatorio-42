@@ -56,6 +56,16 @@ export function mapError(error: unknown): ErrorMapping {
     }
   }
 
+  // Lo que rechaza el propio servidor antes de llegar a una ruta (un JSON mal
+  // escrito, un cuerpo demasiado grande, un tipo de contenido que no entiende)
+  // es culpa de la petición, no nuestra: se devuelve con su código y un mensaje
+  // fijo, sin el texto del error, que puede citar parte de lo recibido.
+  const rejected = requestRejection(error)
+
+  if (rejected !== undefined) {
+    return rejected
+  }
+
   // Lo que no se reconoce se registra entero pero al front solo se le da un
   // mensaje genérico: un error interno puede traer rutas de ficheros o SQL.
   return {
@@ -65,4 +75,30 @@ export function mapError(error: unknown): ErrorMapping {
       message: 'Algo ha ido mal por nuestra parte. Prueba de nuevo en un momento.',
     },
   }
+}
+
+const REJECTIONS: Record<number, { error: string; message: string }> = {
+  400: { error: 'invalid_input', message: 'La petición no se entiende' },
+  404: { error: 'not_found', message: 'No existe' },
+  408: { error: 'invalid_input', message: 'La petición ha tardado demasiado en llegar' },
+  413: { error: 'invalid_input', message: 'La petición es demasiado grande' },
+  414: { error: 'invalid_input', message: 'La dirección es demasiado larga' },
+  415: { error: 'invalid_input', message: 'Ese tipo de contenido no se admite' },
+}
+
+/** Un error de Fastify por una petición mal formada, o `undefined` si no lo es. */
+function requestRejection(error: unknown): ErrorMapping | undefined {
+  if (typeof error !== 'object' || error === null) return undefined
+
+  const { code, statusCode } = error as { code?: unknown; statusCode?: unknown }
+
+  // Solo los del servidor (`FST_ERR_…`): un error cualquiera que traiga un
+  // `statusCode` no decide por su cuenta qué se le contesta a la gente.
+  if (typeof code !== 'string' || !code.startsWith('FST_ERR_') || typeof statusCode !== 'number') {
+    return undefined
+  }
+
+  const body = REJECTIONS[statusCode]
+
+  return body === undefined ? undefined : { status: statusCode, body }
 }

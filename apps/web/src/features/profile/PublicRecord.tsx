@@ -11,6 +11,7 @@ import { HealthCard } from './HealthCard'
 import { NetworkCard } from './NetworkCard'
 import { Icon } from '../../shared/ui/Icon'
 import type { IconName } from '../../shared/ui/Icon'
+import { intraHref } from '../../shared/links'
 
 const ACHIEVEMENT_ICONS: Record<AchievementId, IconName> = {
   first_duty: 'estrella',
@@ -74,12 +75,7 @@ export function PublicRecord({ login }: { login: string }) {
               ? t('xp.max', { xp: xp.total })
               : t('xp.progress', { xp: xp.total, next: xp.next })}
           </span>
-          <a
-            className="profile-link"
-            href={`https://profile.intra.42.fr/users/${data.login}`}
-            target="_blank"
-            rel="noreferrer"
-          >
+          <a className="profile-link" href={intraHref(data.login)} target="_blank" rel="noreferrer">
             {t('record.intra')}
           </a>
         </div>
