@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import type { StatTotals, UsageStats } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
+import { Avatar } from '../../shared/ui/Avatar'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 
 const RANGES = [1, 7, 30, 90] as const
@@ -22,6 +23,16 @@ export function duration(seconds: number): string {
   return minutes < 60
     ? `${minutes} min`
     : `${Math.floor(minutes / 60)} h ${String(minutes % 60).padStart(2, '0')} min`
+}
+
+/** "2h", "45m", "30s": lo justo para caber encima de una barra. */
+export function briefTime(seconds: number): string {
+  if (seconds < 60) return `${seconds}s`
+  if (seconds < 3600) return `${Math.round(seconds / 60)}m`
+
+  const hours = seconds / 3600
+
+  return `${hours.toFixed(hours < 10 ? 1 : 0)}h`
 }
 
 /** "1,2 MB", "340 kB". */
@@ -119,6 +130,8 @@ export function StatsPanel() {
           </button>
         )}
       </div>
+
+      {login === null && <OnlineCard onPick={setLogin} />}
 
       {loading && <p className="estado">{t('app.loading')}</p>}
       {data === undefined ? (
@@ -264,6 +277,11 @@ function HourChart({ hours }: { hours: StatTotals[] }) {
           className="stat-hour"
           title={`${String(index).padStart(2, '0')}:00 · ${duration(hour.seen)} / ${duration(hour.back)} / ${duration(hour.hidden)} · ${hour.requests}`}
         >
+          <b className="stat-value">
+            {hour.seen + hour.back + hour.hidden > 0
+              ? briefTime(hour.seen + hour.back + hour.hidden)
+              : ''}
+          </b>
           <span className="stat-bar">
             <i className="hidden" style={{ height: `${(hour.hidden / top) * 100}%` }} />
             <i className="back" style={{ height: `${(hour.back / top) * 100}%` }} />
@@ -273,5 +291,63 @@ function HourChart({ hours }: { hours: StatTotals[] }) {
         </div>
       ))}
     </div>
+  )
+}
+
+/** Cada cuánto se vuelve a preguntar quién está conectado. */
+const ONLINE_EVERY_MS = 60_000
+
+/**
+ * Quién tiene la web abierta ahora mismo y cuánto lleva su sesión. Pulsar a
+ * alguien enseña sus estadísticas.
+ */
+function OnlineCard({ onPick }: { onPick: (login: string) => void }) {
+  const { t } = useI18n()
+  const { data, reload } = useAsync(() => api.getOnline(), [])
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (!document.hidden) void reload()
+    }, ONLINE_EVERY_MS)
+
+    return () => {
+      clearInterval(timer)
+    }
+  }, [reload])
+
+  if (data === undefined) return null
+
+  // Con la hora de la API: el reloj de quien mira puede ir a su aire.
+  const since = (at: string): number =>
+    Math.max(0, Math.round((Date.parse(data.now) - Date.parse(at)) / 1000))
+
+  return (
+    <article className="card">
+      <span className="eyebrow">{t('admin.online.title', { n: data.people.length })}</span>
+      {data.people.length === 0 ? (
+        <p className="estado">{t('admin.online.nobody')}</p>
+      ) : (
+        <ul className="online-list">
+          {data.people.map((person) => (
+            <li key={person.login}>
+              <button
+                type="button"
+                className="row plain"
+                title={t('admin.online.open', { login: person.login })}
+                onClick={() => {
+                  onPick(person.login)
+                }}
+              >
+                <Avatar login={person.login} image={person.image} size={28} />
+                <span>
+                  <strong>{person.login}</strong>
+                  <small>{t('admin.online.for', { time: duration(since(person.since)) })}</small>
+                </span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </article>
   )
 }

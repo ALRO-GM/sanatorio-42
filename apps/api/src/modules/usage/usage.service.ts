@@ -6,7 +6,14 @@
  * más usa la comunidad.
  */
 
-import type { StatTotals, UsageCounts, UsageHeatmap, UsageStats } from '@sanatorio/contracts'
+import type {
+  OnlineUsers,
+  StatTotals,
+  UsageCounts,
+  UsageFlows,
+  UsageHeatmap,
+  UsageStats,
+} from '@sanatorio/contracts'
 import { z } from 'zod'
 
 import type { Actor } from '../../core/actor.js'
@@ -16,6 +23,7 @@ import { domainError } from '../../core/errors.js'
 import { createTtlCache } from '../../core/ttl-cache.js'
 import { parse } from '../../core/validation.js'
 import type { ReplicaRepository } from '../replica/index.js'
+import { sectionsOf, START } from './flows.rules.js'
 
 /** Claves como `nav.tablon` o `expediente.health`: dos palabras en minúsculas. */
 const KEY = /^[a-z]{2,20}\.[a-z_]{2,30}$/
@@ -42,6 +50,14 @@ const sendSchema = z.object({
   time: z
     .record(z.string().regex(KEY, 'clave no válida'), z.tuple([seconds, seconds, seconds]))
     .refine((time) => Object.keys(time).length <= 20, 'demasiadas claves')
+    .optional(),
+  // Pasos de una sección a otra: `tablon>red`, o `start>tablon` al entrar.
+  flows: z
+    .record(
+      z.string().regex(/^[a-z]{2,20}>[a-z]{2,20}$/, 'paso no válido'),
+      z.number().int().min(1).max(MAX_PER_SEND),
+    )
+    .refine((flows) => Object.keys(flows).length <= 60, 'demasiados pasos')
     .optional(),
 })
 
@@ -94,10 +110,14 @@ export type Traffic = (
 /** Segundos en una sección: viéndola, con otra ventana delante y con la pestaña oculta. */
 export type SectionTime = { seen: number; back: number; hidden: number }
 
+/** Quién está conectado ahora: lo sabe `profile`. */
+export type Online = () => Promise<{ login: string; since: string; seenAt: string }[]>
+
 export function createUsageService(options: {
   db: Db
   replica: ReplicaRepository
   traffic?: Traffic
+  online?: Online
   now?: () => number
 }) {
   const { db, replica } = options
@@ -109,14 +129,27 @@ export function createUsageService(options: {
     ...(options.now === undefined ? {} : { now: options.now }),
   })
 
+  /** El periodo que se pide: por defecto la última semana, y nunca más de `STATS_MAX_DAYS`. */
+  const period = (input: unknown): { from: string; to: string; login: string | null } => {
+    const asked = parse(statsSchema, input)
+    const to = asked.to ?? dayOf(now())
+    const earliest = dayOf(Date.parse(`${to}T00:00:00Z`) - (STATS_MAX_DAYS - 1) * DAY_MS)
+    const wanted = asked.from ?? dayOf(Date.parse(`${to}T00:00:00Z`) - (STATS_DAYS - 1) * DAY_MS)
+    // Ni un periodo al revés ni uno tan largo que pese.
+    const from = wanted > to ? to : wanted < earliest ? earliest : wanted
+
+    return { from, to, login: asked.login ?? null }
+  }
+
   return {
     /** Suma lo que la web ha contado desde el último envío. */
     async record(actor: Actor, input: unknown): Promise<void> {
       const sent = parse(sendSchema, input)
       const entries = Object.entries(sent.counts)
       const time = Object.entries(sent.time ?? {})
+      const flows = Object.entries(sent.flows ?? {})
 
-      if (entries.length === 0 && time.length === 0) {
+      if (entries.length === 0 && time.length === 0 && flows.length === 0) {
         return
       }
 
@@ -132,6 +165,17 @@ export function createUsageService(options: {
                   ON CONFLICT (key, login) DO UPDATE SET count = count + excluded.count`,
             args: [key, actor.login, count],
           })),
+          ...flows.map(([step, count]) => {
+            const [from = '', to = ''] = step.split('>')
+
+            return {
+              sql: `INSERT INTO usage_flows (login, day, from_key, to_key, count)
+                    VALUES (?, ?, ?, ?, ?)
+                    ON CONFLICT (login, day, from_key, to_key)
+                    DO UPDATE SET count = count + excluded.count`,
+              args: [actor.login, dayOf(now()), from, to, count],
+            }
+          }),
           ...[...keys].map((key) => {
             const [seen, back, hidden] = sent.time?.[key] ?? [0, 0, 0]
 
@@ -164,13 +208,7 @@ export function createUsageService(options: {
         throw domainError('forbidden', 'Solo para quien administra la web')
       }
 
-      const asked = parse(statsSchema, input)
-      const to = asked.to ?? dayOf(now())
-      const earliest = dayOf(Date.parse(`${to}T00:00:00Z`) - (STATS_MAX_DAYS - 1) * DAY_MS)
-      const wanted = asked.from ?? dayOf(Date.parse(`${to}T00:00:00Z`) - (STATS_DAYS - 1) * DAY_MS)
-      // Ni un periodo al revés ni uno tan largo que pese.
-      const from = wanted > to ? to : wanted < earliest ? earliest : wanted
-      const login = asked.login ?? null
+      const { from, to, login } = period(input)
 
       const [used, traffic] = await Promise.all([
         db.execute({
@@ -284,6 +322,76 @@ export function createUsageService(options: {
           { seen: toNumber(row.seen), back: toNumber(row.back), hidden: toNumber(row.hidden) },
         ]),
       )
+    },
+
+    /**
+     * Cómo se navega por la web en un periodo: los pasos de una sección a otra
+     * y lo que eso dice de cada una (`flows.rules.ts`). De todo el mundo o de
+     * una persona. Solo para quien administra la web.
+     *
+     * @param input Lo mismo que `stats`: `from`, `to` y, si se quiere, `login`.
+     * @throws {DomainError} `forbidden` si quien pregunta no es admin.
+     */
+    async flows(actor: Actor, input: unknown): Promise<UsageFlows> {
+      if (!actor.admin) {
+        throw domainError('forbidden', 'Solo para quien administra la web')
+      }
+
+      const { from, to, login } = period(input)
+      const [steps, time] = await Promise.all([
+        db.execute({
+          sql: `SELECT from_key, to_key, SUM(count) AS count, COUNT(DISTINCT login) AS people
+                FROM usage_flows WHERE day >= ? AND day <= ? AND (? IS NULL OR login = ?)
+                GROUP BY from_key, to_key ORDER BY count DESC`,
+          args: [from, to, login, login],
+        }),
+        db.execute({
+          sql: `SELECT key, SUM(seen_s) AS seen FROM usage_time
+                WHERE day >= ? AND day <= ? AND (? IS NULL OR login = ?) AND key LIKE 'nav.%'
+                GROUP BY key`,
+          args: [from, to, login, login],
+        }),
+      ])
+      const flows = steps.rows.map((row) => ({
+        from: toText(row.from_key),
+        to: toText(row.to_key),
+        count: toNumber(row.count),
+        people: toNumber(row.people),
+      }))
+      const sections = sectionsOf(
+        flows,
+        new Map(time.rows.map((row) => [toText(row.key).slice('nav.'.length), toNumber(row.seen)])),
+      )
+
+      return {
+        from,
+        to,
+        login,
+        // Cada entrada es una visita a la web.
+        sessions: flows.reduce((sum, flow) => sum + (flow.from === START ? flow.count : 0), 0),
+        sections,
+        flows,
+      }
+    },
+
+    /**
+     * Quién tiene la web abierta ahora y cuánto lleva su sesión. Solo para
+     * quien administra la web.
+     *
+     * @throws {DomainError} `forbidden` si quien pregunta no es admin.
+     */
+    async online(actor: Actor): Promise<OnlineUsers> {
+      if (!actor.admin) {
+        throw domainError('forbidden', 'Solo para quien administra la web')
+      }
+
+      const people = (await options.online?.()) ?? []
+      const images = await replica.imagesOf(people.map((person) => person.login))
+
+      return {
+        now: new Date(now()).toISOString(),
+        people: people.map((person) => ({ ...person, image: images.get(person.login) ?? null })),
+      }
     },
 
     /** Cuánto usa la comunidad cada elemento. Se guarda unos minutos. */

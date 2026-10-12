@@ -374,3 +374,157 @@ dialog.broadcast-dialog .actions {
   border-color: var(--danger);
   color: var(--danger);
 }
+
+/* El valor encima de cada barra: la barra compara, la cifra dice cuánto. */
+.stat-hours {
+  height: 190px;
+}
+.stat-hour {
+  grid-template-rows: auto 1fr auto;
+}
+.stat-value {
+  justify-self: center;
+  height: 2.2rem;
+  color: var(--text-3);
+  font-size: 0.62rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  /* De pie: veinticuatro barras no dejan sitio para escribirlo tumbado. */
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  text-align: left;
+}
+.recent-bars {
+  padding-top: 2rem;
+  height: 122px;
+}
+.recent-bars span {
+  position: relative;
+}
+.recent-bars span[data-value]::after {
+  content: attr(data-value);
+  position: absolute;
+  bottom: calc(100% + 2px);
+  left: 50%;
+  color: var(--text-3);
+  font-size: 0.55rem;
+  font-weight: 600;
+  line-height: 1;
+  writing-mode: vertical-rl;
+  transform: translateX(-50%) rotate(180deg);
+}
+.heat td small {
+  display: block;
+  opacity: 0.75;
+  font-size: 0.7rem;
+}
+.cell-bar {
+  display: inline-block;
+  width: 4.5rem;
+  height: 0.5rem;
+  margin-right: 0.5rem;
+  border-radius: 999px;
+  background: var(--surface-2);
+  vertical-align: middle;
+  overflow: hidden;
+}
+.cell-bar i {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--accent);
+}
+.sub-tabs {
+  margin-bottom: 0.25rem;
+}
+
+/* Conectados ahora. */
+.online-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0.4rem;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.online-list button {
+  width: 100%;
+  border: 0;
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+}
+
+/* El grafo de recorridos. */
+.flow-graph svg {
+  display: block;
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+}
+.flow-edge {
+  fill: none;
+  stroke: var(--text-2);
+  stroke-linecap: round;
+}
+.flow-edge.entry {
+  stroke: var(--accent);
+  stroke-dasharray: 5 4;
+}
+#flow-arrow path {
+  fill: context-stroke;
+}
+.flow-node {
+  cursor: pointer;
+  outline: none;
+}
+.flow-node circle {
+  fill: var(--surface-3);
+  stroke: var(--border);
+  stroke-width: 1.5;
+}
+.flow-node.start circle {
+  fill: var(--text);
+}
+.flow-node.stay circle,
+.flow-key.stay {
+  fill: var(--accent);
+  background: var(--accent);
+}
+.flow-node.pass circle,
+.flow-key.pass {
+  fill: var(--text-4);
+  background: var(--text-4);
+}
+.flow-node.end circle,
+.flow-key.end {
+  fill: var(--warn);
+  background: var(--warn);
+}
+.flow-node.picked circle,
+.flow-node:focus-visible circle {
+  stroke: var(--text);
+  stroke-width: 3;
+}
+.flow-node text {
+  fill: var(--text);
+  font-size: 12px;
+  font-weight: 600;
+}
+.flow-node .flow-figure {
+  fill: var(--text-3);
+  font-size: 10.5px;
+  font-weight: 400;
+}
+.flow-key {
+  display: inline-block;
+  width: 0.8rem;
+  height: 0.8rem;
+  border-radius: 50%;
+  vertical-align: -1px;
+}
+.stat-table tr.picked th,
+.stat-table tr.picked td {
+  background: var(--accent-soft);
+}

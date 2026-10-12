@@ -7,6 +7,8 @@
  */
 
 import type {
+  OnlineUsers,
+  UsageFlows,
   AdminData,
   DataWipe,
   AvailabilityResponse,
@@ -180,7 +182,15 @@ export type Api = {
   /** Cuánto usa la comunidad cada elemento, para el orden automático. */
   getUsage: () => Promise<UsageCounts>
   /** Suma lo que has usado desde el último envío. */
-  sendUsage: (counts: Record<string, number>, time?: UsageSend['time']) => Promise<void>
+  sendUsage: (
+    counts: Record<string, number>,
+    time?: UsageSend['time'],
+    flows?: UsageSend['flows'],
+  ) => Promise<void>
+  /** Cómo se navega entre secciones en un periodo. Solo admins. */
+  getFlows: (query: { from?: string; to?: string; login?: string }) => Promise<UsageFlows>
+  /** Quién tiene la web abierta ahora y cuánto lleva. Solo admins. */
+  getOnline: () => Promise<OnlineUsers>
   /** Estadísticas de uso de un periodo, de toda la web o de una persona. Solo admins. */
   getStats: (query: { from?: string; to?: string; login?: string }) => Promise<UsageStats>
   /** Mapa de calor del uso por grupos de personas. Solo admins. */

@@ -26,6 +26,9 @@ export type ProfileRow = {
   preReview: boolean
 }
 
+/** Sin señales de vida durante esto, lo siguiente ya es otra sesión. */
+const SESSION_GAP_MS = 10 * 60_000
+
 export function createProfilesRepository(db: Db) {
   return {
     /** Preferencias de una persona, o `undefined` si nunca ha entrado. */
@@ -49,15 +52,42 @@ export function createProfilesRepository(db: Db) {
       }
     },
 
-    /** Crea el perfil si falta y anota la visita (en `at`, o ahora). */
+    /**
+     * Crea el perfil si falta y anota la visita (en `at`, o ahora). Si la
+     * anterior fue hace más de `SESSION_GAP_MS`, es que ha vuelto: empieza otra
+     * sesión.
+     */
     async touch(login: string, at?: string): Promise<void> {
       const now = at ?? nowIso()
+      const gone = new Date(Date.parse(now) - SESSION_GAP_MS).toISOString()
 
       await db.execute({
-        sql: `INSERT INTO profiles (login, created_at, seen_at) VALUES (?, ?, ?)
-              ON CONFLICT (login) DO UPDATE SET seen_at = excluded.seen_at`,
-        args: [login, now, now],
+        // En el `SET`, `seen_at` a secas es todavía el valor de antes.
+        sql: `INSERT INTO profiles (login, created_at, seen_at, session_at) VALUES (?, ?, ?, ?)
+              ON CONFLICT (login) DO UPDATE SET
+                session_at = CASE WHEN session_at IS NULL OR seen_at IS NULL OR seen_at < ?
+                                  THEN excluded.seen_at ELSE session_at END,
+                seen_at = excluded.seen_at`,
+        args: [login, now, now, now, gone],
       })
+    },
+
+    /**
+     * Quién está conectado (ha dado señales de vida desde `since`), con cuándo
+     * empezó su sesión y su última señal. Quien lleva más, primero.
+     */
+    async online(since: string): Promise<{ login: string; since: string; seenAt: string }[]> {
+      const result = await db.execute({
+        sql: `SELECT login, session_at, seen_at FROM profiles WHERE seen_at >= ?
+              ORDER BY COALESCE(session_at, seen_at), login`,
+        args: [since],
+      })
+
+      return result.rows.map((row) => ({
+        login: toText(row.login),
+        since: toText(row.session_at ?? row.seen_at),
+        seenAt: toText(row.seen_at),
+      }))
     },
 
     /** Quién ha dado señales de vida desde `since` (ISO): tiene la web abierta. */

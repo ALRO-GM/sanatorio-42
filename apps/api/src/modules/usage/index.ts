@@ -8,7 +8,7 @@ import { tableStore } from '../../core/db/data-store.js'
 import type { AppModule } from '../../core/module.js'
 import type { ReplicaRepository } from '../replica/index.js'
 import { createUsageService } from './usage.service.js'
-import type { Traffic } from './usage.service.js'
+import type { Online, Traffic } from './usage.service.js'
 import type { UsageService } from './usage.service.js'
 
 export type UsageModule = AppModule & { service: UsageService }
@@ -17,6 +17,7 @@ export function createUsageModule(deps: {
   db: Db
   replica: ReplicaRepository
   traffic?: Traffic
+  online?: Online
   now?: () => number
 }): UsageModule {
   const service = createUsageService(deps)
@@ -28,6 +29,12 @@ export function createUsageModule(deps: {
       tableStore(deps.db, {
         id: 'usage',
         table: 'usage_time',
+        login: 'login',
+        date: { column: 'day', as: 'day' },
+      }),
+      tableStore(deps.db, {
+        id: 'flows',
+        table: 'usage_flows',
         login: 'login',
         date: { column: 'day', as: 'day' },
       }),
@@ -57,6 +64,20 @@ export function createUsageModule(deps: {
         reply.header('Cache-Control', 'private, no-store')
 
         return reply.send(await service.stats(await session.actor(request), request.query))
+      })
+
+      /** `GET /admin/flows?from=&to=&login=` → cómo se navega entre secciones. Solo admins. */
+      app.get<{ Querystring: Record<string, string> }>('/admin/flows', async (request, reply) => {
+        reply.header('Cache-Control', 'private, no-store')
+
+        return reply.send(await service.flows(await session.actor(request), request.query))
+      })
+
+      /** `GET /admin/online` → quién tiene la web abierta y cuánto lleva. Solo admins. */
+      app.get('/admin/online', async (request, reply) => {
+        reply.header('Cache-Control', 'private, no-store')
+
+        return reply.send(await service.online(await session.actor(request)))
       })
 
       /** `POST /usage` → suma lo que has usado desde el último envío. 204. */

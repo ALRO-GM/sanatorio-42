@@ -265,6 +265,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     db,
     replica: replica.repository,
     traffic: (from, to, login) => admin.service.traffic(from, to, login),
+    online: () => profile.profiles.online(new Date(now() - PRESENCE_WINDOW_MS).toISOString()),
     ...clock,
   })
 

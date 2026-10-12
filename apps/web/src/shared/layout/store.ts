@@ -64,6 +64,10 @@ let state: State = {
 const mineAtStart: Readonly<Record<string, number>> = { ...state.mine }
 /** Lo usado desde el último envío a la API. */
 let pending: Record<string, number> = {}
+/** Pasos de una sección a otra desde el último envío (`tablon>red`). */
+let pendingFlows: Record<string, number> = {}
+/** La sección que se está mirando; `null` hasta que se abre la primera. */
+let current: string | null = null
 /** El tiempo pasado en cada sección, repartido según cómo estaba la ventana. */
 const clock = createViewClock(FLUSH_EVERY_MS)
 let asked = false
@@ -122,13 +126,24 @@ function flush(): void {
 
   const counts = pending
   const time = clock.take()
+  const flows = pendingFlows
 
-  if (Object.keys(counts).length === 0 && Object.keys(time).length === 0) return
+  if (
+    Object.keys(counts).length === 0 &&
+    Object.keys(time).length === 0 &&
+    Object.keys(flows).length === 0
+  ) {
+    return
+  }
 
   pending = {}
-  api.sendUsage(counts, time).catch(() => {
+  pendingFlows = {}
+  api.sendUsage(counts, time, flows).catch(() => {
     for (const [key, count] of Object.entries(counts)) {
       pending[key] = (pending[key] ?? 0) + count
+    }
+    for (const [step, count] of Object.entries(flows)) {
+      pendingFlows[step] = (pendingFlows[step] ?? 0) + count
     }
 
     clock.giveBack(time)
@@ -143,6 +158,14 @@ function settle(): void {
 /** Qué sección se está mirando: su tiempo empieza a contar desde ahora. */
 export function viewing(section: string): void {
   clock.open(`nav.${section}`, Date.now(), windowState())
+
+  // De dónde se viene: de otra sección o, si es la primera, de fuera.
+  if (section !== current) {
+    const step = `${current ?? 'start'}>${section}`
+
+    pendingFlows[step] = Math.min(200, (pendingFlows[step] ?? 0) + 1)
+    current = section
+  }
 }
 
 /** Anota un uso de un elemento (`nav.tablon`, `expediente.health`). */

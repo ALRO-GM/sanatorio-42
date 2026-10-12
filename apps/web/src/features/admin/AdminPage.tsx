@@ -14,7 +14,7 @@ import { BroadcastsTab } from './BroadcastsTab'
 import { ClickerPanel } from './ClickerPanel'
 import { DataPanel } from './DataPanel'
 import { StatsPanel } from './StatsPanel'
-import { UsageHeatmap } from './UsageHeatmap'
+import { UsageTab } from './UsageTab'
 import { Icon } from '../../shared/ui/Icon'
 
 const TABS = [
@@ -74,7 +74,7 @@ export function AdminPage({ campusId }: { campusId?: number | undefined }) {
       )}
       {tab === 'inbox' && <InboxTab />}
       {tab === 'messages' && <MessagesTab />}
-      {tab === 'usage' && <UsageHeatmap />}
+      {tab === 'usage' && <UsageTab />}
       {tab === 'stats' && <StatsPanel />}
       {tab === 'clicker' && <ClickerPanel />}
       {tab === 'data' && <DataPanel />}
@@ -241,6 +241,10 @@ function WeekPattern({ data }: { data: Consumption }) {
   )
 }
 
+/** "1,2k", "340": una cifra que quepa encima de una barra. */
+const brief = (value: number): string =>
+  value >= 1000 ? `${(value / 1000).toFixed(value >= 10_000 ? 0 : 1)}k` : String(value)
+
 /** Peticiones de las últimas 48 horas, una barra por hora. */
 function RecentBars({ data }: { data: Consumption }) {
   const { t } = useI18n()
@@ -254,6 +258,7 @@ function RecentBars({ data }: { data: Consumption }) {
         <span
           key={`${hour.day}-${hour.hour}`}
           style={{ height: `${Math.max(3, (100 * hour.requests) / peak)}%` }}
+          data-value={hour.requests > 0 ? brief(hour.requests) : undefined}
           title={t('admin.cons.hour', {
             day: hour.day,
             hour: hour.hour,

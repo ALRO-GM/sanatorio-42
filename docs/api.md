@@ -646,7 +646,7 @@ declara sus datos borrables en `stores` (`core/db/data-store.ts`).
 
 GET /admin/data → `{ kinds: [{ id, rows }] }`: los tipos de dato y cuántas filas
 tiene cada uno. Ahora: `traffic`, `tickets`, `notices`, `messages`,
-`event_alerts`, `broadcasts` (con sus respuestas), `checkins`, `usage`,
+`event_alerts`, `broadcasts` (con sus respuestas), `checkins`, `usage`, `flows`,
 `clicker_capital`, `clicker_alerts` y `clicker_cheats`.
 
 POST /admin/data/count → `{ rows }`. Recibe `{ kind, login?, before?, from? }`:
@@ -713,6 +713,25 @@ POST /usage acepta, además de `counts`, el tiempo pasado en cada sección:
   el foco), con otra ventana delante, y con la pestaña oculta. Hasta 900 por
   envío.
 - Se guarda por persona, día, hora (UTC) y elemento. No se borra solo.
+
+GET /admin/online → `{ now, people: [{ login, image, since, seenAt }] }`: quién
+tiene la web abierta ahora. `since` es cuándo empezó su sesión (más de diez
+minutos sin señales de vida y la siguiente ya es otra) y `now`, la hora de la
+API para contar cuánto lleva. Solo admins.
+
+Recorridos. Con `POST /usage` la web manda también `flows`: los pasos de una
+sección a otra desde el último envío (`{ "tablon>red": 2 }`); al entrar, el
+primero viene de `start`. Se guardan por persona y día.
+
+GET /admin/flows?from=&to=&login= → `{ from, to, login, sessions, sections, flows }`.
+Solo admins. `sessions` son las entradas a la web. Cada sección trae `visits`
+(llegadas), `entries` (las que fueron lo primero), `onward` (las que siguieron a
+otra), `exits` (las que no: ahí se acabó), `exitRate`, `seen` y `avgSeen`
+(segundos mirándola, en total y por visita) y `role`: `pass`, de paso (menos de
+20 s por visita y tasa de salida bajo el 30 %); `end`, final de trayecto (tasa
+de salida del 60 % o más); `stay`, de estancia (dos minutos o más por visita);
+`null` si no destaca o tiene menos de cinco visitas. `flows` son los pasos
+(`from`, `to`, `count`, `people`), el más repetido primero.
 
 GET /admin/stats?from=&to=&login= → solo admins. Días UTC, los dos incluidos;
 por defecto la última semana, y 92 días como mucho.

@@ -4,6 +4,7 @@
 
 import type { DataWipe, Ticket } from '@sanatorio/contracts'
 import { ME } from './data'
+import { portrait } from './portrait'
 import type { Api } from '../types'
 import {
   delay,
@@ -39,6 +40,8 @@ export const adminMock: Pick<
   | 'sendUsage'
   | 'getStats'
   | 'getUsageHeatmap'
+  | 'getFlows'
+  | 'getOnline'
   | 'getAdminData'
   | 'countAdminData'
   | 'deleteAdminData'
@@ -375,6 +378,102 @@ export const adminMock: Pick<
           Math.round((group.people * (30 + ((row * 37 + column * 53) % 90))) / (1 + (row % 4))),
         ),
       })),
+    }
+  },
+
+  async getFlows(query) {
+    await delay()
+
+    const today = new Date().toISOString().slice(0, 10)
+    const part = query.login === undefined ? 1 : 0.25
+    // Se entra por el expediente, que es la portada, y de ahí se reparte.
+    const steps: [string, string, number][] = [
+      ['start', 'expediente', 120],
+      ['start', 'consulta', 34],
+      ['start', 'tablon', 18],
+      ['expediente', 'consulta', 70],
+      ['expediente', 'tablon', 28],
+      ['expediente', 'calendario', 12],
+      ['consulta', 'clusters', 40],
+      ['consulta', 'terapia', 22],
+      ['consulta', 'expediente', 14],
+      ['tablon', 'red', 16],
+      ['tablon', 'expediente', 9],
+      ['clusters', 'consulta', 12],
+      ['terapia', 'pizarras', 10],
+      ['red', 'tablon', 6],
+      ['calendario', 'expediente', 5],
+      ['pizarras', 'terapia', 3],
+    ]
+    const seen: Record<string, number> = {
+      expediente: 2400,
+      consulta: 14_000,
+      tablon: 9800,
+      clusters: 5200,
+      terapia: 4100,
+      red: 6900,
+      calendario: 700,
+      pizarras: 2600,
+    }
+    const flows = steps.map(([from, to, count]) => ({
+      from,
+      to,
+      count: Math.ceil(count * part),
+      people: Math.min(query.login === undefined ? 9 : 1, Math.ceil(count / 12)),
+    }))
+    const sections = Object.keys(seen)
+      .map((key) => {
+        const visits = flows.reduce((sum, flow) => sum + (flow.to === key ? flow.count : 0), 0)
+        const entries = flows.find((flow) => flow.from === 'start' && flow.to === key)?.count ?? 0
+        const onward = flows.reduce((sum, flow) => sum + (flow.from === key ? flow.count : 0), 0)
+        const exits = Math.max(0, visits - onward)
+        const time = Math.round((seen[key] ?? 0) * part)
+        const avgSeen = visits === 0 ? 0 : Math.round(time / visits)
+        const exitRate = visits === 0 ? 0 : exits / visits
+
+        return {
+          key,
+          visits,
+          entries,
+          exits,
+          onward,
+          seen: time,
+          avgSeen,
+          exitRate,
+          role:
+            avgSeen < 20 && exitRate < 0.3
+              ? ('pass' as const)
+              : exitRate >= 0.6
+                ? ('end' as const)
+                : avgSeen >= 120
+                  ? ('stay' as const)
+                  : null,
+        }
+      })
+      .sort((a, b) => b.visits - a.visits)
+
+    return {
+      from: query.from ?? today,
+      to: query.to ?? today,
+      login: query.login ?? null,
+      sessions: flows.reduce((sum, flow) => sum + (flow.from === 'start' ? flow.count : 0), 0),
+      sections,
+      flows: flows.sort((a, b) => b.count - a.count),
+    }
+  },
+
+  async getOnline() {
+    await delay(120)
+
+    const ago = (minutes: number): string => new Date(Date.now() - minutes * 60_000).toISOString()
+
+    return {
+      now: new Date().toISOString(),
+      people: [
+        { login: 'jdoe', image: portrait('jdoe'), since: ago(134), seenAt: ago(0) },
+        { login: ME.login, image: portrait(ME.login), since: ago(22), seenAt: ago(0) },
+        { login: 'rsoto', image: portrait('rsoto'), since: ago(3), seenAt: ago(1) },
+      ],
     }
   },
 

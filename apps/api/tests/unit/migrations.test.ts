@@ -92,6 +92,7 @@ describe('migraciones', () => {
       'therapy_members',
       'tickets',
       'usage_counts',
+      'usage_flows',
       'usage_time',
       'user_blocks',
       'user_levels',

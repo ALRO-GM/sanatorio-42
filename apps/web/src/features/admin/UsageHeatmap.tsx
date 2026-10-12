@@ -131,6 +131,7 @@ function HeatTable({ data, nameOf, groupName }: HeatTableProps) {
                     title={t('admin.usage.cell', { uses: count, pct: Math.round(part * 100) })}
                   >
                     {count === 0 ? '·' : `${Math.round(part * 100)} %`}
+                    {count > 0 && <small>{count.toLocaleString()}</small>}
                   </td>
                 )
               })}

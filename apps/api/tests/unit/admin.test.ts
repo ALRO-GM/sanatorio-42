@@ -109,6 +109,88 @@ describe('comunidad', () => {
       )
     })
 
+    it('los recorridos dicen por dónde se entra, por dónde se pasa y dónde se acaba', async () => {
+      const { usage } = services
+      const boss = actor('eva', { admin: true })
+
+      // `ana` entra seis veces por el expediente; casi siempre sigue al tablón,
+      // donde se queda un buen rato, y de ahí a veces a la red, donde acaba.
+      await usage.record(actor('ana'), {
+        counts: {},
+        flows: { 'start>expediente': 6, 'expediente>tablon': 5, 'tablon>red': 2 },
+        time: { 'nav.expediente': [30, 0, 0], 'nav.tablon': [900, 0, 0] },
+      })
+      await usage.record(actor('ana'), { counts: {}, time: { 'nav.red': [300, 0, 0] } })
+      await usage.record(actor('leo'), {
+        counts: {},
+        flows: { 'start>tablon': 1, 'tablon>red': 3 },
+      })
+
+      const seen = await usage.flows(boss, {})
+
+      expect(seen.sessions).toBe(7)
+      expect(seen.flows[0]).toEqual({ from: 'start', to: 'expediente', count: 6, people: 1 })
+      expect(seen.flows.find((flow) => flow.to === 'red')).toMatchObject({ count: 5, people: 2 })
+
+      const [first, second, third] = seen.sections
+
+      // El tablón: seis llegadas, cinco siguen. Mucho rato cada vez.
+      expect(first).toEqual({
+        key: 'tablon',
+        visits: 6,
+        entries: 1,
+        exits: 1,
+        onward: 5,
+        seen: 900,
+        avgSeen: 150,
+        exitRate: 1 / 6,
+        role: 'stay',
+      })
+      // El expediente: se entra por ahí, cinco segundos y a otra cosa.
+      expect(second).toMatchObject({
+        key: 'expediente',
+        visits: 6,
+        entries: 6,
+        exits: 1,
+        avgSeen: 5,
+        role: 'pass',
+      })
+      // La red: de ahí no se va a ningún sitio.
+      expect(third).toMatchObject({ key: 'red', visits: 5, exits: 5, exitRate: 1, role: 'end' })
+
+      // Las de una sola persona.
+      expect((await usage.flows(boss, { login: 'leo' })).sessions).toBe(1)
+      await expectCode(usage.flows(actor('ana'), {}), 'forbidden')
+      await expectCode(
+        usage.record(actor('ana'), { counts: {}, flows: { 'tablon->red': 1 } }),
+        'invalid_input',
+      )
+    })
+
+    it('quien administra ve quién está conectado y cuánto lleva su sesión', async () => {
+      const { usage, repositories } = services
+      const boss = actor('eva', { admin: true })
+      const at = (): string => new Date(clock.now()).toISOString()
+      const start = at()
+
+      await repositories.profiles.touch('ana', start)
+      clock.advance(3 * MINUTE)
+      await repositories.profiles.touch('ana', at())
+      await repositories.profiles.touch('leo', at())
+
+      // `ana` lleva tres minutos; `leo` acaba de llegar.
+      expect((await usage.online(boss)).people).toMatchObject([
+        { login: 'ana', since: start, seenAt: at() },
+        { login: 'leo', since: at() },
+      ])
+
+      // Sin señales de vida un rato, deja de salir; al volver, es otra sesión.
+      clock.advance(20 * MINUTE)
+      await repositories.profiles.touch('leo', at())
+      expect((await usage.online(boss)).people).toMatchObject([{ login: 'leo', since: at() }])
+      await expectCode(usage.online(actor('ana')), 'forbidden')
+    })
+
     it('el uso por horas no se borra solo: se quita a mano, entero o por fechas', async () => {
       const { usage, admin } = services
       const boss = actor('eva', { admin: true })
@@ -135,6 +217,7 @@ describe('comunidad', () => {
           'broadcasts',
           'checkins',
           'usage',
+          'flows',
           'clicker_capital',
           'clicker_alerts',
           'clicker_cheats',

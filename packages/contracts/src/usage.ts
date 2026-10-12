@@ -16,6 +16,11 @@ export type UsageSend = {
    * `[viéndola, abierta detrás de otra ventana, con la pestaña oculta]`.
    */
   time?: Record<string, [seen: number, back: number, hidden: number]>
+  /**
+   * Pasos de una sección a otra desde el último envío: `"tablon>red": 2`. Al
+   * entrar en la web, el primero viene de `start`.
+   */
+  flows?: Record<string, number>
 }
 
 /** Lo que se mide de un tramo: pulsaciones, tiempo y tráfico con la API. */
@@ -65,4 +70,55 @@ export type UsageHeatmap = {
   groups: { id: string; people: number }[]
   /** Un elemento por fila; `counts[i]` son los usos del grupo `groups[i]`. */
   rows: { key: string; counts: number[] }[]
+}
+
+/**
+ * `GET /admin/flows?from=&to=&login=`: cómo se navega por la web en un periodo,
+ * de todo el mundo o de una persona. Solo admins.
+ */
+export type UsageFlows = {
+  from: string
+  to: string
+  login: string | null
+  /** Veces que se ha entrado en la web. */
+  sessions: number
+  /** Una fila por sección, la más visitada primero. */
+  sections: {
+    /** La sección, sin el `nav.` (`tablon`). */
+    key: string
+    /** Veces que se ha llegado, desde otra sección o al entrar. */
+    visits: number
+    /** Las que fueron lo primero que se abrió. */
+    entries: number
+    /** Las que no siguieron a otra sección: ahí se acabó la visita a la web. */
+    exits: number
+    /** Las que sí siguieron a otra. */
+    onward: number
+    /** Segundos mirándola, en total y por visita. */
+    seen: number
+    avgSeen: number
+    /** Parte de las visitas que acaban ahí, de 0 a 1. */
+    exitRate: number
+    /**
+     * Qué papel hace: `pass`, de paso (poco rato y se sigue); `end`, final de
+     * trayecto (casi siempre lo último); `stay`, de estancia (ahí se pasa el
+     * rato). `null` si no destaca o hay pocas visitas.
+     */
+    role: 'pass' | 'end' | 'stay' | null
+  }[]
+  /** Los pasos, el más repetido primero. `from` vale `start` al entrar. */
+  flows: { from: string; to: string; count: number; people: number }[]
+}
+
+/** `GET /admin/online`: quién tiene la web abierta ahora. Solo admins. */
+export type OnlineUsers = {
+  /** La hora de la API, para contar cuánto lleva cada sesión. */
+  now: string
+  people: {
+    login: string
+    image: string | null
+    /** Cuándo empezó la sesión en curso, y su última señal de vida. */
+    since: string
+    seenAt: string
+  }[]
 }
