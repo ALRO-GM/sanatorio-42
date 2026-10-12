@@ -98,3 +98,60 @@ el segundo compra.
   <https://mechanicsofmagic.com/2025/05/24/cookie-clicker-satisfaction-of-doing-nothing/>
 - Wiki de Cookie Clicker (leche, edificios, producción):
   <https://cookieclicker.wiki.gg/wiki/Milk>, <https://cookieclicker.wiki.gg/wiki/Building>
+
+## Trampas
+
+La partida la lleva el navegador, así que quien quiera puede tocarla. La API no
+juega, pero comprueba en cada guardado que las cuentas salen
+(`apps/api/src/modules/clicker/cheat.rules.ts`):
+
+- Lo que hay sin gastar más lo que costó lo que se tiene no puede pasar de lo
+  escrito en la partida. Los edificios los cuenta la API; las mejoras, la web.
+- Lo escrito desde el último guardado no puede pasar de lo que da tiempo, con
+  la mejor racha, las pulsaciones contadas y los bugs que había pegados. El
+  tiempo es el del servidor, así que adelantar el reloj no sirve.
+- Las líneas por segundo y el prestigio no pueden pasar de lo que cabe con lo
+  escrito en total.
+
+Los márgenes son anchos a propósito: pillar a quien no ha hecho nada sale más
+caro que dejar pasar una trampa pequeña. Quien se sepa las reglas puede ir algo
+más rápido de lo normal sin que se note; lo que no puede es dar un salto.
+
+Qué pasa al pillar una:
+
+1. **Primera**: no se guarda, la partida vuelve a la buena, título «Hacker
+   ético» en el banner y logro.
+2. **Segunda**: el título pasa a «Hacker poco ético», y otro logro.
+3. **Tercera**: «Hacker desencriptado», el último logro, y se venden todos los
+   edificios a la mitad de lo que costaron (lo normal es un 25 %). Las mejoras
+   se quedan.
+4. **De la cuarta en adelante**: se vende todo otra vez, el título lleva al lado
+   las veces que van, y sale uno de diez mensajes, cada vez más cansados.
+
+El título se pone solo en el banner cada vez; quien quiera puede cambiarlo por
+otro en su expediente. En el panel de gestión, la pestaña Code Clicker enseña a
+quién se ha pillado, cuántas veces y por qué la última.
+
+### Indulto
+
+Cada partida rechazada se guarda tal como llegó. Si resulta que no era trampa,
+quien administra la indulta desde la ficha de esa persona en el panel: esa
+partida pasa a ser la que está en curso, se le descuenta la trampa, se anula la
+venta pendiente y el banner vuelve al título que tenía. La copia se borra.
+
+### Capital
+
+El capital es todo lo que vale una partida: las líneas sin gastar, lo que costó
+lo comprado y lo que devolverán los bugs. Comprar no lo mueve y aplastar un bug
+tampoco, así que jugando limpio sube poco a poco y un salto se ve.
+
+La web lo apunta cada segundo y lo manda con cada guardado. La API mira esos
+segundos al llegar y guarda el historial para siempre, cada vez con menos
+detalle: lo del último día, un punto cada diez segundos; lo de la última
+semana, uno por hora; lo anterior, uno por día. Es lo que pinta la gráfica de
+las estadísticas, en escala logarítmica, con tramos de un toque, dos fechas a
+mano y arrastrar para acercarse. Si en diez segundos o
+menos el capital se multiplica por tres o más y el guardado no se ha dado por
+trampa, queda un aviso en el panel con el segundo a segundo de alrededor. No
+castiga a nadie: es para mirarlo. Una pull request dorada con racha de
+pulsaciones puede dar un salto así jugando limpio, y el aviso lo dice.

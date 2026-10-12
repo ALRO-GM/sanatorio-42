@@ -10,7 +10,19 @@ import { BigKey, Tile } from './art'
 import { CardView } from './Card'
 import { cardFor } from './cards'
 import type { Tip } from './cards'
-import { ACHIEVEMENTS, BUGS, BUILDINGS, CAFFEINE_PER_ACHIEVEMENT, GOLDEN, UPGRADE } from './data'
+import { Bust } from './Bust'
+import { CapitalHistory } from './CapitalHistory'
+import type { Busted } from './Bust'
+import {
+  ACHIEVEMENTS,
+  BUGS,
+  BUILDINGS,
+  CAFFEINE_PER_ACHIEVEMENT,
+  FORCED_REFUND,
+  GOLDEN,
+  hiddenAchievement,
+  UPGRADE,
+} from './data'
 import { useEgg } from './egg'
 import {
   baseCps,
@@ -27,7 +39,10 @@ import {
   prestigeAfter,
   priceOf,
   reachedStage,
+  capitalOf,
+  invested,
   recompile,
+  sellAll,
   refundOf,
   restore,
   sell,
@@ -41,7 +56,15 @@ import type { Game } from './engine'
 import { buildingShare, levelProgress, reach } from './insight'
 import { Backdrop, Coffee, CursorRing, drinkOf, hueOf, Skyline } from './scene'
 import { play, setSound, soundOn } from './sound'
-import { canResume, newSession, readLocal, writeLocal } from './sync'
+import {
+  canResume,
+  markCaught,
+  newSession,
+  readLocal,
+  sample,
+  seenCaught,
+  writeLocal,
+} from './sync'
 import { achievementText, fill, newsFor, short, textsOf, upgradeText } from './texts'
 
 /** Cada cuánto se hacen cuentas y se repinta, y cada cuánto se guarda. */
@@ -50,6 +73,8 @@ const LOCAL_SAVE_MS = 10_000
 const SERVER_SAVE_MS = 60_000
 /** Cada cuánto se vuelve a intentar cargar si la API no contestó. */
 const RETRY_MS = 30_000
+/** Tras un guardado rechazado, lo que se espera antes de volver a recargar por otro. */
+const REFUSED_WAIT_MS = 10_000
 const NEWS_MS = 13_500
 /** Lo que se queda en pantalla un aviso (un logro, el efecto de una pull request). */
 const TOAST_MS = 7500
@@ -139,6 +164,13 @@ export function CodeClicker({ me, onExit }: { me: string; onExit: () => void }) 
   const [stale, setStale] = useState(false)
   // Lo mismo que `stale`, a mano para el guardado, que no se rehace al cambiar.
   const lost = useRef(false)
+  // Veces que la API ha pillado trampas, y la ventana que lo cuenta.
+  const caught = useRef(0)
+  const [bust, setBust] = useState<Busted | null>(null)
+  const refusedAt = useRef(0)
+  // El capital segundo a segundo, a la espera de mandarlo con el próximo guardado.
+  const samples = useRef<[number, number][]>([])
+  const reload = useRef<() => void>(() => undefined)
   const counter = useRef(0)
   const plus = useRef(egg.plus)
   const heard = useRef(false)
@@ -174,6 +206,8 @@ export function CodeClicker({ me, onExit }: { me: string; onExit: () => void }) 
 
     if (!toServer || rev === null) return
 
+    const sent = [...samples.current]
+
     api
       .saveClicker({
         save: saved,
@@ -183,10 +217,28 @@ export function CodeClicker({ me, onExit }: { me: string; onExit: () => void }) 
         perSecond: baseCps(current),
         achievements: current.achieved.length,
         prestige: current.prestige,
+        spent: invested(current),
+        capital: sent,
       })
       .then(
         (done) => {
-          base.current = done.rev
+          if (!done.refused) {
+            base.current = done.rev
+            // Lo mandado ya está allí. Se deja el último punto, para que un
+            // salto entre un envío y el siguiente también se vea.
+            samples.current = samples.current.filter(([at]) => at >= (sent.at(-1)?.[0] ?? 0))
+
+            return
+          }
+
+          samples.current = []
+
+          // La API no se la cree: se vuelve a la última partida buena, y la
+          // carga se encarga de contar qué ha pasado.
+          if (Date.now() - refusedAt.current > REFUSED_WAIT_MS) {
+            refusedAt.current = Date.now()
+            reload.current()
+          }
         },
         (error: unknown) => {
           if (error instanceof ApiError && error.status === 409) {
@@ -202,39 +254,60 @@ export function CodeClicker({ me, onExit }: { me: string; onExit: () => void }) 
    * juega con la copia del navegador y se reintenta. Con `replace` se cambia la
    * partida en curso por la de la API (tras haberla seguido en otro sitio).
    */
-  const load = useCallback(async (replace: boolean): Promise<void> => {
-    const local = readLocal()
+  const load = useCallback(
+    async (replace: boolean): Promise<void> => {
+      const local = readLocal()
 
-    try {
-      const state = await api.getClicker()
+      try {
+        const state = await api.getClicker()
 
-      names.current = state.names
+        names.current = state.names
 
-      if (game.current === null || replace) {
-        game.current =
-          restore(state.save, Date.now()) ??
-          (replace ? null : restore(local.save, Date.now())) ??
-          newGame(Date.now())
-      } else if (!canResume(state, local)) {
-        // Se jugó sin conexión, y mientras tanto en otro sitio: no se pisa.
-        lost.current = true
-        setStale(true)
+        if (game.current === null || replace) {
+          // Los puntos de la partida que se deja no valen para la que entra.
+          samples.current = []
+          game.current =
+            restore(state.save, Date.now()) ??
+            (replace ? null : restore(local.save, Date.now())) ??
+            newGame(Date.now())
+        } else if (!canResume(state, local)) {
+          // Se jugó sin conexión, y mientras tanto en otro sitio: no se pisa.
+          lost.current = true
+          setStale(true)
+          setOffline(false)
+
+          return
+        }
+
+        base.current = state.rev
+        lost.current = false
+        setStale(false)
         setOffline(false)
+        caught.current = state.caught
+        // Si han indultado alguna, que la siguiente vuelva a avisar.
+        if (state.caught < seenCaught()) markCaught(state.caught)
 
-        return
+        // A la tercera trampa se vende todo, y hasta entonces la API no guarda nada.
+        const sold = state.saleDue ? sellAll(game.current, FORCED_REFUND) : null
+
+        if (sold !== null) save(true)
+        if (sold !== null || state.caught > seenCaught()) {
+          setBust({ n: state.caught, sold })
+          markCaught(state.caught)
+        }
+      } catch {
+        game.current ??= restore(local.save, Date.now()) ?? newGame(Date.now())
+        setOffline(true)
+      } finally {
+        setLoaded(true)
       }
+    },
+    [save],
+  )
 
-      base.current = state.rev
-      lost.current = false
-      setStale(false)
-      setOffline(false)
-    } catch {
-      game.current ??= restore(local.save, Date.now()) ?? newGame(Date.now())
-      setOffline(true)
-    } finally {
-      setLoaded(true)
-    }
-  }, [])
+  reload.current = () => {
+    void load(true)
+  }
 
   useEffect(() => {
     void load(false)
@@ -260,13 +333,14 @@ export function CodeClicker({ me, onExit }: { me: string; onExit: () => void }) 
 
       if (current === null) return
 
-      for (const id of tick(current, Date.now(), Math.random, plus.current)) {
+      for (const id of tick(current, Date.now(), Math.random, plus.current, caught.current)) {
         const [title, text] = achievementText(id, lang)
 
         toast({ icon: 'trophy', title, text, tier: ACHIEVEMENTS.indexOf(id) % 11 })
         play('achievement', heard.current)
       }
 
+      sample(samples.current, Date.now(), capitalOf(current))
       setFrame((value) => value + 1)
     }, FRAME_MS)
     const local = window.setInterval(() => {
@@ -394,6 +468,9 @@ export function CodeClicker({ me, onExit }: { me: string; onExit: () => void }) 
   const now = Date.now()
   const stage = stageOf(current, now)
   const reached = reachedStage(current)
+  const shownAchievements = ACHIEVEMENTS.filter(
+    (id) => !hiddenAchievement(id) || current.achieved.includes(id),
+  )
   const cps = cpsOf(current, now)
   const upgrades = shop(current, now)
   const all = current.before + current.total
@@ -567,6 +644,16 @@ export function CodeClicker({ me, onExit }: { me: string; onExit: () => void }) 
             {ui('staleLoad')}
           </button>
         </p>
+      )}
+      {bust !== null && (
+        <Bust
+          key={bust.n}
+          bust={bust}
+          lang={lang}
+          onClose={() => {
+            setBust(null)
+          }}
+        />
       )}
       {offline && !stale && (
         <p className="cc-sync" role="status">
@@ -815,6 +902,11 @@ export function CodeClicker({ me, onExit }: { me: string; onExit: () => void }) 
                 {ui('caffeine', { pct: Math.round(caffeine(current) * 100) })} ·{' '}
                 {ui('caffeineAbout')}
               </p>
+              <CapitalHistory
+                lang={lang}
+                label={ui('capital', { n: number(capitalOf(current)) })}
+                live={capitalOf(current)}
+              />
               <p className="cc-hint">{ui('prestigeAbout')}</p>
               {prestigeAfter(current) > current.prestige ? (
                 <>
@@ -864,14 +956,15 @@ export function CodeClicker({ me, onExit }: { me: string; onExit: () => void }) 
           {tab === 'achievements' && (
             <>
               <p className="cc-hint">
-                {current.achieved.length} / {ACHIEVEMENTS.length} ·{' '}
+                {current.achieved.length} / {shownAchievements.length} ·{' '}
                 {ui('caffeine', {
                   pct: Math.round(current.achieved.length * CAFFEINE_PER_ACHIEVEMENT * 100),
                 })}
               </p>
               <div className="cc-achievements">
-                {ACHIEVEMENTS.map((id, index) => {
+                {shownAchievements.map((id) => {
                   const got = current.achieved.includes(id)
+                  const index = ACHIEVEMENTS.indexOf(id)
 
                   return (
                     <span

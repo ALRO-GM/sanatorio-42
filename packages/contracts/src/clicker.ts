@@ -18,6 +18,13 @@ export type ClickerState = {
    * si ya no es esa, es que se ha seguido jugando en otro sitio.
    */
   rev: number
+  /** Veces que le han pillado haciendo trampas. */
+  caught: number
+  /**
+   * Le toca vender todo lo que tiene (a la mitad de lo que costó) por haber
+   * hecho trampas tres veces o más: hasta entonces no se guarda nada.
+   */
+  saleDue: boolean
   /** Logins de quienes más corrigen en su campus: salen en las noticias del juego. */
   names: string[]
 }
@@ -34,10 +41,65 @@ export type ClickerSaveInput = {
   perSecond: number
   achievements: number
   prestige: number
+  /** Lo que costó todo lo que se tiene, edificios y mejoras. */
+  spent: number
+  /**
+   * El capital (líneas sin gastar, lo que costó lo que se tiene y lo que deben
+   * los bugs) segundo a segundo desde el último guardado: `[segundo, capital]`.
+   */
+  capital?: [at: number, capital: number][]
 }
 
-/** Respuesta de `PUT /clicker/save`: la `rev` que queda tras guardar. */
-export type ClickerSaved = { rev: number }
+/**
+ * `GET /clicker/capital?from=&to=`: el historial de capital entre dos momentos
+ * (segundos desde 1970; sin ellos, entero), en 300 puntos como mucho.
+ *
+ * Lo del último día se guarda cada diez segundos; lo de la última semana, cada
+ * hora; lo anterior, cada día. No se borra.
+ */
+export type ClickerCapital = {
+  /** `[segundo desde 1970, capital]`, del más antiguo al más nuevo. */
+  points: [at: number, capital: number][]
+  /** El primer y el último segundo de los que hay historial; `null` si no hay. */
+  first: number | null
+  last: number | null
+}
+
+/** Una partida que se rechazó por tramposa y sigue guardada, por si hay que indultarla. */
+export type ClickerCheat = {
+  id: number
+  login: string
+  at: string
+  /** `figures`, `ledger`, `rate`, `speed` o `prestige`. */
+  why: string
+  total: number
+  perSecond: number
+}
+
+/** Un salto de capital demasiado grande en pocos segundos que no se dio por trampa. */
+export type ClickerAlert = {
+  id: number
+  login: string
+  at: string
+  /** Segundos que duró el salto, y el capital antes y después. */
+  seconds: number
+  from: number
+  to: number
+  /** Se abrió una pull request dorada por entonces: suele ser la explicación. */
+  golden: boolean
+  /** El capital segundo a segundo alrededor del salto. */
+  trace: [at: number, capital: number][]
+}
+
+/** Respuesta de `PUT /clicker/save`. */
+export type ClickerSaved = {
+  /** La `rev` que queda tras guardar. */
+  rev: number
+  /** Veces que le han pillado haciendo trampas, contando esta si lo es. */
+  caught: number
+  /** La partida no se ha guardado: no cuadra, o falta la venta forzosa. Toca volver a cargar. */
+  refused: boolean
+}
 
 export type ClickerRank = {
   /** Puesto, empezando en 1. */
@@ -77,6 +139,11 @@ export type ClickerPlayer = {
   saves: number
   /** Última vez que pulsó la cruz o guardó. */
   updatedAt: string
+  /** Trampas que se le han pillado, por qué la última y cuándo. */
+  caught: number
+  /** `figures`, `ledger`, `rate`, `speed` o `prestige`. */
+  caughtWhy: string | null
+  caughtAt: string | null
   /**
    * Segundos con el juego abierto en el periodo: viéndolo, con otra ventana
    * delante y con la pestaña oculta.
@@ -109,10 +176,16 @@ export type ClickerUsage = {
     /** Líneas escritas y guardados entre todas las partidas. */
     total: number
     saves: number
+    /** Personas a las que se ha pillado alguna trampa. */
+    caught: number
     seen: number
     back: number
     hidden: number
   }
   /** Una fila por persona, la que más ha escrito primero. */
   players: ClickerPlayer[]
+  /** Saltos de capital por mirar, el más reciente primero. */
+  alerts: ClickerAlert[]
+  /** Partidas rechazadas que se pueden indultar, la más reciente primero. */
+  cheats: ClickerCheat[]
 }

@@ -137,8 +137,8 @@ reservada»). Ya no existe `POST /reactions`: la XP por ayudar sale solo de una
 sesión reservada.
 
 GET /users/:login/profile → el expediente público de otra persona: `login`,
-`image`, `xp`, `title`, `achievements`, `reactions` y `health` (como
-`/me/health`). No lleva preferencias ni desglose de XP. `404`
+`image`, `xp`, `title`, `hacks` (las veces que le han pillado haciendo trampas
+en Code Clicker), `achievements`, `reactions` y `health` (como `/me/health`). No lleva preferencias ni desglose de XP. `404`
 si no conocemos a nadie con ese login.
 
 ## Avisos, chat y asistencia de un evento
@@ -157,8 +157,8 @@ calendario (y va a ir) puede leer o escribir; el resto recibe `403`.
   pasó media hora desde el inicio sin respuesta y quedaste como no asistido
   (se apunta en el chat con `reason: "missed"`); `info`: no pide respuesta.
 - POST /events/alerts/ack → `{ "id" }`: cierra un aviso `missed`. 204.
-- Los mensajes se borran a los 90 días; el registro de intentos de códigos
-  (`/admin/checkins`), al año. El tiempo validado no se borra.
+- Ni los mensajes ni el registro de intentos de códigos (`/admin/checkins`) se
+  borran solos: los quita quien administra (ver «Borrado de datos»).
 - GET /events/attendance?id= → solo pizarras y sesiones de ayuda aceptadas. Quien
   organiza recibe `codes: { start, end }` (cuatro caracteres cada uno) y lo
   validado por cada persona; quien asiste, lo suyo en `mine`. Las dos partes
@@ -552,10 +552,13 @@ Se llega pulsando cien veces la cruz de la cabecera y eligiendo la pastilla
 roja. La API no juega: cuenta pulsaciones, guarda qué pastilla se eligió y
 custodia la partida. Las reglas están en `apps/web/src/features/clicker`.
 
-GET /clicker → por dónde vas y tu partida: `{ plus, pill, save, rev, names }`.
+GET /clicker → por dónde vas y tu partida:
+`{ plus, pill, save, rev, caught, saleDue, names }`.
 
 - `names` son los logins que más corrigen en tu campus, para las noticias del
   juego. Solo viene con la pastilla roja.
+- `caught` son las veces que te han pillado haciendo trampas, y `saleDue` dice
+  que te toca vender todos los edificios antes de poder guardar.
 
 POST /clicker/plus → `{ "count": 3 }`: pulsaciones de la cruz desde el último
 envío (25 como mucho). Devuelve `{ plus, pill }`. Con pastilla elegida ya no suma.
@@ -563,30 +566,99 @@ envío (25 como mucho). Devuelve `{ plus, pill }`. Con pastilla elegida ya no su
 POST /clicker/pill → `{ "pill": "red" }` o `"blue"`. Una sola vez, y solo con
 cien pulsaciones: `409` si falta o si ya se eligió. La azul no tiene vuelta atrás.
 
-PUT /clicker/save → `{ rev }`. Recibe
-`{ save, rev, session, total, perSecond, achievements, prestige }`: `rev` es la
-que se cargó (o la del último guardado) y `session` un identificador de la
-pestaña. `409` si la partida se ha seguido en otro dispositivo: solo entra un
-guardado de la pestaña que hizo el último o que parta de la `rev` que hay.
-`403` sin la pastilla roja. La partida pesa 80 kB como mucho; las cifras no se
-comprueban, y el `total` de la clasificación nunca baja.
+PUT /clicker/save → `{ rev, caught, refused }`. Recibe
+`{ save, rev, session, total, perSecond, achievements, prestige, spent }`: `rev`
+es la que se cargó (o la del último guardado), `session` un identificador de la
+pestaña y `spent` lo que costó todo lo que se tiene. `409` si la partida se ha
+seguido en otro dispositivo: solo entra un guardado de la pestaña que hizo el
+último o que parta de la `rev` que hay. `403` sin la pastilla roja; `400` si
+`save` no es una partida. La partida pesa 80 kB como mucho, y el `total` de la
+clasificación nunca baja.
+
+Trampas (`modules/clicker/cheat.rules.ts`). Un guardado que no cuadra no entra:
+se contesta `refused: true` y la web vuelve a cargar la última partida buena. No
+cuadra si las cifras no son las de la partida (`figures`), si se tiene más de lo
+que se ha escrito (`ledger`), si se ha escrito más de lo que da tiempo desde el
+último guardado, ni con la mejor racha (`rate`), o si hay más producción
+(`speed`) o prestigio (`prestige`) del que cabe con lo escrito. Los márgenes son
+anchos: solo cae lo desproporcionado.
+
+- Cada trampa suma a `caught`, como mucho una cada cinco minutos, y pone un
+  título en el banner: `hacker_etico` la primera, `hacker_poco_etico` la segunda
+  y `hacker_cazado` de la tercera en adelante (el expediente trae `hacks`, las
+  veces, para el contador).
+- De la tercera en adelante queda `saleDue`: la web vende todos los edificios a
+  la mitad de lo que costaron y guarda. Mientras no llegue una partida sin
+  edificios, los guardados se contestan con `refused: true`.
+- La partida rechazada se guarda tal como llegó (las diez últimas de cada
+  persona), por si hay que indultarla.
+
+Capital. Con cada guardado la web manda `capital`: `[segundo, capital]` de cada
+segundo desde el anterior (el capital son las líneas sin gastar, lo que costó lo
+que se tiene y lo que deben los bugs). La API mira esos segundos y, si el
+capital se multiplica por tres o más en diez segundos o menos (y pasa del
+millón) sin que el guardado se haya dado por trampa, deja un aviso para quien
+administra con los segundos de alrededor.
+
+El historial no se borra: se aligera. Lo del último día se guarda cada diez
+segundos; cada hora, un trabajo deja lo que tiene más de un día en un punto por
+hora, y lo que tiene más de una semana, en uno por día.
+
+GET /clicker/capital?from=&to= → `{ points, first, last }`: tu historial,
+`[segundo, capital]`, en 300 puntos como mucho. `from` y `to` (segundos desde
+1970) piden solo un tramo, que llega con el detalle que haya de esas fechas.
+`first` y `last` son el primer y el último segundo con historial.
+
+GET /admin/clicker/capital?login=&from=&to= → lo mismo, de otra persona. Solo admins.
+
+POST /admin/clicker/cheats/:id/pardon → 204. Solo admins. Indulta una trampa: la
+partida rechazada pasa a ser la que está en curso (con sus cifras), se descuenta
+de `caught`, se quita la venta pendiente, el banner vuelve al título de antes y
+la copia se borra. `404` si ya no está. Quien tuviera la partida abierta recibe
+`409` al guardar y tiene que cargarla.
+
+DELETE /admin/clicker/alerts/:id → 204. Solo admins. Descarta un aviso de salto.
 
 GET /clicker/board → `{ entries, me }`: quién ha escrito más código, de
 cualquier campus. `level` es `floor(3 · log10(1 + total))`. `403` sin la roja.
 
-GET /admin/clicker?days= → `{ days, totals, players }`: el uso del juego. Solo
+GET /admin/clicker?days= → `{ days, totals, players, alerts, cheats }`: el uso del juego. Solo
 admins. `days` (1 a 90, por defecto 7) son los días que cubre el tiempo.
 
 - `totals`: `pressed` (pulsaron la cruz), `reached` (llegaron a cien), `red`,
-  `blue`, `players` (con partida guardada), `active` (pulsaron o guardaron en el
+  `blue`, `players` (con partida guardada), `caught` (con trampas), `active` (pulsaron o guardaron en el
   periodo), `total` (líneas), `saves` y el tiempo con el juego abierto
   (`seen`, `back`, `hidden`, en segundos).
 - `players`: una fila por persona que ha pulsado la cruz, con `plus`, `pill`,
   `level`, `total`, `perSecond`, `achievements`, `prestige`, `clicks`
-  (pulsaciones de la tecla, leídas de la partida), `saves`, `updatedAt` y su
-  tiempo en el periodo.
+  (pulsaciones de la tecla, leídas de la partida), `saves`, `updatedAt`, las
+  trampas (`caught`, `caughtWhy`, `caughtAt`) y su tiempo en el periodo.
+- `alerts`: los saltos de capital por mirar (`login`, `at`, `seconds`, `from`,
+  `to`, `golden` y `trace`), y `cheats`: las partidas rechazadas que se pueden
+  indultar (`id`, `login`, `at`, `why`, `total`, `perSecond`).
 - El tiempo sale del uso de la sección `nav.clicker`; lo demás es de siempre,
   porque de la partida solo se guarda cómo está ahora.
+
+## Borrado de datos
+
+La API no borra nada por viejo. Quien administra elige qué quitar. Cada módulo
+declara sus datos borrables en `stores` (`core/db/data-store.ts`).
+
+GET /admin/data → `{ kinds: [{ id, rows }] }`: los tipos de dato y cuántas filas
+tiene cada uno. Ahora: `traffic`, `tickets`, `notices`, `messages`,
+`event_alerts`, `broadcasts` (con sus respuestas), `checkins`, `usage`,
+`clicker_capital`, `clicker_alerts` y `clicker_cheats`.
+
+POST /admin/data/count → `{ rows }`. Recibe `{ kind, login?, before?, from? }`:
+sin `login` son las filas de todo el mundo; `before` deja solo lo anterior a ese
+día y `from`, lo de ese día en adelante (`YYYY-MM-DD`, UTC). Sin fechas, todo.
+
+POST /admin/data/delete → `{ rows }`: lo mismo, pero las borra. No hay vuelta
+atrás. `404` si el tipo no existe. Las tres, solo admins.
+
+Lo único que sigue borrándose solo es interno: la cola de peticiones a 42 ya
+servidas, y las copias de partidas rechazadas de Code Clicker que pasan de diez
+por persona.
 
 ## Comunicados
 
@@ -640,7 +712,7 @@ POST /usage acepta, además de `counts`, el tiempo pasado en cada sección:
 - Los tres números son segundos: viendo la web (pestaña visible y ventana con
   el foco), con otra ventana delante, y con la pestaña oculta. Hasta 900 por
   envío.
-- Se guarda por persona, día, hora (UTC) y elemento, y se borra a los 180 días.
+- Se guarda por persona, día, hora (UTC) y elemento. No se borra solo.
 
 GET /admin/stats?from=&to=&login= → solo admins. Días UTC, los dos incluidos;
 por defecto la última semana, y 92 días como mucho.
@@ -694,7 +766,7 @@ GET /chats → tus conversaciones directas, la más reciente primero.
   `GET /events/messages?id=dm:<a>:<b>` y `POST /events/messages`, con los dos
   logins en orden alfabético. `403` si no eres uno de los dos, si el orden no
   es ese o si alguno no existe.
-- Valen los mismos topes de mensajes por minuto, se borran a los 90 días y
+- Valen los mismos topes de mensajes por minuto, no se borran solos y
   avisan en el buzón con `kind: "chat"` y `ref` igual al id.
 
 ## Estado de salud
@@ -914,8 +986,7 @@ Ningún módulo escribe en el buzón: cada uno emite un evento `notice` y el mó
 
 Quien provoca un aviso no se avisa a sí. Mientras un aviso sigue sin leer, lo
 mismo que vuelve a pasar (otro mensaje en el mismo chat) no crea otro: sube
-`count`. Abrir un chat da por leído su aviso. Los leídos se borran al mes; los
-que nadie lee, a los tres.
+`count`. Abrir un chat da por leído su aviso. Los avisos no se borran solos.
 
 ## Salud del servicio
 

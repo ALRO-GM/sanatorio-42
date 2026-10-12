@@ -2,7 +2,7 @@
  * API de mentira: buzón, panel de gestión, presupuesto y uso.
  */
 
-import type { Ticket } from '@sanatorio/contracts'
+import type { DataWipe, Ticket } from '@sanatorio/contracts'
 import { ME } from './data'
 import type { Api } from '../types'
 import {
@@ -39,6 +39,9 @@ export const adminMock: Pick<
   | 'sendUsage'
   | 'getStats'
   | 'getUsageHeatmap'
+  | 'getAdminData'
+  | 'countAdminData'
+  | 'deleteAdminData'
 > = {
   async openTicket(ticket) {
     await delay(150)
@@ -374,4 +377,49 @@ export const adminMock: Pick<
       })),
     }
   },
+
+  async getAdminData() {
+    await delay()
+
+    return { kinds: Object.entries(dataRows).map(([id, rows]) => ({ id, rows })) }
+  },
+
+  async countAdminData(scope) {
+    await delay(100)
+
+    return { rows: rowsIn(scope) }
+  },
+
+  async deleteAdminData(scope) {
+    await delay(200)
+
+    const rows = rowsIn(scope)
+
+    dataRows[scope.kind] = (dataRows[scope.kind] ?? 0) - rows
+
+    return { rows }
+  },
+}
+
+/** Filas de cada tipo de dato en la web de mentira. */
+const dataRows: Record<string, number> = {
+  traffic: 5210,
+  tickets: 14,
+  notices: 860,
+  messages: 2340,
+  event_alerts: 96,
+  broadcasts: 7,
+  checkins: 412,
+  usage: 18_300,
+  clicker_capital: 9100,
+  clicker_alerts: 1,
+  clicker_cheats: 0,
+}
+
+/** Aquí no hay fechas de verdad: una persona es la décima parte, y un tramo, la mitad. */
+function rowsIn(scope: DataWipe): number {
+  const all = dataRows[scope.kind] ?? 0
+  const mine = scope.login === undefined ? all : Math.ceil(all / 10)
+
+  return scope.before === undefined && scope.from === undefined ? mine : Math.ceil(mine / 2)
 }

@@ -4,6 +4,7 @@
  */
 
 import type { Db } from '../../core/db/database.js'
+import { tableStore } from '../../core/db/data-store.js'
 import type { AppModule } from '../../core/module.js'
 import type { ReplicaRepository } from '../replica/index.js'
 import { createUsageService } from './usage.service.js'
@@ -23,14 +24,13 @@ export function createUsageModule(deps: {
   return {
     name: 'usage',
     service,
-    jobs: [
-      {
-        name: 'borrado del uso por horas antiguo',
-        everyMs: 24 * 60 * 60_000,
-        run: async () => {
-          await service.purge()
-        },
-      },
+    stores: [
+      tableStore(deps.db, {
+        id: 'usage',
+        table: 'usage_time',
+        login: 'login',
+        date: { column: 'day', as: 'day' },
+      }),
     ],
     routes: (app, { session }) => {
       /** `GET /usage` → cuánto usa la comunidad cada elemento: `{ counts: { "nav.tablon": 120 } }`. */

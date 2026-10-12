@@ -390,3 +390,38 @@ button.seat:focus-visible {
 .direct-row.active {
   background: var(--accent-soft);
 }
+
+/* La ficha fijada al pulsar un puesto: se queda abierta y lleva sus botones. */
+.seat-hover.pinned {
+  z-index: 31;
+  max-width: 260px;
+  pointer-events: auto;
+}
+.seat-hover-close {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
+  display: grid;
+  padding: 0.2rem;
+  color: var(--text-3);
+}
+.seat-hover-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.4rem;
+  margin-top: 0.4rem;
+}
+.seat-hover-actions .pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  text-decoration: none;
+}
+.seat-hover .seat-projects:empty {
+  display: none;
+}
+.seat-hover .seat-reservation {
+  font-size: 0.8rem;
+  color: var(--text-2);
+}

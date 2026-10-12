@@ -12,6 +12,7 @@ import { BudgetCard } from './BudgetCard'
 import { QuotaCard } from './QuotaCard'
 import { BroadcastsTab } from './BroadcastsTab'
 import { ClickerPanel } from './ClickerPanel'
+import { DataPanel } from './DataPanel'
 import { StatsPanel } from './StatsPanel'
 import { UsageHeatmap } from './UsageHeatmap'
 import { Icon } from '../../shared/ui/Icon'
@@ -25,6 +26,7 @@ const TABS = [
   'stats',
   'clicker',
   'casts',
+  'data',
 ] as const
 
 type Tab = (typeof TABS)[number]
@@ -75,6 +77,7 @@ export function AdminPage({ campusId }: { campusId?: number | undefined }) {
       {tab === 'usage' && <UsageHeatmap />}
       {tab === 'stats' && <StatsPanel />}
       {tab === 'clicker' && <ClickerPanel />}
+      {tab === 'data' && <DataPanel />}
       {tab === 'casts' && <BroadcastsTab campusId={campusId} />}
     </section>
   )

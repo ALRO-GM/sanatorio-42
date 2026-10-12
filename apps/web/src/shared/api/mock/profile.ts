@@ -2,6 +2,7 @@
  * API de mentira: expediente, preferencias, estado de salud y ranking.
  */
 
+import { mockHacker } from './clicker'
 import type { PaceRef } from '@sanatorio/contracts'
 
 import { LEVEL_FLOORS, ME, RANKING, TITLES } from './data'
@@ -31,6 +32,7 @@ export const profileMock: Pick<
 
     return {
       login,
+      hacks: 0,
       image: portrait(login),
       xp: {
         total,
@@ -55,6 +57,7 @@ export const profileMock: Pick<
     await delay()
     const xp = levelFor(state.xp)
     const helps = Object.values(state.reactions).reduce((sum, count) => sum + count, 0)
+    const hacker = mockHacker()
     return {
       login: ME.login,
       campusId: state.campusId,
@@ -64,8 +67,13 @@ export const profileMock: Pick<
       admin: true,
       preReview: state.preReview,
       xp,
-      title: state.title,
-      titles: TITLES.map((title) => ({ ...title, unlocked: xp.level >= title.level })),
+      // Como en la API: al pillar una trampa, el título se pone solo.
+      title: hacker.title ?? state.title,
+      hacks: hacker.caught,
+      titles: [
+        ...TITLES.map((title) => ({ ...title, unlocked: xp.level >= title.level })),
+        ...(hacker.title === null ? [] : [{ id: hacker.title, level: 0, unlocked: true }]),
+      ],
       achievements: [
         achievement('first_duty', localStorage.getItem(AVAILABLE_KEY) === null ? 0 : 1, 1),
         achievement('group_therapy', 6, 10),

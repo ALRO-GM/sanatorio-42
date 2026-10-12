@@ -129,18 +129,18 @@ describe('comunicados', () => {
     expect(await broadcasts.reports(boss)).toEqual([])
   })
 
-  it('pasado un mes deja de salir, y pasado medio año se borra', async () => {
-    const { broadcasts } = services
+  it('pasado un mes deja de salir, pero no se borra hasta que lo quita quien administra', async () => {
+    const { broadcasts, admin } = services
 
     await broadcasts.send(boss, { title: 'Viejo', body: 'Hola', audience: { kind: 'all' } })
     clock.advance(31 * 24 * HOUR)
     expect(await broadcasts.count(actor('ana'))).toBe(0)
-    // Sigue en el panel hasta que cumple el plazo.
-    await broadcasts.purge()
+    // Sigue en el panel, por mucho que pase.
+    clock.advance(400 * 24 * HOUR)
     expect(await broadcasts.reports(boss)).toHaveLength(1)
 
-    clock.advance(180 * 24 * HOUR)
-    await broadcasts.purge()
+    await expectCode(admin.wipe(actor('ana'), { kind: 'broadcasts' }, true), 'forbidden')
+    expect(await admin.wipe(boss, { kind: 'broadcasts' }, true)).toEqual({ rows: 1 })
     expect(await broadcasts.reports(boss)).toEqual([])
   })
 })

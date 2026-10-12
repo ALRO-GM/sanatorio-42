@@ -59,8 +59,6 @@ const statsSchema = z.object({
 /** Días que cubren las estadísticas si no se dice otra cosa, y lo máximo que se puede pedir. */
 const STATS_DAYS = 7
 const STATS_MAX_DAYS = 92
-/** Lo que se guarda el uso por horas antes de borrarlo. */
-const KEEP_DAYS = 180
 const DAY_MS = 24 * 60 * 60_000
 
 /** Suma, campo a campo, lo de `add` sobre `into`. */
@@ -286,14 +284,6 @@ export function createUsageService(options: {
           { seen: toNumber(row.seen), back: toNumber(row.back), hidden: toNumber(row.hidden) },
         ]),
       )
-    },
-
-    /** Borra el uso por horas que ya ha cumplido el plazo. Lo lanza un trabajo periódico. */
-    async purge(): Promise<void> {
-      await db.execute({
-        sql: 'DELETE FROM usage_time WHERE day < ?',
-        args: [dayOf(now() - KEEP_DAYS * DAY_MS)],
-      })
     },
 
     /** Cuánto usa la comunidad cada elemento. Se guarda unos minutos. */

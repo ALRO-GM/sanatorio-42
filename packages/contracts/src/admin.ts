@@ -150,3 +150,22 @@ export type LoggedMessage = {
   body: string | null
   at: string
 }
+
+/** `GET /admin/data`: los tipos de dato que se pueden borrar a mano y cuántas filas tiene cada uno. */
+export type AdminData = {
+  kinds: { id: string; rows: number }[]
+}
+
+/**
+ * Cuerpo de `POST /admin/data/count` y `/admin/data/delete`: qué filas. Sin
+ * `login` son las de todo el mundo; sin fechas, todas. Los días van como
+ * `YYYY-MM-DD`, en UTC.
+ */
+export type DataWipe = {
+  kind: string
+  login?: string
+  /** Solo lo anterior a ese día. */
+  before?: string
+  /** Solo lo de ese día en adelante. */
+  from?: string
+}

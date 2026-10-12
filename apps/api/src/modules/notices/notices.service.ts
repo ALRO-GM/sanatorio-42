@@ -25,17 +25,11 @@ export type NoticesServiceOptions = {
   now?: () => number
 }
 
-const DAY = 24 * 60 * 60_000
-
 /** Avisos que se devuelven: los últimos. */
 const LIST_LIMIT = 60
 
 /** Lo que cabe del título o del mensaje: es un aviso, no el mensaje. */
 const TEXT_MAX = 140
-
-/** Los avisos leídos se guardan un mes; los que nadie lee, tres. */
-const KEEP_READ_DAYS = 30
-const KEEP_UNREAD_DAYS = 90
 
 const readSchema = z.object({
   /** Los que se dan por leídos. Sin ellos, todos. */
@@ -147,16 +141,6 @@ export function createNoticesService(options: NoticesServiceOptions) {
               AND read_at IS NULL`,
         args: [iso(), login, kind, ref],
       })
-    },
-
-    /** Borra los avisos viejos. Lo lanza un trabajo periódico. */
-    async purge(): Promise<number> {
-      const result = await db.execute({
-        sql: `DELETE FROM notices WHERE (read_at IS NOT NULL AND read_at < ?) OR updated_at < ?`,
-        args: [iso(now() - KEEP_READ_DAYS * DAY), iso(now() - KEEP_UNREAD_DAYS * DAY)],
-      })
-
-      return result.rowsAffected
     },
   }
 }

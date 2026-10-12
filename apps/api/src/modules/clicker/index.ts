@@ -2,6 +2,7 @@
  * Módulo `clicker`: Code Clicker, la sección secreta de la web.
  */
 
+import { tableStore } from '../../core/db/data-store.js'
 import type { AppModule } from '../../core/module.js'
 import { createClickerService } from './clicker.service.js'
 import type { ClickerService, ClickerServiceOptions } from './clicker.service.js'
@@ -14,6 +15,33 @@ export function createClickerModule(deps: ClickerServiceOptions): ClickerModule 
   return {
     name: 'clicker',
     service,
+    jobs: [
+      {
+        name: 'aligerado del historial de capital',
+        everyMs: 60 * 60_000,
+        run: () => service.compact(),
+      },
+    ],
+    stores: [
+      tableStore(deps.db, {
+        id: 'clicker_capital',
+        table: 'clicker_capital',
+        login: 'login',
+        date: { column: 'at', as: 'seconds' },
+      }),
+      tableStore(deps.db, {
+        id: 'clicker_alerts',
+        table: 'clicker_alerts',
+        login: 'login',
+        date: { column: 'at', as: 'iso' },
+      }),
+      tableStore(deps.db, {
+        id: 'clicker_cheats',
+        table: 'clicker_cheats',
+        login: 'login',
+        date: { column: 'at', as: 'iso' },
+      }),
+    ],
     routes: (app, { session }) => {
       /** `GET /clicker` → cuánto llevas pulsado, qué pastilla elegiste y tu partida. */
       app.get('/clicker', async (request, reply) => {
@@ -44,6 +72,46 @@ export function createClickerModule(deps: ClickerServiceOptions): ClickerModule 
         return reply.send(await service.board(await session.actor(request)))
       })
 
+      /** `GET /clicker/capital?from=&to=` → tu historial de capital, para la gráfica. */
+      app.get<{ Querystring: Record<string, string> }>(
+        '/clicker/capital',
+        async (request, reply) => {
+          reply.header('Cache-Control', 'private, no-store')
+
+          return reply.send(await service.capital(await session.actor(request), request.query))
+        },
+      )
+
+      /** `GET /admin/clicker/capital?login=&from=&to=` → el historial de otra persona. Solo admins. */
+      app.get<{ Querystring: Record<string, string> }>(
+        '/admin/clicker/capital',
+        async (request, reply) => {
+          reply.header('Cache-Control', 'private, no-store')
+
+          return reply.send(await service.capitalFor(await session.actor(request), request.query))
+        },
+      )
+
+      /** `POST /admin/clicker/cheats/:id/pardon` → indulta esa trampa. 204. Solo admins. */
+      app.post<{ Params: { id: string } }>(
+        '/admin/clicker/cheats/:id/pardon',
+        async (request, reply) => {
+          await service.pardon(await session.actor(request), request.params.id)
+
+          return reply.code(204).send()
+        },
+      )
+
+      /** `DELETE /admin/clicker/alerts/:id` → descarta un aviso de salto. 204. Solo admins. */
+      app.delete<{ Params: { id: string } }>(
+        '/admin/clicker/alerts/:id',
+        async (request, reply) => {
+          await service.dismiss(await session.actor(request), request.params.id)
+
+          return reply.code(204).send()
+        },
+      )
+
       /** `GET /admin/clicker?days=` → el uso del juego, general y por persona. Solo admins. */
       app.get<{ Querystring: Record<string, string> }>('/admin/clicker', async (request, reply) => {
         reply.header('Cache-Control', 'private, no-store')
@@ -54,5 +122,6 @@ export function createClickerModule(deps: ClickerServiceOptions): ClickerModule 
   }
 }
 
+export { hackerTitle } from './cheat.rules.js'
 export { clickerLevel, PLUS_GOAL } from './clicker.service.js'
 export type { ClickerService } from './clicker.service.js'

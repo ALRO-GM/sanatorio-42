@@ -16,6 +16,7 @@
  */
 
 import type {
+  AdminData,
   AdminPeople,
   BudgetSettings,
   BudgetStatus,
@@ -29,6 +30,7 @@ import { z } from 'zod'
 
 import type { Actor } from '../../core/actor.js'
 import type { Notify } from '../../core/events.js'
+import type { DataStore } from '../../core/db/data-store.js'
 import type { Db } from '../../core/db/database.js'
 import { toNumber, toText } from '../../core/db/rows.js'
 import { domainError } from '../../core/errors.js'
@@ -61,6 +63,8 @@ export type AdminServiceOptions = {
   guardLevel?: () => Promise<LimitLevel>
   /** Para dejar un aviso en el buzón de quien tiene que enterarse. Sin él, no se avisa. */
   notify?: Notify
+  /** Los datos que cada módulo deja borrar a mano: los junta quien monta la app. */
+  stores?: () => readonly DataStore[]
   now?: () => number
 }
 
@@ -82,6 +86,13 @@ const login = z
   .regex(/^[a-z0-9-]{1,30}$/, 'login no válido')
 
 const roleSchema = z.object({ login, admin: z.boolean() })
+const day = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'La fecha va como AAAA-MM-DD')
+const dataSchema = z.object({
+  kind: z.string().min(1).max(40),
+  login: login.optional(),
+  before: day.optional(),
+  from: day.optional(),
+})
 const blockSchema = z.object({
   login,
   reason: z.string().trim().min(3, 'explica el motivo').max(300),
@@ -755,6 +766,44 @@ export function createAdminService(options: AdminServiceOptions) {
       })
 
       return ticket
+    },
+
+    // --- Datos: nada se borra solo, y esto es lo único que borra -------------
+    /**
+     * Los tipos de dato que se pueden borrar y cuántas filas tiene cada uno.
+     *
+     * @throws {DomainError} `forbidden` si quien pregunta no es admin.
+     */
+    async data(actor: Actor): Promise<AdminData> {
+      assertAdmin(actor)
+
+      const stores = options.stores?.() ?? []
+
+      return {
+        kinds: await Promise.all(
+          stores.map(async (store) => ({ id: store.id, rows: await store.count({}) })),
+        ),
+      }
+    },
+
+    /**
+     * Cuenta o borra las filas de un tipo de dato: de todo el mundo o de una
+     * persona, enteras o solo las de antes (o las de después) de un día.
+     *
+     * @param erase `false` solo cuenta, para enseñar qué se va a borrar.
+     * @returns Cuántas filas son (o eran).
+     * @throws {DomainError} `forbidden` si quien pregunta no es admin;
+     *   `not_found` si ese tipo de dato no existe.
+     */
+    async wipe(actor: Actor, input: unknown, erase: boolean): Promise<{ rows: number }> {
+      assertAdmin(actor)
+
+      const { kind, ...scope } = parse(dataSchema, input)
+      const store = (options.stores?.() ?? []).find((candidate) => candidate.id === kind)
+
+      if (store === undefined) throw domainError('not_found', 'Ese tipo de dato no existe')
+
+      return { rows: erase ? await store.wipe(scope) : await store.count(scope) }
     },
   }
 }

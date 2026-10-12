@@ -8,6 +8,7 @@
 
 import {
   ACHIEVEMENTS,
+  HACK_GOALS,
   BUGS,
   BUILDINGS,
   CAFFEINE_PER_ACHIEVEMENT,
@@ -260,6 +261,47 @@ export function refundOf(game: Game, id: BuildingId, count = 1): number {
   return Math.floor(((base * GROWTH ** from * (GROWTH ** sold - 1)) / (GROWTH - 1)) * REFUND)
 }
 
+/**
+ * Lo que costó todo lo que se tiene, edificios y mejoras. Nunca puede pasar,
+ * junto con lo que hay sin gastar, de lo escrito en la partida: la API lo mira
+ * para saber si las cuentas cuadran.
+ */
+export function invested(game: Game): number {
+  const buildings = BUILDINGS.reduce(
+    (sum, { id, base }) => sum + (base * (GROWTH ** ownedOf(game, id) - 1)) / (GROWTH - 1),
+    0,
+  )
+
+  return game.bought.reduce((sum, id) => sum + (UPGRADE.get(id)?.price ?? 0), buildings)
+}
+
+/**
+ * El capital: todo lo que vale la partida. Las líneas sin gastar, lo que costó
+ * lo que se tiene y lo que devolverán los bugs al aplastarlos. Comprar no lo
+ * mueve y aplastar un bug tampoco; jugando solo sube poco a poco.
+ */
+export function capitalOf(game: Game): number {
+  return game.code + invested(game) + game.bugs.reduce((sum, bug) => sum + bug, 0) * BUGS.back
+}
+
+/**
+ * Vende todos los edificios a `share` de lo que costaron. Las mejoras se
+ * quedan. Devuelve lo cobrado.
+ */
+export function sellAll(game: Game, share: number): number {
+  const paid = Math.floor(
+    BUILDINGS.reduce(
+      (sum, { id, base }) => sum + (base * (GROWTH ** ownedOf(game, id) - 1)) / (GROWTH - 1),
+      0,
+    ) * share,
+  )
+
+  game.owned = {}
+  game.code += paid
+
+  return paid
+}
+
 function earn(game: Game, amount: number): void {
   game.code += amount
   game.total += amount
@@ -473,7 +515,7 @@ export function recompile(game: Game, now: number, random: Random = Math.random)
 }
 
 /** Los logros que tocan y aún no se tienen. `plus` son las pulsaciones de la cruz. */
-function earned(game: Game, plus: number): string[] {
+function earned(game: Game, plus: number, caught: number): string[] {
   const all = game.before + game.total
   const cps = baseCps(game)
   const reached = reachedStage(game)
@@ -486,6 +528,7 @@ function earned(game: Game, plus: number): string[] {
     golden: (index) => game.golden >= (GOLDEN_GOALS[index] ?? Infinity),
     stage: (index) => reached >= index,
     hotfix: () => game.hotfixes > 0,
+    hack: (index) => caught >= (HACK_GOALS[index] ?? Infinity),
     bug: (index) => game.pops >= (BUG_GOALS[index] ?? Infinity),
     prestige: (index) => game.prestige >= (PRESTIGE_GOALS[index] ?? Infinity),
     own: (_, id) => {
@@ -509,9 +552,16 @@ function earned(game: Game, plus: number): string[] {
  * requests y bugs, y concede logros.
  *
  * @param plus Pulsaciones de la cruz de la cabecera, para los logros del secreto.
+ * @param caught Veces que la API ha pillado a esta persona haciendo trampas.
  * @returns Los logros que se acaban de conseguir.
  */
-export function tick(game: Game, now: number, random: Random = Math.random, plus = 100): string[] {
+export function tick(
+  game: Game,
+  now: number,
+  random: Random = Math.random,
+  plus = 100,
+  caught = 0,
+): string[] {
   const seconds = Math.max(0, (now - game.last) / 1000)
   const stage = stageOf(game, now)
 
@@ -567,7 +617,7 @@ export function tick(game: Game, now: number, random: Random = Math.random, plus
     }
   }
 
-  const fresh = earned(game, plus)
+  const fresh = earned(game, plus, caught)
 
   game.achieved.push(...fresh)
 

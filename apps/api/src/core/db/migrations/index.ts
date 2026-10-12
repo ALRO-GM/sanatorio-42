@@ -34,6 +34,8 @@ import { usageTimeSchema } from './0025-usage-time.js'
 import { broadcastsSchema } from './0026-broadcasts.js'
 import { clickerSchema } from './0027-clicker.js'
 import { clickerRevSchema } from './0028-clicker-rev.js'
+import { clickerCaughtSchema } from './0029-clicker-caught.js'
+import { clickerCapitalSchema } from './0030-clicker-capital.js'
 import type { Migration } from './types.js'
 
 export type { Migration } from './types.js'
@@ -67,6 +69,8 @@ export const MIGRATIONS: readonly Migration[] = [
   broadcastsSchema,
   clickerSchema,
   clickerRevSchema,
+  clickerCaughtSchema,
+  clickerCapitalSchema,
 ]
 
 /** Versión más alta que existe en el código. */

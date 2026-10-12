@@ -1,5 +1,6 @@
 import type { AchievementId } from '@sanatorio/contracts'
 
+import { titleText } from './title'
 import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
@@ -42,7 +43,7 @@ export function PublicRecord({ login }: { login: string }) {
     )
   }
 
-  const { xp, title, achievements, reactions } = data
+  const { xp, title, hacks, achievements, reactions } = data
   const pct =
     xp.next === null ? 100 : Math.round(((xp.total - xp.floor) / (xp.next - xp.floor)) * 100)
 
@@ -59,7 +60,7 @@ export function PublicRecord({ login }: { login: string }) {
           <Avatar login={data.login} image={data.image} size={72} />
           <div className="record-name">
             <strong>{data.login}</strong>
-            <span className="record-title">{t(`title.${title}`)}</span>
+            <span className="record-title">{titleText(t, title, hacks)}</span>
           </div>
           <div className="level">
             <span className="eyebrow">{t('xp.level')}</span>

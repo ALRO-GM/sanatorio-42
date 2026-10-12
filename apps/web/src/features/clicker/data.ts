@@ -42,6 +42,8 @@ export type BuildingId = (typeof BUILDINGS)[number]['id']
 export const GROWTH = 1.15
 /** Al vender se recupera esta parte de lo que costó. */
 export const REFUND = 0.25
+/** Y esta cuando lo vende el juego por haber hecho trampas: todo de golpe, pero mejor pagado. */
+export const FORCED_REFUND = 0.5
 
 /** Cuántos hay que tener para que salga cada mejora de un edificio. */
 export const TIER_AT = [1, 5, 25, 50, 100, 150, 200, 250, 300, 350, 400]
@@ -179,6 +181,8 @@ export const HAND_GOALS = [1e3, 1e5, 1e7, 1e9, 1e11]
 export const GOLDEN_GOALS = [1, 7, 27, 77]
 export const BUG_GOALS = [1, 50, 200]
 export const PRESTIGE_GOALS = [1, 10, 100]
+/** Veces que te han pillado haciendo trampas: las tres primeras dan logro. */
+export const HACK_GOALS = [1, 2, 3]
 /** Los del secreto: las pulsaciones de la cruz que dan cada uno. */
 export const PLUS_GOALS = [1, 10, 50, 100]
 
@@ -197,7 +201,12 @@ export const ACHIEVEMENTS: readonly string[] = [
   'hotfix',
   ...BUG_GOALS.map((_, index) => `bug:${index}`),
   ...PRESTIGE_GOALS.map((_, index) => `prestige:${index}`),
+  // Los de las trampas van al final y no se enseñan hasta tenerlos.
+  ...HACK_GOALS.map((_, index) => `hack:${index}`),
 ]
+
+/** Un logro que no sale en la lista hasta que se consigue. */
+export const hiddenAchievement = (id: string): boolean => id.startsWith('hack:')
 
 export type Upgrade = {
   id: string

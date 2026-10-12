@@ -350,3 +350,27 @@ dialog.broadcast-dialog .actions {
   flex-wrap: wrap;
   margin-top: 1rem;
 }
+
+/* Borrado de datos a mano. */
+.data-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 0.75rem;
+}
+.data-form label {
+  display: grid;
+  gap: 0.25rem;
+  color: var(--text-2);
+  font-size: 0.85rem;
+}
+.data-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 1rem;
+}
+.pill.danger:not(:disabled) {
+  border-color: var(--danger);
+  color: var(--danger);
+}

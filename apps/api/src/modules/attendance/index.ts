@@ -4,6 +4,7 @@
  * participa en cada evento.
  */
 
+import { tableStore } from '../../core/db/data-store.js'
 import type { AppModule } from '../../core/module.js'
 import { createAttendanceService } from './attendance.service.js'
 import type { AttendanceService, AttendanceServiceOptions } from './attendance.service.js'
@@ -16,14 +17,13 @@ export function createAttendanceModule(deps: AttendanceServiceOptions): Attendan
   return {
     name: 'attendance',
     service,
-    jobs: [
-      {
-        name: 'borrado de intentos de códigos antiguos',
-        everyMs: 24 * 60 * 60_000,
-        run: async () => {
-          await service.purge()
-        },
-      },
+    stores: [
+      tableStore(deps.db, {
+        id: 'checkins',
+        table: 'event_checkins',
+        login: 'login',
+        date: { column: 'created_at', as: 'iso' },
+      }),
     ],
   }
 }

@@ -85,6 +85,20 @@ export const realApi: Api = {
   saveClicker: (save) => sendJson('PUT', '/clicker/save', save),
   getClickerBoard: () => getJson('/clicker/board'),
   getClickerUsage: (days) => getJson(`/admin/clicker?days=${days}`),
+  getClickerCapital: ({ login, from, to } = {}) => {
+    const query = new URLSearchParams({
+      ...(login === undefined ? {} : { login }),
+      ...(from === undefined ? {} : { from: String(from) }),
+      ...(to === undefined ? {} : { to: String(to) }),
+    }).toString()
+
+    return getJson(`${login === undefined ? '' : '/admin'}/clicker/capital?${query}`)
+  },
+  getAdminData: () => getJson('/admin/data'),
+  countAdminData: (scope) => sendJson('POST', '/admin/data/count', scope),
+  deleteAdminData: (scope) => sendJson('POST', '/admin/data/delete', scope),
+  pardonClickerCheat: (id) => send('POST', `/admin/clicker/cheats/${id}/pardon`),
+  dismissClickerAlert: (id) => send('DELETE', `/admin/clicker/alerts/${id}`),
   getBroadcasts: () => getJson('/broadcasts'),
   answerBroadcast: (id, answer) => sendJson('POST', `/broadcasts/${id}/answer`, answer),
   getAdminBroadcasts: () => getJson('/admin/broadcasts'),

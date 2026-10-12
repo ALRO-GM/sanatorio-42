@@ -19,7 +19,6 @@ import { id, parse } from '../../core/validation.js'
 const DAY_MS = 24 * 60 * 60_000
 /** Un comunicado sin contestar deja de salir pasado esto: ya no es noticia. */
 const SHOWN_DAYS = 30
-const KEEP_DAYS = 180
 /** Comunicados que se enseñan en el panel, del más reciente al más antiguo. */
 const REPORT_LIMIT = 50
 
@@ -217,23 +216,6 @@ export function createBroadcastsService(options: BroadcastsServiceOptions) {
         [
           { sql: 'DELETE FROM broadcast_answers WHERE broadcast_id = ?', args: [broadcastId] },
           { sql: 'DELETE FROM broadcasts WHERE id = ?', args: [broadcastId] },
-        ],
-        'write',
-      )
-    },
-
-    /** Borra los comunicados que ya han cumplido el plazo. Lo lanza un trabajo periódico. */
-    async purge(): Promise<void> {
-      const before = iso(now() - KEEP_DAYS * DAY_MS)
-
-      await db.batch(
-        [
-          {
-            sql: `DELETE FROM broadcast_answers WHERE broadcast_id IN
-                  (SELECT id FROM broadcasts WHERE created_at < ?)`,
-            args: [before],
-          },
-          { sql: 'DELETE FROM broadcasts WHERE created_at < ?', args: [before] },
         ],
         'write',
       )

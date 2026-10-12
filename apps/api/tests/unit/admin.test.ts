@@ -109,14 +109,49 @@ describe('comunidad', () => {
       )
     })
 
-    it('el uso por horas se borra pasado medio año', async () => {
-      const { usage } = services
+    it('el uso por horas no se borra solo: se quita a mano, entero o por fechas', async () => {
+      const { usage, admin } = services
       const boss = actor('eva', { admin: true })
 
       await usage.record(actor('ana'), { counts: { 'nav.tablon': 1 } })
       clock.advance(200 * 24 * HOUR)
       await usage.record(actor('ana'), { counts: { 'nav.red': 1 } })
-      await usage.purge()
+
+      // Medio año después sigue lo de octubre.
+      const kept = await usage.stats(boss, { from: '2026-10-01', to: '2026-10-31' })
+
+      expect(kept.keys.map((row) => row.key)).toEqual(['nav.tablon'])
+
+      // Lo que se puede borrar, con cuántas filas tiene cada cosa.
+      const { kinds } = await admin.data(boss)
+
+      expect(kinds.map((kind) => kind.id)).toEqual(
+        expect.arrayContaining([
+          'traffic',
+          'tickets',
+          'notices',
+          'messages',
+          'event_alerts',
+          'broadcasts',
+          'checkins',
+          'usage',
+          'clicker_capital',
+          'clicker_alerts',
+          'clicker_cheats',
+        ]),
+      )
+      expect(kinds.find((kind) => kind.id === 'usage')).toEqual({ id: 'usage', rows: 2 })
+      await expectCode(admin.data(actor('ana')), 'forbidden')
+      await expectCode(admin.wipe(boss, { kind: 'inventado' }, true), 'not_found')
+      await expectCode(admin.wipe(boss, { kind: 'usage', before: 'ayer' }, true), 'invalid_input')
+
+      // Contar no borra; borrar lo de antes de 2027 se lleva solo lo viejo.
+      expect(await admin.wipe(boss, { kind: 'usage', before: '2027-01-01' }, false)).toEqual({
+        rows: 1,
+      })
+      expect(await admin.wipe(boss, { kind: 'usage', before: '2027-01-01' }, true)).toEqual({
+        rows: 1,
+      })
 
       const old = await usage.stats(boss, { from: '2026-10-01', to: '2026-10-31' })
       const recent = await usage.stats(boss, { from: '2027-04-01', to: '2027-05-01' })

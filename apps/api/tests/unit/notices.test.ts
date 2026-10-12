@@ -244,18 +244,21 @@ describe('buzón de avisos', () => {
     expect(await inbox('leo')).toEqual(['group_closed de ana: ft_printf'])
   })
 
-  it('los avisos leídos se borran al mes, y los que nadie lee a los tres', async () => {
-    const { notices } = services
+  it('los avisos no se borran solos: los quita quien administra, y de quien elija', async () => {
+    const { notices, admin } = services
+    const boss = actor('eva', { admin: true })
 
     await notices.add({ to: ['ana'], kind: 'chat', ref: 'board:1', from: 'eva' })
     await notices.add({ to: ['leo'], kind: 'chat', ref: 'board:1', from: 'eva' })
     await notices.read(actor('ana'), {})
 
-    clock.advance(31 * 24 * HOUR + MINUTE)
-    expect(await notices.purge()).toBe(1)
-    expect(await notices.unread('leo')).toBe(1)
+    // Pasa un año y siguen los dos, el leído y el que nadie leyó.
+    clock.advance(365 * 24 * HOUR + MINUTE)
+    expect(await admin.wipe(boss, { kind: 'notices' }, false)).toEqual({ rows: 2 })
 
-    clock.advance(60 * 24 * HOUR)
-    expect(await notices.purge()).toBe(1)
+    expect(await admin.wipe(boss, { kind: 'notices', login: 'ana' }, true)).toEqual({ rows: 1 })
+    expect(await notices.unread('leo')).toBe(1)
+    expect(await admin.wipe(boss, { kind: 'notices' }, true)).toEqual({ rows: 1 })
+    expect(await notices.unread('leo')).toBe(0)
   })
 })

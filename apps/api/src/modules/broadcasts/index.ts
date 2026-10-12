@@ -3,6 +3,7 @@
  * a quien le toquen, con opciones entre las que elegir si hace falta.
  */
 
+import { tableStore } from '../../core/db/data-store.js'
 import type { AppModule } from '../../core/module.js'
 import { createBroadcastsService } from './broadcasts.service.js'
 import type { BroadcastsService, BroadcastsServiceOptions } from './broadcasts.service.js'
@@ -15,14 +16,14 @@ export function createBroadcastsModule(deps: BroadcastsServiceOptions): Broadcas
   return {
     name: 'broadcasts',
     service,
-    jobs: [
-      {
-        name: 'borrado de comunicados antiguos',
-        everyMs: 24 * 60 * 60_000,
-        run: async () => {
-          await service.purge()
-        },
-      },
+    stores: [
+      tableStore(deps.db, {
+        id: 'broadcasts',
+        table: 'broadcasts',
+        login: 'from_login',
+        date: { column: 'created_at', as: 'iso' },
+        children: [{ table: 'broadcast_answers', key: 'broadcast_id', parent: 'id' }],
+      }),
     ],
     routes: (app, { session }) => {
       /** `GET /broadcasts` → los comunicados que tienes por leer, el más antiguo primero. */

@@ -9,6 +9,7 @@
 
 import type { FastifyRequest } from 'fastify'
 
+import { tableStore } from '../../core/db/data-store.js'
 import type { AppModule } from '../../core/module.js'
 import type { SessionReader } from '../../core/session.js'
 import { ANONYMOUS, createAdminService } from './admin.service.js'
@@ -157,6 +158,23 @@ export function createAdminModule(deps: AdminServiceOptions): AdminModule {
         return reply.send(await service.setBudget(await session.actor(request), request.body))
       })
 
+      /** `GET /admin/data` → los tipos de dato que se pueden borrar y cuántas filas tienen. */
+      app.get('/admin/data', async (request, reply) => {
+        reply.header('Cache-Control', 'private, no-store')
+
+        return reply.send(await service.data(await session.actor(request)))
+      })
+
+      /** `POST /admin/data/count` → `{ kind, login?, before?, from? }`: cuántas filas son. */
+      app.post('/admin/data/count', async (request, reply) => {
+        return reply.send(await service.wipe(await session.actor(request), request.body, false))
+      })
+
+      /** `POST /admin/data/delete` → lo mismo, pero las borra. Devuelve cuántas eran. */
+      app.post('/admin/data/delete', async (request, reply) => {
+        return reply.send(await service.wipe(await session.actor(request), request.body, true))
+      })
+
       /** `GET /admin/tickets` → el buzón entero, lo pendiente primero. */
       app.get('/admin/tickets', async (request, reply) => {
         return reply.send(await service.tickets(await session.actor(request)))
@@ -173,6 +191,20 @@ export function createAdminModule(deps: AdminServiceOptions): AdminModule {
         )
       })
     },
+    stores: [
+      tableStore(deps.db, {
+        id: 'traffic',
+        table: 'request_stats',
+        login: 'login',
+        date: { column: 'day', as: 'day' },
+      }),
+      tableStore(deps.db, {
+        id: 'tickets',
+        table: 'tickets',
+        login: 'login',
+        date: { column: 'created_at', as: 'iso' },
+      }),
+    ],
     jobs: [
       {
         name: 'volcado del consumo',

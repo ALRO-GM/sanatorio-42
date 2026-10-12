@@ -1337,3 +1337,158 @@ small.cc-bugs {
     opacity: 1;
   }
 }
+
+/* La ventana de la trampa pillada. */
+dialog.cc-bust {
+  display: grid;
+  gap: 0.7rem;
+  justify-items: start;
+  width: min(30rem, calc(100vw - 2rem));
+  padding: 1.4rem;
+  color: var(--text);
+}
+dialog.cc-bust:not([open]) {
+  display: none;
+}
+.cc-bust h3 {
+  margin: 0;
+  font-size: 1.35rem;
+}
+.cc-bust p {
+  margin: 0;
+  color: var(--text-2);
+  line-height: 1.5;
+}
+.cc-bust-icon {
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--warn) 18%, transparent);
+  color: var(--warn);
+}
+.cc-bust .cc-bust-sold {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+/* La gráfica de capital. Se usa también en el panel, fuera del juego: de ahí
+   que los colores vengan del tema y no de las variables del juego. */
+.cc-chart {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0.75rem 0 0;
+  min-width: 0;
+}
+.cc-chart figcaption,
+.cc-chart-scale,
+.cc-chart-times {
+  color: var(--text-3);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+.cc-chart-body {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.5rem;
+}
+.cc-chart-scale {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  text-align: right;
+}
+.cc-chart svg {
+  width: 100%;
+  height: 9rem;
+  border-bottom: 1px solid var(--border);
+  border-left: 1px solid var(--border);
+}
+.cc-chart-line {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+.cc-chart-fill {
+  fill: color-mix(in srgb, var(--accent) 14%, transparent);
+}
+.cc-chart-times {
+  display: flex;
+  justify-content: space-between;
+}
+.clicker-alert {
+  flex-wrap: wrap;
+}
+.clicker-alert .cc-chart {
+  flex: 1 0 100%;
+}
+/* Dentro del juego, con su paleta. */
+.cc .cc-chart figcaption,
+.cc .cc-chart-scale,
+.cc .cc-chart-times {
+  color: var(--cc-dim);
+}
+.cc .cc-chart svg {
+  border-color: var(--cc-line);
+}
+.cc .cc-chart-line {
+  stroke: var(--cc-main);
+}
+.cc .cc-chart-fill {
+  fill: color-mix(in srgb, var(--cc-main) 14%, transparent);
+}
+.clicker-alert > span:first-child {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Los mandos del historial: tramos de un toque y dos fechas. */
+.cc-history {
+  display: grid;
+  gap: 0.4rem;
+  margin-top: 0.75rem;
+  min-width: 0;
+}
+.cc-history-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.8rem;
+  font-size: 0.8rem;
+}
+.cc-history-controls label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--text-3);
+}
+.cc-history-controls input[type='date'] {
+  padding: 0.15rem 0.35rem;
+  font-size: 0.8rem;
+}
+.cc-history .cc-chart {
+  margin-top: 0;
+}
+.cc-chart svg.pickable {
+  cursor: crosshair;
+  touch-action: pan-y;
+}
+.cc-chart-pick {
+  fill: color-mix(in srgb, var(--accent) 28%, transparent);
+}
+.cc-chart-hint,
+.cc-chart-empty {
+  margin: 0;
+  color: var(--text-3);
+  font-size: 0.75rem;
+}
+.cc .cc-history-controls label,
+.cc .cc-chart-hint,
+.cc .cc-chart-empty {
+  color: var(--cc-dim);
+}
+.cc .cc-chart-pick {
+  fill: color-mix(in srgb, var(--cc-main) 28%, transparent);
+}

@@ -25,6 +25,7 @@ import { PERIODS, startOf } from './period'
 import type { Period } from './period'
 import { PersonPanel } from './PersonPanel'
 import { PersonSearch } from './PersonSearch'
+import { RangeSlider } from './RangeSlider'
 import { RankCard, ranked } from './RankCard'
 import type { Order } from './RankCard'
 import { StrictestCard } from './StrictestCard'
@@ -232,9 +233,31 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
     [topPairs, orders.pairs],
   )
   const allProjects = graph?.projects
+  // Entre cuántas correcciones tiene que tener un proyecto para salir en su
+  // lista; `null` es sin tope por ese lado. Los pasos del deslizador son las
+  // cantidades que hay de verdad: de uno en uno, casi todo el recorrido serían
+  // los cuatro proyectos que más tienen.
+  const [projectSpan, setProjectSpan] = useState<{ min: number | null; max: number | null }>({
+    min: null,
+    max: null,
+  })
+  const projectSteps = useMemo(
+    () =>
+      [...new Set((allProjects ?? []).map((project) => project.corrections))].sort((a, b) => a - b),
+    [allProjects],
+  )
+  const spanLow = projectSpan.min ?? projectSteps[0] ?? 0
+  const spanHigh = projectSpan.max ?? projectSteps.at(-1) ?? 0
   const projects = useMemo(
-    () => ranked(allProjects ?? [], (project) => project.corrections, orders.projects),
-    [allProjects, orders.projects],
+    () =>
+      ranked(
+        (allProjects ?? []).filter(
+          (project) => project.corrections >= spanLow && project.corrections <= spanHigh,
+        ),
+        (project) => project.corrections,
+        orders.projects,
+      ),
+    [allProjects, orders.projects, spanLow, spanHigh],
   )
 
   return (
@@ -715,6 +738,45 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
                                       setOrders((current) => ({ ...current, projects: order }))
                                     }}
                                     count={projects.length}
+                                    controls={
+                                      projectSteps.length > 1 && (
+                                        <div className="net-span">
+                                          <span>
+                                            {t('net.projects.span', {
+                                              min: spanLow.toLocaleString(),
+                                              max: spanHigh.toLocaleString(),
+                                            })}
+                                          </span>
+                                          <RangeSlider
+                                            max={projectSteps.length - 1}
+                                            // El paso más cercano por dentro del tramo elegido.
+                                            low={Math.max(
+                                              0,
+                                              projectSteps.findIndex((step) => step >= spanLow),
+                                            )}
+                                            high={Math.max(
+                                              0,
+                                              projectSteps.findLastIndex(
+                                                (step) => step <= spanHigh,
+                                              ),
+                                            )}
+                                            lowLabel={t('net.projects.min')}
+                                            highLabel={t('net.projects.max')}
+                                            onChange={(low, high) => {
+                                              // En los extremos no se fija nada: si cambian
+                                              // los datos, el tramo sigue siendo "todos".
+                                              setProjectSpan({
+                                                min: low === 0 ? null : (projectSteps[low] ?? null),
+                                                max:
+                                                  high === projectSteps.length - 1
+                                                    ? null
+                                                    : (projectSteps[high] ?? null),
+                                              })
+                                            }}
+                                          />
+                                        </div>
+                                      )
+                                    }
                                     footer={<p className="hint">{t('net.projects.hint')}</p>}
                                   >
                                     {projects.map((project) => (
@@ -734,7 +796,9 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
                                             })
                                           }}
                                         >
-                                          <span className="net-row-name">{project.name}</span>
+                                          <span className="net-row-name" title={project.name}>
+                                            {project.name}
+                                          </span>
                                           <span className="net-row-count">
                                             {project.corrections.toLocaleString()}
                                             {project.passRate !== null && (

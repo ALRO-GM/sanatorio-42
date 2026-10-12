@@ -35,6 +35,12 @@ type Texts = {
   goldens: string[]
   /** Nombre y descripción de los logros con texto propio. */
   achievements: Record<string, [name: string, about: string]>
+  /**
+   * Lo que se dice al pillar una trampa: título y mensaje. Las tres primeras
+   * tienen el suyo; de la cuarta en adelante van los diez siguientes, en orden,
+   * y después se repite el último. `{n}` son las veces que van.
+   */
+  busts: [title: string, text: string][]
   /** Sufijos de los números grandes, de mil en mil a partir del millón. */
   scale: string[]
   /**
@@ -143,6 +149,10 @@ const es: Texts = {
     clickGain: 'por pulsación: {n}',
     stale: 'Esta partida se ha seguido en otro dispositivo. Lo que hagas aquí ya no se guarda.',
     staleLoad: 'Cargar la partida guardada',
+    capital: 'Capital: {n} (lo que tienes, lo que costó lo comprado y lo que deben los bugs)',
+    bustEyebrow: 'Sistema antitrampas',
+    bustOk: 'Entendido',
+    bustSold: 'Vendido todo lo de la tienda por {n} líneas.',
     offline: 'Sin conexión: la partida se guarda solo en este navegador hasta que vuelva.',
     upTier: '{building}: escriben el doble.',
     upCursor: 'El cursor y cada pulsación escriben el doble.',
@@ -329,7 +339,61 @@ const es: Texts = {
     'prestige:0': ['Segunda compilación', ''],
     'prestige:1': ['Nada es definitivo', ''],
     'prestige:2': ['Bucle infinito', ''],
+    'hack:0': ['Sombrero blanco', 'Te han pillado haciendo trampas. Con mucha educación.'],
+    'hack:1': ['Sombrero gris', 'Te han pillado otra vez. Ya con menos educación.'],
+    'hack:2': ['Sombrero confiscado', 'A la tercera se vendió todo.'],
   },
+  busts: [
+    [
+      'Hacker ético',
+      'Tu partida ha escrito más código del que da tiempo a escribir, y nos hemos dado cuenta. Gracias por el hackeo: así probamos que el sistema funciona. Te has ganado un título para tu banner, «Hacker ético», y la partida vuelve a como estaba antes del truco. Eso sí: no lo vuelvas a intentar. Siempre estamos vigilando.',
+    ],
+    [
+      'Hacker poco ético',
+      'Lo has vuelto a intentar. Has perdido el título de «Hacker ético», que era el bueno, y en tu banner ahora pone «Hacker poco ético». Y esta vez sí que no vamos a tener compasión. De verdad. Era la última oportunidad.',
+    ],
+    [
+      'Hacker desencriptado',
+      'Te lo avisamos y has querido ir más allá. Tu título pasa a ser «Hacker desencriptado», con un contador de las veces que te hemos cazado. Y por pasarte de listo, el juego ha vendido automáticamente todo lo que tenías comprado en la tienda: cursores, pisciners, clusters… todo. Como somos así, te lo pagamos al 50 % de lo que costó en vez del 25 % de siempre. Las mejoras te las quedas.',
+    ],
+    [
+      'Pillado otra vez',
+      'Van {n}. Ya sabes cómo funciona: se vende todo, sube el contador de tu banner y aquí no ha pasado nada.',
+    ],
+    ['¿Otra?', 'Van {n}. Empezamos a pensar que lo que te gusta es el cartel de «vendido».'],
+    [
+      'Sí, te hemos visto',
+      '{n} veces. El sistema ya ni se sorprende. Nosotros todavía un poco, la verdad.',
+    ],
+    [
+      'Mira…',
+      'Van {n}. Con el tiempo que le estás echando a esto ya habrías aprobado un proyecto. Uno de los fáciles, pero aprobado.',
+    ],
+    [
+      'El equipo de seguridad',
+      '{n}. Hemos dejado de avisar al equipo de seguridad. El equipo de seguridad es un `if`, y hasta él está cansado.',
+    ],
+    [
+      'Ya ni nos enfadamos',
+      'Van {n}. Es más bien pena, como ver a alguien empujar una puerta en la que pone «tirar». Vendido todo.',
+    ],
+    [
+      'Vendido. Otra vez.',
+      '{n}. Lo vendemos todo de nuevo. Lo haríamos con más ganas, pero se nos han acabado.',
+    ],
+    [
+      'En serio',
+      '{n}… Detrás de esto hay un juego entero. Está bastante bien. Lo hicimos con cariño. Podrías jugarlo.',
+    ],
+    [
+      'Vale',
+      '{n}. Vendido. Contador. Banner. A estas alturas te sabes el resto mejor que nosotros.',
+    ],
+    [
+      'Sin comentarios',
+      '{n}. Vendido todo. Aquí seguiremos, tú y nosotros, hasta que alguien se canse. Nosotros somos un servidor: no nos cansamos. Solo nos decepcionamos.',
+    ],
+  ],
   scale: [
     'millones',
     'miles de millones',
@@ -500,6 +564,10 @@ const en: Texts = {
     clickGain: 'per press: {n}',
     stale: 'This game has been continued on another device. What you do here is no longer saved.',
     staleLoad: 'Load the saved game',
+    capital: 'Worth: {n} (what you hold, what your purchases cost and what the bugs owe)',
+    bustEyebrow: 'Anti-cheat system',
+    bustOk: 'Got it',
+    bustSold: 'Everything from the shop sold for {n} lines.',
     offline: 'Offline: the game is saved only in this browser until the connection is back.',
     upTier: '{building}: they write twice as much.',
     upCursor: 'The cursor and every key press write twice as much.',
@@ -681,7 +749,58 @@ const en: Texts = {
     'prestige:0': ['Second compilation', ''],
     'prestige:1': ['Nothing is final', ''],
     'prestige:2': ['Infinite loop', ''],
+    'hack:0': ['White hat', 'You got caught cheating. Very politely.'],
+    'hack:1': ['Grey hat', 'You got caught again. Less politely.'],
+    'hack:2': ['Confiscated hat', 'Third time, everything got sold.'],
   },
+  busts: [
+    [
+      'Ethical hacker',
+      'Your game wrote more code than there was time to write, and we noticed. Thanks for the hack: it proves the system works. You have earned a title for your banner, "Ethical hacker", and your game is back to how it was before the trick. But do not try it again. We are always watching.',
+    ],
+    [
+      'Not so ethical hacker',
+      'You tried again. You have lost the "Ethical hacker" title, which was the good one, and your banner now says "Not so ethical hacker". And this time there will be no mercy. Really. That was your last chance.',
+    ],
+    [
+      'Decrypted hacker',
+      'We warned you and you went further. Your title is now "Decrypted hacker", with a counter of the times we have caught you. And for being too clever, the game has automatically sold everything you had bought in the shop: cursors, pisciners, clusters… all of it. Because we are like that, you get 50% of what it cost instead of the usual 25%. You keep the upgrades.',
+    ],
+    [
+      'Caught again',
+      'That makes {n}. You know how it goes: everything gets sold, the counter on your banner goes up, and nothing happened here.',
+    ],
+    ['Another one?', 'That makes {n}. We are starting to think you just like the "sold" sign.'],
+    [
+      'Yes, we saw you',
+      '{n} times. The system is not even surprised any more. We still are, a little.',
+    ],
+    [
+      'Look…',
+      'That makes {n}. With the time you are putting into this you could have passed a project. An easy one, but passed.',
+    ],
+    [
+      'The security team',
+      '{n}. We stopped telling the security team. The security team is an `if`, and even it is tired.',
+    ],
+    [
+      'We are not even angry',
+      'That makes {n}. It is more like pity, like watching someone push a door that says "pull". Everything sold.',
+    ],
+    [
+      'Sold. Again.',
+      '{n}. We are selling everything again. We would do it with more enthusiasm, but we ran out.',
+    ],
+    [
+      'Seriously',
+      '{n}… There is a whole game behind this. It is rather good. We made it with love. You could play it.',
+    ],
+    ['Fine', '{n}. Sold. Counter. Banner. By now you know the rest better than we do.'],
+    [
+      'No comment',
+      '{n}. Everything sold. We will stay here, you and us, until someone gets tired. We are a server: we do not get tired. We only get disappointed.',
+    ],
+  ],
   scale: [
     'million',
     'billion',
@@ -786,6 +905,14 @@ export function short(value: number, lang: Lang, decimals = 3): string {
   const step = Math.min(scale.length - 1, Math.floor(Math.log10(Math.abs(value)) / 3) - 2)
 
   return `${(value / 10 ** ((step + 2) * 3)).toLocaleString(locale, { maximumFractionDigits: decimals })} ${scale[step] ?? ''}`
+}
+
+/** Título y mensaje de la ventana de la trampa número `n`. */
+export function bustText(n: number, lang: Lang): [title: string, text: string] {
+  const { busts } = textsOf(lang)
+  const [title, text] = busts[Math.min(n, busts.length) - 1] ?? ['', '']
+
+  return [title, fill(text, { n })]
 }
 
 /** Nombre y descripción de un logro. */

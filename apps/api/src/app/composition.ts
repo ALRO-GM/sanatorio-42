@@ -26,7 +26,7 @@ import { createBroadcastsModule } from '../modules/broadcasts/index.js'
 import type { BroadcastsModule } from '../modules/broadcasts/index.js'
 import { createCalendarModule } from '../modules/calendar/index.js'
 import type { CalendarModule } from '../modules/calendar/index.js'
-import { createClickerModule } from '../modules/clicker/index.js'
+import { createClickerModule, hackerTitle } from '../modules/clicker/index.js'
 import type { ClickerModule } from '../modules/clicker/index.js'
 import { createDoubtsModule } from '../modules/doubts/index.js'
 import type { DoubtsModule } from '../modules/doubts/index.js'
@@ -129,7 +129,17 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
   // Los módulos avisan sin saber que hay un buzón: `notices` es quien escucha.
   const notify: Notify = (notice) => events.emit('notice', notice)
   const common = { db, replica: replica.repository, ...clock }
-  const profile = createProfileModule({ ...common, curriculum: replica.curriculum, events })
+  const profile = createProfileModule({
+    ...common,
+    curriculum: replica.curriculum,
+    events,
+    // `clicker` se monta después: para cuando alguien pregunte ya estará.
+    hacker: async (login) => {
+      const caught = await clicker.service.caughtOf(login)
+
+      return { title: hackerTitle(caught), caught }
+    },
+  })
 
   // Presencia: quién tiene la web abierta. Se anota como mucho una vez por
   // minuto y persona, que es de sobra para un "está conectado".
@@ -229,6 +239,8 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     fortyTwoRemaining: () => client.hourlyRemaining(),
     ...(config.guardLevel === undefined ? {} : { guardLevel: config.guardLevel }),
     notify,
+    // Los demás módulos se montan después: para cuando alguien pregunte ya estarán.
+    stores: () => modules.flatMap((module) => module.stores ?? []),
     ...clock,
   })
 
@@ -238,6 +250,13 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     topCorrectors: (campusId, limit) => network.topCorrectors(campusId, limit),
     // `usage` se monta después: para cuando alguien pregunte ya estará.
     timeOn: (key, from, to) => usage.service.timeOn(key, from, to),
+    brand: async (login, title) => {
+      const before = (await profile.profiles.get(login))?.title ?? null
+
+      await profile.profiles.update(login, { title })
+
+      return before
+    },
     ...clock,
   })
 
@@ -249,29 +268,31 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     ...clock,
   })
 
+  // `admin` va el primero: sus ganchos de consumo solo ven las rutas que se
+  // registran después.
+  const modules: AppModule[] = [
+    admin,
+    replica,
+    peers,
+    profile,
+    therapy,
+    doubts,
+    attendance,
+    boards,
+    map,
+    help,
+    calendar,
+    network,
+    usage,
+    meet,
+    notices,
+    broadcasts,
+    clicker,
+  ]
+
   return {
     events,
-    // `admin` va el primero: sus ganchos de consumo solo ven las rutas que se
-    // registran después.
-    modules: [
-      admin,
-      replica,
-      peers,
-      profile,
-      therapy,
-      doubts,
-      attendance,
-      boards,
-      map,
-      help,
-      calendar,
-      network,
-      usage,
-      meet,
-      notices,
-      broadcasts,
-      clicker,
-    ],
+    modules,
     services: {
       repositories: {
         availability: peers.availabilityRepository,

@@ -1,16 +1,14 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { FocusEvent, MouseEvent } from 'react'
 
 import type { ClusterMap, MapCluster, MapSeat, SeatReservation } from '@sanatorio/contracts'
 
 import { localeOf, useI18n } from '../../shared/i18n'
 import type { Translate } from '../../shared/i18n'
-import { Avatar } from '../../shared/ui/Avatar'
 import { SeatFace } from './SeatFace'
 import { SeatHoverCard } from './SeatHoverCard'
 import type { Hovered } from './SeatHoverCard'
 import { clusterName, seatName } from './seats'
-import { Icon } from '../../shared/ui/Icon'
 
 // Quien pinta el mapa suele necesitar también el nombre de la sala.
 export { clusterName }
@@ -103,14 +101,50 @@ export function ClusterMapView({
   const { t } = useI18n()
   const [chosenCluster, setChosenCluster] = useState<string | null>(null)
   const [openHost, setOpenHost] = useState<string | null>(null)
+  // El botón del puesto abierto: su ficha se queda fijada junto a él.
+  const [openAnchor, setOpenAnchor] = useState<Element | null>(null)
   // Puesto sobre el que está el ratón (o el foco): su ficha flota al lado.
   const [hovered, setHovered] = useState<Hovered | null>(null)
+  const [, setMoved] = useState(0)
 
   const hover = (seat: MapSeat) => (event: MouseEvent | FocusEvent) => {
     if (seat.occupant !== null) {
-      setHovered({ seat, rect: event.currentTarget.getBoundingClientRect() })
+      setHovered({ seat, anchor: event.currentTarget })
     }
   }
+
+  // La ficha fijada sigue a su puesto al deslizar la página o el plano, y se
+  // cierra con Escape o al pulsar fuera.
+  useEffect(() => {
+    if (openHost === null) return
+
+    const follow = (): void => {
+      setMoved((count) => count + 1)
+    }
+    const onKey = (event: KeyboardEvent): void => {
+      if (event.key === 'Escape') setOpenHost(null)
+    }
+    const onDown = (event: PointerEvent): void => {
+      const target = event.target
+
+      // Pulsar otro puesto ya cambia de ficha: eso lo lleva su propio clic.
+      if (target instanceof Element && target.closest('.seat-hover.pinned, .seat') !== null) return
+
+      setOpenHost(null)
+    }
+
+    window.addEventListener('scroll', follow, true)
+    window.addEventListener('resize', follow)
+    document.addEventListener('keydown', onKey)
+    document.addEventListener('pointerdown', onDown)
+
+    return () => {
+      window.removeEventListener('scroll', follow, true)
+      window.removeEventListener('resize', follow)
+      document.removeEventListener('keydown', onKey)
+      document.removeEventListener('pointerdown', onDown)
+    }
+  }, [openHost])
   const unhover = (): void => {
     setHovered(null)
   }
@@ -126,6 +160,10 @@ export function ClusterMapView({
 
   const byPosition = new Map(cluster.seats.map((seat) => [`${seat.row}:${seat.seat}`, seat]))
   const open = cluster.seats.find((seat) => seat.host === openHost) ?? null
+  const reservation = open?.reservation ?? null
+  const openReservation = reservation !== null && showReservation(reservation) ? reservation : null
+  // El puesto abierto, si hay alguien sentado: es el que lleva ficha fijada.
+  const openTaken = open?.occupant === undefined || open.occupant === null ? null : open
   const rows = Array.from({ length: cluster.rows }, (_, index) => index + 1)
   const columns = Array.from({ length: cluster.seatsPerRow }, (_, index) => index + 1)
 
@@ -189,8 +227,9 @@ export function ClusterMapView({
                     onMouseLeave={unhover}
                     onFocus={hover(seat)}
                     onBlur={unhover}
-                    onClick={() => {
+                    onClick={(event) => {
                       if (onPick === undefined) {
+                        setOpenAnchor(event.currentTarget)
                         setOpenHost(seat.host === openHost ? null : seat.host)
                       } else {
                         onPick(seat.host)
@@ -210,13 +249,29 @@ export function ClusterMapView({
         </div>
       </div>
 
-      {hovered !== null && <SeatHoverCard hovered={hovered} />}
-      {open !== null && (
-        <SeatDetail
-          seat={open}
-          reserved={open.reservation !== null && showReservation(open.reservation)}
-          onChat={onChat}
+      {/* La del ratón no sale encima de la que ya está fijada. */}
+      {hovered !== null && hovered.seat.host !== openHost && <SeatHoverCard hovered={hovered} />}
+      {openTaken !== null && openAnchor !== null && (
+        <SeatHoverCard
+          hovered={{ seat: openTaken, anchor: openAnchor }}
+          pinned={{
+            onChat,
+            onClose: () => {
+              setOpenHost(null)
+            },
+            extra: openReservation !== null && <ReservationNote reservation={openReservation} />,
+          }}
         />
+      )}
+      {/* Un puesto libre no tiene ficha: lo suyo se dice debajo del plano. */}
+      {open !== null && openTaken === null && (
+        <div className="seat-detail" role="status">
+          <strong className="seat-host" title={open.host}>
+            {seatName(open.host, t)}
+          </strong>
+          <span>{t('map.seatFree')}</span>
+          {openReservation !== null && <ReservationNote reservation={openReservation} />}
+        </div>
       )}
 
       <ul className="map-legend">
@@ -242,80 +297,26 @@ export function ClusterMapView({
   )
 }
 
-/** Quién está en el puesto pulsado y si está reservado. */
-type SeatDetailProps = {
-  seat: MapSeat
-  reserved: boolean
-  onChat: ((login: string) => void) | undefined
-}
-
-function SeatDetail({ seat, reserved, onChat }: SeatDetailProps) {
+/** Para qué proyecto y cuándo está reservado un puesto. */
+function ReservationNote({ reservation }: { reservation: SeatReservation }) {
   const { t, lang } = useI18n()
-  const { occupant, reservation } = seat
 
   return (
-    <div className="seat-detail" role="status">
-      <strong className="seat-host" title={seat.host}>
-        {seatName(seat.host, t)}
-      </strong>
-      {occupant === null ? (
-        <span>{t('map.seatFree')}</span>
-      ) : (
-        <span className="seat-person">
-          <Avatar login={occupant.login} image={occupant.image} size={28} />
-          <a
-            className="profile-link"
-            href={`https://profile.intra.42.fr/users/${occupant.login}`}
-            target="_blank"
-            rel="noreferrer"
-          >
-            {occupant.login}
-          </a>
-          {occupant.me && <span className="badge subtle">{t('map.you')}</span>}
-          {occupant.online && !occupant.me && (
-            <span className="badge on">{t('clusters.online')}</span>
-          )}
-          {occupant.duty !== null && (
-            <span className={`badge ${occupant.duty === 'specialist' ? 'specialist' : 'on'}`}>
-              {t(`map.duty.${occupant.duty}`)}
-            </span>
-          )}
-          {occupant.projects.map((project) => (
-            <span key={project} className="chip">
-              {project}
-            </span>
-          ))}
-          {onChat !== undefined && !occupant.me && (
-            <button
-              type="button"
-              className="primary small"
-              onClick={() => {
-                onChat(occupant.login)
-              }}
-            >
-              <Icon name="chat" /> {t('clusters.write')}
-            </button>
-          )}
-        </span>
-      )}
-      {reservation !== null && reserved && (
-        <span className="seat-reservation">
-          {t('map.reservedFor', {
-            project: reservation.projectName ?? '?',
-            days: reservation.dates
-              .map((day) =>
-                new Date(`${day}T12:00:00`).toLocaleDateString(localeOf(lang), {
-                  day: 'numeric',
-                  month: 'short',
-                }),
-              )
-              .join(', '),
-            start: reservation.start,
-            end: reservation.end,
-          })}
-          {reservation.inSession && <span className="badge on">{t('therapy.inSession')}</span>}
-        </span>
-      )}
-    </div>
+    <span className="seat-reservation">
+      {t('map.reservedFor', {
+        project: reservation.projectName ?? '?',
+        days: reservation.dates
+          .map((day) =>
+            new Date(`${day}T12:00:00`).toLocaleDateString(localeOf(lang), {
+              day: 'numeric',
+              month: 'short',
+            }),
+          )
+          .join(', '),
+        start: reservation.start,
+        end: reservation.end,
+      })}
+      {reservation.inSession && <span className="badge on">{t('therapy.inSession')}</span>}
+    </span>
   )
 }

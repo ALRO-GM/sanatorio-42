@@ -693,7 +693,7 @@ export const ca: Record<string, string> = {
   'meet.said.absent': 'No hi podrà anar',
   'meet.chat': "Xat de l'esdeveniment",
   'meet.chatNotice':
-    "Els missatges s'esborren al cap de 90 dies. Qui administra la web els pot llegir si hi ha una denúncia.",
+    'Els missatges es guarden. Qui administra la web els pot llegir si hi ha una denúncia.',
   'meet.chatEmpty': "Ningú ha escrit encara. El que posis ho veuen tots els de l'esdeveniment.",
   'meet.write': 'Escriu un missatge…',
   'meet.sendText': 'Envia',

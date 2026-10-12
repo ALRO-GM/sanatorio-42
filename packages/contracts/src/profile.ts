@@ -15,7 +15,16 @@ export type ReactionKind = 'bug' | 'code' | 'concept' | 'patient'
 export type AchievementId =
   'first_duty' | 'group_therapy' | 'selfless_help' | 'board_teacher' | 'campus_guardian'
 
-export type TitleId = 'paciente' | 'interno' | 'residente' | 'especialista' | 'jefe'
+export type TitleId =
+  | 'paciente'
+  | 'interno'
+  | 'residente'
+  | 'especialista'
+  | 'jefe'
+  // Los de Code Clicker: se ganan haciendo trampas, uno cada vez.
+  | 'hacker_etico'
+  | 'hacker_poco_etico'
+  | 'hacker_cazado'
 
 export type Lang = 'es' | 'en' | 'ca' | 'eu'
 
@@ -38,6 +47,8 @@ export type Expediente = {
   }
   /** Título que luce en el banner. */
   title: string
+  /** Veces que le han pillado haciendo trampas en Code Clicker: sale junto al último título. */
+  hacks: number
   titles: { id: TitleId; level: number; unlocked: boolean }[]
   achievements: { id: AchievementId; progress: number; goal: number; unlocked: boolean }[]
   /** Reacciones recibidas, por tipo. */
@@ -55,7 +66,7 @@ export type Expediente = {
  */
 export type PublicProfile = Pick<
   Expediente,
-  'login' | 'xp' | 'title' | 'achievements' | 'reactions'
+  'login' | 'xp' | 'title' | 'hacks' | 'achievements' | 'reactions'
 > & {
   image: string | null
   health: Health

@@ -7,6 +7,8 @@
  */
 
 import type {
+  AdminData,
+  DataWipe,
   AvailabilityResponse,
   BoardInput,
   BoardView,
@@ -36,6 +38,7 @@ import type {
   BroadcastInput,
   BroadcastReport,
   ClickerBoard,
+  ClickerCapital,
   ClickerSaveInput,
   ClickerSaved,
   ClickerUsage,
@@ -197,6 +200,25 @@ export type Api = {
   getClickerBoard: () => Promise<ClickerBoard>
   /** El uso del juego, general y por persona. Solo admins. */
   getClickerUsage: (days: number) => Promise<ClickerUsage>
+  /**
+   * Tu historial de capital, o el de otra persona si administras. `from` y `to`
+   * (segundos desde 1970) piden solo un tramo, con más detalle.
+   */
+  getClickerCapital: (query?: {
+    login?: string
+    from?: number
+    to?: number
+  }) => Promise<ClickerCapital>
+  /** Los tipos de dato que se pueden borrar a mano y cuántas filas tienen. Solo admins. */
+  getAdminData: () => Promise<AdminData>
+  /** Cuántas filas son esas. Solo admins. */
+  countAdminData: (scope: DataWipe) => Promise<{ rows: number }>
+  /** Las borra, y dice cuántas eran. Solo admins. */
+  deleteAdminData: (scope: DataWipe) => Promise<{ rows: number }>
+  /** Indulta una trampa: la partida rechazada pasa a estar en curso. Solo admins. */
+  pardonClickerCheat: (id: number) => Promise<void>
+  /** Descarta un aviso de salto de capital. Solo admins. */
+  dismissClickerAlert: (id: number) => Promise<void>
   /** Los comunicados que tienes por leer, el más antiguo primero. */
   getBroadcasts: () => Promise<Broadcast[]>
   /** Contesta a uno (o lo cierra sin elegir) y devuelve los que quedan. */

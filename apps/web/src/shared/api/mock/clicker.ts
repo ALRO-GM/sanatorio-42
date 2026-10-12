@@ -6,9 +6,11 @@
  * con la pastilla roja ya elegida. `?secreto=otro` es la roja con la partida
  * abierta también en otro dispositivo (los guardados se rechazan) y
  * `?secreto=caido`, la roja con la carga de la partida fallando al entrar.
+ * `?secreto=trampa` es la roja con la API pillando una trampa en cada guardado.
+ * Sin eso, solo se pilla lo más burdo: tener sin gastar más de lo escrito.
  */
 
-import type { ClickerState } from '@sanatorio/contracts'
+import type { ClickerAlert, ClickerCheat, ClickerState, TitleId } from '@sanatorio/contracts'
 
 import { ME } from './data'
 import { portrait } from './portrait'
@@ -16,15 +18,56 @@ import { delay, fail } from './state'
 import type { Api } from '../types'
 
 const wanted = new URLSearchParams(window.location.search).get('secreto')
-const red = wanted === 'rojo' || wanted === 'otro' || wanted === 'caido'
+const red = wanted === 'rojo' || wanted === 'otro' || wanted === 'caido' || wanted === 'trampa'
 const state: ClickerState = {
   plus: red ? 100 : Math.max(0, Number(wanted ?? 0) || 0),
   pill: red ? 'red' : null,
   save: null,
   rev: 0,
+  caught: 0,
+  saleDue: false,
   names: ['jdoe', 'rsoto', 'mlopez', 'agarcia'],
 }
 let best = 0
+// Lo que se va apuntando mientras se juega en la web de mentira.
+const history: [number, number][] = []
+let cheats: (ClickerCheat & { save: string })[] = []
+let alerts: ClickerAlert[] = [
+  {
+    id: 1,
+    login: 'rsoto',
+    at: new Date(Date.now() - 2 * 3_600_000).toISOString(),
+    seconds: 4,
+    from: 2.1e6,
+    to: 1.9e7,
+    golden: false,
+    trace: Array.from({ length: 60 }, (_, index): [number, number] => [
+      Math.floor(Date.now() / 1000) - 7200 - 30 + index,
+      index < 30
+        ? 2e6 + index * 3000
+        : index < 34
+          ? 2.1e6 * 1.75 ** (index - 29)
+          : 1.9e7 + index * 4000,
+    ]),
+  },
+]
+
+/** El título que deja en el banner haber sido pillado, y las veces: lo pinta el expediente. */
+export function mockHacker(): { title: TitleId | null; caught: number } {
+  const { caught } = state
+
+  return {
+    title:
+      caught === 0
+        ? null
+        : caught === 1
+          ? 'hacker_etico'
+          : caught === 2
+            ? 'hacker_poco_etico'
+            : 'hacker_cazado',
+    caught,
+  }
+}
 let holder: string | null = null
 // La primera petición la hace la cabecera, para saber la pastilla; las dos
 // siguientes son del juego al cargar la partida (en desarrollo React la pide
@@ -33,7 +76,15 @@ let calls = 0
 
 export const clickerMock: Pick<
   Api,
-  'getClicker' | 'pressPlus' | 'choosePill' | 'saveClicker' | 'getClickerBoard' | 'getClickerUsage'
+  | 'getClicker'
+  | 'pressPlus'
+  | 'choosePill'
+  | 'saveClicker'
+  | 'getClickerBoard'
+  | 'getClickerUsage'
+  | 'getClickerCapital'
+  | 'pardonClickerCheat'
+  | 'dismissClickerAlert'
 > = {
   async getClicker() {
     await delay(100)
@@ -67,12 +118,47 @@ export const clickerMock: Pick<
       throw fail(409, 'Esta partida se ha seguido en otro dispositivo')
     }
 
+    const sent = JSON.parse(save.save) as {
+      code: number
+      total: number
+      owned?: Record<string, number>
+    }
+    const empty = Object.values(sent.owned ?? {}).every((count) => count === 0)
+    // Con la venta pendiente, el guardado que llega sin edificios es el bueno.
+    const selling = state.saleDue && empty
+
+    // Con `trampa`, el primer guardado entra, para que haya una partida buena a la que volver.
+    const rigged = wanted === 'trampa' && state.save !== null
+
+    if (!selling && (rigged || sent.code > sent.total + 1)) {
+      state.caught += 1
+      state.saleDue = state.caught >= 3
+      cheats.unshift({
+        id: state.caught,
+        login: ME.login,
+        at: new Date().toISOString(),
+        why: rigged ? 'rate' : 'ledger',
+        total: save.total,
+        perSecond: save.perSecond,
+        save: save.save,
+      })
+
+      return { rev: state.rev, caught: state.caught, refused: true }
+    }
+    if (state.saleDue && !empty) return { rev: state.rev, caught: state.caught, refused: true }
+
+    for (const [at, capital] of save.capital ?? []) {
+      // Un punto cada diez segundos: aquí no hay meses de historial que enseñar.
+      if (at - (history.at(-1)?.[0] ?? 0) >= 10) history.push([at, capital])
+    }
+
+    state.saleDue = false
     state.save = save.save
     state.rev += 1
     holder = save.session
     best = Math.max(best, save.total)
 
-    return { rev: state.rev }
+    return { rev: state.rev, caught: state.caught, refused: false }
   },
 
   async getClickerBoard() {
@@ -114,6 +200,9 @@ export const clickerMock: Pick<
       prestige: 0,
       saves: row.total > 0 ? 300 - index * 120 : 0,
       updatedAt: at(index * 30),
+      caught: row.login === ME.login ? state.caught : 0,
+      caughtWhy: row.login === ME.login ? (cheats[0]?.why ?? null) : null,
+      caughtAt: row.login === ME.login ? (cheats[0]?.at ?? null) : null,
       // Quien juega lo deja abierto: casi todo el tiempo es con la pestaña oculta.
       seen: row.pill === 'red' ? days * (900 - index * 300) : 0,
       back: row.pill === 'red' ? days * (400 - index * 100) : 0,
@@ -133,11 +222,61 @@ export const clickerMock: Pick<
         active: players.filter((_, index) => index * 30 < days * 24).length,
         total: sum('total'),
         saves: sum('saves'),
+        caught: players.filter((player) => player.caught > 0).length,
         seen: sum('seen'),
         back: sum('back'),
         hidden: sum('hidden'),
       },
       players,
+      alerts,
+      cheats: cheats.map(({ save: _, ...cheat }) => cheat),
     }
+  },
+
+  async getClickerCapital({ login, from = 0, to = Infinity } = {}) {
+    await delay()
+
+    const now = Math.floor(Date.now() / 1000)
+    // Tres meses subiendo a buen ritmo, con sus parones de noche: lo de hoy
+    // con detalle, lo de la semana por horas y lo anterior por días.
+    const past = [
+      ...Array.from({ length: 83 }, (_, index) => now - (90 - index) * 86_400),
+      ...Array.from({ length: 144 }, (_, index) => now - (168 - index) * 3600),
+      ...Array.from({ length: 360 }, (_, index) => now - (24 * 360 - index * 24) * 10),
+    ].map((at): [number, number] => {
+      const days = 90 - (now - at) / 86_400
+
+      return [at, 500 * 1.12 ** days * (1 + 0.05 * Math.sin(days * 6.3))]
+    })
+    const all = login === undefined || login === ME.login ? [...past, ...history] : past
+    const points = all.filter(([at]) => at >= from && at <= to)
+    const step = Math.max(1, Math.ceil(points.length / 300))
+
+    return {
+      first: all[0]?.[0] ?? null,
+      last: all.at(-1)?.[0] ?? null,
+      points: points.filter((_, index) => index % step === 0 || index === points.length - 1),
+    }
+  },
+
+  async pardonClickerCheat(id) {
+    await delay(150)
+
+    const copy = cheats.find((cheat) => cheat.id === id)
+
+    if (copy === undefined) throw fail(404, 'Esa trampa ya no está')
+
+    cheats = cheats.filter((cheat) => cheat.id !== id)
+    state.save = copy.save
+    state.rev += 1
+    holder = null
+    state.caught = Math.max(0, state.caught - 1)
+    state.saleDue = false
+    best = Math.max(best, copy.total)
+  },
+
+  async dismissClickerAlert(id) {
+    await delay(100)
+    alerts = alerts.filter((alert) => alert.id !== id)
   },
 }

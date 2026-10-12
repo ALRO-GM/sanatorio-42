@@ -590,3 +590,112 @@ describe('code clicker: las fichas que explican cada cosa', () => {
     expect(span(Infinity)).toBe('∞')
   })
 })
+
+describe('code clicker: las trampas', () => {
+  it('lo invertido y lo que queda nunca pasan de lo escrito jugando limpio', async () => {
+    const { buy, buyUpgrade, click, invested, sell, shop } =
+      await import('../src/features/clicker/engine')
+    const game = newGame(T0, always(0.5))
+    let now = T0
+
+    // Un rato comprando lo primero que se pueda pagar, y vendiendo de vez en cuando.
+    for (let step = 0; step < 4000; step += 1) {
+      now += SECOND
+      tick(game, now, always(0.99))
+      click(game, now)
+
+      for (const { id } of BUILDINGS) buy(game, id)
+      for (const upgrade of shop(game, now)) buyUpgrade(game, upgrade.id, now)
+      if (step % 500 === 499) sell(game, 'cursor', 3)
+
+      expect(game.code + invested(game)).toBeLessThanOrEqual(game.total * 1.001 + 1000)
+    }
+
+    expect(invested(game)).toBeGreaterThan(1000)
+  })
+
+  it('la venta forzosa se lo lleva todo y paga la mitad', async () => {
+    const { invested, sellAll } = await import('../src/features/clicker/engine')
+    const { FORCED_REFUND } = await import('../src/features/clicker/data')
+    const game = newGame(T0, always(0.5))
+
+    game.owned = { cursor: 10, pisciner: 3 }
+    game.bought = ['cursor:0']
+
+    const worth = invested(game) - 100
+    const paid = sellAll(game, FORCED_REFUND)
+
+    expect(paid).toBe(Math.floor(worth / 2))
+    expect(game.code).toBe(paid)
+    expect(game.owned).toEqual({})
+    // Las mejoras se quedan.
+    expect(game.bought).toEqual(['cursor:0'])
+    expect(baseCps(game)).toBe(0)
+  })
+
+  it('las tres primeras veces dan logro, y cada vez toca un mensaje', async () => {
+    const { bustText, textsOf } = await import('../src/features/clicker/texts')
+    const game = newGame(T0, always(0.5))
+
+    expect(tick(game, T0, always(0.5), 0, 0)).toEqual(['pill:red'])
+    expect(tick(game, T0, always(0.5), 0, 1)).toEqual(['hack:0'])
+    expect(tick(game, T0, always(0.5), 0, 5)).toEqual(['hack:1', 'hack:2'])
+    expect(tick(game, T0, always(0.5), 0, 9)).toEqual([])
+
+    for (const lang of ['es', 'en'] as const) {
+      // Tres con título propio y diez para lo que venga después.
+      expect(textsOf(lang).busts).toHaveLength(13)
+      expect(new Set(textsOf(lang).busts.map(([, text]) => text)).size).toBe(13)
+      expect(bustText(4, lang)[1]).toContain('4')
+      // Pasados los diez, se queda en el último.
+      expect(bustText(40, lang)[0]).toBe(bustText(13, lang)[0])
+      expect(bustText(40, lang)[1]).toContain('40')
+    }
+  })
+})
+
+describe('code clicker: el capital', () => {
+  it('comprar no lo mueve, aplastar un bug tampoco, y vender lo baja', async () => {
+    const { buy, capitalOf, sell, squash } = await import('../src/features/clicker/engine')
+    const game = newGame(T0, always(0.5))
+
+    game.code = 10_000
+    game.total = 10_000
+    expect(capitalOf(game)).toBe(10_000)
+
+    buy(game, 'cursor', 10)
+    buy(game, 'pisciner', 5)
+    // Los precios se redondean hacia arriba: se pierde, como mucho, una línea por compra.
+    expect(capitalOf(game)).toBeGreaterThan(9_998)
+    expect(capitalOf(game)).toBeLessThanOrEqual(10_000)
+
+    game.bugs = [1000, 500]
+
+    const withBugs = capitalOf(game)
+
+    expect(withBugs).toBeCloseTo(capitalOf({ ...game, bugs: [] }) + 1650)
+    squash(game, 0)
+    expect(capitalOf(game)).toBeCloseTo(withBugs)
+
+    sell(game, 'pisciner', 5)
+    expect(capitalOf(game)).toBeLessThan(withBugs)
+  })
+
+  it('se apunta una vez por segundo, y no se acumula sin fin', async () => {
+    const { sample } = await import('../src/features/clicker/sync')
+    const samples: [number, number][] = []
+
+    sample(samples, 5_000, 10)
+    sample(samples, 5_400, 11)
+    sample(samples, 6_100, 12)
+    expect(samples).toEqual([
+      [5, 10],
+      [6, 12],
+    ])
+
+    for (let second = 7; second < 2000; second += 1) sample(samples, second * 1000, second)
+
+    expect(samples).toHaveLength(900)
+    expect(samples.at(-1)).toEqual([1999, 1999])
+  })
+})

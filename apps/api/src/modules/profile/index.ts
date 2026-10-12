@@ -15,13 +15,14 @@ import { createProfilesRepository } from './profiles.repository.js'
 import type { ProfilesRepository } from './profiles.repository.js'
 import { createXpRepository } from './xp.repository.js'
 import { createXpService } from './xp.service.js'
-import type { XpService } from './xp.service.js'
+import type { XpService, XpServiceOptions } from './xp.service.js'
 
 export type ProfileModuleDeps = {
   db: Db
   replica: ReplicaRepository
   curriculum: Curriculum
   events: EventBus
+  hacker?: XpServiceOptions['hacker']
   now?: () => number
 }
 
@@ -37,6 +38,7 @@ export function createProfileModule(deps: ProfileModuleDeps): ProfileModule {
     profiles,
     replica: deps.replica,
     curriculum: deps.curriculum,
+    ...(deps.hacker === undefined ? {} : { hacker: deps.hacker }),
     ...(deps.now === undefined ? {} : { now: deps.now }),
   })
 

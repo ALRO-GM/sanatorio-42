@@ -2,6 +2,7 @@
  * Módulo `meet`: avisos y chat de cada evento, y asistencia validada con códigos.
  */
 
+import { tableStore } from '../../core/db/data-store.js'
 import type { AppModule } from '../../core/module.js'
 import { createMeetService } from './meet.service.js'
 import type { MeetService, MeetServiceOptions } from './meet.service.js'
@@ -106,14 +107,19 @@ export function createMeetModule(deps: MeetServiceOptions): MeetModule {
         return reply.send(await service.checkins(await session.actor(request), request.query.id))
       })
     },
-    jobs: [
-      {
-        name: 'borrado de mensajes antiguos',
-        everyMs: 6 * 60 * 60_000,
-        run: async () => {
-          await service.purge()
-        },
-      },
+    stores: [
+      tableStore(deps.db, {
+        id: 'messages',
+        table: 'event_messages',
+        login: 'login',
+        date: { column: 'created_at', as: 'iso' },
+      }),
+      tableStore(deps.db, {
+        id: 'event_alerts',
+        table: 'event_alerts',
+        login: 'login',
+        date: { column: 'missed_at', as: 'iso' },
+      }),
     ],
   }
 }

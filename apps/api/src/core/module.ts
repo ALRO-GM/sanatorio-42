@@ -11,6 +11,7 @@
 
 import type { FastifyInstance } from 'fastify'
 
+import type { DataStore } from './db/data-store.js'
 import type { SessionReader } from './session.js'
 
 /** Lo que recibe un módulo al registrar sus rutas. */
@@ -38,6 +39,11 @@ export type AppModule = {
    * la app al arrancar; en los tests se llama a `run` a mano.
    */
   readonly jobs?: readonly Job[]
+  /**
+   * Los datos del módulo que quien administra puede borrar a mano desde el
+   * panel. Nada se borra solo por viejo.
+   */
+  readonly stores?: readonly DataStore[]
   /** Arranca el trabajo de fondo, si lo tiene. Solo lo llama `main.ts`. */
   readonly start?: () => void
   /** Para el trabajo de fondo y espera a que termine lo que esté a medias. */

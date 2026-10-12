@@ -93,8 +93,9 @@ describe('comunidad', () => {
       )
     })
 
-    it('los mensajes se borran a los 90 días, y el registro de códigos al año', async () => {
+    it('ni los mensajes ni el registro de códigos se borran solos: los quita quien administra', async () => {
       const { boards, meet, attendance } = services
+      const wipe = services.admin.wipe.bind(services.admin)
       const board = await boards.create(actor('eva'), malloc())
       const id = `board:${board.id}`
       const admin = actor('eva', { admin: true })
@@ -111,16 +112,35 @@ describe('comunidad', () => {
       const later = await boards.create(actor('eva'), malloc(24 * 92))
 
       await meet.send(actor('eva'), null, { id: `board:${later.id}`, kind: 'text', body: 'nuevo' })
-      expect(await meet.purge()).toBe(0)
 
-      clock.advance(2 * 24 * HOUR)
-      expect(await meet.purge()).toBe(1)
-      expect((await meet.log(admin)).map((message) => message.body)).toEqual(['nuevo'])
+      // Pasa más de un año y sigue todo.
+      clock.advance(400 * 24 * HOUR)
+      expect((await meet.log(admin)).map((message) => message.body)).toContain('viejo')
+      expect(await meet.checkins(admin, id)).toHaveLength(2)
 
-      // El registro de intentos dura un año; el tiempo validado no se borra nunca.
-      expect(await attendance.purge()).toBe(0)
-      clock.advance(280 * 24 * HOUR)
-      expect(await attendance.purge()).toBe(2)
+      // Se borran los mensajes de antes de una fecha: el reciente se queda.
+      const texts = async (): Promise<(string | null)[]> =>
+        (await meet.log(admin))
+          .filter((message) => message.kind === 'text')
+          .map((message) => message.body)
+
+      expect(await texts()).toEqual(expect.arrayContaining(['viejo', 'nuevo']))
+      await wipe(admin, { kind: 'messages', before: '2026-12-01' }, true)
+      expect(await texts()).toEqual(['nuevo'])
+      // O los de una persona, de una fecha en adelante.
+      expect(
+        await wipe(admin, { kind: 'messages', login: 'ana', from: '2026-01-01' }, true),
+      ).toEqual({
+        rows: 0,
+      })
+      expect(
+        await wipe(admin, { kind: 'messages', login: 'eva', from: '2026-12-01' }, false),
+      ).toEqual({
+        rows: 1,
+      })
+
+      // El registro de intentos, entero; el tiempo validado no es de este registro.
+      expect(await wipe(admin, { kind: 'checkins' }, true)).toEqual({ rows: 2 })
       expect(await meet.checkins(admin, id)).toEqual([])
       expect(await attendance.attended(id)).toEqual(['ana'])
     })

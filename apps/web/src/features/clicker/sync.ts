@@ -10,6 +10,7 @@ import type { ClickerState } from '@sanatorio/contracts'
 
 const LOCAL_KEY = 'sanatorio_clicker'
 const REV_KEY = 'sanatorio_clicker_rev'
+const CAUGHT_KEY = 'sanatorio_clicker_caught'
 
 /** La copia de este navegador y la `rev` de la API de la que salió. */
 export type LocalCopy = { save: string | null; rev: number | null }
@@ -50,5 +51,38 @@ export function newSession(): string {
     return crypto.randomUUID()
   } catch {
     return `s-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`
+  }
+}
+
+/** La última trampa de la que ya se avisó en este navegador: su número. */
+export function seenCaught(): number {
+  try {
+    return Number(localStorage.getItem(CAUGHT_KEY) ?? 0) || 0
+  } catch {
+    return 0
+  }
+}
+
+/** Segundos de capital que se guardan a la espera de mandarlos, como mucho. */
+const SAMPLES_KEPT = 900
+
+/**
+ * Apunta el capital de este segundo, si aún no se había apuntado. La API lo
+ * guarda por minutos y mira si hay saltos raros.
+ */
+export function sample(samples: [number, number][], now: number, capital: number): void {
+  const second = Math.floor(now / 1000)
+
+  if ((samples.at(-1)?.[0] ?? 0) >= second) return
+
+  samples.push([second, capital])
+  if (samples.length > SAMPLES_KEPT) samples.splice(0, samples.length - SAMPLES_KEPT)
+}
+
+export function markCaught(caught: number): void {
+  try {
+    localStorage.setItem(CAUGHT_KEY, String(caught))
+  } catch {
+    // Sin almacenamiento, el aviso volverá a salir al recargar.
   }
 }

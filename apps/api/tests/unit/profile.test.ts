@@ -92,6 +92,7 @@ describe('comunidad', () => {
       expect(record.health).toMatchObject({ currentCircle: 0, milestones: [], declared: null })
       expect(Object.keys(record).sort()).toEqual([
         'achievements',
+        'hacks',
         'health',
         'image',
         'login',

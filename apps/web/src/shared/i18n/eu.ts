@@ -696,7 +696,7 @@ export const eu: Record<string, string> = {
   'meet.said.absent': 'Ezingo du joan',
   'meet.chat': 'Ekitaldiaren txata',
   'meet.chatNotice':
-    'Mezuak 90 egunera ezabatzen dira. Weba kudeatzen duenak irakur ditzake salaketa bat badago.',
+    'Mezuak gorde egiten dira. Weba kudeatzen duenak irakur ditzake salaketa bat badago.',
   'meet.chatEmpty': 'Inork ez du oraindik idatzi. Jartzen duzuna ekitaldiko guztiek ikusten dute.',
   'meet.write': 'Idatzi mezu bat…',
   'meet.sendText': 'Bidali',
