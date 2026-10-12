@@ -1,0 +1,100 @@
+# Code Clicker: qué se ha copiado del original y por qué
+
+Code Clicker es la sección secreta de Sanatorio 42: una recreación de Cookie
+Clicker con tema de programación. Este documento recoge el análisis del original
+y de lo que se ha escrito sobre el género, y qué se ha aplicado de cada cosa. Las
+reglas están en `apps/web/src/features/clicker/engine.ts`; la progresión (costes,
+producción, umbrales) es la del original y no se toca.
+
+## 1. Qué hace que el original parezca vivo
+
+Cookie Clicker no tiene una sola animación llamativa: tiene muchas pequeñas, y
+casi todas dicen algo del estado de la partida.
+
+| En el original | Qué comunica | En Code Clicker |
+| --- | --- | --- |
+| La galleta crece al pasar el ratón, se encoge al pulsar y rebota | Cada pulsación ha contado | La tecla baja, y rebota con un muelle que se reinicia en cada pulsación |
+| Sale un `+N` que sube y se desvanece, y migas que caen | Cuánto ha dado esa pulsación | `+N`, una onda desde el punto pulsado y tres símbolos de código que saltan y caen |
+| Rayos de luz que giran detrás de la galleta | Es el centro de la pantalla | Rayos que giran detrás de la tecla; dorados y rápidos durante una racha |
+| Un anillo de cursores alrededor que la pulsan por turnos | Cuántos cursores tienes, y que trabajan solos | Dos anillos (hasta 52 cursores) que giran despacio y pulsan en oleada |
+| Lluvia de galletas, más densa cuanta más producción | Tu producción por segundo, sin leer el número | Lluvia de código en cuatro densidades; dorada y al doble de velocidad en una racha |
+| Leche con oleaje que sube con los logros y cambia de sabor cada 25 | Tus logros, de un vistazo | Un líquido con oleaje que sube con los logros y cambia de bebida cada 25 |
+| Una fila por edificio, con su fondo y un muñeco por unidad | Lo que has construido, como un pueblo que crece | Una fila por edificio con fondo propio y una ficha por unidad, que entra con un salto y se mece |
+| La galleta dorada aparece poco a poco, se balancea y se va | Hay que estar atento: es azar y dura poco | La pull request dorada aparece, se balancea y se desvanece; al abrirla estalla y dice qué ha dado |
+| Productos en gris si no llega, precio en verde o rojo, silueta y `???` si no se conocen | Qué puedes comprar ya y qué hay más allá | Lo mismo, más una barra que se llena según lo cerca que estás de poder pagarlo |
+| Las mejoras brillan cuando se pueden comprar | Hay algo nuevo que hacer | Entran con un salto, laten cuando llega el dinero y llevan su barra cuando no |
+| La pestaña del navegador dice cuántas galletas tienes | El juego sigue aunque mires otra cosa | La pestaña dice cuántas líneas llevas |
+| Con el Grandmapocalypse cambian el fondo, las abuelas y las noticias | Algo va mal, y lo has hecho tú | Cambian los colores, las noticias, las ventanas del campus y los pisciners; al final la tecla te mira |
+| Los wrinklers se pegan a la galleta | Te están comiendo producción | Los bugs se pegan alrededor de la tecla y la roen |
+
+## 2. La ficha: saber qué hace algo antes de comprarlo
+
+En el original, al pasar por un edificio sale: nombre, precio, cuántos tienes,
+una frase, lo que produce cada uno, lo que producen entre todos con su tanto por
+ciento del total y lo producido hasta ahora. En una mejora: nombre, precio, tipo
+y efecto. Lo que no se ha descubierto sale como `???`.
+
+Code Clicker enseña todo eso (`cards.ts`, `Card.tsx`) y añade tres cuentas que en
+el original hay que hacer de cabeza o con una extensión (`insight.ts`):
+
+- **Cuánto sube la producción** al comprarlo, en líneas por segundo y en tanto
+  por ciento. Se calcula comprando de mentira, así que sirve para cualquier
+  mejora, también las que interactúan entre sí.
+- **Cuánto falta** para poder pagarlo al ritmo actual.
+- **En cuánto se paga solo**: precio entre lo que sube la producción. Es la
+  cifra que de verdad compara dos compras.
+
+No se destripa nada: un edificio sin descubrir o un logro sin conseguir no
+cuentan lo que son, y las mejoras solo salen cuando el juego las desbloquea.
+
+En pantalla táctil no hay "pasar por encima": el primer toque enseña la ficha y
+el segundo compra.
+
+## 3. Qué dicen los análisis del género
+
+- **El bucle es de esperar, no de pulsar.** El estudio de CHI 2018 sobre 66
+  juegos del género ("Playing to Wait") describe cómo pasan a quien juega de
+  jugar a planificar: se empieza pulsando y se acaba decidiendo qué comprar y
+  volviendo a mirar. De ahí que la tienda tenga que explicar bien cada compra.
+- **Coste exponencial, producción lineal.** Es la base matemática (Pecorella,
+  "The Math of Idle Games"): cada unidad cuesta un 15 % más y produce lo mismo,
+  así que siempre hay algo casi al alcance y nunca se termina. Las mejoras que
+  doblan sirven para que la producción alcance de nuevo a los costes.
+- **Siempre un objetivo cerca.** Lo que retiene es ver el siguiente hito a punto
+  de caer. Por eso hay barra de nivel, barras de "cuánto te falta" en la tienda
+  y la silueta de los dos edificios siguientes.
+- **Recompensa de razón variable.** La pull request dorada sale cuando quiere y
+  da cosas distintas: es lo único del juego que no se puede planificar, y lo
+  que hace que se mire la pantalla.
+- **Respuesta inmediata y exagerada** ("juice"): que cada acción tenga varias
+  señales a la vez (movimiento, número, partículas, sonido) aunque el efecto
+  real sea pequeño.
+- **El giro oscuro.** La curiosidad por lo que viene después sostiene el juego
+  cuando los números ya no dicen nada.
+- **Prestigio.** Cuando la espera se hace larga, empezar de cero con ventaja
+  vuelve a dar la sensación de avance rápido del principio.
+
+## 4. Lo que no se ha hecho, a propósito
+
+- **Nada que empuje a volver por obligación**: ni avisos fuera de la web, ni
+  producción que se pierde si no entras, ni rachas diarias. Es un juego
+  escondido en una herramienta de estudio, no un producto que viva de retener.
+- **El sonido viene apagado.** Está (sintetizado, sin ficheros), pero en un
+  cluster no se enciende solo.
+- **No se han copiado imágenes ni código del original.** Los dibujos son
+  vectoriales y están en `art.tsx` y `scene.tsx`.
+- **Faltan del original**: minijuegos, mejoras celestiales, temporadas y el
+  dragón.
+
+## Fuentes
+
+- Alharthi, Alsaedi, Toups Dugas, Tanenbaum y Hammer, "Playing to Wait: A
+  Taxonomy of Idle Games", CHI 2018: <https://doi.org/10.1145/3173574.3174195>
+- Anthony Pecorella, "The Math of Idle Games, Part I":
+  <https://www.gamedeveloper.com/design/the-math-of-idle-games-part-i>
+- Eric Guan, "Idle Game Design Principles":
+  <https://ericguan.substack.com/p/idle-game-design-principles>
+- "Cookie Clicker & the Strange Satisfaction of Doing Almost Nothing":
+  <https://mechanicsofmagic.com/2025/05/24/cookie-clicker-satisfaction-of-doing-nothing/>
+- Wiki de Cookie Clicker (leche, edificios, producción):
+  <https://cookieclicker.wiki.gg/wiki/Milk>, <https://cookieclicker.wiki.gg/wiki/Building>

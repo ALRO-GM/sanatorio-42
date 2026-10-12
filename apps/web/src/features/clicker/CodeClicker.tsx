@@ -1,13 +1,16 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import type { PointerEvent } from 'react'
+import type { FocusEvent, PointerEvent } from 'react'
 
 import type { ClickerBoard } from '@sanatorio/contracts'
 
-import { api } from '../../shared/api'
+import { api, ApiError } from '../../shared/api'
 import { useI18n } from '../../shared/i18n'
 import { Avatar } from '../../shared/ui/Avatar'
 import { BigKey, Tile } from './art'
-import { ACHIEVEMENTS, BUGS, BUILDINGS, CAFFEINE_PER_ACHIEVEMENT } from './data'
+import { CardView } from './Card'
+import { cardFor } from './cards'
+import type { Tip } from './cards'
+import { ACHIEVEMENTS, BUGS, BUILDINGS, CAFFEINE_PER_ACHIEVEMENT, GOLDEN, UPGRADE } from './data'
 import { useEgg } from './egg'
 import {
   baseCps,
@@ -15,6 +18,7 @@ import {
   buyUpgrade,
   caffeine,
   click,
+  clickPower,
   cpsOf,
   hotfix,
   hotfixPrice,
@@ -32,24 +36,46 @@ import {
   squash,
   stageOf,
   tick,
-  unitCps,
 } from './engine'
 import type { Game } from './engine'
+import { buildingShare, levelProgress, reach } from './insight'
+import { Backdrop, Coffee, CursorRing, drinkOf, hueOf, Skyline } from './scene'
+import { play, setSound, soundOn } from './sound'
+import { canResume, newSession, readLocal, writeLocal } from './sync'
 import { achievementText, fill, newsFor, short, textsOf, upgradeText } from './texts'
 
-const LOCAL_KEY = 'sanatorio_clicker'
 /** Cada cuánto se hacen cuentas y se repinta, y cada cuánto se guarda. */
 const FRAME_MS = 100
 const LOCAL_SAVE_MS = 10_000
 const SERVER_SAVE_MS = 60_000
-const NEWS_MS = 9000
+/** Cada cuánto se vuelve a intentar cargar si la API no contestó. */
+const RETRY_MS = 30_000
+const NEWS_MS = 13_500
+/** Lo que se queda en pantalla un aviso (un logro, el efecto de una pull request). */
+const TOAST_MS = 7500
+/** Fichas que se pintan en la fila de un edificio, por muchas que se tengan. */
+const ROW_UNITS = 36
+/** Lo que se lanza al pulsar la tecla, además del número. */
+const SPARKS = '{};()<>=+*&'
 const TABS = ['play', 'stats', 'achievements', 'board'] as const
 const AMOUNTS = [1, 10, 100] as const
 /** Caracteres que llueven por detrás de la tecla. */
 const RAIN = '{}[]();=<>/*01&|!#'
 
 type Tab = (typeof TABS)[number]
-type Pop = { id: number; x: number; y: number; text: string }
+/** Lo que salta al pulsar: el número, una chispa de código o la onda. */
+type Pop = {
+  id: number
+  kind: 'num' | 'spark' | 'ripple'
+  x: number
+  y: number
+  text: string
+  /** Hacia dónde sale despedida una chispa, en píxeles. */
+  dx?: number
+}
+/** El estallido al abrir una pull request dorada, en tantos por ciento del panel. */
+type Burst = { id: number; x: number; y: number; text: string; bad: boolean }
+type Shown = Tip & { anchor: DOMRect }
 type Toast = { id: number; icon: string; title: string; text: string; tier?: number }
 
 /** El nivel dentro del juego: el mismo cálculo que hace la API para la clasificación. */
@@ -89,13 +115,39 @@ export function CodeClicker({ me, onExit }: { me: string; onExit: () => void }) 
   const [toasts, setToasts] = useState<Toast[]>([])
   const [news, setNews] = useState('')
   const [board, setBoard] = useState<ClickerBoard | null>(null)
-  const [focus, setFocus] = useState<string | null>(null)
+  const [bursts, setBursts] = useState<Burst[]>([])
+  // La ficha que se enseña: lo que hay bajo el ratón (o lo último que se tocó).
+  const [tip, setTip] = useState<Shown | null>(null)
+  const tipNow = useRef<Shown | null>(null)
+  // En pantalla táctil no hay "pasar por encima": el primer toque enseña la
+  // ficha y el segundo compra.
+  const touch = useRef(false)
+  const primed = useRef(false)
+  const [sound, setSoundOn] = useState(soundOn)
+  // Lo último que se compró, para el destello de su botón.
+  const [flash, setFlash] = useState<{ id: string; n: number } | null>(null)
+  const keyArt = useRef<HTMLButtonElement>(null)
   // La partida ya está cargada: el rótulo de noticias puede empezar.
   const [loaded, setLoaded] = useState(false)
+  // La `rev` de la API de la que parte esta partida. Sin ella (`null`) no se
+  // guarda allí: aún no se sabe qué hay, y se podría pisar la partida buena.
+  const base = useRef<number | null>(null)
+  const session = useRef('')
+  // La API no contesta: se juega con la copia del navegador.
+  const [offline, setOffline] = useState(false)
+  // La partida se ha seguido en otro dispositivo: esta ya no se guarda.
+  const [stale, setStale] = useState(false)
+  // Lo mismo que `stale`, a mano para el guardado, que no se rehace al cambiar.
+  const lost = useRef(false)
   const counter = useRef(0)
   const plus = useRef(egg.plus)
+  const heard = useRef(false)
+
+  if (session.current === '') session.current = newSession()
 
   plus.current = egg.plus
+  heard.current = sound
+  tipNow.current = tip
 
   const toast = useCallback((entry: Omit<Toast, 'id'>): void => {
     const id = ++counter.current
@@ -103,7 +155,7 @@ export function CodeClicker({ me, onExit }: { me: string; onExit: () => void }) 
     setToasts((current) => [...current.slice(-3), { ...entry, id }])
     window.setTimeout(() => {
       setToasts((current) => current.filter((other) => other.id !== id))
-    }, 5000)
+    }, TOAST_MS)
   }, [])
 
   const save = useCallback((toServer: boolean): void => {
@@ -112,59 +164,94 @@ export function CodeClicker({ me, onExit }: { me: string; onExit: () => void }) 
     if (current === null) return
 
     const saved = serialize(current)
+    const rev = base.current
+
+    // Una partida que ya no es la buena no se guarda ni aquí: al recargar
+    // manda la de la API.
+    if (lost.current) return
+
+    writeLocal(saved, rev)
+
+    if (!toServer || rev === null) return
+
+    api
+      .saveClicker({
+        save: saved,
+        rev,
+        session: session.current,
+        total: current.before + current.total,
+        perSecond: baseCps(current),
+        achievements: current.achieved.length,
+        prestige: current.prestige,
+      })
+      .then(
+        (done) => {
+          base.current = done.rev
+        },
+        (error: unknown) => {
+          if (error instanceof ApiError && error.status === 409) {
+            lost.current = true
+            setStale(true)
+          }
+        },
+      )
+  }, [])
+
+  /**
+   * Trae la partida de la API. Al entrar manda la de la API; si no contesta, se
+   * juega con la copia del navegador y se reintenta. Con `replace` se cambia la
+   * partida en curso por la de la API (tras haberla seguido en otro sitio).
+   */
+  const load = useCallback(async (replace: boolean): Promise<void> => {
+    const local = readLocal()
 
     try {
-      localStorage.setItem(LOCAL_KEY, saved)
-    } catch {
-      // Sin almacenamiento local, queda la copia de la API.
-    }
+      const state = await api.getClicker()
 
-    if (toServer) {
-      void api
-        .saveClicker({
-          save: saved,
-          total: current.before + current.total,
-          perSecond: baseCps(current),
-          achievements: current.achieved.length,
-          prestige: current.prestige,
-        })
-        .catch(() => undefined)
+      names.current = state.names
+
+      if (game.current === null || replace) {
+        game.current =
+          restore(state.save, Date.now()) ??
+          (replace ? null : restore(local.save, Date.now())) ??
+          newGame(Date.now())
+      } else if (!canResume(state, local)) {
+        // Se jugó sin conexión, y mientras tanto en otro sitio: no se pisa.
+        lost.current = true
+        setStale(true)
+        setOffline(false)
+
+        return
+      }
+
+      base.current = state.rev
+      lost.current = false
+      setStale(false)
+      setOffline(false)
+    } catch {
+      game.current ??= restore(local.save, Date.now()) ?? newGame(Date.now())
+      setOffline(true)
+    } finally {
+      setLoaded(true)
     }
   }, [])
 
-  // Cargar la partida: manda la de la API; si no hay, la de este navegador.
   useEffect(() => {
-    let alive = true
+    void load(false)
+  }, [load])
 
-    api.getClicker().then(
-      (state) => {
-        if (!alive) return
+  // Sin conexión se reintenta hasta que la API contesta.
+  useEffect(() => {
+    if (!offline) return
 
-        let local: string | null = null
-
-        try {
-          local = localStorage.getItem(LOCAL_KEY)
-        } catch {
-          local = null
-        }
-
-        names.current = state.names
-        game.current =
-          restore(state.save, Date.now()) ?? restore(local, Date.now()) ?? newGame(Date.now())
-        setLoaded(true)
-      },
-      () => {
-        if (!alive) return
-
-        game.current = newGame(Date.now())
-        setLoaded(true)
-      },
-    )
+    const timer = window.setInterval(() => {
+      void load(false)
+    }, RETRY_MS)
 
     return () => {
-      alive = false
+      window.clearInterval(timer)
     }
-  }, [])
+  }, [offline, load])
 
   // El reloj del juego, y los guardados periódicos.
   useEffect(() => {
@@ -177,6 +264,7 @@ export function CodeClicker({ me, onExit }: { me: string; onExit: () => void }) 
         const [title, text] = achievementText(id, lang)
 
         toast({ icon: 'trophy', title, text, tier: ACHIEVEMENTS.indexOf(id) % 11 })
+        play('achievement', heard.current)
       }
 
       setFrame((value) => value + 1)
@@ -247,9 +335,48 @@ export function CodeClicker({ me, onExit }: { me: string; onExit: () => void }) 
     }
   }, [tab, save])
 
+  // La ficha se quita al mover la página (ya no estaría al lado de lo que
+  // explica) y, en táctil, al tocar fuera de lo que tiene ficha.
+  useEffect(() => {
+    if (tip === null) return
+
+    const close = (): void => {
+      setTip(null)
+    }
+    const outside = (event: Event): void => {
+      if (!(event.target instanceof Element) || event.target.closest('[data-tip]') === null) close()
+    }
+
+    window.addEventListener('scroll', close, true)
+    document.addEventListener('pointerdown', outside)
+
+    return () => {
+      window.removeEventListener('scroll', close, true)
+      document.removeEventListener('pointerdown', outside)
+    }
+  }, [tip])
+
+  // Como en el original, la pestaña del navegador dice cuánto llevas: se ve
+  // crecer aunque estés en otra.
+  useEffect(() => {
+    const before = document.title
+    const timer = window.setInterval(() => {
+      const current = game.current
+
+      if (current !== null) {
+        document.title = `${short(Math.floor(current.code), lang, 1)} · Code Clicker`
+      }
+    }, 1000)
+
+    return () => {
+      window.clearInterval(timer)
+      document.title = before
+    }
+  }, [lang])
+
   const rain = useMemo(
     () =>
-      Array.from({ length: 26 }, (_, index) => ({
+      Array.from({ length: 30 }, (_, index) => ({
         char: RAIN[(index * 7) % RAIN.length] ?? '0',
         left: (index * 37) % 100,
         delay: (index * 0.61) % 7,
@@ -276,51 +403,122 @@ export function CodeClicker({ me, onExit }: { me: string; onExit: () => void }) 
     -1,
   )
   const number = (value: number, decimals = 3): string => short(value, lang, decimals)
+  const boosted = current.buffs.some((buff) => buff.id !== 'clot' && buff.until > now)
+  const clotted = current.buffs.some((buff) => buff.id === 'clot' && buff.until > now)
+  // La lluvia de código es más densa cuanto más se escribe por segundo.
+  const drops = cps <= 0 ? 0 : cps < 50 ? 8 : cps < 5000 ? 16 : boosted ? 30 : 24
+
+  /** Lo que hace falta para que algo enseñe su ficha al pasar, enfocar o tocar. */
+  const tipOf = (kind: Tip['kind'], id: string) => {
+    const show = (element: Element): void => {
+      setTip({ kind, id, anchor: element.getBoundingClientRect() })
+    }
+
+    return {
+      'data-tip': kind,
+      onPointerEnter: (event: PointerEvent<HTMLElement>) => {
+        if (event.pointerType !== 'touch') {
+          touch.current = false
+          show(event.currentTarget)
+        }
+      },
+      onPointerLeave: (event: PointerEvent<HTMLElement>) => {
+        if (event.pointerType !== 'touch') setTip(null)
+      },
+      onPointerDown: (event: PointerEvent<HTMLElement>) => {
+        if (event.pointerType !== 'touch') return
+
+        touch.current = true
+        primed.current = tipNow.current?.kind === kind && tipNow.current.id === id
+        show(event.currentTarget)
+      },
+      onFocus: (event: FocusEvent<HTMLElement>) => {
+        if (!touch.current) show(event.currentTarget)
+      },
+      onBlur: () => {
+        if (!touch.current) setTip(null)
+      },
+    }
+  }
+  /** En táctil, el primer toque solo enseña la ficha. */
+  const ready = (): boolean => !touch.current || primed.current
 
   const press = (event: PointerEvent<HTMLButtonElement>): void => {
     const gained = click(current, Date.now())
     const box = event.currentTarget.getBoundingClientRect()
-    const id = ++counter.current
-
-    setPops((list) => [
-      ...list.slice(-18),
+    const x = event.clientX - box.left
+    const y = event.clientY - box.top
+    const fresh: Pop[] = [
       {
-        id,
-        x: event.clientX - box.left + (Math.random() - 0.5) * 24,
-        y: event.clientY - box.top,
+        id: ++counter.current,
+        kind: 'num',
+        x: x + (Math.random() - 0.5) * 24,
+        y,
         text: `+${number(gained, 1)}`,
       },
-    ])
+      { id: ++counter.current, kind: 'ripple', x, y, text: '' },
+      ...Array.from({ length: 3 }, (): Pop => ({
+        id: ++counter.current,
+        kind: 'spark',
+        x,
+        y,
+        text: SPARKS[Math.floor(Math.random() * SPARKS.length)] ?? ';',
+        dx: (Math.random() - 0.5) * 150,
+      })),
+    ]
+    const ids = new Set(fresh.map((pop) => pop.id))
+
+    setPops((list) => [...list.slice(-40), ...fresh])
     window.setTimeout(() => {
-      setPops((list) => list.filter((pop) => pop.id !== id))
-    }, 900)
+      setPops((list) => list.filter((pop) => !ids.has(pop.id)))
+    }, 1100)
+    // El rebote elástico de la tecla, que se reinicia aunque se pulse muy seguido.
+    keyArt.current
+      ?.querySelector('.cc-key-art')
+      ?.animate(
+        [
+          { transform: 'scale(0.9)' },
+          { transform: 'scale(1.07)', offset: 0.45 },
+          { transform: 'scale(0.98)', offset: 0.75 },
+          { transform: 'scale(1)' },
+        ],
+        { duration: 320, easing: 'ease-out' },
+      )
+    play('click', sound)
   }
 
   const golden = (): void => {
+    const at = current.goldenUp
     const result = openGolden(current, Date.now())
 
-    if (result === null) return
+    if (result === null || at === null) return
 
-    toast({
-      icon: result.effect === 'clot' || result.effect === 'ruin' ? 'bug' : 'golden',
-      title: ui(result.effect === 'clot' || result.effect === 'ruin' ? 'wrath' : 'golden'),
-      text: ui(`fx_${result.effect}`, { n: number(Math.abs(result.amount), 1) }),
-    })
+    const bad = result.effect === 'clot' || result.effect === 'ruin'
+    const text = ui(`fx_${result.effect}`, { n: number(Math.abs(result.amount), 1) })
+    const id = ++counter.current
+
+    setBursts((list) => [...list, { id, x: at.x * 100, y: at.y * 100, text, bad }])
+    window.setTimeout(() => {
+      setBursts((list) => list.filter((burst) => burst.id !== id))
+    }, 3000)
+    toast({ icon: bad ? 'bug' : 'golden', title: ui(bad ? 'wrath' : 'golden'), text })
+    play(bad ? 'bad' : 'golden', sound)
   }
 
-  const detail = (): [string, string, number] | null => {
-    if (focus === null) return null
+  const bought = (id: string, done: boolean, upgrade: boolean): void => {
+    if (!done) return
 
-    const upgrade = upgrades.find((entry) => entry.id === focus)
-
-    if (upgrade === undefined) return null
-
-    return [...upgradeText(upgrade.id, lang), upgrade.price]
+    setFlash({ id, n: ++counter.current })
+    play(upgrade ? 'upgrade' : 'buy', sound)
   }
-  const shown = detail()
+
+  const card = tip === null ? null : cardFor(tip, { game: current, now, lang, selling, amount })
+  const level = levelOf(all)
 
   return (
-    <section className={`cc stage-${reached} ${stage === 0 && reached > 0 ? 'patched' : ''}`}>
+    <section
+      className={`cc stage-${reached} ${stage === 0 && reached > 0 ? 'patched' : ''} ${boosted ? 'boosted' : ''} ${clotted ? 'clotted' : ''}`}
+    >
       <header className="cc-head">
         <h2 className="cc-title">{reached >= 3 ? '42 > ./reality' : ui('title')}</h2>
         <div className="filter-pills" role="tablist">
@@ -338,11 +536,43 @@ export function CodeClicker({ me, onExit }: { me: string; onExit: () => void }) 
               {ui(option)}
             </button>
           ))}
+          <button
+            type="button"
+            className="pill"
+            aria-pressed={sound}
+            onClick={() => {
+              setSound(!sound)
+              setSoundOn(!sound)
+              play('buy', !sound)
+            }}
+          >
+            {ui(sound ? 'soundOn' : 'soundOff')}
+          </button>
           <button type="button" className="pill" onClick={onExit}>
             {ui('back')}
           </button>
         </div>
       </header>
+
+      {stale && (
+        <p className="cc-sync" role="alert">
+          <span>{ui('stale')}</span>
+          <button
+            type="button"
+            className="pill"
+            onClick={() => {
+              void load(true)
+            }}
+          >
+            {ui('staleLoad')}
+          </button>
+        </p>
+      )}
+      {offline && !stale && (
+        <p className="cc-sync" role="status">
+          <span>{ui('offline')}</span>
+        </p>
+      )}
 
       <p className="cc-news" role="status">
         <span key={news}>{news}</span>
@@ -350,81 +580,121 @@ export function CodeClicker({ me, onExit }: { me: string; onExit: () => void }) 
 
       <div className="cc-grid">
         <div className="cc-bank">
+          <Skyline stage={reached} />
           <div className="cc-rain" aria-hidden="true">
-            {cps > 0 &&
-              rain.map((drop, index) => (
-                <i
-                  key={index}
-                  style={{
-                    left: `${drop.left}%`,
-                    animationDelay: `-${drop.delay}s`,
-                    animationDuration: `${drop.time}s`,
-                  }}
-                >
-                  {drop.char}
-                </i>
-              ))}
+            {rain.slice(0, drops).map((drop, index) => (
+              <i
+                key={index}
+                style={{
+                  left: `${drop.left}%`,
+                  animationDelay: `-${drop.delay}s`,
+                  animationDuration: `${boosted ? drop.time / 2 : drop.time}s`,
+                }}
+              >
+                {drop.char}
+              </i>
+            ))}
           </div>
-          <div
-            className="cc-coffee"
-            style={{ height: `${Math.min(60, caffeine(current) * 12)}%` }}
-            title={`${ui('caffeine', { pct: Math.round(caffeine(current) * 100) })}. ${ui('caffeineAbout')}`}
+          <Coffee
+            achievements={current.achieved.length}
+            title={`${ui(`drink${drinkOf(current.achieved.length)}`)} · ${ui('caffeine', { pct: Math.round(caffeine(current) * 100) })}. ${ui('caffeineAbout')}`}
           />
 
           <span className="cc-repo">{ui('repo', { login: me })}</span>
           <strong className="cc-count">{number(Math.floor(current.code))}</strong>
           <span className="cc-unit">{ui('code')}</span>
-          <span className="cc-cps">{ui('perSecond', { n: number(cps, 1) })}</span>
+          <span className="cc-cps">
+            {ui('perSecond', { n: number(cps, 1) })} ·{' '}
+            {ui('clickGain', { n: number(clickPower(current, now), 1) })}
+          </span>
+          <span
+            className="cc-level"
+            role="progressbar"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={Math.round(levelProgress(all) * 100)}
+            aria-label={ui('levelBar', { n: level })}
+          >
+            <i style={{ width: `${levelProgress(all) * 100}%` }} />
+            <b>
+              {ui('levelBar', { n: level })} → {level + 1}
+            </b>
+          </span>
 
-          <button type="button" className="cc-key" aria-label={ui('title')} onPointerDown={press}>
-            <BigKey stage={reached} />
-            {pops.map((pop) => (
-              <span key={pop.id} className="cc-pop" style={{ left: pop.x, top: pop.y }}>
-                {pop.text}
-              </span>
+          <div className="cc-keywrap">
+            <div className="cc-shine" aria-hidden="true" />
+            <CursorRing count={current.owned.cursor ?? 0} />
+            <button
+              ref={keyArt}
+              type="button"
+              className="cc-key"
+              aria-label={ui('title')}
+              onPointerDown={press}
+            >
+              <BigKey stage={reached} />
+              {pops.map((pop) =>
+                pop.kind === 'ripple' ? (
+                  <span key={pop.id} className="cc-ripple" style={{ left: pop.x, top: pop.y }} />
+                ) : (
+                  <span
+                    key={pop.id}
+                    className={pop.kind === 'spark' ? 'cc-spark' : 'cc-pop'}
+                    style={{
+                      left: pop.x,
+                      top: pop.y,
+                      ...(pop.dx === undefined ? {} : { ['--dx' as string]: `${pop.dx}px` }),
+                    }}
+                  >
+                    {pop.text}
+                  </span>
+                ),
+              )}
+            </button>
+            {/* Los bugs se pegan alrededor de la tecla, como parásitos. */}
+            {current.bugs.map((eaten, index) => (
+              <button
+                key={index}
+                type="button"
+                className="cc-bug"
+                style={{ ['--a' as string]: `${index * 36 + 18}deg` }}
+                title={ui('squashed', { n: number(eaten * BUGS.back, 1) })}
+                onClick={() => {
+                  const back = squash(current, index)
+
+                  toast({ icon: 'bug', title: ui('squashed', { n: number(back, 1) }), text: '' })
+                  play('squash', sound)
+                }}
+              >
+                <Tile icon="bug" size={34} />
+              </button>
             ))}
-          </button>
+          </div>
 
           {current.buffs.length > 0 && (
             <div className="cc-buffs">
               {current.buffs.map((buff) => (
                 <span key={buff.id} className={`cc-buff ${buff.id}`}>
-                  {ui(`fx_${buff.id}`).split(/[!:]/)[0]} · {Math.ceil((buff.until - now) / 1000)} s
+                  <i
+                    style={{
+                      width: `${Math.max(0, Math.min(1, (buff.until - now) / GOLDEN[buff.id].ms)) * 100}%`,
+                    }}
+                  />
+                  <b>
+                    {ui(`fx_${buff.id}`).split(/[!:]/)[0]} · {Math.ceil((buff.until - now) / 1000)}{' '}
+                    s
+                  </b>
                 </span>
               ))}
             </div>
           )}
 
           {current.bugs.length > 0 && (
-            <div className="cc-bugs">
-              <small>
-                {ui('bugs', {
-                  n: current.bugs.length,
-                  pct: Math.round(current.bugs.length * BUGS.share * 100),
-                })}
-              </small>
-              <div>
-                {current.bugs.map((eaten, index) => (
-                  <button
-                    key={index}
-                    type="button"
-                    className="cc-bug"
-                    title={number(eaten * BUGS.back, 1)}
-                    onClick={() => {
-                      const back = squash(current, index)
-
-                      toast({
-                        icon: 'bug',
-                        title: ui('squashed', { n: number(back, 1) }),
-                        text: '',
-                      })
-                    }}
-                  >
-                    <Tile icon="bug" size={34} />
-                  </button>
-                ))}
-              </div>
-            </div>
+            <small className="cc-bugs">
+              {ui('bugs', {
+                n: current.bugs.length,
+                pct: Math.round(current.bugs.length * BUGS.share * 100),
+              })}
+            </small>
           )}
 
           {reached > 0 &&
@@ -454,26 +724,64 @@ export function CodeClicker({ me, onExit }: { me: string; onExit: () => void }) 
               aria-label={ui(current.goldenUp.wrath ? 'wrath' : 'golden')}
               onClick={golden}
             >
-              <Tile icon={current.goldenUp.wrath ? 'bug' : 'golden'} size={56} />
+              <span>
+                <Tile icon={current.goldenUp.wrath ? 'bug' : 'golden'} size={64} />
+              </span>
             </button>
           )}
+          {bursts.map((burst) => (
+            <span
+              key={burst.id}
+              className={`cc-burst ${burst.bad ? 'bad' : ''}`}
+              style={{ left: `${burst.x}%`, top: `${burst.y}%` }}
+            >
+              {Array.from({ length: 12 }, (_, index) => (
+                <i key={index} style={{ ['--a' as string]: `${index * 30}deg` }} />
+              ))}
+              <b>{burst.text}</b>
+            </span>
+          ))}
         </div>
 
         <div className="cc-middle">
           {tab === 'play' && (
             <div className="cc-rows">
-              {BUILDINGS.filter(({ id }) => (current.owned[id] ?? 0) > 0).map(({ id }) => (
-                <div key={id} className="cc-row">
-                  <span className="cc-row-name">
-                    {texts.buildings[id][0]} <b>×{current.owned[id]}</b>
-                  </span>
-                  <span className="cc-row-strip">
-                    {Array.from({ length: Math.min(28, current.owned[id] ?? 0) }, (_, index) => (
-                      <Tile key={index} icon={id} size={26} />
-                    ))}
-                  </span>
-                </div>
-              ))}
+              {BUILDINGS.filter(({ id }) => (current.owned[id] ?? 0) > 0).map(({ id }) => {
+                const owned = current.owned[id] ?? 0
+
+                return (
+                  <div
+                    key={id}
+                    className={`cc-row ${id === 'pisciner' && stage > 0 ? `possessed-${stage}` : ''}`}
+                    style={{ ['--h' as string]: hueOf(id) }}
+                    tabIndex={0}
+                    {...tipOf('building', id)}
+                  >
+                    <Backdrop id={id} />
+                    <span className="cc-row-name">
+                      {texts.buildings[id][0]} <b>×{owned}</b>
+                      <small>
+                        {ui('rowSpeed', { n: number(buildingShare(current, id).all, 1) })}
+                      </small>
+                    </span>
+                    <span className="cc-row-strip">
+                      {Array.from({ length: Math.min(ROW_UNITS, owned) }, (_, index) => (
+                        <span
+                          key={index}
+                          className="cc-unit-tile"
+                          style={{
+                            ['--y' as string]: `${((index * 37) % 9) - 4}px`,
+                            animationDelay: `${((index * 13) % 10) / 5}s`,
+                          }}
+                        >
+                          <Tile icon={id} size={30} />
+                        </span>
+                      ))}
+                      {owned > ROW_UNITS && <b className="cc-row-more">+{owned - ROW_UNITS}</b>}
+                    </span>
+                  </div>
+                )
+              })}
               {lastOwned < 0 && <p className="cc-hint">{texts.buildings.cursor[2]}</p>}
             </div>
           )}
@@ -483,7 +791,7 @@ export function CodeClicker({ me, onExit }: { me: string; onExit: () => void }) 
               <dl>
                 {(
                   [
-                    ['statLevel', String(levelOf(all))],
+                    ['statLevel', String(level)],
                     ['statTotal', number(current.total)],
                     ['statAll', number(all)],
                     ['statHand', number(current.hand)],
@@ -527,6 +835,29 @@ export function CodeClicker({ me, onExit }: { me: string; onExit: () => void }) 
               ) : (
                 <p className="cc-hint">{ui('recompileNo')}</p>
               )}
+              {current.bought.length > 0 && (
+                <>
+                  <span className="eyebrow">
+                    {ui('boughtUpgrades', { n: current.bought.length })}
+                  </span>
+                  <div className="cc-upgrades owned">
+                    {current.bought.map((id) => {
+                      const upgrade = UPGRADE.get(id)
+
+                      return upgrade === undefined ? null : (
+                        <span key={id} className="cc-upgrade" tabIndex={0} {...tipOf('owned', id)}>
+                          <Tile
+                            icon={upgrade.icon}
+                            size={36}
+                            tier={upgrade.tier}
+                            {...(upgrade.icon === 'project' ? { label: '42' } : {})}
+                          />
+                        </span>
+                      )
+                    })}
+                  </div>
+                </>
+              )}
             </div>
           )}
 
@@ -541,13 +872,13 @@ export function CodeClicker({ me, onExit }: { me: string; onExit: () => void }) 
               <div className="cc-achievements">
                 {ACHIEVEMENTS.map((id, index) => {
                   const got = current.achieved.includes(id)
-                  const [name, about] = achievementText(id, lang)
 
                   return (
                     <span
                       key={id}
-                      className="cc-achievement"
-                      title={got ? `${name}\n${about}` : ui('locked')}
+                      className={`cc-achievement ${got ? 'got' : ''}`}
+                      tabIndex={0}
+                      {...tipOf('achievement', id)}
                     >
                       <Tile
                         icon={id.startsWith('own:') ? (id.split(':')[1] ?? 'trophy') : 'trophy'}
@@ -599,46 +930,35 @@ export function CodeClicker({ me, onExit }: { me: string; onExit: () => void }) 
             <>
               <span className="eyebrow">{ui('upgrades')}</span>
               <div className="cc-upgrades">
-                {upgrades.slice(0, 24).map((upgrade) => (
-                  <button
-                    key={upgrade.id}
-                    type="button"
-                    className={`cc-upgrade ${upgrade.price > current.code ? 'poor' : ''}`}
-                    aria-label={upgradeText(upgrade.id, lang)[0]}
-                    onMouseEnter={() => {
-                      setFocus(upgrade.id)
-                    }}
-                    onFocus={() => {
-                      setFocus(upgrade.id)
-                    }}
-                    onMouseLeave={() => {
-                      setFocus(null)
-                    }}
-                    onBlur={() => {
-                      setFocus(null)
-                    }}
-                    onClick={() => {
-                      buyUpgrade(current, upgrade.id, Date.now())
-                    }}
-                  >
-                    <Tile
-                      icon={upgrade.icon}
-                      size={40}
-                      tier={upgrade.tier}
-                      {...(upgrade.icon === 'project' ? { label: '42' } : {})}
-                    />
-                  </button>
-                ))}
+                {upgrades.slice(0, 24).map((upgrade) => {
+                  const poor = upgrade.price > current.code
+
+                  return (
+                    <button
+                      key={upgrade.id}
+                      type="button"
+                      className={`cc-upgrade ${poor ? 'poor' : 'can'}`}
+                      aria-label={upgradeText(upgrade.id, lang)[0]}
+                      aria-disabled={poor}
+                      style={{ ['--reach' as string]: reach(current, upgrade.price) }}
+                      {...tipOf('upgrade', upgrade.id)}
+                      onClick={() => {
+                        if (!ready()) return
+
+                        bought(upgrade.id, buyUpgrade(current, upgrade.id, Date.now()), true)
+                        setTip(null)
+                      }}
+                    >
+                      <Tile
+                        icon={upgrade.icon}
+                        size={44}
+                        tier={upgrade.tier}
+                        {...(upgrade.icon === 'project' ? { label: '42' } : {})}
+                      />
+                    </button>
+                  )
+                })}
               </div>
-              <p className="cc-detail" role="status">
-                {shown !== null && (
-                  <>
-                    <strong>{shown[0]}</strong> · {number(shown[2])}
-                    <br />
-                    {shown[1]}
-                  </>
-                )}
-              </p>
             </>
           )}
 
@@ -686,30 +1006,35 @@ export function CodeClicker({ me, onExit }: { me: string; onExit: () => void }) 
               const known = index <= lastOwned + 1
               const price = selling ? refundOf(current, id, amount) : priceOf(current, id, amount)
               const able = selling ? owned > 0 : price <= current.code
-              const each = unitCps(current, id)
 
               return (
                 <li key={id}>
                   <button
                     type="button"
-                    className={`cc-building ${able ? '' : 'poor'}`}
-                    disabled={!able}
-                    title={
-                      known
-                        ? `${texts.buildings[id][2]}\n${ui('each', { n: number(each, 1) })}`
-                        : ui('locked')
-                    }
+                    className={`cc-building ${able ? 'can' : 'poor'} ${known ? '' : 'unknown'}`}
+                    aria-disabled={!able}
+                    style={{
+                      ['--reach' as string]: selling ? 1 : reach(current, price),
+                      ['--h' as string]: hueOf(id),
+                    }}
+                    {...tipOf('building', id)}
                     onClick={() => {
-                      if (selling) sell(current, id, amount)
-                      else buy(current, id, amount)
+                      if (!able || !ready()) return
+
+                      bought(
+                        id,
+                        selling ? sell(current, id, amount) : buy(current, id, amount),
+                        false,
+                      )
                     }}
                   >
+                    {flash?.id === id && <i key={flash.n} className="cc-flash" />}
                     <Tile icon={id} size={46} dim={!known} />
                     <span>
                       <strong>{known ? texts.buildings[id][0] : ui('locked')}</strong>
                       <small className={able ? 'can' : 'cannot'}>{number(price)}</small>
                     </span>
-                    <b>{owned > 0 ? owned : ''}</b>
+                    <b key={owned}>{owned > 0 ? owned : ''}</b>
                   </button>
                 </li>
               )
@@ -733,6 +1058,16 @@ export function CodeClicker({ me, onExit }: { me: string; onExit: () => void }) 
           </div>
         ))}
       </div>
+
+      {card !== null && tip !== null && (
+        <CardView
+          card={card}
+          anchor={tip.anchor}
+          stage={reached}
+          price={(value) => number(value)}
+          {...(touch.current && card.price !== undefined ? { hint: ui('cardTouch') } : {})}
+        />
+      )}
     </section>
   )
 }

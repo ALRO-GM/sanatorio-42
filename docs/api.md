@@ -552,7 +552,7 @@ Se llega pulsando cien veces la cruz de la cabecera y eligiendo la pastilla
 roja. La API no juega: cuenta pulsaciones, guarda qué pastilla se eligió y
 custodia la partida. Las reglas están en `apps/web/src/features/clicker`.
 
-GET /clicker → por dónde vas y tu partida: `{ plus, pill, save, names }`.
+GET /clicker → por dónde vas y tu partida: `{ plus, pill, save, rev, names }`.
 
 - `names` son los logins que más corrigen en tu campus, para las noticias del
   juego. Solo viene con la pastilla roja.
@@ -563,7 +563,11 @@ envío (25 como mucho). Devuelve `{ plus, pill }`. Con pastilla elegida ya no su
 POST /clicker/pill → `{ "pill": "red" }` o `"blue"`. Una sola vez, y solo con
 cien pulsaciones: `409` si falta o si ya se eligió. La azul no tiene vuelta atrás.
 
-PUT /clicker/save → `204`. `{ save, total, perSecond, achievements, prestige }`.
+PUT /clicker/save → `{ rev }`. Recibe
+`{ save, rev, session, total, perSecond, achievements, prestige }`: `rev` es la
+que se cargó (o la del último guardado) y `session` un identificador de la
+pestaña. `409` si la partida se ha seguido en otro dispositivo: solo entra un
+guardado de la pestaña que hizo el último o que parta de la `rev` que hay.
 `403` sin la pastilla roja. La partida pesa 80 kB como mucho; las cifras no se
 comprueban, y el `total` de la clasificación nunca baja.
 

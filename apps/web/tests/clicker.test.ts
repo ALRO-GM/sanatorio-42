@@ -39,6 +39,17 @@ import {
   unitCps,
 } from '../src/features/clicker/engine'
 import type { Game } from '../src/features/clicker/engine'
+import { cardFor } from '../src/features/clicker/cards'
+import {
+  buildingGain,
+  buildingShare,
+  levelProgress,
+  payback,
+  span,
+  upgradeGain,
+  waitFor,
+} from '../src/features/clicker/insight'
+import { canResume, newSession } from '../src/features/clicker/sync'
 import {
   achievementText,
   newsFor,
@@ -407,5 +418,175 @@ describe('code clicker: textos', () => {
         expect(textsOf(lang).buildings[id].every((text) => text.length > 1)).toBe(true)
       }
     }
+  })
+})
+
+describe('code clicker: dónde vive la partida', () => {
+  it('tras jugar sin conexión solo se sigue guardando si nadie ha tocado la partida', () => {
+    // La API no tenía partida: no hay nada que pisar.
+    expect(canResume({ save: null, rev: 0 }, { save: null, rev: null })).toBe(true)
+    // La copia del navegador salió de la misma rev que hay en la API.
+    expect(canResume({ save: '{}', rev: 7 }, { save: '{}', rev: 7 })).toBe(true)
+    // Mientras tanto se guardó desde otro dispositivo.
+    expect(canResume({ save: '{}', rev: 8 }, { save: '{}', rev: 7 })).toBe(false)
+    // Navegador nuevo, sin copia: la partida recién empezada no pisa la buena.
+    expect(canResume({ save: '{}', rev: 3 }, { save: null, rev: null })).toBe(false)
+    expect(canResume({ save: '{}', rev: 0 }, { save: null, rev: 0 })).toBe(false)
+  })
+
+  it('cada pestaña tiene su identificador', () => {
+    expect(newSession()).not.toBe(newSession())
+    expect(newSession().length).toBeGreaterThanOrEqual(8)
+  })
+})
+
+describe('code clicker: las fichas que explican cada cosa', () => {
+  const NOW = 1_000_000
+  const context = (game: Game) => ({
+    game,
+    now: NOW,
+    lang: 'es' as const,
+    selling: false,
+    amount: 1,
+  })
+  const textOf = (game: Game, kind: 'building' | 'upgrade' | 'owned' | 'achievement', id: string) =>
+    cardFor({ kind, id }, context(game))
+      .lines.map((line) => line.text)
+      .join(' | ')
+
+  it('se apunta lo que escribe cada edificio, y entre todos suman lo escrito', () => {
+    const game = newGame(NOW)
+
+    game.owned = { cursor: 10, pisciner: 5 }
+    game.goldenAt = Infinity
+    tick(game, NOW + 100_000, () => 0.5)
+
+    // 10 cursores × 0,1 y 5 pisciners × 1, durante 100 segundos.
+    expect(game.made.cursor).toBeCloseTo(100)
+    expect(game.made.pisciner).toBeCloseTo(500)
+    expect(game.total).toBeCloseTo(600)
+    expect(buildingShare(game, 'pisciner')).toMatchObject({ each: 1, all: 5 })
+    expect(buildingShare(game, 'pisciner').share).toBeCloseTo(5 / 6)
+  })
+
+  it('dice cuánto sube la producción una compra, cuándo llega y en cuánto se paga', () => {
+    const game = newGame(NOW)
+
+    game.owned = { pisciner: 10 }
+    game.code = 100
+
+    // Un pisciner más: +1 por segundo. La primera mejora los dobla: +10.
+    expect(buildingGain(game, 'pisciner')).toBeCloseTo(1)
+    expect(upgradeGain(game, 'tier:pisciner:0', NOW).cps).toBeCloseTo(10)
+    // Las del cursor suben también cada pulsación.
+    expect(upgradeGain(game, 'cursor:0', NOW).click).toBeCloseTo(1)
+
+    // Faltan 900 a 10 por segundo; con lo que ya hay, nada; sin producción, no se sabe.
+    expect(waitFor(game, 1000, NOW)).toBeCloseTo(90)
+    expect(waitFor(game, 50, NOW)).toBe(0)
+    expect(waitFor(newGame(NOW), 50, NOW)).toBeNull()
+    expect(payback(1000, 10)).toBe(100)
+    expect(payback(1000, 0)).toBeNull()
+  })
+
+  it('la ficha de un edificio da sus cifras, y la de uno sin descubrir no cuenta nada', () => {
+    const game = newGame(NOW)
+
+    game.owned = { cursor: 4, pisciner: 10 }
+    game.made = { pisciner: 25_000 }
+    game.code = 100
+
+    const card = cardFor({ kind: 'building', id: 'pisciner' }, context(game))
+
+    expect(card).toMatchObject({ name: 'Pisciner', tag: 'tienes 10', able: false })
+    expect(card.price).toBe(priceOf(game, 'pisciner'))
+    expect(card.quote).toBeTruthy()
+
+    const text = textOf(game, 'building', 'pisciner')
+
+    expect(text).toContain('Cada pisciner escribe 1 por segundo')
+    expect(text).toContain('10 pisciners escriben 10 por segundo')
+    expect(text).toContain('Líneas escritas hasta ahora: 25.000')
+    expect(text).toContain('Comprarlo suma +1 por segundo')
+    expect(text).toContain('Te llegará en')
+    expect(text).toContain('Se paga solo en')
+
+    // El siguiente al último que se tiene ya se conoce; el de después, no.
+    expect(cardFor({ kind: 'building', id: 'cluster' }, context(game)).name).toBe('Cluster')
+    expect(cardFor({ kind: 'building', id: 'overflow' }, context(game))).toMatchObject({
+      name: '???',
+      lines: [{ text: 'Aún no lo has descubierto.' }],
+    })
+    expect(cardFor({ kind: 'building', id: 'overflow' }, context(game)).price).toBeUndefined()
+  })
+
+  it('la ficha de una mejora dice qué hace y cuánto da; comprada, ya no tiene precio', () => {
+    const game = newGame(NOW)
+
+    game.owned = { pisciner: 10 }
+    game.code = 5000
+
+    const card = cardFor({ kind: 'upgrade', id: 'tier:pisciner:0' }, context(game))
+
+    expect(card).toMatchObject({ tag: 'Mejora', price: 1000, able: true })
+    expect(textOf(game, 'upgrade', 'tier:pisciner:0')).toContain('+10 por segundo (+100 %)')
+    expect(textOf(game, 'upgrade', 'tier:pisciner:0')).toContain('Te llega para comprarlo')
+    expect(cardFor({ kind: 'upgrade', id: 'project:libft' }, context(game)).tag).toBe(
+      'Proyecto de 42',
+    )
+
+    game.bought = ['tier:pisciner:0']
+
+    const owned = cardFor({ kind: 'owned', id: 'tier:pisciner:0' }, context(game))
+
+    expect(owned.tag).toBe('Comprada')
+    expect(owned.price).toBeUndefined()
+    expect(owned.lines).toHaveLength(1)
+  })
+
+  it('todas las mejoras y edificios tienen ficha con texto, en los dos idiomas', () => {
+    const game = newGame(NOW)
+
+    game.owned = Object.fromEntries(BUILDINGS.map(({ id }) => [id, 1]))
+
+    for (const lang of ['es', 'en'] as const) {
+      for (const { id } of UPGRADES) {
+        const card = cardFor({ kind: 'upgrade', id }, { ...context(game), lang })
+
+        expect(card.name, id).not.toBe(id)
+        expect(card.lines[0]?.text.length, id).toBeGreaterThan(8)
+        expect(card.lines.map((line) => line.text).join(' '), id).not.toMatch(/\{\w+\}|card[A-Z]/)
+      }
+      for (const { id } of BUILDINGS) {
+        const text = cardFor({ kind: 'building', id }, { ...context(game), lang })
+          .lines.map((line) => line.text)
+          .join(' ')
+
+        expect(text, id).not.toMatch(/\{\w+\}|card[A-Z]/)
+      }
+    }
+  })
+
+  it('un logro sin conseguir no se destripa', () => {
+    const game = newGame(NOW)
+
+    expect(cardFor({ kind: 'achievement', id: 'total:3' }, context(game))).toMatchObject({
+      name: '???',
+      lines: [{ text: 'Aún no lo has descubierto.' }],
+    })
+
+    game.achieved = ['total:3']
+    expect(cardFor({ kind: 'achievement', id: 'total:3' }, context(game)).name).not.toBe('???')
+  })
+
+  it('el camino al siguiente nivel y los plazos se leen bien', () => {
+    expect(levelProgress(0)).toBe(0)
+    // Mil líneas son el nivel 9 justo; a mitad de camino del 10 hay 10^(9,5/3) − 1.
+    expect(levelProgress(10 ** (9.5 / 3) - 1)).toBeCloseTo(0.5)
+    expect(span(12)).toBe('12 s')
+    expect(span(200)).toBe('3 min 20 s')
+    expect(span(7500)).toBe('2 h 05 min')
+    expect(span(273_600)).toBe('3 d 4 h')
+    expect(span(Infinity)).toBe('∞')
   })
 })

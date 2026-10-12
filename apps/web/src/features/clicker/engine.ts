@@ -58,6 +58,8 @@ export type Game = {
   hand: number
   clicks: number
   owned: Partial<Record<BuildingId, number>>
+  /** Lo que ha escrito cada tipo de edificio en esta partida: sale en su ficha. */
+  made: Partial<Record<BuildingId, number>>
   /** Ids de las mejoras compradas. */
   bought: string[]
   /** Ids de los logros conseguidos. */
@@ -94,6 +96,7 @@ export function newGame(now: number, random: Random = Math.random): Game {
     hand: 0,
     clicks: 0,
     owned: {},
+    made: {},
     bought: [],
     achieved: [],
     golden: 0,
@@ -521,6 +524,23 @@ export function tick(game: Game, now: number, random: Random = Math.random, plus
     const eaten = game.bugs.length * BUGS.share
 
     earn(game, cps * seconds * (1 - eaten))
+
+    // Se apunta lo de cada edificio, para poder enseñar cuánto lleva escrito.
+    const base = baseCps(game)
+
+    if (base > 0) {
+      const mult = globalMult(game)
+
+      for (const { id } of BUILDINGS) {
+        const owned = ownedOf(game, id)
+
+        if (owned === 0) continue
+
+        const share = (owned * unitCps(game, id) * mult) / base
+
+        game.made[id] = (game.made[id] ?? 0) + cps * seconds * (1 - eaten) * share
+      }
+    }
     game.bugs = game.bugs.map((bug) => bug + cps * seconds * eaten)
 
     // Con la singularidad en marcha, de vez en cuando se pega un bug nuevo.

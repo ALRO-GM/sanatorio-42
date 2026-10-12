@@ -99,6 +99,19 @@
   color: var(--cc-dim);
   font-size: 0.85rem;
 }
+.cc-sync {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  margin: 0.75rem 0 0;
+  padding: 0.5rem 0.9rem;
+  border: 1px solid var(--warn);
+  border-radius: 10px;
+  color: var(--cc-ink);
+  font-size: 0.85rem;
+}
 .cc-news span {
   display: inline-block;
   animation: cc-rise 0.4s ease-out;
@@ -674,5 +687,653 @@ dialog.cc-pill-dialog h3::before {
   .cc *,
   .cc-pill-dialog * {
     animation: none !important;
+  }
+}
+
+/* ── Lo que hace que la pantalla parezca viva ────────────────────────────────
+   Como en el original: rayos que giran detrás de la tecla, cursores que la
+   rodean y la pulsan por turnos, un líquido con oleaje que sube con los logros,
+   una fila con su fondo por cada edificio y una ficha que explica cada cosa
+   antes de comprarla. Va al final para mandar sobre lo de arriba.
+   ──────────────────────────────────────────────────────────────────────────── */
+
+/* --- La ficha flotante ------------------------------------------------------- */
+.cc-card {
+  --cc-bg: #0a1211;
+  --cc-panel: #101b19;
+  --cc-line: #1e302c;
+  --cc-ink: #e6f3ef;
+  --cc-dim: #8aa39b;
+  --cc-main: #22c7c8;
+  position: fixed;
+  z-index: 90;
+  top: 0;
+  left: 0;
+  visibility: hidden;
+  width: min(330px, calc(100vw - 16px));
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--cc-main);
+  border-radius: 12px;
+  background: var(--cc-panel);
+  color: var(--cc-ink);
+  font-family: 'JetBrains Mono Variable', ui-monospace, monospace;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.55);
+  pointer-events: none;
+}
+.cc-card.stage-1 {
+  --cc-main: #e0a84a;
+  --cc-panel: #1c1810;
+}
+.cc-card.stage-2 {
+  --cc-main: #f0605f;
+  --cc-panel: #1e1010;
+}
+.cc-card.stage-3 {
+  --cc-main: #ff3b3b;
+  --cc-panel: #170808;
+}
+.cc-card-head {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.6rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--cc-line);
+}
+.cc-card-head > span {
+  display: grid;
+  min-width: 0;
+}
+.cc-card-head strong {
+  font-size: 0.92rem;
+}
+.cc-card-head small {
+  color: var(--cc-dim);
+}
+.cc-card-head b {
+  font-size: 0.9rem;
+}
+.cc-card .can {
+  color: #6fe3a0;
+}
+.cc-card .cannot {
+  color: #f0807f;
+}
+.cc-card ul {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.cc-card li.good {
+  color: #6fe3a0;
+}
+.cc-card li.dim {
+  color: var(--cc-dim);
+}
+.cc-card li.warn {
+  color: #f2c94c;
+}
+.cc-card q,
+.cc-card em {
+  display: block;
+  margin-top: 0.5rem;
+  color: var(--cc-dim);
+  font-style: italic;
+}
+.cc-card em {
+  color: var(--cc-main);
+  font-style: normal;
+  font-weight: 700;
+}
+
+/* --- La tecla y lo que la rodea ---------------------------------------------- */
+.cc-bank {
+  min-height: 600px;
+}
+.cc-level {
+  position: relative;
+  width: min(250px, 84%);
+  height: 17px;
+  margin-top: 0.35rem;
+  border: 1px solid var(--cc-line);
+  border-radius: 9px;
+  background: var(--cc-bg);
+  overflow: hidden;
+}
+.cc-level i {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: repeating-linear-gradient(
+    -45deg,
+    color-mix(in srgb, var(--cc-main) 75%, transparent) 0 8px,
+    color-mix(in srgb, var(--cc-main) 50%, transparent) 8px 16px
+  );
+  background-size: 23px 100%;
+  transition: width 0.3s ease-out;
+  animation: cc-stripes 1.2s linear infinite;
+}
+.cc-level b {
+  position: relative;
+  display: block;
+  font-size: 0.66rem;
+  line-height: 15px;
+  text-shadow: 0 1px 3px #000;
+}
+.cc-keywrap {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: min(310px, 98%);
+  aspect-ratio: 1;
+  container-type: inline-size;
+}
+.cc-keywrap .cc-key {
+  width: 60%;
+  margin: 0;
+  z-index: 2;
+}
+.cc-shine {
+  position: absolute;
+  inset: -14%;
+  border-radius: 50%;
+  background: repeating-conic-gradient(
+    from 0deg,
+    color-mix(in srgb, var(--cc-main) 26%, transparent) 0 8deg,
+    transparent 8deg 30deg
+  );
+  -webkit-mask: radial-gradient(circle, #000 26%, transparent 66%);
+  mask: radial-gradient(circle, #000 26%, transparent 66%);
+  animation: cc-spin 46s linear infinite reverse;
+  pointer-events: none;
+}
+.cc.boosted .cc-shine {
+  background: repeating-conic-gradient(
+    from 0deg,
+    color-mix(in srgb, var(--cc-gold) 50%, transparent) 0 8deg,
+    transparent 8deg 30deg
+  );
+  animation-duration: 9s;
+}
+.cc-orbit {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  animation: cc-spin 120s linear infinite;
+  pointer-events: none;
+}
+.cc-orbit i {
+  --r: 37cqw;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 6.4cqw;
+  height: 6.4cqw;
+  margin: -3.2cqw;
+  transform: rotate(var(--a)) translateY(calc(-1 * var(--r)));
+  animation: cc-poke 2.6s ease-in-out infinite;
+}
+.cc-orbit i.ring-1 {
+  --r: 45cqw;
+  opacity: 0.8;
+}
+.cc-ripple {
+  position: absolute;
+  z-index: 3;
+  width: 22px;
+  height: 22px;
+  margin: -11px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: cc-ripple 0.6s ease-out forwards;
+}
+.cc-spark {
+  position: absolute;
+  z-index: 3;
+  color: var(--cc-main);
+  font-weight: 800;
+  font-size: 1.1rem;
+  text-shadow: 0 1px 4px #000;
+  pointer-events: none;
+  animation: cc-spark 1s cubic-bezier(0.2, 0.6, 0.6, 1) forwards;
+}
+.cc.boosted .cc-spark,
+.cc.boosted .cc-pop,
+.cc.boosted .cc-count {
+  color: var(--cc-gold);
+}
+.cc-keywrap .cc-bug {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 3;
+  margin: -17px;
+  transform: rotate(var(--a)) translateY(-33cqw);
+  animation: cc-gnaw 0.9s ease-in-out infinite;
+}
+small.cc-bugs {
+  display: block;
+  max-width: 30ch;
+  color: var(--cc-dim);
+  font-size: 0.72rem;
+}
+.cc.boosted .cc-bank {
+  box-shadow: inset 0 0 70px color-mix(in srgb, var(--cc-gold) 30%, transparent);
+}
+.cc.boosted .cc-rain i {
+  color: var(--cc-gold);
+  opacity: 0.45;
+}
+.cc.clotted .cc-bank {
+  filter: saturate(0.35);
+}
+
+/* --- El líquido, con oleaje, y el campus al fondo ---------------------------- */
+.cc-coffee {
+  border: 0;
+  border-radius: 0;
+  background: none;
+}
+.cc-wave {
+  position: absolute;
+  top: -15px;
+  left: 0;
+  width: 200%;
+  height: 17px;
+  animation: cc-wave 7s linear infinite;
+}
+.cc-wave.back {
+  top: -20px;
+  animation-duration: 12s;
+  animation-direction: reverse;
+}
+.cc-coffee-body {
+  position: absolute;
+  inset: 0;
+}
+.cc-skyline {
+  position: absolute !important;
+  z-index: 0 !important;
+  inset: auto 0 0;
+  width: 100%;
+  height: 34%;
+  opacity: 0.6;
+  pointer-events: none;
+}
+.cc-tower {
+  fill: color-mix(in srgb, var(--cc-main) 9%, #04080a);
+}
+.cc-window {
+  fill: var(--cc-gold);
+  opacity: 0.5;
+  animation: cc-blink 9s steps(1) infinite;
+}
+.cc.stage-2 .cc-window,
+.cc.stage-3 .cc-window {
+  fill: #ff4a4a;
+}
+
+/* --- Rachas, pull request dorada y su estallido ------------------------------ */
+.cc-buff {
+  position: relative;
+  overflow: hidden;
+}
+.cc-buff i {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: color-mix(in srgb, var(--cc-gold) 45%, transparent);
+}
+.cc-buff.clot i {
+  background: rgba(240, 96, 95, 0.4);
+}
+.cc-buff b {
+  position: relative;
+}
+.cc-golden {
+  animation: cc-life 13s linear forwards;
+}
+.cc-golden > span {
+  display: block;
+  animation: cc-wobble 1.8s ease-in-out infinite;
+}
+.cc-burst {
+  position: absolute !important;
+  z-index: 5 !important;
+  pointer-events: none;
+}
+.cc-burst i {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  margin: -3.5px;
+  border-radius: 50%;
+  background: var(--cc-gold);
+  animation: cc-fly 0.8s ease-out forwards;
+}
+.cc-burst.bad i {
+  background: #ff4a4a;
+}
+.cc-burst b {
+  position: absolute;
+  width: max-content;
+  max-width: 230px;
+  color: var(--cc-gold);
+  font-size: 0.95rem;
+  text-shadow: 0 2px 8px #000;
+  transform: translate(-50%, -50%);
+  animation: cc-big 3s ease-out forwards;
+}
+.cc-burst.bad b {
+  color: #ff7a7a;
+}
+
+/* --- Las filas de edificios -------------------------------------------------- */
+.cc-row {
+  position: relative;
+  min-height: 78px;
+  padding: 0.4rem 0.6rem 0.55rem;
+  border: 1px solid hsl(var(--h) 40% 26%);
+  overflow: hidden;
+  cursor: help;
+  animation: cc-rise 0.4s ease-out;
+}
+.cc-backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.cc-row-name,
+.cc-row-strip {
+  position: relative;
+}
+.cc-row-name {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  color: #fff;
+  text-shadow: 0 1px 3px #000;
+}
+.cc-row-name small {
+  margin-left: auto;
+  color: hsl(var(--h) 60% 80%);
+}
+.cc-row-strip {
+  align-items: center;
+  gap: 0;
+  padding: 4px 12px 0 0;
+}
+.cc-unit-tile {
+  display: inline-block;
+  margin-right: -12px;
+  transform: translateY(var(--y));
+  animation: cc-bob 2.4s ease-in-out infinite;
+}
+.cc-unit-tile .cc-tile {
+  display: block;
+  animation: cc-pop-in 0.4s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+.cc-row-more {
+  margin-left: 18px;
+  color: #fff;
+  font-size: 0.75rem;
+  text-shadow: 0 1px 3px #000;
+}
+/* Con la singularidad, los pisciners dejan de parecer pisciners. */
+.cc-row.possessed-1 .cc-tile {
+  filter: hue-rotate(-150deg);
+}
+.cc-row.possessed-2 .cc-tile {
+  filter: hue-rotate(-190deg) saturate(1.6);
+}
+.cc-row.possessed-3 .cc-tile {
+  filter: hue-rotate(-200deg) saturate(2) contrast(1.2);
+}
+.cc-row.possessed-3 .cc-unit-tile {
+  animation-duration: 0.35s;
+}
+
+/* --- La tienda: qué llega, qué falta y qué se acaba de comprar --------------- */
+.cc-upgrades {
+  gap: 5px;
+}
+.cc-upgrade {
+  position: relative;
+  animation: cc-pop-in 0.4s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+.cc-upgrade.can {
+  animation:
+    cc-pop-in 0.4s cubic-bezier(0.3, 1.6, 0.5, 1),
+    cc-glow 1.6s ease-in-out 0.4s infinite;
+}
+.cc-upgrade.poor {
+  opacity: 0.55;
+  cursor: help;
+}
+.cc-upgrade.poor::after {
+  content: '';
+  position: absolute;
+  bottom: 1px;
+  left: 4px;
+  width: calc(var(--reach) * (100% - 8px));
+  height: 3px;
+  border-radius: 2px;
+  background: #f2c94c;
+}
+.cc-upgrade:hover,
+.cc-upgrade:focus-visible {
+  transform: translateY(-3px) scale(1.1);
+  opacity: 1;
+}
+.cc-upgrades.owned .cc-upgrade {
+  cursor: help;
+}
+.cc-building {
+  position: relative;
+  overflow: hidden;
+}
+.cc-building::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: calc(var(--reach) * 100%);
+  height: 3px;
+  background: #f2c94c;
+  transition: width 0.25s ease-out;
+}
+.cc-building.can::after {
+  background: #6fe3a0;
+}
+.cc-building.can {
+  border-color: color-mix(in srgb, #6fe3a0 40%, var(--cc-line));
+  background: linear-gradient(90deg, hsl(var(--h) 45% 14%), var(--cc-bg) 70%);
+}
+.cc-building.poor {
+  opacity: 0.72;
+  cursor: help;
+}
+.cc-building:hover {
+  border-color: var(--cc-main);
+  transform: translateX(-2px);
+}
+/* Lo que aún no se conoce es una silueta, como en el original. */
+.cc-building.unknown .cc-tile {
+  filter: brightness(0) drop-shadow(0 0 1px var(--cc-dim));
+  opacity: 1;
+}
+.cc-building > b {
+  animation: cc-bump 0.35s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+.cc-flash {
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  opacity: 0;
+  pointer-events: none;
+  animation: cc-flash 0.4s ease-out;
+}
+.cc-achievement {
+  cursor: help;
+  transition: transform 0.1s;
+}
+.cc-achievement:hover,
+.cc-achievement:focus-visible {
+  transform: scale(1.18);
+}
+.cc-toast {
+  animation: cc-toast 0.45s cubic-bezier(0.3, 1.5, 0.5, 1);
+}
+
+@keyframes cc-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes cc-stripes {
+  to {
+    background-position: 23px 0;
+  }
+}
+@keyframes cc-poke {
+  0%,
+  78%,
+  100% {
+    transform: rotate(var(--a)) translateY(calc(-1 * var(--r)));
+  }
+  88% {
+    transform: rotate(var(--a)) translateY(calc(-1 * var(--r) + 3cqw));
+  }
+}
+@keyframes cc-ripple {
+  to {
+    transform: scale(9);
+    opacity: 0;
+  }
+}
+@keyframes cc-spark {
+  35% {
+    transform: translate(calc(var(--dx) * 0.5), -70px) rotate(120deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--dx), 70px) rotate(320deg);
+    opacity: 0;
+  }
+}
+@keyframes cc-gnaw {
+  50% {
+    transform: rotate(var(--a)) translateY(-31cqw) rotate(10deg);
+  }
+}
+@keyframes cc-wave {
+  to {
+    transform: translateX(-50%);
+  }
+}
+@keyframes cc-blink {
+  0%,
+  86% {
+    opacity: 0.5;
+  }
+  87%,
+  100% {
+    opacity: 0.08;
+  }
+}
+@keyframes cc-life {
+  0% {
+    opacity: 0;
+  }
+  6%,
+  78% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes cc-wobble {
+  0%,
+  100% {
+    transform: rotate(-9deg) scale(1);
+  }
+  50% {
+    transform: rotate(9deg) scale(1.14);
+  }
+}
+@keyframes cc-fly {
+  from {
+    transform: rotate(var(--a)) translateY(0);
+  }
+  to {
+    transform: rotate(var(--a)) translateY(-95px) scale(0.3);
+    opacity: 0;
+  }
+}
+@keyframes cc-big {
+  0% {
+    transform: translate(-50%, -50%) scale(0.5);
+    opacity: 0;
+  }
+  10% {
+    transform: translate(-50%, -50%) scale(1.15);
+    opacity: 1;
+  }
+  75% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -130%) scale(1);
+    opacity: 0;
+  }
+}
+@keyframes cc-bob {
+  50% {
+    transform: translateY(calc(var(--y) - 3px));
+  }
+}
+@keyframes cc-pop-in {
+  from {
+    transform: scale(0) rotate(-20deg);
+    opacity: 0;
+  }
+}
+@keyframes cc-glow {
+  50% {
+    filter: drop-shadow(0 0 7px var(--cc-main)) brightness(1.15);
+  }
+}
+@keyframes cc-bump {
+  from {
+    transform: scale(1.7);
+    color: #6fe3a0;
+  }
+}
+@keyframes cc-flash {
+  from {
+    opacity: 0.45;
+  }
+}
+@keyframes cc-toast {
+  from {
+    transform: translateX(40px) scale(0.9);
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cc-spark,
+  .cc-ripple,
+  .cc-burst i,
+  .cc-shine {
+    display: none;
+  }
+  /* La pull request dorada se sigue viendo, aunque no se mueva. */
+  .cc-golden {
+    opacity: 1;
   }
 }

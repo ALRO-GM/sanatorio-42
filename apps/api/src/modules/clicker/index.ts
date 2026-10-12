@@ -32,11 +32,9 @@ export function createClickerModule(deps: ClickerServiceOptions): ClickerModule 
         return reply.send(await service.choose(await session.actor(request), request.body))
       })
 
-      /** `PUT /clicker/save` → guarda la partida y las cifras de la clasificación. 204. */
+      /** `PUT /clicker/save` → guarda la partida y las cifras de la clasificación. */
       app.put('/clicker/save', async (request, reply) => {
-        await service.save(await session.actor(request), request.body)
-
-        return reply.code(204).send()
+        return reply.send(await service.save(await session.actor(request), request.body))
       })
 
       /** `GET /clicker/board` → quién ha escrito más código. */

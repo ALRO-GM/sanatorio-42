@@ -3,24 +3,33 @@
  *
  * Con `?secreto=N` en la dirección se empieza con N pulsaciones de la cruz ya
  * hechas (99 deja a una de la ventana de las pastillas), y con `?secreto=rojo`,
- * con la pastilla roja ya elegida.
+ * con la pastilla roja ya elegida. `?secreto=otro` es la roja con la partida
+ * abierta también en otro dispositivo (los guardados se rechazan) y
+ * `?secreto=caido`, la roja con la carga de la partida fallando al entrar.
  */
 
 import type { ClickerState } from '@sanatorio/contracts'
 
 import { ME } from './data'
 import { portrait } from './portrait'
-import { delay } from './state'
+import { delay, fail } from './state'
 import type { Api } from '../types'
 
 const wanted = new URLSearchParams(window.location.search).get('secreto')
+const red = wanted === 'rojo' || wanted === 'otro' || wanted === 'caido'
 const state: ClickerState = {
-  plus: wanted === 'rojo' ? 100 : Math.max(0, Number(wanted ?? 0) || 0),
-  pill: wanted === 'rojo' ? 'red' : null,
+  plus: red ? 100 : Math.max(0, Number(wanted ?? 0) || 0),
+  pill: red ? 'red' : null,
   save: null,
+  rev: 0,
   names: ['jdoe', 'rsoto', 'mlopez', 'agarcia'],
 }
 let best = 0
+let holder: string | null = null
+// La primera petición la hace la cabecera, para saber la pastilla; las dos
+// siguientes son del juego al cargar la partida (en desarrollo React la pide
+// dos veces), y son las que fallan con `?secreto=caido`.
+let calls = 0
 
 export const clickerMock: Pick<
   Api,
@@ -28,6 +37,10 @@ export const clickerMock: Pick<
 > = {
   async getClicker() {
     await delay(100)
+
+    calls += 1
+
+    if (wanted === 'caido' && (calls === 2 || calls === 3)) throw fail(503, 'Sin servicio')
 
     return { ...state, names: state.pill === 'red' ? state.names : [] }
   },
@@ -49,8 +62,17 @@ export const clickerMock: Pick<
 
   async saveClicker(save) {
     await delay(50)
+
+    if (wanted === 'otro' || (save.rev !== state.rev && save.session !== holder)) {
+      throw fail(409, 'Esta partida se ha seguido en otro dispositivo')
+    }
+
     state.save = save.save
+    state.rev += 1
+    holder = save.session
     best = Math.max(best, save.total)
+
+    return { rev: state.rev }
   },
 
   async getClickerBoard() {

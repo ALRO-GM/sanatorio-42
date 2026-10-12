@@ -6,7 +6,13 @@
  * clasificación. Las cifras las manda la web y no se comprueban: es un juego.
  */
 
-import type { ClickerBoard, ClickerRank, ClickerState, Pill } from '@sanatorio/contracts'
+import type {
+  ClickerBoard,
+  ClickerRank,
+  ClickerSaved,
+  ClickerState,
+  Pill,
+} from '@sanatorio/contracts'
 import { z } from 'zod'
 
 import type { Actor } from '../../core/actor.js'
@@ -31,6 +37,8 @@ const pillSchema = z.object({ pill: z.enum(['red', 'blue']) })
 const figure = z.number().min(0).max(1e300)
 const saveSchema = z.object({
   save: z.string().min(2).max(MAX_SAVE_BYTES),
+  rev: z.number().int().min(0),
+  session: z.string().min(8).max(64),
   total: figure,
   perSecond: figure,
   achievements: z.number().int().min(0).max(10_000),
@@ -74,6 +82,7 @@ export function createClickerService(options: ClickerServiceOptions) {
         plus: toNumber(found?.plus ?? 0),
         pill,
         save: typeof found?.save === 'string' ? found.save : null,
+        rev: toNumber(found?.rev ?? 0),
         // Los nombres solo hacen falta dentro del juego.
         names:
           pill === 'red'
@@ -131,18 +140,26 @@ export function createClickerService(options: ClickerServiceOptions) {
     /**
      * Guarda la partida y las cifras de la clasificación.
      *
-     * @throws {DomainError} `forbidden` si no eligió la roja.
+     * Solo entra si viene de la pestaña que hizo el último guardado o si partió
+     * de la `rev` que hay: así un dispositivo que se quedó abierto con una
+     * partida vieja no pisa la que se siguió en otro. Lo de la pestaña es para
+     * que no se rechace a sí misma si se le pierde una respuesta.
+     *
+     * @throws {DomainError} `forbidden` si no eligió la roja; `conflict` si la
+     *   partida se ha seguido en otro sitio.
      */
-    async save(actor: Actor, input: unknown): Promise<void> {
+    async save(actor: Actor, input: unknown): Promise<ClickerSaved> {
       const sent = parse(saveSchema, input)
 
       if (pillOf(await row(actor.login)) !== 'red') {
         throw domainError('forbidden', 'Esto no existe')
       }
 
-      await db.execute({
+      const result = await db.execute({
         sql: `UPDATE clicker SET save = ?, total = MAX(total, ?), per_second = ?,
-                achievements = ?, prestige = ?, updated_at = ? WHERE login = ?`,
+                achievements = ?, prestige = ?, updated_at = ?, holder = ?, rev = rev + 1
+              WHERE login = ? AND (rev = ? OR holder = ?)
+              RETURNING rev`,
         args: [
           sent.save,
           sent.total,
@@ -150,9 +167,19 @@ export function createClickerService(options: ClickerServiceOptions) {
           sent.achievements,
           sent.prestige,
           iso(),
+          sent.session,
           actor.login,
+          sent.rev,
+          sent.session,
         ],
       })
+      const saved = result.rows[0]
+
+      if (saved === undefined) {
+        throw domainError('conflict', 'Esta partida se ha seguido en otro dispositivo')
+      }
+
+      return { rev: toNumber(saved.rev) }
     },
 
     /**

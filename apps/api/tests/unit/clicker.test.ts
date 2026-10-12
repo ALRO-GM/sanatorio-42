@@ -27,7 +27,15 @@ describe('code clicker', () => {
     }
   }
 
-  const SAVE = { save: '{"v":1}', total: 1500, perSecond: 12, achievements: 6, prestige: 0 }
+  const SAVE = {
+    save: '{"v":1}',
+    rev: 0,
+    session: 'pestaña-1',
+    total: 1500,
+    perSecond: 12,
+    achievements: 6,
+    prestige: 0,
+  }
 
   it('cuenta las pulsaciones de la cruz, y no deja elegir antes de las cien', async () => {
     const { clicker } = services
@@ -36,6 +44,7 @@ describe('code clicker', () => {
       plus: 0,
       pill: null,
       save: null,
+      rev: 0,
       names: [],
     })
 
@@ -94,6 +103,36 @@ describe('code clicker', () => {
       clicker.save(actor('ana'), { ...SAVE, save: 'x'.repeat(90_000) }),
       'invalid_input',
     )
+  })
+
+  it('un dispositivo con la partida vieja no pisa la que se siguió en otro', async () => {
+    const { clicker } = services
+    const ana = actor('ana')
+
+    await press('ana', 100)
+    await clicker.choose(ana, { pill: 'red' })
+
+    // El portátil y el móvil cargan la misma partida (rev 0); juega el portátil.
+    expect(await clicker.save(ana, { ...SAVE, session: 'portatil-1' })).toEqual({ rev: 1 })
+    expect(await clicker.save(ana, { ...SAVE, rev: 1, session: 'portatil-1' })).toEqual({ rev: 2 })
+
+    // El móvil, que sigue con la de antes, no entra, y la partida no cambia.
+    await expectCode(
+      clicker.save(ana, { ...SAVE, save: '{"v":"vieja"}', session: 'movil-123' }),
+      'conflict',
+    )
+    expect(await clicker.state(ana)).toMatchObject({ save: '{"v":1}', rev: 2 })
+
+    // Si al portátil se le perdió una respuesta y manda una rev atrasada, entra:
+    // es la misma pestaña.
+    expect(await clicker.save(ana, { ...SAVE, rev: 1, session: 'portatil-1' })).toEqual({ rev: 3 })
+
+    // El móvil recarga, parte de la rev que hay y pasa a tener la partida.
+    expect(
+      await clicker.save(ana, { ...SAVE, save: '{"v":"movil"}', rev: 3, session: 'movil-123' }),
+    ).toEqual({ rev: 4 })
+    await expectCode(clicker.save(ana, { ...SAVE, rev: 3, session: 'portatil-1' }), 'conflict')
+    expect(await clicker.state(ana)).toMatchObject({ save: '{"v":"movil"}', rev: 4 })
   })
 
   it('el nivel sube tres por cada cero del total', () => {

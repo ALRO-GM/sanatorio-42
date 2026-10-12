@@ -37,6 +37,7 @@ import type {
   BroadcastReport,
   ClickerBoard,
   ClickerSaveInput,
+  ClickerSaved,
   ClickerState,
   DirectChat,
   Pill,
@@ -191,7 +192,7 @@ export type Api = {
   getClicker: () => Promise<ClickerState>
   pressPlus: (count: number) => Promise<{ plus: number; pill: Pill | null }>
   choosePill: (pill: Pill) => Promise<ClickerState>
-  saveClicker: (save: ClickerSaveInput) => Promise<void>
+  saveClicker: (save: ClickerSaveInput) => Promise<ClickerSaved>
   getClickerBoard: () => Promise<ClickerBoard>
   /** Los comunicados que tienes por leer, el más antiguo primero. */
   getBroadcasts: () => Promise<Broadcast[]>

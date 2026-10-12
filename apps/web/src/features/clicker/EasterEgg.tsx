@@ -8,7 +8,7 @@ import { choosePill, dismissFresh, loadEgg, PLUS_GOAL, useEgg } from './egg'
 import { achievementText } from './texts'
 
 /** Lo que dura a la vista el aviso de un logro del secreto. */
-const TOAST_MS = 6000
+const TOAST_MS = 9000
 
 /**
  * El secreto de la cruz, visto desde fuera del juego: un aviso de logro a la

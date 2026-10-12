@@ -13,6 +13,11 @@ export type ClickerState = {
   pill: Pill | null
   /** La partida, tal como la guardó la web (JSON), o `null` si no ha jugado. */
   save: string | null
+  /**
+   * Cuántas veces se ha guardado la partida. Quien guarda dice de cuál partió:
+   * si ya no es esa, es que se ha seguido jugando en otro sitio.
+   */
+  rev: number
   /** Logins de quienes más corrigen en su campus: salen en las noticias del juego. */
   names: string[]
 }
@@ -20,12 +25,19 @@ export type ClickerState = {
 /** Cuerpo de `PUT /clicker/save`: la partida y las cifras que van a la clasificación. */
 export type ClickerSaveInput = {
   save: string
+  /** La `rev` que se cargó, o la que devolvió el último guardado. */
+  rev: number
+  /** Un identificador de la pestaña, inventado al abrir el juego. */
+  session: string
   /** Líneas de código escritas en total, contando todas las partidas. */
   total: number
   perSecond: number
   achievements: number
   prestige: number
 }
+
+/** Respuesta de `PUT /clicker/save`: la `rev` que queda tras guardar. */
+export type ClickerSaved = { rev: number }
 
 export type ClickerRank = {
   /** Puesto, empezando en 1. */
