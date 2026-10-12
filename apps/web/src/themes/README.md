@@ -56,6 +56,13 @@ Casi todo se hace dando valor a variables. Los componentes ya las usan.
   y `--stage-muted` (las letras), `--stage-link` (las líneas), `--stage-halo`
   (el borde de las letras, del color del fondo) y `--stage-accent` (lo elegido).
   Se ponen una vez, en el bloque de claro: valen igual de noche.
+- **Las ruedas del tablón** (`styles/styles.css`, usadas en
+  `styles/doubt-graph.css`): `--ring-from` y `--ring-to` son el color del
+  círculo de dentro y el del de fuera; los de en medio salen de mezclarlos, un
+  paso cada uno. `--ring-shade` es con qué se oscurecen las paredes de cada
+  rueda (un tono oscuro del estilo en claro, negro de noche) y `--orb-done`, el
+  color de un proyecto aprobado. Las caras, lo aprobado y los cantos se calculan
+  solos a partir de esos y de los colores del tema.
 
 Lo que no se pueda decir con una variable se escribe como una regla más en el
 `theme.css` del estilo, siempre bajo su `:root[data-style='<id>']`. Las clases

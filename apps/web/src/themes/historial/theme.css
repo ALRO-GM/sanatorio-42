@@ -77,6 +77,12 @@
   --stage-link: #c9bfa3;
   --stage-halo: #18211b;
   --stage-accent: #ffe36e;
+
+  /* De la tinta azul al lápiz rojo. */
+  --ring-from: #2a4a8f;
+  --ring-to: #b0392b;
+  --ring-shade: #4a3a22;
+  --orb-done: #2a4a8f;
 }
 :root[data-style='historial'][data-theme='dark'] {
   --bg: #1d1913;
@@ -119,6 +125,11 @@
   --primary-shadow: 2px 3px 0 rgba(0, 0, 0, 0.5);
   --banner-image:
     url('./assets/paper-dark.svg'), linear-gradient(120deg, #4a4030, #3d3528 60%, #332c20);
+
+  --ring-from: #9db8f5;
+  --ring-to: #e88a7c;
+  --ring-shade: #000000;
+  --orb-done: #9db8f5;
 }
 
 /* La letra a pluma es menuda: los títulos crecen para leerse igual de bien. */

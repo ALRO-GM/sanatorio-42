@@ -52,6 +52,10 @@
     linear-gradient(180deg, #0c2422, #051110);
   --stage-halo: #071615;
   --stage-accent: #3ee9e2;
+
+  --ring-from: #12c2bd;
+  --ring-to: #6f7df2;
+  --ring-shade: #0b3b47;
 }
 :root[data-style='clinica'][data-theme='dark'] {
   --bg: #061514;
@@ -89,6 +93,8 @@
   --banner-image:
     radial-gradient(420px 160px at 85% 0%, rgba(255, 255, 255, 0.22), transparent 70%),
     linear-gradient(120deg, #0f8f8b, #0a5f86 55%, #3b4fb0);
+
+  --ring-shade: #000000;
 }
 
 /* La marca: una cruz con luz propia. */

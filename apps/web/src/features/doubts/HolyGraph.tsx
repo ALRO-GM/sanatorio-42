@@ -20,7 +20,7 @@ import {
   SIGNALS,
 } from './graph'
 import type { NodeLook, RingItem, Signal } from './graph'
-import { isoOf } from './iso'
+import { isoOf, TILT } from './iso'
 import type { Half } from './iso'
 import { layoutOf, radiusFor } from './layout'
 import { api } from '../../shared/api'
@@ -41,19 +41,15 @@ const LAST_CIRCLE = 6
 /** Tamaño mínimo de la burbuja de una serie cerrada: caben sus módulos en miniatura. */
 const SERIES_RADIUS = 40
 
-/**
- * Tono de cada círculo (matiz HSL). Van seguidos, del turquesa al violeta, para
- * que de un círculo al siguiente el color avance un paso y no dé un salto: se
- * lee como un degradado de dentro afuera. Los colores concretos (pastel en
- * claro, apagados en oscuro) los ponen los estilos.
- */
-const HUES = [172, 190, 208, 226, 244, 262, 280] as const
-
 /** Alturas de las bandejas: todas tienen grosor, cada una un escalón más que la de fuera. */
 const PLATE_BASE = 9
 const PLATE_STEP = 6
-/** Lo que sube una bandeja al pasar por ella o al tener abierto uno de sus proyectos. */
+/** Lo que sube una bandeja elegida, o la del proyecto abierto. */
 const PLATE_LIFT = 30
+/** Lo que se mueve al pasar el ratón por ella: lo justo para notar que responde. */
+const HOVER_LIFT = 7
+/** Parte de lo que falta que se recorre en cada fotograma: cuanto menos, más suave. */
+const EASE = 0.13
 /** Lo que encogen las burbujas en la vista en perspectiva. */
 const ORB_SCALE = 0.84
 
@@ -81,7 +77,7 @@ function useEased(targets: readonly number[]): readonly number[] {
         const value = current.current[index] ?? target
         const left = target - value
 
-        return Math.abs(left) < 0.4 ? target : value + left * 0.24
+        return Math.abs(left) < 0.2 ? target : value + left * EASE
       })
 
       current.current = next
@@ -102,8 +98,6 @@ function useEased(targets: readonly number[]): readonly number[] {
 
   return values
 }
-
-const hueOf = (circle: number): number => HUES[circle % HUES.length] ?? 172
 
 /** Horas que suman esos proyectos, contando solo los que tienen estimación. */
 const hoursOf = (projects: readonly GraphProject[]): number =>
@@ -176,8 +170,10 @@ function describeSeries(series: string, projects: readonly GraphProject[], t: Tr
  *
  * - Cada círculo es una bandeja con grosor, vista en perspectiva, que se va
  *   **rellenando** según lo que llevas aprobado en él (por horas); su etiqueta
- *   dice el porcentaje. Al pasar por una bandeja, **se levanta** con sus
- *   proyectos por encima de las demás; la del proyecto abierto se queda arriba.
+ *   dice el porcentaje. Al pasar por una bandeja se mueve un poco; al pulsarla
+ *   (o al abrir uno de sus proyectos) **se levanta** con sus proyectos por
+ *   encima de las demás. Las de los círculos a los que aún no has llegado se
+ *   ven con sus proyectos, en gris y con candado, y no se mueven ni se abren.
  * - Cada proyecto es una burbuja, más grande cuantas más horas estima 42 para él.
  *   Turquesa si lo aprobaste (con aro dorado si fue con 125), blanca si lo estás
  *   haciendo, gris si lo tienes disponible y gris con candado si todavía no.
@@ -204,8 +200,10 @@ export function HolyGraph({ graph, selected, onSelect }: HolyGraphProps) {
   const origin = declared === null ? null : originOf(declared)
   // Sin elegir otro, se enseñan los plazos del pace al que se va.
   const pace = chosen ?? PACES.find((option) => option === declared?.pace) ?? null
-  // Círculo bajo el ratón o con el foco: su bandeja se levanta.
+  // Círculo bajo el ratón o con el foco: su bandeja se mueve un poco.
   const [raised, setRaised] = useState<number | null>(null)
+  // Círculo elegido con un clic: su bandeja se queda levantada.
+  const [pinned, setPinned] = useState<number | null>(null)
 
   const rings = useMemo(
     () =>
@@ -232,11 +230,16 @@ export function HolyGraph({ graph, selected, onSelect }: HolyGraphProps) {
 
   // Cada bandeja, un escalón más alta que la de fuera; la del ratón y la del
   // proyecto abierto, levantadas.
-  const lifted = (circle: number): boolean => circle === raised || circle === selectedEntry?.circle
+  // A los círculos a los que aún no se ha llegado no se puede entrar: no se
+  // mueven ni se eligen.
+  const ahead = (circle: number): boolean => circle > graph.currentCircle
+  const lifted = (circle: number): boolean =>
+    !ahead(circle) && (circle === pinned || circle === selectedEntry?.circle)
+  const liftOf = (circle: number): number =>
+    lifted(circle) ? PLATE_LIFT : circle === raised && !ahead(circle) ? HOVER_LIFT : 0
   const heights = useEased(
     rings.map(
-      ({ circle }, index) =>
-        PLATE_BASE + (rings.length - 1 - index) * PLATE_STEP + (lifted(circle) ? PLATE_LIFT : 0),
+      ({ circle }, index) => PLATE_BASE + (rings.length - 1 - index) * PLATE_STEP + liftOf(circle),
     ),
   )
 
@@ -264,7 +267,15 @@ export function HolyGraph({ graph, selected, onSelect }: HolyGraphProps) {
     ...rings.map(({ circle }, index) => ({ circle, index, half: 'front' as const })),
   ]
 
-  /** Las burbujas de un círculo que caen en esa mitad, de la más lejana a la más cercana. */
+  /**
+   * Las burbujas de un círculo que se pintan con esa mitad, de la más lejana a
+   * la más cercana.
+   *
+   * Una burbuja de la mitad de atrás que queda cerca del centro asoma por
+   * encima de la mitad de delante de su propia bandeja, que se pinta después y
+   * la taparía por abajo. Esas van con la de delante: así todas quedan siempre
+   * por encima de las dos partes de su círculo.
+   */
   const nodesOf = (index: number, half: Half) =>
     (rings[index]?.items ?? [])
       .flatMap((item, at) => {
@@ -272,7 +283,10 @@ export function HolyGraph({ graph, selected, onSelect }: HolyGraphProps) {
 
         return point === undefined ? [] : [{ item, point }]
       })
-      .filter(({ point }) => point.y >= layout.center === (half === 'front'))
+      .filter(
+        ({ item, point }) =>
+          point.y + (sizeOf(item) * ORB_SCALE * 0.6) / TILT >= layout.center === (half === 'front'),
+      )
       .sort((a, b) => a.point.y - b.point.y)
 
   /** Texto de la barra de detalle: lo que hay bajo el ratón, o lo que está abierto. */
@@ -413,7 +427,7 @@ export function HolyGraph({ graph, selected, onSelect }: HolyGraphProps) {
             <li
               key={circle}
               className={circle === graph.currentCircle ? 'current' : ''}
-              style={{ ['--done' as string]: `${done * 100}%`, ['--hue' as string]: hueOf(circle) }}
+              style={{ ['--done' as string]: `${done * 100}%`, ['--i' as string]: circle }}
             >
               <span className="graph-ring-name">
                 {t('graph.circle', { n: circle })}
@@ -470,7 +484,7 @@ export function HolyGraph({ graph, selected, onSelect }: HolyGraphProps) {
         </ol>
       ) : (
         <svg
-          className={`graph-svg ${raised === null ? '' : 'focusing'}`}
+          className={`graph-svg ${rings.some(({ circle }) => lifted(circle)) ? 'focusing' : ''}`}
           viewBox={`0 0 ${iso.width} ${iso.height.toFixed(0)}`}
           style={{ maxWidth: Math.min(760, iso.width * 1.3) }}
           role="group"
@@ -530,7 +544,7 @@ export function HolyGraph({ graph, selected, onSelect }: HolyGraphProps) {
             return (
               <g
                 key={`${circle}-${half}`}
-                className={`graph-ring ${lifted(circle) ? 'lifted' : ''}`}
+                className={`graph-ring ${state} ${lifted(circle) ? 'lifted' : ''}`}
                 onMouseEnter={() => {
                   setRaised(circle)
                 }}
@@ -543,8 +557,17 @@ export function HolyGraph({ graph, selected, onSelect }: HolyGraphProps) {
               >
                 <g
                   className={`graph-plate ${state}`}
-                  style={{ ['--hue' as string]: hueOf(circle) }}
+                  style={{ ['--i' as string]: circle }}
                   aria-hidden="true"
+                  // Pulsar la bandeja la deja levantada; otra vez, la baja. A
+                  // las que aún no se ha llegado no se entra.
+                  onClick={
+                    state === 'ahead'
+                      ? undefined
+                      : () => {
+                          setPinned(pinned === circle ? null : circle)
+                        }
+                  }
                 >
                   {/* Atrás se ve la pared de dentro; delante, la de fuera. */}
                   {half === 'back' && inner > 0 && (
@@ -574,8 +597,21 @@ export function HolyGraph({ graph, selected, onSelect }: HolyGraphProps) {
                       {/* A un círculo al que aún no se ha llegado le basta su número. */}
                       {state === 'ahead' ? (
                         <>
-                          <circle className="ring-tag" r="10" />
-                          <text className="ring-number">{circle}</text>
+                          <rect
+                            className="ring-tag"
+                            x="-19"
+                            y="-10"
+                            width="38"
+                            height="20"
+                            rx="10"
+                          />
+                          {/* El candado dice lo que el gris solo insinúa: aquí aún no se entra. */}
+                          <g className="ring-lock" transform="translate(-14 -6)">
+                            <Icon name="candado" size={12} />
+                          </g>
+                          <text className="ring-number" x="7">
+                            {circle}
+                          </text>
                         </>
                       ) : (
                         <>
@@ -629,10 +665,11 @@ export function HolyGraph({ graph, selected, onSelect }: HolyGraphProps) {
                           describeSeries(item.series, item.projects, t),
                           false,
                           () => {
-                            toggleSeries(item.series)
+                            if (state !== 'ahead') toggleSeries(item.series)
                           },
                         )}
                         aria-expanded={false}
+                        aria-disabled={state === 'ahead'}
                       >
                         {shadow}
                         <g className="orb">
@@ -692,9 +729,11 @@ export function HolyGraph({ graph, selected, onSelect }: HolyGraphProps) {
                         describe(project, circle, t),
                         project.projectId === selected,
                         () => {
-                          onSelect(project.projectId)
+                          // De un círculo al que aún no se ha llegado se ve qué hay, pero no se abre.
+                          if (state !== 'ahead') onSelect(project.projectId)
                         },
                       )}
+                      aria-disabled={state === 'ahead'}
                     >
                       {shadow}
                       {/* Capa aparte para la animación: el `<g>` de fuera ya lleva la posición. */}
@@ -779,7 +818,7 @@ export function HolyGraph({ graph, selected, onSelect }: HolyGraphProps) {
                   <li
                     key={circle}
                     className={`pace-chip ${state}`}
-                    style={{ ['--hue' as string]: hueOf(circle) }}
+                    style={{ ['--i' as string]: circle }}
                   >
                     <strong>{circle}</strong>
                     <span>

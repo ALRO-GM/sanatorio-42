@@ -55,6 +55,17 @@ export type Half = 'back' | 'front'
 /** Con el eje `y` hacia abajo, lo de delante son los ángulos de 0 a π. */
 const RANGE: Record<Half, [number, number]> = { front: [0, Math.PI], back: [Math.PI, 2 * Math.PI] }
 
+/**
+ * Lo que la mitad de delante se mete en la de atrás, en radianes. Dos formas
+ * del mismo color que solo se tocan dejan ver una raya fina donde se juntan;
+ * solapándolas un poco, la de delante tapa la junta.
+ */
+const OVERLAP = 0.04
+
+/** El tramo de una mitad, con el solape si es la de delante. */
+const spanOf = (half: Half): [number, number] =>
+  half === 'front' ? [-OVERLAP, Math.PI + OVERLAP] : RANGE.back
+
 export function isoOf(layout: Layout): Iso {
   const { center, size } = layout
   const origin = PAD_TOP + center * TILT
@@ -90,7 +101,7 @@ export function isoOf(layout: Layout): Iso {
     height: PAD_TOP + size * TILT + PAD_BOTTOM,
     point,
 
-    top: (outer, inner, z, half) => band(outer, inner, z, ...RANGE[half]),
+    top: (outer, inner, z, half) => band(outer, inner, z, ...spanOf(half)),
 
     rim: (radius, z, half) => `M ${arc(radius, z, ...RANGE[half])}`,
 
@@ -119,7 +130,11 @@ export function isoOf(layout: Layout): Iso {
         const front = Math.sin((from + to) / 2) >= 0
 
         if (to - from > 1e-6 && front === (half === 'front')) {
-          parts.push(band(outer, inner, z, from, to))
+          // Delante, cada trozo se alarga un poco sobre la junta, sin salirse
+          // de lo que de verdad está relleno.
+          const pad = half === 'front' ? OVERLAP : 0
+
+          parts.push(band(outer, inner, z, Math.max(start, from - pad), Math.min(end, to + pad)))
         }
       }
 

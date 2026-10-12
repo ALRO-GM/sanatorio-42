@@ -42,6 +42,13 @@
   --stage-link: #9db4ae;
   --stage-halo: #081413;
   --stage-accent: #2bdcd5;
+  /* Las ruedas del tablón. Cada círculo va de `--ring-from` (el de dentro) a
+     `--ring-to` (el de fuera), un paso cada uno; `--ring-shade` oscurece las
+     paredes y `--orb-done` es el color de un proyecto aprobado. */
+  --ring-from: var(--accent);
+  --ring-to: #7c6cf0;
+  --ring-shade: #16302d;
+  --orb-done: var(--accent);
   /* Cómo se escriben los rótulos pequeños. */
   --eyebrow-font: var(--font-display);
   --eyebrow-transform: uppercase;

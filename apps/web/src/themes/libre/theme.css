@@ -54,6 +54,10 @@
   --stage-link: oklch(0.72 0.03 var(--hue));
   --stage-halo: oklch(0.15 calc(var(--chroma) * 0.2) var(--hue));
   --stage-accent: oklch(0.82 var(--chroma) var(--hue));
+
+  --ring-from: oklch(0.68 var(--chroma) var(--hue));
+  --ring-to: oklch(0.6 var(--chroma) calc(var(--hue) + 80));
+  --ring-shade: oklch(0.25 0.03 var(--hue));
 }
 :root[data-style='libre'][data-theme='dark'] {
   --bg: oklch(0.17 calc(var(--tint) * 1.4) var(--hue));
@@ -80,6 +84,10 @@
     oklch(0.42 var(--chroma) var(--hue)),
     oklch(0.34 var(--chroma) calc(var(--hue) + 40))
   );
+
+  --ring-from: oklch(0.78 var(--chroma) var(--hue));
+  --ring-to: oklch(0.72 var(--chroma) calc(var(--hue) + 80));
+  --ring-shade: #000000;
 }
 :root[data-style='libre'] .brand-mark {
   border-radius: 8px;

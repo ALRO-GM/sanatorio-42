@@ -67,6 +67,10 @@
   --stage-link: #3d7045;
   --stage-halo: #030603;
   --stage-accent: #4af626;
+
+  --ring-from: #1a7f37;
+  --ring-to: #8250df;
+  --ring-shade: #16191d;
 }
 :root[data-style='terminal'][data-theme='dark'] {
   --bg: #050805;
@@ -99,6 +103,10 @@
 
   --card-shadow: 4px 4px 0 var(--border);
   --primary-shadow: 3px 3px 0 var(--border-strong);
+
+  --ring-from: #4af626;
+  --ring-to: #d2a8ff;
+  --ring-shade: #000000;
 }
 
 /* Ni una curva: muchas reglas llevan su radio escrito. Se libran los retratos y
