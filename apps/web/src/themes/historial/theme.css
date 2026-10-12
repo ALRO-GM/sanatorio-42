@@ -49,28 +49,30 @@
   --glow: rgba(42, 74, 143, 0.14);
   --shadow: rgba(60, 40, 10, 0.3);
 
-  --page-image: url('./assets/paper.svg');
-  --page-size: 240px 240px;
+  --page-image: url('./assets/paper.png');
+  --page-size: 160px 160px;
+  /* Una textura que se repite va con la página: quieta costaría repintarlo todo. */
+  --page-attachment: scroll;
   /* Hoja pautada: una raya azul muy tenue cada renglón. */
   --surface-image:
-    url('./assets/paper.svg'),
+    url('./assets/paper.png'),
     repeating-linear-gradient(
       180deg,
       transparent 0 1.72rem,
       rgba(42, 74, 143, 0.09) 1.72rem 1.78rem
     );
-  --surface-size: 240px 240px, auto;
+  --surface-size: 160px 160px, auto;
   --card-shadow: 0 1px 1px rgba(60, 40, 10, 0.18), 0 12px 22px -14px rgba(60, 40, 10, 0.5);
   --primary-image: none;
   --primary-shadow: 2px 3px 0 rgba(29, 54, 112, 0.35);
   --appbar-bg: color-mix(in srgb, var(--bg) 88%, transparent);
-  --banner-image: url('./assets/paper.svg'), linear-gradient(120deg, #d9c9a3, #c9b889 60%, #b9a877);
+  --banner-image: url('./assets/paper.png'), linear-gradient(120deg, #d9c9a3, #c9b889 60%, #b9a877);
   --eyebrow-transform: uppercase;
   font-size: 16px;
 
   /* La pizarra del aula: verde, con su grano. */
   --stage-bg:
-    url('./assets/paper-dark.svg') 0 0 / 240px 240px,
+    url('./assets/paper-dark.png') 0 0 / 160px 160px,
     radial-gradient(120% 95% at 50% 0%, #5c7a63, #40584a 75%);
   --stage-text: #fbf5e6;
   --stage-muted: #d3c8a8;
@@ -113,9 +115,9 @@
   --glow: rgba(157, 184, 245, 0.14);
   --shadow: rgba(0, 0, 0, 0.6);
 
-  --page-image: url('./assets/paper-dark.svg');
+  --page-image: url('./assets/paper-dark.png');
   --surface-image:
-    url('./assets/paper-dark.svg'),
+    url('./assets/paper-dark.png'),
     repeating-linear-gradient(
       180deg,
       transparent 0 1.72rem,
@@ -124,7 +126,7 @@
   --card-shadow: 0 1px 1px rgba(0, 0, 0, 0.5), 0 14px 24px -14px rgba(0, 0, 0, 0.85);
   --primary-shadow: 2px 3px 0 rgba(0, 0, 0, 0.5);
   --banner-image:
-    url('./assets/paper-dark.svg'), linear-gradient(120deg, #4a4030, #3d3528 60%, #332c20);
+    url('./assets/paper-dark.png'), linear-gradient(120deg, #4a4030, #3d3528 60%, #332c20);
 
   --ring-from: #9db8f5;
   --ring-to: #e88a7c;
@@ -132,7 +134,7 @@
   --orb-done: #9db8f5;
 
   --stage-bg:
-    url('./assets/paper-dark.svg') 0 0 / 240px 240px,
+    url('./assets/paper-dark.png') 0 0 / 160px 160px,
     radial-gradient(120% 95% at 50% 0%, #2b3a30, #18211b 75%);
   --stage-text: #f0e4c9;
   --stage-muted: #a89a7c;

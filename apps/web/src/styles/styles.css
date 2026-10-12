@@ -22,6 +22,9 @@
   /* El fondo de la página, encima de `--bg`: un degradado o una textura. */
   --page-image: radial-gradient(1100px 420px at 50% -180px, var(--glow), transparent 70%);
   --page-size: auto;
+  /* `fixed` deja el fondo quieto al deslizar, pero obliga a repintar la página
+     entera en cada movimiento: vale para un degradado, no para una textura. */
+  --page-attachment: fixed;
   /* Lo mismo para tarjetas y demás superficies, encima de `--surface`. */
   --surface-image: none;
   --surface-size: auto;

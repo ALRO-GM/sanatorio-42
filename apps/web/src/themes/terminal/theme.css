@@ -47,6 +47,8 @@
 
   --page-image: url('./assets/grid.svg');
   --page-size: 24px 24px;
+  /* Una textura que se repite va con la página: quieta costaría repintarlo todo. */
+  --page-attachment: scroll;
   --surface-image: none;
   /* La única sombra que hay: dura y desplazada, como una ventana de texto. */
   --card-shadow: 4px 4px 0 var(--border);

@@ -8,7 +8,7 @@
 body {
   background: var(--page-image), var(--bg);
   background-size: var(--page-size), auto;
-  background-attachment: fixed;
+  background-attachment: var(--page-attachment);
 }
 .card,
 .project,

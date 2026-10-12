@@ -27,7 +27,9 @@ themes/
    bajo `:root[data-style='<id>'][data-theme='dark']`. Tiene que verse bien en
    los dos.
 4. Mete en `assets/` las texturas e imágenes y úsalas desde el CSS con
-   `url('./assets/…')`.
+   `url('./assets/…')`. Las texturas, mejor como imagen ya hecha (PNG) que como
+   SVG con filtros (`feTurbulence` y parecidos): el navegador recalcula el filtro
+   en cada trozo de pantalla y, con tarjeta gráfica, deja trozos sin pintar.
 5. Apunta el estilo en `index.ts`.
 
 No hay que tocar ningún componente ni ningún otro fichero.
@@ -50,6 +52,9 @@ Casi todo se hace dando valor a variables. Los componentes ya las usan.
   `--surface-size` (la textura de las tarjetas), `--card-shadow`,
   `--border-style`, `--primary-image` y `--primary-shadow` (el botón principal),
   `--appbar-bg` y `--banner-image`.
+  `--page-attachment` es `fixed` de fábrica (el fondo se queda quieto al
+  deslizar); un estilo cuyo fondo sea una textura que se repite lo pone en
+  `scroll`.
 - **El escenario** (`styles/styles.css`): la zona donde se pintan los grafos,
   que es oscura también en modo claro para que los colores de los nodos se
   distingan. `--stage-bg` (el fondo: un degradado o una textura), `--stage-text`

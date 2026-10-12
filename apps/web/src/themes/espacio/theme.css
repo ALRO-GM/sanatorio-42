@@ -133,20 +133,16 @@
   background-blend-mode: multiply, multiply, normal, normal, normal, normal, normal;
 }
 
-/* Paneles de cristal: dejan pasar el cielo, desenfocado. */
+/* Paneles de cristal oscuro: dejan entrever el cielo. Sin desenfoque: con
+   tantas tarjetas, desenfocar lo de detrás en cada una hacía que el navegador
+   dejara trozos sin pintar. */
 :root[data-style='espacio'] .card,
 :root[data-style='espacio'] .project,
 :root[data-style='espacio'] .peer-card,
 :root[data-style='espacio'] .step-card,
 :root[data-style='espacio'] .group-card,
 :root[data-style='espacio'] .stat-card {
-  background-color: color-mix(in srgb, var(--surface) 78%, transparent);
-  backdrop-filter: blur(10px) saturate(1.3);
-}
-:root[data-style='espacio'] .card .card,
-:root[data-style='espacio'] .card .stat-card,
-:root[data-style='espacio'] .card .tile {
-  backdrop-filter: none;
+  background-color: color-mix(in srgb, var(--surface) 90%, transparent);
 }
 :root[data-style='espacio'] h2 {
   text-transform: uppercase;

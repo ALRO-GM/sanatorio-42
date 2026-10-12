@@ -68,6 +68,8 @@
     );
   --page-size:
     520px 520px, 520px 520px, 520px 520px, 520px 520px, 520px 520px, 520px 520px, 520px 520px, auto;
+  /* Una textura que se repite va con la página: quieta costaría repintarlo todo. */
+  --page-attachment: scroll;
   --card-shadow: 0 1px 2px oklch(0.22 0.02 var(--hue) / 0.06);
   --primary-shadow: 0 4px 12px -6px oklch(0.58 var(--chroma) var(--hue) / 0.7);
   --banner-image: linear-gradient(
