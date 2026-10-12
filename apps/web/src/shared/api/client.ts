@@ -65,6 +65,14 @@ export const realApi: Api = {
   checkinEvent: (id, code) => sendJson('POST', '/events/checkin', { id, code }),
   attendanceReportUrl: (query) =>
     apiUrl(`/events/report?${new URLSearchParams({ ...query, format: 'csv' }).toString()}`),
+  staffLogin: (key) => send('POST', '/auth/staff', { key }),
+  getStaffMe: () => getJson('/staff/me'),
+  getStaffDocument: (code) => getJson(`/staff/documents/${encodeURIComponent(code)}`),
+  compareStaffDocument: (code, content) =>
+    sendJson('POST', `/staff/documents/${encodeURIComponent(code)}/compare`, { content }),
+  getStaffAccounts: () => getJson('/admin/staff'),
+  createStaffAccount: (name) => sendJson('POST', '/admin/staff', { name }),
+  revokeStaffAccount: (id) => send('DELETE', `/admin/staff/${id}`),
   openTicket: (ticket) => sendJson('POST', '/tickets', ticket),
   getMyTickets: () => getJson('/tickets/mine'),
   getAdminConsumption: () => getJson('/admin/consumption'),

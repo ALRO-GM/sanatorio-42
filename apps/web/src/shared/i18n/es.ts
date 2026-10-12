@@ -778,7 +778,7 @@ export const es: Record<string, string> = {
   'meet.att.code': 'Código de cuatro caracteres',
   'hours.title': 'Horas validadas',
   'hours.hint':
-    'Tu tiempo en pizarras y sesiones de ayuda, validado con los códigos de inicio y fin. Descárgalo si quieres enseñárselo al staff.',
+    'Tu tiempo en pizarras y sesiones de ayuda, validado con los códigos de inicio y fin. Descárgalo si quieres enseñárselo al staff: el nombre del fichero acaba en un código de cuatro caracteres con el que el staff puede comprobar que es auténtico.',
   'hours.hintAll':
     'El tiempo de todo el mundo en pizarras y sesiones de ayuda, validado con los códigos de inicio y fin.',
   'hours.from': 'Desde',
@@ -1324,4 +1324,63 @@ export const es: Record<string, string> = {
   'egg.redAbout':
     'Te quedas, y ves hasta dónde llega la madriguera. Bajo tu propia responsabilidad.',
   'nav.clicker': 'Code Clicker',
+  'login.staff': 'Soy del staff: validar un documento',
+  'staff.title': 'Validar un documento',
+  'staff.subtitle': 'Comprueba que unas horas validadas son las que emitió Sanatorio 42.',
+  'staff.back': 'Ir a Sanatorio 42',
+  'staff.enter': 'Entrada del staff',
+  'staff.enterHint':
+    'Escribe la clave que te ha dado quien administra Sanatorio 42. Esta cuenta solo sirve para comprobar documentos.',
+  'staff.key': 'Clave',
+  'staff.enterButton': 'Entrar',
+  'staff.as': 'Staff · {name}',
+  'staff.code': 'Código del documento',
+  'staff.codeHint':
+    'Son los cuatro caracteres del final del nombre del fichero (…_K7QF.csv) y de su última línea. También puedes pegar el nombre entero.',
+  'staff.check': 'Comprobar',
+  'staff.found':
+    'El código {code} es de un documento emitido por Sanatorio 42. Esto es lo que decía al emitirse:',
+  'staff.of': 'Horas de',
+  'staff.everyone': 'Todo el mundo',
+  'staff.period': 'Periodo',
+  'staff.range': 'Del {from} al {to}',
+  'staff.total': 'Tiempo validado',
+  'staff.rows': '{n} filas',
+  'staff.issued': 'Emitido',
+  'staff.by': 'lo descargó {login}',
+  'staff.file': 'Fichero',
+  'staff.compare': 'Comparar con el fichero que te han entregado',
+  'staff.compareHint': 'El fichero solo se envía para compararlo: no se guarda.',
+  'staff.same': 'Es idéntico al documento emitido.',
+  'staff.different':
+    'No coincide con el documento emitido: lo han modificado o es otro fichero. Fíate de lo que ves aquí abajo.',
+  'staff.original': 'El documento original',
+  'staff.empty': 'El documento no tenía ninguna fila: en ese periodo no había horas validadas.',
+  'admin.staff.title': 'Cuentas de staff',
+  'admin.staff.hint':
+    'Para que el staff de 42 compruebe los informes de horas en {url}. No son cuentas de 42 ni dan acceso a nada más.',
+  'admin.staff.none': 'Todavía no hay ninguna.',
+  'admin.staff.created': 'Creada el {date} por {by}',
+  'admin.staff.unused': 'sin usar',
+  'admin.staff.used': 'último uso el {date}',
+  'admin.staff.revoke': 'Retirar',
+  'admin.staff.revoked': 'Retirada el {date}',
+  'admin.staff.keyOf': 'Clave de {name}',
+  'admin.staff.keyOnce':
+    'Cópiala ahora y dásela al staff por un canal seguro: no se guarda y no se puede volver a ver.',
+  'admin.staff.copy': 'Copiar',
+  'admin.staff.copied': 'Copiada',
+  'admin.staff.hide': 'Ya la tengo',
+  'admin.staff.name': 'Nombre de la cuenta (p. ej. Bocal Madrid)',
+  'admin.staff.create': 'Crear cuenta',
+  'admin.data.kind.exports': 'Informes de horas emitidos',
+  'admin.data.kind.exports.summary':
+    'La copia de cada informe de horas descargado, con su código de verificación.',
+  'admin.data.kind.exports.detail':
+    'Es lo que ve el staff al escribir el código de un documento. Si se borra, ese documento ya no se puede comprobar: su código dejará de existir.',
+  'admin.data.kind.staff_checks': 'Comprobaciones del staff',
+  'admin.data.kind.staff_checks.summary':
+    'Cada código que ha comprobado una cuenta de staff y con qué resultado.',
+  'admin.data.kind.staff_checks.detail':
+    'Es solo un registro: borrarlo no cambia ningún documento ni ninguna cuenta.',
 }

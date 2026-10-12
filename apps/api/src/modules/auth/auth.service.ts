@@ -68,6 +68,12 @@ type StatePayload = {
 const DEFAULT_SESSION_TTL_MS = 12 * 60 * 60 * 1000
 const DEFAULT_STATE_TTL_MS = 10 * 60 * 1000
 
+/**
+ * Vida de una sesión de staff. Corta: se abre para comprobar unos documentos y
+ * no hace falta que dure una jornada.
+ */
+export const STAFF_SESSION_TTL_MS = 2 * 60 * 60 * 1000
+
 export function createAuthService(options: AuthServiceOptions) {
   const now = options.now ?? Date.now
   const sessionTtlMs = options.sessionTtlMs ?? DEFAULT_SESSION_TTL_MS
@@ -174,6 +180,7 @@ export function createAuthService(options: AuthServiceOptions) {
       // devolvía siempre `null`.
       image: avatarUrlOf(profile.image),
       campusId,
+      role: 'student',
     }
 
     const expiresAt = now() + sessionTtlMs
@@ -185,6 +192,30 @@ export function createAuthService(options: AuthServiceOptions) {
       sessionCookie: sign(options.secret, payload),
       redirectUrl: options.frontendUrl,
     }
+  }
+
+  /**
+   * Abre una sesión de staff: la misma cookie firmada, con `role: 'staff'`, el
+   * id de la cuenta y su nombre. Quien lee la sesión la distingue por el rol y
+   * no la deja pasar por las rutas de la gente.
+   */
+  function openStaffSession(account: { id: number; name: string }): {
+    sessionCookie: string
+    ttlMs: number
+  } {
+    const user: SessionUser = {
+      id: account.id,
+      login: account.name,
+      name: account.name,
+      image: null,
+      campusId: null,
+      role: 'staff',
+    }
+    const payload = Buffer.from(
+      JSON.stringify({ ...user, exp: now() + STAFF_SESSION_TTL_MS }),
+    ).toString('base64url')
+
+    return { sessionCookie: sign(options.secret, payload), ttlMs: STAFF_SESSION_TTL_MS }
   }
 
   /**
@@ -299,6 +330,7 @@ export function createAuthService(options: AuthServiceOptions) {
   return {
     startLogin,
     finishLogin,
+    openStaffSession,
     readSession,
     currentUser,
     logout,
@@ -325,6 +357,7 @@ function readSessionUser(parsed: unknown): SessionUser | undefined {
     name?: unknown
     image?: unknown
     campusId?: unknown
+    role?: unknown
   }
 
   if (typeof candidate.login !== 'string' || candidate.login === '') {
@@ -337,6 +370,9 @@ function readSessionUser(parsed: unknown): SessionUser | undefined {
     name: typeof candidate.name === 'string' ? candidate.name : null,
     image: typeof candidate.image === 'string' ? candidate.image : null,
     campusId: typeof candidate.campusId === 'number' ? candidate.campusId : null,
+    // Las cookies de antes de que hubiera roles son todas de personas. Y solo
+    // `staff` escrito tal cual es staff: cualquier otra cosa no gana nada.
+    role: candidate.role === 'staff' ? 'staff' : 'student',
   }
 }
 

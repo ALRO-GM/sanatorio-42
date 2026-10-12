@@ -17,6 +17,7 @@ import { meetMock } from './meet'
 import { peersMock } from './peers'
 import { profileMock } from './profile'
 import { replicaMock } from './replica'
+import { staffMock } from './staff'
 import { therapyMock } from './therapy'
 
 /** Cada trozo es una funcionalidad; juntos tienen que cumplir `Api` entero. */
@@ -31,4 +32,5 @@ export const mockApi: Api = {
   ...doubtsMock,
   ...boardsMock,
   ...clickerMock,
+  ...staffMock,
 }

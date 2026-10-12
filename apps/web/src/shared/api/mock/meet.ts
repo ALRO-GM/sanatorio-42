@@ -141,6 +141,8 @@ export const meetMock: Pick<
       [
         'login;rol;tipo;evento;titulo;fecha;inicio;fin;minutos_validados;minutos_previstos;con',
         `${ME.login};organiza;pizarra;board:1;Ejemplo de ${from} a ${to};${to};16:30;18:00;90;90;jdoe mgarcia`,
+        // El código con el que el staff puede comprobarlo (en la web de mentira, siempre este).
+        'codigo_de_verificacion;K7QF',
         '',
       ].join('\r\n'),
     )}`,

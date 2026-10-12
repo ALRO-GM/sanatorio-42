@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 
 import { Login } from '../features/auth/Login'
 import { useAuth } from '../features/auth/useAuth'
+import { StaffPage } from '../features/staff/StaffPage'
 import { useI18n } from '../shared/i18n'
 import { Logo } from '../shared/ui/Logo'
 import { Clinic } from './Clinic'
@@ -42,6 +43,34 @@ function readOAuthError(): string | null {
 
 /** Decide qué pantalla toca: cargando, servidor caído, login o la web. */
 export function App() {
+  const staff = useStaffRoute()
+
+  // La pantalla del staff no es de la web de la gente: tiene su propia entrada
+  // y no pregunta por la sesión de nadie.
+  return staff ? <StaffPage /> : <StudentApp />
+}
+
+/** `true` mientras la dirección sea la de validar documentos (`#/validar`). */
+function useStaffRoute(): boolean {
+  const read = (): boolean => /^#\/?validar(\/|$)/.test(window.location.hash)
+  const [staff, setStaff] = useState(read)
+
+  useEffect(() => {
+    const onChange = (): void => {
+      setStaff(read())
+    }
+
+    window.addEventListener('hashchange', onChange)
+
+    return () => {
+      window.removeEventListener('hashchange', onChange)
+    }
+  }, [])
+
+  return staff
+}
+
+function StudentApp() {
   const { t } = useI18n()
   const { me, loading, error, retry, login, logout } = useAuth()
   const [oauthError] = useState(readOAuthError)

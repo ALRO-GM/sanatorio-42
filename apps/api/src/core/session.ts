@@ -20,11 +20,22 @@ export type SessionUser = {
   image: string | null
   /** Campus principal en 42, o `null` si no se pudo saber al entrar. */
   campusId: number | null
+  /**
+   * `staff` en las sesiones abiertas con una clave de staff: no son de nadie
+   * de 42 y solo sirven para validar documentos. `id` es entonces el de la
+   * cuenta de staff y `login`, su nombre.
+   */
+  role: 'student' | 'staff'
 }
 
 export type SessionReader = {
-  /** La persona de la sesión, o `401`. No toca la base. */
+  /**
+   * La persona de la sesión, o `401`. No toca la base. Una sesión de staff no
+   * es una persona: da `403`, así que ninguna ruta de la web le sirve.
+   */
   user: (request: FastifyRequest) => SessionUser
+  /** La cuenta de staff de la sesión, o `401`; `403` si la sesión es de una persona. */
+  staff: (request: FastifyRequest) => { id: number; name: string }
   /** Campus principal de la persona en 42, con el de por defecto como red. */
   homeCampus: (user: SessionUser) => number
   /** La persona y el campus que está mirando. Cuesta una lectura a la base. */

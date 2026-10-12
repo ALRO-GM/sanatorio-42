@@ -768,7 +768,7 @@ export const en: Record<string, string> = {
   'meet.att.code': 'Four-character code',
   'hours.title': 'Validated hours',
   'hours.hint':
-    'Your time in whiteboards and help sessions, validated with the start and end codes. Download it if you want to show it to the staff.',
+    'Your time in whiteboards and help sessions, validated with the start and end codes. Download it if you want to show it to the staff: the file name ends in a four-character code the staff can use to check it is genuine.',
   'hours.hintAll':
     'Everyone\u2019s time in whiteboards and help sessions, validated with the start and end codes.',
   'hours.from': 'From',
@@ -1277,4 +1277,62 @@ export const en: Record<string, string> = {
   'egg.red': 'The red pill',
   'egg.redAbout': 'You stay, and see how deep the rabbit hole goes. At your own risk.',
   'nav.clicker': 'Code Clicker',
+  'login.staff': 'I am staff: verify a document',
+  'staff.title': 'Verify a document',
+  'staff.subtitle': 'Check that a validated-hours report is the one Sanatorio 42 issued.',
+  'staff.back': 'Go to Sanatorio 42',
+  'staff.enter': 'Staff sign-in',
+  'staff.enterHint':
+    'Type the key you were given by whoever runs Sanatorio 42. This account can only check documents.',
+  'staff.key': 'Key',
+  'staff.enterButton': 'Sign in',
+  'staff.as': 'Staff · {name}',
+  'staff.code': 'Document code',
+  'staff.codeHint':
+    'The four characters at the end of the file name (…_K7QF.csv) and on its last line. You can also paste the whole name.',
+  'staff.check': 'Check',
+  'staff.found':
+    'Code {code} belongs to a document issued by Sanatorio 42. This is what it said when it was issued:',
+  'staff.of': 'Hours of',
+  'staff.everyone': 'Everyone',
+  'staff.period': 'Period',
+  'staff.range': 'From {from} to {to}',
+  'staff.total': 'Validated time',
+  'staff.rows': '{n} rows',
+  'staff.issued': 'Issued',
+  'staff.by': 'downloaded by {login}',
+  'staff.file': 'File',
+  'staff.compare': 'Compare with the file you were given',
+  'staff.compareHint': 'The file is only sent to be compared: it is not stored.',
+  'staff.same': 'It is identical to the issued document.',
+  'staff.different':
+    'It does not match the issued document: it was modified or it is a different file. Trust what you see below.',
+  'staff.original': 'The original document',
+  'staff.empty': 'The document had no rows: there were no validated hours in that period.',
+  'admin.staff.title': 'Staff accounts',
+  'admin.staff.hint':
+    'So that 42 staff can check hours reports at {url}. They are not 42 accounts and give access to nothing else.',
+  'admin.staff.none': 'There are none yet.',
+  'admin.staff.created': 'Created on {date} by {by}',
+  'admin.staff.unused': 'never used',
+  'admin.staff.used': 'last used on {date}',
+  'admin.staff.revoke': 'Revoke',
+  'admin.staff.revoked': 'Revoked on {date}',
+  'admin.staff.keyOf': 'Key for {name}',
+  'admin.staff.keyOnce':
+    'Copy it now and hand it to the staff over a safe channel: it is not stored and cannot be shown again.',
+  'admin.staff.copy': 'Copy',
+  'admin.staff.copied': 'Copied',
+  'admin.staff.hide': 'I have it',
+  'admin.staff.name': 'Account name (e.g. Bocal Madrid)',
+  'admin.staff.create': 'Create account',
+  'admin.data.kind.exports': 'Issued hours reports',
+  'admin.data.kind.exports.summary':
+    'The copy of every downloaded hours report, with its verification code.',
+  'admin.data.kind.exports.detail':
+    'It is what staff see when they type a document code. If it is deleted, that document can no longer be checked: its code stops existing.',
+  'admin.data.kind.staff_checks': 'Staff checks',
+  'admin.data.kind.staff_checks.summary': 'Every code a staff account has checked, and the result.',
+  'admin.data.kind.staff_checks.detail':
+    'It is only a log: deleting it changes no document and no account.',
 }

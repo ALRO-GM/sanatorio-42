@@ -106,6 +106,7 @@ export async function buildApp(options: BuildOptions = {}): Promise<BuiltApp> {
       services.sync.touch()
     },
     access: (login) => services.admin.accessOf(login),
+    staff: (key) => services.staff.authenticate(key),
   })
 
   const modules: AppModule[] = [auth, ...domainModules]

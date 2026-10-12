@@ -48,6 +48,8 @@ import { createReplicaModule } from '../modules/replica/index.js'
 import type { ReplicaModule, SyncerConfig } from '../modules/replica/index.js'
 import { createToursModule } from '../modules/tours/index.js'
 import type { ToursModule } from '../modules/tours/index.js'
+import { createStaffModule } from '../modules/staff/index.js'
+import type { StaffModule } from '../modules/staff/index.js'
 import { createUsageModule } from '../modules/usage/index.js'
 import type { UsageModule } from '../modules/usage/index.js'
 import { createTherapyModule } from '../modules/therapy/index.js'
@@ -96,6 +98,7 @@ export type Services = {
   usage: UsageModule['service']
   meet: MeetModule['service']
   attendance: AttendanceModule['service']
+  staff: StaffModule['service']
   admin: AdminModule['service']
   notices: NoticesModule['service']
   broadcasts: BroadcastsModule['service']
@@ -223,8 +226,11 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     ...clock,
   })
 
+  const staff = createStaffModule({ db, ...clock })
+
   const meet = createMeetModule({
     db,
+    documents: staff.service,
     calendar: calendar.service,
     boards: boards.service,
     help: help.service,
@@ -295,6 +301,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     broadcasts,
     clicker,
     tours,
+    staff,
   ]
 
   return {
@@ -323,6 +330,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
       usage: usage.service,
       meet: meet.service,
       attendance: attendance.service,
+      staff: staff.service,
       admin: admin.service,
       notices: notices.service,
       broadcasts: broadcasts.service,

@@ -17,6 +17,7 @@ import { StatsPanel } from './StatsPanel'
 import { UsageTab } from './UsageTab'
 import { Icon } from '../../shared/ui/Icon'
 import { recordHref } from '../../shared/links'
+import { StaffAccounts } from './StaffAccounts'
 
 const TABS = [
   'consumption',
@@ -68,6 +69,7 @@ export function AdminPage({ campusId }: { campusId?: number | undefined }) {
       </div>
       {tab === 'consumption' && <ConsumptionTab />}
       {tab === 'people' && <PeopleTab />}
+      {tab === 'people' && <StaffAccounts />}
       {tab === 'people' && (
         <article className="card">
           <HoursReport everyone />

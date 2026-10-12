@@ -722,7 +722,7 @@ export const eu: Record<string, string> = {
   'meet.att.code': 'Lau karaktereko kodea',
   'hours.title': 'Balidatutako orduak',
   'hours.hint':
-    'Arbeletan eta laguntza-saioetan emandako denbora, hasierako eta amaierako kodeekin balidatuta. Deskargatu staffari erakutsi nahi badiozu.',
+    'Arbeletan eta laguntza-saioetan emandako denbora, hasierako eta amaierako kodeekin balidatuta. Deskargatu staffari erakutsi nahi badiozu: fitxategiaren izena lau karaktereko kode batekin amaitzen da, eta harekin staffak benetakoa dela egiazta dezake.',
   'hours.hintAll':
     'Denek arbeletan eta laguntza-saioetan emandako denbora, hasierako eta amaierako kodeekin balidatuta.',
   'hours.from': 'Noiztik',
@@ -934,4 +934,36 @@ export const eu: Record<string, string> = {
   'egg.redAbout':
     'Geratu egiten zara, eta zuloa noraino iristen den ikusiko duzu. Zure ardurapean.',
   'nav.clicker': 'Code Clicker',
+  'login.staff': 'Staffekoa naiz: dokumentu bat balidatu',
+  'staff.title': 'Dokumentu bat balidatu',
+  'staff.subtitle': 'Egiaztatu balidatutako ordu batzuk Sanatorio 42k igorritakoak direla.',
+  'staff.back': 'Joan Sanatorio 42ra',
+  'staff.enter': 'Staffaren sarrera',
+  'staff.enterHint':
+    'Idatzi Sanatorio 42 kudeatzen duenak eman dizun gakoa. Kontu honek dokumentuak egiaztatzeko baino ez du balio.',
+  'staff.key': 'Gakoa',
+  'staff.enterButton': 'Sartu',
+  'staff.as': 'Staff · {name}',
+  'staff.code': 'Dokumentuaren kodea',
+  'staff.codeHint':
+    'Fitxategiaren izenaren amaierako (…_K7QF.csv) eta azken lerroko lau karaktereak dira. Izen osoa ere itsats dezakezu.',
+  'staff.check': 'Egiaztatu',
+  'staff.found':
+    '{code} kodea Sanatorio 42k igorritako dokumentu batena da. Hau zioen igorri zenean:',
+  'staff.of': 'Norenak',
+  'staff.everyone': 'Denenak',
+  'staff.period': 'Aldia',
+  'staff.range': '{from} – {to}',
+  'staff.total': 'Balidatutako denbora',
+  'staff.rows': '{n} lerro',
+  'staff.issued': 'Igorria',
+  'staff.by': '{login} erabiltzaileak deskargatu zuen',
+  'staff.file': 'Fitxategia',
+  'staff.compare': 'Konparatu eman dizuten fitxategiarekin',
+  'staff.compareHint': 'Fitxategia konparatzeko baino ez da bidaltzen: ez da gordetzen.',
+  'staff.same': 'Igorritako dokumentuaren berdina da.',
+  'staff.different':
+    'Ez dator bat igorritako dokumentuarekin: aldatu egin dute edo beste fitxategi bat da. Fidatu hemen behean ikusten duzunaz.',
+  'staff.original': 'Jatorrizko dokumentua',
+  'staff.empty': 'Dokumentuak ez zuen lerrorik: aldi horretan ez zegoen balidatutako ordurik.',
 }

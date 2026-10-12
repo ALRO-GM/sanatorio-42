@@ -95,10 +95,13 @@ export function createMeetModule(deps: MeetServiceOptions): MeetModule {
           return reply.send(await service.report(actor, query))
         }
 
+        const issued = await service.reportCsv(actor, query)
+
         return reply
           .header('Content-Type', 'text/csv; charset=utf-8')
-          .header('Content-Disposition', 'attachment; filename="horas-validadas.csv"')
-          .send(await service.reportCsv(actor, query))
+          .header('Content-Disposition', `attachment; filename="${issued.fileName}"`)
+          .header('X-Verification-Code', issued.code)
+          .send(issued.csv)
       })
 
       /** `GET /admin/checkins?id=` → cada intento de validar un código de un evento. Solo admins. */

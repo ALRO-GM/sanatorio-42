@@ -15,6 +15,8 @@ export type DomainErrorCode =
   | 'invalid_input'
   /** Hay sesión, pero esa persona no puede hacer eso. */
   | 'forbidden'
+  /** Demasiados intentos en poco tiempo: hay que esperar. */
+  | 'rate_limited'
   /** La petición es correcta pero choca con el estado actual (grupo lleno, ya reaccionaste hoy). */
   | 'conflict'
 

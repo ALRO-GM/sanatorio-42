@@ -30,6 +30,50 @@ Los errores tienen siempre la misma forma, y `message` se puede enseñar tal cua
   { "id": 1234, "login": "plopez-l", "name": "…", "image": "https://...", "campusId": 22 }
 - POST /auth/logout
 
+Lo que vale para todas las rutas:
+
+- Sin sesión, `401`. Con una cuenta bloqueada, `403` en todo menos en `/auth/…`.
+- Todo lo que cuelga de `/admin/…` es `403` para quien no administra, exista o
+  no la ruta.
+- Empezar un login o volver de 42 más de 200 veces en diez minutos desde la
+  misma IP acaba en el front con `?error=rate_limited`.
+- Un JSON mal escrito es `400`; un cuerpo de más de 64 kB, `413`; un tipo de
+  contenido que no sea JSON, `415`.
+- Las respuestas llevan `Cache-Control: private, no-store` salvo que la ruta
+  diga otra cosa.
+
+## Documentos verificables y staff
+
+Quien se descarga sus horas (`GET /events/report?format=csv`) puede entregar el
+fichero al staff de 42. Para que el staff sepa que no se ha retocado, hay cuentas
+de staff: no son de 42, las crea quien administra y **solo** llegan a las rutas
+de este apartado. Cualquier otra ruta les contesta `403`.
+
+- POST /auth/staff → `{ "key" }`. Abre una sesión de staff de dos horas. `204`.
+  `401` con una clave que no vale (la misma respuesta exista o no la cuenta) y
+  `429` tras diez claves falladas desde la misma IP en un cuarto de hora.
+- GET /staff/me → `{ "name" }`. `401` sin sesión o si a la cuenta se le ha
+  retirado el acceso; `403` con la sesión de una persona.
+- GET /staff/documents/:code → el documento emitido con ese código, como salió:
+  `{ "code", "login", "requestedBy", "from", "to", "totalMinutes", "rows",
+  "issuedAt", "fileName", "header", "lines" }`. `login` es `null` en el informe
+  de todo el mundo. El código vale en minúsculas y con espacios o guiones.
+  `404` si no es de ningún documento.
+- POST /staff/documents/:code/compare → `{ "content" }` (el texto del fichero
+  recibido, hasta un millón de caracteres) → `{ "identical" }`. No cuentan la
+  marca de UTF-8, el tipo de salto de línea ni los espacios del final; cualquier
+  otro cambio, sí.
+- Las dos anteriores comparten tope: 60 comprobaciones cada diez minutos por
+  cuenta (`429`). Cada una queda apuntada.
+- GET /admin/staff → `{ "accounts": [{ "id", "name", "createdBy", "createdAt",
+  "lastUsedAt", "revokedAt" }] }`. Solo admins.
+- POST /admin/staff → `{ "name" }` (de 3 a 40 letras, números, espacios, puntos
+  o guiones). `201` con `{ "account", "key" }`: la clave **solo viaja en esta
+  respuesta**; en la base queda su resumen (scrypt con sal). `409` si el nombre
+  ya existe.
+- DELETE /admin/staff/:id → retira el acceso. Las sesiones abiertas de esa cuenta
+  dejan de valer al momento. `204`; `404` si no existe o ya estaba retirada.
+
 ## Mis proyectos
 GET /me/projects → solo los que tengo en curso
 [{ "id": 1314, "name": "ft_printf" }]
@@ -180,7 +224,12 @@ calendario (y va a ir) puede leer o escribir; el resto recibe `403`.
   "kind", "title", "day", "from", "to", "minutes", "scheduledMinutes", "with" }] }`.
   Sin `login`, las tuyas; las de otra persona o las de todo el mundo
   (`login=all`), solo quien administra. Con `format=csv` es un fichero para una
-  hoja de cálculo, con las horas del campus.
+  hoja de cálculo, con las horas del campus. El fichero es un **documento
+  verificable**: se guarda una copia con un código de cuatro caracteres, que va
+  en el nombre (`horas-validadas_<login>_<desde>_<hasta>_<CÓDIGO>.csv`), en la
+  cabecera `X-Verification-Code` y en la última línea
+  (`"codigo_de_verificacion";"K7QF"`). Pedir dos veces el mismo documento da el
+  mismo código. `429` si ya has emitido 40 documentos distintos hoy.
 - GET /admin/checkins?id= → cada intento de validar un código de ese evento, con
   su resultado (`ok`, `repeat`, `wrong_code`, `locked`, `too_early`, `too_late`,
   `no_start`). Solo admins.

@@ -718,7 +718,7 @@ export const ca: Record<string, string> = {
   'meet.att.code': 'Codi de quatre caràcters',
   'hours.title': 'Hores validades',
   'hours.hint':
-    "El teu temps en pissarres i sessions d'ajuda, validat amb els codis d'inici i fi. Baixa-te'l si el vols ensenyar a l'staff.",
+    "El teu temps en pissarres i sessions d'ajuda, validat amb els codis d'inici i fi. Baixa-te'l si el vols ensenyar a l'staff: el nom del fitxer acaba en un codi de quatre caràcters amb què l'staff pot comprovar que és autèntic.",
   'hours.hintAll':
     "El temps de tothom en pissarres i sessions d'ajuda, validat amb els codis d'inici i fi.",
   'hours.from': 'Des de',
@@ -927,4 +927,36 @@ export const ca: Record<string, string> = {
   'egg.red': 'La pastilla vermella',
   'egg.redAbout': 'Et quedes, i veus fins on arriba el cau. Sota la teva responsabilitat.',
   'nav.clicker': 'Code Clicker',
+  'login.staff': "Soc de l'staff: validar un document",
+  'staff.title': 'Validar un document',
+  'staff.subtitle': 'Comprova que unes hores validades són les que va emetre Sanatorio 42.',
+  'staff.back': 'Ves a Sanatorio 42',
+  'staff.enter': "Entrada de l'staff",
+  'staff.enterHint':
+    "Escriu la clau que t'ha donat qui administra Sanatorio 42. Aquest compte només serveix per comprovar documents.",
+  'staff.key': 'Clau',
+  'staff.enterButton': 'Entra',
+  'staff.as': 'Staff · {name}',
+  'staff.code': 'Codi del document',
+  'staff.codeHint':
+    "Són els quatre caràcters del final del nom del fitxer (…_K7QF.csv) i de l'última línia. També hi pots enganxar el nom sencer.",
+  'staff.check': 'Comprova',
+  'staff.found':
+    "El codi {code} és d'un document emès per Sanatorio 42. Això és el que deia quan es va emetre:",
+  'staff.of': 'Hores de',
+  'staff.everyone': 'Tothom',
+  'staff.period': 'Període',
+  'staff.range': 'Del {from} al {to}',
+  'staff.total': 'Temps validat',
+  'staff.rows': '{n} files',
+  'staff.issued': 'Emès',
+  'staff.by': 'el va baixar {login}',
+  'staff.file': 'Fitxer',
+  'staff.compare': "Compara amb el fitxer que t'han lliurat",
+  'staff.compareHint': "El fitxer només s'envia per comparar-lo: no es desa.",
+  'staff.same': 'És idèntic al document emès.',
+  'staff.different':
+    "No coincideix amb el document emès: l'han modificat o és un altre fitxer. Fia't del que veus aquí sota.",
+  'staff.original': 'El document original',
+  'staff.empty': 'El document no tenia cap fila: en aquest període no hi havia hores validades.',
 }

@@ -28,6 +28,17 @@ function loginOf(session: SessionReader, request: FastifyRequest): string | null
   }
 }
 
+/** `true` si la petición trae una sesión de staff. */
+function isStaff(session: SessionReader, request: FastifyRequest): boolean {
+  try {
+    session.staff(request)
+
+    return true
+  } catch {
+    return false
+  }
+}
+
 export function createAdminModule(deps: AdminServiceOptions): AdminModule {
   const service = createAdminService(deps)
 
@@ -68,6 +79,26 @@ export function createAdminModule(deps: AdminServiceOptions): AdminModule {
 
         const who = loginOf(session, request)
         const path = request.url.split('?')[0] ?? ''
+
+        // Una sesión de staff solo llega a lo suyo. Cada ruta de la gente ya la
+        // rechaza al leer la sesión; esto cubre también las que no la leen. Lo
+        // que no es una ruta de la API (la propia web, sus ficheros) sí pasa:
+        // es lo mismo que ve cualquiera sin sesión.
+        if (
+          isStaff(session, request) &&
+          !request.is404 &&
+          !path.startsWith('/auth/') &&
+          !path.startsWith('/staff/') &&
+          !path.startsWith('/health')
+        ) {
+          await reply.code(403).send({
+            error: 'forbidden',
+            message: 'Esta cuenta solo sirve para validar documentos',
+          })
+
+          return
+        }
+
         // Todo lo que cuelga de `/admin` es de quien administra. Cada servicio
         // lo comprueba también por su cuenta; esto es la segunda cerradura, para
         // que una ruta nueva a la que se le olvide no quede abierta.

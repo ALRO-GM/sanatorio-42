@@ -29,7 +29,22 @@ export type AuthRoutesOptions = {
   stateTtlMs?: number
   /** Tope de entradas por IP. Por defecto, `LOGIN_ATTEMPTS` cada diez minutos. */
   attempts?: RateLimit
+  /**
+   * La cuenta de staff a la que corresponde una clave, o `null`. Sin esto no
+   * hay entrada de staff.
+   */
+  staff?: (key: unknown) => Promise<{ id: number; name: string } | null>
+  /** Tope de claves de staff falladas por IP. */
+  staffAttempts?: RateLimit
 }
+
+/**
+ * Claves de staff falladas que caben por IP cada cuarto de hora. Una clave
+ * tiene 256 bits: no se adivina. El tope está para que probar no salga gratis
+ * (cada intento es un resumen caro de calcular) y para que quede corto.
+ */
+export const STAFF_KEY_ATTEMPTS = 10
+const STAFF_KEY_WINDOW_MS = 15 * 60 * 1000
 
 /**
  * Pasos de login que caben por IP cada diez minutos. Un login son dos (ir a 42
@@ -162,6 +177,52 @@ export function registerAuthRoutes(app: FastifyInstance, options: AuthRoutesOpti
     },
   )
 
+  const staffAttempts =
+    options.staffAttempts ??
+    createRateLimit({ max: STAFF_KEY_ATTEMPTS, windowMs: STAFF_KEY_WINDOW_MS })
+
+  /**
+   * `POST /auth/staff` → `{ key }`: abre una sesión de staff. 204.
+   *
+   * La respuesta a una clave mala es siempre la misma, exista o no la cuenta.
+   * Los fallos se cuentan por IP; acertar no los borra, para que una clave
+   * buena no sirva de comodín para seguir probando otras.
+   */
+  app.post<{ Body?: { key?: unknown } }>('/auth/staff', async (request, reply) => {
+    if (!staffAttempts.allowed(request.ip)) {
+      return reply
+        .code(429)
+        .header('Retry-After', String(staffAttempts.retryAfter(request.ip)))
+        .send({
+          error: 'rate_limited',
+          message: 'Demasiados intentos. Espera unos minutos y vuelve a probar.',
+        })
+    }
+
+    const account = (await options.staff?.(request.body?.key)) ?? null
+
+    if (account === null) {
+      staffAttempts.hit(request.ip)
+
+      return reply.code(401).send({ error: 'unauthenticated', message: 'Esa clave no vale' })
+    }
+
+    const opened = auth.openStaffSession(account)
+
+    reply.header(
+      'Set-Cookie',
+      serializeCookie(SESSION_COOKIE_NAME, opened.sessionCookie, {
+        maxAgeMs: opened.ttlMs,
+        path: '/',
+        // Esta sesión no viene de ninguna otra web: no hace falta que viaje al
+        // llegar desde un enlace de fuera.
+        sameSite: 'strict',
+      }),
+    )
+
+    return reply.code(204).send()
+  })
+
   /**
    * `GET /auth/me` → la persona de la sesión.
    *
@@ -172,6 +233,12 @@ export function registerAuthRoutes(app: FastifyInstance, options: AuthRoutesOpti
    */
   app.get('/auth/me', async (request, reply) => {
     const user = auth.currentUser(cookieOf(request, SESSION_COOKIE_NAME))
+
+    // Una sesión de staff no es una persona: para la web de la gente es como
+    // no haber entrado. Quién es se pregunta en `/staff/me`.
+    if (user.role === 'staff') {
+      throw new DomainError('unauthenticated', 'No hay sesión iniciada')
+    }
 
     return reply.send({
       id: user.id,

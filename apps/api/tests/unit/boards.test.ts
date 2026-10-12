@@ -621,9 +621,19 @@ describe('comunidad', () => {
         )
 
         // En CSV, con las horas del campus (16:30 en Madrid).
-        expect((await meet.reportCsv(actor('leo'), {})).split('\r\n')).toEqual([
+        // La última línea es el código de verificación, el mismo que va en el nombre.
+        const issued = await meet.reportCsv(actor('leo'), {})
+
+        expect(issued.code).toMatch(/^[A-HJKMNP-Z2-9]{4}$/)
+        expect(issued.fileName).toMatch(
+          new RegExp(
+            `^horas-validadas_leo_\\d{4}-\\d{2}-\\d{2}_\\d{4}-\\d{2}-\\d{2}_${issued.code}\\.csv$`,
+          ),
+        )
+        expect(issued.csv.split('\r\n')).toEqual([
           '\uFEFF"login";"rol";"tipo";"evento";"titulo";"fecha";"inicio";"fin";"minutos_validados";"minutos_previstos";"con"',
           `"leo";"asiste";"pizarra";"${id}";"malloc: dónde vive tu memoria";"2026-10-07";"16:50";"18:00";"70";"90";"eva"`,
+          `"codigo_de_verificacion";"${issued.code}"`,
           '',
         ])
       })
@@ -639,7 +649,7 @@ describe('comunidad', () => {
         clock.advance(30 * MINUTE)
         await validate(id, 'eva', 'ana', 'end')
 
-        expect(await meet.reportCsv(actor('ana'), {})).toContain(`"'=HYPERLINK(""x"")"`)
+        expect((await meet.reportCsv(actor('ana'), {})).csv).toContain(`"'=HYPERLINK(""x"")"`)
       })
 
       it('una sesión de ayuda cuenta el tiempo de las dos personas', async () => {

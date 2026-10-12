@@ -26,6 +26,8 @@ export type AuthModuleDeps = {
   onLogin: (profile: ApiUser) => Promise<{ campusId: number }>
   /** Aviso de actividad, para que la sincronización sepa que hay alguien mirando. */
   onActivity?: () => void
+  /** La cuenta de staff a la que corresponde una clave, o `null`. */
+  staff?: (key: unknown) => Promise<{ id: number; name: string } | null>
   /** Permisos y bloqueos del panel de administración. */
   access?: (
     login: string,
@@ -72,7 +74,11 @@ export function createAuthModule(deps: AuthModuleDeps): AuthModule {
     service,
     session,
     routes: (app) => {
-      registerAuthRoutes(app, { auth: service, frontendUrl: env.FRONTEND_URL })
+      registerAuthRoutes(app, {
+        auth: service,
+        frontendUrl: env.FRONTEND_URL,
+        ...(deps.staff === undefined ? {} : { staff: deps.staff }),
+      })
     },
   }
 }

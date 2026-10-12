@@ -27,6 +27,8 @@ export function statusForError(error: unknown): number {
         return 403
       case 'conflict':
         return 409
+      case 'rate_limited':
+        return 429
       default:
         return 500
     }

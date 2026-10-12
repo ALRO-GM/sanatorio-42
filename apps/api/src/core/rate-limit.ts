@@ -11,6 +11,8 @@
  */
 
 export type RateLimit = {
+  /** `true` si a esa clave le quedan intentos. No apunta nada. */
+  allowed: (key: string) => boolean
   /** Apunta un intento. `false` si con este ya se pasa del tope. */
   hit: (key: string) => boolean
   /** Olvida los intentos de una clave (por ejemplo, tras acertar). */
@@ -58,6 +60,10 @@ export function createRateLimit(options: {
   }
 
   return {
+    allowed(key) {
+      return (live(key)?.count ?? 0) < max
+    },
+
     hit(key) {
       const window = live(key)
 

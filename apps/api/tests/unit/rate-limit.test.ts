@@ -78,3 +78,23 @@ describe('tope de intentos', () => {
     expect(limit.hit(huge)).toBe(false)
   })
 })
+
+describe('consultar sin gastar', () => {
+  it('allowed dice si quedan intentos y no apunta ninguno', () => {
+    let at = 0
+    const limit = createRateLimit({ max: 2, windowMs: 1000, now: () => at })
+
+    expect(limit.allowed('a')).toBe(true)
+    expect(limit.allowed('a')).toBe(true)
+    limit.hit('a')
+    expect(limit.allowed('a')).toBe(true)
+    limit.hit('a')
+    expect(limit.allowed('a')).toBe(false)
+    at = 1000
+    expect(limit.allowed('a')).toBe(true)
+  })
+
+  it('con tope cero nunca queda ninguno', () => {
+    expect(createRateLimit({ max: 0, windowMs: 1000, now: () => 0 }).allowed('a')).toBe(false)
+  })
+})

@@ -16,6 +16,7 @@ import {
   buildMap,
   resetState,
 } from './state'
+import { closeStaffSession } from './staff'
 
 export const peersMock: Pick<
   Api,
@@ -54,6 +55,7 @@ export const peersMock: Pick<
   async logout() {
     await delay()
     localStorage.removeItem(LOGGED_KEY)
+    closeStaffSession()
     resetState()
   },
 

@@ -38,6 +38,7 @@ import { createTtlCache } from '../../core/ttl-cache.js'
 import { parse } from '../../core/validation.js'
 import { EVENT_ID } from '../attendance/index.js'
 import type { AttendanceEvent, AttendanceService } from '../attendance/index.js'
+import type { IssuedExport, StaffService } from '../staff/index.js'
 import type { BoardsService } from '../boards/index.js'
 import type { CalendarService } from '../calendar/index.js'
 import type { HelpService } from '../help/index.js'
@@ -50,6 +51,8 @@ export type MeetServiceOptions = {
   boards: BoardsService
   help: HelpService
   attendance: AttendanceService
+  /** Quien emite los documentos con código de verificación. */
+  documents: Pick<StaffService, 'issue'>
   /** Para el chat de cada grupo de terapia (`group:<id>`), que no es un evento del calendario. */
   therapy: TherapyService
   replica: ReplicaRepository
@@ -602,11 +605,26 @@ export function createMeetService(options: MeetServiceOptions) {
       return attendance.report(reportOf(actor, login), period)
     },
 
-    /** El mismo informe en CSV, para llevárselo a una hoja de cálculo. */
-    async reportCsv(actor: Actor, query: unknown): Promise<string> {
+    /**
+     * El mismo informe en CSV, para llevárselo a una hoja de cálculo o
+     * entregárselo al staff. Sale con un código de verificación en el nombre y
+     * en la última línea: el staff lo escribe en su pantalla y ve la copia que
+     * se guarda aquí.
+     */
+    async reportCsv(actor: Actor, query: unknown): Promise<IssuedExport> {
       const { login, ...period } = parse(reportSchema, query)
+      const subject = reportOf(actor, login)
+      const report = await attendance.reportCsv(subject, period)
 
-      return attendance.reportCsv(reportOf(actor, login), period)
+      return options.documents.issue({
+        login: subject,
+        requestedBy: actor.login,
+        from: report.from,
+        to: report.to,
+        totalMinutes: report.totalMinutes,
+        rows: report.rows,
+        csv: report.csv,
+      })
     },
 
     /** Cada intento de validar un código de un evento. Solo para quien administra la web. */

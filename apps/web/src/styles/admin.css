@@ -607,3 +607,114 @@ dialog.data-review h3 {
   top: 0;
   background: var(--surface);
 }
+
+/* ── Staff: validar documentos (#/validar) y sus cuentas en el panel ──────────
+   La pantalla del staff va sola, sin la cabecera ni la navegación de la web. */
+.staff-page {
+  display: grid;
+  gap: 1rem;
+  max-width: 860px;
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 2rem 1rem 1.5rem;
+  align-content: start;
+}
+.staff-head {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+.staff-head h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+.staff-head .hint {
+  margin: 0.2rem 0 0;
+}
+.staff-card {
+  display: grid;
+  gap: 0.7rem;
+}
+.staff-card label {
+  display: grid;
+  gap: 0.3rem;
+  font-weight: 600;
+}
+.staff-card .primary {
+  justify-self: start;
+}
+.staff-who {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.staff-code {
+  max-width: 11rem;
+  font-family: ui-monospace, monospace;
+  font-size: 1.5rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+.staff-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 0.7rem 1.2rem;
+  margin: 0;
+}
+.staff-facts dt {
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.staff-facts dd {
+  margin: 0.15rem 0 0;
+}
+.staff-facts small {
+  color: var(--text-3);
+}
+.staff-file,
+.staff-key code {
+  font-family: ui-monospace, monospace;
+  font-size: 0.85rem;
+  overflow-wrap: anywhere;
+}
+.staff-compare {
+  display: grid;
+  gap: 0.4rem;
+  padding: 0.8rem;
+  border-radius: 12px;
+  background: var(--surface-2);
+}
+.estado.ok {
+  border: 1px solid color-mix(in srgb, var(--ok) 35%, transparent);
+  background: color-mix(in srgb, var(--ok) 12%, var(--surface));
+  color: var(--text);
+}
+.staff-key {
+  display: grid;
+  gap: 0.4rem;
+  margin-top: 0.7rem;
+  padding: 0.8rem;
+  border: 1px dashed var(--accent);
+  border-radius: 12px;
+  background: var(--accent-soft);
+}
+.staff-key code {
+  padding: 0.5rem 0.6rem;
+  border-radius: 8px;
+  background: var(--surface);
+  user-select: all;
+}
+.staff-key-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.staff-document .stat-table th,
+.staff-document .stat-table td {
+  text-align: left;
+  white-space: nowrap;
+}

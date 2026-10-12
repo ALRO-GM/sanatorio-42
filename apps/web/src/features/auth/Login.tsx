@@ -46,6 +46,9 @@ export function Login({ onLogin, notice }: LoginProps) {
       <footer className="footer">
         <LangSelect />
         <ThemeSelect />
+        <a className="link" href="#/validar">
+          {t('login.staff')}
+        </a>
         <p>{t('app.footer')}</p>
       </footer>
     </main>

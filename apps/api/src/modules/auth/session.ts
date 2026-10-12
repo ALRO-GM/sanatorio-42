@@ -46,9 +46,31 @@ export function createSessionReader(options: SessionReaderOptions): SessionReade
       throw new DomainError('unauthenticated', 'No hay sesión iniciada')
     }
 
+    const session = options.auth.currentUser(cookie)
+
+    // Una sesión de staff no es de nadie de 42: no tiene expediente, ni campus,
+    // ni nada que hacer en las rutas de la gente. Se corta aquí, que es por
+    // donde pasan todas, y no ruta a ruta.
+    if (session.role === 'staff') {
+      throw new DomainError('forbidden', 'Esta cuenta solo sirve para validar documentos')
+    }
+
     options.onActivity?.()
 
-    return options.auth.currentUser(cookie)
+    return session
+  }
+
+  /** La cuenta de staff de la sesión, o `401`; `403` si la sesión es de una persona. */
+  function staff(request: FastifyRequest): { id: number; name: string } {
+    const session = options.auth.currentUser(
+      readCookie(request.headers.cookie, SESSION_COOKIE_NAME),
+    )
+
+    if (session.role !== 'staff' || session.id === null) {
+      throw new DomainError('forbidden', 'Solo para cuentas de staff')
+    }
+
+    return { id: session.id, name: session.login }
   }
 
   /** Campus principal de la persona en 42, con el de por defecto como red. */
@@ -58,6 +80,7 @@ export function createSessionReader(options: SessionReaderOptions): SessionReade
 
   return {
     user,
+    staff,
     homeCampus,
 
     /**

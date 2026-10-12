@@ -508,9 +508,17 @@ export function createAttendanceService(options: AttendanceServiceOptions) {
       return { from, to, rows, totalMinutes: rows.reduce((sum, row) => sum + row.minutes, 0) }
     },
 
-    /** El mismo informe, como CSV para abrir en una hoja de cálculo. */
-    async reportCsv(login: string | null, input: unknown): Promise<string> {
-      const { start, end } = period(input)
+    /**
+     * El mismo informe, como CSV para abrir en una hoja de cálculo, con el
+     * periodo y los totales que hacen falta para emitirlo como documento.
+     */
+    async reportCsv(
+      login: string | null,
+      input: unknown,
+    ): Promise<{ csv: string; from: string; to: string; rows: number; totalMinutes: number }> {
+      const { from, to, start, end } = period(input)
+      let rows = 0
+      let totalMinutes = 0
       const zones = new Map<number, string | undefined>()
       const lines = [
         [
@@ -540,6 +548,8 @@ export function createAttendanceService(options: AttendanceServiceOptions) {
           return `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`
         }
 
+        rows += 1
+        totalMinutes += row.minutes
         lines.push(
           [
             row.login,
@@ -559,7 +569,7 @@ export function createAttendanceService(options: AttendanceServiceOptions) {
         )
       }
 
-      return `${BOM}${lines.join('\r\n')}\r\n`
+      return { csv: `${BOM}${lines.join('\r\n')}\r\n`, from, to, rows, totalMinutes }
     },
 
     /** Los intentos de validar códigos de un evento, del más antiguo al más reciente. */
