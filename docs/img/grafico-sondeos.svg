@@ -1,0 +1,25 @@
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 860 312' width='860' height='312' font-family='system-ui,-apple-system,Segoe UI,Helvetica,Arial,sans-serif'>
+<rect width='860' height='312' rx='14' fill='#ffffff' stroke='#e6ecee'/>
+<text x='28' y='38' font-size='19' font-weight='700' fill='#16262b'>Peticiones de fondo por pestaña y hora</text>
+<text x='28' y='62' font-size='13' fill='#5c6f76'>Calculado a partir de los intervalos del código · menos es mejor</text>
+<rect x='610' y='24' width='12' height='12' rx='3' fill='#b9c4c9'/><text x='628' y='35' font-size='13' fill='#5c6f76'>Antes</text>
+<rect x='690' y='24' width='12' height='12' rx='3' fill='#0aa5a8'/><text x='708' y='35' font-size='13' fill='#5c6f76'>Ahora</text>
+<text x='284' y='117' font-size='13.5' fill='#16262b' text-anchor='end'>Pestaña abierta, sin hacer nada</text>
+<rect x='300' y='92' width='48.2' height='16' rx='4' fill='#b9c4c9'/>
+<text x='356.2' y='104.5' font-size='12.5' fill='#5c6f76' font-weight='400'>60 /h</text>
+<rect x='300' y='112' width='33.8' height='16' rx='4' fill='#0aa5a8'/>
+<text x='341.8' y='124.5' font-size='12.5' fill='#16262b' font-weight='600'>42 /h</text>
+<text x='836' y='117' font-size='15' font-weight='700' fill='#0aa5a8' text-anchor='end'>−30 %</text>
+<text x='284' y='175' font-size='13.5' fill='#16262b' text-anchor='end'>Con un chat abierto y callado</text>
+<rect x='300' y='150' width='361.8' height='16' rx='4' fill='#b9c4c9'/>
+<text x='669.8' y='162.5' font-size='12.5' fill='#5c6f76' font-weight='400'>450 /h</text>
+<rect x='300' y='170' width='96.5' height='16' rx='4' fill='#0aa5a8'/>
+<text x='404.5' y='182.5' font-size='12.5' fill='#16262b' font-weight='600'>120 /h</text>
+<text x='836' y='175' font-size='15' font-weight='700' fill='#0aa5a8' text-anchor='end'>−73 %</text>
+<text x='284' y='233' font-size='13.5' fill='#16262b' text-anchor='end'>Pestaña oculta con un chat abierto</text>
+<rect x='300' y='208' width='410.0' height='16' rx='4' fill='#b9c4c9'/>
+<text x='718.0' y='220.5' font-size='12.5' fill='#5c6f76' font-weight='400'>510 /h</text>
+<rect x='300' y='228' width='9.6' height='16' rx='4' fill='#0aa5a8'/>
+<text x='317.6' y='240.5' font-size='12.5' fill='#16262b' font-weight='600'>12 /h</text>
+<text x='836' y='233' font-size='15' font-weight='700' fill='#0aa5a8' text-anchor='end'>−98 %</text>
+<text x='28' y='294' font-size='11.5' fill='#5c6f76'>Fuente: docs/rendimiento.md</text></svg>
