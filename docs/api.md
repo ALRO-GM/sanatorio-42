@@ -137,7 +137,7 @@ reservada»). Ya no existe `POST /reactions`: la XP por ayudar sale solo de una
 sesión reservada.
 
 GET /users/search?q= → hasta 8 personas cuyo login o nombre lleva lo escrito,
-sin distinguir mayúsculas: `[{ login, name, image }]`. Primero las de tu campus
+sin distinguir mayúsculas ni tildes: `[{ login, name, image }]`. Primero las de tu campus
 y, dentro, las que empiezan así. Con menos de dos letras, `[]`. Es el buscador
 de la cabecera.
 

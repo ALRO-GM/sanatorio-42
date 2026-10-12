@@ -81,6 +81,7 @@ describe('comunidad', () => {
           [9002, 'garcilaso', 'Laso de la Vega', MADRID],
           [9003, 'pgarcia', 'Pau Garcia', 46],
           [9004, 'jdoe_x', 'Juan 100%', MADRID],
+          [9005, 'amunoz', 'Álvaro Muñoz Güell', MADRID],
         ].flatMap(([id, login, name, campus]) => [
           {
             sql: `INSERT INTO users (id, login, name, image, synced_at)
@@ -105,6 +106,18 @@ describe('comunidad', () => {
       expect(await xp.search(actor('ana'), 'maría')).toEqual([
         { login: 'mgarcia', name: 'María García', image: 'https://img/mgarcia.png' },
       ])
+      // Ni mayúsculas ni tildes: se encuentra escribiéndolo de cualquier manera.
+      for (const typed of ['garcia', 'GARCÍA', 'maria garc']) {
+        expect((await xp.search(actor('ana'), typed)).map((person) => person.login)).toContain(
+          'mgarcia',
+        )
+      }
+      for (const typed of ['alvaro', 'ÁLVARO', 'munoz', 'Muñoz', 'guell']) {
+        expect((await xp.search(actor('ana'), typed)).map((person) => person.login)).toEqual([
+          'amunoz',
+        ])
+      }
+
       // Los comodines de la búsqueda se toman al pie de la letra.
       expect((await xp.search(actor('ana'), '100%')).map((person) => person.login)).toEqual([
         'jdoe_x',

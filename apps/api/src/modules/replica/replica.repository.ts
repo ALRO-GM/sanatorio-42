@@ -67,6 +67,11 @@ const STUDENT_PROJECT = `(${IS_CORE} OR NOT EXISTS (
     WHERE other.user_id = u.id AND ${IS_CORE}
   ))`
 
+/** Un texto en minúsculas y sin tildes ni diéresis, como se compara al buscar. */
+export function plain(text: string): string {
+  return text.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase()
+}
+
 export function createReplicaRepository(db: Db) {
   /** Ejecuta las sentencias en lotes atómicos. */
   async function run(statements: InStatement[]): Promise<void> {
@@ -661,35 +666,46 @@ export function createReplicaRepository(db: Db) {
     },
 
     /**
-     * Personas cuyo login o nombre lleva lo escrito, sin distinguir mayúsculas.
-     * Primero las de `campusId`, y dentro, las que empiezan por lo escrito.
+     * Personas cuyo login o nombre lleva lo escrito, sin distinguir mayúsculas
+     * ni tildes: «garcia» encuentra a «García» y «munoz», a «Muñoz». Primero
+     * las de `campusId`, y dentro, las que empiezan por lo escrito.
+     *
+     * Se compara aquí y no en la consulta: SQLite no sabe quitar tildes ni
+     * pasar a minúsculas una letra que las lleve. Son unos miles de filas.
      */
     async searchUsers(
       text: string,
       campusId: number,
       limit: number,
     ): Promise<{ login: string; name: string | null; image: string | null }[]> {
-      // `LIKE` trata `%` y `_` como comodines: se escapan para buscar lo escrito.
-      const wanted = text.toLowerCase().replace(/[\\%_]/g, '\\$&')
+      const wanted = plain(text)
       const result = await db.execute({
         sql: `SELECT u.login, u.name, u.image,
                      EXISTS (SELECT 1 FROM campus_members m
                              WHERE m.user_id = u.id AND m.campus_id = ?) AS here
-              FROM users u
-              WHERE u.active = 1
-                AND (LOWER(u.login) LIKE ? ESCAPE '\\' OR LOWER(COALESCE(u.name, '')) LIKE ? ESCAPE '\\')
-              ORDER BY here DESC,
-                       (LOWER(u.login) LIKE ? ESCAPE '\\') DESC,
-                       u.login
-              LIMIT ?`,
-        args: [campusId, `%${wanted}%`, `%${wanted}%`, `${wanted}%`, limit],
+              FROM users u WHERE u.active = 1`,
+        args: [campusId],
       })
 
-      return result.rows.map((row) => ({
-        login: toText(row.login),
-        name: typeof row.name === 'string' && row.name !== '' ? row.name : null,
-        image: typeof row.image === 'string' ? row.image : null,
-      }))
+      return result.rows
+        .map((row) => ({
+          login: toText(row.login),
+          name: typeof row.name === 'string' && row.name !== '' ? row.name : null,
+          image: typeof row.image === 'string' ? row.image : null,
+          here: toNumber(row.here) === 1,
+        }))
+        .filter(
+          (person) =>
+            plain(person.login).includes(wanted) || plain(person.name ?? '').includes(wanted),
+        )
+        .sort(
+          (a, b) =>
+            Number(b.here) - Number(a.here) ||
+            Number(plain(b.login).startsWith(wanted)) - Number(plain(a.login).startsWith(wanted)) ||
+            (a.login < b.login ? -1 : 1),
+        )
+        .slice(0, limit)
+        .map(({ here: _, ...person }) => person)
     },
 
     /** Avatares de una lista de logins, para pintar grupos y dudas. */
