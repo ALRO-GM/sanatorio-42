@@ -903,4 +903,8 @@ export const eu: Record<string, string> = {
   'clusters.chat': 'Txat zuzena',
   'clusters.chatEmpty':
     'Inork ez du oraindik idatzi. Jartzen duzuna zuek biok bakarrik ikusten duzue.',
+  'broadcast.from': '{login}(r)en jakinarazpena',
+  'broadcast.must': 'Aukeratu aukera bat mezu hau ixteko.',
+  'broadcast.ok': 'Ulertuta',
+  'broadcast.later': 'Orain ez',
 }

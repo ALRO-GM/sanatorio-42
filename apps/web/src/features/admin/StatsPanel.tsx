@@ -1,0 +1,277 @@
+import { useState } from 'react'
+
+import type { StatTotals, UsageStats } from '@sanatorio/contracts'
+
+import { api } from '../../shared/api'
+import { useAsync } from '../../shared/hooks/useAsync'
+import { useI18n } from '../../shared/i18n'
+import { ErrorNote } from '../../shared/ui/ErrorNote'
+
+const RANGES = [1, 7, 30, 90] as const
+const DAY_MS = 24 * 60 * 60_000
+
+/** `YYYY-MM-DD` en UTC: los días de las estadísticas van en UTC. */
+const dayOf = (at: number): string => new Date(at).toISOString().slice(0, 10)
+
+/** "2 h 05 min", "7 min", "40 s". */
+export function duration(seconds: number): string {
+  if (seconds < 60) return `${seconds} s`
+
+  const minutes = Math.round(seconds / 60)
+
+  return minutes < 60
+    ? `${minutes} min`
+    : `${Math.floor(minutes / 60)} h ${String(minutes % 60).padStart(2, '0')} min`
+}
+
+/** "1,2 MB", "340 kB". */
+const size = (bytes: number): string =>
+  bytes >= 1_000_000 ? `${(bytes / 1_000_000).toFixed(1)} MB` : `${Math.round(bytes / 1000)} kB`
+
+/**
+ * El uso de cada hora del día, sumando todos los días del periodo, en la hora
+ * de quien mira: la API las da en UTC.
+ */
+export function byLocalHour(hours: UsageStats['hours']): StatTotals[] {
+  const day = Array.from({ length: 24 }, () => ({
+    clicks: 0,
+    seen: 0,
+    back: 0,
+    hidden: 0,
+    requests: 0,
+    bytes: 0,
+  }))
+
+  for (const row of hours) {
+    const local = new Date(`${row.day}T${String(row.hour).padStart(2, '0')}:00:00Z`).getHours()
+    const slot = day[local]
+
+    if (slot === undefined) continue
+
+    slot.clicks += row.clicks
+    slot.seen += row.seen
+    slot.back += row.back
+    slot.hidden += row.hidden
+    slot.requests += row.requests
+    slot.bytes += row.bytes
+  }
+
+  return day
+}
+
+/**
+ * Estadísticas de uso: cuánto tiempo se pasa en la web y en qué, a qué horas,
+ * y cuánto tráfico cuesta, de todo el mundo o de una persona.
+ *
+ * El tiempo va en tres cuentas: viéndola, abierta detrás de otra ventana y con
+ * la pestaña oculta. Solo la primera es uso de verdad; las otras dos dicen
+ * cuánto se queda la web abierta sin que nadie la mire.
+ */
+export function StatsPanel() {
+  const { t } = useI18n()
+  const [days, setDays] = useState<number>(7)
+  const [login, setLogin] = useState<string | null>(null)
+  const { data, error, loading, reload } = useAsync(
+    () =>
+      api.getStats({
+        from: dayOf(Date.now() - (days - 1) * DAY_MS),
+        to: dayOf(Date.now()),
+        ...(login === null ? {} : { login }),
+      }),
+    [days, login],
+  )
+
+  const sectionName = (key: string): string => {
+    const [page = '', id = ''] = key.split('.')
+
+    return page === 'nav'
+      ? t(`nav.${id}`)
+      : `${t(`layout.page.${page}`)} · ${t(`layout.${page}.${id}`)}`
+  }
+
+  return (
+    <section>
+      <h2>{login === null ? t('admin.stats.title') : t('admin.stats.of', { login })}</h2>
+
+      <div className="filter-pills" role="group" aria-label={t('admin.stats.range')}>
+        {RANGES.map((option) => (
+          <button
+            key={option}
+            type="button"
+            className={`pill ${days === option ? 'active' : ''}`}
+            aria-pressed={days === option}
+            onClick={() => {
+              setDays(option)
+            }}
+          >
+            {t('admin.stats.days', { n: option })}
+          </button>
+        ))}
+        {login !== null && (
+          <button
+            type="button"
+            className="pill"
+            onClick={() => {
+              setLogin(null)
+            }}
+          >
+            {t('admin.stats.everyone')}
+          </button>
+        )}
+      </div>
+
+      {loading && <p className="estado">{t('app.loading')}</p>}
+      {data === undefined ? (
+        <ErrorNote error={error} onRetry={() => void reload()} />
+      ) : (
+        <>
+          <div className="stat-cards">
+            <Figure label={t('admin.stats.seen')} value={duration(data.totals.seen)} strong />
+            <Figure label={t('admin.stats.back')} value={duration(data.totals.back)} />
+            <Figure label={t('admin.stats.hidden')} value={duration(data.totals.hidden)} />
+            <Figure label={t('admin.stats.clicks')} value={String(data.totals.clicks)} />
+            <Figure
+              label={t('admin.stats.traffic')}
+              value={`${data.totals.requests} · ${size(data.totals.bytes)}`}
+            />
+            {login === null && (
+              <Figure label={t('admin.stats.people')} value={String(data.totals.people)} />
+            )}
+          </div>
+
+          <article className="card">
+            <span className="eyebrow">{t('admin.stats.byHour')}</span>
+            <HourChart hours={byLocalHour(data.hours)} />
+            <ul className="map-legend">
+              <li>
+                <span className="stat-key seen" /> {t('admin.stats.seen')}
+              </li>
+              <li>
+                <span className="stat-key back" /> {t('admin.stats.back')}
+              </li>
+              <li>
+                <span className="stat-key hidden" /> {t('admin.stats.hidden')}
+              </li>
+            </ul>
+          </article>
+
+          <article className="card">
+            <span className="eyebrow">{t('admin.stats.byKey')}</span>
+            <div className="table-scroll">
+              <table className="stat-table">
+                <thead>
+                  <tr>
+                    <th>{t('admin.stats.element')}</th>
+                    <th>{t('admin.stats.seen')}</th>
+                    <th>{t('admin.stats.back')}</th>
+                    <th>{t('admin.stats.hidden')}</th>
+                    <th>{t('admin.stats.clicks')}</th>
+                    {login === null && <th>{t('admin.stats.people')}</th>}
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.keys.map((row) => (
+                    <tr key={row.key}>
+                      <th>{sectionName(row.key)}</th>
+                      <td>{row.seen > 0 ? duration(row.seen) : '—'}</td>
+                      <td>{row.back > 0 ? duration(row.back) : '—'}</td>
+                      <td>{row.hidden > 0 ? duration(row.hidden) : '—'}</td>
+                      <td>{row.clicks}</td>
+                      {login === null && <td>{row.people}</td>}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {data.keys.length === 0 && <p className="estado">{t('admin.stats.empty')}</p>}
+          </article>
+
+          {login === null && (
+            <article className="card">
+              <span className="eyebrow">{t('admin.stats.byUser')}</span>
+              <div className="table-scroll">
+                <table className="stat-table">
+                  <thead>
+                    <tr>
+                      <th>{t('admin.stats.person')}</th>
+                      <th>{t('admin.stats.seen')}</th>
+                      <th>{t('admin.stats.back')}</th>
+                      <th>{t('admin.stats.hidden')}</th>
+                      <th>{t('admin.stats.clicks')}</th>
+                      <th>{t('admin.stats.requests')}</th>
+                      <th>{t('admin.stats.size')}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {data.users.map((row) => (
+                      <tr key={row.login}>
+                        <th>
+                          <button
+                            type="button"
+                            className="link"
+                            onClick={() => {
+                              setLogin(row.login)
+                            }}
+                          >
+                            {row.login}
+                          </button>
+                        </th>
+                        <td>{duration(row.seen)}</td>
+                        <td>{duration(row.back)}</td>
+                        <td>{duration(row.hidden)}</td>
+                        <td>{row.clicks}</td>
+                        <td>{row.requests}</td>
+                        <td>{size(row.bytes)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </article>
+          )}
+        </>
+      )}
+    </section>
+  )
+}
+
+function Figure({
+  label,
+  value,
+  strong = false,
+}: {
+  label: string
+  value: string
+  strong?: boolean
+}) {
+  return (
+    <div className={`stat-card ${strong ? 'strong' : ''}`}>
+      <span className="eyebrow">{label}</span>
+      <strong>{value}</strong>
+    </div>
+  )
+}
+
+/** Veinticuatro barras, una por hora, con el tiempo apilado en sus tres cuentas. */
+function HourChart({ hours }: { hours: StatTotals[] }) {
+  const top = Math.max(1, ...hours.map((hour) => hour.seen + hour.back + hour.hidden))
+
+  return (
+    <div className="stat-hours" role="img">
+      {hours.map((hour, index) => (
+        <div
+          key={index}
+          className="stat-hour"
+          title={`${String(index).padStart(2, '0')}:00 · ${duration(hour.seen)} / ${duration(hour.back)} / ${duration(hour.hidden)} · ${hour.requests}`}
+        >
+          <span className="stat-bar">
+            <i className="hidden" style={{ height: `${(hour.hidden / top) * 100}%` }} />
+            <i className="back" style={{ height: `${(hour.back / top) * 100}%` }} />
+            <i className="seen" style={{ height: `${(hour.seen / top) * 100}%` }} />
+          </span>
+          <small>{index % 3 === 0 ? String(index).padStart(2, '0') : ''}</small>
+        </div>
+      ))}
+    </div>
+  )
+}

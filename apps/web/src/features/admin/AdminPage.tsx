@@ -10,10 +10,12 @@ import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { HoursReport } from '../profile/HoursReport'
 import { BudgetCard } from './BudgetCard'
 import { QuotaCard } from './QuotaCard'
+import { BroadcastsTab } from './BroadcastsTab'
+import { StatsPanel } from './StatsPanel'
 import { UsageHeatmap } from './UsageHeatmap'
 import { Icon } from '../../shared/ui/Icon'
 
-const TABS = ['consumption', 'people', 'inbox', 'messages', 'usage'] as const
+const TABS = ['consumption', 'people', 'inbox', 'messages', 'usage', 'stats', 'casts'] as const
 
 type Tab = (typeof TABS)[number]
 
@@ -28,7 +30,7 @@ function size(bytes: number): string {
  * Panel de gestión: consumo y límites, permisos y bloqueos, buzón, registro de
  * mensajes y mapa de calor de uso. Solo lo ve quien administra la web.
  */
-export function AdminPage() {
+export function AdminPage({ campusId }: { campusId?: number | undefined }) {
   const { t } = useI18n()
   const [tab, setTab] = useState<Tab>('consumption')
 
@@ -61,6 +63,8 @@ export function AdminPage() {
       {tab === 'inbox' && <InboxTab />}
       {tab === 'messages' && <MessagesTab />}
       {tab === 'usage' && <UsageHeatmap />}
+      {tab === 'stats' && <StatsPanel />}
+      {tab === 'casts' && <BroadcastsTab campusId={campusId} />}
     </section>
   )
 }

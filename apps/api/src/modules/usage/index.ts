@@ -7,6 +7,7 @@ import type { Db } from '../../core/db/database.js'
 import type { AppModule } from '../../core/module.js'
 import type { ReplicaRepository } from '../replica/index.js'
 import { createUsageService } from './usage.service.js'
+import type { Traffic } from './usage.service.js'
 import type { UsageService } from './usage.service.js'
 
 export type UsageModule = AppModule & { service: UsageService }
@@ -14,6 +15,7 @@ export type UsageModule = AppModule & { service: UsageService }
 export function createUsageModule(deps: {
   db: Db
   replica: ReplicaRepository
+  traffic?: Traffic
   now?: () => number
 }): UsageModule {
   const service = createUsageService(deps)
@@ -21,6 +23,15 @@ export function createUsageModule(deps: {
   return {
     name: 'usage',
     service,
+    jobs: [
+      {
+        name: 'borrado del uso por horas antiguo',
+        everyMs: 24 * 60 * 60_000,
+        run: async () => {
+          await service.purge()
+        },
+      },
+    ],
     routes: (app, { session }) => {
       /** `GET /usage` → cuánto usa la comunidad cada elemento: `{ counts: { "nav.tablon": 120 } }`. */
       app.get('/usage', async (request, reply) => {
@@ -38,6 +49,16 @@ export function createUsageModule(deps: {
         return reply.send(await service.heatmap(await session.actor(request), request.query))
       })
 
+      /**
+       * `GET /admin/stats?from=&to=&login=` → uso por hora, por elemento y por
+       * persona, con el tráfico de la API. Solo admins.
+       */
+      app.get<{ Querystring: Record<string, string> }>('/admin/stats', async (request, reply) => {
+        reply.header('Cache-Control', 'private, no-store')
+
+        return reply.send(await service.stats(await session.actor(request), request.query))
+      })
+
       /** `POST /usage` → suma lo que has usado desde el último envío. 204. */
       app.post('/usage', async (request, reply) => {
         await service.record(await session.actor(request), request.body)
@@ -48,4 +69,4 @@ export function createUsageModule(deps: {
   }
 }
 
-export type { UsageService } from './usage.service.js'
+export type { Traffic, UsageService } from './usage.service.js'

@@ -45,6 +45,88 @@ describe('comunidad', () => {
   })
 
   describe('administración y uso', () => {
+    it('las estadísticas reparten el tiempo por hora, elemento y persona', async () => {
+      const { usage, admin } = services
+      const boss = actor('eva', { admin: true })
+
+      // 14:30 UTC: `ana` mira el tablón, parte del rato con otra ventana delante.
+      await usage.record(actor('ana'), {
+        counts: { 'nav.tablon': 2, 'expediente.health': 1 },
+        time: { 'nav.tablon': [300, 60, 0] },
+      })
+      await usage.record(actor('leo'), { counts: {}, time: { 'nav.red': [120, 0, 600] } })
+      admin.count('ana', 2000)
+      admin.count('ana', 1000)
+      // El tráfico se apunta en la hora en que se vuelca, que es cada poco.
+      await admin.flush()
+
+      // Una hora después, `ana` sigue con la pestaña oculta.
+      clock.advance(HOUR)
+      await usage.record(actor('ana'), { counts: {}, time: { 'nav.tablon': [0, 0, 900] } })
+
+      const stats = await usage.stats(boss, {})
+
+      expect(stats.login).toBeNull()
+      expect(stats.totals).toMatchObject({
+        clicks: 3,
+        seen: 420,
+        back: 60,
+        hidden: 1500,
+        requests: 2,
+        bytes: 3000,
+        people: 2,
+      })
+      // Una fila por hora (UTC), con cuánta gente hubo.
+      expect(stats.hours).toMatchObject([
+        { day: '2026-10-06', hour: 14, people: 2, seen: 420, hidden: 600, requests: 2 },
+        { day: '2026-10-06', hour: 15, people: 1, seen: 0, hidden: 900 },
+      ])
+      // Las secciones llevan tiempo; un bloque, solo pulsaciones.
+      expect(stats.keys).toMatchObject([
+        { key: 'nav.tablon', seen: 300, back: 60, hidden: 900, clicks: 2, people: 1 },
+        { key: 'nav.red', seen: 120, hidden: 600, people: 1 },
+        { key: 'expediente.health', clicks: 1, seen: 0, people: 1 },
+      ])
+      // Por persona, quien más la ha visto primero.
+      expect(stats.users.map((user) => [user.login, user.seen, user.requests])).toEqual([
+        ['ana', 300, 2],
+        ['leo', 120, 0],
+      ])
+
+      // Las de una sola persona no traen la lista de gente.
+      const mine = await usage.stats(boss, { login: 'leo' })
+
+      expect(mine).toMatchObject({ login: 'leo', users: [], totals: { seen: 120, people: 1 } })
+      expect(mine.keys.map((row) => row.key)).toEqual(['nav.red'])
+
+      // Fuera del periodo no hay nada, y solo las ve quien administra.
+      expect((await usage.stats(boss, { from: '2026-09-01', to: '2026-09-30' })).hours).toEqual([])
+      await expectCode(usage.stats(actor('ana'), {}), 'forbidden')
+      // Un envío con más tiempo del que cabe en un envío no entra.
+      await expectCode(
+        usage.record(actor('ana'), { counts: {}, time: { 'nav.tablon': [5000, 0, 0] } }),
+        'invalid_input',
+      )
+    })
+
+    it('el uso por horas se borra pasado medio año', async () => {
+      const { usage } = services
+      const boss = actor('eva', { admin: true })
+
+      await usage.record(actor('ana'), { counts: { 'nav.tablon': 1 } })
+      clock.advance(200 * 24 * HOUR)
+      await usage.record(actor('ana'), { counts: { 'nav.red': 1 } })
+      await usage.purge()
+
+      const old = await usage.stats(boss, { from: '2026-10-01', to: '2026-10-31' })
+      const recent = await usage.stats(boss, { from: '2027-04-01', to: '2027-05-01' })
+
+      expect(old.keys).toEqual([])
+      expect(recent.keys.map((row) => row.key)).toEqual(['nav.red'])
+      // Lo que ordena las pestañas no se toca.
+      expect((await usage.community()).counts['nav.tablon']).toBe(1)
+    })
+
     it('el uso de la comunidad suma a todos, sin que una persona lo decida sola', async () => {
       const { usage } = services
 

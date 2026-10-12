@@ -898,4 +898,8 @@ export const ca: Record<string, string> = {
   'map.legend.online': 'Amb Sanatorio obert',
   'clusters.chat': 'Xat directe',
   'clusters.chatEmpty': 'Ningú ha escrit encara. El que posis només ho veieu vosaltres dos.',
+  'broadcast.from': 'Comunicat de {login}',
+  'broadcast.must': 'Tria una opció per tancar aquest missatge.',
+  'broadcast.ok': 'Entesos',
+  'broadcast.later': 'Ara no',
 }

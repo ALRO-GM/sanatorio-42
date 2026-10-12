@@ -31,7 +31,13 @@ import type {
   HelpReputation,
   HelperTag,
   HolyGraph,
+  Broadcast,
+  BroadcastAnswer,
+  BroadcastInput,
+  BroadcastReport,
   DirectChat,
+  UsageSend,
+  UsageStats,
   Health,
   PaceRefInput,
   Leaderboard,
@@ -165,7 +171,9 @@ export type Api = {
   /** Cuánto usa la comunidad cada elemento, para el orden automático. */
   getUsage: () => Promise<UsageCounts>
   /** Suma lo que has usado desde el último envío. */
-  sendUsage: (counts: Record<string, number>) => Promise<void>
+  sendUsage: (counts: Record<string, number>, time?: UsageSend['time']) => Promise<void>
+  /** Estadísticas de uso de un periodo, de toda la web o de una persona. Solo admins. */
+  getStats: (query: { from?: string; to?: string; login?: string }) => Promise<UsageStats>
   /** Mapa de calor del uso por grupos de personas. Solo admins. */
   getUsageHeatmap: (by: UsageHeatmap['by']) => Promise<UsageHeatmap>
 
@@ -175,6 +183,13 @@ export type Api = {
   getSyncStatus: () => Promise<SyncStatus>
   /** Avisos sin leer y estado de la cuota de 42: lo que se pregunta de fondo. */
   getPulse: () => Promise<Pulse>
+  /** Los comunicados que tienes por leer, el más antiguo primero. */
+  getBroadcasts: () => Promise<Broadcast[]>
+  /** Contesta a uno (o lo cierra sin elegir) y devuelve los que quedan. */
+  answerBroadcast: (id: number, answer: BroadcastAnswer) => Promise<Broadcast[]>
+  getAdminBroadcasts: () => Promise<BroadcastReport[]>
+  sendBroadcast: (message: BroadcastInput) => Promise<BroadcastReport>
+  removeBroadcast: (id: number) => Promise<void>
   /** Tu buzón de avisos, lo que no has leído primero. */
   getNotices: () => Promise<Notices>
   /** Da por leídos esos avisos, o todos si no se dice cuáles. Devuelve el buzón. */

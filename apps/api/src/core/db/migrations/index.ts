@@ -30,6 +30,8 @@ import { messageRateSchema } from './0021-message-rate.js'
 import { noticesSchema } from './0022-notices.js'
 import { eventAlertsSchema } from './0023-event-alerts.js'
 import { paceRefSchema } from './0024-pace-ref.js'
+import { usageTimeSchema } from './0025-usage-time.js'
+import { broadcastsSchema } from './0026-broadcasts.js'
 import type { Migration } from './types.js'
 
 export type { Migration } from './types.js'
@@ -59,6 +61,8 @@ export const MIGRATIONS: readonly Migration[] = [
   noticesSchema,
   eventAlertsSchema,
   paceRefSchema,
+  usageTimeSchema,
+  broadcastsSchema,
 ]
 
 /** Versión más alta que existe en el código. */

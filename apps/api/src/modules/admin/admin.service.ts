@@ -558,6 +558,32 @@ export function createAdminService(options: AdminServiceOptions) {
       )
     },
 
+    /**
+     * El tráfico de un periodo, hora a hora y persona a persona, para cruzarlo
+     * con el uso de la web. `from` y `to` son días UTC, los dos incluidos.
+     */
+    async traffic(
+      from: string,
+      to: string,
+      login?: string,
+    ): Promise<{ login: string; day: string; hour: number; requests: number; bytes: number }[]> {
+      await this.flush()
+
+      const result = await db.execute({
+        sql: `SELECT login, day, hour, requests, bytes FROM request_stats
+              WHERE day >= ? AND day <= ? AND login <> ? AND (? IS NULL OR login = ?)`,
+        args: [from, to, ANONYMOUS, login ?? null, login ?? null],
+      })
+
+      return result.rows.map((row) => ({
+        login: toText(row.login),
+        day: toText(row.day),
+        hour: toNumber(row.hour),
+        requests: toNumber(row.requests),
+        bytes: toNumber(row.bytes),
+      }))
+    },
+
     async consumption(actor: Actor): Promise<Consumption> {
       assertAdmin(actor)
       await this.flush()

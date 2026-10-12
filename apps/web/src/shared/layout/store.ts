@@ -14,6 +14,7 @@ import { arrange } from './order'
 import type { OrderMode } from './order'
 import { NAV_DEFAULT, PAGES } from './registry'
 import type { PageId } from './registry'
+import { createViewClock, windowState } from './view-clock'
 
 export type Prefs = {
   mode: OrderMode
@@ -63,6 +64,8 @@ let state: State = {
 const mineAtStart: Readonly<Record<string, number>> = { ...state.mine }
 /** Lo usado desde el último envío a la API. */
 let pending: Record<string, number> = {}
+/** El tiempo pasado en cada sección, repartido según cómo estaba la ventana. */
+const clock = createViewClock(FLUSH_EVERY_MS)
 let asked = false
 const listeners = new Set<() => void>()
 
@@ -115,16 +118,31 @@ export function toggleFold(page: PageId, id: string): void {
 
 /** Manda a la API lo usado desde la última vez. Si falla, se guarda para la siguiente. */
 function flush(): void {
-  const counts = pending
+  settle()
 
-  if (Object.keys(counts).length === 0) return
+  const counts = pending
+  const time = clock.take()
+
+  if (Object.keys(counts).length === 0 && Object.keys(time).length === 0) return
 
   pending = {}
-  api.sendUsage(counts).catch(() => {
+  api.sendUsage(counts, time).catch(() => {
     for (const [key, count] of Object.entries(counts)) {
       pending[key] = (pending[key] ?? 0) + count
     }
+
+    clock.giveBack(time)
   })
+}
+
+/** Cuenta hasta ahora el tiempo de la sección abierta, según cómo esté la ventana. */
+function settle(): void {
+  clock.settle(Date.now(), windowState())
+}
+
+/** Qué sección se está mirando: su tiempo empieza a contar desde ahora. */
+export function viewing(section: string): void {
+  clock.open(`nav.${section}`, Date.now(), windowState())
 }
 
 /** Anota un uso de un elemento (`nav.tablon`, `expediente.health`). */
@@ -151,8 +169,13 @@ export function startUsage(): void {
   )
   setInterval(flush, FLUSH_EVERY_MS)
   document.addEventListener('visibilitychange', () => {
+    // Al ocultarse se manda lo que haya: puede que la pestaña no vuelva.
     if (document.hidden) flush()
+    else settle()
   })
+  // Con otra ventana delante la web sigue visible, pero nadie la está mirando.
+  window.addEventListener('focus', settle)
+  window.addEventListener('blur', settle)
 }
 
 /** La personalización, viva: quien la usa se repinta cuando cambia. */

@@ -111,7 +111,7 @@ export function SectionView({
       {section === 'clusters' && <ClustersPage me={me.login} initialPeer={chatWith} />}
       {section === 'gestion' &&
         (profile.data?.admin === true ? (
-          <AdminPage />
+          <AdminPage campusId={profile.data.campusId} />
         ) : (
           <p className="estado">{t('admin.only')}</p>
         ))}

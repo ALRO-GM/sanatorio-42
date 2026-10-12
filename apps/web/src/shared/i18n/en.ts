@@ -1049,4 +1049,8 @@ export const en: Record<string, string> = {
   'map.legend.online': 'Has Sanatorio open',
   'clusters.chat': 'Direct chat',
   'clusters.chatEmpty': 'Nobody has written yet. Only the two of you see what you write.',
+  'broadcast.from': 'Message from {login}',
+  'broadcast.must': 'Pick an option to close this message.',
+  'broadcast.ok': 'Got it',
+  'broadcast.later': 'Not now',
 }

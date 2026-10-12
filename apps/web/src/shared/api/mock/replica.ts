@@ -1,3 +1,5 @@
+import type { BroadcastReport } from '@sanatorio/contracts'
+
 /**
  * API de mentira: cuota de 42, estado de la réplica y red de correcciones.
  */
@@ -7,9 +9,40 @@ import { mockNetwork, mockPair, mockPeople, mockStrictest } from './network'
 import type { Api } from '../types'
 import { delay, notices, quotaSettings, quotaQueue, quotaStatus } from './state'
 
+/**
+ * Los comunicados de la web de mentira. Con `?comunicado` en la dirección hay
+ * uno esperando, de los que no se cierran sin elegir.
+ */
+const casts: BroadcastReport[] = new URLSearchParams(window.location.search).has('comunicado')
+  ? [
+      {
+        id: 1,
+        from: 'albrodri',
+        title: '¿Vienes a la charla del jueves?',
+        body: 'Jueves a las 17:00 en el cluster 2: cómo preparar la corrección de minishell.',
+        options: ['Sí', 'No', 'Aún no lo sé'],
+        required: true,
+        audience: { kind: 'all' },
+        at: new Date().toISOString(),
+        counts: [0, 0, 0],
+        seen: 0,
+        answers: [],
+      },
+    ]
+  : []
+
+/** Los que quien mira aún no ha contestado. */
+const pendingCasts = (): BroadcastReport[] =>
+  casts.filter((cast) => !cast.answers.some((answer) => answer.login === ME.login))
+
 export const replicaMock: Pick<
   Api,
   | 'getPulse'
+  | 'getBroadcasts'
+  | 'answerBroadcast'
+  | 'getAdminBroadcasts'
+  | 'sendBroadcast'
+  | 'removeBroadcast'
   | 'getAdminQuota'
   | 'setAdminQuota'
   | 'getSyncStatus'
@@ -21,6 +54,64 @@ export const replicaMock: Pick<
 > = {
   // En la web de mentira la cuota va bien hasta que se pone el modo ahorro en
   // el panel: entonces hay cola, y avanza un turno cada vez que se pregunta.
+  async getBroadcasts() {
+    await delay(100)
+
+    return pendingCasts().map(
+      ({ audience: _audience, counts: _counts, seen: _seen, answers: _answers, ...cast }) => cast,
+    )
+  },
+
+  async answerBroadcast(id, { option }) {
+    await delay(100)
+
+    const cast = casts.find((entry) => entry.id === id)
+
+    if (cast !== undefined) {
+      cast.answers.push({ login: ME.login, option, at: new Date().toISOString() })
+      if (option === null) cast.seen += 1
+      else cast.counts[option] = (cast.counts[option] ?? 0) + 1
+    }
+
+    return this.getBroadcasts()
+  },
+
+  async getAdminBroadcasts() {
+    await delay()
+
+    return [...casts].reverse()
+  },
+
+  async sendBroadcast(message) {
+    await delay(150)
+
+    const cast: BroadcastReport = {
+      id: casts.length + 1,
+      from: ME.login,
+      title: message.title,
+      body: message.body,
+      options: message.options ?? [],
+      required: message.required ?? false,
+      audience: message.audience,
+      at: new Date().toISOString(),
+      counts: (message.options ?? []).map(() => 0),
+      seen: 0,
+      answers: [],
+    }
+
+    casts.push(cast)
+
+    return cast
+  },
+
+  async removeBroadcast(id) {
+    await delay(100)
+    casts.splice(
+      casts.findIndex((entry) => entry.id === id),
+      1,
+    )
+  },
+
   async getPulse() {
     await delay(100)
 
@@ -29,7 +120,7 @@ export const replicaMock: Pick<
     if (!quotaSettings.saving) {
       quotaQueue.ahead = 5
 
-      return { unread, quota: { level: 'ok', ticket: null } }
+      return { unread, broadcasts: pendingCasts().length, quota: { level: 'ok', ticket: null } }
     }
 
     const ahead = quotaQueue.ahead
@@ -38,6 +129,7 @@ export const replicaMock: Pick<
 
     return {
       unread,
+      broadcasts: pendingCasts().length,
       quota: {
         level: 'tight',
         ticket: {

@@ -546,6 +546,84 @@ Reglas:
 - A quien bloqueas no le sales en `/help/offers` ni puede reservarte; recibe la
   misma respuesta que si no te ofrecieras.
 
+## Comunicados
+
+Mensajes de quien administra que salen en pantalla a quien le toquen.
+`GET /pulse` trae `broadcasts`: cuántos tienes por leer.
+
+GET /broadcasts → los que tienes por leer, el más antiguo primero.
+
+```json
+[
+  {
+    "id": 4,
+    "from": "albrodri",
+    "title": "¿Vienes a la charla?",
+    "body": "El jueves a las 17:00",
+    "options": ["Sí", "No"],
+    "required": true,
+    "at": "2026-10-12T09:00:00.000Z"
+  }
+]
+```
+
+POST /broadcasts/:id/answer → `{ "option": 0 }`, o `{ "option": null }` para
+cerrarlo sin elegir. Devuelve los que quedan por leer.
+
+- `400 invalid_input` si la opción no existe, o si `required` es `true`, hay
+  opciones y no se elige ninguna. Sin opciones basta con `null`.
+- `404` si no es para ti o ya lo contestaste.
+- Deja de salir a los 30 días y se borra a los 180.
+
+Solo admins:
+
+- GET /admin/broadcasts → los últimos 50 con `audience`, `counts` (cuántos han
+  elegido cada opción), `seen` (lo han visto sin elegir) y `answers`.
+- POST /admin/broadcasts → `201`. `{ title, body, options?, required?, audience }`
+  con `audience` igual a `{ "kind": "all" }`, `{ "kind": "campus", "campusId": 22 }`
+  o `{ "kind": "logins", "logins": ["ana"] }`. Hasta 6 opciones y 200 logins.
+- DELETE /admin/broadcasts/:id → `204`. Lo retira con sus respuestas.
+
+A quién le toca se decide al preguntar, no al mandarlo: le llega también a
+quien entra días después. El campus es el que esa persona está mirando.
+
+## Estadísticas de uso
+
+POST /usage acepta, además de `counts`, el tiempo pasado en cada sección:
+
+```json
+{ "counts": { "nav.tablon": 2 }, "time": { "nav.tablon": [300, 60, 0] } }
+```
+
+- Los tres números son segundos: viendo la web (pestaña visible y ventana con
+  el foco), con otra ventana delante, y con la pestaña oculta. Hasta 900 por
+  envío.
+- Se guarda por persona, día, hora (UTC) y elemento, y se borra a los 180 días.
+
+GET /admin/stats?from=&to=&login= → solo admins. Días UTC, los dos incluidos;
+por defecto la última semana, y 92 días como mucho.
+
+```json
+{
+  "from": "2026-10-06",
+  "to": "2026-10-12",
+  "login": null,
+  "totals": { "clicks": 3, "seen": 420, "back": 60, "hidden": 1500,
+              "requests": 2, "bytes": 3000, "people": 2 },
+  "hours": [{ "day": "2026-10-06", "hour": 14, "people": 2, "clicks": 3,
+              "seen": 420, "back": 60, "hidden": 600, "requests": 2, "bytes": 3000 }],
+  "keys": [{ "key": "nav.tablon", "clicks": 2, "seen": 300, "back": 60,
+             "hidden": 900, "people": 1 }],
+  "users": [{ "login": "ana", "clicks": 3, "seen": 300, "back": 60,
+              "hidden": 900, "requests": 2, "bytes": 3000 }]
+}
+```
+
+- `requests` y `bytes` son el tráfico con la API de Sanatorio (`request_stats`).
+- Las secciones (`nav.*`) llevan tiempo; los bloques de una página, solo
+  pulsaciones.
+- Con `login`, todo es de esa persona y `users` viene vacío.
+
 ## Clústers y chat directo
 
 GET /map → el plano del campus (el mismo de `GET /projects/:id/map`, sin nadie

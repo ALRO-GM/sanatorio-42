@@ -37,6 +37,7 @@ export const adminMock: Pick<
   | 'getAdminMessages'
   | 'getUsage'
   | 'sendUsage'
+  | 'getStats'
   | 'getUsageHeatmap'
 > = {
   async openTicket(ticket) {
@@ -258,6 +259,68 @@ export const adminMock: Pick<
 
   async sendUsage() {
     await delay(50)
+  },
+
+  async getStats(query) {
+    await delay()
+
+    const today = new Date().toISOString().slice(0, 10)
+    // Una tarde cualquiera: sube hacia las seis y cae por la noche.
+    const hours = Array.from({ length: 14 }, (_, index) => {
+      const weight = 14 - Math.abs(index - 8)
+
+      return {
+        day: today,
+        hour: 7 + index,
+        people: query.login === undefined ? 2 + (weight % 5) : 1,
+        clicks: weight * 6,
+        seen: weight * 310,
+        back: weight * 120,
+        hidden: weight * 540,
+        requests: weight * 45,
+        bytes: weight * 310_000,
+      }
+    })
+    const sum = (field: 'clicks' | 'seen' | 'back' | 'hidden' | 'requests' | 'bytes'): number =>
+      hours.reduce((total, hour) => total + hour[field], 0)
+    const totals = {
+      clicks: sum('clicks'),
+      seen: sum('seen'),
+      back: sum('back'),
+      hidden: sum('hidden'),
+      requests: sum('requests'),
+      bytes: sum('bytes'),
+    }
+    const share = (part: number) => ({
+      clicks: Math.round(totals.clicks * part),
+      seen: Math.round(totals.seen * part),
+      back: Math.round(totals.back * part),
+      hidden: Math.round(totals.hidden * part),
+    })
+
+    return {
+      from: query.from ?? today,
+      to: query.to ?? today,
+      login: query.login ?? null,
+      totals: { ...totals, people: query.login === undefined ? 4 : 1 },
+      hours,
+      keys: [
+        { key: 'nav.consulta', ...share(0.4), people: 4 },
+        { key: 'nav.tablon', ...share(0.3), people: 3 },
+        { key: 'nav.red', ...share(0.2), people: 2 },
+        { key: 'nav.clusters', ...share(0.1), people: 2 },
+        { key: 'expediente.health', clicks: 9, seen: 0, back: 0, hidden: 0, people: 3 },
+      ],
+      users:
+        query.login === undefined
+          ? ['jdoe', 'rsoto', 'mlopez', ME.login].map((login, index) => ({
+              login,
+              ...share([0.4, 0.3, 0.2, 0.1][index] ?? 0),
+              requests: Math.round(totals.requests * ([0.4, 0.3, 0.2, 0.1][index] ?? 0)),
+              bytes: Math.round(totals.bytes * ([0.4, 0.3, 0.2, 0.1][index] ?? 0)),
+            }))
+          : [],
+    }
   },
 
   async getUsageHeatmap(by) {

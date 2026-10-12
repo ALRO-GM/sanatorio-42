@@ -22,6 +22,8 @@ import { createAttendanceModule } from '../modules/attendance/index.js'
 import type { AttendanceModule } from '../modules/attendance/index.js'
 import { createBoardsModule } from '../modules/boards/index.js'
 import type { BoardsModule } from '../modules/boards/index.js'
+import { createBroadcastsModule } from '../modules/broadcasts/index.js'
+import type { BroadcastsModule } from '../modules/broadcasts/index.js'
 import { createCalendarModule } from '../modules/calendar/index.js'
 import type { CalendarModule } from '../modules/calendar/index.js'
 import { createDoubtsModule } from '../modules/doubts/index.js'
@@ -92,6 +94,7 @@ export type Services = {
   attendance: AttendanceModule['service']
   admin: AdminModule['service']
   notices: NoticesModule['service']
+  broadcasts: BroadcastsModule['service']
 }
 
 export type Composition = {
@@ -138,11 +141,13 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
   const online = (): Promise<Set<string>> =>
     profile.profiles.seenSince(new Date(now() - PRESENCE_WINDOW_MS).toISOString())
 
+  const broadcasts = createBroadcastsModule({ db, ...clock })
   const notices = createNoticesModule({
     db,
     events,
     quota: replica.quota,
     onPulse: beat,
+    broadcasts: (actor) => broadcasts.service.count(actor),
     ...clock,
   })
 
@@ -225,7 +230,12 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
   })
 
   halted = () => admin.service.halted()
-  const usage = createUsageModule({ db, replica: replica.repository, ...clock })
+  const usage = createUsageModule({
+    db,
+    replica: replica.repository,
+    traffic: (from, to, login) => admin.service.traffic(from, to, login),
+    ...clock,
+  })
 
   return {
     events,
@@ -247,6 +257,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
       usage,
       meet,
       notices,
+      broadcasts,
     ],
     services: {
       repositories: {
@@ -273,6 +284,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
       attendance: attendance.service,
       admin: admin.service,
       notices: notices.service,
+      broadcasts: broadcasts.service,
     },
   }
 }

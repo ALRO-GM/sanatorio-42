@@ -7,6 +7,7 @@
 export type * from './admin.js'
 export type * from './auth.js'
 export type * from './boards.js'
+export type * from './broadcasts.js'
 export type * from './calendar.js'
 export type * from './doubts.js'
 export type * from './errors.js'

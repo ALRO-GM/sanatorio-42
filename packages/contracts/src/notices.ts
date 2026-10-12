@@ -63,5 +63,7 @@ export type Notices = {
  */
 export type Pulse = {
   unread: number
+  /** Comunicados de quien administra que tienes por leer: salen en pantalla. */
+  broadcasts: number
   quota: QuotaStatus
 }

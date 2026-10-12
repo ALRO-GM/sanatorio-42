@@ -3,6 +3,7 @@
  * pregunta cada poco para saber si hay algo nuevo.
  */
 
+import type { Actor } from '../../core/actor.js'
 import type { Pulse } from '@sanatorio/contracts'
 
 import type { EventBus } from '../../core/events.js'
@@ -20,6 +21,8 @@ export type NoticesModuleDeps = NoticesServiceOptions & {
    * único que toda pestaña abierta pregunta de fondo, así que sirve de latido.
    */
   onPulse?: (login: string) => void
+  /** Cuántos comunicados tiene esa persona por leer. */
+  broadcasts?: (actor: Actor) => Promise<number>
 }
 
 export type NoticesModule = AppModule & { service: NoticesService }
@@ -43,7 +46,11 @@ export function createNoticesModule(deps: NoticesModuleDeps): NoticesModule {
         reply.header('Cache-Control', 'private, no-store')
         deps.onPulse?.(login)
 
-        return { unread: await service.unread(login), quota: await deps.quota.statusFor(login) }
+        return {
+          unread: await service.unread(login),
+          broadcasts: (await deps.broadcasts?.(await session.actor(request))) ?? 0,
+          quota: await deps.quota.statusFor(login),
+        }
       })
 
       /** `GET /notices` → tu buzón: lo que no has leído primero. */

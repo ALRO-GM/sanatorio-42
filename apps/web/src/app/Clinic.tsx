@@ -2,13 +2,14 @@ import { lazy, Suspense, useCallback, useEffect, useState } from 'react'
 
 import type { CurrentUser } from '@sanatorio/contracts'
 
+import { BroadcastGate } from '../features/admin/BroadcastGate'
 import { AlertCenter } from '../features/alerts/AlertCenter'
 import { QuotaNotice } from '../features/alerts/QuotaNotice'
 import { api } from '../shared/api'
 import { useAsync } from '../shared/hooks/useAsync'
 import { usePulse } from '../shared/hooks/usePulse'
 import { LayoutSettings } from '../shared/layout/LayoutSettings'
-import { startUsage } from '../shared/layout/store'
+import { startUsage, viewing } from '../shared/layout/store'
 import { Footer } from './Footer'
 import { Header } from './Header'
 import { SectionView } from './SectionView'
@@ -49,6 +50,11 @@ export function Clinic({ me, onLogout }: ClinicProps) {
   useEffect(() => {
     startUsage()
   }, [])
+
+  // El tiempo de uso se apunta a la sección que se está mirando.
+  useEffect(() => {
+    viewing(section)
+  }, [section])
 
   // Todos los proyectos de la persona (en curso y aprobados). Los usan los
   // selectores de terapia y tablón; se piden una vez y salen de la réplica.
@@ -102,6 +108,7 @@ export function Clinic({ me, onLogout }: ClinicProps) {
       {/* La red de correcciones necesita sitio: es la única sección a todo lo ancho. */}
       <main className={`container ${section === 'red' ? 'wide' : ''}`}>
         <QuotaNotice status={pulse?.quota ?? null} />
+        <BroadcastGate pending={pulse?.broadcasts ?? 0} onChange={refresh} />
         <AlertCenter
           me={me.login}
           onGo={(next) => {
