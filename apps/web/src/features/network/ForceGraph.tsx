@@ -432,15 +432,80 @@ export function ForceGraph({
 
     let drag: { node: SimNode | null; x: number; y: number; moved: boolean } | null = null
 
-    const onPointerDown = (event: PointerEvent): void => {
-      const point = toGraph(event)
+    // Los dedos (o el ratón) que hay sobre el lienzo, y el gesto de dos dedos en
+    // curso: a qué distancia estaban y dónde quedaba su punto medio.
+    const touches = new Map<number, { x: number; y: number }>()
+    let pinch: { distance: number; x: number; y: number } | null = null
 
-      drag = { node: nodeAt(point), x: event.clientX, y: event.clientY, moved: false }
+    /** Dónde está un puntero dentro del lienzo. */
+    const place = (event: PointerEvent): { x: number; y: number } => {
+      const box = canvas.getBoundingClientRect()
+
+      return { x: event.clientX - box.left, y: event.clientY - box.top }
+    }
+    /** La distancia entre los dos dedos y su punto medio. */
+    const spread = (): { distance: number; x: number; y: number } => {
+      const [a = { x: 0, y: 0 }, b = { x: 0, y: 0 }] = [...touches.values()]
+
+      return {
+        distance: Math.max(1, Math.hypot(b.x - a.x, b.y - a.y)),
+        x: (a.x + b.x) / 2,
+        y: (a.y + b.y) / 2,
+      }
+    }
+    /** Suelta la burbuja que se estuviera arrastrando, sin elegir a nadie. */
+    const letGo = (): void => {
+      const held = drag?.node ?? null
+
+      if (held !== null) {
+        held.fx = null
+        held.fy = null
+        state.simulation?.alphaTarget(0)
+      }
+
+      drag = null
+    }
+
+    const onPointerDown = (event: PointerEvent): void => {
+      touches.set(event.pointerId, place(event))
       setTip(null)
       canvas.setPointerCapture(event.pointerId)
+
+      // Con dos dedos se acerca, se aleja y se mueve el grafo, caigan donde
+      // caigan: si alguno había cogido una burbuja, la suelta.
+      if (touches.size === 2) {
+        letGo()
+        pinch = spread()
+
+        return
+      }
+      if (touches.size > 2) return
+
+      drag = { node: nodeAt(toGraph(event)), x: event.clientX, y: event.clientY, moved: false }
     }
 
     const onPointerMove = (event: PointerEvent): void => {
+      if (touches.has(event.pointerId)) touches.set(event.pointerId, place(event))
+
+      if (pinch !== null && touches.size === 2) {
+        const now = spread()
+
+        // Primero el zoom, alrededor del punto medio; después, lo que ese punto
+        // se haya movido: así se puede pellizcar y desplazar a la vez.
+        zoomAt(now.distance / pinch.distance, pinch.x, pinch.y)
+        state.view = {
+          ...state.view,
+          x: state.view.x + now.x - pinch.x,
+          y: state.view.y + now.y - pinch.y,
+        }
+        pinch = now
+        schedule.current()
+
+        return
+      }
+      // El dedo que queda tras un gesto de dos no arrastra ni elige nada.
+      if (drag === null && touches.size > 0) return
+
       const point = toGraph(event)
 
       if (drag === null) {
@@ -488,6 +553,9 @@ export function ForceGraph({
     }
 
     const onPointerUp = (event: PointerEvent): void => {
+      touches.delete(event.pointerId)
+      if (touches.size < 2) pinch = null
+
       if (drag === null) {
         return
       }

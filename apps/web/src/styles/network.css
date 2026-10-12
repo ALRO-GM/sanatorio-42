@@ -37,8 +37,10 @@
 }
 .net-rail {
   grid-area: rail;
-  display: grid;
-  align-content: start;
+  /* En columna y no en rejilla: sus piezas llevan nombre de zona para la vista
+     estrecha, y en una rejilla sin esas zonas caerían todas en el mismo sitio. */
+  display: flex;
+  flex-direction: column;
   gap: 0.9rem;
   min-height: 0;
   /* Sitio para la barra, que no pise las tarjetas. */
@@ -46,6 +48,10 @@
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: var(--fill-muted) transparent;
+}
+/* Cada pieza, a su alto: ninguna se encoge para hacer sitio a las demás. */
+.net-rail > * {
+  flex: none;
 }
 .net-filters {
   grid-area: filters;
