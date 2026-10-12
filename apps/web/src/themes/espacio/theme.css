@@ -1,0 +1,225 @@
+/* ── Espacial ────────────────────────────────────────────────────────────────
+   El puente de mando de una nave. De noche, espacio profundo: estrellas,
+   nebulosas, una galaxia a un lado y un planeta con anillos al otro. Los
+   paneles son de cristal oscuro con el borde encendido, los rótulos van en letra
+   de consola y lo que se pulsa brilla en violeta y cian.
+
+   De día es el mismo cielo al amanecer: lila muy claro, con las estrellas en
+   violeta y los mismos astros, más tenues.
+   ──────────────────────────────────────────────────────────────────────────── */
+:root[data-style='espacio'] {
+  --font: 'Exo 2 Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Orbitron Variable', var(--font);
+  --display-weight: 700;
+  --display-spacing: 0.04em;
+  --eyebrow-font: 'Orbitron Variable', var(--font);
+  --icon-stroke: 1.6;
+  --radius: 12px;
+  --radius-sm: 6px;
+
+  --bg: #e9e6fb;
+  --surface: #f8f7ff;
+  --surface-2: #e7e4f8;
+  --surface-3: #d9d4f2;
+  --border: #c7bfee;
+  --border-strong: #9d91dc;
+  --fill-muted: #b9b0e6;
+  --text: #17123f;
+  --text-2: #3a3470;
+  --text-3: #645d99;
+  --text-4: #9790c2;
+  --accent: #6a4be0;
+  --accent-hover: #5536c9;
+  --accent-soft: #e0d8ff;
+  --accent-text: #4f33c0;
+  --accent-2: #0aa3c2;
+  --on-accent: #ffffff;
+  --glow: rgba(106, 75, 224, 0.22);
+
+  --surface-image: linear-gradient(160deg, rgba(255, 255, 255, 0.9), rgba(236, 232, 255, 0.75));
+  --card-shadow: 0 0 0 1px rgba(106, 75, 224, 0.1), 0 14px 34px -18px rgba(60, 40, 160, 0.45);
+  --primary-image: linear-gradient(135deg, #7c5cff, #0aa3c2);
+  --primary-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.25) inset, 0 8px 22px -8px rgba(106, 75, 224, 0.8);
+  --appbar-bg: color-mix(in srgb, #f3f0ff 70%, transparent);
+  --banner-image:
+    url('./assets/stars.svg') 0 0 / 300px, linear-gradient(120deg, #2b1a6b, #5a3fd0 45%, #0aa3c2);
+
+  /* En claro, el escenario de los grafos es un cielo de atardecer, no negro. */
+  --stage-bg:
+    url('./assets/stars.svg') 0 0 / 420px,
+    radial-gradient(80% 70% at 85% 0%, rgba(255, 157, 226, 0.35), transparent 70%),
+    linear-gradient(160deg, #4a3aa8, #2a2a78 60%, #1f4a8a);
+  --stage-text: #f1eeff;
+  --stage-muted: #b9b3e6;
+  --stage-link: #c4bdf5;
+  --stage-halo: #2f2d84;
+  --stage-accent: #7df9ff;
+
+  --ring-from: #0aa3c2;
+  --ring-to: #c04be0;
+  --ring-shade: #2b1a6b;
+}
+:root[data-style='espacio'][data-theme='dark'] {
+  --bg: #060718;
+  --surface: #10132f;
+  --surface-2: #171b3f;
+  --surface-3: #20254f;
+  --border: #2a2f66;
+  --border-strong: #454c99;
+  --fill-muted: #3a4085;
+  --text: #e9ecff;
+  --text-2: #bcc2f0;
+  --text-3: #8b92cc;
+  --text-4: #5d649c;
+  --accent: #b388ff;
+  --accent-hover: #cfb3ff;
+  --accent-soft: #241a55;
+  --accent-text: #c9adff;
+  --accent-2: #5ef0ff;
+  --on-accent: #0b0728;
+  --glow: rgba(179, 136, 255, 0.22);
+  --shadow: rgba(0, 0, 0, 0.7);
+
+  --surface-image: linear-gradient(160deg, rgba(40, 46, 110, 0.55), rgba(14, 16, 44, 0.72));
+  --card-shadow:
+    0 0 0 1px rgba(125, 249, 255, 0.07), 0 0 26px -10px rgba(179, 136, 255, 0.55),
+    0 18px 38px -20px rgba(0, 0, 0, 0.9);
+  --primary-image: linear-gradient(135deg, #b388ff, #5ef0ff);
+  --primary-shadow: 0 0 22px -4px rgba(125, 249, 255, 0.7);
+  --appbar-bg: color-mix(in srgb, #070820 62%, transparent);
+  --banner-image:
+    url('./assets/stars.svg') 0 0 / 300px, linear-gradient(120deg, #1a0f4a, #4a2fb0 45%, #0b7f98);
+
+  --stage-bg:
+    url('./assets/stars.svg') 0 0 / 420px,
+    radial-gradient(80% 70% at 85% 0%, rgba(179, 136, 255, 0.28), transparent 70%),
+    radial-gradient(70% 60% at 0% 100%, rgba(94, 240, 255, 0.16), transparent 70%), #05061a;
+  --stage-halo: #05061a;
+  --stage-link: #7f86c9;
+
+  --ring-from: #5ef0ff;
+  --ring-to: #ff9de2;
+  --ring-shade: #000000;
+}
+
+/* El cielo: un planeta con anillos arriba a la derecha, una galaxia abajo a la
+   izquierda, estrellas por todas partes y dos nebulosas. Va escrito aquí y no
+   en `--page-image` porque cada astro tiene su sitio y su tamaño. */
+:root[data-style='espacio'] body {
+  background:
+    url('./assets/planet.svg') right -70px top 90px / 330px no-repeat,
+    url('./assets/galaxy.svg') left -120px bottom -60px / 520px no-repeat,
+    url('./assets/stars-light.svg') 0 0 / 420px,
+    radial-gradient(60% 50% at 80% 10%, rgba(179, 136, 255, 0.4), transparent 70%),
+    radial-gradient(55% 45% at 10% 90%, rgba(94, 205, 255, 0.35), transparent 70%),
+    radial-gradient(40% 35% at 45% 45%, rgba(255, 157, 226, 0.22), transparent 70%),
+    var(--bg);
+  background-attachment: fixed;
+}
+:root[data-style='espacio'][data-theme='dark'] body {
+  background:
+    url('./assets/planet.svg') right -70px top 90px / 330px no-repeat,
+    url('./assets/galaxy.svg') left -120px bottom -60px / 520px no-repeat,
+    url('./assets/stars.svg') 0 0 / 420px,
+    radial-gradient(60% 50% at 80% 10%, rgba(106, 63, 208, 0.5), transparent 70%),
+    radial-gradient(55% 45% at 10% 90%, rgba(11, 127, 152, 0.42), transparent 70%),
+    radial-gradient(40% 35% at 45% 45%, rgba(192, 75, 224, 0.2), transparent 70%),
+    var(--bg);
+  background-attachment: fixed;
+}
+/* En claro los astros van más tenues: son para ambientar, no para tapar. */
+:root[data-style='espacio']:not([data-theme='dark']) body {
+  background-blend-mode: multiply, multiply, normal, normal, normal, normal, normal;
+}
+
+/* Paneles de cristal: dejan pasar el cielo, desenfocado. */
+:root[data-style='espacio'] .card,
+:root[data-style='espacio'] .project,
+:root[data-style='espacio'] .peer-card,
+:root[data-style='espacio'] .step-card,
+:root[data-style='espacio'] .group-card,
+:root[data-style='espacio'] .stat-card {
+  background-color: color-mix(in srgb, var(--surface) 78%, transparent);
+  backdrop-filter: blur(10px) saturate(1.3);
+}
+:root[data-style='espacio'] .card .card,
+:root[data-style='espacio'] .card .stat-card,
+:root[data-style='espacio'] .card .tile {
+  backdrop-filter: none;
+}
+:root[data-style='espacio'] h2 {
+  text-transform: uppercase;
+  font-size: 1.3rem;
+}
+/* Bajo el título, la línea de un panel de instrumentos. */
+:root[data-style='espacio'] h2::after {
+  content: '';
+  display: block;
+  width: 7rem;
+  height: 2px;
+  margin-top: 0.4rem;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2), transparent);
+  box-shadow: 0 0 10px var(--glow);
+}
+:root[data-style='espacio'] .eyebrow {
+  color: var(--accent-text);
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+}
+:root[data-style='espacio'] .brand-mark {
+  background: var(--primary-image);
+  box-shadow: var(--primary-shadow);
+}
+:root[data-style='espacio'] .brand-name {
+  letter-spacing: 0.06em;
+}
+:root[data-style='espacio'] button.primary {
+  border: 0;
+  font-family: var(--font-display);
+  font-size: 0.82em;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+:root[data-style='espacio'] button.primary:hover:not(:disabled) {
+  background-image: var(--primary-image);
+  filter: brightness(1.12);
+}
+:root[data-style='espacio'] .pill.active,
+:root[data-style='espacio'] .pill.active:hover:not(:disabled) {
+  border-color: var(--accent);
+  box-shadow:
+    0 0 0 1px var(--accent) inset,
+    0 0 14px -2px var(--glow);
+}
+:root[data-style='espacio'] .tab {
+  font-family: var(--font-display);
+  font-size: 0.74rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+:root[data-style='espacio'] .tab.active::after {
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  box-shadow: 0 0 12px var(--accent-2);
+}
+:root[data-style='espacio'] input:focus-visible,
+:root[data-style='espacio'] select:focus-visible,
+:root[data-style='espacio'] textarea:focus-visible {
+  border-color: var(--accent-2);
+  box-shadow: 0 0 0 3px var(--glow);
+}
+:root[data-style='espacio'] .stat-card.strong strong {
+  background: linear-gradient(90deg, var(--accent-text), var(--accent-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+:root[data-style='espacio'] dialog.layout-dialog,
+:root[data-style='espacio'] dialog.event-dialog {
+  background-image: var(--surface-image);
+  box-shadow:
+    0 0 0 1px var(--border-strong),
+    0 0 40px -8px var(--glow),
+    0 30px 80px -20px var(--shadow);
+}

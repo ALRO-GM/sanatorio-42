@@ -61,12 +61,13 @@
   --eyebrow-transform: lowercase;
   font-size: 14px;
 
-  --stage-bg: url('./assets/grid.svg') 0 0 / 24px 24px, #030603;
-  --stage-text: #d7e4d9;
-  --stage-muted: #7b917f;
-  --stage-link: #3d7045;
-  --stage-halo: #030603;
-  --stage-accent: #4af626;
+  /* De día, el editor con el tema oscuro "suave": gris pizarra, no negro. */
+  --stage-bg: url('./assets/grid.svg') 0 0 / 24px 24px, #2d333b;
+  --stage-text: #e6edf3;
+  --stage-muted: #9da7b3;
+  --stage-link: #8b949e;
+  --stage-halo: #2d333b;
+  --stage-accent: #7ee787;
 
   --ring-from: #1a7f37;
   --ring-to: #8250df;
@@ -107,6 +108,13 @@
   --ring-from: #4af626;
   --ring-to: #d2a8ff;
   --ring-shade: #000000;
+
+  --stage-bg: url('./assets/grid.svg') 0 0 / 24px 24px, #030603;
+  --stage-text: #d7e4d9;
+  --stage-muted: #7b917f;
+  --stage-link: #3d7045;
+  --stage-halo: #030603;
+  --stage-accent: #4af626;
 }
 
 /* Ni una curva: muchas reglas llevan su radio escrito. Se libran los retratos y

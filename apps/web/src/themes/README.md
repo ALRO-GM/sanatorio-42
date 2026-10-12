@@ -91,4 +91,7 @@ primera de la lista es la de fábrica.
 - `clinica`: la sala de un hospital nuevo. Turquesa, blanco y relieve.
 - `terminal`: una consola. Letra de máquina, líneas rectas y colores de editor.
 - `historial`: el expediente en papel. Pluma, papel pautado y notas con celo.
-- `libre`: sobrio y sin color propio; se elige paleta.
+- `espacio`: el puente de una nave. Estrellas, nebulosas, una galaxia, un
+  planeta con anillos, paneles de cristal y neón.
+- `libre`: sin color propio; se elige paleta, y de ella salen el fondo en
+  pastel, su estampado y todo lo demás.

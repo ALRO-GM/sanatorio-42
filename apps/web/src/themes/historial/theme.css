@@ -68,14 +68,14 @@
   --eyebrow-transform: uppercase;
   font-size: 16px;
 
-  /* La pizarra del aula: verde oscuro, con su grano. */
+  /* La pizarra del aula: verde, con su grano. */
   --stage-bg:
     url('./assets/paper-dark.svg') 0 0 / 240px 240px,
-    radial-gradient(120% 95% at 50% 0%, #2b3a30, #18211b 75%);
-  --stage-text: #f0e4c9;
-  --stage-muted: #a89a7c;
-  --stage-link: #c9bfa3;
-  --stage-halo: #18211b;
+    radial-gradient(120% 95% at 50% 0%, #5c7a63, #40584a 75%);
+  --stage-text: #fbf5e6;
+  --stage-muted: #d3c8a8;
+  --stage-link: #e3dac0;
+  --stage-halo: #47604f;
   --stage-accent: #ffe36e;
 
   /* De la tinta azul al lápiz rojo. */
@@ -130,6 +130,14 @@
   --ring-to: #e88a7c;
   --ring-shade: #000000;
   --orb-done: #9db8f5;
+
+  --stage-bg:
+    url('./assets/paper-dark.svg') 0 0 / 240px 240px,
+    radial-gradient(120% 95% at 50% 0%, #2b3a30, #18211b 75%);
+  --stage-text: #f0e4c9;
+  --stage-muted: #a89a7c;
+  --stage-link: #c9bfa3;
+  --stage-halo: #18211b;
 }
 
 /* La letra a pluma es menuda: los títulos crecen para leerse igual de bien. */

@@ -6,12 +6,13 @@
  */
 
 import { clinica } from './clinica/theme'
+import { espacio } from './espacio/theme'
 import { historial } from './historial/theme'
 import { libre } from './libre/theme'
 import { terminal } from './terminal/theme'
 import type { ThemeManifest } from './types'
 
-export const THEMES: readonly ThemeManifest[] = [clinica, terminal, historial, libre]
+export const THEMES: readonly ThemeManifest[] = [clinica, terminal, historial, espacio, libre]
 
 export const DEFAULT_THEME: ThemeManifest = clinica
 

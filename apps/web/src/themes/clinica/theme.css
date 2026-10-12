@@ -47,11 +47,11 @@
     linear-gradient(120deg, #1ccfc9, #0a8fb0 55%, #5b8def);
 
   --stage-bg:
-    radial-gradient(70% 60% at 15% 0%, rgba(43, 220, 213, 0.22), transparent 70%),
-    radial-gradient(70% 60% at 100% 100%, rgba(56, 168, 255, 0.18), transparent 70%),
-    linear-gradient(180deg, #0c2422, #051110);
-  --stage-halo: #071615;
-  --stage-accent: #3ee9e2;
+    radial-gradient(70% 60% at 15% 0%, rgba(127, 243, 238, 0.35), transparent 70%),
+    radial-gradient(70% 60% at 100% 100%, rgba(120, 180, 255, 0.3), transparent 70%),
+    linear-gradient(170deg, #2f7f7b, #1f5c6c);
+  --stage-halo: #276a70;
+  --stage-accent: #a8fffb;
 
   --ring-from: #12c2bd;
   --ring-to: #6f7df2;
@@ -95,6 +95,16 @@
     linear-gradient(120deg, #0f8f8b, #0a5f86 55%, #3b4fb0);
 
   --ring-shade: #000000;
+
+  --stage-bg:
+    radial-gradient(70% 60% at 15% 0%, rgba(43, 220, 213, 0.22), transparent 70%),
+    radial-gradient(70% 60% at 100% 100%, rgba(56, 168, 255, 0.18), transparent 70%),
+    linear-gradient(180deg, #0c2422, #051110);
+  --stage-text: #eef6f4;
+  --stage-muted: #8fa39d;
+  --stage-link: #9db4ae;
+  --stage-halo: #071615;
+  --stage-accent: #3ee9e2;
 }
 
 /* La marca: una cruz con luz propia. */

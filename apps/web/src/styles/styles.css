@@ -33,15 +33,16 @@
   /* La barra de arriba y la franja del expediente. */
   --appbar-bg: color-mix(in srgb, var(--bg) 82%, transparent);
   --banner-image: linear-gradient(120deg, var(--accent-soft), var(--surface-2) 70%);
-  /* El escenario: la zona oscura donde se pintan los grafos, en claro y en
-     nocturno. Sobre oscuro los colores de los nodos se distinguen; sobre blanco
-     se apagaban. `--stage-halo` es el borde de las letras, del color del fondo. */
-  --stage-bg: radial-gradient(120% 95% at 50% 0%, #17322f, #081413 72%);
-  --stage-text: #eef6f4;
-  --stage-muted: #8fa39d;
-  --stage-link: #9db4ae;
-  --stage-halo: #081413;
-  --stage-accent: #2bdcd5;
+  /* El escenario: la zona donde se pintan los grafos. Va en un tono medio, con
+     color, para que los nodos se distingan (sobre blanco se apagaban) sin que
+     en claro parezca un agujero negro; de noche, cada estilo lo oscurece.
+     `--stage-halo` es el borde de las letras, del color del fondo. */
+  --stage-bg: radial-gradient(120% 95% at 50% 0%, #3b7672, #24524f 72%);
+  --stage-text: #f3fbf9;
+  --stage-muted: #b5cfc9;
+  --stage-link: #c2dcd6;
+  --stage-halo: #2a5b58;
+  --stage-accent: #7ff3ee;
   /* Las ruedas del tablón. Cada círculo va de `--ring-from` (el de dentro) a
      `--ring-to` (el de fuera), un paso cada uno; `--ring-shade` oscurece las
      paredes y `--orb-done` es el color de un proyecto aprobado. */
