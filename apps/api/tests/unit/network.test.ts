@@ -588,6 +588,79 @@ describe('red de correcciones', () => {
       })
     })
 
+    it('junta varios campus en el mismo grafo, o todos', async () => {
+      const BARCELONA = 46
+
+      api.scaleTeams.set(MADRID, [scaleTeam('eva', 'ana'), scaleTeam('ana', 'eva')])
+      await copyAll()
+      // Otro campus con lo suyo, y una corrección que cruza de uno a otro.
+      await db.batch(
+        [
+          ['pau', 'nil'],
+          ['nil', 'pau'],
+          ['pau', 'ana'],
+        ].map(([corrector, corrected], index) => ({
+          sql: `INSERT INTO corrections (id, campus_id, corrector, corrected, begin_at, final_mark, positive)
+                VALUES (?, ?, ?, ?, '2026-05-01T10:00:00.000Z', 100, 1)`,
+          args: [9000 + index, BARCELONA, corrector ?? '', corrected ?? ''],
+        })),
+        'write',
+      )
+
+      // La gente de ese campus, como la dejaría su réplica.
+      await db.batch(
+        ['pau', 'nil'].flatMap((login, index) => [
+          {
+            sql: `INSERT INTO users (id, login, synced_at) VALUES (?, ?, '2026-01-01T00:00:00.000Z')`,
+            args: [7000 + index, login],
+          },
+          {
+            sql: 'INSERT INTO campus_members (campus_id, user_id) VALUES (?, ?)',
+            args: [BARCELONA, 7000 + index],
+          },
+        ]),
+        'write',
+      )
+
+      // Sin pedir nada, solo el propio.
+      const own = await services.network.graph(actor('ana'), {})
+
+      expect(own.campuses).toEqual([MADRID])
+      expect(own.available.map((campus) => campus.id)).toEqual(
+        [MADRID, BARCELONA].sort((a, b) => a - b),
+      )
+      expect(own.totals.corrections).toBe(2)
+
+      const both = await services.network.graph(actor('ana'), {
+        campuses: `${MADRID},${BARCELONA}`,
+      })
+
+      expect(both.campuses).toEqual([MADRID, BARCELONA].sort((a, b) => a - b))
+      expect(both.totals.corrections).toBe(5)
+      expect(both.nodes.map((node) => node.login).sort()).toEqual(['ana', 'eva', 'nil', 'pau'])
+      expect(both.nodes.find((node) => node.login === 'ana')).toMatchObject({ campusId: MADRID })
+      expect(both.nodes.find((node) => node.login === 'pau')).toMatchObject({
+        campusId: BARCELONA,
+        external: false,
+      })
+      // Y la pareja que cruza de un campus a otro se puede mirar.
+      expect(
+        await services.network.pair(actor('ana'), { a: 'pau', b: 'ana', campuses: 'all' }),
+      ).toMatchObject({ forth: 1, back: 0 })
+      expect((await services.network.graph(actor('ana'), { campuses: 'all' })).totals).toEqual(
+        both.totals,
+      )
+      // Un campus sin correcciones no se puede pedir: queda el propio.
+      expect((await services.network.graph(actor('ana'), { campuses: '999' })).campuses).toEqual([
+        MADRID,
+      ])
+      await expect(
+        services.network.graph(actor('ana'), { campuses: 'todos' }),
+      ).rejects.toMatchObject({
+        code: 'invalid_input',
+      })
+    })
+
     it('busca personas por el principio del login', async () => {
       api.scaleTeams.set(MADRID, [
         scaleTeam('eva', 'ana'),

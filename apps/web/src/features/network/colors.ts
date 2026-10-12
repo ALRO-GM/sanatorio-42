@@ -12,6 +12,7 @@ export const COLOR_MODES = [
   'cohort',
   'balance',
   'origin',
+  'campus',
 ] as const
 
 export type ColorMode = (typeof COLOR_MODES)[number]
@@ -128,7 +129,14 @@ export function colorOf(node: NetworkNode, mode: ColorMode, scale?: Scale): stri
     }
     case 'origin':
       return node.external ? 'hsl(28 80% 55%)' : 'hsl(186 62% 45%)'
+    case 'campus':
+      return node.campusId === null ? OTHER : campusColor(node.campusId)
   }
+}
+
+/** Color estable para un campus: los ids seguidos quedan lejos en el círculo. */
+export function campusColor(campusId: number): string {
+  return `hsl(${(campusId * 137) % 360} 62% 52%)`
 }
 
 export type LegendEntry = { color: string; label: string }
@@ -143,6 +151,7 @@ export function legendOf(
   mode: ColorMode,
   t: (key: string, vars?: Record<string, string | number>) => string,
   scale?: Scale,
+  campuses: readonly { id: number; name: string }[] = [],
 ): LegendEntry[] {
   if (isScaleMode(mode)) {
     const range = scale ?? DEFAULT_SCALES[mode]
@@ -225,5 +234,19 @@ export function legendOf(
         { color: 'hsl(186 62% 45%)', label: t('net.legend.campus') },
         { color: 'hsl(28 80% 55%)', label: t('net.legend.external') },
       ]
+    case 'campus': {
+      const count = (id: number | null): number =>
+        nodes.filter((node) => node.campusId === id).length
+
+      return [
+        ...campuses
+          .filter((campus) => count(campus.id) > 0)
+          .map((campus) => ({
+            color: campusColor(campus.id),
+            label: `${campus.name} (${count(campus.id)})`,
+          })),
+        ...(count(null) > 0 ? [{ color: OTHER, label: t('net.legend.external') }] : []),
+      ]
+    }
   }
 }

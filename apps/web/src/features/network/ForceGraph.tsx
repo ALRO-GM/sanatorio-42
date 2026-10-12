@@ -545,7 +545,9 @@ export function ForceGraph({
     })
 
     observer.observe(canvas)
-    themeObserver.observe(document.documentElement, { attributeFilter: ['data-theme'] })
+    themeObserver.observe(document.documentElement, {
+      attributeFilter: ['data-theme', 'data-style', 'style'],
+    })
     canvas.addEventListener('pointerdown', onPointerDown)
     canvas.addEventListener('pointermove', onPointerMove)
     canvas.addEventListener('pointerup', onPointerUp)

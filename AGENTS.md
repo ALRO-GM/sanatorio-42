@@ -78,10 +78,12 @@ Monorepo con workspaces de npm. Ver `README.md` y `docs/architecture.md`.
   corta por acción; 20 s de guion como mucho, que el motor estira un 50 %). Usa
   las etiquetas reales de la web y logins inventados, y enseña lo que la web
   hace de verdad.
-- Aspecto: las reglas están en `styles/system.css`. Una superficie se separa del
-  fondo con una raya, no con sombra; dentro de una tarjeta no va otra tarjeta
-  con borde; el color es del acento y de los estados (`--ok`, `--warn`,
-  `--danger`). Compruébalo siempre en claro y en oscuro.
+- Aspecto: hay varios estilos, cada uno en su carpeta de `apps/web/src/themes/`
+  (ver su `README.md`). Los componentes no saben cuál está puesto: usan las
+  variables de `styles/theme.css` y `styles/styles.css`, y cada estilo les da
+  valor. Lo que añadas tiene que verse bien en todos, en claro y en oscuro. Lo
+  que no cambia: dentro de una tarjeta no va otra tarjeta con borde, y el color
+  es del acento y de los estados (`--ok`, `--warn`, `--danger`).
 - Un aviso de un evento con más gente no se puede cerrar sin contestar (voy, me
   retraso, no voy). Lo pendiente lo guarda la API (`GET /events/alerts`), no el
   navegador. No añadas una forma de saltárselo.
@@ -105,8 +107,7 @@ Monorepo con workspaces de npm. Ver `README.md` y `docs/architecture.md`.
   (`--surface`, `--text`, `--border`…). Un hexadecimal suelto no cambiaría con el
   modo nocturno; solo vale para lo que es igual en los dos temas (post-its,
   códigos de color del mapa y del grafo).
-- Paleta: fondo crema, verdes menta y salvia, turquesa de 42 como acento. "No
-  disponible" en gris neutro, nunca en rojo.
+- Paleta: la pone el estilo. "No disponible" va en gris neutro, nunca en rojo.
 - La cabecera tiene que caber en una sola fila y todo verse bien en móvil.
 - No hagas commits: los hace la persona.
 

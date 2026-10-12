@@ -27,9 +27,17 @@ export type StoredCorrection = CorrectionRow & {
 
 export type PairRow = { corrector: string; corrected: string; count: number }
 
+/** Un campus, o varios para mirarlos juntos. */
+export type Campuses = number | readonly number[]
+
+/** Para `campus_id IN (SELECT value FROM json_each(?))`: vale igual con uno que con varios. */
+const scope = (campuses: Campuses): string =>
+  JSON.stringify(typeof campuses === 'number' ? [campuses] : campuses)
+const IN_SCOPE = 'campus_id IN (SELECT value FROM json_each(?))'
+
 /** Qué correcciones se miran. */
 export type CorrectionFilter = {
-  campusId: number
+  campusId: Campuses
   from?: string | null
   to?: string | null
   projectId?: number | null
@@ -43,8 +51,8 @@ const BATCH = 100
 export function createNetworkRepository(db: Db) {
   /** El `WHERE` de un filtro y sus argumentos. */
   const where = (filter: CorrectionFilter): { sql: string; args: (string | number)[] } => {
-    const clauses = ['campus_id = ?']
-    const args: (string | number)[] = [filter.campusId]
+    const clauses = [IN_SCOPE]
+    const args: (string | number)[] = [scope(filter.campusId)]
 
     if (filter.from !== null && filter.from !== undefined) {
       clauses.push('begin_at >= ?')
@@ -331,17 +339,26 @@ export function createNetworkRepository(db: Db) {
       }))
     },
 
+    /** Los campus de los que hay correcciones copiadas. */
+    async campuses(): Promise<number[]> {
+      const result = await db.execute(
+        'SELECT DISTINCT campus_id FROM corrections ORDER BY campus_id',
+      )
+
+      return result.rows.map((row) => toNumber(row.campus_id))
+    },
+
     /** Año de la primera corrección de cada persona, hecha o recibida. */
-    async firstYears(campusId: number): Promise<Map<string, number>> {
+    async firstYears(campusId: Campuses): Promise<Map<string, number>> {
       const result = await db.execute({
         sql: `SELECT login, MIN(first) AS first FROM (
                 SELECT corrector AS login, MIN(begin_at) AS first
-                FROM corrections WHERE campus_id = ? GROUP BY corrector
+                FROM corrections WHERE ${IN_SCOPE} GROUP BY corrector
                 UNION ALL
                 SELECT corrected AS login, MIN(begin_at) AS first
-                FROM corrections WHERE campus_id = ? GROUP BY corrected
+                FROM corrections WHERE ${IN_SCOPE} GROUP BY corrected
               ) GROUP BY login`,
-        args: [campusId, campusId],
+        args: [scope(campusId), scope(campusId)],
       })
 
       return new Map(
@@ -351,13 +368,13 @@ export function createNetworkRepository(db: Db) {
 
     /** Proyectos con correcciones: cuántas tiene cada uno y qué parte aprobó. */
     async projects(
-      campusId: number,
+      campusId: Campuses,
     ): Promise<{ id: number; corrections: number; passRate: number | null }[]> {
       const result = await db.execute({
         sql: `SELECT project_id, COUNT(*) AS total, AVG(passed) AS pass_rate FROM corrections
-              WHERE campus_id = ? AND project_id IS NOT NULL
+              WHERE ${IN_SCOPE} AND project_id IS NOT NULL
               GROUP BY project_id ORDER BY total DESC`,
-        args: [campusId],
+        args: [scope(campusId)],
       })
 
       return result.rows.map((row) => ({
@@ -369,7 +386,7 @@ export function createNetworkRepository(db: Db) {
 
     /** Logins que empiezan por `prefix`, los más activos primero. */
     async search(
-      campusId: number,
+      campusId: Campuses,
       prefix: string,
       limit: number,
     ): Promise<{ login: string; corrections: number }[]> {
@@ -378,12 +395,12 @@ export function createNetworkRepository(db: Db) {
       const result = await db.execute({
         sql: `SELECT login, SUM(total) AS total FROM (
                 SELECT corrector AS login, COUNT(*) AS total FROM corrections
-                WHERE campus_id = ? AND corrector LIKE ? ESCAPE '\\' GROUP BY corrector
+                WHERE ${IN_SCOPE} AND corrector LIKE ? ESCAPE '\\' GROUP BY corrector
                 UNION ALL
                 SELECT corrected AS login, COUNT(*) AS total FROM corrections
-                WHERE campus_id = ? AND corrected LIKE ? ESCAPE '\\' GROUP BY corrected
+                WHERE ${IN_SCOPE} AND corrected LIKE ? ESCAPE '\\' GROUP BY corrected
               ) GROUP BY login ORDER BY total DESC, login LIMIT ?`,
-        args: [campusId, pattern, campusId, pattern, limit],
+        args: [scope(campusId), pattern, scope(campusId), pattern, limit],
       })
 
       return result.rows.map((row) => ({

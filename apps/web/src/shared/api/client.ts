@@ -139,6 +139,7 @@ export const realApi: Api = {
     if (params.to !== undefined) query.set('to', params.to)
     if (params.projectId !== undefined) query.set('projectId', String(params.projectId))
     if (params.verdict !== undefined) query.set('verdict', params.verdict)
+    if (params.campuses !== undefined) query.set('campuses', params.campuses)
 
     return getJson(`/network/pair?${query.toString()}`)
   },
@@ -148,11 +149,12 @@ export const realApi: Api = {
     if (params.from !== undefined) query.set('from', params.from)
     if (params.to !== undefined) query.set('to', params.to)
     if (params.projectId !== undefined) query.set('projectId', String(params.projectId))
+    if (params.campuses !== undefined) query.set('campuses', params.campuses)
 
     return getJson(`/network/strictest?${query.toString()}`)
   },
   getNetworkMine: () => getJson('/network/mine'),
-  searchNetworkPeople: (q) => getJson(`/network/people?q=${encodeURIComponent(q)}`),
+  searchNetworkPeople: (q, campuses) => getJson(`/network/people?${search({ q, campuses })}`),
 
   getHelpDay: () => getJson('/help/today'),
   setHelpDay: (day) => sendJson('PUT', '/help/today', day),

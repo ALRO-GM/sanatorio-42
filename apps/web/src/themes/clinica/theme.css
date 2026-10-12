@@ -1,0 +1,152 @@
+/* ── Clínica ─────────────────────────────────────────────────────────────────
+   La sala de un hospital nuevo: turquesa, blanco y relieve. Nada es plano: la
+   página tiene luz de fondo, las tarjetas flotan un poco y lo que se pulsa
+   brilla. Es el estilo de fábrica.
+   ──────────────────────────────────────────────────────────────────────────── */
+:root[data-style='clinica'] {
+  --font: 'Figtree Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: var(--font);
+  --display-weight: 800;
+  --display-spacing: -0.025em;
+  --radius: 18px;
+  --radius-sm: 12px;
+
+  --bg: #eaf3f1;
+  --surface: #ffffff;
+  --surface-2: #eef6f4;
+  --surface-3: #e0edea;
+  --border: #d5e4e0;
+  --border-strong: #b4cbc5;
+  --text: #10302c;
+  --text-2: #35524d;
+  --text-3: #5f7a75;
+  --accent: #0fb5b0;
+  --accent-hover: #0a9d9c;
+  --accent-soft: #d9f5f2;
+  --accent-text: #067f80;
+  /* El segundo tono de los degradados: el azul de las batas. */
+  --accent-2: #0a8fb0;
+  --glow: rgba(15, 181, 176, 0.18);
+
+  --page-image:
+    url('./assets/crosses.svg'),
+    radial-gradient(900px 520px at 8% -8%, rgba(15, 181, 176, 0.22), transparent 62%),
+    radial-gradient(820px 520px at 100% 0%, rgba(96, 165, 250, 0.18), transparent 60%),
+    radial-gradient(900px 600px at 50% 115%, rgba(52, 211, 153, 0.16), transparent 62%);
+  --page-size: 64px 64px, auto, auto, auto;
+  --surface-image: linear-gradient(180deg, #ffffff, #f6fbfa);
+  --card-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 1px 2px rgba(16, 48, 44, 0.06),
+    0 14px 30px -16px rgba(10, 80, 76, 0.28);
+  --primary-image: linear-gradient(135deg, #1ccfc9, var(--accent-2));
+  --primary-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 8px 18px -8px rgba(10, 143, 176, 0.7);
+  --appbar-bg: color-mix(in srgb, #ffffff 72%, transparent);
+  --banner-image:
+    radial-gradient(420px 160px at 85% 0%, rgba(255, 255, 255, 0.55), transparent 70%),
+    linear-gradient(120deg, #1ccfc9, #0a8fb0 55%, #5b8def);
+}
+:root[data-style='clinica'][data-theme='dark'] {
+  --bg: #061514;
+  --surface: #0e2220;
+  --surface-2: #142c29;
+  --surface-3: #1b3733;
+  --border: #1f3d39;
+  --border-strong: #2f5650;
+  --fill-muted: #3b655f;
+  --text: #e6f6f3;
+  --text-2: #b4d2cc;
+  --text-3: #83a8a1;
+  --text-4: #5a7d77;
+  --accent: #2bdcd5;
+  --accent-hover: #63ebe5;
+  --accent-soft: #0d3634;
+  --accent-text: #63ebe5;
+  --accent-2: #38a8ff;
+  --on-accent: #032120;
+  --glow: rgba(43, 220, 213, 0.14);
+
+  --page-image:
+    url('./assets/crosses.svg'),
+    radial-gradient(900px 520px at 8% -8%, rgba(43, 220, 213, 0.2), transparent 62%),
+    radial-gradient(820px 520px at 100% 0%, rgba(56, 168, 255, 0.16), transparent 60%),
+    radial-gradient(900px 600px at 50% 115%, rgba(52, 211, 153, 0.1), transparent 62%);
+  --surface-image: linear-gradient(180deg, #11292600, #0b1c1a);
+  --card-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 1px 2px rgba(0, 0, 0, 0.4),
+    0 18px 34px -18px rgba(0, 0, 0, 0.75);
+  --primary-image: linear-gradient(135deg, #3ee9e2, var(--accent-2));
+  --primary-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 8px 22px -8px rgba(43, 220, 213, 0.55);
+  --appbar-bg: color-mix(in srgb, #0a1c1a 76%, transparent);
+  --banner-image:
+    radial-gradient(420px 160px at 85% 0%, rgba(255, 255, 255, 0.22), transparent 70%),
+    linear-gradient(120deg, #0f8f8b, #0a5f86 55%, #3b4fb0);
+}
+
+/* La marca: una cruz con luz propia. */
+:root[data-style='clinica'] .brand-mark {
+  background: var(--primary-image);
+  box-shadow: var(--primary-shadow);
+}
+/* El título, con su pulso debajo. */
+:root[data-style='clinica'] h2::after {
+  content: '';
+  display: block;
+  width: 5.5rem;
+  height: 0.7rem;
+  margin-top: 0.25rem;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  -webkit-mask: url('./assets/pulse.svg') left center / contain no-repeat;
+  mask: url('./assets/pulse.svg') left center / contain no-repeat;
+}
+:root[data-style='clinica'] button.primary {
+  border: 0;
+  font-weight: 700;
+  transition:
+    transform 0.15s,
+    filter 0.15s;
+}
+:root[data-style='clinica'] button.primary:hover:not(:disabled) {
+  background-image: var(--primary-image);
+  filter: brightness(1.07) saturate(1.1);
+  transform: translateY(-1px);
+}
+:root[data-style='clinica'] .pill.active,
+:root[data-style='clinica'] .pill.active:hover:not(:disabled) {
+  border-color: transparent;
+  background: var(--primary-image);
+  box-shadow: var(--primary-shadow);
+  color: var(--on-accent);
+}
+:root[data-style='clinica'] .pill {
+  box-shadow: 0 1px 2px rgba(16, 48, 44, 0.06);
+}
+:root[data-style='clinica'] .tab.active::after {
+  height: 3px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  box-shadow: 0 0 12px var(--glow);
+}
+:root[data-style='clinica'] .badge.on,
+:root[data-style='clinica'] .chip {
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.5), transparent);
+}
+:root[data-style='clinica'] input:focus-visible,
+:root[data-style='clinica'] select:focus-visible,
+:root[data-style='clinica'] textarea:focus-visible {
+  box-shadow: 0 0 0 4px var(--glow);
+}
+:root[data-style='clinica'] .stat-card.strong strong {
+  background: linear-gradient(90deg, var(--accent-text), var(--accent-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+:root[data-style='clinica'] dialog.layout-dialog,
+:root[data-style='clinica'] dialog.event-dialog {
+  background-image: var(--surface-image);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    0 30px 80px -20px var(--shadow);
+}

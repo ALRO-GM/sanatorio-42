@@ -50,6 +50,8 @@ export type NetworkNode = {
   community: number
   /** Año de su primera corrección en el campus: una pista de su promoción. */
   cohort: number | null
+  /** De qué campus es, entre los que se miran; `null` si viene de fuera. */
+  campusId: number | null
 }
 
 /** Dos personas que se han corregido. Sin dirección: los dos sentidos van dentro. */
@@ -101,6 +103,10 @@ export type NetworkQuery = {
 /** `GET /network`. */
 export type NetworkGraph = {
   query: NetworkQuery
+  /** Los campus que se están mirando juntos. */
+  campuses: number[]
+  /** Los que se pueden elegir: los que tienen correcciones copiadas, y el propio. */
+  available: { id: number; name: string }[]
   nodes: NetworkNode[]
   links: NetworkLink[]
   /** Calculado sobre todo lo que cumple los filtros, no solo sobre lo que se pinta. */

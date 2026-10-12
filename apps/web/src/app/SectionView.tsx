@@ -113,18 +113,27 @@ export function SectionView({
       )}
       {section === 'pizarras' && <BoardsCalendar />}
       {section === 'red' && <NetworkPage me={me} />}
-      {section === 'clicker' &&
-        // Para quien no eligió la roja, esta sección no existe.
-        (egg.pill === 'red' ? (
+      {/* Quien eligió la roja lleva el juego puesto en toda la web: fuera de su
+          sección sigue corriendo y solo enseña una ventanita. Con su propia
+          espera, para que al cargarse no tape la sección que se está mirando. */}
+      {egg.pill === 'red' && (
+        <Suspense fallback={null}>
           <CodeClicker
             me={me.login}
+            background={section !== 'clicker'}
+            onOpen={() => {
+              onGo('clicker')
+            }}
             onExit={() => {
               onGo('expediente')
             }}
           />
-        ) : (
-          egg.ready && <p className="estado">{t('error.404')}</p>
-        ))}
+        </Suspense>
+      )}
+      {/* Para quien no eligió la roja, esta sección no existe. */}
+      {section === 'clicker' && egg.pill !== 'red' && egg.ready && (
+        <p className="estado">{t('error.404')}</p>
+      )}
       {section === 'clusters' && <ClustersPage me={me.login} initialPeer={chatWith} />}
       {section === 'gestion' &&
         (profile.data?.admin === true ? (

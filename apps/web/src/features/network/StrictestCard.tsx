@@ -51,15 +51,16 @@ export function StrictestCard({ params, onSelect }: StrictestCardProps) {
     }
   }, [wanted])
 
-  const { from, to, projectId } = params
+  const { from, to, projectId, campuses } = params
   const { data, error, loading, reload } = useAsync(
     () =>
       api.getNetworkStrictest(min, order, {
         ...(from === undefined ? {} : { from }),
         ...(to === undefined ? {} : { to }),
         ...(projectId === undefined ? {} : { projectId }),
+        ...(campuses === undefined ? {} : { campuses }),
       }),
-    [min, order, from, to, projectId],
+    [min, order, from, to, projectId, campuses],
   )
 
   return (

@@ -28,7 +28,7 @@ export type Pair = { a: string; b: string; ab: number; ba: number }
 /** Lo que se sabe de cada persona antes de pintarla. */
 export type PersonStats = Omit<
   NetworkNode,
-  'image' | 'cohort' | 'givenPassRate' | 'receivedPassRate'
+  'image' | 'cohort' | 'campusId' | 'givenPassRate' | 'receivedPassRate'
 >
 
 export type Analysis = {

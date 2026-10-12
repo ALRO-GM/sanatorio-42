@@ -60,6 +60,8 @@ type Filters = {
   mutual: boolean
   min: number
   limit: number
+  /** Los campus que se miran juntos; `null` es solo el propio y `'all'`, todos. */
+  campuses: readonly number[] | 'all' | null
 }
 
 /** Login de un enlace directo `#/red/<login>`, o `null`. */
@@ -81,6 +83,9 @@ function paramsOf(filters: Filters): NetworkParams {
     ...(filters.mutual ? { mutual: true } : {}),
     min: filters.min,
     limit: filters.limit,
+    ...(filters.campuses === null
+      ? {}
+      : { campuses: filters.campuses === 'all' ? 'all' : filters.campuses.join(',') }),
   }
 }
 
@@ -102,6 +107,7 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
     // Con una persona elegida interesa toda su red, no solo sus uniones fuertes.
     min: loginInUrl() === null ? 2 : 1,
     limit: 300,
+    campuses: null,
   })
   const [mode, setMode] = useState<ColorMode>('community')
   const [selected, setSelected] = useState<string | null>(loginInUrl)
@@ -201,7 +207,11 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
     [t],
   )
   const nodes = graph?.nodes
-  const legend = useMemo(() => legendOf(nodes ?? [], mode, t, scale), [nodes, mode, t, scale])
+  const available = graph?.available
+  const legend = useMemo(
+    () => legendOf(nodes ?? [], mode, t, scale, available),
+    [nodes, mode, t, scale, available],
+  )
   const chosen = nodes?.find((node) => node.login === selected) ?? null
   // Sentido de cada lista del panel: de mayor a menor mientras no se cambie.
   const [orders, setOrders] = useState<Record<'endogamy' | 'pairs' | 'projects', Order>>({
@@ -294,6 +304,50 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
         </div>
 
         <div className="card net-filters">
+          {graph !== null && graph.available.length > 1 && (
+            <div className="net-filter">
+              <span className="eyebrow">{t('net.campuses')}</span>
+              <div className="filter-pills" role="group" aria-label={t('net.campuses')}>
+                {graph.available.map((campus) => {
+                  const on = graph.campuses.includes(campus.id)
+
+                  return (
+                    <button
+                      key={campus.id}
+                      type="button"
+                      className={`pill ${on ? 'active' : ''}`}
+                      aria-pressed={on}
+                      onClick={() => {
+                        const next = on
+                          ? graph.campuses.filter((id) => id !== campus.id)
+                          : [...graph.campuses, campus.id]
+
+                        // Sin ninguno no hay grafo: el último no se puede quitar.
+                        if (next.length === 0) return
+
+                        change({ campuses: next })
+                        // Con más de uno, lo que interesa ver es de cuál es cada quien.
+                        if (next.length > 1) setMode('campus')
+                      }}
+                    >
+                      {campus.name}
+                    </button>
+                  )
+                })}
+                <button
+                  type="button"
+                  className={`pill ${graph.campuses.length === graph.available.length ? 'active' : ''}`}
+                  aria-pressed={graph.campuses.length === graph.available.length}
+                  onClick={() => {
+                    change({ campuses: 'all' })
+                    setMode('campus')
+                  }}
+                >
+                  {t('net.campuses.all')}
+                </button>
+              </div>
+            </div>
+          )}
           <div className="net-filter">
             <span className="eyebrow">{t('net.period')}</span>
             <div className="filter-pills" role="group" aria-label={t('net.period')}>
@@ -352,7 +406,12 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
 
           <div className="net-filter">
             <span className="eyebrow">{t('net.person')}</span>
-            <PersonSearch value={filters.login} me={me.login} onChange={focusOn} />
+            <PersonSearch
+              value={filters.login}
+              me={me.login}
+              onChange={focusOn}
+              campuses={params.campuses}
+            />
           </div>
 
           <div className="net-filter-grid">

@@ -1,0 +1,265 @@
+/* ── Historial ───────────────────────────────────────────────────────────────
+   El expediente en papel: una carpeta de cartulina con hojas pautadas. Los
+   títulos van a pluma, el texto es de libro y los rótulos pequeños, de máquina
+   de escribir. Las tarjetas son hojas sujetas con celo, con el borde un poco
+   torcido, como dibujado a mano; lo elegido se marca con rotulador fosforito.
+
+   De noche, la misma mesa con el flexo apagado: papel oscuro y tinta clara.
+   ──────────────────────────────────────────────────────────────────────────── */
+:root[data-style='historial'] {
+  --font: 'Source Serif 4 Variable', Georgia, 'Times New Roman', serif;
+  --font-display: 'Caveat Variable', 'Segoe Print', cursive;
+  --display-weight: 700;
+  --display-spacing: 0;
+  --eyebrow-font: 'Special Elite', 'Courier New', monospace;
+  --icon-stroke: 2;
+  --radius: 14px;
+  --radius-sm: 9px;
+  /* El borde irregular de lo dibujado a mano. */
+  --sketch: 255px 15px 225px 15px / 15px 225px 15px 255px;
+  --sketch-sm: 120px 10px 110px 12px / 12px 110px 10px 120px;
+
+  --bg: #eadfc8;
+  --surface: #fbf5e6;
+  --surface-2: #f1e7d0;
+  --surface-3: #e6d9bc;
+  --border: #cdbb95;
+  --border-strong: #8a7550;
+  --fill-muted: #c9b78f;
+  --text: #33291c;
+  --text-2: #55472f;
+  --text-3: #7a6a4d;
+  --text-4: #a39373;
+  /* Tinta azul de pluma. */
+  --accent: #2a4a8f;
+  --accent-hover: #1d3670;
+  --accent-soft: #dfe5f3;
+  --accent-text: #2a4a8f;
+  --on-accent: #fbf5e6;
+  /* El lápiz rojo de corregir y el fosforito de subrayar. */
+  --ink-red: #b0392b;
+  --marker: #ffe36e;
+  --ok: #3f7a4b;
+  --ok-soft: #dcecd6;
+  --warn: #a8691a;
+  --warn-soft: #f6e6c2;
+  --danger: #b0392b;
+  --danger-soft: #f3d9d2;
+  --gold: #a87a16;
+  --glow: rgba(42, 74, 143, 0.14);
+  --shadow: rgba(60, 40, 10, 0.3);
+
+  --page-image: url('./assets/paper.svg');
+  --page-size: 240px 240px;
+  /* Hoja pautada: una raya azul muy tenue cada renglón. */
+  --surface-image:
+    url('./assets/paper.svg'),
+    repeating-linear-gradient(
+      180deg,
+      transparent 0 1.72rem,
+      rgba(42, 74, 143, 0.09) 1.72rem 1.78rem
+    );
+  --surface-size: 240px 240px, auto;
+  --card-shadow: 0 1px 1px rgba(60, 40, 10, 0.18), 0 12px 22px -14px rgba(60, 40, 10, 0.5);
+  --primary-image: none;
+  --primary-shadow: 2px 3px 0 rgba(29, 54, 112, 0.35);
+  --appbar-bg: color-mix(in srgb, var(--bg) 88%, transparent);
+  --banner-image: url('./assets/paper.svg'), linear-gradient(120deg, #d9c9a3, #c9b889 60%, #b9a877);
+  --eyebrow-transform: uppercase;
+  font-size: 16px;
+}
+:root[data-style='historial'][data-theme='dark'] {
+  --bg: #1d1913;
+  --surface: #28221a;
+  --surface-2: #322b21;
+  --surface-3: #3d3528;
+  --border: #4a4030;
+  --border-strong: #8a7a5c;
+  --fill-muted: #5c503c;
+  --text: #f0e4c9;
+  --text-2: #d3c5a6;
+  --text-3: #a89a7c;
+  --text-4: #7a6e56;
+  --accent: #9db8f5;
+  --accent-hover: #bdd0fa;
+  --accent-soft: #263352;
+  --accent-text: #b4c8f8;
+  --on-accent: #151c2e;
+  --ink-red: #e88a7c;
+  --marker: #7a6a1c;
+  --ok: #8fc79a;
+  --ok-soft: #223527;
+  --warn: #e3b05c;
+  --warn-soft: #3a2d14;
+  --danger: #e88a7c;
+  --danger-soft: #40201b;
+  --gold: #e0b95a;
+  --glow: rgba(157, 184, 245, 0.14);
+  --shadow: rgba(0, 0, 0, 0.6);
+
+  --page-image: url('./assets/paper-dark.svg');
+  --surface-image:
+    url('./assets/paper-dark.svg'),
+    repeating-linear-gradient(
+      180deg,
+      transparent 0 1.72rem,
+      rgba(157, 184, 245, 0.07) 1.72rem 1.78rem
+    );
+  --card-shadow: 0 1px 1px rgba(0, 0, 0, 0.5), 0 14px 24px -14px rgba(0, 0, 0, 0.85);
+  --primary-shadow: 2px 3px 0 rgba(0, 0, 0, 0.5);
+  --banner-image:
+    url('./assets/paper-dark.svg'), linear-gradient(120deg, #4a4030, #3d3528 60%, #332c20);
+}
+
+/* La letra a pluma es menuda: los títulos crecen para leerse igual de bien. */
+:root[data-style='historial'] h1,
+:root[data-style='historial'] h2,
+:root[data-style='historial'] h3,
+:root[data-style='historial'] h4,
+:root[data-style='historial'] .brand-name {
+  color: var(--accent-text);
+  line-height: 1.05;
+}
+:root[data-style='historial'] h2 {
+  font-size: 2.3rem;
+}
+:root[data-style='historial'] h3 {
+  font-size: 1.6rem;
+}
+:root[data-style='historial'] h4 {
+  font-size: 1.35rem;
+}
+:root[data-style='historial'] .brand-name {
+  font-size: 1.5rem;
+}
+/* El título, subrayado de un trazo. */
+:root[data-style='historial'] h2::after {
+  content: '';
+  display: block;
+  width: min(14rem, 70%);
+  height: 0.5rem;
+  margin-top: 0.1rem;
+  background: var(--ink-red);
+  -webkit-mask: url('./assets/stroke.svg') left center / 100% 100% no-repeat;
+  mask: url('./assets/stroke.svg') left center / 100% 100% no-repeat;
+}
+:root[data-style='historial'] .eyebrow {
+  color: var(--text-3);
+  font-weight: 400;
+  letter-spacing: 0.06em;
+}
+/* Las hojas: borde a mano y un trozo de celo arriba. */
+:root[data-style='historial'] .card,
+:root[data-style='historial'] .project,
+:root[data-style='historial'] .peer-card,
+:root[data-style='historial'] .step-card,
+:root[data-style='historial'] .group-card,
+:root[data-style='historial'] .stat-card {
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--sketch);
+}
+:root[data-style='historial'] main .card:not(.card .card) {
+  position: relative;
+}
+:root[data-style='historial'] main .card:not(.card .card)::before {
+  content: '';
+  position: absolute;
+  top: -11px;
+  left: 50%;
+  z-index: 1;
+  width: 96px;
+  height: 26px;
+  background: url('./assets/tape.svg') center / contain no-repeat;
+  transform: translateX(-50%) rotate(-2.5deg);
+  pointer-events: none;
+}
+/* Lo de dentro de una hoja son recuadros a lápiz, sin celo. */
+:root[data-style='historial'] .card .card,
+:root[data-style='historial'] .card .tile,
+:root[data-style='historial'] .card .stat-card {
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--sketch-sm);
+}
+:root[data-style='historial'] button.primary {
+  border: 1.5px solid var(--accent-hover);
+  border-radius: var(--sketch-sm);
+  font-family: var(--font-display);
+  font-size: 1.25em;
+  font-weight: 700;
+  line-height: 1.1;
+}
+:root[data-style='historial'] .pill {
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--sketch-sm);
+  background: var(--surface);
+}
+/* Lo elegido, pasado con fosforito. */
+:root[data-style='historial'] .pill.active,
+:root[data-style='historial'] .pill.active:hover:not(:disabled) {
+  border-color: var(--text);
+  background: linear-gradient(100deg, transparent 2%, var(--marker) 6% 94%, transparent 98%)
+    var(--surface);
+  color: var(--text);
+}
+/* Las pestañas de arriba son las de un archivador. */
+:root[data-style='historial'] .tab {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+:root[data-style='historial'] .tab.active {
+  border: 1.5px solid var(--border-strong);
+  border-bottom: 0;
+  border-radius: 14px 18px 0 0;
+  background: var(--surface);
+  color: var(--accent-text);
+}
+:root[data-style='historial'] .tab.active::after {
+  display: none;
+}
+:root[data-style='historial'] .badge,
+:root[data-style='historial'] .chip {
+  border-radius: var(--sketch-sm);
+  font-family: var(--eyebrow-font);
+  font-size: 0.72rem;
+}
+/* Los campos son una raya sobre la que escribir. Casillas, interruptores y
+   deslizadores se quedan como son: sin su forma no se reconocen. */
+:root[data-style='historial']
+  input:not([type='checkbox']):not([type='radio']):not([type='range']):not([class*='switch']),
+:root[data-style='historial'] select,
+:root[data-style='historial'] textarea {
+  border: 0;
+  border-bottom: 1.5px solid var(--border-strong);
+  border-radius: 0;
+  background: transparent;
+  font-family: var(--font);
+}
+:root[data-style='historial'] select {
+  background: var(--surface);
+}
+:root[data-style='historial'] .stat-card strong,
+:root[data-style='historial'] .level strong {
+  font-family: var(--font-display);
+  font-size: 1.9rem;
+  line-height: 1;
+}
+:root[data-style='historial'] .brand-mark {
+  border-radius: var(--sketch-sm);
+  background: var(--ink-red);
+  color: #fbf5e6;
+}
+:root[data-style='historial'] a,
+:root[data-style='historial'] .link {
+  text-decoration: underline;
+  text-decoration-style: wavy;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+:root[data-style='historial'] dialog.layout-dialog,
+:root[data-style='historial'] dialog.event-dialog {
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--sketch);
+  background-image: var(--surface-image);
+  background-size: var(--surface-size);
+}

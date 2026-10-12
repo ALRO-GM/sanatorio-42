@@ -62,7 +62,17 @@ const login = z
   .toLowerCase()
   .regex(/^[a-z0-9-]{1,30}$/, 'login no válido')
 
+/**
+ * Los campus que se miran juntos: sus ids separados por comas, o `all` para
+ * todos los que tienen correcciones copiadas. Sin él, el de quien pregunta.
+ */
+const campusesField = z
+  .string()
+  .regex(/^(all|\d{1,6}(,\d{1,6}){0,49})$/)
+  .optional()
+
 const pairSchema = z.object({
+  campuses: campusesField,
   a: login,
   b: login,
   from: moment.optional(),
@@ -72,6 +82,7 @@ const pairSchema = z.object({
 })
 
 const strictSchema = z.object({
+  campuses: campusesField,
   min: z.coerce.number().int().min(1).max(500).default(20),
   // `desc`: los que más suspenden primero; `asc`: los que menos.
   order: z.enum(['asc', 'desc']).default('desc'),
@@ -112,6 +123,7 @@ function passRateOf(verdict: { judged: number; passed: number } | undefined): nu
 }
 
 const querySchema = z.object({
+  campuses: campusesField,
   from: moment.optional(),
   to: moment.optional(),
   login: login.optional(),
@@ -132,8 +144,10 @@ type Cached = {
   given: Map<string, { judged: number; passed: number }>
   received: Map<string, { judged: number; passed: number }>
   timeline: { month: string; corrections: number }[]
-  /** Avatar de cada persona del campus. Quien no está aquí es de fuera. */
+  /** Avatar de cada persona de los campus que se miran. Quien no está aquí es de fuera. */
   members: Map<string, string | null>
+  /** De qué campus es cada una. */
+  homes: Map<string, number>
 }
 
 type Catalogue = {
@@ -154,23 +168,29 @@ export function createNetworkService(options: NetworkServiceOptions) {
 
   /** El análisis de unos filtros, del caché si es reciente. */
   const analysisFor = (
-    campusId: number,
+    campusId: readonly number[],
     from: string | null,
     to: string | null,
     projectId: number | null,
     passed: boolean | null,
   ): Promise<Cached> =>
     analyses.get(
-      `${campusId}|${from ?? ''}|${to ?? ''}|${projectId ?? ''}|${passed ?? ''}`,
+      `${campusId.join(',')}|${from ?? ''}|${to ?? ''}|${projectId ?? ''}|${passed ?? ''}`,
       async () => {
-        const [rows, members, given, received, timeline] = await Promise.all([
+        const [rows, perCampus, given, received, timeline] = await Promise.all([
           corrections.pairs({ campusId, from, to, projectId, passed }),
-          replica.membersOf(campusId),
+          Promise.all(campusId.map((id) => replica.membersOf(id))),
           corrections.verdicts({ campusId, from, to, projectId }, 'corrector'),
           corrections.verdicts({ campusId, from, to, projectId }, 'corrected'),
           // La línea de tiempo no lleva fechas: enseña todo para poder elegirlas.
           corrections.timeline({ campusId, projectId }),
         ])
+        const members = new Map(perCampus.flatMap((campus) => [...campus]))
+        const homes = new Map(
+          perCampus.flatMap((campus, index) =>
+            [...campus.keys()].map((login): [string, number] => [login, campusId[index] ?? 0]),
+          ),
+        )
         // Sin réplica del campus no se sabe quién es de fuera: se trata a todo el
         // mundo como de dentro en vez de enseñar un grafo vacío.
         const everyone = rows.flatMap((row) => [row.corrector, row.corrected])
@@ -182,6 +202,7 @@ export function createNetworkService(options: NetworkServiceOptions) {
         return {
           analysis: analyse(mergePairs(rows, inside), inside),
           members,
+          homes,
           given,
           received,
           timeline,
@@ -190,8 +211,8 @@ export function createNetworkService(options: NetworkServiceOptions) {
     )
 
   /** Lo que no depende de los filtros: año de llegada de cada quien y proyectos con correcciones. */
-  const catalogueOf = (campusId: number): Promise<Catalogue> =>
-    catalogues.get(String(campusId), async () => {
+  const catalogueOf = (campusId: readonly number[]): Promise<Catalogue> =>
+    catalogues.get(campusId.join(','), async () => {
       const [years, projects] = await Promise.all([
         corrections.firstYears(campusId),
         corrections.projects(campusId),
@@ -208,9 +229,30 @@ export function createNetworkService(options: NetworkServiceOptions) {
       }
     })
 
+  /** Los campus con correcciones copiadas: cambia poco, se recuerda un rato. */
+  const known = createTtlCache<number[]>({ ttlMs: CATALOGUE_TTL_MS, maxEntries: 1, now })
+
+  /**
+   * Los campus que se piden, en orden. Solo valen los que tienen correcciones
+   * copiadas, más el de quien pregunta; si no queda ninguno, el suyo.
+   */
+  const campusesOf = async (actor: Actor, asked: string | undefined): Promise<number[]> => {
+    if (asked === undefined) return [actor.campusId]
+
+    const available = new Set([
+      ...(await known.get('all', () => corrections.campuses())),
+      actor.campusId,
+    ])
+    const wanted = asked === 'all' ? [...available] : asked.split(',').map(Number)
+    const chosen = [...new Set(wanted)].filter((id) => available.has(id)).sort((a, b) => a - b)
+
+    return chosen.length === 0 ? [actor.campusId] : chosen
+  }
+
   return {
     /**
-     * El grafo de correcciones del campus que mira `actor`.
+     * El grafo de correcciones del campus que mira `actor`, o de los que pida
+     * en `campuses` para verlos juntos.
      *
      * @param input `from`, `to`, `login`, `projectId`, `min`, `limit`: todo opcional.
      */
@@ -222,12 +264,20 @@ export function createNetworkService(options: NetworkServiceOptions) {
       const projectId = query.projectId ?? null
       const focus = query.login ?? null
 
-      const [{ analysis, members, given, received, timeline }, { years, projects }, status] =
-        await Promise.all([
-          analysisFor(actor.campusId, from, to, projectId, passedOf(query.verdict)),
-          catalogueOf(actor.campusId),
-          sync.status(actor.campusId),
-        ])
+      const campuses = await campusesOf(actor, query.campuses)
+      const [
+        { analysis, members, homes, given, received, timeline },
+        { years, projects },
+        status,
+        available,
+        names,
+      ] = await Promise.all([
+        analysisFor(campuses, from, to, projectId, passedOf(query.verdict)),
+        catalogueOf(campuses),
+        sync.status(actor.campusId),
+        known.get('all', () => corrections.campuses()),
+        replica.listCampuses([]),
+      ])
       const shown = select(analysis, {
         focus,
         min: query.min,
@@ -253,6 +303,7 @@ export function createNetworkService(options: NetworkServiceOptions) {
                 givenPassRate: passRateOf(given.get(login)),
                 receivedPassRate: passRateOf(received.get(login)),
                 cohort: years.get(login) ?? null,
+                campusId: homes.get(login) ?? null,
               },
             ]
       })
@@ -268,6 +319,14 @@ export function createNetworkService(options: NetworkServiceOptions) {
           min: query.min,
           limit: query.limit,
         },
+        campuses,
+        // Los que se pueden elegir: los que tienen correcciones, y el propio.
+        available: [...new Set([...available, actor.campusId])]
+          .sort((a, b) => a - b)
+          .map((id) => ({
+            id,
+            name: names.find((campus) => campus.id === id)?.name ?? String(id),
+          })),
         nodes,
         links: shown.links,
         totals: analysis.totals,
@@ -291,7 +350,7 @@ export function createNetworkService(options: NetworkServiceOptions) {
     async pair(actor: Actor, input: unknown): Promise<NetworkPairDetail> {
       const query = parse(pairSchema, input)
       const filter = {
-        campusId: actor.campusId,
+        campusId: await campusesOf(actor, query.campuses),
         from: query.from ?? null,
         to: endOf(query.to),
         projectId: query.projectId ?? null,
@@ -339,7 +398,7 @@ export function createNetworkService(options: NetworkServiceOptions) {
     async strictest(actor: Actor, input: unknown): Promise<NetworkStrictest> {
       const query = parse(strictSchema, input)
       const { analysis, members, given } = await analysisFor(
-        actor.campusId,
+        await campusesOf(actor, query.campuses),
         query.from ?? null,
         endOf(query.to),
         query.projectId ?? null,
@@ -378,14 +437,19 @@ export function createNetworkService(options: NetworkServiceOptions) {
     },
 
     /** Logins que empiezan por lo escrito, para el buscador de personas. */
-    async people(actor: Actor, q: unknown): Promise<NetworkPerson[]> {
+    async people(actor: Actor, q: unknown, campuses?: unknown): Promise<NetworkPerson[]> {
       const prefix = typeof q === 'string' ? q.trim().toLowerCase() : ''
 
       if (!/^[a-z0-9-]{1,30}$/.test(prefix)) {
         return []
       }
 
-      const found = await corrections.search(actor.campusId, prefix, 8)
+      const asked = campusesField.safeParse(campuses)
+      const found = await corrections.search(
+        await campusesOf(actor, asked.success ? asked.data : undefined),
+        prefix,
+        8,
+      )
       const images = await replica.imagesOf(found.map((person) => person.login))
 
       return found.map((person) => ({ ...person, image: images.get(person.login) ?? null }))

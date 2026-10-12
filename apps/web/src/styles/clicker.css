@@ -1492,3 +1492,67 @@ dialog.cc-bust:not([open]) {
 .cc .cc-chart-pick {
   fill: color-mix(in srgb, var(--cc-main) 28%, transparent);
 }
+
+/* La ventanita que acompaña fuera del juego. Con los colores del estilo que
+   esté puesto, no con los del juego: aquí es parte de la web. */
+.cc-mini {
+  position: fixed;
+  bottom: 0.9rem;
+  left: 0.9rem;
+  z-index: 35;
+  display: flex;
+  align-items: stretch;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  box-shadow: 0 8px 24px -10px var(--shadow);
+  font-size: 0.8rem;
+  opacity: 0.92;
+}
+.cc-mini:hover,
+.cc-mini:focus-within {
+  opacity: 1;
+}
+.cc-mini button {
+  border: 0;
+  background: none;
+  color: var(--text);
+  cursor: pointer;
+}
+.cc-mini-open {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.3rem 0.4rem 0.55rem;
+  text-align: left;
+}
+.cc-mini-open strong,
+.cc-mini-open small {
+  display: block;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+.cc-mini-open small {
+  color: var(--text-3);
+  font-size: 0.7rem;
+}
+.cc-mini-key {
+  display: grid;
+  place-items: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  border-radius: 6px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.cc-mini-close {
+  padding: 0 0.45rem;
+  color: var(--text-3) !important;
+}
+.cc-mini-close:hover {
+  color: var(--text) !important;
+}

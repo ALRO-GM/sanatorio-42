@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import type { CSSProperties } from 'react'
 
 import { useI18n } from '../i18n'
 import { arrange, move } from './order'
@@ -6,7 +7,8 @@ import type { OrderMode } from './order'
 import { NAV_DEFAULT, PAGE_IDS, PAGES } from './registry'
 import type { PageId } from './registry'
 import { resetPrefs, toggleFold, updatePrefs, usePrefs } from './store'
-import { STYLE_CHOICES, useStyle } from '../theme'
+import { THEMES } from '../../themes'
+import { useLook, usePalette, useStyle } from '../theme'
 import { Icon } from '../ui/Icon'
 
 /** Antelaciones del aviso que se pueden elegir, en minutos. `0` es sin avisos. */
@@ -20,11 +22,13 @@ const MODES = ['manual', 'mine', 'community'] as const satisfies readonly OrderM
  * solo con lo que más usas tú o la comunidad.
  */
 export function LayoutSettings({ onClose }: { onClose: () => void }) {
-  const { t } = useI18n()
+  const { t, lang } = useI18n()
   const prefs = usePrefs()
   const dialog = useRef<HTMLDialogElement>(null)
   const manual = prefs.mode === 'manual'
   const [style, setStyle] = useStyle()
+  const [palette, setPalette] = usePalette()
+  const { theme } = useLook()
 
   useEffect(() => {
     // Sin limpieza a propósito: cerrar aquí dispararía `onClose` en el doble
@@ -68,22 +72,57 @@ export function LayoutSettings({ onClose }: { onClose: () => void }) {
       <section className="layout-group">
         <h4>{t('layout.style')}</h4>
         <fieldset className="style-picker" aria-label={t('layout.style')}>
-          {STYLE_CHOICES.map((option) => (
-            <label key={option} className={`style-option ${option}`}>
+          {THEMES.map((option) => (
+            <label
+              key={option.id}
+              className="style-option"
+              style={
+                {
+                  '--sample-bg': option.preview.bg,
+                  '--sample-surface': option.preview.surface,
+                  '--sample-text': option.preview.text,
+                  '--sample-accent': option.preview.accent,
+                  '--sample-font': option.preview.font,
+                  '--sample-radius': option.preview.radius,
+                } as CSSProperties
+              }
+            >
               <input
                 type="radio"
                 name="layout-style"
-                checked={style === option}
+                checked={style === option.id}
                 onChange={() => {
-                  setStyle(option)
+                  setStyle(option.id)
                 }}
               />
-              <strong>{t(`layout.style.${option}`)}</strong>
-              <small>{t(`layout.style.${option}.hint`)}</small>
-              <i />
+              <strong>{option.name[lang] ?? option.name.es}</strong>
+              <small>{option.hint[lang] ?? option.hint.es}</small>
+              <span className="style-sample" aria-hidden="true">
+                <i />
+                <i />
+              </span>
             </label>
           ))}
         </fieldset>
+        {theme.palettes !== undefined && (
+          <fieldset className="palette-picker" aria-label={t('layout.palette')}>
+            <legend>{t('layout.palette')}</legend>
+            {theme.palettes.map((option) => (
+              <label key={option.id} title={option.name[lang] ?? option.name.es}>
+                <input
+                  type="radio"
+                  name="layout-palette"
+                  checked={palette === option.id}
+                  onChange={() => {
+                    setPalette(option.id)
+                  }}
+                />
+                <i style={{ background: option.swatch }} />
+                <span>{option.name[lang] ?? option.name.es}</span>
+              </label>
+            ))}
+          </fieldset>
+        )}
       </section>
 
       <fieldset className="layout-modes">

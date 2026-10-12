@@ -22,6 +22,7 @@ const node = (extra: Partial<NetworkNode> = {}): NetworkNode => ({
   receivedPassRate: 0.9,
   community: 0,
   cohort: 2025,
+  campusId: 22,
   ...extra,
 })
 
@@ -109,5 +110,33 @@ describe('periodos de la red', () => {
     expect(startOf('quarter', now)).toBe('2026-07-12')
     expect(startOf('year', now)).toBe('2025-10-11')
     expect(dayOf(now)).toBe('2026-10-11')
+  })
+})
+
+describe('red: varias escuelas', () => {
+  it('pinta a cada quien del color de su escuela y lo cuenta en la leyenda', async () => {
+    const { campusColor, colorOf, legendOf } = await import('../src/features/network/colors')
+    const nodes = [
+      node({ login: 'ana', campusId: 22 }),
+      node({ login: 'eva', campusId: 22 }),
+      node({ login: 'pau', campusId: 46 }),
+      node({ login: 'fuera', campusId: null, external: true }),
+    ]
+
+    expect(colorOf(nodes[0] ?? node(), 'campus')).toBe(campusColor(22))
+    expect(campusColor(22)).not.toBe(campusColor(46))
+
+    const legend = legendOf(nodes, 'campus', (key) => key, undefined, [
+      { id: 22, name: 'Madrid' },
+      { id: 46, name: 'Barcelona' },
+      { id: 37, name: 'Málaga' },
+    ])
+
+    // Solo las escuelas que tienen a alguien pintado, y al final quien viene de fuera.
+    expect(legend.map((entry) => entry.label)).toEqual([
+      'Madrid (2)',
+      'Barcelona (1)',
+      'net.legend.external',
+    ])
   })
 })

@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react'
 
+import { useLook } from '../theme'
+
 /**
  * Los iconos de la web: un solo juego, dibujado a propósito, en vez de emojis.
  *
@@ -256,6 +258,9 @@ type IconProps = {
  * botón o el texto que lo acompaña.
  */
 export function Icon({ name, size, className }: IconProps) {
+  // Un estilo puede dibujar un icono a su manera; si no, vale el de siempre.
+  const own = useLook().theme.icons?.[name]
+
   return (
     <svg
       className={`icon ${className ?? ''}`}
@@ -270,7 +275,7 @@ export function Icon({ name, size, className }: IconProps) {
       aria-hidden="true"
       focusable="false"
     >
-      {PATHS[name]}
+      {own ?? PATHS[name]}
     </svg>
   )
 }

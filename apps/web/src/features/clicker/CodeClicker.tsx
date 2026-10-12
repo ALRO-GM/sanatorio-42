@@ -55,6 +55,7 @@ import {
 import type { Game } from './engine'
 import { buildingShare, levelProgress, reach } from './insight'
 import { Backdrop, Coffee, CursorRing, drinkOf, hueOf, Skyline } from './scene'
+import { Mini, miniOn, setMini } from './Mini'
 import { play, setSound, soundOn } from './sound'
 import {
   canResume,
@@ -69,6 +70,8 @@ import { achievementText, fill, newsFor, short, textsOf, upgradeText } from './t
 
 /** Cada cuánto se hacen cuentas y se repinta, y cada cuánto se guarda. */
 const FRAME_MS = 100
+/** Fuera del juego basta con hacer cuentas una vez por segundo: solo se ve un número. */
+const BACKGROUND_FRAME_MS = 1000
 const LOCAL_SAVE_MS = 10_000
 const SERVER_SAVE_MS = 60_000
 /** Cada cuánto se vuelve a intentar cargar si la API no contestó. */
@@ -121,7 +124,22 @@ function clock(ms: number): string {
  * Las reglas están en `engine.ts`; aquí se lleva el reloj, se guarda la
  * partida y se pinta.
  */
-export function CodeClicker({ me, onExit }: { me: string; onExit: () => void }) {
+/**
+ * @param background La web está en otra sección: el juego sigue corriendo, pero
+ *   solo se pinta la ventanita de abajo.
+ * @param onOpen Lo que hace la ventanita al pulsarla: volver al juego.
+ */
+export function CodeClicker({
+  me,
+  onExit,
+  background = false,
+  onOpen,
+}: {
+  me: string
+  onExit: () => void
+  background?: boolean
+  onOpen?: () => void
+}) {
   const { lang } = useI18n()
   const texts = textsOf(lang)
   const ui = useCallback(
@@ -149,6 +167,7 @@ export function CodeClicker({ me, onExit }: { me: string; onExit: () => void }) 
   const touch = useRef(false)
   const primed = useRef(false)
   const [sound, setSoundOn] = useState(soundOn)
+  const [mini, setMiniOn] = useState(miniOn)
   // Lo último que se compró, para el destello de su botón.
   const [flash, setFlash] = useState<{ id: string; n: number } | null>(null)
   const keyArt = useRef<HTMLButtonElement>(null)
@@ -328,21 +347,25 @@ export function CodeClicker({ me, onExit }: { me: string; onExit: () => void }) 
 
   // El reloj del juego, y los guardados periódicos.
   useEffect(() => {
-    const frame = window.setInterval(() => {
-      const current = game.current
+    const frame = window.setInterval(
+      () => {
+        const current = game.current
 
-      if (current === null) return
+        if (current === null) return
 
-      for (const id of tick(current, Date.now(), Math.random, plus.current, caught.current)) {
-        const [title, text] = achievementText(id, lang)
+        for (const id of tick(current, Date.now(), Math.random, plus.current, caught.current)) {
+          const [title, text] = achievementText(id, lang)
 
-        toast({ icon: 'trophy', title, text, tier: ACHIEVEMENTS.indexOf(id) % 11 })
-        play('achievement', heard.current)
-      }
+          toast({ icon: 'trophy', title, text, tier: ACHIEVEMENTS.indexOf(id) % 11 })
+          // Fuera del juego no suena nada: allí no se ha venido a jugar.
+          play('achievement', heard.current && !background)
+        }
 
-      sample(samples.current, Date.now(), capitalOf(current))
-      setFrame((value) => value + 1)
-    }, FRAME_MS)
+        sample(samples.current, Date.now(), capitalOf(current))
+        setFrame((value) => value + 1)
+      },
+      background ? BACKGROUND_FRAME_MS : FRAME_MS,
+    )
     const local = window.setInterval(() => {
       save(false)
     }, LOCAL_SAVE_MS)
@@ -362,7 +385,7 @@ export function CodeClicker({ me, onExit }: { me: string; onExit: () => void }) 
       document.removeEventListener('visibilitychange', onHide)
       save(true)
     }
-  }, [lang, save, toast])
+  }, [lang, save, toast, background])
 
   // El rótulo de noticias: una nueva cada pocos segundos, según cómo va la partida.
   useEffect(() => {
@@ -462,7 +485,23 @@ export function CodeClicker({ me, onExit }: { me: string; onExit: () => void }) 
   const current = game.current
 
   if (current === null) {
-    return <p className="estado">…</p>
+    return background ? null : <p className="estado">…</p>
+  }
+
+  // En otra sección el juego sigue, pero de él solo queda la ventanita.
+  if (background) {
+    return mini ? (
+      <Mini
+        lines={short(Math.floor(current.code), lang, 2)}
+        perSecond={ui('perSecond', { n: short(cpsOf(current, Date.now()), lang, 1) })}
+        labels={{ open: ui('miniOpen'), close: ui('miniClose') }}
+        onOpen={() => onOpen?.()}
+        onClose={() => {
+          setMini(false)
+          setMiniOn(false)
+        }}
+      />
+    ) : null
   }
 
   const now = Date.now()
@@ -624,6 +663,18 @@ export function CodeClicker({ me, onExit }: { me: string; onExit: () => void }) 
             }}
           >
             {ui(sound ? 'soundOn' : 'soundOff')}
+          </button>
+          <button
+            type="button"
+            className="pill"
+            aria-pressed={mini}
+            title={ui('miniAbout')}
+            onClick={() => {
+              setMini(!mini)
+              setMiniOn(!mini)
+            }}
+          >
+            {ui(mini ? 'miniOn' : 'miniOff')}
           </button>
           <button type="button" className="pill" onClick={onExit}>
             {ui('back')}

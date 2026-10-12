@@ -110,6 +110,8 @@ export type NetworkParams = {
   min?: number
   /** Tope de personas. */
   limit?: number
+  /** Los campus que se miran juntos: ids separados por comas, o `all`. Sin él, el propio. */
+  campuses?: string
 }
 
 /** El tramo de gente que se pide, por lo activa que es: del `low` % al `high` %. */
@@ -265,7 +267,7 @@ export type Api = {
   /** Con quién te has corregido tú, en todo el histórico. */
   getNetworkMine: () => Promise<NetworkMine>
   /** Logins que empiezan por lo escrito, para el buscador de la red. */
-  searchNetworkPeople: (q: string) => Promise<NetworkPerson[]>
+  searchNetworkPeople: (q: string, campuses?: string) => Promise<NetworkPerson[]>
 
   /** Fechas para el estado de salud: inicio, círculos completados y black hole. */
   getHealth: () => Promise<Health>

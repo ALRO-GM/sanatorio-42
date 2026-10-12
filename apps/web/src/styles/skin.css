@@ -1,0 +1,52 @@
+/* ── La piel ─────────────────────────────────────────────────────────────────
+   Aplica a los componentes las variables de aspecto de `styles.css`. Va la
+   última de las hojas de la web, detrás de `system.css`, porque esta fija a mano
+   fondos y sombras que aquí pasan a depender del estilo.
+
+   Detrás solo van las hojas de cada estilo (`src/themes/`).
+   ──────────────────────────────────────────────────────────────────────────── */
+body {
+  background: var(--page-image), var(--bg);
+  background-size: var(--page-size), auto;
+  background-attachment: fixed;
+}
+.card,
+.project,
+.peer-card,
+.step-card,
+.group-card,
+.stat-card,
+.tile {
+  background-image: var(--surface-image);
+  background-size: var(--surface-size);
+  box-shadow: var(--card-shadow);
+  border-style: var(--border-style);
+}
+/* Lo de dentro de una tarjeta no es otra ventana: ni sombra ni textura propia. */
+.card .card,
+.card .tile,
+.card .stat-card,
+.layout-dialog .card {
+  background-image: none;
+  box-shadow: none;
+}
+button.primary {
+  background-image: var(--primary-image);
+  box-shadow: var(--primary-shadow);
+}
+.appbar {
+  background: var(--appbar-bg);
+}
+.banner {
+  background: var(--banner-image);
+}
+.eyebrow {
+  font-family: var(--eyebrow-font);
+  text-transform: var(--eyebrow-transform);
+}
+h1,
+h2,
+h3 {
+  font-weight: var(--display-weight);
+  letter-spacing: var(--display-spacing);
+}

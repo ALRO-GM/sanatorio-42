@@ -1,25 +1,51 @@
 /**
- * Tema de la web: claro, nocturno o el que diga el sistema.
+ * El aspecto de la web: tema (claro, nocturno o el del sistema), estilo y, si
+ * el estilo las tiene, paleta de color.
  *
- * El tema efectivo se escribe en `data-theme` de `<html>`, que es lo que miran
- * los estilos (`styles/theme.css`). La elección se guarda en el navegador.
+ * Todo se escribe en `<html>`, que es lo que miran las hojas de estilos:
+ * `data-theme`, `data-style` y las variables de la paleta. La elección se
+ * guarda en el navegador.
  *
- * `index.html` lleva una copia mínima de `resolve` que se ejecuta antes de
- * pintar, para que al cargar en modo nocturno no se vea un fogonazo blanco. Si
- * cambias la clave o la lógica, cámbiala también allí.
+ * `public/theme.js` hace lo mismo antes de pintar, para que al cargar no se vea
+ * un fogonazo con el aspecto de fábrica. Si cambias una clave, cámbiala allí.
  */
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, useSyncExternalStore } from 'react'
+
+import { DEFAULT_THEME, themeOf } from '../../themes'
+import type { ThemeManifest, ThemePalette } from '../../themes'
 
 export const THEME_CHOICES = ['auto', 'light', 'dark'] as const
 
 export type ThemeChoice = (typeof THEME_CHOICES)[number]
 
 const STORAGE_KEY = 'sanatorio_theme'
+const STYLE_KEY = 'sanatorio_style'
+/** La paleta elegida de cada estilo: `{ libre: 'oceano' }`. */
+const PALETTE_KEY = 'sanatorio_palette'
+/** Las variables de la paleta en uso, tal cual, para `theme.js`. */
+const PALETTE_VARS_KEY = 'sanatorio_palette_vars'
 const DARK_QUERY = '(prefers-color-scheme: dark)'
 
+function read(key: string): string | null {
+  try {
+    return localStorage.getItem(key)
+  } catch {
+    // Sin almacenamiento (modo privado estricto): vale lo de fábrica.
+    return null
+  }
+}
+
+function write(key: string, value: string): void {
+  try {
+    localStorage.setItem(key, value)
+  } catch {
+    // La elección dura lo que dure la pestaña.
+  }
+}
+
 function stored(): ThemeChoice {
-  const value = localStorage.getItem(STORAGE_KEY)
+  const value = read(STORAGE_KEY)
 
   return THEME_CHOICES.find((choice) => choice === value) ?? 'auto'
 }
@@ -61,42 +87,102 @@ export function useTheme(): [ThemeChoice, (next: ThemeChoice) => void] {
   }, [choice])
 
   const change = useCallback((next: ThemeChoice) => {
-    localStorage.setItem(STORAGE_KEY, next)
+    write(STORAGE_KEY, next)
     setChoice(next)
   }, [])
 
   return [choice, change]
 }
 
-export const STYLE_CHOICES = ['clinica', 'terminal', 'historial'] as const
+// --- Estilo y paleta ----------------------------------------------------------
+// Van en un almacén propio, fuera de React: los usa el selector, pero también
+// cada icono, que tiene que saber si el estilo lo dibuja a su manera.
 
-/** Cómo viste la web: letra, acento, esquinas e iconos (`styles/styles.css`). */
-export type StyleChoice = (typeof STYLE_CHOICES)[number]
+function storedPalettes(): Record<string, string> {
+  try {
+    const parsed: unknown = JSON.parse(read(PALETTE_KEY) ?? '{}')
 
-const STYLE_KEY = 'sanatorio_style'
-
-function storedStyle(): StyleChoice {
-  const value = localStorage.getItem(STYLE_KEY)
-
-  return STYLE_CHOICES.find((choice) => choice === value) ?? 'clinica'
+    return typeof parsed === 'object' && parsed !== null ? (parsed as Record<string, string>) : {}
+  } catch {
+    return {}
+  }
 }
 
-/**
- * El estilo elegido y cómo cambiarlo. Se escribe en `data-style` de `<html>`;
- * `public/theme.js` hace lo mismo antes de pintar. Si cambias la clave, cámbiala
- * también allí.
- */
-export function useStyle(): [StyleChoice, (next: StyleChoice) => void] {
-  const [choice, setChoice] = useState(storedStyle)
+const paletteOf = (theme: ThemeManifest, palettes: Record<string, string>): ThemePalette | null =>
+  theme.palettes?.find((palette) => palette.id === palettes[theme.id]) ??
+  theme.palettes?.[0] ??
+  null
 
-  useEffect(() => {
-    document.documentElement.dataset.style = choice
-  }, [choice])
+let look: { theme: ThemeManifest; palette: ThemePalette | null } = (() => {
+  const theme = themeOf(read(STYLE_KEY))
 
-  const change = useCallback((next: StyleChoice) => {
-    localStorage.setItem(STYLE_KEY, next)
-    setChoice(next)
+  return { theme, palette: paletteOf(theme, storedPalettes()) }
+})()
+/** Las variables que puso la paleta anterior, para quitarlas al cambiar. */
+let painted: string[] = []
+const listeners = new Set<() => void>()
+
+/** Escribe el estilo y la paleta en `<html>` y los deja guardados. */
+function paint(): void {
+  // Sin página (en los tests) no hay dónde escribirlo.
+  if (typeof document === 'undefined') return
+
+  const root = document.documentElement
+  const vars = look.palette?.vars ?? {}
+
+  root.dataset.style = look.theme.id
+  for (const name of painted) root.style.removeProperty(name)
+  for (const [name, value] of Object.entries(vars)) root.style.setProperty(name, value)
+  painted = Object.keys(vars)
+
+  write(STYLE_KEY, look.theme.id)
+  write(PALETTE_VARS_KEY, JSON.stringify(vars))
+}
+
+function set(next: typeof look): void {
+  look = next
+  paint()
+  for (const listener of listeners) listener()
+}
+
+function subscribe(listener: () => void): () => void {
+  listeners.add(listener)
+
+  return () => {
+    listeners.delete(listener)
+  }
+}
+
+paint()
+
+/** El estilo en uso, con su manifiesto: se repinta quien lo use cuando cambia. */
+export function useLook(): typeof look {
+  return useSyncExternalStore(subscribe, () => look)
+}
+
+/** El estilo elegido (su id) y cómo cambiarlo. */
+export function useStyle(): [string, (next: string) => void] {
+  const { theme } = useLook()
+  const change = useCallback((next: string) => {
+    const chosen = themeOf(next)
+
+    set({ theme: chosen, palette: paletteOf(chosen, storedPalettes()) })
   }, [])
 
-  return [choice, change]
+  return [theme.id, change]
 }
+
+/** La paleta en uso (su id, o `null` si el estilo no tiene) y cómo cambiarla. */
+export function usePalette(): [string | null, (next: string) => void] {
+  const { palette } = useLook()
+  const change = useCallback((next: string) => {
+    const palettes = { ...storedPalettes(), [look.theme.id]: next }
+
+    write(PALETTE_KEY, JSON.stringify(palettes))
+    set({ theme: look.theme, palette: paletteOf(look.theme, palettes) })
+  }, [])
+
+  return [palette?.id ?? null, change]
+}
+
+export { DEFAULT_THEME }

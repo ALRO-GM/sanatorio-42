@@ -42,3 +42,5 @@
 @import './tour.css';
 /* El sistema visual: lo último, para que mande sobre lo de cada sección. */
 @import './system.css';
+/* La piel: aplica a los componentes las variables de aspecto de cada estilo. */
+@import './skin.css';

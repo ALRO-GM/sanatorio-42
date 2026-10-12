@@ -13,13 +13,15 @@ type PersonSearchProps = {
   /** Login de quien mira, para el atajo "mi red". */
   me: string
   onChange: (login: string | null) => void
+  /** Los campus en los que se busca; sin él, el propio. */
+  campuses?: string | undefined
 }
 
 /** Espera tras la última tecla antes de preguntar a la API. */
 const DEBOUNCE_MS = 180
 
 /** Buscador de personas de la red: escribe el principio de un login y elige. */
-export function PersonSearch({ value, me, onChange }: PersonSearchProps) {
+export function PersonSearch({ value, me, onChange, campuses }: PersonSearchProps) {
   const { t } = useI18n()
   const [text, setText] = useState('')
   const [found, setFound] = useState<NetworkPerson[]>([])
@@ -36,7 +38,7 @@ export function PersonSearch({ value, me, onChange }: PersonSearchProps) {
     let current = true
     const timer = setTimeout(() => {
       api
-        .searchNetworkPeople(prefix)
+        .searchNetworkPeople(prefix, campuses)
         .then((people) => {
           if (current) setFound(people)
         })
@@ -49,7 +51,7 @@ export function PersonSearch({ value, me, onChange }: PersonSearchProps) {
       current = false
       clearTimeout(timer)
     }
-  }, [text])
+  }, [text, campuses])
 
   const choose = (login: string | null): void => {
     setText('')

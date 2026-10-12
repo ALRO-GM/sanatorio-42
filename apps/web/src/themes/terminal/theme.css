@@ -1,0 +1,218 @@
+/* ── Terminal ────────────────────────────────────────────────────────────────
+   Una consola. Letra de máquina en todo, ni una curva ni una sombra suave, y
+   los colores de una terminal: verde fósforo para lo que manda, y rojo, ámbar,
+   azul y magenta para lo demás, como en el resaltado de un editor.
+
+   En claro es el mismo editor con el tema de día: papel blanco y tinta.
+   ──────────────────────────────────────────────────────────────────────────── */
+:root[data-style='terminal'] {
+  --font: 'JetBrains Mono Variable', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --font-display: var(--font);
+  --display-weight: 800;
+  --display-spacing: -0.02em;
+  --icon-stroke: 1.5;
+  --icon-cap: square;
+  --icon-join: miter;
+  --radius: 0;
+  --radius-sm: 0;
+
+  --bg: #f3f4f1;
+  --surface: #ffffff;
+  --surface-2: #eceee9;
+  --surface-3: #dfe2db;
+  --border: #1f2328;
+  --border-strong: #1f2328;
+  --fill-muted: #9aa39a;
+  --text: #16191d;
+  --text-2: #2f363d;
+  --text-3: #57606a;
+  --text-4: #8c959f;
+  --accent: #116329;
+  --accent-hover: #0b4d1e;
+  --accent-soft: #d6f5d9;
+  --accent-text: #116329;
+  --on-accent: #ffffff;
+  --ok: #1a7f37;
+  --ok-soft: #dafbe1;
+  --warn: #9a6700;
+  --warn-soft: #fff4c2;
+  --danger: #cf222e;
+  --danger-soft: #ffe2e0;
+  --gold: #bf8700;
+  /* Los otros colores del resaltado, para rótulos y marcas. */
+  --term-blue: #0550ae;
+  --term-magenta: #8250df;
+  --glow: rgba(17, 99, 41, 0.18);
+  --shadow: rgba(0, 0, 0, 0.35);
+
+  --page-image: url('./assets/grid.svg');
+  --page-size: 24px 24px;
+  --surface-image: none;
+  /* La única sombra que hay: dura y desplazada, como una ventana de texto. */
+  --card-shadow: 4px 4px 0 var(--border);
+  --primary-image: none;
+  --primary-shadow: 3px 3px 0 var(--text);
+  --appbar-bg: var(--bg);
+  --banner-image: repeating-linear-gradient(
+    -45deg,
+    var(--accent) 0 10px,
+    var(--surface-3) 10px 20px
+  );
+  --eyebrow-transform: lowercase;
+  font-size: 14px;
+}
+:root[data-style='terminal'][data-theme='dark'] {
+  --bg: #050805;
+  --surface: #0b120c;
+  --surface-2: #111a12;
+  --surface-3: #18251a;
+  --border: #2a4a2f;
+  --border-strong: #3d7045;
+  --fill-muted: #2f5236;
+  --text: #d7e4d9;
+  --text-2: #a9bcac;
+  --text-3: #7b917f;
+  --text-4: #526656;
+  --accent: #4af626;
+  --accent-hover: #8dff75;
+  --accent-soft: #0f2a0c;
+  --accent-text: #4af626;
+  --on-accent: #041003;
+  --ok: #4af626;
+  --ok-soft: #0f2a0c;
+  --warn: #ffbd2e;
+  --warn-soft: #2e2408;
+  --danger: #ff5f56;
+  --danger-soft: #321110;
+  --gold: #ffd75f;
+  --term-blue: #58a6ff;
+  --term-magenta: #d2a8ff;
+  --glow: rgba(74, 246, 38, 0.2);
+  --shadow: rgba(0, 0, 0, 0.8);
+
+  --card-shadow: 4px 4px 0 var(--border);
+  --primary-shadow: 3px 3px 0 var(--border-strong);
+}
+
+/* Ni una curva: muchas reglas llevan su radio escrito. Se libran los retratos y
+   los interruptores, que sin redondear no se reconocen. */
+:root[data-style='terminal']
+  *:not([class*='avatar']):not([class*='switch']):not([class*='switch'] *):not(.seat-online):not(
+    .duty-dot
+  ) {
+  border-radius: 0 !important;
+}
+/* Las líneas de un monitor viejo, solo de noche. */
+:root[data-style='terminal'][data-theme='dark'] body::after {
+  content: '';
+  display: block;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: repeating-linear-gradient(180deg, transparent 0 2px, rgba(0, 0, 0, 0.16) 2px 3px);
+  pointer-events: none;
+}
+:root[data-style='terminal'] ::selection {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+:root[data-style='terminal'] .appbar {
+  backdrop-filter: none;
+  border-bottom: 1px solid var(--border-strong);
+}
+:root[data-style='terminal'] h2 {
+  text-transform: lowercase;
+}
+:root[data-style='terminal'] h2::before {
+  content: '$ ';
+  color: var(--accent-text);
+  font-weight: 400;
+}
+/* El cursor, parpadeando al final del título. */
+:root[data-style='terminal'] h2::after {
+  content: '█';
+  margin-left: 0.25em;
+  color: var(--accent-text);
+  font-size: 0.8em;
+  animation: term-blink 1.1s steps(1) infinite;
+}
+@keyframes term-blink {
+  50% {
+    opacity: 0;
+  }
+}
+:root[data-style='terminal'] .eyebrow {
+  color: var(--term-magenta);
+  letter-spacing: 0;
+}
+:root[data-style='terminal'] .eyebrow::before {
+  content: '// ';
+  color: var(--text-4);
+}
+:root[data-style='terminal'] button.primary {
+  border: 1px solid var(--text);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+:root[data-style='terminal'] button.primary:active:not(:disabled) {
+  box-shadow: none;
+  transform: translate(3px, 3px);
+}
+/* Lo elegido va en negativo, como una selección de texto. */
+:root[data-style='terminal'] .pill.active,
+:root[data-style='terminal'] .pill.active:hover:not(:disabled) {
+  border-color: var(--text);
+  background: var(--text);
+  color: var(--bg);
+}
+:root[data-style='terminal'] .tab.active {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+:root[data-style='terminal'] .tab.active .icon {
+  color: var(--on-accent);
+}
+:root[data-style='terminal'] .tab.active::after {
+  display: none;
+}
+:root[data-style='terminal'] a,
+:root[data-style='terminal'] .link,
+:root[data-style='terminal'] .profile-link,
+:root[data-style='terminal'] .record-link {
+  color: var(--term-blue);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+:root[data-style='terminal'] input,
+:root[data-style='terminal'] select,
+:root[data-style='terminal'] textarea {
+  caret-color: var(--accent);
+  font-family: var(--font);
+}
+:root[data-style='terminal'] input:focus-visible,
+:root[data-style='terminal'] select:focus-visible,
+:root[data-style='terminal'] textarea:focus-visible,
+:root[data-style='terminal'] button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 0;
+  box-shadow: none;
+}
+:root[data-style='terminal'] .badge,
+:root[data-style='terminal'] .chip {
+  border: 1px solid currentColor;
+  background: none;
+}
+:root[data-style='terminal'] .stat-card.strong strong {
+  color: var(--accent-text);
+}
+:root[data-style='terminal'] dialog.layout-dialog,
+:root[data-style='terminal'] dialog.event-dialog {
+  border: 1px solid var(--border-strong);
+  box-shadow: 8px 8px 0 var(--shadow);
+}
+@media (prefers-reduced-motion: reduce) {
+  :root[data-style='terminal'] h2::after {
+    animation: none;
+  }
+}

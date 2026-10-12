@@ -124,8 +124,16 @@ function statsOf(person: Person, links: readonly NetworkLink[]): NetworkNode {
     receivedPassRate: received < 3 ? null : 0.6 + ((person.login.charCodeAt(1) * 5) % 40) / 100,
     community: person.group,
     cohort: person.cohort,
+    campusId: person.external ? null : MOCK_CAMPUSES[0].id,
   }
 }
+
+/** Los campus con correcciones en la web de mentira. */
+const MOCK_CAMPUSES = [
+  { id: 22, name: 'Madrid' },
+  { id: 46, name: 'Barcelona' },
+  { id: 37, name: 'Málaga' },
+] as const
 
 let cached: { me: string; people: Person[]; links: NetworkLink[] } | null = null
 
@@ -180,6 +188,16 @@ export function mockNetwork(me: string, params: NetworkParams): NetworkGraph {
   const weighted = (value: (node: NetworkNode) => number): number =>
     insiders.reduce((sum, node) => sum + value(node) * (node.given + node.received), 0) / weight
 
+  const wanted =
+    params.campuses === undefined
+      ? [MOCK_CAMPUSES[0].id]
+      : params.campuses === 'all'
+        ? MOCK_CAMPUSES.map((campus) => campus.id)
+        : params.campuses.split(',').map(Number)
+  const chosen: number[] = MOCK_CAMPUSES.map((campus) => campus.id).filter((id) =>
+    wanted.includes(id),
+  )
+
   return {
     query: {
       from: params.from ?? null,
@@ -191,7 +209,17 @@ export function mockNetwork(me: string, params: NetworkParams): NetworkGraph {
       min,
       limit,
     },
-    nodes,
+    campuses: chosen,
+    available: [...MOCK_CAMPUSES],
+    // Con varios campus, cada grupo es de uno: así se ve el color por campus.
+    nodes: nodes.map((node, index) => ({
+      ...node,
+      campusId: node.external
+        ? null
+        : (chosen[
+            (people.find((person) => person.login === node.login)?.group ?? index) % chosen.length
+          ] ?? null),
+    })),
     links,
     totals: {
       corrections: all.reduce((sum, link) => sum + link.forth + link.back, 0),

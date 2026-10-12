@@ -851,6 +851,13 @@ como `AAAA-MM-DD` o queda a más de 800 días, o si ya completaste el common cor
 Quién ha corregido a quién en el 42cursus del campus que miras. Sale de una
 copia local de las correcciones de 42 que se va completando sola.
 
+Varias escuelas. `/network`, `/network/pair`, `/network/strictest` y
+`/network/people` admiten `campuses`: los ids de los campus que se miran juntos,
+separados por comas, o `all` para todos los que tienen correcciones copiadas.
+Sin él, el de quien pregunta. El grafo trae `campuses` (los que se están
+mirando), `available` (los que se pueden elegir, con su nombre) y, en cada
+persona, `campusId` (de cuál es; `null` si viene de fuera de todos ellos).
+
 GET /network?from=&to=&login=&projectId=&min=&limit= → el grafo. Todo opcional.
 
 - `from`, `to`: fecha (`2026-10-11`) o instante ISO-8601. `to` sin hora incluye
