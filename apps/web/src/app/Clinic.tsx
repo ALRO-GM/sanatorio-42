@@ -149,6 +149,7 @@ export function Clinic({ me, onLogout }: ClinicProps) {
         <Suspense fallback={null}>
           {box === 'notices' && (
             <Mailbox
+              me={me.login}
               onClose={() => {
                 setBox(null)
                 refresh()

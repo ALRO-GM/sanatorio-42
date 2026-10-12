@@ -787,7 +787,6 @@ export const en: Record<string, string> = {
   'notices.openUnread': 'Open the mailbox: {n} unread',
   'notices.empty': 'You have no notices.',
   'notices.readAll': 'Mark all as read',
-  'notices.write': 'Write to whoever runs the site',
   'notices.unreadMark': 'Unread:',
   'notices.someone': 'Someone',
   'notices.now': 'just now',
@@ -1341,4 +1340,9 @@ export const en: Record<string, string> = {
   'demo.real': 'Go to the real site',
   'demo.staff':
     'In the demo any key starting with “s42-” works, and the sample document has the code K7QF.',
+  'notices.compose': 'Write a message',
+  'notices.toAdmin': 'To the admins',
+  'notices.toPeer': 'To someone on campus',
+  'notices.peerLabel': 'Search by login or name',
+  'record.write': 'Message {login}',
 }

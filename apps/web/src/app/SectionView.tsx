@@ -134,7 +134,9 @@ export function SectionView({
       {section === 'clicker' && egg.pill !== 'red' && egg.ready && (
         <p className="estado">{t('error.404')}</p>
       )}
-      {section === 'clusters' && <ClustersPage me={me.login} initialPeer={chatWith} />}
+      {section === 'clusters' && (
+        <ClustersPage key={chatWith ?? ''} me={me.login} initialPeer={chatWith} />
+      )}
       {section === 'gestion' &&
         (profile.data?.admin === true ? (
           <AdminPage campusId={profile.data.campusId} />

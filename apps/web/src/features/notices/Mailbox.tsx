@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import type { Notice } from '@sanatorio/contracts'
 
@@ -11,8 +11,12 @@ import type { NoticeTarget } from './routes'
 import { Icon } from '../../shared/ui/Icon'
 import { InfoTip } from '../../shared/ui/InfoTip'
 import { MailboxTour } from './MailboxTour'
+import { PeerPicker } from './PeerPicker'
+import { chatHref } from '../../shared/links'
 
 type MailboxProps = {
+  /** Quién eres: para no ofrecerte escribirte. */
+  me: string
   onClose: () => void
   /** Lleva a donde se ve de qué va el aviso. */
   onOpen: (target: NoticeTarget) => void
@@ -25,11 +29,13 @@ type MailboxProps = {
  * respondido, te han pedido ayuda, hay mensajes en un chat tuyo…), lo que no
  * has leído primero. Cada aviso lleva al sitio donde se ve.
  */
-export function Mailbox({ onClose, onOpen, onChange }: MailboxProps) {
+export function Mailbox({ me, onClose, onOpen, onChange }: MailboxProps) {
   const { t, lang } = useI18n()
   const dialog = useRef<HTMLDialogElement>(null)
   const { data, error, loading, reload } = useAsync(() => api.getNotices(), [])
   const action = useAction()
+  /** A quién se va a escribir: aún no se ha dicho, o a alguien del campus. */
+  const [writing, setWriting] = useState<'closed' | 'choose' | 'peer'>('closed')
 
   useEffect(() => {
     // Sin limpieza a propósito: ver `LayoutSettings`.
@@ -137,13 +143,50 @@ export function Mailbox({ onClose, onOpen, onChange }: MailboxProps) {
         <button
           type="button"
           className="link"
+          aria-expanded={writing !== 'closed'}
           onClick={() => {
-            onOpen('inbox')
+            setWriting(writing === 'closed' ? 'choose' : 'closed')
           }}
         >
-          <Icon name="lapiz" /> {t('notices.write')}
+          <Icon name="lapiz" /> {t('notices.compose')}
         </button>
       </div>
+
+      {writing !== 'closed' && (
+        <div className="compose">
+          <div className="filter-pills" role="group" aria-label={t('notices.compose')}>
+            <button
+              type="button"
+              className="pill"
+              onClick={() => {
+                onOpen('inbox')
+              }}
+            >
+              <Icon name="buzon" /> {t('notices.toAdmin')}
+            </button>
+            <button
+              type="button"
+              className={`pill ${writing === 'peer' ? 'active' : ''}`}
+              aria-pressed={writing === 'peer'}
+              onClick={() => {
+                setWriting('peer')
+              }}
+            >
+              <Icon name="chat" /> {t('notices.toPeer')}
+            </button>
+          </div>
+          {writing === 'peer' && (
+            <PeerPicker
+              me={me}
+              onPick={(login) => {
+                // La conversación se abre en los clusters, con su chat ya a la vista.
+                window.location.hash = chatHref(login)
+                dialog.current?.close()
+              }}
+            />
+          )}
+        </div>
+      )}
     </dialog>
   )
 }

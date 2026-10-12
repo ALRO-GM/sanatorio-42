@@ -1,17 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 
-import type { FoundPerson } from '@sanatorio/contracts'
-
-import { api } from '../../shared/api'
 import { useI18n } from '../../shared/i18n'
 import { Avatar } from '../../shared/ui/Avatar'
 import { Icon } from '../../shared/ui/Icon'
 import { recordHref } from '../../shared/links'
-
-/** Lo que se espera tras la última tecla antes de preguntar a la API. */
-const WAIT_MS = 180
-/** Con menos letras no se busca: saldría medio campus. */
-const MIN_LETTERS = 2
+import { usePeopleSearch } from './usePeopleSearch'
 
 /**
  * El buscador de personas de la cabecera. Se escribe un login o un nombre, da
@@ -25,36 +18,9 @@ export function PersonFinder() {
   const { t } = useI18n()
   const [open, setOpen] = useState(false)
   const [text, setText] = useState('')
-  const [found, setFound] = useState<FoundPerson[] | null>(null)
   const box = useRef<HTMLDivElement>(null)
   const input = useRef<HTMLInputElement>(null)
-  const wanted = text.trim()
-
-  useEffect(() => {
-    if (wanted.length < MIN_LETTERS) {
-      setFound(null)
-
-      return undefined
-    }
-
-    let current = true
-    const timer = setTimeout(() => {
-      api.searchPeople(wanted).then(
-        (people) => {
-          // Si entre tanto se ha escrito otra cosa, esta respuesta ya no vale.
-          if (current) setFound(people)
-        },
-        () => {
-          if (current) setFound([])
-        },
-      )
-    }, WAIT_MS)
-
-    return () => {
-      current = false
-      clearTimeout(timer)
-    }
-  }, [wanted])
+  const found = usePeopleSearch(text)
 
   // Se cierra al pulsar fuera.
   useEffect(() => {

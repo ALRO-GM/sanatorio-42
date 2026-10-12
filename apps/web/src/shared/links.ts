@@ -21,6 +21,11 @@ export function networkHref(login: string | null = null): string {
   return login === null ? '#/red' : `#/red/${encodeURIComponent(login)}`
 }
 
+/** La conversación directa con alguien: se abre en los clusters. */
+export function chatHref(login: string): string {
+  return `#/clusters/${encodeURIComponent(login)}`
+}
+
 /** El perfil de alguien en la intra de 42. */
 export function intraHref(login: string): string {
   return `https://profile.intra.42.fr/users/${encodeURIComponent(login)}`

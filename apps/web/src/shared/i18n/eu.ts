@@ -741,7 +741,6 @@ export const eu: Record<string, string> = {
   'notices.openUnread': 'Ireki postontzia: {n} irakurri gabe',
   'notices.empty': 'Ez duzu abisurik.',
   'notices.readAll': 'Markatu dena irakurrita gisa',
-  'notices.write': 'Idatzi kudeatzaileari',
   'notices.unreadMark': 'Irakurri gabe:',
   'notices.someone': 'Norbait',
   'notices.now': 'oraintxe',
@@ -972,4 +971,9 @@ export const eu: Record<string, string> = {
   'demo.real': 'Joan benetako webgunera',
   'demo.staff':
     'Erakustaldian «s42-» hasten den edozein gakok balio du, eta adibideko dokumentuak K7QF kodea du.',
+  'notices.compose': 'Idatzi mezu bat',
+  'notices.toAdmin': 'Kudeatzaileari',
+  'notices.toPeer': 'Campuseko norbaiti',
+  'notices.peerLabel': 'Bilatu loginaren edo izenaren arabera',
+  'record.write': 'Idatzi {login} erabiltzaileari',
 }

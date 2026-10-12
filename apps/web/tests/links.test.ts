@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { decodePart, intraHref, networkHref, recordHref } from '../src/shared/links'
+import { chatHref, decodePart, intraHref, networkHref, recordHref } from '../src/shared/links'
 
 describe('direcciones de la web', () => {
   it('un login normal va tal cual', () => {
@@ -18,6 +18,14 @@ describe('direcciones de la web', () => {
       'https://profile.intra.42.fr/users/x%2F..%2F..%2Flogout',
     )
     expect(intraHref('"><script>')).not.toContain('<')
+  })
+
+  it('la conversación con alguien se abre en los clusters, con el login codificado', () => {
+    expect(chatHref('jdoe')).toBe('#/clusters/jdoe')
+    expect(chatHref('a/b')).toBe('#/clusters/a%2Fb')
+    expect(chatHref('')).toBe('#/clusters/')
+    expect(decodePart(chatHref('ñ #?%').slice('#/clusters/'.length))).toBe('ñ #?%')
+    expect(chatHref('x'.repeat(5000))).toHaveLength('#/clusters/'.length + 5000)
   })
 
   it('ida y vuelta: lo codificado se recupera igual', () => {

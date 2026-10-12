@@ -104,7 +104,8 @@ Las capturas son del estado actual de la web, con los datos simulados de
 Es la portada. Nivel y títulos por XP, estado de salud (a qué _pace_ vas, cuándo
 caerías al siguiente y cuándo te alcanza el _black hole_, con calculadora), las
 horas validadas con descarga en CSV, tu red de correcciones, logros y ranking.
-El expediente de otra persona se puede abrir en una versión pública recortada.
+El expediente de otra persona se puede abrir en una versión pública recortada,
+con un botón junto a su nombre para escribirle.
 
 ![Expediente](docs/img/expediente.webp)
 
@@ -168,7 +169,8 @@ Si es con más gente no se puede cerrar sin contestar: «voy», «me retraso» o
 puedo ir» con motivo. Cada evento tiene un chat que comparten todos. Pizarras y
 sesiones de ayuda validan la asistencia con dos códigos, a mano o por QR. Lo que
 le pasa a una persona por lo que hace otra llega a su buzón, con el número de
-avisos sin leer en la cabecera.
+avisos sin leer en la cabecera. Desde el buzón también se escribe: a quien
+administra o a alguien del campus, que se busca por login o por nombre.
 
 ### Red de correcciones
 

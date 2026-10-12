@@ -53,7 +53,7 @@ Monorepo con workspaces de npm. Ver `README.md` y `docs/architecture.md`.
 - Web: los componentes no llevan texto escrito, usan `t('clave')`. Cada texto
   nuevo va en `shared/i18n/es.ts` y su traducción en `en.ts`.
 - Web: las direcciones se construyen con `shared/links.ts` (`recordHref`,
-  `networkHref`, `intraHref`) y se leen con `decodePart`. Nada de montar un
+  `networkHref`, `chatHref`, `intraHref`) y se leen con `decodePart`. Nada de montar un
   `#/…/${login}` a mano.
 - Web: lo que se añada a la API de mentira sale también en la demostración
   pública (`/demo/`): logins y datos inventados, nunca de gente real.

@@ -797,7 +797,6 @@ export const es: Record<string, string> = {
   'notices.openUnread': 'Abrir el buzón: {n} sin leer',
   'notices.empty': 'No tienes ningún aviso.',
   'notices.readAll': 'Marcar todo como leído',
-  'notices.write': 'Escribir a quien administra',
   'notices.unreadMark': 'Sin leer:',
   'notices.someone': 'Alguien',
   'notices.now': 'ahora mismo',
@@ -1389,4 +1388,9 @@ export const es: Record<string, string> = {
   'demo.real': 'Ir a la web de verdad',
   'demo.staff':
     'En la demostración vale cualquier clave que empiece por «s42-», y el documento de ejemplo tiene el código K7QF.',
+  'notices.compose': 'Escribir un mensaje',
+  'notices.toAdmin': 'A quien administra',
+  'notices.toPeer': 'A alguien del campus',
+  'notices.peerLabel': 'Busca por login o por nombre',
+  'record.write': 'Escribir a {login}',
 }

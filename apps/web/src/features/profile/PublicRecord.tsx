@@ -11,7 +11,7 @@ import { HealthCard } from './HealthCard'
 import { NetworkCard } from './NetworkCard'
 import { Icon } from '../../shared/ui/Icon'
 import type { IconName } from '../../shared/ui/Icon'
-import { intraHref } from '../../shared/links'
+import { chatHref, intraHref } from '../../shared/links'
 
 const ACHIEVEMENT_ICONS: Record<AchievementId, IconName> = {
   first_duty: 'estrella',
@@ -60,7 +60,17 @@ export function PublicRecord({ login }: { login: string }) {
         <div className="record-head">
           <Avatar login={data.login} image={data.image} size={72} />
           <div className="record-name">
-            <strong>{data.login}</strong>
+            <span className="record-login">
+              <strong>{data.login}</strong>
+              <a
+                className="record-write"
+                href={chatHref(data.login)}
+                title={t('record.write', { login: data.login })}
+                aria-label={t('record.write', { login: data.login })}
+              >
+                <Icon name="chat" />
+              </a>
+            </span>
             <span className="record-title">{titleText(t, title, hacks)}</span>
           </div>
           <div className="level">

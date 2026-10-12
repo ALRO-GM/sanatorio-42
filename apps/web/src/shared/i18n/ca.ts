@@ -737,7 +737,6 @@ export const ca: Record<string, string> = {
   'notices.openUnread': 'Obre la bústia: {n} sense llegir',
   'notices.empty': 'No tens cap avís.',
   'notices.readAll': 'Marca-ho tot com a llegit',
-  'notices.write': 'Escriu a qui administra',
   'notices.unreadMark': 'Sense llegir:',
   'notices.someone': 'Algú',
   'notices.now': 'ara mateix',
@@ -965,4 +964,9 @@ export const ca: Record<string, string> = {
   'demo.real': 'Ves al web de veritat',
   'demo.staff':
     "A la demostració val qualsevol clau que comenci per «s42-», i el document d'exemple té el codi K7QF.",
+  'notices.compose': 'Escriu un missatge',
+  'notices.toAdmin': 'A qui administra',
+  'notices.toPeer': 'A algú del campus',
+  'notices.peerLabel': 'Cerca per login o per nom',
+  'record.write': 'Escriu a {login}',
 }

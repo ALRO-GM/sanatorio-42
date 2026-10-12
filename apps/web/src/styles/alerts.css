@@ -339,3 +339,88 @@
   clip-path: inset(50%);
   white-space: nowrap;
 }
+
+/* ── Escribir desde el buzón: a quien administra o a alguien del campus ─────── */
+.compose {
+  display: grid;
+  gap: 0.6rem;
+  margin-top: 0.8rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--border);
+}
+.compose .pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.peer-picker label {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.peer-picker label > .icon {
+  position: absolute;
+  left: 0.7rem;
+  color: var(--text-3);
+  pointer-events: none;
+}
+.peer-picker input {
+  width: 100%;
+  padding-left: 2.2rem;
+}
+.peer-list {
+  display: grid;
+  gap: 0.1rem;
+  max-height: 15rem;
+  margin: 0.4rem 0 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+.peer-list button {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.35rem 0.5rem;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.peer-list button:hover,
+.peer-list button:focus-visible {
+  background: var(--accent-soft);
+}
+.peer-list strong,
+.peer-list small {
+  display: block;
+  line-height: 1.25;
+}
+.peer-list small {
+  color: var(--text-3);
+  font-size: 0.78rem;
+}
+/* Escribirle, en el expediente ajeno: un botón redondo pegado a su nombre. */
+.record-login {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.record-write {
+  display: inline-grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent-text);
+  text-decoration: none;
+}
+.record-write:hover,
+.record-write:focus-visible {
+  background: var(--accent);
+  color: var(--on-accent);
+}
