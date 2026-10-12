@@ -31,6 +31,7 @@ import type {
   HelpReputation,
   HelperTag,
   HolyGraph,
+  DirectChat,
   Health,
   PaceRefInput,
   Leaderboard,
@@ -117,6 +118,8 @@ export type Api = {
   getProjectMap: (projectId: number) => Promise<ClusterMap>
   /** El plano a secas: ocupación y reservas, para elegir puestos. */
   getCampusMap: () => Promise<ClusterMap>
+  /** Tus conversaciones directas, la más reciente primero. */
+  getChats: () => Promise<DirectChat[]>
 
   // --- Campus, preferencias y estado de la réplica
   getCampuses: () => Promise<CampusSummary[]>

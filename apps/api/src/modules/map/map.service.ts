@@ -27,6 +27,8 @@ export type MapServiceOptions = {
   sync: Syncer
   peers: PeersService
   therapy: TherapyService
+  /** Quién tiene la web abierta ahora mismo. */
+  online?: () => Promise<Set<string>>
   now?: () => number
 }
 
@@ -61,10 +63,11 @@ export function createMapService(options: MapServiceOptions) {
       }
 
       const since = new Date(now() - LOCATION_MAX_AGE_MS).toISOString()
-      const [known, present, reservations] = await Promise.all([
+      const [known, present, reservations, online] = await Promise.all([
         replica.knownSeats(actor.campusId),
         replica.presenceIn(actor.campusId, since),
         therapy.reservations(actor.campusId),
+        options.online?.() ?? new Set<string>(),
       ])
 
       // De guardia = disponible y sentado. Misma regla que en la lista.
@@ -129,6 +132,7 @@ export function createMapService(options: MapServiceOptions) {
           projects: (activeProjects.get(person.login) ?? []).slice(0, MAX_PROJECTS),
           duty: personDuty,
           me: person.login === actor.login,
+          online: online.has(person.login),
         }
       }
 

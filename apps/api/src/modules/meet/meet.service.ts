@@ -18,6 +18,7 @@ import type {
   EventAlert,
   EventAlerts,
   CheckinLogEntry,
+  DirectChat,
   LoggedMessage,
   MeetAttendance,
   MeetCheckin,
@@ -51,6 +52,8 @@ export type MeetServiceOptions = {
   /** Para el chat de cada grupo de terapia (`group:<id>`), que no es un evento del calendario. */
   therapy: TherapyService
   replica: ReplicaRepository
+  /** Quién tiene la web abierta ahora mismo. */
+  online?: () => Promise<Set<string>>
   /** Para dejar un aviso en el buzón de quien tiene que enterarse. Sin él, no se avisa. */
   notify?: Notify
   /** Para dar por leído el aviso de un chat cuando esa persona lo abre. */
@@ -138,6 +141,9 @@ const reportSchema = z.object({
   to: z.string().optional(),
 })
 
+/** Conversaciones directas que se listan como mucho. */
+const MAX_CHATS = 50
+
 export function createMeetService(options: MeetServiceOptions) {
   const { db, calendar, boards, help, attendance, therapy, replica } = options
   const now = options.now ?? Date.now
@@ -168,6 +174,18 @@ export function createMeetService(options: MeetServiceOptions) {
             group.id === Number(second) &&
             group.joined &&
             (kind === 'group' || group.dates.includes(third ?? '')),
+        )
+      }
+      // Un chat directo es de sus dos logins, en orden alfabético para que
+      // haya un solo chat por pareja, y los dos tienen que existir.
+      if (kind === 'dm') {
+        const pair = [second ?? '', third ?? '']
+
+        return (
+          pair.includes(actor.login) &&
+          pair[0] !== pair[1] &&
+          [...pair].sort().join() === pair.join() &&
+          (await Promise.all(pair.map((login) => replica.userExists(login)))).every(Boolean)
         )
       }
       if (kind === 'board') {
@@ -245,6 +263,9 @@ export function createMeetService(options: MeetServiceOptions) {
   const peopleIn = async (actor: Actor, id: string): Promise<string[]> => {
     const [kind, second, third] = id.split(':')
 
+    if (kind === 'dm') {
+      return [second ?? '', third ?? '']
+    }
     if (kind === 'board') {
       return boards.people(Number(second))
     }
@@ -368,6 +389,49 @@ export function createMeetService(options: MeetServiceOptions) {
       }
 
       return this.thread(actor, userId, message.id)
+    },
+
+    /**
+     * Las conversaciones directas de alguien, la más reciente primero.
+     *
+     * Salen de los propios mensajes: un chat existe desde que alguien escribe.
+     */
+    async chats(actor: Actor): Promise<DirectChat[]> {
+      const result = await db.execute({
+        sql: `SELECT m.event_id, m.login, m.body, m.created_at FROM event_messages m
+              JOIN (
+                SELECT event_id, MAX(id) AS id FROM event_messages
+                WHERE event_id LIKE ? OR event_id LIKE ? GROUP BY event_id
+              ) last ON last.id = m.id
+              ORDER BY m.id DESC LIMIT ?`,
+        args: [`dm:${actor.login}:%`, `dm:%:${actor.login}`, MAX_CHATS],
+      })
+      const others = result.rows.map(
+        (row) =>
+          toText(row.event_id)
+            .split(':')
+            .slice(1)
+            .find((login) => login !== actor.login) ?? '',
+      )
+      const [images, online] = await Promise.all([
+        replica.imagesOf(others),
+        options.online?.() ?? new Set<string>(),
+      ])
+
+      return result.rows.map((row, index): DirectChat => {
+        const login = others[index] ?? ''
+        const body = typeof row.body === 'string' ? row.body : null
+
+        return {
+          login,
+          image: images.get(login) ?? null,
+          id: toText(row.event_id),
+          last: body === null ? null : body.slice(0, 80),
+          lastFrom: toText(row.login),
+          at: toText(row.created_at),
+          online: online.has(login),
+        }
+      })
     },
 
     /**

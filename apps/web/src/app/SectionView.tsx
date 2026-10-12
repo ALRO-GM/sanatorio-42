@@ -11,6 +11,9 @@ import type { Section } from './sections'
 // Solo la portada (la sala de espera) viaja con la web. El resto de secciones se
 // descarga cuando alguien las abre: quien entra a mirar quién le puede ayudar no
 // paga el calendario, el grafo del tablón ni la física de la red.
+const ClustersPage = lazy(() =>
+  import('../features/map/ClustersPage').then((m) => ({ default: m.ClustersPage })),
+)
 const BoardsCalendar = lazy(() =>
   import('../features/boards/BoardsCalendar').then((m) => ({ default: m.BoardsCalendar })),
 )
@@ -47,6 +50,8 @@ type SectionViewProps = {
   focusProject: number | null
   /** El login de `#/expediente/<login>` si es de otra persona; `null` para el propio. */
   otherRecord: string | null
+  /** Con quién abrir el chat directo al entrar en los clusters. */
+  chatWith: string | null
   onGo: (section: Section, projectId?: number | null) => void
 }
 
@@ -58,6 +63,7 @@ export function SectionView({
   projects,
   focusProject,
   otherRecord,
+  chatWith,
   onGo,
 }: SectionViewProps) {
   const { t } = useI18n()
@@ -102,6 +108,7 @@ export function SectionView({
       )}
       {section === 'pizarras' && <BoardsCalendar />}
       {section === 'red' && <NetworkPage me={me} />}
+      {section === 'clusters' && <ClustersPage me={me.login} initialPeer={chatWith} />}
       {section === 'gestion' &&
         (profile.data?.admin === true ? (
           <AdminPage />

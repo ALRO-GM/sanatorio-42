@@ -4,6 +4,7 @@
 
 import { CAMPUSES, ME, PEERS, PROJECTS } from './data'
 import { calendarEvents } from './calendar'
+import { portrait } from './portrait'
 import type { Api } from '../types'
 import {
   LOGGED_KEY,
@@ -28,6 +29,7 @@ export const peersMock: Pick<
   | 'getCalendar'
   | 'getProjectMap'
   | 'getCampusMap'
+  | 'getChats'
   | 'getCampuses'
 > = {
   // --- Sesión ------------------------------------------------------------------
@@ -113,6 +115,22 @@ export const peersMock: Pick<
     await delay()
 
     return buildMap()
+  },
+
+  async getChats() {
+    await delay()
+
+    return [
+      {
+        login: 'jdoe',
+        image: portrait('jdoe'),
+        id: `dm:${['jdoe', ME.login].sort().join(':')}`,
+        last: '¿Sigues por el cluster 1?',
+        lastFrom: 'jdoe',
+        at: new Date(Date.now() - 12 * 60_000).toISOString(),
+        online: true,
+      },
+    ]
   },
 
   // --- Campus, preferencias y estado de la réplica -----------------------------

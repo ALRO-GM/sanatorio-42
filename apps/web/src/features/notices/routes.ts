@@ -3,7 +3,7 @@ import type { IconName } from '../../shared/ui/Icon'
 
 /** Dónde lleva un aviso: una sección de la web, o el buzón de incidencias. */
 export type NoticeTarget =
-  'inbox' | 'gestion' | 'guardia' | 'tablon' | 'pizarras' | 'terapia' | 'calendario'
+  'inbox' | 'gestion' | 'guardia' | 'tablon' | 'pizarras' | 'terapia' | 'calendario' | 'clusters'
 
 /** Un icono por familia de avisos, para distinguirlos de un vistazo. */
 export function iconOf(notice: Notice): IconName {
@@ -41,6 +41,9 @@ export function targetOf(notice: Notice): NoticeTarget {
       return 'gestion'
     case 'chat':
       // El chat de un grupo está en su tarjeta; el de un evento, en el calendario.
+      // …y el de una conversación directa, en los clusters.
+      if (notice.ref.startsWith('dm:')) return 'clusters'
+
       return notice.ref.startsWith('group:') ? 'terapia' : 'calendario'
     case 'booking_requested':
     case 'booking_accepted':

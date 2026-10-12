@@ -892,4 +892,15 @@ export const eu: Record<string, string> = {
   'layout.style.terminal.hint': 'Makina-letra eta ertz zuzenak',
   'layout.style.historial': 'Historiala',
   'layout.style.historial.hint': 'Paper epela eta serifadun izenburuak',
+  'nav.clusters': 'Klusterrak',
+  'clusters.title': 'Campuseko klusterrak',
+  'clusters.count': 'Eserita dauden {occupied} pertsonatik {online}k Sanatorio irekita dute',
+  'clusters.online': 'Sanatorio irekita du',
+  'clusters.write': 'Idatzi',
+  'clusters.chats': 'Zure elkarrizketak',
+  'clusters.noChats': 'Oraindik ez duzu inorekin hitz egin. Sakatu norbait planoan eta idatzi.',
+  'map.legend.online': 'Sanatorio irekita du',
+  'clusters.chat': 'Txat zuzena',
+  'clusters.chatEmpty':
+    'Inork ez du oraindik idatzi. Jartzen duzuna zuek biok bakarrik ikusten duzue.',
 }

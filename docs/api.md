@@ -546,6 +546,37 @@ Reglas:
 - A quien bloqueas no le sales en `/help/offers` ni puede reservarte; recibe la
   misma respuesta que si no te ofrecieras.
 
+## Clústers y chat directo
+
+GET /map → el plano del campus (el mismo de `GET /projects/:id/map`, sin nadie
+resaltado). Cada `occupant` lleva `online`: `true` si tiene Sanatorio abierto.
+
+- "Abierto" es haber pedido `GET /pulse` en los últimos 6 minutos: es lo único
+  que toda pestaña pregunta de fondo, y se anota como mucho una vez por minuto.
+
+GET /chats → tus conversaciones directas, la más reciente primero.
+
+```json
+[
+  {
+    "login": "eva",
+    "image": null,
+    "id": "dm:ana:eva",
+    "last": "Sí, en la fila 2",
+    "lastFrom": "eva",
+    "at": "2026-10-12T09:00:00.000Z",
+    "online": true
+  }
+]
+```
+
+- Un chat directo es un chat más: se lee y se escribe con
+  `GET /events/messages?id=dm:<a>:<b>` y `POST /events/messages`, con los dos
+  logins en orden alfabético. `403` si no eres uno de los dos, si el orden no
+  es ese o si alguno no existe.
+- Valen los mismos topes de mensajes por minuto, se borran a los 90 días y
+  avisan en el buzón con `kind: "chat"` y `ref` igual al id.
+
 ## Estado de salud
 
 GET /me/health → las fechas para saber cómo vas de tiempo en el common core.

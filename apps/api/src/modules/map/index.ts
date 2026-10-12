@@ -5,20 +5,11 @@
  */
 
 import type { AppModule } from '../../core/module.js'
-import type { PeersService } from '../peers/index.js'
-import type { ReplicaRepository, Syncer } from '../replica/index.js'
-import type { TherapyService } from '../therapy/index.js'
 import { registerMapRoutes } from './map.routes.js'
 import { createMapService } from './map.service.js'
-import type { MapService } from './map.service.js'
+import type { MapService, MapServiceOptions } from './map.service.js'
 
-export type MapModuleDeps = {
-  replica: ReplicaRepository
-  sync: Syncer
-  peers: PeersService
-  therapy: TherapyService
-  now?: () => number
-}
+export type MapModuleDeps = MapServiceOptions
 
 export type MapModule = AppModule & { service: MapService }
 

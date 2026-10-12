@@ -40,6 +40,13 @@ export function createMeetModule(deps: MeetServiceOptions): MeetModule {
       })
 
       /** `GET /events/alerts` → tus avisos de evento, por orden de inicio. */
+      /** `GET /chats` → tus conversaciones directas, la más reciente primero. */
+      app.get('/chats', async (request, reply) => {
+        reply.header('Cache-Control', 'private, no-store')
+
+        return reply.send(await service.chats(await session.actor(request)))
+      })
+
       app.get('/events/alerts', async (request, reply) => {
         reply.header('Cache-Control', 'private, no-store')
 

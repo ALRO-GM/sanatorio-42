@@ -126,6 +126,7 @@ export function Clinic({ me, onLogout }: ClinicProps) {
             projects={projects.data ?? []}
             focusProject={focusProject}
             otherRecord={otherRecord}
+            chatWith={section === 'clusters' && param !== null ? param.toLowerCase() : null}
             onGo={openSection}
           />
         </div>

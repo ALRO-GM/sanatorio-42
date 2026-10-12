@@ -6,7 +6,7 @@
 
 import type { Db } from '../../core/db/database.js'
 import { nowIso } from '../../core/db/database.js'
-import { toNumber } from '../../core/db/rows.js'
+import { toNumber, toText } from '../../core/db/rows.js'
 
 /** Pace y plazo del milestone que alguien ha copiado de su perfil de la intra. */
 export type PaceRefRow = {
@@ -49,15 +49,25 @@ export function createProfilesRepository(db: Db) {
       }
     },
 
-    /** Crea el perfil si falta y anota la visita. */
-    async touch(login: string): Promise<void> {
-      const now = nowIso()
+    /** Crea el perfil si falta y anota la visita (en `at`, o ahora). */
+    async touch(login: string, at?: string): Promise<void> {
+      const now = at ?? nowIso()
 
       await db.execute({
         sql: `INSERT INTO profiles (login, created_at, seen_at) VALUES (?, ?, ?)
               ON CONFLICT (login) DO UPDATE SET seen_at = excluded.seen_at`,
         args: [login, now, now],
       })
+    },
+
+    /** Quién ha dado señales de vida desde `since` (ISO): tiene la web abierta. */
+    async seenSince(since: string): Promise<Set<string>> {
+      const result = await db.execute({
+        sql: 'SELECT login FROM profiles WHERE seen_at >= ?',
+        args: [since],
+      })
+
+      return new Set(result.rows.map((row) => toText(row.login)))
     },
 
     /** Cambia solo las preferencias que vengan; `undefined` no toca la columna. */

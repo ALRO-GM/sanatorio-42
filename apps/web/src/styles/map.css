@@ -349,3 +349,44 @@ button.seat:focus-visible {
     animation: none;
   }
 }
+
+/* Tiene Sanatorio abierto: un punto verde en la esquina del puesto. */
+.seat-online {
+  position: absolute;
+  right: -3px;
+  bottom: -3px;
+  width: 11px;
+  height: 11px;
+  border: 2px solid var(--surface);
+  border-radius: 50%;
+  background: var(--ok);
+}
+.seat-online.sample {
+  position: static;
+  display: inline-block;
+  vertical-align: -1px;
+}
+.clusters-count {
+  margin: -0.5rem 0 1rem;
+  color: var(--text-2);
+}
+.direct-chat .card-head {
+  margin-bottom: 0.5rem;
+}
+.direct-row {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.direct-row > span {
+  display: grid;
+}
+.direct-row small {
+  color: var(--text-3);
+}
+.direct-row.active {
+  background: var(--accent-soft);
+}

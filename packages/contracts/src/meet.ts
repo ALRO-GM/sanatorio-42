@@ -165,3 +165,19 @@ export type EventAlert = {
 export type EventAlerts = {
   alerts: EventAlert[]
 }
+
+/** Una conversación directa con otra persona del campus (`GET /chats`). */
+export type DirectChat = {
+  /** Con quién. */
+  login: string
+  image: string | null
+  /** Id del chat, para leerlo y escribir con `/events/messages`. */
+  id: string
+  /** El último mensaje, recortado. */
+  last: string | null
+  /** De quién es ese último mensaje. */
+  lastFrom: string
+  at: string
+  /** `true` si esa persona tiene Sanatorio abierto ahora. */
+  online: boolean
+}

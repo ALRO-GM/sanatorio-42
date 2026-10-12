@@ -14,7 +14,14 @@ import type { Thread } from './useThread'
  * Un chat: los mensajes, del más antiguo al más reciente, y la caja para
  * escribir. Los avisos (lo he visto, me retraso, no voy) salen como un mensaje más.
  */
-export function Chat({ thread, me }: { thread: Thread; me: string }) {
+type ChatProps = {
+  thread: Thread
+  me: string
+  /** Es una conversación entre dos, no el chat de un evento: cambian los rótulos. */
+  direct?: boolean
+}
+
+export function Chat({ thread, me, direct = false }: ChatProps) {
   const { t, lang } = useI18n()
   const [text, setText] = useState('')
   const list = useRef<HTMLOListElement>(null)
@@ -50,12 +57,14 @@ export function Chat({ thread, me }: { thread: Thread; me: string }) {
 
   return (
     <>
-      <span className="eyebrow">{t('meet.chat')}</span>
+      <span className="eyebrow">{t(direct ? 'clusters.chat' : 'meet.chat')}</span>
       {messages === null && loadError === null && <p className="hint">{t('app.loading')}</p>}
       {loadError !== null && <ErrorNote error={loadError} />}
       {messages !== null && (
         <ol ref={list} className="meet-chat">
-          {messages.length === 0 && <li className="hint">{t('meet.chatEmpty')}</li>}
+          {messages.length === 0 && (
+            <li className="hint">{t(direct ? 'clusters.chatEmpty' : 'meet.chatEmpty')}</li>
+          )}
           {messages.map((message) => (
             <li
               key={message.id}

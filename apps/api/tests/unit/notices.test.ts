@@ -7,7 +7,14 @@
 
 import { beforeEach, describe, expect, it } from 'vitest'
 
-import { HOUR, MINUTE, TUESDAY_AFTERNOON, actor, useCommunity } from '../helpers/community.js'
+import {
+  HOUR,
+  MINUTE,
+  TUESDAY_AFTERNOON,
+  actor,
+  expectCode,
+  useCommunity,
+} from '../helpers/community.js'
 import type { Community } from '../helpers/community.js'
 
 describe('buzón de avisos', () => {
@@ -69,6 +76,53 @@ describe('buzón de avisos', () => {
     // Nadie lee los avisos de otra persona.
     await notices.read(actor('ana'), {})
     expect(await notices.unread('leo')).toBe(1)
+  })
+
+  it('un chat directo es de sus dos personas y de nadie más', async () => {
+    const { meet, notices } = services
+    // Un solo chat por pareja: los logins van en orden alfabético.
+    const id = 'dm:ana:eva'
+
+    await meet.send(actor('eva'), null, { id, kind: 'text', body: '¿Sigues en el cluster 1?' })
+    await meet.send(actor('ana'), null, { id, kind: 'text', body: 'Sí, en la fila 2' })
+
+    expect((await meet.thread(actor('ana'), null, id)).messages).toMatchObject([
+      { login: 'eva', body: '¿Sigues en el cluster 1?' },
+      { login: 'ana', body: 'Sí, en la fila 2' },
+    ])
+    // A `eva` le queda el aviso de la respuesta; lleva a ese chat.
+    expect(await notices.list(actor('eva'))).toMatchObject({
+      unread: 1,
+      items: [{ kind: 'chat', ref: id, from: 'ana' }],
+    })
+
+    // Ni un tercero, ni el id al revés, ni hablar a solas, ni con quien no existe.
+    await expectCode(meet.thread(actor('leo'), null, id), 'forbidden')
+    await expectCode(meet.thread(actor('ana'), null, 'dm:eva:ana'), 'forbidden')
+    await expectCode(meet.thread(actor('ana'), null, 'dm:ana:ana'), 'forbidden')
+    await expectCode(
+      meet.send(actor('ana'), null, { id: 'dm:ana:nadie', kind: 'text', body: 'hola' }),
+      'forbidden',
+    )
+  })
+
+  it('las conversaciones salen con la última frase y con quién sigue conectado', async () => {
+    const { meet, repositories } = services
+
+    await meet.send(actor('eva'), null, { id: 'dm:ana:eva', kind: 'text', body: 'Hola, Ana' })
+    await meet.send(actor('eva'), null, { id: 'dm:eva:leo', kind: 'text', body: 'Hola, Leo' })
+    await repositories.profiles.touch('leo', new Date(clock.now()).toISOString())
+
+    // La más reciente primero; de cada una, con quién es.
+    expect(await meet.chats(actor('eva'))).toMatchObject([
+      { login: 'leo', id: 'dm:eva:leo', last: 'Hola, Leo', lastFrom: 'eva', online: true },
+      { login: 'ana', id: 'dm:ana:eva', last: 'Hola, Ana', lastFrom: 'eva', online: false },
+    ])
+    expect(await meet.chats(actor('ana'))).toMatchObject([{ login: 'eva', id: 'dm:ana:eva' }])
+
+    // Pasados unos minutos sin señales, `leo` ya no cuenta como conectado.
+    clock.advance(10 * MINUTE)
+    expect((await meet.chats(actor('eva')))[0]).toMatchObject({ login: 'leo', online: false })
   })
 
   it('los mensajes de un chat se juntan en un solo aviso, que se va al abrir el chat', async () => {

@@ -42,6 +42,7 @@ export const realApi: Api = {
 
   getProjectMap: (projectId) => getJson(`/projects/${projectId}/map`),
   getCampusMap: () => getJson('/map'),
+  getChats: () => getJson('/chats'),
 
   getCampuses: () => getJson('/campuses'),
   getProfile: () => getJson('/me/profile'),

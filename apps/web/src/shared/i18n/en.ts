@@ -1038,4 +1038,15 @@ export const en: Record<string, string> = {
   'layout.style.terminal.hint': 'Monospace and square corners',
   'layout.style.historial': 'Chart',
   'layout.style.historial.hint': 'Warm paper and serif headings',
+  'nav.clusters': 'Clusters',
+  'clusters.title': 'Campus clusters',
+  'clusters.count': '{online} of {occupied} people at a seat have Sanatorio open',
+  'clusters.online': 'Has Sanatorio open',
+  'clusters.write': 'Message',
+  'clusters.chats': 'Your conversations',
+  'clusters.noChats':
+    'You have not talked to anyone yet. Click someone on the map and write to them.',
+  'map.legend.online': 'Has Sanatorio open',
+  'clusters.chat': 'Direct chat',
+  'clusters.chatEmpty': 'Nobody has written yet. Only the two of you see what you write.',
 }

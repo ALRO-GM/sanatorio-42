@@ -162,6 +162,8 @@ export function buildMap(projectId?: number): ClusterMap {
       projects: projectsOf(login),
       duty: null,
       me: login === ME.login,
+      // Uno de cada tres tiene la web abierta: basta para ver el punto.
+      online: login.length % 3 === 0,
     })
   }
 
@@ -173,6 +175,7 @@ export function buildMap(projectId?: number): ClusterMap {
         projects: projectsOf(peer.login),
         duty: peer.available ? (peer.status === 'finished' ? 'specialist' : 'patient') : null,
         me: false,
+        online: peer.available,
       })
     }
   }

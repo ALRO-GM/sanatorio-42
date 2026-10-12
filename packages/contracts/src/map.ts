@@ -32,6 +32,8 @@ export type MapSeat = {
     duty: SeatDuty | null
     /** `true` si es quien pregunta. */
     me: boolean
+    /** `true` si tiene Sanatorio abierto ahora: se le puede escribir y lo verá. */
+    online: boolean
   } | null
   reservation: SeatReservation | null
 }

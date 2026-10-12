@@ -47,6 +47,11 @@ import type { UsageModule } from '../modules/usage/index.js'
 import { createTherapyModule } from '../modules/therapy/index.js'
 import type { TherapyModule } from '../modules/therapy/index.js'
 
+/** Cada cuánto se anota, como mucho, que alguien sigue con la web abierta. */
+const PRESENCE_BEAT_MS = 60_000
+/** La web pregunta el pulso cada pocos minutos: pasado esto sin señales, se fue. */
+const PRESENCE_WINDOW_MS = 6 * 60_000
+
 export type CompositionConfig = {
   sync: SyncerConfig
   /** `false` para que `start()` no arranque el bucle de sincronización. */
@@ -118,9 +123,29 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
   // Los módulos avisan sin saber que hay un buzón: `notices` es quien escucha.
   const notify: Notify = (notice) => events.emit('notice', notice)
   const common = { db, replica: replica.repository, ...clock }
-  const notices = createNoticesModule({ db, events, quota: replica.quota, ...clock })
-
   const profile = createProfileModule({ ...common, curriculum: replica.curriculum, events })
+
+  // Presencia: quién tiene la web abierta. Se anota como mucho una vez por
+  // minuto y persona, que es de sobra para un "está conectado".
+  const beats = new Map<string, number>()
+  const now = config.now ?? Date.now
+  const beat = (login: string): void => {
+    if (now() - (beats.get(login) ?? 0) < PRESENCE_BEAT_MS) return
+
+    beats.set(login, now())
+    void profile.profiles.touch(login, new Date(now()).toISOString()).catch(() => undefined)
+  }
+  const online = (): Promise<Set<string>> =>
+    profile.profiles.seenSince(new Date(now() - PRESENCE_WINDOW_MS).toISOString())
+
+  const notices = createNoticesModule({
+    db,
+    events,
+    quota: replica.quota,
+    onPulse: beat,
+    ...clock,
+  })
+
   const peers = createPeersModule({ ...common, sync: replica.sync, events })
   const therapy = createTherapyModule({ ...common, sync: replica.sync, xp: profile.xp, notify })
   const doubts = createDoubtsModule({
@@ -146,6 +171,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     sync: replica.sync,
     peers: peers.peers,
     therapy: therapy.service,
+    online,
     ...clock,
   })
 
@@ -186,6 +212,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     replica: replica.repository,
     notify,
     onRead: (login, eventId) => notices.service.readAbout(login, 'chat', eventId),
+    online,
     ...clock,
   })
   const admin = createAdminModule({

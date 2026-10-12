@@ -10,6 +10,7 @@ import { SeatFace } from './SeatFace'
 import { SeatHoverCard } from './SeatHoverCard'
 import type { Hovered } from './SeatHoverCard'
 import { clusterName, seatName } from './seats'
+import { Icon } from '../../shared/ui/Icon'
 
 // Quien pinta el mapa suele necesitar también el nombre de la sala.
 export { clusterName }
@@ -21,6 +22,8 @@ type ClusterMapViewProps = {
    * vez de enseñar su detalle.
    */
   onPick?: (host: string) => void
+  /** Si viene, la ficha de quien ocupa un puesto ofrece escribirle. */
+  onChat?: (login: string) => void
   /** Puestos elegidos, en modo elegir. */
   picked?: readonly string[]
   /**
@@ -34,7 +37,8 @@ type ClusterMapViewProps = {
   legend?: readonly LegendItem[]
 }
 
-type LegendItem = 'patient' | 'specialist' | 'reserved' | 'clash' | 'occupied' | 'free' | 'picked'
+type LegendItem =
+  'patient' | 'specialist' | 'reserved' | 'clash' | 'occupied' | 'free' | 'picked' | 'online'
 
 const DEFAULT_LEGEND: readonly LegendItem[] = [
   'specialist',
@@ -91,6 +95,7 @@ function seatLabel(seat: MapSeat, t: Translate, reserved: boolean): string {
 export function ClusterMapView({
   map,
   onPick,
+  onChat,
   picked = [],
   showReservation = (reservation) => reservation.inSession,
   legend = DEFAULT_LEGEND,
@@ -195,6 +200,8 @@ export function ClusterMapView({
                     {seat.occupant !== null && (
                       <SeatFace login={seat.occupant.login} image={seat.occupant.image} />
                     )}
+                    {/* Tiene Sanatorio abierto: un punto verde en la esquina. */}
+                    {seat.occupant?.online === true && <i className="seat-online" />}
                   </button>
                 )
               })}
@@ -208,6 +215,7 @@ export function ClusterMapView({
         <SeatDetail
           seat={open}
           reserved={open.reservation !== null && showReservation(open.reservation)}
+          onChat={onChat}
         />
       )}
 
@@ -215,8 +223,10 @@ export function ClusterMapView({
         {legend.map((item) => (
           <li key={item}>
             <span
-              className={`seat sample ${item === 'clash' ? 'reserved free' : item === 'reserved' ? 'reserved free' : item}`}
-            />
+              className={`seat sample ${item === 'clash' ? 'reserved free' : item === 'reserved' ? 'reserved free' : item === 'online' ? 'occupied' : item}`}
+            >
+              {item === 'online' && <i className="seat-online" />}
+            </span>
             {t(`map.legend.${item}`)}
           </li>
         ))}
@@ -233,7 +243,13 @@ export function ClusterMapView({
 }
 
 /** Quién está en el puesto pulsado y si está reservado. */
-function SeatDetail({ seat, reserved }: { seat: MapSeat; reserved: boolean }) {
+type SeatDetailProps = {
+  seat: MapSeat
+  reserved: boolean
+  onChat: ((login: string) => void) | undefined
+}
+
+function SeatDetail({ seat, reserved, onChat }: SeatDetailProps) {
   const { t, lang } = useI18n()
   const { occupant, reservation } = seat
 
@@ -256,6 +272,9 @@ function SeatDetail({ seat, reserved }: { seat: MapSeat; reserved: boolean }) {
             {occupant.login}
           </a>
           {occupant.me && <span className="badge subtle">{t('map.you')}</span>}
+          {occupant.online && !occupant.me && (
+            <span className="badge on">{t('clusters.online')}</span>
+          )}
           {occupant.duty !== null && (
             <span className={`badge ${occupant.duty === 'specialist' ? 'specialist' : 'on'}`}>
               {t(`map.duty.${occupant.duty}`)}
@@ -266,6 +285,17 @@ function SeatDetail({ seat, reserved }: { seat: MapSeat; reserved: boolean }) {
               {project}
             </span>
           ))}
+          {onChat !== undefined && !occupant.me && (
+            <button
+              type="button"
+              className="primary small"
+              onClick={() => {
+                onChat(occupant.login)
+              }}
+            >
+              <Icon name="chat" /> {t('clusters.write')}
+            </button>
+          )}
         </span>
       )}
       {reservation !== null && reserved && (

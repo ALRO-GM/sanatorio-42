@@ -15,6 +15,11 @@ export type NoticesModuleDeps = NoticesServiceOptions & {
   events: EventBus
   /** La cuota de 42, para contarla en el mismo pulso que los avisos sin leer. */
   quota: Quota
+  /**
+   * Alguien con la web abierta acaba de dar señales de vida. El pulso es lo
+   * único que toda pestaña abierta pregunta de fondo, así que sirve de latido.
+   */
+  onPulse?: (login: string) => void
 }
 
 export type NoticesModule = AppModule & { service: NoticesService }
@@ -36,6 +41,7 @@ export function createNoticesModule(deps: NoticesModuleDeps): NoticesModule {
         const { login } = session.user(request)
 
         reply.header('Cache-Control', 'private, no-store')
+        deps.onPulse?.(login)
 
         return { unread: await service.unread(login), quota: await deps.quota.statusFor(login) }
       })
