@@ -28,18 +28,21 @@ export function createClickerModule(deps: ClickerServiceOptions): ClickerModule 
         table: 'clicker_capital',
         login: 'login',
         date: { column: 'at', as: 'seconds' },
+        show: ['login', 'at', 'capital'],
       }),
       tableStore(deps.db, {
         id: 'clicker_alerts',
         table: 'clicker_alerts',
         login: 'login',
         date: { column: 'at', as: 'iso' },
+        show: ['id', 'login', 'at', 'seconds', 'from_capital', 'to_capital'],
       }),
       tableStore(deps.db, {
         id: 'clicker_cheats',
         table: 'clicker_cheats',
         login: 'login',
         date: { column: 'at', as: 'iso' },
+        show: ['id', 'login', 'at', 'why', 'total', 'per_second'],
       }),
     ],
     routes: (app, { session }) => {

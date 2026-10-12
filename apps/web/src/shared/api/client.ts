@@ -105,7 +105,7 @@ export const realApi: Api = {
     return getJson(`${login === undefined ? '' : '/admin'}/clicker/capital?${query}`)
   },
   getAdminData: () => getJson('/admin/data'),
-  countAdminData: (scope) => sendJson('POST', '/admin/data/count', scope),
+  previewAdminData: (scope) => sendJson('POST', '/admin/data/preview', scope),
   deleteAdminData: (scope) => sendJson('POST', '/admin/data/delete', scope),
   pardonClickerCheat: (id) => send('POST', `/admin/clicker/cheats/${id}/pardon`),
   dismissClickerAlert: (id) => send('DELETE', `/admin/clicker/alerts/${id}`),

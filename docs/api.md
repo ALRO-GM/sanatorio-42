@@ -448,6 +448,11 @@ GET /boards?from=<ISO>&to=<ISO> → pizarras del campus que empiezan en ese inte
 POST /boards → 201 con la pizarra. `topic`, `description` y `capacity` (por defecto 20) son opcionales.
 { "title": "…", "place": "…", "startsAt": "2026-10-08T17:00:00+02:00", "endsAt": "2026-10-08T18:30:00+02:00" }
 
+- Ni pizarras ni terapias se pueden poner con más de 62 días de antelación
+  (`EVENT_HORIZON_DAYS`, en `core/time.ts`): `400`. Una que ya estuviera más
+  lejos se puede retocar o acercar, pero no se puede llevar ninguna allí. La
+  web, antes de guardar, dice cuánto falta y pide confirmación.
+
 - POST /boards/:id/join → 204 (409 si no quedan plazas)
 - DELETE /boards/:id/join → 204
 - DELETE /boards/:id → 204. Solo quien la imparte.
@@ -652,6 +657,11 @@ tiene cada uno. Ahora: `traffic`, `tickets`, `notices`, `messages`,
 POST /admin/data/count → `{ rows }`. Recibe `{ kind, login?, before?, from? }`:
 sin `login` son las filas de todo el mundo; `before` deja solo lo anterior a ese
 día y `from`, lo de ese día en adelante (`YYYY-MM-DD`, UTC). Sin fechas, todo.
+
+POST /admin/data/preview → `{ rows, columns, sample }`: lo mismo que se
+borraría con ese cuerpo. `rows` es el total y `sample`, las 50 filas más
+recientes como mucho, con los valores en el orden de `columns` y los textos
+largos recortados a 120 caracteres. Es lo que enseña la web antes de borrar.
 
 POST /admin/data/delete → `{ rows }`: lo mismo, pero las borra. No hay vuelta
 atrás. `404` si el tipo no existe. Las tres, solo admins.

@@ -279,6 +279,25 @@ describe('comunidad', () => {
       await expectCode(admin.wipe(boss, { kind: 'inventado' }, true), 'not_found')
       await expectCode(admin.wipe(boss, { kind: 'usage', before: 'ayer' }, true), 'invalid_input')
 
+      // Antes de borrar se enseña qué es: cuántas filas y las más recientes.
+      const preview = await admin.preview(boss, { kind: 'usage', login: 'ana' })
+
+      expect(preview.rows).toBe(2)
+      expect(preview.columns).toEqual([
+        'login',
+        'day',
+        'hour',
+        'key',
+        'clicks',
+        'seen_s',
+        'back_s',
+        'hidden_s',
+      ])
+      expect(preview.sample.map((row) => row[3])).toEqual(['nav.red', 'nav.tablon'])
+      expect((await admin.preview(boss, { kind: 'usage', login: 'nadie' })).sample).toEqual([])
+      await expectCode(admin.preview(actor('ana'), { kind: 'usage' }), 'forbidden')
+      await expectCode(admin.preview(boss, { kind: 'inventado' }), 'not_found')
+
       // Contar no borra; borrar lo de antes de 2027 se lleva solo lo viejo.
       expect(await admin.wipe(boss, { kind: 'usage', before: '2027-01-01' }, false)).toEqual({
         rows: 1,

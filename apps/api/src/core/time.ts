@@ -88,3 +88,17 @@ export function zonedInstant(day: string, minutes: number, timeZone: string | un
 
   return guess
 }
+
+/**
+ * Con cuánta antelación se puede poner un evento, en días: dos meses largos.
+ * Más allá casi siempre es un error al escribir la fecha (otro año, otro mes),
+ * y lo que queda tan lejos no sale en ningún calendario: nadie lo ve ni lo
+ * puede quitar.
+ */
+export const EVENT_HORIZON_DAYS = 62
+
+const DAY_MS = 24 * 60 * 60_000
+
+/** `true` si ese instante cae más allá de lo que se deja reservar. */
+export const beyondHorizon = (at: number, now: number): boolean =>
+  at - now > EVENT_HORIZON_DAYS * DAY_MS

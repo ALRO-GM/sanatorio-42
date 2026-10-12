@@ -16,6 +16,7 @@ import type { BoardRow, BoardsRepository } from './boards.repository.js'
 import { EVENT_ID, closed } from '../attendance/index.js'
 import type { AttendanceService } from '../attendance/index.js'
 import type { ReplicaRepository } from '../replica/index.js'
+import { beyondHorizon, EVENT_HORIZON_DAYS } from '../../core/time.js'
 import { domainError } from '../../core/errors.js'
 import { XP_KIND } from '../profile/index.js'
 import type { XpService } from '../profile/index.js'
@@ -47,6 +48,7 @@ const boardSchema = z.object({
 })
 
 const HOUR = 3_600_000
+const TOO_FAR = `No se puede proponer una pizarra con más de ${EVENT_HORIZON_DAYS} días de antelación`
 
 /** Pizarras futuras que puede tener propuestas una persona. */
 const MAX_UPCOMING_BOARDS = 5
@@ -141,6 +143,9 @@ export function createBoardsService(options: BoardsServiceOptions) {
       if (startsAt < now()) {
         throw domainError('invalid_input', 'La pizarra tiene que ser en el futuro')
       }
+      if (beyondHorizon(startsAt, now())) {
+        throw domainError('invalid_input', TOO_FAR)
+      }
       if (endsAt <= startsAt || endsAt - startsAt > 4 * HOUR) {
         throw domainError('invalid_input', 'Una pizarra dura entre unos minutos y cuatro horas')
       }
@@ -190,6 +195,11 @@ export function createBoardsService(options: BoardsServiceOptions) {
       // lo que no se puede es llevársela al pasado.
       if (startsAt < now() && startsAt !== Date.parse(current.startsAt)) {
         throw domainError('invalid_input', 'La pizarra tiene que ser en el futuro')
+      }
+      // Lo mismo con el futuro lejano: una que ya estaba allí se puede retocar
+      // (o acercar), pero no se puede llevar ninguna tan lejos.
+      if (beyondHorizon(startsAt, now()) && startsAt !== Date.parse(current.startsAt)) {
+        throw domainError('invalid_input', TOO_FAR)
       }
       if (endsAt <= startsAt || endsAt - startsAt > 4 * HOUR) {
         throw domainError('invalid_input', 'Una pizarra dura entre unos minutos y cuatro horas')

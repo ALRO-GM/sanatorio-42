@@ -425,3 +425,16 @@ button.seat:focus-visible {
   font-size: 0.8rem;
   color: var(--text-2);
 }
+
+/* Cada puesto, en su capa. La foto va ampliada dentro de un recorte redondeado
+   y el puesto se levanta al pasar el ratón: sin esto, mientras dura ese
+   movimiento, la foto podía pintarse un instante por encima de los de al lado.
+   El que se levanta queda siempre encima de sus vecinos. */
+.seat {
+  isolation: isolate;
+  contain: paint;
+}
+button.seat:hover,
+button.seat.open {
+  z-index: 2;
+}

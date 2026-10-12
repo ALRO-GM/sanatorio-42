@@ -23,9 +23,23 @@ export type DataStore = {
   /** Nombre corto del tipo de dato: la web lo traduce (`admin.data.kind.*`). */
   readonly id: string
   count: (scope: DataScope) => Promise<number>
+  /**
+   * Una muestra de esas filas, las más recientes primero, para que quien va a
+   * borrar vea qué es. Los textos largos van recortados.
+   */
+  sample: (scope: DataScope, limit: number) => Promise<DataSample>
   /** Borra y devuelve cuántas filas ha quitado. */
   wipe: (scope: DataScope) => Promise<number>
 }
+
+/** Las columnas que se enseñan y las filas, cada una con sus valores en ese orden. */
+export type DataSample = {
+  columns: string[]
+  rows: (string | number | null)[][]
+}
+
+/** Lo que se deja ver de un texto en la muestra. */
+const TEXT_SHOWN = 120
 
 type TableStoreOptions = {
   id: string
@@ -34,6 +48,8 @@ type TableStoreOptions = {
   login: string
   /** La columna con la fecha, y cómo está guardada. */
   date: { column: string; as: 'iso' | 'day' | 'seconds' }
+  /** Las columnas que se enseñan en la muestra: las que dicen qué es cada fila. */
+  show: readonly string[]
   /** Tablas que cuelgan de esta: sus filas se van con las de aquí. */
   children?: readonly { table: string; key: string; parent: string }[]
 }
@@ -76,6 +92,32 @@ export function tableStore(db: Db, options: TableStoreOptions): DataStore {
       const result = await db.execute({ sql: `SELECT COUNT(*) AS total FROM ${table}${sql}`, args })
 
       return toNumber(result.rows[0]?.total ?? 0)
+    },
+
+    async sample(scope, limit) {
+      const { sql, args } = where(scope)
+      const result = await db.execute({
+        sql: `SELECT ${options.show.join(', ')} FROM ${table}${sql}
+              ORDER BY ${date.column} DESC LIMIT ?`,
+        args: [...args, limit],
+      })
+
+      return {
+        columns: [...options.show],
+        rows: result.rows.map((row) =>
+          options.show.map((column) => {
+            const value = row[column]
+
+            if (typeof value === 'number') return value
+            // Lo que no sea texto ni número (un nulo, un binario) no se enseña.
+            if (typeof value !== 'string') return null
+
+            const text = value
+
+            return text.length > TEXT_SHOWN ? `${text.slice(0, TEXT_SHOWN)}…` : text
+          }),
+        ),
+      }
     },
 
     async wipe(scope) {

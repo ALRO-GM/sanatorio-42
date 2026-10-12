@@ -660,3 +660,13 @@ dialog::backdrop {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
+
+/* Con ratón no hay forma cómoda de deslizar las pestañas de lado, y la barra de
+   desplazamiento va escondida: si no caben, pasan a otra fila en vez de
+   quedarse fuera. En pantalla táctil siguen en una fila y se deslizan. */
+@media (hover: hover) and (pointer: fine) {
+  .tabs {
+    flex-wrap: wrap;
+    overflow-x: visible;
+  }
+}

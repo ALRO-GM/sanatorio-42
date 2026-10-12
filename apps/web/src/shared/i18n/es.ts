@@ -1086,10 +1086,70 @@ export const es: Record<string, string> = {
   'broadcast.must': 'Elige una opción para cerrar este mensaje.',
   'broadcast.ok': 'Entendido',
   'broadcast.later': 'Ahora no',
-  'admin.tab.data': 'Datos',
-  'admin.data.title': 'Borrar datos',
+  'admin.tab.data': 'Limpiar datos',
+  'admin.data.title': 'Limpiar datos',
   'admin.data.about':
     'La web no borra nada por viejo. Aquí eliges qué quitar, de quién y de cuándo. Lo borrado no se puede recuperar.',
+  'admin.data.kind.traffic.summary':
+    'Cuántas peticiones y cuántos bytes ha servido la web a cada persona, hora a hora.',
+  'admin.data.kind.traffic.detail':
+    'Una fila por persona y hora con sus peticiones, lo que pesaron las respuestas y cuántas se le rechazaron por pasarse del tope. De aquí salen el consumo del mes, los gráficos de la pestaña Consumo y las columnas de peticiones de Estadísticas. Borrarlo no cambia los topes ni lo ya gastado del plan, que lo cuenta la máquina: solo se pierde el historial.',
+  'admin.data.kind.tickets.summary':
+    'Lo que la gente ha escrito al buzón de quien administra, con sus respuestas.',
+  'admin.data.kind.tickets.detail':
+    'Cada incidencia, sugerencia o denuncia: quién la mandó, el asunto, el texto, su estado y lo que se le contestó. Al borrarlas desaparecen del buzón del panel y de «lo que has mandado» de cada persona.',
+  'admin.data.kind.notices.summary':
+    'Los avisos de la campana: te han respondido, te han reservado, hay un mensaje nuevo…',
+  'admin.data.kind.notices.detail':
+    'Una fila por aviso, leído o sin leer, con a quién es, de qué va y quién lo provocó. Borrarlos vacía la campana; no toca lo que avisaban (el mensaje, la reserva o la duda siguen donde estaban).',
+  'admin.data.kind.messages.summary':
+    'Todo lo escrito en los chats: los de pizarras, terapias y sesiones de ayuda, y los directos entre dos personas.',
+  'admin.data.kind.messages.detail':
+    'Una fila por mensaje, con el chat al que pertenece, quién lo escribió y el texto. También las respuestas a los avisos de un evento («voy», «me retraso», «no voy»). Al borrarlos desaparecen para todo el mundo y del registro de Mensajes del panel; si hay una denuncia abierta sobre ellos, ya no se podrá revisar.',
+  'admin.data.kind.event_alerts.summary':
+    'Los avisos de «tu evento empieza ya» que cada persona tiene que contestar.',
+  'admin.data.kind.event_alerts.detail':
+    'Una fila por persona y evento: cuándo empezaba, si se le pasó sin contestar y si ya lo cerró. Borrarlos quita los avisos pendientes; no cambia quién asistió ni el tiempo validado.',
+  'admin.data.kind.broadcasts.summary':
+    'Los mensajes que quien administra ha mandado a la gente, con lo que contestó cada persona.',
+  'admin.data.kind.broadcasts.detail':
+    'Cada comunicado (título, texto, a quién iba) y, colgando de él, la respuesta de cada persona. «De quién» aquí es quien lo envió. Al borrarlos dejan de salirle a quien aún no los había leído y se pierde el recuento de respuestas.',
+  'admin.data.kind.checkins.summary':
+    'Cada vez que alguien ha escrito un código de inicio o de fin de un evento, acertara o no.',
+  'admin.data.kind.checkins.detail':
+    'Una fila por intento: el evento, quién, si era de inicio o de fin y qué pasó (válido, repetido, código incorrecto, fuera de plazo…). Es la prueba de las horas. Borrarlo no quita el tiempo ya validado, pero ese tiempo se queda sin justificante.',
+  'admin.data.kind.usage.summary':
+    'Cuánto tiempo pasa cada persona en cada sección y cuánto pulsa, hora a hora.',
+  'admin.data.kind.usage.detail':
+    'Una fila por persona, hora y elemento (una sección o un bloque de una página), con las pulsaciones y los segundos viéndola, con otra ventana delante y con la pestaña oculta. De aquí salen Estadísticas y el tiempo de Recorridos. No toca el recuento que ordena las pestañas según lo que más se usa.',
+  'admin.data.kind.flows.summary':
+    'Los pasos de una sección a otra: por dónde se entra y a dónde se va después.',
+  'admin.data.kind.flows.detail':
+    'Una fila por persona, día y paso («del tablón a la red»), con las veces que lo ha dado. De aquí sale el grafo de Recorridos, las entradas, las salidas y el papel de cada sección.',
+  'admin.data.kind.clicker_capital.summary':
+    'La curva de cuánto vale la partida de cada persona a lo largo del tiempo.',
+  'admin.data.kind.clicker_capital.detail':
+    'Un punto por persona y momento: cada diez segundos el último día, por horas la última semana y por días lo anterior. Es la gráfica de las estadísticas del juego y la de la ficha de cada jugador en el panel. No toca la partida ni la clasificación.',
+  'admin.data.kind.clicker_alerts.summary':
+    'Los saltos de capital demasiado bruscos que no se dieron por trampa.',
+  'admin.data.kind.clicker_alerts.detail':
+    'Una fila por aviso: quién, cuándo, de cuánto a cuánto y en cuántos segundos. Son los que salen en «Saltos de capital por mirar» de la pestaña Code Clicker. Borrarlos es lo mismo que descartarlos uno a uno.',
+  'admin.data.kind.clicker_cheats.summary': 'La copia de cada partida que se rechazó por tramposa.',
+  'admin.data.kind.clicker_cheats.detail':
+    'Una fila por trampa pillada: quién, cuándo, por qué y las cifras de la partida que llegó. Es lo que permite indultar. Si las borras, esas trampas ya no se podrán indultar; el contador de veces pillado y el título del banner no cambian.',
+  'admin.data.includes': 'Qué incluye',
+  'admin.data.see': 'Ver qué se borraría',
+  'admin.data.review': 'Esto es lo que se borraría',
+  'admin.data.reviewScope': '{kind} · {who} · {when}',
+  'admin.data.scope.everyone': 'de todo el mundo',
+  'admin.data.scope.all': 'todo',
+  'admin.data.scope.before': 'anterior al {day}',
+  'admin.data.scope.from': 'desde el {day}',
+  'admin.data.total': '{n} filas en total',
+  'admin.data.showing': 'Se enseñan las {n} más recientes.',
+  'admin.data.none': 'No hay nada que cumpla eso.',
+  'admin.data.deleteN': 'Borrar las {n} filas',
+  'admin.data.close': 'Cerrar sin borrar',
   'admin.data.kind': 'Qué',
   'admin.data.choose': 'Elige un tipo de dato',
   'admin.data.who': 'De quién (login)',
@@ -1099,11 +1159,7 @@ export const es: Record<string, string> = {
   'admin.data.range.before': 'Lo anterior a un día',
   'admin.data.range.from': 'Desde un día en adelante',
   'admin.data.day': 'Día',
-  'admin.data.count': 'Contar',
-  'admin.data.delete': 'Borrar',
-  'admin.data.found': '{n} filas cumplen eso.',
   'admin.data.deleted': 'Borradas {n} filas.',
-  'admin.data.ask': 'Vas a borrar {n} filas de «{kind}». No se pueden recuperar. ¿Borrar?',
   'admin.data.kind.traffic': 'Tráfico con la API',
   'admin.data.kind.tickets': 'Incidencias y sugerencias',
   'admin.data.kind.notices': 'Avisos del buzón',
@@ -1168,6 +1224,18 @@ export const es: Record<string, string> = {
   'admin.segment.high': 'Dejar fuera a las más activas',
   'admin.segment.least': 'Menos activas',
   'admin.segment.most': 'Más activas',
+  'event.confirm': 'Va a ser el {when}: dentro de {in}. ¿Es correcto?',
+  'event.horizon': 'Como mucho, con dos meses de antelación',
+  'until.now': 'un momento',
+  'until.and': '{a} y {b}',
+  'until.minute.one': '{n} minuto',
+  'until.minute.many': '{n} minutos',
+  'until.hour.one': '{n} hora',
+  'until.hour.many': '{n} horas',
+  'until.day.one': '{n} día',
+  'until.day.many': '{n} días',
+  'until.month.one': '{n} mes',
+  'until.month.many': '{n} meses',
   'admin.tab.clicker': 'Code Clicker',
   'admin.clicker.title': 'Uso de Code Clicker',
   'admin.clicker.of': 'Code Clicker de {login}',

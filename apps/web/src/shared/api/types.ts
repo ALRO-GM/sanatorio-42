@@ -7,6 +7,7 @@
  */
 
 import type {
+  DataPreview,
   OnlineUsers,
   UsageFlows,
   AdminData,
@@ -229,8 +230,8 @@ export type Api = {
   }) => Promise<ClickerCapital>
   /** Los tipos de dato que se pueden borrar a mano y cuántas filas tienen. Solo admins. */
   getAdminData: () => Promise<AdminData>
-  /** Cuántas filas son esas. Solo admins. */
-  countAdminData: (scope: DataWipe) => Promise<{ rows: number }>
+  /** Cuántas son y una muestra, para ver qué se va a borrar. Solo admins. */
+  previewAdminData: (scope: DataWipe) => Promise<DataPreview>
   /** Las borra, y dice cuántas eran. Solo admins. */
   deleteAdminData: (scope: DataWipe) => Promise<{ rows: number }>
   /** Indulta una trampa: la partida rechazada pasa a estar en curso. Solo admins. */

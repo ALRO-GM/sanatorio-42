@@ -17,6 +17,7 @@
 
 import type {
   AdminData,
+  DataPreview,
   AdminPeople,
   BudgetSettings,
   BudgetStatus,
@@ -87,6 +88,8 @@ const login = z
 
 const roleSchema = z.object({ login, admin: z.boolean() })
 const day = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'La fecha va como AAAA-MM-DD')
+/** Filas que se enseñan de lo que se va a borrar. */
+const PREVIEW_ROWS = 50
 const dataSchema = z.object({
   kind: z.string().min(1).max(40),
   login: login.optional(),
@@ -795,6 +798,29 @@ export function createAdminService(options: AdminServiceOptions) {
      * @throws {DomainError} `forbidden` si quien pregunta no es admin;
      *   `not_found` si ese tipo de dato no existe.
      */
+    /**
+     * Lo que se borraría: cuántas filas son y una muestra de las más recientes,
+     * para comprobar que es lo que se busca antes de quitarlo.
+     *
+     * @throws {DomainError} `forbidden` si quien pregunta no es admin;
+     *   `not_found` si ese tipo de dato no existe.
+     */
+    async preview(actor: Actor, input: unknown): Promise<DataPreview> {
+      assertAdmin(actor)
+
+      const { kind, ...scope } = parse(dataSchema, input)
+      const store = (options.stores?.() ?? []).find((candidate) => candidate.id === kind)
+
+      if (store === undefined) throw domainError('not_found', 'Ese tipo de dato no existe')
+
+      const [rows, sample] = await Promise.all([
+        store.count(scope),
+        store.sample(scope, PREVIEW_ROWS),
+      ])
+
+      return { rows, columns: sample.columns, sample: sample.rows }
+    },
+
     async wipe(actor: Actor, input: unknown, erase: boolean): Promise<{ rows: number }> {
       assertAdmin(actor)
 

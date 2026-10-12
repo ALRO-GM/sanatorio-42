@@ -31,12 +31,14 @@ export function createUsageModule(deps: {
         table: 'usage_time',
         login: 'login',
         date: { column: 'day', as: 'day' },
+        show: ['login', 'day', 'hour', 'key', 'clicks', 'seen_s', 'back_s', 'hidden_s'],
       }),
       tableStore(deps.db, {
         id: 'flows',
         table: 'usage_flows',
         login: 'login',
         date: { column: 'day', as: 'day' },
+        show: ['login', 'day', 'from_key', 'to_key', 'count'],
       }),
     ],
     routes: (app, { session }) => {

@@ -43,7 +43,7 @@ export const adminMock: Pick<
   | 'getFlows'
   | 'getOnline'
   | 'getAdminData'
-  | 'countAdminData'
+  | 'previewAdminData'
   | 'deleteAdminData'
 > = {
   async openTicket(ticket) {
@@ -492,10 +492,28 @@ export const adminMock: Pick<
     return { kinds: Object.entries(dataRows).map(([id, rows]) => ({ id, rows })) }
   },
 
-  async countAdminData(scope) {
-    await delay(100)
+  async previewAdminData(scope) {
+    await delay(150)
 
-    return { rows: rowsIn(scope) }
+    const rows = rowsIn(scope)
+    const who = scope.login ?? 'jdoe'
+    // Unas pocas filas con pinta de mensajes: aquí no hay tablas de verdad.
+    const sample = Array.from({ length: Math.min(rows, 8) }, (_, index) => [
+      2340 - index,
+      `board:${3 - (index % 3)}`,
+      index % 2 === 0 ? who : 'rsoto',
+      'text',
+      ['¿Alguien por el cluster 2?', 'Llego en diez minutos', 'Gracias por la pizarra'][
+        index % 3
+      ] ?? null,
+      new Date(Date.now() - index * 5_400_000).toISOString(),
+    ])
+
+    return {
+      rows,
+      columns: ['id', 'event_id', 'login', 'kind', 'body', 'created_at'],
+      sample,
+    }
   },
 
   async deleteAdminData(scope) {

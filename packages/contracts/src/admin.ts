@@ -169,3 +169,15 @@ export type DataWipe = {
   /** Solo lo de ese día en adelante. */
   from?: string
 }
+
+/**
+ * `POST /admin/data/preview`: lo que se borraría. Cuántas filas son y una
+ * muestra de las más recientes (50 como mucho), con los textos largos recortados.
+ */
+export type DataPreview = {
+  rows: number
+  /** Los nombres de las columnas de la muestra. */
+  columns: string[]
+  /** Una fila por elemento, con sus valores en el orden de `columns`. */
+  sample: (string | number | null)[][]
+}

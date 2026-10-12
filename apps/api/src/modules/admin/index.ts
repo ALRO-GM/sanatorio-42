@@ -170,6 +170,11 @@ export function createAdminModule(deps: AdminServiceOptions): AdminModule {
         return reply.send(await service.wipe(await session.actor(request), request.body, false))
       })
 
+      /** `POST /admin/data/preview` → cuántas son y una muestra de las más recientes. */
+      app.post('/admin/data/preview', async (request, reply) => {
+        return reply.send(await service.preview(await session.actor(request), request.body))
+      })
+
       /** `POST /admin/data/delete` → lo mismo, pero las borra. Devuelve cuántas eran. */
       app.post('/admin/data/delete', async (request, reply) => {
         return reply.send(await service.wipe(await session.actor(request), request.body, true))
@@ -197,12 +202,14 @@ export function createAdminModule(deps: AdminServiceOptions): AdminModule {
         table: 'request_stats',
         login: 'login',
         date: { column: 'day', as: 'day' },
+        show: ['login', 'day', 'hour', 'requests', 'bytes', 'limited'],
       }),
       tableStore(deps.db, {
         id: 'tickets',
         table: 'tickets',
         login: 'login',
         date: { column: 'created_at', as: 'iso' },
+        show: ['id', 'login', 'kind', 'subject', 'status', 'created_at'],
       }),
     ],
     jobs: [

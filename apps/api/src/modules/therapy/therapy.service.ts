@@ -12,7 +12,7 @@ import { z } from 'zod'
 import type { GroupRow, TherapyRepository } from './therapy.repository.js'
 import type { ReplicaRepository, Syncer } from '../replica/index.js'
 import { domainError } from '../../core/errors.js'
-import { localMoment, minutesOf } from '../../core/time.js'
+import { beyondHorizon, EVENT_HORIZON_DAYS, localMoment, minutesOf } from '../../core/time.js'
 import { LOCATION_MAX_AGE_MS } from '../replica/index.js'
 import { XP_KIND } from '../profile/index.js'
 import type { XpService } from '../profile/index.js'
@@ -172,13 +172,25 @@ export function createTherapyService(options: TherapyServiceOptions) {
     return localMoment(now(), await replica.timeZoneOf(campusId)).day
   }
 
-  /** Ningún día puede ser anterior a hoy: no se queda en el pasado. */
+  /**
+   * Ningún día puede ser anterior a hoy (no se queda en el pasado) ni caer más
+   * allá de lo que se deja reservar.
+   */
   async function mustBeUpcoming(dates: readonly string[], campusId: number): Promise<void> {
     const today = await todayIn(campusId)
     const past = dates.find((date) => date < today)
 
     if (past !== undefined) {
       throw domainError('invalid_input', `dates: el ${past} ya ha pasado`)
+    }
+
+    const far = dates.find((date) => beyondHorizon(Date.parse(`${date}T00:00:00Z`), now()))
+
+    if (far !== undefined) {
+      throw domainError(
+        'invalid_input',
+        `dates: el ${far} queda a más de ${EVENT_HORIZON_DAYS} días. No se puede reservar con tanta antelación`,
+      )
     }
   }
 

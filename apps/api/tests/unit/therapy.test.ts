@@ -150,6 +150,15 @@ describe('comunidad', () => {
         therapy.create(actor('ana'), { ...martesYJueves, dates: ['martes'] }),
         'invalid_input',
       )
+      // Ni con más de dos meses de antelación: un año mal escrito no entra.
+      await expectCode(
+        therapy.create(actor('ana'), { ...martesYJueves, dates: ['2027-10-06'] }),
+        'invalid_input',
+      )
+      await expectCode(
+        therapy.create(actor('ana'), { ...martesYJueves, dates: ['2026-10-06', '2026-12-20'] }),
+        'invalid_input',
+      )
       // Repetidos fuera, y en orden.
       const group = await therapy.create(actor('ana'), {
         ...martesYJueves,

@@ -841,10 +841,70 @@ export const en: Record<string, string> = {
   'admin.tab.inbox': 'Inbox',
   'admin.tab.messages': 'Messages',
   'admin.tab.usage': 'What gets used',
-  'admin.tab.data': 'Data',
-  'admin.data.title': 'Delete data',
+  'admin.tab.data': 'Clean up data',
+  'admin.data.title': 'Clean up data',
   'admin.data.about':
     'The site deletes nothing for being old. Here you choose what to remove, whose and from when. Deleted data cannot be recovered.',
+  'admin.data.kind.traffic.summary':
+    'How many requests and bytes the site has served to each person, hour by hour.',
+  'admin.data.kind.traffic.detail':
+    'One row per person and hour with their requests, the size of the responses and how many were refused for going over the cap. It feeds the monthly consumption, the charts in Consumption and the request columns in Statistics. Deleting it does not change the caps or what the plan has already spent, which the machine counts: only the history is lost.',
+  'admin.data.kind.tickets.summary':
+    'What people have written to the admin inbox, with the answers.',
+  'admin.data.kind.tickets.detail':
+    "Each issue, suggestion or report: who sent it, the subject, the text, its status and the answer. Deleting them removes them from the panel inbox and from each person's sent list.",
+  'admin.data.kind.notices.summary':
+    'The bell notices: someone answered, booked you, sent a new message…',
+  'admin.data.kind.notices.detail':
+    'One row per notice, read or unread, with who it is for, what it is about and who caused it. Deleting them empties the bell; what they pointed to (the message, booking or question) stays where it was.',
+  'admin.data.kind.messages.summary':
+    'Everything written in chats: boards, therapies and help sessions, and direct chats between two people.',
+  'admin.data.kind.messages.detail':
+    "One row per message, with the chat it belongs to, who wrote it and the text. Also the answers to event alerts (going, late, not going). Deleting them removes them for everyone and from the panel's Messages log; an open report about them can no longer be reviewed.",
+  'admin.data.kind.event_alerts.summary':
+    'The "your event is starting" alerts each person has to answer.',
+  'admin.data.kind.event_alerts.detail':
+    'One row per person and event: when it started, whether they missed it and whether they closed it. Deleting them clears pending alerts; attendance and validated time are untouched.',
+  'admin.data.kind.broadcasts.summary':
+    'Messages the admins have sent to people, with what each person answered.',
+  'admin.data.kind.broadcasts.detail':
+    'Each announcement (title, text, audience) and, under it, each person\'s answer. "Whose" here means who sent it. Deleting them stops them showing for people who had not read them and loses the answer tally.',
+  'admin.data.kind.checkins.summary':
+    'Every time someone typed an event start or end code, right or wrong.',
+  'admin.data.kind.checkins.detail':
+    'One row per attempt: the event, who, whether it was start or end and what happened (valid, repeated, wrong code, out of time…). It is the proof behind the hours. Deleting it does not remove validated time, but that time is left without evidence.',
+  'admin.data.kind.usage.summary':
+    'How long each person spends in each section and how much they click, hour by hour.',
+  'admin.data.kind.usage.detail':
+    'One row per person, hour and element (a section or a block of a page), with clicks and seconds looking at it, behind another window and with the tab hidden. It feeds Statistics and the time in Paths. It does not touch the tally that orders tabs by use.',
+  'admin.data.kind.flows.summary':
+    'Steps from one section to another: where people come in and where they go next.',
+  'admin.data.kind.flows.detail':
+    "One row per person, day and step (from questions to network), with how many times. It feeds the Paths graph, entries, exits and each section's role.",
+  'admin.data.kind.clicker_capital.summary':
+    "The curve of how much each person's game is worth over time.",
+  'admin.data.kind.clicker_capital.detail':
+    "One point per person and moment: every ten seconds for the last day, hourly for the last week and daily before that. It is the chart in the game stats and in each player's card in the panel. The game and the leaderboard are untouched.",
+  'admin.data.kind.clicker_alerts.summary':
+    'Worth jumps that were too sudden but not flagged as cheating.',
+  'admin.data.kind.clicker_alerts.detail':
+    'One row per alert: who, when, from how much to how much and in how many seconds. They show under worth jumps to review in the Code Clicker tab. Deleting them is the same as dismissing them one by one.',
+  'admin.data.kind.clicker_cheats.summary': 'The copy of each game refused as a cheat.',
+  'admin.data.kind.clicker_cheats.detail':
+    'One row per cheat caught: who, when, why and the figures of the game that arrived. It is what makes a pardon possible. Once deleted, those cheats can no longer be pardoned; the caught counter and the banner title do not change.',
+  'admin.data.includes': 'What it includes',
+  'admin.data.see': 'See what would be deleted',
+  'admin.data.review': 'This is what would be deleted',
+  'admin.data.reviewScope': '{kind} · {who} · {when}',
+  'admin.data.scope.everyone': 'everyone',
+  'admin.data.scope.all': 'everything',
+  'admin.data.scope.before': 'before {day}',
+  'admin.data.scope.from': 'from {day}',
+  'admin.data.total': '{n} rows in total',
+  'admin.data.showing': 'Showing the {n} most recent.',
+  'admin.data.none': 'Nothing matches that.',
+  'admin.data.deleteN': 'Delete the {n} rows',
+  'admin.data.close': 'Close without deleting',
   'admin.data.kind': 'What',
   'admin.data.choose': 'Choose a kind of data',
   'admin.data.who': 'Whose (login)',
@@ -854,12 +914,7 @@ export const en: Record<string, string> = {
   'admin.data.range.before': 'Before a day',
   'admin.data.range.from': 'From a day onwards',
   'admin.data.day': 'Day',
-  'admin.data.count': 'Count',
-  'admin.data.delete': 'Delete',
-  'admin.data.found': '{n} rows match.',
   'admin.data.deleted': '{n} rows deleted.',
-  'admin.data.ask':
-    'You are about to delete {n} rows of "{kind}". They cannot be recovered. Delete?',
   'admin.data.kind.traffic': 'API traffic',
   'admin.data.kind.tickets': 'Issues and suggestions',
   'admin.data.kind.notices': 'Inbox notices',
@@ -924,6 +979,18 @@ export const en: Record<string, string> = {
   'admin.segment.high': 'Leave out the most active',
   'admin.segment.least': 'Least active',
   'admin.segment.most': 'Most active',
+  'event.confirm': 'It will be on {when}: in {in}. Is that right?',
+  'event.horizon': 'At most two months ahead',
+  'until.now': 'a moment',
+  'until.and': '{a} and {b}',
+  'until.minute.one': '{n} minute',
+  'until.minute.many': '{n} minutes',
+  'until.hour.one': '{n} hour',
+  'until.hour.many': '{n} hours',
+  'until.day.one': '{n} day',
+  'until.day.many': '{n} days',
+  'until.month.one': '{n} month',
+  'until.month.many': '{n} months',
   'admin.tab.clicker': 'Code Clicker',
   'admin.clicker.title': 'Code Clicker usage',
   'admin.clicker.of': "{login}'s Code Clicker",

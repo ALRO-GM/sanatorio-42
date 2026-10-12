@@ -5,7 +5,8 @@ import type { GroupKind, GroupView, ProjectSummary } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
 import { useAction } from '../../shared/hooks/useAsync'
-import { useI18n } from '../../shared/i18n'
+import { localeOf, useI18n } from '../../shared/i18n'
+import { lastDay, untilText } from '../../shared/until'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { clusterName } from '../map/ClusterMapView'
 import { SeatPicker } from '../map/SeatPicker'
@@ -207,6 +208,28 @@ export function GroupForm({ projects, defaultProject, group, onCancel, onSaved }
       kind: form.kind,
       progress: form.kind === 'review' ? 100 : form.progress,
     }
+    // Antes de guardar se dice cuánto falta para la primera sesión: un año o un
+    // mes mal puestos se ven aquí. Al retocar sin tocar los días no hace falta.
+    const first = form.dates[0]
+    const moved = group === undefined || form.dates.some((day) => !group.dates.includes(day))
+
+    if (first !== undefined && moved) {
+      const startsAt = new Date(`${first}T${form.start}:00`)
+      const text = t('event.confirm', {
+        when: startsAt.toLocaleString(localeOf(lang), {
+          weekday: 'long',
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
+        in: untilText(startsAt.getTime() - Date.now(), t),
+      })
+
+      if (!window.confirm(text)) return
+    }
+
     const ok = await run(() =>
       group === undefined ? api.createGroup(input) : api.updateGroup(group.id, input),
     )
@@ -351,6 +374,8 @@ export function GroupForm({ projects, defaultProject, group, onCancel, onSaved }
             type="date"
             value={nextDate}
             min={today()}
+            max={lastDay()}
+            title={t('event.horizon')}
             aria-label={t('therapy.addDate')}
             onChange={(event) => {
               setNextDate(event.target.value)

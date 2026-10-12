@@ -72,6 +72,7 @@ export function createNoticesModule(deps: NoticesModuleDeps): NoticesModule {
         table: 'notices',
         login: 'login',
         date: { column: 'updated_at', as: 'iso' },
+        show: ['id', 'login', 'kind', 'ref', 'from_login', 'text', 'updated_at', 'read_at'],
       }),
     ],
   }

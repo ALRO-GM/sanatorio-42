@@ -5,7 +5,8 @@ import type { BoardView } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
 import { useAction } from '../../shared/hooks/useAsync'
-import { useI18n } from '../../shared/i18n'
+import { localeOf, useI18n } from '../../shared/i18n'
+import { lastDay, untilText } from '../../shared/until'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { dayKey, hhmm } from './dates'
 
@@ -20,7 +21,7 @@ type BoardFormProps = {
 
 /** Proponer una pizarra, o cambiar una que ya existe (`board`). */
 export function BoardForm({ defaultDay, board, onCancel, onSaved }: BoardFormProps) {
-  const { t } = useI18n()
+  const { t, lang } = useI18n()
   const { busy, error, run } = useAction()
   const [form, setForm] = useState(() =>
     board === undefined
@@ -51,6 +52,20 @@ export function BoardForm({ defaultDay, board, onCancel, onSaved }: BoardFormPro
       setForm((current) => ({ ...current, [field]: event.target.value }))
     }
 
+  /** "Va a ser el martes 14 de octubre a las 17:00: dentro de 2 días y 3 horas." */
+  const confirmText = (startsAt: string): string =>
+    t('event.confirm', {
+      when: new Date(startsAt).toLocaleString(localeOf(lang), {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
+      in: untilText(Date.parse(startsAt) - Date.now(), t),
+    })
+
   const submit = async (event: SyntheticEvent): Promise<void> => {
     event.preventDefault()
     // El día y las horas son las del navegador, que es la hora del campus para
@@ -65,6 +80,12 @@ export function BoardForm({ defaultDay, board, onCancel, onSaved }: BoardFormPro
       startsAt: at(form.start),
       endsAt: at(form.end),
     }
+    // Antes de guardar se dice cuánto falta: un año o un mes mal puestos se ven
+    // aquí. Al retocar una pizarra sin moverle la hora no hace falta.
+    const moved = board === undefined || input.startsAt !== new Date(board.startsAt).toISOString()
+
+    if (moved && !window.confirm(confirmText(input.startsAt))) return
+
     const ok = await run(() =>
       board === undefined ? api.createBoard(input) : api.updateBoard(board.id, input),
     )
@@ -106,7 +127,14 @@ export function BoardForm({ defaultDay, board, onCancel, onSaved }: BoardFormPro
         </label>
         <label>
           {t('cal.f.date')}
-          <input type="date" value={form.day} onChange={set('day')} required />
+          <input
+            type="date"
+            value={form.day}
+            onChange={set('day')}
+            max={lastDay()}
+            title={t('event.horizon')}
+            required
+          />
         </label>
         <label>
           {t('cal.f.capacity')}

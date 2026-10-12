@@ -609,3 +609,35 @@ dialog.info-dialog {
     opacity: 0;
   }
 }
+
+/* --- Orden de las capas, fijo ---------------------------------------------- */
+/* Lo que se mueve o se funde en una demostración cambia de capa mientras dura
+   la animación: el navegador lo saca a una capa propia y, al acabar, lo
+   devuelve. En ese ir y venir, durante unas centésimas, algo que iba debajo se
+   pintaba encima. Aquí se deja todo en su capa desde el principio, se mueva o
+   no: el decorado es un mundo aparte, la escena va debajo del fundido y del
+   ratón, y cada pieza que entra animada tiene siempre el mismo sitio. */
+.tour-stage {
+  isolation: isolate;
+  contain: layout paint;
+}
+.tour-scene {
+  z-index: 0;
+}
+.tour-graph,
+.tour-cursor,
+.tour-cursor span {
+  will-change: transform;
+}
+.tour-fade {
+  will-change: opacity;
+}
+.tour-in,
+.tour-saved,
+.tour-booking,
+.tour-caption span,
+.tour-bell i,
+.tour-pill,
+.tour-ev {
+  isolation: isolate;
+}

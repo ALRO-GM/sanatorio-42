@@ -23,6 +23,7 @@ export function createAttendanceModule(deps: AttendanceServiceOptions): Attendan
         table: 'event_checkins',
         login: 'login',
         date: { column: 'created_at', as: 'iso' },
+        show: ['id', 'event_id', 'login', 'phase', 'outcome', 'created_at'],
       }),
     ],
   }

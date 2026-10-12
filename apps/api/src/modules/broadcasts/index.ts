@@ -22,6 +22,7 @@ export function createBroadcastsModule(deps: BroadcastsServiceOptions): Broadcas
         table: 'broadcasts',
         login: 'from_login',
         date: { column: 'created_at', as: 'iso' },
+        show: ['id', 'from_login', 'title', 'audience', 'created_at'],
         children: [{ table: 'broadcast_answers', key: 'broadcast_id', parent: 'id' }],
       }),
     ],

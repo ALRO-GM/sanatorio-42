@@ -546,3 +546,64 @@ dialog.broadcast-dialog .actions {
   justify-content: space-between;
   font-size: 0.72rem;
 }
+
+/* Limpiar datos: qué es cada tipo y la ventana con lo que se va a borrar. */
+.data-about {
+  display: grid;
+  gap: 0.3rem;
+  margin-top: 1rem;
+  padding: 0.8rem 1rem;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+}
+.data-about p {
+  margin: 0;
+  color: var(--text-2);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+.data-kinds {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0.6rem 0 0;
+}
+.data-kinds dt {
+  font-weight: 600;
+}
+.data-kinds dt small {
+  margin-left: 0.5rem;
+  color: var(--text-3);
+  font-weight: 400;
+}
+.data-kinds dd {
+  margin: 0.1rem 0 0;
+  color: var(--text-2);
+  font-size: 0.9rem;
+}
+dialog.data-review {
+  width: min(960px, calc(100vw - 1.5rem));
+  max-height: calc(100vh - 3rem);
+  padding: 1.25rem;
+  color: var(--text);
+}
+dialog.data-review h3 {
+  margin: 0.2rem 0 0.4rem;
+}
+.data-sample {
+  max-height: 50vh;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.data-sample .stat-table th,
+.data-sample .stat-table td {
+  text-align: left;
+  white-space: normal;
+  max-width: 22rem;
+  overflow-wrap: anywhere;
+}
+.data-sample thead th {
+  position: sticky;
+  top: 0;
+  background: var(--surface);
+}

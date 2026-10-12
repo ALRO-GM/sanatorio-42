@@ -113,12 +113,14 @@ export function createMeetModule(deps: MeetServiceOptions): MeetModule {
         table: 'event_messages',
         login: 'login',
         date: { column: 'created_at', as: 'iso' },
+        show: ['id', 'event_id', 'login', 'kind', 'body', 'created_at'],
       }),
       tableStore(deps.db, {
         id: 'event_alerts',
         table: 'event_alerts',
         login: 'login',
         date: { column: 'missed_at', as: 'iso' },
+        show: ['event_id', 'login', 'event', 'starts_at', 'missed_at', 'acked_at'],
       }),
     ],
   }

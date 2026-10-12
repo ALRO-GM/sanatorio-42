@@ -49,6 +49,22 @@ describe('comunidad', () => {
       ])
     })
 
+    it('no se puede proponer con más de dos meses de antelación', async () => {
+      const { boards } = services
+
+      // Dentro de dos meses, sí.
+      const near = await boards.create(actor('eva'), malloc(24 * 60))
+
+      // Un año equivocado al escribir la fecha, no.
+      await expectCode(boards.create(actor('eva'), malloc(24 * 365 * 3)), 'invalid_input')
+      await expectCode(boards.create(actor('eva'), malloc(24 * 63)), 'invalid_input')
+      // Ni llevándose allí una que ya existe.
+      await expectCode(boards.update(actor('eva'), near.id, malloc(24 * 200)), 'invalid_input')
+      await expect(boards.update(actor('eva'), near.id, malloc(24 * 30))).resolves.toMatchObject({
+        id: near.id,
+      })
+    })
+
     it('quien participa en un evento puede avisar y chatear; quien no, no', async () => {
       const { boards, meet } = services
       const board = await boards.create(actor('eva'), malloc())
