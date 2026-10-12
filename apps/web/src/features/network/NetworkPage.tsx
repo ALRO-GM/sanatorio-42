@@ -279,369 +279,241 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
   return (
     <section className="network">
       <div className="net-layout">
-        <div className="net-head">
-          <h2>
-            {t('net.title')}
-            <InfoTip title={t('net.title')}>
-              <NetworkTour />
-            </InfoTip>
-          </h2>
+        {/* La columna de la derecha: título, filtros y paneles. En pantalla ancha
+            tiene su propio desplazamiento, y el grafo se queda quieto a su lado. */}
+        <div className="net-rail">
+          <div className="net-head">
+            <h2>
+              {t('net.title')}
+              <InfoTip title={t('net.title')}>
+                <NetworkTour />
+              </InfoTip>
+            </h2>
 
-          {graph !== null && graph.sync.phase !== 'done' && (
-            <div className="net-sync" role="status">
-              <span>
-                {graph.sync.total === null
-                  ? t('net.sync.pending')
-                  : t('net.sync.copying', {
-                      rows: graph.sync.rows.toLocaleString(),
-                      total: graph.sync.total.toLocaleString(),
+            {graph !== null && graph.sync.phase !== 'done' && (
+              <div className="net-sync" role="status">
+                <span>
+                  {graph.sync.total === null
+                    ? t('net.sync.pending')
+                    : t('net.sync.copying', {
+                        rows: graph.sync.rows.toLocaleString(),
+                        total: graph.sync.total.toLocaleString(),
+                      })}
+                </span>
+                {graph.sync.first !== null && graph.sync.last !== null && (
+                  <small>
+                    {t('net.sync.range', {
+                      from: graph.sync.first.slice(0, 10),
+                      to: graph.sync.last.slice(0, 10),
                     })}
-              </span>
-              {graph.sync.first !== null && graph.sync.last !== null && (
-                <small>
-                  {t('net.sync.range', {
-                    from: graph.sync.first.slice(0, 10),
-                    to: graph.sync.last.slice(0, 10),
-                  })}
-                </small>
-              )}
-            </div>
-          )}
-        </div>
-
-        <div className="card net-filters">
-          {graph !== null && graph.available.length > 1 && (
-            <div className="net-filter">
-              <span className="eyebrow">{t('net.campuses')}</span>
-              <div className="filter-pills" role="group" aria-label={t('net.campuses')}>
-                {graph.available.map((campus) => {
-                  const on = graph.campuses.includes(campus.id)
-
-                  return (
-                    <button
-                      key={campus.id}
-                      type="button"
-                      className={`pill ${on ? 'active' : ''}`}
-                      aria-pressed={on}
-                      onClick={() => {
-                        const next = on
-                          ? graph.campuses.filter((id) => id !== campus.id)
-                          : [...graph.campuses, campus.id]
-
-                        // Sin ninguno no hay grafo: el último no se puede quitar.
-                        if (next.length === 0) return
-
-                        change({ campuses: next })
-                        // Con más de uno, lo que interesa ver es de cuál es cada quien.
-                        if (next.length > 1) setMode('campus')
-                      }}
-                    >
-                      {campus.name}
-                    </button>
-                  )
-                })}
-                <button
-                  type="button"
-                  className={`pill ${graph.campuses.length === graph.available.length ? 'active' : ''}`}
-                  aria-pressed={graph.campuses.length === graph.available.length}
-                  onClick={() => {
-                    change({ campuses: 'all' })
-                    setMode('campus')
-                  }}
-                >
-                  {t('net.campuses.all')}
-                </button>
-              </div>
-            </div>
-          )}
-          <div className="net-filter">
-            <span className="eyebrow">{t('net.period')}</span>
-            <div className="filter-pills" role="group" aria-label={t('net.period')}>
-              {PERIODS.map((period) => (
-                <button
-                  key={period}
-                  type="button"
-                  className={`pill ${filters.period === period ? 'active' : ''}`}
-                  aria-pressed={filters.period === period}
-                  onClick={() => {
-                    change({ period })
-                  }}
-                >
-                  {t(`net.period.${period}`)}
-                </button>
-              ))}
-            </div>
-            {filters.period === 'custom' && (
-              <div className="net-dates">
-                <label>
-                  {t('net.from')}
-                  <input
-                    type="date"
-                    value={filters.from}
-                    max={filters.to === '' ? undefined : filters.to}
-                    onChange={(event) => {
-                      change({ from: event.target.value })
-                    }}
-                  />
-                </label>
-                <label>
-                  {t('net.to')}
-                  <input
-                    type="date"
-                    value={filters.to}
-                    min={filters.from === '' ? undefined : filters.from}
-                    onChange={(event) => {
-                      change({ to: event.target.value })
-                    }}
-                  />
-                </label>
-              </div>
-            )}
-          </div>
-
-          {graph !== null && (
-            <Timeline
-              months={graph.timeline}
-              from={params.from ?? null}
-              to={params.to ?? null}
-              onSelect={(from, to) => {
-                change({ period: 'custom', from, to })
-              }}
-            />
-          )}
-
-          <div className="net-filter">
-            <span className="eyebrow">{t('net.person')}</span>
-            <PersonSearch
-              value={filters.login}
-              me={me.login}
-              onChange={focusOn}
-              campuses={params.campuses}
-            />
-          </div>
-
-          <div className="net-filter-grid">
-            <label>
-              {t('net.project')}
-              <select
-                value={filters.projectId ?? ''}
-                onChange={(event) => {
-                  change({
-                    projectId: event.target.value === '' ? null : Number(event.target.value),
-                  })
-                }}
-              >
-                <option value="">{t('net.project.all')}</option>
-                {(graph?.projects ?? []).map((project) => (
-                  <option key={project.id} value={project.id}>
-                    {project.name} ({project.corrections})
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              {t('net.min', { n: filters.min })}
-              <input
-                type="range"
-                min={1}
-                max={12}
-                value={filters.min}
-                onChange={(event) => {
-                  change({ min: Number(event.target.value) })
-                }}
-              />
-            </label>
-            <label>
-              {t('net.limit')}
-              <select
-                value={filters.limit}
-                onChange={(event) => {
-                  change({ limit: Number(event.target.value) })
-                }}
-              >
-                {LIMITS.map((limit) => (
-                  <option key={limit} value={limit}>
-                    {limit === ALL_PEOPLE ? t('net.limit.all') : limit}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              {t('net.color')}
-              <select
-                value={mode}
-                onChange={(event) => {
-                  setMode(
-                    COLOR_MODES.find((option) => option === event.target.value) ?? 'community',
-                  )
-                }}
-              >
-                {COLOR_MODES.map((option) => (
-                  <option key={option} value={option}>
-                    {t(`net.color.${option}`)}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              {t('net.verdict')}
-              <select
-                value={filters.verdict}
-                onChange={(event) => {
-                  const verdict = event.target.value
-
-                  change({ verdict: verdict === 'pass' || verdict === 'fail' ? verdict : '' })
-                }}
-              >
-                <option value="">{t('net.verdict.all')}</option>
-                <option value="pass">{t('net.verdict.pass')}</option>
-                <option value="fail">{t('net.verdict.fail')}</option>
-              </select>
-            </label>
-            <label className="net-check">
-              <input
-                type="checkbox"
-                checked={filters.mutual}
-                onChange={(event) => {
-                  change({ mutual: event.target.checked })
-                }}
-              />
-              {t('net.mutualOnly')}
-            </label>
-          </div>
-        </div>
-
-        {graph === null && (
-          <div className="net-stage">
-            {error === null ? (
-              <p className="estado">{t('net.loading')}</p>
-            ) : (
-              <ErrorNote
-                error={error}
-                onRetry={() => {
-                  setReloads((count) => count + 1)
-                }}
-              />
-            )}
-          </div>
-        )}
-
-        {graph !== null && (
-          <>
-            <div className={`net-stage ${loading ? 'loading' : ''}`}>
-              {graph.nodes.length === 0 ? (
-                <p className="estado">
-                  {graph.query.login === null ? t('net.empty') : t('net.emptyPerson')}
-                </p>
-              ) : (
-                <ForceGraph
-                  nodes={graph.nodes}
-                  links={graph.links}
-                  colorOf={paint}
-                  selected={selected}
-                  onSelect={setSelected}
-                  label={t('net.graphLabel', {
-                    people: graph.nodes.length,
-                    links: graph.links.length,
-                  })}
-                  tooltip={tooltip}
-                  controls={controls}
-                />
-              )}
-              <div className="net-key">
-                <ul className="net-legend">
-                  {legend.map((entry) => (
-                    <li key={entry.label}>
-                      <span style={{ background: entry.color }} />
-                      {entry.label}
-                    </li>
-                  ))}
-                </ul>
-                {/* La escala: entre qué porcentajes se reparte el degradado, de punto en punto. */}
-                {isScaleMode(mode) && scale !== undefined && (
-                  <div className="net-scale">
-                    <span
-                      className="net-scale-bar"
-                      aria-hidden="true"
-                      style={{
-                        background: `linear-gradient(90deg, ${[0, 0.25, 0.5, 0.75, 1]
-                          .map((step) =>
-                            scaleColor(scale.min + (scale.max - scale.min) * step, scale),
-                          )
-                          .join(', ')})`,
-                      }}
-                    />
-                    <label>
-                      <span>{t('net.scale.from', { n: scale.min })}</span>
-                      <input
-                        type="range"
-                        min={0}
-                        max={99}
-                        step={1}
-                        value={scale.min}
-                        onChange={(event) => {
-                          const min = Number(event.target.value)
-
-                          // El mínimo empuja al máximo si lo alcanza: siempre queda un punto de tramo.
-                          setScales((current) => ({
-                            ...current,
-                            [mode]: { min, max: Math.max(min + 1, scale.max) },
-                          }))
-                        }}
-                      />
-                    </label>
-                    <label>
-                      <span>{t('net.scale.to', { n: scale.max })}</span>
-                      <input
-                        type="range"
-                        min={1}
-                        max={100}
-                        step={1}
-                        value={scale.max}
-                        onChange={(event) => {
-                          const max = Number(event.target.value)
-
-                          setScales((current) => ({
-                            ...current,
-                            [mode]: { min: Math.min(max - 1, scale.min), max },
-                          }))
-                        }}
-                      />
-                    </label>
-                    <div className="net-scale-actions">
-                      <button
-                        type="button"
-                        className="pill"
-                        onClick={() => {
-                          setScales((current) => ({
-                            ...current,
-                            [mode]: fitScale(graph.nodes, mode),
-                          }))
-                        }}
-                      >
-                        {t('net.scale.fit')}
-                      </button>
-                      <button
-                        type="button"
-                        className="pill"
-                        onClick={() => {
-                          setScales((current) => ({ ...current, [mode]: DEFAULT_SCALES[mode] }))
-                        }}
-                      >
-                        {t('net.scale.reset')}
-                      </button>
-                    </div>
-                  </div>
+                  </small>
                 )}
               </div>
-              <p className="net-help">{t('net.help')}</p>
-              <p className="net-shown" role="status">
-                {t('net.shown', { people: graph.nodes.length, links: graph.links.length })}
-                {graph.hidden !== null &&
-                  ` · ${t('net.hidden', { people: graph.hidden.nodes, links: graph.hidden.links })}`}
-              </p>
+            )}
+          </div>
+
+          <div className="card net-filters">
+            {graph !== null && graph.available.length > 1 && (
+              <div className="net-filter">
+                <span className="eyebrow">{t('net.campuses')}</span>
+                <div className="filter-pills" role="group" aria-label={t('net.campuses')}>
+                  {graph.available.map((campus) => {
+                    const on = graph.campuses.includes(campus.id)
+
+                    return (
+                      <button
+                        key={campus.id}
+                        type="button"
+                        className={`pill ${on ? 'active' : ''}`}
+                        aria-pressed={on}
+                        onClick={() => {
+                          const next = on
+                            ? graph.campuses.filter((id) => id !== campus.id)
+                            : [...graph.campuses, campus.id]
+
+                          // Sin ninguno no hay grafo: el último no se puede quitar.
+                          if (next.length === 0) return
+
+                          change({ campuses: next })
+                          // Con más de uno, lo que interesa ver es de cuál es cada quien.
+                          if (next.length > 1) setMode('campus')
+                        }}
+                      >
+                        {campus.name}
+                      </button>
+                    )
+                  })}
+                  <button
+                    type="button"
+                    className={`pill ${graph.campuses.length === graph.available.length ? 'active' : ''}`}
+                    aria-pressed={graph.campuses.length === graph.available.length}
+                    onClick={() => {
+                      change({ campuses: 'all' })
+                      setMode('campus')
+                    }}
+                  >
+                    {t('net.campuses.all')}
+                  </button>
+                </div>
+              </div>
+            )}
+            <div className="net-filter">
+              <span className="eyebrow">{t('net.period')}</span>
+              <div className="filter-pills" role="group" aria-label={t('net.period')}>
+                {PERIODS.map((period) => (
+                  <button
+                    key={period}
+                    type="button"
+                    className={`pill ${filters.period === period ? 'active' : ''}`}
+                    aria-pressed={filters.period === period}
+                    onClick={() => {
+                      change({ period })
+                    }}
+                  >
+                    {t(`net.period.${period}`)}
+                  </button>
+                ))}
+              </div>
+              {filters.period === 'custom' && (
+                <div className="net-dates">
+                  <label>
+                    {t('net.from')}
+                    <input
+                      type="date"
+                      value={filters.from}
+                      max={filters.to === '' ? undefined : filters.to}
+                      onChange={(event) => {
+                        change({ from: event.target.value })
+                      }}
+                    />
+                  </label>
+                  <label>
+                    {t('net.to')}
+                    <input
+                      type="date"
+                      value={filters.to}
+                      min={filters.from === '' ? undefined : filters.from}
+                      onChange={(event) => {
+                        change({ to: event.target.value })
+                      }}
+                    />
+                  </label>
+                </div>
+              )}
             </div>
 
+            {graph !== null && (
+              <Timeline
+                months={graph.timeline}
+                from={params.from ?? null}
+                to={params.to ?? null}
+                onSelect={(from, to) => {
+                  change({ period: 'custom', from, to })
+                }}
+              />
+            )}
+
+            <div className="net-filter">
+              <span className="eyebrow">{t('net.person')}</span>
+              <PersonSearch
+                value={filters.login}
+                me={me.login}
+                onChange={focusOn}
+                campuses={params.campuses}
+              />
+            </div>
+
+            <div className="net-filter-grid">
+              <label>
+                {t('net.project')}
+                <select
+                  value={filters.projectId ?? ''}
+                  onChange={(event) => {
+                    change({
+                      projectId: event.target.value === '' ? null : Number(event.target.value),
+                    })
+                  }}
+                >
+                  <option value="">{t('net.project.all')}</option>
+                  {(graph?.projects ?? []).map((project) => (
+                    <option key={project.id} value={project.id}>
+                      {project.name} ({project.corrections})
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                {t('net.min', { n: filters.min })}
+                <input
+                  type="range"
+                  min={1}
+                  max={12}
+                  value={filters.min}
+                  onChange={(event) => {
+                    change({ min: Number(event.target.value) })
+                  }}
+                />
+              </label>
+              <label>
+                {t('net.limit')}
+                <select
+                  value={filters.limit}
+                  onChange={(event) => {
+                    change({ limit: Number(event.target.value) })
+                  }}
+                >
+                  {LIMITS.map((limit) => (
+                    <option key={limit} value={limit}>
+                      {limit === ALL_PEOPLE ? t('net.limit.all') : limit}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                {t('net.color')}
+                <select
+                  value={mode}
+                  onChange={(event) => {
+                    setMode(
+                      COLOR_MODES.find((option) => option === event.target.value) ?? 'community',
+                    )
+                  }}
+                >
+                  {COLOR_MODES.map((option) => (
+                    <option key={option} value={option}>
+                      {t(`net.color.${option}`)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                {t('net.verdict')}
+                <select
+                  value={filters.verdict}
+                  onChange={(event) => {
+                    const verdict = event.target.value
+
+                    change({ verdict: verdict === 'pass' || verdict === 'fail' ? verdict : '' })
+                  }}
+                >
+                  <option value="">{t('net.verdict.all')}</option>
+                  <option value="pass">{t('net.verdict.pass')}</option>
+                  <option value="fail">{t('net.verdict.fail')}</option>
+                </select>
+              </label>
+              <label className="net-check">
+                <input
+                  type="checkbox"
+                  checked={filters.mutual}
+                  onChange={(event) => {
+                    change({ mutual: event.target.checked })
+                  }}
+                />
+                {t('net.mutualOnly')}
+              </label>
+            </div>
+          </div>
+          {graph !== null && (
             <aside className="net-side">
               {chosen !== null && (
                 <PersonPanel
@@ -901,6 +773,139 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
                 ]}
               />
             </aside>
+          )}
+        </div>
+
+        {graph === null && (
+          <div className="net-stage">
+            {error === null ? (
+              <p className="estado">{t('net.loading')}</p>
+            ) : (
+              <ErrorNote
+                error={error}
+                onRetry={() => {
+                  setReloads((count) => count + 1)
+                }}
+              />
+            )}
+          </div>
+        )}
+
+        {graph !== null && (
+          <>
+            <div className={`net-stage ${loading ? 'loading' : ''}`}>
+              {graph.nodes.length === 0 ? (
+                <p className="estado">
+                  {graph.query.login === null ? t('net.empty') : t('net.emptyPerson')}
+                </p>
+              ) : (
+                <ForceGraph
+                  nodes={graph.nodes}
+                  links={graph.links}
+                  colorOf={paint}
+                  selected={selected}
+                  onSelect={setSelected}
+                  label={t('net.graphLabel', {
+                    people: graph.nodes.length,
+                    links: graph.links.length,
+                  })}
+                  tooltip={tooltip}
+                  controls={controls}
+                />
+              )}
+              <div className="net-key">
+                <ul className="net-legend">
+                  {legend.map((entry) => (
+                    <li key={entry.label}>
+                      <span style={{ background: entry.color }} />
+                      {entry.label}
+                    </li>
+                  ))}
+                </ul>
+                {/* La escala: entre qué porcentajes se reparte el degradado, de punto en punto. */}
+                {isScaleMode(mode) && scale !== undefined && (
+                  <div className="net-scale">
+                    <span
+                      className="net-scale-bar"
+                      aria-hidden="true"
+                      style={{
+                        background: `linear-gradient(90deg, ${[0, 0.25, 0.5, 0.75, 1]
+                          .map((step) =>
+                            scaleColor(scale.min + (scale.max - scale.min) * step, scale),
+                          )
+                          .join(', ')})`,
+                      }}
+                    />
+                    <label>
+                      <span>{t('net.scale.from', { n: scale.min })}</span>
+                      <input
+                        type="range"
+                        min={0}
+                        max={99}
+                        step={1}
+                        value={scale.min}
+                        onChange={(event) => {
+                          const min = Number(event.target.value)
+
+                          // El mínimo empuja al máximo si lo alcanza: siempre queda un punto de tramo.
+                          setScales((current) => ({
+                            ...current,
+                            [mode]: { min, max: Math.max(min + 1, scale.max) },
+                          }))
+                        }}
+                      />
+                    </label>
+                    <label>
+                      <span>{t('net.scale.to', { n: scale.max })}</span>
+                      <input
+                        type="range"
+                        min={1}
+                        max={100}
+                        step={1}
+                        value={scale.max}
+                        onChange={(event) => {
+                          const max = Number(event.target.value)
+
+                          setScales((current) => ({
+                            ...current,
+                            [mode]: { min: Math.min(max - 1, scale.min), max },
+                          }))
+                        }}
+                      />
+                    </label>
+                    <div className="net-scale-actions">
+                      <button
+                        type="button"
+                        className="pill"
+                        onClick={() => {
+                          setScales((current) => ({
+                            ...current,
+                            [mode]: fitScale(graph.nodes, mode),
+                          }))
+                        }}
+                      >
+                        {t('net.scale.fit')}
+                      </button>
+                      <button
+                        type="button"
+                        className="pill"
+                        onClick={() => {
+                          setScales((current) => ({ ...current, [mode]: DEFAULT_SCALES[mode] }))
+                        }}
+                      >
+                        {t('net.scale.reset')}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+              <p className="net-help">{t('net.help')}</p>
+              <p className="net-shown" role="status">
+                {t('net.shown', { people: graph.nodes.length, links: graph.links.length })}
+                {graph.hidden !== null &&
+                  ` · ${t('net.hidden', { people: graph.hidden.nodes, links: graph.hidden.links })}`}
+              </p>
+            </div>
           </>
         )}
       </div>

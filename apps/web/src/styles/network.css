@@ -22,16 +22,30 @@
 .net-sync small {
   color: var(--text-3);
 }
+/* En pantalla ancha la red mide lo que queda de ventana bajo la cabecera: el
+   grafo a la izquierda, quieto, y a la derecha una columna que se desliza por
+   su cuenta. Así la rueda mueve las opciones y el grafo no se pierde de vista. */
 .net-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 340px;
-  grid-template-areas:
-    'stage head'
-    'stage filters'
-    'stage side';
-  grid-template-rows: auto auto 1fr;
+  grid-template-areas: 'stage rail';
   gap: 0.9rem;
-  align-items: start;
+  /* La cabecera, el aire de arriba de la página y un poco por abajo. */
+  height: calc(100vh - var(--appbar-h, 98px) - 2.6rem);
+  height: calc(100dvh - var(--appbar-h, 98px) - 2.6rem);
+  min-height: 440px;
+}
+.net-rail {
+  grid-area: rail;
+  display: grid;
+  align-content: start;
+  gap: 0.9rem;
+  min-height: 0;
+  /* Sitio para la barra, que no pise las tarjetas. */
+  padding-right: 0.35rem;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--fill-muted) transparent;
 }
 .net-filters {
   grid-area: filters;
@@ -142,11 +156,9 @@
 }
 .net-stage {
   grid-area: stage;
-  position: sticky;
-  top: 0.75rem;
-  /* Lo que queda de pantalla bajo la cabecera y las pestañas. */
-  height: calc(100vh - 11.5rem);
-  min-height: 460px;
+  /* Ocupa todo el alto de la red, que es el de la ventana (ver `.net-layout`). */
+  height: 100%;
+  min-height: 0;
   border-radius: 18px;
   border: 1.5px solid var(--border);
   background: radial-gradient(circle at 50% 45%, var(--surface) 0%, var(--surface-2) 100%);
@@ -410,6 +422,9 @@
   font-size: 0.9rem;
 }
 @media (max-width: 960px) {
+  /* En estrecho va todo en una columna y se desliza la página, como siempre.
+     La columna deja de ser una caja: sus piezas se colocan una a una, con el
+     grafo en medio. */
   .net-layout {
     grid-template-columns: 1fr;
     grid-template-areas:
@@ -417,10 +432,14 @@
       'filters'
       'stage'
       'side';
+    height: auto;
+    min-height: 0;
+  }
+  .net-rail {
+    display: contents;
   }
   .net-stage {
     position: relative;
-    top: 0;
     height: 68vh;
   }
   .net-help {

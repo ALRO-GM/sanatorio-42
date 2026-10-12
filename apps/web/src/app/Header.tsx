@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import type { CurrentUser } from '@sanatorio/contracts'
 
@@ -49,6 +49,30 @@ export function Header({
   const egg = useEgg()
   // Al bajar, la barra gana una raya que la separa de lo que pasa por debajo.
   const [scrolled, setScrolled] = useState(false)
+  const bar = useRef<HTMLDivElement>(null)
+
+  // Lo que mide la cabecera (cambia si las pestañas pasan a dos filas) queda
+  // en `--appbar-h`: lo que se ancla debajo de ella sabe así dónde empieza.
+  useEffect(() => {
+    const element = bar.current
+
+    if (element === null) return undefined
+
+    const measure = (): void => {
+      document.documentElement.style.setProperty(
+        '--appbar-h',
+        `${Math.round(element.getBoundingClientRect().height)}px`,
+      )
+    }
+    const observer = new ResizeObserver(measure)
+
+    measure()
+    observer.observe(element)
+
+    return () => {
+      observer.disconnect()
+    }
+  }, [])
 
   useEffect(() => {
     const onScroll = (): void => {
@@ -63,7 +87,7 @@ export function Header({
   }, [])
 
   return (
-    <div className={`appbar ${scrolled ? 'scrolled' : ''}`}>
+    <div ref={bar} className={`appbar ${scrolled ? 'scrolled' : ''}`}>
       <div className="appbar-inner">
         <header className="appbar-row">
           <button
