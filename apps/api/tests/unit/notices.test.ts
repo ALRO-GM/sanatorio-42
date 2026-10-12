@@ -106,25 +106,6 @@ describe('buzón de avisos', () => {
     )
   })
 
-  it('las conversaciones salen con la última frase y con quién sigue conectado', async () => {
-    const { meet, repositories } = services
-
-    await meet.send(actor('eva'), null, { id: 'dm:ana:eva', kind: 'text', body: 'Hola, Ana' })
-    await meet.send(actor('eva'), null, { id: 'dm:eva:leo', kind: 'text', body: 'Hola, Leo' })
-    await repositories.profiles.touch('leo', new Date(clock.now()).toISOString())
-
-    // La más reciente primero; de cada una, con quién es.
-    expect(await meet.chats(actor('eva'))).toMatchObject([
-      { login: 'leo', id: 'dm:eva:leo', last: 'Hola, Leo', lastFrom: 'eva', online: true },
-      { login: 'ana', id: 'dm:ana:eva', last: 'Hola, Ana', lastFrom: 'eva', online: false },
-    ])
-    expect(await meet.chats(actor('ana'))).toMatchObject([{ login: 'eva', id: 'dm:ana:eva' }])
-
-    // Pasados unos minutos sin señales, `leo` ya no cuenta como conectado.
-    clock.advance(10 * MINUTE)
-    expect((await meet.chats(actor('eva')))[0]).toMatchObject({ login: 'leo', online: false })
-  })
-
   it('los mensajes de un chat se juntan en un solo aviso, que se va al abrir el chat', async () => {
     const { boards, meet, notices } = services
     const board = await boards.create(actor('eva'), malloc)

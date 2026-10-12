@@ -230,6 +230,23 @@ calendario (y va a ir) puede leer o escribir; el resto recibe `403`.
   cabecera `X-Verification-Code` y en la última línea
   (`"codigo_de_verificacion";"K7QF"`). Pedir dos veces el mismo documento da el
   mismo código. `429` si ya has emitido 40 documentos distintos hoy.
+- GET /conversations → `{ "items": [...] }`: todas tus conversaciones, la de
+  actividad más reciente primero (hasta 100). Son tuyas las directas en las que
+  estás, los chats donde has escrito, los que te han dejado un aviso y los que
+  has marcado. Cada una: `{ "id", "kind", "title", "peer", "image", "online",
+  "last": { "from", "body", "kind", "at" } | null, "unread", "pending",
+  "remindAt", "project": { "id", "name" } | null }`. `kind` es `direct`, `group`,
+  `board`, `help` o `event`. `unread` cuenta los mensajes de otras personas
+  posteriores a la última vez que abriste el hilo; abrirlo
+  (`GET /events/thread`) o escribir en él la da por leída.
+- PUT /conversations/mark → `{ "id", "read"?, "pending"?, "remindAt"?,
+  "projectId"? }`. Lo que no viene se queda como estaba. `read: false` deja sin
+  leer el último mensaje ajeno. `remindAt` (ISO-8601) tiene que ser futuro y a
+  no más de 30 días; al llegar la hora se deja un aviso `chat_reminder` en el
+  buzón, la conversación queda pendiente y la hora se vacía. Pedir un
+  recordatorio la marca como pendiente salvo que se diga `pending: false`.
+  Devuelve la lista al día. `403` si no participas en esa conversación, `400`
+  si la hora o el proyecto no valen.
 - GET /admin/checkins?id= → cada intento de validar un código de ese evento, con
   su resultado (`ok`, `repeat`, `wrong_code`, `locked`, `too_early`, `too_late`,
   `no_start`). Solo admins.
@@ -856,21 +873,8 @@ resaltado). Cada `occupant` lleva `online`: `true` si tiene Sanatorio abierto.
 - "Abierto" es haber pedido `GET /pulse` en los últimos 6 minutos: es lo único
   que toda pestaña pregunta de fondo, y se anota como mucho una vez por minuto.
 
-GET /chats → tus conversaciones directas, la más reciente primero.
-
-```json
-[
-  {
-    "login": "eva",
-    "image": null,
-    "id": "dm:ana:eva",
-    "last": "Sí, en la fila 2",
-    "lastFrom": "eva",
-    "at": "2026-10-12T09:00:00.000Z",
-    "online": true
-  }
-]
-```
+Las conversaciones directas salen, con todas las demás, en `GET /conversations`
+(ver «Avisos, chat y asistencia de un evento»).
 
 - Un chat directo es un chat más: se lee y se escribe con
   `GET /events/messages?id=dm:<a>:<b>` y `POST /events/messages`, con los dos

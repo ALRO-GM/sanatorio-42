@@ -166,18 +166,56 @@ export type EventAlerts = {
   alerts: EventAlert[]
 }
 
-/** Una conversación directa con otra persona del campus (`GET /chats`). */
-export type DirectChat = {
-  /** Con quién. */
-  login: string
-  image: string | null
-  /** Id del chat, para leerlo y escribir con `/events/messages`. */
+/**
+ * De qué es una conversación.
+ *
+ * - `direct`: entre dos personas.
+ * - `group`: la de un grupo de terapia.
+ * - `board`: la de una pizarra.
+ * - `help`: la de una sesión de ayuda reservada.
+ * - `event`: la de un evento de 42 (una corrección, un evento del campus).
+ */
+export type ConversationKind = 'direct' | 'group' | 'board' | 'help' | 'event'
+
+/** `GET /conversations`: una conversación tuya, con lo que has apuntado de ella. */
+export type Conversation = {
+  /** Id del chat, para leerlo y escribir con `/events/thread` y `/events/messages`. */
   id: string
-  /** El último mensaje, recortado. */
-  last: string | null
-  /** De quién es ese último mensaje. */
-  lastFrom: string
-  at: string
-  /** `true` si esa persona tiene Sanatorio abierto ahora. */
+  kind: ConversationKind
+  /**
+   * Cómo se llama: el título de la pizarra, el proyecto del grupo o de la
+   * sesión. `null` si no se sabe (ya no existe, o es de 42): la web pone el tipo.
+   */
+  title: string | null
+  /** Con quién, en una directa. `null` en las demás. */
+  peer: string | null
+  image: string | null
+  /** `true` si esa persona tiene Sanatorio abierto ahora. Solo en las directas. */
   online: boolean
+  /** El último mensaje, recortado. `null` si aún no se ha escrito nada. */
+  last: { from: string; body: string | null; kind: MeetMessageKind; at: string } | null
+  /** Mensajes de otras personas que no has visto. */
+  unread: number
+  /** La has marcado como pendiente de responder. */
+  pending: boolean
+  /** Cuándo te la recordará el buzón (ISO-8601), o `null`. */
+  remindAt: string | null
+  /** El proyecto del que va, si lo has dicho. */
+  project: { id: number; name: string } | null
+}
+
+export type Conversations = { items: Conversation[] }
+
+/**
+ * `PUT /conversations/mark`: lo que cambias de una conversación. Lo que no
+ * viene, se queda como estaba.
+ */
+export type ConversationMark = {
+  id: string
+  /** `true` la da por leída entera; `false` deja el último mensaje ajeno sin leer. */
+  read?: boolean
+  pending?: boolean
+  /** Cuándo recordártela (ISO-8601, en el futuro y a no más de 30 días), o `null` para quitarlo. */
+  remindAt?: string | null
+  projectId?: number | null
 }

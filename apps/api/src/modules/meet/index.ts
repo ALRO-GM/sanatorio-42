@@ -41,11 +41,20 @@ export function createMeetModule(deps: MeetServiceOptions): MeetModule {
       })
 
       /** `GET /events/alerts` → tus avisos de evento, por orden de inicio. */
-      /** `GET /chats` → tus conversaciones directas, la más reciente primero. */
-      app.get('/chats', async (request, reply) => {
-        reply.header('Cache-Control', 'private, no-store')
+      /** `GET /conversations` → todas tus conversaciones, con lo que has apuntado de cada una. */
+      app.get('/conversations', async (request, reply) => {
+        return reply.send(await service.conversations(await session.actor(request)))
+      })
 
-        return reply.send(await service.chats(await session.actor(request)))
+      /** `PUT /conversations/mark` → `{ id, read?, pending?, remindAt?, projectId? }`. Devuelve la lista. */
+      app.put('/conversations/mark', async (request, reply) => {
+        return reply.send(
+          await service.markConversation(
+            await session.actor(request),
+            session.user(request).id,
+            request.body,
+          ),
+        )
       })
 
       app.get('/events/alerts', async (request, reply) => {
@@ -111,6 +120,15 @@ export function createMeetModule(deps: MeetServiceOptions): MeetModule {
         return reply.send(await service.checkins(await session.actor(request), request.query.id))
       })
     },
+    jobs: [
+      {
+        name: 'recordatorios de conversaciones',
+        everyMs: 60_000,
+        run: async () => {
+          await service.remind()
+        },
+      },
+    ],
     stores: [
       tableStore(deps.db, {
         id: 'messages',
@@ -118,6 +136,13 @@ export function createMeetModule(deps: MeetServiceOptions): MeetModule {
         login: 'login',
         date: { column: 'created_at', as: 'iso' },
         show: ['id', 'event_id', 'login', 'kind', 'body', 'created_at'],
+      }),
+      tableStore(deps.db, {
+        id: 'conversation_marks',
+        table: 'conversation_marks',
+        login: 'login',
+        date: { column: 'updated_at', as: 'iso' },
+        show: ['login', 'chat_id', 'read_upto', 'pending', 'remind_at', 'project_id', 'updated_at'],
       }),
       tableStore(deps.db, {
         id: 'event_alerts',

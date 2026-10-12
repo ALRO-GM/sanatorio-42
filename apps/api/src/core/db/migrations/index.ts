@@ -39,6 +39,7 @@ import { clickerCapitalSchema } from './0030-clicker-capital.js'
 import { usageFlowsSchema } from './0031-usage-flows.js'
 import { tourSpeedSchema } from './0032-tour-speed.js'
 import { staffSchema } from './0033-staff.js'
+import { conversationsSchema } from './0034-conversations.js'
 import type { Migration } from './types.js'
 
 export type { Migration } from './types.js'
@@ -77,6 +78,7 @@ export const MIGRATIONS: readonly Migration[] = [
   usageFlowsSchema,
   tourSpeedSchema,
   staffSchema,
+  conversationsSchema,
 ]
 
 /** Versión más alta que existe en el código. */

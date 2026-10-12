@@ -12,6 +12,7 @@ import type { QuotaStatus } from './replica.js'
  * - `ticket_answered`: han respondido a lo que mandaste al buzón de incidencias.
  * - `ticket_new`: alguien ha mandado una incidencia, sugerencia o denuncia (solo admins).
  * - `chat`: mensajes nuevos en el chat de un evento o de un grupo en el que estás.
+ * - `chat_reminder`: pediste que se te recordara responder a una conversación, y ha llegado la hora.
  * - `booking_*`: te han pedido ayuda, o han aceptado, rechazado o anulado una reserva.
  * - `doubt_answered` / `doubt_solved`: han respondido a tu duda, o tu respuesta la resolvió.
  * - `proposal_*`: han validado o rechazado un cambio que propusiste para una guía.
@@ -22,6 +23,7 @@ export type NoticeKind =
   | 'ticket_answered'
   | 'ticket_new'
   | 'chat'
+  | 'chat_reminder'
   | 'booking_requested'
   | 'booking_accepted'
   | 'booking_declined'
