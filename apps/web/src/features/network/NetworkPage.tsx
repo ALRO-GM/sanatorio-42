@@ -203,7 +203,13 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
     [t],
   )
   const controls = useMemo(
-    () => ({ zoomIn: t('net.zoomIn'), zoomOut: t('net.zoomOut'), fit: t('net.fit') }),
+    () => ({
+      zoomIn: t('net.zoomIn'),
+      zoomOut: t('net.zoomOut'),
+      fit: t('net.fit'),
+      find: t('net.find'),
+      none: t('net.findNone'),
+    }),
     [t],
   )
   const nodes = graph?.nodes

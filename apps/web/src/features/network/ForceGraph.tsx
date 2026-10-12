@@ -17,8 +17,8 @@ type ForceGraphProps = {
   label: string
   /** Lo que se enseña junto a la burbuja bajo el ratón. */
   tooltip: (node: NetworkNode) => ReactNode
-  /** Nombres de los botones de zoom. */
-  controls: { zoomIn: string; zoomOut: string; fit: string }
+  /** Nombres de los botones de zoom y del buscador. */
+  controls: { zoomIn: string; zoomOut: string; fit: string; find: string; none: string }
 }
 
 /** Una persona dentro de la simulación: los datos y dónde está. */
@@ -57,6 +57,11 @@ const FIT_BOTTOM = 64
 
 const MIN_ZOOM = 0.08
 const MAX_ZOOM = 6
+/** Al ir a una persona buscada: el zoom mínimo con el que se la ve bien, y lo que tarda. */
+const GO_TO_ZOOM = 1.6
+const GO_TO_MS = 450
+/** Personas que se ofrecen al buscar. */
+const FOUND_MAX = 6
 
 /**
  * Radio de una burbuja. El área es proporcional a su actividad, y la escala es
@@ -155,7 +160,10 @@ export function ForceGraph({
   const actions = useRef({
     zoomBy: (_factor: number): void => undefined,
     fit: (): void => undefined,
+    goTo: (_login: string): void => undefined,
   })
+  // Lo escrito en el buscador de dentro del grafo.
+  const [query, setQuery] = useState('')
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const scene = useRef<Scene>({
     nodes: [],
@@ -186,6 +194,8 @@ export function ForceGraph({
     }
 
     const stage: HTMLCanvasElement = canvas
+    /** El viaje en curso hasta una burbuja buscada, para poder cortarlo. */
+    let travel = 0
     const state = scene.current
     let width = 0
     let height = 0
@@ -538,6 +548,39 @@ export function ForceGraph({
         zoomAt(factor, width / 2, height / 2)
       },
       fit: onDoubleClick,
+      // Lleva la vista hasta una burbuja, acercándose si hace falta, en un
+      // movimiento corto para que se vea de dónde a dónde se va.
+      goTo: (login) => {
+        const node = state.nodes.find((candidate) => candidate.login === login)
+
+        if (node === undefined) return
+
+        const from = state.view
+        const k = Math.max(from.k, GO_TO_ZOOM)
+        const to = { k, x: width / 2 - (node.x ?? 0) * k, y: height / 2 - (node.y ?? 0) * k }
+        const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        const start = performance.now()
+
+        state.touched = true
+        setTip(null)
+        cancelAnimationFrame(travel)
+
+        const step = (now: number): void => {
+          const part = still ? 1 : Math.min(1, (now - start) / GO_TO_MS)
+          // Sale rápido y frena al llegar.
+          const eased = 1 - (1 - part) ** 3
+
+          state.view = {
+            k: from.k + (to.k - from.k) * eased,
+            x: from.x + (to.x - from.x) * eased,
+            y: from.y + (to.y - from.y) * eased,
+          }
+          schedule.current()
+          if (part < 1) travel = requestAnimationFrame(step)
+        }
+
+        travel = requestAnimationFrame(step)
+      },
     }
 
     const observer = new ResizeObserver(resize)
@@ -580,6 +623,7 @@ export function ForceGraph({
       canvas.removeEventListener('dblclick', onDoubleClick)
       canvas.removeEventListener('graph:fit', fitter)
       cancelAnimationFrame(state.frame)
+      cancelAnimationFrame(travel)
       state.frame = 0
     }
   }, [])
@@ -733,9 +777,69 @@ export function ForceGraph({
     schedule.current()
   }, [colorOf, selected])
 
+  // Quienes están pintados y llevan lo escrito en el login: primero los que
+  // empiezan así, y a igualdad, los más activos.
+  const wanted = query.trim().toLowerCase()
+  const found =
+    wanted === ''
+      ? []
+      : nodes
+          .filter((node) => node.login.includes(wanted))
+          .sort(
+            (a, b) =>
+              Number(b.login.startsWith(wanted)) - Number(a.login.startsWith(wanted)) ||
+              b.given + b.received - (a.given + a.received),
+          )
+          .slice(0, FOUND_MAX)
+  const pick = (login: string): void => {
+    onSelect(login)
+    actions.current.goTo(login)
+    setQuery('')
+  }
+
   return (
     <div className="force-wrap">
       <canvas ref={canvasRef} className="force-graph" role="img" aria-label={label} />
+      {/* Buscar a alguien entre quienes están pintados: la vista va hasta su burbuja. */}
+      <div className="force-find">
+        <input
+          type="search"
+          value={query}
+          placeholder={controls.find}
+          aria-label={controls.find}
+          autoComplete="off"
+          spellCheck={false}
+          onChange={(event) => {
+            setQuery(event.target.value)
+          }}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' && found[0] !== undefined) pick(found[0].login)
+            if (event.key === 'Escape') setQuery('')
+          }}
+        />
+        {wanted !== '' && (
+          <ul>
+            {found.length === 0 ? (
+              <li className="none">{controls.none}</li>
+            ) : (
+              found.map((node) => (
+                <li key={node.login}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      pick(node.login)
+                    }}
+                  >
+                    <i style={{ background: colorOf(node) }} />
+                    {node.login}
+                    <small>{node.given + node.received}</small>
+                  </button>
+                </li>
+              ))
+            )}
+          </ul>
+        )}
+      </div>
       {tip !== null && (
         <div className="force-tip" style={{ left: tip.x, top: tip.y }}>
           {tooltip(tip.node)}

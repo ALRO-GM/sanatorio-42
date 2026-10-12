@@ -802,3 +802,69 @@ ol.net-rows .net-row-name {
   color: var(--text-2);
   font-size: 0.82rem;
 }
+
+/* El buscador de dentro del grafo: abajo a la izquierda, sobre el escenario. La
+   lista se abre hacia arriba, que debajo no hay sitio. */
+.force-find {
+  position: absolute;
+  bottom: 0.7rem;
+  left: 0.7rem;
+  z-index: 2;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 0.3rem;
+  width: min(15rem, calc(100% - 4.5rem));
+}
+.force-find input {
+  width: 100%;
+  padding: 0.4rem 0.7rem;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.85rem;
+  box-shadow: 0 2px 0 var(--shadow-soft);
+}
+.force-find ul {
+  margin: 0;
+  padding: 0.25rem;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  box-shadow: 0 8px 24px var(--shadow);
+  list-style: none;
+}
+.force-find button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.3rem 0.45rem;
+  border: 0;
+  border-radius: 7px;
+  background: none;
+  color: var(--text);
+  font-size: 0.85rem;
+  text-align: left;
+  cursor: pointer;
+}
+.force-find button:hover,
+.force-find button:focus-visible {
+  background: var(--accent-soft);
+}
+.force-find i {
+  flex: none;
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
+}
+.force-find small {
+  margin-left: auto;
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+.force-find .none {
+  padding: 0.3rem 0.45rem;
+  color: var(--text-3);
+  font-size: 0.8rem;
+}

@@ -590,6 +590,8 @@ export const eu: Record<string, string> = {
   'net.zoomIn': 'Hurbildu',
   'net.zoomOut': 'Urrundu',
   'net.fit': 'Doitu dena',
+  'net.find': 'Bilatu grafoan',
+  'net.findNone': 'Margotutako inor ez da horrela deitzen',
   'app.loadingSection': 'Irekitzen…',
   'net.projects': 'Gehien zuzendutako proiektuak',
   'net.projects.pass': 'Gainditu zuten zuzenketak',

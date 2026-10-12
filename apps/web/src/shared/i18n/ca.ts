@@ -588,6 +588,8 @@ export const ca: Record<string, string> = {
   'net.zoomIn': 'Apropa',
   'net.zoomOut': 'Allunya',
   'net.fit': 'Encaixa-ho tot',
+  'net.find': 'Cerca al graf',
+  'net.findNone': 'Ningú pintat es diu així',
   'app.loadingSection': 'Obrint…',
   'net.projects': 'Projectes més corregits',
   'net.projects.pass': 'Correccions que van aprovar',

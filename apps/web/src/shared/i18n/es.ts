@@ -616,6 +616,8 @@ export const es: Record<string, string> = {
   'net.zoomIn': 'Acercar',
   'net.zoomOut': 'Alejar',
   'net.fit': 'Encajar todo',
+  'net.find': 'Buscar en el grafo',
+  'net.findNone': 'Nadie pintado se llama así',
   'app.loadingSection': 'Abriendo…',
   'net.projects': 'Proyectos más corregidos',
   'net.projects.pass': 'Correcciones que aprobaron',

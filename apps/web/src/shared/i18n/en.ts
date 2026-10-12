@@ -608,6 +608,8 @@ export const en: Record<string, string> = {
   'net.zoomIn': 'Zoom in',
   'net.zoomOut': 'Zoom out',
   'net.fit': 'Fit everything',
+  'net.find': 'Find in the graph',
+  'net.findNone': 'Nobody shown has that name',
   'app.loadingSection': 'Opening…',
   'net.projects': 'Most evaluated projects',
   'net.projects.pass': 'Evaluations that passed',
