@@ -60,6 +60,13 @@
   );
   --eyebrow-transform: lowercase;
   font-size: 14px;
+
+  --stage-bg: url('./assets/grid.svg') 0 0 / 24px 24px, #030603;
+  --stage-text: #d7e4d9;
+  --stage-muted: #7b917f;
+  --stage-link: #3d7045;
+  --stage-halo: #030603;
+  --stage-accent: #4af626;
 }
 :root[data-style='terminal'][data-theme='dark'] {
   --bg: #050805;

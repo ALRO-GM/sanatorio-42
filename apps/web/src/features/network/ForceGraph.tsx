@@ -185,22 +185,25 @@ export function ForceGraph({
       return undefined
     }
 
+    const stage: HTMLCanvasElement = canvas
     const state = scene.current
     let width = 0
     let height = 0
     let palette = readPalette()
 
+    // El grafo va siempre sobre fondo oscuro, sea cual sea el tema: sus colores
+    // son los del "escenario" (`--stage-*`), que pone cada estilo.
     function readPalette() {
-      const style = getComputedStyle(document.documentElement)
+      const style = getComputedStyle(stage)
       const read = (name: string, fallback: string): string =>
         style.getPropertyValue(name).trim() || fallback
 
       return {
-        text: read('--text', '#333'),
-        muted: read('--text-4', '#aaa'),
-        surface: read('--surface', '#fff'),
-        accent: read('--accent', '#00babc'),
-        link: read('--text-3', '#888'),
+        text: read('--stage-text', '#eef6f4'),
+        muted: read('--stage-muted', '#8fa39d'),
+        surface: read('--stage-halo', '#071110'),
+        accent: read('--stage-accent', '#2bdcd5'),
+        link: read('--stage-link', '#9db4ae'),
       }
     }
 

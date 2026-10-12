@@ -67,6 +67,16 @@
   --banner-image: url('./assets/paper.svg'), linear-gradient(120deg, #d9c9a3, #c9b889 60%, #b9a877);
   --eyebrow-transform: uppercase;
   font-size: 16px;
+
+  /* La pizarra del aula: verde oscuro, con su grano. */
+  --stage-bg:
+    url('./assets/paper-dark.svg') 0 0 / 240px 240px,
+    radial-gradient(120% 95% at 50% 0%, #2b3a30, #18211b 75%);
+  --stage-text: #f0e4c9;
+  --stage-muted: #a89a7c;
+  --stage-link: #c9bfa3;
+  --stage-halo: #18211b;
+  --stage-accent: #ffe36e;
 }
 :root[data-style='historial'][data-theme='dark'] {
   --bg: #1d1913;

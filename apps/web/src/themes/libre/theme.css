@@ -43,6 +43,17 @@
     oklch(0.7 var(--chroma) var(--hue)),
     oklch(0.6 var(--chroma) calc(var(--hue) + 40))
   );
+
+  --stage-bg: radial-gradient(
+    120% 95% at 50% 0%,
+    oklch(0.3 calc(var(--chroma) * 0.45) var(--hue)),
+    oklch(0.15 calc(var(--chroma) * 0.2) var(--hue)) 72%
+  );
+  --stage-text: oklch(0.95 0.01 var(--hue));
+  --stage-muted: oklch(0.68 0.02 var(--hue));
+  --stage-link: oklch(0.72 0.03 var(--hue));
+  --stage-halo: oklch(0.15 calc(var(--chroma) * 0.2) var(--hue));
+  --stage-accent: oklch(0.82 var(--chroma) var(--hue));
 }
 :root[data-style='libre'][data-theme='dark'] {
   --bg: oklch(0.17 calc(var(--tint) * 1.4) var(--hue));

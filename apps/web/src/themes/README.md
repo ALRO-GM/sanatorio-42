@@ -50,6 +50,12 @@ Casi todo se hace dando valor a variables. Los componentes ya las usan.
   `--surface-size` (la textura de las tarjetas), `--card-shadow`,
   `--border-style`, `--primary-image` y `--primary-shadow` (el botón principal),
   `--appbar-bg` y `--banner-image`.
+- **El escenario** (`styles/styles.css`): la zona donde se pintan los grafos,
+  que es oscura también en modo claro para que los colores de los nodos se
+  distingan. `--stage-bg` (el fondo: un degradado o una textura), `--stage-text`
+  y `--stage-muted` (las letras), `--stage-link` (las líneas), `--stage-halo`
+  (el borde de las letras, del color del fondo) y `--stage-accent` (lo elegido).
+  Se ponen una vez, en el bloque de claro: valen igual de noche.
 
 Lo que no se pueda decir con una variable se escribe como una regla más en el
 `theme.css` del estilo, siempre bajo su `:root[data-style='<id>']`. Las clases

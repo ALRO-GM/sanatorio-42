@@ -45,6 +45,13 @@
   --banner-image:
     radial-gradient(420px 160px at 85% 0%, rgba(255, 255, 255, 0.55), transparent 70%),
     linear-gradient(120deg, #1ccfc9, #0a8fb0 55%, #5b8def);
+
+  --stage-bg:
+    radial-gradient(70% 60% at 15% 0%, rgba(43, 220, 213, 0.22), transparent 70%),
+    radial-gradient(70% 60% at 100% 100%, rgba(56, 168, 255, 0.18), transparent 70%),
+    linear-gradient(180deg, #0c2422, #051110);
+  --stage-halo: #071615;
+  --stage-accent: #3ee9e2;
 }
 :root[data-style='clinica'][data-theme='dark'] {
   --bg: #061514;

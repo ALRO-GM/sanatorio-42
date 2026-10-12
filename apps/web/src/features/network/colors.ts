@@ -20,7 +20,9 @@ export type ColorMode = (typeof COLOR_MODES)[number]
 /** Tonos de las comunidades mayores. De la décima en adelante, gris. */
 const COMMUNITY_HUES = [186, 28, 262, 138, 340, 48, 212, 96, 300, 12]
 
-const OTHER = 'hsl(160 6% 62%)'
+// El grafo se pinta siempre sobre fondo oscuro (`--stage-bg`): los colores van
+// vivos y claros, que es lo que se distingue ahí.
+const OTHER = 'hsl(200 12% 68%)'
 
 /**
  * Parte de suspensos a partir de la cual alguien ya sale en rojo del todo. En
@@ -33,7 +35,7 @@ const STRICTEST = 0.25
 function heat(value: number): string {
   const clamped = Math.max(0, Math.min(1, value))
 
-  return `hsl(${Math.round(150 - 150 * clamped)} 68% ${Math.round(48 + 6 * clamped)}%)`
+  return `hsl(${Math.round(150 - 150 * clamped)} 88% ${Math.round(58 + 4 * clamped)}%)`
 }
 
 /** Los modos que pintan un porcentaje con el degradado, y por tanto tienen escala. */
@@ -92,7 +94,7 @@ export function fitScale(nodes: readonly NetworkNode[], mode: ScaleMode): Scale 
 
 /** Color estable para un año: los años seguidos quedan lejos en el círculo. */
 function yearColor(year: number): string {
-  return `hsl(${(year * 67) % 360} 58% 55%)`
+  return `hsl(${(year * 67) % 360} 82% 63%)`
 }
 
 /** Color de un porcentaje de aprobados: rojo si suspende una de cada cuatro o más, verde si casi nada. */
@@ -116,7 +118,7 @@ export function colorOf(node: NetworkNode, mode: ColorMode, scale?: Scale): stri
     case 'community': {
       const hue = COMMUNITY_HUES[node.community]
 
-      return hue === undefined ? OTHER : `hsl(${hue} 62% 52%)`
+      return hue === undefined ? OTHER : `hsl(${hue} 86% 62%)`
     }
     case 'cohort':
       return node.cohort === null ? OTHER : yearColor(node.cohort)
@@ -125,10 +127,10 @@ export function colorOf(node: NetworkNode, mode: ColorMode, scale?: Scale): stri
       const total = node.given + node.received
       const lean = total === 0 ? 0 : (node.given - node.received) / total
 
-      return `hsl(${lean >= 0 ? 205 : 24} ${Math.round(25 + 55 * Math.abs(lean))}% 54%)`
+      return `hsl(${lean >= 0 ? 205 : 24} ${Math.round(30 + 60 * Math.abs(lean))}% 62%)`
     }
     case 'origin':
-      return node.external ? 'hsl(28 80% 55%)' : 'hsl(186 62% 45%)'
+      return node.external ? 'hsl(28 92% 62%)' : 'hsl(186 80% 55%)'
     case 'campus':
       return node.campusId === null ? OTHER : campusColor(node.campusId)
   }
@@ -136,7 +138,7 @@ export function colorOf(node: NetworkNode, mode: ColorMode, scale?: Scale): stri
 
 /** Color estable para un campus: los ids seguidos quedan lejos en el círculo. */
 export function campusColor(campusId: number): string {
-  return `hsl(${(campusId * 137) % 360} 62% 52%)`
+  return `hsl(${(campusId * 137) % 360} 86% 62%)`
 }
 
 export type LegendEntry = { color: string; label: string }
@@ -201,7 +203,7 @@ export function legendOf(
           const year = mainYear(community)
 
           return {
-            color: `hsl(${COMMUNITY_HUES[community] ?? 0} 62% 52%)`,
+            color: `hsl(${COMMUNITY_HUES[community] ?? 0} 86% 62%)`,
             label:
               year === null
                 ? t('net.legend.community', { n: community + 1, size })
@@ -225,14 +227,14 @@ export function legendOf(
     }
     case 'balance':
       return [
-        { color: 'hsl(205 80% 54%)', label: t('net.legend.gives') },
-        { color: 'hsl(205 25% 54%)', label: t('net.legend.even') },
-        { color: 'hsl(24 80% 54%)', label: t('net.legend.receives') },
+        { color: 'hsl(205 90% 62%)', label: t('net.legend.gives') },
+        { color: 'hsl(205 30% 62%)', label: t('net.legend.even') },
+        { color: 'hsl(24 90% 62%)', label: t('net.legend.receives') },
       ]
     case 'origin':
       return [
-        { color: 'hsl(186 62% 45%)', label: t('net.legend.campus') },
-        { color: 'hsl(28 80% 55%)', label: t('net.legend.external') },
+        { color: 'hsl(186 80% 55%)', label: t('net.legend.campus') },
+        { color: 'hsl(28 92% 62%)', label: t('net.legend.external') },
       ]
     case 'campus': {
       const count = (id: number | null): number =>
