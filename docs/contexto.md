@@ -36,6 +36,11 @@ que hacer, en orden. Este documento es el porqué; aquel, el qué.
     (`npm run build:demo`, que ya lanza `npm run build`). Sus ajustes van en
     `vite.config.ts`, no en un `.env.demo`: los `.env.*` no entran en git ni en
     la imagen.
+- **Copias de seguridad**: no habían funcionado nunca en producción (carpeta de
+  root, cron como `ubuntu`). Arreglado el 2026-10-12: `infra/backups` es de
+  `ubuntu` y hay una copia comprobada. Siguen estando solo en la misma máquina.
+  Para ver si la de anoche salió: `ls -la /opt/sanatorio/infra/backups` y
+  `tail /var/log/sanatorio-backup.log`.
 - `npm run check` pasa con 483 tests de la API y 125 de la web.
 - El aviso `[oauth] /oauth/token respondió 401 … invalid_grant` que sale al
   pasar los tests **no es un fallo**: lo escribe un test que simula a propósito

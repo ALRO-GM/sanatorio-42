@@ -98,6 +98,14 @@ Por gravedad. «Dónde» es el fichero principal del arreglo.
 | 11 | Baja | El contenedor de la app corría sin root, pero con las capacidades de fábrica | Sin capacidades, sin escalada de privilegios y con tope de procesos | `infra/compose.yml` |
 | 12 | Limpieza | Seis funciones que nadie llamaba y dos tipografías que no se usaban | Fuera | varios |
 | 13 | Limpieza | El selector de periodo del panel, copiado en tres pestañas; dos utilidades de 42, en dos ficheros | Un componente y un fichero | `admin/RangePills.tsx`, `forty-two/headers.ts` |
+| 14 | Alta | **Las copias nocturnas de producción no habían funcionado nunca.** La carpeta de destino era de root y el cron corre como otro usuario; al fallar, el temporal se quedaba dentro del contenedor y bloqueaba todas las siguientes. Nadie lo veía: el fallo solo quedaba en un registro | El guion comprueba antes que puede escribir y dice cómo arreglarlo, y borra el temporal siempre. Carpeta corregida en la máquina y copia hecha y comprobada | `infra/scripts/backup.sh` |
+| 15 | Baja | Algunos trozos de tipografía se incrustaban como `data:` y la política de contenido los bloqueaba: esas letras salían con otra fuente | El build ya no incrusta nada; la política se queda como estaba | `apps/web/vite.config.ts` |
+
+La fila 14 no la encontró ninguna herramienta: apareció al hacer una copia a mano
+antes de desplegar esta revisión. Es el hallazgo más serio de todos, porque
+afectaba a lo único que no se puede volver a bajar de 42: lo que la gente ha
+hecho en la web. La 15 salió al abrir la demostración en un navegador de verdad,
+con la política de contenido de producción.
 
 De los cinco errores internos (filas 1 a 3), ninguno filtraba datos ni se saltaba
 permisos: eran respuestas feas a peticiones mal hechas. Pero un 500 es
@@ -271,3 +279,8 @@ se corrigió el test, no el código.
 - Tests de componentes de la web: hoy se prueban sus funciones puras y, a mano,
   con el navegador sin ventana.
 - Una prueba de carga.
+- **Copias fuera de la máquina.** Hoy se guardan en la misma máquina que la base:
+  protegen de un error, no de perder la máquina. El guion ya sabe subirlas
+  (`BACKUP_REMOTE`); falta darle un destino gratuito.
+- Vigilar las copias: que un fallo avise en el panel en vez de quedarse en un
+  registro.

@@ -340,6 +340,7 @@ administra puede ver la copia e indultar. El detalle, en
 | Un JSON mal escrito o una fecha imposible daban un error interno | Un test recorre todas las rutas con entradas extremas: encontró cinco casos y ya no queda ninguno |
 | La comprobación de admin estaba copiada en siete sitios | Una sola función y una barrera global para todo `/admin` |
 | La vuelta del login no tenía tope y se podía usar para machacar a 42 | Tope de intentos por IP |
+| Las copias nocturnas de producción no se estaban guardando, y nadie lo veía | Apareció al hacer una copia a mano antes de un despliegue. El guion comprueba ahora que puede escribir y limpia lo que deja a medias |
 | **Abierto**: en un ordenador de escritorio, trozos rectangulares de la página dejan de pintarse durante un instante  | Sin resolver. En el móvil no pasa y no se reproduce sin tarjeta gráfica. Lo probado y lo que queda por probar, en [docs/bug-trozos-sin-pintar.md](docs/bug-trozos-sin-pintar.md) |
 
 ## Cómo está hecho

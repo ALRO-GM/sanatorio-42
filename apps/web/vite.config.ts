@@ -6,6 +6,13 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react()],
+    build: {
+      // Nada incrustado como `data:`. Vite mete así los ficheros pequeños, y
+      // entre ellos caían trozos de tipografías: la política de contenido
+      // (`font-src 'self'`) los bloqueaba y esas letras salían con otra fuente.
+      // Mejor un fichero más que abrir la política.
+      assetsInlineLimit: 0,
+    },
     // La demostración pública (`npm run build:demo`) es la web con la API de
     // mentira. Sus ajustes van aquí y no en un `.env.demo`: los `.env.*` no
     // entran ni en git ni en la imagen de Docker, y sin ellos la demo se
