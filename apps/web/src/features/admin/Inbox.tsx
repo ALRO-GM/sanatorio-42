@@ -5,9 +5,11 @@ import type { TicketKind } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
 import { useAction, useAsync } from '../../shared/hooks/useAsync'
-import { useI18n } from '../../shared/i18n'
+import { localeOf, useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { Icon } from '../../shared/ui/Icon'
+import { InfoTip } from '../../shared/ui/InfoTip'
+import { InboxTour } from './InboxTour'
 
 const KINDS = ['issue', 'idea'] as const satisfies readonly TicketKind[]
 
@@ -42,12 +44,16 @@ export function Inbox({ onClose }: { onClose: () => void }) {
   return (
     <dialog ref={dialog} className="layout-dialog" onClose={onClose} aria-label={t('inbox.title')}>
       <div className="layout-head">
-        <h3>{t('inbox.title')}</h3>
+        <h3>
+          {t('inbox.title')}
+          <InfoTip title={t('inbox.title')}>
+            <InboxTour />
+          </InfoTip>
+        </h3>
         <button type="button" className="link" aria-label={t('layout.close')} onClick={onClose}>
           <Icon name="cerrar" />
         </button>
       </div>
-      <p className="hint">{t('inbox.hint')}</p>
 
       <form className="inbox-form" onSubmit={(event) => void submit(event)}>
         <div className="filter-pills" role="group" aria-label={t('inbox.kind')}>
@@ -100,9 +106,7 @@ export function Inbox({ onClose }: { onClose: () => void }) {
             <div className="ticket-head">
               <span className="badge subtle">{t(`inbox.kind.${ticket.kind}`)}</span>
               <strong>{ticket.subject}</strong>
-              <small>
-                {new Date(ticket.createdAt).toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-GB')}
-              </small>
+              <small>{new Date(ticket.createdAt).toLocaleDateString(localeOf(lang))}</small>
             </div>
             <p>{ticket.body}</p>
             {ticket.answer === null ? (

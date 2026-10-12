@@ -17,7 +17,7 @@ export type AchievementId =
 
 export type TitleId = 'paciente' | 'interno' | 'residente' | 'especialista' | 'jefe'
 
-export type Lang = 'es' | 'en'
+export type Lang = 'es' | 'en' | 'ca' | 'eu'
 
 /** `GET /me/profile` (la API añade además `homeCampusId`, ver `Profile`). */
 export type Expediente = {

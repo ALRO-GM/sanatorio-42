@@ -29,6 +29,8 @@ import { RankCard, ranked } from './RankCard'
 import type { Order } from './RankCard'
 import { StrictestCard } from './StrictestCard'
 import { Timeline } from './Timeline'
+import { InfoTip } from '../../shared/ui/InfoTip'
+import { NetworkTour } from './NetworkTour'
 
 /** Topes de personas que se pueden pedir. */
 const LIMITS = [150, 300, 600, 1000, 2000, 20_000] as const
@@ -239,7 +241,12 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
     <section className="network">
       <div className="net-layout">
         <div className="net-head">
-          <h2>{t('net.title')}</h2>
+          <h2>
+            {t('net.title')}
+            <InfoTip title={t('net.title')}>
+              <NetworkTour />
+            </InfoTip>
+          </h2>
 
           {graph !== null && graph.sync.phase !== 'done' && (
             <div className="net-sync" role="status">

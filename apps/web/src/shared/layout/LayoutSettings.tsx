@@ -6,6 +6,7 @@ import type { OrderMode } from './order'
 import { NAV_DEFAULT, PAGE_IDS, PAGES } from './registry'
 import type { PageId } from './registry'
 import { resetPrefs, toggleFold, updatePrefs, usePrefs } from './store'
+import { STYLE_CHOICES, useStyle } from '../theme'
 import { Icon } from '../ui/Icon'
 
 /** Antelaciones del aviso que se pueden elegir, en minutos. `0` es sin avisos. */
@@ -23,6 +24,7 @@ export function LayoutSettings({ onClose }: { onClose: () => void }) {
   const prefs = usePrefs()
   const dialog = useRef<HTMLDialogElement>(null)
   const manual = prefs.mode === 'manual'
+  const [style, setStyle] = useStyle()
 
   useEffect(() => {
     // Sin limpieza a propósito: cerrar aquí dispararía `onClose` en el doble
@@ -62,6 +64,27 @@ export function LayoutSettings({ onClose }: { onClose: () => void }) {
           <Icon name="cerrar" />
         </button>
       </div>
+
+      <section className="layout-group">
+        <h4>{t('layout.style')}</h4>
+        <fieldset className="style-picker" aria-label={t('layout.style')}>
+          {STYLE_CHOICES.map((option) => (
+            <label key={option} className={`style-option ${option}`}>
+              <input
+                type="radio"
+                name="layout-style"
+                checked={style === option}
+                onChange={() => {
+                  setStyle(option)
+                }}
+              />
+              <strong>{t(`layout.style.${option}`)}</strong>
+              <small>{t(`layout.style.${option}.hint`)}</small>
+              <i />
+            </label>
+          ))}
+        </fieldset>
+      </section>
 
       <fieldset className="layout-modes">
         <legend>{t('layout.mode')}</legend>
@@ -113,7 +136,22 @@ export function LayoutSettings({ onClose }: { onClose: () => void }) {
             ))}
           </select>
         </label>
-        <p className="hint">{t('layout.alerts.hint')}</p>
+      </section>
+
+      <section className="layout-group">
+        <h4>{t('layout.tips')}</h4>
+        <label className="duty-check">
+          <input
+            type="checkbox"
+            checked={prefs.tips !== false}
+            onChange={(event) => {
+              const tips = event.target.checked
+
+              updatePrefs((current) => ({ ...current, tips }))
+            }}
+          />
+          {t('layout.tips.show')}
+        </label>
       </section>
 
       <section className="layout-group">

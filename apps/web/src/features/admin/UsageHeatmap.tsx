@@ -6,6 +6,7 @@ import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { InfoTip } from '../../shared/ui/InfoTip'
 
 const GROUPINGS = [
   'total',
@@ -41,8 +42,12 @@ export function UsageHeatmap() {
 
   return (
     <section>
-      <h2>{t('admin.usage.title')}</h2>
-      <p className="lead">{t('admin.usage.subtitle')}</p>
+      <h2>
+        {t('admin.usage.title')}
+        <InfoTip title={t('admin.usage.title')}>
+          <p>{t('admin.usage.subtitle')}</p>
+        </InfoTip>
+      </h2>
 
       <div className="filter-pills" role="group" aria-label={t('admin.usage.by')}>
         {GROUPINGS.map((option) => (

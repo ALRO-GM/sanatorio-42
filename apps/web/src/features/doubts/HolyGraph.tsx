@@ -4,7 +4,7 @@ import type { KeyboardEvent, ReactNode } from 'react'
 import type { GraphProject, HolyGraph as HolyGraphData } from '@sanatorio/contracts'
 
 import { useMediaQuery } from '../../shared/hooks/useMediaQuery'
-import { useI18n } from '../../shared/i18n'
+import { localeOf, useI18n } from '../../shared/i18n'
 import type { Translate } from '../../shared/i18n'
 import { Icon } from '../../shared/ui/Icon'
 import {
@@ -783,7 +783,7 @@ export function HolyGraph({ graph, selected, onSelect }: HolyGraphProps) {
                   >
                     <strong>{circle}</strong>
                     <span>
-                      {date.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-GB', {
+                      {date.toLocaleDateString(localeOf(lang), {
                         day: 'numeric',
                         month: 'short',
                         year: '2-digit',

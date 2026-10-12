@@ -7,6 +7,8 @@ import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { BoardCard } from './BoardCard'
 import { BoardForm } from './BoardForm'
 import { dayKey } from './dates'
+import { InfoTip } from '../../shared/ui/InfoTip'
+import { BoardsTour } from './BoardsTour'
 
 /** Calendario de pizarras: el mes, las pizarras del día elegido y el formulario para proponer una. */
 export function BoardsCalendar() {
@@ -44,8 +46,12 @@ export function BoardsCalendar() {
 
   return (
     <section>
-      <h2>{t('cal.title')}</h2>
-      <p className="lead">{t('cal.subtitle')}</p>
+      <h2>
+        {t('cal.title')}
+        <InfoTip title={t('cal.title')}>
+          <BoardsTour />
+        </InfoTip>
+      </h2>
 
       <div className="cal-layout">
         <div>

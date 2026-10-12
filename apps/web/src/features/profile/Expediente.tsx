@@ -17,6 +17,8 @@ import { LeaderboardCard } from './LeaderboardCard'
 import { NetworkCard } from './NetworkCard'
 import { Icon } from '../../shared/ui/Icon'
 import type { IconName } from '../../shared/ui/Icon'
+import { InfoTip } from '../../shared/ui/InfoTip'
+import { RecordTour } from './RecordTour'
 
 /** Lo que da XP, en el orden en que se explica. */
 const RULES = [
@@ -75,7 +77,12 @@ export function Expediente({ me, profile }: ExpedienteProps) {
 
   return (
     <section>
-      <h2>{t('xp.title')}</h2>
+      <h2>
+        {t('xp.title')}
+        <InfoTip title={t('xp.title')}>
+          <RecordTour />
+        </InfoTip>
+      </h2>
 
       <Blocks
         page="expediente"

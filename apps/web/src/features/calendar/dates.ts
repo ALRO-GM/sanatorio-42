@@ -1,6 +1,7 @@
 import type { CalendarEvent } from '@sanatorio/contracts'
 
 import type { View } from './kinds'
+import { localeOf } from '../../shared/i18n/locale'
 
 /** Medianoche (hora del navegador) de ese día. */
 export function startOfDay(date: Date): Date {
@@ -64,7 +65,7 @@ export function eventsOn(events: readonly CalendarEvent[], day: Date): CalendarE
   return events.filter((event) => Date.parse(event.start) < to && Date.parse(event.end) > from)
 }
 
-export const locale = (lang: string): string => (lang === 'es' ? 'es-ES' : 'en-GB')
+export const locale = localeOf
 
 /** `16:00`, en la hora del navegador. */
 export function time(iso: string, lang: string): string {

@@ -1,10 +1,15 @@
+import { useState } from 'react'
+
 import { api } from '../../shared/api'
 import { useAction, useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { Blocks } from '../../shared/layout/Blocks'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { InfoTip } from '../../shared/ui/InfoTip'
 import { BookingCard } from './BookingCard'
+import { cheerFor } from './cheers'
 import { DayEditor } from './DayEditor'
+import { GuardTour } from './GuardTour'
 import { PreReviewToggle } from './PreReviewToggle'
 
 /**
@@ -12,7 +17,9 @@ import { PreReviewToggle } from './PreReviewToggle'
  * te piden y las que has pedido) y a quién no quieres ayudar.
  */
 export function Guardia() {
-  const { t } = useI18n()
+  const { t, lang } = useI18n()
+  // La frase de ánimo se elige al entrar: no cambia mientras se marcan franjas.
+  const [pick] = useState(() => Math.random())
   const { data, error, loading, reload, setData } = useAsync(() => api.getHelpDay(), [])
   const unblocking = useAction()
 
@@ -39,8 +46,13 @@ export function Guardia() {
 
   return (
     <section>
-      <h2>{t('help.title')}</h2>
-      <p className="lead">{t('help.subtitle')}</p>
+      <h2>
+        {t('help.title')}
+        <InfoTip title={t('help.title')}>
+          <GuardTour />
+        </InfoTip>
+      </h2>
+      <p className="cheer">{cheerFor(lang, data.windows.length > 0, pick)}</p>
 
       <Blocks
         page="guardia"
@@ -79,8 +91,12 @@ export function Guardia() {
                   id: 'blocked',
                   content: (
                     <article className="card">
-                      <span className="eyebrow">{t('help.blocked')}</span>
-                      <p className="hint">{t('help.blockedHint')}</p>
+                      <span className="eyebrow">
+                        {t('help.blocked')}
+                        <InfoTip title={t('help.blocked')}>
+                          <p>{t('help.blockedHint')}</p>
+                        </InfoTip>
+                      </span>
                       <ul className="rows">
                         {data.blocked.map((login) => (
                           <li key={login} className="row plain">

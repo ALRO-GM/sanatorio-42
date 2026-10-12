@@ -9,6 +9,8 @@ import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { ProjectPills } from '../../shared/ui/ProjectPills'
 import { GroupCard } from './GroupCard'
 import { GroupForm } from './GroupForm'
+import { InfoTip } from '../../shared/ui/InfoTip'
+import { TherapyTour } from './TherapyTour'
 
 type TherapyGroupsProps = {
   /** Todos los proyectos de la persona; aquí solo se usan los que tiene en curso. */
@@ -29,8 +31,12 @@ export function TherapyGroups({ projects, initialProject, me }: TherapyGroupsPro
 
   return (
     <section>
-      <h2>{t('therapy.title')}</h2>
-      <p className="lead">{t('therapy.subtitle')}</p>
+      <h2>
+        {t('therapy.title')}
+        <InfoTip title={t('therapy.title')}>
+          <TherapyTour />
+        </InfoTip>
+      </h2>
 
       <div className="filters">
         <ProjectPills

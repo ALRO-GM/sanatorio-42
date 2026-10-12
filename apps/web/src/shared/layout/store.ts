@@ -23,6 +23,8 @@ export type Prefs = {
   pages: Partial<Record<PageId, { order: string[]; folded: string[] }>>
   /** Minutos antes de un evento a los que salta el aviso. `0` lo apaga. Por defecto, 5. */
   alertLead?: number
+  /** `false` esconde los iconos de información y sus demostraciones. Por defecto se ven. */
+  tips?: boolean
 }
 
 type State = {

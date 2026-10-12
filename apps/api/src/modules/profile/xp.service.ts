@@ -61,7 +61,7 @@ const paceRefSchema = z.object({
 
 const settingsSchema = z.object({
   campusId: id.optional(),
-  lang: z.enum(['es', 'en']).optional(),
+  lang: z.enum(['es', 'en', 'ca', 'eu']).optional(),
   title: z.string().optional(),
   preReview: z.boolean().optional(),
 })

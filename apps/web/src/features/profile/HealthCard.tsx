@@ -5,7 +5,7 @@ import type { Health, PaceRef } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
-import { useI18n } from '../../shared/i18n'
+import { localeOf, useI18n } from '../../shared/i18n'
 import { daysBetween, originOf, paceOn, PACES, SLOWEST, stepsFor } from '../../shared/pace'
 import type { PaceStep } from '../../shared/pace'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
@@ -90,7 +90,7 @@ function HealthBody({ health, startedAt, mine, onSaved }: HealthBodyProps) {
   const origin = declared === null ? null : originOf(declared)
 
   const day = (date: Date | string): string =>
-    new Date(date).toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-GB', {
+    new Date(date).toLocaleDateString(localeOf(lang), {
       day: 'numeric',
       month: 'short',
       year: 'numeric',
@@ -321,7 +321,6 @@ function PaceAsk({ health, onSaved }: PaceAskProps) {
   return (
     <div className="health-ask">
       <strong>{t('health.ask')}</strong>
-      <p className="hint">{t('health.askHow')}</p>
       <PaceForm
         health={health}
         onSaved={onSaved}

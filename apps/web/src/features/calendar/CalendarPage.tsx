@@ -12,6 +12,8 @@ import { EventDialog } from './EventDialog'
 import { KINDS, loadHidden, loadView, saveHidden, saveView, VIEWS } from './kinds'
 import type { View } from './kinds'
 import { Icon } from '../../shared/ui/Icon'
+import { InfoTip } from '../../shared/ui/InfoTip'
+import { AgendaTour } from './AgendaTour'
 
 type CalendarPageProps = {
   /** Ir a otra sección de la web, desde la ficha de un evento propio. */
@@ -74,8 +76,12 @@ export function CalendarPage({ onGo, me }: CalendarPageProps) {
 
   return (
     <section>
-      <h2>{t('agenda.title')}</h2>
-      <p className="lead">{t('agenda.subtitle')}</p>
+      <h2>
+        {t('agenda.title')}
+        <InfoTip title={t('agenda.title')}>
+          <AgendaTour />
+        </InfoTip>
+      </h2>
 
       <div className="card agenda">
         <div className="agenda-bar">

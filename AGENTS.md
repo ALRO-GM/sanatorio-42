@@ -71,6 +71,13 @@ Monorepo con workspaces de npm. Ver `README.md` y `docs/architecture.md`.
   idioma y campus van en el pie.
 - Iconos: solo los de `shared/ui/Icon.tsx`, nunca emojis. Uno nuevo se dibuja en
   la misma rejilla (24 × 24, solo trazos, sin colores) y se apunta ahí.
+- Explicaciones: nada de párrafos fijos de ayuda bajo un título. Cada sección
+  lleva junto al título un `InfoTip` (`shared/ui/InfoTip.tsx`) con su
+  demostración animada, y la ventana no lleva más texto que el de la demo. Una
+  demo es un guion sobre `shared/tour/Tour.tsx` (ratón, fundidos y una frase
+  corta por acción; 20 s de guion como mucho, que el motor estira un 50 %). Usa
+  las etiquetas reales de la web y logins inventados, y enseña lo que la web
+  hace de verdad.
 - Aspecto: las reglas están en `styles/system.css`. Una superficie se separa del
   fondo con una raya, no con sombra; dentro de una tarjeta no va otra tarjeta
   con borde; el color es del acento y de los estados (`--ok`, `--warn`,

@@ -4,8 +4,10 @@ import type { ReactNode } from 'react'
 import type { Lang } from '@sanatorio/contracts'
 
 import { ApiError } from '../api/http'
+import { ca } from './ca'
 import { en } from './en'
 import { es } from './es'
+import { eu } from './eu'
 
 export type Dictionary = Record<string, string>
 
@@ -14,7 +16,11 @@ export type Dictionary = Record<string, string>
 export const LANGS: Record<Lang, { name: string; dict: Dictionary }> = {
   es: { name: 'Español', dict: es },
   en: { name: 'English', dict: en },
+  ca: { name: 'Català', dict: ca },
+  eu: { name: 'Euskara', dict: eu },
 }
+
+export { localeOf } from './locale'
 
 export type Translate = (key: string, vars?: Record<string, string | number>) => string
 

@@ -5,7 +5,7 @@ import type { Consumption, Ticket } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
 import { useAction, useAsync } from '../../shared/hooks/useAsync'
-import { useI18n } from '../../shared/i18n'
+import { localeOf, useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { HoursReport } from '../profile/HoursReport'
 import { BudgetCard } from './BudgetCard'
@@ -333,9 +333,7 @@ function PeopleTab() {
                   {entry.until === null
                     ? t('admin.people.forever')
                     : t('admin.people.until', {
-                        date: new Date(entry.until).toLocaleDateString(
-                          lang === 'es' ? 'es-ES' : 'en-GB',
-                        ),
+                        date: new Date(entry.until).toLocaleDateString(localeOf(lang)),
                       })}
                 </small>
               </span>
@@ -469,8 +467,7 @@ function TicketRow({ ticket, onDone }: { ticket: Ticket; onDone: () => void }) {
         </span>
         <strong>{ticket.subject}</strong>
         <small>
-          {ticket.login} ·{' '}
-          {new Date(ticket.createdAt).toLocaleString(lang === 'es' ? 'es-ES' : 'en-GB')}
+          {ticket.login} · {new Date(ticket.createdAt).toLocaleString(localeOf(lang))}
           {ticket.target !== null && ` · ${ticket.target}`}
         </small>
       </div>
@@ -548,7 +545,7 @@ function MessagesTab() {
               <td>
                 <small>#{message.id}</small>
               </td>
-              <td>{new Date(message.at).toLocaleString(lang === 'es' ? 'es-ES' : 'en-GB')}</td>
+              <td>{new Date(message.at).toLocaleString(localeOf(lang))}</td>
               <th scope="row">{message.login}</th>
               <td>
                 <small>{message.eventId}</small>

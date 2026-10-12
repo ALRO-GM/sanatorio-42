@@ -83,7 +83,6 @@ export function DayEditor({ day, onSaved }: DayEditorProps) {
   return (
     <article className="card form">
       <h3>{t('help.today')}</h3>
-      <p className="hint">{t('help.todayHint')}</p>
 
       <div className="slot-grid" role="group" aria-label={t('help.today')}>
         {starts.map((start) => {

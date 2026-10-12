@@ -2,6 +2,7 @@ import { useState } from 'react'
 
 import { api } from '../../shared/api'
 import { useI18n } from '../../shared/i18n'
+import { InfoTip } from '../../shared/ui/InfoTip'
 
 const DAY = 24 * 60 * 60_000
 
@@ -22,8 +23,12 @@ export function HoursReport({ everyone = false }: { everyone?: boolean }) {
 
   return (
     <div className="hours-report">
-      <span className="eyebrow">{t('hours.title')}</span>
-      <p className="hint">{t(everyone ? 'hours.hintAll' : 'hours.hint')}</p>
+      <span className="eyebrow">
+        {t('hours.title')}
+        <InfoTip title={t('hours.title')}>
+          <p>{t(everyone ? 'hours.hintAll' : 'hours.hint')}</p>
+        </InfoTip>
+      </span>
       <div className="hours-form">
         <label>
           {t('hours.from')}

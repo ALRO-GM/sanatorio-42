@@ -67,3 +67,36 @@ export function useTheme(): [ThemeChoice, (next: ThemeChoice) => void] {
 
   return [choice, change]
 }
+
+export const STYLE_CHOICES = ['clinica', 'terminal', 'historial'] as const
+
+/** Cómo viste la web: letra, acento, esquinas e iconos (`styles/styles.css`). */
+export type StyleChoice = (typeof STYLE_CHOICES)[number]
+
+const STYLE_KEY = 'sanatorio_style'
+
+function storedStyle(): StyleChoice {
+  const value = localStorage.getItem(STYLE_KEY)
+
+  return STYLE_CHOICES.find((choice) => choice === value) ?? 'clinica'
+}
+
+/**
+ * El estilo elegido y cómo cambiarlo. Se escribe en `data-style` de `<html>`;
+ * `public/theme.js` hace lo mismo antes de pintar. Si cambias la clave, cámbiala
+ * también allí.
+ */
+export function useStyle(): [StyleChoice, (next: StyleChoice) => void] {
+  const [choice, setChoice] = useState(storedStyle)
+
+  useEffect(() => {
+    document.documentElement.dataset.style = choice
+  }, [choice])
+
+  const change = useCallback((next: StyleChoice) => {
+    localStorage.setItem(STYLE_KEY, next)
+    setChoice(next)
+  }, [])
+
+  return [choice, change]
+}

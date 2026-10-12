@@ -7,6 +7,7 @@ import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { Avatar } from '../../shared/ui/Avatar'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { InfoTip } from '../../shared/ui/InfoTip'
 
 const PERIODS = ['month', 'all'] as const satisfies readonly LeaderboardPeriod[]
 
@@ -30,7 +31,12 @@ export function LeaderboardCard({ me }: { me: string }) {
   return (
     <article className="card">
       <div className="card-head">
-        <span className="eyebrow">{t('rank.title')}</span>
+        <span className="eyebrow">
+          {t('rank.title')}
+          <InfoTip title={t('rank.title')}>
+            <p>{t('rank.hint')}</p>
+          </InfoTip>
+        </span>
         <div className="filter-pills" role="group" aria-label={t('rank.period')}>
           {PERIODS.map((option) => (
             <button
@@ -47,7 +53,6 @@ export function LeaderboardCard({ me }: { me: string }) {
           ))}
         </div>
       </div>
-      <p className="hint">{t('rank.hint')}</p>
 
       {loading && <p>{t('app.loading')}</p>}
       {data === undefined && <ErrorNote error={error} onRetry={() => void reload()} />}

@@ -3,7 +3,7 @@ import type { FocusEvent, MouseEvent } from 'react'
 
 import type { ClusterMap, MapCluster, MapSeat, SeatReservation } from '@sanatorio/contracts'
 
-import { useI18n } from '../../shared/i18n'
+import { localeOf, useI18n } from '../../shared/i18n'
 import type { Translate } from '../../shared/i18n'
 import { Avatar } from '../../shared/ui/Avatar'
 import { SeatFace } from './SeatFace'
@@ -274,7 +274,7 @@ function SeatDetail({ seat, reserved }: { seat: MapSeat; reserved: boolean }) {
             project: reservation.projectName ?? '?',
             days: reservation.dates
               .map((day) =>
-                new Date(`${day}T12:00:00`).toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-GB', {
+                new Date(`${day}T12:00:00`).toLocaleDateString(localeOf(lang), {
                   day: 'numeric',
                   month: 'short',
                 }),

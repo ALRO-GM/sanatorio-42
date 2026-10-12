@@ -3,6 +3,13 @@ import { createRoot } from 'react-dom/client'
 
 import { App } from './app/App'
 import { I18nProvider } from './shared/i18n'
+// Las letras de los tres estilos, servidas desde aquí: el navegador solo baja
+// las del estilo que se esté usando.
+import '@fontsource-variable/figtree'
+import '@fontsource-variable/fraunces'
+import '@fontsource-variable/jetbrains-mono'
+import '@fontsource-variable/source-sans-3'
+import '@fontsource-variable/space-grotesk'
 import './styles/index.css'
 
 const root = document.getElementById('root')

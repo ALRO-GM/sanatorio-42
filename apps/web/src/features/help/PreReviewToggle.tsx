@@ -35,7 +35,6 @@ export function PreReviewToggle() {
         />
         {t('help.preReview')}
       </label>
-      <p className="hint">{t('help.preReview.hint')}</p>
       <ErrorNote error={error} />
     </div>
   )

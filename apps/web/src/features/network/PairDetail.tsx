@@ -1,7 +1,7 @@
 import { api } from '../../shared/api'
 import type { NetworkParams } from '../../shared/api/types'
 import { useAsync } from '../../shared/hooks/useAsync'
-import { useI18n } from '../../shared/i18n'
+import { localeOf, useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 
 type PairDetailProps = {
@@ -29,7 +29,7 @@ export function PairDetail({ a, b, params }: PairDetailProps) {
         {data.corrections.map((row) => (
           <li key={`${row.id}-${row.corrected}`}>
             <time dateTime={row.at}>
-              {new Date(row.at).toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-GB', {
+              {new Date(row.at).toLocaleDateString(localeOf(lang), {
                 day: 'numeric',
                 month: 'short',
                 year: '2-digit',

@@ -3,7 +3,7 @@ import type { SyntheticEvent } from 'react'
 
 import type { MeetMessage } from '@sanatorio/contracts'
 
-import { useI18n } from '../../shared/i18n'
+import { localeOf, useI18n } from '../../shared/i18n'
 import { Avatar } from '../../shared/ui/Avatar'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { ReportButton } from '../admin/ReportButton'
@@ -65,7 +65,7 @@ export function Chat({ thread, me }: { thread: Thread; me: string }) {
               <span>
                 <small>
                   {message.login} ·{' '}
-                  {new Date(message.at).toLocaleTimeString(lang === 'es' ? 'es-ES' : 'en-GB', {
+                  {new Date(message.at).toLocaleTimeString(localeOf(lang), {
                     hour: '2-digit',
                     minute: '2-digit',
                   })}

@@ -5,6 +5,8 @@ import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { Icon } from '../../shared/ui/Icon'
+import { InfoTip } from '../../shared/ui/InfoTip'
+import { WaitingTour } from './WaitingTour'
 
 type ProjectSelectProps = {
   onSelect: (project: ProjectSummary) => void
@@ -30,7 +32,12 @@ export function ProjectSelect({ onSelect }: ProjectSelectProps) {
 
   return (
     <section>
-      <h2>{t('projects.title')}</h2>
+      <h2>
+        {t('projects.title')}
+        <InfoTip title={t('nav.consulta')}>
+          <WaitingTour />
+        </InfoTip>
+      </h2>
       {data.length === 0 && <p className="estado">{t('projects.empty')}</p>}
       <ul className="project-list">
         {data.map((project) => (

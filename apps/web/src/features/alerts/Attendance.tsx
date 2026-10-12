@@ -6,7 +6,7 @@ import qrcode from 'qrcode-generator'
 
 import { api } from '../../shared/api'
 import { useAction, useAsync } from '../../shared/hooks/useAsync'
-import { useI18n } from '../../shared/i18n'
+import { localeOf, useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 
 /** La dirección que abre la web y valida el código sola: es lo que lleva el QR. */
@@ -34,7 +34,7 @@ function Qr({ text, label }: { text: string; label: string }) {
 function hour(iso: string | null, lang: string): string {
   return iso === null
     ? '—'
-    : new Date(iso).toLocaleTimeString(lang === 'es' ? 'es-ES' : 'en-GB', {
+    : new Date(iso).toLocaleTimeString(localeOf(lang), {
         hour: '2-digit',
         minute: '2-digit',
       })

@@ -800,6 +800,10 @@ describe('calendario', () => {
   })
 
   it('incluye tus franjas de guardia y cada sesión de tus grupos de terapia', async () => {
+    // A mediodía de hoy: una media hora que ya ha empezado no se puede abrir, y
+    // con el reloj de verdad no quedaba franja que guardar a última hora del día.
+    vi.useFakeTimers({ toFake: ['Date'], now: new Date().setUTCHours(12, 0, 0, 0) })
+
     const built = await app()
     const http = client(built, await built.login())
 

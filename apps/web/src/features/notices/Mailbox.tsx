@@ -4,11 +4,13 @@ import type { Notice } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
 import { useAction, useAsync } from '../../shared/hooks/useAsync'
-import { useI18n } from '../../shared/i18n'
+import { localeOf, useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { iconOf, targetOf } from './routes'
 import type { NoticeTarget } from './routes'
 import { Icon } from '../../shared/ui/Icon'
+import { InfoTip } from '../../shared/ui/InfoTip'
+import { MailboxTour } from './MailboxTour'
 
 type MailboxProps = {
   onClose: () => void
@@ -58,7 +60,7 @@ export function Mailbox({ onClose, onOpen, onChange }: MailboxProps) {
     if (minutes < 60) return t('notices.minutesAgo', { n: minutes })
     if (minutes < 24 * 60) return t('notices.hoursAgo', { n: Math.round(minutes / 60) })
 
-    return new Date(at).toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-GB', {
+    return new Date(at).toLocaleDateString(localeOf(lang), {
       day: 'numeric',
       month: 'short',
     })
@@ -78,12 +80,14 @@ export function Mailbox({ onClose, onOpen, onChange }: MailboxProps) {
         <h3>
           {t('notices.title')}
           {unread > 0 && <span className="count-badge">{unread}</span>}
+          <InfoTip title={t('notices.title')}>
+            <MailboxTour />
+          </InfoTip>
         </h3>
         <button type="button" className="link" aria-label={t('layout.close')} onClick={onClose}>
           <Icon name="cerrar" />
         </button>
       </div>
-      <p className="hint">{t('notices.hint')}</p>
 
       {loading && <p className="hint">{t('app.loading')}</p>}
       {data === undefined && !loading && <ErrorNote error={error} onRetry={() => void reload()} />}

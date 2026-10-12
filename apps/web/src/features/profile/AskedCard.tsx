@@ -3,6 +3,7 @@ import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { REQUESTER_TAGS } from '../help/tags'
 import { Icon } from '../../shared/ui/Icon'
+import { InfoTip } from '../../shared/ui/InfoTip'
 
 /**
  * Cómo te han descrito quienes te ayudaron. No son notas: son cuatro formas de
@@ -19,8 +20,12 @@ export function AskedCard() {
 
   return (
     <article className="card">
-      <span className="eyebrow">{t('help.askedTitle')}</span>
-      <p className="hint">{t('help.askedHint')}</p>
+      <span className="eyebrow">
+        {t('help.askedTitle')}
+        <InfoTip title={t('help.askedTitle')}>
+          <p>{t('help.askedHint')}</p>
+        </InfoTip>
+      </span>
       <ul className="rows">
         {REQUESTER_TAGS.map(({ tag, emoji }) => (
           <li key={tag} className="row plain">

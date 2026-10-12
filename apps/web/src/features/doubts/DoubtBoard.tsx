@@ -9,6 +9,8 @@ import { DoubtForm } from './DoubtForm'
 import { firstInProgress } from './graph'
 import { GuidePanel } from './GuidePanel'
 import { HolyGraph } from './HolyGraph'
+import { InfoTip } from '../../shared/ui/InfoTip'
+import { BoardTour } from './BoardTour'
 
 type DoubtBoardProps = {
   /** Proyecto con el que se abre, si se llega desde otra sección. */
@@ -48,8 +50,12 @@ export function DoubtBoard({ initialProject }: DoubtBoardProps) {
 
   return (
     <section>
-      <h2>{t('board.title')}</h2>
-      <p className="lead">{t('graph.lead')}</p>
+      <h2>
+        {t('board.title')}
+        <InfoTip title={t('board.title')}>
+          <BoardTour />
+        </InfoTip>
+      </h2>
 
       {graph.loading && <p>{t('graph.loading')}</p>}
       {graph.data === undefined ? (
