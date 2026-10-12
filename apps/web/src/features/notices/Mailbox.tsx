@@ -11,12 +11,16 @@ import type { NoticeTarget } from './routes'
 import { Icon } from '../../shared/ui/Icon'
 import { InfoTip } from '../../shared/ui/InfoTip'
 import { MailboxTour } from './MailboxTour'
+import { Conversations } from './Conversations'
+import { directChatId } from './conversations'
 import { PeerPicker } from './PeerPicker'
-import { chatHref } from '../../shared/links'
 
 type MailboxProps = {
   /** Quién eres: para no ofrecerte escribirte. */
   me: string
+  /** La conversación abierta, o `null`. La lleva quien monta el buzón, para poder abrirla desde fuera. */
+  chat: string | null
+  onChat: (id: string | null) => void
   onClose: () => void
   /** Lleva a donde se ve de qué va el aviso. */
   onOpen: (target: NoticeTarget) => void
@@ -29,13 +33,19 @@ type MailboxProps = {
  * respondido, te han pedido ayuda, hay mensajes en un chat tuyo…), lo que no
  * has leído primero. Cada aviso lleva al sitio donde se ve.
  */
-export function Mailbox({ me, onClose, onOpen, onChange }: MailboxProps) {
+export function Mailbox({ me, chat, onChat, onClose, onOpen, onChange }: MailboxProps) {
   const { t, lang } = useI18n()
   const dialog = useRef<HTMLDialogElement>(null)
   const { data, error, loading, reload } = useAsync(() => api.getNotices(), [])
   const action = useAction()
   /** A quién se va a escribir: aún no se ha dicho, o a alguien del campus. */
   const [writing, setWriting] = useState<'closed' | 'choose' | 'peer'>('closed')
+  // Si se llega con una conversación ya elegida, se entra por su pestaña.
+  const [tab, setTab] = useState<'notices' | 'chats'>(chat === null ? 'notices' : 'chats')
+
+  useEffect(() => {
+    if (chat !== null) setTab('chats')
+  }, [chat])
 
   useEffect(() => {
     // Sin limpieza a propósito: ver `LayoutSettings`.
@@ -55,7 +65,11 @@ export function Mailbox({ me, onClose, onOpen, onChange }: MailboxProps) {
       onChange()
     }
 
-    onOpen(targetOf(notice))
+    const target = targetOf(notice)
+
+    // Una conversación se abre aquí mismo, en su pestaña.
+    if (target === 'conversations') onChat(notice.ref)
+    else onOpen(target)
   }
 
   /** "hace 5 min", "hace 3 h", o la fecha si es de otro día. */
@@ -95,62 +109,94 @@ export function Mailbox({ me, onClose, onOpen, onChange }: MailboxProps) {
         </button>
       </div>
 
-      {loading && <p className="hint">{t('app.loading')}</p>}
-      {data === undefined && !loading && <ErrorNote error={error} onRetry={() => void reload()} />}
-      {data !== undefined && items.length === 0 && <p className="hint">{t('notices.empty')}</p>}
+      <div className="filter-pills mailbox-tabs" role="tablist">
+        {(['notices', 'chats'] as const).map((option) => (
+          <button
+            key={option}
+            type="button"
+            role="tab"
+            className={`pill ${tab === option ? 'active' : ''}`}
+            aria-selected={tab === option}
+            onClick={() => {
+              setTab(option)
+              onChat(null)
+            }}
+          >
+            {t(`notices.tab.${option}`)}
+          </button>
+        ))}
+      </div>
 
-      <ul className="notice-list">
-        {items.map((notice) => (
-          <li key={notice.id}>
+      {tab === 'chats' ? (
+        <Conversations me={me} openId={chat} onOpen={onChat} onChange={onChange} />
+      ) : (
+        <>
+          {loading && <p className="hint">{t('app.loading')}</p>}
+          {data === undefined && !loading && (
+            <ErrorNote error={error} onRetry={() => void reload()} />
+          )}
+          {data !== undefined && items.length === 0 && <p className="hint">{t('notices.empty')}</p>}
+
+          <ul className="notice-list">
+            {items.map((notice) => (
+              <li key={notice.id}>
+                <button
+                  type="button"
+                  className={`notice ${notice.read ? 'read' : 'unread'}`}
+                  disabled={action.busy}
+                  onClick={() => void open(notice)}
+                >
+                  <span className="notice-icon" aria-hidden="true">
+                    <Icon name={iconOf(notice)} size={20} />
+                  </span>
+                  <span className="notice-body">
+                    <strong>
+                      {!notice.read && <span className="sr-only">{t('notices.unreadMark')} </span>}
+                      {t(`notices.kind.${notice.kind}`, {
+                        from: notice.from ?? t('notices.someone'),
+                        n: notice.count,
+                      })}
+                    </strong>
+                    {notice.text !== null && <span className="notice-text">{notice.text}</span>}
+                    <small>
+                      {when(notice.at)} · {t(`notices.go.${targetOf(notice)}`)}
+                    </small>
+                  </span>
+                  {!notice.read && <span className="notice-dot" aria-hidden="true" />}
+                </button>
+              </li>
+            ))}
+          </ul>
+          <ErrorNote error={action.error} />
+        </>
+      )}
+
+      {chat === null && (
+        <div className="actions">
+          {tab === 'notices' ? (
             <button
               type="button"
-              className={`notice ${notice.read ? 'read' : 'unread'}`}
-              disabled={action.busy}
-              onClick={() => void open(notice)}
+              className="small"
+              disabled={action.busy || unread === 0}
+              onClick={() => void markAll()}
             >
-              <span className="notice-icon" aria-hidden="true">
-                <Icon name={iconOf(notice)} size={20} />
-              </span>
-              <span className="notice-body">
-                <strong>
-                  {!notice.read && <span className="sr-only">{t('notices.unreadMark')} </span>}
-                  {t(`notices.kind.${notice.kind}`, {
-                    from: notice.from ?? t('notices.someone'),
-                    n: notice.count,
-                  })}
-                </strong>
-                {notice.text !== null && <span className="notice-text">{notice.text}</span>}
-                <small>
-                  {when(notice.at)} · {t(`notices.go.${targetOf(notice)}`)}
-                </small>
-              </span>
-              {!notice.read && <span className="notice-dot" aria-hidden="true" />}
+              {t('notices.readAll')}
             </button>
-          </li>
-        ))}
-      </ul>
-      <ErrorNote error={action.error} />
-
-      <div className="actions">
-        <button
-          type="button"
-          className="small"
-          disabled={action.busy || unread === 0}
-          onClick={() => void markAll()}
-        >
-          {t('notices.readAll')}
-        </button>
-        <button
-          type="button"
-          className="link"
-          aria-expanded={writing !== 'closed'}
-          onClick={() => {
-            setWriting(writing === 'closed' ? 'choose' : 'closed')
-          }}
-        >
-          <Icon name="lapiz" /> {t('notices.compose')}
-        </button>
-      </div>
+          ) : (
+            <span />
+          )}
+          <button
+            type="button"
+            className="link"
+            aria-expanded={writing !== 'closed'}
+            onClick={() => {
+              setWriting(writing === 'closed' ? 'choose' : 'closed')
+            }}
+          >
+            <Icon name="lapiz" /> {t('notices.compose')}
+          </button>
+        </div>
+      )}
 
       {writing !== 'closed' && (
         <div className="compose">
@@ -179,9 +225,8 @@ export function Mailbox({ me, onClose, onOpen, onChange }: MailboxProps) {
             <PeerPicker
               me={me}
               onPick={(login) => {
-                // La conversación se abre en los clusters, con su chat ya a la vista.
-                window.location.hash = chatHref(login)
-                dialog.current?.close()
+                setWriting('closed')
+                onChat(directChatId(me, login))
               }}
             />
           )}

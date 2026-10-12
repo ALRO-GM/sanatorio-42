@@ -11,7 +11,8 @@ import { HealthCard } from './HealthCard'
 import { NetworkCard } from './NetworkCard'
 import { Icon } from '../../shared/ui/Icon'
 import type { IconName } from '../../shared/ui/Icon'
-import { chatHref, intraHref } from '../../shared/links'
+import { intraHref } from '../../shared/links'
+import { directChatId, openChat } from '../notices/conversations'
 
 const ACHIEVEMENT_ICONS: Record<AchievementId, IconName> = {
   first_duty: 'estrella',
@@ -28,7 +29,7 @@ const ACHIEVEMENT_ICONS: Record<AchievementId, IconName> = {
  * Es de solo lectura y enseña menos que el propio: ni el desglose de XP ni las
  * preferencias. El estado de salud sí. Se abre con `#/expediente/<login>`.
  */
-export function PublicRecord({ login }: { login: string }) {
+export function PublicRecord({ login, me }: { login: string; me: string }) {
   const { t } = useI18n()
   const { data, error, loading, reload } = useAsync(() => api.getPublicProfile(login), [login])
 
@@ -62,14 +63,17 @@ export function PublicRecord({ login }: { login: string }) {
           <div className="record-name">
             <span className="record-login">
               <strong>{data.login}</strong>
-              <a
+              <button
+                type="button"
                 className="record-write"
-                href={chatHref(data.login)}
+                onClick={() => {
+                  openChat(directChatId(me, data.login))
+                }}
                 title={t('record.write', { login: data.login })}
                 aria-label={t('record.write', { login: data.login })}
               >
                 <Icon name="chat" />
-              </a>
+              </button>
             </span>
             <span className="record-title">{titleText(t, title, hacks)}</span>
           </div>

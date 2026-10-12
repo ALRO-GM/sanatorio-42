@@ -54,8 +54,6 @@ type SectionViewProps = {
   focusProject: number | null
   /** El login de `#/expediente/<login>` si es de otra persona; `null` para el propio. */
   otherRecord: string | null
-  /** Con quién abrir el chat directo al entrar en los clusters. */
-  chatWith: string | null
   onGo: (section: Section, projectId?: number | null) => void
 }
 
@@ -67,7 +65,6 @@ export function SectionView({
   projects,
   focusProject,
   otherRecord,
-  chatWith,
   onGo,
 }: SectionViewProps) {
   const { t } = useI18n()
@@ -134,9 +131,7 @@ export function SectionView({
       {section === 'clicker' && egg.pill !== 'red' && egg.ready && (
         <p className="estado">{t('error.404')}</p>
       )}
-      {section === 'clusters' && (
-        <ClustersPage key={chatWith ?? ''} me={me.login} initialPeer={chatWith} />
-      )}
+      {section === 'clusters' && <ClustersPage me={me.login} />}
       {section === 'gestion' &&
         (profile.data?.admin === true ? (
           <AdminPage campusId={profile.data.campusId} />
@@ -147,7 +142,7 @@ export function SectionView({
         (otherRecord === null ? (
           <Expediente me={me} profile={profile} />
         ) : (
-          <PublicRecord key={otherRecord} login={otherRecord} />
+          <PublicRecord key={otherRecord} login={otherRecord} me={me.login} />
         ))}
     </Suspense>
   )

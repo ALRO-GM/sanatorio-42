@@ -6,6 +6,7 @@ import { BroadcastGate } from '../features/admin/BroadcastGate'
 import { AlertCenter } from '../features/alerts/AlertCenter'
 import { EasterEgg } from '../features/clicker/EasterEgg'
 import { QuotaNotice } from '../features/alerts/QuotaNotice'
+import { onOpenChat } from '../features/notices/conversations'
 import { api } from '../shared/api'
 import { useAsync } from '../shared/hooks/useAsync'
 import { usePulse } from '../shared/hooks/usePulse'
@@ -46,6 +47,19 @@ export function Clinic({ me, onLogout }: ClinicProps) {
   const [customizing, setCustomizing] = useState(false)
   // Qué buzón está abierto: el de avisos, o el de escribir a quien administra.
   const [box, setBox] = useState<'notices' | 'inbox' | null>(null)
+  /** La conversación abierta en el buzón, o `null`. */
+  const [chat, setChat] = useState<string | null>(null)
+
+  // Cualquier parte de la web puede pedir que se abra una conversación (un
+  // puesto del mapa, un expediente): se abre el buzón por ella.
+  useEffect(
+    () =>
+      onOpenChat((id) => {
+        setChat(id)
+        setBox('notices')
+      }),
+    [],
+  )
   const { pulse, refresh } = usePulse()
 
   useEffect(() => {
@@ -139,7 +153,6 @@ export function Clinic({ me, onLogout }: ClinicProps) {
             projects={projects.data ?? []}
             focusProject={focusProject}
             otherRecord={otherRecord}
-            chatWith={section === 'clusters' && param !== null ? param.toLowerCase() : null}
             onGo={openSection}
           />
         </div>
@@ -150,8 +163,11 @@ export function Clinic({ me, onLogout }: ClinicProps) {
           {box === 'notices' && (
             <Mailbox
               me={me.login}
+              chat={chat}
+              onChat={setChat}
               onClose={() => {
                 setBox(null)
+                setChat(null)
                 refresh()
               }}
               onChange={refresh}
@@ -159,7 +175,8 @@ export function Clinic({ me, onLogout }: ClinicProps) {
                 // Lo que te han respondido está en el buzón de incidencias; lo demás, en su sección.
                 if (target === 'inbox') {
                   setBox('inbox')
-                } else {
+                } else if (target !== 'conversations') {
+                  // Las conversaciones las abre el propio buzón, sin salir de él.
                   setBox(null)
                   openSection(target)
                 }

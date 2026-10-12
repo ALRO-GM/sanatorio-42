@@ -33,7 +33,8 @@ import type {
   CurrentUser,
   DataPreview,
   DataWipe,
-  DirectChat,
+  ConversationMark,
+  Conversations,
   DoubtAnswer,
   DoubtBoard,
   DoubtDetail,
@@ -152,8 +153,10 @@ export type Api = {
   getProjectMap: (projectId: number) => Promise<ClusterMap>
   /** El plano a secas: ocupación y reservas, para elegir puestos. */
   getCampusMap: () => Promise<ClusterMap>
-  /** Tus conversaciones directas, la más reciente primero. */
-  getChats: () => Promise<DirectChat[]>
+  /** Todas tus conversaciones, con lo que has apuntado de cada una. */
+  getConversations: () => Promise<Conversations>
+  /** Cambia lo apuntado de una conversación; devuelve la lista al día. */
+  markConversation: (change: ConversationMark) => Promise<Conversations>
 
   // --- Campus, preferencias y estado de la réplica
   getCampuses: () => Promise<CampusSummary[]>

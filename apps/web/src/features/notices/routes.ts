@@ -1,9 +1,19 @@
 import type { Notice } from '@sanatorio/contracts'
 import type { IconName } from '../../shared/ui/Icon'
 
-/** Dónde lleva un aviso: una sección de la web, o el buzón de incidencias. */
+/**
+ * Dónde lleva un aviso: una sección de la web, el buzón de incidencias o la
+ * bandeja de conversaciones del propio buzón.
+ */
 export type NoticeTarget =
-  'inbox' | 'gestion' | 'guardia' | 'tablon' | 'pizarras' | 'terapia' | 'calendario' | 'clusters'
+  | 'conversations'
+  | 'inbox'
+  | 'gestion'
+  | 'guardia'
+  | 'tablon'
+  | 'pizarras'
+  | 'terapia'
+  | 'calendario'
 
 /** Un icono por familia de avisos, para distinguirlos de un vistazo. */
 export function iconOf(notice: Notice): IconName {
@@ -13,6 +23,8 @@ export function iconOf(notice: Notice): IconName {
       return 'buzon'
     case 'chat':
       return 'chat'
+    case 'chat_reminder':
+      return 'reloj'
     case 'booking_requested':
     case 'booking_accepted':
     case 'booking_declined':
@@ -39,10 +51,13 @@ export function targetOf(notice: Notice): NoticeTarget {
       return 'inbox'
     case 'ticket_new':
       return 'gestion'
+    case 'chat_reminder':
+      // Recordar una conversación es llevarte a ella, sea del tipo que sea.
+      return 'conversations'
     case 'chat':
       // El chat de un grupo está en su tarjeta; el de un evento, en el calendario.
-      // …y el de una conversación directa, en los clusters.
-      if (notice.ref.startsWith('dm:')) return 'clusters'
+      // …y una conversación directa, en la bandeja de conversaciones.
+      if (notice.ref.startsWith('dm:')) return 'conversations'
 
       return notice.ref.startsWith('group:') ? 'terapia' : 'calendario'
     case 'booking_requested':

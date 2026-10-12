@@ -424,3 +424,90 @@
   background: var(--accent);
   color: var(--on-accent);
 }
+
+/* ── La bandeja de conversaciones, dentro del buzón ─────────────────────────── */
+.mailbox-tabs {
+  margin: 0.6rem 0 0.4rem;
+}
+.conversations,
+.conversation {
+  display: grid;
+  gap: 0.5rem;
+}
+.conversations .filter-pills .pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.conversation-filters,
+.conversation-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.conversation-filters select,
+.conversation-select select {
+  padding: 0.3rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+}
+.conversation-select {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: var(--text-3);
+}
+.conversation-tools .pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.82rem;
+}
+.conversation-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+}
+.conversation-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+}
+.conversation-row .notice {
+  align-items: center;
+  cursor: pointer;
+}
+.conversation-row .notice-body {
+  display: grid;
+  gap: 0.1rem;
+  min-width: 0;
+  flex: 1;
+}
+.conversation-row .notice-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.conversation-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem 0.5rem;
+  color: var(--text-3);
+}
+.conversation-tags .chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  font-size: 0.72rem;
+}
+.conversation-tags .chip.pending {
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+.conversation-privacy {
+  margin: 0;
+  font-size: 0.78rem;
+}

@@ -370,26 +370,6 @@ button.seat:focus-visible {
   margin: -0.5rem 0 1rem;
   color: var(--text-2);
 }
-.direct-chat .card-head {
-  margin-bottom: 0.5rem;
-}
-.direct-row {
-  width: 100%;
-  border: 0;
-  background: transparent;
-  color: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-.direct-row > span {
-  display: grid;
-}
-.direct-row small {
-  color: var(--text-3);
-}
-.direct-row.active {
-  background: var(--accent-soft);
-}
 
 /* La ficha fijada al pulsar un puesto: se queda abierta y lleva sus botones. */
 .seat-hover.pinned {

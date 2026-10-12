@@ -33,7 +33,7 @@ hecho de principio a fin: producto, diseño, código, despliegue y operación.
 | ----------------------- | ----------------------------------------------------------------------------------------------------- |
 | **Qué es**              | Aplicación web completa: API, web, base de datos y despliegue                                         |
 | **Tecnología**          | TypeScript de punta a punta · Node 22 y Fastify · React 19 y Vite · SQLite · Docker y Caddy           |
-| **Tamaño** | 20 módulos de API, 113 rutas, 33 migraciones, 15 secciones de web, 5 estilos visuales, 4 idiomas |
+| **Tamaño** | 20 módulos de API, 114 rutas, 34 migraciones, 15 secciones de web, 5 estilos visuales, 4 idiomas |
 | **Calidad** | 608 tests automáticos (cobertura del 97 % en la API), tipos estrictos, lint con fronteras entre módulos y CI en cada subida |
 | **Seguridad** | Revisión completa documentada: permisos con doble cerradura, topes de intentos y un test que recorre todas las rutas con entradas imposibles |
 | **Datos**               | 193 784 correcciones y 15 032 personas de 4 campus copiadas de la API de 42                           |
@@ -169,8 +169,16 @@ Si es con más gente no se puede cerrar sin contestar: «voy», «me retraso» o
 puedo ir» con motivo. Cada evento tiene un chat que comparten todos. Pizarras y
 sesiones de ayuda validan la asistencia con dos códigos, a mano o por QR. Lo que
 le pasa a una persona por lo que hace otra llega a su buzón, con el número de
-avisos sin leer en la cabecera. Desde el buzón también se escribe: a quien
-administra o a alguien del campus, que se busca por login o por nombre.
+avisos sin leer en la cabecera.
+
+El buzón tiene además una pestaña de **conversaciones**, como un correo interno:
+todos tus chats juntos (con otra persona, de un grupo de terapia, de una
+pizarra, de una sesión de ayuda), con cuántos mensajes tienes sin leer en cada
+uno. Cada conversación se puede marcar como no leída o como pendiente de
+responder, pedir que se te recuerde (dentro de una hora, mañana o el lunes) y
+asociar a un proyecto. Se filtran por no leídas, pendientes, tipo y proyecto.
+Desde ahí se escribe a quien administra o a alguien del campus, que se busca por
+login o por nombre.
 
 ### Red de correcciones
 
@@ -488,7 +496,7 @@ Lo que impide que una funcionalidad nueva rompa otra, por orden de cuándo actú
    (`no-restricted-imports` en `eslint.config.js`). Solo `replica` habla con 42.
 4. **Entradas validadas.** Las variables de entorno se validan al arrancar y el
    cuerpo de cada petición, con zod en la ruta.
-5. **Migraciones inmutables.** Un cambio de esquema es un fichero nuevo; los 33
+5. **Migraciones inmutables.** Un cambio de esquema es un fichero nuevo; los 34
    existentes no se editan. Se aplican solas al arrancar.
 6. **Reglas en funciones puras.** Lo delicado (XP, asistencia, presupuesto,
    trampas, recorridos) vive en ficheros `*.rules.ts` sin base de datos ni
