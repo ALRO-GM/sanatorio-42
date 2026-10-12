@@ -28,6 +28,25 @@ stamp=$(date +%Y%m%d-%H%M%S)
 file="backups/sanatorio-$stamp.db"
 mkdir -p backups
 
+# Antes de pedirle nada a la base: si aquí no se puede escribir, la copia se
+# quedaría hecha dentro del contenedor y sin salir. Pasó: la carpeta era de root
+# y el cron corre como otro usuario, y ninguna copia llegó a guardarse.
+if ! [ -w backups ]; then
+  echo "No se puede escribir en infra/backups ($(id -un)). Arréglalo con:" >&2
+  echo "  sudo chown $(id -un) $(pwd)/backups" >&2
+  exit 1
+fi
+
+# La copia se hace primero dentro del contenedor. Pase lo que pase después, ese
+# temporal se borra al salir: si se quedara, la siguiente copia fallaría con
+# «output file already exists». Y se borra también antes de empezar, por si
+# quedó de una vez anterior.
+cleanup() {
+  docker compose exec -T app rm -f /data/backup.db > /dev/null 2>&1 || true
+}
+trap cleanup EXIT
+cleanup
+
 docker compose exec -T app node -e "
   import('@libsql/client').then(async ({ createClient }) => {
     const db = createClient({ url: process.env.DATABASE_URL })
@@ -36,7 +55,6 @@ docker compose exec -T app node -e "
   })
 "
 docker compose cp app:/data/backup.db "$file"
-docker compose exec -T app rm /data/backup.db
 gzip "$file"
 
 # Se guardan las 14 últimas.
