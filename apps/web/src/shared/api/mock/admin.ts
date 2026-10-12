@@ -41,6 +41,10 @@ export const adminMock: Pick<
   | 'getStats'
   | 'getUsageHeatmap'
   | 'getFlows'
+  | 'getTourSpeeds'
+  | 'sendTourSpeed'
+  | 'getTourStats'
+  | 'searchPeople'
   | 'getOnline'
   | 'getAdminData'
   | 'previewAdminData'
@@ -471,6 +475,66 @@ export const adminMock: Pick<
     }
   },
 
+  async getTourSpeeds() {
+    await delay(80)
+
+    return { speeds: { ...tourSpeeds } }
+  },
+
+  async sendTourSpeed(name, rate) {
+    await delay(80)
+    tourRates[name] = rate
+
+    return { speed: tourSpeeds[name] ?? 1 }
+  },
+
+  async getTourStats() {
+    await delay()
+
+    // Lo que se ha visto en esta visita, más un par de ejemplos para que haya algo.
+    const mine = Object.entries(tourRates).map(([name, rate]) => ({
+      name,
+      speed: tourSpeeds[name] ?? 1,
+      faster: Number(rate > 1),
+      slower: Number(rate < 1),
+      same: Number(rate === 1),
+      mean: rate,
+      adjustedAt: null,
+    }))
+
+    return {
+      votesToAdjust: 8,
+      tours: [
+        ...mine,
+        {
+          name: 'guardia',
+          speed: 1.25,
+          faster: 5,
+          slower: 0,
+          same: 1,
+          mean: 1.38,
+          adjustedAt: new Date(Date.now() - 3 * 86_400_000).toISOString(),
+        },
+        { name: 'red', speed: 1, faster: 1, slower: 4, same: 2, mean: 0.82, adjustedAt: null },
+      ].filter((tour, index, all) => all.findIndex((other) => other.name === tour.name) === index),
+    }
+  },
+
+  async searchPeople(q) {
+    await delay(120)
+
+    const wanted = q.trim().toLowerCase()
+
+    if (wanted.length < 2) return []
+
+    return MOCK_PEOPLE.filter(
+      (person) => person.login.includes(wanted) || person.name.toLowerCase().includes(wanted),
+    )
+      .sort((a, b) => Number(b.login.startsWith(wanted)) - Number(a.login.startsWith(wanted)))
+      .slice(0, 8)
+      .map((person) => ({ ...person, image: portrait(person.login) }))
+  },
+
   async getOnline() {
     await delay(120)
 
@@ -526,6 +590,22 @@ export const adminMock: Pick<
     return { rows }
   },
 }
+
+/** La velocidad de fábrica de cada demostración y a cuánto se ha visto en esta visita. */
+const tourSpeeds: Record<string, number> = { guardia: 1.25 }
+const tourRates: Record<string, number> = {}
+
+/** Gente a la que encontrar con el buscador de arriba. */
+const MOCK_PEOPLE = [
+  { login: 'jdoe', name: 'Jane Doe' },
+  { login: 'rsoto', name: 'Rocío Soto' },
+  { login: 'mlopez', name: 'Mario López' },
+  { login: 'mgarcia', name: 'María García' },
+  { login: 'agarcia', name: 'Ander García' },
+  { login: 'ibanez', name: 'Irene Ibáñez' },
+  { login: 'pmartin', name: 'Pau Martín' },
+  { login: 'lmartinez', name: 'Laia Martínez' },
+]
 
 /** El tramo de gente que se pide, sobre `of` personas, y la parte que es del total. */
 function segmentOf(

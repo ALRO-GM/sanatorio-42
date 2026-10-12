@@ -46,6 +46,8 @@ import { createProfileModule } from '../modules/profile/index.js'
 import type { ProfileModule } from '../modules/profile/index.js'
 import { createReplicaModule } from '../modules/replica/index.js'
 import type { ReplicaModule, SyncerConfig } from '../modules/replica/index.js'
+import { createToursModule } from '../modules/tours/index.js'
+import type { ToursModule } from '../modules/tours/index.js'
 import { createUsageModule } from '../modules/usage/index.js'
 import type { UsageModule } from '../modules/usage/index.js'
 import { createTherapyModule } from '../modules/therapy/index.js'
@@ -98,6 +100,7 @@ export type Services = {
   notices: NoticesModule['service']
   broadcasts: BroadcastsModule['service']
   clicker: ClickerModule['service']
+  tours: ToursModule['service']
 }
 
 export type Composition = {
@@ -260,6 +263,8 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     ...clock,
   })
 
+  const tours = createToursModule({ db, ...clock })
+
   halted = () => admin.service.halted()
   const usage = createUsageModule({
     db,
@@ -289,6 +294,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     notices,
     broadcasts,
     clicker,
+    tours,
   ]
 
   return {
@@ -321,6 +327,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
       notices: notices.service,
       broadcasts: broadcasts.service,
       clicker: clicker.service,
+      tours: tours.service,
     },
   }
 }

@@ -91,6 +91,8 @@ describe('migraciones', () => {
       'therapy_groups',
       'therapy_members',
       'tickets',
+      'tour_rates',
+      'tour_speeds',
       'usage_counts',
       'usage_flows',
       'usage_time',

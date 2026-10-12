@@ -670,3 +670,119 @@ dialog::backdrop {
     overflow-x: visible;
   }
 }
+
+/* --- El buscador de personas de la cabecera ---------------------------------- */
+.finder {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+/* En ancho, el campo está siempre a la vista y la lupa suelta sobra. */
+.finder-toggle {
+  display: none;
+}
+.finder-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.finder-field > .icon {
+  position: absolute;
+  left: 0.6rem;
+  color: var(--text-3);
+  pointer-events: none;
+}
+.finder-field input {
+  width: 11.5rem;
+  padding: 0.35rem 0.7rem 0.35rem 2rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  transition: width 0.2s;
+}
+.finder-field input:focus {
+  width: 15rem;
+}
+.finder-list {
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  right: 0;
+  z-index: 50;
+  width: min(20rem, calc(100vw - 1.5rem));
+  max-height: min(24rem, 70vh);
+  margin: 0;
+  padding: 0.3rem;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  box-shadow: 0 16px 40px -12px var(--shadow);
+  list-style: none;
+}
+.finder-list button {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.35rem 0.5rem;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+.finder-list button:hover,
+.finder-list button:focus-visible {
+  background: var(--accent-soft);
+}
+.finder-list strong,
+.finder-list small {
+  display: block;
+  line-height: 1.25;
+}
+.finder-list small {
+  color: var(--text-3);
+  font-size: 0.78rem;
+}
+.finder-none {
+  padding: 0.5rem;
+  color: var(--text-3);
+  font-size: 0.85rem;
+}
+/* En estrecho, una lupa: el campo se despliega bajo la cabecera, a todo lo
+   ancho, y la cabecera sigue cabiendo en una fila. */
+@media (max-width: 900px) {
+  .finder {
+    position: static;
+  }
+  .finder-toggle {
+    display: grid;
+  }
+  .finder-field {
+    display: none;
+  }
+  .finder.open .finder-field {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    left: 0;
+    z-index: 50;
+    display: flex;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .finder.open .finder-field > .icon {
+    left: 1.35rem;
+  }
+  .finder.open .finder-field input,
+  .finder.open .finder-field input:focus {
+    width: 100%;
+  }
+  .finder.open .finder-list {
+    top: 100%;
+    right: 0.75rem;
+    left: 0.75rem;
+    width: auto;
+  }
+}

@@ -9,6 +9,7 @@
 
 import type {
   Expediente,
+  FoundPerson,
   PublicProfile,
   Health,
   Leaderboard,
@@ -56,6 +57,8 @@ const PACES = [8, 12, 15, 18, 22, 24]
 /** Un plazo no puede caer más lejos que esto de hoy: el pace más lento dura dos años. */
 const MAX_DEADLINE_DAYS = 800
 const DAY_MS = 24 * 60 * 60_000
+/** Personas que ofrece el buscador de una vez. */
+const SEARCH_LIMIT = 8
 
 const paceRefSchema = z.object({
   pace: z.number().refine((pace) => PACES.includes(pace), 'Ese pace no existe'),
@@ -124,6 +127,18 @@ export function createXpService(options: XpServiceOptions) {
         reactions: full.reactions,
         health,
       }
+    },
+
+    /**
+     * Personas que se llaman así, para el buscador de arriba: por login o por
+     * nombre, sin distinguir mayúsculas. Con menos de dos letras no busca.
+     */
+    async search(actor: Actor, q: unknown): Promise<FoundPerson[]> {
+      const text = typeof q === 'string' ? q.trim() : ''
+
+      if (text.length < 2 || text.length > 40) return []
+
+      return replica.searchUsers(text, actor.campusId, SEARCH_LIMIT)
     },
 
     /** Expediente completo de quien pregunta. */

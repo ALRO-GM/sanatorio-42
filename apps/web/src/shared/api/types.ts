@@ -7,6 +7,9 @@
  */
 
 import type {
+  FoundPerson,
+  TourSpeeds,
+  TourSpeedStats,
   DataPreview,
   OnlineUsers,
   UsageFlows,
@@ -196,6 +199,14 @@ export type Api = {
     time?: UsageSend['time'],
     flows?: UsageSend['flows'],
   ) => Promise<void>
+  /** A cuánto va cada demostración de fábrica. */
+  getTourSpeeds: () => Promise<TourSpeeds>
+  /** Dice a cuánto has visto una demostración, respecto a la de fábrica. */
+  sendTourSpeed: (name: string, rate: number) => Promise<{ speed: number }>
+  /** Velocidad y recuento de cada demostración. Solo admins. */
+  getTourStats: () => Promise<TourSpeedStats>
+  /** Personas cuyo login o nombre lleva lo escrito. */
+  searchPeople: (q: string) => Promise<FoundPerson[]>
   /** Cómo se navega entre secciones en un periodo. Solo admins. */
   getFlows: (query: UsageQuery) => Promise<UsageFlows>
   /** Quién tiene la web abierta ahora y cuánto lleva. Solo admins. */

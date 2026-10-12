@@ -136,6 +136,11 @@ Los textos de unos y otros los pone el front (`apps/web/src/shared/i18n/`).
 reservada»). Ya no existe `POST /reactions`: la XP por ayudar sale solo de una
 sesión reservada.
 
+GET /users/search?q= → hasta 8 personas cuyo login o nombre lleva lo escrito,
+sin distinguir mayúsculas: `[{ login, name, image }]`. Primero las de tu campus
+y, dentro, las que empiezan así. Con menos de dos letras, `[]`. Es el buscador
+de la cabecera.
+
 GET /users/:login/profile → el expediente público de otra persona: `login`,
 `image`, `xp`, `title`, `hacks` (las veces que le han pillado haciendo trampas
 en Code Clicker), `achievements`, `reactions` y `health` (como `/me/health`). No lleva preferencias ni desglose de XP. `404`
@@ -669,6 +674,25 @@ atrás. `404` si el tipo no existe. Las tres, solo admins.
 Lo único que sigue borrándose solo es interno: la cola de peticiones a 42 ya
 servidas, y las copias de partidas rechazadas de Code Clicker que pasan de diez
 por persona.
+
+## Demostraciones («cómo funciona»)
+
+Cada demostración animada tiene un deslizador de velocidad, y su velocidad de
+fábrica se ajusta sola con lo que hace la gente.
+
+GET /tours/speeds → `{ speeds: { "board": 1.5 } }`: a cuánto va cada una de
+fábrica. `1` es el ritmo con el que se escribió; las que no salen van a `1`.
+
+POST /tours/speed → `{ speed }`. Recibe `{ name, rate }`: a cuánto has visto esa
+demostración respecto a la de fábrica (de `0.5` a `2`; `1` si no tocaste el
+deslizador). Se guarda una por persona y demostración. Cuando la han visto 8
+personas distintas, la de fábrica se multiplica por la media geométrica de lo
+que la han movido (entre `0.5` y `3`; si la media se aparta menos de un 5 %, se
+queda) y se vuelve a contar desde cero. Cuenta también quien no la toca.
+
+GET /admin/tours → `{ votesToAdjust, tours }`. Solo admins. De cada una: `speed`
+(la de fábrica), `faster`, `slower` y `same` (cuánta gente la ha acelerado,
+frenado o dejado desde el último ajuste), `mean` y `adjustedAt`.
 
 ## Comunicados
 

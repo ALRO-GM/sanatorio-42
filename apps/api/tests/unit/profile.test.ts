@@ -9,7 +9,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 
 import { localMoment } from '../../src/core/time.js'
 import { levelFor, titleUnlocked } from '../../src/modules/profile/xp.rules.js'
-import { TUESDAY_AFTERNOON, actor, expectCode, useCommunity } from '../helpers/community.js'
+import { MADRID, TUESDAY_AFTERNOON, actor, expectCode, useCommunity } from '../helpers/community.js'
 import type { Community } from '../helpers/community.js'
 
 describe('comunidad', () => {
@@ -70,6 +70,49 @@ describe('comunidad', () => {
       expect(board.me).toMatchObject({ rank: 2, login: 'leo' })
       // `ana` solo ha ido a terapia: no sale.
       expect((await xp.leaderboard(actor('ana'), 'all')).me).toBeNull()
+    })
+
+    it('el buscador encuentra por login o por nombre, sin mirar mayúsculas', async () => {
+      const { xp } = services
+
+      await community.db.batch(
+        [
+          [9001, 'mgarcia', 'María García', MADRID],
+          [9002, 'garcilaso', 'Laso de la Vega', MADRID],
+          [9003, 'pgarcia', 'Pau Garcia', 46],
+          [9004, 'jdoe_x', 'Juan 100%', MADRID],
+        ].flatMap(([id, login, name, campus]) => [
+          {
+            sql: `INSERT INTO users (id, login, name, image, synced_at)
+                  VALUES (?, ?, ?, ?, '2026-01-01T00:00:00.000Z')`,
+            args: [id ?? 0, login ?? '', name ?? '', `https://img/${login}.png`],
+          },
+          {
+            sql: 'INSERT INTO campus_members (campus_id, user_id) VALUES (?, ?)',
+            args: [campus ?? 0, id ?? 0],
+          },
+        ]),
+        'write',
+      )
+
+      // Primero la gente de tu campus; dentro, quien empieza por lo escrito.
+      expect((await xp.search(actor('ana'), 'GARCI')).map((person) => person.login)).toEqual([
+        'garcilaso',
+        'mgarcia',
+        'pgarcia',
+      ])
+      // Por nombre, con sus mayúsculas y su foto.
+      expect(await xp.search(actor('ana'), 'maría')).toEqual([
+        { login: 'mgarcia', name: 'María García', image: 'https://img/mgarcia.png' },
+      ])
+      // Los comodines de la búsqueda se toman al pie de la letra.
+      expect((await xp.search(actor('ana'), '100%')).map((person) => person.login)).toEqual([
+        'jdoe_x',
+      ])
+      expect(await xp.search(actor('ana'), '%%')).toEqual([])
+      // Con una letra no busca.
+      expect(await xp.search(actor('ana'), 'g')).toEqual([])
+      expect(await xp.search(actor('ana'), undefined)).toEqual([])
     })
 
     it('el expediente de otra persona solo enseña su parte pública', async () => {

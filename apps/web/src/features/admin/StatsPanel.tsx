@@ -4,7 +4,7 @@ import type { StatTotals, UsageStats } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
-import { useI18n } from '../../shared/i18n'
+import { localeOf, useI18n } from '../../shared/i18n'
 import { Avatar } from '../../shared/ui/Avatar'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { EVERYONE, SegmentSlider } from './SegmentSlider'
@@ -204,6 +204,7 @@ export function StatsPanel() {
             {data.keys.length === 0 && <p className="estado">{t('admin.stats.empty')}</p>}
           </article>
 
+          {login === null && <TourSpeeds />}
           {login === null && (
             <article className="card">
               <span className="eyebrow">{t('admin.stats.byUser')}</span>
@@ -296,6 +297,58 @@ function HourChart({ hours }: { hours: StatTotals[] }) {
         </div>
       ))}
     </div>
+  )
+}
+
+/**
+ * A cuánto va cada demostración y qué hace la gente con su deslizador desde el
+ * último ajuste: cuántas personas la aceleran, la frenan o la dejan.
+ */
+function TourSpeeds() {
+  const { t, lang } = useI18n()
+  const { data } = useAsync(() => api.getTourStats(), [])
+
+  if (data === undefined || data.tours.length === 0) return null
+
+  const times = (value: number): string => `×${value.toLocaleString(localeOf(lang))}`
+
+  return (
+    <article className="card">
+      <span className="eyebrow">{t('admin.tours.title')}</span>
+      <div className="table-scroll">
+        <table className="stat-table">
+          <thead>
+            <tr>
+              <th>{t('admin.tours.name')}</th>
+              <th>{t('admin.tours.speed')}</th>
+              <th>{t('admin.tours.faster')}</th>
+              <th>{t('admin.tours.slower')}</th>
+              <th>{t('admin.tours.same')}</th>
+              <th>{t('admin.tours.mean')}</th>
+              <th>{t('admin.tours.left')}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.tours.map((tour) => {
+              const votes = tour.faster + tour.slower + tour.same
+
+              return (
+                <tr key={tour.name}>
+                  <th>{tour.name}</th>
+                  <td>{times(tour.speed)}</td>
+                  <td>{tour.faster}</td>
+                  <td>{tour.slower}</td>
+                  <td>{tour.same}</td>
+                  <td>{votes === 0 ? '—' : times(tour.mean)}</td>
+                  <td>{Math.max(0, data.votesToAdjust - votes)}</td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
+      <p className="hint">{t('admin.tours.hint', { n: data.votesToAdjust })}</p>
+    </article>
   )
 }
 

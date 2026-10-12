@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { CurrentUser } from '@sanatorio/contracts'
 
 import { AvailabilityToggle } from '../features/peers/AvailabilityToggle'
+import { PersonFinder } from '../features/profile/PersonFinder'
 import { useI18n } from '../shared/i18n'
 import { track } from '../shared/layout/store'
 import { Icon } from '../shared/ui/Icon'
@@ -118,6 +119,7 @@ export function Header({
           </button>
 
           <div className="appbar-actions">
+            <PersonFinder />
             <AvailabilityToggle
               active={section === 'guardia'}
               onOpen={() => {

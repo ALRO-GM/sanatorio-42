@@ -660,6 +660,38 @@ export function createReplicaRepository(db: Db) {
       return result.rows.length > 0
     },
 
+    /**
+     * Personas cuyo login o nombre lleva lo escrito, sin distinguir mayúsculas.
+     * Primero las de `campusId`, y dentro, las que empiezan por lo escrito.
+     */
+    async searchUsers(
+      text: string,
+      campusId: number,
+      limit: number,
+    ): Promise<{ login: string; name: string | null; image: string | null }[]> {
+      // `LIKE` trata `%` y `_` como comodines: se escapan para buscar lo escrito.
+      const wanted = text.toLowerCase().replace(/[\\%_]/g, '\\$&')
+      const result = await db.execute({
+        sql: `SELECT u.login, u.name, u.image,
+                     EXISTS (SELECT 1 FROM campus_members m
+                             WHERE m.user_id = u.id AND m.campus_id = ?) AS here
+              FROM users u
+              WHERE u.active = 1
+                AND (LOWER(u.login) LIKE ? ESCAPE '\\' OR LOWER(COALESCE(u.name, '')) LIKE ? ESCAPE '\\')
+              ORDER BY here DESC,
+                       (LOWER(u.login) LIKE ? ESCAPE '\\') DESC,
+                       u.login
+              LIMIT ?`,
+        args: [campusId, `%${wanted}%`, `%${wanted}%`, `${wanted}%`, limit],
+      })
+
+      return result.rows.map((row) => ({
+        login: toText(row.login),
+        name: typeof row.name === 'string' && row.name !== '' ? row.name : null,
+        image: typeof row.image === 'string' ? row.image : null,
+      }))
+    },
+
     /** Avatares de una lista de logins, para pintar grupos y dudas. */
     async imagesOf(logins: readonly string[]): Promise<Map<string, string | null>> {
       const images = new Map<string, string | null>()

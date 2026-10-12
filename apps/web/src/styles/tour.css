@@ -641,3 +641,28 @@ dialog.info-dialog {
 .tour-ev {
   isolation: isolate;
 }
+
+/* El deslizador de velocidad, junto al botón de repetir. */
+.tour .actions {
+  align-items: center;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+}
+.tour-speed {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-2);
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+.tour-speed span {
+  min-width: 6.5em;
+}
+.tour-speed input[type='range'] {
+  width: 8rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  accent-color: var(--accent);
+}

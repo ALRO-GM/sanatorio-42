@@ -1,8 +1,10 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 
-import { useI18n } from '../i18n'
+import { api } from '../api'
+import { localeOf, useI18n } from '../i18n'
 import { Icon } from '../ui/Icon'
+import { RATES, useTourSpeed } from './speed'
 
 /**
  * Lo que toda demostración tiene en cada instante, haga lo que haga: en qué
@@ -40,8 +42,9 @@ const BASE: Base = {
 /**
  * Cuánto se estira el guion. Los tiempos de cada demostración se escriben a
  * ritmo de quien ya sabe usar la web; quien la ve por primera vez necesita la
- * mitad más para leer la frase y seguir al ratón. Las transiciones de CSS se
- * estiran igual (`--pace` en `tour.css`).
+ * mitad más para leer la frase y seguir al ratón. Sobre eso va la velocidad de
+ * cada demostración (`speed.ts`). Las transiciones de CSS se estiran igual
+ * (`--pace`, que pone el decorado).
  */
 const PACE = 1.5
 
@@ -116,12 +119,29 @@ export function Tour<S extends object>({
   bell,
   children,
 }: TourProps<S>) {
-  const { t } = useI18n()
+  const { t, lang } = useI18n()
   const [still] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches)
   const [take, setTake] = useState(0)
   const [shot, setShot] = useState<Shot<S>>({ ...start, ...BASE })
   const stage = useRef<HTMLDivElement>(null)
   const [point, setPoint] = useState({ x: 0, y: 0 })
+  const { base, rate, choose } = useTourSpeed(name)
+  // Cuánto se estira el guion ahora: el ritmo de lectura, entre la velocidad de
+  // fábrica de esta demostración y lo que la haya movido quien mira.
+  const pace = PACE / (base * rate)
+  // Lo último que se le ha dicho a la API de cómo la ve esta persona.
+  const told = useRef<number | null>(null)
+
+  // Vista entera, se cuenta a cuánto se ha visto: con lo de todo el mundo la
+  // API ajusta la velocidad de fábrica. Una vez por velocidad, no por repetición.
+  useEffect(() => {
+    if (!shot.done || told.current === rate) return
+
+    told.current = rate
+    api.sendTourSpeed(name, rate).catch(() => {
+      // Es para afinar el ritmo: si no llega, no pasa nada.
+    })
+  }, [shot.done, rate, name])
 
   useEffect(() => {
     if (still) return
@@ -134,7 +154,7 @@ export function Tour<S extends object>({
     const timers = cues.map(([at, change]) =>
       setTimeout(() => {
         setShot((current) => ({ ...current, ...change }))
-      }, at * PACE),
+      }, at * pace),
     )
 
     return () => {
@@ -142,7 +162,7 @@ export function Tour<S extends object>({
     }
     // El guion y el inicio son constantes de cada demostración.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [still, take])
+  }, [still, take, pace])
 
   // El ratón va al centro de lo que toque. Se mide en cada cambio, después de
   // pintar, porque muchos destinos (un desplegable, un botón) acaban de aparecer.
@@ -175,7 +195,13 @@ export function Tour<S extends object>({
 
   return (
     <div className="tour">
-      <div ref={stage} className="tour-stage" aria-hidden="true">
+      <div
+        ref={stage}
+        className="tour-stage"
+        aria-hidden="true"
+        // Las transiciones del decorado se estiran lo mismo que el guion.
+        style={{ ['--pace' as string]: pace }}
+      >
         <div className="tour-bar">
           <span className="tour-dots" />
           <span className="tour-tab">{tab(shot)}</span>
@@ -209,6 +235,22 @@ export function Tour<S extends object>({
         <span key={shot.caption}>{t(`tour.${name}.${shot.caption}`)}</span>
       </p>
       <div className="actions">
+        <label className="tour-speed">
+          <span>{t('tour.speed', { n: rate.toLocaleString(localeOf(lang)) })}</span>
+          <input
+            type="range"
+            min={0}
+            max={RATES.length - 1}
+            step={1}
+            value={RATES.findIndex((option) => option === rate)}
+            aria-valuetext={`×${rate}`}
+            onChange={(event) => {
+              // Cambiarla vuelve a empezar: los pasos ya programados iban a la de antes.
+              choose(RATES[Number(event.target.value)] ?? 1)
+              setTake((current) => current + 1)
+            }}
+          />
+        </label>
         <button
           type="button"
           className="pill"

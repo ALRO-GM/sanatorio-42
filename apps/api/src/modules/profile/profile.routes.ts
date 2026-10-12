@@ -40,6 +40,11 @@ export function registerProfileRoutes(
     return reply.code(204).send()
   })
 
+  /** `GET /users/search?q=` → personas cuyo login o nombre lleva lo escrito. */
+  app.get<{ Querystring: { q?: string } }>('/users/search', async (request, reply) => {
+    return reply.send(await xp.search(await session.actor(request), request.query.q))
+  })
+
   /** `GET /users/:login/profile` → el expediente público de otra persona. */
   app.get<{ Params: { login: string } }>('/users/:login/profile', async (request, reply) => {
     // Hace falta sesión para mirarlo, aunque no importe de quién sea.

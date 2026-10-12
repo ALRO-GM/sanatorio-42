@@ -65,9 +65,9 @@ Monorepo con workspaces de npm. Ver `README.md` y `docs/architecture.md`.
   cuando se pueda).
 - Lo primero que se ve al entrar es el expediente: es la portada y la primera
   pestaña. La navegación entre secciones va en su propia fila, debajo de la
-  marca. Arriba a la derecha solo hay tres cosas: la guardia, el buzón y el
-  menú de la cuenta, que recoge lo demás (panel, personalizar, incidencias y
-  sugerencias, salir). No añadas botones sueltos a la cabecera: van al menú. El
+  marca. Arriba a la derecha solo hay cuatro cosas: el buscador de personas, la
+  guardia, el buzón y el menú de la cuenta, que recoge lo demás (panel,
+  personalizar, incidencias y sugerencias, salir). No añadas botones sueltos a la cabecera: van al menú. El
   idioma y campus van en el pie.
 - Iconos: solo los de `shared/ui/Icon.tsx`, nunca emojis. Uno nuevo se dibuja en
   la misma rejilla (24 × 24, solo trazos, sin colores) y se apunta ahí.
