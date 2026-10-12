@@ -11,11 +11,21 @@ import { HoursReport } from '../profile/HoursReport'
 import { BudgetCard } from './BudgetCard'
 import { QuotaCard } from './QuotaCard'
 import { BroadcastsTab } from './BroadcastsTab'
+import { ClickerPanel } from './ClickerPanel'
 import { StatsPanel } from './StatsPanel'
 import { UsageHeatmap } from './UsageHeatmap'
 import { Icon } from '../../shared/ui/Icon'
 
-const TABS = ['consumption', 'people', 'inbox', 'messages', 'usage', 'stats', 'casts'] as const
+const TABS = [
+  'consumption',
+  'people',
+  'inbox',
+  'messages',
+  'usage',
+  'stats',
+  'clicker',
+  'casts',
+] as const
 
 type Tab = (typeof TABS)[number]
 
@@ -64,6 +74,7 @@ export function AdminPage({ campusId }: { campusId?: number | undefined }) {
       {tab === 'messages' && <MessagesTab />}
       {tab === 'usage' && <UsageHeatmap />}
       {tab === 'stats' && <StatsPanel />}
+      {tab === 'clicker' && <ClickerPanel />}
       {tab === 'casts' && <BroadcastsTab campusId={campusId} />}
     </section>
   )

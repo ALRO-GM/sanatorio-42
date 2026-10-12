@@ -574,6 +574,20 @@ comprueban, y el `total` de la clasificación nunca baja.
 GET /clicker/board → `{ entries, me }`: quién ha escrito más código, de
 cualquier campus. `level` es `floor(3 · log10(1 + total))`. `403` sin la roja.
 
+GET /admin/clicker?days= → `{ days, totals, players }`: el uso del juego. Solo
+admins. `days` (1 a 90, por defecto 7) son los días que cubre el tiempo.
+
+- `totals`: `pressed` (pulsaron la cruz), `reached` (llegaron a cien), `red`,
+  `blue`, `players` (con partida guardada), `active` (pulsaron o guardaron en el
+  periodo), `total` (líneas), `saves` y el tiempo con el juego abierto
+  (`seen`, `back`, `hidden`, en segundos).
+- `players`: una fila por persona que ha pulsado la cruz, con `plus`, `pill`,
+  `level`, `total`, `perSecond`, `achievements`, `prestige`, `clicks`
+  (pulsaciones de la tecla, leídas de la partida), `saves`, `updatedAt` y su
+  tiempo en el periodo.
+- El tiempo sale del uso de la sección `nav.clicker`; lo demás es de siempre,
+  porque de la partida solo se guarda cómo está ahora.
+
 ## Comunicados
 
 Mensajes de quien administra que salen en pantalla a quien le toquen.

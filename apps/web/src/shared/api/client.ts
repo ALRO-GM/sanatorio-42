@@ -84,6 +84,7 @@ export const realApi: Api = {
   choosePill: (pill) => sendJson('POST', '/clicker/pill', { pill }),
   saveClicker: (save) => sendJson('PUT', '/clicker/save', save),
   getClickerBoard: () => getJson('/clicker/board'),
+  getClickerUsage: (days) => getJson(`/admin/clicker?days=${days}`),
   getBroadcasts: () => getJson('/broadcasts'),
   answerBroadcast: (id, answer) => sendJson('POST', `/broadcasts/${id}/answer`, answer),
   getAdminBroadcasts: () => getJson('/admin/broadcasts'),

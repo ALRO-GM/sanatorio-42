@@ -43,6 +43,13 @@ export function createClickerModule(deps: ClickerServiceOptions): ClickerModule 
 
         return reply.send(await service.board(await session.actor(request)))
       })
+
+      /** `GET /admin/clicker?days=` → el uso del juego, general y por persona. Solo admins. */
+      app.get<{ Querystring: Record<string, string> }>('/admin/clicker', async (request, reply) => {
+        reply.header('Cache-Control', 'private, no-store')
+
+        return reply.send(await service.usage(await session.actor(request), request.query))
+      })
     },
   }
 }

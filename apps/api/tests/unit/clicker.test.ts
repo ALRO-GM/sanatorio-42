@@ -135,6 +135,57 @@ describe('code clicker', () => {
     expect(await clicker.state(ana)).toMatchObject({ save: '{"v":"movil"}', rev: 4 })
   })
 
+  it('quien administra ve el uso del juego, general y de cada persona', async () => {
+    const { clicker, usage } = services
+    const boss = actor('eva', { admin: true })
+
+    await press('ana', 100)
+    await press('leo', 100)
+    await press('rut', 40)
+    await clicker.choose(actor('ana'), { pill: 'red' })
+    await clicker.choose(actor('leo'), { pill: 'blue' })
+    await clicker.save(actor('ana'), { ...SAVE, save: '{"v":1,"clicks":321}' })
+    await usage.record(actor('ana'), { counts: {}, time: { 'nav.clicker': [300, 60, 900] } })
+    // El tiempo en otra sección no es tiempo de juego.
+    await usage.record(actor('ana'), { counts: {}, time: { 'nav.tablon': [500, 0, 0] } })
+
+    const seen = await clicker.usage(boss, {})
+
+    expect(seen.days).toBe(7)
+    expect(seen.totals).toEqual({
+      pressed: 3,
+      reached: 2,
+      red: 1,
+      blue: 1,
+      players: 1,
+      active: 3,
+      total: 1500,
+      saves: 1,
+      seen: 300,
+      back: 60,
+      hidden: 900,
+    })
+    expect(seen.players.map((player) => player.login)).toEqual(['ana', 'leo', 'rut'])
+    expect(seen.players[0]).toMatchObject({
+      plus: 100,
+      pill: 'red',
+      level: 9,
+      total: 1500,
+      clicks: 321,
+      saves: 1,
+      seen: 300,
+      hidden: 900,
+    })
+    expect(seen.players[2]).toMatchObject({ plus: 40, pill: null, total: 0, clicks: 0, seen: 0 })
+
+    // Una partida que no se entiende no rompe la cuenta.
+    await clicker.save(actor('ana'), { ...SAVE, rev: 1, save: 'no es json' })
+    expect((await clicker.usage(boss, { days: '30' })).players[0]).toMatchObject({ clicks: 0 })
+
+    await expectCode(clicker.usage(actor('ana'), {}), 'forbidden')
+    await expectCode(clicker.usage(boss, { days: '0' }), 'invalid_input')
+  })
+
   it('el nivel sube tres por cada cero del total', () => {
     expect(clickerLevel(0)).toBe(0)
     expect(clickerLevel(99)).toBe(6)

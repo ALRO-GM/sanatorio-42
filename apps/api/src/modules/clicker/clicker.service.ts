@@ -8,9 +8,11 @@
 
 import type {
   ClickerBoard,
+  ClickerPlayer,
   ClickerRank,
   ClickerSaved,
   ClickerState,
+  ClickerUsage,
   Pill,
 } from '@sanatorio/contracts'
 import { z } from 'zod'
@@ -45,6 +47,11 @@ const saveSchema = z.object({
   prestige: z.number().int().min(0).max(1e12),
 })
 
+const usageSchema = z.object({ days: z.coerce.number().int().min(1).max(90).default(7) })
+const DAY_MS = 24 * 60 * 60_000
+/** La clave con la que la web apunta el tiempo pasado en el juego. */
+const SECTION = 'nav.clicker'
+
 /**
  * El nivel dentro del juego: tres por cada cero que se le añade al total. Mil
  * líneas son el nivel 9; un millón, el 18.
@@ -58,6 +65,12 @@ export type ClickerServiceOptions = {
   replica: ReplicaRepository
   /** Quién corrige más en un campus, para las noticias del juego. */
   topCorrectors?: (campusId: number, limit: number) => Promise<string[]>
+  /** El tiempo que cada quien ha tenido abierta una sección: lo sabe `usage`. */
+  timeOn?: (
+    key: string,
+    from: string,
+    to: string,
+  ) => Promise<Map<string, { seen: number; back: number; hidden: number }>>
   now?: () => number
 }
 
@@ -219,6 +232,83 @@ export function createClickerService(options: ClickerServiceOptions) {
         entries: ranks.slice(0, BOARD_SIZE),
         me: ranks.find((rank) => rank.login === actor.login) ?? null,
       }
+    },
+
+    /**
+     * El uso del juego, de todo el mundo y persona a persona. Solo para quien
+     * administra la web.
+     *
+     * @param input `days`: los días hacia atrás que cubre el tiempo de juego
+     *   (por defecto 7). Lo demás es de siempre.
+     * @throws {DomainError} `forbidden` si quien pregunta no es admin.
+     */
+    async usage(actor: Actor, input: unknown): Promise<ClickerUsage> {
+      if (!actor.admin) {
+        throw domainError('forbidden', 'Solo para quien administra la web')
+      }
+
+      const { days } = parse(usageSchema, input)
+      const dayOf = (at: number): string => new Date(at).toISOString().slice(0, 10)
+      const from = dayOf(now() - (days - 1) * DAY_MS)
+      const [result, time] = await Promise.all([
+        // De la partida solo se mira cuánto se ha pulsado la tecla, y solo si
+        // se entiende: la escribe la web y aquí no se comprueba.
+        db.execute(
+          `SELECT login, plus, pill, total, per_second, achievements, prestige, rev, updated_at,
+                  save IS NOT NULL AS played,
+                  CASE WHEN json_valid(save) THEN json_extract(save, '$.clicks') END AS clicks
+           FROM clicker ORDER BY total DESC, plus DESC, login`,
+        ),
+        options.timeOn?.(SECTION, from, dayOf(now())) ?? new Map<string, never>(),
+      ])
+      const totals: ClickerUsage['totals'] = {
+        pressed: result.rows.length,
+        reached: 0,
+        red: 0,
+        blue: 0,
+        players: 0,
+        active: 0,
+        total: 0,
+        saves: 0,
+        seen: 0,
+        back: 0,
+        hidden: 0,
+      }
+      const players = result.rows.map((entry): ClickerPlayer => {
+        const login = toText(entry.login)
+        const pill = pillOf(entry)
+        const total = Number(entry.total)
+        const spent = time.get(login) ?? { seen: 0, back: 0, hidden: 0 }
+        const player: ClickerPlayer = {
+          login,
+          plus: toNumber(entry.plus),
+          pill,
+          level: clickerLevel(total),
+          total,
+          perSecond: Number(entry.per_second),
+          achievements: toNumber(entry.achievements),
+          prestige: toNumber(entry.prestige),
+          clicks: typeof entry.clicks === 'number' ? Math.max(0, Math.floor(entry.clicks)) : 0,
+          saves: toNumber(entry.rev),
+          updatedAt: toText(entry.updated_at),
+          ...spent,
+        }
+
+        totals.reached += Number(player.plus >= PLUS_GOAL)
+        totals.red += Number(pill === 'red')
+        totals.blue += Number(pill === 'blue')
+        totals.players += Number(toNumber(entry.played) === 1)
+        totals.active += Number(player.updatedAt.slice(0, 10) >= from)
+        totals.total += total
+        totals.saves += player.saves
+        totals.seen += spent.seen
+        totals.back += spent.back
+        totals.hidden += spent.hidden
+
+        return player
+      })
+
+      return { days, totals, players }
     },
   }
 }

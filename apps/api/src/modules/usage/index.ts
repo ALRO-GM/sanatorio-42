@@ -69,4 +69,4 @@ export function createUsageModule(deps: {
   }
 }
 
-export type { Traffic, UsageService } from './usage.service.js'
+export type { SectionTime, Traffic, UsageService } from './usage.service.js'

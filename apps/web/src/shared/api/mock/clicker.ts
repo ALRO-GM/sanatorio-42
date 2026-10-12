@@ -33,7 +33,7 @@ let calls = 0
 
 export const clickerMock: Pick<
   Api,
-  'getClicker' | 'pressPlus' | 'choosePill' | 'saveClicker' | 'getClickerBoard'
+  'getClicker' | 'pressPlus' | 'choosePill' | 'saveClicker' | 'getClickerBoard' | 'getClickerUsage'
 > = {
   async getClicker() {
     await delay(100)
@@ -92,5 +92,52 @@ export const clickerMock: Pick<
     }))
 
     return { entries, me: entries.find((row) => row.login === ME.login) ?? null }
+  },
+
+  async getClickerUsage(days) {
+    await delay()
+
+    const level = (total: number): number => Math.floor(3 * Math.log10(1 + total))
+    const at = (hoursAgo: number): string =>
+      new Date(Date.now() - hoursAgo * 3_600_000).toISOString()
+    const rows = [
+      { login: 'jdoe', plus: 100, pill: 'red', total: 4.2e9, perSecond: 91_000, clicks: 5200 },
+      { login: ME.login, plus: state.plus, pill: state.pill, total: best, perSecond: 0, clicks: 0 },
+      { login: 'rsoto', plus: 100, pill: 'red', total: 1800, perSecond: 6, clicks: 410 },
+      { login: 'mlopez', plus: 100, pill: 'blue', total: 0, perSecond: 0, clicks: 0 },
+      { login: 'agarcia', plus: 37, pill: null, total: 0, perSecond: 0, clicks: 0 },
+    ] as const
+    const players = rows.map((row, index) => ({
+      ...row,
+      level: level(row.total),
+      achievements: row.total > 0 ? 41 - index * 16 : 0,
+      prestige: 0,
+      saves: row.total > 0 ? 300 - index * 120 : 0,
+      updatedAt: at(index * 30),
+      // Quien juega lo deja abierto: casi todo el tiempo es con la pestaña oculta.
+      seen: row.pill === 'red' ? days * (900 - index * 300) : 0,
+      back: row.pill === 'red' ? days * (400 - index * 100) : 0,
+      hidden: row.pill === 'red' ? days * (5200 - index * 1500) : 0,
+    }))
+    const sum = (field: 'total' | 'saves' | 'seen' | 'back' | 'hidden'): number =>
+      players.reduce((total, player) => total + player[field], 0)
+
+    return {
+      days,
+      totals: {
+        pressed: players.length,
+        reached: players.filter((player) => player.plus >= 100).length,
+        red: players.filter((player) => player.pill === 'red').length,
+        blue: players.filter((player) => player.pill === 'blue').length,
+        players: players.filter((player) => player.total > 0).length,
+        active: players.filter((_, index) => index * 30 < days * 24).length,
+        total: sum('total'),
+        saves: sum('saves'),
+        seen: sum('seen'),
+        back: sum('back'),
+        hidden: sum('hidden'),
+      },
+      players,
+    }
   },
 }

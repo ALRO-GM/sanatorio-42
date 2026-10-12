@@ -58,3 +58,61 @@ export type ClickerBoard = {
   /** Tu fila, estés o no entre las primeras; `null` si aún no has guardado. */
   me: ClickerRank | null
 }
+
+/** Lo que se sabe de alguien que ha tocado el secreto. */
+export type ClickerPlayer = {
+  login: string
+  /** Veces que ha pulsado la cruz. */
+  plus: number
+  pill: Pill | null
+  /** Las cifras de su partida; a cero si no ha guardado ninguna. */
+  level: number
+  total: number
+  perSecond: number
+  achievements: number
+  prestige: number
+  /** Pulsaciones sobre la tecla, según su partida guardada. */
+  clicks: number
+  /** Veces que su partida ha llegado a la API. */
+  saves: number
+  /** Última vez que pulsó la cruz o guardó. */
+  updatedAt: string
+  /**
+   * Segundos con el juego abierto en el periodo: viéndolo, con otra ventana
+   * delante y con la pestaña oculta.
+   */
+  seen: number
+  back: number
+  hidden: number
+}
+
+/**
+ * `GET /admin/clicker?days=`: el uso de Code Clicker. Solo admins.
+ *
+ * El tiempo es el del periodo; lo demás es de siempre, porque de la partida
+ * solo se guarda cómo está ahora.
+ */
+export type ClickerUsage = {
+  /** Días que cubre el tiempo, contando hoy. */
+  days: number
+  totals: {
+    /** Quienes han pulsado la cruz alguna vez. */
+    pressed: number
+    /** Quienes llegaron a las cien pulsaciones. */
+    reached: number
+    red: number
+    blue: number
+    /** Quienes tienen una partida guardada. */
+    players: number
+    /** Quienes han pulsado la cruz o guardado en el periodo. */
+    active: number
+    /** Líneas escritas y guardados entre todas las partidas. */
+    total: number
+    saves: number
+    seen: number
+    back: number
+    hidden: number
+  }
+  /** Una fila por persona, la que más ha escrito primero. */
+  players: ClickerPlayer[]
+}

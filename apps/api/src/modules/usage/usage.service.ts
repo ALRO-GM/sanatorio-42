@@ -93,6 +93,9 @@ export type Traffic = (
   login?: string,
 ) => Promise<{ login: string; day: string; hour: number; requests: number; bytes: number }[]>
 
+/** Segundos en una sección: viéndola, con otra ventana delante y con la pestaña oculta. */
+export type SectionTime = { seen: number; back: number; hidden: number }
+
 export function createUsageService(options: {
   db: Db
   replica: ReplicaRepository
@@ -263,6 +266,26 @@ export function createUsageService(options: {
                 .sort((a, b) => b.seen - a.seen || b.requests - a.requests)
             : [],
       }
+    },
+
+    /**
+     * El tiempo que cada quien ha pasado en una sección entre dos días (UTC,
+     * los dos incluidos). Es para otros módulos: quien lo enseñe comprueba antes
+     * que quien pregunta administra.
+     */
+    async timeOn(key: string, from: string, to: string): Promise<Map<string, SectionTime>> {
+      const result = await db.execute({
+        sql: `SELECT login, SUM(seen_s) AS seen, SUM(back_s) AS back, SUM(hidden_s) AS hidden
+              FROM usage_time WHERE key = ? AND day >= ? AND day <= ? GROUP BY login`,
+        args: [key, from, to],
+      })
+
+      return new Map(
+        result.rows.map((row) => [
+          toText(row.login),
+          { seen: toNumber(row.seen), back: toNumber(row.back), hidden: toNumber(row.hidden) },
+        ]),
+      )
     },
 
     /** Borra el uso por horas que ya ha cumplido el plazo. Lo lanza un trabajo periódico. */

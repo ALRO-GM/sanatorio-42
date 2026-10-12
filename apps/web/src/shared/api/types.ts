@@ -38,6 +38,7 @@ import type {
   ClickerBoard,
   ClickerSaveInput,
   ClickerSaved,
+  ClickerUsage,
   ClickerState,
   DirectChat,
   Pill,
@@ -194,6 +195,8 @@ export type Api = {
   choosePill: (pill: Pill) => Promise<ClickerState>
   saveClicker: (save: ClickerSaveInput) => Promise<ClickerSaved>
   getClickerBoard: () => Promise<ClickerBoard>
+  /** El uso del juego, general y por persona. Solo admins. */
+  getClickerUsage: (days: number) => Promise<ClickerUsage>
   /** Los comunicados que tienes por leer, el más antiguo primero. */
   getBroadcasts: () => Promise<Broadcast[]>
   /** Contesta a uno (o lo cierra sin elegir) y devuelve los que quedan. */
