@@ -16,6 +16,10 @@ export const ca: Record<string, string> = {
   'nav.tablon': 'Tauler',
   'nav.pizarras': 'Pissarres',
   'nav.expediente': 'Expedient',
+  'layout.recordStyle': 'Amb quin estil veuen els altres el teu expedient',
+  'layout.recordStyle.none': 'Amb el seu, cadascú',
+  'layout.recordStyle.yours': 'només teu',
+  'record.styleOf': 'Així el vol ensenyar {login}: amb el seu estil, {style}.',
   'clicker.review.kind': 'Revisió de Code Clicker',
   'clicker.review.title': 'La teva partida no quadra',
   'clicker.review.intro':

@@ -13,6 +13,9 @@ import { api } from '../shared/api'
 import { useAsync } from '../shared/hooks/useAsync'
 import { usePulse } from '../shared/hooks/usePulse'
 import { LayoutSettings } from '../shared/layout/LayoutSettings'
+import { DEFAULT_THEME, useStyle } from '../shared/theme'
+import { canUseStyle } from '../themes'
+import { RecordStylePicker } from '../features/profile/RecordStylePicker'
 import { startUsage, viewing } from '../shared/layout/store'
 import { Footer } from './Footer'
 import { Header } from './Header'
@@ -78,6 +81,13 @@ export function Clinic({ me, onLogout }: ClinicProps) {
   // selectores de terapia y tablón; se piden una vez y salen de la réplica.
   const projects = useAsync(() => api.getMyProjects(true), [])
   const profile = useAsync(() => api.getProfile(), [campusVersion])
+  const [style, setStyle] = useStyle()
+
+  // Un estilo hecho para otra persona no se queda puesto aunque esté guardado
+  // en el navegador (a mano, o de otra cuenta en el mismo equipo).
+  useEffect(() => {
+    if (!canUseStyle(style, me.login)) setStyle(DEFAULT_THEME.id)
+  }, [style, me.login, setStyle])
 
   // El expediente cambia por lo que se hace en otras secciones (fichar, recibir
   // una reacción): al entrar en él se vuelve a pedir, en vez de enseñar el de
@@ -143,9 +153,19 @@ export function Clinic({ me, onLogout }: ClinicProps) {
 
         {customizing && (
           <LayoutSettings
+            me={me.login}
             onClose={() => {
               setCustomizing(false)
             }}
+            recordStyle={
+              profile.data !== undefined && (
+                <RecordStylePicker
+                  me={me.login}
+                  current={profile.data.recordStyle}
+                  onSaved={() => void reloadProfile()}
+                />
+              )
+            }
           />
         )}
 

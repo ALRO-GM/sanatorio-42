@@ -17,6 +17,10 @@ export const es: Record<string, string> = {
   'nav.tablon': 'Tablón',
   'nav.pizarras': 'Pizarras',
   'nav.expediente': 'Expediente',
+  'layout.recordStyle': 'Con qué estilo ven tu expediente los demás',
+  'layout.recordStyle.none': 'Con el suyo, cada cual',
+  'layout.recordStyle.yours': 'solo tuyo',
+  'record.styleOf': 'Así lo quiere ver {login}: con su estilo, {style}.',
   'clicker.review.kind': 'Revisión de Code Clicker',
   'clicker.review.title': 'Tu partida no cuadra',
   'clicker.review.intro':

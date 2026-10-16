@@ -36,6 +36,7 @@ import {
 } from './xp.rules.js'
 import type { AchievementId, XpKind } from './xp.rules.js'
 import { day, id, parse } from '../../core/validation.js'
+import { canUseStyle, isStyle, NO_RECORD_STYLE, recordStyleOf } from './styles.rules.js'
 import type { Actor } from '../../core/actor.js'
 
 export type XpServiceOptions = {
@@ -70,6 +71,11 @@ const settingsSchema = z.object({
   lang: z.enum(['es', 'en', 'ca', 'eu']).optional(),
   title: z.string().optional(),
   preReview: z.boolean().optional(),
+  /** El id de un estilo, `none` (el de quien mira) o `default` (lo de fábrica). */
+  recordStyle: z
+    .string()
+    .regex(/^[a-z][a-z0-9-]{1,30}$/, 'estilo no válido')
+    .optional(),
 })
 
 export function createXpService(options: XpServiceOptions) {
@@ -120,6 +126,7 @@ export function createXpService(options: XpServiceOptions) {
         xp: full.xp,
         title: full.title,
         hacks: full.hacks,
+        recordStyle: full.recordStyle,
         achievements: full.achievements,
         reactions: full.reactions,
         health,
@@ -176,6 +183,7 @@ export function createXpService(options: XpServiceOptions) {
         lang: profile?.lang ?? null,
         admin: actor.admin,
         preReview: profile?.preReview ?? false,
+        recordStyle: recordStyleOf(actor.login, profile?.recordStyle ?? null),
         xp: { total, ...level },
         title,
         hacks: hacker.caught,
@@ -373,7 +381,20 @@ export function createXpService(options: XpServiceOptions) {
         }
       }
 
-      await profiles.update(actor.login, settings)
+      const { recordStyle, ...rest } = settings
+
+      if (recordStyle !== undefined) {
+        if (recordStyle !== 'default' && recordStyle !== NO_RECORD_STYLE && !isStyle(recordStyle)) {
+          throw domainError('invalid_input', 'Ese estilo no existe')
+        }
+        if (isStyle(recordStyle) && !canUseStyle(recordStyle, actor.login)) {
+          throw domainError('forbidden', 'Ese estilo es de otra persona')
+        }
+
+        await profiles.setRecordStyle(actor.login, recordStyle === 'default' ? null : recordStyle)
+      }
+
+      await profiles.update(actor.login, rest)
     },
   }
 }

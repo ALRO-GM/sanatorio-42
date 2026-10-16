@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 
-import { useLook } from '../theme'
+import { useShownTheme } from '../theme'
 
 /**
  * Los iconos de la web: un solo juego, dibujado a propósito, en vez de emojis.
@@ -268,7 +268,7 @@ type IconProps = {
  */
 export function Icon({ name, size, className }: IconProps) {
   // Un estilo puede dibujar un icono a su manera; si no, vale el de siempre.
-  const own = useLook().theme.icons?.[name]
+  const own = useShownTheme().icons?.[name]
 
   return (
     <svg

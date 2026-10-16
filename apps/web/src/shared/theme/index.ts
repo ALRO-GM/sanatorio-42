@@ -118,6 +118,11 @@ let look: { theme: ThemeManifest; palette: ThemePalette | null } = (() => {
 
   return { theme, palette: paletteOf(theme, storedPalettes()) }
 })()
+/**
+ * El estilo prestado: el del expediente que se está mirando, si su dueña eligió
+ * uno. Se pinta encima de lo tuyo y no se guarda: al salir vuelve lo tuyo.
+ */
+let borrowed: ThemeManifest | null = null
 /** Las variables que puso la paleta anterior, para quitarlas al cambiar. */
 let painted: string[] = []
 const listeners = new Set<() => void>()
@@ -128,15 +133,18 @@ function paint(): void {
   if (typeof document === 'undefined') return
 
   const root = document.documentElement
-  const vars = look.palette?.vars ?? {}
+  const shown = borrowed ?? look.theme
+  // Un estilo prestado va con su paleta de fábrica: la tuya es de tu estilo.
+  const vars = (borrowed === null ? look.palette : (borrowed.palettes?.[0] ?? null))?.vars ?? {}
 
-  root.dataset.style = look.theme.id
+  root.dataset.style = shown.id
   for (const name of painted) root.style.removeProperty(name)
   for (const [name, value] of Object.entries(vars)) root.style.setProperty(name, value)
   painted = Object.keys(vars)
 
+  // Lo guardado es siempre lo tuyo, aunque ahora se vea un estilo prestado.
   write(STYLE_KEY, look.theme.id)
-  write(PALETTE_VARS_KEY, JSON.stringify(vars))
+  write(PALETTE_VARS_KEY, JSON.stringify(look.palette?.vars ?? {}))
 }
 
 function set(next: typeof look): void {
@@ -154,6 +162,35 @@ function subscribe(listener: () => void): () => void {
 }
 
 paint()
+
+/**
+ * Pinta la página con otro estilo mientras se usa el componente que lo pide (el
+ * expediente de alguien con estilo propio). `null` no presta nada. Lo tuyo no
+ * cambia: ni el selector ni lo guardado se enteran.
+ */
+export function useBorrowedStyle(style: string | null): void {
+  useEffect(() => {
+    if (style === null) return undefined
+
+    borrowed = themeOf(style)
+    paint()
+    for (const listener of listeners) listener()
+
+    return () => {
+      borrowed = null
+      paint()
+      for (const listener of listeners) listener()
+    }
+  }, [style])
+}
+
+/**
+ * El estilo que se ve ahora: el prestado si lo hay, si no el tuyo. Es el que
+ * manda en lo que se dibuja (los iconos de cada estilo).
+ */
+export function useShownTheme(): ThemeManifest {
+  return useSyncExternalStore(subscribe, () => borrowed ?? look.theme)
+}
 
 /** El estilo en uso, con su manifiesto: se repinta quien lo use cuando cambia. */
 export function useLook(): typeof look {

@@ -15,6 +15,10 @@ export const en: Record<string, string> = {
   'nav.tablon': 'Questions',
   'nav.pizarras': 'Whiteboards',
   'nav.expediente': 'Record',
+  'layout.recordStyle': 'Which style others see your record in',
+  'layout.recordStyle.none': 'Their own, each person',
+  'layout.recordStyle.yours': 'yours only',
+  'record.styleOf': 'This is how {login} wants it seen: in their style, {style}.',
   'clicker.review.kind': 'Code Clicker review',
   'clicker.review.title': 'Your game does not add up',
   'clicker.review.intro':

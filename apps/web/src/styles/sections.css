@@ -837,3 +837,16 @@ button.link {
 dialog.legal-gate {
   width: min(640px, calc(100vw - 1.5rem));
 }
+
+/* Debajo del estilo, en Personalizar: con cuál ven los demás tu expediente. */
+.record-style-picker {
+  display: grid;
+  gap: 0.3rem;
+  margin-top: 0.8rem;
+}
+.record-style {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin: -0.4rem 0 0.8rem;
+}

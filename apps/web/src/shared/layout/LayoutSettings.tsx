@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import type { CSSProperties } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 
 import { useI18n } from '../i18n'
 import { arrange, move } from './order'
@@ -7,7 +7,7 @@ import type { OrderMode } from './order'
 import { NAV_DEFAULT, PAGE_IDS, PAGES } from './registry'
 import type { PageId } from './registry'
 import { resetPrefs, toggleFold, updatePrefs, usePrefs } from './store'
-import { THEMES } from '../../themes'
+import { themesFor } from '../../themes'
 import { useLook, usePalette, useStyle } from '../theme'
 import { Icon } from '../ui/Icon'
 
@@ -21,7 +21,17 @@ const MODES = ['manual', 'mine', 'community'] as const satisfies readonly OrderM
  * cada página, cuáles salen plegados, y si el orden lo pones tú o se calcula
  * solo con lo que más usas tú o la comunidad.
  */
-export function LayoutSettings({ onClose }: { onClose: () => void }) {
+export function LayoutSettings({
+  me,
+  onClose,
+  recordStyle,
+}: {
+  /** Quién eres: hay estilos que solo puede elegir su dueña. */
+  me: string
+  onClose: () => void
+  /** Lo que se pone debajo del estilo: con cuál ven los demás tu expediente. */
+  recordStyle?: ReactNode
+}) {
   const { t, lang } = useI18n()
   const prefs = usePrefs()
   const dialog = useRef<HTMLDialogElement>(null)
@@ -72,7 +82,7 @@ export function LayoutSettings({ onClose }: { onClose: () => void }) {
       <section className="layout-group">
         <h4>{t('layout.style')}</h4>
         <fieldset className="style-picker" aria-label={t('layout.style')}>
-          {THEMES.map((option) => (
+          {themesFor(me).map((option) => (
             <label
               key={option.id}
               className="style-option"
@@ -123,6 +133,7 @@ export function LayoutSettings({ onClose }: { onClose: () => void }) {
             ))}
           </fieldset>
         )}
+        {recordStyle}
       </section>
 
       <fieldset className="layout-modes">

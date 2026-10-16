@@ -13,6 +13,9 @@ import { AVAILABLE_KEY, state, delay, levelFor, achievement } from './state'
 /** Lo que se anota en la tarjeta de salud: dura lo que dure la pestaña. */
 let declared: PaceRef | null = null
 
+/** Con qué estilo ven los demás el expediente de la persona de mentira. */
+const recordStyle: { current: string | null } = { current: null }
+
 export const profileMock: Pick<
   Api,
   | 'getPublicProfile'
@@ -33,6 +36,8 @@ export const profileMock: Pick<
     return {
       login,
       hacks: 0,
+      // Alguien de mentira que enseña su expediente con su estilo: así se ve en la demo.
+      recordStyle: login === 'mgarcia' ? 'espacio' : null,
       image: portrait(login),
       xp: {
         total,
@@ -66,6 +71,7 @@ export const profileMock: Pick<
       // En la web de mentira se es admin, para poder ver el panel de gestión.
       admin: true,
       preReview: state.preReview,
+      recordStyle: recordStyle.current,
       xp,
       // Como en la API: al pillar una trampa, el título se pone solo.
       title: hacker.title ?? state.title,
@@ -114,6 +120,12 @@ export const profileMock: Pick<
 
     if (settings.campusId !== undefined) state.campusId = settings.campusId
     if (settings.preReview !== undefined) state.preReview = settings.preReview
+    if (settings.recordStyle !== undefined) {
+      recordStyle.current =
+        settings.recordStyle === 'none' || settings.recordStyle === 'default'
+          ? null
+          : settings.recordStyle
+    }
 
     const title = TITLES.find((candidate) => candidate.id === settings.title)
 

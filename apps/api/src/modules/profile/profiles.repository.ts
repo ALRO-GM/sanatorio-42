@@ -24,6 +24,8 @@ export type ProfileRow = {
   title: string | null
   /** Se ofrece a preevaluar proyectos terminados. */
   preReview: boolean
+  /** Con qué estilo ven su expediente los demás, tal como se guardó (`styles.rules.ts`). */
+  recordStyle: string | null
 }
 
 /** Sin señales de vida durante esto, lo siguiente ya es otra sesión. */
@@ -34,7 +36,8 @@ export function createProfilesRepository(db: Db) {
     /** Preferencias de una persona, o `undefined` si nunca ha entrado. */
     async get(login: string): Promise<ProfileRow | undefined> {
       const result = await db.execute({
-        sql: 'SELECT login, campus_id, lang, title, pre_review FROM profiles WHERE login = ?',
+        sql: `SELECT login, campus_id, lang, title, pre_review, record_style
+              FROM profiles WHERE login = ?`,
         args: [login],
       })
       const row = result.rows[0]
@@ -49,7 +52,19 @@ export function createProfilesRepository(db: Db) {
         lang: typeof row.lang === 'string' ? row.lang : null,
         title: typeof row.title === 'string' ? row.title : null,
         preReview: toNumber(row.pre_review) === 1,
+        recordStyle: typeof row.record_style === 'string' ? row.record_style : null,
       }
+    },
+
+    /** Guarda con qué estilo se ve su expediente; `null` vuelve a lo de fábrica. */
+    async setRecordStyle(login: string, style: string | null): Promise<void> {
+      const now = nowIso()
+
+      await db.execute({
+        sql: `INSERT INTO profiles (login, record_style, created_at, seen_at) VALUES (?, ?, ?, ?)
+              ON CONFLICT (login) DO UPDATE SET record_style = excluded.record_style`,
+        args: [login, style, now, now],
+      })
     },
 
     /**

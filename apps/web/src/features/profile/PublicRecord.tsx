@@ -3,6 +3,8 @@ import type { AchievementId } from '@sanatorio/contracts'
 import { titleText } from './title'
 import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
+import { useBorrowedStyle } from '../../shared/theme'
+import { themeOf } from '../../themes'
 import { useI18n } from '../../shared/i18n'
 import { REACTIONS } from '../../shared/reactions'
 import { Avatar } from '../../shared/ui/Avatar'
@@ -30,8 +32,12 @@ const ACHIEVEMENT_ICONS: Record<AchievementId, IconName> = {
  * preferencias. El estado de salud sí. Se abre con `#/expediente/<login>`.
  */
 export function PublicRecord({ login, me }: { login: string; me: string }) {
-  const { t } = useI18n()
+  const { t, lang } = useI18n()
   const { data, error, loading, reload } = useAsync(() => api.getPublicProfile(login), [login])
+  // Si su dueña eligió con qué estilo se ve su expediente, se ve con ese.
+  const style = data?.recordStyle ?? null
+
+  useBorrowedStyle(style)
 
   if (loading) return <p>{t('xp.loading')}</p>
   if (data === undefined) {
@@ -55,6 +61,15 @@ export function PublicRecord({ login, me }: { login: string; me: string }) {
         {t('record.backToMine')}
       </a>
       <h2>{t('record.of', { login: data.login })}</h2>
+      {style !== null && (
+        <p className="hint record-style">
+          <Icon name="estrella" size={14} />{' '}
+          {t('record.styleOf', {
+            login: data.login,
+            style: themeOf(style).name[lang] ?? themeOf(style).name.es,
+          })}
+        </p>
+      )}
 
       <article className="card record">
         <div className="banner" />

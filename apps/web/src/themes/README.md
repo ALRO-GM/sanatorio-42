@@ -76,6 +76,23 @@ que más se repiten: `.card`, `button.primary`, `.pill` (y `.pill.active`),
 `.stat-card`, los campos (`input`, `select`, `textarea`) y las ventanas
 (`dialog.layout-dialog`).
 
+## Estilos exclusivos y estilo del expediente
+
+Un estilo puede ser de alguien en concreto: solo su dueña lo ve en el selector,
+y quien visita su expediente lo ve con él.
+
+1. Crea el estilo como cualquier otro.
+2. Apúntalo en `ids.ts`, en `EXCLUSIVE_STYLES`, con los logins de sus dueñas, y
+   en el manifiesto pon `owners: EXCLUSIVE_STYLES.<id>`.
+3. Apúntalo igual en la API, `modules/profile/styles.rules.ts`: es la que no deja
+   ponérselo a otra persona (un test comprueba que las dos listas coinciden).
+
+Cada cual elige en Personalizar con qué estilo ven los demás su expediente
+(`recordStyle`): con el suyo cada cual, o uno de los que puede usar. Sin elegir
+nada, quien tiene un estilo exclusivo lo enseña. Al visitar ese expediente la
+página se pinta con ese estilo (`useBorrowedStyle` en `shared/theme`), sin tocar
+lo que tiene elegido quien mira.
+
 ## Paletas
 
 Un estilo puede dejar elegir color. En su manifiesto, `palettes` es una lista en
@@ -100,3 +117,6 @@ primera de la lista es la de fábrica.
   planeta con anillos, paneles de cristal y neón.
 - `libre`: sin color propio; se elige paleta, y de ella salen el fondo en
   pastel, su estampado y todo lo demás.
+- `bichota` (solo de acamelo): leopardo fucsia, negro y oro, títulos manuscritos
+  y el color moviéndose entre rosas y fucsia. Las teselas las genera
+  `apps/web/scripts/leopard.py`.

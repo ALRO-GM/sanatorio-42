@@ -37,6 +37,11 @@ export type Expediente = {
   admin: boolean
   /** `true` si te ofreces a preevaluar proyectos terminados de los que ya aprobaste. */
   preReview: boolean
+  /**
+   * Con qué estilo ven tu expediente quienes lo visitan (el id de un estilo de
+   * `apps/web/src/themes`), o `null` si cada cual lo ve con el suyo.
+   */
+  recordStyle: string | null
   xp: {
     total: number
     level: number
@@ -66,7 +71,7 @@ export type Expediente = {
  */
 export type PublicProfile = Pick<
   Expediente,
-  'login' | 'xp' | 'title' | 'hacks' | 'achievements' | 'reactions'
+  'login' | 'xp' | 'title' | 'hacks' | 'achievements' | 'reactions' | 'recordStyle'
 > & {
   image: string | null
   health: Health
@@ -85,6 +90,12 @@ export type SettingsInput = {
   title?: string
   /** Ofrecerte (o dejar de hacerlo) a preevaluar proyectos terminados. */
   preReview?: boolean
+  /**
+   * Con qué estilo ven tu expediente los demás: el id de un estilo que puedas
+   * usar, `none` (cada cual con el suyo) o `default` (lo de fábrica: tu estilo
+   * exclusivo si tienes uno).
+   */
+  recordStyle?: string
 }
 
 /** De cuándo es el ranking. */

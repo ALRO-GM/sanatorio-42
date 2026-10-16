@@ -153,6 +153,8 @@ describe('comunidad', () => {
         'image',
         'login',
         'reactions',
+        // Con qué estilo quiere que se vea su expediente: es para quien lo visita.
+        'recordStyle',
         'title',
         'xp',
       ])

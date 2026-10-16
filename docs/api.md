@@ -154,6 +154,12 @@ aplicación (no gasta cuota de la API: la CDN no la cuenta), la guarda en
 toda foto de la CDN (`photoUrl` en `shared/api/photos.ts`). Como mucho 1 500
 fotos nuevas por hora; una que 42 no da no se vuelve a pedir hasta pasada una hora.
 
+## Estilo del expediente
+`PUT /me/settings` admite `recordStyle`: el id de un estilo, `none` (cada cual
+lo ve con el suyo) o `default` (lo de fábrica: tu estilo exclusivo si tienes uno).
+Un estilo exclusivo de otra persona da `403`. `GET /me/profile` y
+`GET /profiles/:login` traen `recordStyle`, ya resuelto: con qué estilo se ve.
+
 ## Privacidad y condiciones
 GET /me/legal → `{ "version": "2026-10-16", "acceptedAt": null }`: la versión vigente
 y cuándo la aceptaste. La web no deja seguir hasta aceptarla.

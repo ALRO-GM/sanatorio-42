@@ -9,6 +9,11 @@ import type { Lang } from '@sanatorio/contracts'
 export type ThemeManifest = {
   /** Va en `data-style` de `<html>` y es el nombre de la carpeta. Minúsculas y guiones. */
   id: string
+  /**
+   * Si es un estilo hecho para alguien, sus logins: solo esas personas lo ven en
+   * el selector. Sin él, es de todo el mundo. Ver `ids.ts`.
+   */
+  owners?: readonly string[]
   /** Cómo se llama y qué se dice de él en el selector. Lo que falte sale en español. */
   name: Partial<Record<Lang, string>> & { es: string }
   hint: Partial<Record<Lang, string>> & { es: string }

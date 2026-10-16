@@ -16,6 +16,10 @@ export const eu: Record<string, string> = {
   'nav.tablon': 'Taula',
   'nav.pizarras': 'Arbelak',
   'nav.expediente': 'Espedientea',
+  'layout.recordStyle': 'Zein estilorekin ikusten duten besteek zure espedientea',
+  'layout.recordStyle.none': 'Bakoitzak berearekin',
+  'layout.recordStyle.yours': 'zuretzat bakarrik',
+  'record.styleOf': 'Horrela nahi du {login}(e)k: bere estiloarekin, {style}.',
   'clicker.review.kind': 'Code Clickerreko berrikuspena',
   'clicker.review.title': 'Zure partida ez dator bat',
   'clicker.review.intro':

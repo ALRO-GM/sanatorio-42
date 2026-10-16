@@ -1,0 +1,273 @@
+/* ── Bichota ──────────────────────────────────────────────────────────────────
+   El estilo de acamelo, y solo suyo (ver `themes/ids.ts`). Lo describió ella en
+   el buzón: negro, rosa y oro; brillante; el color moviéndose sin parar entre
+   rosas y fucsia; estampado de leopardo con las manchas doradas; títulos en
+   negrita y cursiva y el resto en letra redonda, sobre rosa claro.
+
+   - El fondo de la página es rosa claro con el leopardo en suave
+     (`leopard-soft.svg`); la franja del expediente y la marca llevan el leopardo
+     de verdad sobre fucsia (`leopard.svg`). Las teselas las genera
+     `apps/web/scripts/leopard.py`.
+   - Lo que se mueve (botones, pastillas, títulos, franja) recorre un degradado
+     de rosas y fucsia, con brillo de oro. Quien pide menos movimiento lo ve
+     quieto.
+   ──────────────────────────────────────────────────────────────────────────── */
+:root[data-style='bichota'] {
+  --font: 'Nunito Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Dancing Script Variable', 'Brush Script MT', cursive;
+  --display-weight: 700;
+  --display-spacing: 0.01em;
+  --eyebrow-font: var(--font);
+  --radius: 22px;
+  --radius-sm: 14px;
+
+  --bg: #ffe1f0;
+  --surface: #fff8fc;
+  --surface-2: #ffeaf5;
+  --surface-3: #ffd6ea;
+  --border: #f6bdd9;
+  --border-strong: #d9a33a;
+  --text: #1a0610;
+  --text-2: #4a1730;
+  --text-3: #7a3a5a;
+  --text-4: #a5698a;
+  --accent: #e6007e;
+  --accent-hover: #c2006a;
+  --accent-soft: #ffd0e8;
+  --accent-text: #ad005d;
+  --on-accent: #ffffff;
+  --gold: #b8860b;
+  --glow: rgba(230, 0, 126, 0.22);
+  --shadow: rgba(120, 0, 60, 0.28);
+
+  /* El degradado que se mueve: rosa, fucsia, rosa chicle y vuelta. */
+  --bichota-flow: linear-gradient(115deg, #ff5fb8, #e6007e 25%, #ff8ccc 50%, #c8006e 75%, #ff5fb8);
+  --bichota-gold: linear-gradient(115deg, #a8740e, #f5d06a 30%, #fff3b8 45%, #e2ae32 60%, #a8740e);
+
+  --page-image:
+    url('./assets/leopard-soft.svg'),
+    radial-gradient(900px 520px at 10% -10%, rgba(230, 0, 126, 0.16), transparent 62%),
+    radial-gradient(820px 520px at 100% 0%, rgba(245, 197, 66, 0.18), transparent 60%);
+  --page-size: 320px 320px, auto, auto;
+  --page-attachment: scroll;
+  --surface-image: linear-gradient(180deg, #ffffff, #fff1f8);
+  --card-shadow:
+    0 0 0 1px rgba(217, 163, 58, 0.35), 0 1px 2px rgba(120, 0, 60, 0.08),
+    0 16px 34px -18px rgba(150, 0, 80, 0.45);
+  --primary-image: var(--bichota-flow);
+  --primary-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), 0 8px 20px -8px rgba(230, 0, 126, 0.7);
+  --appbar-bg: color-mix(in srgb, #fff0f7 80%, transparent);
+  --banner-image:
+    url('./assets/leopard.svg') 0 0 / 200px 200px,
+    linear-gradient(115deg, #ff3fa4, #e6007e, #ff6fbf);
+
+  --stage-bg:
+    radial-gradient(70% 60% at 15% 0%, rgba(255, 79, 179, 0.35), transparent 70%),
+    radial-gradient(70% 60% at 100% 100%, rgba(245, 197, 66, 0.22), transparent 70%),
+    linear-gradient(170deg, #2a0618, #0c0207);
+  --stage-text: #fff0f7;
+  --stage-muted: #e2a9c6;
+  --stage-link: #f3b6d6;
+  --stage-halo: #12030a;
+  --stage-accent: #ffd36b;
+
+  --ring-from: #ff4fb3;
+  --ring-to: #d9a33a;
+  --ring-shade: #4a0a2a;
+  --orb-done: #e2ae32;
+}
+:root[data-style='bichota'][data-theme='dark'] {
+  --bg: #12030b;
+  --surface: #1f0714;
+  --surface-2: #2a0b1c;
+  --surface-3: #361026;
+  --border: #4d1a36;
+  --border-strong: #c99a35;
+  --fill-muted: #6a2a4c;
+  --text: #ffeaf5;
+  --text-2: #f3bfd9;
+  --text-3: #d18cb0;
+  --text-4: #a0607f;
+  --accent: #ff4fb3;
+  --accent-hover: #ff7fc8;
+  --accent-soft: #4a0d2e;
+  --accent-text: #ff8fd0;
+  --on-accent: #1a0610;
+  --gold: #f5c542;
+  --glow: rgba(255, 79, 179, 0.2);
+  --shadow: rgba(0, 0, 0, 0.6);
+
+  /* De noche, el leopardo de verdad, apagado para que se pueda leer encima. */
+  --page-image:
+    linear-gradient(rgba(18, 3, 11, 0.86), rgba(18, 3, 11, 0.86)), url('./assets/leopard.svg'),
+    radial-gradient(900px 520px at 10% -10%, rgba(255, 79, 179, 0.3), transparent 62%);
+  --page-size: auto, 320px 320px, auto;
+  --surface-image: linear-gradient(180deg, #24091a, #170511);
+  --card-shadow:
+    0 0 0 1px rgba(201, 154, 53, 0.35), 0 1px 2px rgba(0, 0, 0, 0.5),
+    0 18px 36px -18px rgba(0, 0, 0, 0.8);
+  --primary-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 8px 24px -8px rgba(255, 79, 179, 0.6);
+  --appbar-bg: color-mix(in srgb, #1a0510 82%, transparent);
+  --ring-shade: #000000;
+}
+
+/* --- Lo que se mueve ---------------------------------------------------------- */
+@keyframes bichota-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+@keyframes bichota-shine {
+  0% {
+    background-position: 140% 0;
+  }
+  100% {
+    background-position: -40% 0;
+  }
+}
+
+/* Los títulos: manuscritos, en negrita, y con el rosa corriendo por dentro. */
+:root[data-style='bichota'] h1,
+:root[data-style='bichota'] h2,
+:root[data-style='bichota'] .brand-name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-style: italic;
+  background: var(--bichota-flow);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: bichota-flow 6s ease-in-out infinite;
+}
+:root[data-style='bichota'] h3,
+:root[data-style='bichota'] h4 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-style: italic;
+  font-size: 1.25em;
+}
+/* Bajo el título, una raya de oro con su destello. */
+:root[data-style='bichota'] h2::after {
+  content: '';
+  display: block;
+  width: 5.5rem;
+  height: 4px;
+  margin-top: 0.3rem;
+  border-radius: 4px;
+  background: var(--bichota-gold);
+  background-size: 250% 100%;
+  animation: bichota-shine 3.2s linear infinite;
+}
+
+/* La marca y los botones principales: fucsia en movimiento, con borde de oro. */
+:root[data-style='bichota'] .brand-mark,
+:root[data-style='bichota'] button.primary,
+:root[data-style='bichota'] a.button.primary,
+:root[data-style='bichota'] .pill.active,
+:root[data-style='bichota'] .pill.active:hover:not(:disabled) {
+  border: 1px solid rgba(245, 197, 66, 0.75);
+  background: var(--bichota-flow);
+  background-size: 300% 100%;
+  box-shadow: var(--primary-shadow);
+  color: var(--on-accent);
+  animation: bichota-flow 5s ease-in-out infinite;
+}
+:root[data-style='bichota'] .brand-mark {
+  background:
+    url('./assets/leopard.svg') 0 0 / 60px 60px,
+    var(--bichota-flow);
+  background-size:
+    60px 60px,
+    300% 100%;
+}
+:root[data-style='bichota'] button.primary {
+  font-weight: 800;
+}
+:root[data-style='bichota'] button.primary:hover:not(:disabled) {
+  filter: brightness(1.08) saturate(1.15);
+  transform: translateY(-1px);
+}
+
+/* La franja del expediente: leopardo de verdad, y un brillo que la cruza. */
+:root[data-style='bichota'] .banner {
+  position: relative;
+  overflow: hidden;
+  border-bottom: 2px solid #e2ae32;
+}
+:root[data-style='bichota'] .banner::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 35%,
+    rgba(255, 243, 184, 0.55) 48%,
+    transparent 60%
+  );
+  background-size: 250% 100%;
+  animation: bichota-shine 4.5s linear infinite;
+  pointer-events: none;
+}
+
+/* Tarjetas con filo de oro; las cifras importantes, en oro con destello. */
+:root[data-style='bichota'] .card {
+  border-color: rgba(217, 163, 58, 0.5);
+}
+:root[data-style='bichota'] .stat-card.strong strong {
+  background: var(--bichota-gold);
+  background-size: 250% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: bichota-shine 3.6s linear infinite;
+}
+:root[data-style='bichota'] .eyebrow {
+  color: var(--accent-text);
+  letter-spacing: 0.08em;
+}
+:root[data-style='bichota'] .tab.active::after {
+  height: 3px;
+  border-radius: 3px;
+  background: var(--bichota-flow);
+  background-size: 300% 100%;
+  animation: bichota-flow 5s ease-in-out infinite;
+}
+:root[data-style='bichota'] .badge.on,
+:root[data-style='bichota'] .chip {
+  border-color: rgba(217, 163, 58, 0.55);
+}
+:root[data-style='bichota'] input:focus-visible,
+:root[data-style='bichota'] select:focus-visible,
+:root[data-style='bichota'] textarea:focus-visible {
+  box-shadow: 0 0 0 4px var(--glow);
+}
+:root[data-style='bichota'] dialog.layout-dialog,
+:root[data-style='bichota'] dialog.event-dialog {
+  border-color: rgba(217, 163, 58, 0.6);
+  background-image: var(--surface-image);
+}
+
+/* Quien pide menos movimiento lo ve quieto: mismos colores, sin vaivén. */
+@media (prefers-reduced-motion: reduce) {
+  :root[data-style='bichota'] h1,
+  :root[data-style='bichota'] h2,
+  :root[data-style='bichota'] h2::after,
+  :root[data-style='bichota'] .brand-name,
+  :root[data-style='bichota'] .brand-mark,
+  :root[data-style='bichota'] button.primary,
+  :root[data-style='bichota'] a.button.primary,
+  :root[data-style='bichota'] .pill.active,
+  :root[data-style='bichota'] .banner::after,
+  :root[data-style='bichota'] .stat-card.strong strong,
+  :root[data-style='bichota'] .tab.active::after {
+    animation: none;
+  }
+}
