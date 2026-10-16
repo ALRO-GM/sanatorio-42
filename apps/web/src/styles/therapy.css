@@ -47,10 +47,95 @@
   font-size: 0.68rem;
   color: var(--text);
 }
+/* Preevaluar: una de las cosas principales de la guardia, en grande. */
 .pre-review {
-  margin-top: 0.6rem;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.8rem;
 }
-.pre-review .hint {
-  margin: 0.2rem 0 0;
-  font-size: 0.8rem;
+.pre-review.on {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--glow);
+}
+.pre-review-icon {
+  display: grid;
+  place-items: center;
+  width: 3.6rem;
+  height: 3.6rem;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+.pre-review.on .pre-review-icon {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.pre-review-text h3 {
+  margin: 0 0 0.2rem;
+  font-size: 1.25rem;
+}
+.pre-review-text p {
+  margin: 0;
+  color: var(--text-2);
+}
+/* El interruptor, grande: se tiene que ver de lejos si está encendido. */
+.pre-review-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.55rem 1rem 0.55rem 0.55rem;
+  border: 1.5px solid var(--border-strong);
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--text);
+  font-weight: 700;
+  white-space: nowrap;
+}
+.pre-review-switch > span {
+  position: relative;
+  width: 2.6rem;
+  height: 1.5rem;
+  border-radius: 999px;
+  background: var(--fill-muted, var(--border-strong));
+  transition: background 0.2s;
+}
+.pre-review-switch > span::after {
+  content: '';
+  position: absolute;
+  top: 0.15rem;
+  left: 0.15rem;
+  width: 1.2rem;
+  height: 1.2rem;
+  border-radius: 50%;
+  background: #ffffff;
+  transition: transform 0.2s;
+}
+.pre-review-switch[aria-checked='true'] {
+  border-color: var(--accent);
+}
+.pre-review-switch[aria-checked='true'] > span {
+  background: var(--accent);
+}
+.pre-review-switch[aria-checked='true'] > span::after {
+  transform: translateX(1.1rem);
+}
+.pre-review .error-note,
+.pre-review > :last-child:not(.pre-review-switch) {
+  grid-column: 1 / -1;
+}
+.pre-review-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+@media (max-width: 560px) {
+  .pre-review {
+    grid-template-columns: auto 1fr;
+  }
+  .pre-review-switch {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
 }

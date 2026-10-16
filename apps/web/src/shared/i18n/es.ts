@@ -468,6 +468,15 @@ export const es: Record<string, string> = {
   'board.editDoubt': 'Texto de la duda',
   'help.pastSlot': 'Esta media hora ya ha empezado',
   'help.busySlot': 'Ya tienes algo en el calendario a esta hora',
+  'help.preReview.title': 'Preevaluaciones',
+  'help.preReview.on':
+    'Te ofreces a preevaluar: sales marcado en tus {n} proyectos aprobados, y quien los termine te puede pedir un ensayo de corrección.',
+  'help.preReview.onNone':
+    'Te ofreces a preevaluar: saldrás marcado en cuanto apruebes tu primer proyecto.',
+  'help.preReview.off':
+    'Enciéndelo y quien termine un proyecto que ya aprobaste verá que le puedes hacer un ensayo de la corrección.',
+  'help.preReview.yes': 'Me ofrezco',
+  'help.preReview.no': 'No me ofrezco',
   'help.status.title': 'Cómo te ven ahora',
   'help.status.onDuty': 'Sales de guardia: tienes el interruptor encendido y te vemos en {seat}.',
   'help.status.notSeated':
@@ -740,6 +749,7 @@ export const es: Record<string, string> = {
   'layout.expediente.network': 'Tu red de correcciones',
   'layout.expediente.achievements': 'Logros y reacciones',
   'layout.expediente.ranking': 'Ranking y tus dudas',
+  'layout.guardia.prereview': 'Preevaluaciones',
   'layout.guardia.today': 'Tus franjas de hoy',
   'layout.guardia.bookings': 'Reservas',
   'layout.guardia.blocked': 'Personas bloqueadas',

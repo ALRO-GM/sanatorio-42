@@ -449,6 +449,15 @@ export const eu: Record<string, string> = {
   'board.editDoubt': 'Zalantzaren testua',
   'help.pastSlot': 'Ordu erdi hau hasita dago jada',
   'help.busySlot': 'Badaukazu zerbait egutegian ordu honetan',
+  'help.preReview.title': 'Aurreebaluazioak',
+  'help.preReview.on':
+    'Aurreebaluatzeko eskaintzen zara: gainditutako zure {n} proiektuetan markatuta agertzen zara, eta amaitzen dituenak zuzenketa-entsegu bat eska diezazuke.',
+  'help.preReview.onNone':
+    'Aurreebaluatzeko eskaintzen zara: zure lehen proiektua gainditu bezain laster agertuko zara markatuta.',
+  'help.preReview.off':
+    'Piztu ezazu, eta gainditu zenuen proiektu bat amaitzen duenak ikusiko du zuzenketaren entsegu bat egin diezaiokezula.',
+  'help.preReview.yes': 'Eskaintzen naiz',
+  'help.preReview.no': 'Ez naiz eskaintzen',
   'help.status.title': 'Nola ikusten zaituzten orain',
   'help.status.onDuty': 'Guardian zaude: etengailua piztuta duzu eta {seat}-n ikusten zaitugu.',
   'help.status.notSeated':
@@ -711,6 +720,7 @@ export const eu: Record<string, string> = {
   'layout.expediente.network': 'Zure zuzenketen sarea',
   'layout.expediente.achievements': 'Lorpenak eta erreakzioak',
   'layout.expediente.ranking': 'Rankinga eta zure zalantzak',
+  'layout.guardia.prereview': 'Aurreebaluazioak',
   'layout.guardia.today': 'Zure gaurko tarteak',
   'layout.guardia.bookings': 'Erreserbak',
   'layout.guardia.blocked': 'Blokeatutako pertsonak',

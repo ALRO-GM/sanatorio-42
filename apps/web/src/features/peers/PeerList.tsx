@@ -5,6 +5,7 @@ import type { Peer, ProjectStatus, ProjectSummary } from '@sanatorio/contracts'
 import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
+import { Icon } from '../../shared/ui/Icon'
 import { Avatar } from '../../shared/ui/Avatar'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { BookHelp } from '../help/BookHelp'
@@ -227,8 +228,11 @@ export function PeerList({ project, onOpenTherapy }: PeerListProps) {
                   <span className="badge subtle">{t('peers.patient')}</span>
                 )}
                 {peer.preReview && (
-                  <span className="badge on plain" title={t('peers.preReview.hint')}>
-                    {t('peers.preReview')}
+                  <span
+                    className="badge on plain pre-review-badge"
+                    title={t('peers.preReview.hint')}
+                  >
+                    <Icon name="preevaluar" size={14} /> {t('peers.preReview')}
                   </span>
                 )}
                 {crossed !== undefined ? (

@@ -445,6 +445,15 @@ export const ca: Record<string, string> = {
   'board.editDoubt': 'Text del dubte',
   'help.pastSlot': 'Aquesta mitja hora ja ha començat',
   'help.busySlot': 'Ja tens alguna cosa al calendari a aquesta hora',
+  'help.preReview.title': 'Preavaluacions',
+  'help.preReview.on':
+    "T'ofereixes a preavaluar: surts marcat als teus {n} projectes aprovats, i qui els acabi et pot demanar un assaig de correcció.",
+  'help.preReview.onNone':
+    "T'ofereixes a preavaluar: sortiràs marcat tan bon punt aprovis el teu primer projecte.",
+  'help.preReview.off':
+    'Encén-lo i qui acabi un projecte que ja vas aprovar veurà que li pots fer un assaig de la correcció.',
+  'help.preReview.yes': "M'ofereixo",
+  'help.preReview.no': "No m'ofereixo",
   'help.status.title': 'Com et veuen ara',
   'help.status.onDuty': "Surts de guàrdia: tens l'interruptor encès i et veiem a {seat}.",
   'help.status.notSeated':
@@ -707,6 +716,7 @@ export const ca: Record<string, string> = {
   'layout.expediente.network': 'La teva xarxa de correccions',
   'layout.expediente.achievements': 'Assoliments i reaccions',
   'layout.expediente.ranking': 'Rànquing i els teus dubtes',
+  'layout.guardia.prereview': 'Preavaluacions',
   'layout.guardia.today': "Les teves franges d'avui",
   'layout.guardia.bookings': 'Reserves',
   'layout.guardia.blocked': 'Persones bloquejades',

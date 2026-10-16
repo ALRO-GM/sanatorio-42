@@ -69,13 +69,13 @@ export function Guardia() {
       <Blocks
         page="guardia"
         blocks={[
+          { id: 'prereview', content: <PreReviewToggle /> },
           {
             id: 'today',
             content: (
               <>
                 <GuardStatus day={data} />
                 <DayEditor key={data.day} day={data} onSaved={setData} />
-                <PreReviewToggle />
               </>
             ),
           },

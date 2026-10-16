@@ -31,6 +31,8 @@ export const PAGES = {
     { id: 'ranking', foldable: true },
   ],
   guardia: [
+    // Preevaluar es una de las cosas principales de la guardia: va la primera.
+    { id: 'prereview', foldable: false },
     { id: 'today', foldable: true },
     { id: 'bookings', foldable: true },
     { id: 'blocked', foldable: true },

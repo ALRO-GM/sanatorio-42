@@ -164,6 +164,14 @@ const PATHS = {
       <path d="M8 11V8a4 4 0 0 1 8 0v3" />
     </>
   ),
+  /** Preevaluar: una tablilla de corrección con su visto. */
+  preevaluar: (
+    <>
+      <path d="M8.5 4.5H6.5a1.5 1.5 0 0 0-1.5 1.5v13.5A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5h-2" />
+      <path d="M9 3h6v3H9z" />
+      <path d="M8.5 13.5l2.5 2.5 4.5-5" />
+    </>
+  ),
   /** Borrar: una papelera. */
   papelera: (
     <>
