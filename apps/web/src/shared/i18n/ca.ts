@@ -243,6 +243,8 @@ export const ca: Record<string, string> = {
   'cal.nextBoard': 'Pròxima pissarra',
   'cal.seats': '{taken} de {capacity} places',
   'cal.join': "Apunta-m'hi",
+  'cal.upcoming': 'Properes pissarres amb lloc',
+  'cal.upcomingEmpty': 'No hi ha pissarres amb lloc als propers dos mesos. En proposes una?',
   'cal.leave': "Desapunta-me'n",
   'cal.full': 'Completa',
   'cal.cancel': 'Cancel·la la pissarra',

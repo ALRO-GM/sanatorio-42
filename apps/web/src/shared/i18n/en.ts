@@ -251,6 +251,8 @@ export const en: Record<string, string> = {
   'cal.nextBoard': 'Next whiteboard',
   'cal.seats': '{taken} of {capacity} seats',
   'cal.join': 'Sign me up',
+  'cal.upcoming': 'Upcoming whiteboards with seats',
+  'cal.upcomingEmpty': 'No whiteboards with seats in the next two months. Want to propose one?',
   'cal.leave': 'Drop out',
   'cal.full': 'Full',
   'cal.cancel': 'Cancel whiteboard',

@@ -243,6 +243,9 @@ export const eu: Record<string, string> = {
   'cal.nextBoard': 'Hurrengo arbela',
   'cal.seats': '{capacity} plazatik {taken}',
   'cal.join': 'Eman izena',
+  'cal.upcoming': 'Leku libreko hurrengo arbelak',
+  'cal.upcomingEmpty':
+    'Ez dago leku libreko arbelik hurrengo bi hilabeteetan. Zuk proposatu nahi duzu bat?',
   'cal.leave': 'Kendu izena',
   'cal.full': 'Beteta',
   'cal.cancel': 'Bertan behera utzi arbela',

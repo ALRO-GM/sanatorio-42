@@ -257,6 +257,8 @@ export const es: Record<string, string> = {
   'cal.nextBoard': 'Próxima pizarra',
   'cal.seats': '{taken} de {capacity} plazas',
   'cal.join': 'Apuntarme',
+  'cal.upcoming': 'Próximas pizarras con plaza',
+  'cal.upcomingEmpty': 'No hay pizarras con plaza en los próximos dos meses. ¿Propones tú una?',
   'cal.leave': 'Desapuntarme',
   'cal.full': 'Completa',
   'cal.cancel': 'Cancelar pizarra',

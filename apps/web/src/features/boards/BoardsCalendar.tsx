@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 
 import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
-import { useI18n } from '../../shared/i18n'
+import { localeOf, useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { BoardCard } from './BoardCard'
 import { BoardForm } from './BoardForm'
@@ -10,9 +10,17 @@ import { dayKey } from './dates'
 import { InfoTip } from '../../shared/ui/InfoTip'
 import { BoardsTour } from './BoardsTour'
 
-/** Calendario de pizarras: el mes, las pizarras del día elegido y el formulario para proponer una. */
+/** Hasta dónde se miran las próximas pizarras, sin día elegido. */
+const UPCOMING_DAYS = 60
+/** Cuántas próximas se enseñan como mucho. */
+const UPCOMING_MAX = 8
+
+/**
+ * Calendario de pizarras: el mes, el formulario para proponer una y, debajo,
+ * las del día elegido o, sin día, las próximas a las que aún te puedes apuntar.
+ */
 export function BoardsCalendar() {
-  const { t } = useI18n()
+  const { t, lang } = useI18n()
   const today = useMemo(() => new Date(), [])
   const [month, setMonth] = useState(() => new Date(today.getFullYear(), today.getMonth(), 1))
   const [selectedDay, setSelectedDay] = useState<string | null>(null)
@@ -21,14 +29,35 @@ export function BoardsCalendar() {
   const from = month.toISOString()
   const to = new Date(month.getFullYear(), month.getMonth() + 1, 1).toISOString()
   const boards = useAsync(() => api.getBoards(from, to), [from, to])
+  // Las próximas desde ahora, aunque caigan en otro mes que el que se ve.
+  const soon = useAsync(
+    () =>
+      api.getBoards(
+        today.toISOString(),
+        new Date(today.getTime() + UPCOMING_DAYS * 86_400_000).toISOString(),
+      ),
+    [today],
+  )
 
   const list = boards.data ?? []
   const withBoard = new Set(list.map((board) => dayKey(new Date(board.startsAt))))
+  const now = Date.now()
+  // Sin día: las que no han terminado y tienen plaza (o ya tienes la tuya).
   const shown =
     selectedDay === null
-      ? list
+      ? (soon.data ?? [])
+          .filter(
+            (board) =>
+              Date.parse(board.endsAt) > now &&
+              (board.joined || board.mine || board.attendees < board.capacity),
+          )
+          .sort((a, b) => Date.parse(a.startsAt) - Date.parse(b.startsAt))
+          .slice(0, UPCOMING_MAX)
       : list.filter((board) => dayKey(new Date(board.startsAt)) === selectedDay)
-  const now = Date.now()
+  const reload = (): void => {
+    void boards.reload()
+    void soon.reload()
+  }
   const nextId = list.find((board) => Date.parse(board.endsAt) > now)?.id
 
   const move = (delta: number): void => {
@@ -142,23 +171,35 @@ export function BoardsCalendar() {
               }}
               onSaved={() => {
                 setProposing(false)
-                void boards.reload()
+                reload()
               }}
             />
           )}
-          {boards.loading && <p>{t('cal.loading')}</p>}
-          <ErrorNote error={boards.error} onRetry={() => void boards.reload()} />
-          {boards.data !== undefined && shown.length === 0 && (
-            <p className="estado">{t('cal.empty')}</p>
+          <h3 className="boards-list-title">
+            {selectedDay === null
+              ? t('cal.upcoming')
+              : new Date(`${selectedDay}T12:00:00`).toLocaleDateString(localeOf(lang), {
+                  weekday: 'long',
+                  day: 'numeric',
+                  month: 'long',
+                })}
+          </h3>
+          {(selectedDay === null ? soon.loading : boards.loading) && <p>{t('cal.loading')}</p>}
+          <ErrorNote
+            error={selectedDay === null ? soon.error : boards.error}
+            onRetry={() => {
+              reload()
+            }}
+          />
+          {(selectedDay === null ? soon.data : boards.data) !== undefined && shown.length === 0 && (
+            <p className="estado">
+              {selectedDay === null ? t('cal.upcomingEmpty') : t('cal.empty')}
+            </p>
           )}
           <ul className="stack">
             {shown.map((board) => (
               <li key={board.id}>
-                <BoardCard
-                  board={board}
-                  featured={board.id === nextId}
-                  onChange={() => void boards.reload()}
-                />
+                <BoardCard board={board} featured={board.id === nextId} onChange={reload} />
               </li>
             ))}
           </ul>
