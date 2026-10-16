@@ -58,7 +58,7 @@ describe('migraciones', () => {
       'clicker_cheats',
       'conversation_marks',
       'corrections',
-      'curriculum',
+      'curriculum_votes',
       'doubt_answers',
       'doubts',
       'event_alerts',
@@ -230,6 +230,48 @@ describe('migraciones', () => {
       'ana ticket_answered ticket:1',
       'eva ticket_new ticket:9',
     ])
+
+    db.close()
+  })
+
+  it('la 37 pasa lo aprendido del plan a un voto por persona y proyecto', async () => {
+    const db = createClient({ url: 'file::memory:' })
+
+    await db.batch([
+      ...MIGRATIONS.filter((m) => m.version < 37).flatMap((m) => m.statements),
+      'CREATE TABLE schema_version (id INTEGER PRIMARY KEY CHECK (id = 1), version INTEGER NOT NULL)',
+      'INSERT INTO schema_version (id, version) VALUES (1, 36)',
+      `INSERT INTO users (id, login, synced_at) VALUES (1, 'ana', 'x'), (2, 'leo', 'x'), (3, 'sol', 'x')`,
+      `INSERT INTO projects (id, name, slug, core) VALUES
+        (10, 'Libft', '42cursus-libft', 1), (20, 'Nuevo', 'nuevo', 1), (30, 'Fuera', 'fuera', 0)`,
+      // `ana` validó el rango 0 en mayo y el 1 en junio; `sol` tiene un JSON roto.
+      `INSERT INTO user_tracks (login, track, rank, ranks, fetched_at) VALUES
+        ('ana', 'next', 1, '["2026-05-01T00:00:00Z","2026-06-01T00:00:00Z"]', 'x'),
+        ('leo', 'classic', -1, '[]', 'x'),
+        ('sol', 'next', 0, 'roto', 'x')`,
+      `INSERT INTO project_users (id, user_id, project_id, status, synced_at, created_at_42) VALUES
+        (1, 1, 10, 'finished', 'x', '2026-04-01T00:00:00Z'),
+        (2, 1, 20, 'in_progress', 'x', '2026-06-20T00:00:00Z'),
+        (3, 1, 30, 'in_progress', 'x', '2026-06-20T00:00:00Z'),
+        (4, 2, 10, 'in_progress', 'x', '2026-09-01T00:00:00Z'),
+        (5, 2, 20, 'in_progress', 'x', NULL),
+        (6, 3, 10, 'in_progress', 'x', '2026-09-01T00:00:00Z')`,
+      `INSERT INTO curriculum (track, project_id, circle) VALUES ('next', 20, 0)`,
+    ])
+    await migrate(db)
+
+    const votes = await db.execute(
+      'SELECT track, project_id, login, circle FROM curriculum_votes ORDER BY login, project_id',
+    )
+
+    // Lo que no es del common core, lo que no tiene fecha y el JSON roto no votan.
+    expect(
+      votes.rows.map(
+        (row) =>
+          `${textOf(row, 'login')} ${textOf(row, 'track')} ${Number(row.project_id)} ${Number(row.circle)}`,
+      ),
+    ).toEqual(['ana next 10 0', 'ana next 20 2', 'leo classic 10 0'])
+    expect(await tableNames(db)).not.toContain('curriculum')
 
     db.close()
   })

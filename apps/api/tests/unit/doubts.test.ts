@@ -559,6 +559,46 @@ describe('comunidad', () => {
       ).not.toContainEqual(expect.objectContaining({ name: 'Proyecto Nuevo' }))
     })
 
+    it('lo de la tabla de partida manda sobre lo aprendido, y los «elige uno» van marcados', async () => {
+      // `nex` está en el círculo 0 (sin rangos) y aun así tiene el 06 bis: su
+      // voto diría círculo 0. La tabla de partida lo pone en el 2.
+      await replica().ingestProjectUsers(
+        [
+          projectUser('nex', {
+            projectId: 2782,
+            projectName: 'Python Module 06 bis',
+            slug: 'python-module-06-bis',
+            createdAt: '2026-06-25T10:00:00.000Z',
+          }),
+          projectUser('nex', {
+            projectId: 2696,
+            projectName: 'Python Module 06',
+            slug: 'python-module-06',
+            createdAt: '2026-06-25T10:00:00.000Z',
+          }),
+        ],
+        MADRID,
+      )
+      api.quests.set(userId('nex'), [
+        { quest_id: 128, validated_at: '2026-03-12T10:00:00.000Z', quest: { slug: '42next' } },
+      ])
+
+      const projects = all(await services.doubts.graph(actor('nex'), userId('nex')))
+
+      expect(projects.find((p) => p.name === 'Python Module 06 bis')).toMatchObject({
+        circle: 2,
+        choice: 'python-06',
+      })
+      expect(projects.find((p) => p.name === 'Python Module 06')).toMatchObject({
+        circle: 2,
+        choice: 'python-06',
+      })
+      // Lo que no es de ningún grupo no lleva marca.
+      expect(projects.find((p) => p.name === 'Libft')?.choice ?? null).toBeNull()
+      // Sus hitos y su cursus sí se piden a 42: son lo único que pide el grafo.
+      api.calls.length = 0
+    })
+
     it('da las fechas del estado de salud: inicio, círculos completados y black hole', async () => {
       await replica().ingestUser(
         {

@@ -67,6 +67,10 @@ export const doubtsMock: Pick<
             perfect: id === 1312,
             hours,
             series: /^(.+) Module \d+$/.exec(name)?.[1] ?? null,
+            // Como la API: el módulo y su `bis` son un solo hueco.
+            choice: /^Python Module 0[56]( bis)?$/.test(name)
+              ? `python-${name.slice(14, 16)}`
+              : null,
             locked: status === 'todo' && circle > CURRENT_CIRCLE,
             signals: {
               unanswered: status === 'todo' ? 0 : unanswered,

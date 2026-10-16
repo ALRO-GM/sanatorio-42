@@ -42,6 +42,7 @@ import { staffSchema } from './0033-staff.js'
 import { conversationsSchema } from './0034-conversations.js'
 import { evaluationMissedSchema } from './0035-evaluation-missed.js'
 import { settledTicketsSchema } from './0036-settled-tickets.js'
+import { curriculumVotesSchema } from './0037-curriculum-votes.js'
 import type { Migration } from './types.js'
 
 export type { Migration } from './types.js'
@@ -83,6 +84,7 @@ export const MIGRATIONS: readonly Migration[] = [
   conversationsSchema,
   evaluationMissedSchema,
   settledTicketsSchema,
+  curriculumVotesSchema,
 ]
 
 /** Versión más alta que existe en el código. */

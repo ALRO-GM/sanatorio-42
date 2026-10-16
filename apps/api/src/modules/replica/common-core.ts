@@ -79,3 +79,18 @@ export const COMMON_CORE: readonly (readonly CoreProject[])[] = [
   ],
   [project('ft_transcendence', 'transc.', 'ft_transcendence'), exam('06')],
 ]
+
+/**
+ * Proyectos entre los que se elige uno: con aprobar cualquiera del grupo, el
+ * hueco está hecho. Por slug, como la tabla de arriba.
+ *
+ * Los `bis` de Python son la segunda oportunidad de un módulo: vale uno de los dos.
+ */
+export const CHOICES: Readonly<Record<string, readonly string[]>> = {
+  'circle2-graphics': ['so_long', '42cursus-fdf', '42cursus-fract-ol'],
+  'circle2-unix': ['pipex', 'minitalk'],
+  'circle4-graphics': ['cub3d', 'minirt'],
+  'circle5-network': ['ft_irc', 'webserv'],
+  'python-05': ['python-module-05', 'python-module-05-bis'],
+  'python-06': ['python-module-06', 'python-module-06-bis'],
+}

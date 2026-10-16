@@ -238,8 +238,9 @@ export function createDoubtsService(options: DoubtsServiceOptions) {
 
       await curriculum.ensureHours(actor.campusId)
 
-      const [circles, mine, activity, perfect, cursus] = await Promise.all([
+      const [circles, choices, mine, activity, perfect, cursus] = await Promise.all([
         curriculum.circles(track),
+        curriculum.choices(),
         replica.projectsOf(actor.login, true),
         doubts.activity(actor.campusId, actor.login),
         replica.perfectProjectsOf(actor.login),
@@ -286,6 +287,7 @@ export function createDoubtsService(options: DoubtsServiceOptions) {
             perfect: perfect.has(projectId),
             hours,
             series: seriesOf(name),
+            choice: choices.get(projectId) ?? null,
             // Lo que ya tiene (aunque sea de un círculo posterior) nunca está cerrado.
             locked: status === 'todo' && circle > currentCircle,
             signals: {

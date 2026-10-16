@@ -46,6 +46,12 @@ export type GraphProject = {
    * misma serie se pueden agrupar en una sola burbuja.
    */
   series: string | null
+  /**
+   * Grupo de «elige uno» al que pertenece (`"circle2-graphics"` para so_long,
+   * FdF y fract-ol), o `null`. Del grupo basta con aprobar uno: el círculo se
+   * cuenta con un solo hueco por grupo.
+   */
+  choice: string | null
   /** `true` si aún no lo tiene disponible: es de un círculo al que no ha llegado. */
   locked: boolean
   signals: GraphSignals

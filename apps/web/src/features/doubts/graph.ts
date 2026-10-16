@@ -124,16 +124,35 @@ export function seriesIn(graph: HolyGraph): { series: string; circle: number; to
  * Cuenta por horas, no por número de proyectos: aprobar el de 120 horas avanza
  * más que aprobar un módulo de 6. Los que no tienen horas cuentan como la media
  * de los que sí.
+ *
+ * Los de un grupo de «elige uno» (`choice`: so_long, FdF o fract-ol) son un solo
+ * hueco, del tamaño medio del grupo, y está hecho si se aprobó cualquiera: si no,
+ * nadie llegaría nunca al 100 %.
  */
 export function completion(projects: readonly GraphProject[]): number {
   const known = projects.flatMap((project) => (project.hours === null ? [] : [project.hours]))
   const average =
     known.length === 0 ? 1 : known.reduce((sum, hours) => sum + hours, 0) / known.length
   const weight = (project: GraphProject): number => project.hours ?? average
-  const total = projects.reduce((sum, project) => sum + weight(project), 0)
-  const done = projects
-    .filter((project) => project.status === 'finished')
-    .reduce((sum, project) => sum + weight(project), 0)
+  // Cada hueco: un proyecto suelto, o un grupo entero de «elige uno».
+  const slots = new Map<string, GraphProject[]>()
+
+  for (const project of projects) {
+    const key =
+      project.choice === null ? `project:${project.projectId}` : `choice:${project.choice}`
+
+    slots.set(key, [...(slots.get(key) ?? []), project])
+  }
+
+  let total = 0
+  let done = 0
+
+  for (const members of slots.values()) {
+    const size = members.reduce((sum, project) => sum + weight(project), 0) / members.length
+
+    total += size
+    if (members.some((project) => project.status === 'finished')) done += size
+  }
 
   return total === 0 ? 0 : done / total
 }

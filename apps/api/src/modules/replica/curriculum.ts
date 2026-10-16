@@ -18,10 +18,12 @@
  * Nadie puede apuntarse a un proyecto antes de tenerlo disponible, así que un
  * proyecto al que alguien se apuntó con dos rangos validados es, como mucho,
  * del círculo 2. Con cada persona que entra en la web se aprende un poco más
- * del plan, y de cada proyecto se guarda el círculo más bajo que se ha visto.
+ * del plan: cada cual vota un círculo para cada proyecto suyo, y gana el más
+ * bajo en el que coincide bastante gente (`curriculum.rules.ts`).
  *
- * Para no empezar de cero hay una tabla de partida (`SEED`): el plan clásico
- * entero y los cuatro primeros círculos del nuevo, comprobados con datos reales.
+ * Hay además una tabla de partida (`SEED`): el plan clásico entero y los cuatro
+ * primeros círculos del nuevo, comprobados con datos reales. Lo que está en ella
+ * manda sobre lo aprendido; lo aprendido solo pone los proyectos que no están.
  */
 
 import type { Db } from '../../core/db/database.js'
@@ -29,7 +31,8 @@ import { toNumber, toText } from '../../core/db/rows.js'
 import type { FortyTwoClient } from '../../integrations/forty-two/client.js'
 import { hourlyQuota } from './quota.js'
 import type { QuotaGate } from './quota.js'
-import { COMMON_CORE } from './common-core.js'
+import { CHOICES, COMMON_CORE } from './common-core.js'
+import { learnedCircle } from './curriculum.rules.js'
 
 export type Track = 'classic' | 'next'
 
@@ -102,7 +105,15 @@ const SEED: Record<Track, readonly (readonly string[])[]> = {
   next: [
     ['42cursus-libft'],
     ['42cursus-ft_printf', '42cursus-get_next_line', '42next-push_swap'],
-    ['42next-born2beroot', 'a-maze-ing', ...pythonModules, '42next-exam-rank-02'],
+    [
+      '42next-born2beroot',
+      'a-maze-ing',
+      ...pythonModules,
+      // Las segundas oportunidades de dos módulos: van con el resto.
+      'python-module-05-bis',
+      'python-module-06-bis',
+      '42next-exam-rank-02',
+    ],
     ['codexion', 'fly-in', 'call-me-maybe', '42next-exam-rank-03'],
     ['42next-exam-rank-04'],
     ['42next-exam-rank-05'],
@@ -221,16 +232,21 @@ export function createCurriculum(options: CurriculumOptions) {
               VALUES (?, ?, ?, ?, ?)`,
         args: [login, track, rank, JSON.stringify(dates), new Date(now()).toISOString()],
       },
+      // Lo que votaba antes esta persona (si cambió de plan, en el otro) se rehace.
+      { sql: 'DELETE FROM curriculum_votes WHERE login = ?', args: [login] },
       ...projects.rows.map((row) => {
         const created = toText(row.created_at_42)
 
         return {
-          // De cada proyecto se queda el círculo más bajo que se haya visto:
-          // quien repite o hace uno de más se apunta tarde, nunca pronto.
-          sql: `INSERT INTO curriculum (track, project_id, circle) VALUES (?, ?, ?)
-                ON CONFLICT (track, project_id) DO UPDATE SET
-                  circle = MIN(curriculum.circle, excluded.circle)`,
-          args: [track, toNumber(row.project_id), dates.filter((date) => date <= created).length],
+          // Su voto: cuántos rangos tenía cuando se apuntó.
+          sql: `INSERT OR REPLACE INTO curriculum_votes (track, project_id, login, circle)
+                VALUES (?, ?, ?, ?)`,
+          args: [
+            track,
+            toNumber(row.project_id),
+            login,
+            dates.filter((date) => date <= created).length,
+          ],
         }
       }),
     ])
@@ -240,6 +256,26 @@ export function createCurriculum(options: CurriculumOptions) {
 
   return {
     learn,
+
+    /** De cada proyecto que va en un grupo de «elige uno», el grupo (`CHOICES`). */
+    async choices(): Promise<Map<number, string>> {
+      const bySlug = new Map(
+        Object.entries(CHOICES).flatMap(([group, slugs]) => slugs.map((slug) => [slug, group])),
+      )
+      const slugs = [...bySlug.keys()]
+      const known = await db.execute({
+        sql: `SELECT id, slug FROM projects WHERE slug IN (${slugs.map(() => '?').join(', ')})`,
+        args: slugs,
+      })
+
+      return new Map(
+        known.rows.flatMap((row) => {
+          const group = bySlug.get(toText(row.slug))
+
+          return group === undefined ? [] : [[toNumber(row.id), group] as const]
+        }),
+      )
+    },
 
     /**
      * Deja al día las horas estimadas de los proyectos de un campus.
@@ -390,17 +426,11 @@ export function createCurriculum(options: CurriculumOptions) {
     },
 
     /**
-     * El círculo de cada proyecto de un plan: lo de partida más lo aprendido,
-     * quedándose con el más bajo. Solo hasta el final del common core.
+     * El círculo de cada proyecto de un plan: lo de partida y, para lo que no
+     * está ahí, lo aprendido por votos. Solo hasta el final del common core.
      */
     async circles(track: Track): Promise<Map<number, number>> {
       const circles = new Map<number, number>()
-      const lower = (projectId: number, circle: number): void => {
-        if (circle <= LAST_CIRCLE) {
-          circles.set(projectId, Math.min(circles.get(projectId) ?? circle, circle))
-        }
-      }
-
       const seed = SEED[track]
       const slugs = seed.flat()
       const known = await db.execute({
@@ -413,17 +443,32 @@ export function createCurriculum(options: CurriculumOptions) {
         for (const slug of entries) {
           const projectId = idOf.get(slug)
 
-          if (projectId !== undefined) lower(projectId, circle)
+          // Un slug que saliera en dos círculos se queda en el primero.
+          if (projectId !== undefined && !circles.has(projectId)) circles.set(projectId, circle)
         }
       }
 
-      const learned = await db.execute({
-        sql: 'SELECT project_id, circle FROM curriculum WHERE track = ?',
+      const tally = await db.execute({
+        sql: `SELECT project_id, circle, COUNT(*) AS votes FROM curriculum_votes
+              WHERE track = ? GROUP BY project_id, circle`,
         args: [track],
       })
+      const votes = new Map<number, Map<number, number>>()
 
-      for (const row of learned.rows) {
-        lower(toNumber(row.project_id), toNumber(row.circle))
+      for (const row of tally.rows) {
+        const projectId = toNumber(row.project_id)
+        const byCircle = votes.get(projectId) ?? new Map<number, number>()
+
+        byCircle.set(toNumber(row.circle), toNumber(row.votes))
+        votes.set(projectId, byCircle)
+      }
+
+      for (const [projectId, byCircle] of votes) {
+        const circle = learnedCircle(byCircle)
+
+        if (!circles.has(projectId) && circle !== null && circle <= LAST_CIRCLE) {
+          circles.set(projectId, circle)
+        }
       }
 
       return circles

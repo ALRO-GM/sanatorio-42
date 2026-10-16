@@ -94,6 +94,8 @@ const CORE_NAMES: [name: string, short: string, id?: number | undefined, hours?:
 
       return [`Python Module ${n}`, `Py ${n}`, undefined, 6 + (index % 4) * 3]
     }),
+    // La segunda oportunidad del módulo 05: con uno de los dos basta.
+    ['Python Module 05 bis', 'Py 05 bis', undefined, 9],
   ],
   [
     ['Call Me Maybe', 'CallMe', undefined, 80],
