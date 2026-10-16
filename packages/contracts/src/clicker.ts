@@ -199,12 +199,14 @@ export type ClickerRank = {
   /** Nivel dentro del juego: sale de `total`. */
   level: number
   total: number
+  /** Patrimonio: el código sin gastar más lo que costaron sus edificios. Ordena la clasificación. */
+  wealth: number
   perSecond: number
   achievements: number
   prestige: number
 }
 
-/** `GET /clicker/board`: quién ha escrito más código. */
+/** `GET /clicker/board`: quién tiene más patrimonio ahora mismo. */
 export type ClickerBoard = {
   entries: ClickerRank[]
   /** Tu fila, estés o no entre las primeras; `null` si aún no has guardado. */

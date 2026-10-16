@@ -217,10 +217,24 @@ export const clickerMock: Pick<
 
     const level = (total: number): number => Math.floor(3 * Math.log10(1 + total))
     const rows = [
-      { login: 'jdoe', total: 4.2e9, perSecond: 91_000, achievements: 41, prestige: 0 },
-      { login: ME.login, total: best, perSecond: 0, achievements: 0, prestige: 0 },
-      { login: 'rsoto', total: 1800, perSecond: 6, achievements: 9, prestige: 0 },
-    ].sort((a, b) => b.total - a.total)
+      {
+        login: 'jdoe',
+        total: 4.2e9,
+        wealth: 6e8,
+        perSecond: 91_000,
+        achievements: 41,
+        prestige: 0,
+      },
+      {
+        login: ME.login,
+        total: best,
+        wealth: best / 2,
+        perSecond: 0,
+        achievements: 0,
+        prestige: 0,
+      },
+      { login: 'rsoto', total: 1800, wealth: 900, perSecond: 6, achievements: 9, prestige: 0 },
+    ].sort((a, b) => b.wealth - a.wealth)
     const entries = rows.map((row, index) => ({
       ...row,
       rank: index + 1,

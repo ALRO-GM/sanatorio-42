@@ -119,6 +119,9 @@ const es: Texts = {
     rank: 'Puesto',
     level: 'Nivel',
     noBoard: 'Todavía no hay nadie. Sé la primera persona.',
+    wealth: 'Patrimonio',
+    boardHint:
+      'Por patrimonio: el código sin gastar más lo que costaron los edificios, según el último guardado.',
     saved: 'Partida guardada',
     back: 'Salir del juego',
     tagBuilding: 'Edificio',
@@ -668,6 +671,8 @@ const en: Texts = {
     rank: 'Rank',
     level: 'Level',
     noBoard: 'Nobody here yet. Be the first.',
+    wealth: 'Net worth',
+    boardHint: 'By net worth: unspent code plus what the buildings cost, as of the last save.',
     saved: 'Game saved',
     back: 'Leave the game',
     tagBuilding: 'Building',

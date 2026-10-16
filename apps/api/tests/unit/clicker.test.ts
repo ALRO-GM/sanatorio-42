@@ -96,7 +96,7 @@ describe('code clicker', () => {
     clock.advance(HOUR)
     await clicker.save(actor('eva'), {
       ...SAVE,
-      save: game({ total: 2e6 }),
+      save: game({ code: 1000, total: 2e6 }),
       total: 2e6,
       perSecond: 900,
       prestige: 1,
@@ -111,6 +111,19 @@ describe('code clicker', () => {
       { rank: 2, login: 'ana', total: 1500, level: 9, achievements: 6 },
     ])
     expect(board.me).toMatchObject({ rank: 2, login: 'ana' })
+
+    // Manda el patrimonio de ahora (código más lo que costaron los edificios), no lo escrito.
+    await clicker.save(actor('ana'), {
+      ...SAVE,
+      rev: 1,
+      save: game({ code: 1400, owned: { cursor: 2 } }),
+    })
+    const cursors = (BASE_PRICE.cursor ?? 0) * (1 + GROWTH)
+
+    expect((await clicker.board(actor('ana'))).entries).toMatchObject([
+      { rank: 1, login: 'ana', total: 1500, wealth: 1400 + cursors },
+      { rank: 2, login: 'eva', total: 2e6, wealth: 1000 },
+    ])
 
     // El total de la clasificación no baja aunque se empiece una partida nueva.
     await clicker.save(actor('eva'), {

@@ -1168,26 +1168,29 @@ export function CodeClicker({
               ) : board.entries.length === 0 ? (
                 <p className="cc-hint">{ui('noBoard')}</p>
               ) : (
-                <ol>
-                  {[
-                    ...board.entries,
-                    ...(board.me !== null && !board.entries.some((row) => row.login === me)
-                      ? [board.me]
-                      : []),
-                  ].map((row) => (
-                    <li key={row.login} className={row.login === me ? 'me' : ''}>
-                      <b>{row.rank}</b>
-                      <Avatar login={row.login} image={row.image} size={28} />
-                      <span>
-                        <strong>{row.login}</strong>
-                        <small>
-                          {ui('level')} {row.level} · {number(row.total, 1)} · {row.achievements}{' '}
-                          <Tile icon="trophy" size={14} />
-                        </small>
-                      </span>
-                    </li>
-                  ))}
-                </ol>
+                <>
+                  <p className="cc-hint">{ui('boardHint')}</p>
+                  <ol>
+                    {[
+                      ...board.entries,
+                      ...(board.me !== null && !board.entries.some((row) => row.login === me)
+                        ? [board.me]
+                        : []),
+                    ].map((row) => (
+                      <li key={row.login} className={row.login === me ? 'me' : ''}>
+                        <b>{row.rank}</b>
+                        <Avatar login={row.login} image={row.image} size={28} />
+                        <span>
+                          <strong>{row.login}</strong>
+                          <small>
+                            {ui('wealth')} {number(row.wealth, 1)} · {ui('level')} {row.level} ·{' '}
+                            {row.achievements} <Tile icon="trophy" size={14} />
+                          </small>
+                        </span>
+                      </li>
+                    ))}
+                  </ol>
+                </>
               )}
             </div>
           )}

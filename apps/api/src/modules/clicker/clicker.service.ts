@@ -43,6 +43,7 @@ import {
   readSave,
   giftShare,
   seizedValue,
+  wealthOf,
   verdict,
 } from './cheat.rules.js'
 
@@ -900,7 +901,8 @@ export function createClickerService(options: ClickerServiceOptions) {
     },
 
     /**
-     * La clasificación: quién ha escrito más código, de cualquier campus.
+     * La clasificación: quién tiene más patrimonio ahora (`wealthOf`), de
+     * cualquier campus. Se calcula al pedirla, de la partida guardada.
      *
      * @throws {DomainError} `forbidden` si no eligió la roja.
      */
@@ -910,17 +912,24 @@ export function createClickerService(options: ClickerServiceOptions) {
       }
 
       const result = await db.execute(
-        `SELECT login, total, per_second, achievements, prestige FROM clicker
-         WHERE pill = 'red' AND save IS NOT NULL ORDER BY total DESC, login`,
+        `SELECT login, save, total, per_second, achievements, prestige FROM clicker
+         WHERE pill = 'red' AND save IS NOT NULL`,
       )
+      const rows = result.rows
+        .map((entry) => ({ entry, wealth: wealthOf(readSave(toText(entry.save))) }))
+        .sort(
+          (a, b) =>
+            b.wealth - a.wealth || toText(a.entry.login).localeCompare(toText(b.entry.login)),
+        )
       const images = await replica.imagesOf(
-        result.rows.slice(0, BOARD_SIZE).map((entry) => toText(entry.login)),
+        rows.slice(0, BOARD_SIZE).map(({ entry }) => toText(entry.login)),
       )
-      const ranks = result.rows.map((entry, index): ClickerRank => {
+      const ranks = rows.map(({ entry, wealth }, index): ClickerRank => {
         const login = toText(entry.login)
         const total = Number(entry.total)
 
         return {
+          wealth,
           rank: index + 1,
           login,
           image: images.get(login) ?? null,

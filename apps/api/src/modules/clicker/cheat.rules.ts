@@ -259,6 +259,17 @@ export function seizedValue(ledger: Ledger | null): number {
   return ledger === null || !Number.isFinite(ledger.holdings) ? 0 : ledger.holdings * SALE_REFUND
 }
 
+/**
+ * El patrimonio de una partida: el código sin gastar más lo que costaron sus
+ * edificios. Una partida ilegible, o con edificios imposibles, cuenta solo el
+ * código (o nada).
+ */
+export function wealthOf(ledger: Ledger | null): number {
+  if (ledger === null) return 0
+
+  return Number.isFinite(ledger.holdings) ? ledger.code + ledger.holdings : ledger.code
+}
+
 /** Lo que le toca a cada persona limpia del reparto: a partes iguales. */
 export function giftShare(amount: number, people: number): number {
   return people > 0 && Number.isFinite(amount) && amount > 0 ? amount / people : 0
