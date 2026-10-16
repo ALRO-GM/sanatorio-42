@@ -152,6 +152,8 @@ export const ca: Record<string, string> = {
   'therapy.join': 'Uneix-me al grup',
   'therapy.leave': 'Surt del grup',
   'therapy.close': 'Tanca el grup',
+  'therapy.remove': 'Retira (moderació)',
+  'therapy.removeAsk': 'Vols retirar el grup de {creator}? Es tanca i s’avisa qui hi era.',
   'therapy.copy': 'Copia els logins',
   'therapy.copied': 'Copiats!',
   'therapy.inSession': 'En sessió ara',
@@ -239,6 +241,9 @@ export const ca: Record<string, string> = {
   'cal.leave': "Desapunta-me'n",
   'cal.full': 'Completa',
   'cal.cancel': 'Cancel·la la pissarra',
+  'cal.remove': 'Retira (moderació)',
+  'cal.removeAsk':
+    'Vols retirar la pissarra de {host}? Es cancel·la i s’avisa qui s’hi havia apuntat.',
   'cal.past': 'Ja ha passat',
   'cal.empty': 'Aquest mes no hi ha pissarres.',
   'cal.yours': '+ La teva pissarra pot ser aquí',

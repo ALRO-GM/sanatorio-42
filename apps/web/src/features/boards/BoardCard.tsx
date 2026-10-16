@@ -107,6 +107,20 @@ export function BoardCard({ board, featured, onChange }: BoardCardProps) {
             {full ? t('cal.full') : t('cal.join')}
           </button>
         )}
+        {/* Quien modera puede retirar la de otra persona, pero no cambiarla. */}
+        {!past && !board.mine && board.canCancel && (
+          <button
+            className="link"
+            disabled={busy}
+            onClick={() => {
+              if (window.confirm(t('cal.removeAsk', { host: board.host }))) {
+                void act(() => api.cancelBoard(board.id))
+              }
+            }}
+          >
+            {t('cal.remove')}
+          </button>
+        )}
       </div>
       {!board.mine && (
         <ReportButton target={`board:${board.id}`} summary={`${board.host}: ${board.title}`} />

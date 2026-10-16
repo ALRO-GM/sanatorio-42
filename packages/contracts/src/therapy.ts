@@ -25,8 +25,10 @@ export type GroupView = {
   kind: GroupKind
   /** `true` si quien pregunta está dentro. */
   joined: boolean
-  /** `true` si es quien lo abrió (o modera) y puede cerrarlo. */
+  /** `true` si es quien lo abrió: solo esa persona lo cambia. */
   mine: boolean
+  /** `true` si puede cerrarlo: quien lo abrió, o quien modera (para retirarlo). */
+  canClose: boolean
   /** `true` si ahora mismo es día y hora de quedada. */
   inSession: boolean
 }

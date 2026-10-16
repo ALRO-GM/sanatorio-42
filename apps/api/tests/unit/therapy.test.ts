@@ -296,10 +296,16 @@ describe('comunidad', () => {
       })
       // La gente apuntada sigue apuntada.
       expect(updated.members.map((member) => member.login)).toEqual(['ana', 'leo'])
-      // Quien modera también puede.
-      await expect(
+      // Ni quien modera: solo quien lo abrió. Eso sí, puede cerrarlo.
+      await expectCode(
         therapy.update(actor('moderadora', { admin: true }), group.id, martesYJueves),
-      ).resolves.toMatchObject({ place: 'Cluster 1 · Planta 2' })
+        'forbidden',
+      )
+      expect(
+        (await therapy.list(actor('moderadora', { admin: true }))).find(
+          (one) => one.id === group.id,
+        ),
+      ).toMatchObject({ mine: false, canClose: true, joined: false })
     })
 
     it('al cambiarlo no caben menos plazas que gente, ni días nuevos en el pasado', async () => {

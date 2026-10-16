@@ -15,8 +15,10 @@ export type BoardView = {
   attendees: number
   /** `true` si quien pregunta tiene plaza. */
   joined: boolean
-  /** `true` si la imparte quien pregunta (o modera) y puede cancelarla. */
+  /** `true` si la imparte quien pregunta: solo esa persona la cambia. */
   mine: boolean
+  /** `true` si puede cancelarla: quien la imparte, o quien modera (para retirarla). */
+  canCancel: boolean
 }
 
 /** Cuerpo de `POST /boards`. */

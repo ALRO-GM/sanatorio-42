@@ -235,6 +235,20 @@ export function GroupCard({ group, projects, onChange, me }: GroupCardProps) {
             </button>
           </>
         )}
+        {/* Quien modera puede retirar el de otra persona, pero no cambiarlo. */}
+        {!group.mine && group.canClose && (
+          <button
+            className="link"
+            disabled={busy}
+            onClick={() => {
+              if (window.confirm(t('therapy.removeAsk', { creator: group.creator }))) {
+                void act(() => api.closeGroup(group.id))
+              }
+            }}
+          >
+            {t('therapy.remove')}
+          </button>
+        )}
       </div>
       <ErrorNote error={error} />
     </article>

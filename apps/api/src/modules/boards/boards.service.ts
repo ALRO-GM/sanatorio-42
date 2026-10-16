@@ -69,7 +69,8 @@ export function createBoardsService(options: BoardsServiceOptions) {
         hostImage: images.get(board.host) ?? null,
         attendees: attendees.length,
         joined: attendees.includes(actor.login),
-        mine: board.host === actor.login || actor.admin,
+        mine: board.host === actor.login,
+        canCancel: board.host === actor.login || actor.admin,
       }
     })
   }
@@ -180,7 +181,8 @@ export function createBoardsService(options: BoardsServiceOptions) {
     async update(actor: Actor, boardId: number, input: unknown): Promise<BoardView> {
       const current = await mustGet(boardId, actor)
 
-      if (current.host !== actor.login && !actor.admin) {
+      // Ni quien modera: si hay que quitarla, la cancela.
+      if (current.host !== actor.login) {
         throw domainError('forbidden', 'Solo quien imparte la pizarra puede cambiarla')
       }
       if (Date.parse(current.endsAt) <= now()) {

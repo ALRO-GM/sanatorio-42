@@ -209,7 +209,8 @@ export function createTherapyService(options: TherapyServiceOptions) {
           progress: given[login] ?? null,
         })),
         joined: members.includes(actor.login),
-        mine: group.creator === actor.login || actor.admin,
+        mine: group.creator === actor.login,
+        canClose: group.creator === actor.login || actor.admin,
         inSession: (await inSession(group)).active,
       })
     }
@@ -310,7 +311,7 @@ export function createTherapyService(options: TherapyServiceOptions) {
 
     /**
      * Cambia un grupo: sitio, días, horario, plazas, nota o puestos. Solo quien
-     * lo abrió, o quien modera.
+     * lo abrió (quien modera, si hay que quitarlo, lo cierra).
      *
      * Los días que el grupo ya tenía se pueden conservar aunque hayan pasado;
      * los que se añadan tienen que ser de hoy en adelante. Las plazas no pueden
@@ -319,7 +320,7 @@ export function createTherapyService(options: TherapyServiceOptions) {
     async update(actor: Actor, groupId: number, input: unknown): Promise<GroupView> {
       const current = await mustGet(groupId, actor)
 
-      if (current.creator !== actor.login && !actor.admin) {
+      if (current.creator !== actor.login) {
         throw domainError('forbidden', 'Solo quien abrió el grupo puede cambiarlo')
       }
       if (current.closed) {

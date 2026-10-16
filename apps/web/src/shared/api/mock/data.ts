@@ -159,7 +159,10 @@ export const CLUSTER_SIZES: Record<string, [rows: number, seats: number]> = {
   c5: [3, 6],
 }
 
-export type StoredGroup = Omit<GroupView, 'members' | 'joined' | 'mine' | 'inSession'> & {
+export type StoredGroup = Omit<
+  GroupView,
+  'members' | 'joined' | 'mine' | 'canClose' | 'inSession'
+> & {
   members: string[]
   /** Cómo llevaba el proyecto cada persona al apuntarse. */
   progress: Record<string, number>
@@ -198,7 +201,7 @@ export type StoredChange = {
   flaggedBy: string[]
 }
 
-export type StoredBoard = Omit<BoardView, 'attendees' | 'joined' | 'mine'> & {
+export type StoredBoard = Omit<BoardView, 'attendees' | 'joined' | 'mine' | 'canCancel'> & {
   attendees: string[]
 }
 

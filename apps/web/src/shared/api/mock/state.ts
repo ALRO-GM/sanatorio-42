@@ -114,6 +114,8 @@ export function groupView(group: StoredGroup): GroupView {
     })),
     joined: group.members.includes(ME.login),
     mine: group.creator === ME.login,
+    // En el simulado se administra: se puede retirar cualquiera.
+    canClose: true,
     // Reunido si hoy es uno de sus días (aquí no se mira la hora).
     inSession: group.dates.includes(today()),
   }
@@ -140,6 +142,8 @@ export function boardView(board: StoredBoard): BoardView {
     attendees: board.attendees.length,
     joined: board.attendees.includes(ME.login),
     mine: board.host === ME.login,
+    // En el simulado se administra: se puede retirar cualquiera.
+    canCancel: true,
   }
 }
 

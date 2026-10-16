@@ -674,6 +674,23 @@ describe('comunidad', () => {
       })
     })
 
+    it('solo la cambia quien la imparte; quien modera puede apuntarse o retirarla', async () => {
+      const { boards } = services
+      const board = await boards.create(actor('eva'), malloc())
+      const boss = actor('mod', { admin: true })
+
+      await expectCode(boards.update(boss, board.id, malloc()), 'forbidden')
+      // Para quien modera es una pizarra más: se apunta como cualquiera.
+      expect(await boards.list(boss)).toMatchObject([
+        { id: board.id, mine: false, canCancel: true, joined: false },
+      ])
+      await boards.join(boss, board.id)
+      expect(await boards.list(boss)).toMatchObject([{ joined: true, attendees: 1 }])
+      expect(await boards.list(actor('eva'))).toMatchObject([{ mine: true, canCancel: true }])
+      expect(await boards.list(actor('ana'))).toMatchObject([{ mine: false, canCancel: false }])
+      await boards.leave(boss, board.id)
+    })
+
     it('solo la cancela quien la imparte', async () => {
       const { boards } = services
       const board = await boards.create(actor('eva'), malloc())

@@ -151,6 +151,8 @@ export const eu: Record<string, string> = {
   'therapy.join': 'Sartu taldean',
   'therapy.leave': 'Irten taldetik',
   'therapy.close': 'Itxi taldea',
+  'therapy.remove': 'Kendu (moderazioa)',
+  'therapy.removeAsk': '{creator}(r)en taldea kendu? Itxi egiten da eta kideei abisatzen zaie.',
   'therapy.copy': 'Kopiatu loginak',
   'therapy.copied': 'Kopiatuta!',
   'therapy.inSession': 'Saioan orain',
@@ -239,6 +241,9 @@ export const eu: Record<string, string> = {
   'cal.leave': 'Kendu izena',
   'cal.full': 'Beteta',
   'cal.cancel': 'Bertan behera utzi arbela',
+  'cal.remove': 'Kendu (moderazioa)',
+  'cal.removeAsk':
+    '{host}(r)en arbela kendu? Bertan behera geratzen da eta izena emandakoei abisatzen zaie.',
   'cal.past': 'Pasa da',
   'cal.empty': 'Hilabete honetan ez dago arbelik.',
   'cal.yours': '+ Zure arbela hemen egon daiteke',

@@ -161,6 +161,9 @@ export const es: Record<string, string> = {
   'therapy.join': 'Unirme al grupo',
   'therapy.leave': 'Salir del grupo',
   'therapy.close': 'Cerrar grupo',
+  'therapy.remove': 'Retirar (moderación)',
+  'therapy.removeAsk':
+    '¿Retirar el grupo de {creator}? Se cierra y se avisa a quien estaba dentro.',
   'therapy.copy': 'Copiar logins',
   'therapy.copied': '¡Copiados!',
   'therapy.inSession': 'En sesión ahora',
@@ -252,6 +255,8 @@ export const es: Record<string, string> = {
   'cal.leave': 'Desapuntarme',
   'cal.full': 'Completa',
   'cal.cancel': 'Cancelar pizarra',
+  'cal.remove': 'Retirar (moderación)',
+  'cal.removeAsk': '¿Retirar la pizarra de {host}? Se cancela y se avisa a quien estaba apuntado.',
   'cal.past': 'Ya pasó',
   'cal.empty': 'Este mes no hay pizarras.',
   'cal.yours': '+ Tu pizarra puede estar aquí',
