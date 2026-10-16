@@ -89,6 +89,12 @@ const capitalSchema = z.object({
   to: z.coerce.number().int().min(0).optional(),
 })
 const idSchema = z.coerce.number().int().min(1)
+const sanctionSchema = z.object({
+  login: z.string().regex(/^[a-z0-9-]{1,30}$/),
+  code: z.number().min(0),
+  wipe: z.boolean(),
+  note: z.string().trim().min(1).max(500),
+})
 const loginSchema = z.object({ login: z.string().regex(/^[a-z0-9-]{1,30}$/) })
 /**
  * Tras pillar a alguien, lo que tarda en poder contarle otra. La web vuelve a
@@ -799,6 +805,63 @@ export function createClickerService(options: ClickerServiceOptions) {
       })
 
       return { amount, pool: Number(taken.rows[0].amount) }
+    },
+
+    /**
+     * Una sanción a mano: le deja `code` líneas y, con `wipe`, sin edificios ni
+     * mejoras (ni lo que llevaba en marcha). Conserva logros, prestigio y la
+     * cuenta de la clasificación. Lo verá en el juego con el mensaje (`note`).
+     *
+     * La partida queda sin dueño (`holder`), así que la pestaña que la tuviera
+     * abierta tiene que cargarla en vez de guardar encima.
+     *
+     * @throws {DomainError} `forbidden` si no administra; `not_found` si no
+     *   tiene partida.
+     */
+    async sanction(actor: Actor, input: unknown): Promise<void> {
+      assertAdmin(actor)
+
+      const { login, code, wipe, note } = parse(sanctionSchema, input)
+      const found = await row(login)
+      let game: Record<string, unknown> | null = null
+
+      try {
+        const read: unknown = typeof found?.save === 'string' ? JSON.parse(found.save) : null
+
+        if (typeof read === 'object' && read !== null && !Array.isArray(read)) {
+          game = read as Record<string, unknown>
+        }
+      } catch {
+        game = null
+      }
+
+      if (game === null) throw domainError('not_found', 'Esa persona no tiene partida')
+
+      const total = Math.max(Number(game.total) || 0, code)
+      const next = wipe
+        ? { ...game, code, total, owned: {}, made: {}, bought: [], buffs: [], bugs: [] }
+        : { ...game, code, total }
+      const seizure: ClickerSeizure = {
+        by: 'admin',
+        amount: 0,
+        n: toNumber(found?.caught ?? 0),
+        shared: 0,
+        evidence: null,
+        note,
+      }
+
+      await db.execute({
+        sql: `UPDATE clicker SET save = ?, per_second = ?, updated_at = ?, holder = NULL,
+                rev = rev + 1, sale_due = 0, seizure = ?
+              WHERE login = ?`,
+        args: [
+          JSON.stringify(next),
+          wipe ? 0 : Number(found?.per_second ?? 0),
+          iso(),
+          JSON.stringify(seizure),
+          login,
+        ],
+      })
     },
 
     /** Ya ha visto el aviso de la policía del código. */

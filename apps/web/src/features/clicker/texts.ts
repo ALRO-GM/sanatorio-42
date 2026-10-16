@@ -173,6 +173,7 @@ const es: Texts = {
     bustSold: 'Vendido todo lo de la tienda por {n} líneas.',
     spectating: 'Viendo la partida de {login}: lo que toques aquí no se guarda en ningún sitio.',
     policeEyebrow: 'Policía del código',
+    policeNote: 'Mensaje de la policía del código',
     policeMoney:
       'Tus edificios se han vendido a la mitad de lo que costaron: {n} líneas vuelven a tu repositorio, y otras tantas se reparten entre las {people} personas que juegan limpio.',
     giftTitle: 'Reparto de la policía del código',
@@ -721,6 +722,7 @@ const en: Texts = {
     bustSold: 'Everything from the shop sold for {n} lines.',
     spectating: 'Watching {login}’s game: nothing you touch here is saved anywhere.',
     policeEyebrow: 'Code police',
+    policeNote: 'A message from the code police',
     policeMoney:
       'Your buildings were sold for half of what they cost: {n} lines go back to your repository, and the same amount is shared among the {people} people who play fair.',
     giftTitle: 'Code police payout',

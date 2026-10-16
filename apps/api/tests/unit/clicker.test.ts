@@ -825,6 +825,61 @@ describe('code clicker', () => {
       await expectCode(clicker.gameOf(boss, { login: 'nadie' }), 'not_found')
       await expectCode(clicker.gameOf(boss, { login: '../x' }), 'invalid_input')
     })
+
+    it('una sanción a mano deja el código, quita edificios y mejoras, y avisa en el juego', async () => {
+      const { clicker } = services
+      const boss = actor('eva', { admin: true })
+      const note = 'Eres el top trampas: la próxima, disimula un poco.'
+
+      await send({
+        code: 1000,
+        total: 1500,
+        owned: { cursor: 3 },
+        made: { cursor: 10 },
+        bought: ['a'],
+        achieved: ['x'],
+        prestige: 2,
+        buffs: [{ id: 'frenzy', until: 1 }],
+      })
+      expect(await clicker.state(ana)).toMatchObject({ caught: 0, rev })
+
+      await expectCode(
+        clicker.sanction(ana, { login: 'ana', code: 1e9, wipe: true, note }),
+        'forbidden',
+      )
+      await expectCode(
+        clicker.sanction(boss, { login: 'nadie', code: 1e9, wipe: true, note }),
+        'not_found',
+      )
+      await expectCode(
+        clicker.sanction(boss, { login: 'ana', code: -1, wipe: true, note }),
+        'invalid_input',
+      )
+
+      await clicker.sanction(boss, { login: 'ana', code: 1e9, wipe: true, note })
+
+      const after = await clicker.state(ana)
+      const saved = JSON.parse(after.save ?? '{}') as Record<string, unknown>
+
+      expect(saved).toMatchObject({
+        code: 1e9,
+        total: 1e9,
+        owned: {},
+        made: {},
+        bought: [],
+        buffs: [],
+        achieved: ['x'],
+        prestige: 2,
+      })
+      expect(after.rev).toBe(rev + 1)
+      expect(after.caught).toBe(0)
+      expect(after.saleDue).toBe(false)
+      expect(after.seizure).toMatchObject({ by: 'admin', note, amount: 0 })
+      // Sin dueño: la pestaña que la tenía abierta ya no guarda encima.
+      const holder = await db.execute("SELECT holder FROM clicker WHERE login = 'ana'")
+
+      expect(holder.rows[0]?.holder).toBeNull()
+    })
   })
 
   it('el nivel sube tres por cada cero del total', () => {

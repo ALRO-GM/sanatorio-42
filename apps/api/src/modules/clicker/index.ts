@@ -161,6 +161,16 @@ export function createClickerModule(deps: ClickerServiceOptions): ClickerModule 
         },
       )
 
+      /**
+       * `POST /admin/clicker/sanction` → `{ login, code, wipe, note }`: le deja ese
+       * código y, con `wipe`, sin edificios ni mejoras; lo verá en el juego. 204.
+       */
+      app.post('/admin/clicker/sanction', async (request, reply) => {
+        await service.sanction(await session.actor(request), request.body)
+
+        return reply.code(204).send()
+      })
+
       /** `GET /admin/clicker/game?login=` → la partida de alguien, para verla. Solo admins. */
       app.get<{ Querystring: Record<string, string> }>(
         '/admin/clicker/game',

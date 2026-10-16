@@ -130,6 +130,7 @@ export const clickerMock: Pick<
   | 'claimClickerPool'
   | 'ackClickerSeizure'
   | 'getClickerGameOf'
+  | 'sanctionClicker'
 > = {
   async getClicker() {
     await delay(100)
@@ -383,6 +384,21 @@ export const clickerMock: Pick<
       caught: login === 'rsoto' ? 2 : 0,
       perSecond: 340,
     }
+  },
+
+  async sanctionClicker({ code, wipe, note }) {
+    await delay(150)
+
+    const game = JSON.parse(state.save ?? '{}') as Record<string, unknown>
+    const total = Math.max(Number(game.total) || 0, code)
+
+    state.save = JSON.stringify(
+      wipe
+        ? { ...game, code, total, owned: {}, made: {}, bought: [], buffs: [], bugs: [] }
+        : { ...game, code, total },
+    )
+    state.rev += 1
+    state.seizure = { by: 'admin', amount: 0, n: state.caught, shared: 0, evidence: null, note }
   },
 
   async ackClickerSeizure() {

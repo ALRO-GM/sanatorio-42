@@ -10,6 +10,7 @@ import { CapitalChart } from '../clicker/CapitalChart'
 import { CapitalHistory } from '../clicker/CapitalHistory'
 import { duration } from './StatsPanel'
 import { RangePills } from './RangePills'
+import { SanctionForm } from './SanctionForm'
 
 // El juego entero solo se baja si se quiere ver la partida de alguien.
 const CodeClicker = lazy(() =>
@@ -128,6 +129,10 @@ export function ClickerPanel() {
                 {t('admin.clicker.watch')}
               </button>
             ))}
+
+          {one.pill === 'red' && watching !== one.login && (
+            <SanctionForm login={one.login} onDone={() => void reload()} />
+          )}
 
           {data.cheats.some((cheat) => cheat.login === one.login) && (
             <article className="card">

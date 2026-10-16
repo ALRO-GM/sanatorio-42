@@ -220,6 +220,12 @@ button.primary.small {
   font-size: 0.85rem;
   color: var(--text-2);
 }
+/* Las casillas, con su texto al lado. */
+.form label.duty-check {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.4rem;
+}
 
 input,
 select,

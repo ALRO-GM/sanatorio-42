@@ -23,20 +23,23 @@ export function Bust({ bust, lang, onClose }: { bust: Busted; lang: Lang; onClos
   const { seizure } = bust
   // Un aviso guardado antes de que llevara la cuenta usa la de la ventana.
   const [policeTitle, policeBody] = policeText(seizure?.n ?? bust.n, lang)
-  const title = seizure === null ? bustTitle : policeTitle
+  // Una sanción a mano trae su propio mensaje.
+  const note = seizure?.by === 'admin' ? (seizure.note ?? '') : null
+  const title = seizure === null ? bustTitle : note !== null ? (ui.policeNote ?? '') : policeTitle
   const evidence = seizure?.evidence ?? null
   // Lo que no cuadró, con las cifras (no cómo se ha visto).
   const text =
     seizure === null
       ? bustBody
-      : seizure.by === 'auto' || evidence === null
-        ? policeBody
-        : `${policeBody} ${ui.policeReview ?? ''} ${fill(ui.policeJump ?? '', {
-            from: short(evidence.from, lang),
-            to: short(evidence.to, lang),
-            seconds: evidence.seconds,
-            rate: short(evidence.perSecond, lang),
-          })}${evidence.golden ? '' : `, ${ui.policeNoGolden ?? ''}`}.`
+      : (note ??
+        (seizure.by === 'auto' || evidence === null
+          ? policeBody
+          : `${policeBody} ${ui.policeReview ?? ''} ${fill(ui.policeJump ?? '', {
+              from: short(evidence.from, lang),
+              to: short(evidence.to, lang),
+              seconds: evidence.seconds,
+              rate: short(evidence.perSecond, lang),
+            })}${evidence.golden ? '' : `, ${ui.policeNoGolden ?? ''}`}.`))
 
   useEffect(() => {
     if (dialog.current?.open === false) dialog.current.showModal()
@@ -50,7 +53,7 @@ export function Bust({ bust, lang, onClose }: { bust: Busted; lang: Lang; onClos
       <span className="eyebrow">{seizure === null ? ui.bustEyebrow : ui.policeEyebrow}</span>
       <h3>{title}</h3>
       <p>{text}</p>
-      {seizure !== null && (
+      {seizure !== null && note === null && (
         <p className="cc-bust-sold">
           {fill(ui.policeMoney ?? '', {
             // Lo cobrado de verdad al vender, si se acaba de vender; si no, la cuenta de la API.

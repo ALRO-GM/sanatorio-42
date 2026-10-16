@@ -57,8 +57,11 @@ export type ClickerEvidence = {
  * la misma cantidad se reparte entre quienes juegan limpio.
  */
 export type ClickerSeizure = {
-  /** `review`: lo decidió quien administra; `auto`: lo vio la API al guardar. */
-  by: 'review' | 'auto'
+  /**
+   * `review`: lo decidió quien administra; `auto`: lo vio la API al guardar;
+   * `admin`: una sanción a mano, con su propio mensaje (`note`).
+   */
+  by: 'review' | 'auto' | 'admin'
   /** Lo que se le devuelve (la mitad de lo que costaron), y lo mismo que se reparte. */
   amount: number
   /** Veces que le han pillado, contando esta: elige el mensaje. */
@@ -67,6 +70,19 @@ export type ClickerSeizure = {
   shared: number
   /** Los datos que no cuadraron, si los hay. */
   evidence: ClickerEvidence | null
+  /** Lo que le dice quien administra, en una sanción a mano. */
+  note?: string
+}
+
+/** Una sanción a mano de quien administra (`POST /admin/clicker/sanction`). */
+export type ClickerSanction = {
+  login: string
+  /** El código que le queda. */
+  code: number
+  /** Si se le quitan todos los edificios y las mejoras. */
+  wipe: boolean
+  /** Lo que verá en el juego, con el aviso de la policía del código. */
+  note: string
 }
 
 /** Una revisión pendiente de contestar: no se puede seguir sin defenderse. */

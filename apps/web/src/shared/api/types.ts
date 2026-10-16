@@ -25,6 +25,7 @@ import type {
   ClickerBoard,
   ClickerCapital,
   ClickerGameView,
+  ClickerSanction,
   ClickerPoolClaim,
   ClickerReview,
   ClickerSaved,
@@ -302,6 +303,8 @@ export type Api = {
   claimClickerPool: () => Promise<ClickerPoolClaim>
   /** La partida de alguien, para verla. Solo admins. */
   getClickerGameOf: (login: string) => Promise<ClickerGameView>
+  /** Sanción a mano: le deja ese código y, si se pide, sin edificios ni mejoras. */
+  sanctionClicker: (sanction: ClickerSanction) => Promise<void>
   /** Ya has visto el aviso de la policía del código. */
   ackClickerSeizure: () => Promise<void>
   /** Los comunicados que tienes por leer, el más antiguo primero. */
