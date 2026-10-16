@@ -9,6 +9,7 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 
 import { BASE_PRICE, GROWTH, SALE_REFUND } from '../../src/modules/clicker/cheat.rules.js'
+import { toText } from '../../src/core/db/rows.js'
 import { clickerLevel } from '../../src/modules/clicker/index.js'
 import { actor, expectCode, HOUR, MINUTE, useCommunity } from '../helpers/community.js'
 import type { Community } from '../helpers/community.js'
@@ -573,6 +574,52 @@ describe('code clicker', () => {
 
       return alert?.id ?? 0
     }
+
+    it('un reparto cobrado no es un salto: solo avisa lo que sube por encima del premio', async () => {
+      const { clicker } = services
+      const boss = actor('eva', { admin: true })
+      const second = (): number => Math.floor(clock.now() / 1000)
+      const prize = 5e9
+      /** Medio minuto quieto en 2 millones y después, de golpe, `then`. */
+      const series = (then: number): [number, number][] =>
+        Array.from({ length: 60 }, (_, index): [number, number] => [
+          second() - 59 + index,
+          index < 30 ? 2e6 : then,
+        ])
+
+      for (const [total, extra, alerts] of [
+        // El premio y lo normal de esos segundos: nada que avisar.
+        [2400, 5e5, 0],
+        // El premio y, encima, seis veces lo que había: eso sí.
+        [2600, 1e7, 1],
+      ] as const) {
+        // Lejos del reparto anterior, para que solo cuente el de esta vuelta.
+        clock.advance(5 * MINUTE)
+        await db.execute({
+          sql: "UPDATE clicker SET pending_gift = ? WHERE login = 'ana'",
+          args: [prize],
+        })
+        await send({ total })
+        clock.advance(30_000)
+        await send({ total: total + 100 }, { capital: series(2e6 + prize + extra) })
+        expect((await clicker.usage(boss, {})).alerts).toHaveLength(alerts)
+      }
+
+      // Se acuerda de los repartos de la última hora, no de más.
+      const stored = await db.execute("SELECT gifts FROM clicker WHERE login = 'ana'")
+
+      expect(JSON.parse(toText(stored.rows[0]?.gifts))).toHaveLength(2)
+      clock.advance(2 * HOUR)
+      await db.execute("UPDATE clicker SET pending_gift = 1 WHERE login = 'ana'")
+      await send({ total: 3000 })
+      expect(
+        JSON.parse(
+          toText(
+            (await db.execute("SELECT gifts FROM clicker WHERE login = 'ana'")).rows[0]?.gifts,
+          ),
+        ),
+      ).toEqual([[second(), 1]])
+    })
 
     it('revisión: «no es trampa» lo cierra sin más, y solo lo decide quien administra', async () => {
       const { clicker } = services

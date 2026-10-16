@@ -33,7 +33,16 @@ import { toNumber, toText } from '../../core/db/rows.js'
 import { domainError } from '../../core/errors.js'
 import { parse } from '../../core/validation.js'
 import type { ReplicaRepository } from '../replica/index.js'
-import { clean, coarse, FINE_FOR_S, HOURLY_FOR_S, jump, thin } from './capital.rules.js'
+import {
+  clean,
+  coarse,
+  FINE_FOR_S,
+  HOURLY_FOR_S,
+  jump,
+  readGifts,
+  rememberGifts,
+  thin,
+} from './capital.rules.js'
 import { CLICK_HISTORY_S, overClicked } from './clicks.rules.js'
 import type { ClickSample } from './clicks.rules.js'
 import {
@@ -451,6 +460,16 @@ export function createClickerService(options: ClickerServiceOptions) {
 
       if (saved === undefined) stale()
 
+      // Lo que acaba de cobrar del reparto, apuntado para no tomarlo por un salto.
+      const gifts = rememberGifts(readGifts(found?.gifts), second, Number(saved?.gift ?? 0))
+
+      if (JSON.stringify(gifts) !== toText(found?.gifts ?? '[]')) {
+        await db.execute({
+          sql: 'UPDATE clicker SET gifts = ? WHERE login = ?',
+          args: [JSON.stringify(gifts), actor.login],
+        })
+      }
+
       // El contador de este guardado, con la hora de aquí, para los tramos largos.
       await db.batch(
         [
@@ -471,7 +490,8 @@ export function createClickerService(options: ClickerServiceOptions) {
       const samples = clean(sent.capital, now())
 
       if (samples.length > 0) {
-        const leap = jump(samples)
+        // Los repartos de antes de este guardado: el de ahora aún no está en la web.
+        const leap = jump(samples, readGifts(found?.gifts))
         const before = typeof found?.save === 'string' ? readSave(found.save) : null
 
         await db.batch(

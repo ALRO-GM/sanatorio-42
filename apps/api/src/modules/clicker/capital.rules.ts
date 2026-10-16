@@ -11,6 +11,8 @@
 
 /** Un punto del historial: el segundo (desde 1970) y el capital que había. */
 export type Sample = [at: number, capital: number]
+/** Un reparto cobrado: el segundo (de la API) en que llegó y las líneas que traía. */
+export type Gift = [at: number, amount: number]
 
 /** Lo más atrás y lo más adelante que puede caer un punto respecto a ahora, en segundos. */
 const PAST_S = 3600
@@ -22,6 +24,38 @@ export const JUMP_FACTOR = 3
 export const JUMP_FLOOR = 1e6
 /** Segundos de antes y de después del salto que se guardan con el aviso. */
 const TRACE_S = 30
+/**
+ * Margen alrededor de un salto para contar un reparto: la web lo suma al
+ * recibir la respuesta del guardado, y su reloj no es el de la API.
+ */
+const GIFT_SLACK_S = AHEAD_S
+/** Lo que se recuerdan los repartos cobrados: lo mismo que el historial que llega. */
+export const GIFT_MEMORY_S = PAST_S
+
+/** Los repartos de la última hora, con el de ahora si lo hay. */
+export function rememberGifts(gifts: readonly Gift[], second: number, amount: number): Gift[] {
+  const kept = gifts.filter(([at]) => at >= second - GIFT_MEMORY_S)
+
+  return amount > 0 ? [...kept, [second, amount]] : kept
+}
+
+/** Lee la lista guardada; lo que no sea una lista de pares de números, fuera. */
+export function readGifts(stored: unknown): Gift[] {
+  try {
+    const read: unknown = typeof stored === 'string' ? JSON.parse(stored) : []
+
+    return Array.isArray(read)
+      ? read.filter(
+          (gift): gift is Gift =>
+            Array.isArray(gift) &&
+            gift.length === 2 &&
+            gift.every((value) => typeof value === 'number' && Number.isFinite(value)),
+        )
+      : []
+  } catch {
+    return []
+  }
+}
 
 /** Los puntos que valen, en orden y sin repetir segundo. */
 export function clean(samples: readonly Sample[], now: number): Sample[] {
@@ -50,9 +84,15 @@ export function coarse(samples: readonly Sample[]): Sample[] {
   return [...kept]
 }
 
-/** El mayor salto que hay en esos puntos, o `null` si ninguno llama la atención. */
+/**
+ * El mayor salto que hay en esos puntos, o `null` si ninguno llama la atención.
+ *
+ * Un reparto cobrado cerca de un tramo (`gifts`) se le descuenta: lo que se
+ * mira es si, quitando el premio, el resto sube más de lo normal.
+ */
 export function jump(
   samples: readonly Sample[],
+  gifts: readonly Gift[] = [],
 ): { at: number; seconds: number; from: number; to: number; trace: Sample[] } | null {
   let best = { start: -1, end: -1, ratio: 0 }
 
@@ -64,7 +104,12 @@ export function jump(
 
       if (at - before > JUMP_WINDOW_S) break
 
-      const ratio = capital / Math.max(1, was)
+      const prize = gifts.reduce(
+        (sum, [given, amount]) =>
+          given >= before - GIFT_SLACK_S && given <= at + GIFT_SLACK_S ? sum + amount : sum,
+        0,
+      )
+      const ratio = (capital - prize) / Math.max(1, was)
 
       if (ratio >= JUMP_FACTOR && ratio > best.ratio) best = { start, end, ratio }
     }
