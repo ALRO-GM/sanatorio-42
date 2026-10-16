@@ -27,7 +27,16 @@ type ForceGraphProps = {
   /** Lo que se enseña junto a la burbuja bajo el ratón. */
   tooltip: (node: NetworkNode) => ReactNode
   /** Nombres de los botones de zoom y del buscador. */
-  controls: { zoomIn: string; zoomOut: string; fit: string; find: string; none: string }
+  controls: {
+    zoomIn: string
+    zoomOut: string
+    fit: string
+    find: string
+    none: string
+    /** La leyenda de las flechas de quien está elegido. */
+    gave: string
+    got: string
+  }
 }
 
 /** Una persona dentro de la simulación: los datos y dónde está. */
@@ -35,6 +44,9 @@ type SimNode = SimulationNodeDatum & { login: string; data: NetworkNode; r: numb
 type SimLink = SimulationLinkDatum<SimNode> & {
   weight: number
   mutual: boolean
+  /** Veces que `source` ha corregido a `target`, y al revés. */
+  forth: number
+  back: number
   /** `true` si une a dos personas de la misma comunidad. */
   inner: boolean
 }
@@ -282,6 +294,8 @@ export function ForceGraph({
         surface: read('--stage-halo', '#071110'),
         accent: read('--stage-accent', '#2bdcd5'),
         link: read('--stage-link', '#9db4ae'),
+        gave: read('--stage-gave', '#7ff3ee'),
+        got: read('--stage-got', '#ffb36b'),
       }
     }
 
@@ -376,13 +390,71 @@ export function ForceGraph({
       }
       const touches = (link: SimLink): boolean =>
         (link.source as SimNode).login === focus || (link.target as SimNode).login === focus
+      /**
+       * Las uniones de quien está elegido, con sentido: una flecha hacia quien
+       * fue corregido, en un color si corrigió esa persona y en otro si la
+       * corrigieron. Si fueron las dos cosas, dos flechas una junto a otra.
+       */
+      const directed = (link: SimLink): void => {
+        if (!crosses(link)) return
+
+        const source = link.source as SimNode
+        const target = link.target as SimNode
+        const ways: [SimNode, SimNode, number][] = []
+
+        if (link.forth > 0) ways.push([source, target, link.forth])
+        if (link.back > 0) ways.push([target, source, link.back])
+
+        for (const [index, [from, to, count]] of ways.entries()) {
+          const x1 = from.x ?? 0
+          const y1 = from.y ?? 0
+          const x2 = to.x ?? 0
+          const y2 = to.y ?? 0
+          const length = Math.hypot(x2 - x1, y2 - y1)
+
+          if (length < from.r + to.r) continue
+
+          const ux = (x2 - x1) / length
+          const uy = (y2 - y1) / length
+          const width = (0.8 + Math.sqrt(count) * 0.75) / Math.sqrt(view.k)
+          // Con dos flechas, cada una hacia su lado de la línea, sin pisarse.
+          const gap = width + 3 / view.k
+          const shift = ways.length === 2 ? (index === 0 ? gap : -gap) : 0
+          const ox = -uy * shift
+          const oy = ux * shift
+          const head = Math.max(6 / view.k, width * 3)
+          // La punta, en el borde de la burbuja de quien fue corregido.
+          const tipX = x2 - ux * (to.r + 1 / view.k) + ox
+          const tipY = y2 - uy * (to.r + 1 / view.k) + oy
+          const colour = from.login === focus ? palette.gave : palette.got
+
+          context.globalAlpha = 0.95
+          context.strokeStyle = colour
+          context.fillStyle = colour
+          context.lineWidth = width
+          context.beginPath()
+          context.moveTo(x1 + ux * from.r + ox, y1 + uy * from.r + oy)
+          context.lineTo(tipX - ux * head * 0.8, tipY - uy * head * 0.8)
+          context.stroke()
+          context.beginPath()
+          context.moveTo(tipX, tipY)
+          context.lineTo(tipX - ux * head - uy * head * 0.55, tipY - uy * head + ux * head * 0.55)
+          context.lineTo(tipX - ux * head + uy * head * 0.55, tipY - uy * head - ux * head * 0.55)
+          context.closePath()
+          context.fill()
+        }
+      }
 
       if (state.moving) {
         for (const link of state.links.length > MOVING_LINKS ? state.strong : state.links) {
           const on = around === null || touches(link)
 
-          style(context, link, on)
-          line(context, link)
+          if (around !== null && on) {
+            directed(link)
+          } else {
+            style(context, link, on)
+            line(context, link)
+          }
         }
       } else {
         const kind = around === null ? 'rest' : 'dim'
@@ -416,8 +488,7 @@ export function ForceGraph({
           for (const link of state.links) {
             if (!touches(link)) continue
 
-            style(context, link, true)
-            line(context, link)
+            directed(link)
           }
         }
       }
@@ -850,6 +921,8 @@ export function ForceGraph({
         target,
         weight: weightOf(link),
         mutual: link.forth > 0 && link.back > 0,
+        forth: link.forth,
+        back: link.back,
         inner: source.data.community === target.data.community,
       })
 
@@ -1033,6 +1106,18 @@ export function ForceGraph({
           </ul>
         )}
       </div>
+      {selected !== null && (
+        <ul className="force-arrows" aria-label={`${controls.gave} · ${controls.got}`}>
+          <li>
+            <i className="gave" aria-hidden="true" />
+            {controls.gave}
+          </li>
+          <li>
+            <i className="got" aria-hidden="true" />
+            {controls.got}
+          </li>
+        </ul>
+      )}
       {tip !== null && (
         <div className="force-tip" style={{ left: tip.x, top: tip.y }}>
           {tooltip(tip.node)}

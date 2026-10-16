@@ -46,6 +46,9 @@
   --stage-link: #c2dcd6;
   --stage-halo: #2a5b58;
   --stage-accent: #7ff3ee;
+  /* Las flechas de quien está elegido: corrigió (frío) o le corrigieron (cálido). */
+  --stage-gave: #7ff3ee;
+  --stage-got: #ffb36b;
   /* Las ruedas del tablón. Cada círculo va de `--ring-from` (el de dentro) a
      `--ring-to` (el de fuera), un paso cada uno; `--ring-shade` oscurece las
      paredes y `--orb-done` es el color de un proyecto aprobado. */

@@ -678,6 +678,8 @@ export const es: Record<string, string> = {
   'net.fit': 'Encajar todo',
   'net.find': 'Buscar en el grafo',
   'net.findNone': 'Nadie pintado se llama así',
+  'net.arrows.gave': 'Corrigió →',
+  'net.arrows.got': '← Le corrigieron',
   'app.loadingSection': 'Abriendo…',
   'net.projects': 'Proyectos más corregidos',
   'net.projects.pass': 'Correcciones que aprobaron',

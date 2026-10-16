@@ -661,6 +661,8 @@ export const ca: Record<string, string> = {
   'net.fit': 'Encaixa-ho tot',
   'net.find': 'Cerca al graf',
   'net.findNone': 'Ningú pintat es diu així',
+  'net.arrows.gave': 'Va corregir →',
+  'net.arrows.got': '← El van corregir',
   'app.loadingSection': 'Obrint…',
   'net.projects': 'Projectes més corregits',
   'net.projects.pass': 'Correccions que van aprovar',

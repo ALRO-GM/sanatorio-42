@@ -213,6 +213,8 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
       fit: t('net.fit'),
       find: t('net.find'),
       none: t('net.findNone'),
+      gave: t('net.arrows.gave'),
+      got: t('net.arrows.got'),
     }),
     [t],
   )

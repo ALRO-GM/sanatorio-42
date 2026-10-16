@@ -664,6 +664,8 @@ export const eu: Record<string, string> = {
   'net.fit': 'Doitu dena',
   'net.find': 'Bilatu grafoan',
   'net.findNone': 'Margotutako inor ez da horrela deitzen',
+  'net.arrows.gave': 'Zuzendu zuen →',
+  'net.arrows.got': '← Zuzendu zioten',
   'app.loadingSection': 'Irekitzen…',
   'net.projects': 'Gehien zuzendutako proiektuak',
   'net.projects.pass': 'Gainditu zuten zuzenketak',

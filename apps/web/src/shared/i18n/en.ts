@@ -669,6 +669,8 @@ export const en: Record<string, string> = {
   'net.fit': 'Fit everything',
   'net.find': 'Find in the graph',
   'net.findNone': 'Nobody shown has that name',
+  'net.arrows.gave': 'Evaluated →',
+  'net.arrows.got': '← Was evaluated by',
   'app.loadingSection': 'Opening…',
   'net.projects': 'Most evaluated projects',
   'net.projects.pass': 'Evaluations that passed',
