@@ -616,9 +616,12 @@ Reglas:
 - Una pareja puntúa una vez al día, y solo puede tener una reserva al día.
 - Con una sesión terminada sin valorar (`mustRate`) no se puede reservar ni
   ofrecerse.
-- Una **corrección de 42** manda sobre la guardia: mientras dura no se te puede
-  reservar, aunque caiga en una franja abierta. `GET /help/today` las trae en
-  `busy`. Los **slots abiertos** para corregir no se pueden leer ni cerrar: 42
+- **Lo que ya tienes en el calendario** manda sobre la guardia: correcciones,
+  exámenes y eventos de 42 a los que vas, terapias y pizarras. Mientras dura no
+  se te puede reservar, aunque caiga en una franja abierta, y la web no deja
+  marcar esas medias horas. `GET /help/today` lo trae en `busy`.
+- Una media hora ya empezada no se puede abrir, pero sí quitar; la que alguien
+  tiene reservada se queda hasta cancelar o rechazar la reserva. Los **slots abiertos** para corregir no se pueden leer ni cerrar: 42
   los reserva al permiso `projects`, que esta web no pide.
 - A quien bloqueas no le sales en `/help/offers` ni puede reservarte; recibe la
   misma respuesta que si no te ofrecieras.

@@ -50,8 +50,23 @@ export type HelpServiceOptions = {
   attendance: AttendanceService
   /** Para dejar un aviso en el buzón de quien tiene que enterarse. Sin él, no se avisa. */
   notify?: Notify
+  /**
+   * Lo que alguien ya tiene en el calendario entre dos instantes (terapias,
+   * pizarras, eventos y exámenes de 42, correcciones): a esas horas no se puede
+   * ofrecer. Lo da `calendar`, que se monta después. Sin él solo cuentan las
+   * correcciones de 42.
+   */
+  commitments?: Commitments
   now?: () => number
 }
+
+/** Ratos ocupados de alguien entre dos instantes. `refresh`: preguntar a 42 si lo guardado es viejo. */
+export type Commitments = (
+  who: Actor,
+  refresh: boolean,
+  from: number,
+  to: number,
+) => Promise<readonly { start: string; end: string }[]>
 
 /** Todo va en medias horas: franjas, reservas y topes. */
 const SLOT = 30
@@ -161,12 +176,26 @@ export function createHelpService(options: HelpServiceOptions) {
     return localMoment(now(), await replica.timeZoneOf(campusId))
   }
 
+  /** Lo que se usa sin `calendar`: solo las correcciones de 42 de la agenda. */
+  const evaluationsOnly: Commitments = async (who, refresh) => {
+    const mine = refresh
+      ? await agenda.userAgenda(who.login, await replica.userIdOf(who.login))
+      : await agenda.userAgenda(who.login, null)
+
+    return (mine?.evaluations ?? []).map((evaluation) => ({
+      start: evaluation.beginAt,
+      end: evaluation.endAt,
+    }))
+  }
+  const commitments = options.commitments ?? evaluationsOnly
+
   /**
-   * Ratos de hoy en los que alguien tiene una corrección de 42, en minutos del
-   * día en su campus.
+   * Ratos de hoy en los que alguien ya tiene algo en el calendario, en minutos
+   * del día en su campus.
    *
-   * Una corrección manda sobre la guardia: mientras dura, esa persona no puede
-   * estar ayudando, aunque el rato caiga dentro de una franja que abrió.
+   * Lo que ya está en el calendario manda sobre la guardia: mientras dura, esa
+   * persona no puede estar ayudando, aunque el rato caiga dentro de una franja
+   * que abrió.
    *
    * @param refresh Si es `true` y lo guardado es viejo, se pregunta a 42 (tres
    *   peticiones). Con `false` vale lo último que se supo: es lo que se usa al
@@ -178,15 +207,18 @@ export function createHelpService(options: HelpServiceOptions) {
     day: string,
     refresh: boolean,
   ): Promise<Span[]> {
-    const mine = refresh
-      ? await agenda.userAgenda(login, await replica.userIdOf(login))
-      : await agenda.userAgenda(login, null)
     const timeZone = await replica.timeZoneOf(campusId)
+    const taken = await commitments(
+      { login, campusId, admin: false },
+      refresh,
+      zonedInstant(day, 0, timeZone),
+      zonedInstant(day, 24 * 60, timeZone),
+    )
     const spans: Span[] = []
 
-    for (const evaluation of mine?.evaluations ?? []) {
-      const start = localMoment(Date.parse(evaluation.beginAt), timeZone)
-      const end = localMoment(Date.parse(evaluation.endAt), timeZone)
+    for (const span of taken) {
+      const start = localMoment(Date.parse(span.start), timeZone)
+      const end = localMoment(Date.parse(span.end), timeZone)
 
       // Solo lo que toca el día: lo que empieza antes o acaba después se recorta.
       if (start.day <= day && end.day >= day) {
@@ -607,13 +639,16 @@ export function createHelpService(options: HelpServiceOptions) {
         throw domainError('conflict', 'Esa franja ya está cogida')
       }
       // Aquí sí se pregunta a 42 si hace falta: es una sola persona, y reservar
-      // encima de una corrección dejaría plantada a una de las dos partes.
+      // encima de otra cosa dejaría plantada a una de las dos partes.
       if (
         (await busyOf(request.helper, actor.campusId, moment.day, true)).some((span) =>
           overlaps(slot, span),
         )
       ) {
-        throw domainError('conflict', `${request.helper} tiene una corrección a esa hora`)
+        throw domainError(
+          'conflict',
+          `${request.helper} tiene otra cosa en el calendario a esa hora`,
+        )
       }
 
       const remaining = day.maxMinutes - bookedMinutes(active)

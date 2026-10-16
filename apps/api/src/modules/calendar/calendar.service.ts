@@ -258,7 +258,40 @@ export function createCalendarService(options: CalendarServiceOptions) {
         fortyTwoAt: fortyTwo.at,
       }
     },
+
+    /**
+     * Los ratos en los que `actor` ya tiene algo entre dos instantes: terapias y
+     * pizarras a las que va, eventos y exámenes de 42 en los que está apuntado y
+     * correcciones. Es lo que impide ofrecerse a ayudar a esa hora.
+     *
+     * No incluye la propia guardia (franjas y reservas): `help` pregunta esto
+     * para calcularla, y contarla aquí sería preguntarse a sí misma.
+     *
+     * @param userId Su id en 42 para preguntar a 42 si lo guardado es viejo, o
+     *   `null` para quedarse con lo último que se supo.
+     */
+    async commitments(
+      actor: Actor,
+      userId: number | null,
+      from: number,
+      to: number,
+    ): Promise<Commitment[]> {
+      const timeZone = await replica.timeZoneOf(actor.campusId)
+      const [sessions, whiteboards, fortyTwo] = await Promise.all([
+        therapyEvents(actor, from, to, timeZone),
+        boardEvents(actor, from, to),
+        fortyTwoEvents(actor, userId, from, to),
+      ])
+
+      return [...sessions, ...whiteboards, ...fortyTwo.events]
+        .filter((event) => event.joined !== false && event.kind !== 'event_open')
+        .filter((event) => Date.parse(event.start) < to && Date.parse(event.end) > from)
+        .map((event) => ({ start: event.start, end: event.end, kind: event.kind }))
+    },
   }
 }
 
 export type CalendarService = ReturnType<typeof createCalendarService>
+
+/** Un rato ocupado: lo que tapa la guardia. */
+export type Commitment = { start: string; end: string; kind: CalendarEvent['kind'] }

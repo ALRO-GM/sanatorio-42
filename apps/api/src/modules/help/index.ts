@@ -12,7 +12,7 @@ import type { Agenda, ReplicaRepository } from '../replica/index.js'
 import { createHelpRepository } from './help.repository.js'
 import { registerHelpRoutes } from './help.routes.js'
 import { createHelpService } from './help.service.js'
-import type { HelpService } from './help.service.js'
+import type { Commitments, HelpService } from './help.service.js'
 
 export type HelpModuleDeps = {
   db: Db
@@ -21,6 +21,8 @@ export type HelpModuleDeps = {
   xp: XpService
   attendance: AttendanceService
   notify?: Notify
+  /** Lo que alguien ya tiene en el calendario: ahí no se puede ofrecer. */
+  commitments?: Commitments
   now?: () => number
 }
 
@@ -34,6 +36,7 @@ export function createHelpModule(deps: HelpModuleDeps): HelpModule {
     xp: deps.xp,
     attendance: deps.attendance,
     ...(deps.notify === undefined ? {} : { notify: deps.notify }),
+    ...(deps.commitments === undefined ? {} : { commitments: deps.commitments }),
     ...(deps.now === undefined ? {} : { now: deps.now }),
   })
 
@@ -46,4 +49,4 @@ export function createHelpModule(deps: HelpModuleDeps): HelpModule {
   }
 }
 
-export type { HelpService } from './help.service.js'
+export type { Commitments, HelpService } from './help.service.js'

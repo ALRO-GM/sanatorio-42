@@ -417,11 +417,11 @@ export const ca: Record<string, string> = {
   'cal.editTitle': 'Canvia la pissarra',
   'board.editDoubt': 'Text del dubte',
   'help.pastSlot': 'Aquesta mitja hora ja ha començat',
-  'help.busySlot': 'Tens una correcció de 42 a aquesta hora',
+  'help.busySlot': 'Ja tens alguna cosa al calendari a aquesta hora',
   'help.bookedSlot':
     'Algú té reservada aquesta mitja hora: cancel·la o rebutja la reserva per treure-la',
   'help.busy':
-    "Tens correcció de 42 de {ranges}. En aquesta estona no se't pot reservar ajuda, encara que ho tinguis obert.",
+    'Ja tens alguna cosa al calendari de {ranges} (correccions, exàmens, esdeveniments, teràpies o pissarres). En aquesta estona no et pots oferir.',
   'graph.level': 'Nivell {level}',
   'graph.levelHint': 'El teu nivell al 42cursus i el que portes del següent',
   'graph.series': 'Mòduls',

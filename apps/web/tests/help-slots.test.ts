@@ -37,6 +37,12 @@ describe('guardia: medias horas', () => {
     expect(canToggle({ past: true, active: false, booked: false })).toBe(false)
   })
 
+  it('con otra cosa en el calendario no se marca, pero lo ya marcado se puede quitar', () => {
+    expect(canToggle({ past: false, active: false, booked: false, taken: true })).toBe(false)
+    expect(canToggle({ past: false, active: true, booked: false, taken: true })).toBe(true)
+    expect(canToggle({ past: false, active: false, booked: false, taken: false })).toBe(true)
+  })
+
   it('la reservada no se toca, empezada o no', () => {
     expect(canToggle({ past: false, active: true, booked: true })).toBe(false)
     expect(canToggle({ past: true, active: true, booked: true })).toBe(false)

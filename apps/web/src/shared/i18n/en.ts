@@ -434,11 +434,11 @@ export const en: Record<string, string> = {
   'cal.editTitle': 'Change the whiteboard',
   'board.editDoubt': 'Question text',
   'help.pastSlot': 'This half hour has already started',
-  'help.busySlot': 'You have a 42 evaluation at this time',
+  'help.busySlot': 'You already have something in your calendar at this time',
   'help.bookedSlot':
     'Someone has booked this half hour: cancel or decline the booking to remove it',
   'help.busy':
-    'You have a 42 evaluation at {ranges}. Nobody can book you then, even if the slot is open.',
+    "You already have something in your calendar at {ranges} (evaluations, exams, events, therapy or boards). You can't offer help then.",
   'graph.level': 'Level {level}',
   'graph.levelHint': 'Your level in the 42cursus and your progress towards the next',
   'graph.series': 'Modules',

@@ -68,8 +68,9 @@ export type HelpDay = {
   /** Tope de minutos que quieres ayudar hoy. */
   maxMinutes: number
   /**
-   * Correcciones de 42 que tienes hoy. Mientras duran no se te puede reservar
-   * ayuda, aunque caigan dentro de una franja que hayas abierto.
+   * Lo que ya tienes hoy en el calendario: correcciones, exámenes y eventos de
+   * 42 a los que vas, terapias y pizarras. Mientras dura no se te puede reservar
+   * ayuda, aunque caiga dentro de una franja que hayas abierto.
    */
   busy: TimeRange[]
   /** Minutos ya reservados (pendientes o aceptados). */

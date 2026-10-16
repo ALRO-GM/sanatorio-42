@@ -440,11 +440,11 @@ export const es: Record<string, string> = {
   'cal.editTitle': 'Cambiar la pizarra',
   'board.editDoubt': 'Texto de la duda',
   'help.pastSlot': 'Esta media hora ya ha empezado',
-  'help.busySlot': 'Tienes una corrección de 42 a esta hora',
+  'help.busySlot': 'Ya tienes algo en el calendario a esta hora',
   'help.bookedSlot':
     'Alguien tiene reservada esta media hora: cancela o rechaza la reserva para quitarla',
   'help.busy':
-    'Tienes corrección de 42 de {ranges}. En ese rato no se te puede reservar ayuda, aunque lo tengas abierto.',
+    'Ya tienes algo en el calendario de {ranges} (correcciones, exámenes, eventos, terapias o pizarras). En ese rato no te puedes ofrecer.',
   'graph.level': 'Nivel {level}',
   'graph.levelHint': 'Tu nivel en el 42cursus y lo que llevas del siguiente',
   'graph.series': 'Módulos',

@@ -68,12 +68,19 @@ export function bookedSlotsOf(day: Pick<HelpDay, 'day' | 'bookings'>): Set<numbe
 }
 
 /**
- * Si una media hora del editor se puede pulsar: la que ya empezó solo para
- * quitarla, y la reservada nunca (se suelta cancelando la reserva). Es lo que
+ * Si una media hora del editor se puede pulsar. Quitarla siempre se puede,
+ * salvo si está reservada (se suelta cancelando la reserva). Marcarla, solo si
+ * no ha empezado y no tienes otra cosa en el calendario a esa hora. Es lo que
  * acepta la API.
  */
-export function canToggle(slot: { past: boolean; active: boolean; booked: boolean }): boolean {
+export function canToggle(slot: {
+  past: boolean
+  active: boolean
+  booked: boolean
+  taken?: boolean
+}): boolean {
   if (slot.booked) return false
+  if (slot.active) return true
 
-  return !slot.past || slot.active
+  return !slot.past && slot.taken !== true
 }

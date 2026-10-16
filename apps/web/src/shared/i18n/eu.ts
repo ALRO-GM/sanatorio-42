@@ -421,11 +421,11 @@ export const eu: Record<string, string> = {
   'cal.editTitle': 'Aldatu arbela',
   'board.editDoubt': 'Zalantzaren testua',
   'help.pastSlot': 'Ordu erdi hau hasita dago jada',
-  'help.busySlot': '42ko zuzenketa bat duzu ordu honetan',
+  'help.busySlot': 'Badaukazu zerbait egutegian ordu honetan',
   'help.bookedSlot':
     'Norbaitek ordu erdi hau erreserbatu du: ezeztatu edo baztertu erreserba kentzeko',
   'help.busy':
-    '42ko zuzenketa duzu {ranges} tartean. Tarte horretan ezin zaizu laguntzarik erreserbatu, irekita izan arren.',
+    'Badaukazu zerbait egutegian {ranges} tartean (zuzenketak, azterketak, ekitaldiak, terapiak edo arbelak). Tarte horretan ezin zara eskaini.',
   'graph.level': '{level}. maila',
   'graph.levelHint': 'Zure maila 42cursusean eta hurrengotik daramazuna',
   'graph.series': 'Moduluak',

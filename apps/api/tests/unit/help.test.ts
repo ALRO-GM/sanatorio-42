@@ -11,7 +11,9 @@ import { projectUser } from '../helpers/fixtures.js'
 import {
   MADRID,
   AGENDA_CALL,
+  HOUR,
   MINUTE,
+  TUESDAY_AFTERNOON,
   actor,
   expectCode,
   useCommunity,
@@ -124,6 +126,49 @@ describe('comunidad', () => {
       expect((await help.setToday(actor('eva'), { windows: [], maxMinutes: 60 })).windows).toEqual(
         [],
       )
+    })
+
+    it('lo que ya tienes en el calendario tapa la guardia, no solo las correcciones', async () => {
+      const { help, boards } = services
+      // Una pizarra de 18:00 a 19:00 a la que va `eva`; y otra a la que no va.
+      const at = (hours: number): string => new Date(TUESDAY_AFTERNOON + hours * HOUR).toISOString()
+      const board = await boards.create(actor('sol'), {
+        title: 'Punteros sin miedo',
+        topic: 'punteros',
+        place: 'Cluster 2',
+        startsAt: at(1.5),
+        endsAt: at(2.5),
+        capacity: 5,
+      })
+      await boards.create(actor('sol'), {
+        title: 'Otra que no le toca',
+        topic: 'otra',
+        place: 'Cluster 2',
+        startsAt: at(0.5),
+        endsAt: at(1),
+        capacity: 5,
+      })
+      await boards.join(actor('eva'), board.id)
+
+      const day = await help.setToday(actor('eva'), tarde)
+
+      expect(day.busy).toEqual([{ start: '18:00', end: '19:00' }])
+      // Nadie la puede reservar a esa hora, pero sí antes.
+      await expectCode(
+        help.book(actor('ana'), { helper: 'eva', start: '18:00', minutes: 30 }),
+        'conflict',
+      )
+      expect(
+        (await help.offers(actor('ana'))).find((offer) => offer.login === 'eva')?.freeStarts,
+      ).toEqual(['17:00', '17:30'])
+
+      // Quien organiza también está ocupado en la suya.
+      expect((await help.today(actor('sol'))).busy).toEqual([
+        { start: '17:00', end: '17:30' },
+        { start: '18:00', end: '19:00' },
+      ])
+      // Y quien no va a ninguna, no.
+      expect((await help.today(actor('leo'))).busy).toEqual([])
     })
 
     it('la reserva la tiene que aceptar quien ayuda', async () => {
@@ -284,7 +329,9 @@ describe('comunidad', () => {
 
     it('si la cuota de 42 va justa, la agenda se sirve con lo guardado y se coge turno', async () => {
       const { help, quota } = services
-      const agendaCalls = (): number => api.calls.filter((call) => AGENDA_CALL.test(call)).length
+      // Solo lo de cada persona: los eventos del campus se piden una vez para todo el mundo.
+      const agendaCalls = (): number =>
+        api.calls.filter((call) => AGENDA_CALL.test(call) && call.includes('/users/')).length
 
       // Con cuota, la guardia de `eva` lee su agenda de 42: tres peticiones.
       api.hourlyRemaining = 250

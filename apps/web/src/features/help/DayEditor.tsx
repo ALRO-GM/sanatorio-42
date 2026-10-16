@@ -59,7 +59,7 @@ export function DayEditor({ day, onSaved }: DayEditorProps) {
   }, [day.now])
 
   const now = toMinutes(day.now) + elapsed
-  // Medias horas que pisa una corrección de 42: ahí no se te puede reservar.
+  // Medias horas en las que ya tienes algo en el calendario: ahí no te puedes ofrecer.
   const evaluationSlots = slotsOf(day.busy)
   const bookedSlots = bookedSlotsOf(day)
   const offered = slots.size * SLOT
@@ -119,7 +119,7 @@ export function DayEditor({ day, onSaved }: DayEditorProps) {
                       ? t('help.busySlot')
                       : undefined
               }
-              disabled={!canToggle({ past, active, booked }) || day.mustRate}
+              disabled={!canToggle({ past, active, booked, taken }) || day.mustRate}
               onClick={() => {
                 toggle(start)
               }}

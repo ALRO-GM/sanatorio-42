@@ -205,6 +205,14 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     xp: profile.xp,
     attendance: attendance.service,
     notify,
+    // `calendar` se monta después (necesita la guardia): para cuando alguien pregunte ya estará.
+    commitments: async (who, refresh, from, to) =>
+      calendar.service.commitments(
+        who,
+        refresh ? await replica.repository.userIdOf(who.login) : null,
+        from,
+        to,
+      ),
   })
   const calendar = createCalendarModule({
     replica: replica.repository,
