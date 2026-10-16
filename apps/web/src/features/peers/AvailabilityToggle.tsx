@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 
 import { api } from '../../shared/api'
 import { useI18n } from '../../shared/i18n'
+import { announceAvailability } from './availability-events'
 
 type AvailabilityToggleProps = {
   /** Se acaba de poner de guardia: buen momento para abrir sus franjas de hoy. */
@@ -47,6 +48,7 @@ export function AvailabilityToggle({ onTurnedOn, onOpen, active }: AvailabilityT
 
     try {
       await api.setAvailability(next)
+      announceAvailability(next)
       if (next) onTurnedOn?.()
     } catch {
       // Se revierte y se avisa: dejar el interruptor en un estado que la base no

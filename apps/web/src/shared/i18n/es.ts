@@ -468,6 +468,17 @@ export const es: Record<string, string> = {
   'board.editDoubt': 'Texto de la duda',
   'help.pastSlot': 'Esta media hora ya ha empezado',
   'help.busySlot': 'Ya tienes algo en el calendario a esta hora',
+  'help.status.title': 'Cómo te ven ahora',
+  'help.status.onDuty': 'Sales de guardia: tienes el interruptor encendido y te vemos en {seat}.',
+  'help.status.notSeated':
+    'Tienes el interruptor encendido, pero no te vemos sentado en el campus: no sales de guardia hasta que te sientes.',
+  'help.status.offDuty':
+    'No sales de guardia: el interruptor de arriba está apagado. Enciéndelo para que te vean quienes buscan ayuda ahora.',
+  'help.status.noSlots': 'Nadie te puede reservar: no te quedan medias horas marcadas hoy.',
+  'help.status.capReached':
+    'Ya te han reservado {booked}, tu tope de hoy: dejas de salir para reservar, aunque te queden medias horas marcadas.',
+  'help.status.bookable':
+    'Te pueden reservar en tus medias horas marcadas (con el interruptor encendido o no), hasta {left} más. Por ejemplo, si tu tope es {max}, en cuanto te reserven {max} en total dejas de salir para ayudar el resto del día.',
   'help.bookedSlot':
     'Alguien tiene reservada esta media hora: cancela o rechaza la reserva para quitarla',
   'help.busy':
@@ -490,6 +501,12 @@ export const es: Record<string, string> = {
   'health.unknown':
     '42 no nos da tu fecha de inicio en el 42cursus. Si acabas de entrar, recarga en un momento.',
   'health.pace': 'Pace',
+  'health.paceNow': 'Pace hoy',
+  'health.paceNowHint':
+    'El pace en el que te quedarías si pasaras de círculo hoy. Si vas por delante, es más rápido que el de tu intra.',
+  'health.paceIntra': 'En tu intra',
+  'health.paceIntraHint':
+    'El pace que pone tu perfil de la intra (el que anotaste aquí). Es el oficial; el de hoy dice cómo vas.',
   'health.summary':
     'Estás en el círculo {circle} y vas a pace {pace}. Lo conservas si lo terminas antes del {date} (quedan {left} d).',
   'health.summaryGone':

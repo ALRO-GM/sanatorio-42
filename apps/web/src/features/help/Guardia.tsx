@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { api } from '../../shared/api'
 import { useAction, useAsync } from '../../shared/hooks/useAsync'
@@ -9,6 +9,8 @@ import { InfoTip } from '../../shared/ui/InfoTip'
 import { BookingCard } from './BookingCard'
 import { cheerFor } from './cheers'
 import { DayEditor } from './DayEditor'
+import { GuardStatus } from './GuardStatus'
+import { onAvailability } from '../peers/availability-events'
 import { GuardTour } from './GuardTour'
 import { PreReviewToggle } from './PreReviewToggle'
 
@@ -22,6 +24,16 @@ export function Guardia() {
   const [pick] = useState(() => Math.random())
   const { data, error, loading, reload, setData } = useAsync(() => api.getHelpDay(), [])
   const unblocking = useAction()
+
+  // Encender o apagar el interruptor cambia «cómo te ven ahora»: se pide otra
+  // vez sin pasar por «cargando», para no perder lo marcado sin guardar.
+  useEffect(
+    () =>
+      onAvailability(() => {
+        api.getHelpDay().then(setData, () => undefined)
+      }),
+    [setData],
+  )
 
   if (loading) {
     return <p>{t('app.loading')}</p>
@@ -61,6 +73,7 @@ export function Guardia() {
             id: 'today',
             content: (
               <>
+                <GuardStatus day={data} />
                 <DayEditor key={data.day} day={data} onSaved={setData} />
                 <PreReviewToggle />
               </>

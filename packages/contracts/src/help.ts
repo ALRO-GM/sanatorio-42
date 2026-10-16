@@ -81,6 +81,12 @@ export type HelpDay = {
   mustRate: boolean
   /** Personas a las que no quieres ayudar. */
   blocked: string[]
+  /**
+   * Si sales «de guardia» en las listas: hace falta el interruptor encendido
+   * (`available`) y estar sentado en el campus (`seat`). Las reservas no
+   * dependen de esto: van por las medias horas marcadas y el tope.
+   */
+  presence: { available: boolean; seat: string | null }
 }
 
 /** Cuerpo de `PUT /help/today`. */

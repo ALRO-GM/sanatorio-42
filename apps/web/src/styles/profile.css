@@ -21,6 +21,15 @@
   font-size: 1.9rem;
   line-height: 1.1;
 }
+/* El de la intra, al lado y más discreto: es la referencia, no cómo vas. */
+.health-pace.official {
+  background: var(--surface-2);
+  box-shadow: none;
+}
+.health-pace.official strong {
+  font-size: 1.4rem;
+  color: var(--text-2);
+}
 .health-pace.gone {
   background: color-mix(in srgb, #c0392b 18%, var(--surface));
 }

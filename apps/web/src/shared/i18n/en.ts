@@ -462,6 +462,17 @@ export const en: Record<string, string> = {
   'board.editDoubt': 'Question text',
   'help.pastSlot': 'This half hour has already started',
   'help.busySlot': 'You already have something in your calendar at this time',
+  'help.status.title': 'How others see you now',
+  'help.status.onDuty': 'You are on duty: your switch is on and we see you at {seat}.',
+  'help.status.notSeated':
+    'Your switch is on, but we do not see you seated on campus: you are not on duty until you sit down.',
+  'help.status.offDuty':
+    'You are not on duty: the switch at the top is off. Turn it on so people looking for help right now can see you.',
+  'help.status.noSlots': 'Nobody can book you: you have no marked half hours left today.',
+  'help.status.capReached':
+    'You have already been booked for {booked}, your limit for today: you stop showing up for bookings, even if you still have marked half hours.',
+  'help.status.bookable':
+    'People can book you in your marked half hours (switch on or not), for up to {left} more. For example, if your limit is {max}, once you are booked for {max} in total you stop showing up to help for the rest of the day.',
   'help.bookedSlot':
     'Someone has booked this half hour: cancel or decline the booking to remove it',
   'help.busy':
@@ -483,6 +494,12 @@ export const en: Record<string, string> = {
   'health.unknown':
     '42 does not give us your 42cursus start date. If you just logged in, reload in a moment.',
   'health.pace': 'Pace',
+  'health.paceNow': 'Pace today',
+  'health.paceNowHint':
+    'The pace you would stay in if you passed the circle today. If you are ahead, it is faster than the one on your intra.',
+  'health.paceIntra': 'On your intra',
+  'health.paceIntraHint':
+    'The pace on your intra profile (the one you entered here). It is the official one; today’s shows how you are doing.',
   'health.summary':
     'You are in circle {circle} at pace {pace}. You keep it if you finish before {date} ({left} d left).',
   'health.summaryGone':

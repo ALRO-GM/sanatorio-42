@@ -445,6 +445,17 @@ export const ca: Record<string, string> = {
   'board.editDoubt': 'Text del dubte',
   'help.pastSlot': 'Aquesta mitja hora ja ha començat',
   'help.busySlot': 'Ja tens alguna cosa al calendari a aquesta hora',
+  'help.status.title': 'Com et veuen ara',
+  'help.status.onDuty': "Surts de guàrdia: tens l'interruptor encès i et veiem a {seat}.",
+  'help.status.notSeated':
+    "Tens l'interruptor encès, però no et veiem assegut al campus: no surts de guàrdia fins que t'asseguis.",
+  'help.status.offDuty':
+    "No surts de guàrdia: l'interruptor de dalt està apagat. Encén-lo perquè et vegi qui busca ajuda ara.",
+  'help.status.noSlots': 'Ningú no et pot reservar: no et queden mitges hores marcades avui.',
+  'help.status.capReached':
+    "Ja t'han reservat {booked}, el teu límit d'avui: deixes de sortir per reservar, encara que et quedin mitges hores marcades.",
+  'help.status.bookable':
+    "Et poden reservar a les teves mitges hores marcades (amb l'interruptor encès o no), fins a {left} més. Per exemple, si el teu límit és {max}, quan t'hagin reservat {max} en total deixes de sortir per ajudar la resta del dia.",
   'help.bookedSlot':
     'Algú té reservada aquesta mitja hora: cancel·la o rebutja la reserva per treure-la',
   'help.busy':
@@ -464,6 +475,12 @@ export const ca: Record<string, string> = {
   'health.loading': 'Prenent les constants…',
   'health.unknown':
     "42 no ens dona la teva data d'inici al 42cursus. Si acabes d'entrar, recarrega d'aquí a un moment.",
+  'health.paceNow': 'Pace avui',
+  'health.paceNowHint':
+    'El pace en què et quedaries si passessis de cercle avui. Si vas per davant, és més ràpid que el de la teva intra.',
+  'health.paceIntra': 'A la teva intra',
+  'health.paceIntraHint':
+    "El pace que posa el teu perfil de la intra (el que vas anotar aquí). És l'oficial; el d'avui diu com vas.",
   'health.summary':
     "Ets al cercle {circle} i vas a pace {pace}. El conserves si l'acabes abans del {date} (queden {left} d).",
   'health.summaryGone':

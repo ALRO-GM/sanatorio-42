@@ -640,7 +640,8 @@ Quien está de guardia abre franjas del día (en medias horas) y un tope de
 minutos; otras personas le reservan un rato. Es la única forma de ganar XP por
 ayudar en persona.
 
-- GET /help/today → tu guardia de hoy: `windows`, `maxMinutes`, `bookedMinutes`,
+- GET /help/today → tu guardia de hoy (con `presence`: `available`, el interruptor, y
+  `seat`, tu puesto si estás sentado): `windows`, `maxMinutes`, `bookedMinutes`,
   `bookings`, `mustRate` y `blocked`.
 - PUT /help/today → `{ "windows": [{ "start": "17:00", "end": "19:00" }], "maxMinutes": 60 }`.
   Las franjas que se pisan se juntan. `[]` retira la oferta.

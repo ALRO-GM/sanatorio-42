@@ -140,9 +140,18 @@ function HealthBody({ health, startedAt, mine, onSaved }: HealthBodyProps) {
   return (
     <>
       <div className="health-head">
-        <div className={`health-pace ${current === null ? 'gone' : ''}`}>
-          <span className="eyebrow">{t('health.pace')}</span>
+        {/* Dos números distintos, y cada uno dice cuál es: el que tendrías si
+            pasaras de círculo hoy y el que pone tu intra (el que anotaste). */}
+        <div
+          className={`health-pace ${current === null ? 'gone' : ''}`}
+          title={t('health.paceNowHint')}
+        >
+          <span className="eyebrow">{t('health.paceNow')}</span>
           <strong>{current?.pace ?? <Icon name="pozo" size={26} />}</strong>
+        </div>
+        <div className="health-pace official" title={t('health.paceIntraHint')}>
+          <span className="eyebrow">{t('health.paceIntra')}</span>
+          <strong>{declared.pace}</strong>
         </div>
         <p className="health-summary">
           {current === null

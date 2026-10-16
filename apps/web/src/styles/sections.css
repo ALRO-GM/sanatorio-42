@@ -850,3 +850,29 @@ dialog.legal-gate {
   gap: 0.3rem;
   margin: -0.4rem 0 0.8rem;
 }
+
+/* La guardia: cómo te ve ahora el resto. Cada línea lleva el color de su estado. */
+.guard-status {
+  display: grid;
+  gap: 0.4rem;
+  margin-bottom: 0.8rem;
+}
+.guard-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+  margin: 0;
+}
+.guard-line svg {
+  flex: none;
+  margin-top: 0.2rem;
+}
+.guard-line.ok svg {
+  color: var(--ok);
+}
+.guard-line.warn svg {
+  color: var(--warn);
+}
+.guard-line.off svg {
+  color: var(--text-4);
+}

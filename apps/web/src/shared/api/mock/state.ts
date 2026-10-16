@@ -257,6 +257,8 @@ export function helpDay(): HelpDay {
       )
       .reduce((sum) => sum + 30, 0),
     bookings: live.map((booking) => ({ ...booking })),
+    // Como la API: el interruptor de la cabecera, y sentado en un puesto de mentira.
+    presence: { available: localStorage.getItem(AVAILABLE_KEY) === 'true', seat: 'c2r4s6' },
     mustRate: live.some(
       (booking) =>
         booking.status === 'confirmed' &&

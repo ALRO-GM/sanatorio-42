@@ -215,6 +215,10 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     xp: profile.xp,
     attendance: attendance.service,
     notify,
+    presenceOf: async (login) => ({
+      available: (await peers.availability.get(login)).available,
+      seat: await peers.peers.locationOf(login),
+    }),
     // `calendar` se monta después (necesita la guardia): para cuando alguien pregunte ya estará.
     commitments: async (who, refresh, from, to) =>
       calendar.service.commitments(

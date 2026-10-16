@@ -57,6 +57,8 @@ export type HelpServiceOptions = {
    * correcciones de 42.
    */
   commitments?: Commitments
+  /** Si tiene el interruptor de guardia encendido y dónde está sentada: lo sabe `peers`. */
+  presenceOf?: (login: string) => Promise<{ available: boolean; seat: string | null }>
   now?: () => number
 }
 
@@ -472,11 +474,12 @@ export function createHelpService(options: HelpServiceOptions) {
       await settle()
 
       const moment = await momentIn(actor.campusId)
-      const [day, relevant, blocked, busy] = await Promise.all([
+      const [day, relevant, blocked, busy, presence] = await Promise.all([
         help.day(actor.login, moment.day),
         help.relevantTo(actor.login, moment.day),
         help.blockedBy(actor.login),
         busyOf(actor.login, actor.campusId, moment.day, true),
+        options.presenceOf?.(actor.login) ?? Promise.resolve({ available: false, seat: null }),
       ])
       const asHelper = relevant.filter(
         (booking) =>
@@ -500,6 +503,7 @@ export function createHelpService(options: HelpServiceOptions) {
           (booking) => finished(booking, moment) && owesRating(booking, actor.login),
         ),
         blocked,
+        presence,
       }
     },
 

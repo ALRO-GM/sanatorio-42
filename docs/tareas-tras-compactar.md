@@ -75,7 +75,7 @@ Orden (se marca cada uno al desplegarlo):
 - [x] 13 Trampas de Code Clicker, tres botones: «no es trampa» cierra; «alta probabilidad» abre ventana obligatoria de defensa que llega al admin; «trampa» = **vender todos sus edificios**, aviso temático en el juego («La policía del código te ha requisado las ganancias fraudulentas») y el dinero va a una **bolsa común**. La bolsa se reparte con una imagen temática que aparece por la zona del juego como el commit dorado; al pulsarla da **10 × el commit de la suerte** (el de ganancia, no el frenesí).
 
 **C. Mejoras**
-- [ ] 17 Explicar guardia, tope y pace (dos números).
+- [x] 17 Explicar guardia, tope y pace (dos números).
 - [ ] 21 Preevaluaciones: marcar disponibilidad mucho más grande, con icono propio; característica principal.
 - [ ] 27 Últimas 8 búsquedas en el navegador.
 - [ ] 23 Clusters: puesto como enlace (clic central), girar 180°, círculo en el puesto, filtros, brillo dorado por 125.

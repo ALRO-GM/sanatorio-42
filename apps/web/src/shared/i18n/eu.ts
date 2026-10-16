@@ -449,6 +449,18 @@ export const eu: Record<string, string> = {
   'board.editDoubt': 'Zalantzaren testua',
   'help.pastSlot': 'Ordu erdi hau hasita dago jada',
   'help.busySlot': 'Badaukazu zerbait egutegian ordu honetan',
+  'help.status.title': 'Nola ikusten zaituzten orain',
+  'help.status.onDuty': 'Guardian zaude: etengailua piztuta duzu eta {seat}-n ikusten zaitugu.',
+  'help.status.notSeated':
+    'Etengailua piztuta duzu, baina ez zaitugu campusean eserita ikusten: ez zaude guardian eseri arte.',
+  'help.status.offDuty':
+    'Ez zaude guardian: goiko etengailua itzalita dago. Piztu ezazu orain laguntza bila dabiltzanek ikus zaitzaten.',
+  'help.status.noSlots':
+    'Inork ezin zaitu erreserbatu: gaur ez zaizu ordu-erdi markaturik geratzen.',
+  'help.status.capReached':
+    'Dagoeneko {booked} erreserbatu dizkizute, gaurko muga: erreserbetan agertzeari uzten diozu, ordu-erdi markatuak geratu arren.',
+  'help.status.bookable':
+    'Zure ordu-erdi markatuetan erreserba zaitzakete (etengailua piztuta edo ez), {left} gehiago arte. Adibidez, zure muga {max} bada, guztira {max} erreserbatzen dizkizutenean egunaren gainerakoan laguntzeko agertzeari uzten diozu.',
   'help.bookedSlot':
     'Norbaitek ordu erdi hau erreserbatu du: ezeztatu edo baztertu erreserba kentzeko',
   'help.busy':
@@ -468,6 +480,12 @@ export const eu: Record<string, string> = {
   'health.loading': 'Bizi-konstanteak hartzen…',
   'health.unknown':
     '42k ez digu ematen 42cursusean hasi zinen data. Sartu berri bazara, kargatu berriro pixka bat barru.',
+  'health.paceNow': 'Gaurko pacea',
+  'health.paceNowHint':
+    'Gaur zirkulua gaindituko bazenu geratuko zinatekeen pacea. Aurretik bazoaz, zure intrakoa baino azkarragoa da.',
+  'health.paceIntra': 'Zure intran',
+  'health.paceIntraHint':
+    'Zure intrako profilak dioen pacea (hemen idatzi zenuena). Ofiziala da; gaurkoak nola zoazen dio.',
   'health.summary':
     '{circle}. zirkuluan zaude eta {pace} pacean zoaz. Eutsiko diozu {date} baino lehen amaitzen baduzu ({left} egun geratzen dira).',
   'health.summaryGone':

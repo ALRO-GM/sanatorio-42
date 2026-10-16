@@ -23,6 +23,8 @@ export type HelpModuleDeps = {
   notify?: Notify
   /** Lo que alguien ya tiene en el calendario: ahí no se puede ofrecer. */
   commitments?: Commitments
+  /** Interruptor de guardia y puesto de alguien: lo sabe `peers`. */
+  presenceOf?: (login: string) => Promise<{ available: boolean; seat: string | null }>
   now?: () => number
 }
 
@@ -37,6 +39,7 @@ export function createHelpModule(deps: HelpModuleDeps): HelpModule {
     attendance: deps.attendance,
     ...(deps.notify === undefined ? {} : { notify: deps.notify }),
     ...(deps.commitments === undefined ? {} : { commitments: deps.commitments }),
+    ...(deps.presenceOf === undefined ? {} : { presenceOf: deps.presenceOf }),
     ...(deps.now === undefined ? {} : { now: deps.now }),
   })
 

@@ -171,6 +171,18 @@ describe('comunidad', () => {
       expect((await help.today(actor('leo'))).busy).toEqual([])
     })
 
+    it('la guardia dice si sales de guardia: interruptor encendido y sentado en el campus', async () => {
+      const { help, availability } = services
+
+      expect((await help.today(actor('eva'))).presence).toEqual({ available: false, seat: null })
+
+      await availability.set('eva', true)
+      expect((await help.today(actor('eva'))).presence).toEqual({ available: true, seat: null })
+
+      await community.seat({ eva: 'c1r2s3' })
+      expect((await help.today(actor('eva'))).presence).toEqual({ available: true, seat: 'c1r2s3' })
+    })
+
     it('la reserva la tiene que aceptar quien ayuda', async () => {
       const { help } = services
 
