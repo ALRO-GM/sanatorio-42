@@ -482,6 +482,48 @@ export const es: Record<string, string> = {
   'agenda.open42': 'Abrir en 42',
   'agenda.goTo': 'Ir a {section}',
   'settings.theme': 'Tema',
+  'welcome.open': 'Ver la bienvenida',
+  'welcome.title': 'Bienvenida a Sanatorio 42',
+  'welcome.step': '{n} de {total}',
+  'welcome.go': 'Llévame ahí',
+  'welcome.skip': 'Saltar',
+  'welcome.back': 'Anterior',
+  'welcome.next': 'Siguiente',
+  'welcome.done': 'Empezar',
+  'welcome.hello.title': 'Bienvenida a Sanatorio 42',
+  'welcome.hello.body':
+    'Aquí la gente de 42 se ayuda: quién puede echarte una mano con tu proyecto, dónde está sentada y cuándo. Te enseñamos lo básico en un minuto.',
+  'welcome.record.title': 'Tu expediente',
+  'welcome.record.body':
+    'Tu nivel, tus títulos y tu estado de salud: el pace al que vas y cuándo te alcanzaría el black hole. Anota tu pace para ver todas tus fechas.',
+  'welcome.waiting.title': 'Sala de espera',
+  'welcome.waiting.body':
+    'Elige un proyecto y verás quién lo tiene aprobado o lo está haciendo, quién está de guardia y dónde se sienta en el mapa. A quien se ofrece, le puedes pedir ayuda.',
+  'welcome.duty.title': 'De guardia',
+  'welcome.duty.body':
+    'Enciende «De guardia» y marca las medias horas en que puedes ayudar. Te pedirán un rato y ganarás XP; lo que ya tengas en el calendario no se puede reservar.',
+  'welcome.board.title': 'Tablón',
+  'welcome.board.body':
+    'Las dudas de cada proyecto, ordenadas por círculos. Pregunta, responde y mira la guía que mantiene quien ya lo aprobó.',
+  'welcome.groups.title': 'Terapias y pizarras',
+  'welcome.groups.body':
+    'Quedad para sacar un proyecto juntos (terapias, con puestos reservados) o para explicar un concepto a quien quiera venir (pizarras).',
+  'welcome.agenda.title': 'Calendario',
+  'welcome.agenda.body':
+    'Todo en un sitio: tus correcciones, exámenes y eventos de 42, tu guardia, terapias y pizarras. En lista o con las horas a la vista.',
+  'welcome.net.title': 'Red y clústeres',
+  'welcome.net.body':
+    'Con quién te has corregido y quién se sienta dónde ahora mismo. En el mapa puedes resaltar a tu círculo o a quien terminó tu proyecto.',
+  'welcome.comfort.title': 'A tu medida',
+  'welcome.comfort.body':
+    'En el pie puedes cambiar idioma, tema, tamaño del texto, colores para daltonismo y el modo zen; en tu menú, personalizar las pestañas. Esta bienvenida también está ahí.',
+  'settings.text': 'Texto',
+  'settings.text.auto': 'Automático',
+  'settings.cvd': 'Daltonismo',
+  'settings.cvdHint':
+    'Azul y naranja en vez de verde y rojo, y más contraste en lo que solo se distingue por color',
+  'settings.zen': 'Modo zen',
+  'settings.zenHint': 'Lo mínimo: sin animaciones, ventanitas ni avisos de adorno',
   'settings.theme.auto': 'Como el sistema',
   'settings.theme.light': 'Claro',
   'settings.theme.dark': 'Nocturno',

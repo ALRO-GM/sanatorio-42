@@ -475,6 +475,48 @@ export const en: Record<string, string> = {
   'agenda.open42': 'Open on 42',
   'agenda.goTo': 'Go to {section}',
   'settings.theme': 'Theme',
+  'welcome.open': 'See the welcome tour',
+  'welcome.title': 'Welcome to Sanatorio 42',
+  'welcome.step': '{n} of {total}',
+  'welcome.go': 'Take me there',
+  'welcome.skip': 'Skip',
+  'welcome.back': 'Back',
+  'welcome.next': 'Next',
+  'welcome.done': 'Start',
+  'welcome.hello.title': 'Welcome to Sanatorio 42',
+  'welcome.hello.body':
+    'This is where 42 people help each other: who can give you a hand with your project, where they sit and when. Here are the basics in a minute.',
+  'welcome.record.title': 'Your record',
+  'welcome.record.body':
+    'Your level, your titles and your health status: the pace you are on and when the black hole would catch you. Enter your pace to see all your dates.',
+  'welcome.waiting.title': 'Waiting room',
+  'welcome.waiting.body':
+    'Pick a project to see who passed it or is doing it, who is on duty and where they sit on the map. You can ask those who offer for help.',
+  'welcome.duty.title': 'On duty',
+  'welcome.duty.body':
+    'Switch on «On duty» and mark the half hours when you can help. People will book you and you will earn XP; whatever is already in your calendar cannot be booked.',
+  'welcome.board.title': 'Board',
+  'welcome.board.body':
+    'Questions for each project, ordered by circles. Ask, answer and read the guide kept by those who already passed it.',
+  'welcome.groups.title': 'Therapies and whiteboards',
+  'welcome.groups.body':
+    'Meet to get a project done together (therapies, with reserved seats) or to explain a concept to anyone who wants to come (whiteboards).',
+  'welcome.agenda.title': 'Calendar',
+  'welcome.agenda.body':
+    'Everything in one place: your 42 evaluations, exams and events, your duty, therapies and whiteboards. As a list or with the hours in view.',
+  'welcome.net.title': 'Network and clusters',
+  'welcome.net.body':
+    'Who you have evaluated with and who sits where right now. On the map you can highlight your circle or whoever finished your project.',
+  'welcome.comfort.title': 'Make it yours',
+  'welcome.comfort.body':
+    'In the footer you can change language, theme, text size, colour-blind colours and zen mode; in your menu, customise the tabs. This welcome is there too.',
+  'settings.text': 'Text',
+  'settings.text.auto': 'Automatic',
+  'settings.cvd': 'Colour blindness',
+  'settings.cvdHint':
+    'Blue and orange instead of green and red, and more contrast where only colour tells things apart',
+  'settings.zen': 'Zen mode',
+  'settings.zenHint': 'The bare minimum: no animations, pop-ups or decorative notices',
   'settings.theme.auto': 'Match system',
   'settings.theme.light': 'Light',
   'settings.theme.dark': 'Dark',

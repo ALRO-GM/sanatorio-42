@@ -463,6 +463,47 @@ export const eu: Record<string, string> = {
   'agenda.open42': 'Ireki 42n',
   'agenda.goTo': 'Joan hona: {section}',
   'settings.theme': 'Gaia',
+  'welcome.open': 'Ikusi ongietorria',
+  'welcome.title': 'Ongi etorri Sanatorio 42ra',
+  'welcome.step': '{n} / {total}',
+  'welcome.go': 'Eraman nazazu',
+  'welcome.skip': 'Saltatu',
+  'welcome.back': 'Aurrekoa',
+  'welcome.next': 'Hurrengoa',
+  'welcome.done': 'Hasi',
+  'welcome.hello.title': 'Ongi etorri Sanatorio 42ra',
+  'welcome.hello.body':
+    'Hemen 42ko jendeak elkar laguntzen du: nork lagun zaitzakeen zure proiektuarekin, non dagoen eta noiz. Oinarrizkoa minutu batean.',
+  'welcome.record.title': 'Zure espedientea',
+  'welcome.record.body':
+    'Zure maila, tituluak eta osasun egoera: zein pacetan zauden eta noiz harrapatuko zintuzkeen black holeak.',
+  'welcome.waiting.title': 'Itxaron gela',
+  'welcome.waiting.body':
+    'Aukeratu proiektu bat eta ikusi nork gainditu duen edo egiten ari den, nor dagoen guardian eta non eserita dagoen.',
+  'welcome.duty.title': 'Guardian',
+  'welcome.duty.body':
+    'Piztu «Guardian» eta markatu lagun dezakezun ordu erdiak. Denbora eskatuko dizute eta XP irabaziko duzu.',
+  'welcome.board.title': 'Taula',
+  'welcome.board.body':
+    'Proiektu bakoitzeko zalantzak, zirkuluka. Galdetu, erantzun eta irakurri gida.',
+  'welcome.groups.title': 'Terapiak eta arbelak',
+  'welcome.groups.body':
+    'Elkartu proiektu bat batera ateratzeko (terapiak) edo kontzeptu bat azaltzeko (arbelak).',
+  'welcome.agenda.title': 'Egutegia',
+  'welcome.agenda.body':
+    'Dena leku bakarrean: 42ko zuzenketak, azterketak eta ekitaldiak, guardia, terapiak eta arbelak.',
+  'welcome.net.title': 'Sarea eta klusterrak',
+  'welcome.net.body': 'Norekin zuzendu duzun eta nor non dagoen eserita orain.',
+  'welcome.comfort.title': 'Zure neurrira',
+  'welcome.comfort.body':
+    'Orri-oinean hizkuntza, gaia, testuaren tamaina, daltonismorako koloreak eta zen modua alda ditzakezu. Ongietorri hau zure menuan ere badago.',
+  'settings.text': 'Testua',
+  'settings.text.auto': 'Automatikoa',
+  'settings.cvd': 'Daltonismoa',
+  'settings.cvdHint':
+    'Urdina eta laranja berdea eta gorriaren ordez, eta kontraste gehiago kolorea bakarrik bereizten duen tokietan',
+  'settings.zen': 'Zen modua',
+  'settings.zenHint': 'Gutxienekoa: animaziorik, leihotxorik eta apaingarrizko oharrik gabe',
   'settings.theme.auto': 'Sistemak bezala',
   'settings.theme.light': 'Argia',
   'settings.theme.dark': 'Gauekoa',

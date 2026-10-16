@@ -25,6 +25,8 @@ type HeaderProps = {
   onCustomize: () => void
   /** Abre el formulario de incidencias y sugerencias. */
   onInbox: () => void
+  /** Volver a ver la bienvenida. */
+  onWelcome: () => void
   onLogout: () => void
 }
 
@@ -45,6 +47,7 @@ export function Header({
   onGo,
   onCustomize,
   onInbox,
+  onWelcome,
   onLogout,
 }: HeaderProps) {
   const { t } = useI18n()
@@ -203,6 +206,7 @@ export function Header({
                 null,
                 { id: 'personalizar', icon: 'ajustes', label: t('layout.open'), run: onCustomize },
                 { id: 'incidencias', icon: 'bicho', label: t('inbox.open'), run: onInbox },
+                { id: 'bienvenida', icon: 'pregunta', label: t('welcome.open'), run: onWelcome },
                 null,
                 { id: 'salir', icon: 'salir', label: t('app.logout'), run: onLogout, danger: true },
               ]}

@@ -56,6 +56,27 @@
   root.dataset.theme = dark ? 'dark' : 'light'
   root.dataset.style = style !== null && /^[a-z0-9-]{1,30}$/.test(style) ? style : 'clinica'
 
+  // Comodidad (`src/shared/comfort.ts`): tamaño del texto, daltonismo y zen.
+  try {
+    var comfort = JSON.parse(localStorage.getItem('sanatorio_comfort') || '{}') || {}
+    var sizes = [90, 100, 110, 125, 150]
+    var width = window.screen.width
+    var size =
+      sizes.indexOf(comfort.text) >= 0
+        ? comfort.text
+        : width >= 2400
+          ? 125
+          : width >= 1800
+            ? 110
+            : 100
+
+    if (size !== 100) root.style.fontSize = size + '%'
+    root.dataset.cvd = comfort.cvd === true ? 'on' : 'off'
+    root.dataset.zen = comfort.zen === true ? 'on' : 'off'
+  } catch {
+    // Sin almacenamiento: tamaño de fábrica.
+  }
+
   if (vars !== null && typeof vars === 'object') {
     Object.keys(vars).forEach(function (name) {
       // Solo variables de CSS: lo guardado no puede tocar otra cosa.

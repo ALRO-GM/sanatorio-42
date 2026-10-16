@@ -44,3 +44,5 @@
 @import './system.css';
 /* La piel: aplica a los componentes las variables de aspecto de cada estilo. */
 @import './skin.css';
+/* Comodidad: daltonismo y modo zen. La última, para ganar a todo. */
+@import './comfort.css';

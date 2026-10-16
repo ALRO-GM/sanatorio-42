@@ -84,8 +84,8 @@ Orden (se marca cada uno al desplegarlo):
 - [x] 24 Terapias: «proponer puestos», puestos rotos (7 días), avisar a quien hace el mismo proyecto.
 - [x] 25 Calendario: vistas compacta / día / desde ahora.
 - [x] 18 Peticiones de ayuda en ventana obligatoria (recibir y rechazo).
-- [ ] 29 Daltónicos, modo zen y demo de bienvenida.
-- [ ] 22 Tamaño de texto 90–150 % y móvil.
+- [x] 29 Daltónicos, modo zen y demo de bienvenida.
+- [x] 22 Tamaño de texto 90–150 % y móvil.
 - [x] 33 Code Clicker: tope con pace en riesgo, logro por donar.
 
 **D. Muchos datos (al final, poco a poco en horas de poco uso)**

@@ -1013,3 +1013,46 @@ dialog.help-gate.news {
   font-size: 1rem;
   text-transform: capitalize;
 }
+
+/* La bienvenida: una diapositiva cada vez, con su icono grande y los puntos. */
+dialog.welcome {
+  width: min(460px, calc(100vw - 1.5rem));
+  text-align: center;
+}
+.welcome-art {
+  display: grid;
+  place-items: center;
+  width: 84px;
+  height: 84px;
+  margin: 0.4rem auto 0.8rem;
+  border-radius: 24px;
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+dialog.welcome h3 {
+  margin: 0.3rem 0 0.6rem;
+}
+dialog.welcome p {
+  min-height: 4.8em;
+  color: var(--text-2);
+}
+.welcome-dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin: 0.8rem 0;
+}
+.welcome-dots i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--border-strong);
+}
+.welcome-dots i.on {
+  width: 22px;
+  border-radius: 4px;
+  background: var(--accent);
+}
+dialog.welcome .actions {
+  justify-content: space-between;
+}

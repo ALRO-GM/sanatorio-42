@@ -459,6 +459,47 @@ export const ca: Record<string, string> = {
   'agenda.open42': 'Obre a 42',
   'agenda.goTo': 'Ves a {section}',
   'settings.theme': 'Tema',
+  'welcome.open': 'Mira la benvinguda',
+  'welcome.title': 'Benvinguda a Sanatorio 42',
+  'welcome.step': '{n} de {total}',
+  'welcome.go': 'Porta-m’hi',
+  'welcome.skip': 'Salta',
+  'welcome.back': 'Enrere',
+  'welcome.next': 'Següent',
+  'welcome.done': 'Comença',
+  'welcome.hello.title': 'Benvinguda a Sanatorio 42',
+  'welcome.hello.body':
+    'Aquí la gent de 42 s’ajuda: qui et pot donar un cop de mà amb el teu projecte, on seu i quan. T’ensenyem el bàsic en un minut.',
+  'welcome.record.title': 'El teu expedient',
+  'welcome.record.body':
+    'El teu nivell, els teus títols i el teu estat de salut: el pace que portes i quan t’atraparia el black hole.',
+  'welcome.waiting.title': 'Sala d’espera',
+  'welcome.waiting.body':
+    'Tria un projecte i veuràs qui l’ha aprovat o l’està fent, qui està de guàrdia i on seu al mapa.',
+  'welcome.duty.title': 'De guàrdia',
+  'welcome.duty.body':
+    'Activa «De guàrdia» i marca les mitges hores en què pots ajudar. Et demanaran una estona i guanyaràs XP.',
+  'welcome.board.title': 'Tauler',
+  'welcome.board.body':
+    'Els dubtes de cada projecte, per cercles. Pregunta, respon i mira la guia.',
+  'welcome.groups.title': 'Teràpies i pissarres',
+  'welcome.groups.body':
+    'Quedeu per treure un projecte junts (teràpies) o per explicar un concepte (pissarres).',
+  'welcome.agenda.title': 'Calendari',
+  'welcome.agenda.body':
+    'Tot en un lloc: correccions, exàmens i esdeveniments de 42, la guàrdia, teràpies i pissarres.',
+  'welcome.net.title': 'Xarxa i clústers',
+  'welcome.net.body': 'Amb qui t’has corregit i qui seu on ara mateix.',
+  'welcome.comfort.title': 'A la teva mida',
+  'welcome.comfort.body':
+    'Al peu pots canviar idioma, tema, mida del text, colors per a daltonisme i el mode zen. Aquesta benvinguda també és al teu menú.',
+  'settings.text': 'Text',
+  'settings.text.auto': 'Automàtic',
+  'settings.cvd': 'Daltonisme',
+  'settings.cvdHint':
+    'Blau i taronja en lloc de verd i vermell, i més contrast on només el color diferencia les coses',
+  'settings.zen': 'Mode zen',
+  'settings.zenHint': 'El mínim: sense animacions, finestretes ni avisos decoratius',
   'settings.theme.auto': 'Com el sistema',
   'settings.theme.light': 'Clar',
   'settings.theme.dark': 'Nocturn',

@@ -6,6 +6,7 @@ import type { SyncStatus } from '@sanatorio/contracts'
 import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
+import { ComfortSettings } from './ComfortSettings'
 import { LangSelect } from './LangSelect'
 import { ThemeSelect } from './ThemeSelect'
 
@@ -39,6 +40,7 @@ export function Settings({ campusId, onCampusChange }: SettingsProps) {
     <div className="settings" aria-label={t('settings.label')}>
       <LangSelect />
       <ThemeSelect />
+      <ComfortSettings />
       {campuses.data !== undefined && campuses.data.length > 0 && campusId !== undefined && (
         <label className="setting">
           <span>{t('settings.campus')}</span>

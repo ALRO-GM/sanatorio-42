@@ -6,6 +6,7 @@ import { BroadcastGate } from '../features/admin/BroadcastGate'
 import { LegalGate } from '../features/legal/LegalGate'
 import { ReviewGate } from '../features/clicker/ReviewGate'
 import { HelpGate } from '../features/help/HelpGate'
+import { Welcome } from '../features/welcome/Welcome'
 import { AlertCenter } from '../features/alerts/AlertCenter'
 import { EasterEgg } from '../features/clicker/EasterEgg'
 import { QuotaNotice } from '../features/alerts/QuotaNotice'
@@ -52,6 +53,8 @@ export function Clinic({ me, onLogout }: ClinicProps) {
   // Cambia al elegir otro campus: todo lo que depende del campus se vuelve a montar.
   const [campusVersion, setCampusVersion] = useState(0)
   const [customizing, setCustomizing] = useState(false)
+  // La bienvenida, abierta a mano desde el menú de la cuenta.
+  const [welcoming, setWelcoming] = useState(false)
   // Qué buzón está abierto: el de avisos, o el de escribir a quien administra.
   const [box, setBox] = useState<'notices' | 'inbox' | null>(null)
   /** La conversación abierta en el buzón, o `null`. */
@@ -131,6 +134,9 @@ export function Clinic({ me, onLogout }: ClinicProps) {
         onInbox={() => {
           setBox('inbox')
         }}
+        onWelcome={() => {
+          setWelcoming(true)
+        }}
         onLogout={onLogout}
       />
 
@@ -141,6 +147,15 @@ export function Clinic({ me, onLogout }: ClinicProps) {
         <BroadcastGate pending={pulse?.broadcasts ?? 0} onChange={refresh} />
         <ReviewGate pending={pulse?.clickerReviews ?? 0} onChange={refresh} />
         <HelpGate pending={pulse?.help ?? 0} onChange={refresh} />
+        <Welcome
+          open={welcoming}
+          onGo={(next) => {
+            openSection(next)
+          }}
+          onClose={() => {
+            setWelcoming(false)
+          }}
+        />
         <EasterEgg
           onRed={() => {
             openSection('clicker')

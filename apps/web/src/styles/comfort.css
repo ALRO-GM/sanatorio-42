@@ -1,0 +1,69 @@
+/*
+ * Comodidad (`src/shared/comfort.ts`): colores para daltonismo y modo zen. Va
+ * la última para ganar a los estilos y a sus paletas.
+ */
+
+/* Daltonismo: la paleta de Okabe e Ito. Lo que era verde (bien, de guardia)
+   pasa a azul y lo que era rojo (peligro, rechazado) a naranja oscuro; el
+   dorado se queda en un amarillo que se distingue de los dos. */
+:root[data-cvd='on'] {
+  --ok: #0072b2 !important;
+  --danger: #d55e00 !important;
+  --danger-soft: color-mix(in srgb, #d55e00 14%, var(--surface)) !important;
+  --stage-gave: #56b4e9 !important;
+  --stage-got: #e69f00 !important;
+}
+:root[data-cvd='on'] .cluster-map {
+  --seat-green: #0072b2;
+  --seat-gold: #e69f00;
+  --seat-blue: #56b4e9;
+  --seat-violet: #cc79a7;
+  --seat-teal: #009e73;
+}
+/* En el calendario, cada tipo con un color de la misma paleta (además de su
+   icono): así no se confunden la guardia, los eventos y los exámenes. */
+:root[data-cvd='on'] .kind-help {
+  --kind: #56b4e9;
+}
+:root[data-cvd='on'] .kind-therapy {
+  --kind: #0072b2;
+}
+:root[data-cvd='on'] .kind-board {
+  --kind: #cc79a7;
+}
+:root[data-cvd='on'] .kind-evaluation {
+  --kind: #e69f00;
+}
+:root[data-cvd='on'] .kind-event_joined {
+  --kind: #009e73;
+}
+:root[data-cvd='on'] .kind-exam {
+  --kind: #d55e00;
+}
+/* Lo de guardia o encendido, además del color, con el punto subrayado. */
+:root[data-cvd='on'] .badge.on {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Modo zen: lo mínimo. Sin animaciones ni transiciones, sin las manchas del
+   fondo, sin la ventanita de Code Clicker, sin avisos de logros del secreto,
+   sin noticias del juego y sin las ayudas (i) de cada sección. Lo obligatorio
+   (comunicados, revisiones, peticiones de ayuda) sigue saliendo. */
+:root[data-zen='on'] *,
+:root[data-zen='on'] *::before,
+:root[data-zen='on'] *::after {
+  animation: none !important;
+  transition: none !important;
+}
+:root[data-zen='on'] body::before,
+:root[data-zen='on'] body::after,
+:root[data-zen='on'] .cc-mini,
+:root[data-zen='on'] .cc-egg-toast,
+:root[data-zen='on'] .cc-news,
+:root[data-zen='on'] .info-tip {
+  display: none !important;
+}
+:root[data-zen='on'] body {
+  background: var(--bg) !important;
+}
