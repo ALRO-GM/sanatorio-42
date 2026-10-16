@@ -14,6 +14,11 @@ export function createMeetModule(deps: MeetServiceOptions): MeetModule {
 
   return {
     name: 'meet',
+    personal: [
+      { table: 'event_messages', logins: ['login'] },
+      { table: 'conversation_marks', logins: ['login'] },
+      { table: 'event_alerts', logins: ['login'] },
+    ],
     service,
     routes: (app, { session }) => {
       /** `GET /events/thread?id=&after=` → el chat de un evento en el que participas. */

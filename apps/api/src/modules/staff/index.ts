@@ -20,6 +20,7 @@ export function createStaffModule(deps: StaffServiceOptions): StaffModule {
 
   return {
     name: 'staff',
+    personal: [{ table: 'report_exports', logins: ['login', 'requested_by'] }],
     service,
     stores: [
       tableStore(deps.db, {

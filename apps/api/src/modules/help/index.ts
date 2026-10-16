@@ -42,6 +42,10 @@ export function createHelpModule(deps: HelpModuleDeps): HelpModule {
 
   return {
     name: 'help',
+    personal: [
+      { table: 'help_days', logins: ['login'] },
+      { table: 'help_bookings', logins: ['helper', 'requester'] },
+    ],
     service,
     routes: (app, context) => {
       registerHelpRoutes(app, context, service)

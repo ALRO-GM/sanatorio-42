@@ -72,6 +72,15 @@ export function createAdminModule(deps: AdminModuleDeps): AdminModule {
 
   return {
     name: 'admin',
+    personal: [
+      { table: 'user_roles', logins: ['login'] },
+      { table: 'user_blocks', logins: ['login'] },
+      { table: 'tickets', logins: ['login'] },
+      { table: 'request_stats', logins: ['login'] },
+      { table: 'user_limits', logins: ['login'] },
+      // El secreto del segundo factor no se da nunca: con él se sacan códigos.
+      { table: 'admin_second_factor', logins: ['login'], omit: ['secret'] },
+    ],
     service,
     secondFactor,
     routes: (app, { session }) => {

@@ -3,6 +3,7 @@ import { lazy, Suspense, useCallback, useEffect, useState } from 'react'
 import type { CurrentUser } from '@sanatorio/contracts'
 
 import { BroadcastGate } from '../features/admin/BroadcastGate'
+import { LegalGate } from '../features/legal/LegalGate'
 import { AlertCenter } from '../features/alerts/AlertCenter'
 import { EasterEgg } from '../features/clicker/EasterEgg'
 import { QuotaNotice } from '../features/alerts/QuotaNotice'
@@ -124,6 +125,7 @@ export function Clinic({ me, onLogout }: ClinicProps) {
       {/* La red de correcciones necesita sitio: es la única sección a todo lo ancho. */}
       <main className={`container ${section === 'red' || section === 'clicker' ? 'wide' : ''}`}>
         <QuotaNotice status={pulse?.quota ?? null} />
+        <LegalGate />
         <BroadcastGate pending={pulse?.broadcasts ?? 0} onChange={refresh} />
         <EasterEgg
           onRed={() => {

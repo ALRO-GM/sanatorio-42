@@ -13,7 +13,12 @@ export function Footer({ campusId, onCampusChange }: FooterProps) {
   return (
     <footer className="footer">
       <Settings campusId={campusId} onCampusChange={onCampusChange} />
-      <p>{t('app.footer')}</p>
+      <p>
+        {t('app.footer')} ·{' '}
+        <a className="link" href="#/privacidad">
+          {t('legal.link')}
+        </a>
+      </p>
     </footer>
   )
 }

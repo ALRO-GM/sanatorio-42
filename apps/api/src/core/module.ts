@@ -12,6 +12,7 @@
 import type { FastifyInstance } from 'fastify'
 
 import type { DataStore } from './db/data-store.js'
+import type { PersonalTable } from './db/personal-data.js'
 import type { SessionReader } from './session.js'
 
 /** Lo que recibe un módulo al registrar sus rutas. */
@@ -44,6 +45,11 @@ export type AppModule = {
    * panel. Nada se borra solo por viejo.
    */
   readonly stores?: readonly DataStore[]
+  /**
+   * Las tablas del módulo con datos de una persona: es lo que se le da al
+   * descargar sus datos (`GET /me/export`). Toda tabla con un login va aquí.
+   */
+  readonly personal?: readonly PersonalTable[]
   /** Arranca el trabajo de fondo, si lo tiene. Solo lo llama `main.ts`. */
   readonly start?: () => void
   /** Para el trabajo de fondo y espera a que termine lo que esté a medias. */

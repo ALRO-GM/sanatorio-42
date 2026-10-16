@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 
 import { Login } from '../features/auth/Login'
+import { LegalPage } from '../features/legal/LegalPage'
 import { useAuth } from '../features/auth/useAuth'
 import { StaffPage } from '../features/staff/StaffPage'
 import { useI18n } from '../shared/i18n'
@@ -106,6 +107,15 @@ function StudentApp() {
     )
   }
 
+  // Sin sesión también se puede leer qué se hace con los datos antes de entrar.
+  if (me === null && /^#\/?privacidad(\/|$)/.test(window.location.hash)) {
+    return (
+      <main className="container">
+        <PublicLegal />
+      </main>
+    )
+  }
+
   if (me === null) {
     const notice =
       oauthError === null
@@ -118,4 +128,18 @@ function StudentApp() {
   }
 
   return <Clinic me={me} onLogout={() => void logout()} />
+}
+
+/** La privacidad sin sesión, con una vuelta a la entrada. */
+function PublicLegal() {
+  const { t } = useI18n()
+
+  return (
+    <>
+      <a className="link" href="#/">
+        {t('legal.back')}
+      </a>
+      <LegalPage signedIn={false} />
+    </>
+  )
 }

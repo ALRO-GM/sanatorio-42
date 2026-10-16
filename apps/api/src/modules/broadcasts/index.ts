@@ -16,6 +16,10 @@ export function createBroadcastsModule(deps: BroadcastsServiceOptions): Broadcas
 
   return {
     name: 'broadcasts',
+    personal: [
+      { table: 'broadcasts', logins: ['from_login'] },
+      { table: 'broadcast_answers', logins: ['login'] },
+    ],
     service,
     stores: [
       tableStore(deps.db, {

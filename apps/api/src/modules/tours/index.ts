@@ -15,6 +15,7 @@ export function createToursModule(deps: { db: Db; now?: () => number }): ToursMo
 
   return {
     name: 'tours',
+    personal: [{ table: 'tour_rates', logins: ['login'] }],
     service,
     routes: (app, { session }) => {
       /** `GET /tours/speeds` → a cuánto va cada demostración de fábrica. */

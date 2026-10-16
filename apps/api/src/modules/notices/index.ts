@@ -36,6 +36,7 @@ export function createNoticesModule(deps: NoticesModuleDeps): NoticesModule {
 
   return {
     name: 'notices',
+    personal: [{ table: 'notices', logins: ['login'] }],
     service,
     routes: (app, { session }) => {
       /**

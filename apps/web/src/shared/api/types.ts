@@ -94,6 +94,7 @@ import type {
   UsageSend,
   UsageStats,
   SecondFactorStatus,
+  LegalStatus,
 } from '@sanatorio/contracts'
 
 /** `GET /projects/:id/peers`, con lo que viaja en cabeceras ya leído. */
@@ -214,6 +215,11 @@ export type Api = {
   setUserLimit: (login: string, perHour: number | null) => Promise<void>
   getAdminTickets: () => Promise<Ticket[]>
   answerTicket: (id: number, answer: string, status: 'answered' | 'closed') => Promise<Ticket>
+  // Privacidad y condiciones.
+  getLegal: () => Promise<LegalStatus>
+  acceptLegal: (version: string) => Promise<LegalStatus>
+  /** Dirección de la descarga de todos tus datos (JSON). */
+  exportUrl: () => string
   // Segundo factor del panel.
   getSecondFactor: () => Promise<SecondFactorStatus>
   setupSecondFactor: () => Promise<{ uri: string }>

@@ -215,3 +215,11 @@ export type SecondFactorStatus = {
   /** Hasta cuándo está abierto el panel en este navegador (ISO-8601), o `null`. */
   elevatedUntil: string | null
 }
+
+/** `GET /me/legal`: la versión vigente de la privacidad y las condiciones, y si la aceptaste. */
+export type LegalStatus = {
+  /** Versión vigente (una fecha, `2026-10-16`). Cambia cuando cambia el texto. */
+  version: string
+  /** Cuándo aceptaste esa versión (ISO-8601), o `null` si aún no. */
+  acceptedAt: string | null
+}

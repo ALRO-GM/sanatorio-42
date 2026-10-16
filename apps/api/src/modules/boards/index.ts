@@ -42,6 +42,10 @@ export function createBoardsModule(deps: BoardsModuleDeps): BoardsModule {
 
   return {
     name: 'boards',
+    personal: [
+      { table: 'boards', logins: ['host'] },
+      { table: 'board_attendees', logins: ['login'] },
+    ],
     service,
     routes: (app, context) => {
       registerBoardsRoutes(app, context, service)

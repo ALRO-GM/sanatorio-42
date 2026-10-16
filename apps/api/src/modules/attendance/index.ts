@@ -16,6 +16,10 @@ export function createAttendanceModule(deps: AttendanceServiceOptions): Attendan
 
   return {
     name: 'attendance',
+    personal: [
+      { table: 'event_attendance', logins: ['login', 'host'] },
+      { table: 'event_checkins', logins: ['login'] },
+    ],
     service,
     stores: [
       tableStore(deps.db, {

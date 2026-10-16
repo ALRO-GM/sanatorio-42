@@ -12,6 +12,9 @@ import { useEgg } from '../features/clicker/egg'
 // Solo la portada (la sala de espera) viaja con la web. El resto de secciones se
 // descarga cuando alguien las abre: quien entra a mirar quién le puede ayudar no
 // paga el calendario, el grafo del tablón ni la física de la red.
+const LegalPage = lazy(() =>
+  import('../features/legal/LegalPage').then((m) => ({ default: m.LegalPage })),
+)
 const ClustersPage = lazy(() =>
   import('../features/map/ClustersPage').then((m) => ({ default: m.ClustersPage })),
 )
@@ -132,6 +135,7 @@ export function SectionView({
         <p className="estado">{t('error.404')}</p>
       )}
       {section === 'clusters' && <ClustersPage me={me.login} />}
+      {section === 'privacidad' && <LegalPage signedIn />}
       {section === 'gestion' &&
         (profile.data?.admin === true ? (
           <AdminPage campusId={profile.data.campusId} />

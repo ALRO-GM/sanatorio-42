@@ -38,6 +38,15 @@ export function createDoubtsModule(deps: DoubtsModuleDeps): DoubtsModule {
 
   return {
     name: 'doubts',
+    personal: [
+      { table: 'doubts', logins: ['author'] },
+      { table: 'doubt_answers', logins: ['author'] },
+      { table: 'guides', logins: ['updated_by'] },
+      { table: 'guide_proposals', logins: ['author'] },
+      { table: 'guide_changes', logins: ['proposer'] },
+      { table: 'guide_change_flags', logins: ['login'] },
+      { table: 'guide_strikes', logins: ['login'] },
+    ],
     service,
     routes: (app, context) => {
       registerDoubtsRoutes(app, context, service)

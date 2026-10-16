@@ -39,6 +39,7 @@ export function createPeersModule(deps: PeersModuleDeps): PeersModule {
 
   return {
     name: 'peers',
+    personal: [{ table: 'availability', logins: ['login'] }],
     peers,
     availability,
     availabilityRepository,

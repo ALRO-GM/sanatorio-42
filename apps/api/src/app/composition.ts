@@ -32,6 +32,8 @@ import { createDoubtsModule } from '../modules/doubts/index.js'
 import type { DoubtsModule } from '../modules/doubts/index.js'
 import { createHelpModule } from '../modules/help/index.js'
 import type { HelpModule } from '../modules/help/index.js'
+import { createLegalModule } from '../modules/legal/index.js'
+import type { LegalModule } from '../modules/legal/index.js'
 import { createMapModule } from '../modules/map/index.js'
 import type { MapModule } from '../modules/map/index.js'
 import { createMeetModule } from '../modules/meet/index.js'
@@ -108,6 +110,7 @@ export type Services = {
   broadcasts: BroadcastsModule['service']
   clicker: ClickerModule['service']
   tours: ToursModule['service']
+  legal: LegalModule['service']
 }
 
 export type Composition = {
@@ -285,6 +288,12 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
   })
 
   const tours = createToursModule({ db, ...clock })
+  // `modules` se monta justo después: para cuando alguien descargue sus datos ya estará.
+  const legal = createLegalModule({
+    db,
+    personal: () => modules.flatMap((module) => module.personal ?? []),
+    ...clock,
+  })
 
   halted = () => admin.service.halted()
   const usage = createUsageModule({
@@ -317,6 +326,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     clicker,
     tours,
     staff,
+    legal,
   ]
 
   return {
@@ -351,6 +361,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
       broadcasts: broadcasts.service,
       clicker: clicker.service,
       tours: tours.service,
+      legal: legal.service,
     },
   }
 }

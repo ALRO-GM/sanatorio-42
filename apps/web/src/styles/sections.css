@@ -807,3 +807,33 @@ button.link {
     stroke-dashoffset: 0;
   }
 }
+
+/* Privacidad y condiciones: un documento para leer, no una tarjeta de datos. */
+.legal-doc {
+  display: grid;
+  gap: 0.9rem;
+  max-width: 46rem;
+  line-height: 1.55;
+}
+.legal-doc h3 {
+  margin: 0.4rem 0 0.2rem;
+}
+.legal-doc p,
+.legal-doc ul {
+  margin: 0.25rem 0;
+}
+.legal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+.legal-summary {
+  display: grid;
+  gap: 0.35rem;
+  padding-left: 1.1rem;
+}
+dialog.legal-gate {
+  width: min(640px, calc(100vw - 1.5rem));
+}

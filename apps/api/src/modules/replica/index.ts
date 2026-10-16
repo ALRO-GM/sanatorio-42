@@ -119,6 +119,18 @@ export function createReplicaModule(deps: ReplicaModuleDeps): ReplicaModule {
 
   return {
     name: 'replica',
+    personal: [
+      { table: 'users', logins: ['login'] },
+      { table: 'campus_members', userIds: ['user_id'] },
+      { table: 'project_users', userIds: ['user_id'] },
+      { table: 'presence', userIds: ['user_id'] },
+      { table: 'corrections', logins: ['corrector', 'corrected'] },
+      { table: 'agenda_users', logins: ['login'] },
+      { table: 'user_tracks', logins: ['login'] },
+      { table: 'user_levels', logins: ['login'] },
+      { table: 'quota_queue', logins: ['login'] },
+      { table: 'curriculum_votes', logins: ['login'] },
+    ],
     repository,
     agenda,
     curriculum,

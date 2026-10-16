@@ -28,6 +28,8 @@ export const SECTIONS = [
   { id: 'clicker', icon: 'terminal', inNav: false },
   // Panel de gestión: solo para quien administra la web.
   { id: 'gestion', icon: 'gestion', inNav: false },
+  // Privacidad y condiciones: se llega desde el pie.
+  { id: 'privacidad', icon: 'escudo', inNav: false },
 ] as const satisfies readonly { id: string; icon: IconName; inNav: boolean }[]
 
 export type Section = (typeof SECTIONS)[number]['id']

@@ -55,6 +55,9 @@ export function Login({ onLogin, notice }: LoginProps) {
         <a className="link" href="#/validar">
           {t('login.staff')}
         </a>
+        <a className="link" href="#/privacidad">
+          {t('legal.link')}
+        </a>
         <p>{t('app.footer')}</p>
       </footer>
     </main>

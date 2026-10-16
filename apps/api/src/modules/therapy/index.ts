@@ -36,6 +36,10 @@ export function createTherapyModule(deps: TherapyModuleDeps): TherapyModule {
 
   return {
     name: 'therapy',
+    personal: [
+      { table: 'therapy_groups', logins: ['creator'] },
+      { table: 'therapy_members', logins: ['login'] },
+    ],
     service,
     routes: (app, context) => {
       registerTherapyRoutes(app, context, service)

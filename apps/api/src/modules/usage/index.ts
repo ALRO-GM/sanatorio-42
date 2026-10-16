@@ -24,6 +24,11 @@ export function createUsageModule(deps: {
 
   return {
     name: 'usage',
+    personal: [
+      { table: 'usage_counts', logins: ['login'] },
+      { table: 'usage_time', logins: ['login'] },
+      { table: 'usage_flows', logins: ['login'] },
+    ],
     service,
     stores: [
       tableStore(deps.db, {

@@ -154,6 +154,16 @@ aplicación (no gasta cuota de la API: la CDN no la cuenta), la guarda en
 toda foto de la CDN (`photoUrl` en `shared/api/photos.ts`). Como mucho 1 500
 fotos nuevas por hora; una que 42 no da no se vuelve a pedir hasta pasada una hora.
 
+## Privacidad y condiciones
+GET /me/legal → `{ "version": "2026-10-16", "acceptedAt": null }`: la versión vigente
+y cuándo la aceptaste. La web no deja seguir hasta aceptarla.
+POST /me/legal/accept → `{ "version" }`: hay que mandar la vigente (si cambió
+mientras se leía, `409`).
+GET /me/export → todo lo tuyo, tabla a tabla, como JSON para descargar
+(`Content-Disposition: attachment`). Cada módulo apunta en `personal` qué tablas
+suyas tienen datos de alguien; un test comprueba que no falta ninguna. Los
+secretos (el del segundo factor) no salen nunca.
+
 ## Campus y preferencias
 GET /campuses
 [{ "id": 22, "name": "Madrid", "city": "Madrid", "country": "Spain", "tracked": true }]

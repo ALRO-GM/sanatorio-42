@@ -46,6 +46,12 @@ export function createProfileModule(deps: ProfileModuleDeps): ProfileModule {
 
   return {
     name: 'profile',
+    personal: [
+      { table: 'profiles', logins: ['login'] },
+      { table: 'xp_events', logins: ['login'] },
+      { table: 'reactions', logins: ['from_login', 'to_login'] },
+      { table: 'pace_refs', logins: ['login'] },
+    ],
     xp,
     profiles,
     routes: (app, context) => {

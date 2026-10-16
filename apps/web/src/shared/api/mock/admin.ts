@@ -20,6 +20,12 @@ import {
   notices,
 } from './state'
 
+/** La versión de mentira de la privacidad y las condiciones, y si se ha aceptado. */
+const legal: { version: string; acceptedAt: string | null } = {
+  version: '2026-10-16',
+  acceptedAt: null,
+}
+
 /** El panel de mentira: dado de alta o no, y hasta cuándo está abierto. */
 const panel: { enrolled: boolean; elevatedUntil: string | null } = {
   enrolled: false,
@@ -45,6 +51,9 @@ export const adminMock: Pick<
   | 'saveNotice'
   | 'withdrawTicket'
   | 'removeTicket'
+  | 'getLegal'
+  | 'acceptLegal'
+  | 'exportUrl'
   | 'getSecondFactor'
   | 'setupSecondFactor'
   | 'confirmSecondFactor'
@@ -169,6 +178,34 @@ export const adminMock: Pick<
     if (index === -1) throw fail(409, 'Ya no se puede retirar')
 
     tickets.splice(index, 1)
+  },
+
+  async getLegal() {
+    await delay(60)
+
+    return { ...legal }
+  },
+
+  async acceptLegal(version) {
+    await delay(100)
+    if (version !== legal.version) throw fail(409, 'El texto ha cambiado: léelo otra vez')
+    legal.acceptedAt ??= new Date().toISOString()
+
+    return { ...legal }
+  },
+
+  // La descarga de mentira: un JSON hecho aquí mismo, con datos inventados.
+  exportUrl() {
+    const data = {
+      login: ME.login,
+      exportedAt: new Date().toISOString(),
+      legalVersion: legal.version,
+      tables: { tickets: tickets.filter((ticket) => ticket.login === ME.login), notices },
+    }
+
+    return URL.createObjectURL(
+      new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }),
+    )
   },
 
   // Segundo factor de mentira: cualquier código de seis cifras vale, menos 000000.
