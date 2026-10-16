@@ -33,6 +33,8 @@ import { domainError } from '../../core/errors.js'
 import { parse } from '../../core/validation.js'
 import type { ReplicaRepository } from '../replica/index.js'
 import { clean, coarse, FINE_FOR_S, HOURLY_FOR_S, jump, thin } from './capital.rules.js'
+import { CLICK_HISTORY_S, overClicked } from './clicks.rules.js'
+import type { ClickSample } from './clicks.rules.js'
 import {
   hackerTitle,
   POOL_EVERY_MS,
@@ -68,6 +70,11 @@ const saveSchema = z.object({
   spent: figure.default(0),
   // El capital segundo a segundo desde el último guardado.
   capital: z
+    .array(z.tuple([z.number().int().min(0), figure]))
+    .max(1200)
+    .default([]),
+  // Y las pulsaciones contadas, igual: para ver un minuto a toda máquina.
+  clicks: z
     .array(z.tuple([z.number().int().min(0), figure]))
     .max(1200)
     .default([]),
@@ -148,6 +155,31 @@ export function createClickerService(options: ClickerServiceOptions) {
   const now = options.now ?? Date.now
   const iso = (): string => new Date(now()).toISOString()
   const notify: Notify = options.notify ?? (() => Promise.resolve())
+
+  /**
+   * `clicks` si pulsa más de lo que aguanta una persona, o `null`. Se mira lo
+   * que manda la web segundo a segundo (para el minuto) y lo guardado con la
+   * hora de aquí (para los tramos largos, que no se pueden falsear desde fuera).
+   */
+  async function tooManyClicks(
+    login: string,
+    second: number,
+    clicks: number,
+    fine: readonly ClickSample[],
+  ): Promise<'clicks' | null> {
+    const history = await db.execute({
+      sql: 'SELECT at, clicks FROM clicker_clicks WHERE login = ? AND at >= ? ORDER BY at',
+      args: [login, second - CLICK_HISTORY_S],
+    })
+    const stored: ClickSample[] = history.rows.map((entry) => [
+      toNumber(entry.at),
+      Number(entry.clicks),
+    ])
+
+    return overClicked(fine) !== null || overClicked([...stored, [second, clicks]]) !== null
+      ? 'clicks'
+      : null
+  }
 
   /** Lo que hay en la bolsa común. */
   const poolAmount = async (): Promise<number> =>
@@ -297,18 +329,20 @@ export function createClickerService(options: ClickerServiceOptions) {
       if (rev !== sent.rev && found?.holder !== sent.session) stale()
 
       let caught = toNumber(found?.caught ?? 0)
-      const why = verdict(
-        {
-          total: Number(found?.last_total ?? 0),
-          perSecond: Number(found?.per_second ?? 0),
-          at: Date.parse(toText(found?.updated_at ?? iso())),
-          ledger: typeof found?.save === 'string' ? readSave(found.save) : null,
-          bonus: Number(found?.pool_bonus ?? 0),
-        },
-        sent,
-        ledger,
-        now(),
-      )
+      const second = Math.floor(now() / 1000)
+      const why =
+        verdict(
+          {
+            total: Number(found?.last_total ?? 0),
+            perSecond: Number(found?.per_second ?? 0),
+            at: Date.parse(toText(found?.updated_at ?? iso())),
+            ledger: typeof found?.save === 'string' ? readSave(found.save) : null,
+            bonus: Number(found?.pool_bonus ?? 0),
+          },
+          sent,
+          ledger,
+          now(),
+        ) ?? (await tooManyClicks(actor.login, second, ledger.clicks, clean(sent.clicks, now())))
 
       if (why !== null) {
         const last = typeof found?.caught_at === 'string' ? Date.parse(found.caught_at) : 0
@@ -402,6 +436,22 @@ export function createClickerService(options: ClickerServiceOptions) {
       const saved = result.rows[0]
 
       if (saved === undefined) stale()
+
+      // El contador de este guardado, con la hora de aquí, para los tramos largos.
+      await db.batch(
+        [
+          {
+            sql: `INSERT INTO clicker_clicks (login, at, clicks) VALUES (?, ?, ?)
+                  ON CONFLICT (login, at) DO UPDATE SET clicks = excluded.clicks`,
+            args: [actor.login, second, ledger.clicks],
+          },
+          {
+            sql: 'DELETE FROM clicker_clicks WHERE login = ? AND at < ?',
+            args: [actor.login, second - CLICK_HISTORY_S],
+          },
+        ],
+        'write',
+      )
 
       // El historial de capital, y el aviso si hay un salto que no se explica.
       const samples = clean(sent.capital, now())

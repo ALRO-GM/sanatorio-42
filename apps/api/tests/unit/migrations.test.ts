@@ -57,6 +57,7 @@ describe('migraciones', () => {
       'clicker_alerts',
       'clicker_capital',
       'clicker_cheats',
+      'clicker_clicks',
       'clicker_pool',
       'conversation_marks',
       'corrections',

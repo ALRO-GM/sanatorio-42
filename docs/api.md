@@ -754,6 +754,14 @@ la copia se borra. `404` si ya no está. Quien tuviera la partida abierta recibe
 
 DELETE /admin/clicker/alerts/:id → 204. Solo admins. Descarta un aviso de salto.
 
+Pulsar más de lo que aguanta una persona también es trampa (motivo `clicks`).
+No se mira segundo a segundo, sino el total de cada tramo seguido: más de 50
+por segundo durante un minuto, más de 9 durante media hora, y de media más de 6
+en 2 h, 4 en 6 h y 2 en 24 h (`clicks.rules.ts`). El minuto se mide con lo que
+manda la web en `clicks` (`[segundo, pulsaciones]`, como `capital`, reenviando
+el último minuto del guardado anterior); los tramos largos, con el contador de
+cada guardado y la hora del servidor (tabla `clicker_clicks`, 25 h).
+
 POST /admin/clicker/alerts/:id/review → `{ "verdict": "cheat" | "likely" | "clean" }`. 204.
 Solo admins. Lo que se decide sobre un salto de capital sospechoso:
 

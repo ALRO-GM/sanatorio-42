@@ -98,6 +98,8 @@ export type ClickerSaveInput = {
    * los bugs) segundo a segundo desde el último guardado: `[segundo, capital]`.
    */
   capital?: [at: number, capital: number][]
+  /** Las pulsaciones contadas segundo a segundo, `[segundo, pulsaciones]`. */
+  clicks?: [at: number, clicks: number][]
 }
 
 /**

@@ -77,6 +77,8 @@ const FRAME_MS = 100
 const BACKGROUND_FRAME_MS = 1000
 const LOCAL_SAVE_MS = 10_000
 const SERVER_SAVE_MS = 60_000
+/** Lo que se reenvía de las pulsaciones del guardado anterior, en segundos. */
+const CLICKS_OVERLAP_S = 60
 /** Cada cuánto se vuelve a intentar cargar si la API no contestó. */
 const RETRY_MS = 30_000
 /** Tras un guardado rechazado, lo que se espera antes de volver a recargar por otro. */
@@ -194,6 +196,8 @@ export function CodeClicker({
   const refusedAt = useRef(0)
   // El capital segundo a segundo, a la espera de mandarlo con el próximo guardado.
   const samples = useRef<[number, number][]>([])
+  // Las pulsaciones contadas segundo a segundo, igual: la API mira cada minuto seguido.
+  const clickSamples = useRef<[number, number][]>([])
   const reload = useRef<() => void>(() => undefined)
   const counter = useRef(0)
   const plus = useRef(egg.plus)
@@ -234,6 +238,7 @@ export function CodeClicker({
     if (!toServer || rev === null) return
 
     const sent = [...samples.current]
+    const sentClicks = [...clickSamples.current]
 
     api
       .saveClicker({
@@ -246,6 +251,7 @@ export function CodeClicker({
         prestige: current.prestige,
         spent: invested(current),
         capital: sent,
+        clicks: sentClicks,
       })
       .then(
         (done) => {
@@ -254,11 +260,17 @@ export function CodeClicker({
             // Lo mandado ya está allí. Se deja el último punto, para que un
             // salto entre un envío y el siguiente también se vea.
             samples.current = samples.current.filter(([at]) => at >= (sent.at(-1)?.[0] ?? 0))
+            // De las pulsaciones se queda el último minuto: una ráfaga que cae
+            // entre dos guardados se mide entera en el siguiente.
+            clickSamples.current = clickSamples.current.filter(
+              ([at]) => at >= (sentClicks.at(-1)?.[0] ?? 0) - CLICKS_OVERLAP_S,
+            )
 
             return
           }
 
           samples.current = []
+          clickSamples.current = []
 
           // La API no se la cree: se vuelve a la última partida buena, y la
           // carga se encarga de contar qué ha pasado.
@@ -294,6 +306,7 @@ export function CodeClicker({
         if (game.current === null || replace) {
           // Los puntos de la partida que se deja no valen para la que entra.
           samples.current = []
+          clickSamples.current = []
           game.current =
             restore(state.save, Date.now()) ??
             (replace ? null : restore(local.save, Date.now())) ??
@@ -371,6 +384,7 @@ export function CodeClicker({
         }
 
         sample(samples.current, Date.now(), capitalOf(current))
+        sample(clickSamples.current, Date.now(), current.clicks)
         loot.current = lootStep(loot.current, Date.now(), pool.current, Math.random)
         setFrame((value) => value + 1)
       },

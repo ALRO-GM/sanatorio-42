@@ -1356,6 +1356,7 @@ export const es: Record<string, string> = {
   'admin.clicker.why.rate': 'Ha escrito más de lo que da tiempo',
   'admin.clicker.why.speed': 'Más producción de la que cabe',
   'admin.clicker.why.prestige': 'Más prestigio del que cabe',
+  'admin.clicker.why.clicks': 'Pulsa más de lo que aguanta una persona',
   'admin.clicker.alerts': 'Saltos de capital por mirar',
   'admin.clicker.jump': '×{times} en {seconds} s',
   'admin.clicker.withGolden': 'abrió una pull request dorada',

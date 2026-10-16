@@ -1104,6 +1104,7 @@ export const en: Record<string, string> = {
   'admin.clicker.why.rate': 'Wrote more than there was time for',
   'admin.clicker.why.speed': 'More production than possible',
   'admin.clicker.why.prestige': 'More prestige than possible',
+  'admin.clicker.why.clicks': 'Clicks more than a person can keep up',
   'admin.clicker.alerts': 'Worth jumps to review',
   'admin.clicker.jump': '×{times} in {seconds} s',
   'admin.clicker.withGolden': 'opened a golden pull request',

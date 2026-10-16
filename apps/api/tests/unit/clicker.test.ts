@@ -238,7 +238,10 @@ describe('code clicker', () => {
     /** Guarda y sigue la `rev`, como hace la web. */
     const send = async (
       extra: Record<string, unknown>,
-      figures: Partial<typeof SAVE> & { capital?: [number, number][] } = {},
+      figures: Partial<typeof SAVE> & {
+        capital?: [number, number][]
+        clicks?: [number, number][]
+      } = {},
     ): Promise<{ caught: number; refused: boolean }> => {
       const total = Number(extra.total ?? 1500) + Number(extra.before ?? 0)
       const done = await services.clicker.save(ana, {
@@ -664,6 +667,67 @@ describe('code clicker', () => {
 
       // Quien no juega no coge nada.
       await expectCode(clicker.claimPool(actor('leo')), 'forbidden')
+    })
+
+    it('pulsar más que una persona: un minuto a más de 50 por segundo', async () => {
+      const { clicker, xp } = services
+      const second = (): number => Math.floor(clock.now() / 1000)
+
+      // Un minuto a 45 por segundo: se puede.
+      clock.advance(MINUTE)
+
+      const calm = Array.from({ length: 61 }, (_, i): [number, number] => [
+        second() - 60 + i,
+        i * 45,
+      ])
+
+      expect(await send({ clicks: 60 * 45 }, { clicks: calm })).toEqual({
+        caught: 0,
+        refused: false,
+      })
+
+      // El siguiente minuto, a 55: no.
+      clock.advance(MINUTE)
+
+      const fast = Array.from({ length: 61 }, (_, i): [number, number] => [
+        second() - 60 + i,
+        60 * 45 + i * 55,
+      ])
+
+      expect(await send({ clicks: 60 * 45 + 60 * 55 }, { clicks: fast })).toEqual({
+        caught: 1,
+        refused: true,
+      })
+      expect((await clicker.usage(actor('eva', { admin: true }), {})).players[0]).toMatchObject({
+        caughtWhy: 'clicks',
+      })
+      expect((await xp.expediente(ana)).hacks).toBe(1)
+    })
+
+    it('pulsar más que una persona: media hora a más de 9 por segundo, con los guardados', async () => {
+      // Sin muestras finas (una web que no las manda): bastan los guardados de cada minuto.
+      let clicks = 0
+
+      for (let minute = 1; minute <= 30; minute += 1) {
+        clock.advance(MINUTE)
+        clicks += 60 * 8
+        expect(await send({ clicks })).toEqual({ caught: 0, refused: false })
+      }
+
+      // Ahora a 10 por segundo. La media de la última media hora pasa de 9 en
+      // cuanto más de la mitad es a 10: al minuto 16.
+      const results: { caught: number; refused: boolean }[] = []
+
+      for (let minute = 1; minute <= 20; minute += 1) {
+        clock.advance(MINUTE)
+        clicks += 60 * 10
+        results.push(await send({ clicks }))
+      }
+
+      const first = results.findIndex((result) => result.refused)
+
+      expect(first + 1).toBe(16)
+      expect(results[first]).toEqual({ caught: 1, refused: true })
     })
 
     it('el historial se aligera con el tiempo, pero no se borra', async () => {

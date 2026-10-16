@@ -50,6 +50,7 @@ import { secondFactorSchema } from './0041-second-factor.js'
 import { legalSchema } from './0042-legal.js'
 import { clickerReviewSchema } from './0043-clicker-review.js'
 import { recordStyleSchema } from './0044-record-style.js'
+import { clickerClicksSchema } from './0045-clicker-clicks.js'
 import type { Migration } from './types.js'
 
 export type { Migration } from './types.js'
@@ -99,6 +100,7 @@ export const MIGRATIONS: readonly Migration[] = [
   legalSchema,
   clickerReviewSchema,
   recordStyleSchema,
+  clickerClicksSchema,
 ]
 
 /** Versión más alta que existe en el código. */

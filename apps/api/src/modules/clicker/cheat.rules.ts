@@ -147,7 +147,7 @@ export type Figures = {
 }
 
 /** Por qué una partida no cuadra. */
-export type Reason = 'figures' | 'ledger' | 'rate' | 'speed' | 'prestige'
+export type Reason = 'figures' | 'ledger' | 'rate' | 'speed' | 'prestige' | 'clicks'
 
 /** Margen de las cuentas con decimales: precios redondeados y números enormes. */
 const slack = (total: number): number => total * 1e-3 + 1000

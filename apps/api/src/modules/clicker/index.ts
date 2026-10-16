@@ -19,6 +19,7 @@ export function createClickerModule(deps: ClickerServiceOptions): ClickerModule 
       { table: 'clicker_cheats', logins: ['login'] },
       { table: 'clicker_capital', logins: ['login'] },
       { table: 'clicker_alerts', logins: ['login'] },
+      { table: 'clicker_clicks', logins: ['login'] },
     ],
     service,
     jobs: [
