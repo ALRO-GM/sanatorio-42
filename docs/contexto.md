@@ -55,7 +55,20 @@ que hacer, en orden. Este documento es el porqué; aquel, el qué.
     ve con su estilo. Es reutilizable para otros perfiles: `EXCLUSIVE_STYLES`
     en `themes/ids.ts` y `styles.rules.ts` en la API (un test comprueba que
     coinciden), `recordStyle` (migración 44).
-- Base en la versión 46. `npm run check`: 578 tests de la API y 192 de la web.
+  - **Code Clicker**: la clasificación ordena por patrimonio (código sin
+    gastar más lo que costaron los edificios); el aviso de saltos descuenta los
+    repartos cobrados en la última hora (migración 47, `gifts`); el panel
+    enseña código, patrimonio, edificios y mejoras de cada persona. La cruz
+    abre el juego a las **42** pulsaciones (antes 100); los logros de la cruz
+    son 1, 10, 21 y 42, y quien tenía el de 50 recibe **Beta tester** (oculto,
+    ya no se consigue; se convierte al cargar la partida, `renamed` en
+    `engine.ts`).
+  - **Pizarras y terapias**: solo las cambia quien las crea; quien modera solo
+    puede retirarlas (`canCancel`, `canClose`) y se apunta como cualquiera.
+  - **Mapa**: puestos rotos (migración 48, `broken_seats`, una semana o hasta
+    que alguien inicie sesión en él), proponer puestos para una terapia
+    (`propose.ts`), girar el plano, círculos y resaltados (`look.ts`).
+- Base en la versión 48. `npm run check`: 584 tests de la API y 203 de la web.
 - El texto legal es de base: conviene que lo revise alguien de leyes.
 
 ## Estado a 2026-10-12
