@@ -5,6 +5,7 @@ import type { CurrentUser } from '@sanatorio/contracts'
 import { BroadcastGate } from '../features/admin/BroadcastGate'
 import { LegalGate } from '../features/legal/LegalGate'
 import { ReviewGate } from '../features/clicker/ReviewGate'
+import { HelpGate } from '../features/help/HelpGate'
 import { AlertCenter } from '../features/alerts/AlertCenter'
 import { EasterEgg } from '../features/clicker/EasterEgg'
 import { QuotaNotice } from '../features/alerts/QuotaNotice'
@@ -139,6 +140,7 @@ export function Clinic({ me, onLogout }: ClinicProps) {
         <LegalGate />
         <BroadcastGate pending={pulse?.broadcasts ?? 0} onChange={refresh} />
         <ReviewGate pending={pulse?.clickerReviews ?? 0} onChange={refresh} />
+        <HelpGate pending={pulse?.help ?? 0} onChange={refresh} />
         <EasterEgg
           onRed={() => {
             openSection('clicker')

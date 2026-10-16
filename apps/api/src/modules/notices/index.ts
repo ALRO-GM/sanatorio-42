@@ -26,6 +26,8 @@ export type NoticesModuleDeps = NoticesServiceOptions & {
   broadcasts?: (actor: Actor) => Promise<number>
   /** Cuántas revisiones de trampas de Code Clicker tiene esa persona por contestar. */
   clickerReviews?: (actor: Actor) => Promise<number>
+  /** Peticiones de ayuda por contestar y rechazos sin ver. */
+  help?: (actor: Actor) => Promise<number>
 }
 
 export type NoticesModule = AppModule & { service: NoticesService }
@@ -55,6 +57,7 @@ export function createNoticesModule(deps: NoticesModuleDeps): NoticesModule {
           unread: await service.unread(login),
           broadcasts: (await deps.broadcasts?.(await session.actor(request))) ?? 0,
           clickerReviews: (await deps.clickerReviews?.(await session.actor(request))) ?? 0,
+          help: (await deps.help?.(await session.actor(request))) ?? 0,
           quota: await deps.quota.statusFor(login),
         }
       })

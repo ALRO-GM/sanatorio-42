@@ -83,7 +83,7 @@ Orden (se marca cada uno al desplegarlo):
 - [x] 20 Guardia y preevaluación brillando en el mapa con filtro; fichas compactas con «Pedir ayuda».
 - [x] 24 Terapias: «proponer puestos», puestos rotos (7 días), avisar a quien hace el mismo proyecto.
 - [x] 25 Calendario: vistas compacta / día / desde ahora.
-- [ ] 18 Peticiones de ayuda en ventana obligatoria (recibir y rechazo).
+- [x] 18 Peticiones de ayuda en ventana obligatoria (recibir y rechazo).
 - [ ] 29 Daltónicos, modo zen y demo de bienvenida.
 - [ ] 22 Tamaño de texto 90–150 % y móvil.
 - [ ] 33 Code Clicker: tope con pace en riesgo, logro por donar.

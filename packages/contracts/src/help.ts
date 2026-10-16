@@ -89,6 +89,14 @@ export type HelpDay = {
   presence: { available: boolean; seat: string | null }
 }
 
+/** `GET /help/inbox`: lo que sale en una ventana que no se salta. */
+export type HelpInbox = {
+  /** Te han pedido ayuda y aún no has contestado. */
+  requests: Booking[]
+  /** Te han rechazado o anulado una reserva y aún no lo has visto. */
+  news: Booking[]
+}
+
 /** Cuerpo de `PUT /help/today`. */
 export type HelpDayInput = {
   windows: TimeRange[]

@@ -205,6 +205,8 @@ export const realApi: Api = {
   respondBooking: (id, accept) =>
     send('POST', `/help/bookings/${id}/${accept ? 'accept' : 'decline'}`),
   cancelBooking: (id) => send('DELETE', `/help/bookings/${id}`),
+  getHelpInbox: () => getJson('/help/inbox'),
+  seenBooking: (id) => send('POST', `/help/bookings/${id}/seen`),
   rateBooking: (id, tag) => sendJson('POST', `/help/bookings/${id}/rating`, { tag }),
   blockHelp: (login) => send('POST', '/help/blocks', { login }),
   unblockHelp: (login) => send('DELETE', `/help/blocks/${encodeURIComponent(login)}`),

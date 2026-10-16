@@ -75,5 +75,7 @@ export type Pulse = {
   broadcasts: number
   /** Revisiones de trampas de Code Clicker por contestar: sale una ventana que no se salta. */
   clickerReviews: number
+  /** Peticiones de ayuda por contestar y rechazos sin ver: también en una ventana. */
+  help: number
   quota: QuotaStatus
 }

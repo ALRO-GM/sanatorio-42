@@ -6,6 +6,7 @@ import type { BroadcastReport } from '@sanatorio/contracts'
 
 import { ME, PEERS } from './data'
 import { mockNetwork, mockPair, mockPeople, mockStrictest } from './network'
+import { helpInbox } from './help'
 import type { Api } from '../types'
 import { clickerMock } from './clicker'
 import { delay, notices, quotaSettings, quotaQueue, quotaStatus } from './state'
@@ -128,6 +129,7 @@ export const replicaMock: Pick<
         unread,
         broadcasts: pendingCasts().length,
         clickerReviews: await pendingReviews(),
+        help: helpInbox().requests.length + helpInbox().news.length,
         quota: { level: 'ok', ticket: null },
       }
     }
@@ -140,6 +142,7 @@ export const replicaMock: Pick<
       unread,
       broadcasts: pendingCasts().length,
       clickerReviews: await pendingReviews(),
+      help: helpInbox().requests.length + helpInbox().news.length,
       quota: {
         level: 'tight',
         ticket: {

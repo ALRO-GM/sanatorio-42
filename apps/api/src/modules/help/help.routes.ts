@@ -47,6 +47,20 @@ export function registerHelpRoutes(
     })
   }
 
+  /** `GET /help/inbox` → peticiones por contestar y rechazos sin ver. */
+  app.get('/help/inbox', async (request, reply) => {
+    reply.header('Cache-Control', 'private, no-store')
+
+    return reply.send(await help.inbox(await session.actor(request)))
+  })
+
+  /** `POST /help/bookings/:id/seen` → ya has visto que se rechazó o anuló. 204. */
+  app.post<IdParams>('/help/bookings/:id/seen', async (request, reply) => {
+    await help.seen(await session.actor(request), idParam(request.params.id, 'La reserva'))
+
+    return reply.code(204).send()
+  })
+
   /** `DELETE /help/bookings/:id` → la anula. Cualquiera de las dos personas. */
   app.delete<IdParams>('/help/bookings/:id', async (request, reply) => {
     await help.cancel(await session.actor(request), idParam(request.params.id, 'La reserva'))

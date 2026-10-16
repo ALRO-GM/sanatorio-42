@@ -128,6 +128,46 @@ describe('comunidad', () => {
       )
     })
 
+    it('las peticiones por contestar y los rechazos salen en la ventana hasta que se ven', async () => {
+      const { help } = services
+
+      await help.setToday(actor('eva'), tarde)
+      const first = await help.book(actor('ana'), { helper: 'eva', start: '18:00', minutes: 30 })
+      const second = await help.book(actor('leo'), { helper: 'eva', start: '18:30', minutes: 30 })
+
+      // `eva` tiene dos por contestar; `ana`, nada todavía.
+      expect((await help.inbox(actor('eva'))).requests.map((one) => one.id)).toEqual([
+        first.id,
+        second.id,
+      ])
+      expect(await help.inboxCount(actor('ana'))).toBe(0)
+
+      // Rechaza una: a `ana` le sale; `leo` anula la otra: le sale a `eva`.
+      await help.respond(actor('eva'), first.id, false)
+      await help.cancel(actor('leo'), second.id)
+      expect(await help.inbox(actor('ana'))).toMatchObject({
+        requests: [],
+        news: [{ id: first.id, status: 'declined', peer: { login: 'eva' } }],
+      })
+      expect(await help.inbox(actor('eva'))).toMatchObject({
+        requests: [],
+        news: [{ id: second.id, status: 'cancelled' }],
+      })
+
+      // Visto, no vuelve a salir. Y solo lo da por visto a quien le toca.
+      await help.seen(actor('eva'), first.id)
+      expect(await help.inboxCount(actor('ana'))).toBe(1)
+      await help.seen(actor('ana'), first.id)
+      expect(await help.inboxCount(actor('ana'))).toBe(0)
+
+      // Una petición cuya hora ya pasó no se queda esperando respuesta.
+      const late = await help.book(actor('sol'), { helper: 'eva', start: '17:30', minutes: 30 })
+
+      expect(await help.inboxCount(actor('eva'))).toBe(2)
+      clock.advance(3 * HOUR)
+      expect((await help.inbox(actor('eva'))).requests.map((one) => one.id)).not.toContain(late.id)
+    })
+
     it('lo que ya tienes en el calendario tapa la guardia, no solo las correcciones', async () => {
       const { help, boards } = services
       // Una pizarra de 18:00 a 19:00 a la que va `eva`; y otra a la que no va.

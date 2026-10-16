@@ -55,6 +55,7 @@ import type {
   GuideSection,
   Health,
   HelpDay,
+  HelpInbox,
   HelpDayInput,
   HelperTag,
   HelpOffer,
@@ -358,6 +359,10 @@ export type Api = {
   bookHelp: (booking: BookingInput) => Promise<Booking>
   respondBooking: (id: number, accept: boolean) => Promise<void>
   cancelBooking: (id: number) => Promise<void>
+  /** Peticiones de ayuda por contestar y rechazos o anulaciones sin ver. */
+  getHelpInbox: () => Promise<HelpInbox>
+  /** Ya has visto que se rechazó o anuló esa reserva. */
+  seenBooking: (id: number) => Promise<void>
   /** Devuelve la XP repartida, o `null` si falta la valoración de la otra persona. */
   rateBooking: (id: number, tag: HelperTag | RequesterTag) => Promise<{ xp: number | null }>
   blockHelp: (login: string) => Promise<void>

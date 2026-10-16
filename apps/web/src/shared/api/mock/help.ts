@@ -7,6 +7,53 @@ import { offers, today, ME } from './data'
 import type { Api } from '../types'
 import { state, delay, fail, emptyToNull, projectName, find, helpDay, newId } from './state'
 
+/**
+ * La ventana de ayuda solo sale en la demo si se pide (`?ayuda=peticion` o
+ * `?ayuda=rechazo`): si no, taparía todo lo demás en cada visita.
+ */
+const wantedHelp = new URLSearchParams(window.location.search).get('ayuda')
+
+/** Rechazos y anulaciones que aún no has visto. */
+const helpNews = new Set<number>()
+
+if (wantedHelp === 'rechazo') {
+  const declined: Booking = {
+    id: 90,
+    helper: 'jdoe',
+    requester: ME.login,
+    peer: { login: 'jdoe', image: null },
+    role: 'requester',
+    projectId: 1314,
+    projectName: 'ft_printf',
+    day: today(),
+    start: '18:00',
+    end: '18:30',
+    note: null,
+    status: 'declined',
+    finished: false,
+    verified: false,
+    ratedByMe: false,
+    ratedByPeer: false,
+    xp: null,
+  }
+
+  state.help.bookings.push(declined)
+  helpNews.add(declined.id)
+}
+
+/** Lo que sale en la ventana de ayuda. */
+export function helpInbox(): { requests: Booking[]; news: Booking[] } {
+  return {
+    requests:
+      wantedHelp === 'peticion'
+        ? state.help.bookings.filter(
+            (booking) => booking.role === 'helper' && booking.status === 'pending',
+          )
+        : [],
+    news: state.help.bookings.filter((booking) => helpNews.has(booking.id)),
+  }
+}
+
 export const helpMock: Pick<
   Api,
   | 'getHelpDay'
@@ -19,7 +66,20 @@ export const helpMock: Pick<
   | 'blockHelp'
   | 'unblockHelp'
   | 'getHelpReputation'
+  | 'getHelpInbox'
+  | 'seenBooking'
 > = {
+  async getHelpInbox() {
+    await delay(80)
+
+    return helpInbox()
+  },
+
+  async seenBooking(id) {
+    await delay(60)
+    helpNews.delete(id)
+  },
+
   // --- Ayuda reservada ---------------------------------------------------------
 
   async getHelpDay() {

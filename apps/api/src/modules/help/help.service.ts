@@ -26,6 +26,7 @@ import type {
   HelpReputation,
   HelperTag,
   RequesterTag,
+  HelpInbox,
 } from '@sanatorio/contracts'
 import { z } from 'zod'
 
@@ -352,6 +353,19 @@ export function createHelpService(options: HelpServiceOptions) {
     }
 
     return views
+  }
+
+  /** Las filas de la ventana de ayuda: peticiones vivas por contestar y novedades. */
+  async function inboxRows(
+    actor: Actor,
+    moment: { day: string; minutes: number },
+  ): Promise<{ pending: BookingRow[]; news: BookingRow[] }> {
+    const [pending, news] = await Promise.all([
+      help.pendingFor(actor.login, moment.day),
+      help.newsFor(actor.login),
+    ])
+
+    return { pending: pending.filter((row) => !finished(row, moment)), news }
   }
 
   /** La reserva, si quien pregunta es una de las dos personas. Si no, 404. */
@@ -704,6 +718,34 @@ export function createHelpService(options: HelpServiceOptions) {
       return created
     },
 
+    /**
+     * Lo que tiene que salir en una ventana que no se salta: las peticiones de
+     * ayuda por contestar (si aún no ha pasado su hora) y los rechazos y
+     * anulaciones que todavía no ha visto.
+     */
+    async inbox(actor: Actor): Promise<HelpInbox> {
+      const moment = await momentIn(actor.campusId)
+      const { pending, news } = await inboxRows(actor, moment)
+
+      return {
+        requests: await view(pending, actor, moment),
+        news: await view(news, actor, moment),
+      }
+    },
+
+    /** Cuántas cosas tiene en esa ventana. Para el pulso: sin fotos ni nombres. */
+    async inboxCount(actor: Actor): Promise<number> {
+      const { pending, news } = await inboxRows(actor, await momentIn(actor.campusId))
+
+      return pending.length + news.length
+    },
+
+    /** Ya ha visto que le rechazaron o anularon esa reserva. */
+    async seen(actor: Actor, bookingId: number): Promise<void> {
+      await mustGet(bookingId, actor)
+      await help.clearNews(bookingId, actor.login)
+    },
+
     /** Acepta o rechaza una reserva pendiente. Solo quien ayuda. */
     async respond(actor: Actor, bookingId: number, accept: boolean): Promise<void> {
       const booking = await mustGet(bookingId, actor)
@@ -715,7 +757,12 @@ export function createHelpService(options: HelpServiceOptions) {
         throw domainError('conflict', 'Esa reserva ya estaba contestada')
       }
 
-      await help.setStatus(bookingId, accept ? 'confirmed' : 'declined')
+      // Un rechazo se le enseña a quien pidió la ayuda en una ventana.
+      await help.setStatus(
+        bookingId,
+        accept ? 'confirmed' : 'declined',
+        accept ? null : booking.requester,
+      )
       await notify({
         to: [booking.requester],
         kind: accept ? 'booking_accepted' : 'booking_declined',
@@ -736,7 +783,12 @@ export function createHelpService(options: HelpServiceOptions) {
         throw domainError('conflict', 'Esa reserva ya está cerrada')
       }
 
-      await help.setStatus(bookingId, 'cancelled')
+      // Quien no la anuló se entera en una ventana.
+      await help.setStatus(
+        bookingId,
+        'cancelled',
+        actor.login === booking.helper ? booking.requester : booking.helper,
+      )
       await notify({
         to: [booking.helper, booking.requester],
         kind: 'booking_cancelled',

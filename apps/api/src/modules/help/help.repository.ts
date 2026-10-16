@@ -39,6 +39,8 @@ export type BookingRow = {
   requesterTag: string | null
   /** XP repartida, o `null` si la sesión sigue abierta. */
   xp: number | null
+  /** A quién hay que contarle que se rechazó o se anuló, hasta que lo vea. */
+  newsFor: string | null
 }
 
 const nullableText = (value: unknown): string | null => (typeof value === 'string' ? value : null)
@@ -61,6 +63,7 @@ function toBooking(row: Record<string, unknown>): BookingRow {
     helperTag: nullableText(row.helper_tag),
     requesterTag: nullableText(row.requester_tag),
     xp: nullableNumber(row.xp),
+    newsFor: nullableText(row.news_for),
   }
 }
 
@@ -211,10 +214,33 @@ export function createHelpRepository(db: Db) {
       return toNumber(result.lastInsertRowid)
     },
 
-    async setStatus(id: number, status: BookingStatus): Promise<void> {
+    /** Cambia el estado; con `newsFor`, esa persona lo verá en una ventana. */
+    async setStatus(
+      id: number,
+      status: BookingStatus,
+      newsFor: string | null = null,
+    ): Promise<void> {
       await db.execute({
-        sql: 'UPDATE help_bookings SET status = ? WHERE id = ?',
-        args: [status, id],
+        sql: 'UPDATE help_bookings SET status = ?, news_for = ? WHERE id = ?',
+        args: [status, newsFor, id],
+      })
+    },
+
+    /** Lo pendiente de contestar por quien ayuda, desde ese día. */
+    async pendingFor(helper: string, day: string): Promise<BookingRow[]> {
+      return bookings(`helper = ? AND status = 'pending' AND day >= ?`, [helper, day])
+    },
+
+    /** Rechazos y anulaciones que esa persona aún no ha visto. */
+    async newsFor(login: string): Promise<BookingRow[]> {
+      return bookings(`news_for = ? AND status IN ('declined', 'cancelled')`, [login])
+    },
+
+    /** Ya lo ha visto. */
+    async clearNews(id: number, login: string): Promise<void> {
+      await db.execute({
+        sql: 'UPDATE help_bookings SET news_for = NULL WHERE id = ? AND news_for = ?',
+        args: [id, login],
       })
     },
 

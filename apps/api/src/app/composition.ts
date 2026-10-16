@@ -177,6 +177,8 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     broadcasts: (actor) => broadcasts.service.count(actor),
     // `clicker` se monta después: para cuando alguien pregunte ya estará.
     clickerReviews: async (actor) => (await clicker.service.reviews(actor)).length,
+    // `help` también se monta después.
+    help: (actor) => help.service.inboxCount(actor),
     ...clock,
   })
 
