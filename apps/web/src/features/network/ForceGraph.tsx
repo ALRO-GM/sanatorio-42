@@ -5,6 +5,14 @@ import type { NetworkLink, NetworkNode } from '@sanatorio/contracts'
 import { forceCollide, forceLink, forceManyBody, forceSimulation, forceX, forceY } from 'd3-force'
 import type { Simulation, SimulationLinkDatum, SimulationNodeDatum } from 'd3-force'
 import { photoUrl } from '../../shared/api'
+import {
+  MOVING_LINKS,
+  inside,
+  layerKey,
+  segmentMeets,
+  strongest,
+  visibleBounds,
+} from './graph-layers'
 
 type ForceGraphProps = {
   nodes: readonly NetworkNode[]
@@ -47,6 +55,12 @@ type Scene = {
   /** Si la persona ha movido la vista, no se le vuelve a encajar sola. */
   touched: boolean
   frame: number
+  /** Las uniones más fuertes: las únicas que se pintan mientras todo se mueve. */
+  strong: SimLink[]
+  /** `true` mientras la simulación recoloca las burbujas. */
+  moving: boolean
+  /** Sube con cada cosa que cambia lo que se ve en las uniones (ver `graph-layers.ts`). */
+  version: number
 }
 
 /** Con cuánta fuerza tira de cada burbuja el centro de su comunidad. */
@@ -113,24 +127,62 @@ function communityForce(nodes: readonly SimNode[]): (alpha: number) => void {
   }
 }
 
-/** Fotos ya pedidas, entre montajes: cambiar un filtro no las vuelve a descargar. */
-const pictures = new Map<string, HTMLImageElement | null>()
+/** Lado, en píxeles, de cada foto ya recortada en redondo. */
+const PHOTO_PX = 128
 
-function pictureOf(url: string, onLoad: () => void): HTMLImageElement | null {
+/**
+ * Fotos ya pedidas, entre montajes: cambiar un filtro no las vuelve a descargar.
+ * Se guardan ya recortadas en redondo: recortar cada foto en cada fotograma
+ * (`clip`) era de lo que más costaba con el grafo moviéndose.
+ */
+const pictures = new Map<string, HTMLCanvasElement | null | 'loading'>()
+
+/** La foto cuadrada del centro, recortada en un círculo. */
+function roundPicture(image: HTMLImageElement): HTMLCanvasElement | null {
+  const canvas = document.createElement('canvas')
+  const context = canvas.getContext('2d')
+  const side = Math.min(image.naturalWidth, image.naturalHeight)
+
+  if (context === null || side === 0) return null
+
+  canvas.width = PHOTO_PX
+  canvas.height = PHOTO_PX
+  context.beginPath()
+  context.arc(PHOTO_PX / 2, PHOTO_PX / 2, PHOTO_PX / 2, 0, 2 * Math.PI)
+  context.clip()
+  context.drawImage(
+    image,
+    (image.naturalWidth - side) / 2,
+    (image.naturalHeight - side) / 2,
+    side,
+    side,
+    0,
+    0,
+    PHOTO_PX,
+    PHOTO_PX,
+  )
+
+  return canvas
+}
+
+function pictureOf(url: string, onLoad: () => void): HTMLCanvasElement | null {
   const known = pictures.get(url)
 
   if (known !== undefined) {
-    return known !== null && known.complete && known.naturalWidth > 0 ? known : null
+    return known === 'loading' ? null : known
   }
 
   const image = new Image()
 
-  image.onload = onLoad
+  image.onload = () => {
+    pictures.set(url, roundPicture(image))
+    onLoad()
+  }
   image.onerror = () => {
     pictures.set(url, null)
   }
   image.src = url
-  pictures.set(url, image)
+  pictures.set(url, 'loading')
 
   return null
 }
@@ -176,6 +228,9 @@ export function ForceGraph({
     needsFit: true,
     touched: false,
     frame: 0,
+    strong: [],
+    moving: false,
+    version: 0,
   })
   // Lo último que llegó por props, a mano para el dibujo sin volver a montar nada.
   const live = useRef({ colorOf, selected, onSelect })
@@ -195,6 +250,18 @@ export function ForceGraph({
     }
 
     const stage: HTMLCanvasElement = canvas
+    /** La capa de uniones ya pintada, y de qué estado es. */
+    const layerCanvas = document.createElement('canvas')
+    const layerContext = layerCanvas.getContext('2d')
+
+    if (layerContext === null) return undefined
+
+    const layer = { canvas: layerCanvas, context: layerContext, key: '' }
+    /** Dónde está el lienzo en la página. Se guarda: pedirlo en cada movimiento del ratón obliga a recalcular la página. */
+    let box = canvas.getBoundingClientRect()
+    const measure = (): void => {
+      box = canvas.getBoundingClientRect()
+    }
     /** El viaje en curso hasta una burbuja buscada, para poder cortarlo. */
     let travel = 0
     const state = scene.current
@@ -266,40 +333,98 @@ export function ForceGraph({
       )
       const lit = (login: string): boolean =>
         around === null || login === focus || around.has(login)
+      // Lo que cae fuera de lo que se ve no se pinta (con zoom, casi todo).
+      const bounds = visibleBounds(view, width, height)
+      const shown = (node: SimNode): boolean =>
+        inside(bounds, node.x ?? 0, node.y ?? 0, node.r + 20)
+      const crosses = (link: SimLink): boolean => {
+        const from = link.source as SimNode
+        const to = link.target as SimNode
+
+        return segmentMeets(bounds, from.x ?? 0, from.y ?? 0, to.x ?? 0, to.y ?? 0)
+      }
 
       context.setTransform(ratio, 0, 0, ratio, 0, 0)
       context.clearRect(0, 0, width, height)
       context.translate(view.x, view.y)
       context.scale(view.k, view.k)
 
-      // Uniones: primero las apagadas, luego las encendidas encima.
-      for (const pass of [false, true]) {
-        for (const link of state.links) {
-          const source = link.source as SimNode
-          const target = link.target as SimNode
-          const on = around === null || source.login === focus || target.login === focus
+      // Uniones. Con el grafo quieto, las que no están encendidas salen de una
+      // capa ya pintada (`graph-layers.ts`) y solo se pintan encima las de quien
+      // está elegido. Mientras se mueve, con muchas, solo las más fuertes.
+      const style = (target: CanvasRenderingContext2D, link: SimLink, on: boolean): void => {
+        target.lineWidth = (0.5 + Math.sqrt(link.weight) * 0.75) / Math.sqrt(view.k)
+        // En reposo, todas del mismo gris: el color es para las burbujas. Al
+        // elegir a alguien, las suyas se encienden, en turquesa las mutuas.
+        target.strokeStyle = around !== null && on && link.mutual ? palette.accent : palette.link
+        target.globalAlpha = on
+          ? around === null
+            ? Math.min(0.7, (0.1 + link.weight * 0.05) * density)
+            : 0.9
+          : 0.04
+      }
+      const line = (target: CanvasRenderingContext2D, link: SimLink): void => {
+        if (!crosses(link)) return
 
-          if (on !== pass) {
-            continue
+        const from = link.source as SimNode
+        const to = link.target as SimNode
+
+        target.beginPath()
+        target.moveTo(from.x ?? 0, from.y ?? 0)
+        target.lineTo(to.x ?? 0, to.y ?? 0)
+        target.stroke()
+      }
+      const touches = (link: SimLink): boolean =>
+        (link.source as SimNode).login === focus || (link.target as SimNode).login === focus
+
+      if (state.moving) {
+        for (const link of state.links.length > MOVING_LINKS ? state.strong : state.links) {
+          const on = around === null || touches(link)
+
+          style(context, link, on)
+          line(context, link)
+        }
+      } else {
+        const kind = around === null ? 'rest' : 'dim'
+        const key = layerKey({ kind, view, width, height, ratio, version: state.version })
+
+        if (layer.key !== key) {
+          const target = layer.context
+
+          layer.canvas.width = Math.round(width * ratio)
+          layer.canvas.height = Math.round(height * ratio)
+          target.setTransform(ratio, 0, 0, ratio, 0, 0)
+          target.translate(view.x, view.y)
+          target.scale(view.k, view.k)
+
+          // En la capa «apagada» van todas tenues: las de quien está elegido se
+          // pintan después encima, y la tenue de debajo no se nota.
+          for (const link of state.links) {
+            style(target, link, around === null)
+            line(target, link)
           }
+          layer.key = key
+        }
 
-          context.beginPath()
-          context.moveTo(source.x ?? 0, source.y ?? 0)
-          context.lineTo(target.x ?? 0, target.y ?? 0)
-          context.lineWidth = (0.5 + Math.sqrt(link.weight) * 0.75) / Math.sqrt(view.k)
-          // En reposo, todas del mismo gris: el color es para las burbujas. Al
-          // elegir a alguien, las suyas se encienden, en turquesa las mutuas.
-          context.strokeStyle = around !== null && on && link.mutual ? palette.accent : palette.link
-          context.globalAlpha = on
-            ? around === null
-              ? Math.min(0.7, (0.1 + link.weight * 0.05) * density)
-              : 0.9
-            : 0.04
-          context.stroke()
+        context.save()
+        context.setTransform(1, 0, 0, 1, 0, 0)
+        context.globalAlpha = 1
+        context.drawImage(layer.canvas, 0, 0)
+        context.restore()
+
+        if (around !== null) {
+          for (const link of state.links) {
+            if (!touches(link)) continue
+
+            style(context, link, true)
+            line(context, link)
+          }
         }
       }
 
       for (const node of state.nodes) {
+        if (!shown(node)) continue
+
         const on = lit(node.login)
         const x = node.x ?? 0
         const y = node.y ?? 0
@@ -320,24 +445,8 @@ export function ForceGraph({
 
           if (picture !== null) {
             const inner = node.r - Math.max(1.5, node.r * 0.14)
-            const side = Math.min(picture.naturalWidth, picture.naturalHeight)
 
-            context.save()
-            context.beginPath()
-            context.arc(x, y, inner, 0, 2 * Math.PI)
-            context.clip()
-            context.drawImage(
-              picture,
-              (picture.naturalWidth - side) / 2,
-              (picture.naturalHeight - side) / 2,
-              side,
-              side,
-              x - inner,
-              y - inner,
-              inner * 2,
-              inner * 2,
-            )
-            context.restore()
+            context.drawImage(picture, x - inner, y - inner, inner * 2, inner * 2)
           }
         }
 
@@ -369,7 +478,7 @@ export function ForceGraph({
             ? node.r * view.k > 13
             : lit(node.login) && (around.size < 60 || node.login === focus)
 
-        if (!named) {
+        if (!named || !shown(node)) {
           continue
         }
 
@@ -391,8 +500,8 @@ export function ForceGraph({
 
     const resize = (): void => {
       const ratio = window.devicePixelRatio || 1
-      const box = canvas.getBoundingClientRect()
 
+      measure()
       width = box.width
       height = box.height
       canvas.width = Math.round(width * ratio)
@@ -407,8 +516,6 @@ export function ForceGraph({
 
     /** Punto del lienzo, en coordenadas del grafo. */
     const toGraph = (event: PointerEvent | WheelEvent): { x: number; y: number } => {
-      const box = canvas.getBoundingClientRect()
-
       return {
         x: (event.clientX - box.left - state.view.x) / state.view.k,
         y: (event.clientY - box.top - state.view.y) / state.view.k,
@@ -442,8 +549,6 @@ export function ForceGraph({
 
     /** Dónde está un puntero dentro del lienzo. */
     const place = (event: PointerEvent): { x: number; y: number } => {
-      const box = canvas.getBoundingClientRect()
-
       return { x: event.clientX - box.left, y: event.clientY - box.top }
     }
     /** La distancia entre los dos dedos y su punto medio. */
@@ -470,6 +575,7 @@ export function ForceGraph({
     }
 
     const onPointerDown = (event: PointerEvent): void => {
+      measure()
       touches.set(event.pointerId, place(event))
       setTip(null)
       canvas.setPointerCapture(event.pointerId)
@@ -600,8 +706,7 @@ export function ForceGraph({
 
     const onWheel = (event: WheelEvent): void => {
       event.preventDefault()
-
-      const box = canvas.getBoundingClientRect()
+      measure()
 
       // El punto bajo el ratón no se mueve al hacer zoom.
       zoomAt(Math.exp(-event.deltaY * 0.0015), event.clientX - box.left, event.clientY - box.top)
@@ -658,6 +763,7 @@ export function ForceGraph({
     // El modo nocturno cambia los colores del texto y de las uniones.
     const themeObserver = new MutationObserver(() => {
       palette = readPalette()
+      state.version += 1
       schedule.current()
     })
 
@@ -665,6 +771,9 @@ export function ForceGraph({
     themeObserver.observe(document.documentElement, {
       attributeFilter: ['data-theme', 'data-style', 'style'],
     })
+    // La página se desplaza sin que el lienzo cambie de tamaño: se vuelve a medir.
+    window.addEventListener('scroll', measure, { capture: true, passive: true })
+    canvas.addEventListener('pointerenter', measure)
     canvas.addEventListener('pointerdown', onPointerDown)
     canvas.addEventListener('pointermove', onPointerMove)
     canvas.addEventListener('pointerup', onPointerUp)
@@ -685,6 +794,8 @@ export function ForceGraph({
     return () => {
       observer.disconnect()
       themeObserver.disconnect()
+      window.removeEventListener('scroll', measure, { capture: true })
+      canvas.removeEventListener('pointerenter', measure)
       canvas.removeEventListener('pointerdown', onPointerDown)
       canvas.removeEventListener('pointermove', onPointerMove)
       canvas.removeEventListener('pointerup', onPointerUp)
@@ -765,6 +876,9 @@ export function ForceGraph({
     state.simulation?.stop()
     state.nodes = simNodes
     state.links = simLinks
+    state.strong = strongest(simLinks, MOVING_LINKS)
+    state.moving = true
+    state.version += 1
     state.neighbours = neighbours
     state.hover = null
 
@@ -818,10 +932,13 @@ export function ForceGraph({
       .force('x', forceX<SimNode>(0).strength(0.035))
       .force('y', forceY<SimNode>(0).strength(0.035))
       .alpha(kept === simNodes.length && kept > 0 ? 0.35 : 1)
-      .alphaDecay(simNodes.length > 800 ? 0.035 : 0.022)
+      // Con muchas uniones cada paso cuesta más: se enfría antes.
+      .alphaDecay(simNodes.length > 800 || simLinks.length > 5000 ? 0.035 : 0.022)
       .velocityDecay(0.35)
       .on('tick', () => {
         ticks += 1
+        state.moving = true
+        state.version += 1
 
         // Durante la primera colocación la vista acompaña al grafo.
         if (state.needsFit && !state.touched && ticks % 6 === 0) {
@@ -831,6 +948,11 @@ export function ForceGraph({
         schedule.current()
       })
       .on('end', () => {
+        // Quieto: la próxima vez se pintan todas las uniones, y en la capa guardada.
+        state.moving = false
+        state.version += 1
+        schedule.current()
+
         if (state.needsFit) {
           canvas?.dispatchEvent(new Event('graph:fit'))
           state.needsFit = false
