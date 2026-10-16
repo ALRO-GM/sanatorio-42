@@ -34,6 +34,13 @@ export type MapSeat = {
     me: boolean
     /** `true` si tiene Sanatorio abierto ahora: se le puede escribir y lo verá. */
     online: boolean
+    /** El círculo del common core en que va (0 a 6), si se sabe. */
+    circle: number | null
+    /**
+     * La mejor nota con la que aprobó alguno de los proyectos que tiene en curso
+     * quien mira (125 es la máxima), o `null` si no aprobó ninguno.
+     */
+    finishedMine: number | null
   } | null
   reservation: SeatReservation | null
 }
@@ -59,4 +66,6 @@ export type ClusterMap = {
   clusters: MapCluster[]
   /** Gente en puestos cuyo nombre no se sabe colocar en una cuadrícula. */
   unplaced: { host: string; login: string; duty: SeatDuty | null }[]
+  /** Quien mira: su círculo y sus proyectos en curso, para resaltar a quien comparte algo. */
+  me: { circle: number | null; projects: string[] }
 }

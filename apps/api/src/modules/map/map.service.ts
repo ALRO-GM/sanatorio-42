@@ -29,6 +29,8 @@ export type MapServiceOptions = {
   therapy: TherapyService
   /** Quién tiene la web abierta ahora mismo. */
   online?: () => Promise<Set<string>>
+  /** El círculo en que va cada persona, sin preguntar a 42. */
+  circlesOf?: (logins: readonly string[]) => Promise<Map<string, number>>
   now?: () => number
 }
 
@@ -115,7 +117,16 @@ export function createMapService(options: MapServiceOptions) {
         }
       }
 
-      const activeProjects = await replica.activeProjectsOf(present.map((person) => person.login))
+      const logins = present.map((person) => person.login)
+      const mine = await replica.projectsOf(actor.login)
+      const [activeProjects, circles, marks] = await Promise.all([
+        replica.activeProjectsOf([...logins, actor.login]),
+        options.circlesOf?.([...logins, actor.login]) ?? new Map<string, number>(),
+        replica.bestMarksIn(
+          logins,
+          mine.map((project) => project.id),
+        ),
+      ])
 
       for (const person of present) {
         const seat = seatAt(person.host)
@@ -133,6 +144,8 @@ export function createMapService(options: MapServiceOptions) {
           duty: personDuty,
           me: person.login === actor.login,
           online: online.has(person.login),
+          circle: circles.get(person.login) ?? null,
+          finishedMine: marks.get(person.login) ?? null,
         }
       }
 
@@ -191,6 +204,10 @@ export function createMapService(options: MapServiceOptions) {
           a.id.localeCompare(b.id, 'en', { numeric: true }),
         ),
         unplaced: unplaced.sort((a, b) => a.host.localeCompare(b.host, 'en', { numeric: true })),
+        me: {
+          circle: circles.get(actor.login) ?? null,
+          projects: activeProjects.get(actor.login) ?? [],
+        },
       }
     },
   }

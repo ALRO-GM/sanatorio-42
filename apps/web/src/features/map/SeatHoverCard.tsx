@@ -86,6 +86,14 @@ export function SeatHoverCard({ hovered, pinned }: SeatHoverCardProps) {
         {occupant.online && !occupant.me && pinned !== undefined && (
           <span className="badge on">{t('clusters.online')}</span>
         )}
+        {occupant.circle !== null && (
+          <span className="badge subtle">{t('map.circle', { n: occupant.circle })}</span>
+        )}
+        {occupant.finishedMine !== null && (
+          <span className={`badge ${occupant.finishedMine >= 125 ? 'specialist' : 'on'}`}>
+            {t('map.finishedMine', { n: occupant.finishedMine })}
+          </span>
+        )}
         {occupant.duty !== null && (
           <span className={`badge ${occupant.duty === 'specialist' ? 'specialist' : 'on'}`}>
             {t(`map.duty.${occupant.duty}`)}

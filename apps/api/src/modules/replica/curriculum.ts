@@ -254,7 +254,7 @@ export function createCurriculum(options: CurriculumOptions) {
     return { track, rank, ranks: dates }
   }
 
-  return {
+  const curriculum = {
     learn,
 
     /** De cada proyecto que va en un grupo de «elige uno», el grupo (`CHOICES`). */
@@ -426,6 +426,72 @@ export function createCurriculum(options: CurriculumOptions) {
     },
 
     /**
+     * El círculo en que va cada una de esas personas, sin preguntar a 42: el
+     * rango que se guardó la última vez que se supo y, si nunca se supo, el
+     * círculo más alto en el que tiene algún proyecto (como en el holy graph).
+     * Quien no tiene nada de lo que tirar no sale.
+     */
+    async circlesOf(logins: readonly string[]): Promise<Map<string, number>> {
+      const found = new Map<string, number>()
+
+      if (logins.length === 0) return found
+
+      const marks = logins.map(() => '?').join(', ')
+      const [tracks, projects, classic, next] = await Promise.all([
+        db.execute({
+          sql: `SELECT login, track, rank FROM user_tracks WHERE login IN (${marks})`,
+          args: [...logins],
+        }),
+        db.execute({
+          sql: `SELECT u.login, pu.project_id, p.slug FROM project_users pu
+                JOIN users u ON u.id = pu.user_id
+                JOIN projects p ON p.id = pu.project_id
+                WHERE u.login IN (${marks})`,
+          args: [...logins],
+        }),
+        curriculum.circles('classic'),
+        curriculum.circles('next'),
+      ])
+      const known = new Map(
+        tracks.rows.map((row) => [
+          toText(row.login),
+          { track: toText(row.track) === 'next' ? 'next' : 'classic', rank: row.rank },
+        ]),
+      )
+      const byLogin = new Map<string, { ids: number[]; next: boolean }>()
+
+      for (const row of projects.rows) {
+        const login = toText(row.login)
+        const entry = byLogin.get(login) ?? { ids: [], next: false }
+        const slug = toText(row.slug)
+
+        entry.ids.push(toNumber(row.project_id))
+        entry.next ||= slug.startsWith('42next-') || slug.startsWith('python-module-')
+        byLogin.set(login, entry)
+      }
+
+      for (const login of logins) {
+        const stored = known.get(login)
+
+        if (stored !== undefined && typeof stored.rank === 'number') {
+          found.set(login, Math.min(LAST_CIRCLE, stored.rank + 1))
+          continue
+        }
+
+        const mine = byLogin.get(login)
+
+        if (mine === undefined) continue
+
+        const plan = (stored?.track ?? (mine.next ? 'next' : 'classic')) === 'next' ? next : classic
+        const reached = Math.max(-1, ...mine.ids.map((id) => plan.get(id) ?? -1))
+
+        if (reached >= 0) found.set(login, Math.min(LAST_CIRCLE, reached))
+      }
+
+      return found
+    },
+
+    /**
      * El círculo de cada proyecto de un plan: lo de partida y, para lo que no
      * está ahí, lo aprendido por votos. Solo hasta el final del common core.
      */
@@ -474,6 +540,8 @@ export function createCurriculum(options: CurriculumOptions) {
       return circles
     },
   }
+
+  return curriculum
 }
 
 export type Curriculum = ReturnType<typeof createCurriculum>

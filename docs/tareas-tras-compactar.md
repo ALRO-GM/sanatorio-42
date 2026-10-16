@@ -78,7 +78,7 @@ Orden (se marca cada uno al desplegarlo):
 - [x] 17 Explicar guardia, tope y pace (dos números).
 - [x] 21 Preevaluaciones: marcar disponibilidad mucho más grande, con icono propio; característica principal.
 - [x] 27 Últimas 8 búsquedas en el navegador.
-- [ ] 23 Clusters: puesto como enlace (clic central), girar 180°, círculo en el puesto, filtros, brillo dorado por 125.
+- [x] 23 Clusters: puesto como enlace (clic central), girar 180°, círculo en el puesto, filtros, brillo dorado por 125.
 - [ ] 26 Red: color por sentido y flecha en las líneas de la persona elegida.
 - [ ] 20 Guardia y preevaluación brillando en el mapa con filtro; fichas compactas con «Pedir ayuda».
 - [ ] 24 Terapias: «proponer puestos», puestos rotos (7 días), avisar a quien hace el mismo proyecto.

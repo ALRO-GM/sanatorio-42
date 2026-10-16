@@ -685,6 +685,17 @@ export const es: Record<string, string> = {
   'net.projects.min': 'Correcciones como mínimo',
   'net.projects.max': 'Correcciones como máximo',
   'map.profile': 'Ver perfil',
+  'map.look': 'Cómo ver el plano',
+  'map.flip': 'Girar 180°',
+  'map.circles': 'Círculos',
+  'map.highlight': 'Resaltar:',
+  'map.mate.circle': 'Mi círculo',
+  'map.mate.project': 'Mi proyecto',
+  'map.mate.done': 'Lo han terminado',
+  'map.middleClick':
+    'Clic central (o Ctrl + clic) en un puesto: abre su expediente en otra pestaña.',
+  'map.circle': 'Círculo {n}',
+  'map.finishedMine': 'Terminó tu proyecto: {n}',
   'net.projects.hint':
     'Número de correcciones y cuántas aprobaron, en todo el histórico. Pulsa uno para ver solo su red.',
   'net.legend.communityYear': 'Grupo {n} \u00b7 {year} ({size})',

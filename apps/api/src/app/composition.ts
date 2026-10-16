@@ -206,6 +206,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     peers: peers.peers,
     therapy: therapy.service,
     online,
+    circlesOf: (logins) => replica.curriculum.circlesOf(logins),
     ...clock,
   })
 

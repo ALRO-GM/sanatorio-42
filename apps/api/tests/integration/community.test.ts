@@ -603,8 +603,30 @@ describe('mapa de clusters', () => {
       occupant: null,
       reservation: null,
     })
+    // Quien mira hace ft_printf; `jdoe` lo aprobó con un 100.
+    expect(map.me).toEqual({ circle: null, projects: ['ft_printf'] })
+    expect(seats[0]?.occupant).toMatchObject({ finishedMine: 100, circle: null })
+    expect(seats[5]?.occupant).toMatchObject({ finishedMine: null })
     // Un puesto cuyo nombre no encaja en una cuadrícula no se pierde.
     expect(map.unplaced).toEqual([expect.objectContaining({ host: 'sala-rara', duty: null })])
+  })
+
+  it('enseña el círculo de cada persona con el rango que se guardó, sin preguntar a 42', async () => {
+    const built = await app({}, {})
+    const http = client(built, await built.login())
+    built.provider.routes['/v2/campus/22/locations'] = [
+      { id: 2, host: 'c1r2s3', end_at: null, user: { id: 3, login: 'mgomez' } },
+    ]
+    await built.db.execute(
+      `INSERT INTO user_tracks (login, track, rank, ranks, fetched_at)
+       VALUES ('mgomez', 'classic', 2, '[]', '2026-01-01T00:00:00.000Z')`,
+    )
+
+    const map = json(await http.get('/map')) as ClusterMap
+    const seat = map.clusters[0]?.seats.find((one) => one.host === 'c1r2s3')
+
+    // Con el rango 2 completado va por el círculo 3.
+    expect(seat?.occupant).toMatchObject({ login: 'mgomez', circle: 3 })
   })
 
   it('recuerda los puestos que ha visto aunque ya no haya nadie', async () => {

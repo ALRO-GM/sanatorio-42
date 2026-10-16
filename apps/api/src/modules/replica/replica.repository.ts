@@ -312,6 +312,37 @@ export function createReplicaRepository(db: Db) {
           }
     },
 
+    /**
+     * La mejor nota con la que cada una de esas personas aprobó alguno de esos
+     * proyectos. Quien no aprobó ninguno no sale.
+     */
+    async bestMarksIn(
+      logins: readonly string[],
+      projectIds: readonly number[],
+    ): Promise<Map<string, number>> {
+      const marks = new Map<string, number>()
+
+      if (projectIds.length === 0) return marks
+
+      for (let from = 0; from < logins.length; from += BATCH_SIZE) {
+        const batch = logins.slice(from, from + BATCH_SIZE)
+        const result = await db.execute({
+          sql: `SELECT u.login, MAX(pu.final_mark) AS mark
+                FROM users u
+                JOIN project_users pu ON pu.user_id = u.id
+                WHERE u.login IN (${batch.map(() => '?').join(', ')})
+                  AND pu.project_id IN (${projectIds.map(() => '?').join(', ')})
+                  AND pu.status = 'finished' AND pu.validated = 1 AND pu.final_mark IS NOT NULL
+                GROUP BY u.login`,
+          args: [...batch, ...projectIds],
+        })
+
+        for (const row of result.rows) marks.set(toText(row.login), toNumber(row.mark))
+      }
+
+      return marks
+    },
+
     /** Nombres de los proyectos que tiene en curso cada una de esas personas. */
     async activeProjectsOf(logins: readonly string[]): Promise<Map<string, string[]>> {
       const projects = new Map<string, string[]>()

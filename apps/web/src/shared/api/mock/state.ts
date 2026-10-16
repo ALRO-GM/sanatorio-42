@@ -168,6 +168,8 @@ export function buildMap(projectId?: number): ClusterMap {
       me: login === ME.login,
       // Uno de cada tres tiene la web abierta: basta para ver el punto.
       online: login.length % 3 === 0,
+      circle: login.length % 5,
+      finishedMine: null,
     })
   }
 
@@ -180,6 +182,9 @@ export function buildMap(projectId?: number): ClusterMap {
         duty: peer.available ? (peer.status === 'finished' ? 'specialist' : 'patient') : null,
         me: false,
         online: peer.available,
+        circle: peer.login.length % 5,
+        // Quien lo aprobó, uno sí y otro no con la nota máxima.
+        finishedMine: peer.status === 'finished' ? (peer.login.length % 2 === 0 ? 125 : 100) : null,
       })
     }
   }
@@ -224,6 +229,7 @@ export function buildMap(projectId?: number): ClusterMap {
       }
     }),
     unplaced: [],
+    me: { circle: 2, projects: projectsOf(ME.login) },
   }
 }
 

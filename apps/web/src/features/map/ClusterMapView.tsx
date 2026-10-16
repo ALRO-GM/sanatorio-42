@@ -5,6 +5,9 @@ import type { ClusterMap, MapCluster, MapSeat, SeatReservation } from '@sanatori
 
 import { localeOf, useI18n } from '../../shared/i18n'
 import type { Translate } from '../../shared/i18n'
+import { recordHref } from '../../shared/links'
+import { loadLook, lookClasses, MATES, order, saveLook } from './look'
+import type { MapLook } from './look'
 import { SeatFace } from './SeatFace'
 import { SeatHoverCard } from './SeatHoverCard'
 import type { Hovered } from './SeatHoverCard'
@@ -33,6 +36,11 @@ type ClusterMapViewProps = {
   showReservation?: (reservation: SeatReservation) => boolean
   /** Qué colores explica la leyenda. En modo elegir sobran los de guardia. */
   legend?: readonly LegendItem[]
+}
+
+/** Abre el expediente de quien ocupa un puesto en otra pestaña. */
+function openRecord(seat: MapSeat): void {
+  if (seat.occupant !== null) window.open(recordHref(seat.occupant.login), '_blank', 'noopener')
 }
 
 type LegendItem =
@@ -106,6 +114,15 @@ export function ClusterMapView({
   // Puesto sobre el que está el ratón (o el foco): su ficha flota al lado.
   const [hovered, setHovered] = useState<Hovered | null>(null)
   const [, setMoved] = useState(0)
+  // Girado, con círculos y a quién resaltar: lo elige cada cual y se recuerda.
+  const [look, setLook] = useState<MapLook>(loadLook)
+  const change = (next: MapLook): void => {
+    setLook(next)
+    saveLook(next)
+  }
+  // Al elegir puestos el plano se ve tal cual: sin giros ni resaltados.
+  const tools = onPick === undefined
+  const shown: MapLook = tools ? look : { flip: false, circles: false, mates: [] }
 
   const hover = (seat: MapSeat) => (event: MouseEvent | FocusEvent) => {
     if (seat.occupant !== null) {
@@ -164,8 +181,8 @@ export function ClusterMapView({
   const openReservation = reservation !== null && showReservation(reservation) ? reservation : null
   // El puesto abierto, si hay alguien sentado: es el que lleva ficha fijada.
   const openTaken = open?.occupant === undefined || open.occupant === null ? null : open
-  const rows = Array.from({ length: cluster.rows }, (_, index) => index + 1)
-  const columns = Array.from({ length: cluster.seatsPerRow }, (_, index) => index + 1)
+  const rows = order(cluster.rows, shown.flip)
+  const columns = order(cluster.seatsPerRow, shown.flip)
 
   return (
     <div className="cluster-map">
@@ -189,6 +206,54 @@ export function ClusterMapView({
           </button>
         ))}
       </div>
+
+      {tools && (
+        <div className="map-tools" role="group" aria-label={t('map.look')}>
+          <button
+            type="button"
+            className={`pill ${look.flip ? 'active' : ''}`}
+            aria-pressed={look.flip}
+            onClick={() => {
+              change({ ...look, flip: !look.flip })
+            }}
+          >
+            ⟲ {t('map.flip')}
+          </button>
+          <button
+            type="button"
+            className={`pill ${look.circles ? 'active' : ''}`}
+            aria-pressed={look.circles}
+            onClick={() => {
+              change({ ...look, circles: !look.circles })
+            }}
+          >
+            {t('map.circles')}
+          </button>
+          <span className="map-tools-label">{t('map.highlight')}</span>
+          {MATES.map((mate) => {
+            const on = look.mates.includes(mate)
+
+            return (
+              <button
+                key={mate}
+                type="button"
+                className={`pill mate-pill mate-${mate} ${on ? 'active' : ''}`}
+                aria-pressed={on}
+                disabled={mate === 'circle' && map.me.circle === null}
+                onClick={() => {
+                  change({
+                    ...look,
+                    mates: on ? look.mates.filter((one) => one !== mate) : [...look.mates, mate],
+                  })
+                }}
+              >
+                <i className={`mate-dot mate-${mate}`} aria-hidden="true" />
+                {t(`map.mate.${mate}`)}
+              </button>
+            )
+          })}
+        </div>
+      )}
 
       <div className="map-scroll">
         <div
@@ -218,7 +283,11 @@ export function ClusterMapView({
                   <button
                     key={column}
                     type="button"
-                    className={`${seatClasses(seat, isPicked, reserved)} ${seat.host === openHost ? 'open' : ''}`}
+                    className={[
+                      seatClasses(seat, isPicked, reserved),
+                      seat.host === openHost ? 'open' : '',
+                      ...lookClasses(seat, map.me, shown),
+                    ].join(' ')}
                     aria-label={label}
                     aria-pressed={onPick === undefined ? seat.host === openHost : isPicked}
                     // Los ocupados ya enseñan su ficha al pasar: el `title` la taparía.
@@ -227,8 +296,18 @@ export function ClusterMapView({
                     onMouseLeave={unhover}
                     onFocus={hover(seat)}
                     onBlur={unhover}
+                    // El botón central (o con Ctrl o Cmd) abre su expediente en otra pestaña.
+                    onMouseDown={(event) => {
+                      // Sin el desplazamiento automático del botón central.
+                      if (event.button === 1 && seat.occupant !== null) event.preventDefault()
+                    }}
+                    onAuxClick={(event) => {
+                      if (event.button === 1 && tools) openRecord(seat)
+                    }}
                     onClick={(event) => {
-                      if (onPick === undefined) {
+                      if (tools && (event.ctrlKey || event.metaKey) && seat.occupant !== null) {
+                        openRecord(seat)
+                      } else if (onPick === undefined) {
                         setOpenAnchor(event.currentTarget)
                         setOpenHost(seat.host === openHost ? null : seat.host)
                       } else {
@@ -241,6 +320,11 @@ export function ClusterMapView({
                     )}
                     {/* Tiene Sanatorio abierto: un punto verde en la esquina. */}
                     {seat.occupant?.online === true && <i className="seat-online" />}
+                    {shown.circles && typeof seat.occupant?.circle === 'number' && (
+                      <b className="seat-circle" aria-hidden="true">
+                        {seat.occupant.circle}
+                      </b>
+                    )}
                   </button>
                 )
               })}
@@ -286,6 +370,8 @@ export function ClusterMapView({
           </li>
         ))}
       </ul>
+
+      {tools && <p className="hint">{t('map.middleClick')}</p>}
 
       {map.unplaced.length > 0 && (
         <p className="hint">
