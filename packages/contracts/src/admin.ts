@@ -15,6 +15,9 @@ export type TicketStatus = 'open' | 'answered' | 'closed'
  */
 export type TicketCategory = 'bug' | 'improvement' | 'idea' | 'translation' | 'other'
 
+/** Por qué se denuncia algo. Con `other` hay que explicarlo. */
+export type ReportReason = 'spam' | 'harassment' | 'insults' | 'other'
+
 export type Ticket = {
   id: number
   login: string
@@ -27,6 +30,8 @@ export type Ticket = {
   category: TicketCategory | null
   /** Sección de la web de la que va (`tablon`, `red`…), o `null` si no se dijo. */
   section: string | null
+  /** El motivo de una denuncia, o `null` (no es denuncia, o es de antes de que se pudiera elegir). */
+  reason: ReportReason | null
   status: TicketStatus
   /** Lo que respondió quien administra, o `null` si aún no. */
   answer: string | null
@@ -44,6 +49,8 @@ export type TicketInput = {
   target?: string
   category?: TicketCategory
   section?: string
+  /** Solo en denuncias. Con un motivo que no sea `other`, el texto puede ir vacío. */
+  reason?: ReportReason
 }
 
 /** Peticiones de una hora concreta. */

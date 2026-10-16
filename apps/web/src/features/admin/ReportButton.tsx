@@ -1,11 +1,14 @@
 import { useState } from 'react'
 import type { SyntheticEvent } from 'react'
 
+import type { ReportReason } from '@sanatorio/contracts'
+
 import { api } from '../../shared/api'
 import { useAction } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { Icon } from '../../shared/ui/Icon'
+import { REPORT_REASONS, reportIsReady } from './inbox'
 
 type ReportButtonProps = {
   /** Qué se denuncia: `message:12`, `board:3`, `doubt:5`. */
@@ -16,7 +19,8 @@ type ReportButtonProps = {
 
 /**
  * "Denunciar": avisa a quien administra de que un mensaje, una pizarra o una
- * duda es problemática. Pide el motivo y lo manda al buzón.
+ * duda es problemática. Se elige el motivo (spam, acoso, insultos u otro) y, si
+ * es «otro», se explica; lo manda al buzón.
  */
 export function ReportButton({ target, summary }: ReportButtonProps) {
   const { t } = useI18n()
@@ -24,6 +28,7 @@ export function ReportButton({ target, summary }: ReportButtonProps) {
   const [open, setOpen] = useState(false)
   const [sent, setSent] = useState(false)
   const [why, setWhy] = useState('')
+  const [reason, setReason] = useState<ReportReason>('insults')
 
   if (sent) {
     return <small className="report-sent">{t('report.sent')}</small>
@@ -51,6 +56,7 @@ export function ReportButton({ target, summary }: ReportButtonProps) {
         kind: 'report',
         subject: summary.slice(0, 110),
         body: why,
+        reason,
         target,
       }),
     )
@@ -60,16 +66,29 @@ export function ReportButton({ target, summary }: ReportButtonProps) {
 
   return (
     <form className="report-form" onSubmit={(event) => void submit(event)}>
+      <select
+        value={reason}
+        aria-label={t('report.reason')}
+        onChange={(event) => {
+          setReason(event.target.value as ReportReason)
+        }}
+      >
+        {REPORT_REASONS.map((option) => (
+          <option key={option} value={option}>
+            {t(`report.reason.${option}`)}
+          </option>
+        ))}
+      </select>
       <input
         value={why}
         maxLength={500}
-        placeholder={t('report.why')}
+        placeholder={t(reason === 'other' ? 'report.why' : 'report.whyOptional')}
         aria-label={t('report.why')}
         onChange={(event) => {
           setWhy(event.target.value)
         }}
       />
-      <button type="submit" className="pill" disabled={busy || why.trim().length < 5}>
+      <button type="submit" className="pill" disabled={busy || !reportIsReady(reason, why)}>
         {t('report.send')}
       </button>
       <button

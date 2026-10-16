@@ -447,6 +447,54 @@ describe('comunidad', () => {
       }
     })
 
+    it('una denuncia dice su motivo; con uno claro no hace falta explicarlo', async () => {
+      const { admin } = services
+      const spam = await admin.openTicket(actor('ana'), {
+        kind: 'report',
+        reason: 'spam',
+        body: '',
+        target: 'message:7',
+      })
+
+      expect(spam).toMatchObject({ reason: 'spam', subject: 'Denuncia', body: '' })
+      // «Otro» sin explicación, no; con ella, sí.
+      await expectCode(
+        admin.openTicket(actor('leo'), {
+          kind: 'report',
+          reason: 'other',
+          body: 'mal',
+          target: 'message:7',
+        }),
+        'invalid_input',
+      )
+      expect(
+        await admin.openTicket(actor('leo'), {
+          kind: 'report',
+          reason: 'other',
+          body: 'Publica mis datos',
+          target: 'message:7',
+        }),
+      ).toMatchObject({ reason: 'other' })
+      // Sin motivo sigue haciendo falta el texto, y un motivo fuera de una denuncia no vale.
+      await expectCode(
+        admin.openTicket(actor('sol'), { kind: 'report', body: '', target: 'message:7' }),
+        'invalid_input',
+      )
+      await expectCode(
+        admin.openTicket(actor('sol'), { kind: 'idea', reason: 'spam', body: 'Una idea larga' }),
+        'invalid_input',
+      )
+      await expectCode(
+        admin.openTicket(actor('sol'), {
+          kind: 'report',
+          reason: 'odio',
+          body: '',
+          target: 'message:7',
+        }),
+        'invalid_input',
+      )
+    })
+
     it('el consumo se cuenta por persona y el tope se reparte entre quienes están', async () => {
       const { admin } = services
       const boss = actor('eva', { admin: true })

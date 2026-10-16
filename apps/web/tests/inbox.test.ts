@@ -4,11 +4,12 @@
 
 import { describe, expect, it } from 'vitest'
 
-import type { Ticket, TicketStatus } from '@sanatorio/contracts'
+import type { ReportReason, Ticket, TicketStatus } from '@sanatorio/contracts'
 
 import {
   CATEGORIES,
   kindOf,
+  reportIsReady,
   reportableSections,
   sectionFor,
   ticketsIn,
@@ -67,5 +68,27 @@ describe('escribir al buzón', () => {
     expect(sectionFor('clicker', sections)).toBeNull()
     expect(sectionFor('', sections)).toBeNull()
     expect(sectionFor('no-existe', sections)).toBeNull()
+  })
+})
+
+describe('denuncias', () => {
+  const report = (id: number, reason: ReportReason | null): Ticket =>
+    ({ id, status: 'open', kind: 'report', reason, login: 'ana', subject: 's', body: '' }) as Ticket
+
+  it('con un motivo claro basta; con «otro» hay que explicarlo (cinco letras)', () => {
+    expect(reportIsReady('spam', '')).toBe(true)
+    expect(reportIsReady('insults', '  ')).toBe(true)
+    expect(reportIsReady('other', '')).toBe(false)
+    expect(reportIsReady('other', 'cuatr'.slice(0, 4))).toBe(false)
+    expect(reportIsReady('other', 'cinco')).toBe(true)
+    expect(reportIsReady('other', '    cinco    ')).toBe(true)
+  })
+
+  it('el filtro por motivo deja solo esas denuncias; «todo» lo deja todo', () => {
+    const all = [report(1, 'spam'), report(2, 'insults'), report(3, null), ticket(4, 'open')]
+
+    expect(ticketsIn(all, 'pending', 'spam').map((t) => t.id)).toEqual([1])
+    expect(ticketsIn(all, 'pending', 'harassment')).toEqual([])
+    expect(ticketsIn(all, 'pending', 'all').map((t) => t.id)).toEqual([4, 3, 2, 1])
   })
 })

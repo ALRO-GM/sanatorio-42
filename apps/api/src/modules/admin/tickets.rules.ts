@@ -3,7 +3,7 @@
  * cómo se titula un mensaje que llega sin título.
  */
 
-import type { TicketCategory } from '@sanatorio/contracts'
+import type { ReportReason, TicketCategory } from '@sanatorio/contracts'
 
 export const TICKET_CATEGORIES = [
   'bug',
@@ -12,6 +12,21 @@ export const TICKET_CATEGORIES = [
   'translation',
   'other',
 ] as const satisfies readonly TicketCategory[]
+
+export const REPORT_REASONS = [
+  'spam',
+  'harassment',
+  'insults',
+  'other',
+] as const satisfies readonly ReportReason[]
+
+/**
+ * `true` si el texto basta: hacen falta cinco letras, salvo en una denuncia con
+ * un motivo claro (spam, acoso, insultos), donde el motivo ya lo dice todo.
+ */
+export function bodyIsEnough(body: string, reason: ReportReason | undefined): boolean {
+  return body.trim().length >= 5 || (reason !== undefined && reason !== 'other')
+}
 
 /** Largo máximo de un título. */
 export const SUBJECT_MAX = 120

@@ -11,8 +11,8 @@ import { api } from '../../shared/api'
 import { useAction, useAsync } from '../../shared/hooks/useAsync'
 import { localeOf, useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
-import { INBOX_VIEWS, ticketsIn } from './inbox'
-import type { InboxView } from './inbox'
+import { INBOX_VIEWS, REPORT_REASONS, ticketsIn } from './inbox'
+import type { InboxFilter, InboxView } from './inbox'
 
 export function InboxTab() {
   const { t } = useI18n()
@@ -20,11 +20,13 @@ export function InboxTab() {
   // A quién se acaba de responder: se dice dónde va a ver la respuesta.
   const [answered, setAnswered] = useState<string | null>(null)
   const [view, setView] = useState<InboxView>('pending')
+  const [filter, setFilter] = useState<InboxFilter>('all')
 
   if (loading) return <p className="estado">{t('app.loading')}</p>
   if (data === undefined) return <ErrorNote error={error} onRetry={() => void reload()} />
 
-  const shown = ticketsIn(data, view)
+  const shown = ticketsIn(data, view, filter)
+  const reports = ticketsIn(data, view).filter((ticket) => ticket.kind === 'report').length
 
   return (
     <>
@@ -44,6 +46,24 @@ export function InboxTab() {
           </button>
         ))}
       </div>
+      {(reports > 0 || filter !== 'all') && (
+        <div className="filter-pills" role="group" aria-label={t('admin.inbox.byReason')}>
+          {(['all', ...REPORT_REASONS] as const).map((option) => (
+            <button
+              key={option}
+              type="button"
+              aria-pressed={filter === option}
+              className={`pill ${filter === option ? 'active' : ''}`}
+              onClick={() => {
+                setFilter(option)
+              }}
+            >
+              {option === 'all' ? t('admin.inbox.allKinds') : t(`report.reason.${option}`)} (
+              {ticketsIn(data, view, option).length})
+            </button>
+          ))}
+        </div>
+      )}
       {shown.length === 0 && <p className="estado">{t('admin.inbox.empty')}</p>}
       {answered !== null && (
         <p className="reaction-done" role="status">

@@ -24,6 +24,7 @@ import type {
   LimitLevel,
   Consumption,
   Ticket,
+  ReportReason,
   TicketCategory,
   TicketKind,
   TicketStatus,
@@ -52,7 +53,13 @@ import {
   worst,
 } from './budget.rules.js'
 import type { DayPlan } from './budget.rules.js'
-import { SUBJECT_MAX, TICKET_CATEGORIES, subjectFrom } from './tickets.rules.js'
+import {
+  REPORT_REASONS,
+  SUBJECT_MAX,
+  TICKET_CATEGORIES,
+  bodyIsEnough,
+  subjectFrom,
+} from './tickets.rules.js'
 
 export type AdminServiceOptions = {
   db: Db
@@ -136,8 +143,9 @@ function withChanges(base: BudgetSettings, patch: z.infer<typeof budgetSchema>):
 const ticketSchema = z.object({
   kind: z.enum(['issue', 'idea', 'report']),
   subject: z.string().trim().min(3, 'ponle un título').max(SUBJECT_MAX).optional(),
-  body: z.string().trim().min(5, 'cuéntalo con un poco más de detalle').max(2000),
+  body: z.string().trim().max(2000).default(''),
   category: z.enum(TICKET_CATEGORIES).optional(),
+  reason: z.enum(REPORT_REASONS).optional(),
   // Una sección de la web: su id (`tablon`, `red`…).
   section: z
     .string()
@@ -172,6 +180,7 @@ function toTicket(row: Record<string, unknown>): Ticket {
     target: text(row.target),
     category: text(row.category) as TicketCategory | null,
     section: text(row.section),
+    reason: text(row.reason) as ReportReason | null,
     status: toText(row.status) as TicketStatus,
     answer: text(row.answer),
     answeredBy: text(row.answered_by),
@@ -689,6 +698,12 @@ export function createAdminService(options: AdminServiceOptions) {
       if (ticket.kind === 'report' && ticket.target === undefined) {
         throw domainError('invalid_input', 'Una denuncia tiene que decir de qué es')
       }
+      if (ticket.reason !== undefined && ticket.kind !== 'report') {
+        throw domainError('invalid_input', 'Solo una denuncia lleva motivo')
+      }
+      if (!bodyIsEnough(ticket.body, ticket.reason)) {
+        throw domainError('invalid_input', 'body: cuéntalo con un poco más de detalle')
+      }
 
       const open = await db.execute({
         sql: "SELECT COUNT(*) AS total FROM tickets WHERE login = ? AND status = 'open'",
@@ -712,16 +727,18 @@ export function createAdminService(options: AdminServiceOptions) {
       }
 
       const result = await db.execute({
-        sql: `INSERT INTO tickets (login, kind, subject, body, target, category, section, created_at)
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING *`,
+        sql: `INSERT INTO tickets
+                (login, kind, subject, body, target, category, section, reason, created_at)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING *`,
         args: [
           actor.login,
           ticket.kind,
-          ticket.subject ?? subjectFrom(ticket.body),
+          ticket.subject ?? (subjectFrom(ticket.body) || 'Denuncia'),
           ticket.body,
           ticket.target ?? null,
           ticket.category ?? null,
           ticket.section ?? null,
+          ticket.reason ?? null,
           iso(),
         ],
       })

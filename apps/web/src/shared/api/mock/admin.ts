@@ -63,6 +63,7 @@ export const adminMock: Pick<
       target: ticket.target ?? null,
       category: ticket.category ?? null,
       section: ticket.section ?? null,
+      reason: ticket.reason ?? null,
       status: 'open',
       answer: null,
       answeredBy: null,

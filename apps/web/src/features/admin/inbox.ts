@@ -2,7 +2,7 @@
  * Las vistas del buzón del panel, sin React: qué mensaje va en cada pestaña.
  */
 
-import type { Ticket, TicketCategory, TicketKind } from '@sanatorio/contracts'
+import type { ReportReason, Ticket, TicketCategory, TicketKind } from '@sanatorio/contracts'
 
 /** Los tipos que se pueden elegir al escribir, en el orden del desplegable. */
 export const CATEGORIES = [
@@ -38,6 +38,21 @@ export function sectionFor(
 
 export const INBOX_VIEWS = ['pending', 'done'] as const
 
+export const REPORT_REASONS = [
+  'spam',
+  'harassment',
+  'insults',
+  'other',
+] as const satisfies readonly ReportReason[]
+
+/** Una denuncia se puede mandar con un motivo claro sin más; con «otro» hay que explicarlo. */
+export function reportIsReady(reason: ReportReason, why: string): boolean {
+  return reason !== 'other' || why.trim().length >= 5
+}
+
+/** Qué mensajes se enseñan: todos, o solo las denuncias de un motivo. */
+export type InboxFilter = 'all' | ReportReason
+
 export type InboxView = (typeof INBOX_VIEWS)[number]
 
 /**
@@ -45,8 +60,13 @@ export type InboxView = (typeof INBOX_VIEWS)[number]
  * nadie ha respondido; lo respondido (aunque siga abierto a más respuestas) y lo
  * cerrado van juntos en la otra.
  */
-export function ticketsIn(tickets: readonly Ticket[], view: InboxView): Ticket[] {
+export function ticketsIn(
+  tickets: readonly Ticket[],
+  view: InboxView,
+  filter: InboxFilter = 'all',
+): Ticket[] {
   return tickets
     .filter((ticket) => (ticket.status === 'open') === (view === 'pending'))
+    .filter((ticket) => filter === 'all' || (ticket.kind === 'report' && ticket.reason === filter))
     .sort((a, b) => b.id - a.id)
 }
