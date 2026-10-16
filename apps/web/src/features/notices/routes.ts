@@ -41,6 +41,8 @@ export function iconOf(notice: Notice): IconName {
     case 'group_joined':
     case 'group_closed':
       return 'terapia'
+    case 'clicker_defense':
+      return 'escudo'
   }
 }
 
@@ -50,6 +52,7 @@ export function targetOf(notice: Notice): NoticeTarget {
     case 'ticket_answered':
       return 'inbox'
     case 'ticket_new':
+    case 'clicker_defense':
       return 'gestion'
     case 'chat_reminder':
       // Recordar una conversación es llevarte a ella, sea del tipo que sea.

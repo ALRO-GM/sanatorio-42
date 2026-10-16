@@ -24,10 +24,13 @@ import type {
   CampusSummary,
   ClickerBoard,
   ClickerCapital,
+  ClickerPoolClaim,
+  ClickerReview,
   ClickerSaved,
   ClickerSaveInput,
   ClickerState,
   ClickerUsage,
+  ClickerVerdict,
   ClusterMap,
   Consumption,
   CurrentUser,
@@ -289,6 +292,15 @@ export type Api = {
   pardonClickerCheat: (id: number) => Promise<void>
   /** Descarta un aviso de salto de capital. Solo admins. */
   dismissClickerAlert: (id: number) => Promise<void>
+  /** Decide sobre un salto sospechoso: trampa, probable o nada. Solo admins. */
+  reviewClickerAlert: (id: number, verdict: ClickerVerdict) => Promise<void>
+  /** Las revisiones que tienes que contestar. */
+  getClickerReviews: () => Promise<ClickerReview[]>
+  defendClickerReview: (id: number, answer: string) => Promise<void>
+  /** Coge el botín de la bolsa común. */
+  claimClickerPool: () => Promise<ClickerPoolClaim>
+  /** Ya has visto el aviso de la policía del código. */
+  ackClickerSeizure: () => Promise<void>
   /** Los comunicados que tienes por leer, el más antiguo primero. */
   getBroadcasts: () => Promise<Broadcast[]>
   /** Contesta a uno (o lo cierra sin elegir) y devuelve los que quedan. */

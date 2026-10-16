@@ -11,9 +11,13 @@ import type {
   ClickerBoard,
   ClickerCapital,
   ClickerCheat,
+  ClickerEvidence,
   ClickerPlayer,
+  ClickerPoolClaim,
   ClickerRank,
+  ClickerReview,
   ClickerSaved,
+  ClickerSeizure,
   ClickerState,
   ClickerUsage,
   Pill,
@@ -22,13 +26,22 @@ import { z } from 'zod'
 
 import { assertAdmin } from '../../core/actor.js'
 import type { Actor } from '../../core/actor.js'
+import type { Notify } from '../../core/events.js'
 import type { Db } from '../../core/db/database.js'
 import { toNumber, toText } from '../../core/db/rows.js'
 import { domainError } from '../../core/errors.js'
 import { parse } from '../../core/validation.js'
 import type { ReplicaRepository } from '../replica/index.js'
 import { clean, coarse, FINE_FOR_S, HOURLY_FOR_S, jump, thin } from './capital.rules.js'
-import { hackerTitle, readSave, SALE_FROM, verdict } from './cheat.rules.js'
+import {
+  hackerTitle,
+  POOL_EVERY_MS,
+  poolShare,
+  readSave,
+  SALE_FROM,
+  seizedValue,
+  verdict,
+} from './cheat.rules.js'
 
 /** Pulsaciones de la cruz que abren la pregunta de las pastillas. */
 export const PLUS_GOAL = 100
@@ -105,13 +118,70 @@ export type ClickerServiceOptions = {
    * (`null` si ninguno): lo sabe hacer `profile`.
    */
   brand?: (login: string, title: string) => Promise<string | null>
+  /** Para avisar a quien administra de que alguien se ha defendido. */
+  notify?: Notify
+  /** Quién administra la web: lo sabe `admin`. */
+  admins?: () => Promise<readonly string[]>
   now?: () => number
+}
+
+/** Lo que tiene que escribir quien se defiende, como poco. */
+const DEFENSE_MIN = 20
+const DEFENSE_MAX = 2000
+
+const reviewSchema = z.object({ verdict: z.enum(['cheat', 'likely', 'clean']) })
+const defenseSchema = z.object({ answer: z.string().trim().min(DEFENSE_MIN).max(DEFENSE_MAX) })
+
+/** Lee un JSON guardado por nosotros; `null` si falta o no se entiende. */
+function stored(value: unknown): unknown {
+  if (typeof value !== 'string') return null
+
+  try {
+    return JSON.parse(value) as unknown
+  } catch {
+    return null
+  }
 }
 
 export function createClickerService(options: ClickerServiceOptions) {
   const { db, replica } = options
   const now = options.now ?? Date.now
   const iso = (): string => new Date(now()).toISOString()
+  const notify: Notify = options.notify ?? (() => Promise.resolve())
+
+  /** Lo que hay en la bolsa común. */
+  const poolAmount = async (): Promise<number> =>
+    Number((await db.execute('SELECT amount FROM clicker_pool WHERE id = 1')).rows[0]?.amount ?? 0)
+
+  /**
+   * La política de trampas: se requisan todos los edificios (la web los vende
+   * al cargar y no le devuelve nada, `saleDue`) y lo que valían, según la última
+   * partida buena, va a la bolsa común. El aviso de la policía del código sale
+   * en el juego hasta que lo ve (`seizure`).
+   */
+  async function confiscate(
+    login: string,
+    found: Record<string, unknown> | undefined,
+    by: ClickerSeizure['by'],
+    evidence: ClickerEvidence | null,
+  ): Promise<void> {
+    const amount = seizedValue(typeof found?.save === 'string' ? readSave(found.save) : null)
+    const seizure: ClickerSeizure = { by, amount, evidence }
+
+    await db.batch(
+      [
+        {
+          sql: 'UPDATE clicker SET sale_due = 1, seizure = ? WHERE login = ?',
+          args: [JSON.stringify(seizure), login],
+        },
+        {
+          sql: 'UPDATE clicker_pool SET amount = amount + ?, updated_at = ? WHERE id = 1',
+          args: [amount, iso()],
+        },
+      ],
+      'write',
+    )
+  }
 
   const row = async (login: string): Promise<Record<string, unknown> | undefined> =>
     (await db.execute({ sql: 'SELECT * FROM clicker WHERE login = ?', args: [login] })).rows[0]
@@ -132,6 +202,8 @@ export function createClickerService(options: ClickerServiceOptions) {
         rev: toNumber(found?.rev ?? 0),
         caught: toNumber(found?.caught ?? 0),
         saleDue: toNumber(found?.sale_due ?? 0) === 1,
+        seizure: stored(found?.seizure) as ClickerSeizure | null,
+        pool: pill === 'red' ? await poolAmount() : 0,
         // Los nombres solo hacen falta dentro del juego.
         names:
           pill === 'red'
@@ -231,6 +303,7 @@ export function createClickerService(options: ClickerServiceOptions) {
           perSecond: Number(found?.per_second ?? 0),
           at: Date.parse(toText(found?.updated_at ?? iso())),
           ledger: typeof found?.save === 'string' ? readSave(found.save) : null,
+          bonus: Number(found?.pool_bonus ?? 0),
         },
         sent,
         ledger,
@@ -243,9 +316,8 @@ export function createClickerService(options: ClickerServiceOptions) {
         if (now() - last >= CAUGHT_COOLDOWN_MS) {
           caught += 1
           await db.execute({
-            sql: `UPDATE clicker SET caught = ?, caught_at = ?, caught_why = ?,
-                    sale_due = MAX(sale_due, ?) WHERE login = ?`,
-            args: [caught, iso(), why, Number(caught >= SALE_FROM), actor.login],
+            sql: `UPDATE clicker SET caught = ?, caught_at = ?, caught_why = ? WHERE login = ?`,
+            args: [caught, iso(), why, actor.login],
           })
 
           const title = hackerTitle(caught)
@@ -254,6 +326,11 @@ export function createClickerService(options: ClickerServiceOptions) {
             title === null
               ? null
               : ((await options.brand?.(actor.login, title).catch(() => null)) ?? null)
+
+          // A la tercera, la política de trampas.
+          if (caught >= SALE_FROM && toNumber(found?.sale_due ?? 0) === 0) {
+            await confiscate(actor.login, found, 'auto', null)
+          }
 
           // Se guarda la partida tal como llegó, por si hay que indultarla.
           await db.execute({
@@ -305,7 +382,7 @@ export function createClickerService(options: ClickerServiceOptions) {
       const result = await db.execute({
         sql: `UPDATE clicker SET save = ?, total = MAX(total, ?), last_total = ?, per_second = ?,
                 achievements = ?, prestige = ?, updated_at = ?, holder = ?, rev = rev + 1,
-                sale_due = 0
+                sale_due = 0, pool_bonus = 0
               WHERE login = ? AND (rev = ? OR holder = ?)
               RETURNING rev`,
         args: [
@@ -509,6 +586,165 @@ export function createClickerService(options: ClickerServiceOptions) {
       )
     },
 
+    /**
+     * Lo que decide quien administra sobre un salto de capital sospechoso:
+     *
+     * - `clean`: no es trampa. Se cierra y no pasa nada.
+     * - `likely`: probable. A esa persona le sale, sin poder saltárselo, qué
+     *   datos no cuadran, y tiene que defenderse o explicar cómo lo hizo. Su
+     *   respuesta llega aquí; después se decide otra vez.
+     * - `cheat`: trampa. Se aplica la política (`seize`) y se le enseñan los
+     *   datos que no cuadraron, no cómo se ha visto.
+     *
+     * @throws {DomainError} `forbidden` si no administra; `not_found` si ese aviso no está.
+     */
+    async review(actor: Actor, id: unknown, input: unknown): Promise<void> {
+      assertAdmin(actor)
+
+      const alertId = parse(idSchema, id)
+      const { verdict: decision } = parse(reviewSchema, input)
+      const alert = (
+        await db.execute({ sql: 'SELECT * FROM clicker_alerts WHERE id = ?', args: [alertId] })
+      ).rows[0]
+
+      if (alert === undefined) throw domainError('not_found', 'Ese aviso ya no está')
+
+      const login = toText(alert.login)
+
+      if (decision === 'clean') {
+        await db.execute({ sql: 'DELETE FROM clicker_alerts WHERE id = ?', args: [alertId] })
+
+        return
+      }
+
+      const player = await row(login)
+      const evidence: ClickerEvidence = {
+        from: Number(alert.from_capital),
+        to: Number(alert.to_capital),
+        seconds: toNumber(alert.seconds),
+        perSecond: Number(player?.per_second ?? 0),
+        golden: toNumber(alert.golden) === 1,
+      }
+
+      if (decision === 'likely') {
+        await db.execute({
+          sql: `UPDATE clicker_alerts SET status = 'asked', evidence = ?, answer = NULL,
+                  answered_at = NULL WHERE id = ?`,
+          args: [JSON.stringify(evidence), alertId],
+        })
+
+        return
+      }
+
+      const caught = toNumber(player?.caught ?? 0) + 1
+
+      await db.execute({
+        sql: `UPDATE clicker SET caught = ?, caught_at = ?, caught_why = 'review' WHERE login = ?`,
+        args: [caught, iso(), login],
+      })
+      await confiscate(login, player, 'review', evidence)
+      await db.execute({ sql: 'DELETE FROM clicker_alerts WHERE id = ?', args: [alertId] })
+
+      const title = hackerTitle(caught)
+
+      if (title !== null) await options.brand?.(login, title).catch(() => null)
+    },
+
+    /** Las revisiones que quien pregunta tiene que contestar, la más antigua primero. */
+    async reviews(actor: Actor): Promise<ClickerReview[]> {
+      const result = await db.execute({
+        sql: `SELECT id, at, evidence FROM clicker_alerts
+              WHERE login = ? AND status = 'asked' ORDER BY id`,
+        args: [actor.login],
+      })
+
+      return result.rows.flatMap((entry) => {
+        const evidence = stored(entry.evidence) as ClickerEvidence | null
+
+        return evidence === null ? [] : [{ id: toNumber(entry.id), at: toText(entry.at), evidence }]
+      })
+    },
+
+    /**
+     * Contesta una revisión: se defiende o explica cómo lo hizo. Llega a quien
+     * administra, que decide después.
+     *
+     * @throws {DomainError} `not_found` si no es suya o ya no espera respuesta.
+     */
+    async defend(actor: Actor, id: unknown, input: unknown): Promise<void> {
+      const alertId = parse(idSchema, id)
+      const { answer } = parse(defenseSchema, input)
+      const result = await db.execute({
+        sql: `UPDATE clicker_alerts SET status = 'answered', answer = ?, answered_at = ?
+              WHERE id = ? AND login = ? AND status = 'asked'`,
+        args: [answer, iso(), alertId, actor.login],
+      })
+
+      if (result.rowsAffected === 0)
+        throw domainError('not_found', 'Esa revisión ya no espera respuesta')
+
+      await notify({
+        to: (await options.admins?.()) ?? [],
+        kind: 'clicker_defense',
+        ref: `clicker:${alertId}`,
+        from: actor.login,
+        text: answer,
+      })
+    },
+
+    /**
+     * Coge el botín de la bolsa común: diez commits de la suerte (según su
+     * última partida guardada), sin pasar de lo que hay, y como mucho una vez
+     * cada cinco minutos. Lo cobrado vale como escrito en el siguiente guardado.
+     *
+     * @throws {DomainError} `forbidden` si no eligió la roja; `conflict` si es pronto
+     *   o la bolsa está vacía.
+     */
+    async claimPool(actor: Actor): Promise<ClickerPoolClaim> {
+      const found = await row(actor.login)
+
+      if (pillOf(found) !== 'red') throw domainError('forbidden', 'Esto no existe')
+
+      const last =
+        typeof found?.pool_claimed_at === 'string' ? Date.parse(found.pool_claimed_at) : 0
+
+      if (now() - last < POOL_EVERY_MS)
+        throw domainError('conflict', 'Ya has cogido botín hace poco')
+
+      const ledger = typeof found?.save === 'string' ? readSave(found.save) : null
+      const amount = poolShare(
+        ledger?.code ?? 0,
+        Number(found?.per_second ?? 0),
+        await poolAmount(),
+      )
+
+      if (amount <= 0) throw domainError('conflict', 'La bolsa está vacía')
+
+      // Se descuenta solo si sigue habiendo: dos a la vez no sacan más de lo que hay.
+      const taken = await db.execute({
+        sql: `UPDATE clicker_pool SET amount = amount - ?, updated_at = ?
+              WHERE id = 1 AND amount >= ? RETURNING amount`,
+        args: [amount, iso(), amount],
+      })
+
+      if (taken.rows[0] === undefined) throw domainError('conflict', 'La bolsa está vacía')
+
+      await db.execute({
+        sql: `UPDATE clicker SET pool_bonus = pool_bonus + ?, pool_claimed_at = ? WHERE login = ?`,
+        args: [amount, iso(), actor.login],
+      })
+
+      return { amount, pool: Number(taken.rows[0].amount) }
+    },
+
+    /** Ya ha visto el aviso de la policía del código. */
+    async ackSeizure(actor: Actor): Promise<void> {
+      await db.execute({
+        sql: 'UPDATE clicker SET seizure = NULL WHERE login = ?',
+        args: [actor.login],
+      })
+    },
+
     /** Veces que han pillado a alguien haciendo trampas. Para el título del banner. */
     async caughtOf(login: string): Promise<number> {
       return toNumber((await row(login))?.caught ?? 0)
@@ -647,6 +883,8 @@ export function createClickerService(options: ClickerServiceOptions) {
           to: Number(entry.to_capital),
           golden: toNumber(entry.golden) === 1,
           trace: JSON.parse(toText(entry.trace)) as [number, number][],
+          status: toText(entry.status) as ClickerAlert['status'],
+          answer: typeof entry.answer === 'string' ? entry.answer : null,
         })),
         cheats: cheats.rows.map((entry): ClickerCheat => ({
           id: toNumber(entry.id),

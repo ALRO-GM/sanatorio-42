@@ -748,6 +748,27 @@ la copia se borra. `404` si ya no está. Quien tuviera la partida abierta recibe
 
 DELETE /admin/clicker/alerts/:id → 204. Solo admins. Descarta un aviso de salto.
 
+POST /admin/clicker/alerts/:id/review → `{ "verdict": "cheat" | "likely" | "clean" }`. 204.
+Solo admins. Lo que se decide sobre un salto de capital sospechoso:
+
+- `clean`: no es trampa; se cierra sin más.
+- `likely`: le sale una ventana que no se salta con las cifras que no cuadran
+  (`GET /clicker/reviews`) y tiene que defenderse o explicar cómo lo hizo
+  (`POST /clicker/reviews/:id` `{ "answer" }`, de 20 a 2 000 letras). La
+  respuesta llega a quien administra (aviso `clicker_defense`) y al panel
+  (`status: "answered"`, `answer`); un método nuevo no se penaliza.
+- `cheat`: la **política de trampas**: se requisan todos sus edificios (la web
+  los vende sin devolverle nada) y lo que valían va a la **bolsa común**. En el
+  juego le sale el aviso de la policía del código con las cifras que no
+  cuadraron (`seizure` en `GET /clicker`, hasta `POST /clicker/seizure/ack`).
+  Es la misma política que se aplica sola a la tercera partida que no cuadra.
+
+La bolsa común (`pool` en `GET /clicker`) se reparte en el juego: de vez en
+cuando sale una placa, y quien la coge (`POST /clicker/pool/claim` →
+`{ "amount", "pool" }`) se lleva diez commits de la suerte según su última
+partida guardada, sin pasar de lo que hay y como mucho una vez cada cinco
+minutos. Lo cobrado vale como escrito en su siguiente guardado.
+
 GET /clicker/board → `{ entries, me }`: quién ha escrito más código, de
 cualquier campus. `level` es `floor(3 · log10(1 + total))`. `403` sin la roja.
 

@@ -18,6 +18,7 @@ import type { QuotaStatus } from './replica.js'
  * - `proposal_*`: han validado o rechazado un cambio que propusiste para una guía.
  * - `board_changed` / `board_cancelled`: una pizarra a la que vas ha cambiado o se ha cancelado.
  * - `group_joined` / `group_closed`: alguien se ha apuntado a tu grupo de terapia, o se ha cerrado uno tuyo.
+ * - `clicker_defense`: alguien ha contestado a una revisión de trampas de Code Clicker (solo admins).
  */
 export type NoticeKind =
   | 'ticket_answered'
@@ -36,6 +37,7 @@ export type NoticeKind =
   | 'board_cancelled'
   | 'group_joined'
   | 'group_closed'
+  | 'clicker_defense'
 
 export type Notice = {
   id: number
@@ -69,5 +71,7 @@ export type Pulse = {
   unread: number
   /** Comunicados de quien administra que tienes por leer: salen en pantalla. */
   broadcasts: number
+  /** Revisiones de trampas de Code Clicker por contestar: sale una ventana que no se salta. */
+  clickerReviews: number
   quota: QuotaStatus
 }

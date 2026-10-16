@@ -1,12 +1,16 @@
 import { useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 
-import type { Lang } from '@sanatorio/contracts'
+import type { ClickerSeizure, Lang } from '@sanatorio/contracts'
 import { Icon } from '../../shared/ui/Icon'
+import { Tile } from './art'
 import { bustText, fill, short, textsOf } from './texts'
 
-/** Una trampa pillada: la que hace `n`, y lo cobrado si se ha vendido todo. */
-export type Busted = { n: number; sold: number | null }
+/**
+ * Una trampa pillada: la que hace `n`, lo cobrado si se ha vendido todo y, si
+ * la policía del código ha requisado los edificios, qué y por qué.
+ */
+export type Busted = { n: number; sold: number | null; seizure: ClickerSeizure | null }
 
 /**
  * La ventana que sale cuando la API pilla una trampa: qué ha pasado con el
@@ -15,7 +19,22 @@ export type Busted = { n: number; sold: number | null }
 export function Bust({ bust, lang, onClose }: { bust: Busted; lang: Lang; onClose: () => void }) {
   const dialog = useRef<HTMLDialogElement>(null)
   const ui = textsOf(lang).ui
-  const [title, text] = bustText(bust.n, lang)
+  const [bustTitle, bustBody] = bustText(bust.n, lang)
+  const { seizure } = bust
+  const title = seizure === null ? bustTitle : (ui.policeTitle ?? bustTitle)
+  const evidence = seizure?.evidence ?? null
+  // Lo que no cuadró, con las cifras (no cómo se ha visto).
+  const text =
+    seizure === null
+      ? bustBody
+      : seizure.by === 'auto' || evidence === null
+        ? (ui.policeAuto ?? bustBody)
+        : `${ui.policeReview ?? ''} ${fill(ui.policeJump ?? '', {
+            from: short(evidence.from, lang),
+            to: short(evidence.to, lang),
+            seconds: evidence.seconds,
+            rate: short(evidence.perSecond, lang),
+          })}${evidence.golden ? '' : `, ${ui.policeNoGolden ?? ''}`}.`
 
   useEffect(() => {
     if (dialog.current?.open === false) dialog.current.showModal()
@@ -24,12 +43,17 @@ export function Bust({ bust, lang, onClose }: { bust: Busted; lang: Lang; onClos
   return createPortal(
     <dialog ref={dialog} className="layout-dialog cc-bust" aria-label={title} onClose={onClose}>
       <span className="cc-bust-icon" aria-hidden="true">
-        <Icon name="escudo" size={28} />
+        {seizure === null ? <Icon name="escudo" size={28} /> : <Tile icon="loot" size={40} />}
       </span>
-      <span className="eyebrow">{ui.bustEyebrow}</span>
+      <span className="eyebrow">{seizure === null ? ui.bustEyebrow : ui.policeEyebrow}</span>
       <h3>{title}</h3>
       <p>{text}</p>
-      {bust.sold !== null && (
+      {seizure !== null && (
+        <p className="cc-bust-sold">
+          {fill(ui.policePool ?? '', { n: short(seizure.amount, lang) })}
+        </p>
+      )}
+      {seizure === null && bust.sold !== null && (
         <p className="cc-bust-sold">{fill(ui.bustSold ?? '', { n: short(bust.sold, lang) })}</p>
       )}
       <button

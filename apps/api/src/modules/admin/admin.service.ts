@@ -749,11 +749,10 @@ export function createAdminService(options: AdminServiceOptions) {
         ],
       })
       const created = toTicket(result.rows[0] ?? {}, now())
-      const granted = await db.execute('SELECT login FROM user_roles')
 
       // A quien administra, para que no dependa de que alguien abra el panel.
       await notify({
-        to: [...fixedAdmins, ...granted.rows.map((row) => toText(row.login))],
+        to: await this.adminLogins(),
         kind: 'ticket_new',
         ref: `ticket:${created.id}`,
         from: actor.login,
@@ -761,6 +760,13 @@ export function createAdminService(options: AdminServiceOptions) {
       })
 
       return created
+    },
+
+    /** Quién administra: por configuración y por permiso dado desde el panel. */
+    async adminLogins(): Promise<string[]> {
+      const granted = await db.execute('SELECT login FROM user_roles')
+
+      return [...new Set([...fixedAdmins, ...granted.rows.map((row) => toText(row.login))])]
     },
 
     /** Lo que ha mandado quien pregunta, con sus respuestas. */

@@ -7,10 +7,18 @@
  * abierta también en otro dispositivo (los guardados se rechazan) y
  * `?secreto=caido`, la roja con la carga de la partida fallando al entrar.
  * `?secreto=trampa` es la roja con la API pillando una trampa en cada guardado.
+ * `?secreto=revision` es la roja con una revisión de trampas por contestar, y
+ * `?secreto=policia`, la roja con los edificios recién requisados.
  * Sin eso, solo se pilla lo más burdo: tener sin gastar más de lo escrito.
  */
 
-import type { ClickerAlert, ClickerCheat, ClickerState, TitleId } from '@sanatorio/contracts'
+import type {
+  ClickerAlert,
+  ClickerCheat,
+  ClickerReview,
+  ClickerState,
+  TitleId,
+} from '@sanatorio/contracts'
 
 import { ME } from './data'
 import { portrait } from './portrait'
@@ -18,16 +26,43 @@ import { delay, fail } from './state'
 import type { Api } from '../types'
 
 const wanted = new URLSearchParams(window.location.search).get('secreto')
-const red = wanted === 'rojo' || wanted === 'otro' || wanted === 'caido' || wanted === 'trampa'
+const red =
+  wanted === 'rojo' ||
+  wanted === 'otro' ||
+  wanted === 'caido' ||
+  wanted === 'trampa' ||
+  wanted === 'revision' ||
+  wanted === 'policia'
 const state: ClickerState = {
   plus: red ? 100 : Math.max(0, Number(wanted ?? 0) || 0),
   pill: red ? 'red' : null,
   save: null,
   rev: 0,
   caught: 0,
-  saleDue: false,
+  saleDue: wanted === 'policia',
+  seizure:
+    wanted === 'policia'
+      ? {
+          by: 'review',
+          amount: 4.7e5,
+          evidence: { from: 1.2e6, to: 9.4e6, seconds: 3, perSecond: 840, golden: false },
+        }
+      : null,
+  // Algo en la bolsa común, para que la placa del botín salga en la demostración.
+  pool: 2.5e6,
   names: ['jdoe', 'rsoto', 'mlopez', 'agarcia'],
 }
+/** La revisión de mentira que hay que contestar con `?secreto=revision`. */
+let reviews: ClickerReview[] =
+  wanted === 'revision'
+    ? [
+        {
+          id: 7,
+          at: new Date(Date.now() - 3_600_000).toISOString(),
+          evidence: { from: 1.2e6, to: 9.4e6, seconds: 3, perSecond: 840, golden: false },
+        },
+      ]
+    : []
 let best = 0
 // Lo que se va apuntando mientras se juega en la web de mentira.
 const history: [number, number][] = []
@@ -41,6 +76,8 @@ let alerts: ClickerAlert[] = [
     from: 2.1e6,
     to: 1.9e7,
     golden: false,
+    status: 'open',
+    answer: null,
     trace: Array.from({ length: 60 }, (_, index): [number, number] => [
       Math.floor(Date.now() / 1000) - 7200 - 30 + index,
       index < 30
@@ -85,6 +122,11 @@ export const clickerMock: Pick<
   | 'getClickerCapital'
   | 'pardonClickerCheat'
   | 'dismissClickerAlert'
+  | 'reviewClickerAlert'
+  | 'getClickerReviews'
+  | 'defendClickerReview'
+  | 'claimClickerPool'
+  | 'ackClickerSeizure'
 > = {
   async getClicker() {
     await delay(100)
@@ -132,6 +174,11 @@ export const clickerMock: Pick<
 
     if (!selling && (rigged || sent.code > sent.total + 1)) {
       state.caught += 1
+      // A la tercera, la política de trampas: lo de los edificios, a la bolsa común.
+      if (state.caught >= 3 && !state.saleDue) {
+        state.seizure = { by: 'auto', amount: 1.2e5, evidence: null }
+        state.pool += 1.2e5
+      }
       state.saleDue = state.caught >= 3
       cheats.unshift({
         id: state.caught,
@@ -278,5 +325,49 @@ export const clickerMock: Pick<
   async dismissClickerAlert(id) {
     await delay(100)
     alerts = alerts.filter((alert) => alert.id !== id)
+  },
+
+  async reviewClickerAlert(id, verdict) {
+    await delay(100)
+
+    const alert = alerts.find((entry) => entry.id === id)
+
+    if (alert === undefined) throw fail(404, 'Ese aviso ya no está')
+    if (verdict === 'likely') {
+      alert.status = 'asked'
+
+      return
+    }
+
+    alerts = alerts.filter((entry) => entry.id !== id)
+    if (verdict === 'cheat') state.pool += 4.7e5
+  },
+
+  async getClickerReviews() {
+    await delay(80)
+
+    return [...reviews]
+  },
+
+  async defendClickerReview(id, answer) {
+    await delay(120)
+    if (answer.trim().length < 20) throw fail(400, 'Cuéntalo con un poco más de detalle')
+    reviews = reviews.filter((review) => review.id !== id)
+  },
+
+  async claimClickerPool() {
+    await delay(120)
+
+    const amount = Math.min(state.pool, 5e4)
+
+    if (amount <= 0) throw fail(409, 'La bolsa está vacía')
+    state.pool -= amount
+
+    return { amount, pool: state.pool }
+  },
+
+  async ackClickerSeizure() {
+    await delay(60)
+    state.seizure = null
   },
 }

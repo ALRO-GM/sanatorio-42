@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import type { ClickerPlayer } from '@sanatorio/contracts'
+import type { ClickerPlayer, ClickerVerdict } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
 import { useAction, useAsync } from '../../shared/hooks/useAsync'
@@ -34,8 +34,10 @@ export function ClickerPanel() {
     if (!window.confirm(t('admin.clicker.pardonAsk'))) return
     if (await action.run(() => api.pardonClickerCheat(id))) await reload()
   }
-  const dismiss = async (id: number): Promise<void> => {
-    if (await action.run(() => api.dismissClickerAlert(id))) await reload()
+  /** Lo que se decide sobre un salto. La trampa requisa todo: se pregunta antes. */
+  const review = async (id: number, verdict: ClickerVerdict): Promise<void> => {
+    if (verdict === 'cheat' && !window.confirm(t('admin.clicker.cheatAsk'))) return
+    if (await action.run(() => api.reviewClickerAlert(id, verdict))) await reload()
   }
 
   return (
@@ -169,14 +171,28 @@ export function ClickerPanel() {
                         {alert.golden && ` · ${t('admin.clicker.withGolden')}`}
                       </small>
                     </span>
-                    <button
-                      type="button"
-                      className="pill"
-                      disabled={action.busy}
-                      onClick={() => void dismiss(alert.id)}
-                    >
-                      {t('admin.clicker.dismiss')}
-                    </button>
+                    <span className="clicker-verdicts">
+                      {(['cheat', 'likely', 'clean'] as const).map((verdict) => (
+                        <button
+                          key={verdict}
+                          type="button"
+                          className={`pill ${verdict === 'cheat' ? 'danger' : ''}`}
+                          disabled={
+                            action.busy || (verdict === 'likely' && alert.status !== 'open')
+                          }
+                          onClick={() => void review(alert.id, verdict)}
+                        >
+                          {t(`admin.clicker.verdict.${verdict}`)}
+                        </button>
+                      ))}
+                    </span>
+                    {alert.status !== 'open' && (
+                      <p className="hint clicker-defense">
+                        {alert.status === 'asked'
+                          ? t('admin.clicker.asked')
+                          : t('admin.clicker.answered', { answer: alert.answer ?? '' })}
+                      </p>
+                    )}
                     <CapitalChart
                       points={alert.trace}
                       lang={lang}

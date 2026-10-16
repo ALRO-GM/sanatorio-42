@@ -137,6 +137,12 @@ export const realApi: Api = {
   deleteAdminData: (scope) => sendJson('POST', '/admin/data/delete', scope),
   pardonClickerCheat: (id) => send('POST', `/admin/clicker/cheats/${id}/pardon`),
   dismissClickerAlert: (id) => send('DELETE', `/admin/clicker/alerts/${id}`),
+  reviewClickerAlert: (id, verdict) =>
+    send('POST', `/admin/clicker/alerts/${id}/review`, { verdict }),
+  getClickerReviews: () => getJson('/clicker/reviews'),
+  defendClickerReview: (id, answer) => send('POST', `/clicker/reviews/${id}`, { answer }),
+  claimClickerPool: () => sendJson('POST', '/clicker/pool/claim'),
+  ackClickerSeizure: () => send('POST', '/clicker/seizure/ack'),
   getBroadcasts: () => getJson('/broadcasts'),
   answerBroadcast: (id, answer) => sendJson('POST', `/broadcasts/${id}/answer`, answer),
   getAdminBroadcasts: () => getJson('/admin/broadcasts'),

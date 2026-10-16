@@ -25,8 +25,58 @@ export type ClickerState = {
    * hecho trampas tres veces o más: hasta entonces no se guarda nada.
    */
   saleDue: boolean
+  /**
+   * Lo que le ha requisado la policía del código y por qué, hasta que lo vea en
+   * el juego (`POST /clicker/seizure/ack`). `null` si no hay nada que contar.
+   */
+  seizure: ClickerSeizure | null
+  /** Líneas que hay en la bolsa común de lo requisado: se reparten en el juego. */
+  pool: number
   /** Logins de quienes más corrigen en su campus: salen en las noticias del juego. */
   names: string[]
+}
+
+/**
+ * Los datos de un salto de capital que no cuadra. Son las cifras, no cómo se
+ * detecta: quien hizo trampa ve qué no cuadró, no el mecanismo.
+ */
+export type ClickerEvidence = {
+  /** Capital antes y después, y en cuántos segundos. */
+  from: number
+  to: number
+  seconds: number
+  /** Líneas por segundo que tenía guardadas entonces. */
+  perSecond: number
+  /** Se abrió una pull request dorada por entonces. */
+  golden: boolean
+}
+
+/** Lo que se ha requisado: todos los edificios, a la bolsa común. */
+export type ClickerSeizure = {
+  /** `review`: lo decidió quien administra; `auto`: la tercera partida que no cuadraba. */
+  by: 'review' | 'auto'
+  /** Lo que valían los edificios: es lo que va a la bolsa. */
+  amount: number
+  /** Los datos que no cuadraron, si los hay. */
+  evidence: ClickerEvidence | null
+}
+
+/** Una revisión pendiente de contestar: no se puede seguir sin defenderse. */
+export type ClickerReview = {
+  id: number
+  at: string
+  evidence: ClickerEvidence
+}
+
+/** Lo que decide quien administra sobre un salto sospechoso. */
+export type ClickerVerdict = 'cheat' | 'likely' | 'clean'
+
+/** Respuesta de `POST /clicker/pool/claim`. */
+export type ClickerPoolClaim = {
+  /** Lo que se lleva quien lo ha cogido. */
+  amount: number
+  /** Lo que queda en la bolsa. */
+  pool: number
 }
 
 /** Cuerpo de `PUT /clicker/save`: la partida y las cifras que van a la clasificación. */
@@ -89,6 +139,10 @@ export type ClickerAlert = {
   golden: boolean
   /** El capital segundo a segundo alrededor del salto. */
   trace: [at: number, capital: number][]
+  /** `open`: por mirar; `asked`: tiene que defenderse; `answered`: ya lo ha hecho. */
+  status: 'open' | 'asked' | 'answered'
+  /** Su defensa o explicación, si ha contestado. */
+  answer: string | null
 }
 
 /** Respuesta de `PUT /clicker/save`. */

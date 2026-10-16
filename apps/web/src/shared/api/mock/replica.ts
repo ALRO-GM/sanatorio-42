@@ -7,6 +7,7 @@ import type { BroadcastReport } from '@sanatorio/contracts'
 import { ME, PEERS } from './data'
 import { mockNetwork, mockPair, mockPeople, mockStrictest } from './network'
 import type { Api } from '../types'
+import { clickerMock } from './clicker'
 import { delay, notices, quotaSettings, quotaQueue, quotaStatus } from './state'
 
 /**
@@ -34,6 +35,9 @@ const casts: BroadcastReport[] = new URLSearchParams(window.location.search).has
 /** Los que quien mira aún no ha contestado. */
 const pendingCasts = (): BroadcastReport[] =>
   casts.filter((cast) => !cast.answers.some((answer) => answer.login === ME.login))
+
+/** Las revisiones de mentira por contestar: las lleva el simulado del juego. */
+const pendingReviews = async (): Promise<number> => (await clickerMock.getClickerReviews()).length
 
 export const replicaMock: Pick<
   Api,
@@ -120,7 +124,12 @@ export const replicaMock: Pick<
     if (!quotaSettings.saving) {
       quotaQueue.ahead = 5
 
-      return { unread, broadcasts: pendingCasts().length, quota: { level: 'ok', ticket: null } }
+      return {
+        unread,
+        broadcasts: pendingCasts().length,
+        clickerReviews: await pendingReviews(),
+        quota: { level: 'ok', ticket: null },
+      }
     }
 
     const ahead = quotaQueue.ahead
@@ -130,6 +139,7 @@ export const replicaMock: Pick<
     return {
       unread,
       broadcasts: pendingCasts().length,
+      clickerReviews: await pendingReviews(),
       quota: {
         level: 'tight',
         ticket: {

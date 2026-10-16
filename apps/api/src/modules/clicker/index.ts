@@ -74,6 +74,32 @@ export function createClickerModule(deps: ClickerServiceOptions): ClickerModule 
         return reply.send(await service.save(await session.actor(request), request.body))
       })
 
+      /** `GET /clicker/reviews` → revisiones de trampas que tienes que contestar. */
+      app.get('/clicker/reviews', async (request, reply) => {
+        reply.header('Cache-Control', 'private, no-store')
+
+        return reply.send(await service.reviews(await session.actor(request)))
+      })
+
+      /** `POST /clicker/reviews/:id` → `{ answer }`: te defiendes o explicas cómo lo hiciste. 204. */
+      app.post<{ Params: { id: string } }>('/clicker/reviews/:id', async (request, reply) => {
+        await service.defend(await session.actor(request), request.params.id, request.body)
+
+        return reply.code(204).send()
+      })
+
+      /** `POST /clicker/pool/claim` → coge el botín de la bolsa común. */
+      app.post('/clicker/pool/claim', async (request, reply) => {
+        return reply.send(await service.claimPool(await session.actor(request)))
+      })
+
+      /** `POST /clicker/seizure/ack` → ya has visto el aviso de la policía del código. 204. */
+      app.post('/clicker/seizure/ack', async (request, reply) => {
+        await service.ackSeizure(await session.actor(request))
+
+        return reply.code(204).send()
+      })
+
       /** `GET /clicker/board` → quién ha escrito más código. */
       app.get('/clicker/board', async (request, reply) => {
         reply.header('Cache-Control', 'private, no-store')
@@ -106,6 +132,19 @@ export function createClickerModule(deps: ClickerServiceOptions): ClickerModule 
         '/admin/clicker/cheats/:id/pardon',
         async (request, reply) => {
           await service.pardon(await session.actor(request), request.params.id)
+
+          return reply.code(204).send()
+        },
+      )
+
+      /**
+       * `POST /admin/clicker/alerts/:id/review` → `{ verdict }`: `cheat` aplica la
+       * política de trampas, `likely` le pide que se defienda, `clean` lo cierra. 204.
+       */
+      app.post<{ Params: { id: string } }>(
+        '/admin/clicker/alerts/:id/review',
+        async (request, reply) => {
+          await service.review(await session.actor(request), request.params.id, request.body)
 
           return reply.code(204).send()
         },

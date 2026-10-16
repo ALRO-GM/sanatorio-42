@@ -48,6 +48,7 @@ import { reportReasonSchema } from './0039-report-reason.js'
 import { savedNoticesSchema } from './0040-saved-notices.js'
 import { secondFactorSchema } from './0041-second-factor.js'
 import { legalSchema } from './0042-legal.js'
+import { clickerReviewSchema } from './0043-clicker-review.js'
 import type { Migration } from './types.js'
 
 export type { Migration } from './types.js'
@@ -95,6 +96,7 @@ export const MIGRATIONS: readonly Migration[] = [
   savedNoticesSchema,
   secondFactorSchema,
   legalSchema,
+  clickerReviewSchema,
 ]
 
 /** Versión más alta que existe en el código. */

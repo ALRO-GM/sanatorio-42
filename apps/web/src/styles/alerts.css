@@ -542,3 +542,13 @@
   margin: 0;
   font-size: 0.78rem;
 }
+
+/* La revisión de trampas: las cifras que no cuadran, en una lista corta. */
+.review-evidence {
+  display: grid;
+  gap: 0.3rem;
+  padding-left: 1.1rem;
+}
+.review-gate textarea {
+  width: 100%;
+}

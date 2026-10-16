@@ -138,6 +138,13 @@ const GLYPHS: Record<string, ReactNode> = {
       <path d="M6.5 7.3v9.4M17.5 16.7V11c0-3-2-4-5-4h-2M13 4.5L10.4 7 13 9.5" />
     </>
   ),
+  /** El botín requisado: una placa de la policía del código. */
+  loot: (
+    <>
+      <path d="M12 2.8l7 2.6v5.6c0 4.6-3 8.4-7 10.2-4-1.8-7-5.6-7-10.2V5.4z" />
+      <path d="M12 7.6l1.3 2.7 3 .4-2.2 2.1.5 3-2.6-1.4-2.6 1.4.5-3-2.2-2.1 3-.4z" />
+    </>
+  ),
   bug: (
     <path d="M8 8.5a4 4 0 0 1 8 0v7a4 4 0 0 1-8 0zM4 10l4 1M4 16.5l4-1M20 10l-4 1M20 16.5l-4-1M9 3.5l1.6 2.2M15 3.5l-1.6 2.2M12 9v10" />
   ),
@@ -160,6 +167,8 @@ const HUES: Record<string, number> = {
   duck: 46,
   research: 284,
   golden: 44,
+  // El azul de una placa de policía.
+  loot: 215,
   bug: 0,
   trophy: 40,
   plus: 176,

@@ -481,6 +481,14 @@ export function openGolden(
   return { effect, amount: 0 }
 }
 
+/**
+ * Suma a la partida lo que se trae de fuera (el botín de la bolsa común): cuenta
+ * como escrito, igual que una dorada de la suerte.
+ */
+export function receive(game: Game, amount: number): void {
+  if (Number.isFinite(amount) && amount > 0) earn(game, amount)
+}
+
 /** Aplasta un bug: devuelve lo que se había comido, y un 10 % más. */
 export function squash(game: Game, index: number): number {
   const eaten = game.bugs[index]

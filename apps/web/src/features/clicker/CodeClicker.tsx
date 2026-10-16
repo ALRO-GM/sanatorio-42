@@ -36,6 +36,7 @@ import {
   hotfixPrice,
   newGame,
   openGolden,
+  receive,
   prestigeAfter,
   priceOf,
   reachedStage,
@@ -53,6 +54,8 @@ import {
   tick,
 } from './engine'
 import type { Game } from './engine'
+import { lootStep, lootTaken } from './loot'
+import type { LootState } from './loot'
 import { buildingShare, levelProgress, reach } from './insight'
 import { Backdrop, Coffee, CursorRing, drinkOf, hueOf, Skyline } from './scene'
 import { Mini, miniOn, setMini } from './Mini'
@@ -195,6 +198,9 @@ export function CodeClicker({
   const counter = useRef(0)
   const plus = useRef(egg.plus)
   const heard = useRef(false)
+  // La bolsa común de lo requisado y la placa del botín (`loot.ts`).
+  const pool = useRef(0)
+  const loot = useRef<LootState>(lootTaken(Date.now(), Math.random))
 
   if (session.current === '') session.current = newSession()
 
@@ -283,6 +289,7 @@ export function CodeClicker({
         const state = await api.getClicker()
 
         names.current = state.names
+        pool.current = state.pool
 
         if (game.current === null || replace) {
           // Los puntos de la partida que se deja no valen para la que entra.
@@ -312,8 +319,8 @@ export function CodeClicker({
         const sold = state.saleDue ? sellAll(game.current, FORCED_REFUND) : null
 
         if (sold !== null) save(true)
-        if (sold !== null || state.caught > seenCaught()) {
-          setBust({ n: state.caught, sold })
+        if (sold !== null || state.caught > seenCaught() || state.seizure !== null) {
+          setBust({ n: state.caught, sold, seizure: state.seizure })
           markCaught(state.caught)
         }
       } catch {
@@ -364,6 +371,7 @@ export function CodeClicker({
         }
 
         sample(samples.current, Date.now(), capitalOf(current))
+        loot.current = lootStep(loot.current, Date.now(), pool.current, Math.random)
         setFrame((value) => value + 1)
       },
       background ? BACKGROUND_FRAME_MS : FRAME_MS,
@@ -633,6 +641,34 @@ export function CodeClicker({
     play(bad ? 'bad' : 'golden', sound)
   }
 
+  /** Coge la placa del botín: la API dice cuánto se lleva de la bolsa común. */
+  const grab = (): void => {
+    const at = loot.current.up
+
+    if (at === null) return
+
+    loot.current = lootTaken(Date.now(), Math.random)
+    api.claimClickerPool().then(
+      (claim) => {
+        const text = ui('fx_loot', { n: number(claim.amount, 1) })
+        const id = ++counter.current
+
+        // La partida que haya ahora: si se ha recargado mientras tanto, va a esa.
+        if (game.current !== null) receive(game.current, claim.amount)
+        pool.current = claim.pool
+        setBursts((list) => [...list, { id, x: at.x * 100, y: at.y * 100, text, bad: false }])
+        window.setTimeout(() => {
+          setBursts((list) => list.filter((burst) => burst.id !== id))
+        }, 3000)
+        toast({ icon: 'loot', title: ui('loot'), text })
+        play('golden', sound)
+      },
+      () => {
+        toast({ icon: 'loot', title: ui('loot'), text: ui('lootGone') })
+      },
+    )
+  }
+
   const bought = (id: string, done: boolean, upgrade: boolean): void => {
     if (!done) return
 
@@ -714,6 +750,8 @@ export function CodeClicker({
           bust={bust}
           lang={lang}
           onClose={() => {
+            // El aviso de la policía sale una vez: visto, la API lo olvida.
+            if (bust.seizure !== null) void api.ackClickerSeizure().catch(() => undefined)
             setBust(null)
           }}
         />
@@ -883,6 +921,19 @@ export function CodeClicker({
             >
               <span>
                 <Tile icon={current.goldenUp.wrath ? 'bug' : 'golden'} size={64} />
+              </span>
+            </button>
+          )}
+          {loot.current.up !== null && (
+            <button
+              type="button"
+              className="cc-golden cc-loot"
+              style={{ left: `${loot.current.up.x * 100}%`, top: `${loot.current.up.y * 100}%` }}
+              aria-label={ui('loot')}
+              onClick={grab}
+            >
+              <span>
+                <Tile icon="loot" size={64} />
               </span>
             </button>
           )}

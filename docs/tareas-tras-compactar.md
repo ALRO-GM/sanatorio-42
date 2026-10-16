@@ -70,9 +70,9 @@ Orden (se marca cada uno al desplegarlo):
 - [x] 14 Tipos de denuncia (spam, acoso, insultos, otro) y filtro en el panel.
 - [x] 15 Formulario de incidencias: tipo y sección en desplegables, «Para: administración», icono `bicho`.
 - [x] 16 Borrar avisos / retirar mensaje propio (15 min, sin respuesta) / admin borra spam.
-- [ ] 9 Segundo factor (TOTP) para `/admin`, sesión elevada 12 h.
-- [ ] 12 Página de privacidad y condiciones, aceptación versionada, descarga de datos.
-- [ ] 13 Trampas de Code Clicker, tres botones: «no es trampa» cierra; «alta probabilidad» abre ventana obligatoria de defensa que llega al admin; «trampa» = **vender todos sus edificios**, aviso temático en el juego («La policía del código te ha requisado las ganancias fraudulentas») y el dinero va a una **bolsa común**. La bolsa se reparte con una imagen temática que aparece por la zona del juego como el commit dorado; al pulsarla da **10 × el commit de la suerte** (el de ganancia, no el frenesí).
+- [x] 9 Segundo factor (TOTP) para `/admin`, sesión elevada 12 h.
+- [x] 12 Página de privacidad y condiciones, aceptación versionada, descarga de datos.
+- [x] 13 Trampas de Code Clicker, tres botones: «no es trampa» cierra; «alta probabilidad» abre ventana obligatoria de defensa que llega al admin; «trampa» = **vender todos sus edificios**, aviso temático en el juego («La policía del código te ha requisado las ganancias fraudulentas») y el dinero va a una **bolsa común**. La bolsa se reparte con una imagen temática que aparece por la zona del juego como el commit dorado; al pulsarla da **10 × el commit de la suerte** (el de ganancia, no el frenesí).
 
 **C. Mejoras**
 - [ ] 17 Explicar guardia, tope y pace (dos números).

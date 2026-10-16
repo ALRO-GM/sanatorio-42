@@ -757,3 +757,19 @@ dialog.data-review h3 {
   align-items: center;
   gap: 0.3rem;
 }
+
+/* Lo que se decide sobre un salto sospechoso de Code Clicker. */
+.clicker-verdicts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+.clicker-verdicts .pill.danger {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+.clicker-defense {
+  grid-column: 1 / -1;
+  margin: 0;
+  white-space: pre-wrap;
+}

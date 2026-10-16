@@ -55,6 +55,8 @@ describe('code clicker', () => {
       rev: 0,
       caught: 0,
       saleDue: false,
+      seizure: null,
+      pool: 0,
       names: [],
     })
 
@@ -382,15 +384,23 @@ describe('code clicker', () => {
       clock.advance(10 * MINUTE)
       expect(await send({ ...fair, code: 1e9 })).toEqual({ caught: 3, refused: true })
       expect(await titleOf()).toEqual({ title: 'hacker_cazado', hacks: 3, extra: 'hacker_cazado' })
-      expect(await clicker.state(ana)).toMatchObject({ caught: 3, saleDue: true })
+      // La política de trampas: sus edificios (los de la última partida buena)
+      // van a la bolsa común, y lo verá en el juego.
+      expect(await clicker.state(ana)).toMatchObject({
+        caught: 3,
+        saleDue: true,
+        pool: cost('cursor', 10),
+        seizure: { by: 'auto', amount: cost('cursor', 10), evidence: null },
+      })
 
       // Hasta que no llega sin edificios, no se guarda nada, ni jugando limpio.
       clock.advance(MINUTE)
       expect(await send(fair, { perSecond: 1 })).toEqual({ caught: 3, refused: true })
-      // Vendidos a la mitad de lo que costaron.
-      expect(
-        await send({ total, code: 100 + cost('cursor', 10) / 2, owned: { cursor: 0 } }),
-      ).toEqual({ caught: 3, refused: false })
+      // Requisados: sin edificios y sin que se le devuelva nada.
+      expect(await send({ total, code: 100, owned: { cursor: 0 } })).toEqual({
+        caught: 3,
+        refused: false,
+      })
       expect(await clicker.state(ana)).toMatchObject({ caught: 3, saleDue: false })
 
       // Y a la cuarta, otra vez.
@@ -526,6 +536,134 @@ describe('code clicker', () => {
       await expectCode(clicker.dismiss(ana, alert?.id), 'forbidden')
       await clicker.dismiss(boss, alert?.id)
       expect((await clicker.usage(boss, {})).alerts).toEqual([])
+    })
+
+    /** Un salto sospechoso de `ana`, como lo dejaría un guardado: el que mira el panel. */
+    const leap = async (extra: Record<string, unknown> = { total: 3000 }): Promise<number> => {
+      clock.advance(MINUTE)
+
+      const second = Math.floor(clock.now() / 1000)
+
+      await send(extra, {
+        capital: Array.from({ length: 60 }, (_, index): [number, number] => [
+          second - 59 + index,
+          index < 30 ? 2e6 : 1e7,
+        ]),
+      })
+
+      const [alert] = (await services.clicker.usage(actor('eva', { admin: true }), {})).alerts
+
+      return alert?.id ?? 0
+    }
+
+    it('revisión: «no es trampa» lo cierra sin más, y solo lo decide quien administra', async () => {
+      const { clicker } = services
+      const boss = actor('eva', { admin: true })
+      const id = await leap()
+
+      await expectCode(clicker.review(ana, id, { verdict: 'clean' }), 'forbidden')
+      await expectCode(clicker.review(boss, id, { verdict: 'quizá' }), 'invalid_input')
+      await expectCode(clicker.review(boss, 9999, { verdict: 'clean' }), 'not_found')
+      await clicker.review(boss, id, { verdict: 'clean' })
+      expect((await clicker.usage(boss, {})).alerts).toEqual([])
+      expect(await clicker.state(ana)).toMatchObject({ caught: 0, saleDue: false, seizure: null })
+    })
+
+    it('revisión: «probable» le enseña los datos y no sigue sin defenderse', async () => {
+      const { clicker, notices } = services
+      const boss = actor('eva', { admin: true })
+
+      await services.admin.setRole(boss, { login: 'leo', admin: true })
+
+      const id = await leap()
+
+      await clicker.review(boss, id, { verdict: 'likely' })
+
+      // Le sale con las cifras que no cuadran (no cómo se detecta).
+      const [pending, ...more] = await clicker.reviews(ana)
+
+      expect(more).toEqual([])
+      expect(pending).toMatchObject({ id, evidence: { from: 2e6, to: 1e7, seconds: 1 } })
+      expect(await clicker.reviews(actor('leo'))).toEqual([])
+
+      // Hay que escribir algo de verdad; y solo la persona revisada.
+      await expectCode(clicker.defend(ana, id, { answer: 'no' }), 'invalid_input')
+      await expectCode(clicker.defend(actor('leo'), id, { answer: 'x'.repeat(30) }), 'not_found')
+      await clicker.defend(ana, id, { answer: 'Tenía una dorada abierta y una racha de bugs.' })
+
+      // Llega al panel y a quien administra; ya no se le vuelve a pedir.
+      expect(await clicker.reviews(ana)).toEqual([])
+      expect((await clicker.usage(boss, {})).alerts[0]).toMatchObject({
+        status: 'answered',
+        answer: 'Tenía una dorada abierta y una racha de bugs.',
+      })
+      expect((await notices.list(actor('leo'))).items[0]).toMatchObject({
+        kind: 'clicker_defense',
+        from: 'ana',
+      })
+      await expectCode(clicker.defend(ana, id, { answer: 'x'.repeat(30) }), 'not_found')
+    })
+
+    it('revisión: «trampa» requisa los edificios a la bolsa común y le dice qué no cuadró', async () => {
+      const { clicker } = services
+      const boss = actor('eva', { admin: true })
+
+      clock.advance(5 * HOUR)
+
+      const fair = { total: 50_000, code: 100, owned: { cursor: 10 } }
+
+      await send(fair, { perSecond: 1 })
+
+      const id = await leap(fair)
+
+      await clicker.review(boss, id, { verdict: 'cheat' })
+
+      expect(await clicker.state(ana)).toMatchObject({
+        caught: 1,
+        saleDue: true,
+        pool: cost('cursor', 10),
+        seizure: { by: 'review', amount: cost('cursor', 10), evidence: { from: 2e6, to: 1e7 } },
+      })
+      expect((await clicker.usage(boss, {})).alerts).toEqual([])
+      // Visto el aviso, no vuelve a salir; la venta sigue pendiente hasta que la haga.
+      await clicker.ackSeizure(ana)
+      expect(await clicker.state(ana)).toMatchObject({ seizure: null, saleDue: true })
+    })
+
+    it('el botín de la bolsa: diez commits de la suerte, sin pasar de lo que hay y cada cinco minutos', async () => {
+      const { clicker } = services
+
+      // Con 1 000 líneas sin gastar y 12 por segundo, un commit de la suerte da
+      // 1 000 × 0,15 + 13 (lo menor de las dos cuentas, más trece).
+      clock.advance(MINUTE)
+      await send({ code: 1000 })
+
+      // Nada en la bolsa: nada que coger.
+      await expectCode(clicker.claimPool(ana), 'conflict')
+      await db.execute('UPDATE clicker_pool SET amount = 1e6 WHERE id = 1')
+
+      const first = await clicker.claimPool(ana)
+
+      expect(first).toEqual({
+        amount: 10 * (1000 * 0.15 + 13),
+        pool: 1e6 - 10 * (1000 * 0.15 + 13),
+      })
+      await expectCode(clicker.claimPool(ana), 'conflict')
+
+      // Lo cobrado vale como escrito: el siguiente guardado no es trampa.
+      clock.advance(MINUTE)
+      expect(await send({ total: 1500 + first.amount, code: 1000 + first.amount })).toEqual({
+        caught: 0,
+        refused: false,
+      })
+
+      // A los cinco minutos, otra vez; y si queda poco, se lleva lo que queda.
+      clock.advance(5 * MINUTE)
+      await db.execute('UPDATE clicker_pool SET amount = 50 WHERE id = 1')
+      expect(await clicker.claimPool(ana)).toEqual({ amount: 50, pool: 0 })
+
+      // Quien no juega no coge nada.
+      await expectCode(clicker.claimPool(actor('leo')), 'forbidden')
     })
 
     it('el historial se aligera con el tiempo, pero no se borra', async () => {

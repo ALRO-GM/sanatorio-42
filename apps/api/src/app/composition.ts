@@ -175,6 +175,8 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     quota: replica.quota,
     onPulse: beat,
     broadcasts: (actor) => broadcasts.service.count(actor),
+    // `clicker` se monta después: para cuando alguien pregunte ya estará.
+    clickerReviews: async (actor) => (await clicker.service.reviews(actor)).length,
     ...clock,
   })
 
@@ -284,6 +286,8 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
 
       return before
     },
+    notify,
+    admins: () => admin.service.adminLogins(),
     ...clock,
   })
 

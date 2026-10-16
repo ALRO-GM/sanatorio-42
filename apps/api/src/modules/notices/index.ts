@@ -24,6 +24,8 @@ export type NoticesModuleDeps = NoticesServiceOptions & {
   onPulse?: (login: string) => void
   /** Cuántos comunicados tiene esa persona por leer. */
   broadcasts?: (actor: Actor) => Promise<number>
+  /** Cuántas revisiones de trampas de Code Clicker tiene esa persona por contestar. */
+  clickerReviews?: (actor: Actor) => Promise<number>
 }
 
 export type NoticesModule = AppModule & { service: NoticesService }
@@ -52,6 +54,7 @@ export function createNoticesModule(deps: NoticesModuleDeps): NoticesModule {
         return {
           unread: await service.unread(login),
           broadcasts: (await deps.broadcasts?.(await session.actor(request))) ?? 0,
+          clickerReviews: (await deps.clickerReviews?.(await session.actor(request))) ?? 0,
           quota: await deps.quota.statusFor(login),
         }
       })
