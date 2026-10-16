@@ -97,11 +97,13 @@
   --glow: rgba(255, 79, 179, 0.2);
   --shadow: rgba(0, 0, 0, 0.6);
 
-  /* De noche, el leopardo de verdad, apagado para que se pueda leer encima. */
-  --page-image:
-    linear-gradient(rgba(18, 3, 11, 0.86), rgba(18, 3, 11, 0.86)), url('./assets/leopard.svg'),
-    radial-gradient(900px 520px at 10% -10%, rgba(255, 79, 179, 0.3), transparent 62%);
-  --page-size: auto, 320px 320px, auto;
+  /* De noche, el leopardo como lo pidió acamelo: fucsia vivo con manchas
+     negras y doradas. Las tarjetas van oscuras y opacas: encima se lee bien. */
+  --page-image: url('./assets/leopard.svg'), linear-gradient(135deg, #ff2d9b, #e6007e 50%, #c4006b);
+  --page-size: 320px 320px, auto;
+  /* La franja del expediente, en negro con filo de oro: sobre el fucsia y el
+     leopardo es lo que más contrasta (el dorado se perdería entre las manchas). */
+  --banner-image: linear-gradient(180deg, #1a0510, #050103);
   --surface-image: linear-gradient(180deg, #24091a, #170511);
   --card-shadow:
     0 0 0 1px rgba(201, 154, 53, 0.35), 0 1px 2px rgba(0, 0, 0, 0.5),
@@ -196,11 +198,25 @@
   transform: translateY(-1px);
 }
 
-/* La franja del expediente: leopardo de verdad, y un brillo que la cruza. */
+/* La franja del expediente: leopardo de verdad, y un brillo que la cruza. Más
+   baja que en los demás estilos, y por debajo de la foto: acamelo pidió que no
+   le tapara la foto. */
 :root[data-style='bichota'] .banner {
   position: relative;
+  z-index: 0;
   overflow: hidden;
   border-bottom: 2px solid #e2ae32;
+}
+:root[data-style='bichota'] .record .banner {
+  height: 44px;
+}
+:root[data-style='bichota'] .record-head {
+  position: relative;
+  z-index: 1;
+}
+:root[data-style='bichota'] .record-head .avatar-fallback,
+:root[data-style='bichota'] .record-head img {
+  border-color: #e2ae32;
 }
 :root[data-style='bichota'] .banner::after {
   content: '';
@@ -253,6 +269,38 @@
 :root[data-style='bichota'] dialog.event-dialog {
   border-color: rgba(217, 163, 58, 0.6);
   background-image: var(--surface-image);
+}
+
+/* De noche el fondo es fucsia con leopardo: lo que va directamente encima (no
+   dentro de una tarjeta) necesita su propio contraste. Los títulos, en oro y
+   crema con sombra negra; las frases sueltas, sobre una pastilla oscura. */
+:root[data-style='bichota'][data-theme='dark'] h1,
+:root[data-style='bichota'][data-theme='dark'] main section > h2 {
+  background: linear-gradient(115deg, #fff3b8, #f5c542 25%, #ffe3f1 50%, #f5c542 75%, #fff3b8);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  filter: drop-shadow(0 0 1px #000000) drop-shadow(0 2px 3px rgba(0, 0, 0, 0.85));
+}
+:root[data-style='bichota'][data-theme='dark'] main section > p,
+:root[data-style='bichota'][data-theme='dark'] .back-btn {
+  justify-self: start;
+  width: fit-content;
+  max-width: 100%;
+  padding: 0.35rem 0.75rem;
+  border: 1px solid rgba(226, 174, 50, 0.55);
+  border-radius: 999px;
+  background: rgba(12, 2, 7, 0.86);
+  color: var(--text);
+}
+:root[data-style='bichota'][data-theme='dark'] .block-head {
+  padding: 0.1rem 0.6rem;
+  border-radius: 999px;
+  background: rgba(12, 2, 7, 0.86);
+  color: var(--text-2);
+}
+:root[data-style='bichota'][data-theme='dark'] main section > p.hint {
+  color: var(--text-2);
 }
 
 /* Quien pide menos movimiento lo ve quieto: mismos colores, sin vaivén. */
