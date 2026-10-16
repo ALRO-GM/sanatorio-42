@@ -158,6 +158,8 @@ describe('token de la aplicación', () => {
       `Basic ${Buffer.from('u-test:s-test').toString('base64')}`,
     )
     expect(fake.bodyOf(0)).toContain('grant_type=client_credentials')
+    // Solo el permiso público, aunque la app tenga más marcados en la intra.
+    expect(new URLSearchParams(fake.bodyOf(0)).get('scope')).toBe('public')
   })
 
   it('reutiliza el token mientras siga vivo', async () => {

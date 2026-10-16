@@ -11,6 +11,9 @@
 
 import { ApiError, apiErrorFromNetwork } from './errors.js'
 
+/** El único permiso que pide el token de la aplicación. */
+export const APP_SCOPE = 'public'
+
 export type AppTokenOptions = {
   tokenUrl: string
   uid: string
@@ -53,6 +56,9 @@ export function createAppTokenProvider(options: AppTokenOptions) {
           grant_type: 'client_credentials',
           client_id: options.uid,
           client_secret: options.secret,
+          // Solo lectura pública, aunque la app tenga más permisos marcados en la
+          // intra: el servidor no necesita nada más (comprobado el 2026-10-16).
+          scope: APP_SCOPE,
         }).toString(),
       })
     } catch (cause) {
