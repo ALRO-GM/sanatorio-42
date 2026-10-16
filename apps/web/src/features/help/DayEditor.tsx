@@ -6,7 +6,18 @@ import { api } from '../../shared/api'
 import { useAction } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
-import { DAY_END, DAY_START, duration, SLOT, slotsOf, toMinutes, toTime, windowsOf } from './time'
+import {
+  bookedSlotsOf,
+  canToggle,
+  DAY_END,
+  DAY_START,
+  duration,
+  SLOT,
+  slotsOf,
+  toMinutes,
+  toTime,
+  windowsOf,
+} from './time'
 import { Icon } from '../../shared/ui/Icon'
 
 type DayEditorProps = {
@@ -19,8 +30,9 @@ const MAX_OPTIONS = Array.from({ length: 16 }, (_, index) => (index + 1) * SLOT)
 
 /**
  * El calendario de hoy: se marcan las medias horas en las que te ofreces y el
- * tope de tiempo que quieres ayudar. Las medias horas que ya han empezado no se
- * pueden marcar ni desmarcar: nadie podría reservarlas enteras.
+ * tope de tiempo que quieres ayudar. Una media hora que ya ha empezado no se
+ * puede marcar (nadie podría reservarla entera), pero sí quitar si te vas. La
+ * que alguien ha reservado no se quita aquí: hay que cancelar la reserva.
  */
 export function DayEditor({ day, onSaved }: DayEditorProps) {
   const { t } = useI18n()
@@ -49,6 +61,7 @@ export function DayEditor({ day, onSaved }: DayEditorProps) {
   const now = toMinutes(day.now) + elapsed
   // Medias horas que pisa una corrección de 42: ahí no se te puede reservar.
   const evaluationSlots = slotsOf(day.busy)
+  const bookedSlots = bookedSlotsOf(day)
   const offered = slots.size * SLOT
   // Primera hora que se enseña: la de ahora, para no gastar pantalla en el pasado.
   const first = Math.max(DAY_START, Math.floor(now / 60) * 60)
@@ -89,6 +102,7 @@ export function DayEditor({ day, onSaved }: DayEditorProps) {
           const past = start <= now
           const active = slots.has(start)
           const taken = evaluationSlots.has(start)
+          const booked = bookedSlots.has(start)
 
           return (
             <button
@@ -96,8 +110,16 @@ export function DayEditor({ day, onSaved }: DayEditorProps) {
               type="button"
               className={`slot ${active ? 'active' : ''} ${taken ? 'busy' : ''} ${past ? 'past' : ''}`}
               aria-pressed={active}
-              title={past ? t('help.pastSlot') : taken ? t('help.busySlot') : undefined}
-              disabled={past || day.mustRate}
+              title={
+                booked
+                  ? t('help.bookedSlot')
+                  : past && !active
+                    ? t('help.pastSlot')
+                    : taken
+                      ? t('help.busySlot')
+                      : undefined
+              }
+              disabled={!canToggle({ past, active, booked }) || day.mustRate}
               onClick={() => {
                 toggle(start)
               }}

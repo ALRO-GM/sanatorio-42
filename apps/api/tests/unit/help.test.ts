@@ -103,6 +103,29 @@ describe('comunidad', () => {
       ).toEqual([{ start: '17:00', end: '19:00' }])
     })
 
+    it('deja quitar la media hora en curso, pero no la que alguien tiene reservada', async () => {
+      const { help } = services
+
+      await help.setToday(actor('eva'), tarde)
+      const booking = await help.book(actor('ana'), { helper: 'eva', start: '18:00', minutes: 30 })
+
+      // Son las 17:10: la de las 17:00 está en curso y se puede quitar.
+      clock.advance(40 * MINUTE)
+      const day = await help.setToday(actor('eva'), {
+        windows: [{ start: '17:30', end: '18:00' }],
+        maxMinutes: 60,
+      })
+
+      // La de las 18:00 está pedida: se queda aunque no venga en lo guardado.
+      expect(day.windows).toEqual([{ start: '17:30', end: '18:30' }])
+
+      // Rechazada la reserva, ya se puede soltar.
+      await help.respond(actor('eva'), booking.id, false)
+      expect((await help.setToday(actor('eva'), { windows: [], maxMinutes: 60 })).windows).toEqual(
+        [],
+      )
+    })
+
     it('la reserva la tiene que aceptar quien ayuda', async () => {
       const { help } = services
 

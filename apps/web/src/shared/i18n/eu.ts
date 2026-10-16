@@ -422,6 +422,8 @@ export const eu: Record<string, string> = {
   'board.editDoubt': 'Zalantzaren testua',
   'help.pastSlot': 'Ordu erdi hau hasita dago jada',
   'help.busySlot': '42ko zuzenketa bat duzu ordu honetan',
+  'help.bookedSlot':
+    'Norbaitek ordu erdi hau erreserbatu du: ezeztatu edo baztertu erreserba kentzeko',
   'help.busy':
     '42ko zuzenketa duzu {ranges} tartean. Tarte horretan ezin zaizu laguntzarik erreserbatu, irekita izan arren.',
   'graph.level': '{level}. maila',

@@ -418,6 +418,8 @@ export const ca: Record<string, string> = {
   'board.editDoubt': 'Text del dubte',
   'help.pastSlot': 'Aquesta mitja hora ja ha començat',
   'help.busySlot': 'Tens una correcció de 42 a aquesta hora',
+  'help.bookedSlot':
+    'Algú té reservada aquesta mitja hora: cancel·la o rebutja la reserva per treure-la',
   'help.busy':
     "Tens correcció de 42 de {ranges}. En aquesta estona no se't pot reservar ajuda, encara que ho tinguis obert.",
   'graph.level': 'Nivell {level}',

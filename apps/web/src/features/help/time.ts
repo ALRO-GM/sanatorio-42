@@ -1,4 +1,4 @@
-import type { TimeRange } from '@sanatorio/contracts'
+import type { HelpDay, TimeRange } from '@sanatorio/contracts'
 
 /** Todo va en medias horas. */
 export const SLOT = 30
@@ -53,4 +53,27 @@ export function windowsOf(slots: ReadonlySet<number>): TimeRange[] {
   }
 
   return windows.map((window) => ({ start: toTime(window.start), end: toTime(window.end) }))
+}
+
+/** Medias horas de hoy que alguien te ha reservado (pedidas o aceptadas). */
+export function bookedSlotsOf(day: Pick<HelpDay, 'day' | 'bookings'>): Set<number> {
+  return slotsOf(
+    day.bookings.filter(
+      (booking) =>
+        booking.role === 'helper' &&
+        booking.day === day.day &&
+        (booking.status === 'pending' || booking.status === 'confirmed'),
+    ),
+  )
+}
+
+/**
+ * Si una media hora del editor se puede pulsar: la que ya empezó solo para
+ * quitarla, y la reservada nunca (se suelta cancelando la reserva). Es lo que
+ * acepta la API.
+ */
+export function canToggle(slot: { past: boolean; active: boolean; booked: boolean }): boolean {
+  if (slot.booked) return false
+
+  return !slot.past || slot.active
 }

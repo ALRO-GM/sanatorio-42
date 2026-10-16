@@ -435,6 +435,8 @@ export const en: Record<string, string> = {
   'board.editDoubt': 'Question text',
   'help.pastSlot': 'This half hour has already started',
   'help.busySlot': 'You have a 42 evaluation at this time',
+  'help.bookedSlot':
+    'Someone has booked this half hour: cancel or decline the booking to remove it',
   'help.busy':
     'You have a 42 evaluation at {ranges}. Nobody can book you then, even if the slot is open.',
   'graph.level': 'Level {level}',

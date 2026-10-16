@@ -367,6 +367,11 @@ export function createHelpService(options: HelpServiceOptions) {
   /**
    * Las franjas pedidas, sin las medias horas que ya han empezado, salvo las
    * que esa persona ya tenía abiertas.
+   *
+   * Quitar una media hora siempre se puede, también la que está en curso (te
+   * tienes que ir), salvo si alguien la tiene reservada: esas se quedan aunque
+   * no vengan en lo pedido, para no dejar una reserva sin franja. Para soltarlas
+   * hay que cancelar o rechazar la reserva.
    */
   const stillOpen = async (
     login: string,
@@ -374,6 +379,10 @@ export function createHelpService(options: HelpServiceOptions) {
     moment: { day: string; minutes: number },
   ): Promise<Span[]> => {
     const before = (await help.day(login, moment.day))?.windows ?? []
+    const booked = (await help.activeOfHelper(login, moment.day)).map((booking) => ({
+      start: booking.start,
+      end: booking.start + booking.minutes,
+    }))
     const kept: Span[] = []
 
     for (const window of windows) {
@@ -386,7 +395,7 @@ export function createHelpService(options: HelpServiceOptions) {
       }
     }
 
-    return kept
+    return [...kept, ...booked]
   }
 
   return {
