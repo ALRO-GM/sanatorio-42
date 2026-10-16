@@ -321,7 +321,7 @@ describe('code clicker: logros, prestigio y partida guardada', () => {
     const game = newGame(T0, always(0.5))
 
     expect(tick(game, T0, always(0.5), 10)).toEqual(['plus:1', 'plus:10', 'pill:red'])
-    expect(tick(game, T0 + 1, always(0.5), 100)).toEqual(['plus:50', 'plus:100'])
+    expect(tick(game, T0 + 1, always(0.5), 42)).toEqual(['plus:21', 'plus:42'])
 
     click(game, T0 + 2)
     expect(tick(game, T0 + 3, always(0.5), 100)).toEqual(['total:0'])

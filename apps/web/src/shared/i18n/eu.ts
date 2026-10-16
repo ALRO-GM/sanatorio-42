@@ -1053,7 +1053,8 @@ export const eu: Record<string, string> = {
   'broadcast.ok': 'Ulertuta',
   'broadcast.later': 'Orain ez',
   'egg.achievement': 'Lorpena lortuta',
-  'egg.title': 'Ehun aldiz jo duzu atea',
+  'egg.title': '42 aldiz jo duzu atea',
+  'egg.eyebrow': '// konexioa sartzen',
   'egg.body':
     'Norbaitek ireki du. Bi pilula eskaintzen dizkizu, eta ez dizu aukeratu gabe joaten uzten.',
   'egg.blue': 'Pilula urdina',

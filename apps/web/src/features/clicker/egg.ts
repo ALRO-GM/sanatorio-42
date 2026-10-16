@@ -24,7 +24,7 @@ export type Egg = {
 }
 
 /** Pulsaciones que abren la pregunta de las pastillas. */
-export const PLUS_GOAL = 100
+export const PLUS_GOAL = 42
 const SEND_AFTER_MS = 1500
 const MAX_PER_SEND = 20
 

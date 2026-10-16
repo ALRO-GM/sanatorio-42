@@ -1404,7 +1404,7 @@ export const es: Record<string, string> = {
   'admin.clicker.of': 'Code Clicker de {login}',
   'admin.clicker.funnel': 'Del secreto a la partida',
   'admin.clicker.pressed': 'Pulsaron la cruz',
-  'admin.clicker.reached': 'Llegaron a cien',
+  'admin.clicker.reached': 'Llegaron a 42',
   'admin.clicker.red': 'Pastilla roja',
   'admin.clicker.blue': 'Pastilla azul',
   'admin.clicker.players': 'Con partida',
@@ -1482,7 +1482,8 @@ export const es: Record<string, string> = {
   'admin.cast.wasRequired': 'había que elegir',
   'admin.cast.wasOptional': 'se podía cerrar sin elegir',
   'egg.achievement': 'Logro conseguido',
-  'egg.title': 'Has llamado cien veces',
+  'egg.title': 'Has llamado 42 veces',
+  'egg.eyebrow': '// conexión entrante',
   'egg.body': 'Alguien ha abierto. Te ofrece dos pastillas, y no deja que te vayas sin elegir.',
   'egg.blue': 'La pastilla azul',
   'egg.blueAbout':

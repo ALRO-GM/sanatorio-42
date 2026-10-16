@@ -415,7 +415,7 @@ describe('comunidad', () => {
           .flatMap((cluster) => cluster.seats)
           .find((one) => one.host === host)?.broken
 
-      await seat({ eva: 'c1r1s1', leo: 'c1r1s2' })
+      await seat({ eva: 'c1r1s1', leo: 'c1r1s3' })
       // Los cambios del campus, recién traídos: el mapa no tiene que pedirlos a 42.
       await services.repositories.replica.setState(`delta:${MADRID}`, {
         cursor: new Date(clock.now()).toISOString(),
@@ -429,12 +429,20 @@ describe('comunidad', () => {
       expect(await brokenOf('c1r1s2')).toBeNull()
 
       // Pasada una semana se da por arreglado.
-      await map.reportBroken(actor('ana'), 'c1r1s1')
+      await map.reportBroken(actor('ana'), 'c1r1s2')
       await community.db.execute({
-        sql: "UPDATE broken_seats SET reported_at = ? WHERE host = 'c1r1s1'",
+        sql: "UPDATE broken_seats SET reported_at = ? WHERE host = 'c1r1s2'",
         args: [new Date(clock.now() - 7 * 24 * HOUR - MINUTE).toISOString()],
       })
-      expect(await brokenOf('c1r1s1')).toBeNull()
+      expect(await brokenOf('c1r1s2')).toBeNull()
+
+      // Y también en cuanto alguien inicia sesión en él después del aviso.
+      await map.reportBroken(actor('ana'), 'c1r1s2')
+      await seat({ eva: 'c1r1s1', leo: 'c1r1s3', ana: 'c1r1s2' })
+      expect(await brokenOf('c1r1s2')).toBeNull()
+      expect(
+        (await community.db.execute('SELECT COUNT(*) AS n FROM broken_seats')).rows[0]?.n,
+      ).toBe(0)
 
       await expectCode(map.reportBroken(actor('ana'), '../x'), 'invalid_input')
     })

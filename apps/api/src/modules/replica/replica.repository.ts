@@ -388,9 +388,9 @@ export function createReplicaRepository(db: Db) {
     async presenceIn(
       campusId: number,
       since: string,
-    ): Promise<{ login: string; image: string | null; host: string }[]> {
+    ): Promise<{ login: string; image: string | null; host: string; beginAt: string | null }[]> {
       const result = await db.execute({
-        sql: `SELECT u.login, u.image, p.host
+        sql: `SELECT u.login, u.image, p.host, p.begin_at
               FROM presence p JOIN users u ON u.id = p.user_id
               WHERE p.campus_id = ? AND p.seen_at >= ?`,
         args: [campusId, since],
@@ -400,6 +400,8 @@ export function createReplicaRepository(db: Db) {
         login: toText(row.login),
         image: typeof row.image === 'string' ? row.image : null,
         host: toText(row.host),
+        // Cuándo inició sesión en ese puesto, si 42 lo dice.
+        beginAt: typeof row.begin_at === 'string' ? row.begin_at : null,
       }))
     },
 

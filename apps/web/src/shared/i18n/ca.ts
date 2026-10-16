@@ -1045,7 +1045,8 @@ export const ca: Record<string, string> = {
   'broadcast.ok': 'Entesos',
   'broadcast.later': 'Ara no',
   'egg.achievement': 'Assoliment aconseguit',
-  'egg.title': 'Has trucat cent vegades',
+  'egg.title': 'Has trucat 42 vegades',
+  'egg.eyebrow': '// connexió entrant',
   'egg.body': "Algú ha obert. T'ofereix dues pastilles, i no et deixa marxar sense triar.",
   'egg.blue': 'La pastilla blava',
   'egg.blueAbout':

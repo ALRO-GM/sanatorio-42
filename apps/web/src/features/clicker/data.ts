@@ -187,13 +187,20 @@ export const BUG_GOALS = [1, 50, 200]
 export const PRESTIGE_GOALS = [1, 10, 100]
 /** Veces que te han pillado haciendo trampas: las tres primeras dan logro. */
 export const HACK_GOALS = [1, 2, 3]
-/** Los del secreto: las pulsaciones de la cruz que dan cada uno. */
-export const PLUS_GOALS = [1, 10, 50, 100]
+/** Los del secreto: las pulsaciones de la cruz que dan cada uno (42 abre el juego). */
+export const PLUS_GOALS = [1, 10, 21, 42]
+
+/**
+ * Para quien llegó antes de que la puerta bajara de cien a 42 pulsaciones: lo
+ * tiene quien consiguió el logro de las cincuenta. Ya no se puede conseguir.
+ */
+export const BETA = 'beta'
 
 /** Todos los ids de logro, en el orden en que se enseñan. */
 export const ACHIEVEMENTS: readonly string[] = [
   ...PLUS_GOALS.map((goal) => `plus:${goal}`),
   'pill:red',
+  BETA,
   ...TOTAL_GOALS.map((_, index) => `total:${index}`),
   ...CPS_GOALS.map((_, index) => `cps:${index}`),
   ...HAND_GOALS.map((_, index) => `hand:${index}`),
@@ -210,7 +217,7 @@ export const ACHIEVEMENTS: readonly string[] = [
 ]
 
 /** Un logro que no sale en la lista hasta que se consigue. */
-export const hiddenAchievement = (id: string): boolean => id.startsWith('hack:')
+export const hiddenAchievement = (id: string): boolean => id.startsWith('hack:') || id === BETA
 
 export type Upgrade = {
   id: string

@@ -95,6 +95,60 @@ h2 {
   background: var(--accent);
   color: var(--on-accent);
 }
+/* El secreto de la cruz: cada pulsación la hace vibrar, y cuanto más cerca de
+   las 42 más gira, más se infla y más brilla (`--strain`, de 0 a 1). A la 42
+   vuelve a su forma de golpe. */
+.brand-mark {
+  rotate: calc(var(--strain, 0) * 38deg);
+  scale: calc(1 + var(--strain, 0) * 0.5);
+  box-shadow: 0 0 calc(var(--strain, 0) * 18px) calc(var(--strain, 0) * 3px)
+    color-mix(in srgb, var(--accent) 70%, transparent);
+  transition:
+    rotate 0.25s ease-out,
+    scale 0.25s ease-out;
+}
+.brand-mark.knocked {
+  animation: brand-knock 0.38s ease-out;
+}
+.brand-mark.opened {
+  animation: brand-open 0.6s cubic-bezier(0.2, 1.6, 0.4, 1);
+}
+@keyframes brand-knock {
+  0% {
+    translate: 0 0;
+  }
+  20% {
+    translate: calc(-2px - var(--strain, 0) * 3px) 0;
+  }
+  40% {
+    translate: calc(2px + var(--strain, 0) * 3px) 0;
+  }
+  60% {
+    translate: calc(-1px - var(--strain, 0) * 2px) 0;
+  }
+  80% {
+    translate: calc(1px + var(--strain, 0) * 2px) 0;
+  }
+  100% {
+    translate: 0 0;
+  }
+}
+@keyframes brand-open {
+  0% {
+    scale: 1.6;
+    rotate: 45deg;
+  }
+  100% {
+    scale: 1;
+    rotate: 0deg;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .brand-mark.knocked,
+  .brand-mark.opened {
+    animation: none;
+  }
+}
 .brand-name b {
   color: var(--accent-text);
   font-weight: 700;

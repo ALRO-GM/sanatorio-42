@@ -361,8 +361,12 @@ const es: Texts = {
   achievements: {
     'plus:1': ['Curiosidad', 'Has pulsado la cruz. No hace nada. ¿O sí?'],
     'plus:10': ['Insistencia', 'Diez veces. La cruz sigue ahí.'],
-    'plus:50': ['No deberías seguir', 'Cincuenta. Algo al otro lado ha empezado a contar contigo.'],
-    'plus:100': ['Toc, toc', 'Cien. Ha abierto.'],
+    'plus:21': ['No deberías seguir', 'Veintiuna. Algo al otro lado ha empezado a contar contigo.'],
+    'plus:42': ['Toc, toc', 'Cuarenta y dos. Ha abierto.'],
+    beta: [
+      'Beta tester',
+      'Llegaste cuando había que pulsar la cruz cien veces. Gracias por probarlo antes que nadie.',
+    ],
     'pill:red': ['La pastilla roja', 'Elegiste ver hasta dónde llega la madriguera.'],
     'stage:1': ['Te están mirando', 'Los pisciners piensan como uno.'],
     'stage:2': ['Ya no parpadean', 'El barrido ha terminado.'],
@@ -903,11 +907,15 @@ const en: Texts = {
   achievements: {
     'plus:1': ['Curiosity', 'You pressed the cross. It does nothing. Or does it?'],
     'plus:10': ['Insistence', 'Ten times. The cross is still there.'],
-    'plus:50': [
+    'plus:21': [
       'You should not go on',
-      'Fifty. Something on the other side has started counting on you.',
+      'Twenty-one. Something on the other side has started counting on you.',
     ],
-    'plus:100': ['Knock, knock', 'A hundred. It opened.'],
+    'plus:42': ['Knock, knock', 'Forty-two. It opened.'],
+    beta: [
+      'Beta tester',
+      'You got here when the cross took a hundred presses. Thanks for trying it before anyone else.',
+    ],
     'pill:red': ['The red pill', 'You chose to see how deep the rabbit hole goes.'],
     'stage:1': ['They are watching you', 'The pisciners think as one.'],
     'stage:2': ['They no longer blink', 'The sweep is done.'],

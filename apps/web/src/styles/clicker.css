@@ -557,65 +557,250 @@
   animation: cc-shake 0.5s ease-in-out;
 }
 
-/* La ventana de las pastillas: no se parece a nada del resto de la web. */
+/* La ventana de las pastillas: no se parece a nada del resto de la web. Una
+   pantalla de terminal con lluvia de caracteres detrás, líneas de barrido, el
+   título que falla y dos cápsulas de verdad, en relieve, que flotan. */
 dialog.cc-pill-dialog {
-  width: min(560px, calc(100vw - 1.5rem));
-  padding: 1.6rem;
-  border: 1px solid #1d3a2c;
-  border-radius: 6px !important;
-  background: #030705;
-  color: #7dffb0;
+  position: relative;
+  width: min(640px, calc(100vw - 1.5rem));
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid #1f6b3f;
+  border-radius: 14px !important;
+  background: #020805;
+  color: #8dffbd;
   font-family: 'JetBrains Mono Variable', ui-monospace, monospace;
   box-shadow:
-    0 0 0 1px #0a1f14,
-    0 0 80px rgba(0, 255, 120, 0.18);
+    0 0 0 1px #0b2a18,
+    0 0 60px rgba(0, 255, 120, 0.25),
+    0 30px 80px rgba(0, 0, 0, 0.8);
+  animation: cc-screen-on 0.7s ease-out;
 }
 dialog.cc-pill-dialog::backdrop {
-  background: rgba(0, 0, 0, 0.92);
+  background: radial-gradient(circle at 50% 40%, rgba(0, 40, 20, 0.85), rgba(0, 0, 0, 0.96));
   backdrop-filter: blur(6px);
 }
+.cc-pill-rain {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.35;
+}
+/* Líneas de barrido y viñeta, por encima de la lluvia y por debajo del texto. */
+dialog.cc-pill-dialog::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.28) 0 1px, transparent 1px 3px),
+    radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.75));
+}
+.cc-pill-screen {
+  position: relative;
+  z-index: 1;
+  padding: 2rem 2rem 1.8rem;
+}
+.cc-pill-eyebrow {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #3fbf75;
+}
 dialog.cc-pill-dialog h3 {
-  margin: 0 0 0.6rem;
+  position: relative;
+  margin: 0 0 0.9rem;
   font-family: inherit;
+  font-size: clamp(1.4rem, 4vw, 2rem);
+  color: #d6ffe5;
+  text-shadow: 0 0 12px rgba(80, 255, 150, 0.7);
   outline: none;
 }
 dialog.cc-pill-dialog h3::before {
   content: '> ';
+  color: #3fbf75;
+}
+/* El título falla de vez en cuando, en cian y magenta. */
+.cc-glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  color: #d6ffe5;
+  opacity: 0;
+  animation: cc-glitch-layer 3.2s infinite steps(1);
+}
+@keyframes cc-glitch-layer {
+  0%,
+  88%,
+  100% {
+    opacity: 0;
+    transform: none;
+    text-shadow: none;
+  }
+  90% {
+    opacity: 0.9;
+    transform: translate(3px, -1px);
+    text-shadow:
+      -3px 0 #0ff,
+      3px 0 #f0f;
+    clip-path: inset(10% 0 55% 0);
+  }
+  93% {
+    opacity: 0.9;
+    transform: translate(-3px, 1px);
+    text-shadow:
+      3px 0 #0ff,
+      -3px 0 #f0f;
+    clip-path: inset(55% 0 8% 0);
+  }
+}
+.cc-typed {
+  min-height: 3.2em;
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #9dffc6;
+}
+.cc-caret {
+  display: inline-block;
+  width: 0.55em;
+  height: 1.05em;
+  margin-left: 2px;
+  vertical-align: -0.15em;
+  background: #8dffbd;
+  animation: cc-caret 0.9s steps(1) infinite;
+}
+@keyframes cc-caret {
+  50% {
+    opacity: 0;
+  }
 }
 .cc-pills {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.8rem;
-  margin-top: 1.2rem;
+  gap: 1rem;
+  margin-top: 1.6rem;
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity 0.6s ease-out,
+    transform 0.6s ease-out;
+}
+.cc-pills.shown {
+  opacity: 1;
+  transform: none;
 }
 .cc-pill {
   display: grid;
-  gap: 0.35rem;
-  padding: 1.1rem 1.6rem;
-  border: 2px solid var(--pill);
-  border-radius: 999px !important;
-  background: color-mix(in srgb, var(--pill) 16%, #000);
+  justify-items: center;
+  gap: 0.45rem;
+  padding: 1.3rem 1rem 1.1rem;
+  border: 1px solid color-mix(in srgb, var(--pill) 55%, transparent);
+  border-radius: 16px !important;
+  background: radial-gradient(
+    circle at 50% 30%,
+    color-mix(in srgb, var(--pill) 22%, transparent),
+    rgba(0, 0, 0, 0.55) 70%
+  );
   color: #fff;
   font: inherit;
   text-align: center;
   cursor: pointer;
   transition:
-    transform 0.15s,
-    box-shadow 0.15s;
+    transform 0.2s,
+    box-shadow 0.2s,
+    border-color 0.2s;
 }
-.cc-pill:hover:not(:disabled) {
-  transform: translateY(-3px);
-  box-shadow: 0 0 34px color-mix(in srgb, var(--pill) 60%, transparent);
+.cc-pill:hover:not(:disabled),
+.cc-pill:focus-visible {
+  transform: translateY(-4px);
+  border-color: var(--pill);
+  box-shadow:
+    0 0 0 1px var(--pill),
+    0 0 40px color-mix(in srgb, var(--pill) 55%, transparent);
+}
+.cc-pill strong {
+  font-size: 1rem;
+  letter-spacing: 0.04em;
 }
 .cc-pill small {
-  color: rgba(255, 255, 255, 0.75);
+  color: rgba(255, 255, 255, 0.72);
   font-size: 0.74rem;
+  line-height: 1.45;
 }
 .cc-pill.blue {
-  --pill: #2f7df6;
+  --pill: #3b8bff;
+  --pill-dark: #0f3fa8;
 }
 .cc-pill.red {
-  --pill: #e6322e;
+  --pill: #ff3b3b;
+  --pill-dark: #a10f16;
+}
+/* La cápsula: dos mitades del mismo color, un brillo arriba y su sombra. */
+.cc-capsule {
+  position: relative;
+  width: 92px;
+  height: 36px;
+  margin: 0.3rem 0 0.5rem;
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.35), transparent 45%, rgba(0, 0, 0, 0.35)),
+    linear-gradient(90deg, var(--pill) 0 50%, var(--pill-dark) 50% 100%);
+  box-shadow:
+    inset 0 -3px 6px rgba(0, 0, 0, 0.35),
+    0 6px 14px rgba(0, 0, 0, 0.6),
+    0 0 26px color-mix(in srgb, var(--pill) 65%, transparent);
+  rotate: -22deg;
+  animation: cc-capsule-float 3.2s ease-in-out infinite;
+}
+.cc-pill.red .cc-capsule {
+  rotate: 22deg;
+  animation-delay: -1.6s;
+}
+/* El brillo de arriba. */
+.cc-capsule::after {
+  content: '';
+  position: absolute;
+  top: 5px;
+  left: 14px;
+  width: 44%;
+  height: 7px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.65);
+  filter: blur(1px);
+}
+.cc-pill:hover:not(:disabled) .cc-capsule {
+  animation-duration: 1.2s;
+  box-shadow:
+    inset 0 -3px 6px rgba(0, 0, 0, 0.35),
+    0 6px 14px rgba(0, 0, 0, 0.6),
+    0 0 44px var(--pill);
+}
+@keyframes cc-capsule-float {
+  50% {
+    translate: 0 -6px;
+  }
+}
+@keyframes cc-screen-on {
+  0% {
+    transform: scaleY(0.02) scaleX(0.6);
+    filter: brightness(3);
+  }
+  45% {
+    transform: scaleY(0.02) scaleX(1);
+  }
+  100% {
+    transform: none;
+    filter: none;
+  }
+}
+@media (max-width: 520px) {
+  .cc-pills {
+    grid-template-columns: 1fr;
+  }
 }
 
 @keyframes cc-float {

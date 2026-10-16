@@ -154,6 +154,17 @@ export function createMapService(options: MapServiceOptions) {
         return seat
       }
 
+      // Un puesto roto en el que alguien ha iniciado sesión después del aviso
+      // funciona: se da por arreglado.
+      for (const person of present) {
+        const report = broken.get(person.host)
+
+        if (report !== undefined && (person.beginAt === null || person.beginAt >= report.at)) {
+          broken.delete(person.host)
+          await options.broken?.clear(actor.campusId, person.host)
+        }
+      }
+
       for (const host of known) {
         seatAt(host)
       }

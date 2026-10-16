@@ -1147,7 +1147,7 @@ export const en: Record<string, string> = {
   'admin.clicker.of': "{login}'s Code Clicker",
   'admin.clicker.funnel': 'From the secret to the game',
   'admin.clicker.pressed': 'Pressed the cross',
-  'admin.clicker.reached': 'Reached a hundred',
+  'admin.clicker.reached': 'Reached 42',
   'admin.clicker.red': 'Red pill',
   'admin.clicker.blue': 'Blue pill',
   'admin.clicker.players': 'With a game',
@@ -1432,7 +1432,8 @@ export const en: Record<string, string> = {
   'broadcast.ok': 'Got it',
   'broadcast.later': 'Not now',
   'egg.achievement': 'Achievement unlocked',
-  'egg.title': 'You knocked a hundred times',
+  'egg.title': 'You knocked 42 times',
+  'egg.eyebrow': '// incoming connection',
   'egg.body':
     'Someone opened. They offer you two pills, and will not let you leave without choosing.',
   'egg.blue': 'The blue pill',

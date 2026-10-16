@@ -57,7 +57,7 @@ import {
 } from './cheat.rules.js'
 
 /** Pulsaciones de la cruz que abren la pregunta de las pastillas. */
-export const PLUS_GOAL = 100
+export const PLUS_GOAL = 42
 /** Pulsaciones que caben en un envío: la web las junta para no pedir una a una. */
 const MAX_PLUS_PER_SEND = 25
 /** Lo que puede pesar una partida guardada. */

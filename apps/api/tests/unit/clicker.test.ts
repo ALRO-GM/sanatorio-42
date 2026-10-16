@@ -46,7 +46,7 @@ describe('code clicker', () => {
     spent: 0,
   }
 
-  it('cuenta las pulsaciones de la cruz, y no deja elegir antes de las cien', async () => {
+  it('cuenta las pulsaciones de la cruz, y no deja elegir antes de las 42', async () => {
     const { clicker } = services
 
     expect(await clicker.state(actor('ana'))).toEqual({
@@ -61,9 +61,12 @@ describe('code clicker', () => {
       names: [],
     })
 
-    await press('ana', 60)
-    expect(await clicker.plus(actor('ana'), { count: 5 })).toEqual({ plus: 65, pill: null })
+    await press('ana', 36)
+    expect(await clicker.plus(actor('ana'), { count: 5 })).toEqual({ plus: 41, pill: null })
     await expectCode(clicker.choose(actor('ana'), { pill: 'red' }), 'conflict')
+    // A la 42, sí.
+    await press('ana', 1)
+    expect(await clicker.choose(actor('ana'), { pill: 'red' })).toMatchObject({ pill: 'red' })
     // Ni envíos vacíos ni un millón de golpe.
     await expectCode(clicker.plus(actor('ana'), { count: 0 }), 'invalid_input')
     await expectCode(clicker.plus(actor('ana'), { count: 1000 }), 'invalid_input')

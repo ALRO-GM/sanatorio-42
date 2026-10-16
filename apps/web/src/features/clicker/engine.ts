@@ -38,6 +38,7 @@ import {
   TOTAL_GOALS,
   UPGRADE,
   UPGRADES,
+  BETA,
 } from './data'
 import type { BuildingId, Upgrade } from './data'
 
@@ -530,6 +531,8 @@ function earned(game: Game, plus: number, caught: number): string[] {
   const tests: Record<string, (index: number, id: string) => boolean> = {
     plus: (goal) => plus >= goal,
     pill: () => true,
+    // Solo se conserva: ya no se puede conseguir.
+    beta: () => false,
     total: (index) => all >= (TOTAL_GOALS[index] ?? Infinity),
     cps: (index) => cps >= (CPS_GOALS[index] ?? Infinity),
     hand: (index) => game.hand >= (HAND_GOALS[index] ?? Infinity),
@@ -635,6 +638,17 @@ export function tick(
 /** La partida tal como se guarda. */
 export const serialize = (game: Game): string => JSON.stringify(game)
 
+/**
+ * Los logros de la cruz de antes (50 y 100 pulsaciones) ya no existen: ahora
+ * son 21 y 42, que se vuelven a conceder solos. Quien tenía el de 50 se queda
+ * con el de beta tester.
+ */
+function renamed(achieved: readonly string[]): string[] {
+  const kept = achieved.filter((id) => id !== 'plus:50' && id !== 'plus:100')
+
+  return achieved.includes('plus:50') && !kept.includes(BETA) ? [...kept, BETA] : kept
+}
+
 /** Lee una partida guardada; `null` si no se entiende. */
 export function restore(saved: string | null, now: number): Game | null {
   if (saved === null) return null
@@ -646,7 +660,9 @@ export function restore(saved: string | null, now: number): Game | null {
 
     // Lo que falte (una partida de una versión anterior) vale lo de una nueva.
     // El tiempo con la web cerrada no cuenta: se retoma desde ahora.
-    return { ...newGame(now), ...parsed, last: now, goldenUp: null }
+    const game = { ...newGame(now), ...parsed, last: now, goldenUp: null }
+
+    return { ...game, achieved: renamed(game.achieved) }
   } catch {
     return null
   }

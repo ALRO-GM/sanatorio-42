@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import type { CSSProperties } from 'react'
 
 import type { CurrentUser } from '@sanatorio/contracts'
 
@@ -10,7 +11,7 @@ import { Icon } from '../shared/ui/Icon'
 import { Nav } from './Nav'
 import type { Section } from './sections'
 import { UserMenu } from './UserMenu'
-import { pressPlus, useEgg } from '../features/clicker/egg'
+import { PLUS_GOAL, pressPlus, useEgg } from '../features/clicker/egg'
 
 type HeaderProps = {
   me: CurrentUser
@@ -50,6 +51,11 @@ export function Header({
   const egg = useEgg()
   // Al bajar, la barra gana una raya que la separa de lo que pasa por debajo.
   const [scrolled, setScrolled] = useState(false)
+  // Cada pulsación de la cruz la hace vibrar otra vez (cambia la clave y se repite).
+  const [knocks, setKnocks] = useState(0)
+  // Lo cerca que está de abrirse, de 0 a 1: gira y se infla poco a poco.
+  const counting = egg.ready && egg.pill === null && egg.plus > 0 && egg.plus < PLUS_GOAL
+  const strain = counting ? egg.plus / PLUS_GOAL : 0
   const bar = useRef<HTMLDivElement>(null)
 
   // Lo que mide la cabecera (cambia si las pestañas pasan a dos filas) queda
@@ -98,12 +104,18 @@ export function Header({
             aria-current={section === 'expediente' ? 'page' : undefined}
             onClick={() => {
               track('nav.expediente')
-              // Y cuenta para el secreto: a las cien, pasa algo.
+              // Y cuenta para el secreto: a las 42, pasa algo.
               pressPlus()
+              setKnocks((count) => count + 1)
               onGo('expediente')
             }}
           >
-            <span className="brand-mark" aria-hidden="true">
+            <span
+              key={knocks}
+              className={`brand-mark ${counting ? 'knocked' : ''} ${knocks > 0 && !counting && egg.plus >= PLUS_GOAL && egg.pill === null ? 'opened' : ''}`}
+              style={{ '--strain': strain } as CSSProperties}
+              aria-hidden="true"
+            >
               <svg viewBox="0 0 24 24" width="18" height="18">
                 <path
                   d="M12 5v14M5 12h14"
