@@ -357,3 +357,118 @@ a.button {
     padding: 0.1rem;
   }
 }
+
+/* Cómo se ven el día y la semana: lista o con las horas a la vista. */
+.agenda-layouts {
+  margin-bottom: 0.5rem;
+}
+.timeline-wrap {
+  overflow-x: auto;
+}
+.timeline-wait {
+  margin: 0 0 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 10px;
+  background: var(--accent-soft);
+  color: var(--accent-text);
+  font-weight: 600;
+}
+.timeline {
+  display: grid;
+  gap: 6px;
+  align-items: start;
+}
+.timeline.week {
+  min-width: 700px;
+}
+.timeline .day-head.today strong {
+  color: var(--accent-text);
+}
+.timeline-hours {
+  position: relative;
+}
+.timeline-hours span {
+  position: absolute;
+  right: 0.3rem;
+  transform: translateY(-50%);
+  font-size: 0.7rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-3);
+}
+.timeline-hours span:first-child {
+  transform: none;
+}
+.timeline-day {
+  position: relative;
+  min-width: 0;
+  background: var(--surface-2);
+  border-radius: 10px;
+}
+.timeline-day.today {
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+.timeline-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1px solid var(--border);
+  pointer-events: none;
+}
+.timeline-day .day-empty {
+  position: absolute;
+  inset: 0.3rem auto auto 0.3rem;
+}
+.timeline-day button.event-chip {
+  z-index: 1;
+  align-content: flex-start;
+  overflow: hidden;
+}
+.timeline-now {
+  position: absolute;
+  left: -3px;
+  right: 0;
+  z-index: 2;
+  border-top: 2px solid var(--danger);
+  pointer-events: none;
+}
+.timeline-now::before {
+  content: '';
+  position: absolute;
+  left: -2px;
+  top: -5px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--danger);
+}
+/* En la línea de horas: hora arriba y título recortado, sin partir palabras. */
+.timeline-day button.event-chip {
+  flex-direction: column;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  gap: 0.05rem;
+  padding: 0.2rem 0.35rem;
+  font-size: 0.75rem;
+}
+.timeline-day button.event-chip .event-title,
+.timeline-day button.event-chip .event-time,
+.timeline-day button.event-chip .event-place {
+  flex: none;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow-wrap: normal;
+}
+.timeline-day button.event-chip .event-icon {
+  display: none;
+}
+/* Los bajitos, todo en una línea. */
+.timeline-day button.event-chip.short {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0 0.35rem;
+}
+.timeline-day button.event-chip.short .event-place {
+  display: none;
+}

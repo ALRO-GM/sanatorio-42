@@ -1,7 +1,9 @@
+import type { CSSProperties } from 'react'
+
 import type { CalendarEvent } from '@sanatorio/contracts'
 
 import { useI18n } from '../../shared/i18n'
-import { timeOn } from './dates'
+import { rangeOn, timeOn } from './dates'
 import { iconOf } from './kinds'
 import { Icon } from '../../shared/ui/Icon'
 
@@ -12,23 +14,36 @@ type EventChipProps = {
   /** `true` en la vista de mes, donde solo cabe una línea. */
   compact?: boolean
   onOpen: (event: CalendarEvent) => void
+  /** Dónde va en la línea de horas (posición y tamaño), si se pinta ahí. */
+  style?: CSSProperties
+  /** `true` si en la línea de horas es tan bajo que todo tiene que ir en una línea. */
+  short?: boolean
 }
 
 /**
  * Un evento en el calendario: su color y su icono dicen de qué tipo es, y el
  * borde discontinuo, que no estás apuntado.
  */
-export function EventChip({ event, day, compact = false, onOpen }: EventChipProps) {
+export function EventChip({
+  event,
+  day,
+  compact = false,
+  onOpen,
+  style,
+  short = false,
+}: EventChipProps) {
   const { t, lang } = useI18n()
-  const hour = timeOn(event, day, lang)
+  // En el mes solo cabe el inicio; en lo demás, inicio y fin.
+  const hour = compact ? timeOn(event, day, lang) : rangeOn(event, day, lang)
   const label = [t(`agenda.kind.${event.kind}`), hour, event.title].filter(Boolean).join(' · ')
 
   return (
     <button
       type="button"
-      className={`event-chip kind-${event.kind} ${event.joined === false ? 'not-joined' : ''} ${compact ? 'compact' : ''}`}
+      className={`event-chip kind-${event.kind} ${event.joined === false ? 'not-joined' : ''} ${compact ? 'compact' : ''} ${short ? 'short' : ''}`}
       aria-label={label}
       title={label}
+      style={style}
       onClick={() => {
         onOpen(event)
       }}

@@ -14,6 +14,9 @@ import type { View } from './kinds'
 import { Icon } from '../../shared/ui/Icon'
 import { InfoTip } from '../../shared/ui/InfoTip'
 import { AgendaTour } from './AgendaTour'
+import { DayTimeline } from './DayTimeline'
+import { LAYOUTS, loadLayout, saveLayout } from './timeline'
+import type { Layout } from './timeline'
 
 type CalendarPageProps = {
   /** Ir a otra sección de la web, desde la ficha de un evento propio. */
@@ -36,6 +39,8 @@ export function CalendarPage({ onGo, me }: CalendarPageProps) {
   const [cursor, setCursor] = useState(() => startOfDay(new Date()))
   const [hidden, setHidden] = useState(loadHidden)
   const [open, setOpen] = useState<CalendarEvent | null>(null)
+  // Cómo se ven el día y la semana: lista o con las horas.
+  const [layout, setLayout] = useState<Layout>(loadLayout)
 
   const days = useMemo(() => daysOf(view, cursor), [view, cursor])
   const from = (days[0] ?? cursor).toISOString()
@@ -136,6 +141,26 @@ export function CalendarPage({ onGo, me }: CalendarPageProps) {
           </div>
         </div>
 
+        {view !== 'month' && (
+          <div className="filter-pills agenda-layouts" role="group" aria-label={t('agenda.layout')}>
+            {LAYOUTS.map((option) => (
+              <button
+                key={option}
+                type="button"
+                className={`pill ${layout === option ? 'active' : ''}`}
+                aria-pressed={layout === option}
+                title={t(`agenda.layout.${option}.hint`)}
+                onClick={() => {
+                  saveLayout(option)
+                  setLayout(option)
+                }}
+              >
+                {t(`agenda.layout.${option}`)}
+              </button>
+            ))}
+          </div>
+        )}
+
         <div className="agenda-kinds" role="group" aria-label={t('agenda.kinds')}>
           {KINDS.map(({ kind, icon }) => (
             <button
@@ -212,7 +237,18 @@ export function CalendarPage({ onGo, me }: CalendarPageProps) {
           </div>
         )}
 
-        {data !== undefined && view !== 'month' && (
+        {data !== undefined && view !== 'month' && layout !== 'list' && (
+          <DayTimeline
+            days={days}
+            events={visible}
+            layout={layout}
+            week={view === 'week'}
+            onOpen={setOpen}
+            onOpenDay={openDay}
+          />
+        )}
+
+        {data !== undefined && view !== 'month' && layout === 'list' && (
           <div className={`day-columns view-${view}`}>
             {days.map((day) => {
               const events = eventsOn(visible, day)

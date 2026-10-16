@@ -77,6 +77,17 @@ export function timeOn(event: CalendarEvent, day: Date, lang: string): string {
   return Date.parse(event.start) < day.getTime() ? '' : time(event.start, lang)
 }
 
+/**
+ * Inicio y fin de un evento en un día concreto (`16:00–18:00`). Lo que viene de
+ * otro día o sigue al siguiente se queda sin esa hora.
+ */
+export function rangeOn(event: CalendarEvent, day: Date, lang: string): string {
+  const start = timeOn(event, day, lang)
+  const end = Date.parse(event.end) > addDays(day, 1).getTime() ? '' : time(event.end, lang)
+
+  return start === '' && end === '' ? '' : `${start}–${end}`
+}
+
 /** "martes, 13 de octubre · 16:00–18:00", o las dos fechas si dura varios días. */
 export function whenText(event: CalendarEvent, lang: string): string {
   const start = new Date(event.start)
