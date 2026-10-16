@@ -730,3 +730,115 @@ svg .graph-node.selected .orb {
   color: var(--text-3);
   pointer-events: none;
 }
+
+/* El grafo de correcciones: medallas por círculos, del color de las veces. */
+.graph-views {
+  margin-bottom: 0.6rem;
+}
+.correction-graph {
+  --tier-0: var(--surface-2);
+  --tier-1: #b87333;
+  --tier-2: #a8b2bd;
+  --tier-3: #e0a92e;
+  --tier-4: #9b6bff;
+}
+.cgraph-master {
+  margin: 0.4rem 0 0.8rem;
+  padding: 0.5rem 0.8rem;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--tier-4) 18%, var(--surface));
+  color: var(--text);
+  font-weight: 700;
+}
+.cgraph-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+  margin: 0 0 1rem;
+  padding: 0;
+  list-style: none;
+  font-size: 0.85rem;
+  color: var(--text-2);
+}
+.cgraph-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.cgraph-rings {
+  display: grid;
+  gap: 0.8rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.cgraph-circle {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.cgraph-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.cgraph-medal {
+  display: grid;
+  place-items: center;
+  gap: 0;
+  width: 74px;
+  height: 74px;
+  padding: 0.3rem;
+  border: 3px solid var(--tier-color, var(--border));
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 35% 28%,
+    color-mix(in srgb, var(--tier-color, var(--surface-2)) 45%, var(--surface)),
+    var(--surface-2) 75%
+  );
+  color: var(--text);
+  font-size: 0.7rem;
+  line-height: 1.15;
+  text-align: center;
+  cursor: pointer;
+}
+.cgraph-medal strong {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cgraph-medal small {
+  color: var(--text-2);
+}
+.cgraph-medal.tier-1 {
+  --tier-color: var(--tier-1);
+}
+.cgraph-medal.tier-2 {
+  --tier-color: var(--tier-2);
+}
+.cgraph-medal.tier-3 {
+  --tier-color: var(--tier-3);
+}
+.cgraph-medal.tier-4 {
+  --tier-color: var(--tier-4);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--tier-4) 60%, transparent);
+}
+.cgraph-medal.future {
+  border-style: dashed;
+  opacity: 0.6;
+}
+.cgraph-medal.selected {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+.cgraph-medal.sample {
+  width: 14px;
+  height: 14px;
+  padding: 0;
+  border-width: 3px;
+  cursor: default;
+}

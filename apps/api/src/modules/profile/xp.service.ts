@@ -50,8 +50,16 @@ export type XpServiceOptions = {
    * veces que le han pillado. Lo sabe `clicker`.
    */
   hacker?: (login: string) => Promise<{ title: TitleId | null; caught: number }>
+  /**
+   * En cuántos proyectos ha hecho alguien `MASTER_AT` correcciones o más. Da
+   * el título de maestro del código. Lo sabe `network`.
+   */
+  master?: (login: string) => Promise<number>
   now?: () => number
 }
+
+/** Correcciones de un mismo proyecto que hacen maestro del código. */
+export const MASTER_AT = 10
 
 /** Los paces que existen: los meses en los que se prevé acabar el common core. */
 const PACES = [8, 12, 15, 18, 22, 24]
@@ -85,6 +93,9 @@ export function createXpService(options: XpServiceOptions) {
   /** Día UTC de hoy, que es la unidad de "una reacción por pareja y día". */
   const today = (): string => new Date(now()).toISOString().slice(0, 10)
   /** Si no se puede saber, es que no hay título: el expediente no se cae por esto. */
+  const masterOf = async (login: string): Promise<number> =>
+    (await options.master?.(login).catch(() => 0)) ?? 0
+
   const hackerOf = async (login: string): Promise<{ title: TitleId | null; caught: number }> =>
     (await options.hacker?.(login).catch(() => undefined)) ?? { title: null, caught: 0 }
 
@@ -126,6 +137,7 @@ export function createXpService(options: XpServiceOptions) {
         xp: full.xp,
         title: full.title,
         hacks: full.hacks,
+        master: full.master,
         recordStyle: full.recordStyle,
         achievements: full.achievements,
         reactions: full.reactions,
@@ -147,12 +159,13 @@ export function createXpService(options: XpServiceOptions) {
 
     /** Expediente completo de quien pregunta. */
     async expediente(actor: Actor): Promise<Expediente> {
-      const [total, earned, received, profile, hacker] = await Promise.all([
+      const [total, earned, received, profile, hacker, master] = await Promise.all([
         xp.total(actor.login),
         xp.earnedByKind(actor.login),
         xp.reactionsReceived(actor.login),
         profiles.get(actor.login),
         hackerOf(actor.login),
+        masterOf(actor.login),
       ])
       const level = levelFor(total)
       const count = (kind: XpKind): number => earned.get(kind)?.times ?? 0
@@ -173,7 +186,10 @@ export function createXpService(options: XpServiceOptions) {
       const best = [...TITLES].reverse().find((title) => level.level >= title.level) ?? TITLES[0]
       const chosen = profile?.title ?? null
       const title =
-        chosen !== null && (titleUnlocked(chosen, level.level) || chosen === hacker.title)
+        chosen !== null &&
+        (titleUnlocked(chosen, level.level) ||
+          chosen === hacker.title ||
+          (chosen === 'maestro' && master > 0))
           ? chosen
           : best.id
 
@@ -187,9 +203,11 @@ export function createXpService(options: XpServiceOptions) {
         xp: { total, ...level },
         title,
         hacks: hacker.caught,
+        master,
         titles: [
           ...TITLES.map((entry) => ({ ...entry, unlocked: level.level >= entry.level })),
           ...(hacker.title === null ? [] : [{ id: hacker.title, level: 0, unlocked: true }]),
+          ...(master > 0 ? [{ id: 'maestro' as const, level: 0, unlocked: true }] : []),
         ],
         achievements: ACHIEVEMENTS.map((entry) => ({
           id: entry.id,
@@ -375,7 +393,8 @@ export function createXpService(options: XpServiceOptions) {
 
         if (
           !titleUnlocked(settings.title, level) &&
-          settings.title !== (await hackerOf(actor.login)).title
+          settings.title !== (await hackerOf(actor.login)).title &&
+          !(settings.title === 'maestro' && (await masterOf(actor.login)) > 0)
         ) {
           throw domainError('forbidden', 'Ese título todavía no lo has desbloqueado')
         }

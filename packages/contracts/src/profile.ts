@@ -25,6 +25,8 @@ export type TitleId =
   | 'hacker_etico'
   | 'hacker_poco_etico'
   | 'hacker_cazado'
+  // Quien ha corregido diez veces un mismo proyecto. Lleva al lado en cuántos.
+  | 'maestro'
 
 export type Lang = 'es' | 'en' | 'ca' | 'eu'
 
@@ -54,6 +56,8 @@ export type Expediente = {
   title: string
   /** Veces que le han pillado haciendo trampas en Code Clicker: sale junto al último título. */
   hacks: number
+  /** Proyectos que ha corregido diez veces o más: el título de maestro lleva esa cuenta. */
+  master: number
   titles: { id: TitleId; level: number; unlocked: boolean }[]
   achievements: { id: AchievementId; progress: number; goal: number; unlocked: boolean }[]
   /** Reacciones recibidas, por tipo. */
@@ -71,7 +75,7 @@ export type Expediente = {
  */
 export type PublicProfile = Pick<
   Expediente,
-  'login' | 'xp' | 'title' | 'hacks' | 'achievements' | 'reactions' | 'recordStyle'
+  'login' | 'xp' | 'title' | 'hacks' | 'master' | 'achievements' | 'reactions' | 'recordStyle'
 > & {
   image: string | null
   health: Health

@@ -62,7 +62,7 @@ export function Expediente({ me, profile }: ExpedienteProps) {
     return <ErrorNote error={profile.error} onRetry={() => void profile.reload()} />
   }
 
-  const { xp, title, hacks, titles, achievements, reactions, rules, earned } = profile.data
+  const { xp, title, hacks, master, titles, achievements, reactions, rules, earned } = profile.data
   // La barra más larga es la de lo que más XP te ha dado.
   const most = Math.max(1, ...RULES.map((kind) => earned[kind].xp))
   const nextTitle = titles.find((entry) => !entry.unlocked)
@@ -97,7 +97,7 @@ export function Expediente({ me, profile }: ExpedienteProps) {
                   <Avatar login={me.login} image={me.image} size={72} />
                   <div className="record-name">
                     <strong>{me.login}</strong>
-                    <span className="record-title">{titleText(t, title, hacks)}</span>
+                    <span className="record-title">{titleText(t, title, hacks, master)}</span>
                   </div>
                   <div className="level">
                     <span className="eyebrow">{t('xp.level')}</span>
@@ -172,7 +172,7 @@ export function Expediente({ me, profile }: ExpedienteProps) {
                       aria-pressed={entry.id === title}
                       onClick={() => void choose(entry.id)}
                     >
-                      {titleText(t, entry.id, hacks)}
+                      {titleText(t, entry.id, hacks, master)}
                       {!entry.unlocked && ` · ${t('xp.locked', { level: entry.level })}`}
                     </button>
                   ))}

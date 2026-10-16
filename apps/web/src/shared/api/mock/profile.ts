@@ -45,6 +45,7 @@ export const profileMock: Pick<
     return {
       login,
       hacks: 0,
+      master: 0,
       // Alguien de mentira que enseña su expediente con su estilo: así se ve en la demo.
       recordStyle: login === 'mgarcia' ? 'espacio' : null,
       image: portrait(login),
@@ -85,9 +86,12 @@ export const profileMock: Pick<
       // Como en la API: al pillar una trampa, el título se pone solo.
       title: hacker.title ?? state.title,
       hacks: hacker.caught,
+      // Maestro del código en un proyecto (Libft), como en el grafo de mentira.
+      master: 1,
       titles: [
         ...TITLES.map((title) => ({ ...title, unlocked: xp.level >= title.level })),
         ...(hacker.title === null ? [] : [{ id: hacker.title, level: 0, unlocked: true }]),
+        { id: 'maestro' as const, level: 0, unlocked: true },
       ],
       achievements: [
         achievement('first_duty', localStorage.getItem(AVAILABLE_KEY) === null ? 0 : 1, 1),

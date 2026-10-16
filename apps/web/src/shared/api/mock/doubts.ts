@@ -72,6 +72,9 @@ export const doubtsMock: Pick<
               ? `python-${name.slice(14, 16)}`
               : null,
             locked: status === 'todo' && circle > CURRENT_CIRCLE,
+            // Lo aprobado, corregido más veces cuanto más antiguo (Libft, maestro).
+            corrected: status === 'finished' ? Math.max(0, 12 - circle * 4 - (id % 3)) : 0,
+            retired: false,
             signals: {
               unanswered: status === 'todo' ? 0 : unanswered,
               proposals:

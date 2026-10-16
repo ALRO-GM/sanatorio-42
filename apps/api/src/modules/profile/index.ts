@@ -23,6 +23,7 @@ export type ProfileModuleDeps = {
   curriculum: Curriculum
   events: EventBus
   hacker?: XpServiceOptions['hacker']
+  master?: XpServiceOptions['master']
   now?: () => number
 }
 
@@ -39,6 +40,7 @@ export function createProfileModule(deps: ProfileModuleDeps): ProfileModule {
     replica: deps.replica,
     curriculum: deps.curriculum,
     ...(deps.hacker === undefined ? {} : { hacker: deps.hacker }),
+    ...(deps.master === undefined ? {} : { master: deps.master }),
     ...(deps.now === undefined ? {} : { now: deps.now }),
   })
 
@@ -63,3 +65,5 @@ export function createProfileModule(deps: ProfileModuleDeps): ProfileModule {
 export { XP_AMOUNT, XP_KIND } from './xp.rules.js'
 export type { ProfilesRepository } from './profiles.repository.js'
 export type { XpService } from './xp.service.js'
+
+export { MASTER_AT } from './xp.service.js'

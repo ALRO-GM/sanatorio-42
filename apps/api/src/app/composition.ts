@@ -45,7 +45,7 @@ import type { NoticesModule } from '../modules/notices/index.js'
 import type { NetworkModule } from '../modules/network/index.js'
 import { createPeersModule } from '../modules/peers/index.js'
 import type { PeersModule } from '../modules/peers/index.js'
-import { createProfileModule } from '../modules/profile/index.js'
+import { createProfileModule, MASTER_AT } from '../modules/profile/index.js'
 import type { ProfileModule } from '../modules/profile/index.js'
 import { createReplicaModule } from '../modules/replica/index.js'
 import type { PhotoStore, ReplicaModule, SyncerConfig } from '../modules/replica/index.js'
@@ -154,6 +154,10 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
 
       return { title: hackerTitle(caught), caught }
     },
+    // `network` también se monta después.
+    master: async (login) =>
+      [...(await network.correctedByProject(login)).values()].filter((times) => times >= MASTER_AT)
+        .length,
   })
 
   // Presencia: quién tiene la web abierta. Se anota como mucho una vez por
@@ -190,6 +194,11 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     curriculum: replica.curriculum,
     xp: profile.xp,
     notify,
+    // `network` se monta después: para cuando alguien pregunte ya estará.
+    corrections: {
+      byProject: (login) => network.correctedByProject(login),
+      since: (campusId, since) => network.correctedSince(campusId, since),
+    },
   })
   const attendance = createAttendanceModule({
     db,

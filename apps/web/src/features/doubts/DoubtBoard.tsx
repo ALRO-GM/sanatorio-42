@@ -9,6 +9,7 @@ import { DoubtForm } from './DoubtForm'
 import { firstInProgress } from './graph'
 import { GuidePanel } from './GuidePanel'
 import { HolyGraph } from './HolyGraph'
+import { CorrectionGraph } from './CorrectionGraph'
 import { InfoTip } from '../../shared/ui/InfoTip'
 import { BoardTour } from './BoardTour'
 
@@ -25,6 +26,8 @@ export function DoubtBoard({ initialProject }: DoubtBoardProps) {
   const { t } = useI18n()
   const graph = useAsync(() => api.getDoubtGraph(), [])
   const [projectId, setProjectId] = useState<number | null>(initialProject)
+  // Qué grafo se ve: el de tu avance o el de lo que has corregido.
+  const [view, setView] = useState<'progress' | 'corrections'>('progress')
   const boardRef = useRef<HTMLDivElement>(null)
 
   // Si no se llega con un proyecto ya elegido, se abre el primero que la
@@ -61,7 +64,28 @@ export function DoubtBoard({ initialProject }: DoubtBoardProps) {
       {graph.data === undefined ? (
         <ErrorNote error={graph.error} onRetry={() => void graph.reload()} />
       ) : (
-        <HolyGraph graph={graph.data} selected={projectId} onSelect={select} />
+        <>
+          <div className="filter-pills graph-views" role="group" aria-label={t('cgraph.views')}>
+            {(['progress', 'corrections'] as const).map((option) => (
+              <button
+                key={option}
+                type="button"
+                className={`pill ${view === option ? 'active' : ''}`}
+                aria-pressed={view === option}
+                onClick={() => {
+                  setView(option)
+                }}
+              >
+                {t(`cgraph.view.${option}`)}
+              </button>
+            ))}
+          </div>
+          {view === 'progress' ? (
+            <HolyGraph graph={graph.data} selected={projectId} onSelect={select} />
+          ) : (
+            <CorrectionGraph graph={graph.data} selected={projectId} onSelect={select} />
+          )}
+        </>
       )}
 
       <div ref={boardRef} className="board-anchor">

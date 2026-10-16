@@ -12,7 +12,7 @@ import { createDoubtsRepository } from './doubts.repository.js'
 import { createGuideChangesRepository } from './guide-changes.repository.js'
 import { registerDoubtsRoutes } from './doubts.routes.js'
 import { createDoubtsService } from './doubts.service.js'
-import type { DoubtsService } from './doubts.service.js'
+import type { DoubtsService, DoubtsServiceOptions } from './doubts.service.js'
 
 export type DoubtsModuleDeps = {
   db: Db
@@ -20,6 +20,8 @@ export type DoubtsModuleDeps = {
   curriculum: Curriculum
   xp: XpService
   notify?: Notify
+  /** Las correcciones copiadas de 42, para el grafo de correcciones. */
+  corrections?: DoubtsServiceOptions['corrections']
   now?: () => number
 }
 
@@ -33,6 +35,7 @@ export function createDoubtsModule(deps: DoubtsModuleDeps): DoubtsModule {
     xp: deps.xp,
     replica: deps.replica,
     ...(deps.notify === undefined ? {} : { notify: deps.notify }),
+    ...(deps.corrections === undefined ? {} : { corrections: deps.corrections }),
     ...(deps.now === undefined ? {} : { now: deps.now }),
   })
 

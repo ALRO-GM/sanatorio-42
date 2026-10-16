@@ -305,6 +305,32 @@ export function createNetworkRepository(db: Db) {
       return { forth: count(a), back: count(b) }
     },
 
+    /**
+     * Cuántas correcciones ha hecho alguien de cada proyecto, en cualquier
+     * campus. Una corrección a un grupo cuenta una vez.
+     */
+    async correctedByProject(login: string): Promise<Map<number, number>> {
+      const result = await db.execute({
+        sql: `SELECT project_id, COUNT(DISTINCT id) AS times FROM corrections
+              WHERE corrector = ? AND corrected <> corrector AND project_id IS NOT NULL
+              GROUP BY project_id`,
+        args: [login],
+      })
+
+      return new Map(result.rows.map((row) => [toNumber(row.project_id), toNumber(row.times)]))
+    },
+
+    /** Proyectos que se han corregido en un campus desde esa fecha: los que siguen vivos. */
+    async correctedSince(campusId: number, since: string): Promise<Set<number>> {
+      const result = await db.execute({
+        sql: `SELECT DISTINCT project_id FROM corrections
+              WHERE campus_id = ? AND begin_at >= ? AND project_id IS NOT NULL`,
+        args: [campusId, since],
+      })
+
+      return new Set(result.rows.map((row) => toNumber(row.project_id)))
+    },
+
     /** Los logins que más correcciones han hecho en un campus, el que más primero. */
     async topCorrectors(campusId: number, limit: number): Promise<string[]> {
       const result = await db.execute({

@@ -152,6 +152,8 @@ describe('comunidad', () => {
         'health',
         'image',
         'login',
+        // En cuántos proyectos es maestro del código: acompaña a ese título.
+        'master',
         'reactions',
         // Con qué estilo quiere que se vea su expediente: es para quien lo visita.
         'recordStyle',
@@ -260,6 +262,36 @@ describe('comunidad', () => {
 
       await xp.updateSettings(actor('eva'), { title: 'paciente' })
       expect((await xp.expediente(actor('eva'))).title).toBe('paciente')
+    })
+
+    it('quien corrige diez veces un mismo proyecto es maestro del código, y cuenta en cuántos', async () => {
+      const { xp } = services
+      /** `eva` corrige `times` veces el proyecto `projectId` (cada una con su id). */
+      const correct = async (projectId: number, times: number, from: number): Promise<void> => {
+        await community.db.batch(
+          Array.from({ length: times }, (_, index) => ({
+            sql: `INSERT INTO corrections
+                    (id, campus_id, corrector, corrected, project_id, begin_at, final_mark, positive)
+                  VALUES (?, 22, 'eva', ?, ?, '2026-09-01T10:00:00.000Z', 100, 1)`,
+            args: [from + index, index % 2 === 0 ? 'ana' : 'leo', projectId],
+          })),
+          'write',
+        )
+      }
+
+      await correct(10, 9, 100)
+      expect((await xp.expediente(actor('eva'))).master).toBe(0)
+      await expectCode(xp.updateSettings(actor('eva'), { title: 'maestro' }), 'forbidden')
+
+      await correct(10, 1, 200)
+      await correct(11, 12, 300)
+
+      const record = await xp.expediente(actor('eva'))
+
+      expect(record.master).toBe(2)
+      expect(record.titles).toContainEqual({ id: 'maestro', level: 0, unlocked: true })
+      await xp.updateSettings(actor('eva'), { title: 'maestro' })
+      expect((await xp.expediente(actor('eva'))).title).toBe('maestro')
     })
 
     it('guarda idioma y campus sin pisar lo que no viene', async () => {

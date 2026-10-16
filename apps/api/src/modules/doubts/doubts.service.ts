@@ -41,6 +41,14 @@ export type DoubtsServiceOptions = {
   replica: ReplicaRepository
   /** Para dejar un aviso en el buzón de quien tiene que enterarse. Sin él, no se avisa. */
   notify?: Notify
+  /**
+   * Las correcciones copiadas de 42 (las sabe `network`): cuántas ha hecho
+   * alguien de cada proyecto y qué proyectos se siguen corrigiendo en un campus.
+   */
+  corrections?: {
+    byProject: (login: string) => Promise<Map<number, number>>
+    since: (campusId: number, since: string) => Promise<Set<number>>
+  }
   now?: () => number
 }
 
@@ -48,6 +56,9 @@ export type DoubtsServiceOptions = {
 const COLORS = 5
 
 const DAY = 24 * 60 * 60_000
+
+/** Un proyecto que nadie del campus ha corregido en este tiempo se da por retirado. */
+const RETIRED_AFTER_DAYS = 365
 
 /** Personas distintas que tienen que señalar un cambio para que se retire. */
 const FLAGS_TO_REVOKE = 2
@@ -262,7 +273,14 @@ export function createDoubtsService(options: DoubtsServiceOptions) {
         }
       }
 
-      const info = await replica.projectInfo([...circles.keys()])
+      const [info, corrected, alive] = await Promise.all([
+        replica.projectInfo([...circles.keys()]),
+        options.corrections?.byProject(actor.login) ?? new Map<number, number>(),
+        options.corrections?.since(
+          actor.campusId,
+          new Date(now() - RETIRED_AFTER_DAYS * DAY).toISOString(),
+        ) ?? null,
+      ])
       const byCircle = new Map<number, GraphProject[]>()
 
       for (const [projectId, circle] of circles) {
@@ -290,6 +308,9 @@ export function createDoubtsService(options: DoubtsServiceOptions) {
             choice: choices.get(projectId) ?? null,
             // Lo que ya tiene (aunque sea de un círculo posterior) nunca está cerrado.
             locked: status === 'todo' && circle > currentCircle,
+            corrected: corrected.get(projectId) ?? 0,
+            // Sin correcciones copiadas no se puede decir: ninguno está retirado.
+            retired: alive !== null && alive.size > 0 && !alive.has(projectId),
             signals: {
               unanswered: status === 'todo' ? 0 : (pending?.unanswered ?? 0),
               proposals: status === 'finished' ? (pending?.proposals ?? 0) : 0,

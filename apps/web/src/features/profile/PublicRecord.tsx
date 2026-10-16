@@ -51,7 +51,7 @@ export function PublicRecord({ login, me }: { login: string; me: string }) {
     )
   }
 
-  const { xp, title, hacks, achievements, reactions } = data
+  const { xp, title, hacks, master, achievements, reactions } = data
   const pct =
     xp.next === null ? 100 : Math.round(((xp.total - xp.floor) / (xp.next - xp.floor)) * 100)
 
@@ -90,7 +90,7 @@ export function PublicRecord({ login, me }: { login: string; me: string }) {
                 <Icon name="chat" />
               </button>
             </span>
-            <span className="record-title">{titleText(t, title, hacks)}</span>
+            <span className="record-title">{titleText(t, title, hacks, master)}</span>
           </div>
           <div className="level">
             <span className="eyebrow">{t('xp.level')}</span>

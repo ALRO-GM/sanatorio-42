@@ -54,6 +54,13 @@ export type GraphProject = {
   choice: string | null
   /** `true` si aún no lo tiene disponible: es de un círculo al que no ha llegado. */
   locked: boolean
+  /** Veces que quien pregunta ha corregido este proyecto (en cualquier campus). */
+  corrected: number
+  /**
+   * `true` si en su campus nadie lo ha corregido en el último año: se da por
+   * retirado y no cuenta para el grafo de correcciones.
+   */
+  retired: boolean
   signals: GraphSignals
 }
 

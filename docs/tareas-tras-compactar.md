@@ -89,7 +89,7 @@ Orden (se marca cada uno al desplegarlo):
 - [x] 33 Code Clicker: tope con pace en riesgo, logro por donar.
 
 **D. Muchos datos (al final, poco a poco en horas de poco uso)**
-- [ ] 32 Holy graph de correcciones con logros y banner.
+- [x] 32 Holy graph de correcciones con logros y banner.
 - [ ] 30 Estadísticas de exámenes (intentos de 42 en cola de fondo; duración de círculos).
 - [ ] 31 Exámenes en vivo: pestaña que se activa cuando empieza un examen en tu campus (sale en el calendario); gente apuntada separada por examen, grado y cursus, del círculo en que está; cada 5 min se actualiza la nota con el último intento.
 

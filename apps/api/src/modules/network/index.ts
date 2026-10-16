@@ -32,6 +32,10 @@ export type NetworkModule = AppModule & {
   service: NetworkService
   sync: CorrectionSync /** Quién corrige más en un campus: lo usan las noticias del juego secreto. */
   topCorrectors: (campusId: number, limit: number) => Promise<string[]>
+  /** Correcciones hechas por alguien, por proyecto. */
+  correctedByProject: (login: string) => Promise<Map<number, number>>
+  /** Proyectos corregidos en un campus desde una fecha (ISO). */
+  correctedSince: (campusId: number, since: string) => Promise<Set<number>>
 }
 
 /** Cada cuánto avanza la copia. Con el histórico hecho, casi todas las vueltas no piden nada. */
@@ -58,6 +62,8 @@ export function createNetworkModule(deps: NetworkModuleDeps): NetworkModule {
     service,
     sync,
     topCorrectors: (campusId, limit) => corrections.topCorrectors(campusId, limit),
+    correctedByProject: (login) => corrections.correctedByProject(login),
+    correctedSince: (campusId, since) => corrections.correctedSince(campusId, since),
     routes: (app, context) => {
       registerNetworkRoutes(app, context, service)
     },
