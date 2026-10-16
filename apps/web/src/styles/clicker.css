@@ -1986,3 +1986,24 @@ dialog.cc-bust:not([open]) {
     display: none;
   }
 }
+
+/* El tope con el pace en riesgo: el aviso de lo que queda y la pantalla de «por hoy, basta». */
+.cc-limit-left {
+  border-color: color-mix(in srgb, var(--danger) 50%, transparent);
+}
+.cc.cc-limited {
+  display: grid;
+  place-items: center;
+  min-height: 60vh;
+}
+.cc-limit-card {
+  max-width: 460px;
+  padding: 2rem;
+  border-radius: 16px;
+  background: var(--surface);
+  text-align: center;
+  box-shadow: 0 10px 30px var(--shadow);
+}
+.cc-limit-card h2 {
+  margin: 0.4rem 0 0.8rem;
+}

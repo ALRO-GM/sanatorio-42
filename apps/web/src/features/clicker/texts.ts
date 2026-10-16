@@ -176,6 +176,12 @@ const es: Texts = {
     bustSold: 'Vendido todo lo de la tienda por {n} líneas.',
     spectating: 'Viendo la partida de {login}: lo que toques aquí no se guarda en ningún sitio.',
     policeEyebrow: 'Policía del código',
+    limitEyebrow: 'Pace en riesgo',
+    limitTitle: 'Por hoy ya has jugado bastante',
+    limitBody:
+      'Hoy irías a pace {pace}: con el pace en riesgo, Code Clicker se juega media hora al día. Tu partida sigue escribiendo código sola; vuelve mañana o, mejor, avanza un proyecto.',
+    limitLeft: 'Pace {pace} en riesgo: te quedan {min} min de juego hoy.',
+    limitHole: 'black hole',
     policeNote: 'Mensaje de la policía del código',
     policeMoney:
       'Tus edificios se han vendido a la mitad de lo que costaron: {n} líneas vuelven a tu repositorio, y otras tantas se reparten entre las {people} personas que juegan limpio.',
@@ -731,6 +737,12 @@ const en: Texts = {
     bustSold: 'Everything from the shop sold for {n} lines.',
     spectating: 'Watching {login}’s game: nothing you touch here is saved anywhere.',
     policeEyebrow: 'Code police',
+    limitEyebrow: 'Pace at risk',
+    limitTitle: 'That is enough playing for today',
+    limitBody:
+      'Today you would drop to pace {pace}: with your pace at risk, Code Clicker is played half an hour a day. Your game keeps writing code on its own; come back tomorrow or, better, move a project forward.',
+    limitLeft: 'Pace {pace} at risk: {min} min of play left today.',
+    limitHole: 'black hole',
     policeNote: 'A message from the code police',
     policeMoney:
       'Your buildings were sold for half of what they cost: {n} lines go back to your repository, and the same amount is shared among the {people} people who play fair.',

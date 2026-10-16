@@ -24,6 +24,7 @@ import {
   UPGRADE,
 } from './data'
 import { useEgg } from './egg'
+import { usePlayLimit } from './limit'
 import {
   baseCps,
   buy,
@@ -158,6 +159,8 @@ export function CodeClicker({
     [texts],
   )
   const egg = useEgg()
+  // Con el pace en riesgo, media hora al día (no cuenta en segundo plano ni viendo otra).
+  const limit = usePlayLimit(!background && spectate === undefined)
   const game = useRef<Game | null>(null)
   const names = useRef<string[]>([])
   const [, setFrame] = useState(0)
@@ -727,6 +730,23 @@ export function CodeClicker({
 
   const card = tip === null ? null : cardFor(tip, { game: current, now, lang, selling, amount })
   const level = levelOf(all)
+  const paceText = limit.pace === 0 ? ui('limitHole') : String(limit.pace)
+
+  // Se acabó la media hora de hoy: la partida sigue, pero no se juega.
+  if (limit.pace !== null && limit.left <= 0) {
+    return (
+      <section className="cc cc-limited">
+        <div className="cc-limit-card">
+          <span className="eyebrow">{ui('limitEyebrow')}</span>
+          <h2>{ui('limitTitle')}</h2>
+          <p>{ui('limitBody', { pace: paceText })}</p>
+          <button type="button" className="primary small" onClick={onExit}>
+            {ui('back')}
+          </button>
+        </div>
+      </section>
+    )
+  }
 
   return (
     <section
@@ -779,6 +799,11 @@ export function CodeClicker({
         </div>
       </header>
 
+      {limit.pace !== null && (
+        <p className="cc-sync cc-limit-left" role="status">
+          {ui('limitLeft', { pace: paceText, min: Math.ceil(limit.left / 60) })}
+        </p>
+      )}
       {stale && (
         <p className="cc-sync" role="alert">
           <span>{ui('stale')}</span>

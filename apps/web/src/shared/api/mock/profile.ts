@@ -11,7 +11,16 @@ import type { Api } from '../types'
 import { AVAILABLE_KEY, state, delay, levelFor, achievement } from './state'
 
 /** Lo que se anota en la tarjeta de salud: dura lo que dure la pestaña. */
-let declared: PaceRef | null = null
+// Con `?pace=riesgo`, un pace 24 a diez días del plazo: sale el tope de Code Clicker.
+let declared: PaceRef | null =
+  new URLSearchParams(window.location.search).get('pace') === 'riesgo'
+    ? {
+        pace: 24,
+        circle: 3,
+        deadline: new Date(Date.now() + 10 * 86_400_000).toISOString().slice(0, 10),
+        updatedAt: new Date().toISOString(),
+      }
+    : null
 
 /** Con qué estilo ven los demás el expediente de la persona de mentira. */
 const recordStyle: { current: string | null } = { current: null }
