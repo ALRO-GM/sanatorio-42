@@ -93,6 +93,7 @@ import type {
   UsageHeatmap,
   UsageSend,
   UsageStats,
+  SecondFactorStatus,
 } from '@sanatorio/contracts'
 
 /** `GET /projects/:id/peers`, con lo que viaja en cabeceras ya leído. */
@@ -213,6 +214,12 @@ export type Api = {
   setUserLimit: (login: string, perHour: number | null) => Promise<void>
   getAdminTickets: () => Promise<Ticket[]>
   answerTicket: (id: number, answer: string, status: 'answered' | 'closed') => Promise<Ticket>
+  // Segundo factor del panel.
+  getSecondFactor: () => Promise<SecondFactorStatus>
+  setupSecondFactor: () => Promise<{ uri: string }>
+  confirmSecondFactor: (code: string) => Promise<void>
+  verifySecondFactor: (code: string) => Promise<void>
+  lockPanel: () => Promise<void>
   /** Borra un mensaje del buzón (spam). Solo admins. */
   removeTicket: (id: number) => Promise<void>
   getAdminMessages: () => Promise<LoggedMessage[]>

@@ -7,17 +7,38 @@
  * demás módulos.
  */
 
+import { randomBytes } from 'node:crypto'
+
 import type { FastifyRequest } from 'fastify'
 
 import { tableStore } from '../../core/db/data-store.js'
+import { readCookie, serializeCookie, setCookies } from '../../core/http/cookies.js'
 import { idParam } from '../../core/http/params.js'
 import type { AppModule } from '../../core/module.js'
 import type { SessionReader } from '../../core/session.js'
 import { ANONYMOUS, createAdminService } from './admin.service.js'
 import { RESPONSE_OVERHEAD_BYTES } from './budget.rules.js'
 import type { AdminService, AdminServiceOptions } from './admin.service.js'
+import { ELEVATION_COOKIE, ELEVATION_MS, createSecondFactor } from './second-factor.js'
+import type { SecondFactor } from './second-factor.js'
 
-export type AdminModule = AppModule & { service: AdminService }
+export type AdminModule = AppModule & { service: AdminService; secondFactor: SecondFactor }
+
+export type AdminModuleDeps = AdminServiceOptions & {
+  /**
+   * Secreto del servidor (`SESSION_SECRET`) para el segundo factor del panel.
+   * Sin él (tests de servicios), uno al azar: las cookies del panel valen hasta
+   * que se reinicia.
+   */
+  secret?: string
+}
+
+/** Lo que el panel deja abrir sin el segundo factor: lo necesario para darlo. */
+const SECOND_FACTOR_PATH = '/admin/totp'
+
+/** La cookie del panel: solo por HTTPS, solo a este dominio y nunca desde otro sitio. */
+const elevationCookie = (value: string, maxAgeMs: number): string =>
+  serializeCookie(ELEVATION_COOKIE, value, { maxAgeMs, path: '/', sameSite: 'strict' })
 
 /** Login de la sesión, o `null` si la petición no trae una válida. */
 function loginOf(session: SessionReader, request: FastifyRequest): string | null {
@@ -39,12 +60,20 @@ function isStaff(session: SessionReader, request: FastifyRequest): boolean {
   }
 }
 
-export function createAdminModule(deps: AdminServiceOptions): AdminModule {
+export function createAdminModule(deps: AdminModuleDeps): AdminModule {
   const service = createAdminService(deps)
+  const secondFactor = createSecondFactor({
+    db: deps.db,
+    secret: deps.secret ?? randomBytes(32).toString('hex'),
+    ...(deps.now === undefined ? {} : { now: deps.now }),
+  })
+  const panelCookie = (request: FastifyRequest): string | undefined =>
+    readCookie(request.headers.cookie, ELEVATION_COOKIE)
 
   return {
     name: 'admin',
     service,
+    secondFactor,
     routes: (app, { session }) => {
       // --- Consumo: tope antes de servir, cuenta después ----------------------
       app.addHook('onRequest', async (request, reply) => {
@@ -136,6 +165,21 @@ export function createAdminModule(deps: AdminServiceOptions): AdminModule {
           return
         }
 
+        // Tercera cerradura: el panel pide además el código de la app de
+        // autenticación, cada 12 horas y en cada navegador.
+        if (
+          adminOnly &&
+          !path.startsWith(SECOND_FACTOR_PATH) &&
+          !secondFactor.elevated(who, panelCookie(request))
+        ) {
+          await reply.code(403).send({
+            error: 'second_factor',
+            message: 'Escribe el código de tu app de autenticación para abrir el panel',
+          })
+
+          return
+        }
+
         if (!(await service.allow(who, admin))) {
           await reply.code(429).header('Retry-After', '600').send({
             error: 'rate_limited',
@@ -163,6 +207,41 @@ export function createAdminModule(deps: AdminServiceOptions): AdminModule {
         )
 
         done()
+      })
+
+      // --- Segundo factor del panel -------------------------------------------
+      /** `GET /admin/totp` → `{ enrolled, elevatedUntil }`: si hay que darse de alta o escribir el código. */
+      app.get('/admin/totp', async (request, reply) => {
+        const { login } = session.user(request)
+
+        return reply.send(await secondFactor.status(login, panelCookie(request)))
+      })
+
+      /** `POST /admin/totp/setup` → `{ uri }`: un secreto nuevo para el QR, mientras no se haya confirmado. */
+      app.post('/admin/totp/setup', async (request, reply) => {
+        return reply.send(await secondFactor.setup(session.user(request).login))
+      })
+
+      /** `POST /admin/totp/confirm` y `/verify` → `{ code }`: abren el panel 12 horas. 204. */
+      for (const [path, run] of [
+        ['/admin/totp/confirm', secondFactor.confirm],
+        ['/admin/totp/verify', secondFactor.verify],
+      ] as const) {
+        app.post(path, async (request, reply) => {
+          const value = await run(session.user(request).login, request.body)
+
+          setCookies(reply, [elevationCookie(value, ELEVATION_MS)])
+
+          return reply.code(204).send()
+        })
+      }
+
+      /** `POST /admin/totp/lock` → cierra el panel en este navegador. 204. */
+      app.post('/admin/totp/lock', async (request, reply) => {
+        session.user(request)
+        setCookies(reply, [elevationCookie('', 0)])
+
+        return reply.code(204).send()
       })
 
       // --- Buzón de la gente ---------------------------------------------------

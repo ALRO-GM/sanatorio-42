@@ -163,9 +163,9 @@ describe('todas las rutas', () => {
     expect(await call(built, 'GET', '/admin/no-existe', null)).toBe(401)
   })
 
-  it('quien administra sí entra en las de lectura', async () => {
+  it('quien administra sí entra en las de lectura, con el panel abierto', async () => {
     const built = await app({ ADMIN_LOGINS: 'albrodri' })
-    const cookie = await built.login()
+    const cookie = await built.adminLogin()
     const failed: string[] = []
 
     for (const { method, url } of routesOf(built)) {
@@ -260,7 +260,8 @@ describe('ninguna entrada acaba en un error interno', () => {
   for (const admin of [false, true]) {
     it(`${admin ? 'administrando' : 'sin administrar'}: parámetros, consultas y cuerpos extremos`, async () => {
       const built = await app(admin ? { ADMIN_LOGINS: 'albrodri' } : {})
-      const cookie = await built.login()
+      // Administrando, con el panel abierto: si no, todo lo de /admin daría 403 sin mirar la entrada.
+      const cookie = admin ? await built.adminLogin() : await built.login()
       const failed: string[] = []
 
       for (const { method, url } of routesOf(built)) {

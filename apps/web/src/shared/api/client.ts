@@ -90,6 +90,12 @@ export const realApi: Api = {
   getAdminTickets: () => getJson('/admin/tickets'),
   removeTicket: (id) => send('DELETE', `/admin/tickets/${id}`),
 
+  getSecondFactor: () => getJson('/admin/totp'),
+  setupSecondFactor: () => sendJson('POST', '/admin/totp/setup'),
+  confirmSecondFactor: (code) => send('POST', '/admin/totp/confirm', { code }),
+  verifySecondFactor: (code) => send('POST', '/admin/totp/verify', { code }),
+  lockPanel: () => send('POST', '/admin/totp/lock'),
+
   answerTicket: (id, answer, status) =>
     sendJson('POST', `/admin/tickets/${id}/answer`, { answer, status }),
   getAdminMessages: () => getJson('/admin/messages'),

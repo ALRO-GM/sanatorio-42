@@ -207,3 +207,11 @@ export type DataPreview = {
   /** Una fila por elemento, con sus valores en el orden de `columns`. */
   sample: (string | number | null)[][]
 }
+
+/** `GET /admin/totp`: el segundo factor del panel de quien pregunta. */
+export type SecondFactorStatus = {
+  /** `true` si ya se dio de alta (con un código confirmado). */
+  enrolled: boolean
+  /** Hasta cuándo está abierto el panel en este navegador (ISO-8601), o `null`. */
+  elevatedUntil: string | null
+}

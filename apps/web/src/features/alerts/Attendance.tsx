@@ -1,34 +1,17 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import type { SyntheticEvent } from 'react'
 
 import type { MeetPresence } from '@sanatorio/contracts'
-import qrcode from 'qrcode-generator'
 
 import { api } from '../../shared/api'
 import { useAction, useAsync } from '../../shared/hooks/useAsync'
 import { localeOf, useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { Qr } from '../../shared/ui/Qr'
 
 /** La dirección que abre la web y valida el código sola: es lo que lleva el QR. */
 export function checkinUrl(eventId: string, code: string): string {
   return `${window.location.origin}${window.location.pathname}#/asistencia/${encodeURIComponent(eventId)}/${code}`
-}
-
-/** Un QR como SVG, sin pedir nada a ningún servidor. */
-function Qr({ text, label }: { text: string; label: string }) {
-  const svg = useMemo(() => {
-    const code = qrcode(0, 'M')
-
-    code.addData(text)
-    code.make()
-
-    return code.createSvgTag({ cellSize: 4, margin: 2, scalable: true })
-  }, [text])
-
-  // El SVG lo genera la librería a partir de un texto nuestro: no hay nada de fuera.
-  return (
-    <span className="qr" role="img" aria-label={label} dangerouslySetInnerHTML={{ __html: svg }} />
-  )
 }
 
 function hour(iso: string | null, lang: string): string {

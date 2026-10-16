@@ -116,7 +116,7 @@ describe('cortes por el límite del plan', () => {
 
   it('al 90 %: quien administra sí entra', async () => {
     const built = await guarded('90', true)
-    const cookie = await built.login()
+    const cookie = await built.adminLogin()
 
     expect((await get(built, '/me/projects', cookie)).statusCode).toBe(200)
     expect((await get(built, '/admin/consumption', cookie)).statusCode).toBe(200)
@@ -138,7 +138,7 @@ describe('cortes por el límite del plan', () => {
 
   it('una sesión de staff tampoco pasa con el corte puesto', async () => {
     const built = await guarded('90', true)
-    const admin = await built.login()
+    const admin = await built.adminLogin()
     const created = await built.app.inject({
       method: 'POST',
       url: '/admin/staff',

@@ -207,7 +207,7 @@ describe('réplica vista desde fuera', () => {
     const plain = await app()
     const student = client(plain, await plain.login())
     const managed = await app({ ADMIN_LOGINS: 'albrodri' })
-    const admin = client(managed, await managed.login())
+    const admin = client(managed, await managed.adminLogin())
     const boss = { login: 'jefa', campusId: 22, admin: true }
 
     for (const built of [plain, managed]) {

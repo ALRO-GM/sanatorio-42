@@ -720,3 +720,40 @@ dialog.data-review h3 {
   text-align: left;
   white-space: nowrap;
 }
+
+/* La cerradura del panel: el QR para darse de alta y el código. */
+.panel-lock {
+  max-width: 34rem;
+}
+.panel-lock h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.panel-lock-qr {
+  display: grid;
+  justify-items: start;
+  gap: 0.5rem;
+}
+.panel-lock-qr .qr {
+  width: 11rem;
+  padding: 0.5rem;
+  border-radius: var(--radius-sm);
+  /* Un QR se lee mejor oscuro sobre claro, sea cual sea el tema. */
+  background: #ffffff;
+  color: #000000;
+}
+.panel-lock-qr code {
+  overflow-wrap: anywhere;
+}
+.panel-lock input {
+  width: 8rem;
+  letter-spacing: 0.2em;
+  text-align: center;
+}
+.panel-open {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem;
+}

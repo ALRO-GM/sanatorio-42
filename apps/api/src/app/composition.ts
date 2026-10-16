@@ -72,6 +72,8 @@ export type CompositionConfig = {
   guardLevel?: () => Promise<LimitLevel>
   /** Dónde se guardan las fotos de perfil bajadas de 42. Sin él, en memoria. */
   photos?: PhotoStore
+  /** Secreto del servidor (`SESSION_SECRET`): firma la cookie del panel y cifra el segundo factor. */
+  secret?: string
   /** Reloj inyectable, para los tests. */
   now?: () => number
 }
@@ -260,6 +262,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     ...(config.guardLevel === undefined ? {} : { guardLevel: config.guardLevel }),
     notify,
     settle: (about) => events.emit('notice.settled', about),
+    ...(config.secret === undefined ? {} : { secret: config.secret }),
     // Los demás módulos se montan después: para cuando alguien pregunte ya estarán.
     stores: () => modules.flatMap((module) => module.stores ?? []),
     ...clock,

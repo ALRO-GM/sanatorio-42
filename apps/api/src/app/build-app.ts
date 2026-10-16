@@ -83,6 +83,7 @@ export async function buildApp(options: BuildOptions = {}): Promise<BuiltApp> {
     backgroundSync: env.SYNC_ENABLED === 'true',
     admins: env.adminLogins,
     photos: diskPhotoStore(photoDirOf(env.DATABASE_URL)),
+    secret: env.SESSION_SECRET,
     ...(env.GUARD_LEVEL_FILE === ''
       ? {}
       : {

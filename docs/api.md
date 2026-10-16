@@ -347,7 +347,21 @@ cola. El modo ahorro deja pasar solo lo crítico.
   pasado. 204, o 409 si ya no se puede.
 
 Solo admins (`403` para el resto). Administra quien está en `ADMIN_LOGINS` o
-quien haya recibido el permiso desde el panel:
+quien haya recibido el permiso desde el panel. Además, todo `/admin/…` pide el
+**segundo factor**: sin él responde `403` con `error: "second_factor"`.
+
+- GET /admin/totp → `{ "enrolled", "elevatedUntil" }`.
+- POST /admin/totp/setup → `{ "uri" }` (`otpauth://…`, lo que lleva el QR).
+  Mientras no se confirme se puede pedir otro; después, `409`.
+- POST /admin/totp/confirm (la primera vez) · POST /admin/totp/verify →
+  `{ "code": "123456" }`. `204` y la cookie `__Host-sanatorio_admin`, firmada y
+  de ese navegador, que abre el panel 12 horas. Un código no vale dos veces;
+  cinco fallos en 15 min dan `429`.
+- POST /admin/totp/lock → cierra el panel en ese navegador. `204`.
+- Si alguien pierde el móvil, se le da de baja por SSH y vuelve a darse de alta:
+  `DELETE FROM admin_second_factor WHERE login = '…'`.
+
+Con el panel abierto:
 
 - GET /admin/consumption → tope actual, últimas 48 h, media por día de la semana
   y hora (UTC), avisos de los tramos por encima del 80 % del presupuesto y quién

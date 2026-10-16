@@ -43,6 +43,7 @@ describe('migraciones', () => {
     const db = await openDatabase({ url: 'file::memory:' })
 
     expect((await tableNames(db)).sort()).toEqual([
+      'admin_second_factor',
       'agenda_events',
       'agenda_users',
       'availability',

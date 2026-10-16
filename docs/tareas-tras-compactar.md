@@ -65,11 +65,11 @@ Orden (se marca cada uno al desplegarlo):
 - [x] 6 Grafo de la Red a tirones: medir y optimizar `ForceGraph.tsx`.
 
 **B. Seguridad, moderación y legal**
-- [ ] 10 Scopes: fijar `public` en el token de la app; Alberto desmarca los permisos sobrantes en la intra.
-- [ ] 11 web-check: `security.txt`, quitar `via`, HSTS `includeSubDomains`.
-- [ ] 14 Tipos de denuncia (spam, acoso, insultos, otro) y filtro en el panel.
-- [ ] 15 Formulario de incidencias: tipo y sección en desplegables, «Para: administración», icono `bicho`.
-- [ ] 16 Borrar avisos / retirar mensaje propio (15 min, sin respuesta) / admin borra spam.
+- [x] 10 Scopes: fijar `public` en el token de la app; Alberto desmarca los permisos sobrantes en la intra.
+- [x] 11 web-check: `security.txt`, quitar `via`, HSTS `includeSubDomains`.
+- [x] 14 Tipos de denuncia (spam, acoso, insultos, otro) y filtro en el panel.
+- [x] 15 Formulario de incidencias: tipo y sección en desplegables, «Para: administración», icono `bicho`.
+- [x] 16 Borrar avisos / retirar mensaje propio (15 min, sin respuesta) / admin borra spam.
 - [ ] 9 Segundo factor (TOTP) para `/admin`, sesión elevada 12 h.
 - [ ] 12 Página de privacidad y condiciones, aceptación versionada, descarga de datos.
 - [ ] 13 Trampas de Code Clicker, tres botones: «no es trampa» cierra; «alta probabilidad» abre ventana obligatoria de defensa que llega al admin; «trampa» = **vender todos sus edificios**, aviso temático en el juego («La policía del código te ha requisado las ganancias fraudulentas») y el dinero va a una **bolsa común**. La bolsa se reparte con una imagen temática que aparece por la zona del juego como el commit dorado; al pulsarla da **10 × el commit de la suerte** (el de ganancia, no el frenesí).

@@ -9,6 +9,7 @@ import { buildApp } from '../../src/app/build-app.js'
 import type { BuiltApp } from '../../src/app/build-app.js'
 import { loadEnv } from '../../src/config/env.js'
 import { closeDatabase, openDatabase } from '../../src/core/db/database.js'
+import { base32Decode, codeAt, stepOf } from '../../src/modules/admin/totp.js'
 import type { Env } from '../../src/config/env.js'
 import { activeLocation, projectUser } from './fixtures.js'
 
@@ -239,6 +240,12 @@ export type TestApp = BuiltApp & {
    * Devuelve el par `nombre=valor` listo para mandar como cabecera `Cookie`.
    */
   login: () => Promise<string>
+  /**
+   * Login de quien administra, con el panel ya abierto: se da de alta en el
+   * segundo factor (leyendo el secreto del QR y calculando el código, como haría
+   * la app del móvil) y devuelve las dos cookies juntas para la cabecera `Cookie`.
+   */
+  adminLogin: () => Promise<string>
 }
 
 /**
@@ -283,10 +290,43 @@ export async function makeApp(
     return cookieValue(callback.headers['set-cookie'], '__Host-sanatorio_session')
   }
 
+  async function adminLogin(): Promise<string> {
+    const session = await login()
+    const setup = await built.app.inject({
+      method: 'POST',
+      url: '/admin/totp/setup',
+      headers: { cookie: session },
+    })
+    const secret = new URL((JSON.parse(setup.body) as { uri: string }).uri).searchParams.get(
+      'secret',
+    )
+    const bytes = base32Decode(secret ?? '')
+
+    if (setup.statusCode !== 200 || bytes === null) {
+      throw new Error(`el alta del segundo factor falló con ${setup.statusCode}: ${setup.body}`)
+    }
+
+    const confirm = await built.app.inject({
+      method: 'POST',
+      url: '/admin/totp/confirm',
+      headers: { cookie: session, 'content-type': 'application/json' },
+      payload: { code: codeAt(bytes, stepOf(Date.now())) },
+    })
+
+    if (confirm.statusCode !== 204) {
+      throw new Error(
+        `el código del segundo factor falló con ${confirm.statusCode}: ${confirm.body}`,
+      )
+    }
+
+    return `${session}; ${cookieValue(confirm.headers['set-cookie'], '__Host-sanatorio_admin')}`
+  }
+
   return {
     ...built,
     provider,
     login,
+    adminLogin,
     close: async () => {
       await built.app.close()
       closeDatabase(db)

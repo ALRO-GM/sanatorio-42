@@ -40,7 +40,7 @@ function send(built: TestApp, method: Method, url: string, cookie: string | null
 /** App con `albrodri` administrando, una cuenta de staff creada y su sesión abierta. */
 async function withStaff() {
   const built = await app({ ADMIN_LOGINS: 'albrodri' })
-  const admin = await built.login()
+  const admin = await built.adminLogin()
   const created = json(
     await send(built, 'POST', '/admin/staff', admin, { name: 'Bocal Madrid' }),
   ) as StaffAccountCreated

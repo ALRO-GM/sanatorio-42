@@ -20,6 +20,19 @@ import {
   notices,
 } from './state'
 
+/** El panel de mentira: dado de alta o no, y hasta cuándo está abierto. */
+const panel: { enrolled: boolean; elevatedUntil: string | null } = {
+  enrolled: false,
+  elevatedUntil: null,
+}
+
+function openPanel(code: string): void {
+  if (!/^\d{6}$/.test(code) || code === '000000')
+    throw fail(400, 'Ese código no vale (o ya se usó)')
+
+  panel.elevatedUntil = new Date(Date.now() + 12 * 3_600_000).toISOString()
+}
+
 export const adminMock: Pick<
   Api,
   | 'openTicket'
@@ -32,6 +45,11 @@ export const adminMock: Pick<
   | 'saveNotice'
   | 'withdrawTicket'
   | 'removeTicket'
+  | 'getSecondFactor'
+  | 'setupSecondFactor'
+  | 'confirmSecondFactor'
+  | 'verifySecondFactor'
+  | 'lockPanel'
   | 'setAdminBudget'
   | 'getAdminConsumption'
   | 'getAdminPeople'
@@ -151,6 +169,37 @@ export const adminMock: Pick<
     if (index === -1) throw fail(409, 'Ya no se puede retirar')
 
     tickets.splice(index, 1)
+  },
+
+  // Segundo factor de mentira: cualquier código de seis cifras vale, menos 000000.
+  async getSecondFactor() {
+    await delay(80)
+
+    return { ...panel, elevatedUntil: panel.elevatedUntil }
+  },
+
+  async setupSecondFactor() {
+    await delay(80)
+
+    return {
+      uri: 'otpauth://totp/Sanatorio%2042%3Aplopez-l?secret=JBSWY3DPEHPK3PXP&issuer=Sanatorio%2042',
+    }
+  },
+
+  async confirmSecondFactor(code) {
+    await delay(120)
+    openPanel(code)
+    panel.enrolled = true
+  },
+
+  async verifySecondFactor(code) {
+    await delay(120)
+    openPanel(code)
+  },
+
+  async lockPanel() {
+    await delay(60)
+    panel.elevatedUntil = null
   },
 
   async removeTicket(id) {

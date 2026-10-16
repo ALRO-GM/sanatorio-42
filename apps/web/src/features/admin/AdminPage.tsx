@@ -19,6 +19,7 @@ import { Icon } from '../../shared/ui/Icon'
 import { recordHref } from '../../shared/links'
 import { StaffAccounts } from './StaffAccounts'
 import { InboxTab } from './InboxTab'
+import { PanelLock } from './PanelLock'
 
 const TABS = [
   'consumption',
@@ -47,11 +48,24 @@ function size(bytes: number): string {
  */
 export function AdminPage({ campusId }: { campusId?: number | undefined }) {
   const { t } = useI18n()
-  const [tab, setTab] = useState<Tab>('consumption')
 
   return (
     <section className="admin">
       <h2>{t('admin.title')}</h2>
+      <PanelLock>
+        <AdminTabs campusId={campusId} />
+      </PanelLock>
+    </section>
+  )
+}
+
+/** Las pestañas del panel, ya con el segundo factor dado. */
+function AdminTabs({ campusId }: { campusId?: number | undefined }) {
+  const { t } = useI18n()
+  const [tab, setTab] = useState<Tab>('consumption')
+
+  return (
+    <>
       <div className="filter-pills" role="tablist" aria-label={t('admin.title')}>
         {TABS.map((option) => (
           <button
@@ -83,7 +97,7 @@ export function AdminPage({ campusId }: { campusId?: number | undefined }) {
       {tab === 'clicker' && <ClickerPanel />}
       {tab === 'data' && <DataPanel />}
       {tab === 'casts' && <BroadcastsTab campusId={campusId} />}
-    </section>
+    </>
   )
 }
 

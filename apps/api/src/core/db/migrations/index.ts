@@ -46,6 +46,7 @@ import { curriculumVotesSchema } from './0037-curriculum-votes.js'
 import { ticketCategorySchema } from './0038-ticket-category.js'
 import { reportReasonSchema } from './0039-report-reason.js'
 import { savedNoticesSchema } from './0040-saved-notices.js'
+import { secondFactorSchema } from './0041-second-factor.js'
 import type { Migration } from './types.js'
 
 export type { Migration } from './types.js'
@@ -91,6 +92,7 @@ export const MIGRATIONS: readonly Migration[] = [
   ticketCategorySchema,
   reportReasonSchema,
   savedNoticesSchema,
+  secondFactorSchema,
 ]
 
 /** Versión más alta que existe en el código. */
