@@ -230,6 +230,15 @@ describe('code clicker', () => {
     clock.advance(24 * HOUR)
     expect(await clicker.state(actor('ana'))).toMatchObject({ donated: 6 })
     expect(asked()).toBe(2)
+
+    // Si 42 falla, se queda lo que había y no se vuelve a preguntar hasta mañana.
+    api.failOn = { match: 'correction_point_historics', status: 500 }
+    clock.advance(25 * HOUR)
+    expect(await clicker.state(actor('ana'))).toMatchObject({ donated: 6 })
+    api.failOn = null
+    clock.advance(HOUR)
+    expect(await clicker.state(actor('ana'))).toMatchObject({ donated: 6 })
+    expect(asked()).toBe(3)
   })
 
   it('quien administra ve el uso del juego, general y de cada persona', async () => {

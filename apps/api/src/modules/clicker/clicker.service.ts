@@ -277,16 +277,18 @@ export function createClickerService(options: ClickerServiceOptions) {
 
     if (options.donated === undefined || now() - at < DONATED_TTL_MS) return known
 
-    const fresh = await options.donated(login).catch(() => null)
+    // Sin cuota se vuelve a intentar en la siguiente visita; si 42 falla, mañana:
+    // no se le pregunta en cada visita algo que no va a contestar.
+    const fresh = await options.donated(login).catch(() => 'failed' as const)
 
     if (fresh === null) return known
 
     await db.execute({
       sql: 'UPDATE clicker SET donated = ?, donated_at = ? WHERE login = ?',
-      args: [fresh, iso(), login],
+      args: [fresh === 'failed' ? known : fresh, iso(), login],
     })
 
-    return fresh
+    return fresh === 'failed' ? known : fresh
   }
 
   const row = async (login: string): Promise<Record<string, unknown> | undefined> =>
