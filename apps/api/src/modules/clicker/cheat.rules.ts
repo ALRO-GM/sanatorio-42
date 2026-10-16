@@ -217,8 +217,13 @@ export function verdict(
   return gain > allowed ? 'rate' : null
 }
 
-/** Veces que hay que pillar a alguien para venderle todo. */
-export const SALE_FROM = 3
+/**
+ * La política de trampas, en cada trampa pillada: vuelve la última partida
+ * buena, se venden todos sus edificios y se le da esta parte de lo que
+ * costaron. La misma cantidad se reparte entre quienes nunca han sido pillados.
+ * Es `FORCED_REFUND` de la web (`data.ts`); un test comprueba que coinciden.
+ */
+export const SALE_REFUND = 0.5
 
 /** El título que deja en el banner haber sido pillado tantas veces. */
 export function hackerTitle(
@@ -251,5 +256,10 @@ export const POOL_EVERY_MS = GOLDEN_EVERY_S * 1000
  * edificios imposibles (`holdings` infinito) no aporta nada a la bolsa.
  */
 export function seizedValue(ledger: Ledger | null): number {
-  return ledger === null || !Number.isFinite(ledger.holdings) ? 0 : ledger.holdings
+  return ledger === null || !Number.isFinite(ledger.holdings) ? 0 : ledger.holdings * SALE_REFUND
+}
+
+/** Lo que le toca a cada persona limpia del reparto: a partes iguales. */
+export function giftShare(amount: number, people: number): number {
+  return people > 0 && Number.isFinite(amount) && amount > 0 ? amount / people : 0
 }

@@ -12,6 +12,7 @@ import type {
   ClickerCapital,
   ClickerCheat,
   ClickerEvidence,
+  ClickerGameView,
   ClickerPlayer,
   ClickerPoolClaim,
   ClickerRank,
@@ -40,7 +41,7 @@ import {
   POOL_EVERY_MS,
   poolShare,
   readSave,
-  SALE_FROM,
+  giftShare,
   seizedValue,
   verdict,
 } from './cheat.rules.js'
@@ -186,19 +187,25 @@ export function createClickerService(options: ClickerServiceOptions) {
     Number((await db.execute('SELECT amount FROM clicker_pool WHERE id = 1')).rows[0]?.amount ?? 0)
 
   /**
-   * La política de trampas: se requisan todos los edificios (la web los vende
-   * al cargar y no le devuelve nada, `saleDue`) y lo que valían, según la última
-   * partida buena, va a la bolsa común. El aviso de la policía del código sale
-   * en el juego hasta que lo ve (`seizure`).
+   * La política de trampas (`SALE_REFUND`): la web vuelve a la última partida
+   * buena y vende al cargar todos sus edificios (`saleDue`); se le da la mitad de
+   * lo que costaron y esa misma cantidad se reparte, a partes iguales, entre
+   * quienes juegan y nunca han sido pillados. Lo verá en el juego (`seizure`).
    */
   async function confiscate(
     login: string,
     found: Record<string, unknown> | undefined,
     by: ClickerSeizure['by'],
     evidence: ClickerEvidence | null,
+    n: number,
   ): Promise<void> {
     const amount = seizedValue(typeof found?.save === 'string' ? readSave(found.save) : null)
-    const seizure: ClickerSeizure = { by, amount, evidence }
+    const clean = `pill = 'red' AND caught = 0 AND save IS NOT NULL AND login != ?`
+    const people = toNumber(
+      (await db.execute({ sql: `SELECT COUNT(*) AS n FROM clicker WHERE ${clean}`, args: [login] }))
+        .rows[0]?.n ?? 0,
+    )
+    const seizure: ClickerSeizure = { by, amount, n, shared: people, evidence }
 
     await db.batch(
       [
@@ -207,8 +214,8 @@ export function createClickerService(options: ClickerServiceOptions) {
           args: [JSON.stringify(seizure), login],
         },
         {
-          sql: 'UPDATE clicker_pool SET amount = amount + ?, updated_at = ? WHERE id = 1',
-          args: [amount, iso()],
+          sql: `UPDATE clicker SET pending_gift = pending_gift + ? WHERE ${clean}`,
+          args: [giftShare(amount, people), login],
         },
       ],
       'write',
@@ -361,9 +368,9 @@ export function createClickerService(options: ClickerServiceOptions) {
               ? null
               : ((await options.brand?.(actor.login, title).catch(() => null)) ?? null)
 
-          // A la tercera, la política de trampas.
-          if (caught >= SALE_FROM && toNumber(found?.sale_due ?? 0) === 0) {
-            await confiscate(actor.login, found, 'auto', null)
+          // La política de trampas, en cada una (si no tiene ya la venta pendiente).
+          if (toNumber(found?.sale_due ?? 0) === 0) {
+            await confiscate(actor.login, found, 'auto', null, caught)
           }
 
           // Se guarda la partida tal como llegó, por si hay que indultarla.
@@ -405,20 +412,20 @@ export function createClickerService(options: ClickerServiceOptions) {
           })
         }
 
-        return { rev, caught, refused: true }
+        return { rev, caught, refused: true, gift: 0 }
       }
 
       // Con la venta pendiente no vale seguir con los edificios puestos.
       if (toNumber(found?.sale_due ?? 0) === 1 && ledger.holdings > 0) {
-        return { rev, caught, refused: true }
+        return { rev, caught, refused: true, gift: 0 }
       }
 
       const result = await db.execute({
         sql: `UPDATE clicker SET save = ?, total = MAX(total, ?), last_total = ?, per_second = ?,
                 achievements = ?, prestige = ?, updated_at = ?, holder = ?, rev = rev + 1,
-                sale_due = 0, pool_bonus = 0
+                sale_due = 0, pool_bonus = pending_gift, pending_gift = 0
               WHERE login = ? AND (rev = ? OR holder = ?)
-              RETURNING rev`,
+              RETURNING rev, pool_bonus AS gift`,
         args: [
           sent.save,
           sent.total,
@@ -491,7 +498,14 @@ export function createClickerService(options: ClickerServiceOptions) {
         )
       }
 
-      return { rev: toNumber(saved?.rev ?? rev), caught, refused: false }
+      // Lo que le llega del reparto se suma en la web, y vale como escrito en el
+      // siguiente guardado (`pool_bonus`).
+      return {
+        rev: toNumber(saved?.rev ?? rev),
+        caught,
+        refused: false,
+        gift: Number(saved?.gift ?? 0),
+      }
     },
 
     /**
@@ -692,7 +706,7 @@ export function createClickerService(options: ClickerServiceOptions) {
         sql: `UPDATE clicker SET caught = ?, caught_at = ?, caught_why = 'review' WHERE login = ?`,
         args: [caught, iso(), login],
       })
-      await confiscate(login, player, 'review', evidence)
+      await confiscate(login, player, 'review', evidence, caught)
       await db.execute({ sql: 'DELETE FROM clicker_alerts WHERE id = ?', args: [alertId] })
 
       const title = hackerTitle(caught)
@@ -793,6 +807,28 @@ export function createClickerService(options: ClickerServiceOptions) {
         sql: 'UPDATE clicker SET seizure = NULL WHERE login = ?',
         args: [actor.login],
       })
+    },
+
+    /**
+     * La partida de alguien, para que quien administra la vea en su pantalla
+     * de juego (sin guardar nada).
+     *
+     * @throws {DomainError} `forbidden` si no administra; `not_found` si no juega.
+     */
+    async gameOf(actor: Actor, input: unknown): Promise<ClickerGameView> {
+      assertAdmin(actor)
+
+      const { login } = parse(loginSchema.loose(), input)
+      const found = await row(login)
+
+      if (found === undefined) throw domainError('not_found', 'Esa persona no juega')
+
+      return {
+        login,
+        save: typeof found.save === 'string' ? found.save : null,
+        caught: toNumber(found.caught ?? 0),
+        perSecond: Number(found.per_second ?? 0),
+      }
     },
 
     /** Veces que han pillado a alguien haciendo trampas. Para el título del banner. */

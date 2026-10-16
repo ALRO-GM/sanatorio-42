@@ -161,6 +161,16 @@ export function createClickerModule(deps: ClickerServiceOptions): ClickerModule 
         },
       )
 
+      /** `GET /admin/clicker/game?login=` → la partida de alguien, para verla. Solo admins. */
+      app.get<{ Querystring: Record<string, string> }>(
+        '/admin/clicker/game',
+        async (request, reply) => {
+          reply.header('Cache-Control', 'private, no-store')
+
+          return reply.send(await service.gameOf(await session.actor(request), request.query))
+        },
+      )
+
       /** `GET /admin/clicker?days=` → el uso del juego, general y por persona. Solo admins. */
       app.get<{ Querystring: Record<string, string> }>('/admin/clicker', async (request, reply) => {
         reply.header('Cache-Control', 'private, no-store')

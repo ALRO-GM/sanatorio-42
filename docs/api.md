@@ -772,17 +772,24 @@ Solo admins. Lo que se decide sobre un salto de capital sospechoso:
   (`POST /clicker/reviews/:id` `{ "answer" }`, de 20 a 2 000 letras). La
   respuesta llega a quien administra (aviso `clicker_defense`) y al panel
   (`status: "answered"`, `answer`); un método nuevo no se penaliza.
-- `cheat`: la **política de trampas**: se requisan todos sus edificios (la web
-  los vende sin devolverle nada) y lo que valían va a la **bolsa común**. En el
+- `cheat`: la **política de trampas**, la misma que se aplica sola a cada
+  trampa que se pilla al guardar: se vuelve a la última partida buena, se venden
+  todos sus edificios y se le da la mitad de lo que costaron (`SALE_REFUND`), y
+  esa misma cantidad se reparte a partes iguales entre quienes juegan y nunca han
+  sido pillados (les llega en `gift` con su siguiente `PUT /clicker/save`). En el
   juego le sale el aviso de la policía del código con las cifras que no
   cuadraron (`seizure` en `GET /clicker`, hasta `POST /clicker/seizure/ack`).
-  Es la misma política que se aplica sola a la tercera partida que no cuadra.
+  El aviso lleva `n` (veces pillado: elige el mensaje) y `shared` (entre
+  cuántas personas se repartió).
 
 La bolsa común (`pool` en `GET /clicker`) se reparte en el juego: de vez en
 cuando sale una placa, y quien la coge (`POST /clicker/pool/claim` →
 `{ "amount", "pool" }`) se lleva diez commits de la suerte según su última
 partida guardada, sin pasar de lo que hay y como mucho una vez cada cinco
 minutos. Lo cobrado vale como escrito en su siguiente guardado.
+
+GET /admin/clicker/game?login= → `{ login, save, caught, perSecond }`: la
+partida de alguien, para verla en su pantalla de juego sin guardar nada. Solo admins.
 
 GET /clicker/board → `{ entries, me }`: quién ha escrito más código, de
 cualquier campus. `level` es `floor(3 · log10(1 + total))`. `403` sin la roja.

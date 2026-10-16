@@ -51,12 +51,20 @@ export type ClickerEvidence = {
   golden: boolean
 }
 
-/** Lo que se ha requisado: todos los edificios, a la bolsa común. */
+/**
+ * Lo que ha hecho la policía del código al pillar una trampa: volver a la última
+ * partida buena, vender todos sus edificios y darle la mitad de lo que costaron;
+ * la misma cantidad se reparte entre quienes juegan limpio.
+ */
 export type ClickerSeizure = {
-  /** `review`: lo decidió quien administra; `auto`: la tercera partida que no cuadraba. */
+  /** `review`: lo decidió quien administra; `auto`: lo vio la API al guardar. */
   by: 'review' | 'auto'
-  /** Lo que valían los edificios: es lo que va a la bolsa. */
+  /** Lo que se le devuelve (la mitad de lo que costaron), y lo mismo que se reparte. */
   amount: number
+  /** Veces que le han pillado, contando esta: elige el mensaje. */
+  n: number
+  /** Entre cuántas personas se ha repartido. */
+  shared: number
   /** Los datos que no cuadraron, si los hay. */
   evidence: ClickerEvidence | null
 }
@@ -155,6 +163,16 @@ export type ClickerSaved = {
   caught: number
   /** La partida no se ha guardado: no cuadra, o falta la venta forzosa. Toca volver a cargar. */
   refused: boolean
+  /** Lo que le llega del reparto de las trampas de otras personas: hay que sumarlo. */
+  gift: number
+}
+
+/** `GET /admin/clicker/game?login=`: la partida de alguien, para verla. Solo admins. */
+export type ClickerGameView = {
+  login: string
+  save: string | null
+  caught: number
+  perSecond: number
 }
 
 export type ClickerRank = {

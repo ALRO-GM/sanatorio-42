@@ -143,6 +143,7 @@ export const realApi: Api = {
   defendClickerReview: (id, answer) => send('POST', `/clicker/reviews/${id}`, { answer }),
   claimClickerPool: () => sendJson('POST', '/clicker/pool/claim'),
   ackClickerSeizure: () => send('POST', '/clicker/seizure/ack'),
+  getClickerGameOf: (login) => getJson(`/admin/clicker/game?login=${encodeURIComponent(login)}`),
   getBroadcasts: () => getJson('/broadcasts'),
   answerBroadcast: (id, answer) => sendJson('POST', `/broadcasts/${id}/answer`, answer),
   getAdminBroadcasts: () => getJson('/admin/broadcasts'),

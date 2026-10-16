@@ -133,17 +133,22 @@ function clock(ms: number): string {
  * @param background La web está en otra sección: el juego sigue corriendo, pero
  *   solo se pinta la ventanita de abajo.
  * @param onOpen Lo que hace la ventanita al pulsarla: volver al juego.
+ * @param spectate Para quien administra: la partida de esa persona, para verla.
+ *   No se guarda nada, ni aquí ni en la API; lo que se toque solo cambia en
+ *   esta pantalla.
  */
 export function CodeClicker({
   me,
   onExit,
   background = false,
   onOpen,
+  spectate,
 }: {
   me: string
   onExit: () => void
   background?: boolean
   onOpen?: () => void
+  spectate?: string
 }) {
   const { lang } = useI18n()
   const texts = textsOf(lang)
@@ -221,72 +226,85 @@ export function CodeClicker({
     }, TOAST_MS)
   }, [])
 
-  const save = useCallback((toServer: boolean): void => {
-    const current = game.current
+  const save = useCallback(
+    (toServer: boolean): void => {
+      const current = game.current
 
-    if (current === null) return
+      // Mirando la partida de otra persona no se guarda nada en ningún sitio.
+      if (current === null || spectate !== undefined) return
 
-    const saved = serialize(current)
-    const rev = base.current
+      const saved = serialize(current)
+      const rev = base.current
 
-    // Una partida que ya no es la buena no se guarda ni aquí: al recargar
-    // manda la de la API.
-    if (lost.current) return
+      // Una partida que ya no es la buena no se guarda ni aquí: al recargar
+      // manda la de la API.
+      if (lost.current) return
 
-    writeLocal(saved, rev)
+      writeLocal(saved, rev)
 
-    if (!toServer || rev === null) return
+      if (!toServer || rev === null) return
 
-    const sent = [...samples.current]
-    const sentClicks = [...clickSamples.current]
+      const sent = [...samples.current]
+      const sentClicks = [...clickSamples.current]
 
-    api
-      .saveClicker({
-        save: saved,
-        rev,
-        session: session.current,
-        total: current.before + current.total,
-        perSecond: baseCps(current),
-        achievements: current.achieved.length,
-        prestige: current.prestige,
-        spent: invested(current),
-        capital: sent,
-        clicks: sentClicks,
-      })
-      .then(
-        (done) => {
-          if (!done.refused) {
-            base.current = done.rev
-            // Lo mandado ya está allí. Se deja el último punto, para que un
-            // salto entre un envío y el siguiente también se vea.
-            samples.current = samples.current.filter(([at]) => at >= (sent.at(-1)?.[0] ?? 0))
-            // De las pulsaciones se queda el último minuto: una ráfaga que cae
-            // entre dos guardados se mide entera en el siguiente.
-            clickSamples.current = clickSamples.current.filter(
-              ([at]) => at >= (sentClicks.at(-1)?.[0] ?? 0) - CLICKS_OVERLAP_S,
-            )
+      api
+        .saveClicker({
+          save: saved,
+          rev,
+          session: session.current,
+          total: current.before + current.total,
+          perSecond: baseCps(current),
+          achievements: current.achieved.length,
+          prestige: current.prestige,
+          spent: invested(current),
+          capital: sent,
+          clicks: sentClicks,
+        })
+        .then(
+          (done) => {
+            if (!done.refused) {
+              base.current = done.rev
+              // Lo que le toca del reparto de una trampa ajena: se suma y se cuenta.
+              if (done.gift > 0 && game.current !== null) {
+                receive(game.current, done.gift)
+                toast({
+                  icon: 'loot',
+                  title: ui('giftTitle'),
+                  text: ui('giftText', { n: short(done.gift, lang, 1) }),
+                })
+              }
+              // Lo mandado ya está allí. Se deja el último punto, para que un
+              // salto entre un envío y el siguiente también se vea.
+              samples.current = samples.current.filter(([at]) => at >= (sent.at(-1)?.[0] ?? 0))
+              // De las pulsaciones se queda el último minuto: una ráfaga que cae
+              // entre dos guardados se mide entera en el siguiente.
+              clickSamples.current = clickSamples.current.filter(
+                ([at]) => at >= (sentClicks.at(-1)?.[0] ?? 0) - CLICKS_OVERLAP_S,
+              )
 
-            return
-          }
+              return
+            }
 
-          samples.current = []
-          clickSamples.current = []
+            samples.current = []
+            clickSamples.current = []
 
-          // La API no se la cree: se vuelve a la última partida buena, y la
-          // carga se encarga de contar qué ha pasado.
-          if (Date.now() - refusedAt.current > REFUSED_WAIT_MS) {
-            refusedAt.current = Date.now()
-            reload.current()
-          }
-        },
-        (error: unknown) => {
-          if (error instanceof ApiError && error.status === 409) {
-            lost.current = true
-            setStale(true)
-          }
-        },
-      )
-  }, [])
+            // La API no se la cree: se vuelve a la última partida buena, y la
+            // carga se encarga de contar qué ha pasado.
+            if (Date.now() - refusedAt.current > REFUSED_WAIT_MS) {
+              refusedAt.current = Date.now()
+              reload.current()
+            }
+          },
+          (error: unknown) => {
+            if (error instanceof ApiError && error.status === 409) {
+              lost.current = true
+              setStale(true)
+            }
+          },
+        )
+    },
+    [spectate, toast, ui, lang],
+  )
 
   /**
    * Trae la partida de la API. Al entrar manda la de la API; si no contesta, se
@@ -295,6 +313,23 @@ export function CodeClicker({
    */
   const load = useCallback(
     async (replace: boolean): Promise<void> => {
+      if (spectate !== undefined) {
+        // La partida de otra persona, tal como la guardó: solo para verla.
+        try {
+          const view = await api.getClickerGameOf(spectate)
+
+          game.current = restore(view.save, Date.now()) ?? newGame(Date.now())
+          caught.current = view.caught
+        } catch {
+          game.current ??= newGame(Date.now())
+          setOffline(true)
+        } finally {
+          setLoaded(true)
+        }
+
+        return
+      }
+
       const local = readLocal()
 
       try {
@@ -343,7 +378,7 @@ export function CodeClicker({
         setLoaded(true)
       }
     },
-    [save],
+    [save, spectate],
   )
 
   reload.current = () => {
@@ -769,6 +804,11 @@ export function CodeClicker({
             setBust(null)
           }}
         />
+      )}
+      {spectate !== undefined && (
+        <p className="cc-sync" role="status">
+          <span>{ui('spectating', { login: spectate })}</span>
+        </p>
       )}
       {offline && !stale && (
         <p className="cc-sync" role="status">

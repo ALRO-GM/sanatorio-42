@@ -8,7 +8,7 @@
 
 import { beforeEach, describe, expect, it } from 'vitest'
 
-import { BASE_PRICE, GROWTH } from '../../src/modules/clicker/cheat.rules.js'
+import { BASE_PRICE, GROWTH, SALE_REFUND } from '../../src/modules/clicker/cheat.rules.js'
 import { clickerLevel } from '../../src/modules/clicker/index.js'
 import { actor, expectCode, HOUR, MINUTE, useCommunity } from '../helpers/community.js'
 import type { Community } from '../helpers/community.js'
@@ -343,7 +343,7 @@ describe('code clicker', () => {
       expect(await clicker.state(ana)).toMatchObject({ save: game(), rev: 1 })
     })
 
-    it('la primera da un título, la segunda lo cambia y la tercera lo vende todo', async () => {
+    it('cada trampa: título, sus edificios vendidos a la mitad y lo mismo repartido a quien juega limpio', async () => {
       const { clicker, xp } = services
       const titleOf = async (): Promise<unknown> => {
         const { title, hacks, titles } = await xp.expediente(ana)
@@ -351,68 +351,70 @@ describe('code clicker', () => {
         return { title, hacks, extra: titles.find((entry) => entry.id.startsWith('hacker'))?.id }
       }
 
-      // Juega una tarde y compra diez cursores.
+      // `leo` juega limpio; `sol` ya fue pillada alguna vez: a ella no le toca nada.
+      for (const login of ['leo', 'sol']) {
+        await press(login, 100)
+        await clicker.choose(actor(login), { pill: 'red' })
+        await clicker.save(actor(login), { ...SAVE, session: `pestaña-${login}` })
+      }
+      await db.execute("UPDATE clicker SET caught = 1 WHERE login = 'sol'")
+
+      // `ana` juega una tarde y compra diez cursores.
       clock.advance(5 * HOUR)
 
       const owned = { cursor: 10 }
       const total = 50_000
       const fair = { total, code: 100, owned }
+      const half = cost('cursor', 10) / 2
 
       await send(fair, { perSecond: 1 })
       expect(await titleOf()).toEqual({ title: 'paciente', hacks: 0, extra: undefined })
 
+      // La pillan: no entra, vuelve a la buena y se le venden los edificios a la mitad.
       clock.advance(MINUTE)
-      expect(await send({ ...fair, code: 1e9 })).toEqual({ caught: 1, refused: true })
+      expect(await send({ ...fair, code: 1e9 })).toMatchObject({ caught: 1, refused: true })
       expect(await titleOf()).toEqual({ title: 'hacker_etico', hacks: 1, extra: 'hacker_etico' })
-
-      // Otra vez enseguida: no entra, pero no cuenta dos veces.
-      clock.advance(MINUTE)
-      expect(await send({ ...fair, code: 1e9 })).toEqual({ caught: 1, refused: true })
-
-      // Puede quitarse el título y volver a ponérselo, pero no el siguiente.
-      await xp.updateSettings(ana, { title: 'paciente' })
-      await xp.updateSettings(ana, { title: 'hacker_etico' })
-      await expectCode(xp.updateSettings(ana, { title: 'hacker_cazado' }), 'forbidden')
-      await expectCode(xp.updateSettings(actor('leo'), { title: 'hacker_etico' }), 'forbidden')
-
-      clock.advance(10 * MINUTE)
-      expect(await send({ ...fair, code: 1e9 })).toEqual({ caught: 2, refused: true })
-      expect(await titleOf()).toEqual({
-        title: 'hacker_poco_etico',
-        hacks: 2,
-        extra: 'hacker_poco_etico',
-      })
-      expect(await clicker.state(ana)).toMatchObject({ caught: 2, saleDue: false })
-
-      clock.advance(10 * MINUTE)
-      expect(await send({ ...fair, code: 1e9 })).toEqual({ caught: 3, refused: true })
-      expect(await titleOf()).toEqual({ title: 'hacker_cazado', hacks: 3, extra: 'hacker_cazado' })
-      // La política de trampas: sus edificios (los de la última partida buena)
-      // van a la bolsa común, y lo verá en el juego.
       expect(await clicker.state(ana)).toMatchObject({
-        caught: 3,
+        caught: 1,
         saleDue: true,
-        pool: cost('cursor', 10),
-        seizure: { by: 'auto', amount: cost('cursor', 10), evidence: null },
+        seizure: { by: 'auto', amount: half, n: 1, shared: 1, evidence: null },
       })
 
-      // Hasta que no llega sin edificios, no se guarda nada, ni jugando limpio.
+      // A `leo` le llega lo mismo en su siguiente guardado; a `sol`, nada.
+      const leo = await clicker.save(actor('leo'), { ...SAVE, rev: 1, session: 'pestaña-leo' })
+
+      expect(leo.gift).toBeCloseTo(half)
+      expect(
+        (await clicker.save(actor('sol'), { ...SAVE, rev: 1, session: 'pestaña-sol' })).gift,
+      ).toBe(0)
+      // Y lo cobrado vale como escrito: su siguiente guardado, con eso de más, no es trampa.
       clock.advance(MINUTE)
-      expect(await send(fair, { perSecond: 1 })).toEqual({ caught: 3, refused: true })
-      // Requisados: sin edificios y sin que se le devuelva nada.
-      expect(await send({ total, code: 100, owned: { cursor: 0 } })).toEqual({
-        caught: 3,
+      expect(
+        await clicker.save(actor('leo'), {
+          ...SAVE,
+          rev: leo.rev,
+          session: 'pestaña-leo',
+          save: game({ code: half }),
+        }),
+      ).toMatchObject({ refused: false, gift: 0 })
+
+      // Hasta que no llega sin edificios, no se guarda nada; con la mitad cobrada, sí.
+      clock.advance(MINUTE)
+      expect(await send(fair, { perSecond: 1 })).toMatchObject({ refused: true })
+      expect(await send({ total, code: 100 + half, owned: { cursor: 0 } })).toMatchObject({
+        caught: 1,
         refused: false,
       })
-      expect(await clicker.state(ana)).toMatchObject({ caught: 3, saleDue: false })
+      expect(await clicker.state(ana)).toMatchObject({ saleDue: false })
 
-      // Y a la cuarta, otra vez.
-      clock.advance(10 * MINUTE)
-      expect(await send({ total, code: 1e9 })).toEqual({ caught: 4, refused: true })
-      expect(await titleOf()).toMatchObject({ title: 'hacker_cazado', hacks: 4 })
-      expect(await clicker.state(ana)).toMatchObject({ saleDue: true })
+      // Otra vez dentro de los cinco minutos: no cuenta dos veces. Pasados, la segunda.
+      clock.advance(MINUTE)
+      expect(await send({ total, code: 1e9 })).toMatchObject({ caught: 1, refused: true })
+      clock.advance(5 * MINUTE)
+      expect(await send({ total, code: 1e9 })).toMatchObject({ caught: 2, refused: true })
+      expect(await titleOf()).toMatchObject({ title: 'hacker_poco_etico', hacks: 2 })
       expect((await clicker.usage(actor('eva', { admin: true }), {})).players[0]).toMatchObject({
-        caught: 4,
+        caught: 2,
         caughtWhy: 'ledger',
       })
     })
@@ -607,7 +609,7 @@ describe('code clicker', () => {
       await expectCode(clicker.defend(ana, id, { answer: 'x'.repeat(30) }), 'not_found')
     })
 
-    it('revisión: «trampa» requisa los edificios a la bolsa común y le dice qué no cuadró', async () => {
+    it('revisión: «trampa» aplica la política y le dice qué no cuadró', async () => {
       const { clicker } = services
       const boss = actor('eva', { admin: true })
 
@@ -624,8 +626,12 @@ describe('code clicker', () => {
       expect(await clicker.state(ana)).toMatchObject({
         caught: 1,
         saleDue: true,
-        pool: cost('cursor', 10),
-        seizure: { by: 'review', amount: cost('cursor', 10), evidence: { from: 2e6, to: 1e7 } },
+        seizure: {
+          by: 'review',
+          amount: cost('cursor', 10) / 2,
+          n: 1,
+          evidence: { from: 2e6, to: 1e7 },
+        },
       })
       expect((await clicker.usage(boss, {})).alerts).toEqual([])
       // Visto el aviso, no vuelve a salir; la venta sigue pendiente hasta que la haga.
@@ -795,12 +801,29 @@ describe('code clicker', () => {
       const data = (await import(/* @vite-ignore */ path)) as {
         BUILDINGS: { id: string; base: number }[]
         GROWTH: number
+        FORCED_REFUND: number
       }
 
       expect(Object.fromEntries(data.BUILDINGS.map(({ id, base }) => [id, base]))).toEqual(
         BASE_PRICE,
       )
       expect(data.GROWTH).toBe(GROWTH)
+      // Y lo que se devuelve al vender por trampa, también.
+      expect(data.FORCED_REFUND).toBe(SALE_REFUND)
+    })
+
+    it('quien administra puede ver la partida de cualquiera; nadie más', async () => {
+      const { clicker } = services
+      const boss = actor('eva', { admin: true })
+
+      expect(await clicker.gameOf(boss, { login: 'ana' })).toMatchObject({
+        login: 'ana',
+        caught: 0,
+        save: game(),
+      })
+      await expectCode(clicker.gameOf(ana, { login: 'ana' }), 'forbidden')
+      await expectCode(clicker.gameOf(boss, { login: 'nadie' }), 'not_found')
+      await expectCode(clicker.gameOf(boss, { login: '../x' }), 'invalid_input')
     })
   })
 

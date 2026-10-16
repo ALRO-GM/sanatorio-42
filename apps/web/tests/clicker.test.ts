@@ -641,7 +641,7 @@ describe('code clicker: las trampas', () => {
     expect(invested(game)).toBeGreaterThan(1000)
   })
 
-  it('la requisa se lo lleva todo y no devuelve nada (va a la bolsa común)', async () => {
+  it('la venta por trampa se lo lleva todo y paga la mitad', async () => {
     const { invested, sellAll } = await import('../src/features/clicker/engine')
     const { FORCED_REFUND } = await import('../src/features/clicker/data')
     const game = newGame(T0, always(0.5))
@@ -649,14 +649,11 @@ describe('code clicker: las trampas', () => {
     game.owned = { cursor: 10, pisciner: 3 }
     game.bought = ['cursor:0']
 
-    const code = game.code
-
-    expect(invested(game)).toBeGreaterThan(100)
-
+    const worth = invested(game) - 100
     const paid = sellAll(game, FORCED_REFUND)
 
-    expect(paid).toBe(0)
-    expect(game.code).toBe(code)
+    expect(paid).toBe(Math.floor(worth / 2))
+    expect(game.code).toBe(paid)
     expect(game.owned).toEqual({})
     // Las mejoras se quedan.
     expect(game.bought).toEqual(['cursor:0'])

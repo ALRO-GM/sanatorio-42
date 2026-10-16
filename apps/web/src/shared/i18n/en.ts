@@ -1136,6 +1136,7 @@ export const en: Record<string, string> = {
   'admin.clicker.jump': '×{times} in {seconds} s',
   'admin.clicker.withGolden': 'opened a golden pull request',
   'admin.clicker.dismiss': 'Dismiss',
+  'admin.clicker.watch': 'Watch their game',
   'admin.clicker.verdict.cheat': 'Cheated',
   'admin.clicker.verdict.likely': 'Very likely',
   'admin.clicker.verdict.clean': 'Not cheating',

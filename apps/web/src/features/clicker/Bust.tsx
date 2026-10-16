@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom'
 import type { ClickerSeizure, Lang } from '@sanatorio/contracts'
 import { Icon } from '../../shared/ui/Icon'
 import { Tile } from './art'
-import { bustText, fill, short, textsOf } from './texts'
+import { bustText, fill, policeText, short, textsOf } from './texts'
 
 /**
  * Una trampa pillada: la que hace `n`, lo cobrado si se ha vendido todo y, si
@@ -21,15 +21,17 @@ export function Bust({ bust, lang, onClose }: { bust: Busted; lang: Lang; onClos
   const ui = textsOf(lang).ui
   const [bustTitle, bustBody] = bustText(bust.n, lang)
   const { seizure } = bust
-  const title = seizure === null ? bustTitle : (ui.policeTitle ?? bustTitle)
+  // Un aviso guardado antes de que llevara la cuenta usa la de la ventana.
+  const [policeTitle, policeBody] = policeText(seizure?.n ?? bust.n, lang)
+  const title = seizure === null ? bustTitle : policeTitle
   const evidence = seizure?.evidence ?? null
   // Lo que no cuadró, con las cifras (no cómo se ha visto).
   const text =
     seizure === null
       ? bustBody
       : seizure.by === 'auto' || evidence === null
-        ? (ui.policeAuto ?? bustBody)
-        : `${ui.policeReview ?? ''} ${fill(ui.policeJump ?? '', {
+        ? policeBody
+        : `${policeBody} ${ui.policeReview ?? ''} ${fill(ui.policeJump ?? '', {
             from: short(evidence.from, lang),
             to: short(evidence.to, lang),
             seconds: evidence.seconds,
@@ -50,7 +52,11 @@ export function Bust({ bust, lang, onClose }: { bust: Busted; lang: Lang; onClos
       <p>{text}</p>
       {seizure !== null && (
         <p className="cc-bust-sold">
-          {fill(ui.policePool ?? '', { n: short(seizure.amount, lang) })}
+          {fill(ui.policeMoney ?? '', {
+            // Lo cobrado de verdad al vender, si se acaba de vender; si no, la cuenta de la API.
+            n: short(bust.sold ?? seizure.amount, lang),
+            people: seizure.shared,
+          })}
         </p>
       )}
       {seizure === null && bust.sold !== null && (

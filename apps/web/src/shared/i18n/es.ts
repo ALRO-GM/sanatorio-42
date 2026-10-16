@@ -1390,6 +1390,7 @@ export const es: Record<string, string> = {
   'admin.clicker.jump': '×{times} en {seconds} s',
   'admin.clicker.withGolden': 'abrió una pull request dorada',
   'admin.clicker.dismiss': 'Descartar',
+  'admin.clicker.watch': 'Ver su partida',
   'admin.clicker.verdict.cheat': 'Ha hecho trampas',
   'admin.clicker.verdict.likely': 'Alta probabilidad',
   'admin.clicker.verdict.clean': 'No es trampa',

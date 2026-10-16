@@ -43,11 +43,11 @@ export const GROWTH = 1.15
 /** Al vender se recupera esta parte de lo que costó. */
 export const REFUND = 0.25
 /**
- * Y esta cuando lo requisa la policía del código por haber hecho trampas: nada.
- * Lo que valía va a la bolsa común (la cuenta la lleva la API) y se reparte
- * entre quien juega limpio.
+ * Y esta cuando lo vende la policía del código por haber hecho trampas: la
+ * mitad. La misma cantidad se reparte entre quienes nunca han sido pillados
+ * (lo lleva la API, `SALE_REFUND`; un test comprueba que coinciden).
  */
-export const FORCED_REFUND = 0
+export const FORCED_REFUND = 0.5
 
 /** Cuántos hay que tener para que salga cada mejora de un edificio. */
 export const TIER_AT = [1, 5, 25, 50, 100, 150, 200, 250, 300, 350, 400]

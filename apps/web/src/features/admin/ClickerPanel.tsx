@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { lazy, Suspense, useState } from 'react'
 
 import type { ClickerPlayer, ClickerVerdict } from '@sanatorio/contracts'
 
@@ -11,6 +11,11 @@ import { CapitalHistory } from '../clicker/CapitalHistory'
 import { duration } from './StatsPanel'
 import { RangePills } from './RangePills'
 
+// El juego entero solo se baja si se quiere ver la partida de alguien.
+const CodeClicker = lazy(() =>
+  import('../clicker/CodeClicker').then((m) => ({ default: m.CodeClicker })),
+)
+
 /**
  * Uso de Code Clicker: cuánta gente encuentra el secreto y qué elige, cuánto
  * tiempo se pasa con el juego abierto y cómo va la partida de cada quien.
@@ -22,6 +27,8 @@ export function ClickerPanel() {
   const { t, lang } = useI18n()
   const [days, setDays] = useState<number>(7)
   const [login, setLogin] = useState<string | null>(null)
+  // De quién se está viendo la partida, o `null`.
+  const [watching, setWatching] = useState<string | null>(null)
   const { data, error, loading, reload } = useAsync(() => api.getClickerUsage(days), [days])
   const compact = new Intl.NumberFormat(localeOf(lang), {
     notation: 'compact',
@@ -96,6 +103,31 @@ export function ClickerPanel() {
           <article className="card">
             <CapitalHistory login={one.login} lang={lang} label={t('admin.clicker.capital')} />
           </article>
+
+          {/* Su pantalla de juego, tal como la tiene: para mirar, sin guardar nada. */}
+          {one.pill === 'red' &&
+            (watching === one.login ? (
+              <Suspense fallback={<p className="estado">{t('app.loading')}</p>}>
+                <CodeClicker
+                  key={one.login}
+                  me={one.login}
+                  spectate={one.login}
+                  onExit={() => {
+                    setWatching(null)
+                  }}
+                />
+              </Suspense>
+            ) : (
+              <button
+                type="button"
+                className="pill"
+                onClick={() => {
+                  setWatching(one.login)
+                }}
+              >
+                {t('admin.clicker.watch')}
+              </button>
+            ))}
 
           {data.cheats.some((cheat) => cheat.login === one.login) && (
             <article className="card">

@@ -41,6 +41,11 @@ type Texts = {
    * y después se repite el último. `{n}` son las veces que van.
    */
   busts: [title: string, text: string][]
+  /**
+   * Lo que dice la policía del código al vender los edificios por una trampa:
+   * título y mensaje. Van rotando según las veces que le han pillado.
+   */
+  police: [title: string, text: string][]
   /** Sufijos de los números grandes, de mil en mil a partir del millón. */
   scale: string[]
   /**
@@ -166,15 +171,16 @@ const es: Texts = {
     bustEyebrow: 'Sistema antitrampas',
     bustOk: 'Entendido',
     bustSold: 'Vendido todo lo de la tienda por {n} líneas.',
+    spectating: 'Viendo la partida de {login}: lo que toques aquí no se guarda en ningún sitio.',
     policeEyebrow: 'Policía del código',
-    policeTitle: 'La policía del código te ha requisado las ganancias fraudulentas',
-    policeAuto: 'Tres partidas seguidas que no cuadraban: se acabó.',
+    policeMoney:
+      'Tus edificios se han vendido a la mitad de lo que costaron: {n} líneas vuelven a tu repositorio, y otras tantas se reparten entre las {people} personas que juegan limpio.',
+    giftTitle: 'Reparto de la policía del código',
+    giftText: 'Alguien hizo trampa y ha pagado: te tocan {n} líneas por jugar limpio.',
     policeReview: 'Quien administra ha revisado tu partida y no cuadra:',
     policeJump:
       'tu capital pasó de {from} a {to} en {seconds} s, con una producción de {rate} por segundo',
     policeNoGolden: 'sin ninguna pull request dorada abierta',
-    policePool:
-      'Todos tus edificios ({n} líneas) van a la bolsa común: se reparte entre quien juega limpio.',
     loot: 'Botín de los tramposos',
     fx_loot: 'Recuperas {n} líneas requisadas',
     lootGone: 'Alguien ha llegado antes al botín',
@@ -368,6 +374,40 @@ const es: Texts = {
     'hack:1': ['Sombrero gris', 'Te han pillado otra vez. Ya con menos educación.'],
     'hack:2': ['Sombrero confiscado', 'A la tercera se vendió todo.'],
   },
+  police: [
+    [
+      'La policía del código te ha requisado las ganancias fraudulentas',
+      'Hemos vuelto a tu última partida honrada. Tus edificios han salido a subasta: el martillo no perdona.',
+    ],
+    [
+      'git revert --hard tu-dignidad',
+      'Tu repositorio vuelve a un commit en el que todavía jugabas limpio. Los edificios, embargados.',
+    ],
+    [
+      'Norminette ha encontrado 9 000 errores en tus ganancias',
+      'Ni una función de menos de 25 líneas en tu contabilidad. Se vende todo y a otra cosa.',
+    ],
+    [
+      'Segfault en tu cuenta bancaria',
+      'Accediste a memoria que no era tuya. Valgrind lo ha visto todo y tus edificios pagan la fuga.',
+    ],
+    [
+      'Tu patito de goma se ha chivado',
+      'Le contaste cómo lo hacías y no ha podido callarse. Edificios vendidos; el pato, en protección de testigos.',
+    ],
+    [
+      'Moulinette dice: KO',
+      'La partida no pasa los tests de honradez. Volvemos a la versión buena y la tienda se vacía.',
+    ],
+    [
+      'Has sido corregido... por la policía',
+      'Nota final: -42. Tus edificios se han rematado a precio de saldo para pagar la multa.',
+    ],
+    [
+      'Otra vez tú',
+      'Ya te conocemos en comisaría. Edificios fuera, partida atrás, y una ficha que no para de crecer.',
+    ],
+  ],
   busts: [
     [
       'Hacker ético',
@@ -679,14 +719,15 @@ const en: Texts = {
     bustEyebrow: 'Anti-cheat system',
     bustOk: 'Got it',
     bustSold: 'Everything from the shop sold for {n} lines.',
+    spectating: 'Watching {login}’s game: nothing you touch here is saved anywhere.',
     policeEyebrow: 'Code police',
-    policeTitle: 'The code police have seized your fraudulent earnings',
-    policeAuto: 'Three games in a row that did not add up: game over.',
+    policeMoney:
+      'Your buildings were sold for half of what they cost: {n} lines go back to your repository, and the same amount is shared among the {people} people who play fair.',
+    giftTitle: 'Code police payout',
+    giftText: 'Someone cheated and paid for it: you get {n} lines for playing fair.',
     policeReview: 'Whoever runs the site reviewed your game and it does not add up:',
     policeJump: 'your capital went from {from} to {to} in {seconds} s, producing {rate} per second',
     policeNoGolden: 'with no golden pull request open',
-    policePool:
-      'All your buildings ({n} lines) go to the common pool: it is shared among those who play fair.',
     loot: 'Cheaters’ loot',
     fx_loot: 'You recover {n} seized lines',
     lootGone: 'Someone got to the loot first',
@@ -875,6 +916,40 @@ const en: Texts = {
     'hack:1': ['Grey hat', 'You got caught again. Less politely.'],
     'hack:2': ['Confiscated hat', 'Third time, everything got sold.'],
   },
+  police: [
+    [
+      'The code police have seized your fraudulent earnings',
+      'We rolled back to your last honest game. Your buildings went to auction: the hammer shows no mercy.',
+    ],
+    [
+      'git revert --hard your-dignity',
+      'Your repository goes back to a commit where you still played fair. Buildings: impounded.',
+    ],
+    [
+      'Norminette found 9,000 errors in your earnings',
+      'Not a single function under 25 lines in your books. Everything is sold, move along.',
+    ],
+    [
+      'Segfault in your bank account',
+      'You touched memory that was not yours. Valgrind saw everything and your buildings pay for the leak.',
+    ],
+    [
+      'Your rubber duck snitched',
+      'You told it how you did it and it could not keep quiet. Buildings sold; the duck is in witness protection.',
+    ],
+    [
+      'Moulinette says: KO',
+      'Your game fails the honesty tests. Back to the good version, and the shop is emptied.',
+    ],
+    [
+      'You have been evaluated... by the police',
+      'Final mark: -42. Your buildings were sold off cheap to pay the fine.',
+    ],
+    [
+      'You again',
+      'They know you at the station by now. Buildings out, game rolled back, and a record that keeps growing.',
+    ],
+  ],
   busts: [
     [
       'Ethical hacker',
@@ -1108,6 +1183,13 @@ export function short(value: number, lang: Lang, decimals = 3): string {
 }
 
 /** Título y mensaje de la ventana de la trampa número `n`. */
+/** Lo que dice la policía la vez `n` que te pilla (desde 1); va rotando. */
+export function policeText(n: number, lang: Lang): [title: string, text: string] {
+  const list = textsOf(lang).police
+
+  return list[(Math.max(1, n) - 1) % list.length] ?? ['', '']
+}
+
 export function bustText(n: number, lang: Lang): [title: string, text: string] {
   const { busts } = textsOf(lang)
   const [title, text] = busts[Math.min(n, busts.length) - 1] ?? ['', '']

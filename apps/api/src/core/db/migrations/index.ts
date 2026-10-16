@@ -51,6 +51,7 @@ import { legalSchema } from './0042-legal.js'
 import { clickerReviewSchema } from './0043-clicker-review.js'
 import { recordStyleSchema } from './0044-record-style.js'
 import { clickerClicksSchema } from './0045-clicker-clicks.js'
+import { clickerGiftsSchema } from './0046-clicker-gifts.js'
 import type { Migration } from './types.js'
 
 export type { Migration } from './types.js'
@@ -101,6 +102,7 @@ export const MIGRATIONS: readonly Migration[] = [
   clickerReviewSchema,
   recordStyleSchema,
   clickerClicksSchema,
+  clickerGiftsSchema,
 ]
 
 /** Versión más alta que existe en el código. */

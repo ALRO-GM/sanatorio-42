@@ -45,6 +45,8 @@ const state: ClickerState = {
       ? {
           by: 'review',
           amount: 4.7e5,
+          n: 3,
+          shared: 35,
           evidence: { from: 1.2e6, to: 9.4e6, seconds: 3, perSecond: 840, golden: false },
         }
       : null,
@@ -127,6 +129,7 @@ export const clickerMock: Pick<
   | 'defendClickerReview'
   | 'claimClickerPool'
   | 'ackClickerSeizure'
+  | 'getClickerGameOf'
 > = {
   async getClicker() {
     await delay(100)
@@ -174,12 +177,11 @@ export const clickerMock: Pick<
 
     if (!selling && (rigged || sent.code > sent.total + 1)) {
       state.caught += 1
-      // A la tercera, la política de trampas: lo de los edificios, a la bolsa común.
-      if (state.caught >= 3 && !state.saleDue) {
-        state.seizure = { by: 'auto', amount: 1.2e5, evidence: null }
-        state.pool += 1.2e5
+      // Como la API: en cada trampa se venden los edificios a la mitad.
+      if (!state.saleDue) {
+        state.seizure = { by: 'auto', amount: 1.2e5, n: state.caught, shared: 35, evidence: null }
       }
-      state.saleDue = state.caught >= 3
+      state.saleDue = true
       cheats.unshift({
         id: state.caught,
         login: ME.login,
@@ -190,9 +192,10 @@ export const clickerMock: Pick<
         save: save.save,
       })
 
-      return { rev: state.rev, caught: state.caught, refused: true }
+      return { rev: state.rev, caught: state.caught, refused: true, gift: 0 }
     }
-    if (state.saleDue && !empty) return { rev: state.rev, caught: state.caught, refused: true }
+    if (state.saleDue && !empty)
+      return { rev: state.rev, caught: state.caught, refused: true, gift: 0 }
 
     for (const [at, capital] of save.capital ?? []) {
       // Un punto cada diez segundos: aquí no hay meses de historial que enseñar.
@@ -205,7 +208,7 @@ export const clickerMock: Pick<
     holder = save.session
     best = Math.max(best, save.total)
 
-    return { rev: state.rev, caught: state.caught, refused: false }
+    return { rev: state.rev, caught: state.caught, refused: false, gift: 0 }
   },
 
   async getClickerBoard() {
@@ -340,7 +343,6 @@ export const clickerMock: Pick<
     }
 
     alerts = alerts.filter((entry) => entry.id !== id)
-    if (verdict === 'cheat') state.pool += 4.7e5
   },
 
   async getClickerReviews() {
@@ -364,6 +366,23 @@ export const clickerMock: Pick<
     state.pool -= amount
 
     return { amount, pool: state.pool }
+  },
+
+  // Las partidas de mentira de los demás: con algo comprado, para que se vea.
+  async getClickerGameOf(login) {
+    await delay(100)
+
+    return {
+      login,
+      save: JSON.stringify({
+        v: 1,
+        code: 48_200,
+        total: 2.6e6,
+        owned: { cursor: 25, pisciner: 12, cluster: 4 },
+      }),
+      caught: login === 'rsoto' ? 2 : 0,
+      perSecond: 340,
+    }
   },
 
   async ackClickerSeizure() {
