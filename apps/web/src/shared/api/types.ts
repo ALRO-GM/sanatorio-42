@@ -199,6 +199,8 @@ export type Api = {
   /** Manda una incidencia, una sugerencia o una denuncia. */
   openTicket: (ticket: TicketInput) => Promise<Ticket>
   getMyTickets: () => Promise<Ticket[]>
+  /** Retira un mensaje propio, si aún se puede (`withdrawUntil`). */
+  withdrawTicket: (id: number) => Promise<void>
   getAdminConsumption: () => Promise<Consumption>
   /** Cambia los ajustes del presupuesto de peticiones; solo hace falta mandar lo que cambia. */
   setAdminBudget: (changes: Partial<BudgetSettings>) => Promise<BudgetStatus>
@@ -211,6 +213,8 @@ export type Api = {
   setUserLimit: (login: string, perHour: number | null) => Promise<void>
   getAdminTickets: () => Promise<Ticket[]>
   answerTicket: (id: number, answer: string, status: 'answered' | 'closed') => Promise<Ticket>
+  /** Borra un mensaje del buzón (spam). Solo admins. */
+  removeTicket: (id: number) => Promise<void>
   getAdminMessages: () => Promise<LoggedMessage[]>
 
   // --- Uso de la web
@@ -283,6 +287,9 @@ export type Api = {
   getNotices: () => Promise<Notices>
   /** Da por leídos esos avisos, o todos si no se dice cuáles. Devuelve el buzón. */
   readNotices: (ids?: number[]) => Promise<Notices>
+  /** Borra esos avisos, o todos los leídos que no estén guardados. */
+  removeNotices: (which: { ids: number[] } | { read: true }) => Promise<Notices>
+  saveNotice: (id: number, saved: boolean) => Promise<Notices>
   getAdminQuota: () => Promise<FortyTwoQuota>
   /** Cambia los ajustes de la cuota de 42; solo hace falta mandar lo que cambia. */
   setAdminQuota: (changes: Partial<FortyTwoQuotaSettings>) => Promise<FortyTwoQuota>

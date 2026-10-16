@@ -78,3 +78,18 @@ export function targetOf(notice: Notice): NoticeTarget {
       return 'terapia'
   }
 }
+
+/** Qué avisos se enseñan: todos, o solo los guardados. */
+export type NoticeFilter = 'all' | 'saved'
+
+export function noticesIn<T extends { saved: boolean }>(
+  items: readonly T[],
+  filter: NoticeFilter,
+): T[] {
+  return filter === 'saved' ? items.filter((notice) => notice.saved) : [...items]
+}
+
+/** Cuántos se irían con «borrar los leídos»: los leídos que no están guardados. */
+export function removableCount(items: readonly { read: boolean; saved: boolean }[]): number {
+  return items.filter((notice) => notice.read && !notice.saved).length
+}

@@ -36,6 +36,15 @@ const readSchema = z.object({
   ids: z.array(z.number().int().positive()).max(200).optional(),
 })
 
+const removeSchema = z.union([
+  /** Esos avisos, guardados o no. */
+  z.object({ ids: z.array(z.number().int().positive()).min(1).max(200) }),
+  /** Todos los leídos que no estén guardados. */
+  z.object({ read: z.literal(true) }),
+])
+
+const saveSchema = z.object({ id: z.number().int().positive(), saved: z.boolean() })
+
 export function createNoticesService(options: NoticesServiceOptions) {
   const { db } = options
   const now = options.now ?? Date.now
@@ -88,7 +97,7 @@ export function createNoticesService(options: NoticesServiceOptions) {
     /** El buzón de quien pregunta: lo que no ha leído primero y, dentro de eso, lo más reciente. */
     async list(actor: Actor): Promise<Notices> {
       const result = await db.execute({
-        sql: `SELECT id, kind, ref, from_login, text, count, updated_at, read_at FROM notices
+        sql: `SELECT id, kind, ref, from_login, text, count, updated_at, read_at, saved FROM notices
               WHERE login = ? ORDER BY (read_at IS NULL) DESC, updated_at DESC, id DESC LIMIT ?`,
         args: [actor.login, LIST_LIMIT],
       })
@@ -104,6 +113,7 @@ export function createNoticesService(options: NoticesServiceOptions) {
           count: toNumber(row.count),
           at: toText(row.updated_at),
           read: row.read_at !== null,
+          saved: toNumber(row.saved) === 1,
         })),
       }
     },
@@ -127,6 +137,41 @@ export function createNoticesService(options: NoticesServiceOptions) {
           args: [iso(), actor.login, ...ids],
         })
       }
+
+      return this.list(actor)
+    },
+
+    /**
+     * Borra avisos de quien pregunta: los que diga, o todos los leídos que no
+     * haya guardado. Solo toca los suyos. Devuelve el buzón.
+     */
+    async remove(actor: Actor, input: unknown): Promise<Notices> {
+      const which = parse(removeSchema, input ?? {})
+
+      if ('ids' in which) {
+        await db.execute({
+          sql: `DELETE FROM notices WHERE login = ?
+                AND id IN (${which.ids.map(() => '?').join(', ')})`,
+          args: [actor.login, ...which.ids],
+        })
+      } else {
+        await db.execute({
+          sql: 'DELETE FROM notices WHERE login = ? AND read_at IS NOT NULL AND saved = 0',
+          args: [actor.login],
+        })
+      }
+
+      return this.list(actor)
+    },
+
+    /** Guarda o deja de guardar un aviso de quien pregunta. Devuelve el buzón. */
+    async save(actor: Actor, input: unknown): Promise<Notices> {
+      const { id, saved } = parse(saveSchema, input)
+
+      await db.execute({
+        sql: 'UPDATE notices SET saved = ? WHERE id = ? AND login = ?',
+        args: [saved ? 1 : 0, id, actor.login],
+      })
 
       return this.list(actor)
     },

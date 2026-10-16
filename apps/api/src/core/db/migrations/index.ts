@@ -45,6 +45,7 @@ import { settledTicketsSchema } from './0036-settled-tickets.js'
 import { curriculumVotesSchema } from './0037-curriculum-votes.js'
 import { ticketCategorySchema } from './0038-ticket-category.js'
 import { reportReasonSchema } from './0039-report-reason.js'
+import { savedNoticesSchema } from './0040-saved-notices.js'
 import type { Migration } from './types.js'
 
 export type { Migration } from './types.js'
@@ -89,6 +90,7 @@ export const MIGRATIONS: readonly Migration[] = [
   curriculumVotesSchema,
   ticketCategorySchema,
   reportReasonSchema,
+  savedNoticesSchema,
 ]
 
 /** Versión más alta que existe en el código. */

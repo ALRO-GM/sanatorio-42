@@ -6,8 +6,8 @@ import { api } from '../../shared/api'
 import { useAction, useAsync } from '../../shared/hooks/useAsync'
 import { localeOf, useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
-import { iconOf, targetOf } from './routes'
-import type { NoticeTarget } from './routes'
+import { iconOf, noticesIn, removableCount, targetOf } from './routes'
+import type { NoticeFilter, NoticeTarget } from './routes'
 import { Icon } from '../../shared/ui/Icon'
 import { InfoTip } from '../../shared/ui/InfoTip'
 import { MailboxTour } from './MailboxTour'
@@ -42,6 +42,7 @@ export function Mailbox({ me, chat, onChat, onClose, onOpen, onChange }: Mailbox
   const [writing, setWriting] = useState<'closed' | 'choose' | 'peer'>('closed')
   // Si se llega con una conversación ya elegida, se entra por su pestaña.
   const [tab, setTab] = useState<'notices' | 'chats'>(chat === null ? 'notices' : 'chats')
+  const [filter, setFilter] = useState<NoticeFilter>('all')
 
   useEffect(() => {
     if (chat !== null) setTab('chats')
@@ -54,6 +55,14 @@ export function Mailbox({ me, chat, onChat, onClose, onOpen, onChange }: Mailbox
 
   const markAll = async (): Promise<void> => {
     if (await action.run(() => api.readNotices())) {
+      onChange()
+      await reload()
+    }
+  }
+
+  /** Borra o guarda y, como el buzón vuelve con la respuesta, se pide de nuevo. */
+  const change = async (job: () => Promise<unknown>): Promise<void> => {
+    if (await action.run(job)) {
       onChange()
       await reload()
     }
@@ -86,8 +95,10 @@ export function Mailbox({ me, chat, onChat, onClose, onOpen, onChange }: Mailbox
     })
   }
 
-  const items = data?.items ?? []
+  const all = data?.items ?? []
+  const items = noticesIn(all, filter)
   const unread = data?.unread ?? 0
+  const removable = removableCount(all)
 
   return (
     <dialog
@@ -135,11 +146,30 @@ export function Mailbox({ me, chat, onChat, onClose, onOpen, onChange }: Mailbox
           {data === undefined && !loading && (
             <ErrorNote error={error} onRetry={() => void reload()} />
           )}
-          {data !== undefined && items.length === 0 && <p className="hint">{t('notices.empty')}</p>}
+          {all.some((notice) => notice.saved) && (
+            <div className="filter-pills" role="group" aria-label={t('notices.filter')}>
+              {(['all', 'saved'] as const).map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  aria-pressed={filter === option}
+                  className={`pill ${filter === option ? 'active' : ''}`}
+                  onClick={() => {
+                    setFilter(option)
+                  }}
+                >
+                  {t(`notices.filter.${option}`)}
+                </button>
+              ))}
+            </div>
+          )}
+          {data !== undefined && items.length === 0 && (
+            <p className="hint">{t(filter === 'saved' ? 'notices.noneSaved' : 'notices.empty')}</p>
+          )}
 
           <ul className="notice-list">
             {items.map((notice) => (
-              <li key={notice.id}>
+              <li key={notice.id} className="notice-row">
                 <button
                   type="button"
                   className={`notice ${notice.read ? 'read' : 'unread'}`}
@@ -164,6 +194,29 @@ export function Mailbox({ me, chat, onChat, onClose, onOpen, onChange }: Mailbox
                   </span>
                   {!notice.read && <span className="notice-dot" aria-hidden="true" />}
                 </button>
+                <span className="notice-actions">
+                  <button
+                    type="button"
+                    className={`link ${notice.saved ? 'on' : ''}`}
+                    aria-pressed={notice.saved}
+                    aria-label={t(notice.saved ? 'notices.unsave' : 'notices.save')}
+                    title={t(notice.saved ? 'notices.unsave' : 'notices.save')}
+                    disabled={action.busy}
+                    onClick={() => void change(() => api.saveNotice(notice.id, !notice.saved))}
+                  >
+                    <Icon name="estrella" size={16} />
+                  </button>
+                  <button
+                    type="button"
+                    className="link"
+                    aria-label={t('notices.remove')}
+                    title={t('notices.remove')}
+                    disabled={action.busy}
+                    onClick={() => void change(() => api.removeNotices({ ids: [notice.id] }))}
+                  >
+                    <Icon name="papelera" size={16} />
+                  </button>
+                </span>
               </li>
             ))}
           </ul>
@@ -174,14 +227,24 @@ export function Mailbox({ me, chat, onChat, onClose, onOpen, onChange }: Mailbox
       {chat === null && (
         <div className="actions">
           {tab === 'notices' ? (
-            <button
-              type="button"
-              className="small"
-              disabled={action.busy || unread === 0}
-              onClick={() => void markAll()}
-            >
-              {t('notices.readAll')}
-            </button>
+            <span className="notice-bulk">
+              <button
+                type="button"
+                className="small"
+                disabled={action.busy || unread === 0}
+                onClick={() => void markAll()}
+              >
+                {t('notices.readAll')}
+              </button>
+              <button
+                type="button"
+                className="small"
+                disabled={action.busy || removable === 0}
+                onClick={() => void change(() => api.removeNotices({ read: true }))}
+              >
+                <Icon name="papelera" size={14} /> {t('notices.removeRead', { n: removable })}
+              </button>
+            </span>
           ) : (
             <span />
           )}

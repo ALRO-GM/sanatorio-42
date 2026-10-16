@@ -164,6 +164,15 @@ const PATHS = {
       <path d="M8 11V8a4 4 0 0 1 8 0v3" />
     </>
   ),
+  /** Borrar: una papelera. */
+  papelera: (
+    <>
+      <path d="M4 7h16" />
+      <path d="M9.5 7V4.5h5V7" />
+      <path d="M6.5 7l1 13h9l1-13" />
+      <path d="M10 11v5.5M14 11v5.5" />
+    </>
+  ),
   estrella: <path d="M12 3.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8-5.3-2.8-5.3 2.8 1-5.8L3.5 9.7l5.9-.9z" />,
   lupa: (
     <>

@@ -66,6 +66,19 @@ export function createNoticesModule(deps: NoticesModuleDeps): NoticesModule {
       app.post('/notices/read', async (request, reply) => {
         return reply.send(await service.read(await session.actor(request), request.body))
       })
+
+      /**
+       * `POST /notices/remove` → `{ ids }` o `{ read: true }`: borra esos avisos, o
+       * todos los leídos sin guardar. Devuelve el buzón.
+       */
+      app.post('/notices/remove', async (request, reply) => {
+        return reply.send(await service.remove(await session.actor(request), request.body))
+      })
+
+      /** `POST /notices/save` → `{ id, saved }`: guarda o deja de guardar un aviso. Devuelve el buzón. */
+      app.post('/notices/save', async (request, reply) => {
+        return reply.send(await service.save(await session.actor(request), request.body))
+      })
     },
     stores: [
       tableStore(deps.db, {

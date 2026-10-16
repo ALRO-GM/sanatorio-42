@@ -38,6 +38,11 @@ export type Ticket = {
   answeredBy: string | null
   createdAt: string
   answeredAt: string | null
+  /**
+   * Hasta cuándo puede retirarlo quien lo escribió (ISO-8601): un rato después
+   * de mandarlo y mientras nadie lo haya respondido. `null` si ya no se puede.
+   */
+  withdrawUntil: string | null
 }
 
 /** `POST /tickets`. */

@@ -77,6 +77,8 @@ export const realApi: Api = {
   revokeStaffAccount: (id) => send('DELETE', `/admin/staff/${id}`),
   openTicket: (ticket) => sendJson('POST', '/tickets', ticket),
   getMyTickets: () => getJson('/tickets/mine'),
+
+  withdrawTicket: (id) => send('DELETE', `/tickets/${id}`),
   getAdminConsumption: () => getJson('/admin/consumption'),
   setAdminBudget: (changes) => sendJson('PUT', '/admin/budget', changes),
   getAdminPeople: () => getJson('/admin/people'),
@@ -86,6 +88,8 @@ export const realApi: Api = {
   unblockUser: (login) => send('DELETE', `/admin/blocks/${encodeURIComponent(login)}`),
   setUserLimit: (login, perHour) => send('PUT', '/admin/limits', { login, perHour }),
   getAdminTickets: () => getJson('/admin/tickets'),
+  removeTicket: (id) => send('DELETE', `/admin/tickets/${id}`),
+
   answerTicket: (id, answer, status) =>
     sendJson('POST', `/admin/tickets/${id}/answer`, { answer, status }),
   getAdminMessages: () => getJson('/admin/messages'),
@@ -130,6 +134,10 @@ export const realApi: Api = {
   removeBroadcast: (id) => send('DELETE', `/admin/broadcasts/${id}`),
   getNotices: () => getJson('/notices'),
   readNotices: (ids) => sendJson('POST', '/notices/read', ids === undefined ? {} : { ids }),
+
+  removeNotices: (which) => sendJson('POST', '/notices/remove', which),
+
+  saveNotice: (id, saved) => sendJson('POST', '/notices/save', { id, saved }),
   getAdminQuota: () => getJson('/admin/quota'),
   setAdminQuota: (changes) => sendJson('PUT', '/admin/quota', changes),
 

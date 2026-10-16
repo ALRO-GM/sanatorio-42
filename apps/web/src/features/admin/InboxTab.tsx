@@ -11,6 +11,7 @@ import { api } from '../../shared/api'
 import { useAction, useAsync } from '../../shared/hooks/useAsync'
 import { localeOf, useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { Icon } from '../../shared/ui/Icon'
 import { INBOX_VIEWS, REPORT_REASONS, ticketsIn } from './inbox'
 import type { InboxFilter, InboxView } from './inbox'
 
@@ -144,6 +145,20 @@ function TicketRow({ ticket, onDone }: { ticket: Ticket; onDone: () => void }) {
           {t('admin.inbox.close')}
         </button>
         <small>{t(`admin.inbox.status.${ticket.status}`)}</small>
+        <button
+          type="button"
+          className="link"
+          disabled={busy}
+          onClick={() => {
+            if (window.confirm(t('admin.inbox.removeConfirm'))) {
+              void run(() => api.removeTicket(ticket.id)).then((ok) => {
+                if (ok) onDone()
+              })
+            }
+          }}
+        >
+          <Icon name="papelera" size={14} /> {t('admin.inbox.remove')}
+        </button>
       </div>
     </li>
   )

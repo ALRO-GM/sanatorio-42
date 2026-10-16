@@ -51,6 +51,8 @@ export type Notice = {
   /** Cuándo fue la última vez (ISO-8601). */
   at: string
   read: boolean
+  /** `true` si lo has guardado: no se borra con «borrar los leídos». */
+  saved: boolean
 }
 
 /** `GET /notices`: tu buzón, lo más reciente primero. */

@@ -49,3 +49,21 @@ export function subjectFrom(body: string): string {
 
   return `${(space > DERIVED_MAX / 2 ? cut.slice(0, space) : cut).trimEnd()}…`
 }
+
+/** Cuánto tiene quien escribe para retirar su mensaje, si nadie lo ha respondido. */
+export const WITHDRAW_MS = 15 * 60_000
+
+/**
+ * Hasta cuándo se puede retirar un mensaje, o `null` si ya no: pasado el rato,
+ * o en cuanto alguien lo responde o lo cierra.
+ */
+export function withdrawUntil(
+  ticket: { createdAt: string; status: string; answer: string | null },
+  now: number,
+): string | null {
+  const until = Date.parse(ticket.createdAt) + WITHDRAW_MS
+
+  return ticket.status === 'open' && ticket.answer === null && Number.isFinite(until) && until > now
+    ? new Date(until).toISOString()
+    : null
+}

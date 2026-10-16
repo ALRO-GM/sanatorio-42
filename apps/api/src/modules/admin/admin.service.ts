@@ -57,8 +57,10 @@ import {
   REPORT_REASONS,
   SUBJECT_MAX,
   TICKET_CATEGORIES,
+  WITHDRAW_MS,
   bodyIsEnough,
   subjectFrom,
+  withdrawUntil,
 } from './tickets.rules.js'
 
 export type AdminServiceOptions = {
@@ -168,8 +170,11 @@ const MAX_OPEN_TICKETS = 10
 const MAX_TICKETS_PER_WINDOW = 3
 const TICKET_WINDOW_MS = 10 * 60_000
 
-function toTicket(row: Record<string, unknown>): Ticket {
+function toTicket(row: Record<string, unknown>, now: number): Ticket {
   const text = (value: unknown): string | null => (typeof value === 'string' ? value : null)
+  const status = toText(row.status) as TicketStatus
+  const answer = text(row.answer)
+  const createdAt = toText(row.created_at)
 
   return {
     id: toNumber(row.id),
@@ -186,6 +191,7 @@ function toTicket(row: Record<string, unknown>): Ticket {
     answeredBy: text(row.answered_by),
     createdAt: toText(row.created_at),
     answeredAt: text(row.answered_at),
+    withdrawUntil: withdrawUntil({ createdAt, status, answer }, now),
   }
 }
 
@@ -742,7 +748,7 @@ export function createAdminService(options: AdminServiceOptions) {
           iso(),
         ],
       })
-      const created = toTicket(result.rows[0] ?? {})
+      const created = toTicket(result.rows[0] ?? {}, now())
       const granted = await db.execute('SELECT login FROM user_roles')
 
       // A quien administra, para que no dependa de que alguien abra el panel.
@@ -764,7 +770,7 @@ export function createAdminService(options: AdminServiceOptions) {
         args: [actor.login],
       })
 
-      return result.rows.map(toTicket)
+      return result.rows.map((row) => toTicket(row, now()))
     },
 
     /** El buzón entero, lo pendiente primero. */
@@ -775,7 +781,7 @@ export function createAdminService(options: AdminServiceOptions) {
         `SELECT * FROM tickets ORDER BY (status = 'open') DESC, id DESC LIMIT 200`,
       )
 
-      return result.rows.map(toTicket)
+      return result.rows.map((row) => toTicket(row, now()))
     },
 
     async answerTicket(actor: Actor, id: number, input: unknown): Promise<Ticket> {
@@ -793,7 +799,7 @@ export function createAdminService(options: AdminServiceOptions) {
         throw domainError('not_found', 'Ese aviso no existe')
       }
 
-      const ticket = toTicket(row)
+      const ticket = toTicket(row, now())
 
       // Ya está atendido: el «mensaje nuevo» deja de contar para todo quien administra.
       await settle({ kind: 'ticket_new', ref: `ticket:${ticket.id}` })
@@ -807,6 +813,42 @@ export function createAdminService(options: AdminServiceOptions) {
       })
 
       return ticket
+    },
+
+    /**
+     * Retira un mensaje propio: solo un rato después de mandarlo y mientras
+     * nadie lo haya respondido. Su aviso deja de contar para quien administra.
+     *
+     * @throws {DomainError} `conflict` si ya no se puede (o no es suyo, o no existe).
+     */
+    async withdrawTicket(actor: Actor, id: number): Promise<void> {
+      const result = await db.execute({
+        sql: `DELETE FROM tickets WHERE id = ? AND login = ? AND status = 'open'
+              AND answer IS NULL AND created_at > ?`,
+        args: [id, actor.login, new Date(now() - WITHDRAW_MS).toISOString()],
+      })
+
+      if (result.rowsAffected === 0) {
+        throw domainError(
+          'conflict',
+          'Ya no se puede retirar: ha pasado el rato o ya te han respondido',
+        )
+      }
+
+      await settle({ kind: 'ticket_new', ref: `ticket:${id}` })
+    },
+
+    /** Borra un mensaje del buzón (spam, bromas). Solo admins. */
+    async removeTicket(actor: Actor, id: number): Promise<void> {
+      assertAdmin(actor)
+
+      const result = await db.execute({ sql: 'DELETE FROM tickets WHERE id = ?', args: [id] })
+
+      if (result.rowsAffected === 0) {
+        throw domainError('not_found', 'Ese aviso no existe')
+      }
+
+      await settle({ kind: 'ticket_new', ref: `ticket:${id}` })
     },
 
     // --- Datos: nada se borra solo, y esto es lo único que borra -------------

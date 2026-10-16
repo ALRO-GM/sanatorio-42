@@ -334,9 +334,17 @@ cola. El modo ahorro deja pasar solo lo crítico.
   "maxPerPerson", "saving" }`. Devuelve el estado (`budget` de
   `GET /admin/consumption`: `settings`, `day` y `month`). Solo admins.
 
-- POST /tickets → `{ "kind": "issue" | "idea" | "report", "subject", "body", "target"? }`.
-  Una denuncia (`report`) lleva `target`: `message:12`, `board:3`, `doubt:5`.
-- GET /tickets/mine → lo que has mandado, con su `answer` si la tiene.
+- POST /tickets → `{ "kind": "issue" | "idea" | "report", "subject"?, "body", "target"?,
+  "category"?, "section"?, "reason"? }`. Sin `subject`, se pone la primera línea
+  de `body`. `category`: `bug`, `improvement`, `idea`, `translation`, `other`;
+  `section`: el id de una sección de la web. Una denuncia (`report`) lleva
+  `target` (`message:12`, `board:3`, `doubt:5`) y puede llevar `reason`
+  (`spam`, `harassment`, `insults`, `other`); con un motivo que no sea `other`
+  el `body` puede ir vacío.
+- GET /tickets/mine → lo que has mandado, con su `answer` si la tiene y
+  `withdrawUntil`: hasta cuándo puedes retirarlo (15 min y sin respuesta), o `null`.
+- DELETE /tickets/:id → retira un mensaje tuyo mientras `withdrawUntil` no haya
+  pasado. 204, o 409 si ya no se puede.
 
 Solo admins (`403` para el resto). Administra quien está en `ADMIN_LOGINS` o
 quien haya recibido el permiso desde el panel:
@@ -347,7 +355,9 @@ quien haya recibido el permiso desde el panel:
 - GET /admin/people · PUT /admin/roles `{ login, admin }` · PUT /admin/blocks
   `{ login, reason, days? }` · DELETE /admin/blocks/:login · PUT /admin/limits
   `{ login, perHour }` (`null` vuelve al tope automático).
-- GET /admin/tickets · POST /admin/tickets/:id/answer `{ answer, status? }`.
+- GET /admin/tickets · POST /admin/tickets/:id/answer `{ answer, status? }` ·
+  DELETE /admin/tickets/:id (spam, bromas; 204). Responder o borrar un mensaje
+  da por leído su `ticket_new` a todo quien administra.
 - GET /admin/messages → los últimos mensajes de los chats de eventos.
 
 Toda petición con sesión cuenta para el consumo de esa persona. Si se pasa de su
@@ -1105,9 +1115,13 @@ Ningún módulo escribe en el buzón: cada uno emite un evento `notice` y el mó
 - GET /pulse → `{ "unread": 2, "quota": { "level", "ticket" } }`. Lo único que
   la web pregunta de fondo además del calendario: avisos sin leer y cuota de 42.
 - GET /notices → `{ "unread", "items": [{ "id", "kind", "ref", "from", "text",
-  "count", "at", "read" }] }`, lo que no se ha leído primero.
+  "count", "at", "read", "saved" }] }`, lo que no se ha leído primero.
 - POST /notices/read → `{ "ids"? }`: da por leídos esos avisos, o todos. Devuelve
   el buzón.
+- POST /notices/remove → `{ "ids": [...] }` borra esos avisos; `{ "read": true }`,
+  todos los leídos que no estén guardados. Devuelve el buzón.
+- POST /notices/save → `{ "id", "saved" }`: guarda un aviso (no se borra con
+  «borrar los leídos») o deja de guardarlo. Devuelve el buzón.
 
 | `kind` | A quién | Cuándo |
 | ------ | ------- | ------ |

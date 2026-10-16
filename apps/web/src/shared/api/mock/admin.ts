@@ -28,6 +28,10 @@ export const adminMock: Pick<
   | 'answerTicket'
   | 'getNotices'
   | 'readNotices'
+  | 'removeNotices'
+  | 'saveNotice'
+  | 'withdrawTicket'
+  | 'removeTicket'
   | 'setAdminBudget'
   | 'getAdminConsumption'
   | 'getAdminPeople'
@@ -69,6 +73,7 @@ export const adminMock: Pick<
       answeredBy: null,
       createdAt: new Date().toISOString(),
       answeredAt: null,
+      withdrawUntil: new Date(Date.now() + 15 * 60_000).toISOString(),
     }
 
     tickets.unshift(created)
@@ -107,6 +112,57 @@ export const adminMock: Pick<
     return this.getNotices()
   },
 
+  async removeNotices(which) {
+    await delay(100)
+
+    for (let index = notices.length - 1; index >= 0; index -= 1) {
+      const notice = notices[index]
+
+      if (notice === undefined) continue
+      if ('ids' in which ? which.ids.includes(notice.id) : notice.read && !notice.saved) {
+        notices.splice(index, 1)
+      }
+    }
+
+    return this.getNotices()
+  },
+
+  async saveNotice(id, saved) {
+    await delay(100)
+
+    const notice = notices.find((entry) => entry.id === id)
+
+    if (notice !== undefined) notice.saved = saved
+
+    return this.getNotices()
+  },
+
+  async withdrawTicket(id) {
+    await delay(100)
+
+    const index = tickets.findIndex(
+      (ticket) =>
+        ticket.id === id &&
+        ticket.login === ME.login &&
+        ticket.withdrawUntil !== null &&
+        Date.parse(ticket.withdrawUntil) > Date.now(),
+    )
+
+    if (index === -1) throw fail(409, 'Ya no se puede retirar')
+
+    tickets.splice(index, 1)
+  },
+
+  async removeTicket(id) {
+    await delay(100)
+
+    const index = tickets.findIndex((ticket) => ticket.id === id)
+
+    if (index === -1) throw fail(404, 'Ese aviso no existe')
+
+    tickets.splice(index, 1)
+  },
+
   async answerTicket(id, answer, status) {
     await delay(150)
 
@@ -119,6 +175,7 @@ export const adminMock: Pick<
       status,
       answeredBy: ME.login,
       answeredAt: new Date().toISOString(),
+      withdrawUntil: null,
     })
     // En la web de mentira eres quien pregunta y quien responde: el aviso te llega a ti.
     addNotice({

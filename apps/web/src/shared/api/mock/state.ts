@@ -297,6 +297,7 @@ export const tickets: Ticket[] = [
     answeredBy: null,
     createdAt: new Date(Date.now() - 3_600_000).toISOString(),
     answeredAt: null,
+    withdrawUntil: null,
   },
   {
     id: 2,
@@ -313,6 +314,7 @@ export const tickets: Ticket[] = [
     answeredBy: 'plopez-l',
     createdAt: new Date(Date.now() - 86_400_000).toISOString(),
     answeredAt: new Date(Date.now() - 80_000_000).toISOString(),
+    withdrawUntil: null,
   },
 ]
 export const admins: string[] = []
@@ -403,6 +405,7 @@ export const notices: Notice[] = [
     count: 2,
     at: new Date(Date.now() - 4 * 60_000).toISOString(),
     read: false,
+    saved: false,
   },
   {
     id: 2,
@@ -413,6 +416,7 @@ export const notices: Notice[] = [
     count: 1,
     at: new Date(Date.now() - 50 * 60_000).toISOString(),
     read: false,
+    saved: false,
   },
   {
     id: 1,
@@ -423,6 +427,7 @@ export const notices: Notice[] = [
     count: 1,
     at: new Date(Date.now() - 26 * 3_600_000).toISOString(),
     read: true,
+    saved: true,
   },
 ]
 
@@ -434,5 +439,6 @@ export function addNotice(notice: Pick<Notice, 'kind' | 'ref' | 'from' | 'text'>
     count: 1,
     at: new Date().toISOString(),
     read: false,
+    saved: false,
   })
 }

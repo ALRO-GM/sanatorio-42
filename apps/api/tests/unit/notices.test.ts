@@ -110,6 +110,108 @@ describe('buzón de avisos', () => {
     expect(await inbox('leo')).toEqual(['ticket_new de sol: Dos'])
   })
 
+  it('los avisos se guardan y se borran; «borrar los leídos» respeta los guardados', async () => {
+    const { admin, notices } = services
+    const boss = actor('eva', { admin: true })
+    const ids: number[] = []
+
+    for (const subject of ['Uno', 'Dos', 'Tres']) {
+      const ticket = await admin.openTicket(actor('ana'), {
+        kind: 'idea',
+        subject,
+        body: 'Algo largo',
+      })
+
+      ids.push(ticket.id)
+      await admin.answerTicket(boss, ticket.id, { answer: 'Hecho' })
+    }
+
+    const [first, second, third] = (await notices.list(actor('ana'))).items
+
+    expect(first).toMatchObject({ saved: false })
+    // Se guarda uno y se leen dos.
+    await notices.save(actor('ana'), { id: second?.id, saved: true })
+    await notices.read(actor('ana'), { ids: [first?.id ?? 0, second?.id ?? 0] })
+
+    // Borrar los leídos: se va el leído sin guardar; el guardado y el sin leer se quedan.
+    const left = await notices.remove(actor('ana'), { read: true })
+
+    expect(left.items.map((notice) => notice.id).sort()).toEqual([second?.id, third?.id].sort())
+    expect(left.items.find((notice) => notice.id === second?.id)).toMatchObject({ saved: true })
+
+    // Uno a uno se borra cualquiera, guardado o no; de otra persona, nada.
+    await notices.remove(actor('leo'), { ids: [second?.id ?? 0] })
+    expect((await notices.list(actor('ana'))).items).toHaveLength(2)
+    await notices.save(actor('leo'), { id: third?.id, saved: true })
+    expect((await notices.list(actor('ana'))).items.find((n) => n.id === third?.id)?.saved).toBe(
+      false,
+    )
+    expect((await notices.remove(actor('ana'), { ids: [second?.id ?? 0] })).items).toHaveLength(1)
+
+    // Lo que no es una orden válida no borra nada.
+    for (const wrong of [{}, { ids: [] }, { read: false }, { ids: [-1] }, { ids: 'todo' }, null]) {
+      await expectCode(notices.remove(actor('ana'), wrong), 'invalid_input')
+    }
+    await expectCode(notices.save(actor('ana'), { id: 1 }), 'invalid_input')
+    expect((await notices.list(actor('ana'))).items).toHaveLength(1)
+  })
+
+  it('un mensaje al buzón se retira en los primeros 15 minutos si nadie lo ha respondido', async () => {
+    const { admin, notices } = services
+    const boss = actor('eva', { admin: true })
+    const ticket = await admin.openTicket(actor('ana'), {
+      kind: 'idea',
+      subject: 'Uno',
+      body: 'Algo largo',
+    })
+
+    expect(ticket.withdrawUntil).not.toBeNull()
+    // Nadie retira el de otra persona.
+    await expectCode(admin.withdrawTicket(actor('leo'), ticket.id), 'conflict')
+
+    clock.advance(14 * MINUTE)
+    await admin.withdrawTicket(actor('ana'), ticket.id)
+    expect(await admin.myTickets(actor('ana'))).toEqual([])
+    // Su aviso a quien administra ya no cuenta.
+    expect(await notices.unread('eva')).toBe(0)
+
+    // Pasados los 15 minutos, no; respondido, tampoco.
+    const late = await admin.openTicket(actor('ana'), {
+      kind: 'idea',
+      subject: 'Dos',
+      body: 'Algo largo',
+    })
+
+    clock.advance(15 * MINUTE + 1000)
+    expect((await admin.myTickets(actor('ana')))[0]?.withdrawUntil).toBeNull()
+    await expectCode(admin.withdrawTicket(actor('ana'), late.id), 'conflict')
+
+    const answered = await admin.openTicket(actor('ana'), {
+      kind: 'idea',
+      subject: 'Tres',
+      body: 'Algo largo',
+    })
+
+    await admin.answerTicket(boss, answered.id, { answer: 'Visto' })
+    expect((await admin.myTickets(actor('ana')))[0]?.withdrawUntil).toBeNull()
+    await expectCode(admin.withdrawTicket(actor('ana'), answered.id), 'conflict')
+  })
+
+  it('quien administra borra cualquier mensaje del buzón; nadie más', async () => {
+    const { admin } = services
+    const boss = actor('eva', { admin: true })
+    const junk = await admin.openTicket(actor('ana'), {
+      kind: 'idea',
+      subject: 'cabeza',
+      body: 'apapafrita',
+    })
+
+    await expectCode(admin.removeTicket(actor('leo'), junk.id), 'forbidden')
+    await admin.removeTicket(boss, junk.id)
+    expect(await admin.tickets(boss)).toEqual([])
+    await expectCode(admin.removeTicket(boss, junk.id), 'not_found')
+  })
+
   it('un chat directo es de sus dos personas y de nadie más', async () => {
     const { meet, notices } = services
     // Un solo chat por pareja: los logins van en orden alfabético.

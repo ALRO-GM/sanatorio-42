@@ -144,6 +144,21 @@ export function Inbox({
               <small>{new Date(ticket.createdAt).toLocaleDateString(localeOf(lang))}</small>
             </div>
             <p>{ticket.body}</p>
+            {ticket.withdrawUntil !== null && Date.parse(ticket.withdrawUntil) > Date.now() && (
+              <button
+                type="button"
+                className="link"
+                disabled={busy}
+                onClick={() =>
+                  void run(async () => {
+                    await api.withdrawTicket(ticket.id)
+                    await mine.reload()
+                  })
+                }
+              >
+                <Icon name="papelera" size={14} /> {t('inbox.withdraw')}
+              </button>
+            )}
             {ticket.answer === null ? (
               <small className="ticket-pending">{t('inbox.pending')}</small>
             ) : (

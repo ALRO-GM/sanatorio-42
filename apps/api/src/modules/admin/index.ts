@@ -173,6 +173,16 @@ export function createAdminModule(deps: AdminServiceOptions): AdminModule {
           .send(await service.openTicket(await session.actor(request), request.body))
       })
 
+      /** `DELETE /tickets/:id` → retira un mensaje tuyo, si aún se puede. 204. */
+      app.delete<{ Params: { id: string } }>('/tickets/:id', async (request, reply) => {
+        await service.withdrawTicket(
+          await session.actor(request),
+          idParam(request.params.id, 'El mensaje'),
+        )
+
+        return reply.code(204).send()
+      })
+
       /** `GET /tickets/mine` → lo que has mandado, con sus respuestas. */
       app.get('/tickets/mine', async (request, reply) => {
         return reply.send(await service.myTickets(await session.actor(request)))
@@ -247,6 +257,16 @@ export function createAdminModule(deps: AdminServiceOptions): AdminModule {
       /** `GET /admin/tickets` → el buzón entero, lo pendiente primero. */
       app.get('/admin/tickets', async (request, reply) => {
         return reply.send(await service.tickets(await session.actor(request)))
+      })
+
+      /** `DELETE /admin/tickets/:id` → borra un mensaje del buzón (spam). 204. */
+      app.delete<{ Params: { id: string } }>('/admin/tickets/:id', async (request, reply) => {
+        await service.removeTicket(
+          await session.actor(request),
+          idParam(request.params.id, 'El mensaje'),
+        )
+
+        return reply.code(204).send()
       })
 
       /** `POST /admin/tickets/:id/answer` → `{ answer, status? }`. */
