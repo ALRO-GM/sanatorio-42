@@ -64,8 +64,9 @@ export const meetMock: Pick<
         )
         .map((event) => ({
           event,
+          // Como la API: las correcciones de 42 solo avisan, no piden respuesta.
           state:
-            event.kind === 'therapy' || event.kind === 'board' || event.kind === 'evaluation'
+            event.kind === 'therapy' || event.kind === 'board'
               ? ('pending' as const)
               : ('info' as const),
         })),

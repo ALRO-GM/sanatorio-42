@@ -158,6 +158,43 @@ describe('migraciones', () => {
     db.close()
   })
 
+  it('la 35 borra las faltas automáticas de las correcciones y nada más', async () => {
+    const db = createClient({ url: 'file::memory:' })
+    const before = MIGRATIONS.filter((migration) => migration.version < 35)
+
+    await db.batch([
+      ...before.flatMap((migration) => migration.statements),
+      'CREATE TABLE schema_version (id INTEGER PRIMARY KEY CHECK (id = 1), version INTEGER NOT NULL)',
+      'INSERT INTO schema_version (id, version) VALUES (1, 34)',
+      `INSERT INTO event_messages (event_id, login, kind, reason, created_at) VALUES
+        ('evaluation:1', 'ana', 'absent', 'missed', 'x'),
+        ('evaluation:1', 'leo', 'absent', 'sick', 'x'),
+        ('evaluation:2', 'ana', 'seen', NULL, 'x'),
+        ('board:3', 'ana', 'absent', 'missed', 'x')`,
+      `INSERT INTO event_alerts (event_id, login, event, starts_at, missed_at) VALUES
+        ('evaluation:1', 'ana', '{}', 'x', 'x'),
+        ('board:3', 'ana', '{}', 'x', 'x')`,
+    ])
+
+    expect(await migrate(db)).toEqual(
+      MIGRATIONS.filter((migration) => migration.version >= 35).map((m) => m.version),
+    )
+
+    const messages = await db.execute(
+      'SELECT event_id, login, kind FROM event_messages ORDER BY id',
+    )
+    // La falta que dijo la persona (`sick`) y la de una pizarra se quedan.
+    expect(
+      messages.rows.map(
+        (row) => `${textOf(row, 'event_id')} ${textOf(row, 'login')} ${textOf(row, 'kind')}`,
+      ),
+    ).toEqual(['evaluation:1 leo absent', 'evaluation:2 ana seen', 'board:3 ana absent'])
+    const alerts = await db.execute('SELECT event_id FROM event_alerts')
+    expect(alerts.rows.map((row) => textOf(row, 'event_id'))).toEqual(['board:3'])
+
+    db.close()
+  })
+
   it('numera las migraciones de forma creciente y sin huecos', () => {
     expect(MIGRATIONS.map((migration) => migration.version)).toEqual(
       MIGRATIONS.map((_migration, index) => index + 1),

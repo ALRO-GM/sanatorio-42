@@ -201,7 +201,8 @@ calendario (y va a ir) puede leer o escribir; el resto recibe `403`.
   `kind`: `seen` (he visto el aviso), `late` (pide `minutes`), `absent` o `text`
   (pide `body`). `reason`: `evaluation`, `other_event`, `on_my_way`, `transport`, `other`.
 - GET /events/alerts → `{ "alerts": [{ "event", "state" }] }`, por orden de
-  inicio. `pending`: es con más gente y no has dicho si vas (la web no deja
+  inicio. `pending`: es con más gente de Sanatorio (pizarra, terapia o ayuda
+  reservada; las correcciones de 42 no) y no has dicho si vas (la web no deja
   cerrar el aviso hasta que contestes con `seen`, `late` o `absent`); `missed`:
   pasó media hora desde el inicio sin respuesta y quedaste como no asistido
   (se apunta en el chat con `reason: "missed"`); `info`: no pide respuesta.

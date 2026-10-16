@@ -17,7 +17,7 @@ este fichero y se hace lo que dice, en orden.
 - Si una tarea necesita una decisión de Alberto, se le pregunta antes de seguir
   con esa; las demás no esperan.
 
-Última puesta al día: 2026-10-11, con todo el apartado 2 hecho y subido. Queda desplegar.
+Última puesta al día: 2026-10-16. En producción desde el 2026-10-11.
 
 ## 1. Arranque (siempre, en cada sesión nueva)
 
@@ -39,145 +39,63 @@ este fichero y se hace lo que dice, en orden.
 - [ ] `npm run check`, para partir de un estado conocido.
 - [ ] Decir a Alberto en dos líneas cómo está todo antes de empezar con el plan.
 
-## 2. Plan vigente: revisión antes de desplegar
+## 2. Plan vigente: lo que pidieron en el buzón (decidido el 2026-10-16)
 
-Tres pasadas cortas, cada una con su commit (y push solo si Alberto lo pide).
-No es una reescritura: no se cambia el comportamiento salvo donde se diga.
+Alberto revisó los 39 puntos sacados de los 64 mensajes del buzón (volcado y
+análisis en la conversación del 2026-10-16). **Para esta tanda ha autorizado
+commit, push y despliegue de cada funcionalidad** en cuanto pasen los tests
+(`npm run check`). Cada punto: código desacoplado en su módulo, tests nuevos,
+commit, push y `infra/scripts/deploy.sh` en la máquina. Si un test falla, mirar
+si es porque el cambio no estaba previsto en el test o si es un fallo real.
+Lo que dependa de muchas llamadas a 42 va al final.
 
-### 2.0 Dos funcionalidades decididas el 2026-10-11 (van antes que la revisión)
+Orden (se marca cada uno al desplegarlo):
 
-- [x] **La XP de pizarras y de sesiones de ayuda depende de los códigos.**
-      Hecho el 2026-10-11, sin subir. Módulo nuevo `modules/attendance`
-      (migración 18): ventanas de validez, tope de cinco fallos, registro de
-      intentos (`event_checkins`), tiempo validado guardado e informe
-      (`GET /events/report`, CSV con `format=csv`; botón en el expediente y en
-      "Permisos y bloqueos" del panel). `help.verify` y su trabajo periódico ya
-      no existen. Reglas y valores en `attendance.rules.ts` y en `docs/api.md`,
-      "Reglas de los códigos".
+**A. Fallos**
+- [ ] 28 Euskera: `ach.selfless_help` → «Eskuzabaltasun laguntza»; `net.asCorrected.hint` → «Aurkeztutako bereburuko proiektuak».
+- [ ] 1 Correcciones marcadas «no asistida»: las de 42 dejan de pedir respuesta (`needsReply` en `meet.service.ts`) y una migración borra las marcas `absent/missed` de evaluaciones y sus `event_alerts`.
+- [ ] 2 Guardia: dejar quitar la media hora en curso (`DayEditor.tsx`) si no hay reserva.
+- [ ] 5 Buzón: responder un ticket marca leído `ticket_new` de todos los admins; pestañas Pendientes / Cerrados.
+- [ ] 7 Contraste de las insignias de la Red (`.net-row-badge`): texto según luminancia.
+- [ ] 19 Guardia: no ofrecer medias horas ocupadas por cualquier cosa del calendario (`busyOf` en `help.service.ts`).
+- [ ] 4 Calendario: refrescar la agenda si tiene más de 2 min al abrirlo; «actualizado hace X» y botón.
+- [ ] 8 Título cortado de los comunicados con zoom (`BroadcastGate.tsx`).
+- [ ] 3 Holy graph: bis en la SEED, círculo aprendido con mínimo de personas, grupos «elige uno» en `common-core.ts`, recalcular.
+- [ ] 34 Fotos de perfil que no salen en PC: averiguar si es la API o la web y arreglarlo. (Subir fotos: no por ahora.)
+- [ ] 6 Grafo de la Red a tirones: medir y optimizar `ForceGraph.tsx`.
 
-- [x] **Presupuesto de peticiones de la web, dinámico y regulable a mano.**
-      Hecho el 2026-10-11. `modules/admin/budget.rules.ts` y
-      migración 19 (`settings`): día ← mes (bytes de salida, 10 TB de fábrica),
-      hora ← día, persona ← gente conectada; colchón del 85 %, mínimo y máximo
-      por persona, modo ahorro (un cuarto). `PUT /admin/budget` y tarjeta en la
-      pestaña "Consumo" con lo gastado, lo que queda y la previsión. El contador
-      se recupera de `request_stats` al arrancar (cierra el punto de 2.1).
+**B. Seguridad, moderación y legal**
+- [ ] 10 Scopes: fijar `public` en el token de la app; Alberto desmarca los permisos sobrantes en la intra.
+- [ ] 11 web-check: `security.txt`, quitar `via`, HSTS `includeSubDomains`.
+- [ ] 14 Tipos de denuncia (spam, acoso, insultos, otro) y filtro en el panel.
+- [ ] 15 Formulario de incidencias: tipo y sección en desplegables, «Para: administración», icono `bicho`.
+- [ ] 16 Borrar avisos / retirar mensaje propio (15 min, sin respuesta) / admin borra spam.
+- [ ] 9 Segundo factor (TOTP) para `/admin`, sesión elevada 12 h.
+- [ ] 12 Página de privacidad y condiciones, aceptación versionada, descarga de datos.
+- [ ] 13 Trampas de Code Clicker, tres botones: «no es trampa» cierra; «alta probabilidad» abre ventana obligatoria de defensa que llega al admin; «trampa» = **vender todos sus edificios**, aviso temático en el juego («La policía del código te ha requisado las ganancias fraudulentas») y el dinero va a una **bolsa común**. La bolsa se reparte con una imagen temática que aparece por la zona del juego como el commit dorado; al pulsarla da **10 × el commit de la suerte** (el de ganancia, no el frenesí).
 
-- [x] **Lo mismo para la API de 42, con aviso y cola.** Hecho el 2026-10-11. `modules/replica/quota.ts` y migración 20: tres escalones (fondo,
-      aplazable, crítico), tope diario o mensual regulable (`PUT /admin/quota`),
-      cola por orden de llegada guardada en la base, `GET /quota`, rótulo y
-      tique de turno en la web (`features/alerts/QuotaNotice.tsx`) y tarjeta en
-      la pestaña "Consumo". Tests en `tests/unit/quota.test.ts`.
+**C. Mejoras**
+- [ ] 17 Explicar guardia, tope y pace (dos números).
+- [ ] 21 Preevaluaciones: marcar disponibilidad mucho más grande, con icono propio; característica principal.
+- [ ] 27 Últimas 8 búsquedas en el navegador.
+- [ ] 23 Clusters: puesto como enlace (clic central), girar 180°, círculo en el puesto, filtros, brillo dorado por 125.
+- [ ] 26 Red: color por sentido y flecha en las líneas de la persona elegida.
+- [ ] 20 Guardia y preevaluación brillando en el mapa con filtro; fichas compactas con «Pedir ayuda».
+- [ ] 24 Terapias: «proponer puestos», puestos rotos (7 días), avisar a quien hace el mismo proyecto.
+- [ ] 25 Calendario: vistas compacta / día / desde ahora.
+- [ ] 18 Peticiones de ayuda en ventana obligatoria (recibir y rechazo).
+- [ ] 29 Daltónicos, modo zen y demo de bienvenida.
+- [ ] 22 Tamaño de texto 90–150 % y móvil.
+- [ ] 33 Code Clicker: tope con pace en riesgo, logro por donar.
 
-### 2.1 Seguridad
+**D. Muchos datos (al final, poco a poco en horas de poco uso)**
+- [ ] 32 Holy graph de correcciones con logros y banner.
+- [ ] 30 Estadísticas de exámenes (intentos de 42 en cola de fondo; duración de círculos).
+- [ ] 31 Exámenes en vivo: pestaña que se activa cuando empieza un examen en tu campus (sale en el calendario); gente apuntada separada por examen, grado y cursus, del círculo en que está; cada 5 min se actualiza la nota con el último intento.
 
-Hecho el 2026-10-11, salvo lo que espera a Alberto:
+**Ideas para el futuro (no hacer ahora)**: 35 racha diaria con preguntas; 37 curso de git; 38 presentaciones de Transcendence/outer como evento; 39 Doom 2 (Freedoom) y patitos. **Descartado para siempre**: 36 modo sin conexión con los datos del campus.
 
-- [x] **Bloqueo de cuentas en todas las rutas.** Lo corta el gancho de `admin`
-      antes de llegar a ninguna ruta (`modules/admin/index.ts`); solo quedan las
-      de `/auth/`. Con test de integración.
-- [x] **Límite de mensajes por persona**: ocho por minuto y evento, veinte por
-      minuto en total (`meet.service.ts`); tres avisos al buzón cada diez
-      minutos (`admin.service.ts`).
-- [x] **QR de asistencia.** Ya no valida solo: enseña el código y pide
-      confirmar (`AlertCenter.tsx`), porque un enlace con un código equivocado
-      gastaba un intento. Cinco fallos por persona y evento.
-- [x] **Tope de uso tras un reinicio.** Se recupera de `request_stats`.
-- [x] **Registro de mensajes para admins.** Los mensajes se borran a los 90
-      días y el registro de intentos de códigos al año; lo dice cada chat.
-- [x] **Entradas de texto libre**: nada se pinta como HTML salvo el QR. El CSV
-      del informe de horas desactiva las fórmulas.
-- [x] **Cabeceras y cookies.** Política de contenido y de permisos en
-      `infra/Caddyfile`; el script del tema pasa a `public/theme.js` para no
-      necesitar scripts en línea. Las cookies ya eran `__Host-`, `HttpOnly`,
-      `Secure` y `SameSite`. **Comprobar en el despliegue** que la web carga
-      sin errores de CSP en la consola (fotos de perfil, QR, descarga del CSV).
-- [x] `npm audit --omit=dev`: 0 vulnerabilidades (2026-10-11).
-- [ ] Recordar a Alberto que **rote el secreto de la app de 42** (se vio en una
-      conversación) y actualizar `apps/api/.env` e `infra/.env` con el nuevo.
-
-### 2.2 Rendimiento
-
-Hecho el 2026-10-11:
-
-- [x] **Avisos**: el calendario se pide cada cinco minutos y se mira en el
-      navegador cada treinta segundos si algo está a punto de empezar.
-- [x] **Chat**: solo se piden los mensajes nuevos (`after`), la espera crece de
-      8 a 30 s mientras nadie escribe y no se pregunta con la pestaña oculta.
-- [x] **Saber si alguien participa en un evento** se pregunta al módulo de cada
-      cosa; el calendario entero solo se calcula para lo de 42.
-- [x] **Consultas en la base real**: a la base le faltaban estadísticas (la
-      consulta de una pareja en la red recorría todo el campus; con `ANALYZE`
-      usa los índices). Ahora se calculan al abrir si faltan y un trabajo las
-      mantiene (`core/db/database.ts`). Además la base pasa a **WAL**, para que
-      se pueda leer mientras el sincronizador escribe. Índice nuevo para el tope
-      de mensajes (migración 21). Las agregaciones de todo el campus tardan unos
-      40 ms con 86 000 correcciones: no hace falta más.
-- [x] **Tamaño de lo que descarga la web**: unos 135 kB comprimidos al entrar
-      (JS y CSS); cada sección va en su trozo y los datos simulados no entran en
-      producción. Lo único que sobra son los dos idiomas a la vez (unos 15 kB
-      comprimidos) y el generador de QR en el trozo principal: no compensa
-      tocarlo ahora.
-
-### 2.3 Simplificar
-
-Hecho el 2026-10-11:
-
-- [x] `Clinic.tsx` partido en `Header.tsx`, `SectionView.tsx` y `Footer.tsx`.
-- [x] `shared/api/mock/index.ts` partido por funcionalidad (`peers`, `meet`,
-      `admin`, `profile`, `replica`, `help`, `therapy`, `doubts`, `boards`), con
-      el estado compartido en `state.ts`.
-- [x] `layout.css` repartido en `layout.css`, `alerts.css`, `admin.css` y
-      `therapy.css`. Comprobado que el CSS generado tiene las mismas reglas.
-- [x] `community.test.ts` partido en un fichero por módulo (`profile`, `admin`,
-      `help`, `therapy`, `doubts`, `boards`), con el montaje en
-      `tests/helpers/community.ts`. Siguen siendo los mismos tests.
-- [x] El chat sale de `EventRoom`: `useThread.ts` y `Chat.tsx` (`ChatRoom` para
-      los grupos de terapia).
-- [x] `docs/api.md` repasado contra las rutas reales.
-
-### 2.4 Buzón de avisos (pedido el 2026-10-11)
-
-- [x] Buzón con todo lo que alguien puede recibir (respuestas del buzón de
-      incidencias, reservas, dudas, cambios de guía, chats, pizarras, terapias),
-      con el número de avisos sin leer en rojo en la cabecera. Módulo `notices`
-      (migración 22), `GET /pulse`, `features/notices/Mailbox.tsx`. Los módulos
-      avisan con `notify`; el rótulo de cuota y el buzón comparten un solo
-      sondeo (`usePulse`).
-- [x] `docs/rendimiento.md` cuenta de cada mejora qué se hacía antes, qué se
-      hace ahora y por qué es más rápido.
-
-### 2.5 Pay As You Go sin pasar de lo gratuito (pedido el 2026-10-11)
-
-- [x] Reglas fijas: al 90 % del tráfico del mes solo entra quien administra, la
-      web deja de hablar con 42 y de lanzar trabajos, y la guardia de la máquina
-      (`infra/scripts/limits-guard.sh`, cron cada cinco minutos) para y bloquea
-      actualizaciones automáticas, snaps, el agente de Oracle y la subida de
-      copias. Al 95 % no entra nadie y se paran los contenedores: solo SSH. El
-      reparto diario llega hasta el 90 %. `create-instance.sh` no pide más del
-      90 % del cómputo gratuito. Explicado en `docs/deploy-oracle.md`.
-- [x] **Al desplegar** (2026-10-11): la máquina nació con `/etc/cron.d/sanatorio-limits`
-      y la guardia da el tráfico del mes. Las unidades de `QUIET_UNITS` existen
-      con esos nombres en la imagen de Oracle (menos `chrony`, que no está: usa
-      `systemd-timesyncd`, también en la lista). Añadido el envío automático de
-      informes de fallos (`apport-autoreport`), que faltaba.
-- [ ] **Alberto, en la consola de Oracle**: pasar a Pay As You Go y crear un
-      presupuesto de 1 € con alerta por correo.
-
-### 2.6 Rediseño (pedido el 2026-10-11)
-
-- [x] El expediente es la portada. Cabecera nueva (`app/Header.tsx`,
-      `app/UserMenu.tsx`): marca, guardia, buzón y menú de la cuenta.
-- [x] Juego de iconos propio (`shared/ui/Icon.tsx`) en vez de emojis.
-- [x] Paleta nueva (`styles/theme.css`) y capa de sistema (`styles/system.css`):
-      superficies planas con raya, sin manchas de fondo, estados con su color.
-- [x] Tablón en perspectiva, con bandejas que se elevan (`features/doubts/iso.ts`).
-- [x] Red: escala del degradado regulable de punto en punto, con ajuste a los datos.
-- [x] Avisos de evento con respuesta obligatoria, cola por orden de inicio y
-      falta automática a la media hora (migración 23, `GET /events/alerts`).
-- [ ] Repasar a ojo, con Alberto, las secciones que no se han mirado una a una
-      en los dos temas (sala de espera con proyecto abierto, pizarras, calendario,
-      ventanas de terapia) y el móvil.
+Pendientes de antes: rotar el secreto de 42 (Alberto), primera cuenta de staff, Oracle Pay As You Go con presupuesto de 1 €, CSP con sesión iniciada, repaso a ojo de temas y móvil.
 
 ## 3. A medias o por confirmar con Alberto
 

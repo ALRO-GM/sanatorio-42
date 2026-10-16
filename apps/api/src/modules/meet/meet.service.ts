@@ -37,6 +37,7 @@ import { domainError } from '../../core/errors.js'
 import { createTtlCache } from '../../core/ttl-cache.js'
 import { parse } from '../../core/validation.js'
 import { createConversations } from './conversations.js'
+import { needsReply } from './meet.rules.js'
 import { EVENT_ID } from '../attendance/index.js'
 import type { AttendanceEvent, AttendanceService } from '../attendance/index.js'
 import type { IssuedExport, StaffService } from '../staff/index.js'
@@ -94,18 +95,6 @@ export const MISSED_AFTER_MINUTES = 30
 const ALERTS_AHEAD_MS = 3 * HOUR
 /** Y hacia atrás: lo que empezó hace más ya no avisa ni se da por perdido. */
 const ALERTS_BACK_MS = 12 * HOUR
-
-/** `true` si el evento es con más gente y vas: hay que decir si vas, si te retrasas o si no. */
-function needsReply(event: CalendarEvent): boolean {
-  if (event.joined === false) return false
-
-  return (
-    event.id.startsWith('help:booking:') ||
-    event.kind === 'therapy' ||
-    event.kind === 'board' ||
-    event.kind === 'evaluation'
-  )
-}
 
 const eventId = z.string().regex(/^[a-z_]+(:[A-Za-z0-9-]+){1,3}$/, 'evento no válido')
 
