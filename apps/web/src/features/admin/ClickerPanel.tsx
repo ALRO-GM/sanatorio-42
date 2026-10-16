@@ -85,6 +85,10 @@ export function ClickerPanel() {
             <Figure label={t('admin.clicker.level')} value={String(one.level)} />
             <Figure label={t('admin.clicker.lines')} value={compact.format(one.total)} />
             <Figure label={t('admin.clicker.perSecond')} value={compact.format(one.perSecond)} />
+            <Figure label={t('admin.clicker.code')} value={compact.format(one.code)} />
+            <Figure label={t('admin.clicker.wealth')} value={compact.format(one.wealth)} />
+            <Figure label={t('admin.clicker.buildings')} value={String(one.buildings)} />
+            <Figure label={t('admin.clicker.upgrades')} value={String(one.upgrades)} />
             <Figure label={t('admin.clicker.keys')} value={compact.format(one.clicks)} />
             <Figure label={t('admin.clicker.achievements')} value={String(one.achievements)} />
             <Figure label={t('admin.clicker.prestige')} value={String(one.prestige)} />
@@ -264,6 +268,9 @@ export function ClickerPanel() {
                     <th>{t('admin.clicker.pill')}</th>
                     <th>{t('admin.clicker.level')}</th>
                     <th>{t('admin.clicker.lines')}</th>
+                    <th>{t('admin.clicker.wealth')}</th>
+                    <th>{t('admin.clicker.buildings')}</th>
+                    <th>{t('admin.clicker.upgrades')}</th>
                     <th>{t('admin.clicker.keys')}</th>
                     <th>{t('admin.stats.seen')}</th>
                     <th>{t('admin.stats.back')}</th>
@@ -290,6 +297,9 @@ export function ClickerPanel() {
                       <td>{t(`admin.clicker.pill.${row.pill ?? 'none'}`)}</td>
                       <td>{row.total > 0 ? row.level : '—'}</td>
                       <td>{row.total > 0 ? compact.format(row.total) : '—'}</td>
+                      <td>{row.wealth > 0 ? compact.format(row.wealth) : '—'}</td>
+                      <td>{row.buildings > 0 ? row.buildings : '—'}</td>
+                      <td>{row.upgrades > 0 ? row.upgrades : '—'}</td>
                       <td>{row.clicks > 0 ? compact.format(row.clicks) : '—'}</td>
                       <td>{row.seen > 0 ? duration(row.seen) : '—'}</td>
                       <td>{row.back > 0 ? duration(row.back) : '—'}</td>

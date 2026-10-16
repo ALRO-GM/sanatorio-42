@@ -238,6 +238,24 @@ export function createClickerService(options: ClickerServiceOptions) {
     )
   }
 
+  /** Cuántos edificios y mejoras hay en una partida guardada (sin comprobarla). */
+  const holdingsOf = (save: string | null): { buildings: number; upgrades: number } => {
+    try {
+      const game = (save === null ? {} : JSON.parse(save)) as {
+        owned?: Record<string, unknown>
+        bought?: unknown
+      }
+      const buildings = Object.values(game.owned ?? {}).reduce<number>(
+        (sum, count) => sum + (typeof count === 'number' && Number.isFinite(count) ? count : 0),
+        0,
+      )
+
+      return { buildings, upgrades: Array.isArray(game.bought) ? game.bought.length : 0 }
+    } catch {
+      return { buildings: 0, upgrades: 0 }
+    }
+  }
+
   const row = async (login: string): Promise<Record<string, unknown> | undefined> =>
     (await db.execute({ sql: 'SELECT * FROM clicker WHERE login = ?', args: [login] })).rows[0]
 
@@ -985,7 +1003,7 @@ export function createClickerService(options: ClickerServiceOptions) {
         // De la partida solo se mira cuánto se ha pulsado la tecla, y solo si
         // se entiende: la escribe la web y aquí no se comprueba.
         db.execute(
-          `SELECT login, plus, pill, total, per_second, achievements, prestige, rev, updated_at,
+          `SELECT login, plus, pill, total, per_second, achievements, prestige, rev, updated_at, save,
                   save IS NOT NULL AS played, caught, caught_why, caught_at,
                   CASE WHEN json_valid(save) THEN json_extract(save, '$.clicks') END AS clicks
            FROM clicker ORDER BY total DESC, plus DESC, login`,
@@ -1015,6 +1033,9 @@ export function createClickerService(options: ClickerServiceOptions) {
         const pill = pillOf(entry)
         const total = Number(entry.total)
         const spent = time.get(login) ?? { seen: 0, back: 0, hidden: 0 }
+        const save = typeof entry.save === 'string' ? entry.save : null
+        const ledger = save === null ? null : readSave(save)
+        const { buildings, upgrades } = holdingsOf(save)
         const player: ClickerPlayer = {
           login,
           plus: toNumber(entry.plus),
@@ -1025,6 +1046,10 @@ export function createClickerService(options: ClickerServiceOptions) {
           achievements: toNumber(entry.achievements),
           prestige: toNumber(entry.prestige),
           clicks: typeof entry.clicks === 'number' ? Math.max(0, Math.floor(entry.clicks)) : 0,
+          code: ledger?.code ?? 0,
+          wealth: wealthOf(ledger),
+          buildings,
+          upgrades,
           saves: toNumber(entry.rev),
           updatedAt: toText(entry.updated_at),
           caught: toNumber(entry.caught),

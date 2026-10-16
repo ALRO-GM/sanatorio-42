@@ -199,7 +199,10 @@ describe('code clicker', () => {
     await press('rut', 40)
     await clicker.choose(actor('ana'), { pill: 'red' })
     await clicker.choose(actor('leo'), { pill: 'blue' })
-    await clicker.save(actor('ana'), { ...SAVE, save: game({ clicks: 321 }) })
+    await clicker.save(actor('ana'), {
+      ...SAVE,
+      save: game({ clicks: 321, code: 200, owned: { cursor: 2 }, bought: ['a', 'b'] }),
+    })
     await usage.record(actor('ana'), { counts: {}, time: { 'nav.clicker': [300, 60, 900] } })
     // El tiempo en otra sección no es tiempo de juego.
     await usage.record(actor('ana'), { counts: {}, time: { 'nav.tablon': [500, 0, 0] } })
@@ -228,6 +231,11 @@ describe('code clicker', () => {
       level: 9,
       total: 1500,
       clicks: 321,
+      // Lo que tiene ahora, de su partida guardada.
+      code: 200,
+      wealth: 200 + (BASE_PRICE.cursor ?? 0) * (1 + GROWTH),
+      buildings: 2,
+      upgrades: 2,
       saves: 1,
       seen: 300,
       hidden: 900,
@@ -236,7 +244,13 @@ describe('code clicker', () => {
 
     // Una partida que no se entiende no rompe la cuenta.
     await db.execute("UPDATE clicker SET save = 'no es json' WHERE login = 'ana'")
-    expect((await clicker.usage(boss, { days: '30' })).players[0]).toMatchObject({ clicks: 0 })
+    expect((await clicker.usage(boss, { days: '30' })).players[0]).toMatchObject({
+      clicks: 0,
+      code: 0,
+      wealth: 0,
+      buildings: 0,
+      upgrades: 0,
+    })
 
     await expectCode(clicker.usage(actor('ana'), {}), 'forbidden')
     await expectCode(clicker.usage(boss, { days: '0' }), 'invalid_input')

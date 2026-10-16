@@ -227,6 +227,12 @@ export type ClickerPlayer = {
   prestige: number
   /** Pulsaciones sobre la tecla, según su partida guardada. */
   clicks: number
+  /** Lo que tiene ahora, según su partida guardada: líneas sin gastar y patrimonio. */
+  code: number
+  wealth: number
+  /** Edificios que tiene (sumando todos los tipos) y mejoras compradas. */
+  buildings: number
+  upgrades: number
   /** Veces que su partida ha llegado a la API. */
   saves: number
   /** Última vez que pulsó la cruz o guardó. */
