@@ -95,10 +95,19 @@ Orden (se marca cada uno al desplegarlo):
 
 **Ideas para el futuro (no hacer ahora)**: 35 racha diaria con preguntas; 37 curso de git; 38 presentaciones de Transcendence/outer como evento; 39 Doom 2 (Freedoom) y patitos. **Descartado para siempre**: 36 modo sin conexión con los datos del campus.
 
+Hecho además en esta tanda (fuera de la lista): estilo Bichota, antitrampas
+de pulsaciones, política de trampas nueva (venta al 50 % y reparto), ver la
+partida de cualquiera y sanción a mano desde el panel. Detalle en `contexto.md`.
+
 Pendientes de antes: rotar el secreto de 42 (Alberto), primera cuenta de staff, Oracle Pay As You Go con presupuesto de 1 €, CSP con sesión iniciada, repaso a ojo de temas y móvil.
 
 ## 3. A medias o por confirmar con Alberto
 
+- **Bolsa común de Code Clicker**: con la política nueva ya no se llena y su
+  placa no sale. Preguntar a Alberto si se quita del todo (`loot.ts`,
+  `clicker_pool`, `POST /clicker/pool/claim`).
+- **Saltos de Code Clicker pendientes** en el panel (55 a 2026-10-16): los
+  revisa Alberto.
 - **Cifras de los límites** (se cambian desde el panel, pestaña "Consumo"): el
   tráfico de salida de Oracle está puesto a 10 TB al mes y se renueva el día 1,
   con el corte fijo al 90 % (9 TB); el tope diario o mensual de

@@ -34,7 +34,28 @@ que hacer, en orden. Este documento es el porqué; aquel, el qué.
   el móvil: `DELETE FROM admin_second_factor WHERE login = '…'` por SSH),
   **privacidad y condiciones** con aceptación y descarga de datos, y la
   **revisión de trampas** de Code Clicker con bolsa común.
-- Base en la versión 43. `npm run check`: 561 tests de la API y 181 de la web.
+- Después, también en producción:
+  - **Política de trampas nueva** (Alberto, 2026-10-16; sustituye a la bolsa
+    común): en cada trampa contada se vuelve a la última partida buena, se
+    venden sus edificios al 50 % de lo que costaron (`SALE_REFUND` en la API =
+    `FORCED_REFUND` en la web, un test comprueba que coinciden), se le da ese
+    dinero y la misma cantidad se reparte entre quienes juegan con la roja y
+    nunca han sido pillados (`pending_gift`, migración 46). Ocho mensajes de la
+    policía del código con humor (`police` en `texts.ts`). La bolsa común ya no
+    se llena y su placa queda dormida: **falta decidir con Alberto si se quita**.
+  - **Antitrampas de pulsaciones** (`clicks.rules.ts`, migración 45): topes
+    absolutos de 50/s durante 60 s, 9/s en 30 min, 6/s en 2 h, 4/s en 6 h y
+    2/s en 24 h. No se mira segundo a segundo.
+  - **Quien administra ve la partida de cualquiera** (botón «Ver su partida»,
+    no guarda nada) y puede poner una **sanción a mano** («Sanción a mano» en
+    la ficha del jugador; `POST /admin/clicker/sanction`): deja el código que
+    se diga, con o sin edificios y mejoras, y un mensaje que sale en el juego.
+    Conserva logros, prestigio y la cuenta de la clasificación.
+  - **Estilo Bichota**, solo para un expediente: quien entra en ese perfil lo
+    ve con su estilo. Es reutilizable para otros perfiles: `EXCLUSIVE_STYLES`
+    en `themes/ids.ts` y `styles.rules.ts` en la API (un test comprueba que
+    coinciden), `recordStyle` (migración 44).
+- Base en la versión 46. `npm run check`: 578 tests de la API y 192 de la web.
 - El texto legal es de base: conviene que lo revise alguien de leyes.
 
 ## Estado a 2026-10-12
