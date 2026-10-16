@@ -142,6 +142,18 @@ GET /me/availability → { "available": true }
 PUT /me/availability
 { "available": true }
 
+## Fotos de perfil
+GET /avatars/:login → la foto de esa persona (`image/jpeg`, `png`, `gif` o `webp`), o 404
+si no tiene o 42 no la da ahora. Pide sesión.
+
+Desde octubre de 2026 la CDN de 42 (`cdn.intra.42.fr`) contesta 403 a quien no
+tiene la intra abierta, así que las direcciones `image` de las respuestas ya no
+se ven en cualquier equipo. La API pide la foto una vez con el token de la
+aplicación (no gasta cuota de la API: la CDN no la cuenta), la guarda en
+`photos/` junto a la base y la sirve desde aquí; la web pide esta ruta para
+toda foto de la CDN (`photoUrl` en `shared/api/photos.ts`). Como mucho 1 500
+fotos nuevas por hora; una que 42 no da no se vuelve a pedir hasta pasada una hora.
+
 ## Campus y preferencias
 GET /campuses
 [{ "id": 22, "name": "Madrid", "city": "Madrid", "country": "Spain", "tracked": true }]

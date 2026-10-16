@@ -276,6 +276,7 @@ describe('réplica vista desde fuera', () => {
       '/network/pair?a=ana&b=eva',
       '/network/people?q=a',
       '/calendar?from=2026-10-01T00:00:00Z&to=2026-10-08T00:00:00Z',
+      '/avatars/albrodri',
       '/projects/10/doubts',
     ]) {
       expect((await built.app.inject({ method: 'GET', url })).statusCode).toBe(401)

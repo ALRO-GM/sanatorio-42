@@ -45,7 +45,7 @@ import type { PeersModule } from '../modules/peers/index.js'
 import { createProfileModule } from '../modules/profile/index.js'
 import type { ProfileModule } from '../modules/profile/index.js'
 import { createReplicaModule } from '../modules/replica/index.js'
-import type { ReplicaModule, SyncerConfig } from '../modules/replica/index.js'
+import type { PhotoStore, ReplicaModule, SyncerConfig } from '../modules/replica/index.js'
 import { createToursModule } from '../modules/tours/index.js'
 import type { ToursModule } from '../modules/tours/index.js'
 import { createStaffModule } from '../modules/staff/index.js'
@@ -70,6 +70,8 @@ export type CompositionConfig = {
   admins?: readonly string[]
   /** Lo que dice la guardia de la máquina sobre los límites del plan, si la hay. */
   guardLevel?: () => Promise<LimitLevel>
+  /** Dónde se guardan las fotos de perfil bajadas de 42. Sin él, en memoria. */
+  photos?: PhotoStore
   /** Reloj inyectable, para los tests. */
   now?: () => number
 }
@@ -129,6 +131,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     ...(config.backgroundSync === undefined ? {} : { backgroundSync: config.backgroundSync }),
     priority: (login) => (config.admins ?? []).includes(login),
     halted: () => halted(),
+    ...(config.photos === undefined ? {} : { photos: config.photos }),
     ...(config.log === undefined ? {} : { log: config.log }),
     ...clock,
   })

@@ -1,5 +1,7 @@
 import { useState } from 'react'
 
+import { photoUrl } from '../api'
+
 type AvatarProps = {
   login: string
   image: string | null
@@ -20,8 +22,9 @@ function colorFor(login: string): string {
 /** Foto de la persona, o su inicial sobre un color si no tiene o no carga. */
 export function Avatar({ login, image, size = 64 }: AvatarProps) {
   const [failed, setFailed] = useState(false)
+  const src = photoUrl(login, image)
 
-  if (image === null || image === '' || failed) {
+  if (src === null || failed) {
     return (
       <span
         className="avatar-fallback"
@@ -34,7 +37,7 @@ export function Avatar({ login, image, size = 64 }: AvatarProps) {
 
   return (
     <img
-      src={image}
+      src={src}
       alt={login}
       style={{ width: size, height: size, borderRadius: '50%', objectFit: 'cover' }}
       onError={() => {

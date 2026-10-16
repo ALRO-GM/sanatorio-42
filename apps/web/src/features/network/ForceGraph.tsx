@@ -4,6 +4,7 @@ import type { ReactNode } from 'react'
 import type { NetworkLink, NetworkNode } from '@sanatorio/contracts'
 import { forceCollide, forceLink, forceManyBody, forceSimulation, forceX, forceY } from 'd3-force'
 import type { Simulation, SimulationLinkDatum, SimulationNodeDatum } from 'd3-force'
+import { photoUrl } from '../../shared/api'
 
 type ForceGraphProps = {
   nodes: readonly NetworkNode[]
@@ -312,8 +313,10 @@ export function ForceGraph({
         // La foto, solo cuando la burbuja se ve lo bastante grande para distinguirla.
         const shownRadius = node.r * view.k
 
-        if (on && shownRadius > 11 && node.data.image !== null) {
-          const picture = pictureOf(node.data.image, schedule.current)
+        const photo = photoUrl(node.data.login, node.data.image)
+
+        if (on && shownRadius > 11 && photo !== null) {
+          const picture = pictureOf(photo, schedule.current)
 
           if (picture !== null) {
             const inner = node.r - Math.max(1.5, node.r * 0.14)

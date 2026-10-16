@@ -1,5 +1,7 @@
 import { useState } from 'react'
 
+import { photoUrl } from '../../shared/api'
+
 type SeatFaceProps = {
   login: string
   image: string | null
@@ -14,15 +16,16 @@ type SeatFaceProps = {
  */
 export function SeatFace({ login, image }: SeatFaceProps) {
   const [failed, setFailed] = useState(false)
+  const src = photoUrl(login, image)
 
-  if (image === null || image === '' || failed) {
+  if (src === null || failed) {
     return <span className="seat-initial">{login.charAt(0).toUpperCase()}</span>
   }
 
   return (
     <img
       className="seat-face"
-      src={image}
+      src={src}
       alt=""
       loading="lazy"
       draggable={false}

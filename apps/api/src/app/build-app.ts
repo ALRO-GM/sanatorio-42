@@ -9,6 +9,7 @@
  */
 
 import { readFile } from 'node:fs/promises'
+import { dirname, join } from 'node:path'
 
 import Fastify from 'fastify'
 import type { FastifyInstance } from 'fastify'
@@ -21,7 +22,7 @@ import { registerStatic } from '../core/http/static.js'
 import type { AppModule } from '../core/module.js'
 import { createApiClient } from '../integrations/forty-two/create-client.js'
 import { createAuthModule } from '../modules/auth/index.js'
-import { syncConfigFrom } from '../modules/replica/index.js'
+import { diskPhotoStore, syncConfigFrom } from '../modules/replica/index.js'
 import { compose } from './composition.js'
 import type { Services } from './composition.js'
 import { registerCors } from './cors.js'
@@ -51,6 +52,18 @@ export type BuiltApp = {
   close: () => Promise<void>
 }
 
+/**
+ * Carpeta de las fotos de perfil: junto a la base si es un fichero (en el
+ * contenedor, `/data/photos`, en el volumen que ya se guarda), y si no, `data/photos`.
+ */
+export function photoDirOf(databaseUrl: string): string {
+  const file = databaseUrl.startsWith('file:') ? databaseUrl.slice('file:'.length) : ''
+
+  return file === '' || file.startsWith(':memory:')
+    ? join('data', 'photos')
+    : join(dirname(file), 'photos')
+}
+
 /** Crea la app completa, sin abrir el puerto ni arrancar el trabajo de fondo. */
 export async function buildApp(options: BuildOptions = {}): Promise<BuiltApp> {
   const env = options.env ?? loadEnv()
@@ -69,6 +82,7 @@ export async function buildApp(options: BuildOptions = {}): Promise<BuiltApp> {
     sync: syncConfigFrom(env),
     backgroundSync: env.SYNC_ENABLED === 'true',
     admins: env.adminLogins,
+    photos: diskPhotoStore(photoDirOf(env.DATABASE_URL)),
     ...(env.GUARD_LEVEL_FILE === ''
       ? {}
       : {

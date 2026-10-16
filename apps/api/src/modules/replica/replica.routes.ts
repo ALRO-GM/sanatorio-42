@@ -5,8 +5,12 @@
 import { assertAdmin } from '../../core/actor.js'
 import type { FastifyInstance } from 'fastify'
 
+import { z } from 'zod'
+
 import type { RouteContext } from '../../core/module.js'
+import { parse } from '../../core/validation.js'
 import type { CampusesService } from './campuses.service.js'
+import type { Photos } from './photos.js'
 import type { Quota } from './quota.js'
 import type { Syncer } from './syncer.js'
 
@@ -14,13 +18,40 @@ export type ReplicaRoutesOptions = {
   campuses: CampusesService
   sync: Syncer
   quota: Quota
+  photos: Photos
 }
+
+/** Un login de 42: minúsculas, cifras y guiones (las cuentas borradas llevan `3b3-…`). */
+const photoParams = z.object({ login: z.string().regex(/^[a-z0-9-]{1,40}$/, 'login no válido') })
 
 export function registerReplicaRoutes(
   app: FastifyInstance,
   { session }: RouteContext,
-  { campuses, sync, quota }: ReplicaRoutesOptions,
+  { campuses, sync, quota, photos }: ReplicaRoutesOptions,
 ): void {
+  /**
+   * `GET /avatars/:login` → la foto de perfil de alguien, servida desde aquí
+   * (la CDN de 42 ya no la da sin sesión de la intra). 404 si no tiene o 42 no
+   * la da ahora: la web pone su inicial.
+   */
+  app.get<{ Params: { login: string } }>('/avatars/:login', async (request, reply) => {
+    session.user(request)
+
+    const photo = await photos.photoOf(parse(photoParams, request.params).login)
+
+    if (photo === null) {
+      reply.header('Cache-Control', 'private, max-age=600')
+
+      return reply.code(404).send({ error: 'not_found', message: 'Sin foto' })
+    }
+
+    // Una foto no cambia sin cambiar de dirección en 42: se puede guardar un día.
+    reply.header('Cache-Control', 'private, max-age=86400')
+    reply.type(photo.type)
+
+    return reply.send(Buffer.from(photo.body))
+  })
+
   /** `GET /campuses` → catálogo de campus, para el selector. */
   app.get('/campuses', async (request, reply) => {
     session.user(request)

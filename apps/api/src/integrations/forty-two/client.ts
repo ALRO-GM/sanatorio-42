@@ -121,6 +121,15 @@ export type Page<T> = {
   total: number
 }
 
+/** El único sitio del que se bajan fotos. */
+const CDN_HOST = 'cdn.intra.42.fr'
+
+/** Lo que se acepta como foto: lo que sube la gente a la intra. */
+const IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/gif', 'image/webp'])
+
+/** Una foto `medium` pesa unas decenas de kB; un original de móvil, megas. */
+const MAX_IMAGE_BYTES = 3 * 1024 * 1024
+
 export class FortyTwoClient {
   private readonly apiV2Base: string
   private readonly userAgent: string
@@ -295,6 +304,67 @@ export class FortyTwoClient {
    */
   async getUserProjects(login: string): Promise<ApiProjectUser[]> {
     return this.fetchAllPages<ApiProjectUser>(`/users/${encodeURIComponent(login)}/projects_users`)
+  }
+
+  /**
+   * Una foto de perfil de la CDN de 42 (`cdn.intra.42.fr`).
+   *
+   * Desde octubre de 2026 la CDN contesta 403 a quien no lleva sesión de la
+   * intra: el navegador solo ve las fotos si tiene la intra abierta. Con el token
+   * de la aplicación sí las da. No pasa por el ritmo de la API: la CDN no cuenta
+   * en la cuota de peticiones (no manda sus cabeceras).
+   *
+   * @throws {ApiError} Si la dirección no es de la CDN, 42 no la da o lo que
+   *   llega no es una imagen razonable.
+   */
+  async getCdnImage(url: string): Promise<{ type: string; body: Uint8Array }> {
+    const endpoint = 'cdn.intra.42.fr'
+    let parsed: URL
+
+    try {
+      parsed = new URL(url)
+    } catch {
+      throw new ApiError('Dirección de foto no válida', 0, { endpoint, code: 'bad_request' })
+    }
+    // Solo la CDN de 42: lo que venga en `image` no debe servir para pedir
+    // cualquier cosa desde el servidor.
+    if (parsed.protocol !== 'https:' || parsed.hostname !== CDN_HOST) {
+      throw new ApiError('La foto no es de la CDN de 42', 0, { endpoint, code: 'bad_request' })
+    }
+
+    const token = await this.tokens.getToken()
+    let response: Response
+
+    try {
+      response = await this.fetchImpl(parsed.href, {
+        headers: { Authorization: `Bearer ${token}`, 'User-Agent': this.userAgent },
+        redirect: 'error',
+        signal: AbortSignal.timeout(this.timeoutMs),
+      })
+    } catch (cause) {
+      throw apiErrorFromNetwork(endpoint, cause)
+    }
+
+    if (!response.ok) {
+      throw apiErrorFromResponse(response.status, endpoint, '', response.headers)
+    }
+
+    const type = (response.headers.get('content-type') ?? '').split(';')[0]?.trim() ?? ''
+
+    if (!IMAGE_TYPES.has(type)) {
+      throw new ApiError(`La CDN no ha dado una imagen (${type})`, 0, {
+        endpoint,
+        code: 'bad_request',
+      })
+    }
+
+    const body = new Uint8Array(await response.arrayBuffer())
+
+    if (body.byteLength === 0 || body.byteLength > MAX_IMAGE_BYTES) {
+      throw new ApiError('Foto vacía o demasiado grande', 0, { endpoint, code: 'bad_request' })
+    }
+
+    return { type, body }
   }
 
   // --- Cuota ---------------------------------------------------------------

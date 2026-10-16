@@ -17,6 +17,8 @@ import { createCampusesService } from './campuses.service.js'
 import { DRAIN_EVERY_MS, createQuota } from './quota.js'
 import type { Quota } from './quota.js'
 import type { CampusesService } from './campuses.service.js'
+import { createPhotos, memoryPhotoStore } from './photos.js'
+import type { PhotoStore } from './photos.js'
 import { createReplicaRepository } from './replica.repository.js'
 import type { ReplicaRepository } from './replica.repository.js'
 import { registerReplicaRoutes } from './replica.routes.js'
@@ -33,6 +35,8 @@ export type ReplicaModuleDeps = {
   halted?: () => boolean
   /** Quién no hace cola cuando la cuota de 42 va justa (quien administra). */
   priority?: (login: string) => boolean
+  /** Dónde se guardan las fotos de perfil bajadas de 42. Sin él, en memoria. */
+  photos?: PhotoStore
   log?: (message: string) => void
   now?: () => number
 }
@@ -92,6 +96,15 @@ export function createReplicaModule(deps: ReplicaModuleDeps): ReplicaModule {
     ...(deps.log === undefined ? {} : { log: deps.log }),
   })
 
+  const photos = createPhotos({
+    db: deps.db,
+    client: deps.client,
+    store: deps.photos ?? memoryPhotoStore(),
+    ...(deps.halted === undefined ? {} : { halted: deps.halted }),
+    ...(deps.now === undefined ? {} : { now: deps.now }),
+    ...(deps.log === undefined ? {} : { log: deps.log }),
+  })
+
   // Lo que se hace cuando le llega el turno a quien esperaba: lo mismo que se
   // habría hecho en su visita si hubiera habido cuota.
   quota.register('agenda', async (login) =>
@@ -113,7 +126,7 @@ export function createReplicaModule(deps: ReplicaModuleDeps): ReplicaModule {
     campuses,
     quota,
     routes: (app, context) => {
-      registerReplicaRoutes(app, context, { campuses, sync, quota })
+      registerReplicaRoutes(app, context, { campuses, sync, quota, photos })
     },
     jobs: [
       {
@@ -142,6 +155,8 @@ export function createReplicaModule(deps: ReplicaModuleDeps): ReplicaModule {
 
 export type { Agenda, AgendaEvaluation, AgendaEvent, UserAgenda } from './agenda.js'
 export { FRESH_USER_TTL_MS } from './agenda.js'
+export { diskPhotoStore, memoryPhotoStore } from './photos.js'
+export type { PhotoStore } from './photos.js'
 export { LAST_CIRCLE, parseHours } from './curriculum.js'
 export type { Curriculum, Track } from './curriculum.js'
 export { hourlyQuota } from './quota.js'

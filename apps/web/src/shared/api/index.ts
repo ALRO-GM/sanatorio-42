@@ -15,4 +15,5 @@ export const api: Api =
   import.meta.env.VITE_USE_MOCK === 'true' ? (await import('./mock')).mockApi : realApi
 
 export { ApiError } from './http'
+export { photoUrl } from './photos'
 export type { Api, PeersResult } from './types'
