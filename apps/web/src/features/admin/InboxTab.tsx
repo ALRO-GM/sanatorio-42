@@ -79,8 +79,15 @@ function TicketRow({ ticket, onDone }: { ticket: Ticket; onDone: () => void }) {
     <li className={`card ticket status-${ticket.status}`}>
       <div className="ticket-head">
         <span className={`badge ${ticket.kind === 'report' ? 'specialist' : 'subtle'}`}>
-          {t(`inbox.kind.${ticket.kind}`)}
+          {t(
+            ticket.category === null
+              ? `inbox.kind.${ticket.kind}`
+              : `inbox.category.${ticket.category}`,
+          )}
         </span>
+        {ticket.section !== null && (
+          <span className="badge subtle">{t(`nav.${ticket.section}`)}</span>
+        )}
         <strong>{ticket.subject}</strong>
         <small>
           {ticket.login} · {new Date(ticket.createdAt).toLocaleString(localeOf(lang))}

@@ -24,6 +24,7 @@ import type {
   LimitLevel,
   Consumption,
   Ticket,
+  TicketCategory,
   TicketKind,
   TicketStatus,
 } from '@sanatorio/contracts'
@@ -51,6 +52,7 @@ import {
   worst,
 } from './budget.rules.js'
 import type { DayPlan } from './budget.rules.js'
+import { SUBJECT_MAX, TICKET_CATEGORIES, subjectFrom } from './tickets.rules.js'
 
 export type AdminServiceOptions = {
   db: Db
@@ -133,8 +135,14 @@ function withChanges(base: BudgetSettings, patch: z.infer<typeof budgetSchema>):
 
 const ticketSchema = z.object({
   kind: z.enum(['issue', 'idea', 'report']),
-  subject: z.string().trim().min(3, 'ponle un título').max(120),
+  subject: z.string().trim().min(3, 'ponle un título').max(SUBJECT_MAX).optional(),
   body: z.string().trim().min(5, 'cuéntalo con un poco más de detalle').max(2000),
+  category: z.enum(TICKET_CATEGORIES).optional(),
+  // Una sección de la web: su id (`tablon`, `red`…).
+  section: z
+    .string()
+    .regex(/^[a-z]{2,20}$/, 'sección no válida')
+    .optional(),
   target: z
     .string()
     .regex(/^(message|board|doubt|group):[0-9]{1,12}$/, 'destino no válido')
@@ -162,6 +170,8 @@ function toTicket(row: Record<string, unknown>): Ticket {
     subject: toText(row.subject),
     body: toText(row.body),
     target: text(row.target),
+    category: text(row.category) as TicketCategory | null,
+    section: text(row.section),
     status: toText(row.status) as TicketStatus,
     answer: text(row.answer),
     answeredBy: text(row.answered_by),
@@ -702,9 +712,18 @@ export function createAdminService(options: AdminServiceOptions) {
       }
 
       const result = await db.execute({
-        sql: `INSERT INTO tickets (login, kind, subject, body, target, created_at)
-              VALUES (?, ?, ?, ?, ?, ?) RETURNING *`,
-        args: [actor.login, ticket.kind, ticket.subject, ticket.body, ticket.target ?? null, iso()],
+        sql: `INSERT INTO tickets (login, kind, subject, body, target, category, section, created_at)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING *`,
+        args: [
+          actor.login,
+          ticket.kind,
+          ticket.subject ?? subjectFrom(ticket.body),
+          ticket.body,
+          ticket.target ?? null,
+          ticket.category ?? null,
+          ticket.section ?? null,
+          iso(),
+        ],
       })
       const created = toTicket(result.rows[0] ?? {})
       const granted = await db.execute('SELECT login FROM user_roles')

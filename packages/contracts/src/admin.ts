@@ -8,6 +8,13 @@ export type TicketKind = 'issue' | 'idea' | 'report'
 
 export type TicketStatus = 'open' | 'answered' | 'closed'
 
+/**
+ * De qué va un mensaje del buzón, lo elige quien escribe. Pocas opciones a
+ * propósito: un fallo, una mejora de algo que ya hay, una idea nueva, un texto
+ * mal traducido u otra cosa.
+ */
+export type TicketCategory = 'bug' | 'improvement' | 'idea' | 'translation' | 'other'
+
 export type Ticket = {
   id: number
   login: string
@@ -16,6 +23,10 @@ export type Ticket = {
   body: string
   /** De qué va una denuncia: `message:12`, `board:3`, `doubt:5`. `null` en el resto. */
   target: string | null
+  /** Qué tipo de mensaje es, o `null` en los de antes de que se pudiera elegir y en las denuncias. */
+  category: TicketCategory | null
+  /** Sección de la web de la que va (`tablon`, `red`…), o `null` si no se dijo. */
+  section: string | null
   status: TicketStatus
   /** Lo que respondió quien administra, o `null` si aún no. */
   answer: string | null
@@ -27,9 +38,12 @@ export type Ticket = {
 /** `POST /tickets`. */
 export type TicketInput = {
   kind: TicketKind
-  subject: string
+  /** Si no se da, se saca del principio del mensaje. */
+  subject?: string
   body: string
   target?: string
+  category?: TicketCategory
+  section?: string
 }
 
 /** Peticiones de una hora concreta. */

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { SyntheticEvent } from 'react'
 
-import type { TicketKind } from '@sanatorio/contracts'
+import type { TicketCategory } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
 import { useAction, useAsync } from '../../shared/hooks/useAsync'
@@ -11,19 +11,31 @@ import { Icon } from '../../shared/ui/Icon'
 import { InfoTip } from '../../shared/ui/InfoTip'
 import { InboxTour } from './InboxTour'
 
-const KINDS = ['issue', 'idea'] as const satisfies readonly TicketKind[]
+import { CATEGORIES, kindOf, reportableSections, sectionFor } from './inbox'
 
 /**
  * El buzón de cada persona: contar que algo no va o proponer una mejora, y ver
- * lo que le han respondido.
+ * lo que le han respondido. Se elige el tipo y la sección (por defecto, la que
+ * estaba abierta); no hace falta inventarse un título.
+ *
+ * @param section La sección abierta al pulsar «Incidencias y sugerencias».
+ * @param sections Las secciones de la web, para el desplegable.
  */
-export function Inbox({ onClose }: { onClose: () => void }) {
+export function Inbox({
+  onClose,
+  section,
+  sections,
+}: {
+  onClose: () => void
+  section: string
+  sections: readonly { id: string; inNav: boolean }[]
+}) {
   const { t, lang } = useI18n()
   const dialog = useRef<HTMLDialogElement>(null)
   const mine = useAsync(() => api.getMyTickets(), [])
   const { busy, error, run } = useAction()
-  const [kind, setKind] = useState<TicketKind>('issue')
-  const [subject, setSubject] = useState('')
+  const [category, setCategory] = useState<TicketCategory>('bug')
+  const [where, setWhere] = useState(() => sectionFor(section, sections))
   const [body, setBody] = useState('')
 
   useEffect(() => {
@@ -34,8 +46,14 @@ export function Inbox({ onClose }: { onClose: () => void }) {
   const submit = async (event: SyntheticEvent): Promise<void> => {
     event.preventDefault()
 
-    if (await run(() => api.openTicket({ kind, subject, body }))) {
-      setSubject('')
+    const ticket = {
+      kind: kindOf(category),
+      category,
+      body,
+      ...(where === null ? {} : { section: where }),
+    }
+
+    if (await run(() => api.openTicket(ticket))) {
       setBody('')
       await mine.reload()
     }
@@ -56,37 +74,48 @@ export function Inbox({ onClose }: { onClose: () => void }) {
       </div>
 
       <form className="inbox-form" onSubmit={(event) => void submit(event)}>
-        <div className="filter-pills" role="group" aria-label={t('inbox.kind')}>
-          {KINDS.map((option) => (
-            <button
-              key={option}
-              type="button"
-              className={`pill ${kind === option ? 'active' : ''}`}
-              aria-pressed={kind === option}
-              onClick={() => {
-                setKind(option)
+        <p className="hint inbox-to">
+          <Icon name="buzon" size={14} /> {t('inbox.to')}
+        </p>
+        <div className="form-grid">
+          <label>
+            {t('inbox.kind')}
+            <select
+              value={category}
+              onChange={(event) => {
+                setCategory(event.target.value as TicketCategory)
               }}
             >
-              {t(`inbox.kind.${option}`)}
-            </button>
-          ))}
+              {CATEGORIES.map((option) => (
+                <option key={option} value={option}>
+                  {t(`inbox.category.${option}`)}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            {t('inbox.section')}
+            <select
+              value={where ?? ''}
+              onChange={(event) => {
+                setWhere(event.target.value === '' ? null : event.target.value)
+              }}
+            >
+              <option value="">{t('inbox.section.general')}</option>
+              {reportableSections(sections).map((id) => (
+                <option key={id} value={id}>
+                  {t(`nav.${id}`)}
+                </option>
+              ))}
+            </select>
+          </label>
         </div>
-        <input
-          value={subject}
-          maxLength={120}
-          required
-          placeholder={t('inbox.subject')}
-          aria-label={t('inbox.subject')}
-          onChange={(event) => {
-            setSubject(event.target.value)
-          }}
-        />
         <textarea
           value={body}
           maxLength={2000}
           rows={4}
           required
-          placeholder={t(`inbox.body.${kind === 'idea' ? 'idea' : 'issue'}`)}
+          placeholder={t(`inbox.body.${category}`)}
           aria-label={t('inbox.bodyLabel')}
           onChange={(event) => {
             setBody(event.target.value)
@@ -104,7 +133,13 @@ export function Inbox({ onClose }: { onClose: () => void }) {
         {(mine.data ?? []).map((ticket) => (
           <li key={ticket.id} className={`ticket status-${ticket.status}`}>
             <div className="ticket-head">
-              <span className="badge subtle">{t(`inbox.kind.${ticket.kind}`)}</span>
+              <span className="badge subtle">
+                {t(
+                  ticket.category === null
+                    ? `inbox.kind.${ticket.kind}`
+                    : `inbox.category.${ticket.category}`,
+                )}
+              </span>
               <strong>{ticket.subject}</strong>
               <small>{new Date(ticket.createdAt).toLocaleDateString(localeOf(lang))}</small>
             </div>

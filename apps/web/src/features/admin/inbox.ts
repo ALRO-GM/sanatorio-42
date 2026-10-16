@@ -2,7 +2,39 @@
  * Las vistas del buzón del panel, sin React: qué mensaje va en cada pestaña.
  */
 
-import type { Ticket } from '@sanatorio/contracts'
+import type { Ticket, TicketCategory, TicketKind } from '@sanatorio/contracts'
+
+/** Los tipos que se pueden elegir al escribir, en el orden del desplegable. */
+export const CATEGORIES = [
+  'bug',
+  'improvement',
+  'idea',
+  'translation',
+  'other',
+] as const satisfies readonly TicketCategory[]
+
+/** Los fallos y las traducciones son «algo no va»; lo demás, una mejora. */
+export function kindOf(category: TicketCategory): TicketKind {
+  return category === 'bug' || category === 'translation' ? 'issue' : 'idea'
+}
+
+/**
+ * Las secciones de las que se puede escribir: las de las pestañas, la guardia y
+ * el expediente. Ni el panel (es de quien administra) ni la sección secreta.
+ */
+export function reportableSections(sections: readonly { id: string; inNav: boolean }[]): string[] {
+  return sections
+    .filter((section) => section.inNav || section.id === 'guardia' || section.id === 'expediente')
+    .map((section) => section.id)
+}
+
+/** La sección que sale elegida: la abierta, si se puede elegir; si no, ninguna (toda la web). */
+export function sectionFor(
+  open: string,
+  sections: readonly { id: string; inNav: boolean }[],
+): string | null {
+  return reportableSections(sections).includes(open) ? open : null
+}
 
 export const INBOX_VIEWS = ['pending', 'done'] as const
 

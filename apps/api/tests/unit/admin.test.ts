@@ -406,6 +406,47 @@ describe('comunidad', () => {
       await expectCode(admin.answerTicket(boss, 9999, { answer: 'x' }), 'not_found')
     })
 
+    it('un mensaje del buzón dice su tipo y su sección; el título es opcional', async () => {
+      const { admin } = services
+
+      const bug = await admin.openTicket(actor('ana'), {
+        kind: 'issue',
+        category: 'bug',
+        section: 'red',
+        body: 'El grafo va a tirones\ncuando hay mucha gente',
+      })
+
+      expect(bug).toMatchObject({
+        category: 'bug',
+        section: 'red',
+        subject: 'El grafo va a tirones',
+      })
+      // Con título, se respeta; sin tipo ni sección, quedan vacíos.
+      expect(
+        await admin.openTicket(actor('leo'), {
+          kind: 'idea',
+          subject: 'Con título',
+          body: 'Hola qué tal',
+        }),
+      ).toMatchObject({ subject: 'Con título', category: null, section: null })
+
+      // Lo que no es un tipo o una sección no entra.
+      for (const wrong of [
+        { category: 'queja' },
+        { section: 'Red' },
+        { section: '../admin' },
+        { section: 'x' },
+        { section: 'a'.repeat(21) },
+        { subject: 'ab' },
+        { subject: 'a'.repeat(121) },
+      ]) {
+        await expectCode(
+          admin.openTicket(actor('sol'), { kind: 'idea', body: 'Un mensaje normal', ...wrong }),
+          'invalid_input',
+        )
+      }
+    })
+
     it('el consumo se cuenta por persona y el tope se reparte entre quienes están', async () => {
       const { admin } = services
       const boss = actor('eva', { admin: true })

@@ -15,6 +15,7 @@ import { startUsage, viewing } from '../shared/layout/store'
 import { Footer } from './Footer'
 import { Header } from './Header'
 import { SectionView } from './SectionView'
+import { SECTIONS } from './sections'
 import type { Section } from './sections'
 import { useRoute } from './useRoute'
 
@@ -185,6 +186,8 @@ export function Clinic({ me, onLogout }: ClinicProps) {
           )}
           {box === 'inbox' && (
             <Inbox
+              section={section}
+              sections={SECTIONS}
               onClose={() => {
                 setBox(null)
                 refresh()

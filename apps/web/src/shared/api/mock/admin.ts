@@ -57,9 +57,12 @@ export const adminMock: Pick<
       id: tickets.length + 1,
       login: ME.login,
       kind: ticket.kind,
-      subject: ticket.subject,
+      // Como la API: sin título, la primera línea del mensaje.
+      subject: ticket.subject ?? ticket.body.trim().split('\n')[0]?.slice(0, 80) ?? '',
       body: ticket.body,
       target: ticket.target ?? null,
+      category: ticket.category ?? null,
+      section: ticket.section ?? null,
       status: 'open',
       answer: null,
       answeredBy: null,

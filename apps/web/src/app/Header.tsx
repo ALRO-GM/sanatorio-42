@@ -190,7 +190,7 @@ export function Header({
                   : []),
                 null,
                 { id: 'personalizar', icon: 'ajustes', label: t('layout.open'), run: onCustomize },
-                { id: 'incidencias', icon: 'lapiz', label: t('inbox.open'), run: onInbox },
+                { id: 'incidencias', icon: 'bicho', label: t('inbox.open'), run: onInbox },
                 null,
                 { id: 'salir', icon: 'salir', label: t('app.logout'), run: onLogout, danger: true },
               ]}

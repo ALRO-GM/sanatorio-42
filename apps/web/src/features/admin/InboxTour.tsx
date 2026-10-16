@@ -47,12 +47,12 @@ export function InboxTour() {
             <>
               <div className="tour-row">
                 <span className="tour-select" data-tour="kind">
-                  {t(shot.idea ? 'inbox.kind.idea' : 'inbox.kind.issue')} ▾
+                  {t(shot.idea ? 'inbox.category.improvement' : 'inbox.category.bug')} ▾
                   {shot.menu && (
                     <span className="tour-menu">
-                      <span>{t('inbox.kind.issue')}</span>
+                      <span>{t('inbox.category.bug')}</span>
                       <span className="pick" data-tour="idea">
-                        {t('inbox.kind.idea')}
+                        {t('inbox.category.improvement')}
                       </span>
                     </span>
                   )}
