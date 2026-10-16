@@ -5,7 +5,15 @@
 import type { NetworkNode } from '@sanatorio/contracts'
 import { describe, expect, it } from 'vitest'
 
-import { COLOR_MODES, colorOf, legendOf } from '../src/features/network/colors'
+import {
+  badgeStyle,
+  COLOR_MODES,
+  colorOf,
+  inkOn,
+  legendOf,
+  luminanceOf,
+  passColor,
+} from '../src/features/network/colors'
 import { dayOf, startOf } from '../src/features/network/period'
 
 const node = (extra: Partial<NetworkNode> = {}): NetworkNode => ({
@@ -138,5 +146,41 @@ describe('red: varias escuelas', () => {
       'Barcelona (1)',
       'net.legend.external',
     ])
+  })
+})
+
+describe('tinta de las insignias de color', () => {
+  /** Contraste WCAG entre dos luminancias. */
+  const contrast = (a: number, b: number): number =>
+    (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05)
+  const DARK = 0.0035
+
+  it('calcula la luminancia de los colores conocidos', () => {
+    expect(luminanceOf('hsl(0 0% 100%)')).toBeCloseTo(1, 3)
+    expect(luminanceOf('hsl(0 0% 0%)')).toBeCloseTo(0, 3)
+    expect(luminanceOf('hsl(0 100% 50%)')).toBeCloseTo(0.2126, 3)
+    expect(luminanceOf('hsl(120 100% 50%)')).toBeCloseTo(0.7152, 3)
+  })
+
+  it('no entiende lo que no es un hsl: se queda con la tinta blanca', () => {
+    expect(luminanceOf('#fff')).toBeNull()
+    expect(luminanceOf('')).toBeNull()
+    expect(inkOn('rojo')).toBe('#ffffff')
+  })
+
+  it('en todo el degradado, la tinta elegida se lee (al menos 4,5:1)', () => {
+    for (let rate = 0; rate <= 1.0001; rate += 0.01) {
+      const background = passColor(rate)
+      const lum = luminanceOf(background) ?? 0
+      const ink = inkOn(background)
+      const inkLum = ink === '#ffffff' ? 1 : DARK
+
+      expect(contrast(lum, inkLum), background).toBeGreaterThanOrEqual(4.5)
+    }
+  })
+
+  it('el verde y el ámbar llevan texto oscuro', () => {
+    expect(badgeStyle(passColor(1))).toEqual({ background: passColor(1), color: '#080c0e' })
+    expect(inkOn(passColor(0.9))).toBe('#080c0e')
   })
 })

@@ -1,7 +1,7 @@
 import type { NetworkNode } from '@sanatorio/contracts'
 
 import { useI18n } from '../../shared/i18n'
-import { passColor } from './colors'
+import { passColor, badgeStyle } from './colors'
 
 /**
  * Las dos caras de una persona en las correcciones, sin mezclarlas:
@@ -65,7 +65,7 @@ function Side({ title, subtitle, count, rate, passes, fails, unknown }: SideProp
           </div>
           <span className="net-verdict-line">
             <span>{passes(pass)}</span>
-            <span className="net-row-badge" style={{ background: passColor(rate) }}>
+            <span className="net-row-badge" style={badgeStyle(passColor(rate))}>
               {fails(100 - pass)}
             </span>
           </span>

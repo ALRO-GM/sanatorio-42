@@ -252,3 +252,51 @@ export function legendOf(
     }
   }
 }
+
+/** Luminancia relativa (WCAG) de un color `hsl(h s% l%)`, de 0 a 1. `null` si no se entiende. */
+export function luminanceOf(color: string): number | null {
+  const match = /^hsl\(\s*(-?[\d.]+)\s+([\d.]+)%\s+([\d.]+)%\s*\)$/.exec(color)
+
+  if (match === null) return null
+
+  const [h, s, l] = [Number(match[1]) / 360, Number(match[2]) / 100, Number(match[3]) / 100]
+  const q = l < 0.5 ? l * (1 + s) : l + s - l * s
+  const p = 2 * l - q
+  const channel = (offset: number): number => {
+    const t = (((h + offset) % 1) + 1) % 1
+    const value =
+      t < 1 / 6
+        ? p + (q - p) * 6 * t
+        : t < 1 / 2
+          ? q
+          : t < 2 / 3
+            ? p + (q - p) * (2 / 3 - t) * 6
+            : p
+
+    return value <= 0.039_28 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4
+  }
+
+  return 0.2126 * channel(1 / 3) + 0.7152 * channel(0) + 0.0722 * channel(-1 / 3)
+}
+
+/** Las dos tintas posibles sobre un color: casi negra o blanca. Iguales en los dos temas. */
+const DARK_INK = '#080c0e'
+const LIGHT_INK = '#ffffff'
+
+/**
+ * La tinta que se lee sobre un color de fondo: la que más contraste tenga. Los
+ * verdes y ámbares claros del degradado llevan texto oscuro; el rojo, blanco.
+ */
+export function inkOn(background: string): string {
+  const lum = luminanceOf(background)
+
+  if (lum === null) return LIGHT_INK
+
+  // Contraste con negro (0,0035 es la luminancia de DARK_INK) frente a con blanco.
+  return (lum + 0.05) / (0.0035 + 0.05) >= 1.05 / (lum + 0.05) ? DARK_INK : LIGHT_INK
+}
+
+/** Fondo y tinta de una insignia de color con un número dentro. */
+export function badgeStyle(background: string): { background: string; color: string } {
+  return { background, color: inkOn(background) }
+}

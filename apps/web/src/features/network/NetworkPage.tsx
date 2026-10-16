@@ -16,6 +16,7 @@ import {
   legendOf,
   passColor,
   scaleColor,
+  badgeStyle,
 } from './colors'
 import type { Scale, ScaleMode } from './colors'
 import type { ColorMode } from './colors'
@@ -613,9 +614,7 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
                                     <span className="net-row-name">{node.login}</span>
                                     <span
                                       className="net-row-badge"
-                                      style={{
-                                        background: colorOf(node, 'endogamy', scales.endogamy),
-                                      }}
+                                      style={badgeStyle(colorOf(node, 'endogamy', scales.endogamy))}
                                     >
                                       {node.endogamy}
                                     </span>
@@ -745,7 +744,7 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
                                               <span
                                                 className="net-row-badge"
                                                 title={t('net.projects.pass')}
-                                                style={{ background: passColor(project.passRate) }}
+                                                style={badgeStyle(passColor(project.passRate))}
                                               >
                                                 {Math.round(project.passRate * 100)} %
                                               </span>

@@ -411,7 +411,7 @@
   min-width: 2rem;
   padding: 0.05rem 0.4rem;
   border-radius: 999px;
-  color: #fff;
+  /* La tinta la pone `badgeStyle` según el fondo. */
   font-weight: 700;
   font-size: 0.78rem;
   text-align: center;

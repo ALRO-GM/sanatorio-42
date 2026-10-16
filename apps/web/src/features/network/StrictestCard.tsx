@@ -6,7 +6,7 @@ import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { Avatar } from '../../shared/ui/Avatar'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
-import { passColor } from './colors'
+import { passColor, badgeStyle } from './colors'
 import { RankCard } from './RankCard'
 import type { Order } from './RankCard'
 
@@ -116,10 +116,7 @@ export function StrictestCard({ params, onSelect }: StrictestCardProps) {
             <span className="net-row-name">{person.login}</span>
             <span className="net-row-count">
               {t('net.strict.of', { failed: person.failed, judged: person.judged })}
-              <span
-                className="net-row-badge"
-                style={{ background: passColor(1 - person.failRate) }}
-              >
+              <span className="net-row-badge" style={badgeStyle(passColor(1 - person.failRate))}>
                 {Math.round(person.failRate * 100)} %
               </span>
             </span>
