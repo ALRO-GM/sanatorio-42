@@ -159,6 +159,11 @@
 dialog.layout-dialog {
   width: min(560px, calc(100vw - 1.5rem));
   max-height: calc(100vh - 3rem);
+  /* Con zoom o en móvil, la barra del navegador se come parte de 100vh: se usa
+     la altura que de verdad se ve, y lo que no cabe se desplaza. */
+  max-height: calc(100dvh - 2rem);
+  overflow: auto;
+  overflow-wrap: anywhere;
   padding: 1.25rem;
   border: 1.5px solid var(--border);
   border-radius: 18px;
@@ -171,6 +176,8 @@ dialog.layout-dialog::backdrop {
 }
 .layout-head {
   display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
   align-items: center;
   justify-content: space-between;
 }
