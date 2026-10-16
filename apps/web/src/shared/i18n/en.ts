@@ -392,6 +392,7 @@ export const en: Record<string, string> = {
   'agenda.empty': 'Nothing',
   'agenda.no42': 'Could not read 42 data: you only see Sanatorio events.',
   'agenda.from42': '42 events, exams and evaluations read {min} min ago.',
+  'agenda.refresh': 'Refresh',
   'agenda.back': 'Back to calendar',
   'agenda.when': 'When',
   'agenda.where': 'Where',

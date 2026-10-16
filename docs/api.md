@@ -534,8 +534,11 @@ validó los dos códigos de asistencia (ver "Reglas de los códigos").
 
 ## Calendario personal
 
-GET /calendar?from=&to= → tus eventos entre dos instantes (ISO-8601), ordenados
-por hora. Como mucho, 62 días de una vez.
+GET /calendar?from=&to=&fresh= → tus eventos entre dos instantes (ISO-8601), ordenados
+por hora. Como mucho, 62 días de una vez. Lo tuyo de 42 se guarda un cuarto de
+hora; con `fresh=1` (lo manda la web al abrir el calendario o pulsar
+«Actualizar») se vuelve a pedir si tiene más de dos minutos, para que salga una
+corrección recién reservada. `fresh` solo admite `0` o `1`.
 
 ```json
 {

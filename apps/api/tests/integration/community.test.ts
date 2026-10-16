@@ -813,6 +813,38 @@ describe('calendario', () => {
     expect(again.events.some((event) => event.id === 'event:500')).toBe(true)
   })
 
+  it('al mirarlo (`fresh=1`), lo tuyo de 42 se vuelve a pedir si tiene más de dos minutos', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] })
+    vi.setSystemTime(new Date('2026-10-06T06:00:00.000Z'))
+
+    try {
+      const built = await app({}, { routes: fortyTwo })
+      const http = client(built, await built.login())
+      const mine = (): number =>
+        built.provider.requests.filter((request) => request.url.includes('/users/1/')).length
+
+      await http.get(`/calendar?${range}`)
+      const first = mine()
+
+      // Al minuto y medio, ni de fondo ni al mirarlo: recargar sin parar no cuesta nada.
+      vi.setSystemTime(new Date('2026-10-06T06:01:30.000Z'))
+      await http.get(`/calendar?${range}&fresh=1`)
+      expect(mine()).toBe(first)
+
+      // A los tres minutos, de fondo sigue valiendo lo guardado; al mirarlo, no.
+      vi.setSystemTime(new Date('2026-10-06T06:03:00.000Z'))
+      await http.get(`/calendar?${range}`)
+      expect(mine()).toBe(first)
+      await http.get(`/calendar?${range}&fresh=1`)
+      expect(mine()).toBe(first + 3)
+
+      // Lo que no es 0 ni 1 no se adivina.
+      expect((await http.get(`/calendar?${range}&fresh=si`)).statusCode).toBe(400)
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
   it('si 42 no contesta, el calendario sale igual con lo propio', async () => {
     // Sin rutas de agenda: 42 responde 404 a todo lo del calendario.
     const built = await app()

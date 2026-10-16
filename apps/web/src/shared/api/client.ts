@@ -45,8 +45,9 @@ export const realApi: Api = {
 
   setAvailability: (available) => sendJson('PUT', '/me/availability', { available }),
 
+  // Solo lo pide quien está mirando su calendario: lo de 42 de hace dos minutos como mucho.
   getCalendar: (from, to) =>
-    getJson(`/calendar?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`),
+    getJson(`/calendar?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&fresh=1`),
 
   getProjectMap: (projectId) => getJson(`/projects/${projectId}/map`),
   getCampusMap: () => getJson('/map'),

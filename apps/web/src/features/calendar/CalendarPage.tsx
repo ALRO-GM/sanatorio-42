@@ -250,7 +250,10 @@ export function CalendarPage({ onGo, me }: CalendarPageProps) {
               ? t('agenda.no42')
               : t('agenda.from42', {
                   min: Math.max(0, Math.round((Date.now() - Date.parse(data.fortyTwoAt)) / 60_000)),
-                })}
+                })}{' '}
+            <button type="button" className="link" disabled={loading} onClick={() => void reload()}>
+              {t('agenda.refresh')}
+            </button>
           </p>
         )}
       </div>

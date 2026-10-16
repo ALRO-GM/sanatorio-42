@@ -141,6 +141,7 @@ export function createReplicaModule(deps: ReplicaModuleDeps): ReplicaModule {
 }
 
 export type { Agenda, AgendaEvaluation, AgendaEvent, UserAgenda } from './agenda.js'
+export { FRESH_USER_TTL_MS } from './agenda.js'
 export { LAST_CIRCLE, parseHours } from './curriculum.js'
 export type { Curriculum, Track } from './curriculum.js'
 export { hourlyQuota } from './quota.js'

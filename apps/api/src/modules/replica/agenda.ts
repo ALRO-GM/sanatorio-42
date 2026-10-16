@@ -67,6 +67,12 @@ const DAY = 24 * 60 * MINUTE
 /** Cada cuánto se vuelve a pedir lo del campus y lo de cada persona. */
 const CAMPUS_TTL_MS = 60 * MINUTE
 const USER_TTL_MS = 15 * MINUTE
+/**
+ * Lo más fresco que se puede pedir lo de una persona: quien abre el calendario
+ * quiere ver la corrección que acaba de reservar, pero recargar sin parar no
+ * debe costar tres peticiones cada vez.
+ */
+export const FRESH_USER_TTL_MS = 2 * MINUTE
 
 /** Ventana que se copia: un mes atrás (para ver el mes en curso entero) y tres adelante. */
 const PAST_DAYS = 31
@@ -208,9 +214,15 @@ export function createAgenda(options: AgendaOptions) {
      * Lo que una persona tiene apuntado en 42, refrescándolo antes si toca.
      *
      * @param userId Su id en 42. Sin él (sesiones antiguas) no se puede pedir nada.
+     * @param maxAgeMs Cuánto puede tener lo guardado para servirlo sin preguntar.
+     *   De fábrica, un cuarto de hora; nunca menos de `FRESH_USER_TTL_MS`.
      * @returns `null` si nunca se ha podido leer.
      */
-    async userAgenda(login: string, userId: number | null): Promise<UserAgenda | null> {
+    async userAgenda(
+      login: string,
+      userId: number | null,
+      maxAgeMs: number = USER_TTL_MS,
+    ): Promise<UserAgenda | null> {
       const read = async (): Promise<UserAgenda | null> => {
         const result = await db.execute({
           sql: 'SELECT * FROM agenda_users WHERE login = ?',
@@ -228,7 +240,8 @@ export function createAgenda(options: AgendaOptions) {
             }
       }
       const stored = await read()
-      const fresh = stored !== null && now() - Date.parse(stored.fetchedAt) < USER_TTL_MS
+      const ttl = Math.max(FRESH_USER_TTL_MS, maxAgeMs)
+      const fresh = stored !== null && now() - Date.parse(stored.fetchedAt) < ttl
 
       // Si la cuota va justa, se sirve lo guardado y esa persona coge turno en la cola.
       if (fresh || userId === null || !(await quota.defer(login, 'agenda'))) {

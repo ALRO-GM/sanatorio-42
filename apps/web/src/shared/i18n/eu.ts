@@ -379,6 +379,7 @@ export const eu: Record<string, string> = {
   'agenda.empty': 'Ezer ez',
   'agenda.no42': 'Ezin izan dira 42ko datuak irakurri: Sanatoriokoak bakarrik ikusten dituzu.',
   'agenda.from42': '42ko ekitaldiak, azterketak eta zuzenketak duela {min} min irakurrita.',
+  'agenda.refresh': 'Eguneratu',
   'agenda.back': 'Itzuli egutegira',
   'agenda.when': 'Noiz',
   'agenda.where': 'Non',

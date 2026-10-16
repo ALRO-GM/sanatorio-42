@@ -27,6 +27,7 @@ import { domainError } from '../../core/errors.js'
 import { minutesOf, zonedInstant } from '../../core/time.js'
 import type { BoardsService } from '../boards/index.js'
 import type { HelpService } from '../help/index.js'
+import { FRESH_USER_TTL_MS } from '../replica/index.js'
 import type { Agenda, ReplicaRepository } from '../replica/index.js'
 import type { TherapyService } from '../therapy/index.js'
 
@@ -163,10 +164,13 @@ export function createCalendarService(options: CalendarServiceOptions) {
     userId: number | null,
     from: number,
     to: number,
+    fresh = false,
   ): Promise<{ events: CalendarEvent[]; at: string | null }> {
     const [campus, mine] = await Promise.all([
       agenda.campusEvents(actor.campusId, iso(from), iso(to)),
-      agenda.userAgenda(actor.login, userId),
+      fresh
+        ? agenda.userAgenda(actor.login, userId, FRESH_USER_TTL_MS)
+        : agenda.userAgenda(actor.login, userId),
     ])
     const events: CalendarEvent[] = []
 
@@ -223,6 +227,9 @@ export function createCalendarService(options: CalendarServiceOptions) {
      * Los eventos de `actor` entre dos instantes, ordenados por hora.
      *
      * @param userId Su id en 42, para pedir lo que tiene apuntado allí.
+     * @param fresh `true` si lo pide la persona al mirar su calendario: lo de 42
+     *   se vuelve a pedir si tiene más de dos minutos (una corrección recién
+     *   reservada tiene que salir). De fondo basta con lo de un cuarto de hora.
      * @throws {DomainError} 400 si las fechas no valen o el intervalo es demasiado largo.
      */
     async between(
@@ -230,6 +237,7 @@ export function createCalendarService(options: CalendarServiceOptions) {
       userId: number | null,
       fromIso: string | undefined,
       toIso: string | undefined,
+      fresh = false,
     ): Promise<Calendar> {
       const from = Date.parse(fromIso ?? '')
       const to = Date.parse(toIso ?? '')
@@ -246,7 +254,7 @@ export function createCalendarService(options: CalendarServiceOptions) {
         helpEvents(actor, timeZone),
         therapyEvents(actor, from, to, timeZone),
         boardEvents(actor, from, to),
-        fortyTwoEvents(actor, userId, from, to),
+        fortyTwoEvents(actor, userId, from, to, fresh),
       ])
       const inRange = (event: CalendarEvent): boolean =>
         Date.parse(event.start) < to && Date.parse(event.end) > from

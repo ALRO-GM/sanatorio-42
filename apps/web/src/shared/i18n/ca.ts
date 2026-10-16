@@ -376,6 +376,7 @@ export const ca: Record<string, string> = {
   'agenda.empty': 'Res',
   'agenda.no42': "No s'han pogut llegir les dades de 42: només veus el de Sanatorio.",
   'agenda.from42': 'Esdeveniments, exàmens i correccions de 42 llegits fa {min} min.',
+  'agenda.refresh': 'Actualitza',
   'agenda.back': 'Torna al calendari',
   'agenda.when': 'Quan',
   'agenda.where': 'On',
