@@ -903,6 +903,8 @@ export const ca: Record<string, string> = {
   'finder.label': 'Cerca persones',
   'finder.placeholder': 'Cerca algú…',
   'finder.none': 'Ningú es diu així',
+  'finder.recent': 'Cerques recents',
+  'finder.recentClear': 'Esborra',
   'tour.speed': 'Velocitat ×{n}',
   'tour.guard.1': "Marca les mitges hores en què t'ofereixes avui.",
   'tour.guard.2': 'Tria quant de temps vols ajudar com a molt.',

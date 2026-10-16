@@ -1092,6 +1092,8 @@ export const es: Record<string, string> = {
   'finder.label': 'Buscar personas',
   'finder.placeholder': 'Buscar a alguien…',
   'finder.none': 'Nadie se llama así',
+  'finder.recent': 'Búsquedas recientes',
+  'finder.recentClear': 'Borrar',
   'tour.speed': 'Velocidad ×{n}',
   'tour.guard.1': 'Marca las medias horas en las que te ofreces hoy.',
   'tour.guard.2': 'Elige cuánto tiempo quieres ayudar como mucho.',

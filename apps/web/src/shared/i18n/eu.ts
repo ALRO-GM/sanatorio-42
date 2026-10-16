@@ -909,6 +909,8 @@ export const eu: Record<string, string> = {
   'finder.label': 'Bilatu pertsonak',
   'finder.placeholder': 'Bilatu norbait…',
   'finder.none': 'Inor ez da horrela deitzen',
+  'finder.recent': 'Azken bilaketak',
+  'finder.recentClear': 'Ezabatu',
   'tour.speed': 'Abiadura ×{n}',
   'tour.guard.1': 'Markatu gaur eskaintzen zaren ordu erdiak.',
   'tour.guard.2': 'Aukeratu gehienez zenbat denbora lagundu nahi duzun.',

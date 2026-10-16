@@ -4,7 +4,12 @@ import { useI18n } from '../../shared/i18n'
 import { Avatar } from '../../shared/ui/Avatar'
 import { Icon } from '../../shared/ui/Icon'
 import { recordHref } from '../../shared/links'
+import { forget, recentOf, remember } from '../../shared/recent'
+import type { RecentPerson } from '../../shared/recent'
 import { usePeopleSearch } from './usePeopleSearch'
+
+/** Las recientes del buscador de la cabecera. */
+const RECENT_LIST = 'people'
 
 /**
  * El buscador de personas de la cabecera. Se escribe un login o un nombre, da
@@ -21,12 +26,17 @@ export function PersonFinder() {
   const box = useRef<HTMLDivElement>(null)
   const input = useRef<HTMLInputElement>(null)
   const found = usePeopleSearch(text)
+  // Con el campo vacío y a la vista, las últimas personas buscadas.
+  const [focused, setFocused] = useState(false)
+  const [recent, setRecent] = useState<RecentPerson[]>(() => recentOf(RECENT_LIST))
+  const showRecent = found === null && text.trim() === '' && focused && recent.length > 0
 
   // Se cierra al pulsar fuera.
   useEffect(() => {
     const onDown = (event: PointerEvent): void => {
       if (event.target instanceof Node && box.current?.contains(event.target) === false) {
         setOpen(false)
+        setFocused(false)
         setText('')
       }
     }
@@ -40,10 +50,12 @@ export function PersonFinder() {
 
   const close = (): void => {
     setOpen(false)
+    setFocused(false)
     setText('')
     input.current?.blur()
   }
-  const go = (login: string): void => {
+  const go = (login: string, image: string | null = null): void => {
+    setRecent(remember(RECENT_LIST, { login, image }))
     window.location.hash = recordHref(login)
     close()
   }
@@ -78,11 +90,48 @@ export function PersonFinder() {
           onChange={(event) => {
             setText(event.target.value)
           }}
+          onFocus={() => {
+            setFocused(true)
+          }}
           onKeyDown={(event) => {
             if (event.key === 'Escape') close()
-            if (event.key === 'Enter' && found?.[0] !== undefined) go(found[0].login)
+            if (event.key === 'Enter' && found?.[0] !== undefined) {
+              go(found[0].login, found[0].image)
+            }
           }}
         />
+        {showRecent && (
+          <ul className="finder-list">
+            <li className="finder-recent-head">
+              <span>{t('finder.recent')}</span>
+              <button
+                type="button"
+                className="link"
+                onClick={() => {
+                  forget(RECENT_LIST)
+                  setRecent([])
+                }}
+              >
+                {t('finder.recentClear')}
+              </button>
+            </li>
+            {recent.map((person) => (
+              <li key={person.login}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    go(person.login, person.image)
+                  }}
+                >
+                  <Avatar login={person.login} image={person.image} size={32} />
+                  <span>
+                    <strong>{person.login}</strong>
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
         {found !== null && (
           <ul className="finder-list">
             {found.length === 0 ? (
@@ -93,7 +142,7 @@ export function PersonFinder() {
                   <button
                     type="button"
                     onClick={() => {
-                      go(person.login)
+                      go(person.login, person.image)
                     }}
                   >
                     <Avatar login={person.login} image={person.image} size={32} />

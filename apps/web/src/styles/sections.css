@@ -876,3 +876,17 @@ dialog.legal-gate {
 .guard-line.off svg {
   color: var(--text-4);
 }
+
+/* Búsquedas recientes, encima de la lista: título pequeño y «borrar». */
+.finder-recent-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.3rem 0.6rem;
+  color: var(--text-3);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  gap: 1rem;
+}

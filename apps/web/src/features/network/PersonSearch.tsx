@@ -6,6 +6,11 @@ import { api } from '../../shared/api'
 import { useI18n } from '../../shared/i18n'
 import { Avatar } from '../../shared/ui/Avatar'
 import { Icon } from '../../shared/ui/Icon'
+import { forget, recentOf, remember } from '../../shared/recent'
+import type { RecentPerson } from '../../shared/recent'
+
+/** Las recientes del buscador de la Red. */
+const RECENT_LIST = 'network'
 
 type PersonSearchProps = {
   /** Persona en la que está centrado el grafo, o `null`. */
@@ -25,6 +30,9 @@ export function PersonSearch({ value, me, onChange, campuses }: PersonSearchProp
   const { t } = useI18n()
   const [text, setText] = useState('')
   const [found, setFound] = useState<NetworkPerson[]>([])
+  // Con el campo vacío y a la vista, las últimas personas buscadas aquí.
+  const [focused, setFocused] = useState(false)
+  const [recent, setRecent] = useState<RecentPerson[]>(() => recentOf(RECENT_LIST))
 
   useEffect(() => {
     const prefix = text.trim().toLowerCase()
@@ -53,9 +61,11 @@ export function PersonSearch({ value, me, onChange, campuses }: PersonSearchProp
     }
   }, [text, campuses])
 
-  const choose = (login: string | null): void => {
+  const choose = (login: string | null, image: string | null = null): void => {
+    if (login !== null && login !== me) setRecent(remember(RECENT_LIST, { login, image }))
     setText('')
     setFound([])
+    setFocused(false)
     onChange(login)
   }
 
@@ -89,11 +99,14 @@ export function PersonSearch({ value, me, onChange, campuses }: PersonSearchProp
           onChange={(event) => {
             setText(event.target.value)
           }}
+          onFocus={() => {
+            setFocused(true)
+          }}
           onKeyDown={(event) => {
             const first = found[0]
 
             if (event.key === 'Enter' && first !== undefined) {
-              choose(first.login)
+              choose(first.login, first.image)
             }
           }}
         />
@@ -107,6 +120,36 @@ export function PersonSearch({ value, me, onChange, campuses }: PersonSearchProp
           {t('net.person.me')}
         </button>
       </div>
+      {focused && text.trim() === '' && recent.length > 0 && (
+        <ul className="net-search-list">
+          <li className="finder-recent-head">
+            <span>{t('finder.recent')}</span>
+            <button
+              type="button"
+              className="link"
+              onClick={() => {
+                forget(RECENT_LIST)
+                setRecent([])
+              }}
+            >
+              {t('finder.recentClear')}
+            </button>
+          </li>
+          {recent.map((person) => (
+            <li key={person.login}>
+              <button
+                type="button"
+                onClick={() => {
+                  choose(person.login, person.image)
+                }}
+              >
+                <Avatar login={person.login} image={person.image} size={22} />
+                <span>{person.login}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
       {found.length > 0 && (
         <ul className="net-search-list">
           {found.map((person) => (
@@ -114,7 +157,7 @@ export function PersonSearch({ value, me, onChange, campuses }: PersonSearchProp
               <button
                 type="button"
                 onClick={() => {
-                  choose(person.login)
+                  choose(person.login, person.image)
                 }}
               >
                 <Avatar login={person.login} image={person.image} size={22} />
