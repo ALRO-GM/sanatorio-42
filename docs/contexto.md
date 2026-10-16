@@ -6,7 +6,7 @@ hace la web está en el [README](../README.md); cómo está montada, en
 [architecture.md](architecture.md); el contrato HTTP, en [api.md](api.md). Aquí
 va lo que no está en el código.
 
-Última puesta al día: 2026-10-12.
+Última puesta al día: 2026-10-16.
 
 **Al retomar con el contexto vacío, lo primero es
 [tareas-tras-compactar.md](tareas-tras-compactar.md)**: es la lista de lo que hay
@@ -20,6 +20,22 @@ que hacer, en orden. Este documento es el porqué; aquel, el qué.
   de respaldo anterior a la red de correcciones: `punto-guardado-2026-10-11`.
 - Antes de dar algo por hecho: `npm run check` (tipos, lint, formato y tests).
 - Los cambios de la web se prueban con `npm run dev:mock` y Chrome sin ventana.
+
+## Estado a 2026-10-16
+
+- **Tanda del buzón** (39 puntos sacados de los 64 mensajes): el plan, con lo
+  hecho marcado, está en [tareas-tras-compactar.md](tareas-tras-compactar.md),
+  apartado 2. Alberto autorizó commit, push y despliegue por cada punto.
+- Hechos y en producción los bloques A (fallos) y B (seguridad, moderación y
+  legal): correcciones sin falta automática, guardia, buzón de admins, Red,
+  holy graph por votos, **fotos servidas por la API** (la CDN de 42 da 403 sin
+  sesión), cabeceras, denuncias con motivo, buzón con tipo y sección, borrar y
+  guardar avisos, **segundo factor del panel** (TOTP, cada 12 h; si se pierde
+  el móvil: `DELETE FROM admin_second_factor WHERE login = '…'` por SSH),
+  **privacidad y condiciones** con aceptación y descarga de datos, y la
+  **revisión de trampas** de Code Clicker con bolsa común.
+- Base en la versión 43. `npm run check`: 561 tests de la API y 181 de la web.
+- El texto legal es de base: conviene que lo revise alguien de leyes.
 
 ## Estado a 2026-10-12
 
