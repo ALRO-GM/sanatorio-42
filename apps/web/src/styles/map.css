@@ -518,3 +518,37 @@ button.seat.open {
       0 0 16px 4px color-mix(in srgb, #ffd65a 80%, transparent);
   }
 }
+
+/* Un puesto que no funciona: tachado en rojo. */
+.seat.broken {
+  border-color: var(--danger);
+  background:
+    linear-gradient(
+      45deg,
+      transparent 46%,
+      color-mix(in srgb, var(--danger) 70%, transparent) 46% 54%,
+      transparent 54%
+    ),
+    linear-gradient(
+      -45deg,
+      transparent 46%,
+      color-mix(in srgb, var(--danger) 70%, transparent) 46% 54%,
+      transparent 54%
+    ),
+    var(--surface);
+}
+
+/* Proponer puestos, encima del mapa del formulario de terapia. */
+.seat-propose {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+.seat-propose label {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.4rem;
+}

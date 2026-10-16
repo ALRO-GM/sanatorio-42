@@ -104,6 +104,14 @@ export function levelFor(xp: number): Expediente['xp'] {
   }
 }
 
+/** Grupos de los que ya se avisó, y a cuánta gente. */
+export const invitedGroups = new Map<number, number>()
+
+/** Puestos que alguien ha dicho que no funcionan (uno de muestra). */
+export const brokenSeats = new Map<string, { by: string; at: string }>([
+  ['c1r5s8', { by: 'rsoto', at: new Date().toISOString() }],
+])
+
 export function groupView(group: StoredGroup): GroupView {
   return {
     ...group,
@@ -118,6 +126,7 @@ export function groupView(group: StoredGroup): GroupView {
     canClose: true,
     // Reunido si hoy es uno de sus días (aquí no se mira la hora).
     inSession: group.dates.includes(today()),
+    invited: invitedGroups.get(group.id) ?? null,
   }
 }
 
@@ -203,6 +212,7 @@ export function buildMap(projectId?: number): ClusterMap {
             row,
             seat,
             occupant: seated.get(host) ?? null,
+            broken: brokenSeats.get(host) ?? null,
             reservation:
               group === undefined
                 ? null

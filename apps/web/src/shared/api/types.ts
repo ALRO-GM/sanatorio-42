@@ -160,6 +160,9 @@ export type Api = {
   getProjectMap: (projectId: number) => Promise<ClusterMap>
   /** El plano a secas: ocupación y reservas, para elegir puestos. */
   getCampusMap: () => Promise<ClusterMap>
+  /** Ese puesto no funciona (vale una semana), o ya funciona. */
+  reportBrokenSeat: (host: string) => Promise<void>
+  clearBrokenSeat: (host: string) => Promise<void>
   /** Todas tus conversaciones, con lo que has apuntado de cada una. */
   getConversations: () => Promise<Conversations>
   /** Cambia lo apuntado de una conversación; devuelve la lista al día. */
@@ -370,6 +373,8 @@ export type Api = {
   joinGroup: (id: number, progress?: number) => Promise<void>
   leaveGroup: (id: number) => Promise<void>
   closeGroup: (id: number) => Promise<void>
+  /** Avisa del grupo a quien hace el proyecto en el campus (una vez, quien lo abrió). */
+  inviteGroup: (id: number) => Promise<{ invited: number }>
 
   // --- Tablón de dudas
   /** El common core por círculos, con tu estado y dónde hace falta una mano. */

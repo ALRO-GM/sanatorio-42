@@ -38,6 +38,8 @@ type ClusterMapViewProps = {
   legend?: readonly LegendItem[]
   /** Si viene, se resalta a esta gente y se apaga al resto (los filtros de una lista). */
   spotlight?: ReadonlySet<string> | null
+  /** Si viene, en un puesto libre se puede avisar de que no funciona, o de que ya sí. */
+  onBroken?: (host: string, broken: boolean) => void
 }
 
 /** Abre el expediente de quien ocupa un puesto en otra pestaña. */
@@ -46,7 +48,15 @@ function openRecord(seat: MapSeat): void {
 }
 
 type LegendItem =
-  'patient' | 'specialist' | 'reserved' | 'clash' | 'occupied' | 'free' | 'picked' | 'online'
+  | 'patient'
+  | 'specialist'
+  | 'reserved'
+  | 'clash'
+  | 'occupied'
+  | 'free'
+  | 'picked'
+  | 'online'
+  | 'broken'
 
 const DEFAULT_LEGEND: readonly LegendItem[] = [
   'specialist',
@@ -54,6 +64,7 @@ const DEFAULT_LEGEND: readonly LegendItem[] = [
   'reserved',
   'occupied',
   'free',
+  'broken',
 ]
 
 /** El cluster que más interesa abrir: donde hay alguien de guardia, o si no, donde hay más gente. */
@@ -70,6 +81,8 @@ function seatClasses(seat: MapSeat, picked: boolean, reserved: boolean): string 
     seat.occupant === null ? 'free' : 'occupied',
     seat.occupant?.duty ?? '',
     seat.occupant?.me === true ? 'me' : '',
+    // Roto solo se pinta si está libre: si hay alguien sentado, funciona.
+    seat.broken !== null && seat.occupant === null ? 'broken' : '',
     reserved ? 'reserved' : '',
     reserved && seat.reservation?.inSession === true ? 'in-session' : '',
     picked ? 'picked' : '',
@@ -90,6 +103,7 @@ function seatLabel(seat: MapSeat, t: Translate, reserved: boolean): string {
   }
 
   if (reserved) parts.push(t('map.seatReserved'))
+  if (seat.broken !== null && seat.occupant === null) parts.push(t('map.seatBroken'))
 
   return parts.join(' · ')
 }
@@ -108,6 +122,7 @@ export function ClusterMapView({
   showReservation = (reservation) => reservation.inSession,
   legend = DEFAULT_LEGEND,
   spotlight = null,
+  onBroken,
 }: ClusterMapViewProps) {
   const { t } = useI18n()
   const [chosenCluster, setChosenCluster] = useState<string | null>(null)
@@ -359,8 +374,19 @@ export function ClusterMapView({
           <strong className="seat-host" title={open.host}>
             {seatName(open.host, t)}
           </strong>
-          <span>{t('map.seatFree')}</span>
+          <span>{open.broken === null ? t('map.seatFree') : t('map.seatBroken')}</span>
           {openReservation !== null && <ReservationNote reservation={openReservation} />}
+          {onBroken !== undefined && (
+            <button
+              type="button"
+              className="pill"
+              onClick={() => {
+                onBroken(open.host, open.broken === null)
+              }}
+            >
+              {open.broken === null ? t('map.reportBroken') : t('map.fixed')}
+            </button>
+          )}
         </div>
       )}
 
@@ -368,7 +394,7 @@ export function ClusterMapView({
         {legend.map((item) => (
           <li key={item}>
             <span
-              className={`seat sample ${item === 'clash' ? 'reserved free' : item === 'reserved' ? 'reserved free' : item === 'online' ? 'occupied' : item}`}
+              className={`seat sample ${item === 'clash' ? 'reserved free' : item === 'reserved' ? 'reserved free' : item === 'online' ? 'occupied' : item === 'broken' ? 'free broken' : item}`}
             >
               {item === 'online' && <i className="seat-online" />}
             </span>

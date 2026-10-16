@@ -395,6 +395,47 @@ export function createTherapyService(options: TherapyServiceOptions) {
       }
     },
 
+    /**
+     * Avisa del grupo a quien tiene el proyecto en curso en el campus y aún no
+     * está dentro. Solo quien lo abrió, y una sola vez por grupo: es un aviso
+     * en el buzón de mucha gente.
+     *
+     * @returns A cuántas personas se avisó.
+     * @throws {DomainError} `forbidden` si no lo abrió; `conflict` si está
+     *   cerrado o ya se avisó.
+     */
+    async invite(actor: Actor, groupId: number): Promise<{ invited: number }> {
+      const group = await mustGet(groupId, actor)
+
+      if (group.creator !== actor.login) {
+        throw domainError('forbidden', 'Solo quien abrió el grupo puede avisar')
+      }
+      if (group.closed) {
+        throw domainError('conflict', 'Ese grupo ya está cerrado')
+      }
+      if (group.invited !== null) {
+        throw domainError('conflict', 'Ya se avisó de este grupo')
+      }
+
+      const people = (await replica.doingProject(group.projectId, group.campusId)).filter(
+        (login) => !group.members.includes(login),
+      )
+
+      if (!(await therapy.markInvited(groupId, people.length))) {
+        throw domainError('conflict', 'Ya se avisó de este grupo')
+      }
+
+      await notify({
+        to: people,
+        kind: 'group_invite',
+        ref: `group:${groupId}`,
+        from: actor.login,
+        text: group.projectName,
+      })
+
+      return { invited: people.length }
+    },
+
     /** Cierra el grupo. Solo quien lo abrió, o quien modera. */
     async close(actor: Actor, groupId: number): Promise<void> {
       const group = await mustGet(groupId, actor)

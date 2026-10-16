@@ -43,6 +43,11 @@ export type MapSeat = {
     finishedMine: number | null
   } | null
   reservation: SeatReservation | null
+  /**
+   * Si alguien ha avisado de que no funciona (vale una semana): quién y
+   * cuándo. Un puesto roto no se propone para una terapia.
+   */
+  broken: { by: string; at: string } | null
 }
 
 export type MapCluster = {

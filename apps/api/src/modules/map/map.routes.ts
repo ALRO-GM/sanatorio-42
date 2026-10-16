@@ -37,4 +37,18 @@ export function registerMapRoutes(
 
     return reply.send(await map.forCampus(await session.actor(request)))
   })
+
+  /** `POST /map/seats/:host/broken` → ese puesto no funciona (vale una semana). 204. */
+  app.post<{ Params: { host: string } }>('/map/seats/:host/broken', async (request, reply) => {
+    await map.reportBroken(await session.actor(request), request.params.host)
+
+    return reply.code(204).send()
+  })
+
+  /** `DELETE /map/seats/:host/broken` → ya funciona. 204. */
+  app.delete<{ Params: { host: string } }>('/map/seats/:host/broken', async (request, reply) => {
+    await map.clearBroken(await session.actor(request), request.params.host)
+
+    return reply.code(204).send()
+  })
 }

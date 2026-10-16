@@ -34,7 +34,7 @@ import { createHelpModule } from '../modules/help/index.js'
 import type { HelpModule } from '../modules/help/index.js'
 import { createLegalModule } from '../modules/legal/index.js'
 import type { LegalModule } from '../modules/legal/index.js'
-import { createMapModule } from '../modules/map/index.js'
+import { createBrokenSeats, createMapModule } from '../modules/map/index.js'
 import type { MapModule } from '../modules/map/index.js'
 import { createMeetModule } from '../modules/meet/index.js'
 import type { MeetModule } from '../modules/meet/index.js'
@@ -207,6 +207,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     therapy: therapy.service,
     online,
     circlesOf: (logins) => replica.curriculum.circlesOf(logins),
+    broken: createBrokenSeats(db),
     ...clock,
   })
 

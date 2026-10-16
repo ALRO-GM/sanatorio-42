@@ -34,7 +34,12 @@ export function ClustersPage({ me }: { me: string }) {
           <div className="card">
             <ClusterMapView
               map={map.data}
-              legend={['online', 'occupied', 'reserved', 'free']}
+              legend={['online', 'occupied', 'reserved', 'free', 'broken']}
+              onBroken={(host, broken) => {
+                void (broken ? api.reportBrokenSeat(host) : api.clearBrokenSeat(host))
+                  .then(() => map.reload())
+                  .catch(() => undefined)
+              }}
               onChat={(login) => {
                 openChat(directChatId(me, login))
               }}

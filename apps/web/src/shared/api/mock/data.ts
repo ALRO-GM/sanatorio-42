@@ -161,7 +161,7 @@ export const CLUSTER_SIZES: Record<string, [rows: number, seats: number]> = {
 
 export type StoredGroup = Omit<
   GroupView,
-  'members' | 'joined' | 'mine' | 'canClose' | 'inSession'
+  'members' | 'joined' | 'mine' | 'canClose' | 'inSession' | 'invited'
 > & {
   members: string[]
   /** Cómo llevaba el proyecto cada persona al apuntarse. */

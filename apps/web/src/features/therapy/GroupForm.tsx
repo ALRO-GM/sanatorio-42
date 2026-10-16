@@ -282,6 +282,10 @@ export function GroupForm({ projects, defaultProject, group, onCancel, onSaved }
         <SeatPicker
           value={form.seats}
           onToggle={toggleSeat}
+          onPropose={(hosts) => {
+            updateSeats(() => hosts)
+          }}
+          max={MAX_SEATS}
           when={{ dates: form.dates, start: form.start, end: form.end }}
         />
         <label className="seat-manual">

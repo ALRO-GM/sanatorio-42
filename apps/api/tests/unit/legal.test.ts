@@ -92,6 +92,7 @@ describe('privacidad y condiciones', () => {
       'settings.updated_by',
       'staff_accounts.created_by',
       'seats.host',
+      'broken_seats.host',
       'presence.host',
       'notices.from_login',
       'help_bookings.helper_tag',

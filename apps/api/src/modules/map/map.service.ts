@@ -19,6 +19,9 @@ import type { PeersService } from '../peers/index.js'
 import { LOCATION_MAX_AGE_MS } from '../replica/index.js'
 import type { ReplicaRepository, Syncer } from '../replica/index.js'
 import type { TherapyService } from '../therapy/index.js'
+import { domainError } from '../../core/errors.js'
+import { BROKEN_FOR_MS, MAX_BROKEN_PER_PERSON } from './broken-seats.js'
+import type { BrokenSeats } from './broken-seats.js'
 import { hostAt, parseHost } from './seat-layout.js'
 import type { SeatPosition } from './seat-layout.js'
 
@@ -29,6 +32,8 @@ export type MapServiceOptions = {
   therapy: TherapyService
   /** Quién tiene la web abierta ahora mismo. */
   online?: () => Promise<Set<string>>
+  /** Los puestos que no funcionan. Sin esto, ninguno lo está. */
+  broken?: BrokenSeats
   /** El círculo en que va cada persona, sin preguntar a 42. */
   circlesOf?: (logins: readonly string[]) => Promise<Map<string, number>>
   now?: () => number
@@ -44,7 +49,43 @@ export function createMapService(options: MapServiceOptions) {
   const { replica, sync, peers, therapy } = options
   const now = options.now ?? Date.now
 
+  /** Desde cuándo vale un aviso de puesto roto. */
+  const brokenSince = (): string => new Date(now() - BROKEN_FOR_MS).toISOString()
+
+  /** El nombre del puesto, en minúsculas, si es uno que se sabe colocar. */
+  const seatHost = (host: unknown): string => {
+    const name = typeof host === 'string' ? host.trim().toLowerCase() : ''
+
+    if (parseHost(name) === null) throw domainError('invalid_input', 'Ese puesto no existe')
+
+    return name
+  }
+
   return {
+    /**
+     * Avisa de que un puesto no funciona: sale tachado en el mapa una semana y
+     * no se propone para una terapia.
+     *
+     * @throws {DomainError} `invalid_input` si el nombre no es de un puesto;
+     *   `conflict` si ya tiene demasiados avisos puestos.
+     */
+    async reportBroken(actor: Actor, host: unknown): Promise<void> {
+      const name = seatHost(host)
+
+      const mine = (await options.broken?.countBy(actor.login, brokenSince())) ?? 0
+
+      if (mine >= MAX_BROKEN_PER_PERSON) {
+        throw domainError('conflict', `Como mucho ${MAX_BROKEN_PER_PERSON} puestos rotos a la vez`)
+      }
+
+      await options.broken?.report(actor.campusId, name, actor.login, new Date(now()).toISOString())
+    },
+
+    /** Ya funciona: cualquiera que esté delante puede decirlo. */
+    async clearBroken(actor: Actor, host: unknown): Promise<void> {
+      await options.broken?.clear(actor.campusId, seatHost(host))
+    },
+
     /**
      * El campus que mira `actor`.
      *
@@ -65,11 +106,13 @@ export function createMapService(options: MapServiceOptions) {
       }
 
       const since = new Date(now() - LOCATION_MAX_AGE_MS).toISOString()
-      const [known, present, reservations, online] = await Promise.all([
+      const [known, present, reservations, online, broken] = await Promise.all([
         replica.knownSeats(actor.campusId),
         replica.presenceIn(actor.campusId, since),
         therapy.reservations(actor.campusId),
         options.online?.() ?? new Set<string>(),
+        options.broken?.listSince(actor.campusId, brokenSince()) ??
+          new Map<string, { by: string; at: string }>(),
       ])
 
       // De guardia = disponible y sentado. Misma regla que en la lista.
@@ -98,7 +141,13 @@ export function createMapService(options: MapServiceOptions) {
           return null
         }
 
-        const seat: PlacedSeat = { host, ...position, occupant: null, reservation: null }
+        const seat: PlacedSeat = {
+          host,
+          ...position,
+          occupant: null,
+          reservation: null,
+          broken: broken.get(host) ?? null,
+        }
 
         seats.set(host, seat)
 

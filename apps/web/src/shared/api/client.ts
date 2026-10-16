@@ -51,6 +51,8 @@ export const realApi: Api = {
 
   getProjectMap: (projectId) => getJson(`/projects/${projectId}/map`),
   getCampusMap: () => getJson('/map'),
+  reportBrokenSeat: (host) => send('POST', `/map/seats/${encodeURIComponent(host)}/broken`),
+  clearBrokenSeat: (host) => send('DELETE', `/map/seats/${encodeURIComponent(host)}/broken`),
   getConversations: () => getJson('/conversations'),
   markConversation: (change) => sendJson('PUT', '/conversations/mark', change),
 
@@ -218,6 +220,7 @@ export const realApi: Api = {
     send('POST', `/groups/${id}/join`, progress === undefined ? {} : { progress }),
   leaveGroup: (id) => send('DELETE', `/groups/${id}/join`),
   closeGroup: (id) => send('DELETE', `/groups/${id}`),
+  inviteGroup: (id) => sendJson('POST', `/groups/${id}/invite`),
 
   getDoubtGraph: () => getJson('/doubts/graph'),
   getDoubtBoard: (projectId) => getJson(`/projects/${projectId}/doubts`),

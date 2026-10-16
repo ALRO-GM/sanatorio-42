@@ -157,6 +157,10 @@ export const en: Record<string, string> = {
   'therapy.join': 'Join the group',
   'therapy.leave': 'Leave the group',
   'therapy.close': 'Close group',
+  'therapy.invited': 'You told {n} people doing the project',
+  'therapy.inviteAsk':
+    'Tell everyone doing {project} on your campus about the group? You can only do it once.',
+  'therapy.invite': 'Tell who is doing the project',
   'therapy.remove': 'Remove (moderation)',
   'therapy.removeAsk': 'Remove {creator}’s group? It is closed and its members are told.',
   'therapy.copy': 'Copy logins',
@@ -688,6 +692,14 @@ export const en: Record<string, string> = {
   'map.mate.done': 'Finished it',
   'map.middleClick': 'Middle click (or Ctrl + click) on a seat opens their record in a new tab.',
   'map.circle': 'Circle {n}',
+  'map.proposeNone': 'There are not that many free seats together: try fewer.',
+  'map.proposeHint': 'Finds free, working seats together, as close to you as possible.',
+  'map.propose': 'Suggest seats',
+  'map.proposeHow': 'Seats',
+  'map.legend.broken': 'Not working (reported this week)',
+  'map.fixed': 'It works now',
+  'map.reportBroken': 'Report it is not working',
+  'map.seatBroken': 'Not working',
   'map.finishedMine': 'Finished your project: {n}',
   'net.projects.hint':
     'Number of evaluations and how many passed, all time. Click one to see only its network.',
@@ -895,6 +907,7 @@ export const en: Record<string, string> = {
   'notices.kind.board_cancelled': '{from} cancelled a whiteboard',
   'notices.kind.group_joined': '{from} joined your therapy group',
   'notices.kind.group_closed': '{from} closed a therapy group',
+  'notices.kind.group_invite': '{from} opened a therapy group for a project you are doing',
   'notices.kind.clicker_defense': '{from} answered a Code Clicker review',
   'admin.inbox.sent':
     'Answer sent. {login} gets a notice in their mailbox (the envelope in the header).',

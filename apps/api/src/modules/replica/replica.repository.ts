@@ -522,6 +522,21 @@ export function createReplicaRepository(db: Db) {
     },
 
     /** Personas del campus con alguna fila en el proyecto, hagan lo que hagan. */
+    /** Logins de quienes tienen ese proyecto en curso en ese campus. */
+    async doingProject(projectId: number, campusId: number): Promise<string[]> {
+      const result = await db.execute({
+        sql: `SELECT DISTINCT u.login
+              FROM project_users pu
+              JOIN users u ON u.id = pu.user_id
+              JOIN campus_members cm ON cm.user_id = pu.user_id AND cm.campus_id = ?
+              WHERE pu.project_id = ? AND pu.status = 'in_progress'
+              ORDER BY u.login`,
+        args: [campusId, projectId],
+      })
+
+      return result.rows.map((row) => toText(row.login))
+    },
+
     async countParticipants(projectId: number, campusId: number): Promise<number> {
       const result = await db.execute({
         sql: `SELECT COUNT(DISTINCT pu.user_id) AS total

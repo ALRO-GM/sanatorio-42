@@ -51,6 +51,7 @@ describe('migraciones', () => {
       'boards',
       'broadcast_answers',
       'broadcasts',
+      'broken_seats',
       'campus_members',
       'campuses',
       'clicker',

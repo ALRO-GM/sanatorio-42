@@ -26,6 +26,8 @@ export type GroupRow = {
   /** Cómo llevaba el proyecto cada persona al apuntarse (0-100), si lo dijo. */
   progress: Record<string, number | null>
   kind: 'study' | 'review'
+  /** A cuántas personas se avisó del grupo, o `null` si aún no. */
+  invited: number | null
 }
 
 /**
@@ -102,6 +104,7 @@ export function createTherapyRepository(db: Db) {
         (members.get(toNumber(row.id)) ?? []).map((member) => [member.login, member.progress]),
       ),
       kind: toText(row.kind) === 'review' ? 'review' : 'study',
+      invited: row.invited === null || row.invited === undefined ? null : toNumber(row.invited),
     }))
   }
 
@@ -262,6 +265,19 @@ export function createTherapyRepository(db: Db) {
         sql: 'DELETE FROM therapy_members WHERE group_id = ? AND login = ?',
         args: [id, login],
       })
+    },
+
+    /**
+     * Apunta a cuántas personas se avisó. `false` si ya se había avisado: dos
+     * pulsaciones a la vez no avisan dos veces.
+     */
+    async markInvited(id: number, people: number): Promise<boolean> {
+      const result = await db.execute({
+        sql: 'UPDATE therapy_groups SET invited = ? WHERE id = ? AND invited IS NULL',
+        args: [people, id],
+      })
+
+      return result.rowsAffected > 0
     },
 
     async close(id: number): Promise<void> {

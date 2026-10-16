@@ -162,6 +162,10 @@ export const es: Record<string, string> = {
   'therapy.join': 'Unirme al grupo',
   'therapy.leave': 'Salir del grupo',
   'therapy.close': 'Cerrar grupo',
+  'therapy.invited': 'Avisaste a {n} personas que hacen el proyecto',
+  'therapy.inviteAsk':
+    '¿Avisar del grupo a quien está haciendo {project} en tu campus? Se puede hacer una sola vez.',
+  'therapy.invite': 'Avisar a quien hace el proyecto',
   'therapy.remove': 'Retirar (moderación)',
   'therapy.removeAsk':
     '¿Retirar el grupo de {creator}? Se cierra y se avisa a quien estaba dentro.',
@@ -698,6 +702,14 @@ export const es: Record<string, string> = {
   'map.middleClick':
     'Clic central (o Ctrl + clic) en un puesto: abre su expediente en otra pestaña.',
   'map.circle': 'Círculo {n}',
+  'map.proposeNone': 'No hay tantos puestos juntos libres: prueba con menos.',
+  'map.proposeHint': 'Busca puestos juntos, libres y que funcionen, lo más cerca de ti.',
+  'map.propose': 'Proponer puestos',
+  'map.proposeHow': 'Puestos',
+  'map.legend.broken': 'No funciona (avisado esta semana)',
+  'map.fixed': 'Ya funciona',
+  'map.reportBroken': 'Avisar de que no funciona',
+  'map.seatBroken': 'No funciona',
   'map.finishedMine': 'Terminó tu proyecto: {n}',
   'net.projects.hint':
     'Número de correcciones y cuántas aprobaron, en todo el histórico. Pulsa uno para ver solo su red.',
@@ -907,6 +919,8 @@ export const es: Record<string, string> = {
   'notices.kind.board_cancelled': '{from} ha cancelado una pizarra',
   'notices.kind.group_joined': '{from} se ha apuntado a tu grupo de terapia',
   'notices.kind.group_closed': '{from} ha cerrado un grupo de terapia',
+  'notices.kind.group_invite':
+    '{from} ha abierto un grupo de terapia de un proyecto que estás haciendo',
   'notices.kind.clicker_defense': '{from} se ha defendido en una revisión de Code Clicker',
   'admin.inbox.sent':
     'Respuesta enviada. A {login} le sale un aviso en su buzón (el sobre de la cabecera).',

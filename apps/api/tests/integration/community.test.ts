@@ -602,6 +602,7 @@ describe('mapa de clusters', () => {
       seat: 2,
       occupant: null,
       reservation: null,
+      broken: null,
     })
     // Quien mira hace ft_printf; `jdoe` lo aprobó con un 100.
     expect(map.me).toEqual({ circle: null, projects: ['ft_printf'] })
@@ -644,7 +645,7 @@ describe('mapa de clusters', () => {
     const map = json(await http.get('/map')) as ClusterMap
 
     expect(map.clusters[0]?.seats).toEqual([
-      { host: 'c2r1s1', row: 1, seat: 1, occupant: null, reservation: null },
+      { host: 'c2r1s1', row: 1, seat: 1, occupant: null, reservation: null, broken: null },
     ])
   })
 

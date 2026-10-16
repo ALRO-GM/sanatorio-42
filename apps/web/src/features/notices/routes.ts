@@ -40,6 +40,7 @@ export function iconOf(notice: Notice): IconName {
       return 'pizarras'
     case 'group_joined':
     case 'group_closed':
+    case 'group_invite':
       return 'terapia'
     case 'clicker_defense':
       return 'escudo'
@@ -78,6 +79,7 @@ export function targetOf(notice: Notice): NoticeTarget {
       return 'pizarras'
     case 'group_joined':
     case 'group_closed':
+    case 'group_invite':
       return 'terapia'
   }
 }

@@ -14,6 +14,7 @@ import {
   isLoggedIn,
   buildMap,
   resetState,
+  brokenSeats,
 } from './state'
 import { closeStaffSession } from './staff'
 
@@ -29,6 +30,8 @@ export const peersMock: Pick<
   | 'getCalendar'
   | 'getProjectMap'
   | 'getCampusMap'
+  | 'reportBrokenSeat'
+  | 'clearBrokenSeat'
   | 'getCampuses'
 > = {
   // --- Sesión ------------------------------------------------------------------
@@ -115,6 +118,15 @@ export const peersMock: Pick<
     await delay()
 
     return buildMap()
+  },
+  async reportBrokenSeat(host) {
+    await delay(80)
+    brokenSeats.set(host.toLowerCase(), { by: ME.login, at: new Date().toISOString() })
+  },
+
+  async clearBrokenSeat(host) {
+    await delay(80)
+    brokenSeats.delete(host.toLowerCase())
   },
 
   // --- Campus, preferencias y estado de la réplica -----------------------------

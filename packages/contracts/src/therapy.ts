@@ -31,6 +31,11 @@ export type GroupView = {
   canClose: boolean
   /** `true` si ahora mismo es día y hora de quedada. */
   inSession: boolean
+  /**
+   * A cuántas personas que hacen el proyecto se les avisó del grupo, o `null`
+   * si aún no. Se avisa una sola vez, y solo lo hace quien lo abrió.
+   */
+  invited: number | null
 }
 
 /** Cuerpo de `POST /groups`. */

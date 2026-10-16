@@ -59,6 +59,16 @@ export function registerTherapyRoutes(
     return reply.code(204).send()
   })
 
+  /**
+   * `POST /groups/:id/invite` → avisa del grupo a quien hace el proyecto en el
+   * campus. Solo quien lo abrió, una vez. Devuelve `{ invited }`.
+   */
+  app.post<IdParams>('/groups/:id/invite', async (request, reply) => {
+    return reply.send(
+      await therapy.invite(await session.actor(request), idParam(request.params.id, 'El grupo')),
+    )
+  })
+
   /** `DELETE /groups/:id` → cierra el grupo. Solo quien lo abrió, o quien modera. */
   app.delete<IdParams>('/groups/:id', async (request, reply) => {
     await therapy.close(await session.actor(request), idParam(request.params.id, 'El grupo'))

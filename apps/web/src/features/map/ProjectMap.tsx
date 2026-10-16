@@ -42,7 +42,15 @@ export function ProjectMap({
       {data === undefined ? (
         <ErrorNote error={error} onRetry={() => void reload()} />
       ) : (
-        <ClusterMapView map={data} spotlight={spotlight} />
+        <ClusterMapView
+          map={data}
+          spotlight={spotlight}
+          onBroken={(host, broken) => {
+            void (broken ? api.reportBrokenSeat(host) : api.clearBrokenSeat(host))
+              .then(() => reload())
+              .catch(() => undefined)
+          }}
+        />
       )}
     </section>
   )

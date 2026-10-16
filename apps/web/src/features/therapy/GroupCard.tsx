@@ -235,6 +235,23 @@ export function GroupCard({ group, projects, onChange, me }: GroupCardProps) {
             </button>
           </>
         )}
+        {/* Quien lo abrió puede avisar, una vez, a quien hace el proyecto. */}
+        {group.mine && group.invited === null && (
+          <button
+            className="pill"
+            disabled={busy}
+            onClick={() => {
+              if (window.confirm(t('therapy.inviteAsk', { project: group.projectName ?? '' }))) {
+                void act(() => api.inviteGroup(group.id))
+              }
+            }}
+          >
+            <Icon name="campana" /> {t('therapy.invite')}
+          </button>
+        )}
+        {group.mine && group.invited !== null && (
+          <span className="hint">{t('therapy.invited', { n: group.invited })}</span>
+        )}
         {/* Quien modera puede retirar el de otra persona, pero no cambiarlo. */}
         {!group.mine && group.canClose && (
           <button

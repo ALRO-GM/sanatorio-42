@@ -393,6 +393,60 @@ describe('comunidad', () => {
       expect(await therapy.list(actor('leo'))).toEqual([])
     })
 
+    it('quien lo abrió avisa una vez a quien hace el proyecto y aún no está', async () => {
+      const { therapy, notices } = services
+      const group = await therapy.create(actor('ana'), martesYJueves)
+
+      await expectCode(therapy.invite(actor('leo'), group.id), 'forbidden')
+      // `leo` hace ft_printf; `ana` ya está dentro y `eva` lo aprobó.
+      expect(await therapy.invite(actor('ana'), group.id)).toEqual({ invited: 1 })
+      expect((await notices.list(actor('leo'))).items).toMatchObject([
+        { kind: 'group_invite', ref: `group:${group.id}`, from: 'ana' },
+      ])
+      expect((await notices.list(actor('eva'))).items).toEqual([])
+      expect((await therapy.list(actor('ana')))[0]).toMatchObject({ invited: 1 })
+      await expectCode(therapy.invite(actor('ana'), group.id), 'conflict')
+    })
+
+    it('un puesto roto sale en el mapa una semana, hasta que alguien dice que ya funciona', async () => {
+      const { map } = services
+      const brokenOf = async (host: string) =>
+        (await map.forCampus(actor('leo'))).clusters
+          .flatMap((cluster) => cluster.seats)
+          .find((one) => one.host === host)?.broken
+
+      await seat({ eva: 'c1r1s1', leo: 'c1r1s2' })
+      // Los cambios del campus, recién traídos: el mapa no tiene que pedirlos a 42.
+      await services.repositories.replica.setState(`delta:${MADRID}`, {
+        cursor: new Date(clock.now()).toISOString(),
+        at: clock.now(),
+      })
+      await map.reportBroken(actor('ana'), 'C1R1S2')
+      expect(await brokenOf('c1r1s2')).toMatchObject({ by: 'ana' })
+      expect(await brokenOf('c1r1s1')).toBeNull()
+
+      await map.clearBroken(actor('leo'), 'c1r1s2')
+      expect(await brokenOf('c1r1s2')).toBeNull()
+
+      // Pasada una semana se da por arreglado.
+      await map.reportBroken(actor('ana'), 'c1r1s1')
+      await community.db.execute({
+        sql: "UPDATE broken_seats SET reported_at = ? WHERE host = 'c1r1s1'",
+        args: [new Date(clock.now() - 7 * 24 * HOUR - MINUTE).toISOString()],
+      })
+      expect(await brokenOf('c1r1s1')).toBeNull()
+
+      await expectCode(map.reportBroken(actor('ana'), '../x'), 'invalid_input')
+    })
+
+    it('nadie puede tener más de diez puestos rotos avisados a la vez', async () => {
+      const { map } = services
+
+      for (let n = 1; n <= 10; n += 1) await map.reportBroken(actor('ana'), `c1r1s${n}`)
+      await expectCode(map.reportBroken(actor('ana'), 'c1r2s1'), 'conflict')
+      await map.reportBroken(actor('leo'), 'c1r2s1')
+    })
+
     it('los grupos de un campus no se ven desde otro', async () => {
       const { therapy } = services
       const group = await therapy.create(actor('ana'), martesYJueves)

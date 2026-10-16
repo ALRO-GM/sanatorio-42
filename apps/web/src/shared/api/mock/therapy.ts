@@ -5,11 +5,27 @@
 import { ME } from './data'
 import type { StoredGroup } from './data'
 import type { Api } from '../types'
-import { state, delay, fail, emptyToNull, projectName, find, groupView, newId } from './state'
+import {
+  state,
+  delay,
+  fail,
+  emptyToNull,
+  projectName,
+  find,
+  groupView,
+  newId,
+  invitedGroups,
+} from './state'
 
 export const therapyMock: Pick<
   Api,
-  'getGroups' | 'createGroup' | 'updateGroup' | 'joinGroup' | 'leaveGroup' | 'closeGroup'
+  | 'getGroups'
+  | 'createGroup'
+  | 'updateGroup'
+  | 'joinGroup'
+  | 'leaveGroup'
+  | 'closeGroup'
+  | 'inviteGroup'
 > = {
   // --- Terapias de grupo -------------------------------------------------------
 
@@ -105,5 +121,13 @@ export const therapyMock: Pick<
   async closeGroup(id) {
     await delay()
     state.groups = state.groups.filter((group) => group.id !== id)
+  },
+
+  async inviteGroup(id) {
+    await delay()
+    // En el simulado, siempre las mismas siete personas.
+    invitedGroups.set(id, 7)
+
+    return { invited: 7 }
   },
 }
