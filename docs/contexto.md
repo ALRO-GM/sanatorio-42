@@ -68,7 +68,20 @@ que hacer, en orden. Este documento es el porqué; aquel, el qué.
   - **Mapa**: puestos rotos (migración 48, `broken_seats`, una semana o hasta
     que alguien inicie sesión en él), proponer puestos para una terapia
     (`propose.ts`), girar el plano, círculos y resaltados (`look.ts`).
-- Base en la versión 48. `npm run check`: 584 tests de la API y 203 de la web.
+  - **Ayuda**: las peticiones por contestar y los rechazos o anulaciones salen
+    en una ventana que no se salta (migración 49, `news_for`; `GET /help/inbox`).
+  - **Code Clicker**: media hora de juego al día si el pace va en riesgo
+    (22, 24 o black hole; `limit.ts`, en el navegador) y logros y producción
+    por los puntos de evaluación donados a la bolsa de 42 (migración 50; una
+    petición al día por persona a `correction_point_historics`, se cuenta lo
+    que resta y lleva «pool» en el motivo). **Por confirmar** que 42 escribe
+    «pool» en el motivo: mirar `SELECT login, donated FROM clicker WHERE
+    donated_at IS NOT NULL` cuando haya gente jugando.
+  - **Comodidad**: tamaño del texto, daltonismo, modo zen (`shared/comfort.ts`
+    y `public/theme.js`), bienvenida (`features/welcome`) y pestañas en
+    desplegable en el móvil.
+  - **Pizarras**: sin día elegido, las próximas con plaza.
+- Base en la versión 50. `npm run check`: 587 tests de la API y 206 de la web.
 - El texto legal es de base: conviene que lo revise alguien de leyes.
 
 ## Estado a 2026-10-12
