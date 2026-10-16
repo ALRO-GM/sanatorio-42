@@ -58,6 +58,9 @@ describe('buzón de avisos', () => {
 
     await admin.answerTicket(boss, idea.id, { answer: 'Ya está hecho.' })
 
+    // Respondido por `eva`: para `leo` ya no es nuevo, aunque no lo haya abierto.
+    expect(await inbox('leo')).toEqual([])
+
     expect(await notices.list(actor('ana'))).toMatchObject({
       unread: 1,
       items: [
@@ -74,8 +77,37 @@ describe('buzón de avisos', () => {
       items: [{ kind: 'ticket_answered', read: true }],
     })
     // Nadie lee los avisos de otra persona.
+    await admin.openTicket(actor('sol'), {
+      kind: 'issue',
+      subject: 'No carga',
+      body: 'El mapa no carga',
+    })
     await notices.read(actor('ana'), {})
     expect(await notices.unread('leo')).toBe(1)
+  })
+
+  it('responder un mensaje solo atiende ese: los demás siguen como nuevos', async () => {
+    const { admin } = services
+    const boss = actor('eva', { admin: true })
+
+    await admin.setRole(boss, { login: 'leo', admin: true })
+    const first = await admin.openTicket(actor('ana'), {
+      kind: 'issue',
+      subject: 'Uno',
+      body: 'El mapa no carga',
+    })
+    await admin.openTicket(actor('sol'), {
+      kind: 'idea',
+      subject: 'Dos',
+      body: 'Un modo para daltónicos',
+    })
+
+    await admin.answerTicket(boss, first.id, { answer: 'Hecho' })
+    expect(await inbox('leo')).toEqual(['ticket_new de sol: Dos'])
+    // Responder otra vez el mismo no cambia nada; uno que no existe, tampoco.
+    await admin.answerTicket(boss, first.id, { answer: 'Hecho de nuevo' })
+    await expectCode(admin.answerTicket(boss, 9999, { answer: 'x' }), 'not_found')
+    expect(await inbox('leo')).toEqual(['ticket_new de sol: Dos'])
   })
 
   it('un chat directo es de sus dos personas y de nadie más', async () => {

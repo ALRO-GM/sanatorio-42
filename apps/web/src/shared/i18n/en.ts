@@ -1153,6 +1153,8 @@ export const en: Record<string, string> = {
   'admin.people.noLimits': 'Everyone has the automatic cap.',
   'admin.people.perHour': '{n} per hour',
   'admin.inbox.empty': 'The inbox is empty.',
+  'admin.inbox.view.pending': 'Pending',
+  'admin.inbox.view.done': 'Answered and closed',
   'admin.inbox.answer': 'Your answer',
   'admin.inbox.reply': 'Reply',
   'admin.inbox.close': 'Reply and close',

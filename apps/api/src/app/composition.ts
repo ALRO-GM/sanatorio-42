@@ -248,6 +248,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     fortyTwoRemaining: () => client.hourlyRemaining(),
     ...(config.guardLevel === undefined ? {} : { guardLevel: config.guardLevel }),
     notify,
+    settle: (about) => events.emit('notice.settled', about),
     // Los demás módulos se montan después: para cuando alguien pregunte ya estarán.
     stores: () => modules.flatMap((module) => module.stores ?? []),
     ...clock,

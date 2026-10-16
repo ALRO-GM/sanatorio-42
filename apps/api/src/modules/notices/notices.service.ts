@@ -135,6 +135,14 @@ export function createNoticesService(options: NoticesServiceOptions) {
      * Da por leídos los avisos de un asunto: quien abre el chat de una pizarra
      * ya ha visto sus mensajes, sin tener que pasar por el buzón.
      */
+    /** Da por leídos los avisos de un asunto ya atendido, de todo el mundo. */
+    async settle(kind: NoticeKind, ref: string): Promise<void> {
+      await db.execute({
+        sql: 'UPDATE notices SET read_at = ? WHERE kind = ? AND ref = ? AND read_at IS NULL',
+        args: [iso(), kind, ref],
+      })
+    },
+
     async readAbout(login: string, kind: NoticeKind, ref: string): Promise<void> {
       await db.execute({
         sql: `UPDATE notices SET read_at = ? WHERE login = ? AND kind = ? AND ref = ?

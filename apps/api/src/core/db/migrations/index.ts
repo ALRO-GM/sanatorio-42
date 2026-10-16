@@ -41,6 +41,7 @@ import { tourSpeedSchema } from './0032-tour-speed.js'
 import { staffSchema } from './0033-staff.js'
 import { conversationsSchema } from './0034-conversations.js'
 import { evaluationMissedSchema } from './0035-evaluation-missed.js'
+import { settledTicketsSchema } from './0036-settled-tickets.js'
 import type { Migration } from './types.js'
 
 export type { Migration } from './types.js'
@@ -81,6 +82,7 @@ export const MIGRATIONS: readonly Migration[] = [
   staffSchema,
   conversationsSchema,
   evaluationMissedSchema,
+  settledTicketsSchema,
 ]
 
 /** Versión más alta que existe en el código. */

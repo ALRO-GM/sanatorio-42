@@ -195,6 +195,45 @@ describe('migraciones', () => {
     db.close()
   })
 
+  it('la 36 da por leído el «mensaje nuevo» de lo ya respondido, de todo quien administra', async () => {
+    const db = createClient({ url: 'file::memory:' })
+
+    await db.batch([
+      ...MIGRATIONS.filter((m) => m.version < 36).flatMap((m) => m.statements),
+      'CREATE TABLE schema_version (id INTEGER PRIMARY KEY CHECK (id = 1), version INTEGER NOT NULL)',
+      'INSERT INTO schema_version (id, version) VALUES (1, 35)',
+      `INSERT INTO tickets (id, login, kind, subject, body, status, created_at) VALUES
+        (1, 'ana', 'issue', 'a', 'b', 'answered', 'x'),
+        (2, 'ana', 'idea', 'a', 'b', 'closed', 'x'),
+        (3, 'ana', 'idea', 'a', 'b', 'open', 'x')`,
+      `INSERT INTO notices (login, kind, ref, created_at, updated_at, read_at) VALUES
+        ('eva', 'ticket_new', 'ticket:1', 'x', 'x', NULL),
+        ('leo', 'ticket_new', 'ticket:1', 'x', 'x', NULL),
+        ('eva', 'ticket_new', 'ticket:2', 'x', 'x', NULL),
+        ('eva', 'ticket_new', 'ticket:3', 'x', 'x', NULL),
+        ('ana', 'ticket_answered', 'ticket:1', 'x', 'x', NULL),
+        ('eva', 'ticket_new', 'ticket:9', 'x', 'x', NULL)`,
+    ])
+    await migrate(db)
+
+    const unread = await db.execute(
+      'SELECT login, kind, ref FROM notices WHERE read_at IS NULL ORDER BY id',
+    )
+
+    // Lo abierto, la respuesta que aún no ha visto `ana` y lo que no casa con nada, siguen.
+    expect(
+      unread.rows.map(
+        (row) => `${textOf(row, 'login')} ${textOf(row, 'kind')} ${textOf(row, 'ref')}`,
+      ),
+    ).toEqual([
+      'eva ticket_new ticket:3',
+      'ana ticket_answered ticket:1',
+      'eva ticket_new ticket:9',
+    ])
+
+    db.close()
+  })
+
   it('numera las migraciones de forma creciente y sin huecos', () => {
     expect(MIGRATIONS.map((migration) => migration.version)).toEqual(
       MIGRATIONS.map((_migration, index) => index + 1),

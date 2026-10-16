@@ -959,6 +959,8 @@ export const es: Record<string, string> = {
   'admin.people.noLimits': 'Todo el mundo lleva el tope automático.',
   'admin.people.perHour': '{n} por hora',
   'admin.inbox.empty': 'El buzón está vacío.',
+  'admin.inbox.view.pending': 'Pendientes',
+  'admin.inbox.view.done': 'Respondidos y cerrados',
   'admin.inbox.answer': 'Tu respuesta',
   'admin.inbox.reply': 'Responder',
   'admin.inbox.close': 'Responder y cerrar',

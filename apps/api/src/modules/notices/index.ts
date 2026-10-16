@@ -32,6 +32,7 @@ export function createNoticesModule(deps: NoticesModuleDeps): NoticesModule {
   const service = createNoticesService(deps)
 
   deps.events.on('notice', (notice) => service.add(notice))
+  deps.events.on('notice.settled', (about) => service.settle(about.kind, about.ref))
 
   return {
     name: 'notices',

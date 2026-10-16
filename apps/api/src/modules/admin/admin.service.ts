@@ -31,7 +31,7 @@ import { z } from 'zod'
 
 import { assertAdmin } from '../../core/actor.js'
 import type { Actor } from '../../core/actor.js'
-import type { Notify } from '../../core/events.js'
+import type { Notify, Settle } from '../../core/events.js'
 import type { DataStore } from '../../core/db/data-store.js'
 import type { Db } from '../../core/db/database.js'
 import { toNumber, toText } from '../../core/db/rows.js'
@@ -65,6 +65,8 @@ export type AdminServiceOptions = {
   guardLevel?: () => Promise<LimitLevel>
   /** Para dejar un aviso en el buzón de quien tiene que enterarse. Sin él, no se avisa. */
   notify?: Notify
+  /** Para dar por atendido el aviso de un mensaje del buzón al responderlo. */
+  settle?: Settle
   /** Los datos que cada módulo deja borrar a mano: los junta quien monta la app. */
   stores?: () => readonly DataStore[]
   now?: () => number
@@ -172,6 +174,7 @@ export function createAdminService(options: AdminServiceOptions) {
   const { db, fixedAdmins } = options
   const now = options.now ?? Date.now
   const notify: Notify = options.notify ?? (() => Promise.resolve())
+  const settle: Settle = options.settle ?? (() => Promise.resolve())
   const iso = (): string => new Date(now()).toISOString()
   // Permisos y bloqueos se miran en cada petición con sesión: se recuerdan medio minuto.
   const access = createTtlCache<{
@@ -756,6 +759,8 @@ export function createAdminService(options: AdminServiceOptions) {
 
       const ticket = toTicket(row)
 
+      // Ya está atendido: el «mensaje nuevo» deja de contar para todo quien administra.
+      await settle({ kind: 'ticket_new', ref: `ticket:${ticket.id}` })
       // Sin esto, quien escribió solo veía la respuesta si volvía a abrir el buzón por su cuenta.
       await notify({
         to: [ticket.login],

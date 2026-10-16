@@ -30,6 +30,16 @@ export type NoticeEvent = {
 /** Lo que recibe un servicio para avisar, sin saber que existe un buzón. */
 export type Notify = (notice: NoticeEvent) => Promise<void>
 
+/**
+ * Un asunto ya está atendido: sus avisos de ese tipo dejan de contar como sin
+ * leer para todo el mundo. Lo usa, por ejemplo, el buzón de incidencias: cuando
+ * alguien que administra responde, el «mensaje nuevo» ya no es nuevo para nadie.
+ */
+export type SettledEvent = { kind: NoticeKind; ref: string }
+
+/** Lo que recibe un servicio para dar un asunto por atendido. */
+export type Settle = (about: SettledEvent) => Promise<void>
+
 /** Todos los eventos que existen, con lo que lleva cada uno. */
 export type AppEvents = {
   /** Alguien se ha marcado como de guardia. */
@@ -38,6 +48,8 @@ export type AppEvents = {
   'profile.viewed': { login: string }
   /** Hay algo que contar a alguien: acaba en su buzón. */
   notice: NoticeEvent
+  /** Un asunto ya está atendido: sus avisos dejan de contar para todo el mundo. */
+  'notice.settled': SettledEvent
 }
 
 type Handler<T> = (payload: T) => Promise<void> | void

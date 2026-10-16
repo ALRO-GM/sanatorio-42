@@ -295,6 +295,19 @@ export const tickets: Ticket[] = [
     createdAt: new Date(Date.now() - 3_600_000).toISOString(),
     answeredAt: null,
   },
+  {
+    id: 2,
+    login: 'mgarcia',
+    kind: 'idea',
+    subject: 'Un modo para daltónicos',
+    body: 'Los porcentajes en verde y rojo no los distingo.',
+    target: null,
+    status: 'answered',
+    answer: 'Gracias: lo analizamos y el fin de semana lo implementamos.',
+    answeredBy: 'plopez-l',
+    createdAt: new Date(Date.now() - 86_400_000).toISOString(),
+    answeredAt: new Date(Date.now() - 80_000_000).toISOString(),
+  },
 ]
 export const admins: string[] = []
 export const blocks: AdminPeople['blocks'] = []
