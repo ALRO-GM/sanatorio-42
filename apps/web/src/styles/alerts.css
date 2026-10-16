@@ -399,7 +399,7 @@
   width: 100%;
   padding-left: 2.2rem;
 }
-.peer-list {
+.peer-picker .peer-list {
   display: grid;
   gap: 0.1rem;
   max-height: 15rem;
@@ -408,7 +408,7 @@
   overflow-y: auto;
   list-style: none;
 }
-.peer-list button {
+.peer-picker .peer-list button {
   display: flex;
   align-items: center;
   gap: 0.6rem;
@@ -421,16 +421,16 @@
   text-align: left;
   cursor: pointer;
 }
-.peer-list button:hover,
-.peer-list button:focus-visible {
+.peer-picker .peer-list button:hover,
+.peer-picker .peer-list button:focus-visible {
   background: var(--accent-soft);
 }
-.peer-list strong,
-.peer-list small {
+.peer-picker .peer-list strong,
+.peer-picker .peer-list small {
   display: block;
   line-height: 1.25;
 }
-.peer-list small {
+.peer-picker .peer-list small {
   color: var(--text-3);
   font-size: 0.78rem;
 }

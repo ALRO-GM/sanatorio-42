@@ -425,6 +425,12 @@ a,
   background: var(--surface-2);
   color: var(--text-2);
 }
+/* Encendida (de guardia, próxima…): el verde de cada tema, que se lea de día y de noche. */
+.badge.on {
+  background: color-mix(in srgb, var(--ok) 16%, var(--surface-2));
+  color: var(--ok);
+  font-weight: 600;
+}
 input,
 select,
 textarea {

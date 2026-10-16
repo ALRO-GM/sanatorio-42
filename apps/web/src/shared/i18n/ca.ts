@@ -92,6 +92,7 @@ export const ca: Record<string, string> = {
   'peers.specialists': 'Especialistes ({n})',
   'peers.patients': 'Pacients com tu ({n})',
   'peers.onlyOnDuty': 'Només de guàrdia',
+  'peers.onlyBookable': 'Només a qui pots demanar ajuda ({n})',
   'peers.noneFilter': 'Ara mateix no hi ha ningú així de guàrdia. Prova amb un altre filtre',
   'peers.attendsAt': "T'atén a {location}",
   'peers.away': 'Fora del centre',

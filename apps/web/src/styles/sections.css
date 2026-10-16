@@ -896,3 +896,76 @@ dialog.legal-gate {
   white-space: nowrap;
   gap: 1rem;
 }
+
+/* Sala de espera: fichas en horizontal, con todo a la vista sin desplazarse,
+   y «Pedir ayuda» como botón principal. */
+.peer-list:has(.peer-card.compact) {
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 0.6rem;
+}
+.peer-card.compact {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  text-align: left;
+  gap: 0.75rem;
+  padding: 0.8rem 0.9rem;
+}
+.peer-card.compact:hover {
+  transform: none;
+}
+.peer-card.compact.bookable {
+  box-shadow:
+    0 0 0 2px var(--accent),
+    0 2px 12px var(--shadow-soft);
+}
+.peer-card.compact .peer-main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+.peer-card.compact .peer-name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
+.peer-card.compact .peer-where {
+  color: var(--text-3);
+  font-size: 0.85rem;
+}
+.peer-card.compact .peer-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+.peer-card.compact .badge {
+  padding: 0.15rem 0.6rem;
+}
+.peer-card.compact .peer-actions {
+  display: flex;
+  flex-basis: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.peer-card.compact .peer-actions:has(> :only-child) {
+  justify-content: flex-end;
+}
+.peer-card.compact .book-help {
+  flex-basis: 100%;
+}
+
+/* El mapa sigue a los filtros de la lista: quien queda, con un halo. */
+.seat.spot {
+  box-shadow:
+    0 0 0 3px var(--accent),
+    0 0 12px color-mix(in srgb, var(--accent) 70%, transparent);
+}
+.peer-card.compact img,
+.peer-card.compact .avatar-fallback {
+  width: 52px;
+  height: 52px;
+}

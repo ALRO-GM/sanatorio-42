@@ -49,6 +49,8 @@ export function PeerList({ project, onOpenTherapy }: PeerListProps) {
   const [onlyOnDuty, setOnlyOnDuty] = useState(false)
   // Solo especialistas que se ofrecen a preevaluar un proyecto ya terminado.
   const [onlyPreReview, setOnlyPreReview] = useState(false)
+  // Solo a quien se le puede reservar un rato ahora mismo.
+  const [onlyBookable, setOnlyBookable] = useState(false)
   // Quién se ofrece hoy con hueco: a esas personas se les puede reservar un rato.
   const offers = useAsync(() => api.getHelpOffers(), [])
   const [booking, setBooking] = useState<string | null>(null)
@@ -98,8 +100,14 @@ export function PeerList({ project, onOpenTherapy }: PeerListProps) {
   const specialistsCount = byDuty.filter((p) => p.status === 'finished').length
   const inProgressCount = byDuty.filter((p) => p.status === 'in_progress').length
   const byType = typeFilter === 'all' ? byDuty : byDuty.filter((p) => p.status === typeFilter)
-  const filtered = onlyPreReview ? byType.filter((p) => p.preReview) : byType
+  const bookable = new Set(offers.data?.map((offer) => offer.login) ?? [])
+  const byPreReview = onlyPreReview ? byType.filter((p) => p.preReview) : byType
+  const filtered = onlyBookable ? byPreReview.filter((p) => bookable.has(p.login)) : byPreReview
   const preReviewers = peers.filter((p) => p.preReview).length
+  const bookableCount = peers.filter((p) => bookable.has(p.login)).length
+  // Con algún filtro puesto, el mapa resalta a quien queda en la lista.
+  const filtering = typeFilter !== 'all' || onlyOnDuty || onlyPreReview || onlyBookable
+  const spotlight = filtering ? new Set(filtered.map((peer) => peer.login)) : null
 
   const inProgressOnDuty = peers.filter((p) => onDuty(p) && p.status === 'in_progress')
   const openGroups = groups.data?.length ?? 0
@@ -139,7 +147,7 @@ export function PeerList({ project, onOpenTherapy }: PeerListProps) {
         </p>
       )}
       {peers.length === 0 && <p>{t('peers.nobody')}</p>}
-      <ProjectMap projectId={project.id} />
+      <ProjectMap projectId={project.id} spotlight={spotlight} />
       <div className="filters">
         <div className="filter-pills">
           {(
@@ -183,6 +191,18 @@ export function PeerList({ project, onOpenTherapy }: PeerListProps) {
             {t('peers.preReview.only', { n: preReviewers })}
           </label>
         )}
+        {bookableCount > 0 && (
+          <label className="duty-check">
+            <input
+              type="checkbox"
+              checked={onlyBookable}
+              onChange={(event) => {
+                setOnlyBookable(event.target.checked)
+              }}
+            />
+            {t('peers.onlyBookable', { n: bookableCount })}
+          </label>
+        )}
       </div>
       {filtered.length === 0 && peers.length > 0 && <p>{t('peers.noneFilter')}</p>}
       {(openGroups > 0 || inProgressOnDuty.length >= 2) && (
@@ -207,34 +227,46 @@ export function PeerList({ project, onOpenTherapy }: PeerListProps) {
           const known = (network.data?.partners.length ?? 0) > 0
 
           return (
-            <li key={peer.login} className="peer-card">
-              <Avatar login={peer.login} image={peer.image} />
-              <div>
-                <a className="record-link" href={recordHref(peer.login)}>
-                  <strong>{peer.login}</strong>
-                </a>
-                <p>
+            <li
+              key={peer.login}
+              className={`peer-card compact ${offer === undefined ? '' : 'bookable'}`}
+            >
+              <Avatar login={peer.login} image={peer.image} size={52} />
+              <div className="peer-main">
+                <span className="peer-name">
+                  <a className="record-link" href={recordHref(peer.login)}>
+                    <strong>{peer.login}</strong>
+                  </a>
+                  {onDuty(peer) ? (
+                    <span className="badge on">{t('peers.badgeOn')}</span>
+                  ) : (
+                    <span className="badge off">{t('peers.badgeOff')}</span>
+                  )}
+                </span>
+                <span className="peer-where">
                   {peer.location !== null
                     ? t('peers.attendsAt', { location: peer.location })
                     : t('peers.away')}
-                </p>
-                {peer.perfect ? (
-                  <span className="badge eminence" title={t('peers.eminenceHint')}>
-                    {t('peers.eminence')}
-                  </span>
-                ) : peer.status === 'finished' ? (
-                  <span className="badge specialist">{t('peers.specialist')}</span>
-                ) : (
-                  <span className="badge subtle">{t('peers.patient')}</span>
-                )}
-                {peer.preReview && (
-                  <span
-                    className="badge on plain pre-review-badge"
-                    title={t('peers.preReview.hint')}
-                  >
-                    <Icon name="preevaluar" size={14} /> {t('peers.preReview')}
-                  </span>
-                )}
+                </span>
+                <span className="peer-badges">
+                  {peer.perfect ? (
+                    <span className="badge eminence" title={t('peers.eminenceHint')}>
+                      {t('peers.eminence')}
+                    </span>
+                  ) : peer.status === 'finished' ? (
+                    <span className="badge specialist">{t('peers.specialist')}</span>
+                  ) : (
+                    <span className="badge subtle">{t('peers.patient')}</span>
+                  )}
+                  {peer.preReview && (
+                    <span
+                      className="badge on plain pre-review-badge"
+                      title={t('peers.preReview.hint')}
+                    >
+                      <Icon name="preevaluar" size={14} /> {t('peers.preReview')}
+                    </span>
+                  )}
+                </span>
                 {crossed !== undefined ? (
                   <small className="peer-crossed">
                     {t('peers.crossed', { gave: crossed.gave, got: crossed.got })}
@@ -243,11 +275,6 @@ export function PeerList({ project, onOpenTherapy }: PeerListProps) {
                   known && <small className="peer-crossed new">{t('peers.neverCrossed')}</small>
                 )}
               </div>
-              {onDuty(peer) ? (
-                <span className="badge on">{t('peers.badgeOn')}</span>
-              ) : (
-                <span className="badge off">{t('peers.badgeOff')}</span>
-              )}
               {offer !== undefined && booking === peer.login ? (
                 <BookHelp
                   offer={offer}
@@ -261,12 +288,12 @@ export function PeerList({ project, onOpenTherapy }: PeerListProps) {
                 <div className="peer-actions">
                   {offer !== undefined && (
                     <button
-                      className="pill active"
+                      className="primary small"
                       onClick={() => {
                         setBooking(peer.login)
                       }}
                     >
-                      {t('help.ask')}
+                      <Icon name="chat" size={14} /> {t('help.ask')}
                     </button>
                   )}
                   <a

@@ -92,6 +92,7 @@ export const eu: Record<string, string> = {
   'peers.specialists': 'Espezialistak ({n})',
   'peers.patients': 'Zu bezalako pazienteak ({n})',
   'peers.onlyOnDuty': 'Guardian daudenak bakarrik',
+  'peers.onlyBookable': 'Laguntza eska diezaiekezunak bakarrik ({n})',
   'peers.noneFilter': 'Une honetan ez dago horrelakorik guardian. Probatu beste iragazki batekin',
   'peers.attendsAt': '{location} postuan artatuko zaitu',
   'peers.away': 'Zentrotik kanpo',

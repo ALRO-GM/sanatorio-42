@@ -95,6 +95,7 @@ export const en: Record<string, string> = {
   'peers.specialists': 'Specialists ({n})',
   'peers.patients': 'Patients like you ({n})',
   'peers.onlyOnDuty': 'On duty only',
+  'peers.onlyBookable': 'Only who you can ask for help ({n})',
   'peers.noneFilter': 'Nobody like that is on duty right now. Try another filter',
   'peers.attendsAt': 'Find them at {location}',
   'peers.away': 'Off campus',

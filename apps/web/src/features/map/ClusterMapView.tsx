@@ -36,6 +36,8 @@ type ClusterMapViewProps = {
   showReservation?: (reservation: SeatReservation) => boolean
   /** Qué colores explica la leyenda. En modo elegir sobran los de guardia. */
   legend?: readonly LegendItem[]
+  /** Si viene, se resalta a esta gente y se apaga al resto (los filtros de una lista). */
+  spotlight?: ReadonlySet<string> | null
 }
 
 /** Abre el expediente de quien ocupa un puesto en otra pestaña. */
@@ -105,6 +107,7 @@ export function ClusterMapView({
   picked = [],
   showReservation = (reservation) => reservation.inSession,
   legend = DEFAULT_LEGEND,
+  spotlight = null,
 }: ClusterMapViewProps) {
   const { t } = useI18n()
   const [chosenCluster, setChosenCluster] = useState<string | null>(null)
@@ -287,6 +290,9 @@ export function ClusterMapView({
                       seatClasses(seat, isPicked, reserved),
                       seat.host === openHost ? 'open' : '',
                       ...lookClasses(seat, map.me, shown),
+                      ...(spotlight === null || seat.occupant === null
+                        ? []
+                        : [spotlight.has(seat.occupant.login) ? 'spot' : 'dim']),
                     ].join(' ')}
                     aria-label={label}
                     aria-pressed={onPick === undefined ? seat.host === openHost : isPicked}

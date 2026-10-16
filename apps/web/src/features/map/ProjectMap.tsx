@@ -13,7 +13,14 @@ const REFRESH_MS = 60_000
  * El mapa de la sala de espera de un proyecto: quién hay en cada puesto, con la
  * gente de guardia para ese proyecto resaltada y los puestos de terapia en azul.
  */
-export function ProjectMap({ projectId }: { projectId: number }) {
+export function ProjectMap({
+  projectId,
+  spotlight = null,
+}: {
+  projectId: number
+  /** Si viene, se resalta a esta gente y se apaga al resto (los filtros de la lista). */
+  spotlight?: ReadonlySet<string> | null
+}) {
   const { t } = useI18n()
   const { data, error, loading, reload } = useAsync(() => api.getProjectMap(projectId), [projectId])
 
@@ -35,7 +42,7 @@ export function ProjectMap({ projectId }: { projectId: number }) {
       {data === undefined ? (
         <ErrorNote error={error} onRetry={() => void reload()} />
       ) : (
-        <ClusterMapView map={data} />
+        <ClusterMapView map={data} spotlight={spotlight} />
       )}
     </section>
   )

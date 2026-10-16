@@ -98,6 +98,7 @@ export const es: Record<string, string> = {
   'peers.specialists': 'Especialistas ({n})',
   'peers.patients': 'Pacientes como tú ({n})',
   'peers.onlyOnDuty': 'Solo de guardia',
+  'peers.onlyBookable': 'Solo a quien puedes pedir ayuda ({n})',
   'peers.noneFilter': 'Ahora mismo no hay nadie así de guardia. Prueba con otro filtro',
   'peers.attendsAt': 'Te atiende en {location}',
   'peers.away': 'Fuera del centro',
