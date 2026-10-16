@@ -52,17 +52,17 @@ Lo que dependa de muchas llamadas a 42 va al final.
 Orden (se marca cada uno al desplegarlo):
 
 **A. Fallos**
-- [ ] 28 Euskera: `ach.selfless_help` → «Eskuzabaltasun laguntza»; `net.asCorrected.hint` → «Aurkeztutako bereburuko proiektuak».
-- [ ] 1 Correcciones marcadas «no asistida»: las de 42 dejan de pedir respuesta (`needsReply` en `meet.service.ts`) y una migración borra las marcas `absent/missed` de evaluaciones y sus `event_alerts`.
-- [ ] 2 Guardia: dejar quitar la media hora en curso (`DayEditor.tsx`) si no hay reserva.
-- [ ] 5 Buzón: responder un ticket marca leído `ticket_new` de todos los admins; pestañas Pendientes / Cerrados.
-- [ ] 7 Contraste de las insignias de la Red (`.net-row-badge`): texto según luminancia.
-- [ ] 19 Guardia: no ofrecer medias horas ocupadas por cualquier cosa del calendario (`busyOf` en `help.service.ts`).
-- [ ] 4 Calendario: refrescar la agenda si tiene más de 2 min al abrirlo; «actualizado hace X» y botón.
-- [ ] 8 Título cortado de los comunicados con zoom (`BroadcastGate.tsx`).
-- [ ] 3 Holy graph: bis en la SEED, círculo aprendido con mínimo de personas, grupos «elige uno» en `common-core.ts`, recalcular.
-- [ ] 34 Fotos de perfil que no salen en PC: averiguar si es la API o la web y arreglarlo. (Subir fotos: no por ahora.)
-- [ ] 6 Grafo de la Red a tirones: medir y optimizar `ForceGraph.tsx`.
+- [x] 28 Euskera: `ach.selfless_help` → «Eskuzabaltasun laguntza»; `net.asCorrected.hint` → «Aurkeztutako bereburuko proiektuak».
+- [x] 1 Correcciones marcadas «no asistida»: las de 42 dejan de pedir respuesta (`needsReply` en `meet.service.ts`) y una migración borra las marcas `absent/missed` de evaluaciones y sus `event_alerts`.
+- [x] 2 Guardia: dejar quitar la media hora en curso (`DayEditor.tsx`) si no hay reserva.
+- [x] 5 Buzón: responder un ticket marca leído `ticket_new` de todos los admins; pestañas Pendientes / Cerrados.
+- [x] 7 Contraste de las insignias de la Red (`.net-row-badge`): texto según luminancia.
+- [x] 19 Guardia: no ofrecer medias horas ocupadas por cualquier cosa del calendario (`busyOf` en `help.service.ts`).
+- [x] 4 Calendario: refrescar la agenda si tiene más de 2 min al abrirlo; «actualizado hace X» y botón.
+- [x] 8 Título cortado de los comunicados con zoom (`BroadcastGate.tsx`). No reproducido (200–600 %); arreglos preventivos en `dialog.layout-dialog`. Si vuelve a pasar, pedir navegador y zoom.
+- [x] 3 Holy graph: bis en la SEED, círculo aprendido con mínimo de personas, grupos «elige uno» en `common-core.ts`, recalcular.
+- [x] 34 Fotos de perfil: la CDN de 42 da 403 sin sesión de la intra; ahora las sirve la API (`GET /avatars/:login`, guardadas en `/data/photos`). Subir fotos: no por ahora.
+- [x] 6 Grafo de la Red a tirones: medir y optimizar `ForceGraph.tsx`.
 
 **B. Seguridad, moderación y legal**
 - [ ] 10 Scopes: fijar `public` en el token de la app; Alberto desmarca los permisos sobrantes en la intra.

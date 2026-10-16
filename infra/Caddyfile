@@ -4,22 +4,40 @@
 	encode zstd gzip
 
 	header {
-		Strict-Transport-Security "max-age=31536000"
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
 		X-Content-Type-Options "nosniff"
 		Referrer-Policy "strict-origin-when-cross-origin"
 		# La web no se incrusta en ninguna otra.
 		X-Frame-Options "DENY"
 		# Solo se ejecuta y se carga lo que sirve esta misma máquina. Las fotos
-		# de perfil vienen de 42 (cualquier https); los estilos en línea son los
-		# `style` que pone React (anchos de barras, colores del mapa).
-		Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self'; font-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+		# de perfil también: las sirve la API (`/api/avatars/…`), porque la CDN de
+		# 42 ya no las da sin sesión. Los estilos en línea son solo los atributos
+		# `style` que pone React (anchos de barras, colores del mapa): un bloque
+		# `<style>` metido en la página no se aplica. Los navegadores que no
+		# conocen `style-src-elem`/`-attr` se quedan con `style-src`.
+		Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; style-src-elem 'self'; style-src-attr 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
 		# La web no usa cámara, micrófono ni ubicación: el QR lo lee la cámara del móvil, no la página.
 		Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
 		-Server
+		# No hace falta decir qué servidor hay delante.
+		-Via
+	}
+
+	# A quién avisar de un fallo de seguridad (RFC 9116). Caduca al año: hay que
+	# renovar la fecha antes de 2027-10-16.
+	handle /.well-known/security.txt {
+		header Content-Type "text/plain; charset=utf-8"
+		respond <<TXT
+			Contact: https://github.com/ALRO-GM/sanatorio-42/security/advisories/new
+			Expires: 2027-10-16T00:00:00.000Z
+			Preferred-Languages: es, en
+			Canonical: https://{$DOMAIN}/.well-known/security.txt
+			TXT 200
 	}
 
 	reverse_proxy app:3000 {
 		health_uri /health
 		health_interval 30s
+		header_down -Via
 	}
 }
