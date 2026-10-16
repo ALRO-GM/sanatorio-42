@@ -13,6 +13,8 @@ export type ClickerState = {
   pill: Pill | null
   /** La partida, tal como la guardó la web (JSON), o `null` si no ha jugado. */
   save: string | null
+  /** Puntos de evaluación que ha donado a la bolsa de 42: dan logros y producción. */
+  donated: number
   /**
    * Cuántas veces se ha guardado la partida. Quien guarda dice de cuál partió:
    * si ya no es esa, es que se ha seguido jugando en otro sitio.

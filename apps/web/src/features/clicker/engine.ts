@@ -39,6 +39,8 @@ import {
   UPGRADE,
   UPGRADES,
   BETA,
+  DONATE_GOALS,
+  DONATION_CAP,
 } from './data'
 import type { BuildingId, Upgrade } from './data'
 
@@ -72,6 +74,11 @@ export type Game = {
   hotfixes: number
   /** Nivel de prestigio: un 1 % más de producción por cada uno. */
   prestige: number
+  /**
+   * Puntos de evaluación donados a la bolsa de 42 (lo dice la API, no se juega):
+   * un 1 % más de producción por cada uno, hasta `DONATION_CAP`.
+   */
+  donated: number
   buffs: { id: BuffId; until: number }[]
   /** Cuándo sale la próxima pull request dorada, y la que hay a la vista. */
   goldenAt: number
@@ -105,6 +112,7 @@ export function newGame(now: number, random: Random = Math.random): Game {
     pops: 0,
     hotfixes: 0,
     prestige: 0,
+    donated: 0,
     buffs: [],
     goldenAt: now + nextGolden(random),
     goldenUp: null,
@@ -191,7 +199,7 @@ export const caffeine = (game: Game): number => game.achieved.length * CAFFEINE_
 
 /** Por cuánto se multiplica toda la producción: proyectos, patitos, investigación y prestigio. */
 export function globalMult(game: Game): number {
-  let mult = 1 + game.prestige * 0.01
+  let mult = (1 + game.prestige * 0.01) * (1 + donationBonus(game))
 
   for (const project of PROJECTS) {
     if (has(game, `project:${project.id}`)) mult *= 1 + project.power / 100
@@ -223,6 +231,11 @@ const buffMult = (game: Game, now: number, ids: readonly BuffId[]): number =>
   )
 
 /** Líneas por segundo sin contar rachas ni bugs: lo que dan los edificios con sus mejoras. */
+/** Lo que suma a la producción lo donado a la bolsa: un 1 % por punto, con tope. */
+export function donationBonus(game: Pick<Game, 'donated'>): number {
+  return Math.min(DONATION_CAP, Math.max(0, game.donated) * 0.01)
+}
+
 export function baseCps(game: Game): number {
   return (
     BUILDINGS.reduce((total, { id }) => total + ownedOf(game, id) * unitCps(game, id), 0) *
@@ -539,6 +552,7 @@ function earned(game: Game, plus: number, caught: number): string[] {
     golden: (index) => game.golden >= (GOLDEN_GOALS[index] ?? Infinity),
     stage: (index) => reached >= index,
     hotfix: () => game.hotfixes > 0,
+    donate: (index) => game.donated >= (DONATE_GOALS[index] ?? Infinity),
     hack: (index) => caught >= (HACK_GOALS[index] ?? Infinity),
     bug: (index) => game.pops >= (BUG_GOALS[index] ?? Infinity),
     prestige: (index) => game.prestige >= (PRESTIGE_GOALS[index] ?? Infinity),

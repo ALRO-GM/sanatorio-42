@@ -12,6 +12,7 @@ import { BASE_PRICE, GROWTH, SALE_REFUND } from '../../src/modules/clicker/cheat
 import { toText } from '../../src/core/db/rows.js'
 import { clickerLevel } from '../../src/modules/clicker/index.js'
 import { actor, expectCode, HOUR, MINUTE, useCommunity } from '../helpers/community.js'
+import { userId } from '../helpers/fixtures.js'
 import type { Community } from '../helpers/community.js'
 
 describe('code clicker', () => {
@@ -19,9 +20,10 @@ describe('code clicker', () => {
   let services: Community['services']
   let clock: Community['clock']
   let db: Community['db']
+  let api: Community['api']
 
   beforeEach(() => {
-    ;({ services, clock, db } = community)
+    ;({ services, clock, db, api } = community)
   })
 
   /** Pulsa la cruz `times` veces, en envíos de veinte. */
@@ -53,6 +55,7 @@ describe('code clicker', () => {
       plus: 0,
       pill: null,
       save: null,
+      donated: 0,
       rev: 0,
       caught: 0,
       saleDue: false,
@@ -191,6 +194,42 @@ describe('code clicker', () => {
     ).toMatchObject({ rev: 4, refused: false })
     await expectCode(clicker.save(ana, { ...SAVE, rev: 3, session: 'portatil-1' }), 'conflict')
     expect(await clicker.state(ana)).toMatchObject({ save: game({ tag: 'movil' }), rev: 4 })
+  })
+
+  it('lee de 42 los puntos donados a la bolsa, como mucho una vez al día', async () => {
+    const { clicker } = services
+    const asked = (): number =>
+      // Cada pregunta es una o varias páginas: se cuentan las primeras.
+      api.calls.filter(
+        (call) => call.includes('correction_point_historics') && /[?&]page=1(&|$)/.test(call),
+      ).length
+
+    api.points.set(userId('ana'), [
+      { id: 1, reason: 'Provided points to the pool', sum: -4, total: 2, created_at: '' },
+      { id: 2, reason: 'Earning after defense', sum: 1, total: 3, created_at: '' },
+    ])
+
+    // Sin la roja no se pregunta: el juego no existe.
+    expect(await clicker.state(actor('ana'))).toMatchObject({ donated: 0 })
+    expect(asked()).toBe(0)
+
+    await press('ana', 42)
+    await clicker.choose(actor('ana'), { pill: 'red' })
+    expect(await clicker.state(actor('ana'))).toMatchObject({ donated: 4 })
+
+    // Al rato, lo guardado; al día siguiente, se vuelve a mirar.
+    api.points.get(userId('ana'))?.push({
+      id: 3,
+      reason: 'Provided points to the pool',
+      sum: -2,
+      total: 1,
+      created_at: '',
+    })
+    clock.advance(HOUR)
+    expect(await clicker.state(actor('ana'))).toMatchObject({ donated: 4 })
+    clock.advance(24 * HOUR)
+    expect(await clicker.state(actor('ana'))).toMatchObject({ donated: 6 })
+    expect(asked()).toBe(2)
   })
 
   it('quien administra ve el uso del juego, general y de cada persona', async () => {

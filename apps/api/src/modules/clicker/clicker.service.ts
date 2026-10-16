@@ -99,6 +99,8 @@ const capitalSchema = z.object({
   to: z.coerce.number().int().min(0).optional(),
 })
 const idSchema = z.coerce.number().int().min(1)
+/** Cada cuánto se vuelve a preguntar a 42 lo donado a la bolsa. */
+export const DONATED_TTL_MS = 24 * 3_600_000
 const sanctionSchema = z.object({
   login: z.string().regex(/^[a-z0-9-]{1,30}$/),
   code: z.number().min(0),
@@ -147,6 +149,12 @@ export type ClickerServiceOptions = {
   /** Quién administra la web: lo sabe `admin`. */
   admins?: () => Promise<readonly string[]>
   now?: () => number
+  /**
+   * Puntos de evaluación que esa persona ha donado a la bolsa de 42, o `null`
+   * si ahora no se puede saber (sin cuota, 42 caído). Se pregunta como mucho
+   * una vez al día por persona (`DONATED_TTL_MS`).
+   */
+  donated?: (login: string) => Promise<number | null>
 }
 
 /** Lo que tiene que escribir quien se defiende, como poco. */
@@ -256,6 +264,31 @@ export function createClickerService(options: ClickerServiceOptions) {
     }
   }
 
+  /**
+   * Lo donado a la bolsa de 42: lo guardado si se miró hace menos de un día;
+   * si no, se pregunta (y si no se puede, lo guardado).
+   */
+  const donatedOf = async (
+    login: string,
+    found: Record<string, unknown> | undefined,
+  ): Promise<number> => {
+    const known = toNumber(found?.donated ?? 0)
+    const at = typeof found?.donated_at === 'string' ? Date.parse(found.donated_at) : 0
+
+    if (options.donated === undefined || now() - at < DONATED_TTL_MS) return known
+
+    const fresh = await options.donated(login).catch(() => null)
+
+    if (fresh === null) return known
+
+    await db.execute({
+      sql: 'UPDATE clicker SET donated = ?, donated_at = ? WHERE login = ?',
+      args: [fresh, iso(), login],
+    })
+
+    return fresh
+  }
+
   const row = async (login: string): Promise<Record<string, unknown> | undefined> =>
     (await db.execute({ sql: 'SELECT * FROM clicker WHERE login = ?', args: [login] })).rows[0]
 
@@ -267,11 +300,13 @@ export function createClickerService(options: ClickerServiceOptions) {
     async state(actor: Actor): Promise<ClickerState> {
       const found = await row(actor.login)
       const pill = pillOf(found)
+      const donated = pill === 'red' ? await donatedOf(actor.login, found) : 0
 
       return {
         plus: toNumber(found?.plus ?? 0),
         pill,
         save: typeof found?.save === 'string' ? found.save : null,
+        donated,
         rev: toNumber(found?.rev ?? 0),
         caught: toNumber(found?.caught ?? 0),
         saleDue: toNumber(found?.sale_due ?? 0) === 1,

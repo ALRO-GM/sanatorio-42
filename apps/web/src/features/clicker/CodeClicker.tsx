@@ -53,6 +53,7 @@ import {
   squash,
   stageOf,
   tick,
+  donationBonus,
 } from './engine'
 import type { Game } from './engine'
 import { lootStep, lootTaken } from './loot'
@@ -358,6 +359,8 @@ export function CodeClicker({
           return
         }
 
+        // Lo donado lo dice la API, no la partida.
+        game.current.donated = state.donated
         base.current = state.rev
         lost.current = false
         setStale(false)
@@ -1090,6 +1093,10 @@ export function CodeClicker({
                     ['statGolden', number(current.golden)],
                     ['statBugs', number(current.pops)],
                     ['statPrestige', number(current.prestige)],
+                    [
+                      'statDonated',
+                      `${number(current.donated)} (+${Math.round(donationBonus(current) * 100)} %)`,
+                    ],
                   ] as const
                 ).map(([key, value]) => (
                   <div key={key}>

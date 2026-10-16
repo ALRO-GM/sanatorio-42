@@ -24,6 +24,8 @@ export const MADRID = 22
 /** Peticiones de la agenda de 42: eventos y exámenes del campus, y lo de cada persona. */
 export const AGENDA_CALL =
   /^\/(users\/\d+\/(events_users|exams|scale_teams)|campus\/\d+\/(events|exams))/
+/** Lo donado a la bolsa de 42, para Code Clicker. */
+export const DONATIONS_CALL = /^\/users\/\d+\/correction_point_historics/
 export const MINUTE = 60_000
 export const HOUR = 60 * MINUTE
 
@@ -114,9 +116,12 @@ export function useCommunity(): Community {
 
   afterEach(() => {
     closeDatabase(community.db)
-    // La comunidad no le pregunta nada a 42, con una excepción: la guardia mira
-    // la agenda de quien ayuda (sus correcciones), que se guarda un cuarto de hora.
-    expect(community.api.calls.filter((call) => !AGENDA_CALL.test(call))).toHaveLength(0)
+    // La comunidad no le pregunta nada a 42, con dos excepciones: la guardia mira
+    // la agenda de quien ayuda (sus correcciones), que se guarda un cuarto de
+    // hora, y Code Clicker mira una vez al día lo donado a la bolsa.
+    expect(
+      community.api.calls.filter((call) => !AGENDA_CALL.test(call) && !DONATIONS_CALL.test(call)),
+    ).toHaveLength(0)
   })
 
   /** Sienta a esa gente y deja la foto de puestos recién hecha, para que no se pida a 42. */

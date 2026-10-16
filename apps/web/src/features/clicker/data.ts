@@ -187,6 +187,10 @@ export const BUG_GOALS = [1, 50, 200]
 export const PRESTIGE_GOALS = [1, 10, 100]
 /** Veces que te han pillado haciendo trampas: las tres primeras dan logro. */
 export const HACK_GOALS = [1, 2, 3]
+/** Puntos de evaluación donados a la bolsa de 42 que dan cada logro. */
+export const DONATE_GOALS = [1, 10, 42]
+/** Lo más que suma a la producción lo donado: un 42 %. */
+export const DONATION_CAP = 0.42
 /** Los del secreto: las pulsaciones de la cruz que dan cada uno (42 abre el juego). */
 export const PLUS_GOALS = [1, 10, 21, 42]
 
@@ -210,6 +214,7 @@ export const ACHIEVEMENTS: readonly string[] = [
   'stage:2',
   'stage:3',
   'hotfix',
+  ...DONATE_GOALS.map((_, index) => `donate:${index}`),
   ...BUG_GOALS.map((_, index) => `bug:${index}`),
   ...PRESTIGE_GOALS.map((_, index) => `prestige:${index}`),
   // Los de las trampas van al final y no se enseñan hasta tenerlos.

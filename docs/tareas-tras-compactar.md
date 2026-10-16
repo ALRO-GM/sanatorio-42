@@ -86,7 +86,7 @@ Orden (se marca cada uno al desplegarlo):
 - [x] 18 Peticiones de ayuda en ventana obligatoria (recibir y rechazo).
 - [ ] 29 Daltónicos, modo zen y demo de bienvenida.
 - [ ] 22 Tamaño de texto 90–150 % y móvil.
-- [ ] 33 Code Clicker: tope con pace en riesgo, logro por donar.
+- [x] 33 Code Clicker: tope con pace en riesgo, logro por donar.
 
 **D. Muchos datos (al final, poco a poco en horas de poco uso)**
 - [ ] 32 Holy graph de correcciones con logros y banner.

@@ -35,6 +35,7 @@ import type { HelpModule } from '../modules/help/index.js'
 import { createLegalModule } from '../modules/legal/index.js'
 import type { LegalModule } from '../modules/legal/index.js'
 import { createBrokenSeats, createMapModule } from '../modules/map/index.js'
+import { donatedPoints } from '../modules/clicker/donations.rules.js'
 import type { MapModule } from '../modules/map/index.js'
 import { createMeetModule } from '../modules/meet/index.js'
 import type { MeetModule } from '../modules/meet/index.js'
@@ -296,6 +297,14 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     },
     notify,
     admins: () => admin.service.adminLogins(),
+    // Lo donado a la bolsa: una petición a 42 al día por persona, si hay cuota.
+    donated: async (login) => {
+      const userId = await replica.repository.userIdOf(login)
+
+      if (userId === null || !replica.quota.allows('deferrable')) return null
+
+      return donatedPoints(await client.getCorrectionPoints(userId))
+    },
     ...clock,
   })
 

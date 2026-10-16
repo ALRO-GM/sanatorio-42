@@ -36,6 +36,11 @@ export type Fake42 = {
   cursus: Map<number, ApiCursusUser[]>
   /** Correcciones por campus. `updated_at` solo lo usa el filtro de novedades. */
   scaleTeams: Map<number, (ApiScaleTeam & { updated_at?: string })[]>
+  /** Historial de puntos de evaluación, por id de persona. */
+  points: Map<
+    number,
+    { id: number; reason: string; sum: number; total: number; created_at: string }[]
+  >
   /** Rutas pedidas, en orden, sin el host. */
   calls: string[]
   /** Lo que dirá `x-hourly-ratelimit-remaining` en la próxima respuesta. */
@@ -52,6 +57,7 @@ export function createFake42(pageSize = 2): Fake42 {
     quests: new Map(),
     cursus: new Map(),
     scaleTeams: new Map(),
+    points: new Map(),
     calls: [],
     hourlyRemaining: 1200,
     failOn: null,
@@ -93,6 +99,8 @@ export function createFake42(pageSize = 2): Fake42 {
       )
     } else if (/^\/users\/\d+\/quests_users$/.test(path)) {
       items = state.quests.get(Number(path.split('/')[2])) ?? []
+    } else if (/^\/users\/\d+\/correction_point_historics$/.test(path)) {
+      items = state.points.get(Number(path.split('/')[2])) ?? []
     } else if (/^\/users\/\d+\/cursus_users$/.test(path)) {
       items = state.cursus.get(Number(path.split('/')[2])) ?? []
     } else if (path === '/scale_teams') {

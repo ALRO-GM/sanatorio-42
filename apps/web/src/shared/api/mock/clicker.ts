@@ -37,6 +37,8 @@ const state: ClickerState = {
   plus: red ? 100 : Math.max(0, Number(wanted ?? 0) || 0),
   pill: red ? 'red' : null,
   save: null,
+  // Unos pocos puntos donados, para ver el logro y el extra.
+  donated: 3,
   rev: 0,
   caught: 0,
   saleDue: wanted === 'policia',

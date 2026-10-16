@@ -240,3 +240,16 @@ export type ApiProjectSession = {
   project_id: number
   estimate_time?: string | null
 }
+
+/**
+ * Un movimiento de puntos de evaluación (`/users/:id/correction_point_historics`).
+ * `sum` es lo que cambió (negativo si se gastaron o se dieron) y `reason`, por
+ * qué: una donación a la bolsa lleva «pool» en el motivo.
+ */
+export type ApiCorrectionPoint = {
+  id: number
+  reason: string
+  sum: number
+  total: number
+  created_at: string
+}

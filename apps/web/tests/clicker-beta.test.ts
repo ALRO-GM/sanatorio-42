@@ -26,3 +26,18 @@ describe('la puerta de la cruz, de 100 a 42', () => {
     expect(hiddenAchievement('beta')).toBe(true)
   })
 })
+
+describe('donar puntos a la bolsa de 42', () => {
+  it('un 1 % más de producción por punto, con tope en el 42 %, y sus logros', async () => {
+    const { donationBonus, newGame, tick } = await import('../src/features/clicker/engine')
+    const game = newGame(0, () => 0.5)
+
+    expect(donationBonus(game)).toBe(0)
+    game.donated = 10
+    expect(donationBonus(game)).toBeCloseTo(0.1)
+    expect(tick(game, 1, () => 0.5, 0)).toEqual(expect.arrayContaining(['donate:0', 'donate:1']))
+    expect(game.achieved).not.toContain('donate:2')
+    game.donated = 500
+    expect(donationBonus(game)).toBeCloseTo(0.42)
+  })
+})

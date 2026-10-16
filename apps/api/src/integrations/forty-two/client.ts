@@ -35,6 +35,7 @@ import type {
   ApiProjectUser,
   ApiQuestUser,
   ApiScaleTeam,
+  ApiCorrectionPoint,
 } from './types.js'
 import { defaultSleep, readInt } from './headers.js'
 
@@ -237,6 +238,14 @@ export class FortyTwoClient {
   /** `GET /v2/users/:id/cursus_users`: nivel, inicio y black hole en cada cursus. */
   async getUserCursus(userId: number): Promise<ApiCursusUser[]> {
     return this.fetchAllPages<ApiCursusUser>(`/users/${userId}/cursus_users`)
+  }
+
+  /**
+   * `GET /v2/users/:id/correction_point_historics`: cómo han cambiado sus
+   * puntos de evaluación. Para saber cuántos ha donado a la bolsa.
+   */
+  async getCorrectionPoints(userId: number): Promise<ApiCorrectionPoint[]> {
+    return this.fetchAllPages<ApiCorrectionPoint>(`/users/${userId}/correction_point_historics`)
   }
 
   /** `GET /v2/users/:id/quests_users`: los hitos de alguien (rangos del common core, plan). */
