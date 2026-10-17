@@ -81,7 +81,21 @@ que hacer, en orden. Este documento es el porqué; aquel, el qué.
     y `public/theme.js`), bienvenida (`features/welcome`) y pestañas en
     desplegable en el móvil.
   - **Pizarras**: sin día elegido, las próximas con plaza.
-- Base en la versión 50. `npm run check`: 587 tests de la API y 206 de la web.
+  - **Tablón**: «Mis correcciones», el holy graph de lo corregido (medallas
+    por 1, 3, 5 y 10 correcciones; un proyecto sin correcciones en el campus
+    en un año se da por retirado) y el título «Maestro del código» (10
+    correcciones de un proyecto; lleva al lado en cuántos). Sale de la tabla
+    `corrections`, sin pedir nada nuevo a 42.
+  - **Exámenes** (sección nueva, módulo `exams`, migración 51): los intentos
+    de los Exam Rank (los `teams` de la fila de 42) se guardan al copiar; una
+    copia de fondo baja lo antiguo (estado en `sync_state`, claves
+    `exams:<campus>:<proyecto>`), solo con cuota de sobra y sin nadie usando
+    la web. Estadísticas por examen y duración de círculos (de `user_tracks`).
+    En vivo: `GET /exams/live`, quién está apuntado (`/exams/:id/exams_users`)
+    y su última nota, refrescado cada 5 min mientras alguien mira; el pulso
+    enciende la pestaña («en vivo»). **Por confirmar** con datos reales que
+    42 manda `teams` en `/projects_users` (si no, cuenta por `occurrence`).
+- Base en la versión 51. `npm run check`: 595 tests de la API y 208 de la web.
 - El texto legal es de base: conviene que lo revise alguien de leyes.
 
 ## Estado a 2026-10-12
