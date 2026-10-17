@@ -52,13 +52,13 @@ mensaje, una revisión completa. Se hace por bloques; cada bloque termina con
       imprevisible, límite; producción). Escribir `docs/tests.md` con la lista
       de comprobación. Medir cobertura, rellenar huecos. Proteger producción:
       umbral de cobertura en CI y `deploy.sh` no despliega sin tests verdes.
-- [ ] **3. Textos en tablas.** Los textos de la web salen de tablas por tema
+- [x] **3. Textos en tablas.** Los textos de la web salen de tablas por tema
       (CSV con clave, contexto, es, en, ca, eu) que son la única fuente; un
       plugin de Vite las convierte y cada idioma se carga solo si se usa.
       `docs/textos/` con la tabla legible por tema (generada, con dónde se usa
       cada clave). Comprobación en `npm run check`: claves usadas que faltan,
       claves sin uso y tabla generada al día. Regla estricta en `AGENTS.md`.
-- [ ] **4. Claridad del español.** Repasar los textos: frases breves, con
+- [x] **4. Claridad del español.** Repasar los textos: frases breves, con
       sentido y bien construidas. Ajustar las traducciones que cambien.
 - [ ] **5. Categorías y modos.** Agrupar las pestañas: Expediente · Ayuda
       (sala de espera, tablón, terapia, pizarras) · Calendario · Datos (red,
