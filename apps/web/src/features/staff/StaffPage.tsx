@@ -10,6 +10,7 @@ import { cellValue } from '../../shared/table-sort'
 import { DataTable } from '../../shared/ui/DataTable'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { Logo } from '../../shared/ui/Logo'
+import { FacilityList } from '../facility/FacilityList'
 import { LangSelect } from '../settings/LangSelect'
 import { ThemeSelect } from '../settings/ThemeSelect'
 import { codeFromName, hoursText } from './code'
@@ -41,7 +42,18 @@ export function StaffPage() {
       </header>
 
       {me.data !== undefined ? (
-        <Checker name={me.data.name} onLeave={() => void api.logout().then(me.reload)} />
+        <>
+          <Checker name={me.data.name} onLeave={() => void api.logout().then(me.reload)} />
+          {/* Los avisos de problemas del edificio y de los ordenadores (#77). */}
+          <section className="card">
+            <h2>{t('staff.facility')}</h2>
+            <FacilityList
+              load={() => api.getStaffFacility()}
+              resolve={(id) => api.resolveStaffFacility(id)}
+              showCampus
+            />
+          </section>
+        </>
       ) : denied ? (
         <KeyForm onEnter={() => void me.reload()} />
       ) : (

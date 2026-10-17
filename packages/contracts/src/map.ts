@@ -94,3 +94,28 @@ export type PersonCard = {
   /** Es quien pregunta. */
   me: boolean
 }
+
+/** Qué tipo de problema del edificio o de los ordenadores es (#77 del buzón). */
+export type FacilityCategory =
+  'computer' | 'peripheral' | 'network' | 'toilets' | 'temperature' | 'light' | 'cleaning' | 'other'
+
+/** Cuerpo de `POST /facility/reports`. Sin `place`, el puesto en el que estás. */
+export type FacilityReportInput = {
+  category: FacilityCategory
+  place?: string
+  note?: string
+}
+
+/** Un aviso, como lo ven el staff y quien administra. */
+export type FacilityReport = {
+  id: number
+  campusId: number
+  campusName: string
+  login: string
+  category: FacilityCategory
+  place: string
+  note: string | null
+  createdAt: string
+  resolvedAt: string | null
+  resolvedBy: string | null
+}

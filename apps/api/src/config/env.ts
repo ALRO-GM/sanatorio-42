@@ -185,6 +185,12 @@ const envSchema = z.object({
   ADMIN_LOGINS: z.string().default(''),
 
   /**
+   * Webhook de Slack («incoming webhook») del canal del staff: los avisos de
+   * problemas del edificio llegan también allí. Vacío, solo en la web.
+   */
+  SLACK_WEBHOOK_URL: z.url().or(z.literal('')).default(''),
+
+  /**
    * Carpeta con la web compilada (`apps/web/dist`), para servirla desde el mismo
    * proceso. Vacía en desarrollo, donde la web la sirve Vite.
    */

@@ -178,7 +178,10 @@ despliegue espera a la CI).
       (ficha al pasar el ratón por un login, componente único), #79
       (clasificación de quién va más rápido según el pace, desde su inicio),
       [x] #71 (panel: uso por campus elegibles y usuarios totales/nuevos por día),
-      #77 (avisar al staff de problemas de ordenadores/edificio con opciones
+      [x] #77 [HECHO: módulo `facility` nuevo: tabla facility_reports (migración 57),
+      POST /facility/reports, listas en /admin/facility y /staff/facility, resolver;
+      Slack opcional con SLACK_WEBHOOK_URL; web: botón en Clústeres, pestaña en el
+      panel y lista en la página del staff] (avisar al staff de problemas de ordenadores/edificio con opciones
       claras; Slack si hay webhook), #69 (mapa de calor de clics por elemento y
       por cuadrícula normalizada móvil/ordenador).
       **#65 Pomodoro**: individual y llamativo; los demás ven «estoy

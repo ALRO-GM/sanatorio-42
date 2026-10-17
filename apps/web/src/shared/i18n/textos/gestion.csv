@@ -448,3 +448,5 @@ admin.growth.new,"Panel, crecimiento por campus: usuarios nuevos en el periodo",
 admin.growth.newByDay,"Panel, crecimiento por campus: gráfica de usuarios nuevos por día",Nuevos por día,New per day,Nous per dia,Berriak egunero
 admin.growth.activeAvg,"Panel, crecimiento por campus: media de gente que usa la web cada día",Activos al día (media),Active per day (average),Actius al dia (mitjana),Aktiboak egunero (batez beste)
 admin.growth.activeByCampus,"Panel, crecimiento por campus: gráfica de gente activa por día y campus",Activos por día y campus,Active per day and campus,Actius per dia i campus,Aktiboak egunero eta campusaren arabera
+admin.tab.facility,Panel: pestaña de los avisos del edificio,Avisos del edificio,Building reports,Avisos de l'edifici,Eraikineko jakinarazpenak
+staff.facility,Página del staff: título de los avisos del edificio,Avisos de problemas,Problem reports,Avisos de problemes,Arazoen jakinarazpenak

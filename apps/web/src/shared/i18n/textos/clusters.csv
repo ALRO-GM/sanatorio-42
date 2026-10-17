@@ -49,3 +49,25 @@ clusters.write,Botón para escribir a alguien,Escribir,Message,Escriu-li,Idatzi
 map.legend.online,Leyenda: tiene Sanatorio abierto,Con Sanatorio abierto,Has Sanatorio open,Amb Sanatorio obert,Sanatorio irekita du
 clusters.chat,Chat directo con alguien,Chat directo,Direct chat,Xat directe,Txat zuzena
 clusters.chatEmpty,Chat directo vacío,Nadie ha escrito todavía. Lo que pongas solo lo veis vosotros dos.,Nobody has written yet. Only the two of you see what you write.,Ningú ha escrit encara. El que posis només ho veieu vosaltres dos.,Inork ez du oraindik idatzi. Jartzen duzuna zuek biok bakarrik ikusten duzue.
+facility.open,Clústeres: botón para avisar al staff de un problema del edificio o de un ordenador,Avisar de un problema,Report a problem,Avisar d'un problema,Arazo baten berri eman
+facility.title,Aviso al staff: título del formulario,Avisar al staff,Tell the staff,Avisar l'staff,Staffari jakinarazi
+facility.what,Aviso al staff: qué pasa,¿Qué pasa?,What is wrong?,Què passa?,Zer gertatzen da?
+facility.where,Aviso al staff: dónde,¿Dónde?,Where?,On?,Non?
+facility.wherePlaceholder,Aviso al staff: ayuda del campo «dónde»,"Si no dices nada, tu puesto",Leave empty for your seat,"Si no dius res, el teu lloc","Ezer esaten ez baduzu, zure postua"
+facility.note,Aviso al staff: nota opcional,Nota (opcional),Note (optional),Nota (opcional),Oharra (aukerakoa)
+facility.noteRequired,Aviso al staff: nota obligatoria con «otro»,Cuenta qué pasa,Tell what is wrong,Explica què passa,Kontatu zer gertatzen den
+facility.send,Aviso al staff: enviar,Avisar,Report,Avisar,Jakinarazi
+facility.sent,Aviso al staff: confirmación,Aviso enviado al staff. ¡Gracias!,Sent to the staff. Thanks!,Avís enviat a l'staff. Gràcies!,Staffari bidalia. Eskerrik asko!
+facility.close,Aviso al staff: cerrar la confirmación,Cerrar,Close,Tanca,Itxi
+facility.none,Lista de avisos del edificio vacía,No hay avisos pendientes.,No pending reports.,No hi ha avisos pendents.,Ez dago jakinarazpenik zain.
+facility.by,Lista de avisos: quién y cuándo,Avisa {login} · {when},Reported by {login} · {when},Avisa {login} · {when},{login}(e)k jakinarazia · {when}
+facility.resolvedBy,Lista de avisos: quién lo resolvió y cuándo,resuelto por {by} · {when},resolved by {by} · {when},resolt per {by} · {when},{by}(e)k konponduta · {when}
+facility.resolve,Lista de avisos: darlo por resuelto,Resuelto,Resolved,Resolt,Konponduta
+facility.category.computer,Tipo de problema: el ordenador,Ordenador,Computer,Ordinador,Ordenagailua
+facility.category.peripheral,"Tipo de problema: pantalla, teclado o ratón","Pantalla, teclado o ratón","Screen, keyboard or mouse","Pantalla, teclat o ratolí","Pantaila, teklatua edo sagua"
+facility.category.network,Tipo de problema: la red o el wifi,Red o wifi,Network or wifi,Xarxa o wifi,Sarea edo wifia
+facility.category.toilets,Tipo de problema: los baños,Baños,Toilets,Lavabos,Komunak
+facility.category.temperature,Tipo de problema: frío o calor,Temperatura,Temperature,Temperatura,Tenperatura
+facility.category.light,Tipo de problema: la luz,Luz,Light,Llum,Argia
+facility.category.cleaning,Tipo de problema: limpieza,Limpieza,Cleaning,Neteja,Garbiketa
+facility.category.other,Tipo de problema: otro,Otro,Other,Altre,Bestelakoa

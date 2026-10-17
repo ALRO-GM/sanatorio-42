@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/gestion.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-449 textos. «—» es que falta la traducción: sale en español.
+451 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -456,3 +456,5 @@ Generado desde `apps/web/src/shared/i18n/textos/gestion.csv` con
 | `admin.growth.newByDay` | Panel, crecimiento por campus: gráfica de usuarios nuevos por día | features/admin/GrowthPanel | Nuevos por día | New per day | Nous per dia | Berriak egunero |
 | `admin.growth.activeAvg` | Panel, crecimiento por campus: media de gente que usa la web cada día | features/admin/GrowthPanel | Activos al día (media) | Active per day (average) | Actius al dia (mitjana) | Aktiboak egunero (batez beste) |
 | `admin.growth.activeByCampus` | Panel, crecimiento por campus: gráfica de gente activa por día y campus | features/admin/GrowthPanel | Activos por día y campus | Active per day and campus | Actius per dia i campus | Aktiboak egunero eta campusaren arabera |
+| `admin.tab.facility` | Panel: pestaña de los avisos del edificio | features/admin/AdminPage | Avisos del edificio | Building reports | Avisos de l'edifici | Eraikineko jakinarazpenak |
+| `staff.facility` | Página del staff: título de los avisos del edificio | features/staff/StaffPage | Avisos de problemas | Problem reports | Avisos de problemes | Arazoen jakinarazpenak |

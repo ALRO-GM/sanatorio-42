@@ -1175,3 +1175,52 @@ dialog.welcome .actions {
   border-radius: 2px;
   vertical-align: -1px;
 }
+
+/* ── Avisos del edificio (`features/facility/`) ─────────────────────────── */
+.facility-open {
+  margin-bottom: 0.75rem;
+}
+.facility-form {
+  display: grid;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+.facility-kinds {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.facility-kinds legend {
+  margin-bottom: 0.35rem;
+  font-weight: 600;
+}
+.facility-item {
+  display: grid;
+  gap: 0.35rem;
+  justify-items: start;
+}
+.facility-item.resolved {
+  opacity: 0.65;
+}
+.facility-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+.facility-item p {
+  margin: 0;
+}
+.facility-form label {
+  display: grid;
+  gap: 0.3rem;
+  font-weight: 600;
+}
+.facility-form input,
+.facility-form textarea {
+  width: 100%;
+  font-weight: 400;
+}

@@ -7,6 +7,8 @@
  */
 
 import type {
+  FacilityReport,
+  FacilityReportInput,
   AdminGrowth,
   QuizLobby,
   QuizRoom,
@@ -215,6 +217,12 @@ export type Api = {
   staffLogin: (key: string) => Promise<void>
   /** Quién eres con la sesión de staff. Falla con 401 o 403 si no la hay. */
   getStaffMe: () => Promise<StaffMe>
+  getStaffFacility: () => Promise<FacilityReport[]>
+  resolveStaffFacility: (id: number) => Promise<void>
+  // --- Avisos del edificio
+  reportFacility: (input: FacilityReportInput) => Promise<FacilityReport>
+  getAdminFacility: () => Promise<FacilityReport[]>
+  resolveAdminFacility: (id: number) => Promise<void>
   /** El documento emitido con ese código, o 404. */
   getStaffDocument: (code: string) => Promise<StaffDocument>
   /** ¿El fichero recibido es el que se emitió con ese código? */

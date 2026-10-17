@@ -21,6 +21,7 @@ import type { Db } from '../core/db/database.js'
 import { registerStatic } from '../core/http/static.js'
 import type { AppModule } from '../core/module.js'
 import { createApiClient } from '../integrations/forty-two/create-client.js'
+import { createSlackPoster } from '../integrations/slack.js'
 import { createAuthModule } from '../modules/auth/index.js'
 import { diskPhotoStore, syncConfigFrom } from '../modules/replica/index.js'
 import { compose } from './composition.js'
@@ -82,6 +83,9 @@ export async function buildApp(options: BuildOptions = {}): Promise<BuiltApp> {
     sync: syncConfigFrom(env),
     backgroundSync: env.SYNC_ENABLED === 'true',
     admins: env.adminLogins,
+    slack: createSlackPoster(env.SLACK_WEBHOOK_URL, (detail) => {
+      process.stderr.write(`[slack] ${detail}\n`)
+    }),
     photos: diskPhotoStore(photoDirOf(env.DATABASE_URL)),
     secret: env.SESSION_SECRET,
     ...(env.GUARD_LEVEL_FILE === ''

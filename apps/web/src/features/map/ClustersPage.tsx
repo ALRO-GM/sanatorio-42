@@ -1,7 +1,11 @@
+import { useState } from 'react'
+
 import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
+import { Icon } from '../../shared/ui/Icon'
 import { InfoTip } from '../../shared/ui/InfoTip'
+import { FacilityForm } from '../facility/FacilityForm'
 import { ClustersTour } from './ClustersTour'
 import { Show } from '../../shared/detail'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
@@ -14,6 +18,7 @@ import { ClusterMapView } from './ClusterMapView'
  * la conversación se abre en el buzón, que es donde viven todas.
  */
 export function ClustersPage({ me }: { me: string }) {
+  const [reporting, setReporting] = useState(false)
   const { t } = useI18n()
   const map = useAsync(() => api.getCampusMap(), [])
 
@@ -29,6 +34,23 @@ export function ClustersPage({ me }: { me: string }) {
           <ClustersTour />
         </InfoTip>
       </h2>
+      {reporting ? (
+        <FacilityForm
+          onDone={() => {
+            setReporting(false)
+          }}
+        />
+      ) : (
+        <button
+          type="button"
+          className="pill facility-open"
+          onClick={() => {
+            setReporting(true)
+          }}
+        >
+          <Icon name="aviso" size={14} /> {t('facility.open')}
+        </button>
+      )}
       {map.loading && <p className="estado">{t('map.loading')}</p>}
       {!map.loading && map.data === undefined && (
         <ErrorNote error={map.error} onRetry={() => void map.reload()} />

@@ -53,8 +53,11 @@ import { createProfileModule, MASTER_AT } from '../modules/profile/index.js'
 import type { ProfileModule } from '../modules/profile/index.js'
 import { createReplicaModule } from '../modules/replica/index.js'
 import type { PhotoStore, ReplicaModule, SyncerConfig } from '../modules/replica/index.js'
+import { createFacilityModule } from '../modules/facility/index.js'
+import type { FacilityModule } from '../modules/facility/index.js'
 import { createStatsModule } from '../modules/stats/index.js'
 import type { StatsModule } from '../modules/stats/index.js'
+import type { SlackPoster } from '../integrations/slack.js'
 import { createToursModule } from '../modules/tours/index.js'
 import type { ToursModule } from '../modules/tours/index.js'
 import { createStaffModule } from '../modules/staff/index.js'
@@ -83,6 +86,8 @@ type CompositionConfig = {
   photos?: PhotoStore
   /** Secreto del servidor (`SESSION_SECRET`): firma la cookie del panel y cifra el segundo factor. */
   secret?: string
+  /** Webhook de Slack del staff (`SLACK_WEBHOOK_URL`) para los avisos del edificio. */
+  slack?: SlackPoster | null
   /** Reloj inyectable, para los tests. */
   now?: () => number
 }
@@ -124,6 +129,7 @@ export type Services = {
   quiz: QuizModule['service']
   chess: QuizModule['chess']
   stats: StatsModule['service']
+  facility: FacilityModule['service']
 }
 
 type Composition = {
@@ -291,6 +297,18 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
   })
 
   const staff = createStaffModule({ db, ...clock })
+  const facility = createFacilityModule({
+    db,
+    seatOf: async (campusId, login) => {
+      const since = new Date(now() - PRESENCE_WINDOW_MS).toISOString()
+      const present = await replica.repository.presenceIn(campusId, since)
+
+      return present.find((person) => person.login === login)?.host ?? null
+    },
+    slack: config.slack ?? null,
+    staffActive: (id) => staff.service.active(id),
+    ...clock,
+  })
 
   const meet = createMeetModule({
     db,
@@ -397,6 +415,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     legal,
     quiz,
     stats,
+    facility,
   ]
 
   return {
@@ -438,6 +457,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
       quiz: quiz.service,
       chess: quiz.chess,
       stats: stats.service,
+      facility: facility.service,
     },
   }
 }

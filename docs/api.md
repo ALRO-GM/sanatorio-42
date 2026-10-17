@@ -1253,6 +1253,26 @@ POST /games/rooms/:id/resign   → abandona: gana el otro bando
   El resultado va a `game_results` con `game: 'chess'` (victoria 2, tablas 1).
 - Nadie está a la vez en una sala de preguntas y en una por turnos (409).
 
+## Avisos del edificio (`modules/facility`)
+
+```
+POST /facility/reports                → { category, place?, note? } → 201 FacilityReport
+GET  /admin/facility                  → FacilityReport[] del campus (solo admins)
+POST /admin/facility/:id/resolve      → 204 (solo admins)
+GET  /staff/facility                  → FacilityReport[] de todos los campus (sesión de staff)
+POST /staff/facility/:id/resolve      → 204 (sesión de staff)
+```
+
+- `category`: `computer`, `peripheral`, `network`, `toilets`, `temperature`,
+  `light`, `cleaning` u `other` (con nota de 3 caracteres o más).
+- Sin `place`, el puesto en el que está sentada la persona; sin puesto y sin
+  `place`, 400.
+- Diez por persona y día como mucho (429).
+- Las listas traen lo abierto y lo resuelto en la última semana, primero lo
+  abierto.
+- Si está configurado `SLACK_WEBHOOK_URL`, cada aviso va también al canal del
+  staff. Un fallo de Slack no rompe el aviso.
+
 ## Crecimiento por campus (`modules/admin/growth.ts`, solo admins)
 
 ```

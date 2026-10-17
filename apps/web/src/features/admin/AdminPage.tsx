@@ -15,6 +15,7 @@ import { QuotaCard } from './QuotaCard'
 import { BroadcastsTab } from './BroadcastsTab'
 import { ClickerPanel } from './ClickerPanel'
 import { DataPanel } from './DataPanel'
+import { FacilityList } from '../facility/FacilityList'
 import { GrowthPanel } from './GrowthPanel'
 import { StatsPanel } from './StatsPanel'
 import { UsageTab } from './UsageTab'
@@ -32,6 +33,7 @@ const TABS = [
   'stats',
   'clicker',
   'casts',
+  'facility',
   'data',
 ] as const
 
@@ -100,6 +102,12 @@ function AdminTabs({ campusId, me }: { campusId?: number | undefined; me: string
       {tab === 'clicker' && <ClickerPanel me={me} />}
       {tab === 'data' && <DataPanel />}
       {tab === 'casts' && <BroadcastsTab campusId={campusId} />}
+      {tab === 'facility' && (
+        <FacilityList
+          load={() => api.getAdminFacility()}
+          resolve={(id) => api.resolveAdminFacility(id)}
+        />
+      )}
     </>
   )
 }

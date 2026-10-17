@@ -92,6 +92,11 @@ export const realApi: Api = {
     apiUrl(`/events/report?${new URLSearchParams({ ...query, format: 'csv' }).toString()}`),
   staffLogin: (key) => send('POST', '/auth/staff', { key }),
   getStaffMe: () => getJson('/staff/me'),
+  getStaffFacility: () => getJson('/staff/facility'),
+  resolveStaffFacility: (id) => send('POST', `/staff/facility/${id}/resolve`),
+  reportFacility: (input) => sendJson('POST', '/facility/reports', input),
+  getAdminFacility: () => getJson('/admin/facility'),
+  resolveAdminFacility: (id) => send('POST', `/admin/facility/${id}/resolve`),
   getStaffDocument: (code) => getJson(`/staff/documents/${encodeURIComponent(code)}`),
   compareStaffDocument: (code, content) =>
     sendJson('POST', `/staff/documents/${encodeURIComponent(code)}/compare`, { content }),

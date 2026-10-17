@@ -71,6 +71,7 @@ Lo que este proyecto enseña de quien lo ha hecho:
   - [Avisos y sala del evento](#avisos-y-sala-del-evento)
   - [Red de correcciones](#red-de-correcciones)
   - [Clústeres](#clústeres)
+  - [Avisos del edificio](#avisos-del-edificio)
   - [Exámenes](#exámenes)
   - [Buscador de personas](#buscador-de-personas)
   - [Demostraciones animadas](#demostraciones-animadas)
@@ -264,6 +265,15 @@ ordenador que no funciona (se da por arreglado en cuanto alguien inicia sesión
 en él).
 
 ![Clústeres con una ficha abierta](docs/img/clusters.webp)
+
+### Avisos del edificio
+
+Desde Clústeres, «Avisar de un problema»: qué pasa (ordenador; pantalla,
+teclado o ratón; red o wifi; baños; temperatura; luz; limpieza u otro), dónde
+(si no se dice, tu puesto) y una nota. Lo ve el staff en su página y quien
+administra en el panel, y lo dan por resuelto con un botón. Si se configura un
+webhook de Slack (`SLACK_WEBHOOK_URL`), cada aviso llega también al canal del
+staff.
 
 ### Exámenes
 
@@ -534,6 +544,7 @@ pie showData title Líneas por parte
 | `clicker`    | Partidas del juego, comprobación de trampas e historial de capital                |
 | `quiz`       | Not-games: banco de preguntas, salas, partidas y dificultad que se reajusta       |
 | `stats`      | Estadísticas de Ayuda: cifras del campus y clasificación de cada sección          |
+| `facility`   | Avisos al staff de problemas del edificio y de los ordenadores (y Slack)          |
 | `staff` | Documentos con código de verificación y las cuentas de staff que los comprueban |
 | `admin`      | Permisos, bloqueos, buzón, consumo, presupuesto de peticiones y limpieza de datos |
 

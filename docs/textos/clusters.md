@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/clusters.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-50 textos. «—» es que falta la traducción: sale en español.
+72 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -57,3 +57,25 @@ Generado desde `apps/web/src/shared/i18n/textos/clusters.csv` con
 | `map.legend.online` | Leyenda: tiene Sanatorio abierto | features/map/ClusterMapView | Con Sanatorio abierto | Has Sanatorio open | Amb Sanatorio obert | Sanatorio irekita du |
 | `clusters.chat` | Chat directo con alguien | features/alerts/Chat | Chat directo | Direct chat | Xat directe | Txat zuzena |
 | `clusters.chatEmpty` | Chat directo vacío | features/alerts/Chat | Nadie ha escrito todavía. Lo que pongas solo lo veis vosotros dos. | Nobody has written yet. Only the two of you see what you write. | Ningú ha escrit encara. El que posis només ho veieu vosaltres dos. | Inork ez du oraindik idatzi. Jartzen duzuna zuek biok bakarrik ikusten duzue. |
+| `facility.open` | Clústeres: botón para avisar al staff de un problema del edificio o de un ordenador | features/map/ClustersPage | Avisar de un problema | Report a problem | Avisar d'un problema | Arazo baten berri eman |
+| `facility.title` | Aviso al staff: título del formulario | features/facility/FacilityForm | Avisar al staff | Tell the staff | Avisar l'staff | Staffari jakinarazi |
+| `facility.what` | Aviso al staff: qué pasa | features/facility/FacilityForm | ¿Qué pasa? | What is wrong? | Què passa? | Zer gertatzen da? |
+| `facility.where` | Aviso al staff: dónde | features/facility/FacilityForm | ¿Dónde? | Where? | On? | Non? |
+| `facility.wherePlaceholder` | Aviso al staff: ayuda del campo «dónde» | features/facility/FacilityForm | Si no dices nada, tu puesto | Leave empty for your seat | Si no dius res, el teu lloc | Ezer esaten ez baduzu, zure postua |
+| `facility.note` | Aviso al staff: nota opcional | features/facility/FacilityForm | Nota (opcional) | Note (optional) | Nota (opcional) | Oharra (aukerakoa) |
+| `facility.noteRequired` | Aviso al staff: nota obligatoria con «otro» | features/facility/FacilityForm | Cuenta qué pasa | Tell what is wrong | Explica què passa | Kontatu zer gertatzen den |
+| `facility.send` | Aviso al staff: enviar | features/facility/FacilityForm | Avisar | Report | Avisar | Jakinarazi |
+| `facility.sent` | Aviso al staff: confirmación | features/facility/FacilityForm | Aviso enviado al staff. ¡Gracias! | Sent to the staff. Thanks! | Avís enviat a l'staff. Gràcies! | Staffari bidalia. Eskerrik asko! |
+| `facility.close` | Aviso al staff: cerrar la confirmación | features/facility/FacilityForm | Cerrar | Close | Tanca | Itxi |
+| `facility.none` | Lista de avisos del edificio vacía | features/facility/FacilityList | No hay avisos pendientes. | No pending reports. | No hi ha avisos pendents. | Ez dago jakinarazpenik zain. |
+| `facility.by` | Lista de avisos: quién y cuándo | features/facility/FacilityList | Avisa {login} · {when} | Reported by {login} · {when} | Avisa {login} · {when} | {login}(e)k jakinarazia · {when} |
+| `facility.resolvedBy` | Lista de avisos: quién lo resolvió y cuándo | features/facility/FacilityList | resuelto por {by} · {when} | resolved by {by} · {when} | resolt per {by} · {when} | {by}(e)k konponduta · {when} |
+| `facility.resolve` | Lista de avisos: darlo por resuelto | features/facility/FacilityList | Resuelto | Resolved | Resolt | Konponduta |
+| `facility.category.computer` | Tipo de problema: el ordenador | features/facility/FacilityForm, features/facility/FacilityList | Ordenador | Computer | Ordinador | Ordenagailua |
+| `facility.category.peripheral` | Tipo de problema: pantalla, teclado o ratón | features/facility/FacilityForm, features/facility/FacilityList | Pantalla, teclado o ratón | Screen, keyboard or mouse | Pantalla, teclat o ratolí | Pantaila, teklatua edo sagua |
+| `facility.category.network` | Tipo de problema: la red o el wifi | features/facility/FacilityForm, features/facility/FacilityList | Red o wifi | Network or wifi | Xarxa o wifi | Sarea edo wifia |
+| `facility.category.toilets` | Tipo de problema: los baños | features/facility/FacilityForm, features/facility/FacilityList | Baños | Toilets | Lavabos | Komunak |
+| `facility.category.temperature` | Tipo de problema: frío o calor | features/facility/FacilityForm, features/facility/FacilityList | Temperatura | Temperature | Temperatura | Tenperatura |
+| `facility.category.light` | Tipo de problema: la luz | features/facility/FacilityForm, features/facility/FacilityList | Luz | Light | Llum | Argia |
+| `facility.category.cleaning` | Tipo de problema: limpieza | features/facility/FacilityForm, features/facility/FacilityList | Limpieza | Cleaning | Neteja | Garbiketa |
+| `facility.category.other` | Tipo de problema: otro | features/facility/FacilityForm, features/facility/FacilityList | Otro | Other | Altre | Bestelakoa |
