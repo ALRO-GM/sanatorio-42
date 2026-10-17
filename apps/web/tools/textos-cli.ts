@@ -18,7 +18,7 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync
 import { join, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { LANG_CODES, readTables } from './textos.ts'
+import { LANG_CODES, readGroup, tableGroups } from './textos.ts'
 import type { TextRow } from './textos.ts'
 
 const WEB = fileURLToPath(new URL('..', import.meta.url))
@@ -82,6 +82,25 @@ function usageIn(rows: readonly TextRow[]): Usage {
 
     for (const [, literal = ''] of code.matchAll(/\bt\(\s*['"]([^'"]+)['"]/g)) {
       if (!keys.has(literal)) missing.push({ key: literal, file })
+    }
+
+    // Un prefijo que se pide entero (`tree('cheer.ask')`, `unflatten(dict,
+    // 'game')`) usa todo lo que cuelga de él.
+    const prefixes = [
+      ...[...code.matchAll(/['"]([a-zA-Z][\w-]*(?:\.[\w-]+)+)['"]/g)].map(
+        (match) => match[1] ?? '',
+      ),
+      ...[...code.matchAll(/unflatten\([\s\S]*?,\s*['"]([\w.-]+)['"]\s*\)/g)].map(
+        (match) => match[1] ?? '',
+      ),
+    ]
+
+    for (const prefix of prefixes) {
+      if (keys.has(prefix)) continue
+
+      for (const key of keys) {
+        if (key.startsWith(`${prefix}.`)) mark(key, file)
+      }
     }
 
     for (const [, template = ''] of code.matchAll(/`([a-zA-Z][\w.-]*\$\{[^`]*)`/g)) {
@@ -170,7 +189,8 @@ function indexDoc(rows: readonly TextRow[]): string {
 function main(): void {
   const write = process.argv.includes('--write')
   const problems: string[] = []
-  const rows = readTables()
+  // Las tablas de la web y las de cada grupo (`juego/`), todas juntas.
+  const rows = ['', ...tableGroups()].flatMap(readGroup)
   const seen = new Map<string, TextRow>()
 
   for (const row of rows) {

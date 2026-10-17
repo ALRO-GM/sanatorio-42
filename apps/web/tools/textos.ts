@@ -134,8 +134,25 @@ export function dictionaryOf(rows: readonly TextRow[], lang: LangCode): Record<s
 const VIRTUAL = 'virtual:textos/'
 
 /**
+ * Los grupos de tablas: subcarpetas de `textos/` que no viajan con la web, sino
+ * con la parte que las usa (`juego/`, con Code Clicker). Se importan como
+ * `virtual:textos/juego/es`.
+ */
+export function tableGroups(dir = TEXTOS_DIR): string[] {
+  return readdirSync(dir, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
+    .sort()
+}
+
+/** Las tablas de un grupo, o las de la web (`''`). */
+export function readGroup(group: string): TextRow[] {
+  return readTables(group === '' ? TEXTOS_DIR : join(TEXTOS_DIR, group))
+}
+
+/**
  * Plugin de Vite: `import es from 'virtual:textos/es'` da el diccionario del
- * español sacado de las tablas. Al tocar una tabla en `npm run dev`, la web se
+ * español sacado de las tablas, y `virtual:textos/juego/es`, el de un grupo. Al tocar una tabla en `npm run dev`, la web se
  * recarga con el texto nuevo.
  */
 export function textosPlugin() {
@@ -147,15 +164,19 @@ export function textosPlugin() {
     load(this: { addWatchFile: (file: string) => void }, id: string): string | undefined {
       if (!id.startsWith(`\0${VIRTUAL}`)) return undefined
 
-      const lang = id.slice(`\0${VIRTUAL}`.length)
+      const path = id.slice(`\0${VIRTUAL}`.length).split('/')
+      const lang = path.pop() ?? ''
+      const group = path.join('/')
 
       if (!(LANG_CODES as readonly string[]).includes(lang)) {
         throw new Error(`No hay tabla de textos para el idioma «${lang}»`)
       }
 
-      for (const { file } of tableFiles()) this.addWatchFile(file)
+      const dir = group === '' ? TEXTOS_DIR : join(TEXTOS_DIR, group)
 
-      return `export default ${JSON.stringify(dictionaryOf(readTables(), lang as LangCode))}`
+      for (const { file } of tableFiles(dir)) this.addWatchFile(file)
+
+      return `export default ${JSON.stringify(dictionaryOf(readTables(dir), lang as LangCode))}`
     },
   }
 }

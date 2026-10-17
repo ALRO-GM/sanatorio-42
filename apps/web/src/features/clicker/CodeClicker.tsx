@@ -849,7 +849,9 @@ export function CodeClicker({
       <p className="cc-news" role="status">
         <b className="cc-news-tag">{ui('newsTag')}</b>
         <span key={news}>
-          {news.startsWith(ui('newsPrefix')) ? news.slice(ui('newsPrefix').length) : news}
+          {news.startsWith(ui('newsPrefix'))
+            ? news.slice(ui('newsPrefix').length).trimStart()
+            : news}
         </span>
         <i key={`bar-${news}`} className="cc-news-bar" aria-hidden="true" />
       </p>

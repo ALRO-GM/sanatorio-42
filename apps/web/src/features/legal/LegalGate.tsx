@@ -14,7 +14,7 @@ import { legalText } from './text'
  * el texto entero sin salir.
  */
 export function LegalGate() {
-  const { t, lang } = useI18n()
+  const { t, tree } = useI18n()
   const status = useAsync(() => api.getLegal(), [])
   const { busy, error, run } = useAction()
   const dialog = useRef<HTMLDialogElement>(null)
@@ -22,7 +22,7 @@ export function LegalGate() {
   /** Ya aceptado: cerrar la ventana ya no la vuelve a abrir. */
   const accepted = useRef(false)
   const pending = status.data?.acceptedAt === null
-  const { text } = legalText(lang)
+  const { text } = legalText(tree)
 
   useEffect(() => {
     if (pending && dialog.current?.open === false) dialog.current.showModal()

@@ -11,6 +11,7 @@ import en from 'virtual:textos/en'
 import es from 'virtual:textos/es'
 import eu from 'virtual:textos/eu'
 import { localeOf } from '../src/shared/i18n/locale'
+import { treeOf } from './tree-of'
 
 const LANGS = ['es', 'en', 'ca', 'eu'] as const
 const OTHERS = { en, ca, eu }
@@ -37,7 +38,7 @@ describe('idiomas', () => {
 
   it('catalán y euskera traducen todo lo que ve cualquier persona', () => {
     // Lo único que se queda en español es el panel de gestión.
-    const visible = Object.keys(es).filter((key) => !/^(admin|quota|staff)\./.test(key))
+    const visible = Object.keys(es).filter((key) => !/^(admin|quota|staff|legal\.doc)\./.test(key))
 
     for (const dict of [ca, eu]) {
       const missing = visible.filter((key) => !(key in dict))
@@ -67,7 +68,7 @@ describe('idiomas', () => {
 describe('frases de ánimo', () => {
   /** Todas las frases de una lista, recorriéndola entera. */
   const all = (lang: (typeof LANGS)[number], offering: boolean): string[] =>
-    Array.from({ length: 50 }, (_, index) => cheerFor(lang, offering, (index + 0.5) / 50))
+    Array.from({ length: 50 }, (_, index) => cheerFor(treeOf(lang), offering, (index + 0.5) / 50))
 
   it.each(LANGS)('%s tiene cien frases distintas: 50 que invitan y 50 que agradecen', (lang) => {
     const phrases = [...all(lang, false), ...all(lang, true)]
@@ -77,7 +78,7 @@ describe('frases de ánimo', () => {
   })
 
   it('con el azar al límite sigue saliendo una frase', () => {
-    expect(cheerFor('eu', true, 0.999999)).not.toBe('')
-    expect(cheerFor('ca', false, 1)).not.toBe('')
+    expect(cheerFor(treeOf('eu'), true, 0.999999)).not.toBe('')
+    expect(cheerFor(treeOf('ca'), false, 1)).not.toBe('')
   })
 })

@@ -19,7 +19,7 @@ import { PreReviewToggle } from './PreReviewToggle'
  * te piden y las que has pedido) y a quién no quieres ayudar.
  */
 export function Guardia() {
-  const { t, lang } = useI18n()
+  const { t, tree } = useI18n()
   // La frase de ánimo se elige al entrar: no cambia mientras se marcan franjas.
   const [pick] = useState(() => Math.random())
   const { data, error, loading, reload, setData } = useAsync(() => api.getHelpDay(), [])
@@ -64,7 +64,7 @@ export function Guardia() {
           <GuardTour />
         </InfoTip>
       </h2>
-      <p className="cheer">{cheerFor(lang, data.windows.length > 0, pick)}</p>
+      <p className="cheer">{cheerFor(tree, data.windows.length > 0, pick)}</p>
 
       <Blocks
         page="guardia"

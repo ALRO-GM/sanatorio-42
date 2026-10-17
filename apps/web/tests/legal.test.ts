@@ -5,10 +5,11 @@
 import { describe, expect, it } from 'vitest'
 
 import { legalText } from '../src/features/legal/text'
+import { treeOf } from './tree-of'
 
 describe('texto legal', () => {
-  const es = legalText('es').text
-  const en = legalText('en').text
+  const es = legalText(treeOf('es')).text
+  const en = legalText(treeOf('en')).text
 
   it('castellano e inglés tienen las mismas partes', () => {
     expect(en.summary).toHaveLength(es.summary.length)
@@ -35,9 +36,9 @@ describe('texto legal', () => {
   })
 
   it('catalán y euskera ven el castellano, y lo dice', () => {
-    expect(legalText('ca')).toEqual({ text: es, translated: false })
-    expect(legalText('eu')).toEqual({ text: es, translated: false })
-    expect(legalText('es').translated).toBe(true)
-    expect(legalText('xx').translated).toBe(false)
+    expect(legalText(treeOf('ca'))).toEqual({ text: es, translated: false })
+    expect(legalText(treeOf('eu'))).toEqual({ text: es, translated: false })
+    expect(legalText(treeOf('es')).translated).toBe(true)
+    expect(legalText(treeOf('xx')).translated).toBe(false)
   })
 })

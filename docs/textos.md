@@ -47,6 +47,22 @@ Google Sheets, Excel) o con un editor de texto:
 | `demos` | Frases de las demostraciones animadas |
 | `gestion` | Panel de gestión y página del staff (en español a propósito) |
 | `code-clicker` | Lo del juego que sale fuera del juego |
+| `animos` | Las cien frases de ánimo de la guardia |
+| `legal` | El texto de privacidad y condiciones (castellano e inglés) |
+| `juego/juego` | Todo Code Clicker: tienda, logros, noticias del rótulo… |
+
+## Textos largos y grupos
+
+Una lista o un documento se guarda en muchas filas con una clave por niveles;
+los números son posiciones, desde 1: `cheer.ask.7` es la séptima frase de
+ánimo, `legal.doc.sections.2.heading` el título del segundo apartado. El código
+pide el prefijo entero (`tree('cheer.ask')`) y rehace la lista
+(`shared/i18n/tree.ts`). Para añadir una frase basta una fila con el número
+siguiente.
+
+Las tablas de una subcarpeta (`textos/juego/`) son un **grupo**: no viajan con
+la web, sino con la parte que las usa (`virtual:textos/juego/es`). Así los
+cientos de frases del juego solo se descargan al jugar.
 
 ## Regla estricta
 

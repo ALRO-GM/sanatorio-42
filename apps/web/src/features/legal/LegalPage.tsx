@@ -10,13 +10,13 @@ import { legalText } from './text'
  * lo tuyo. Sin sesión (desde la pantalla de entrada) se ve solo el texto.
  */
 export function LegalPage({ signedIn }: { signedIn: boolean }) {
-  const { t, lang } = useI18n()
+  const { t, lang, tree } = useI18n()
   const status = useAsync(() => (signedIn ? api.getLegal() : Promise.resolve(null)), [signedIn])
   const accepted = status.data?.acceptedAt ?? null
 
   return (
     <section className="legal-page">
-      <h2>{legalText(lang).text.title}</h2>
+      <h2>{legalText(tree).text.title}</h2>
       {signedIn && (
         <article className="card legal-actions">
           <p className="hint">

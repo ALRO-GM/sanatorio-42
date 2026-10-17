@@ -6,6 +6,7 @@ import type { Lang } from '@sanatorio/contracts'
 import es from 'virtual:textos/es'
 
 import { ApiError } from '../api/http'
+import { pickTree, unflatten } from './tree'
 
 type Dictionary = Record<string, string>
 
@@ -40,6 +41,11 @@ type I18n = {
   lang: Lang
   setLang: (next: Lang) => void
   t: Translate
+  /**
+   * Un texto largo guardado en muchas claves (una lista, un documento): su
+   * estructura en este idioma o, si no está traducido, en español. Ver `tree.ts`.
+   */
+  tree: (prefix: string) => { value: unknown; translated: boolean }
 }
 
 const STORAGE_KEY = 'sanatorio_lang'
@@ -61,7 +67,12 @@ export function initialLang(): Lang {
   return isLang(browser) ? browser : 'es'
 }
 
-const I18nContext = createContext<I18n>({ lang: 'es', setLang: () => undefined, t: (key) => key })
+const I18nContext = createContext<I18n>({
+  lang: 'es',
+  setLang: () => undefined,
+  t: (key) => key,
+  tree: (prefix) => ({ value: unflatten(es, prefix), translated: true }),
+})
 
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState(initialLang)
@@ -117,7 +128,13 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     [lang, arrived],
   )
 
-  const value = useMemo(() => ({ lang, setLang, t }), [lang, setLang, t])
+  const tree = useCallback(
+    (prefix: string) => pickTree(loaded[lang], es, prefix, lang === 'es'),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [lang, arrived],
+  )
+
+  const value = useMemo(() => ({ lang, setLang, t, tree }), [lang, setLang, t, tree])
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>
 }

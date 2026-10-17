@@ -5,6 +5,7 @@ Cómo se trabaja con ellas: [docs/textos.md](../textos.md).
 
 | Tema | Textos | Falta en Inglés | Falta en Catalán | Falta en Euskera |
 | --- | --- | --- | --- | --- |
+| [animos](animos.md) | 100 | 0 | 0 | 0 |
 | [buzon](buzon.md) | 121 | 0 | 0 | 0 |
 | [calendario](calendario.md) | 103 | 0 | 0 | 0 |
 | [clusters](clusters.md) | 50 | 0 | 0 | 0 |
@@ -15,11 +16,13 @@ Cómo se trabaja con ellas: [docs/textos.md](../textos.md).
 | [expediente](expediente.md) | 119 | 0 | 0 | 0 |
 | [gestion](gestion.md) | 411 | 38 | 371 | 371 |
 | [guardia](guardia.md) | 77 | 0 | 0 | 0 |
+| [legal](legal.md) | 52 | 0 | 52 | 52 |
 | [pizarras](pizarras.md) | 37 | 0 | 0 | 0 |
 | [red](red.md) | 137 | 0 | 0 | 0 |
 | [sala-de-espera](sala-de-espera.md) | 46 | 0 | 0 | 0 |
 | [tablon](tablon.md) | 93 | 0 | 0 | 0 |
 | [terapia](terapia.md) | 59 | 0 | 0 | 0 |
+| [juego](juego.md) | 491 | 0 | 491 | 491 |
 
 El panel de gestión (`admin.*`, `quota.*`, `staff.*`) solo lo ve quien
 administra y se deja en español a propósito.

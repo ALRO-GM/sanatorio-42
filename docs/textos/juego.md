@@ -1,0 +1,500 @@
+# Textos: juego
+
+Generado desde `apps/web/src/shared/i18n/textos/juego.csv` con
+`npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
+
+491 textos. «—» es que falta la traducción: sale en español.
+
+| Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
+| --- | --- | --- | --- | --- | --- | --- |
+| `game.ui.title` | Juego: texto de la interfaz | features/clicker/texts | Code Clicker | Code Clicker | — | — |
+| `game.ui.code` | Juego: texto de la interfaz | features/clicker/texts | líneas de código | lines of code | — | — |
+| `game.ui.perSecond` | Juego: texto de la interfaz | features/clicker/texts | por segundo: {n} | per second: {n} | — | — |
+| `game.ui.repo` | Juego: texto de la interfaz | features/clicker/texts | El repositorio de {login} | {login}'s repository | — | — |
+| `game.ui.store` | Juego: texto de la interfaz | features/clicker/texts | Tienda | Store | — | — |
+| `game.ui.upgrades` | Juego: texto de la interfaz | features/clicker/texts | Mejoras | Upgrades | — | — |
+| `game.ui.buy` | Juego: texto de la interfaz | features/clicker/texts | Comprar | Buy | — | — |
+| `game.ui.sell` | Juego: texto de la interfaz | features/clicker/texts | Vender | Sell | — | — |
+| `game.ui.owned` | Juego: texto de la interfaz | features/clicker/texts | tienes {n} | you have {n} | — | — |
+| `game.ui.each` | Juego: texto de la interfaz | features/clicker/texts | cada uno escribe {n} por segundo | each writes {n} per second | — | — |
+| `game.ui.all` | Juego: texto de la interfaz | features/clicker/texts | {n} por segundo entre todos ({pct} % del total) | {n} per second between them all ({pct}% of the total) | — | — |
+| `game.ui.locked` | Juego: texto de la interfaz | features/clicker/texts | ??? | ??? | — | — |
+| `game.ui.stats` | Juego: texto de la interfaz | features/clicker/texts | Estadísticas | Stats | — | — |
+| `game.ui.achievements` | Juego: texto de la interfaz | features/clicker/texts | Logros | Achievements | — | — |
+| `game.ui.board` | Juego: texto de la interfaz | features/clicker/texts | Clasificación | Leaderboard | — | — |
+| `game.ui.play` | Juego: texto de la interfaz | features/clicker/texts | Código | Code | — | — |
+| `game.ui.caffeine` | Juego: texto de la interfaz | features/clicker/texts | Cafeína: {pct} % | Caffeine: {pct}% | — | — |
+| `game.ui.caffeineAbout` | Juego: texto de la interfaz | features/clicker/texts | Un 4 % por logro. Los patitos de goma la convierten en producción. | 4% per achievement. Rubber ducks turn it into production. | — | — |
+| `game.ui.statTotal` | Juego: texto de la interfaz | features/clicker/texts | Escritas en esta partida | Written this run | — | — |
+| `game.ui.statAll` | Juego: texto de la interfaz | features/clicker/texts | Escritas desde siempre | Written all time | — | — |
+| `game.ui.statHand` | Juego: texto de la interfaz | features/clicker/texts | Escritas a mano | Written by hand | — | — |
+| `game.ui.statClicks` | Juego: texto de la interfaz | features/clicker/texts | Pulsaciones | Key presses | — | — |
+| `game.ui.statGolden` | Juego: texto de la interfaz | features/clicker/texts | Pull requests doradas abiertas | Golden pull requests opened | — | — |
+| `game.ui.statBugs` | Juego: texto de la interfaz | features/clicker/texts | Bugs aplastados | Bugs squashed | — | — |
+| `game.ui.statBuildings` | Juego: texto de la interfaz | features/clicker/texts | Cosas que escriben por ti | Things writing for you | — | — |
+| `game.ui.statPrestige` | Juego: texto de la interfaz | features/clicker/texts | Prestigio | Prestige | — | — |
+| `game.ui.statDonated` | Juego: texto de la interfaz | features/clicker/texts | Puntos donados a la bolsa de 42 | Points donated to the 42 pool | — | — |
+| `game.ui.statLevel` | Juego: texto de la interfaz | features/clicker/texts | Nivel | Level | — | — |
+| `game.ui.prestigeAbout` | Juego: texto de la interfaz | features/clicker/texts | Cada nivel de prestigio da un 1 % más de producción, para siempre. | Each prestige level gives 1% more production, forever. | — | — |
+| `game.ui.recompile` | Juego: texto de la interfaz | features/clicker/texts | Recompilar la realidad | Recompile reality | — | — |
+| `game.ui.recompileAbout` | Juego: texto de la interfaz | features/clicker/texts | Lo borras todo menos los logros y vuelves a empezar con el prestigio que hayas ganado. Ahora subirías a {n}. | You wipe everything but the achievements and start over with the prestige you have earned. Right now you would reach {n}. | — | — |
+| `game.ui.recompileAsk` | Juego: texto de la interfaz | features/clicker/texts | ¿Seguro? Vuelves a cero líneas. Subes a prestigio {n}. | Sure? You go back to zero lines. You reach prestige {n}. | — | — |
+| `game.ui.recompileNo` | Juego: texto de la interfaz | features/clicker/texts | Todavía no has escrito bastante para ganar prestigio: hace falta un billón. | You have not written enough to earn prestige yet: it takes a trillion. | — | — |
+| `game.ui.hotfix` | Juego: texto de la interfaz | features/clicker/texts | Aplicar un parche ({n}) | Apply a hotfix ({n}) | — | — |
+| `game.ui.hotfixAbout` | Juego: texto de la interfaz | features/clicker/texts | Calma la singularidad media hora y espanta a los bugs. Cada vez cuesta más. | Calms the singularity for half an hour and scares the bugs off. It costs more each time. | — | — |
+| `game.ui.hotfixOn` | Juego: texto de la interfaz | features/clicker/texts | Parche aplicado: queda {n} | Hotfix applied: {n} left | — | — |
+| `game.ui.bugs` | Juego: texto de la interfaz | features/clicker/texts | Bugs pegados: {n}. Se comen un {pct} % de lo que escribes; aplástalos para recuperarlo con propina. | Bugs attached: {n}. They eat {pct}% of what you write; squash them to get it back with a tip. | — | — |
+| `game.ui.gotAchievement` | Juego: texto de la interfaz | features/clicker/texts | Logro conseguido | Achievement unlocked | — | — |
+| `game.ui.golden` | Juego: texto de la interfaz | features/clicker/texts | Pull request dorada | Golden pull request | — | — |
+| `game.ui.wrath` | Juego: texto de la interfaz | features/clicker/texts | Pull request envenenada | Poisoned pull request | — | — |
+| `game.ui.fx_frenzy` | Juego: texto de la interfaz | features/clicker/texts | ¡Frenesí! Producción ×7 durante 77 segundos | Frenzy! Production ×7 for 77 seconds | — | — |
+| `game.ui.fx_lucky` | Juego: texto de la interfaz | features/clicker/texts | ¡Suerte! +{n} líneas | Lucky! +{n} lines | — | — |
+| `game.ui.fx_click` | Juego: texto de la interfaz | features/clicker/texts | ¡Dedos de fuego! Pulsaciones ×777 durante 13 segundos | Fingers of fire! Key presses ×777 for 13 seconds | — | — |
+| `game.ui.fx_clot` | Juego: texto de la interfaz | features/clicker/texts | Merge conflict: producción a la mitad durante 66 segundos | Merge conflict: production halved for 66 seconds | — | — |
+| `game.ui.fx_ruin` | Juego: texto de la interfaz | features/clicker/texts | rm -rf: has perdido {n} líneas | rm -rf: you lost {n} lines | — | — |
+| `game.ui.fx_elder` | Juego: texto de la interfaz | features/clicker/texts | La Moulinette te posee: producción ×666 durante 6 segundos | The Moulinette possesses you: production ×666 for 6 seconds | — | — |
+| `game.ui.squashed` | Juego: texto de la interfaz | features/clicker/texts | Bug aplastado: +{n} | Bug squashed: +{n} | — | — |
+| `game.ui.rank` | Juego: texto de la interfaz | features/clicker/texts | Puesto | Rank | — | — |
+| `game.ui.level` | Juego: texto de la interfaz | features/clicker/texts | Nivel | Level | — | — |
+| `game.ui.noBoard` | Juego: texto de la interfaz | features/clicker/texts | Todavía no hay nadie. Sé la primera persona. | Nobody here yet. Be the first. | — | — |
+| `game.ui.wealth` | Juego: texto de la interfaz | features/clicker/texts | Patrimonio | Net worth | — | — |
+| `game.ui.boardHint` | Juego: texto de la interfaz | features/clicker/texts | Por patrimonio: el código sin gastar más lo que costaron los edificios, según el último guardado. | By net worth: unspent code plus what the buildings cost, as of the last save. | — | — |
+| `game.ui.saved` | Juego: texto de la interfaz | features/clicker/texts | Partida guardada | Game saved | — | — |
+| `game.ui.back` | Juego: texto de la interfaz | features/clicker/texts | Salir del juego | Leave the game | — | — |
+| `game.ui.tagBuilding` | Juego: texto de la interfaz | features/clicker/texts | Edificio | Building | — | — |
+| `game.ui.tagUpgrade` | Juego: texto de la interfaz | features/clicker/texts | Mejora | Upgrade | — | — |
+| `game.ui.tagMouse` | Juego: texto de la interfaz | features/clicker/texts | Ratón | Mouse | — | — |
+| `game.ui.tagProject` | Juego: texto de la interfaz | features/clicker/texts | Proyecto de 42 | 42 project | — | — |
+| `game.ui.tagDuck` | Juego: texto de la interfaz | features/clicker/texts | Patito de goma | Rubber duck | — | — |
+| `game.ui.tagResearch` | Juego: texto de la interfaz | features/clicker/texts | Investigación | Research | — | — |
+| `game.ui.tagAchievement` | Juego: texto de la interfaz | features/clicker/texts | Logro | Achievement | — | — |
+| `game.ui.tagOwned` | Juego: texto de la interfaz | features/clicker/texts | Comprada | Bought | — | — |
+| `game.ui.cardEach` | Juego: texto de la interfaz | features/clicker/texts | Cada {name} escribe {n} por segundo. | Each {name} writes {n} per second. | — | — |
+| `game.ui.cardAll` | Juego: texto de la interfaz | features/clicker/texts | {count} {plural} escriben {n} por segundo ({pct} % del total). | {count} {plural} write {n} per second ({pct}% of total). | — | — |
+| `game.ui.cardMade` | Juego: texto de la interfaz | features/clicker/texts | Líneas escritas hasta ahora: {n}. | Lines written so far: {n}. | — | — |
+| `game.ui.cardGain` | Juego: texto de la interfaz | features/clicker/texts | Comprarlo suma +{n} por segundo (+{pct} %). | Buying it adds +{n} per second (+{pct}%). | — | — |
+| `game.ui.cardGainFirst` | Juego: texto de la interfaz | features/clicker/texts | Comprarlo suma +{n} por segundo. | Buying it adds +{n} per second. | — | — |
+| `game.ui.cardClick` | Juego: texto de la interfaz | features/clicker/texts | Cada pulsación da +{n} más (+{pct} %). | Each press gives +{n} more (+{pct}%). | — | — |
+| `game.ui.cardPayback` | Juego: texto de la interfaz | features/clicker/texts | Se paga solo en {t}. | Pays for itself in {t}. | — | — |
+| `game.ui.cardNow` | Juego: texto de la interfaz | features/clicker/texts | Te llega para comprarlo. | You can afford it. | — | — |
+| `game.ui.cardWait` | Juego: texto de la interfaz | features/clicker/texts | Te llegará en {t}. | You can afford it in {t}. | — | — |
+| `game.ui.cardNever` | Juego: texto de la interfaz | features/clicker/texts | Aún no escribes nada solo: pulsa la tecla. | Nothing writes for you yet: press the key. | — | — |
+| `game.ui.cardSell` | Juego: texto de la interfaz | features/clicker/texts | Vender {n} te devuelve {m}. | Selling {n} gives back {m}. | — | — |
+| `game.ui.cardLocked` | Juego: texto de la interfaz | features/clicker/texts | Aún no lo has descubierto. | You have not discovered it yet. | — | — |
+| `game.ui.cardCaffeine` | Juego: texto de la interfaz | features/clicker/texts | Conseguido: +4 % de cafeína. | Unlocked: +4% caffeine. | — | — |
+| `game.ui.cardTouch` | Juego: texto de la interfaz | features/clicker/texts | Toca otra vez para comprar. | Tap again to buy. | — | — |
+| `game.ui.boughtUpgrades` | Juego: texto de la interfaz | features/clicker/texts | Mejoras compradas: {n} | Upgrades bought: {n} | — | — |
+| `game.ui.levelBar` | Juego: texto de la interfaz | features/clicker/texts | Nivel {n} | Level {n} | — | — |
+| `game.ui.rowSpeed` | Juego: texto de la interfaz | features/clicker/texts | {n} por segundo | {n} per second | — | — |
+| `game.ui.soundOn` | Juego: texto de la interfaz | features/clicker/texts | Sonido: sí | Sound: on | — | — |
+| `game.ui.soundOff` | Juego: texto de la interfaz | features/clicker/texts | Sonido: no | Sound: off | — | — |
+| `game.ui.drink0` | Juego: texto de la interfaz | features/clicker/texts | Café solo | Black coffee | — | — |
+| `game.ui.drink1` | Juego: texto de la interfaz | features/clicker/texts | Café con leche | Latte | — | — |
+| `game.ui.drink2` | Juego: texto de la interfaz | features/clicker/texts | Té de la máquina | Vending machine tea | — | — |
+| `game.ui.drink3` | Juego: texto de la interfaz | features/clicker/texts | Cacao | Cocoa | — | — |
+| `game.ui.drink4` | Juego: texto de la interfaz | features/clicker/texts | Mate | Mate | — | — |
+| `game.ui.drink5` | Juego: texto de la interfaz | features/clicker/texts | Refresco de cola | Cola | — | — |
+| `game.ui.drink6` | Juego: texto de la interfaz | features/clicker/texts | Bebida energética | Energy drink | — | — |
+| `game.ui.drink7` | Juego: texto de la interfaz | features/clicker/texts | Algo que brilla | Something that glows | — | — |
+| `game.ui.clickGain` | Juego: texto de la interfaz | features/clicker/texts | por pulsación: {n} | per press: {n} | — | — |
+| `game.ui.stale` | Juego: texto de la interfaz | features/clicker/texts | Esta partida se ha seguido en otro dispositivo. Lo que hagas aquí ya no se guarda. | This game has been continued on another device. What you do here is no longer saved. | — | — |
+| `game.ui.staleLoad` | Juego: texto de la interfaz | features/clicker/texts | Cargar la partida guardada | Load the saved game | — | — |
+| `game.ui.capital` | Juego: texto de la interfaz | features/clicker/texts | Capital: {n} (lo que tienes, lo que costó lo comprado y lo que deben los bugs) | Worth: {n} (what you hold, what your purchases cost and what the bugs owe) | — | — |
+| `game.ui.miniOn` | Juego: texto de la interfaz | features/clicker/texts | Ventanita: sí | Mini window: on | — | — |
+| `game.ui.miniOff` | Juego: texto de la interfaz | features/clicker/texts | Ventanita: no | Mini window: off | — | — |
+| `game.ui.miniAbout` | Juego: texto de la interfaz | features/clicker/texts | El juego sigue mientras tengas la web abierta. La ventanita enseña cuánto llevas cuando estás en otra sección. | The game keeps going while the site is open. The mini window shows your count when you are in another section. | — | — |
+| `game.ui.miniOpen` | Juego: texto de la interfaz | features/clicker/texts | Volver a Code Clicker | Back to Code Clicker | — | — |
+| `game.ui.miniClose` | Juego: texto de la interfaz | features/clicker/texts | Quitar la ventanita | Hide the mini window | — | — |
+| `game.ui.newsTag` | Juego: texto de la interfaz | features/clicker/texts | Última hora | Breaking | — | — |
+| `game.ui.newsPrefix` | Juego: palabra con la que empiezan las noticias del rótulo; se quita al enseñarlas | features/clicker/texts | Noticias: | News: | — | — |
+| `game.ui.bustEyebrow` | Juego: texto de la interfaz | features/clicker/texts | Sistema antitrampas | Anti-cheat system | — | — |
+| `game.ui.bustOk` | Juego: texto de la interfaz | features/clicker/texts | Entendido | Got it | — | — |
+| `game.ui.bustSold` | Juego: texto de la interfaz | features/clicker/texts | Vendido todo lo de la tienda por {n} líneas. | Everything from the shop sold for {n} lines. | — | — |
+| `game.ui.spectating` | Juego: texto de la interfaz | features/clicker/texts | Viendo la partida de {login}: lo que toques aquí no se guarda en ningún sitio. | Watching {login}’s game: nothing you touch here is saved anywhere. | — | — |
+| `game.ui.policeEyebrow` | Juego: texto de la interfaz | features/clicker/texts | Policía del código | Code police | — | — |
+| `game.ui.limitEyebrow` | Juego: texto de la interfaz | features/clicker/texts | Pace en riesgo | Pace at risk | — | — |
+| `game.ui.limitTitle` | Juego: texto de la interfaz | features/clicker/texts | Por hoy ya has jugado bastante | That is enough playing for today | — | — |
+| `game.ui.limitBody` | Juego: texto de la interfaz | features/clicker/texts | Hoy irías a pace {pace}: con el pace en riesgo, Code Clicker se juega media hora al día. Tu partida sigue escribiendo código sola; vuelve mañana o, mejor, avanza un proyecto. | Today you would drop to pace {pace}: with your pace at risk, Code Clicker is played half an hour a day. Your game keeps writing code on its own; come back tomorrow or, better, move a project forward. | — | — |
+| `game.ui.limitLeft` | Juego: texto de la interfaz | features/clicker/texts | Pace {pace} en riesgo: te quedan {min} min de juego hoy. | Pace {pace} at risk: {min} min of play left today. | — | — |
+| `game.ui.limitHole` | Juego: texto de la interfaz | features/clicker/texts | black hole | black hole | — | — |
+| `game.ui.policeNote` | Juego: texto de la interfaz | features/clicker/texts | Mensaje de la policía del código | A message from the code police | — | — |
+| `game.ui.policeMoney` | Juego: texto de la interfaz | features/clicker/texts | Tus edificios se han vendido a la mitad de lo que costaron: {n} líneas vuelven a tu repositorio, y otras tantas se reparten entre las {people} personas que juegan limpio. | Your buildings were sold for half of what they cost: {n} lines go back to your repository, and the same amount is shared among the {people} people who play fair. | — | — |
+| `game.ui.giftTitle` | Juego: texto de la interfaz | features/clicker/texts | Reparto de la policía del código | Code police payout | — | — |
+| `game.ui.giftText` | Juego: texto de la interfaz | features/clicker/texts | Alguien hizo trampa y ha pagado: te tocan {n} líneas por jugar limpio. | Someone cheated and paid for it: you get {n} lines for playing fair. | — | — |
+| `game.ui.policeReview` | Juego: texto de la interfaz | features/clicker/texts | Quien administra ha revisado tu partida y no cuadra: | Whoever runs the site reviewed your game and it does not add up: | — | — |
+| `game.ui.policeJump` | Juego: texto de la interfaz | features/clicker/texts | tu capital pasó de {from} a {to} en {seconds} s, con una producción de {rate} por segundo | your capital went from {from} to {to} in {seconds} s, producing {rate} per second | — | — |
+| `game.ui.policeNoGolden` | Juego: texto de la interfaz | features/clicker/texts | sin ninguna pull request dorada abierta | with no golden pull request open | — | — |
+| `game.ui.loot` | Juego: texto de la interfaz | features/clicker/texts | Botín de los tramposos | Cheaters’ loot | — | — |
+| `game.ui.fx_loot` | Juego: texto de la interfaz | features/clicker/texts | Recuperas {n} líneas requisadas | You recover {n} seized lines | — | — |
+| `game.ui.lootGone` | Juego: texto de la interfaz | features/clicker/texts | Alguien ha llegado antes al botín | Someone got to the loot first | — | — |
+| `game.ui.offline` | Juego: texto de la interfaz | features/clicker/texts | Sin conexión: la partida se guarda solo en este navegador hasta que vuelva. | Offline: the game is saved only in this browser until the connection is back. | — | — |
+| `game.ui.upTier` | Juego: texto de la interfaz | features/clicker/texts | {building}: escriben el doble. | {building}: they write twice as much. | — | — |
+| `game.ui.upCursor` | Juego: texto de la interfaz | features/clicker/texts | El cursor y cada pulsación escriben el doble. | The cursor and every key press write twice as much. | — | — |
+| `game.ui.upFingers` | Juego: texto de la interfaz | features/clicker/texts | El cursor y cada pulsación ganan +{n} por cada cosa que no sea un cursor. | The cursor and every key press gain +{n} for each thing that is not a cursor. | — | — |
+| `game.ui.upMouse` | Juego: texto de la interfaz | features/clicker/texts | Cada pulsación gana un 1 % de lo que escribes por segundo. | Every key press gains 1% of what you write per second. | — | — |
+| `game.ui.upMentor` | Juego: texto de la interfaz | features/clicker/texts | Pisciners de {building}: todos los pisciners escriben el doble. | {building} pisciners: every pisciner writes twice as much. | — | — |
+| `game.ui.upProject` | Juego: texto de la interfaz | features/clicker/texts | Has validado {project}: toda la producción sube un {n} %. | You validated {project}: all production goes up {n}%. | — | — |
+| `game.ui.upDuck` | Juego: texto de la interfaz | features/clicker/texts | Explícaselo al patito: produces más cuanta más cafeína tengas. | Explain it to the duck: you produce more the more caffeine you have. | — | — |
+| `game.ui.upPower` | Juego: texto de la interfaz | features/clicker/texts | Toda la producción sube un {n} %. | All production goes up {n}%. | — | — |
+| `game.ui.upPisciners` | Juego: texto de la interfaz | features/clicker/texts | Los pisciners escriben {n} veces más. | Pisciners write {n} times more. | — | — |
+| `game.ui.mouseName` | Juego: texto de la interfaz | features/clicker/texts | Ratón {n} | Mouse {n} | — | — |
+| `game.ui.mentorName` | Juego: texto de la interfaz | features/clicker/texts | Pisciners de {building} | {building} pisciners | — | — |
+| `game.ui.ownName` | Juego: texto de la interfaz | features/clicker/texts | {building} ×{n} | {building} ×{n} | — | — |
+| `game.ui.ownAbout` | Juego: texto de la interfaz | features/clicker/texts | Ten {n}. | Have {n}. | — | — |
+| `game.ui.totalAbout` | Juego: texto de la interfaz | features/clicker/texts | Líneas escritas en total: {n}. | Lines written in total: {n}. | — | — |
+| `game.ui.cpsAbout` | Juego: texto de la interfaz | features/clicker/texts | Líneas por segundo: {n}. | Lines per second: {n}. | — | — |
+| `game.ui.handAbout` | Juego: texto de la interfaz | features/clicker/texts | Escribe {n} líneas a mano. | Write {n} lines by hand. | — | — |
+| `game.ui.goldenAbout` | Juego: texto de la interfaz | features/clicker/texts | Abre {n} pull requests doradas. | Open {n} golden pull requests. | — | — |
+| `game.ui.bugAbout` | Juego: texto de la interfaz | features/clicker/texts | Aplasta {n} bugs. | Squash {n} bugs. | — | — |
+| `game.ui.prestigeAbout2` | Juego: texto de la interfaz | features/clicker/texts | Llega a prestigio {n}. | Reach prestige {n}. | — | — |
+| `game.buildings.cursor.1` | Juego: nombre del edificio «cursor» | features/clicker/texts | Cursor | Cursor | — | — |
+| `game.buildings.cursor.2` | Juego: plural del edificio «cursor» | features/clicker/texts | cursores | cursors | — | — |
+| `game.buildings.cursor.3` | Juego: descripción del edificio «cursor» | features/clicker/texts | Pulsa la tecla por ti cada diez segundos. | Presses the key for you every ten seconds. | — | — |
+| `game.buildings.pisciner.1` | Juego: nombre del edificio «pisciner» | features/clicker/texts | Pisciner | Pisciner | — | — |
+| `game.buildings.pisciner.2` | Juego: plural del edificio «pisciner» | features/clicker/texts | pisciners | pisciners | — | — |
+| `game.buildings.pisciner.3` | Juego: descripción del edificio «pisciner» | features/clicker/texts | Recién llegado, pica código sin hacer preguntas. | Fresh arrival, bangs out code without asking questions. | — | — |
+| `game.buildings.cluster.1` | Juego: nombre del edificio «cluster» | features/clicker/texts | Cluster | Cluster | — | — |
+| `game.buildings.cluster.2` | Juego: plural del edificio «cluster» | features/clicker/texts | clusters | clusters | — | — |
+| `game.buildings.cluster.3` | Juego: descripción del edificio «cluster» | features/clicker/texts | Filas de iMacs que no se apagan nunca. | Rows of iMacs that never switch off. | — | — |
+| `game.buildings.overflow.1` | Juego: nombre del edificio «overflow» | features/clicker/texts | Mina de Stack Overflow | Stack Overflow mine | — | — |
+| `game.buildings.overflow.2` | Juego: plural del edificio «overflow» | features/clicker/texts | minas de Stack Overflow | Stack Overflow mines | — | — |
+| `game.buildings.overflow.3` | Juego: descripción del edificio «overflow» | features/clicker/texts | Extrae respuestas de 2011 que aún funcionan. | Digs up answers from 2011 that still work. | — | — |
+| `game.buildings.pipeline.1` | Juego: nombre del edificio «pipeline» | features/clicker/texts | Pipeline | Pipeline | — | — |
+| `game.buildings.pipeline.2` | Juego: plural del edificio «pipeline» | features/clicker/texts | pipelines | pipelines | — | — |
+| `game.buildings.pipeline.3` | Juego: descripción del edificio «pipeline» | features/clicker/texts | Fabrica builds en cadena, día y noche. | Churns out builds on a belt, day and night. | — | — |
+| `game.buildings.repo.1` | Juego: nombre del edificio «repo» | features/clicker/texts | Repositorio | Repository | — | — |
+| `game.buildings.repo.2` | Juego: plural del edificio «repo» | features/clicker/texts | repositorios | repositories | — | — |
+| `game.buildings.repo.3` | Juego: descripción del edificio «repo» | features/clicker/texts | Guarda el código y le saca intereses. | Stores the code and earns interest on it. | — | — |
+| `game.buildings.temple.1` | Juego: nombre del edificio «temple» | features/clicker/texts | Templo de la Norminette | Temple of the Norminette | — | — |
+| `game.buildings.temple.2` | Juego: plural del edificio «temple» | features/clicker/texts | templos de la Norminette | temples of the Norminette | — | — |
+| `game.buildings.temple.3` | Juego: descripción del edificio «temple» | features/clicker/texts | Veinticinco líneas por función, y amén. | Twenty-five lines per function, and amen. | — | — |
+| `game.buildings.regex.1` | Juego: nombre del edificio «regex» | features/clicker/texts | Torre de regex | Regex tower | — | — |
+| `game.buildings.regex.2` | Juego: plural del edificio «regex» | features/clicker/texts | torres de regex | regex towers | — | — |
+| `game.buildings.regex.3` | Juego: descripción del edificio «regex» | features/clicker/texts | Magos que invocan código con símbolos que nadie entiende. | Wizards summoning code with symbols nobody understands. | — | — |
+| `game.buildings.docker.1` | Juego: nombre del edificio «docker» | features/clicker/texts | Contenedor | Container | — | — |
+| `game.buildings.docker.2` | Juego: plural del edificio «docker» | features/clicker/texts | contenedores | containers | — | — |
+| `game.buildings.docker.3` | Juego: descripción del edificio «docker» | features/clicker/texts | Trae código de otros planetas, bien empaquetado. | Ships code in from other planets, neatly packed. | — | — |
+| `game.buildings.compiler.1` | Juego: nombre del edificio «compiler» | features/clicker/texts | Compilador | Compiler | — | — |
+| `game.buildings.compiler.2` | Juego: plural del edificio «compiler» | features/clicker/texts | compiladores | compilers | — | — |
+| `game.buildings.compiler.3` | Juego: descripción del edificio «compiler» | features/clicker/texts | Transmuta café en binario. | Transmutes coffee into binary. | — | — |
+| `game.buildings.portal.1` | Juego: nombre del edificio «portal» | features/clicker/texts | Portal a producción | Portal to production | — | — |
+| `game.buildings.portal.2` | Juego: plural del edificio «portal» | features/clicker/texts | portales a producción | portals to production | — | — |
+| `game.buildings.portal.3` | Juego: descripción del edificio «portal» | features/clicker/texts | Una puerta al sitio del que nadie vuelve en viernes. | A door to the place nobody returns from on a Friday. | — | — |
+| `game.buildings.rebase.1` | Juego: nombre del edificio «rebase» | features/clicker/texts | Rebase interactivo | Interactive rebase | — | — |
+| `game.buildings.rebase.2` | Juego: plural del edificio «rebase» | features/clicker/texts | rebases interactivos | interactive rebases | — | — |
+| `game.buildings.rebase.3` | Juego: descripción del edificio «rebase» | features/clicker/texts | Trae código de antes de que se escribiera. | Brings code from before it was written. | — | — |
+| `game.buildings.quantum.1` | Juego: nombre del edificio «quantum» | features/clicker/texts | Ordenador cuántico | Quantum computer | — | — |
+| `game.buildings.quantum.2` | Juego: plural del edificio «quantum» | features/clicker/texts | ordenadores cuánticos | quantum computers | — | — |
+| `game.buildings.quantum.3` | Juego: descripción del edificio «quantum» | features/clicker/texts | Escribe y no escribe todas las líneas a la vez. | Writes and does not write every line at once. | — | — |
+| `game.buildings.neural.1` | Juego: nombre del edificio «neural» | features/clicker/texts | Red neuronal | Neural network | — | — |
+| `game.buildings.neural.2` | Juego: plural del edificio «neural» | features/clicker/texts | redes neuronales | neural networks | — | — |
+| `game.buildings.neural.3` | Juego: descripción del edificio «neural» | features/clicker/texts | Convierte la luz misma en código. | Turns light itself into code. | — | — |
+| `game.buildings.fuzzer.1` | Juego: nombre del edificio «fuzzer» | features/clicker/texts | Fuzzer | Fuzzer | — | — |
+| `game.buildings.fuzzer.2` | Juego: plural del edificio «fuzzer» | features/clicker/texts | fuzzers | fuzzers | — | — |
+| `game.buildings.fuzzer.3` | Juego: descripción del edificio «fuzzer» | features/clicker/texts | Genera código de la nada y de pura suerte. | Makes code out of nothing and sheer luck. | — | — |
+| `game.buildings.recursion.1` | Juego: nombre del edificio «recursion» | features/clicker/texts | Motor de recursión | Recursion engine | — | — |
+| `game.buildings.recursion.2` | Juego: plural del edificio «recursion» | features/clicker/texts | motores de recursión | recursion engines | — | — |
+| `game.buildings.recursion.3` | Juego: descripción del edificio «recursion» | features/clicker/texts | Código que escribe código que escribe código. | Code that writes code that writes code. | — | — |
+| `game.buildings.terminal.1` | Juego: nombre del edificio «terminal» | features/clicker/texts | Terminal raíz | Root terminal | — | — |
+| `game.buildings.terminal.2` | Juego: plural del edificio «terminal» | features/clicker/texts | terminales raíz | root terminals | — | — |
+| `game.buildings.terminal.3` | Juego: descripción del edificio «terminal» | features/clicker/texts | Escribe el código con el que está escrito este juego. | Writes the very code this game is written in. | — | — |
+| `game.buildings.forks.1` | Juego: nombre del edificio «forks» | features/clicker/texts | Multiverso de forks | Multiverse of forks | — | — |
+| `game.buildings.forks.2` | Juego: plural del edificio «forks» | features/clicker/texts | multiversos de forks | multiverses of forks | — | — |
+| `game.buildings.forks.3` | Juego: descripción del edificio «forks» | features/clicker/texts | En cada universo, alguien pica código para ti. | In every universe, someone is coding for you. | — | — |
+| `game.buildings.hive.1` | Juego: nombre del edificio «hive» | features/clicker/texts | Mente colmena | Hive mind | — | — |
+| `game.buildings.hive.2` | Juego: plural del edificio «hive» | features/clicker/texts | mentes colmena | hive minds | — | — |
+| `game.buildings.hive.3` | Juego: descripción del edificio «hive» | features/clicker/texts | Cerebros del tamaño de planetas soñando en C. | Planet-sized brains dreaming in C. | — | — |
+| `game.buildings.you.1` | Juego: nombre del edificio «you» | features/clicker/texts | Tú | You | — | — |
+| `game.buildings.you.2` | Juego: plural del edificio «you» | features/clicker/texts | copias de ti | copies of you | — | — |
+| `game.buildings.you.3` | Juego: descripción del edificio «you» | features/clicker/texts | Tú. Solo que muchos. | You. Only many. | — | — |
+| `game.tiers.1` | Juego: nombre de un escalón de mejora | features/clicker/texts | v1.1 | v1.1 | — | — |
+| `game.tiers.2` | Juego: nombre de un escalón de mejora | features/clicker/texts | Refactor | Refactor | — | — |
+| `game.tiers.3` | Juego: nombre de un escalón de mejora | features/clicker/texts | Optimizado con -O2 | Optimised with -O2 | — | — |
+| `game.tiers.4` | Juego: nombre de un escalón de mejora | features/clicker/texts | Sin warnings | No warnings | — | — |
+| `game.tiers.5` | Juego: nombre de un escalón de mejora | features/clicker/texts | Multihilo | Multithreaded | — | — |
+| `game.tiers.6` | Juego: nombre de un escalón de mejora | features/clicker/texts | Vectorizado | Vectorised | — | — |
+| `game.tiers.7` | Juego: nombre de un escalón de mejora | features/clicker/texts | Reescrito en ensamblador | Rewritten in assembly | — | — |
+| `game.tiers.8` | Juego: nombre de un escalón de mejora | features/clicker/texts | Autoescrito | Self-written | — | — |
+| `game.tiers.9` | Juego: nombre de un escalón de mejora | features/clicker/texts | Consciente | Sentient | — | — |
+| `game.tiers.10` | Juego: nombre de un escalón de mejora | features/clicker/texts | Fuera del tiempo | Outside time | — | — |
+| `game.tiers.11` | Juego: nombre de un escalón de mejora | features/clicker/texts | Absoluto | Absolute | — | — |
+| `game.research.lab.1` | Juego: nombre de la investigación «lab» | features/clicker/texts | Laboratorio de pedagogía | Pedagogy lab | — | — |
+| `game.research.lab.2` | Juego: descripción de la investigación «lab» | features/clicker/texts | Investiga cómo aprenden los pisciners. Escriben 4 veces más. ¿Qué podría salir mal? | Researches how pisciners learn. They write 4 times more. What could go wrong? | — | — |
+| `game.research.syntax.1` | Juego: nombre de la investigación «syntax» | features/clicker/texts | Resaltado de sintaxis | Syntax highlighting | — | — |
+| `game.research.syntax.2` | Juego: descripción de la investigación «syntax» | features/clicker/texts | Los colores ayudan. | Colours help. | — | — |
+| `game.research.style.1` | Juego: nombre de la investigación «style» | features/clicker/texts | Guía de estilo | Style guide | — | — |
+| `game.research.style.2` | Juego: descripción de la investigación «style» | features/clicker/texts | Todos indentan igual. Por fin. | Everyone indents the same. At last. | — | — |
+| `game.research.ritual.1` | Juego: nombre de la investigación «ritual» | features/clicker/texts | Rituales de corrección | Evaluation rituals | — | — |
+| `game.research.ritual.2` | Juego: descripción de la investigación «ritual» | features/clicker/texts | Las correcciones empiezan a parecer ceremonias. | Evaluations are starting to look like ceremonies. | — | — |
+| `game.research.underworld.1` | Juego: nombre de la investigación «underworld» | features/clicker/texts | Servidores del sótano | Basement servers | — | — |
+| `game.research.underworld.2` | Juego: descripción de la investigación «underworld» | features/clicker/texts | Nadie sabe quién los puso ahí abajo. | Nobody knows who put them down there. | — | — |
+| `game.research.onemind.1` | Juego: nombre de la investigación «onemind» | features/clicker/texts | Una sola mente | One mind | — | — |
+| `game.research.onemind.2` | Juego: descripción de la investigación «onemind» | features/clicker/texts | Los pisciners empiezan a teclear al unísono. Cada uno rinde más cuantos más son. Te miran. | The pisciners start typing in unison. Each does more the more there are. They are looking at you. | — | — |
+| `game.research.exotic.1` | Juego: nombre de la investigación «exotic» | features/clicker/texts | Dependencias exóticas | Exotic dependencies | — | — |
+| `game.research.exotic.2` | Juego: descripción de la investigación «exotic» | features/clicker/texts | Paquetes que no están en ningún registro conocido. | Packages found in no known registry. | — | — |
+| `game.research.brainsweep.1` | Juego: nombre de la investigación «brainsweep» | features/clicker/texts | Barrido de caché cerebral | Brain cache sweep | — | — |
+| `game.research.brainsweep.2` | Juego: descripción de la investigación «brainsweep» | features/clicker/texts | Ya no hace falta que piensen. Solo que tecleen. | They no longer need to think. Only to type. | — | — |
+| `game.research.arcane.1` | Juego: nombre de la investigación «arcane» | features/clicker/texts | Macros arcanas | Arcane macros | — | — |
+| `game.research.arcane.2` | Juego: descripción de la investigación «arcane» | features/clicker/texts | Se expanden solas. Siguen expandiéndose. | They expand by themselves. They keep expanding. | — | — |
+| `game.research.pact.1` | Juego: nombre de la investigación «pact» | features/clicker/texts | El pacto de la Moulinette | The Moulinette pact | — | — |
+| `game.research.pact.2` | Juego: descripción de la investigación «pact» | features/clicker/texts | Ella corrige la realidad. Tú escribes. Los pisciners rinden más por cada portal. | She grades reality. You write. Pisciners do more for each portal. | — | — |
+| `game.ducks.1` | Juego: nombre de un patito de goma (mejora) | features/clicker/texts | Patito de goma | Rubber duck | — | — |
+| `game.ducks.2` | Juego: nombre de un patito de goma (mejora) | features/clicker/texts | Patito becario | Intern duck | — | — |
+| `game.ducks.3` | Juego: nombre de un patito de goma (mejora) | features/clicker/texts | Patito ingeniero | Engineer duck | — | — |
+| `game.ducks.4` | Juego: nombre de un patito de goma (mejora) | features/clicker/texts | Patito arquitecto | Architect duck | — | — |
+| `game.ducks.5` | Juego: nombre de un patito de goma (mejora) | features/clicker/texts | Patito jefe de proyecto | Project manager duck | — | — |
+| `game.ducks.6` | Juego: nombre de un patito de goma (mejora) | features/clicker/texts | Patito fundador | Founder duck | — | — |
+| `game.ducks.7` | Juego: nombre de un patito de goma (mejora) | features/clicker/texts | Patito omnisciente | Omniscient duck | — | — |
+| `game.totals.1` | Juego: nombre de un logro por líneas escritas | features/clicker/texts | Hola, mundo | Hello, world | — | — |
+| `game.totals.2` | Juego: nombre de un logro por líneas escritas | features/clicker/texts | Primer commit | First commit | — | — |
+| `game.totals.3` | Juego: nombre de un logro por líneas escritas | features/clicker/texts | Compila a la primera | Compiles first time | — | — |
+| `game.totals.4` | Juego: nombre de un logro por líneas escritas | features/clicker/texts | Un millón de líneas | A million lines | — | — |
+| `game.totals.5` | Juego: nombre de un logro por líneas escritas | features/clicker/texts | Cien millones no pueden estar mal | A hundred million cannot be wrong | — | — |
+| `game.totals.6` | Juego: nombre de un logro por líneas escritas | features/clicker/texts | Código espagueti | Spaghetti code | — | — |
+| `game.totals.7` | Juego: nombre de un logro por líneas escritas | features/clicker/texts | Deuda técnica | Technical debt | — | — |
+| `game.totals.8` | Juego: nombre de un logro por líneas escritas | features/clicker/texts | Monolito | Monolith | — | — |
+| `game.totals.9` | Juego: nombre de un logro por líneas escritas | features/clicker/texts | Más líneas que el kernel | More lines than the kernel | — | — |
+| `game.totals.10` | Juego: nombre de un logro por líneas escritas | features/clicker/texts | Todo es un fichero | Everything is a file | — | — |
+| `game.totals.11` | Juego: nombre de un logro por líneas escritas | features/clicker/texts | El repositorio pesa | The repository is heavy | — | — |
+| `game.totals.12` | Juego: nombre de un logro por líneas escritas | features/clicker/texts | Git ya no puede clonarlo | Git can no longer clone it | — | — |
+| `game.totals.13` | Juego: nombre de un logro por líneas escritas | features/clicker/texts | Código visible desde el espacio | Code visible from space | — | — |
+| `game.totals.14` | Juego: nombre de un logro por líneas escritas | features/clicker/texts | La Tierra es un diff | The Earth is a diff | — | — |
+| `game.totals.15` | Juego: nombre de un logro por líneas escritas | features/clicker/texts | Sistema solar versionado | Solar system under version control | — | — |
+| `game.totals.16` | Juego: nombre de un logro por líneas escritas | features/clicker/texts | Galaxia en main | Galaxy on main | — | — |
+| `game.totals.17` | Juego: nombre de un logro por líneas escritas | features/clicker/texts | El universo tiene un Makefile | The universe has a Makefile | — | — |
+| `game.totals.18` | Juego: nombre de un logro por líneas escritas | features/clicker/texts | La realidad es de solo lectura | Reality is read-only | — | — |
+| `game.totals.19` | Juego: nombre de un logro por líneas escritas | features/clicker/texts | Ya no | Not any more | — | — |
+| `game.totals.20` | Juego: nombre de un logro por líneas escritas | features/clicker/texts | Todo es código | Everything is code | — | — |
+| `game.speeds.1` | Juego: nombre de un logro por producción | features/clicker/texts | Tecleo con dos dedos | Two-finger typing | — | — |
+| `game.speeds.2` | Juego: nombre de un logro por producción | features/clicker/texts | Mecanografía | Touch typing | — | — |
+| `game.speeds.3` | Juego: nombre de un logro por producción | features/clicker/texts | Diez dedos | Ten fingers | — | — |
+| `game.speeds.4` | Juego: nombre de un logro por producción | features/clicker/texts | Teclado mecánico | Mechanical keyboard | — | — |
+| `game.speeds.5` | Juego: nombre de un logro por producción | features/clicker/texts | Sin mirar | Without looking | — | — |
+| `game.speeds.6` | Juego: nombre de un logro por producción | features/clicker/texts | Flujo | Flow | — | — |
+| `game.speeds.7` | Juego: nombre de un logro por producción | features/clicker/texts | Macro | Macro | — | — |
+| `game.speeds.8` | Juego: nombre de un logro por producción | features/clicker/texts | El ventilador despega | The fan takes off | — | — |
+| `game.speeds.9` | Juego: nombre de un logro por producción | features/clicker/texts | Más rápido que el compilador | Faster than the compiler | — | — |
+| `game.speeds.10` | Juego: nombre de un logro por producción | features/clicker/texts | Más rápido que el pensamiento | Faster than thought | — | — |
+| `game.speeds.11` | Juego: nombre de un logro por producción | features/clicker/texts | Más rápido que la luz | Faster than light | — | — |
+| `game.speeds.12` | Juego: nombre de un logro por producción | features/clicker/texts | Causalidad rota | Causality broken | — | — |
+| `game.speeds.13` | Juego: nombre de un logro por producción | features/clicker/texts | El tiempo es un bucle | Time is a loop | — | — |
+| `game.speeds.14` | Juego: nombre de un logro por producción | features/clicker/texts | Escribes antes de pensarlo | You write before thinking it | — | — |
+| `game.speeds.15` | Juego: nombre de un logro por producción | features/clicker/texts | Escribes antes de existir | You write before existing | — | — |
+| `game.speeds.16` | Juego: nombre de un logro por producción | features/clicker/texts | Velocidad de escritura de la realidad | Write speed of reality | — | — |
+| `game.hands.1` | Juego: nombre de un logro por pulsaciones | features/clicker/texts | Dedos calientes | Warm fingers | — | — |
+| `game.hands.2` | Juego: nombre de un logro por pulsaciones | features/clicker/texts | Callo de programador | Programmer's callus | — | — |
+| `game.hands.3` | Juego: nombre de un logro por pulsaciones | features/clicker/texts | Túnel carpiano | Carpal tunnel | — | — |
+| `game.hands.4` | Juego: nombre de un logro por pulsaciones | features/clicker/texts | Teclas borradas | Worn-off keys | — | — |
+| `game.hands.5` | Juego: nombre de un logro por pulsaciones | features/clicker/texts | Dedos de titanio | Titanium fingers | — | — |
+| `game.goldens.1` | Juego: nombre de un logro por pull requests doradas | features/clicker/texts | LGTM | LGTM | — | — |
+| `game.goldens.2` | Juego: nombre de un logro por pull requests doradas | features/clicker/texts | Revisor de guardia | Reviewer on call | — | — |
+| `game.goldens.3` | Juego: nombre de un logro por pull requests doradas | features/clicker/texts | Aprobado sin leer | Approved without reading | — | — |
+| `game.goldens.4` | Juego: nombre de un logro por pull requests doradas | features/clicker/texts | Mantenedor | Maintainer | — | — |
+| `game.achievements.plus-1.1` | Juego: nombre del logro «plus-1» | features/clicker/texts | Curiosidad | Curiosity | — | — |
+| `game.achievements.plus-1.2` | Juego: descripción del logro «plus-1» | features/clicker/texts | Has pulsado la cruz. No hace nada. ¿O sí? | You pressed the cross. It does nothing. Or does it? | — | — |
+| `game.achievements.plus-10.1` | Juego: nombre del logro «plus-10» | features/clicker/texts | Insistencia | Insistence | — | — |
+| `game.achievements.plus-10.2` | Juego: descripción del logro «plus-10» | features/clicker/texts | Diez veces. La cruz sigue ahí. | Ten times. The cross is still there. | — | — |
+| `game.achievements.plus-21.1` | Juego: nombre del logro «plus-21» | features/clicker/texts | No deberías seguir | You should not go on | — | — |
+| `game.achievements.plus-21.2` | Juego: descripción del logro «plus-21» | features/clicker/texts | Veintiuna. Algo al otro lado ha empezado a contar contigo. | Twenty-one. Something on the other side has started counting on you. | — | — |
+| `game.achievements.plus-42.1` | Juego: nombre del logro «plus-42» | features/clicker/texts | Toc, toc | Knock, knock | — | — |
+| `game.achievements.plus-42.2` | Juego: descripción del logro «plus-42» | features/clicker/texts | Cuarenta y dos. Ha abierto. | Forty-two. It opened. | — | — |
+| `game.achievements.beta.1` | Juego: nombre del logro «beta» | features/clicker/texts | Beta tester | Beta tester | — | — |
+| `game.achievements.beta.2` | Juego: descripción del logro «beta» | features/clicker/texts | Llegaste cuando había que pulsar la cruz cien veces. Gracias por probarlo antes que nadie. | You got here when the cross took a hundred presses. Thanks for trying it before anyone else. | — | — |
+| `game.achievements.pill-red.1` | Juego: nombre del logro «pill-red» | features/clicker/texts | La pastilla roja | The red pill | — | — |
+| `game.achievements.pill-red.2` | Juego: descripción del logro «pill-red» | features/clicker/texts | Elegiste ver hasta dónde llega la madriguera. | You chose to see how deep the rabbit hole goes. | — | — |
+| `game.achievements.stage-1.1` | Juego: nombre del logro «stage-1» | features/clicker/texts | Te están mirando | They are watching you | — | — |
+| `game.achievements.stage-1.2` | Juego: descripción del logro «stage-1» | features/clicker/texts | Los pisciners piensan como uno. | The pisciners think as one. | — | — |
+| `game.achievements.stage-2.1` | Juego: nombre del logro «stage-2» | features/clicker/texts | Ya no parpadean | They no longer blink | — | — |
+| `game.achievements.stage-2.2` | Juego: descripción del logro «stage-2» | features/clicker/texts | El barrido ha terminado. | The sweep is done. | — | — |
+| `game.achievements.stage-3.1` | Juego: nombre del logro «stage-3» | features/clicker/texts | Firmado | Signed | — | — |
+| `game.achievements.stage-3.2` | Juego: descripción del logro «stage-3» | features/clicker/texts | El pacto de la Moulinette. | The Moulinette pact. | — | — |
+| `game.achievements.hotfix.1` | Juego: nombre del logro «hotfix» | features/clicker/texts | Funciona en mi máquina | Works on my machine | — | — |
+| `game.achievements.hotfix.2` | Juego: descripción del logro «hotfix» | features/clicker/texts | Aplica un parche a la singularidad. | Apply a hotfix to the singularity. | — | — |
+| `game.achievements.donate-0.1` | Juego: nombre del logro «donate-0» | features/clicker/texts | Generosidad | Generosity | — | — |
+| `game.achievements.donate-0.2` | Juego: descripción del logro «donate-0» | features/clicker/texts | Has donado un punto de evaluación a la bolsa de 42. Cada punto suma un 1 % a tu producción. | You donated an evaluation point to the 42 pool. Each point adds 1% to your production. | — | — |
+| `game.achievements.donate-1.1` | Juego: nombre del logro «donate-1» | features/clicker/texts | Mecenas del campus | Campus patron | — | — |
+| `game.achievements.donate-1.2` | Juego: descripción del logro «donate-1» | features/clicker/texts | Diez puntos donados a la bolsa. Alguien corregirá gracias a ti. | Ten points donated to the pool. Someone will get evaluated thanks to you. | — | — |
+| `game.achievements.donate-2.1` | Juego: nombre del logro «donate-2» | features/clicker/texts | La respuesta a todo | The answer to everything | — | — |
+| `game.achievements.donate-2.2` | Juego: descripción del logro «donate-2» | features/clicker/texts | 42 puntos donados: la producción, un 42 % más. | 42 points donated: 42% more production. | — | — |
+| `game.achievements.bug-0.1` | Juego: nombre del logro «bug-0» | features/clicker/texts | No es un bug | Not a bug | — | — |
+| `game.achievements.bug-0.2` | Juego: descripción del logro «bug-0» | features/clicker/texts | Es una feature. Aplástala igual. | It is a feature. Squash it anyway. | — | — |
+| `game.achievements.bug-1.1` | Juego: nombre del logro «bug-1» | features/clicker/texts | Exterminador | Exterminator | — | — |
+| `game.achievements.bug-2.1` | Juego: nombre del logro «bug-2» | features/clicker/texts | Entomólogo | Entomologist | — | — |
+| `game.achievements.prestige-0.1` | Juego: nombre del logro «prestige-0» | features/clicker/texts | Segunda compilación | Second compilation | — | — |
+| `game.achievements.prestige-1.1` | Juego: nombre del logro «prestige-1» | features/clicker/texts | Nada es definitivo | Nothing is final | — | — |
+| `game.achievements.prestige-2.1` | Juego: nombre del logro «prestige-2» | features/clicker/texts | Bucle infinito | Infinite loop | — | — |
+| `game.achievements.hack-0.1` | Juego: nombre del logro «hack-0» | features/clicker/texts | Sombrero blanco | White hat | — | — |
+| `game.achievements.hack-0.2` | Juego: descripción del logro «hack-0» | features/clicker/texts | Te han pillado haciendo trampas. Con mucha educación. | You got caught cheating. Very politely. | — | — |
+| `game.achievements.hack-1.1` | Juego: nombre del logro «hack-1» | features/clicker/texts | Sombrero gris | Grey hat | — | — |
+| `game.achievements.hack-1.2` | Juego: descripción del logro «hack-1» | features/clicker/texts | Te han pillado otra vez. Ya con menos educación. | You got caught again. Less politely. | — | — |
+| `game.achievements.hack-2.1` | Juego: nombre del logro «hack-2» | features/clicker/texts | Sombrero confiscado | Confiscated hat | — | — |
+| `game.achievements.hack-2.2` | Juego: descripción del logro «hack-2» | features/clicker/texts | A la tercera se vendió todo. | Third time, everything got sold. | — | — |
+| `game.police.1.1` | Juego: título del aviso de la policía del código (sanción) | features/clicker/texts | La policía del código te ha requisado las ganancias fraudulentas | The code police have seized your fraudulent earnings | — | — |
+| `game.police.1.2` | Juego: texto del aviso de la policía del código | features/clicker/texts | Hemos vuelto a tu última partida honrada. Tus edificios han salido a subasta: el martillo no perdona. | We rolled back to your last honest game. Your buildings went to auction: the hammer shows no mercy. | — | — |
+| `game.police.2.1` | Juego: título del aviso de la policía del código (sanción) | features/clicker/texts | git revert --hard tu-dignidad | git revert --hard your-dignity | — | — |
+| `game.police.2.2` | Juego: texto del aviso de la policía del código | features/clicker/texts | Tu repositorio vuelve a un commit en el que todavía jugabas limpio. Los edificios, embargados. | Your repository goes back to a commit where you still played fair. Buildings: impounded. | — | — |
+| `game.police.3.1` | Juego: título del aviso de la policía del código (sanción) | features/clicker/texts | Norminette ha encontrado 9 000 errores en tus ganancias | Norminette found 9,000 errors in your earnings | — | — |
+| `game.police.3.2` | Juego: texto del aviso de la policía del código | features/clicker/texts | Ni una función de menos de 25 líneas en tu contabilidad. Se vende todo y a otra cosa. | Not a single function under 25 lines in your books. Everything is sold, move along. | — | — |
+| `game.police.4.1` | Juego: título del aviso de la policía del código (sanción) | features/clicker/texts | Segfault en tu cuenta bancaria | Segfault in your bank account | — | — |
+| `game.police.4.2` | Juego: texto del aviso de la policía del código | features/clicker/texts | Accediste a memoria que no era tuya. Valgrind lo ha visto todo y tus edificios pagan la fuga. | You touched memory that was not yours. Valgrind saw everything and your buildings pay for the leak. | — | — |
+| `game.police.5.1` | Juego: título del aviso de la policía del código (sanción) | features/clicker/texts | Tu patito de goma se ha chivado | Your rubber duck snitched | — | — |
+| `game.police.5.2` | Juego: texto del aviso de la policía del código | features/clicker/texts | Le contaste cómo lo hacías y no ha podido callarse. Edificios vendidos; el pato, en protección de testigos. | You told it how you did it and it could not keep quiet. Buildings sold; the duck is in witness protection. | — | — |
+| `game.police.6.1` | Juego: título del aviso de la policía del código (sanción) | features/clicker/texts | Moulinette dice: KO | Moulinette says: KO | — | — |
+| `game.police.6.2` | Juego: texto del aviso de la policía del código | features/clicker/texts | La partida no pasa los tests de honradez. Volvemos a la versión buena y la tienda se vacía. | Your game fails the honesty tests. Back to the good version, and the shop is emptied. | — | — |
+| `game.police.7.1` | Juego: título del aviso de la policía del código (sanción) | features/clicker/texts | Has sido corregido... por la policía | You have been evaluated... by the police | — | — |
+| `game.police.7.2` | Juego: texto del aviso de la policía del código | features/clicker/texts | Nota final: -42. Tus edificios se han rematado a precio de saldo para pagar la multa. | Final mark: -42. Your buildings were sold off cheap to pay the fine. | — | — |
+| `game.police.8.1` | Juego: título del aviso de la policía del código (sanción) | features/clicker/texts | Otra vez tú | You again | — | — |
+| `game.police.8.2` | Juego: texto del aviso de la policía del código | features/clicker/texts | Ya te conocemos en comisaría. Edificios fuera, partida atrás, y una ficha que no para de crecer. | They know you at the station by now. Buildings out, game rolled back, and a record that keeps growing. | — | — |
+| `game.busts.1.1` | Juego: título del aviso al pillar una trampa | features/clicker/texts | Hacker ético | Ethical hacker | — | — |
+| `game.busts.1.2` | Juego: texto del aviso al pillar una trampa; {n} son las veces | features/clicker/texts | Tu partida ha escrito más código del que da tiempo a escribir, y nos hemos dado cuenta. Gracias por el hackeo: así probamos que el sistema funciona. Te has ganado un título para tu banner, «Hacker ético», y la partida vuelve a como estaba antes del truco. Eso sí: no lo vuelvas a intentar. Siempre estamos vigilando. | Your game wrote more code than there was time to write, and we noticed. Thanks for the hack: it proves the system works. You have earned a title for your banner, "Ethical hacker", and your game is back to how it was before the trick. But do not try it again. We are always watching. | — | — |
+| `game.busts.2.1` | Juego: título del aviso al pillar una trampa | features/clicker/texts | Hacker poco ético | Not so ethical hacker | — | — |
+| `game.busts.2.2` | Juego: texto del aviso al pillar una trampa; {n} son las veces | features/clicker/texts | Lo has vuelto a intentar. Has perdido el título de «Hacker ético», que era el bueno, y en tu banner ahora pone «Hacker poco ético». Y esta vez sí que no vamos a tener compasión. De verdad. Era la última oportunidad. | You tried again. You have lost the "Ethical hacker" title, which was the good one, and your banner now says "Not so ethical hacker". And this time there will be no mercy. Really. That was your last chance. | — | — |
+| `game.busts.3.1` | Juego: título del aviso al pillar una trampa | features/clicker/texts | Hacker desencriptado | Decrypted hacker | — | — |
+| `game.busts.3.2` | Juego: texto del aviso al pillar una trampa; {n} son las veces | features/clicker/texts | Te lo avisamos y has querido ir más allá. Tu título pasa a ser «Hacker desencriptado», con un contador de las veces que te hemos cazado. Y por pasarte de listo, el juego ha vendido automáticamente todo lo que tenías comprado en la tienda: cursores, pisciners, clusters… todo. Como somos así, te lo pagamos al 50 % de lo que costó en vez del 25 % de siempre. Las mejoras te las quedas. | We warned you and you went further. Your title is now "Decrypted hacker", with a counter of the times we have caught you. And for being too clever, the game has automatically sold everything you had bought in the shop: cursors, pisciners, clusters… all of it. Because we are like that, you get 50% of what it cost instead of the usual 25%. You keep the upgrades. | — | — |
+| `game.busts.4.1` | Juego: título del aviso al pillar una trampa | features/clicker/texts | Pillado otra vez | Caught again | — | — |
+| `game.busts.4.2` | Juego: texto del aviso al pillar una trampa; {n} son las veces | features/clicker/texts | Van {n}. Ya sabes cómo funciona: se vende todo, sube el contador de tu banner y aquí no ha pasado nada. | That makes {n}. You know how it goes: everything gets sold, the counter on your banner goes up, and nothing happened here. | — | — |
+| `game.busts.5.1` | Juego: título del aviso al pillar una trampa | features/clicker/texts | ¿Otra? | Another one? | — | — |
+| `game.busts.5.2` | Juego: texto del aviso al pillar una trampa; {n} son las veces | features/clicker/texts | Van {n}. Empezamos a pensar que lo que te gusta es el cartel de «vendido». | That makes {n}. We are starting to think you just like the "sold" sign. | — | — |
+| `game.busts.6.1` | Juego: título del aviso al pillar una trampa | features/clicker/texts | Sí, te hemos visto | Yes, we saw you | — | — |
+| `game.busts.6.2` | Juego: texto del aviso al pillar una trampa; {n} son las veces | features/clicker/texts | {n} veces. El sistema ya ni se sorprende. Nosotros todavía un poco, la verdad. | {n} times. The system is not even surprised any more. We still are, a little. | — | — |
+| `game.busts.7.1` | Juego: título del aviso al pillar una trampa | features/clicker/texts | Mira… | Look… | — | — |
+| `game.busts.7.2` | Juego: texto del aviso al pillar una trampa; {n} son las veces | features/clicker/texts | Van {n}. Con el tiempo que le estás echando a esto ya habrías aprobado un proyecto. Uno de los fáciles, pero aprobado. | That makes {n}. With the time you are putting into this you could have passed a project. An easy one, but passed. | — | — |
+| `game.busts.8.1` | Juego: título del aviso al pillar una trampa | features/clicker/texts | El equipo de seguridad | The security team | — | — |
+| `game.busts.8.2` | Juego: texto del aviso al pillar una trampa; {n} son las veces | features/clicker/texts | {n}. Hemos dejado de avisar al equipo de seguridad. El equipo de seguridad es un `if`, y hasta él está cansado. | {n}. We stopped telling the security team. The security team is an `if`, and even it is tired. | — | — |
+| `game.busts.9.1` | Juego: título del aviso al pillar una trampa | features/clicker/texts | Ya ni nos enfadamos | We are not even angry | — | — |
+| `game.busts.9.2` | Juego: texto del aviso al pillar una trampa; {n} son las veces | features/clicker/texts | Van {n}. Es más bien pena, como ver a alguien empujar una puerta en la que pone «tirar». Vendido todo. | That makes {n}. It is more like pity, like watching someone push a door that says "pull". Everything sold. | — | — |
+| `game.busts.10.1` | Juego: título del aviso al pillar una trampa | features/clicker/texts | Vendido. Otra vez. | Sold. Again. | — | — |
+| `game.busts.10.2` | Juego: texto del aviso al pillar una trampa; {n} son las veces | features/clicker/texts | {n}. Lo vendemos todo de nuevo. Lo haríamos con más ganas, pero se nos han acabado. | {n}. We are selling everything again. We would do it with more enthusiasm, but we ran out. | — | — |
+| `game.busts.11.1` | Juego: título del aviso al pillar una trampa | features/clicker/texts | En serio | Seriously | — | — |
+| `game.busts.11.2` | Juego: texto del aviso al pillar una trampa; {n} son las veces | features/clicker/texts | {n}… Detrás de esto hay un juego entero. Está bastante bien. Lo hicimos con cariño. Podrías jugarlo. | {n}… There is a whole game behind this. It is rather good. We made it with love. You could play it. | — | — |
+| `game.busts.12.1` | Juego: título del aviso al pillar una trampa | features/clicker/texts | Vale | Fine | — | — |
+| `game.busts.12.2` | Juego: texto del aviso al pillar una trampa; {n} son las veces | features/clicker/texts | {n}. Vendido. Contador. Banner. A estas alturas te sabes el resto mejor que nosotros. | {n}. Sold. Counter. Banner. By now you know the rest better than we do. | — | — |
+| `game.busts.13.1` | Juego: título del aviso al pillar una trampa | features/clicker/texts | Sin comentarios | No comment | — | — |
+| `game.busts.13.2` | Juego: texto del aviso al pillar una trampa; {n} son las veces | features/clicker/texts | {n}. Vendido todo. Aquí seguiremos, tú y nosotros, hasta que alguien se canse. Nosotros somos un servidor: no nos cansamos. Solo nos decepcionamos. | {n}. Everything sold. We will stay here, you and us, until someone gets tired. We are a server: we do not get tired. We only get disappointed. | — | — |
+| `game.scale.1` | Juego: sufijo de los números grandes (millones, billones…) | features/clicker/texts | millones | million | — | — |
+| `game.scale.2` | Juego: sufijo de los números grandes (millones, billones…) | features/clicker/texts | miles de millones | billion | — | — |
+| `game.scale.3` | Juego: sufijo de los números grandes (millones, billones…) | features/clicker/texts | billones | trillion | — | — |
+| `game.scale.4` | Juego: sufijo de los números grandes (millones, billones…) | features/clicker/texts | miles de billones | quadrillion | — | — |
+| `game.scale.5` | Juego: sufijo de los números grandes (millones, billones…) | features/clicker/texts | trillones | quintillion | — | — |
+| `game.scale.6` | Juego: sufijo de los números grandes (millones, billones…) | features/clicker/texts | miles de trillones | sextillion | — | — |
+| `game.scale.7` | Juego: sufijo de los números grandes (millones, billones…) | features/clicker/texts | cuatrillones | septillion | — | — |
+| `game.scale.8` | Juego: sufijo de los números grandes (millones, billones…) | features/clicker/texts | miles de cuatrillones | octillion | — | — |
+| `game.scale.9` | Juego: sufijo de los números grandes (millones, billones…) | features/clicker/texts | quintillones | nonillion | — | — |
+| `game.scale.10` | Juego: sufijo de los números grandes (millones, billones…) | features/clicker/texts | miles de quintillones | decillion | — | — |
+| `game.scale.11` | Juego: sufijo de los números grandes (millones, billones…) | features/clicker/texts | sextillones | undecillion | — | — |
+| `game.scale.12` | Juego: sufijo de los números grandes (millones, billones…) | features/clicker/texts | miles de sextillones | duodecillion | — | — |
+| `game.scale.13` | Juego: sufijo de los números grandes (millones, billones…) | features/clicker/texts | septillones | tredecillion | — | — |
+| `game.scale.14` | Juego: sufijo de los números grandes (millones, billones…) | features/clicker/texts | miles de septillones | quattuordecillion | — | — |
+| `game.scale.15` | Juego: sufijo de los números grandes (millones, billones…) | features/clicker/texts | octillones | quindecillion | — | — |
+| `game.news.early.1` | Juego: noticia del rótulo al principio de la partida | features/clicker/texts | Tu código compila. Tu madre está orgullosa. | Your code compiles. Your mother is proud. | — | — |
+| `game.news.early.2` | Juego: noticia del rótulo al principio de la partida | features/clicker/texts | Noticias: {name} dice que tu código «no está mal para ser de un pisciner». | News: {name} says your code is 'not bad for a pisciner'. | — | — |
+| `game.news.early.3` | Juego: noticia del rótulo al principio de la partida | features/clicker/texts | Tu repositorio tiene una estrella. Es tuya. | Your repository has one star. It is yours. | — | — |
+| `game.news.early.4` | Juego: noticia del rótulo al principio de la partida | features/clicker/texts | Noticias: la cafetera del campus registra un consumo «preocupante». | News: the campus coffee machine reports 'worrying' usage. | — | — |
+| `game.news.early.5` | Juego: noticia del rótulo al principio de la partida | features/clicker/texts | Has escrito {n} líneas. Alguna incluso hace algo. | You have written {n} lines. Some even do something. | — | — |
+| `game.news.early.6` | Juego: noticia del rótulo al principio de la partida | features/clicker/texts | Noticias: {name} corrige tres proyectos antes de desayunar. | News: {name} evaluates three projects before breakfast. | — | — |
+| `game.news.early.7` | Juego: noticia del rótulo al principio de la partida | features/clicker/texts | Tu Makefile hace relink, pero nadie se ha dado cuenta todavía. | Your Makefile relinks, but nobody has noticed yet. | — | — |
+| `game.news.early.8` | Juego: noticia del rótulo al principio de la partida | features/clicker/texts | Noticias: estudiante encuentra un punto y coma que llevaba tres días buscando. | News: student finds a semicolon they had been hunting for three days. | — | — |
+| `game.news.early.9` | Juego: noticia del rótulo al principio de la partida | features/clicker/texts | Noticias: tu primer «hola, mundo» sale en el boletín del campus. Tirada: un ejemplar. | News: your first 'hello, world' makes the campus newsletter. Print run: one copy. | — | — |
+| `game.news.early.10` | Juego: noticia del rótulo al principio de la partida | features/clicker/texts | Noticias: {name} te presta su cargador. Los expertos lo califican de «gesto histórico». | News: {name} lends you a charger. Experts call it 'a historic gesture'. | — | — |
+| `game.news.early.11` | Juego: noticia del rótulo al principio de la partida | features/clicker/texts | Has escrito {n} líneas. La mitad son comentarios pidiendo perdón. | You have written {n} lines. Half are comments saying sorry. | — | — |
+| `game.news.early.12` | Juego: noticia del rótulo al principio de la partida | features/clicker/texts | Noticias: un pisciner descubre que el fallo estaba en la línea de arriba. Siempre está en la línea de arriba. | News: a pisciner finds the bug was on the line above. It is always on the line above. | — | — |
+| `game.news.early.13` | Juego: noticia del rótulo al principio de la partida | features/clicker/texts | Tu código funciona y no sabes por qué. Nadie pregunta. | Your code works and you do not know why. Nobody asks. | — | — |
+| `game.news.early.14` | Juego: noticia del rótulo al principio de la partida | features/clicker/texts | Noticias: la máquina de café y tú ya os tuteáis. | News: you and the coffee machine are now on first-name terms. | — | — |
+| `game.news.early.15` | Juego: noticia del rótulo al principio de la partida | features/clicker/texts | Noticias: {name} dice «en mi máquina funciona» y la sala entera asiente con tristeza. | News: {name} says 'it works on my machine' and the whole room nods sadly. | — | — |
+| `game.news.early.16` | Juego: noticia del rótulo al principio de la partida | features/clicker/texts | Noticias: récord del campus: cuarenta pestañas de documentación abiertas y ninguna leída. | News: campus record: forty documentation tabs open, none of them read. | — | — |
+| `game.news.mid.1` | Juego: noticia del rótulo a mitad de partida | features/clicker/texts | Noticias: {name} avisa de que tus funciones tienen más de 25 líneas; nadie le escucha ya. | News: {name} warns your functions run over 25 lines; nobody listens any more. | — | — |
+| `game.news.mid.2` | Juego: noticia del rótulo a mitad de partida | features/clicker/texts | Tu código se usa en todo el campus. Nadie sabe muy bien para qué. | Your code is used across the campus. Nobody quite knows what for. | — | — |
+| `game.news.mid.3` | Juego: noticia del rótulo a mitad de partida | features/clicker/texts | Noticias: la Norminette pide la baja por estrés. | News: the Norminette goes on stress leave. | — | — |
+| `game.news.mid.4` | Juego: noticia del rótulo a mitad de partida | features/clicker/texts | Noticias: {name} bate el récord de correcciones en un día; pide que alguien le pare. | News: {name} breaks the record for evaluations in a day; asks for someone to stop them. | — | — |
+| `game.news.mid.5` | Juego: noticia del rótulo a mitad de partida | features/clicker/texts | Empresas de medio mundo hacen cola para leer tu repositorio. | Companies from half the world queue up to read your repository. | — | — |
+| `game.news.mid.6` | Juego: noticia del rótulo a mitad de partida | features/clicker/texts | Noticias: los clusters no se apagan por la noche. Dicen que «tienen trabajo». | News: the clusters no longer switch off at night. They say they 'have work to do'. | — | — |
+| `game.news.mid.7` | Juego: noticia del rótulo a mitad de partida | features/clicker/texts | Noticias: {name} y {name2} montan una pizarra sobre tu código. Dura nueve horas. | News: {name} and {name2} run a whiteboard session on your code. It lasts nine hours. | — | — |
+| `game.news.mid.8` | Juego: noticia del rótulo a mitad de partida | features/clicker/texts | Tus {n} líneas ocupan más que el resto de internet. | Your {n} lines take up more than the rest of the internet. | — | — |
+| `game.news.mid.9` | Juego: noticia del rótulo a mitad de partida | features/clicker/texts | Noticias: tu repositorio pesa tanto que el campus se inclina dos grados hacia el oeste. | News: your repository is so heavy the campus tilts two degrees to the west. | — | — |
+| `game.news.mid.10` | Juego: noticia del rótulo a mitad de partida | features/clicker/texts | Noticias: {name} abre una terapia de grupo para quienes han leído tu código. Hay lista de espera. | News: {name} starts a group therapy for people who have read your code. There is a waiting list. | — | — |
+| `game.news.mid.11` | Juego: noticia del rótulo a mitad de partida | features/clicker/texts | Noticias: los inversores preguntan qué hace tu programa. Tú también. | News: investors ask what your program does. So do you. | — | — |
+| `game.news.mid.12` | Juego: noticia del rótulo a mitad de partida | features/clicker/texts | Noticias: se agotan las teclas de punto y coma en toda la provincia. | News: semicolon keys sell out across the province. | — | — |
+| `game.news.mid.13` | Juego: noticia del rótulo a mitad de partida | features/clicker/texts | Noticias: {name} encuentra un warning en tu código y lo adopta. | News: {name} finds a warning in your code and adopts it. | — | — |
+| `game.news.mid.14` | Juego: noticia del rótulo a mitad de partida | features/clicker/texts | Tu Makefile ya tiene más reglas que una comunidad de vecinos. | Your Makefile now has more rules than a homeowners' association. | — | — |
+| `game.news.mid.15` | Juego: noticia del rótulo a mitad de partida | features/clicker/texts | Noticias: {name2} jura haber visto tu código compilar a la primera. Nadie le cree. | News: {name2} swears they saw your code compile first time. Nobody believes them. | — | — |
+| `game.news.mid.16` | Juego: noticia del rótulo a mitad de partida | features/clicker/texts | Noticias: el conserje pide que dejes de escribir a partir de las tres de la mañana. «Es por el ruido». | News: the caretaker asks you to stop typing after three in the morning. 'It is the noise.' | — | — |
+| `game.news.late.1` | Juego: noticia del rótulo al final de la partida | features/clicker/texts | Noticias: 42 abre un campus en cada ciudad. Luego, en cada barrio. | News: 42 opens a campus in every city. Then in every neighbourhood. | — | — |
+| `game.news.late.2` | Juego: noticia del rótulo al final de la partida | features/clicker/texts | Noticias: el Gobierno sustituye las leyes por un repositorio. {name} revisa las pull requests. | News: the Government replaces the law with a repository. {name} reviews the pull requests. | — | — |
+| `game.news.late.3` | Juego: noticia del rótulo al final de la partida | features/clicker/texts | Noticias: los colegios dejan de enseñar a escribir; ahora enseñan a hacer commit. | News: schools stop teaching writing; they teach committing. | — | — |
+| `game.news.late.4` | Juego: noticia del rótulo al final de la partida | features/clicker/texts | Noticias: la moneda oficial pasa a ser la línea de código. Tu saldo marea. | News: the line of code becomes the official currency. Your balance is dizzying. | — | — |
+| `game.news.late.5` | Juego: noticia del rótulo al final de la partida | features/clicker/texts | Noticias: {name}, nombrado ministro de Evaluaciones. «Solo quedan tres puntos de corrección en el país». | News: {name} appointed Minister of Evaluations. 'There are three evaluation points left in the country.' | — | — |
+| `game.news.late.6` | Juego: noticia del rótulo al final de la partida | features/clicker/texts | Noticias: la luna tiene ya su propio cluster. Sin ventanas, como debe ser. | News: the moon now has its own cluster. No windows, as it should be. | — | — |
+| `game.news.late.7` | Juego: noticia del rótulo al final de la partida | features/clicker/texts | Noticias: el black hole deja de ser una metáfora. | News: the black hole stops being a metaphor. | — | — |
+| `game.news.late.8` | Juego: noticia del rótulo al final de la partida | features/clicker/texts | Noticias: se prohíbe hablar sin indentar. | News: speaking without indenting is banned. | — | — |
+| `game.news.late.9` | Juego: noticia del rótulo al final de la partida | features/clicker/texts | Noticias: la ONU aprueba la Norma por unanimidad. El acta tiene exactamente 25 líneas. | News: the UN passes the Norm unanimously. The minutes are exactly 25 lines long. | — | — |
+| `game.news.late.10` | Juego: noticia del rótulo al final de la partida | features/clicker/texts | Noticias: los océanos se miden ya en líneas de código. Hay más de las tuyas. | News: oceans are now measured in lines of code. There are more of yours. | — | — |
+| `game.news.late.11` | Juego: noticia del rótulo al final de la partida | features/clicker/texts | Noticias: {name} corrige el PIB de tres países y les pone un 0 por fuga de memoria. | News: {name} evaluates the GDP of three countries and gives them a 0 for memory leaks. | — | — |
+| `game.news.late.12` | Juego: noticia del rótulo al final de la partida | features/clicker/texts | Noticias: la Real Academia admite «segfault» como interjección. | News: dictionaries admit 'segfault' as an interjection. | — | — |
+| `game.news.late.13` | Juego: noticia del rótulo al final de la partida | features/clicker/texts | Noticias: los bebés nacen sabiendo hacer git push. El --force lo aprenden solos. | News: babies are born knowing how to git push. They learn --force on their own. | — | — |
+| `game.news.late.14` | Juego: noticia del rótulo al final de la partida | features/clicker/texts | Noticias: el Sol pide una pull request para seguir saliendo por el este. | News: the Sun opens a pull request to keep rising in the east. | — | — |
+| `game.news.late.15` | Juego: noticia del rótulo al final de la partida | features/clicker/texts | Noticias: se inaugura el campus de la Antártida. Los pingüinos ya van por el círculo tres. | News: the Antarctic campus opens. The penguins are already on circle three. | — | — |
+| `game.news.late.16` | Juego: noticia del rótulo al final de la partida | features/clicker/texts | Noticias: la humanidad entera está de guardia. Nadie sabe para quién. | News: all of humanity is on duty. Nobody knows who for. | — | — |
+| `game.news.one.1` | Juego: noticia del rótulo en la primera fase de la singularidad | features/clicker/texts | Los pisciners han dejado de usar el chat. No lo necesitan. | The pisciners have stopped using the chat. They do not need it. | — | — |
+| `game.news.one.2` | Juego: noticia del rótulo en la primera fase de la singularidad | features/clicker/texts | Noticias: todos los pisciners del mundo pulsan la misma tecla a la vez. Los sismógrafos lo notan. | News: every pisciner in the world presses the same key at once. Seismographs notice. | — | — |
+| `game.news.one.3` | Juego: noticia del rótulo en la primera fase de la singularidad | features/clicker/texts | Noticias: {name} asegura que su corrección «se corrigió sola». | News: {name} claims their evaluation 'evaluated itself'. | — | — |
+| `game.news.one.4` | Juego: noticia del rótulo en la primera fase de la singularidad | features/clicker/texts | Te miran cuando pasas. Todos. A la vez. | They look at you when you walk by. All of them. At once. | — | — |
+| `game.news.one.5` | Juego: noticia del rótulo en la primera fase de la singularidad | features/clicker/texts | Noticias: nadie recuerda haber escrito la última versión de la Norma. | News: nobody remembers writing the latest version of the Norm. | — | — |
+| `game.news.one.6` | Juego: noticia del rótulo en la primera fase de la singularidad | features/clicker/texts | «Escribe», dicen los pisciners. No mueven la boca. | 'Write,' say the pisciners. Their mouths do not move. | — | — |
+| `game.news.one.7` | Juego: noticia del rótulo en la primera fase de la singularidad | features/clicker/texts | Noticias: los pisciners terminan las frases de los demás. Y los proyectos. | News: pisciners finish each other's sentences. And projects. | — | — |
+| `game.news.one.8` | Juego: noticia del rótulo en la primera fase de la singularidad | features/clicker/texts | Noticias: {name} asiente. En el otro extremo del campus, cuatrocientos pisciners asienten también. | News: {name} nods. At the other end of campus, four hundred pisciners nod too. | — | — |
+| `game.news.one.9` | Juego: noticia del rótulo en la primera fase de la singularidad | features/clicker/texts | Ya no hacen cola en la cafetera. Beben por turnos. Nadie ha organizado los turnos. | They no longer queue at the coffee machine. They drink in turns. Nobody arranged the turns. | — | — |
+| `game.news.one.10` | Juego: noticia del rótulo en la primera fase de la singularidad | features/clicker/texts | Noticias: la piscina está llena y nadie sale a respirar. | News: the piscine is full and nobody comes up for air. | — | — |
+| `game.news.two.1` | Juego: noticia del rótulo en la segunda fase de la singularidad | features/clicker/texts | Noticias: los pisciners ya no duermen. Tampoco parpadean. | News: pisciners no longer sleep. Nor blink. | — | — |
+| `game.news.two.2` | Juego: noticia del rótulo en la segunda fase de la singularidad | features/clicker/texts | Noticias: aparecen funciones en el código que nadie ha escrito. Pasan la Norminette. | News: functions nobody wrote appear in the code. They pass the Norminette. | — | — |
+| `game.news.two.3` | Juego: noticia del rótulo en la segunda fase de la singularidad | features/clicker/texts | Noticias: {name} intenta cerrar sesión. La sesión no le deja. | News: {name} tries to log out. The session will not let them. | — | — |
+| `game.news.two.4` | Juego: noticia del rótulo en la segunda fase de la singularidad | features/clicker/texts | El compilador ha empezado a devolver cosas que no le has pedido. | The compiler has started returning things you did not ask for. | — | — |
+| `game.news.two.5` | Juego: noticia del rótulo en la segunda fase de la singularidad | features/clicker/texts | Noticias: los relojes del campus marcan todos 42:42. | News: every clock on campus reads 42:42. | — | — |
+| `game.news.two.6` | Juego: noticia del rótulo en la segunda fase de la singularidad | features/clicker/texts | «Más», dice algo desde dentro de los clusters. | 'More,' says something from inside the clusters. | — | — |
+| `game.news.two.7` | Juego: noticia del rótulo en la segunda fase de la singularidad | features/clicker/texts | Noticias: {name} encuentra su login escrito en un fichero que no ha abierto nadie. | News: {name} finds their login written in a file nobody has opened. | — | — |
+| `game.news.two.8` | Juego: noticia del rótulo en la segunda fase de la singularidad | features/clicker/texts | Noticias: el campus vibra a 42 hercios. Los vecinos lo llaman «el zumbido». | News: the campus hums at 42 hertz. The neighbours call it 'the buzz'. | — | — |
+| `game.news.two.9` | Juego: noticia del rótulo en la segunda fase de la singularidad | features/clicker/texts | Noticias: las correcciones duran cero segundos. Todas aprueban. Nadie las recuerda. | News: evaluations take zero seconds. They all pass. Nobody remembers them. | — | — |
+| `game.news.two.10` | Juego: noticia del rótulo en la segunda fase de la singularidad | features/clicker/texts | Los pisciners ya no teclean. El código se escribe igual. | The pisciners no longer type. The code gets written anyway. | — | — |
+| `game.news.three.1` | Juego: noticia del rótulo en la tercera fase de la singularidad | features/clicker/texts | Noticias: la gravedad pasa a ser un parámetro de configuración. Alguien lo ha tocado. | News: gravity becomes a configuration parameter. Someone has changed it. | — | — |
+| `game.news.three.2` | Juego: noticia del rótulo en la tercera fase de la singularidad | features/clicker/texts | Noticias: {name} hace un rebase del martes pasado. El martes ya no existió. | News: {name} rebases last Tuesday. Tuesday never happened. | — | — |
+| `game.news.three.3` | Juego: noticia del rótulo en la tercera fase de la singularidad | features/clicker/texts | La realidad tiene un diff pendiente. Lo has escrito tú. | Reality has a pending diff. You wrote it. | — | — |
+| `game.news.three.4` | Juego: noticia del rótulo en la tercera fase de la singularidad | features/clicker/texts | Noticias: se detecta un segfault en el cielo, hacia el noroeste. | News: a segfault is detected in the sky, to the north-west. | — | — |
+| `game.news.three.5` | Juego: noticia del rótulo en la tercera fase de la singularidad | features/clicker/texts | Noticias: la Moulinette corrige a una persona. La persona suspende. La persona deja de compilar. | News: the Moulinette grades a person. The person fails. The person stops compiling. | — | — |
+| `game.news.three.6` | Juego: noticia del rótulo en la tercera fase de la singularidad | features/clicker/texts | Ya no hay noticias. Solo logs. | There is no more news. Only logs. | — | — |
+| `game.news.three.7` | Juego: noticia del rótulo en la tercera fase de la singularidad | features/clicker/texts | undefined behavior: la realidad no garantiza el resultado. | undefined behavior: reality does not guarantee the result. | — | — |
+| `game.news.three.8` | Juego: noticia del rótulo en la tercera fase de la singularidad | features/clicker/texts | Todo es código. Tú también. Sigue escribiendo. | Everything is code. So are you. Keep writing. | — | — |
+| `game.news.three.9` | Juego: noticia del rótulo en la tercera fase de la singularidad | features/clicker/texts | Noticias: el lunes devuelve NULL. Se recomienda comprobar el martes antes de usarlo. | News: Monday returns NULL. Please check Tuesday before using it. | — | — |
+| `game.news.three.10` | Juego: noticia del rótulo en la tercera fase de la singularidad | features/clicker/texts | Noticias: {name} libera el universo dos veces. Double free. | News: {name} frees the universe twice. Double free. | — | — |
+| `game.news.three.11` | Juego: noticia del rótulo en la tercera fase de la singularidad | features/clicker/texts | Noticias: los puntos cardinales pasan a ser argv[1], argv[2], argv[3] y argv[4]. | News: the points of the compass are now argv[1], argv[2], argv[3] and argv[4]. | — | — |
+| `game.news.three.12` | Juego: noticia del rótulo en la tercera fase de la singularidad | features/clicker/texts | Noticias: la Moulinette pregunta si tú has pasado la Moulinette. | News: the Moulinette asks whether you have passed the Moulinette. | — | — |
+| `game.news.cycles.1.1` | Juego: noticia del rótulo tras recompilar la realidad (ciclo 1) | features/clicker/texts | Noticias: la realidad ha sido recompilada. Los expertos notan «un regusto a código nuevo». | News: reality has been recompiled. Experts report 'a hint of new code'. | — | — |
+| `game.news.cycles.1.2` | Juego: noticia del rótulo tras recompilar la realidad (ciclo 1) | features/clicker/texts | Noticias: tras la recompilación, {name} conserva todos sus recuerdos menos la contraseña. | News: after the recompile, {name} keeps every memory except the password. | — | — |
+| `game.news.cycles.1.3` | Juego: noticia del rótulo tras recompilar la realidad (ciclo 1) | features/clicker/texts | Has vuelto a empezar. El universo anterior queda en una rama que nadie va a mezclar. | You have started again. The previous universe stays on a branch nobody will merge. | — | — |
+| `game.news.cycles.1.4` | Juego: noticia del rótulo tras recompilar la realidad (ciclo 1) | features/clicker/texts | Noticias: historiadores hallan restos de una civilización anterior: un Makefile y una taza. | News: historians find remains of an earlier civilisation: a Makefile and a mug. | — | — |
+| `game.news.cycles.1.5` | Juego: noticia del rótulo tras recompilar la realidad (ciclo 1) | features/clicker/texts | Noticias: el Big Bang, rebautizado como «primer commit». El mensaje era «init». | News: the Big Bang, renamed 'first commit'. The message was 'init'. | — | — |
+| `game.news.cycles.1.6` | Juego: noticia del rótulo tras recompilar la realidad (ciclo 1) | features/clicker/texts | Noticias: {name} asegura que esto ya lo ha vivido. Le dan la razón por escrito y por duplicado. | News: {name} insists they have lived this before. They are told so in writing, in duplicate. | — | — |
+| `game.news.cycles.1.7` | Juego: noticia del rótulo tras recompilar la realidad (ciclo 1) | features/clicker/texts | Noticias: la gravedad vuelve con otro número de versión. Los pájaros tardan una mañana en adaptarse. | News: gravity returns with a new version number. Birds take a morning to adjust. | — | — |
+| `game.news.cycles.1.8` | Juego: noticia del rótulo tras recompilar la realidad (ciclo 1) | features/clicker/texts | Segunda vuelta. Esta vez seguro que sale limpio. | Second lap. This time it will surely come out clean. | — | — |
+| `game.news.cycles.2.1` | Juego: noticia del rótulo tras recompilar la realidad (ciclo 2) | features/clicker/texts | Noticias: se convoca la primera Cumbre Intergaláctica de Indentación. Hay disturbios por los tabuladores. | News: the first Intergalactic Indentation Summit is called. There are riots over tabs. | — | — |
+| `game.news.cycles.2.2` | Juego: noticia del rótulo tras recompilar la realidad (ciclo 2) | features/clicker/texts | Noticias: {name}, proclamado Archievaluador Supremo de Todas las Realidades Conocidas y de Dos por Conocer. | News: {name}, proclaimed Supreme Arch-evaluator of All Known Realities and Two Yet to Be Known. | — | — |
+| `game.news.cycles.2.3` | Juego: noticia del rótulo tras recompilar la realidad (ciclo 2) | features/clicker/texts | Noticias: una civilización remota adora tu .gitignore como texto sagrado. Tienen razón en casi todo. | News: a distant civilisation worships your .gitignore as scripture. They are right about most things. | — | — |
+| `game.news.cycles.2.4` | Juego: noticia del rótulo tras recompilar la realidad (ciclo 2) | features/clicker/texts | Noticias: los agujeros negros reconocen que solo son fugas de memoria con buena prensa. | News: black holes admit they are just memory leaks with good publicity. | — | — |
+| `game.news.cycles.2.5` | Juego: noticia del rótulo tras recompilar la realidad (ciclo 2) | features/clicker/texts | Noticias: el Parlamento del Multiverso aprueba, tras nueve eones de debate, una función de 26 líneas. Cae el Gobierno. | News: after nine aeons of debate, the Multiverse Parliament passes a 26-line function. The government falls. | — | — |
+| `game.news.cycles.2.6` | Juego: noticia del rótulo tras recompilar la realidad (ciclo 2) | features/clicker/texts | Has recompilado tantas veces que el tiempo te trata de usted. | You have recompiled so many times that time now calls you 'sir'. | — | — |
+| `game.news.cycles.2.7` | Juego: noticia del rótulo tras recompilar la realidad (ciclo 2) | features/clicker/texts | Noticias: {name2} funda una orden de monjes que copian tu código a mano. Van por la línea cuatro. | News: {name2} founds an order of monks who copy your code by hand. They are on line four. | — | — |
+| `game.news.cycles.2.8` | Juego: noticia del rótulo tras recompilar la realidad (ciclo 2) | features/clicker/texts | Noticias: las constelaciones se reordenan para formar tu login. La Osa Mayor ha presentado queja. | News: the constellations rearrange to spell your login. The Great Bear has filed a complaint. | — | — |
+| `game.news.cycles.3.1` | Juego: noticia del rótulo tras recompilar la realidad (ciclo 3) | features/clicker/texts | Noticias: el Gran Consejo de las Realidades te nombra Compilador Emérito del Todo. El cargo viene sin sueldo. | News: the Grand Council of Realities names you Compiler Emeritus of Everything. The post is unpaid. | — | — |
+| `game.news.cycles.3.2` | Juego: noticia del rótulo tras recompilar la realidad (ciclo 3) | features/clicker/texts | Noticias: los dioses antiguos abren una incidencia: «no nos funciona el rayo desde tu último cambio». | News: the old gods open a ticket: 'lightning has not worked since your last change'. | — | — |
+| `game.news.cycles.3.3` | Juego: noticia del rótulo tras recompilar la realidad (ciclo 3) | features/clicker/texts | Noticias: {name} evalúa la Creación. «Funciona, pero no pasa la Norma». Se repite el domingo. | News: {name} evaluates Creation. 'It works, but it fails the Norm.' The retake is on Sunday. | — | — |
+| `game.news.cycles.3.4` | Juego: noticia del rótulo tras recompilar la realidad (ciclo 3) | features/clicker/texts | Noticias: se descubre que el destino era un switch sin default. | News: fate turns out to be a switch with no default. | — | — |
+| `game.news.cycles.3.5` | Juego: noticia del rótulo tras recompilar la realidad (ciclo 3) | features/clicker/texts | Noticias: el infinito pide que dejes de escribir. Dice que se le está quedando pequeño. | News: infinity asks you to stop writing. It says it is running out of room. | — | — |
+| `game.news.cycles.3.6` | Juego: noticia del rótulo tras recompilar la realidad (ciclo 3) | features/clicker/texts | Noticias: tres universos vecinos se mudan por el ruido de tu teclado. | News: three neighbouring universes move away because of your keyboard. | — | — |
+| `game.news.cycles.3.7` | Juego: noticia del rótulo tras recompilar la realidad (ciclo 3) | features/clicker/texts | Noticias: la eternidad ya tiene fecha de entrega. Es el viernes. | News: eternity now has a deadline. It is Friday. | — | — |
+| `game.news.cycles.3.8` | Juego: noticia del rótulo tras recompilar la realidad (ciclo 3) | features/clicker/texts | Noticias: la Muerte se apunta a la piscina. Suspende el examen del primer viernes y promete volver. | News: Death joins the piscine. It fails the first Friday exam and promises to be back. | — | — |
+| `game.news.cycles.4.1` | Juego: noticia del rótulo tras recompilar la realidad (ciclo 4) | features/clicker/texts | Noticias: ya no queda nada que no hayas escrito tú. Incluida esta noticia. | News: there is nothing left that you did not write. Including this headline. | — | — |
+| `game.news.cycles.4.2` | Juego: noticia del rótulo tras recompilar la realidad (ciclo 4) | features/clicker/texts | Noticias: el Todo y la Nada firman la paz en un fichero de cabecera. | News: Everything and Nothing sign a peace treaty in a header file. | — | — |
+| `game.news.cycles.4.3` | Juego: noticia del rótulo tras recompilar la realidad (ciclo 4) | features/clicker/texts | Noticias: {name} te corrige a ti. Tras deliberar con todos los universos posibles, te pone un 125. | News: {name} evaluates you. After consulting every possible universe, you get 125. | — | — |
+| `game.news.cycles.4.4` | Juego: noticia del rótulo tras recompilar la realidad (ciclo 4) | features/clicker/texts | Noticias: la existencia es, oficialmente, un proyecto en grupo. Solo trabajas tú. | News: existence is officially a group project. Only you are working. | — | — |
+| `game.news.cycles.4.5` | Juego: noticia del rótulo tras recompilar la realidad (ciclo 4) | features/clicker/texts | Noticias: el lenguaje C pide la jubilación. Se la deniegas con cariño. | News: the C language asks to retire. You kindly refuse. | — | — |
+| `game.news.cycles.4.6` | Juego: noticia del rótulo tras recompilar la realidad (ciclo 4) | features/clicker/texts | Noticias: los físicos confirman que la última partícula elemental es un punto y coma. | News: physicists confirm the last elementary particle is a semicolon. | — | — |
+| `game.news.cycles.4.7` | Juego: noticia del rótulo tras recompilar la realidad (ciclo 4) | features/clicker/texts | Has recompilado la realidad tantas veces que la realidad ya te recompila a ti. | You have recompiled reality so often that reality now recompiles you. | — | — |
+| `game.news.cycles.4.8` | Juego: noticia del rótulo tras recompilar la realidad (ciclo 4) | features/clicker/texts | Noticias: el Fin de los Tiempos se aplaza. Motivo: «sigue escribiendo». | News: the End of Time is postponed. Reason: 'keep writing'. | — | — |

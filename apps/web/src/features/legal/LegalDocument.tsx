@@ -3,8 +3,8 @@ import { legalText } from './text'
 
 /** El texto entero de privacidad y condiciones, en el idioma de la web si está traducido. */
 export function LegalDocument() {
-  const { t, lang } = useI18n()
-  const { text, translated } = legalText(lang)
+  const { t, tree } = useI18n()
+  const { text, translated } = legalText(tree)
 
   return (
     <div className="legal-doc">
