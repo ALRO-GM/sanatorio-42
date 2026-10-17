@@ -128,6 +128,7 @@ tema (nunca un color suelto) y se apunta en esta tabla.
 | `mailbox` | Buzón | Avisos sin leer y a dónde llevan |
 | `inbox` | Incidencias | Escribir y recibir respuesta |
 | `helpStats` | Estadísticas | Periodo, cifras de una sección, clasificación con fotos, tu fila, ir a un expediente |
+| `chess` | Ajedrez de Not-games | Mover, pregunta a los dos, quien acierta mueve, castigo por fallar |
 | `notGames` | Not-games | Elegir modo, contestar, ver la buena y por qué, marcador con vidas |
 
 Falta la de Exámenes.

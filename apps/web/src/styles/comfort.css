@@ -69,12 +69,14 @@
 }
 
 /* Con la web quieta (pestaña oculta, ventana sin foco o 30 s sin tocar nada,
-   `src/shared/still.ts`), todas las animaciones en pausa: una que no para
-   obliga a sacar fotogramas sin descanso aunque nadie mire, y calienta el
-   ordenador y el móvil. Al volver, siguen donde se quedaron. Las
-   demostraciones no: quien las mira no suele mover el ratón. */
+   `src/shared/still.ts`), las animaciones dejan de repetirse: la que da vueltas
+   acaba la que lleva y se para. Una que no para obliga a sacar fotogramas sin
+   descanso aunque nadie mire, y calienta el ordenador y el móvil. No se
+   pausan: una de entrada (algo que aparece desde transparente) se quedaría a
+   medias, invisible. Las demostraciones, tal cual: quien las mira no suele
+   mover el ratón. */
 :root[data-still='on'] :not(.tour, .tour *),
 :root[data-still='on'] :not(.tour, .tour *)::before,
 :root[data-still='on'] :not(.tour, .tour *)::after {
-  animation-play-state: paused !important;
+  animation-iteration-count: 1 !important;
 }

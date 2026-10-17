@@ -60,6 +60,7 @@ import { examAttemptsSchema } from './0051-exam-attempts.js'
 import { clickerCheatLogSchema } from './0052-clicker-cheat-log.js'
 import { quizSchema } from './0053-quiz.js'
 import { gameResultsSchema } from './0054-game-results.js'
+import { turnGamesSchema } from './0055-turn-games.js'
 import type { Migration } from './types.js'
 
 export const MIGRATIONS: readonly Migration[] = [
@@ -117,6 +118,7 @@ export const MIGRATIONS: readonly Migration[] = [
   clickerCheatLogSchema,
   quizSchema,
   gameResultsSchema,
+  turnGamesSchema,
 ]
 
 /** Versión más alta que existe en el código. */

@@ -10,6 +10,8 @@ import { Avatar } from '../../shared/ui/Avatar'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { Icon } from '../../shared/ui/Icon'
 import { settingsText } from './settings-text'
+import { SoundToggle } from './SoundToggle'
+import { useGameSounds } from './sounds'
 
 /** Cada cuánto se pide la sala: deprisa jugando, despacio esperando gente. */
 const PLAYING_MS = 1000
@@ -30,11 +32,19 @@ export function RoomView({ id, me }: RoomViewProps) {
   const offset = useRef(0)
   const action = useAction()
 
-  const take = useCallback((next: QuizRoom) => {
-    offset.current = Date.parse(next.now) - Date.now()
-    setRoom(next)
-    setError(null)
-  }, [])
+  const sounds = useGameSounds()
+  const take = useCallback(
+    (next: QuizRoom) => {
+      offset.current = Date.parse(next.now) - Date.now()
+      setRoom((previous) => {
+        sounds.quizChanged(previous, next, me)
+
+        return next
+      })
+      setError(null)
+    },
+    [me, sounds],
+  )
 
   const load = useCallback(async () => {
     try {
@@ -94,11 +104,14 @@ export function RoomView({ id, me }: RoomViewProps) {
         <a className="back-btn" href={notGamesHref()}>
           {t('notgames.back')}
         </a>
-        {present && (
-          <button type="button" className="pill" disabled={action.busy} onClick={leave}>
-            <Icon name="salir" size={14} /> {t('notgames.leave')}
-          </button>
-        )}
+        <span className="quiz-room-tools">
+          <SoundToggle />
+          {present && (
+            <button type="button" className="pill" disabled={action.busy} onClick={leave}>
+              <Icon name="salir" size={14} /> {t('notgames.leave')}
+            </button>
+          )}
+        </span>
       </div>
       <p className="hint">
         <strong>{t(`notgames.mode.${room.settings.mode}`)}</strong> ·{' '}
@@ -237,6 +250,7 @@ type QuestionProps = {
 function Question({ room, question, me, playing, offset, onAnswer }: QuestionProps) {
   const { t } = useI18n()
   const [now, setNow] = useState(() => Date.now() + offset)
+  const sounds = useGameSounds()
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -255,6 +269,12 @@ function Question({ room, question, me, playing, offset, onAnswer }: QuestionPro
   const left = Math.max(0, Math.ceil((endsAt - now) / 1000))
   const share = Math.max(0, Math.min(1, (endsAt - now) / Math.max(1, endsAt - startsAt)))
   const answered = question.mine !== null
+  const ticking = playing && !answered && !reveal && left > 0 && left <= 3 ? left : null
+
+  // Tictac en los tres últimos segundos, si aún no has contestado.
+  useEffect(() => {
+    if (ticking !== null) sounds.tick()
+  }, [ticking, sounds])
 
   if (waiting) {
     return (

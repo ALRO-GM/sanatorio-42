@@ -64,3 +64,54 @@ notgames.over,Not-games: la partida ha terminado,Fin de la partida,Game over,Fi 
 notgames.youWon,Not-games: has ganado,¡Has ganado!,You won!,Has guanyat!,Irabazi duzu!
 notgames.winner,Not-games: quién ha ganado,Ha ganado {names},{names} won,Ha guanyat {names},{names}-k irabazi du
 notgames.again,Not-games: volver a la lista para otra partida,Otra partida,Another round,Una altra partida,Beste partida bat
+notgames.sound,Not-games: botón para encender o apagar los sonidos de los juegos,Sonidos,Sounds,Sons,Soinuak
+notgames.game.label,Not-games: qué juego tiene la sala nueva,Juego,Game,Joc,Jokoa
+notgames.game.quiz,Not-games: el juego de preguntas,Preguntas,Questions,Preguntes,Galderak
+notgames.game.quiz.hint,Not-games: explicación del juego de preguntas,"Preguntas de programación por rondas, en varios modos.","Programming questions in rounds, in several modes.","Preguntes de programació per rondes, en diversos modes.","Programazio-galderak txandaka, hainbat modutan."
+notgames.game.chess,Not-games: el juego de ajedrez,Ajedrez,Chess,Escacs,Xakea
+notgames.game.chess.hint,"Not-games, ajedrez: explicación del juego","Con reloj: tras cada jugada, una pregunta a los dos. Quien acierta primero, mueve.","With a clock: after each move, a question for both. Whoever answers right first moves.","Amb rellotge: després de cada jugada, una pregunta als dos. Qui l'encerta primer, mou.","Erlojuarekin: jokaldi bakoitzaren ondoren, galdera bat bientzat. Lehenik asmatzen duenak mugitzen du."
+notgames.minutes,"Not-games, ajedrez: tiempo de reloj de cada jugador",Reloj,Clock,Rellotge,Erlojua
+notgames.minutesN,"Not-games, ajedrez: minutos de reloj",{n} min por jugador,{n} min each,{n} min per jugador,{n} min jokalari bakoitzeko
+notgames.chess.board,"Not-games, ajedrez: nombre del tablero para lectores de pantalla",Tablero,Board,Tauler,Taula
+notgames.chess.boardStyle,"Not-games, ajedrez: grupo para elegir el estilo del tablero",Estilo del tablero,Board style,Estil del tauler,Taularen estiloa
+notgames.chess.board.tournament,"Not-games, ajedrez: estilo de tablero verde de torneo",Torneo,Tournament,Torneig,Txapelketa
+notgames.chess.board.wood,"Not-games, ajedrez: estilo de tablero de madera",Madera,Wood,Fusta,Egurra
+notgames.chess.board.ocean,"Not-games, ajedrez: estilo de tablero azul",Océano,Ocean,Oceà,Ozeanoa
+notgames.chess.board.contrast,"Not-games, ajedrez: estilo de tablero de alto contraste",Contraste,Contrast,Contrast,Kontrastea
+notgames.chess.clock,"Not-games, ajedrez: reloj de un jugador para lectores de pantalla",Reloj de {login},{login}'s clock,Rellotge de {login},{login}(r)en erlojua
+notgames.chess.side.a,"Not-games, ajedrez: bando de las blancas",Blancas,White,Blanques,Zuriak
+notgames.chess.side.b,"Not-games, ajedrez: bando de las negras",Negras,Black,Negres,Beltzak
+notgames.chess.waitingRival,"Not-games, ajedrez: hueco libre en la sala",Esperando rival…,Waiting for a rival…,Esperant rival…,Aurkariaren zain…
+notgames.chess.yourMove,"Not-games, ajedrez: te toca mover",Te toca mover: corre tu reloj.,Your move: your clock is running.,Et toca moure: corre el teu rellotge.,Zure txanda: zure erlojua dabil.
+notgames.chess.theirMove,"Not-games, ajedrez: le toca mover al otro",Mueve {login}.,{login} to move.,Mou {login}.,{login}(e)k mugitzen du.
+notgames.chess.question,"Not-games, ajedrez: aviso de que hay pregunta","Relojes parados: ¡el primero que acierte, mueve!",Clocks stopped: first right answer moves!,"Rellotges aturats: qui l'encerti primer, mou!",Erlojuak geldirik: lehenik asmatzen duenak mugitzen du!
+notgames.chess.questionTitle,"Not-games, ajedrez: título de la pregunta entre jugadas",Pregunta para los dos,Question for both,Pregunta per als dos,Galdera bientzat
+notgames.chess.firstRight,"Not-games, ajedrez: alguien acertó primero",{login} acertó primero y mueve.,{login} answered right first and moves.,{login} ha encertat primer i mou.,{login}(e)k asmatu du lehenik eta mugitzen du.
+notgames.chess.firstWrong,"Not-games, ajedrez: alguien falló primero",{login} falló: pierde el 10 % de su tiempo y mueve {other}.,{login} got it wrong: loses 10% of their time and {other} moves.,{login} ha fallat: perd el 10 % del seu temps i mou {other}.,{login}(e)k huts egin du: denboraren % 10 galdu du eta {other}(e)k mugitzen du.
+notgames.chess.nobody,"Not-games, ajedrez: nadie contestó la pregunta","Nadie contestó a tiempo: mueve {login}, como tocaba.","Nobody answered in time: {login} moves, as planned.","Ningú no ha contestat a temps: mou {login}, com tocava.","Inork ez du garaiz erantzun: {login}(e)k mugitzen du, zegokion bezala."
+notgames.chess.moves,"Not-games, ajedrez: jugadas de la partida, desplegable",Jugadas ({n}),Moves ({n}),Jugades ({n}),Jokaldiak ({n})
+notgames.chess.resign,"Not-games, ajedrez: botón para rendirse",Abandonar,Resign,Abandonar,Amore eman
+notgames.chess.promote,"Not-games, ajedrez: elegir la pieza al coronar",Corona:,Promote to:,Corona:,Koroatu:
+notgames.end.checkmate,"Not-games, ajedrez: final por jaque mate",Jaque mate,Checkmate,Escac i mat,Xake-mate
+notgames.end.stalemate,"Not-games, ajedrez: final por ahogado",Tablas por ahogado,Stalemate,Taules per ofegat,Berdinketa itota
+notgames.end.draw,"Not-games, ajedrez: final en tablas",Tablas,Draw,Taules,Berdinketa
+notgames.end.time,"Not-games, ajedrez: final por tiempo",Sin tiempo,Out of time,Sense temps,Denborarik gabe
+notgames.end.resign,"Not-games, ajedrez: final por abandono",Abandono,Resignation,Abandonament,Amore ematea
+notgames.end.left,"Not-games, ajedrez: final porque alguien se fue",Se fue de la sala,Left the room,Ha sortit de la sala,Gelatik irten da
+notgames.end.drawResult,"Not-games, ajedrez: resultado en tablas",Tablas: nadie gana.,Draw: nobody wins.,Taules: no guanya ningú.,Berdinketa: inork ez du irabazten.
+notgames.chess.piece.ak,"Not-games, ajedrez: nombre de una pieza para lectores de pantalla",rey blanco,white king,rei blanc,errege zuria
+notgames.chess.piece.aq,"Not-games, ajedrez: nombre de una pieza para lectores de pantalla",dama blanca,white queen,dama blanca,dama zuria
+notgames.chess.piece.ar,"Not-games, ajedrez: nombre de una pieza para lectores de pantalla",torre blanca,white rook,torre blanca,dorrea zuria
+notgames.chess.piece.ab,"Not-games, ajedrez: nombre de una pieza para lectores de pantalla",alfil blanco,white bishop,alfil blanc,alfila zuria
+notgames.chess.piece.an,"Not-games, ajedrez: nombre de una pieza para lectores de pantalla",caballo blanco,white knight,cavall blanc,zaldia zuria
+notgames.chess.piece.ap,"Not-games, ajedrez: nombre de una pieza para lectores de pantalla",peón blanco,white pawn,peó blanc,peoia zuria
+notgames.chess.piece.bk,"Not-games, ajedrez: nombre de una pieza para lectores de pantalla",rey negro,black king,rei negre,errege beltza
+notgames.chess.piece.bq,"Not-games, ajedrez: nombre de una pieza para lectores de pantalla",dama negra,black queen,dama negra,dama beltza
+notgames.chess.piece.br,"Not-games, ajedrez: nombre de una pieza para lectores de pantalla",torre negra,black rook,torre negra,dorrea beltza
+notgames.chess.piece.bb,"Not-games, ajedrez: nombre de una pieza para lectores de pantalla",alfil negro,black bishop,alfil negre,alfila beltza
+notgames.chess.piece.bn,"Not-games, ajedrez: nombre de una pieza para lectores de pantalla",caballo negro,black knight,cavall negre,zaldia beltza
+notgames.chess.piece.bp,"Not-games, ajedrez: nombre de una pieza para lectores de pantalla",peón negro,black pawn,peó negre,peoia beltza
+notgames.chess.firstRightMe,"Not-games, ajedrez: acertaste tú primero",Acertaste primero: mueves tú.,You answered right first: your move.,Has encertat primer: mous tu.,Lehenik asmatu duzu: zuk mugitzen duzu.
+notgames.chess.firstWrongMe,"Not-games, ajedrez: fallaste tú primero",Fallaste: pierdes el 10 % de tu tiempo y mueve {other}.,Wrong: you lose 10% of your time and {other} moves.,Has fallat: perds el 10 % del teu temps i mou {other}.,Huts egin duzu: zure denboraren % 10 galdu duzu eta {other}(e)k mugitzen du.
+notgames.chess.firstWrongYouMove,"Not-games, ajedrez: el otro falló primero y mueves tú",{login} falló: pierde el 10 % de su tiempo y mueves tú.,{login} got it wrong: loses 10% of their time and you move.,{login} ha fallat: perd el 10 % del seu temps i mous tu.,{login}(e)k huts egin du: denboraren % 10 galdu du eta zuk mugitzen duzu.
+notgames.chess.nobodyMe,"Not-games, ajedrez: nadie contestó y te tocaba a ti","Nadie contestó a tiempo: mueves tú, como tocaba.","Nobody answered in time: you move, as planned.","Ningú no ha contestat a temps: mous tu, com tocava.","Inork ez du garaiz erantzun: zuk mugitzen duzu, zegokion bezala."

@@ -1222,6 +1222,37 @@ Sin sesión: las usan Caddy y quien despliega.
 - GET /health → `{ "status": "ok" }` si el proceso responde.
 - GET /health/db → lo mismo si además la base contesta; `503` si no.
 
+## Not-games por turnos: ajedrez (`modules/quiz/games`)
+
+Juegos de dos bandos con reloj y **una pregunta entre jugada y jugada**. La
+mecánica es común (`modules/quiz/turns.rules.ts`) y cada juego aporta sus reglas
+(`TurnGame` en `games/turns.service.ts`); el ajedrez valida las jugadas con
+`chess.js` (`games/chess.rules.ts`).
+
+```
+GET  /games/rooms              → TurnLobby[]: las salas sin empezar del campus y las tuyas recientes
+POST /games/rooms              → TurnSettings { game: 'chess', minutes: 3|5|10|15, pool, kinds, minCircle } → 201 TurnRoom
+GET  /games/rooms/:id          → TurnRoom (la web lo pide cada segundo jugando)
+POST /games/rooms/:id/join     → entra con el bando libre (a = blancas, b = negras)
+POST /games/rooms/:id/leave    → 204. Jugando, pierde quien se va. Vacía, la sala se borra
+POST /games/rooms/:id/start    → solo quien la creó, con los dos bandos ocupados. Mueven blancas
+POST /games/rooms/:id/move     → { from, to, promotion? } (sin promotion, dama). 409 si no te toca; 400 si no vale
+POST /games/rooms/:id/answer   → { question, option }
+POST /games/rooms/:id/resign   → abandona: gana el otro bando
+```
+
+- Al mover, los dos relojes se paran y sale una pregunta a los dos (`question`).
+  La **primera respuesta** decide: si acierta, mueve quien contestó (aunque sean
+  dos jugadas seguidas); si falla, pierde el 10 % del tiempo que le quedaba y
+  mueve el rival. Sin respuestas, al acabarse el tiempo mueve a quien le tocaba.
+- Si a quien gana la pregunta el juego no le deja mover (en ajedrez, mover dos
+  veces dejaría el rey contrario en jaque), mueve el otro.
+- `last` cuenta cómo fue la pregunta anterior (quién contestó primero, si
+  acertó, la buena, el porqué y quién perdió tiempo).
+- Final (`end`): jaque mate, ahogado o tablas, sin tiempo, abandono o se fue.
+  El resultado va a `game_results` con `game: 'chess'` (victoria 2, tablas 1).
+- Nadie está a la vez en una sala de preguntas y en una por turnos (409).
+
 ## Estadísticas de Ayuda (`modules/stats`)
 
 Solo lee, de las tablas de cada sección, y siempre del campus de quien mira.

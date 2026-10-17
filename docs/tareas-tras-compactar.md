@@ -153,6 +153,60 @@ despliegue espera a la CI).
       #70 #71 #75 #76 #77 #78 #79). Esperar a que diga cuáles y cómo; #48
       (Python 06 bis en el círculo 0) es un fallo: arreglarlo.
 
+## 2d. Plan vigente: pedido el 2026-10-18 (por orden)
+
+- [x] **G1. Guardia: error al guardar a las 23:30** («windows.0.end: hora no
+      válida»): la franja que acaba a medianoche (24:00 / 00:00). Arreglarlo en
+      API y web, con test.
+- [x] **G2. Guardia: elegir horas como en el calendario**: rejilla de medias
+      horas por día; **arrastrar** para marcar dónde apareces, **varias franjas**
+      por día. Slots de 30 min.
+- [x] **C1. Calendario** (era la clase `.day` de las terapias pisando la vista de un día): con «día entero», «ajustada» o «desde ahora» en un
+      solo día y poco día por delante, se ve mal: barra de desplazamiento y
+      todo muy comprimido. Que ocupe bien el alto.
+- [x] **B4**: ajedrez (hecho el 2026-10-18). API hecha y probada (`modules/quiz/games/`,
+      `turns.rules.ts`, migración 55, 17 tests en `tests/unit/turns.test.ts`),
+      **sin commit**. Falta: web (lobby con «Ajedrez», tablero con varios
+      estilos de tablero, relojes, pregunta entre jugadas, coronación),
+      cliente + mock, textos, test de pantalla, docs (api.md, README, interfaz).
+- [x] B5 demo del ajedrez · [x] B6 sonidos (salas) y animaciones (ajedrez) ·
+      [ ] B7 Repaso · [x] fotos en clasificaciones y marcadores.
+- [ ] **Buzón** (decidido por Alberto): hacer todas hasta las medianas
+      incluidas: #48 (fallo Python 06 bis en círculo 0), #75 (pizarras de más
+      cercana a más lejana y después las pasadas), #76 (avisos que abren el
+      evento en el calendario para apuntarse), #78 (botón a la intra), #70
+      (ficha al pasar el ratón por un login, componente único), #79
+      (clasificación de quién va más rápido según el pace, desde su inicio),
+      #71 (panel: uso por campus elegibles y usuarios totales/nuevos por día),
+      #77 (avisar al staff de problemas de ordenadores/edificio con opciones
+      claras; Slack si hay webhook), #69 (mapa de calor de clics por elemento y
+      por cuadrícula normalizada móvil/ordenador).
+      **#65 Pomodoro**: individual y llamativo; los demás ven «estoy
+      concentrado, no me distraigas» (en su ficha, mapa, sala de espera…); la
+      web se simplifica a lo que la persona elija ver (p. ej. avisos de
+      correcciones o eventos) y silencia juegos y demás avisos; configurable.
+      Descartadas: #50 y #45.
+- [ ] **#42 Curso de git** (grande, especificación de Alberto del 2026-10-18):
+      - Solo desde un ordenador de un clúster (con sesión en un puesto).
+      - Estética de juego: un **camino con puntos** con forma de ramas de git
+        de colores, que se marcan al completarlos.
+      - **Terminal simplificada** para escribir los comandos (git simulado).
+      - Cada punto: 1) explicación con **animación** de la estructura de ramas
+        a conseguir; 2) **teoría** del comando (uso, cuándo, para qué, cuándo
+        no, cómo se ve en las ramas, qué problemas da); 3) **reto**: recrear una
+        estructura de ramas y/o archivos.
+      - Antes: **investigar** cursos de git y flujos asentados, sintetizar los
+        conceptos, repartirlos por **niveles** (cada nivel, un punto gordo con
+        pasos intermedios) y ver cómo los juegos usan el camino para enganchar.
+      - Pasos que enseñan conceptos; puntos que unifican varios; unos en
+        solitario y otros **en grupo en ordenadores del clúster, en paralelo**;
+        cada X conceptos, **prueba de grupo**: eliges entre el mínimo de
+        personas o más, y recreáis una estructura de ramas.
+      - **Jefe final**: todos los conceptos; cada cual en ordenadores separados
+        **al menos 4 filas y 4 columnas**, sin comunicarse y con tiempo límite.
+      - Antes de cada nivel de grupo, **test de preguntas rápidas con 100 % de
+        acierto**; si fallas, no se repite en **una hora** (se puede repasar).
+
 ## 3. A medias o por confirmar con Alberto
 
 - **Intentos de examen**: la copia de fondo nunca arrancaba (pedía 200 peticiones

@@ -59,6 +59,16 @@ export const realApi: Api = {
   startQuizRoom: (id) => sendJson('POST', `/quiz/rooms/${id}/start`),
   answerQuiz: (id, question, option) =>
     sendJson('POST', `/quiz/rooms/${id}/answer`, { question, option }),
+  getTurnRooms: () => getJson('/games/rooms'),
+  createTurnRoom: (settings) => sendJson('POST', '/games/rooms', settings),
+  getTurnRoom: (id) => getJson(`/games/rooms/${id}`),
+  joinTurnRoom: (id) => sendJson('POST', `/games/rooms/${id}/join`),
+  leaveTurnRoom: (id) => send('POST', `/games/rooms/${id}/leave`),
+  startTurnRoom: (id) => sendJson('POST', `/games/rooms/${id}/start`),
+  moveTurn: (id, move) => sendJson('POST', `/games/rooms/${id}/move`, move),
+  answerTurn: (id, question, option) =>
+    sendJson('POST', `/games/rooms/${id}/answer`, { question, option }),
+  resignTurn: (id) => sendJson('POST', `/games/rooms/${id}/resign`),
   getExamStats: () => getJson('/exams/stats'),
   getLiveExam: () => getJson('/exams/live'),
   reportBrokenSeat: (host) => send('POST', `/map/seats/${encodeURIComponent(host)}/broken`),

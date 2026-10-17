@@ -26,6 +26,11 @@ export function notGamesHref(room: number | null = null): string {
   return room === null ? '#/notgames' : `#/notgames/${room}`
 }
 
+/** Not-games: una partida por turnos (ajedrez). Va con una `t` delante: `#/notgames/t12`. */
+export function turnGameHref(room: number): string {
+  return `#/notgames/t${room}`
+}
+
 /** El perfil de alguien en la intra de 42. */
 export function intraHref(login: string): string {
   return `https://profile.intra.42.fr/users/${encodeURIComponent(login)}`

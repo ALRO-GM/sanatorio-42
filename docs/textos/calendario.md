@@ -47,7 +47,7 @@ Generado desde `apps/web/src/shared/i18n/textos/calendario.csv` con
 | `agenda.where` | Ficha del evento: dónde | features/calendar/EventDialog | Dónde | Where | On | Non |
 | `agenda.with` | Ficha del evento: con quién | features/calendar/EventDialog | Con | With | Amb | Norekin |
 | `agenda.seats` | Ficha del evento: plazas | features/calendar/EventDialog | Plazas | Seats | Places | Plazak |
-| `agenda.you` | Tú, en una lista de personas | features/calendar/EventDialog, features/notgames/RoomView | Tú | You | Tu | Zu |
+| `agenda.you` | Tú, en una lista de personas | features/calendar/EventDialog, features/notgames/RoomView, features/notgames/TurnRoomView | Tú | You | Tu | Zu |
 | `agenda.seatsOpen` | Gente apuntada sin límite de plazas | features/calendar/EventDialog | {taken} personas apuntadas, sin tope | {taken} people signed up, no limit | {taken} persones apuntades, sense límit | {taken} pertsona izena emanda, mugarik gabe |
 | `agenda.seatsOf` | Plazas ocupadas y totales | features/calendar/EventDialog | {taken} de {max} | {taken} of {max} | {taken} de {max} | {max}tik {taken} |
 | `agenda.joined` | Estado: te has apuntado | features/calendar/EventDialog | Te has apuntado | You've signed up | T'hi has apuntat | Izena emanda |

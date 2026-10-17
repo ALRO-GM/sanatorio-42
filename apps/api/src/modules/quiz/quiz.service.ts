@@ -32,6 +32,8 @@ type QuizServiceOptions = {
   bank: readonly Concept[]
   /** El círculo en que va cada persona (para el mínimo de una sala). */
   circlesOf: (logins: readonly string[]) => Promise<Map<string, number>>
+  /** Si alguien está ya en una partida por turnos (ajedrez…): no se juegan dos a la vez. */
+  busyElsewhere?: (login: string) => Promise<boolean>
   /** Las fotos de 42, para el marcador. */
   imagesOf?: (logins: readonly string[]) => Promise<Map<string, string | null>>
   now?: () => number
@@ -345,7 +347,7 @@ export function createQuizService(options: QuizServiceOptions) {
   async function mustBeFree(login: string, except: number | null = null): Promise<void> {
     const open = (await quiz.openRoomsOf(login)).filter((id) => id !== except)
 
-    if (open.length > 0) {
+    if (open.length > 0 || ((await options.busyElsewhere?.(login)) ?? false)) {
       throw domainError(
         'conflict',
         'Ya estás en otra sala: sal de ella antes de entrar en una nueva',

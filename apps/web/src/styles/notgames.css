@@ -277,3 +277,341 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ── Botones de la sala: sonido y salir ────────────────────────────────── */
+.quiz-room-tools {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.pill.icon-only {
+  padding-inline: 0.55rem;
+}
+
+/* ── Ajedrez ───────────────────────────────────────────────────────────── */
+.turn-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 34rem) minmax(16rem, 1fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+@media (max-width: 760px) {
+  .turn-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.turn-board-col {
+  display: grid;
+  gap: 0.6rem;
+}
+.turn-side {
+  display: grid;
+  gap: 0.75rem;
+  align-content: start;
+}
+
+/* Los colores del tablero son los de cada estilo de tablero, iguales en claro y
+   en oscuro (como en cualquier tablero de verdad). */
+.chess-board {
+  --light: #eeeed2;
+  --dark: #769656;
+  position: relative;
+}
+.chess-board.board-wood,
+.board-swatch.board-wood {
+  --light: #f0d9b5;
+  --dark: #b58863;
+}
+.chess-board.board-ocean,
+.board-swatch.board-ocean {
+  --light: #dee3e6;
+  --dark: #7d97a8;
+}
+.chess-board.board-contrast,
+.board-swatch.board-contrast {
+  --light: #ffffff;
+  --dark: #5a5a5a;
+}
+.board-swatch {
+  --light: #eeeed2;
+  --dark: #769656;
+}
+.board-swatch i {
+  display: inline-block;
+  width: 0.9rem;
+  height: 0.9rem;
+  border-radius: 3px;
+  background: linear-gradient(135deg, var(--light) 50%, var(--dark) 50%);
+  vertical-align: -2px;
+}
+.chess-grid {
+  /* Las piezas se miden con el tablero (cqi), no con la pantalla. */
+  container-type: inline-size;
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 10px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
+}
+.chess-square {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  aspect-ratio: 1;
+  cursor: pointer;
+}
+.chess-square.light {
+  background: var(--light);
+}
+.chess-square.dark {
+  background: var(--dark);
+}
+.chess-square:disabled {
+  cursor: default;
+  opacity: 1;
+}
+.chess-square.last {
+  box-shadow: inset 0 0 0 100vmax rgba(255, 214, 10, 0.35);
+}
+.chess-square.selected {
+  box-shadow: inset 0 0 0 100vmax rgba(20, 160, 255, 0.45);
+}
+.chess-square.check {
+  box-shadow: inset 0 0 0 100vmax rgba(230, 40, 40, 0.55);
+}
+/* Donde se puede ir: un punto; donde se puede comer: un anillo. */
+.chess-square.target::after {
+  content: '';
+  width: 30%;
+  height: 30%;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.22);
+}
+.chess-square.capture::after {
+  content: '';
+  position: absolute;
+  inset: 6%;
+  border: 0.35rem solid rgba(0, 0, 0, 0.22);
+  border-radius: 50%;
+}
+.chess-square:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: -3px;
+  z-index: 1;
+}
+.chess-piece {
+  /* Casi toda la casilla (1/8 del tablero), como en un tablero de verdad. */
+  font-size: calc(100cqi / 8 * 0.86);
+  line-height: 1;
+  font-family: 'DejaVu Sans', 'Segoe UI Symbol', 'Noto Sans Symbols 2', serif;
+  user-select: none;
+}
+/* Las dos tintas con su contorno: se leen en casilla clara y en oscura. */
+.chess-piece.side-a {
+  color: #fffdf6;
+  text-shadow:
+    0 0 1px #111,
+    0 0 2px #111,
+    0 1px 2px rgba(0, 0, 0, 0.6);
+}
+.chess-piece.side-b {
+  color: #1b1b1b;
+  text-shadow:
+    0 0 1px #f2f2f2,
+    0 1px 2px rgba(255, 255, 255, 0.35);
+}
+.chess-square.last .chess-piece {
+  animation: chess-land 0.22s ease-out;
+}
+@keyframes chess-land {
+  from {
+    transform: scale(1.25);
+  }
+}
+.chess-rank,
+.chess-file {
+  position: absolute;
+  font-size: 0.6rem;
+  font-weight: 700;
+  opacity: 0.7;
+}
+.chess-rank {
+  top: 2px;
+  left: 3px;
+}
+.chess-file {
+  right: 3px;
+  bottom: 1px;
+}
+.chess-square.light small {
+  color: var(--dark);
+}
+.chess-square.dark small {
+  color: var(--light);
+}
+.chess-promote {
+  position: absolute;
+  inset: auto 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.6rem;
+  border-radius: 0 0 10px 10px;
+  background: var(--surface);
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.25);
+}
+.chess-promote .chess-piece {
+  font-size: 2.2rem;
+}
+
+.turn-clocks {
+  display: grid;
+  gap: 0.5rem;
+}
+.turn-clock {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.55rem 0.75rem;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  transition:
+    border-color 0.2s,
+    background 0.2s;
+}
+.turn-clock-name {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+}
+.turn-clock-name small {
+  color: var(--text-3);
+}
+.turn-clock-time {
+  font-size: 1.6rem;
+  font-variant-numeric: tabular-nums;
+}
+.turn-clock.running {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.turn-clock.running .turn-clock-time {
+  animation: clock-beat 1s ease-in-out infinite;
+}
+.turn-clock.low .turn-clock-time {
+  color: var(--danger);
+}
+.turn-clock.low.running {
+  border-color: var(--danger);
+}
+@keyframes clock-beat {
+  50% {
+    opacity: 0.72;
+  }
+}
+.turn-status {
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  border-radius: 10px;
+  background: var(--surface-2);
+  font-weight: 600;
+}
+.turn-status.you {
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+.turn-status.ask {
+  background: color-mix(in srgb, var(--warn) 22%, var(--surface));
+  animation: pop-in 0.25s ease-out;
+}
+.turn-board-stack {
+  position: relative;
+}
+/* La pregunta, encima del tablero: con ella nadie puede mover. */
+.turn-board-stack .turn-question {
+  position: absolute;
+  inset: 5%;
+  z-index: 2;
+  overflow: auto;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+  animation: pop-in 0.25s ease-out;
+}
+@media (max-width: 420px) {
+  .turn-board-stack .turn-question {
+    inset: 0;
+  }
+}
+@keyframes pop-in {
+  from {
+    transform: scale(0.96);
+    opacity: 0;
+  }
+}
+.turn-last {
+  border-left: 4px solid var(--ok);
+}
+.turn-last.wrong {
+  border-left-color: var(--danger);
+}
+.turn-last p {
+  margin: 0.25rem 0 0;
+}
+.turn-history ol {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
+  gap: 0.15rem 0.75rem;
+  margin: 0.5rem 0 0;
+  padding-left: 1.4rem;
+  font-variant-numeric: tabular-nums;
+}
+@media (prefers-reduced-motion: reduce) {
+  .chess-square.last .chess-piece,
+  .turn-clock.running .turn-clock-time,
+  .turn-status.ask,
+  .turn-question {
+    animation: none;
+  }
+}
+
+/* La demostración del ajedrez: un trozo de tablero. */
+.tour-chess {
+  container-type: inline-size;
+  display: grid;
+  grid-template-columns: repeat(3, 2.6em);
+  width: max-content;
+  overflow: hidden;
+  border-radius: 0.5em;
+}
+.tour-chess-square {
+  display: grid;
+  place-items: center;
+  height: 2.6em;
+  background: #eeeed2;
+}
+.tour-chess-square.dark {
+  background: #769656;
+}
+.tour-chess-square.on {
+  box-shadow: inset 0 0 0 100vmax rgba(20, 160, 255, 0.45);
+}
+.tour-chess-square.target::after {
+  content: '';
+  width: 30%;
+  height: 30%;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.22);
+}
+.tour-chess .chess-piece {
+  font-size: 2.2em;
+}
+.tour-danger {
+  color: var(--danger);
+}

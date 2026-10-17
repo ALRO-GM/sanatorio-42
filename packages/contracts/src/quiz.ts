@@ -83,11 +83,14 @@ export type QuizQuestion = {
   results: { login: string; correct: boolean | null }[] | null
 }
 
+/** Sin empezar, jugando o acabada. */
+export type QuizRoomStatus = 'lobby' | 'playing' | 'done'
+
 export type QuizRoom = {
   id: number
   host: string
   settings: QuizSettings
-  status: 'lobby' | 'playing' | 'done'
+  status: QuizRoomStatus
   /** `question`: se puede contestar; `reveal`: se enseña la respuesta. */
   phase: 'question' | 'reveal' | null
   players: QuizPlayer[]
@@ -117,3 +120,104 @@ export type QuizJoinInput = { team?: QuizTeam | null }
 
 /** Cuerpo de `POST /quiz/rooms/:id/answer`. */
 export type QuizAnswerInput = { question: number; option: number }
+
+// --- Juegos por turnos con pregunta (ajedrez y los que vengan)
+
+/** Los juegos por turnos que hay. */
+export type TurnGameKind = 'chess'
+
+/** Los dos bandos. En ajedrez, `a` son las blancas. */
+export type TurnSide = 'a' | 'b'
+
+export type TurnSettings = {
+  game: TurnGameKind
+  /** Minutos de reloj de cada bando. */
+  minutes: number
+  /** Qué preguntas salen entre jugada y jugada, como en las salas de preguntas. */
+  pool: QuizPool
+  kinds: QuizKinds
+  minCircle: number | null
+}
+
+export type TurnPlayer = {
+  login: string
+  image: string | null
+  side: TurnSide
+  /** Lo que le queda de reloj, en ms, a la hora de `now`. */
+  clockMs: number
+  correct: number
+  wrong: number
+}
+
+/** La pregunta entre jugada y jugada. El primero que contesta decide quién mueve. */
+export type TurnQuestionView = {
+  index: number
+  kind: 'quick' | 'long'
+  prompt: string
+  code: string | null
+  options: QuizOption[]
+  startsAt: string
+  endsAt: string
+  /** Lo que has contestado tú, o `null`. */
+  mine: number | null
+}
+
+/** Cómo fue la pregunta anterior: quién contestó primero, si acertó y quién movió. */
+export type TurnLastQuestion = {
+  index: number
+  prompt: string
+  options: QuizOption[]
+  answer: number
+  why: string
+  /** Quién contestó primero (o `null`: nadie contestó y movió a quien le tocaba). */
+  first: { login: string; correct: boolean } | null
+  /** Quién ganó el turno. */
+  winner: TurnSide
+  /** Quién perdió el 10 % de su tiempo por fallar. */
+  penalized: TurnSide | null
+}
+
+export type ChessBoardView = {
+  fen: string
+  /** La última jugada, para resaltarla. */
+  lastMove: { from: string; to: string; captured: boolean; check: boolean } | null
+  /** Las jugadas en notación algebraica, en orden. */
+  history: string[]
+}
+
+export type TurnEnd = {
+  /** `null`: tablas. */
+  winner: TurnSide | null
+  reason: 'checkmate' | 'stalemate' | 'draw' | 'time' | 'resign' | 'left'
+}
+
+export type TurnRoom = {
+  id: number
+  host: string
+  settings: TurnSettings
+  status: QuizRoomStatus
+  players: TurnPlayer[]
+  /** El bando que tiene que mover, o `null` mientras hay pregunta (o sin empezar). */
+  mover: TurnSide | null
+  question: TurnQuestionView | null
+  last: TurnLastQuestion | null
+  board: ChessBoardView | null
+  end: TurnEnd | null
+  /** Hora del servidor: los relojes y la cuenta atrás van con ella. */
+  now: string
+  joinable: boolean
+  whyNot: string | null
+}
+
+/** Una sala por turnos en la lista. */
+export type TurnLobby = {
+  id: number
+  host: string
+  settings: TurnSettings
+  status: QuizRoomStatus
+  players: number
+  joined: boolean
+}
+
+export type TurnMoveInput = { from: string; to: string; promotion?: 'q' | 'r' | 'b' | 'n' }
+export type TurnAnswerInput = { question: number; option: number }

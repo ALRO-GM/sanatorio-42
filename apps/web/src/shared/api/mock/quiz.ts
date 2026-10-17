@@ -27,7 +27,7 @@ type Sample = {
   seconds: number
 }
 
-const SAMPLES: Sample[] = [
+export const SAMPLES: Sample[] = [
   {
     prompt: '¿Cuántos bits tiene un byte?',
     options: ['8', '4', '16', '32'],

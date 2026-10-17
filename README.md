@@ -192,6 +192,15 @@ de cada pregunta empieza estimada y se reajusta con lo que falla la gente. Al
 acabar cada pregunta se ve la buena y por qué. El servidor lleva el reloj y la
 partida: nadie puede contestar tarde ni ver la buena antes de tiempo.
 
+**Ajedrez con pregunta.** Dos personas, cada una con su reloj (3, 5, 10 o 15
+minutos) y el tablero que prefiera (torneo, madera, océano o contraste). Al
+mover, los relojes se paran y sale una pregunta a los dos encima del tablero:
+quien acierta primero mueve (aunque sea dos veces seguidas) y quien falla pierde
+el 10 % de su tiempo. La mecánica de turnos con pregunta está separada del
+ajedrez para reutilizarla en otros juegos. Cada juego tiene su demostración, y
+las salas suenan (jugadas, preguntas, aciertos, últimos segundos) salvo que se
+silencien.
+
 ### Estadísticas de Ayuda
 
 Una pestaña en Ayuda con lo que se mueve en el campus en cada sección (sala de

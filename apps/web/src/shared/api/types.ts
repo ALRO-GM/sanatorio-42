@@ -11,6 +11,10 @@ import type {
   QuizRoom,
   QuizSettings,
   QuizTeam,
+  TurnLobby,
+  TurnMoveInput,
+  TurnRoom,
+  TurnSettings,
   AdminData,
   AdminPeople,
   AvailabilityResponse,
@@ -435,4 +439,16 @@ export type Api = {
   startQuizRoom: (id: number) => Promise<QuizRoom>
   /** `option` es el id de la respuesta, no su posición en pantalla. */
   answerQuiz: (id: number, question: number, option: number) => Promise<QuizRoom>
+  // Juegos por turnos con pregunta (ajedrez).
+  getTurnRooms: () => Promise<TurnLobby[]>
+  createTurnRoom: (settings: TurnSettings) => Promise<TurnRoom>
+  /** La partida ahora mismo: se pide cada segundo mientras se juega. */
+  getTurnRoom: (id: number) => Promise<TurnRoom>
+  joinTurnRoom: (id: number) => Promise<TurnRoom>
+  leaveTurnRoom: (id: number) => Promise<void>
+  startTurnRoom: (id: number) => Promise<TurnRoom>
+  moveTurn: (id: number, move: TurnMoveInput) => Promise<TurnRoom>
+  /** `option` es el id de la respuesta, no su posición en pantalla. */
+  answerTurn: (id: number, question: number, option: number) => Promise<TurnRoom>
+  resignTurn: (id: number) => Promise<TurnRoom>
 }

@@ -17,6 +17,8 @@ import { PYTHON } from './python.js'
 import type { Concept } from './types.js'
 import { UNIX } from './unix.js'
 
+export type { Concept } from './types.js'
+
 export const BANK: readonly Concept[] = [
   ...GENERAL,
   ...C_BASICS,

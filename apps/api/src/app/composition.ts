@@ -122,6 +122,7 @@ export type Services = {
   tours: ToursModule['service']
   legal: LegalModule['service']
   quiz: QuizModule['service']
+  chess: QuizModule['chess']
   stats: StatsModule['service']
 }
 
@@ -434,6 +435,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
       tours: tours.service,
       legal: legal.service,
       quiz: quiz.service,
+      chess: quiz.chess,
       stats: stats.service,
     },
   }

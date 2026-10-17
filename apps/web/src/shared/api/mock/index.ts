@@ -19,6 +19,7 @@ import { peersMock } from './peers'
 import { profileMock } from './profile'
 import { quizMock } from './quiz'
 import { statsMock } from './stats'
+import { turnsMock } from './turns'
 import { replicaMock } from './replica'
 import { staffMock } from './staff'
 import { therapyMock } from './therapy'
@@ -39,4 +40,5 @@ export const mockApi: Api = {
   ...staffMock,
   ...quizMock,
   ...statsMock,
+  ...turnsMock,
 }

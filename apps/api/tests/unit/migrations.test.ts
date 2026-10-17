@@ -110,6 +110,8 @@ describe('migraciones', () => {
       'tickets',
       'tour_rates',
       'tour_speeds',
+      'turn_players',
+      'turn_rooms',
       'usage_counts',
       'usage_flows',
       'usage_time',
