@@ -1,0 +1,514 @@
+/**
+ * Banco de Not-games: C++ (los CPP 00 a 09). Clases, forma canónica,
+ * herencia y polimorfismo, excepciones, casts, plantillas y la STL.
+ */
+
+import type { Concept } from './types.js'
+
+const cpp = (...modules: string[]): string[] => modules.map((module) => `cpp-module-${module}`)
+
+const FROM_00 = cpp('00', '01', '02', '03', '04', '05', '06', '07', '08', '09')
+const FROM_02 = cpp('02', '03', '04', '05', '06', '07', '08', '09')
+const FROM_04 = cpp('04', '05', '06', '07', '08', '09')
+const FROM_05 = cpp('05', '06', '07', '08', '09')
+const FROM_06 = cpp('06', '07', '08', '09')
+const FROM_07 = cpp('07', '08', '09')
+const FROM_08 = cpp('08', '09')
+
+export const CPP: readonly Concept[] = [
+  {
+    id: 'cpp-class-struct',
+    topic: 'c++',
+    needs: { projects: FROM_00 },
+    kind: 'quick',
+    level: 1,
+    forms: [
+      {
+        ask: [
+          'En C++, ¿qué diferencia hay entre `class` y `struct`?',
+          'Lo único que cambia entre class y struct es…',
+        ],
+        right: [
+          'Lo que es privado o público por defecto',
+          'En class todo es privado por defecto; en struct, público',
+        ],
+      },
+    ],
+    wrong: [
+      'struct no puede tener métodos',
+      'class va en el montón y struct en la pila',
+      'struct no admite herencia',
+      'Ninguna, son idénticas en todo',
+    ],
+    why: 'En C++ una struct es una clase con todo público por defecto; puede tener métodos, herencia y todo lo demás.',
+  },
+  {
+    id: 'cpp-reference',
+    topic: 'c++',
+    needs: { projects: FROM_00 },
+    kind: 'quick',
+    level: 2,
+    forms: [
+      {
+        ask: [
+          '¿Qué diferencia hay entre una referencia y un puntero?',
+          'Una referencia, a diferencia de un puntero…',
+        ],
+        right: [
+          'No puede ser nula ni cambiar a qué se refiere',
+          'Siempre apunta a lo mismo y no puede ser NULL',
+        ],
+      },
+    ],
+    wrong: [
+      'Ocupa más memoria',
+      'Solo sirve para enteros',
+      'Se puede reasignar a otra variable',
+      'Es más lenta',
+    ],
+    why: 'Una referencia es otro nombre para algo que ya existe: se inicializa siempre y no se reasigna.',
+  },
+  {
+    id: 'cpp-const-method',
+    topic: 'c++',
+    needs: { projects: FROM_00 },
+    kind: 'quick',
+    level: 2,
+    forms: [
+      {
+        ask: [
+          '¿Qué significa el `const` al final de `int getValue() const;`?',
+          'Un método marcado const al final…',
+        ],
+        right: ['Que el método no cambia el objeto', 'Promete no modificar los atributos'],
+      },
+    ],
+    wrong: [
+      'Que devuelve una constante',
+      'Que solo se puede llamar una vez',
+      'Que es estático',
+      'Que no se puede sobrescribir',
+    ],
+    why: 'Así se puede llamar sobre objetos const y el compilador impide tocar los atributos dentro.',
+  },
+  {
+    id: 'cpp-new-delete',
+    topic: 'c++',
+    needs: { projects: FROM_00 },
+    kind: 'long',
+    level: 3,
+    code: 'Zombie *horde = new Zombie[10];\n// ...\ndelete horde;',
+    forms: [
+      {
+        ask: ['¿Qué falla aquí?', '¿Cómo se libera bien lo que se ha creado con `new Zombie[10]`?'],
+        right: [
+          'Hay que usar delete[]: con delete solo se destruye el primero',
+          'Con delete[] horde',
+        ],
+      },
+    ],
+    wrong: [
+      'Nada, está bien',
+      'Hay que usar free(horde)',
+      'Hay que borrar uno a uno con delete',
+      'new no admite arrays',
+    ],
+    why: 'Lo que se crea con new[] se libera con delete[], para que se llame al destructor de cada elemento.',
+  },
+  {
+    id: 'cpp-canonical',
+    topic: 'c++',
+    needs: { projects: FROM_02 },
+    kind: 'quick',
+    level: 2,
+    forms: [
+      {
+        ask: [
+          '¿Qué cuatro cosas forman la forma canónica ortodoxa de una clase?',
+          'La forma canónica de Coplien pide…',
+        ],
+        right: [
+          'Constructor por defecto, constructor de copia, operador de asignación y destructor',
+          'Por defecto, copia, operator= y destructor',
+        ],
+      },
+      {
+        ask: ['¿Cuándo se llama al constructor de copia?', 'En `A b = a;`, ¿qué se ejecuta?'],
+        right: ['Al crear un objeto nuevo a partir de otro', 'El constructor de copia'],
+        wrong: [
+          'El operador de asignación',
+          'El constructor por defecto y luego operator=',
+          'El destructor de a',
+        ],
+      },
+    ],
+    wrong: [
+      'Constructor, destructor, getter y setter',
+      'Constructor, operator==, operator<< y destructor',
+      'Constructor por defecto, move, swap y destructor',
+    ],
+    why: 'Copiar al crear es el constructor de copia; asignar a uno que ya existe, operator=.',
+  },
+  {
+    id: 'cpp-shallow-copy',
+    topic: 'c++',
+    needs: { projects: FROM_02 },
+    kind: 'long',
+    level: 4,
+    code: 'class Brain { public: std::string *ideas; ... };\n\nBrain::Brain() { ideas = new std::string[100]; }\nBrain::~Brain() { delete[] ideas; }\n// Sin constructor de copia ni operator=\n\nBrain a;\nBrain b = a;',
+    seconds: 60,
+    forms: [
+      {
+        ask: ['¿Qué pasa al terminar el programa?', 'Al destruirse a y b, ¿qué ocurre?'],
+        right: [
+          'Se libera dos veces el mismo array: la copia por defecto copia el puntero',
+          'Doble delete: a y b comparten ideas',
+        ],
+      },
+    ],
+    wrong: [
+      'Nada, la copia por defecto copia el array',
+      'Una fuga de memoria y nada más',
+      'No compila',
+      'Se llama al destructor solo una vez',
+    ],
+    why: 'La copia por defecto copia el puntero, no lo apuntado: hay que escribir una copia profunda.',
+  },
+  {
+    id: 'cpp-virtual',
+    topic: 'c++',
+    needs: { projects: FROM_04 },
+    kind: 'long',
+    level: 3,
+    code: 'class Animal { public: void makeSound() const { std::cout << "..."; } };\nclass Dog : public Animal { public: void makeSound() const { std::cout << "Guau"; } };\n\nAnimal *a = new Dog();\na->makeSound();',
+    forms: [
+      {
+        ask: ['¿Qué imprime?', '¿Qué sale por pantalla?'],
+        right: ['...', '«...», porque makeSound no es virtual'],
+      },
+      {
+        ask: [
+          '¿Qué hay que cambiar para que imprima «Guau»?',
+          'Para que a->makeSound() diga «Guau»…',
+        ],
+        right: [
+          'Declarar makeSound como virtual en Animal',
+          'Poner virtual en el método de la clase base',
+        ],
+        wrong: [
+          'Declararlo virtual solo en Dog',
+          'Hacer un cast a Dog siempre',
+          'Cambiar public por private',
+        ],
+      },
+    ],
+    wrong: ['Guau', 'Guau...', 'No compila', 'Nada'],
+    why: 'Sin virtual se llama según el tipo del puntero (Animal); con virtual, según el objeto real (Dog).',
+  },
+  {
+    id: 'cpp-virtual-destructor',
+    topic: 'c++',
+    needs: { projects: FROM_04 },
+    kind: 'quick',
+    level: 3,
+    forms: [
+      {
+        ask: [
+          '¿Por qué el destructor de una clase base debe ser virtual?',
+          'Sin destructor virtual, `delete animal` (que apunta a un Dog)…',
+        ],
+        right: [
+          'Para que delete por un puntero a la base llame también al destructor de la hija',
+          'Solo llama al destructor de Animal',
+        ],
+      },
+    ],
+    wrong: [
+      'Para que sea más rápido',
+      'Para poder copiar la clase',
+      'Porque si no, no compila',
+      'Para que la clase sea abstracta',
+    ],
+    why: 'Sin virtual, delete solo ve el tipo del puntero: la parte de la hija no se destruye.',
+  },
+  {
+    id: 'cpp-abstract',
+    topic: 'c++',
+    needs: { projects: FROM_04 },
+    kind: 'quick',
+    level: 2,
+    forms: [
+      {
+        ask: [
+          '¿Qué hace abstracta a una clase en C++?',
+          '`virtual void makeSound() const = 0;` hace que la clase…',
+        ],
+        right: [
+          'Tener al menos un método virtual puro (= 0)',
+          'Sea abstracta: no se pueden crear objetos de ella',
+        ],
+      },
+    ],
+    wrong: [
+      'La palabra abstract',
+      'No tener constructor',
+      'Tener todo privado',
+      'Que el método devuelva 0',
+    ],
+    why: '= 0 es un método virtual puro: la clase no se puede instanciar y las hijas deben implementarlo.',
+  },
+  {
+    id: 'cpp-diamond',
+    topic: 'c++',
+    needs: { projects: cpp('03', '04', '05', '06', '07', '08', '09') },
+    kind: 'quick',
+    level: 4,
+    forms: [
+      {
+        ask: [
+          'DiamondTrap hereda de ScavTrap y de FragTrap, que heredan las dos de ClapTrap. ¿Cómo se evita tener dos ClapTrap dentro?',
+          'Para que en una herencia en diamante haya una sola base común…',
+        ],
+        right: [
+          'Con herencia virtual: `class ScavTrap : virtual public ClapTrap`',
+          'Heredando de forma virtual de la base',
+        ],
+      },
+    ],
+    wrong: [
+      'Haciendo ClapTrap abstracta',
+      'Con un destructor virtual',
+      'Heredando como private',
+      'No se puede evitar',
+    ],
+    why: 'La herencia virtual comparte una única copia de la base entre todos los caminos del diamante.',
+  },
+  {
+    id: 'cpp-exceptions',
+    topic: 'c++',
+    needs: { projects: FROM_05 },
+    kind: 'quick',
+    level: 2,
+    forms: [
+      {
+        ask: ['¿Qué hace `throw`?', 'Al lanzar una excepción con throw…'],
+        right: [
+          'Corta lo que se está haciendo y salta al catch que la recoja',
+          'Se busca hacia arriba un catch de ese tipo',
+        ],
+      },
+      {
+        ask: [
+          '¿Qué método se sobrescribe para dar el mensaje de una excepción?',
+          'Una clase que hereda de std::exception explica el error con…',
+        ],
+        right: ['what()', 'const char *what() const throw()'],
+        wrong: ['message()', 'error()', 'toString()'],
+      },
+    ],
+    wrong: [
+      'Termina el programa siempre',
+      'Devuelve -1',
+      'Imprime el error y sigue',
+      'Reinicia la función',
+    ],
+    why: 'throw sube por la pila de llamadas, destruyendo lo local, hasta el catch que encaje; si no hay, termina.',
+  },
+  {
+    id: 'cpp-catch-ref',
+    topic: 'c++',
+    needs: { projects: FROM_05 },
+    kind: 'quick',
+    level: 3,
+    forms: [
+      {
+        ask: [
+          '¿Por qué se captura con `catch (std::exception &e)` y no por valor?',
+          'Capturar una excepción por referencia sirve para…',
+        ],
+        right: [
+          'Para no copiarla ni perder el tipo real de la hija',
+          'Que what() sea el de la clase real',
+        ],
+      },
+    ],
+    wrong: [
+      'Porque por valor no compila',
+      'Para poder modificarla siempre',
+      'Porque es más corto de escribir',
+      'Para relanzarla',
+    ],
+    why: 'Por valor se copia como std::exception y se pierde la parte de la hija (slicing).',
+  },
+  {
+    id: 'cpp-casts',
+    topic: 'c++',
+    needs: { projects: FROM_06 },
+    kind: 'quick',
+    level: 3,
+    forms: [
+      {
+        ask: [
+          '¿Qué cast comprueba en ejecución que un puntero a Base es en realidad un Derived?',
+          'Para saber el tipo real de un objeto polimórfico…',
+        ],
+        right: ['dynamic_cast'],
+        wrong: ['static_cast', 'reinterpret_cast'],
+      },
+      {
+        ask: [
+          '¿Qué cast reinterpreta los bits de un puntero como otro tipo (p. ej. a uintptr_t)?',
+          'Para convertir un puntero en un entero se usa…',
+        ],
+        right: ['reinterpret_cast'],
+        wrong: ['dynamic_cast', 'static_cast'],
+      },
+      {
+        ask: [
+          '¿Qué cast usas para convertir un double en int?',
+          'Una conversión normal entre tipos numéricos es…',
+        ],
+        right: ['static_cast'],
+        wrong: ['dynamic_cast', 'reinterpret_cast'],
+      },
+    ],
+    wrong: ['const_cast', 'type_cast', 'implicit_cast'],
+    why: 'static_cast convierte en compilación, dynamic_cast comprueba en ejecución, reinterpret_cast cambia el tipo de los bits.',
+  },
+  {
+    id: 'cpp-dynamic-null',
+    topic: 'c++',
+    needs: { projects: FROM_06 },
+    kind: 'quick',
+    level: 3,
+    forms: [
+      {
+        ask: [
+          '¿Qué hace `dynamic_cast<B*>(p)` si p no apunta a un B?',
+          'Un dynamic_cast de puntero que no encaja…',
+        ],
+        right: ['Devuelve NULL', 'Devuelve un puntero nulo'],
+      },
+      {
+        ask: [
+          '¿Qué hace `dynamic_cast<B&>(r)` si r no es un B?',
+          'Un dynamic_cast de referencia que no encaja…',
+        ],
+        right: ['Lanza std::bad_cast', 'Lanza una excepción'],
+        wrong: ['Devuelve NULL'],
+      },
+    ],
+    wrong: [
+      'No compila',
+      'Devuelve p sin cambiar',
+      'Termina el programa',
+      'Comportamiento indefinido',
+    ],
+    why: 'No existe una referencia nula, así que el de referencia lanza bad_cast; el de puntero da NULL.',
+  },
+  {
+    id: 'cpp-templates',
+    topic: 'c++',
+    needs: { projects: FROM_07 },
+    kind: 'quick',
+    level: 3,
+    forms: [
+      {
+        ask: [
+          '¿Por qué las plantillas suelen ir enteras en el .hpp?',
+          'El código de una template se pone en la cabecera porque…',
+        ],
+        right: [
+          'El compilador necesita verlas para generar cada versión',
+          'Se instancian al usarlas con un tipo',
+        ],
+      },
+      {
+        ask: ['¿Qué hace `template <typename T> T max(T a, T b)`?', 'Una función plantilla así…'],
+        right: [
+          'Sirve para cualquier tipo que se pueda comparar',
+          'Genera una versión por cada tipo con que se use',
+        ],
+        wrong: ['Solo funciona con int', 'Convierte todo a double', 'Se ejecuta más lenta'],
+      },
+    ],
+    wrong: [
+      'Por convención, sin más',
+      'Porque no se pueden compilar',
+      'Para que ocupen menos',
+      'Porque son privadas',
+    ],
+    why: 'Una plantilla no es código hasta que se usa con un tipo; para generarlo, el compilador tiene que verla.',
+  },
+  {
+    id: 'cpp-containers',
+    topic: 'c++',
+    needs: { projects: FROM_08 },
+    kind: 'quick',
+    level: 2,
+    forms: [
+      {
+        ask: [
+          '¿Qué contenedor de la STL guarda pares clave-valor ordenados por clave?',
+          'Para un diccionario ordenado se usa…',
+        ],
+        right: ['std::map'],
+      },
+      {
+        ask: [
+          '¿Qué contenedor guarda los elementos seguidos en memoria y deja acceder por índice?',
+          'El array dinámico de la STL es…',
+        ],
+        right: ['std::vector'],
+        wrong: ['std::map', 'std::list'],
+      },
+    ],
+    wrong: ['std::stack', 'std::list', 'std::deque', 'std::queue'],
+    why: 'vector es un array que crece; map es un árbol ordenado por clave; list, una lista doblemente enlazada.',
+  },
+  {
+    id: 'cpp-iterator-invalid',
+    topic: 'c++',
+    needs: { projects: FROM_08 },
+    kind: 'long',
+    level: 4,
+    code: 'std::vector<int> v;\nv.push_back(1);\nstd::vector<int>::iterator it = v.begin();\nfor (int i = 0; i < 100; i++)\n    v.push_back(i);\nstd::cout << *it;',
+    forms: [
+      {
+        ask: ['¿Qué problema tiene?', '¿Es seguro leer *it al final?'],
+        right: [
+          'Al crecer, el vector puede moverse y el iterador queda inválido',
+          'No: push_back puede invalidar it',
+        ],
+      },
+    ],
+    wrong: ['Imprime 1 siempre', 'Imprime 99', 'No compila', 'Imprime 0'],
+    why: 'Si el vector necesita más sitio, reserva otro bloque y copia: los iteradores viejos apuntan a memoria liberada.',
+  },
+  {
+    id: 'cpp-rpn',
+    topic: 'c++',
+    needs: { projects: cpp('09') },
+    kind: 'long',
+    level: 3,
+    forms: [
+      {
+        ask: [
+          '¿Cuánto vale la expresión en notación polaca inversa «3 4 + 2 *»?',
+          'En RPN, «3 4 + 2 *» da…',
+        ],
+        right: ['14'],
+      },
+      {
+        ask: [
+          '¿Qué estructura se usa para evaluar notación polaca inversa?',
+          'Para calcular RPN se apilan los números en…',
+        ],
+        right: ['Una pila', 'std::stack'],
+        wrong: ['Un map', 'Una cola', 'Un árbol'],
+      },
+    ],
+    wrong: ['11', '10', '24', '9'],
+    why: 'Se apilan los números y cada operador saca dos: 3 + 4 = 7, 7 · 2 = 14.',
+  },
+]

@@ -132,7 +132,10 @@ export function buildRound(concept: Concept, random: () => number): Round {
   const pick = <T>(items: readonly T[]): T => items[Math.floor(random() * items.length)] as T
   const form = pick(concept.forms)
   const right = pick(form.right)
-  const wrong = shuffled([...concept.wrong, ...(form.wrong ?? [])], random).slice(0, OPTIONS - 1)
+  // Primero las malas de la forma, que se parecen a su buena; después, las comunes.
+  const wrong = [
+    ...new Set([...shuffled(form.wrong ?? [], random), ...shuffled(concept.wrong, random)]),
+  ].slice(0, OPTIONS - 1)
   const options = shuffled([right, ...wrong], random)
 
   return {

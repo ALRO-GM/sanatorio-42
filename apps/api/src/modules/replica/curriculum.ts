@@ -123,6 +123,11 @@ const SEED: Record<Track, readonly (readonly string[])[]> = {
   ],
 }
 
+/** Todos los slugs de la tabla de partida, de los dos planes. */
+export const SEEDED_SLUGS: ReadonlySet<string> = new Set(
+  Object.values(SEED).flatMap((circles) => circles.flat()),
+)
+
 /**
  * Hasta qué círculo está comprobada la tabla de partida de cada plan. Hasta ahí
  * no se aprende nada: lo que no está en la tabla no es del plan.

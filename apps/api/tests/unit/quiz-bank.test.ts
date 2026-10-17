@@ -6,6 +6,7 @@ import { describe, expect, it } from 'vitest'
 
 import { BANK } from '../../src/modules/quiz/bank/index.js'
 import { buildRound, OPTIONS, seeded } from '../../src/modules/quiz/quiz.rules.js'
+import { SEEDED_SLUGS } from '../../src/modules/replica/curriculum.js'
 
 // Sin espacios de más. Las mayúsculas cuentan: «ff» y «FF» son respuestas distintas.
 const norm = (text: string): string => text.trim()
@@ -57,6 +58,14 @@ describe('banco de preguntas', () => {
         expect(form?.right).toContain(round.options[round.answer])
       }
     }
+  })
+
+  it('los proyectos que pide cada concepto existen (si no, no saldría nunca)', () => {
+    const unknown = BANK.flatMap((concept) =>
+      (concept.needs.projects ?? []).filter((slug) => !SEEDED_SLUGS.has(slug)),
+    )
+
+    expect(unknown).toEqual([])
   })
 
   it('hay preguntas de todo: rápidas y largas, generales y de proyecto', () => {
