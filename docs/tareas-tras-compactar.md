@@ -17,7 +17,7 @@ este fichero y se hace lo que dice, en orden.
 - Si una tarea necesita una decisión de Alberto, se le pregunta antes de seguir
   con esa; las demás no esperan.
 
-Última puesta al día: 2026-10-16. En producción desde el 2026-10-11.
+Última puesta al día: 2026-10-17. En producción desde el 2026-10-11.
 
 ## 1. Arranque (siempre, en cada sesión nueva)
 
@@ -39,67 +39,38 @@ este fichero y se hace lo que dice, en orden.
 - [ ] `npm run check`, para partir de un estado conocido.
 - [ ] Decir a Alberto en dos líneas cómo está todo antes de empezar con el plan.
 
-## 2. Plan vigente: lo que pidieron en el buzón (decidido el 2026-10-16)
+## 2. Plan vigente: revisión completa (pedido el 2026-10-17)
 
-Alberto revisó los 39 puntos sacados de los 64 mensajes del buzón (volcado y
-análisis en la conversación del 2026-10-16). **Para esta tanda ha autorizado
-commit, push y despliegue de cada funcionalidad** en cuanto pasen los tests
-(`npm run check`). Cada punto: código desacoplado en su módulo, tests nuevos,
-commit, push y `infra/scripts/deploy.sh` en la máquina. Si un test falla, mirar
-si es porque el cambio no estaba previsto en el test o si es un fallo real.
-Lo que dependa de muchas llamadas a 42 va al final.
+La tanda del buzón (39 puntos, 2026-10-16) está entera desplegada; su detalle
+queda en `contexto.md` y en el historial. Alberto pidió después, en un solo
+mensaje, una revisión completa. Se hace por bloques; cada bloque termina con
+`npm run check`, commit, push y despliegue (como en la tanda del buzón).
 
-Orden (se marca cada uno al desplegarlo):
-
-**A. Fallos**
-- [x] 28 Euskera: `ach.selfless_help` → «Eskuzabaltasun laguntza»; `net.asCorrected.hint` → «Aurkeztutako bereburuko proiektuak».
-- [x] 1 Correcciones marcadas «no asistida»: las de 42 dejan de pedir respuesta (`needsReply` en `meet.service.ts`) y una migración borra las marcas `absent/missed` de evaluaciones y sus `event_alerts`.
-- [x] 2 Guardia: dejar quitar la media hora en curso (`DayEditor.tsx`) si no hay reserva.
-- [x] 5 Buzón: responder un ticket marca leído `ticket_new` de todos los admins; pestañas Pendientes / Cerrados.
-- [x] 7 Contraste de las insignias de la Red (`.net-row-badge`): texto según luminancia.
-- [x] 19 Guardia: no ofrecer medias horas ocupadas por cualquier cosa del calendario (`busyOf` en `help.service.ts`).
-- [x] 4 Calendario: refrescar la agenda si tiene más de 2 min al abrirlo; «actualizado hace X» y botón.
-- [x] 8 Título cortado de los comunicados con zoom (`BroadcastGate.tsx`). No reproducido (200–600 %); arreglos preventivos en `dialog.layout-dialog`. Si vuelve a pasar, pedir navegador y zoom.
-- [x] 3 Holy graph: bis en la SEED, círculo aprendido con mínimo de personas, grupos «elige uno» en `common-core.ts`, recalcular.
-- [x] 34 Fotos de perfil: la CDN de 42 da 403 sin sesión de la intra; ahora las sirve la API (`GET /avatars/:login`, guardadas en `/data/photos`). Subir fotos: no por ahora.
-- [x] 6 Grafo de la Red a tirones: medir y optimizar `ForceGraph.tsx`.
-
-**B. Seguridad, moderación y legal**
-- [x] 10 Scopes: fijar `public` en el token de la app; Alberto desmarca los permisos sobrantes en la intra.
-- [x] 11 web-check: `security.txt`, quitar `via`, HSTS `includeSubDomains`.
-- [x] 14 Tipos de denuncia (spam, acoso, insultos, otro) y filtro en el panel.
-- [x] 15 Formulario de incidencias: tipo y sección en desplegables, «Para: administración», icono `bicho`.
-- [x] 16 Borrar avisos / retirar mensaje propio (15 min, sin respuesta) / admin borra spam.
-- [x] 9 Segundo factor (TOTP) para `/admin`, sesión elevada 12 h.
-- [x] 12 Página de privacidad y condiciones, aceptación versionada, descarga de datos.
-- [x] 13 Trampas de Code Clicker, tres botones: «no es trampa» cierra; «alta probabilidad» abre ventana obligatoria de defensa que llega al admin; «trampa» = **vender todos sus edificios**, aviso temático en el juego («La policía del código te ha requisado las ganancias fraudulentas») y el dinero va a una **bolsa común**. La bolsa se reparte con una imagen temática que aparece por la zona del juego como el commit dorado; al pulsarla da **10 × el commit de la suerte** (el de ganancia, no el frenesí).
-
-**C. Mejoras**
-- [x] 17 Explicar guardia, tope y pace (dos números).
-- [x] 21 Preevaluaciones: marcar disponibilidad mucho más grande, con icono propio; característica principal.
-- [x] 27 Últimas 8 búsquedas en el navegador.
-- [x] 23 Clusters: puesto como enlace (clic central), girar 180°, círculo en el puesto, filtros, brillo dorado por 125.
-- [x] 26 Red: color por sentido y flecha en las líneas de la persona elegida.
-- [x] 20 Guardia y preevaluación brillando en el mapa con filtro; fichas compactas con «Pedir ayuda».
-- [x] 24 Terapias: «proponer puestos», puestos rotos (7 días), avisar a quien hace el mismo proyecto.
-- [x] 25 Calendario: vistas compacta / día / desde ahora.
-- [x] 18 Peticiones de ayuda en ventana obligatoria (recibir y rechazo).
-- [x] 29 Daltónicos, modo zen y demo de bienvenida.
-- [x] 22 Tamaño de texto 90–150 % y móvil.
-- [x] 33 Code Clicker: tope con pace en riesgo, logro por donar.
-
-**D. Muchos datos (al final, poco a poco en horas de poco uso)**
-- [x] 32 Holy graph de correcciones con logros y banner.
-- [x] 30 Estadísticas de exámenes (intentos de 42 en cola de fondo; duración de círculos).
-- [x] 31 Exámenes en vivo: pestaña que se activa cuando empieza un examen en tu campus (sale en el calendario); gente apuntada separada por examen, grado y cursus, del círculo en que está; cada 5 min se actualiza la nota con el último intento.
-
-**Ideas para el futuro (no hacer ahora)**: 35 racha diaria con preguntas; 37 curso de git; 38 presentaciones de Transcendence/outer como evento; 39 Doom 2 (Freedoom) y patitos. **Descartado para siempre**: 36 modo sin conexión con los datos del campus.
-
-Hecho además en esta tanda (fuera de la lista): estilo Bichota, antitrampas
-de pulsaciones, política de trampas nueva (venta al 50 % y reparto), ver la
-partida de cualquiera y sanción a mano desde el panel. Detalle en `contexto.md`.
-
-Pendientes de antes: rotar el secreto de 42 (Alberto), primera cuenta de staff, Oracle Pay As You Go con presupuesto de 1 €, CSP con sesión iniciada, repaso a ojo de temas y móvil.
+- [ ] **1. Código muerto, duplicado o simplificable.** `knip` (exportaciones y
+      ficheros sin uso), `jscpd` (duplicados) y repaso a mano. Borrar o unir.
+- [ ] **2. Tests.** Buscar guías profesionales de qué cubrir (normal,
+      imprevisible, límite; producción). Escribir `docs/tests.md` con la lista
+      de comprobación. Medir cobertura, rellenar huecos. Proteger producción:
+      umbral de cobertura en CI y `deploy.sh` no despliega sin tests verdes.
+- [ ] **3. Textos en tablas.** Los textos de la web salen de tablas por tema
+      (CSV con clave, contexto, es, en, ca, eu) que son la única fuente; un
+      plugin de Vite las convierte y cada idioma se carga solo si se usa.
+      `docs/textos/` con la tabla legible por tema (generada, con dónde se usa
+      cada clave). Comprobación en `npm run check`: claves usadas que faltan,
+      claves sin uso y tabla generada al día. Regla estricta en `AGENTS.md`.
+- [ ] **4. Claridad del español.** Repasar los textos: frases breves, con
+      sentido y bien construidas. Ajustar las traducciones que cambien.
+- [ ] **5. Categorías y modos.** Agrupar las pestañas: Expediente · Ayuda
+      (sala de espera, tablón, terapia, pizarras) · Calendario · Datos (red,
+      clústers, exámenes). Tres modos de interfaz a elegir (simplificado,
+      normal, loco por los datos) con la importancia de cada elemento por
+      página. `docs/interfaz.md` con el mapa, la importancia y la valoración de
+      uso de cada elemento. Regla en `AGENTS.md`: cada funcionalidad nueva dice
+      su categoría y en qué modo sale.
+- [ ] **6. Demostraciones animadas.** Revisar cómo se hacen, unificar
+      criterios y dejar una plantilla (`shared/tour/`) y su guía.
+- [ ] **7. README.** Al día con todas las funcionalidades, las categorías y
+      los modos.
 
 ## 3. A medias o por confirmar con Alberto
 
