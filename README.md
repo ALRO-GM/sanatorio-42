@@ -192,6 +192,10 @@ de cada pregunta empieza estimada y se reajusta con lo que falla la gente. Al
 acabar cada pregunta se ve la buena y por qué. El servidor lleva el reloj y la
 partida: nadie puede contestar tarde ni ver la buena antes de tiempo.
 
+Cada cual tiene su **Repaso**: lo que ha fallado en cualquier juego, concepto a
+concepto, con qué es, un ejemplo y la pregunta tal como salió. Lo que acierta
+después pasa a superado.
+
 **Ajedrez con pregunta.** Dos personas, cada una con su reloj (3, 5, 10 o 15
 minutos) y el tablero que prefiera (torneo, madera, océano o contraste). Al
 mover, los relojes se paran y sale una pregunta a los dos encima del tablero:

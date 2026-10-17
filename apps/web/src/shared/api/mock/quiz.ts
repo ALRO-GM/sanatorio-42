@@ -8,6 +8,7 @@ import type {
   QuizLobby,
   QuizPlayer,
   QuizQuestion,
+  QuizReviewItem,
   QuizRoom,
   QuizSettings,
   QuizTeam,
@@ -117,6 +118,39 @@ type MockRoom = {
 }
 
 const rooms = new Map<number, MockRoom>()
+
+/** Lo que se falla en las salas de mentira, para el Repaso. */
+const missed = new Map<string, QuizReviewItem>()
+
+const REVIEW_SAMPLES: QuizReviewItem[] = [
+  {
+    conceptId: 'c-dangling',
+    topic: 'memoria',
+    title: 'Punteros colgantes',
+    definition:
+      'Las variables locales viven en la pila y desaparecen al salir de la función. Devolver su dirección deja un puntero a memoria que se reutilizará: hay que usar malloc o recibir el sitio desde fuera.',
+    example:
+      'int *f(void) { int n = 42; return &n; } ← mal. Bien: int *p = malloc(sizeof(int)); *p = 42; return p;',
+    why: 'n vive en la pila de f; al volver, esa memoria se reutiliza y el puntero ya no vale.',
+    question: '¿Qué falla en esta función?',
+    misses: 2,
+    lastMissedAt: new Date(Date.now() - 86_400_000).toISOString(),
+    mastered: false,
+  },
+  {
+    conceptId: 'gen-git-add',
+    topic: 'git',
+    title: 'El índice (git add)',
+    definition:
+      'Entre tus ficheros y el commit está el índice (staging): git add elige qué cambios entran en el próximo commit. git status enseña qué está en cada sitio.',
+    example: 'git add src/ft_split.c → solo ese fichero entra en el commit siguiente.',
+    why: 'El índice es la lista de lo que entrará en el próximo commit.',
+    question: '¿Para qué sirve `git add fichero`?',
+    misses: 1,
+    lastMissedAt: new Date(Date.now() - 3 * 86_400_000).toISOString(),
+    mastered: true,
+  },
+]
 let nextId = 1
 
 const fresh = (login: string, team: QuizTeam | null): Player => ({
@@ -308,6 +342,7 @@ export const quizMock: Pick<
   | 'leaveQuizRoom'
   | 'startQuizRoom'
   | 'answerQuiz'
+  | 'getQuizReview'
 > = {
   async getQuizRooms() {
     await delay(150)
@@ -441,8 +476,33 @@ export const quizMock: Pick<
 
       answers.push({ login: ME.login, option, correct })
       score(room, ME.login, correct)
+      // Como la API: lo fallado va al Repaso (las de ejemplo traen su porqué como definición).
+      if (!correct) {
+        const key = round.prompt
+        const before = missed.get(key)
+
+        missed.set(key, {
+          conceptId: key,
+          topic: 'Not-games',
+          title: round.prompt,
+          definition: round.why,
+          example: round.code ?? round.options[round.answer] ?? '',
+          why: round.why,
+          question: round.prompt,
+          misses: (before?.misses ?? 0) + 1,
+          lastMissedAt: new Date().toISOString(),
+          mastered: false,
+        })
+      }
     }
 
     return view(room)
+  },
+
+  async getQuizReview() {
+    await delay(150)
+
+    // Dos fallos de ejemplo (uno ya superado) y lo que se falle en las salas de mentira.
+    return [...missed.values(), ...REVIEW_SAMPLES]
   },
 }

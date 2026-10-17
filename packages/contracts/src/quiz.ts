@@ -221,3 +221,21 @@ export type TurnLobby = {
 
 export type TurnMoveInput = { from: string; to: string; promotion?: 'q' | 'r' | 'b' | 'n' }
 export type TurnAnswerInput = { question: number; option: number }
+
+/** Un concepto que has fallado, para estudiarlo (`GET /quiz/review`). */
+export type QuizReviewItem = {
+  conceptId: string
+  /** Tema: `memoria`, `procesos`, `redes`… */
+  topic: string
+  title: string
+  definition: string
+  example: string
+  /** El porqué de la respuesta, el mismo que se ve al revelar. */
+  why: string
+  /** Una de las preguntas del concepto, para recordar cómo salía. */
+  question: string
+  misses: number
+  lastMissedAt: string
+  /** Lo acertaste después del último fallo. */
+  mastered: boolean
+}

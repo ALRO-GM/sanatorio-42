@@ -57,3 +57,10 @@ export type Concept = {
   /** Por qué, en una frase: se enseña al revelar la respuesta. */
   why: string
 }
+
+/** Lo que se enseña en el Repaso de un concepto: título corto, qué es y un ejemplo. */
+export type ReviewEntry = {
+  title: string
+  definition: string
+  example: string
+}

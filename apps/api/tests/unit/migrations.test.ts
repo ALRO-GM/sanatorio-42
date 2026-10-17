@@ -91,6 +91,7 @@ describe('migraciones', () => {
       'project_users',
       'projects',
       'quiz_answers',
+      'quiz_misses',
       'quiz_players',
       'quiz_rooms',
       'quiz_rounds',

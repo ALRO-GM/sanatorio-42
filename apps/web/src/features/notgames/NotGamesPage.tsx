@@ -22,6 +22,7 @@ import { InfoTip } from '../../shared/ui/InfoTip'
 import { NotGamesTour } from './NotGamesTour'
 import { RoomView } from './RoomView'
 import { ChessTour } from './ChessTour'
+import { ReviewTab } from './ReviewTab'
 import { TurnRoomView } from './TurnRoomView'
 import { settingsText } from './settings-text'
 
@@ -67,7 +68,37 @@ export function NotGamesPage({ me, room }: NotGamesPageProps) {
   )
 }
 
+const TABS = ['rooms', 'review'] as const
+
+/** La portada de Not-games: las salas, o tu Repaso. */
 function Lobby() {
+  const { t } = useI18n()
+  const [tab, setTab] = useState<(typeof TABS)[number]>('rooms')
+
+  return (
+    <>
+      <div className="filter-pills" role="tablist" aria-label={t('nav.notgames')}>
+        {TABS.map((option) => (
+          <button
+            key={option}
+            type="button"
+            role="tab"
+            className={`pill ${tab === option ? 'active' : ''}`}
+            aria-selected={tab === option}
+            onClick={() => {
+              setTab(option)
+            }}
+          >
+            {t(`notgames.tab.${option}`)}
+          </button>
+        ))}
+      </div>
+      {tab === 'rooms' ? <Rooms /> : <ReviewTab />}
+    </>
+  )
+}
+
+function Rooms() {
   const { t } = useI18n()
   const rooms = useAsync(async () => {
     const [quiz, turns] = await Promise.all([api.getQuizRooms(), api.getTurnRooms()])

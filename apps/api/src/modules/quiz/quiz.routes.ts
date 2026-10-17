@@ -23,6 +23,13 @@ export function registerQuizRoutes(
     return reply.send(await quiz.list(await session.actor(request)))
   })
 
+  /** `GET /quiz/review` → lo que has fallado, con definición y ejemplo para estudiarlo. */
+  app.get('/quiz/review', async (request, reply) => {
+    reply.header('Cache-Control', 'private, no-store')
+
+    return reply.send(await quiz.review(await session.actor(request)))
+  })
+
   /** `POST /quiz/rooms` → `QuizSettings`: crea una sala y entras en ella. */
   app.post('/quiz/rooms', async (request, reply) => {
     return reply.code(201).send(await quiz.create(await session.actor(request), request.body))

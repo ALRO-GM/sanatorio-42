@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/notgames.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-116 textos. «—» es que falta la traducción: sale en español.
+125 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -123,3 +123,12 @@ Generado desde `apps/web/src/shared/i18n/textos/notgames.csv` con
 | `notgames.chess.firstWrongMe` | Not-games, ajedrez: fallaste tú primero | features/notgames/TurnRoomView | Fallaste: pierdes el 10 % de tu tiempo y mueve {other}. | Wrong: you lose 10% of your time and {other} moves. | Has fallat: perds el 10 % del teu temps i mou {other}. | Huts egin duzu: zure denboraren % 10 galdu duzu eta {other}(e)k mugitzen du. |
 | `notgames.chess.firstWrongYouMove` | Not-games, ajedrez: el otro falló primero y mueves tú | features/notgames/ChessTour, features/notgames/TurnRoomView | {login} falló: pierde el 10 % de su tiempo y mueves tú. | {login} got it wrong: loses 10% of their time and you move. | {login} ha fallat: perd el 10 % del seu temps i mous tu. | {login}(e)k huts egin du: denboraren % 10 galdu du eta zuk mugitzen duzu. |
 | `notgames.chess.nobodyMe` | Not-games, ajedrez: nadie contestó y te tocaba a ti | features/notgames/TurnRoomView | Nadie contestó a tiempo: mueves tú, como tocaba. | Nobody answered in time: you move, as planned. | Ningú no ha contestat a temps: mous tu, com tocava. | Inork ez du garaiz erantzun: zuk mugitzen duzu, zegokion bezala. |
+| `notgames.tab.rooms` | Not-games: pestaña de las salas | features/notgames/NotGamesPage | Salas | Rooms | Sales | Gelak |
+| `notgames.tab.review` | Not-games: pestaña del Repaso, con lo que has fallado | features/notgames/NotGamesPage | Repaso | Review | Repàs | Errepasoa |
+| `notgames.review.empty` | Not-games, Repaso: aún no has fallado nada | features/notgames/ReviewTab | Aún no has fallado nada. Lo que falles en las partidas saldrá aquí, explicado. | Nothing missed yet. What you miss in games will show up here, explained. | Encara no has fallat res. El que fallis a les partides sortirà aquí, explicat. | Oraindik ez duzu ezer huts egin. Partidetan huts egiten duzuna hemen agertuko da, azalduta. |
+| `notgames.review.pending` | Not-games, Repaso: cuántos conceptos quedan por repasar | features/notgames/ReviewTab | Por repasar: {n}. Son los que fallaste y aún no has acertado. | To review: {n}. Missed and not yet answered right. | Per repassar: {n}. Són els que vas fallar i encara no has encertat. | Errepasatzeko: {n}. Huts egin eta oraindik asmatu ez dituzunak. |
+| `notgames.review.mastered` | Not-games, Repaso: desplegar los ya superados | features/notgames/ReviewTab | Superados ({n}) | Mastered ({n}) | Superats ({n}) | Gaindituak ({n}) |
+| `notgames.review.masteredOne` | Not-games, Repaso: este lo acertaste después de fallarlo | features/notgames/ReviewTab | Superado: lo acertaste después. | Mastered: you got it right later. | Superat: el vas encertar després. | Gaindituta: geroago asmatu zenuen. |
+| `notgames.review.misses` | Not-games, Repaso: cuántas veces lo has fallado | features/notgames/ReviewTab | Fallos: {n} | Misses: {n} | Errors: {n} | Hutsak: {n} |
+| `notgames.review.example` | Not-games, Repaso: encabezado del ejemplo | features/notgames/ReviewTab | Ejemplo | Example | Exemple | Adibidea |
+| `notgames.review.question` | Not-games, Repaso: desplegar cómo salía la pregunta | features/notgames/ReviewTab | Cómo salía la pregunta | How the question looked | Com sortia la pregunta | Galdera nola zegoen |

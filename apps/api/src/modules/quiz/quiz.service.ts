@@ -12,6 +12,7 @@
 
 import type {
   QuizLobby,
+  QuizReviewItem,
   QuizPlayer,
   QuizQuestion,
   QuizRoom,
@@ -23,13 +24,15 @@ import { z } from 'zod'
 import type { Actor } from '../../core/actor.js'
 import { domainError } from '../../core/errors.js'
 import { parse } from '../../core/validation.js'
-import type { Concept } from './bank/types.js'
+import type { Concept, ReviewEntry } from './bank/types.js'
 import type { PlayerRow, QuizRepository, RoomRow, RoundRow } from './quiz.repository.js'
 import { buildRound, levelOf, LIVES, orderFor, pickConcepts, pointsFor } from './quiz.rules.js'
 
 type QuizServiceOptions = {
   quiz: QuizRepository
   bank: readonly Concept[]
+  /** Definición y ejemplo de cada concepto, para el Repaso. */
+  review?: Readonly<Record<string, ReviewEntry>>
   /** El círculo en que va cada persona (para el mínimo de una sala). */
   circlesOf: (logins: readonly string[]) => Promise<Map<string, number>>
   /** Si alguien está ya en una partida por turnos (ajedrez…): no se juegan dos a la vez. */
@@ -550,6 +553,7 @@ export function createQuizService(options: QuizServiceOptions) {
             ? Math.max(0, (me.lives ?? LIVES) - (correct ? 0 : 1))
             : me.lives
 
+        await quiz.remember(actor.login, round.conceptId, correct, iso(t))
         await quiz.answer(
           id,
           question,
@@ -560,6 +564,36 @@ export function createQuizService(options: QuizServiceOptions) {
 
         return viewOf(actor, room)
       })
+    },
+
+    /**
+     * El Repaso de quien pregunta: lo que ha fallado, con qué es y un ejemplo.
+     * Primero lo que aún no ha acertado después, y lo más reciente antes.
+     */
+    async review(actor: Actor): Promise<QuizReviewItem[]> {
+      const concepts = new Map(bank.map((concept) => [concept.id, concept]))
+      const items: QuizReviewItem[] = []
+
+      for (const miss of await quiz.misses(actor.login)) {
+        const concept = concepts.get(miss.conceptId)
+        const entry = options.review?.[miss.conceptId]
+
+        // Un concepto que ya no está en el banco no se puede repasar.
+        if (concept === undefined || entry === undefined) continue
+
+        items.push({
+          conceptId: concept.id,
+          topic: concept.topic,
+          ...entry,
+          why: concept.why,
+          question: concept.forms[0]?.ask[0] ?? '',
+          misses: miss.misses,
+          lastMissedAt: miss.lastMissedAt,
+          mastered: miss.lastRightAt !== null && miss.lastRightAt >= miss.lastMissedAt,
+        })
+      }
+
+      return items.sort((a, b) => Number(a.mastered) - Number(b.mastered))
     },
 
     /** Borra las salas que nadie empezó y las partidas de hace más de una semana. */

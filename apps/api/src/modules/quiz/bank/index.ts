@@ -14,7 +14,9 @@ import { GENERAL } from './general.js'
 import { GRAPHICS } from './graphics.js'
 import { NETWORK_BANK } from './network.js'
 import { PYTHON } from './python.js'
-import type { Concept } from './types.js'
+import { REVIEW_A } from './review-a.js'
+import { REVIEW_B } from './review-b.js'
+import type { Concept, ReviewEntry } from './types.js'
 import { UNIX } from './unix.js'
 
 export type { Concept } from './types.js'
@@ -29,3 +31,6 @@ export const BANK: readonly Concept[] = [
   ...CPP,
   ...PYTHON,
 ]
+
+/** El repaso de cada concepto, por id. Un test comprueba que no falta ninguno. */
+export const REVIEW: Readonly<Record<string, ReviewEntry>> = { ...REVIEW_A, ...REVIEW_B }

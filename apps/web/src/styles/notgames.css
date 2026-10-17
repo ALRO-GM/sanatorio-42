@@ -615,3 +615,41 @@
 .tour-danger {
   color: var(--danger);
 }
+
+/* ── Repaso ────────────────────────────────────────────────────────────── */
+.quiz-review {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+.quiz-review-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
+  gap: 0.75rem;
+}
+.quiz-review-card {
+  display: grid;
+  align-content: start;
+  gap: 0.4rem;
+  border-left: 4px solid var(--warn);
+}
+.quiz-review-card.mastered {
+  border-left-color: var(--ok);
+  opacity: 0.85;
+}
+.quiz-review-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.quiz-review-head h3 {
+  margin: 0;
+}
+.quiz-review-card p {
+  margin: 0;
+}
+.quiz-review-card .quiz-code {
+  margin: 0;
+  white-space: pre-wrap;
+}

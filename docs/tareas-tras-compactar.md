@@ -170,7 +170,7 @@ despliegue espera a la CI).
       estilos de tablero, relojes, pregunta entre jugadas, coronación),
       cliente + mock, textos, test de pantalla, docs (api.md, README, interfaz).
 - [x] B5 demo del ajedrez · [x] B6 sonidos (salas) y animaciones (ajedrez) ·
-      [ ] B7 Repaso · [x] fotos en clasificaciones y marcadores.
+      [x] B7 Repaso · [x] fotos en clasificaciones y marcadores.
 - [ ] **Buzón** (decidido por Alberto): hacer todas hasta las medianas
       incluidas: #48 (fallo Python 06 bis en círculo 0), #75 (pizarras de más
       cercana a más lejana y después las pasadas), #76 (avisos que abren el

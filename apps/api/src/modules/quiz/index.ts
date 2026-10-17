@@ -6,7 +6,7 @@
 
 import type { Db } from '../../core/db/database.js'
 import type { AppModule } from '../../core/module.js'
-import { BANK } from './bank/index.js'
+import { BANK, REVIEW } from './bank/index.js'
 import { createChessService, openTurnRoomsOf } from './games/index.js'
 import type { ChessService } from './games/index.js'
 import { registerTurnRoutes } from './games/turns.routes.js'
@@ -34,6 +34,7 @@ export function createQuizModule(deps: QuizModuleDeps): QuizModule {
   const service = createQuizService({
     quiz,
     bank: BANK,
+    review: REVIEW,
     circlesOf: deps.circlesOf,
     imagesOf: deps.imagesOf,
     busyElsewhere: async (login) => (await openTurnRoomsOf(deps.db)(login)).length > 0,
@@ -55,6 +56,7 @@ export function createQuizModule(deps: QuizModuleDeps): QuizModule {
       { table: 'quiz_players', logins: ['login'] },
       { table: 'quiz_answers', logins: ['login'] },
       { table: 'game_results', logins: ['login'] },
+      { table: 'quiz_misses', logins: ['login'] },
       { table: 'turn_rooms', logins: ['host'] },
       { table: 'turn_players', logins: ['login'] },
     ],

@@ -10,6 +10,7 @@ import type {
   QuizLobby,
   QuizRoom,
   QuizSettings,
+  QuizReviewItem,
   QuizTeam,
   TurnLobby,
   TurnMoveInput,
@@ -439,6 +440,8 @@ export type Api = {
   startQuizRoom: (id: number) => Promise<QuizRoom>
   /** `option` es el id de la respuesta, no su posición en pantalla. */
   answerQuiz: (id: number, question: number, option: number) => Promise<QuizRoom>
+  /** El Repaso: lo que has fallado, con definición y ejemplo. */
+  getQuizReview: () => Promise<QuizReviewItem[]>
   // Juegos por turnos con pregunta (ajedrez).
   getTurnRooms: () => Promise<TurnLobby[]>
   createTurnRoom: (settings: TurnSettings) => Promise<TurnRoom>

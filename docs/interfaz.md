@@ -63,6 +63,7 @@ de datos.
 | Terapia y Pizarras | Todo | S | Son quedar |
 | Pestañas | Not-games | N | Aprender jugando: no hace falta para pedir ni dar ayuda |
 | Not-games | Salas, crear sala, partida y marcador | N | La sección en sí |
+| Not-games | Repaso: lo fallado con definición y ejemplo | N | Para estudiar después de jugar |
 | Not-games | Ajedrez: tablero, relojes, pregunta encima del tablero, estilos de tablero, sonido | N | Un juego más de la sección |
 | Pestañas | Estadísticas (en Ayuda) | N | Clasificaciones: el simplificado no enseña rankings |
 | Estadísticas | Cifras del campus y clasificación de cada sección, con fotos | N | La sección en sí |

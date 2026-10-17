@@ -138,4 +138,23 @@ describe('Not-games', () => {
     )
     expect(await screen.findByText(new RegExp(text('notgames.end.resign')))).toBeTruthy()
   }, 40_000)
+
+  it('el Repaso enseña lo que fallaste con su definición y ejemplo, y aparte lo superado', async () => {
+    const user = userEvent.setup()
+
+    await openApp('#/notgames')
+    await user.click(await screen.findByRole('tab', { name: text('notgames.tab.review') }))
+
+    const card = must(
+      (await screen.findByRole('heading', { name: 'Punteros colgantes' })).closest('article'),
+      'la tarjeta',
+    )
+
+    expect(within(card).getByText(text('notgames.review.example'))).toBeTruthy()
+    expect(within(card).getByText(/malloc\(sizeof\(int\)\)/)).toBeTruthy()
+    // Lo superado no se ve hasta desplegarlo.
+    expect(screen.queryByRole('heading', { name: 'El índice (git add)' })).toBeNull()
+    await user.click(screen.getByRole('button', { name: /\(1\)/ }))
+    expect(await screen.findByRole('heading', { name: 'El índice (git add)' })).toBeTruthy()
+  }, 20_000)
 })

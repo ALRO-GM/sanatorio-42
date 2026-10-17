@@ -59,6 +59,7 @@ export const realApi: Api = {
   startQuizRoom: (id) => sendJson('POST', `/quiz/rooms/${id}/start`),
   answerQuiz: (id, question, option) =>
     sendJson('POST', `/quiz/rooms/${id}/answer`, { question, option }),
+  getQuizReview: () => getJson('/quiz/review'),
   getTurnRooms: () => getJson('/games/rooms'),
   createTurnRoom: (settings) => sendJson('POST', '/games/rooms', settings),
   getTurnRoom: (id) => getJson(`/games/rooms/${id}`),

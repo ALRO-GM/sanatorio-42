@@ -4,7 +4,7 @@
  */
 import { describe, expect, it } from 'vitest'
 
-import { BANK } from '../../src/modules/quiz/bank/index.js'
+import { BANK, REVIEW } from '../../src/modules/quiz/bank/index.js'
 import { buildRound, OPTIONS, seeded } from '../../src/modules/quiz/quiz.rules.js'
 import { SEEDED_SLUGS } from '../../src/modules/replica/curriculum.js'
 
@@ -66,6 +66,19 @@ describe('banco de preguntas', () => {
     )
 
     expect(unknown).toEqual([])
+  })
+
+  it('cada concepto tiene su repaso (título, definición y ejemplo), y no sobra ninguno', () => {
+    const ids = new Set(BANK.map((concept) => concept.id))
+
+    expect(BANK.filter((concept) => REVIEW[concept.id] === undefined).map((c) => c.id)).toEqual([])
+    expect(Object.keys(REVIEW).filter((id) => !ids.has(id))).toEqual([])
+    for (const entry of Object.values(REVIEW)) {
+      expect(entry.title.length).toBeGreaterThan(2)
+      expect(entry.title.length).toBeLessThanOrEqual(60)
+      expect(entry.definition.length).toBeGreaterThan(40)
+      expect(entry.example.length).toBeGreaterThan(5)
+    }
   })
 
   it('hay preguntas de todo: rápidas y largas, generales y de proyecto', () => {

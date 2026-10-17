@@ -331,6 +331,37 @@ export function createQuizRepository(db: Db) {
       return true
     },
 
+    /** Apunta para el Repaso que `login` ha fallado (o acertado) ese concepto. */
+    async remember(login: string, conceptId: string, correct: boolean, at: string): Promise<void> {
+      await db.execute({
+        sql: correct
+          ? `UPDATE quiz_misses SET last_right_at = ? WHERE login = ? AND concept_id = ?`
+          : `INSERT INTO quiz_misses (login, concept_id, misses, last_missed_at) VALUES (?, ?, 1, ?)
+             ON CONFLICT (login, concept_id) DO UPDATE SET misses = misses + 1, last_missed_at = excluded.last_missed_at`,
+        args: correct ? [at, login, conceptId] : [login, conceptId, at],
+      })
+    },
+
+    /** Lo que ha fallado `login`, de lo último a lo primero. */
+    async misses(
+      login: string,
+    ): Promise<
+      { conceptId: string; misses: number; lastMissedAt: string; lastRightAt: string | null }[]
+    > {
+      const result = await db.execute({
+        sql: `SELECT concept_id, misses, last_missed_at, last_right_at FROM quiz_misses
+              WHERE login = ? ORDER BY last_missed_at DESC`,
+        args: [login],
+      })
+
+      return result.rows.map((row) => ({
+        conceptId: toText(row.concept_id),
+        misses: toNumber(row.misses),
+        lastMissedAt: toText(row.last_missed_at),
+        lastRightAt: typeof row.last_right_at === 'string' ? row.last_right_at : null,
+      }))
+    },
+
     /** Quita una vida (o deja fuera) a quien no contestó a tiempo. */
     async penalize(
       roomId: number,

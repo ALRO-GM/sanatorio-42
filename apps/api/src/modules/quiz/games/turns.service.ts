@@ -560,6 +560,8 @@ export function createTurnsService<Board, View>(options: TurnsServiceOptions<Boa
         if (answered === null) throw domainError('conflict', 'Esa pregunta ya se ha cerrado')
 
         const correct = option === round.answer
+
+        await quiz.remember(actor.login, round.conceptId, correct, iso(now()))
         const counts = {
           ...state.counts,
           [side]: {

@@ -440,6 +440,48 @@ describe('partidas de Not-games', () => {
     expect((await quiz.view(actor('ana'), id)).status).toBe('done')
   })
 
+  it('el Repaso guarda lo que fallas, con definición y ejemplo, y lo marca superado al acertarlo', async () => {
+    const { quiz } = services
+
+    expect(await quiz.review(actor('ana'))).toEqual([])
+
+    const { id } = await quiz.create(actor('ana'), { mode: 'ffa', pool: 'general', questions: 5 })
+
+    await quiz.start(actor('ana'), id)
+    let room = await begin(id)
+    const conceptOf = async (index: number): Promise<string> => {
+      const row = await db.execute({
+        sql: 'SELECT concept_id FROM quiz_rounds WHERE room_id = ? AND idx = ?',
+        args: [id, index],
+      })
+      const value = row.rows[0]?.concept_id
+
+      return typeof value === 'string' ? value : ''
+    }
+    const missed = await conceptOf(0)
+
+    await quiz.answer(actor('ana'), id, { question: 0, option: await wrongOf(room) })
+
+    const review = await quiz.review(actor('ana'))
+
+    expect(review).toEqual([
+      expect.objectContaining({ conceptId: missed, misses: 1, mastered: false }),
+    ])
+    expect(review[0]?.definition.length).toBeGreaterThan(40)
+    expect(review[0]?.example.length).toBeGreaterThan(5)
+    // A otra persona no le sale.
+    expect(await quiz.review(actor('leo'))).toEqual([])
+
+    // Acertarlo después lo marca como superado (sigue a la vista, abajo).
+    await db.execute({
+      sql: `UPDATE quiz_misses SET last_right_at = ? WHERE login = 'ana'`,
+      args: [new Date(clock.now() + 1000).toISOString()],
+    })
+    expect((await quiz.review(actor('ana')))[0]?.mastered).toBe(true)
+    room = await quiz.view(actor('ana'), id)
+    expect(room.status).toBe('playing')
+  })
+
   it('la lista enseña las salas abiertas del campus y las tuyas', async () => {
     const { quiz } = services
     const { id } = await quiz.create(actor('ana'), { mode: 'duel', pool: 'general' })

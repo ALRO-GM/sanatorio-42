@@ -1298,6 +1298,12 @@ POST /quiz/rooms/:id/answer   → QuizRoom. { question, option }: option es el i
 ```
 
 - Cada jugador lleva su foto de 42 (`image`, o `null`).
+- **Repaso** (`GET /quiz/review` → `QuizReviewItem[]`): lo que ha fallado quien
+  pregunta, de cualquier juego, con título, definición, ejemplo, el porqué y una
+  de sus preguntas. `mastered` si lo acertó después del último fallo; primero lo
+  pendiente. Se guarda en `quiz_misses` (las salas se borran). Cada concepto del
+  banco tiene su repaso en `bank/review-a.ts` y `bank/review-b.ts`; un test exige
+  que no falte ninguno.
 - Al acabar una partida se guarda el resultado de cada cual en `game_results`
   (común a todos los juegos), que queda para las estadísticas aunque la sala se
   borre.
