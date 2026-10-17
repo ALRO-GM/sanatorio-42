@@ -30,10 +30,15 @@ wait_for_ci() {
     runs=$(curl -fsS "https://api.github.com/repos/$REPO/commits/$sha/check-runs") || runs=''
     total=$(printf '%s' "$runs" | jq -r '.total_count // 0' 2>/dev/null || echo 0)
     pending=$(printf '%s' "$runs" | jq -r '[.check_runs[] | select(.status != "completed")] | length' 2>/dev/null || echo 1)
-    failed=$(printf '%s' "$runs" | jq -r '[.check_runs[] | select(.status == "completed" and .conclusion != "success" and .conclusion != "skipped")] | length' 2>/dev/null || echo 0)
+    failed=$(printf '%s' "$runs" | jq -r '[.check_runs[] | select(.status == "completed" and .conclusion != "success" and .conclusion != "skipped" and .conclusion != "cancelled")] | length' 2>/dev/null || echo 0)
+    cancelled=$(printf '%s' "$runs" | jq -r '[.check_runs[] | select(.conclusion == "cancelled")] | length' 2>/dev/null || echo 0)
 
     if [ "$failed" != 0 ]; then
       echo "La CI de $sha ha fallado: no se despliega. Mira https://github.com/$REPO/actions" >&2
+      return 1
+    fi
+    if [ "$cancelled" != 0 ]; then
+      echo "La CI de $sha se canceló porque se subió un commit más nuevo: vuelve a desplegar para coger el último." >&2
       return 1
     fi
     if [ "$total" != 0 ] && [ "$pending" = 0 ]; then
