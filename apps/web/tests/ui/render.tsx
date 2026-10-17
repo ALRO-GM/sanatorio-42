@@ -1,8 +1,8 @@
-import { act, fireEvent, render, screen } from '@testing-library/react'
+import { act, render } from '@testing-library/react'
 
 import { App } from '../../src/app/App'
+import { api } from '../../src/shared/api'
 import { I18nProvider } from '../../src/shared/i18n'
-import es from 'virtual:textos/es'
 
 /** Deja pasar el tiempo para que la API de mentira conteste y se pinte. */
 export async function settle(ms = 600): Promise<void> {
@@ -13,12 +13,16 @@ export async function settle(ms = 600): Promise<void> {
 
 /**
  * Pinta la web entera en esa dirección, con la API de mentira y en español, sin
- * la bienvenida delante.
+ * la bienvenida ni las condiciones delante.
  */
 export async function openApp(hash: string): Promise<void> {
   localStorage.clear()
   localStorage.setItem('sanatorio_welcome_seen', '1')
   localStorage.setItem('sanatorio_lang', 'es')
+  // Alguien que ya aceptó las condiciones: su ventana no tapa lo que se prueba.
+  const legal = await api.getLegal()
+
+  if (legal.acceptedAt === null) await api.acceptLegal(legal.version)
   window.location.hash = hash
   render(
     <I18nProvider>
@@ -26,11 +30,4 @@ export async function openApp(hash: string): Promise<void> {
     </I18nProvider>,
   )
   await settle(900)
-  // Como haría cualquiera la primera vez: acepta las condiciones.
-  const accept = screen.queryByRole('button', { name: es['legal.accept'] ?? '' })
-
-  if (accept !== null) {
-    fireEvent.click(accept)
-    await settle(300)
-  }
 }

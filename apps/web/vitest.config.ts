@@ -23,7 +23,7 @@ export default defineConfig({
       exclude: ['src/main.tsx', 'src/vite-env.d.ts'],
       // Mínimos que la CI exige (`npm run test:coverage`). Solo suben, nunca
       // bajan: cada pantalla con su test los empuja hacia arriba.
-      thresholds: { lines: 39, statements: 39, functions: 40, branches: 75 },
+      thresholds: { lines: 48, statements: 48, functions: 44, branches: 78 },
     },
   },
 })

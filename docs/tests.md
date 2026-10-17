@@ -83,7 +83,7 @@ traducir. Una sección nueva entra sola.
    construya.
 3. **Mínimos de cobertura** en `apps/*/vitest.config.ts` (`thresholds`). Solo
    suben: si un cambio los baja, faltan tests de lo nuevo. A día de hoy:
-   API 96 % de líneas y 89 % de ramas; web 39 % de líneas, ya sin contar los textos (sube con cada
+   API 96 % de líneas y 89 % de ramas; web 48 % de líneas, ya sin contar los textos (sube con cada
    pantalla probada).
 4. **`deploy.sh` no despliega un commit sin la CI en verde**: si aún corre,
    espera; si ha fallado, se niega. Solo en una emergencia con GitHub caído:
