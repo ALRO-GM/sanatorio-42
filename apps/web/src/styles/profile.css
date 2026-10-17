@@ -285,3 +285,27 @@ a.back-btn {
   display: inline-block;
   text-decoration: none;
 }
+
+/* Los plazos ya pasados, juntos en una línea discreta. */
+.health-step.lost-all {
+  opacity: 0.6;
+  border-style: dashed;
+  font-size: 0.9rem;
+}
+/* El botón de actualizar es un botón, no una fila entera. */
+.health-detail > .health-update {
+  justify-self: start;
+}
+/* En el móvil, los dos números del pace arriba y el resumen debajo, a lo ancho. */
+@media (max-width: 560px) {
+  .health-head {
+    flex-wrap: wrap;
+  }
+  .health-head .health-summary {
+    order: 3;
+    flex-basis: 100%;
+  }
+  .health-head .xp-toggle {
+    margin-left: auto;
+  }
+}

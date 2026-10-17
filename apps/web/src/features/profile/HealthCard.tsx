@@ -191,15 +191,29 @@ function HealthBody({ health, startedAt, mine, onSaved }: HealthBodyProps) {
   function detailOf(): ReactNode {
     if (origin === null || declared === null) return null
 
+    const lost = steps.filter((step) => step.daysLeft < 0)
+    const upcoming = steps.filter((step) => step.daysLeft >= 0)
+
     return (
       <>
         <span className="eyebrow">{t('health.drops', { circle })}</span>
         <ol className="health-steps">
-          {steps.map((step, index) => (
+          {/* Los plazos que ya se pasaron, en una sola línea: lo que importa es lo que queda. */}
+          {lost.length > 0 && (
+            <li className="health-step lost-all">
+              <span className="health-badge">
+                <Icon name="reloj" size={16} />
+              </span>
+              <span>
+                {t('health.lostAll', { paces: lost.map((step) => step.pace).join(', ') })}
+              </span>
+            </li>
+          )}
+          {upcoming.map((step) => (
             <StepRow
               key={step.pace}
               step={step}
-              next={steps[index + 1]?.pace ?? null}
+              next={steps[steps.indexOf(step) + 1]?.pace ?? null}
               current={step.pace === current?.pace}
               day={day}
             />
@@ -232,7 +246,7 @@ function HealthBody({ health, startedAt, mine, onSaved }: HealthBodyProps) {
                 return (
                   <li key={date} className="chip">
                     {t('health.historyRow', { circle: done, date: day(date) })}
-                    <strong>{pace === null ? '—' : t('pace.option', { n: pace })}</strong>
+                    {pace !== null && <strong>{t('pace.option', { n: pace })}</strong>}
                   </li>
                 )
               })}
@@ -266,12 +280,12 @@ function HealthBody({ health, startedAt, mine, onSaved }: HealthBodyProps) {
           ) : (
             <button
               type="button"
-              className="pill"
+              className="pill health-update"
               onClick={() => {
                 setEditing(true)
               }}
             >
-              {t('health.update')}
+              <Icon name="lapiz" size={14} /> {t('health.update')}
             </button>
           ))}
       </>

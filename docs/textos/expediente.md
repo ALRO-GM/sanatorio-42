@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/expediente.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-119 textos. «—» es que falta la traducción: sale en español.
+120 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -71,7 +71,7 @@ Generado desde `apps/web/src/shared/i18n/textos/expediente.csv` con
 | `health.paceNowHint` | Explicación del pace de hoy | features/profile/HealthCard | El pace en el que te quedarías si pasaras de círculo hoy. Si vas por delante, es más rápido que el de tu intra. | The pace you would stay in if you passed the circle today. If you are ahead, it is faster than the one on your intra. | El pace en què et quedaries si passessis de cercle avui. Si vas per davant, és més ràpid que el de la teva intra. | Gaur zirkulua gaindituko bazenu geratuko zinatekeen pacea. Aurretik bazoaz, zure intrakoa baino azkarragoa da. |
 | `health.paceIntra` | El pace que dice la intra de 42 | features/profile/HealthCard | En tu intra | On your intra | A la teva intra | Zure intran |
 | `health.paceIntraHint` | Explicación del pace de la intra | features/profile/HealthCard | El pace de tu perfil de la intra (el que anotaste aquí). Es el oficial; el de hoy dice cómo vas. | The pace on your intra profile (the one you entered here). It is the official one; today’s shows how you are doing. | El pace que posa el teu perfil de la intra (el que vas anotar aquí). És l'oficial; el d'avui diu com vas. | Zure intrako profilak dioen pacea (hemen idatzi zenuena). Ofiziala da; gaurkoak nola zoazen dio. |
-| `health.summary` | Resumen: círculo, pace y fecha límite; {left} son días que quedan | features/profile/HealthCard | Estás en el círculo {circle} y vas a pace {pace}. Lo conservas si lo terminas antes del {date} (quedan {left} d). | You are in circle {circle} at pace {pace}. You keep it if you finish before {date} ({left} d left). | Ets al cercle {circle} i vas a pace {pace}. El conserves si l'acabes abans del {date} (queden {left} d). | {circle}. zirkuluan zaude eta {pace} pacean zoaz. Eutsiko diozu {date} baino lehen amaitzen baduzu ({left} egun geratzen dira). |
+| `health.summary` | Resumen: círculo, pace y fecha límite; {left} son días que quedan | features/profile/HealthCard | Estás en el círculo {circle} y vas a pace {pace}. Lo conservas si lo terminas antes del {date} (quedan {left} d). | You are in circle {circle} at pace {pace}. You keep it if you finish before {date} ({left} d left). | Ets al cercle {circle} i vas a pace {pace}. El conserves si l'acabes abans del {date} (queden {left} d). | {circle}. zirkuluan zaude eta {pace} pacean zoaz. Eutsiko diozu {date} baino lehen amaitzen baduzu ({left} egun geratzen dira). |
 | `health.summaryGone` | Se te ha pasado incluso el plazo más lento | features/profile/HealthCard | Se te ha pasado el plazo del pace más lento para el círculo {circle}. Habla con el staff cuanto antes. | The slowest pace deadline for circle {circle} has passed. Talk to the staff as soon as possible. | Se t'ha passat el termini del pace més lent per al cercle {circle}. Parla amb l'staff com més aviat millor. | {circle}. zirkulurako pace motelenaren epea pasa zaizu. Hitz egin staffarekin lehenbailehen. |
 | `health.finished` | Has terminado el common core | features/profile/HealthCard | Has completado el common core: el black hole ya no te alcanza. | You have completed the common core: the black hole can't reach you. | Has completat el common core: el black hole ja no t'atrapa. | Common corea osatu duzu: black holeak ez zaitu harrapatuko. |
 | `health.started` | Cuándo empezaste y cuántos días llevas | features/profile/HealthCard | Empezaste el {date} · día {days} del cursus | You started on {date} · day {days} of the cursus | Vas començar el {date} · dia {days} del cursus | {date} egunean hasi zinen · cursuseko {days}. eguna |
@@ -112,7 +112,7 @@ Generado desde `apps/web/src/shared/i18n/textos/expediente.csv` con
 | `pace.option` | Opción de pace | features/doubts/HolyGraph, features/profile/HealthCard, features/profile/RecordTour | Pace {n} | Pace {n} | Pace {n} | Pace {n} |
 | `pace.deadlines` | Lista de fechas límite por círculo | features/doubts/HolyGraph | Fecha límite de cada círculo | Deadline for each circle | Data límit de cada cercle | Zirkulu bakoitzaren epemuga |
 | `pace.done` | Círculo ya hecho | features/doubts/HolyGraph | hecho | done | fet | eginda |
-| `pace.left` | Días que quedan | features/doubts/HolyGraph, features/profile/HealthCard | quedan {n} d | {n} d left | queden {n} d | {n} egun geratzen dira |
+| `pace.left` | Días que quedan | features/doubts/HolyGraph, features/profile/HealthCard | quedan {n} d | {n} d left | queden {n} d | {n} egun geratzen dira |
 | `pace.late` | Días de retraso | features/doubts/HolyGraph, features/profile/HealthCard | {n} d de retraso | {n} d late | {n} d de retard | {n} eguneko atzerapena |
 | `health.toggle` | Botón que despliega plazos, black hole y calculadora | features/profile/HealthCard | Ver plazos, black hole y calculadora | Show deadlines, black hole and calculator | Veure terminis, black hole i calculadora | Ikusi epeak, black holea eta kalkulagailua |
 | `record.of` | Título del perfil de otra persona | features/profile/PublicRecord | Expediente de {login} | {login}'s record | Expedient de {login} | {login}(r)en espedientea |
@@ -126,3 +126,4 @@ Generado desde `apps/web/src/shared/i18n/textos/expediente.csv` con
 | `hours.to` | Fecha de fin del periodo | features/profile/HoursReport | Hasta | To | Fins a | Noiz arte |
 | `hours.download` | Botón para descargar las horas en una hoja de cálculo | features/profile/HoursReport | Descargar CSV | Download CSV | Baixa el CSV | Deskargatu CSVa |
 | `record.write` | Botón para escribir un mensaje a esa persona | features/admin/CheatsPanel, features/profile/PublicRecord | Escribir a {login} | Message {login} | Escriu a {login} | Idatzi {login} erabiltzaileari |
+| `health.lostAll` | Estado de salud: los paces cuyo plazo ya pasó, en una línea; {paces} es la lista | features/profile/HealthCard | Plazos ya pasados: pace {paces} | Deadlines already gone: pace {paces} | Terminis ja passats: pace {paces} | Iragandako epeak: {paces} pacea |
