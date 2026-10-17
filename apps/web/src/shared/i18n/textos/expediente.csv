@@ -1,0 +1,120 @@
+clave,contexto,es,en,ca,eu
+record.styleOf,Perfil ajeno: se ve con el estilo que eligió su dueño; {style} es el nombre del estilo,"Así lo quiere ver {login}: con su estilo, {style}.","This is how {login} wants it seen: in their style, {style}.","Així el vol ensenyar {login}: amb el seu estil, {style}.","Horrela nahi du {login}(e)k: bere estiloarekin, {style}."
+react.bug,Reacción tras una ayuda: te ayudó a encontrar un fallo,Cazabugs,Bug hunter,Caçabugs,Bug-ehiztaria
+react.code,Reacción tras una ayuda: revisó tu código,Revisó mi código,Reviewed my code,Va revisar el meu codi,Nire kodea berrikusi zuen
+react.concept,Reacción tras una ayuda: explicó bien un concepto,Explica genial,Great explainer,Explica genial,Bikain azaltzen du
+react.patient,Reacción tras una ayuda: tuvo mucha paciencia,Muy paciente,Very patient,Molt pacient,Oso pazientea
+react.cancel,Botón para no valorar todavía,Ahora no,Not now,Ara no,Orain ez
+xp.title,Título de la página de tu perfil,Tu expediente,Your record,El teu expedient,Zure espedientea
+xp.loading,Mientras carga tu perfil,Buscando tu expediente...,Fetching your record...,Buscant el teu expedient...,Zure espedientea bilatzen...
+xp.level,Etiqueta del nivel de XP,Nivel,Level,Nivell,Maila
+xp.howTo,Botón que despliega cómo se gana la XP y cuánta llevas,Cómo se gana XP y cuánta llevas,How XP is earned and how much you have,Com es guanya XP i quanta en portes,Nola irabazten den XP eta zenbat daramazun
+xp.gotXp,XP ganada con una actividad,{xp} XP,{xp} XP,{xp} XP,{xp} XP
+xp.gotOnce,Veces que hiciste una actividad (una),{n} vez,{n} time,{n} vegada,{n} aldiz
+xp.gotTimes,Veces que hiciste una actividad (varias),{n} veces,{n} times,{n} vegades,{n} aldiz
+xp.progress,XP actual y la que hace falta para el siguiente nivel,{xp} de {next} XP,{xp} of {next} XP,{xp} de {next} XP,{next} XPtik {xp}
+xp.max,XP actual cuando ya estás en el último nivel,{xp} XP · nivel máximo,{xp} XP · max level,{xp} XP · nivell màxim,{xp} XP · gehieneko maila
+xp.nextTitle,Siguiente título que desbloquearás,Siguiente: {title},Next: {title},Següent: {title},Hurrengoa: {title}
+xp.titles,Título de la lista de títulos para lucir en el perfil,Títulos para tu banner,Titles for your banner,Títols per al teu bàner,Zure bannerrerako tituluak
+xp.locked,Junto a un título bloqueado: el nivel que lo desbloquea,bloqueado · nivel {level},locked · level {level},bloquejat · nivell {level},blokeatuta · {level}. maila
+xp.achievements,Título de la tarjeta de logros,Logros,Achievements,Assoliments,Lorpenak
+xp.reactions,Título de la tarjeta de reacciones recibidas,Reacciones recibidas,Reactions received,Reaccions rebudes,Jasotako erreakzioak
+xp.lockedAt,Logro bloqueado: progreso actual y meta,Bloqueado: {progress} de {goal},Locked: {progress} of {goal},Bloquejat: {progress} de {goal},Blokeatuta: {goal}tik {progress}
+title.paciente,"Título del perfil, nivel inicial (juego con el tema del hospital)",Paciente constante,Steady patient,Pacient constant,Paziente iraunkorra
+title.interno,"Título del perfil, segundo nivel",Interno de planta,Ward intern,Intern de planta,Solairuko internoa
+title.residente,"Título del perfil, tercer nivel",Residente de guardia,Resident on duty,Resident de guàrdia,Guardiako egoiliarra
+title.especialista,"Título del perfil, cuarto nivel",Especialista,Specialist,Especialista,Espezialista
+title.jefe,"Título del perfil, quinto nivel",Jefe de planta,Head of ward,Cap de planta,Solairuko burua
+title.maestro,Título por corregir un proyecto diez veces o más,Maestro del código,Code master,Mestre del codi,Kodearen maisua
+title.hacker_etico,Título de Code Clicker: confesó una trampa,Hacker ético,Ethical hacker,Hacker ètic,Hacker etikoa
+title.hacker_poco_etico,Título de Code Clicker: pillado haciendo trampas,Hacker poco ético,Not so ethical hacker,Hacker poc ètic,Hacker ez oso etikoa
+title.hacker_cazado,Título de Code Clicker: pillado varias veces,Hacker desencriptado,Decrypted hacker,Hacker desencriptat,Hacker deszifratua
+ach.first_duty,Logro: ponerse de guardia la primera vez,Primera guardia,First shift,Primera guàrdia,Lehen guardia
+ach.first_duty.d,Descripción del logro de la primera guardia,Te pusiste de guardia,You went on duty,Et vas posar de guàrdia,Guardian jarri zinen
+ach.group_therapy,Logro: ir a sesiones de terapia,Terapia en grupo,Group therapy,Teràpia en grup,Talde-terapia
+ach.group_therapy.d,Descripción del logro de terapias; {goal} es la meta,{goal} sesiones asistidas,{goal} sessions attended,{goal} sessions assistides,{goal} saiotan izan zara
+ach.selfless_help,Logro: ayudar en proyectos que ya aprobaste,Ayuda desinteresada,Selfless help,Ajuda desinteressada,Eskuzabaltasun laguntza
+ach.selfless_help.d,Descripción del logro de ayudas; {goal} es la meta,{goal} ayudas como especialista,{goal} helps as a specialist,{goal} ajudes com a especialista,{goal} laguntza espezialista gisa
+ach.board_teacher,Logro: dar una pizarra,Tiza en mano,Chalk in hand,Guix a la mà,Klariona eskuan
+ach.board_teacher.d,Descripción del logro de dar una pizarra,Impartiste una pizarra,You ran a whiteboard,Vas impartir una pissarra,Arbel bat eman zenuen
+ach.campus_guardian,Logro: muchas ayudas en total,Guardián del campus,Campus guardian,Guardià del campus,Campuseko zaindaria
+ach.campus_guardian.d,Descripción del logro de ayudas totales; {goal} es la meta,{goal} ayudas en total,{goal} helps in total,{goal} ajudes en total,{goal} laguntza guztira
+rank.title,Tarjeta de clasificación por XP de ayudar,Quién ayuda más,Who helps the most,Qui ajuda més,Nork laguntzen du gehien
+rank.period,Selector del periodo de la clasificación,Periodo,Period,Període,Aldia
+rank.month,Periodo: este mes,Este mes,This month,Aquest mes,Hilabete honetan
+rank.all,Periodo: desde el principio,Desde siempre,All time,Des de sempre,Betidanik
+rank.hint,Explicación de qué cuenta en la clasificación,"Cuenta la XP de ayudar: sesiones de ayuda, dudas resueltas, guías y pizarras.","Counts XP from helping: help sessions, solved questions, guides and whiteboards.","Compta l'XP d'ajudar: sessions d'ajuda, dubtes resolts, guies i pissarres.","Laguntzearen XPa zenbatzen da: laguntza-saioak, ebatzitako zalantzak, gidak eta arbelak."
+rank.empty,Clasificación vacía,Todavía no hay nadie. El primer puesto está libre.,Nobody yet. First place is free.,Encara no hi ha ningú. El primer lloc és lliure.,Oraindik ez dago inor. Lehen postua libre dago.
+rank.notYet,No sales en la clasificación todavía,Aún no apareces: ayuda a alguien y entrarás.,You are not on it yet: help someone and you will be.,Encara no hi apareixes: ajuda algú i hi entraràs.,Oraindik ez zara agertzen: lagundu norbaiti eta sartuko zara.
+rank.place,Tu puesto en la clasificación,Puesto {n},Place {n},Lloc {n},{n}. postua
+rank.xp,XP de una fila de la clasificación,{xp} XP,{xp} XP,{xp} XP,{xp} XP
+xp.rule.specialist_help,Cuánta XP da ayudar en un proyecto que ya aprobaste,"+{xp} XP por una sesión de ayuda, con sus dos códigos, en un proyecto que ya aprobaste","+{xp} XP for a help session, with both codes, on a project you passed","+{xp} XP per una sessió d'ajuda, amb els seus dos codis, en un projecte que ja has aprovat","+{xp} XP laguntza-saio batengatik, bere bi kodeekin, dagoeneko gainditu duzun proiektu batean"
+xp.rule.peer_help,Cuánta XP da ayudar en otro proyecto,"+{xp} XP por una sesión de ayuda, con sus dos códigos, en cualquier otro proyecto","+{xp} XP for a help session, with both codes, on any other project","+{xp} XP per una sessió d'ajuda, amb els seus dos codis, en qualsevol altre projecte","+{xp} XP laguntza-saio batengatik, bere bi kodeekin, beste edozein proiektutan"
+xp.rule.doubt_solved,Cuánta XP da resolver una duda del tablón,+{xp} XP si tu respuesta resuelve una duda,+{xp} XP when your answer solves a question,+{xp} XP si la teva resposta resol un dubte,+{xp} XP zure erantzunak zalantza bat ebazten badu
+xp.rule.guide_proposal,Cuánta XP da que acepten tu cambio en una guía,+{xp} XP si te validan un cambio en una guía,+{xp} XP when a guide change of yours is validated,+{xp} XP si et validen un canvi en una guia,+{xp} XP gida batean aldaketa bat balidatzen badizute
+xp.rule.guide_review,Cuánta XP da revisar el cambio de otra persona en una guía,+{xp} XP por validar el cambio de otra persona,+{xp} XP for validating someone else's change,+{xp} XP per validar el canvi d'una altra persona,+{xp} XP beste baten aldaketa balidatzeagatik
+xp.rule.board_host,Cuánta XP da dar una pizarra,+{xp} XP por impartir una pizarra en la que alguien valide los dos códigos,+{xp} XP for hosting a whiteboard where someone validates both codes,+{xp} XP per impartir una pissarra on algú validi els dos codis,+{xp} XP norbaitek bi kodeak balidatzen dituen arbel bat emateagatik
+xp.rule.therapy_session,Cuánta XP da cada media hora en una terapia,+{xp} XP por cada media hora en tu puesto de una terapia,+{xp} XP for each half hour at your seat in a therapy group,+{xp} XP per cada mitja hora al teu lloc d'una teràpia,+{xp} XP terapia bateko zure postuan egindako ordu erdi bakoitzeko
+health.title,Tarjeta del estado de salud: pace y black hole (plazos de 42),Estado de salud,Health status,Estat de salut,Osasun-egoera
+health.loading,Mientras carga el estado de salud (broma de hospital),Tomando las constantes…,Taking your vitals…,Prenent les constants…,Bizi-konstanteak hartzen…
+health.unknown,No se sabe cuándo empezaste el cursus,"42 no nos da tu fecha de inicio en el 42cursus. Si acabas de entrar, recarga dentro de un momento.","42 does not give us your 42cursus start date. If you just logged in, reload in a moment.","42 no ens dona la teva data d'inici al 42cursus. Si acabes d'entrar, recarrega d'aquí a un moment.","42k ez digu ematen 42cursusean hasi zinen data. Sartu berri bazara, kargatu berriro pixka bat barru."
+health.pace,Etiqueta del pace (ritmo de avance en 42),Pace,Pace,Pace,Pace
+health.paceNow,El pace que tendrías si pasaras de círculo hoy,Pace hoy,Pace today,Pace avui,Gaurko pacea
+health.paceNowHint,Explicación del pace de hoy,"El pace en el que te quedarías si pasaras de círculo hoy. Si vas por delante, es más rápido que el de tu intra.","The pace you would stay in if you passed the circle today. If you are ahead, it is faster than the one on your intra.","El pace en què et quedaries si passessis de cercle avui. Si vas per davant, és més ràpid que el de la teva intra.","Gaur zirkulua gaindituko bazenu geratuko zinatekeen pacea. Aurretik bazoaz, zure intrakoa baino azkarragoa da."
+health.paceIntra,El pace que dice la intra de 42,En tu intra,On your intra,A la teva intra,Zure intran
+health.paceIntraHint,Explicación del pace de la intra,El pace de tu perfil de la intra (el que anotaste aquí). Es el oficial; el de hoy dice cómo vas.,The pace on your intra profile (the one you entered here). It is the official one; today’s shows how you are doing.,El pace que posa el teu perfil de la intra (el que vas anotar aquí). És l'oficial; el d'avui diu com vas.,Zure intrako profilak dioen pacea (hemen idatzi zenuena). Ofiziala da; gaurkoak nola zoazen dio.
+health.summary,"Resumen: círculo, pace y fecha límite; {left} son días que quedan",Estás en el círculo {circle} y vas a pace {pace}. Lo conservas si lo terminas antes del {date} (quedan {left} d).,You are in circle {circle} at pace {pace}. You keep it if you finish before {date} ({left} d left).,Ets al cercle {circle} i vas a pace {pace}. El conserves si l'acabes abans del {date} (queden {left} d).,{circle}. zirkuluan zaude eta {pace} pacean zoaz. Eutsiko diozu {date} baino lehen amaitzen baduzu ({left} egun geratzen dira).
+health.summaryGone,Se te ha pasado incluso el plazo más lento,Se te ha pasado el plazo del pace más lento para el círculo {circle}. Habla con el staff cuanto antes.,The slowest pace deadline for circle {circle} has passed. Talk to the staff as soon as possible.,Se t'ha passat el termini del pace més lent per al cercle {circle}. Parla amb l'staff com més aviat millor.,{circle}. zirkulurako pace motelenaren epea pasa zaizu. Hitz egin staffarekin lehenbailehen.
+health.finished,Has terminado el common core,Has completado el common core: el black hole ya no te alcanza.,You have completed the common core: the black hole can't reach you.,Has completat el common core: el black hole ja no t'atrapa.,Common corea osatu duzu: black holeak ez zaitu harrapatuko.
+health.started,Cuándo empezaste y cuántos días llevas,Empezaste el {date} · día {days} del cursus,You started on {date} · day {days} of the cursus,Vas començar el {date} · dia {days} del cursus,{date} egunean hasi zinen · cursuseko {days}. eguna
+health.drops,Encabezado de la tabla de lo que pasa si no terminas el círculo,Si no terminas el círculo {circle}…,If you don't finish circle {circle}…,Si no acabes el cercle {circle}…,{circle}. zirkulua amaitzen ez baduzu…
+health.stepUntil,Fila de la tabla: plazo hasta una fecha,Hasta el {date},Until {date},Fins al {date},{date} arte
+health.stepLost,Fila de la tabla: plazo ya pasado,Se pasó el {date},Passed on {date},Va passar el {date},{date} egunean pasa zen
+health.thenDrop,Fila de la tabla: bajas a un pace más lento,después caes a pace {pace},then you drop to pace {pace},després caus a pace {pace},gero {pace} pacera erortzen zara
+health.thenHole,Fila de la tabla: el siguiente paso es el black hole,"después, black hole","then, black hole","després, black hole","gero, black hole"
+health.lost,Etiqueta de un plazo ya perdido,perdido,lost,perdut,galduta
+health.hole,Fecha del black hole,Black hole el {date},Black hole on {date},Black hole el {date},Black hole {date} egunean
+health.holeTable,Qué pasa en el black hole,te absorbe y sales del cursus,it absorbs you and you leave the cursus,t'absorbeix i surts del cursus,xurgatu egiten zaitu eta cursusetik ateratzen zara
+health.history,Lista de círculos completados,Círculos completados,Completed circles,Cercles completats,Osatutako zirkuluak
+health.historyRow,Círculo completado y su fecha,Círculo {circle} · {date},Circle {circle} · {date},Cercle {circle} · {date},{circle}. zirkulua · {date}
+health.calc,Calculadora: qué pace te queda si terminas un círculo un día,Calculadora: si termino…,Calculator: if I finish…,Calculadora: si acabo…,Kalkulagailua: amaitzen badut…
+health.calcCircle,Calculadora: elegir círculo,el círculo,circle,el cercle,zirkulua
+health.calcDate,Calculadora: elegir fecha,el día,on,el dia,eguna
+health.circle,Opción de círculo,Círculo {n},Circle {n},Cercle {n},{n}. zirkulua
+health.calcPace,Calculadora: el pace resultante,Te quedas en pace {pace}.,You stay at pace {pace}.,Et quedes a pace {pace}.,{pace} pacean geratzen zara.
+health.calcMargin,Calculadora: días de margen hasta el plazo,Con {n} d de margen (su plazo acaba el {date}).,{n} d to spare (its deadline ends on {date}).,Amb {n} d de marge (el seu termini acaba el {date}).,{n} eguneko tartearekin (bere epea {date} egunean amaitzen da).
+health.calcFaster,Calculadora: cuánto llegas tarde para un pace más rápido,Para pace {pace} llegas {n} d tarde.,For pace {pace} you are {n} d late.,Per a pace {pace} arribes {n} d tard.,{pace} pacerako {n} egun berandu iristen zara.
+health.calcSlowest,Calculadora: ya es el pace más lento,Es el más lento: lo siguiente es el black hole.,It is the slowest one: next comes the black hole.,És el més lent: el següent és el black hole.,Motelena da: hurrengoa black holea da.
+health.calcGone,Calculadora: llegarías al black hole,Black hole: el último plazo del círculo {circle} acaba el {date}.,Black hole: the last deadline for circle {circle} ends on {date}.,Black hole: l'últim termini del cercle {circle} acaba el {date}.,Black hole: {circle}. zirkuluaren azken epea {date} egunean amaitzen da.
+health.source,De dónde salen las cuentas: lo que anotaste y cuándo,Calculado con la tabla del pace system a partir de lo que anotaste el {updated}: pace {pace} y plazo del círculo {circle} el {deadline}.,Worked out with the pace system table from what you entered on {updated}: pace {pace} and circle {circle} deadline on {deadline}.,Calculat amb la taula del pace system a partir del que vas anotar el {updated}: pace {pace} i termini del cercle {circle} el {deadline}.,"Pace systemaren taularekin kalkulatuta, {updated} egunean idatzi zenuenetik abiatuta: {pace} pacea eta {circle}. zirkuluaren epea {deadline}."
+health.bonus,Días de bonus que suma a tu fecha de inicio,"Incluye {n} d de bonus sobre tu fecha de inicio. Si 42 te da más, actualiza el plazo.","It includes {n} bonus d on top of your start date. If 42 gives you more, update the deadline.","Inclou {n} d de bonus sobre la teva data d'inici. Si 42 te'n dona més, actualitza el termini.","{n} bonus-egun barne ditu zure hasiera-dataren gainean. 42k gehiago ematen badizu, eguneratu epea."
+health.update,Botón para cambiar el pace y el plazo anotados,Actualizar pace y plazo,Update pace and deadline,Actualitza pace i termini,Eguneratu pacea eta epea
+health.ask,Pregunta para animar a anotar el pace,¿Quieres ver todas tus fechas del pace system y tu black hole?,Do you want all your pace system dates and your black hole?,Vols veure totes les teves dates del pace system i el teu black hole?,Pace systemaren zure data guztiak eta zure black holea ikusi nahi dituzu?
+health.askYes,Botón para anotar el pace,Anotar mi pace,Enter my pace,Anota el meu pace,Idatzi nire pacea
+health.askNo,Botón para dejarlo para luego,Ahora no,Not now,Ara no,Orain ez
+health.skipped,Aviso: sin pace no hay fechas,Sin tu pace y tu Milestone Deadline no se pueden calcular tus fechas.,Without your pace and Milestone Deadline your dates cannot be worked out.,Sense el teu pace i el teu Milestone Deadline no es poden calcular les teves dates.,Zure pacea eta Milestone Deadline gabe ezin dira zure datak kalkulatu.
+health.undeclared,Perfil ajeno: esa persona no ha anotado su pace,"Está en el círculo {circle}. Todavía no ha anotado su pace, así que no hay fechas que enseñar.","They are in circle {circle}. They have not entered their pace yet, so there are no dates to show.","És al cercle {circle}. Encara no ha anotat el seu pace, així que no hi ha dates per ensenyar.","{circle}. zirkuluan dago. Oraindik ez du bere pacea idatzi, beraz ez dago erakusteko datarik."
+health.formPace,Formulario: tu pace,Tu pace,Your pace,El teu pace,Zure pacea
+health.formDeadline,"Formulario: fecha límite del círculo, como la llama 42",Milestone Deadline (círculo {circle}),Milestone Deadline (circle {circle}),Milestone Deadline (cercle {circle}),Milestone Deadline ({circle}. zirkulua)
+health.formSave,Formulario: guardar y calcular,Guardar y calcular,Save and calculate,Desa i calcula,Gorde eta kalkulatu
+health.formCancel,Formulario: cancelar,Cancelar,Cancel,Cancel·la,Utzi
+pace.label,Selector de tu pace,Tu pace,Your pace,El teu pace,Zure pacea
+pace.none,Sin pace elegido,Sin elegir,Not set,Sense triar,Aukeratu gabe
+pace.needsRef,Aviso: hay que anotar el pace en el expediente,Anota tu pace y tu Milestone Deadline en el estado de salud del expediente para ver los plazos.,Enter your pace and Milestone Deadline in the health status of your record to see the deadlines.,Anota el teu pace i el teu Milestone Deadline a l'estat de salut de l'expedient per veure els terminis.,Idatzi zure pacea eta Milestone Deadline espedienteko osasun-egoeran epeak ikusteko.
+pace.option,Opción de pace,Pace {n},Pace {n},Pace {n},Pace {n}
+pace.deadlines,Lista de fechas límite por círculo,Fecha límite de cada círculo,Deadline for each circle,Data límit de cada cercle,Zirkulu bakoitzaren epemuga
+pace.done,Círculo ya hecho,hecho,done,fet,eginda
+pace.left,Días que quedan,quedan {n} d,{n} d left,queden {n} d,{n} egun geratzen dira
+pace.late,Días de retraso,{n} d de retraso,{n} d late,{n} d de retard,{n} eguneko atzerapena
+health.toggle,"Botón que despliega plazos, black hole y calculadora","Ver plazos, black hole y calculadora","Show deadlines, black hole and calculator","Veure terminis, black hole i calculadora","Ikusi epeak, black holea eta kalkulagailua"
+record.of,Título del perfil de otra persona,Expediente de {login},{login}'s record,Expedient de {login},{login}(r)en espedientea
+record.backToMine,Enlace para volver a tu perfil,← Mi expediente,← My record,← El meu expedient,← Nire espedientea
+record.intra,Enlace al perfil de esa persona en la intra de 42,Perfil en 42 ↗,42 profile ↗,Perfil a 42 ↗,Profila 42n ↗
+record.open,Nombre accesible del enlace al perfil de alguien,Ver el expediente de {login},Open {login}'s record,Veure l'expedient de {login},Ikusi {login}(r)en espedientea
+hours.title,Tarjeta de horas validadas (para enseñar al staff),Horas validadas,Validated hours,Hores validades,Balidatutako orduak
+hours.hint,Explicación de las horas validadas y del código de autenticidad,"Tu tiempo en pizarras y sesiones de ayuda, validado con los códigos de inicio y fin. Descárgalo para enseñárselo al staff: el nombre del fichero lleva un código de cuatro letras con el que pueden comprobar que es auténtico.","Your time in whiteboards and help sessions, validated with the start and end codes. Download it if you want to show it to the staff: the file name ends in a four-character code the staff can use to check it is genuine.","El teu temps en pissarres i sessions d'ajuda, validat amb els codis d'inici i fi. Baixa-te'l si el vols ensenyar a l'staff: el nom del fitxer acaba en un codi de quatre caràcters amb què l'staff pot comprovar que és autèntic.","Arbeletan eta laguntza-saioetan emandako denbora, hasierako eta amaierako kodeekin balidatuta. Deskargatu staffari erakutsi nahi badiozu: fitxategiaren izena lau karaktereko kode batekin amaitzen da, eta harekin staffak benetakoa dela egiazta dezake."
+hours.hintAll,Panel: horas de todo el mundo,"El tiempo de todo el mundo en pizarras y sesiones de ayuda, validado con los códigos de inicio y fin.","Everyone’s time in whiteboards and help sessions, validated with the start and end codes.","El temps de tothom en pissarres i sessions d'ajuda, validat amb els codis d'inici i fi.","Denek arbeletan eta laguntza-saioetan emandako denbora, hasierako eta amaierako kodeekin balidatuta."
+hours.from,Fecha de inicio del periodo,Desde,From,Des de,Noiztik
+hours.to,Fecha de fin del periodo,Hasta,To,Fins a,Noiz arte
+hours.download,Botón para descargar las horas en una hoja de cálculo,Descargar CSV,Download CSV,Baixa el CSV,Deskargatu CSVa
+record.write,Botón para escribir un mensaje a esa persona,Escribir a {login},Message {login},Escriu a {login},Idatzi {login} erabiltzaileari

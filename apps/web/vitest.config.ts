@@ -1,5 +1,7 @@
 import { defineConfig } from 'vitest/config'
 
+import { textosPlugin } from './tools/textos.ts'
+
 /**
  * Tests de la web. Las funciones sueltas corren en Node; las pantallas
  * (`tests/ui`), en un navegador de mentira (jsdom) y contra la API de mentira,
@@ -11,6 +13,7 @@ import { defineConfig } from 'vitest/config'
  */
 export default defineConfig({
   esbuild: { jsx: 'automatic' },
+  plugins: [textosPlugin()],
   test: {
     environmentMatchGlobs: [['tests/ui/**', 'jsdom']],
     setupFiles: ['tests/ui/setup.ts'],

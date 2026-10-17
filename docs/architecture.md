@@ -211,7 +211,8 @@ Por ejemplo, "avisos":
    a `modules`.
 5. **Web**: métodos nuevos en `shared/api/types.ts`, `client.ts` y `mock/`;
    pantalla en `features/notices/`; si es una sección, apuntarla en
-   `app/sections.ts` y pintarla en `app/SectionView.tsx`; textos en `es.ts` y `en.ts`.
+   `app/sections.ts` y pintarla en `app/SectionView.tsx`; textos en su tabla de
+   `shared/i18n/textos/` (`docs/textos.md`).
 6. **Tests** en `apps/api/tests/`, y documentar las rutas en `docs/api.md`.
 
 Ningún otro módulo se toca.

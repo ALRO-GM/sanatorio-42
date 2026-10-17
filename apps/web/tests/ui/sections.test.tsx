@@ -2,7 +2,7 @@ import { cleanup, screen, waitFor } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { SECTIONS } from '../../src/app/sections'
-import { es } from '../../src/shared/i18n/es'
+import es from 'virtual:textos/es'
 import { openApp } from './render'
 
 afterEach(() => {

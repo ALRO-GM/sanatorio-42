@@ -5,7 +5,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { es } from '../src/shared/i18n/es'
+import es from 'virtual:textos/es'
 import { EVENT_HORIZON_DAYS, lastDay, untilText } from '../src/shared/until'
 
 const MINUTE = 60_000

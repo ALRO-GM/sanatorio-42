@@ -17,3 +17,10 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv
 }
+
+// Los textos de cada idioma, sacados de las tablas de `src/shared/i18n/textos`
+// por el plugin de `tools/textos.ts`.
+declare module 'virtual:textos/*' {
+  const dictionary: Record<string, string>
+  export default dictionary
+}

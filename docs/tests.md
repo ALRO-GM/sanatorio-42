@@ -65,7 +65,7 @@ Y además, según lo que sea:
 | Pantallas y recorridos de la web | `apps/web/tests/ui/*.test.tsx` | jsdom, Testing Library y la API de mentira |
 
 Los tests de pantallas buscan como lo haría una persona: por rol y nombre
-accesible (`getByRole('button', { name: … })`), con los textos de `es.ts`, nunca
+accesible (`getByRole('button', { name: … })`), con los textos de las tablas (`virtual:textos/es`), nunca
 por clases CSS. Si algo no se puede encontrar así, es un fallo de
 accesibilidad y se arregla en la web (así salió el `role="switch"` del
 interruptor de guardia).

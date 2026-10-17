@@ -1,0 +1,94 @@
+# Textos e idiomas
+
+Todos los textos de la web están en **tablas**, una por tema, en
+`apps/web/src/shared/i18n/textos/*.csv`. Son la única fuente: el código no lleva
+texto escrito, solo claves (`t('cal.join')`). Para cambiar o traducir un texto
+se edita la tabla y nada más; la web lo toma de ahí.
+
+La versión para leer cómodamente, con dónde se usa cada clave, está en
+[docs/textos/](textos/README.md). Se genera sola: no se edita a mano.
+
+## Cómo es una tabla
+
+Un CSV normal, que se abre con cualquier hoja de cálculo (LibreOffice,
+Google Sheets, Excel) o con un editor de texto:
+
+| clave | contexto | es | en | ca | eu |
+| --- | --- | --- | --- | --- | --- |
+| `cal.join` | Botón para apuntarse | Apuntarme | Sign me up | Apunta-m'hi | Eman izena |
+
+- **clave**: `tema.cosa`. No se cambia nunca sin cambiar también el código.
+- **contexto**: qué es y dónde sale, en pocas palabras. Obligatorio: es lo que
+  necesita quien traduce para no equivocarse.
+- **es**: el español, idioma de referencia. Obligatorio.
+- **en, ca, eu**: las traducciones. Si una celda se deja vacía, ese idioma
+  enseña el español. El inglés es obligatorio salvo en el panel de gestión.
+- `{login}`, `{n}`…: huecos que rellena la web. Cada traducción tiene que llevar
+  los mismos huecos que el español (se comprueba).
+- Las listas separadas por comas (`cal.months`) llevan los mismos elementos en
+  todos los idiomas.
+
+## Las tablas
+
+| Tabla | Qué textos |
+| --- | --- |
+| `comun` | Navegación, cabecera, pie, entrada, bienvenida, errores, personalizar |
+| `expediente` | Perfil: XP, títulos, logros, clasificación, estado de salud, horas |
+| `sala-de-espera` | Elegir proyecto, quién ayuda, interruptor de guardia |
+| `guardia` | Tu guardia, reservas de ayuda, valoraciones, preevaluaciones |
+| `tablon` | Grafo de proyectos, guías, dudas y respuestas |
+| `terapia` | Grupos de terapia |
+| `pizarras` | Calendario de pizarras |
+| `calendario` | Tu calendario, avisos de eventos, chats y códigos de asistencia |
+| `buzon` | Avisos, conversaciones, incidencias y denuncias |
+| `red` | Red de correcciones |
+| `clusters` | Mapa de los clústeres |
+| `examenes` | Exámenes en vivo y estadísticas |
+| `demos` | Frases de las demostraciones animadas |
+| `gestion` | Panel de gestión y página del staff (en español a propósito) |
+| `code-clicker` | Lo del juego que sale fuera del juego |
+
+## Regla estricta
+
+**Cada cambio en un texto de la web pasa por las tablas**, sin excepción:
+
+1. Un texto nuevo es una fila nueva, con su contexto y, como mínimo, el español
+   y el inglés. Si se sabe, también catalán y euskera.
+2. Cambiar un texto es cambiar su celda. Si cambia el sentido (no solo la
+   forma), se cambian también las traducciones o se vacían para que salga el
+   español hasta que alguien las haga.
+3. Una clave que el código deja de usar se borra de la tabla.
+4. Después de tocar una tabla: `npm run textos -- --write` para poner al día
+   `docs/textos/`, y `npm run check`.
+
+`npm run textos` (dentro de `npm run check` y de la CI) falla si:
+
+- el código pide una clave que no está en ninguna tabla;
+- hay claves en las tablas que el código no usa;
+- una clave se repite, no tiene contexto o no tiene español;
+- falta el inglés fuera del panel de gestión;
+- una traducción no conserva los huecos del español;
+- `docs/textos/` no está al día con las tablas.
+
+## Cómo se escriben
+
+- Frases breves, en segunda persona y sin género cuando se puede («quien se ha
+  apuntado», no «los apuntados»).
+- Una idea por frase. Si una explicación necesita más de dos frases, sobra algo
+  o tiene que ser una demostración animada.
+- Las palabras de la casa, siempre iguales: de guardia, fuera de turno,
+  especialista, paciente como tú, sala de espera, terapia de grupo, pizarra,
+  clústeres, pace, black hole.
+- Botones con verbo («Apuntarme», «Guardar cambios»), no con sustantivo.
+
+## Cómo llega a la web
+
+El plugin de `apps/web/tools/textos.ts` convierte las tablas en un módulo por
+idioma (`virtual:textos/es`, `virtual:textos/en`…). El español viaja con la web;
+los demás se descargan solo al elegirlos, unos 20 KB comprimidos cada uno. Al
+editar una tabla con `npm run dev` abierto, la web se recarga con el texto
+nuevo.
+
+Añadir un idioma: una columna nueva en todas las tablas, su código en
+`LANG_CODES` (`tools/textos.ts`), su entrada en `LANGS`
+(`src/shared/i18n/index.tsx`) y en el tipo `Lang` de `packages/contracts`.

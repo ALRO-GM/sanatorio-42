@@ -2,7 +2,7 @@ import { act, fireEvent, render, screen } from '@testing-library/react'
 
 import { App } from '../../src/app/App'
 import { I18nProvider } from '../../src/shared/i18n'
-import { es } from '../../src/shared/i18n/es'
+import es from 'virtual:textos/es'
 
 /** Deja pasar el tiempo para que la API de mentira conteste y se pinte. */
 export async function settle(ms = 600): Promise<void> {

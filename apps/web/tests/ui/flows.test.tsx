@@ -2,8 +2,8 @@ import { cleanup, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it } from 'vitest'
 
-import { en } from '../../src/shared/i18n/en'
-import { es } from '../../src/shared/i18n/es'
+import en from 'virtual:textos/en'
+import es from 'virtual:textos/es'
 import { must } from './must'
 import { openApp, settle } from './render'
 

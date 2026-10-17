@@ -1,0 +1,169 @@
+clave,contexto,es,en,ca,eu
+app.loading,Mensaje mientras carga algo,Cargando...,Loading...,Carregant...,Kargatzen...
+app.footer,"Pie de página, al final de todas las pantallas",Sanatorio 42 · Hecho en la Hackathon de 42 Madrid,Sanatorio 42 · Made at the 42 Madrid Hackathon,Sanatorio 42 · Fet a la Hackathon de 42 Madrid,Sanatorio 42 · 42 Madrilgo Hackathonean egina
+app.serverDown,Pantalla de error cuando la API no responde,No se puede conectar con el servidor. Puede estar arrancando o caído.,Can't reach the server. It may be starting up or down.,No es pot connectar amb el servidor. Pot ser que estigui arrencant o que hagi caigut.,Ezin da zerbitzariarekin konektatu. Baliteke abiarazten egotea edo erori izana.
+app.retry,Botón para volver a intentar conectar,Volver a probar,Try again,Torna-ho a provar,Saiatu berriro
+app.logout,Opción del menú de la cuenta para cerrar sesión,Salir,Log out,Surt,Irten
+app.back,Botón para volver de la lista de personas a la elección de proyecto,Volver a la sala de espera,Back to the waiting room,Torna a la sala d'espera,Itzuli itxarongelara
+nav.label,Nombre accesible de la barra de pestañas,Secciones,Sections,Seccions,Atalak
+nav.consulta,"Pestaña: sala de espera, donde se busca quién ayuda con un proyecto",Sala de espera,Waiting room,Sala d'espera,Itxarongela
+nav.terapia,Pestaña: grupos de terapia (quedar para hacer un proyecto juntos),Terapia,Therapy,Teràpia,Terapia
+nav.tablon,Pestaña: tablón de dudas por proyecto,Tablón,Questions,Tauler,Taula
+nav.pizarras,Pestaña: pizarras (charlas abiertas para explicar un tema),Pizarras,Whiteboards,Pissarres,Arbelak
+nav.expediente,"Pestaña: tu perfil, con nivel, logros y estado",Expediente,Record,Expedient,Espedientea
+layout.recordStyle,Personalizar: elegir con qué estilo visual ven tu perfil los demás,Con qué estilo ven tu expediente los demás,Which style others see your record in,Amb quin estil veuen els altres el teu expedient,Zein estilorekin ikusten duten besteek zure espedientea
+layout.recordStyle.none,Opción: cada visitante ve tu perfil con su propio estilo,"Con el suyo, cada cual","Their own, each person","Amb el seu, cadascú",Bakoitzak berearekin
+layout.recordStyle.yours,Etiqueta junto a un estilo exclusivo que solo tiene esa persona,solo tuyo,yours only,només teu,zuretzat bakarrik
+nav.privacidad,Pestaña oculta: página de privacidad y condiciones,Privacidad,Privacy,Privacitat,Pribatutasuna
+legal.link,Enlace del pie a la página de privacidad,Privacidad y condiciones,Privacy and terms,Privacitat i condicions,Pribatutasuna eta baldintzak
+legal.untranslated,Aviso: el texto legal no está en el idioma elegido,Este texto solo está en castellano y en inglés.,This text is only available in Spanish and English.,Aquest text només és en castellà i en anglès.,Testu hau gaztelaniaz eta ingelesez bakarrik dago.
+legal.notAccepted,Estado: no has aceptado la versión vigente de las condiciones,Aún no has aceptado esta versión.,You have not accepted this version yet.,Encara no has acceptat aquesta versió.,Oraindik ez duzu bertsio hau onartu.
+legal.acceptedOn,Estado: fecha en que aceptaste las condiciones,Aceptaste esta versión el {date}.,You accepted this version on {date}.,Vas acceptar aquesta versió el {date}.,Bertsio hau {date}(e)an onartu zenuen.
+legal.export,Botón para descargar todos tus datos en un fichero,Descargar mis datos,Download my data,Descarrega les meves dades,Deskargatu nire datuak
+legal.gateKind,Encabezado de la ventana obligatoria de condiciones,Antes de seguir,Before you go on,Abans de continuar,Jarraitu aurretik
+legal.readAll,Enlace para abrir el texto legal completo,Leer el texto entero,Read the full text,Llegeix el text sencer,Irakurri testu osoa
+legal.accept,Botón para aceptar las condiciones y seguir,Lo he leído y lo acepto,I have read it and I accept,L'he llegit i l'accepto,Irakurri dut eta onartzen dut
+legal.back,Botón para volver a la pantalla de entrada,Volver a la entrada,Back to sign in,Torna a l'entrada,Itzuli sarrerara
+nav.openRecord,Nombre accesible del logo: lleva a tu perfil,Sanatorio 42: ir a tu expediente,Sanatorio 42: go to your record,Sanatorio 42: ves al teu expedient,Sanatorio 42: joan zure espedientera
+menu.open,Nombre accesible del botón del menú de la cuenta,"Tu cuenta, {login}","Your account, {login}","El teu compte, {login}","Zure kontua, {login}"
+menu.record,Opción del menú de la cuenta: ir a tu perfil,Mi expediente,My record,El meu expedient,Nire espedientea
+menu.duty,Opción del menú de la cuenta: ir a tu guardia,Mi guardia,My duty,La meva guàrdia,Nire guardia
+login.pitch,Pantalla de entrada: frase que explica para qué sirve la web,"¿Te has atascado? Pasa a consulta: siempre hay alguien de guardia. Y si hoy puedes, ponte de guardia y echa una mano.","Stuck? Come in for a consultation: there's always someone on duty. And when it's your turn, go on duty and lend a hand.","T'has encallat? Passa a consulta: aquí sempre hi ha algú de guàrdia. I si avui et toca a tu, posa't de guàrdia i dona un cop de mà.","Trabatuta zaude? Etorri kontsultara: hemen beti dago norbait guardian. Eta gaur zuri tokatzen bazaizu, jarri guardian eta lagundu."
+login.button,Pantalla de entrada: botón para iniciar sesión con la cuenta de 42,Entrar con 42,Sign in with 42,Entra amb 42,Sartu 42rekin
+login.how,Pantalla de entrada: título de los tres pasos,Cómo funciona,How it works,Com funciona,Nola dabil
+login.step1,Pantalla de entrada: paso 1,1. Cuéntanos qué te duele,1. Tell us where it hurts,1. Explica'ns què et fa mal,1. Esan zer duzun minduta
+login.step1d,Pantalla de entrada: detalle del paso 1,Elige tu proyecto,Pick your project,Tria el teu projecte,Aukeratu zure proiektua
+login.step2,Pantalla de entrada: paso 2,2. Mira quién está de guardia,2. See who's on duty,2. Mira qui està de guàrdia,2. Begiratu nor dagoen guardian
+login.step2d,Pantalla de entrada: detalle del paso 2,Gente disponible y su puesto,Available peers and their seat,Gent disponible i el seu lloc,Jende erabilgarria eta haien postua
+login.step3,Pantalla de entrada: paso 3,3. Ve a su puesto y pide ayuda,3. Walk over and ask,3. Ves al seu lloc i demana ajuda,3. Joan haren postura eta eskatu laguntza
+login.step3d,Pantalla de entrada: detalle del paso 3,Nada como explicarlo cara a cara,Nothing beats explaining it face to face,Res com explicar-ho cara a cara,Aurrez aurre azaltzea bezalakorik ez dago
+login.cancelled,Aviso al volver de 42 sin haber dado permiso,Has cancelado el inicio de sesión. Puedes probar cuando quieras.,You cancelled the sign-in. Try again whenever you like.,Has cancel·lat l'inici de sessió. Pots provar-ho quan vulguis.,Saio-hasiera bertan behera utzi duzu. Nahi duzunean saia zaitezke.
+login.failed,Aviso cuando falla el inicio de sesión; {code} es el código de error,El inicio de sesión con 42 ha fallado ({code}). Prueba otra vez.,Signing in with 42 failed ({code}). Please try again.,L'inici de sessió amb 42 ha fallat ({code}). Torna-ho a provar.,42rekin saioa hasteak huts egin du ({code}). Saiatu berriro.
+error.network,Error: no hay conexión con el servidor,No se puede conectar con el servidor,Can't reach the server,No es pot connectar amb el servidor,Ezin da zerbitzariarekin konektatu
+error.generic,Error sin explicación conocida; {detail} es el detalle técnico,Algo no ha ido bien ({detail}).,Something went wrong ({detail}).,Alguna cosa no ha anat bé ({detail}).,Zerbait ez da ondo joan ({detail}).
+error.409,"Error: la acción choca con el estado actual (ya está lleno, ya existe…)",Ahora mismo no se puede.,That's not possible right now.,Ara mateix no es pot.,Une honetan ezin da.
+error.403,Error: no tienes permiso,No tienes permiso para eso.,You're not allowed to do that.,No tens permís per a això.,Ez duzu horretarako baimenik.
+error.404,Error: lo que buscas ya no existe,Eso ya no existe.,That no longer exists.,Això ja no existeix.,Hori ez da existitzen jada.
+error.400,Error: los datos enviados no son válidos,Revisa los datos.,Please check the details.,Revisa les dades.,Berrikusi datuak.
+days.short,"Iniciales de los días de la semana, de lunes a domingo, separadas por comas","L,M,X,J,V,S,D","M,T,W,T,F,S,S","Dl,Dt,Dc,Dj,Dv,Ds,Dg","Al,Ar,Az,Og,Or,Lr,Ig"
+settings.label,Nombre accesible de los ajustes del pie,Ajustes,Settings,Configuració,Ezarpenak
+settings.lang,Pie: selector de idioma,Idioma,Language,Idioma,Hizkuntza
+settings.campus,Pie: selector del campus que estás viendo,Campus,Campus,Campus,Campusa
+settings.campusLazy,Junto a un campus que se copia solo cuando alguien lo pide,bajo demanda,on demand,sota demanda,eskatu ahala
+sync.fresh,Pie: cuándo se leyeron los puestos de 42; {min} son minutos,Puestos de 42 actualizados hace {min} min,42 seats updated {min} min ago,Llocs de 42 actualitzats fa {min} min,42ko postuak duela {min} min eguneratuta
+sync.now,Pie: los puestos se acaban de leer,Puestos de 42 recién actualizados,42 seats just updated,Llocs de 42 acabats d'actualitzar,42ko postuak oraintxe eguneratuta
+sync.copying,Pie: progreso de la primera copia del campus; {pct} es el porcentaje,Copiando el campus desde 42: {pct} %,Copying the campus from 42: {pct} %,Copiant el campus des de 42: {pct} %,Campusa 42tik kopiatzen: % {pct}
+sync.copyingStart,Pie: empieza la primera copia del campus,Copiando el campus desde 42...,Copying the campus from 42...,Copiant el campus des de 42...,Campusa 42tik kopiatzen...
+nav.guardia,Sección: tu guardia (cuándo puedes ayudar y tus reservas),Guardia,On duty,Guàrdia,Guardia
+nav.calendario,Pestaña: calendario con todo lo tuyo,Calendario,Calendar,Calendari,Egutegia
+settings.theme,Pie: selector de tema claro u oscuro,Tema,Theme,Tema,Gaia
+welcome.open,Menú de la cuenta: volver a ver la bienvenida,Ver la bienvenida,See the welcome tour,Mira la benvinguda,Ikusi ongietorria
+welcome.title,Título de la ventana de bienvenida,Bienvenida a Sanatorio 42,Welcome to Sanatorio 42,Benvinguda a Sanatorio 42,Ongi etorri Sanatorio 42ra
+welcome.step,Bienvenida: paso actual de un total,{n} de {total},{n} of {total},{n} de {total},{n} / {total}
+welcome.go,Bienvenida: botón que abre la sección que se explica,Llévame ahí,Take me there,Porta-m’hi,Eraman nazazu
+welcome.skip,Bienvenida: botón para cerrarla,Saltar,Skip,Salta,Saltatu
+welcome.back,Bienvenida: paso anterior,Anterior,Back,Enrere,Aurrekoa
+welcome.next,Bienvenida: paso siguiente,Siguiente,Next,Següent,Hurrengoa
+welcome.done,Bienvenida: botón del último paso,Empezar,Start,Comença,Hasi
+welcome.hello.title,"Bienvenida, paso 1: título",Bienvenida a Sanatorio 42,Welcome to Sanatorio 42,Benvinguda a Sanatorio 42,Ongi etorri Sanatorio 42ra
+welcome.hello.body,"Bienvenida, paso 1: qué es la web","Aquí la gente de 42 se ayuda. Verás quién te puede echar una mano con tu proyecto, dónde se sienta y cuándo. Lo básico, en un minuto.","This is where 42 people help each other: who can give you a hand with your project, where they sit and when. Here are the basics in a minute.","Aquí la gent de 42 s’ajuda: qui et pot donar un cop de mà amb el teu projecte, on seu i quan. T’ensenyem el bàsic en un minut.","Hemen 42ko jendeak elkar laguntzen du: nork lagun zaitzakeen zure proiektuarekin, non dagoen eta noiz. Oinarrizkoa minutu batean."
+welcome.record.title,Bienvenida: paso del expediente,Tu expediente,Your record,El teu expedient,Zure espedientea
+welcome.record.body,Bienvenida: qué hay en el expediente,"Tu nivel, tus títulos y tu estado de salud: a qué pace vas y cuándo llegaría el black hole. Anota tu pace para ver todas tus fechas.","Your level, your titles and your health status: the pace you are on and when the black hole would catch you. Enter your pace to see all your dates.","El teu nivell, els teus títols i el teu estat de salut: el pace que portes i quan t’atraparia el black hole.","Zure maila, tituluak eta osasun egoera: zein pacetan zauden eta noiz harrapatuko zintuzkeen black holeak."
+welcome.waiting.title,Bienvenida: paso de la sala de espera,Sala de espera,Waiting room,Sala d’espera,Itxaron gela
+welcome.waiting.body,Bienvenida: cómo se busca ayuda,"Elige un proyecto. Verás quién lo aprobó, quién lo está haciendo, quién está de guardia y dónde se sienta. A quien se ofrece, le puedes pedir ayuda.","Pick a project to see who passed it or is doing it, who is on duty and where they sit on the map. You can ask those who offer for help.","Tria un projecte i veuràs qui l’ha aprovat o l’està fent, qui està de guàrdia i on seu al mapa.","Aukeratu proiektu bat eta ikusi nork gainditu duen edo egiten ari den, nor dagoen guardian eta non eserita dagoen."
+welcome.duty.title,Bienvenida: paso de la guardia,De guardia,On duty,De guàrdia,Guardian
+welcome.duty.body,Bienvenida: cómo ofrecer ayuda,Enciende «De guardia» y marca las medias horas en que puedes ayudar. Te reservarán un rato y ganarás XP. Lo que ya tienes en el calendario no se puede reservar.,Switch on «On duty» and mark the half hours when you can help. People will book you and you will earn XP; whatever is already in your calendar cannot be booked.,Activa «De guàrdia» i marca les mitges hores en què pots ajudar. Et demanaran una estona i guanyaràs XP.,Piztu «Guardian» eta markatu lagun dezakezun ordu erdiak. Denbora eskatuko dizute eta XP irabaziko duzu.
+welcome.board.title,Bienvenida: paso del tablón,Tablón,Board,Tauler,Taula
+welcome.board.body,Bienvenida: para qué sirve el tablón,"Las dudas de cada proyecto, por círculos. Pregunta, responde y lee la guía que mantiene quien ya lo aprobó.","Questions for each project, ordered by circles. Ask, answer and read the guide kept by those who already passed it.","Els dubtes de cada projecte, per cercles. Pregunta, respon i mira la guia.","Proiektu bakoitzeko zalantzak, zirkuluka. Galdetu, erantzun eta irakurri gida."
+welcome.groups.title,Bienvenida: paso de terapias y pizarras,Terapias y pizarras,Therapies and whiteboards,Teràpies i pissarres,Terapiak eta arbelak
+welcome.groups.body,Bienvenida: diferencia entre terapia y pizarra,"Terapia: quedar para sacar un proyecto en grupo, con puestos reservados. Pizarra: explicar un tema a quien quiera venir.","Meet to get a project done together (therapies, with reserved seats) or to explain a concept to anyone who wants to come (whiteboards).",Quedeu per treure un projecte junts (teràpies) o per explicar un concepte (pissarres).,Elkartu proiektu bat batera ateratzeko (terapiak) edo kontzeptu bat azaltzeko (arbelak).
+welcome.agenda.title,Bienvenida: paso del calendario,Calendario,Calendar,Calendari,Egutegia
+welcome.agenda.body,Bienvenida: qué junta el calendario,"Todo en un sitio: tus correcciones, exámenes y eventos de 42, tu guardia, terapias y pizarras. En lista o por horas.","Everything in one place: your 42 evaluations, exams and events, your duty, therapies and whiteboards. As a list or with the hours in view.","Tot en un lloc: correccions, exàmens i esdeveniments de 42, la guàrdia, teràpies i pissarres.","Dena leku bakarrean: 42ko zuzenketak, azterketak eta ekitaldiak, guardia, terapiak eta arbelak."
+welcome.net.title,Bienvenida: paso de la red y el mapa,Red y clústeres,Network and clusters,Xarxa i clústers,Sarea eta klusterrak
+welcome.net.body,Bienvenida: qué enseñan la red y el mapa,Con quién te has corregido y quién se sienta dónde ahora. En el mapa puedes resaltar tu círculo o a quien aprobó tu proyecto.,Who you have evaluated with and who sits where right now. On the map you can highlight your circle or whoever finished your project.,Amb qui t’has corregit i qui seu on ara mateix.,Norekin zuzendu duzun eta nor non dagoen eserita orain.
+welcome.comfort.title,Bienvenida: paso de los ajustes,A tu medida,Make it yours,A la teva mida,Zure neurrira
+welcome.comfort.body,"Bienvenida: dónde se cambian idioma, tema y comodidad","En el pie cambias idioma, tema, tamaño del texto, colores para daltonismo y modo zen. En tu menú, las pestañas y esta bienvenida.","In the footer you can change language, theme, text size, colour-blind colours and zen mode; in your menu, customise the tabs. This welcome is there too.","Al peu pots canviar idioma, tema, mida del text, colors per a daltonisme i el mode zen. Aquesta benvinguda també és al teu menú.","Orri-oinean hizkuntza, gaia, testuaren tamaina, daltonismorako koloreak eta zen modua alda ditzakezu. Ongietorri hau zure menuan ere badago."
+settings.text,Pie: selector del tamaño del texto,Texto,Text,Text,Testua
+settings.text.auto,Tamaño de texto automático según la pantalla,Automático,Automatic,Automàtic,Automatikoa
+settings.cvd,Pie: casilla de colores para daltonismo,Daltonismo,Colour blindness,Daltonisme,Daltonismoa
+settings.cvdHint,Explicación de la casilla de daltonismo,"Azul y naranja en vez de verde y rojo, y más contraste donde solo cambia el color","Blue and orange instead of green and red, and more contrast where only colour tells things apart","Blau i taronja en lloc de verd i vermell, i més contrast on només el color diferencia les coses","Urdina eta laranja berdea eta gorriaren ordez, eta kontraste gehiago kolorea bakarrik bereizten duen tokietan"
+settings.zen,Pie: casilla del modo zen (sin adornos),Modo zen,Zen mode,Mode zen,Zen modua
+settings.zenHint,Explicación de la casilla del modo zen,"Lo mínimo: sin animaciones, ventanitas ni avisos de adorno","The bare minimum: no animations, pop-ups or decorative notices","El mínim: sense animacions, finestretes ni avisos decoratius","Gutxienekoa: animaziorik, leihotxorik eta apaingarrizko oharrik gabe"
+settings.theme.auto,Tema: el mismo que el sistema,Como el sistema,Match system,Com el sistema,Sistemak bezala
+settings.theme.light,Tema claro,Claro,Light,Clar,Argia
+settings.theme.dark,Tema oscuro,Nocturno,Dark,Nocturn,Gauekoa
+edit.edit,Botón para editar algo propio,Editar,Edit,Edita,Editatu
+edit.save,Botón para guardar lo editado,Guardar cambios,Save changes,Desa els canvis,Gorde aldaketak
+nav.red,Pestaña: red de correcciones entre estudiantes,Red,Network,Xarxa,Sarea
+app.loadingSection,Mientras se descarga una sección,Abriendo…,Opening…,Obrint…,Irekitzen…
+layout.open,Menú de la cuenta: abrir la personalización,Personalizar la web,Customise the site,Personalitza la web,Pertsonalizatu weba
+layout.title,Título de la ventana de personalización,Personalizar,Customise,Personalitza,Pertsonalizatu
+layout.close,Botón para cerrar una ventana,Cerrar,Close,Tanca,Itxi
+layout.done,Botón para terminar y cerrar la personalización,Listo,Done,Fet,Eginda
+layout.reset,Botón para volver al orden original,Volver al orden de fábrica,Back to the default order,Torna a l'ordre de fàbrica,Itzuli fabrikako ordenara
+layout.mode,Personalizar: quién decide el orden de pestañas y bloques,Quién decide el orden,Who decides the order,Qui decideix l'ordre,Nork erabakitzen du ordena
+layout.mode.manual,Orden: lo decides tú,Yo,Me,Jo,Nik
+layout.mode.manual.hint,Explicación del orden manual,El orden que pongas aquí con las flechas.,The order you set here with the arrows.,L'ordre que posis aquí amb les fletxes.,Hemen geziekin jartzen duzun ordena.
+layout.mode.mine,Orden: según lo que más usas,Mi uso,My usage,El meu ús,Nire erabilera
+layout.mode.mine.hint,Explicación del orden por tu uso,Lo que más usas tú sube solo al principio.,What you use most moves to the front by itself.,El que més fas servir tu puja sol al principi.,Zuk gehien erabiltzen duzuna berez igotzen da hasierara.
+layout.mode.community,Orden: según lo que más usa todo el mundo,La comunidad,The community,La comunitat,Komunitatea
+layout.mode.community.hint,Explicación del orden por uso de la comunidad,Lo que más usa todo el mundo va primero.,What everybody uses most goes first.,El que més fa servir tothom va primer.,Denek gehien erabiltzen dutena lehenengo doa.
+layout.autoNote,Aviso: con orden automático no se puede mover a mano,Con el orden automático las flechas no hacen nada: se ordena solo. Lo plegado sí se respeta.,With automatic order the arrows do nothing: it rearranges itself. Folded items are still respected.,Amb l'ordre automàtic les fletxes no fan res: es recol·loca sol. El que està plegat sí que es respecta.,Ordena automatikoarekin geziek ez dute ezer egiten: berez kokatzen da. Tolestutakoa errespetatzen da.
+layout.nav,Personalizar: apartado de las pestañas,Pestañas,Tabs,Pestanyes,Fitxak
+layout.folded,Etiqueta de un bloque plegado,plegado,folded,plegat,tolestuta
+layout.up,Botón para subir un elemento; {name} es su nombre,Subir {name},Move {name} up,Puja {name},Igo {name}
+layout.down,Botón para bajar un elemento; {name} es su nombre,Bajar {name},Move {name} down,Baixa {name},Jaitsi {name}
+layout.fold,Casilla para plegar un bloque,plegar,fold,plega,tolestu
+layout.page.expediente,Personalizar: bloques del expediente,Expediente,Record,Expedient,Espedientea
+layout.page.guardia,Personalizar: bloques de la guardia,Guardia,On duty,Guàrdia,Guardia
+layout.page.red,Personalizar: bloques de la red,Red,Network,Xarxa,Sarea
+layout.expediente.record,Bloque del expediente: nivel y títulos,Nivel y títulos,Level and titles,Nivell i títols,Maila eta tituluak
+layout.expediente.health,Bloque del expediente: estado de salud (pace y black hole),Estado de salud,Health status,Estat de salut,Osasun-egoera
+layout.expediente.network,Bloque del expediente: tu red de correcciones,Tu red de correcciones,Your evaluation network,La teva xarxa de correccions,Zure zuzenketen sarea
+layout.expediente.achievements,Bloque del expediente: logros y reacciones,Logros y reacciones,Achievements and reactions,Assoliments i reaccions,Lorpenak eta erreakzioak
+layout.expediente.ranking,Bloque del expediente: clasificación y tus dudas,Ranking y tus dudas,Ranking and your questions,Rànquing i els teus dubtes,Rankinga eta zure zalantzak
+layout.guardia.prereview,Bloque de la guardia: preevaluaciones,Preevaluaciones,Pre-reviews,Preavaluacions,Aurreebaluazioak
+layout.guardia.today,Bloque de la guardia: tus franjas de hoy,Tus franjas de hoy,Today's slots,Les teves franges d'avui,Zure gaurko tarteak
+layout.guardia.bookings,Bloque de la guardia: reservas,Reservas,Bookings,Reserves,Erreserbak
+layout.guardia.blocked,Bloque de la guardia: personas bloqueadas,Personas bloqueadas,Blocked people,Persones bloquejades,Blokeatutako pertsonak
+layout.red.totals,Bloque de la red: totales,Totales,Totals,Totals,Guztizkoak
+layout.red.endogamy,Bloque de la red: quién se corrige siempre con la misma gente,Más endogamia,Most inbred,Més endogàmia,Endogamia handiena
+layout.red.pairs,Bloque de la red: parejas que más se corrigen,Parejas que más se corrigen,Pairs that evaluate each other most,Parelles que més es corregeixen,Elkar gehien zuzentzen duten bikoteak
+layout.red.strictest,Bloque de la red: quién pone las notas más bajas,Los más estrictos,Strictest,Els més estrictes,Zorrotzenak
+layout.red.projects,Bloque de la red: proyectos más corregidos,Proyectos más corregidos,Most evaluated projects,Projectes més corregits,Gehien zuzendutako proiektuak
+layout.red.about,Bloque de la red: cómo leer el grafo,Cómo se lee,How to read it,Com es llegeix,Nola irakurtzen den
+nav.gestion,Sección oculta: panel de gestión para quien administra,Gestión,Admin,Gestió,Kudeaketa
+layout.alerts,Personalizar: apartado de avisos,Avisos,Reminders,Avisos,Abisuak
+layout.alerts.lead,Personalizar: cuánto antes avisar de un evento,Avisarme antes de cada evento,Remind me before each event,Avisa'm abans de cada esdeveniment,Abisatu ekitaldi bakoitzaren aurretik
+layout.alerts.off,Opción: no avisar,No avisarme,Don't remind me,No m'avisis,Ez abisatu
+layout.alerts.minutes,Opción: avisar {n} minutos antes,{n} min antes,{n} min before,{n} min abans,{n} min lehenago
+info.open,Nombre accesible del botón (i) que abre la demostración; {title} es la sección,Cómo funciona: {title},How it works: {title},Com funciona: {title},Nola dabil: {title}
+finder.label,Buscador de personas de la cabecera,Buscar personas,Find people,Cerca persones,Bilatu pertsonak
+finder.placeholder,Texto de ejemplo dentro del buscador,Buscar a alguien…,Find someone…,Cerca algú…,Bilatu norbait…
+finder.none,Buscador: no hay nadie con ese login,Nadie se llama así,Nobody by that name,Ningú es diu així,Inor ez da horrela deitzen
+finder.recent,Buscador: últimas búsquedas,Búsquedas recientes,Recent searches,Cerques recents,Azken bilaketak
+finder.recentClear,Buscador: borrar las últimas búsquedas,Borrar,Clear,Esborra,Ezabatu
+layout.tips,Personalizar: apartado de ayuda,Ayuda,Help,Ajuda,Laguntza
+layout.tips.show,Casilla para enseñar u ocultar los botones (i) de demostración,Enseñar los iconos de información con las demostraciones,Show the information icons with their demos,Mostra les icones d'informació amb les demostracions,Erakutsi informazio-ikonoak beren demoekin
+layout.style,Personalizar: estilo visual de la web,Estilo,Style,Estil,Estiloa
+layout.palette,Personalizar: color de acento,Color,Colour,Color,Kolorea
+nav.clusters,"Pestaña: mapa de los clústeres, quién se sienta dónde",Clústeres,Clusters,Clústers,Klusterrak
+nav.examenes,"Pestaña: exámenes, en vivo y estadísticas",Exámenes,Exams,Exàmens,Azterketak
+nav.examenesLive,Etiqueta junto a Exámenes cuando hay uno en curso,en vivo,live,en directe,zuzenean
+until.now,Tiempo restante cuando es casi nada,un momento,a moment,un moment,une bat
+until.and,Une dos cantidades de tiempo: «2 horas y 5 minutos»,{a} y {b},{a} and {b},{a} i {b},{a} eta {b}
+until.minute.one,Tiempo: un minuto,{n} minuto,{n} minute,{n} minut,minutu {n}
+until.minute.many,Tiempo: varios minutos,{n} minutos,{n} minutes,{n} minuts,{n} minutu
+until.hour.one,Tiempo: una hora,{n} hora,{n} hour,{n} hora,ordu {n}
+until.hour.many,Tiempo: varias horas,{n} horas,{n} hours,{n} hores,{n} ordu
+until.day.one,Tiempo: un día,{n} día,{n} day,{n} dia,egun {n}
+until.day.many,Tiempo: varios días,{n} días,{n} days,{n} dies,{n} egun
+until.month.one,Tiempo: un mes,{n} mes,{n} month,{n} mes,hilabete {n}
+until.month.many,Tiempo: varios meses,{n} meses,{n} months,{n} mesos,{n} hilabete
+nav.clicker,Sección secreta: el juego Code Clicker,Code Clicker,Code Clicker,Code Clicker,Code Clicker
+login.staff,Pantalla de entrada: enlace para el personal de 42,Soy del staff: validar un documento,I am staff: verify a document,Soc de l'staff: validar un document,Staffekoa naiz: dokumentu bat balidatu
+login.demo,Pantalla de entrada: enlace a la demostración,Ver una demostración sin cuenta,See a demo without an account,Mira una demostració sense compte,Ikusi erakustaldi bat konturik gabe
+demo.title,Etiqueta de la demostración pública,Demostración,Demo,Demostració,Erakustaldia
+demo.about,Explicación de la demostración,Datos inventados. Nada de lo que hagas aquí se guarda.,Made-up data. Nothing you do here is saved.,Dades inventades. Res del que facis aquí es desa.,Asmatutako datuak. Hemen egiten duzun ezer ez da gordetzen.
+demo.real,Enlace de la demostración a la web real,Ir a la web de verdad,Go to the real site,Ves al web de veritat,Joan benetako webgunera
+demo.staff,Pista de la demostración para probar la validación de documentos,"En la demostración vale cualquier clave que empiece por «s42-», y el documento de ejemplo tiene el código K7QF.","In the demo any key starting with “s42-” works, and the sample document has the code K7QF.","A la demostració val qualsevol clau que comenci per «s42-», i el document d'exemple té el codi K7QF.","Erakustaldian «s42-» hasten den edozein gakok balio du, eta adibideko dokumentuak K7QF kodea du."

@@ -1,0 +1,36 @@
+# Textos: code-clicker
+
+Generado desde `apps/web/src/shared/i18n/textos/code-clicker.csv` con
+`npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
+
+27 textos. «—» es que falta la traducción: sale en español.
+
+| Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
+| --- | --- | --- | --- | --- | --- | --- |
+| `clicker.review.kind` | Encabezado de la ventana obligatoria de revisión de trampas | features/clicker/ReviewGate | Revisión de Code Clicker | Code Clicker review | Revisió de Code Clicker | Code Clickerreko berrikuspena |
+| `clicker.review.title` | Título de la ventana de revisión de trampas | features/clicker/ReviewGate | Tu partida no cuadra | Your game does not add up | La teva partida no quadra | Zure partida ez dator bat |
+| `clicker.review.intro` | Por qué se revisa la partida | features/clicker/ReviewGate | Quien administra ha mirado tu partida y hay un salto en tu capital que no se explica con lo que tenías: | Whoever runs the site looked at your game and there is a jump in your capital that what you had does not explain: | Qui administra ha mirat la teva partida i hi ha un salt al teu capital que no s'explica amb el que tenies: | Kudeatzaileak zure partida begiratu du, eta zure kapitalean jauzi bat dago zeneukanarekin azaltzen ez dena: |
+| `clicker.review.jump` | Dato: el salto en las líneas de código del juego | features/clicker/ReviewGate | pasó de {from} a {to} líneas en {seconds} s; | it went from {from} to {to} lines in {seconds} s; | va passar de {from} a {to} línies en {seconds} s; | {from} lerrotik {to} lerrora pasatu zen {seconds} s-tan; |
+| `clicker.review.rate` | Dato: la producción por segundo guardada | features/clicker/ReviewGate | tu producción guardada era de {rate} líneas por segundo; | your saved production was {rate} lines per second; | la teva producció desada era de {rate} línies per segon; | gordetako zure ekoizpena segundoko {rate} lerrokoa zen; |
+| `clicker.review.golden` | Dato: había una bonificación dorada activa | features/clicker/ReviewGate | tenías una pull request dorada abierta. | you had a golden pull request open. | tenies una pull request daurada oberta. | pull request urrezko bat irekita zeneukan. |
+| `clicker.review.noGolden` | Dato: no había bonificación dorada | features/clicker/ReviewGate | no había ninguna pull request dorada abierta. | there was no golden pull request open. | no hi havia cap pull request daurada oberta. | ez zegoen pull request urrezkorik irekita. |
+| `clicker.review.ask` | Petición de explicación | features/clicker/ReviewGate | Cuéntalo: si no hiciste trampas, explica qué pasó; si las hiciste, explica cómo, con detalle. Si es un método nuevo, no se te penaliza. | Tell us: if you did not cheat, explain what happened; if you did, explain how, in detail. If it is a new method, you will not be penalised. | Explica-ho: si no vas fer trampes, explica què va passar; si en vas fer, explica com, amb detall. Si és un mètode nou, no se't penalitza. | Kontatu: tranparik egin ez bazenuen, azaldu zer gertatu zen; egin bazenituen, azaldu nola, xehetasunez. Metodo berria bada, ez zaizu zigorrik jarriko. |
+| `clicker.review.answer` | Campo de texto de la explicación | features/clicker/ReviewGate | Tu explicación (al menos 20 letras) | Your explanation (at least 20 characters) | La teva explicació (almenys 20 lletres) | Zure azalpena (gutxienez 20 letra) |
+| `clicker.review.send` | Botón para enviar la explicación | features/clicker/ReviewGate | Enviar mi explicación | Send my explanation | Envia la meva explicació | Bidali nire azalpena |
+| `clicker.chart.span` | Gráfica del juego: selector del tramo de tiempo | features/clicker/CapitalHistory | Tramo | Range | Tram | Tartea |
+| `clicker.chart.today` | Tramo: hoy | features/clicker/CapitalHistory | Hoy | Today | Avui | Gaur |
+| `clicker.chart.week` | Tramo: 7 días | features/clicker/CapitalHistory | 7 días | 7 days | 7 dies | 7 egun |
+| `clicker.chart.month` | Tramo: 30 días | features/clicker/CapitalHistory | 30 días | 30 days | 30 dies | 30 egun |
+| `clicker.chart.all` | Tramo: todo | features/clicker/CapitalHistory | Todo | All | Tot | Dena |
+| `clicker.chart.from` | Fecha de inicio | features/clicker/CapitalHistory | Desde | From | Des de | Noiztik |
+| `clicker.chart.to` | Fecha de fin | features/clicker/CapitalHistory | Hasta | To | Fins a | Noiz arte |
+| `clicker.chart.empty` | No hay datos en esas fechas | features/clicker/CapitalHistory | No hay historial en esas fechas. | No history for those dates. | No hi ha historial en aquestes dates. | Ez dago historialik data horietan. |
+| `clicker.chart.hint` | Cómo usar la gráfica | features/clicker/CapitalHistory | Arrastra sobre la gráfica para acercarte. Lo de hoy va cada diez segundos; lo de la semana, cada hora; lo anterior, cada día. | Drag over the chart to zoom in. Today is kept every ten seconds; the week, every hour; before that, every day. | Arrossega sobre la gràfica per apropar-t'hi. Avui va cada deu segons; la setmana, cada hora; abans, cada dia. | Arrastatu grafikoaren gainean hurbiltzeko. Gaurkoa hamar segundoz behin doa; astekoa, orduro; lehenagokoa, egunero. |
+| `egg.achievement` | Aviso al encontrar el juego secreto | features/clicker/EasterEgg | Logro conseguido | Achievement unlocked | Assoliment aconseguit | Lorpena lortuta |
+| `egg.title` | Título: pulsaste 42 veces la cruz del logo | features/clicker/EasterEgg | Has llamado 42 veces | You knocked 42 times | Has trucat 42 vegades | 42 aldiz jo duzu atea |
+| `egg.eyebrow` | Rótulo con aire de terminal | features/clicker/EasterEgg | // conexión entrante | // incoming connection | // connexió entrant | // konexioa sartzen |
+| `egg.body` | Presentación de la elección de pastilla (referencia a Matrix) | features/clicker/EasterEgg | Alguien ha abierto. Te ofrece dos pastillas, y no deja que te vayas sin elegir. | Someone opened. They offer you two pills, and will not let you leave without choosing. | Algú ha obert. T'ofereix dues pastilles, i no et deixa marxar sense triar. | Norbaitek ireki du. Bi pilula eskaintzen dizkizu, eta ez dizu aukeratu gabe joaten uzten. |
+| `egg.blue` | Opción: pastilla azul (olvidar el juego) | features/clicker/EasterEgg | La pastilla azul | The blue pill | La pastilla blava | Pilula urdina |
+| `egg.blueAbout` | Qué pasa con la pastilla azul | features/clicker/EasterEgg | Esto no ha pasado. La cruz vuelve a ser solo una cruz, y nunca más podrás volver aquí. | This never happened. The cross is just a cross again, and you can never come back here. | Això no ha passat. La creu torna a ser només una creu, i mai més podràs tornar aquí. | Hau ez da gertatu. Gurutzea gurutze hutsa da berriro, eta ezingo zara inoiz hona itzuli. |
+| `egg.red` | Opción: pastilla roja (entrar en el juego) | features/clicker/EasterEgg | La pastilla roja | The red pill | La pastilla vermella | Pilula gorria |
+| `egg.redAbout` | Qué pasa con la pastilla roja | features/clicker/EasterEgg | Te quedas, y ves hasta dónde llega la madriguera. Bajo tu propia responsabilidad. | You stay, and see how deep the rabbit hole goes. At your own risk. | Et quedes, i veus fins on arriba el cau. Sota la teva responsabilitat. | Geratu egiten zara, eta zuloa noraino iristen den ikusiko duzu. Zure ardurapean. |

@@ -4,3 +4,4 @@ coverage
 data
 package-lock.json
 *.md
+docs/textos/

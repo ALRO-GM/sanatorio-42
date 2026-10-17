@@ -6,10 +6,10 @@
 import { describe, expect, it } from 'vitest'
 
 import { cheerFor } from '../src/features/help/cheers'
-import { ca } from '../src/shared/i18n/ca'
-import { en } from '../src/shared/i18n/en'
-import { es } from '../src/shared/i18n/es'
-import { eu } from '../src/shared/i18n/eu'
+import ca from 'virtual:textos/ca'
+import en from 'virtual:textos/en'
+import es from 'virtual:textos/es'
+import eu from 'virtual:textos/eu'
 import { localeOf } from '../src/shared/i18n/locale'
 
 const LANGS = ['es', 'en', 'ca', 'eu'] as const
@@ -37,15 +37,12 @@ describe('idiomas', () => {
 
   it('catalán y euskera traducen todo lo que ve cualquier persona', () => {
     // Lo único que se queda en español es el panel de gestión.
-    const visible = Object.keys(es).filter((key) => !key.startsWith('admin.'))
+    const visible = Object.keys(es).filter((key) => !/^(admin|quota|staff)\./.test(key))
 
     for (const dict of [ca, eu]) {
-      const missing = visible.filter(
-        (key) => !(key in dict) && /[a-záéíóú]{4}/i.test(es[key] ?? ''),
-      )
+      const missing = visible.filter((key) => !(key in dict))
 
-      // Se libran los que son iguales en cualquier idioma: nombres propios y cifras.
-      expect(missing.length).toBeLessThan(30)
+      expect(missing).toEqual([])
     }
   })
 

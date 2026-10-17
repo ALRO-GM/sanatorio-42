@@ -1,11 +1,13 @@
 import react from '@vitejs/plugin-react'
 import { defineConfig, loadEnv } from 'vite'
 
+import { textosPlugin } from './tools/textos.ts'
+
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
 
   return {
-    plugins: [react()],
+    plugins: [react(), textosPlugin()],
     build: {
       // Nada incrustado como `data:`. Vite mete así los ficheros pequeños, y
       // entre ellos caían trozos de tipografías: la política de contenido

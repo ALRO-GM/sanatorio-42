@@ -3,21 +3,33 @@ import type { ReactNode } from 'react'
 
 import type { Lang } from '@sanatorio/contracts'
 
+import es from 'virtual:textos/es'
+
 import { ApiError } from '../api/http'
-import { ca } from './ca'
-import { en } from './en'
-import { es } from './es'
-import { eu } from './eu'
 
 type Dictionary = Record<string, string>
 
-// Idiomas disponibles. Añadir uno es crear su fichero y apuntarlo aquí: las
-// claves que le falten caen al español.
-export const LANGS: Record<Lang, { name: string; dict: Dictionary }> = {
-  es: { name: 'Español', dict: es },
-  en: { name: 'English', dict: en },
-  ca: { name: 'Català', dict: ca },
-  eu: { name: 'Euskara', dict: eu },
+/**
+ * Idiomas disponibles. Los textos salen de las tablas de `textos/` (una por
+ * tema, con una columna por idioma): añadir un idioma es añadir su columna a
+ * las tablas, su código en `tools/textos.ts` y su entrada aquí. Lo que le falte
+ * cae al español.
+ *
+ * Solo el español viaja con la web; los demás se descargan al elegirlos.
+ */
+export const LANGS: Record<Lang, { name: string; load: () => Promise<{ default: Dictionary }> }> = {
+  es: { name: 'Español', load: () => Promise.resolve({ default: es }) },
+  en: { name: 'English', load: () => import('virtual:textos/en') },
+  ca: { name: 'Català', load: () => import('virtual:textos/ca') },
+  eu: { name: 'Euskara', load: () => import('virtual:textos/eu') },
+}
+
+/** Los idiomas ya descargados. */
+const loaded: Partial<Record<Lang, Dictionary>> = { es }
+
+/** Descarga los textos de un idioma, si no lo estaban ya. */
+export async function loadLang(lang: Lang): Promise<void> {
+  loaded[lang] ??= (await LANGS[lang].load()).default
 }
 
 export { localeOf } from './locale'
@@ -37,7 +49,7 @@ export function isLang(value: string | null | undefined): value is Lang {
 }
 
 /** Idioma inicial: el que eligió la última vez, o el del navegador si lo tenemos. */
-function initialLang(): Lang {
+export function initialLang(): Lang {
   const stored = localStorage.getItem(STORAGE_KEY)
 
   if (isLang(stored)) {
@@ -53,6 +65,25 @@ const I18nContext = createContext<I18n>({ lang: 'es', setLang: () => undefined, 
 
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState(initialLang)
+  // Cambia cuando termina de llegar un idioma: obliga a pintar con sus textos.
+  const [arrived, setArrived] = useState(0)
+
+  useEffect(() => {
+    if (loaded[lang] !== undefined) return
+
+    let alive = true
+
+    loadLang(lang).then(
+      () => {
+        if (alive) setArrived((count) => count + 1)
+      },
+      () => undefined,
+    )
+
+    return () => {
+      alive = false
+    }
+  }, [lang])
 
   useEffect(() => {
     document.documentElement.lang = lang
@@ -71,7 +102,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
    */
   const t = useCallback<Translate>(
     (key, vars) => {
-      const template = LANGS[lang].dict[key] ?? es[key] ?? key
+      const template = loaded[lang]?.[key] ?? es[key] ?? key
 
       if (vars === undefined) {
         return template
@@ -81,7 +112,9 @@ export function I18nProvider({ children }: { children: ReactNode }) {
         name in vars ? String(vars[name]) : match,
       )
     },
-    [lang],
+    // `arrived`: al llegar los textos del idioma, `t` cambia y se repinta todo.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [lang, arrived],
   )
 
   const value = useMemo(() => ({ lang, setLang, t }), [lang, setLang, t])

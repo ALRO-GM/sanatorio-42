@@ -54,8 +54,13 @@ Monorepo con workspaces de npm. Ver `README.md` y `docs/architecture.md`.
   esperar usa `quota.defer`, que le da turno en la cola si no hay cuota.
 - API: un cambio de esquema es una migración nueva en
   `src/core/db/migrations/`; las existentes no se editan.
-- Web: los componentes no llevan texto escrito, usan `t('clave')`. Cada texto
-  nuevo va en `shared/i18n/es.ts` y su traducción en `en.ts`.
+- Web: **los textos solo viven en las tablas** de `shared/i18n/textos/*.csv`
+  (una por tema; clave, contexto, español, inglés, catalán y euskera). Los
+  componentes no llevan texto escrito: usan `t('clave')`. Cada texto nuevo o
+  cambiado se edita en su tabla, con su contexto y al menos español e inglés;
+  la clave que deja de usarse se borra. Después, `npm run textos -- --write` y
+  `npm run check`. Las reglas y el estilo de redacción están en `docs/textos.md`;
+  no hay excepciones.
 - Web: las direcciones se construyen con `shared/links.ts` (`recordHref`,
   `networkHref`, `intraHref`) y se leen con `decodePart`. Nada de montar un
   `#/…/${login}` a mano.
@@ -70,7 +75,7 @@ Monorepo con workspaces de npm. Ver `README.md` y `docs/architecture.md`.
 - API: cuando algo que hace una persona le toca a otra (le responden, le
   reservan, le escriben), el servicio llama a `notify` con un `kind` de
   `packages/contracts/src/notices.ts`. No se escribe en el buzón directamente:
-  lo hace `notices` al oír el evento. El texto del aviso va en `es.ts` y `en.ts`
+  lo hace `notices` al oír el evento. El texto del aviso va en la tabla `buzon`
   (`notices.kind.*`).
 - Web: lo que haya que preguntar de fondo va en `GET /pulse` (`usePulse`), no en
   un sondeo nuevo.

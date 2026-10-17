@@ -24,12 +24,13 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "npm run test --workspaces --if-present",
-    "check": "npm run typecheck && npm run lint && npm run format:check && npm run deadcode && npm run duplicates && npm run test",
+    "check": "npm run typecheck && npm run lint && npm run format:check && npm run deadcode && npm run duplicates && npm run textos && npm run test",
     "sync:status": "npm run sync:status -w @sanatorio/api",
     "sync:run": "npm run sync:run -w @sanatorio/api",
     "deadcode": "knip --no-progress",
     "duplicates": "jscpd apps/api/src apps/web/src packages/contracts/src --min-lines 8 --min-tokens 80 --threshold 1 --ignore '**/i18n/**' --reporters consoleFull --silent",
-    "test:coverage": "npm run test:coverage --workspaces --if-present"
+    "test:coverage": "npm run test:coverage --workspaces --if-present",
+    "textos": "npm run textos -w @sanatorio/web --"
   },
   "devDependencies": {
     "@eslint/js": "^9.18.0",
