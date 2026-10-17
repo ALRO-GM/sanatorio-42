@@ -169,7 +169,7 @@ export type { Agenda, AgendaEvaluation, AgendaEvent, UserAgenda } from './agenda
 export { FRESH_USER_TTL_MS } from './agenda.js'
 export { diskPhotoStore, memoryPhotoStore } from './photos.js'
 export type { PhotoStore } from './photos.js'
-export { LAST_CIRCLE, parseHours } from './curriculum.js'
+export { LAST_CIRCLE, SEEDED_UP_TO, parseHours } from './curriculum.js'
 export type { Curriculum, Track } from './curriculum.js'
 export { hourlyQuota } from './quota.js'
 export type { Quota, QuotaGate } from './quota.js'

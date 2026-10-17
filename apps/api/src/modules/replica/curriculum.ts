@@ -23,7 +23,9 @@
  *
  * Hay además una tabla de partida (`SEED`): el plan clásico entero y los cuatro
  * primeros círculos del nuevo, comprobados con datos reales. Lo que está en ella
- * manda sobre lo aprendido; lo aprendido solo pone los proyectos que no están.
+ * manda sobre lo aprendido, y en los círculos que cubre no se aprende nada: lo
+ * que alguien haga de más ahí (un proyecto del otro plan, una práctica de
+ * empresa, un examen de recuperación) no es del plan.
  */
 
 import type { Db } from '../../core/db/database.js'
@@ -120,6 +122,12 @@ const SEED: Record<Track, readonly (readonly string[])[]> = {
     ['42next-exam-rank-06'],
   ],
 }
+
+/**
+ * Hasta qué círculo está comprobada la tabla de partida de cada plan. Hasta ahí
+ * no se aprende nada: lo que no está en la tabla no es del plan.
+ */
+export const SEEDED_UP_TO: Record<Track, number> = { classic: LAST_CIRCLE, next: 3 }
 
 /** El 42cursus en la API de 42. */
 const CORE_CURSUS_ID = 21
@@ -512,8 +520,9 @@ export function createCurriculum(options: CurriculumOptions) {
     },
 
     /**
-     * El círculo de cada proyecto de un plan: lo de partida y, para lo que no
-     * está ahí, lo aprendido por votos. Solo hasta el final del common core.
+     * El círculo de cada proyecto de un plan: lo de partida y, en los círculos
+     * que la tabla no cubre, lo aprendido por votos. Solo hasta el final del
+     * common core.
      */
     async circles(track: Track): Promise<Map<number, number>> {
       const circles = new Map<number, number>()
@@ -552,7 +561,12 @@ export function createCurriculum(options: CurriculumOptions) {
       for (const [projectId, byCircle] of votes) {
         const circle = learnedCircle(byCircle)
 
-        if (!circles.has(projectId) && circle !== null && circle <= LAST_CIRCLE) {
+        if (
+          !circles.has(projectId) &&
+          circle !== null &&
+          circle > SEEDED_UP_TO[track] &&
+          circle <= LAST_CIRCLE
+        ) {
           circles.set(projectId, circle)
         }
       }

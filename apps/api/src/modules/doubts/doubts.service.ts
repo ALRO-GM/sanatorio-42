@@ -25,7 +25,7 @@ import { z } from 'zod'
 import type { AnswerRow, DoubtRow, DoubtsRepository, GuideRow } from './doubts.repository.js'
 import { XP_KIND } from '../profile/index.js'
 import type { XpService } from '../profile/index.js'
-import { LAST_CIRCLE } from '../replica/index.js'
+import { LAST_CIRCLE, SEEDED_UP_TO } from '../replica/index.js'
 import type { Curriculum, ReplicaRepository } from '../replica/index.js'
 import { domainError } from '../../core/errors.js'
 import { parse, startOfDayIso, text } from '../../core/validation.js'
@@ -236,6 +236,11 @@ export function createDoubtsService(options: DoubtsServiceOptions) {
      * de Python y no los proyectos de C que ya no le tocan, y al revés. La
      * piscina no sale nunca (no es del 42cursus).
      *
+     * En los círculos que ya completó salen los proyectos que hizo, no los que
+     * podría haber hecho: de un «elige uno», el que eligió, y lo que hizo con
+     * el otro plan antes de cambiarse, en su sitio. En el que está y los que
+     * vienen, lo que puede hacer.
+     *
      * Los avisos se filtran aquí, no en la web: quien aprobó un proyecto ve sus
      * dudas sin responder, las propuestas a la guía y si falta la guía (es
      * quien puede hacer algo con las tres cosas); quien lo está haciendo, solo
@@ -249,8 +254,9 @@ export function createDoubtsService(options: DoubtsServiceOptions) {
 
       await curriculum.ensureHours(actor.campusId)
 
-      const [circles, choices, mine, activity, perfect, cursus] = await Promise.all([
+      const [circles, otherPlan, choices, mine, activity, perfect, cursus] = await Promise.all([
         curriculum.circles(track),
+        curriculum.circles(track === 'next' ? 'classic' : 'next'),
         curriculum.choices(),
         replica.projectsOf(actor.login, true),
         doubts.activity(actor.campusId, actor.login),
@@ -264,12 +270,38 @@ export function createDoubtsService(options: DoubtsServiceOptions) {
       const reached = Math.max(-1, ...mine.map((project) => circles.get(project.id) ?? -1))
       const currentCircle = Math.min(LAST_CIRCLE, rank === null ? Math.max(0, reached) : rank + 1)
 
-      // Un proyecto suyo que aún no está en la tabla del plan (nadie lo había
-      // hecho antes aquí) se coloca en el círculo en el que está. Si ya terminó
-      // el common core, lo que haga después no es de este grafo.
-      if (rank === null || rank < LAST_CIRCLE) {
+      for (const project of mine) {
+        if (circles.has(project.id)) continue
+
+        // Lo que hizo con el otro plan (antes de cambiarse) va en su círculo,
+        // si es uno al que ya ha llegado.
+        const before = otherPlan.get(project.id)
+
+        if (before !== undefined && before <= currentCircle) {
+          circles.set(project.id, before)
+          continue
+        }
+
+        // Un proyecto suyo que aún no está en el plan (nadie lo había hecho
+        // antes aquí) se coloca en el círculo en el que está, si es uno que la
+        // tabla de partida no cubre: en los que cubre, lo que no está no es del
+        // plan (una práctica de empresa, un examen de recuperación). Si ya
+        // terminó el common core, lo que haga después no es de este grafo.
+        if (currentCircle > SEEDED_UP_TO[track] && (rank === null || rank < LAST_CIRCLE)) {
+          circles.set(project.id, currentCircle)
+        }
+      }
+
+      // Los círculos que completó (si se sabe su rango) con algo suyo dentro:
+      // ahí solo sale lo que hizo. Si de uno no se tiene nada suyo (la réplica
+      // aún no lo ha copiado), se deja el plan entero antes que un hueco.
+      const done = new Set<number>()
+
+      if (rank !== null) {
         for (const project of mine) {
-          if (!circles.has(project.id)) circles.set(project.id, currentCircle)
+          const circle = circles.get(project.id)
+
+          if (circle !== undefined && circle <= rank) done.add(circle)
         }
       }
 
@@ -293,6 +325,11 @@ export function createDoubtsService(options: DoubtsServiceOptions) {
         const { name, hours } = project
 
         const status: GraphStatus = statusById.get(projectId) ?? 'todo'
+
+        if (status === 'todo' && done.has(circle)) {
+          continue
+        }
+
         const pending = activity.get(projectId)
 
         byCircle.set(circle, [

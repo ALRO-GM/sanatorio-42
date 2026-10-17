@@ -489,8 +489,9 @@ describe('comunidad', () => {
     })
 
     it('aprende el plan de los rangos y las fechas de cada persona', async () => {
-      // `nex` validó el rango 0 en mayo y el 1 en junio, y después se apuntó a
-      // un proyecto que no está en ninguna tabla.
+      // `nex` validó el rango 0 en mayo y del 1 al 3 en junio, y después se
+      // apuntó a un proyecto que no está en ninguna tabla. Es del círculo 4: más
+      // allá de lo que cubre la tabla de partida del plan nuevo.
       await replica().ingestProjectUsers(
         [
           projectUser('nex', {
@@ -525,13 +526,23 @@ describe('comunidad', () => {
           validated_at: '2026-06-15T10:00:00.000Z',
           quest: { slug: 'common-core-rank-01' },
         },
+        {
+          quest_id: 46,
+          validated_at: '2026-06-16T10:00:00.000Z',
+          quest: { slug: 'common-core-rank-02' },
+        },
+        {
+          quest_id: 47,
+          validated_at: '2026-06-18T10:00:00.000Z',
+          quest: { slug: 'common-core-rank-03' },
+        },
         { quest_id: 37, validated_at: null, quest: { slug: 'common-core' } },
       ])
 
       const graph = await services.doubts.graph(actor('nex'), userId('nex'))
 
-      expect(graph).toMatchObject({ track: 'next', currentCircle: 2 })
-      expect(all(graph).find((p) => p.name === 'Proyecto Nuevo')).toMatchObject({ circle: 2 })
+      expect(graph).toMatchObject({ track: 'next', currentCircle: 4 })
+      expect(all(graph).find((p) => p.name === 'Proyecto Nuevo')).toMatchObject({ circle: 4 })
 
       // Solo se pregunta por sus hitos y su cursus, y no se repite al volver a abrir el grafo.
       const asked = api.calls.length
@@ -550,9 +561,9 @@ describe('comunidad', () => {
       // Lo aprendido vale para quien venga detrás en el mismo plan: lo verá
       // como algo que tendrá, aún cerrado.
       expect(await node('otra', 'Proyecto Nuevo')).toMatchObject({
-        circle: 2,
+        circle: 4,
         status: 'todo',
-        locked: false,
+        locked: true,
       })
       expect(
         (await services.doubts.graph(actor('ana'), null)).circles.flatMap((c) => c.projects),
@@ -596,6 +607,113 @@ describe('comunidad', () => {
       // Lo que no es de ningún grupo no lleva marca.
       expect(projects.find((p) => p.name === 'Libft')?.choice ?? null).toBeNull()
       // Sus hitos y su cursus sí se piden a 42: son lo único que pide el grafo.
+      api.calls.length = 0
+    })
+
+    it('en los círculos completados salen los que hizo; en el actual, todo lo que puede hacer', async () => {
+      const done = (projectId: number, projectName: string, slug: string) =>
+        projectUser('cla', { projectId, projectName, slug, status: 'finished' })
+
+      await replica().ingestProjectUsers(
+        [
+          done(20, 'Libft', '42cursus-libft'),
+          done(10, 'ft_printf', '42cursus-ft_printf'),
+          done(41, 'Born2beroot', 'born2beroot'),
+          done(40, 'push_swap', '42cursus-push_swap'),
+          done(42, 'so_long', 'so_long'),
+          done(43, 'pipex', 'pipex'),
+          done(44, 'Exam Rank 02', 'exam-rank-02'),
+          projectUser('cla', {
+            projectId: 50,
+            projectName: 'Philosophers',
+            slug: '42cursus-philosophers',
+          }),
+          // Una práctica de empresa: no es del common core.
+          projectUser('cla', {
+            projectId: 99,
+            projectName: 'Work Experience I',
+            slug: 'work-experience-i',
+          }),
+          // Lo que otras personas hacen: así se conocen esos proyectos.
+          projectUser('leo', { projectId: 45, projectName: 'FdF', slug: '42cursus-fdf' }),
+          projectUser('leo', { projectId: 46, projectName: 'minitalk', slug: 'minitalk' }),
+          projectUser('leo', {
+            projectId: 47,
+            projectName: 'get_next_line',
+            slug: '42cursus-get_next_line',
+          }),
+          projectUser('leo', {
+            projectId: 51,
+            projectName: 'minishell',
+            slug: '42cursus-minishell',
+          }),
+          projectUser('leo', { projectId: 52, projectName: 'Exam Rank 03', slug: 'exam-rank-03' }),
+        ],
+        MADRID,
+      )
+      api.quests.set(
+        userId('cla'),
+        ['00', '01', '02'].map((rank, index) => ({
+          quest_id: 44 + index,
+          validated_at: `2026-0${index + 3}-01T10:00:00.000Z`,
+          quest: { slug: `common-core-rank-${rank}` },
+        })),
+      )
+
+      const graph = await services.doubts.graph(actor('cla'), userId('cla'))
+      const names = (circle: number) => graph.circles[circle]?.projects.map((p) => p.name) ?? []
+
+      expect(graph.currentCircle).toBe(3)
+      expect(names(0)).toEqual(['Libft'])
+      // get_next_line no consta entre lo suyo: no sale.
+      expect(names(1)).toEqual(['Born2beroot', 'ft_printf'])
+      // De los «elige uno», solo el que eligió.
+      expect(names(2)).toEqual(['Exam Rank 02', 'pipex', 'push_swap', 'so_long'])
+      // El círculo en el que está, entero: lo que puede hacer.
+      expect(names(3)).toEqual(['Exam Rank 03', 'minishell', 'Philosophers'])
+      expect(all(graph).some((p) => p.name === 'Work Experience I')).toBe(false)
+      api.calls.length = 0
+    })
+
+    it('quien se cambia de plan ve lo que hizo con el anterior en su círculo', async () => {
+      await replica().ingestProjectUsers(
+        [
+          projectUser('sw', {
+            projectId: 20,
+            projectName: 'Libft',
+            slug: '42cursus-libft',
+            status: 'finished',
+          }),
+          projectUser('sw', {
+            projectId: 40,
+            projectName: 'push_swap',
+            slug: '42cursus-push_swap',
+            status: 'finished',
+          }),
+          projectUser('sw', {
+            projectId: 30,
+            projectName: 'Python Module 00',
+            slug: 'python-module-00',
+          }),
+        ],
+        MADRID,
+      )
+      api.quests.set(userId('sw'), [
+        { quest_id: 128, validated_at: '2026-03-12T10:00:00.000Z', quest: { slug: '42next' } },
+        ...['00', '01'].map((rank, index) => ({
+          quest_id: 44 + index,
+          validated_at: `2026-0${index + 4}-01T10:00:00.000Z`,
+          quest: { slug: `common-core-rank-${rank}` },
+        })),
+      ])
+
+      const graph = await services.doubts.graph(actor('sw'), userId('sw'))
+
+      expect(graph.track).toBe('next')
+      expect(all(graph).find((p) => p.name === 'push_swap')).toMatchObject({
+        circle: 2,
+        status: 'finished',
+      })
       api.calls.length = 0
     })
 
