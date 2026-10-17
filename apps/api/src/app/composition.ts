@@ -42,6 +42,8 @@ import type { MapModule } from '../modules/map/index.js'
 import { createMeetModule } from '../modules/meet/index.js'
 import type { MeetModule } from '../modules/meet/index.js'
 import { createNetworkModule } from '../modules/network/index.js'
+import { createQuizModule } from '../modules/quiz/index.js'
+import type { QuizModule } from '../modules/quiz/index.js'
 import { createNoticesModule } from '../modules/notices/index.js'
 import type { NoticesModule } from '../modules/notices/index.js'
 import type { NetworkModule } from '../modules/network/index.js'
@@ -117,6 +119,7 @@ export type Services = {
   clicker: ClickerModule['service']
   tours: ToursModule['service']
   legal: LegalModule['service']
+  quiz: QuizModule['service']
 }
 
 type Composition = {
@@ -355,6 +358,12 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     ...clock,
   })
 
+  const quiz = createQuizModule({
+    db,
+    circlesOf: (logins) => replica.curriculum.circlesOf(logins),
+    ...clock,
+  })
+
   // `admin` va el primero: sus ganchos de consumo solo ven las rutas que se
   // registran después.
   const modules: AppModule[] = [
@@ -379,6 +388,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     tours,
     staff,
     legal,
+    quiz,
   ]
 
   return {
@@ -417,6 +427,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
       clicker: clicker.service,
       tours: tours.service,
       legal: legal.service,
+      quiz: quiz.service,
     },
   }
 }

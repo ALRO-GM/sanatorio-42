@@ -1221,3 +1221,36 @@ Sin sesión: las usan Caddy y quien despliega.
 
 - GET /health → `{ "status": "ok" }` si el proceso responde.
 - GET /health/db → lo mismo si además la base contesta; `503` si no.
+
+## Not-games (`modules/quiz`)
+
+Partidas de preguntas de programación. El servidor lleva el reloj y corrige: la
+partida avanza cada vez que alguien la mira o contesta, y la web no recibe la
+respuesta buena hasta que se cierra la pregunta. Tipos en
+`packages/contracts/src/quiz.ts`.
+
+```
+GET  /quiz/rooms              → QuizLobby[]: salas abiertas del campus y las tuyas de las últimas 6 h.
+POST /quiz/rooms              → 201 QuizRoom. Cuerpo QuizSettings: mode (duel|teams|ffa|survival),
+                                competitive, pool (common|general), kinds (quick|long|mixed),
+                                difficulty (easy|medium|hard|rising), questions (5–30; 60 en
+                                supervivencia), minCircle (0–6 o null). Entras en ella.
+GET  /quiz/rooms/:id          → QuizRoom: cómo va ahora. La web lo pide cada segundo jugando.
+POST /quiz/rooms/:id/join     → QuizRoom. { team?: 'a'|'b' }: entra, o cambia de equipo antes de empezar.
+POST /quiz/rooms/:id/leave    → 204. Sin empezar: sale (si es quien la creó, la cierra). Jugando: queda fuera.
+POST /quiz/rooms/:id/start    → QuizRoom. Solo quien la creó. Duelo: 2; equipos: uno por equipo;
+                                supervivencia: 2 o más; todos contra todos: 1 o más (práctica).
+POST /quiz/rooms/:id/answer   → QuizRoom. { question, option }: option es el id de una respuesta.
+```
+
+- Nadie está en dos salas a la vez (409). Salas sin empezar se borran a las 2 h;
+  las jugadas, a la semana.
+- Preguntas: las de los conceptos que les valen a **todos** los que juegan según
+  sus proyectos (aprobados o en curso), o solo los generales. El banco está en
+  `modules/quiz/bank/`; la dificultad de cada concepto sale de lo que falla la
+  gente (`quiz_stats`) a partir de 20 respuestas.
+- Tiempos: 3 s de cuenta atrás antes de la primera, 10 s las rápidas y 30 s (o
+  60) las largas, 1 s de margen para respuestas tardías y 4 s enseñando la
+  respuesta. Se cierra antes si han contestado todos.
+- Puntos: acertar suma 1; en competitivo, fallar resta 1. Supervivencia: fallar o
+  no contestar quita una de las 3 vidas.
