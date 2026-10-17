@@ -1148,3 +1148,30 @@ dialog.welcome .actions {
 .board-past {
   opacity: 0.7;
 }
+
+/* ── Panel: crecimiento por campus (`features/admin/GrowthPanel.tsx`) ───── */
+.growth {
+  display: grid;
+  gap: 0.6rem;
+}
+.growth-chart {
+  margin: 0;
+}
+.growth-chart svg {
+  width: 100%;
+  height: auto;
+}
+.growth-axis {
+  stroke: var(--border);
+}
+.growth-tick {
+  font-size: 10px;
+  fill: var(--text-3);
+}
+.growth-key {
+  display: inline-block;
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 2px;
+  vertical-align: -1px;
+}

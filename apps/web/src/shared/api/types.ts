@@ -7,6 +7,7 @@
  */
 
 import type {
+  AdminGrowth,
   QuizLobby,
   QuizRoom,
   QuizSettings,
@@ -280,6 +281,8 @@ export type Api = {
   getOnline: () => Promise<OnlineUsers>
   /** Estadísticas de uso de un periodo, de toda la web o de una persona. Solo admins. */
   getStats: (query: UsageQuery) => Promise<UsageStats>
+  /** Uso por campus y crecimiento (usuarios nuevos y totales por día). Solo admins. */
+  getAdminGrowth: (from: string, to: string, campuses: readonly number[]) => Promise<AdminGrowth>
   /** Mapa de calor del uso por grupos de personas. Solo admins. */
   getUsageHeatmap: (by: UsageHeatmap['by'], segment?: SegmentQuery) => Promise<UsageHeatmap>
 

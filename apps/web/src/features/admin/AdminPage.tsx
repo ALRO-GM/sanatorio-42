@@ -15,6 +15,7 @@ import { QuotaCard } from './QuotaCard'
 import { BroadcastsTab } from './BroadcastsTab'
 import { ClickerPanel } from './ClickerPanel'
 import { DataPanel } from './DataPanel'
+import { GrowthPanel } from './GrowthPanel'
 import { StatsPanel } from './StatsPanel'
 import { UsageTab } from './UsageTab'
 import { Icon } from '../../shared/ui/Icon'
@@ -95,6 +96,7 @@ function AdminTabs({ campusId, me }: { campusId?: number | undefined; me: string
       {tab === 'messages' && <MessagesTab />}
       {tab === 'usage' && <UsageTab />}
       {tab === 'stats' && <StatsPanel />}
+      {tab === 'stats' && <GrowthPanel />}
       {tab === 'clicker' && <ClickerPanel me={me} />}
       {tab === 'data' && <DataPanel />}
       {tab === 'casts' && <BroadcastsTab campusId={campusId} />}

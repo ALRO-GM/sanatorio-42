@@ -19,6 +19,7 @@ import type { SessionReader } from '../../core/session.js'
 import { ANONYMOUS, createAdminService } from './admin.service.js'
 import { RESPONSE_OVERHEAD_BYTES } from './budget.rules.js'
 import type { AdminService, AdminServiceOptions } from './admin.service.js'
+import { createGrowthService } from './growth.js'
 import { ELEVATION_COOKIE, ELEVATION_MS, createSecondFactor } from './second-factor.js'
 import type { SecondFactor } from './second-factor.js'
 
@@ -62,6 +63,7 @@ function isStaff(session: SessionReader, request: FastifyRequest): boolean {
 
 export function createAdminModule(deps: AdminModuleDeps): AdminModule {
   const service = createAdminService(deps)
+  const growth = createGrowthService(deps.db)
   const secondFactor = createSecondFactor({
     db: deps.db,
     secret: deps.secret ?? randomBytes(32).toString('hex'),
@@ -280,6 +282,13 @@ export function createAdminModule(deps: AdminModuleDeps): AdminModule {
       /** `GET /admin/consumption` → uso por horas, patrón semanal, avisos y quién más consume. */
       app.get('/admin/consumption', async (request, reply) => {
         return reply.send(await service.consumption(await session.actor(request)))
+      })
+
+      /** `GET /admin/growth?from=&to=&campus=` → uso por campus y usuarios totales y nuevos por día. */
+      app.get('/admin/growth', async (request, reply) => {
+        reply.header('Cache-Control', 'private, no-store')
+
+        return reply.send(await growth.growth(await session.actor(request), request.query))
       })
 
       /** `GET /admin/people` → admins, cuentas bloqueadas y topes a mano. */

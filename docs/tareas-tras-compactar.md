@@ -177,7 +177,7 @@ despliegue espera a la CI).
       evento en el calendario para apuntarse), [x] #78 (botón a la intra, en tu expediente), [x] #70
       (ficha al pasar el ratón por un login, componente único), #79
       (clasificación de quién va más rápido según el pace, desde su inicio),
-      #71 (panel: uso por campus elegibles y usuarios totales/nuevos por día),
+      [x] #71 (panel: uso por campus elegibles y usuarios totales/nuevos por día),
       #77 (avisar al staff de problemas de ordenadores/edificio con opciones
       claras; Slack si hay webhook), #69 (mapa de calor de clics por elemento y
       por cuadrícula normalizada móvil/ordenador).

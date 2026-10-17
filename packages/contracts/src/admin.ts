@@ -223,3 +223,20 @@ export type LegalStatus = {
   /** Cuándo aceptaste esa versión (ISO-8601), o `null` si aún no. */
   acceptedAt: string | null
 }
+
+/**
+ * `GET /admin/growth?from=&to=&campus=22,58`: uso por campus y crecimiento
+ * (#71 del buzón). Sin `campus`, todos. Días en UTC.
+ */
+export type AdminGrowth = {
+  from: string
+  to: string
+  /** Los campus con gente en Sanatorio, para elegir. */
+  campuses: { id: number; name: string; people: number }[]
+  /** Los que se han pedido (todos si no se pidió ninguno). */
+  selected: number[]
+  /** Por día y campus: quién usó la web y quién entró por primera vez. Solo días con algo. */
+  days: { day: string; campusId: number; active: number; newUsers: number }[]
+  /** Cuánta gente había ya en cada campus antes de `from`, para sumar el total. */
+  before: { campusId: number; people: number }[]
+}

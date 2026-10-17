@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/gestion.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-440 textos. «—» es que falta la traducción: sale en español.
+449 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -447,3 +447,12 @@ Generado desde `apps/web/src/shared/i18n/textos/gestion.csv` con
 | `admin.cheats.none` | Panel de gestión, «Code Clicker»: apartado de trampas: sin trampas | features/admin/CheatsPanel | No hay trampas registradas. | No cheats recorded. | — | — |
 | `admin.cheats.log` | Panel de gestión, «Code Clicker»: apartado de trampas: tabla del historial | features/admin/CheatsPanel | Historial de trampas | Cheat history | — | — |
 | `admin.cheats.title` | Panel de gestión, «Code Clicker»: título del apartado de trampas | features/admin/ClickerPanel | Trampas de Code Clicker | Code Clicker cheats | — | — |
+| `admin.growth.title` | Panel, crecimiento por campus: título del bloque | features/admin/GrowthPanel | Crecimiento por campus | Growth by campus | Creixement per campus | Hazkundea campusaren arabera |
+| `admin.growth.campuses` | Panel, crecimiento por campus: grupo para elegir campus | features/admin/GrowthPanel | Campus | Campuses | Campus | Campusak |
+| `admin.growth.all` | Panel, crecimiento por campus: todos los campus | features/admin/GrowthPanel | Todos | All | Tots | Denak |
+| `admin.growth.noCampus` | Panel, crecimiento por campus: gente sin campus conocido | features/admin/GrowthPanel | Sin campus | No campus | Sense campus | Campusik gabe |
+| `admin.growth.total` | Panel, crecimiento por campus: usuarios en total (gente que ha entrado alguna vez) | features/admin/GrowthPanel | Usuarios en total | Total users | Usuaris en total | Erabiltzaileak guztira |
+| `admin.growth.new` | Panel, crecimiento por campus: usuarios nuevos en el periodo | features/admin/GrowthPanel | Nuevos | New | Nous | Berriak |
+| `admin.growth.newByDay` | Panel, crecimiento por campus: gráfica de usuarios nuevos por día | features/admin/GrowthPanel | Nuevos por día | New per day | Nous per dia | Berriak egunero |
+| `admin.growth.activeAvg` | Panel, crecimiento por campus: media de gente que usa la web cada día | features/admin/GrowthPanel | Activos al día (media) | Active per day (average) | Actius al dia (mitjana) | Aktiboak egunero (batez beste) |
+| `admin.growth.activeByCampus` | Panel, crecimiento por campus: gráfica de gente activa por día y campus | features/admin/GrowthPanel | Activos por día y campus | Active per day and campus | Actius per dia i campus | Aktiboak egunero eta campusaren arabera |

@@ -439,3 +439,12 @@ admin.cheats.writeTo,"Panel de gestión, «Code Clicker»: apartado de trampas: 
 admin.cheats.none,"Panel de gestión, «Code Clicker»: apartado de trampas: sin trampas",No hay trampas registradas.,No cheats recorded.,,
 admin.cheats.log,"Panel de gestión, «Code Clicker»: apartado de trampas: tabla del historial",Historial de trampas,Cheat history,,
 admin.cheats.title,"Panel de gestión, «Code Clicker»: título del apartado de trampas",Trampas de Code Clicker,Code Clicker cheats,,
+admin.growth.title,"Panel, crecimiento por campus: título del bloque",Crecimiento por campus,Growth by campus,Creixement per campus,Hazkundea campusaren arabera
+admin.growth.campuses,"Panel, crecimiento por campus: grupo para elegir campus",Campus,Campuses,Campus,Campusak
+admin.growth.all,"Panel, crecimiento por campus: todos los campus",Todos,All,Tots,Denak
+admin.growth.noCampus,"Panel, crecimiento por campus: gente sin campus conocido",Sin campus,No campus,Sense campus,Campusik gabe
+admin.growth.total,"Panel, crecimiento por campus: usuarios en total (gente que ha entrado alguna vez)",Usuarios en total,Total users,Usuaris en total,Erabiltzaileak guztira
+admin.growth.new,"Panel, crecimiento por campus: usuarios nuevos en el periodo",Nuevos,New,Nous,Berriak
+admin.growth.newByDay,"Panel, crecimiento por campus: gráfica de usuarios nuevos por día",Nuevos por día,New per day,Nous per dia,Berriak egunero
+admin.growth.activeAvg,"Panel, crecimiento por campus: media de gente que usa la web cada día",Activos al día (media),Active per day (average),Actius al dia (mitjana),Aktiboak egunero (batez beste)
+admin.growth.activeByCampus,"Panel, crecimiento por campus: gráfica de gente activa por día y campus",Activos por día y campus,Active per day and campus,Actius per dia i campus,Aktiboak egunero eta campusaren arabera

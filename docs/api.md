@@ -1253,6 +1253,19 @@ POST /games/rooms/:id/resign   → abandona: gana el otro bando
   El resultado va a `game_results` con `game: 'chess'` (victoria 2, tablas 1).
 - Nadie está a la vez en una sala de preguntas y en una por turnos (409).
 
+## Crecimiento por campus (`modules/admin/growth.ts`, solo admins)
+
+```
+GET /admin/growth?from=YYYY-MM-DD&to=YYYY-MM-DD&campus=22,58  → AdminGrowth
+```
+
+Sin `campus`, todos. Por día y campus: `active` (gente con peticiones ese día,
+de `request_stats`) y `newUsers` (primera entrada, `profiles.created_at`), más
+`before` (cuánta gente había ya antes de `from`, para sumar el total). El campus
+de cada cual es el que eligió en la web o, si no eligió, el suyo de 42 (`-1`: sin
+campus). Como mucho 400 días; un periodo al revés o un `campus` que no sean
+números separados por comas es 400.
+
 ## Ficha de una persona (`modules/map`)
 
 ```

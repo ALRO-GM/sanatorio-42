@@ -135,6 +135,10 @@ export const realApi: Api = {
   getTourStats: () => getJson('/admin/tours'),
   searchPeople: (q) => getJson(`/users/search?${search({ q })}`),
   getStats: (query) => getJson(`/admin/stats?${search(query)}`),
+  getAdminGrowth: (from, to, campuses) =>
+    getJson(
+      `/admin/growth?from=${from}&to=${to}${campuses.length === 0 ? '' : `&campus=${campuses.join(',')}`}`,
+    ),
   getUsageHeatmap: (by, segment = {}) => getJson(`/usage/heatmap?${search({ by, ...segment })}`),
   getPublicProfile: (login) => getJson(`/users/${encodeURIComponent(login)}/profile`),
   getPersonCard: (login) => getJson(`/people/${encodeURIComponent(login)}/card`),

@@ -70,6 +70,7 @@ export const adminMock: Pick<
   | 'getUsage'
   | 'sendUsage'
   | 'getStats'
+  | 'getAdminGrowth'
   | 'getUsageHeatmap'
   | 'getFlows'
   | 'getTourSpeeds'
@@ -416,6 +417,47 @@ export const adminMock: Pick<
 
   async sendUsage() {
     await delay(50)
+  },
+
+  async getAdminGrowth(from, to, campuses) {
+    await delay(200)
+
+    // Tres campus de mentira, con gente que crece poco a poco.
+    const all = [
+      { id: 22, name: 'Madrid', people: 412 },
+      { id: 46, name: 'Málaga', people: 128 },
+      { id: 58, name: 'Barcelona', people: 96 },
+    ]
+    const selected = campuses.length === 0 ? all.map((campus) => campus.id) : [...campuses]
+    const days = []
+
+    for (let at = Date.parse(from), n = 0; at <= Date.parse(to); at += 86_400_000, n++) {
+      const day = new Date(at).toISOString().slice(0, 10)
+      const weekend = [0, 6].includes(new Date(at).getUTCDay())
+
+      for (const [index, campus] of all.entries()) {
+        if (!selected.includes(campus.id)) continue
+        days.push({
+          day,
+          campusId: campus.id,
+          active: Math.round(
+            (campus.people / 6) * (weekend ? 0.4 : 1) * (1 + 0.3 * Math.sin(n / 3 + index)),
+          ),
+          newUsers: (n * 7 + index * 3) % 5,
+        })
+      }
+    }
+
+    return {
+      from,
+      to,
+      campuses: all,
+      selected,
+      days,
+      before: all
+        .filter((campus) => selected.includes(campus.id))
+        .map((campus) => ({ campusId: campus.id, people: campus.people - 40 })),
+    }
   },
 
   async getStats(query) {
