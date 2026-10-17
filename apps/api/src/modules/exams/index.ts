@@ -27,7 +27,6 @@ type ExamsModuleDeps = {
   campusIds: readonly number[]
   quota: QuotaGate
   hourlyReserve: number
-  isActive?: () => boolean
   log?: (message: string) => void
   now?: () => number
 }
@@ -46,7 +45,6 @@ export function createExamsModule(deps: ExamsModuleDeps): ExamsModule {
     campusIds: deps.campusIds,
     quota: deps.quota,
     hourlyReserve: deps.hourlyReserve,
-    ...(deps.isActive === undefined ? {} : { isActive: deps.isActive }),
     ...(deps.log === undefined ? {} : { log: deps.log }),
   })
   const service = createExamsService({ exams, sync })

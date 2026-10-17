@@ -278,7 +278,6 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     campusIds: config.sync.trackedCampusIds,
     hourlyReserve: config.sync.hourlyReserve,
     quota: replica.quota,
-    isActive: () => replica.sync.isActive(),
     ...(config.log === undefined ? {} : { log: config.log }),
     ...clock,
   })

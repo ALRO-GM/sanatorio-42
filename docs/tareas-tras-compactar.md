@@ -82,13 +82,10 @@ en la guardia, eventos cortados en el calendario, demostración de Exámenes).
 
 ## 3. A medias o por confirmar con Alberto
 
-- **Comprobar los intentos de examen** (`SELECT COUNT(*) FROM exam_attempts`
-  y las claves `exams:%` de `sync_state`). La copia de fondo solo avanza con
-  la web sin uso 10 minutos; el 2026-10-17 por la mañana aún no había
-  empezado. Si avanza y `exam_attempts` sigue a cero, 42 no manda `teams` en
-  `/projects_users`: las estadísticas cuentan por `occurrence` y habría que
-  pedir los intentos de otra forma. (Lo donado a la bolsa ya está
-  comprobado: se lee bien.)
+- **Intentos de examen**: la copia de fondo nunca arrancaba (pedía 200 peticiones
+  más que la reserva y la web vacía, y la de correcciones la dejaba sin cuota).
+  Arreglado el 2026-10-17: va por delante hasta la mitad de la reserva. 42 sí
+  manda `teams` en `/projects_users`. Comprobar que `exam_attempts` crece.
 - **Bolsa común de Code Clicker**: con la política nueva ya no se llena y su
   placa no sale. Preguntar a Alberto si se quita del todo (`loot.ts`,
   `clicker_pool`, `POST /clicker/pool/claim`).

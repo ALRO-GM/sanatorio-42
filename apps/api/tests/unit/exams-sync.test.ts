@@ -81,4 +81,33 @@ describe('exámenes', () => {
     expect(api.calls.filter((call) => call.includes('filter[project_id]=1320'))).toHaveLength(2)
     api.calls.length = 0
   })
+
+  it('avanza aunque la web esté en uso y quede poca cuota, y para en la mitad de la reserva', async () => {
+    const { replica } = services.repositories
+
+    await replica.ingestProjectUsers([projectUser('sol', { ...EXAM })], MADRID)
+    api.rows.set(MADRID, [
+      examRow('ana', [[100, true, '2026-01-01T10:00:00Z']]),
+      examRow('leo', [[0, false, '2026-01-01T10:00:00Z']]),
+      examRow('eva', [[100, true, '2026-01-02T10:00:00Z']]),
+    ])
+
+    // Alguien usando la web y 400 peticiones libres: por encima de la mitad de
+    // la reserva (150), así que sigue. (Antes pedía 500 y la web vacía.)
+    services.sync.touch()
+    api.hourlyRemaining = 400
+    expect(await services.examsSync.step()).toBe(true)
+    expect(await services.examsSync.step()).toBe(true)
+    expect(await services.examsSync.progress()).toEqual({ done: 1, total: 1 })
+
+    // Con un examen nuevo por copiar y solo 120 libres, espera: eso es de la gente.
+    await replica.ingestProjectUsers(
+      [projectUser('sol', { projectId: 1321, projectName: 'Exam Rank 03', slug: 'exam-rank-03' })],
+      MADRID,
+    )
+    api.hourlyRemaining = 120
+    expect(await services.examsSync.step()).toBe(true)
+    expect(await services.examsSync.step()).toBe(false)
+    api.calls.length = 0
+  })
 })

@@ -1,8 +1,15 @@
 /**
  * La copia de los intentos de examen antiguos. Lo nuevo ya llega con la copia
- * de cada día (las filas de un examen traen sus intentos); esto completa lo de
- * antes, examen a examen y página a página, solo cuando sobra cuota y nadie
- * está usando la web.
+ * de lo que cambia (las filas de un examen de `/projects_users` traen sus
+ * intentos en `teams`); esto completa lo de antes, examen a examen y página a
+ * página: una petición por minuto como mucho.
+ *
+ * Va por delante de la copia de las correcciones: aquella gasta hasta que
+ * quedan `hourlyReserve` peticiones en la hora, y esta sigue hasta la mitad de
+ * eso. Antes pedía 200 más que la reserva y esperar a que nadie usara la web:
+ * con la copia de correcciones en marcha, nunca llegaba su turno (a 2026-10-17
+ * no había copiado ni un intento). Lo que quede por debajo de la mitad es de
+ * los inicios de sesión y de lo que pide la gente.
  */
 
 import type { FortyTwoClient } from '../../integrations/forty-two/client.js'
@@ -17,22 +24,16 @@ type ExamsSyncOptions = {
   quota: QuotaGate
   /** Cuota que no se toca: la de la gente. */
   hourlyReserve: number
-  /** `true` si alguien está usando la web: entonces espera. */
-  isActive?: () => boolean
   log?: (message: string) => void
 }
 
 /** Lo que va copiado de un examen en un campus: la siguiente página, o hecho. */
 type ExamState = { page: number; done: boolean }
 
-/** Margen por encima de la reserva para lo de fondo. */
-const MARGIN = 200
-
 const examKey = (campusId: number, projectId: number): string => `exams:${campusId}:${projectId}`
 
 export function createExamsSync(options: ExamsSyncOptions) {
   const { client, replica, exams, campusIds, quota, hourlyReserve } = options
-  const isActive = options.isActive ?? (() => false)
   const log = options.log ?? (() => undefined)
 
   return {
@@ -41,7 +42,7 @@ export function createExamsSync(options: ExamsSyncOptions) {
      * había nada que hacer (o no tocaba).
      */
     async step(): Promise<boolean> {
-      if (isActive() || !quota.allows('background', hourlyReserve + MARGIN)) return false
+      if (!quota.allows('background', Math.round(hourlyReserve / 2))) return false
 
       const projects = await exams.exams()
 
@@ -60,11 +61,12 @@ export function createExamsSync(options: ExamsSyncOptions) {
             })
 
             await replica.ingestProjectUsers(page.items, campusId)
-            await replica.setState(key, {
-              page: state.page + 1,
-              // Hecho cuando ya no quedan páginas (`total` son registros, no páginas).
-              done: page.items.length === 0 || state.page * page.perPage >= page.total,
-            })
+
+            // Hecho cuando ya no quedan páginas (`total` son registros, no páginas).
+            const done = page.items.length === 0 || state.page * page.perPage >= page.total
+
+            await replica.setState(key, { page: state.page + 1, done })
+            if (done) log(`intentos de ${project.name} en el campus ${campusId}: copiados`)
           } catch (error) {
             log(
               `intentos de ${project.name}: ${error instanceof Error ? error.message : String(error)}`,
