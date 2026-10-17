@@ -845,3 +845,89 @@ dialog::backdrop {
     width: auto;
   }
 }
+
+/* La segunda fila: las secciones de la categoría abierta, en pastillas más
+   pequeñas y pegadas a su pestaña. En el móvil se deslizan de lado. */
+.subtabs {
+  display: flex;
+  gap: 0.35rem;
+  margin: 0.5rem 0 1.5rem;
+  padding: 2px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.subtabs::-webkit-scrollbar {
+  display: none;
+}
+.subtab {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text-2);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+.subtab:hover {
+  color: var(--text);
+}
+.subtab.active {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, var(--surface));
+  color: var(--text);
+  font-weight: 600;
+}
+.subtab.active .icon {
+  color: var(--accent-text);
+}
+.subtab .tab-live {
+  margin-left: 0.2rem;
+  padding: 0 0.4rem;
+  border-radius: 999px;
+  background: var(--danger);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+/* Con segunda fila, la primera se le pega. */
+.tabs:has(+ .subtabs) {
+  margin-bottom: 0;
+}
+
+/* Los tres modos de la interfaz, como tarjetas (en la bienvenida). */
+.detail-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin: 0.75rem 0;
+}
+.detail-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  text-align: left;
+}
+.detail-card small {
+  color: var(--text-3);
+  line-height: 1.35;
+}
+.detail-card.active {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+}
+@media (max-width: 560px) {
+  .detail-cards {
+    grid-template-columns: 1fr;
+  }
+}

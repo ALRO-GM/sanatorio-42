@@ -5,6 +5,7 @@ import type { CalendarEvent, CalendarKind, CalendarSection } from '@sanatorio/co
 import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
+import { Show } from '../../shared/detail'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { addDays, daysOf, eventsOn, locale, move, rangeTitle, sameDay, startOfDay } from './dates'
 import { EventChip } from './EventChip'
@@ -142,23 +143,29 @@ export function CalendarPage({ onGo, me }: CalendarPageProps) {
         </div>
 
         {view !== 'month' && (
-          <div className="filter-pills agenda-layouts" role="group" aria-label={t('agenda.layout')}>
-            {LAYOUTS.map((option) => (
-              <button
-                key={option}
-                type="button"
-                className={`pill ${layout === option ? 'active' : ''}`}
-                aria-pressed={layout === option}
-                title={t(`agenda.layout.${option}.hint`)}
-                onClick={() => {
-                  saveLayout(option)
-                  setLayout(option)
-                }}
-              >
-                {t(`agenda.layout.${option}`)}
-              </button>
-            ))}
-          </div>
+          <Show from="normal">
+            <div
+              className="filter-pills agenda-layouts"
+              role="group"
+              aria-label={t('agenda.layout')}
+            >
+              {LAYOUTS.map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  className={`pill ${layout === option ? 'active' : ''}`}
+                  aria-pressed={layout === option}
+                  title={t(`agenda.layout.${option}.hint`)}
+                  onClick={() => {
+                    saveLayout(option)
+                    setLayout(option)
+                  }}
+                >
+                  {t(`agenda.layout.${option}`)}
+                </button>
+              ))}
+            </div>
+          </Show>
         )}
 
         <div className="agenda-kinds" role="group" aria-label={t('agenda.kinds')}>

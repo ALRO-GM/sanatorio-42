@@ -6,7 +6,9 @@ import type { SyncStatus } from '@sanatorio/contracts'
 import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
+import { Show } from '../../shared/detail'
 import { ComfortSettings } from './ComfortSettings'
+import { DetailSelect } from './DetailSelect'
 import { LangSelect } from './LangSelect'
 import { ThemeSelect } from './ThemeSelect'
 
@@ -17,7 +19,8 @@ type SettingsProps = {
 }
 
 /**
- * Ajustes del pie: idioma, campus y de cuándo son los datos de 42.
+ * Ajustes del pie: modo de la interfaz, idioma, campus y de cuándo son los
+ * datos de 42.
  *
  * Van en el pie y no en la cabecera, que tiene que seguir cabiendo en una fila.
  */
@@ -38,23 +41,28 @@ export function Settings({ campusId, onCampusChange }: SettingsProps) {
 
   return (
     <div className="settings" aria-label={t('settings.label')}>
+      <DetailSelect />
       <LangSelect />
       <ThemeSelect />
       <ComfortSettings />
       {campuses.data !== undefined && campuses.data.length > 0 && campusId !== undefined && (
-        <label className="setting">
-          <span>{t('settings.campus')}</span>
-          <select value={campusId} onChange={(event) => void change(event)} disabled={saving}>
-            {campuses.data.map((campus) => (
-              <option key={campus.id} value={campus.id}>
-                {campus.name}
-                {campus.tracked ? '' : ` (${t('settings.campusLazy')})`}
-              </option>
-            ))}
-          </select>
-        </label>
+        <Show from="normal">
+          <label className="setting">
+            <span>{t('settings.campus')}</span>
+            <select value={campusId} onChange={(event) => void change(event)} disabled={saving}>
+              {campuses.data.map((campus) => (
+                <option key={campus.id} value={campus.id}>
+                  {campus.name}
+                  {campus.tracked ? '' : ` (${t('settings.campusLazy')})`}
+                </option>
+              ))}
+            </select>
+          </label>
+        </Show>
       )}
-      <SyncNote campusId={campusId} />
+      <Show from="datos">
+        <SyncNote campusId={campusId} />
+      </Show>
     </div>
   )
 }

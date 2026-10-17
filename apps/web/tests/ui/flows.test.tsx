@@ -92,7 +92,7 @@ describe('lo que hace la gente en la web, de principio a fin', () => {
     await openApp('#/expediente')
     await user.selectOptions(screen.getByRole('combobox', { name: text('settings.lang') }), 'en')
     await settle(100)
-    expect(screen.getAllByText(en['nav.consulta'] ?? '?').length).toBeGreaterThan(0)
+    expect(screen.getAllByText(en['nav.cat.ayuda'] ?? '?').length).toBeGreaterThan(0)
   }, 20_000)
 
   it('una dirección que no existe lleva a la portada, no a una pantalla en blanco', async () => {

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 
 import type { Section } from '../../app/sections'
+import { DetailCards } from '../settings/DetailSelect'
 import { useI18n } from '../../shared/i18n'
 import { Icon } from '../../shared/ui/Icon'
 import type { IconName } from '../../shared/ui/Icon'
@@ -13,6 +14,8 @@ const WAIT_MS = 1500
 /** Las diapositivas: de qué va cada parte y a dónde lleva. */
 const SLIDES: readonly { id: string; icon: IconName; go?: Section }[] = [
   { id: 'hello', icon: 'pregunta' },
+  // Lo primero que se elige: cuánto enseña la web. Se cambia luego en el pie.
+  { id: 'mode', icon: 'cifras' },
   { id: 'record', icon: 'expediente', go: 'expediente' },
   { id: 'waiting', icon: 'consulta', go: 'consulta' },
   { id: 'duty', icon: 'guardia', go: 'guardia' },
@@ -113,6 +116,7 @@ export function Welcome({ open, onGo, onClose }: WelcomeProps) {
       <span className="eyebrow">{t('welcome.step', { n: step + 1, total: SLIDES.length })}</span>
       <h3>{t(`welcome.${slide.id}.title`)}</h3>
       <p>{t(`welcome.${slide.id}.body`)}</p>
+      {slide.id === 'mode' && <DetailCards />}
       {slide.go !== undefined && (
         <button
           type="button"

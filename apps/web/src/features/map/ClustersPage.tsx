@@ -1,6 +1,7 @@
 import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
+import { Show } from '../../shared/detail'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { directChatId, openChat } from '../notices/conversations'
 import { ClusterMapView } from './ClusterMapView'
@@ -28,9 +29,11 @@ export function ClustersPage({ me }: { me: string }) {
 
       {map.data !== undefined && (
         <>
-          <p className="clusters-count" role="status">
-            <span className="seat-online sample" /> {t('clusters.count', { online, occupied })}
-          </p>
+          <Show from="datos">
+            <p className="clusters-count" role="status">
+              <span className="seat-online sample" /> {t('clusters.count', { online, occupied })}
+            </p>
+          </Show>
           <div className="card">
             <ClusterMapView
               map={map.data}

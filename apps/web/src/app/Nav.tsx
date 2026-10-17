@@ -1,8 +1,11 @@
+import { useEffect, useRef } from 'react'
+
+import { shows, useDetail } from '../shared/detail'
 import { useI18n } from '../shared/i18n'
 import { track, useNavOrder } from '../shared/layout/store'
-import { SECTIONS } from './sections'
-import type { Section } from './sections'
 import { Icon } from '../shared/ui/Icon'
+import { CATEGORIES, categoryOf, sectionsOfCategory } from './sections'
+import type { Category, Section } from './sections'
 
 type NavProps = {
   section: Section
@@ -11,34 +14,96 @@ type NavProps = {
   examLive?: boolean
 }
 
-// Las pestañas van en su propia fila, debajo de la marca y pegadas arriba al
-// bajar por la página. El orden es el que la persona ha elegido, o el automático.
+/** La última sección que se miró de cada categoría: se vuelve a ella. */
+const lastOf = new Map<Category, Section>()
+
+/**
+ * Las pestañas, en su propia fila debajo de la marca: arriba las categorías
+ * (Expediente, Ayuda, Calendario, Datos) y, si la abierta tiene varias
+ * secciones, una segunda fila con ellas, en el orden que la persona ha elegido
+ * (o el automático). Solo sale lo que toca en el modo de la interfaz.
+ */
 export function Nav({ section, onGo, examLive = false }: NavProps) {
   const { t } = useI18n()
   const order = useNavOrder()
-  // El expediente va siempre el primero: es donde se entra. El resto, en el orden elegido.
-  const tabs = [
-    ...SECTIONS.filter((entry) => entry.id === 'expediente'),
-    ...order.flatMap((id) => SECTIONS.filter((entry) => entry.id === id && entry.inNav)),
-  ]
+  const detail = useDetail()
+  const active = categoryOf(section)
+
+  const bar = useRef<HTMLElement>(null)
+
+  useEffect(() => {
+    if (active !== null) lastOf.set(active, section)
+  }, [active, section])
+
+  // En el móvil las filas se deslizan de lado: la pestaña abierta, a la vista.
+  useEffect(() => {
+    for (const element of bar.current?.parentElement?.querySelectorAll('[aria-current="page"]') ??
+      []) {
+      element.scrollIntoView({ block: 'nearest', inline: 'nearest' })
+    }
+  }, [section])
+
+  // Las de la categoría que tocan en este modo; las que se pueden reordenar, en
+  // el orden elegido.
+  const sectionsOf = (category: Category) => {
+    const all = sectionsOfCategory(category)
+
+    return [
+      ...all.filter((entry) => !entry.inNav),
+      ...order.flatMap((id) => all.filter((entry) => entry.id === id && entry.inNav)),
+    ].filter((entry) => shows(detail, entry.from ?? 'simple'))
+  }
+
+  const categories = CATEGORIES.filter(({ id }) => sectionsOf(id).length > 0)
+  const subs = active === null ? [] : sectionsOf(active)
+  const open = (category: Category): void => {
+    const choices = sectionsOf(category)
+    const remembered = lastOf.get(category)
+    const target = choices.find((entry) => entry.id === remembered) ?? choices[0]
+
+    if (target === undefined) return
+    track(`nav.${target.id}`)
+    onGo(target.id)
+  }
 
   return (
-    <nav className="tabs" aria-label={t('nav.label')}>
-      {tabs.map(({ id, icon }) => (
-        <button
-          key={id}
-          className={`tab ${section === id ? 'active' : ''}`}
-          aria-current={section === id ? 'page' : undefined}
-          onClick={() => {
-            track(`nav.${id}`)
-            onGo(id)
-          }}
-        >
-          <Icon name={icon} />
-          <span>{t(`nav.${id}`)}</span>
-          {id === 'examenes' && examLive && <b className="tab-live">{t('nav.examenesLive')}</b>}
-        </button>
-      ))}
-    </nav>
+    <>
+      <nav ref={bar} className="tabs" aria-label={t('nav.label')}>
+        {categories.map(({ id, icon }) => (
+          <button
+            key={id}
+            className={`tab ${active === id ? 'active' : ''}`}
+            aria-current={active === id ? 'page' : undefined}
+            title={t(`nav.cat.${id}.hint`)}
+            onClick={() => {
+              open(id)
+            }}
+          >
+            <Icon name={icon} />
+            <span>{t(`nav.cat.${id}`)}</span>
+            {examLive && id === 'datos' && <b className="tab-live">{t('nav.examenesLive')}</b>}
+          </button>
+        ))}
+      </nav>
+      {subs.length > 1 && (
+        <nav className="subtabs" aria-label={t(`nav.cat.${active ?? 'ayuda'}`)}>
+          {subs.map(({ id, icon }) => (
+            <button
+              key={id}
+              className={`subtab ${section === id ? 'active' : ''}`}
+              aria-current={section === id ? 'page' : undefined}
+              onClick={() => {
+                track(`nav.${id}`)
+                onGo(id)
+              }}
+            >
+              <Icon name={icon} size={16} />
+              <span>{t(`nav.${id}`)}</span>
+              {id === 'examenes' && examLive && <b className="tab-live">{t('nav.examenesLive')}</b>}
+            </button>
+          ))}
+        </nav>
+      )}
+    </>
   )
 }

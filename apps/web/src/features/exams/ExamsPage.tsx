@@ -5,6 +5,7 @@ import type { ExamStat, LiveExam, LiveExaminee } from '@sanatorio/contracts'
 import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { localeOf, useI18n } from '../../shared/i18n'
+import { Show } from '../../shared/detail'
 import { Avatar } from '../../shared/ui/Avatar'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { recordHref } from '../../shared/links'
@@ -63,21 +64,23 @@ export function ExamsPage() {
             </div>
           )}
           {stats.data.circles.length > 0 && (
-            <article className="card">
-              <span className="eyebrow">{t('exams.circles')}</span>
-              <p className="hint">{t('exams.circlesHint')}</p>
-              <ul className="rows">
-                {stats.data.circles.map((circle) => (
-                  <li key={circle.circle} className="row">
-                    <span>{t('graph.circle', { n: circle.circle })}</span>
-                    <strong>{t('exams.days', { n: circle.median })}</strong>
-                    <small className="hint">
-                      {t('exams.range', { p25: circle.p25, p75: circle.p75, n: circle.people })}
-                    </small>
-                  </li>
-                ))}
-              </ul>
-            </article>
+            <Show from="datos">
+              <article className="card">
+                <span className="eyebrow">{t('exams.circles')}</span>
+                <p className="hint">{t('exams.circlesHint')}</p>
+                <ul className="rows">
+                  {stats.data.circles.map((circle) => (
+                    <li key={circle.circle} className="row">
+                      <span>{t('graph.circle', { n: circle.circle })}</span>
+                      <strong>{t('exams.days', { n: circle.median })}</strong>
+                      <small className="hint">
+                        {t('exams.range', { p25: circle.p25, p75: circle.p75, n: circle.people })}
+                      </small>
+                    </li>
+                  ))}
+                </ul>
+              </article>
+            </Show>
           )}
         </>
       )}

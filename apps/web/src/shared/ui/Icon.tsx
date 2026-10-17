@@ -36,6 +36,13 @@ const PATHS = {
       <path d="M8.5 8.5h7M8.5 12h2.5" />
     </>
   ),
+  /** Categoría «Datos»: un gráfico de barras sobre su eje. */
+  cifras: (
+    <>
+      <path d="M4 4v16h16" />
+      <path d="M8 16v-4M12 16V8M16 16v-6" />
+    </>
+  ),
   /** Terapia de grupo: tres personas. */
   terapia: (
     <>

@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
+import { Show, shows, useDetail } from '../../shared/detail'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { DoubtDetailCard } from './DoubtDetailCard'
 import { DoubtForm } from './DoubtForm'
@@ -24,6 +25,7 @@ type DoubtBoardProps = {
  */
 export function DoubtBoard({ initialProject }: DoubtBoardProps) {
   const { t } = useI18n()
+  const detail = useDetail()
   const graph = useAsync(() => api.getDoubtGraph(), [])
   const [projectId, setProjectId] = useState<number | null>(initialProject)
   // Qué grafo se ve: el de tu avance o el de lo que has corregido.
@@ -65,22 +67,25 @@ export function DoubtBoard({ initialProject }: DoubtBoardProps) {
         <ErrorNote error={graph.error} onRetry={() => void graph.reload()} />
       ) : (
         <>
-          <div className="filter-pills graph-views" role="group" aria-label={t('cgraph.views')}>
-            {(['progress', 'corrections'] as const).map((option) => (
-              <button
-                key={option}
-                type="button"
-                className={`pill ${view === option ? 'active' : ''}`}
-                aria-pressed={view === option}
-                onClick={() => {
-                  setView(option)
-                }}
-              >
-                {t(`cgraph.view.${option}`)}
-              </button>
-            ))}
-          </div>
-          {view === 'progress' ? (
+          <Show from="normal">
+            <div className="filter-pills graph-views" role="group" aria-label={t('cgraph.views')}>
+              {(['progress', 'corrections'] as const).map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  className={`pill ${view === option ? 'active' : ''}`}
+                  aria-pressed={view === option}
+                  onClick={() => {
+                    setView(option)
+                  }}
+                >
+                  {t(`cgraph.view.${option}`)}
+                </button>
+              ))}
+            </div>
+          </Show>
+          {/* En el modo simplificado solo está el grafo de tu avance. */}
+          {view === 'progress' || !shows(detail, 'normal') ? (
             <HolyGraph graph={graph.data} selected={projectId} onSelect={select} />
           ) : (
             <CorrectionGraph graph={graph.data} selected={projectId} onSelect={select} />

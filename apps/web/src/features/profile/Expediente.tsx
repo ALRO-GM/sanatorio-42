@@ -7,6 +7,7 @@ import { api } from '../../shared/api'
 import { useAction } from '../../shared/hooks/useAsync'
 import type { AsyncState } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
+import { Show, useDetail } from '../../shared/detail'
 import { Blocks } from '../../shared/layout/Blocks'
 import { Avatar } from '../../shared/ui/Avatar'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
@@ -45,7 +46,9 @@ export function Expediente({ me, profile }: ExpedienteProps) {
   const { t } = useI18n()
   const { busy, error, run } = useAction()
   // Cómo se gana XP y cuánta llevas con cada cosa: plegado hasta que se pide.
-  const [showRules, setShowRules] = useState(false)
+  const detail = useDetail()
+  // En el modo de datos, el desglose de la XP viene abierto.
+  const [showRules, setShowRules] = useState(() => detail === 'datos')
 
   if (profile.loading) return <p>{t('xp.loading')}</p>
   if (profile.data === undefined) {
@@ -168,7 +171,9 @@ export function Expediente({ me, profile }: ExpedienteProps) {
                   ))}
                 </div>
                 <ErrorNote error={error} />
-                <HoursReport />
+                <Show from="normal">
+                  <HoursReport />
+                </Show>
               </article>
             ),
           },

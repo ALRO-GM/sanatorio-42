@@ -5,6 +5,7 @@ import type { Peer, ProjectStatus, ProjectSummary } from '@sanatorio/contracts'
 import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
+import { Show } from '../../shared/detail'
 import { Icon } from '../../shared/ui/Icon'
 import { Avatar } from '../../shared/ui/Avatar'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
@@ -149,26 +150,28 @@ export function PeerList({ project, onOpenTherapy }: PeerListProps) {
       {peers.length === 0 && <p>{t('peers.nobody')}</p>}
       <ProjectMap projectId={project.id} spotlight={spotlight} />
       <div className="filters">
-        <div className="filter-pills">
-          {(
-            [
-              ['all', t('peers.all', { n: byDuty.length })],
-              ['finished', t('peers.specialists', { n: specialistsCount })],
-              ['in_progress', t('peers.patients', { n: inProgressCount })],
-            ] as const
-          ).map(([value, label]) => (
-            <button
-              key={value}
-              className={`pill ${typeFilter === value ? 'active' : ''}`}
-              aria-pressed={typeFilter === value}
-              onClick={() => {
-                setTypeFilter(value)
-              }}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
+        <Show from="normal">
+          <div className="filter-pills">
+            {(
+              [
+                ['all', t('peers.all', { n: byDuty.length })],
+                ['finished', t('peers.specialists', { n: specialistsCount })],
+                ['in_progress', t('peers.patients', { n: inProgressCount })],
+              ] as const
+            ).map(([value, label]) => (
+              <button
+                key={value}
+                className={`pill ${typeFilter === value ? 'active' : ''}`}
+                aria-pressed={typeFilter === value}
+                onClick={() => {
+                  setTypeFilter(value)
+                }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </Show>
         <label className="duty-check">
           <input
             type="checkbox"
@@ -180,16 +183,18 @@ export function PeerList({ project, onOpenTherapy }: PeerListProps) {
           {t('peers.onlyOnDuty')}
         </label>
         {preReviewers > 0 && (
-          <label className="duty-check" title={t('peers.preReview.hint')}>
-            <input
-              type="checkbox"
-              checked={onlyPreReview}
-              onChange={(event) => {
-                setOnlyPreReview(event.target.checked)
-              }}
-            />
-            {t('peers.preReview.only', { n: preReviewers })}
-          </label>
+          <Show from="normal">
+            <label className="duty-check" title={t('peers.preReview.hint')}>
+              <input
+                type="checkbox"
+                checked={onlyPreReview}
+                onChange={(event) => {
+                  setOnlyPreReview(event.target.checked)
+                }}
+              />
+              {t('peers.preReview.only', { n: preReviewers })}
+            </label>
+          </Show>
         )}
         {bookableCount > 0 && (
           <label className="duty-check">
@@ -267,13 +272,15 @@ export function PeerList({ project, onOpenTherapy }: PeerListProps) {
                     </span>
                   )}
                 </span>
-                {crossed !== undefined ? (
-                  <small className="peer-crossed">
-                    {t('peers.crossed', { gave: crossed.gave, got: crossed.got })}
-                  </small>
-                ) : (
-                  known && <small className="peer-crossed new">{t('peers.neverCrossed')}</small>
-                )}
+                <Show from="datos">
+                  {crossed !== undefined ? (
+                    <small className="peer-crossed">
+                      {t('peers.crossed', { gave: crossed.gave, got: crossed.got })}
+                    </small>
+                  ) : (
+                    known && <small className="peer-crossed new">{t('peers.neverCrossed')}</small>
+                  )}
+                </Show>
               </div>
               {offer !== undefined && booking === peer.login ? (
                 <BookHelp

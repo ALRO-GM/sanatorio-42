@@ -22,29 +22,32 @@ export const NAV_DEFAULT = [
   'examenes',
 ] as const
 
-/** Bloques de cada página, en su orden de fábrica. `foldable`: se puede plegar. */
+/**
+ * Bloques de cada página, en su orden de fábrica. `foldable`: se puede plegar.
+ * `from`: desde qué modo de la interfaz sale (`shared/detail.tsx`).
+ */
 export const PAGES = {
   expediente: [
-    { id: 'record', foldable: true },
-    { id: 'health', foldable: true },
-    { id: 'network', foldable: true },
-    { id: 'achievements', foldable: true },
-    { id: 'ranking', foldable: true },
+    { id: 'record', foldable: true, from: 'simple' },
+    { id: 'health', foldable: true, from: 'simple' },
+    { id: 'network', foldable: true, from: 'normal' },
+    { id: 'achievements', foldable: true, from: 'normal' },
+    { id: 'ranking', foldable: true, from: 'normal' },
   ],
   guardia: [
     // Preevaluar es una de las cosas principales de la guardia: va la primera.
-    { id: 'prereview', foldable: false },
-    { id: 'today', foldable: true },
-    { id: 'bookings', foldable: true },
-    { id: 'blocked', foldable: true },
+    { id: 'prereview', foldable: false, from: 'simple' },
+    { id: 'today', foldable: true, from: 'simple' },
+    { id: 'bookings', foldable: true, from: 'simple' },
+    { id: 'blocked', foldable: true, from: 'normal' },
   ],
   red: [
-    { id: 'totals', foldable: false },
-    { id: 'endogamy', foldable: true },
-    { id: 'pairs', foldable: true },
-    { id: 'strictest', foldable: true },
-    { id: 'projects', foldable: true },
-    { id: 'about', foldable: false },
+    { id: 'totals', foldable: false, from: 'normal' },
+    { id: 'endogamy', foldable: true, from: 'datos' },
+    { id: 'pairs', foldable: true, from: 'datos' },
+    { id: 'strictest', foldable: true, from: 'datos' },
+    { id: 'projects', foldable: true, from: 'datos' },
+    { id: 'about', foldable: false, from: 'normal' },
   ],
 } as const
 
