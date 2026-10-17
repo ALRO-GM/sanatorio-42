@@ -343,7 +343,9 @@ button.link {
   height: 8px;
   border-radius: 50%;
   background: #6fbf8f;
-  animation: pulse 1.6s ease-in-out infinite;
+  /* Late al aparecer y se queda quieto: latiendo siempre, la pantalla no deja
+     de redibujarse (y en una lista hay muchos). */
+  animation: pulse 1.6s ease-in-out 3;
 }
 
 @keyframes pulse {

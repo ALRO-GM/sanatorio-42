@@ -5,6 +5,7 @@ import type { ClickerBoard } from '@sanatorio/contracts'
 
 import { api, ApiError } from '../../shared/api'
 import { useI18n } from '../../shared/i18n'
+import { useStill } from '../../shared/still'
 import { Avatar } from '../../shared/ui/Avatar'
 import { BigKey, Tile } from './art'
 import { CardView } from './Card'
@@ -162,6 +163,7 @@ export function CodeClicker({
   const egg = useEgg()
   // Con el pace en riesgo, media hora al día (no cuenta en segundo plano ni viendo otra).
   const limit = usePlayLimit(!background && spectate === undefined)
+  const still = useStill()
   const game = useRef<Game | null>(null)
   const names = useRef<string[]>([])
   const [, setFrame] = useState(0)
@@ -408,7 +410,8 @@ export function CodeClicker({
     }
   }, [offline, load])
 
-  // El reloj del juego, y los guardados periódicos.
+  // El reloj del juego: aparte de los guardados, para que cambiar de ritmo no
+  // los reinicie.
   useEffect(() => {
     const frame = window.setInterval(
       () => {
@@ -429,8 +432,17 @@ export function CodeClicker({
         loot.current = lootStep(loot.current, Date.now(), pool.current, Math.random)
         setFrame((value) => value + 1)
       },
-      background ? BACKGROUND_FRAME_MS : FRAME_MS,
+      // Fuera del juego o sin nadie mirando, basta con un fotograma por segundo.
+      background || still ? BACKGROUND_FRAME_MS : FRAME_MS,
     )
+
+    return () => {
+      window.clearInterval(frame)
+    }
+  }, [lang, toast, background, still])
+
+  // Los guardados periódicos, y uno al entrar o salir del juego.
+  useEffect(() => {
     const local = window.setInterval(() => {
       save(false)
     }, LOCAL_SAVE_MS)
@@ -444,13 +456,12 @@ export function CodeClicker({
     document.addEventListener('visibilitychange', onHide)
 
     return () => {
-      window.clearInterval(frame)
       window.clearInterval(local)
       window.clearInterval(server)
       document.removeEventListener('visibilitychange', onHide)
       save(true)
     }
-  }, [lang, save, toast, background])
+  }, [save, background])
 
   // El rótulo de noticias: una nueva cada pocos segundos, según cómo va la partida.
   useEffect(() => {
@@ -894,7 +905,8 @@ export function CodeClicker({
             aria-valuenow={Math.round(levelProgress(all) * 100)}
             aria-label={ui('levelBar', { n: level })}
           >
-            <i style={{ width: `${levelProgress(all) * 100}%` }} />
+            {/* Con el nivel como clave, las rayas vuelven a correr al subir. */}
+            <i key={level} style={{ width: `${levelProgress(all) * 100}%` }} />
             <b>
               {ui('levelBar', { n: level })} → {level + 1}
             </b>

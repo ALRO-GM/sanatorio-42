@@ -711,6 +711,16 @@ Otras decisiones que cuentan:
   por hora pasado un día y uno por día pasada una semana.
 - **Canvas y `ref`.** En los grafos, lo que cambia a cada fotograma no provoca
   repintados de React.
+- **Sin nadie mirando, nada se mueve.** Con la pestaña oculta, otra ventana
+  delante o 30 s sin tocar nada, todas las animaciones se pausan
+  (`shared/still.ts`) y Code Clicker pasa de 10 refrescos por segundo a 1. Las
+  animaciones que no paraban nunca (el punto que late, el brillo de las mejoras
+  del juego, los degradados del estilo bichota) ahora se mueven unas veces y se
+  quedan quietas: una sola animación infinita, aunque sea un punto de 8 px,
+  obliga a sacar fotogramas sin descanso. Medido con trazas de Chrome sobre la
+  versión de producción: Code Clicker en reposo pasa de componer fotogramas el
+  80 % del tiempo a menos del 1 %, y una página con el estilo bichota, de
+  rasterizar el 37 % del tiempo a nada.
 
 Medido en producción el 12 de octubre de 2026, desde fuera de la máquina:
 

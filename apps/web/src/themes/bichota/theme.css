@@ -147,7 +147,7 @@
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  animation: bichota-flow 6s ease-in-out infinite;
+  animation: bichota-flow 6s ease-in-out 2;
 }
 :root[data-style='bichota'] h3,
 :root[data-style='bichota'] h4 {
@@ -166,7 +166,7 @@
   border-radius: 4px;
   background: var(--bichota-gold);
   background-size: 250% 100%;
-  animation: bichota-shine 3.2s linear infinite;
+  animation: bichota-shine 3.2s linear 2;
 }
 
 /* La marca y los botones principales: fucsia en movimiento, con borde de oro. */
@@ -180,7 +180,7 @@
   background-size: 300% 100%;
   box-shadow: var(--primary-shadow);
   color: var(--on-accent);
-  animation: bichota-flow 5s ease-in-out infinite;
+  animation: bichota-flow 5s ease-in-out 2;
 }
 :root[data-style='bichota'] .brand-mark {
   background:
@@ -229,7 +229,7 @@
     transparent 60%
   );
   background-size: 250% 100%;
-  animation: bichota-shine 4.5s linear infinite;
+  animation: bichota-shine 4.5s linear 2;
   pointer-events: none;
 }
 
@@ -243,7 +243,7 @@
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  animation: bichota-shine 3.6s linear infinite;
+  animation: bichota-shine 3.6s linear 2;
 }
 :root[data-style='bichota'] .eyebrow {
   color: var(--accent-text);
@@ -254,7 +254,7 @@
   border-radius: 3px;
   background: var(--bichota-flow);
   background-size: 300% 100%;
-  animation: bichota-flow 5s ease-in-out infinite;
+  animation: bichota-flow 5s ease-in-out 2;
 }
 :root[data-style='bichota'] .badge.on,
 :root[data-style='bichota'] .chip {
@@ -301,6 +301,16 @@
 }
 :root[data-style='bichota'][data-theme='dark'] main section > p.hint {
   color: var(--text-2);
+}
+
+/* Los degradados se mueven dos veces al aparecer y, después, solo bajo el
+   ratón: moverlos siempre obliga a repintarlos en cada fotograma, y con la web
+   abierta un rato calentaba el ordenador y el móvil. */
+:root[data-style='bichota'] .brand-mark:hover,
+:root[data-style='bichota'] button.primary:hover:not(:disabled),
+:root[data-style='bichota'] a.button.primary:hover,
+:root[data-style='bichota'] .pill.active:hover:not(:disabled) {
+  animation-iteration-count: infinite;
 }
 
 /* Quien pide menos movimiento lo ve quieto: mismos colores, sin vaivén. */

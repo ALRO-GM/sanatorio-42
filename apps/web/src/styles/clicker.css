@@ -1003,7 +1003,9 @@ dialog.cc-pill-dialog h3::before {
   );
   background-size: 23px 100%;
   transition: width 0.3s ease-out;
-  animation: cc-stripes 1.2s linear infinite;
+  /* Las rayas corren al subir de nivel, no siempre (repintar la barra en cada
+     fotograma no compensa). */
+  animation: cc-stripes 1.2s linear 2;
 }
 .cc-level b {
   position: relative;
@@ -1295,9 +1297,12 @@ small.cc-bugs {
   animation: cc-pop-in 0.4s cubic-bezier(0.3, 1.6, 0.5, 1);
 }
 .cc-upgrade.can {
+  /* El brillo de «se puede comprar» late tres veces y se queda: un filtro que
+     late siempre obliga a repintar cada botón en cada fotograma. */
+  filter: drop-shadow(0 0 4px var(--cc-main));
   animation:
     cc-pop-in 0.4s cubic-bezier(0.3, 1.6, 0.5, 1),
-    cc-glow 1.6s ease-in-out 0.4s infinite;
+    cc-glow 1.6s ease-in-out 0.4s 3;
 }
 .cc-upgrade.poor {
   opacity: 0.55;

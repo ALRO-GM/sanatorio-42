@@ -67,3 +67,14 @@
 :root[data-zen='on'] body {
   background: var(--bg) !important;
 }
+
+/* Con la web quieta (pestaña oculta, ventana sin foco o 30 s sin tocar nada,
+   `src/shared/still.ts`), todas las animaciones en pausa: una que no para
+   obliga a sacar fotogramas sin descanso aunque nadie mire, y calienta el
+   ordenador y el móvil. Al volver, siguen donde se quedaron. Las
+   demostraciones no: quien las mira no suele mover el ratón. */
+:root[data-still='on'] :not(.tour, .tour *),
+:root[data-still='on'] :not(.tour, .tour *)::before,
+:root[data-still='on'] :not(.tour, .tour *)::after {
+  animation-play-state: paused !important;
+}
