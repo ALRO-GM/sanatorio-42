@@ -99,6 +99,12 @@ const capitalSchema = z.object({
   to: z.coerce.number().int().min(0).optional(),
 })
 const idSchema = z.coerce.number().int().min(1)
+/**
+ * Quien no sale en la clasificación (lo pidió): juega igual, pero no ocupa
+ * puesto ni cuenta para los de los demás.
+ */
+export const HIDDEN_FROM_BOARD: ReadonlySet<string> = new Set(['albrodri'])
+
 /** Cada cuánto se vuelve a preguntar a 42 lo donado a la bolsa. */
 export const DONATED_TTL_MS = 24 * 3_600_000
 const sanctionSchema = z.object({
@@ -991,6 +997,7 @@ export function createClickerService(options: ClickerServiceOptions) {
          WHERE pill = 'red' AND save IS NOT NULL`,
       )
       const rows = result.rows
+        .filter((entry) => !HIDDEN_FROM_BOARD.has(toText(entry.login)))
         .map((entry) => ({ entry, wealth: wealthOf(readSave(toText(entry.save))) }))
         .sort(
           (a, b) =>

@@ -87,6 +87,25 @@ describe('code clicker', () => {
     await expectCode(clicker.board(actor('leo')), 'forbidden')
   })
 
+  it('quien pidió no salir en la clasificación no sale, ni para los demás ni para sí', async () => {
+    const { clicker } = services
+
+    for (const login of ['ana', 'albrodri']) {
+      await press(login, 42)
+      await clicker.choose(actor(login), { pill: 'red' })
+      await clicker.save(actor(login), {
+        ...SAVE,
+        save: game({ code: login === 'ana' ? 10 : 1e6 }),
+      })
+    }
+
+    expect((await clicker.board(actor('ana'))).entries).toMatchObject([{ rank: 1, login: 'ana' }])
+    expect(await clicker.board(actor('albrodri'))).toMatchObject({
+      entries: [{ login: 'ana' }],
+      me: null,
+    })
+  })
+
   it('con la roja se guarda la partida y se entra en la clasificación', async () => {
     const { clicker } = services
 
