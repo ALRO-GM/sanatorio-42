@@ -60,7 +60,7 @@ mensaje, una revisión completa. Se hace por bloques; cada bloque termina con
       claves sin uso y tabla generada al día. Regla estricta en `AGENTS.md`.
 - [x] **4. Claridad del español.** Repasar los textos: frases breves, con
       sentido y bien construidas. Ajustar las traducciones que cambien.
-- [ ] **5. Categorías y modos.** Agrupar las pestañas: Expediente · Ayuda
+- [x] **5. Categorías y modos.** Agrupar las pestañas: Expediente · Ayuda
       (sala de espera, tablón, terapia, pizarras) · Calendario · Datos (red,
       clústers, exámenes). Tres modos de interfaz a elegir (simplificado,
       normal, loco por los datos) con la importancia de cada elemento por

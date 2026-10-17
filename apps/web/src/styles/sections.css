@@ -476,6 +476,11 @@ input[type='checkbox'] {
   justify-content: space-between;
   margin-bottom: 0.75rem;
 }
+/* Mes anterior y siguiente, uno al lado del otro. */
+.cal-head > span {
+  display: inline-flex;
+  gap: 0.25rem;
+}
 .icon-btn {
   width: 32px;
   height: 32px;
@@ -985,7 +990,10 @@ dialog.help-gate.news {
 .boards-list-title {
   margin: 0 0 0.6rem;
   font-size: 1rem;
-  text-transform: capitalize;
+}
+/* Solo la primera letra: «Martes, 23 de octubre», no «Próximas Pizarras Con Plaza». */
+.boards-list-title::first-letter {
+  text-transform: uppercase;
 }
 
 /* La bienvenida: una diapositiva cada vez, con su icono grande y los puntos. */

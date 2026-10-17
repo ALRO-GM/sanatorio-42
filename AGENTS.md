@@ -101,8 +101,15 @@ Monorepo con workspaces de npm. Ver `README.md` y `docs/architecture.md`.
 - Textos en segunda persona y con lenguaje inclusivo (evitar formas con género
   cuando se pueda).
 - Lo primero que se ve al entrar es el expediente: es la portada y la primera
-  pestaña. La navegación entre secciones va en su propia fila, debajo de la
-  marca. Arriba a la derecha solo hay cuatro cosas: el buscador de personas, la
+  pestaña. La navegación va en su propia fila, debajo de la marca: cuatro
+  categorías (Expediente, Ayuda, Calendario, Datos) y, debajo, las secciones de
+  la abierta (`CATEGORIES` en `app/sections.ts`).
+- **Funcionalidad nueva**: antes de escribir código se decide su categoría, si
+  es sección o bloque, desde qué modo de la interfaz sale (simplificado,
+  normal o loco por los datos: `from` y `<Show>` de `shared/detail.tsx`) y su
+  importancia, siguiendo la regla de `docs/interfaz.md`; se apunta allí y se
+  dice en la respuesta. Mejor un bloque en una sección que existe que una
+  sección nueva. Arriba a la derecha solo hay cuatro cosas: el buscador de personas, la
   guardia, el buzón y el menú de la cuenta, que recoge lo demás (panel,
   personalizar, incidencias y sugerencias, salir). No añadas botones sueltos a la cabecera: van al menú. El
   idioma y campus van en el pie.
