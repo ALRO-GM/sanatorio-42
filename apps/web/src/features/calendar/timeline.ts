@@ -17,6 +17,21 @@ export const LAYOUTS = ['list', 'full', 'fit', 'now'] as const
 
 export type Layout = (typeof LAYOUTS)[number]
 
+/**
+ * Como poco, estas horas a la vista: con menos (a última hora, «desde ahora»)
+ * todo se apelotona. Se completa hacia atrás si el día se acaba.
+ */
+const MIN_SPAN = 3
+
+/** Con al menos `MIN_SPAN` horas, sin salirse de 0–24. */
+function widened(from: number, to: number): { from: number; to: number } {
+  if (to - from >= MIN_SPAN) return { from, to }
+
+  const end = Math.min(24, from + MIN_SPAN)
+
+  return { from: Math.max(0, end - MIN_SPAN), to: Math.max(to, end) }
+}
+
 /** El tramo que se enseña sin nada que mirar: un día de clase. */
 const EMPTY_RANGE = { from: 8, to: 20 }
 
@@ -61,17 +76,17 @@ export function hourRange(
   if (layout === 'now' && today !== undefined) {
     const from = Math.floor(hoursIn(today, now.toISOString()))
 
-    return {
+    return widened(
       from,
-      to: Math.min(24, Math.max(from + 1, Math.ceil(last === -Infinity ? from + 4 : last))),
-    }
+      Math.min(24, Math.max(from + 1, Math.ceil(last === -Infinity ? from + 4 : last))),
+    )
   }
 
   if (first === Infinity) return EMPTY_RANGE
 
   const from = Math.floor(first)
 
-  return { from, to: Math.max(from + 1, Math.ceil(last)) }
+  return widened(from, Math.max(from + 1, Math.ceil(last)))
 }
 
 /**

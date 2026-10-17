@@ -67,7 +67,8 @@ export function DayTimeline({ days, events, layout, week, onOpen, onOpenDay }: D
         </p>
       )}
       <div
-        className={`timeline ${week ? 'week' : 'day'}`}
+        // `one-day`, no `day`: `.day` es la bolita de los días de las terapias.
+        className={`timeline ${week ? 'week' : 'one-day'}`}
         style={{ gridTemplateColumns: `3.2rem repeat(${days.length}, minmax(0, 1fr))` }}
       >
         {week && <span aria-hidden="true" />}

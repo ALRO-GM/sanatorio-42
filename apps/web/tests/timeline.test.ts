@@ -29,6 +29,24 @@ describe('las horas del calendario', () => {
     expect(hourRange('fit', [], [day], day)).toEqual({ from: 8, to: 20 })
   })
 
+  it('a última hora no se apelotona: siempre se ven al menos tres horas', () => {
+    // Desde ahora a las 23:20, sin nada más: de 21 a 24, no solo de 23 a 24.
+    expect(hourRange('now', events, [day], new Date(2026, 9, 16, 23, 20))).toEqual({
+      from: 21,
+      to: 24,
+    })
+    // Ajustada con un solo evento de media hora: tres horas desde su inicio.
+    expect(hourRange('fit', [event('c', at(9), at(9, 30))], [day], day)).toEqual({
+      from: 9,
+      to: 12,
+    })
+    // Al final del día, se completa hacia atrás.
+    expect(hourRange('fit', [event('d', at(23), at(23, 30))], [day], day)).toEqual({
+      from: 21,
+      to: 24,
+    })
+  })
+
   it('pone uno al lado del otro los eventos que se pisan', () => {
     const placed = lanesOf(
       [
