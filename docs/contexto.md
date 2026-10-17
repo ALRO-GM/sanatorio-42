@@ -74,9 +74,8 @@ que hacer, en orden. Este documento es el porqué; aquel, el qué.
     (22, 24 o black hole; `limit.ts`, en el navegador) y logros y producción
     por los puntos de evaluación donados a la bolsa de 42 (migración 50; una
     petición al día por persona a `correction_point_historics`, se cuenta lo
-    que resta y lleva «pool» en el motivo). **Por confirmar** que 42 escribe
-    «pool» en el motivo: mirar `SELECT login, donated FROM clicker WHERE
-    donated_at IS NOT NULL` cuando haya gente jugando.
+    que resta y lleva «pool» en el motivo). Comprobado con datos reales el
+    2026-10-17: se leen bien.
   - **Comodidad**: tamaño del texto, daltonismo, modo zen (`shared/comfort.ts`
     y `public/theme.js`), bienvenida (`features/welcome`) y pestañas en
     desplegable en el móvil.

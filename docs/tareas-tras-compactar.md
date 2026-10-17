@@ -103,12 +103,13 @@ Pendientes de antes: rotar el secreto de 42 (Alberto), primera cuenta de staff, 
 
 ## 3. A medias o por confirmar con Alberto
 
-- **Comprobar con datos reales** (el 2026-10-17 aún no había): que lo donado
-  a la bolsa sale (`SELECT login, donated FROM clicker WHERE donated_at IS NOT
-  NULL`) y que los intentos de examen se guardan (`SELECT COUNT(*) FROM
-  exam_attempts`). Si el segundo sigue a cero con la copia avanzando, 42 no
-  manda `teams` en `/projects_users`: las estadísticas cuentan entonces por
-  `occurrence` y habría que pedir los intentos de otra forma.
+- **Comprobar los intentos de examen** (`SELECT COUNT(*) FROM exam_attempts`
+  y las claves `exams:%` de `sync_state`). La copia de fondo solo avanza con
+  la web sin uso 10 minutos; el 2026-10-17 por la mañana aún no había
+  empezado. Si avanza y `exam_attempts` sigue a cero, 42 no manda `teams` en
+  `/projects_users`: las estadísticas cuentan por `occurrence` y habría que
+  pedir los intentos de otra forma. (Lo donado a la bolsa ya está
+  comprobado: se lee bien.)
 - **Bolsa común de Code Clicker**: con la política nueva ya no se llena y su
   placa no sale. Preguntar a Alberto si se quita del todo (`loot.ts`,
   `clicker_pool`, `POST /clicker/pool/claim`).
