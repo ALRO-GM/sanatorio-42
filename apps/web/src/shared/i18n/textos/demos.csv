@@ -1,7 +1,7 @@
 clave,contexto,es,en,ca,eu
 tour.replay,Botón para repetir la demostración animada,Ver otra vez,Watch again,Torna-ho a veure,Ikusi berriro
 tour.speed,Botón de velocidad de la demostración,Velocidad ×{n},Speed ×{n},Velocitat ×{n},Abiadura ×{n}
-tour.guard.1,Demostración animada de la guardia: frase del paso 1,Marca las medias horas en las que te ofreces hoy.,Mark the half hours you offer today.,Marca les mitges hores en què t'ofereixes avui.,Markatu gaur eskaintzen zaren ordu erdiak.
+tour.guard.1,Demostración animada de la guardia: frase del paso 1,Arrastra por las medias horas en las que te ofreces hoy.,Drag over the half hours you offer today.,Arrossega per les mitges hores en què t'ofereixes avui.,Arrastatu gaur eskaintzen zaren ordu erdietatik.
 tour.guard.2,Demostración animada de la guardia: frase del paso 2,Elige cuánto tiempo quieres ayudar como mucho.,Choose how long you want to help at most.,Tria quant de temps vols ajudar com a molt.,Aukeratu gehienez zenbat denbora lagundu nahi duzun.
 tour.guard.3,Demostración animada de la guardia: frase del paso 3,"Si quieres, ofrécete también a preevaluar proyectos.","If you like, offer to pre-review projects too.","Si vols, ofereix-te també a preavaluar projectes.","Nahi baduzu, eskaini proiektuak aurre-ebaluatzeko ere."
 tour.guard.4,Demostración animada de la guardia: frase del paso 4,Guarda tu guardia: ya te pueden reservar.,Save your shift: you can now be booked.,Desa la teva guàrdia: ja et poden reservar.,Gorde zure guardia: orain erreserba zaitzakete.

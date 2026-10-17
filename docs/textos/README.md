@@ -16,7 +16,7 @@ Cómo se trabaja con ellas: [docs/textos.md](../textos.md).
 | [examenes](examenes.md) | 25 | 0 | 0 | 0 |
 | [expediente](expediente.md) | 120 | 0 | 0 | 0 |
 | [gestion](gestion.md) | 440 | 38 | 400 | 400 |
-| [guardia](guardia.md) | 77 | 0 | 0 | 0 |
+| [guardia](guardia.md) | 79 | 0 | 0 | 0 |
 | [legal](legal.md) | 52 | 0 | 52 | 52 |
 | [notgames](notgames.md) | 65 | 0 | 0 | 0 |
 | [pizarras](pizarras.md) | 37 | 0 | 0 | 0 |

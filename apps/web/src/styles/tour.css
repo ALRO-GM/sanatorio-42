@@ -154,12 +154,34 @@ dialog.info-dialog {
 .tour-end {
   margin-left: auto;
 }
-.tour-slots {
+.tour-slot-day {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0.4em;
 }
-.tour-slots span,
+.tour-slot-row {
+  display: grid;
+  grid-template-columns: 3em 1fr;
+  align-items: center;
+}
+.tour-slot {
+  height: 1.3em;
+  margin: 1px 0;
+  border-radius: 0.5em;
+  background: var(--surface-2);
+  transition: background 0.18s;
+}
+.tour-slot.on {
+  background: var(--accent);
+}
+.tour-slot.on.joined-above {
+  margin-top: 0;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+.tour-slot.on.joined-below {
+  margin-bottom: 0;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
 .tour-seat,
 .tour-day {
   border: 2px solid var(--border);
@@ -172,10 +194,6 @@ dialog.info-dialog {
     color 0.18s,
     opacity 0.3s;
 }
-.tour-slots span {
-  padding: 0.4em 0;
-}
-.tour-slots span.on,
 .tour-seat.on,
 .tour-day.on,
 .tour-pill.on {

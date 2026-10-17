@@ -1,25 +1,65 @@
 /* ── Guardia: franjas, reservas y valoraciones ───────────────────────────── */
 
-.slot-grid {
+/* El día de la guardia, como el día del calendario: las horas a la izquierda
+   y una media hora por fila. Las marcadas seguidas forman un bloque. */
+.slot-day {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(62px, 1fr));
-  gap: 0.35rem;
-  margin: 0.75rem 0 1rem;
+  margin: 0.5rem 0 1rem;
+  user-select: none;
+}
+.slot-row {
+  display: grid;
+  grid-template-columns: 3.2rem 1fr;
+  align-items: stretch;
+}
+/* La raya de cada hora, solo en su columna: así un bloque marcado se ve entero. */
+.slot-row.hour .slot-hour {
+  border-top: 1px solid var(--border);
+}
+.slot-hour {
+  padding-right: 0.4rem;
+  transform: translateY(-0.55em);
+  text-align: right;
+  font-size: 0.7rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-3);
 }
 button.slot {
-  padding: 0.4rem 0;
-  border: 2px solid var(--border);
-  border-radius: 10px;
-  background: var(--surface);
-  color: var(--text);
-  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 26px;
+  margin: 1px 0;
+  padding: 0 0.6rem;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: var(--surface-2);
+  color: var(--text-2);
+  font-size: 0.78rem;
   font-variant-numeric: tabular-nums;
+  text-align: left;
+  /* Arrastrar con el dedo marca; para desplazarse, por la columna de las horas. */
+  touch-action: none;
+  transition: background 0.12s ease;
+}
+button.slot:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--accent) 22%, var(--surface-2));
 }
 button.slot.active {
   background: var(--accent);
   border-color: var(--accent);
   color: var(--on-accent);
   font-weight: 700;
+}
+button.slot.joined-above {
+  margin-top: 0;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+button.slot.joined-below {
+  margin-bottom: 0;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
 }
 /* Una corrección de 42 pisa esa media hora: naranja, como en el calendario. */
 button.slot.busy {
@@ -32,9 +72,20 @@ button.slot.busy.active {
   background: color-mix(in srgb, #d9822b 30%, var(--surface));
   text-decoration: line-through;
 }
+button.slot.booked {
+  box-shadow: inset 3px 0 0 var(--ok);
+}
 button.slot:disabled {
   opacity: 0.4;
   cursor: default;
+}
+button.slot.active:disabled {
+  opacity: 0.75;
+}
+.slot-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .help-summary {
   align-self: end;

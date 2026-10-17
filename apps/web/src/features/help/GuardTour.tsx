@@ -40,11 +40,13 @@ const drag = (at: number, to: string, pan: Guard['pan']): Cue<Guard>[] => [
 ]
 
 export const TOUR = defineTour<Guard>('guard', START, [
-  // Escena 1: marcar cuatro medias horas, el tope, preevaluar y guardar.
-  ...click<Guard>(300, 'slot2', { slots: [2] }),
-  ...click<Guard>(1150, 'slot3', { slots: [2, 3] }),
-  ...click<Guard>(2000, 'slot4', { slots: [2, 3, 4] }),
-  ...click<Guard>(2850, 'slot5', { slots: [2, 3, 4, 5] }),
+  // Escena 1: arrastrar por cuatro medias horas, el tope, preevaluar y guardar.
+  [300, { cursor: 'slot2' }],
+  [1000, { press: true, slots: [2] }],
+  [1500, { cursor: 'slot3', slots: [2, 3] }],
+  [2000, { cursor: 'slot4', slots: [2, 3, 4] }],
+  [2500, { cursor: 'slot5', slots: [2, 3, 4, 5] }],
+  [3100, { press: false }],
   [3700, { caption: 2 }],
   ...click<Guard>(3700, 'max', { menu: true }),
   ...click<Guard>(4600, 'opt30', { menu: false, max: 30 }),
@@ -91,14 +93,19 @@ export function GuardTour() {
         shot.scene === 0 ? (
           <div className="tour-card">
             <strong>{t('help.today')}</strong>
-            <div className="tour-slots">
+            <div className="tour-slot-day">
               {SLOTS.map((time, index) => (
-                <span
-                  key={time}
-                  data-tour={`slot${index}`}
-                  className={shot.slots.includes(index) ? 'on' : ''}
-                >
-                  {time}
+                <span key={time} className="tour-slot-row">
+                  <small className="tour-muted">{time.endsWith(':00') ? time : ''}</small>
+                  <span
+                    data-tour={`slot${index}`}
+                    className={[
+                      'tour-slot',
+                      shot.slots.includes(index) ? 'on' : '',
+                      shot.slots.includes(index - 1) ? 'joined-above' : '',
+                      shot.slots.includes(index + 1) ? 'joined-below' : '',
+                    ].join(' ')}
+                  />
                 </span>
               ))}
             </div>
