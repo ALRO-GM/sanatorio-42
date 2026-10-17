@@ -69,8 +69,16 @@ mensaje, una revisión completa. Se hace por bloques; cada bloque termina con
       su categoría y en qué modo sale.
 - [x] **6. Demostraciones animadas.** Revisar cómo se hacen, unificar
       criterios y dejar una plantilla (`shared/tour/`) y su guía.
-- [ ] **7. README.** Al día con todas las funcionalidades, las categorías y
+- [x] **7. README.** Al día con todas las funcionalidades, las categorías y
       los modos.
+
+Hecho además, a petición durante la revisión: tablas ordenables con cabecera
+fija, apartado de trampas de Code Clicker, estado de salud ordenado y nombres
+de las noticias del juego por correcciones.
+
+Siguiente tanda propuesta (sin empezar, pedir a Alberto): las mejoras de la
+última columna de la valoración de uso de `docs/interfaz.md` (avisos apilados
+en la guardia, eventos cortados en el calendario, demostración de Exámenes).
 
 ## 3. A medias o por confirmar con Alberto
 

@@ -33,8 +33,8 @@ hecho de principio a fin: producto, diseño, código, despliegue y operación.
 | ----------------------- | ----------------------------------------------------------------------------------------------------- |
 | **Qué es**              | Aplicación web completa: API, web, base de datos y despliegue                                         |
 | **Tecnología**          | TypeScript de punta a punta · Node 22 y Fastify · React 19 y Vite · SQLite · Docker y Caddy           |
-| **Tamaño** | 20 módulos de API, 114 rutas, 34 migraciones, 15 secciones de web, 5 estilos visuales, 4 idiomas |
-| **Calidad** | 608 tests automáticos (cobertura del 97 % en la API), tipos estrictos, lint con fronteras entre módulos y CI en cada subida |
+| **Tamaño** | 22 módulos de API, 142 rutas, 52 migraciones, 4 categorías con 13 secciones, 3 modos de interfaz, 5 estilos, 4 idiomas |
+| **Calidad** | 918 tests automáticos (97 % de cobertura en la API, mínimos que solo suben), pantallas probadas como las usa una persona, sin código muerto ni duplicado, y un despliegue que no sale sin la CI en verde |
 | **Seguridad** | Revisión completa documentada: permisos con doble cerradura, topes de intentos y un test que recorre todas las rutas con entradas imposibles |
 | **Datos**               | 193 784 correcciones y 15 032 personas de 4 campus copiadas de la API de 42                           |
 | **Rendimiento**         | Consultas hasta 100 veces más rápidas tras la revisión; la portada llega en unos 33 ms                |
@@ -58,6 +58,7 @@ Lo que este proyecto enseña de quien lo ha hecho:
 ## Índice
 
 - [Funcionalidades](#funcionalidades)
+  - [Cuatro categorías y tres modos](#cuatro-categorías-y-tres-modos)
   - [Expediente](#expediente)
   - [Sala de espera](#sala-de-espera)
   - [Guardia](#guardia)
@@ -67,7 +68,8 @@ Lo que este proyecto enseña de quien lo ha hecho:
   - [Calendario](#calendario)
   - [Avisos y sala del evento](#avisos-y-sala-del-evento)
   - [Red de correcciones](#red-de-correcciones)
-  - [Clústers](#clústers)
+  - [Clústeres](#clústeres)
+  - [Exámenes](#exámenes)
   - [Buscador de personas](#buscador-de-personas)
   - [Demostraciones animadas](#demostraciones-animadas)
   - [Personalizar y estilos](#personalizar-y-estilos)
@@ -98,6 +100,21 @@ Lo que este proyecto enseña de quien lo ha hecho:
 
 Las capturas son del estado actual de la web, con los datos simulados de
 `npm run dev:mock`: ninguna persona que aparece es real.
+
+### Cuatro categorías y tres modos
+
+Arriba hay cuatro pestañas agrupadas por para qué sirve cada cosa: **Expediente**
+(lo tuyo), **Ayuda** (sala de espera, tablón, terapia y pizarras: quedar con
+gente para pedir y dar ayuda, aprender y enseñar), **Calendario** y **Datos**
+(red, clústeres y exámenes). La abierta enseña sus secciones en una segunda
+fila, y al volver a ella se abre la última que se miró.
+
+Cada cual elige cuánto enseña la web, en el pie o en la bienvenida:
+**simplificado** (lo justo para pedir y dar ayuda, sin cifras ni rankings),
+**normal** o **loco por los datos** (rankings, estadísticas y desgloses
+abiertos). Cada elemento dice desde qué modo sale; el mapa entero, con el porqué
+y una valoración de uso de cada pantalla, está en
+[docs/interfaz.md](docs/interfaz.md).
 
 ### Expediente
 
@@ -192,13 +209,24 @@ desplaza con dos dedos.
 
 ![Red de correcciones](docs/img/red.webp)
 
-### Clústers
+### Clústeres
 
 El mapa del campus entero. Al pulsar un puesto ocupado, la ficha de esa persona
 se queda abierta con sus proyectos y los botones para escribirle o abrir su
-expediente. Un punto verde marca a quien tiene Sanatorio abierto.
+expediente. Un punto verde marca a quien tiene Sanatorio abierto. Se puede
+resaltar a tu círculo o a quien hace tu proyecto, girar el plano y avisar de un
+ordenador que no funciona (se da por arreglado en cuanto alguien inicia sesión
+en él).
 
-![Clústers con una ficha abierta](docs/img/clusters.webp)
+![Clústeres con una ficha abierta](docs/img/clusters.webp)
+
+### Exámenes
+
+Cuando empieza un examen en tu campus, la pestaña de Datos lo avisa «en vivo»:
+quién está dentro, de qué examen y círculo, y su última nota, que se pone al día
+cada cinco minutos. Debajo, las estadísticas de cada examen (en qué intento se
+aprueba, nota media por intento) y, en el modo de datos, cuánto se tarda en
+cada círculo.
 
 ### Buscador de personas
 
@@ -212,7 +240,11 @@ mayúsculas ni acentos, y enseña foto y nombre.
 La web no lleva párrafos de ayuda. Junto a cada título hay un icono de
 información que abre una demostración: un ratón que hace lo que harías tú, con
 una frase corta por acción. La velocidad se puede regular, y la que viene de
-fábrica se ajusta sola con lo que elige la comunidad.
+fábrica se ajusta sola con lo que elige la comunidad. Todas siguen los mismos
+criterios (una frase de 70 caracteres como mucho por acción, 20 s de guion, el
+ratón solo hacia lo que existe), que los tests comprueban solos, y una nueva se
+empieza con `npm run demo:new` desde una plantilla
+([docs/demos.md](docs/demos.md)).
 
 ![Demostración del calendario de pizarras](docs/img/demostracion.webp)
 
@@ -227,8 +259,11 @@ ningún componente (lo explica
 
 ![Los cinco estilos y la ventana de personalizar](docs/img/estilos.webp)
 
-Idiomas: español e inglés completos; catalán y euskera en los textos de las
-secciones (874 de 1 215; el resto cae al español).
+Idiomas: español, inglés, catalán y euskera, completos salvo el panel de
+gestión y el texto legal en catalán y euskera. Los textos no están en el código:
+viven en tablas por tema (un CSV con clave, contexto y una columna por idioma)
+que se editan como una hoja de cálculo; cada idioma se descarga solo si se usa
+([docs/textos.md](docs/textos.md)).
 
 ### En el móvil
 
@@ -249,12 +284,14 @@ Solo para quien administra. Nueve pestañas:
 | Mensajes             | Registro de lo que se escribe en los chats                                                             |
 | Qué se usa           | Mapa de calor de cada elemento y grafo de recorridos entre secciones                                   |
 | Estadísticas         | Tiempo de uso por persona, quién está conectado ahora y cuánto lleva                                   |
-| Code Clicker         | Uso del juego, trampas detectadas con copia de la partida, indulto y avisos de saltos sospechosos      |
+| Code Clicker         | Uso del juego y un apartado de trampas: quién, cuándo, cómo se vio, qué se requisó, indulto, avisos de saltos y un comunicado solo para quienes las hicieron |
 | Comunicados          | Mensajes para todo el mundo                                                                            |
 | Limpiar datos        | Borrado a mano de cualquier dato, global o de una persona, entero o desde una fecha                    |
 
 Nada se borra solo: lo único que elimina datos es «Limpiar datos», que antes
-enseña en una ventana qué va a borrar y cuánto.
+enseña en una ventana qué va a borrar y cuánto. Todas las tablas del panel
+dejan la cabecera fija al bajar y se ordenan por varias columnas: la última que
+se pulsa manda y las anteriores deciden los empates.
 
 ![Consumo](docs/img/panel-consumo.webp)
 
@@ -496,28 +533,36 @@ Lo que impide que una funcionalidad nueva rompa otra, por orden de cuándo actú
    (`no-restricted-imports` en `eslint.config.js`). Solo `replica` habla con 42.
 4. **Entradas validadas.** Las variables de entorno se validan al arrancar y el
    cuerpo de cada petición, con zod en la ruta.
-5. **Migraciones inmutables.** Un cambio de esquema es un fichero nuevo; los 34
+5. **Migraciones inmutables.** Un cambio de esquema es un fichero nuevo; los 52
    existentes no se editan. Se aplican solas al arrancar.
 6. **Reglas en funciones puras.** Lo delicado (XP, asistencia, presupuesto,
    trampas, recorridos) vive en ficheros `*.rules.ts` sin base de datos ni
    reloj, con sus tests. Los tests usan un reloj falso: no dependen de la hora.
-7. **Tests.** 483 de la API (unidad e integración sobre SQLite en memoria, con
-   la API de 42 simulada; cubren el 97 % de las sentencias) y 125 de la web.
-   Prueban lo esperado y después el borde: el valor justo en el límite y el
-   siguiente, lo vacío, lo enorme y lo que no es del tipo que toca.
+7. **Tests.** 608 de la API (unidad e integración sobre SQLite en memoria, con
+   la API de 42 simulada; cubren el 97 % de las sentencias) y 310 de la web,
+   entre ellos los de pantallas: abren cada sección y hacen lo que haría una
+   persona (apuntarse, pedir ayuda, ordenar una tabla), buscando por rol y
+   nombre como un lector de pantalla. Cada cosa se prueba en cinco familias:
+   normal, límite, vacío y enorme, imprevisible y permisos
+   ([docs/tests.md](docs/tests.md), con sus fuentes).
 8. **Un test que recorre todas las rutas.** Saca la lista de la propia app, así
    que una ruta nueva entra sola: sin sesión tiene que dar 401, lo de `/admin`
    403 a quien no administra, y ninguna entrada puede acabar en un error interno.
 9. **Doble cerradura en los permisos.** Lo de admin y lo de staff lo comprueba
    cada servicio y, además, una barrera por la que pasan todas las peticiones.
-10. **`npm run check`** antes de dar nada por terminado: tipos, lint, formato y
-   tests. Es lo mismo que pasa la CI.
-11. **CI en cada subida** (`.github/workflows/ci.yml`): tipos, lint, formato,
-   tests, compilación y que la imagen de Docker construye.
-12. **El despliegue se comprueba a sí mismo.** `deploy.sh` no da el despliegue
-    por bueno hasta que la app contesta a `/health/db`.
+10. **`npm run check`** antes de dar nada por terminado: tipos, lint, formato,
+    código sin uso (`knip`), duplicados (`jscpd`, máximo 1 %), textos al día
+    con las tablas y tests. Es lo mismo que pasa la CI.
+11. **CI en cada subida** (`.github/workflows/ci.yml`): todo lo anterior, los
+    mínimos de cobertura (solo suben), la compilación y que la imagen de Docker
+    construye.
+12. **El despliegue se protege a sí mismo.** `deploy.sh` no despliega un commit
+    cuya CI no haya pasado (si aún corre, espera), guarda la imagen que funciona
+    y, si la nueva no contesta en `/health/db`, vuelve sola a la anterior.
 13. **Normas escritas** en [AGENTS.md](AGENTS.md): reglas de código y de
-    producto que cualquier persona o asistente lee antes de tocar nada.
+    producto que cualquier persona o asistente lee antes de tocar nada; entre
+    ellas, dónde va una funcionalidad nueva (categoría, modo e importancia) y que
+    todo texto pasa por las tablas.
 
 Y en producción:
 
@@ -775,6 +820,10 @@ npm run dev:mock
 - [docs/rendimiento.md](docs/rendimiento.md): cada mejora con su antes, su después y cómo se midió.
 - [docs/deploy-oracle.md](docs/deploy-oracle.md): despliegue, copias, límites y mantenimiento.
 - [docs/code-clicker.md](docs/code-clicker.md): el juego y sus reglas.
+- [docs/interfaz.md](docs/interfaz.md): categorías, modos, importancia de cada elemento, valoración de uso y dónde va algo nuevo.
+- [docs/tests.md](docs/tests.md): qué cubre cada test, de qué guías sale y cómo se protege producción.
+- [docs/textos.md](docs/textos.md) y [docs/textos/](docs/textos/README.md): las tablas de textos e idiomas, y su versión legible con el contexto de cada texto.
+- [docs/demos.md](docs/demos.md): criterios, plantilla y pasos para las demostraciones animadas.
 - [docs/bug-trozos-sin-pintar.md](docs/bug-trozos-sin-pintar.md): el bug abierto y su tabla de pruebas.
 - [apps/web/src/themes/README.md](apps/web/src/themes/README.md): cómo crear un estilo.
 - [AGENTS.md](AGENTS.md): normas del proyecto para asistentes de código.

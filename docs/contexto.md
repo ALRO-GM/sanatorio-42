@@ -6,7 +6,7 @@ hace la web está en el [README](../README.md); cómo está montada, en
 [architecture.md](architecture.md); el contrato HTTP, en [api.md](api.md). Aquí
 va lo que no está en el código.
 
-Última puesta al día: 2026-10-16.
+Última puesta al día: 2026-10-17.
 
 **Al retomar con el contexto vacío, lo primero es
 [tareas-tras-compactar.md](tareas-tras-compactar.md)**: es la lista de lo que hay
@@ -18,8 +18,38 @@ que hacer, en orden. Este documento es el porqué; aquel, el qué.
 - Repositorio: `git@github.com:ALRO-GM/sanatorio-42.git`, rama `main`.
 - **Commits y push solo cuando Alberto lo pide** (lo dice `AGENTS.md`). Etiqueta
   de respaldo anterior a la red de correcciones: `punto-guardado-2026-10-11`.
-- Antes de dar algo por hecho: `npm run check` (tipos, lint, formato y tests).
+- Antes de dar algo por hecho: `npm run check` (tipos, lint, formato, código
+  sin uso, duplicados, textos y tests).
+- Desplegar: `ssh ubuntu@51.170.34.214 "cd /opt/sanatorio && git pull -q
+  --ff-only && infra/scripts/backup.sh; infra/scripts/deploy.sh"`. Hacer el
+  `git pull` aparte evita reescribir `deploy.sh` mientras se ejecuta. El script
+  espera a la CI del commit (no despliega si falla) y vuelve a la imagen
+  anterior si la nueva no responde.
 - Los cambios de la web se prueban con `npm run dev:mock` y Chrome sin ventana.
+
+## Revisión completa (2026-10-17)
+
+Alberto pidió una revisión de todo; hecha y desplegada por bloques:
+
+- **Código**: `knip` y `jscpd` en `npm run check` y la CI; borrado lo muerto,
+  unido lo repetido (`useGateQueue`, `LimitParts`, `Achievements`, `Figure`,
+  `shared/day.ts`).
+- **Tests**: guía en `docs/tests.md`; tests de pantallas (jsdom + Testing
+  Library contra la API simulada) en `apps/web/tests/ui`; mínimos de cobertura
+  que solo suben (API 96 %, web 48 % sin contar textos).
+- **Textos**: ya no hay texto en el código. Tablas CSV por tema en
+  `apps/web/src/shared/i18n/textos/` (y el grupo `juego/` para Code Clicker),
+  plugin de Vite, idiomas descargados aparte, `npm run textos` y
+  `docs/textos/` generado. Regla estricta en `docs/textos.md` y `AGENTS.md`.
+- **Interfaz**: cuatro categorías (Expediente, Ayuda, Calendario, Datos) y tres
+  modos (simplificado, normal, loco por los datos). Mapa, importancia de cada
+  elemento, valoración de uso y regla para lo nuevo en `docs/interfaz.md`.
+- **Demostraciones**: `defineTour`, tests que las encuentran solas, plantilla
+  con `npm run demo:new`, demo de Clústeres; `docs/demos.md`.
+- Peticiones sueltas durante la revisión: tablas ordenables por varias
+  columnas con cabecera fija (`DataTable`), apartado de trampas de Code Clicker
+  (migración 52, registro de trampas), estado de salud ordenado, y nombres de
+  las noticias del juego sacados de con quién se ha corregido cada cual.
 
 ## Estado a 2026-10-16
 
