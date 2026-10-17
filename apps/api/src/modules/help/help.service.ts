@@ -100,11 +100,21 @@ const halfHour = z
   .transform((time) => toMinutes(time))
   .refine((minutes) => minutes % SLOT === 0, 'tiene que ser en punto o a y media')
 
+/**
+ * El final de una franja: como `halfHour`, pero también `24:00`, la medianoche
+ * del final del día (la franja de las 23:30 acaba ahí).
+ */
+const endHalfHour = z
+  .string()
+  .regex(/^(([01]\d|2[0-3]):[0-5]\d|24:00)$/, 'hora no válida')
+  .transform((time) => toMinutes(time))
+  .refine((minutes) => minutes % SLOT === 0, 'tiene que ser en punto o a y media')
+
 const daySchema = z.object({
   windows: z
     .array(
       z
-        .object({ start: halfHour, end: halfHour })
+        .object({ start: halfHour, end: endHalfHour })
         .refine((span) => span.end - span.start >= SLOT, 'cada franja dura al menos media hora'),
     )
     .max(8, 'demasiadas franjas'),

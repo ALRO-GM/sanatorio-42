@@ -105,6 +105,34 @@ describe('comunidad', () => {
       ).toEqual([{ start: '17:00', end: '19:00' }])
     })
 
+    it('la última media hora del día acaba a las 24:00 (y se puede reservar)', async () => {
+      const { help } = services
+      const day = await help.setToday(actor('eva'), {
+        windows: [{ start: '22:30', end: '24:00' }],
+        maxMinutes: 90,
+      })
+
+      expect(day.windows).toEqual([{ start: '22:30', end: '24:00' }])
+      await expect(
+        help.book(actor('ana'), { helper: 'eva', start: '23:30', minutes: 30 }),
+      ).resolves.toMatchObject({ start: '23:30', end: '24:00' })
+      // 24:00 solo vale como final: no como inicio, ni horas de después.
+      await expectCode(
+        help.setToday(actor('eva'), {
+          windows: [{ start: '24:00', end: '24:00' }],
+          maxMinutes: 30,
+        }),
+        'invalid_input',
+      )
+      await expectCode(
+        help.setToday(actor('eva'), {
+          windows: [{ start: '23:30', end: '24:30' }],
+          maxMinutes: 30,
+        }),
+        'invalid_input',
+      )
+    })
+
     it('deja quitar la media hora en curso, pero no la que alguien tiene reservada', async () => {
       const { help } = services
 
