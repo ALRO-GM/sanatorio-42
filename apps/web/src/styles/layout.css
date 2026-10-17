@@ -282,21 +282,3 @@ dialog.layout-dialog::backdrop {
     padding: 0.15rem 0.3rem !important;
   }
 }
-
-/* En el móvil, las pestañas son un desplegable que ocupa la fila entera. */
-.tabs-select {
-  display: none;
-}
-@media (max-width: 600px) {
-  .tabs-select {
-    display: block;
-    padding: 0.35rem 0 0.5rem;
-  }
-  .tabs-select select {
-    width: 100%;
-    font-weight: 600;
-  }
-  .appbar .tabs {
-    display: none;
-  }
-}
