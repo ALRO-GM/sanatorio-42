@@ -6,7 +6,7 @@ import { localeOf, useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { BoardCard } from './BoardCard'
 import { BoardForm } from './BoardForm'
-import { dayKey } from './dates'
+import { dayKey } from '../../shared/day'
 import { InfoTip } from '../../shared/ui/InfoTip'
 import { BoardsTour } from './BoardsTour'
 

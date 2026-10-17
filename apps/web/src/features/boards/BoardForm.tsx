@@ -8,7 +8,7 @@ import { useAction } from '../../shared/hooks/useAsync'
 import { localeOf, useI18n } from '../../shared/i18n'
 import { lastDay, untilText } from '../../shared/until'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
-import { dayKey, hhmm } from './dates'
+import { dayKey, hhmm } from '../../shared/day'
 
 type BoardFormProps = {
   /** Día con el que se abre el formulario, como `2026-10-10`. */

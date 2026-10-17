@@ -43,9 +43,10 @@ Monorepo con workspaces de npm. Ver `README.md` y `docs/architecture.md`.
 - API: una ruta nueva entra sola en `tests/integration/routes.test.ts`, que la
   recorre con entradas extremas. Si hace falta que sea pública, se apunta en su
   lista `OPEN`, con el porqué.
-- Tests: cada cosa se prueba con lo esperado y después con el borde: el valor
-  justo en el límite y el siguiente, lo vacío, lo enorme, lo negativo y lo que no
-  es del tipo que toca.
+- Tests: cada cosa se prueba con las cinco familias de `docs/tests.md`
+  (normal, límite, vacío y enorme, imprevisible, permisos). Una pantalla nueva
+  lleva su recorrido en `apps/web/tests/ui/`, buscando por rol y nombre como
+  lo haría una persona. Los mínimos de cobertura (`thresholds`) solo suben.
 - API: ningún módulo llama a la API de 42 salvo `replica`. Los demás leen de la
   réplica.
 - API: antes de pedir algo a 42 se pregunta a `replica.quota` con su escalón
@@ -161,7 +162,6 @@ Monorepo con workspaces de npm. Ver `README.md` y `docs/architecture.md`.
 - Probar las secciones con gente real y ajustar textos y límites (plazas, XP).
 - Guardar el idioma elegido también en el servidor (`PUT /me/settings` ya lo admite).
 - Traducir los mensajes de error de la API; fuera del español se enseña uno genérico.
-- Tests de componentes de la web (tiene de sus funciones puras).
 
 ## Al limpiar o compactar el contexto
 

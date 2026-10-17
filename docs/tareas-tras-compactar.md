@@ -46,9 +46,9 @@ queda en `contexto.md` y en el historial. Alberto pidió después, en un solo
 mensaje, una revisión completa. Se hace por bloques; cada bloque termina con
 `npm run check`, commit, push y despliegue (como en la tanda del buzón).
 
-- [ ] **1. Código muerto, duplicado o simplificable.** `knip` (exportaciones y
+- [x] **1. Código muerto, duplicado o simplificable.** `knip` (exportaciones y
       ficheros sin uso), `jscpd` (duplicados) y repaso a mano. Borrar o unir.
-- [ ] **2. Tests.** Buscar guías profesionales de qué cubrir (normal,
+- [x] **2. Tests.** Buscar guías profesionales de qué cubrir (normal,
       imprevisible, límite; producción). Escribir `docs/tests.md` con la lista
       de comprobación. Medir cobertura, rellenar huecos. Proteger producción:
       umbral de cobertura en CI y `deploy.sh` no despliega sin tests verdes.

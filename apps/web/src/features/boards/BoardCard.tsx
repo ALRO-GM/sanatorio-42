@@ -9,7 +9,7 @@ import { Avatar } from '../../shared/ui/Avatar'
 import { ReportButton } from '../admin/ReportButton'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { BoardForm } from './BoardForm'
-import { dayKey, hhmm } from './dates'
+import { dayKey, hhmm } from '../../shared/day'
 
 type BoardCardProps = {
   board: BoardView

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { api } from '../../shared/api'
 import { useI18n } from '../../shared/i18n'
@@ -21,13 +21,16 @@ export function AvailabilityToggle({ onTurnedOn, onOpen, active }: AvailabilityT
   const [available, setAvailable] = useState(false)
   const [saving, setSaving] = useState(false)
   const [notice, setNotice] = useState<string | null>(null)
+  // Si se pulsa antes de que llegue lo guardado, manda lo pulsado: la respuesta
+  // tardía no puede pisar lo que la persona acaba de elegir.
+  const touched = useRef(false)
 
   useEffect(() => {
     let current = true
 
     api.getAvailability().then(
       (saved) => {
-        if (current) setAvailable(saved)
+        if (current && !touched.current) setAvailable(saved)
       },
       () => {
         // Si no se puede leer, se queda apagado.
@@ -42,6 +45,7 @@ export function AvailabilityToggle({ onTurnedOn, onOpen, active }: AvailabilityT
 
   const toggle = async (): Promise<void> => {
     const next = !available
+    touched.current = true
     setAvailable(next)
     setSaving(true)
     setNotice(null)
@@ -77,6 +81,7 @@ export function AvailabilityToggle({ onTurnedOn, onOpen, active }: AvailabilityT
         </button>
         <input
           type="checkbox"
+          role="switch"
           className="switch"
           checked={available}
           aria-label={t('duty.switch')}

@@ -2,6 +2,7 @@ import type { Booking } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
 import { useAction } from '../../shared/hooks/useAsync'
+import { todayKey } from '../../shared/day'
 import { useGateQueue } from '../../shared/hooks/useGateQueue'
 import { localeOf, useI18n } from '../../shared/i18n'
 import { Avatar } from '../../shared/ui/Avatar'
@@ -42,10 +43,8 @@ export function HelpGate({ pending, onChange }: HelpGateProps) {
     })
   }
   const when = `${current.start}–${current.end}`
-  const local = new Date()
-  const todayKey = `${local.getFullYear()}-${String(local.getMonth() + 1).padStart(2, '0')}-${String(local.getDate()).padStart(2, '0')}`
   const day =
-    current.day === todayKey
+    current.day === todayKey()
       ? t('helpGate.today')
       : new Date(`${current.day}T12:00:00`).toLocaleDateString(localeOf(lang), {
           weekday: 'long',

@@ -27,7 +27,8 @@ jobs:
       - run: npm run format:check
       - run: npm run deadcode
       - run: npm run duplicates
-      - run: npm test
+      # Los tests con los mínimos de cobertura: si bajan, la CI falla.
+      - run: npm run test:coverage
       - run: npm run build
 
   image:

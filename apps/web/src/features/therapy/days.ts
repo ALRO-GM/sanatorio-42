@@ -17,9 +17,4 @@ export function shortDay(day: string, lang: string): string {
 }
 
 /** Hoy, como `YYYY-MM-DD`, en la hora del navegador. */
-export function today(): string {
-  const date = new Date()
-  const pad = (value: number): string => String(value).padStart(2, '0')
-
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
-}
+export { todayKey as today } from '../../shared/day'

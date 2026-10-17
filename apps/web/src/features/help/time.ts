@@ -1,5 +1,7 @@
 import type { HelpDay, TimeRange } from '@sanatorio/contracts'
 
+import { clockOf } from '../../shared/day'
+
 /** Todo va en medias horas. */
 export const SLOT = 30
 
@@ -13,9 +15,7 @@ export function toMinutes(time: string): number {
   return Number(hours) * 60 + Number(minutes)
 }
 
-export function toTime(minutes: number): string {
-  return `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`
-}
+export const toTime = clockOf
 
 /** "1 h 30 min", "45 min", "2 h". */
 export function duration(minutes: number): string {

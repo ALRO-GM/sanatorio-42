@@ -29,14 +29,14 @@ const DEFAULT_COMFORT: Comfort = { text: 'auto', cvd: false, zen: false }
  * El tamaño con `auto`: en las pantallas grandes del cluster todo se ve
  * pequeño, así que se agranda un poco.
  */
-function autoSize(width: number): number {
+export function autoSize(width: number): number {
   if (width >= 2400) return 125
   if (width >= 1800) return 110
 
   return 100
 }
 
-function readComfort(raw: string | null): Comfort {
+export function readComfort(raw: string | null): Comfort {
   try {
     const read = JSON.parse(raw ?? 'null') as Partial<Comfort> | null
 

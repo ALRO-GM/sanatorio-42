@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react'
 import type { Health } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
+import { todayKey } from '../../shared/day'
 import { originOf, stepsFor } from '../../shared/pace'
 
 /** Lo que se puede jugar al día con el pace en riesgo. */
@@ -36,13 +37,6 @@ export function riskyPace(health: Health, now: number): number | null {
   return current.pace >= RISKY_PACE ? current.pace : null
 }
 
-/** El día de hoy, en la hora del navegador (`YYYY-MM-DD`). */
-const today = (now: number): string => {
-  const date = new Date(now)
-
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
-}
-
 type Store = Pick<Storage, 'getItem' | 'setItem'>
 
 function storage(): Store | null {
@@ -58,7 +52,7 @@ export function playedToday(now: number, store: Store | null = storage()): numbe
   try {
     const read = JSON.parse(store?.getItem(KEY) ?? 'null') as { day?: string; s?: number } | null
 
-    return read?.day === today(now) && typeof read.s === 'number' ? read.s : 0
+    return read?.day === todayKey(now) && typeof read.s === 'number' ? read.s : 0
   } catch {
     return 0
   }
@@ -69,7 +63,7 @@ export function addPlayed(seconds: number, now: number, store: Store | null = st
   const total = playedToday(now, store) + seconds
 
   try {
-    store?.setItem(KEY, JSON.stringify({ day: today(now), s: total }))
+    store?.setItem(KEY, JSON.stringify({ day: todayKey(now), s: total }))
   } catch {
     // Sin guardar: el tope se cuenta solo mientras la pestaña siga abierta.
   }
