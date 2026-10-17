@@ -12,6 +12,7 @@ import { adminMock } from './admin'
 import { boardsMock } from './boards'
 import { clickerMock } from './clicker'
 import { doubtsMock } from './doubts'
+import { examsMock } from './exams'
 import { helpMock } from './help'
 import { meetMock } from './meet'
 import { peersMock } from './peers'
@@ -30,6 +31,7 @@ export const mockApi: Api = {
   ...helpMock,
   ...therapyMock,
   ...doubtsMock,
+  ...examsMock,
   ...boardsMock,
   ...clickerMock,
   ...staffMock,

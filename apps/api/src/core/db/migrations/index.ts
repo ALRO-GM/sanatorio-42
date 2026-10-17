@@ -56,6 +56,7 @@ import { clickerGiftLogSchema } from './0047-clicker-gift-log.js'
 import { brokenSeatsSchema } from './0048-broken-seats.js'
 import { helpNewsSchema } from './0049-help-news.js'
 import { clickerDonationsSchema } from './0050-clicker-donations.js'
+import { examAttemptsSchema } from './0051-exam-attempts.js'
 import type { Migration } from './types.js'
 
 export type { Migration } from './types.js'
@@ -111,6 +112,7 @@ export const MIGRATIONS: readonly Migration[] = [
   brokenSeatsSchema,
   helpNewsSchema,
   clickerDonationsSchema,
+  examAttemptsSchema,
 ]
 
 /** Versión más alta que existe en el código. */

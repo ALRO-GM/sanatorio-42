@@ -19,6 +19,7 @@ export const NAV_DEFAULT = [
   'calendario',
   'red',
   'clusters',
+  'examenes',
 ] as const
 
 /** Bloques de cada página, en su orden de fábrica. `foldable`: se puede plegar. */

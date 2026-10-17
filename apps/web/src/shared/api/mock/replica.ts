@@ -130,6 +130,7 @@ export const replicaMock: Pick<
         broadcasts: pendingCasts().length,
         clickerReviews: await pendingReviews(),
         help: helpInbox().requests.length + helpInbox().news.length,
+        examLive: true,
         quota: { level: 'ok', ticket: null },
       }
     }
@@ -143,6 +144,7 @@ export const replicaMock: Pick<
       broadcasts: pendingCasts().length,
       clickerReviews: await pendingReviews(),
       help: helpInbox().requests.length + helpInbox().news.length,
+      examLive: true,
       quota: {
         level: 'tight',
         ticket: {

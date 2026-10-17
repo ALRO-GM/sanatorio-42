@@ -21,6 +21,8 @@ export const SECTIONS = [
   { id: 'calendario', icon: 'calendario', inNav: true },
   { id: 'red', icon: 'red', inNav: true },
   { id: 'clusters', icon: 'capas', inNav: true },
+  // Exámenes: el de ahora (en vivo) y sus estadísticas.
+  { id: 'examenes', icon: 'medalla', inNav: true },
   // La guardia se abre desde "De guardia", en la cabecera.
   { id: 'guardia', icon: 'guardia', inNav: false },
   { id: 'expediente', icon: 'expediente', inNav: false },

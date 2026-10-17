@@ -1056,3 +1056,108 @@ dialog.welcome p {
 dialog.welcome .actions {
   justify-content: space-between;
 }
+
+/* Exámenes: el de ahora y las estadísticas. */
+.exams-subtitle {
+  margin: 1.5rem 0 0.6rem;
+}
+.exam-live.running {
+  border-top: 4px solid var(--danger);
+}
+.exam-live .eyebrow {
+  color: var(--danger);
+}
+.exam-live:not(.running) .eyebrow {
+  color: var(--text-3);
+}
+.exam-live h3 small {
+  font-weight: 400;
+  color: var(--text-3);
+}
+.exam-live .filter-pills select {
+  min-width: 10rem;
+}
+.exam-group h4 {
+  margin: 1rem 0 0.4rem;
+}
+.exam-people {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.exam-people li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.6rem;
+  border-radius: 10px;
+  background: var(--surface-2);
+}
+.exam-people li.passed {
+  box-shadow: inset 3px 0 0 var(--ok);
+}
+.exam-people a {
+  font-weight: 600;
+  color: var(--text);
+  text-decoration: none;
+}
+.exam-badges {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+.exam-mark {
+  min-width: 2.5rem;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.exam-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 0.8rem;
+  margin-bottom: 0.8rem;
+}
+.exam-bars {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0.3rem 0 0.8rem;
+  padding: 0;
+  list-style: none;
+}
+.exam-bars li {
+  display: grid;
+  grid-template-columns: 1.8rem 1fr 2.5rem;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+}
+.exam-bars i {
+  height: 10px;
+  border-radius: 5px;
+  background: var(--accent);
+}
+.exam-bars small {
+  color: var(--text-3);
+}
+/* La pestaña, mientras hay examen: un punto rojo. */
+.tab .tab-live {
+  margin-left: 0.3rem;
+  padding: 0 0.4rem;
+  border-radius: 999px;
+  background: var(--danger);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+/* Cada intento: el número a la izquierda, sin partirse, y el resto en una línea. */
+.exam-attempts .row {
+  display: grid;
+  grid-template-columns: 5.5rem 1fr;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+}

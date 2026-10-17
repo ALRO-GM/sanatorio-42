@@ -35,6 +35,8 @@ import type { HelpModule } from '../modules/help/index.js'
 import { createLegalModule } from '../modules/legal/index.js'
 import type { LegalModule } from '../modules/legal/index.js'
 import { createBrokenSeats, createMapModule } from '../modules/map/index.js'
+import { createExamsModule } from '../modules/exams/index.js'
+import type { ExamsModule } from '../modules/exams/index.js'
 import { donatedPoints } from '../modules/clicker/donations.rules.js'
 import type { MapModule } from '../modules/map/index.js'
 import { createMeetModule } from '../modules/meet/index.js'
@@ -102,6 +104,9 @@ export type Services = {
   calendar: CalendarModule['service']
   network: NetworkModule['service']
   corrections: NetworkModule['sync']
+  exams: ExamsModule['service']
+  examsSync: ExamsModule['sync']
+  examsLive: ExamsModule['live']
   usage: UsageModule['service']
   meet: MeetModule['service']
   attendance: AttendanceModule['service']
@@ -184,6 +189,8 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     clickerReviews: async (actor) => (await clicker.service.reviews(actor)).length,
     // `help` también se monta después.
     help: (actor) => help.service.inboxCount(actor),
+    // `exams`, también.
+    examLive: (actor) => exams.live.running(actor),
     ...clock,
   })
 
@@ -254,6 +261,20 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     db,
     client,
     replica: replica.repository,
+    campusIds: config.sync.trackedCampusIds,
+    hourlyReserve: config.sync.hourlyReserve,
+    quota: replica.quota,
+    isActive: () => replica.sync.isActive(),
+    ...(config.log === undefined ? {} : { log: config.log }),
+    ...clock,
+  })
+
+  const exams = createExamsModule({
+    db,
+    client,
+    replica: replica.repository,
+    agenda: replica.agenda,
+    curriculum: replica.curriculum,
     campusIds: config.sync.trackedCampusIds,
     hourlyReserve: config.sync.hourlyReserve,
     quota: replica.quota,
@@ -349,6 +370,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     help,
     calendar,
     network,
+    exams,
     usage,
     meet,
     notices,
@@ -382,6 +404,9 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
       calendar: calendar.service,
       network: network.service,
       corrections: network.sync,
+      exams: exams.service,
+      examsSync: exams.sync,
+      examsLive: exams.live,
       usage: usage.service,
       meet: meet.service,
       attendance: attendance.service,

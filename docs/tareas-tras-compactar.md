@@ -90,8 +90,8 @@ Orden (se marca cada uno al desplegarlo):
 
 **D. Muchos datos (al final, poco a poco en horas de poco uso)**
 - [x] 32 Holy graph de correcciones con logros y banner.
-- [ ] 30 Estadísticas de exámenes (intentos de 42 en cola de fondo; duración de círculos).
-- [ ] 31 Exámenes en vivo: pestaña que se activa cuando empieza un examen en tu campus (sale en el calendario); gente apuntada separada por examen, grado y cursus, del círculo en que está; cada 5 min se actualiza la nota con el último intento.
+- [x] 30 Estadísticas de exámenes (intentos de 42 en cola de fondo; duración de círculos).
+- [x] 31 Exámenes en vivo: pestaña que se activa cuando empieza un examen en tu campus (sale en el calendario); gente apuntada separada por examen, grado y cursus, del círculo en que está; cada 5 min se actualiza la nota con el último intento.
 
 **Ideas para el futuro (no hacer ahora)**: 35 racha diaria con preguntas; 37 curso de git; 38 presentaciones de Transcendence/outer como evento; 39 Doom 2 (Freedoom) y patitos. **Descartado para siempre**: 36 modo sin conexión con los datos del campus.
 

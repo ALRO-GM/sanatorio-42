@@ -62,6 +62,11 @@ const IS_CORE = `(p.core = 1 OR (p.core IS NULL
  * que hizo para entrar no son "sus proyectos". De quien todavía está en la
  * piscina cuentan todos, que es lo único que tiene.
  */
+/** `true` si el proyecto es un examen (Exam Rank 02, `exam-rank-03`…). */
+export function isExam(project: { name?: string | null; slug?: string | null }): boolean {
+  return /exam/i.test(project.slug ?? '') || /^exam/i.test(project.name ?? '')
+}
+
 const STUDENT_PROJECT = `(${IS_CORE} OR NOT EXISTS (
     SELECT 1 FROM project_users other JOIN projects p ON p.id = other.project_id
     WHERE other.user_id = u.id AND ${IS_CORE}
@@ -143,14 +148,15 @@ export function createReplicaRepository(db: Db) {
         statements.push({
           sql: `INSERT INTO project_users
                   (id, user_id, project_id, status, validated, final_mark, updated_at_42,
-                   created_at_42, synced_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                   created_at_42, occurrence, synced_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT (id) DO UPDATE SET
                   created_at_42 = COALESCE(excluded.created_at_42, project_users.created_at_42),
                   status        = excluded.status,
                   validated     = excluded.validated,
                   final_mark    = excluded.final_mark,
                   updated_at_42 = excluded.updated_at_42,
+                  occurrence    = COALESCE(excluded.occurrence, project_users.occurrence),
                   synced_at     = excluded.synced_at`,
           args: [
             row.id,
@@ -161,9 +167,32 @@ export function createReplicaRepository(db: Db) {
             typeof row.final_mark === 'number' ? Math.round(row.final_mark) : null,
             row.updated_at ?? null,
             row.created_at ?? null,
+            typeof row.occurrence === 'number' ? row.occurrence : null,
             now,
           ],
         })
+
+        // Los intentos de un examen, con su nota: para sus estadísticas.
+        if (isExam(project) && Array.isArray(row.teams)) {
+          for (const team of row.teams) {
+            if (!isId(team.id)) continue
+
+            statements.push({
+              sql: `INSERT OR REPLACE INTO exam_attempts
+                      (team_id, project_user_id, user_id, project_id, mark, validated, at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)`,
+              args: [
+                team.id,
+                row.id,
+                user.id,
+                project.id,
+                typeof team.final_mark === 'number' ? Math.round(team.final_mark) : null,
+                triState(team['validated?']),
+                team.closed_at ?? team.created_at ?? null,
+              ],
+            })
+          }
+        }
         saved += 1
       }
 

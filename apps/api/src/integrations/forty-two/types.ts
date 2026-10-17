@@ -101,6 +101,13 @@ export type ApiProjectUser = {
    */
   cursus_ids?: number[] | null
   project?: { id: number; name?: string | null; slug?: string | null } | null
+  /** Veces que lo ha reintentado (0 la primera). En los exámenes, los reintentos. */
+  occurrence?: number | null
+  /**
+   * Los grupos con los que lo ha hecho, uno por intento. En un examen, cada uno
+   * es un intento con su nota.
+   */
+  teams?: ApiProjectTeam[] | null
   /**
    * La persona, anidada.
    *
@@ -252,4 +259,26 @@ export type ApiCorrectionPoint = {
   sum: number
   total: number
   created_at: string
+}
+
+/** Un intento de un proyecto (un «equipo»), tal como viene dentro de su fila. */
+export type ApiProjectTeam = {
+  id: number
+  final_mark?: number | null
+  'validated?'?: boolean | null
+  created_at?: string | null
+  closed_at?: string | null
+}
+
+/** Una inscripción a un examen (`/exams/:id/exams_users`), con la persona anidada. */
+export type ApiExamUser = {
+  id: number
+  user?: {
+    id: number
+    login: string
+    image?: {
+      link?: string | null
+      versions?: { small?: string | null; medium?: string | null } | null
+    } | null
+  } | null
 }

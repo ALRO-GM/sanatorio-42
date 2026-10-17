@@ -34,6 +34,8 @@ import type {
   ClickerUsage,
   ClickerVerdict,
   ClusterMap,
+  ExamStats,
+  LiveExam,
   Consumption,
   CurrentUser,
   DataPreview,
@@ -161,6 +163,10 @@ export type Api = {
   getProjectMap: (projectId: number) => Promise<ClusterMap>
   /** El plano a secas: ocupación y reservas, para elegir puestos. */
   getCampusMap: () => Promise<ClusterMap>
+  /** Estadísticas de los exámenes y de los círculos del campus. */
+  getExamStats: () => Promise<ExamStats>
+  /** El examen que hay ahora en el campus (o el siguiente de hoy). */
+  getLiveExam: () => Promise<LiveExam>
   /** Ese puesto no funciona (vale una semana), o ya funciona. */
   reportBrokenSeat: (host: string) => Promise<void>
   clearBrokenSeat: (host: string) => Promise<void>

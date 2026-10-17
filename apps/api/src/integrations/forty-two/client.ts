@@ -36,6 +36,7 @@ import type {
   ApiQuestUser,
   ApiScaleTeam,
   ApiCorrectionPoint,
+  ApiExamUser,
 } from './types.js'
 import { defaultSleep, readInt } from './headers.js'
 
@@ -291,6 +292,11 @@ export class FortyTwoClient {
     )
 
     return page.items
+  }
+
+  /** `GET /v2/exams/:id/exams_users`: quién está apuntado a un examen. */
+  async getExamUsers(examId: number): Promise<ApiExamUser[]> {
+    return this.fetchAllPages<ApiExamUser>(`/exams/${examId}/exams_users`)
   }
 
   /** `GET /v2/users/:id/exams`: los exámenes a los que alguien está apuntado, en ese intervalo. */

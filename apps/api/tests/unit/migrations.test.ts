@@ -70,6 +70,7 @@ describe('migraciones', () => {
       'event_checkins',
       'event_codes',
       'event_messages',
+      'exam_attempts',
       'forty_two_stats',
       'guide_change_flags',
       'guide_changes',

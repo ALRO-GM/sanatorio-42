@@ -51,6 +51,8 @@ export const realApi: Api = {
 
   getProjectMap: (projectId) => getJson(`/projects/${projectId}/map`),
   getCampusMap: () => getJson('/map'),
+  getExamStats: () => getJson('/exams/stats'),
+  getLiveExam: () => getJson('/exams/live'),
   reportBrokenSeat: (host) => send('POST', `/map/seats/${encodeURIComponent(host)}/broken`),
   clearBrokenSeat: (host) => send('DELETE', `/map/seats/${encodeURIComponent(host)}/broken`),
   getConversations: () => getJson('/conversations'),

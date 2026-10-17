@@ -1,3 +1,4 @@
+import { ExamsPage } from '../features/exams/ExamsPage'
 import { lazy, Suspense, useState } from 'react'
 
 import type { CurrentUser, Profile, ProjectSummary } from '@sanatorio/contracts'
@@ -135,6 +136,7 @@ export function SectionView({
         <p className="estado">{t('error.404')}</p>
       )}
       {section === 'clusters' && <ClustersPage me={me.login} />}
+      {section === 'examenes' && <ExamsPage />}
       {section === 'privacidad' && <LegalPage signedIn />}
       {section === 'gestion' &&
         (profile.data?.admin === true ? (

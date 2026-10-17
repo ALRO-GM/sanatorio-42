@@ -13,6 +13,7 @@ import { join } from 'node:path'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import type {
+  LiveExam,
   Calendar,
   ClusterMap,
   Expediente,
@@ -716,6 +717,79 @@ describe('mapa de clusters', () => {
     const http = client(built, await built.login())
 
     expect((await http.get('/projects/999999/map')).statusCode).toBe(404)
+  })
+})
+
+describe('exámenes en vivo', () => {
+  const at = (minutes: number): string => new Date(Date.now() + minutes * 60_000).toISOString()
+  const exam = { id: 1320, name: 'Exam Rank 02', slug: 'exam-rank-02' }
+
+  it('enseña quién está en el examen de ahora, qué examen hace y su última nota', async () => {
+    const built = await app(
+      {},
+      {
+        routes: {
+          '/v2/campus/22/events': [],
+          '/v2/campus/22/exams': [
+            { id: 710, name: 'Exam Session', location: 'c3', begin_at: at(-30), end_at: at(120) },
+          ],
+          '/v2/exams/710/exams_users': [
+            { id: 1, user: { id: 2, login: 'jdoe' } },
+            { id: 2, user: { id: 3, login: 'mgomez' } },
+          ],
+          // Lo nuevo de los exámenes desde que empezó: `jdoe` ya ha entregado.
+          '/v2/projects_users': [
+            {
+              id: 5001,
+              status: 'finished',
+              'validated?': true,
+              final_mark: 100,
+              project: exam,
+              user: { id: 2, login: 'jdoe' },
+              teams: [{ id: 8001, final_mark: 100, 'validated?': true, closed_at: at(-5) }],
+            },
+          ],
+        },
+      },
+    )
+    const http = client(built, await built.login())
+
+    // El examen ya se conoce: alguien lo tenía de antes.
+    await built.services.repositories.replica.ingestProjectUsers(
+      [
+        {
+          id: 4000,
+          status: 'in_progress',
+          project: exam,
+          user: { id: 9, login: 'otra', location: null },
+        },
+      ],
+      22,
+    )
+
+    const live = json(await http.get('/exams/live')) as LiveExam
+
+    expect(live).toMatchObject({ running: true, exam: { id: 710, name: 'Exam Session' } })
+    expect(live.groups.map((group) => [group.name, group.people.map((one) => one.login)])).toEqual([
+      ['Exam Rank 02', ['jdoe']],
+      [null, ['mgomez']],
+    ])
+    expect(live.groups[0]?.people[0]).toMatchObject({ mark: 100, passed: true })
+  })
+
+  it('sin examen hoy, no hay nada que enseñar', async () => {
+    const built = await app(
+      {},
+      { routes: { '/v2/campus/22/events': [], '/v2/campus/22/exams': [] } },
+    )
+    const http = client(built, await built.login())
+
+    expect(json(await http.get('/exams/live'))).toEqual({
+      exam: null,
+      running: false,
+      groups: [],
+      updatedAt: null,
+    })
   })
 })
 

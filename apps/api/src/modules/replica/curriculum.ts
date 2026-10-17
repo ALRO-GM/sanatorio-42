@@ -434,6 +434,22 @@ export function createCurriculum(options: CurriculumOptions) {
     async circlesOf(logins: readonly string[]): Promise<Map<string, number>> {
       const found = new Map<string, number>()
 
+      for (const [login, place] of await curriculum.placesOf(logins)) {
+        if (place.circle !== null) found.set(login, place.circle)
+      }
+
+      return found
+    },
+
+    /**
+     * El círculo (si se sabe) y el plan de estudios de cada una de esas
+     * personas, sin preguntar a 42. Quien no tiene nada de lo que tirar no sale.
+     */
+    async placesOf(
+      logins: readonly string[],
+    ): Promise<Map<string, { circle: number | null; track: Track }>> {
+      const found = new Map<string, { circle: number | null; track: Track }>()
+
       if (logins.length === 0) return found
 
       const marks = logins.map(() => '?').join(', ')
@@ -473,19 +489,23 @@ export function createCurriculum(options: CurriculumOptions) {
       for (const login of logins) {
         const stored = known.get(login)
 
+        const mine = byLogin.get(login)
+        const track: Track = (stored?.track ?? (mine?.next === true ? 'next' : 'classic')) as Track
+
         if (stored !== undefined && typeof stored.rank === 'number') {
-          found.set(login, Math.min(LAST_CIRCLE, stored.rank + 1))
+          found.set(login, { circle: Math.min(LAST_CIRCLE, stored.rank + 1), track })
           continue
         }
 
-        const mine = byLogin.get(login)
+        if (mine === undefined) {
+          if (stored !== undefined) found.set(login, { circle: null, track })
+          continue
+        }
 
-        if (mine === undefined) continue
-
-        const plan = (stored?.track ?? (mine.next ? 'next' : 'classic')) === 'next' ? next : classic
+        const plan = track === 'next' ? next : classic
         const reached = Math.max(-1, ...mine.ids.map((id) => plan.get(id) ?? -1))
 
-        if (reached >= 0) found.set(login, Math.min(LAST_CIRCLE, reached))
+        found.set(login, { circle: reached >= 0 ? Math.min(LAST_CIRCLE, reached) : null, track })
       }
 
       return found

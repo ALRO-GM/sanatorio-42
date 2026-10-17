@@ -122,6 +122,7 @@ export function Clinic({ me, onLogout }: ClinicProps) {
         section={section}
         admin={profile.data?.admin === true}
         unread={pulse?.unread ?? 0}
+        examLive={pulse?.examLive === true}
         onMailbox={() => {
           setBox('notices')
         }}

@@ -28,6 +28,8 @@ export type NoticesModuleDeps = NoticesServiceOptions & {
   clickerReviews?: (actor: Actor) => Promise<number>
   /** Peticiones de ayuda por contestar y rechazos sin ver. */
   help?: (actor: Actor) => Promise<number>
+  /** Si hay un examen en marcha en su campus. */
+  examLive?: (actor: Actor) => Promise<boolean>
 }
 
 export type NoticesModule = AppModule & { service: NoticesService }
@@ -58,6 +60,8 @@ export function createNoticesModule(deps: NoticesModuleDeps): NoticesModule {
           broadcasts: (await deps.broadcasts?.(await session.actor(request))) ?? 0,
           clickerReviews: (await deps.clickerReviews?.(await session.actor(request))) ?? 0,
           help: (await deps.help?.(await session.actor(request))) ?? 0,
+          examLive:
+            (await deps.examLive?.(await session.actor(request)).catch(() => false)) ?? false,
           quota: await deps.quota.statusFor(login),
         }
       })

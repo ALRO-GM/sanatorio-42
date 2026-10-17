@@ -27,6 +27,8 @@ type HeaderProps = {
   onInbox: () => void
   /** Volver a ver la bienvenida. */
   onWelcome: () => void
+  /** Hay un examen en marcha en el campus. */
+  examLive?: boolean
   onLogout: () => void
 }
 
@@ -48,6 +50,7 @@ export function Header({
   onCustomize,
   onInbox,
   onWelcome,
+  examLive = false,
   onLogout,
 }: HeaderProps) {
   const { t } = useI18n()
@@ -214,7 +217,7 @@ export function Header({
           </div>
         </header>
 
-        <Nav section={section} onGo={onGo} />
+        <Nav section={section} onGo={onGo} examLive={examLive} />
       </div>
     </div>
   )

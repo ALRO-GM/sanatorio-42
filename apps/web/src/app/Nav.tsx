@@ -7,11 +7,13 @@ import { Icon } from '../shared/ui/Icon'
 type NavProps = {
   section: Section
   onGo: (next: Section) => void
+  /** `true` si hay un examen en marcha en el campus: su pestaña lo dice. */
+  examLive?: boolean
 }
 
 // Las pestañas van en su propia fila, debajo de la marca y pegadas arriba al
 // bajar por la página. El orden es el que la persona ha elegido, o el automático.
-export function Nav({ section, onGo }: NavProps) {
+export function Nav({ section, onGo, examLive = false }: NavProps) {
   const { t } = useI18n()
   const order = useNavOrder()
   // El expediente va siempre el primero: es donde se entra. El resto, en el orden elegido.
@@ -47,6 +49,7 @@ export function Nav({ section, onGo }: NavProps) {
           {tabs.map(({ id }) => (
             <option key={id} value={id}>
               {t(`nav.${id}`)}
+              {id === 'examenes' && examLive ? ` · ${t('nav.examenesLive')}` : ''}
             </option>
           ))}
         </select>
@@ -64,6 +67,7 @@ export function Nav({ section, onGo }: NavProps) {
           >
             <Icon name={icon} />
             <span>{t(`nav.${id}`)}</span>
+            {id === 'examenes' && examLive && <b className="tab-live">{t('nav.examenesLive')}</b>}
           </button>
         ))}
       </nav>
