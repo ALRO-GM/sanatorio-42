@@ -187,3 +187,4 @@ welcome.mode.body,"Bienvenida, paso 2: explicación del modo",Elige cuánto ense
 table.sortedBy,"Tablas: por qué columnas está ordenada, de la que más manda a la que menos",Ordenado por {columns},Sorted by {columns},Ordenat per {columns},Honen arabera ordenatuta: {columns}
 table.unsort,Tablas: botón para quitar el orden,Quitar el orden,Clear sorting,Treu l'ordre,Kendu ordena
 table.sortHint,Tablas: explicación al pasar por una cabecera,Ordenar por esta columna. Lo que ordenaste antes decide los empates.,Sort by this column. What you sorted before breaks ties.,Ordena per aquesta columna. El que vas ordenar abans decideix els empats.,Ordenatu zutabe honen arabera. Lehen ordenatutakoak erabakitzen ditu berdinketak.
+nav.notgames,Pestaña de Ayuda: preguntas de programación para aprender jugando (no se llama juego a propósito),Not-games,Not-games,Not-games,Not-games

@@ -21,6 +21,11 @@ export function networkHref(login: string | null = null): string {
   return login === null ? '#/red' : `#/red/${encodeURIComponent(login)}`
 }
 
+/** Not-games: la lista de salas, o una sala si se dice cuál. */
+export function notGamesHref(room: number | null = null): string {
+  return room === null ? '#/notgames' : `#/notgames/${room}`
+}
+
 /** El perfil de alguien en la intra de 42. */
 export function intraHref(login: string): string {
   return `https://profile.intra.42.fr/users/${encodeURIComponent(login)}`

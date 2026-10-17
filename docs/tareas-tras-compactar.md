@@ -115,9 +115,9 @@ Diseño:
   segundo mientras se juega.
 
 Fases (cada una con check, commit, push y despliegue):
-- [ ] **F1. API**: banco (formato y primera tanda), elegibilidad, salas y motor
+- [x] **F1. API**: banco (formato y primera tanda), elegibilidad, salas y motor
       de partida con los cinco modos, rutas y tests.
-- [ ] **F2. Web**: sección, salas, partida, resultados; API simulada; textos en
+- [x] **F2. Web**: sección, salas, partida, resultados; API simulada; textos en
       su tabla; tests de pantalla.
 - [ ] **F3. Banco grande**: todos los proyectos del common core de los dos
       planes y lo general (git, shell, complejidad, binario…).

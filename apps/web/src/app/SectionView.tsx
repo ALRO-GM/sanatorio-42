@@ -44,6 +44,9 @@ const AdminPage = lazy(() =>
 const NetworkPage = lazy(() =>
   import('../features/network/NetworkPage').then((m) => ({ default: m.NetworkPage })),
 )
+const NotGamesPage = lazy(() =>
+  import('../features/notgames/NotGamesPage').then((m) => ({ default: m.NotGamesPage })),
+)
 const TherapyGroups = lazy(() =>
   import('../features/therapy/TherapyGroups').then((m) => ({ default: m.TherapyGroups })),
 )
@@ -58,6 +61,8 @@ type SectionViewProps = {
   focusProject: number | null
   /** El login de `#/expediente/<login>` si es de otra persona; `null` para el propio. */
   otherRecord: string | null
+  /** Lo que va detrás de la sección en la dirección (`#/notgames/12` → `12`). */
+  param: string | null
   onGo: (section: Section, projectId?: number | null) => void
 }
 
@@ -69,6 +74,7 @@ export function SectionView({
   projects,
   focusProject,
   otherRecord,
+  param,
   onGo,
 }: SectionViewProps) {
   const { t } = useI18n()
@@ -113,6 +119,7 @@ export function SectionView({
         />
       )}
       {section === 'pizarras' && <BoardsCalendar />}
+      {section === 'notgames' && <NotGamesPage me={me.login} room={param} />}
       {section === 'red' && <NetworkPage me={me} />}
       {/* Quien eligió la roja lleva el juego puesto en toda la web: fuera de su
           sección sigue corriendo y solo enseña una ventanita. Con su propia

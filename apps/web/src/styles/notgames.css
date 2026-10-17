@@ -1,0 +1,273 @@
+/* ── Not-games: salas, formulario y partida ───────────────────────────────── */
+
+.notgames-subtitle {
+  margin: 1.5rem 0 0.6rem;
+  font-size: 1rem;
+}
+
+/* Crear una sala: los modos como tarjetas y los campos con su nombre encima. */
+.quiz-create {
+  display: grid;
+  gap: 0.9rem;
+  margin: 0.75rem 0;
+}
+.quiz-create label {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.85rem;
+  color: var(--text-2);
+}
+.quiz-create label.duty-check {
+  display: flex;
+}
+.quiz-modes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.quiz-modes legend {
+  margin-bottom: 0.4rem;
+  font-size: 0.85rem;
+  color: var(--text-2);
+}
+.quiz-mode {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  text-align: left;
+}
+.quiz-mode small {
+  color: var(--text-3);
+  line-height: 1.35;
+}
+.quiz-mode.active {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+}
+
+/* La lista de salas. */
+.quiz-rooms {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0 0 0.75rem;
+  padding: 0;
+  list-style: none;
+}
+.quiz-room-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.quiz-room-card > span {
+  display: grid;
+  gap: 0.15rem;
+}
+.quiz-room-card small {
+  color: var(--text-3);
+}
+
+/* La sala de espera y los equipos. */
+.quiz-players {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.6rem 0;
+  padding: 0;
+  list-style: none;
+}
+.quiz-players li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.6rem 0.2rem 0.25rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.85rem;
+}
+.quiz-players li.me {
+  border-color: var(--accent);
+}
+.quiz-teams {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+.quiz-team {
+  padding: 0.6rem;
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+}
+
+/* La pregunta: cuenta atrás, enunciado, código y respuestas. */
+.quiz-question {
+  display: grid;
+  gap: 0.8rem;
+}
+.quiz-question-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.quiz-level {
+  color: var(--text-3);
+  font-size: 0.8rem;
+}
+.quiz-countdown {
+  justify-items: center;
+}
+.quiz-count {
+  font-size: 3rem;
+  color: var(--accent-text);
+}
+.quiz-timer {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--surface-3);
+  overflow: hidden;
+}
+.quiz-timer span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.2s linear;
+}
+.quiz-timer.late span {
+  background: var(--warn);
+}
+.quiz-prompt {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+.quiz-code {
+  margin: 0;
+  padding: 0.75rem;
+  border-radius: 10px;
+  background: var(--surface-3);
+  font-family: 'JetBrains Mono Variable', ui-monospace, monospace;
+  font-size: 0.9rem;
+  white-space: pre-wrap;
+  overflow-x: auto;
+}
+.quiz-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+.quiz-option {
+  min-height: 3.2rem;
+  padding: 0.6rem 0.8rem;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  text-align: left;
+  font-size: 0.95rem;
+}
+.quiz-option:not(:disabled):hover {
+  border-color: var(--accent);
+}
+.quiz-option.mine {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, var(--surface));
+}
+.quiz-option.right {
+  border-color: var(--ok);
+  background: color-mix(in srgb, var(--ok) 22%, var(--surface));
+}
+.quiz-option.wrong {
+  border-color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 16%, var(--surface));
+}
+.quiz-option:disabled {
+  opacity: 1;
+  cursor: default;
+}
+.quiz-question.reveal .quiz-option:not(.right):not(.wrong) {
+  opacity: 0.55;
+}
+.quiz-reveal {
+  display: grid;
+  gap: 0.4rem;
+}
+.quiz-reveal p {
+  margin: 0;
+  color: var(--text-2);
+}
+.quiz-results {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.8rem;
+}
+.quiz-results li {
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+}
+.quiz-results li.right {
+  border-color: var(--ok);
+}
+.quiz-results li.wrong {
+  border-color: var(--danger);
+}
+.quiz-results li.none {
+  opacity: 0.6;
+}
+
+/* El marcador. */
+.quiz-ranking {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.quiz-ranking li {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto auto;
+  align-items: center;
+  gap: 0.6rem;
+}
+.quiz-ranking li.me .quiz-name {
+  font-weight: 700;
+}
+.quiz-ranking li.out {
+  opacity: 0.5;
+}
+.quiz-ranking small {
+  color: var(--text-3);
+}
+.quiz-lives .icon.on {
+  color: var(--danger);
+}
+.quiz-lives .icon.off {
+  opacity: 0.25;
+}
+.quiz-final {
+  display: grid;
+  justify-items: center;
+  gap: 0.6rem;
+  text-align: center;
+}
+.quiz-winner {
+  font-size: 1.4rem;
+}
+
+@media (max-width: 560px) {
+  .quiz-options,
+  .quiz-teams {
+    grid-template-columns: 1fr;
+  }
+}

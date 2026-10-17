@@ -196,6 +196,7 @@ export function Clinic({ me, onLogout }: ClinicProps) {
             projects={projects.data ?? []}
             focusProject={focusProject}
             otherRecord={otherRecord}
+            param={param}
             onGo={openSection}
           />
         </div>

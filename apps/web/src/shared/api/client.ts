@@ -51,6 +51,14 @@ export const realApi: Api = {
 
   getProjectMap: (projectId) => getJson(`/projects/${projectId}/map`),
   getCampusMap: () => getJson('/map'),
+  getQuizRooms: () => getJson('/quiz/rooms'),
+  createQuizRoom: (settings) => sendJson('POST', '/quiz/rooms', settings),
+  getQuizRoom: (id) => getJson(`/quiz/rooms/${id}`),
+  joinQuizRoom: (id, team = null) => sendJson('POST', `/quiz/rooms/${id}/join`, { team }),
+  leaveQuizRoom: (id) => send('POST', `/quiz/rooms/${id}/leave`),
+  startQuizRoom: (id) => sendJson('POST', `/quiz/rooms/${id}/start`),
+  answerQuiz: (id, question, option) =>
+    sendJson('POST', `/quiz/rooms/${id}/answer`, { question, option }),
   getExamStats: () => getJson('/exams/stats'),
   getLiveExam: () => getJson('/exams/live'),
   reportBrokenSeat: (host) => send('POST', `/map/seats/${encodeURIComponent(host)}/broken`),

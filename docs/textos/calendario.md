@@ -41,13 +41,13 @@ Generado desde `apps/web/src/shared/i18n/textos/calendario.csv` con
 | `agenda.empty` | Día sin nada | features/calendar/CalendarPage, features/calendar/DayTimeline | Nada | Nothing | Res | Ezer ez |
 | `agenda.no42` | No se pudo leer 42 | features/calendar/CalendarPage | No se han podido leer los datos de 42: solo ves lo de Sanatorio. | Could not read 42 data: you only see Sanatorio events. | No s'han pogut llegir les dades de 42: només veus el de Sanatorio. | Ezin izan dira 42ko datuak irakurri: Sanatoriokoak bakarrik ikusten dituzu. |
 | `agenda.from42` | Cuándo se leyeron los datos de 42 | features/calendar/CalendarPage | Eventos, exámenes y correcciones de 42 leídos hace {min} min. | 42 events, exams and evaluations read {min} min ago. | Esdeveniments, exàmens i correccions de 42 llegits fa {min} min. | 42ko ekitaldiak, azterketak eta zuzenketak duela {min} min irakurrita. |
-| `agenda.refresh` | Botón para volver a leer los datos | features/calendar/CalendarPage | Actualizar | Refresh | Actualitza | Eguneratu |
+| `agenda.refresh` | Botón para volver a leer los datos | features/calendar/CalendarPage, features/notgames/NotGamesPage | Actualizar | Refresh | Actualitza | Eguneratu |
 | `agenda.back` | Botón para volver al calendario desde un evento | features/calendar/EventDialog | Volver al calendario | Back to calendar | Torna al calendari | Itzuli egutegira |
 | `agenda.when` | Ficha del evento: cuándo | features/calendar/EventDialog | Cuándo | When | Quan | Noiz |
 | `agenda.where` | Ficha del evento: dónde | features/calendar/EventDialog | Dónde | Where | On | Non |
 | `agenda.with` | Ficha del evento: con quién | features/calendar/EventDialog | Con | With | Amb | Norekin |
 | `agenda.seats` | Ficha del evento: plazas | features/calendar/EventDialog | Plazas | Seats | Places | Plazak |
-| `agenda.you` | Tú, en una lista de personas | features/calendar/EventDialog | Tú | You | Tu | Zu |
+| `agenda.you` | Tú, en una lista de personas | features/calendar/EventDialog, features/notgames/RoomView | Tú | You | Tu | Zu |
 | `agenda.seatsOpen` | Gente apuntada sin límite de plazas | features/calendar/EventDialog | {taken} personas apuntadas, sin tope | {taken} people signed up, no limit | {taken} persones apuntades, sense límit | {taken} pertsona izena emanda, mugarik gabe |
 | `agenda.seatsOf` | Plazas ocupadas y totales | features/calendar/EventDialog | {taken} de {max} | {taken} of {max} | {taken} de {max} | {max}tik {taken} |
 | `agenda.joined` | Estado: te has apuntado | features/calendar/EventDialog | Te has apuntado | You've signed up | T'hi has apuntat | Izena emanda |

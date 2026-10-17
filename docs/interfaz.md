@@ -13,7 +13,7 @@ volver a una categoría se abre la última sección que se miró en ella.
 | Categoría | Para qué | Secciones | Dónde está |
 | --- | --- | --- | --- |
 | **Expediente** | Lo tuyo | Expediente (la portada) | `app/sections.ts` |
-| **Ayuda** | Quedar con gente: pedir y dar ayuda, aprender y enseñar | Sala de espera · Tablón · Terapia · Pizarras | |
+| **Ayuda** | Quedar con gente: pedir y dar ayuda, aprender y enseñar | Sala de espera · Tablón · Terapia · Pizarras · Not-games | |
 | **Calendario** | Todo lo que tienes, en el tiempo | Calendario | |
 | **Datos** | El campus en cifras | Red · Clústeres · Exámenes | |
 
@@ -60,6 +60,8 @@ de datos.
 | Tablón | Grafo de tu avance, guía y dudas | S | Es el tablón |
 | Tablón | Grafo de tus correcciones (maestro del código) | N | Reconocimiento |
 | Terapia y Pizarras | Todo | S | Son quedar |
+| Pestañas | Not-games | N | Aprender jugando: no hace falta para pedir ni dar ayuda |
+| Not-games | Salas, crear sala, partida y marcador | N | La sección en sí |
 | Calendario | Vistas día/semana/mes, tipos de evento (también leyenda) | S | Básico |
 | Calendario | Formas del día (lista, entera, ajustada, desde ahora) | N | Comodidad |
 | Red | Grafo, filtros, totales, cómo se lee | N | La sección en sí |
@@ -97,6 +99,7 @@ Revisado el 2026-10-17 sobre la demostración, en escritorio y móvil.
 | Red | 3 | 3 | 3 | Grafo rápido, ficha de cada persona, flechas por sentido | Muchos filtros antes de ver el grafo; «endogamia» necesita la explicación; en móvil el grafo queda muy abajo |
 | Clústeres | 4 | 4 | 4 | Plano fiel, leyenda, resaltar a tu círculo o proyecto | El clic central para abrir un expediente no se descubre solo (la demostración ya enseña la ficha de un puesto) |
 | Exámenes | 4 | 4 | 3 | Aviso «en vivo» en la pestaña; notas al momento | Las estadísticas por intento son densas; falta decir qué examen es cuál si hay varios a la vez |
+| Not-games | 4 | 4 | 4 | Modos explicados al elegir; cuenta atrás con la hora del servidor; el porqué de cada respuesta | Aún sin demostración (i); sin la lista de salas a la vista mientras se crea una |
 | Buzón | 5 | 4 | 4 | Número rojo en la cabecera; avisos llevan a su sitio | Avisos y conversaciones en pestañas: las conversaciones se descubren tarde |
 | Personalizar | 3 | 4 | 4 | Orden manual, por tu uso o por la comunidad | Escondido en el menú de la cuenta |
 | Pie (ajustes) | 3 | 5 | 5 | Todo a la vista y con nombres claros | Está al final de páginas muy largas: el modo y el idioma se descubren tarde (por eso también están en la bienvenida) |

@@ -7,6 +7,10 @@
  */
 
 import type {
+  QuizLobby,
+  QuizRoom,
+  QuizSettings,
+  QuizTeam,
   AdminData,
   AdminPeople,
   AvailabilityResponse,
@@ -417,4 +421,15 @@ export type Api = {
   joinBoard: (id: number) => Promise<void>
   leaveBoard: (id: number) => Promise<void>
   cancelBoard: (id: number) => Promise<void>
+
+  // --- Not-games
+  getQuizRooms: () => Promise<QuizLobby[]>
+  createQuizRoom: (settings: QuizSettings) => Promise<QuizRoom>
+  /** La sala ahora mismo: se pide cada segundo mientras se juega. */
+  getQuizRoom: (id: number) => Promise<QuizRoom>
+  joinQuizRoom: (id: number, team?: QuizTeam | null) => Promise<QuizRoom>
+  leaveQuizRoom: (id: number) => Promise<void>
+  startQuizRoom: (id: number) => Promise<QuizRoom>
+  /** `option` es el id de la respuesta, no su posición en pantalla. */
+  answerQuiz: (id: number, question: number, option: number) => Promise<QuizRoom>
 }

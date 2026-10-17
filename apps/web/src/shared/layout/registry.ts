@@ -16,6 +16,7 @@ export const NAV_DEFAULT = [
   'tablon',
   'terapia',
   'pizarras',
+  'notgames',
   'calendario',
   'red',
   'clusters',

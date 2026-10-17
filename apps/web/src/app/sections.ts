@@ -20,6 +20,8 @@ export const SECTIONS = [
   { id: 'tablon', icon: 'tablon', inNav: true, category: 'ayuda', from: 'simple' },
   { id: 'terapia', icon: 'terapia', inNav: true, category: 'ayuda', from: 'simple' },
   { id: 'pizarras', icon: 'pizarras', inNav: true, category: 'ayuda', from: 'simple' },
+  // Not-games: aprender jugando a preguntas de programación con más gente.
+  { id: 'notgames', icon: 'pregunta', inNav: true, category: 'ayuda', from: 'normal' },
   { id: 'calendario', icon: 'calendario', inNav: true, category: 'calendario', from: 'simple' },
   { id: 'red', icon: 'red', inNav: true, category: 'datos', from: 'normal' },
   { id: 'clusters', icon: 'capas', inNav: true, category: 'datos', from: 'normal' },
