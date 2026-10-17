@@ -11,7 +11,7 @@
  * La piscina no está: no forma parte del common core.
  */
 
-export type CoreProject = {
+type CoreProject = {
   /** Identificador estable dentro del grafo. */
   key: string
   name: string

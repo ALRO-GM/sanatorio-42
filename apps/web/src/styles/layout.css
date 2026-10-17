@@ -1,44 +1,5 @@
 /* ── Cabecera fija, bloques plegables y ventana de personalización ─────────── */
 
-/* La cabecera y las pestañas se quedan arriba al bajar por la página. */
-.top-sticky {
-  position: sticky;
-  top: 0;
-  z-index: 30;
-  margin: -0.5rem -0.5rem 1.25rem;
-  padding: 0.5rem 0.5rem 0.35rem;
-  border-radius: 0 0 18px 18px;
-  transition:
-    padding 0.2s,
-    background 0.2s,
-    box-shadow 0.2s;
-}
-.top-sticky .topbar {
-  margin-bottom: 0.5rem;
-  transition: padding 0.2s;
-}
-.top-sticky .tabs {
-  margin: 0;
-}
-/* Encogida: menos aire, sin latido del logo y con fondo para tapar lo que pasa por debajo. */
-.top-sticky.compact {
-  padding: 0.3rem 0.5rem 0.25rem;
-  background: color-mix(in srgb, var(--bg) 88%, transparent);
-  backdrop-filter: blur(10px);
-  box-shadow: 0 6px 18px var(--shadow-soft);
-}
-.top-sticky.compact .topbar {
-  padding: 0.3rem 0.7rem;
-  margin-bottom: 0.3rem;
-}
-.top-sticky.compact .topbar .ekg {
-  display: none;
-}
-.top-sticky.compact .tab {
-  padding: 0.25rem 0.7rem;
-  font-size: 0.8rem;
-}
-
 /* Pestañas más recogidas: juntas a la izquierda en vez de repartidas a lo ancho. */
 .tabs {
   justify-content: flex-start;
@@ -63,11 +24,6 @@
   background: var(--accent-soft);
   color: var(--accent-text);
   text-decoration: none;
-}
-.topbar .switch-row {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
 }
 
 /* El punto de información: un círculo con borde que se lee en los dos temas. */
@@ -274,10 +230,6 @@ dialog.layout-dialog::backdrop {
 }
 
 @media (max-width: 560px) {
-  .top-sticky {
-    margin: -0.4rem -0.4rem 1rem;
-    padding: 0.4rem;
-  }
   .duty-open {
     padding: 0.15rem 0.3rem !important;
   }

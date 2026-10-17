@@ -65,7 +65,7 @@ const PRESENCE_BEAT_MS = 60_000
 /** La web pregunta el pulso cada pocos minutos: pasado esto sin señales, se fue. */
 const PRESENCE_WINDOW_MS = 6 * 60_000
 
-export type CompositionConfig = {
+type CompositionConfig = {
   sync: SyncerConfig
   /** `false` para que `start()` no arranque el bucle de sincronización. */
   backgroundSync?: boolean
@@ -119,7 +119,7 @@ export type Services = {
   legal: LegalModule['service']
 }
 
-export type Composition = {
+type Composition = {
   events: EventBus
   /** En el orden en que se registran sus rutas. */
   modules: AppModule[]

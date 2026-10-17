@@ -12,9 +12,9 @@
 import { ApiError, apiErrorFromNetwork } from './errors.js'
 
 /** El único permiso que pide el token de la aplicación. */
-export const APP_SCOPE = 'public'
+const APP_SCOPE = 'public'
 
-export type AppTokenOptions = {
+type AppTokenOptions = {
   tokenUrl: string
   uid: string
   secret: string

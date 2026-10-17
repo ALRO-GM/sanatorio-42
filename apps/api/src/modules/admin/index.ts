@@ -24,7 +24,7 @@ import type { SecondFactor } from './second-factor.js'
 
 export type AdminModule = AppModule & { service: AdminService; secondFactor: SecondFactor }
 
-export type AdminModuleDeps = AdminServiceOptions & {
+type AdminModuleDeps = AdminServiceOptions & {
   /**
    * Secreto del servidor (`SESSION_SECRET`) para el segundo factor del panel.
    * Sin él (tests de servicios), uno al azar: las cookies del panel valen hasta

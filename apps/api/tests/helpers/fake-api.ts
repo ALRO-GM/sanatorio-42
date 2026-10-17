@@ -14,13 +14,13 @@ type FetchInput = Parameters<typeof fetch>[0]
 type FetchInit = Parameters<typeof fetch>[1]
 
 /** Petición que espera el `fetch` falso. */
-export type RecordedCall = {
+type RecordedCall = {
   url: string
   init: FetchInit
 }
 
 /** Respuesta que devuelve el `fetch` falso. */
-export type FakeResponse = {
+type FakeResponse = {
   status?: number
   body?: unknown
   headers?: Record<string, string>
@@ -33,7 +33,7 @@ export type FakeResponse = {
 }
 
 /** `fetch` falso con registro de llamadas. */
-export type FakeFetch = {
+type FakeFetch = {
   fetchImpl: typeof fetch
   calls: RecordedCall[]
   /** URLs pedidas, en orden. */
@@ -137,41 +137,6 @@ export function createFakeSleep() {
     },
   }
 }
-
-/**
- * `Throttle` que no espera de verdad.
- *
- * El ritmo se prueba con el reloj manual en `throttle.test.ts`; aquí solo se
- * neutraliza la espera para que un test con tres peticiones no tarde medio
- * segundo. `observe` se sigue contando para que los tests puedan mirar la cuota
- * restante.
- */
-export function instantThrottle(minIntervalMs = 0) {
-  const waits: number[] = []
-  let startedAt = 0
-  let hourlyRemaining = 1200
-
-  return {
-    throttle: {
-      before: async (): Promise<void> => {
-        const wait = Math.max(0, minIntervalMs - (Date.now() - startedAt))
-        waits.push(wait)
-        startedAt = Date.now() + wait
-      },
-      observe: (headers: Headers): void => {
-        const remaining = headers.get('x-hourly-ratelimit-remaining')
-
-        if (remaining !== null) {
-          hourlyRemaining = Number(remaining)
-        }
-      },
-      hourlyRemaining: () => hourlyRemaining,
-      pendingDelayMs: () => 0,
-    },
-    waits,
-  }
-}
-
 /**
  * Proveedor de token de aplicación preconfigurado, sin llamadas de red.
  *

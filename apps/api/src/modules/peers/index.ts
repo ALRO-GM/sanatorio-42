@@ -14,7 +14,7 @@ import { registerPeersRoutes } from './peers.routes.js'
 import { createPeersService } from './peers.service.js'
 import type { PeersService } from './peers.service.js'
 
-export type PeersModuleDeps = {
+type PeersModuleDeps = {
   db: Db
   replica: ReplicaRepository
   sync: Syncer

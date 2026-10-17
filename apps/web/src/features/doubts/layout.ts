@@ -17,7 +17,7 @@ const TAG_ARC = 58
 
 const MARGIN = 10
 
-export type Point = { x: number; y: number }
+type Point = { x: number; y: number }
 
 export type RingLayout = {
   /** Radio de la órbita en la que van las burbujas. `0` si es una sola, en el centro. */

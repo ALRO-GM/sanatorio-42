@@ -55,7 +55,7 @@ export type SyncerConfig = {
   requestPageBudget: number
 }
 
-export type SyncerOptions = {
+type SyncerOptions = {
   client: FortyTwoClient
   replica: ReplicaRepository
   config: SyncerConfig

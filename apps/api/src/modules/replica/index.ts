@@ -25,7 +25,7 @@ import { registerReplicaRoutes } from './replica.routes.js'
 import { createSyncer } from './syncer.js'
 import type { Syncer, SyncerConfig } from './syncer.js'
 
-export type ReplicaModuleDeps = {
+type ReplicaModuleDeps = {
   db: Db
   client: FortyTwoClient
   config: SyncerConfig
@@ -165,15 +165,15 @@ export function createReplicaModule(deps: ReplicaModuleDeps): ReplicaModule {
   }
 }
 
-export type { Agenda, AgendaEvaluation, AgendaEvent, UserAgenda } from './agenda.js'
+export type { Agenda } from './agenda.js'
 export { FRESH_USER_TTL_MS } from './agenda.js'
-export { diskPhotoStore, memoryPhotoStore } from './photos.js'
+export { diskPhotoStore } from './photos.js'
 export type { PhotoStore } from './photos.js'
 export { LAST_CIRCLE, SEEDED_UP_TO, parseHours } from './curriculum.js'
-export type { Curriculum, Track } from './curriculum.js'
+export type { Curriculum } from './curriculum.js'
 export { hourlyQuota } from './quota.js'
 export type { Quota, QuotaGate } from './quota.js'
 export { syncConfigFrom } from './sync-config.js'
-export { LOCATION_MAX_AGE_MS, PROJECT_STATUS } from './replica.domain.js'
+export { LOCATION_MAX_AGE_MS } from './replica.domain.js'
 export type { ReplicaRepository } from './replica.repository.js'
 export type { Syncer, SyncerConfig } from './syncer.js'

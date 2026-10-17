@@ -14,7 +14,7 @@ import type { AuthService } from './auth.service.js'
 import { createOAuthClient } from './oauth-client.js'
 import { createSessionReader } from './session.js'
 
-export type AuthModuleDeps = {
+type AuthModuleDeps = {
   env: Env
   fetchImpl?: typeof fetch
   /** Preferencias de cada persona: de ahí sale el campus que está mirando. */
@@ -34,7 +34,7 @@ export type AuthModuleDeps = {
   ) => Promise<{ admin: boolean; block: { reason: string; until: string | null } | null }>
 }
 
-export type AuthModule = AppModule & {
+type AuthModule = AppModule & {
   service: AuthService
   session: SessionReader
 }
@@ -82,5 +82,3 @@ export function createAuthModule(deps: AuthModuleDeps): AuthModule {
     },
   }
 }
-
-export type { AuthService } from './auth.service.js'

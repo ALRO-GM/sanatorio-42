@@ -11,9 +11,9 @@
  * revise alguien de leyes.
  */
 
-export type LegalSection = { heading: string; body: readonly (string | readonly string[])[] }
+type LegalSection = { heading: string; body: readonly (string | readonly string[])[] }
 
-export type LegalText = {
+type LegalText = {
   title: string
   /** Lo que se enseña antes de aceptar: lo esencial en una lista corta. */
   summary: readonly string[]

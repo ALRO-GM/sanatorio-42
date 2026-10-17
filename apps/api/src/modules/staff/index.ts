@@ -103,5 +103,4 @@ export function createStaffModule(deps: StaffServiceOptions): StaffModule {
   }
 }
 
-export { EXPORTS_PER_DAY } from './staff.service.js'
-export type { ExportInput, IssuedExport, StaffIdentity, StaffService } from './staff.service.js'
+export type { IssuedExport, StaffService } from './staff.service.js'

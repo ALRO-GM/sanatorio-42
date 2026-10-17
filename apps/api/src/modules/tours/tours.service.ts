@@ -21,8 +21,8 @@ import { toNumber, toText } from '../../core/db/rows.js'
 import { parse } from '../../core/validation.js'
 
 /** Lo más lento y lo más rápido que puede poner alguien el deslizador. */
-export const MIN_RATE = 0.5
-export const MAX_RATE = 2
+const MIN_RATE = 0.5
+const MAX_RATE = 2
 /** Personas distintas que tienen que haberla visto para ajustar la velocidad. */
 export const VOTES_TO_ADJUST = 8
 /** Entre qué valores se mueve la velocidad de fábrica, por mucho que empuje la gente. */

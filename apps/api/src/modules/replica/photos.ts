@@ -84,7 +84,7 @@ export function memoryPhotoStore(): PhotoStore {
   }
 }
 
-export type PhotosOptions = {
+type PhotosOptions = {
   db: Db
   client: FortyTwoClient
   store: PhotoStore

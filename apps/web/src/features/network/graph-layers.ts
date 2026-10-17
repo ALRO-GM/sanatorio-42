@@ -40,7 +40,7 @@ export function layerKey(state: LayerState): string {
 }
 
 /** El rectángulo del grafo que se ve, en sus coordenadas. */
-export type Bounds = { left: number; top: number; right: number; bottom: number }
+type Bounds = { left: number; top: number; right: number; bottom: number }
 
 export function visibleBounds(
   view: { x: number; y: number; k: number },

@@ -16,7 +16,7 @@ import { NAV_DEFAULT, PAGES } from './registry'
 import type { PageId } from './registry'
 import { createViewClock, windowState } from './view-clock'
 
-export type Prefs = {
+type Prefs = {
   mode: OrderMode
   /** Orden manual de las pestañas. */
   nav: string[]

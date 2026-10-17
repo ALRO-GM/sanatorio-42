@@ -14,7 +14,7 @@ import type { Pill } from '@sanatorio/contracts'
 import { api } from '../../shared/api'
 import { PLUS_GOALS } from './data'
 
-export type Egg = {
+type Egg = {
   /** `false` hasta que la API dice por dónde iba. */
   ready: boolean
   plus: number

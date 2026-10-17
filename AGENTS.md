@@ -19,7 +19,10 @@ Monorepo con workspaces de npm. Ver `README.md` y `docs/architecture.md`.
 
 ## Reglas de código
 
-- Antes de dar algo por hecho: `npm run check` (tipos, lint, formato y tests).
+- Antes de dar algo por hecho: `npm run check` (tipos, lint, formato, código sin
+  uso con `knip`, duplicados con `jscpd` y tests). Lo que `knip` marque se borra
+  o deja de exportarse; no se silencia en `knip.json` salvo que sea un falso aviso,
+  con el porqué.
 - Un cambio en la forma de una respuesta empieza en `packages/contracts` y se
   refleja en `docs/api.md`.
 - API: `core/` e `integrations/` no importan de `modules/`; de otro módulo solo

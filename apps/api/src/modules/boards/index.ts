@@ -14,7 +14,7 @@ import { registerBoardsRoutes } from './boards.routes.js'
 import { createBoardsService } from './boards.service.js'
 import type { BoardsService } from './boards.service.js'
 
-export type BoardsModuleDeps = {
+type BoardsModuleDeps = {
   db: Db
   replica: ReplicaRepository
   xp: XpService

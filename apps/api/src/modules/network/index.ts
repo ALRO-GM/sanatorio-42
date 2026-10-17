@@ -14,7 +14,7 @@ import type { NetworkService } from './network.service.js'
 import { createCorrectionSync } from './network.sync.js'
 import type { CorrectionSync } from './network.sync.js'
 
-export type NetworkModuleDeps = {
+type NetworkModuleDeps = {
   db: Db
   client: FortyTwoClient
   replica: ReplicaRepository

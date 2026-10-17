@@ -9,28 +9,28 @@
 const MINUTE = 60_000
 
 /** Lo que se puede validar antes de la hora de inicio, y lo que cuenta después de la de fin. */
-export const MARGIN_MS = 10 * MINUTE
+const MARGIN_MS = 10 * MINUTE
 
 /**
  * Retraso máximo con el que aún se puede validar el código de inicio. En un
  * evento corto es la mitad de lo que dura: llegar con media sesión pasada no es
  * haber ido.
  */
-export const MAX_LATE_MS = 30 * MINUTE
+const MAX_LATE_MS = 30 * MINUTE
 
 /** Tiempo que tiene que pasar entre el código de inicio y el de fin. */
 export const MIN_STAY_MS = 10 * MINUTE
 
 /** Lo que se espera el código de fin después de la hora de fin, para quien se despista. */
-export const END_GRACE_MS = 30 * MINUTE
+const END_GRACE_MS = 30 * MINUTE
 
 /** Códigos equivocados que puede escribir una persona en un evento. */
 export const MAX_FAILED_ATTEMPTS = 5
 
 /** Horario previsto de un evento, en milisegundos. */
-export type Schedule = { startsAt: number; endsAt: number }
+type Schedule = { startsAt: number; endsAt: number }
 
-export type CodeWindow = {
+type CodeWindow = {
   /** Desde cuándo vale el código de inicio. */
   startFrom: number
   /** Hasta cuándo vale el código de inicio. */
@@ -53,7 +53,7 @@ export function closed(schedule: Schedule, at: number): boolean {
   return at > windowOf(schedule).endUntil
 }
 
-export type ValidSpan = { from: number; to: number; minutes: number }
+type ValidSpan = { from: number; to: number; minutes: number }
 
 /**
  * El rato que cuenta entre dos códigos.

@@ -14,7 +14,7 @@ import { registerHelpRoutes } from './help.routes.js'
 import { createHelpService } from './help.service.js'
 import type { Commitments, HelpService } from './help.service.js'
 
-export type HelpModuleDeps = {
+type HelpModuleDeps = {
   db: Db
   replica: ReplicaRepository
   agenda: Agenda
@@ -56,4 +56,4 @@ export function createHelpModule(deps: HelpModuleDeps): HelpModule {
   }
 }
 
-export type { Commitments, HelpService } from './help.service.js'
+export type { HelpService } from './help.service.js'

@@ -36,7 +36,7 @@ export type ApiUserImage = {
  * Los tamaños no están garantizados por la API, así que si `medium` no existe
  * se baja a `small` y de ahí al original, antes que devolver `null`.
  */
-export type AvatarSize = 'medium' | 'small' | 'link'
+type AvatarSize = 'medium' | 'small' | 'link'
 
 /**
  * Tamaños del avatar, en orden de preferencia: de más pequeño a más grande.
@@ -164,13 +164,6 @@ export type ApiCampus = {
   country?: string | null
   users_count?: number | null
   active?: boolean | null
-}
-
-/** Error de la API de 42 con la forma que devuelve en JSON. */
-export type ApiErrorBody = {
-  error?: string
-  message?: string
-  status?: number
 }
 
 /** Un evento de un campus, de `GET /v2/campus/:id/events`. */

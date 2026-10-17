@@ -20,7 +20,7 @@ export type PersonalTable = {
 }
 
 /** Quién pide sus datos. */
-export type DataSubject = { login: string; userId: number | null }
+type DataSubject = { login: string; userId: number | null }
 
 /** Lo más que se da de una tabla: una descarga no debe tumbar nada. */
 const MAX_ROWS = 5000

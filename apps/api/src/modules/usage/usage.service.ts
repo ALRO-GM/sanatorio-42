@@ -143,7 +143,7 @@ export type Traffic = (
 ) => Promise<{ login: string; day: string; hour: number; requests: number; bytes: number }[]>
 
 /** Segundos en una sección: viéndola, con otra ventana delante y con la pestaña oculta. */
-export type SectionTime = { seen: number; back: number; hidden: number }
+type SectionTime = { seen: number; back: number; hidden: number }
 
 /** Quién está conectado ahora: lo sabe `profile`. */
 export type Online = () => Promise<{ login: string; since: string; seenAt: string }[]>

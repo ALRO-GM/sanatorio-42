@@ -29,7 +29,7 @@ import { registerCors } from './cors.js'
 import { registerErrorHandler } from './error-handler.js'
 import { registerHealth } from './health.js'
 
-export type BuildOptions = {
+type BuildOptions = {
   env?: Env
   /** Conexión ya abierta. En los tests, para poder inspeccionarla. */
   db?: Db
@@ -56,7 +56,7 @@ export type BuiltApp = {
  * Carpeta de las fotos de perfil: junto a la base si es un fichero (en el
  * contenedor, `/data/photos`, en el volumen que ya se guarda), y si no, `data/photos`.
  */
-export function photoDirOf(databaseUrl: string): string {
+function photoDirOf(databaseUrl: string): string {
   const file = databaseUrl.startsWith('file:') ? databaseUrl.slice('file:'.length) : ''
 
   return file === '' || file.startsWith(':memory:')
@@ -206,7 +206,7 @@ export async function buildApp(options: BuildOptions = {}): Promise<BuiltApp> {
  *
  * Solo se mira el principio del path: un `?destino=/api/algo` no se toca.
  */
-export function stripApiPrefix(url: string): string {
+function stripApiPrefix(url: string): string {
   if (url === '/api' || url.startsWith('/api?')) {
     return `/${url.slice('/api'.length)}`
   }

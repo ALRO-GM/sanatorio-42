@@ -18,7 +18,7 @@ import { LATEST_VERSION, MIGRATIONS } from './migrations/index.js'
 
 export type Db = Client
 
-export type DatabaseOptions = {
+type DatabaseOptions = {
   /** `libsql://…` para Turso, `file:…` para un SQLite local. */
   url: string
   /** Token de Turso. Se ignora con `file:`. */

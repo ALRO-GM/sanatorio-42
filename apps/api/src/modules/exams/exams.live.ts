@@ -17,11 +17,11 @@ import type { Agenda, Curriculum, QuotaGate, ReplicaRepository } from '../replic
 import type { ExamsRepository } from './exams.repository.js'
 
 /** Cada cuánto se vuelven a pedir las notas y la lista. */
-export const REFRESH_MS = 5 * 60_000
+const REFRESH_MS = 5 * 60_000
 /** Hasta cuánto antes se enseña el siguiente examen. */
 const AHEAD_MS = 24 * 3_600_000
 
-export type ExamsLiveOptions = {
+type ExamsLiveOptions = {
   db: Db
   client: Pick<FortyTwoClient, 'getExamUsers' | 'getCampusProjectUsersPage'>
   replica: Pick<ReplicaRepository, 'ingestProjectUsers' | 'imagesOf'>

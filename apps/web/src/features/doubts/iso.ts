@@ -25,7 +25,7 @@ const PAD_BOTTOM = 14
 /** Trozos en los que se parte media vuelta al dibujar una elipse. */
 const STEPS = 28
 
-export type Iso = {
+type Iso = {
   width: number
   height: number
   /** Dónde cae en pantalla un punto del plano a esa altura. */

@@ -52,7 +52,7 @@ export const FORCED_REFUND = 0.5
 /** Cuántos hay que tener para que salga cada mejora de un edificio. */
 export const TIER_AT = [1, 5, 25, 50, 100, 150, 200, 250, 300, 350, 400]
 /** Lo que cuesta cada una, en veces el precio base del edificio. */
-export const TIER_PRICE = [10, 50, 500, 5e4, 5e6, 5e8, 5e10, 5e13, 5e16, 5e19, 5e22]
+const TIER_PRICE = [10, 50, 500, 5e4, 5e6, 5e8, 5e10, 5e13, 5e16, 5e19, 5e22]
 
 /**
  * El cursor va aparte: sus tres primeras mejoras lo doblan (a él y a cada
@@ -60,14 +60,14 @@ export const TIER_PRICE = [10, 50, 500, 5e4, 5e6, 5e8, 5e10, 5e13, 5e16, 5e19, 5
  * un cursor.
  */
 export const CURSOR_AT = [1, 1, 10, 25, 50, 100, 150, 200, 250, 300, 350]
-export const CURSOR_PRICE = [100, 500, 1e4, 1e5, 1e7, 1e8, 1e9, 1e10, 1e13, 1e16, 1e19]
+const CURSOR_PRICE = [100, 500, 1e4, 1e5, 1e7, 1e8, 1e9, 1e10, 1e13, 1e16, 1e19]
 /** Lo que suma por edificio ajeno la primera de esas mejoras, y por cuánto lo multiplica cada una de las siguientes. */
 export const FINGERS_BASE = 0.1
 export const FINGERS_MULT = [1, 5, 10, 20, 20, 20, 20, 20]
 
 /** Mejoras del ratón: cada pulsación gana un 1 % de la producción por segundo. */
 export const MOUSE_AT = [1e3, 1e5, 1e7, 1e9, 1e11, 1e13, 1e15, 1e17, 1e19]
-export const MOUSE_PRICE = [5e4, 5e6, 5e8, 5e10, 5e12, 5e14, 5e16, 5e18, 5e20]
+const MOUSE_PRICE = [5e4, 5e6, 5e8, 5e10, 5e12, 5e14, 5e16, 5e18, 5e20]
 
 /**
  * Proyectos de 42: cada uno sube toda la producción un tanto por ciento. Salen

@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { useI18n } from '../shared/i18n'
 
 /** `true` en la web de demostración (`/demo/`): datos inventados, sin servidor. */
-export const DEMO = import.meta.env.VITE_DEMO === 'true'
+const DEMO = import.meta.env.VITE_DEMO === 'true'
 
 /**
  * El aviso de la demostración: una etiqueta pequeña en una esquina que dice que

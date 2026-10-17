@@ -41,7 +41,7 @@ import type {
 import { defaultSleep, readInt } from './headers.js'
 
 /** Configuración del cliente. */
-export type FortyTwoClientOptions = {
+type FortyTwoClientOptions = {
   /** Raíz de la API v2, con barra final. */
   apiV2Base: string
   /** `User-Agent` de la aplicación. */
@@ -74,7 +74,7 @@ const DEFAULT_BACKOFF_MAX_MS = 10_000
 const EPOCH = '1970-01-01T00:00:00.000Z'
 
 /** Filtros de `getCampusProjectUsersPage`. */
-export type ProjectUsersQuery = {
+type ProjectUsersQuery = {
   campusId: number
   projectId?: number | undefined
   /** `in_progress`, `finished`… Un solo valor: la API no combina varios. */
@@ -86,7 +86,7 @@ export type ProjectUsersQuery = {
 }
 
 /** Filtros de `getCampusScaleTeamsPage`. */
-export type ScaleTeamsQuery = {
+type ScaleTeamsQuery = {
   campusId: number
   /** Solo las de id mayor que este, ordenadas por id. */
   afterId?: number | undefined
@@ -106,7 +106,7 @@ const MAX_ID = 2_000_000_000
 const MAX_ITEMS = 20_000
 
 /** Una página de resultados, con los metadatos que manda la API en las cabeceras. */
-export type Page<T> = {
+type Page<T> = {
   items: T[]
   /** Registros por página que dice la API. */
   perPage: number

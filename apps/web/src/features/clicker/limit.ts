@@ -12,9 +12,9 @@ import { api } from '../../shared/api'
 import { originOf, stepsFor } from '../../shared/pace'
 
 /** Lo que se puede jugar al día con el pace en riesgo. */
-export const PLAY_LIMIT_S = 30 * 60
+const PLAY_LIMIT_S = 30 * 60
 /** Desde este pace (incluido) se considera en riesgo. */
-export const RISKY_PACE = 22
+const RISKY_PACE = 22
 /** Cada cuánto se apunta el tiempo jugado. */
 const TICK_S = 5
 

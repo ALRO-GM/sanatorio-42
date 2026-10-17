@@ -1,28 +1,17 @@
-import type { AchievementId } from '@sanatorio/contracts'
-
 import { titleText } from './title'
 import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useBorrowedStyle } from '../../shared/theme'
 import { themeOf } from '../../themes'
 import { useI18n } from '../../shared/i18n'
-import { REACTIONS } from '../../shared/reactions'
 import { Avatar } from '../../shared/ui/Avatar'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { Achievements } from './Achievements'
 import { HealthCard } from './HealthCard'
 import { NetworkCard } from './NetworkCard'
 import { Icon } from '../../shared/ui/Icon'
-import type { IconName } from '../../shared/ui/Icon'
 import { intraHref } from '../../shared/links'
 import { directChatId, openChat } from '../notices/conversations'
-
-const ACHIEVEMENT_ICONS: Record<AchievementId, IconName> = {
-  first_duty: 'estrella',
-  group_therapy: 'terapia',
-  selfless_help: 'corazon',
-  board_teacher: 'pizarras',
-  campus_guardian: 'escudo',
-}
 
 /**
  * El expediente de otra persona: su nivel, su título, sus logros, las
@@ -123,43 +112,7 @@ export function PublicRecord({ login, me }: { login: string; me: string }) {
       <HealthCard health={data.health} />
       <NetworkCard me={data.login} />
 
-      <div className="two-col">
-        <article className="card">
-          <span className="eyebrow">{t('xp.achievements')}</span>
-          <ul className="rows">
-            {achievements.map((entry) => (
-              <li key={entry.id} className={`row ${entry.unlocked ? 'unlocked' : 'locked'}`}>
-                <span className="row-icon" aria-hidden="true">
-                  <Icon name={ACHIEVEMENT_ICONS[entry.id]} size={20} />
-                </span>
-                <span>
-                  <strong>{t(`ach.${entry.id}`)}</strong>
-                  <small>
-                    {entry.unlocked
-                      ? t(`ach.${entry.id}.d`, { goal: entry.goal })
-                      : t('xp.lockedAt', { progress: entry.progress, goal: entry.goal })}
-                  </small>
-                </span>
-              </li>
-            ))}
-          </ul>
-        </article>
-
-        <article className="card">
-          <span className="eyebrow">{t('xp.reactions')}</span>
-          <ul className="rows">
-            {REACTIONS.map(({ kind, emoji }) => (
-              <li key={kind} className="row plain">
-                <span className="row-icon" aria-hidden="true">
-                  <Icon name={emoji} size={20} />
-                </span>
-                <span>{t(`react.${kind}`)}</span>
-                <strong className="row-count">{reactions[kind]}</strong>
-              </li>
-            ))}
-          </ul>
-        </article>
-      </div>
+      <Achievements achievements={achievements} reactions={reactions} />
     </section>
   )
 }

@@ -48,7 +48,7 @@ export const XP_AMOUNT: Record<XpKind, number> = {
  * Los primeros niveles están cerca a propósito: quien ayuda una vez tiene que
  * notar que ha pasado algo.
  */
-export const LEVEL_FLOORS = [0, 50, 120, 250, 500, 800, 1200, 1700, 2300, 3000] as const
+const LEVEL_FLOORS = [0, 50, 120, 250, 500, 800, 1200, 1700, 2300, 3000] as const
 
 /** Títulos para el banner, por nivel mínimo. */
 export const TITLES = [
@@ -58,13 +58,6 @@ export const TITLES = [
   { id: 'especialista', level: 5 },
   { id: 'jefe', level: 7 },
 ] as const
-
-export type TitleId = (typeof TITLES)[number]['id']
-
-/** Tipos de reacción de "¿Cómo te ayudó?". */
-export const REACTION_KINDS = ['bug', 'code', 'concept', 'patient'] as const
-
-export type ReactionKind = (typeof REACTION_KINDS)[number]
 
 /**
  * Lo que cuenta como ayudar a los demás, para el ranking.
@@ -91,7 +84,7 @@ export const ACHIEVEMENTS = [
 
 export type AchievementId = (typeof ACHIEVEMENTS)[number]['id']
 
-export type LevelInfo = {
+type LevelInfo = {
   level: number
   /** XP con la que empezó este nivel. */
   floor: number

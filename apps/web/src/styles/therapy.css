@@ -121,7 +121,6 @@
 .pre-review-switch[aria-checked='true'] > span::after {
   transform: translateX(1.1rem);
 }
-.pre-review .error-note,
 .pre-review > :last-child:not(.pre-review-switch) {
   grid-column: 1 / -1;
 }

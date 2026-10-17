@@ -7,7 +7,7 @@
  */
 import type { Translate } from '../../shared/i18n'
 
-export type SeatPosition = { cluster: string; row: number; seat: number }
+type SeatPosition = { cluster: string; row: number; seat: number }
 
 const HOST = /^(.+?)r(\d{1,2})[sp](\d{1,2})$/
 

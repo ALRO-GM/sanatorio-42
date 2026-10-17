@@ -30,8 +30,8 @@ const DAY = 24 * 60 * 60_000
  * El 5 % que queda es margen para lo que la web no ve (cabeceras, TLS,
  * reintentos de red). Los dos cortes se levantan solos al renovarse el límite.
  */
-export const STOP_SHARE = 0.9
-export const HARD_STOP_SHARE = 0.95
+const STOP_SHARE = 0.9
+const HARD_STOP_SHARE = 0.95
 
 /** Los bytes a partir de los que solo entra quien administra, para un límite mensual. */
 export function stopAt(monthlyBytes: number): number {
@@ -80,7 +80,7 @@ export const DEFAULT_BUDGET: BudgetSettings = {
 }
 
 /** En modo ahorro todo se queda en esta parte de lo normal. */
-export const SAVING_FACTOR = 0.25
+const SAVING_FACTOR = 0.25
 
 /** Lo que pesa una respuesta, mientras no haya datos del mes para saberlo. */
 const DEFAULT_BYTES_PER_REQUEST = 20_000

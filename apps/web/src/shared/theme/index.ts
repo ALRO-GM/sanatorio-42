@@ -17,7 +17,7 @@ import type { ThemeManifest, ThemePalette } from '../../themes'
 
 export const THEME_CHOICES = ['auto', 'light', 'dark'] as const
 
-export type ThemeChoice = (typeof THEME_CHOICES)[number]
+type ThemeChoice = (typeof THEME_CHOICES)[number]
 
 const STORAGE_KEY = 'sanatorio_theme'
 const STYLE_KEY = 'sanatorio_style'

@@ -38,7 +38,7 @@ export type GuideRow = {
   updatedAt: string | null
 }
 
-export type ProposalRow = {
+type ProposalRow = {
   id: number
   campusId: number
   projectId: number
@@ -49,7 +49,7 @@ export type ProposalRow = {
 }
 
 /** Lo que hay pendiente en el tablón de un proyecto. */
-export type ProjectActivity = {
+type ProjectActivity = {
   /** Dudas sin resolver y sin ninguna respuesta. */
   unanswered: number
   /** Propuestas de cambio a la guía pendientes de revisar. */

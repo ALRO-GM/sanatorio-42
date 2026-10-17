@@ -44,7 +44,7 @@ const HOURLY_CAUTION = 30
 /** Cuánto se espera de más cuando la cuota por hora anda baja. */
 const HOURLY_CAUTION_DELAY_MS = 1_000
 
-export type ThrottleOptions = {
+type ThrottleOptions = {
   /** Separación mínima entre peticiones, en ms. Evita ráfagas en el mismo tick. */
   minIntervalMs: number
   /** `sleep` inyectable, para que los tests no esperen de verdad. */

@@ -10,7 +10,7 @@ import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { Qr } from '../../shared/ui/Qr'
 
 /** La dirección que abre la web y valida el código sola: es lo que lleva el QR. */
-export function checkinUrl(eventId: string, code: string): string {
+function checkinUrl(eventId: string, code: string): string {
   return `${window.location.origin}${window.location.pathname}#/asistencia/${encodeURIComponent(eventId)}/${code}`
 }
 

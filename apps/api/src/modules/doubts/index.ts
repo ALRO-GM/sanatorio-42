@@ -14,7 +14,7 @@ import { registerDoubtsRoutes } from './doubts.routes.js'
 import { createDoubtsService } from './doubts.service.js'
 import type { DoubtsService, DoubtsServiceOptions } from './doubts.service.js'
 
-export type DoubtsModuleDeps = {
+type DoubtsModuleDeps = {
   db: Db
   replica: ReplicaRepository
   curriculum: Curriculum

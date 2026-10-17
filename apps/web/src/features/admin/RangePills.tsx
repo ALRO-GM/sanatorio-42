@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 import { useI18n } from '../../shared/i18n'
 
 /** Los periodos que ofrecen las pestañas del panel, en días. */
-export const RANGES = [1, 7, 30, 90] as const
+const RANGES = [1, 7, 30, 90] as const
 
 /**
  * El selector de periodo de las pestañas del panel: último día, semana, mes o

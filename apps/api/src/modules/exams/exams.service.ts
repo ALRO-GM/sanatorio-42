@@ -10,7 +10,7 @@ import type { ExamsRepository } from './exams.repository.js'
 import { circleDurations, examStat } from './exams.rules.js'
 import type { ExamsSync } from './exams.sync.js'
 
-export type ExamsServiceOptions = {
+type ExamsServiceOptions = {
   exams: ExamsRepository
   sync: Pick<ExamsSync, 'progress'>
 }

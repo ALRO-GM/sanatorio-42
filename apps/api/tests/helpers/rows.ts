@@ -8,7 +8,7 @@
  */
 
 /** Fila suelta de libSQL, o `undefined` si el `SELECT` no devolvió nada. */
-export type RowLike = Record<string, unknown> | undefined
+type RowLike = Record<string, unknown> | undefined
 
 /**
  * Una columna como texto.

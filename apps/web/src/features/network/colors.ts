@@ -141,7 +141,7 @@ export function campusColor(campusId: number): string {
   return `hsl(${(campusId * 137) % 360} 86% 62%)`
 }
 
-export type LegendEntry = { color: string; label: string }
+type LegendEntry = { color: string; label: string }
 
 /**
  * La leyenda de un modo de color para las personas que se están pintando.

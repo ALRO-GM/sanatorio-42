@@ -70,7 +70,7 @@ export type StaffServiceOptions = {
 }
 
 /** Lo que hace falta para emitir un documento. */
-export type ExportInput = {
+type ExportInput = {
   /** De quién son las horas; `null` si es el informe de todo el mundo. */
   login: string | null
   requestedBy: string
@@ -85,7 +85,7 @@ export type ExportInput = {
 export type IssuedExport = { code: string; fileName: string; csv: string }
 
 /** Una sesión de staff: el id y el nombre de la cuenta. */
-export type StaffIdentity = { id: number; name: string }
+type StaffIdentity = { id: number; name: string }
 
 const accountSchema = z.object({
   name: z

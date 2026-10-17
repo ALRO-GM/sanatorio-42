@@ -16,4 +16,3 @@ export const api: Api =
 
 export { ApiError } from './http'
 export { photoUrl } from './photos'
-export type { Api, PeersResult } from './types'

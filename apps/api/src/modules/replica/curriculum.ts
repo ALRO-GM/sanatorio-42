@@ -36,9 +36,9 @@ import type { QuotaGate } from './quota.js'
 import { CHOICES, COMMON_CORE } from './common-core.js'
 import { learnedCircle } from './curriculum.rules.js'
 
-export type Track = 'classic' | 'next'
+type Track = 'classic' | 'next'
 
-export type UserTrack = {
+type UserTrack = {
   track: Track
   /** Último círculo completado. `-1` si todavía no ha completado ninguno. */
   rank: number
@@ -46,7 +46,7 @@ export type UserTrack = {
   ranks: string[]
 }
 
-export type CurriculumOptions = {
+type CurriculumOptions = {
   db: Db
   client: FortyTwoClient
   /** Peticiones de la hora que no se tocan: son para los logins. */
@@ -133,7 +133,7 @@ export const SEEDED_UP_TO: Record<Track, number> = { classic: LAST_CIRCLE, next:
 const CORE_CURSUS_ID = 21
 
 /** Lo que se sabe del paso de alguien por el 42cursus. */
-export type CursusInfo = {
+type CursusInfo = {
   level: number | null
   startedAt: string | null
   blackholedAt: string | null

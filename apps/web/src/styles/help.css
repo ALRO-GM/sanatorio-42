@@ -1,8 +1,5 @@
 /* ── Guardia: franjas, reservas y valoraciones ───────────────────────────── */
-.section-sub {
-  margin: 1.5rem 0 0.6rem;
-  font-size: 1rem;
-}
+
 .slot-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(62px, 1fr));

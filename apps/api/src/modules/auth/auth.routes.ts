@@ -21,7 +21,7 @@ import {
   setCookies,
 } from '../../core/http/cookies.js'
 
-export type AuthRoutesOptions = {
+type AuthRoutesOptions = {
   auth: AuthService
   /** A dónde se vuelve al terminar el login, y a dónde se va si falla. */
   frontendUrl: string
@@ -43,7 +43,7 @@ export type AuthRoutesOptions = {
  * tiene 256 bits: no se adivina. El tope está para que probar no salga gratis
  * (cada intento es un resumen caro de calcular) y para que quede corto.
  */
-export const STAFF_KEY_ATTEMPTS = 10
+const STAFF_KEY_ATTEMPTS = 10
 const STAFF_KEY_WINDOW_MS = 15 * 60 * 1000
 
 /**
@@ -52,7 +52,7 @@ const STAFF_KEY_WINDOW_MS = 15 * 60 * 1000
  * por la misma dirección, y muy poco para quien quiera usar la vuelta de 42
  * (que canjea un código contra su servidor) como martillo.
  */
-export const LOGIN_ATTEMPTS = 200
+const LOGIN_ATTEMPTS = 200
 const LOGIN_WINDOW_MS = 10 * 60 * 1000
 
 export function registerAuthRoutes(app: FastifyInstance, options: AuthRoutesOptions) {

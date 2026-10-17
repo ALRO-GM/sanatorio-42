@@ -46,7 +46,7 @@ const ISSUER = 'Sanatorio 42'
 
 const codeSchema = z.object({ code: z.string().regex(/^\d{6}$/, 'escribe las seis cifras') })
 
-export type SecondFactorOptions = {
+type SecondFactorOptions = {
   db: Db
   /** Secreto del servidor (`SESSION_SECRET`): firma la cookie y cifra los secretos. */
   secret: string

@@ -59,8 +59,6 @@ import { clickerDonationsSchema } from './0050-clicker-donations.js'
 import { examAttemptsSchema } from './0051-exam-attempts.js'
 import type { Migration } from './types.js'
 
-export type { Migration } from './types.js'
-
 export const MIGRATIONS: readonly Migration[] = [
   replicaSchema,
   availabilitySchema,

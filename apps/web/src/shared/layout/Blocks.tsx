@@ -4,7 +4,7 @@ import { useI18n } from '../i18n'
 import type { PageId } from './registry'
 import { toggleFold, track, usePageLayout } from './store'
 
-export type Block = {
+type Block = {
   id: string
   content: ReactNode
   /**

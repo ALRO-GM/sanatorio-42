@@ -17,7 +17,7 @@ import { hourlyQuota } from './quota.js'
 import type { QuotaGate } from './quota.js'
 import type { ApiEvent, ApiExam, ApiScaleTeam } from '../../integrations/forty-two/types.js'
 
-export type AgendaEvent = {
+type AgendaEvent = {
   source: 'event' | 'exam'
   id: number
   name: string
@@ -32,7 +32,7 @@ export type AgendaEvent = {
 }
 
 /** Una corrección concertada. No se guarda con quién: 42 lo oculta hasta que llega la hora. */
-export type AgendaEvaluation = {
+type AgendaEvaluation = {
   id: number
   beginAt: string
   endAt: string
@@ -41,7 +41,7 @@ export type AgendaEvaluation = {
   role: 'corrector' | 'corrected'
 }
 
-export type UserAgenda = {
+type UserAgenda = {
   /** Ids de los eventos a los que está apuntada. */
   events: number[]
   /** Ids de los exámenes a los que está apuntada. */
@@ -50,7 +50,7 @@ export type UserAgenda = {
   fetchedAt: string
 }
 
-export type AgendaOptions = {
+type AgendaOptions = {
   db: Db
   client: FortyTwoClient
   /** Peticiones de la hora que no se tocan: son para los logins. */

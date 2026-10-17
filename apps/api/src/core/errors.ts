@@ -6,7 +6,7 @@
  * una capa web.
  */
 
-export type DomainErrorCode =
+type DomainErrorCode =
   /** No hay sesión, o la sesión no corresponde a nadie. */
   | 'unauthenticated'
   /** El recurso pedido no existe. */

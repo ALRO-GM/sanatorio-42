@@ -25,7 +25,7 @@ export const MADRID = 22
 export const AGENDA_CALL =
   /^\/(users\/\d+\/(events_users|exams|scale_teams)|campus\/\d+\/(events|exams))/
 /** Lo donado a la bolsa de 42, para Code Clicker. */
-export const DONATIONS_CALL = /^\/users\/\d+\/correction_point_historics/
+const DONATIONS_CALL = /^\/users\/\d+\/correction_point_historics/
 export const MINUTE = 60_000
 export const HOUR = 60 * MINUTE
 

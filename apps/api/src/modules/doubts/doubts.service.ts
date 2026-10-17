@@ -116,7 +116,7 @@ const SHORT_NAMES: Record<string, string> = {
  * Serie de un proyecto, si es uno de varios módulos numerados: `"Python"` para
  * `Python Module 05`, `"CPP"` para `CPP Module 03`. `null` para el resto.
  */
-export function seriesOf(name: string): string | null {
+function seriesOf(name: string): string | null {
   return /^(.+) Module \d+$/.exec(name)?.[1] ?? null
 }
 

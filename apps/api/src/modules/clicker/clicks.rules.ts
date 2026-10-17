@@ -8,7 +8,7 @@
  */
 
 /** Un tramo y lo más que se puede pulsar de media en él. */
-export type ClickLimit = { seconds: number; perSecond: number }
+type ClickLimit = { seconds: number; perSecond: number }
 
 /**
  * Los topes, del más corto al más largo:

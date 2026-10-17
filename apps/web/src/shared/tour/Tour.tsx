@@ -10,7 +10,7 @@ import { RATES, useTourSpeed } from './speed'
  * Lo que toda demostración tiene en cada instante, haga lo que haga: en qué
  * escena está, dónde va el ratón y qué frase acompaña a la acción.
  */
-export type Base = {
+type Base = {
   scene: number
   /** Fundido a negro entre escenas. */
   dark: boolean

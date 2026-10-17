@@ -1,9 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
-
 import type { Booking } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
 import { useAction } from '../../shared/hooks/useAsync'
+import { useGateQueue } from '../../shared/hooks/useGateQueue'
 import { localeOf, useI18n } from '../../shared/i18n'
 import { Avatar } from '../../shared/ui/Avatar'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
@@ -23,35 +22,12 @@ type HelpGateProps = {
  */
 export function HelpGate({ pending, onChange }: HelpGateProps) {
   const { t, lang } = useI18n()
-  const dialog = useRef<HTMLDialogElement>(null)
-  const [queue, setQueue] = useState<Booking[]>([])
+  const { queue, setQueue, current, dialog, left } = useGateQueue<Booking>(pending, async () => {
+    const inbox = await api.getHelpInbox()
+
+    return [...inbox.requests, ...inbox.news]
+  })
   const { busy, error, run } = useAction()
-  const current = queue[0]
-  /** Las que quedan, a mano para `onClose` (que no se rehace). */
-  const left = useRef(0)
-
-  left.current = queue.length
-
-  useEffect(() => {
-    if (pending === 0) return
-
-    let alive = true
-
-    api.getHelpInbox().then(
-      (inbox) => {
-        if (alive) setQueue([...inbox.requests, ...inbox.news])
-      },
-      () => undefined,
-    )
-
-    return () => {
-      alive = false
-    }
-  }, [pending])
-
-  useEffect(() => {
-    if (current !== undefined && dialog.current?.open === false) dialog.current.showModal()
-  }, [current])
 
   if (current === undefined) return null
 

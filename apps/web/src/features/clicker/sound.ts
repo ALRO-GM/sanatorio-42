@@ -6,7 +6,7 @@
 
 const KEY = 'sanatorio_clicker_sound'
 
-export type Sound = 'click' | 'buy' | 'upgrade' | 'golden' | 'achievement' | 'bad' | 'squash'
+type Sound = 'click' | 'buy' | 'upgrade' | 'golden' | 'achievement' | 'bad' | 'squash'
 
 /** Cada sonido: forma de onda, notas (Hz) y cuánto dura cada una, en segundos. */
 const TUNES: Record<Sound, { wave: OscillatorType; notes: number[]; step: number; gain: number }> =

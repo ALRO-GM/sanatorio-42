@@ -10,7 +10,7 @@ import type { Db } from '../../core/db/database.js'
 import { toNumber, toText } from '../../core/db/rows.js'
 import type { GuideSection } from './doubts.repository.js'
 
-export type ChangeRow = {
+type ChangeRow = {
   id: number
   campusId: number
   projectId: number

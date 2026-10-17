@@ -554,8 +554,7 @@
 .net-pair-mark.fail {
   background: color-mix(in srgb, #d9534f 30%, var(--surface));
 }
-.net-pair .hint,
-.net-passrate {
+.net-pair .hint {
   margin: 0;
   font-size: 0.8rem;
   color: var(--text-2);

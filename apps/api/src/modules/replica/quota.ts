@@ -36,12 +36,12 @@ import { periodOf } from '../../core/period.js'
 import { parse } from '../../core/validation.js'
 import type { FortyTwoClient } from '../../integrations/forty-two/client.js'
 
-export type QuotaTier = 'background' | 'deferrable' | 'critical'
+type QuotaTier = 'background' | 'deferrable' | 'critical'
 
 /** Lo aplazable que es de una persona y por tanto puede esperar turno. */
 export type QuotaTask = 'agenda' | 'cursus' | 'track'
 
-export type QuotaOptions = {
+type QuotaOptions = {
   db: Db
   client: Pick<FortyTwoClient, 'hourlyRemaining' | 'requestCount'>
   /** Cuota horaria que no tocan ni el trabajo de fondo ni lo aplazable. */
@@ -65,7 +65,7 @@ const DAY = 24 * HOUR
  * Por debajo de esto no se hace desde una visita ninguna llamada a 42: lo poco
  * que queda es para que la gente pueda seguir entrando (el login son dos).
  */
-export const CRITICAL_FLOOR = 40
+const CRITICAL_FLOOR = 40
 
 /** Parte del tope del día a partir de la que se frena cada escalón. */
 const DAY_SHARE: Record<Exclude<QuotaTier, 'critical'>, number> = {
@@ -73,7 +73,7 @@ const DAY_SHARE: Record<Exclude<QuotaTier, 'critical'>, number> = {
   deferrable: 0.9,
 }
 
-export const DEFAULT_QUOTA: FortyTwoQuotaSettings = {
+const DEFAULT_QUOTA: FortyTwoQuotaSettings = {
   dailyRequests: null,
   monthlyRequests: null,
   renewDay: 1,
@@ -84,7 +84,7 @@ export const DEFAULT_QUOTA: FortyTwoQuotaSettings = {
 const SYNC_EVERY_MS = MINUTE
 
 /** Turnos que se atienden en cada pasada de la cola, y cada cuánto hay una. */
-export const DRAIN_BATCH = 5
+const DRAIN_BATCH = 5
 export const DRAIN_EVERY_MS = 20_000
 
 /** Los turnos atendidos se guardan un día, para poder decir por cuál va la cola. */

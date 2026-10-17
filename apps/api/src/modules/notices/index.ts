@@ -13,7 +13,7 @@ import type { Quota } from '../replica/index.js'
 import { createNoticesService } from './notices.service.js'
 import type { NoticesService, NoticesServiceOptions } from './notices.service.js'
 
-export type NoticesModuleDeps = NoticesServiceOptions & {
+type NoticesModuleDeps = NoticesServiceOptions & {
   events: EventBus
   /** La cuota de 42, para contarla en el mismo pulso que los avisos sin leer. */
   quota: Quota

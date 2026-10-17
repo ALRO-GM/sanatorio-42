@@ -18,7 +18,7 @@ import type { ExamsService } from './exams.service.js'
 import { createExamsSync } from './exams.sync.js'
 import type { ExamsSync } from './exams.sync.js'
 
-export type ExamsModuleDeps = {
+type ExamsModuleDeps = {
   db: Db
   client: FortyTwoClient
   replica: ReplicaRepository

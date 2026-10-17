@@ -7,7 +7,7 @@ import type { CampusSummary } from '@sanatorio/contracts'
 import type { ReplicaRepository } from './replica.repository.js'
 import type { Syncer } from './syncer.js'
 
-export type CampusesServiceOptions = {
+type CampusesServiceOptions = {
   replica: ReplicaRepository
   sync: Syncer
   /** Campus que se replican en segundo plano, para marcarlos en el catálogo. */

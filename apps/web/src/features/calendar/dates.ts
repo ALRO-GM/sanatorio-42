@@ -13,7 +13,7 @@ export function addDays(date: Date, days: number): Date {
 }
 
 /** El lunes de la semana de ese día. */
-export function startOfWeek(date: Date): Date {
+function startOfWeek(date: Date): Date {
   return addDays(date, -((date.getDay() + 6) % 7))
 }
 
@@ -68,7 +68,7 @@ export function eventsOn(events: readonly CalendarEvent[], day: Date): CalendarE
 export const locale = localeOf
 
 /** `16:00`, en la hora del navegador. */
-export function time(iso: string, lang: string): string {
+function time(iso: string, lang: string): string {
   return new Date(iso).toLocaleTimeString(locale(lang), { hour: '2-digit', minute: '2-digit' })
 }
 

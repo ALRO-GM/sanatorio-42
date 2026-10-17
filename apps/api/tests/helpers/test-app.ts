@@ -14,7 +14,7 @@ import type { Env } from '../../src/config/env.js'
 import { activeLocation, projectUser } from './fixtures.js'
 
 /** Entorno válido, con lo único que no se puede inventar siendo parametrizado. */
-export function makeEnv(overrides: Partial<NodeJS.ProcessEnv> = {}): Env {
+function makeEnv(overrides: Partial<NodeJS.ProcessEnv> = {}): Env {
   return loadEnv({
     FORTY_TWO_UID: 'u-test',
     FORTY_TWO_SECRET: 's-test',
@@ -31,14 +31,14 @@ export function makeEnv(overrides: Partial<NodeJS.ProcessEnv> = {}): Env {
 }
 
 /** Petición registrada por el proveedor simulado. */
-export type Recorded = {
+type Recorded = {
   url: string
   method: string
   body: string
   authorization: string
 }
 
-export type ProviderOptions = {
+type ProviderOptions = {
   /** Perfil que devuelve `/v2/me`. */
   profile?: unknown
   /** Status de `/v2/me`. 404 simula el scope de identidad sin aprobar. */
@@ -360,9 +360,4 @@ export function cookieValue(setCookie: unknown, name: string): string {
   }
 
   throw new Error(`no se ha encontrado la cookie ${name} en ${JSON.stringify(setCookie)}`)
-}
-
-/** Solo el valor, sin el nombre. Para inspeccionar. */
-export function cookieValueOnly(setCookie: unknown, name: string): string {
-  return cookieValue(setCookie, name).slice(`${name}=`.length)
 }

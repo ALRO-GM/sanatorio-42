@@ -15,7 +15,7 @@ import type { Actor } from '../../core/actor.js'
 import type { SessionReader, SessionUser } from '../../core/session.js'
 import { readCookie, SESSION_COOKIE_NAME } from '../../core/http/cookies.js'
 
-export type SessionReaderOptions = {
+type SessionReaderOptions = {
   auth: AuthService
   profiles: ProfilesRepository
   /** Campus de quien no trae ninguno en la sesión. */

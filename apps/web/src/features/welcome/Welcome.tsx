@@ -23,7 +23,7 @@ const SLIDES: readonly { id: string; icon: IconName; go?: Section }[] = [
   { id: 'comfort', icon: 'ajustes' },
 ]
 
-export function welcomeSeen(): boolean {
+function welcomeSeen(): boolean {
   try {
     return localStorage.getItem(SEEN_KEY) !== null
   } catch {

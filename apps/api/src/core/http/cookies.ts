@@ -7,7 +7,7 @@
 
 import type { FastifyReply } from 'fastify'
 
-export type CookieOptions = {
+type CookieOptions = {
   /** Vida en ms. Sin ella, cookie de sesión (se borra al cerrar el navegador). */
   maxAgeMs?: number
   httpOnly?: boolean

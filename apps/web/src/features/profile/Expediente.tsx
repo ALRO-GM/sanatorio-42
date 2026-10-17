@@ -1,23 +1,21 @@
 import { useState } from 'react'
 
 import { titleText } from './title'
-import type { AchievementId, CurrentUser, Profile, TitleId, XpKind } from '@sanatorio/contracts'
+import type { CurrentUser, Profile, TitleId, XpKind } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
 import { useAction } from '../../shared/hooks/useAsync'
 import type { AsyncState } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { Blocks } from '../../shared/layout/Blocks'
-import { REACTIONS } from '../../shared/reactions'
 import { Avatar } from '../../shared/ui/Avatar'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { Achievements } from './Achievements'
 import { AskedCard } from './AskedCard'
 import { HealthCard } from './HealthCard'
 import { HoursReport } from './HoursReport'
 import { LeaderboardCard } from './LeaderboardCard'
 import { NetworkCard } from './NetworkCard'
-import { Icon } from '../../shared/ui/Icon'
-import type { IconName } from '../../shared/ui/Icon'
 import { InfoTip } from '../../shared/ui/InfoTip'
 import { RecordTour } from './RecordTour'
 
@@ -31,14 +29,6 @@ const RULES = [
   'board_host',
   'therapy_session',
 ] as const satisfies readonly XpKind[]
-
-const ACHIEVEMENT_ICONS: Record<AchievementId, IconName> = {
-  first_duty: 'estrella',
-  group_therapy: 'terapia',
-  selfless_help: 'corazon',
-  board_teacher: 'pizarras',
-  campus_guardian: 'escudo',
-}
 
 type ExpedienteProps = {
   me: CurrentUser
@@ -186,48 +176,7 @@ export function Expediente({ me, profile }: ExpedienteProps) {
           { id: 'network', content: <NetworkCard me={me.login} /> },
           {
             id: 'achievements',
-            content: (
-              <div className="two-col">
-                <article className="card">
-                  <span className="eyebrow">{t('xp.achievements')}</span>
-                  <ul className="rows">
-                    {achievements.map((entry) => (
-                      <li
-                        key={entry.id}
-                        className={`row ${entry.unlocked ? 'unlocked' : 'locked'}`}
-                      >
-                        <span className="row-icon" aria-hidden="true">
-                          <Icon name={ACHIEVEMENT_ICONS[entry.id]} size={20} />
-                        </span>
-                        <span>
-                          <strong>{t(`ach.${entry.id}`)}</strong>
-                          <small>
-                            {entry.unlocked
-                              ? t(`ach.${entry.id}.d`, { goal: entry.goal })
-                              : t('xp.lockedAt', { progress: entry.progress, goal: entry.goal })}
-                          </small>
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                </article>
-
-                <article className="card">
-                  <span className="eyebrow">{t('xp.reactions')}</span>
-                  <ul className="rows">
-                    {REACTIONS.map(({ kind, emoji }) => (
-                      <li key={kind} className="row plain">
-                        <span className="row-icon" aria-hidden="true">
-                          <Icon name={emoji} size={20} />
-                        </span>
-                        <span>{t(`react.${kind}`)}</span>
-                        <strong className="row-count">{reactions[kind]}</strong>
-                      </li>
-                    ))}
-                  </ul>
-                </article>
-              </div>
-            ),
+            content: <Achievements achievements={achievements} reactions={reactions} />,
           },
           {
             id: 'ranking',

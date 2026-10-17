@@ -9,7 +9,7 @@ import type { EventBus } from '../../core/events.js'
 import type { RouteContext } from '../../core/module.js'
 import type { XpService } from './xp.service.js'
 
-export type ProfileRoutesOptions = {
+type ProfileRoutesOptions = {
   xp: XpService
   events: EventBus
 }

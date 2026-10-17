@@ -27,7 +27,7 @@ import type { ReplicaRepository } from '../replica/index.js'
 import type { TherapyService } from '../therapy/index.js'
 
 /** Conversaciones que se devuelven: las de actividad más reciente. */
-export const MAX_CONVERSATIONS = 100
+const MAX_CONVERSATIONS = 100
 /** Lo que se enseña del último mensaje en la lista. */
 const SNIPPET = 80
 /** Lo más lejos que se puede poner un recordatorio. */
@@ -46,7 +46,7 @@ const markSchema = z.object({
   projectId: idSchema.nullable().optional(),
 })
 
-export type ConversationsOptions = {
+type ConversationsOptions = {
   db: Db
   replica: ReplicaRepository
   boards: BoardsService
@@ -370,5 +370,3 @@ export function createConversations(options: ConversationsOptions) {
     },
   }
 }
-
-export type ConversationsService = ReturnType<typeof createConversations>

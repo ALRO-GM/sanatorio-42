@@ -70,7 +70,7 @@ const PRESTIGE_UNIT = 1e12
 const CPS_PER_TOTAL = 0.1
 
 /** Lo que se lee de una partida guardada para hacerle las cuentas. */
-export type Ledger = {
+type Ledger = {
   /** Líneas sin gastar. */
   code: number
   /** Líneas escritas en esta partida, y en las anteriores a recompilar. */
@@ -138,7 +138,7 @@ export function readSave(save: string): Ledger | null {
 }
 
 /** Las cifras que manda la web con cada guardado. */
-export type Figures = {
+type Figures = {
   total: number
   perSecond: number
   prestige: number
@@ -147,7 +147,7 @@ export type Figures = {
 }
 
 /** Por qué una partida no cuadra. */
-export type Reason = 'figures' | 'ledger' | 'rate' | 'speed' | 'prestige' | 'clicks'
+type Reason = 'figures' | 'ledger' | 'rate' | 'speed' | 'prestige' | 'clicks'
 
 /** Margen de las cuentas con decimales: precios redondeados y números enormes. */
 const slack = (total: number): number => total * 1e-3 + 1000
@@ -239,7 +239,7 @@ const LUCKY_SHARE = 0.15
 const LUCKY_SECONDS = 900
 
 /** Cuántos commits de la suerte vale coger el botín de la bolsa común. */
-export const POOL_LUCKY_TIMES = 10
+const POOL_LUCKY_TIMES = 10
 
 /** Lo que se lleva alguien del botín: diez commits de la suerte, sin pasar de lo que hay. */
 export function poolShare(code: number, perSecond: number, pool: number): number {

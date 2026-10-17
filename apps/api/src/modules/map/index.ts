@@ -10,7 +10,7 @@ import { registerMapRoutes } from './map.routes.js'
 import { createMapService } from './map.service.js'
 import type { MapService, MapServiceOptions } from './map.service.js'
 
-export type MapModuleDeps = MapServiceOptions
+type MapModuleDeps = MapServiceOptions
 
 export type MapModule = AppModule & { service: MapService }
 

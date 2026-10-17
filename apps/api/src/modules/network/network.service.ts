@@ -25,7 +25,7 @@ import type { Analysis } from './network.analysis.js'
 import type { NetworkRepository } from './network.repository.js'
 import type { CorrectionSync } from './network.sync.js'
 
-export type NetworkServiceOptions = {
+type NetworkServiceOptions = {
   corrections: NetworkRepository
   replica: ReplicaRepository
   sync: CorrectionSync

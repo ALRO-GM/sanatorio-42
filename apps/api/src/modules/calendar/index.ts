@@ -14,7 +14,7 @@ import { registerCalendarRoutes } from './calendar.routes.js'
 import { createCalendarService } from './calendar.service.js'
 import type { CalendarService } from './calendar.service.js'
 
-export type CalendarModuleDeps = {
+type CalendarModuleDeps = {
   replica: ReplicaRepository
   agenda: Agenda
   help: HelpService

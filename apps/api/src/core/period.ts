@@ -5,7 +5,7 @@
 
 const DAY = 24 * 60 * 60_000
 
-export type Period = {
+type Period = {
   /** Cuándo se renovó el límite por última vez, y cuándo vuelve a hacerlo. */
   start: number
   end: number

@@ -14,7 +14,7 @@ import type { Photos } from './photos.js'
 import type { Quota } from './quota.js'
 import type { Syncer } from './syncer.js'
 
-export type ReplicaRoutesOptions = {
+type ReplicaRoutesOptions = {
   campuses: CampusesService
   sync: Syncer
   quota: Quota

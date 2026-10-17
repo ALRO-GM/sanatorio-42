@@ -89,7 +89,7 @@ const REASONS = ['evaluation', 'other_event', 'on_my_way', 'transport', 'other']
  * Minutos desde el inicio de un evento a partir de los que, si esa persona no
  * ha dicho nada, se le da por no asistida.
  */
-export const MISSED_AFTER_MINUTES = 30
+const MISSED_AFTER_MINUTES = 30
 
 /** Hasta dónde se mira por delante al pedir los avisos: de sobra para el aviso más largo. */
 const ALERTS_AHEAD_MS = 3 * HOUR

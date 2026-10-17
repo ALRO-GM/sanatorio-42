@@ -7,7 +7,7 @@
  */
 
 /** Códigos de error que la API de 42 devuelve en el cuerpo. */
-export type ApiErrorCode =
+type ApiErrorCode =
   | 'rate_limited'
   | 'unauthorized'
   | 'forbidden'
@@ -25,7 +25,7 @@ export type ApiErrorBody = {
 }
 
 /** Detalle de por qué se reintentó o no, para logs y tests. */
-export type ApiErrorOptions = {
+type ApiErrorOptions = {
   /**
    * Ruta llamada, para localizar el fallo en el log.
    *
@@ -102,7 +102,7 @@ export class ApiError extends Error {
  * Los 5xx son fallos transitorios. Un 4xx no lo es: reintentar no cambia nada
  * y cada intento vuelve a gastar cuota.
  */
-export function isRetryableStatus(status: number): boolean {
+function isRetryableStatus(status: number): boolean {
   if (status === 408 || status === 429) {
     return true
   }
@@ -110,7 +110,7 @@ export function isRetryableStatus(status: number): boolean {
 }
 
 /** Traduce un status HTTP al código normalizado. */
-export function codeForStatus(status: number): ApiErrorCode {
+function codeForStatus(status: number): ApiErrorCode {
   if (status === 408) {
     return 'timeout'
   }
@@ -199,7 +199,7 @@ export function endpointFromUrl(url: string): string {
  * merece la pena distinguir: si no se puede entender, se ignora y se usa
  * el backoff normal.
  */
-export function parseRetryAfter(value: string | null | undefined): number | undefined {
+function parseRetryAfter(value: string | null | undefined): number | undefined {
   if (value === null || value === undefined || value.trim() === '') {
     return undefined
   }
@@ -217,7 +217,7 @@ export function parseRetryAfter(value: string | null | undefined): number | unde
 }
 
 /** Intenta leer JSON sin lanzar si el cuerpo no es JSON válido. */
-export function safeParseJson(raw: string): ApiErrorBody | undefined {
+function safeParseJson(raw: string): ApiErrorBody | undefined {
   if (raw.trim() === '') {
     return undefined
   }

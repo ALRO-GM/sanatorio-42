@@ -507,8 +507,7 @@ a:focus-visible {
 }
 
 /* --- Avisos de estado ------------------------------------------------------- */
-.estado.error,
-.error-note {
+.estado.error {
   border: 1px solid color-mix(in srgb, var(--danger) 35%, transparent);
   background: var(--danger-soft);
   color: var(--danger);

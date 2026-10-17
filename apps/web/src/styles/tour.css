@@ -92,8 +92,7 @@ dialog.info-dialog {
   margin-left: auto;
   color: var(--text-2);
 }
-.tour-bell i,
-.tour-count {
+.tour-bell i {
   min-width: 1.4em;
   padding: 0 0.3em;
   border-radius: 1em;
@@ -347,12 +346,7 @@ dialog.info-dialog {
   height: 100%;
   transition: transform calc(0.94s * var(--pace)) cubic-bezier(0.4, 0.1, 0.3, 1);
 }
-.tour-graph.pan1 {
-  transform: translate(-20%, -12%);
-}
-.tour-graph.pan2 {
-  transform: translate(-6%, 4%);
-}
+
 .tour-graph circle,
 .tour-graph line {
   transition:

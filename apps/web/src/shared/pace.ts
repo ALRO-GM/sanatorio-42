@@ -69,7 +69,7 @@ function daysLeft(date: number, now: number): number {
   return Math.floor((date + HALF_DAY_MS - now) / DAY_MS)
 }
 
-export type Deadline = {
+type Deadline = {
   circle: number
   /** El último día para completar ese círculo. */
   date: Date

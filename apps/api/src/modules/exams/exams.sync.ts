@@ -9,7 +9,7 @@ import type { FortyTwoClient } from '../../integrations/forty-two/client.js'
 import type { QuotaGate, ReplicaRepository } from '../replica/index.js'
 import type { ExamsRepository } from './exams.repository.js'
 
-export type ExamsSyncOptions = {
+type ExamsSyncOptions = {
   client: Pick<FortyTwoClient, 'getCampusProjectUsersPage'>
   replica: Pick<ReplicaRepository, 'ingestProjectUsers' | 'getState' | 'setState'>
   exams: Pick<ExamsRepository, 'exams'>
@@ -28,8 +28,7 @@ type ExamState = { page: number; done: boolean }
 /** Margen por encima de la reserva para lo de fondo. */
 const MARGIN = 200
 
-export const examKey = (campusId: number, projectId: number): string =>
-  `exams:${campusId}:${projectId}`
+const examKey = (campusId: number, projectId: number): string => `exams:${campusId}:${projectId}`
 
 export function createExamsSync(options: ExamsSyncOptions) {
   const { client, replica, exams, campusIds, quota, hourlyReserve } = options

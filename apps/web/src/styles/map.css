@@ -71,8 +71,7 @@
 /* Cada puesto es una tecla: cara clara arriba, canto debajo y una sombra corta.
    Al pasar el ratón se levanta un poco. Sutil a propósito: el relieve ayuda a
    leer el plano, no tiene que llamar la atención. */
-.seat,
-.topbar .seat {
+.seat {
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -280,7 +279,6 @@ button.seat:focus-visible {
 .seat-host {
   font-weight: 700;
 }
-.seat-person,
 .seat-reservation {
   display: inline-flex;
   align-items: center;

@@ -37,7 +37,7 @@ function stored(): Record<string, number> {
 }
 
 /** La velocidad de la lista más cercana a esa. */
-export const nearestRate = (rate: number): number =>
+const nearestRate = (rate: number): number =>
   RATES.reduce((best, option) => (Math.abs(option - rate) < Math.abs(best - rate) ? option : best))
 
 /**

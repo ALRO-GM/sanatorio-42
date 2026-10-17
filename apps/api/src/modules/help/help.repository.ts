@@ -14,7 +14,7 @@ import { toNumber, toText } from '../../core/db/rows.js'
 /** Una franja, en minutos desde medianoche. */
 export type Span = { start: number; end: number }
 
-export type DayRow = {
+type DayRow = {
   login: string
   campusId: number
   windows: Span[]

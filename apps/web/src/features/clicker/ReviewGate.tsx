@@ -1,15 +1,16 @@
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 
 import type { ClickerReview } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
 import { useAction } from '../../shared/hooks/useAsync'
+import { useGateQueue } from '../../shared/hooks/useGateQueue'
 import { localeOf, useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { Icon } from '../../shared/ui/Icon'
 
 /** Lo que hay que escribir como poco: lo mismo que pide la API. */
-export const DEFENSE_MIN = 20
+const DEFENSE_MIN = 20
 
 type ReviewGateProps = {
   /** Cuántas dice el pulso que hay por contestar. */
@@ -25,38 +26,13 @@ type ReviewGateProps = {
  */
 export function ReviewGate({ pending, onChange }: ReviewGateProps) {
   const { t, lang } = useI18n()
-  const dialog = useRef<HTMLDialogElement>(null)
-  const [queue, setQueue] = useState<ClickerReview[]>([])
   const [answer, setAnswer] = useState('')
+  const { setQueue, current, dialog, left } = useGateQueue<ClickerReview>(pending, () =>
+    api.getClickerReviews(),
+  )
   const { busy, error, run } = useAction()
-  const current = queue[0]
-  /** Las que quedan por contestar, a mano para `onClose` (que no se rehace). */
-  const left = useRef(0)
-
-  left.current = queue.length
   const number = (value: number): string =>
     new Intl.NumberFormat(localeOf(lang), { maximumFractionDigits: 0 }).format(value)
-
-  useEffect(() => {
-    if (pending === 0) return
-
-    let alive = true
-
-    api.getClickerReviews().then(
-      (list) => {
-        if (alive) setQueue(list)
-      },
-      () => undefined,
-    )
-
-    return () => {
-      alive = false
-    }
-  }, [pending])
-
-  useEffect(() => {
-    if (current !== undefined && dialog.current?.open === false) dialog.current.showModal()
-  }, [current])
 
   if (current === undefined) return null
 

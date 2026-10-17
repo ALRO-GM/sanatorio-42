@@ -15,7 +15,7 @@ import type { HelpDay } from '@sanatorio/contracts'
 
 import { SLOT, slotsOf, toMinutes } from './time'
 
-export type StatusLine = {
+type StatusLine = {
   /** Clave del texto (`help.status.*`) y sus huecos. */
   key: string
   vars: Record<string, string | number>

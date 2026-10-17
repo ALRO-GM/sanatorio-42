@@ -24,15 +24,19 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "npm run test --workspaces --if-present",
-    "check": "npm run typecheck && npm run lint && npm run format:check && npm run test",
+    "check": "npm run typecheck && npm run lint && npm run format:check && npm run deadcode && npm run duplicates && npm run test",
     "sync:status": "npm run sync:status -w @sanatorio/api",
-    "sync:run": "npm run sync:run -w @sanatorio/api"
+    "sync:run": "npm run sync:run -w @sanatorio/api",
+    "deadcode": "knip --no-progress",
+    "duplicates": "jscpd apps/api/src apps/web/src packages/contracts/src --min-lines 8 --min-tokens 80 --threshold 1 --ignore '**/i18n/**' --reporters consoleFull --silent"
   },
   "devDependencies": {
     "@eslint/js": "^9.18.0",
     "eslint": "^9.18.0",
     "eslint-plugin-react-hooks": "^5.1.0",
     "globals": "^15.14.0",
+    "jscpd": "^4.3.0",
+    "knip": "^5.88.1",
     "prettier": "^3.4.2",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.20.0"

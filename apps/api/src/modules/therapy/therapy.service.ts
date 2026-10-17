@@ -20,7 +20,7 @@ import { id, optionalText, parse, startOfDayIso, text } from '../../core/validat
 import type { Actor } from '../../core/actor.js'
 import type { Notify } from '../../core/events.js'
 
-export type TherapyServiceOptions = {
+type TherapyServiceOptions = {
   therapy: TherapyRepository
   replica: ReplicaRepository
   sync: Syncer

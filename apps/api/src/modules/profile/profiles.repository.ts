@@ -9,7 +9,7 @@ import { nowIso } from '../../core/db/database.js'
 import { toNumber, toText } from '../../core/db/rows.js'
 
 /** Pace y plazo del milestone que alguien ha copiado de su perfil de la intra. */
-export type PaceRefRow = {
+type PaceRefRow = {
   pace: number
   circle: number
   /** `YYYY-MM-DD`. */
@@ -17,7 +17,7 @@ export type PaceRefRow = {
   updatedAt: string
 }
 
-export type ProfileRow = {
+type ProfileRow = {
   login: string
   campusId: number | null
   lang: string | null

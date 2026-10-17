@@ -20,7 +20,7 @@ export type CorrectionRow = {
 
 /** Cuántas veces ha corregido una persona a otra. */
 /** Una corrección leída de la base, ya con su veredicto. */
-export type StoredCorrection = CorrectionRow & {
+type StoredCorrection = CorrectionRow & {
   /** `true` si aprobó; `null` si aún no se ha calculado. */
   passed: boolean | null
 }
@@ -28,7 +28,7 @@ export type StoredCorrection = CorrectionRow & {
 export type PairRow = { corrector: string; corrected: string; count: number }
 
 /** Un campus, o varios para mirarlos juntos. */
-export type Campuses = number | readonly number[]
+type Campuses = number | readonly number[]
 
 /** Para `campus_id IN (SELECT value FROM json_each(?))`: vale igual con uno que con varios. */
 const scope = (campuses: Campuses): string =>
@@ -36,7 +36,7 @@ const scope = (campuses: Campuses): string =>
 const IN_SCOPE = 'campus_id IN (SELECT value FROM json_each(?))'
 
 /** Qué correcciones se miran. */
-export type CorrectionFilter = {
+type CorrectionFilter = {
   campusId: Campuses
   from?: string | null
   to?: string | null

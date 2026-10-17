@@ -6,7 +6,7 @@
  * ninguna librería.
  */
 
-export type LocalMoment = {
+type LocalMoment = {
   /** `YYYY-MM-DD` en el campus. */
   day: string
   /** Día de la semana: 1 lunes … 7 domingo. */

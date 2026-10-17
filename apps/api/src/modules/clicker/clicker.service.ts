@@ -57,7 +57,7 @@ import {
 } from './cheat.rules.js'
 
 /** Pulsaciones de la cruz que abren la pregunta de las pastillas. */
-export const PLUS_GOAL = 42
+const PLUS_GOAL = 42
 /** Pulsaciones que caben en un envío: la web las junta para no pedir una a una. */
 const MAX_PLUS_PER_SEND = 25
 /** Lo que puede pesar una partida guardada. */
@@ -103,10 +103,10 @@ const idSchema = z.coerce.number().int().min(1)
  * Quien no sale en la clasificación (lo pidió): juega igual, pero no ocupa
  * puesto ni cuenta para los de los demás.
  */
-export const HIDDEN_FROM_BOARD: ReadonlySet<string> = new Set(['albrodri'])
+const HIDDEN_FROM_BOARD: ReadonlySet<string> = new Set(['albrodri'])
 
 /** Cada cuánto se vuelve a preguntar a 42 lo donado a la bolsa. */
-export const DONATED_TTL_MS = 24 * 3_600_000
+const DONATED_TTL_MS = 24 * 3_600_000
 const sanctionSchema = z.object({
   login: z.string().regex(/^[a-z0-9-]{1,30}$/),
   code: z.number().min(0),

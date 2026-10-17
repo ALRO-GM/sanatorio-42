@@ -17,7 +17,7 @@ import { LOCATION_MAX_AGE_MS } from '../replica/index.js'
 import type { Peer, ProjectSummary } from '@sanatorio/contracts'
 import type { Syncer } from '../replica/index.js'
 
-export type PeersResult = {
+type PeersResult = {
   /** Los accionables, ya ordenados: de guardia primero. */
   peers: Peer[]
   /** Personas del campus con alguna fila en el proyecto. */
@@ -26,14 +26,14 @@ export type PeersResult = {
   complete: boolean
 }
 
-export type PeersServiceOptions = {
+type PeersServiceOptions = {
   replica: ReplicaRepository
   sync: Syncer
   now?: () => number
 }
 
 /** Quién pregunta. `id` puede faltar en sesiones antiguas. */
-export type Viewer = { login: string; id: number | null }
+type Viewer = { login: string; id: number | null }
 
 export function createPeersService(options: PeersServiceOptions) {
   const { replica, sync } = options

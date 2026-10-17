@@ -32,7 +32,7 @@ const STAY_MIN_SECONDS = 120
 type Section = UsageFlows['sections'][number]
 
 /** El papel de una sección según cómo se pasa por ella. */
-export function roleOf(section: Pick<Section, 'visits' | 'avgSeen' | 'exitRate'>): Section['role'] {
+function roleOf(section: Pick<Section, 'visits' | 'avgSeen' | 'exitRate'>): Section['role'] {
   if (section.visits < ROLE_MIN_VISITS) return null
   if (section.avgSeen < PASS_MAX_SECONDS && section.exitRate < PASS_MAX_EXIT) return 'pass'
   if (section.exitRate >= END_MIN_EXIT) return 'end'

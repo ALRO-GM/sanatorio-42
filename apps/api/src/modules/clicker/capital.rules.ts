@@ -10,18 +10,18 @@
  */
 
 /** Un punto del historial: el segundo (desde 1970) y el capital que había. */
-export type Sample = [at: number, capital: number]
+type Sample = [at: number, capital: number]
 /** Un reparto cobrado: el segundo (de la API) en que llegó y las líneas que traía. */
-export type Gift = [at: number, amount: number]
+type Gift = [at: number, amount: number]
 
 /** Lo más atrás y lo más adelante que puede caer un punto respecto a ahora, en segundos. */
 const PAST_S = 3600
 const AHEAD_S = 120
 /** Segundos en los que se busca un salto, y por cuánto tiene que multiplicarse el capital. */
-export const JUMP_WINDOW_S = 10
-export const JUMP_FACTOR = 3
+const JUMP_WINDOW_S = 10
+const JUMP_FACTOR = 3
 /** Con menos capital que esto, doblarlo en un momento es jugar: no se avisa. */
-export const JUMP_FLOOR = 1e6
+const JUMP_FLOOR = 1e6
 /** Segundos de antes y de después del salto que se guardan con el aviso. */
 const TRACE_S = 30
 /**
@@ -30,7 +30,7 @@ const TRACE_S = 30
  */
 const GIFT_SLACK_S = AHEAD_S
 /** Lo que se recuerdan los repartos cobrados: lo mismo que el historial que llega. */
-export const GIFT_MEMORY_S = PAST_S
+const GIFT_MEMORY_S = PAST_S
 
 /** Los repartos de la última hora, con el de ahora si lo hay. */
 export function rememberGifts(gifts: readonly Gift[], second: number, amount: number): Gift[] {
@@ -70,7 +70,7 @@ export function clean(samples: readonly Sample[], now: number): Sample[] {
 }
 
 /** Cada cuántos segundos se guarda un punto del día en curso. */
-export const FINE_S = 10
+const FINE_S = 10
 /** Lo que dura el detalle fino, y lo que dura el de un punto por hora. */
 export const FINE_FOR_S = 24 * 3600
 export const HOURLY_FOR_S = 7 * 24 * 3600

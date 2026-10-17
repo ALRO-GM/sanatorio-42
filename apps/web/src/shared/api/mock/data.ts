@@ -235,7 +235,7 @@ export function today(): string {
 }
 
 /** El día de dentro de `days` días, como `YYYY-MM-DD`, en la hora del navegador. */
-export function dayIn(days: number): string {
+function dayIn(days: number): string {
   const date = new Date()
   const pad = (value: number): string => String(value).padStart(2, '0')
 

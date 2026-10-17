@@ -18,7 +18,7 @@ import type { QuotaGate, ReplicaRepository } from '../replica/index.js'
 import { DEFAULT_PASS_MARK, passMarkOf } from './network.analysis.js'
 import type { CorrectionRow, NetworkRepository } from './network.repository.js'
 
-export type CorrectionSyncOptions = {
+type CorrectionSyncOptions = {
   client: FortyTwoClient
   corrections: NetworkRepository
   /** Para guardar por dónde va la copia, junto al resto de tareas. */

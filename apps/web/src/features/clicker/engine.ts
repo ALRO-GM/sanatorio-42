@@ -47,7 +47,7 @@ import type { BuildingId, Upgrade } from './data'
 export type BuffId = 'frenzy' | 'click' | 'clot' | 'elder'
 
 /** Lo que puede pasar al abrir una pull request dorada (o una envenenada). */
-export type GoldenEffect = BuffId | 'lucky' | 'ruin'
+type GoldenEffect = BuffId | 'lucky' | 'ruin'
 
 export type Game = {
   /** Versión del formato de la partida guardada. */

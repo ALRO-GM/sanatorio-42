@@ -9,7 +9,7 @@ import { en } from './en'
 import { es } from './es'
 import { eu } from './eu'
 
-export type Dictionary = Record<string, string>
+type Dictionary = Record<string, string>
 
 // Idiomas disponibles. Añadir uno es crear su fichero y apuntarlo aquí: las
 // claves que le falten caen al español.

@@ -27,7 +27,7 @@ export function duration(seconds: number): string {
 }
 
 /** "2h", "45m", "30s": lo justo para caber encima de una barra. */
-export function briefTime(seconds: number): string {
+function briefTime(seconds: number): string {
   if (seconds < 60) return `${seconds}s`
   if (seconds < 3600) return `${Math.round(seconds / 60)}m`
 

@@ -7,6 +7,7 @@ import { api } from '../../shared/api'
 import { useAction, useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { LimitActions, NumberField, Tile } from './LimitParts'
 
 /** Un tope escrito en el formulario: vacío es "sin tope". */
 const capOf = (text: string): number | null => (text.trim() === '' ? null : Number(text))
@@ -50,67 +51,55 @@ export function QuotaCard() {
   }
 
   const field = (name: keyof typeof form, extra: { min?: number; max?: number } = {}) => (
-    <label>
-      {t(`admin.quota.${name}`)}
-      <input
-        type="number"
-        inputMode="numeric"
-        value={form[name]}
-        {...extra}
-        onChange={(event) => {
-          setDraft({ ...form, [name]: event.target.value })
-        }}
-      />
-    </label>
+    <NumberField
+      label={t(`admin.quota.${name}`)}
+      value={form[name]}
+      {...extra}
+      onChange={(value) => {
+        setDraft({ ...form, [name]: value })
+      }}
+    />
   )
 
   return (
     <article className={`card budget ${settings.saving ? 'saving' : ''}`}>
       <span className="eyebrow">{t('admin.quota.title')}</span>
       <div className="tiles">
-        <div className="tile">
-          <span className="eyebrow">{t('admin.quota.hour')}</span>
-          <strong>{data.hourlyRemaining ?? '—'}</strong>
-          <small>{t(`admin.quota.level.${data.level}`)}</small>
-        </div>
-        <div className="tile">
-          <span className="eyebrow">{t('admin.quota.today')}</span>
-          <strong>
-            {day.spent.toLocaleString()}
-            {day.allowance !== null && ` / ${day.allowance.toLocaleString()}`}
-          </strong>
-          <small>{t(day.allowance === null ? 'admin.quota.noCap' : 'admin.quota.cap')}</small>
-        </div>
-        <div className="tile">
-          <span className="eyebrow">{t('admin.quota.month')}</span>
-          <strong>{month.spent.toLocaleString()}</strong>
-          <small>{t('admin.budget.renews', { n: month.daysLeft, day: month.renewsOn })}</small>
-        </div>
-        <div className="tile">
-          <span className="eyebrow">{t('admin.quota.queued')}</span>
-          <strong>{data.queued}</strong>
-          <small>{t('admin.quota.queuedHint')}</small>
-        </div>
+        <Tile
+          label={t('admin.quota.hour')}
+          value={data.hourlyRemaining ?? '—'}
+          hint={t(`admin.quota.level.${data.level}`)}
+        />
+        <Tile
+          label={t('admin.quota.today')}
+          value={
+            day.allowance === null
+              ? day.spent.toLocaleString()
+              : `${day.spent.toLocaleString()} / ${day.allowance.toLocaleString()}`
+          }
+          hint={t(day.allowance === null ? 'admin.quota.noCap' : 'admin.quota.cap')}
+        />
+        <Tile
+          label={t('admin.quota.month')}
+          value={month.spent.toLocaleString()}
+          hint={t('admin.budget.renews', { n: month.daysLeft, day: month.renewsOn })}
+        />
+        <Tile
+          label={t('admin.quota.queued')}
+          value={data.queued}
+          hint={t('admin.quota.queuedHint')}
+        />
       </div>
 
       <form className="budget-form" onSubmit={submit}>
         {field('daily', { min: 100 })}
         {field('monthly', { min: 1000 })}
         {field('renewDay', { min: 1, max: 28 })}
-        <div className="actions">
-          <button type="submit" className="primary small" disabled={action.busy}>
-            {t('admin.budget.save')}
-          </button>
-          <button
-            type="button"
-            className={`small ${settings.saving ? 'primary' : ''}`}
-            aria-pressed={settings.saving}
-            disabled={action.busy}
-            onClick={() => void save({ saving: !settings.saving })}
-          >
-            {t(settings.saving ? 'admin.budget.savingOff' : 'admin.budget.savingOn')}
-          </button>
-        </div>
+        <LimitActions
+          busy={action.busy}
+          saving={settings.saving}
+          onToggleSaving={() => void save({ saving: !settings.saving })}
+        />
       </form>
       <p className="hint">{t('admin.quota.hint')}</p>
       <ErrorNote error={action.error} />

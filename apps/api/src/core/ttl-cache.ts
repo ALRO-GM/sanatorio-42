@@ -7,7 +7,7 @@
  * primera en vez de lanzar otra consulta igual.
  */
 
-export type TtlCache<T> = {
+type TtlCache<T> = {
   /** El valor de `key`: el guardado si sigue vigente; si no, el que dé `load`. */
   get: (key: string, load: () => Promise<T>) => Promise<T>
   /** Olvida todo. */

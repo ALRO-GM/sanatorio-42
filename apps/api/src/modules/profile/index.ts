@@ -17,7 +17,7 @@ import { createXpRepository } from './xp.repository.js'
 import { createXpService } from './xp.service.js'
 import type { XpService, XpServiceOptions } from './xp.service.js'
 
-export type ProfileModuleDeps = {
+type ProfileModuleDeps = {
   db: Db
   replica: ReplicaRepository
   curriculum: Curriculum
@@ -62,7 +62,7 @@ export function createProfileModule(deps: ProfileModuleDeps): ProfileModule {
   }
 }
 
-export { XP_AMOUNT, XP_KIND } from './xp.rules.js'
+export { XP_KIND } from './xp.rules.js'
 export type { ProfilesRepository } from './profiles.repository.js'
 export type { XpService } from './xp.service.js'
 

@@ -157,7 +157,7 @@ export function boardView(board: StoredBoard): BoardView {
 }
 
 /** Proyectos en curso de alguien, según las listas de mentira. */
-export function projectsOf(login: string): string[] {
+function projectsOf(login: string): string[] {
   return PROJECTS.filter((project) =>
     (PEERS[project.id] ?? []).some((peer) => peer.login === login && peer.status === 'in_progress'),
   ).map((project) => project.name)
@@ -247,7 +247,7 @@ export function buildMap(projectId?: number): ClusterMap {
  * Una corrección de mentira para hoy, hora y media después de ahora, para que se
  * vea cómo bloquea la guardia. Si ya es muy tarde, ninguna.
  */
-export function busyToday(): { start: string; end: string }[] {
+function busyToday(): { start: string; end: string }[] {
   const date = new Date()
   const start = Math.ceil((date.getHours() * 60 + date.getMinutes()) / 30) * 30 + 90
   const time = (minutes: number): string =>

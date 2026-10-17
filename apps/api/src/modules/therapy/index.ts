@@ -13,7 +13,7 @@ import { registerTherapyRoutes } from './therapy.routes.js'
 import { createTherapyService } from './therapy.service.js'
 import type { TherapyService } from './therapy.service.js'
 
-export type TherapyModuleDeps = {
+type TherapyModuleDeps = {
   db: Db
   replica: ReplicaRepository
   sync: Syncer

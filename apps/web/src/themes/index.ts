@@ -14,14 +14,7 @@ import { terminal } from './terminal/theme'
 import { canUseStyle } from './ids'
 import type { ThemeManifest } from './types'
 
-export const THEMES: readonly ThemeManifest[] = [
-  clinica,
-  terminal,
-  historial,
-  espacio,
-  libre,
-  bichota,
-]
+const THEMES: readonly ThemeManifest[] = [clinica, terminal, historial, espacio, libre, bichota]
 
 export const DEFAULT_THEME: ThemeManifest = clinica
 
@@ -32,5 +25,5 @@ export const themeOf = (id: string | null | undefined): ThemeManifest =>
 export const themesFor = (login: string): ThemeManifest[] =>
   THEMES.filter((theme) => canUseStyle(theme.id, login))
 
-export { canUseStyle, EXCLUSIVE_STYLES, PUBLIC_STYLES } from './ids'
+export { canUseStyle } from './ids'
 export type { ThemeManifest, ThemePalette } from './types'

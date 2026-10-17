@@ -21,7 +21,7 @@ export type MapLook = {
 }
 
 /** Nota con la que un proyecto sale perfecto: brillo dorado. */
-export const PERFECT_MARK = 125
+const PERFECT_MARK = 125
 
 const KEY = 'sanatorio_map_look'
 

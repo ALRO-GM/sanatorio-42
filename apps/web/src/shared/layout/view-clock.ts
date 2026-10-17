@@ -13,10 +13,10 @@
  * No toca el navegador: recibe la hora y el estado, así se puede probar.
  */
 
-export type WindowState = 'seen' | 'back' | 'hidden'
+type WindowState = 'seen' | 'back' | 'hidden'
 
 /** `[viéndola, detrás de otra ventana, oculta]`, en segundos. */
-export type ViewTime = [seen: number, back: number, hidden: number]
+type ViewTime = [seen: number, back: number, hidden: number]
 
 const SLOT: Record<WindowState, 0 | 1 | 2> = { seen: 0, back: 1, hidden: 2 }
 

@@ -7,7 +7,7 @@ import { api } from '../../shared/api'
 /** Lo que se espera tras la última tecla antes de preguntar a la API. */
 const WAIT_MS = 180
 /** Con menos letras no se busca: saldría medio campus. */
-export const MIN_LETTERS = 2
+const MIN_LETTERS = 2
 
 /**
  * Quienes llevan `text` en el login o en el nombre, mientras se escribe.

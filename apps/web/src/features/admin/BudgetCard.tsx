@@ -7,6 +7,7 @@ import { api } from '../../shared/api'
 import { useAction } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { LimitActions, NumberField, Tile } from './LimitParts'
 
 const GB = 1_000_000_000
 
@@ -56,18 +57,14 @@ export function BudgetCard({ status, onChange }: { status: BudgetStatus; onChang
   }
 
   const field = (name: keyof Draft, extra: { min?: number; max?: number } = {}) => (
-    <label>
-      {t(`admin.budget.${name}`)}
-      <input
-        type="number"
-        inputMode="numeric"
-        value={draft[name]}
-        {...extra}
-        onChange={(event) => {
-          setDraft((current) => ({ ...current, [name]: event.target.value }))
-        }}
-      />
-    </label>
+    <NumberField
+      label={t(`admin.budget.${name}`)}
+      value={draft[name]}
+      {...extra}
+      onChange={(value) => {
+        setDraft((current) => ({ ...current, [name]: value }))
+      }}
+    />
   )
 
   return (
@@ -79,38 +76,32 @@ export function BudgetCard({ status, onChange }: { status: BudgetStatus; onChang
         </p>
       )}
       <div className="tiles">
-        <div className="tile">
-          <span className="eyebrow">{t('admin.budget.today')}</span>
-          <strong>
-            {day.used.toLocaleString()} / {day.allowance.toLocaleString()}
-          </strong>
-          <small>
-            {t(`admin.budget.limitedBy.${day.limitedBy}`, { left: day.left.toLocaleString() })}
-          </small>
-        </div>
-        <div className="tile">
-          <span className="eyebrow">{t('admin.budget.forecast')}</span>
-          <strong>{day.forecast.toLocaleString()}</strong>
-          <small>
-            {t(
-              day.forecast > day.allowance
-                ? 'admin.budget.forecastOver'
-                : 'admin.budget.forecastOk',
-            )}
-          </small>
-        </div>
-        <div className="tile">
-          <span className="eyebrow">{t('admin.budget.month')}</span>
-          <strong>
-            {month.stopAt === null
+        <Tile
+          label={t('admin.budget.today')}
+          value={`${day.used.toLocaleString()} / ${day.allowance.toLocaleString()}`}
+          hint={t(`admin.budget.limitedBy.${day.limitedBy}`, { left: day.left.toLocaleString() })}
+        />
+        <Tile
+          label={t('admin.budget.forecast')}
+          value={day.forecast.toLocaleString()}
+          hint={t(
+            day.forecast > day.allowance ? 'admin.budget.forecastOver' : 'admin.budget.forecastOk',
+          )}
+        />
+        <Tile
+          label={t('admin.budget.month')}
+          value={
+            month.stopAt === null
               ? traffic(month.bytesUsed)
-              : `${traffic(month.bytesUsed)} / ${traffic(month.stopAt)}`}
-          </strong>
-          <small>
-            {month.stopAt !== null && `${t('admin.budget.stopAt')} `}
-            {t('admin.budget.renews', { n: month.daysLeft, day: month.renewsOn })}
-          </small>
-        </div>
+              : `${traffic(month.bytesUsed)} / ${traffic(month.stopAt)}`
+          }
+          hint={
+            <>
+              {month.stopAt !== null && `${t('admin.budget.stopAt')} `}
+              {t('admin.budget.renews', { n: month.daysLeft, day: month.renewsOn })}
+            </>
+          }
+        />
       </div>
 
       <form className="budget-form" onSubmit={submit}>
@@ -120,20 +111,11 @@ export function BudgetCard({ status, onChange }: { status: BudgetStatus; onChang
         {field('share', { min: 50, max: 100 })}
         {field('min', { min: 10 })}
         {field('max', { min: 10 })}
-        <div className="actions">
-          <button type="submit" className="primary small" disabled={action.busy}>
-            {t('admin.budget.save')}
-          </button>
-          <button
-            type="button"
-            className={`small ${settings.saving ? 'primary' : ''}`}
-            aria-pressed={settings.saving}
-            disabled={action.busy}
-            onClick={() => void save({ saving: !settings.saving })}
-          >
-            {t(settings.saving ? 'admin.budget.savingOff' : 'admin.budget.savingOn')}
-          </button>
-        </div>
+        <LimitActions
+          busy={action.busy}
+          saving={settings.saving}
+          onToggleSaving={() => void save({ saving: !settings.saving })}
+        />
       </form>
       <p className="hint">{t('admin.budget.hint')}</p>
       <ErrorNote error={action.error} />

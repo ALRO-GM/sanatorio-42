@@ -192,5 +192,5 @@ export function createClickerModule(deps: ClickerServiceOptions): ClickerModule 
 }
 
 export { hackerTitle } from './cheat.rules.js'
-export { clickerLevel, PLUS_GOAL } from './clicker.service.js'
+export { clickerLevel } from './clicker.service.js'
 export type { ClickerService } from './clicker.service.js'

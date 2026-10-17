@@ -13,7 +13,7 @@ import type { ApiUser } from '../../integrations/forty-two/types.js'
 import { randomToken, base64url } from './signed-cookie.js'
 import { createHash } from 'node:crypto'
 
-export type OAuthClientOptions = {
+type OAuthClientOptions = {
   authorizeUrl: string
   tokenUrl: string
   clientId: string
@@ -37,10 +37,10 @@ export type OAuthClientOptions = {
  * ya ha escrito su contraseña. Por eso `scopes` llega en las opciones en vez de
  * estar fijo aquí, y se ajusta con `FORTY_TWO_SCOPES`.
  */
-export const DEFAULT_OAUTH_SCOPES = ['public', 'profile'] as const
+const DEFAULT_OAUTH_SCOPES = ['public', 'profile'] as const
 
 /** Challenge PKCE: `S256`, no `plain`. */
-export type PkcePair = {
+type PkcePair = {
   verifier: string
   challenge: string
 }
@@ -53,7 +53,7 @@ export function createPkcePair(): PkcePair {
   return { verifier, challenge }
 }
 
-export type AuthorizeParams = {
+type AuthorizeParams = {
   /** Devuelve donde el navegador debe acabar. */
   redirectUri?: string
   state: string
@@ -61,7 +61,7 @@ export type AuthorizeParams = {
 }
 
 /** Cuerpo de la respuesta de `POST /oauth/token`. */
-export type TokenResponse = {
+type TokenResponse = {
   access_token: string
   token_type: string
   expires_in?: number
@@ -69,7 +69,7 @@ export type TokenResponse = {
 }
 
 /** Sesión de usuario ya canjeada. */
-export type OAuthUserSession = {
+type OAuthUserSession = {
   accessToken: string
   /** Segundos de validez del token, si la API los dice. */
   expiresInSeconds: number | undefined

@@ -24,7 +24,7 @@ import { optionalText, parse, text } from '../../core/validation.js'
 import type { Actor } from '../../core/actor.js'
 import type { Notify } from '../../core/events.js'
 
-export type BoardsServiceOptions = {
+type BoardsServiceOptions = {
   boards: BoardsRepository
   replica: ReplicaRepository
   xp: XpService

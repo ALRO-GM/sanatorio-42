@@ -31,7 +31,7 @@ import { FRESH_USER_TTL_MS } from '../replica/index.js'
 import type { Agenda, ReplicaRepository } from '../replica/index.js'
 import type { TherapyService } from '../therapy/index.js'
 
-export type CalendarServiceOptions = {
+type CalendarServiceOptions = {
   replica: ReplicaRepository
   agenda: Agenda
   help: HelpService
@@ -302,4 +302,4 @@ export function createCalendarService(options: CalendarServiceOptions) {
 export type CalendarService = ReturnType<typeof createCalendarService>
 
 /** Un rato ocupado: lo que tapa la guardia. */
-export type Commitment = { start: string; end: string; kind: CalendarEvent['kind'] }
+type Commitment = { start: string; end: string; kind: CalendarEvent['kind'] }

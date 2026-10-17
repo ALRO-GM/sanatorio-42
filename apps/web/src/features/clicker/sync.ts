@@ -13,7 +13,7 @@ const REV_KEY = 'sanatorio_clicker_rev'
 const CAUGHT_KEY = 'sanatorio_clicker_caught'
 
 /** La copia de este navegador y la `rev` de la API de la que salió. */
-export type LocalCopy = { save: string | null; rev: number | null }
+type LocalCopy = { save: string | null; rev: number | null }
 
 export function readLocal(): LocalCopy {
   try {

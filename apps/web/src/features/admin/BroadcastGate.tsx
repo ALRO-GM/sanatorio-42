@@ -1,9 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
-
 import type { Broadcast } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
 import { useAction } from '../../shared/hooks/useAsync'
+import { useGateQueue } from '../../shared/hooks/useGateQueue'
 import { localeOf, useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { Icon } from '../../shared/ui/Icon'
@@ -25,34 +24,14 @@ type BroadcastGateProps = {
  */
 export function BroadcastGate({ pending, onChange }: BroadcastGateProps) {
   const { t, lang } = useI18n()
-  const [queue, setQueue] = useState<Broadcast[]>([])
-  const dialog = useRef<HTMLDialogElement>(null)
+  const { queue, setQueue, current, dialog } = useGateQueue<Broadcast>(pending, () =>
+    api.getBroadcasts(),
+  )
   const { busy, error, run } = useAction()
-  const current = queue[0]
   // Con opciones y obligación de elegir, no hay otra forma de cerrarlo.
   const locked = current !== undefined && current.required && current.options.length > 0
 
   // El pulso solo trae la cuenta: la lista se pide cuando hay algo.
-  useEffect(() => {
-    if (pending === 0) return
-
-    let alive = true
-
-    api.getBroadcasts().then(
-      (list) => {
-        if (alive) setQueue(list)
-      },
-      () => undefined,
-    )
-
-    return () => {
-      alive = false
-    }
-  }, [pending])
-
-  useEffect(() => {
-    if (current !== undefined && dialog.current?.open === false) dialog.current.showModal()
-  }, [current])
 
   if (current === undefined) return null
 

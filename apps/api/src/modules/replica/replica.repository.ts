@@ -27,7 +27,7 @@ import type {
 import type { CampusSummary, ProjectStatus, ProjectSummary } from '@sanatorio/contracts'
 
 /** Una persona del proyecto, tal y como sale del JOIN. */
-export type PeerRow = {
+type PeerRow = {
   login: string
   image: string | null
   location: string | null
@@ -63,7 +63,7 @@ const IS_CORE = `(p.core = 1 OR (p.core IS NULL
  * piscina cuentan todos, que es lo único que tiene.
  */
 /** `true` si el proyecto es un examen del common core (`exam-rank-03`, `42next-exam-rank-02`). */
-export function isExam(project: { name?: string | null; slug?: string | null }): boolean {
+function isExam(project: { name?: string | null; slug?: string | null }): boolean {
   return /^(42next-)?exam-rank-/.test(project.slug ?? '')
 }
 
@@ -73,7 +73,7 @@ const STUDENT_PROJECT = `(${IS_CORE} OR NOT EXISTS (
   ))`
 
 /** Un texto en minúsculas y sin tildes ni diéresis, como se compara al buscar. */
-export function plain(text: string): string {
+function plain(text: string): string {
   return text.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase()
 }
 

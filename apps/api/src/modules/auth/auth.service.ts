@@ -33,7 +33,7 @@ import { createPkcePair } from './oauth-client.js'
 import type { OAuthClient } from './oauth-client.js'
 import { randomToken, sign, verify } from './signed-cookie.js'
 
-export type AuthServiceOptions = {
+type AuthServiceOptions = {
   oauth: OAuthClient
   /** Secreto de `SESSION_SECRET`, para firmar. */
   secret: string
@@ -56,8 +56,6 @@ export type AuthServiceOptions = {
   now?: () => number
 }
 
-export type { SessionUser }
-
 /** Valor del cookie de estado, ya serializado. */
 type StatePayload = {
   state: string
@@ -72,7 +70,7 @@ const DEFAULT_STATE_TTL_MS = 10 * 60 * 1000
  * Vida de una sesión de staff. Corta: se abre para comprobar unos documentos y
  * no hace falta que dure una jornada.
  */
-export const STAFF_SESSION_TTL_MS = 2 * 60 * 60 * 1000
+const STAFF_SESSION_TTL_MS = 2 * 60 * 60 * 1000
 
 export function createAuthService(options: AuthServiceOptions) {
   const now = options.now ?? Date.now

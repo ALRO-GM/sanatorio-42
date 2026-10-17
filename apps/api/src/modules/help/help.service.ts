@@ -41,7 +41,7 @@ import type { XpService } from '../profile/index.js'
 import type { Agenda, ReplicaRepository } from '../replica/index.js'
 import type { BookingRow, HelpRepository, Span } from './help.repository.js'
 
-export type HelpServiceOptions = {
+type HelpServiceOptions = {
   help: HelpRepository
   replica: ReplicaRepository
   /** Agenda de 42: de ahí salen las correcciones que pisan la guardia. */
@@ -83,8 +83,8 @@ const BOOKING_MINUTES = [30, 60, 90, 120] as const
 /** Reservas vivas que puede tener a la vez quien pide ayuda. */
 const MAX_ACTIVE_REQUESTS = 3
 
-export const HELPER_TAGS = ['bug', 'code', 'concept', 'patient'] as const satisfies HelperTag[]
-export const REQUESTER_TAGS = [
+const HELPER_TAGS = ['bug', 'code', 'concept', 'patient'] as const satisfies HelperTag[]
+const REQUESTER_TAGS = [
   'prepared',
   'curious',
   'autonomous',

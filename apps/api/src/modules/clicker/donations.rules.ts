@@ -4,7 +4,7 @@
  * resta puntos y en cuyo motivo sale «pool».
  */
 
-export type PointMove = { reason: string; sum: number }
+type PointMove = { reason: string; sum: number }
 
 export function donatedPoints(moves: readonly PointMove[]): number {
   return moves.reduce(

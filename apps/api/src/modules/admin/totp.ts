@@ -8,10 +8,10 @@
 
 import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto'
 
-export const STEP_SECONDS = 30
-export const DIGITS = 6
+const STEP_SECONDS = 30
+const DIGITS = 6
 /** Pasos de margen a cada lado: el reloj del móvil puede ir medio minuto desfasado. */
-export const DRIFT_STEPS = 1
+const DRIFT_STEPS = 1
 
 const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'
 

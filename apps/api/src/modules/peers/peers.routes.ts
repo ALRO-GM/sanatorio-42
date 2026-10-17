@@ -15,7 +15,7 @@ import type { RouteContext } from '../../core/module.js'
 import type { AvailabilityService } from './availability.service.js'
 import type { PeersService } from './peers.service.js'
 
-export type PeersRoutesOptions = {
+type PeersRoutesOptions = {
   peers: PeersService
   availability: AvailabilityService
   events: EventBus

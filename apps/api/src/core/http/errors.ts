@@ -8,13 +8,13 @@
 import { DomainError } from '../errors.js'
 import { ApiError } from '../../integrations/forty-two/errors.js'
 
-export type ErrorMapping = {
+type ErrorMapping = {
   status: number
   /** Cuerpo JSON que ve el front. */
   body: { error: string; message: string }
 }
 
-export function statusForError(error: unknown): number {
+function statusForError(error: unknown): number {
   if (error instanceof DomainError) {
     switch (error.code) {
       case 'unauthenticated':
