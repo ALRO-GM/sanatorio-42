@@ -1237,12 +1237,18 @@ POST /quiz/rooms              → 201 QuizRoom. Cuerpo QuizSettings: mode (duel|
                                 supervivencia), minCircle (0–6 o null). Entras en ella.
 GET  /quiz/rooms/:id          → QuizRoom: cómo va ahora. La web lo pide cada segundo jugando.
 POST /quiz/rooms/:id/join     → QuizRoom. { team?: 'a'|'b' }: entra, o cambia de equipo antes de empezar.
-POST /quiz/rooms/:id/leave    → 204. Sin empezar: sale (si es quien la creó, la cierra). Jugando: queda fuera.
+POST /quiz/rooms/:id/leave    → 204. Sale de la sala, esté como esté. Si era quien la creó, pasa a quien
+                                entró después; vacía, se borra. Jugando, si ya no hay con quién (duelo o
+                                supervivencia con una persona, un equipo vacío), la partida acaba.
 POST /quiz/rooms/:id/start    → QuizRoom. Solo quien la creó. Duelo: 2; equipos: uno por equipo;
                                 supervivencia: 2 o más; todos contra todos: 1 o más (práctica).
 POST /quiz/rooms/:id/answer   → QuizRoom. { question, option }: option es el id de una respuesta.
 ```
 
+- Cada jugador lleva su foto de 42 (`image`, o `null`).
+- Al acabar una partida se guarda el resultado de cada cual en `game_results`
+  (común a todos los juegos), que queda para las estadísticas aunque la sala se
+  borre.
 - Nadie está en dos salas a la vez (409). Salas sin empezar se borran a las 2 h;
   las jugadas, a la semana.
 - Preguntas: las de los conceptos que les valen a **todos** los que juegan según

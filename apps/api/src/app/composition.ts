@@ -361,6 +361,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
   const quiz = createQuizModule({
     db,
     circlesOf: (logins) => replica.curriculum.circlesOf(logins),
+    imagesOf: (logins) => replica.repository.imagesOf(logins),
     ...clock,
   })
 

@@ -74,17 +74,32 @@ export function RoomView({ id, me }: RoomViewProps) {
   }
 
   const inside = room.players.some((p) => p.login === me && !p.out)
+  const present = room.players.some((p) => p.login === me)
   const run = (task: () => Promise<QuizRoom>): void => {
     void action.run(async () => {
       take(await task())
     })
   }
+  // Se puede salir siempre: esperando, jugando o al acabar.
+  const leave = (): void => {
+    void action.run(async () => {
+      await api.leaveQuizRoom(id)
+      window.location.hash = notGamesHref()
+    })
+  }
 
   return (
     <div className="quiz-room">
-      <a className="back-btn" href={notGamesHref()}>
-        {t('notgames.back')}
-      </a>
+      <div className="quiz-room-bar">
+        <a className="back-btn" href={notGamesHref()}>
+          {t('notgames.back')}
+        </a>
+        {present && (
+          <button type="button" className="pill" disabled={action.busy} onClick={leave}>
+            <Icon name="salir" size={14} /> {t('notgames.leave')}
+          </button>
+        )}
+      </div>
       <p className="hint">
         <strong>{t(`notgames.mode.${room.settings.mode}`)}</strong> ·{' '}
         {settingsText(t, room.settings)}
@@ -100,12 +115,6 @@ export function RoomView({ id, me }: RoomViewProps) {
           }}
           onStart={() => {
             run(() => api.startQuizRoom(id))
-          }}
-          onLeave={() => {
-            void action.run(async () => {
-              await api.leaveQuizRoom(id)
-              window.location.hash = notGamesHref()
-            })
           }}
         />
       )}
@@ -138,11 +147,10 @@ type WaitingProps = {
   busy: boolean
   onJoin: (team: QuizTeam | null) => void
   onStart: () => void
-  onLeave: () => void
 }
 
 /** La sala antes de empezar: quién está, los equipos y los botones. */
-function Waiting({ room, me, busy, onJoin, onStart, onLeave }: WaitingProps) {
+function Waiting({ room, me, busy, onJoin, onStart }: WaitingProps) {
   const { t } = useI18n()
   const inside = room.players.some((p) => p.login === me)
   const teams = room.settings.mode === 'teams'
@@ -197,11 +205,6 @@ function Waiting({ room, me, busy, onJoin, onStart, onLeave }: WaitingProps) {
         {room.host !== me && inside && (
           <span className="hint">{t('notgames.waitHost', { host: room.host })}</span>
         )}
-        {inside && (
-          <button type="button" className="pill" disabled={busy} onClick={onLeave}>
-            {room.host === me ? t('notgames.close') : t('notgames.leave')}
-          </button>
-        )}
       </div>
     </article>
   )
@@ -212,7 +215,7 @@ function PlayerList({ players, me }: { players: readonly QuizPlayer[]; me: strin
     <ul className="quiz-players">
       {players.map((player) => (
         <li key={player.login} className={player.login === me ? 'me' : ''}>
-          <Avatar login={player.login} image={null} size={24} />
+          <Avatar login={player.login} image={player.image} size={24} />
           {player.login}
         </li>
       ))}
@@ -370,7 +373,7 @@ function Scores({ room, me }: { room: QuizRoom; me: string }) {
             key={player.login}
             className={`${player.login === me ? 'me' : ''} ${player.out ? 'out' : ''}`}
           >
-            <Avatar login={player.login} image={null} size={24} />
+            <Avatar login={player.login} image={player.image} size={32} />
             <span className="quiz-name">
               {player.login}
               {player.team !== null && <small> · {t(`notgames.team.${player.team}`)}</small>}

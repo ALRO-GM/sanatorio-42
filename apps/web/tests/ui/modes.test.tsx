@@ -35,13 +35,14 @@ afterEach(() => {
 })
 
 describe('categorías', () => {
-  it('arriba hay cuatro categorías y la abierta enseña sus secciones debajo', async () => {
+  it('arriba hay cinco categorías y la abierta enseña sus secciones debajo', async () => {
     await openIn('normal', '#/tablon')
 
     expect(tabsOf(text('nav.label'))).toEqual([
       text('nav.cat.expediente'),
       text('nav.cat.ayuda'),
       text('nav.cat.calendario'),
+      text('nav.cat.clusters'),
       text('nav.cat.datos'),
     ])
     expect(tabsOf(text('nav.cat.ayuda'))).toEqual(

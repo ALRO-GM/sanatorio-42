@@ -369,25 +369,75 @@ describe('partidas de Not-games', () => {
     await expectCode(quiz.answer(actor('leo'), id, { question: 0, option: 0 }), 'forbidden')
   })
 
-  it('quien crea una sala sin empezar y se va, la cierra; jugando, sale y queda fuera', async () => {
+  it('si se va quien creó la sala, pasa a la siguiente; si se queda vacía, se borra', async () => {
     const { quiz } = services
-    const lobby = await quiz.create(actor('ana'), { mode: 'ffa', pool: 'general' })
+    const { id } = await quiz.create(actor('ana'), { mode: 'ffa', pool: 'general' })
 
-    await quiz.leave(actor('ana'), lobby.id)
-    await expectCode(quiz.view(actor('ana'), lobby.id), 'not_found')
+    await quiz.join(actor('leo'), id, {})
+    await quiz.leave(actor('ana'), id)
+    expect(await quiz.view(actor('leo'), id)).toMatchObject({
+      host: 'leo',
+      players: [{ login: 'leo' }],
+    })
 
+    await quiz.leave(actor('leo'), id)
+    await expectCode(quiz.view(actor('leo'), id), 'not_found')
+    // Salir de una sala en la que no estás no hace nada (ni rompe).
+    const other = await quiz.create(actor('ana'), { mode: 'ffa', pool: 'general' })
+
+    await expect(quiz.leave(actor('leo'), other.id)).resolves.toBeUndefined()
+    expect((await quiz.view(actor('ana'), other.id)).players).toHaveLength(1)
+  })
+
+  it('jugando, quien sale se va de la sala y puede entrar en otra; la partida sigue', async () => {
+    const { quiz } = services
     const { id } = await quiz.create(actor('ana'), { mode: 'ffa', pool: 'general', questions: 5 })
+
+    await quiz.join(actor('leo'), id, {})
+    await quiz.join(actor('eva'), id, {})
+    await quiz.start(actor('ana'), id)
+    await quiz.leave(actor('leo'), id)
+
+    const room = await quiz.view(actor('ana'), id)
+
+    expect(room.players.map((p) => p.login)).toEqual(['ana', 'eva'])
+    expect(room.status).toBe('playing')
+    await expect(
+      quiz.create(actor('leo'), { mode: 'ffa', pool: 'general' }),
+    ).resolves.toMatchObject({ host: 'leo' })
+  })
+
+  it('un duelo acaba si se va uno, y el resultado queda guardado', async () => {
+    const { quiz } = services
+    const { id } = await quiz.create(actor('ana'), { mode: 'duel', pool: 'general', questions: 5 })
 
     await quiz.join(actor('leo'), id, {})
     await quiz.start(actor('ana'), id)
     await quiz.leave(actor('leo'), id)
-    expect((await quiz.view(actor('ana'), id)).players.find((p) => p.login === 'leo')?.out).toBe(
-      true,
-    )
-    // Y ya puede entrar en otra.
-    await expect(
-      quiz.create(actor('leo'), { mode: 'ffa', pool: 'general' }),
-    ).resolves.toMatchObject({ host: 'leo' })
+
+    expect(await quiz.view(actor('ana'), id)).toMatchObject({ status: 'done', winners: ['ana'] })
+
+    const results = await db.execute('SELECT game, mode, login, won FROM game_results')
+
+    expect(results.rows).toEqual([
+      expect.objectContaining({ game: 'quiz', mode: 'duel', login: 'ana', won: 1 }),
+    ])
+
+    // Acabada, en cuanto se va la última, se borra.
+    await quiz.leave(actor('ana'), id)
+    await expectCode(quiz.view(actor('ana'), id), 'not_found')
+  })
+
+  it('en equipos, si un equipo se queda sin nadie, la partida acaba', async () => {
+    const { quiz } = services
+    const { id } = await quiz.create(actor('ana'), { mode: 'teams', pool: 'general', questions: 5 })
+
+    await quiz.join(actor('leo'), id, { team: 'b' })
+    await quiz.join(actor('eva'), id, { team: 'a' })
+    await quiz.start(actor('ana'), id)
+    await quiz.leave(actor('leo'), id)
+
+    expect((await quiz.view(actor('ana'), id)).status).toBe('done')
   })
 
   it('la lista enseña las salas abiertas del campus y las tuyas', async () => {

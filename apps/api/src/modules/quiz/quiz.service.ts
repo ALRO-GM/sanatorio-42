@@ -32,6 +32,8 @@ type QuizServiceOptions = {
   bank: readonly Concept[]
   /** El círculo en que va cada persona (para el mínimo de una sala). */
   circlesOf: (logins: readonly string[]) => Promise<Map<string, number>>
+  /** Las fotos de 42, para el marcador. */
+  imagesOf?: (logins: readonly string[]) => Promise<Map<string, string | null>>
   now?: () => number
   random?: () => number
 }
@@ -105,6 +107,33 @@ export function createQuizService(options: QuizServiceOptions) {
     return room
   }
 
+  /** Termina la partida y guarda el resultado de cada cual para las estadísticas. */
+  async function finish(room: RoomRow, t: number): Promise<RoomRow> {
+    const done: RoomRow = { ...room, phase: null, phaseUntil: null, status: 'done' }
+
+    await quiz.setPhase(room.id, { phase: null, until: null, status: 'done', finishedAt: iso(t) })
+
+    const players = await quiz.players(room.id)
+    const winners = winnersOf(done, players)
+
+    await quiz.record(
+      'quiz',
+      room.settings.mode,
+      room.id,
+      room.campusId,
+      players.map((p) => ({
+        login: p.login,
+        won: winners.includes(p.login) || (p.team !== null && winners.includes(p.team)),
+        correct: p.correct,
+        wrong: p.wrong,
+        score: p.score,
+      })),
+      iso(t),
+    )
+
+    return done
+  }
+
   /** Hace avanzar la partida hasta donde toque ahora. */
   async function advance(start: RoomRow): Promise<RoomRow> {
     let room = start
@@ -158,16 +187,7 @@ export function createQuizService(options: QuizServiceOptions) {
           alive.length === 0 ||
           (room.settings.mode === 'survival' && players.length > 1 && alive.length <= 1)
 
-        if (over) {
-          await quiz.setPhase(room.id, {
-            phase: null,
-            until: null,
-            status: 'done',
-            finishedAt: iso(t),
-          })
-
-          return { ...room, phase: null, phaseUntil: null, status: 'done' }
-        }
+        if (over) return finish(room, t)
 
         const next = room.round + 1
         const round = await quiz.round(room.id, next)
@@ -249,10 +269,13 @@ export function createQuizService(options: QuizServiceOptions) {
     const round = room.status === 'lobby' ? null : await quiz.round(room.id, room.round)
     const answers = round === null ? [] : await quiz.answers(room.id, room.round)
     const whyNot = await canJoin(actor, room, players)
+    const images =
+      (await options.imagesOf?.(players.map((p) => p.login))) ?? new Map<string, string | null>()
     const t = now()
 
     const playerView = (p: PlayerRow): QuizPlayer => ({
       login: p.login,
+      image: images.get(p.login) ?? null,
       team: p.team,
       score: p.score,
       correct: p.correct,
@@ -392,21 +415,41 @@ export function createQuizService(options: QuizServiceOptions) {
       })
     },
 
-    /** Sale. Sin empezar, se va de la sala (y si es quien la creó, se cierra); jugando, queda fuera. */
+    /**
+     * Sale de la sala, esté como esté: sin empezar, jugando o acabada. Si se va
+     * quien la creó, la sala pasa a quien entró después; si no queda nadie, la
+     * sala se borra. Jugando, si ya no hay con quién jugar (un duelo o una
+     * supervivencia con una sola persona, un equipo vacío), la partida acaba.
+     */
     async leave(actor: Actor, id: number): Promise<void> {
       await locked(id, async () => {
-        const room = await mustRoom(id)
+        const room = await advance(await mustRoom(id))
+        const players = await quiz.players(id)
 
-        if (room.status === 'lobby') {
-          if (room.host === actor.login) await quiz.drop(id)
-          else await quiz.remove(id, actor.login)
+        if (!players.some((p) => p.login === actor.login)) return
+
+        await quiz.remove(id, actor.login)
+
+        const rest = players.filter((p) => p.login !== actor.login)
+
+        if (rest.length === 0) {
+          await quiz.drop(id)
 
           return
         }
+        if (room.host === actor.login && rest[0] !== undefined)
+          await quiz.setHost(id, rest[0].login)
+        if (room.status !== 'playing') return
 
-        const me = (await quiz.players(id)).find((p) => p.login === actor.login)
+        const { mode } = room.settings
+        const alive = rest.filter((p) => !p.out)
+        const alone =
+          alive.length === 0 ||
+          ((mode === 'duel' || mode === 'survival') && alive.length < 2) ||
+          (mode === 'teams' &&
+            !(['a', 'b'] as const).every((team) => alive.some((p) => p.team === team)))
 
-        if (me !== undefined && !me.out) await quiz.penalize(id, actor.login, me.lives, true)
+        if (alone) await finish(room, now())
       })
     },
 

@@ -44,7 +44,6 @@ notgames.joinTeam,Not-games: entrar en ese equipo,Entrar aquí,Join here,Entra a
 notgames.switchTeam,Not-games: pasarse a ese equipo,Cambiarme aquí,Switch here,Canvia't aquí,Aldatu hona
 notgames.start,Not-games: botón para empezar la partida (quien creó la sala),Empezar,Start,Comença,Hasi
 notgames.waitHost,Not-games: esperando a quien creó la sala,Empieza {host} cuando estéis.,{host} starts when you are ready.,Comença {host} quan estigueu.,{host}-k hasiko du prest zaudetenean.
-notgames.close,Not-games: quien creó la sala la cierra,Cerrar la sala,Close the room,Tanca la sala,Itxi gela
 notgames.leave,Not-games: salir de la sala,Salir,Leave,Surt,Irten
 notgames.questionOf,Not-games: número de pregunta,Pregunta {n} de {total},Question {n} of {total},Pregunta {n} de {total},{total}tik {n}. galdera
 notgames.kind.quick,Not-games: etiqueta de pregunta rápida,Rápida,Quick,Ràpida,Azkarra

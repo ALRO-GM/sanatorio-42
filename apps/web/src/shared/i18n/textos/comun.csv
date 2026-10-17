@@ -173,8 +173,10 @@ nav.cat.ayuda,"Pestaña de arriba que agrupa sala de espera, tablón, terapia y 
 nav.cat.ayuda.hint,Explicación al pasar el ratón por la pestaña,"Quedar con gente: pedir y dar ayuda, aprender y enseñar","Meet people: ask for and give help, learn and teach","Quedar amb gent: demanar i donar ajuda, aprendre i ensenyar","Jendearekin elkartu: laguntza eskatu eta eman, ikasi eta irakatsi"
 nav.cat.calendario,Pestaña de arriba: tu calendario,Calendario,Calendar,Calendari,Egutegia
 nav.cat.calendario.hint,Explicación al pasar el ratón por la pestaña,"Todo lo que tienes, de aquí y de 42, en el tiempo","Everything you have, from here and from 42, over time","Tot el que tens, d'aquí i de 42, en el temps","Duzun guztia, hemengoa eta 42koa, denboran"
-nav.cat.datos,"Pestaña de arriba que agrupa red, clústeres y exámenes",Datos,Data,Dades,Datuak
-nav.cat.datos.hint,Explicación al pasar el ratón por la pestaña,"El campus en cifras: correcciones, puestos y exámenes","The campus in numbers: evaluations, seats and exams","El campus en xifres: correccions, llocs i exàmens","Campusa zenbakitan: zuzenketak, postuak eta azterketak"
+nav.cat.clusters,Pestaña de arriba: el plano de los clústeres,Clústeres,Clusters,Clústers,Klusterrak
+nav.cat.clusters.hint,Explicación al pasar el ratón por la pestaña,"El plano del campus: quién está, dónde y de guardia","The campus map: who is in, where and on call","El plànol del campus: qui hi és, on i de guàrdia","Campuseko planoa: nor dagoen, non eta guardian"
+nav.cat.datos,Pestaña de arriba que agrupa red y exámenes,Datos,Data,Dades,Datuak
+nav.cat.datos.hint,Explicación al pasar el ratón por la pestaña,El campus en cifras: correcciones y exámenes,The campus in numbers: evaluations and exams,El campus en xifres: correccions i exàmens,Campusa zenbakitan: zuzenketak eta azterketak
 settings.detail,Pie y bienvenida: cuánto enseña la web (modo de la interfaz),Modo,Mode,Mode,Modua
 settings.detail.simple,Modo de la interfaz: lo mínimo,Simplificado,Simplified,Simplificat,Erraztua
 settings.detail.simple.hint,Qué enseña el modo simplificado,Lo justo para pedir y dar ayuda. Sin cifras ni rankings.,Just what you need to ask for and give help. No numbers or rankings.,El just per demanar i donar ajuda. Sense xifres ni rànquings.,Laguntza eskatzeko eta emateko behar dena. Zenbakirik eta sailkapenik gabe.

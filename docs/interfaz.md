@@ -15,7 +15,8 @@ volver a una categoría se abre la última sección que se miró en ella.
 | **Expediente** | Lo tuyo | Expediente (la portada) | `app/sections.ts` |
 | **Ayuda** | Quedar con gente: pedir y dar ayuda, aprender y enseñar | Sala de espera · Tablón · Terapia · Pizarras · Not-games | |
 | **Calendario** | Todo lo que tienes, en el tiempo | Calendario | |
-| **Datos** | El campus en cifras | Red · Clústeres · Exámenes | |
+| **Clústeres** | El plano del campus: quién está, dónde y de guardia | Clústeres | |
+| **Datos** | El campus en cifras | Red · Exámenes | |
 
 Fuera de las pestañas, a propósito:
 

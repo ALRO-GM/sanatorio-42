@@ -144,6 +144,52 @@ export function createQuizRepository(db: Db) {
       })
     },
 
+    /** Guarda cómo le fue a cada cual en una partida terminada. */
+    async record(
+      game: string,
+      mode: string,
+      roomId: number,
+      campusId: number,
+      results: readonly {
+        login: string
+        won: boolean
+        correct: number
+        wrong: number
+        score: number
+      }[],
+      at: string,
+    ): Promise<void> {
+      if (results.length === 0) return
+
+      await db.batch(
+        results.map((r) => ({
+          sql: `INSERT INTO game_results (game, mode, room_id, campus_id, login, won, correct, wrong, score, at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          args: [
+            game,
+            mode,
+            roomId,
+            campusId,
+            r.login,
+            r.won ? 1 : 0,
+            r.correct,
+            r.wrong,
+            r.score,
+            at,
+          ],
+        })),
+        'write',
+      )
+    },
+
+    /** Pasa la sala a otra persona (cuando se va quien la creó). */
+    async setHost(roomId: number, login: string): Promise<void> {
+      await db.execute({
+        sql: 'UPDATE quiz_rooms SET host = ? WHERE id = ?',
+        args: [login, roomId],
+      })
+    },
+
     async drop(roomId: number): Promise<void> {
       await db.batch(
         ['quiz_answers', 'quiz_rounds', 'quiz_players', 'quiz_rooms'].map((table) => ({

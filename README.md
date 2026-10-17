@@ -58,7 +58,7 @@ Lo que este proyecto enseña de quien lo ha hecho:
 ## Índice
 
 - [Funcionalidades](#funcionalidades)
-  - [Cuatro categorías y tres modos](#cuatro-categorías-y-tres-modos)
+  - [Cinco categorías y tres modos](#cinco-categorías-y-tres-modos)
   - [Expediente](#expediente)
   - [Sala de espera](#sala-de-espera)
   - [Guardia](#guardia)
@@ -102,12 +102,12 @@ Lo que este proyecto enseña de quien lo ha hecho:
 Las capturas son del estado actual de la web, con los datos simulados de
 `npm run dev:mock`: ninguna persona que aparece es real.
 
-### Cuatro categorías y tres modos
+### Cinco categorías y tres modos
 
-Arriba hay cuatro pestañas agrupadas por para qué sirve cada cosa: **Expediente**
+Arriba hay cinco pestañas agrupadas por para qué sirve cada cosa: **Expediente**
 (lo tuyo), **Ayuda** (sala de espera, tablón, terapia y pizarras: quedar con
-gente para pedir y dar ayuda, aprender y enseñar), **Calendario** y **Datos**
-(red, clústeres y exámenes). La abierta enseña sus secciones en una segunda
+gente para pedir y dar ayuda, aprender y enseñar), **Calendario**,
+**Clústeres** (el plano del campus) y **Datos** (red y exámenes). La abierta enseña sus secciones en una segunda
 fila, y al volver a ella se abre la última que se miró.
 
 Cada cual elige cuánto enseña la web, en el pie o en la bienvenida:

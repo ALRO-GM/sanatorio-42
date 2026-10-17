@@ -60,6 +60,12 @@
   padding: 0;
   list-style: none;
 }
+.quiz-room-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
 .quiz-room-card {
   display: flex;
   align-items: center;

@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/notgames.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-66 textos. «—» es que falta la traducción: sale en español.
+65 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -52,7 +52,6 @@ Generado desde `apps/web/src/shared/i18n/textos/notgames.csv` con
 | `notgames.switchTeam` | Not-games: pasarse a ese equipo | features/notgames/RoomView | Cambiarme aquí | Switch here | Canvia't aquí | Aldatu hona |
 | `notgames.start` | Not-games: botón para empezar la partida (quien creó la sala) | features/notgames/RoomView | Empezar | Start | Comença | Hasi |
 | `notgames.waitHost` | Not-games: esperando a quien creó la sala | features/notgames/RoomView | Empieza {host} cuando estéis. | {host} starts when you are ready. | Comença {host} quan estigueu. | {host}-k hasiko du prest zaudetenean. |
-| `notgames.close` | Not-games: quien creó la sala la cierra | features/notgames/RoomView | Cerrar la sala | Close the room | Tanca la sala | Itxi gela |
 | `notgames.leave` | Not-games: salir de la sala | features/notgames/RoomView | Salir | Leave | Surt | Irten |
 | `notgames.questionOf` | Not-games: número de pregunta | features/notgames/NotGamesTour, features/notgames/RoomView | Pregunta {n} de {total} | Question {n} of {total} | Pregunta {n} de {total} | {total}tik {n}. galdera |
 | `notgames.kind.quick` | Not-games: etiqueta de pregunta rápida | features/notgames/NotGamesTour, features/notgames/RoomView | Rápida | Quick | Ràpida | Azkarra |

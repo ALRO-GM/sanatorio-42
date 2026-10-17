@@ -14,6 +14,7 @@ import type {
 } from '@sanatorio/contracts'
 
 import { ME } from './data'
+import { portrait } from './portrait'
 import { delay, fail } from './state'
 import type { Api } from '../types'
 
@@ -120,6 +121,7 @@ let nextId = 1
 
 const fresh = (login: string, team: QuizTeam | null): Player => ({
   login,
+  image: portrait(login),
   team,
   score: 0,
   correct: 0,
@@ -373,8 +375,14 @@ export const quizMock: Pick<
 
     const room = mustRoom(id)
 
-    if (room.status === 'lobby' && room.host === ME.login) rooms.delete(id)
-    else room.players = room.players.map((p) => (p.login === ME.login ? { ...p, out: true } : p))
+    // Como en la API: quien sale se va de la sala; la sala pasa a otra
+    // persona, y vacía (los compañeros de mentira no cuentan), se borra.
+    room.players = room.players.filter((p) => p.login !== ME.login)
+    if (room.players.length === 0 || room.players.every((p) => BOTS.includes(p.login))) {
+      rooms.delete(id)
+    } else if (room.host === ME.login) {
+      room.host = room.players[0]?.login ?? room.host
+    }
   },
 
   async startQuizRoom(id) {

@@ -24,7 +24,8 @@ export const SECTIONS = [
   { id: 'notgames', icon: 'pregunta', inNav: true, category: 'ayuda', from: 'normal' },
   { id: 'calendario', icon: 'calendario', inNav: true, category: 'calendario', from: 'simple' },
   { id: 'red', icon: 'red', inNav: true, category: 'datos', from: 'normal' },
-  { id: 'clusters', icon: 'capas', inNav: true, category: 'datos', from: 'normal' },
+  // Clústeres: el plano del campus, en su propia pestaña de arriba.
+  { id: 'clusters', icon: 'capas', inNav: true, category: 'clusters', from: 'normal' },
   // Exámenes: el de ahora (en vivo) y sus estadísticas.
   { id: 'examenes', icon: 'medalla', inNav: true, category: 'datos', from: 'normal' },
   // La guardia se abre desde "De guardia", en la cabecera.
@@ -54,7 +55,8 @@ export type Section = (typeof SECTIONS)[number]['id']
  * - Expediente: lo tuyo. Es la portada.
  * - Ayuda: quedar con gente para pedir y dar ayuda, aprender y enseñar.
  * - Calendario: todo lo que tienes, en el tiempo.
- * - Datos: el campus en cifras (correcciones, puestos, exámenes).
+ * - Clústeres: el plano del campus, quién está y dónde.
+ * - Datos: el campus en cifras (correcciones, exámenes).
  *
  * Una categoría con una sola sección es esa sección; con varias, al abrirla
  * sale una segunda fila con ellas. Dónde va una funcionalidad nueva: la regla
@@ -64,6 +66,7 @@ export const CATEGORIES = [
   { id: 'expediente', icon: 'expediente' },
   { id: 'ayuda', icon: 'corazon' },
   { id: 'calendario', icon: 'calendario' },
+  { id: 'clusters', icon: 'capas' },
   { id: 'datos', icon: 'cifras' },
 ] as const satisfies readonly { id: string; icon: IconName }[]
 

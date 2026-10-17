@@ -15,6 +15,7 @@ import type { QuizService } from './quiz.service.js'
 type QuizModuleDeps = {
   db: Db
   circlesOf: (logins: readonly string[]) => Promise<Map<string, number>>
+  imagesOf: (logins: readonly string[]) => Promise<Map<string, string | null>>
   now?: () => number
   random?: () => number
 }
@@ -26,6 +27,7 @@ export function createQuizModule(deps: QuizModuleDeps): QuizModule {
     quiz: createQuizRepository(deps.db),
     bank: BANK,
     circlesOf: deps.circlesOf,
+    imagesOf: deps.imagesOf,
     ...(deps.now === undefined ? {} : { now: deps.now }),
     ...(deps.random === undefined ? {} : { random: deps.random }),
   })
@@ -36,6 +38,7 @@ export function createQuizModule(deps: QuizModuleDeps): QuizModule {
       { table: 'quiz_rooms', logins: ['host'] },
       { table: 'quiz_players', logins: ['login'] },
       { table: 'quiz_answers', logins: ['login'] },
+      { table: 'game_results', logins: ['login'] },
     ],
     service,
     routes: (app, context) => {

@@ -101,8 +101,8 @@ Monorepo con workspaces de npm. Ver `README.md` y `docs/architecture.md`.
 - Textos en segunda persona y con lenguaje inclusivo (evitar formas con género
   cuando se pueda).
 - Lo primero que se ve al entrar es el expediente: es la portada y la primera
-  pestaña. La navegación va en su propia fila, debajo de la marca: cuatro
-  categorías (Expediente, Ayuda, Calendario, Datos) y, debajo, las secciones de
+  pestaña. La navegación va en su propia fila, debajo de la marca: cinco
+  categorías (Expediente, Ayuda, Calendario, Clústeres, Datos) y, debajo, las secciones de
   la abierta (`CATEGORIES` en `app/sections.ts`).
 - **Funcionalidad nueva**: antes de escribir código se decide su categoría, si
   es sección o bloque, desde qué modo de la interfaz sale (simplificado,

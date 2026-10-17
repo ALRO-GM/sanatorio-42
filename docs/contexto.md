@@ -41,7 +41,7 @@ Alberto pidió una revisión de todo; hecha y desplegada por bloques:
   `apps/web/src/shared/i18n/textos/` (y el grupo `juego/` para Code Clicker),
   plugin de Vite, idiomas descargados aparte, `npm run textos` y
   `docs/textos/` generado. Regla estricta en `docs/textos.md` y `AGENTS.md`.
-- **Interfaz**: cuatro categorías (Expediente, Ayuda, Calendario, Datos) y tres
+- **Interfaz**: cinco categorías (Expediente, Ayuda, Calendario, Clústeres, Datos) y tres
   modos (simplificado, normal, loco por los datos). Mapa, importancia de cada
   elemento, valoración de uso y regla para lo nuevo en `docs/interfaz.md`.
 - **Demostraciones**: `defineTour`, tests que las encuentran solas, plantilla

@@ -41,13 +41,15 @@ export type QuizRoomInput = QuizSettings
 
 export type QuizPlayer = {
   login: string
+  /** Su foto de 42, si la hay. */
+  image: string | null
   team: QuizTeam | null
   score: number
   correct: number
   wrong: number
   /** Vidas que le quedan, solo en supervivencia. */
   lives: number | null
-  /** Eliminado (supervivencia) o se ha ido. */
+  /** Eliminado (supervivencia). Quien se va, sale de la sala. */
   out: boolean
   /** Ya ha contestado la pregunta de ahora. */
   answered: boolean

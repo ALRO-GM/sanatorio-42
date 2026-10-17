@@ -52,6 +52,13 @@ describe('Not-games', () => {
       ),
     ).toBeTruthy()
     expect(screen.getByText(text('notgames.scores'))).toBeTruthy()
+
+    // Se puede salir en plena partida: vuelve a la lista y la sala, sin nadie, ya no está.
+    await user.click(screen.getByRole('button', { name: new RegExp(text('notgames.leave')) }))
+    await waitFor(() => {
+      expect(window.location.hash).toBe('#/notgames')
+    })
+    expect(await screen.findByText(text('notgames.noRooms'))).toBeTruthy()
   }, 40_000)
 
   it('cada modo explica en qué consiste', async () => {

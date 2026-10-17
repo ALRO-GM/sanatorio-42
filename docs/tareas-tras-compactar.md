@@ -125,6 +125,29 @@ Fases (cada una con check, commit, push y despliegue):
 - [x] **F4. Demostración, documentación** (`docs/api.md`, `docs/interfaz.md`,
       README) y repaso.
 
+## 2c. Plan vigente: tanda del 2026-10-17 (tarde)
+
+Cada bloque con check, commit, push y despliegue (sin empujar mientras un
+despliegue espera a la CI).
+- [x] **B1. Salir de la sala** de Not-games en cualquier momento (también
+      jugando) y **sala vacía = borrada** (en el motor de la API y en el mock).
+- [x] **B2. Clústeres a General**: categoría propia arriba (como Calendario).
+- [ ] **B3. Estadísticas** (pestaña en Ayuda): totales y por persona con
+      clasificación de cada sección: sala de espera, tablón, terapia, pizarras
+      y Not-games. Nuevo módulo de API `stats`.
+- [ ] **B4. Ajedrez** en Not-games: varios tableros (estilos) elegibles, reloj;
+      al mover, el reloj se para y sale una pregunta a los dos: el primero que
+      acierta mueve (y le corre el tiempo); si fallas, mueve el rival y pierdes
+      el 10 % de tu tiempo. La mecánica de turnos con pregunta, **separada y
+      reutilizable** (`quiz/turns`), para más juegos de turnos.
+- [ ] **B5. Demostración animada** de cada juego nuevo (ajedrez).
+- [ ] **Fotos** de cada jugador en clasificaciones y marcadores (`Avatar`). Hecho en el marcador de Not-games; falta en las clasificaciones nuevas.
+- [ ] **B6. Sonidos y animaciones** en los juegos: cronómetros, pulsaciones,
+      acierto/fallo.
+- [ ] **Buzón**: resumen dado a Alberto (13 abiertos: #42 #45 #48 #50 #65 #69
+      #70 #71 #75 #76 #77 #78 #79). Esperar a que diga cuáles y cómo; #48
+      (Python 06 bis en el círculo 0) es un fallo: arreglarlo.
+
 ## 3. A medias o por confirmar con Alberto
 
 - **Intentos de examen**: la copia de fondo nunca arrancaba (pedía 200 peticiones
