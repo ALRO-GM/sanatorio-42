@@ -6,7 +6,7 @@ import { api } from '../../shared/api'
 import { useAction, useAsync } from '../../shared/hooks/useAsync'
 import { localeOf, useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
-import { iconOf, noticesIn, removableCount, targetOf } from './routes'
+import { calendarEventOf, iconOf, noticesIn, removableCount, targetOf } from './routes'
 import type { NoticeFilter, NoticeTarget } from './routes'
 import { Icon } from '../../shared/ui/Icon'
 import { InfoTip } from '../../shared/ui/InfoTip'
@@ -23,7 +23,8 @@ type MailboxProps = {
   onChat: (id: string | null) => void
   onClose: () => void
   /** Lleva a donde se ve de qué va el aviso. */
-  onOpen: (target: NoticeTarget) => void
+  /** `event`: el evento del calendario que hay que abrir, si el aviso lleva a uno. */
+  onOpen: (target: NoticeTarget, event?: string | null) => void
   /** El número de avisos sin leer ha cambiado: que la cabecera se entere. */
   onChange: () => void
 }
@@ -78,7 +79,7 @@ export function Mailbox({ me, chat, onChat, onClose, onOpen, onChange }: Mailbox
 
     // Una conversación se abre aquí mismo, en su pestaña.
     if (target === 'conversations') onChat(notice.ref)
-    else onOpen(target)
+    else onOpen(target, calendarEventOf(notice))
   }
 
   /** "hace 5 min", "hace 3 h", o la fecha si es de otro día. */

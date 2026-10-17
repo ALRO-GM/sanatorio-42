@@ -31,6 +31,11 @@ export function turnGameHref(room: number): string {
   return `#/notgames/t${room}`
 }
 
+/** El calendario, o el calendario con un evento abierto (`board:12`, `therapy:5`). */
+export function calendarHref(event: string | null = null): string {
+  return event === null ? '#/calendario' : `#/calendario/${encodeURIComponent(event)}`
+}
+
 /** El perfil de alguien en la intra de 42. */
 export function intraHref(login: string): string {
   return `https://profile.intra.42.fr/users/${encodeURIComponent(login)}`

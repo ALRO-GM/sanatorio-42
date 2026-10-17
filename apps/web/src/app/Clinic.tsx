@@ -5,6 +5,7 @@ import type { CurrentUser } from '@sanatorio/contracts'
 import { BroadcastGate } from '../features/admin/BroadcastGate'
 import { LegalGate } from '../features/legal/LegalGate'
 import { ReviewGate } from '../features/clicker/ReviewGate'
+import { calendarHref } from '../shared/links'
 import { HelpGate } from '../features/help/HelpGate'
 import { Welcome } from '../features/welcome/Welcome'
 import { AlertCenter } from '../features/alerts/AlertCenter'
@@ -215,10 +216,14 @@ export function Clinic({ me, onLogout }: ClinicProps) {
                 refresh()
               }}
               onChange={refresh}
-              onOpen={(target) => {
+              onOpen={(target, event) => {
                 // Lo que te han respondido está en el buzón de incidencias; lo demás, en su sección.
                 if (target === 'inbox') {
                   setBox('inbox')
+                } else if (target === 'calendario' && event !== undefined && event !== null) {
+                  // Al calendario, con el evento abierto.
+                  setBox(null)
+                  window.location.hash = calendarHref(event)
                 } else if (target !== 'conversations') {
                   // Las conversaciones las abre el propio buzón, sin salir de él.
                   setBox(null)

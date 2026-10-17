@@ -11,6 +11,7 @@ cal.nextBoard,Etiqueta de la próxima pizarra,Próxima pizarra,Next whiteboard,P
 cal.seats,Plazas ocupadas y totales,{taken} de {capacity} plazas,{taken} of {capacity} seats,{taken} de {capacity} places,{capacity} plazatik {taken}
 cal.join,Botón para apuntarse,Apuntarme,Sign me up,Apunta-m'hi,Eman izena
 cal.upcoming,Lista de las próximas pizarras con plaza (sin día elegido),Próximas pizarras con plaza,Upcoming whiteboards with seats,Properes pissarres amb lloc,Leku libreko hurrengo arbelak
+cal.pastTitle,"Pizarras: encabezado de las ya pasadas del mes que se ve, debajo de las próximas",Ya pasadas,Already held,Ja passades,Dagoeneko eginak
 cal.upcomingEmpty,No hay pizarras próximas con plaza,No hay pizarras con plaza en los próximos dos meses. ¿Propones tú una?,No whiteboards with seats in the next two months. Want to propose one?,No hi ha pissarres amb lloc als propers dos mesos. En proposes una?,Ez dago leku libreko arbelik hurrengo bi hilabeteetan. Zuk proposatu nahi duzu bat?
 cal.leave,Botón para desapuntarse,Desapuntarme,Drop out,Desapunta-me'n,Kendu izena
 cal.full,Pizarra completa,Completa,Full,Completa,Beteta

@@ -35,6 +35,7 @@ agenda.no42,No se pudo leer 42,No se han podido leer los datos de 42: solo ves l
 agenda.from42,Cuándo se leyeron los datos de 42,"Eventos, exámenes y correcciones de 42 leídos hace {min} min.","42 events, exams and evaluations read {min} min ago.","Esdeveniments, exàmens i correccions de 42 llegits fa {min} min.","42ko ekitaldiak, azterketak eta zuzenketak duela {min} min irakurrita."
 agenda.refresh,Botón para volver a leer los datos,Actualizar,Refresh,Actualitza,Eguneratu
 agenda.back,Botón para volver al calendario desde un evento,Volver al calendario,Back to calendar,Torna al calendari,Itzuli egutegira
+agenda.join,Calendario: botón de la ficha para apuntarse a una pizarra o un grupo,Apuntarme,Join,Apunta'm,Izena eman
 agenda.when,Ficha del evento: cuándo,Cuándo,When,Quan,Noiz
 agenda.where,Ficha del evento: dónde,Dónde,Where,On,Non
 agenda.with,Ficha del evento: con quién,Con,With,Amb,Norekin

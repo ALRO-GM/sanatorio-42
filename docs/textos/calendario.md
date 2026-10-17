@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/calendario.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-103 textos. «—» es que falta la traducción: sale en español.
+104 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -43,6 +43,7 @@ Generado desde `apps/web/src/shared/i18n/textos/calendario.csv` con
 | `agenda.from42` | Cuándo se leyeron los datos de 42 | features/calendar/CalendarPage | Eventos, exámenes y correcciones de 42 leídos hace {min} min. | 42 events, exams and evaluations read {min} min ago. | Esdeveniments, exàmens i correccions de 42 llegits fa {min} min. | 42ko ekitaldiak, azterketak eta zuzenketak duela {min} min irakurrita. |
 | `agenda.refresh` | Botón para volver a leer los datos | features/calendar/CalendarPage, features/notgames/NotGamesPage | Actualizar | Refresh | Actualitza | Eguneratu |
 | `agenda.back` | Botón para volver al calendario desde un evento | features/calendar/EventDialog | Volver al calendario | Back to calendar | Torna al calendari | Itzuli egutegira |
+| `agenda.join` | Calendario: botón de la ficha para apuntarse a una pizarra o un grupo | features/calendar/EventDialog | Apuntarme | Join | Apunta'm | Izena eman |
 | `agenda.when` | Ficha del evento: cuándo | features/calendar/EventDialog | Cuándo | When | Quan | Noiz |
 | `agenda.where` | Ficha del evento: dónde | features/calendar/EventDialog | Dónde | Where | On | Non |
 | `agenda.with` | Ficha del evento: con quién | features/calendar/EventDialog | Con | With | Amb | Norekin |

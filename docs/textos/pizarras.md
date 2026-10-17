@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/pizarras.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-37 textos. «—» es que falta la traducción: sale en español.
+38 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -19,6 +19,7 @@ Generado desde `apps/web/src/shared/i18n/textos/pizarras.csv` con
 | `cal.seats` | Plazas ocupadas y totales | features/boards/BoardCard | {taken} de {capacity} plazas | {taken} of {capacity} seats | {taken} de {capacity} places | {capacity} plazatik {taken} |
 | `cal.join` | Botón para apuntarse | features/boards/BoardCard, features/boards/BoardsTour | Apuntarme | Sign me up | Apunta-m'hi | Eman izena |
 | `cal.upcoming` | Lista de las próximas pizarras con plaza (sin día elegido) | features/boards/BoardsCalendar | Próximas pizarras con plaza | Upcoming whiteboards with seats | Properes pissarres amb lloc | Leku libreko hurrengo arbelak |
+| `cal.pastTitle` | Pizarras: encabezado de las ya pasadas del mes que se ve, debajo de las próximas | features/boards/BoardsCalendar | Ya pasadas | Already held | Ja passades | Dagoeneko eginak |
 | `cal.upcomingEmpty` | No hay pizarras próximas con plaza | features/boards/BoardsCalendar | No hay pizarras con plaza en los próximos dos meses. ¿Propones tú una? | No whiteboards with seats in the next two months. Want to propose one? | No hi ha pissarres amb lloc als propers dos mesos. En proposes una? | Ez dago leku libreko arbelik hurrengo bi hilabeteetan. Zuk proposatu nahi duzu bat? |
 | `cal.leave` | Botón para desapuntarse | features/boards/BoardCard | Desapuntarme | Drop out | Desapunta-me'n | Kendu izena |
 | `cal.full` | Pizarra completa | features/boards/BoardCard | Completa | Full | Completa | Beteta |

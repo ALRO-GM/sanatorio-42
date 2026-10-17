@@ -7,6 +7,7 @@ import { api } from '../../shared/api'
 import { useAction } from '../../shared/hooks/useAsync'
 import type { AsyncState } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
+import { intraHref } from '../../shared/links'
 import { Show, useDetail } from '../../shared/detail'
 import { Blocks } from '../../shared/layout/Blocks'
 import { Avatar } from '../../shared/ui/Avatar'
@@ -107,6 +108,15 @@ export function Expediente({ me, profile }: ExpedienteProps) {
                   {nextTitle && (
                     <span>{t('xp.nextTitle', { title: t(`title.${nextTitle.id}`) })}</span>
                   )}
+                  {/* Tu perfil en la intra, también desde el tuyo (#78 del buzón). */}
+                  <a
+                    className="profile-link"
+                    href={intraHref(me.login)}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {t('record.intra')}
+                  </a>
                 </div>
                 <div className="xp-row">
                   <div

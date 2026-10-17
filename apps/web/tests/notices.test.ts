@@ -4,7 +4,14 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { noticesIn, removableCount } from '../src/features/notices/routes'
+import type { Notice } from '@sanatorio/contracts'
+
+import {
+  calendarEventOf,
+  noticesIn,
+  removableCount,
+  targetOf,
+} from '../src/features/notices/routes'
 
 const items = [
   { id: 1, read: true, saved: false },
@@ -24,5 +31,20 @@ describe('buzón de avisos', () => {
     expect(removableCount(items)).toBe(1)
     expect(removableCount([])).toBe(0)
     expect(removableCount([{ read: false, saved: false }])).toBe(0)
+  })
+
+  it('los avisos de pizarras y grupos llevan al calendario con su evento abierto', () => {
+    const notice = (kind: Notice['kind'], ref: string) => ({ kind, ref }) as Notice
+
+    expect(targetOf(notice('board_changed', 'board:12'))).toBe('calendario')
+    expect(calendarEventOf(notice('board_changed', 'board:12'))).toBe('board:12')
+    // En el calendario, un grupo es cada uno de sus días: therapy:5:… (se abre el próximo).
+    expect(calendarEventOf(notice('group_invite', 'group:5'))).toBe('therapy:5')
+    expect(calendarEventOf(notice('group_joined', 'group:5'))).toBe('therapy:5')
+    // Lo que ya no está en el calendario va a su sección, sin evento.
+    expect(targetOf(notice('board_cancelled', 'board:12'))).toBe('pizarras')
+    expect(calendarEventOf(notice('board_cancelled', 'board:12'))).toBeNull()
+    expect(targetOf(notice('group_closed', 'group:5'))).toBe('terapia')
+    expect(calendarEventOf(notice('doubt_answered', 'doubt:1'))).toBeNull()
   })
 })

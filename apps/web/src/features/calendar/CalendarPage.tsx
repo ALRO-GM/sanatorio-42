@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import type { CalendarEvent, CalendarKind, CalendarSection } from '@sanatorio/contracts'
 
@@ -20,6 +20,11 @@ import { LAYOUTS, loadLayout, saveLayout } from './timeline'
 import type { Layout } from './timeline'
 
 type CalendarPageProps = {
+  /**
+   * Un evento que abrir al entrar (`board:12`, `therapy:5`), de la dirección:
+   * se busca su próxima vez, se salta a ese día y se abre su ficha.
+   */
+  focus?: string | null
   /** Ir a otra sección de la web, desde la ficha de un evento propio. */
   onGo: (section: CalendarSection) => void
   /** Login de quien mira, para el chat de los eventos. */
@@ -34,7 +39,7 @@ const MONTH_CELL_EVENTS = 3
  * (correcciones, eventos, exámenes), por día, semana o mes. Cada tipo tiene su
  * color y su icono, y se puede ocultar.
  */
-export function CalendarPage({ onGo, me }: CalendarPageProps) {
+export function CalendarPage({ focus = null, onGo, me }: CalendarPageProps) {
   const { t, lang } = useI18n()
   const [view, setView] = useState<View>(loadView)
   const [cursor, setCursor] = useState(() => startOfDay(new Date()))
@@ -47,6 +52,43 @@ export function CalendarPage({ onGo, me }: CalendarPageProps) {
   const from = (days[0] ?? cursor).toISOString()
   const to = addDays(days.at(-1) ?? cursor, 1).toISOString()
   const { data, error, loading, reload } = useAsync(() => api.getCalendar(from, to), [from, to])
+
+  // El evento de la dirección: su próxima vez en los dos meses que vienen.
+  useEffect(() => {
+    if (focus === null) return
+
+    const start = startOfDay(new Date())
+
+    void api
+      .getCalendar(addDays(start, -1).toISOString(), addDays(start, 62).toISOString())
+      .then((found) => {
+        const now = Date.now()
+        const event =
+          found.events.find(
+            (one) =>
+              (one.id === focus || one.id.startsWith(`${focus}:`)) && Date.parse(one.end) > now,
+          ) ?? found.events.find((one) => one.id === focus)
+
+        if (event !== undefined) {
+          setCursor(startOfDay(new Date(event.start)))
+          setOpen(event)
+        }
+        // La dirección vuelve a ser la del calendario: recargar no lo reabre.
+        window.history.replaceState(null, '', '#/calendario')
+      })
+      .catch(() => undefined)
+  }, [focus])
+
+  /** Apuntarse a una pizarra o a un grupo desde su ficha. */
+  const join = async (event: CalendarEvent): Promise<void> => {
+    const [kind, id] = event.id.split(':')
+
+    if (kind === 'board') await api.joinBoard(Number(id))
+    else if (kind === 'therapy') await api.joinGroup(Number(id))
+
+    setOpen({ ...event, joined: true })
+    await reload()
+  }
 
   const today = startOfDay(new Date())
   const visible = (data?.events ?? []).filter((event) => !hidden.has(event.kind))
@@ -313,6 +355,7 @@ export function CalendarPage({ onGo, me }: CalendarPageProps) {
             setOpen(null)
             onGo(section)
           }}
+          onJoin={join}
         />
       )}
     </section>

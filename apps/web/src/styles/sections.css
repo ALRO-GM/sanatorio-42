@@ -1143,3 +1143,8 @@ dialog.welcome .actions {
   gap: 0.5rem;
   font-size: 0.82rem;
 }
+
+/* Pizarras ya pasadas: se ven, pero en segundo plano. */
+.board-past {
+  opacity: 0.7;
+}

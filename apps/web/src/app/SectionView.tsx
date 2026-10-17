@@ -116,6 +116,7 @@ export function SectionView({
       {section === 'calendario' && (
         <CalendarPage
           me={me.login}
+          focus={param}
           onGo={(next) => {
             onGo(next)
           }}

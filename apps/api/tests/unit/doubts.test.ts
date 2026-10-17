@@ -457,6 +457,41 @@ describe('comunidad', () => {
       ])
     })
 
+    it('los votos no mueven lo que fija la tabla de partida (Python 06 bis no acaba en el círculo 0)', async () => {
+      // En producción, el 06 bis tenía tres votos: círculos 0, 1 y 2. Antes ganaba
+      // el 0; hasta el círculo 3 del plan nuevo manda la tabla.
+      await services.repositories.replica.ingestProjectUsers(
+        [
+          projectUser('uma', {
+            projectId: 31,
+            projectName: 'Python Module 06 bis',
+            slug: 'python-module-06-bis',
+          }),
+        ],
+        MADRID,
+      )
+      for (const [login, circle] of [
+        ['v0', 0],
+        ['v1', 1],
+        ['v2', 2],
+      ] as const) {
+        await db.execute({
+          sql: `INSERT INTO curriculum_votes (track, project_id, login, circle) VALUES ('next', 31, ?, ?)`,
+          args: [login, circle],
+        })
+      }
+
+      const next = await services.doubts.graph(actor('nex'), null)
+      const bis = all(next).find((p) => p.name === 'Python Module 06 bis')
+
+      expect(bis?.circle ?? 2).toBe(2)
+      expect(
+        all(next)
+          .filter((p) => p.circle === 0)
+          .map((p) => p.name),
+      ).toEqual(['Libft'])
+    })
+
     it('la piscina no sale, ni en el grafo ni entre los proyectos de quien ya es estudiante', async () => {
       const names = all(await services.doubts.graph(actor('nex'), null)).map((p) => p.name)
 

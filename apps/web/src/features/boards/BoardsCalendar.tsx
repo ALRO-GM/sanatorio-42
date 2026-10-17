@@ -5,6 +5,7 @@ import { useAsync } from '../../shared/hooks/useAsync'
 import { localeOf, useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { BoardCard } from './BoardCard'
+import { orderBoards } from './order'
 import { BoardForm } from './BoardForm'
 import { dayKey } from '../../shared/day'
 import { InfoTip } from '../../shared/ui/InfoTip'
@@ -43,17 +44,19 @@ export function BoardsCalendar() {
   const withBoard = new Set(list.map((board) => dayKey(new Date(board.startsAt))))
   const now = Date.now()
   // Sin día: las que no han terminado y tienen plaza (o ya tienes la tuya).
+  // De la más cercana a la más lejana, y las pasadas después (#75 del buzón).
+  const ofDay = orderBoards(
+    list.filter((board) => dayKey(new Date(board.startsAt)) === selectedDay),
+    now,
+  )
   const shown =
     selectedDay === null
-      ? (soon.data ?? [])
-          .filter(
-            (board) =>
-              Date.parse(board.endsAt) > now &&
-              (board.joined || board.mine || board.attendees < board.capacity),
-          )
-          .sort((a, b) => Date.parse(a.startsAt) - Date.parse(b.startsAt))
+      ? orderBoards(soon.data ?? [], now)
+          .coming.filter((board) => board.joined || board.mine || board.attendees < board.capacity)
           .slice(0, UPCOMING_MAX)
-      : list.filter((board) => dayKey(new Date(board.startsAt)) === selectedDay)
+      : [...ofDay.coming, ...ofDay.past]
+  // Sin día elegido, debajo de las próximas: las ya pasadas del mes que se ve.
+  const history = selectedDay === null ? orderBoards(list, now).past.slice(0, UPCOMING_MAX) : []
   const reload = (): void => {
     void boards.reload()
     void soon.reload()
@@ -198,11 +201,23 @@ export function BoardsCalendar() {
           )}
           <ul className="stack">
             {shown.map((board) => (
-              <li key={board.id}>
+              <li key={board.id} className={Date.parse(board.endsAt) <= now ? 'board-past' : ''}>
                 <BoardCard board={board} featured={board.id === nextId} onChange={reload} />
               </li>
             ))}
           </ul>
+          {history.length > 0 && (
+            <>
+              <h3 className="boards-list-title">{t('cal.pastTitle')}</h3>
+              <ul className="stack">
+                {history.map((board) => (
+                  <li key={board.id} className="board-past">
+                    <BoardCard board={board} featured={false} onChange={reload} />
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
           {!proposing && (
             <button
               className="ghost-slot"

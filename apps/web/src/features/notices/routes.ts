@@ -74,14 +74,30 @@ export function targetOf(notice: Notice): NoticeTarget {
     case 'proposal_accepted':
     case 'proposal_rejected':
       return 'tablon'
+    // Una pizarra que cambia o un grupo al que te invitan o en el que entra
+    // alguien: al calendario, con el evento abierto para apuntarse (#76).
     case 'board_changed':
+    case 'group_joined':
+    case 'group_invite':
+      return 'calendario'
     case 'board_cancelled':
       return 'pizarras'
-    case 'group_joined':
     case 'group_closed':
-    case 'group_invite':
       return 'terapia'
   }
+}
+
+/**
+ * El evento del calendario que abre un aviso, si lleva a uno: la pizarra
+ * (`board:12`) o el grupo (`therapy:5`, que en el calendario es cada uno de
+ * sus días: se abre el próximo).
+ */
+export function calendarEventOf(notice: Notice): string | null {
+  if (targetOf(notice) !== 'calendario') return null
+  if (notice.ref.startsWith('board:')) return notice.ref
+  if (notice.ref.startsWith('group:')) return `therapy:${notice.ref.slice('group:'.length)}`
+
+  return null
 }
 
 /** Qué avisos se enseñan: todos, o solo los guardados. */

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import type { CalendarEvent, CalendarSection } from '@sanatorio/contracts'
 
@@ -7,6 +7,7 @@ import { hasCodes, hasRoom } from '../alerts/eligible'
 import { EventRoom } from '../alerts/EventRoom'
 import { whenText } from './dates'
 import { iconOf } from './kinds'
+import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { Icon } from '../../shared/ui/Icon'
 
 /** Minutos que faltan para un instante, redondeando hacia arriba. */
@@ -35,6 +36,8 @@ type EventDialogProps = {
   onReplied?: () => void
   /** Cuántos avisos más esperan detrás de este. */
   queued?: number
+  /** Apuntarse a una pizarra o a un grupo al que aún no vas. */
+  onJoin?: (event: CalendarEvent) => Promise<void>
 }
 
 /**
@@ -55,8 +58,16 @@ export function EventDialog({
   must,
   onReplied,
   queued = 0,
+  onJoin,
 }: EventDialogProps) {
   const { t, lang } = useI18n()
+  const [joining, setJoining] = useState(false)
+  const [joinError, setJoinError] = useState<unknown>(null)
+  // Se puede apuntar a pizarras y grupos a los que no va, si queda sitio.
+  const joinable =
+    onJoin !== undefined &&
+    event.joined === false &&
+    (event.id.startsWith('board:') || event.id.startsWith('therapy:'))
   const ref = useRef<HTMLDialogElement>(null)
 
   useEffect(() => {
@@ -190,11 +201,32 @@ export function EventDialog({
             </button>
           </footer>
         )}
+        <ErrorNote error={joinError} />
         <footer className="actions" hidden={must !== undefined}>
           {event.url !== null && (
             <a className="button primary small" href={event.url} target="_blank" rel="noreferrer">
               {t('agenda.open42')} ↗
             </a>
+          )}
+          {joinable && (
+            <button
+              type="button"
+              className="primary small"
+              disabled={joining}
+              onClick={() => {
+                setJoining(true)
+                setJoinError(null)
+                void onJoin(event)
+                  .catch((caught: unknown) => {
+                    setJoinError(caught)
+                  })
+                  .finally(() => {
+                    setJoining(false)
+                  })
+              }}
+            >
+              <Icon name="mas" size={14} /> {t('agenda.join')}
+            </button>
           )}
           {event.section !== null && (
             <button

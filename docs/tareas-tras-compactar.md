@@ -172,9 +172,9 @@ despliegue espera a la CI).
 - [x] B5 demo del ajedrez · [x] B6 sonidos (salas) y animaciones (ajedrez) ·
       [x] B7 Repaso · [x] fotos en clasificaciones y marcadores.
 - [ ] **Buzón** (decidido por Alberto): hacer todas hasta las medianas
-      incluidas: #48 (fallo Python 06 bis en círculo 0), #75 (pizarras de más
-      cercana a más lejana y después las pasadas), #76 (avisos que abren el
-      evento en el calendario para apuntarse), #78 (botón a la intra), #70
+      incluidas: [x] #48 (ya arreglado por la tabla de partida; test añadido), [x] #75 (pizarras de más
+      cercana a más lejana y después las pasadas), [x] #76 (avisos que abren el
+      evento en el calendario para apuntarse), [x] #78 (botón a la intra, en tu expediente), #70
       (ficha al pasar el ratón por un login, componente único), #79
       (clasificación de quién va más rápido según el pace, desde su inicio),
       #71 (panel: uso por campus elegibles y usuarios totales/nuevos por día),
