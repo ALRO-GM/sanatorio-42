@@ -80,6 +80,50 @@ Siguiente tanda propuesta (sin empezar, pedir a Alberto): las mejoras de la
 última columna de la valoración de uso de `docs/interfaz.md` (avisos apilados
 en la guardia, eventos cortados en el calendario, demostración de Exámenes).
 
+## 2b. Plan vigente: Not-games (pedido el 2026-10-17)
+
+Juego de preguntas de programación para aprender jugando. No se llama «juego»
+en ningún sitio visible: la sección es **Not-games**. Decidido (regla de
+`docs/interfaz.md`): categoría **Ayuda**, sección propia `notgames`, modo
+**normal**.
+
+Lo pedido por Alberto (literal en la conversación del 2026-10-17):
+- Preguntas de programación general sacadas de lo que hay que aprender en
+  cada proyecto, de lo sencillo a lo complejo, con lo conceptual básico.
+- Dos tipos: rápidas (10 s) y largas (30 s o 1 min: razonar o encontrar el
+  fallo en un código).
+- La misma pregunta planteada de varias formas, respuestas correctas escritas
+  de varias formas, incorrectas mezcladas y en orden aleatorio; reserva grande.
+- Dificultad de cada pregunta según su porcentaje de fallo, reajustándose.
+- Modos: duelo (más aciertos), equipo contra equipo (suma de aciertos), todos
+  contra todos; versión competitiva de los tres (penaliza fallar);
+  supervivencia con tres vidas hasta que quede uno.
+- Según los proyectos de cada cual (no preguntar Python a quien solo hizo C):
+  partida con lo que saben todos, solo conceptos genéricos, o un nivel mínimo
+  para entrar.
+
+Diseño:
+- API, módulo `quiz`: banco tipado en `modules/quiz/bank/*.ts` (un concepto
+  = varias formas de preguntarlo, varias respuestas buenas, muchas malas;
+  `needs` = proyectos o lenguaje), salas con código, el servidor marca los
+  tiempos y corrige (la web nunca recibe la buena antes de tiempo), orden de
+  respuestas distinto para cada jugador, estadísticas por concepto para la
+  dificultad. Migración 53.
+- Web: sección `notgames`: salas abiertas del campus, crear sala, sala de
+  espera con equipos, partida (pregunta, código, cuenta atrás, opciones),
+  resultado de cada pregunta y clasificación final. Consulta la sala cada
+  segundo mientras se juega.
+
+Fases (cada una con check, commit, push y despliegue):
+- [ ] **F1. API**: banco (formato y primera tanda), elegibilidad, salas y motor
+      de partida con los cinco modos, rutas y tests.
+- [ ] **F2. Web**: sección, salas, partida, resultados; API simulada; textos en
+      su tabla; tests de pantalla.
+- [ ] **F3. Banco grande**: todos los proyectos del common core de los dos
+      planes y lo general (git, shell, complejidad, binario…).
+- [ ] **F4. Demostración, documentación** (`docs/api.md`, `docs/interfaz.md`,
+      README) y repaso.
+
 ## 3. A medias o por confirmar con Alberto
 
 - **Intentos de examen**: la copia de fondo nunca arrancaba (pedía 200 peticiones
