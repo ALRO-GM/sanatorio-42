@@ -22,7 +22,7 @@ type SectionQueries = {
 
 const day = (iso: string | null): string | null => (iso === null ? null : iso.slice(0, 10))
 
-const QUERIES: Record<StatsSectionId, SectionQueries> = {
+const QUERIES: Record<Exclude<StatsSectionId, 'ritmo'>, SectionQueries> = {
   // Sala de espera: sesiones aceptadas y, de ellas, las validadas con los dos
   // códigos. La clasificación solo cuenta las validadas: son las que valen XP.
   consulta: {
@@ -129,13 +129,13 @@ const QUERIES: Record<StatsSectionId, SectionQueries> = {
   },
 }
 
-export const STATS_SECTIONS = Object.keys(QUERIES) as StatsSectionId[]
+export const STATS_SECTIONS = Object.keys(QUERIES) as Exclude<StatsSectionId, 'ritmo'>[]
 
 export function createStatsRepository(db: Db) {
   return {
     /** Las cifras de una sección, en el orden de sus columnas. */
     async totals(
-      section: StatsSectionId,
+      section: Exclude<StatsSectionId, 'ritmo'>,
       campus: number,
       since: string | null,
       now: string,
@@ -148,7 +148,7 @@ export function createStatsRepository(db: Db) {
 
     /** La clasificación entera de una sección, de mejor a peor, sin quien no ha hecho nada. */
     async ranking(
-      section: StatsSectionId,
+      section: Exclude<StatsSectionId, 'ritmo'>,
       campus: number,
       since: string | null,
       now: string,
@@ -172,5 +172,39 @@ export function createStatsRepository(db: Db) {
     },
   }
 }
+
+/** Lo que hace falta para el ritmo de cada cual: cuándo empezó y cuándo completó cada círculo. */
+type PaceRow = {
+  login: string
+  image: string | null
+  startedAt: string
+  milestones: string[]
+}
+
+export function createPaceRepository(db: Db) {
+  return {
+    /** La gente del campus con fecha de inicio y algún círculo completado. */
+    async rows(campus: number): Promise<PaceRow[]> {
+      const result = await db.execute({
+        sql: `SELECT ut.login, u.image, ul.begin_at, ut.ranks
+              FROM user_tracks ut
+              JOIN user_levels ul ON ul.login = ut.login
+              JOIN users u ON u.login = ut.login
+              JOIN campus_members m ON m.user_id = u.id AND m.campus_id = ?
+              WHERE ul.begin_at IS NOT NULL AND ut.ranks IS NOT NULL AND ut.ranks != '[]'`,
+        args: [campus],
+      })
+
+      return result.rows.map((row) => ({
+        login: toText(row.login),
+        image: typeof row.image === 'string' ? row.image : null,
+        startedAt: toText(row.begin_at),
+        milestones: JSON.parse(toText(row.ranks)) as string[],
+      }))
+    },
+  }
+}
+
+export type PaceRepository = ReturnType<typeof createPaceRepository>
 
 export type StatsRepository = ReturnType<typeof createStatsRepository>

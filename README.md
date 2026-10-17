@@ -211,7 +211,8 @@ Una pestaña en Ayuda con lo que se mueve en el campus en cada sección (sala de
 espera, tablón, terapia, pizarras y Not-games), del mes o desde siempre, y la
 clasificación de cada una con la foto de cada cual: quién ayuda más en sesiones
 validadas, quién resuelve más dudas, quién va a más terapias, quién reúne a más
-gente en sus pizarras y quién gana más partidas. Tu fila sale marcada aunque no
+gente en sus pizarras y quién gana más partidas. Y, aparte, quién va más rápido
+en el curso según el sistema de pace (el % del curso completado y a qué pace). Tu fila sale marcada aunque no
 estés entre los diez primeros. Sale desde el modo normal: el simplificado no
 enseña rankings.
 

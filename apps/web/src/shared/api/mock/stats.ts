@@ -52,6 +52,16 @@ const MONTH: Record<StatsSectionId, { totals: Record<string, number>; rows: Row[
       ['anavarro', 15, 1],
     ],
   },
+  ritmo: {
+    totals: { people: 41, median: 18, fast: 6 },
+    rows: [
+      ['lruiz', 42, 8],
+      ['cfernandez', 59, 12],
+      [ME.login, 42, 15],
+      ['jdoe', 24, 18],
+      ['mgarcia', 16, 0],
+    ],
+  },
   notgames: {
     totals: { games: 23, people: 18, correct: 412, wrong: 167 },
     rows: [
@@ -94,10 +104,12 @@ export const statsMock: Pick<Api, 'getHelpStats'> = {
     await delay(200)
 
     const times = period === 'all' ? 4 : 1
+    // El ritmo no depende del periodo: se mide desde que empezaste. Va el último.
+    const ids = (Object.keys(MONTH) as StatsSectionId[]).filter((id) => id !== 'ritmo')
 
     return {
       period,
-      sections: (Object.keys(MONTH) as StatsSectionId[]).map((id) => sectionOf(id, times)),
+      sections: [...ids.map((id) => sectionOf(id, times)), sectionOf('ritmo', 1)],
     }
   },
 }

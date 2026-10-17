@@ -6,6 +6,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 
 import type { HelpStats, StatsSectionId } from '@sanatorio/contracts'
 
+import { paceOf } from '../../src/modules/stats/pace.rules.js'
 import { ranked } from '../../src/modules/stats/stats.service.js'
 import { actor, MADRID, useCommunity } from '../helpers/community.js'
 import type { Community } from '../helpers/community.js'
@@ -49,6 +50,7 @@ describe('estadísticas de Ayuda', () => {
       'terapia',
       'pizarras',
       'notgames',
+      'ritmo',
     ])
     for (const s of stats.sections) {
       expect(s.ranking).toEqual([])
@@ -171,6 +173,54 @@ describe('estadísticas de Ayuda', () => {
     ])
     // eva no ha ganado este mes: no tiene puesto.
     expect(section(stats, 'notgames').me).toBeNull()
+  })
+
+  it('ritmo: de pace más rápido a más lento, con el % del curso según el pace', async () => {
+    const started = '2026-01-01T09:00:00.000Z'
+    const after = (days: number): string =>
+      new Date(Date.parse(started) + days * 86_400_000).toISOString()
+    const person = async (login: string, milestones: string[]) => {
+      await run(
+        `INSERT OR REPLACE INTO user_levels (login, level, updated_at, begin_at) VALUES (?, 3, ?, ?)`,
+        [login, started, started],
+      )
+      await run(
+        `INSERT OR REPLACE INTO user_tracks (login, track, rank, fetched_at, ranks) VALUES (?, 'classic', ?, ?, ?)`,
+        [login, milestones.length - 1, started, JSON.stringify(milestones)],
+      )
+    }
+
+    // ana completó el círculo 2 en 50 días (pace 8); leo, el 3 en 200 días
+    // (pace 18); eva, el 2 en 300 días (más lento que 24).
+    await person('ana', [after(5), after(20), after(50)])
+    await person('leo', [after(10), after(40), after(100), after(200)])
+    await person('eva', [after(40), after(100), after(300)])
+
+    const stats = await services.stats.help(actor('leo'), 'month')
+
+    expect(board(stats, 'ritmo')).toEqual([
+      [1, 'ana', 24, 8],
+      [2, 'leo', 42, 18],
+      [3, 'eva', 24, 0],
+    ])
+    expect(totals(stats, 'ritmo')).toEqual({ people: 3, median: 18, fast: 1 })
+    expect(section(stats, 'ritmo').me).toMatchObject({ rank: 2, login: 'leo' })
+  })
+
+  it('el ritmo de una persona: progreso por el plazo del curso y el pace más rápido que cumple', () => {
+    expect(paceOf('2026-01-01', ['2026-01-05'])).toEqual({ progress: 6, pace: 8 })
+    expect(paceOf('2026-01-01', ['2026-01-05', '2026-03-01'])).toEqual({ progress: 16, pace: 15 })
+    // Sin círculos, o con fechas que no cuadran: sin ritmo.
+    expect(paceOf('2026-01-01', [])).toBeNull()
+    expect(paceOf('2026-03-01', ['2026-01-05'])).toBeNull()
+    expect(paceOf('no', ['2026-01-05'])).toBeNull()
+    // Los siete círculos: el curso entero.
+    expect(
+      paceOf(
+        '2024-01-01',
+        Array.from({ length: 7 }, () => '2025-12-01'),
+      )?.progress,
+    ).toBe(100)
   })
 
   it('los puestos: empate solo si coinciden las dos cifras', () => {

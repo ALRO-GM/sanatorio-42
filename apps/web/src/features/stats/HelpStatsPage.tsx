@@ -73,7 +73,9 @@ function SectionCard({ section, me }: { section: StatsSection; me: string }) {
 
   return (
     <article className="card help-stats-card" aria-labelledby={`stats-${section.id}`}>
-      <h3 id={`stats-${section.id}`}>{t(`nav.${section.id}`)}</h3>
+      <h3 id={`stats-${section.id}`}>
+        {section.id === 'ritmo' ? t('stats.ritmo.title') : t(`nav.${section.id}`)}
+      </h3>
       <dl className="help-stats-totals">
         {section.totals.map((total) => (
           <div key={total.key}>
@@ -105,7 +107,12 @@ function SectionCard({ section, me }: { section: StatsSection; me: string }) {
               {entry.login === me && <span className="chip">{t('stats.you')}</span>}
               <span className="row-count">
                 <strong>{t(`stats.${section.id}.value`, { n: entry.value })}</strong>
-                <small>{t(`stats.${section.id}.extra`, { n: entry.extra })}</small>
+                <small>
+                  {/* En el ritmo, 0 es «más lento que el pace de 24 meses». */}
+                  {section.id === 'ritmo' && entry.extra === 0
+                    ? t('stats.ritmo.slow')
+                    : t(`stats.${section.id}.extra`, { n: entry.extra })}
+                </small>
               </span>
             </li>
           ))}

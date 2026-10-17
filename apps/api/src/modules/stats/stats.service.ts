@@ -7,7 +7,8 @@
 import type { HelpStats, LeaderboardPeriod, StatsEntry, StatsSection } from '@sanatorio/contracts'
 
 import type { Actor } from '../../core/actor.js'
-import type { RankRow, StatsRepository } from './stats.repository.js'
+import { paceOf } from './pace.rules.js'
+import type { PaceRepository, RankRow, StatsRepository } from './stats.repository.js'
 import { STATS_SECTIONS } from './stats.repository.js'
 
 /** Puestos que se enseñan de cada clasificación. */
@@ -27,9 +28,48 @@ export function ranked(rows: readonly RankRow[]): StatsEntry[] {
   return entries
 }
 
-export function createStatsService(options: { stats: StatsRepository; now?: () => number }) {
+export function createStatsService(options: {
+  stats: StatsRepository
+  paces?: PaceRepository
+  now?: () => number
+}) {
   const { stats } = options
   const now = options.now ?? Date.now
+
+  /**
+   * Quién va más rápido en el curso (#79 del buzón): de pace más rápido a más
+   * lento y, al mismo pace, quien lleva más. `value` es el % del curso;
+   * `extra`, el pace en meses (0 si va más lento que 24). No depende del
+   * periodo: el ritmo se mide desde que empezaste.
+   */
+  async function pace(actor: Actor): Promise<StatsSection> {
+    const rows = (await options.paces?.rows(actor.campusId)) ?? []
+    const measured = rows.flatMap((row) => {
+      const found = paceOf(row.startedAt, row.milestones)
+
+      return found === null
+        ? []
+        : [{ login: row.login, image: row.image, value: found.progress, extra: found.pace ?? 0 }]
+    })
+    // Más rápido primero; quien va a más de 24 meses (0), al final.
+    const months = (row: RankRow): number => (row.extra === 0 ? Infinity : row.extra)
+    const sorted = measured.sort(
+      (a, b) => months(a) - months(b) || b.value - a.value || a.login.localeCompare(b.login),
+    )
+    const entries = ranked(sorted)
+    const paces = sorted.map(months).filter((value) => value !== Infinity)
+
+    return {
+      id: 'ritmo',
+      totals: [
+        { key: 'people', value: sorted.length },
+        { key: 'median', value: paces[Math.floor(paces.length / 2)] ?? 0 },
+        { key: 'fast', value: paces.filter((value) => value <= 12).length },
+      ],
+      ranking: entries.slice(0, TOP),
+      me: entries.find((entry) => entry.login === actor.login) ?? null,
+    }
+  }
 
   return {
     async help(actor: Actor, period: LeaderboardPeriod): Promise<HelpStats> {
@@ -57,7 +97,7 @@ export function createStatsService(options: { stats: StatsRepository; now?: () =
         }),
       )
 
-      return { period, sections }
+      return { period, sections: [...sections, await pace(actor)] }
     },
   }
 }

@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/estadisticas.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-38 textos. «—» es que falta la traducción: sale en español.
+46 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -45,3 +45,11 @@ Generado desde `apps/web/src/shared/i18n/textos/estadisticas.csv` con
 | `stats.notgames.rank` | Estadísticas de Ayuda, Not-games: de qué va la clasificación | features/stats/HelpStatsPage | Quién gana más partidas | Who wins the most games | Qui guanya més partides | Nork irabazten dituen partida gehien |
 | `stats.notgames.value` | Estadísticas de Ayuda, Not-games: cifra de cada fila | features/stats/HelpStatsPage | {n} ganadas | {n} won | {n} guanyades | {n} irabazi |
 | `stats.notgames.extra` | Estadísticas de Ayuda, Not-games: segunda cifra de cada fila | features/stats/HelpStatsPage | {n} aciertos | {n} correct | {n} encerts | {n} asmatu |
+| `stats.ritmo.title` | Estadísticas, ritmo (quién va más rápido en el curso): título del apartado | features/stats/HelpStatsPage | Quién va más rápido | Who is going fastest | Qui va més ràpid | Nor doan azkarren |
+| `stats.ritmo.people` | Estadísticas, ritmo (quién va más rápido en el curso): personas de las que se sabe el ritmo | features/stats/HelpStatsPage | Personas medidas | People measured | Persones mesurades | Neurtutako pertsonak |
+| `stats.ritmo.median` | Estadísticas, ritmo (quién va más rápido en el curso): pace mediano, en meses | features/stats/HelpStatsPage | Pace mediano (meses) | Median pace (months) | Pace mitjà (mesos) | Pace mediana (hilabeteak) |
+| `stats.ritmo.fast` | Estadísticas, ritmo (quién va más rápido en el curso): personas a pace 12 o más rápido | features/stats/HelpStatsPage | A pace 12 o menos | At pace 12 or less | A pace 12 o menys | 12ko pacean edo gutxiagoan |
+| `stats.ritmo.rank` | Estadísticas, ritmo (quién va más rápido en el curso): de qué va la clasificación | features/stats/HelpStatsPage | Por pace y % del curso completado | By pace and % of the course done | Per pace i % del curs completat | Pacearen eta osatutako ikastaroaren %aren arabera |
+| `stats.ritmo.value` | Estadísticas, ritmo (quién va más rápido en el curso): % del curso completado según el pace | features/stats/HelpStatsPage | {n} % del curso | {n}% of the course | {n} % del curs | Ikastaroaren % {n} |
+| `stats.ritmo.extra` | Estadísticas, ritmo (quién va más rápido en el curso): pace al que va, en meses | features/stats/HelpStatsPage | pace {n} meses | pace {n} months | pace {n} mesos | {n} hilabeteko pacea |
+| `stats.ritmo.slow` | Estadísticas, ritmo (quién va más rápido en el curso): va más lento que el pace más lento | features/stats/HelpStatsPage | más de 24 meses | over 24 months | més de 24 mesos | 24 hilabete baino gehiago |

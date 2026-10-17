@@ -1274,7 +1274,7 @@ GET /stats?period=month|all  → HelpStats: { period, sections: StatsSection[] }
 ```
 
 - Una `StatsSection` por sección, en este orden: `consulta`, `tablon`,
-  `terapia`, `pizarras`, `notgames`. Cada una trae `totals` (cifras del campus,
+  `terapia`, `pizarras`, `notgames` y `ritmo`. Cada una trae `totals` (cifras del campus,
   `{ key, value }`), `ranking` (los 10 primeros) y `me` (tu puesto, aunque no
   entres en los 10; `null` si no sales).
 - Cada fila: `rank` (empates en las dos cifras comparten puesto), `login`,
@@ -1285,6 +1285,13 @@ GET /stats?period=month|all  → HelpStats: { period, sections: StatsSection[] }
   pizarras ya empezadas (extra: pizarras) y partidas ganadas de Not-games
   (extra: aciertos). Quien tiene 0 no sale.
 - «Este mes» empieza el día 1 en UTC, como la clasificación de XP.
+- La última sección es `ritmo` (#79 del buzón): quién va más rápido en el curso
+  según el sistema de pace, no por número de proyectos. `value` es el % del
+  curso (lo que suma el último círculo completado con los plazos del pace de 24
+  meses) y `extra`, el pace más rápido que habría cumplido desde que empezó (0:
+  más lento que 24). Ordena de pace más rápido a más lento y, a igual pace, por
+  % del curso. No depende del periodo. Sale de `user_levels.begin_at` y
+  `user_tracks.ranks` (`modules/stats/pace.rules.ts`).
 
 ## Not-games (`modules/quiz`)
 

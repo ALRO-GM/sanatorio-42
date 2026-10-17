@@ -5,7 +5,7 @@
 
 import type { Db } from '../../core/db/database.js'
 import type { AppModule } from '../../core/module.js'
-import { createStatsRepository } from './stats.repository.js'
+import { createPaceRepository, createStatsRepository } from './stats.repository.js'
 import { createStatsService } from './stats.service.js'
 import type { StatsService } from './stats.service.js'
 
@@ -14,6 +14,7 @@ export type StatsModule = AppModule & { service: StatsService }
 export function createStatsModule(deps: { db: Db; now?: () => number }): StatsModule {
   const service = createStatsService({
     stats: createStatsRepository(deps.db),
+    paces: createPaceRepository(deps.db),
     ...(deps.now === undefined ? {} : { now: deps.now }),
   })
 

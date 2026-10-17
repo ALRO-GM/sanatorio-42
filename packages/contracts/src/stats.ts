@@ -5,7 +5,8 @@
 
 import type { LeaderboardPeriod } from './profile.js'
 
-export type StatsSectionId = 'consulta' | 'tablon' | 'terapia' | 'pizarras' | 'notgames'
+/** `ritmo`: quién va más rápido en el curso, según el sistema de pace. */
+export type StatsSectionId = 'consulta' | 'tablon' | 'terapia' | 'pizarras' | 'notgames' | 'ritmo'
 
 /** Una cifra del campus. `key` es la del texto (`stats.<sección>.<key>`). */
 export type StatsTotal = { key: string; value: number }
