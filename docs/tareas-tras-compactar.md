@@ -67,7 +67,7 @@ mensaje, una revisión completa. Se hace por bloques; cada bloque termina con
       página. `docs/interfaz.md` con el mapa, la importancia y la valoración de
       uso de cada elemento. Regla en `AGENTS.md`: cada funcionalidad nueva dice
       su categoría y en qué modo sale.
-- [ ] **6. Demostraciones animadas.** Revisar cómo se hacen, unificar
+- [x] **6. Demostraciones animadas.** Revisar cómo se hacen, unificar
       criterios y dejar una plantilla (`shared/tour/`) y su guía.
 - [ ] **7. README.** Al día con todas las funcionalidades, las categorías y
       los modos.

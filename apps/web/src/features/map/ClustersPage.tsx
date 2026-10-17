@@ -1,6 +1,8 @@
 import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
+import { InfoTip } from '../../shared/ui/InfoTip'
+import { ClustersTour } from './ClustersTour'
 import { Show } from '../../shared/detail'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { directChatId, openChat } from '../notices/conversations'
@@ -21,7 +23,12 @@ export function ClustersPage({ me }: { me: string }) {
 
   return (
     <section>
-      <h2>{t('clusters.title')}</h2>
+      <h2>
+        {t('clusters.title')}
+        <InfoTip title={t('clusters.title')}>
+          <ClustersTour />
+        </InfoTip>
+      </h2>
       {map.loading && <p className="estado">{t('map.loading')}</p>}
       {!map.loading && map.data === undefined && (
         <ErrorNote error={map.error} onRetry={() => void map.reload()} />

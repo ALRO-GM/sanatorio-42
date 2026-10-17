@@ -1,19 +1,18 @@
 import { useI18n } from '../../shared/i18n'
 import { MiniGraph } from '../../shared/tour/MiniGraph'
-import { click, cut, Tour } from '../../shared/tour/Tour'
-import type { Cue } from '../../shared/tour/Tour'
+import { click, cut, defineTour, Tour } from '../../shared/tour/Tour'
 import { Icon } from '../../shared/ui/Icon'
 
 type Mailbox = { open: boolean; read: boolean }
 
 const START: Mailbox = { open: false, read: false }
 
-export const SCRIPT: readonly Cue<Mailbox>[] = [
+export const TOUR = defineTour<Mailbox>('mailbox', START, [
   ...click<Mailbox>(1500, 'bell', { open: true }),
   [2600, { caption: 2 }],
   ...click<Mailbox>(4300, 'n1', { read: true }),
   ...cut<Mailbox>(5300, { scene: 1, caption: 3, open: false, cursor: 'rest' }),
-]
+])
 
 /**
  * Cómo funciona el buzón: el número rojo son avisos sin leer, dentro está lo
@@ -24,10 +23,7 @@ export function MailboxTour() {
 
   return (
     <Tour
-      name="mailbox"
-      start={START}
-      script={SCRIPT}
-      steps={[1, 2, 3]}
+      tour={TOUR}
       tab={(shot) => t(shot.scene === 0 ? 'nav.consulta' : 'nav.tablon')}
       bell={(shot) => (shot.read ? 1 : 2)}
     >

@@ -1,5 +1,5 @@
 import { useI18n } from '../../shared/i18n'
-import { click, cut, Tour } from '../../shared/tour/Tour'
+import { click, cut, defineTour, Tour } from '../../shared/tour/Tour'
 import type { Cue } from '../../shared/tour/Tour'
 import { MiniGraph } from '../../shared/tour/MiniGraph'
 import { Icon } from '../../shared/ui/Icon'
@@ -39,7 +39,7 @@ const drag = (at: number, to: string, pan: Guard['pan']): Cue<Guard>[] => [
   [at + 1000, { press: false, drag: false }],
 ]
 
-export const SCRIPT: readonly Cue<Guard>[] = [
+export const TOUR = defineTour<Guard>('guard', START, [
   // Escena 1: marcar cuatro medias horas, el tope, preevaluar y guardar.
   ...click<Guard>(300, 'slot2', { slots: [2] }),
   ...click<Guard>(1150, 'slot3', { slots: [2, 3] }),
@@ -66,7 +66,7 @@ export const SCRIPT: readonly Cue<Guard>[] = [
   [15000, { alert: true, caption: 8 }],
   ...click<Guard>(15800, 'going', { alert: false }),
   [17000, { caption: 9 }],
-]
+])
 
 /** Las medias horas de la rejilla de mentira. */
 const SLOTS = ['16:00', '16:30', '17:00', '17:30', '18:00', '18:30', '19:00', '19:30']
@@ -83,10 +83,7 @@ export function GuardTour() {
 
   return (
     <Tour
-      name="guard"
-      start={START}
-      script={SCRIPT}
-      steps={[1, 2, 3, 4, 6, 7, 8, 9]}
+      tour={TOUR}
       tab={(shot) => t(shot.scene === 0 ? 'nav.guardia' : 'nav.tablon')}
       bell={(shot) => (shot.box === 'badge' ? 1 : 0)}
     >

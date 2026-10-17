@@ -660,3 +660,17 @@ dialog.info-dialog {
   background: none;
   accent-color: var(--accent);
 }
+
+/* Clústeres: un puesto resaltado (quien hace tu proyecto) y uno averiado. */
+.tour-seat.glow {
+  border-color: var(--ok);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--ok) 45%, transparent);
+}
+.tour-seat.broken {
+  border-color: var(--danger);
+  background: repeating-linear-gradient(
+    45deg,
+    transparent 0 4px,
+    color-mix(in srgb, var(--danger) 35%, transparent) 4px 6px
+  );
+}

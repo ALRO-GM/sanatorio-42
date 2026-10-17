@@ -118,10 +118,11 @@ Monorepo con workspaces de npm. Ver `README.md` y `docs/architecture.md`.
 - Explicaciones: nada de párrafos fijos de ayuda bajo un título. Cada sección
   lleva junto al título un `InfoTip` (`shared/ui/InfoTip.tsx`) con su
   demostración animada, y la ventana no lleva más texto que el de la demo. Una
-  demo es un guion sobre `shared/tour/Tour.tsx` (ratón, fundidos y una frase
-  corta por acción; 20 s de guion como mucho, que el motor estira un 50 %). Usa
-  las etiquetas reales de la web y logins inventados, y enseña lo que la web
-  hace de verdad.
+  demo nueva se empieza con `npm run demo:new` (plantilla) y cumple los
+  criterios de `docs/demos.md`: un guion sobre `shared/tour/Tour.tsx` hecho con
+  `defineTour`, una frase de 70 caracteres como mucho por acción, 20 s de guion
+  como mucho, etiquetas reales de la web, logins inventados y el ratón solo
+  hacia cosas que existen. Los tests lo comprueban solos.
 - Aspecto: hay varios estilos, cada uno en su carpeta de `apps/web/src/themes/`
   (ver su `README.md`). Los componentes no saben cuál está puesto: usan las
   variables de `styles/theme.css` y `styles/styles.css`, y cada estilo les da

@@ -86,14 +86,39 @@ export function typing<S>(at: number, key: keyof S, letters: number, step = 60):
   })
 }
 
-type TourProps<S> = {
-  /** Nombre de la demostración: sus frases son `tour.<name>.1`, `.2`… */
+/** Una demostración: su nombre, cómo empieza y su guion. Se hace con `defineTour`. */
+export type TourDef<S> = {
+  /** Nombre de la demostración: sus frases son `tour.<name>.1`, `.2`… (tabla `demos`). */
   name: string
   /** Cómo empieza lo propio de esta demostración. */
   start: S
   script: readonly Cue<S>[]
   /** Las frases que cuentan los pasos, en orden, para quien no quiere animación. */
   steps: readonly number[]
+}
+
+/**
+ * Define una demostración. Las frases (`caption`) son los pasos que se leen
+ * sin animación: salen solas del guion, en orden.
+ *
+ * Cada fichero de demostración exporta lo que devuelve como `TOUR`: así los
+ * tests la encuentran sin apuntarla en ningún sitio (`tests/tours.test.ts`).
+ */
+export function defineTour<S extends object>(
+  name: string,
+  start: S,
+  script: readonly Cue<S>[],
+): TourDef<S> {
+  const captions = script.flatMap(([, change]) =>
+    change.caption === undefined ? [] : [change.caption],
+  )
+
+  return { name, start, script, steps: [...new Set([1, ...captions])].sort((a, b) => a - b) }
+}
+
+type TourProps<S> = {
+  /** La demostración, de `defineTour`. */
+  tour: TourDef<S>
   /** Pestaña que se ve abierta en la cabecera de mentira. */
   tab: (shot: Shot<S>) => string
   /** Avisos sin leer en la campana; `0` si no pinta nada. */
@@ -110,15 +135,8 @@ type TourProps<S> = {
  * Es un decorado: nada de lo que se ve es un control de verdad ni llama a la
  * API. Quien prefiere menos movimiento ve los mismos pasos como lista.
  */
-export function Tour<S extends object>({
-  name,
-  start,
-  script,
-  steps,
-  tab,
-  bell,
-  children,
-}: TourProps<S>) {
+export function Tour<S extends object>({ tour, tab, bell, children }: TourProps<S>) {
+  const { name, start, script, steps } = tour
   const { t, lang } = useI18n()
   const [still] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches)
   const [take, setTake] = useState(0)

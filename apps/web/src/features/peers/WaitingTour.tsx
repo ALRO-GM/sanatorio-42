@@ -1,6 +1,5 @@
 import { useI18n } from '../../shared/i18n'
-import { click, cut, Tour } from '../../shared/tour/Tour'
-import type { Cue } from '../../shared/tour/Tour'
+import { click, cut, defineTour, Tour } from '../../shared/tour/Tour'
 import { Icon } from '../../shared/ui/Icon'
 
 type Waiting = {
@@ -14,7 +13,7 @@ type Waiting = {
 
 const START: Waiting = { project: false, open: false, slot: false, sent: false, duty: false }
 
-export const SCRIPT: readonly Cue<Waiting>[] = [
+export const TOUR = defineTour<Waiting>('waiting', START, [
   ...click<Waiting>(500, 'proj', { project: true }),
   [1700, { caption: 2 }],
   [3400, { caption: 3 }],
@@ -25,7 +24,7 @@ export const SCRIPT: readonly Cue<Waiting>[] = [
   ...cut<Waiting>(8600, { scene: 1, caption: 5, cursor: 'rest' }),
   ...click<Waiting>(9900, 'duty', { duty: true }),
   [10900, { caption: 6 }],
-]
+])
 
 const PROJECTS = ['libft', 'ft_printf', 'push_swap']
 
@@ -37,13 +36,7 @@ export function WaitingTour() {
   const { t } = useI18n()
 
   return (
-    <Tour
-      name="waiting"
-      start={START}
-      script={SCRIPT}
-      steps={[1, 2, 3, 4, 5]}
-      tab={() => t('nav.consulta')}
-    >
+    <Tour tour={TOUR} tab={() => t('nav.consulta')}>
       {(shot) =>
         shot.scene === 0 ? (
           <>

@@ -1,7 +1,6 @@
 import { useI18n } from '../../shared/i18n'
 import { MiniGraph } from '../../shared/tour/MiniGraph'
-import { click, cut, Tour, typing } from '../../shared/tour/Tour'
-import type { Cue } from '../../shared/tour/Tour'
+import { click, cut, defineTour, Tour, typing } from '../../shared/tour/Tour'
 import { Icon } from '../../shared/ui/Icon'
 
 type Board = {
@@ -18,7 +17,7 @@ const START: Board = { picked: false, form: false, typed: 0, posted: false, solv
 /** Letras que se teclean como mucho: la duda se corta ahí si es más larga. */
 const LETTERS = 24
 
-export const SCRIPT: readonly Cue<Board>[] = [
+export const TOUR = defineTour<Board>('board', START, [
   ...click<Board>(600, 'node', { picked: true }),
   [1800, { caption: 2 }],
   [3300, { caption: 3 }],
@@ -28,7 +27,7 @@ export const SCRIPT: readonly Cue<Board>[] = [
   ...cut<Board>(7800, { scene: 1, caption: 4, cursor: 'rest' }),
   [9800, { caption: 5 }],
   ...click<Board>(9800, 'solve', { solved: true }),
-]
+])
 
 /**
  * Cómo funciona el tablón: eliges un proyecto en el grafo, ves su guía y sus
@@ -40,10 +39,7 @@ export function BoardTour() {
 
   return (
     <Tour
-      name="board"
-      start={START}
-      script={SCRIPT}
-      steps={[1, 2, 3, 4, 5]}
+      tour={TOUR}
       tab={() => t('nav.tablon')}
       bell={(shot) => (shot.scene === 1 && !shot.solved ? 1 : 0)}
     >

@@ -1,0 +1,45 @@
+import { useI18n } from '../../shared/i18n'
+import { click, cut, defineTour, Tour } from '../../shared/tour/Tour'
+
+/**
+ * Lo que cambia en el decorado a lo largo del guion. Un campo por cosa que se
+ * enciende, se abre o se elige.
+ */
+type __Tipo__ = { picked: boolean }
+
+const START: __Tipo__ = { picked: false }
+
+/**
+ * El guion: a los N milisegundos, cambia esto. Una frase (`caption`) por
+ * acción, 20 s como mucho (el motor lo estira un 50 % para quien lo ve por
+ * primera vez). Las frases están en la tabla `demos`: `tour.__nombre__.1`, `.2`…
+ * Criterios y piezas del decorado: docs/demos.md.
+ */
+export const TOUR = defineTour<__Tipo__>('__nombre__', START, [
+  ...click<__Tipo__>(1200, 'target', { picked: true }),
+  [2600, { caption: 2 }],
+  ...cut<__Tipo__>(4600, { scene: 1, caption: 3, cursor: 'rest' }),
+])
+
+/** __Descripcion__ */
+export function __Componente__Tour() {
+  const { t } = useI18n()
+
+  return (
+    <Tour tour={TOUR} tab={() => t('nav.__seccion__')}>
+      {(shot) =>
+        shot.scene === 0 ? (
+          <div className="tour-row">
+            <span className={`tour-pill ${shot.picked ? 'on' : ''}`} data-tour="target">
+              {t('nav.__seccion__')}
+            </span>
+          </div>
+        ) : (
+          <div className="tour-card tour-in">
+            <span className="tour-item on">{t('nav.__seccion__')}</span>
+          </div>
+        )
+      }
+    </Tour>
+  )
+}

@@ -1,6 +1,5 @@
 import { useI18n } from '../../shared/i18n'
-import { click, cut, Tour, typing } from '../../shared/tour/Tour'
-import type { Cue } from '../../shared/tour/Tour'
+import { click, cut, defineTour, Tour, typing } from '../../shared/tour/Tour'
 import { Icon } from '../../shared/ui/Icon'
 
 type Inbox = {
@@ -15,14 +14,14 @@ const START: Inbox = { menu: false, idea: false, typed: 0, sent: false }
 
 const LETTERS = 30
 
-export const SCRIPT: readonly Cue<Inbox>[] = [
+export const TOUR = defineTour<Inbox>('inbox', START, [
   ...click<Inbox>(900, 'kind', { menu: true }),
   ...click<Inbox>(1900, 'idea', { menu: false, idea: true }),
   [3000, { caption: 2 }],
   ...typing<Inbox>(3200, 'typed', LETTERS, 50),
   ...click<Inbox>(5000, 'send', { sent: true }),
   ...cut<Inbox>(6800, { scene: 1, caption: 3, cursor: 'rest' }),
-]
+])
 
 /**
  * Cómo funciona el buzón de incidencias: eliges de qué se trata, lo escribes y
@@ -33,14 +32,7 @@ export function InboxTour() {
   const text = t('tour.inbox.text')
 
   return (
-    <Tour
-      name="inbox"
-      start={START}
-      script={SCRIPT}
-      steps={[1, 2, 3]}
-      tab={() => t('inbox.title')}
-      bell={(shot) => (shot.scene === 1 ? 1 : 0)}
-    >
+    <Tour tour={TOUR} tab={() => t('inbox.title')} bell={(shot) => (shot.scene === 1 ? 1 : 0)}>
       {(shot) => (
         <div className="tour-card">
           {shot.scene === 0 ? (

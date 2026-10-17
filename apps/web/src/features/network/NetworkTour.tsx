@@ -1,6 +1,5 @@
 import { useI18n } from '../../shared/i18n'
-import { click, Tour, typing } from '../../shared/tour/Tour'
-import type { Cue } from '../../shared/tour/Tour'
+import { click, defineTour, Tour, typing } from '../../shared/tour/Tour'
 
 type Network = {
   /** Burbuja elegida: su índice en `NODES`, o `-1`. */
@@ -15,7 +14,7 @@ const START: Network = { picked: -1, typed: 0, scale: 80 }
 
 const SEARCH = 'lso'
 
-export const SCRIPT: readonly Cue<Network>[] = [
+export const TOUR = defineTour<Network>('network', START, [
   [1700, { caption: 2 }],
   ...click<Network>(1700, 'n2', { picked: 2 }),
   [4300, { caption: 3 }],
@@ -26,7 +25,7 @@ export const SCRIPT: readonly Cue<Network>[] = [
   [9000, { press: true, drag: true }],
   [9060, { cursor: 'k2', scale: 35 }],
   [10100, { press: false, drag: false }],
-]
+])
 
 /** Las personas de la red de mentira: dónde están, cuánto corrigen y quién son. */
 const NODES = [
@@ -62,13 +61,7 @@ export function NetworkTour() {
   const { t } = useI18n()
 
   return (
-    <Tour
-      name="network"
-      start={START}
-      script={SCRIPT}
-      steps={[1, 2, 3, 4]}
-      tab={() => t('nav.red')}
-    >
+    <Tour tour={TOUR} tab={() => t('nav.red')}>
       {(shot) => {
         const near = (index: number): boolean =>
           shot.picked === -1 ||

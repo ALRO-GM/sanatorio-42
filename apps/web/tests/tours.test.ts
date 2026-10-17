@@ -5,27 +5,65 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { SCRIPT as inbox } from '../src/features/admin/InboxTour'
-import { SCRIPT as boards } from '../src/features/boards/BoardsTour'
-import { SCRIPT as agenda } from '../src/features/calendar/AgendaTour'
-import { SCRIPT as board } from '../src/features/doubts/BoardTour'
-import { SCRIPT as guard } from '../src/features/help/GuardTour'
-import { SCRIPT as network } from '../src/features/network/NetworkTour'
-import { SCRIPT as mailbox } from '../src/features/notices/MailboxTour'
-import { SCRIPT as waiting } from '../src/features/peers/WaitingTour'
-import { SCRIPT as record } from '../src/features/profile/RecordTour'
-import { SCRIPT as therapy } from '../src/features/therapy/TherapyTour'
 import ca from 'virtual:textos/ca'
 import en from 'virtual:textos/en'
 import es from 'virtual:textos/es'
 import eu from 'virtual:textos/eu'
 import { click, cut, typing } from '../src/shared/tour/Tour'
+import type { TourDef } from '../src/shared/tour/Tour'
 
-const TOURS = { guard, waiting, board, therapy, boards, agenda, network, record, mailbox, inbox }
+/**
+ * Todas las demostraciones: cada fichero `*Tour.tsx` exporta su `TOUR`
+ * (`defineTour`). Una nueva entra sola en estos tests.
+ */
+const MODULES = import.meta.glob<{ TOUR?: TourDef<object> }>('../src/features/**/*Tour.tsx', {
+  eager: true,
+})
+const TOURS = Object.fromEntries(
+  Object.values(MODULES).flatMap((module) =>
+    module.TOUR === undefined ? [] : [[module.TOUR.name, module.TOUR.script]],
+  ),
+)
+
+/** Lo más largo que puede ser una frase de demostración, en español. */
+const MAX_CAPTION = 70
 
 type AnyCue = readonly [number, { caption?: number; press?: boolean; dark?: boolean }]
 
 describe('demostraciones', () => {
+  it('cada fichero de demostración exporta su TOUR con un nombre distinto', () => {
+    const files = Object.keys(MODULES)
+
+    expect(files.length).toBeGreaterThan(9)
+    expect(Object.keys(TOURS)).toHaveLength(files.length)
+  })
+
+  it.each(Object.entries(TOURS))('%s: frases cortas, numeradas desde 1 y sin huecos', (name) => {
+    const numbers = Object.keys(es)
+      .filter((key) => new RegExp(`^tour\\.${name}\\.\\d+$`).test(key))
+      .map((key) => Number(key.split('.').at(-1)))
+      .sort((a, b) => a - b)
+
+    expect(numbers).toEqual(numbers.map((_, index) => index + 1))
+    for (const n of numbers) {
+      expect((es[`tour.${name}.${n}`] ?? '').length, `tour.${name}.${n}`).toBeLessThanOrEqual(
+        MAX_CAPTION,
+      )
+    }
+  })
+
+  it.each(Object.entries(TOURS))(
+    '%s: el guion usa todas sus frases de la tabla',
+    (name, script) => {
+      const used = new Set([1, ...(script as readonly AnyCue[]).map(([, cue]) => cue.caption ?? 1)])
+      const inTable = Object.keys(es).filter((key) =>
+        new RegExp(`^tour\\.${name}\\.\\d+$`).test(key),
+      )
+
+      expect(inTable.filter((key) => !used.has(Number(key.split('.').at(-1))))).toEqual([])
+    },
+  )
+
   it.each(Object.entries(TOURS))('%s: el guion dura 20 s como mucho', (_, script) => {
     const end = Math.max(...(script as readonly AnyCue[]).map(([at]) => at))
 

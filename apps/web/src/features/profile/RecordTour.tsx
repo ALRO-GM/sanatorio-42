@@ -1,6 +1,5 @@
 import { localeOf, useI18n } from '../../shared/i18n'
-import { click, cut, Tour } from '../../shared/tour/Tour'
-import type { Cue } from '../../shared/tour/Tour'
+import { click, cut, defineTour, Tour } from '../../shared/tour/Tour'
 import { Icon } from '../../shared/ui/Icon'
 
 type Rec = {
@@ -14,7 +13,7 @@ type Rec = {
 
 const START: Rec = { xp: 310, menu: false, pace: null, date: false, calc: false }
 
-export const SCRIPT: readonly Cue<Rec>[] = [
+export const TOUR = defineTour<Rec>('record', START, [
   [1800, { caption: 2, xp: 350 }],
   ...cut<Rec>(4300, { scene: 1, caption: 3, cursor: 'rest' }),
   ...click<Rec>(5500, 'pace', { menu: true }),
@@ -22,7 +21,7 @@ export const SCRIPT: readonly Cue<Rec>[] = [
   ...click<Rec>(7400, 'date', { date: true }),
   [8500, { caption: 4 }],
   ...click<Rec>(8500, 'save', { calc: true }),
-]
+])
 
 /** Los plazos que salen en la demostración: pace y fecha. `0` es el black hole. */
 const STEPS = [
@@ -41,13 +40,7 @@ export function RecordTour() {
     date.toLocaleDateString(localeOf(lang), { day: 'numeric', month: 'short' })
 
   return (
-    <Tour
-      name="record"
-      start={START}
-      script={SCRIPT}
-      steps={[1, 2, 3, 4]}
-      tab={() => t('nav.expediente')}
-    >
+    <Tour tour={TOUR} tab={() => t('nav.expediente')}>
       {(shot) =>
         shot.scene === 0 ? (
           <div className="tour-card">

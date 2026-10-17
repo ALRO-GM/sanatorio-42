@@ -1,6 +1,5 @@
 import { useI18n } from '../../shared/i18n'
-import { click, cut, Tour } from '../../shared/tour/Tour'
-import type { Cue } from '../../shared/tour/Tour'
+import { click, cut, defineTour, Tour } from '../../shared/tour/Tour'
 import { Icon } from '../../shared/ui/Icon'
 
 type Therapy = {
@@ -12,7 +11,7 @@ type Therapy = {
 
 const START: Therapy = { joined: false, seats: [], days: [], created: false }
 
-export const SCRIPT: readonly Cue<Therapy>[] = [
+export const TOUR = defineTour<Therapy>('therapy', START, [
   [1500, { caption: 2 }],
   ...click<Therapy>(1500, 'join', { joined: true }),
   ...click<Therapy>(3700, 'new'),
@@ -25,7 +24,7 @@ export const SCRIPT: readonly Cue<Therapy>[] = [
   ...click<Therapy>(9500, 'day3', { days: [1, 3] }),
   [10500, { caption: 5 }],
   ...click<Therapy>(10500, 'create', { created: true }),
-]
+])
 
 /** Puestos del cluster de mentira que ya tiene otra persona. */
 const BUSY = [1, 4, 11]
@@ -39,13 +38,7 @@ export function TherapyTour() {
   const days = t('tour.days').split(',')
 
   return (
-    <Tour
-      name="therapy"
-      start={START}
-      script={SCRIPT}
-      steps={[1, 2, 3, 4, 5]}
-      tab={() => t('nav.terapia')}
-    >
+    <Tour tour={TOUR} tab={() => t('nav.terapia')}>
       {(shot) =>
         shot.scene === 0 ? (
           <>

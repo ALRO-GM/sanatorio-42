@@ -1,6 +1,5 @@
 import { useI18n } from '../../shared/i18n'
-import { click, Tour } from '../../shared/tour/Tour'
-import type { Cue } from '../../shared/tour/Tour'
+import { click, defineTour, Tour } from '../../shared/tour/Tour'
 import { Icon } from '../../shared/ui/Icon'
 
 type Agenda = {
@@ -12,7 +11,7 @@ type Agenda = {
 
 const START: Agenda = { hidden: false, sheet: false, going: false }
 
-export const SCRIPT: readonly Cue<Agenda>[] = [
+export const TOUR = defineTour<Agenda>('agenda', START, [
   [1800, { caption: 2 }],
   ...click<Agenda>(1800, 'kind', { hidden: true }),
   ...click<Agenda>(3700, 'kind', { hidden: false }),
@@ -20,7 +19,7 @@ export const SCRIPT: readonly Cue<Agenda>[] = [
   ...click<Agenda>(5200, 'ev', { sheet: true }),
   [7200, { caption: 4 }],
   ...click<Agenda>(7600, 'going', { going: true }),
-]
+])
 
 const KINDS = [
   { id: 'evaluation', color: '#d9822b' },
@@ -54,13 +53,7 @@ export function AgendaTour() {
   const days = t('tour.days').split(',')
 
   return (
-    <Tour
-      name="agenda"
-      start={START}
-      script={SCRIPT}
-      steps={[1, 2, 3, 4]}
-      tab={() => t('nav.calendario')}
-    >
+    <Tour tour={TOUR} tab={() => t('nav.calendario')}>
       {(shot) => (
         <>
           <div className="tour-row">

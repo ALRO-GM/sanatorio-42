@@ -1,6 +1,5 @@
 import { useI18n } from '../../shared/i18n'
-import { click, cut, Tour, typing } from '../../shared/tour/Tour'
-import type { Cue } from '../../shared/tour/Tour'
+import { click, cut, defineTour, Tour, typing } from '../../shared/tour/Tour'
 import { Icon } from '../../shared/ui/Icon'
 
 type Boards = {
@@ -19,7 +18,7 @@ const START: Boards = { day: false, joined: false, typed: 0, created: false, cod
 const LETTERS = 20
 const CODE = 'K7QM'
 
-export const SCRIPT: readonly Cue<Boards>[] = [
+export const TOUR = defineTour<Boards>('boards', START, [
   ...click<Boards>(600, 'day9', { day: true }),
   [1800, { caption: 2 }],
   ...click<Boards>(2700, 'join', { joined: true }),
@@ -31,7 +30,7 @@ export const SCRIPT: readonly Cue<Boards>[] = [
   ...typing<Boards>(11000, 'code', CODE.length, 220),
   [12100, { caption: 5 }],
   ...click<Boards>(12100, 'validate', { valid: true }),
-]
+])
 
 /**
  * Cómo funcionan las pizarras: te apuntas a una del calendario, propones la
@@ -41,13 +40,7 @@ export function BoardsTour() {
   const { t } = useI18n()
 
   return (
-    <Tour
-      name="boards"
-      start={START}
-      script={SCRIPT}
-      steps={[1, 2, 3, 4, 5]}
-      tab={() => t('nav.pizarras')}
-    >
+    <Tour tour={TOUR} tab={() => t('nav.pizarras')}>
       {(shot) =>
         shot.scene === 0 ? (
           <>

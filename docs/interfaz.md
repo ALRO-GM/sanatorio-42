@@ -95,7 +95,7 @@ Revisado el 2026-10-17 sobre la demostración, en escritorio y móvil.
 | Pizarras | 4 | 5 | 5 | Sin día elegido salen las próximas con plaza; «Apuntarme» grande | — (arreglado: el título salía con mayúsculas en cada palabra y las flechas del mes, una encima de otra) |
 | Calendario | 5 | 4 | 3 | Todo en un sitio, colores por tipo, «te quedan X para lo siguiente» | En semana los eventos cortos se cortan («Terap…»); la fila de tipos ocupa dos líneas y no se nota que también filtra |
 | Red | 3 | 3 | 3 | Grafo rápido, ficha de cada persona, flechas por sentido | Muchos filtros antes de ver el grafo; «endogamia» necesita la explicación; en móvil el grafo queda muy abajo |
-| Clústeres | 4 | 4 | 4 | Plano fiel, leyenda, resaltar a tu círculo o proyecto | No tiene demostración (i) como las demás; el clic central para abrir un expediente no se descubre solo |
+| Clústeres | 4 | 4 | 4 | Plano fiel, leyenda, resaltar a tu círculo o proyecto | El clic central para abrir un expediente no se descubre solo (la demostración ya enseña la ficha de un puesto) |
 | Exámenes | 4 | 4 | 3 | Aviso «en vivo» en la pestaña; notas al momento | Las estadísticas por intento son densas; falta decir qué examen es cuál si hay varios a la vez |
 | Buzón | 5 | 4 | 4 | Número rojo en la cabecera; avisos llevan a su sitio | Avisos y conversaciones en pestañas: las conversaciones se descubren tarde |
 | Personalizar | 3 | 4 | 4 | Orden manual, por tu uso o por la comunidad | Escondido en el menú de la cuenta |

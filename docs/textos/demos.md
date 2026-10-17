@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/demos.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-64 textos. «—» es que falta la traducción: sale en español.
+68 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -71,3 +71,7 @@ Generado desde `apps/web/src/shared/i18n/textos/demos.csv` con
 | `tour.inbox.3` | Demostración animada de las incidencias: frase del paso 3 | shared/tour/Tour | Te respondemos aquí mismo y te avisamos en el buzón. | We answer right here and tell you in the mailbox. | Et responem aquí mateix i t'avisem a la bústia. | Hementxe erantzuten dizugu eta postontzian abisatzen dizugu. |
 | `tour.inbox.text` | Demostración de incidencias: mensaje de ejemplo | features/admin/InboxTour, shared/tour/Tour | Me gustaría filtrar por cluster | I would like to filter by cluster | M'agradaria filtrar per clúster | Klusterraren arabera iragazi nahiko nuke |
 | `tour.inbox.reply` | Demostración de incidencias: respuesta de ejemplo | features/admin/InboxTour, shared/tour/Tour | Buena idea: lo apuntamos. | Good idea: noted. | Bona idea: ho apuntem. | Ideia ona: apuntatuta. |
+| `tour.clusters.1` | Demostración animada de los clústeres: frase del paso 1 | shared/tour/Tour | Elige una sala: ves quién se sienta dónde. | Pick a room: see who sits where. | Tria una sala: veus qui seu on. | Aukeratu gela bat: nor non eserita dagoen ikusiko duzu. |
+| `tour.clusters.2` | Demostración animada de los clústeres: frase del paso 2 | shared/tour/Tour | Resalta a quien hace tu proyecto. | Highlight whoever is doing your project. | Ressalta qui fa el teu projecte. | Nabarmendu zure proiektua egiten ari dena. |
+| `tour.clusters.3` | Demostración animada de los clústeres: frase del paso 3 | shared/tour/Tour | Pulsa un puesto para ver quién es y escribirle. | Tap a seat to see who it is and message them. | Prem un lloc per veure qui és i escriure-li. | Sakatu postu bat nor den ikusteko eta idazteko. |
+| `tour.clusters.4` | Demostración animada de los clústeres: frase del paso 4 | shared/tour/Tour | ¿Un ordenador no va? Avísalo desde su puesto. | A computer not working? Report it from its seat. | Un ordinador no va? Avisa'n des del seu lloc. | Ordenagailu batek ez du funtzionatzen? Abisatu bere postutik. |
