@@ -22,6 +22,9 @@ export const SECTIONS = [
   { id: 'pizarras', icon: 'pizarras', inNav: true, category: 'ayuda', from: 'simple' },
   // Not-games: aprender jugando a preguntas de programación con más gente.
   { id: 'notgames', icon: 'pregunta', inNav: true, category: 'ayuda', from: 'normal' },
+  // Estadísticas de Ayuda: cifras y clasificación de cada sección. Con rankings:
+  // desde el modo normal (el simplificado no enseña rankings).
+  { id: 'estadisticas', icon: 'cifras', inNav: true, category: 'ayuda', from: 'normal' },
   { id: 'calendario', icon: 'calendario', inNav: true, category: 'calendario', from: 'simple' },
   { id: 'red', icon: 'red', inNav: true, category: 'datos', from: 'normal' },
   // Clústeres: el plano del campus, en su propia pestaña de arriba.

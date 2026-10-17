@@ -132,7 +132,7 @@ despliegue espera a la CI).
 - [x] **B1. Salir de la sala** de Not-games en cualquier momento (también
       jugando) y **sala vacía = borrada** (en el motor de la API y en el mock).
 - [x] **B2. Clústeres a General**: categoría propia arriba (como Calendario).
-- [ ] **B3. Estadísticas** (pestaña en Ayuda): totales y por persona con
+- [x] **B3. Estadísticas** (pestaña en Ayuda): totales y por persona con
       clasificación de cada sección: sala de espera, tablón, terapia, pizarras
       y Not-games. Nuevo módulo de API `stats`.
 - [ ] **B4. Ajedrez** en Not-games: varios tableros (estilos) elegibles, reloj;
@@ -142,6 +142,11 @@ despliegue espera a la CI).
       reutilizable** (`quiz/turns`), para más juegos de turnos.
 - [ ] **B5. Demostración animada** de cada juego nuevo (ajedrez).
 - [ ] **Fotos** de cada jugador en clasificaciones y marcadores (`Avatar`). Hecho en el marcador de Not-games; falta en las clasificaciones nuevas.
+- [ ] **B7. Repaso** (pestaña en Not-games, de cada persona): los conceptos que
+      ha fallado (de cualquier juego), con **definición y ejemplo** para
+      estudiarlos. Añadir `definition` y `example` a los 152 conceptos del
+      banco (test que lo exija) y guardar los fallos por persona
+      (`quiz_answers` + concepto, o tabla `quiz_misses`).
 - [ ] **B6. Sonidos y animaciones** en los juegos: cronómetros, pulsaciones,
       acierto/fallo.
 - [ ] **Buzón**: resumen dado a Alberto (13 abiertos: #42 #45 #48 #50 #65 #69

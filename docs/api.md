@@ -1222,6 +1222,27 @@ Sin sesión: las usan Caddy y quien despliega.
 - GET /health → `{ "status": "ok" }` si el proceso responde.
 - GET /health/db → lo mismo si además la base contesta; `503` si no.
 
+## Estadísticas de Ayuda (`modules/stats`)
+
+Solo lee, de las tablas de cada sección, y siempre del campus de quien mira.
+
+```
+GET /stats?period=month|all  → HelpStats: { period, sections: StatsSection[] }
+```
+
+- Una `StatsSection` por sección, en este orden: `consulta`, `tablon`,
+  `terapia`, `pizarras`, `notgames`. Cada una trae `totals` (cifras del campus,
+  `{ key, value }`), `ranking` (los 10 primeros) y `me` (tu puesto, aunque no
+  entres en los 10; `null` si no sales).
+- Cada fila: `rank` (empates en las dos cifras comparten puesto), `login`,
+  `image`, `value` (lo que ordena) y `extra` (lo que desempata).
+- Qué ordena cada una: sesiones de ayuda **validadas con los dos códigos**
+  (extra: minutos), respuestas que resuelven una duda ajena (extra: respuestas),
+  grupos de terapia a los que vas (extra: los que abres), gente apuntada a tus
+  pizarras ya empezadas (extra: pizarras) y partidas ganadas de Not-games
+  (extra: aciertos). Quien tiene 0 no sale.
+- «Este mes» empieza el día 1 en UTC, como la clasificación de XP.
+
 ## Not-games (`modules/quiz`)
 
 Partidas de preguntas de programación. El servidor lleva el reloj y corrige: la

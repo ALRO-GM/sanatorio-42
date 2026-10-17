@@ -173,6 +173,7 @@ export const realApi: Api = {
   setAdminQuota: (changes) => sendJson('PUT', '/admin/quota', changes),
 
   getLeaderboard: (period) => getJson(`/leaderboard?period=${period}`),
+  getHelpStats: (period) => getJson(`/stats?period=${period}`),
   getHealth: () => getJson('/me/health'),
   declarePace: (ref) => sendJson('PUT', '/me/health/pace', ref),
 

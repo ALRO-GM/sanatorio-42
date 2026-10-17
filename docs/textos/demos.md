@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/demos.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-77 textos. «—» es que falta la traducción: sale en español.
+82 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -84,3 +84,8 @@ Generado desde `apps/web/src/shared/i18n/textos/demos.csv` con
 | `tour.notGames.ask` | Demostración animada de Not-games: la pregunta de ejemplo (fork() se queda tal cual) | features/notgames/NotGamesTour, shared/tour/Tour | ¿Qué devuelve fork() en el proceso hijo? | What does fork() return in the child process? | Què retorna fork() al procés fill? | Zer itzultzen du fork()-ek prozesu umean? |
 | `tour.notGames.pid` | Demostración animada de Not-games: una respuesta mala de la pregunta de ejemplo | features/notgames/NotGamesTour, shared/tour/Tour | El PID del hijo | The child's PID | El PID del fill | Umearen PIDa |
 | `tour.notGames.why` | Demostración animada de Not-games: la explicación que sale al revelar | features/notgames/NotGamesTour, shared/tour/Tour | fork vuelve dos veces: 0 en el hijo y su PID en el padre. | fork returns twice: 0 in the child and its PID in the parent. | fork torna dues vegades: 0 al fill i el seu PID al pare. | fork-ek bi aldiz itzultzen du: 0 umean eta bere PIDa gurasoan. |
+| `tour.helpStats.1` | Demostración animada de las estadísticas de Ayuda: frase del paso 1 | shared/tour/Tour | Elige el periodo: este mes o desde siempre. | Pick the period: this month or all time. | Tria el període: aquest mes o des de sempre. | Aukeratu aldia: hilabete hau edo betidanik. |
+| `tour.helpStats.2` | Demostración animada de las estadísticas de Ayuda: frase del paso 2 | shared/tour/Tour | Cada sección, con sus cifras del campus. | Each section, with its campus numbers. | Cada secció, amb les seves xifres del campus. | Atal bakoitza, bere campuseko zifrekin. |
+| `tour.helpStats.3` | Demostración animada de las estadísticas de Ayuda: frase del paso 3 | shared/tour/Tour | Y quién más la mueve, con su foto. | And who drives it the most, with their photo. | I qui més la mou, amb la seva foto. | Eta nork mugitzen duen gehien, bere argazkiarekin. |
+| `tour.helpStats.4` | Demostración animada de las estadísticas de Ayuda: frase del paso 4 | shared/tour/Tour | Tu fila sale marcada aunque no estés arriba. | Your row is highlighted even if you are not on top. | La teva fila surt marcada encara que no siguis a dalt. | Zure lerroa markatuta ateratzen da goian ez egon arren. |
+| `tour.helpStats.5` | Demostración animada de las estadísticas de Ayuda: frase del paso 5 | shared/tour/Tour | Pulsa un nombre para ver su expediente. | Click a name to see their record. | Prem un nom per veure el seu expedient. | Sakatu izen bat bere espedientea ikusteko. |

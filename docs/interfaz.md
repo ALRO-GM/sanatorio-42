@@ -13,7 +13,7 @@ volver a una categoría se abre la última sección que se miró en ella.
 | Categoría | Para qué | Secciones | Dónde está |
 | --- | --- | --- | --- |
 | **Expediente** | Lo tuyo | Expediente (la portada) | `app/sections.ts` |
-| **Ayuda** | Quedar con gente: pedir y dar ayuda, aprender y enseñar | Sala de espera · Tablón · Terapia · Pizarras · Not-games | |
+| **Ayuda** | Quedar con gente: pedir y dar ayuda, aprender y enseñar | Sala de espera · Tablón · Terapia · Pizarras · Not-games · Estadísticas | |
 | **Calendario** | Todo lo que tienes, en el tiempo | Calendario | |
 | **Clústeres** | El plano del campus: quién está, dónde y de guardia | Clústeres | |
 | **Datos** | El campus en cifras | Red · Exámenes | |
@@ -63,6 +63,8 @@ de datos.
 | Terapia y Pizarras | Todo | S | Son quedar |
 | Pestañas | Not-games | N | Aprender jugando: no hace falta para pedir ni dar ayuda |
 | Not-games | Salas, crear sala, partida y marcador | N | La sección en sí |
+| Pestañas | Estadísticas (en Ayuda) | N | Clasificaciones: el simplificado no enseña rankings |
+| Estadísticas | Cifras del campus y clasificación de cada sección, con fotos | N | La sección en sí |
 | Calendario | Vistas día/semana/mes, tipos de evento (también leyenda) | S | Básico |
 | Calendario | Formas del día (lista, entera, ajustada, desde ahora) | N | Comodidad |
 | Red | Grafo, filtros, totales, cómo se lee | N | La sección en sí |

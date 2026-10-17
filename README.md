@@ -66,6 +66,7 @@ Lo que este proyecto enseña de quien lo ha hecho:
   - [Terapia de grupo](#terapia-de-grupo)
   - [Pizarras](#pizarras)
   - [Not-games](#not-games)
+  - [Estadísticas de Ayuda](#estadísticas-de-ayuda)
   - [Calendario](#calendario)
   - [Avisos y sala del evento](#avisos-y-sala-del-evento)
   - [Red de correcciones](#red-de-correcciones)
@@ -190,6 +191,16 @@ cual ve las respuestas en otro orden: memorizar el botón no sirve. La dificulta
 de cada pregunta empieza estimada y se reajusta con lo que falla la gente. Al
 acabar cada pregunta se ve la buena y por qué. El servidor lleva el reloj y la
 partida: nadie puede contestar tarde ni ver la buena antes de tiempo.
+
+### Estadísticas de Ayuda
+
+Una pestaña en Ayuda con lo que se mueve en el campus en cada sección (sala de
+espera, tablón, terapia, pizarras y Not-games), del mes o desde siempre, y la
+clasificación de cada una con la foto de cada cual: quién ayuda más en sesiones
+validadas, quién resuelve más dudas, quién va a más terapias, quién reúne a más
+gente en sus pizarras y quién gana más partidas. Tu fila sale marcada aunque no
+estés entre los diez primeros. Sale desde el modo normal: el simplificado no
+enseña rankings.
 
 ### Calendario
 
@@ -508,6 +519,7 @@ pie showData title Líneas por parte
 | `tours`      | Velocidad de las demostraciones: la de cada persona y la que vota la comunidad    |
 | `clicker`    | Partidas del juego, comprobación de trampas e historial de capital                |
 | `quiz`       | Not-games: banco de preguntas, salas, partidas y dificultad que se reajusta       |
+| `stats`      | Estadísticas de Ayuda: cifras del campus y clasificación de cada sección          |
 | `staff` | Documentos con código de verificación y las cuentas de staff que los comprueban |
 | `admin`      | Permisos, bloqueos, buzón, consumo, presupuesto de peticiones y limpieza de datos |
 

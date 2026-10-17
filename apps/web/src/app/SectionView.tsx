@@ -44,6 +44,9 @@ const AdminPage = lazy(() =>
 const NetworkPage = lazy(() =>
   import('../features/network/NetworkPage').then((m) => ({ default: m.NetworkPage })),
 )
+const HelpStatsPage = lazy(() =>
+  import('../features/stats/HelpStatsPage').then((m) => ({ default: m.HelpStatsPage })),
+)
 const NotGamesPage = lazy(() =>
   import('../features/notgames/NotGamesPage').then((m) => ({ default: m.NotGamesPage })),
 )
@@ -120,6 +123,7 @@ export function SectionView({
       )}
       {section === 'pizarras' && <BoardsCalendar />}
       {section === 'notgames' && <NotGamesPage me={me.login} room={param} />}
+      {section === 'estadisticas' && <HelpStatsPage me={me.login} />}
       {section === 'red' && <NetworkPage me={me} />}
       {/* Quien eligió la roja lleva el juego puesto en toda la web: fuera de su
           sección sigue corriendo y solo enseña una ventanita. Con su propia

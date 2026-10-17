@@ -47,4 +47,6 @@
 /* Comodidad: daltonismo y modo zen. La última, para ganar a todo. */
 /* Not-games. */
 @import './notgames.css';
+/* Estadísticas de Ayuda. */
+@import './stats.css';
 @import './comfort.css';

@@ -68,6 +68,7 @@ import type {
   HelpOffer,
   HelpReputation,
   HolyGraph,
+  HelpStats,
   Leaderboard,
   LeaderboardPeriod,
   LoggedMessage,
@@ -343,6 +344,8 @@ export type Api = {
   setAdminQuota: (changes: Partial<FortyTwoQuotaSettings>) => Promise<FortyTwoQuota>
 
   getLeaderboard: (period: LeaderboardPeriod) => Promise<Leaderboard>
+  /** Estadísticas de Ayuda: cifras y clasificación de cada sección. */
+  getHelpStats: (period: LeaderboardPeriod) => Promise<HelpStats>
   // --- Red de correcciones
   /** Quién ha corregido a quién en el campus, con los filtros que se pasen. */
   getNetwork: (params: NetworkParams) => Promise<NetworkGraph>

@@ -1,0 +1,56 @@
+/* ── Estadísticas de Ayuda (`features/stats/`) ───────────────────────────── */
+.help-stats .section-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.help-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+.help-stats-card {
+  display: grid;
+  align-content: start;
+  gap: 0.6rem;
+}
+.help-stats-card h3 {
+  margin: 0;
+}
+.help-stats-totals {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(6.5rem, 1fr));
+  gap: 0.5rem;
+  margin: 0;
+}
+.help-stats-totals div {
+  display: grid;
+  gap: 0.1rem;
+  padding: 0.5rem 0.6rem;
+  border-radius: var(--radius-sm, 8px);
+  background: var(--surface-2);
+}
+.help-stats-totals dt {
+  color: var(--text-3);
+  font-size: 0.75rem;
+}
+.help-stats-totals dd {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.help-stats-card .ranking {
+  margin: 0;
+}
+.help-stats-card .row-count {
+  display: grid;
+  justify-items: end;
+  line-height: 1.2;
+}
+.help-stats-card .row-count small {
+  color: var(--text-3);
+}

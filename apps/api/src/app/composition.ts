@@ -53,6 +53,8 @@ import { createProfileModule, MASTER_AT } from '../modules/profile/index.js'
 import type { ProfileModule } from '../modules/profile/index.js'
 import { createReplicaModule } from '../modules/replica/index.js'
 import type { PhotoStore, ReplicaModule, SyncerConfig } from '../modules/replica/index.js'
+import { createStatsModule } from '../modules/stats/index.js'
+import type { StatsModule } from '../modules/stats/index.js'
 import { createToursModule } from '../modules/tours/index.js'
 import type { ToursModule } from '../modules/tours/index.js'
 import { createStaffModule } from '../modules/staff/index.js'
@@ -120,6 +122,7 @@ export type Services = {
   tours: ToursModule['service']
   legal: LegalModule['service']
   quiz: QuizModule['service']
+  stats: StatsModule['service']
 }
 
 type Composition = {
@@ -342,6 +345,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
   })
 
   const tours = createToursModule({ db, ...clock })
+  const stats = createStatsModule({ db, ...clock })
   // `modules` se monta justo después: para cuando alguien descargue sus datos ya estará.
   const legal = createLegalModule({
     db,
@@ -390,6 +394,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     staff,
     legal,
     quiz,
+    stats,
   ]
 
   return {
@@ -429,6 +434,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
       tours: tours.service,
       legal: legal.service,
       quiz: quiz.service,
+      stats: stats.service,
     },
   }
 }
