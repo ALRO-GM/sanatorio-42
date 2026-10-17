@@ -186,7 +186,7 @@ export function createExamsLive(options: ExamsLiveOptions) {
     if (logins.length === 0) return found
 
     const result = await db.execute({
-      sql: `SELECT u.login, a.project_id, p.name, a.mark, a.validated, a.at
+      sql: `SELECT u.login, a.project_id, p.name, p.slug, a.mark, a.validated, a.at
             FROM exam_attempts a
             JOIN users u ON u.id = a.user_id
             JOIN projects p ON p.id = a.project_id
@@ -199,7 +199,10 @@ export function createExamsLive(options: ExamsLiveOptions) {
     for (const row of result.rows) {
       found.set(toText(row.login), {
         projectId: toNumber(row.project_id),
-        name: toText(row.name),
+        // Los dos planes los llaman igual: el del nuevo lleva su marca.
+        name: toText(row.slug).startsWith('42next-')
+          ? `${toText(row.name)} · 42next`
+          : toText(row.name),
         mark: row.mark === null ? null : toNumber(row.mark),
         passed: row.validated !== null && toNumber(row.validated) === 1,
       })

@@ -6,8 +6,12 @@ import type { Db } from '../../core/db/database.js'
 import { toNumber, toText } from '../../core/db/rows.js'
 import type { AttemptRow, OccurrenceRow } from './exams.rules.js'
 
-/** Los proyectos que son exámenes, por su nombre o su slug. */
-const EXAM_PROJECT = `(p.slug LIKE '%exam%' OR p.name LIKE 'Exam%')`
+/**
+ * Los exámenes del common core: los Exam Rank, del plan clásico
+ * (`exam-rank-02`) y del nuevo (`42next-exam-rank-02`). Los de la piscina y
+ * los de pruebas no cuentan.
+ */
+const EXAM_PROJECT = `(p.slug LIKE 'exam-rank-%' OR p.slug LIKE '42next-exam-rank-%')`
 
 const triState = (value: unknown): boolean | null =>
   value === null || value === undefined ? null : toNumber(value) === 1
@@ -17,10 +21,16 @@ export function createExamsRepository(db: Db) {
     /** Los exámenes que se conocen, por nombre. */
     async exams(): Promise<{ id: number; name: string }[]> {
       const result = await db.execute(
-        `SELECT p.id, p.name FROM projects p WHERE ${EXAM_PROJECT} ORDER BY p.name`,
+        `SELECT p.id, p.name, p.slug FROM projects p WHERE ${EXAM_PROJECT} ORDER BY p.name, p.slug`,
       )
 
-      return result.rows.map((row) => ({ id: toNumber(row.id), name: toText(row.name) }))
+      // Los dos planes los llaman igual: el del nuevo lleva su marca.
+      return result.rows.map((row) => ({
+        id: toNumber(row.id),
+        name: toText(row.slug).startsWith('42next-')
+          ? `${toText(row.name)} · 42next`
+          : toText(row.name),
+      }))
     },
 
     /** Los intentos guardados de la gente de un campus. */

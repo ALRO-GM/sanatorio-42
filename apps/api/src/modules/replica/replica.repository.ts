@@ -62,9 +62,9 @@ const IS_CORE = `(p.core = 1 OR (p.core IS NULL
  * que hizo para entrar no son "sus proyectos". De quien todavía está en la
  * piscina cuentan todos, que es lo único que tiene.
  */
-/** `true` si el proyecto es un examen (Exam Rank 02, `exam-rank-03`…). */
+/** `true` si el proyecto es un examen del common core (`exam-rank-03`, `42next-exam-rank-02`). */
 export function isExam(project: { name?: string | null; slug?: string | null }): boolean {
-  return /exam/i.test(project.slug ?? '') || /^exam/i.test(project.name ?? '')
+  return /^(42next-)?exam-rank-/.test(project.slug ?? '')
 }
 
 const STUDENT_PROJECT = `(${IS_CORE} OR NOT EXISTS (
