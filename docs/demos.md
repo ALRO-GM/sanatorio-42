@@ -127,5 +127,6 @@ tema (nunca un color suelto) y se apunta en esta tabla.
 | `record` | Expediente | Nivel, XP, estado de salud |
 | `mailbox` | Buzón | Avisos sin leer y a dónde llevan |
 | `inbox` | Incidencias | Escribir y recibir respuesta |
+| `notGames` | Not-games | Elegir modo, contestar, ver la buena y por qué, marcador con vidas |
 
 Falta la de Exámenes.

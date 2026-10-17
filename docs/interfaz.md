@@ -99,7 +99,7 @@ Revisado el 2026-10-17 sobre la demostración, en escritorio y móvil.
 | Red | 3 | 3 | 3 | Grafo rápido, ficha de cada persona, flechas por sentido | Muchos filtros antes de ver el grafo; «endogamia» necesita la explicación; en móvil el grafo queda muy abajo |
 | Clústeres | 4 | 4 | 4 | Plano fiel, leyenda, resaltar a tu círculo o proyecto | El clic central para abrir un expediente no se descubre solo (la demostración ya enseña la ficha de un puesto) |
 | Exámenes | 4 | 4 | 3 | Aviso «en vivo» en la pestaña; notas al momento | Las estadísticas por intento son densas; falta decir qué examen es cuál si hay varios a la vez |
-| Not-games | 4 | 4 | 4 | Modos explicados al elegir; cuenta atrás con la hora del servidor; el porqué de cada respuesta | Aún sin demostración (i); sin la lista de salas a la vista mientras se crea una |
+| Not-games | 4 | 4 | 4 | Modos explicados al elegir; cuenta atrás con la hora del servidor; el porqué de cada respuesta | Sin la lista de salas a la vista mientras se crea una; preguntas solo en español |
 | Buzón | 5 | 4 | 4 | Número rojo en la cabecera; avisos llevan a su sitio | Avisos y conversaciones en pestañas: las conversaciones se descubren tarde |
 | Personalizar | 3 | 4 | 4 | Orden manual, por tu uso o por la comunidad | Escondido en el menú de la cuenta |
 | Pie (ajustes) | 3 | 5 | 5 | Todo a la vista y con nombres claros | Está al final de páginas muy largas: el modo y el idioma se descubren tarde (por eso también están en la bienvenida) |

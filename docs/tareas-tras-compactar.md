@@ -122,7 +122,7 @@ Fases (cada una con check, commit, push y despliegue):
 - [x] **F3. Banco grande**: todos los proyectos del common core de los dos
       planes y lo general (git, shell, complejidad, binario…). 152 conceptos,
       528 maneras de preguntar; un test comprueba que los slugs existen.
-- [ ] **F4. Demostración, documentación** (`docs/api.md`, `docs/interfaz.md`,
+- [x] **F4. Demostración, documentación** (`docs/api.md`, `docs/interfaz.md`,
       README) y repaso.
 
 ## 3. A medias o por confirmar con Alberto

@@ -65,6 +65,7 @@ Lo que este proyecto enseña de quien lo ha hecho:
   - [Tablón de dudas](#tablón-de-dudas)
   - [Terapia de grupo](#terapia-de-grupo)
   - [Pizarras](#pizarras)
+  - [Not-games](#not-games)
   - [Calendario](#calendario)
   - [Avisos y sala del evento](#avisos-y-sala-del-evento)
   - [Red de correcciones](#red-de-correcciones)
@@ -170,6 +171,25 @@ con códigos. Una pizarra no se puede poner a más de 62 días vista, y si la fe
 queda lejos la web pide confirmarla.
 
 ![Pizarras](docs/img/pizarras.webp)
+
+### Not-games
+
+Preguntas de programación para aprender con más gente (no es un juego: es
+repaso). Se crea una sala y se elige el modo: duelo, equipo contra equipo,
+todos contra todos o supervivencia con tres vidas; los tres primeros, también
+en competitivo, donde fallar resta. A cada cual le sale lo que ha estudiado: las
+preguntas de un proyecto solo salen si todos los de la sala lo han hecho (o
+están en él), o se juega solo con lo general; también se puede pedir un círculo
+mínimo para entrar.
+
+El banco tiene 152 conceptos de todo el common core de los dos planes, de lo
+básico a lo difícil: rápidas (10 s, leer y contestar) y largas (30 s o 1 min,
+razonar o encontrar el fallo en un código). Cada concepto se pregunta de varias
+formas, con la buena escrita de varias maneras y las malas mezcladas, y cada
+cual ve las respuestas en otro orden: memorizar el botón no sirve. La dificultad
+de cada pregunta empieza estimada y se reajusta con lo que falla la gente. Al
+acabar cada pregunta se ve la buena y por qué. El servidor lleva el reloj y la
+partida: nadie puede contestar tarde ni ver la buena antes de tiempo.
 
 ### Calendario
 
@@ -487,6 +507,7 @@ pie showData title Líneas por parte
 | `broadcasts` | Comunicados de quien administra para todo el mundo                                |
 | `tours`      | Velocidad de las demostraciones: la de cada persona y la que vota la comunidad    |
 | `clicker`    | Partidas del juego, comprobación de trampas e historial de capital                |
+| `quiz`       | Not-games: banco de preguntas, salas, partidas y dificultad que se reajusta       |
 | `staff` | Documentos con código de verificación y las cuentas de staff que los comprueban |
 | `admin`      | Permisos, bloqueos, buzón, consumo, presupuesto de peticiones y limpieza de datos |
 

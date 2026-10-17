@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/demos.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-68 textos. «—» es que falta la traducción: sale en español.
+77 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -75,3 +75,12 @@ Generado desde `apps/web/src/shared/i18n/textos/demos.csv` con
 | `tour.clusters.2` | Demostración animada de los clústeres: frase del paso 2 | shared/tour/Tour | Resalta a quien hace tu proyecto. | Highlight whoever is doing your project. | Ressalta qui fa el teu projecte. | Nabarmendu zure proiektua egiten ari dena. |
 | `tour.clusters.3` | Demostración animada de los clústeres: frase del paso 3 | shared/tour/Tour | Pulsa un puesto para ver quién es y escribirle. | Tap a seat to see who it is and message them. | Prem un lloc per veure qui és i escriure-li. | Sakatu postu bat nor den ikusteko eta idazteko. |
 | `tour.clusters.4` | Demostración animada de los clústeres: frase del paso 4 | shared/tour/Tour | ¿Un ordenador no va? Avísalo desde su puesto. | A computer not working? Report it from its seat. | Un ordinador no va? Avisa'n des del seu lloc. | Ordenagailu batek ez du funtzionatzen? Abisatu bere postutik. |
+| `tour.notGames.1` | Demostración animada de Not-games: frase del paso 1 | shared/tour/Tour | Elige el modo: duelo, equipos, todos o supervivencia. | Pick the mode: duel, teams, everyone or survival. | Tria el mode: duel, equips, tothom o supervivència. | Aukeratu modua: duelua, taldeak, denak edo biziraupena. |
+| `tour.notGames.2` | Demostración animada de Not-games: frase del paso 2 | shared/tour/Tour | A cada cual le sale lo que ha estudiado. | Everyone gets what they have studied. | A cadascú li surt el que ha estudiat. | Bakoitzari ikasi duena ateratzen zaio. |
+| `tour.notGames.3` | Demostración animada de Not-games: frase del paso 3 | shared/tour/Tour | Contesta antes de que se acabe el tiempo. | Answer before time runs out. | Contesta abans que s'acabi el temps. | Erantzun denbora amaitu baino lehen. |
+| `tour.notGames.4` | Demostración animada de Not-games: frase del paso 4 | shared/tour/Tour | Al acabar, ves la buena y por qué. | When it ends, you see the right one and why. | En acabar, veus la bona i per què. | Amaitzean, zuzena eta zergatik ikusten duzu. |
+| `tour.notGames.5` | Demostración animada de Not-games: frase del paso 5 | shared/tour/Tour | En supervivencia, cada fallo quita una vida. | In survival, every miss costs a life. | En supervivència, cada error treu una vida. | Biziraupenean, huts bakoitzak bizitza bat kentzen du. |
+| `tour.notGames.6` | Demostración animada de Not-games: frase del paso 6 | shared/tour/Tour | Gana quien queda en pie. | Whoever is left standing wins. | Guanya qui queda dempeus. | Zutik geratzen denak irabazten du. |
+| `tour.notGames.ask` | Demostración animada de Not-games: la pregunta de ejemplo (fork() se queda tal cual) | features/notgames/NotGamesTour, shared/tour/Tour | ¿Qué devuelve fork() en el proceso hijo? | What does fork() return in the child process? | Què retorna fork() al procés fill? | Zer itzultzen du fork()-ek prozesu umean? |
+| `tour.notGames.pid` | Demostración animada de Not-games: una respuesta mala de la pregunta de ejemplo | features/notgames/NotGamesTour, shared/tour/Tour | El PID del hijo | The child's PID | El PID del fill | Umearen PIDa |
+| `tour.notGames.why` | Demostración animada de Not-games: la explicación que sale al revelar | features/notgames/NotGamesTour, shared/tour/Tour | fork vuelve dos veces: 0 en el hijo y su PID en el padre. | fork returns twice: 0 in the child and its PID in the parent. | fork torna dues vegades: 0 al fill i el seu PID al pare. | fork-ek bi aldiz itzultzen du: 0 umean eta bere PIDa gurasoan. |

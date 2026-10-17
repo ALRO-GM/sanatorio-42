@@ -16,6 +16,8 @@ import { useI18n } from '../../shared/i18n'
 import { notGamesHref } from '../../shared/links'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { Icon } from '../../shared/ui/Icon'
+import { InfoTip } from '../../shared/ui/InfoTip'
+import { NotGamesTour } from './NotGamesTour'
 import { RoomView } from './RoomView'
 import { settingsText } from './settings-text'
 
@@ -41,7 +43,12 @@ export function NotGamesPage({ me, room }: NotGamesPageProps) {
 
   return (
     <section className="notgames">
-      <h2>{t('nav.notgames')}</h2>
+      <h2>
+        {t('nav.notgames')}
+        <InfoTip title={t('nav.notgames')}>
+          <NotGamesTour />
+        </InfoTip>
+      </h2>
       {id !== null && Number.isInteger(id) && id > 0 ? <RoomView id={id} me={me} /> : <Lobby />}
     </section>
   )

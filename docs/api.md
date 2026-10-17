@@ -1247,8 +1247,11 @@ POST /quiz/rooms/:id/answer   → QuizRoom. { question, option }: option es el i
   las jugadas, a la semana.
 - Preguntas: las de los conceptos que les valen a **todos** los que juegan según
   sus proyectos (aprobados o en curso), o solo los generales. El banco está en
-  `modules/quiz/bank/`; la dificultad de cada concepto sale de lo que falla la
-  gente (`quiz_stats`) a partir de 20 respuestas.
+  `modules/quiz/bank/`, un fichero por tema; la dificultad de cada concepto sale
+  de lo que falla la gente (`quiz_stats`) a partir de 20 respuestas.
+- Cada pregunta se monta al sacarla: una forma de preguntar, una de sus buenas y
+  tres malas (primero las de esa forma, que se parecen a la buena; luego las del
+  concepto). Cada jugador ve las respuestas en su propio orden.
 - Tiempos: 3 s de cuenta atrás antes de la primera, 10 s las rápidas y 30 s (o
   60) las largas, 1 s de margen para respuestas tardías y 4 s enseñando la
   respuesta. Se cierra antes si han contestado todos.

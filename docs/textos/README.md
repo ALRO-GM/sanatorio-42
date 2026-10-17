@@ -11,7 +11,7 @@ Cómo se trabaja con ellas: [docs/textos.md](../textos.md).
 | [clusters](clusters.md) | 50 | 0 | 0 | 0 |
 | [code-clicker](code-clicker.md) | 27 | 0 | 0 | 0 |
 | [comun](comun.md) | 189 | 0 | 0 | 0 |
-| [demos](demos.md) | 68 | 0 | 0 | 0 |
+| [demos](demos.md) | 77 | 0 | 0 | 0 |
 | [examenes](examenes.md) | 25 | 0 | 0 | 0 |
 | [expediente](expediente.md) | 120 | 0 | 0 | 0 |
 | [gestion](gestion.md) | 440 | 38 | 400 | 400 |
