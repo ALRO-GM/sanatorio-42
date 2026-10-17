@@ -48,6 +48,42 @@ describe('code clicker', () => {
     spent: 0,
   }
 
+  it('las noticias hablan de quien más te ha corregido y has corregido, y luego del campus', async () => {
+    const { clicker } = services
+    let id = 1
+    /** `corrector` corrige `times` veces a `corrected` en Madrid. */
+    const correct = async (corrector: string, corrected: string, times: number): Promise<void> => {
+      for (let index = 0; index < times; index++) {
+        await db.execute({
+          sql: `INSERT INTO corrections
+                  (id, campus_id, corrector, corrected, project_id, begin_at, final_mark, positive)
+                VALUES (?, 22, ?, ?, 1, '2026-09-01T10:00:00.000Z', 100, 1)`,
+          args: [id++, corrector, corrected],
+        })
+      }
+    }
+
+    await correct('leo', 'ana', 3)
+    await correct('ana', 'uma', 2)
+    await correct('zoe', 'bob', 20)
+    await correct('ana', 'ana', 5)
+
+    // Sin la roja no hacen falta.
+    expect((await clicker.state(actor('ana'))).names).toEqual([])
+
+    await press('ana', 42)
+    await clicker.choose(actor('ana'), { pill: 'red' })
+
+    const { names } = await clicker.state(actor('ana'))
+
+    // Primero con quién se ha corregido (más veces antes), sin repetir ni salir ella.
+    expect(names.slice(0, 2)).toEqual(['leo', 'uma'])
+    expect(names).toContain('zoe')
+    expect(names).not.toContain('ana')
+    expect(new Set(names).size).toBe(names.length)
+    expect(names.length).toBeLessThanOrEqual(12)
+  })
+
   it('cuenta las pulsaciones de la cruz, y no deja elegir antes de las 42', async () => {
     const { clicker } = services
 

@@ -175,6 +175,11 @@ partida, otra por cada fase de la singularidad y cuatro más que entran al
 recompilar la realidad, según el prestigio que se lleve (1, 5, 25 y 100): cada
 una más desmedida que la anterior.
 
+La gente que sale en las noticias es la de cada jugador: las personas con las
+que más se ha corregido (le corrigieron o las corrigió), de más a menos. Si son
+pocas, se completa con quienes más corrigen en su campus (`namesFor` en
+`clicker.service.ts`).
+
 El café del fondo es líquido de verdad: tres olas que se cruzan, burbujas y, de
 vez en cuando, un chorro que cae y salpica. Cada patito de goma comprado flota
 en él (hasta cuatro a la vez).

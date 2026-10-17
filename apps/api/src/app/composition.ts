@@ -316,6 +316,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     db,
     replica: replica.repository,
     topCorrectors: (campusId, limit) => network.topCorrectors(campusId, limit),
+    partnersOf: (campusId, login, limit) => network.partnersOf(campusId, login, limit),
     // `usage` se monta después: para cuando alguien pregunte ya estará.
     timeOn: (key, from, to) => usage.service.timeOn(key, from, to),
     brand: async (login, title) => {

@@ -143,6 +143,8 @@ export type ClickerServiceOptions = {
   replica: ReplicaRepository
   /** Quién corrige más en un campus, para las noticias del juego. */
   topCorrectors?: (campusId: number, limit: number) => Promise<string[]>
+  /** Con quién se ha corregido más alguien, en los dos sentidos. */
+  partnersOf?: (campusId: number, login: string, limit: number) => Promise<string[]>
   /** El tiempo que cada quien ha tenido abierta una sección: lo sabe `usage`. */
   timeOn?: (
     key: string,
@@ -287,6 +289,24 @@ export function createClickerService(options: ClickerServiceOptions) {
     })
   }
 
+  /**
+   * Los nombres de las noticias del juego: las personas con las que más se ha
+   * corregido quien juega (le corrigieron o las corrigió), para que las
+   * noticias hablen de gente que conoce. Si son pocas, se completa con quienes
+   * más corrigen en su campus.
+   */
+  async function namesFor(actor: Actor): Promise<string[]> {
+    const partners =
+      (await options.partnersOf?.(actor.campusId, actor.login, NAMES).catch(() => [])) ?? []
+
+    if (partners.length >= NAMES) return partners
+
+    const campus = (await options.topCorrectors?.(actor.campusId, NAMES * 2).catch(() => [])) ?? []
+    const others = campus.filter((login) => login !== actor.login && !partners.includes(login))
+
+    return [...partners, ...others].slice(0, NAMES)
+  }
+
   /** Cuántos edificios y mejoras hay en una partida guardada (sin comprobarla). */
   const holdingsOf = (save: string | null): { buildings: number; upgrades: number } => {
     try {
@@ -356,10 +376,7 @@ export function createClickerService(options: ClickerServiceOptions) {
         seizure: stored(found?.seizure) as ClickerSeizure | null,
         pool: pill === 'red' ? await poolAmount() : 0,
         // Los nombres solo hacen falta dentro del juego.
-        names:
-          pill === 'red'
-            ? ((await options.topCorrectors?.(actor.campusId, NAMES).catch(() => [])) ?? [])
-            : [],
+        names: pill === 'red' ? await namesFor(actor) : [],
       }
     },
 

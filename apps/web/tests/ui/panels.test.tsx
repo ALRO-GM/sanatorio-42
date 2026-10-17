@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { api } from '../../src/shared/api'
 import { must } from './must'
-import { openApp, settle } from './render'
+import { answerGates, openApp, settle } from './render'
 
 const WAIT = { timeout: 5000 }
 const text = (key: string): string => must(es[key], `el texto ${key}`)
@@ -150,6 +150,8 @@ describe('ventanas y paneles', () => {
 
       await user.click(screen.getByRole('button', { name: /tu cuenta/i }))
       await user.click(await screen.findByRole('menuitem', { name: text('welcome.open') }, WAIT))
+      // La bienvenida espera a que no haya otra ventana delante.
+      await answerGates()
 
       await screen.findByRole('button', { name: text('welcome.next') }, WAIT)
 

@@ -34,7 +34,11 @@ export type ClickerState = {
   seizure: ClickerSeizure | null
   /** Líneas que hay en la bolsa común de lo requisado: se reparten en el juego. */
   pool: number
-  /** Logins de quienes más corrigen en su campus: salen en las noticias del juego. */
+  /**
+   * Logins que salen en las noticias del juego: con quién más se ha corregido
+   * quien juega (en los dos sentidos) y, si son pocos, quienes más corrigen en
+   * su campus.
+   */
   names: string[]
 }
 
