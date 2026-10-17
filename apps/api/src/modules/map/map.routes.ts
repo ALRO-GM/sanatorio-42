@@ -32,6 +32,13 @@ export function registerMapRoutes(
    * `GET /map` → el mismo plano sin proyecto: ocupación y reservas, sin nadie
    * resaltado. Es el que se usa para elegir puestos al abrir un grupo de terapia.
    */
+  /** `GET /people/:login/card` → la ficha de alguien para cuando se pasa el ratón por su login. */
+  app.get<{ Params: { login: string } }>('/people/:login/card', async (request, reply) => {
+    reply.header('Cache-Control', 'private, max-age=30')
+
+    return reply.send(await map.personCard(await session.actor(request), request.params.login))
+  })
+
   app.get('/map', async (request, reply) => {
     reply.header('Cache-Control', 'private, no-store')
 

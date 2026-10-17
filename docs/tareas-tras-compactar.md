@@ -174,7 +174,7 @@ despliegue espera a la CI).
 - [ ] **Buzón** (decidido por Alberto): hacer todas hasta las medianas
       incluidas: [x] #48 (ya arreglado por la tabla de partida; test añadido), [x] #75 (pizarras de más
       cercana a más lejana y después las pasadas), [x] #76 (avisos que abren el
-      evento en el calendario para apuntarse), [x] #78 (botón a la intra, en tu expediente), #70
+      evento en el calendario para apuntarse), [x] #78 (botón a la intra, en tu expediente), [x] #70
       (ficha al pasar el ratón por un login, componente único), #79
       (clasificación de quién va más rápido según el pace, desde su inicio),
       #71 (panel: uso por campus elegibles y usuarios totales/nuevos por día),

@@ -7,8 +7,8 @@ import { useAsync } from '../../shared/hooks/useAsync'
 import { localeOf, useI18n } from '../../shared/i18n'
 import { Show } from '../../shared/detail'
 import { Avatar } from '../../shared/ui/Avatar'
+import { PersonLink } from '../../shared/ui/PersonLink'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
-import { recordHref } from '../../shared/links'
 
 /** Cada cuánto se pregunta por el examen en vivo: la API refresca las notas cada 5 min. */
 const LIVE_REFRESH_MS = 60_000
@@ -166,7 +166,7 @@ function LiveCard({ live }: { live: LiveExam }) {
               {people.map((person) => (
                 <li key={person.login} className={person.passed ? 'passed' : ''}>
                   <Avatar login={person.login} image={person.image} size={32} />
-                  <a href={recordHref(person.login)}>{person.login}</a>
+                  <PersonLink login={person.login} className="" />
                   <span className="exam-badges">
                     {person.circle !== null && (
                       <span className="badge subtle">

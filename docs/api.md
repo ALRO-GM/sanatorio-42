@@ -1253,6 +1253,18 @@ POST /games/rooms/:id/resign   → abandona: gana el otro bando
   El resultado va a `game_results` con `game: 'chess'` (victoria 2, tablas 1).
 - Nadie está a la vez en una sala de preguntas y en una por turnos (409).
 
+## Ficha de una persona (`modules/map`)
+
+```
+GET /people/:login/card  → PersonCard { login, image, seat, circle, projects, onDuty, online, me }
+```
+
+La que sale al pasar el ratón por un login en cualquier parte de la web
+(`shared/ui/PersonLink.tsx`): dónde está sentada ahora en el campus que se mira,
+su círculo, hasta 4 proyectos en curso, si está de guardia (interruptor y
+sentada) y si tiene la web abierta. Un login con caracteres raros es 400. Sin
+peticiones a 42: sale de la réplica.
+
 ## Estadísticas de Ayuda (`modules/stats`)
 
 Solo lee, de las tablas de cada sección, y siempre del campus de quien mira.

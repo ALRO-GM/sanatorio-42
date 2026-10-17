@@ -8,6 +8,7 @@ import { useAction, useAsync } from '../../shared/hooks/useAsync'
 import { localeOf, useI18n } from '../../shared/i18n'
 import { DataTable } from '../../shared/ui/DataTable'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { PersonLink } from '../../shared/ui/PersonLink'
 import { HoursReport } from '../profile/HoursReport'
 import { BudgetCard } from './BudgetCard'
 import { QuotaCard } from './QuotaCard'
@@ -17,7 +18,6 @@ import { DataPanel } from './DataPanel'
 import { StatsPanel } from './StatsPanel'
 import { UsageTab } from './UsageTab'
 import { Icon } from '../../shared/ui/Icon'
-import { recordHref } from '../../shared/links'
 import { StaffAccounts } from './StaffAccounts'
 import { InboxTab } from './InboxTab'
 import { PanelLock } from './PanelLock'
@@ -194,11 +194,7 @@ function ConsumptionTab() {
               label: t('admin.col.login'),
               sort: (row) => row.login,
               first: 'asc',
-              cell: (row) => (
-                <a className="record-link" href={recordHref(row.login)}>
-                  {row.login}
-                </a>
-              ),
+              cell: (row) => <PersonLink login={row.login} />,
             },
             {
               id: 'requests',

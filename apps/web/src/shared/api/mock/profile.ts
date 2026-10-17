@@ -28,12 +28,35 @@ const recordStyle: { current: string | null } = { current: null }
 export const profileMock: Pick<
   Api,
   | 'getPublicProfile'
+  | 'getPersonCard'
   | 'getProfile'
   | 'updateSettings'
   | 'getHealth'
   | 'declarePace'
   | 'getLeaderboard'
 > = {
+  async getPersonCard(login) {
+    await delay(120)
+
+    // Logins inventados con un puesto y proyectos que cambian según el nombre.
+    const n = Array.from({ length: login.length }, (_, i) => login.charCodeAt(i)).reduce(
+      (sum, code) => sum + code,
+      0,
+    )
+    const seated = n % 3 !== 0
+
+    return {
+      login,
+      image: portrait(login),
+      seat: seated ? `c${(n % 4) + 1}r${(n % 9) + 1}s${(n % 7) + 1}` : null,
+      circle: n % 5,
+      projects: [['ft_printf', 'get_next_line'], ['push_swap'], ['minishell'], []][n % 4] ?? [],
+      onDuty: seated && n % 2 === 0,
+      online: n % 2 === 1,
+      me: login === ME.login,
+    }
+  },
+
   async getPublicProfile(login) {
     await delay()
 

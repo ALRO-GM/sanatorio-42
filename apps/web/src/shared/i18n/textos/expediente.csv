@@ -119,3 +119,5 @@ hours.to,Fecha de fin del periodo,Hasta,To,Fins a,Noiz arte
 hours.download,Botón para descargar las horas en una hoja de cálculo,Descargar CSV,Download CSV,Baixa el CSV,Deskargatu CSVa
 record.write,Botón para escribir un mensaje a esa persona,Escribir a {login},Message {login},Escriu a {login},Idatzi {login} erabiltzaileari
 health.lostAll,"Estado de salud: los paces cuyo plazo ya pasó, en una línea; {paces} es la lista",Plazos ya pasados: pace {paces},Deadlines already gone: pace {paces},Terminis ja passats: pace {paces},Iragandako epeak: {paces} pacea
+person.seat,Ficha al pasar el ratón por un login: dónde está sentada la persona,En {seat},At {seat},A {seat},{seat}(e)n
+person.away,Ficha al pasar el ratón por un login: no está sentada en el campus,Fuera del centro,Off campus,Fora del centre,Zentrotik kanpo

@@ -12,7 +12,15 @@
  * de compañeros.
  */
 
-import type { ClusterMap, MapCluster, MapSeat, Peer, SeatDuty } from '@sanatorio/contracts'
+import type {
+  ClusterMap,
+  MapCluster,
+  MapSeat,
+  Peer,
+  PersonCard,
+  SeatDuty,
+} from '@sanatorio/contracts'
+import { z } from 'zod'
 
 import type { Actor } from '../../core/actor.js'
 import type { PeersService } from '../peers/index.js'
@@ -20,6 +28,7 @@ import { LOCATION_MAX_AGE_MS } from '../replica/index.js'
 import type { ReplicaRepository, Syncer } from '../replica/index.js'
 import type { TherapyService } from '../therapy/index.js'
 import { domainError } from '../../core/errors.js'
+import { parse } from '../../core/validation.js'
 import { BROKEN_FOR_MS, MAX_BROKEN_PER_PERSON } from './broken-seats.js'
 import type { BrokenSeats } from './broken-seats.js'
 import { hostAt, parseHost } from './seat-layout.js'
@@ -36,11 +45,20 @@ export type MapServiceOptions = {
   broken?: BrokenSeats
   /** El círculo en que va cada persona, sin preguntar a 42. */
   circlesOf?: (logins: readonly string[]) => Promise<Map<string, number>>
+  /** Si alguien tiene encendido «de guardia». */
+  availableOf?: (login: string) => Promise<boolean>
   now?: () => number
 }
 
 /** Un puesto con lo que hace falta para colocarlo, además de lo que se devuelve. */
 type PlacedSeat = MapSeat & Pick<SeatPosition, 'cluster' | 'separator'>
+
+/** Un login de 42: letras, números y guiones. */
+const loginSchema = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .regex(/^[a-z0-9-]{1,40}$/, 'login no válido')
 
 /** Proyectos en curso que se enseñan de cada persona, como mucho. */
 const MAX_PROJECTS = 4
@@ -94,6 +112,36 @@ export function createMapService(options: MapServiceOptions) {
      *
      * @throws {DomainError} 404 si el proyecto no existe.
      */
+    /**
+     * La ficha de una persona para cuando se pasa el ratón por su login: foto,
+     * dónde está sentada, círculo, proyectos en curso, si está de guardia y si
+     * tiene la web abierta. Lo mismo que la ficha de un puesto, sin el plano.
+     */
+    async personCard(actor: Actor, login: unknown): Promise<PersonCard> {
+      const who = parse(loginSchema, login)
+      const since = new Date(now() - LOCATION_MAX_AGE_MS).toISOString()
+      const [present, images, active, circles, online, available] = await Promise.all([
+        replica.presenceIn(actor.campusId, since),
+        replica.imagesOf([who]),
+        replica.activeProjectsOf([who]),
+        options.circlesOf?.([who]) ?? new Map<string, number>(),
+        options.online?.() ?? new Set<string>(),
+        options.availableOf?.(who) ?? false,
+      ])
+      const seat = present.find((person) => person.login === who)?.host ?? null
+
+      return {
+        login: who,
+        image: images.get(who) ?? null,
+        seat,
+        circle: circles.get(who) ?? null,
+        projects: (active.get(who) ?? []).slice(0, MAX_PROJECTS),
+        onDuty: available && seat !== null,
+        online: online.has(who),
+        me: who === actor.login,
+      }
+    },
+
     async forCampus(actor: Actor, projectId?: number): Promise<ClusterMap> {
       // Va primero: es lo que refresca la foto de puestos si se ha quedado vieja
       // y, con proyecto, lo que responde 404 si no existe.

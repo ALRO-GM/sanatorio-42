@@ -6,9 +6,9 @@ import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { Avatar } from '../../shared/ui/Avatar'
+import { PersonLink } from '../../shared/ui/PersonLink'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { InfoTip } from '../../shared/ui/InfoTip'
-import { recordHref } from '../../shared/links'
 
 const PERIODS = ['month', 'all'] as const satisfies readonly LeaderboardPeriod[]
 
@@ -71,9 +71,7 @@ export function LeaderboardCard({ me }: { me: string }) {
               </span>
             </span>
             <Avatar login={entry.login} image={entry.image} size={28} />
-            <a className="record-link" href={recordHref(entry.login)}>
-              {entry.login}
-            </a>
+            <PersonLink login={entry.login} />
             <strong className="row-count">{t('rank.xp', { xp: entry.xp })}</strong>
           </li>
         ))}

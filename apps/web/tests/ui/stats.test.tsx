@@ -47,4 +47,19 @@ describe('Estadísticas de Ayuda', () => {
     await screen.findByRole('button', { name: text('rank.all'), pressed: true })
     await expect.poll(doubts).not.toBe(before)
   }, 20_000)
+
+  it('al pasar el ratón por un login sale su ficha con la foto y lo que está haciendo', async () => {
+    const user = userEvent.setup()
+
+    await openApp('#/estadisticas')
+    const link = (await screen.findAllByRole('link', { name: 'anavarro' }))[0]
+
+    await user.hover(must(link, 'el enlace'))
+    const card = await screen.findByRole('tooltip', {}, { timeout: 3000 })
+
+    expect(within(card).getByText('anavarro')).toBeTruthy()
+    expect(within(card).getByRole('img')).toBeTruthy()
+    await user.unhover(must(link, 'el enlace'))
+    expect(screen.queryByRole('tooltip')).toBeNull()
+  }, 20_000)
 })

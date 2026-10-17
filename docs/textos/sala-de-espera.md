@@ -35,7 +35,7 @@ Generado desde `apps/web/src/shared/i18n/textos/sala-de-espera.csv` con
 | `peers.noneFilter` | Nadie cumple el filtro elegido | features/peers/PeerList | Ahora mismo no hay nadie así de guardia. Prueba con otro filtro. | Nobody like that is on duty right now. Try another filter | Ara mateix no hi ha ningú així de guàrdia. Prova amb un altre filtre | Une honetan ez dago horrelakorik guardian. Probatu beste iragazki batekin |
 | `peers.attendsAt` | Puesto donde está sentada esa persona | features/peers/PeerList | Te atiende en {location} | Find them at {location} | T'atén a {location} | {location} postuan artatuko zaitu |
 | `peers.away` | Esa persona no está en el campus | features/peers/PeerList | Fuera del centro | Off campus | Fora del centre | Zentrotik kanpo |
-| `peers.badgeOn` | Etiqueta: está de guardia | features/peers/PeerList, features/peers/WaitingTour | De guardia | On duty | De guàrdia | Guardian |
+| `peers.badgeOn` | Etiqueta: está de guardia | features/peers/PeerList, features/peers/WaitingTour, shared/ui/PersonLink | De guardia | On duty | De guàrdia | Guardian |
 | `peers.badgeOff` | Etiqueta: no está de guardia | features/peers/PeerList | Fuera de turno | Off shift | Fora de torn | Txandatik kanpo |
 | `peers.specialist` | Etiqueta: aprobó el proyecto | features/peers/PeerList, features/peers/WaitingTour | ★ Especialista | ★ Specialist | ★ Especialista | ★ Espezialista |
 | `peers.patient` | Etiqueta: está haciendo el mismo proyecto | features/peers/PeerList | Paciente como tú | Patient like you | Pacient com tu | Zu bezalako pazientea |

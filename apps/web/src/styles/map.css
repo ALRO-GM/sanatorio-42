@@ -550,3 +550,11 @@ button.seat.open {
   align-items: center;
   gap: 0.4rem;
 }
+
+/* La ficha de una persona al pasar por su login (`shared/ui/PersonLink.tsx`):
+   la misma que la de un puesto, por encima de la cabecera fija y sin recibir
+   clics (es solo para mirar). */
+.person-hover {
+  z-index: 60;
+  pointer-events: none;
+}

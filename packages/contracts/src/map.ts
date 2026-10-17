@@ -74,3 +74,23 @@ export type ClusterMap = {
   /** Quien mira: su círculo y sus proyectos en curso, para resaltar a quien comparte algo. */
   me: { circle: number | null; projects: string[] }
 }
+
+/**
+ * `GET /people/:login/card`: la ficha que sale al pasar el ratón por un login
+ * en cualquier parte de la web (la misma información que la de un puesto).
+ */
+export type PersonCard = {
+  login: string
+  image: string | null
+  /** Dónde está sentado ahora en el campus que se mira, o `null`. */
+  seat: string | null
+  circle: number | null
+  /** Proyectos en curso, por nombre. */
+  projects: string[]
+  /** De guardia: disponible y sentado. */
+  onDuty: boolean
+  /** Tiene Sanatorio abierto ahora. */
+  online: boolean
+  /** Es quien pregunta. */
+  me: boolean
+}

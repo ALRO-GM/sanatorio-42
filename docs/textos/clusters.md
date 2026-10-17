@@ -18,7 +18,7 @@ Generado desde `apps/web/src/shared/i18n/textos/clusters.csv` con
 | `map.rowsLong` | Varias filas | features/therapy/GroupForm | filas {rows} | rows {rows} | files {rows} | {rows} ilarak |
 | `map.seatFree` | Puesto libre | features/map/ClusterMapView | Libre | Free | Lliure | Libre |
 | `map.seatReserved` | Puesto reservado por un grupo de terapia | features/map/ClusterMapView | Reservado por una terapia | Reserved by a therapy group | Reservat per una teràpia | Terapia batek erreserbatuta |
-| `map.you` | Tu puesto | features/map/SeatHoverCard, features/notices/Conversations | Tú | You | Tu | Zu |
+| `map.you` | Tu puesto | features/map/SeatHoverCard, features/notices/Conversations, shared/ui/PersonLink | Tú | You | Tu | Zu |
 | `map.duty.patient` | Alguien de guardia que hace tu proyecto | features/map/ClusterMapView, features/map/SeatHoverCard | Paciente de guardia | Patient on duty | Pacient de guàrdia | Pazientea guardian |
 | `map.duty.specialist` | Alguien de guardia que aprobó tu proyecto | features/map/ClusterMapView, features/map/SeatHoverCard | Especialista de guardia | Specialist on duty | Especialista de guàrdia | Espezialista guardian |
 | `map.reservedFor` | Para qué grupo está reservado y cuándo | features/map/ClusterMapView | Reservado para terapia de {project} · {days} · {start}–{end} | Reserved for {project} therapy · {days} · {start}–{end} | Reservat per a teràpia de {project} · {days} · {start}–{end} | {project} terapiarako erreserbatuta · {days} · {start}–{end} |
@@ -29,7 +29,7 @@ Generado desde `apps/web/src/shared/i18n/textos/clusters.csv` con
 | `map.legend.occupied` | Leyenda: ocupado | features/map/ClusterMapView | Ocupado | Taken | Ocupat | Okupatuta |
 | `map.legend.free` | Leyenda: libre | features/map/ClusterMapView | Libre | Free | Lliure | Libre |
 | `map.legend.picked` | Leyenda: elegido para un grupo | features/map/ClusterMapView | Elegido | Chosen | Triat | Aukeratuta |
-| `map.noProjects` | Esa persona no tiene proyectos en curso | features/map/SeatHoverCard | Sin proyectos en curso | No projects in progress | Sense projectes en curs | Abian den proiekturik gabe |
+| `map.noProjects` | Esa persona no tiene proyectos en curso | features/map/SeatHoverCard, shared/ui/PersonLink | Sin proyectos en curso | No projects in progress | Sense projectes en curs | Abian den proiekturik gabe |
 | `map.legend.clash` | Leyenda: reservado a esa hora | features/map/ClusterMapView | Reservado a esa hora | Reserved at that time | Reservat a aquesta hora | Ordu horretan erreserbatuta |
 | `map.profile` | Enlace al perfil | features/map/SeatHoverCard | Ver perfil | View profile | Veure el perfil | Ikusi profila |
 | `map.look` | Opciones de vista del plano | features/map/ClusterMapView | Cómo ver el plano | How to see the map | Com veure el plànol | Planoa nola ikusi |
@@ -40,7 +40,7 @@ Generado desde `apps/web/src/shared/i18n/textos/clusters.csv` con
 | `map.mate.project` | Resaltar: gente de tu proyecto | features/map/ClusterMapView, features/map/ClustersTour | Mi proyecto | My project | El meu projecte | Nire proiektua |
 | `map.mate.done` | Resaltar: gente que aprobó tu proyecto | features/map/ClusterMapView | Lo han terminado | Finished it | L'han acabat | Amaitu dutenak |
 | `map.middleClick` | Truco para abrir un perfil en otra pestaña | features/map/ClusterMapView | Clic central (o Ctrl + clic) en un puesto: abre su expediente en otra pestaña. | Middle click (or Ctrl + click) on a seat opens their record in a new tab. | Clic central (o Ctrl + clic) en un lloc: obre el seu expedient en una altra pestanya. | Erdiko klik (edo Ctrl + klik) postu batean: haren espedientea beste fitxa batean irekitzen du. |
-| `map.circle` | Círculo de una persona | features/map/SeatHoverCard | Círculo {n} | Circle {n} | Cercle {n} | {n}. zirkulua |
+| `map.circle` | Círculo de una persona | features/map/SeatHoverCard, shared/ui/PersonLink | Círculo {n} | Circle {n} | Cercle {n} | {n}. zirkulua |
 | `map.proposeNone` | No hay tantos puestos juntos libres | features/map/SeatPicker | No hay tantos puestos juntos libres: prueba con menos. | There are not that many free seats together: try fewer. | No hi ha tants llocs junts lliures: prova amb menys. | Ez dago hainbeste postu libre elkarren ondoan: saiatu gutxiagorekin. |
 | `map.proposeHint` | Qué hace proponer puestos | features/map/SeatPicker | Busca puestos juntos, libres y que funcionen, lo más cerca de ti. | Finds free, working seats together, as close to you as possible. | Busca llocs junts, lliures i que funcionin, com més a prop teu millor. | Elkarren ondoko postu libre eta erabilgarriak bilatzen ditu, zugandik ahalik eta hurbilen. |
 | `map.propose` | Botón para que la web proponga puestos | features/map/SeatPicker | Proponer puestos | Suggest seats | Proposa llocs | Postuak proposatu |
@@ -52,7 +52,7 @@ Generado desde `apps/web/src/shared/i18n/textos/clusters.csv` con
 | `map.finishedMine` | Cuánta gente cerca aprobó tu proyecto | features/map/SeatHoverCard | Terminó tu proyecto: {n} | Finished your project: {n} | Ha acabat el teu projecte: {n} | Zure proiektua amaitu du: {n} |
 | `clusters.title` | Título de la página del mapa | features/map/ClustersPage | Clústeres del campus | Campus clusters | Clústers del campus | Campuseko klusterrak |
 | `clusters.count` | Cuánta gente sentada tiene la web abierta | features/map/ClustersPage | {online} de {occupied} personas sentadas tienen Sanatorio abierto | {online} of {occupied} people at a seat have Sanatorio open | {online} de {occupied} persones assegudes tenen Sanatorio obert | Eserita dauden {occupied} pertsonatik {online}k Sanatorio irekita dute |
-| `clusters.online` | Etiqueta: tiene la web abierta | features/map/SeatHoverCard, features/notices/Conversations | Con Sanatorio abierto | Has Sanatorio open | Amb Sanatorio obert | Sanatorio irekita du |
+| `clusters.online` | Etiqueta: tiene la web abierta | features/map/SeatHoverCard, features/notices/Conversations, shared/ui/PersonLink | Con Sanatorio abierto | Has Sanatorio open | Amb Sanatorio obert | Sanatorio irekita du |
 | `clusters.write` | Botón para escribir a alguien | features/admin/CheatsPanel, features/map/ClustersTour, features/map/SeatHoverCard | Escribir | Message | Escriu-li | Idatzi |
 | `map.legend.online` | Leyenda: tiene Sanatorio abierto | features/map/ClusterMapView | Con Sanatorio abierto | Has Sanatorio open | Amb Sanatorio obert | Sanatorio irekita du |
 | `clusters.chat` | Chat directo con alguien | features/alerts/Chat | Chat directo | Direct chat | Xat directe | Txat zuzena |

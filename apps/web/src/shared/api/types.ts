@@ -93,6 +93,7 @@ import type {
   Pill,
   Profile,
   ProjectSummary,
+  PersonCard,
   PublicProfile,
   Pulse,
   RequesterTag,
@@ -284,6 +285,8 @@ export type Api = {
 
   /** El expediente público de otra persona. */
   getPublicProfile: (login: string) => Promise<PublicProfile>
+  /** La ficha que sale al pasar el ratón por un login. */
+  getPersonCard: (login: string) => Promise<PersonCard>
   updateSettings: (settings: SettingsInput) => Promise<void>
   getSyncStatus: () => Promise<SyncStatus>
   /** Avisos sin leer y estado de la cuota de 42: lo que se pregunta de fondo. */

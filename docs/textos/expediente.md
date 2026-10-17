@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/expediente.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-120 textos. «—» es que falta la traducción: sale en español.
+122 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -127,3 +127,5 @@ Generado desde `apps/web/src/shared/i18n/textos/expediente.csv` con
 | `hours.download` | Botón para descargar las horas en una hoja de cálculo | features/profile/HoursReport | Descargar CSV | Download CSV | Baixa el CSV | Deskargatu CSVa |
 | `record.write` | Botón para escribir un mensaje a esa persona | features/admin/CheatsPanel, features/profile/PublicRecord | Escribir a {login} | Message {login} | Escriu a {login} | Idatzi {login} erabiltzaileari |
 | `health.lostAll` | Estado de salud: los paces cuyo plazo ya pasó, en una línea; {paces} es la lista | features/profile/HealthCard | Plazos ya pasados: pace {paces} | Deadlines already gone: pace {paces} | Terminis ja passats: pace {paces} | Iragandako epeak: {paces} pacea |
+| `person.seat` | Ficha al pasar el ratón por un login: dónde está sentada la persona | shared/ui/PersonLink | En {seat} | At {seat} | A {seat} | {seat}(e)n |
+| `person.away` | Ficha al pasar el ratón por un login: no está sentada en el campus | shared/ui/PersonLink | Fuera del centro | Off campus | Fora del centre | Zentrotik kanpo |

@@ -8,10 +8,11 @@ import { useI18n } from '../../shared/i18n'
 import { Show } from '../../shared/detail'
 import { Icon } from '../../shared/ui/Icon'
 import { Avatar } from '../../shared/ui/Avatar'
+import { PersonLink } from '../../shared/ui/PersonLink'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { BookHelp } from '../help/BookHelp'
 import { ProjectMap } from '../map/ProjectMap'
-import { intraHref, recordHref } from '../../shared/links'
+import { intraHref } from '../../shared/links'
 
 // 0: especialista de guardia · 1: paciente como tú de guardia
 // 2: especialista que no está de guardia · 3: paciente como tú que no está de guardia
@@ -239,9 +240,9 @@ export function PeerList({ project, onOpenTherapy }: PeerListProps) {
               <Avatar login={peer.login} image={peer.image} size={52} />
               <div className="peer-main">
                 <span className="peer-name">
-                  <a className="record-link" href={recordHref(peer.login)}>
+                  <PersonLink login={peer.login}>
                     <strong>{peer.login}</strong>
-                  </a>
+                  </PersonLink>
                   {onDuty(peer) ? (
                     <span className="badge on">{t('peers.badgeOn')}</span>
                   ) : (

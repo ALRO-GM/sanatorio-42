@@ -6,8 +6,8 @@ import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { localeOf } from '../../shared/i18n/locale'
-import { recordHref } from '../../shared/links'
 import { Avatar } from '../../shared/ui/Avatar'
+import { PersonLink } from '../../shared/ui/PersonLink'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { InfoTip } from '../../shared/ui/InfoTip'
 import { HelpStatsTour } from './HelpStatsTour'
@@ -101,9 +101,7 @@ function SectionCard({ section, me }: { section: StatsSection; me: string }) {
                 </span>
               </span>
               <Avatar login={entry.login} image={entry.image} size={28} />
-              <a className="record-link" href={recordHref(entry.login)}>
-                {entry.login}
-              </a>
+              <PersonLink login={entry.login} />
               {entry.login === me && <span className="chip">{t('stats.you')}</span>}
               <span className="row-count">
                 <strong>{t(`stats.${section.id}.value`, { n: entry.value })}</strong>

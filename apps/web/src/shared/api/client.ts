@@ -137,6 +137,7 @@ export const realApi: Api = {
   getStats: (query) => getJson(`/admin/stats?${search(query)}`),
   getUsageHeatmap: (by, segment = {}) => getJson(`/usage/heatmap?${search({ by, ...segment })}`),
   getPublicProfile: (login) => getJson(`/users/${encodeURIComponent(login)}/profile`),
+  getPersonCard: (login) => getJson(`/people/${encodeURIComponent(login)}/card`),
   updateSettings: (settings) => send('PUT', '/me/settings', settings),
   getSyncStatus: () => getJson('/sync/status'),
   getPulse: () => getJson('/pulse'),
