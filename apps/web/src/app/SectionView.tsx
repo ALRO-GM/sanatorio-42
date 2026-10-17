@@ -140,7 +140,7 @@ export function SectionView({
       {section === 'privacidad' && <LegalPage signedIn />}
       {section === 'gestion' &&
         (profile.data?.admin === true ? (
-          <AdminPage campusId={profile.data.campusId} />
+          <AdminPage campusId={profile.data.campusId} me={me.login} />
         ) : (
           <p className="estado">{t('admin.only')}</p>
         ))}

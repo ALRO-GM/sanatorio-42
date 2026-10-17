@@ -5,11 +5,13 @@ import type { UsageFlows } from '@sanatorio/contracts'
 import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
+import { DataTable } from '../../shared/ui/DataTable'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { SegmentSlider } from './SegmentSlider'
 import type { SegmentRange } from './SegmentSlider'
 import { duration } from './StatsPanel'
 import { RangePills } from './RangePills'
+import { Figure } from './Figure'
 
 const DAY_MS = 24 * 60 * 60_000
 const dayOf = (at: number): string => new Date(at).toISOString().slice(0, 10)
@@ -153,51 +155,74 @@ function Flows({
 
       <article className="card">
         <span className="eyebrow">{t('admin.flows.sections')}</span>
-        <div className="table-scroll">
-          <table className="stat-table">
-            <thead>
-              <tr>
-                <th>{t('admin.flows.section')}</th>
-                <th>{t('admin.flows.visits')}</th>
-                <th>{t('admin.flows.entries')}</th>
-                <th>{t('admin.flows.exits')}</th>
-                <th>{t('admin.flows.time')}</th>
-                <th>{t('admin.flows.perVisit')}</th>
-                <th>{t('admin.flows.role')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sections.map((section) => (
-                <tr key={section.key} className={section.key === picked ? 'picked' : ''}>
-                  <th>
-                    <button
-                      type="button"
-                      className="link"
-                      onClick={() => {
-                        onPick(section.key === picked ? null : section.key)
-                      }}
-                    >
-                      {name(section.key)}
-                    </button>
-                  </th>
-                  <td>
-                    <Bar part={section.visits / topVisits} />
-                    {section.visits.toLocaleString()}
-                  </td>
-                  <td>
-                    {section.entries} · {pct(section.entries, sessions)} %
-                  </td>
-                  <td>
-                    {section.exits} · {Math.round(section.exitRate * 100)} %
-                  </td>
-                  <td>{section.seen > 0 ? duration(section.seen) : '—'}</td>
-                  <td>{section.avgSeen > 0 ? duration(section.avgSeen) : '—'}</td>
-                  <td>{section.role === null ? '—' : t(`admin.flows.role.${section.role}`)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <DataTable
+          id="flows-sections"
+          rows={sections}
+          rowKey={(section) => section.key}
+          rowClass={(section) => (section.key === picked ? 'picked' : '')}
+          columns={[
+            {
+              id: 'section',
+              label: t('admin.flows.section'),
+              sort: (section) => name(section.key),
+              first: 'asc',
+              cell: (section) => (
+                <button
+                  type="button"
+                  className="link"
+                  onClick={() => {
+                    onPick(section.key === picked ? null : section.key)
+                  }}
+                >
+                  {name(section.key)}
+                </button>
+              ),
+            },
+            {
+              id: 'visits',
+              label: t('admin.flows.visits'),
+              sort: (section) => section.visits,
+              cell: (section) => (
+                <>
+                  <Bar part={section.visits / topVisits} />
+                  {section.visits.toLocaleString()}
+                </>
+              ),
+            },
+            {
+              id: 'entries',
+              label: t('admin.flows.entries'),
+              sort: (section) => section.entries,
+              cell: (section) => `${section.entries} · ${pct(section.entries, sessions)} %`,
+            },
+            {
+              id: 'exits',
+              label: t('admin.flows.exits'),
+              sort: (section) => section.exitRate,
+              cell: (section) => `${section.exits} · ${Math.round(section.exitRate * 100)} %`,
+            },
+            {
+              id: 'seen',
+              label: t('admin.flows.time'),
+              sort: (section) => section.seen,
+              cell: (section) => (section.seen > 0 ? duration(section.seen) : '—'),
+            },
+            {
+              id: 'avgSeen',
+              label: t('admin.flows.perVisit'),
+              sort: (section) => section.avgSeen,
+              cell: (section) => (section.avgSeen > 0 ? duration(section.avgSeen) : '—'),
+            },
+            {
+              id: 'role',
+              label: t('admin.flows.role'),
+              sort: (section) => section.role,
+              first: 'asc',
+              cell: (section) =>
+                section.role === null ? '—' : t(`admin.flows.role.${section.role}`),
+            },
+          ]}
+        />
       </article>
 
       <article className="card">
@@ -206,33 +231,44 @@ function Flows({
             ? t('admin.flows.steps')
             : t('admin.flows.stepsOf', { name: name(picked) })}
         </span>
-        <div className="table-scroll">
-          <table className="stat-table">
-            <thead>
-              <tr>
-                <th>{t('admin.flows.step')}</th>
-                <th>{t('admin.flows.times')}</th>
-                <th>{t('admin.flows.share')}</th>
-                <th>{t('admin.stats.people')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {shown.slice(0, 25).map((flow) => (
-                <tr key={`${flow.from}>${flow.to}`}>
-                  <th>
-                    {name(flow.from)} → {name(flow.to)}
-                  </th>
-                  <td>
-                    <Bar part={flow.count / topFlow} />
-                    {flow.count.toLocaleString()}
-                  </td>
-                  <td>{pct(flow.count, leaving(flow.from))} %</td>
-                  <td>{flow.people}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <DataTable
+          id="flows-steps"
+          rows={shown}
+          limit={25}
+          rowKey={(flow) => `${flow.from}>${flow.to}`}
+          columns={[
+            {
+              id: 'step',
+              label: t('admin.flows.step'),
+              sort: (flow) => `${name(flow.from)} ${name(flow.to)}`,
+              first: 'asc',
+              cell: (flow) => `${name(flow.from)} → ${name(flow.to)}`,
+            },
+            {
+              id: 'count',
+              label: t('admin.flows.times'),
+              sort: (flow) => flow.count,
+              cell: (flow) => (
+                <>
+                  <Bar part={flow.count / topFlow} />
+                  {flow.count.toLocaleString()}
+                </>
+              ),
+            },
+            {
+              id: 'share',
+              label: t('admin.flows.share'),
+              sort: (flow) => flow.count / Math.max(1, leaving(flow.from)),
+              cell: (flow) => `${pct(flow.count, leaving(flow.from))} %`,
+            },
+            {
+              id: 'people',
+              label: t('admin.stats.people'),
+              sort: (flow) => flow.people,
+              cell: (flow) => flow.people,
+            },
+          ]}
+        />
         <p className="hint">{t('admin.flows.shareHint')}</p>
       </article>
     </>
@@ -245,23 +281,6 @@ function Bar({ part }: { part: number }) {
     <span className="cell-bar" aria-hidden="true">
       <i style={{ width: `${Math.max(2, Math.round(part * 100))}%` }} />
     </span>
-  )
-}
-
-function Figure({
-  label,
-  value,
-  strong = false,
-}: {
-  label: string
-  value: string
-  strong?: boolean
-}) {
-  return (
-    <div className={`stat-card ${strong ? 'strong' : ''}`}>
-      <span className="eyebrow">{label}</span>
-      <strong>{value}</strong>
-    </div>
   )
 }
 

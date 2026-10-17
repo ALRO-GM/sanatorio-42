@@ -5,10 +5,12 @@ import type { StatTotals, UsageStats } from '@sanatorio/contracts'
 import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { localeOf, useI18n } from '../../shared/i18n'
+import { DataTable } from '../../shared/ui/DataTable'
 import { Avatar } from '../../shared/ui/Avatar'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { EVERYONE, SegmentSlider } from './SegmentSlider'
 import { RangePills } from './RangePills'
+import { Figure } from './Figure'
 
 const DAY_MS = 24 * 60 * 60_000
 
@@ -162,32 +164,54 @@ export function StatsPanel() {
 
           <article className="card">
             <span className="eyebrow">{t('admin.stats.byKey')}</span>
-            <div className="table-scroll">
-              <table className="stat-table">
-                <thead>
-                  <tr>
-                    <th>{t('admin.stats.element')}</th>
-                    <th>{t('admin.stats.seen')}</th>
-                    <th>{t('admin.stats.back')}</th>
-                    <th>{t('admin.stats.hidden')}</th>
-                    <th>{t('admin.stats.clicks')}</th>
-                    {login === null && <th>{t('admin.stats.people')}</th>}
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.keys.map((row) => (
-                    <tr key={row.key}>
-                      <th>{sectionName(row.key)}</th>
-                      <td>{row.seen > 0 ? duration(row.seen) : '—'}</td>
-                      <td>{row.back > 0 ? duration(row.back) : '—'}</td>
-                      <td>{row.hidden > 0 ? duration(row.hidden) : '—'}</td>
-                      <td>{row.clicks}</td>
-                      {login === null && <td>{row.people}</td>}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <DataTable
+              id={login === null ? 'stats-keys' : 'stats-keys-one'}
+              rows={data.keys}
+              rowKey={(row) => row.key}
+              columns={[
+                {
+                  id: 'key',
+                  label: t('admin.stats.element'),
+                  sort: (row) => sectionName(row.key),
+                  first: 'asc',
+                  cell: (row) => sectionName(row.key),
+                },
+                {
+                  id: 'seen',
+                  label: t('admin.stats.seen'),
+                  sort: (row) => row.seen,
+                  cell: (row) => (row.seen > 0 ? duration(row.seen) : '—'),
+                },
+                {
+                  id: 'back',
+                  label: t('admin.stats.back'),
+                  sort: (row) => row.back,
+                  cell: (row) => (row.back > 0 ? duration(row.back) : '—'),
+                },
+                {
+                  id: 'hidden',
+                  label: t('admin.stats.hidden'),
+                  sort: (row) => row.hidden,
+                  cell: (row) => (row.hidden > 0 ? duration(row.hidden) : '—'),
+                },
+                {
+                  id: 'clicks',
+                  label: t('admin.stats.clicks'),
+                  sort: (row) => row.clicks,
+                  cell: (row) => row.clicks,
+                },
+                ...(login === null
+                  ? [
+                      {
+                        id: 'people',
+                        label: t('admin.stats.people'),
+                        sort: (row: (typeof data.keys)[number]) => row.people,
+                        cell: (row: (typeof data.keys)[number]) => row.people,
+                      },
+                    ]
+                  : []),
+              ]}
+            />
             {data.keys.length === 0 && <p className="estado">{t('admin.stats.empty')}</p>}
           </article>
 
@@ -195,66 +219,71 @@ export function StatsPanel() {
           {login === null && (
             <article className="card">
               <span className="eyebrow">{t('admin.stats.byUser')}</span>
-              <div className="table-scroll">
-                <table className="stat-table">
-                  <thead>
-                    <tr>
-                      <th>{t('admin.stats.person')}</th>
-                      <th>{t('admin.stats.seen')}</th>
-                      <th>{t('admin.stats.back')}</th>
-                      <th>{t('admin.stats.hidden')}</th>
-                      <th>{t('admin.stats.clicks')}</th>
-                      <th>{t('admin.stats.requests')}</th>
-                      <th>{t('admin.stats.size')}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {data.users.map((row) => (
-                      <tr key={row.login}>
-                        <th>
-                          <button
-                            type="button"
-                            className="link"
-                            onClick={() => {
-                              setLogin(row.login)
-                            }}
-                          >
-                            {row.login}
-                          </button>
-                        </th>
-                        <td>{duration(row.seen)}</td>
-                        <td>{duration(row.back)}</td>
-                        <td>{duration(row.hidden)}</td>
-                        <td>{row.clicks}</td>
-                        <td>{row.requests}</td>
-                        <td>{size(row.bytes)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              <DataTable
+                id="stats-users"
+                rows={data.users}
+                rowKey={(row) => row.login}
+                columns={[
+                  {
+                    id: 'login',
+                    label: t('admin.stats.person'),
+                    sort: (row) => row.login,
+                    first: 'asc',
+                    cell: (row) => (
+                      <button
+                        type="button"
+                        className="link"
+                        onClick={() => {
+                          setLogin(row.login)
+                        }}
+                      >
+                        {row.login}
+                      </button>
+                    ),
+                  },
+                  {
+                    id: 'seen',
+                    label: t('admin.stats.seen'),
+                    sort: (row) => row.seen,
+                    cell: (row) => duration(row.seen),
+                  },
+                  {
+                    id: 'back',
+                    label: t('admin.stats.back'),
+                    sort: (row) => row.back,
+                    cell: (row) => duration(row.back),
+                  },
+                  {
+                    id: 'hidden',
+                    label: t('admin.stats.hidden'),
+                    sort: (row) => row.hidden,
+                    cell: (row) => duration(row.hidden),
+                  },
+                  {
+                    id: 'clicks',
+                    label: t('admin.stats.clicks'),
+                    sort: (row) => row.clicks,
+                    cell: (row) => row.clicks,
+                  },
+                  {
+                    id: 'requests',
+                    label: t('admin.stats.requests'),
+                    sort: (row) => row.requests,
+                    cell: (row) => row.requests,
+                  },
+                  {
+                    id: 'bytes',
+                    label: t('admin.stats.size'),
+                    sort: (row) => row.bytes,
+                    cell: (row) => size(row.bytes),
+                  },
+                ]}
+              />
             </article>
           )}
         </>
       )}
     </section>
-  )
-}
-
-function Figure({
-  label,
-  value,
-  strong = false,
-}: {
-  label: string
-  value: string
-  strong?: boolean
-}) {
-  return (
-    <div className={`stat-card ${strong ? 'strong' : ''}`}>
-      <span className="eyebrow">{label}</span>
-      <strong>{value}</strong>
-    </div>
   )
 }
 
@@ -302,38 +331,56 @@ function TourSpeeds() {
   return (
     <article className="card">
       <span className="eyebrow">{t('admin.tours.title')}</span>
-      <div className="table-scroll">
-        <table className="stat-table">
-          <thead>
-            <tr>
-              <th>{t('admin.tours.name')}</th>
-              <th>{t('admin.tours.speed')}</th>
-              <th>{t('admin.tours.faster')}</th>
-              <th>{t('admin.tours.slower')}</th>
-              <th>{t('admin.tours.same')}</th>
-              <th>{t('admin.tours.mean')}</th>
-              <th>{t('admin.tours.left')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.tours.map((tour) => {
-              const votes = tour.faster + tour.slower + tour.same
-
-              return (
-                <tr key={tour.name}>
-                  <th>{tour.name}</th>
-                  <td>{times(tour.speed)}</td>
-                  <td>{tour.faster}</td>
-                  <td>{tour.slower}</td>
-                  <td>{tour.same}</td>
-                  <td>{votes === 0 ? '—' : times(tour.mean)}</td>
-                  <td>{Math.max(0, data.votesToAdjust - votes)}</td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
-      </div>
+      <DataTable
+        id="tour-speeds"
+        rows={data.tours}
+        rowKey={(tour) => tour.name}
+        columns={[
+          {
+            id: 'name',
+            label: t('admin.tours.name'),
+            sort: (tour) => tour.name,
+            first: 'asc',
+            cell: (tour) => tour.name,
+          },
+          {
+            id: 'speed',
+            label: t('admin.tours.speed'),
+            sort: (tour) => tour.speed,
+            cell: (tour) => times(tour.speed),
+          },
+          {
+            id: 'faster',
+            label: t('admin.tours.faster'),
+            sort: (tour) => tour.faster,
+            cell: (tour) => tour.faster,
+          },
+          {
+            id: 'slower',
+            label: t('admin.tours.slower'),
+            sort: (tour) => tour.slower,
+            cell: (tour) => tour.slower,
+          },
+          {
+            id: 'same',
+            label: t('admin.tours.same'),
+            sort: (tour) => tour.same,
+            cell: (tour) => tour.same,
+          },
+          {
+            id: 'mean',
+            label: t('admin.tours.mean'),
+            sort: (tour) => (tour.faster + tour.slower + tour.same === 0 ? null : tour.mean),
+            cell: (tour) => (tour.faster + tour.slower + tour.same === 0 ? '—' : times(tour.mean)),
+          },
+          {
+            id: 'left',
+            label: t('admin.tours.left'),
+            sort: (tour) => Math.max(0, data.votesToAdjust - tour.faster - tour.slower - tour.same),
+            cell: (tour) => Math.max(0, data.votesToAdjust - tour.faster - tour.slower - tour.same),
+          },
+        ]}
+      />
       <p className="hint">{t('admin.tours.hint', { n: data.votesToAdjust })}</p>
     </article>
   )

@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/gestion.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-411 textos. «—» es que falta la traducción: sale en español.
+440 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -148,7 +148,7 @@ Generado desde `apps/web/src/shared/i18n/textos/gestion.csv` con
 | `admin.inbox.remove` | Panel de gestión, «Buzón»: incidencias y denuncias | features/admin/InboxTab | Borrar | Delete | — | — |
 | `admin.inbox.removeConfirm` | Panel de gestión, «Buzón»: incidencias y denuncias | features/admin/InboxTab | ¿Borrar este mensaje? No se puede deshacer. | Delete this message? This cannot be undone. | — | — |
 | `admin.inbox.byReason` | Panel de gestión, «Buzón»: incidencias y denuncias | features/admin/InboxTab | Por motivo | By reason | — | — |
-| `admin.inbox.allKinds` | Panel de gestión, «Buzón»: incidencias y denuncias | features/admin/InboxTab | Todo | All | — | — |
+| `admin.inbox.allKinds` | Panel de gestión, «Buzón»: incidencias y denuncias | features/admin/CheatsPanel, features/admin/InboxTab | Todo | All | — | — |
 | `admin.inbox.view.pending` | Panel de gestión, «Buzón»: incidencias y denuncias | features/admin/InboxTab | Pendientes | Pending | — | — |
 | `admin.inbox.view.done` | Panel de gestión, «Buzón»: incidencias y denuncias | features/admin/InboxTab | Respondidos y cerrados | Answered and closed | — | — |
 | `admin.inbox.answer` | Panel de gestión, «Buzón»: incidencias y denuncias | features/admin/InboxTab | Tu respuesta | Your answer | — | — |
@@ -174,7 +174,7 @@ Generado desde `apps/web/src/shared/i18n/textos/gestion.csv` con
 | `admin.stats.requests` | Panel de gestión, «Estadísticas»: tiempo y uso por persona | features/admin/StatsPanel | Peticiones | — | — | — |
 | `admin.stats.size` | Panel de gestión, «Estadísticas»: tiempo y uso por persona | features/admin/StatsPanel | Tamaño | — | — | — |
 | `admin.stats.people` | Panel de gestión, «Estadísticas»: tiempo y uso por persona | features/admin/FlowsPanel, features/admin/StatsPanel | Personas | — | — | — |
-| `admin.stats.person` | Panel de gestión, «Estadísticas»: tiempo y uso por persona | features/admin/ClickerPanel, features/admin/StatsPanel | Persona | — | — | — |
+| `admin.stats.person` | Panel de gestión, «Estadísticas»: tiempo y uso por persona | features/admin/CheatsPanel, features/admin/ClickerPanel, features/admin/StatsPanel | Persona | — | — | — |
 | `admin.stats.element` | Panel de gestión, «Estadísticas»: tiempo y uso por persona | features/admin/StatsPanel | Sección o bloque | — | — | — |
 | `admin.stats.byHour` | Panel de gestión, «Estadísticas»: tiempo y uso por persona | features/admin/StatsPanel | Tiempo por hora del día | — | — | — |
 | `admin.stats.byKey` | Panel de gestión, «Estadísticas»: tiempo y uso por persona | features/admin/StatsPanel | Tiempo y pulsaciones por elemento | — | — | — |
@@ -301,7 +301,7 @@ Generado desde `apps/web/src/shared/i18n/textos/gestion.csv` con
 | `admin.clicker.blue` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/ClickerPanel | Pastilla azul | Blue pill | — | — |
 | `admin.clicker.players` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/ClickerPanel | Con partida | With a game | — | — |
 | `admin.clicker.active` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/ClickerPanel | Con actividad en el periodo | Active in the period | — | — |
-| `admin.clicker.lines` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/ClickerPanel | Líneas escritas | Lines written | — | — |
+| `admin.clicker.lines` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/CheatsPanel, features/admin/ClickerPanel | Líneas escritas | Lines written | — | — |
 | `admin.clicker.saves` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/ClickerPanel | Guardados | Saves | — | — |
 | `admin.clicker.byUser` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/ClickerPanel | Por persona | By person | — | — |
 | `admin.clicker.plus` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/ClickerPanel | Cruz | Cross | — | — |
@@ -310,9 +310,9 @@ Generado desde `apps/web/src/shared/i18n/textos/gestion.csv` con
 | `admin.clicker.pill.blue` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/ClickerPanel | Azul | Blue | — | — |
 | `admin.clicker.pill.none` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/ClickerPanel | Sin elegir | Not chosen | — | — |
 | `admin.clicker.level` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/ClickerPanel | Nivel | Level | — | — |
-| `admin.clicker.perSecond` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/ClickerPanel | Por segundo | Per second | — | — |
+| `admin.clicker.perSecond` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/CheatsPanel, features/admin/ClickerPanel | Por segundo | Per second | — | — |
 | `admin.clicker.code` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/ClickerPanel | Código ahora | Code now | — | — |
-| `admin.clicker.wealth` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/ClickerPanel | Patrimonio | Net worth | — | — |
+| `admin.clicker.wealth` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/CheatsPanel, features/admin/ClickerPanel | Patrimonio | Net worth | — | — |
 | `admin.clicker.buildings` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/ClickerPanel | Edificios | Buildings | — | — |
 | `admin.clicker.upgrades` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/ClickerPanel | Mejoras | Upgrades | — | — |
 | `admin.clicker.keys` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/ClickerPanel | Tecla | Key | — | — |
@@ -321,17 +321,17 @@ Generado desde `apps/web/src/shared/i18n/textos/gestion.csv` con
 | `admin.clicker.last` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/ClickerPanel | Última vez | Last time | — | — |
 | `admin.clicker.caught` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/ClickerPanel | Trampas | Cheats | — | — |
 | `admin.clicker.cheaters` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/ClickerPanel | Con trampas pilladas | Caught cheating | — | — |
-| `admin.clicker.why` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/ClickerPanel | Última trampa | Last cheat | — | — |
-| `admin.clicker.why.figures` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/ClickerPanel | Cifras que no son las de la partida | Figures that are not the game's | — | — |
-| `admin.clicker.why.ledger` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/ClickerPanel | Tiene más de lo que ha escrito | Owns more than was written | — | — |
-| `admin.clicker.why.rate` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/ClickerPanel | Ha escrito más de lo que da tiempo | Wrote more than there was time for | — | — |
-| `admin.clicker.why.speed` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/ClickerPanel | Más producción de la que cabe | More production than possible | — | — |
-| `admin.clicker.why.prestige` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/ClickerPanel | Más prestigio del que cabe | More prestige than possible | — | — |
-| `admin.clicker.why.clicks` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/ClickerPanel | Pulsa más de lo que aguanta una persona | Clicks more than a person can keep up | — | — |
+| `admin.clicker.why` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/CheatsPanel, features/admin/ClickerPanel | Última trampa | Last cheat | — | — |
+| `admin.clicker.why.figures` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/CheatsPanel, features/admin/ClickerPanel | Cifras que no son las de la partida | Figures that are not the game's | — | — |
+| `admin.clicker.why.ledger` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/CheatsPanel, features/admin/ClickerPanel | Tiene más de lo que ha escrito | Owns more than was written | — | — |
+| `admin.clicker.why.rate` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/CheatsPanel, features/admin/ClickerPanel | Ha escrito más de lo que da tiempo | Wrote more than there was time for | — | — |
+| `admin.clicker.why.speed` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/CheatsPanel, features/admin/ClickerPanel | Más producción de la que cabe | More production than possible | — | — |
+| `admin.clicker.why.prestige` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/CheatsPanel, features/admin/ClickerPanel | Más prestigio del que cabe | More prestige than possible | — | — |
+| `admin.clicker.why.clicks` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/CheatsPanel, features/admin/ClickerPanel | Pulsa más de lo que aguanta una persona | Clicks more than a person can keep up | — | — |
 | `admin.clicker.alerts` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/ClickerPanel | Saltos de capital por mirar | Worth jumps to review | — | — |
 | `admin.clicker.jump` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/ClickerPanel | ×{times} en {seconds} s | ×{times} in {seconds} s | — | — |
 | `admin.clicker.withGolden` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/ClickerPanel | abrió una pull request dorada | opened a golden pull request | — | — |
-| `admin.clicker.watch` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/ClickerPanel | Ver su partida | Watch their game | — | — |
+| `admin.clicker.watch` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/CheatsPanel, features/admin/ClickerPanel | Ver su partida | Watch their game | — | — |
 | `admin.clicker.sanction` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/SanctionForm | Sanción a mano | Manual sanction | — | — |
 | `admin.clicker.sanctionCode` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/SanctionForm | Código que le queda | Code left | — | — |
 | `admin.clicker.sanctionWipe` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/SanctionForm | Quitarle todos los edificios y las mejoras | Remove all buildings and upgrades | — | — |
@@ -344,13 +344,13 @@ Generado desde `apps/web/src/shared/i18n/textos/gestion.csv` con
 | `admin.clicker.cheatAsk` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/ClickerPanel | Se le requisan todos los edificios a la bolsa común y se le avisa de qué no cuadró. ¿Seguro? | All their buildings will be seized into the common pool and they will be told what did not add up. Sure? | — | — |
 | `admin.clicker.asked` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/ClickerPanel | Le hemos pedido que se defienda: esperando su respuesta. | Asked to explain: waiting for an answer. | — | — |
 | `admin.clicker.answered` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/ClickerPanel | Su respuesta: «{answer}» | Their answer: “{answer}” | — | — |
-| `admin.clicker.why.review` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/ClickerPanel | Revisada a mano: trampa | Reviewed by hand: cheating | — | — |
+| `admin.clicker.why.review` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/CheatsPanel, features/admin/ClickerPanel | Revisada a mano: trampa | Reviewed by hand: cheating | — | — |
 | `admin.clicker.trace` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/ClickerPanel | Capital segundo a segundo alrededor del salto | Worth second by second around the jump | — | — |
 | `admin.clicker.capital` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/ClickerPanel | Capital a lo largo del tiempo (escala logarítmica) | Worth over time (log scale) | — | — |
 | `admin.clicker.copies` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/ClickerPanel | Partidas rechazadas por trampa | Games refused as cheats | — | — |
 | `admin.clicker.copy` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/ClickerPanel | {total} líneas · {perSecond} por segundo | {total} lines · {perSecond} per second | — | — |
-| `admin.clicker.pardon` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/ClickerPanel | Indultar | Pardon | — | — |
-| `admin.clicker.pardonAsk` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/ClickerPanel | Esta partida pasará a ser la que está en curso, se descontará una trampa y su banner volverá a como estaba. ¿Indultar? | This game will become the current one, one cheat will be taken off and the banner will go back to how it was. Pardon? | — | — |
+| `admin.clicker.pardon` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/CheatsPanel, features/admin/ClickerPanel | Indultar | Pardon | — | — |
+| `admin.clicker.pardonAsk` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/CheatsPanel, features/admin/ClickerPanel | Esta partida pasará a ser la que está en curso, se descontará una trampa y su banner volverá a como estaba. ¿Indultar? | This game will become the current one, one cheat will be taken off and the banner will go back to how it was. Pardon? | — | — |
 | `admin.clicker.empty` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/ClickerPanel | Nadie ha encontrado todavía el secreto. | Nobody has found the secret yet. | — | — |
 | `admin.tab.casts` | Panel de gestión: pestaña del panel | features/admin/AdminPage | Comunicados | — | — | — |
 | `admin.cast.new` | Panel de gestión, «Comunicados»: mensajes a toda la gente | features/admin/BroadcastsTab | Nuevo comunicado | — | — | — |
@@ -359,11 +359,11 @@ Generado desde `apps/web/src/shared/i18n/textos/gestion.csv` con
 | `admin.cast.to.campus` | Panel de gestión, «Comunicados»: mensajes a toda la gente | features/admin/BroadcastsTab | El campus que estoy viendo | — | — | — |
 | `admin.cast.to.logins` | Panel de gestión, «Comunicados»: mensajes a toda la gente | features/admin/BroadcastsTab | Personas concretas | — | — | — |
 | `admin.cast.logins` | Panel de gestión, «Comunicados»: mensajes a toda la gente | features/admin/BroadcastsTab | Logins, separados por comas o espacios | — | — | — |
-| `admin.cast.title` | Panel de gestión, «Comunicados»: mensajes a toda la gente | features/admin/BroadcastsTab | Título | — | — | — |
-| `admin.cast.body` | Panel de gestión, «Comunicados»: mensajes a toda la gente | features/admin/BroadcastsTab | Mensaje | — | — | — |
+| `admin.cast.title` | Panel de gestión, «Comunicados»: mensajes a toda la gente | features/admin/BroadcastsTab, features/admin/CheatsPanel | Título | — | — | — |
+| `admin.cast.body` | Panel de gestión, «Comunicados»: mensajes a toda la gente | features/admin/BroadcastsTab, features/admin/CheatsPanel | Mensaje | — | — | — |
 | `admin.cast.options` | Panel de gestión, «Comunicados»: mensajes a toda la gente | features/admin/BroadcastsTab | Opciones para elegir, una por línea (hasta 6; vacío si no hacen falta) | — | — | — |
 | `admin.cast.required` | Panel de gestión, «Comunicados»: mensajes a toda la gente | features/admin/BroadcastsTab | No se puede cerrar la ventana sin elegir una opción | — | — | — |
-| `admin.cast.send` | Panel de gestión, «Comunicados»: mensajes a toda la gente | features/admin/BroadcastsTab | Enviar | — | — | — |
+| `admin.cast.send` | Panel de gestión, «Comunicados»: mensajes a toda la gente | features/admin/BroadcastsTab, features/admin/CheatsPanel | Enviar | — | — | — |
 | `admin.cast.none` | Panel de gestión, «Comunicados»: mensajes a toda la gente | features/admin/BroadcastsTab | Todavía no se ha mandado ningún comunicado. | — | — | — |
 | `admin.cast.seen` | Panel de gestión, «Comunicados»: mensajes a toda la gente | features/admin/BroadcastsTab | Visto sin elegir | — | — | — |
 | `admin.cast.who` | Panel de gestión, «Comunicados»: mensajes a toda la gente | features/admin/BroadcastsTab | Quién ha contestado ({n}) | — | — | — |
@@ -418,3 +418,32 @@ Generado desde `apps/web/src/shared/i18n/textos/gestion.csv` con
 | `admin.data.kind.staff_checks` | Panel de gestión, «Limpiar datos»: un tipo de dato que se puede borrar | features/admin/DataPanel | Comprobaciones del staff | Staff checks | — | — |
 | `admin.data.kind.staff_checks.summary` | Panel de gestión, «Limpiar datos»: un tipo de dato que se puede borrar | features/admin/DataPanel | Cada código que ha comprobado una cuenta de staff y con qué resultado. | Every code a staff account has checked, and the result. | — | — |
 | `admin.data.kind.staff_checks.detail` | Panel de gestión, «Limpiar datos»: un tipo de dato que se puede borrar | features/admin/DataPanel | Es solo un registro: borrarlo no cambia ningún documento ni ninguna cuenta. | It is only a log: deleting it changes no document and no account. | — | — |
+| `admin.clicker.view.usage` | Panel de gestión, «Code Clicker»: vista del uso del juego | features/admin/ClickerPanel | Uso | Usage | — | — |
+| `admin.clicker.view.cheats` | Panel de gestión, «Code Clicker»: vista del registro de trampas | features/admin/ClickerPanel | Trampas | Cheats | — | — |
+| `admin.clicker.why.manual` | Panel de gestión, «Code Clicker»: apartado de trampas: motivo de una sanción puesta a mano | features/admin/CheatsPanel, features/admin/ClickerPanel | Sanción a mano | Manual sanction | — | — |
+| `admin.cheats.times` | Panel de gestión, «Code Clicker»: apartado de trampas: columna de trampas sin indultar | features/admin/CheatsPanel | Trampas | Cheats | — | — |
+| `admin.cheats.last` | Panel de gestión, «Code Clicker»: apartado de trampas: columna de la última trampa | features/admin/CheatsPanel | Última | Latest | — | — |
+| `admin.cheats.first` | Panel de gestión, «Code Clicker»: apartado de trampas: columna de la primera trampa | features/admin/CheatsPanel | Primera | First | — | — |
+| `admin.cheats.whys` | Panel de gestión, «Code Clicker»: apartado de trampas: columna de los motivos | features/admin/CheatsPanel | Por qué | Why | — | — |
+| `admin.cheats.seized` | Panel de gestión, «Code Clicker»: apartado de trampas: lo requisado para el reparto | features/admin/CheatsPanel | Requisado | Seized | — | — |
+| `admin.cheats.review` | Panel de gestión, «Code Clicker»: apartado de trampas: columna de revisión abierta | features/admin/CheatsPanel | Revisión | Review | — | — |
+| `admin.cheats.review.asked` | Panel de gestión, «Code Clicker»: apartado de trampas: tiene que defenderse | features/admin/CheatsPanel | Tiene que defenderse | Must explain | — | — |
+| `admin.cheats.review.answered` | Panel de gestión, «Code Clicker»: apartado de trampas: ya se ha defendido | features/admin/CheatsPanel | Se ha defendido | Has explained | — | — |
+| `admin.cheats.when` | Panel de gestión, «Code Clicker»: apartado de trampas: columna de la fecha | features/admin/AdminPage, features/admin/CheatsPanel | Cuándo | When | — | — |
+| `admin.cheats.how` | Panel de gestión, «Code Clicker»: apartado de trampas: columna de cómo se vio | features/admin/CheatsPanel | Cómo se vio | How it was found | — | — |
+| `admin.cheats.how.auto` | Panel de gestión, «Code Clicker»: apartado de trampas: se vio sola al guardar la partida | features/admin/CheatsPanel | Sola, al guardar | Automatically, on save | — | — |
+| `admin.cheats.how.review` | Panel de gestión, «Code Clicker»: apartado de trampas: al revisar un salto de capital | features/admin/CheatsPanel | Al revisar un salto | Reviewing a jump | — | — |
+| `admin.cheats.how.sanction` | Panel de gestión, «Code Clicker»: apartado de trampas: sanción puesta a mano | features/admin/CheatsPanel | Sanción a mano | Manual sanction | — | — |
+| `admin.cheats.state` | Panel de gestión, «Code Clicker»: apartado de trampas: columna del estado | features/admin/CheatsPanel | Estado | State | — | — |
+| `admin.cheats.pardoned` | Panel de gestión, «Code Clicker»: apartado de trampas: indultada y cuándo | features/admin/CheatsPanel | Indultada el {date} | Pardoned on {date} | — | — |
+| `admin.cheats.standing` | Panel de gestión, «Code Clicker»: apartado de trampas: sigue contando y ya no se puede indultar | features/admin/CheatsPanel | En pie | Standing | — | — |
+| `admin.cheats.people` | Panel de gestión, «Code Clicker»: apartado de trampas: cifra de personas con trampas | features/admin/CheatsPanel | Personas pilladas | People caught | — | — |
+| `admin.cheats.total` | Panel de gestión, «Code Clicker»: apartado de trampas: cifra de trampas sin indultar | features/admin/CheatsPanel | Trampas en pie | Standing cheats | — | — |
+| `admin.cheats.recent` | Panel de gestión, «Code Clicker»: apartado de trampas: cifra de los últimos 30 días | features/admin/CheatsPanel | Últimos 30 días | Last 30 days | — | — |
+| `admin.cheats.pardonedCount` | Panel de gestión, «Code Clicker»: apartado de trampas: cifra de indultadas | features/admin/CheatsPanel | Indultadas | Pardoned | — | — |
+| `admin.cheats.who` | Panel de gestión, «Code Clicker»: apartado de trampas: tabla de personas | features/admin/CheatsPanel | Quién ha hecho trampas | Who has cheated | — | — |
+| `admin.cheats.writeAll` | Panel de gestión, «Code Clicker»: apartado de trampas: botón para mandar un comunicado solo a esas personas | features/admin/CheatsPanel | Escribir a estas {n} personas | Write to these {n} people | — | — |
+| `admin.cheats.writeTo` | Panel de gestión, «Code Clicker»: apartado de trampas: a quién le llega el comunicado | features/admin/CheatsPanel | Les llega un comunicado a: {logins} | An announcement goes to: {logins} | — | — |
+| `admin.cheats.none` | Panel de gestión, «Code Clicker»: apartado de trampas: sin trampas | features/admin/CheatsPanel | No hay trampas registradas. | No cheats recorded. | — | — |
+| `admin.cheats.log` | Panel de gestión, «Code Clicker»: apartado de trampas: tabla del historial | features/admin/CheatsPanel | Historial de trampas | Cheat history | — | — |
+| `admin.cheats.title` | Panel de gestión, «Code Clicker»: título del apartado de trampas | features/admin/ClickerPanel | Trampas de Code Clicker | Code Clicker cheats | — | — |

@@ -6,6 +6,8 @@ import type { StaffDocument } from '@sanatorio/contracts'
 import { api, ApiError } from '../../shared/api'
 import { useAction, useAsync } from '../../shared/hooks/useAsync'
 import { localeOf, useI18n } from '../../shared/i18n'
+import { cellValue } from '../../shared/table-sort'
+import { DataTable } from '../../shared/ui/DataTable'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { Logo } from '../../shared/ui/Logo'
 import { LangSelect } from '../settings/LangSelect'
@@ -229,26 +231,18 @@ function Document({ found }: { found: StaffDocument }) {
       {found.lines.length === 0 ? (
         <p className="hint">{t('staff.empty')}</p>
       ) : (
-        <div className="table-scroll">
-          <table className="stat-table">
-            <thead>
-              <tr>
-                {found.header.map((cell, index) => (
-                  <th key={index}>{cell}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {found.lines.map((line, row) => (
-                <tr key={row}>
-                  {line.map((cell, index) => (
-                    <td key={index}>{cell}</td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <DataTable<{ line: string[]; index: number }>
+          id="staff-document"
+          rows={found.lines.map((line, index) => ({ line, index }))}
+          rowKey={({ index }) => String(index)}
+          columns={found.header.map((cell, at) => ({
+            id: `${at}`,
+            label: cell,
+            sort: ({ line }) => cellValue(line[at]),
+            first: 'asc' as const,
+            cell: ({ line }) => line[at],
+          }))}
+        />
       )}
     </article>
   )

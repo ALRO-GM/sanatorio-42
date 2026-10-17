@@ -57,6 +57,7 @@ describe('migraciones', () => {
       'clicker',
       'clicker_alerts',
       'clicker_capital',
+      'clicker_cheat_log',
       'clicker_cheats',
       'clicker_clicks',
       'clicker_pool',
@@ -278,6 +279,38 @@ describe('migraciones', () => {
       ),
     ).toEqual(['ana next 10 0', 'ana next 20 2', 'leo classic 10 0'])
     expect(await tableNames(db)).not.toContain('curriculum')
+
+    db.close()
+  })
+
+  it('la 52 rellena el registro de trampas con lo que ya había', async () => {
+    const db = createClient({ url: 'file::memory:' })
+
+    await db.batch([
+      ...MIGRATIONS.filter((migration) => migration.version < 52).flatMap((m) => m.statements),
+      'CREATE TABLE schema_version (id INTEGER PRIMARY KEY CHECK (id = 1), version INTEGER NOT NULL)',
+      'INSERT INTO schema_version (id, version) VALUES (1, 51)',
+      `INSERT INTO clicker (login, updated_at, caught, caught_at, caught_why) VALUES
+        ('ana', 'x', 1, '2026-10-01T10:00:00.000Z', 'review'),
+        ('leo', 'x', 2, '2026-10-02T10:00:00.000Z', 'rate'),
+        ('uma', 'x', 0, NULL, NULL)`,
+      `INSERT INTO clicker_cheats (login, at, why, save, total, per_second, achievements, prestige)
+        VALUES ('leo', '2026-10-02T10:00:00.000Z', 'rate', '{}', 9e7, 2, 0, 0)`,
+    ])
+
+    expect(await migrate(db)).toEqual(
+      MIGRATIONS.filter((migration) => migration.version >= 52).map((m) => m.version),
+    )
+
+    const log = await db.execute(
+      'SELECT login, how, why, copy_id FROM clicker_cheat_log ORDER BY login',
+    )
+
+    // La partida rechazada de leo (con su copia) y la revisión de ana; uma, nada.
+    expect(
+      log.rows.map((row) => `${textOf(row, 'login')} ${textOf(row, 'how')} ${textOf(row, 'why')}`),
+    ).toEqual(['ana review review', 'leo auto rate'])
+    expect(log.rows[1]?.copy_id).not.toBeNull()
 
     db.close()
   })

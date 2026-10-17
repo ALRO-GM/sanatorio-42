@@ -6,6 +6,7 @@ import type { Consumption } from '@sanatorio/contracts'
 import { api } from '../../shared/api'
 import { useAction, useAsync } from '../../shared/hooks/useAsync'
 import { localeOf, useI18n } from '../../shared/i18n'
+import { DataTable } from '../../shared/ui/DataTable'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { HoursReport } from '../profile/HoursReport'
 import { BudgetCard } from './BudgetCard'
@@ -46,21 +47,21 @@ function size(bytes: number): string {
  * Panel de gestión: consumo y límites, permisos y bloqueos, buzón, registro de
  * mensajes y mapa de calor de uso. Solo lo ve quien administra la web.
  */
-export function AdminPage({ campusId }: { campusId?: number | undefined }) {
+export function AdminPage({ campusId, me }: { campusId?: number | undefined; me: string }) {
   const { t } = useI18n()
 
   return (
     <section className="admin">
       <h2>{t('admin.title')}</h2>
       <PanelLock>
-        <AdminTabs campusId={campusId} />
+        <AdminTabs campusId={campusId} me={me} />
       </PanelLock>
     </section>
   )
 }
 
 /** Las pestañas del panel, ya con el segundo factor dado. */
-function AdminTabs({ campusId }: { campusId?: number | undefined }) {
+function AdminTabs({ campusId, me }: { campusId?: number | undefined; me: string }) {
   const { t } = useI18n()
   const [tab, setTab] = useState<Tab>('consumption')
 
@@ -94,7 +95,7 @@ function AdminTabs({ campusId }: { campusId?: number | undefined }) {
       {tab === 'messages' && <MessagesTab />}
       {tab === 'usage' && <UsageTab />}
       {tab === 'stats' && <StatsPanel />}
-      {tab === 'clicker' && <ClickerPanel />}
+      {tab === 'clicker' && <ClickerPanel me={me} />}
       {tab === 'data' && <DataPanel />}
       {tab === 'casts' && <BroadcastsTab campusId={campusId} />}
     </>
@@ -182,41 +183,58 @@ function ConsumptionTab() {
       <article className="card">
         <span className="eyebrow">{t('admin.cons.top')}</span>
         <ErrorNote error={action.error} />
-        <table className="admin-table">
-          <thead>
-            <tr>
-              <th>{t('admin.col.login')}</th>
-              <th>{t('admin.col.requests')}</th>
-              <th>{t('admin.col.bytes')}</th>
-              <th>{t('admin.col.limited')}</th>
-              <th>{t('admin.col.limit')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.top.map((row) => (
-              <tr key={row.login}>
-                <th scope="row">
-                  <a className="record-link" href={recordHref(row.login)}>
-                    {row.login}
-                  </a>
-                </th>
-                <td>{row.requests.toLocaleString()}</td>
-                <td>{size(row.bytes)}</td>
-                <td className={row.limited > 0 ? 'bad' : ''}>{row.limited}</td>
-                <td>
-                  <button
-                    type="button"
-                    className="pill"
-                    disabled={action.busy}
-                    onClick={() => void limit(row.login, row.manualLimit)}
-                  >
-                    {row.manualLimit ?? t('admin.limit.auto')}
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <DataTable
+          id="admin-top"
+          className="admin-table"
+          rows={data.top}
+          rowKey={(row) => row.login}
+          columns={[
+            {
+              id: 'login',
+              label: t('admin.col.login'),
+              sort: (row) => row.login,
+              first: 'asc',
+              cell: (row) => (
+                <a className="record-link" href={recordHref(row.login)}>
+                  {row.login}
+                </a>
+              ),
+            },
+            {
+              id: 'requests',
+              label: t('admin.col.requests'),
+              sort: (row) => row.requests,
+              cell: (row) => row.requests.toLocaleString(),
+            },
+            {
+              id: 'bytes',
+              label: t('admin.col.bytes'),
+              sort: (row) => row.bytes,
+              cell: (row) => size(row.bytes),
+            },
+            {
+              id: 'limited',
+              label: t('admin.col.limited'),
+              sort: (row) => row.limited,
+              cell: (row) => <span className={row.limited > 0 ? 'bad' : ''}>{row.limited}</span>,
+            },
+            {
+              id: 'limit',
+              label: t('admin.col.limit'),
+              sort: (row) => row.manualLimit,
+              cell: (row) => (
+                <button
+                  type="button"
+                  className="pill"
+                  disabled={action.busy}
+                  onClick={() => void limit(row.login, row.manualLimit)}
+                >
+                  {row.manualLimit ?? t('admin.limit.auto')}
+                </button>
+              ),
+            },
+          ]}
+        />
         <p className="hint">{t('admin.cons.topHint')}</p>
       </article>
     </>
@@ -488,25 +506,46 @@ function MessagesTab() {
         }}
       />
       {rows.length === 0 && <p className="hint">{t('admin.messages.empty')}</p>}
-      <table className="admin-table">
-        <tbody>
-          {rows.map((message) => (
-            <tr key={message.id}>
-              <td>
-                <small>#{message.id}</small>
-              </td>
-              <td>{new Date(message.at).toLocaleString(localeOf(lang))}</td>
-              <th scope="row">{message.login}</th>
-              <td>
-                <small>{message.eventId}</small>
-              </td>
-              <td>
-                {message.body ?? t(`meet.said.${message.kind === 'text' ? 'seen' : message.kind}`)}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <DataTable
+        id="admin-messages"
+        className="admin-table"
+        rows={rows}
+        rowKey={(message) => String(message.id)}
+        columns={[
+          {
+            id: 'id',
+            label: '#',
+            sort: (message) => message.id,
+            cell: (message) => <small>#{message.id}</small>,
+          },
+          {
+            id: 'at',
+            label: t('admin.cheats.when'),
+            sort: (message) => message.at,
+            cell: (message) => new Date(message.at).toLocaleString(localeOf(lang)),
+          },
+          {
+            id: 'login',
+            label: t('admin.col.login'),
+            sort: (message) => message.login,
+            first: 'asc',
+            cell: (message) => message.login,
+          },
+          {
+            id: 'event',
+            label: t('chats.kind.event'),
+            sort: (message) => message.eventId,
+            first: 'asc',
+            cell: (message) => <small>{message.eventId}</small>,
+          },
+          {
+            id: 'body',
+            label: t('meet.chat'),
+            cell: (message) =>
+              message.body ?? t(`meet.said.${message.kind === 'text' ? 'seen' : message.kind}`),
+          },
+        ]}
+      />
     </article>
   )
 }

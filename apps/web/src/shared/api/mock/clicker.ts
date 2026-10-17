@@ -18,6 +18,8 @@ import type {
   ClickerReview,
   ClickerState,
   TitleId,
+  ClickerCheatEntry,
+  ClickerCheater,
 } from '@sanatorio/contracts'
 
 import { ME } from './data'
@@ -124,6 +126,7 @@ export const clickerMock: Pick<
   | 'getClickerBoard'
   | 'getClickerUsage'
   | 'getClickerCapital'
+  | 'getClickerCheats'
   | 'pardonClickerCheat'
   | 'dismissClickerAlert'
   | 'reviewClickerAlert'
@@ -328,6 +331,120 @@ export const clickerMock: Pick<
       last: all.at(-1)?.[0] ?? null,
       points: points.filter((_, index) => index % step === 0 || index === points.length - 1),
     }
+  },
+
+  // Un registro de trampas inventado, más las que se pillen en esta sesión.
+  async getClickerCheats() {
+    await delay()
+
+    const day = (n: number): string => new Date(Date.now() - n * 86_400_000).toISOString()
+    const invented: ClickerCheatEntry[] = [
+      {
+        id: 9001,
+        login: 'tbravo',
+        at: day(1),
+        how: 'auto',
+        why: 'rate',
+        total: 4.2e9,
+        perSecond: 3e6,
+        seized: 1.8e9,
+        note: null,
+        pardonedAt: null,
+        copyId: null,
+      },
+      {
+        id: 9002,
+        login: 'tbravo',
+        at: day(6),
+        how: 'auto',
+        why: 'clicks',
+        total: 2.1e8,
+        perSecond: 4e4,
+        seized: 9e7,
+        note: null,
+        pardonedAt: null,
+        copyId: null,
+      },
+      {
+        id: 9003,
+        login: 'nruiz',
+        at: day(3),
+        how: 'review',
+        why: 'review',
+        total: null,
+        perSecond: null,
+        seized: 5.5e10,
+        note: null,
+        pardonedAt: null,
+        copyId: null,
+      },
+      {
+        id: 9004,
+        login: 'jdoe',
+        at: day(9),
+        how: 'auto',
+        why: 'figures',
+        total: 1e12,
+        perSecond: 1e9,
+        seized: 0,
+        note: null,
+        pardonedAt: day(8),
+        copyId: null,
+      },
+      {
+        id: 9005,
+        login: 'nruiz',
+        at: day(12),
+        how: 'sanction',
+        why: 'manual',
+        total: null,
+        perSecond: null,
+        seized: 0,
+        note: 'Te quedas con mil millones.',
+        pardonedAt: null,
+        copyId: null,
+      },
+    ]
+    const mine: ClickerCheatEntry[] = cheats.map((cheat) => ({
+      id: cheat.id,
+      login: ME.login,
+      at: cheat.at,
+      how: 'auto',
+      why: cheat.why,
+      total: cheat.total,
+      perSecond: cheat.perSecond,
+      seized: 0,
+      note: null,
+      pardonedAt: null,
+      copyId: cheat.id,
+    }))
+    const entries = [...mine, ...invented].sort((a, b) => b.at.localeCompare(a.at))
+    const people = new Map<string, ClickerCheater>()
+
+    for (const entry of entries) {
+      const known = people.get(entry.login)
+      const counts = entry.pardonedAt === null ? 1 : 0
+
+      if (known === undefined) {
+        people.set(entry.login, {
+          login: entry.login,
+          times: counts,
+          first: entry.at,
+          last: entry.at,
+          whys: [entry.why],
+          seized: entry.seized,
+          wealth: entry.login === 'tbravo' ? 3.1e9 : 8.4e10,
+          review: entry.login === 'nruiz' ? 'answered' : null,
+        })
+      } else {
+        known.times += counts
+        known.first = entry.at
+        known.seized += entry.seized
+        if (!known.whys.includes(entry.why)) known.whys.push(entry.why)
+      }
+    }
+
+    return { entries, people: [...people.values()] }
   },
 
   async pardonClickerCheat(id) {

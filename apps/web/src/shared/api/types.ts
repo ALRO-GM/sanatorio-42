@@ -24,6 +24,7 @@ import type {
   CampusSummary,
   ClickerBoard,
   ClickerCapital,
+  ClickerCheats,
   ClickerGameView,
   ClickerSanction,
   ClickerPoolClaim,
@@ -301,6 +302,8 @@ export type Api = {
   /** Las borra, y dice cuántas eran. Solo admins. */
   deleteAdminData: (scope: DataWipe) => Promise<{ rows: number }>
   /** Indulta una trampa: la partida rechazada pasa a estar en curso. Solo admins. */
+  /** El registro de trampas de Code Clicker. Solo admins. */
+  getClickerCheats: () => Promise<ClickerCheats>
   pardonClickerCheat: (id: number) => Promise<void>
   /** Descarta un aviso de salto de capital. Solo admins. */
   dismissClickerAlert: (id: number) => Promise<void>

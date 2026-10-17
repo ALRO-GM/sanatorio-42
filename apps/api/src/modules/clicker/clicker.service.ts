@@ -21,6 +21,10 @@ import type {
   ClickerSeizure,
   ClickerState,
   ClickerUsage,
+  ClickerCheater,
+  ClickerCheatEntry,
+  ClickerCheatHow,
+  ClickerCheats,
   Pill,
 } from '@sanatorio/contracts'
 import { z } from 'zod'
@@ -228,7 +232,7 @@ export function createClickerService(options: ClickerServiceOptions) {
     by: ClickerSeizure['by'],
     evidence: ClickerEvidence | null,
     n: number,
-  ): Promise<void> {
+  ): Promise<number> {
     const amount = seizedValue(typeof found?.save === 'string' ? readSave(found.save) : null)
     const clean = `pill = 'red' AND caught = 0 AND save IS NOT NULL AND login != ?`
     const people = toNumber(
@@ -250,6 +254,37 @@ export function createClickerService(options: ClickerServiceOptions) {
       ],
       'write',
     )
+
+    return amount
+  }
+
+  /** Apunta una trampa en el registro (`clicker_cheat_log`), para el apartado del panel. */
+  async function logCheat(entry: {
+    login: string
+    how: ClickerCheatHow
+    why: string
+    total?: number
+    perSecond?: number
+    seized?: number
+    detail?: unknown
+    copyId?: number | null
+  }): Promise<void> {
+    await db.execute({
+      sql: `INSERT INTO clicker_cheat_log
+              (login, at, how, why, total, per_second, seized, detail, copy_id)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      args: [
+        entry.login,
+        iso(),
+        entry.how,
+        entry.why,
+        entry.total ?? null,
+        entry.perSecond ?? null,
+        entry.seized ?? 0,
+        entry.detail === undefined ? null : JSON.stringify(entry.detail),
+        entry.copyId ?? null,
+      ],
+    })
   }
 
   /** Cuántos edificios y mejoras hay en una partida guardada (sin comprobarla). */
@@ -446,12 +481,13 @@ export function createClickerService(options: ClickerServiceOptions) {
               : ((await options.brand?.(actor.login, title).catch(() => null)) ?? null)
 
           // La política de trampas, en cada una (si no tiene ya la venta pendiente).
-          if (toNumber(found?.sale_due ?? 0) === 0) {
-            await confiscate(actor.login, found, 'auto', null, caught)
-          }
+          const seized =
+            toNumber(found?.sale_due ?? 0) === 0
+              ? await confiscate(actor.login, found, 'auto', null, caught)
+              : 0
 
           // Se guarda la partida tal como llegó, por si hay que indultarla.
-          await db.execute({
+          const copy = await db.execute({
             sql: `INSERT INTO clicker_cheats
                     (login, at, why, save, total, per_second, achievements, prestige, title_before)
                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -466,6 +502,16 @@ export function createClickerService(options: ClickerServiceOptions) {
               sent.prestige,
               before,
             ],
+          })
+
+          await logCheat({
+            login: actor.login,
+            how: 'auto',
+            why,
+            total: sent.total,
+            perSecond: sent.perSecond,
+            seized,
+            copyId: copy.lastInsertRowid === undefined ? null : Number(copy.lastInsertRowid),
           })
           await db.execute({
             sql: `DELETE FROM clicker_cheats WHERE login = ? AND id NOT IN
@@ -688,6 +734,10 @@ export function createClickerService(options: ClickerServiceOptions) {
             ],
           },
           { sql: 'DELETE FROM clicker_cheats WHERE id = ?', args: [id] },
+          {
+            sql: 'UPDATE clicker_cheat_log SET pardoned_at = ? WHERE copy_id = ?',
+            args: [iso(), id],
+          },
         ],
         'write',
       )
@@ -794,7 +844,9 @@ export function createClickerService(options: ClickerServiceOptions) {
         sql: `UPDATE clicker SET caught = ?, caught_at = ?, caught_why = 'review' WHERE login = ?`,
         args: [caught, iso(), login],
       })
-      await confiscate(login, player, 'review', evidence, caught)
+      const seized = await confiscate(login, player, 'review', evidence, caught)
+
+      await logCheat({ login, how: 'review', why: 'review', seized, detail: evidence })
       await db.execute({ sql: 'DELETE FROM clicker_alerts WHERE id = ?', args: [alertId] })
 
       const title = hackerTitle(caught)
@@ -944,6 +996,7 @@ export function createClickerService(options: ClickerServiceOptions) {
           login,
         ],
       })
+      await logCheat({ login, how: 'sanction', why: 'manual', detail: { note, code, wipe } })
     },
 
     /** Ya ha visto el aviso de la policía del código. */
@@ -1037,6 +1090,96 @@ export function createClickerService(options: ClickerServiceOptions) {
      *   (por defecto 7). Lo demás es de siempre.
      * @throws {DomainError} `forbidden` si quien pregunta no es admin.
      */
+    /**
+     * El registro de trampas: cada vez que se pilló a alguien, la más reciente
+     * primero, y un resumen por persona con su patrimonio de ahora y si tiene
+     * una revisión abierta.
+     *
+     * @throws {DomainError} `forbidden` si no administra.
+     */
+    async cheats(actor: Actor): Promise<ClickerCheats> {
+      assertAdmin(actor)
+
+      const [log, copies, games, open] = await Promise.all([
+        db.execute('SELECT * FROM clicker_cheat_log ORDER BY at DESC, id DESC LIMIT 2000'),
+        db.execute('SELECT id FROM clicker_cheats'),
+        db.execute(
+          `SELECT login, save FROM clicker
+           WHERE login IN (SELECT DISTINCT login FROM clicker_cheat_log)`,
+        ),
+        db.execute(
+          `SELECT login, status FROM clicker_alerts WHERE status IN ('asked', 'answered')
+           ORDER BY id`,
+        ),
+      ])
+      const kept = new Set(copies.rows.map((entry) => toNumber(entry.id)))
+      const entries = log.rows.map((entry): ClickerCheatEntry => {
+        let note: string | null = null
+
+        try {
+          const detail = JSON.parse(toText(entry.detail ?? 'null')) as { note?: unknown } | null
+
+          note = typeof detail?.note === 'string' ? detail.note : null
+        } catch {
+          note = null
+        }
+
+        const copyId = entry.copy_id === null ? null : toNumber(entry.copy_id)
+
+        return {
+          id: toNumber(entry.id),
+          login: toText(entry.login),
+          at: toText(entry.at),
+          how: toText(entry.how) as ClickerCheatHow,
+          why: toText(entry.why),
+          total: entry.total === null ? null : Number(entry.total),
+          perSecond: entry.per_second === null ? null : Number(entry.per_second),
+          seized: Number(entry.seized ?? 0),
+          note,
+          pardonedAt: typeof entry.pardoned_at === 'string' ? entry.pardoned_at : null,
+          copyId: copyId !== null && kept.has(copyId) ? copyId : null,
+        }
+      })
+      const wealth = new Map(
+        games.rows.map((entry) => [
+          toText(entry.login),
+          typeof entry.save === 'string' ? wealthOf(readSave(entry.save)) : 0,
+        ]),
+      )
+      const review = new Map(
+        open.rows.map((entry) => [
+          toText(entry.login),
+          toText(entry.status) as 'asked' | 'answered',
+        ]),
+      )
+      const people = new Map<string, ClickerCheater>()
+
+      for (const entry of entries) {
+        const known = people.get(entry.login)
+        const counts = entry.pardonedAt === null ? 1 : 0
+
+        if (known === undefined) {
+          people.set(entry.login, {
+            login: entry.login,
+            times: counts,
+            first: entry.at,
+            last: entry.at,
+            whys: [entry.why],
+            seized: entry.seized,
+            wealth: wealth.get(entry.login) ?? 0,
+            review: review.get(entry.login) ?? null,
+          })
+        } else {
+          known.times += counts
+          known.first = entry.at
+          known.seized += entry.seized
+          if (!known.whys.includes(entry.why)) known.whys.push(entry.why)
+        }
+      }
+
+      return { entries, people: [...people.values()] }
+    },
+
     async usage(actor: Actor, input: unknown): Promise<ClickerUsage> {
       assertAdmin(actor)
 

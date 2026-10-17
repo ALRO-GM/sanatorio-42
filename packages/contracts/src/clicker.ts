@@ -289,3 +289,56 @@ export type ClickerUsage = {
   /** Partidas rechazadas que se pueden indultar, la más reciente primero. */
   cheats: ClickerCheat[]
 }
+
+/** Cómo se pilló una trampa: sola al guardar, al revisar un salto o con una sanción a mano. */
+export type ClickerCheatHow = 'auto' | 'review' | 'sanction'
+
+/** Una vez que se pilló a alguien, del registro de trampas. */
+export type ClickerCheatEntry = {
+  id: number
+  login: string
+  at: string
+  how: ClickerCheatHow
+  /**
+   * Por qué: `figures`, `ledger`, `rate`, `speed`, `prestige` o `clicks` si se
+   * vio sola; `review` si se dio por trampa al revisar un salto; `manual` si fue
+   * una sanción a mano.
+   */
+  why: string
+  /** Las cifras de la partida que llegó, si se vio al guardar. */
+  total: number | null
+  perSecond: number | null
+  /** Lo que se le requisó para el reparto, en líneas. */
+  seized: number
+  /** El mensaje que vio en el juego, en una sanción a mano. */
+  note: string | null
+  /** Cuándo se indultó, o `null`. */
+  pardonedAt: string | null
+  /** La partida rechazada que aún se guarda y se puede indultar, o `null`. */
+  copyId: number | null
+}
+
+/** Una persona del registro de trampas, con lo suyo resumido. */
+export type ClickerCheater = {
+  login: string
+  /** Trampas sin indultar. */
+  times: number
+  first: string
+  last: string
+  /** Los porqués distintos, del más reciente al más antiguo. */
+  whys: string[]
+  /** Lo requisado en total. */
+  seized: number
+  /** Su patrimonio ahora. */
+  wealth: number
+  /** Si tiene una revisión abierta: pendiente de defenderse o ya defendida. */
+  review: 'asked' | 'answered' | null
+}
+
+/** `GET /admin/clicker/cheats`: el registro de trampas. Solo admins. */
+export type ClickerCheats = {
+  /** El más reciente primero. */
+  entries: ClickerCheatEntry[]
+  /** Quien tiene alguna, la del último pillado primero. */
+  people: ClickerCheater[]
+}

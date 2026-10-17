@@ -5,6 +5,8 @@ import type { DataPreview, DataWipe } from '@sanatorio/contracts'
 import { api } from '../../shared/api'
 import { useAction, useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
+import { cellValue } from '../../shared/table-sort'
+import { DataTable } from '../../shared/ui/DataTable'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 
 const RANGES = ['all', 'before', 'from'] as const
@@ -227,25 +229,19 @@ function Review({
       {preview.rows === 0 ? (
         <p className="estado">{t('admin.data.none')}</p>
       ) : (
-        <div className="table-scroll data-sample">
-          <table className="stat-table">
-            <thead>
-              <tr>
-                {preview.columns.map((column) => (
-                  <th key={column}>{column}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {preview.sample.map((row, index) => (
-                <tr key={index}>
-                  {row.map((value, column) => (
-                    <td key={preview.columns[column] ?? column}>{value ?? '—'}</td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="data-sample">
+          <DataTable<{ row: (string | number | null)[]; index: number }>
+            id="data-sample"
+            rows={preview.sample.map((row, index) => ({ row, index }))}
+            rowKey={({ index }) => String(index)}
+            columns={preview.columns.map((column, at) => ({
+              id: column,
+              label: column,
+              sort: ({ row }) => cellValue(row[at]),
+              first: 'asc' as const,
+              cell: ({ row }) => row[at] ?? '—',
+            }))}
+          />
         </div>
       )}
 

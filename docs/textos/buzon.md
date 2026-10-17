@@ -111,7 +111,7 @@ Generado desde `apps/web/src/shared/i18n/textos/buzon.csv` con
 | `chats.kind.group` | Tipo: grupo de terapia | features/notices/Conversations | Grupo de terapia | Therapy group | Grup de teràpia | Terapia-taldea |
 | `chats.kind.board` | Tipo: pizarra | features/notices/Conversations | Pizarra | Whiteboard | Pissarra | Arbela |
 | `chats.kind.help` | Tipo: sesión de ayuda | features/notices/Conversations | Sesión de ayuda | Help session | Sessió d'ajuda | Laguntza-saioa |
-| `chats.kind.event` | Tipo: evento | features/notices/Conversations | Evento | Event | Esdeveniment | Ekitaldia |
+| `chats.kind.event` | Tipo: evento | features/admin/AdminPage, features/notices/Conversations | Evento | Event | Esdeveniment | Ekitaldia |
 | `chats.said.seen` | Respuesta al aviso: lo ha visto | features/notices/Conversations | Lo ha visto | Has seen it | Ho ha vist | Ikusi du |
 | `chats.said.late` | Respuesta al aviso: llega tarde | features/notices/Conversations | Se retrasa | Running late | Fa tard | Berandu dator |
 | `chats.said.absent` | Respuesta al aviso: no va | features/notices/Conversations | No puede ir | Cannot make it | No hi pot anar | Ezin du joan |

@@ -546,6 +546,17 @@ describe('code clicker', () => {
       ])
       await expectCode(clicker.pardon(ana, cheats[0]?.id), 'forbidden')
 
+      // El registro de trampas las tiene las tres, con su partida para indultar.
+      const log = await clicker.cheats(boss)
+
+      expect(log.entries.map((entry) => [entry.how, entry.why, entry.copyId !== null])).toEqual([
+        ['auto', 'rate', true],
+        ['auto', 'rate', true],
+        ['auto', 'rate', true],
+      ])
+      expect(log.people).toMatchObject([{ login: 'ana', times: 3, whys: ['rate'] }])
+      await expectCode(clicker.cheats(ana), 'forbidden')
+
       // Se indulta la última: vuelve la partida con sus edificios y el título anterior.
       await clicker.pardon(boss, cheats[0]?.id)
       expect(await clicker.state(ana)).toMatchObject({
@@ -573,6 +584,13 @@ describe('code clicker', () => {
       expect(await clicker.state(ana)).toMatchObject({ caught: 0, saleDue: false })
       expect(await xp.expediente(ana)).toMatchObject({ title: 'paciente', hacks: 0 })
       expect((await clicker.usage(boss, {})).cheats).toEqual([])
+
+      // En el registro siguen, pero indultadas: ya no cuentan.
+      const pardoned = await clicker.cheats(boss)
+
+      expect(pardoned.people).toMatchObject([{ login: 'ana', times: 0 }])
+      expect(pardoned.entries.every((entry) => entry.pardonedAt !== null)).toBe(true)
+      expect(pardoned.entries.every((entry) => entry.copyId === null)).toBe(true)
     })
 
     it('guarda el capital por minutos y avisa de los saltos que no son trampa', async () => {
@@ -766,6 +784,11 @@ describe('code clicker', () => {
       const id = await leap(fair)
 
       await clicker.review(boss, id, { verdict: 'cheat' })
+      expect((await clicker.cheats(boss)).entries[0]).toMatchObject({
+        how: 'review',
+        why: 'review',
+        seized: cost('cursor', 10) / 2,
+      })
 
       expect(await clicker.state(ana)).toMatchObject({
         caught: 1,
@@ -1019,6 +1042,12 @@ describe('code clicker', () => {
       expect(after.caught).toBe(0)
       expect(after.saleDue).toBe(false)
       expect(after.seizure).toMatchObject({ by: 'admin', note, amount: 0 })
+      expect((await clicker.cheats(boss)).entries[0]).toMatchObject({
+        login: 'ana',
+        how: 'sanction',
+        why: 'manual',
+        note,
+      })
       // Sin dueño: la pestaña que la tenía abierta ya no guarda encima.
       const holder = await db.execute("SELECT holder FROM clicker WHERE login = 'ana'")
 

@@ -139,6 +139,7 @@ export const realApi: Api = {
   getAdminData: () => getJson('/admin/data'),
   previewAdminData: (scope) => sendJson('POST', '/admin/data/preview', scope),
   deleteAdminData: (scope) => sendJson('POST', '/admin/data/delete', scope),
+  getClickerCheats: () => getJson('/admin/clicker/cheats'),
   pardonClickerCheat: (id) => send('POST', `/admin/clicker/cheats/${id}/pardon`),
   dismissClickerAlert: (id) => send('DELETE', `/admin/clicker/alerts/${id}`),
   reviewClickerAlert: (id, verdict) =>

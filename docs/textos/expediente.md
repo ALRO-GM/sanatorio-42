@@ -125,4 +125,4 @@ Generado desde `apps/web/src/shared/i18n/textos/expediente.csv` con
 | `hours.from` | Fecha de inicio del periodo | features/profile/HoursReport | Desde | From | Des de | Noiztik |
 | `hours.to` | Fecha de fin del periodo | features/profile/HoursReport | Hasta | To | Fins a | Noiz arte |
 | `hours.download` | Botón para descargar las horas en una hoja de cálculo | features/profile/HoursReport | Descargar CSV | Download CSV | Baixa el CSV | Deskargatu CSVa |
-| `record.write` | Botón para escribir un mensaje a esa persona | features/profile/PublicRecord | Escribir a {login} | Message {login} | Escriu a {login} | Idatzi {login} erabiltzaileari |
+| `record.write` | Botón para escribir un mensaje a esa persona | features/admin/CheatsPanel, features/profile/PublicRecord | Escribir a {login} | Message {login} | Escriu a {login} | Idatzi {login} erabiltzaileari |

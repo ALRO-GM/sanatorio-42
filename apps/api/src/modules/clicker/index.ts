@@ -17,6 +17,7 @@ export function createClickerModule(deps: ClickerServiceOptions): ClickerModule 
     personal: [
       { table: 'clicker', logins: ['login'] },
       { table: 'clicker_cheats', logins: ['login'] },
+      { table: 'clicker_cheat_log', logins: ['login'] },
       { table: 'clicker_capital', logins: ['login'] },
       { table: 'clicker_alerts', logins: ['login'] },
       { table: 'clicker_clicks', logins: ['login'] },
@@ -127,6 +128,13 @@ export function createClickerModule(deps: ClickerServiceOptions): ClickerModule 
           return reply.send(await service.capitalFor(await session.actor(request), request.query))
         },
       )
+
+      /** `GET /admin/clicker/cheats` → el registro de trampas (`ClickerCheats`). Solo admins. */
+      app.get('/admin/clicker/cheats', async (request, reply) => {
+        reply.header('Cache-Control', 'private, no-store')
+
+        return reply.send(await service.cheats(await session.actor(request)))
+      })
 
       /** `POST /admin/clicker/cheats/:id/pardon` → indulta esa trampa. 204. Solo admins. */
       app.post<{ Params: { id: string } }>(

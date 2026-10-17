@@ -747,6 +747,12 @@ GET /clicker/capital?from=&to= → `{ points, first, last }`: tu historial,
 
 GET /admin/clicker/capital?login=&from=&to= → lo mismo, de otra persona. Solo admins.
 
+GET /admin/clicker/cheats → `{ entries, people }` (`ClickerCheats`): el registro de
+trampas, una fila por cada vez que se pilló a alguien (sola al guardar, al
+revisar un salto o con una sanción a mano), con su motivo, cifras, lo requisado
+y si se indultó; y un resumen por persona con su patrimonio y si tiene una
+revisión abierta. Solo admins.
+
 POST /admin/clicker/cheats/:id/pardon → 204. Solo admins. Indulta una trampa: la
 partida rechazada pasa a ser la que está en curso (con sus cifras), se descuenta
 de `caught`, se quita la venta pendiente, el banner vuelve al título de antes y
