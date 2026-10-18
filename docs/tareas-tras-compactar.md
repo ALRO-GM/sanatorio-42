@@ -193,6 +193,13 @@ despliegue espera a la CI).
       web se simplifica a lo que la persona elija ver (p. ej. avisos de
       correcciones o eventos) y silencia juegos y demás avisos; configurable.
       Descartadas: #50 y #45.
+- [ ] **Curso de git, fases** (diseño en `docs/curso-git.md`, investigación hecha):
+      [x] GC1 motor `packages/gitsim` + tests · [ ] GC2 niveles (mundos 0–5) +
+      camino, animación, teoría y terminal + progreso en la API (re-ejecuta) +
+      exigir puesto en el clúster · [ ] GC3 preguntas de git en el banco + test
+      previo (100 %, 1 h de espera) · [ ] GC4 salas de grupo (remoto común,
+      cada cual su repo, en paralelo) · [ ] GC5 jefe final (4 filas y 4
+      columnas, tiempo) · [ ] GC6 demostración, docs y repaso.
 - [ ] **#42 Curso de git** (grande, especificación de Alberto del 2026-10-18):
       - Solo desde un ordenador de un clúster (con sesión en un puesto).
       - Estética de juego: un **camino con puntos** con forma de ramas de git

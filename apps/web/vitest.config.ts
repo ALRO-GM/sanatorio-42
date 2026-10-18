@@ -14,6 +14,8 @@ import { textosPlugin } from './tools/textos.ts'
 export default defineConfig({
   esbuild: { jsx: 'automatic' },
   plugins: [textosPlugin()],
+  // Los paquetes del monorepo con código (gitsim) se usan desde su fuente.
+  resolve: { conditions: ['source'] },
   test: {
     environmentMatchGlobs: [['tests/ui/**', 'jsdom']],
     setupFiles: ['tests/ui/setup.ts'],

@@ -16,7 +16,7 @@
     "dev:api": "npm run dev -w @sanatorio/api",
     "dev:web": "npm run dev -w @sanatorio/web",
     "dev:mock": "npm run dev:mock -w @sanatorio/web",
-    "build": "npm run build -w @sanatorio/api && npm run build -w @sanatorio/web",
+    "build": "npm run build -w @sanatorio/gitsim && npm run build -w @sanatorio/api && npm run build -w @sanatorio/web",
     "start": "npm run start -w @sanatorio/api",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "lint": "eslint .",

@@ -1,6 +1,8 @@
 import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
+  // Los paquetes del monorepo con código (gitsim) se usan desde su fuente.
+  resolve: { conditions: ['source'] },
   test: {
     /**
      * `tests/unit`        → una pieza cada vez, con la base en memoria.

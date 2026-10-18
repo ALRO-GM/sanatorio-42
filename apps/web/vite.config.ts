@@ -1,5 +1,5 @@
 import react from '@vitejs/plugin-react'
-import { defineConfig, loadEnv } from 'vite'
+import { defaultClientConditions, defineConfig, loadEnv } from 'vite'
 
 import { textosPlugin } from './tools/textos.ts'
 
@@ -8,6 +8,8 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react(), textosPlugin()],
+    // Los paquetes del monorepo con código (gitsim) se usan desde su fuente.
+    resolve: { conditions: ['source', ...defaultClientConditions] },
     build: {
       // Nada incrustado como `data:`. Vite mete así los ficheros pequeños, y
       // entre ellos caían trozos de tipografías: la política de contenido

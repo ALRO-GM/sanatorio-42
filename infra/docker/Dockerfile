@@ -18,6 +18,7 @@ COPY package.json package-lock.json ./
 COPY apps/api/package.json apps/api/
 COPY apps/web/package.json apps/web/
 COPY packages/contracts/package.json packages/contracts/
+COPY packages/gitsim/package.json packages/gitsim/
 RUN npm ci
 
 COPY tsconfig.base.json ./
@@ -33,6 +34,7 @@ COPY package.json package-lock.json ./
 COPY apps/api/package.json apps/api/
 COPY apps/web/package.json apps/web/
 COPY packages/contracts/package.json packages/contracts/
+COPY packages/gitsim/package.json packages/gitsim/
 RUN npm ci --omit=dev --workspace @sanatorio/api
 
 # --- Ejecución ---------------------------------------------------------------
@@ -48,6 +50,10 @@ COPY --from=deps /repo/node_modules node_modules
 COPY --from=build /repo/apps/api/package.json ./
 COPY --from=build /repo/apps/api/dist dist
 COPY --from=build /repo/apps/web/dist web
+# El git simulado del curso de git, compilado: node_modules/@sanatorio/gitsim
+# es un enlace a ../../packages/gitsim (el workspace).
+COPY --from=build /repo/packages/gitsim/package.json packages/gitsim/
+COPY --from=build /repo/packages/gitsim/dist packages/gitsim/dist
 
 # Sin root: el proceso solo necesita escribir en /data.
 RUN mkdir -p /data && chown node:node /data

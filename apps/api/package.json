@@ -8,19 +8,20 @@
     "node": ">=22"
   },
   "scripts": {
-    "dev": "tsx watch --env-file=.env src/main.ts",
+    "dev": "tsx watch --conditions=source --env-file=.env src/main.ts",
     "build": "tsc --project tsconfig.build.json",
     "start": "node --env-file-if-exists=.env dist/main.js",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "db:migrate": "tsx --env-file=.env src/cli/migrate.ts",
-    "sync:status": "tsx --env-file=.env src/cli/sync-status.ts",
-    "sync:run": "tsx --env-file=.env src/cli/sync-run.ts"
+    "db:migrate": "tsx --conditions=source --env-file=.env src/cli/migrate.ts",
+    "sync:status": "tsx --conditions=source --env-file=.env src/cli/sync-status.ts",
+    "sync:run": "tsx --conditions=source --env-file=.env src/cli/sync-run.ts"
   },
   "dependencies": {
     "@libsql/client": "^0.18.0",
+    "@sanatorio/gitsim": "*",
     "chess.js": "1.4.0",
     "fastify": "^5.2.1",
     "zod": "^4.6.5"
