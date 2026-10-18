@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/notgames.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-125 textos. «—» es que falta la traducción: sale en español.
+157 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -132,3 +132,35 @@ Generado desde `apps/web/src/shared/i18n/textos/notgames.csv` con
 | `notgames.review.misses` | Not-games, Repaso: cuántas veces lo has fallado | features/notgames/ReviewTab | Fallos: {n} | Misses: {n} | Errors: {n} | Hutsak: {n} |
 | `notgames.review.example` | Not-games, Repaso: encabezado del ejemplo | features/notgames/ReviewTab | Ejemplo | Example | Exemple | Adibidea |
 | `notgames.review.question` | Not-games, Repaso: desplegar cómo salía la pregunta | features/notgames/ReviewTab | Cómo salía la pregunta | How the question looked | Com sortia la pregunta | Galdera nola zegoen |
+| `notgames.tab.git` | Not-games: pestaña del curso de git | features/notgames/NotGamesPage | Curso de git | Git course | Curs de git | Git ikastaroa |
+| `git.pitch` | Curso de git: frase bajo las pestañas | features/gitcourse/GitCourseTab | Un camino de puntos con forma de ramas: en cada uno ves la animación, lees la teoría y lo haces tú en la terminal. | A path of points shaped like branches: in each one you watch the animation, read the theory and do it yourself in the terminal. | Un camí de punts amb forma de branques: a cada un veus l'animació, llegeixes la teoria i ho fas tu al terminal. | Adar itxurako puntuen bidea: bakoitzean animazioa ikusi, teoria irakurri eta zuk egiten duzu terminalean. |
+| `git.needSeat` | Curso de git: aviso de que solo se juega sentado en el clúster | features/gitcourse/GitCourseTab, features/gitcourse/LevelView | El curso de git se juega desde un ordenador del clúster: siéntate en un puesto para hacer los retos. La animación y la teoría sí se pueden ver. | The git course is played from a cluster computer: sit at a seat to do the challenges. You can still watch the animations and read the theory. | El curs de git es juga des d'un ordinador del clúster: seu en un lloc per fer els reptes. L'animació i la teoria sí que es poden veure. | Git ikastaroa klusterreko ordenagailu batetik jokatzen da: eser zaitez postu batean erronkak egiteko. Animazioa eta teoria ikus daitezke. |
+| `git.atSeat` | Curso de git: desde qué puesto juegas | features/gitcourse/GitCourseTab | Juegas desde {seat}. | Playing from {seat}. | Jugues des de {seat}. | {seat} postutik jokatzen ari zara. |
+| `git.path` | Curso de git: nombre del camino para lectores de pantalla | features/gitcourse/GitCourseTab | Camino del curso de git | Git course path | Camí del curs de git | Git ikastaroaren bidea |
+| `git.group` | Curso de git: punto de prueba de grupo en el camino | features/gitcourse/GitCourseTab | Prueba de grupo ({n} o más) | Group test ({n} or more) | Prova de grup ({n} o més) | Talde-proba ({n} edo gehiago) |
+| `git.boss` | Curso de git: el jefe final en el camino | features/gitcourse/GitCourseTab | Jefe final ({n} o más) | Final boss ({n} or more) | Cap final ({n} o més) | Azken etsaia ({n} edo gehiago) |
+| `git.soon` | Curso de git: lo que aún no está abierto | features/gitcourse/GitCourseTab | Próximamente | Coming soon | Properament | Laster |
+| `git.back` | Curso de git: volver al camino | features/gitcourse/GitCourseTab, features/gitcourse/LevelView | Al camino | Back to the path | Al camí | Bidera |
+| `git.step.animation` | Curso de git: pestaña de la animación | features/gitcourse/GitCourseTab, features/gitcourse/LevelView | Animación | Animation | Animació | Animazioa |
+| `git.step.theory` | Curso de git: pestaña de la teoría | features/gitcourse/GitCourseTab, features/gitcourse/LevelView | Teoría | Theory | Teoria | Teoria |
+| `git.step.challenge` | Curso de git: pestaña del reto | features/gitcourse/GitCourseTab, features/gitcourse/LevelView | Reto | Challenge | Repte | Erronka |
+| `git.anim.start` | Curso de git: primer fotograma de la animación | features/gitcourse/GitCourseTab, features/gitcourse/LevelView | Así empieza el repositorio. | This is how the repository starts. | Així comença el repositori. | Horrela hasten da biltegia. |
+| `git.anim.prev` | Curso de git: paso anterior de la animación | features/gitcourse/GitCourseTab, features/gitcourse/LevelView | Anterior | Previous | Anterior | Aurrekoa |
+| `git.anim.next` | Curso de git: paso siguiente de la animación | features/gitcourse/GitCourseTab, features/gitcourse/LevelView | Siguiente | Next | Següent | Hurrengoa |
+| `git.anim.replay` | Curso de git: volver a ver la animación | features/gitcourse/GitCourseTab, features/gitcourse/LevelView | Repetir | Replay | Repeteix | Errepikatu |
+| `git.toTheory` | Curso de git: botón para ir a la teoría | features/gitcourse/GitCourseTab, features/gitcourse/LevelView | Ver la teoría | Read the theory | Mira la teoria | Ikusi teoria |
+| `git.toChallenge` | Curso de git: botón para ir al reto | features/gitcourse/GitCourseTab, features/gitcourse/LevelView | Al reto | To the challenge | Al repte | Erronkara |
+| `git.theory.what` | Curso de git: teoría, para qué sirve | features/gitcourse/GitCourseTab, features/gitcourse/LevelView | Para qué sirve | What it is for | Per a què serveix | Zertarako balio du |
+| `git.theory.how` | Curso de git: teoría, cómo se usa | features/gitcourse/GitCourseTab, features/gitcourse/LevelView | Cómo se usa | How to use it | Com s'utilitza | Nola erabili |
+| `git.theory.when` | Curso de git: teoría, cuándo usarlo | features/gitcourse/GitCourseTab, features/gitcourse/LevelView | Cuándo usarlo | When to use it | Quan utilitzar-ho | Noiz erabili |
+| `git.theory.whenNot` | Curso de git: teoría, cuándo no usarlo | features/gitcourse/GitCourseTab, features/gitcourse/LevelView | Cuándo no | When not to | Quan no | Noiz ez |
+| `git.theory.looks` | Curso de git: teoría, cómo se ve en las ramas | features/gitcourse/GitCourseTab, features/gitcourse/LevelView | Cómo se ve en las ramas | How it looks in the branches | Com es veu a les branques | Nola ikusten den adarretan |
+| `git.theory.problems` | Curso de git: teoría, qué problemas da | features/gitcourse/GitCourseTab, features/gitcourse/LevelView | Qué problemas da | What can go wrong | Quins problemes dona | Zer arazo ematen dituen |
+| `git.graph.local` | Curso de git: título del dibujo de tu repositorio | features/gitcourse/GitCourseTab, features/gitcourse/LevelView | Tu repositorio | Your repository | El teu repositori | Zure biltegia |
+| `git.target` | Curso de git: el dibujo del objetivo | features/gitcourse/GitCourseTab, features/gitcourse/LevelView | Objetivo | Goal | Objectiu | Helburua |
+| `git.reset` | Curso de git: volver a empezar el reto | features/gitcourse/GitCourseTab, features/gitcourse/LevelView | Empezar de nuevo | Start over | Torna a començar | Hasi berriro |
+| `git.checking` | Curso de git: mientras la API corrige | features/gitcourse/GitCourseTab, features/gitcourse/LevelView | Comprobando… | Checking… | Comprovant… | Egiaztatzen… |
+| `git.won` | Curso de git: reto superado | features/gitcourse/GitCourseTab, features/gitcourse/LevelView | ¡Conseguido! El siguiente punto ya está abierto. | Done! The next point is now open. | Aconseguit! El punt següent ja és obert. | Lortuta! Hurrengo puntua irekita dago. |
+| `git.notYet` | Curso de git: la API no da el reto por bueno | features/gitcourse/GitCourseTab, features/gitcourse/LevelView | Aún no: falta {misses}. | Not yet: missing {misses}. | Encara no: falta {misses}. | Oraindik ez: falta da {misses}. |
+| `git.term.hint` | Curso de git: ayuda arriba de la terminal | features/gitcourse/GitCourseTab, features/gitcourse/Terminal | Escribe comandos de git y pulsa Intro. help para ver cuáles hay; flechas para los anteriores; clear limpia la pantalla. | Type git commands and press Enter. help lists them; arrows for previous ones; clear wipes the screen. | Escriu ordres de git i prem Retorn. help per veure quines hi ha; fletxes per a les anteriors; clear neteja la pantalla. | Idatzi git aginduak eta sakatu Sartu. help zein dauden ikusteko; geziak aurrekoentzat; clear pantaila garbitzeko. |
+| `git.term.input` | Curso de git: campo de la terminal para lectores de pantalla | features/gitcourse/GitCourseTab, features/gitcourse/Terminal | Comando | Command | Ordre | Agindua |

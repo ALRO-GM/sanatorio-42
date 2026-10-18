@@ -72,6 +72,7 @@ Lo que este proyecto enseña de quien lo ha hecho:
   - [Red de correcciones](#red-de-correcciones)
   - [Clústeres](#clústeres)
   - [Modo concentración (Pomodoro)](#modo-concentración-pomodoro)
+  - [Curso de git](#curso-de-git)
   - [Avisos del edificio](#avisos-del-edificio)
   - [Exámenes](#exámenes)
   - [Buscador de personas](#buscador-de-personas)
@@ -276,6 +277,17 @@ ventanita de Code Clicker, sus noticias y logros) y solo saltan los avisos
 elegidos (correcciones, eventos, mensajes, guardia o el resto del buzón); los
 obligatorios de un evento con más gente, siempre. Los demás ven «concentrado,
 no me distraigas» en tu ficha, tu puesto y la sala de espera.
+
+### Curso de git
+
+En Not-games, la pestaña «Curso de git»: un camino de puntos con forma de ramas
+de git, un mundo de un color por cada bloque (raíz, ramas, remotos, reescribir,
+deshacer y flujos de trabajo), que se van marcando con estrellas. Cada punto
+tiene una animación de la estructura a conseguir, la teoría del comando (para
+qué, cómo, cuándo sí y cuándo no, cómo se ve y qué problemas da) y un reto en
+una terminal con git simulado. Los retos solo se juegan sentado en un puesto
+del clúster. Las pruebas de grupo y el jefe final están en camino. Diseño:
+[docs/curso-git.md](docs/curso-git.md).
 
 ### Avisos del edificio
 
@@ -557,6 +569,7 @@ pie showData title Líneas por parte
 | `stats`      | Estadísticas de Ayuda: cifras del campus y clasificación de cada sección          |
 | `facility`   | Avisos al staff de problemas del edificio y de los ordenadores (y Slack)          |
 | `focus`      | Modo concentración (Pomodoro): quién está concentrado y hasta cuándo              |
+| `gitcourse`  | Curso de git: progreso del camino, corregido otra vez con el git simulado         |
 | `staff` | Documentos con código de verificación y las cuentas de staff que los comprueban |
 | `admin`      | Permisos, bloqueos, buzón, consumo, presupuesto de peticiones y limpieza de datos |
 

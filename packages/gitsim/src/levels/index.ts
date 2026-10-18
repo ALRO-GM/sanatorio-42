@@ -1,0 +1,22 @@
+/** El camino del curso de git: los mundos en orden, y cómo jugar cada punto. */
+
+import { WORLD_0, WORLD_1 } from './basics.js'
+import { WORLD_2, WORLD_3, WORLD_4, WORLD_5 } from './shared.js'
+import type { Level } from './types.js'
+
+export const LEVELS: Level[] = [
+  ...WORLD_0,
+  ...WORLD_1,
+  ...WORLD_2,
+  ...WORLD_3,
+  ...WORLD_4,
+  ...WORLD_5,
+]
+
+export function levelOf(id: string): Level | undefined {
+  return LEVELS.find((level) => level.id === id)
+}
+
+export { checkAttempt, goalOfLevel, solvedOf, starsOf, startOf } from './build.js'
+export type { Attempt } from './build.js'
+export type { Level, Theory } from './types.js'

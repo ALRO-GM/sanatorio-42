@@ -653,3 +653,269 @@
   margin: 0;
   white-space: pre-wrap;
 }
+
+/* ── Curso de git: el camino, la animación, la teoría y la terminal ─────────── */
+
+.git-pitch {
+  color: var(--text-2);
+}
+.git-total {
+  font-weight: 600;
+}
+.git-stars {
+  color: #f0b400;
+  letter-spacing: 0.05em;
+}
+
+/* El camino: un tronco y una rama de color por mundo. */
+.git-path {
+  display: block;
+  width: 100%;
+  max-width: 30rem;
+  margin: 0.5rem 0 1rem;
+  overflow: visible;
+}
+.git-path-line {
+  fill: none;
+  stroke-width: 4;
+  stroke-linecap: round;
+  opacity: 0.35;
+}
+.git-path-line.reached {
+  opacity: 1;
+}
+.git-stop [role='button'] {
+  cursor: pointer;
+  outline: none;
+}
+.git-stop [role='button']:focus-visible circle {
+  stroke-width: 5;
+}
+.git-stop circle {
+  stroke-width: 3;
+  transition: transform 0.2s;
+}
+.git-stop:not(.locked) [role='button']:hover > circle:not(.git-stop-ring) {
+  transform: scale(1.15);
+}
+.git-stop.locked {
+  opacity: 0.45;
+}
+.git-stop.locked [role='button'] {
+  cursor: not-allowed;
+}
+.git-stop polygon {
+  fill: var(--surface);
+  stroke: var(--border);
+  stroke-width: 2;
+}
+.git-stop-ring {
+  fill: none;
+  stroke-width: 2;
+  animation: git-ring 1.6s ease-out 3;
+}
+@keyframes git-ring {
+  from {
+    opacity: 1;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 0.35;
+    transform: scale(1.1);
+  }
+}
+.git-stop-title {
+  fill: var(--text);
+  font-size: 12px;
+}
+.git-stop-title.big {
+  font-size: 14px;
+  font-weight: 700;
+}
+.git-stop-sub {
+  fill: var(--text-2);
+  font-size: 11px;
+}
+.git-stop-world {
+  fill: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  text-anchor: middle;
+  pointer-events: none;
+}
+.git-stop-stars {
+  fill: #f0b400;
+  font-size: 11px;
+}
+
+/* Un punto: cabecera, pasos y su contenido. */
+.git-level-head h3 {
+  margin: 0.4rem 0 0.2rem;
+}
+.git-goal {
+  margin: 0 0 0.6rem;
+  font-weight: 600;
+}
+.git-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.6rem 0;
+}
+.git-frame-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 1.6rem;
+  margin: 0.4rem 0 0;
+}
+.git-frame-count {
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+}
+.git-theory dt {
+  margin-top: 0.8rem;
+  font-weight: 700;
+}
+.git-theory dd {
+  margin: 0.2rem 0 0;
+}
+.git-theory pre {
+  margin: 0;
+  padding: 0.6rem 0.8rem;
+  border-radius: 0.5rem;
+  background: #1e1e24;
+  color: #e6e6e6;
+  overflow-x: auto;
+}
+
+/* El dibujo de la historia: los círculos se deslizan a su sitio. */
+.git-graphs {
+  display: grid;
+  gap: 0.5rem;
+}
+.git-graph {
+  margin: 0;
+  padding: 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  background: var(--surface);
+  overflow-x: auto;
+}
+.git-graph figcaption {
+  font-size: 0.8rem;
+  color: var(--text-2);
+}
+.git-graph svg {
+  display: block;
+  max-width: none;
+}
+.git-edge {
+  fill: none;
+  stroke-width: 3;
+}
+.git-node {
+  transition: transform 0.45s ease;
+  animation: git-pop 0.35s ease-out;
+}
+@keyframes git-pop {
+  from {
+    opacity: 0;
+  }
+}
+.git-node circle.copy {
+  stroke: var(--text);
+  stroke-width: 2;
+  stroke-dasharray: 3 2;
+}
+.git-id {
+  fill: #fff;
+  font-size: 8px;
+  font-weight: 700;
+  text-anchor: middle;
+}
+.git-ref {
+  font-size: 10.5px;
+  text-anchor: middle;
+  fill: var(--text);
+}
+.git-ref.head {
+  font-weight: 800;
+}
+.git-ref.remote {
+  fill: var(--text-2);
+  font-style: italic;
+}
+.git-ref.tag {
+  fill: #b07d00;
+}
+.git-target summary {
+  margin-top: 0.5rem;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+/* El reto: terminal a un lado y dibujos al otro (uno debajo de otro en móvil). */
+.git-challenge-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 1rem;
+}
+@media (max-width: 760px) {
+  .git-challenge-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.git-terminal {
+  height: 22rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 0.6rem;
+  background: #16161b;
+  color: #d8d8d8;
+  font-family: 'JetBrains Mono Variable', ui-monospace, monospace;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  overflow-y: auto;
+  cursor: text;
+}
+.git-term-hint {
+  margin: 0 0 0.5rem;
+  color: #8a8a94;
+}
+.git-term-line {
+  color: #fff;
+}
+.git-term-out {
+  white-space: pre-wrap;
+  color: #b9c3cf;
+}
+.git-term-out.error {
+  color: #ff8a80;
+}
+.git-prompt {
+  color: #7ee787;
+}
+.git-term-input {
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+}
+.git-term-input input {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  font: inherit;
+  outline: none;
+}
+.git-won {
+  font-weight: 700;
+}
+.git-trunk {
+  stroke: var(--border);
+  stroke-width: 4;
+  stroke-dasharray: 2 7;
+  stroke-linecap: round;
+}

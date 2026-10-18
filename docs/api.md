@@ -1268,6 +1268,24 @@ pestañas solo las secciones elegidas, calla los juegos y saca solo los avisos
 elegidos (`show`); los obligatorios de un evento con más gente salen siempre. El
 descanso lo lleva la web.
 
+## Curso de git (`modules/gitcourse`)
+
+```
+GET  /gitcourse             → GitCourse { seat, stars: { [punto]: 1–3 } }
+POST /gitcourse/levels/:id  → GitAttemptInput { lines: string[] (≤ 300, ≤ 200 caracteres) } → GitAttemptResult
+```
+
+- Los puntos del camino (teoría, partida, solución) están en
+  `@sanatorio/gitsim` (`LEVELS`), el mismo paquete que usa la web.
+- El reto se corrige **volviendo a ejecutar** `lines` desde el punto de
+  partida con el mismo motor: las líneas que fallan no cuentan. Hecho si la
+  forma de la historia (y HEAD, el remoto, los tags o los ficheros que pida el
+  punto) coincide con la de la solución. Estrellas: 3 con tantos comandos de
+  git como la solución (`status` y `log` no cuentan), 2 con la mitad más uno, 1
+  con más. Se guarda la mejor vez (`git_progress`).
+- Solo desde un puesto del clúster (`seat`, la última sesión en un puesto):
+  sin él, 403. En orden: sin el punto anterior, 409. Punto que no existe, 404.
+
 ## Mapa de calor de clics (`modules/usage/clicks.ts`)
 
 ```

@@ -17,6 +17,7 @@ import { useAction, useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { notGamesHref, turnGameHref } from '../../shared/links'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { GitCourseTab } from '../gitcourse/GitCourseTab'
 import { Icon } from '../../shared/ui/Icon'
 import { InfoTip } from '../../shared/ui/InfoTip'
 import { NotGamesTour } from './NotGamesTour'
@@ -63,17 +64,19 @@ export function NotGamesPage({ me, room }: NotGamesPageProps) {
       </h2>
       {valid && turn && <TurnRoomView id={id} me={me} />}
       {valid && !turn && <RoomView id={id} me={me} />}
-      {!valid && <Lobby />}
+      {!valid && <Lobby initial={room === 'git' ? 'git' : 'rooms'} />}
     </section>
   )
 }
 
-const TABS = ['rooms', 'review'] as const
+const TABS = ['rooms', 'review', 'git'] as const
 
-/** La portada de Not-games: las salas, o tu Repaso. */
-function Lobby() {
+type Tab = (typeof TABS)[number]
+
+/** La portada de Not-games: las salas, tu Repaso o el curso de git (`#/notgames/git`). */
+function Lobby({ initial }: { initial: Tab }) {
   const { t } = useI18n()
-  const [tab, setTab] = useState<(typeof TABS)[number]>('rooms')
+  const [tab, setTab] = useState<Tab>(initial)
 
   return (
     <>
@@ -93,7 +96,9 @@ function Lobby() {
           </button>
         ))}
       </div>
-      {tab === 'rooms' ? <Rooms /> : <ReviewTab />}
+      {tab === 'rooms' && <Rooms />}
+      {tab === 'review' && <ReviewTab />}
+      {tab === 'git' && <GitCourseTab />}
     </>
   )
 }

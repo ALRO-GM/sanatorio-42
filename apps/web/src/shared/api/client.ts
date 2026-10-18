@@ -136,6 +136,9 @@ export const realApi: Api = {
   getFlows: (query) => getJson(`/admin/flows?${search(query)}`),
   getOnline: () => getJson('/admin/online'),
   getFocus: () => getJson('/me/focus'),
+  getGitCourse: () => getJson('/gitcourse'),
+  submitGitAttempt: (level, input) =>
+    sendJson('POST', `/gitcourse/levels/${encodeURIComponent(level)}`, input),
   startFocus: (settings) => sendJson('PUT', '/me/focus', settings),
   stopFocus: () => sendJson('DELETE', '/me/focus'),
   sendClicks: (batch) => send('POST', '/usage/clicks', batch),

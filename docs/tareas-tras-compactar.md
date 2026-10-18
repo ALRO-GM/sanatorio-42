@@ -194,7 +194,7 @@ despliegue espera a la CI).
       correcciones o eventos) y silencia juegos y demás avisos; configurable.
       Descartadas: #50 y #45.
 - [ ] **Curso de git, fases** (diseño en `docs/curso-git.md`, investigación hecha):
-      [x] GC1 motor `packages/gitsim` + tests · [ ] GC2 niveles (mundos 0–5) +
+      [x] GC1 motor `packages/gitsim` + tests · [x] GC2 niveles (mundos 0–5) +
       camino, animación, teoría y terminal + progreso en la API (re-ejecuta) +
       exigir puesto en el clúster · [ ] GC3 preguntas de git en el banco + test
       previo (100 %, 1 h de espera) · [ ] GC4 salas de grupo (remoto común,

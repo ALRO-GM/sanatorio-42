@@ -80,3 +80,20 @@ cierto número de conceptos hay una **prueba de grupo**.
   mismo.
 - `modules/gitcourse` (API): progreso, test previo, salas de grupo y jefe final.
 - `features/gitcourse` (web): el camino, la animación, la teoría y la terminal.
+
+## Estado
+
+- [x] Fase 1: el motor (`packages/gitsim`) con sus tests.
+- [x] Fase 2: los 30 puntos de los mundos 0 a 5 (`packages/gitsim/src/levels`),
+  el camino, la animación, la teoría y la terminal en la web, y el progreso en
+  la API (`modules/gitcourse`, tabla `git_progress`), que vuelve a ejecutar
+  los comandos y exige puesto en el clúster. Cada punto se monta solo con
+  comandos (`start`, y en los de remoto lo que hace una compañera antes y
+  después de que clones) y su objetivo sale de ejecutar la solución: así el
+  objetivo nunca se desfasa del motor. Un test comprueba que todas las
+  soluciones llegan y que ningún punto empieza ya resuelto. La teoría de los
+  puntos está solo en castellano (como el banco de preguntas).
+- [ ] Fase 3: preguntas de git en el banco y el test previo (100 %, 1 h).
+- [ ] Fase 4: pruebas de grupo.
+- [ ] Fase 5: jefe final.
+- [ ] Fase 6: demostración y repaso.

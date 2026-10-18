@@ -5,7 +5,20 @@
  */
 import { describe, expect, it } from 'vitest'
 
-import { emptyRepo, goalOf, headId, missing, run, runAll, tokenize } from '@sanatorio/gitsim'
+import {
+  checkAttempt,
+  emptyRepo,
+  goalOf,
+  goalOfLevel,
+  headId,
+  LEVELS,
+  levelOf,
+  missing,
+  run,
+  runAll,
+  startOf,
+  tokenize,
+} from '@sanatorio/gitsim'
 import type { Remote, World } from '@sanatorio/gitsim'
 
 const start = (): World => ({ repo: emptyRepo(), remote: null })
@@ -307,5 +320,65 @@ describe('git simulado: comparar con el objetivo', () => {
     expect(
       missing(ok(start(), 'echo adiós > a', 'git add a', 'git commit').repo, null, goal),
     ).toEqual([{ kind: 'file', name: 'main:a' }])
+  })
+})
+
+describe('el camino del curso', () => {
+  it('cada punto se puede montar, su solución llega y el principio no vale ya', () => {
+    expect(new Set(LEVELS.map((level) => level.id)).size).toBe(LEVELS.length)
+    for (const level of LEVELS) {
+      const goal = goalOfLevel(level)
+      const start = startOf(level)
+
+      expect(missing(start.repo, start.remote, goal), level.id).not.toEqual([])
+      expect(checkAttempt(level, level.solution, goal), level.id).toMatchObject({
+        done: true,
+        stars: 3,
+      })
+    }
+  })
+
+  it('otro camino al mismo sitio también vale; mirar no resta estrellas y fallar no cuenta', () => {
+    const level = levelOf('w1-branch')
+
+    if (level === undefined) throw new Error('falta w1-branch')
+    expect(
+      checkAttempt(level, [
+        'git status',
+        'git branch feature',
+        'git switch feature',
+        'git log',
+        'git commit -m x',
+      ]),
+    ).toMatchObject({ done: true, stars: 2, commands: 3 })
+    expect(
+      checkAttempt(level, ['git merge nada', 'git switch -c feature', 'git commit']),
+    ).toMatchObject({
+      done: true,
+      stars: 3,
+    })
+    expect(checkAttempt(level, ['git switch -c feature']).done).toBe(false)
+  })
+
+  it('borrar una rama cuenta: si sigue, no está hecho', () => {
+    const level = levelOf('w1-delete')
+
+    if (level === undefined) throw new Error('falta w1-delete')
+    expect(
+      checkAttempt(level, ['git switch -c fix', 'git commit', 'git switch main', 'git merge fix'])
+        .misses,
+    ).toEqual([{ kind: 'branch', name: 'fix' }])
+  })
+
+  it('con remoto: la compañera sube después de que clones, y main protegida no se toca', () => {
+    const pull = levelOf('w2-pull')
+    const flow = levelOf('w5-github-flow')
+
+    if (pull === undefined || flow === undefined) throw new Error('faltan niveles')
+    expect(run(startOf(pull), 'git push').ok).toBe(false)
+    // Un merge no vale donde se pide rebase.
+    expect(checkAttempt(levelOf('w2-world') ?? pull, ['git pull', 'git push']).done).toBe(false)
+    expect(run(startOf(flow), 'git commit').ok).toBe(true)
+    expect(runAll(startOf(flow), ['git commit', 'git push']).ok).toBe(false)
   })
 })

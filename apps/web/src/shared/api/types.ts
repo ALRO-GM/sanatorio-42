@@ -8,6 +8,9 @@
 
 import type {
   Focus,
+  GitAttemptInput,
+  GitAttemptResult,
+  GitCourse,
   FocusSettings,
   ClickBatch,
   ClickHeatmap,
@@ -282,6 +285,8 @@ export type Api = {
   ) => Promise<void>
   /** El Pomodoro: si estás concentrado y tus ajustes. */
   getFocus: () => Promise<Focus>
+  getGitCourse: () => Promise<GitCourse>
+  submitGitAttempt: (level: string, input: GitAttemptInput) => Promise<GitAttemptResult>
   startFocus: (settings: FocusSettings) => Promise<Focus>
   stopFocus: () => Promise<Focus>
   /** Manda los clics de una sección para el mapa de calor. */

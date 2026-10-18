@@ -56,6 +56,8 @@ import type { PhotoStore, ReplicaModule, SyncerConfig } from '../modules/replica
 import { createFacilityModule } from '../modules/facility/index.js'
 import { createFocusModule } from '../modules/focus/index.js'
 import type { FocusModule } from '../modules/focus/index.js'
+import { createGitCourseModule } from '../modules/gitcourse/index.js'
+import type { GitCourseModule } from '../modules/gitcourse/index.js'
 import type { FacilityModule } from '../modules/facility/index.js'
 import { createStatsModule } from '../modules/stats/index.js'
 import type { StatsModule } from '../modules/stats/index.js'
@@ -133,6 +135,7 @@ export type Services = {
   stats: StatsModule['service']
   facility: FacilityModule['service']
   focus: FocusModule['service']
+  gitCourse: GitCourseModule['service']
 }
 
 type Composition = {
@@ -373,6 +376,11 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
   })
 
   const tours = createToursModule({ db, ...clock })
+  const gitCourse = createGitCourseModule({
+    db,
+    seatOf: (login) => peers.peers.locationOf(login),
+    ...clock,
+  })
   const stats = createStatsModule({ db, ...clock })
   // `modules` se monta justo después: para cuando alguien descargue sus datos ya estará.
   const legal = createLegalModule({
@@ -425,6 +433,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     stats,
     facility,
     focus,
+    gitCourse,
   ]
 
   return {
@@ -468,6 +477,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
       stats: stats.service,
       facility: facility.service,
       focus: focus.service,
+      gitCourse: gitCourse.service,
     },
   }
 }

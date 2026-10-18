@@ -76,6 +76,7 @@ describe('migraciones', () => {
       'focus',
       'forty_two_stats',
       'game_results',
+      'git_progress',
       'guide_change_flags',
       'guide_changes',
       'guide_proposals',

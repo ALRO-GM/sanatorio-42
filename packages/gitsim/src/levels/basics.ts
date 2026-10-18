@@ -1,0 +1,257 @@
+/**
+ * Mundos 0 y 1: guardar trabajo (commit, índice) y ramas (crear, cambiar, unir).
+ */
+
+import type { Level } from './types.js'
+
+export const WORLD_0: Level[] = [
+  {
+    id: 'w0-commit',
+    world: 0,
+    kind: 'step',
+    title: 'Tu primer commit',
+    goal: 'Haz dos commits en main.',
+    theory: {
+      what: 'Un commit es una foto de tus ficheros en un momento, con un mensaje. Cada commit apunta al anterior: así se forma la historia.',
+      how: ['git commit -m "Añade el Makefile"', 'git log --oneline'],
+      when: 'Cada vez que terminas un cambio pequeño con sentido propio: una función, un arreglo, un test.',
+      whenNot:
+        'Con el código a medias que no compila, si vas a compartirlo: rompes el trabajo de los demás.',
+      looks: 'Un círculo nuevo encima del anterior, y la rama (main) avanza hasta él.',
+      problems:
+        'Commits gigantes con «cambios varios»: luego nadie (ni tú) sabe qué hizo cada uno.',
+    },
+    start: [],
+    solution: ['git commit -m "uno"', 'git commit -m "dos"'],
+  },
+  {
+    id: 'w0-add',
+    world: 0,
+    kind: 'step',
+    title: 'El índice: git add',
+    goal: 'Crea hola.c con el texto «int main(void)» y guárdalo en un commit.',
+    theory: {
+      what: 'Entre tus ficheros y el commit está el índice (staging area): git add elige qué cambios entran en el próximo commit.',
+      how: [
+        'echo "int main(void)" > hola.c',
+        'git status',
+        'git add hola.c',
+        'git commit -m "Añade hola.c"',
+      ],
+      when: 'Siempre antes de un commit. Con add puedes hacer varios commits limpios con los cambios de un rato.',
+      whenNot: 'git add . sin mirar: acabas subiendo binarios, .o o claves.',
+      looks: 'El índice no se ve en el árbol: es lo que irá dentro del próximo círculo.',
+      problems: 'Olvidar el add: el commit sale sin tus cambios (git status te lo dice).',
+    },
+    start: [],
+    solution: ['echo "int main(void)" > hola.c', 'git add hola.c', 'git commit -m "Añade hola.c"'],
+    check: { files: { main: ['hola.c'] } },
+  },
+  {
+    id: 'w0-status',
+    world: 0,
+    kind: 'step',
+    title: 'Mirar antes de guardar',
+    goal: 'Hay dos ficheros cambiados: guarda solo libft.h en un commit (main.c, no).',
+    theory: {
+      what: 'git status te dice en qué rama estás, qué está preparado y qué no. git log enseña la historia.',
+      how: ['git status', 'git add libft.h', 'git commit -m "Prototipos"', 'git log --oneline'],
+      when: 'Antes de cada add y de cada commit: es gratis y evita sustos.',
+      looks: 'Solo libft.h entra en el commit; main.c sigue cambiado en tu directorio.',
+    },
+    start: [
+      'echo "v1" > libft.h',
+      'echo "v1" > main.c',
+      'git add .',
+      'git commit -m "Base"',
+      'echo "v2" > libft.h',
+      'echo "v2" > main.c',
+    ],
+    solution: ['git add libft.h', 'git commit -m "Prototipos"'],
+    check: { files: { main: ['libft.h', 'main.c'] } },
+  },
+  {
+    id: 'w0-world',
+    world: 0,
+    kind: 'world',
+    title: 'Raíz: la historia',
+    goal: 'Tres commits: el primero crea notas.txt con «a», el segundo le añade una línea «b» y el tercero añade todo.txt con «c».',
+    theory: {
+      what: 'Repaso del mundo: cada commit guarda una foto de lo que preparaste con add, y la rama avanza con cada uno.',
+      how: [
+        'echo a > notas.txt',
+        'git add notas.txt',
+        'git commit -m "notas"',
+        'echo b >> notas.txt',
+        'git commit -am "más notas"',
+      ],
+      when: 'A partir de aquí, todo lo demás se construye sobre commits.',
+      looks: 'Tres círculos seguidos en main.',
+    },
+    start: [],
+    solution: [
+      'echo a > notas.txt',
+      'git add notas.txt',
+      'git commit -m "notas"',
+      'echo b >> notas.txt',
+      'git commit -am "más notas"',
+      'echo c > todo.txt',
+      'git add todo.txt',
+      'git commit -m "todo"',
+    ],
+    check: { files: { main: ['notas.txt', 'todo.txt'] } },
+  },
+]
+
+export const WORLD_1: Level[] = [
+  {
+    id: 'w1-branch',
+    world: 1,
+    kind: 'step',
+    title: 'Crear una rama',
+    goal: 'Crea la rama feature, cámbiate a ella y haz un commit allí.',
+    theory: {
+      what: 'Una rama es solo un nombre que apunta a un commit. Crearla es gratis: sirve para trabajar en algo sin tocar main.',
+      how: [
+        'git branch feature',
+        'git switch feature',
+        'git switch -c otra   # crear y cambiarse a la vez',
+      ],
+      when: 'Para cada cosa nueva: una funcionalidad, un arreglo, un experimento.',
+      whenNot: 'Ramas que viven meses sin unirse: luego el merge es un infierno.',
+      looks:
+        'Una etiqueta nueva sobre el mismo círculo; al hacer commit en ella, se separa de main.',
+      problems:
+        'Hacer commit sin mirar en qué rama estás (git status lo dice, y el prompt también).',
+    },
+    start: ['git commit -m "base"'],
+    solution: ['git switch -c feature', 'git commit -m "trabajo"'],
+  },
+  {
+    id: 'w1-head',
+    world: 1,
+    kind: 'step',
+    title: 'HEAD: dónde estás',
+    goal: 'Vuelve a main y haz un commit: main y feature quedan separadas.',
+    theory: {
+      what: 'HEAD es dónde estás: normalmente señala a una rama, y la rama al commit. Al hacer commit, avanza la rama a la que señala HEAD.',
+      how: ['git switch main', 'git log --oneline --all'],
+      when: 'Cambias de rama para trabajar en otra cosa sin mezclar.',
+      looks: 'Dos caminos que salen del mismo commit: la historia se bifurca.',
+      problems:
+        'Cambiar de rama con cambios sin guardar: git no te deja (o te los lleva). Haz commit o stash antes.',
+    },
+    start: ['git commit -m "base"', 'git switch -c feature', 'git commit -m "trabajo"'],
+    solution: ['git switch main', 'git commit -m "arreglo"'],
+  },
+  {
+    id: 'w1-ff',
+    world: 1,
+    kind: 'step',
+    title: 'Unir: avance rápido',
+    goal: 'Une feature en main sin crear commit nuevo (fast-forward).',
+    theory: {
+      what: 'Si main no ha avanzado desde que saliste, unir feature solo mueve main hacia delante: es un avance rápido (fast-forward).',
+      how: ['git switch main', 'git merge feature'],
+      when: 'Cuando nadie ha tocado main mientras trabajabas.',
+      whenNot:
+        'Si quieres dejar constancia de que hubo una rama: git merge --no-ff crea el commit de merge igualmente.',
+      looks: 'La etiqueta main salta hasta donde está feature. No aparece ningún círculo nuevo.',
+    },
+    start: [
+      'git commit -m "base"',
+      'git switch -c feature',
+      'git commit -m "a"',
+      'git commit -m "b"',
+      'git switch main',
+    ],
+    solution: ['git merge feature'],
+  },
+  {
+    id: 'w1-merge',
+    world: 1,
+    kind: 'step',
+    title: 'Unir: merge de tres vías',
+    goal: 'main y feature han avanzado las dos: únelas en main con un commit de merge.',
+    theory: {
+      what: 'Si las dos ramas tienen commits nuevos, git junta los cambios de las dos (desde su ancestro común) en un commit de merge con dos padres.',
+      how: ['git switch main', 'git merge feature'],
+      when: 'Para traer a main el trabajo terminado de una rama.',
+      whenNot:
+        'Si las dos ramas cambiaron lo mismo de forma distinta habrá conflicto: no es malo, pero hay que resolverlo con calma.',
+      looks: 'Un círculo nuevo con dos flechas: una a cada rama.',
+      problems: 'Merges de main en tu rama cada cinco minutos ensucian la historia.',
+    },
+    start: [
+      'git commit -m "base"',
+      'git switch -c feature',
+      'git commit -m "f1"',
+      'git switch main',
+      'git commit -m "m1"',
+    ],
+    solution: ['git merge feature'],
+  },
+  {
+    id: 'w1-delete',
+    world: 1,
+    kind: 'review',
+    title: 'Repaso: rama, merge y limpiar',
+    goal: 'Crea fix desde main, haz un commit, únela en main y borra fix.',
+    theory: {
+      what: 'Una rama que ya está unida no hace falta: se borra (el trabajo sigue en main). git branch -d no te deja borrar una sin unir.',
+      how: [
+        'git switch -c fix',
+        'git commit -m "arreglo"',
+        'git switch main',
+        'git merge fix',
+        'git branch -d fix',
+      ],
+      when: 'Al terminar cada rama: así la lista de ramas dice lo que está vivo.',
+      whenNot:
+        'git branch -D (mayúscula) borra aunque no esté unida: el trabajo queda perdido (o casi).',
+      looks: 'Desaparece la etiqueta fix; los círculos siguen ahí, dentro de main.',
+    },
+    start: ['git commit -m "base"'],
+    solution: [
+      'git switch -c fix',
+      'git commit -m "arreglo"',
+      'git switch main',
+      'git merge fix',
+      'git branch -d fix',
+    ],
+    check: { branches: ['main', 'fix'] },
+  },
+  {
+    id: 'w1-world',
+    world: 1,
+    kind: 'world',
+    title: 'Ramas: dos a la vez',
+    goal: 'Dos ramas, a y b, salen de main con un commit cada una; únelas las dos en main (primero a, luego b).',
+    theory: {
+      what: 'Repaso del mundo: varias ramas en paralelo, cada una con lo suyo, y main que las va uniendo.',
+      how: [
+        'git switch -c a',
+        'git commit',
+        'git switch main',
+        'git switch -c b',
+        'git commit',
+        'git switch main',
+        'git merge a',
+        'git merge b',
+      ],
+      when: 'Lo normal en un equipo: cada cual en su rama, y main recogiendo.',
+      looks: 'main avanza rápido con a y luego hace un merge con b.',
+    },
+    start: ['git commit -m "base"'],
+    solution: [
+      'git switch -c a',
+      'git commit -m "a1"',
+      'git switch main',
+      'git switch -c b',
+      'git commit -m "b1"',
+      'git switch main',
+      'git merge a',
+      'git merge b',
+    ],
+  },
+]

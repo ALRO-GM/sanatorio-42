@@ -10,3 +10,13 @@ export { ancestors, emptyRepo, GitError, headId, isAncestor, mergeBase } from '.
 export type { Commit, Files, Head, Remote, Repo } from './model.js'
 export { resolve, run, runAll, threeWay, tokenize } from './run.js'
 export type { RunResult, World } from './run.js'
+export {
+  checkAttempt,
+  goalOfLevel,
+  LEVELS,
+  levelOf,
+  solvedOf,
+  starsOf,
+  startOf,
+} from './levels/index.js'
+export type { Attempt, Level, Theory } from './levels/index.js'

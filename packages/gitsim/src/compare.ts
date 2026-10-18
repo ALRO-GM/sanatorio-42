@@ -31,6 +31,9 @@ export function shape(
   return result
 }
 
+/** En un objetivo: la rama (o el tag) no tiene que existir. */
+const GONE = '-'
+
 /** Lo que pide un reto: lo que haya en cada clave, se comprueba; lo que falte, no. */
 export type Goal = {
   /** Las ramas locales y la forma de su historia. */
@@ -57,15 +60,18 @@ export function goalOf(
   } = {},
 ): Goal {
   const memo = new Map<string, string>()
+  // Una rama que se nombra y no está tiene que no estar (`GONE`): borrar cuenta.
   const pick = (
     from: Record<string, string>,
     names: string[] | undefined,
     commits: Record<string, Commit>,
   ) =>
     Object.fromEntries(
-      Object.entries(from)
-        .filter(([name]) => names === undefined || names.includes(name))
-        .map(([name, id]) => [name, shape(commits, id, memo)]),
+      (names ?? Object.keys(from)).map((name) => {
+        const id = from[name]
+
+        return [name, id === undefined ? GONE : shape(commits, id, memo)]
+      }),
     )
   const goal: Goal = { branches: pick(repo.branches, check.branches, repo.commits) }
 
@@ -102,7 +108,11 @@ export function missing(repo: Repo, remote: Remote | null, goal: Goal): Miss[] {
   for (const [name, wanted] of Object.entries(goal.branches ?? {})) {
     const id = repo.branches[name]
 
-    if (id === undefined || shape(repo.commits, id, memo) !== wanted)
+    if (
+      wanted === GONE
+        ? id !== undefined
+        : id === undefined || shape(repo.commits, id, memo) !== wanted
+    )
       misses.push({ kind: 'branch', name })
   }
   if (goal.head !== undefined) {
@@ -116,8 +126,12 @@ export function missing(repo: Repo, remote: Remote | null, goal: Goal): Miss[] {
   }
   for (const [name, wanted] of Object.entries(goal.remote ?? {})) {
     const id = remote?.branches[name]
+    const ok =
+      wanted === GONE
+        ? id === undefined
+        : remote !== null && id !== undefined && shape(remote.commits, id, new Map()) === wanted
 
-    if (remote === null || id === undefined || shape(remote.commits, id, new Map()) !== wanted) {
+    if (!ok) {
       misses.push({ kind: 'remote', name: `origin/${name}` })
     }
   }
