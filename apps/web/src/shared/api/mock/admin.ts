@@ -39,6 +39,10 @@ function openPanel(code: string): void {
   panel.elevatedUntil = new Date(Date.now() + 12 * 3_600_000).toISOString()
 }
 
+/** Los clics que manda la web de mentira, para el mapa de calor. */
+const clickCells = new Map<string, number>()
+const clickElements = new Map<string, number>()
+
 export const adminMock: Pick<
   Api,
   | 'openTicket'
@@ -69,6 +73,8 @@ export const adminMock: Pick<
   | 'getAdminMessages'
   | 'getUsage'
   | 'sendUsage'
+  | 'sendClicks'
+  | 'getClickHeatmap'
   | 'getStats'
   | 'getAdminGrowth'
   | 'getUsageHeatmap'
@@ -417,6 +423,88 @@ export const adminMock: Pick<
 
   async sendUsage() {
     await delay(50)
+  },
+
+  async sendClicks(batch) {
+    await delay(30)
+
+    // Como la API: se suman por sección y forma de pantalla.
+    for (const cell of batch.cells) {
+      const key = `${batch.section}|${batch.layout}|${cell.x},${cell.y}`
+
+      clickCells.set(key, (clickCells.get(key) ?? 0) + cell.n)
+    }
+    for (const one of batch.elements) {
+      const key = `${batch.section}|${one.interactive ? 1 : 0}|${one.element}`
+
+      clickElements.set(key, (clickElements.get(key) ?? 0) + one.n)
+    }
+  },
+
+  async getClickHeatmap(section, layout, days) {
+    await delay(150)
+
+    const chosen = section ?? 'expediente'
+    // De ejemplo: la foto del expediente y las cifras se pulsan sin hacer nada.
+    const sample: [number, number, number][] = [
+      [2, 3, 14],
+      [3, 3, 18],
+      [3, 4, 9],
+      [12, 2, 6],
+      [20, 1, 4],
+      [6, 9, 11],
+      [7, 9, 13],
+      [14, 12, 5],
+      [15, 12, 7],
+      [4, 18, 3],
+      [18, 20, 8],
+    ]
+    const cells = new Map(sample.map(([x, y, n]) => [`${x},${y}`, n]))
+
+    for (const [key, n] of clickCells) {
+      const [where = '', shape = '', cell = ''] = key.split('|')
+
+      if (where === chosen && shape === layout) cells.set(cell, (cells.get(cell) ?? 0) + n)
+    }
+
+    const elements = new Map<string, number>([
+      ['0|img.avatar', 41],
+      ['1|button.pill', 33],
+      ['0|div.stat-card', 19],
+      ['1|a.record-link', 12],
+      ['0|h2', 6],
+    ])
+
+    for (const [key, n] of clickElements) {
+      const [where = '', interactive = '0', element = 'div'] = key.split('|')
+
+      if (where === chosen)
+        elements.set(
+          `${interactive}|${element}`,
+          (elements.get(`${interactive}|${element}`) ?? 0) + n,
+        )
+    }
+
+    return {
+      section: chosen,
+      layout,
+      days,
+      columns: 24,
+      rowPx: 40,
+      cells: [...cells.entries()].map(([cell, n]) => {
+        const [x = 0, y = 0] = cell.split(',').map(Number)
+
+        return { x, y, n }
+      }),
+      elements: [...elements.entries()]
+        .map(([key, n]) => {
+          const [interactive = '0', element = 'div'] = key.split('|')
+
+          return { element, interactive: interactive === '1', n }
+        })
+        .sort((a, b) => b.n - a.n),
+      sections: ['expediente', 'consulta', 'tablon', 'clusters', 'notgames'],
+    }
   },
 
   async getAdminGrowth(from, to, campuses) {

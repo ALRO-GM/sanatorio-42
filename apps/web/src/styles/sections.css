@@ -1224,3 +1224,36 @@ dialog.welcome .actions {
   width: 100%;
   font-weight: 400;
 }
+
+/* ── Panel: mapa de calor de clics (`features/admin/ClickMap.tsx`) ──────── */
+.click-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(18rem, 24rem);
+  gap: 1rem;
+  align-items: start;
+}
+@media (max-width: 800px) {
+  .click-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.click-grid {
+  display: grid;
+  gap: 1px;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-2);
+}
+.click-grid.mobile {
+  max-width: 22rem;
+}
+.click-grid span {
+  aspect-ratio: 1;
+  border-radius: 2px;
+  background: var(--danger);
+}
+tr.dead-click td {
+  color: var(--warn);
+  font-weight: 600;
+}

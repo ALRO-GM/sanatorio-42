@@ -7,6 +7,7 @@ import type { Db } from '../../core/db/database.js'
 import { tableStore } from '../../core/db/data-store.js'
 import type { AppModule } from '../../core/module.js'
 import type { ReplicaRepository } from '../replica/index.js'
+import { createClicksService } from './clicks.js'
 import { createUsageService } from './usage.service.js'
 import type { Online, Traffic } from './usage.service.js'
 import type { UsageService } from './usage.service.js'
@@ -21,6 +22,7 @@ export function createUsageModule(deps: {
   now?: () => number
 }): UsageModule {
   const service = createUsageService(deps)
+  const clicks = createClicksService(deps.db, deps.now)
 
   return {
     name: 'usage',
@@ -85,6 +87,20 @@ export function createUsageModule(deps: {
         reply.header('Cache-Control', 'private, no-store')
 
         return reply.send(await service.online(await session.actor(request)))
+      })
+
+      /** `POST /usage/clicks` → `ClickBatch`: los clics de una sección desde el último envío. 204. */
+      app.post('/usage/clicks', async (request, reply) => {
+        await clicks.record(await session.actor(request), request.body)
+
+        return reply.code(204).send()
+      })
+
+      /** `GET /admin/clicks?section=&layout=&days=` → el mapa de calor de clics de una sección. */
+      app.get<{ Querystring: Record<string, string> }>('/admin/clicks', async (request, reply) => {
+        reply.header('Cache-Control', 'private, no-store')
+
+        return reply.send(await clicks.heatmap(await session.actor(request), request.query))
       })
 
       /** `POST /usage` → suma lo que has usado desde el último envío. 204. */

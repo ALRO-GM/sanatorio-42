@@ -1,13 +1,14 @@
 import { useState } from 'react'
 
 import { useI18n } from '../../shared/i18n'
+import { ClickMap } from './ClickMap'
 import { FlowsPanel } from './FlowsPanel'
 import { EVERYONE } from './SegmentSlider'
 import { UsageHeatmap } from './UsageHeatmap'
 
-const VIEWS = ['heat', 'flows'] as const
+const VIEWS = ['heat', 'flows', 'clicks'] as const
 
-/** «Qué se usa»: el mapa de calor de cada elemento, o los recorridos entre secciones. */
+/** «Qué se usa»: el mapa de calor de cada elemento, los recorridos entre secciones o los clics. */
 export function UsageTab() {
   const { t } = useI18n()
   const [view, setView] = useState<(typeof VIEWS)[number]>('heat')
@@ -32,14 +33,14 @@ export function UsageTab() {
           </button>
         ))}
       </div>
-      {view === 'heat' ? (
-        <UsageHeatmap segment={segment} onSegment={setSegment} />
-      ) : (
+      {view === 'heat' && <UsageHeatmap segment={segment} onSegment={setSegment} />}
+      {view === 'flows' && (
         <>
           <h2>{t('admin.flows.title')}</h2>
           <FlowsPanel segment={segment} onSegment={setSegment} />
         </>
       )}
+      {view === 'clicks' && <ClickMap />}
     </section>
   )
 }

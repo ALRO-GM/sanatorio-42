@@ -10,6 +10,7 @@
 import { useSyncExternalStore } from 'react'
 
 import { api } from '../api'
+import { startClicks } from './clicks'
 import { arrange } from './order'
 import type { OrderMode } from './order'
 import { NAV_DEFAULT, PAGES } from './registry'
@@ -182,6 +183,8 @@ export function startUsage(): void {
   if (asked) return
 
   asked = true
+  // Con el uso, los clics para el mapa de calor (`clicks.ts`).
+  startClicks()
   api.getUsage().then(
     (usage) => {
       set({ community: usage.counts })

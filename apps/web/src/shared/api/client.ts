@@ -135,6 +135,11 @@ export const realApi: Api = {
   sendUsage: (counts, time, flows) => send('POST', '/usage', { counts, time, flows }),
   getFlows: (query) => getJson(`/admin/flows?${search(query)}`),
   getOnline: () => getJson('/admin/online'),
+  sendClicks: (batch) => send('POST', '/usage/clicks', batch),
+  getClickHeatmap: (section, layout, days) =>
+    getJson(
+      `/admin/clicks?${search({ ...(section === null ? {} : { section }), layout, days: String(days) })}`,
+    ),
   getTourSpeeds: () => getJson('/tours/speeds'),
   sendTourSpeed: (name, rate) => sendJson('POST', '/tours/speed', { name, rate }),
   getTourStats: () => getJson('/admin/tours'),

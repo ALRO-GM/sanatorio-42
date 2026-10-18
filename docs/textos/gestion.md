@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/gestion.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-451 textos. «—» es que falta la traducción: sale en español.
+463 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -458,3 +458,15 @@ Generado desde `apps/web/src/shared/i18n/textos/gestion.csv` con
 | `admin.growth.activeByCampus` | Panel, crecimiento por campus: gráfica de gente activa por día y campus | features/admin/GrowthPanel | Activos por día y campus | Active per day and campus | Actius per dia i campus | Aktiboak egunero eta campusaren arabera |
 | `admin.tab.facility` | Panel: pestaña de los avisos del edificio | features/admin/AdminPage | Avisos del edificio | Building reports | Avisos de l'edifici | Eraikineko jakinarazpenak |
 | `staff.facility` | Página del staff: título de los avisos del edificio | features/staff/StaffPage | Avisos de problemas | Problem reports | Avisos de problemes | Arazoen jakinarazpenak |
+| `admin.usage.view.clicks` | Panel, mapa de calor de clics: vista de la pestaña de uso | features/admin/UsageTab | Clics | Clicks | Clics | Klikak |
+| `admin.clicks.title` | Panel, mapa de calor de clics: título | features/admin/ClickMap | Dónde y qué se pulsa | Where and what is clicked | On i què es prem | Non eta zer sakatzen den |
+| `admin.clicks.section` | Panel, mapa de calor de clics: elegir la sección | features/admin/ClickMap | Sección | Section | Secció | Atala |
+| `admin.clicks.layout.desktop` | Panel, mapa de calor de clics: pantallas anchas | features/admin/ClickMap | Ordenador | Desktop | Ordinador | Ordenagailua |
+| `admin.clicks.layout.mobile` | Panel, mapa de calor de clics: pantallas estrechas | features/admin/ClickMap | Móvil | Mobile | Mòbil | Mugikorra |
+| `admin.clicks.gridLabel` | Panel, mapa de calor de clics: la rejilla para lectores de pantalla | features/admin/ClickMap | Mapa de calor de clics sobre el contenido de la sección | Click heat map over the section content | Mapa de calor de clics sobre el contingut de la secció | Atalaren edukiaren gaineko klik-bero mapa |
+| `admin.clicks.element` | Panel, mapa de calor de clics: columna del elemento (etiqueta y clase) | features/admin/ClickMap | Elemento | Element | Element | Elementua |
+| `admin.clicks.interactive` | Panel, mapa de calor de clics: columna de si se puede pulsar | features/admin/ClickMap | ¿Se puede pulsar? | Clickable? | Es pot prémer? | Saka daiteke? |
+| `admin.clicks.yes` | Panel, mapa de calor de clics: sí se puede pulsar | features/admin/ClickMap | Sí | Yes | Sí | Bai |
+| `admin.clicks.dead` | Panel, mapa de calor de clics: no se puede pulsar, y aun así se pulsa | features/admin/ClickMap | No | No | No | Ez |
+| `admin.clicks.count` | Panel, mapa de calor de clics: columna de clics | features/admin/ClickMap | Clics | Clicks | Clics | Klikak |
+| `admin.clicks.hint` | Panel, mapa de calor de clics: explicación bajo el mapa | features/admin/ClickMap | En naranja, lo que se pulsa sin que haga nada: ahí la gente espera que algo pase. La rejilla es el contenido de la sección (24 columnas a lo ancho, filas de 40 px). Sin logins: solo recuentos. | In orange, what gets clicked without doing anything: people expect something there. The grid is the section content (24 columns across, 40 px rows). No logins: counts only. | En taronja, el que es prem sense que faci res: la gent hi espera alguna cosa. La graella és el contingut de la secció (24 columnes d'ample, files de 40 px). Sense logins: només recomptes. | Laranjaz, ezer egiten ez duen arren sakatzen dena: jendeak zerbait espero du hor. Sareta atalaren edukia da (24 zutabe zabalean, 40 px-eko errenkadak). Loginik gabe: zenbaketak bakarrik. |

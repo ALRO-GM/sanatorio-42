@@ -7,6 +7,9 @@
  */
 
 import type {
+  ClickBatch,
+  ClickHeatmap,
+  ClickLayout,
   FacilityReport,
   FacilityReportInput,
   AdminGrowth,
@@ -275,6 +278,14 @@ export type Api = {
     time?: UsageSend['time'],
     flows?: UsageSend['flows'],
   ) => Promise<void>
+  /** Manda los clics de una sección para el mapa de calor. */
+  sendClicks: (batch: ClickBatch) => Promise<void>
+  /** El mapa de calor de clics de una sección. Solo admins. */
+  getClickHeatmap: (
+    section: string | null,
+    layout: ClickLayout,
+    days: number,
+  ) => Promise<ClickHeatmap>
   /** A cuánto va cada demostración de fábrica. */
   getTourSpeeds: () => Promise<TourSpeeds>
   /** Dice a cuánto has visto una demostración, respecto a la de fábrica. */

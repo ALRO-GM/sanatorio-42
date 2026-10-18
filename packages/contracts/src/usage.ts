@@ -141,3 +141,33 @@ export type OnlineUsers = {
     seenAt: string
   }[]
 }
+
+/** Pantalla estrecha (móvil) o ancha (ordenador): la rejilla se cuenta aparte. */
+export type ClickLayout = 'mobile' | 'desktop'
+
+/**
+ * `POST /usage/clicks`: los clics desde el último envío, de una sección.
+ * `cells`: casillas de una rejilla de 24 columnas (x, ancho del contenido) por
+ * filas de 40 px (y, desde arriba del contenido). `elements`: etiqueta y clase
+ * de lo pulsado (sin texto) y si se podía pulsar.
+ */
+export type ClickBatch = {
+  section: string
+  layout: ClickLayout
+  cells: { x: number; y: number; n: number }[]
+  elements: { element: string; interactive: boolean; n: number }[]
+}
+
+/** `GET /admin/clicks?section=&layout=&days=`: el mapa de calor de una sección. Solo admins. */
+export type ClickHeatmap = {
+  section: string
+  layout: ClickLayout
+  days: number
+  columns: number
+  rowPx: number
+  cells: { x: number; y: number; n: number }[]
+  /** De más a menos clics. Los que no se pueden pulsar son los que la gente espera que hagan algo. */
+  elements: { element: string; interactive: boolean; n: number }[]
+  /** Secciones con clics en el periodo, para elegir. */
+  sections: string[]
+}

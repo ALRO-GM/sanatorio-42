@@ -1253,6 +1253,24 @@ POST /games/rooms/:id/resign   → abandona: gana el otro bando
   El resultado va a `game_results` con `game: 'chess'` (victoria 2, tablas 1).
 - Nadie está a la vez en una sala de preguntas y en una por turnos (409).
 
+## Mapa de calor de clics (`modules/usage/clicks.ts`)
+
+```
+POST /usage/clicks                         → ClickBatch → 204
+GET  /admin/clicks?section=&layout=&days=  → ClickHeatmap (solo admins)
+```
+
+La web (`shared/layout/clicks.ts`) junta los clics de cada sección y los manda
+cada minuto y al ocultar la pestaña. Sin login, solo recuentos por día:
+
+- casillas de una rejilla normalizada sobre el contenido (`main`): 24 columnas a
+  lo ancho y filas de 40 px desde arriba (150 como mucho), aparte en `mobile`
+  (menos de 700 px de ancho) y `desktop`: la misma coordenada significa lo mismo
+  con cualquier zoom o ancho;
+- el elemento pulsado como etiqueta y clase (`img.avatar`), sin texto ni clases
+  de estado, y si se podía pulsar. Lo que se pulsa sin poder pulsarse es lo que
+  la gente espera que haga algo.
+
 ## Avisos del edificio (`modules/facility`)
 
 ```
