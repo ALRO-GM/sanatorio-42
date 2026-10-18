@@ -29,6 +29,8 @@ type PeersResult = {
 type PeersServiceOptions = {
   replica: ReplicaRepository
   sync: Syncer
+  /** Quién de esos está en modo Pomodoro, y hasta cuándo. */
+  focusOf?: (logins: readonly string[]) => Promise<Map<string, string>>
   now?: () => number
 }
 
@@ -104,7 +106,14 @@ export function createPeersService(options: PeersServiceOptions) {
         replica.countParticipants(projectId, campusId),
       ])
 
-      return { peers, totalParticipants, complete: !partial }
+      const focusing =
+        (await options.focusOf?.(peers.map((peer) => peer.login))) ?? new Map<string, string>()
+
+      return {
+        peers: peers.map((peer) => ({ ...peer, focusUntil: focusing.get(peer.login) ?? null })),
+        totalParticipants,
+        complete: !partial,
+      }
     },
 
     /** Nombre del proyecto, o `null` si no se ha visto todavía. */

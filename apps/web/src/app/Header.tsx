@@ -27,6 +27,8 @@ type HeaderProps = {
   onInbox: () => void
   /** Volver a ver la bienvenida. */
   onWelcome: () => void
+  /** Abre el Pomodoro (modo concentración). */
+  onFocus: () => void
   /** Hay un examen en marcha en el campus. */
   examLive?: boolean
   onLogout: () => void
@@ -50,6 +52,7 @@ export function Header({
   onCustomize,
   onInbox,
   onWelcome,
+  onFocus,
   examLive = false,
   onLogout,
 }: HeaderProps) {
@@ -207,6 +210,7 @@ export function Header({
                     ]
                   : []),
                 null,
+                { id: 'pomodoro', icon: 'reloj', label: t('focus.open'), run: onFocus },
                 { id: 'personalizar', icon: 'ajustes', label: t('layout.open'), run: onCustomize },
                 { id: 'incidencias', icon: 'bicho', label: t('inbox.open'), run: onInbox },
                 { id: 'bienvenida', icon: 'pregunta', label: t('welcome.open'), run: onWelcome },

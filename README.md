@@ -71,6 +71,7 @@ Lo que este proyecto enseña de quien lo ha hecho:
   - [Avisos y sala del evento](#avisos-y-sala-del-evento)
   - [Red de correcciones](#red-de-correcciones)
   - [Clústeres](#clústeres)
+  - [Modo concentración (Pomodoro)](#modo-concentración-pomodoro)
   - [Avisos del edificio](#avisos-del-edificio)
   - [Exámenes](#exámenes)
   - [Buscador de personas](#buscador-de-personas)
@@ -265,6 +266,16 @@ ordenador que no funciona (se da por arreglado en cuanto alguien inicia sesión
 en él).
 
 ![Clústeres con una ficha abierta](docs/img/clusters.webp)
+
+### Modo concentración (Pomodoro)
+
+Desde el menú de la cuenta: un rato de concentración (25, 50 o 90 minutos) y su
+descanso, con un temporizador grande que flota a la vista. Mientras dura, la web
+se queda con las pestañas que elijas, los juegos se callan (sonidos, la
+ventanita de Code Clicker, sus noticias y logros) y solo saltan los avisos
+elegidos (correcciones, eventos, mensajes, guardia o el resto del buzón); los
+obligatorios de un evento con más gente, siempre. Los demás ven «concentrado,
+no me distraigas» en tu ficha, tu puesto y la sala de espera.
 
 ### Avisos del edificio
 
@@ -545,6 +556,7 @@ pie showData title Líneas por parte
 | `quiz`       | Not-games: banco de preguntas, salas, partidas y dificultad que se reajusta       |
 | `stats`      | Estadísticas de Ayuda: cifras del campus y clasificación de cada sección          |
 | `facility`   | Avisos al staff de problemas del edificio y de los ordenadores (y Slack)          |
+| `focus`      | Modo concentración (Pomodoro): quién está concentrado y hasta cuándo              |
 | `staff` | Documentos con código de verificación y las cuentas de staff que los comprueban |
 | `admin`      | Permisos, bloqueos, buzón, consumo, presupuesto de peticiones y limpieza de datos |
 

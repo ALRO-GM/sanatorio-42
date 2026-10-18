@@ -4,6 +4,7 @@ import { shows, useDetail } from '../shared/detail'
 import { useI18n } from '../shared/i18n'
 import { track, useNavOrder } from '../shared/layout/store'
 import { Icon } from '../shared/ui/Icon'
+import { focusing, useFocus } from '../shared/focus'
 import { CATEGORIES, categoryOf, sectionsOfCategory } from './sections'
 import type { Category, Section } from './sections'
 
@@ -43,15 +44,27 @@ export function Nav({ section, onGo, examLive = false }: NavProps) {
     }
   }, [section])
 
+  const focus = useFocus()
+
   // Las de la categoría que tocan en este modo; las que se pueden reordenar, en
   // el orden elegido.
   const sectionsOf = (category: Category) => {
     const all = sectionsOfCategory(category)
 
-    return [
-      ...all.filter((entry) => !entry.inNav),
-      ...order.flatMap((id) => all.filter((entry) => entry.id === id && entry.inNav)),
-    ].filter((entry) => shows(detail, entry.from ?? 'simple'))
+    return (
+      [
+        ...all.filter((entry) => !entry.inNav),
+        ...order.flatMap((id) => all.filter((entry) => entry.id === id && entry.inNav)),
+      ]
+        .filter((entry) => shows(detail, entry.from ?? 'simple'))
+        // En Pomodoro, solo lo elegido (y la sección en la que se está).
+        .filter(
+          (entry) =>
+            !focusing(focus) ||
+            entry.id === section ||
+            (focus?.settings.sections.includes(entry.id) ?? true),
+        )
+    )
   }
 
   const categories = CATEGORIES.filter(({ id }) => sectionsOf(id).length > 0)

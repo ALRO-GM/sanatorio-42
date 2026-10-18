@@ -7,6 +7,8 @@
  */
 
 import type {
+  Focus,
+  FocusSettings,
   ClickBatch,
   ClickHeatmap,
   ClickLayout,
@@ -278,6 +280,10 @@ export type Api = {
     time?: UsageSend['time'],
     flows?: UsageSend['flows'],
   ) => Promise<void>
+  /** El Pomodoro: si estás concentrado y tus ajustes. */
+  getFocus: () => Promise<Focus>
+  startFocus: (settings: FocusSettings) => Promise<Focus>
+  stopFocus: () => Promise<Focus>
   /** Manda los clics de una sección para el mapa de calor. */
   sendClicks: (batch: ClickBatch) => Promise<void>
   /** El mapa de calor de clics de una sección. Solo admins. */

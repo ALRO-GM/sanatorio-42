@@ -73,6 +73,7 @@ describe('migraciones', () => {
       'event_messages',
       'exam_attempts',
       'facility_reports',
+      'focus',
       'forty_two_stats',
       'game_results',
       'guide_change_flags',

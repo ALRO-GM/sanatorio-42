@@ -8,6 +8,7 @@ import { useI18n } from '../../shared/i18n'
 import { Show } from '../../shared/detail'
 import { Icon } from '../../shared/ui/Icon'
 import { Avatar } from '../../shared/ui/Avatar'
+import { FocusBadge } from '../../shared/ui/FocusBadge'
 import { PersonLink } from '../../shared/ui/PersonLink'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { BookHelp } from '../help/BookHelp'
@@ -243,6 +244,7 @@ export function PeerList({ project, onOpenTherapy }: PeerListProps) {
                   <PersonLink login={peer.login}>
                     <strong>{peer.login}</strong>
                   </PersonLink>
+                  <FocusBadge until={peer.focusUntil} />
                   {onDuty(peer) ? (
                     <span className="badge on">{t('peers.badgeOn')}</span>
                   ) : (

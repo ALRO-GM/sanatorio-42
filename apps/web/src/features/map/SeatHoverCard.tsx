@@ -4,6 +4,7 @@ import type { MapSeat } from '@sanatorio/contracts'
 
 import { useI18n } from '../../shared/i18n'
 import { Avatar } from '../../shared/ui/Avatar'
+import { FocusBadge } from '../../shared/ui/FocusBadge'
 import { Icon } from '../../shared/ui/Icon'
 import { seatName } from './seats'
 import { recordHref } from '../../shared/links'
@@ -81,6 +82,7 @@ export function SeatHoverCard({ hovered, pinned }: SeatHoverCardProps) {
       <Avatar login={occupant.login} image={occupant.image} size={96} />
       <strong>{occupant.login}</strong>
       <span className="seat-host">{seatName(seat.host, t)}</span>
+      <FocusBadge until={occupant.focusUntil} />
       <span className="seat-projects">
         {occupant.me && <span className="badge subtle">{t('map.you')}</span>}
         {occupant.online && !occupant.me && pinned !== undefined && (

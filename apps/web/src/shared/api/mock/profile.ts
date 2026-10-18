@@ -54,6 +54,7 @@ export const profileMock: Pick<
       onDuty: seated && n % 2 === 0,
       online: n % 2 === 1,
       me: login === ME.login,
+      focusUntil: login === 'lsoto' ? new Date(Date.now() + 20 * 60_000).toISOString() : null,
     }
   },
 

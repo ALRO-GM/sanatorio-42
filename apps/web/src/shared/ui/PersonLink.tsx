@@ -7,6 +7,7 @@ import { api } from '../api'
 import { useI18n } from '../i18n'
 import { recordHref } from '../links'
 import { Avatar } from './Avatar'
+import { FocusBadge } from './FocusBadge'
 
 /** Lo que se tarda en sacar la ficha al pasar el ratón: así no salta al cruzar la lista. */
 const HOVER_DELAY_MS = 350
@@ -104,6 +105,7 @@ export function PersonLink({ login, className = 'record-link', children }: Perso
           <span className="seat-host">
             {card.seat === null ? t('person.away') : t('person.seat', { seat: card.seat })}
           </span>
+          <FocusBadge until={card.focusUntil} />
           <span className="seat-projects">
             {card.me && <span className="badge subtle">{t('map.you')}</span>}
             {card.circle !== null && (

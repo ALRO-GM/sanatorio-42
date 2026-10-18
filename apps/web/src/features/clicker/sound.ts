@@ -3,6 +3,7 @@
  * bien que alguien esté jugando; quien quiera los enciende.
  */
 
+import { focusing } from '../../shared/focus'
 import { tone } from '../../shared/synth'
 import type { Tune } from '../../shared/synth'
 
@@ -39,5 +40,6 @@ export function setSound(on: boolean): void {
 
 /** Toca un sonido, si están encendidos. Nunca falla: sin audio, no suena y ya. */
 export function play(sound: Sound, on: boolean): void {
-  if (on) tone(TUNES[sound])
+  // En Pomodoro, el juego no suena.
+  if (on && !focusing()) tone(TUNES[sound])
 }

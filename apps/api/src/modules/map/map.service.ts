@@ -47,6 +47,8 @@ export type MapServiceOptions = {
   circlesOf?: (logins: readonly string[]) => Promise<Map<string, number>>
   /** Si alguien tiene encendido «de guardia». */
   availableOf?: (login: string) => Promise<boolean>
+  /** Quién de esos está en modo Pomodoro, y hasta cuándo. */
+  focusOf?: (logins: readonly string[]) => Promise<Map<string, string>>
   now?: () => number
 }
 
@@ -120,13 +122,14 @@ export function createMapService(options: MapServiceOptions) {
     async personCard(actor: Actor, login: unknown): Promise<PersonCard> {
       const who = parse(loginSchema, login)
       const since = new Date(now() - LOCATION_MAX_AGE_MS).toISOString()
-      const [present, images, active, circles, online, available] = await Promise.all([
+      const [present, images, active, circles, online, available, focusing] = await Promise.all([
         replica.presenceIn(actor.campusId, since),
         replica.imagesOf([who]),
         replica.activeProjectsOf([who]),
         options.circlesOf?.([who]) ?? new Map<string, number>(),
         options.online?.() ?? new Set<string>(),
         options.availableOf?.(who) ?? false,
+        options.focusOf?.([who]) ?? new Map<string, string>(),
       ])
       const seat = present.find((person) => person.login === who)?.host ?? null
 
@@ -139,6 +142,7 @@ export function createMapService(options: MapServiceOptions) {
         onDuty: available && seat !== null,
         online: online.has(who),
         me: who === actor.login,
+        focusUntil: focusing.get(who) ?? null,
       }
     },
 
@@ -227,13 +231,14 @@ export function createMapService(options: MapServiceOptions) {
 
       const logins = present.map((person) => person.login)
       const mine = await replica.projectsOf(actor.login)
-      const [activeProjects, circles, marks] = await Promise.all([
+      const [activeProjects, circles, marks, focusing] = await Promise.all([
         replica.activeProjectsOf([...logins, actor.login]),
         options.circlesOf?.([...logins, actor.login]) ?? new Map<string, number>(),
         replica.bestMarksIn(
           logins,
           mine.map((project) => project.id),
         ),
+        options.focusOf?.(logins) ?? new Map<string, string>(),
       ])
 
       for (const person of present) {
@@ -254,6 +259,7 @@ export function createMapService(options: MapServiceOptions) {
           online: online.has(person.login),
           circle: circles.get(person.login) ?? null,
           finishedMine: marks.get(person.login) ?? null,
+          focusUntil: focusing.get(person.login) ?? null,
         }
       }
 

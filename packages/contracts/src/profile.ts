@@ -168,3 +168,24 @@ export type Health = {
    */
   milestones: string[]
 }
+
+/** Lo que se puede seguir viendo en modo Pomodoro (lo demás se silencia). */
+export type FocusShow = 'corrections' | 'events' | 'messages' | 'guard' | 'notices'
+
+/** Ajustes del Pomodoro: minutos de concentración y de descanso, y qué ver. */
+export type FocusSettings = {
+  focusMinutes: number
+  breakMinutes: number
+  /** Secciones que siguen en las pestañas (las demás se esconden mientras dura). */
+  sections: string[]
+  show: FocusShow[]
+}
+
+/** `GET /me/focus`, `PUT /me/focus` (empieza) y `DELETE /me/focus` (acaba). */
+export type Focus = {
+  /** Cuándo acaba la concentración, o `null` si no estás concentrado. */
+  until: string | null
+  startedAt: string | null
+  /** Los últimos ajustes que usaste (o los de fábrica). */
+  settings: FocusSettings
+}

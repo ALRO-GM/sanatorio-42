@@ -184,7 +184,11 @@ despliegue espera a la CI).
       panel y lista en la página del staff] (avisar al staff de problemas de ordenadores/edificio con opciones
       claras; Slack si hay webhook), [x] #69 (mapa de calor de clics por elemento y
       por cuadrícula normalizada móvil/ordenador).
-      **#65 Pomodoro**: individual y llamativo; los demás ven «estoy
+      [x] **#65 Pomodoro** [HECHO: módulo `focus` (tabla focus, migración 59,
+      GET/PUT/DELETE /me/focus); se ve en PersonCard, Peer y ocupante del mapa;
+      web: temporizador flotante, ajustes en el menú de la cuenta, nav reducida a
+      lo elegido, juegos y avisos silenciados salvo lo elegido; los avisos
+      obligatorios de eventos siguen]: individual y llamativo; los demás ven «estoy
       concentrado, no me distraigas» (en su ficha, mapa, sala de espera…); la
       web se simplifica a lo que la persona elija ver (p. ej. avisos de
       correcciones o eventos) y silencia juegos y demás avisos; configurable.

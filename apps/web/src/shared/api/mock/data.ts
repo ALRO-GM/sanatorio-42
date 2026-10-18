@@ -48,6 +48,8 @@ const peer = (
   location,
   available,
   status,
+  // En el simulado, lsoto está concentrado (Pomodoro): se ve en la sala de espera.
+  focusUntil: login === 'lsoto' ? new Date(Date.now() + 20 * 60_000).toISOString() : null,
   perfect,
   // Quien lo bordó se ofrece a preevaluar.
   preReview: perfect,

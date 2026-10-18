@@ -64,6 +64,7 @@ import { turnGamesSchema } from './0055-turn-games.js'
 import { quizMissesSchema } from './0056-quiz-misses.js'
 import { facilitySchema } from './0057-facility.js'
 import { usageClicksSchema } from './0058-usage-clicks.js'
+import { focusSchema } from './0059-focus.js'
 import type { Migration } from './types.js'
 
 export const MIGRATIONS: readonly Migration[] = [
@@ -125,6 +126,7 @@ export const MIGRATIONS: readonly Migration[] = [
   quizMissesSchema,
   facilitySchema,
   usageClicksSchema,
+  focusSchema,
 ]
 
 /** Versión más alta que existe en el código. */

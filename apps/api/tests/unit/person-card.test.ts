@@ -50,6 +50,7 @@ describe('ficha de una persona', () => {
       onDuty: false,
       online: false,
       me: false,
+      focusUntil: null,
     })
     await expectCode(services.map.personCard(actor('ana'), '../etc'), 'invalid_input')
     await expectCode(services.map.personCard(actor('ana'), ''), 'invalid_input')

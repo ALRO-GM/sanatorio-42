@@ -27,6 +27,7 @@ function cluster(id: string, plan: string[]): ClusterMap['clusters'][number] {
               online: false,
               circle: null,
               finishedMine: null,
+              focusUntil: null,
             }
           : null,
     })),

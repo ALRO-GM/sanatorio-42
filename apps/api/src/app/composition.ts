@@ -54,6 +54,8 @@ import type { ProfileModule } from '../modules/profile/index.js'
 import { createReplicaModule } from '../modules/replica/index.js'
 import type { PhotoStore, ReplicaModule, SyncerConfig } from '../modules/replica/index.js'
 import { createFacilityModule } from '../modules/facility/index.js'
+import { createFocusModule } from '../modules/focus/index.js'
+import type { FocusModule } from '../modules/focus/index.js'
 import type { FacilityModule } from '../modules/facility/index.js'
 import { createStatsModule } from '../modules/stats/index.js'
 import type { StatsModule } from '../modules/stats/index.js'
@@ -130,6 +132,7 @@ export type Services = {
   chess: QuizModule['chess']
   stats: StatsModule['service']
   facility: FacilityModule['service']
+  focus: FocusModule['service']
 }
 
 type Composition = {
@@ -159,6 +162,10 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     ...(config.log === undefined ? {} : { log: config.log }),
     ...clock,
   })
+  // El Pomodoro va pronto: la sala de espera y el plano preguntan quién está concentrado.
+  const focus = createFocusModule({ db, ...clock })
+  const focusOf = (logins: readonly string[]) =>
+    focus.repository.untilOf(logins, new Date(now()).toISOString())
   // Los módulos avisan sin saber que hay un buzón: `notices` es quien escucha.
   const notify: Notify = (notice) => events.emit('notice', notice)
   const common = { db, replica: replica.repository, ...clock }
@@ -207,7 +214,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     ...clock,
   })
 
-  const peers = createPeersModule({ ...common, sync: replica.sync, events })
+  const peers = createPeersModule({ ...common, sync: replica.sync, events, focusOf })
   const therapy = createTherapyModule({ ...common, sync: replica.sync, xp: profile.xp, notify })
   const doubts = createDoubtsModule({
     ...common,
@@ -240,6 +247,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     online,
     circlesOf: (logins) => replica.curriculum.circlesOf(logins),
     availableOf: (login) => peers.availabilityRepository.get(login),
+    focusOf,
     broken: createBrokenSeats(db),
     ...clock,
   })
@@ -416,6 +424,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     quiz,
     stats,
     facility,
+    focus,
   ]
 
   return {
@@ -458,6 +467,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
       chess: quiz.chess,
       stats: stats.service,
       facility: facility.service,
+      focus: focus.service,
     },
   }
 }

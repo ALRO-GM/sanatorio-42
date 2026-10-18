@@ -1257,3 +1257,89 @@ tr.dead-click td {
   color: var(--warn);
   font-weight: 600;
 }
+
+/* ── Pomodoro (`features/focus/`) ──────────────────────────────────────── */
+.focus-timer {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0.9rem 0.6rem 0.6rem;
+  border: 2px solid var(--accent);
+  border-radius: 999px;
+  background: var(--surface);
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.35),
+    0 0 0 6px color-mix(in srgb, var(--accent) 18%, transparent);
+  animation: focus-in 0.35s cubic-bezier(0.3, 1.5, 0.5, 1);
+}
+.focus-timer.resting {
+  border-color: var(--ok);
+  padding-left: 0.9rem;
+}
+.focus-timer svg {
+  width: 56px;
+  height: 56px;
+  transform: rotate(-90deg);
+}
+.focus-track {
+  fill: none;
+  stroke: var(--surface-2);
+  stroke-width: 6;
+}
+.focus-ring {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 6;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.5s linear;
+}
+.focus-text {
+  display: grid;
+  line-height: 1.1;
+}
+.focus-text strong {
+  font-size: 1.5rem;
+  font-variant-numeric: tabular-nums;
+}
+.focus-text small {
+  color: var(--text-3);
+}
+@keyframes focus-in {
+  from {
+    transform: translateY(20px) scale(0.9);
+    opacity: 0;
+  }
+}
+.focus-dialog .focus-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 1rem;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  border: 0;
+}
+.focus-dialog .focus-choices legend {
+  margin-bottom: 0.35rem;
+  font-weight: 600;
+}
+.badge.focus-badge {
+  border-color: color-mix(in srgb, var(--warn) 60%, transparent);
+  background: color-mix(in srgb, var(--warn) 18%, var(--surface));
+  color: var(--text);
+}
+/* Concentrado: fuera lo de los juegos (la ventanita, las noticias y los logros). */
+:root[data-focus='on'] .cc-mini,
+:root[data-focus='on'] .cc-news,
+:root[data-focus='on'] .cc-egg-toast,
+:root[data-focus='on'] .cc-toast {
+  display: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .focus-timer {
+    animation: none;
+  }
+}

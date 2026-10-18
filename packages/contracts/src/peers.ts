@@ -43,6 +43,8 @@ export type Peer = {
    * corrección de prueba antes de la de verdad.
    */
   preReview: boolean
+  /** En modo Pomodoro hasta esa hora (ISO): «concentrado, no me distraigas». `null` si no. */
+  focusUntil: string | null
 }
 
 /** `GET` y `PUT /me/availability`. */

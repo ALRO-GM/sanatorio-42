@@ -11,6 +11,7 @@ import { useMemo, useSyncExternalStore } from 'react'
 
 import type { QuizRoom, TurnRoom } from '@sanatorio/contracts'
 
+import { focusing } from '../../shared/focus'
 import { tone } from '../../shared/synth'
 import type { Tune } from '../../shared/synth'
 
@@ -67,7 +68,8 @@ export function useGameSoundOn(): boolean {
 }
 
 function playGame(sound: Sound): void {
-  if (on) tone(TUNES[sound])
+  // En Pomodoro, los juegos no suenan.
+  if (on && !focusing()) tone(TUNES[sound])
 }
 
 /** Los sonidos de las dos clases de sala, según lo que ha cambiado. */

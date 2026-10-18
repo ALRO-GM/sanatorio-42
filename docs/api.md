@@ -1253,6 +1253,21 @@ POST /games/rooms/:id/resign   → abandona: gana el otro bando
   El resultado va a `game_results` con `game: 'chess'` (victoria 2, tablas 1).
 - Nadie está a la vez en una sala de preguntas y en una por turnos (409).
 
+## Modo concentración, Pomodoro (`modules/focus`)
+
+```
+GET    /me/focus  → Focus { until, startedAt, settings }
+PUT    /me/focus  → FocusSettings { focusMinutes 5–180, breakMinutes 0–60, sections, show } → Focus
+DELETE /me/focus  → Focus (acaba antes de tiempo; los ajustes se guardan)
+```
+
+Mientras `until` no ha pasado, los demás ven `focusUntil` en la ficha
+(`PersonCard`), en el ocupante de su puesto del plano y en la sala de espera
+(`Peer`): «concentrado, no me distraigas». La web, con `settings`, deja en las
+pestañas solo las secciones elegidas, calla los juegos y saca solo los avisos
+elegidos (`show`); los obligatorios de un evento con más gente salen siempre. El
+descanso lo lleva la web.
+
 ## Mapa de calor de clics (`modules/usage/clicks.ts`)
 
 ```

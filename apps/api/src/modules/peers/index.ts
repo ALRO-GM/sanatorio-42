@@ -19,6 +19,8 @@ type PeersModuleDeps = {
   replica: ReplicaRepository
   sync: Syncer
   events: EventBus
+  /** Quién de esos está en modo Pomodoro, y hasta cuándo. */
+  focusOf?: (logins: readonly string[]) => Promise<Map<string, string>>
   now?: () => number
 }
 
@@ -34,6 +36,7 @@ export function createPeersModule(deps: PeersModuleDeps): PeersModule {
   const peers = createPeersService({
     replica: deps.replica,
     sync: deps.sync,
+    ...(deps.focusOf === undefined ? {} : { focusOf: deps.focusOf }),
     ...(deps.now === undefined ? {} : { now: deps.now }),
   })
 

@@ -269,6 +269,7 @@ describe('compañeros', () => {
     for (const peer of json(response) as Peer[]) {
       expect(Object.keys(peer).sort()).toEqual([
         'available',
+        'focusUntil',
         'image',
         'location',
         'login',

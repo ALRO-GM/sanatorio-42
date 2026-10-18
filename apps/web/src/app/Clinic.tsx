@@ -8,6 +8,9 @@ import { ReviewGate } from '../features/clicker/ReviewGate'
 import { calendarHref } from '../shared/links'
 import { HelpGate } from '../features/help/HelpGate'
 import { Welcome } from '../features/welcome/Welcome'
+import { FocusDialog } from '../features/focus/FocusDialog'
+import { FocusTimer } from '../features/focus/FocusTimer'
+import { loadFocus } from '../shared/focus'
 import { AlertCenter } from '../features/alerts/AlertCenter'
 import { EasterEgg } from '../features/clicker/EasterEgg'
 import { QuotaNotice } from '../features/alerts/QuotaNotice'
@@ -75,7 +78,10 @@ export function Clinic({ me, onLogout }: ClinicProps) {
 
   useEffect(() => {
     startUsage()
+    // El Pomodoro, si lo había empezado (en esta u otra pestaña).
+    void loadFocus()
   }, [])
+  const [focusOpen, setFocusOpen] = useState(false)
 
   // El tiempo de uso se apunta a la sección que se está mirando.
   useEffect(() => {
@@ -139,8 +145,20 @@ export function Clinic({ me, onLogout }: ClinicProps) {
         onWelcome={() => {
           setWelcoming(true)
         }}
+        onFocus={() => {
+          setFocusOpen(true)
+        }}
         onLogout={onLogout}
       />
+      {/* El Pomodoro: el temporizador flota a la vista mientras dura. */}
+      <FocusTimer />
+      {focusOpen && (
+        <FocusDialog
+          onClose={() => {
+            setFocusOpen(false)
+          }}
+        />
+      )}
 
       {/* La red de correcciones necesita sitio: es la única sección a todo lo ancho. */}
       <main className={`container ${section === 'red' || section === 'clicker' ? 'wide' : ''}`}>

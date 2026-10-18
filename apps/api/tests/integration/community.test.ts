@@ -97,6 +97,7 @@ describe('réplica vista desde fuera', () => {
         status: 'in_progress',
         perfect: false,
         preReview: false,
+        focusUntil: null,
       },
     ])
     // En el proyecto hay tres personas de Madrid, aunque solo una sea accionable.

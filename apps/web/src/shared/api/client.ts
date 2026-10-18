@@ -135,6 +135,9 @@ export const realApi: Api = {
   sendUsage: (counts, time, flows) => send('POST', '/usage', { counts, time, flows }),
   getFlows: (query) => getJson(`/admin/flows?${search(query)}`),
   getOnline: () => getJson('/admin/online'),
+  getFocus: () => getJson('/me/focus'),
+  startFocus: (settings) => sendJson('PUT', '/me/focus', settings),
+  stopFocus: () => sendJson('DELETE', '/me/focus'),
   sendClicks: (batch) => send('POST', '/usage/clicks', batch),
   getClickHeatmap: (section, layout, days) =>
     getJson(

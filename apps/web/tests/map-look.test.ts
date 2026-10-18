@@ -42,6 +42,7 @@ const seat = (occupant: Partial<NonNullable<MapSeat['occupant']>> | null): MapSe
           online: false,
           circle: null,
           finishedMine: null,
+          focusUntil: null,
           ...occupant,
         },
 })

@@ -191,3 +191,28 @@ table.unsort,Tablas: botón para quitar el orden,Quitar el orden,Clear sorting,T
 table.sortHint,Tablas: explicación al pasar por una cabecera,Ordenar por esta columna. Lo que ordenaste antes decide los empates.,Sort by this column. What you sorted before breaks ties.,Ordena per aquesta columna. El que vas ordenar abans decideix els empats.,Ordenatu zutabe honen arabera. Lehen ordenatutakoak erabakitzen ditu berdinketak.
 nav.notgames,Pestaña de Ayuda: preguntas de programación para aprender jugando (no se llama juego a propósito),Not-games,Not-games,Not-games,Not-games
 nav.estadisticas,Pestaña de Ayuda: cifras y clasificación de cada sección,Estadísticas,Statistics,Estadístiques,Estatistikak
+focus.open,Menú de la cuenta: abrir el Pomodoro,Modo concentración (Pomodoro),Focus mode (Pomodoro),Mode concentració (Pomodoro),Kontzentrazio modua (Pomodoro)
+focus.title,Pomodoro: título de la ventana,Modo concentración,Focus mode,Mode concentració,Kontzentrazio modua
+focus.pitch,Pomodoro: explicación en la ventana,"Un rato sin distracciones: la web se queda con lo que elijas, los juegos se callan y los demás ven que estás concentrado.","Some time without distractions: the web keeps only what you choose, games go quiet and others see you are focusing.","Una estona sense distraccions: la web es queda amb el que triïs, els jocs callen i els altres veuen que estàs concentrat.","Distrakziorik gabeko denbora: webak aukeratzen duzuna bakarrik uzten du, jokoak isiltzen dira eta besteek kontzentratuta zaudela ikusten dute."
+focus.minutes,Pomodoro: minutos de concentración,Concentración,Focus,Concentració,Kontzentrazioa
+focus.break,Pomodoro: minutos de descanso,Descanso,Break,Descans,Atsedena
+focus.minutesN,Pomodoro: duración,{n} min,{n} min,{n} min,{n} min
+focus.noBreak,Pomodoro: sin descanso,Sin descanso,No break,Sense descans,Atsedenik gabe
+focus.sections,Pomodoro: secciones que siguen en las pestañas,Pestañas que quieres ver,Tabs you want to see,Pestanyes que vols veure,Ikusi nahi dituzun fitxak
+focus.show,Pomodoro: avisos que siguen saliendo,Avisos que quieres recibir,Notices you want to get,Avisos que vols rebre,Jaso nahi dituzun abisuak
+focus.show.corrections,Pomodoro: avisos de correcciones,Correcciones,Evaluations,Correccions,Zuzenketak
+focus.show.events,Pomodoro: avisos de eventos,Eventos,Events,Esdeveniments,Ekitaldiak
+focus.show.messages,Pomodoro: mensajes,Mensajes,Messages,Missatges,Mezuak
+focus.show.guard,Pomodoro: avisos de la guardia,Guardia (reservas),Duty (bookings),Guàrdia (reserves),Guardia (erreserbak)
+focus.show.notices,Pomodoro: el resto del buzón,Resto del buzón,Rest of the mailbox,Resta de la bústia,Postontziaren gainerakoa
+focus.always,Pomodoro: lo que sale siempre,Los avisos obligatorios de un evento con más gente salen siempre: hay que contestarlos.,Mandatory notices of an event with other people always show up: they need an answer.,Els avisos obligatoris d'un esdeveniment amb més gent surten sempre: cal contestar-los.,Jende gehiagorekin dagoen ekitaldi baten derrigorrezko abisuak beti agertzen dira: erantzun behar dira.
+focus.start,Pomodoro: empezar,Empezar a concentrarme,Start focusing,Començar a concentrar-me,Kontzentratzen hasi
+focus.stop,Pomodoro: acabar antes,Acabar,Stop,Acabar,Amaitu
+focus.again,Pomodoro: otra vuelta tras el descanso,Otra vuelta,Another round,Una altra volta,Beste txanda bat
+focus.close,Pomodoro: cerrar el aviso del descanso,Cerrar,Close,Tanca,Itxi
+focus.focusing,Pomodoro: etiqueta del temporizador,Concentrado,Focusing,Concentrat,Kontzentratuta
+focus.resting,Pomodoro: etiqueta del descanso,Descanso,Break,Descans,Atsedena
+focus.breakOver,Pomodoro: el descanso ha acabado,¡A por otra!,Ready for another?,Una altra?,Beste bat?
+focus.timerLabel,Pomodoro: temporizador para lectores de pantalla,Tiempo de concentración que queda,Focus time left,Temps de concentració que queda,Geratzen den kontzentrazio denbora
+focus.badge,Lo que ven los demás de quien está concentrado,Concentrado hasta las {time} · no me distraigas,Focusing until {time} · please don't disturb,Concentrat fins a les {time} · no em distreguis,{time}ak arte kontzentratuta · ez nazazu distraitu
+focus.badgeHint,Explicación del aviso de concentración,Está en modo Pomodoro: mejor escribirle después.,In Pomodoro mode: better write later.,És en mode Pomodoro: millor escriure-li després.,Pomodoro moduan dago: hobe geroago idaztea.

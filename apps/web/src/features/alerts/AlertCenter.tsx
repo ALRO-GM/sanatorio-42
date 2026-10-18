@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react'
 import type { CalendarSection, EventAlert, MeetCheckin } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
+import { shows as showsFocus, useFocus } from '../../shared/focus'
 import { useAction } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { usePrefs } from '../../shared/layout/store'
@@ -97,12 +98,16 @@ export function AlertCenter({ me, onGo }: AlertCenterProps) {
 
   // Los que ya toca enseñar, por orden de inicio. Lo que pide respuesta sale
   // aunque los avisos estén apagados: entonces, a la hora de empezar.
+  const focus = useFocus()
   const now = Date.now()
   const due = alerts.filter(({ event, state }) => {
     const start = Date.parse(event.start)
 
     if (state === 'missed') return true
     if (state === 'pending') return start - now <= Math.max(0, lead) * 60_000
+    // En Pomodoro, lo que solo informa sale solo si se eligió (correcciones o eventos).
+    if (!showsFocus(event.kind === 'evaluation' ? 'corrections' : 'events', focus)) return false
+
     // Lo que solo informa: si los avisos están encendidos, una vez, y mientras no haya empezado.
     return (
       lead > 0 &&

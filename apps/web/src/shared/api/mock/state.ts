@@ -179,6 +179,8 @@ export function buildMap(projectId?: number): ClusterMap {
       online: login.length % 3 === 0,
       circle: login.length % 5,
       finishedMine: null,
+      // Alguien concentrado (Pomodoro), para que se vea en el plano.
+      focusUntil: login === 'lsoto' ? new Date(Date.now() + 20 * 60_000).toISOString() : null,
     })
   }
 
@@ -192,6 +194,7 @@ export function buildMap(projectId?: number): ClusterMap {
         me: false,
         online: peer.available,
         circle: peer.login.length % 5,
+        focusUntil: peer.focusUntil,
         // Quien lo aprobó, uno sí y otro no con la nota máxima.
         finishedMine: peer.status === 'finished' ? (peer.login.length % 2 === 0 ? 125 : 100) : null,
       })

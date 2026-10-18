@@ -36,6 +36,8 @@ export type MapSeat = {
     online: boolean
     /** El círculo del common core en que va (0 a 6), si se sabe. */
     circle: number | null
+    /** En modo Pomodoro hasta esa hora (ISO), o `null`. */
+    focusUntil: string | null
     /**
      * La mejor nota con la que aprobó alguno de los proyectos que tiene en curso
      * quien mira (125 es la máxima), o `null` si no aprobó ninguno.
@@ -93,6 +95,8 @@ export type PersonCard = {
   online: boolean
   /** Es quien pregunta. */
   me: boolean
+  /** En modo Pomodoro hasta esa hora (ISO): «concentrado, no me distraigas». */
+  focusUntil: string | null
 }
 
 /** Qué tipo de problema del edificio o de los ordenadores es (#77 del buzón). */
