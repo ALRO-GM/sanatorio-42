@@ -1271,8 +1271,10 @@ descanso lo lleva la web.
 ## Curso de git (`modules/gitcourse`)
 
 ```
-GET  /gitcourse             → GitCourse { seat, stars: { [punto]: 1–3 } }
-POST /gitcourse/levels/:id  → GitAttemptInput { lines: string[] (≤ 300, ≤ 200 caracteres) } → GitAttemptResult
+GET  /gitcourse                   → GitCourse { seat, stars: { [punto]: 1–3 }, gates: { [prueba]: { passed, retryAt } } }
+POST /gitcourse/levels/:id        → GitAttemptInput { lines: string[] (≤ 300, ≤ 200 caracteres) } → GitAttemptResult
+POST /gitcourse/gates/:id/start   → GitGateQuiz { gate, questions: { prompt, code, options }[], deadline }
+POST /gitcourse/gates/:id/answer  → GitGateAnswerInput { answers: (number | null)[] } → GitGateResult
 ```
 
 - Los puntos del camino (teoría, partida, solución) están en
@@ -1285,6 +1287,13 @@ POST /gitcourse/levels/:id  → GitAttemptInput { lines: string[] (≤ 300, ≤ 
   con más. Se guarda la mejor vez (`git_progress`).
 - Solo desde un puesto del clúster (`seat`, la última sesión en un puesto):
   sin él, 403. En orden: sin el punto anterior, 409. Punto que no existe, 404.
+- **Test previo** a cada prueba de grupo (`group1`, `group2`, `group3`, `boss`
+  en `GATES` de gitsim): hace falta el mundo de antes (409). Ocho preguntas del
+  banco de Not-games de los mundos hechos (`CONCEPTS_BY_WORLD`), 20 s cada una;
+  la buena no sale de la API hasta contestar. Aprobado solo con todas bien y a
+  tiempo. Si se falla o caduca, `retryAt` = una hora después (429 al empezar).
+  Volver a empezar a mitad devuelve las mismas preguntas. Cada respuesta va al
+  Repaso (`quiz_misses`). Se guarda en `git_gates`.
 
 ## Mapa de calor de clics (`modules/usage/clicks.ts`)
 

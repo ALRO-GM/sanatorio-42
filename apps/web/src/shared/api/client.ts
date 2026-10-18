@@ -139,6 +139,9 @@ export const realApi: Api = {
   getGitCourse: () => getJson('/gitcourse'),
   submitGitAttempt: (level, input) =>
     sendJson('POST', `/gitcourse/levels/${encodeURIComponent(level)}`, input),
+  startGitGate: (gate) => sendJson('POST', `/gitcourse/gates/${encodeURIComponent(gate)}/start`),
+  answerGitGate: (gate, input) =>
+    sendJson('POST', `/gitcourse/gates/${encodeURIComponent(gate)}/answer`, input),
   startFocus: (settings) => sendJson('PUT', '/me/focus', settings),
   stopFocus: () => sendJson('DELETE', '/me/focus'),
   sendClicks: (batch) => send('POST', '/usage/clicks', batch),

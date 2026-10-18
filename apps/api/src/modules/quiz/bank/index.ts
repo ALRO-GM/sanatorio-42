@@ -10,12 +10,14 @@
 import { ALGORITHMS } from './algorithms.js'
 import { C_BASICS } from './c-basics.js'
 import { CPP } from './cpp.js'
+import { GIT } from './git.js'
 import { GENERAL } from './general.js'
 import { GRAPHICS } from './graphics.js'
 import { NETWORK_BANK } from './network.js'
 import { PYTHON } from './python.js'
 import { REVIEW_A } from './review-a.js'
 import { REVIEW_B } from './review-b.js'
+import { REVIEW_GIT } from './review-git.js'
 import type { Concept, ReviewEntry } from './types.js'
 import { UNIX } from './unix.js'
 
@@ -30,7 +32,12 @@ export const BANK: readonly Concept[] = [
   ...NETWORK_BANK,
   ...CPP,
   ...PYTHON,
+  ...GIT,
 ]
 
 /** El repaso de cada concepto, por id. Un test comprueba que no falta ninguno. */
-export const REVIEW: Readonly<Record<string, ReviewEntry>> = { ...REVIEW_A, ...REVIEW_B }
+export const REVIEW: Readonly<Record<string, ReviewEntry>> = {
+  ...REVIEW_A,
+  ...REVIEW_B,
+  ...REVIEW_GIT,
+}

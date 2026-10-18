@@ -20,3 +20,5 @@ export function levelOf(id: string): Level | undefined {
 export { checkAttempt, goalOfLevel, solvedOf, starsOf, startOf } from './build.js'
 export type { Attempt } from './build.js'
 export type { Level, Theory } from './types.js'
+export { gateOf, GATES } from './gates.js'
+export type { Gate } from './gates.js'

@@ -18,7 +18,7 @@ Cómo se trabaja con ellas: [docs/textos.md](../textos.md).
 | [gestion](gestion.md) | 463 | 38 | 400 | 400 |
 | [guardia](guardia.md) | 79 | 0 | 0 | 0 |
 | [legal](legal.md) | 52 | 0 | 52 | 52 |
-| [notgames](notgames.md) | 157 | 0 | 0 | 0 |
+| [notgames](notgames.md) | 166 | 0 | 0 | 0 |
 | [pizarras](pizarras.md) | 38 | 0 | 0 | 0 |
 | [red](red.md) | 137 | 0 | 0 | 0 |
 | [sala-de-espera](sala-de-espera.md) | 46 | 0 | 0 | 0 |

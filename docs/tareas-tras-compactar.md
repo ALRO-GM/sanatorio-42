@@ -196,7 +196,7 @@ despliegue espera a la CI).
 - [ ] **Curso de git, fases** (diseño en `docs/curso-git.md`, investigación hecha):
       [x] GC1 motor `packages/gitsim` + tests · [x] GC2 niveles (mundos 0–5) +
       camino, animación, teoría y terminal + progreso en la API (re-ejecuta) +
-      exigir puesto en el clúster · [ ] GC3 preguntas de git en el banco + test
+      exigir puesto en el clúster · [x] GC3 preguntas de git en el banco + test
       previo (100 %, 1 h de espera) · [ ] GC4 salas de grupo (remoto común,
       cada cual su repo, en paralelo) · [ ] GC5 jefe final (4 filas y 4
       columnas, tiempo) · [ ] GC6 demostración, docs y repaso.

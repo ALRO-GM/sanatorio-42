@@ -11,6 +11,9 @@ import type {
   GitAttemptInput,
   GitAttemptResult,
   GitCourse,
+  GitGateAnswerInput,
+  GitGateQuiz,
+  GitGateResult,
   FocusSettings,
   ClickBatch,
   ClickHeatmap,
@@ -287,6 +290,8 @@ export type Api = {
   getFocus: () => Promise<Focus>
   getGitCourse: () => Promise<GitCourse>
   submitGitAttempt: (level: string, input: GitAttemptInput) => Promise<GitAttemptResult>
+  startGitGate: (gate: string) => Promise<GitGateQuiz>
+  answerGitGate: (gate: string, input: GitGateAnswerInput) => Promise<GitGateResult>
   startFocus: (settings: FocusSettings) => Promise<Focus>
   stopFocus: () => Promise<Focus>
   /** Manda los clics de una sección para el mapa de calor. */

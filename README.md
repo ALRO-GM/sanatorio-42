@@ -186,7 +186,7 @@ preguntas de un proyecto solo salen si todos los de la sala lo han hecho (o
 están en él), o se juega solo con lo general; también se puede pedir un círculo
 mínimo para entrar.
 
-El banco tiene 152 conceptos de todo el common core de los dos planes, de lo
+El banco tiene 175 conceptos de todo el common core de los dos planes, de lo
 básico a lo difícil: rápidas (10 s, leer y contestar) y largas (30 s o 1 min,
 razonar o encontrar el fallo en un código). Cada concepto se pregunta de varias
 formas, con la buena escrita de varias maneras y las malas mezcladas, y cada
@@ -286,7 +286,9 @@ deshacer y flujos de trabajo), que se van marcando con estrellas. Cada punto
 tiene una animación de la estructura a conseguir, la teoría del comando (para
 qué, cómo, cuándo sí y cuándo no, cómo se ve y qué problemas da) y un reto en
 una terminal con git simulado. Los retos solo se juegan sentado en un puesto
-del clúster. Las pruebas de grupo y el jefe final están en camino. Diseño:
+del clúster. Antes de cada prueba de grupo hay un test de preguntas rápidas
+que hay que acertar entero (si no, una hora de espera); las pruebas de grupo
+y el jefe final están en camino. Diseño:
 [docs/curso-git.md](docs/curso-git.md).
 
 ### Avisos del edificio

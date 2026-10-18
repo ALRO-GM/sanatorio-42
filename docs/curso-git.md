@@ -93,7 +93,10 @@ cierto número de conceptos hay una **prueba de grupo**.
   objetivo nunca se desfasa del motor. Un test comprueba que todas las
   soluciones llegan y que ningún punto empieza ya resuelto. La teoría de los
   puntos está solo en castellano (como el banco de preguntas).
-- [ ] Fase 3: preguntas de git en el banco y el test previo (100 %, 1 h).
+- [x] Fase 3: 23 conceptos de git en el banco de Not-games (`bank/git.ts`,
+  con su Repaso), que también salen en las partidas normales, y el test previo
+  a cada prueba de grupo (8 preguntas, 100 %, una hora de espera si se falla).
+  La estrella de la prueba en el camino se abre al acabar su mundo.
 - [ ] Fase 4: pruebas de grupo.
 - [ ] Fase 5: jefe final.
 - [ ] Fase 6: demostración y repaso.

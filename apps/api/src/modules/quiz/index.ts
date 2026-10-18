@@ -11,6 +11,8 @@ import { createChessService, openTurnRoomsOf } from './games/index.js'
 import type { ChessService } from './games/index.js'
 import { registerTurnRoutes } from './games/turns.routes.js'
 import { createQuizRepository } from './quiz.repository.js'
+import { buildRound } from './quiz.rules.js'
+import type { Round } from './quiz.rules.js'
 import { registerQuizRoutes } from './quiz.routes.js'
 import { createQuizService } from './quiz.service.js'
 import type { QuizService } from './quiz.service.js'
@@ -23,7 +25,17 @@ type QuizModuleDeps = {
   random?: () => number
 }
 
-export type QuizModule = AppModule & { service: QuizService; chess: ChessService }
+export type QuizModule = AppModule & {
+  service: QuizService
+  chess: ChessService
+  /** Para otros juegos con preguntas del banco (el test previo del curso de git). */
+  questions: {
+    /** Una pregunta montada de ese concepto, o `null` si no existe. */
+    roundOf: (conceptId: string, random: () => number) => Round | null
+    /** Apunta un acierto o un fallo para el Repaso de esa persona. */
+    remember: (login: string, conceptId: string, correct: boolean, at: string) => Promise<void>
+  }
+}
 
 export function createQuizModule(deps: QuizModuleDeps): QuizModule {
   const quiz = createQuizRepository(deps.db)
@@ -62,6 +74,14 @@ export function createQuizModule(deps: QuizModuleDeps): QuizModule {
     ],
     service,
     chess,
+    questions: {
+      roundOf: (conceptId, random) => {
+        const concept = BANK.find((each) => each.id === conceptId)
+
+        return concept === undefined ? null : buildRound(concept, random)
+      },
+      remember: (login, conceptId, correct, at) => quiz.remember(login, conceptId, correct, at),
+    },
     routes: (app, context) => {
       registerQuizRoutes(app, context, service)
       registerTurnRoutes(app, context, chess)

@@ -376,11 +376,6 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
   })
 
   const tours = createToursModule({ db, ...clock })
-  const gitCourse = createGitCourseModule({
-    db,
-    seatOf: (login) => peers.peers.locationOf(login),
-    ...clock,
-  })
   const stats = createStatsModule({ db, ...clock })
   // `modules` se monta justo después: para cuando alguien descargue sus datos ya estará.
   const legal = createLegalModule({
@@ -402,6 +397,12 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     db,
     circlesOf: (logins) => replica.curriculum.circlesOf(logins),
     imagesOf: (logins) => replica.repository.imagesOf(logins),
+    ...clock,
+  })
+  const gitCourse = createGitCourseModule({
+    db,
+    seatOf: (login) => peers.peers.locationOf(login),
+    questions: quiz.questions,
     ...clock,
   })
 

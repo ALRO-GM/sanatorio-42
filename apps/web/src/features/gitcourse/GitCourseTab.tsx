@@ -2,13 +2,14 @@ import { useState } from 'react'
 import type { KeyboardEvent } from 'react'
 
 import type { GitCourse } from '@sanatorio/contracts'
-import { LEVELS } from '@sanatorio/gitsim'
-import type { Level } from '@sanatorio/gitsim'
+import { GATES, LEVELS } from '@sanatorio/gitsim'
+import type { Gate, Level } from '@sanatorio/gitsim'
 
 import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { GateView } from './GateView'
 import { LevelView } from './LevelView'
 
 /** Un color por mundo: cada mundo es una rama que sale del tronco y vuelve. */
@@ -17,19 +18,9 @@ const TRUNK_X = 34
 const LANE_X = 92
 const ROW = 62
 
-/** Las pruebas de grupo y el jefe: van en el tronco, detrás de su mundo. */
-const AFTER_WORLD: Record<number, { id: string; min: number }[]> = {
-  1: [{ id: 'group1', min: 2 }],
-  4: [{ id: 'group2', min: 3 }],
-  5: [
-    { id: 'group3', min: 3 },
-    { id: 'boss', min: 2 },
-  ],
-}
-
 type Stop =
   | { kind: 'level'; level: Level; index: number; x: number; y: number; color: string }
-  | { kind: 'group'; id: string; min: number; x: number; y: number }
+  | { kind: 'gate'; gate: Gate; x: number; y: number }
 
 /** El camino de arriba abajo: los pasos de cada mundo en su rama, y el mundo en el tronco. */
 function stopsOf(): Stop[] {
@@ -43,8 +34,8 @@ function stopsOf(): Stop[] {
     stops.push({ kind: 'level', level, index, x: onTrunk ? TRUNK_X : LANE_X, y, color })
     y += ROW
     if (onTrunk) {
-      for (const group of AFTER_WORLD[level.world] ?? []) {
-        stops.push({ kind: 'group', ...group, x: TRUNK_X, y })
+      for (const gate of GATES.filter((each) => each.after === level.id)) {
+        stops.push({ kind: 'gate', gate, x: TRUNK_X, y })
         y += ROW
       }
     }
@@ -62,7 +53,7 @@ const TRUNK = STOPS.filter((stop) => stop.x === TRUNK_X)
  * tronco, tiene sus pasos y vuelve a unirse en un punto gordo. Los puntos se
  * desbloquean en orden y se marcan con estrellas.
  */
-export function GitCourseTab() {
+export function GitCourseTab({ onReview }: { onReview: () => void }) {
   const { t } = useI18n()
   const loaded = useAsync(() => api.getGitCourse(), [])
   const [course, setCourse] = useState<GitCourse | null>(null)
@@ -80,6 +71,21 @@ export function GitCourseTab() {
   }
   const next = LEVELS.findIndex((level, index) => unlocked(index) && !done(level.id))
   const level = LEVELS.find((each) => each.id === open)
+  const gate = GATES.find((each) => each.id === open)
+
+  if (gate !== undefined) {
+    return (
+      <GateView
+        gate={gate}
+        course={current}
+        onCourse={setCourse}
+        onReview={onReview}
+        onBack={() => {
+          setOpen(null)
+        }}
+      />
+    )
+  }
 
   if (level !== undefined) {
     return (
@@ -171,24 +177,68 @@ export function GitCourseTab() {
               }}
             />
           ) : (
-            <g
-              key={stop.id}
-              className="git-stop locked"
-              role="listitem"
-              transform={`translate(${stop.x},${stop.y})`}
-            >
-              <polygon points="0,-17 5,-6 17,-5 8,3 11,15 0,9 -11,15 -8,3 -17,-5 -5,-6" />
-              <text x={28} y={-2} className="git-stop-title">
-                {t(`git.${stop.id === 'boss' ? 'boss' : 'group'}`, { n: stop.min })}
-              </text>
-              <text x={28} y={13} className="git-stop-sub">
-                {t('git.soon')}
-              </text>
-            </g>
+            <GateStop
+              key={stop.gate.id}
+              stop={stop}
+              open={done(stop.gate.after)}
+              passed={current.gates[stop.gate.id]?.passed === true}
+              onOpen={() => {
+                setOpen(stop.gate.id)
+              }}
+            />
           ),
         )}
       </svg>
     </section>
+  )
+}
+
+/** Abrir un punto con Intro o espacio, como un botón. */
+const pressed = (onOpen: () => void) => (event: KeyboardEvent) => {
+  if (event.key === 'Enter' || event.key === ' ') {
+    event.preventDefault()
+    onOpen()
+  }
+}
+
+/** Una prueba de grupo (o el jefe): una estrella en el tronco. */
+function GateStop({
+  stop,
+  open,
+  passed,
+  onOpen,
+}: {
+  stop: Extract<Stop, { kind: 'gate' }>
+  open: boolean
+  passed: boolean
+  onOpen: () => void
+}) {
+  const { t } = useI18n()
+  const name = t(`git.${stop.gate.kind}`, { n: stop.gate.min })
+
+  return (
+    <g
+      className={`git-stop gate ${open ? '' : 'locked'} ${passed ? 'done' : ''}`}
+      role="listitem"
+      transform={`translate(${stop.x},${stop.y})`}
+    >
+      <g
+        role="button"
+        tabIndex={open ? 0 : -1}
+        aria-disabled={!open}
+        aria-label={name}
+        onClick={open ? onOpen : undefined}
+        onKeyDown={open ? pressed(onOpen) : undefined}
+      >
+        <polygon points="0,-17 5,-6 17,-5 8,3 11,15 0,9 -11,15 -8,3 -17,-5 -5,-6" />
+        <text x={28} y={-2} className="git-stop-title big">
+          {name}
+        </text>
+        <text x={28} y={13} className="git-stop-sub">
+          {passed ? `✓ ${t('git.gate.testPassed')}` : t('git.gate.test')}
+        </text>
+      </g>
+    </g>
   )
 }
 
@@ -207,12 +257,6 @@ function LevelStop({
 }) {
   const big = stop.level.kind === 'world'
   const r = big ? 17 : 11
-  const onKeyDown = (event: KeyboardEvent) => {
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault()
-      onOpen()
-    }
-  }
 
   return (
     <g
@@ -226,7 +270,7 @@ function LevelStop({
         aria-disabled={!open}
         aria-label={stop.level.title}
         onClick={open ? onOpen : undefined}
-        onKeyDown={open ? onKeyDown : undefined}
+        onKeyDown={open ? pressed(onOpen) : undefined}
       >
         {current && <circle className="git-stop-ring" r={r + 6} stroke={stop.color} />}
         <circle

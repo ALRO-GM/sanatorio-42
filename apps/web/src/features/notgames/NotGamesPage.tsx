@@ -98,7 +98,13 @@ function Lobby({ initial }: { initial: Tab }) {
       </div>
       {tab === 'rooms' && <Rooms />}
       {tab === 'review' && <ReviewTab />}
-      {tab === 'git' && <GitCourseTab />}
+      {tab === 'git' && (
+        <GitCourseTab
+          onReview={() => {
+            setTab('review')
+          }}
+        />
+      )}
     </>
   )
 }

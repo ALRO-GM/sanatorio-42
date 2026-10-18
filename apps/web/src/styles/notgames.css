@@ -919,3 +919,58 @@
   stroke-dasharray: 2 7;
   stroke-linecap: round;
 }
+.git-stop.gate polygon {
+  fill: #f0b400;
+  stroke: #b07d00;
+}
+.git-stop.gate.locked polygon {
+  fill: var(--surface);
+  stroke: var(--border);
+}
+.git-stop.gate.done polygon {
+  fill: #2f9e44;
+  stroke: #1f6f30;
+}
+.git-gate-quiz ol,
+.git-gate-result ol {
+  display: grid;
+  gap: 0.8rem;
+  padding-left: 1.4rem;
+}
+.git-gate-quiz fieldset {
+  display: grid;
+  gap: 0.3rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.git-gate-quiz legend {
+  margin-bottom: 0.3rem;
+  font-weight: 600;
+}
+.git-gate-option {
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+  cursor: pointer;
+}
+.git-gate-clock {
+  position: sticky;
+  top: 4.5rem;
+  z-index: 1;
+  width: fit-content;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  background: var(--surface);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+.git-gate-clock.late {
+  color: var(--danger);
+}
+.git-gate-result li.right strong {
+  color: var(--ok);
+}
+.git-gate-result li.wrong strong {
+  color: var(--danger);
+}

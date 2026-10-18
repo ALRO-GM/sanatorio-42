@@ -12,6 +12,8 @@ export { resolve, run, runAll, threeWay, tokenize } from './run.js'
 export type { RunResult, World } from './run.js'
 export {
   checkAttempt,
+  gateOf,
+  GATES,
   goalOfLevel,
   LEVELS,
   levelOf,
@@ -19,4 +21,4 @@ export {
   starsOf,
   startOf,
 } from './levels/index.js'
-export type { Attempt, Level, Theory } from './levels/index.js'
+export type { Attempt, Gate, Level, Theory } from './levels/index.js'
