@@ -402,6 +402,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
   const gitCourse = createGitCourseModule({
     db,
     seatOf: (login) => peers.peers.locationOf(login),
+    imagesOf: (logins) => replica.repository.imagesOf(logins),
     questions: quiz.questions,
     ...clock,
   })

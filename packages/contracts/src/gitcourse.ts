@@ -56,3 +56,82 @@ export type GitAttemptResult = {
   misses: string[]
   course: GitCourse
 }
+
+// --- Pruebas de grupo ------------------------------------------------------
+
+/** Un commit del git simulado (como lo guarda `@sanatorio/gitsim`). */
+export type GitCommitView = {
+  id: string
+  parents: string[]
+  message: string
+  files: Record<string, string>
+}
+
+/** Tu repositorio en una prueba de grupo: lo que hace falta para pintarlo y para el prompt. */
+export type GitRepoView = {
+  commits: Record<string, GitCommitView>
+  branches: Record<string, string>
+  tracking: Record<string, string>
+  tags: Record<string, string>
+  head: { kind: 'branch'; name: string } | { kind: 'detached'; id: string }
+  merging: { theirs: string; conflicts: string[] } | null
+}
+
+/** El origin común de la sala. */
+export type GitRemoteView = {
+  commits: Record<string, GitCommitView>
+  branches: Record<string, string>
+  tags: Record<string, string>
+  locked: string[]
+}
+
+export type GitRoomStatus = 'lobby' | 'playing' | 'done'
+
+/** `GET /gitcourse/rooms?gate=`: las salas sin empezar del campus y las tuyas. */
+export type GitRoomLobby = {
+  id: number
+  gate: string
+  host: string
+  status: GitRoomStatus
+  players: number
+  joined: boolean
+}
+
+export type GitRoomPlayer = {
+  login: string
+  image: string | null
+  /** El papel en la misión (`all`, `release`, `hotfix`, `feature`…). */
+  role: string
+  /** El puesto desde el que juega ahora (`null`: se ha levantado). */
+  seat: string | null
+  commands: number
+  /** Lo último que escribió (en el jefe final no se ve lo de los demás). */
+  last: string | null
+}
+
+export type GitMissionItem = { text: string; done: boolean; login: string | null; extra: boolean }
+
+/** `GET /gitcourse/rooms/:id`: la sala, la misión y tu repositorio (la web lo pide cada dos segundos). */
+export type GitRoom = {
+  id: number
+  gate: string
+  host: string
+  status: GitRoomStatus
+  players: GitRoomPlayer[]
+  missions: GitMissionItem[]
+  /** Tu papel y tu repositorio, si juegas y ha empezado. */
+  mine: { role: string; repo: GitRepoView } | null
+  remote: GitRemoteView | null
+  /** Hasta cuándo se puede jugar (desde que empieza). */
+  deadline: string | null
+  /** Al acabar: `passed` (misión cumplida) o `expired` (se acabó el tiempo). */
+  result: 'passed' | 'expired' | null
+  now: string
+  joinable: boolean
+  whyNot: string | null
+}
+
+/** `POST /gitcourse/rooms/:id/run`: una línea de la terminal. */
+export type GitRunInput = { line: string }
+
+export type GitRunResult = { ok: boolean; output: string[]; room: GitRoom }

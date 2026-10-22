@@ -23,6 +23,7 @@ import { z } from 'zod'
 
 import type { Actor } from '../../core/actor.js'
 import { domainError } from '../../core/errors.js'
+import { createLocks } from '../../core/lock.js'
 import { parse } from '../../core/validation.js'
 import type { Concept, ReviewEntry } from './bank/types.js'
 import type { PlayerRow, QuizRepository, RoomRow, RoundRow } from './quiz.repository.js'
@@ -86,23 +87,7 @@ export function createQuizService(options: QuizServiceOptions) {
   const iso = (ms: number): string => new Date(ms).toISOString()
 
   /** Una cosa cada vez por sala: que dos peticiones no cierren la misma pregunta. */
-  const locks = new Map<number, Promise<unknown>>()
-
-  async function locked<T>(roomId: number, run: () => Promise<T>): Promise<T> {
-    const before = locks.get(roomId) ?? Promise.resolve()
-    const next = before.then(run, run)
-
-    locks.set(
-      roomId,
-      next.catch(() => undefined),
-    )
-
-    try {
-      return await next
-    } finally {
-      if (locks.get(roomId) === next) locks.delete(roomId)
-    }
-  }
+  const locked = createLocks()
 
   async function mustRoom(id: number): Promise<RoomRow> {
     const room = await quiz.room(id)

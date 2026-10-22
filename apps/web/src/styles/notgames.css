@@ -974,3 +974,66 @@
 .git-gate-result li.wrong strong {
   color: var(--danger);
 }
+/* Curso de git: pruebas de grupo. */
+.git-stop.gate.won polygon {
+  stroke: var(--text);
+  stroke-width: 2.5;
+}
+.git-group h4 {
+  margin: 0.8rem 0 0.3rem;
+}
+.git-group h5 {
+  margin: 0.8rem 0 0.3rem;
+}
+.git-room-list,
+.git-room-people,
+.git-missions {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0.4rem 0;
+  padding: 0;
+  list-style: none;
+}
+.git-room-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+}
+.git-room-people li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  overflow-wrap: anywhere;
+}
+.git-room-people code {
+  font-size: 0.85em;
+}
+.git-room-tools {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.git-room-tools .git-gate-clock {
+  position: static;
+}
+.git-missions li.done {
+  color: var(--ok);
+}
+.git-tasks {
+  margin-bottom: 0.6rem;
+}
+.git-tasks ol {
+  display: grid;
+  gap: 0.3rem;
+  margin: 0.4rem 0 0;
+  padding-left: 1.4rem;
+}
+.git-tasks code {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}

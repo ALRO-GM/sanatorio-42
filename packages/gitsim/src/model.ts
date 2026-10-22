@@ -139,9 +139,14 @@ export function newId(repo: Repo): string {
   return id
 }
 
-/** Un id para la copia de `id` (rebase, cherry-pick): `c2'`, `c2''`… */
+/**
+ * Un id para la copia de `id` (rebase, cherry-pick): `c2'`, `c2''`… Si el
+ * commit es de otra persona (otro prefijo), la copia lleva un id tuyo nuevo
+ * (`b4'`): con un remoto común, dos personas no pueden inventar el mismo id.
+ */
 export function copyId(repo: Repo, id: string): string {
-  let copy = `${id}'`
+  const own = /^[a-z]+/.exec(id)?.[0] === repo.prefix
+  let copy = own ? `${id}'` : `${newId(repo)}'`
 
   while (repo.commits[copy] !== undefined) copy += "'"
 

@@ -23,6 +23,7 @@ import { z } from 'zod'
 
 import type { Actor } from '../../../core/actor.js'
 import { domainError } from '../../../core/errors.js'
+import { createLocks } from '../../../core/lock.js'
 import { parse } from '../../../core/validation.js'
 import type { Concept } from '../bank/index.js'
 import type { QuizRepository } from '../quiz.repository.js'
@@ -110,23 +111,8 @@ export function createTurnsService<Board, View>(options: TurnsServiceOptions<Boa
 
   type Row = TurnRoomRow<TurnGameState<Board>>
 
-  const locks = new Map<number, Promise<unknown>>()
-
-  async function locked<T>(roomId: number, run: () => Promise<T>): Promise<T> {
-    const before = locks.get(roomId) ?? Promise.resolve()
-    const next = before.then(run, run)
-
-    locks.set(
-      roomId,
-      next.catch(() => undefined),
-    )
-
-    try {
-      return await next
-    } finally {
-      if (locks.get(roomId) === next) locks.delete(roomId)
-    }
-  }
+  /** Una cosa cada vez por sala: que dos peticiones no cierren la misma pregunta. */
+  const locked = createLocks()
 
   async function mustRoom(id: number): Promise<Row> {
     const room = await turns.room(id)

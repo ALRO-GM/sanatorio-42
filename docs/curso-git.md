@@ -79,6 +79,25 @@ cierto número de conceptos hay una **prueba de grupo**.
   *Learn Git Branching*: así dos caminos distintos que llegan a lo mismo dan lo
   mismo.
 - `modules/gitcourse` (API): progreso, test previo, salas de grupo y jefe final.
+- **Pruebas de grupo** (`packages/gitsim/src/levels/groups.ts` y
+  `modules/gitcourse/rooms.ts`): con varias personas el orden de los merges
+  cambia la historia, así que no se compara una forma exacta: cada prueba
+  tiene **misiones** que se miran sobre origin (qué ficheros hay en la punta
+  de cada rama, qué tags y dónde están, de quién son los commits por su
+  prefijo). Las `extra` no hacen falta. Los comandos se ejecutan en el
+  servidor: cada cual tiene su repositorio y todos el mismo origin, así que
+  un push de otra persona se nota al momento (rechazos, conflictos). Cada
+  persona tiene un prefijo de ids (`a`, `b`, `d`…) y la copia de un commit
+  ajeno (rebase, cherry-pick) lleva un id propio, para que dos no inventen el
+  mismo. Para el GitHub flow, la terminal tiene `gh pr merge rama [base]`: un
+  commit de merge en origin aunque la rama esté protegida, y se niega si hay
+  conflictos.
+  - Grupo 1: cada cual su rama con su fichero, y una persona las une en main.
+  - Grupo 2: main protegida; cada cual se apunta en `equipo.txt` desde su rama
+    y entra por pull request; desde el segundo hay conflicto que resolver.
+  - Grupo 3: Gitflow con papeles: la versión 1.1 desde develop, un hotfix
+    1.0.1 desde main y funcionalidades en develop; cada versión con su tag en
+    main y de vuelta en develop.
 - `features/gitcourse` (web): el camino, la animación, la teoría y la terminal.
 
 ## Estado
@@ -97,6 +116,9 @@ cierto número de conceptos hay una **prueba de grupo**.
   con su Repaso), que también salen en las partidas normales, y el test previo
   a cada prueba de grupo (8 preguntas, 100 %, una hora de espera si se falla).
   La estrella de la prueba en el camino se abre al acabar su mundo.
-- [ ] Fase 4: pruebas de grupo.
+- [x] Fase 4: las tres pruebas de grupo: salas (una hora para la misión,
+  hasta 6 personas, papel por orden de llegada), origin común, misiones y la
+  prueba superada para todo el grupo. En la API de mentira, las compañeras
+  entran solas y hacen su parte.
 - [ ] Fase 5: jefe final.
 - [ ] Fase 6: demostración y repaso.

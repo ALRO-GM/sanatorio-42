@@ -53,7 +53,7 @@ const TRUNK = STOPS.filter((stop) => stop.x === TRUNK_X)
  * tronco, tiene sus pasos y vuelve a unirse en un punto gordo. Los puntos se
  * desbloquean en orden y se marcan con estrellas.
  */
-export function GitCourseTab({ onReview }: { onReview: () => void }) {
+export function GitCourseTab({ me, onReview }: { me: string; onReview: () => void }) {
   const { t } = useI18n()
   const loaded = useAsync(() => api.getGitCourse(), [])
   const [course, setCourse] = useState<GitCourse | null>(null)
@@ -77,6 +77,7 @@ export function GitCourseTab({ onReview }: { onReview: () => void }) {
     return (
       <GateView
         gate={gate}
+        me={me}
         course={current}
         onCourse={setCourse}
         onReview={onReview}
@@ -105,7 +106,8 @@ export function GitCourseTab({ onReview }: { onReview: () => void }) {
   }
 
   const height = (STOPS.at(-1)?.y ?? 0) + 50
-  const total = Object.values(current.stars).reduce((sum, stars) => sum + stars, 0)
+  // Las pruebas de grupo también se guardan como estrellas; aquí cuentan solo los puntos.
+  const total = LEVELS.reduce((sum, each) => sum + (current.stars[each.id] ?? 0), 0)
 
   return (
     <section className="git-course">
@@ -182,6 +184,7 @@ export function GitCourseTab({ onReview }: { onReview: () => void }) {
               stop={stop}
               open={done(stop.gate.after)}
               passed={current.gates[stop.gate.id]?.passed === true}
+              won={done(stop.gate.id)}
               onOpen={() => {
                 setOpen(stop.gate.id)
               }}
@@ -206,11 +209,14 @@ function GateStop({
   stop,
   open,
   passed,
+  won,
   onOpen,
 }: {
   stop: Extract<Stop, { kind: 'gate' }>
   open: boolean
   passed: boolean
+  /** La prueba de grupo, superada. */
+  won: boolean
   onOpen: () => void
 }) {
   const { t } = useI18n()
@@ -218,7 +224,7 @@ function GateStop({
 
   return (
     <g
-      className={`git-stop gate ${open ? '' : 'locked'} ${passed ? 'done' : ''}`}
+      className={`git-stop gate ${open ? '' : 'locked'} ${passed ? 'done' : ''} ${won ? 'won' : ''}`}
       role="listitem"
       transform={`translate(${stop.x},${stop.y})`}
     >
@@ -235,7 +241,11 @@ function GateStop({
           {name}
         </text>
         <text x={28} y={13} className="git-stop-sub">
-          {passed ? `✓ ${t('git.gate.testPassed')}` : t('git.gate.test')}
+          {won
+            ? `★ ${t('git.room.done')}`
+            : passed
+              ? `✓ ${t('git.gate.testPassed')}`
+              : t('git.gate.test')}
         </text>
       </g>
     </g>

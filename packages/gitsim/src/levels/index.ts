@@ -22,3 +22,14 @@ export type { Attempt } from './build.js'
 export type { Level, Theory } from './types.js'
 export { gateOf, GATES } from './gates.js'
 export type { Gate } from './gates.js'
+export {
+  GROUP_MISSIONS,
+  groupRemote,
+  groupRepo,
+  MAX_PLAYERS,
+  missionDone,
+  missionOf,
+  PREFIXES,
+  roleOf,
+} from './groups.js'
+export type { GroupMission, GroupPlayer, GroupRole, MissionItem } from './groups.js'

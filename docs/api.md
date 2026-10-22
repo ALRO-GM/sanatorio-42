@@ -1275,6 +1275,13 @@ GET  /gitcourse                   → GitCourse { seat, stars: { [punto]: 1–3 
 POST /gitcourse/levels/:id        → GitAttemptInput { lines: string[] (≤ 300, ≤ 200 caracteres) } → GitAttemptResult
 POST /gitcourse/gates/:id/start   → GitGateQuiz { gate, questions: { prompt, code, options }[], deadline }
 POST /gitcourse/gates/:id/answer  → GitGateAnswerInput { answers: (number | null)[] } → GitGateResult
+GET  /gitcourse/rooms?gate=group1 → GitRoomLobby[] (las sin empezar del campus y las tuyas de las últimas 6 h)
+POST /gitcourse/rooms             → { gate } → GitRoom (201; entras tú)
+GET  /gitcourse/rooms/:id         → GitRoom { status, players, missions, mine: { role, repo }, remote, deadline, result }
+POST /gitcourse/rooms/:id/join    → GitRoom
+POST /gitcourse/rooms/:id/leave   → 204
+POST /gitcourse/rooms/:id/start   → GitRoom (solo quien la creó)
+POST /gitcourse/rooms/:id/run     → GitRunInput { line (≤ 200) } → GitRunResult { ok, output, room }
 ```
 
 - Los puntos del camino (teoría, partida, solución) están en
@@ -1294,6 +1301,20 @@ POST /gitcourse/gates/:id/answer  → GitGateAnswerInput { answers: (number | nu
   tiempo. Si se falla o caduca, `retryAt` = una hora después (429 al empezar).
   Volver a empezar a mitad devuelve las mismas preguntas. Cada respuesta va al
   Repaso (`quiz_misses`). Se guarda en `git_gates`.
+- **Pruebas de grupo** (`rooms.ts`, tablas `git_rooms` y `git_room_players`):
+  para crear o entrar, sentado en un puesto (403) y con el test previo de esa
+  prueba aprobado (409). Una sala abierta del curso a la vez (409), del mismo
+  campus, hasta 6 personas. Empieza quien la creó con el mínimo de la prueba y
+  todas sentadas. Al empezar se monta origin (`groupRemote`) y el repositorio
+  de cada cual ya clonado, con su prefijo de ids (`a`, `b`, `d`…) y su papel
+  por orden de llegada. `run` ejecuta la línea en el servidor con el mismo
+  motor (403 si te levantas; 429 pasados 400 comandos); un error no cambia
+  nada. Las misiones (`check` de la prueba) se miran sobre origin; con todas
+  las no `extra` hechas, la sala acaba (`result: 'passed'`) y la prueba se
+  guarda en `git_progress` con 3 estrellas para cada cual. Hay una hora: luego,
+  `result: 'expired'`. Quien sale pierde su repositorio; la sala pasa a otra
+  persona y vacía se borra. Una tarea cada hora borra las salas sin empezar de
+  más de 2 h y las demás de más de una semana.
 
 ## Mapa de calor de clics (`modules/usage/clicks.ts`)
 

@@ -142,6 +142,13 @@ export const realApi: Api = {
   startGitGate: (gate) => sendJson('POST', `/gitcourse/gates/${encodeURIComponent(gate)}/start`),
   answerGitGate: (gate, input) =>
     sendJson('POST', `/gitcourse/gates/${encodeURIComponent(gate)}/answer`, input),
+  getGitRooms: (gate) => getJson(`/gitcourse/rooms?gate=${encodeURIComponent(gate)}`),
+  createGitRoom: (gate) => sendJson('POST', '/gitcourse/rooms', { gate }),
+  getGitRoom: (id) => getJson(`/gitcourse/rooms/${id}`),
+  joinGitRoom: (id) => sendJson('POST', `/gitcourse/rooms/${id}/join`),
+  leaveGitRoom: (id) => send('POST', `/gitcourse/rooms/${id}/leave`),
+  startGitRoom: (id) => sendJson('POST', `/gitcourse/rooms/${id}/start`),
+  runGitRoom: (id, line) => sendJson('POST', `/gitcourse/rooms/${id}/run`, { line }),
   startFocus: (settings) => sendJson('PUT', '/me/focus', settings),
   stopFocus: () => sendJson('DELETE', '/me/focus'),
   sendClicks: (batch) => send('POST', '/usage/clicks', batch),

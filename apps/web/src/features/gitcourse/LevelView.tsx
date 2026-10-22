@@ -8,7 +8,7 @@ import { api } from '../../shared/api'
 import { useAction } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
-import { GitGraph } from './GitGraph'
+import { WorldGraphs } from './GitGraph'
 import { Terminal } from './Terminal'
 import type { TerminalEntry } from './Terminal'
 
@@ -213,36 +213,6 @@ function TheoryView({ level, onNext }: { level: Level; onNext: () => void }) {
         </button>
       </div>
     </section>
-  )
-}
-
-/** Tu repositorio y, si hay, el remoto. */
-function WorldGraphs({ world, small = false }: { world: World; small?: boolean }) {
-  // En pequeño es el objetivo: su título ya va encima.
-  const { t } = useI18n()
-  const { repo, remote } = world
-
-  return (
-    <div className="git-graphs">
-      <GitGraph
-        label={small ? undefined : t('git.graph.local')}
-        commits={repo.commits}
-        branches={repo.branches}
-        tracking={repo.tracking}
-        tags={repo.tags}
-        head={repo.head}
-        small={small}
-      />
-      {remote !== null && (
-        <GitGraph
-          label="origin"
-          commits={remote.commits}
-          branches={remote.branches}
-          tags={remote.tags}
-          small={small}
-        />
-      )}
-    </div>
   )
 }
 

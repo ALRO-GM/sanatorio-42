@@ -15,10 +15,27 @@ export {
   gateOf,
   GATES,
   goalOfLevel,
+  GROUP_MISSIONS,
+  groupRemote,
+  groupRepo,
   LEVELS,
   levelOf,
+  MAX_PLAYERS,
+  missionDone,
+  missionOf,
+  PREFIXES,
+  roleOf,
   solvedOf,
   starsOf,
   startOf,
 } from './levels/index.js'
-export type { Attempt, Gate, Level, Theory } from './levels/index.js'
+export type {
+  Attempt,
+  Gate,
+  GroupMission,
+  GroupPlayer,
+  GroupRole,
+  Level,
+  MissionItem,
+  Theory,
+} from './levels/index.js'

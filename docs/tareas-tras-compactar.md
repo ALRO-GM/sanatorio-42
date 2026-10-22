@@ -17,7 +17,7 @@ este fichero y se hace lo que dice, en orden.
 - Si una tarea necesita una decisión de Alberto, se le pregunta antes de seguir
   con esa; las demás no esperan.
 
-Última puesta al día: 2026-10-17. En producción desde el 2026-10-11.
+Última puesta al día: 2026-10-22. En producción desde el 2026-10-11.
 
 ## 1. Arranque (siempre, en cada sesión nueva)
 
@@ -149,7 +149,7 @@ despliegue espera a la CI).
       (`quiz_answers` + concepto, o tabla `quiz_misses`).
 - [ ] **B6. Sonidos y animaciones** en los juegos: cronómetros, pulsaciones,
       acierto/fallo.
-- [ ] **Buzón**: resumen dado a Alberto (13 abiertos: #42 #45 #48 #50 #65 #69
+- [x] **Buzón**: resumen dado a Alberto (13 abiertos: #42 #45 #48 #50 #65 #69
       #70 #71 #75 #76 #77 #78 #79). Esperar a que diga cuáles y cómo; #48
       (Python 06 bis en el círculo 0) es un fallo: arreglarlo.
 
@@ -171,11 +171,11 @@ despliegue espera a la CI).
       cliente + mock, textos, test de pantalla, docs (api.md, README, interfaz).
 - [x] B5 demo del ajedrez · [x] B6 sonidos (salas) y animaciones (ajedrez) ·
       [x] B7 Repaso · [x] fotos en clasificaciones y marcadores.
-- [ ] **Buzón** (decidido por Alberto): hacer todas hasta las medianas
+- [x] **Buzón** (decidido por Alberto): hacer todas hasta las medianas
       incluidas: [x] #48 (ya arreglado por la tabla de partida; test añadido), [x] #75 (pizarras de más
       cercana a más lejana y después las pasadas), [x] #76 (avisos que abren el
       evento en el calendario para apuntarse), [x] #78 (botón a la intra, en tu expediente), [x] #70
-      (ficha al pasar el ratón por un login, componente único), #79
+      (ficha al pasar el ratón por un login, componente único), [x] #79
       (clasificación de quién va más rápido según el pace, desde su inicio),
       [x] #71 (panel: uso por campus elegibles y usuarios totales/nuevos por día),
       [x] #77 [HECHO: módulo `facility` nuevo: tabla facility_reports (migración 57),
@@ -197,8 +197,8 @@ despliegue espera a la CI).
       [x] GC1 motor `packages/gitsim` + tests · [x] GC2 niveles (mundos 0–5) +
       camino, animación, teoría y terminal + progreso en la API (re-ejecuta) +
       exigir puesto en el clúster · [x] GC3 preguntas de git en el banco + test
-      previo (100 %, 1 h de espera) · [ ] GC4 salas de grupo (remoto común,
-      cada cual su repo, en paralelo) · [ ] GC5 jefe final (4 filas y 4
+      previo (100 %, 1 h de espera) · [x] GC4 salas de grupo (remoto común,
+      cada cual su repo, en paralelo; misiones sobre origin, `gh pr merge`) · [ ] GC5 jefe final (4 filas y 4
       columnas, tiempo) · [ ] GC6 demostración, docs y repaso.
 - [ ] **#42 Curso de git** (grande, especificación de Alberto del 2026-10-18):
       - Solo desde un ordenador de un clúster (con sesión en un puesto).

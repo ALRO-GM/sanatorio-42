@@ -23,6 +23,7 @@ import { turnsMock } from './turns'
 import { facilityMock } from './facility'
 import { focusMock } from './focus'
 import { gitCourseMock } from './gitcourse'
+import { gitRoomsMock } from './gitrooms'
 import { replicaMock } from './replica'
 import { staffMock } from './staff'
 import { therapyMock } from './therapy'
@@ -47,4 +48,5 @@ export const mockApi: Api = {
   ...facilityMock,
   ...focusMock,
   ...gitCourseMock,
+  ...gitRoomsMock,
 }

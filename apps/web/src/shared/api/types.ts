@@ -14,6 +14,9 @@ import type {
   GitGateAnswerInput,
   GitGateQuiz,
   GitGateResult,
+  GitRoom,
+  GitRoomLobby,
+  GitRunResult,
   FocusSettings,
   ClickBatch,
   ClickHeatmap,
@@ -292,6 +295,14 @@ export type Api = {
   submitGitAttempt: (level: string, input: GitAttemptInput) => Promise<GitAttemptResult>
   startGitGate: (gate: string) => Promise<GitGateQuiz>
   answerGitGate: (gate: string, input: GitGateAnswerInput) => Promise<GitGateResult>
+  /** Las pruebas de grupo del curso de git: salas, empezar y la terminal común. */
+  getGitRooms: (gate: string) => Promise<GitRoomLobby[]>
+  createGitRoom: (gate: string) => Promise<GitRoom>
+  getGitRoom: (id: number) => Promise<GitRoom>
+  joinGitRoom: (id: number) => Promise<GitRoom>
+  leaveGitRoom: (id: number) => Promise<void>
+  startGitRoom: (id: number) => Promise<GitRoom>
+  runGitRoom: (id: number, line: string) => Promise<GitRunResult>
   startFocus: (settings: FocusSettings) => Promise<Focus>
   stopFocus: () => Promise<Focus>
   /** Manda los clics de una sección para el mapa de calor. */

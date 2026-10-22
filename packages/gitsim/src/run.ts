@@ -6,7 +6,8 @@
  * Comandos de shell: `ls`, `cat`, `echo texto > fichero` (o `>>`), `rm`,
  * `help`. De git: init no (ya hay repo), status, log, add, rm, commit (-m, -a,
  * --amend), branch, switch, checkout, merge, rebase, cherry-pick, reset,
- * revert, tag, stash, fetch, pull, push y clone.
+ * revert, tag, stash, fetch, pull, push y clone. Y `gh pr merge`, que acepta
+ * un pull request en origin (para las pruebas de grupo).
  *
  * Una simplificación a sabiendas: `git commit` sin cambios hace un commit
  * vacío (en git de verdad haría falta `--allow-empty`). En los retos de ramas
@@ -196,6 +197,7 @@ const HELP = [
   'Ramas: git branch [nombre] · git switch [-c] rama · git checkout [-b] rama|commit · git merge rama',
   'Reescribir: git rebase rama · git cherry-pick commit… · git reset [--soft|--hard] ref · git revert ref',
   'Más: git tag nombre [ref] · git stash [pop|list] · git fetch · git pull [--rebase] · git push [-u] [--force] [origin rama]',
+  'Equipo: gh pr merge rama (acepta un pull request en origin)',
   'Referencias: HEAD, main, origin/main, c3, HEAD~2, main^, v1.0',
 ]
 
@@ -686,10 +688,12 @@ function pull(ctx: Ctx, args: string[]): void {
     throw new GitError('estás con HEAD separado: cámbiate a una rama')
   fetch(ctx)
 
-  const upstream = `origin/${repo.head.name}`
+  // `git pull origin main` trae main a la rama en la que estés; sin nombre, la suya.
+  const { rest } = flags(args)
+  const named = (rest[0] === 'origin' ? rest[1] : undefined) ?? repo.head.name
+  const upstream = `origin/${named}`
 
-  if (repo.tracking[upstream] === undefined)
-    throw new GitError(`origin no tiene la rama ${repo.head.name}`)
+  if (repo.tracking[upstream] === undefined) throw new GitError(`origin no tiene la rama ${named}`)
   if (args.includes('--rebase')) rebase(ctx, [upstream])
   else merge(ctx, [upstream])
 }
@@ -730,6 +734,58 @@ function push(ctx: Ctx, args: string[]): void {
   remote.branches[name] = local
   repo.tracking[`origin/${name}`] = local
   ctx.out.push(`Subido ${name} a origin (${local})`)
+}
+
+/**
+ * `gh pr merge rama [--base main]`: abre y acepta un pull request en origin,
+ * como el botón de GitHub: un commit de merge en la rama base, aunque esté
+ * protegida. Con conflictos se niega: hay que traer la base a la rama,
+ * resolverlos y subirla otra vez.
+ */
+function pullRequest(ctx: Ctx, args: string[]): void {
+  const remote = mustRemote(ctx.world)
+  const { repo } = ctx.world
+  // `--base develop`: el nombre queda como tercera palabra suelta.
+  const [action, name, baseName = 'main'] = flags(args).rest
+
+  if (action !== 'merge' || name === undefined) throw new GitError('se usa así: gh pr merge rama')
+
+  const theirs = remote.branches[name]
+  const ours = remote.branches[baseName]
+
+  if (theirs === undefined)
+    throw new GitError(`origin no tiene la rama ${name}: súbela con git push`)
+  if (ours === undefined) throw new GitError(`origin no tiene la rama ${baseName}`)
+  if (isAncestor(remote.commits, theirs, ours)) {
+    ctx.out.push(`${name} ya está unida en ${baseName}`)
+
+    return
+  }
+
+  const base = mergeBase(remote.commits, ours, theirs)
+  const result = threeWay(
+    base === null ? {} : (remote.commits[base]?.files ?? {}),
+    remote.commits[ours]?.files ?? {},
+    remote.commits[theirs]?.files ?? {},
+    name,
+  )
+
+  if (result.conflicts.length > 0) {
+    throw new GitError(
+      `el pull request tiene conflictos en ${result.conflicts.join(', ')}: trae ${baseName} a tu rama (git pull origin ${baseName}), resuélvelos y vuelve a subirla`,
+    )
+  }
+
+  const id = newId(repo)
+
+  remote.commits[id] = {
+    id,
+    parents: [ours, theirs],
+    message: `Merge pull request: ${name}`,
+    files: result.files,
+  }
+  remote.branches[baseName] = id
+  ctx.out.push(`Pull request de ${name} unido en ${baseName} (${id}). Tráelo con git pull`)
 }
 
 function gitClone(ctx: Ctx): void {
@@ -904,6 +960,9 @@ export function run(world: World, line: string): RunResult {
         default:
           throw new GitError(`git ${sub ?? ''}: no lo conozco. Escribe help`)
       }
+    } else if (program === 'gh' && args[0] === 'pr') {
+      command = 'pr'
+      pullRequest(ctx, args.slice(1))
     } else throw new GitError(`${program}: orden no encontrada. Escribe help`)
 
     return { ...ctx.world, output: ctx.out, ok: true, command }

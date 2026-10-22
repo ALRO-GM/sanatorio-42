@@ -78,6 +78,8 @@ describe('migraciones', () => {
       'game_results',
       'git_gates',
       'git_progress',
+      'git_room_players',
+      'git_rooms',
       'guide_change_flags',
       'guide_changes',
       'guide_proposals',

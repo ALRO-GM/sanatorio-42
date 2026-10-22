@@ -1,4 +1,6 @@
-import type { Commit, Head } from '@sanatorio/gitsim'
+import type { Commit, Head, Remote, Repo } from '@sanatorio/gitsim'
+
+import { useI18n } from '../../shared/i18n'
 
 /** Colores de las ramas: cada carril, el suyo (en claro y en nocturno se leen igual). */
 const LANES = ['#e8590c', '#2f9e44', '#1971c2', '#ae3ec9', '#f08c00', '#0c8599', '#e64980']
@@ -116,7 +118,7 @@ type GitGraphProps = Refs & {
  * colores y etiquetas encima. Los círculos van con su id, así que al cambiar de
  * estado se deslizan a su sitio nuevo (transición de CSS, sin bucles).
  */
-export function GitGraph({ label, small = false, ...refs }: GitGraphProps) {
+function GitGraph({ label, small = false, ...refs }: GitGraphProps) {
   const { nodes, width, height } = layout(refs)
   const scale = small ? 0.75 : 1
   const color = (lane: number) => LANES[lane % LANES.length] ?? LANES[0]
@@ -209,5 +211,41 @@ export function GitGraph({ label, small = false, ...refs }: GitGraphProps) {
         })}
       </svg>
     </figure>
+  )
+}
+
+/** Lo que se pinta de un mundo (vale también el de una sala de grupo, que viene de la API). */
+type Shown = {
+  repo: Pick<Repo, 'commits' | 'branches' | 'tracking' | 'tags' | 'head'>
+  remote: Pick<Remote, 'commits' | 'branches' | 'tags'> | null
+}
+
+/** Tu repositorio y, si hay, el remoto. */
+export function WorldGraphs({ world, small = false }: { world: Shown; small?: boolean }) {
+  // En pequeño es el objetivo: su título ya va encima.
+  const { t } = useI18n()
+  const { repo, remote } = world
+
+  return (
+    <div className="git-graphs">
+      <GitGraph
+        label={small ? undefined : t('git.graph.local')}
+        commits={repo.commits}
+        branches={repo.branches}
+        tracking={repo.tracking}
+        tags={repo.tags}
+        head={repo.head}
+        small={small}
+      />
+      {remote !== null && (
+        <GitGraph
+          label="origin"
+          commits={remote.commits}
+          branches={remote.branches}
+          tags={remote.tags}
+          small={small}
+        />
+      )}
+    </div>
   )
 }

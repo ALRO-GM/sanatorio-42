@@ -64,6 +64,7 @@ de datos.
 | Pestañas | Not-games | N | Aprender jugando: no hace falta para pedir ni dar ayuda |
 | Not-games | Salas, crear sala, partida y marcador | N | La sección en sí |
 | Not-games | Curso de git: camino, animación, teoría y terminal | N | Aprender jugando, como el resto de Not-games |
+| Not-games | Curso de git: pruebas de grupo (sala, misiones, origin común) | N | Va con el curso: después del test previo de cada prueba |
 | Not-games | Repaso: lo fallado con definición y ejemplo | N | Para estudiar después de jugar |
 | Not-games | Ajedrez: tablero, relojes, pregunta encima del tablero, estilos de tablero, sonido | N | Un juego más de la sección |
 | Menú de la cuenta | Modo concentración (Pomodoro) | S | Para todos: concentrarse no es «de datos» |

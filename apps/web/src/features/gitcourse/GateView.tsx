@@ -7,9 +7,11 @@ import { api } from '../../shared/api'
 import { useAction } from '../../shared/hooks/useAsync'
 import { localeOf, useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { GroupRooms } from './GroupRoom'
 
 type GateViewProps = {
   gate: Gate
+  me: string
   course: GitCourse
   onCourse: (course: GitCourse) => void
   onBack: () => void
@@ -20,7 +22,7 @@ type GateViewProps = {
  * Antes de una prueba de grupo: el test de preguntas rápidas. Todas bien para
  * pasar; si no, una hora de espera (mientras, el Repaso enseña lo fallado).
  */
-export function GateView({ gate, course, onCourse, onBack, onReview }: GateViewProps) {
+export function GateView({ gate, me, course, onCourse, onBack, onReview }: GateViewProps) {
   const { t, lang } = useI18n()
   const [quiz, setQuiz] = useState<GitGateQuiz | null>(null)
   const [chosen, setChosen] = useState<(number | null)[]>([])
@@ -58,7 +60,7 @@ export function GateView({ gate, course, onCourse, onBack, onReview }: GateViewP
           ← {t('git.back')}
         </button>
         <h3>{name}</h3>
-        <p className="git-goal">{t('git.gate.rules')}</p>
+        {state?.passed !== true && <p className="git-goal">{t('git.gate.rules')}</p>}
       </header>
       <ErrorNote error={error} />
       {quiz !== null ? (
@@ -76,7 +78,14 @@ export function GateView({ gate, course, onCourse, onBack, onReview }: GateViewP
       ) : (
         <>
           {result !== null && <GateResult result={result} />}
-          {state?.passed === true ? (
+          {state?.passed === true && gate.kind === 'group' ? (
+            <>
+              {course.stars[gate.id] !== undefined && (
+                <p className="git-won">★ {t('git.room.done')}</p>
+              )}
+              <GroupRooms gate={gate} me={me} />
+            </>
+          ) : state?.passed === true ? (
             <p className="git-won">✓ {t('git.gate.passed')}</p>
           ) : state !== undefined && state.retryAt !== null ? (
             <p className="notice">

@@ -165,3 +165,27 @@ git.gate.lost,Curso de git: test previo suspendido,{right} de {total}: hacen fal
 git.gate.passed,Curso de git: el test previo ya está aprobado,Test superado. La prueba de grupo llega pronto.,Quiz passed. The group test is coming soon.,Test superat. La prova de grup arriba aviat.,Testa gaindituta. Talde-proba laster dator.
 git.gate.wait,Curso de git: cuándo se puede repetir el test previo,Podrás repetirlo a las {time}.,You can retry at {time}.,El podràs repetir a les {time}.,{time}etan errepika dezakezu.
 git.gate.toReview,Curso de git: enlace al Repaso desde el test previo,Ir al Repaso,Go to Review,Ves al Repàs,Joan Errepasora
+git.room.who,Curso de git: cuánta gente cabe en una prueba de grupo,"De {min} a {max} personas, cada una en su puesto del clúster.","From {min} to {max} people, each at their own cluster seat.","De {min} a {max} persones, cadascuna al seu lloc del clúster.","{min}etik {max}era pertsona, bakoitza klusterreko bere postuan."
+git.room.create,Curso de git: crear una sala de prueba de grupo,Crear una sala,Create a room,Crea una sala,Sortu gela bat
+git.room.none,Curso de git: no hay salas de esa prueba,Aún no hay salas abiertas. Crea una y avisa a tu grupo.,No open rooms yet. Create one and tell your group.,Encara no hi ha sales obertes. Crea'n una i avisa el teu grup.,Oraindik ez dago gela irekirik. Sortu bat eta abisatu zure taldeari.
+git.room.players,Curso de git: cuántas personas hay en una sala,{n} en la sala,{n} in the room,{n} a la sala,{n} gelan
+git.room.status.lobby,Curso de git: sala sin empezar,esperando,waiting,esperant,zain
+git.room.status.playing,Curso de git: sala jugando,jugando,playing,jugant,jokoan
+git.room.status.done,Curso de git: sala acabada,acabada,finished,acabada,amaituta
+git.room.join,Curso de git: entrar en una sala,Entrar,Join,Entra,Sartu
+git.room.back,Curso de git: volver a una sala en la que ya estás,Volver,Go back,Torna,Itzuli
+git.room.list,Curso de git: volver a la lista de salas,Salas,Rooms,Sales,Gelak
+git.room.leave,Curso de git: salir de la sala,Salir,Leave,Surt,Irten
+git.room.start,Curso de git: empezar la prueba de grupo,Empezar,Start,Comença,Hasi
+git.room.missing,Curso de git: cuántas personas faltan para empezar,Faltan {n},{n} more needed,En falten {n},{n} falta dira
+git.room.waiting,Curso de git: esperando a quien creó la sala,Esperando a que {host} empiece.,Waiting for {host} to start.,Esperant que {host} comenci.,{host} hasi arte zain.
+git.room.standing,Curso de git: alguien no está sentado en un puesto,sin puesto,no seat,sense lloc,posturik gabe
+git.room.role,Curso de git: tu papel en la prueba de grupo,Tu papel,Your role,El teu paper,Zure rola
+git.room.hints,Curso de git: comandos útiles bajo la terminal,Útiles: {hints},Handy: {hints},Útils: {hints},Erabilgarriak: {hints}
+git.room.missions,Curso de git: título de la lista de misiones,Misiones,Missions,Missions,Misioak
+git.room.extra,Curso de git: misión que no hace falta para acabar,extra,bonus,extra,gehigarria
+git.room.people,Curso de git: título de la lista de personas de la sala,En la sala,In the room,A la sala,Gelan
+git.room.commands,Curso de git: comandos que lleva alguien,{n} comandos,{n} commands,{n} ordres,{n} agindu
+git.room.passed,Curso de git: prueba de grupo superada al acabar,¡Misión cumplida! La prueba de grupo queda superada para todo el grupo.,Mission accomplished! The whole group passes the group test.,Missió complerta! La prova de grup queda superada per a tot el grup.,Misioa beteta! Talde osoak gainditu du talde-proba.
+git.room.expired,Curso de git: se acabó el tiempo de la prueba de grupo,Se acabó el tiempo sin cumplir la misión. Podéis crear otra sala y volver a probar.,Time ran out before the mission was done. You can create another room and try again.,S'ha acabat el temps sense complir la missió. Podeu crear una altra sala i tornar-ho a provar.,Denbora amaitu da misioa bete gabe. Beste gela bat sortu eta berriro saia zaitezkete.
+git.room.done,Curso de git: prueba de grupo ya superada,Prueba superada,Test passed,Prova superada,Proba gaindituta

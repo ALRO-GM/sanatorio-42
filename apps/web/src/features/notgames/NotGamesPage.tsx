@@ -64,7 +64,7 @@ export function NotGamesPage({ me, room }: NotGamesPageProps) {
       </h2>
       {valid && turn && <TurnRoomView id={id} me={me} />}
       {valid && !turn && <RoomView id={id} me={me} />}
-      {!valid && <Lobby initial={room === 'git' ? 'git' : 'rooms'} />}
+      {!valid && <Lobby me={me} initial={room === 'git' ? 'git' : 'rooms'} />}
     </section>
   )
 }
@@ -74,7 +74,7 @@ const TABS = ['rooms', 'review', 'git'] as const
 type Tab = (typeof TABS)[number]
 
 /** La portada de Not-games: las salas, tu Repaso o el curso de git (`#/notgames/git`). */
-function Lobby({ initial }: { initial: Tab }) {
+function Lobby({ me, initial }: { me: string; initial: Tab }) {
   const { t } = useI18n()
   const [tab, setTab] = useState<Tab>(initial)
 
@@ -100,6 +100,7 @@ function Lobby({ initial }: { initial: Tab }) {
       {tab === 'review' && <ReviewTab />}
       {tab === 'git' && (
         <GitCourseTab
+          me={me}
           onReview={() => {
             setTab('review')
           }}

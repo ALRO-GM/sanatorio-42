@@ -287,8 +287,11 @@ tiene una animación de la estructura a conseguir, la teoría del comando (para
 qué, cómo, cuándo sí y cuándo no, cómo se ve y qué problemas da) y un reto en
 una terminal con git simulado. Los retos solo se juegan sentado en un puesto
 del clúster. Antes de cada prueba de grupo hay un test de preguntas rápidas
-que hay que acertar entero (si no, una hora de espera); las pruebas de grupo
-y el jefe final están en camino. Diseño:
+que hay que acertar entero (si no, una hora de espera). Después, la prueba se
+juega en grupo, cada cual desde su puesto: una sala, un origin común y una
+misión con un papel para cada persona (unir ramas en main; GitHub flow con
+`gh pr merge` y un conflicto; Gitflow con una versión y un hotfix a la vez).
+El jefe final está en camino. Diseño:
 [docs/curso-git.md](docs/curso-git.md).
 
 ### Avisos del edificio
