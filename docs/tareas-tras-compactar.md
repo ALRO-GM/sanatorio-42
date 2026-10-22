@@ -237,7 +237,7 @@ despliegue espera a la CI).
   con el corte fijo al 90 % (9 TB); el tope diario o mensual de
   la app de 42 está vacío (solo cuenta la cuota horaria) porque hay que mirarlo
   en la intra.
-- **Valores de los códigos de asistencia, por confirmar por Alberto**
+- **Valores de los códigos de asistencia**: Alberto los dio por buenos el 2026-10-11 (ver `contexto.md`); se dejan apuntados por si cambian
   (`attendance.rules.ts`): margen de 10 min, inicio válido hasta 30 min tarde
   (o media sesión), 10 min mínimos entre códigos, fin válido hasta 30 min
   después, cinco fallos.
