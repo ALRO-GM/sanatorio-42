@@ -17,6 +17,19 @@ Monorepo con workspaces de npm. Ver `README.md` y `docs/architecture.md`.
 - `packages/contracts/`: tipos de las respuestas de la API, compartidos.
 - `infra/`: despliegue.
 
+## Skills y subagentes
+
+En `.claude/skills/` hay una skill por acción recurrente: `nueva-funcionalidad`
+(de la idea a producción), `traducir` (textos en las cuatro lenguas, banco de
+preguntas y curso de git), `migracion`, `comprobar` (`npm run check` y cómo
+leer sus fallos), `revisar` (lista de revisión de este fichero), `desplegar`
+(push, despliegue desacoplado del SSH, vigilancia y cupo de GitHub),
+`paralelo` (repartir tareas entre agentes con worktrees) y `retomar` (al
+empezar una sesión o antes de compactar). Y en `.claude/agents/`, los
+subagentes `implementador`, `traductor`, `probador`, `revisor` y
+`desplegador`. Úsalos antes de improvisar el procedimiento; si cambia una
+regla de aquí, cambia también la skill que la repite.
+
 ## Reglas de código
 
 - Antes de dar algo por hecho: `npm run check` (tipos, lint, formato, código sin
