@@ -23,7 +23,7 @@ import {
   GOLDEN,
   hiddenAchievement,
   UPGRADE,
-} from './data'
+} from '@sanatorio/clicker'
 import { useEgg } from './egg'
 import { usePlayLimit } from './limit'
 import {
@@ -55,8 +55,8 @@ import {
   stageOf,
   tick,
   donationBonus,
-} from './engine'
-import type { Game } from './engine'
+} from '@sanatorio/clicker'
+import type { Game } from '@sanatorio/clicker'
 import { buildingShare, levelProgress, reach } from './insight'
 import { Backdrop, Coffee, CursorRing, drinkOf, hueOf, Skyline } from './scene'
 import { Mini, miniOn, setMini } from './Mini'

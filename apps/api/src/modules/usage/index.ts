@@ -58,10 +58,10 @@ export function createUsageModule(deps: {
       })
 
       /**
-       * `GET /usage/heatmap?by=total|activity|track|cohort` → uso de cada elemento
+       * `GET /admin/usage/heatmap?by=total|activity|track|cohort` → uso de cada elemento
        * por grupo de personas. Solo admins.
        */
-      app.get<{ Querystring: { by?: string } }>('/usage/heatmap', async (request, reply) => {
+      app.get<{ Querystring: { by?: string } }>('/admin/usage/heatmap', async (request, reply) => {
         return reply.send(await service.heatmap(await session.actor(request), request.query))
       })
 

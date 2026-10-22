@@ -404,7 +404,7 @@ Las claves son `<página>.<elemento>`: `nav.tablon`, `expediente.health`.
 - GET /usage → `{ "counts": { "nav.tablon": 420 } }`: el total de la comunidad,
   para la ordenación automática. De cada persona cuentan como mucho 50 usos por
   elemento.
-- GET /usage/heatmap?by=total|activity|track|cohort → solo admins (`403` si no):
+- GET /admin/usage/heatmap?by=total|activity|track|cohort → solo admins (`403` si no):
 
 ```json
 {
@@ -916,7 +916,7 @@ POST /usage acepta, además de `counts`, el tiempo pasado en cada sección:
   envío.
 - Se guarda por persona, día, hora (UTC) y elemento. No se borra solo.
 
-Tramo de gente. `/admin/stats`, `/admin/flows` y `/usage/heatmap` admiten
+Tramo de gente. `/admin/stats`, `/admin/flows` y `/admin/usage/heatmap` admiten
 `low` y `high` (de 0 a 100): se ordena a la gente de menos a más activa y se
 mira solo la que cae entre esos tantos por ciento, para dejar fuera a quien más
 usa la web, a quien menos, o a los dos. En las dos primeras la actividad es el

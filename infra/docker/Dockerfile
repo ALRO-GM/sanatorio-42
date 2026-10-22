@@ -19,6 +19,7 @@ COPY apps/api/package.json apps/api/
 COPY apps/web/package.json apps/web/
 COPY packages/contracts/package.json packages/contracts/
 COPY packages/gitsim/package.json packages/gitsim/
+COPY packages/clicker/package.json packages/clicker/
 RUN npm ci
 
 COPY tsconfig.base.json ./
@@ -35,6 +36,7 @@ COPY apps/api/package.json apps/api/
 COPY apps/web/package.json apps/web/
 COPY packages/contracts/package.json packages/contracts/
 COPY packages/gitsim/package.json packages/gitsim/
+COPY packages/clicker/package.json packages/clicker/
 RUN npm ci --omit=dev --workspace @sanatorio/api
 
 # --- Ejecución ---------------------------------------------------------------
@@ -54,6 +56,9 @@ COPY --from=build /repo/apps/web/dist web
 # es un enlace a ../../packages/gitsim (el workspace).
 COPY --from=build /repo/packages/gitsim/package.json packages/gitsim/
 COPY --from=build /repo/packages/gitsim/dist packages/gitsim/dist
+# Y el motor del Code Clicker, que la API usa para rehacer las cuentas.
+COPY --from=build /repo/packages/clicker/package.json packages/clicker/
+COPY --from=build /repo/packages/clicker/dist packages/clicker/dist
 
 # Sin root: el proceso solo necesita escribir en /data.
 RUN mkdir -p /data && chown node:node /data

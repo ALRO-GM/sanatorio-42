@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
-import { ACHIEVEMENTS, hiddenAchievement } from '../src/features/clicker/data'
-import { restore } from '../src/features/clicker/engine'
+import { ACHIEVEMENTS, hiddenAchievement } from '@sanatorio/clicker'
+import { restore } from '@sanatorio/clicker'
 
 const saved = (achieved: string[]): string =>
   JSON.stringify({ v: 1, code: 10, total: 10, achieved })
@@ -29,7 +29,7 @@ describe('la puerta de la cruz, de 100 a 42', () => {
 
 describe('donar puntos a la bolsa de 42', () => {
   it('un 1 % más de producción por punto, con tope en el 42 %, y sus logros', async () => {
-    const { donationBonus, newGame, tick } = await import('../src/features/clicker/engine')
+    const { donationBonus, newGame, tick } = await import('@sanatorio/clicker')
     const game = newGame(0, () => 0.5)
 
     expect(donationBonus(game)).toBe(0)

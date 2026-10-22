@@ -11,33 +11,19 @@
  * solo cae lo que es desproporcionado.
  */
 
+import { baseCps, BUILDINGS, FORCED_REFUND, GOLDEN, GROWTH, restore } from '@sanatorio/clicker'
+
+/** Precio base de cada edificio, del motor del juego (`@sanatorio/clicker`). */
+export const BASE_PRICE: Readonly<Record<string, number>> = Object.fromEntries(
+  BUILDINGS.map(({ id, base }) => [id, base]),
+)
+export { GROWTH }
 /**
- * Precio base de cada edificio y lo que encarece cada compra. Son los de
- * `apps/web/src/features/clicker/data.ts`; un test comprueba que no se separan.
+ * Por cuánto pueden multiplicar la producción las rachas a la vez (la de
+ * frenesí y la de la pull request anciana): es lo más que puede valer la
+ * producción por segundo que declara la web frente a la de sus edificios.
  */
-export const BASE_PRICE: Readonly<Record<string, number>> = {
-  cursor: 15,
-  pisciner: 100,
-  cluster: 1_100,
-  overflow: 12_000,
-  pipeline: 130_000,
-  repo: 1_400_000,
-  temple: 20_000_000,
-  regex: 330_000_000,
-  docker: 5_100_000_000,
-  compiler: 75_000_000_000,
-  portal: 1e12,
-  rebase: 1.4e13,
-  quantum: 1.7e14,
-  neural: 2.1e15,
-  fuzzer: 2.6e16,
-  recursion: 3.1e17,
-  terminal: 7.1e19,
-  forks: 1.2e22,
-  hive: 1.9e24,
-  you: 5.4e26,
-}
-export const GROWTH = 1.15
+const MAX_BUFF = GOLDEN.frenzy.mult * GOLDEN.elder.mult
 
 /** Segundos que se dan de más al tiempo pasado: relojes, red y guardados que se cruzan. */
 const GRACE_S = 120
@@ -82,6 +68,12 @@ type Ledger = {
   bugs: number
   /** Lo que costaron los edificios que se tienen. */
   holdings: number
+  /**
+   * Lo que producen por segundo los edificios con sus mejoras, según el motor
+   * del juego: la única producción que cuenta. La que declara la web no vale,
+   * porque la pondría quien quisiera.
+   */
+  cps: number
 }
 
 const amount = (value: unknown): number | null =>
@@ -124,9 +116,14 @@ export function readSave(save: string): Ledger | null {
     }
   }
 
+  // Una partida que el motor no entiende no produce nada: lo que no cuadre
+  // con eso se nota en `rate`.
+  const game = restore(save, 0)
+
   return {
     code,
     total,
+    cps: game === null ? 0 : Math.max(0, baseCps(game)),
     before: amount(parsed.before) ?? 0,
     clicks: amount(parsed.clicks) ?? 0,
     golden: amount(parsed.golden) ?? 0,
@@ -166,7 +163,6 @@ const excess = (ledger: Ledger, spent: number): number =>
 export function verdict(
   before: {
     total: number
-    perSecond: number
     at: number
     ledger: Ledger | null
     /**
@@ -194,13 +190,17 @@ export function verdict(
 
   if (sent.prestige > Math.cbrt(sent.total / PRESTIGE_UNIT) + 1) return 'prestige'
   if (sent.perSecond > sent.total * CPS_PER_TOTAL + 10) return 'speed'
+  // Y tampoco de lo que dan sus edificios con la mejor racha encima.
+  if (sent.perSecond > ledger.cps * MAX_BUFF * 1.01 + 10) return 'speed'
 
   const gain = sent.total - before.total
 
   if (gain <= 0) return null
 
   const seconds = Math.max(0, now - before.at) / 1000 + GRACE_S
-  const rate = Math.max(before.perSecond, sent.perSecond)
+  // La producción la dicen los edificios de la partida (la de antes o la de
+  // ahora, la mayor), nunca la cifra que manda la web.
+  const rate = Math.max(before.ledger?.cps ?? 0, ledger.cps)
   // Lo que se ha pulsado y las doradas que se han abierto, según la partida y
   // sin pasar de lo que da tiempo. Si la cuenta ha bajado es que se recompiló:
   // vale el tope.
@@ -224,9 +224,9 @@ export function verdict(
  * La política de trampas, en cada trampa pillada: vuelve la última partida
  * buena, se venden todos sus edificios y se le da esta parte de lo que
  * costaron. La misma cantidad se reparte entre quienes nunca han sido pillados.
- * Es `FORCED_REFUND` de la web (`data.ts`); un test comprueba que coinciden.
+ * Es `FORCED_REFUND` del motor del juego: la misma cifra que aplica la web.
  */
-export const SALE_REFUND = 0.5
+const SALE_REFUND = FORCED_REFUND
 
 /** El título que deja en el banner haber sido pillado tantas veces. */
 export function hackerTitle(

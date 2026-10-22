@@ -9,10 +9,10 @@
 
 import type { Lang } from '@sanatorio/contracts'
 
-import { ACHIEVEMENTS, BUILDINGS, UPGRADE } from './data'
-import type { BuildingId } from './data'
-import { baseCps, clickPower, priceOf, refundOf } from './engine'
-import type { Game } from './engine'
+import { ACHIEVEMENTS, BUILDINGS, UPGRADE } from '@sanatorio/clicker'
+import type { BuildingId } from '@sanatorio/clicker'
+import { baseCps, clickPower, priceOf, refundOf } from '@sanatorio/clicker'
+import type { Game } from '@sanatorio/clicker'
 import { buildingGain, buildingShare, payback, span, upgradeGain, waitFor } from './insight'
 import { achievementText, fill, short, textsOf, upgradeText } from './texts'
 

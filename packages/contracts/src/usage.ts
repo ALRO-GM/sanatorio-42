@@ -78,7 +78,7 @@ export type UsageStats = {
   users: ({ login: string } & StatTotals)[]
 }
 
-/** `GET /usage/heatmap?by=`: uso de cada elemento por grupo de personas. Solo admins. */
+/** `GET /admin/usage/heatmap?by=`: uso de cada elemento por grupo de personas. Solo admins. */
 export type UsageHeatmap = {
   by: 'total' | 'activity' | 'track' | 'cohort'
   /** El tramo de gente, por sus usos de siempre. */

@@ -6,9 +6,9 @@
  * pero son lo que convierte la tienda en una decisión y no en una lotería.
  */
 
-import type { BuildingId } from './data'
-import { baseCps, clickPower, cpsOf, globalMult, unitCps } from './engine'
-import type { Game } from './engine'
+import type { BuildingId } from '@sanatorio/clicker'
+import { baseCps, clickPower, cpsOf, globalMult, unitCps } from '@sanatorio/clicker'
+import type { Game } from '@sanatorio/clicker'
 
 /** Lo que sube la producción por segundo y cada pulsación al comprar una mejora. */
 export function upgradeGain(game: Game, id: string, now: number): { cps: number; click: number } {

@@ -1,5 +1,5 @@
-import { BUILDINGS } from './data'
-import type { BuildingId } from './data'
+import { BUILDINGS } from '@sanatorio/clicker'
+import type { BuildingId } from '@sanatorio/clicker'
 
 /**
  * El decorado de Code Clicker: lo que se mueve alrededor de la tecla y el fondo

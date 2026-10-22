@@ -456,7 +456,6 @@ export function createClickerService(options: ClickerServiceOptions) {
         verdict(
           {
             total: Number(found?.last_total ?? 0),
-            perSecond: Number(found?.per_second ?? 0),
             at: Date.parse(toText(found?.updated_at ?? iso())),
             ledger: typeof found?.save === 'string' ? readSave(found.save) : null,
             credited: creditedSince(

@@ -21,8 +21,8 @@ import {
   PROJECTS,
   RESEARCH,
   TOTAL_GOALS,
-} from './data'
-import type { BuildingId } from './data'
+} from '@sanatorio/clicker'
+import type { BuildingId } from '@sanatorio/clicker'
 
 type Texts = {
   ui: Record<string, string>

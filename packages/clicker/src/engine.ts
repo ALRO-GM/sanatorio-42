@@ -41,8 +41,8 @@ import {
   BETA,
   DONATE_GOALS,
   DONATION_CAP,
-} from './data'
-import type { BuildingId, Upgrade } from './data'
+} from './data.js'
+import type { BuildingId, Upgrade } from './data.js'
 
 export type BuffId = 'frenzy' | 'click' | 'clot' | 'elder'
 

@@ -13,7 +13,7 @@ import {
   RESEARCH,
   RESEARCH_WAIT_MS,
   UPGRADES,
-} from '../src/features/clicker/data'
+} from '@sanatorio/clicker'
 import {
   baseCps,
   buy,
@@ -37,8 +37,8 @@ import {
   stageOf,
   tick,
   unitCps,
-} from '../src/features/clicker/engine'
-import type { Game } from '../src/features/clicker/engine'
+} from '@sanatorio/clicker'
+import type { Game } from '@sanatorio/clicker'
 import { cardFor } from '../src/features/clicker/cards'
 import {
   buildingGain,
@@ -620,8 +620,7 @@ describe('code clicker: las fichas que explican cada cosa', () => {
 
 describe('code clicker: las trampas', () => {
   it('lo invertido y lo que queda nunca pasan de lo escrito jugando limpio', async () => {
-    const { buy, buyUpgrade, click, invested, sell, shop } =
-      await import('../src/features/clicker/engine')
+    const { buy, buyUpgrade, click, invested, sell, shop } = await import('@sanatorio/clicker')
     const game = newGame(T0, always(0.5))
     let now = T0
 
@@ -642,8 +641,8 @@ describe('code clicker: las trampas', () => {
   })
 
   it('la venta por trampa se lo lleva todo y paga la mitad', async () => {
-    const { invested, sellAll } = await import('../src/features/clicker/engine')
-    const { FORCED_REFUND } = await import('../src/features/clicker/data')
+    const { invested, sellAll } = await import('@sanatorio/clicker')
+    const { FORCED_REFUND } = await import('@sanatorio/clicker')
     const game = newGame(T0, always(0.5))
 
     game.owned = { cursor: 10, pisciner: 3 }
@@ -683,7 +682,7 @@ describe('code clicker: las trampas', () => {
 
 describe('code clicker: el capital', () => {
   it('comprar no lo mueve, aplastar un bug tampoco, y vender lo baja', async () => {
-    const { buy, capitalOf, sell, squash } = await import('../src/features/clicker/engine')
+    const { buy, capitalOf, sell, squash } = await import('@sanatorio/clicker')
     const game = newGame(T0, always(0.5))
 
     game.code = 10_000

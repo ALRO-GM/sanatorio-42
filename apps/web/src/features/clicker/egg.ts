@@ -12,7 +12,7 @@ import { useSyncExternalStore } from 'react'
 import type { Pill } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
-import { PLUS_GOALS } from './data'
+import { PLUS_GOALS } from '@sanatorio/clicker'
 
 type Egg = {
   /** `false` hasta que la API dice por dónde iba. */

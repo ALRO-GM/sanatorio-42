@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 
-import { BUILDINGS } from './data'
+import { BUILDINGS } from '@sanatorio/clicker'
 
 /**
  * Los dibujos de Code Clicker. Todos salen del mismo molde para que el juego

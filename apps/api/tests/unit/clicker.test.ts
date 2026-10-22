@@ -8,7 +8,7 @@
 
 import { beforeEach, describe, expect, it } from 'vitest'
 
-import { BASE_PRICE, GROWTH, SALE_REFUND } from '../../src/modules/clicker/cheat.rules.js'
+import { BASE_PRICE, GROWTH } from '../../src/modules/clicker/cheat.rules.js'
 import { toText } from '../../src/core/db/rows.js'
 import { clickerLevel } from '../../src/modules/clicker/index.js'
 import { actor, expectCode, HOUR, MINUTE, useCommunity } from '../helpers/community.js'
@@ -34,15 +34,18 @@ describe('code clicker', () => {
   }
 
   /** Una partida como las que guarda la web, con lo justo para que cuadre. */
+  // Una partida recién empezada: lo escrito, a mano (doscientas pulsaciones).
+  // La API rehace las cuentas con el motor del juego, así que las partidas de
+  // prueba tienen que cuadrar: lo que producen lo dicen sus edificios.
   const game = (extra: Record<string, unknown> = {}): string =>
-    JSON.stringify({ v: 1, code: 0, total: 1500, ...extra })
+    JSON.stringify({ v: 1, code: 0, total: 1500, clicks: 200, ...extra })
 
   const SAVE = {
     save: game(),
     rev: 0,
     session: 'pestaña-1',
     total: 1500,
-    perSecond: 12,
+    perSecond: 1,
     achievements: 6,
     prestige: 0,
     spent: 0,
@@ -157,9 +160,9 @@ describe('code clicker', () => {
     clock.advance(HOUR)
     await clicker.save(actor('eva'), {
       ...SAVE,
-      save: game({ code: 1000, total: 2e6 }),
+      save: game({ code: 1000, total: 2e6, owned: { repo: 1 } }),
       total: 2e6,
-      perSecond: 900,
+      perSecond: 1400,
       prestige: 1,
     })
 
@@ -181,6 +184,14 @@ describe('code clicker', () => {
     })
     const cursors = (BASE_PRICE.cursor ?? 0) * (1 + GROWTH)
 
+    // `eva` vende el repo: le queda lo que tiene sin gastar, menos que a `ana`.
+    await clicker.save(actor('eva'), {
+      ...SAVE,
+      rev: 1,
+      save: game({ code: 1000, total: 2e6 }),
+      total: 2e6,
+      perSecond: 0,
+    })
     expect((await clicker.board(actor('ana'))).entries).toMatchObject([
       { rank: 1, login: 'ana', total: 1500, wealth: 1400 + cursors },
       { rank: 2, login: 'eva', total: 2e6, wealth: 1000 },
@@ -189,7 +200,7 @@ describe('code clicker', () => {
     // El total de la clasificación no baja aunque se empiece una partida nueva.
     await clicker.save(actor('eva'), {
       ...SAVE,
-      rev: 1,
+      rev: 2,
       save: game({ total: 10 }),
       total: 10,
       perSecond: 1,
@@ -402,14 +413,14 @@ describe('code clicker', () => {
       clock.advance(MINUTE)
       expect(await send({ total: 2400, clicks: 200 })).toEqual({ caught: 0, refused: false })
 
-      // Compra cien cursores con lo escrito en una tarde y la producción sube.
+      // Compra dos repos con lo escrito en una tarde y la producción sube (2800/s).
       clock.advance(5 * HOUR)
-      const spent = cost('cursor', 100)
+      const spent = cost('repo', 2)
 
       expect(
         await send(
-          { total: spent + 5000, code: 5000, owned: { cursor: 100 }, clicks: 900 },
-          { perSecond: 4000 },
+          { total: spent + 5000, code: 5000, owned: { repo: 2 }, clicks: 900 },
+          { perSecond: 2800 },
         ),
       ).toEqual({ caught: 0, refused: false })
 
@@ -418,13 +429,13 @@ describe('code clicker', () => {
       expect(
         await send(
           {
-            total: spent + 5000 + 4000 * 3600 * 4,
-            code: 4000 * 3600 * 4,
-            owned: { cursor: 100 },
+            total: spent + 5000 + 2800 * 3600 * 4,
+            code: 2800 * 3600 * 4,
+            owned: { repo: 2 },
             clicks: 1100,
             golden: 1,
           },
-          { perSecond: 4000 },
+          { perSecond: 2800 },
         ),
       ).toEqual({ caught: 0, refused: false })
 
@@ -433,13 +444,13 @@ describe('code clicker', () => {
       expect(
         await send(
           {
-            total: spent + 5000 + 4000 * 3600 * 12,
-            code: 4000 * 3600 * 12,
-            owned: { cursor: 100 },
+            total: spent + 5000 + 2800 * 3600 * 12,
+            code: 2800 * 3600 * 12,
+            owned: { repo: 2 },
             clicks: 1100,
             golden: 1,
           },
-          { perSecond: 4000 },
+          { perSecond: 2800 },
         ),
       ).toEqual({ caught: 0, refused: false })
       expect(await services.clicker.state(ana)).toMatchObject({ caught: 0, saleDue: false })
@@ -462,6 +473,9 @@ describe('code clicker', () => {
         ['figures', {}, { total: 1e15 }],
         // Más producción o más prestigio del que cabe con lo escrito.
         ['speed', {}, { perSecond: 1e6 }],
+        // Producción declarada que sus edificios no dan ni con la mejor racha:
+        // es la que haría pasar por buena cualquier subida.
+        ['speed', {}, { perSecond: 100 }],
         ['prestige', {}, { prestige: 50 }],
       ]
 
@@ -703,7 +717,7 @@ describe('code clicker', () => {
     })
 
     /** Un salto sospechoso de `ana`, como lo dejaría un guardado: el que mira el panel. */
-    const leap = async (extra: Record<string, unknown> = { total: 3000 }): Promise<number> => {
+    const leap = async (extra: Record<string, unknown> = { total: 2400 }): Promise<number> => {
       clock.advance(MINUTE)
 
       const second = Math.floor(clock.now() / 1000)
@@ -998,23 +1012,6 @@ describe('code clicker', () => {
       await clicker.compact()
       expect(await count()).toBe(2)
       expect((await clicker.capital(ana)).points).toHaveLength(2)
-    })
-
-    it('los precios son los del juego', async () => {
-      // La web es la que tiene las reglas: si cambian allí, que se note aquí.
-      const path = '../../../web/src/features/clicker/data.ts'
-      const data = (await import(/* @vite-ignore */ path)) as {
-        BUILDINGS: { id: string; base: number }[]
-        GROWTH: number
-        FORCED_REFUND: number
-      }
-
-      expect(Object.fromEntries(data.BUILDINGS.map(({ id, base }) => [id, base]))).toEqual(
-        BASE_PRICE,
-      )
-      expect(data.GROWTH).toBe(GROWTH)
-      // Y lo que se devuelve al vender por trampa, también.
-      expect(data.FORCED_REFUND).toBe(SALE_REFUND)
     })
 
     it('quien administra puede ver la partida de cualquiera; nadie más', async () => {
