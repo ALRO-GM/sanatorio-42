@@ -70,7 +70,10 @@ export const realApi: Api = {
   answerTurn: (id, question, option) =>
     sendJson('POST', `/games/rooms/${id}/answer`, { question, option }),
   resignTurn: (id) => sendJson('POST', `/games/rooms/${id}/resign`),
-  getExamStats: () => getJson('/exams/stats'),
+  getExamStats: ({ track, kickoffs }) =>
+    getJson(
+      `/exams/stats?track=${track}${kickoffs.length === 0 ? '' : `&kickoffs=${kickoffs.join(',')}`}`,
+    ),
   getLiveExam: () => getJson('/exams/live'),
   reportBrokenSeat: (host) => send('POST', `/map/seats/${encodeURIComponent(host)}/broken`),
   clearBrokenSeat: (host) => send('DELETE', `/map/seats/${encodeURIComponent(host)}/broken`),

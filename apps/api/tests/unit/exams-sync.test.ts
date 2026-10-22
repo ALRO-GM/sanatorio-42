@@ -53,8 +53,35 @@ describe('exámenes', () => {
     const exam = stats.exams.find((one) => one.name === 'Exam Rank 02')
 
     expect(exam).toMatchObject({ people: 2, passed: 2, avgAttempts: 1.5 })
-    expect(exam?.attemptsToPass).toEqual([1, 1, 0, 0, 0])
+    expect(exam?.attemptsToPass).toEqual([1, 1])
     expect(exam?.byAttempt[0]).toMatchObject({ attempt: 1, people: 2, avgMark: 50 })
+  })
+
+  it('filtra por plan y kickoff, y rechaza lo que no es un mes', async () => {
+    const { replica } = services.repositories
+
+    await replica.ingestProjectUsers(
+      [examRow('ana', [[100, true, '2026-01-01T10:00:00Z']])],
+      MADRID,
+    )
+
+    // Sin kickoff conocida, sale en «todas» pero no al elegir una.
+    const all = await services.exams.stats(actor('eva'), { track: 'classic' })
+
+    expect(all).toMatchObject({ people: 1, query: { track: 'classic', kickoffs: [] } })
+    expect(all.exams[0]).toMatchObject({ family: 'classic', rank: 2 })
+    expect((await services.exams.stats(actor('eva'), { kickoffs: '2025-10' })).exams).toEqual([])
+    expect((await services.exams.stats(actor('eva'), { track: 'next' })).people).toBe(0)
+
+    for (const bad of [
+      { kickoffs: '2026-13' },
+      { kickoffs: '2026-1' },
+      { kickoffs: "2026-01' OR 1=1" },
+      { kickoffs: Array.from({ length: 100 }, () => '2026-01').join(',') },
+      { track: 'pascal' },
+    ]) {
+      await expect(services.exams.stats(actor('eva'), bad)).rejects.toThrow()
+    }
   })
 
   it('la copia de fondo baja los intentos antiguos página a página, y para al acabar', async () => {

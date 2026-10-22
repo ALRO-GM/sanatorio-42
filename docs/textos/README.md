@@ -13,7 +13,7 @@ Cómo se trabaja con ellas: [docs/textos.md](../textos.md).
 | [comun](comun.md) | 220 | 0 | 0 | 0 |
 | [demos](demos.md) | 96 | 0 | 0 | 0 |
 | [estadisticas](estadisticas.md) | 72 | 0 | 0 | 0 |
-| [examenes](examenes.md) | 25 | 0 | 0 | 0 |
+| [examenes](examenes.md) | 57 | 0 | 0 | 0 |
 | [expediente](expediente.md) | 134 | 0 | 0 | 0 |
 | [gestion](gestion.md) | 463 | 0 | 400 | 400 |
 | [guardia](guardia.md) | 79 | 0 | 0 | 0 |

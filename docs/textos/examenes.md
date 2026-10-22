@@ -3,18 +3,18 @@
 Generado desde `apps/web/src/shared/i18n/textos/examenes.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-25 textos. «—» es que falta la traducción: sale en español.
+57 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
 | `exams.title` | Título de la página de exámenes | features/exams/ExamsPage | Exámenes | Exams | Exàmens | Azterketak |
-| `exams.stats` | Apartado de estadísticas | features/exams/ExamsPage | Estadísticas del campus | Campus statistics | Estadístiques del campus | Campuseko estatistikak |
-| `exams.backfill` | Progreso de la copia de intentos antiguos | features/exams/ExamsPage | Copiando los intentos antiguos de 42: {done} de {total} exámenes. Las cifras se irán completando. | Copying old attempts from 42: {done} of {total} exams. Figures will fill in. | Copiant els intents antics de 42: {done} de {total} exàmens. | 42ko saiakera zaharrak kopiatzen: {done} / {total} azterketa. |
-| `exams.noStats` | Sin datos de exámenes | features/exams/ExamsPage | Aún no hay intentos de examen copiados en este campus. | No exam attempts copied for this campus yet. | Encara no hi ha intents d’examen copiats en aquest campus. | Oraindik ez dago azterketa saiakerarik kopiatuta campus honetan. |
-| `exams.circles` | Cuánto se tarda en cada círculo | features/exams/ExamsPage | Cuánto se tarda en cada círculo | How long each circle takes | Quant es triga en cada cercle | Zirkulu bakoitzean zenbat irauten den |
-| `exams.circlesHint` | Cómo se calcula | features/exams/ExamsPage | Días desde que se empieza (o desde el círculo anterior) hasta validarlo, sin los casos extremos. Solo de la gente de la que se saben los hitos. | Days from the start (or the previous circle) until it is validated, without extreme cases. Only people whose milestones are known. | Dies des de l’inici (o el cercle anterior) fins a validar-lo, sense casos extrems. | Hasieratik (edo aurreko zirkulutik) balidatu arteko egunak, muturreko kasurik gabe. |
-| `exams.days` | Número de días | features/exams/ExamsPage | {n} días | {n} days | {n} dies | {n} egun |
-| `exams.range` | La mitad central de la gente tarda entre esos días | features/exams/ExamsPage | la mitad, entre {p25} y {p75} · {n} personas | half of them between {p25} and {p75} · {n} people | la meitat, entre {p25} i {p75} · {n} persones | erdiak, {p25} eta {p75} artean · {n} pertsona |
+| `exams.stats` | Apartado de estadísticas | features/exams/ExamStatsPanel | Estadísticas del campus | Campus statistics | Estadístiques del campus | Campuseko estatistikak |
+| `exams.backfill` | Progreso de la copia de intentos antiguos | features/exams/ExamStatsPanel | Copiando los intentos antiguos de 42: {done} de {total} exámenes. Las cifras se irán completando. | Copying old attempts from 42: {done} of {total} exams. Figures will fill in. | Copiant els intents antics de 42: {done} de {total} exàmens. | 42ko saiakera zaharrak kopiatzen: {done} / {total} azterketa. |
+| `exams.noStats` | Sin datos de exámenes | features/exams/ExamStatsPanel | Aún no hay intentos de examen copiados en este campus. | No exam attempts copied for this campus yet. | Encara no hi ha intents d’examen copiats en aquest campus. | Oraindik ez dago azterketa saiakerarik kopiatuta campus honetan. |
+| `exams.circles` | Cuánto se tarda en cada círculo | features/exams/ExamStatsPanel | Cuánto se tarda en cada círculo | How long each circle takes | Quant es triga en cada cercle | Zirkulu bakoitzean zenbat irauten den |
+| `exams.circlesHint` | Cómo se calcula | features/exams/ExamStatsPanel | Días desde que se empieza (o desde el círculo anterior) hasta validarlo, sin los casos extremos. Solo de la gente de la que se saben los hitos. | Days from the start (or the previous circle) until it is validated, without extreme cases. Only people whose milestones are known. | Dies des de l’inici (o el cercle anterior) fins a validar-lo, sense casos extrems. | Hasieratik (edo aurreko zirkulutik) balidatu arteko egunak, muturreko kasurik gabe. |
+| `exams.days` | Número de días | features/exams/ExamStatsPanel | {n} días | {n} days | {n} dies | {n} egun |
+| `exams.range` | La mitad central de la gente tarda entre esos días | features/exams/ExamStatsPanel | la mitad, entre {p25} y {p75} · {n} personas | half of them between {p25} and {p75} · {n} people | la meitat, entre {p25} i {p75} · {n} persones | erdiak, {p25} eta {p75} artean · {n} pertsona |
 | `exams.none` | No hay exámenes hoy | features/exams/ExamsPage | Hoy no hay ningún examen en tu campus. | There is no exam on your campus today. | Avui no hi ha cap examen al teu campus. | Gaur ez dago azterketarik zure campusean. |
 | `exams.live` | Examen en curso | features/exams/ExamsPage, features/exams/ExamsTour | En marcha | Live | En marxa | Martxan |
 | `exams.next` | Examen de hoy aún no empezado | features/exams/ExamsPage | Hoy | Today | Avui | Gaur |
@@ -26,9 +26,41 @@ Generado desde `apps/web/src/shared/i18n/textos/examenes.csv` con
 | `exams.allCircles` | Todos los círculos | features/exams/ExamsPage | Todos los círculos | All circles | Tots els cercles | Zirkulu guztiak |
 | `exams.nobody` | No se sabe quién se ha apuntado | features/exams/ExamsPage | Aún no se sabe quién está apuntado. | Who is signed up is not known yet. | Encara no se sap qui s’hi ha apuntat. | Oraindik ez da jakiten nor dagoen izena emanda. |
 | `exams.noAttempt` | Aún sin entregar | features/exams/ExamsPage | Sin entregar todavía | Nothing handed in yet | Sense entregar encara | Oraindik ezer entregatu gabe |
-| `exams.avg` | Intentos de media | features/exams/ExamsPage | {n} intentos de media | {n} attempts on average | {n} intents de mitjana | {n} saiakera batez beste |
-| `exams.people` | Cuánta gente aprobó | features/exams/ExamsPage | {passed} aprobados de {people} | {passed} passed out of {people} | {passed} aprovats de {people} | {passed} gainditu, {people}tik |
-| `exams.toPass` | En qué intento se aprueba | features/exams/ExamsPage, features/exams/ExamsTour | Aprobado al intento… | Passed on attempt… | Aprovat a l’intent… | Gainditua saiakeran… |
-| `exams.byAttempt` | Datos por intento | features/exams/ExamsPage | Cada intento | Each attempt | Cada intent | Saiakera bakoitza |
-| `exams.attempt` | Número de intento | features/exams/ExamsPage | {n}.º intento | Attempt {n} | {n}r intent | {n}. saiakera |
-| `exams.attemptLine` | Nota media, porcentaje de aprobados y personas de un intento | features/exams/ExamsPage | nota media {mark} · aprueba el {pct} % · {n} personas | average mark {mark} · {pct}% pass · {n} people | nota mitjana {mark} · aprova el {pct} % · {n} persones | batez besteko nota {mark} · %{pct} gainditzen du · {n} pertsona |
+| `exams.avg` | Intentos de media | features/exams/ExamStatsPanel | {n} intentos de media | {n} attempts on average | {n} intents de mitjana | {n} saiakera batez beste |
+| `exams.people` | Cuánta gente aprobó, y qué parte es | features/exams/ExamStatsPanel | {passed} aprobados de {people} · {pct} | {passed} passed out of {people} · {pct} | {passed} aprovats de {people} · {pct} | {passed} gainditu, {people}tik · {pct} |
+| `exams.toPass` | En qué intento se aprueba | features/exams/ExamStatsPanel, features/exams/ExamsTour | Aprobado al intento… | Passed on attempt… | Aprovat a l’intent… | Gainditua saiakeran… |
+| `exams.byAttempt` | Datos por intento | features/exams/ExamStatsPanel | Cada intento | Each attempt | Cada intent | Saiakera bakoitza |
+| `exams.attempt` | Número de intento | features/exams/ExamStatsPanel | {n}.º intento | Attempt {n} | {n}r intent | {n}. saiakera |
+| `exams.attemptLine` | Nota media, porcentaje de aprobados y personas de un intento | features/exams/ExamStatsPanel | nota media {mark} · aprueba el {pct} % · {n} personas | average mark {mark} · {pct}% pass · {n} people | nota mitjana {mark} · aprova el {pct} % · {n} persones | batez besteko nota {mark} · %{pct} gainditzen du · {n} pertsona |
+| `exams.trackFilter` | Estadísticas: grupo de botones del plan que sigue la gente | features/exams/ExamStatsPanel | Plan de la gente | People's track | Pla de la gent | Jendearen plana |
+| `exams.plan.all` | Estadísticas: gente de los dos planes | features/exams/ExamStatsPanel | Toda la gente | Everyone | Tothom | Jende guztia |
+| `exams.plan.classic` | Estadísticas: gente del common core antiguo, en C | features/exams/ExamStatsPanel | Core en C | C core | Core en C | C core-a |
+| `exams.plan.next` | Estadísticas: gente del common core nuevo, en Python | features/exams/ExamStatsPanel | Core en Python | Python core | Core en Python | Python core-a |
+| `exams.familyFilter` | Estadísticas: grupo de botones de qué exámenes se ven | features/exams/ExamStatsPanel | Exámenes | Exams | Exàmens | Azterketak |
+| `exams.family.classic` | Estadísticas: los exámenes del core en C | features/exams/ExamStatsPanel | De C | C exams | De C | C-koak |
+| `exams.family.next` | Estadísticas: los exámenes del core en Python | features/exams/ExamStatsPanel | Nexus | Nexus | Nexus | Nexus |
+| `exams.family.both` | Estadísticas: los dos tipos de examen, uno al lado del otro | features/exams/ExamStatsPanel | Los dos | Both | Tots dos | Biak |
+| `exams.kickoffs` | Estadísticas: grupo de botones de las kickoffs (meses en que se empezó) | features/exams/ExamStatsPanel | Kickoffs | Kickoffs | Kickoffs | Kickoff-ak |
+| `exams.kickoffPill` | Botón de una kickoff: mes y año, y cuánta gente empezó | features/exams/ExamStatsPanel | {month} · {n} | {month} · {n} | {month} · {n} | {month} · {n} |
+| `exams.kickoff.all` | Botón para ver todas las kickoffs juntas | features/exams/ExamStatsPanel | Todas | All | Totes | Denak |
+| `exams.kickoff.small` | Desplegable con las kickoffs de muy poca gente | features/exams/ExamStatsPanel | {n} más con poca gente | {n} more with few people | {n} més amb poca gent | {n} gehiago, jende gutxirekin |
+| `exams.selection` | Cuánta gente entra en lo elegido | features/exams/ExamStatsPanel | {n} personas en lo elegido | {n} people in this selection | {n} persones en el que has triat | {n} pertsona aukeratutakoan |
+| `exams.rank` | Fila de un rango: su examen de C y el de Nexus | features/exams/ExamStatsPanel | Rango {n} | Rank {n} | Rang {n} | {n}. maila |
+| `exams.otherRank` | Fila de exámenes sin número de rango | features/exams/ExamStatsPanel | Otros | Others | Altres | Besteak |
+| `exams.noAttempts` | Un examen de esa fila que nadie de lo elegido ha hecho | features/exams/ExamStatsPanel | Nadie lo ha intentado aún. | Nobody has tried it yet. | Encara no ho ha intentat ningú. | Oraindik inork ez du saiatu. |
+| `exams.pct` | Un porcentaje | features/exams/ExamStatsPanel | {n} % | {n}% | {n} % | % {n} |
+| `exams.bar` | Una cifra y qué parte es del total | features/exams/ExamStatsPanel | {n} · {pct} | {n} · {pct} | {n} · {pct} | {n} · {pct} |
+| `exams.byKickoff` | Tabla: las kickoffs una al lado de otra | features/exams/ExamStatsPanel | Kickoffs, una al lado de otra | Kickoffs side by side | Kickoffs, una al costat de l’altra | Kickoff-ak, bata bestearen ondoan |
+| `exams.col.kickoff` | Columna: la kickoff | features/exams/ExamStatsPanel | Kickoff | Kickoff | Kickoff | Kickoff |
+| `exams.col.people` | Columna: cuánta gente empezó en esa kickoff | features/exams/ExamStatsPanel | Personas | People | Persones | Pertsonak |
+| `exams.col.absorbed` | Columna: cuánta gente de la kickoff se llevó el black hole | features/exams/ExamStatsPanel | Black hole | Black hole | Black hole | Black hole |
+| `exams.bh.title` | Bloque del black hole | features/exams/ExamStatsPanel | Black hole | Black hole | Black hole | Black hole |
+| `exams.bh.total` | Cuánta gente se ha llevado el black hole, de la que se sabe | features/exams/ExamStatsPanel | {n} absorbidos de {known} de los que se sabe · {pct} | {n} absorbed out of {known} known · {pct} | {n} absorbits de {known} dels quals se sap · {pct} | {n} irentsita, {known} ezagunetatik · {pct} |
+| `exams.bh.circles` | Black hole: cuánta gente se lleva en cada círculo | features/exams/ExamStatsPanel | En qué círculo se los lleva | Circle where it took them | En quin cercle se’ls emporta | Zein zirkulutan eraman dituen |
+| `exams.bh.circleLine` | Black hole: absorbidos en un círculo de los que llegaron a él | features/exams/ExamStatsPanel | {n} de {reached} · {pct} | {n} of {reached} · {pct} | {n} de {reached} · {pct} | {n} / {reached} · {pct} |
+| `exams.bh.soon` | Black hole: gente que lo tiene a esos días o menos | features/exams/ExamStatsPanel | a {n} días o menos | {n} days or less away | a {n} dies o menys | {n} egun edo gutxiagora |
+| `exams.bh.months` | Black hole: histórico de absorbidos por mes | features/exams/ExamStatsPanel | Absorbidos cada mes | Absorbed each month | Absorbits cada mes | Hilabete bakoitzean irentsiak |
+| `exams.bh.recent` | Black hole: lista de los últimos absorbidos | features/exams/ExamStatsPanel | Los últimos absorbidos | Most recently absorbed | Els últims absorbits | Azken irentsiak |
+| `exams.bh.closest` | Black hole: lista de quien lo tiene más cerca | features/exams/ExamStatsPanel | Quien lo tiene más cerca | Closest to it | Qui el té més a prop | Hurbilen dutenak |
+| `exams.bh.left` | Black hole: días que le quedan a alguien | features/exams/ExamStatsPanel | quedan {n} días | {n} days left | queden {n} dies | {n} egun falta |
+| `exams.bh.nobody` | Black hole: lista vacía | features/exams/ExamStatsPanel | Nadie, por ahora. | Nobody, for now. | Ningú, de moment. | Inor ez, oraingoz. |

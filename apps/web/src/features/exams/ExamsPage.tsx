@@ -1,15 +1,15 @@
 import { useEffect, useState } from 'react'
 
-import type { ExamStat, LiveExam, LiveExaminee } from '@sanatorio/contracts'
+import type { LiveExam, LiveExaminee } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { localeOf, useI18n } from '../../shared/i18n'
-import { Show } from '../../shared/detail'
 import { Avatar } from '../../shared/ui/Avatar'
 import { PersonLink } from '../../shared/ui/PersonLink'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { InfoTip } from '../../shared/ui/InfoTip'
+import { ExamStatsPanel } from './ExamStatsPanel'
 import { ExamsTour } from './ExamsTour'
 
 /** Cada cuánto se pregunta por el examen en vivo: la API refresca las notas cada 5 min. */
@@ -19,13 +19,12 @@ type TrackFilter = 'all' | LiveExaminee['track']
 
 /**
  * Exámenes: arriba, el examen que hay ahora en tu campus (quién está, qué
- * examen hace y su última nota); debajo, las estadísticas de cada examen y de
- * cuánto se tarda en cada círculo.
+ * examen hace y su última nota); debajo, las estadísticas por plan y kickoff
+ * (`ExamStatsPanel`).
  */
 export function ExamsPage() {
   const { t } = useI18n()
   const live = useAsync(() => api.getLiveExam(), [])
-  const stats = useAsync(() => api.getExamStats(), [])
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -48,49 +47,7 @@ export function ExamsPage() {
       {live.data !== undefined && <LiveCard live={live.data} />}
       <ErrorNote error={live.error} onRetry={() => void live.reload()} />
 
-      <h3 className="exams-subtitle">{t('exams.stats')}</h3>
-      {stats.loading && <p className="estado">{t('app.loading')}</p>}
-      <ErrorNote error={stats.error} onRetry={() => void stats.reload()} />
-      {stats.data !== undefined && (
-        <>
-          {stats.data.backfill.done < stats.data.backfill.total && (
-            <p className="hint">
-              {t('exams.backfill', {
-                done: stats.data.backfill.done,
-                total: stats.data.backfill.total,
-              })}
-            </p>
-          )}
-          {stats.data.exams.length === 0 ? (
-            <p className="estado">{t('exams.noStats')}</p>
-          ) : (
-            <div className="exam-stats">
-              {stats.data.exams.map((exam) => (
-                <ExamCard key={exam.projectId} exam={exam} />
-              ))}
-            </div>
-          )}
-          {stats.data.circles.length > 0 && (
-            <Show from="datos">
-              <article className="card">
-                <span className="eyebrow">{t('exams.circles')}</span>
-                <p className="hint">{t('exams.circlesHint')}</p>
-                <ul className="rows">
-                  {stats.data.circles.map((circle) => (
-                    <li key={circle.circle} className="row">
-                      <span>{t('graph.circle', { n: circle.circle })}</span>
-                      <strong>{t('exams.days', { n: circle.median })}</strong>
-                      <small className="hint">
-                        {t('exams.range', { p25: circle.p25, p75: circle.p75, n: circle.people })}
-                      </small>
-                    </li>
-                  ))}
-                </ul>
-              </article>
-            </Show>
-          )}
-        </>
-      )}
+      <ExamStatsPanel />
     </section>
   )
 }
@@ -189,59 +146,6 @@ function LiveCard({ live }: { live: LiveExam }) {
           </section>
         )
       })}
-    </article>
-  )
-}
-
-/** Las estadísticas de un examen: intentos hasta aprobar y cómo va cada intento. */
-function ExamCard({ exam }: { exam: ExamStat }) {
-  const { t, lang } = useI18n()
-  const decimal = new Intl.NumberFormat(localeOf(lang), { maximumFractionDigits: 1 })
-  const most = Math.max(1, ...exam.attemptsToPass)
-
-  return (
-    <article className="card exam-card">
-      <span className="eyebrow">{exam.name}</span>
-      <p>
-        <strong>
-          {exam.avgAttempts === null
-            ? '—'
-            : t('exams.avg', { n: decimal.format(exam.avgAttempts) })}
-        </strong>{' '}
-        <small className="hint">
-          {t('exams.people', { passed: exam.passed, people: exam.people })}
-        </small>
-      </p>
-      <span className="eyebrow">{t('exams.toPass')}</span>
-      <ul className="exam-bars">
-        {exam.attemptsToPass.map((count, index) => (
-          <li key={index}>
-            <span>{index === 4 ? '5+' : index + 1}</span>
-            <i style={{ width: `${(count / most) * 100}%` }} />
-            <small>{count}</small>
-          </li>
-        ))}
-      </ul>
-      {/* El detalle por intento es denso: solo para quien quiere los datos. */}
-      {exam.byAttempt.length > 0 && (
-        <Show from="datos">
-          <span className="eyebrow">{t('exams.byAttempt')}</span>
-          <ul className="rows exam-attempts">
-            {exam.byAttempt.slice(0, 6).map((attempt) => (
-              <li key={attempt.attempt} className="row">
-                <span>{t('exams.attempt', { n: attempt.attempt })}</span>
-                <span>
-                  {t('exams.attemptLine', {
-                    mark: attempt.avgMark === null ? '—' : Math.round(attempt.avgMark),
-                    pct: Math.round(attempt.passRate * 100),
-                    n: attempt.people,
-                  })}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </Show>
-      )}
     </article>
   )
 }

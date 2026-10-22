@@ -19,8 +19,40 @@ exams.allCircles,Todos los círculos,Todos los círculos,All circles,Tots els ce
 exams.nobody,No se sabe quién se ha apuntado,Aún no se sabe quién está apuntado.,Who is signed up is not known yet.,Encara no se sap qui s’hi ha apuntat.,Oraindik ez da jakiten nor dagoen izena emanda.
 exams.noAttempt,Aún sin entregar,Sin entregar todavía,Nothing handed in yet,Sense entregar encara,Oraindik ezer entregatu gabe
 exams.avg,Intentos de media,{n} intentos de media,{n} attempts on average,{n} intents de mitjana,{n} saiakera batez beste
-exams.people,Cuánta gente aprobó,{passed} aprobados de {people},{passed} passed out of {people},{passed} aprovats de {people},"{passed} gainditu, {people}tik"
+exams.people,"Cuánta gente aprobó, y qué parte es",{passed} aprobados de {people} · {pct},{passed} passed out of {people} · {pct},{passed} aprovats de {people} · {pct},"{passed} gainditu, {people}tik · {pct}"
 exams.toPass,En qué intento se aprueba,Aprobado al intento…,Passed on attempt…,Aprovat a l’intent…,Gainditua saiakeran…
 exams.byAttempt,Datos por intento,Cada intento,Each attempt,Cada intent,Saiakera bakoitza
 exams.attempt,Número de intento,{n}.º intento,Attempt {n},{n}r intent,{n}. saiakera
 exams.attemptLine,"Nota media, porcentaje de aprobados y personas de un intento",nota media {mark} · aprueba el {pct} % · {n} personas,average mark {mark} · {pct}% pass · {n} people,nota mitjana {mark} · aprova el {pct} % · {n} persones,batez besteko nota {mark} · %{pct} gainditzen du · {n} pertsona
+exams.trackFilter,Estadísticas: grupo de botones del plan que sigue la gente,Plan de la gente,People's track,Pla de la gent,Jendearen plana
+exams.plan.all,Estadísticas: gente de los dos planes,Toda la gente,Everyone,Tothom,Jende guztia
+exams.plan.classic,"Estadísticas: gente del common core antiguo, en C",Core en C,C core,Core en C,C core-a
+exams.plan.next,"Estadísticas: gente del common core nuevo, en Python",Core en Python,Python core,Core en Python,Python core-a
+exams.familyFilter,Estadísticas: grupo de botones de qué exámenes se ven,Exámenes,Exams,Exàmens,Azterketak
+exams.family.classic,Estadísticas: los exámenes del core en C,De C,C exams,De C,C-koak
+exams.family.next,Estadísticas: los exámenes del core en Python,Nexus,Nexus,Nexus,Nexus
+exams.family.both,"Estadísticas: los dos tipos de examen, uno al lado del otro",Los dos,Both,Tots dos,Biak
+exams.kickoffs,Estadísticas: grupo de botones de las kickoffs (meses en que se empezó),Kickoffs,Kickoffs,Kickoffs,Kickoff-ak
+exams.kickoffPill,"Botón de una kickoff: mes y año, y cuánta gente empezó",{month} · {n},{month} · {n},{month} · {n},{month} · {n}
+exams.kickoff.all,Botón para ver todas las kickoffs juntas,Todas,All,Totes,Denak
+exams.kickoff.small,Desplegable con las kickoffs de muy poca gente,{n} más con poca gente,{n} more with few people,{n} més amb poca gent,"{n} gehiago, jende gutxirekin"
+exams.selection,Cuánta gente entra en lo elegido,{n} personas en lo elegido,{n} people in this selection,{n} persones en el que has triat,{n} pertsona aukeratutakoan
+exams.rank,Fila de un rango: su examen de C y el de Nexus,Rango {n},Rank {n},Rang {n},{n}. maila
+exams.otherRank,Fila de exámenes sin número de rango,Otros,Others,Altres,Besteak
+exams.noAttempts,Un examen de esa fila que nadie de lo elegido ha hecho,Nadie lo ha intentado aún.,Nobody has tried it yet.,Encara no ho ha intentat ningú.,Oraindik inork ez du saiatu.
+exams.pct,Un porcentaje,{n} %,{n}%,{n} %,% {n}
+exams.bar,Una cifra y qué parte es del total,{n} · {pct},{n} · {pct},{n} · {pct},{n} · {pct}
+exams.byKickoff,Tabla: las kickoffs una al lado de otra,"Kickoffs, una al lado de otra",Kickoffs side by side,"Kickoffs, una al costat de l’altra","Kickoff-ak, bata bestearen ondoan"
+exams.col.kickoff,Columna: la kickoff,Kickoff,Kickoff,Kickoff,Kickoff
+exams.col.people,Columna: cuánta gente empezó en esa kickoff,Personas,People,Persones,Pertsonak
+exams.col.absorbed,Columna: cuánta gente de la kickoff se llevó el black hole,Black hole,Black hole,Black hole,Black hole
+exams.bh.title,Bloque del black hole,Black hole,Black hole,Black hole,Black hole
+exams.bh.total,"Cuánta gente se ha llevado el black hole, de la que se sabe",{n} absorbidos de {known} de los que se sabe · {pct},{n} absorbed out of {known} known · {pct},{n} absorbits de {known} dels quals se sap · {pct},"{n} irentsita, {known} ezagunetatik · {pct}"
+exams.bh.circles,Black hole: cuánta gente se lleva en cada círculo,En qué círculo se los lleva,Circle where it took them,En quin cercle se’ls emporta,Zein zirkulutan eraman dituen
+exams.bh.circleLine,Black hole: absorbidos en un círculo de los que llegaron a él,{n} de {reached} · {pct},{n} of {reached} · {pct},{n} de {reached} · {pct},{n} / {reached} · {pct}
+exams.bh.soon,Black hole: gente que lo tiene a esos días o menos,a {n} días o menos,{n} days or less away,a {n} dies o menys,{n} egun edo gutxiagora
+exams.bh.months,Black hole: histórico de absorbidos por mes,Absorbidos cada mes,Absorbed each month,Absorbits cada mes,Hilabete bakoitzean irentsiak
+exams.bh.recent,Black hole: lista de los últimos absorbidos,Los últimos absorbidos,Most recently absorbed,Els últims absorbits,Azken irentsiak
+exams.bh.closest,Black hole: lista de quien lo tiene más cerca,Quien lo tiene más cerca,Closest to it,Qui el té més a prop,Hurbilen dutenak
+exams.bh.left,Black hole: días que le quedan a alguien,quedan {n} días,{n} days left,queden {n} dies,{n} egun falta
+exams.bh.nobody,Black hole: lista vacía,"Nadie, por ahora.","Nobody, for now.","Ningú, de moment.","Inor ez, oraingoz."
