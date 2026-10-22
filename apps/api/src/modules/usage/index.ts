@@ -114,3 +114,4 @@ export function createUsageModule(deps: {
 }
 
 export type { UsageService } from './usage.service.js'
+export { segmentOf } from './usage.service.js'

@@ -150,7 +150,11 @@ export const realApi: Api = {
   startGitRoom: (id) => sendJson('POST', `/gitcourse/rooms/${id}/start`),
   runGitRoom: (id, line) => sendJson('POST', `/gitcourse/rooms/${id}/run`, { line }),
   startFocus: (settings) => sendJson('PUT', '/me/focus', settings),
-  stopFocus: () => sendJson('DELETE', '/me/focus'),
+  stopFocus: (reasons) =>
+    sendJson('DELETE', '/me/focus', reasons === undefined ? undefined : { reasons }),
+  stayFocus: (reasons) => sendJson('POST', '/me/focus/stay', { reasons }),
+  getMyFocusStats: (query) => getJson(`/me/focus/stats?${search(query)}`),
+  getAdminFocusStats: (query) => getJson(`/admin/focus/stats?${search(query)}`),
   sendClicks: (batch) => send('POST', '/usage/clicks', batch),
   getClickHeatmap: (section, layout, days) =>
     getJson(

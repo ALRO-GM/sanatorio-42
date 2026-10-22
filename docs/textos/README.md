@@ -10,12 +10,12 @@ Cómo se trabaja con ellas: [docs/textos.md](../textos.md).
 | [calendario](calendario.md) | 105 | 0 | 0 | 0 |
 | [clusters](clusters.md) | 72 | 0 | 0 | 0 |
 | [code-clicker](code-clicker.md) | 27 | 0 | 0 | 0 |
-| [comun](comun.md) | 220 | 0 | 0 | 0 |
+| [comun](comun.md) | 273 | 0 | 0 | 0 |
 | [demos](demos.md) | 96 | 0 | 0 | 0 |
 | [estadisticas](estadisticas.md) | 72 | 0 | 0 | 0 |
 | [examenes](examenes.md) | 25 | 0 | 0 | 0 |
 | [expediente](expediente.md) | 134 | 0 | 0 | 0 |
-| [gestion](gestion.md) | 463 | 0 | 400 | 400 |
+| [gestion](gestion.md) | 468 | 0 | 401 | 401 |
 | [guardia](guardia.md) | 79 | 0 | 0 | 0 |
 | [legal](legal.md) | 52 | 0 | 52 | 52 |
 | [notgames](notgames.md) | 199 | 0 | 0 | 0 |

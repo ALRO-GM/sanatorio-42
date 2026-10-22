@@ -18,15 +18,19 @@ export const EVERYONE: SegmentRange = { low: 0, high: 100 }
  * ellas se ve cómo la usa el resto.
  *
  * @param told Lo que la API dice del tramo: cuánta gente entra y de cuánta.
+ * @param texts De dónde salen sus textos: los del panel o, fuera de él, otros
+ *   con las mismas claves debajo (el Pomodoro, `focus.band`).
  */
 export function SegmentSlider({
   value,
   onChange,
   told,
+  texts = 'admin.segment',
 }: {
   value: SegmentRange
   onChange: (next: SegmentRange) => void
   told: Segment | undefined
+  texts?: 'admin.segment' | 'focus.band'
 }) {
   const { t } = useI18n()
 
@@ -34,26 +38,26 @@ export function SegmentSlider({
     <div className="segment-slider">
       <span>
         {value.low === 0 && value.high === 100
-          ? t('admin.segment.all')
-          : t('admin.segment.some', { low: value.low, high: value.high })}
+          ? t(`${texts}.all`)
+          : t(`${texts}.some`, { low: value.low, high: value.high })}
         {told !== undefined && (
-          <small> · {t('admin.segment.people', { n: told.people, of: told.of })}</small>
+          <small> · {t(`${texts}.people`, { n: told.people, of: told.of })}</small>
         )}
       </span>
       <RangeSlider
         max={100 / STEP}
         low={value.low / STEP}
         high={value.high / STEP}
-        lowLabel={t('admin.segment.low')}
-        highLabel={t('admin.segment.high')}
+        lowLabel={t(`${texts}.low`)}
+        highLabel={t(`${texts}.high`)}
         onChange={(low, high) => {
           // Un tramo vacío no enseña nada: los tiradores no llegan a tocarse.
           if (high > low) onChange({ low: low * STEP, high: high * STEP })
         }}
       />
       <small className="segment-ends">
-        <span>{t('admin.segment.least')}</span>
-        <span>{t('admin.segment.most')}</span>
+        <span>{t(`${texts}.least`)}</span>
+        <span>{t(`${texts}.most`)}</span>
       </small>
     </div>
   )

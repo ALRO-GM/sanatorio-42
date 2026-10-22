@@ -1,0 +1,128 @@
+import { useEffect, useRef, useState } from 'react'
+
+import type { FocusReason } from '@sanatorio/contracts'
+
+import { stayFocused, stopFocus } from '../../shared/focus'
+import { useAction } from '../../shared/hooks/useAsync'
+import { useI18n } from '../../shared/i18n'
+import { ErrorNote } from '../../shared/ui/ErrorNote'
+
+/** Segundos para pensárselo antes de poder parar (#80 del buzón). */
+export const THINK_SECONDS = 10
+
+const REASONS: readonly FocusReason[] = [
+  'tired',
+  'break',
+  'distracted',
+  'someone',
+  'urgent',
+  'done',
+  'other',
+]
+
+/**
+ * «¿Seguro que quieres parar?»: sale al pulsar «Acabar», al salir de la
+ * pantalla completa o con Escape. Se marcan los motivos, se recuerda que quizá
+ * pueda esperar al final de la sesión y hay diez segundos para pensarlo: hasta
+ * entonces solo se puede seguir. Seguir también se apunta (con sus motivos),
+ * que es justo lo que se quiere ver en las estadísticas.
+ *
+ * Escape en esta ventana es «sigo»: cerrar la pregunta sin parar.
+ *
+ * @param left Lo que queda de concentración, ya escrito («12:30»).
+ * @param onDone `true` si se ha parado; `false` si se sigue.
+ */
+export function FocusExit({ left, onDone }: { left: string; onDone: (stopped: boolean) => void }) {
+  const { t } = useI18n()
+  const dialog = useRef<HTMLDialogElement>(null)
+  const [wait, setWait] = useState(THINK_SECONDS)
+  const [reasons, setReasons] = useState<FocusReason[]>([])
+  const { busy, error, run } = useAction()
+
+  useEffect(() => {
+    if (dialog.current?.open === false) dialog.current.showModal()
+  }, [])
+
+  // Contra una hora fija y no restando de uno en uno: una pestaña en segundo
+  // plano retrasa los temporizadores, y los diez segundos tienen que ser diez.
+  useEffect(() => {
+    const until = Date.now() + THINK_SECONDS * 1000
+    const tick = window.setInterval(() => {
+      const left = Math.max(0, Math.ceil((until - Date.now()) / 1000))
+
+      setWait(left)
+      if (left === 0) window.clearInterval(tick)
+    }, 250)
+
+    return () => {
+      window.clearInterval(tick)
+    }
+  }, [])
+
+  const stay = (): void => {
+    void run(async () => {
+      await stayFocused(reasons)
+      onDone(false)
+    })
+  }
+
+  return (
+    <dialog
+      ref={dialog}
+      className="layout-dialog focus-exit"
+      aria-labelledby="focus-exit-title"
+      onCancel={(event) => {
+        event.preventDefault()
+        if (!busy) stay()
+      }}
+    >
+      <h3 id="focus-exit-title">{t('focus.exit.title')}</h3>
+      <p>{t('focus.exit.left', { time: left })}</p>
+
+      <fieldset className="focus-choices">
+        <legend>{t('focus.exit.why')}</legend>
+        {REASONS.map((reason) => (
+          <label key={reason} className="duty-check">
+            <input
+              type="checkbox"
+              checked={reasons.includes(reason)}
+              onChange={() => {
+                setReasons((list) =>
+                  list.includes(reason) ? list.filter((one) => one !== reason) : [...list, reason],
+                )
+              }}
+            />
+            {t(`focus.reason.${reason}`)}
+          </label>
+        ))}
+      </fieldset>
+      <p className="focus-later">{t('focus.exit.later')}</p>
+
+      <p className="hint" role="status" aria-live="polite">
+        {wait > 0
+          ? t('focus.exit.wait', { n: wait })
+          : reasons.length === 0
+            ? t('focus.exit.pick')
+            : ''}
+      </p>
+      <ErrorNote error={error} />
+      <div className="actions">
+        <button type="button" className="primary" disabled={busy} onClick={stay}>
+          {t('focus.exit.stay')}
+        </button>
+        <button
+          type="button"
+          disabled={busy || wait > 0 || reasons.length === 0}
+          onClick={() => {
+            void run(async () => {
+              await stopFocus(reasons)
+              onDone(true)
+            })
+          }}
+        >
+          {t('focus.exit.stop')}
+        </button>
+      </div>
+    </dialog>
+  )
+}

@@ -5,13 +5,18 @@
  * ajustes que se guardan aquí). La concentración acaba sola a su hora.
  */
 
-import type { Focus, FocusSettings } from '@sanatorio/contracts'
+import type { Focus, FocusSettings, FocusStats, MyFocusStats } from '@sanatorio/contracts'
 import { z } from 'zod'
 
+import { assertAdmin } from '../../core/actor.js'
 import type { Actor } from '../../core/actor.js'
 import type { Db } from '../../core/db/database.js'
 import { toText } from '../../core/db/rows.js'
-import { parse } from '../../core/validation.js'
+import { domainError } from '../../core/errors.js'
+import { day, parse } from '../../core/validation.js'
+import { segmentOf } from '../usage/index.js'
+import { averageOf, focusedByLogin, positionOf, REASONS, settle, summarize } from './focus.rules.js'
+import type { SessionLog } from './focus.sessions.js'
 
 const DEFAULT_FOCUS: FocusSettings = {
   focusMinutes: 25,
@@ -26,6 +31,31 @@ const settingsSchema = z.object({
   sections: z.array(z.string().regex(/^[a-z]{2,20}$/)).max(20),
   show: z.array(z.enum(['corrections', 'events', 'messages', 'guard', 'notices'])).max(5),
 })
+
+/** Los motivos marcados al querer acabar: sin repetir y solo los que existen. */
+const exitSchema = z
+  .object({
+    reasons: z
+      .array(z.enum(REASONS))
+      .max(REASONS.length)
+      .default([])
+      .transform((list) => [...new Set(list)]),
+  })
+  .default({ reasons: [] })
+
+/** Del 0 al 100: el tramo de gente, de quien menos lo usa a quien más. */
+const share = z.coerce.number().int().min(0).max(100)
+
+const statsSchema = z
+  .object({
+    from: day.optional(),
+    to: day.optional(),
+    /** Minutos que hay que sumar a UTC para tener la hora de quien mira (−14 h a +14 h). */
+    offset: z.coerce.number().int().min(-840).max(840).default(0),
+    low: share.default(0),
+    high: share.default(100),
+  })
+  .refine((asked) => asked.low < asked.high, 'el tramo va de menos a más')
 
 export function createFocusRepository(db: Db) {
   return {
@@ -77,7 +107,11 @@ export function createFocusRepository(db: Db) {
 
 export type FocusRepository = ReturnType<typeof createFocusRepository>
 
-export function createFocusService(focus: FocusRepository, now: () => number = Date.now) {
+export function createFocusService(
+  focus: FocusRepository,
+  log: SessionLog,
+  now: () => number = Date.now,
+) {
   const iso = (ms: number): string => new Date(ms).toISOString()
 
   async function view(login: string): Promise<Focus> {
@@ -91,6 +125,47 @@ export function createFocusService(focus: FocusRepository, now: () => number = D
     }
   }
 
+  /** La sesión que esa persona tiene en marcha ahora, si la tiene. */
+  async function running(login: string) {
+    const open = await log.latestOpen(login)
+
+    return open !== null && settle(open.session, now()).outcome === 'running' ? open : null
+  }
+
+  /**
+   * El periodo pedido, en instantes UTC: de las 00:00 del primer día local a
+   * las 00:00 del día siguiente al último. Sin `to`, hasta hoy; sin `from`,
+   * desde siempre (el total).
+   */
+  function period(input: unknown) {
+    const asked = parse(statsSchema, input ?? {})
+    const shift = asked.offset * 60_000
+    const to = asked.to ?? iso(now() + shift).slice(0, 10)
+    const from = asked.from ?? null
+
+    if (from !== null && from > to) throw domainError('invalid_input', 'from: va antes que to')
+
+    const at = (local: string): string => iso(Date.parse(`${local}T00:00:00.000Z`) - shift)
+
+    return {
+      ...asked,
+      from,
+      to,
+      since: from === null ? null : at(from),
+      until: iso(Date.parse(at(to)) + 86_400_000),
+    }
+  }
+
+  /** Todas las sesiones del periodo y el tramo pedido de gente, por tiempo concentrado. */
+  async function chosen(input: unknown) {
+    const asked = period(input)
+    const sessions = await log.between(asked.since, asked.until)
+    const activity = focusedByLogin(sessions, now())
+    const segment = segmentOf(activity, asked.low, asked.high)
+
+    return { asked, sessions, activity, segment }
+  }
+
   return {
     view: (actor: Actor) => view(actor.login),
 
@@ -98,19 +173,79 @@ export function createFocusService(focus: FocusRepository, now: () => number = D
     async start(actor: Actor, input: unknown): Promise<Focus> {
       const settings = parse(settingsSchema, input)
       const t = now()
+      const before = await running(actor.login)
 
+      // Volver a empezar no es rendirse: la de antes cuenta su tiempo, sin motivos.
+      if (before !== null) await log.close(before.id, iso(t), 'replaced', [])
       await focus.save(actor.login, iso(t), iso(t + settings.focusMinutes * 60_000), settings)
+      await log.open(actor.login, iso(t), settings.focusMinutes * 60)
 
       return view(actor.login)
     },
 
-    /** Acaba antes de tiempo. Se guardan los ajustes para la próxima. */
-    async stop(actor: Actor): Promise<Focus> {
+    /**
+     * Acaba antes de tiempo, con los motivos marcados (`FocusExit`; puede no
+     * venir ninguno). Se guardan los ajustes para la próxima.
+     */
+    async stop(actor: Actor, input?: unknown): Promise<Focus> {
+      const { reasons } = parse(exitSchema, input ?? undefined)
       const found = await focus.get(actor.login)
+      const open = await running(actor.login)
 
       if (found !== null) await focus.save(actor.login, found.startedAt, iso(now()), found.settings)
+      if (open !== null) await log.close(open.id, iso(now()), 'cancelled', reasons)
 
       return view(actor.login)
+    },
+
+    /**
+     * Pulsó «Acabar» y, pensándolo, sigue: se apunta con sus motivos. Sin
+     * sesión en marcha no hay nada que apuntar.
+     */
+    async stay(actor: Actor, input: unknown): Promise<Focus> {
+      const { reasons } = parse(exitSchema, input ?? undefined)
+      const open = await running(actor.login)
+
+      if (open !== null) await log.stay(open.id, open.session, reasons)
+
+      return view(actor.login)
+    },
+
+    /**
+     * Tus estadísticas del periodo y, al lado, la media por persona del tramo
+     * elegido de quienes lo usan (`low`–`high`, de menos a más tiempo).
+     */
+    async myStats(actor: Actor, input: unknown): Promise<MyFocusStats> {
+      const { asked, sessions, activity, segment } = await chosen(input)
+      const mine = sessions.filter((session) => session.login === actor.login)
+      const band = sessions.filter((session) => segment.keep(session.login))
+
+      return {
+        from: asked.from,
+        to: asked.to,
+        ...summarize(mine, now(), asked.offset),
+        segment: { low: asked.low, high: asked.high, people: segment.people, of: segment.of },
+        band: averageOf(band, segment.people, now()),
+        position: positionOf(activity, actor.login),
+      }
+    },
+
+    /** Las de todo el mundo (o del tramo elegido), para el panel. Solo admins. */
+    async adminStats(actor: Actor, input: unknown): Promise<FocusStats> {
+      assertAdmin(actor)
+
+      const { asked, sessions, segment } = await chosen(input)
+
+      return {
+        from: asked.from,
+        to: asked.to,
+        ...summarize(
+          sessions.filter((session) => segment.keep(session.login)),
+          now(),
+          asked.offset,
+        ),
+        segment: { low: asked.low, high: asked.high, people: segment.people, of: segment.of },
+      }
     },
   }
 }
