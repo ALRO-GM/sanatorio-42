@@ -48,7 +48,7 @@ Google Sheets, Excel) o con un editor de texto:
 | `gestion` | Panel de gestión y página del staff (en español a propósito) |
 | `code-clicker` | Lo del juego que sale fuera del juego |
 | `animos` | Las cien frases de ánimo de la guardia |
-| `legal` | El texto de privacidad y condiciones (castellano e inglés) |
+| `legal` | El texto de privacidad y condiciones (español e inglés) |
 | `juego/juego` | Todo Code Clicker: tienda, logros, noticias del rótulo… |
 
 ## Textos largos y grupos

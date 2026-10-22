@@ -539,7 +539,7 @@ describe('code clicker: las fichas que explican cada cosa', () => {
     expect(text).toContain('Se paga solo en')
 
     // El siguiente al último que se tiene ya se conoce; el de después, no.
-    expect(cardFor({ kind: 'building', id: 'cluster' }, context(game)).name).toBe('Cluster')
+    expect(cardFor({ kind: 'building', id: 'cluster' }, context(game)).name).toBe('Clúster')
     expect(cardFor({ kind: 'building', id: 'overflow' }, context(game))).toMatchObject({
       name: '???',
       lines: [{ text: 'Aún no lo has descubierto.' }],

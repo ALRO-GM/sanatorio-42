@@ -1,23 +1,23 @@
 clave,contexto,es,en,ca,eu
-app.loading,Mensaje mientras carga algo,Cargando…,Loading...,Carregant...,Kargatzen...
+app.loading,Mensaje mientras carga algo,Cargando…,Loading…,Carregant…,Kargatzen…
 app.footer,"Pie de página, al final de todas las pantallas",Sanatorio 42 · Hecho en la Hackathon de 42 Madrid,Sanatorio 42 · Made at the 42 Madrid Hackathon,Sanatorio 42 · Fet a la Hackathon de 42 Madrid,Sanatorio 42 · 42 Madrilgo Hackathonean egina
-app.serverDown,Pantalla de error cuando la API no responde,No se puede conectar con el servidor. Puede estar arrancando o caído.,Can't reach the server. It may be starting up or down.,No es pot connectar amb el servidor. Pot ser que estigui arrencant o que hagi caigut.,Ezin da zerbitzariarekin konektatu. Baliteke abiarazten egotea edo erori izana.
+app.serverDown,Pantalla de error cuando la API no responde,No se puede conectar con el servidor. Puede que esté arrancando; prueba en un momento.,Can't reach the server. It may be starting up; try again in a moment.,No es pot connectar amb el servidor. Pot ser que estigui arrencant; prova-ho d'aquí un moment.,Ezin da zerbitzariarekin konektatu. Baliteke abiarazten egotea; saiatu berriro une batean.
 app.retry,Botón para volver a intentar conectar,Volver a probar,Try again,Torna-ho a provar,Saiatu berriro
 app.logout,Opción del menú de la cuenta para cerrar sesión,Salir,Log out,Surt,Irten
 app.back,Botón para volver de la lista de personas a la elección de proyecto,Volver a la sala de espera,Back to the waiting room,Torna a la sala d'espera,Itzuli itxarongelara
 nav.label,Nombre accesible de la barra de pestañas,Secciones,Sections,Seccions,Atalak
 nav.consulta,"Pestaña: sala de espera, donde se busca quién ayuda con un proyecto",Sala de espera,Waiting room,Sala d'espera,Itxarongela
 nav.terapia,Pestaña: grupos de terapia (quedar para hacer un proyecto juntos),Terapia,Therapy,Teràpia,Terapia
-nav.tablon,Pestaña: tablón de dudas por proyecto,Tablón,Questions,Tauler,Taula
+nav.tablon,Pestaña: tablón de dudas por proyecto,Tablón,Board,Tauler,Taula
 nav.pizarras,Pestaña: pizarras (charlas abiertas para explicar un tema),Pizarras,Whiteboards,Pissarres,Arbelak
 nav.expediente,"Pestaña: tu perfil, con nivel, logros y estado",Expediente,Record,Expedient,Espedientea
 layout.recordStyle,Personalizar: elegir con qué estilo visual ven tu perfil los demás,Con qué estilo ven tu expediente los demás,Which style others see your record in,Amb quin estil veuen els altres el teu expedient,Zein estilorekin ikusten duten besteek zure espedientea
-layout.recordStyle.none,Opción: cada visitante ve tu perfil con su propio estilo,"Con el suyo, cada cual","Their own, each person","Amb el seu, cadascú",Bakoitzak berearekin
+layout.recordStyle.none,Opción: cada visitante ve tu perfil con su propio estilo,"Con el suyo, cada cual",Each person's own,"Amb el seu, cadascú",Bakoitzak berearekin
 layout.recordStyle.yours,Etiqueta junto a un estilo exclusivo que solo tiene esa persona,solo tuyo,yours only,només teu,zuretzat bakarrik
 nav.privacidad,Pestaña oculta: página de privacidad y condiciones,Privacidad,Privacy,Privacitat,Pribatutasuna
 legal.link,Enlace del pie a la página de privacidad,Privacidad y condiciones,Privacy and terms,Privacitat i condicions,Pribatutasuna eta baldintzak
-legal.untranslated,Aviso: el texto legal no está en el idioma elegido,Este texto solo está en castellano y en inglés.,This text is only available in Spanish and English.,Aquest text només és en castellà i en anglès.,Testu hau gaztelaniaz eta ingelesez bakarrik dago.
-legal.notAccepted,Estado: no has aceptado la versión vigente de las condiciones,Aún no has aceptado esta versión.,You have not accepted this version yet.,Encara no has acceptat aquesta versió.,Oraindik ez duzu bertsio hau onartu.
+legal.untranslated,Aviso: el texto legal no está en el idioma elegido,Este texto solo está en español y en inglés.,This text is only available in Spanish and English.,Aquest text només és en espanyol i en anglès.,Testu hau gaztelaniaz eta ingelesez bakarrik dago.
+legal.notAccepted,Estado: no has aceptado la versión vigente de las condiciones,Aún no has aceptado esta versión.,You haven't accepted this version yet.,Encara no has acceptat aquesta versió.,Oraindik ez duzu bertsio hau onartu.
 legal.acceptedOn,Estado: fecha en que aceptaste las condiciones,Aceptaste esta versión el {date}.,You accepted this version on {date}.,Vas acceptar aquesta versió el {date}.,Bertsio hau {date}(e)an onartu zenuen.
 legal.export,Botón para descargar todos tus datos en un fichero,Descargar mis datos,Download my data,Descarrega les meves dades,Deskargatu nire datuak
 legal.gateKind,Encabezado de la ventana obligatoria de condiciones,Antes de seguir,Before you go on,Abans de continuar,Jarraitu aurretik
@@ -28,23 +28,23 @@ nav.openRecord,Nombre accesible del logo: lleva a tu perfil,Sanatorio 42: ir a t
 menu.open,Nombre accesible del botón del menú de la cuenta,"Tu cuenta, {login}","Your account, {login}","El teu compte, {login}","Zure kontua, {login}"
 menu.record,Opción del menú de la cuenta: ir a tu perfil,Mi expediente,My record,El meu expedient,Nire espedientea
 menu.duty,Opción del menú de la cuenta: ir a tu guardia,Mi guardia,My duty,La meva guàrdia,Nire guardia
-login.pitch,Pantalla de entrada: frase que explica para qué sirve la web,"¿Te has atascado? Pasa a consulta: siempre hay alguien de guardia. Y si hoy puedes, ponte de guardia y echa una mano.","Stuck? Come in for a consultation: there's always someone on duty. And when it's your turn, go on duty and lend a hand.","T'has encallat? Passa a consulta: aquí sempre hi ha algú de guàrdia. I si avui et toca a tu, posa't de guàrdia i dona un cop de mà.","Trabatuta zaude? Etorri kontsultara: hemen beti dago norbait guardian. Eta gaur zuri tokatzen bazaizu, jarri guardian eta lagundu."
+login.pitch,Pantalla de entrada: frase que explica para qué sirve la web,"¿Te has atascado? Pasa a consulta: siempre hay alguien de guardia. Y si hoy puedes, ponte de guardia y echa una mano.","Stuck? Come in for a consultation: there's always someone on duty. And if you can today, go on duty and lend a hand.","T'has encallat? Passa a consulta: aquí sempre hi ha algú de guàrdia. I si avui et toca a tu, posa't de guàrdia i dona un cop de mà.","Trabatuta zaude? Etorri kontsultara: hemen beti dago norbait guardian. Eta gaur zuri tokatzen bazaizu, jarri guardian eta lagundu."
 login.button,Pantalla de entrada: botón para iniciar sesión con la cuenta de 42,Entrar con 42,Sign in with 42,Entra amb 42,Sartu 42rekin
 login.how,Pantalla de entrada: título de los tres pasos,Cómo funciona,How it works,Com funciona,Nola dabil
 login.step1,Pantalla de entrada: paso 1,1. Cuéntanos qué te duele,1. Tell us where it hurts,1. Explica'ns què et fa mal,1. Esan zer duzun minduta
 login.step1d,Pantalla de entrada: detalle del paso 1,Elige tu proyecto,Pick your project,Tria el teu projecte,Aukeratu zure proiektua
 login.step2,Pantalla de entrada: paso 2,2. Mira quién está de guardia,2. See who's on duty,2. Mira qui està de guàrdia,2. Begiratu nor dagoen guardian
-login.step2d,Pantalla de entrada: detalle del paso 2,Gente disponible y su puesto,Available peers and their seat,Gent disponible i el seu lloc,Jende erabilgarria eta haien postua
+login.step2d,Pantalla de entrada: detalle del paso 2,Gente disponible y su puesto,Who's available and where they sit,Gent disponible i el seu lloc,Jende erabilgarria eta haien postua
 login.step3,Pantalla de entrada: paso 3,3. Ve a su puesto y pide ayuda,3. Walk over and ask,3. Ves al seu lloc i demana ajuda,3. Joan haren postura eta eskatu laguntza
 login.step3d,Pantalla de entrada: detalle del paso 3,Nada como explicarlo cara a cara,Nothing beats explaining it face to face,Res com explicar-ho cara a cara,Aurrez aurre azaltzea bezalakorik ez dago
 login.cancelled,Aviso al volver de 42 sin haber dado permiso,Has cancelado el inicio de sesión. Puedes probar cuando quieras.,You cancelled the sign-in. Try again whenever you like.,Has cancel·lat l'inici de sessió. Pots provar-ho quan vulguis.,Saio-hasiera bertan behera utzi duzu. Nahi duzunean saia zaitezke.
 login.failed,Aviso cuando falla el inicio de sesión; {code} es el código de error,El inicio de sesión con 42 ha fallado ({code}). Prueba otra vez.,Signing in with 42 failed ({code}). Please try again.,L'inici de sessió amb 42 ha fallat ({code}). Torna-ho a provar.,42rekin saioa hasteak huts egin du ({code}). Saiatu berriro.
 error.network,Error: no hay conexión con el servidor,No se puede conectar con el servidor,Can't reach the server,No es pot connectar amb el servidor,Ezin da zerbitzariarekin konektatu
 error.generic,Error sin explicación conocida; {detail} es el detalle técnico,Algo no ha ido bien ({detail}).,Something went wrong ({detail}).,Alguna cosa no ha anat bé ({detail}).,Zerbait ez da ondo joan ({detail}).
-error.409,"Error: la acción choca con el estado actual (ya está lleno, ya existe…)",Ahora mismo no se puede.,That's not possible right now.,Ara mateix no es pot.,Une honetan ezin da.
+error.409,"Error: la acción choca con el estado actual (ya está lleno, ya existe…)",Ahora mismo no se puede: puede que ya esté lleno o que ya exista. Prueba otra vez en un rato.,That's not possible right now: it may be full or already exist. Try again in a bit.,Ara mateix no es pot: potser ja és ple o ja existeix. Torna-ho a provar d'aquí una estona.,Une honetan ezin da: baliteke beteta egotea edo jada existitzea. Saiatu berriro pixka bat geroago.
 error.403,Error: no tienes permiso,No tienes permiso para eso.,You're not allowed to do that.,No tens permís per a això.,Ez duzu horretarako baimenik.
 error.404,Error: lo que buscas ya no existe,Eso ya no existe.,That no longer exists.,Això ja no existeix.,Hori ez da existitzen jada.
-error.400,Error: los datos enviados no son válidos,Revisa los datos.,Please check the details.,Revisa les dades.,Berrikusi datuak.
+error.400,Error: los datos enviados no son válidos,Algo de lo que has escrito no es válido. Revísalo y prueba otra vez.,Something you entered isn't valid. Check it and try again.,Alguna cosa del que has escrit no és vàlida. Revisa-ho i torna-ho a provar.,Idatzi duzunen zerbait ez da baliozkoa. Berrikusi eta saiatu berriro.
 days.short,"Iniciales de los días de la semana, de lunes a domingo, separadas por comas","L,M,X,J,V,S,D","M,T,W,T,F,S,S","Dl,Dt,Dc,Dj,Dv,Ds,Dg","Al,Ar,Az,Og,Or,Lr,Ig"
 settings.label,Nombre accesible de los ajustes del pie,Ajustes,Settings,Configuració,Ezarpenak
 settings.lang,Pie: selector de idioma,Idioma,Language,Idioma,Hizkuntza
@@ -52,27 +52,27 @@ settings.campus,Pie: selector del campus que estás viendo,Campus,Campus,Campus,
 settings.campusLazy,Junto a un campus que se copia solo cuando alguien lo pide,bajo demanda,on demand,sota demanda,eskatu ahala
 sync.fresh,Pie: cuándo se leyeron los puestos de 42; {min} son minutos,Puestos de 42 actualizados hace {min} min,42 seats updated {min} min ago,Llocs de 42 actualitzats fa {min} min,42ko postuak duela {min} min eguneratuta
 sync.now,Pie: los puestos se acaban de leer,Puestos de 42 recién actualizados,42 seats just updated,Llocs de 42 acabats d'actualitzar,42ko postuak oraintxe eguneratuta
-sync.copying,Pie: progreso de la primera copia del campus; {pct} es el porcentaje,Copiando el campus desde 42: {pct} %,Copying the campus from 42: {pct} %,Copiant el campus des de 42: {pct} %,Campusa 42tik kopiatzen: % {pct}
-sync.copyingStart,Pie: empieza la primera copia del campus,Copiando el campus desde 42…,Copying the campus from 42...,Copiant el campus des de 42...,Campusa 42tik kopiatzen...
-nav.guardia,Sección: tu guardia (cuándo puedes ayudar y tus reservas),Guardia,On duty,Guàrdia,Guardia
+sync.copying,Pie: progreso de la primera copia del campus; {pct} es el porcentaje,Copiando el campus desde 42: {pct} %,Copying the campus from 42: {pct}%,Copiant el campus des de 42: {pct} %,Campusa 42tik kopiatzen: % {pct}
+sync.copyingStart,Pie: empieza la primera copia del campus,Copiando el campus desde 42…,Copying the campus from 42…,Copiant el campus des de 42…,Campusa 42tik kopiatzen…
+nav.guardia,Sección: tu guardia (cuándo puedes ayudar y tus reservas),Guardia,Duty,Guàrdia,Guardia
 nav.calendario,Pestaña: calendario con todo lo tuyo,Calendario,Calendar,Calendari,Egutegia
 settings.theme,Pie: selector de tema claro u oscuro,Tema,Theme,Tema,Gaia
 welcome.open,Menú de la cuenta: volver a ver la bienvenida,Ver la bienvenida,See the welcome tour,Mira la benvinguda,Ikusi ongietorria
 welcome.title,Título de la ventana de bienvenida,Bienvenida a Sanatorio 42,Welcome to Sanatorio 42,Benvinguda a Sanatorio 42,Ongi etorri Sanatorio 42ra
 welcome.step,Bienvenida: paso actual de un total,{n} de {total},{n} of {total},{n} de {total},{n} / {total}
-welcome.go,Bienvenida: botón que abre la sección que se explica,Llévame ahí,Take me there,Porta-m’hi,Eraman nazazu
+welcome.go,Bienvenida: botón que abre la sección que se explica,Llévame ahí,Take me there,Porta-m'hi,Eraman nazazu
 welcome.skip,Bienvenida: botón para cerrarla,Saltar,Skip,Salta,Saltatu
 welcome.back,Bienvenida: paso anterior,Anterior,Back,Enrere,Aurrekoa
 welcome.next,Bienvenida: paso siguiente,Siguiente,Next,Següent,Hurrengoa
 welcome.done,Bienvenida: botón del último paso,Empezar,Start,Comença,Hasi
 welcome.hello.title,"Bienvenida, paso 1: título",Bienvenida a Sanatorio 42,Welcome to Sanatorio 42,Benvinguda a Sanatorio 42,Ongi etorri Sanatorio 42ra
-welcome.hello.body,"Bienvenida, paso 1: qué es la web","Aquí la gente de 42 se ayuda. Verás quién te puede echar una mano con tu proyecto, dónde se sienta y cuándo. Lo básico, en un minuto.","This is where 42 people help each other: who can give you a hand with your project, where they sit and when. Here are the basics in a minute.","Aquí la gent de 42 s’ajuda: qui et pot donar un cop de mà amb el teu projecte, on seu i quan. T’ensenyem el bàsic en un minut.","Hemen 42ko jendeak elkar laguntzen du: nork lagun zaitzakeen zure proiektuarekin, non dagoen eta noiz. Oinarrizkoa minutu batean."
+welcome.hello.body,"Bienvenida, paso 1: qué es la web","Aquí la gente de 42 se ayuda. Verás quién te puede echar una mano con tu proyecto, dónde se sienta y cuándo. Lo básico, en un minuto.","This is where 42 people help each other: who can give you a hand with your project, where they sit and when. Here are the basics in a minute.","Aquí la gent de 42 s'ajuda: qui et pot donar un cop de mà amb el teu projecte, on seu i quan. T'ensenyem el bàsic en un minut.","Hemen 42ko jendeak elkar laguntzen du: nork lagun zaitzakeen zure proiektuarekin, non dagoen eta noiz. Oinarrizkoa minutu batean."
 welcome.record.title,Bienvenida: paso del expediente,Tu expediente,Your record,El teu expedient,Zure espedientea
-welcome.record.body,Bienvenida: qué hay en el expediente,"Tu nivel, tus títulos y tu estado de salud: a qué pace vas y cuándo llegaría el black hole. Anota tu pace para ver todas tus fechas.","Your level, your titles and your health status: the pace you are on and when the black hole would catch you. Enter your pace to see all your dates.","El teu nivell, els teus títols i el teu estat de salut: el pace que portes i quan t’atraparia el black hole.","Zure maila, tituluak eta osasun egoera: zein pacetan zauden eta noiz harrapatuko zintuzkeen black holeak."
-welcome.waiting.title,Bienvenida: paso de la sala de espera,Sala de espera,Waiting room,Sala d’espera,Itxaron gela
-welcome.waiting.body,Bienvenida: cómo se busca ayuda,"Elige un proyecto. Verás quién lo aprobó, quién lo está haciendo, quién está de guardia y dónde se sienta. A quien se ofrece, le puedes pedir ayuda.","Pick a project to see who passed it or is doing it, who is on duty and where they sit on the map. You can ask those who offer for help.","Tria un projecte i veuràs qui l’ha aprovat o l’està fent, qui està de guàrdia i on seu al mapa.","Aukeratu proiektu bat eta ikusi nork gainditu duen edo egiten ari den, nor dagoen guardian eta non eserita dagoen."
+welcome.record.body,Bienvenida: qué hay en el expediente,"Tu nivel, tus títulos y tu estado de salud: a qué pace vas y cuándo llegaría el black hole. Anota tu pace para ver todas tus fechas.","Your level, your titles and your health status: the pace you are on and when the black hole would catch you. Enter your pace to see all your dates.","El teu nivell, els teus títols i el teu estat de salut: el pace que portes i quan t'atraparia el black hole.","Zure maila, tituluak eta osasun egoera: zein pacetan zauden eta noiz harrapatuko zintuzkeen black holeak."
+welcome.waiting.title,Bienvenida: paso de la sala de espera,Sala de espera,Waiting room,Sala d'espera,Itxaron gela
+welcome.waiting.body,Bienvenida: cómo se busca ayuda,"Elige un proyecto. Verás quién lo aprobó, quién lo está haciendo, quién está de guardia y dónde se sienta. A quien se ofrece, le puedes pedir ayuda.","Pick a project to see who passed it or is doing it, who is on duty and where they sit on the map. You can ask those who offer for help.","Tria un projecte i veuràs qui l'ha aprovat o l'està fent, qui està de guàrdia i on seu al mapa.","Aukeratu proiektu bat eta ikusi nork gainditu duen edo egiten ari den, nor dagoen guardian eta non eserita dagoen."
 welcome.duty.title,Bienvenida: paso de la guardia,De guardia,On duty,De guàrdia,Guardian
-welcome.duty.body,Bienvenida: cómo ofrecer ayuda,Enciende «De guardia» y marca las medias horas en que puedes ayudar. Te reservarán un rato y ganarás XP. Lo que ya tienes en el calendario no se puede reservar.,Switch on «On duty» and mark the half hours when you can help. People will book you and you will earn XP; whatever is already in your calendar cannot be booked.,Activa «De guàrdia» i marca les mitges hores en què pots ajudar. Et demanaran una estona i guanyaràs XP.,Piztu «Guardian» eta markatu lagun dezakezun ordu erdiak. Denbora eskatuko dizute eta XP irabaziko duzu.
+welcome.duty.body,Bienvenida: cómo ofrecer ayuda,Enciende «De guardia» y marca las medias horas en que puedes ayudar. Te reservarán un rato y ganarás XP. Lo que ya tienes en el calendario no se puede reservar.,Switch on “On duty” and mark the half hours when you can help. People will book you and you will earn XP. Whatever is already in your calendar cannot be booked.,Activa «De guàrdia» i marca les mitges hores en què pots ajudar. Et demanaran una estona i guanyaràs XP.,Piztu «Guardian» eta markatu lagun dezakezun ordu erdiak. Denbora eskatuko dizute eta XP irabaziko duzu.
 welcome.board.title,Bienvenida: paso del tablón,Tablón,Board,Tauler,Taula
 welcome.board.body,Bienvenida: para qué sirve el tablón,"Las dudas de cada proyecto, por círculos. Pregunta, responde y lee la guía que mantiene quien ya lo aprobó.","Questions for each project, ordered by circles. Ask, answer and read the guide kept by those who already passed it.","Els dubtes de cada projecte, per cercles. Pregunta, respon i mira la guia.","Proiektu bakoitzeko zalantzak, zirkuluka. Galdetu, erantzun eta irakurri gida."
 welcome.groups.title,Bienvenida: paso de terapias y pizarras,Terapias y pizarras,Therapies and whiteboards,Teràpies i pissarres,Terapiak eta arbelak
@@ -80,9 +80,9 @@ welcome.groups.body,Bienvenida: diferencia entre terapia y pizarra,"Terapia: que
 welcome.agenda.title,Bienvenida: paso del calendario,Calendario,Calendar,Calendari,Egutegia
 welcome.agenda.body,Bienvenida: qué junta el calendario,"Todo en un sitio: tus correcciones, exámenes y eventos de 42, tu guardia, terapias y pizarras. En lista o por horas.","Everything in one place: your 42 evaluations, exams and events, your duty, therapies and whiteboards. As a list or with the hours in view.","Tot en un lloc: correccions, exàmens i esdeveniments de 42, la guàrdia, teràpies i pissarres.","Dena leku bakarrean: 42ko zuzenketak, azterketak eta ekitaldiak, guardia, terapiak eta arbelak."
 welcome.net.title,Bienvenida: paso de la red y el mapa,Red y clústeres,Network and clusters,Xarxa i clústers,Sarea eta klusterrak
-welcome.net.body,Bienvenida: qué enseñan la red y el mapa,Con quién te has corregido y quién se sienta dónde ahora. En el mapa puedes resaltar tu círculo o a quien aprobó tu proyecto.,Who you have evaluated with and who sits where right now. On the map you can highlight your circle or whoever finished your project.,Amb qui t’has corregit i qui seu on ara mateix.,Norekin zuzendu duzun eta nor non dagoen eserita orain.
+welcome.net.body,Bienvenida: qué enseñan la red y el mapa,Con quién te has corregido y quién se sienta dónde ahora. En el mapa puedes resaltar tu círculo o a quien aprobó tu proyecto.,Who you have evaluated with and who sits where right now. On the map you can highlight your circle or whoever passed your project.,Amb qui t'has corregit i qui seu on ara mateix.,Norekin zuzendu duzun eta nor non dagoen eserita orain.
 welcome.comfort.title,Bienvenida: paso de los ajustes,A tu medida,Make it yours,A la teva mida,Zure neurrira
-welcome.comfort.body,"Bienvenida: dónde se cambian idioma, tema y comodidad","En el pie cambias idioma, tema, tamaño del texto, colores para daltonismo y modo zen. En tu menú, las pestañas y esta bienvenida.","In the footer you can change language, theme, text size, colour-blind colours and zen mode; in your menu, customise the tabs. This welcome is there too.","Al peu pots canviar idioma, tema, mida del text, colors per a daltonisme i el mode zen. Aquesta benvinguda també és al teu menú.","Orri-oinean hizkuntza, gaia, testuaren tamaina, daltonismorako koloreak eta zen modua alda ditzakezu. Ongietorri hau zure menuan ere badago."
+welcome.comfort.body,"Bienvenida: dónde se cambian idioma, tema y comodidad","En el pie cambias idioma, tema, tamaño del texto, colores para daltonismo y modo zen. En tu menú, las pestañas y esta bienvenida.","In the footer you can change language, theme, text size, colour-blind mode and zen mode. In your menu: the tabs, and this welcome.","Al peu pots canviar idioma, tema, mida del text, colors per a daltonisme i el mode zen. Aquesta benvinguda també és al teu menú.","Orri-oinean hizkuntza, gaia, testuaren tamaina, daltonismorako koloreak eta zen modua alda ditzakezu. Ongietorri hau zure menuan ere badago."
 settings.text,Pie: selector del tamaño del texto,Texto,Text,Text,Testua
 settings.text.auto,Tamaño de texto automático según la pantalla,Automático,Automatic,Automàtic,Automatikoa
 settings.cvd,Pie: casilla de colores para daltonismo,Daltonismo,Colour blindness,Daltonisme,Daltonismoa
@@ -103,7 +103,7 @@ layout.close,Botón para cerrar una ventana,Cerrar,Close,Tanca,Itxi
 layout.done,Botón para terminar y cerrar la personalización,Listo,Done,Fet,Eginda
 layout.reset,Botón para volver al orden original,Volver al orden de fábrica,Back to the default order,Torna a l'ordre de fàbrica,Itzuli fabrikako ordenara
 layout.mode,Personalizar: quién decide el orden de pestañas y bloques,Quién decide el orden,Who decides the order,Qui decideix l'ordre,Nork erabakitzen du ordena
-layout.mode.manual,Orden: lo decides tú,Yo,Me,Jo,Nik
+layout.mode.manual,Orden: lo decides tú,A mano,By hand,A mà,Eskuz
 layout.mode.manual.hint,Explicación del orden manual,El orden que pongas aquí con las flechas.,The order you set here with the arrows.,L'ordre que posis aquí amb les fletxes.,Hemen geziekin jartzen duzun ordena.
 layout.mode.mine,Orden: según lo que más usas,Mi uso,My usage,El meu ús,Nire erabilera
 layout.mode.mine.hint,Explicación del orden por tu uso,Lo que más usas tú sube solo al principio.,What you use most moves to the front by itself.,El que més fas servir tu puja sol al principi.,Zuk gehien erabiltzen duzuna berez igotzen da hasierara.
@@ -116,7 +116,7 @@ layout.up,Botón para subir un elemento; {name} es su nombre,Subir {name},Move {
 layout.down,Botón para bajar un elemento; {name} es su nombre,Bajar {name},Move {name} down,Baixa {name},Jaitsi {name}
 layout.fold,Casilla para plegar un bloque,plegar,fold,plega,tolestu
 layout.page.expediente,Personalizar: bloques del expediente,Expediente,Record,Expedient,Espedientea
-layout.page.guardia,Personalizar: bloques de la guardia,Guardia,On duty,Guàrdia,Guardia
+layout.page.guardia,Personalizar: bloques de la guardia,Guardia,Duty,Guàrdia,Guardia
 layout.page.red,Personalizar: bloques de la red,Red,Network,Xarxa,Sarea
 layout.expediente.record,Bloque del expediente: nivel y títulos,Nivel y títulos,Level and titles,Nivell i títols,Maila eta tituluak
 layout.expediente.health,Bloque del expediente: estado de salud (pace y black hole),Estado de salud,Health status,Estat de salut,Osasun-egoera
@@ -128,13 +128,13 @@ layout.guardia.today,Bloque de la guardia: tus franjas de hoy,Tus franjas de hoy
 layout.guardia.bookings,Bloque de la guardia: reservas,Reservas,Bookings,Reserves,Erreserbak
 layout.guardia.blocked,Bloque de la guardia: personas bloqueadas,Personas bloqueadas,Blocked people,Persones bloquejades,Blokeatutako pertsonak
 layout.red.totals,Bloque de la red: totales,Totales,Totals,Totals,Guztizkoak
-layout.red.endogamy,Bloque de la red: quién se corrige siempre con la misma gente,Más endogamia,Most inbred,Més endogàmia,Endogamia handiena
+layout.red.endogamy,Bloque de la red: quién se corrige siempre con la misma gente,Más endogamia,Most endogamous,Més endogàmia,Endogamia handiena
 layout.red.pairs,Bloque de la red: parejas que más se corrigen,Parejas que más se corrigen,Pairs that evaluate each other most,Parelles que més es corregeixen,Elkar gehien zuzentzen duten bikoteak
-layout.red.strictest,Bloque de la red: quién pone las notas más bajas,Los más estrictos,Strictest,Els més estrictes,Zorrotzenak
+layout.red.strictest,Bloque de la red: quién pone las notas más bajas,Quién suspende más al corregir,Strictest evaluators,Qui suspèn més en corregir,Nork suspenditzen duen gehien zuzentzean
 layout.red.projects,Bloque de la red: proyectos más corregidos,Proyectos más corregidos,Most evaluated projects,Projectes més corregits,Gehien zuzendutako proiektuak
 layout.red.about,Bloque de la red: cómo leer el grafo,Cómo se lee,How to read it,Com es llegeix,Nola irakurtzen den
 nav.gestion,Sección oculta: panel de gestión para quien administra,Gestión,Admin,Gestió,Kudeaketa
-layout.alerts,Personalizar: apartado de avisos,Avisos,Reminders,Avisos,Abisuak
+layout.alerts,Personalizar: apartado de avisos,Avisos,Notices,Avisos,Abisuak
 layout.alerts.lead,Personalizar: cuánto antes avisar de un evento,Avisarme antes de cada evento,Remind me before each event,Avisa'm abans de cada esdeveniment,Abisatu ekitaldi bakoitzaren aurretik
 layout.alerts.off,Opción: no avisar,No avisarme,Don't remind me,No m'avisis,Ez abisatu
 layout.alerts.minutes,Opción: avisar {n} minutos antes,{n} min antes,{n} min before,{n} min abans,{n} min lehenago
@@ -162,7 +162,7 @@ until.day.many,Tiempo: varios días,{n} días,{n} days,{n} dies,{n} egun
 until.month.one,Tiempo: un mes,{n} mes,{n} month,{n} mes,hilabete {n}
 until.month.many,Tiempo: varios meses,{n} meses,{n} months,{n} mesos,{n} hilabete
 nav.clicker,Sección secreta: el juego Code Clicker,Code Clicker,Code Clicker,Code Clicker,Code Clicker
-login.staff,Pantalla de entrada: enlace para el personal de 42,Soy del staff: validar un documento,I am staff: verify a document,Soc de l'staff: validar un document,Staffekoa naiz: dokumentu bat balidatu
+login.staff,Pantalla de entrada: enlace para el personal de 42,Soy del staff: validar un documento,I'm staff: verify a document,Soc de l'staff: validar un document,Staffekoa naiz: dokumentu bat balidatu
 login.demo,Pantalla de entrada: enlace a la demostración,Ver una demostración sin cuenta,See a demo without an account,Mira una demostració sense compte,Ikusi erakustaldi bat konturik gabe
 demo.title,Etiqueta de la demostración pública,Demostración,Demo,Demostració,Erakustaldia
 demo.about,Explicación de la demostración,Datos inventados. Nada de lo que hagas aquí se guarda.,Made-up data. Nothing you do here is saved.,Dades inventades. Res del que facis aquí es desa.,Asmatutako datuak. Hemen egiten duzun ezer ez da gordetzen.
@@ -175,7 +175,7 @@ nav.cat.ayuda.hint,Explicación al pasar el ratón por la pestaña,"Quedar con g
 nav.cat.calendario,Pestaña de arriba: tu calendario,Calendario,Calendar,Calendari,Egutegia
 nav.cat.calendario.hint,Explicación al pasar el ratón por la pestaña,"Todo lo que tienes, de aquí y de 42, en el tiempo","Everything you have, from here and from 42, over time","Tot el que tens, d'aquí i de 42, en el temps","Duzun guztia, hemengoa eta 42koa, denboran"
 nav.cat.clusters,Pestaña de arriba: el plano de los clústeres,Clústeres,Clusters,Clústers,Klusterrak
-nav.cat.clusters.hint,Explicación al pasar el ratón por la pestaña,"El plano del campus: quién está, dónde y de guardia","The campus map: who is in, where and on call","El plànol del campus: qui hi és, on i de guàrdia","Campuseko planoa: nor dagoen, non eta guardian"
+nav.cat.clusters.hint,Explicación al pasar el ratón por la pestaña,"El plano del campus: quién está, dónde y de guardia","The campus map: who is in, where and on duty","El plànol del campus: qui hi és, on i de guàrdia","Campuseko planoa: nor dagoen, non eta guardian"
 nav.cat.datos,Pestaña de arriba que agrupa red y exámenes,Datos,Data,Dades,Datuak
 nav.cat.datos.hint,Explicación al pasar el ratón por la pestaña,El campus en cifras: correcciones y exámenes,The campus in numbers: evaluations and exams,El campus en xifres: correccions i exàmens,Campusa zenbakitan: zuzenketak eta azterketak
 settings.detail,Pie y bienvenida: cuánto enseña la web (modo de la interfaz),Modo,Mode,Mode,Modua
@@ -206,27 +206,27 @@ focus.show.events,Pomodoro: avisos de eventos,Eventos,Events,Esdeveniments,Ekita
 focus.show.messages,Pomodoro: mensajes,Mensajes,Messages,Missatges,Mezuak
 focus.show.guard,Pomodoro: avisos de la guardia,Guardia (reservas),Duty (bookings),Guàrdia (reserves),Guardia (erreserbak)
 focus.show.notices,Pomodoro: el resto del buzón,Resto del buzón,Rest of the mailbox,Resta de la bústia,Postontziaren gainerakoa
-focus.always,Pomodoro: lo que sale siempre,Los avisos obligatorios de un evento con más gente salen siempre: hay que contestarlos.,Mandatory notices of an event with other people always show up: they need an answer.,Els avisos obligatoris d'un esdeveniment amb més gent surten sempre: cal contestar-los.,Jende gehiagorekin dagoen ekitaldi baten derrigorrezko abisuak beti agertzen dira: erantzun behar dira.
+focus.always,Pomodoro: lo que sale siempre,Los avisos obligatorios de un evento con más gente salen siempre: hay que responderlos.,Mandatory notices of an event with other people always show up: they need an answer.,Els avisos obligatoris d'un esdeveniment amb més gent surten sempre: cal contestar-los.,Jende gehiagorekin dagoen ekitaldi baten derrigorrezko abisuak beti agertzen dira: erantzun behar dira.
 focus.start,Pomodoro: empezar,Empezar a concentrarme,Start focusing,Començar a concentrar-me,Kontzentratzen hasi
-focus.stop,Pomodoro: acabar antes,Acabar,Stop,Acabar,Amaitu
+focus.stop,Pomodoro: parar antes,Parar,Stop,Parar,Gelditu
 focus.again,Pomodoro: otra vuelta tras el descanso,Otra vuelta,Another round,Una altra volta,Beste txanda bat
 focus.close,Pomodoro: cerrar el aviso del descanso,Cerrar,Close,Tanca,Itxi
 focus.focusing,Pomodoro: etiqueta del temporizador,En concentración,Focusing,Concentrat,Kontzentratuta
 focus.resting,Pomodoro: etiqueta del descanso,Descanso,Break,Descans,Atsedena
-focus.breakOver,Pomodoro: el descanso ha acabado,¡A por otra!,Ready for another?,Una altra?,Beste bat?
+focus.breakOver,Pomodoro: el descanso ha acabado,¡A por otra!,Let's go again!,A per una altra!,Goazen beste baterako!
 focus.timerLabel,Pomodoro: temporizador para lectores de pantalla,Tiempo de concentración que queda,Focus time left,Temps de concentració que queda,Geratzen den kontzentrazio denbora
 focus.badge,Lo que ven los demás de quien está concentrado,En concentración hasta las {time} · no me distraigas,Focusing until {time} · please don't disturb,Concentrat fins a les {time} · no em distreguis,{time}ak arte kontzentratuta · ez nazazu distraitu
 focus.badgeHint,Explicación del aviso de concentración,Está en modo Pomodoro: mejor escribirle después.,In Pomodoro mode: better write later.,És en mode Pomodoro: millor escriure-li després.,Pomodoro moduan dago: hobe geroago idaztea.
-campus.other,"Aviso para quien entra desde un campus que aún no se copia; {campus} es el suyo y {tracked}, los que sí","Tu campus, {campus}, todavía no está en Sanatorio 42: lo que ves es de {tracked}. Si os juntáis cinco personas más de {campus}, lo añadimos; con diez, también vuestro idioma. ¡Corre la voz!","Your campus, {campus}, is not on Sanatorio 42 yet: what you see is from {tracked}. If five more people from {campus} join, we add it; with ten, your language too. Spread the word!","El teu campus, {campus}, encara no és a Sanatorio 42: el que veus és de {tracked}. Si us apunteu cinc persones més de {campus}, l'afegim; amb deu, també el vostre idioma. Feu-ho córrer!","Zure campusa, {campus}, oraindik ez dago Sanatorio 42n: ikusten duzuna {tracked}(e)koa da. {campus}(e)ko bost pertsona gehiago batzen bazarete, gehituko dugu; hamarrekin, zuen hizkuntza ere bai. Zabaldu!"
+campus.other,"Aviso para quien entra desde un campus que aún no se copia; {campus} es el suyo y {tracked}, los que sí","Tu campus, {campus}, todavía no está en Sanatorio 42: lo que ves es de {tracked}. Si se apuntan cinco personas más de {campus}, lo añadimos; con diez, también el idioma. ¡Corre la voz!","Your campus, {campus}, is not on Sanatorio 42 yet: what you see is from {tracked}. If five more people from {campus} join, we add it; with ten, the language too. Spread the word!","El teu campus, {campus}, encara no és a Sanatorio 42: el que veus és de {tracked}. Si s'apunten cinc persones més de {campus}, l'afegim; amb deu, també l'idioma. Fes-ho córrer!","Zure campusa, {campus}, oraindik ez dago Sanatorio 42n: ikusten duzuna {tracked}(e)koa da. {campus}(e)ko bost pertsona gehiago batzen badira, gehituko dugu; hamarrekin, hizkuntza ere bai. Zabaldu mezua!"
 campus.otherOk,Botón para cerrar el aviso de otro campus,Entendido,Got it,Entesos,Ulertuta
 focus.screen.open,Pomodoro: poner el temporizador a pantalla completa,Pantalla completa,Full screen,Pantalla completa,Pantaila osoa
 focus.screen.label,Pomodoro: nombre de la vista a pantalla completa,Pomodoro a pantalla completa,Full-screen Pomodoro,Pomodoro a pantalla completa,Pomodoro pantaila osoan
 focus.screen.sign,Pomodoro a pantalla completa: letrero para quien pase por al lado,En concentración · no molestar,Focusing · do not disturb,En concentració · no molesteu,Kontzentratuta · ez molestatu
 focus.screen.until,Pomodoro a pantalla completa: a qué hora acaba,Hasta las {time},Until {time},Fins a les {time},{time}ak arte
 focus.screen.shrink,Pomodoro a pantalla completa: volver al temporizador pequeño sin parar,Quitar pantalla completa,Exit full screen,Treure la pantalla completa,Irten pantaila osotik
-focus.screen.exit,Pomodoro a pantalla completa: querer acabar la sesión (pregunta antes),Acabar la sesión,End the session,Acabar la sessió,Saioa amaitu
-focus.exit.title,Pomodoro: pregunta al pulsar Acabar,¿Seguro que quieres parar?,Sure you want to stop?,Segur que vols parar?,Ziur gelditu nahi duzula?
-focus.exit.left,"Pomodoro: lo que queda, al querer parar",Quedan {time} de concentración. ¿De verdad hace falta acabar ahora?,{time} of focus left. Do you really need to stop now?,Queden {time} de concentració. De debò cal acabar ara?,{time} geratzen dira. Benetan orain amaitu behar duzu?
+focus.screen.exit,Pomodoro a pantalla completa: querer parar la sesión (pregunta antes),Parar la sesión,Stop the session,Parar la sessió,Saioa gelditu
+focus.exit.title,Pomodoro: pregunta al pulsar Parar,¿De verdad quieres parar?,Do you really want to stop?,De debò vols parar?,Benetan gelditu nahi duzu?
+focus.exit.left,"Pomodoro: lo que queda, al querer parar",Tiempo de concentración restante: {time}. ¿De verdad hace falta acabar ahora?,Focus time left: {time}. Do you really need to stop now?,Temps de concentració restant: {time}. De debò cal acabar ara?,Geratzen den kontzentrazio-denbora: {time}. Benetan orain amaitu behar duzu?
 focus.exit.why,Pomodoro: título de la lista de motivos para parar,¿Por qué quieres parar?,Why do you want to stop?,Per què vols parar?,Zergatik gelditu nahi duzu?
 focus.exit.later,Pomodoro: invitación a dejarlo para el final de la sesión,¿Podría esperar a que acabe la sesión? Apúntalo y hazlo en el descanso.,Could it wait until the session ends? Note it down and do it on your break.,Podria esperar que acabi la sessió? Apunta-ho i fes-ho al descans.,Saioa amaitu arte itxaron dezake? Idatzi eta atsedenaldian egin.
 focus.exit.wait,Pomodoro: cuenta atrás antes de poder parar,Piénsalo: {n} s…,Think it over: {n} s…,Pensa-t'ho: {n} s…,Pentsatu: {n} s…
@@ -234,9 +234,9 @@ focus.exit.pick,Pomodoro: falta marcar un motivo para poder parar,Marca al menos
 focus.exit.stay,Pomodoro: botón para seguir concentrándose,Sigo concentrándome,I'll keep focusing,Continuo concentrant-me,Kontzentratzen jarraituko dut
 focus.exit.stop,Pomodoro: botón para parar de verdad (tras la cuenta atrás),"Sí, parar","Yes, stop","Sí, parar","Bai, gelditu"
 focus.exit.cheer,Pomodoro: felicitación al decidir seguir,¡Bien hecho! Sigues en concentración: lo otro puede esperar.,Well done! You are still focusing: the rest can wait.,Ben fet! Continues en concentració: la resta pot esperar.,Ondo! Kontzentratuta jarraitzen duzu: besteak itxaron dezake.
-focus.reason.tired,Pomodoro: motivo para parar,Me falta energía,I am out of energy,Em falta energia,Energiarik gabe nago
+focus.reason.tired,Pomodoro: motivo para parar,Me falta energía,I'm out of energy,Em falta energia,Energiarik gabe nago
 focus.reason.break,Pomodoro: motivo para parar,Necesito un descanso,I need a break,Necessito un descans,Atseden bat behar dut
-focus.reason.distracted,Pomodoro: motivo para parar,No consigo concentrarme,I cannot focus,No aconsegueixo concentrar-me,Ezin naiz kontzentratu
+focus.reason.distracted,Pomodoro: motivo para parar,No consigo concentrarme,I can't focus,No aconsegueixo concentrar-me,Ezin naiz kontzentratu
 focus.reason.someone,Pomodoro: motivo para parar,Alguien me necesita,Someone needs me,Algú em necessita,Norbaitek behar nau
 focus.reason.urgent,Pomodoro: motivo para parar,Ha surgido algo urgente,Something urgent came up,Ha sorgit una cosa urgent,Zerbait larria sortu da
 focus.reason.done,Pomodoro: motivo para parar,Ya he terminado lo que quería,I have finished what I wanted,Ja he acabat el que volia,Nahi nuena amaitu dut
