@@ -25,6 +25,11 @@ que hacer, en orden. Este documento es el porqué; aquel, el qué.
   `git pull` aparte evita reescribir `deploy.sh` mientras se ejecuta. El script
   espera a la CI del commit (no despliega si falla) y vuelve a la imagen
   anterior si la nueva no responde.
+- **Cupo de GitHub**: la API pública da 60 consultas por hora a la IP del
+  servidor. `deploy.sh` consulta la CI a los 4 minutos y luego una por minuto,
+  mira antes el cupo en `/rate_limit` (gratis) y, si solo queda el 10 % de
+  reserva, para y dice cuándo se renueva. Alberto pidió (2026-10-22) no pasar
+  del 90 %: agrupar los cambios en pocos despliegues.
 - Los cambios de la web se prueban con `npm run dev:mock` y Chrome sin ventana.
 
 ## Estado a 2026-10-22

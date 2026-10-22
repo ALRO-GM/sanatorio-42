@@ -22,11 +22,43 @@ IMAGE=sanatorio-42:local
 BUILT_HERE=0
 
 # Espera a que la CI de ese commit termine. Sale con error si falla o tarda
-# más de 20 minutos. La API pública de GitHub da 60 consultas por hora: con una
-# cada 30 s caben de sobra.
+# más de 20 minutos.
+#
+# La API pública de GitHub da 60 consultas por hora a esta IP, y se comparten
+# con cualquier otra cosa que pregunte desde aquí. Para no agotarlas (y poder
+# desplegar un arreglo urgente cuando haga falta):
+# - la primera consulta va a los 4 minutos, que es lo que tarda la CI como poco,
+#   y después una por minuto: unas 6 por despliegue, 16 como mucho;
+# - antes de cada una se mira lo que queda en /rate_limit (no gasta cupo) y,
+#   si solo queda la reserva del 10 %, no se consulta: se para y se dice cuándo
+#   se renueva.
+CI_FIRST_WAIT_S=${CI_FIRST_WAIT_S:-240}
+CI_EVERY_S=60
+CI_POLLS=16
+
+github_left() {
+  curl -fsS https://api.github.com/rate_limit 2>/dev/null |
+    jq -r '.resources.core | "\(.remaining) \(.limit) \(.reset)"' 2>/dev/null || echo ''
+}
+
 wait_for_ci() {
   sha=$1
-  for _ in $(seq 1 40); do
+  echo "Esperando a la CI de $sha (primera consulta en ${CI_FIRST_WAIT_S} s)..."
+  sleep "$CI_FIRST_WAIT_S"
+  for _ in $(seq 1 "$CI_POLLS"); do
+    left=$(github_left)
+    if [ -n "$left" ]; then
+      remaining=${left%% *}
+      rest=${left#* }
+      limit=${rest%% *}
+      reset=${rest#* }
+      reserve=$(( (limit + 9) / 10 ))
+      if [ "$remaining" -le "$reserve" ]; then
+        echo "Quedan $remaining de $limit consultas a GitHub esta hora: se guarda el margen. Vuelve a desplegar después de las $(date -d "@$reset" +%H:%M)." >&2
+        return 1
+      fi
+    fi
+
     runs=$(curl -fsS "https://api.github.com/repos/$REPO/commits/$sha/check-runs") || runs=''
     total=$(printf '%s' "$runs" | jq -r '.total_count // 0' 2>/dev/null || echo 0)
     pending=$(printf '%s' "$runs" | jq -r '[.check_runs[] | select(.status != "completed")] | length' 2>/dev/null || echo 1)
@@ -45,8 +77,8 @@ wait_for_ci() {
       echo "CI de $sha en verde."
       return 0
     fi
-    echo "Esperando a la CI de $sha..."
-    sleep 30
+    echo "Esperando a la CI de $sha... (quedan ${remaining:-?} consultas a GitHub esta hora)"
+    sleep "$CI_EVERY_S"
   done
   echo "La CI de $sha no ha terminado en 20 minutos: no se despliega." >&2
   return 1
