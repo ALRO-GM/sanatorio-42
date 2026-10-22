@@ -8,12 +8,12 @@ agenda.layout,Selector de cómo se dibuja el día,Cómo ver el día,How to see t
 agenda.layout.list,Forma del día: lista,Lista,List,Llista,Zerrenda
 agenda.layout.full,Forma del día: las 24 horas,Día entero,Whole day,Dia sencer,Egun osoa
 agenda.layout.fit,Forma del día: solo las horas con algo,Ajustada,Fitted,Ajustada,Doitua
-agenda.layout.now,Forma del día: desde la hora actual,Desde ahora,From now,Des d’ara,Oraintik
-agenda.layout.list.hint,Explicación de la lista,"Una actividad debajo de otra, con su inicio y su fin","One activity under another, with start and end","Una activitat sota l’altra, amb l’inici i el final","Jarduerak bata bestearen azpian, hasiera eta amaierarekin"
+agenda.layout.now,Forma del día: desde la hora actual,Desde ahora,From now,Des d'ara,Oraintik
+agenda.layout.list.hint,Explicación de la lista,"Una actividad debajo de otra, con su inicio y su fin","One activity under another, with start and end","Una activitat sota l'altra, amb l'inici i el final","Jarduerak bata bestearen azpian, hasiera eta amaierarekin"
 agenda.layout.full.hint,Explicación del día entero,"Todas las horas del día, cada actividad en su franja","Every hour of the day, each activity in its slot","Totes les hores del dia, cada activitat a la seva franja","Eguneko ordu guztiak, jarduera bakoitza bere tartean"
-agenda.layout.fit.hint,Explicación del día ajustado,De la primera actividad a la última: se ven más grandes,From the first activity to the last: they look bigger,De la primera activitat a l’última: es veuen més grans,Lehen jardueratik azkenera: handiago ikusten dira
-agenda.layout.now.hint,Explicación de desde ahora,Desde la hora actual hasta la última actividad del día,From the current time to the last activity of the day,Des de l’hora actual fins a l’última activitat del dia,Oraingo ordutik eguneko azken jarduerara
-agenda.waiting,Cuánto falta para lo siguiente,Te quedan {time} para lo siguiente,{time} until your next thing,Et queden {time} per a la següent,{time} falta zaizkizu hurrengorako
+agenda.layout.fit.hint,Explicación del día ajustado,De la primera actividad a la última: se ven más grandes,From the first activity to the last: they look bigger,De la primera activitat a l'última: es veuen més grans,Lehen jardueratik azkenera: handiago ikusten dira
+agenda.layout.now.hint,Explicación de desde ahora,Desde la hora actual hasta la última actividad del día,From the current time to the last activity of the day,Des de l'hora actual fins a l'última activitat del dia,Oraingo ordutik eguneko azken jarduerara
+agenda.waiting,Cuánto falta para lo siguiente,"Lo siguiente, en {time}",Next up in {time},"El següent, d'aquí a {time}","Hurrengoa, {time} barru"
 agenda.nothingLeft,No queda nada hoy,Por hoy no te queda nada más,Nothing else for you today,Avui no et queda res més,Gaur ez zaizu ezer gehiago geratzen
 agenda.hoursMinutes,Duración en horas y minutos,{h} h {m} min,{h} h {m} min,{h} h {m} min,{h} h {m} min
 agenda.minutes,Duración en minutos,{m} min,{m} min,{m} min,{m} min
@@ -32,17 +32,17 @@ agenda.kind.exam,Tipo de evento: exámenes de 42,Exámenes,Exams,Exàmens,Azterk
 agenda.loading,Mientras carga el calendario,Preparando tu calendario…,Getting your calendar ready…,Preparant el teu calendari…,Zure egutegia prestatzen…
 agenda.more,Cuántos eventos más hay ese día,+{n} más,+{n} more,+{n} més,+{n} gehiago
 agenda.empty,Día sin nada,Nada,Nothing,Res,Ezer ez
-agenda.no42,No se pudo leer 42,No se han podido leer los datos de 42: solo ves lo de Sanatorio.,Could not read 42 data: you only see Sanatorio events.,No s'han pogut llegir les dades de 42: només veus el de Sanatorio.,Ezin izan dira 42ko datuak irakurri: Sanatoriokoak bakarrik ikusten dituzu.
+agenda.no42,No se pudo leer 42,No se han podido leer los datos de 42: solo ves lo de Sanatorio.,Couldn't read the 42 data: you only see Sanatorio events.,No s'han pogut llegir les dades de 42: només veus el de Sanatorio.,Ezin izan dira 42ko datuak irakurri: Sanatoriokoak bakarrik ikusten dituzu.
 agenda.from42,Cuándo se leyeron los datos de 42,"Eventos, exámenes y correcciones de 42 leídos hace {min} min.","42 events, exams and evaluations read {min} min ago.","Esdeveniments, exàmens i correccions de 42 llegits fa {min} min.","42ko ekitaldiak, azterketak eta zuzenketak duela {min} min irakurrita."
 agenda.refresh,Botón para volver a leer los datos,Actualizar,Refresh,Actualitza,Eguneratu
-agenda.back,Botón para volver al calendario desde un evento,Volver al calendario,Back to calendar,Torna al calendari,Itzuli egutegira
+agenda.back,Botón para volver al calendario desde un evento,Volver al calendario,Back to the calendar,Torna al calendari,Itzuli egutegira
 agenda.join,Calendario: botón de la ficha para apuntarse a una pizarra o un grupo,Apuntarme,Join,Apunta'm,Izena eman
 agenda.when,Ficha del evento: cuándo,Cuándo,When,Quan,Noiz
 agenda.where,Ficha del evento: dónde,Dónde,Where,On,Non
 agenda.with,Ficha del evento: con quién,Con,With,Amb,Norekin
 agenda.seats,Ficha del evento: plazas,Plazas,Seats,Places,Plazak
 agenda.you,"Tú, en una lista de personas",Tú,You,Tu,Zu
-agenda.seatsOpen,Gente apuntada sin límite de plazas,"{taken} personas apuntadas, sin tope","{taken} people signed up, no limit","{taken} persones apuntades, sense límit","{taken} pertsona izena emanda, mugarik gabe"
+agenda.seatsOpen,Gente apuntada sin límite de plazas,Apuntadas: {taken} (sin tope),Signed up: {taken} (no limit),Apuntades: {taken} (sense límit),Izena emanda: {taken} (mugarik gabe)
 agenda.seatsOf,Plazas ocupadas y totales,{taken} de {max},{taken} of {max},{taken} de {max},{max}tik {taken}
 agenda.joined,Estado: te has apuntado,Te has apuntado,You've signed up,T'hi has apuntat,Izena emanda
 agenda.notJoined.help,Estado: reserva pendiente de aceptar,Pendiente de aceptar,Waiting to be accepted,Pendent d'acceptar,Onartzeko zain
@@ -55,15 +55,15 @@ agenda.notJoined.exam,Estado: no te has apuntado,No te has apuntado,Not signed u
 agenda.open42,Enlace al evento en la intra de 42,Abrir en 42,Open on 42,Obre a 42,Ireki 42n
 agenda.goTo,Botón para ir a la sección del evento,Ir a {section},Go to {section},Ves a {section},Joan hona: {section}
 meet.alert,Aviso obligatorio antes de un evento: cuánto falta,Empieza en {minutes} min,Starts in {minutes} min,Comença d'aquí a {minutes} min,{minutes} min barru hasiko da
-meet.reply,Título del aviso al que hay que responder,Responder al aviso,Reply to the reminder,Respon a l'avís,Erantzun abisuari
+meet.reply,Título del aviso al que hay que responder,Responder al aviso,Reply to the notice,Respon a l'avís,Erantzun abisuari
 meet.seen,Respuesta al aviso: voy,Voy,Going,Hi vaig,Banoa
-meet.mustReply,Por qué hay que contestar el aviso,"Di si vas, si te retrasas o si no vas: el aviso se cierra al contestar.","Say whether you are going, running late or not going: the reminder closes when you answer.","Digues si hi vas, si fas tard o si no hi vas: l'avís es tanca en contestar.","Esan bazoazen, berandu zabiltzan edo ez zoazen: abisua erantzutean ixten da."
-meet.missed,No contestaste y se te marca como ausente,Se te pasó: no contestaste al aviso y ha pasado media hora desde el inicio. Has quedado como que no asististe.,You missed it: you did not answer the reminder and half an hour has passed since it started. You are marked as not attending.,Se t'ha passat: no vas contestar l'avís i ha passat mitja hora des de l'inici. Has quedat com que no hi vas assistir.,Pasa zaizu: ez zenion abisuari erantzun eta ordu erdi igaro da hasi zenetik. Bertaratu ez bazina bezala geratu zara.
+meet.mustReply,Por qué hay que responder el aviso,"Di si vas, si te retrasas o si no vas: el aviso se cierra al responder.","Say whether you are going, running late or not going: the notice closes when you answer.","Digues si hi vas, si fas tard o si no hi vas: l'avís es tanca en responder.","Esan bazoazen, berandu zabiltzan edo ez zoazen: abisua erantzutean ixten da."
+meet.missed,No contestaste y se te marca como ausente,"No respondiste al aviso y ya ha pasado media hora desde el inicio, así que figuras como ausente.","You didn't answer the notice and half an hour has passed since the start, so you're marked as absent.","No vas responder l'avís i ja ha passat mitja hora des de l'inici, així que figures com a absent.","Ez zenion abisuari erantzun eta ordu erdi igaro da hasi zenetik, beraz absente gisa agertzen zara."
 meet.missedOk,Botón para dar por leído,Entendido,Got it,Entesos,Ulertuta
 meet.queued,Cuántos avisos más quedan,{n} más después,{n} more after this,{n} més després,{n} gehiago gero
 meet.late,Respuesta al aviso: llego tarde,Me retraso,I'll be late,Faig tard,Berandu nabil
 meet.absent,Respuesta al aviso: no puedo ir,No puedo ir,I can't make it,No hi puc anar,Ezin naiz joan
-meet.howLong,Cuánto tiempo de retraso,Cuánto,How long,Quant,Zenbat
+meet.howLong,Cuánto tiempo de retraso,Cuánto tiempo,How long,Quant temps,Zenbat denbora
 meet.minutes,Minutos de retraso,{n} min,{n} min,{n} min,{n} min
 meet.why,Motivo del retraso o la ausencia,Motivo,Reason,Motiu,Arrazoia
 meet.tell,Botón para enviar la respuesta,Avisar,Let them know,Avisa,Abisatu
@@ -71,11 +71,11 @@ meet.reason.evaluation,Motivo: corrección,Estoy en una corrección,I'm in an ev
 meet.reason.other_event,Motivo: otro evento,Estoy en otro evento,I'm at another event,Soc en un altre esdeveniment,Beste ekitaldi batean nago
 meet.reason.on_my_way,Motivo: en camino,Voy de camino,I'm on my way,Vaig de camí,Bidean noa
 meet.reason.transport,Motivo: el transporte,El transporte,Transport,El transport,Garraioa
-meet.reason.other,Motivo: otro,Otro motivo,Other reason,Un altre motiu,Beste arrazoi bat
-meet.said.seen,Lo que contestó alguien: va,Va,Is going,Hi va,Badoa
-meet.reason.missed,Lo que pasó: no contestó,no contestó al aviso,did not answer the reminder,no va contestar l'avís,ez zion abisuari erantzun
-meet.said.late,Lo que contestó alguien: llega tarde,Se retrasa {n} min,Will be {n} min late,Fa tard {n} min,{n} min berandu dabil
-meet.said.absent,Lo que contestó alguien: no va,No va a poder ir,Can't make it,No hi podrà anar,Ezingo du joan
+meet.reason.other,Motivo: otro,Otro motivo,Another reason,Un altre motiu,Beste arrazoi bat
+meet.said.seen,Lo que respondió alguien: va,Va,Is going,Hi va,Badoa
+meet.reason.missed,Lo que pasó: no respondió,no respondió al aviso,did not answer the notice,no va responder l'avís,ez zion abisuari erantzun
+meet.said.late,Lo que respondió alguien: llega tarde,Se retrasa {n} min,Will be {n} min late,Fa tard {n} min,{n} min berandu dabil
+meet.said.absent,Lo que respondió alguien: no va,No puede ir,Can't make it,No hi pot anar,Ezin du joan
 meet.chat,Chat del evento,Chat del evento,Event chat,Xat de l'esdeveniment,Ekitaldiaren txata
 meet.chatNotice,Aviso de privacidad del chat,Los mensajes se guardan. Quien administra la web puede leerlos si hay una denuncia.,Messages are kept. Whoever runs the site can read them if there is a report.,Els missatges es guarden. Qui administra la web els pot llegir si hi ha una denúncia.,Mezuak gorde egiten dira. Weba kudeatzen duenak irakur ditzake salaketa bat badago.
 meet.chatEmpty,Chat sin mensajes,Nadie ha escrito todavía. Lo que pongas lo ve toda la gente del evento.,Nobody has written yet. Everyone in the event sees what you post.,Ningú ha escrit encara. El que posis ho veu tota la gent de l'esdeveniment.,Inork ez du oraindik idatzi. Jartzen duzuna ekitaldiko guztiek ikusten dute.
@@ -95,8 +95,8 @@ meet.att.guestEnd,Instrucción para escribir el código de fin,"Empezaste a las 
 meet.att.guestDone,Asistencia validada,Asistencia validada: {n} min.,Attendance validated: {n} min.,Assistència validada: {n} min.,Bertaratzea balidatuta: {n} min.
 meet.att.windowStart,Cuándo vale el código de inicio,El código de inicio vale de {from} a {to}.,The start code works from {from} to {to}.,El codi d'inici val de {from} a {to}.,Hasierako kodeak {from}etatik {to}etara balio du.
 meet.att.windowEnd,Cuándo vale el código de fin,"El de fin vale cuando han pasado {n} min desde el de inicio, y hasta las {to}.","The end code works {n} min after the start one, and until {to}.","El de fi val quan han passat {n} min des del d'inici, i fins a les {to}.","Amaierakoak hasierakotik {n} min igaro direnean balio du, eta {to}ak arte."
-meet.att.attempts,Intentos que quedan,Te quedan {n} intentos con un código equivocado.,You have {n} wrong-code attempts left.,Et queden {n} intents amb un codi equivocat.,{n} saiakera geratzen zaizkizu kode okerrarekin.
-meet.att.locked,Sin intentos,Has agotado los intentos en este evento: ya no puedes validar.,You have run out of attempts for this event: you can no longer validate.,Has esgotat els intents en aquest esdeveniment: ja no pots validar.,Saiakerak agortu dituzu ekitaldi honetan: ezin duzu jada balidatu.
+meet.att.attempts,Intentos que quedan,Intentos que te quedan con un código equivocado: {n}.,Attempts left with a wrong code: {n}.,Intents que et queden amb un codi equivocat: {n}.,Kode okerrarekin geratzen zaizkizun saiakerak: {n}.
+meet.att.locked,Sin intentos,Se han agotado los intentos en este evento: ya no se puede validar aquí. Habla con quien organiza.,"You have used all your attempts for this event, so you can't validate here any more. Talk to the organiser.",S'han esgotat els intents en aquest esdeveniment: ja no es pot validar aquí. Parla amb qui organitza.,Saiakerak agortu dira ekitaldi honetan: ezin da hemen jada balidatu. Hitz egin antolatzen duenarekin.
 meet.att.code,Campo del código,Código de cuatro caracteres,Four-character code,Codi de quatre caràcters,Lau karaktereko kodea
 meet.att.validate,Botón para validar el código,Validar,Validate,Valida,Balidatu
 meet.qr.start,Al escanear el QR de inicio,"Código de inicio validado. Al terminar, escanea el de fin.","Start code validated. When you finish, scan the end one.","Codi d'inici validat. En acabar, escaneja el de fi.","Hasierako kodea balidatuta. Bukatzean, eskaneatu amaierakoa."

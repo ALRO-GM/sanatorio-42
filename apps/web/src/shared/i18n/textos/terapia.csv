@@ -1,7 +1,7 @@
 clave,contexto,es,en,ca,eu
 therapy.title,Título de la página de grupos de terapia (quedar para sacar un proyecto juntos),Terapia de grupo,Group therapy,Teràpia de grup,Talde-terapia
 therapy.allProjects,Filtro: todos los proyectos,Todos los proyectos,All projects,Tots els projectes,Proiektu guztiak
-therapy.loading,Mientras cargan los grupos,Buscando grupos…,Looking for groups...,Buscant grups...,Taldeak bilatzen...
+therapy.loading,Mientras cargan los grupos,Buscando grupos…,Looking for groups…,Buscant grups…,Taldeak bilatzen…
 therapy.empty,No hay grupos abiertos,Todavía no hay ningún grupo abierto aquí. ¿Abres tú el primero?,No open groups here yet. Want to open the first one?,Encara no hi ha cap grup obert aquí. Obres tu el primer?,Oraindik ez dago talde irekirik hemen. Zuk irekiko duzu lehena?
 therapy.open,Grupo con plazas libres: ocupadas y totales,Grupo abierto · {taken} de {capacity} plazas,Open group · {taken} of {capacity} seats,Grup obert · {taken} de {capacity} places,Talde irekia · {capacity} plazatik {taken}
 therapy.full,Grupo lleno,Completo · {capacity} plazas,Full · {capacity} seats,Complet · {capacity} places,Beteta · {capacity} plaza
@@ -9,21 +9,21 @@ therapy.where,Etiqueta: lugar,Dónde,Where,On,Non
 therapy.when,Etiqueta: horario,Horario,Schedule,Horari,Ordutegia
 therapy.timeRange,Hora de inicio y fin,{start} a {end},{start} to {end},{start} a {end},{start}etatik {end}etara
 therapy.days,Etiqueta: días en que se queda,Días de quedada,Meeting days,Dies de trobada,Elkartzeko egunak
-therapy.members,Lista de miembros del grupo,Pacientes del grupo,Patients in the group,Pacients del grup,Taldeko pazienteak
+therapy.members,Lista de miembros del grupo,Gente del grupo,People in the group,Gent del grup,Taldeko jendea
 therapy.moreMembers,Terapia: enlace para ver el resto de personas del grupo,y {n} más,and {n} more,i {n} més,eta beste {n}
 therapy.seats,Puestos del campus reservados para el grupo,Puestos reservados,Reserved seats,Llocs reservats,Erreserbatutako postuak
 therapy.pickSeats,Elegir puestos en el mapa,¿Dónde y cuántas plazas?,"Where, and how many seats?",On i quantes places?,Non eta zenbat plaza?
-therapy.pickSeatsHint,Cómo elegir los puestos del grupo,"Elige de 2 a 6 puestos que se toquen: al lado, delante, detrás o en diagonal. Cada puesto es una plaza del grupo.","Pick 2 to 6 seats that touch: next to, in front of, behind or diagonal. Each seat is one place in the group.","Tria de 2 a 6 llocs que es toquin: al costat, davant, darrere o en diagonal. Cada lloc és una plaça del grup.","Aukeratu elkar ukitzen duten 2tik 6ra postu: ondoan, aurrean, atzean edo diagonalean. Postu bakoitza taldeko plaza bat da."
+therapy.pickSeatsHint,Cómo elegir los puestos del grupo,"Elige de 2 a 6 puestos juntos: al lado, delante, detrás o en diagonal. Cada puesto es una plaza del grupo.","Pick 2 to 6 seats next to each other: beside, in front, behind or diagonal. Each seat is one place in the group.","Tria de 2 a 6 llocs junts: al costat, davant, darrere o en diagonal. Cada lloc és una plaça del grup.","Aukeratu 2tik 6ra postu elkarrekin: ondoan, aurrean, atzean edo diagonalean. Postu bakoitza taldeko plaza bat da."
 therapy.pickedSeats,Puestos elegidos,Puestos elegidos ({n}):,Chosen seats ({n}):,Llocs triats ({n}):,Aukeratutako postuak ({n}):
 therapy.clearSeats,Botón para quitar todos los puestos,Quitar todos,Clear all,Treu-los tots,Kendu denak
-therapy.join,Botón para unirse al grupo,Unirme al grupo,Join the group,Uneix-me al grup,Sartu taldean
+therapy.join,Botón para unirse al grupo,Apuntarme al grupo,Join the group,Apunta'm al grup,Eman izena taldean
 therapy.leave,Botón para salir del grupo,Salir del grupo,Leave the group,Surt del grup,Irten taldetik
 therapy.close,Botón para cerrar el grupo (quien lo creó),Cerrar grupo,Close group,Tanca el grup,Itxi taldea
 therapy.invited,Ya avisaste a la gente del proyecto,Avisaste a {n} personas que hacen el proyecto,You told {n} people doing the project,Has avisat {n} persones que fan el projecte,Proiektua egiten ari diren {n} pertsonari abisatu diezu
 therapy.inviteAsk,Confirmación antes de avisar,¿Avisar del grupo a quien está haciendo {project} en tu campus? Se puede hacer una sola vez.,Tell everyone doing {project} on your campus about the group? You can only do it once.,Vols avisar del grup qui fa {project} al teu campus? Només es pot fer una vegada.,Zure campusean {project} egiten ari direnei taldearen berri eman? Behin bakarrik egin daiteke.
-therapy.invite,Botón para avisar a quien hace el proyecto,Avisar a quien hace el proyecto,Tell who is doing the project,Avisa qui fa el projecte,Proiektua egiten ari direnei abisatu
-therapy.remove,Botón de moderación para retirar un grupo,Retirar (moderación),Remove (moderation),Retira (moderació),Kendu (moderazioa)
-therapy.removeAsk,Confirmación antes de retirar un grupo,¿Retirar el grupo de {creator}? Se cierra y se avisa a quien estaba dentro.,Remove {creator}’s group? It is closed and its members are told.,Vols retirar el grup de {creator}? Es tanca i s’avisa qui hi era.,{creator}(r)en taldea kendu? Itxi egiten da eta kideei abisatzen zaie.
+therapy.invite,Botón para avisar a quien hace el proyecto,Avisar a quien hace el proyecto,Tell whoever is doing the project,Avisa qui fa el projecte,Proiektua egiten ari direnei abisatu
+therapy.remove,Botón de moderación para retirar un grupo,Retirar como moderación,Remove as moderator,Retira com a moderació,Kendu moderazio gisa
+therapy.removeAsk,Confirmación antes de retirar un grupo,¿Retirar el grupo de {creator}? Se cierra y se avisa a quien estaba dentro.,Remove {creator}'s group? It is closed and its members are told.,Vols retirar el grup de {creator}? Es tanca i s'avisa qui hi era.,{creator}(r)en taldea kendu? Itxi egiten da eta kideei abisatzen zaie.
 therapy.copy,Botón para copiar los logins del grupo,Copiar logins,Copy logins,Copia els logins,Kopiatu loginak
 therapy.copied,Confirmación de copiado,¡Copiados!,Copied!,Copiats!,Kopiatuta!
 therapy.inSession,El grupo está reunido ahora,En sesión ahora,In session now,En sessió ara,Saioan orain
@@ -31,7 +31,7 @@ therapy.new,Botón para abrir un grupo nuevo,Abrir un grupo,Open a group,Obre un
 therapy.newHint,Explicación del formulario de grupo nuevo,"Elige proyecto, sitio y horario. Tú entras en el grupo al abrirlo.","Pick a project, place and schedule. You join the group when you open it.","Tria projecte, lloc i horari. Tu entres al grup en obrir-lo.","Aukeratu proiektua, lekua eta ordutegia. Taldea irekitzean zu sartzen zara."
 therapy.project,Formulario: proyecto,Proyecto,Project,Projecte,Proiektua
 therapy.place,Formulario: lugar,Lugar de quedada,Meeting place,Lloc de trobada,Elkartzeko lekua
-therapy.placeHint,Ejemplo de lugar,Cluster 1 · Planta 2,Cluster 1 · Floor 2,Clúster 1 · Planta 2,1. klusterra · 2. solairua
+therapy.placeHint,Ejemplo de lugar,Clúster 1 · Planta 2,Cluster 1 · Floor 2,Clúster 1 · Planta 2,1. klusterra · 2. solairua
 therapy.start,Formulario: hora de inicio,Desde,From,Des de,Noiztik
 therapy.end,Formulario: hora de fin,Hasta,To,Fins a,Noiz arte
 therapy.note,Formulario: nota opcional,Nota (opcional),Note (optional),Nota (opcional),Oharra (aukerakoa)
@@ -54,7 +54,7 @@ therapy.kind.review,Tipo: para revisar un proyecto ya terminado,De repaso,Review
 therapy.kind.study.hint,Explicación del tipo para avanzar,Para sacar el proyecto adelante entre varios.,To push the project forward together.,Per tirar endavant el projecte entre uns quants.,Proiektua hainbaten artean aurrera ateratzeko.
 therapy.kind.review.hint,Explicación del tipo de repaso,Para quien ya lo tiene terminado al 100 %: os lo revisáis entre vosotros para encontrar fallos antes de presentarlo.,For people who have it 100% finished: you review each other and hunt for bugs before the evaluation.,Per a qui ja el té acabat al 100 %: us el reviseu entre vosaltres i busqueu errors abans de presentar-lo.,% 100ean amaituta duenarentzat: elkarri berrikusten diozue eta akatsak bilatzen dituzue aurkeztu aurretik.
 therapy.kind.review.join,Aviso al unirse a un grupo de repaso,Este grupo es de repaso: solo para quien ya tiene el proyecto terminado.,This is a review group: only for people who already finished the project.,Aquest grup és de repàs: només per a qui ja té el projecte acabat.,Talde hau errepasokoa da: proiektua amaituta duenarentzat bakarrik.
-therapy.progress,Cuánto lleva cada miembro del proyecto,Cómo lleva el proyecto,How far along they are,Com porta el projecte,Nola daraman proiektua
+therapy.progress,Cuánto lleva cada miembro del proyecto,Cómo van con el proyecto,How far along they are,Com van amb el projecte,Proiektuarekin zer-nolako aurrerapena duten
 therapy.progressAsk,Pregunta al unirse: cuánto llevas,Cómo llevas el proyecto: {n} %,How far along you are: {n}%,Com portes el projecte: {n} %,Nola daramazun proiektua: % {n}
 therapy.joinConfirm,Botón para confirmar la unión,Apuntarme,Join,Apunta-m'hi,Eman izena
 therapy.chatShow,Botón para abrir el chat del grupo,Abrir el chat del grupo,Open the group chat,Obre el xat del grup,Ireki taldearen txata
