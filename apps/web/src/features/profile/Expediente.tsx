@@ -14,7 +14,6 @@ import { Avatar } from '../../shared/ui/Avatar'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { Achievements } from './Achievements'
 import { AskedCard } from './AskedCard'
-import { UnderstoodCard } from './UnderstoodCard'
 import { HealthCard } from './HealthCard'
 import { HoursReport } from './HoursReport'
 import { LeaderboardCard } from './LeaderboardCard'
@@ -199,7 +198,6 @@ export function Expediente({ me, profile }: ExpedienteProps) {
               <div className="two-col">
                 <LeaderboardCard me={me.login} />
                 <AskedCard />
-                <UnderstoodCard />
               </div>
             ),
           },

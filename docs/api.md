@@ -1139,34 +1139,6 @@ GET /network/mine → con quién te has corregido tú, en todo el histórico:
 GET /network/people?q=jd → hasta 8 logins que empiezan así, los más activos
 primero: `[{ "login": "jdoe", "image": "https://…", "corrections": 79 }]`.
 
-### Valorar una corrección (`modules/network/feedback.*`, #91 del buzón)
-
-Al poco de una corrección, la web pregunta a las dos partes en una ventana, de
-una en una. Sale de la copia de `corrections`: solo hay correcciones con nota (ya
-hechas) y se pone al día cada diez minutos. La agenda de 42 no sirve para esto:
-solo se pide al abrir el calendario y oculta con quién es la corrección.
-
-- GET /corrections/pending → tus correcciones por valorar, la última primero:
-  `[{ "id", "role": "corrected" | "corrector", "peers": [{ "login", "image" }],
-  "projectId", "projectName", "beginAt" }]`. Solo las que empezaron en los
-  últimos 7 días. `GET /pulse` trae cuántas en `corrections`.
-- POST /corrections/:id/feedback → 204. Si te corrigieron:
-  `{ "understanding": "perfect" | "enough" | "better" | "same", "reaction"?: "bug" | "code" | "concept" | "patient" | null }`;
-  la reacción suma a las `reactions` del expediente de quien corrigió. Si
-  corregiste tú: `{ "tag": "prepared" | "curious" | "autonomous" | "basics" }`,
-  que suma al `asked` de `GET /help/reputation` de cada persona corregida. Una
-  sola vez por corrección y persona (`409` la segunda); `409` también fuera de la
-  ventana de 7 días, y `404` si no estuviste en esa corrección.
-- POST /corrections/:id/skip → `{ "forever": false }` es «Ahora no»: se vuelve a
-  preguntar a las 6 horas, como mucho dos veces más. `{ "forever": true }` es
-  «No volver a preguntar». 204.
-- GET /corrections/understood → qué tal entendió, en total, la gente a la que
-  corregiste: `{ "total": 14, "answers": { "perfect": 5, "enough": 6, "better": 2, "same": 1 } }`.
-  Solo lo tuyo, nunca por persona ni con logins; con menos de 3 respuestas,
-  `answers` es `null` para que no se sepa de quién es cada una.
-
-Si 42 borra una corrección, lo que se dijo de ella deja de contar.
-
 ## Ranking
 
 GET /leaderboard?period=month|all → quién ayuda más en el campus que miro.
@@ -1215,7 +1187,6 @@ Ningún módulo escribe en el buzón: cada uno emite un evento `notice` y el mó
 
 - GET /pulse → `{ "unread": 2, "quota": { "level", "ticket" } }`. Lo único que
   la web pregunta de fondo además del calendario: avisos sin leer y cuota de 42.
-  También trae `corrections`: cuántas correcciones recientes tienes por valorar.
 - GET /notices → `{ "unread", "items": [{ "id", "kind", "ref", "from", "text",
   "count", "at", "read", "saved" }] }`, lo que no se ha leído primero.
 - POST /notices/read → `{ "ids"? }`: da por leídos esos avisos, o todos. Devuelve

@@ -60,11 +60,6 @@ type HelpServiceOptions = {
   commitments?: Commitments
   /** Si tiene el interruptor de guardia encendido y dónde está sentada: lo sabe `peers`. */
   presenceOf?: (login: string) => Promise<{ available: boolean; seat: string | null }>
-  /**
-   * Cómo llegó alguien a sus correcciones de 42, según quien le corrigió, por
-   * etiqueta. Suma a lo de la ayuda reservada. Lo sabe `network`.
-   */
-  correctionTags?: (login: string) => Promise<Map<string, number>>
   now?: () => number
 }
 
@@ -877,20 +872,14 @@ export function createHelpService(options: HelpServiceOptions) {
 
     /** Cómo han descrito a quien pregunta las personas que le ayudaron. */
     async reputation(actor: Actor): Promise<HelpReputation> {
-      const [helped, corrected] = await Promise.all([
-        help.requesterTags(actor.login),
-        // Si no se puede saber, no suma: la tarjeta no se cae por esto.
-        options.correctionTags?.(actor.login).catch(() => undefined),
-      ])
-      const count = (tag: RequesterTag): number =>
-        (helped.get(tag) ?? 0) + (corrected?.get(tag) ?? 0)
+      const tags = await help.requesterTags(actor.login)
 
       return {
         asked: {
-          prepared: count('prepared'),
-          curious: count('curious'),
-          autonomous: count('autonomous'),
-          basics: count('basics'),
+          prepared: tags.get('prepared') ?? 0,
+          curious: tags.get('curious') ?? 0,
+          autonomous: tags.get('autonomous') ?? 0,
+          basics: tags.get('basics') ?? 0,
         },
       }
     },

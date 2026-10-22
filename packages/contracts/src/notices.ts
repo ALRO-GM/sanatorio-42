@@ -77,8 +77,6 @@ export type Pulse = {
   clickerReviews: number
   /** Peticiones de ayuda por contestar y rechazos sin ver: también en una ventana. */
   help: number
-  /** Correcciones recientes que la web te pide valorar: sale una ventana, de una en una. */
-  corrections: number
   /** `true` si ahora hay un examen en tu campus: la pestaña de exámenes se enciende. */
   examLive: boolean
   quota: QuotaStatus

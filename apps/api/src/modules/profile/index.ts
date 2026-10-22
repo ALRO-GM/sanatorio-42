@@ -24,7 +24,6 @@ type ProfileModuleDeps = {
   events: EventBus
   hacker?: XpServiceOptions['hacker']
   master?: XpServiceOptions['master']
-  correctionReactions?: XpServiceOptions['correctionReactions']
   now?: () => number
 }
 
@@ -42,9 +41,6 @@ export function createProfileModule(deps: ProfileModuleDeps): ProfileModule {
     curriculum: deps.curriculum,
     ...(deps.hacker === undefined ? {} : { hacker: deps.hacker }),
     ...(deps.master === undefined ? {} : { master: deps.master }),
-    ...(deps.correctionReactions === undefined
-      ? {}
-      : { correctionReactions: deps.correctionReactions }),
     ...(deps.now === undefined ? {} : { now: deps.now }),
   })
 

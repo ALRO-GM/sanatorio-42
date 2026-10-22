@@ -10,7 +10,7 @@
  * No se guarda a quién se valora: sale de `corrections`, que dice quién corrigió
  * a quién. Así, si 42 borra una corrección, su valoración deja de contar.
  *
- * Tabla del módulo `network`.
+ * Tabla del módulo `network`. Se quitó en la 66: solo se valora la ayuda.
  */
 
 import type { Migration } from './types.js'
