@@ -270,13 +270,14 @@ function Challenge({
 
   return (
     <section className="git-challenge">
-      {seat === null && <p className="notice">{t('git.needSeat')}</p>}
+      {/* Sin puesto se practica igual; solo cuenta el punto desde el clúster (#86). */}
+      {seat === null && <p className="notice">{t('git.practice')}</p>}
       <div className="git-challenge-grid">
         <div>
           <Terminal
             entries={entries}
             prompt={`${seat ?? 'pc'}:~/repo (${branch})$`}
-            disabled={seat === null || result?.done === true}
+            disabled={result?.done === true}
             onRun={onRun}
             onClear={() => {
               setEntries([])
@@ -296,6 +297,11 @@ function Challenge({
                 {'☆'.repeat(3 - result.stars)}
               </span>{' '}
               {t('git.won')}
+            </p>
+          )}
+          {seat === null && reached && (
+            <p className="notice" role="status">
+              {t('git.practiceDone')}
             </p>
           )}
           {result !== null && !result.done && (
