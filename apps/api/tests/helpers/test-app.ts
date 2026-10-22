@@ -18,7 +18,7 @@ function makeEnv(overrides: Partial<NodeJS.ProcessEnv> = {}): Env {
   return loadEnv({
     FORTY_TWO_UID: 'u-test',
     FORTY_TWO_SECRET: 's-test',
-    SESSION_SECRET: 'secreto-de-sesion-para-pruebas',
+    SESSION_SECRET: 'secreto-de-sesion-para-pruebas-de-treinta-y-dos',
     FRONTEND_ORIGINS: 'https://front.test',
     FRONTEND_URL: 'https://front.test',
     FORTY_TWO_REDIRECT_URI: 'https://back.test/api/auth/callback',

@@ -287,6 +287,19 @@ export function createTurnsService<Board, View>(options: TurnsServiceOptions<Boa
     return order.map((id) => ({ id, text: round.options[id] ?? '' }))
   }
 
+  /**
+   * Una sala se mira si es del campus de quien pregunta o si juega en ella:
+   * los ids van seguidos y, sin esto, cualquiera vería las partidas de otro
+   * campus (quién juega, quién ha contestado). Si no, como si no existiera.
+   */
+  async function assertCanSee(actor: Actor, room: { id: number; campusId: number }): Promise<void> {
+    if (room.campusId === actor.campusId) return
+    if ((await turns.players(room.id)).map((p) => p.login).some((login) => login === actor.login))
+      return
+
+    throw domainError('not_found', 'Esa sala no existe')
+  }
+
   async function viewOf(actor: Actor, start: Row): Promise<TurnRoom> {
     const room = await advance(start)
     const players = await turns.players(room.id)
@@ -413,7 +426,13 @@ export function createTurnsService<Board, View>(options: TurnsServiceOptions<Boa
     },
 
     async view(actor: Actor, id: number): Promise<TurnRoom> {
-      return locked(id, async () => viewOf(actor, await mustRoom(id)))
+      return locked(id, async () => {
+        const room = await mustRoom(id)
+
+        await assertCanSee(actor, room)
+
+        return viewOf(actor, room)
+      })
     },
 
     async join(actor: Actor, id: number): Promise<TurnRoom> {

@@ -93,7 +93,7 @@ const envSchema = z.object({
    * Como la sesión va dentro de la cookie firmada (no hay tabla de sesiones),
    * esta clave es lo único que impide suplantar a alguien.
    */
-  SESSION_SECRET: z.string().min(16, 'SESSION_SECRET debe tener al menos 16 caracteres'),
+  SESSION_SECRET: z.string().min(32, 'SESSION_SECRET debe tener al menos 32 caracteres'),
 
   // --- Base de datos ------------------------------------------------------
   /**

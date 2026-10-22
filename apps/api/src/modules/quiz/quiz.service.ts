@@ -254,6 +254,19 @@ export function createQuizService(options: QuizServiceOptions) {
     return null
   }
 
+  /**
+   * Una sala se mira si es del campus de quien pregunta o si juega en ella:
+   * los ids van seguidos y, sin esto, cualquiera vería las partidas de otro
+   * campus (quién juega, quién ha contestado). Si no, como si no existiera.
+   */
+  async function assertCanSee(actor: Actor, room: { id: number; campusId: number }): Promise<void> {
+    if (room.campusId === actor.campusId) return
+    if ((await quiz.players(room.id)).map((p) => p.login).some((login) => login === actor.login))
+      return
+
+    throw domainError('not_found', 'Esa sala no existe')
+  }
+
   async function viewOf(actor: Actor, start: RoomRow): Promise<QuizRoom> {
     const room = await advance(start)
     const players = await quiz.players(room.id)
@@ -373,7 +386,13 @@ export function createQuizService(options: QuizServiceOptions) {
     },
 
     async view(actor: Actor, id: number): Promise<QuizRoom> {
-      return locked(id, async () => viewOf(actor, await mustRoom(id)))
+      return locked(id, async () => {
+        const room = await mustRoom(id)
+
+        await assertCanSee(actor, room)
+
+        return viewOf(actor, room)
+      })
     },
 
     /** Entra (o cambia de equipo, si ya estaba y aún no ha empezado). */

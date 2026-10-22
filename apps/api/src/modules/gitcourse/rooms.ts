@@ -292,6 +292,18 @@ export function createRoomService(deps: {
     return { ...room, status: 'done', state: done }
   }
 
+  /**
+   * Una sala se mira si es del campus de quien pregunta o si juega en ella:
+   * los ids van seguidos y, sin esto, cualquiera vería las partidas de otro
+   * campus (quién juega, quién ha contestado). Si no, como si no existiera.
+   */
+  async function assertCanSee(actor: Actor, room: { id: number; campusId: number }): Promise<void> {
+    if (room.campusId === actor.campusId) return
+    if ((await rooms.players(room.id)).some((login) => login === actor.login)) return
+
+    throw domainError('not_found', 'Esa sala no existe')
+  }
+
   async function viewOf(actor: Actor, room: RoomRow): Promise<GitRoom> {
     const logins = await rooms.players(room.id)
     const mission = missionFor(room.gate)
@@ -380,7 +392,13 @@ export function createRoomService(deps: {
     },
 
     async view(actor: Actor, id: number): Promise<GitRoom> {
-      return locked(id, async () => viewOf(actor, await expire(await mustRoom(id))))
+      return locked(id, async () => {
+        const room = await expire(await mustRoom(id))
+
+        await assertCanSee(actor, room)
+
+        return viewOf(actor, room)
+      })
     },
 
     async join(actor: Actor, id: number): Promise<GitRoom> {

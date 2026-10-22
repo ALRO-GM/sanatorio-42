@@ -502,6 +502,11 @@ describe('partidas de Not-games', () => {
       expect.objectContaining({ id, host: 'ana', players: 1, joined: false }),
     ])
     expect((await quiz.list(actor('ana')))[0]).toMatchObject({ joined: true })
+
+    // Desde otro campus la sala no existe (los ids van seguidos), salvo para quien juega en ella.
+    await expectCode(quiz.view(actor('zoe', { campusId: 46 }), id), 'not_found')
+    expect((await quiz.view(actor('ana', { campusId: 46 }), id)).id).toBe(id)
+    expect((await quiz.view(actor('leo'), id)).id).toBe(id)
   })
 
   it('lo que falla la gente queda apuntado por concepto', async () => {

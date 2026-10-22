@@ -8,6 +8,14 @@ const TIMEOUT_MS = 5_000
 
 export type SlackPoster = (text: string) => Promise<void>
 
+/**
+ * Lo que Slack interpreta dentro del texto: `<!channel>`, `<!here>` y `<@id>`
+ * avisan a gente. Una nota escrita por cualquiera (un aviso de edificio) no
+ * puede sonar a todo el canal del staff: se escapan como manda Slack.
+ */
+export const escapeSlack = (text: string): string =>
+  text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+
 export function createSlackPoster(
   url: string,
   log: (message: string) => void = () => undefined,
@@ -19,7 +27,7 @@ export function createSlackPoster(
       const response = await fetch(url, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ text }),
+        body: JSON.stringify({ text: escapeSlack(text) }),
         signal: AbortSignal.timeout(TIMEOUT_MS),
       })
 

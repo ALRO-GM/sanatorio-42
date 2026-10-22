@@ -18,7 +18,7 @@ const MINIMO: NodeJS.ProcessEnv = {
   FORTY_TWO_UID: 'u-test',
   FORTY_TWO_SECRET: 's-test',
   FORTY_TWO_REDIRECT_URI: 'https://sanatorio.example.org/api/auth/callback',
-  SESSION_SECRET: 'secreto-de-sesion-para-pruebas',
+  SESSION_SECRET: 'secreto-de-sesion-para-pruebas-de-treinta-y-dos',
   FRONTEND_URL: 'https://sanatorio.example.org',
 }
 
@@ -44,7 +44,7 @@ describe('configuración', () => {
   it('rechaza un SESSION_SECRET demasiado corto', () => {
     // Menos de 16 caracteres: la firma HMAC dejaría de ser creíble.
     expect(() => loadEnv({ ...MINIMO, SESSION_SECRET: 'corto' })).toThrow(
-      /SESSION_SECRET debe tener al menos 16 caracteres/,
+      /SESSION_SECRET debe tener al menos 32 caracteres/,
     )
   })
 
