@@ -261,6 +261,13 @@ export type ApiProjectTeam = {
   'validated?'?: boolean | null
   created_at?: string | null
   closed_at?: string | null
+  /**
+   * Las correcciones automáticas del equipo. En un examen, una por ejercicio
+   * entregado, con la nota que lleva: el equipo no tiene `final_mark` hasta que
+   * se cierra, así que la nota de quien sigue dentro sale de aquí. Viene en
+   * `GET /v2/teams`, no en el `teams` anidado de `projects_users`.
+   */
+  teams_uploads?: { final_mark?: number | null; created_at?: string | null }[] | null
 }
 
 /** Una inscripción a un examen (`/exams/:id/exams_users`), con la persona anidada. */

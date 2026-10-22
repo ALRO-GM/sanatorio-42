@@ -608,3 +608,24 @@ export function examineeStatus(
 
   return recent || attempt !== undefined ? 'inProgress' : 'pending'
 }
+
+/**
+ * La nota de un examen aún sin cerrar: la de su último ejercicio corregido
+ * (`teams_uploads`, cada una con la nota que llevaba). `null` si aún no ha
+ * entregado nada con nota.
+ */
+export function currentMark(
+  uploads: readonly { final_mark?: number | null; created_at?: string | null }[],
+): number | null {
+  let latest: { at: number; mark: number } | null = null
+
+  for (const upload of uploads) {
+    const at = Date.parse(upload.created_at ?? '')
+    const mark = upload.final_mark
+
+    if (typeof mark !== 'number' || Number.isNaN(at)) continue
+    if (latest === null || at >= latest.at) latest = { at, mark: Math.round(mark) }
+  }
+
+  return latest?.mark ?? null
+}

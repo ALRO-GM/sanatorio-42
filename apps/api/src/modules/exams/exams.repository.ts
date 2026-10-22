@@ -60,6 +60,49 @@ export function createExamsRepository(db: Db) {
     },
 
     /**
+     * De esos logins, los que se sabe que son de otro campus y no de este. Quien
+     * no consta en ninguno no entra: puede ser alguien que aún no se ha copiado.
+     */
+    async fromElsewhere(campusId: number, logins: readonly string[]): Promise<Set<string>> {
+      if (logins.length === 0) return new Set()
+
+      const result = await db.execute({
+        sql: `SELECT u.login FROM users u
+              JOIN campus_members cm ON cm.user_id = u.id
+              WHERE u.login IN (SELECT value FROM json_each(?))
+              GROUP BY u.login
+              HAVING MAX(cm.campus_id = ?) = 0`,
+        args: [JSON.stringify(logins), campusId],
+      })
+
+      return new Set(result.rows.map((row) => toText(row.login)))
+    },
+
+    /**
+     * El equipo de examen sin cerrar de cada una de esas personas, creado desde
+     * `since` (el equipo se crea al apuntarse, antes de que empiece el examen).
+     */
+    async openTeams(logins: readonly string[], since: string): Promise<Map<string, number>> {
+      const teams = new Map<string, number>()
+
+      if (logins.length === 0) return teams
+
+      const result = await db.execute({
+        sql: `SELECT u.login, a.team_id FROM exam_attempts a
+              JOIN users u ON u.id = a.user_id
+              WHERE u.login IN (SELECT value FROM json_each(?))
+                AND a.validated IS NULL AND a.at >= ?
+              ORDER BY a.at`,
+        args: [JSON.stringify(logins), since],
+      })
+
+      // Por fecha: si hubiera dos, vale el último.
+      for (const row of result.rows) teams.set(toText(row.login), toNumber(row.team_id))
+
+      return teams
+    },
+
+    /**
      * Las filas de examen tocadas desde `since` de la gente del campus o de esos
      * logins: quien ha entrado en el examen aparece aunque la lista de
      * apuntados no haya llegado. La más reciente de cada cual va la última.
