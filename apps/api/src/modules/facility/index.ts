@@ -3,6 +3,7 @@
  * ordenadores (#77 del buzón).
  */
 
+import type { Actor } from '../../core/actor.js'
 import type { Db } from '../../core/db/database.js'
 import { idParam } from '../../core/http/params.js'
 import type { IdParams } from '../../core/http/params.js'
@@ -14,6 +15,7 @@ type FacilityDeps = {
   db: Db
   seatOf: (campusId: number, login: string) => Promise<string | null>
   slack?: ((text: string) => Promise<void>) | null
+  markBroken?: (actor: Actor, host: string) => Promise<void>
   /** Si una cuenta de staff sigue teniendo acceso. */
   staffActive: (id: number) => Promise<boolean>
   now?: () => number
@@ -26,6 +28,7 @@ export function createFacilityModule(deps: FacilityDeps): FacilityModule {
     db: deps.db,
     seatOf: deps.seatOf,
     slack: deps.slack ?? null,
+    ...(deps.markBroken === undefined ? {} : { markBroken: deps.markBroken }),
     ...(deps.now === undefined ? {} : { now: deps.now }),
   })
   const report = (id: string): number => idParam(id, 'El aviso')

@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 
 import { api } from '../../shared/api'
-import { useAsync } from '../../shared/hooks/useAsync'
+import { useAction, useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { ClusterMapView } from './ClusterMapView'
@@ -22,6 +22,7 @@ export function ProjectMap({
   spotlight?: ReadonlySet<string> | null
 }) {
   const { t } = useI18n()
+  const marking = useAction()
   const { data, error, loading, reload } = useAsync(() => api.getProjectMap(projectId), [projectId])
 
   useEffect(() => {
@@ -42,15 +43,19 @@ export function ProjectMap({
       {data === undefined ? (
         <ErrorNote error={error} onRetry={() => void reload()} />
       ) : (
-        <ClusterMapView
-          map={data}
-          spotlight={spotlight}
-          onBroken={(host, broken) => {
-            void (broken ? api.reportBrokenSeat(host) : api.clearBrokenSeat(host))
-              .then(() => reload())
-              .catch(() => undefined)
-          }}
-        />
+        <>
+          <ClusterMapView
+            map={data}
+            spotlight={spotlight}
+            onBroken={(host, broken) => {
+              // Si falla, se dice (antes se callaba y parecía que no hacía nada).
+              void marking
+                .run(() => (broken ? api.reportBrokenSeat(host) : api.clearBrokenSeat(host)))
+                .then((done) => (done ? reload() : undefined))
+            }}
+          />
+          <ErrorNote error={marking.error} />
+        </>
       )}
     </section>
   )

@@ -3,6 +3,7 @@
  */
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { toText } from '../../src/core/db/rows.js'
 import { createFacilityService } from '../../src/modules/facility/facility.service.js'
 import { actor, expectCode, MADRID, useCommunity } from '../helpers/community.js'
 import type { Community } from '../helpers/community.js'
@@ -37,6 +38,21 @@ describe('avisos del edificio', () => {
     expect((await facility.forAdmin(actor('jefa', { admin: true }))).map((r) => r.id)).toEqual([
       report.id,
     ])
+  })
+
+  it('un ordenador o sus periféricos que fallan dejan el puesto tachado en el mapa', async () => {
+    const { facility } = services
+    const broken = async (): Promise<string[]> =>
+      (await db.execute({ sql: 'SELECT host FROM broken_seats ORDER BY host', args: [] })).rows.map(
+        (row) => toText(row.host),
+      )
+
+    await facility.report(actor('ana'), { category: 'peripheral', place: 'c1r2s4' })
+    expect(await broken()).toEqual(['c1r2s4'])
+    // Lo que no es un puesto (un pasillo, los baños) no toca el mapa.
+    await facility.report(actor('ana'), { category: 'computer', place: 'la sala del fondo' })
+    await facility.report(actor('ana'), { category: 'toilets', place: 'c1r2s5' })
+    expect(await broken()).toEqual(['c1r2s4'])
   })
 
   it('sin puesto hay que decir dónde; «otro» necesita una nota', async () => {

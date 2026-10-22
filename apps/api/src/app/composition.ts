@@ -327,6 +327,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
       return present.find((person) => person.login === login)?.host ?? null
     },
     slack: config.slack ?? null,
+    markBroken: (actor, host) => map.service.reportBroken(actor, host),
     staffActive: (id) => staff.service.active(id),
     ...clock,
   })

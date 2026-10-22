@@ -60,6 +60,11 @@ type FacilityOptions = {
   db: Db
   /** Dónde está sentada ahora esa persona, para cuando no dice dónde. */
   seatOf: (campusId: number, login: string) => Promise<string | null>
+  /**
+   * Marca el puesto como roto en el mapa (si `place` es un puesto): un aviso
+   * del ordenador o de sus periféricos lo pide. Si no es un puesto, no hace nada.
+   */
+  markBroken?: (actor: Actor, host: string) => Promise<void>
   /** Manda el aviso al canal de Slack del staff, si lo hay. */
   slack?: ((text: string) => Promise<void>) | null
   now?: () => number
@@ -137,6 +142,12 @@ export function createFacilityService(options: FacilityOptions) {
         args: [actor.campusId, actor.login, category, where, note ?? null, iso(now())],
       })
       const id = toNumber(inserted.rows[0]?.id)
+
+      // Un ordenador o sus periféricos que fallan: el puesto sale tachado en el
+      // mapa (#82), para que nadie se siente en él ni se proponga para una terapia.
+      if (category === 'computer' || category === 'peripheral') {
+        await options.markBroken?.(actor, where).catch(() => undefined)
+      }
 
       // Al canal del staff, si lo hay. No se espera: Slack no retrasa a nadie.
       void options.slack?.(

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
 import { api } from '../../shared/api'
-import { useAsync } from '../../shared/hooks/useAsync'
+import { useAction, useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { Icon } from '../../shared/ui/Icon'
 import { InfoTip } from '../../shared/ui/InfoTip'
@@ -20,6 +20,7 @@ import { ClusterMapView } from './ClusterMapView'
 export function ClustersPage({ me }: { me: string }) {
   const [reporting, setReporting] = useState(false)
   const { t } = useI18n()
+  const marking = useAction()
   const map = useAsync(() => api.getCampusMap(), [])
 
   const seated = map.data?.clusters.flatMap((cluster) => cluster.seats) ?? []
@@ -68,14 +69,16 @@ export function ClustersPage({ me }: { me: string }) {
               map={map.data}
               legend={['online', 'occupied', 'reserved', 'free', 'broken']}
               onBroken={(host, broken) => {
-                void (broken ? api.reportBrokenSeat(host) : api.clearBrokenSeat(host))
-                  .then(() => map.reload())
-                  .catch(() => undefined)
+                // Si falla, se dice (antes se callaba y parecía que no hacía nada).
+                void marking
+                  .run(() => (broken ? api.reportBrokenSeat(host) : api.clearBrokenSeat(host)))
+                  .then((done) => (done ? map.reload() : undefined))
               }}
               onChat={(login) => {
                 openChat(directChatId(me, login))
               }}
             />
+            <ErrorNote error={marking.error} />
           </div>
         </>
       )}
