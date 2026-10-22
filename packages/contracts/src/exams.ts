@@ -105,8 +105,14 @@ export type LiveExaminee = {
   track: 'classic' | 'next'
   /** Círculo en que va, si se sabe. */
   circle: number | null
-  /** La nota de su último intento en este examen, o `null` si aún no tiene. */
+  /** La nota de su intento de esta sesión, cuando se cierra; `null` mientras tanto. */
   mark: number | null
+  /**
+   * La nota de su último intento cerrado de antes de esta sesión (lo que se ve
+   * en su expediente), o `null` si es el primero. Mientras sigue dentro es lo
+   * único que se sabe: 42 no da la nota del intento abierto hasta cerrarlo.
+   */
+  previousMark: number | null
   /**
    * Cómo va en esta sesión: `pending` si aún no ha empezado, `inProgress` si
    * está dentro, `passed` si lo tiene cerrado con 100 o más y `failed` si lo

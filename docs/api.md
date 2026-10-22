@@ -1526,7 +1526,10 @@ POST /exams/live/refresh  → LiveExam. Lo mismo, pidiendo antes lo nuevo a 42 s
 - `mark`: la del intento de esta sesión, solo cuando se cierra. Mientras sigue
   dentro es `null`: 42 no da nota hasta cerrar (comprobado el 2026-10-22 con
   `GET /v2/teams`: equipos en curso sin `final_mark`, `teams_uploads` ni
-  `scale_teams`). Nunca la del proyecto, que en 42 es la mejor de todas.
+  `scale_teams`). Nunca la del proyecto: mientras está en curso, 42 deja ahí la
+  mejor de los intentos anteriores, no la de ahora.
+- `previousMark`: la de su último intento cerrado de antes de la sesión (lo que
+  se ve en su expediente); es lo que la web enseña de quien sigue dentro.
 - `status`: `pending` (aún no ha entrado), `inProgress`, `passed` (cerrado con 100
   o más) o `failed` (cerrado sin llegar a 100, o sin validar). Solo cuenta la fila
   tocada en esta sesión.

@@ -79,6 +79,38 @@ export function createExamsRepository(db: Db) {
     },
 
     /**
+     * La nota del último intento cerrado de antes de `before` de esas personas,
+     * por `login:proyecto`: lo que se ve en su expediente.
+     */
+    async lastClosedMarks(
+      logins: readonly string[],
+      before: string,
+    ): Promise<Map<string, number | null>> {
+      const marks = new Map<string, number | null>()
+
+      if (logins.length === 0) return marks
+
+      const result = await db.execute({
+        sql: `SELECT u.login, a.project_id, a.mark FROM exam_attempts a
+              JOIN users u ON u.id = a.user_id
+              WHERE u.login IN (SELECT value FROM json_each(?))
+                AND a.validated IS NOT NULL AND a.at < ?
+              ORDER BY a.at`,
+        args: [JSON.stringify(logins), before],
+      })
+
+      // Por fecha: el último pisa a los anteriores.
+      for (const row of result.rows) {
+        marks.set(
+          `${toText(row.login)}:${String(toNumber(row.project_id))}`,
+          row.mark === null ? null : toNumber(row.mark),
+        )
+      }
+
+      return marks
+    },
+
+    /**
      * Las filas de examen tocadas desde `since` de la gente del campus o de esos
      * logins: quien ha entrado en el examen aparece aunque la lista de
      * apuntados no haya llegado. La más reciente de cada cual va la última.

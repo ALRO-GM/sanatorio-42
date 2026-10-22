@@ -285,13 +285,35 @@ describe('el examen en vivo', () => {
         }),
         // `mia` no sale en la lista de 42, pero ya está dentro del examen.
         // `mia` sigue dentro: hasta que cierre, 42 no da nota (la del proyecto, 90,
-        // es de otra vez y no se enseña).
-        projectUser('mia', {
-          ...RANK_02,
-          status: 'in_progress',
-          finalMark: 90,
-          updatedAt: '2026-10-22T07:40:00.000Z',
-        }),
+        // es la mejor de todas). Su último intento cerrado, de la semana pasada: 50.
+        {
+          ...projectUser('mia', {
+            ...RANK_02,
+            status: 'in_progress',
+            finalMark: 90,
+            updatedAt: '2026-10-22T07:40:00.000Z',
+          }),
+          teams: [
+            {
+              id: 9101,
+              final_mark: 90,
+              'validated?': false,
+              closed_at: '2026-10-08T10:00:00.000Z',
+            },
+            {
+              id: 9102,
+              final_mark: 50,
+              'validated?': false,
+              closed_at: '2026-10-15T10:00:00.000Z',
+            },
+            {
+              id: 9103,
+              final_mark: null,
+              'validated?': null,
+              created_at: '2026-10-21T18:00:00.000Z',
+            },
+          ],
+        },
         // Alguien que hizo el 03 del plan nuevo: así se conoce el proyecto.
         projectUser('zoe', {
           ...NEXT_03,
@@ -347,8 +369,9 @@ describe('el examen en vivo', () => {
     ])
     // La nota es la del intento de hoy (75), no la mejor del proyecto (90).
     expect(live.groups[0]?.people[0]).toMatchObject({ mark: 75, track: 'classic', circle: 2 })
-    // Quien sigue dentro no tiene nota todavía: la del proyecto no vale.
-    expect(live.groups[0]?.people[1]).toMatchObject({ login: 'mia', mark: null })
+    // Quien sigue dentro no tiene nota todavía (la del proyecto no vale): se da
+    // la de su último intento cerrado, la de su expediente.
+    expect(live.groups[0]?.people[1]).toMatchObject({ login: 'mia', mark: null, previousMark: 50 })
     // Solo se piden las notas de los exámenes que tocan a alguien, uno por petición.
     expect(calls.pages.sort()).toEqual([1320, 1321, 1400])
   })

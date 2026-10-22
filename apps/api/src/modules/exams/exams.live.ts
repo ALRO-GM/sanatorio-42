@@ -39,7 +39,10 @@ type ExamsLiveOptions = {
   >
   agenda: Pick<Agenda, 'campusEvents'>
   curriculum: Pick<Curriculum, 'placesOf'>
-  exams: Pick<ExamsRepository, 'exams' | 'agendaRegistered' | 'sessionRows' | 'fromElsewhere'>
+  exams: Pick<
+    ExamsRepository,
+    'exams' | 'agendaRegistered' | 'sessionRows' | 'fromElsewhere' | 'lastClosedMarks'
+  >
   quota: QuotaGate
   now?: () => number
   log?: (message: string) => void
@@ -230,13 +233,14 @@ export function createExamsLive(options: ExamsLiveOptions) {
     const state = await stateOf(liveKey(campusId, exam.id))
     const logins = await registered(campusId, exam, state)
     const fromFortyTwo = new Map(state?.logins ?? [])
-    const [places, images, attempts, rows, projects, timeZone] = await Promise.all([
+    const [places, images, attempts, rows, projects, timeZone, previous] = await Promise.all([
       curriculum.placesOf(logins),
       replica.imagesOf(logins),
       latestAttempts(logins, exam.beginAt),
       running ? exams.sessionRows(campusId, exam.beginAt, logins) : Promise.resolve([]),
       exams.exams(),
       replica.timeZoneOf(campusId),
+      exams.lastClosedMarks(logins, exam.beginAt),
     ])
     const bySlug = new Map(projects.map((project) => [project.slug, project]))
     const byId = new Map(projects.map((project) => [project.id, project]))
@@ -261,6 +265,9 @@ export function createExamsLive(options: ExamsLiveOptions) {
         // Solo la del intento de esta sesión: hasta que se cierra, 42 no da nota
         // (ni del equipo ni de sus ejercicios), y la del proyecto es la mejor de todas.
         mark: attempt?.mark ?? null,
+        // Lo que se ve en su expediente: su último intento cerrado de antes.
+        previousMark:
+          projectId === null ? null : (previous.get(`${login}:${String(projectId)}`) ?? null),
         status: examineeStatus(row, attempt, exam.beginAt),
       }
       const group = groups.get(projectId) ?? {

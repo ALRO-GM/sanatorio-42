@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/examenes.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-72 textos. «—» es que falta la traducción: sale en español.
+73 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -78,4 +78,5 @@ Generado desde `apps/web/src/shared/i18n/textos/examenes.csv` con
 | `exams.kickoff.chosen` | Texto del desplegable de kickoffs cuando hay varias marcadas | features/exams/ExamStatsPanel | {n} kickoffs | {n} kickoffs | {n} kickoffs | {n} kickoff |
 | `exams.moreAttempts` | Desplegable con los intentos a partir del sexto | features/exams/ExamStatsPanel | Ver {n} intentos más | Show {n} more attempts | Veure {n} intents més | Ikusi {n} saiakera gehiago |
 | `exams.markLater` | Examen en vivo: en lugar de la nota de quien sigue dentro | features/exams/ExamsPage | Nota al cerrar | Mark when it closes | Nota en tancar | Nota ixtean |
-| `exams.markLaterHint` | Examen en vivo: explicación al pasar el ratón por «Nota al cerrar» | features/exams/ExamsPage | 42 no da la nota de un examen hasta que se cierra: mientras sigue dentro, no se sabe. | 42 does not give an exam's mark until it closes: while they are still in, it is not known. | 42 no dona la nota d'un examen fins que es tanca: mentre hi és, no se sap. | 42k ez du azterketaren nota ematen itxi arte: barruan dagoen bitartean, ez da jakiten. |
+| `exams.markLaterHint` | Examen en vivo: explicación al pasar el ratón por «Nota al cerrar» | features/exams/ExamsPage | 42 no da la nota de un examen hasta que se cierra. Mientras sigue dentro, se ve la de su último intento (la de su expediente). | 42 does not give an exam's mark until it closes. While they are still in, you see the one from their last attempt (the one on their record). | 42 no dona la nota d'un examen fins que es tanca. Mentre hi és, es veu la del seu últim intent (la del seu expedient). | 42k ez du azterketaren nota ematen itxi arte. Barruan dagoen bitartean, azken saiakerarena ikusten da (bere espedientekoa). |
+| `exams.previousMark` | Examen en vivo: quien sigue dentro, con la nota de su último intento cerrado | features/exams/ExamsPage | Último: {n} | Last: {n} | Últim: {n} | Azkena: {n} |

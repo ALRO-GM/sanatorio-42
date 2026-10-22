@@ -256,9 +256,12 @@ function LiveCard({
                     <span className="badge exam-status">{t(`exams.status.${person.status}`)}</span>
                   </span>
                   {person.mark === null && person.status === 'inProgress' ? (
-                    // 42 no da nota hasta que se cierra el examen: no es un fallo.
+                    // 42 no da nota hasta que se cierra el examen: mientras, la de su
+                    // último intento cerrado (la de su expediente), si tiene.
                     <small className="exam-mark pending" title={t('exams.markLaterHint')}>
-                      {t('exams.markLater')}
+                      {person.previousMark === null
+                        ? t('exams.markLater')
+                        : t('exams.previousMark', { n: person.previousMark })}
                     </small>
                   ) : (
                     <strong className="exam-mark">{person.mark ?? '—'}</strong>

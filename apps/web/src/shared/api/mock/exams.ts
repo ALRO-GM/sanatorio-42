@@ -44,7 +44,8 @@ const person = (
   circle: number,
   mark: number | null,
   status: LiveExaminee['status'],
-): LiveExaminee => ({ login, image: portrait(login), track, circle, mark, status })
+  previousMark: number | null = null,
+): LiveExaminee => ({ login, image: portrait(login), track, circle, mark, previousMark, status })
 
 /** Las kickoffs del campus inventado: las grandes y alguna suelta. */
 const KICKOFFS: ExamKickoff[] = [
@@ -106,7 +107,7 @@ function liveNow(manual: boolean): LiveExam {
         people: [
           person('jdoe', 'classic', 2, 100, 'passed'),
           person('llorente', 'classic', 2, 50, 'failed'),
-          person('pvidal', 'classic', 2, null, 'inProgress'),
+          person('pvidal', 'classic', 2, null, 'inProgress', 50),
           person('tmolina', 'classic', 2, null, 'pending'),
         ],
       },
