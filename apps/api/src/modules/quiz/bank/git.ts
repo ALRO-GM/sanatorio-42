@@ -25,7 +25,11 @@ export const GIT: readonly Concept[] = [
       {
         ask: ['¿Qué entra en un commit?', 'Al hacer git commit se guarda…'],
         right: ['Lo que está en el índice (lo preparado con git add)'],
-        wrong: ['Todo lo que hay en la carpeta, siempre', 'Solo los ficheros nuevos'],
+        wrong: [
+          'Todo lo que hay en la carpeta, siempre',
+          'Solo los ficheros nuevos',
+          'Lo que no está en el índice',
+        ],
       },
     ],
     wrong: [
@@ -103,7 +107,11 @@ export const GIT: readonly Concept[] = [
       {
         ask: ['¿Qué es estar con HEAD separado (detached)?', 'HEAD separado quiere decir que…'],
         right: ['HEAD apunta a un commit directamente, no a una rama'],
-        wrong: ['Que se ha borrado la rama main', 'Que no hay conexión con el remoto'],
+        wrong: [
+          'Que se ha borrado la rama main',
+          'Que no hay conexión con el remoto',
+          'Que el repositorio está vacío',
+        ],
       },
     ],
     wrong: [
@@ -220,7 +228,7 @@ export const GIT: readonly Concept[] = [
     level: 2,
     forms: [
       {
-        ask: ['¿Qué hace `git fetch`?', 'git fetch…'],
+        ask: ['¿Qué hace `git fetch`?', '¿Para qué sirve git fetch?'],
         right: [
           'Baja lo nuevo del remoto y mueve origin/main, sin tocar tus ramas',
           'Trae los commits del remoto pero no los une con lo tuyo',
@@ -276,7 +284,11 @@ export const GIT: readonly Concept[] = [
           'Tu push sale rechazado (non-fast-forward). Lo normal es…',
         ],
         right: ['git pull (o pull --rebase) y después git push otra vez'],
-        wrong: ['git push --force sin mirar', 'Borrar el repositorio y clonar de nuevo'],
+        wrong: [
+          'git push --force sin mirar',
+          'Borrar el repositorio y clonar de nuevo',
+          'git commit --amend y otra vez git push',
+        ],
       },
     ],
     wrong: ['git commit --amend', 'git reset --hard', 'git branch -D main', 'git init'],
@@ -290,7 +302,7 @@ export const GIT: readonly Concept[] = [
     level: 1,
     forms: [
       {
-        ask: ['¿Qué hace `git clone url`?', 'git clone…'],
+        ask: ['¿Qué hace `git clone url`?', '¿Para qué sirve git clone?'],
         right: [
           'Copia el repositorio entero, con su historia, y lo deja con origin apuntando a la url',
         ],
@@ -323,7 +335,11 @@ export const GIT: readonly Concept[] = [
       {
         ask: ['¿Cuándo no deberías hacer rebase?', 'El rebase es peligroso en…'],
         right: ['Ramas que ya comparte más gente (sus commits cambian de id)'],
-        wrong: ['Ramas que solo tienes tú en local', 'Ramas con un solo commit'],
+        wrong: [
+          'Ramas que solo tienes tú en local',
+          'Ramas con un solo commit',
+          'Ramas que aún no has subido al remoto',
+        ],
       },
     ],
     wrong: [
@@ -342,18 +358,18 @@ export const GIT: readonly Concept[] = [
     level: 3,
     forms: [
       {
-        ask: ['¿Qué hace `git cherry-pick a1b2c3`?', 'cherry-pick sirve para…'],
+        ask: ['¿Qué hace `git cherry-pick a1b2c3`?', '¿Para qué sirve cherry-pick?'],
         right: [
-          'Copiar los cambios de ese commit encima de donde estás',
-          'Traer un commit concreto de otra rama',
+          'Copia los cambios de ese commit encima de donde estás',
+          'Trae un commit concreto de otra rama',
         ],
       },
     ],
     wrong: [
-      'Traer la rama entera de ese commit',
-      'Borrar ese commit de la historia',
-      'Moverte a ese commit con HEAD separado',
-      'Deshacer ese commit',
+      'Trae la rama entera de ese commit',
+      'Borra ese commit de la historia',
+      'Te mueve a ese commit con HEAD separado',
+      'Deshace ese commit',
     ],
     why: 'cherry-pick copia un commit suelto; la rama de la que viene no cambia.',
   },
@@ -365,7 +381,7 @@ export const GIT: readonly Concept[] = [
     level: 2,
     forms: [
       {
-        ask: ['¿Qué hace `git commit --amend`?', 'Con --amend…'],
+        ask: ['¿Qué hace `git commit --amend`?', '¿Para qué sirve --amend en git commit?'],
         right: [
           'Rehace el último commit (mensaje o ficheros) como un commit nuevo',
           'Cambia el último commit por otro corregido',
@@ -397,7 +413,11 @@ export const GIT: readonly Concept[] = [
       {
         ask: ['¿Qué es `main^`?', 'main^ se refiere a…'],
         right: ['El padre del commit al que apunta main'],
-        wrong: ['La rama main del remoto', 'El primer commit de main'],
+        wrong: [
+          'La rama main del remoto',
+          'El primer commit de main',
+          'El hijo del commit de main',
+        ],
       },
     ],
     wrong: [
@@ -449,7 +469,11 @@ export const GIT: readonly Concept[] = [
           'Para deshacer un commit que ya es público, lo seguro es…',
         ],
         right: ['git revert: un commit nuevo que hace lo contrario'],
-        wrong: ['git reset --hard y git push --force', 'git commit --amend'],
+        wrong: [
+          'git reset --hard y git push --force',
+          'git commit --amend',
+          'Borrar la rama y crearla de nuevo',
+        ],
       },
       {
         ask: ['¿Qué hace `git revert`?', 'git revert de un commit…'],
@@ -472,7 +496,7 @@ export const GIT: readonly Concept[] = [
     level: 2,
     forms: [
       {
-        ask: ['¿Para qué sirve `git stash`?', 'git stash…'],
+        ask: ['¿Para qué sirve `git stash`?', '¿Qué hace git stash?'],
         right: [
           'Aparca los cambios sin commit y deja la carpeta limpia (stash pop los devuelve)',
           'Guarda tus cambios a medias para cambiar de rama un momento',
@@ -526,7 +550,11 @@ export const GIT: readonly Concept[] = [
       {
         ask: ['En Gitflow, ¿para qué sirve develop?', 'La rama develop de Gitflow…'],
         right: ['Recoge el trabajo terminado hasta la próxima versión'],
-        wrong: ['Es lo que está publicado', 'Es una rama de pruebas que se borra'],
+        wrong: [
+          'Es lo que está publicado',
+          'Es una rama de pruebas que se borra',
+          'Guarda solo los hotfix',
+        ],
       },
     ],
     wrong: [
@@ -553,7 +581,7 @@ export const GIT: readonly Concept[] = [
       {
         ask: ['¿Cómo subes los tags al remoto?', 'Los tags se suben con…'],
         right: ['git push --tags', 'git push origin v1.0'],
-        wrong: ['git push (sube los tags siempre)', 'git tag --push'],
+        wrong: ['git push, que sube siempre los tags', 'git tag --push', 'git commit --tags'],
       },
     ],
     wrong: [

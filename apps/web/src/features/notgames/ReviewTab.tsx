@@ -6,6 +6,7 @@ import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { CodeText } from '../../shared/ui/CodeText'
 
 /**
  * El Repaso: lo que has fallado en Not-games (preguntas y ajedrez), cada
@@ -72,13 +73,19 @@ function ReviewCard({ item }: { item: QuizReviewItem }) {
           ? t('notgames.review.masteredOne')
           : t('notgames.review.misses', { n: item.misses })}
       </small>
-      <p>{item.definition}</p>
+      <p>
+        <CodeText text={item.definition} />
+      </p>
       <span className="eyebrow">{t('notgames.review.example')}</span>
       <pre className="quiz-code">{item.example}</pre>
       <details>
         <summary>{t('notgames.review.question')}</summary>
-        <p className="hint">{item.question}</p>
-        <p>{item.why}</p>
+        <p className="hint">
+          <CodeText text={item.question} />
+        </p>
+        <p>
+          <CodeText text={item.why} />
+        </p>
       </details>
     </article>
   )

@@ -3,13 +3,13 @@ duty.label,Cabecera: botón que abre tu guardia (cuándo te ofreces a ayudar),De
 duty.hint,Explicación junto al interruptor de guardia,Solo aparecerás de guardia cuando estés en el campus,You'll only show as on duty while you're on campus,Només apareixeràs de guàrdia quan siguis al campus,Campusean zaudenean bakarrik agertuko zara guardian
 duty.saveError,Error al guardar el interruptor de guardia,No se ha podido guardar. Prueba otra vez.,Couldn't save. Please try again.,No s'ha pogut desar. Torna-ho a provar.,Ezin izan da gorde. Saiatu berriro.
 projects.title,Título de la sala de espera: elegir el proyecto en el que necesitas ayuda (juego con el tema del hospital),¿Qué te duele hoy?,Where does it hurt today?,Què et fa mal avui?,Zer duzu gaur minduta?
-projects.loading,Mientras cargan tus proyectos,Cargando proyectos...,Loading projects...,Carregant projectes...,Proiektuak kargatzen...
+projects.loading,Mientras cargan tus proyectos,Cargando proyectos…,Loading projects...,Carregant projectes...,Proiektuak kargatzen...
 projects.empty,No tienes proyectos en curso,"No tienes proyectos en curso. ¡Buen momento para descansar! Si acabas de empezar uno, aparecerá aquí en unos minutos.","You have no projects in progress. Good time for a break! If you've just started one, come back in a few minutes.","No tens projectes en curs. Bon moment per descansar! Si n'acabes de començar un, torna d'aquí a uns minuts i apareixerà aquí.","Ez duzu proiekturik abian. Atseden hartzeko une ona! Bat hasi berri baduzu, itzuli minutu batzuk barru eta hemen agertuko da."
 projects.pick,Indicación para elegir un proyecto,Elige un proyecto,Pick a project,Tria un projecte,Aukeratu proiektu bat
 projects.doing,Etiqueta de un proyecto en curso,en curso,in progress,en curs,abian
 projects.passed,Etiqueta de un proyecto aprobado,aprobado,passed,aprovat,gaindituta
 peers.title,Título de la lista de personas que pueden ayudar en un proyecto,Quién te puede atender en {project},Who can see you for {project},Qui et pot atendre a {project},Nork artatu zaitzake {project} proiektuan
-peers.loading,Mientras carga la lista de personas,Buscando quién está de guardia...,Checking who's on duty...,Buscant qui està de guàrdia...,Guardian nor dagoen bilatzen...
+peers.loading,Mientras carga la lista de personas,Buscando quién está de guardia…,Checking who's on duty...,Buscant qui està de guàrdia...,Guardian nor dagoen bilatzen...
 peers.onDuty,Cuántas personas están de guardia ahora,{n} de guardia ahora mismo,{n} on duty right now,{n} de guàrdia ara mateix,{n} guardian une honetan
 peers.specialists1,Hay una persona que aprobó el proyecto,1 especialista,1 specialist,1 especialista,Espezialista 1
 peers.specialistsN,Cuántas personas aprobaron el proyecto,{n} especialistas,{n} specialists,{n} especialistes,{n} espezialista

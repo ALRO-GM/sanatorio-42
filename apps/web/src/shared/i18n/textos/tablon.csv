@@ -18,7 +18,7 @@ graph.one.missingGuide,Una guía por escribir,1 guía por escribir,1 guide to wr
 graph.count.unanswered,Varias dudas sin responder,{n} dudas sin responder,{n} unanswered questions,{n} dubtes sense resposta,Erantzunik gabeko {n} zalantza
 graph.count.proposals,Varias propuestas por revisar,{n} propuestas por revisar,{n} suggestions to review,{n} propostes per revisar,{n} proposamen berrikusteko
 graph.count.missingGuide,Varias guías por escribir,{n} guías por escribir,{n} guides to write,{n} guies per escriure,{n} gida idazteko
-board.loading,Mientras carga el tablón de un proyecto,Abriendo el tablón...,Opening the board...,Obrint el tauler...,Taula irekitzen...
+board.loading,Mientras carga el tablón de un proyecto,Abriendo el tablón…,Opening the board...,Obrint el tauler...,Taula irekitzen...
 board.guide,Título de la guía del proyecto,Guía de {project},{project} guide,Guia de {project},{project} proiektuaren gida
 board.guideBy,Quién escribe la guía,Escrita y mantenida por especialistas,Written and maintained by specialists,Escrita i mantinguda per especialistes,Espezialistek idatzia eta mantendua
 board.guideEmpty,El proyecto no tiene guía,Nadie ha escrito todavía la guía de este proyecto.,Nobody has written this project's guide yet.,Ningú ha escrit encara la guia d'aquest projecte.,Inork ez du oraindik proiektu honen gida idatzi.

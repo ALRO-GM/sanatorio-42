@@ -25,21 +25,28 @@ export const C_BASICS: readonly Concept[] = [
           '¿Qué marca el final de un string en C?',
         ],
         right: ["El carácter nulo '\\0'", 'El primer byte que vale 0'],
+        wrong: [
+          "El salto de línea '\\n'",
+          'Su longitud, guardada en el primer byte',
+          'El último espacio',
+          "El carácter '0'",
+        ],
       },
       {
-        ask: ['¿Cuántos bytes ocupa en memoria la cadena "hola"?', '`sizeof("hola")` vale…'],
-        right: ['5', "5: cuatro letras y el '\\0'"],
-        wrong: ['4'],
+        ask: [
+          '¿Cuántos bytes ocupa en memoria la cadena "hola"?',
+          '¿Cuánto vale `sizeof("hola")`?',
+        ],
+        right: ['5'],
+        wrong: ['4', '8', '6', '1'],
       },
     ],
     wrong: [
       "El salto de línea '\\n'",
       'Su longitud, guardada en el primer byte',
       'El último espacio',
-      "El carácter '0'",
-      '8',
     ],
-    why: "Una cadena de C es un array de char terminado en '\\0': ocupa una más que su longitud.",
+    why: "Una cadena de C es un array de char terminado en '\\0': ocupa un byte más que su longitud.",
   },
   {
     id: 'c-sizeof-char',
@@ -51,21 +58,22 @@ export const C_BASICS: readonly Concept[] = [
       {
         ask: [
           '¿Cuánto vale siempre `sizeof(char)`?',
-          'En C, el tamaño de un char es, por definición…',
+          'En C, ¿cuántos bytes ocupa un char, por definición?',
         ],
-        right: ['1', 'Uno, siempre'],
+        right: ['1'],
+        wrong: ['2', '4', '8', '0'],
       },
       {
         ask: [
-          '¿Cuánto ocupa un puntero en una máquina de 64 bits?',
-          'En x86-64, `sizeof(int *)` es…',
+          '¿Cuántos bytes ocupa un puntero en una máquina de 64 bits?',
+          'En x86-64, ¿cuánto vale `sizeof(int *)`?',
         ],
-        right: ['8 bytes', '8'],
-        wrong: ['4', '4 bytes'],
+        right: ['8'],
+        wrong: ['4', '2', '16', '1'],
       },
     ],
-    wrong: ['2', 'Depende del tipo apuntado', '0', '16'],
-    why: 'sizeof(char) es 1 por definición; un puntero ocupa lo que una dirección (8 bytes en 64 bits).',
+    wrong: ['2', '4', '16', '0'],
+    why: 'sizeof(char) es 1 por definición; un puntero ocupa lo que una dirección (8 bytes en 64 bits), apunte a lo que apunte.',
   },
   {
     id: 'c-malloc-free',
@@ -77,23 +85,28 @@ export const C_BASICS: readonly Concept[] = [
       {
         ask: [
           '¿Qué hay que hacer con la memoria que devuelve `malloc` cuando ya no se usa?',
-          'Toda memoria reservada con malloc debe…',
+          'La memoria reservada con malloc, cuando ya no hace falta, hay que…',
         ],
         right: ['Liberarla con free', 'Pasársela a free, una sola vez'],
+        wrong: [
+          'Nada: se libera sola al salir de la función',
+          'Ponerla a NULL, que basta',
+          'Llamar a free dos veces, por seguridad',
+          'Liberarla con delete',
+        ],
       },
       {
         ask: [
           'Si reservas con `malloc` y nunca llamas a `free`, tienes…',
           '¿Cómo se llama la memoria reservada que ya no se puede liberar porque se perdió su puntero?',
         ],
-        right: ['Una fuga de memoria', 'Un memory leak'],
-        wrong: ['Un puntero colgante', 'Un doble free'],
+        right: ['Una fuga (memory leak)'],
+        wrong: ['Un puntero colgante', 'Un doble free', 'Un desbordamiento de pila'],
       },
     ],
     wrong: [
-      'Nada, se libera sola al salir de la función',
-      'Ponerla a NULL basta',
-      'Llamar a free dos veces por seguridad',
+      'Nada: se libera sola al salir de la función',
+      'Ponerla a NULL, que basta',
       'Liberarla con delete',
     ],
     why: 'C no tiene recolector de basura: lo que se pide con malloc se devuelve con free, una sola vez.',
@@ -108,17 +121,23 @@ export const C_BASICS: readonly Concept[] = [
       {
         ask: [
           '¿Qué devuelve `malloc` si no puede reservar la memoria?',
-          'Si falla una reserva, malloc da…',
+          'Si falla una reserva, malloc devuelve…',
         ],
         right: ['NULL', 'Un puntero nulo'],
+        wrong: [
+          '-1',
+          'Un puntero a la pila',
+          'Un puntero a memoria sin inicializar',
+          'Lo que había antes',
+        ],
       },
       {
-        ask: ['¿Qué hace `free(NULL)`?', 'Llamar a free con un puntero nulo…'],
-        right: ['Nada: es seguro', 'No hace nada'],
-        wrong: ['Un fallo de segmentación', 'Un doble free'],
+        ask: ['¿Qué hace `free(NULL)`?', '¿Qué pasa si llamas a free con un puntero nulo?'],
+        right: ['Nada: es seguro'],
+        wrong: ['Da un fallo de segmentación', 'Cuenta como un doble free', 'Aborta el programa'],
       },
     ],
-    wrong: ['-1', 'Aborta el programa', 'Un puntero a la pila', 'Un comportamiento indefinido'],
+    wrong: ['-1', 'Un puntero a la pila', 'Aborta el programa'],
     why: 'malloc devuelve NULL al fallar (hay que comprobarlo) y free(NULL) no hace nada, por definición.',
   },
   {
@@ -130,27 +149,28 @@ export const C_BASICS: readonly Concept[] = [
     code: 'int *f(void)\n{\n    int n = 42;\n    return &n;\n}',
     forms: [
       {
-        ask: ['¿Qué falla en esta función?', '¿Por qué está mal esto?'],
+        ask: ['¿Qué falla en este código?', '¿Por qué está mal esto?'],
         right: [
           'Devuelve la dirección de una variable local, que deja de existir al salir',
-          'El puntero que devuelve apunta a la pila de una función que ya terminó',
+          'El puntero devuelto apunta a la pila de una llamada que ya terminó',
+        ],
+        wrong: [
+          'Falta un cast a int*',
+          'n debería ser unsigned',
+          'No falla nada',
+          'Hay que hacer free(&n) antes de volver',
         ],
       },
       {
         ask: [
-          '¿Cómo se llama el puntero que devuelve?',
+          '¿Cómo se llama el puntero que devuelve f?',
           'Un puntero a memoria que ya no es válida se llama…',
         ],
-        right: ['Un puntero colgante (dangling pointer)', 'Dangling pointer'],
-        wrong: ['Un puntero nulo', 'Una fuga de memoria', 'Un puntero a función'],
+        right: ['Colgante (dangling pointer)'],
+        wrong: ['Nulo', 'Salvaje por no inicializar', 'Puntero a función'],
       },
     ],
-    wrong: [
-      'Falta un cast a int*',
-      'n debería ser unsigned',
-      'No falla nada',
-      'Hay que hacer free(&n)',
-    ],
+    wrong: ['Falta un cast a int*', 'n debería ser unsigned', 'No falla nada'],
     why: 'n vive en la pila de f; al volver, esa memoria se reutiliza y el puntero ya no vale.',
   },
   {
@@ -166,26 +186,31 @@ export const C_BASICS: readonly Concept[] = [
           '¿Por qué existe memmove si ya está memcpy?',
         ],
         right: [
-          'memmove funciona aunque origen y destino se solapen',
-          'memcpy no garantiza nada con zonas solapadas; memmove sí',
+          'memmove copia bien aunque origen y destino se solapen',
+          'Con zonas solapadas, solo memmove garantiza el resultado',
+        ],
+        wrong: [
+          'memmove es siempre más rápida',
+          'memmove borra el origen después de copiar',
+          'Son exactamente iguales',
+          'memmove solo copia cadenas',
         ],
       },
       {
         ask: [
-          'Si origen y destino se solapan, ¿cuál de las dos copia bien?',
+          'Si origen y destino se solapan, ¿qué función copia bien?',
           'Para mover bytes dentro de un mismo array con solapamiento, usas…',
         ],
         right: ['memmove'],
-        wrong: ['memcpy', 'strcpy', 'memset'],
+        wrong: ['memcpy', 'strcpy', 'memset', 'strlcpy'],
       },
     ],
     wrong: [
       'memmove es siempre más rápida',
-      'memmove borra el origen después de copiar',
       'Son exactamente iguales',
       'memmove solo copia cadenas',
     ],
-    why: 'Con solapamiento memcpy puede pisar lo que aún no ha copiado; memmove elige el sentido de la copia.',
+    why: 'Con solapamiento, memcpy puede pisar lo que aún no ha copiado; memmove elige el sentido de la copia.',
   },
   {
     id: 'c-pointer-arith',
@@ -195,14 +220,18 @@ export const C_BASICS: readonly Concept[] = [
     level: 2,
     code: 'int a[] = {10, 20, 30, 40};\nint *p = a;\np += 2;\nprintf("%d\\n", *p);',
     forms: [
-      { ask: ['¿Qué imprime este código?', '¿Cuál es la salida?'], right: ['30'] },
       {
-        ask: ['¿A qué apunta `p` al final?', 'Tras `p += 2`, p apunta a…'],
+        ask: ['¿Qué imprime este código?', '¿Cuál es la salida?'],
+        right: ['30'],
+        wrong: ['20', '12', '10', '40'],
+      },
+      {
+        ask: ['¿A qué apunta `p` al final?', 'Después de `p += 2`, ¿a qué apunta p?'],
         right: ['A a[2]', 'Al tercer elemento'],
-        wrong: ['A a[0] + 2 bytes', 'A a[1]'],
+        wrong: ['A 2 bytes después de a[0]', 'A a[1]', 'Al segundo elemento', 'Fuera del array'],
       },
     ],
-    wrong: ['20', '12', '10', '40', 'La dirección de a'],
+    wrong: ['20', '12', '10', '40'],
     why: 'Sumar 2 a un int* avanza dos enteros, no dos bytes: p apunta a a[2], que vale 30.',
   },
   {
@@ -219,17 +248,18 @@ export const C_BASICS: readonly Concept[] = [
           'Comportamiento indefinido: escribe en un literal (suele dar segmentation fault)',
           'Suele dar segfault: los literales no se pueden modificar',
         ],
+        wrong: ['Imprime Hola', 'Imprime hola', 'Imprime H', 'Tiene una fuga de memoria'],
       },
       {
         ask: [
           '¿Cómo hay que declarar `s` para poder cambiarle letras?',
-          '¿Qué cambio arregla este código?',
+          '¿Qué declaración arregla este código?',
         ],
-        right: ['char s[] = "hola";', 'Como array: char s[] = "hola"'],
-        wrong: ['const char *s = "hola";', "char *s = 'hola';"],
+        right: ['char s[] = "hola";'],
+        wrong: ['const char *s = "hola";', "char *s = 'hola';", 'static char *s = "hola";'],
       },
     ],
-    wrong: ['Imprime Hola', 'Imprime hola', 'No compila', 'Imprime H', 'Una fuga de memoria'],
+    wrong: ['Imprime Hola', 'Imprime hola', 'Imprime H'],
     why: 'Un literal vive en memoria de solo lectura; char s[] = "hola" hace una copia propia que sí se puede cambiar.',
   },
   {
@@ -251,7 +281,6 @@ export const C_BASICS: readonly Concept[] = [
       'malloc necesita un cast a char*',
       's debería ser char**',
       'No falla nada',
-      'Falta comprobar que s no es NULL, y nada más',
     ],
     why: "strlen no cuenta el '\\0', pero strcpy sí lo copia: escribe un byte fuera de lo reservado.",
   },
@@ -265,11 +294,17 @@ export const C_BASICS: readonly Concept[] = [
       {
         ask: [
           '¿Qué tiene de especial una variable local declarada `static`?',
-          'Una variable static dentro de una función…',
+          '¿Qué cambia al poner static a una variable dentro de una función?',
         ],
         right: [
           'Conserva su valor entre llamadas',
-          'Vive todo el programa aunque solo se vea en la función',
+          'Dura todo el programa, aunque solo se vea dentro de la función',
+        ],
+        wrong: [
+          'Se reinicia en cada llamada',
+          'Se ve desde otros ficheros',
+          'Pasa a ser constante',
+          'Se guarda en la pila de quien llama',
         ],
       },
       {
@@ -277,17 +312,12 @@ export const C_BASICS: readonly Concept[] = [
           '¿Qué permite a get_next_line recordar lo que sobró de la lectura anterior?',
           'Para guardar lo leído de más entre dos llamadas a get_next_line se usa…',
         ],
-        right: ['Una variable static', 'Una variable local static'],
+        right: ['Una variable static'],
         wrong: ['Una variable local normal', 'Un parámetro más', 'Una variable global con extern'],
       },
     ],
-    wrong: [
-      'Se reinicia en cada llamada',
-      'Es visible desde otros ficheros',
-      'Se guarda en la pila',
-      'Es constante',
-    ],
-    why: 'static da a la variable duración de todo el programa (se inicializa una vez) sin cambiar dónde se ve.',
+    wrong: ['Se reinicia en cada llamada', 'Se ve desde otros ficheros', 'Pasa a ser constante'],
+    why: 'static da a la variable la duración de todo el programa (se inicializa una vez) sin cambiar dónde se ve.',
   },
   {
     id: 'c-read-return',
@@ -302,26 +332,30 @@ export const C_BASICS: readonly Concept[] = [
           'Cuando no queda nada que leer, read devuelve…',
         ],
         right: ['0'],
-        wrong: ['-1'],
+        wrong: ['-1', '1', '42'],
       },
       {
         ask: ['¿Qué devuelve `read` si hay un error?', 'Si read falla, devuelve…'],
         right: ['-1'],
-        wrong: ['0'],
+        wrong: ['0', '1', '42'],
       },
       {
         ask: [
           'Si `read(fd, buf, 42)` devuelve 10, ¿qué ha pasado?',
-          'read pidió 42 bytes y devolvió 10. Significa…',
+          'read pidió 42 bytes y devolvió 10. ¿Qué significa?',
         ],
         right: [
           'Que solo había 10 bytes disponibles (no es un error)',
-          'Ha leído 10 bytes, menos de lo pedido',
+          'Que ha leído 10 bytes, menos de lo pedido',
         ],
-        wrong: ['Un error', 'Que faltan 32 bytes por un fallo'],
+        wrong: [
+          'Que ha habido un error',
+          'Que faltan 32 bytes por un fallo de disco',
+          'Que el fichero tiene 52 bytes',
+        ],
       },
     ],
-    wrong: ['EOF, que es un carácter', "'\\0'", 'El número de bytes pedido', '42'],
+    wrong: ['1', '42', '2'],
     why: 'read devuelve los bytes leídos (pueden ser menos de los pedidos): 0 es fin de fichero y -1, error.',
   },
   {
@@ -337,22 +371,23 @@ export const C_BASICS: readonly Concept[] = [
           'Para escribir un error con `write`, ¿qué fd usas?',
         ],
         right: ['2'],
+        wrong: ['1', '0', '3'],
       },
       {
         ask: [
           '¿Qué descriptor es la entrada estándar (stdin)?',
-          'read(…, …) desde el teclado lee del fd…',
+          '¿De qué fd lee `read` cuando lee del teclado?',
         ],
         right: ['0'],
-        wrong: ['2'],
+        wrong: ['1', '2', '3'],
       },
       {
         ask: [
           '¿Qué número suele dar `open` al primer fichero que abre un programa?',
-          'El primer fd libre de un programa recién arrancado es…',
+          '¿Cuál es el primer fd libre de un programa recién arrancado?',
         ],
         right: ['3'],
-        wrong: ['0', '2'],
+        wrong: ['0', '2', '1'],
       },
     ],
     wrong: ['1', '-1', '4', '42'],
@@ -371,17 +406,18 @@ export const C_BASICS: readonly Concept[] = [
           'Para leer los argumentos de `printf(const char *fmt, ...)` se usa…',
         ],
         right: ['va_start, va_arg y va_end', 'Una va_list con va_arg'],
+        wrong: ['argc y argv', 'Un array de void*', 'malloc y free', 'getopt'],
       },
       {
         ask: [
           '¿Cómo sabe printf cuántos argumentos le han pasado?',
-          'Una función variádica conoce el número de argumentos…',
+          '¿De dónde saca una función variádica cuántos argumentos tiene?',
         ],
-        right: ['No lo sabe: lo deduce del formato', 'Por la cadena de formato'],
-        wrong: ['Con argc', 'Con sizeof(...)', 'va_arg devuelve NULL al acabar'],
+        right: ['No lo sabe: lo deduce del formato', 'De la cadena de formato'],
+        wrong: ['De argc', 'De sizeof(...)', 'Porque va_arg devuelve NULL al acabar'],
       },
     ],
-    wrong: ['argc y argv', 'Un array de void*', 'malloc y free', 'getopt'],
+    wrong: ['argc y argv', 'Un array de void*', 'getopt'],
     why: 'va_start empieza, va_arg da el siguiente con el tipo que digas y va_end termina; cuántos hay lo dice el formato.',
   },
   {
@@ -391,23 +427,27 @@ export const C_BASICS: readonly Concept[] = [
     kind: 'quick',
     level: 2,
     forms: [
-      { ask: ['¿Qué imprime `printf("%x", 255)`?', 'El formato %x con 255 da…'], right: ['ff'] },
       {
-        ask: ['¿Qué imprime `printf("%X", 255)`?', 'El formato %X con 255 da…'],
+        ask: ['¿Qué imprime `printf("%x", 255)`?', '¿Qué da el formato %x con 255?'],
+        right: ['ff'],
+        wrong: ['FF', 'f', 'fff', 'ef'],
+      },
+      {
+        ask: ['¿Qué imprime `printf("%X", 255)`?', '¿Qué da el formato %X con 255?'],
         right: ['FF'],
-        wrong: ['ff'],
+        wrong: ['ff', 'F', 'FFF', 'EF'],
       },
       {
         ask: [
           '¿Qué imprime `printf("%u", -1)` con int de 32 bits?',
-          '-1 escrito con %u (32 bits) sale como…',
+          '¿Cómo sale -1 escrito con %u (32 bits)?',
         ],
         right: ['4294967295'],
         wrong: ['-1', '1', '2147483647'],
       },
     ],
     wrong: ['0xff', '255', '377', '11111111'],
-    why: '%x/%X escriben en hexadecimal sin prefijo; %u lee los bits como sin signo: -1 son 32 unos.',
+    why: '%x y %X escriben en hexadecimal sin prefijo (en minúsculas y mayúsculas); %u lee los bits como sin signo: -1 son 32 unos.',
   },
   {
     id: 'c-char-promotion',
@@ -419,12 +459,12 @@ export const C_BASICS: readonly Concept[] = [
       {
         ask: [
           'En una función variádica, ¿con qué tipo se lee un char pasado como argumento?',
-          'Para `%c`, printf debe hacer va_arg(ap, …) con…',
+          'Para `%c`, ¿qué tipo hay que pasar a va_arg?',
         ],
-        right: ['int', 'Con int, porque se promociona'],
+        right: ['int'],
       },
     ],
-    wrong: ['char', 'unsigned char', 'char *', 'short', 'Tal cual, sin cambiar'],
+    wrong: ['char', 'unsigned char', 'char *', 'short'],
     why: 'En los argumentos variables, char y short se promocionan a int; leerlos como char es indefinido.',
   },
   {
@@ -442,7 +482,7 @@ export const C_BASICS: readonly Concept[] = [
         ],
         right: [
           'Cambia una copia del puntero: fuera, la cabeza no cambia',
-          'Hay que recibir t_list **lst para cambiar la cabeza',
+          'Tendría que recibir t_list **lst para cambiar la cabeza',
         ],
       },
     ],
@@ -451,7 +491,7 @@ export const C_BASICS: readonly Concept[] = [
       'Debería ser lst->next = new',
       'Hay que liberar lst',
       'Funciona bien',
-      'Falta un return',
+      'Le falta un return',
     ],
     why: 'En C los argumentos se pasan por valor: para cambiar la cabeza hay que pasar su dirección.',
   },
@@ -465,7 +505,7 @@ export const C_BASICS: readonly Concept[] = [
     forms: [
       {
         ask: ['¿Cuántas veces se ejecuta este bucle?', 'Quiere contar de 10 a 0. ¿Qué pasa?'],
-        right: ['Nunca termina: un size_t siempre es >= 0', 'Es un bucle infinito'],
+        right: ['Nunca termina: un size_t siempre es >= 0', 'Se repite sin fin'],
       },
     ],
     wrong: ['11 veces', '10 veces', 'Ninguna', 'Da error de compilación', 'Se para en -1'],
@@ -481,22 +521,23 @@ export const C_BASICS: readonly Concept[] = [
       {
         ask: [
           '¿Qué pasa en C si un int con signo pasa de INT_MAX?',
-          'Sumar 1 a INT_MAX en un int es…',
+          '¿Qué es sumar 1 a INT_MAX en un int?',
         ],
         right: ['Comportamiento indefinido', 'Indefinido: el estándar no dice qué pasa'],
+        wrong: [
+          'Da error de compilación',
+          'Se queda en el máximo',
+          'Lanza una excepción',
+          'Pasa a ser un long',
+        ],
       },
       {
-        ask: ['¿Y si un unsigned int pasa de su máximo?', 'Sumar 1 a UINT_MAX da…'],
-        right: ['0: da la vuelta de forma definida', 'Vuelve a 0'],
-        wrong: ['Comportamiento indefinido'],
+        ask: ['¿Y si un unsigned int pasa de su máximo?', '¿Qué da sumar 1 a UINT_MAX?'],
+        right: ['Vuelve a 0, de forma definida'],
+        wrong: ['Comportamiento indefinido', 'Se queda en el máximo', 'Da error de compilación'],
       },
     ],
-    wrong: [
-      'Da error de compilación',
-      'Se queda en el máximo',
-      'Lanza una excepción',
-      'Pasa a ser un long',
-    ],
+    wrong: ['Da error de compilación', 'Se queda en el máximo', 'Lanza una excepción'],
     why: 'Los unsigned dan la vuelta (aritmética módulo 2ⁿ); con signo, desbordar es indefinido.',
   },
   {
@@ -509,27 +550,36 @@ export const C_BASICS: readonly Concept[] = [
       {
         ask: [
           '¿Cómo sabe make que no hace falta volver a compilar?',
-          'make decide si rehacer un objetivo mirando…',
+          '¿En qué se fija make para decidir si rehace un objetivo?',
         ],
         right: [
-          'Las fechas de modificación del objetivo y sus dependencias',
-          'Si el objetivo es más nuevo que todo lo que necesita',
+          'En las fechas de modificación del objetivo y de sus dependencias',
+          'En si el objetivo es más nuevo que todo lo que necesita',
+        ],
+        wrong: [
+          'En un hash de cada fichero',
+          'En lo que recuerda en memoria entre ejecuciones',
+          'En nada: siempre recompila todo',
+          'En si existe la carpeta obj',
         ],
       },
       {
-        ask: ['¿Para qué sirve `.PHONY` en un Makefile?', 'Declarar `.PHONY: clean` sirve para…'],
+        ask: ['¿Para qué sirve `.PHONY` en un Makefile?', '¿Para qué se declara `.PHONY: clean`?'],
         right: [
-          'Que make ejecute la regla aunque exista un fichero con ese nombre',
-          'Decir que esa regla no crea un fichero',
+          'Para que make ejecute la regla aunque exista un fichero con ese nombre',
+          'Para decir que esa regla no crea ningún fichero',
         ],
-        wrong: ['Compilar en paralelo', 'Ocultar la regla de la ayuda'],
+        wrong: [
+          'Para compilar en paralelo',
+          'Para ocultar la regla de la ayuda',
+          'Para que la regla se ejecute la primera',
+        ],
       },
     ],
     wrong: [
-      'Un hash de cada fichero',
-      'Lo que recuerda en memoria entre ejecuciones',
-      'Siempre recompila todo',
-      'Si existe la carpeta obj',
+      'En un hash de cada fichero',
+      'En nada: siempre recompila todo',
+      'En si existe la carpeta obj',
     ],
     why: 'make rehace un objetivo si alguna dependencia es más reciente; .PHONY marca reglas que no son ficheros.',
   },

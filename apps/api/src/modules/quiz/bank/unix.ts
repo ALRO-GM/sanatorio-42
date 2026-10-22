@@ -20,27 +20,28 @@ export const UNIX: readonly Concept[] = [
     level: 1,
     forms: [
       {
-        ask: ['¿Para qué sirve `sudo`?', '`sudo orden` ejecuta la orden…'],
+        ask: ['¿Para qué sirve `sudo`?', '¿Qué hace `sudo orden`?'],
         right: [
-          'Para ejecutar una orden con los permisos de otro usuario (normalmente root)',
-          'Como root, si tienes permiso',
+          'Ejecuta la orden con los permisos de otro usuario (normalmente root)',
+          'Ejecuta la orden como root, si tienes permiso',
+        ],
+        wrong: [
+          'Cambia de shell',
+          'Apaga la máquina',
+          'Lista los procesos',
+          'Instala paquetes, y nada más',
         ],
       },
       {
         ask: [
           '¿En qué fichero se configura quién puede usar sudo?',
-          'Las reglas de sudo se editan (con visudo) en…',
+          '¿Dónde están las reglas de sudo que se editan con visudo?',
         ],
-        right: ['/etc/sudoers', 'El fichero sudoers'],
+        right: ['/etc/sudoers'],
         wrong: ['/etc/passwd', '/etc/shadow', '~/.bashrc'],
       },
     ],
-    wrong: [
-      'Para cambiar de shell',
-      'Para apagar la máquina',
-      'Para ver los procesos',
-      'Para instalar paquetes, solo eso',
-    ],
+    wrong: ['Cambia de shell', 'Apaga la máquina', 'Lista los procesos'],
     why: 'sudo ejecuta como otro usuario según las reglas de /etc/sudoers, que se editan con visudo para no romperlo.',
   },
   {
@@ -51,19 +52,20 @@ export const UNIX: readonly Concept[] = [
     level: 2,
     forms: [
       {
-        ask: ['¿En qué puerto escucha SSH por defecto?', 'El puerto estándar de SSH es…'],
+        ask: ['¿En qué puerto escucha SSH por defecto?', '¿Cuál es el puerto estándar de SSH?'],
         right: ['22'],
+        wrong: ['21', '80', '443', '4242', '23'],
       },
       {
         ask: [
           '¿Qué fichero configura el servidor SSH?',
           'Para cambiar el puerto del servidor SSH se edita…',
         ],
-        right: ['/etc/ssh/sshd_config', 'sshd_config'],
+        right: ['/etc/ssh/sshd_config'],
         wrong: ['/etc/ssh/ssh_config', '~/.ssh/known_hosts', '/etc/hosts'],
       },
     ],
-    wrong: ['21', '80', '443', '4242', '23'],
+    wrong: ['21', '80', '443', '4242'],
     why: 'SSH usa el 22 por defecto; el servidor (sshd) se configura en sshd_config, y ssh_config es el del cliente.',
   },
   {
@@ -74,22 +76,23 @@ export const UNIX: readonly Concept[] = [
     level: 2,
     forms: [
       {
-        ask: ['¿Qué hace un cortafuegos como UFW?', 'UFW sirve para…'],
+        ask: ['¿Qué hace un cortafuegos como UFW?', '¿Para qué sirve UFW?'],
         right: [
-          'Decidir qué conexiones de red se permiten y cuáles no',
-          'Filtrar el tráfico de red por puertos y reglas',
+          'Decide qué conexiones de red se permiten y cuáles no',
+          'Filtra el tráfico de red por puertos y reglas',
         ],
+        wrong: ['Cifra el disco', 'Gestiona usuarios', 'Comprime ficheros', 'Acelera la red'],
       },
       {
         ask: [
           '¿Qué orden de UFW deja pasar conexiones al puerto 4242?',
           'Para abrir el puerto 4242 en UFW se usa…',
         ],
-        right: ['ufw allow 4242', 'sudo ufw allow 4242'],
+        right: ['ufw allow 4242'],
         wrong: ['ufw open 4242', 'ufw enable 4242', 'ufw deny 4242'],
       },
     ],
-    wrong: ['Cifrar el disco', 'Gestionar usuarios', 'Comprimir ficheros', 'Acelerar la red'],
+    wrong: ['Cifra el disco', 'Gestiona usuarios', 'Comprime ficheros'],
     why: 'Un cortafuegos filtra el tráfico según reglas; con UFW se abren puertos con `allow`.',
   },
   {
@@ -100,18 +103,21 @@ export const UNIX: readonly Concept[] = [
     level: 3,
     forms: [
       {
-        ask: ['¿Qué ventaja tiene LVM frente a particiones normales?', 'LVM permite…'],
+        ask: [
+          '¿Qué ventaja tiene LVM frente a las particiones normales?',
+          '¿Qué permite hacer LVM?',
+        ],
         right: [
-          'Crear y cambiar de tamaño volúmenes lógicos con flexibilidad',
-          'Agrupar discos y redimensionar volúmenes sin reparticionar',
+          'Crear volúmenes lógicos y cambiarlos de tamaño con flexibilidad',
+          'Juntar discos y redimensionar volúmenes sin reparticionar',
         ],
       },
     ],
     wrong: [
-      'Hace el disco más rápido',
-      'Cifra los datos',
-      'Sustituye al sistema de ficheros',
-      'Hace copias de seguridad solo',
+      'Hacer el disco más rápido',
+      'Cifrar los datos',
+      'Prescindir del sistema de ficheros',
+      'Hacer copias de seguridad automáticas',
     ],
     why: 'LVM pone una capa entre discos y volúmenes: se pueden juntar, ampliar o reducir sin tocar particiones.',
   },
@@ -125,21 +131,22 @@ export const UNIX: readonly Concept[] = [
       {
         ask: [
           '¿Dónde se guardan los hashes de las contraseñas en Linux?',
-          'Las contraseñas (cifradas) de los usuarios están en…',
+          '¿En qué fichero están las contraseñas (cifradas) de los usuarios?',
         ],
         right: ['/etc/shadow'],
+        wrong: ['/etc/passwd', '/etc/group', '/etc/sudoers', '/var/log/auth.log'],
       },
       {
         ask: [
           '¿Qué fichero lista los usuarios, su shell y su carpeta?',
-          'Cada usuario, con su uid y su shell, aparece en…',
+          '¿En qué fichero aparece cada usuario con su uid y su shell?',
         ],
         right: ['/etc/passwd'],
-        wrong: ['/etc/shadow'],
+        wrong: ['/etc/shadow', '/etc/group', '/etc/sudoers', '/etc/hosts'],
       },
     ],
-    wrong: ['/etc/group', '/etc/sudoers', '/home/.passwords', '/var/log/auth.log'],
-    why: '/etc/passwd lo lee cualquiera (usuarios); los hashes van aparte en /etc/shadow, que solo lee root.',
+    wrong: ['/etc/group', '/etc/sudoers', '/var/log/auth.log'],
+    why: '/etc/passwd lo lee cualquiera (usuarios); los hashes van aparte, en /etc/shadow, que solo lee root.',
   },
   {
     id: 'proc-fork',
@@ -151,14 +158,15 @@ export const UNIX: readonly Concept[] = [
       {
         ask: ['¿Qué devuelve `fork()` en el proceso hijo?', 'En el hijo, fork devuelve…'],
         right: ['0'],
+        wrong: ['-1', '1', '2'],
       },
       {
         ask: ['¿Qué devuelve `fork()` en el proceso padre?', 'En el padre, fork devuelve…'],
-        right: ['El PID del hijo', 'El identificador del proceso hijo'],
-        wrong: ['0'],
+        right: ['El PID del hijo'],
+        wrong: ['El PID del padre', 'Siempre -1', 'Nada: no vuelve'],
       },
     ],
-    wrong: ['-1 siempre', 'El PID del padre', '1', 'Nada: no vuelve'],
+    wrong: ['El PID del padre', 'Siempre -1', 'Nada: no vuelve'],
     why: 'fork vuelve dos veces: 0 en el hijo y el PID del hijo en el padre (-1 si falla).',
   },
   {
@@ -171,14 +179,14 @@ export const UNIX: readonly Concept[] = [
     forms: [
       {
         ask: ['¿Cuántas veces se imprime «hola»?', '¿Cuántas líneas «hola» salen?'],
-        right: ['4', 'Cuatro'],
+        right: ['4'],
       },
       {
         ask: [
           '¿Cuántos procesos hay en total al llegar al printf?',
           'Contando el original, ¿cuántos procesos ejecutan el printf?',
         ],
-        right: ['4', 'Cuatro'],
+        right: ['4'],
       },
     ],
     wrong: ['2', '3', '1', '8'],
@@ -194,11 +202,16 @@ export const UNIX: readonly Concept[] = [
       {
         ask: [
           '¿Qué pasa con el código que va después de un `execve` que funciona?',
-          'Si execve tiene éxito…',
+          'Si execve tiene éxito, ¿qué pasa con las líneas que lo siguen?',
         ],
         right: [
-          'No se ejecuta nunca: el proceso pasa a ser el nuevo programa',
-          'El proceso se sustituye y no vuelve',
+          'No se ejecutan nunca: el proceso pasa a ser el nuevo programa',
+          'Nada: el proceso se sustituye y execve no vuelve',
+        ],
+        wrong: [
+          'Se ejecutan al terminar el nuevo programa',
+          'Se ejecutan en un hilo aparte',
+          'Se ejecutan en el padre',
         ],
       },
       {
@@ -207,13 +220,13 @@ export const UNIX: readonly Concept[] = [
           'Cuando execve no puede ejecutar el programa, devuelve…',
         ],
         right: ['-1'],
-        wrong: ['0', 'El PID del nuevo programa', '1'],
+        wrong: ['0', '1', '127'],
       },
     ],
     wrong: [
-      'Se ejecuta al terminar el nuevo programa',
-      'Se ejecuta en un hilo aparte',
-      'Se ejecuta en el padre',
+      'Se ejecutan al terminar el nuevo programa',
+      'Se ejecutan en un hilo aparte',
+      'Se ejecutan en el padre',
     ],
     why: 'execve reemplaza la imagen del proceso; solo vuelve (con -1) si no lo ha conseguido.',
   },
@@ -226,19 +239,23 @@ export const UNIX: readonly Concept[] = [
     forms: [
       {
         ask: [
-          'Tras `pipe(fd)`, ¿por qué extremo se escribe?',
-          'En un pipe, el extremo de escritura es…',
+          'Después de `pipe(fd)`, ¿por qué extremo se escribe?',
+          'En un pipe, ¿cuál es el extremo de escritura?',
         ],
         right: ['fd[1]'],
+        wrong: ['fd[0]', 'fd[2]', 'fd[-1]'],
       },
       {
-        ask: ['Tras `pipe(fd)`, ¿por qué extremo se lee?', 'En un pipe, el extremo de lectura es…'],
+        ask: [
+          'Después de `pipe(fd)`, ¿por qué extremo se lee?',
+          'En un pipe, ¿cuál es el extremo de lectura?',
+        ],
         right: ['fd[0]'],
-        wrong: ['fd[1]'],
+        wrong: ['fd[1]', 'fd[2]', 'fd[-1]'],
       },
     ],
-    wrong: ['fd[2]', 'Cualquiera de los dos', 'fd[-1]', 'El que devuelve pipe'],
-    why: 'pipe llena dos descriptores: fd[0] para leer y fd[1] para escribir (como stdin = 0 y stdout = 1).',
+    wrong: ['fd[2]', 'fd[-1]', 'fd[3]'],
+    why: 'pipe llena dos descriptores: fd[0] para leer y fd[1] para escribir (como stdin es 0 y stdout es 1).',
   },
   {
     id: 'proc-dup2',
@@ -248,11 +265,11 @@ export const UNIX: readonly Concept[] = [
     level: 3,
     forms: [
       {
-        ask: [
-          '¿Qué hace `dup2(fd, 1)`?',
-          'Tras `dup2(fd, STDOUT_FILENO)`, lo que se escriba en la salida estándar…',
+        ask: ['¿Qué hace `dup2(fd, 1)`?', '¿Para qué sirve `dup2(fd, STDOUT_FILENO)`?'],
+        right: [
+          'Hace que el descriptor 1 apunte a lo mismo que fd',
+          'Redirige la salida estándar a donde apunta fd',
         ],
-        right: ['Hace que el descriptor 1 apunte a lo mismo que fd', 'Va a donde apuntaba fd'],
       },
     ],
     wrong: [
@@ -276,7 +293,7 @@ export const UNIX: readonly Concept[] = [
         ask: ['Este «ls | wc» se queda colgado. ¿Por qué?', '¿Qué hace que wc no termine nunca?'],
         right: [
           'El padre no cierra fd[1]: wc nunca recibe el fin de fichero',
-          'Queda abierto un extremo de escritura (el del padre), así que wc espera para siempre',
+          'El padre deja abierto un extremo de escritura, así que wc espera para siempre',
         ],
       },
     ],
@@ -287,7 +304,7 @@ export const UNIX: readonly Concept[] = [
       'dup2 se usa al revés',
       'execve necesita la ruta relativa',
     ],
-    why: 'Un lector solo ve EOF cuando todos los extremos de escritura están cerrados, también el que heredó el padre.',
+    why: 'Un lector solo ve el fin de fichero cuando todos los extremos de escritura están cerrados, también el que heredó el padre.',
   },
   {
     id: 'proc-zombie',
@@ -297,26 +314,33 @@ export const UNIX: readonly Concept[] = [
     level: 3,
     forms: [
       {
-        ask: [
-          '¿Qué es un proceso zombi?',
-          'Un hijo que ha terminado y del que el padre aún no ha hecho wait es…',
+        ask: ['¿Qué es un proceso zombi?', '¿Cuándo se dice que un proceso es zombi?'],
+        right: [
+          'Ha terminado, pero su padre aún no ha recogido su estado',
+          'Está muerto y espera a que su padre haga wait',
         ],
-        right: ['Uno que ha terminado pero cuyo padre aún no ha recogido su estado', 'Un zombi'],
+        wrong: [
+          'No responde a señales',
+          'Se ha quedado sin padre',
+          'Usa demasiada memoria',
+          'Está parado con SIGSTOP',
+        ],
+      },
+      {
+        ask: ['Un hijo que ha terminado y por el que el padre aún no ha hecho wait se llama…'],
+        right: ['Zombi'],
+        wrong: ['Huérfano', 'Demonio', 'Colgado'],
       },
       {
         ask: [
           '¿Cómo se evita dejar zombis?',
-          'Para que un hijo terminado no quede como zombi, el padre debe…',
+          'Para que un hijo terminado no se quede como zombi, el padre debe…',
         ],
-        right: ['Hacer wait o waitpid por él', 'Recoger su estado con waitpid'],
+        right: ['Hacer wait o waitpid por él'],
         wrong: ['Matarlo con kill', 'Hacer otro fork', 'Esperar con sleep a que desaparezca'],
       },
     ],
-    wrong: [
-      'Un proceso que no responde a señales',
-      'Un proceso sin padre',
-      'Uno que usa demasiada memoria',
-    ],
+    wrong: ['No responde a señales', 'Se ha quedado sin padre', 'Usa demasiada memoria'],
     why: 'Al terminar, un hijo queda en la tabla de procesos hasta que el padre recoge su estado con wait.',
   },
   {
@@ -329,20 +353,21 @@ export const UNIX: readonly Concept[] = [
       {
         ask: [
           '¿Qué dos señales se suelen usar en minitalk para mandar bits?',
-          'Las señales de usuario libres para lo que quieras son…',
+          '¿Qué señales quedan libres para lo que quiera cada programa?',
         ],
         right: ['SIGUSR1 y SIGUSR2'],
+        wrong: ['SIGINT y SIGQUIT', 'SIGKILL y SIGSTOP', 'SIGSEGV y SIGBUS', 'SIGALRM y SIGCHLD'],
       },
       {
         ask: [
           '¿Con qué función se manda una señal a otro proceso?',
-          'Para enviar SIGUSR1 al PID 1234 se usa…',
+          'Para enviar SIGUSR1 a otro proceso por su PID se usa…',
         ],
-        right: ['kill', 'kill(1234, SIGUSR1)'],
-        wrong: ['signal', 'raise', 'send'],
+        right: ['kill'],
+        wrong: ['signal', 'raise', 'send', 'sigaction'],
       },
     ],
-    wrong: ['SIGINT y SIGQUIT', 'SIGKILL y SIGSTOP', 'SIGSEGV y SIGBUS', 'SIGALRM y SIGCHLD'],
+    wrong: ['SIGINT y SIGQUIT', 'SIGKILL y SIGSTOP', 'SIGSEGV y SIGBUS'],
     why: 'SIGUSR1 y SIGUSR2 no tienen significado fijo; kill no solo mata: manda cualquier señal.',
   },
   {
@@ -359,19 +384,20 @@ export const UNIX: readonly Concept[] = [
         ],
         right: [
           'Comportamiento definido y más control (máscara, flags, quién la mandó)',
-          'Saber el PID de quien manda la señal con SA_SIGINFO, entre otras cosas',
+          'Que con SA_SIGINFO se sabe el PID de quien manda la señal, entre otras cosas',
         ],
+        wrong: ['Que es más rápida', 'Que funciona en Windows', 'Que manda la señal dos veces'],
       },
       {
         ask: [
           '¿Qué dos señales no se pueden capturar ni ignorar?',
-          'No hay manejador posible para…',
+          '¿Para qué señales no hay manejador posible?',
         ],
         right: ['SIGKILL y SIGSTOP'],
         wrong: ['SIGUSR1 y SIGUSR2', 'SIGINT y SIGQUIT', 'SIGTERM y SIGHUP'],
       },
     ],
-    wrong: ['Es más rápido', 'Funciona en Windows', 'Manda la señal dos veces'],
+    wrong: ['Que es más rápida', 'Que funciona en Windows', 'Que manda la señal dos veces'],
     why: 'signal varía entre sistemas; sigaction fija el comportamiento y da información; SIGKILL y SIGSTOP no se capturan nunca.',
   },
   {
@@ -386,15 +412,16 @@ export const UNIX: readonly Concept[] = [
           'Mandando un bit por señal, ¿cuántas señales hacen falta para enviar «Hi»?',
           'Si cada señal es un bit, ¿cuántas señales cuesta mandar 2 caracteres ASCII?',
         ],
-        right: ['16', 'Dieciséis'],
+        right: ['16'],
+        wrong: ['2', '8', '32', '14'],
       },
       {
         ask: [
           '¿Cuántas señales hacen falta para mandar un carácter, a bit por señal?',
-          'Un char, bit a bit, son…',
+          'Bit a bit, ¿cuántas señales es un char?',
         ],
-        right: ['8', 'Ocho'],
-        wrong: ['16'],
+        right: ['8'],
+        wrong: ['16', '1', '4', '7'],
       },
     ],
     wrong: ['2', '4', '32', '7'],
@@ -408,17 +435,18 @@ export const UNIX: readonly Concept[] = [
     level: 2,
     forms: [
       {
-        ask: ["¿Qué imprime `echo '$HOME'`?", 'Entre comillas simples, `$HOME`…'],
-        right: ['$HOME, tal cual', 'El texto $HOME sin expandir'],
+        ask: ["¿Qué imprime `echo '$HOME'`?", '¿Qué pasa con `$HOME` entre comillas simples?'],
+        right: ['$HOME, tal cual, sin expandir'],
+        wrong: ['La ruta de tu carpeta personal', 'Un error de sintaxis', 'Nada', 'HOME'],
       },
       {
-        ask: ['¿Qué imprime `echo "$HOME"`?', 'Entre comillas dobles, `$HOME`…'],
-        right: ['La ruta de tu carpeta personal', 'Se expande a su valor'],
-        wrong: ['$HOME, tal cual'],
+        ask: ['¿Qué imprime `echo "$HOME"`?', '¿Qué pasa con `$HOME` entre comillas dobles?'],
+        right: ['Se expande: sale la ruta de tu carpeta personal'],
+        wrong: ['$HOME, tal cual, sin expandir', 'Un error de sintaxis', 'Nada', 'HOME'],
       },
     ],
     wrong: ['Un error de sintaxis', 'Nada', 'HOME'],
-    why: 'Las simples lo dejan todo literal; las dobles dejan expandir variables.',
+    why: 'Las comillas simples lo dejan todo literal; las dobles dejan expandir variables.',
   },
   {
     id: 'sh-heredoc',
@@ -428,10 +456,10 @@ export const UNIX: readonly Concept[] = [
     level: 3,
     forms: [
       {
-        ask: ['¿Qué hace `cat << FIN`?', 'Un heredoc (`<<`) sirve para…'],
+        ask: ['¿Qué hace `cat << FIN`?', '¿Para qué sirve un heredoc (`<< FIN`)?'],
         right: [
-          'Lee líneas de la entrada hasta una que diga FIN y se las pasa a cat',
-          'Pasar a la orden un texto escrito hasta el delimitador',
+          'Lee líneas hasta una que diga FIN y se las da a cat como entrada',
+          'Pasa a la orden, como entrada, el texto escrito hasta el delimitador',
         ],
       },
     ],
@@ -439,7 +467,7 @@ export const UNIX: readonly Concept[] = [
       'Añade FIN al final de un fichero',
       'Redirige la salida a un fichero llamado FIN',
       'Lee el fichero FIN',
-      'Compara cat con FIN',
+      'Compara la salida de cat con FIN',
     ],
     why: 'El heredoc recoge líneas hasta el delimitador y las da como entrada estándar de la orden.',
   },
@@ -453,21 +481,22 @@ export const UNIX: readonly Concept[] = [
       {
         ask: [
           '¿Qué código de salida da bash si la orden no existe?',
-          '`orden_que_no_existe; echo $?` imprime…',
+          '¿Qué imprime `orden_que_no_existe; echo $?`?',
         ],
         right: ['127'],
+        wrong: ['1', '0', '126', '255'],
       },
       {
         ask: [
           '¿Qué código de salida da una orden interrumpida con Ctrl-C?',
-          'Tras matar una orden con SIGINT, `$?` vale…',
+          'Después de cortar una orden con SIGINT, ¿cuánto vale `$?`?',
         ],
-        right: ['130', '128 + 2'],
-        wrong: ['127'],
+        right: ['130'],
+        wrong: ['127', '2', '1', '255'],
       },
     ],
     wrong: ['1', '0', '-1', '255', '2'],
-    why: '127 es «no encontrada»; terminar por la señal N da 128 + N (SIGINT es 2: 130).',
+    why: '127 es «orden no encontrada»; terminar por la señal N da 128 + N (SIGINT es la 2: 130).',
   },
   {
     id: 'sh-builtin-cd',
@@ -479,7 +508,7 @@ export const UNIX: readonly Concept[] = [
       {
         ask: [
           '¿Por qué `cd` tiene que ser un builtin de la shell?',
-          'cd no puede ser un programa aparte porque…',
+          '¿Por qué cd no puede ser un programa aparte?',
         ],
         right: [
           'Un proceso hijo no puede cambiar el directorio del padre',
@@ -508,16 +537,16 @@ export const UNIX: readonly Concept[] = [
           'Al escribir `ls`, ¿cómo encuentra la shell el programa?',
         ],
         right: [
-          'Busca el programa en las carpetas que lista PATH',
-          'Recorre las carpetas de PATH, en orden',
+          'Lo busca en las carpetas de esa lista, en orden',
+          'Prueba cada carpeta de la lista hasta dar con un ejecutable',
         ],
       },
     ],
     wrong: [
       'Lo busca en todo el disco',
-      'Solo mira la carpeta actual',
-      'Lo descarga',
-      'Mira en /etc/programs',
+      'Solo mira en la carpeta actual',
+      'Lo descarga de internet',
+      'Lo busca en /etc/programs',
     ],
     why: 'PATH es una lista de carpetas separadas por «:»; se prueba cada una hasta encontrar un ejecutable con ese nombre.',
   },

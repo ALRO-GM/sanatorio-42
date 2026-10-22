@@ -8,6 +8,7 @@ import { useAction } from '../../shared/hooks/useAsync'
 import { localeOf, useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { GroupRooms } from './GroupRoom'
+import { CodeText } from '../../shared/ui/CodeText'
 
 type GateViewProps = {
   gate: Gate
@@ -146,7 +147,9 @@ function GateQuestions({
         {quiz.questions.map((question, index) => (
           <li key={index}>
             <fieldset>
-              <legend>{question.prompt}</legend>
+              <legend>
+                <CodeText text={question.prompt} />
+              </legend>
               {question.code !== null && <pre>{question.code}</pre>}
               {question.options.map((option, value) => (
                 <label key={value} className="git-gate-option">
@@ -158,7 +161,7 @@ function GateQuestions({
                       onChoose(index, value)
                     }}
                   />
-                  {option}
+                  <CodeText text={option} />
                 </label>
               ))}
             </fieldset>
@@ -191,9 +194,9 @@ function GateResult({ result }: { result: GitGateResult }) {
 
           return (
             <li key={index} className={ok ? 'right' : 'wrong'}>
-              <strong>{ok ? '✓' : '✗'}</strong> {item.prompt}
+              <strong>{ok ? '✓' : '✗'}</strong> <CodeText text={item.prompt} />
               <div className="muted">
-                {item.options[item.answer]} — {item.why}
+                <CodeText text={item.options[item.answer] ?? ''} /> — <CodeText text={item.why} />
               </div>
             </li>
           )

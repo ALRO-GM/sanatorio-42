@@ -8,7 +8,7 @@ Generado desde `apps/web/src/shared/i18n/textos/pizarras.csv` con
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
 | `cal.title` | Título de la página de pizarras (charlas abiertas sobre un tema) | features/boards/BoardsCalendar | Calendario de pizarras | Whiteboard calendar | Calendari de pissarres | Arbelen egutegia |
-| `cal.loading` | Mientras carga el calendario de pizarras | features/boards/BoardsCalendar | Mirando la agenda... | Checking the schedule... | Mirant l'agenda... | Agenda begiratzen... |
+| `cal.loading` | Mientras carga el calendario de pizarras | features/boards/BoardsCalendar | Mirando la agenda… | Checking the schedule... | Mirant l'agenda... | Agenda begiratzen... |
 | `cal.months` | Nombres de los meses, separados por comas | features/boards/BoardsCalendar | Enero,Febrero,Marzo,Abril,Mayo,Junio,Julio,Agosto,Septiembre,Octubre,Noviembre,Diciembre | January,February,March,April,May,June,July,August,September,October,November,December | Gener,Febrer,Març,Abril,Maig,Juny,Juliol,Agost,Setembre,Octubre,Novembre,Desembre | Urtarrila,Otsaila,Martxoa,Apirila,Maiatza,Ekaina,Uztaila,Abuztua,Iraila,Urria,Azaroa,Abendua |
 | `cal.monthsShort` | Meses abreviados en mayúsculas, separados por comas | features/boards/BoardCard | ENE,FEB,MAR,ABR,MAY,JUN,JUL,AGO,SEP,OCT,NOV,DIC | JAN,FEB,MAR,APR,MAY,JUN,JUL,AUG,SEP,OCT,NOV,DEC | GEN,FEB,MAR,ABR,MAI,JUN,JUL,AGO,SET,OCT,NOV,DES | URT,OTS,MAR,API,MAI,EKA,UZT,ABU,IRA,URR,AZA,ABE |
 | `cal.weekdaysShort` | Días abreviados en mayúsculas, de lunes a domingo, separados por comas | features/boards/BoardCard | LUN,MAR,MIÉ,JUE,VIE,SÁB,DOM | MON,TUE,WED,THU,FRI,SAT,SUN | DL,DT,DC,DJ,DV,DS,DG | AL,AR,AZ,OG,OR,LR,IG |

@@ -20,22 +20,23 @@ export const ALGORITHMS: readonly Concept[] = [
     forms: [
       {
         ask: [
-          '¿Cuántas comparaciones hace, como mínimo, cualquier ordenación por comparación en el peor caso?',
-          'Ordenar comparando no puede bajar de…',
+          'En el peor caso, ¿cuántas comparaciones hace como mínimo cualquier ordenación por comparación?',
+          '¿De qué coste no puede bajar, en el peor caso, ordenar comparando?',
         ],
-        right: ['Del orden de n·log n', 'O(n log n)'],
+        right: ['O(n log n)'],
+        wrong: ['O(n)', 'O(1)', 'O(log n)', 'O(n²)'],
       },
       {
         ask: [
           '¿Qué coste tiene la ordenación por burbuja en el peor caso?',
-          'Bubble sort, en el peor caso, es…',
+          'Bubble sort, en el peor caso, cuesta…',
         ],
-        right: ['O(n²)', 'Cuadrático'],
-        wrong: ['O(n log n)', 'O(n)', 'O(log n)'],
+        right: ['O(n²)'],
+        wrong: ['O(n log n)', 'O(n)', 'O(log n)', 'O(n³)'],
       },
     ],
     wrong: ['O(n)', 'O(1)', 'O(log n)', 'O(n³)', 'O(2ⁿ)'],
-    why: 'Comparando, hay n! órdenes posibles y cada comparación parte en dos: hacen falta unas log₂(n!) ≈ n·log n.',
+    why: 'Comparando, hay n! órdenes posibles y cada comparación parte en dos: hacen falta unas log₂(n!) ≈ n log n.',
   },
   {
     id: 'algo-stack',
@@ -45,16 +46,32 @@ export const ALGORITHMS: readonly Concept[] = [
     level: 1,
     forms: [
       {
-        ask: ['En una pila, ¿qué elemento sale primero?', 'Una pila (stack) es…'],
-        right: ['El último que entró', 'LIFO: último en entrar, primero en salir'],
+        ask: [
+          'En una pila, ¿qué elemento sale primero?',
+          '¿Cuál se saca antes de una pila (stack)?',
+        ],
+        right: ['El último que entró'],
+        wrong: ['El primero que entró', 'El más pequeño', 'El del medio'],
       },
       {
-        ask: ['En una cola, ¿qué elemento sale primero?', 'Una cola (queue) es…'],
-        right: ['El primero que entró', 'FIFO: primero en entrar, primero en salir'],
-        wrong: ['El último que entró', 'LIFO: último en entrar, primero en salir'],
+        ask: [
+          'En una cola, ¿qué elemento sale primero?',
+          '¿Cuál se saca antes de una cola (queue)?',
+        ],
+        right: ['El primero que entró'],
+        wrong: ['El último que entró', 'El más pequeño', 'El del medio'],
+      },
+      {
+        ask: ['¿Qué orden sigue una pila?', '¿Qué política de acceso tiene una pila?'],
+        right: ['LIFO: último en entrar, primero en salir'],
+        wrong: [
+          'FIFO: primero en entrar, primero en salir',
+          'Por prioridad: sale el mayor',
+          'Al azar: sale uno cualquiera',
+        ],
       },
     ],
-    wrong: ['El más pequeño', 'Uno al azar', 'El del medio', 'El más grande'],
+    wrong: ['El más pequeño', 'El del medio', 'El más grande'],
     why: 'La pila saca por donde mete (LIFO); la cola mete por un lado y saca por el otro (FIFO).',
   },
   {
@@ -66,21 +83,22 @@ export const ALGORITHMS: readonly Concept[] = [
     forms: [
       {
         ask: [
-          'La pila a es 1 2 3 4 5 (el 1 arriba). ¿Cómo queda tras `ra`?',
-          'Con a = 1 2 3 4 5 (cima a la izquierda), rotar una vez hacia arriba da…',
+          'La pila a es 1 2 3 4 5 (el 1 arriba). ¿Cómo queda después de `ra`?',
+          'Con a = 1 2 3 4 5 (la cima a la izquierda), ¿qué da rotar una vez hacia arriba?',
         ],
         right: ['2 3 4 5 1'],
+        wrong: ['5 1 2 3 4', '5 4 3 2 1', '2 1 3 4 5', '1 5 2 3 4'],
       },
       {
         ask: [
-          'La pila a es 1 2 3 4 5 (el 1 arriba). ¿Cómo queda tras `rra`?',
-          'Con a = 1 2 3 4 5 (cima a la izquierda), rotar una vez hacia abajo da…',
+          'La pila a es 1 2 3 4 5 (el 1 arriba). ¿Cómo queda después de `rra`?',
+          'Con a = 1 2 3 4 5 (la cima a la izquierda), ¿qué da rotar una vez hacia abajo?',
         ],
         right: ['5 1 2 3 4'],
-        wrong: ['2 3 4 5 1'],
+        wrong: ['2 3 4 5 1', '5 4 3 2 1', '2 1 3 4 5', '1 5 2 3 4'],
       },
     ],
-    wrong: ['5 4 3 2 1', '2 1 3 4 5', '1 2 3 4 5', '1 5 2 3 4'],
+    wrong: ['5 4 3 2 1', '2 1 3 4 5', '1 5 2 3 4'],
     why: 'ra sube todos y el de arriba pasa al fondo; rra hace lo contrario: el del fondo pasa arriba.',
   },
   {
@@ -93,9 +111,9 @@ export const ALGORITHMS: readonly Concept[] = [
       {
         ask: [
           '¿Cuántas operaciones necesita, como mucho, ordenar 3 números en push_swap?',
-          'Ordenar una pila de 3 elementos cuesta, en el peor caso…',
+          'En el peor caso, ¿cuántas operaciones cuesta ordenar una pila de 3 elementos?',
         ],
-        right: ['2', 'Dos'],
+        right: ['2'],
       },
     ],
     wrong: ['1', '3', '4', '6'],
@@ -109,18 +127,18 @@ export const ALGORITHMS: readonly Concept[] = [
     level: 3,
     forms: [
       {
-        ask: ['¿Qué hace la ordenación radix?', 'Radix sort ordena…'],
+        ask: ['¿Cómo ordena la ordenación radix?', '¿Qué hace radix sort para ordenar?'],
         right: [
           'Por dígitos (o bits), de uno en uno, sin comparar elementos entre sí',
-          'Agrupando por cada bit o cifra, empezando por el menos significativo',
+          'Agrupa por cada bit o cifra, empezando por el menos significativo',
         ],
       },
     ],
     wrong: [
-      'Comparando cada par de elementos',
-      'Eligiendo un pivote y partiendo en dos',
-      'Insertando cada elemento en su sitio',
-      'Al azar hasta que sale ordenado',
+      'Compara cada par de elementos',
+      'Elige un pivote y parte en dos',
+      'Inserta cada elemento en su sitio',
+      'Prueba al azar hasta que sale ordenado',
     ],
     why: 'Radix reparte por cada cifra o bit; con índices normalizados y bits, encaja bien con dos pilas.',
   },
@@ -132,28 +150,36 @@ export const ALGORITHMS: readonly Concept[] = [
     level: 3,
     forms: [
       {
-        ask: ['¿Cuándo hace quicksort su peor caso, O(n²)?', 'Quicksort se vuelve cuadrático si…'],
+        ask: [
+          '¿Cuándo cae quicksort en su peor caso, O(n²)?',
+          '¿Qué hace que quicksort se vuelva cuadrático?',
+        ],
         right: [
-          'El pivote es siempre el mínimo o el máximo',
-          'Las particiones salen muy descompensadas',
+          'Que el pivote sea siempre el mínimo o el máximo',
+          'Que las particiones salgan muy descompensadas',
+        ],
+        wrong: [
+          'Que haya números repetidos',
+          'Que la lista sea muy corta',
+          'Que haya números negativos',
+          'Nada: siempre es n log n',
         ],
       },
       {
         ask: [
-          '¿Qué ordenación divide la lista en mitades, ordena cada una y las mezcla?',
-          'Partir en dos, ordenar y fusionar es…',
+          '¿Qué ordenación parte la lista en dos, ordena cada mitad y las junta?',
+          '¿Cómo se llama ordenar partiendo en dos, ordenando cada mitad y fusionándolas?',
         ],
-        right: ['Merge sort', 'Ordenación por mezcla'],
-        wrong: ['Quicksort', 'Bubble sort', 'Insertion sort'],
+        right: ['Merge sort'],
+        wrong: ['Quicksort', 'Bubble sort', 'Insertion sort', 'Radix sort'],
       },
     ],
     wrong: [
-      'Si la lista tiene números repetidos, siempre',
-      'Si la lista es muy corta',
-      'Nunca: siempre es n·log n',
-      'Si hay negativos',
+      'Que haya números repetidos',
+      'Que la lista sea muy corta',
+      'Que haya números negativos',
     ],
-    why: 'Quicksort depende del pivote; merge sort parte siempre por la mitad y da n·log n siempre.',
+    why: 'Quicksort depende del pivote; merge sort parte siempre por la mitad y cuesta n log n siempre.',
   },
   {
     id: 'algo-binary-search',
@@ -165,25 +191,21 @@ export const ALGORITHMS: readonly Concept[] = [
       {
         ask: [
           '¿Qué necesita una búsqueda binaria para funcionar?',
-          'Para buscar partiendo por la mitad, los datos tienen que estar…',
+          '¿Cómo tienen que estar los datos para buscar partiendo por la mitad?',
         ],
-        right: ['Que los datos estén ordenados', 'Ordenados'],
+        right: ['Ordenados'],
+        wrong: ['Sin repetidos', 'En una lista enlazada', 'En un número par', 'En la pila'],
       },
       {
         ask: [
           '¿Cuántos pasos necesita, como mucho, una búsqueda binaria en 1000 elementos?',
-          'Buscando por la mitad entre 1000 elementos, se llega en…',
+          'Buscando por la mitad entre 1000 elementos, ¿en cuántos pasos se llega como mucho?',
         ],
-        right: ['Unos 10', '10'],
-        wrong: ['500', '1000', '100'],
+        right: ['10'],
+        wrong: ['500', '1000', '100', '32'],
       },
     ],
-    wrong: [
-      'Que no haya repetidos',
-      'Que sean números pares',
-      'Que estén en una lista enlazada',
-      'Nada en especial',
-    ],
+    wrong: ['Sin repetidos', 'En una lista enlazada', 'En un número par'],
     why: 'Partir por la mitad solo sirve si sabes hacia qué lado mirar: hace falta orden. 2¹⁰ = 1024.',
   },
   {
@@ -196,26 +218,22 @@ export const ALGORITHMS: readonly Concept[] = [
       {
         ask: [
           '¿Qué recorrido encuentra el camino más corto (en pasos) en un laberinto?',
-          'Para la salida en el menor número de pasos, se recorre…',
+          'Para llegar a la salida en el menor número de pasos, ¿cómo se recorre?',
         ],
-        right: ['En anchura (BFS)', 'BFS, con una cola'],
+        right: ['En anchura (BFS)'],
+        wrong: ['En profundidad (DFS)', 'Al azar', 'Siguiendo la pared derecha'],
       },
       {
         ask: [
           '¿Qué estructura usa un recorrido en profundidad (DFS) sin recursión?',
-          'DFS, hecho a mano, guarda los pendientes en…',
+          'Un DFS hecho a mano, ¿dónde guarda los pendientes?',
         ],
-        right: ['Una pila', 'Una pila (LIFO)'],
-        wrong: ['Una cola', 'Un montículo', 'Una tabla hash'],
+        right: ['En una pila'],
+        wrong: ['En una cola', 'En un montículo', 'En una tabla hash'],
       },
     ],
-    wrong: [
-      'En profundidad (DFS)',
-      'Al azar',
-      'Siguiendo la pared derecha',
-      'Probando todos los caminos',
-    ],
-    why: 'BFS avanza por capas (cola): el primero en llegar llega por el camino más corto. DFS va al fondo (pila).',
+    wrong: ['En profundidad (DFS)', 'Al azar', 'Siguiendo la pared derecha'],
+    why: 'BFS avanza por capas (con una cola): el primero en llegar llega por el camino más corto. DFS va al fondo (con una pila).',
   },
   {
     id: 'algo-dijkstra',
@@ -225,23 +243,27 @@ export const ALGORITHMS: readonly Concept[] = [
     level: 3,
     forms: [
       {
-        ask: ['¿Para qué sirve el algoritmo de Dijkstra?', 'Dijkstra encuentra…'],
+        ask: ['¿Para qué sirve el algoritmo de Dijkstra?', '¿Qué encuentra Dijkstra?'],
         right: [
           'El camino más corto con pesos no negativos',
           'La distancia mínima desde un origen a los demás nodos, con pesos',
         ],
+        wrong: [
+          'El árbol de expansión mínima',
+          'Un ciclo que pase por todos los nodos',
+          'El orden topológico',
+        ],
       },
       {
-        ask: ['¿Qué no admite Dijkstra?', 'Dijkstra puede fallar si hay…'],
-        right: ['Aristas de peso negativo', 'Pesos negativos'],
-        wrong: ['Ciclos', 'Más de 100 nodos', 'Pesos decimales'],
+        ask: ['¿Qué no admite Dijkstra?', '¿Con qué puede fallar Dijkstra?'],
+        right: ['Con aristas de peso negativo'],
+        wrong: ['Con ciclos', 'Con más de 100 nodos', 'Con pesos decimales'],
       },
     ],
     wrong: [
       'El árbol de expansión mínima',
-      'Un ciclo que pase por todos',
+      'Un ciclo que pase por todos los nodos',
       'El orden topológico',
-      'Si hay ciclos',
     ],
     why: 'Dijkstra da por cerrado el nodo más cercano; un peso negativo podría acortar luego algo ya cerrado.',
   },
@@ -254,26 +276,27 @@ export const ALGORITHMS: readonly Concept[] = [
     forms: [
       {
         ask: [
-          '¿Qué es un laberinto «perfecto»?',
-          'En un laberinto perfecto, entre dos casillas hay…',
+          '¿Qué tiene de especial un laberinto «perfecto»?',
+          'En un laberinto perfecto, ¿cuántos caminos hay entre dos casillas?',
         ],
-        right: ['Uno con un único camino entre cada par de casillas', 'Exactamente un camino'],
+        right: ['Exactamente un camino entre cada par de casillas'],
+        wrong: [
+          'Que no tiene salida',
+          'Que es simétrico',
+          'Que hay varios caminos a la salida',
+          'Que no tiene callejones',
+        ],
       },
       {
         ask: [
-          'Visto como grafo, un laberinto perfecto es…',
+          'Visto como grafo, ¿qué es un laberinto perfecto?',
           '¿Qué estructura forman las casillas y los pasos de un laberinto perfecto?',
         ],
-        right: ['Un árbol', 'Un árbol de expansión de la cuadrícula'],
+        right: ['Un árbol'],
         wrong: ['Un grafo completo', 'Un ciclo', 'Una lista'],
       },
     ],
-    wrong: [
-      'Uno sin salida',
-      'Uno simétrico',
-      'Uno con varios caminos a la salida',
-      'Uno sin callejones',
-    ],
+    wrong: ['Un grafo completo', 'Un ciclo', 'Una lista'],
     why: 'Sin ciclos y todo conectado: eso es un árbol, y por eso hay un camino único entre dos puntos.',
   },
   {
@@ -285,8 +308,8 @@ export const ALGORITHMS: readonly Concept[] = [
     forms: [
       {
         ask: [
-          'Generas un laberinto con DFS: desde una casilla, vas a una vecina sin visitar al azar tirando la pared, y retrocedes al no tener. ¿Qué sale?',
-          'El «recursive backtracker» (DFS con paredes) genera…',
+          'Generas un laberinto con DFS: desde una casilla vas a una vecina sin visitar al azar, tiras la pared y, si no te queda ninguna, retrocedes. ¿Qué sale?',
+          '¿Qué genera el «recursive backtracker» (DFS tirando paredes)?',
         ],
         right: [
           'Un laberinto perfecto, con pasillos largos',
@@ -298,7 +321,7 @@ export const ALGORITHMS: readonly Concept[] = [
       'Un laberinto con muchos ciclos',
       'Un laberinto sin solución',
       'Solo una línea recta',
-      'Depende: a veces quedan casillas sueltas',
+      'Un laberinto con casillas sueltas',
     ],
     why: 'Nunca entra en una casilla ya visitada (no hay ciclos) y no para hasta visitarlas todas (todo conectado).',
   },
@@ -312,19 +335,30 @@ export const ALGORITHMS: readonly Concept[] = [
       {
         ask: [
           '¿Qué es una condición de carrera (data race)?',
-          'Dos hilos tocan la misma variable a la vez y al menos uno escribe: eso es…',
+          '¿Cuándo hay una condición de carrera?',
         ],
         right: [
-          'Dos hilos acceden a la vez a un dato y al menos uno escribe, sin sincronizar',
-          'Una condición de carrera',
+          'Cuando dos hilos acceden a la vez a un dato, al menos uno escribe y nada lo sincroniza',
         ],
+        wrong: [
+          'Cuando un hilo acaba antes que otro',
+          'Cuando un hilo usa mucha CPU',
+          'Cuando dos hilos se esperan entre sí para siempre',
+          'Cuando el programa va más rápido con hilos',
+        ],
+      },
+      {
+        ask: [
+          'Dos hilos tocan la misma variable a la vez, al menos uno escribe y no hay mutex. ¿Cómo se llama eso?',
+        ],
+        right: ['Condición de carrera'],
+        wrong: ['Interbloqueo', 'Inanición', 'Cambio de contexto'],
       },
     ],
     wrong: [
-      'Un hilo que acaba antes que otro',
-      'Un bloqueo mutuo',
-      'Un hilo que usa mucha CPU',
-      'Que el programa vaya más rápido con hilos',
+      'Cuando un hilo acaba antes que otro',
+      'Cuando un hilo usa mucha CPU',
+      'Cuando el programa va más rápido con hilos',
     ],
     why: 'Sin mutex (u otra sincronización), el resultado depende de cómo se intercalen los hilos.',
   },
@@ -337,14 +371,14 @@ export const ALGORITHMS: readonly Concept[] = [
     code: 'int count = 0;\n\nvoid *add(void *arg)\n{\n    for (int i = 0; i < 100000; i++)\n        count++;\n    return NULL;\n}\n\n/* main lanza dos hilos con add y espera a los dos */',
     forms: [
       {
-        ask: ['¿Qué vale `count` al final?', 'Tras los dos hilos, ¿cuánto suma count?'],
+        ask: ['¿Qué vale `count` al final?', 'Cuando acaban los dos hilos, ¿cuánto vale count?'],
         right: [
           'Puede ser menos de 200000: count++ no es atómico',
-          'No se sabe; normalmente menos de 200000',
+          'No se sabe; normalmente, menos de 200000',
         ],
       },
     ],
-    wrong: ['Siempre 200000', 'Siempre 100000', 'El programa no compila', 'Siempre 0'],
+    wrong: ['Siempre 200000', 'Siempre 100000', 'No compila', 'Siempre 0'],
     why: 'count++ es leer, sumar y escribir: dos hilos pueden leer el mismo valor y una suma se pierde.',
   },
   {
@@ -355,30 +389,37 @@ export const ALGORITHMS: readonly Concept[] = [
     level: 3,
     forms: [
       {
-        ask: [
-          '¿Qué es un interbloqueo (deadlock)?',
-          'Cada hilo espera algo que tiene otro, y nadie lo suelta: eso es…',
+        ask: ['¿Qué es un interbloqueo (deadlock)?', '¿Cuándo hay un interbloqueo?'],
+        right: ['Cuando varios hilos se esperan entre sí y ninguno puede avanzar'],
+        wrong: [
+          'Cuando un hilo va muy lento',
+          'Cuando dos hilos escriben a la vez',
+          'Cuando un hilo termina antes de tiempo',
         ],
-        right: ['Hilos que se esperan entre sí para siempre', 'Un interbloqueo'],
+      },
+      {
+        ask: ['Cada hilo espera algo que tiene otro, y nadie lo suelta. ¿Cómo se llama eso?'],
+        right: ['Interbloqueo'],
+        wrong: ['Condición de carrera', 'Inanición', 'Fuga de memoria'],
       },
       {
         ask: [
           'Todos los filósofos cogen primero el tenedor de su izquierda. ¿Qué puede pasar?',
-          'Si cada filósofo coge su tenedor izquierdo y espera el derecho…',
+          'Si cada filósofo coge su tenedor izquierdo y espera el derecho, ¿qué puede pasar?',
         ],
         right: [
           'Que se queden todos esperando para siempre',
-          'Un interbloqueo: nadie suelta ni consigue el segundo',
+          'Que nadie consiga el segundo tenedor ni suelte el primero',
         ],
         wrong: ['Que coman dos veces seguidas', 'Que coman todos a la vez', 'Nada: es lo correcto'],
       },
     ],
     wrong: [
-      'Un hilo que va muy lento',
-      'Dos hilos escribiendo a la vez',
-      'Un hilo que termina antes de tiempo',
+      'Cuando un hilo va muy lento',
+      'Cuando dos hilos escriben a la vez',
+      'Cuando un hilo termina antes de tiempo',
     ],
-    why: 'Con espera circular nadie avanza. Romper el ciclo (p. ej. que los pares cojan primero el otro tenedor) lo evita.',
+    why: 'Con espera circular nadie avanza. Romper el ciclo (por ejemplo, que los pares cojan primero el otro tenedor) lo evita.',
   },
   {
     id: 'thr-mutex',
@@ -388,26 +429,31 @@ export const ALGORITHMS: readonly Concept[] = [
     level: 2,
     forms: [
       {
-        ask: ['¿Para qué sirve un mutex?', 'Un mutex garantiza que…'],
+        ask: ['¿Para qué sirve un mutex?', '¿Qué garantiza un mutex?'],
         right: [
-          'Para que solo un hilo a la vez entre en una sección',
-          'Solo un hilo a la vez tenga el candado',
+          'Que solo un hilo a la vez entre en una sección',
+          'Que solo un hilo a la vez tenga el candado',
+        ],
+        wrong: [
+          'Que los hilos vayan más rápido',
+          'Que los hilos se lancen en orden',
+          'Que se pueda compartir memoria entre procesos',
+          'Que el tiempo se mida bien',
         ],
       },
       {
         ask: [
           '¿Qué pasa si un hilo hace `pthread_mutex_lock` dos veces seguidas del mismo mutex normal?',
-          'Bloquear dos veces el mismo mutex (no recursivo) desde el mismo hilo…',
+          '¿Qué pasa si un hilo bloquea dos veces el mismo mutex (no recursivo)?',
         ],
-        right: ['Se queda bloqueado para siempre', 'Se bloquea a sí mismo'],
-        wrong: ['Nada: el segundo se ignora', 'Lo desbloquea', 'Devuelve un error y sigue siempre'],
+        right: ['Se queda bloqueado para siempre, esperándose a sí mismo'],
+        wrong: ['Nada: el segundo se ignora', 'Se desbloquea', 'Da un error y sigue'],
       },
     ],
     wrong: [
-      'Para lanzar hilos',
-      'Para que los hilos vayan más rápido',
-      'Para medir el tiempo',
-      'Para compartir memoria entre procesos',
+      'Que los hilos vayan más rápido',
+      'Que los hilos se lancen en orden',
+      'Que el tiempo se mida bien',
     ],
     why: 'lock espera a que el candado esté libre; si ya lo tienes tú, esperas a ti mismo.',
   },
@@ -419,24 +465,25 @@ export const ALGORITHMS: readonly Concept[] = [
     level: 2,
     forms: [
       {
-        ask: ['¿Qué hace `pthread_join`?', 'pthread_join(th, NULL) sirve para…'],
-        right: ['Esperar a que ese hilo termine', 'Esperar al hilo y recoger lo que devuelve'],
+        ask: ['¿Qué hace `pthread_join`?', '¿Para qué sirve `pthread_join(th, NULL)`?'],
+        right: ['Espera a que ese hilo termine', 'Espera al hilo y recoge lo que devuelve'],
+        wrong: [
+          'Lanza un hilo nuevo',
+          'Junta dos hilos en uno',
+          'Bloquea un mutex',
+          'Duerme el hilo',
+        ],
       },
       {
-        ask: ['¿Qué hace `pthread_detach`?', 'Un hilo «detached»…'],
+        ask: ['¿Qué hace `pthread_detach`?', '¿Qué cambia al hacer detach de un hilo?'],
         right: [
-          'Libera sus recursos solo al terminar; nadie lo espera',
-          'No se puede esperar con join',
+          'Que libera sus recursos solo al terminar, sin que nadie lo espere',
+          'Que ya no se puede esperar con join',
         ],
-        wrong: ['Esperar a que ese hilo termine', 'Lo mata', 'Lo pausa'],
+        wrong: ['Que se espera a que termine', 'Que se mata el hilo', 'Que se pausa el hilo'],
       },
     ],
-    wrong: [
-      'Lanzar un hilo nuevo',
-      'Juntar dos hilos en uno',
-      'Bloquear un mutex',
-      'Dormir el hilo',
-    ],
+    wrong: ['Lanza un hilo nuevo', 'Junta dos hilos en uno', 'Bloquea un mutex'],
     why: 'Todo hilo se recoge con join o se suelta con detach; si no, se quedan sus recursos.',
   },
   {
@@ -448,22 +495,22 @@ export const ALGORITHMS: readonly Concept[] = [
     forms: [
       {
         ask: [
-          'Un filósofo muere si pasan 410 ms sin comer, y tu hilo de vigilancia hace `usleep(500000)` entre comprobaciones. ¿Qué falla?',
-          '¿Por qué un vigilante que duerme medio segundo entre comprobaciones no sirve?',
+          'Un filósofo muere si pasan 410 ms sin comer, y tu hilo vigilante hace `usleep(500000)` entre comprobaciones. ¿Qué falla?',
+          '¿Por qué no sirve un vigilante que duerme medio segundo entre comprobaciones?',
         ],
         right: [
-          'La muerte se anuncia tarde: hay que comprobar cada pocos milisegundos',
-          'Avisa con hasta medio segundo de retraso, y se pide anunciarla en 10 ms',
+          'Anuncia la muerte tarde: hay que comprobar cada pocos milisegundos',
+          'Puede avisar hasta 500 ms tarde, y se pide anunciarla en 10 ms',
         ],
       },
     ],
     wrong: [
       'Nada: usleep es exacto',
       'El filósofo muere antes de tiempo',
-      'usleep no existe en hilos',
+      'usleep no funciona en hilos',
       'Bloquea a todos los filósofos',
     ],
-    why: 'La muerte tiene que anunciarse casi al momento; además usleep puede dormir más de lo pedido.',
+    why: 'La muerte tiene que anunciarse casi al momento; además, usleep puede dormir más de lo pedido.',
   },
   {
     id: 'thr-print',
@@ -474,21 +521,21 @@ export const ALGORITHMS: readonly Concept[] = [
     forms: [
       {
         ask: [
-          '¿Por qué se protege con un mutex el printf de los mensajes?',
-          'Sin mutex para escribir, los mensajes de varios hilos pueden…',
+          '¿Qué se evita protegiendo con un mutex el printf de los mensajes?',
+          'Sin mutex para escribir, ¿qué puede pasar con los mensajes de varios hilos?',
         ],
         right: [
-          'Para que no se mezclen ni salgan después de anunciar una muerte',
-          'Mezclarse o salir tras el mensaje de muerte',
+          'Que se mezclen o salgan después de anunciar una muerte',
+          'Que se corten unos a otros o salgan tras el «died»',
         ],
       },
     ],
     wrong: [
-      'Porque printf no funciona en hilos',
-      'Para que vaya más rápido',
-      'Porque lo pide el compilador',
-      'Para no gastar memoria',
+      'Que printf deje de funcionar',
+      'Que el programa vaya más lento',
+      'Que el compilador dé un aviso',
+      'Que se gaste más memoria',
     ],
-    why: 'Un mensaje tras «died» es un fallo; el mismo mutex también impide líneas mezcladas.',
+    why: 'Un mensaje después de «died» es un fallo; el mismo mutex también impide líneas mezcladas.',
   },
 ]

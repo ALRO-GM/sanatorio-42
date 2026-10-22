@@ -378,7 +378,7 @@ export const WORLD_5: Level[] = [
     world: 5,
     kind: 'step',
     title: 'GitHub flow',
-    goal: 'main está protegida: trae lo último, saca la rama api desde main, dos commits y súbela para el pull request.',
+    goal: 'main está protegida: trae lo último, saca la rama api desde main, haz dos commits y súbela para el pull request.',
     theory: {
       what: 'GitHub flow: main siempre funciona; cada cambio va en una rama corta que se sube, se revisa en un pull request y se une.',
       how: ['git pull', 'git switch -c api', 'git commit -m "..."', 'git push origin api'],
@@ -500,7 +500,7 @@ export const WORLD_5: Level[] = [
     world: 5,
     kind: 'world',
     title: 'Flujos: trunk-based',
-    goal: 'Trabajo en el tronco: una rama corta mini con un commit, ponla al día con lo de origin, únela en main en línea, súbela y borra mini.',
+    goal: 'Trabajo en el tronco: crea una rama corta, mini, con un commit; ponla al día con lo de origin, únela en main en línea, súbela y borra mini.',
     theory: {
       what: 'Trunk-based: todo el mundo une en main varias veces al día, con ramas de horas. Pide tests automáticos que lo protejan.',
       how: [

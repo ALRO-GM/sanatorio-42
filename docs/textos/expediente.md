@@ -14,7 +14,7 @@ Generado desde `apps/web/src/shared/i18n/textos/expediente.csv` con
 | `react.patient` | Reacción tras una ayuda: tuvo mucha paciencia | features/help/BookingCard, features/profile/Achievements | Muy paciente | Very patient | Molt pacient | Oso pazientea |
 | `react.cancel` | Botón para no valorar todavía | features/help/BookHelp, features/help/BookingCard, features/profile/Achievements | Ahora no | Not now | Ara no | Orain ez |
 | `xp.title` | Título de la página de tu perfil | features/profile/Expediente | Tu expediente | Your record | El teu expedient | Zure espedientea |
-| `xp.loading` | Mientras carga tu perfil | features/profile/Expediente, features/profile/PublicRecord | Buscando tu expediente... | Fetching your record... | Buscant el teu expedient... | Zure espedientea bilatzen... |
+| `xp.loading` | Mientras carga tu perfil | features/profile/Expediente, features/profile/PublicRecord | Buscando tu expediente… | Fetching your record... | Buscant el teu expedient... | Zure espedientea bilatzen... |
 | `xp.level` | Etiqueta del nivel de XP | features/profile/Expediente, features/profile/PublicRecord, features/profile/RecordTour | Nivel | Level | Nivell | Maila |
 | `xp.howTo` | Botón que despliega cómo se gana la XP y cuánta llevas | features/profile/Expediente | Cómo se gana XP y cuánta llevas | How XP is earned and how much you have | Com es guanya XP i quanta en portes | Nola irabazten den XP eta zenbat daramazun |
 | `xp.gotXp` | XP ganada con una actividad | features/profile/Expediente | {xp} XP | {xp} XP | {xp} XP | {xp} XP |

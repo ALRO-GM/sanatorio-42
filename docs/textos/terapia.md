@@ -9,7 +9,7 @@ Generado desde `apps/web/src/shared/i18n/textos/terapia.csv` con
 | --- | --- | --- | --- | --- | --- | --- |
 | `therapy.title` | Título de la página de grupos de terapia (quedar para sacar un proyecto juntos) | features/therapy/TherapyGroups | Terapia de grupo | Group therapy | Teràpia de grup | Talde-terapia |
 | `therapy.allProjects` | Filtro: todos los proyectos | features/therapy/TherapyGroups | Todos los proyectos | All projects | Tots els projectes | Proiektu guztiak |
-| `therapy.loading` | Mientras cargan los grupos | features/therapy/TherapyGroups | Buscando grupos... | Looking for groups... | Buscant grups... | Taldeak bilatzen... |
+| `therapy.loading` | Mientras cargan los grupos | features/therapy/TherapyGroups | Buscando grupos… | Looking for groups... | Buscant grups... | Taldeak bilatzen... |
 | `therapy.empty` | No hay grupos abiertos | features/therapy/TherapyGroups | Todavía no hay ningún grupo abierto aquí. ¿Abres tú el primero? | No open groups here yet. Want to open the first one? | Encara no hi ha cap grup obert aquí. Obres tu el primer? | Oraindik ez dago talde irekirik hemen. Zuk irekiko duzu lehena? |
 | `therapy.open` | Grupo con plazas libres: ocupadas y totales | features/therapy/GroupCard, features/therapy/TherapyTour | Grupo abierto · {taken} de {capacity} plazas | Open group · {taken} of {capacity} seats | Grup obert · {taken} de {capacity} places | Talde irekia · {capacity} plazatik {taken} |
 | `therapy.full` | Grupo lleno | features/therapy/GroupCard | Completo · {capacity} plazas | Full · {capacity} seats | Complet · {capacity} places | Beteta · {capacity} plaza |

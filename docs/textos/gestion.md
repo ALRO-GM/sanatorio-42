@@ -160,26 +160,26 @@ Generado desde `apps/web/src/shared/i18n/textos/gestion.csv` con
 | `admin.messages.hint` | Panel de gestión, «Mensajes»: revisar chats denunciados | features/admin/AdminPage | Los últimos mensajes de los chats de eventos, para revisar una denuncia. El número (#) es el que aparece en ella. | The latest messages from event chats, to review a report. The number (#) is the one shown in it. | — | — |
 | `admin.messages.filter` | Panel de gestión, «Mensajes»: revisar chats denunciados | features/admin/AdminPage | Filtrar por login, evento o texto | Filter by login, event or text | — | — |
 | `admin.messages.empty` | Panel de gestión, «Mensajes»: revisar chats denunciados | features/admin/AdminPage | No hay mensajes. | No messages. | — | — |
-| `admin.tab.stats` | Panel de gestión: pestaña del panel | features/admin/AdminPage | Estadísticas | — | — | — |
-| `admin.stats.title` | Panel de gestión, «Estadísticas»: tiempo y uso por persona | features/admin/StatsPanel | Estadísticas de uso | — | — | — |
-| `admin.stats.of` | Panel de gestión, «Estadísticas»: tiempo y uso por persona | features/admin/StatsPanel | Estadísticas de {login} | — | — | — |
-| `admin.stats.range` | Panel de gestión, «Estadísticas»: tiempo y uso por persona | features/admin/RangePills | Periodo | — | — | — |
-| `admin.stats.days` | Panel de gestión, «Estadísticas»: tiempo y uso por persona | features/admin/RangePills | {n} d | — | — | — |
-| `admin.stats.everyone` | Panel de gestión, «Estadísticas»: tiempo y uso por persona | features/admin/ClickerPanel, features/admin/StatsPanel | ← Todo el mundo | — | — | — |
-| `admin.stats.seen` | Panel de gestión, «Estadísticas»: tiempo y uso por persona | features/admin/ClickerPanel, features/admin/StatsPanel | Viéndola | — | — | — |
-| `admin.stats.back` | Panel de gestión, «Estadísticas»: tiempo y uso por persona | features/admin/ClickerPanel, features/admin/StatsPanel | En segundo plano | — | — | — |
-| `admin.stats.hidden` | Panel de gestión, «Estadísticas»: tiempo y uso por persona | features/admin/ClickerPanel, features/admin/StatsPanel | Oculta | — | — | — |
-| `admin.stats.clicks` | Panel de gestión, «Estadísticas»: tiempo y uso por persona | features/admin/StatsPanel | Pulsaciones | — | — | — |
-| `admin.stats.traffic` | Panel de gestión, «Estadísticas»: tiempo y uso por persona | features/admin/StatsPanel | Peticiones · tamaño | — | — | — |
-| `admin.stats.requests` | Panel de gestión, «Estadísticas»: tiempo y uso por persona | features/admin/StatsPanel | Peticiones | — | — | — |
-| `admin.stats.size` | Panel de gestión, «Estadísticas»: tiempo y uso por persona | features/admin/StatsPanel | Tamaño | — | — | — |
-| `admin.stats.people` | Panel de gestión, «Estadísticas»: tiempo y uso por persona | features/admin/FlowsPanel, features/admin/StatsPanel | Personas | — | — | — |
-| `admin.stats.person` | Panel de gestión, «Estadísticas»: tiempo y uso por persona | features/admin/CheatsPanel, features/admin/ClickerPanel, features/admin/StatsPanel | Persona | — | — | — |
-| `admin.stats.element` | Panel de gestión, «Estadísticas»: tiempo y uso por persona | features/admin/StatsPanel | Sección o bloque | — | — | — |
-| `admin.stats.byHour` | Panel de gestión, «Estadísticas»: tiempo y uso por persona | features/admin/StatsPanel | Tiempo por hora del día | — | — | — |
-| `admin.stats.byKey` | Panel de gestión, «Estadísticas»: tiempo y uso por persona | features/admin/StatsPanel | Tiempo y pulsaciones por elemento | — | — | — |
-| `admin.stats.byUser` | Panel de gestión, «Estadísticas»: tiempo y uso por persona | features/admin/StatsPanel | Por persona | — | — | — |
-| `admin.stats.empty` | Panel de gestión, «Estadísticas»: tiempo y uso por persona | features/admin/StatsPanel | Todavía no hay datos de este periodo. | — | — | — |
+| `admin.tab.stats` | Panel de gestión: pestaña del panel | features/admin/AdminPage | Estadísticas | Statistics | — | — |
+| `admin.stats.title` | Panel de gestión, «Estadísticas»: tiempo y uso por persona | features/admin/StatsPanel | Estadísticas de uso | Usage statistics | — | — |
+| `admin.stats.of` | Panel de gestión, «Estadísticas»: tiempo y uso por persona | features/admin/StatsPanel | Estadísticas de {login} | Statistics for {login} | — | — |
+| `admin.stats.range` | Panel de gestión, «Estadísticas»: tiempo y uso por persona | features/admin/RangePills | Periodo | Period | — | — |
+| `admin.stats.days` | Panel de gestión, «Estadísticas»: tiempo y uso por persona | features/admin/RangePills | {n} d | {n} d | — | — |
+| `admin.stats.everyone` | Panel de gestión, «Estadísticas»: tiempo y uso por persona | features/admin/ClickerPanel, features/admin/StatsPanel | ← Todo el mundo | ← Everyone | — | — |
+| `admin.stats.seen` | Panel de gestión, «Estadísticas»: tiempo y uso por persona | features/admin/ClickerPanel, features/admin/StatsPanel | Viéndola | Looking at it | — | — |
+| `admin.stats.back` | Panel de gestión, «Estadísticas»: tiempo y uso por persona | features/admin/ClickerPanel, features/admin/StatsPanel | En segundo plano | In the background | — | — |
+| `admin.stats.hidden` | Panel de gestión, «Estadísticas»: tiempo y uso por persona | features/admin/ClickerPanel, features/admin/StatsPanel | Oculta | Hidden | — | — |
+| `admin.stats.clicks` | Panel de gestión, «Estadísticas»: tiempo y uso por persona | features/admin/StatsPanel | Pulsaciones | Clicks | — | — |
+| `admin.stats.traffic` | Panel de gestión, «Estadísticas»: tiempo y uso por persona | features/admin/StatsPanel | Peticiones · tamaño | Requests · size | — | — |
+| `admin.stats.requests` | Panel de gestión, «Estadísticas»: tiempo y uso por persona | features/admin/StatsPanel | Peticiones | Requests | — | — |
+| `admin.stats.size` | Panel de gestión, «Estadísticas»: tiempo y uso por persona | features/admin/StatsPanel | Tamaño | Size | — | — |
+| `admin.stats.people` | Panel de gestión, «Estadísticas»: tiempo y uso por persona | features/admin/FlowsPanel, features/admin/StatsPanel | Personas | People | — | — |
+| `admin.stats.person` | Panel de gestión, «Estadísticas»: tiempo y uso por persona | features/admin/CheatsPanel, features/admin/ClickerPanel, features/admin/StatsPanel | Persona | Person | — | — |
+| `admin.stats.element` | Panel de gestión, «Estadísticas»: tiempo y uso por persona | features/admin/StatsPanel | Sección o bloque | Section or block | — | — |
+| `admin.stats.byHour` | Panel de gestión, «Estadísticas»: tiempo y uso por persona | features/admin/StatsPanel | Tiempo por hora del día | Time by hour of day | — | — |
+| `admin.stats.byKey` | Panel de gestión, «Estadísticas»: tiempo y uso por persona | features/admin/StatsPanel | Tiempo y pulsaciones por elemento | Time and clicks by element | — | — |
+| `admin.stats.byUser` | Panel de gestión, «Estadísticas»: tiempo y uso por persona | features/admin/StatsPanel | Por persona | By person | — | — |
+| `admin.stats.empty` | Panel de gestión, «Estadísticas»: tiempo y uso por persona | features/admin/StatsPanel | Todavía no hay datos de este periodo. | No data for this period yet. | — | — |
 | `admin.tab.data` | Panel de gestión: pestaña del panel | features/admin/AdminPage | Limpiar datos | Clean up data | — | — |
 | `admin.data.title` | Panel de gestión, «Limpiar datos» | features/admin/DataPanel | Limpiar datos | Clean up data | — | — |
 | `admin.data.about` | Panel de gestión, «Limpiar datos» | features/admin/DataPanel | La web no borra nada por viejo. Aquí eliges qué quitar, de quién y de cuándo. Lo borrado no se puede recuperar. | The site deletes nothing for being old. Here you choose what to remove, whose and from when. Deleted data cannot be recovered. | — | — |
@@ -341,7 +341,7 @@ Generado desde `apps/web/src/shared/i18n/textos/gestion.csv` con
 | `admin.clicker.verdict.cheat` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/ClickerPanel | Ha hecho trampas | Cheated | — | — |
 | `admin.clicker.verdict.likely` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/ClickerPanel | Alta probabilidad | Very likely | — | — |
 | `admin.clicker.verdict.clean` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/ClickerPanel | No es trampa | Not cheating | — | — |
-| `admin.clicker.cheatAsk` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/ClickerPanel | Se le requisan todos los edificios a la bolsa común y se le avisa de qué no cuadró. ¿Seguro? | All their buildings will be seized into the common pool and they will be told what did not add up. Sure? | — | — |
+| `admin.clicker.cheatAsk` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/ClickerPanel | Se le venden todos los edificios, lo requisado se reparte entre quienes juegan limpio y se le avisa de qué no cuadró. ¿Seguro? | All their buildings are sold, the seized amount is shared among clean players and they are told what did not add up. Sure? | — | — |
 | `admin.clicker.asked` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/ClickerPanel | Le hemos pedido que se defienda: esperando su respuesta. | Asked to explain: waiting for an answer. | — | — |
 | `admin.clicker.answered` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/ClickerPanel | Su respuesta: «{answer}» | Their answer: “{answer}” | — | — |
 | `admin.clicker.why.review` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/CheatsPanel, features/admin/ClickerPanel | Revisada a mano: trampa | Reviewed by hand: cheating | — | — |
@@ -352,24 +352,24 @@ Generado desde `apps/web/src/shared/i18n/textos/gestion.csv` con
 | `admin.clicker.pardon` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/CheatsPanel, features/admin/ClickerPanel | Indultar | Pardon | — | — |
 | `admin.clicker.pardonAsk` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/CheatsPanel, features/admin/ClickerPanel | Esta partida pasará a ser la que está en curso, se descontará una trampa y su banner volverá a como estaba. ¿Indultar? | This game will become the current one, one cheat will be taken off and the banner will go back to how it was. Pardon? | — | — |
 | `admin.clicker.empty` | Panel de gestión, «Code Clicker»: uso, trampas y sanciones | features/admin/ClickerPanel | Nadie ha encontrado todavía el secreto. | Nobody has found the secret yet. | — | — |
-| `admin.tab.casts` | Panel de gestión: pestaña del panel | features/admin/AdminPage | Comunicados | — | — | — |
-| `admin.cast.new` | Panel de gestión, «Comunicados»: mensajes a toda la gente | features/admin/BroadcastsTab | Nuevo comunicado | — | — | — |
-| `admin.cast.to` | Panel de gestión, «Comunicados»: mensajes a toda la gente | features/admin/BroadcastsTab | Para | — | — | — |
-| `admin.cast.to.all` | Panel de gestión, «Comunicados»: mensajes a toda la gente | features/admin/BroadcastsTab | Todo el mundo | — | — | — |
-| `admin.cast.to.campus` | Panel de gestión, «Comunicados»: mensajes a toda la gente | features/admin/BroadcastsTab | El campus que estoy viendo | — | — | — |
-| `admin.cast.to.logins` | Panel de gestión, «Comunicados»: mensajes a toda la gente | features/admin/BroadcastsTab | Personas concretas | — | — | — |
-| `admin.cast.logins` | Panel de gestión, «Comunicados»: mensajes a toda la gente | features/admin/BroadcastsTab | Logins, separados por comas o espacios | — | — | — |
-| `admin.cast.title` | Panel de gestión, «Comunicados»: mensajes a toda la gente | features/admin/BroadcastsTab, features/admin/CheatsPanel | Título | — | — | — |
-| `admin.cast.body` | Panel de gestión, «Comunicados»: mensajes a toda la gente | features/admin/BroadcastsTab, features/admin/CheatsPanel | Mensaje | — | — | — |
-| `admin.cast.options` | Panel de gestión, «Comunicados»: mensajes a toda la gente | features/admin/BroadcastsTab | Opciones para elegir, una por línea (hasta 6; vacío si no hacen falta) | — | — | — |
-| `admin.cast.required` | Panel de gestión, «Comunicados»: mensajes a toda la gente | features/admin/BroadcastsTab | No se puede cerrar la ventana sin elegir una opción | — | — | — |
-| `admin.cast.send` | Panel de gestión, «Comunicados»: mensajes a toda la gente | features/admin/BroadcastsTab, features/admin/CheatsPanel | Enviar | — | — | — |
-| `admin.cast.none` | Panel de gestión, «Comunicados»: mensajes a toda la gente | features/admin/BroadcastsTab | Todavía no se ha mandado ningún comunicado. | — | — | — |
-| `admin.cast.seen` | Panel de gestión, «Comunicados»: mensajes a toda la gente | features/admin/BroadcastsTab | Visto sin elegir | — | — | — |
-| `admin.cast.who` | Panel de gestión, «Comunicados»: mensajes a toda la gente | features/admin/BroadcastsTab | Quién ha contestado ({n}) | — | — | — |
-| `admin.cast.remove` | Panel de gestión, «Comunicados»: mensajes a toda la gente | features/admin/BroadcastsTab | Retirar | — | — | — |
-| `admin.cast.wasRequired` | Panel de gestión, «Comunicados»: mensajes a toda la gente | features/admin/BroadcastsTab | había que elegir | — | — | — |
-| `admin.cast.wasOptional` | Panel de gestión, «Comunicados»: mensajes a toda la gente | features/admin/BroadcastsTab | se podía cerrar sin elegir | — | — | — |
+| `admin.tab.casts` | Panel de gestión: pestaña del panel | features/admin/AdminPage | Comunicados | Announcements | — | — |
+| `admin.cast.new` | Panel de gestión, «Comunicados»: mensajes a toda la gente | features/admin/BroadcastsTab | Nuevo comunicado | New announcement | — | — |
+| `admin.cast.to` | Panel de gestión, «Comunicados»: mensajes a toda la gente | features/admin/BroadcastsTab | Para | To | — | — |
+| `admin.cast.to.all` | Panel de gestión, «Comunicados»: mensajes a toda la gente | features/admin/BroadcastsTab | Todo el mundo | Everyone | — | — |
+| `admin.cast.to.campus` | Panel de gestión, «Comunicados»: mensajes a toda la gente | features/admin/BroadcastsTab | El campus que estoy viendo | The campus I am looking at | — | — |
+| `admin.cast.to.logins` | Panel de gestión, «Comunicados»: mensajes a toda la gente | features/admin/BroadcastsTab | Personas concretas | Specific people | — | — |
+| `admin.cast.logins` | Panel de gestión, «Comunicados»: mensajes a toda la gente | features/admin/BroadcastsTab | Logins, separados por comas o espacios | Logins, separated by commas or spaces | — | — |
+| `admin.cast.title` | Panel de gestión, «Comunicados»: mensajes a toda la gente | features/admin/BroadcastsTab, features/admin/CheatsPanel | Título | Title | — | — |
+| `admin.cast.body` | Panel de gestión, «Comunicados»: mensajes a toda la gente | features/admin/BroadcastsTab, features/admin/CheatsPanel | Mensaje | Message | — | — |
+| `admin.cast.options` | Panel de gestión, «Comunicados»: mensajes a toda la gente | features/admin/BroadcastsTab | Opciones para elegir, una por línea (hasta 6; vacío si no hacen falta) | Options to choose from, one per line (up to 6; empty if not needed) | — | — |
+| `admin.cast.required` | Panel de gestión, «Comunicados»: mensajes a toda la gente | features/admin/BroadcastsTab | No se puede cerrar la ventana sin elegir una opción | The window cannot be closed without choosing an option | — | — |
+| `admin.cast.send` | Panel de gestión, «Comunicados»: mensajes a toda la gente | features/admin/BroadcastsTab, features/admin/CheatsPanel | Enviar | Send | — | — |
+| `admin.cast.none` | Panel de gestión, «Comunicados»: mensajes a toda la gente | features/admin/BroadcastsTab | Todavía no se ha mandado ningún comunicado. | No announcement has been sent yet. | — | — |
+| `admin.cast.seen` | Panel de gestión, «Comunicados»: mensajes a toda la gente | features/admin/BroadcastsTab | Visto sin elegir | Seen without choosing | — | — |
+| `admin.cast.who` | Panel de gestión, «Comunicados»: mensajes a toda la gente | features/admin/BroadcastsTab | Quién ha contestado ({n}) | Who has answered ({n}) | — | — |
+| `admin.cast.remove` | Panel de gestión, «Comunicados»: mensajes a toda la gente | features/admin/BroadcastsTab | Retirar | Withdraw | — | — |
+| `admin.cast.wasRequired` | Panel de gestión, «Comunicados»: mensajes a toda la gente | features/admin/BroadcastsTab | había que elegir | a choice was required | — | — |
+| `admin.cast.wasOptional` | Panel de gestión, «Comunicados»: mensajes a toda la gente | features/admin/BroadcastsTab | se podía cerrar sin elegir | could be closed without choosing | — | — |
 | `staff.title` | Página del staff de 42 para comprobar informes de horas | features/staff/StaffPage | Validar un documento | Verify a document | Validar un document | Dokumentu bat balidatu |
 | `staff.subtitle` | Página del staff de 42 para comprobar informes de horas | features/staff/StaffPage | Comprueba que unas horas validadas son las que emitió Sanatorio 42. | Check that a validated-hours report is the one Sanatorio 42 issued. | Comprova que unes hores validades són les que va emetre Sanatorio 42. | Egiaztatu balidatutako ordu batzuk Sanatorio 42k igorritakoak direla. |
 | `staff.back` | Página del staff de 42 para comprobar informes de horas | features/staff/StaffPage | Ir a Sanatorio 42 | Go to Sanatorio 42 | Ves a Sanatorio 42 | Joan Sanatorio 42ra |

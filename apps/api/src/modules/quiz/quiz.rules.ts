@@ -127,14 +127,33 @@ export type Round = {
   why: string
 }
 
+/**
+ * La pinta de una respuesta: un número (con su unidad, si la lleva), código
+ * (lleva `comillas de código`) o texto. Las opciones de una pregunta tienen
+ * todas la misma: si la buena es la única con número, o la única con código,
+ * se adivina sin saber nada.
+ */
+export function shapeOf(answer: string): 'number' | 'code' | 'text' {
+  const text = answer.trim()
+
+  if (/^[-+−]?(0x[0-9a-f]+|0b[01]+|\d[\d.,']*)(\s?[a-zA-Z%]{1,5})?$/i.test(text)) return 'number'
+
+  return text.includes('`') ? 'code' : 'text'
+}
+
 /** Monta una pregunta de un concepto: una forma, una manera de preguntar, una buena y tres malas. */
 export function buildRound(concept: Concept, random: () => number): Round {
   const pick = <T>(items: readonly T[]): T => items[Math.floor(random() * items.length)] as T
   const form = pick(concept.forms)
   const right = pick(form.right)
-  // Primero las malas de la forma, que se parecen a su buena; después, las comunes.
+  // Todas con la pinta de la buena (`shapeOf`). Si la forma trae sus propias
+  // malas, salen solo esas: las comunes pueden no pegar con lo que pregunta.
+  const shape = shapeOf(right)
+  const alike = (list: readonly string[]): string[] =>
+    shuffled(list, random).filter((each) => shapeOf(each) === shape)
+  const own = alike(form.wrong ?? [])
   const wrong = [
-    ...new Set([...shuffled(form.wrong ?? [], random), ...shuffled(concept.wrong, random)]),
+    ...new Set(own.length >= OPTIONS - 1 ? own : [...own, ...alike(concept.wrong)]),
   ].slice(0, OPTIONS - 1)
   const options = shuffled([right, ...wrong], random)
 

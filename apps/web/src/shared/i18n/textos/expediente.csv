@@ -6,7 +6,7 @@ react.concept,Reacción tras una ayuda: explicó bien un concepto,Explica genial
 react.patient,Reacción tras una ayuda: tuvo mucha paciencia,Muy paciente,Very patient,Molt pacient,Oso pazientea
 react.cancel,Botón para no valorar todavía,Ahora no,Not now,Ara no,Orain ez
 xp.title,Título de la página de tu perfil,Tu expediente,Your record,El teu expedient,Zure espedientea
-xp.loading,Mientras carga tu perfil,Buscando tu expediente...,Fetching your record...,Buscant el teu expedient...,Zure espedientea bilatzen...
+xp.loading,Mientras carga tu perfil,Buscando tu expediente…,Fetching your record...,Buscant el teu expedient...,Zure espedientea bilatzen...
 xp.level,Etiqueta del nivel de XP,Nivel,Level,Nivell,Maila
 xp.howTo,Botón que despliega cómo se gana la XP y cuánta llevas,Cómo se gana XP y cuánta llevas,How XP is earned and how much you have,Com es guanya XP i quanta en portes,Nola irabazten den XP eta zenbat daramazun
 xp.gotXp,XP ganada con una actividad,{xp} XP,{xp} XP,{xp} XP,{xp} XP

@@ -15,6 +15,7 @@ import { ChessTour } from './ChessTour'
 import type { BoardStyle } from './ChessBoard'
 import { SoundToggle } from './SoundToggle'
 import { useGameSounds } from './sounds'
+import { CodeText } from '../../shared/ui/CodeText'
 
 const PLAYING_MS = 1000
 const WAITING_MS = 2500
@@ -428,12 +429,16 @@ function TurnQuestionCard({
       >
         <span style={{ width: `${share * 100}%` }} />
       </div>
-      <p className="quiz-prompt">{question.prompt}</p>
+      <p className="quiz-prompt">
+        <CodeText text={question.prompt} />
+      </p>
       {question.code !== null && <pre className="quiz-code">{question.code}</pre>}
       <div className="quiz-options">
         {question.options.map((option) => (
           <button
-            key={option.id}
+            // Una clave por pregunta: si el botón se reutiliza, el que se pulsó en la
+            // anterior se queda con el foco y parece marcado en la nueva.
+            key={`${String(question.index)}-${String(option.id)}`}
             type="button"
             className={`quiz-option ${question.mine === option.id ? 'mine' : ''}`}
             disabled={!playing || answered}
@@ -442,7 +447,7 @@ function TurnQuestionCard({
               onAnswer(option.id)
             }}
           >
-            {option.text}
+            <CodeText text={option.text} />
           </button>
         ))}
       </div>
@@ -484,9 +489,14 @@ function LastQuestion({ room, me }: { room: TurnRoom; me: string }) {
     >
       <strong>{message}</strong>
       <p className="hint">
-        {last.prompt} → <strong>{right}</strong>
+        <CodeText text={last.prompt} /> →{' '}
+        <strong>
+          <CodeText text={right} />
+        </strong>
       </p>
-      <p className="hint">{last.why}</p>
+      <p className="hint">
+        <CodeText text={last.why} />
+      </p>
     </article>
   )
 }

@@ -12,6 +12,7 @@ import { Icon } from '../../shared/ui/Icon'
 import { settingsText } from './settings-text'
 import { SoundToggle } from './SoundToggle'
 import { useGameSounds } from './sounds'
+import { CodeText } from '../../shared/ui/CodeText'
 
 /** Cada cuánto se pide la sala: deprisa jugando, despacio esperando gente. */
 const PLAYING_MS = 1000
@@ -306,7 +307,9 @@ function Question({ room, question, me, playing, offset, onAnswer }: QuestionPro
           <span style={{ width: `${share * 100}%` }} />
         </div>
       )}
-      <p className="quiz-prompt">{question.prompt}</p>
+      <p className="quiz-prompt">
+        <CodeText text={question.prompt} />
+      </p>
       {question.code !== null && <pre className="quiz-code">{question.code}</pre>}
 
       <div className="quiz-options">
@@ -316,7 +319,9 @@ function Question({ room, question, me, playing, offset, onAnswer }: QuestionPro
 
           return (
             <button
-              key={option.id}
+              // Una clave por pregunta: si el botón se reutiliza, el que se pulsó en la
+              // anterior se queda con el foco y parece marcado en la nueva.
+              key={`${String(question.index)}-${String(option.id)}`}
               type="button"
               className={[
                 'quiz-option',
@@ -330,7 +335,7 @@ function Question({ room, question, me, playing, offset, onAnswer }: QuestionPro
                 onAnswer(option.id)
               }}
             >
-              {option.text}
+              <CodeText text={option.text} />
             </button>
           )
         })}
@@ -347,7 +352,11 @@ function Question({ room, question, me, playing, offset, onAnswer }: QuestionPro
                 ? t('notgames.right')
                 : t('notgames.wrong')}
           </strong>
-          {question.why !== null && <p>{question.why}</p>}
+          {question.why !== null && (
+            <p>
+              <CodeText text={question.why} />
+            </p>
+          )}
           <ul className="quiz-results">
             {question.results?.map((result) => (
               <li

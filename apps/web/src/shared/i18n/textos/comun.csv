@@ -1,5 +1,5 @@
 clave,contexto,es,en,ca,eu
-app.loading,Mensaje mientras carga algo,Cargando...,Loading...,Carregant...,Kargatzen...
+app.loading,Mensaje mientras carga algo,Cargando…,Loading...,Carregant...,Kargatzen...
 app.footer,"Pie de página, al final de todas las pantallas",Sanatorio 42 · Hecho en la Hackathon de 42 Madrid,Sanatorio 42 · Made at the 42 Madrid Hackathon,Sanatorio 42 · Fet a la Hackathon de 42 Madrid,Sanatorio 42 · 42 Madrilgo Hackathonean egina
 app.serverDown,Pantalla de error cuando la API no responde,No se puede conectar con el servidor. Puede estar arrancando o caído.,Can't reach the server. It may be starting up or down.,No es pot connectar amb el servidor. Pot ser que estigui arrencant o que hagi caigut.,Ezin da zerbitzariarekin konektatu. Baliteke abiarazten egotea edo erori izana.
 app.retry,Botón para volver a intentar conectar,Volver a probar,Try again,Torna-ho a provar,Saiatu berriro
@@ -53,7 +53,7 @@ settings.campusLazy,Junto a un campus que se copia solo cuando alguien lo pide,b
 sync.fresh,Pie: cuándo se leyeron los puestos de 42; {min} son minutos,Puestos de 42 actualizados hace {min} min,42 seats updated {min} min ago,Llocs de 42 actualitzats fa {min} min,42ko postuak duela {min} min eguneratuta
 sync.now,Pie: los puestos se acaban de leer,Puestos de 42 recién actualizados,42 seats just updated,Llocs de 42 acabats d'actualitzar,42ko postuak oraintxe eguneratuta
 sync.copying,Pie: progreso de la primera copia del campus; {pct} es el porcentaje,Copiando el campus desde 42: {pct} %,Copying the campus from 42: {pct} %,Copiant el campus des de 42: {pct} %,Campusa 42tik kopiatzen: % {pct}
-sync.copyingStart,Pie: empieza la primera copia del campus,Copiando el campus desde 42...,Copying the campus from 42...,Copiant el campus des de 42...,Campusa 42tik kopiatzen...
+sync.copyingStart,Pie: empieza la primera copia del campus,Copiando el campus desde 42…,Copying the campus from 42...,Copiant el campus des de 42...,Campusa 42tik kopiatzen...
 nav.guardia,Sección: tu guardia (cuándo puedes ayudar y tus reservas),Guardia,On duty,Guàrdia,Guardia
 nav.calendario,Pestaña: calendario con todo lo tuyo,Calendario,Calendar,Calendari,Egutegia
 settings.theme,Pie: selector de tema claro u oscuro,Tema,Theme,Tema,Gaia
@@ -194,7 +194,7 @@ nav.notgames,Pestaña de Ayuda: preguntas de programación para aprender jugando
 nav.estadisticas,Pestaña de Ayuda: cifras y clasificación de cada sección,Estadísticas,Statistics,Estadístiques,Estatistikak
 focus.open,Menú de la cuenta: abrir el Pomodoro,Modo concentración (Pomodoro),Focus mode (Pomodoro),Mode concentració (Pomodoro),Kontzentrazio modua (Pomodoro)
 focus.title,Pomodoro: título de la ventana,Modo concentración,Focus mode,Mode concentració,Kontzentrazio modua
-focus.pitch,Pomodoro: explicación en la ventana,"Un rato sin distracciones: la web se queda con lo que elijas, los juegos se callan y los demás ven que estás concentrado.","Some time without distractions: the web keeps only what you choose, games go quiet and others see you are focusing.","Una estona sense distraccions: la web es queda amb el que triïs, els jocs callen i els altres veuen que estàs concentrat.","Distrakziorik gabeko denbora: webak aukeratzen duzuna bakarrik uzten du, jokoak isiltzen dira eta besteek kontzentratuta zaudela ikusten dute."
+focus.pitch,Pomodoro: explicación en la ventana,"Un rato sin distracciones: la web se queda con lo que elijas, los juegos se callan y los demás ven que estás en modo concentración","Some time without distractions: the web keeps only what you choose, games go quiet and others see you are focusing.","Una estona sense distraccions: la web es queda amb el que triïs, els jocs callen i els altres veuen que estàs concentrat.","Distrakziorik gabeko denbora: webak aukeratzen duzuna bakarrik uzten du, jokoak isiltzen dira eta besteek kontzentratuta zaudela ikusten dute."
 focus.minutes,Pomodoro: minutos de concentración,Concentración,Focus,Concentració,Kontzentrazioa
 focus.break,Pomodoro: minutos de descanso,Descanso,Break,Descans,Atsedena
 focus.minutesN,Pomodoro: duración,{n} min,{n} min,{n} min,{n} min
@@ -211,9 +211,9 @@ focus.start,Pomodoro: empezar,Empezar a concentrarme,Start focusing,Començar a 
 focus.stop,Pomodoro: acabar antes,Acabar,Stop,Acabar,Amaitu
 focus.again,Pomodoro: otra vuelta tras el descanso,Otra vuelta,Another round,Una altra volta,Beste txanda bat
 focus.close,Pomodoro: cerrar el aviso del descanso,Cerrar,Close,Tanca,Itxi
-focus.focusing,Pomodoro: etiqueta del temporizador,Concentrado,Focusing,Concentrat,Kontzentratuta
+focus.focusing,Pomodoro: etiqueta del temporizador,En concentración,Focusing,Concentrat,Kontzentratuta
 focus.resting,Pomodoro: etiqueta del descanso,Descanso,Break,Descans,Atsedena
 focus.breakOver,Pomodoro: el descanso ha acabado,¡A por otra!,Ready for another?,Una altra?,Beste bat?
 focus.timerLabel,Pomodoro: temporizador para lectores de pantalla,Tiempo de concentración que queda,Focus time left,Temps de concentració que queda,Geratzen den kontzentrazio denbora
-focus.badge,Lo que ven los demás de quien está concentrado,Concentrado hasta las {time} · no me distraigas,Focusing until {time} · please don't disturb,Concentrat fins a les {time} · no em distreguis,{time}ak arte kontzentratuta · ez nazazu distraitu
+focus.badge,Lo que ven los demás de quien está concentrado,En concentración hasta las {time} · no me distraigas,Focusing until {time} · please don't disturb,Concentrat fins a les {time} · no em distreguis,{time}ak arte kontzentratuta · ez nazazu distraitu
 focus.badgeHint,Explicación del aviso de concentración,Está en modo Pomodoro: mejor escribirle después.,In Pomodoro mode: better write later.,És en mode Pomodoro: millor escriure-li després.,Pomodoro moduan dago: hobe geroago idaztea.

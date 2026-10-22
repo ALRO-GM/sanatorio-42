@@ -5,11 +5,34 @@
 import { describe, expect, it } from 'vitest'
 
 import { BANK, REVIEW } from '../../src/modules/quiz/bank/index.js'
-import { buildRound, OPTIONS, seeded } from '../../src/modules/quiz/quiz.rules.js'
+import { buildRound, OPTIONS, seeded, shapeOf } from '../../src/modules/quiz/quiz.rules.js'
 import { SEEDED_SLUGS } from '../../src/modules/replica/curriculum.js'
 
 // Sin espacios de más. Las mayúsculas cuentan: «ff» y «FF» son respuestas distintas.
 const norm = (text: string): string => text.trim()
+
+/** Para comparar textos sin tildes, mayúsculas ni signos. */
+const plain = (text: string): string =>
+  text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
+
+/** Un número escrito con letras como respuesta («Ocho», «Uno, siempre», «Unos 10»): se escribe con cifras. */
+const NUMERAL =
+  '(cero|uno|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez|once|doce|dieciséis|veinte|treinta|cuarenta|cincuenta|sesenta|setenta|ochenta|noventa|cien|ciento|doscientos|mil)'
+const NUMBER_WORD = new RegExp(
+  `^(${NUMERAL}( y ${NUMERAL}| ${NUMERAL})*( (bits|bytes|veces))?|${NUMERAL},.*|unos? \\d.*)$`,
+  'i',
+)
+
+/**
+ * Preguntas de elegir entre lo que dice el enunciado: ahí la buena sí sale en
+ * la pregunta, y es lo que se pide.
+ */
+const CHOICE = new Set(['gfx-ray-sphere'])
 
 describe('banco de preguntas', () => {
   it('cada concepto tiene un id único', () => {
@@ -38,6 +61,31 @@ describe('banco de preguntas', () => {
         // Ninguna buena entre las malas de su forma.
         expect(form.right.map(norm).filter((right) => wrong.includes(right))).toEqual([])
         expect(form.ask.every((ask) => ask.trim().length > 5)).toBe(true)
+
+        for (const right of form.right) {
+          // Tres malas con la pinta de la buena: números con números, código con código.
+          const alike = new Set(wrong.filter((each) => shapeOf(each) === shapeOf(right)))
+
+          expect(
+            alike.size,
+            `${concept.id}: «${right}» no tiene tres malas como ella`,
+          ).toBeGreaterThanOrEqual(OPTIONS - 1)
+          // Los números, con cifras: si no, la buena se distingue de las malas.
+          expect(NUMBER_WORD.test(right.trim()), `${concept.id}: «${right}»`).toBe(false)
+
+          // La buena no puede venir escrita en la pregunta.
+          if (!CHOICE.has(concept.id)) {
+            for (const ask of form.ask) {
+              expect(
+                plain(right).length >= 3 && ` ${plain(ask)} `.includes(` ${plain(right)} `),
+                `${concept.id}: «${ask}» trae «${right}»`,
+              ).toBe(false)
+            }
+          }
+        }
+        for (const each of wrong) {
+          expect(NUMBER_WORD.test(each.trim()), `${concept.id}: «${each}»`).toBe(false)
+        }
       }
     },
   )
