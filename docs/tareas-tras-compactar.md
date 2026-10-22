@@ -262,6 +262,24 @@ junto y un solo push y despliegue (cupo de GitHub).
       escritura remota en la base de datos está bloqueada; respuestas en el
       scratchpad `answer.mjs` o desde el panel.
 
+## 2f. Plan vigente: revisión completa y flujo de trabajo (pedido el 2026-10-22, noche)
+
+Alberto pidió: revisar todo el código (seguridad, calidad, textos, legibilidad,
+usabilidad, desacoplamiento, código repetido que unificar, funciones que
+generalizar) para una base sólida y reutilizable; analizar el mejor flujo para
+desarrollar de forma segura y constante (funcionalidades, seguridad, tests,
+despliegues); y crear skills y subagentes para lo recurrente (traducciones,
+tests, despliegues y lo que haga falta).
+
+- [ ] Revisiones en paralelo (agentes de solo lectura, informes en el
+      scratchpad de la sesión): seguridad API, calidad API, calidad y
+      usabilidad web, textos, tests e infra. Consolidar en `docs/revision-2026-10.md`.
+- [ ] Skills en `.claude/skills/` y subagentes en `.claude/agents/` (se suben
+      al repo; `.gitignore` ya solo ignora `.claude/worktrees/`).
+- [ ] `docs/flujo-de-trabajo.md` con el flujo recomendado.
+- [ ] Arreglos por tandas, de más grave a menos, cada una con check, push y
+      despliegue.
+
 ## 3. A medias o por confirmar con Alberto
 
 - ~~Intentos de examen~~: comprobado el 2026-10-22: la copia de fondo acabó el

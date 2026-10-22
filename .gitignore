@@ -25,6 +25,7 @@ backups/
 *.swp
 .claude/settings.local.json
 
-# Copias de trabajo de los agentes (git worktree)
-.claude/
+# Copias de trabajo de los agentes (git worktree) y ajustes locales; las skills
+# y los subagentes de .claude/ sí se suben.
+.claude/worktrees/
 infra/deploy.log
