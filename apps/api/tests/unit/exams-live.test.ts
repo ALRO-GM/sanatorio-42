@@ -248,14 +248,33 @@ describe('el examen en vivo', () => {
     await replica.upsertCampuses([{ id: MADRID, name: 'Madrid', time_zone: MADRID_ZONE }])
     await replica.ingestProjectUsers(
       [
-        // `ana` entregó a las 9:30 con 75: cerrado sin 100, suspenso.
-        projectUser('ana', {
-          ...RANK_02,
-          status: 'finished',
-          finalMark: 75,
-          validated: false,
-          updatedAt: '2026-10-22T07:30:00.000Z',
-        }),
+        // `ana` entregó a las 9:30 con 75: cerrado sin 100, suspenso. La nota
+        // del proyecto es 90, la de un intento de la semana pasada: no es la de hoy.
+        {
+          ...projectUser('ana', {
+            ...RANK_02,
+            status: 'finished',
+            finalMark: 90,
+            validated: false,
+            updatedAt: '2026-10-22T07:30:00.000Z',
+          }),
+          teams: [
+            {
+              id: 9001,
+              final_mark: 90,
+              'validated?': false,
+              created_at: '2026-10-15T07:00:00.000Z',
+              closed_at: '2026-10-15T10:00:00.000Z',
+            },
+            {
+              id: 9002,
+              final_mark: 75,
+              'validated?': false,
+              created_at: '2026-10-22T07:00:00.000Z',
+              closed_at: '2026-10-22T07:30:00.000Z',
+            },
+          ],
+        },
         // `leo` suspendió el 03 la semana pasada: hoy aún no ha empezado.
         projectUser('leo', {
           ...RANK_03,
@@ -313,6 +332,7 @@ describe('el examen en vivo', () => {
       ['Exam Rank 03', ['leo:pending']],
       ['Exam Rank 03 · 42next', ['eva:pending']],
     ])
+    // La nota es la del intento de hoy (75), no la mejor del proyecto (90).
     expect(live.groups[0]?.people[0]).toMatchObject({ mark: 75, track: 'classic', circle: 2 })
     // Solo se piden las notas de los exámenes que tocan a alguien, uno por petición.
     expect(calls.pages.sort()).toEqual([1320, 1321, 1400])

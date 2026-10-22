@@ -26,6 +26,8 @@ type FamilyFilter = ExamFamily | 'both'
 const TRACKS: readonly ExamTrack[] = ['all', 'classic', 'next']
 const FAMILIES: readonly FamilyFilter[] = ['classic', 'next', 'both']
 /** Con menos gente, una kickoff va aparte (suele ser alguien con la fecha mal deducida). */
+/** Intentos que se ven de entrada; los demás, al desplegar. */
+const SHOWN_ATTEMPTS = 5
 const SMALL_KICKOFF = 5
 const DAY_MS = 86_400_000
 
@@ -45,8 +47,8 @@ function useMonth(): (month: string) => string {
   return (month) => format.format(new Date(`${month}-01T00:00:00Z`))
 }
 
-/** Un grupo de botones de los que solo vale uno. */
-function Pills<T extends string>(props: {
+/** Un desplegable de los que solo vale una opción. */
+function Choice<T extends string>(props: {
   label: string
   options: readonly T[]
   current: T
@@ -54,21 +56,23 @@ function Pills<T extends string>(props: {
   text: (value: T) => string
 }) {
   return (
-    <div className="filter-pills" role="group" aria-label={props.label}>
-      {props.options.map((option) => (
-        <button
-          key={option}
-          type="button"
-          className={`pill ${props.current === option ? 'active' : ''}`}
-          aria-pressed={props.current === option}
-          onClick={() => {
-            props.onPick(option)
-          }}
-        >
-          {props.text(option)}
-        </button>
-      ))}
-    </div>
+    <label className="exam-choice">
+      <span>{props.label}</span>
+      <select
+        value={props.current}
+        onChange={(event) => {
+          const picked = props.options.find((option) => option === event.target.value)
+
+          if (picked !== undefined) props.onPick(picked)
+        }}
+      >
+        {props.options.map((option) => (
+          <option key={option} value={option}>
+            {props.text(option)}
+          </option>
+        ))}
+      </select>
+    </label>
   )
 }
 
@@ -113,14 +117,14 @@ export function ExamStatsPanel() {
             </p>
           )}
           <div className="exam-filters">
-            <Pills
+            <Choice
               label={t('exams.trackFilter')}
               options={TRACKS}
               current={track}
               onPick={setTrack}
               text={(value) => t(`exams.plan.${value}`)}
             />
-            <Pills
+            <Choice
               label={t('exams.familyFilter')}
               options={FAMILIES}
               current={family}
@@ -148,7 +152,10 @@ export function ExamStatsPanel() {
   )
 }
 
-/** Las kickoffs para elegir, con su gente del plan elegido; las de poca gente, aparte. */
+/**
+ * Las kickoffs para elegir, en un desplegable con casillas (se pueden marcar
+ * varias), con su gente del plan elegido; las de poca gente, al final.
+ */
 function KickoffPicker(props: {
   all: readonly ExamKickoff[]
   track: ExamTrack
@@ -164,40 +171,46 @@ function KickoffPicker(props: {
   const shown = props.all.filter(
     (kickoff) => count(kickoff) > 0 || props.chosen.includes(kickoff.month),
   )
-  const pill = (kickoff: ExamKickoff) => (
-    <button
-      key={kickoff.month}
-      type="button"
-      className={`pill ${props.chosen.includes(kickoff.month) ? 'active' : ''}`}
-      aria-pressed={props.chosen.includes(kickoff.month)}
-      onClick={() => {
-        props.onToggle(kickoff.month)
-      }}
-    >
+  const big = shown.filter((kickoff) => count(kickoff) >= SMALL_KICKOFF)
+  const small = shown.filter((kickoff) => count(kickoff) < SMALL_KICKOFF)
+  const box = (kickoff: ExamKickoff) => (
+    <label key={kickoff.month} className="exam-kickoff-option">
+      <input
+        type="checkbox"
+        checked={props.chosen.includes(kickoff.month)}
+        onChange={() => {
+          props.onToggle(kickoff.month)
+        }}
+      />{' '}
       {t('exams.kickoffPill', { month: month(kickoff.month), n: count(kickoff) })}
-    </button>
-  )
-  const small = shown.filter(
-    (kickoff) => count(kickoff) < SMALL_KICKOFF && !props.chosen.includes(kickoff.month),
+    </label>
   )
 
   return (
-    <div className="filter-pills exam-kickoffs" role="group" aria-label={t('exams.kickoffs')}>
-      <button
-        type="button"
-        className={`pill ${props.chosen.length === 0 ? 'active' : ''}`}
-        aria-pressed={props.chosen.length === 0}
-        onClick={props.onAll}
-      >
-        {t('exams.kickoff.all')}
-      </button>
-      {shown.filter((kickoff) => !small.includes(kickoff)).map(pill)}
-      {small.length > 0 && (
-        <details className="exam-small-kickoffs">
-          <summary>{t('exams.kickoff.small', { n: small.length })}</summary>
-          {small.map(pill)}
-        </details>
-      )}
+    <div className="exam-choice">
+      <span>{t('exams.kickoffs')}</span>
+      <details className="exam-kickoff-select">
+        <summary>
+          {props.chosen.length === 0
+            ? t('exams.kickoff.all')
+            : props.chosen.length === 1
+              ? month(props.chosen[0] ?? '')
+              : t('exams.kickoff.chosen', { n: props.chosen.length })}
+        </summary>
+        <div className="exam-kickoff-list" role="group" aria-label={t('exams.kickoffs')}>
+          <label className="exam-kickoff-option">
+            <input type="checkbox" checked={props.chosen.length === 0} onChange={props.onAll} />{' '}
+            {t('exams.kickoff.all')}
+          </label>
+          {big.map(box)}
+          {small.length > 0 && (
+            <>
+              <span className="hint">{t('exams.kickoff.small', { n: small.length })}</span>
+              {small.map(box)}
+            </>
+          )}
+        </div>
+      </details>
     </div>
   )
 }
@@ -242,6 +255,25 @@ function ExamCard({ exam }: { exam: ExamStat }) {
   const decimal = new Intl.NumberFormat(localeOf(lang), { maximumFractionDigits: 1 })
   const most = Math.max(1, ...exam.attemptsToPass)
   const known = exam.attemptsToPass.reduce((sum, count) => sum + count, 0)
+  const bar = (count: number, index: number) => (
+    <li key={index}>
+      <span>{index + 1}</span>
+      <i style={{ width: `${(count / most) * 100}%` }} />
+      <small>{t('exams.bar', { n: count, pct: pctOf(t, count, known) })}</small>
+    </li>
+  )
+  const line = (attempt: ExamStat['byAttempt'][number]) => (
+    <li key={attempt.attempt} className="row">
+      <span>{t('exams.attempt', { n: attempt.attempt })}</span>
+      <span>
+        {t('exams.attemptLine', {
+          mark: attempt.avgMark === null ? '—' : Math.round(attempt.avgMark),
+          pct: Math.round(attempt.passRate * 100),
+          n: attempt.people,
+        })}
+      </span>
+    </li>
+  )
 
   return (
     <article className="card exam-card">
@@ -264,14 +296,22 @@ function ExamCard({ exam }: { exam: ExamStat }) {
         <>
           <span className="eyebrow">{t('exams.toPass')}</span>
           <ul className="exam-bars" aria-label={t('exams.toPass')}>
-            {exam.attemptsToPass.map((count, index) => (
-              <li key={index}>
-                <span>{index + 1}</span>
-                <i style={{ width: `${(count / most) * 100}%` }} />
-                <small>{t('exams.bar', { n: count, pct: pctOf(t, count, known) })}</small>
-              </li>
-            ))}
+            {exam.attemptsToPass.slice(0, SHOWN_ATTEMPTS).map(bar)}
           </ul>
+          {exam.attemptsToPass.length > SHOWN_ATTEMPTS && (
+            <details className="exam-more">
+              <summary>
+                {t('exams.moreAttempts', {
+                  n: exam.attemptsToPass.length - SHOWN_ATTEMPTS,
+                })}
+              </summary>
+              <ul className="exam-bars">
+                {exam.attemptsToPass
+                  .slice(SHOWN_ATTEMPTS)
+                  .map((count, index) => bar(count, index + SHOWN_ATTEMPTS))}
+              </ul>
+            </details>
+          )}
         </>
       )}
       {/* El detalle por intento es denso: solo para quien quiere los datos. */}
@@ -279,19 +319,18 @@ function ExamCard({ exam }: { exam: ExamStat }) {
         <Show from="datos">
           <span className="eyebrow">{t('exams.byAttempt')}</span>
           <ul className="rows exam-attempts">
-            {exam.byAttempt.map((attempt) => (
-              <li key={attempt.attempt} className="row">
-                <span>{t('exams.attempt', { n: attempt.attempt })}</span>
-                <span>
-                  {t('exams.attemptLine', {
-                    mark: attempt.avgMark === null ? '—' : Math.round(attempt.avgMark),
-                    pct: Math.round(attempt.passRate * 100),
-                    n: attempt.people,
-                  })}
-                </span>
-              </li>
-            ))}
+            {exam.byAttempt.slice(0, SHOWN_ATTEMPTS).map(line)}
           </ul>
+          {exam.byAttempt.length > SHOWN_ATTEMPTS && (
+            <details className="exam-more">
+              <summary>
+                {t('exams.moreAttempts', { n: exam.byAttempt.length - SHOWN_ATTEMPTS })}
+              </summary>
+              <ul className="rows exam-attempts">
+                {exam.byAttempt.slice(SHOWN_ATTEMPTS).map(line)}
+              </ul>
+            </details>
+          )}
         </Show>
       )}
     </article>

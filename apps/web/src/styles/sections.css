@@ -1170,25 +1170,6 @@ dialog.welcome .actions {
 }
 
 /* Estadísticas de exámenes por plan y kickoff (#81). */
-.exam-filters {
-  display: grid;
-  gap: 0.4rem;
-  margin-bottom: 0.4rem;
-}
-.exam-kickoffs {
-  align-items: center;
-}
-.exam-small-kickoffs summary {
-  cursor: pointer;
-  color: var(--text-3);
-  font-size: 0.85rem;
-}
-.exam-small-kickoffs[open] {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.3rem;
-  width: 100%;
-}
 .exam-pairs {
   display: grid;
   gap: 0.8rem;
@@ -1583,4 +1564,55 @@ dialog.layout-dialog.focus-dialog.wide {
   .focus-big-bar i {
     transition: none;
   }
+}
+
+/* Estadísticas de exámenes: los filtros, en desplegables. */
+.exam-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  align-items: flex-end;
+  margin-bottom: 0.4rem;
+}
+.exam-choice {
+  display: grid;
+  gap: 0.2rem;
+  font-size: 0.85rem;
+  color: var(--text-2);
+}
+.exam-kickoff-select {
+  position: relative;
+}
+.exam-kickoff-select summary {
+  min-width: 11rem;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+.exam-kickoff-list {
+  position: absolute;
+  z-index: 5;
+  display: grid;
+  gap: 0.3rem;
+  min-width: 14rem;
+  max-height: 18rem;
+  overflow-y: auto;
+  margin-top: 0.25rem;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
+}
+.exam-kickoff-option {
+  color: var(--text);
+  white-space: nowrap;
+}
+.exam-more summary {
+  cursor: pointer;
+  color: var(--accent-text);
+  font-size: 0.85rem;
 }

@@ -40,8 +40,10 @@ const rankRow = (n: number): HTMLElement =>
     `la fila del rango ${n}`,
   )
 
-/** Un grupo de botones, buscado cada vez: la lista se vuelve a pintar al cambiar de filtro. */
-const group = (key: string): HTMLElement => screen.getByRole('group', { name: text(key) })
+/** Un desplegable de los filtros, buscado cada vez: se vuelve a pintar al cambiar de filtro. */
+const choice = (key: string): HTMLElement => screen.getByRole('combobox', { name: text(key) })
+/** Las casillas de las kickoffs (dentro de su desplegable). */
+const kickoffs = (): HTMLElement => screen.getByRole('group', { name: text('exams.kickoffs') })
 
 const selection = (): string =>
   must(screen.getByText(pattern('exams.selection')).textContent, 'la gente elegida')
@@ -51,47 +53,37 @@ describe('Estadísticas de exámenes', () => {
     const user = userEvent.setup()
 
     await openExams()
-    await screen.findByRole('group', { name: text('exams.familyFilter') }, WAIT)
+    await screen.findByRole('combobox', { name: text('exams.familyFilter') }, WAIT)
 
     // Con los dos, el rango 3 lleva su examen de C y el de Nexus.
     const row = rankRow(3)
 
     expect(within(row).getByText('Exam Rank 03')).toBeTruthy()
     expect(within(row).getByText('Exam Rank 03 · 42next')).toBeTruthy()
+    // De entrada, hasta el quinto intento; los demás, al desplegar.
+    expect(within(row).getAllByText(pattern('exams.moreAttempts')).length).toBeGreaterThan(0)
 
     // Solo Nexus: el de C desaparece.
-    await user.click(
-      within(group('exams.familyFilter')).getByRole('button', { name: text('exams.family.next') }),
-    )
+    await user.selectOptions(choice('exams.familyFilter'), 'next')
     expect(within(rankRow(3)).queryByText('Exam Rank 03')).toBeNull()
     expect(within(rankRow(3)).getByText('Exam Rank 03 · 42next')).toBeTruthy()
 
-    // Una kickoff: menos gente que con todas.
+    // Una kickoff (se marca su casilla en el desplegable): menos gente que con todas.
     const before = selection()
 
+    await user.click(screen.getByText(text('exams.kickoff.all'), { selector: 'summary' }))
     await user.click(
-      must(
-        within(group('exams.kickoffs')).getAllByRole('button', { pressed: false })[0],
-        'una kickoff',
-      ),
+      must(within(kickoffs()).getAllByRole('checkbox', { checked: false })[0], 'una kickoff'),
     )
     await expect.poll(selection, WAIT).not.toBe(before)
     expect(
-      within(group('exams.kickoffs')).getByRole('button', { name: text('exams.kickoff.all') }),
-    ).toHaveProperty('ariaPressed', 'false')
+      within(kickoffs()).getByRole('checkbox', { name: text('exams.kickoff.all') }),
+    ).toHaveProperty('checked', false)
 
     // Solo el core en C: los de Nexus ya no salen.
-    await user.click(
-      within(group('exams.trackFilter')).getByRole('button', {
-        name: text('exams.plan.classic'),
-      }),
-    )
-    await user.click(
-      within(group('exams.kickoffs')).getByRole('button', { name: text('exams.kickoff.all') }),
-    )
-    await user.click(
-      within(group('exams.familyFilter')).getByRole('button', { name: text('exams.family.both') }),
-    )
+    await user.selectOptions(choice('exams.trackFilter'), 'classic')
+    await user.click(within(kickoffs()).getByRole('checkbox', { name: text('exams.kickoff.all') }))
+    await user.selectOptions(choice('exams.familyFilter'), 'both')
     await expect
       .poll(() => within(rankRow(3)).queryByText('Exam Rank 03 · 42next'), WAIT)
       .toBeNull()

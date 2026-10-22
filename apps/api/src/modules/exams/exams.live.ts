@@ -253,8 +253,9 @@ export function createExamsLive(options: ExamsLiveOptions) {
         image: images.get(login) ?? fromFortyTwo.get(login) ?? null,
         track,
         circle,
-        // La nota del intento si lo hay; si no, la de la fila (que es de esta sesión).
-        mark: attempt?.mark ?? row?.finalMark ?? null,
+        // Solo la nota del intento de esta sesión, aunque aún no tenga: la de la
+        // fila es la del proyecto, que en 42 es la mejor de todas las veces.
+        mark: attempt?.mark ?? null,
         status: examineeStatus(row, attempt, exam.beginAt),
       }
       const group = groups.get(projectId) ?? {

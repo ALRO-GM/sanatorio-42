@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/examenes.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-68 textos. «—» es que falta la traducción: sale en español.
+70 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -43,18 +43,18 @@ Generado desde `apps/web/src/shared/i18n/textos/examenes.csv` con
 | `exams.byAttempt` | Datos por intento | features/exams/ExamStatsPanel | Cada intento | Each attempt | Cada intent | Saiakera bakoitza |
 | `exams.attempt` | Número de intento | features/exams/ExamStatsPanel | {n}.º intento | Attempt {n} | {n}r intent | {n}. saiakera |
 | `exams.attemptLine` | Nota media, porcentaje de aprobados y personas de un intento | features/exams/ExamStatsPanel | nota media {mark} · aprueba el {pct} % · {n} personas | average mark {mark} · {pct}% pass · {n} people | nota mitjana {mark} · aprova el {pct} % · {n} persones | batez besteko nota {mark} · %{pct} gainditzen du · {n} pertsona |
-| `exams.trackFilter` | Estadísticas: grupo de botones del plan que sigue la gente | features/exams/ExamStatsPanel | Plan de la gente | People's track | Pla de la gent | Jendearen plana |
+| `exams.trackFilter` | Estadísticas: desplegable del plan que sigue la gente | features/exams/ExamStatsPanel | Plan de la gente | People's track | Pla de la gent | Jendearen plana |
 | `exams.plan.all` | Estadísticas: gente de los dos planes | features/exams/ExamStatsPanel | Toda la gente | Everyone | Tothom | Jende guztia |
 | `exams.plan.classic` | Estadísticas: gente del common core antiguo, en C | features/exams/ExamStatsPanel | Core en C | C core | Core en C | C core-a |
 | `exams.plan.next` | Estadísticas: gente del common core nuevo, en Python | features/exams/ExamStatsPanel | Core en Python | Python core | Core en Python | Python core-a |
-| `exams.familyFilter` | Estadísticas: grupo de botones de qué exámenes se ven | features/exams/ExamStatsPanel | Exámenes | Exams | Exàmens | Azterketak |
+| `exams.familyFilter` | Estadísticas: desplegable de qué exámenes se ven | features/exams/ExamStatsPanel | Exámenes | Exams | Exàmens | Azterketak |
 | `exams.family.classic` | Estadísticas: los exámenes del core en C | features/exams/ExamStatsPanel | De C | C exams | De C | C-koak |
 | `exams.family.next` | Estadísticas: los exámenes del core en Python | features/exams/ExamStatsPanel | Nexus | Nexus | Nexus | Nexus |
 | `exams.family.both` | Estadísticas: los dos tipos de examen, uno al lado del otro | features/exams/ExamStatsPanel | Los dos | Both | Tots dos | Biak |
-| `exams.kickoffs` | Estadísticas: grupo de botones de las kickoffs (meses en que se empezó) | features/exams/ExamStatsPanel | Kickoffs | Kickoffs | Kickoffs | Kickoff-ak |
+| `exams.kickoffs` | Estadísticas: desplegable con casillas de las kickoffs (meses en que se empezó) | features/exams/ExamStatsPanel | Kickoffs | Kickoffs | Kickoffs | Kickoff-ak |
 | `exams.kickoffPill` | Botón de una kickoff: mes y año, y cuánta gente empezó | features/exams/ExamStatsPanel | {month} · {n} | {month} · {n} | {month} · {n} | {month} · {n} |
-| `exams.kickoff.all` | Botón para ver todas las kickoffs juntas | features/exams/ExamStatsPanel | Todas | All | Totes | Denak |
-| `exams.kickoff.small` | Desplegable con las kickoffs de muy poca gente | features/exams/ExamStatsPanel | {n} más con poca gente | {n} more with few people | {n} més amb poca gent | {n} gehiago, jende gutxirekin |
+| `exams.kickoff.all` | Casilla y texto del desplegable cuando se ven todas las kickoffs juntas | features/exams/ExamStatsPanel | Todas | All | Totes | Denak |
+| `exams.kickoff.small` | Rótulo de las kickoffs de muy poca gente, al final del desplegable | features/exams/ExamStatsPanel | {n} más con poca gente | {n} more with few people | {n} més amb poca gent | {n} gehiago, jende gutxirekin |
 | `exams.selection` | Cuánta gente entra en lo elegido | features/exams/ExamStatsPanel | {n} personas en lo elegido | {n} people in this selection | {n} persones en el que has triat | {n} pertsona aukeratutakoan |
 | `exams.rank` | Fila de un rango: su examen de C y el de Nexus | features/exams/ExamStatsPanel | Rango {n} | Rank {n} | Rang {n} | {n}. maila |
 | `exams.otherRank` | Fila de exámenes sin número de rango | features/exams/ExamStatsPanel | Otros | Others | Altres | Besteak |
@@ -75,3 +75,5 @@ Generado desde `apps/web/src/shared/i18n/textos/examenes.csv` con
 | `exams.bh.closest` | Black hole: lista de quien lo tiene más cerca | features/exams/ExamStatsPanel | Quien lo tiene más cerca | Closest to it | Qui el té més a prop | Hurbilen dutenak |
 | `exams.bh.left` | Black hole: días que le quedan a alguien | features/exams/ExamStatsPanel | quedan {n} días | {n} days left | queden {n} dies | {n} egun falta |
 | `exams.bh.nobody` | Black hole: lista vacía | features/exams/ExamStatsPanel | Nadie, por ahora. | Nobody, for now. | Ningú, de moment. | Inor ez, oraingoz. |
+| `exams.kickoff.chosen` | Texto del desplegable de kickoffs cuando hay varias marcadas | features/exams/ExamStatsPanel | {n} kickoffs | {n} kickoffs | {n} kickoffs | {n} kickoff |
+| `exams.moreAttempts` | Desplegable con los intentos a partir del sexto | features/exams/ExamStatsPanel | Ver {n} intentos más | Show {n} more attempts | Veure {n} intents més | Ikusi {n} saiakera gehiago |
