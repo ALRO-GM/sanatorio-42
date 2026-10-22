@@ -183,6 +183,12 @@ export type ChessBoardView = {
   lastMove: { from: string; to: string; captured: boolean; check: boolean } | null
   /** Las jugadas en notación algebraica, en orden. */
   history: string[]
+  /**
+   * La posición (FEN) tras cada jugada, para repasar la partida: aquí un bando
+   * puede mover dos veces seguidas y la notación sola no basta. Las partidas de
+   * antes de guardarla no la tienen.
+   */
+  positions?: string[]
 }
 
 export type TurnEnd = {

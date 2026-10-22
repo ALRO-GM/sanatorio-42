@@ -20,7 +20,7 @@ const moveSchema = z.object({
 
 export const CHESS: TurnGame<ChessBoard, ChessBoardView> = {
   kind: 'chess',
-  start: () => ({ fen: START_FEN, lastMove: null, history: [] }),
+  start: () => ({ fen: START_FEN, lastMove: null, history: [], positions: [] }),
   natural: (board) => sideToMove(board.fen),
   canMove: (board, side) => canMove(board.fen, side),
   play(board, side, input) {
@@ -37,6 +37,7 @@ export const CHESS: TurnGame<ChessBoard, ChessBoardView> = {
         fen: done.fen,
         lastMove: { from: done.from, to: done.to, captured: done.captured, check: done.check },
         history: [...board.history, done.san],
+        positions: [...(board.positions ?? []), done.fen],
       },
       summary: done.san,
     }

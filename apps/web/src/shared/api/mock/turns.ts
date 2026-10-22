@@ -46,6 +46,7 @@ type MockTurnRoom = {
   players: { login: string; side: TurnSide }[]
   fen: string
   history: string[]
+  positions: string[]
   lastMove: ChessBoardView['lastMove']
   clocks: Record<TurnSide, number>
   mover: TurnSide | null
@@ -191,6 +192,7 @@ function applyMove(
   room.clocks = clocksAt(room, t)
   room.fen = done.fen
   room.history = [...room.history, done.san]
+  room.positions = [...room.positions, done.fen]
   room.lastMove = { from: move.from, to: move.to, captured: done.captured, check: done.check }
 
   const ended = outcomeOf(done.fen, side)
@@ -266,7 +268,12 @@ function view(room: MockTurnRoom): TurnRoom {
     board:
       room.status === 'lobby'
         ? null
-        : { fen: room.fen, lastMove: room.lastMove, history: room.history },
+        : {
+            fen: room.fen,
+            lastMove: room.lastMove,
+            history: room.history,
+            positions: room.positions,
+          },
     end: room.end,
     now: new Date(t).toISOString(),
     joinable: room.status === 'lobby' && room.players.length < 2,
@@ -316,6 +323,7 @@ export const turnsMock: Pick<
       ],
       fen: START_FEN,
       history: [],
+      positions: [],
       lastMove: null,
       clocks: { a: settings.minutes * 60_000, b: settings.minutes * 60_000 },
       mover: null,

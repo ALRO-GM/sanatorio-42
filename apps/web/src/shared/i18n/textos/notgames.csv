@@ -189,3 +189,9 @@ git.room.done,Curso de git: prueba de grupo ya superada,Prueba superada,Test pas
 git.room.apart,Curso de git: reglas del jefe final en la sala,"Jefe final: cada cual en un puesto a 4 filas y 4 columnas del resto (u otro clúster), sin hablar. Solo ves lo que escribes tú.","Final boss: everyone at a seat 4 rows and 4 columns away from the rest (or another cluster), no talking. You only see what you type.","Cap final: cadascú en un lloc a 4 files i 4 columnes de la resta (o un altre clúster), sense parlar. Només veus el que escrius tu.","Azken etsaia: bakoitza besteengandik 4 errenkada eta 4 zutabera dagoen postu batean (edo beste kluster batean), hitz egin gabe. Zuk idazten duzuna bakarrik ikusten duzu."
 git.room.number,Curso de git: el número de cada persona en la sala (sale en las tareas),nº {n},no. {n},núm. {n},{n}. zk.
 git.room.tasks,"Curso de git: título de las tareas, que hace cada persona",Lo que haces tú,What you do,El que fas tu,Zuk egiten duzuna
+notgames.chess.leaving,"Ajedrez: al acabar, cuenta atrás para volver a las salas",Vuelves a las salas en {n} s.,Back to the rooms in {n} s.,Tornes a les sales en {n} s.,{n} s barru geletara itzuliko zara.
+notgames.chess.review,Ajedrez: botón para repasar la partida acabada,Repasar la partida,Review the game,Repassa la partida,Errepasatu partida
+notgames.chess.reviewStart,"Ajedrez: repaso, la posición inicial",Posición inicial,Starting position,Posició inicial,Hasierako posizioa
+notgames.chess.reviewStep,"Ajedrez: repaso, qué jugada se ve; {move} en notación algebraica",Jugada {n} de {total}: {move},Move {n} of {total}: {move},Jugada {n} de {total}: {move},{total}tik {n}. jokaldia: {move}
+notgames.chess.reviewPrev,"Ajedrez: repaso, jugada anterior",Anterior,Previous,Anterior,Aurrekoa
+notgames.chess.reviewNext,"Ajedrez: repaso, jugada siguiente",Siguiente,Next,Següent,Hurrengoa

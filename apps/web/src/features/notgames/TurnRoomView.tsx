@@ -14,6 +14,7 @@ import { BOARD_STYLES, ChessBoard, loadBoardStyle, saveBoardStyle } from './Ches
 import { ChessTour } from './ChessTour'
 import type { BoardStyle } from './ChessBoard'
 import { SoundToggle } from './SoundToggle'
+import { START_FEN } from '../../shared/chess'
 import { useGameSounds } from './sounds'
 import { CodeText } from '../../shared/ui/CodeText'
 
@@ -44,6 +45,8 @@ export function TurnRoomView({ id, me }: { id: number; me: string }) {
   const offset = useRef(0)
   const action = useAction()
   const sounds = useGameSounds()
+  // Repasando la partida acabada: qué posición se ve (`null`, la de ahora).
+  const [step, setStep] = useState<number | null>(null)
 
   const take = useCallback(
     (next: TurnRoom) => {
@@ -96,6 +99,12 @@ export function TurnRoomView({ id, me }: { id: number; me: string }) {
   }
 
   const mine = room.players.find((p) => p.login === me)?.side ?? null
+  const positions = room.board?.positions
+  // Las posiciones de la partida, desde la inicial; las partidas viejas no las guardaban.
+  const frames =
+    positions !== undefined && positions.length === room.board?.history.length
+      ? [START_FEN, ...positions]
+      : null
   const run = (task: () => Promise<TurnRoom>): void => {
     void action.run(async () => {
       take(await task())
@@ -149,9 +158,18 @@ export function TurnRoomView({ id, me }: { id: number; me: string }) {
             <div className="turn-board-stack">
               {room.board !== null && (
                 <ChessBoard
-                  board={room.board}
+                  board={
+                    step === null || frames === null
+                      ? room.board
+                      : { ...room.board, fen: frames[step] ?? room.board.fen, lastMove: null }
+                  }
                   side={mine}
-                  canPlay={room.status === 'playing' && room.mover !== null && room.mover === mine}
+                  canPlay={
+                    step === null &&
+                    room.status === 'playing' &&
+                    room.mover !== null &&
+                    room.mover === mine
+                  }
                   style={style}
                   onMove={(move) => {
                     run(() => api.moveTurn(id, move))
@@ -193,7 +211,9 @@ export function TurnRoomView({ id, me }: { id: number; me: string }) {
             <PlayerClocks room={room} me={me} offset={offset.current} />
             {room.status === 'playing' && <TurnStatus room={room} me={me} mine={mine} />}
             {room.last !== null && room.question === null && <LastQuestion room={room} me={me} />}
-            {room.end !== null && <TurnFinal room={room} me={me} />}
+            {room.end !== null && (
+              <TurnFinal room={room} me={me} frames={frames} step={step} onStep={setStep} />
+            )}
             {room.board !== null && room.board.history.length > 0 && (
               <details className="turn-history">
                 <summary>{t('notgames.chess.moves', { n: room.board.history.length })}</summary>
@@ -501,13 +521,50 @@ function LastQuestion({ room, me }: { room: TurnRoom; me: string }) {
   )
 }
 
-function TurnFinal({ room, me }: { room: TurnRoom; me: string }) {
+/** Segundos que se queda la partida acabada en pantalla antes de volver a las salas. */
+const LEAVE_S = 20
+
+function TurnFinal({
+  room,
+  me,
+  frames,
+  step,
+  onStep,
+}: {
+  room: TurnRoom
+  me: string
+  /** Las posiciones para repasar la partida, o `null` si no se guardaron. */
+  frames: string[] | null
+  step: number | null
+  onStep: (step: number | null) => void
+}) {
   const { t } = useI18n()
+  const [left, setLeft] = useState(LEAVE_S)
   const end = room.end
+
+  // Al acabar se vuelve sola a las salas (#89), salvo que se esté repasando la partida.
+  useEffect(() => {
+    if (step !== null) return undefined
+    if (left <= 0) {
+      window.location.hash = notGamesHref()
+
+      return undefined
+    }
+
+    const timer = setTimeout(() => {
+      setLeft((value) => value - 1)
+    }, 1000)
+
+    return () => {
+      clearTimeout(timer)
+    }
+  }, [left, step])
 
   if (end === null) return null
 
   const winner = room.players.find((p) => p.side === end.winner)?.login ?? null
+  const total = frames === null ? 0 : frames.length - 1
+  const history = room.board?.history ?? []
 
   return (
     <article className="card quiz-final">
@@ -521,9 +578,60 @@ function TurnFinal({ room, me }: { room: TurnRoom; me: string }) {
             ? t('notgames.youWon')
             : t('notgames.winner', { names: winner })}
       </strong>
-      <a className="primary small" href={notGamesHref()}>
-        {t('notgames.again')}
-      </a>
+      {step === null ? (
+        <>
+          <p className="hint">{t('notgames.chess.leaving', { n: left })}</p>
+          <div className="actions">
+            <a className="primary small" href={notGamesHref()}>
+              {t('notgames.again')}
+            </a>
+            {frames !== null && total > 0 && (
+              <button
+                type="button"
+                className="pill"
+                onClick={() => {
+                  onStep(0)
+                }}
+              >
+                {t('notgames.chess.review')}
+              </button>
+            )}
+          </div>
+        </>
+      ) : (
+        <div className="turn-replay">
+          <p aria-live="polite">
+            {step === 0
+              ? t('notgames.chess.reviewStart')
+              : t('notgames.chess.reviewStep', { n: step, total, move: history[step - 1] ?? '' })}
+          </p>
+          <div className="actions">
+            <button
+              type="button"
+              className="pill"
+              disabled={step === 0}
+              onClick={() => {
+                onStep(step - 1)
+              }}
+            >
+              ‹ {t('notgames.chess.reviewPrev')}
+            </button>
+            <button
+              type="button"
+              className="pill"
+              disabled={step >= total}
+              onClick={() => {
+                onStep(step + 1)
+              }}
+            >
+              {t('notgames.chess.reviewNext')} ›
+            </button>
+            <a className="primary small" href={notGamesHref()}>
+              {t('notgames.again')}
+            </a>
+          </div>
+        </div>
+      )}
     </article>
   )
 }

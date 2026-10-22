@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/notgames.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-190 textos. «—» es que falta la traducción: sale en español.
+196 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -197,3 +197,9 @@ Generado desde `apps/web/src/shared/i18n/textos/notgames.csv` con
 | `git.room.apart` | Curso de git: reglas del jefe final en la sala | features/gitcourse/GateView, features/gitcourse/GitCourseTab, features/gitcourse/GroupRoom | Jefe final: cada cual en un puesto a 4 filas y 4 columnas del resto (u otro clúster), sin hablar. Solo ves lo que escribes tú. | Final boss: everyone at a seat 4 rows and 4 columns away from the rest (or another cluster), no talking. You only see what you type. | Cap final: cadascú en un lloc a 4 files i 4 columnes de la resta (o un altre clúster), sense parlar. Només veus el que escrius tu. | Azken etsaia: bakoitza besteengandik 4 errenkada eta 4 zutabera dagoen postu batean (edo beste kluster batean), hitz egin gabe. Zuk idazten duzuna bakarrik ikusten duzu. |
 | `git.room.number` | Curso de git: el número de cada persona en la sala (sale en las tareas) | features/gitcourse/GateView, features/gitcourse/GitCourseTab, features/gitcourse/GroupRoom | nº {n} | no. {n} | núm. {n} | {n}. zk. |
 | `git.room.tasks` | Curso de git: título de las tareas, que hace cada persona | features/gitcourse/GateView, features/gitcourse/GitCourseTab, features/gitcourse/GroupRoom | Lo que haces tú | What you do | El que fas tu | Zuk egiten duzuna |
+| `notgames.chess.leaving` | Ajedrez: al acabar, cuenta atrás para volver a las salas | features/notgames/TurnRoomView | Vuelves a las salas en {n} s. | Back to the rooms in {n} s. | Tornes a les sales en {n} s. | {n} s barru geletara itzuliko zara. |
+| `notgames.chess.review` | Ajedrez: botón para repasar la partida acabada | features/notgames/TurnRoomView | Repasar la partida | Review the game | Repassa la partida | Errepasatu partida |
+| `notgames.chess.reviewStart` | Ajedrez: repaso, la posición inicial | features/notgames/TurnRoomView | Posición inicial | Starting position | Posició inicial | Hasierako posizioa |
+| `notgames.chess.reviewStep` | Ajedrez: repaso, qué jugada se ve; {move} en notación algebraica | features/notgames/TurnRoomView | Jugada {n} de {total}: {move} | Move {n} of {total}: {move} | Jugada {n} de {total}: {move} | {total}tik {n}. jokaldia: {move} |
+| `notgames.chess.reviewPrev` | Ajedrez: repaso, jugada anterior | features/notgames/TurnRoomView | Anterior | Previous | Anterior | Aurrekoa |
+| `notgames.chess.reviewNext` | Ajedrez: repaso, jugada siguiente | features/notgames/TurnRoomView | Siguiente | Next | Següent | Hurrengoa |

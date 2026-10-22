@@ -211,6 +211,8 @@ describe('ajedrez: una partida', () => {
     expect(room.mover).toBeNull()
     expect(room.question?.options).toHaveLength(4)
     expect(room.board?.history).toEqual(['e4'])
+    // La posición de después, para repasar la partida al acabar.
+    expect(room.board?.positions).toEqual([room.board?.fen])
     // Con la pregunta, los relojes no corren.
     clock.advance(4_000)
     room = await chess.view(actor('ana'), id)
