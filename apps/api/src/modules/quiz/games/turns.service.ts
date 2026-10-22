@@ -27,7 +27,7 @@ import { createLocks } from '../../../core/lock.js'
 import { parse } from '../../../core/validation.js'
 import type { Concept } from '../bank/index.js'
 import type { QuizRepository } from '../quiz.repository.js'
-import { buildRound, levelOf, orderFor, pickConcepts } from '../quiz.rules.js'
+import { buildRound, levelOf, localizeRound, orderFor, pickConcepts } from '../quiz.rules.js'
 import type { Round } from '../quiz.rules.js'
 import {
   afterMove,
@@ -275,9 +275,12 @@ export function createTurnsService<Board, View>(options: TurnsServiceOptions<Boa
     const clocks = state === null ? null : clocksAt(state.turns, t)
     const question = state?.turns.question ?? null
     const mySide = sideOf(players, actor.login)
-    const round = state?.round ?? null
+    const lang = actor.lang ?? 'es'
+    const stored = state?.round ?? null
+    const round = stored === null ? null : localizeRound(stored, lang)
     const last = state?.turns.last ?? null
-    const lastRound = state?.lastRound ?? null
+    const storedLast = state?.lastRound ?? null
+    const lastRound = storedLast === null ? null : localizeRound(storedLast, lang)
 
     const playerView = (p: TurnPlayerRow): TurnPlayer => ({
       login: p.login,

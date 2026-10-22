@@ -9,6 +9,9 @@ import type { QuizDifficulty, QuizKinds, QuizPool } from '@sanatorio/contracts'
 
 import type { Concept, ConceptKind } from './bank/types.js'
 
+/** Para los juegos de `games/`, que no entran en `bank/` directamente. */
+export { localizeRound } from './bank/localize.js'
+
 export const LIVES = 3
 
 /** Segundos para contestar, según el tipo, si el concepto no dice otra cosa. */

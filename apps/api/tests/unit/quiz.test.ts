@@ -6,6 +6,8 @@ import { beforeEach, describe, expect, it } from 'vitest'
 
 import type { QuizRoom } from '@sanatorio/contracts'
 
+import { BANK_EN } from '../../src/modules/quiz/bank/en/index.js'
+import { REVIEW_EN } from '../../src/modules/quiz/bank/en/review.js'
 import type { Concept } from '../../src/modules/quiz/bank/types.js'
 import {
   fits,
@@ -459,6 +461,11 @@ describe('partidas de Not-games', () => {
       return typeof value === 'string' ? value : ''
     }
     const missed = await conceptOf(0)
+    // Con la web en inglés, la misma pregunta sale en inglés.
+    const english = { ...actor('ana'), lang: 'en' as const }
+    const shown = (await quiz.view(english, id)).question
+
+    expect(BANK_EN[missed]?.forms.flatMap((form) => form.ask)).toContain(shown?.prompt)
 
     await quiz.answer(actor('ana'), id, { question: 0, option: await wrongOf(room) })
 
@@ -471,6 +478,11 @@ describe('partidas de Not-games', () => {
     expect(review[0]?.example.length).toBeGreaterThan(5)
     // A otra persona no le sale.
     expect(await quiz.review(actor('leo'))).toEqual([])
+    // Y el Repaso, también en inglés.
+    expect((await quiz.review(english))[0]).toMatchObject({
+      title: REVIEW_EN[missed]?.title,
+      why: BANK_EN[missed]?.why,
+    })
 
     // Acertarlo después lo marca como superado (sigue a la vista, abajo).
     await db.execute({

@@ -48,12 +48,21 @@ export function apiUrl(path: string): string {
 /** Una petición ya comprobada: devuelve la respuesta o lanza `ApiError`. */
 export async function fetchApi(path: string, init: RequestInit = {}): Promise<Response> {
   let response: Response
+  // El idioma de la web (lo pone el proveedor de textos en <html lang>), para
+  // lo que llega ya escrito del servidor, como las preguntas de Not-games.
+  const headers = new Headers(init.headers)
+
+  headers.set(
+    'x-lang',
+    typeof document === 'undefined' ? 'es' : document.documentElement.lang || 'es',
+  )
 
   try {
     response = await fetch(BASE + path, {
       credentials: 'include',
       signal: AbortSignal.timeout(TIMEOUT_MS),
       ...init,
+      headers,
     })
   } catch (cause) {
     throw new ApiError('No se puede conectar con el servidor', { network: true, cause })

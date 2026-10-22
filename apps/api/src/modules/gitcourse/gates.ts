@@ -30,7 +30,11 @@ export type GateRound = {
 export type GateQuestions = {
   roundOf: (conceptId: string, random: () => number) => GateRound | null
   remember: (login: string, conceptId: string, correct: boolean, at: string) => Promise<void>
+  /** La pregunta en el idioma de quien la mira; sin esto, tal como se montó. */
+  localize?: <T extends GateRound>(round: T, lang: Lang) => T
 }
+
+type Lang = 'es' | 'en'
 
 /** Los conceptos del banco que enseña cada mundo del curso. */
 export const CONCEPTS_BY_WORLD: Readonly<Record<number, readonly string[]>> = {
@@ -140,9 +144,15 @@ export function createGateService(deps: {
 
     return at > deps.now() ? iso(at) : null
   }
-  const quizOf = (gate: string, state: Stored): GitGateQuiz => ({
+  const shown = (rounds: readonly GateRound[], lang: Lang): GateRound[] =>
+    rounds.map((round) => deps.questions.localize?.(round, lang) ?? round)
+  const quizOf = (gate: string, state: Stored, lang: Lang): GitGateQuiz => ({
     gate,
-    questions: (state.rounds ?? []).map(({ prompt, code, options }) => ({ prompt, code, options })),
+    questions: shown(state.rounds ?? [], lang).map(({ prompt, code, options }) => ({
+      prompt,
+      code,
+      options,
+    })),
     deadline: state.deadline ?? iso(deps.now()),
   })
 
@@ -172,7 +182,12 @@ export function createGateService(deps: {
       return states
     },
 
-    async start(login: string, id: string, stars: Record<string, number>): Promise<GitGateQuiz> {
+    async start(
+      login: string,
+      id: string,
+      stars: Record<string, number>,
+      lang: Lang = 'es',
+    ): Promise<GitGateQuiz> {
       const gate = gateOf(id)
 
       if (gate === undefined) throw domainError('not_found', 'Esa prueba no existe')
@@ -189,7 +204,7 @@ export function createGateService(deps: {
           : await settle(login, id, before)
 
       if (state.passedAt !== null) throw domainError('conflict', 'Este test ya lo pasaste')
-      if (state.rounds !== null) return quizOf(id, state)
+      if (state.rounds !== null) return quizOf(id, state, lang)
 
       const retry = retryOf(state)
 
@@ -212,13 +227,14 @@ export function createGateService(deps: {
 
       await deps.gates.save(login, id, started)
 
-      return quizOf(id, started)
+      return quizOf(id, started, lang)
     },
 
     async answer(
       login: string,
       id: string,
       input: unknown,
+      lang: Lang = 'es',
     ): Promise<Omit<GitGateResult, 'course'>> {
       const { answers } = parse(answerSchema, input)
       const stored = (await deps.gates.all(login)).get(id)
@@ -231,7 +247,7 @@ export function createGateService(deps: {
 
       const late = Date.parse(deadline) < deps.now()
       const at = iso(deps.now())
-      const review = rounds.map((round, index) => ({
+      const review = shown(rounds, lang).map((round, index) => ({
         prompt: round.prompt,
         code: round.code,
         options: round.options,

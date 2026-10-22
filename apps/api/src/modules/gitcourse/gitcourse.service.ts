@@ -135,13 +135,13 @@ function gateActions(service: {
     async startGate(actor: Actor, id: string): Promise<GitGateQuiz> {
       const current = await service.seated(actor.login)
 
-      return service.gates.start(actor.login, id, current.stars)
+      return service.gates.start(actor.login, id, current.stars, actor.lang)
     },
 
     async answerGate(actor: Actor, id: string, input: unknown): Promise<GitGateResult> {
       await service.seated(actor.login)
 
-      const result = await service.gates.answer(actor.login, id, input)
+      const result = await service.gates.answer(actor.login, id, input, actor.lang)
 
       return { ...result, course: await service.course(actor.login) }
     },

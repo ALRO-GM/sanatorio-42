@@ -11,6 +11,7 @@ import { createChessService, openTurnRoomsOf } from './games/index.js'
 import type { ChessService } from './games/index.js'
 import { registerTurnRoutes } from './games/turns.routes.js'
 import { createQuizRepository } from './quiz.repository.js'
+import { localizeRound } from './bank/localize.js'
 import { buildRound } from './quiz.rules.js'
 import type { Round } from './quiz.rules.js'
 import { registerQuizRoutes } from './quiz.routes.js'
@@ -34,6 +35,8 @@ export type QuizModule = AppModule & {
     roundOf: (conceptId: string, random: () => number) => Round | null
     /** Apunta un acierto o un fallo para el Repaso de esa persona. */
     remember: (login: string, conceptId: string, correct: boolean, at: string) => Promise<void>
+    /** Una pregunta ya montada, en el idioma de quien la mira. */
+    localize: typeof localizeRound
   }
 }
 
@@ -81,6 +84,7 @@ export function createQuizModule(deps: QuizModuleDeps): QuizModule {
         return concept === undefined ? null : buildRound(concept, random)
       },
       remember: (login, conceptId, correct, at) => quiz.remember(login, conceptId, correct, at),
+      localize: localizeRound,
     },
     routes: (app, context) => {
       registerQuizRoutes(app, context, service)

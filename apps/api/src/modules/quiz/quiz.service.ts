@@ -27,6 +27,7 @@ import { createLocks } from '../../core/lock.js'
 import { parse } from '../../core/validation.js'
 import type { Concept, ReviewEntry } from './bank/types.js'
 import type { PlayerRow, QuizRepository, RoomRow, RoundRow } from './quiz.repository.js'
+import { localizeRound, localizeText, reviewIn } from './bank/localize.js'
 import { buildRound, levelOf, LIVES, orderFor, pickConcepts, pointsFor } from './quiz.rules.js'
 
 type QuizServiceOptions = {
@@ -296,12 +297,13 @@ export function createQuizService(options: QuizServiceOptions) {
   function questionView(
     actor: Actor,
     room: RoomRow,
-    round: RoundRow,
+    stored: RoundRow,
     answers: Awaited<ReturnType<QuizRepository['answers']>>,
     players: readonly PlayerRow[],
     total: number,
     t: number,
   ): QuizQuestion {
+    const round = localizeRound(stored, actor.lang ?? 'es')
     const startsAt = round.startsAt ?? t
     const waiting = t < startsAt
     const reveal = room.phase === 'reveal'
@@ -561,7 +563,8 @@ export function createQuizService(options: QuizServiceOptions) {
 
       for (const miss of await quiz.misses(actor.login)) {
         const concept = concepts.get(miss.conceptId)
-        const entry = options.review?.[miss.conceptId]
+        const lang = actor.lang ?? 'es'
+        const entry = reviewIn(miss.conceptId, lang, options.review)
 
         // Un concepto que ya no está en el banco no se puede repasar.
         if (concept === undefined || entry === undefined) continue
@@ -570,8 +573,8 @@ export function createQuizService(options: QuizServiceOptions) {
           conceptId: concept.id,
           topic: concept.topic,
           ...entry,
-          why: concept.why,
-          question: concept.forms[0]?.ask[0] ?? '',
+          why: localizeText(concept.id, concept.why, lang),
+          question: localizeText(concept.id, concept.forms[0]?.ask[0] ?? '', lang),
           misses: miss.misses,
           lastMissedAt: miss.lastMissedAt,
           mastered: miss.lastRightAt !== null && miss.lastRightAt >= miss.lastMissedAt,

@@ -64,3 +64,16 @@ export type ReviewEntry = {
   definition: string
   example: string
 }
+
+/**
+ * Un concepto en otro idioma: los mismos textos, en el mismo orden y en la
+ * misma cantidad que el original (una pregunta se monta por posiciones y se
+ * enseña en el idioma de cada cual). `code`, solo si el código lleva texto que
+ * traducir.
+ */
+export type ConceptText = {
+  forms: readonly { ask: readonly string[]; right: readonly string[]; wrong?: readonly string[] }[]
+  wrong: readonly string[]
+  why: string
+  code?: string
+}

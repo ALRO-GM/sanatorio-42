@@ -14,8 +14,9 @@ import { CodeText } from '../../shared/ui/CodeText'
  * acertaste después queda aparte, como superado.
  */
 export function ReviewTab() {
-  const { t } = useI18n()
-  const review = useAsync(() => api.getQuizReview(), [])
+  const { t, lang } = useI18n()
+  // Llega escrito en el idioma de la web: al cambiarlo, se vuelve a pedir.
+  const review = useAsync(() => api.getQuizReview(), [lang])
   const [showMastered, setShowMastered] = useState(false)
   const items = review.data ?? []
   const pending = items.filter((item) => !item.mastered)

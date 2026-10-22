@@ -13,6 +13,8 @@ export type Actor = {
   campusId: number
   /** `true` si su login está en `ADMIN_LOGINS`. */
   admin: boolean
+  /** El idioma de su web (cabecera `x-lang`), para lo que se le enseña ya escrito. */
+  lang?: 'es' | 'en'
 }
 
 /**
