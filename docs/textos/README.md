@@ -24,7 +24,7 @@ Cómo se trabaja con ellas: [docs/textos.md](../textos.md).
 | [sala-de-espera](sala-de-espera.md) | 46 | 0 | 0 | 0 |
 | [tablon](tablon.md) | 93 | 0 | 0 | 0 |
 | [terapia](terapia.md) | 60 | 0 | 0 | 0 |
-| [juego](juego.md) | 491 | 0 | 491 | 491 |
+| [juego](juego.md) | 488 | 0 | 488 | 488 |
 
 El panel de gestión (`admin.*`, `quota.*`, `staff.*`) solo lo ve quien
 administra y se deja en español a propósito.

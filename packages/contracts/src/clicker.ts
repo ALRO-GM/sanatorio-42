@@ -32,8 +32,6 @@ export type ClickerState = {
    * el juego (`POST /clicker/seizure/ack`). `null` si no hay nada que contar.
    */
   seizure: ClickerSeizure | null
-  /** Líneas que hay en la bolsa común de lo requisado: se reparten en el juego. */
-  pool: number
   /**
    * Logins que salen en las noticias del juego: con quién más se ha corregido
    * quien juega (en los dos sentidos) y, si son pocos, quienes más corrigen en
@@ -100,14 +98,6 @@ export type ClickerReview = {
 
 /** Lo que decide quien administra sobre un salto sospechoso. */
 export type ClickerVerdict = 'cheat' | 'likely' | 'clean'
-
-/** Respuesta de `POST /clicker/pool/claim`. */
-export type ClickerPoolClaim = {
-  /** Lo que se lleva quien lo ha cogido. */
-  amount: number
-  /** Lo que queda en la bolsa. */
-  pool: number
-}
 
 /** Cuerpo de `PUT /clicker/save`: la partida y las cifras que van a la clasificación. */
 export type ClickerSaveInput = {

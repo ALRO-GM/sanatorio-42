@@ -53,7 +53,6 @@ import type {
   ClickerCheats,
   ClickerGameView,
   ClickerSanction,
-  ClickerPoolClaim,
   ClickerReview,
   ClickerSaved,
   ClickerSaveInput,
@@ -374,8 +373,6 @@ export type Api = {
   /** Las revisiones que tienes que contestar. */
   getClickerReviews: () => Promise<ClickerReview[]>
   defendClickerReview: (id: number, answer: string) => Promise<void>
-  /** Coge el botín de la bolsa común. */
-  claimClickerPool: () => Promise<ClickerPoolClaim>
   /** La partida de alguien, para verla. Solo admins. */
   getClickerGameOf: (login: string) => Promise<ClickerGameView>
   /** Sanción a mano: le deja ese código y, si se pide, sin edificios ni mejoras. */

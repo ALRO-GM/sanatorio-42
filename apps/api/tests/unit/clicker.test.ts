@@ -96,7 +96,6 @@ describe('code clicker', () => {
       caught: 0,
       saleDue: false,
       seizure: null,
-      pool: 0,
       names: [],
     })
 
@@ -842,40 +841,35 @@ describe('code clicker', () => {
       expect(await clicker.state(ana)).toMatchObject({ seizure: null, saleDue: true })
     })
 
-    it('el botín de la bolsa: diez commits de la suerte, sin pasar de lo que hay y cada cinco minutos', async () => {
-      const { clicker } = services
+    it('un reparto de la policía cuenta como escrito, aunque llegue un guardado tarde', async () => {
+      // Le toca un reparto grande: mucho más de lo que escribe en un minuto.
+      const gift = 5e8
 
-      // Con 1 000 líneas sin gastar y 12 por segundo, un commit de la suerte da
-      // 1 000 × 0,15 + 13 (lo menor de las dos cuentas, más trece).
-      clock.advance(MINUTE)
-      await send({ code: 1000 })
-
-      // Nada en la bolsa: nada que coger.
-      await expectCode(clicker.claimPool(ana), 'conflict')
-      await db.execute('UPDATE clicker_pool SET amount = 1e6 WHERE id = 1')
-
-      const first = await clicker.claimPool(ana)
-
-      expect(first).toEqual({
-        amount: 10 * (1000 * 0.15 + 13),
-        pool: 1e6 - 10 * (1000 * 0.15 + 13),
+      await db.execute({
+        sql: 'UPDATE clicker SET pending_gift = ? WHERE login = ?',
+        args: [gift, 'ana'],
       })
-      await expectCode(clicker.claimPool(ana), 'conflict')
-
-      // Lo cobrado vale como escrito: el siguiente guardado no es trampa.
       clock.advance(MINUTE)
-      expect(await send({ total: 1500 + first.amount, code: 1000 + first.amount })).toEqual({
+      // El guardado que lo trae: la web aún no lo ha sumado.
+      expect(await send({ total: 2000, code: 1500 })).toEqual({ caught: 0, refused: false })
+      // Se cruzan dos guardados: este salió antes de sumarlo...
+      clock.advance(MINUTE)
+      expect(await send({ total: 2500, code: 2000 })).toEqual({ caught: 0, refused: false })
+      // ...y este ya lo lleva: no es una trampa.
+      clock.advance(MINUTE)
+      expect(await send({ total: 3000 + gift, code: 2500 + gift })).toEqual({
         caught: 0,
         refused: false,
       })
 
-      // A los cinco minutos, otra vez; y si queda poco, se lleva lo que queda.
-      clock.advance(5 * MINUTE)
-      await db.execute('UPDATE clicker_pool SET amount = 50 WHERE id = 1')
-      expect(await clicker.claimPool(ana)).toEqual({ amount: 50, pool: 0 })
-
-      // Quien no juega no coge nada.
-      await expectCode(clicker.claimPool(actor('leo')), 'forbidden')
+      // Pasado un rato sin repartos, lo mismo de golpe sí lo es.
+      clock.advance(30 * MINUTE)
+      expect(await send({ total: 4000 + gift, code: 3500 + gift })).toMatchObject({ caught: 0 })
+      clock.advance(MINUTE)
+      expect(await send({ total: 4500 + 2 * gift, code: 4000 + 2 * gift })).toMatchObject({
+        caught: 1,
+        refused: true,
+      })
     })
 
     it('pulsar más que una persona: un minuto a más de 50 por segundo', async () => {

@@ -55,7 +55,6 @@ const state: ClickerState = {
         }
       : null,
   // Algo en la bolsa común, para que la placa del botín salga en la demostración.
-  pool: 2.5e6,
   names: ['jdoe', 'rsoto', 'mlopez', 'agarcia'],
 }
 /** La revisión de mentira que hay que contestar con `?secreto=revision`. */
@@ -132,7 +131,6 @@ export const clickerMock: Pick<
   | 'reviewClickerAlert'
   | 'getClickerReviews'
   | 'defendClickerReview'
-  | 'claimClickerPool'
   | 'ackClickerSeizure'
   | 'getClickerGameOf'
   | 'sanctionClicker'
@@ -493,17 +491,6 @@ export const clickerMock: Pick<
     await delay(120)
     if (answer.trim().length < 20) throw fail(400, 'Cuéntalo con un poco más de detalle')
     reviews = reviews.filter((review) => review.id !== id)
-  },
-
-  async claimClickerPool() {
-    await delay(120)
-
-    const amount = Math.min(state.pool, 5e4)
-
-    if (amount <= 0) throw fail(409, 'La bolsa está vacía')
-    state.pool -= amount
-
-    return { amount, pool: state.pool }
   },
 
   // Las partidas de mentira de los demás: con algo comprado, para que se vea.

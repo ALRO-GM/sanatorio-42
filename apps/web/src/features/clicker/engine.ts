@@ -94,7 +94,7 @@ export type Game = {
 }
 
 /** Azar entre 0 y 1. Se pasa como argumento para poder fijarlo en los tests. */
-export type Random = () => number
+type Random = () => number
 
 export function newGame(now: number, random: Random = Math.random): Game {
   return {

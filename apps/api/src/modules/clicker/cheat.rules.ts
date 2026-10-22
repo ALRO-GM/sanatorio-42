@@ -169,8 +169,11 @@ export function verdict(
     perSecond: number
     at: number
     ledger: Ledger | null
-    /** Lo cobrado de la bolsa común desde ese guardado: vale como escrito. */
-    bonus?: number
+    /**
+     * Lo cobrado de fuera hace poco (los repartos de la policía): la web lo suma
+     * como escrito al recibirlo, así que vale como escrito.
+     */
+    credited?: number
   },
   sent: Figures,
   ledger: Ledger,
@@ -212,7 +215,7 @@ export function verdict(
     (before.ledger?.bugs ?? 0) * BUG_BACK +
     13 * goldens +
     1000 +
-    (before.bonus ?? 0)
+    (before.credited ?? 0)
 
   return gain > allowed ? 'rate' : null
 }
@@ -234,26 +237,9 @@ export function hackerTitle(
   return caught === 1 ? 'hacker_etico' : caught === 2 ? 'hacker_poco_etico' : 'hacker_cazado'
 }
 
-/** Lo que da un «commit de la suerte»: como en la web (`openGolden`, `data.ts`). */
-const LUCKY_SHARE = 0.15
-const LUCKY_SECONDS = 900
-
-/** Cuántos commits de la suerte vale coger el botín de la bolsa común. */
-const POOL_LUCKY_TIMES = 10
-
-/** Lo que se lleva alguien del botín: diez commits de la suerte, sin pasar de lo que hay. */
-export function poolShare(code: number, perSecond: number, pool: number): number {
-  const lucky = Math.min(code * LUCKY_SHARE, perSecond * LUCKY_SECONDS) + 13
-
-  return Math.max(0, Math.min(pool, POOL_LUCKY_TIMES * lucky))
-}
-
-/** Cada cuánto puede coger alguien del botín, como poco: lo que tarda en salir una dorada. */
-export const POOL_EVERY_MS = GOLDEN_EVERY_S * 1000
-
 /**
  * Lo que vale lo que se requisa: lo que costaron los edificios. Una partida con
- * edificios imposibles (`holdings` infinito) no aporta nada a la bolsa.
+ * edificios imposibles (`holdings` infinito) no aporta nada al reparto.
  */
 export function seizedValue(ledger: Ledger | null): number {
   return ledger === null || !Number.isFinite(ledger.holdings) ? 0 : ledger.holdings * SALE_REFUND

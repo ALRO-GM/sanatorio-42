@@ -90,11 +90,6 @@ export function createClickerModule(deps: ClickerServiceOptions): ClickerModule 
         return reply.code(204).send()
       })
 
-      /** `POST /clicker/pool/claim` → coge el botín de la bolsa común. */
-      app.post('/clicker/pool/claim', async (request, reply) => {
-        return reply.send(await service.claimPool(await session.actor(request)))
-      })
-
       /** `POST /clicker/seizure/ack` → ya has visto el aviso de la policía del código. 204. */
       app.post('/clicker/seizure/ack', async (request, reply) => {
         await service.ackSeizure(await session.actor(request))

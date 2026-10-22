@@ -227,9 +227,9 @@ despliegue espera a la CI).
 
 - ~~Intentos de examen~~: comprobado el 2026-10-22: la copia de fondo acabó el
   2026-10-17 (25 829 intentos) y siguen entrando (81 desde el 18).
-- **Bolsa común de Code Clicker**: con la política nueva ya no se llena y su
-  placa no sale. Preguntar a Alberto si se quita del todo (`loot.ts`,
-  `clicker_pool`, `POST /clicker/pool/claim`).
+- ~~Bolsa común de Code Clicker~~: quitada el 2026-10-22 (migración 63). No
+  estaba dormida (9,9·10¹⁵ líneas) y cobrarla a la vez que se guardaba daba
+  trampas que no lo eran.
 - **Saltos de Code Clicker pendientes** en el panel (55 a 2026-10-16): los
   revisa Alberto.
 - **Cifras de los límites** (se cambian desde el panel, pestaña "Consumo"): el

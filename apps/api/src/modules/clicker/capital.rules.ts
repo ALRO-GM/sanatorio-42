@@ -29,6 +29,8 @@ const TRACE_S = 30
  * recibir la respuesta del guardado, y su reloj no es el de la API.
  */
 const GIFT_SLACK_S = AHEAD_S
+/** Cuánto antes del guardado anterior cuenta un reparto como aún por llegar. */
+const CREDIT_SLACK_S = 15 * 60
 /** Lo que se recuerdan los repartos cobrados: lo mismo que el historial que llega. */
 const GIFT_MEMORY_S = PAST_S
 
@@ -37,6 +39,19 @@ export function rememberGifts(gifts: readonly Gift[], second: number, amount: nu
   const kept = gifts.filter(([at]) => at >= second - GIFT_MEMORY_S)
 
   return amount > 0 ? [...kept, [second, amount]] : kept
+}
+
+/**
+ * Lo que se ha cobrado de los repartos desde poco antes de `second`. La web
+ * suma un reparto al recibir la respuesta del guardado que lo trae, así que
+ * puede llegar en el guardado siguiente o, si se cruzan, en el de después: se
+ * cuenta con margen para no tomarlo por una trampa.
+ */
+export function creditedSince(gifts: readonly Gift[], second: number): number {
+  return gifts.reduce(
+    (sum, [at, amount]) => (at >= second - CREDIT_SLACK_S ? sum + amount : sum),
+    0,
+  )
 }
 
 /** Lee la lista guardada; lo que no sea una lista de pares de números, fuera. */

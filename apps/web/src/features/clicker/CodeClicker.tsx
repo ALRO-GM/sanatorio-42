@@ -57,8 +57,6 @@ import {
   donationBonus,
 } from './engine'
 import type { Game } from './engine'
-import { lootStep, lootTaken } from './loot'
-import type { LootState } from './loot'
 import { buildingShare, levelProgress, reach } from './insight'
 import { Backdrop, Coffee, CursorRing, drinkOf, hueOf, Skyline } from './scene'
 import { Mini, miniOn, setMini } from './Mini'
@@ -210,12 +208,15 @@ export function CodeClicker({
   // Las pulsaciones contadas segundo a segundo, igual: la API mira cada minuto seguido.
   const clickSamples = useRef<[number, number][]>([])
   const reload = useRef<() => void>(() => undefined)
+  // Un paso del reloj del juego, para ponerlo al día justo antes de guardar.
+  const step = useRef<() => void>(() => undefined)
+  // Un guardado en camino, y si ha quedado otro pendiente detrás.
+  const sending = useRef(false)
+  const again = useRef(false)
+  const saveAgain = useRef<() => void>(() => undefined)
   const counter = useRef(0)
   const plus = useRef(egg.plus)
   const heard = useRef(false)
-  // La bolsa común de lo requisado y la placa del botín (`loot.ts`).
-  const pool = useRef(0)
-  const loot = useRef<LootState>(lootTaken(Date.now(), Math.random))
 
   if (session.current === '') session.current = newSession()
 
@@ -250,12 +251,29 @@ export function CodeClicker({
 
       if (!toServer || rev === null) return
 
+      // Nunca dos a la vez: si se cruzan, un reparto que trae la respuesta de uno
+      // no va en el otro y las cuentas de la API no cuadran. El de detrás espera.
+      if (sending.current) {
+        again.current = true
+
+        return
+      }
+
+      // Al volver de una pausa (el portátil dormido, la pestaña congelada), el
+      // reloj del juego puede ir por detrás del de los guardados: se pone al día
+      // antes, para que lo escrito mientras tanto vaya en este guardado y no de
+      // golpe en el siguiente, que parecería una trampa.
+      step.current()
+
+      const fresh = serialize(current)
       const sent = [...samples.current]
       const sentClicks = [...clickSamples.current]
 
+      sending.current = true
+
       api
         .saveClicker({
-          save: saved,
+          save: fresh,
           rev,
           session: session.current,
           total: current.before + current.total,
@@ -308,6 +326,13 @@ export function CodeClicker({
             }
           },
         )
+        .finally(() => {
+          sending.current = false
+          if (again.current) {
+            again.current = false
+            saveAgain.current()
+          }
+        })
     },
     [spectate, toast, ui, lang],
   )
@@ -342,7 +367,6 @@ export function CodeClicker({
         const state = await api.getClicker()
 
         names.current = state.names
-        pool.current = state.pool
 
         if (game.current === null || replace) {
           // Los puntos de la partida que se deja no valen para la que entra.
@@ -392,6 +416,9 @@ export function CodeClicker({
   reload.current = () => {
     void load(true)
   }
+  saveAgain.current = () => {
+    save(true)
+  }
 
   useEffect(() => {
     void load(false)
@@ -413,24 +440,27 @@ export function CodeClicker({
   // El reloj del juego: aparte de los guardados, para que cambiar de ritmo no
   // los reinicie.
   useEffect(() => {
+    step.current = () => {
+      const current = game.current
+
+      if (current === null) return
+
+      for (const id of tick(current, Date.now(), Math.random, plus.current, caught.current)) {
+        const [title, text] = achievementText(id, lang)
+
+        toast({ icon: 'trophy', title, text, tier: ACHIEVEMENTS.indexOf(id) % 11 })
+        // Fuera del juego no suena nada: allí no se ha venido a jugar.
+        play('achievement', heard.current && !background)
+      }
+
+      sample(samples.current, Date.now(), capitalOf(current))
+      sample(clickSamples.current, Date.now(), current.clicks)
+      setFrame((value) => value + 1)
+    }
+
     const frame = window.setInterval(
       () => {
-        const current = game.current
-
-        if (current === null) return
-
-        for (const id of tick(current, Date.now(), Math.random, plus.current, caught.current)) {
-          const [title, text] = achievementText(id, lang)
-
-          toast({ icon: 'trophy', title, text, tier: ACHIEVEMENTS.indexOf(id) % 11 })
-          // Fuera del juego no suena nada: allí no se ha venido a jugar.
-          play('achievement', heard.current && !background)
-        }
-
-        sample(samples.current, Date.now(), capitalOf(current))
-        sample(clickSamples.current, Date.now(), current.clicks)
-        loot.current = lootStep(loot.current, Date.now(), pool.current, Math.random)
-        setFrame((value) => value + 1)
+        step.current()
       },
       // Fuera del juego o sin nadie mirando, basta con un fotograma por segundo.
       background || still ? BACKGROUND_FRAME_MS : FRAME_MS,
@@ -705,34 +735,6 @@ export function CodeClicker({
     }, 3000)
     toast({ icon: bad ? 'bug' : 'golden', title: ui(bad ? 'wrath' : 'golden'), text })
     play(bad ? 'bad' : 'golden', sound)
-  }
-
-  /** Coge la placa del botín: la API dice cuánto se lleva de la bolsa común. */
-  const grab = (): void => {
-    const at = loot.current.up
-
-    if (at === null) return
-
-    loot.current = lootTaken(Date.now(), Math.random)
-    api.claimClickerPool().then(
-      (claim) => {
-        const text = ui('fx_loot', { n: number(claim.amount, 1) })
-        const id = ++counter.current
-
-        // La partida que haya ahora: si se ha recargado mientras tanto, va a esa.
-        if (game.current !== null) receive(game.current, claim.amount)
-        pool.current = claim.pool
-        setBursts((list) => [...list, { id, x: at.x * 100, y: at.y * 100, text, bad: false }])
-        window.setTimeout(() => {
-          setBursts((list) => list.filter((burst) => burst.id !== id))
-        }, 3000)
-        toast({ icon: 'loot', title: ui('loot'), text })
-        play('golden', sound)
-      },
-      () => {
-        toast({ icon: 'loot', title: ui('loot'), text: ui('lootGone') })
-      },
-    )
   }
 
   const bought = (id: string, done: boolean, upgrade: boolean): void => {
@@ -1017,19 +1019,6 @@ export function CodeClicker({
             >
               <span>
                 <Tile icon={current.goldenUp.wrath ? 'bug' : 'golden'} size={64} />
-              </span>
-            </button>
-          )}
-          {loot.current.up !== null && (
-            <button
-              type="button"
-              className="cc-golden cc-loot"
-              style={{ left: `${loot.current.up.x * 100}%`, top: `${loot.current.up.y * 100}%` }}
-              aria-label={ui('loot')}
-              onClick={grab}
-            >
-              <span>
-                <Tile icon="loot" size={64} />
               </span>
             </button>
           )}

@@ -60,7 +60,6 @@ describe('migraciones', () => {
       'clicker_cheat_log',
       'clicker_cheats',
       'clicker_clicks',
-      'clicker_pool',
       'conversation_marks',
       'corrections',
       'curriculum_votes',

@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/juego.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-491 textos. «—» es que falta la traducción: sale en español.
+488 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -124,9 +124,6 @@ Generado desde `apps/web/src/shared/i18n/textos/juego.csv` con
 | `game.ui.policeReview` | Juego: texto de la interfaz | features/clicker/texts | Quien administra ha revisado tu partida y no cuadra: | Whoever runs the site reviewed your game and it does not add up: | — | — |
 | `game.ui.policeJump` | Juego: texto de la interfaz | features/clicker/texts | tu capital pasó de {from} a {to} en {seconds} s, con una producción de {rate} por segundo | your capital went from {from} to {to} in {seconds} s, producing {rate} per second | — | — |
 | `game.ui.policeNoGolden` | Juego: texto de la interfaz | features/clicker/texts | sin ninguna pull request dorada abierta | with no golden pull request open | — | — |
-| `game.ui.loot` | Juego: texto de la interfaz | features/clicker/texts | Botín de los tramposos | Cheaters’ loot | — | — |
-| `game.ui.fx_loot` | Juego: texto de la interfaz | features/clicker/texts | Recuperas {n} líneas requisadas | You recover {n} seized lines | — | — |
-| `game.ui.lootGone` | Juego: texto de la interfaz | features/clicker/texts | Alguien ha llegado antes al botín | Someone got to the loot first | — | — |
 | `game.ui.offline` | Juego: texto de la interfaz | features/clicker/texts | Sin conexión: la partida se guarda solo en este navegador hasta que vuelva. | Offline: the game is saved only in this browser until the connection is back. | — | — |
 | `game.ui.upTier` | Juego: texto de la interfaz | features/clicker/texts | {building}: escriben el doble. | {building}: they write twice as much. | — | — |
 | `game.ui.upCursor` | Juego: texto de la interfaz | features/clicker/texts | El cursor y cada pulsación escriben el doble. | The cursor and every key press write twice as much. | — | — |

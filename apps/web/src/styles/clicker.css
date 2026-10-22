@@ -295,10 +295,6 @@
 .cc-golden.wrath {
   filter: drop-shadow(0 0 14px #ff3b3b);
 }
-/* El botín de la policía del código: azul de placa en vez de dorado. */
-.cc-golden.cc-loot {
-  filter: drop-shadow(0 0 14px #4f8dff);
-}
 
 /* --- El centro: filas, estadísticas, logros y clasificación ------------------ */
 .cc-rows {

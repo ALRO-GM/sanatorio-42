@@ -14,7 +14,6 @@ import type {
   ClickerEvidence,
   ClickerGameView,
   ClickerPlayer,
-  ClickerPoolClaim,
   ClickerRank,
   ClickerReview,
   ClickerSaved,
@@ -40,6 +39,7 @@ import type { ReplicaRepository } from '../replica/index.js'
 import {
   clean,
   coarse,
+  creditedSince,
   FINE_FOR_S,
   HOURLY_FOR_S,
   jump,
@@ -49,16 +49,7 @@ import {
 } from './capital.rules.js'
 import { CLICK_HISTORY_S, overClicked } from './clicks.rules.js'
 import type { ClickSample } from './clicks.rules.js'
-import {
-  hackerTitle,
-  POOL_EVERY_MS,
-  poolShare,
-  readSave,
-  giftShare,
-  seizedValue,
-  wealthOf,
-  verdict,
-} from './cheat.rules.js'
+import { hackerTitle, readSave, giftShare, seizedValue, wealthOf, verdict } from './cheat.rules.js'
 
 /** Pulsaciones de la cruz que abren la pregunta de las pastillas. */
 const PLUS_GOAL = 42
@@ -218,10 +209,6 @@ export function createClickerService(options: ClickerServiceOptions) {
       : null
   }
 
-  /** Lo que hay en la bolsa común. */
-  const poolAmount = async (): Promise<number> =>
-    Number((await db.execute('SELECT amount FROM clicker_pool WHERE id = 1')).rows[0]?.amount ?? 0)
-
   /**
    * La política de trampas (`SALE_REFUND`): la web vuelve a la última partida
    * buena y vende al cargar todos sus edificios (`saleDue`); se le da la mitad de
@@ -374,7 +361,6 @@ export function createClickerService(options: ClickerServiceOptions) {
         caught: toNumber(found?.caught ?? 0),
         saleDue: toNumber(found?.sale_due ?? 0) === 1,
         seizure: stored(found?.seizure) as ClickerSeizure | null,
-        pool: pill === 'red' ? await poolAmount() : 0,
         // Los nombres solo hacen falta dentro del juego.
         names: pill === 'red' ? await namesFor(actor) : [],
       }
@@ -473,7 +459,10 @@ export function createClickerService(options: ClickerServiceOptions) {
             perSecond: Number(found?.per_second ?? 0),
             at: Date.parse(toText(found?.updated_at ?? iso())),
             ledger: typeof found?.save === 'string' ? readSave(found.save) : null,
-            bonus: Number(found?.pool_bonus ?? 0),
+            credited: creditedSince(
+              readGifts(found?.gifts),
+              Date.parse(toText(found?.updated_at ?? iso())) / 1000,
+            ),
           },
           sent,
           ledger,
@@ -649,8 +638,8 @@ export function createClickerService(options: ClickerServiceOptions) {
         )
       }
 
-      // Lo que le llega del reparto se suma en la web, y vale como escrito en el
-      // siguiente guardado (`pool_bonus`).
+      // Lo que le llega del reparto se suma en la web, y vale como escrito en los
+      // guardados siguientes (`gifts`, `creditedSince`).
       return {
         rev: toNumber(saved?.rev ?? rev),
         caught,
@@ -911,51 +900,6 @@ export function createClickerService(options: ClickerServiceOptions) {
         from: actor.login,
         text: answer,
       })
-    },
-
-    /**
-     * Coge el botín de la bolsa común: diez commits de la suerte (según su
-     * última partida guardada), sin pasar de lo que hay, y como mucho una vez
-     * cada cinco minutos. Lo cobrado vale como escrito en el siguiente guardado.
-     *
-     * @throws {DomainError} `forbidden` si no eligió la roja; `conflict` si es pronto
-     *   o la bolsa está vacía.
-     */
-    async claimPool(actor: Actor): Promise<ClickerPoolClaim> {
-      const found = await row(actor.login)
-
-      if (pillOf(found) !== 'red') throw domainError('forbidden', 'Esto no existe')
-
-      const last =
-        typeof found?.pool_claimed_at === 'string' ? Date.parse(found.pool_claimed_at) : 0
-
-      if (now() - last < POOL_EVERY_MS)
-        throw domainError('conflict', 'Ya has cogido botín hace poco')
-
-      const ledger = typeof found?.save === 'string' ? readSave(found.save) : null
-      const amount = poolShare(
-        ledger?.code ?? 0,
-        Number(found?.per_second ?? 0),
-        await poolAmount(),
-      )
-
-      if (amount <= 0) throw domainError('conflict', 'La bolsa está vacía')
-
-      // Se descuenta solo si sigue habiendo: dos a la vez no sacan más de lo que hay.
-      const taken = await db.execute({
-        sql: `UPDATE clicker_pool SET amount = amount - ?, updated_at = ?
-              WHERE id = 1 AND amount >= ? RETURNING amount`,
-        args: [amount, iso(), amount],
-      })
-
-      if (taken.rows[0] === undefined) throw domainError('conflict', 'La bolsa está vacía')
-
-      await db.execute({
-        sql: `UPDATE clicker SET pool_bonus = pool_bonus + ?, pool_claimed_at = ? WHERE login = ?`,
-        args: [amount, iso(), actor.login],
-      })
-
-      return { amount, pool: Number(taken.rows[0].amount) }
     },
 
     /**
