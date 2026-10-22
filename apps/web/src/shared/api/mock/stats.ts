@@ -4,7 +4,15 @@
  * mes» multiplicado, para que se note el cambio.
  */
 
-import type { HelpStats, StatsEntry, StatsSection, StatsSectionId } from '@sanatorio/contracts'
+import type {
+  HelpStats,
+  ProgressGroup,
+  ProgressLine,
+  StatsEntry,
+  StatsProgress,
+  StatsSection,
+  StatsSectionId,
+} from '@sanatorio/contracts'
 
 import { ME } from './data'
 import { portrait } from './portrait'
@@ -99,7 +107,72 @@ function sectionOf(id: StatsSectionId, times: number): StatsSection {
   }
 }
 
-export const statsMock: Pick<Api, 'getHelpStats'> = {
+// --- Avance (#87): curvas suaves, de mentira, que se parecen a las de verdad.
+
+const DAYS = Array.from({ length: 50 }, (_, index) => Math.min(730, index * 15))
+const PACE_DAYS: Record<number, number[]> = {
+  8: [8, 32, 54, 90, 141, 212, 244],
+  12: [13, 48, 81, 134, 211, 318, 365],
+  15: [18, 60, 101, 168, 264, 398, 457],
+  18: [24, 72, 121, 201, 316, 478, 548],
+  22: [30, 88, 148, 246, 387, 584, 670],
+  24: [45, 118, 178, 306, 447, 644, 730],
+}
+const HOURS_SHARE = [3, 8, 22, 34, 58, 82, 100]
+
+/** Una curva que tiende a `top` (en %) con esa rapidez, hasta el día `until`. */
+const curve = (top: number, speed: number, until = 730): ProgressLine =>
+  DAYS.map((day) => (day > until ? null : Math.round(top * (1 - Math.exp(-day / speed)) * 10) / 10))
+
+function progressMock(other: string | null): StatsProgress {
+  const groups = (scale: number): Record<ProgressGroup, ProgressLine> => ({
+    'campus-all': curve(62 * scale, 260),
+    'campus-classic': curve(58 * scale, 280),
+    'campus-next': curve(66 * scale, 230, 450),
+    'all-all': curve(55 * scale, 280),
+    'all-classic': curve(52 * scale, 300),
+    'all-next': curve(60 * scale, 250, 450),
+  })
+  const paces = (share: (circle: number) => number) =>
+    Object.entries(PACE_DAYS).map(([pace, days]) => ({
+      pace: Number(pace),
+      points: [
+        [0, 0] as [number, number],
+        ...days.map((day, circle): [number, number] => [day, share(circle)]),
+      ],
+    }))
+
+  return {
+    days: DAYS,
+    track: 'next',
+    me: { circles: curve(70, 200, 300), hours: curve(55, 220, 300) },
+    other:
+      other === null
+        ? null
+        : { login: other, line: { circles: curve(60, 260, 420), hours: curve(48, 280, 420) } },
+    averages: { circles: groups(1), hours: groups(0.8) },
+    people: {
+      'campus-all': 420,
+      'campus-classic': 310,
+      'campus-next': 110,
+      'all-all': 5300,
+      'all-classic': 4700,
+      'all-next': 600,
+    },
+    paces: {
+      circles: paces((circle) => Math.round(((circle + 1) / 7) * 1000) / 10),
+      hours: paces((circle) => HOURS_SHARE[circle] ?? 100),
+    },
+  }
+}
+
+export const statsMock: Pick<Api, 'getHelpStats' | 'getStatsProgress'> = {
+  async getStatsProgress(other): Promise<StatsProgress> {
+    await delay(200)
+
+    return progressMock(other)
+  },
+
   async getHelpStats(period): Promise<HelpStats> {
     await delay(200)
 

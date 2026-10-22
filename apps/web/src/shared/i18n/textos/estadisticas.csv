@@ -45,3 +45,29 @@ stats.ritmo.rank,"Estadísticas, ritmo (quién va más rápido en el curso): de 
 stats.ritmo.value,"Estadísticas, ritmo (quién va más rápido en el curso): % del curso completado según el pace",{n} % del curso,{n}% of the course,{n} % del curs,Ikastaroaren % {n}
 stats.ritmo.extra,"Estadísticas, ritmo (quién va más rápido en el curso): pace al que va, en meses",pace {n} meses,pace {n} months,pace {n} mesos,{n} hilabeteko pacea
 stats.ritmo.slow,"Estadísticas, ritmo (quién va más rápido en el curso): va más lento que el pace más lento",más de 24 meses,over 24 months,més de 24 mesos,24 hilabete baino gehiago
+stats.progress.title,Avance: título del apartado,Avance en el common core,Common core progress,Avenç al common core,Common core-ko aurrerapena
+stats.progress.info,Avance: qué enseña la gráfica,"Cuánto llevabas a los días de empezar, frente a la media y a lo que pide cada pace. Por círculos, cada círculo pesa lo mismo y cuenta la parte de sus proyectos aprobada; por horas, las horas estimadas por 42 de lo aprobado frente a las de todo el plan. De quien no ha entrado en la web, el inicio se estima por su primer proyecto.","How far you were a given number of days after starting, against the average and what each pace asks for. By circles, every circle weighs the same and counts the share of its projects passed; by hours, the hours estimated by 42 for what you passed against those of the whole plan. For people who have never logged in here, the start is estimated from their first project.","Quant portaves als dies de començar, davant la mitjana i el que demana cada pace. Per cercles, cada cercle pesa igual i compta la part dels seus projectes aprovada; per hores, les hores estimades per 42 del que has aprovat davant les de tot el pla. De qui no ha entrat al web, l'inici s'estima pel seu primer projecte.","Hasi eta egun batzuetara zenbat zeneraman, batez bestekoaren eta pace bakoitzak eskatzen duenaren aldean. Zirkuluka, zirkulu guztiek berdin balio dute eta gainditutako proiektuen zatia zenbatzen da; orduka, 42k gainditutakoari emandako orduak plan osoarenen aldean. Webgunean sartu ez denaren hasiera bere lehen proiektutik kalkulatzen da."
+stats.progress.measure,Avance: grupo de botones de cómo se mide,Cómo se mide,How it is measured,Com es mesura,Nola neurtzen den
+stats.progress.measure.circles,Avance: medir por la parte hecha de cada círculo,Por círculos,By circles,Per cercles,Zirkuluka
+stats.progress.measure.hours,Avance: medir por horas estimadas de lo aprobado,Por horas estimadas,By estimated hours,Per hores estimades,Kalkulatutako orduka
+stats.progress.scope,Avance: grupo de botones de con qué media se compara,Media de,Average of,Mitjana de,Batez bestekoa
+stats.progress.scope.campus,Avance: media del campus,Tu campus,Your campus,El teu campus,Zure campusa
+stats.progress.scope.all,Avance: media de todos los campus,Todos los campus,All campuses,Tots els campus,Campus guztiak
+stats.progress.plan,Avance: grupo de botones del plan de estudios,Plan,Plan,Pla,Plana
+stats.progress.plan.all,Avance: los dos planes juntos,Los dos,Both,Tots dos,Biak
+stats.progress.plan.classic,"Avance: el plan clásico, todo en C",C,C,C,C
+stats.progress.plan.next,"Avance: el plan nuevo, con Python",Python,Python,Python,Python
+stats.progress.paces,Avance: casilla para enseñar las líneas de los paces,Ver los paces,Show the paces,Veure els paces,Paceak erakutsi
+stats.progress.compare,Avance: botón para compararse con otra persona,Comparar,Compare,Comparar,Alderatu
+stats.progress.comparePlaceholder,Avance: hueco para escribir el login con quien compararse,Login con quien compararte,Login to compare with,Login amb qui comparar-te,Alderatzeko logina
+stats.progress.compareClear,Avance: quitar la comparación,Quitar,Remove,Treure,Kendu
+stats.progress.me,Avance: tu línea,Tú,You,Tu,Zu
+stats.progress.average,"Avance: la línea de la media, con cuánta gente entra",Media ({n} personas),Average ({n} people),Mitjana ({n} persones),Batez bestekoa ({n} pertsona)
+stats.progress.months,"Avance: marca del eje de tiempo, en meses desde el inicio",{n} m,{n} mo,{n} m,{n} hil
+stats.progress.paceShort,Avance: rótulo al final de la línea de un pace,{n} m,{n} mo,{n} m,{n} hil
+stats.progress.paceLegend,Avance: leyenda de las líneas de los paces,Lo que pide cada pace (meses),What each pace asks for (months),El que demana cada pace (mesos),Pace bakoitzak eskatzen duena (hilabeteak)
+stats.progress.day,Avance: cabecera de la ficha al pasar por un punto,Día {n} (mes {m}),Day {n} (month {m}),Dia {n} (mes {m}),{n}. eguna ({m}. hilabetea)
+stats.progress.noMe,Avance: aviso si no hay datos de quien mira,Aún no hay datos de tu avance: salen cuando 42 da tus proyectos.,There is no data on your progress yet: it shows up once 42 gives your projects.,Encara no hi ha dades del teu avenç: surten quan 42 dona els teus projectes.,Oraindik ez dago zure aurrerapenaren daturik: 42k zure proiektuak ematean agertzen dira.
+stats.progress.noOther,Avance: aviso si no hay datos de la persona con quien se compara,No hay datos del avance de {login}.,There is no progress data for {login}.,No hi ha dades de l'avenç de {login}.,Ez dago {login}(r)en aurrerapenaren daturik.
+stats.progress.table,Avance: desplegable para ver los datos en tabla,Ver como tabla,Show as a table,Veure com a taula,Taula gisa ikusi
+stats.progress.tableMonth,Avance: columna del mes en la tabla,Mes,Month,Mes,Hilabetea

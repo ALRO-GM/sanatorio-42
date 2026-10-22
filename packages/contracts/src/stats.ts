@@ -36,3 +36,29 @@ export type HelpStats = {
   period: LeaderboardPeriod
   sections: StatsSection[]
 }
+
+/** Cómo se mide el avance: parte de cada círculo hecha, u horas estimadas hechas. */
+export type ProgressMeasure = 'circles' | 'hours'
+/** Con quién se compara: el campus de quien mira, o todos los campus. */
+export type ProgressScope = 'campus' | 'all'
+/** De qué plan: los dos juntos, el clásico (C) o el nuevo (Python). */
+export type ProgressPlan = 'all' | 'classic' | 'next'
+export type ProgressGroup = `${ProgressScope}-${ProgressPlan}`
+/** Un valor (en %) por cada día de `StatsProgress.days`; `null` donde aún no se llega. */
+export type ProgressLine = (number | null)[]
+
+/** `GET /stats/progress`: el avance en el common core a lo largo del tiempo (#87). */
+export type StatsProgress = {
+  /** Días desde el inicio de cada punto de las líneas. */
+  days: number[]
+  /** El plan de quien mira (o de con quién se compara), si se sabe. */
+  track: 'classic' | 'next' | null
+  me: Record<ProgressMeasure, ProgressLine> | null
+  /** La otra persona con la que se compara (`?with=login`), si la hay. */
+  other: { login: string; line: Record<ProgressMeasure, ProgressLine> } | null
+  averages: Record<ProgressMeasure, Record<ProgressGroup, ProgressLine>>
+  /** Cuánta gente hay en cada media. */
+  people: Record<ProgressGroup, number>
+  /** Lo que pide cada pace, en `[día, %]`, con el plan de quien mira. */
+  paces: Record<ProgressMeasure, { pace: number; points: [number, number][] }[]>
+}

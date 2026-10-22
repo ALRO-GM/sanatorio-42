@@ -215,6 +215,8 @@ export const realApi: Api = {
 
   getLeaderboard: (period) => getJson(`/leaderboard?period=${period}`),
   getHelpStats: (period) => getJson(`/stats?period=${period}`),
+  getStatsProgress: (other) =>
+    getJson(`/stats/progress${other === null ? '' : `?with=${encodeURIComponent(other)}`}`),
   getHealth: () => getJson('/me/health'),
   declarePace: (ref) => sendJson('PUT', '/me/health/pace', ref),
 

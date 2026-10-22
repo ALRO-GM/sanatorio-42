@@ -90,6 +90,7 @@ import type {
   HelpReputation,
   HolyGraph,
   HelpStats,
+  StatsProgress,
   Leaderboard,
   LeaderboardPeriod,
   LoggedMessage,
@@ -400,6 +401,8 @@ export type Api = {
   getLeaderboard: (period: LeaderboardPeriod) => Promise<Leaderboard>
   /** Estadísticas de Ayuda: cifras y clasificación de cada sección. */
   getHelpStats: (period: LeaderboardPeriod) => Promise<HelpStats>
+  /** El avance en el common core a lo largo del tiempo; con `other`, también el de esa persona. */
+  getStatsProgress: (other: string | null) => Promise<StatsProgress>
   // --- Red de correcciones
   /** Quién ha corregido a quién en el campus, con los filtros que se pasen. */
   getNetwork: (params: NetworkParams) => Promise<NetworkGraph>

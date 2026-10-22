@@ -5,16 +5,32 @@
 
 import type { Db } from '../../core/db/database.js'
 import type { AppModule } from '../../core/module.js'
-import { createPaceRepository, createStatsRepository } from './stats.repository.js'
+import { createProgressService } from './progress.service.js'
+import {
+  createPaceRepository,
+  createProgressRepository,
+  createStatsRepository,
+} from './stats.repository.js'
 import { createStatsService } from './stats.service.js'
 import type { StatsService } from './stats.service.js'
 
 export type StatsModule = AppModule & { service: StatsService }
 
-export function createStatsModule(deps: { db: Db; now?: () => number }): StatsModule {
+export function createStatsModule(deps: {
+  db: Db
+  /** El círculo de cada proyecto de un plan (el plan de estudios), para el avance. */
+  circles?: (track: 'classic' | 'next') => Promise<Map<number, number>>
+  now?: () => number
+}): StatsModule {
   const service = createStatsService({
     stats: createStatsRepository(deps.db),
     paces: createPaceRepository(deps.db),
+    ...(deps.now === undefined ? {} : { now: deps.now }),
+  })
+
+  const progress = createProgressService({
+    progress: createProgressRepository(deps.db),
+    circles: deps.circles ?? (() => Promise.resolve(new Map<number, number>())),
     ...(deps.now === undefined ? {} : { now: deps.now }),
   })
 
@@ -30,6 +46,20 @@ export function createStatsModule(deps: { db: Db; now?: () => number }): StatsMo
           await service.help(
             await session.actor(request),
             request.query.period === 'all' ? 'all' : 'month',
+          ),
+        )
+      })
+
+      /** `GET /stats/progress?with=login` → el avance a lo largo del tiempo, con medias y paces. */
+      app.get<{ Querystring: { with?: string } }>('/stats/progress', async (request, reply) => {
+        reply.header('Cache-Control', 'private, max-age=300')
+
+        const other = request.query.with?.trim().toLowerCase() ?? ''
+
+        return reply.send(
+          await progress.progress(
+            await session.actor(request),
+            /^[a-z0-9-]{1,32}$/.test(other) ? other : null,
           ),
         )
       })

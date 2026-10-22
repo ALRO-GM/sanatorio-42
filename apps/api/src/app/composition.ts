@@ -387,7 +387,11 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
   })
 
   const tours = createToursModule({ db, ...clock })
-  const stats = createStatsModule({ db, ...clock })
+  const stats = createStatsModule({
+    db,
+    circles: (track) => replica.curriculum.circles(track),
+    ...clock,
+  })
   // `modules` se monta justo después: para cuando alguien descargue sus datos ya estará.
   const legal = createLegalModule({
     db,

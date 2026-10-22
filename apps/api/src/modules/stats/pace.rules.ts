@@ -13,10 +13,10 @@
  * (`apps/web/src/shared/pace.ts`): si cambia allí, cambia aquí.
  */
 
-const PACES = [8, 12, 15, 18, 22, 24] as const
+export const PACES = [8, 12, 15, 18, 22, 24] as const
 
 /** `DAYS[pace][n]`: días desde el inicio para completar el círculo `n`. */
-const DAYS: Record<(typeof PACES)[number], readonly number[]> = {
+export const DAYS: Record<(typeof PACES)[number], readonly number[]> = {
   8: [8, 32, 54, 90, 141, 212, 244],
   12: [13, 48, 81, 134, 211, 318, 365],
   15: [18, 60, 101, 168, 264, 398, 457],
@@ -24,7 +24,7 @@ const DAYS: Record<(typeof PACES)[number], readonly number[]> = {
   22: [30, 88, 148, 246, 387, 584, 670],
   24: [45, 118, 178, 306, 447, 644, 730],
 }
-const COURSE_DAYS = 730
+export const COURSE_DAYS = 730
 const DAY_MS = 86_400_000
 
 type Pace = { progress: number; pace: number | null }

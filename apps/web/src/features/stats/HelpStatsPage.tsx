@@ -11,6 +11,7 @@ import { PersonLink } from '../../shared/ui/PersonLink'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { InfoTip } from '../../shared/ui/InfoTip'
 import { HelpStatsTour } from './HelpStatsTour'
+import { ProgressCard } from './ProgressCard'
 
 const PERIODS = ['month', 'all'] as const satisfies readonly LeaderboardPeriod[]
 
@@ -58,6 +59,8 @@ export function HelpStatsPage({ me }: { me: string }) {
           <SectionCard key={section.id} section={section} me={me} />
         ))}
       </div>
+
+      <ProgressCard />
     </section>
   )
 }

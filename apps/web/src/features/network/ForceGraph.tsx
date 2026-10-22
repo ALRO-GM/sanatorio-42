@@ -442,6 +442,21 @@ export function ForceGraph({
           context.lineTo(tipX - ux * head + uy * head * 0.55, tipY - uy * head - ux * head * 0.55)
           context.closePath()
           context.fill()
+
+          // La cifra, a media flecha: cuántas (corregidas, aprobadas o
+          // suspendidas, según el filtro) le hizo una burbuja a la otra.
+          const size = 11 / view.k
+          const midX = (x1 + ux * from.r + tipX) / 2 + ox
+          const midY = (y1 + uy * from.r + tipY) / 2 + oy
+
+          context.font = `600 ${String(size)}px system-ui, sans-serif`
+          context.textAlign = 'center'
+          context.textBaseline = 'middle'
+          context.lineWidth = 3 / view.k
+          context.strokeStyle = palette.surface
+          context.strokeText(String(count), midX, midY)
+          context.fillStyle = colour
+          context.fillText(String(count), midX, midY)
         }
       }
 

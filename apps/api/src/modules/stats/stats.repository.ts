@@ -208,3 +208,83 @@ export function createPaceRepository(db: Db) {
 export type PaceRepository = ReturnType<typeof createPaceRepository>
 
 export type StatsRepository = ReturnType<typeof createStatsRepository>
+
+/** Un proyecto del plan aprobado o empezado por alguien, para su avance. */
+type ProgressRow = {
+  login: string
+  projectId: number
+  /** Aprobado, y cuándo (ms); `null` si no. */
+  doneAt: number | null
+  /** Cuándo se apuntó (ms), para saber cuándo empezó quien no tiene fecha de inicio. */
+  createdAt: number | null
+  beginAt: number | null
+  track: 'classic' | 'next' | null
+  /** Si es del campus de quien pregunta. */
+  here: boolean
+}
+
+const msOf = (value: unknown): number | null => {
+  const ms = typeof value === 'string' ? Date.parse(value) : NaN
+
+  return Number.isNaN(ms) ? null : ms
+}
+
+export function createProgressRepository(db: Db) {
+  return {
+    /** Slug y horas de cada uno de esos proyectos. */
+    async projects(
+      ids: readonly number[],
+    ): Promise<Map<number, { slug: string; hours: number | null }>> {
+      if (ids.length === 0) return new Map()
+
+      const result = await db.execute({
+        sql: `SELECT id, slug, hours FROM projects WHERE id IN (${ids.map(() => '?').join(', ')})`,
+        args: [...ids],
+      })
+
+      return new Map(
+        result.rows.map((row) => [
+          toNumber(row.id),
+          {
+            slug: typeof row.slug === 'string' ? row.slug : '',
+            hours: typeof row.hours === 'number' && row.hours > 0 ? row.hours : null,
+          },
+        ]),
+      )
+    },
+
+    /** Los proyectos del plan de todo el mundo (de todos los campus), uno por fila. */
+    async rows(campus: number, ids: readonly number[]): Promise<ProgressRow[]> {
+      if (ids.length === 0) return []
+
+      const result = await db.execute({
+        sql: `SELECT u.login, pu.project_id, pu.status, pu.validated, pu.created_at_42,
+                     pu.updated_at_42, ul.begin_at, ut.track, m.user_id IS NOT NULL AS here
+              FROM project_users pu
+              JOIN users u ON u.id = pu.user_id
+              LEFT JOIN user_levels ul ON ul.login = u.login
+              LEFT JOIN user_tracks ut ON ut.login = u.login
+              LEFT JOIN campus_members m ON m.user_id = u.id AND m.campus_id = ?
+              WHERE pu.project_id IN (${ids.map(() => '?').join(', ')})`,
+        args: [campus, ...ids],
+      })
+
+      return result.rows.map((row) => ({
+        login: toText(row.login),
+        projectId: toNumber(row.project_id),
+        doneAt:
+          row.status === 'finished' && toNumber(row.validated ?? 0) === 1
+            ? msOf(row.updated_at_42)
+            : null,
+        // Las filas antiguas no traen cuándo se apuntó: la última vez que cambió
+        // es lo más temprano que se sabe.
+        createdAt: msOf(row.created_at_42) ?? msOf(row.updated_at_42),
+        beginAt: msOf(row.begin_at),
+        track: row.track === 'classic' || row.track === 'next' ? row.track : null,
+        here: toNumber(row.here) === 1,
+      }))
+    },
+  }
+}
+
+export type ProgressRepository = ReturnType<typeof createProgressRepository>
