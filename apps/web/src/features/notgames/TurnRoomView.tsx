@@ -155,6 +155,8 @@ export function TurnRoomView({ id, me }: { id: number; me: string }) {
       ) : (
         <div className="turn-layout">
           <div className="turn-board-col">
+            {/* A quién le toca, encima del tablero: es lo primero que hay que ver. */}
+            {room.status === 'playing' && <TurnStatus room={room} me={me} mine={mine} />}
             <div className="turn-board-stack">
               {room.board !== null && (
                 <ChessBoard
@@ -209,7 +211,6 @@ export function TurnRoomView({ id, me }: { id: number; me: string }) {
 
           <div className="turn-side">
             <PlayerClocks room={room} me={me} offset={offset.current} />
-            {room.status === 'playing' && <TurnStatus room={room} me={me} mine={mine} />}
             {room.last !== null && room.question === null && <LastQuestion room={room} me={me} />}
             {room.end !== null && (
               <TurnFinal room={room} me={me} frames={frames} step={step} onStep={setStep} />
@@ -391,9 +392,15 @@ function TurnStatus({ room, me, mine }: { room: TurnRoom; me: string; mine: Turn
   if (room.mover === null) return null
 
   const mover = room.players.find((p) => p.side === room.mover)
+  // Tras dar jaque no hay pregunta: el que está en jaque mueve ya.
+  const check = room.board?.lastMove?.check === true
 
   return (
     <p className={`turn-status ${room.mover === mine ? 'you' : ''}`} role="status">
+      <span className={`turn-side-chip side-${room.mover}`}>
+        {t(`notgames.chess.side.${room.mover}`)}
+      </span>{' '}
+      {check && <strong>{t('notgames.chess.inCheck')} </strong>}
       {room.mover === mine
         ? t('notgames.chess.yourMove')
         : t('notgames.chess.theirMove', {

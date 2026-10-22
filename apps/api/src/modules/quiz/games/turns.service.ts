@@ -35,8 +35,11 @@ import {
   checkFlag,
   clocksAt,
   other,
+  passTurn,
+  reask,
   settleQuestion,
   startTurns,
+  unanswered,
 } from '../turns.rules.js'
 import type { Side, TurnState } from '../turns.rules.js'
 import type { TurnPlayerRow, TurnRoomRow, TurnsRepository } from './turns.repository.js'
@@ -51,6 +54,8 @@ export type TurnGame<Board, View> = {
   canMove: (board: Board, side: Side) => boolean
   /** Aplica la jugada (aún sin validar) de `side`, o `null` si no vale. */
   play: (board: Board, side: Side, move: unknown) => { board: Board; summary: string } | null
+  /** A quién obliga el juego a mover ya, sin pregunta (en ajedrez, a quien está en jaque). */
+  forced?: (board: Board) => Side | null
   /** Si la partida ha acabado tras mover `mover`. */
   outcome: (board: Board, mover: Side) => { winner: Side | null; reason: TurnEnd['reason'] } | null
   view: (board: Board) => View
@@ -213,20 +218,38 @@ export function createTurnsService<Board, View>(options: TurnsServiceOptions<Boa
       )
     }
 
+    // Nadie ha contestado a tiempo: otra pregunta (y otra, si sigue sin haber
+    // respuesta y ha pasado más tiempo), hasta el límite de las reglas.
+    const work: TurnGameState<Board> = { ...state }
+    let round = state.round
+    let asked = false
+
+    while (round !== null && unanswered(next, t, GRACE_MS)) {
+      round = nextRound(work, round.index + 1)
+      next = reask(next, round, GRACE_MS)
+      asked = true
+    }
+
     const settled = settleQuestion(next, t, (side) => game.canMove(state.board, side), GRACE_MS)
 
-    if (settled === next) return start
+    if (settled === next && !asked) return start
+    if (settled === next) {
+      const saved: TurnGameState<Board> = { ...work, turns: next, round }
+
+      await turns.save(start.id, 'playing', saved)
+
+      return { ...start, state: saved }
+    }
 
     next = settled
 
-    const round = state.round
-    const answers = state.turns.question?.answers ?? []
+    const answers = settled.last?.answers ?? []
 
     if (round !== null && answers.length > 0) {
       await quiz.count(round.conceptId, answers.length, answers.filter((a) => !a.correct).length)
     }
 
-    const saved: TurnGameState<Board> = { ...state, turns: next, round: null, lastRound: round }
+    const saved: TurnGameState<Board> = { ...work, turns: next, round: null, lastRound: round }
 
     await turns.save(start.id, 'playing', saved)
 
@@ -503,6 +526,21 @@ export function createTurnsService<Board, View>(options: TurnsServiceOptions<Boa
           await finish(room, { ...state, board: played.board }, ended, t)
 
           return viewOf(actor, await mustRoom(id))
+        }
+
+        // Quien queda obligado a mover (en jaque) mueve ya, sin pregunta.
+        const forced = game.forced?.(played.board) ?? null
+
+        if (forced !== null && game.canMove(played.board, forced)) {
+          const saved: TurnGameState<Board> = {
+            ...state,
+            board: played.board,
+            turns: passTurn(state.turns, t, forced),
+          }
+
+          await turns.save(id, 'playing', saved)
+
+          return viewOf(actor, { ...room, state: saved })
         }
 
         const index = (state.lastRound?.index ?? -1) + 1

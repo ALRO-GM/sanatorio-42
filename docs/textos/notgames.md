@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/notgames.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-198 textos. «—» es que falta la traducción: sale en español.
+199 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -92,6 +92,7 @@ Generado desde `apps/web/src/shared/i18n/textos/notgames.csv` con
 | `notgames.chess.waitingRival` | Not-games, ajedrez: hueco libre en la sala | features/notgames/TurnRoomView | Esperando rival… | Waiting for a rival… | Esperant rival… | Aurkariaren zain… |
 | `notgames.chess.yourMove` | Not-games, ajedrez: te toca mover | features/notgames/ChessTour, features/notgames/TurnRoomView | Te toca mover: corre tu reloj. | Your move: your clock is running. | Et toca moure: corre el teu rellotge. | Zure txanda: zure erlojua dabil. |
 | `notgames.chess.theirMove` | Not-games, ajedrez: le toca mover al otro | features/notgames/TurnRoomView | Mueve {login}. | {login} to move. | Mou {login}. | {login}(e)k mugitzen du. |
+| `notgames.chess.inCheck` | Not-games, ajedrez: delante de a quién le toca, cuando está en jaque y mueve sin pregunta | features/notgames/TurnRoomView | ¡Jaque! Sin pregunta: | Check! No question: | Escac! Sense pregunta: | Xake! Galderarik gabe: |
 | `notgames.chess.question` | Not-games, ajedrez: aviso de que hay pregunta | features/notgames/TurnRoomView | Relojes parados: ¡el primero que acierte, mueve! | Clocks stopped: first right answer moves! | Rellotges aturats: qui l'encerti primer, mou! | Erlojuak geldirik: lehenik asmatzen duenak mugitzen du! |
 | `notgames.chess.questionTitle` | Not-games, ajedrez: título de la pregunta entre jugadas | features/notgames/ChessTour, features/notgames/TurnRoomView | Pregunta para los dos | Question for both | Pregunta per als dos | Galdera bientzat |
 | `notgames.chess.firstRight` | Not-games, ajedrez: alguien acertó primero | features/notgames/TurnRoomView | {login} acertó primero y mueve. | {login} answered right first and moves. | {login} ha encertat primer i mou. | {login}(e)k asmatu du lehenik eta mugitzen du. |

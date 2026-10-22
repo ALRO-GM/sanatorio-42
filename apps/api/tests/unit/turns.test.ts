@@ -19,9 +19,13 @@ import {
   answerTurn,
   checkFlag,
   clocksAt,
+  MAX_REASKS,
   MISS_PENALTY,
+  passTurn,
+  reask,
   settleQuestion,
   startTurns,
+  unanswered,
 } from '../../src/modules/quiz/turns.rules.js'
 import type { TurnState } from '../../src/modules/quiz/turns.rules.js'
 import { actor, expectCode, MADRID, useCommunity } from '../helpers/community.js'
@@ -72,6 +76,32 @@ describe('turnos con pregunta: la mecánica', () => {
     // Aún no ha acabado: sigue la pregunta.
     expect(settleQuestion(asked, 29_000, yes)).toBe(asked)
     expect(settleQuestion(asked, 31_000, yes)).toMatchObject({ mover: 'b', since: 30_000 })
+  })
+
+  it('si nadie contesta, antes sale otra pregunta, hasta MAX_REASKS veces', () => {
+    let asked = questioned()
+    const next = { conceptId: 'otra', answer: 1, seconds: 10 }
+
+    expect(unanswered(asked, 29_000)).toBe(false)
+    expect(unanswered(asked, 31_000)).toBe(true)
+
+    for (let time = 1; time <= MAX_REASKS; time++) {
+      asked = reask(asked, next)
+      expect(asked.question).toMatchObject({ conceptId: 'otra', natural: 'b', reasks: time })
+    }
+
+    // Con las de repuesto agotadas, ya no se cambia: mueve a quien le tocaba.
+    const endsAt = must(asked.question).endsAt
+
+    expect(unanswered(asked, endsAt + 1)).toBe(false)
+    expect(settleQuestion(asked, endsAt + 1, yes)).toMatchObject({ mover: 'b' })
+  })
+
+  it('quien está obligado a mover (en jaque) mueve sin pregunta y con su reloj', () => {
+    const passed = passTurn(startTurns(MINUTE, 'a', 0), 5_000, 'b')
+
+    expect(passed).toMatchObject({ mover: 'b', since: 5_000, question: null })
+    expect(passed.clocks).toEqual({ a: MINUTE - 5_000, b: MINUTE })
   })
 
   it('si el que gana no puede mover (posición imposible), mueve el otro', () => {
@@ -277,7 +307,8 @@ describe('ajedrez: una partida', () => {
   it('jaque mate acaba la partida', async () => {
     const { chess } = services
     const id = await begin()
-    // Mate del loco: f3 e5 g4 Dh4#. Tras cada jugada, nadie contesta y mueve a quien toca.
+    // Mate del loco: f3 e5 g4 Dh4#. Tras cada jugada nadie contesta (ni las
+    // preguntas de repuesto) y mueve a quien toca.
     const moves: [string, string, string][] = [
       ['ana', 'f2', 'f3'],
       ['leo', 'e7', 'e5'],
@@ -288,10 +319,31 @@ describe('ajedrez: una partida', () => {
 
     for (const [login, from, to] of moves) {
       room = await chess.move(actor(login), id, { from, to })
-      if (room.status === 'playing') clock.advance(12_000)
+      if (room.status === 'playing') clock.advance(40_000)
     }
 
     expect(room?.end).toEqual({ winner: 'b', reason: 'checkmate' })
+  })
+
+  it('si nadie contesta sale otra pregunta, y quien queda en jaque mueve sin pregunta', async () => {
+    const { chess } = services
+    const id = await begin()
+    let room = await chess.move(actor('ana'), id, { from: 'e2', to: 'e4' })
+
+    expect(room.question?.index).toBe(0)
+    clock.advance(12_000)
+    room = await chess.view(actor('ana'), id)
+    expect(room).toMatchObject({ mover: null, question: { index: 1 } })
+
+    // Ni esa ni la siguiente: mueve leo, que es a quien le tocaba.
+    clock.advance(30_000)
+    room = await chess.move(actor('leo'), id, { from: 'f7', to: 'f5' })
+    clock.advance(40_000)
+    // Dh5+: leo está en jaque y mueve ya, sin pregunta.
+    room = await chess.move(actor('ana'), id, { from: 'd1', to: 'h5' })
+    expect(room).toMatchObject({ mover: 'b', question: null })
+    room = await chess.move(actor('leo'), id, { from: 'g7', to: 'g6' })
+    expect(room.question).not.toBeNull()
   })
 
   it('nadie juega dos partidas a la vez, ni de preguntas ni de ajedrez; y la sala tiene dos plazas', async () => {

@@ -8,9 +8,13 @@
  * 3. El primero que contesta decide quién mueve ahora:
  *    - si acierta, mueve él (y empieza a correr su reloj);
  *    - si falla, mueve el rival, y él pierde el 10 % del tiempo que le queda.
- * 4. Si nadie contesta a tiempo, mueve a quien le tocaba por orden.
+ * 4. Si nadie contesta a tiempo, sale otra pregunta; si tampoco se contestan
+ *    las siguientes (`MAX_REASKS`: nadie está mirando), mueve a quien le
+ *    tocaba por orden, para que la partida no se quede parada.
  * 5. Si al que gana la pregunta el juego no le deja mover (en ajedrez, mover
  *    dos veces seguidas puede dar una posición imposible), mueve el otro.
+ * 6. Si el juego obliga a un bando a mover ya (en ajedrez, quien está en
+ *    jaque), mueve sin pregunta (`passTurn`).
  *
  * Pierde quien se queda sin tiempo. El juego (ajedrez y los que vengan) solo
  * dice quién tiene el turno por orden, si un bando puede mover y cuándo se
@@ -24,6 +28,9 @@ export const other = (side: Side): Side => (side === 'a' ? 'b' : 'a')
 /** Lo que se pierde del tiempo que queda al fallar la pregunta. */
 export const MISS_PENALTY = 0.1
 
+/** Preguntas nuevas que salen seguidas si nadie contesta, antes de mover por orden. */
+export const MAX_REASKS = 2
+
 type TurnAnswer = { side: Side; option: number; correct: boolean; at: number }
 
 export type TurnQuestion = {
@@ -34,6 +41,8 @@ export type TurnQuestion = {
   endsAt: number
   answer: number
   answers: TurnAnswer[]
+  /** Cuántas veces se ha cambiado ya de pregunta porque nadie contestaba. */
+  reasks?: number
 }
 
 export type TurnState = {
@@ -176,4 +185,44 @@ export function settleQuestion(
     question: null,
     last: { ...q, winner, penalized },
   }
+}
+
+/** Si la pregunta se cerró sin que nadie contestara y aún toca cambiarla por otra. */
+export function unanswered(state: TurnState, t: number, graceMs = 0): boolean {
+  const q = state.question
+
+  return (
+    q !== null && q.answers.length === 0 && t > q.endsAt + graceMs && (q.reasks ?? 0) < MAX_REASKS
+  )
+}
+
+/** Nadie contestó: otra pregunta, justo al acabarse la anterior, para los mismos bandos. */
+export function reask(
+  state: TurnState,
+  question: { conceptId: string; answer: number; seconds: number },
+  graceMs = 0,
+): TurnState {
+  const q = state.question
+
+  if (q === null) return state
+
+  const startsAt = q.endsAt + graceMs
+
+  return {
+    ...state,
+    question: {
+      conceptId: question.conceptId,
+      natural: q.natural,
+      startsAt,
+      endsAt: startsAt + question.seconds * 1000,
+      answer: question.answer,
+      answers: [],
+      reasks: (q.reasks ?? 0) + 1,
+    },
+  }
+}
+
+/** Ha movido `state.mover` y el juego obliga a `side` a mover ya: sin pregunta. */
+export function passTurn(state: TurnState, t: number, side: Side): TurnState {
+  return { ...state, clocks: clocksAt(state, t), mover: side, since: t, question: null }
 }

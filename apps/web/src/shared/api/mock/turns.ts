@@ -36,7 +36,12 @@ type Question = {
   natural: TurnSide
   rivalAt: number
   rivalRight: boolean
+  /** Las veces que se ha cambiado de pregunta porque nadie contestaba. */
+  reasks?: number
 }
+
+/** Como en la API (`turns.rules.ts`): preguntas de repuesto antes de mover por orden. */
+const MAX_REASKS = 2
 
 type MockTurnRoom = {
   id: number
@@ -138,6 +143,12 @@ function advance(room: MockTurnRoom, t: number): void {
       const first = q.answers[0]
 
       if (first === undefined && t <= q.endsAt) return
+      // Nadie ha contestado: otra pregunta, hasta MAX_REASKS veces.
+      if (first === undefined && (q.reasks ?? 0) < MAX_REASKS) {
+        ask(room, q.endsAt)
+        if (room.question !== null) room.question.reasks = (q.reasks ?? 0) + 1
+        continue
+      }
 
       let winner = first === undefined ? q.natural : first.correct ? first.side : other(first.side)
       const penalized = first !== undefined && !first.correct ? first.side : null
@@ -198,7 +209,11 @@ function applyMove(
   const ended = outcomeOf(done.fen, side)
 
   if (ended !== null) finish(room, ended, t)
-  else ask(room, t)
+  else if (done.check) {
+    // En jaque se mueve ya, sin pregunta.
+    room.mover = sideToMove(done.fen)
+    room.since = t
+  } else ask(room, t)
 
   return true
 }

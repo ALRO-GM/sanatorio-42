@@ -524,6 +524,21 @@
   background: var(--surface-2);
   font-weight: 600;
 }
+.turn-side-chip {
+  display: inline-block;
+  padding: 0.05rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  font-size: 0.85em;
+}
+.turn-side-chip.side-a {
+  background: #f4f1ea;
+  color: #1d1d1d;
+}
+.turn-side-chip.side-b {
+  background: #1d1d1d;
+  color: #f4f1ea;
+}
 .turn-status.you {
   background: var(--accent-soft);
   color: var(--accent-text);

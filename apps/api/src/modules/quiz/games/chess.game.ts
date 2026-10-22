@@ -23,6 +23,8 @@ export const CHESS: TurnGame<ChessBoard, ChessBoardView> = {
   start: () => ({ fen: START_FEN, lastMove: null, history: [], positions: [] }),
   natural: (board) => sideToMove(board.fen),
   canMove: (board, side) => canMove(board.fen, side),
+  // En jaque se mueve ya: no se juega a la pregunta con el rey amenazado.
+  forced: (board) => (board.lastMove?.check === true ? sideToMove(board.fen) : null),
   play(board, side, input) {
     const move = moveSchema.safeParse(input)
 

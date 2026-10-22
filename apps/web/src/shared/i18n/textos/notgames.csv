@@ -84,6 +84,7 @@ notgames.chess.side.b,"Not-games, ajedrez: bando de las negras",Negras,Black,Neg
 notgames.chess.waitingRival,"Not-games, ajedrez: hueco libre en la sala",Esperando rival…,Waiting for a rival…,Esperant rival…,Aurkariaren zain…
 notgames.chess.yourMove,"Not-games, ajedrez: te toca mover",Te toca mover: corre tu reloj.,Your move: your clock is running.,Et toca moure: corre el teu rellotge.,Zure txanda: zure erlojua dabil.
 notgames.chess.theirMove,"Not-games, ajedrez: le toca mover al otro",Mueve {login}.,{login} to move.,Mou {login}.,{login}(e)k mugitzen du.
+notgames.chess.inCheck,"Not-games, ajedrez: delante de a quién le toca, cuando está en jaque y mueve sin pregunta",¡Jaque! Sin pregunta:,Check! No question:,Escac! Sense pregunta:,Xake! Galderarik gabe:
 notgames.chess.question,"Not-games, ajedrez: aviso de que hay pregunta","Relojes parados: ¡el primero que acierte, mueve!",Clocks stopped: first right answer moves!,"Rellotges aturats: qui l'encerti primer, mou!",Erlojuak geldirik: lehenik asmatzen duenak mugitzen du!
 notgames.chess.questionTitle,"Not-games, ajedrez: título de la pregunta entre jugadas",Pregunta para los dos,Question for both,Pregunta per als dos,Galdera bientzat
 notgames.chess.firstRight,"Not-games, ajedrez: alguien acertó primero",{login} acertó primero y mueve.,{login} answered right first and moves.,{login} ha encertat primer i mou.,{login}(e)k asmatu du lehenik eta mugitzen du.
