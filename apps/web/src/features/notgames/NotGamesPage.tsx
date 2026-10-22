@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { SyntheticEvent } from 'react'
 
 import type {
@@ -110,6 +110,9 @@ function Lobby({ me, initial }: { me: string; initial: Tab }) {
   )
 }
 
+/** Cada cuánto se vuelve a pedir la lista de salas mientras se mira. */
+const LIST_REFRESH_MS = 5000
+
 function Rooms() {
   const { t } = useI18n()
   const rooms = useAsync(async () => {
@@ -121,6 +124,18 @@ function Rooms() {
     ]
   }, [])
   const [creating, setCreating] = useState(false)
+  const { reload } = rooms
+
+  // La lista se pone al día sola: las salas se llenan y se abren mientras miras.
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (!document.hidden) void reload()
+    }, LIST_REFRESH_MS)
+
+    return () => {
+      clearInterval(timer)
+    }
+  }, [reload])
 
   return (
     <>
@@ -182,8 +197,9 @@ function RoomCard({ lobby }: { lobby: QuizLobby }) {
         <small>{settingsText(t, lobby.settings)}</small>
         <small>{t('notgames.hostAndPlayers', { host: lobby.host, n: lobby.players })}</small>
       </span>
+      {/* Dentro se elige equipo: aquí solo se abre (antes decía «Entrar» y no entraba). */}
       <a className="pill" href={notGamesHref(lobby.id)}>
-        {lobby.joined || lobby.status !== 'lobby' ? t('notgames.open') : t('notgames.join')}
+        {t('notgames.open')}
       </a>
     </li>
   )
@@ -191,6 +207,10 @@ function RoomCard({ lobby }: { lobby: QuizLobby }) {
 
 function TurnCard({ lobby }: { lobby: TurnLobby }) {
   const { t } = useI18n()
+  const joining = useAction()
+  // Con plaza libre, «Entrar» te sienta en la sala de verdad: antes solo la
+  // abría, y quien la creó no veía llegar a nadie hasta que se pulsaba otra vez.
+  const canJoin = !lobby.joined && lobby.status === 'lobby' && lobby.players < 2
 
   return (
     <li className="card quiz-room-card">
@@ -205,9 +225,27 @@ function TurnCard({ lobby }: { lobby: TurnLobby }) {
         </small>
         <small>{t('notgames.hostAndPlayers', { host: lobby.host, n: lobby.players })}</small>
       </span>
-      <a className="pill" href={turnGameHref(lobby.id)}>
-        {lobby.joined || lobby.status !== 'lobby' ? t('notgames.open') : t('notgames.join')}
-      </a>
+      {canJoin ? (
+        <button
+          type="button"
+          className="pill"
+          disabled={joining.busy}
+          onClick={() => {
+            void joining
+              .run(() => api.joinTurnRoom(lobby.id))
+              .then((joined) => {
+                if (joined) window.location.hash = turnGameHref(lobby.id)
+              })
+          }}
+        >
+          {t('notgames.join')}
+        </button>
+      ) : (
+        <a className="pill" href={turnGameHref(lobby.id)}>
+          {t('notgames.open')}
+        </a>
+      )}
+      <ErrorNote error={joining.error} />
     </li>
   )
 }
