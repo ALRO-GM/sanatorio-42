@@ -7,11 +7,12 @@ import { LegalGate } from '../features/legal/LegalGate'
 import { ReviewGate } from '../features/clicker/ReviewGate'
 import { calendarHref } from '../shared/links'
 import { HelpGate } from '../features/help/HelpGate'
+import { CorrectionGate } from '../features/network/CorrectionGate'
 import { Welcome } from '../features/welcome/Welcome'
 import { OtherCampusNotice } from '../features/campus/OtherCampusNotice'
 import { FocusDialog } from '../features/focus/FocusDialog'
 import { FocusTimer } from '../features/focus/FocusTimer'
-import { loadFocus } from '../shared/focus'
+import { focusing, loadFocus, useFocus } from '../shared/focus'
 import { AlertCenter } from '../features/alerts/AlertCenter'
 import { EasterEgg } from '../features/clicker/EasterEgg'
 import { QuotaNotice } from '../features/alerts/QuotaNotice'
@@ -86,6 +87,7 @@ export function Clinic({ me, onLogout }: ClinicProps) {
     [],
   )
   const { pulse, refresh } = usePulse()
+  const concentrated = focusing(useFocus())
 
   useEffect(() => {
     startUsage()
@@ -178,7 +180,9 @@ export function Clinic({ me, onLogout }: ClinicProps) {
         <LegalGate />
         <BroadcastGate pending={pulse?.broadcasts ?? 0} onChange={refresh} />
         <ReviewGate pending={pulse?.clickerReviews ?? 0} onChange={refresh} />
-        <HelpGate pending={pulse?.help ?? 0} onChange={refresh} />
+        {/* Valorar puede esperar: en Pomodoro no se interrumpe, sale al acabar. */}
+        <HelpGate pending={concentrated ? 0 : (pulse?.help ?? 0)} onChange={refresh} />
+        <CorrectionGate pending={concentrated ? 0 : (pulse?.corrections ?? 0)} onChange={refresh} />
         <Welcome
           open={welcoming}
           onGo={(next) => {

@@ -254,10 +254,10 @@ respetando el cupo de GitHub (ver `contexto.md`).
       2026-10-22): quien fue corregido responde «¿Qué tal entiendes el problema
       tras la corrección?» (4 opciones) y puede marcar un icono de «Reacciones
       recibidas»; quien corrigió, uno de «Cómo llegas cuando pides ayuda».
-      Migración 66.
+      Migración 65.
 
 **En paralelo (2026-10-22)**: #81 (migración 65), #80 (migración 64) y #91
-(migración 66) los hacen agentes, cada uno en su worktree y rama, sin push.
+(migración 65 al unir) los hacen agentes, cada uno en su worktree y rama, sin push.
 Al acabar: unir las ramas a `main` de una en una, `npm run check` con todo
 junto y un solo push y despliegue (cupo de GitHub).
 - [ ] **Cerrar y contestar** #42, 46, 48, 50, 69, 70, 71, 76, 77, 79, 83: la

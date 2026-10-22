@@ -923,3 +923,46 @@ ol.net-rows .net-row-name {
 .force-arrows i.got {
   background: var(--stage-got, #ffb36b);
 }
+
+/* Valoración de una corrección de 42: la ventana de la ayuda, con la pregunta grande. */
+dialog.correction-gate {
+  border-top: 4px solid var(--accent);
+  animation: correction-gate-in 0.2s ease-out;
+}
+@keyframes correction-gate-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+}
+.correction-gate-faces {
+  display: flex;
+  flex-shrink: 0;
+}
+/* En un grupo, las caras se montan un poco unas sobre otras. */
+.correction-gate-faces > * + * {
+  margin-left: -0.9rem;
+}
+.correction-gate-answers {
+  margin: 0.4rem 0 0.8rem;
+}
+.correction-gate-answers legend,
+.correction-gate-tags legend {
+  margin-bottom: 0.45rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text);
+}
+.correction-gate-tags {
+  margin: 0 0 0.6rem;
+  padding: 0;
+  border: 0;
+}
+dialog.correction-gate .actions {
+  flex-wrap: wrap;
+}
+@media (prefers-reduced-motion: reduce) {
+  dialog.correction-gate {
+    animation: none;
+  }
+}

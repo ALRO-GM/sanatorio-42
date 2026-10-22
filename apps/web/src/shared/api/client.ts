@@ -259,6 +259,10 @@ export const realApi: Api = {
   },
   getNetworkMine: () => getJson('/network/mine'),
   searchNetworkPeople: (q, campuses) => getJson(`/network/people?${search({ q, campuses })}`),
+  getCorrectionPrompts: () => getJson('/corrections/pending'),
+  rateCorrection: (id, input) => send('POST', `/corrections/${id}/feedback`, input),
+  skipCorrection: (id, forever) => send('POST', `/corrections/${id}/skip`, { forever }),
+  getCorrectionsUnderstood: () => getJson('/corrections/understood'),
 
   getHelpDay: () => getJson('/help/today'),
   setHelpDay: (day) => sendJson('PUT', '/help/today', day),

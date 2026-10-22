@@ -55,6 +55,11 @@ export type XpServiceOptions = {
    * el título de maestro del código. Lo sabe `network`.
    */
   master?: (login: string) => Promise<number>
+  /**
+   * Reacciones que ha dejado a alguien la gente a la que corrigió en 42, por
+   * tipo. Suman a las de la ayuda reservada. Lo sabe `network`.
+   */
+  correctionReactions?: (login: string) => Promise<Map<string, number>>
   now?: () => number
 }
 
@@ -95,6 +100,10 @@ export function createXpService(options: XpServiceOptions) {
   /** Si no se puede saber, es que no hay título: el expediente no se cae por esto. */
   const masterOf = async (login: string): Promise<number> =>
     (await options.master?.(login).catch(() => 0)) ?? 0
+
+  /** Si no se puede saber, no suman: el expediente no se cae por esto. */
+  const correctionReactionsOf = async (login: string): Promise<Map<string, number>> =>
+    (await options.correctionReactions?.(login).catch(() => undefined)) ?? new Map()
 
   const hackerOf = async (login: string): Promise<{ title: TitleId | null; caught: number }> =>
     (await options.hacker?.(login).catch(() => undefined)) ?? { title: null, caught: 0 }
@@ -159,14 +168,18 @@ export function createXpService(options: XpServiceOptions) {
 
     /** Expediente completo de quien pregunta. */
     async expediente(actor: Actor): Promise<Expediente> {
-      const [total, earned, received, profile, hacker, master] = await Promise.all([
+      const [total, earned, helped, corrected, profile, hacker, master] = await Promise.all([
         xp.total(actor.login),
         xp.earnedByKind(actor.login),
         xp.reactionsReceived(actor.login),
+        correctionReactionsOf(actor.login),
         profiles.get(actor.login),
         hackerOf(actor.login),
         masterOf(actor.login),
       ])
+      // Las reacciones de la ayuda reservada y las de las correcciones, juntas.
+      const reaction = (kind: ReactionKind): number =>
+        (helped.get(kind) ?? 0) + (corrected.get(kind) ?? 0)
       const level = levelFor(total)
       const count = (kind: XpKind): number => earned.get(kind)?.times ?? 0
 
@@ -216,10 +229,10 @@ export function createXpService(options: XpServiceOptions) {
           unlocked: progress[entry.id] >= entry.goal,
         })),
         reactions: {
-          bug: received.get('bug') ?? 0,
-          code: received.get('code') ?? 0,
-          concept: received.get('concept') ?? 0,
-          patient: received.get('patient') ?? 0,
+          bug: reaction('bug'),
+          code: reaction('code'),
+          concept: reaction('concept'),
+          patient: reaction('patient'),
         },
         rules: XP_AMOUNT,
         earned: {

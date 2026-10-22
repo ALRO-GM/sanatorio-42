@@ -61,6 +61,7 @@ describe('migraciones', () => {
       'clicker_cheats',
       'clicker_clicks',
       'conversation_marks',
+      'correction_feedback',
       'corrections',
       'curriculum_votes',
       'doubt_answers',
@@ -333,9 +334,10 @@ describe('migraciones', () => {
   })
 
   it('numera las migraciones de forma creciente y sin huecos', () => {
-    expect(MIGRATIONS.map((migration) => migration.version)).toEqual(
-      MIGRATIONS.map((_migration, index) => index + 1),
-    )
+    const versions = MIGRATIONS.map((migration) => migration.version)
+    const expected = Array.from({ length: LATEST_VERSION }, (_value, index) => index + 1)
+
+    expect(versions).toEqual(expected)
   })
 
   it('avisa si la base está por delante del código', async () => {
