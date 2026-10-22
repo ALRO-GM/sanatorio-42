@@ -25,12 +25,15 @@ export function LayoutSettings({
   me,
   onClose,
   recordStyle,
+  interfaceMode,
 }: {
   /** Quién eres: hay estilos que solo puede elegir su dueña. */
   me: string
   onClose: () => void
   /** Lo que se pone debajo del estilo: con cuál ven los demás tu expediente. */
   recordStyle?: ReactNode
+  /** El modo de la interfaz (también en el pie, que queda muy abajo). */
+  interfaceMode?: ReactNode
 }) {
   const { t, lang } = useI18n()
   const prefs = usePrefs()
@@ -135,6 +138,7 @@ export function LayoutSettings({
         )}
         {recordStyle}
       </section>
+      {interfaceMode}
 
       <fieldset className="layout-modes">
         <legend>{t('layout.mode')}</legend>

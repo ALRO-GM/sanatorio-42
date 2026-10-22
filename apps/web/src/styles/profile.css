@@ -161,20 +161,23 @@
 /* --- Expediente: desglose de XP, plegado tras la flecha de la barra */
 .xp-row {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 0.6rem;
 }
 .xp-row .xp-bar {
+  min-width: 10rem;
   flex: 1;
 }
 .xp-toggle {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.7rem;
-  height: 1.7rem;
-  padding: 0;
-  border-radius: 50%;
+  gap: 0.3rem;
+  flex: none;
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
   border: 1.5px solid var(--border);
   background: var(--surface);
   color: var(--text-2);
@@ -308,4 +311,11 @@ a.back-btn {
   .health-head .xp-toggle {
     margin-left: auto;
   }
+}
+
+/* Dónde mirar el pace en la intra: en su propia línea, encima de los campos. */
+.health-form-where {
+  flex-basis: 100%;
+  grid-column: 1 / -1;
+  margin: 0;
 }

@@ -153,13 +153,23 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
   // Con un corte por el límite del plan no se pide nada a 42. Quien lo sabe es
   // `admin`, que se monta después: de momento, nadie está cortado.
   let halted = (): boolean => false
+  // Quién pasa sin turno en la cola de 42: quien administra por configuración y
+  // quien tiene el permiso desde el panel. Esto último vive en la base y la
+  // cola pregunta sin esperar, así que se guarda una copia que se pone al día
+  // (como mucho, una vez por minuto) cuando se mira.
+  let panelAdmins: ReadonlySet<string> = new Set()
+  let refreshPanelAdmins = (): void => undefined
 
   const replica = createReplicaModule({
     db,
     client,
     config: config.sync,
     ...(config.backgroundSync === undefined ? {} : { backgroundSync: config.backgroundSync }),
-    priority: (login) => (config.admins ?? []).includes(login),
+    priority: (login) => {
+      refreshPanelAdmins()
+
+      return (config.admins ?? []).includes(login) || panelAdmins.has(login)
+    },
     halted: () => halted(),
     ...(config.photos === undefined ? {} : { photos: config.photos }),
     ...(config.log === undefined ? {} : { log: config.log }),
@@ -385,6 +395,20 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
   })
 
   halted = () => admin.service.halted()
+  let adminsAt = Number.NEGATIVE_INFINITY
+
+  refreshPanelAdmins = () => {
+    const at = (config.now ?? Date.now)()
+
+    if (at - adminsAt < 60_000) return
+    adminsAt = at
+    admin.service.adminLogins().then(
+      (logins) => {
+        panelAdmins = new Set(logins)
+      },
+      () => undefined,
+    )
+  }
   const usage = createUsageModule({
     db,
     replica: replica.repository,

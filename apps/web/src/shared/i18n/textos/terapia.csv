@@ -10,6 +10,7 @@ therapy.when,Etiqueta: horario,Horario,Schedule,Horari,Ordutegia
 therapy.timeRange,Hora de inicio y fin,{start} a {end},{start} to {end},{start} a {end},{start}etatik {end}etara
 therapy.days,Etiqueta: días en que se queda,Días de quedada,Meeting days,Dies de trobada,Elkartzeko egunak
 therapy.members,Lista de miembros del grupo,Pacientes del grupo,Patients in the group,Pacients del grup,Taldeko pazienteak
+therapy.moreMembers,Terapia: enlace para ver el resto de personas del grupo,y {n} más,and {n} more,i {n} més,eta beste {n}
 therapy.seats,Puestos del campus reservados para el grupo,Puestos reservados,Reserved seats,Llocs reservats,Erreserbatutako postuak
 therapy.pickSeats,Elegir puestos en el mapa,¿Dónde y cuántas plazas?,"Where, and how many seats?",On i quantes places?,Non eta zenbat plaza?
 therapy.pickSeatsHint,Cómo elegir los puestos del grupo,"Elige de 2 a 6 puestos que se toquen: al lado, delante, detrás o en diagonal. Cada puesto es una plaza del grupo.","Pick 2 to 6 seats that touch: next to, in front of, behind or diagonal. Each seat is one place in the group.","Tria de 2 a 6 llocs que es toquin: al costat, davant, darrere o en diagonal. Cada lloc és una plaça del grup.","Aukeratu elkar ukitzen duten 2tik 6ra postu: ondoan, aurrean, atzean edo diagonalean. Postu bakoitza taldeko plaza bat da."

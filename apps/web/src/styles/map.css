@@ -304,8 +304,10 @@ button.seat:focus-visible {
 }
 .seat-chip {
   font-family: ui-monospace, monospace;
+  /* Con borde y texto del tema: sin él se perdía sobre el fondo de la tarjeta. */
+  border: 1px solid color-mix(in srgb, #4a8fd9 55%, var(--border));
   background: color-mix(in srgb, #4a8fd9 20%, var(--surface));
-  color: color-mix(in srgb, #2f6fb3 70%, var(--text));
+  color: var(--text);
 }
 .seat-field {
   margin: 0 0 1rem;

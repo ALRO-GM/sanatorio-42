@@ -23,6 +23,9 @@ type GroupCardProps = {
   me: string
 }
 
+/** Cuántas personas se ven del grupo antes de «y N más». */
+const MEMBERS_SHOWN = 4
+
 export function GroupCard({ group, projects, onChange, me }: GroupCardProps) {
   const { t, lang } = useI18n()
   const { busy, error, run } = useAction()
@@ -32,6 +35,7 @@ export function GroupCard({ group, projects, onChange, me }: GroupCardProps) {
   const [joining, setJoining] = useState(false)
   const [progress, setProgress] = useState(group.kind === 'review' ? 100 : 50)
   const [chat, setChat] = useState(false)
+  const [allMembers, setAllMembers] = useState(false)
   const now = today()
   const full = group.members.length >= group.capacity
 
@@ -131,7 +135,7 @@ export function GroupCard({ group, projects, onChange, me }: GroupCardProps) {
 
       <span className="eyebrow">{t('therapy.members')}</span>
       <ul className="members">
-        {group.members.map((member) => (
+        {(allMembers ? group.members : group.members.slice(0, MEMBERS_SHOWN)).map((member) => (
           <li key={member.login}>
             <Avatar login={member.login} image={member.image} size={32} />
             <strong>{member.login}</strong>
@@ -144,6 +148,18 @@ export function GroupCard({ group, projects, onChange, me }: GroupCardProps) {
           </li>
         ))}
       </ul>
+      {/* Con mucha gente la tarjeta se hacía larguísima: el resto, a un clic. */}
+      {!allMembers && group.members.length > MEMBERS_SHOWN && (
+        <button
+          type="button"
+          className="link"
+          onClick={() => {
+            setAllMembers(true)
+          }}
+        >
+          {t('therapy.moreMembers', { n: group.members.length - MEMBERS_SHOWN })}
+        </button>
+      )}
 
       <p className="hint">
         {t(group.seats.length > 0 ? 'therapy.attendance' : 'therapy.attendanceNoSeats')}

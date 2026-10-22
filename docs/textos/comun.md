@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/comun.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-217 textos. «—» es que falta la traducción: sale en español.
+218 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -106,6 +106,7 @@ Generado desde `apps/web/src/shared/i18n/textos/comun.csv` con
 | `app.loadingSection` | Mientras se descarga una sección | app/SectionView | Abriendo… | Opening… | Obrint… | Irekitzen… |
 | `layout.open` | Menú de la cuenta: abrir la personalización | app/Header, features/admin/StatsPanel, features/admin/UsageHeatmap, shared/layout/Blocks, shared/layout/LayoutSettings | Personalizar la web | Customise the site | Personalitza la web | Pertsonalizatu weba |
 | `layout.title` | Título de la ventana de personalización | features/admin/StatsPanel, features/admin/UsageHeatmap, shared/layout/Blocks, shared/layout/LayoutSettings | Personalizar | Customise | Personalitza | Pertsonalizatu |
+| `layout.customizeHere` | Enlace al final de una página con bloques: abre Personalizar | features/admin/StatsPanel, features/admin/UsageHeatmap, shared/layout/Blocks, shared/layout/LayoutSettings | Ordenar o plegar estos bloques | Reorder or fold these blocks | Ordena o plega aquests blocs | Blokeak ordenatu edo tolestu |
 | `layout.close` | Botón para cerrar una ventana | features/admin/Inbox, features/admin/StatsPanel, features/admin/UsageHeatmap, features/focus/FocusDialog, features/map/SeatHoverCard, features/notices/Mailbox, shared/layout/Blocks, shared/layout/LayoutSettings, shared/ui/InfoTip | Cerrar | Close | Tanca | Itxi |
 | `layout.done` | Botón para terminar y cerrar la personalización | features/admin/StatsPanel, features/admin/UsageHeatmap, shared/layout/Blocks, shared/layout/LayoutSettings | Listo | Done | Fet | Eginda |
 | `layout.reset` | Botón para volver al orden original | features/admin/StatsPanel, features/admin/UsageHeatmap, shared/layout/Blocks, shared/layout/LayoutSettings | Volver al orden de fábrica | Back to the default order | Torna a l'ordre de fàbrica | Itzuli fabrikako ordenara |
@@ -156,8 +157,8 @@ Generado desde `apps/web/src/shared/i18n/textos/comun.csv` con
 | `layout.style` | Personalizar: estilo visual de la web | features/admin/StatsPanel, features/admin/UsageHeatmap, shared/layout/Blocks, shared/layout/LayoutSettings | Estilo | Style | Estil | Estiloa |
 | `layout.palette` | Personalizar: color de acento | features/admin/StatsPanel, features/admin/UsageHeatmap, shared/layout/Blocks, shared/layout/LayoutSettings | Color | Colour | Color | Kolorea |
 | `nav.clusters` | Pestaña: mapa de los clústeres, quién se sienta dónde | app/Nav, features/admin/ClickMap, features/admin/FlowsPanel, features/admin/Inbox, features/admin/InboxTab, features/admin/StatsPanel, features/admin/UsageHeatmap, features/calendar/EventDialog, features/focus/FocusDialog, features/map/ClustersTour, features/stats/HelpStatsPage, shared/layout/LayoutSettings, shared/layout/store | Clústeres | Clusters | Clústers | Klusterrak |
-| `nav.examenes` | Pestaña: exámenes, en vivo y estadísticas | app/Nav, features/admin/ClickMap, features/admin/FlowsPanel, features/admin/Inbox, features/admin/InboxTab, features/admin/StatsPanel, features/admin/UsageHeatmap, features/calendar/EventDialog, features/focus/FocusDialog, features/stats/HelpStatsPage, shared/layout/LayoutSettings, shared/layout/store | Exámenes | Exams | Exàmens | Azterketak |
-| `nav.examenesLive` | Etiqueta junto a Exámenes cuando hay uno en curso | app/Nav, features/admin/ClickMap, features/admin/FlowsPanel, features/admin/Inbox, features/admin/InboxTab, features/admin/StatsPanel, features/admin/UsageHeatmap, features/calendar/EventDialog, features/focus/FocusDialog, features/stats/HelpStatsPage, shared/layout/LayoutSettings, shared/layout/store | en vivo | live | en directe | zuzenean |
+| `nav.examenes` | Pestaña: exámenes, en vivo y estadísticas | app/Nav, features/admin/ClickMap, features/admin/FlowsPanel, features/admin/Inbox, features/admin/InboxTab, features/admin/StatsPanel, features/admin/UsageHeatmap, features/calendar/EventDialog, features/exams/ExamsTour, features/focus/FocusDialog, features/stats/HelpStatsPage, shared/layout/LayoutSettings, shared/layout/store | Exámenes | Exams | Exàmens | Azterketak |
+| `nav.examenesLive` | Etiqueta junto a Exámenes cuando hay uno en curso | app/Nav, features/admin/ClickMap, features/admin/FlowsPanel, features/admin/Inbox, features/admin/InboxTab, features/admin/StatsPanel, features/admin/UsageHeatmap, features/calendar/EventDialog, features/exams/ExamsTour, features/focus/FocusDialog, features/stats/HelpStatsPage, shared/layout/LayoutSettings, shared/layout/store | en vivo | live | en directe | zuzenean |
 | `until.now` | Tiempo restante cuando es casi nada | shared/until | un momento | a moment | un moment | une bat |
 | `until.and` | Une dos cantidades de tiempo: «2 horas y 5 minutos» | shared/until | {a} y {b} | {a} and {b} | {a} i {b} | {a} eta {b} |
 | `until.minute.one` | Tiempo: un minuto | shared/until | {n} minuto | {n} minute | {n} minut | minutu {n} |

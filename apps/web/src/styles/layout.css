@@ -234,3 +234,10 @@ dialog.layout-dialog::backdrop {
     padding: 0.15rem 0.3rem !important;
   }
 }
+
+/* Al final de cada página con bloques: abrir Personalizar sin pasar por el menú. */
+.blocks-customize {
+  display: block;
+  margin: 1rem 0 0;
+  font-size: 0.85rem;
+}

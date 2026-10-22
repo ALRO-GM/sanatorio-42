@@ -99,6 +99,10 @@ export function Mailbox({ me, chat, onChat, onClose, onOpen, onChange }: Mailbox
   const all = data?.items ?? []
   const items = noticesIn(all, filter)
   const unread = data?.unread ?? 0
+  // Lo sin leer de conversaciones, también en su pestaña: si no, se descubrían tarde.
+  const chatsUnread = all.filter(
+    (notice) => !notice.read && targetOf(notice) === 'conversations',
+  ).length
   const removable = removableCount(all)
 
   return (
@@ -135,6 +139,9 @@ export function Mailbox({ me, chat, onChat, onClose, onOpen, onChange }: Mailbox
             }}
           >
             {t(`notices.tab.${option}`)}
+            {option === 'chats' && chatsUnread > 0 && (
+              <span className="count-badge">{chatsUnread}</span>
+            )}
           </button>
         ))}
       </div>

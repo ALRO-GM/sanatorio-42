@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/demos.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-92 textos. «—» es que falta la traducción: sale en español.
+96 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -99,3 +99,7 @@ Generado desde `apps/web/src/shared/i18n/textos/demos.csv` con
 | `tour.gitCourse.3` | Demostración animada del curso de git: frase del paso 3 | shared/tour/Tour | Escribe los comandos en la terminal hasta llegar al objetivo. | Type the commands in the terminal until you reach the goal. | Escriu les ordres al terminal fins arribar a l'objectiu. | Idatzi aginduak terminalean helburura iritsi arte. |
 | `tour.gitCourse.4` | Demostración animada del curso de git: frase del paso 4 | shared/tour/Tour | Con tantos comandos como la solución, tres estrellas. | As few commands as the solution: three stars. | Amb tantes ordres com la solució, tres estrelles. | Soluzioak beste agindurekin, hiru izar. |
 | `tour.gitCourse.5` | Demostración animada del curso de git: frase del paso 5 | shared/tour/Tour | En las pruebas de grupo, cada cual cumple todas las misiones. | In group tests, everyone completes every mission. | A les proves de grup, cadascú compleix totes les missions. | Talde-probetan, bakoitzak misio guztiak betetzen ditu. |
+| `tour.exams.1` | Demostración animada de Exámenes: frase del paso 1 | shared/tour/Tour | Cuando hay examen en tu campus, la pestaña avisa en vivo. | When there is an exam on your campus, the tab says live. | Quan hi ha examen al teu campus, la pestanya avisa en directe. | Zure campusean azterketa dagoenean, fitxak zuzenean abisatzen du. |
+| `tour.exams.2` | Demostración animada de Exámenes: frase del paso 2 | shared/tour/Tour | Ves quién está dentro, de qué examen y su círculo. | You see who is in, which exam and their circle. | Veus qui hi és, de quin examen i el seu cercle. | Nor dagoen ikusten duzu, zein azterketa eta bere zirkulua. |
+| `tour.exams.3` | Demostración animada de Exámenes: frase del paso 3 | shared/tour/Tour | Las notas se ponen al día solas cada cinco minutos. | Marks update on their own every five minutes. | Les notes s'actualitzen soles cada cinc minuts. | Notak bost minuturo eguneratzen dira berez. |
+| `tour.exams.4` | Demostración animada de Exámenes: frase del paso 4 | shared/tour/Tour | Debajo, en qué intento se suele aprobar cada examen. | Below, on which attempt each exam is usually passed. | A sota, en quin intent s'acostuma a aprovar cada examen. | Behean, azterketa bakoitza zein saiakeratan gainditzen den. |

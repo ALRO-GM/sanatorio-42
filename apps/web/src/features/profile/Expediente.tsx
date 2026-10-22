@@ -134,13 +134,12 @@ export function Expediente({ me, profile }: ExpedienteProps) {
                     className={`xp-toggle ${showRules ? 'open' : ''}`}
                     aria-expanded={showRules}
                     aria-controls="xp-breakdown"
-                    aria-label={t('xp.howTo')}
-                    title={t('xp.howTo')}
                     onClick={() => {
                       setShowRules((open) => !open)
                     }}
                   >
-                    <span aria-hidden="true">▾</span>
+                    {/* Con texto: la flecha sola era pequeña y no se veía que abre algo. */}
+                    {t('xp.howTo')} <span aria-hidden="true">▾</span>
                   </button>
                 </div>
 

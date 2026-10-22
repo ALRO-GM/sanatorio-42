@@ -76,9 +76,10 @@ Hecho además, a petición durante la revisión: tablas ordenables con cabecera
 fija, apartado de trampas de Code Clicker, estado de salud ordenado y nombres
 de las noticias del juego por correcciones.
 
-Siguiente tanda propuesta (sin empezar, pedir a Alberto): las mejoras de la
-última columna de la valoración de uso de `docs/interfaz.md` (avisos apilados
-en la guardia, eventos cortados en el calendario, demostración de Exámenes).
+- [x] **Tanda de la valoración de uso** (2026-10-22): las mejoras de la última
+      columna de `docs/interfaz.md`, hechas y desplegadas. Quedan abiertas solo
+      las que dicen sin «—»: grafo del tablón en móvil, «endogamia» en la Red y
+      las preguntas de Not-games en otros idiomas (el banco está en castellano).
 
 ## 2b. Plan vigente: Not-games (pedido el 2026-10-17)
 
@@ -224,10 +225,8 @@ despliegue espera a la CI).
 
 ## 3. A medias o por confirmar con Alberto
 
-- **Intentos de examen**: la copia de fondo nunca arrancaba (pedía 200 peticiones
-  más que la reserva y la web vacía, y la de correcciones la dejaba sin cuota).
-  Arreglado el 2026-10-17: va por delante hasta la mitad de la reserva. 42 sí
-  manda `teams` en `/projects_users`. Comprobar que `exam_attempts` crece.
+- ~~Intentos de examen~~: comprobado el 2026-10-22: la copia de fondo acabó el
+  2026-10-17 (25 829 intentos) y siguen entrando (81 desde el 18).
 - **Bolsa común de Code Clicker**: con la política nueva ya no se llena y su
   placa no sale. Preguntar a Alberto si se quita del todo (`loot.ts`,
   `clicker_pool`, `POST /clicker/pool/claim`).
@@ -245,10 +244,12 @@ despliegue espera a la CI).
 - En el rótulo de cuota no se dice de cuándo es cada dato, solo que es lo último
   guardado. Si se quiere la fecha exacta, `agenda_users.fetched_at` y
   `sync_state.updated_at` ya la tienen.
-- La cola solo deja pasar sin turno a quien administra por configuración
-  (`ADMIN_LOGINS`), no a quien recibe el permiso desde el panel.
-- El expediente ajeno enseña el estado de salud con los textos en segunda persona
-  ("Estás en el círculo…"): cambiarlos a tercera cuando se mira el de otro.
+- ~~La cola solo deja pasar sin turno a quien administra por configuración~~:
+  arreglado el 2026-10-22, también pasa quien tiene el permiso desde el panel
+  (copia de `adminLogins` que se refresca como mucho cada minuto, en
+  `app/composition.ts`).
+- ~~El expediente ajeno en segunda persona~~: arreglado el 2026-10-22 (claves
+  `health.*Other`).
 
 ## 4. Antes de la próxima limpieza de contexto
 

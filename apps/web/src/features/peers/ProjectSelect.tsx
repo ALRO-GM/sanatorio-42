@@ -39,7 +39,9 @@ export function ProjectSelect({ onSelect }: ProjectSelectProps) {
         </InfoTip>
       </h2>
       {data.length === 0 && <p className="estado">{t('projects.empty')}</p>}
-      <ul className="project-list">
+      {/* «¿Qué te duele hoy?» es un juego de palabras: esto dice qué hacer. */}
+      {data.length > 0 && <span className="eyebrow">{t('projects.pick')}</span>}
+      <ul className="project-list" aria-label={t('projects.pick')}>
         {data.map((project) => (
           <li key={project.id}>
             <button

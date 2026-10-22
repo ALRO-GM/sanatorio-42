@@ -430,13 +430,13 @@
 @media (max-width: 960px) {
   /* En estrecho va todo en una columna y se desliza la página, como siempre.
      La columna deja de ser una caja: sus piezas se colocan una a una, con el
-     grafo en medio. */
+     grafo justo después del título (con los filtros delante quedaba muy abajo). */
   .net-layout {
     grid-template-columns: 1fr;
     grid-template-areas:
       'head'
-      'filters'
       'stage'
+      'filters'
       'side';
     height: auto;
     min-height: 0;

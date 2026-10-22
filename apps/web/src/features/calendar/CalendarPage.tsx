@@ -211,6 +211,10 @@ export function CalendarPage({ focus = null, onGo, me }: CalendarPageProps) {
         )}
 
         <div className="agenda-kinds" role="group" aria-label={t('agenda.kinds')}>
+          {/* Que se vea que son filtros: cada tipo se enciende o se apaga. */}
+          <span className="agenda-kinds-label" aria-hidden="true">
+            {t('agenda.kindsShow')}
+          </span>
           {KINDS.map(({ kind, icon }) => (
             <button
               key={kind}

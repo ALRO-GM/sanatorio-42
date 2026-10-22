@@ -15,10 +15,12 @@ import { AlertCenter } from '../features/alerts/AlertCenter'
 import { EasterEgg } from '../features/clicker/EasterEgg'
 import { QuotaNotice } from '../features/alerts/QuotaNotice'
 import { onOpenChat } from '../features/notices/conversations'
+import { onOpenCustomize } from '../shared/layout/customize'
 import { api } from '../shared/api'
 import { useAsync } from '../shared/hooks/useAsync'
 import { usePulse } from '../shared/hooks/usePulse'
 import { LayoutSettings } from '../shared/layout/LayoutSettings'
+import { DetailSelect } from '../features/settings/DetailSelect'
 import { DEFAULT_THEME, useStyle } from '../shared/theme'
 import { canUseStyle } from '../themes'
 import { RecordStylePicker } from '../features/profile/RecordStylePicker'
@@ -71,6 +73,14 @@ export function Clinic({ me, onLogout }: ClinicProps) {
       onOpenChat((id) => {
         setChat(id)
         setBox('notices')
+      }),
+    [],
+  )
+  // «Personalizar» también se abre desde el pie de cada página con bloques.
+  useEffect(
+    () =>
+      onOpenCustomize(() => {
+        setCustomizing(true)
       }),
     [],
   )
@@ -194,6 +204,7 @@ export function Clinic({ me, onLogout }: ClinicProps) {
             onClose={() => {
               setCustomizing(false)
             }}
+            interfaceMode={<DetailSelect />}
             recordStyle={
               profile.data !== undefined && (
                 <RecordStylePicker

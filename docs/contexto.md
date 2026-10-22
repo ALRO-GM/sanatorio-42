@@ -6,7 +6,7 @@ hace la web está en el [README](../README.md); cómo está montada, en
 [architecture.md](architecture.md); el contrato HTTP, en [api.md](api.md). Aquí
 va lo que no está en el código.
 
-Última puesta al día: 2026-10-17.
+Última puesta al día: 2026-10-22.
 
 **Al retomar con el contexto vacío, lo primero es
 [tareas-tras-compactar.md](tareas-tras-compactar.md)**: es la lista de lo que hay
@@ -26,6 +26,24 @@ que hacer, en orden. Este documento es el porqué; aquel, el qué.
   espera a la CI del commit (no despliega si falla) y vuelve a la imagen
   anterior si la nueva no responde.
 - Los cambios de la web se prueban con `npm run dev:mock` y Chrome sin ventana.
+
+## Estado a 2026-10-22
+
+- **Despliegue sin preguntar**: Alberto lo autorizó el 2026-10-22 y puso el
+  permiso de la orden en su configuración. Cada bloque: `npm run check`,
+  commit, push y desplegar.
+- **Curso de git (#42) terminado y en producción**: camino de 30 puntos, test
+  previo, tres pruebas de grupo y jefe final (`docs/curso-git.md`). Las
+  misiones de grupo se comprueban **por persona** (pedido por Alberto: todas
+  usan todos los conceptos). En el jefe, puestos a 4 filas y 4 columnas (u
+  otro clúster) y sin ver lo que escriben las demás. Migración 62
+  (`git_rooms`, `git_room_players`). Demostración `gitCourse`.
+- **Tanda de la valoración de uso** hecha (ver `docs/interfaz.md`), con la
+  demostración de Exámenes, «Personalizar» desde cada página y el modo de la
+  interfaz también en Personalizar.
+- Arreglados del apartado 3 del plan: cola de 42 para quien administra desde
+  el panel y expediente ajeno en tercera persona. Comprobado que los intentos
+  de examen siguen entrando.
 
 ## Revisión completa (2026-10-17)
 

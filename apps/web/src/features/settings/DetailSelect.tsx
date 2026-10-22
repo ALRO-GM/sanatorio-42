@@ -1,7 +1,7 @@
 import { DETAILS, isDetail, setDetail, useDetail } from '../../shared/detail'
 import { useI18n } from '../../shared/i18n'
 
-/** Selector del modo de la interfaz, en el pie. */
+/** Selector del modo de la interfaz, en el pie y en Personalizar. */
 export function DetailSelect() {
   const { t } = useI18n()
   const detail = useDetail()

@@ -21,6 +21,7 @@ agenda.view.day,Vista: día,Día,Day,Dia,Eguna
 agenda.view.week,Vista: semana,Semana,Week,Setmana,Astea
 agenda.view.month,Vista: mes,Mes,Month,Mes,Hilabetea
 agenda.kinds,Filtro de tipos de evento,Tipos de evento,Event types,Tipus d'esdeveniment,Ekitaldi motak
+agenda.kindsShow,"Calendario: delante de los tipos de evento, para que se vea que filtran",Ver:,Show:,Mostra:,Erakutsi:
 agenda.kind.help,Tipo de evento: tu guardia y reservas de ayuda,Guardia,On duty,Guàrdia,Guardia
 agenda.kind.therapy,Tipo de evento: terapias,Terapias,Therapy,Teràpies,Terapiak
 agenda.kind.board,Tipo de evento: pizarras,Pizarras,Whiteboards,Pissarres,Arbelak

@@ -244,25 +244,29 @@ export function DayEditor({ day, onSaved }: DayEditorProps) {
             ))}
           </select>
         </label>
-        <p className="hint help-summary" role="status">
-          {offered === 0
-            ? t('help.noWindows')
-            : t('help.summary', {
-                offered: duration(offered),
-                max: duration(Math.min(maxMinutes, offered)),
-              })}
-          {day.bookedMinutes > 0 && ` ${t('help.booked', { booked: duration(day.bookedMinutes) })}`}
-        </p>
+        {/* Un solo aviso, el más importante: sin valorar no se puede tocar nada. */}
+        {day.mustRate ? (
+          <p className="estado aviso" role="status">
+            {t('help.mustRate')}
+          </p>
+        ) : (
+          <p className="hint help-summary" role="status">
+            {offered === 0
+              ? t('help.noWindows')
+              : t('help.summary', {
+                  offered: duration(offered),
+                  max: duration(Math.min(maxMinutes, offered)),
+                })}
+            {day.bookedMinutes > 0 &&
+              ` ${t('help.booked', { booked: duration(day.bookedMinutes) })}`}
+            {day.busy.length > 0 &&
+              ` ${t('help.busy', {
+                ranges: day.busy.map((range) => `${range.start}–${range.end}`).join(', '),
+              })}`}
+          </p>
+        )}
       </div>
 
-      {day.busy.length > 0 && (
-        <p className="hint" role="status">
-          {t('help.busy', {
-            ranges: day.busy.map((range) => `${range.start}–${range.end}`).join(', '),
-          })}
-        </p>
-      )}
-      {day.mustRate && <p className="estado aviso">{t('help.mustRate')}</p>}
       <ErrorNote error={error} />
       <div className="actions">
         <button

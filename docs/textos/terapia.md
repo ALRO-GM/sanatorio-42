@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/terapia.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-59 textos. «—» es que falta la traducción: sale en español.
+60 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -18,6 +18,7 @@ Generado desde `apps/web/src/shared/i18n/textos/terapia.csv` con
 | `therapy.timeRange` | Hora de inicio y fin | features/therapy/GroupCard | {start} a {end} | {start} to {end} | {start} a {end} | {start}etatik {end}etara |
 | `therapy.days` | Etiqueta: días en que se queda | features/therapy/GroupCard, features/therapy/GroupForm | Días de quedada | Meeting days | Dies de trobada | Elkartzeko egunak |
 | `therapy.members` | Lista de miembros del grupo | features/therapy/GroupCard | Pacientes del grupo | Patients in the group | Pacients del grup | Taldeko pazienteak |
+| `therapy.moreMembers` | Terapia: enlace para ver el resto de personas del grupo | features/therapy/GroupCard | y {n} más | and {n} more | i {n} més | eta beste {n} |
 | `therapy.seats` | Puestos del campus reservados para el grupo | features/therapy/GroupCard | Puestos reservados | Reserved seats | Llocs reservats | Erreserbatutako postuak |
 | `therapy.pickSeats` | Elegir puestos en el mapa | features/therapy/GroupForm | ¿Dónde y cuántas plazas? | Where, and how many seats? | On i quantes places? | Non eta zenbat plaza? |
 | `therapy.pickSeatsHint` | Cómo elegir los puestos del grupo | features/therapy/GroupForm | Elige de 2 a 6 puestos que se toquen: al lado, delante, detrás o en diagonal. Cada puesto es una plaza del grupo. | Pick 2 to 6 seats that touch: next to, in front of, behind or diagonal. Each seat is one place in the group. | Tria de 2 a 6 llocs que es toquin: al costat, davant, darrere o en diagonal. Cada lloc és una plaça del grup. | Aukeratu elkar ukitzen duten 2tik 6ra postu: ondoan, aurrean, atzean edo diagonalean. Postu bakoitza taldeko plaza bat da. |

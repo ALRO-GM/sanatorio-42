@@ -9,6 +9,8 @@ import { Show } from '../../shared/detail'
 import { Avatar } from '../../shared/ui/Avatar'
 import { PersonLink } from '../../shared/ui/PersonLink'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { InfoTip } from '../../shared/ui/InfoTip'
+import { ExamsTour } from './ExamsTour'
 
 /** Cada cuánto se pregunta por el examen en vivo: la API refresca las notas cada 5 min. */
 const LIVE_REFRESH_MS = 60_000
@@ -37,7 +39,12 @@ export function ExamsPage() {
 
   return (
     <section>
-      <h2>{t('exams.title')}</h2>
+      <h2>
+        {t('exams.title')}
+        <InfoTip title={t('exams.title')}>
+          <ExamsTour />
+        </InfoTip>
+      </h2>
       {live.data !== undefined && <LiveCard live={live.data} />}
       <ErrorNote error={live.error} onRetry={() => void live.reload()} />
 
@@ -215,8 +222,9 @@ function ExamCard({ exam }: { exam: ExamStat }) {
           </li>
         ))}
       </ul>
+      {/* El detalle por intento es denso: solo para quien quiere los datos. */}
       {exam.byAttempt.length > 0 && (
-        <>
+        <Show from="datos">
           <span className="eyebrow">{t('exams.byAttempt')}</span>
           <ul className="rows exam-attempts">
             {exam.byAttempt.slice(0, 6).map((attempt) => (
@@ -232,7 +240,7 @@ function ExamCard({ exam }: { exam: ExamStat }) {
               </li>
             ))}
           </ul>
-        </>
+        </Show>
       )}
     </article>
   )

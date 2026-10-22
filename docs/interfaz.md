@@ -22,7 +22,7 @@ Fuera de las pestañas, a propósito:
 
 | Qué | Dónde | Por qué |
 | --- | --- | --- |
-| Guardia | «De guardia», en la cabecera | Es un interruptor que se toca a diario, no una página que se visita |
+| Guardia | 4 | 4 | 4 | Interruptor siempre a mano en la cabecera; «Cómo te ven ahora» explica el estado | — (2026-10-22: un solo aviso bajo las franjas; si hay una valoración pendiente, solo ese) |
 | Buscador de personas, buzón, menú de la cuenta | Cabecera | Se usan desde cualquier sitio |
 | Panel de gestión, incidencias, personalizar, bienvenida | Menú de la cuenta | Son de vez en cuando o solo de quien administra |
 | Modo, idioma, tema, texto, daltonismo, zen, campus | Pie | Se eligen una vez |
@@ -48,37 +48,37 @@ de datos.
 | --- | --- | --- | --- |
 | Pestañas | Expediente, Ayuda (las cuatro) y Calendario | S | Son para lo que existe la web |
 | Pestañas | Datos (red, clústeres, exámenes) | N | Informan, no resuelven un atasco |
-| Expediente | Nivel, títulos y XP | S | Lo primero que se ve al entrar |
-| Expediente | Estado de salud (pace y black hole) | S | Afecta a la vida académica |
-| Expediente | Horas validadas (descarga para el staff) | N | Se usa de tarde en tarde |
-| Expediente | Desglose de la XP | N (cerrado) · D (abierto) | Detalle |
-| Expediente | Tu red de correcciones, logros y reacciones, clasificación | N | Es reconocimiento, no utilidad |
-| Guardia | Preevaluaciones, franjas de hoy, reservas | S | Es la guardia |
-| Guardia | Personas bloqueadas | N | Uso raro |
-| Sala de espera | Proyectos, quién ayuda, mapa de dónde se sienta, «solo de guardia», «a quien puedes pedir» | S | Es la sala de espera |
-| Sala de espera | Filtro especialistas / pacientes, filtro de preevaluación | N | Afinar |
-| Sala de espera | «Os habéis corregido N veces» | D | Curiosidad |
-| Tablón | Grafo de tu avance, guía y dudas | S | Es el tablón |
-| Tablón | Grafo de tus correcciones (maestro del código) | N | Reconocimiento |
+| Expediente | 5 | 4 | 4 | Es la portada; nivel y título claros; estado de salud con calculadora | — (2026-10-22: el formulario del pace dice dónde mirarlo en la intra y enlaza; el desglose de XP se abre con un botón con texto; el expediente ajeno habla en tercera persona) |
+| Expediente | 5 | 4 | 4 | Es la portada; nivel y título claros; estado de salud con calculadora | — (2026-10-22: el formulario del pace dice dónde mirarlo en la intra y enlaza; el desglose de XP se abre con un botón con texto; el expediente ajeno habla en tercera persona) |
+| Expediente | 5 | 4 | 4 | Es la portada; nivel y título claros; estado de salud con calculadora | — (2026-10-22: el formulario del pace dice dónde mirarlo en la intra y enlaza; el desglose de XP se abre con un botón con texto; el expediente ajeno habla en tercera persona) |
+| Expediente | 5 | 4 | 4 | Es la portada; nivel y título claros; estado de salud con calculadora | — (2026-10-22: el formulario del pace dice dónde mirarlo en la intra y enlaza; el desglose de XP se abre con un botón con texto; el expediente ajeno habla en tercera persona) |
+| Expediente | 5 | 4 | 4 | Es la portada; nivel y título claros; estado de salud con calculadora | — (2026-10-22: el formulario del pace dice dónde mirarlo en la intra y enlaza; el desglose de XP se abre con un botón con texto; el expediente ajeno habla en tercera persona) |
+| Guardia | 4 | 4 | 4 | Interruptor siempre a mano en la cabecera; «Cómo te ven ahora» explica el estado | — (2026-10-22: un solo aviso bajo las franjas; si hay una valoración pendiente, solo ese) |
+| Guardia | 4 | 4 | 4 | Interruptor siempre a mano en la cabecera; «Cómo te ven ahora» explica el estado | — (2026-10-22: un solo aviso bajo las franjas; si hay una valoración pendiente, solo ese) |
+| Sala de espera | 5 | 5 | 4 | Tarjetas grandes por proyecto; quién ayuda y dónde se sienta en un paso | — (2026-10-22: «Elige un proyecto» encima de la lista, bajo la metáfora) |
+| Sala de espera | 5 | 5 | 4 | Tarjetas grandes por proyecto; quién ayuda y dónde se sienta en un paso | — (2026-10-22: «Elige un proyecto» encima de la lista, bajo la metáfora) |
+| Sala de espera | 5 | 5 | 4 | Tarjetas grandes por proyecto; quién ayuda y dónde se sienta en un paso | — (2026-10-22: «Elige un proyecto» encima de la lista, bajo la metáfora) |
+| Tablón | 4 | 4 | 4 | Grafo de tu plan con marcas de dónde ayudar | El grafo en perspectiva cuesta en móvil (2026-10-22: los módulos agrupados dicen «ver sus N módulos ▸») |
+| Tablón | 4 | 4 | 4 | Grafo de tu plan con marcas de dónde ayudar | El grafo en perspectiva cuesta en móvil (2026-10-22: los módulos agrupados dicen «ver sus N módulos ▸») |
 | Terapia y Pizarras | Todo | S | Son quedar |
 | Pestañas | Not-games | N | Aprender jugando: no hace falta para pedir ni dar ayuda |
-| Not-games | Salas, crear sala, partida y marcador | N | La sección en sí |
-| Not-games | Curso de git: camino, animación, teoría y terminal | N | Aprender jugando, como el resto de Not-games |
-| Not-games | Curso de git: pruebas de grupo (sala, misiones, origin común) | N | Va con el curso: después del test previo de cada prueba |
-| Not-games | Repaso: lo fallado con definición y ejemplo | N | Para estudiar después de jugar |
-| Not-games | Ajedrez: tablero, relojes, pregunta encima del tablero, estilos de tablero, sonido | N | Un juego más de la sección |
+| Not-games | 4 | 4 | 4 | Modos explicados al elegir; cuenta atrás con la hora del servidor; el porqué de cada respuesta | Preguntas solo en español (2026-10-22: creando una sala, las abiertas se ven al lado) |
+| Not-games | 4 | 4 | 4 | Modos explicados al elegir; cuenta atrás con la hora del servidor; el porqué de cada respuesta | Preguntas solo en español (2026-10-22: creando una sala, las abiertas se ven al lado) |
+| Not-games | 4 | 4 | 4 | Modos explicados al elegir; cuenta atrás con la hora del servidor; el porqué de cada respuesta | Preguntas solo en español (2026-10-22: creando una sala, las abiertas se ven al lado) |
+| Not-games | 4 | 4 | 4 | Modos explicados al elegir; cuenta atrás con la hora del servidor; el porqué de cada respuesta | Preguntas solo en español (2026-10-22: creando una sala, las abiertas se ven al lado) |
+| Not-games | 4 | 4 | 4 | Modos explicados al elegir; cuenta atrás con la hora del servidor; el porqué de cada respuesta | Preguntas solo en español (2026-10-22: creando una sala, las abiertas se ven al lado) |
 | Menú de la cuenta | Modo concentración (Pomodoro) | S | Para todos: concentrarse no es «de datos» |
-| Clústeres | Avisar de un problema (edificio u ordenador) | N | Al lado del plano, donde se ve el puesto |
+| Clústeres | 4 | 4 | 4 | Plano fiel, leyenda, resaltar a tu círculo o proyecto | — (el clic central tiene su aviso bajo el plano y la ficha del puesto enlaza al expediente) |
 | Pestañas | Estadísticas (en Ayuda) | N | Clasificaciones: el simplificado no enseña rankings |
 | Estadísticas | Cifras del campus y clasificación de cada sección, con fotos | N | La sección en sí |
-| Calendario | Vistas día/semana/mes, tipos de evento (también leyenda) | S | Básico |
-| Calendario | Formas del día (lista, entera, ajustada, desde ahora) | N | Comodidad |
-| Red | Grafo, filtros, totales, cómo se lee | N | La sección en sí |
-| Red | Endogamia, parejas, los más estrictos, proyectos más corregidos | D | Rankings |
-| Clústeres | Mapa, opciones de vista, resaltar | N | La sección en sí |
-| Clústeres | «N de M personas tienen Sanatorio abierto» | D | Cifra |
-| Exámenes | Examen en vivo y estadísticas de cada examen | N | La sección en sí |
-| Exámenes | Cuánto se tarda en cada círculo | D | Estadística |
+| Calendario | 5 | 4 | 4 | Todo en un sitio, colores por tipo, «te quedan X para lo siguiente» | — (2026-10-22: en semana el título ocupa hasta dos líneas y los bajitos no repiten la hora; los tipos van en una fila con «Ver:» delante) |
+| Calendario | 5 | 4 | 4 | Todo en un sitio, colores por tipo, «te quedan X para lo siguiente» | — (2026-10-22: en semana el título ocupa hasta dos líneas y los bajitos no repiten la hora; los tipos van en una fila con «Ver:» delante) |
+| Red | 3 | 3 | 3 | Grafo rápido, ficha de cada persona, flechas por sentido | «Endogamia» necesita la explicación (2026-10-22: en móvil el grafo va antes que los filtros) |
+| Red | 3 | 3 | 3 | Grafo rápido, ficha de cada persona, flechas por sentido | «Endogamia» necesita la explicación (2026-10-22: en móvil el grafo va antes que los filtros) |
+| Clústeres | 4 | 4 | 4 | Plano fiel, leyenda, resaltar a tu círculo o proyecto | — (el clic central tiene su aviso bajo el plano y la ficha del puesto enlaza al expediente) |
+| Clústeres | 4 | 4 | 4 | Plano fiel, leyenda, resaltar a tu círculo o proyecto | — (el clic central tiene su aviso bajo el plano y la ficha del puesto enlaza al expediente) |
+| Exámenes | 4 | 4 | 4 | Aviso «en vivo» en la pestaña; notas al momento; demostración | — (2026-10-22: el detalle por intento, solo en el modo de datos; cada examen en vivo va con su nombre) |
+| Exámenes | 4 | 4 | 4 | Aviso «en vivo» en la pestaña; notas al momento; demostración | — (2026-10-22: el detalle por intento, solo en el modo de datos; cada examen en vivo va con su nombre) |
 | Pie | Modo, idioma, tema, texto, daltonismo, zen | S | Accesibilidad |
 | Pie | Campus | N | Casi nadie cambia de campus |
 | Pie | «Puestos actualizados hace N min» | D | Dato técnico |
@@ -94,24 +94,24 @@ Cada pantalla, puntuada de 1 a 5 en tres cosas:
 - **Destino**: está claro qué hace cada botón y a dónde lleva.
 - **Datos**: lo que enseña se entiende a la primera.
 
-Revisado el 2026-10-17 sobre la demostración, en escritorio y móvil.
+Revisado el 2026-10-17 sobre la demostración, en escritorio y móvil; mejoras hechas el 2026-10-22.
 
 | Pantalla | Encontrar | Destino | Datos | Lo que funciona | Lo que mejorar |
 | --- | --- | --- | --- | --- | --- |
-| Expediente | 5 | 4 | 4 | Es la portada; nivel y título claros; estado de salud con calculadora | El estado de salud pide pace y fecha sin decir dónde mirarlos en la intra; la flecha del desglose de XP es pequeña |
-| Sala de espera | 5 | 5 | 4 | Tarjetas grandes por proyecto; quién ayuda y dónde se sienta en un paso | «¿Qué te duele hoy?» es una metáfora: sin la (i) no se sabe que hay que elegir proyecto |
-| Guardia | 4 | 3 | 3 | Interruptor siempre a mano en la cabecera; «Cómo te ven ahora» explica el estado | Debajo de las franjas se apilan hasta cuatro avisos (ofrecido, reservado, ocupado, valoración pendiente); conviene uno solo, el más importante |
-| Tablón | 4 | 4 | 4 | Grafo de tu plan con marcas de dónde ayudar | El grafo en perspectiva cuesta en móvil; los módulos agrupados («Python · 11») no se ve que se pueden abrir |
-| Terapia | 4 | 4 | 4 | Tarjeta con dónde, cuándo, quién y cuánto lleva cada cual | Tarjetas largas: con varios grupos hay que bajar mucho; los puestos reservados se leen mal (gris sobre gris) |
+| Expediente | 5 | 4 | 4 | Es la portada; nivel y título claros; estado de salud con calculadora | — (2026-10-22: el formulario del pace dice dónde mirarlo en la intra y enlaza; el desglose de XP se abre con un botón con texto; el expediente ajeno habla en tercera persona) |
+| Sala de espera | 5 | 5 | 4 | Tarjetas grandes por proyecto; quién ayuda y dónde se sienta en un paso | — (2026-10-22: «Elige un proyecto» encima de la lista, bajo la metáfora) |
+| Guardia | 4 | 4 | 4 | Interruptor siempre a mano en la cabecera; «Cómo te ven ahora» explica el estado | — (2026-10-22: un solo aviso bajo las franjas; si hay una valoración pendiente, solo ese) |
+| Tablón | 4 | 4 | 4 | Grafo de tu plan con marcas de dónde ayudar | El grafo en perspectiva cuesta en móvil (2026-10-22: los módulos agrupados dicen «ver sus N módulos ▸») |
+| Terapia | 4 | 4 | 4 | Tarjeta con dónde, cuándo, quién y cuánto lleva cada cual | — (2026-10-22: se ven cuatro personas y «y N más»; los puestos con borde y texto del tema) |
 | Pizarras | 4 | 5 | 5 | Sin día elegido salen las próximas con plaza; «Apuntarme» grande | — (arreglado: el título salía con mayúsculas en cada palabra y las flechas del mes, una encima de otra) |
-| Calendario | 5 | 4 | 3 | Todo en un sitio, colores por tipo, «te quedan X para lo siguiente» | En semana los eventos cortos se cortan («Terap…»); la fila de tipos ocupa dos líneas y no se nota que también filtra |
-| Red | 3 | 3 | 3 | Grafo rápido, ficha de cada persona, flechas por sentido | Muchos filtros antes de ver el grafo; «endogamia» necesita la explicación; en móvil el grafo queda muy abajo |
-| Clústeres | 4 | 4 | 4 | Plano fiel, leyenda, resaltar a tu círculo o proyecto | El clic central para abrir un expediente no se descubre solo (la demostración ya enseña la ficha de un puesto) |
-| Exámenes | 4 | 4 | 3 | Aviso «en vivo» en la pestaña; notas al momento | Las estadísticas por intento son densas; falta decir qué examen es cuál si hay varios a la vez |
-| Not-games | 4 | 4 | 4 | Modos explicados al elegir; cuenta atrás con la hora del servidor; el porqué de cada respuesta | Sin la lista de salas a la vista mientras se crea una; preguntas solo en español |
-| Buzón | 5 | 4 | 4 | Número rojo en la cabecera; avisos llevan a su sitio | Avisos y conversaciones en pestañas: las conversaciones se descubren tarde |
-| Personalizar | 3 | 4 | 4 | Orden manual, por tu uso o por la comunidad | Escondido en el menú de la cuenta |
-| Pie (ajustes) | 3 | 5 | 5 | Todo a la vista y con nombres claros | Está al final de páginas muy largas: el modo y el idioma se descubren tarde (por eso también están en la bienvenida) |
+| Calendario | 5 | 4 | 4 | Todo en un sitio, colores por tipo, «te quedan X para lo siguiente» | — (2026-10-22: en semana el título ocupa hasta dos líneas y los bajitos no repiten la hora; los tipos van en una fila con «Ver:» delante) |
+| Red | 3 | 3 | 3 | Grafo rápido, ficha de cada persona, flechas por sentido | «Endogamia» necesita la explicación (2026-10-22: en móvil el grafo va antes que los filtros) |
+| Clústeres | 4 | 4 | 4 | Plano fiel, leyenda, resaltar a tu círculo o proyecto | — (el clic central tiene su aviso bajo el plano y la ficha del puesto enlaza al expediente) |
+| Exámenes | 4 | 4 | 4 | Aviso «en vivo» en la pestaña; notas al momento; demostración | — (2026-10-22: el detalle por intento, solo en el modo de datos; cada examen en vivo va con su nombre) |
+| Not-games | 4 | 4 | 4 | Modos explicados al elegir; cuenta atrás con la hora del servidor; el porqué de cada respuesta | Preguntas solo en español (2026-10-22: creando una sala, las abiertas se ven al lado) |
+| Buzón | 5 | 4 | 4 | Número rojo en la cabecera; avisos llevan a su sitio | — (2026-10-22: la pestaña de conversaciones lleva su número de sin leer) |
+| Personalizar | 4 | 4 | 4 | Orden manual, por tu uso o por la comunidad | — (2026-10-22: «Ordenar o plegar estos bloques» al final de cada página con bloques) |
+| Pie (ajustes) | 4 | 5 | 5 | Todo a la vista y con nombres claros | — (2026-10-22: el modo de la interfaz también está en Personalizar; además, en la bienvenida) |
 
 Las mejoras de la última columna son el punto de partida de la siguiente
 tanda; cuando se haga una, se actualiza la fila.

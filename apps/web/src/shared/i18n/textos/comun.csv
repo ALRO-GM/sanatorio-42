@@ -98,6 +98,7 @@ nav.red,Pestaña: red de correcciones entre estudiantes,Red,Network,Xarxa,Sarea
 app.loadingSection,Mientras se descarga una sección,Abriendo…,Opening…,Obrint…,Irekitzen…
 layout.open,Menú de la cuenta: abrir la personalización,Personalizar la web,Customise the site,Personalitza la web,Pertsonalizatu weba
 layout.title,Título de la ventana de personalización,Personalizar,Customise,Personalitza,Pertsonalizatu
+layout.customizeHere,Enlace al final de una página con bloques: abre Personalizar,Ordenar o plegar estos bloques,Reorder or fold these blocks,Ordena o plega aquests blocs,Blokeak ordenatu edo tolestu
 layout.close,Botón para cerrar una ventana,Cerrar,Close,Tanca,Itxi
 layout.done,Botón para terminar y cerrar la personalización,Listo,Done,Fet,Eginda
 layout.reset,Botón para volver al orden original,Volver al orden de fábrica,Back to the default order,Torna a l'ordre de fàbrica,Itzuli fabrikako ordenara

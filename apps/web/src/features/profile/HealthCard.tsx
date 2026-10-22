@@ -6,6 +6,7 @@ import type { Health, PaceRef } from '@sanatorio/contracts'
 import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { localeOf, useI18n } from '../../shared/i18n'
+import { INTRA_HOME } from '../../shared/links'
 import { daysBetween, originOf, paceOn, PACES, SLOWEST, stepsFor } from '../../shared/pace'
 import type { PaceStep } from '../../shared/pace'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
@@ -78,6 +79,7 @@ type HealthBodyProps = {
 
 function HealthBody({ health, startedAt, mine, onSaved }: HealthBodyProps) {
   const { t, lang } = useI18n()
+  // En el expediente de otra persona, las frases van en tercera persona (`…Other`).
   // Se fija al montar: las cuentas no deben bailar entre un render y el siguiente.
   const [now] = useState(() => Date.now())
   // Plegado por defecto: de un vistazo, el pace y hasta cuándo; el resto, al abrir.
@@ -98,7 +100,10 @@ function HealthBody({ health, startedAt, mine, onSaved }: HealthBodyProps) {
 
   const started = (
     <small>
-      {t('health.started', { date: day(startedAt), days: daysBetween(Date.parse(startedAt), now) })}
+      {t(mine ? 'health.started' : 'health.startedOther', {
+        date: day(startedAt),
+        days: daysBetween(Date.parse(startedAt), now),
+      })}
     </small>
   )
 
@@ -110,7 +115,7 @@ function HealthBody({ health, startedAt, mine, onSaved }: HealthBodyProps) {
           <strong>✓</strong>
         </div>
         <p className="health-summary">
-          {t('health.finished')}
+          {t(mine ? 'health.finished' : 'health.finishedOther')}
           {started}
         </p>
       </div>
@@ -144,19 +149,22 @@ function HealthBody({ health, startedAt, mine, onSaved }: HealthBodyProps) {
             pasaras de círculo hoy y el que pone tu intra (el que anotaste). */}
         <div
           className={`health-pace ${current === null ? 'gone' : ''}`}
-          title={t('health.paceNowHint')}
+          title={t(mine ? 'health.paceNowHint' : 'health.paceNowHintOther')}
         >
           <span className="eyebrow">{t('health.paceNow')}</span>
           <strong>{current?.pace ?? <Icon name="pozo" size={26} />}</strong>
         </div>
-        <div className="health-pace official" title={t('health.paceIntraHint')}>
-          <span className="eyebrow">{t('health.paceIntra')}</span>
+        <div
+          className="health-pace official"
+          title={t(mine ? 'health.paceIntraHint' : 'health.paceIntraHintOther')}
+        >
+          <span className="eyebrow">{t(mine ? 'health.paceIntra' : 'health.paceIntraOther')}</span>
           <strong>{declared.pace}</strong>
         </div>
         <p className="health-summary">
           {current === null
-            ? t('health.summaryGone', { circle })
-            : t('health.summary', {
+            ? t(mine ? 'health.summaryGone' : 'health.summaryGoneOther', { circle })
+            : t(mine ? 'health.summary' : 'health.summaryOther', {
                 circle,
                 pace: current.pace,
                 date: day(current.date),
@@ -196,7 +204,9 @@ function HealthBody({ health, startedAt, mine, onSaved }: HealthBodyProps) {
 
     return (
       <>
-        <span className="eyebrow">{t('health.drops', { circle })}</span>
+        <span className="eyebrow">
+          {t(mine ? 'health.drops' : 'health.dropsOther', { circle })}
+        </span>
         <ol className="health-steps">
           {/* Los plazos que ya se pasaron, en una sola línea: lo que importa es lo que queda. */}
           {lost.length > 0 && (
@@ -257,13 +267,13 @@ function HealthBody({ health, startedAt, mine, onSaved }: HealthBodyProps) {
         <Calculator origin={origin} from={circle} now={now} day={day} />
 
         <p className="hint">
-          {t('health.source', {
+          {t(mine ? 'health.source' : 'health.sourceOther', {
             pace: declared.pace,
             circle: declared.circle,
             deadline: day(`${declared.deadline}T12:00:00`),
             updated: day(declared.updatedAt),
           })}{' '}
-          {bonusDays > 0 && t('health.bonus', { n: bonusDays })}
+          {bonusDays > 0 && t(mine ? 'health.bonus' : 'health.bonusOther', { n: bonusDays })}
         </p>
         {mine &&
           (editing ? (
@@ -395,6 +405,12 @@ function PaceForm({ health, onSaved, onCancel, cancelLabel }: PaceFormProps) {
         void save()
       }}
     >
+      <p className="hint health-form-where">
+        {t('health.formWhere')}{' '}
+        <a href={INTRA_HOME} target="_blank" rel="noreferrer">
+          {t('health.formIntra')}
+        </a>
+      </p>
       <label>
         {t('health.formPace')}
         <select

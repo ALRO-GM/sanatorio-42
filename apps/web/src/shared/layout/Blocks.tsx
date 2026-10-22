@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 
 import { shows, useDetail } from '../detail'
 import { useI18n } from '../i18n'
+import { openCustomize } from './customize'
 import { PAGES } from './registry'
 import type { PageId } from './registry'
 import { toggleFold, track, usePageLayout } from './store'
@@ -76,6 +77,9 @@ export function Blocks({ page, blocks }: BlocksProps) {
           </div>
         )
       })}
+      <button type="button" className="link blocks-customize" onClick={openCustomize}>
+        {t('layout.customizeHere')}
+      </button>
     </>
   )
 }

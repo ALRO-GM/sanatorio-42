@@ -1037,3 +1037,15 @@
   white-space: normal;
   overflow-wrap: anywhere;
 }
+/* Creando una sala: el formulario y las salas abiertas, lado a lado. */
+.notgames-split {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: 1.2rem;
+  align-items: start;
+}
+@media (max-width: 760px) {
+  .notgames-split {
+    grid-template-columns: 1fr;
+  }
+}

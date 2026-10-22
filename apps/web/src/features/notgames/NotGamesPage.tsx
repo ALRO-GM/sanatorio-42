@@ -125,13 +125,7 @@ function Rooms() {
   return (
     <>
       <p className="hint">{t('notgames.pitch')}</p>
-      {creating ? (
-        <CreateRoom
-          onCancel={() => {
-            setCreating(false)
-          }}
-        />
-      ) : (
+      {!creating && (
         <button
           type="button"
           className="primary"
@@ -143,19 +137,34 @@ function Rooms() {
         </button>
       )}
 
-      <h3 className="notgames-subtitle">{t('notgames.rooms')}</h3>
-      {rooms.loading && rooms.data === undefined && <p className="estado">{t('app.loading')}</p>}
-      <ErrorNote error={rooms.error} onRetry={() => void rooms.reload()} />
-      {rooms.data?.length === 0 && <p className="estado">{t('notgames.noRooms')}</p>}
-      <ul className="quiz-rooms">
-        {rooms.data?.map((entry) =>
-          entry.kind === 'quiz' ? (
-            <RoomCard key={`q${entry.lobby.id}`} lobby={entry.lobby} />
-          ) : (
-            <TurnCard key={`t${entry.lobby.id}`} lobby={entry.lobby} />
-          ),
+      {/* Creando una sala, el formulario y las salas abiertas van lado a lado:
+          así se ve si ya hay una a la que unirse. */}
+      <div className={creating ? 'notgames-split' : undefined}>
+        {creating && (
+          <CreateRoom
+            onCancel={() => {
+              setCreating(false)
+            }}
+          />
         )}
-      </ul>
+        <div>
+          <h3 className="notgames-subtitle">{t('notgames.rooms')}</h3>
+          {rooms.loading && rooms.data === undefined && (
+            <p className="estado">{t('app.loading')}</p>
+          )}
+          <ErrorNote error={rooms.error} onRetry={() => void rooms.reload()} />
+          {rooms.data?.length === 0 && <p className="estado">{t('notgames.noRooms')}</p>}
+          <ul className="quiz-rooms">
+            {rooms.data?.map((entry) =>
+              entry.kind === 'quiz' ? (
+                <RoomCard key={`q${entry.lobby.id}`} lobby={entry.lobby} />
+              ) : (
+                <TurnCard key={`t${entry.lobby.id}`} lobby={entry.lobby} />
+              ),
+            )}
+          </ul>
+        </div>
+      </div>
       <button type="button" className="link" onClick={() => void rooms.reload()}>
         {t('agenda.refresh')}
       </button>

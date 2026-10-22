@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/calendario.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-104 textos. «—» es que falta la traducción: sale en español.
+105 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -29,6 +29,7 @@ Generado desde `apps/web/src/shared/i18n/textos/calendario.csv` con
 | `agenda.view.week` | Vista: semana | features/calendar/CalendarPage | Semana | Week | Setmana | Astea |
 | `agenda.view.month` | Vista: mes | features/calendar/CalendarPage | Mes | Month | Mes | Hilabetea |
 | `agenda.kinds` | Filtro de tipos de evento | features/calendar/CalendarPage | Tipos de evento | Event types | Tipus d'esdeveniment | Ekitaldi motak |
+| `agenda.kindsShow` | Calendario: delante de los tipos de evento, para que se vea que filtran | features/calendar/CalendarPage | Ver: | Show: | Mostra: | Erakutsi: |
 | `agenda.kind.help` | Tipo de evento: tu guardia y reservas de ayuda | features/calendar/AgendaTour, features/calendar/CalendarPage, features/calendar/EventChip, features/calendar/EventDialog | Guardia | On duty | Guàrdia | Guardia |
 | `agenda.kind.therapy` | Tipo de evento: terapias | features/calendar/AgendaTour, features/calendar/CalendarPage, features/calendar/EventChip, features/calendar/EventDialog | Terapias | Therapy | Teràpies | Terapiak |
 | `agenda.kind.board` | Tipo de evento: pizarras | features/calendar/AgendaTour, features/calendar/CalendarPage, features/calendar/EventChip, features/calendar/EventDialog | Pizarras | Whiteboards | Pissarres | Arbelak |

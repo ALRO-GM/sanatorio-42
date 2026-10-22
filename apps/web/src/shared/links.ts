@@ -37,6 +37,9 @@ export function calendarHref(event: string | null = null): string {
 }
 
 /** El perfil de alguien en la intra de 42. */
+/** Tu propio perfil de la intra (la intra lo abre con tu sesión). */
+export const INTRA_HOME = 'https://profile.intra.42.fr/'
+
 export function intraHref(login: string): string {
   return `https://profile.intra.42.fr/users/${encodeURIComponent(login)}`
 }
