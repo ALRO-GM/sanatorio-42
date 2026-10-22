@@ -27,3 +27,4 @@ backups/
 
 # Copias de trabajo de los agentes (git worktree)
 .claude/
+infra/deploy.log
