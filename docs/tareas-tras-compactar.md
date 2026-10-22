@@ -223,6 +223,47 @@ despliegue espera a la CI).
       - Antes de cada nivel de grupo, **test de preguntas rápidas con 100 % de
         acierto**; si fallas, no se repite en **una hora** (se puede repasar).
 
+## 2e. Plan vigente: tanda del 2026-10-22 (buzón y traducción)
+
+Cada punto, al validarlo con tests: commit, push y despliegue (no uno gigante),
+respetando el cupo de GitHub (ver `contexto.md`).
+
+- [x] Revisar textos, preguntas (números en cifras, sin respuesta en la
+      pregunta, opciones resaltadas) y traducir **solo a inglés y español**
+      (no al serbio): banco de Not-games, Repaso y curso de git (niveles y
+      misiones), desplegado. Las rondas se traducen al enseñarlas (`bank/localize.ts`,
+      cabecera `x-lang` → `Actor.lang`).
+- [x] Indulto de Code Clicker: ya no devuelve una partida más atrasada que la de
+      ahora. **Lo pulsa Alberto en el panel** (filas: dstanimi #1, reiascan #6,
+      ilopez-f #8 y #39, acanadil #10, dparra-s #13, acuevas #40, legomez #41,
+      albrodri #38 y #42). Fuera: autoclickers (clicks), vistebel, salegari, stelescu.
+- [x] #88 ajedrez: jaque sin pregunta, otra pregunta si nadie contesta (hasta 2),
+      quién mueve encima del tablero. · [x] #89 repaso de la partida.
+- [x] #68 cifras en las flechas de la red. · [x] #82 · [x] #86 · [x] #92.
+- [x] #87 gráfica de avance (`stats/progress.*`, `GET /stats/progress`).
+- [ ] **#81 exámenes**: kickoff por mes y año (inicio = `begin_at` o primer
+      proyecto, como en el avance), C frente a Python/Nexus lado a lado (rank 3
+      con rank 3 Nexus…), todos los intentos (sin tope en 6), agujero negro por
+      círculo, historial de absorbidos y de los más cercanos, total y %.
+      Revisar también que salga toda la gente.
+- [ ] **#80 pomodoro**: pantalla completa «Enfocado, no molestar»; al salir,
+      motivos y 10 s para pensarlo; estadísticas (admin y de cada cual) por
+      día/hora/uso/cancelaciones/motivos, por fechas, con comparación a la media
+      (doble deslizador por percentil de uso).
+- [ ] **#91** ventana tras una corrección de 42 (decidido por Alberto el
+      2026-10-22): quien fue corregido responde «¿Qué tal entiendes el problema
+      tras la corrección?» (4 opciones) y puede marcar un icono de «Reacciones
+      recibidas»; quien corrigió, uno de «Cómo llegas cuando pides ayuda».
+      Migración 66.
+
+**En paralelo (2026-10-22)**: #81 (migración 65), #80 (migración 64) y #91
+(migración 66) los hacen agentes, cada uno en su worktree y rama, sin push.
+Al acabar: unir las ramas a `main` de una en una, `npm run check` con todo
+junto y un solo push y despliegue (cupo de GitHub).
+- [ ] **Cerrar y contestar** #42, 46, 48, 50, 69, 70, 71, 76, 77, 79, 83: la
+      escritura remota en la base de datos está bloqueada; respuestas en el
+      scratchpad `answer.mjs` o desde el panel.
+
 ## 3. A medias o por confirmar con Alberto
 
 - ~~Intentos de examen~~: comprobado el 2026-10-22: la copia de fondo acabó el
