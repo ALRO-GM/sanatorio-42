@@ -72,6 +72,7 @@ export const realApi: Api = {
   resignTurn: (id) => sendJson('POST', `/games/rooms/${id}/resign`),
   getExamStats: () => getJson('/exams/stats'),
   getLiveExam: () => getJson('/exams/live'),
+  refreshLiveExam: () => sendJson('POST', '/exams/live/refresh'),
   reportBrokenSeat: (host) => send('POST', `/map/seats/${encodeURIComponent(host)}/broken`),
   clearBrokenSeat: (host) => send('DELETE', `/map/seats/${encodeURIComponent(host)}/broken`),
   getConversations: () => getJson('/conversations'),

@@ -35,6 +35,8 @@ export type ExamsModule = AppModule & { service: ExamsService; sync: ExamsSync; 
 
 /** Cada cuánto se copia una página de intentos antiguos (si toca). */
 const BACKFILL_EVERY_MS = 60_000
+/** Cada cuánto se mira si toca refrescar un examen en marcha (toca cada cinco minutos). */
+const LIVE_TICK_MS = 60_000
 
 export function createExamsModule(deps: ExamsModuleDeps): ExamsModule {
   const exams = createExamsRepository(deps.db)
@@ -84,6 +86,16 @@ export function createExamsModule(deps: ExamsModuleDeps): ExamsModule {
 
         return reply.send(await live.live(await session.actor(request)))
       })
+
+      /**
+       * `POST /exams/live/refresh` → lo mismo, pidiendo antes lo nuevo a 42 si
+       * hace al menos un minuto del último refresco (de quien sea).
+       */
+      app.post('/exams/live/refresh', async (request, reply) => {
+        reply.header('Cache-Control', 'private, no-store')
+
+        return reply.send(await live.refreshNow(await session.actor(request)))
+      })
     },
     jobs: [
       {
@@ -91,6 +103,13 @@ export function createExamsModule(deps: ExamsModuleDeps): ExamsModule {
         everyMs: BACKFILL_EVERY_MS,
         run: async () => {
           await sync.step()
+        },
+      },
+      {
+        name: 'examen en vivo',
+        everyMs: LIVE_TICK_MS,
+        run: async () => {
+          await live.tick(deps.campusIds)
         },
       },
     ],

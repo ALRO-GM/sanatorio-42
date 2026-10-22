@@ -3,7 +3,9 @@
  * círculos. Sin base de datos: se prueban solas.
  */
 
-import type { CircleDuration, ExamStat } from '@sanatorio/contracts'
+import type { CircleDuration, ExamStat, LiveExam, LiveExaminee } from '@sanatorio/contracts'
+
+import { localMoment } from '../../core/time.js'
 
 /** Un intento guardado: quién, de qué examen, con qué nota y cuándo. */
 export type AttemptRow = {
@@ -155,4 +157,105 @@ export function circleDurations(
             },
           ]
     })
+}
+
+/** Con el examen en marcha, cada cuánto se vuelven a pedir solas la lista y las notas. */
+export const LIVE_AUTO_MS = 5 * 60_000
+
+/**
+ * Lo menos que tiene que pasar entre dos refrescos pedidos a mano. Cuenta para
+ * todo el campus a la vez: si cada persona pudiera pedir uno por minuto, un
+ * aula llena gastaría la cuota de 42 en un rato.
+ */
+export const LIVE_MANUAL_MS = 60_000
+
+/**
+ * Qué se puede pedir a 42 de un examen en vivo, según cuándo fue el último
+ * refresco (de quien fuera). Sin refresco previo, todo vale ya.
+ */
+export function liveRefreshPlan(
+  lastAt: number | null,
+  now: number,
+): { auto: boolean; manual: boolean; nextAt: number; manualAt: number } {
+  if (lastAt === null) return { auto: true, manual: true, nextAt: now, manualAt: now }
+
+  return {
+    auto: now - lastAt >= LIVE_AUTO_MS,
+    manual: now - lastAt >= LIVE_MANUAL_MS,
+    nextAt: lastAt + LIVE_AUTO_MS,
+    manualAt: lastAt + LIVE_MANUAL_MS,
+  }
+}
+
+/**
+ * El día de un examen visto desde el campus: hoy, mañana o más adelante.
+ *
+ * Se cuenta en la hora del campus, no en UTC ni en la del servidor: un examen
+ * a las 00:30 de Madrid es «mañana» a las 23:30 de la víspera, aunque en UTC
+ * aún sea el mismo día. Lo que ya empezó (un examen de noche que sigue en
+ * marcha) cuenta como de hoy.
+ */
+export function examDay(
+  beginAt: string,
+  now: number,
+  timeZone: string | undefined,
+): NonNullable<LiveExam['exam']>['when'] {
+  const days =
+    (Date.parse(localMoment(Date.parse(beginAt), timeZone).day) -
+      Date.parse(localMoment(now, timeZone).day)) /
+    DAY_MS
+
+  return days <= 0 ? 'today' : days === 1 ? 'tomorrow' : 'later'
+}
+
+/** El primer y el último círculo con examen en el common core (`exam('02')`…`exam('06')`). */
+const FIRST_EXAM_CIRCLE = 2
+const LAST_EXAM_CIRCLE = 6
+
+/**
+ * El examen que le toca a alguien por el círculo en que va: el del círculo N
+ * es el Exam Rank 0N, como en `COMMON_CORE` y en la tabla de partida del plan
+ * nuevo. El plan clásico hace `exam-rank-0N`; el nuevo, `42next-exam-rank-0N`.
+ * Antes del círculo 2 no hay examen.
+ */
+export function expectedExamSlug(
+  track: LiveExaminee['track'],
+  circle: number | null,
+): string | null {
+  if (circle === null || circle < FIRST_EXAM_CIRCLE) return null
+
+  const rank = `exam-rank-0${String(Math.min(LAST_EXAM_CIRCLE, circle))}`
+
+  return track === 'next' ? `42next-${rank}` : rank
+}
+
+/** La fila de alguien en un examen (`project_users`), tal como está en la réplica. */
+export type ExamRow = {
+  status: string
+  finalMark: number | null
+  validated: boolean | null
+  updatedAt: string | null
+}
+
+/**
+ * Cómo va alguien en la sesión de examen que empezó en `since`.
+ *
+ * Solo cuenta la fila tocada desde que empezó: la de un intento de otro día
+ * dice `finished` aunque hoy aún no haya entrado. Cerrada (`finished`) con
+ * 100 o más y validada, aprueba; cerrada sin llegar a 100 (o sin validar),
+ * suspende, aunque la sesión no haya acabado: en 42 ya no puede subir.
+ */
+export function examineeStatus(
+  row: ExamRow | undefined,
+  attempt: { mark: number | null; passed: boolean } | undefined,
+  since: string,
+): LiveExaminee['status'] {
+  const recent = row !== undefined && row.updatedAt !== null && row.updatedAt >= since
+
+  if (recent && row.status === 'finished') {
+    return (row.finalMark ?? 0) >= 100 && row.validated !== false ? 'passed' : 'failed'
+  }
+  if (attempt?.passed === true) return 'passed'
+
+  return recent || attempt !== undefined ? 'inProgress' : 'pending'
 }

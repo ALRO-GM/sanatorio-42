@@ -194,8 +194,10 @@ export type Api = {
   getCampusMap: () => Promise<ClusterMap>
   /** Estadísticas de los exámenes y de los círculos del campus. */
   getExamStats: () => Promise<ExamStats>
-  /** El examen que hay ahora en el campus (o el siguiente de hoy). */
+  /** El examen que hay ahora en el campus (o el siguiente, en las próximas 24 h). */
   getLiveExam: () => Promise<LiveExam>
+  /** Lo mismo, pidiendo antes lo nuevo a 42 (uno por minuto para todo el campus). */
+  refreshLiveExam: () => Promise<LiveExam>
   /** Ese puesto no funciona (vale una semana), o ya funciona. */
   reportBrokenSeat: (host: string) => Promise<void>
   clearBrokenSeat: (host: string) => Promise<void>

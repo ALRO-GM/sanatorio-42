@@ -1078,8 +1078,33 @@ dialog.welcome .actions {
   border-radius: 10px;
   background: var(--surface-2);
 }
-.exam-people li.passed {
+.exam-people li.status-passed {
   box-shadow: inset 3px 0 0 var(--ok);
+}
+.exam-people li.status-failed {
+  box-shadow: inset 3px 0 0 var(--danger);
+}
+.exam-people li.status-pending {
+  color: var(--text-3);
+}
+.exam-status {
+  padding: 0.1rem 0.55rem;
+  background: var(--surface);
+}
+.status-passed .exam-status {
+  color: var(--ok);
+}
+.status-failed .exam-status {
+  color: var(--danger);
+}
+/* Lo que falta para acabar y para el siguiente refresco, con el botón al lado. */
+.exam-clocks {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  margin: 0.25rem 0 0.75rem;
+  font-variant-numeric: tabular-nums;
 }
 .exam-people a {
   font-weight: 600;
