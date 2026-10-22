@@ -11,14 +11,13 @@
 
 import type { GitRoom, GitRoomLobby, GitRoomPlayer, GitRunResult } from '@sanatorio/contracts'
 import {
+  farApart,
   gateOf,
-  groupRemote,
-  groupRepo,
+  groupStart,
   MAX_PLAYERS,
   missionDone,
   missionOf,
   PREFIXES,
-  roleOf,
   run,
 } from '@sanatorio/gitsim'
 import type { GroupMission, GroupPlayer, Remote, Repo } from '@sanatorio/gitsim'
@@ -31,8 +30,6 @@ import { domainError } from '../../core/errors.js'
 import { createLocks } from '../../core/lock.js'
 import { parse } from '../../core/validation.js'
 
-/** Tiempo para acabar la misión desde que empieza. */
-const PLAY_MS = 60 * 60_000
 /** Comandos por persona y partida: de sobra para jugar, no para llenar la base. */
 const MAX_COMMANDS = 400
 const LOBBY_TTL_MS = 2 * 3_600_000
@@ -48,7 +45,7 @@ type State = {
   repos: Record<string, Repo>
   commands: Record<string, number>
   last: Record<string, string>
-  /** Papel y prefijo de cada cual, fijados al empezar. */
+  /** Prefijo y número de cada cual, fijados al empezar. */
   players: GroupPlayer[]
   deadline: string
   result: GitRoom['result']
@@ -250,6 +247,37 @@ export function createRoomService(deps: {
     }
   }
 
+  /**
+   * Jefe final: cada pareja de puestos, lejos (otro clúster, o 4 filas y 4
+   * columnas). Devuelve quiénes están demasiado cerca, o `null`.
+   */
+  async function tooClose(logins: readonly string[]): Promise<string | null> {
+    const seats = await Promise.all(
+      logins.map(async (login) => [login, await deps.seatOf(login)] as const),
+    )
+
+    for (const [i, [a, seatA]] of seats.entries()) {
+      for (const [b, seatB] of seats.slice(i + 1)) {
+        if (seatA !== null && seatB !== null && !farApart(seatA, seatB)) return `${a} y ${b}`
+      }
+    }
+
+    return null
+  }
+
+  async function mustBeApart(mission: GroupMission, logins: readonly string[]): Promise<void> {
+    if (!mission.apart) return
+
+    const close = await tooClose(logins)
+
+    if (close !== null) {
+      throw domainError(
+        'conflict',
+        `${close} estáis demasiado cerca: hacen falta 4 filas y 4 columnas, u otro clúster`,
+      )
+    }
+  }
+
   /** Se acabó el tiempo sin la misión: la sala se cierra sin superar la prueba. */
   async function expire(room: RoomRow): Promise<RoomRow> {
     const state = room.state
@@ -273,17 +301,18 @@ export function createRoomService(deps: {
       Promise.all(logins.map(async (login) => [login, await deps.seatOf(login)] as const)),
     ])
     const seatOf = new Map(seats)
-    const placed = state?.players ?? logins.map((login, index) => player(mission, login, index))
-    const players: GitRoomPlayer[] = logins.map((login) => ({
+    const placed = state?.players ?? logins.map((login, index) => player(login, index))
+    const players: GitRoomPlayer[] = logins.map((login, index) => ({
       login,
       image: images.get(login) ?? null,
-      role: placed.find((p) => p.login === login)?.role ?? 'all',
+      n: placed.find((p) => p.login === login)?.n ?? index + 1,
       seat: seatOf.get(login) ?? null,
       commands: state?.commands[login] ?? 0,
-      last: state?.last[login] ?? null,
+      // En el jefe final no se ve lo que escriben los demás: sin hablar es sin copiar.
+      last: mission.apart && login !== actor.login ? null : (state?.last[login] ?? null),
     }))
     const repo = state?.repos[actor.login]
-    const role = players.find((p) => p.login === actor.login)?.role
+    const n = players.find((p) => p.login === actor.login)?.n
     const reason = await whyNot(actor, room, logins)
 
     return {
@@ -299,7 +328,7 @@ export function createRoomService(deps: {
               state.remote,
               state.players.filter((p) => logins.includes(p.login)),
             ),
-      mine: repo === undefined || role === undefined ? null : { role, repo },
+      mine: repo === undefined || n === undefined ? null : { n, repo },
       remote: state?.remote ?? null,
       deadline: state?.deadline ?? null,
       result: state?.result ?? null,
@@ -309,8 +338,8 @@ export function createRoomService(deps: {
     }
   }
 
-  function player(mission: GroupMission, login: string, index: number): GroupPlayer {
-    return { login, prefix: PREFIXES[index] ?? 'z', role: roleOf(mission, index).id }
+  function player(login: string, index: number): GroupPlayer {
+    return { login, prefix: PREFIXES[index] ?? 'z', n: index + 1 }
   }
 
   return {
@@ -416,15 +445,17 @@ export function createRoomService(deps: {
           throw domainError('conflict', `Falta sentarse en un puesto: ${standing.join(', ')}`)
         }
 
-        const remote = groupRemote(mission)
-        const players = logins.map((login, index) => player(mission, login, index))
+        await mustBeApart(mission, logins)
+
+        const players = logins.map((login, index) => player(login, index))
+        const { remote, repos } = groupStart(mission, players)
         const state: State = {
           remote,
-          repos: Object.fromEntries(players.map((p) => [p.login, groupRepo(remote, p.prefix)])),
+          repos,
           commands: {},
           last: {},
           players,
-          deadline: iso(deps.now() + PLAY_MS),
+          deadline: iso(deps.now() + mission.minutes * 60_000),
           result: null,
         }
 
@@ -448,6 +479,7 @@ export function createRoomService(deps: {
         if (repo === undefined || !(await rooms.players(id)).includes(actor.login))
           throw domainError('forbidden', 'No juegas en esta sala')
         await mustSeat(actor.login)
+        await mustBeApart(missionFor(room.gate), await rooms.players(id))
 
         const used = state.commands[actor.login] ?? 0
 

@@ -100,16 +100,16 @@ export type GitRoomLobby = {
 export type GitRoomPlayer = {
   login: string
   image: string | null
-  /** El papel en la misión (`all`, `release`, `hotfix`, `feature`…). */
-  role: string
+  /** Su número en la sala, desde 1 (las tareas lo usan: `v1.{n}`, «Rompe {n}»). */
+  n: number
   /** El puesto desde el que juega ahora (`null`: se ha levantado). */
   seat: string | null
   commands: number
-  /** Lo último que escribió (en el jefe final no se ve lo de los demás). */
+  /** Lo último que escribió (en el jefe final solo se ve lo tuyo). */
   last: string | null
 }
 
-export type GitMissionItem = { text: string; done: boolean; login: string | null; extra: boolean }
+export type GitMissionItem = { text: string; done: boolean; login: string | null }
 
 /** `GET /gitcourse/rooms/:id`: la sala, la misión y tu repositorio (la web lo pide cada dos segundos). */
 export type GitRoom = {
@@ -119,8 +119,8 @@ export type GitRoom = {
   status: GitRoomStatus
   players: GitRoomPlayer[]
   missions: GitMissionItem[]
-  /** Tu papel y tu repositorio, si juegas y ha empezado. */
-  mine: { role: string; repo: GitRepoView } | null
+  /** Tu número y tu repositorio, si juegas y ha empezado. */
+  mine: { n: number; repo: GitRepoView } | null
   remote: GitRemoteView | null
   /** Hasta cuándo se puede jugar (desde que empieza). */
   deadline: string | null

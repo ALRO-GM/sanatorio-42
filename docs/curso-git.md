@@ -84,7 +84,10 @@ cierto número de conceptos hay una **prueba de grupo**.
   cambia la historia, así que no se compara una forma exacta: cada prueba
   tiene **misiones** que se miran sobre origin (qué ficheros hay en la punta
   de cada rama, qué tags y dónde están, de quién son los commits por su
-  prefijo). Las `extra` no hacen falta. Los comandos se ejecutan en el
+  prefijo). Cada misión se mira **por persona**: todas hacen todas las
+  tareas, así que nadie supera la prueba sin haber usado cada concepto con
+  sus manos (las tareas llevan `{login}` y `{n}`, el número de cada cual en la
+  sala, para que los nombres no choquen). Los comandos se ejecutan en el
   servidor: cada cual tiene su repositorio y todos el mismo origin, así que
   un push de otra persona se nota al momento (rechazos, conflictos). Cada
   persona tiene un prefijo de ids (`a`, `b`, `d`…) y la copia de un commit
@@ -92,12 +95,21 @@ cierto número de conceptos hay una **prueba de grupo**.
   mismo. Para el GitHub flow, la terminal tiene `gh pr merge rama [base]`: un
   commit de merge en origin aunque la rama esté protegida, y se niega si hay
   conflictos.
-  - Grupo 1: cada cual su rama con su fichero, y una persona las une en main.
-  - Grupo 2: main protegida; cada cual se apunta en `equipo.txt` desde su rama
-    y entra por pull request; desde el segundo hay conflicto que resolver.
-  - Grupo 3: Gitflow con papeles: la versión 1.1 desde develop, un hotfix
-    1.0.1 desde main y funcionalidades en develop; cada versión con su tag en
-    main y de vuelta en develop.
+  - Grupo 1: cada cual su rama con su fichero, la sube y la une en main con
+    `merge --no-ff`; quien llega tarde tiene que traer main (pull) para subir.
+  - Grupo 2: main protegida; cada cual se apunta en `equipo.txt` desde su rama.
+    Cuando ya habéis clonado, la «compañera» cambia ese final en main, así que
+    a todas les choca el pull request: cada cual trae main, resuelve y vuelve.
+  - Grupo 3: Gitflow entero para cada cual: su funcionalidad en develop, su
+    hotfix `1.0.{n}` desde main y su versión `1.{n}` desde develop, con tags
+    en main y unidas de vuelta en develop.
+  - Jefe final (30 min): main protegida con un commit roto por persona
+    («Rompe {n}»). Cada cual lo deshace con `revert` por pull request, mete su
+    funcionalidad en develop en un solo commit (`reset --soft`) y encima de lo
+    último (`rebase`, sin merges), y cuando todo está en develop y main
+    arreglada, la une a main y publica `v2.{n}`. Puestos de clústeres
+    distintos o a 4 filas y 4 columnas (se mira al empezar y en cada comando)
+    y solo se ve lo que escribe cada cual.
 - `features/gitcourse` (web): el camino, la animación, la teoría y la terminal.
 
 ## Estado
@@ -120,5 +132,6 @@ cierto número de conceptos hay una **prueba de grupo**.
   hasta 6 personas, papel por orden de llegada), origin común, misiones y la
   prueba superada para todo el grupo. En la API de mentira, las compañeras
   entran solas y hacen su parte.
-- [ ] Fase 5: jefe final.
+- [x] Fase 5: el jefe final, y las pruebas de grupo rehechas para que todas
+  las personas usen todos los conceptos (misiones por persona).
 - [ ] Fase 6: demostración y repaso.

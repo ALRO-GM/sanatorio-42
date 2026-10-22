@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import type { GitRoom, GitRoomLobby } from '@sanatorio/contracts'
-import { MAX_PLAYERS, missionOf } from '@sanatorio/gitsim'
+import { filled, MAX_PLAYERS, missionOf } from '@sanatorio/gitsim'
 import type { Gate, GroupMission } from '@sanatorio/gitsim'
 
 import { api } from '../../shared/api'
@@ -77,6 +77,7 @@ export function GroupRooms({ gate, me }: { gate: Gate; me: string }) {
       <h4>{mission.title}</h4>
       <p>{mission.story}</p>
       <p className="muted">{t('git.room.who', { min: gate.min, max: MAX_PLAYERS })}</p>
+      {mission.apart && <p className="notice">{t('git.room.apart')}</p>}
       <ErrorNote error={error ?? action.error} />
       <div className="git-actions">
         <button
@@ -114,9 +115,6 @@ export function GroupRooms({ gate, me }: { gate: Gate; me: string }) {
     </section>
   )
 }
-
-/** `{login}` de las tareas, con el de cada cual. */
-const filled = (text: string, login: string) => text.replaceAll('{login}', login)
 
 /** Minutos y segundos que quedan hasta `deadline`, con la hora del servidor. */
 function useLeft(deadline: string | null, offset: number): number | null {
@@ -212,8 +210,7 @@ function GroupRoom({
       onExit()
     })
   }
-  const roleTitle = (role: string) => mission.roles.find((each) => each.id === role)?.title ?? role
-  const myRole = mission.roles.find((each) => each.id === room.mine?.role)
+  const myNumber = room.mine?.n ?? null
   const mySeat = room.players.find((p) => p.login === me)?.seat ?? null
   const repo = room.mine?.repo ?? null
   const branch = repo === null ? '' : repo.head.kind === 'branch' ? repo.head.name : repo.head.id
@@ -261,7 +258,7 @@ function GroupRoom({
             {room.players.map((p) => (
               <li key={p.login}>
                 <Avatar login={p.login} image={p.image} size={32} />
-                <strong>{p.login}</strong> · {roleTitle(p.role)}
+                <strong>{p.login}</strong> · {t('git.room.number', { n: p.n })}
                 {p.seat === null && <span className="notice"> {t('git.room.standing')}</span>}
               </li>
             ))}
@@ -293,15 +290,15 @@ function GroupRoom({
       ) : (
         <div className="git-challenge-grid">
           <div>
-            {myRole !== undefined && (
+            {myNumber !== null && (
               <details className="git-tasks" open>
                 <summary>
-                  {t('git.room.role')}: <strong>{myRole.title}</strong>
+                  {t('git.room.tasks')} · <strong>{t('git.room.number', { n: myNumber })}</strong>
                 </summary>
                 <ol>
-                  {myRole.tasks.map((task) => (
+                  {mission.tasks.map((task) => (
                     <li key={task}>
-                      <code>{filled(task, me)}</code>
+                      <code>{filled(task, { login: me, n: myNumber })}</code>
                     </li>
                   ))}
                 </ol>
@@ -323,8 +320,7 @@ function GroupRoom({
             <ul className="git-missions">
               {room.missions.map((item) => (
                 <li key={item.text} className={item.done ? 'done' : ''}>
-                  {item.done ? '✓' : item.extra ? '☆' : '○'} {item.text}
-                  {item.extra && <span className="muted"> ({t('git.room.extra')})</span>}
+                  {item.done ? '✓' : '○'} {item.text}
                 </li>
               ))}
             </ul>
@@ -337,7 +333,7 @@ function GroupRoom({
                 <li key={p.login}>
                   <Avatar login={p.login} image={p.image} size={28} />
                   <span>
-                    <strong>{p.login}</strong> · {roleTitle(p.role)} ·{' '}
+                    <strong>{p.login}</strong> · {t('git.room.number', { n: p.n })} ·{' '}
                     {p.seat ?? t('git.room.standing')} · {t('git.room.commands', { n: p.commands })}
                     {p.last !== null && (
                       <>

@@ -198,8 +198,9 @@ despliegue espera a la CI).
       camino, animación, teoría y terminal + progreso en la API (re-ejecuta) +
       exigir puesto en el clúster · [x] GC3 preguntas de git en el banco + test
       previo (100 %, 1 h de espera) · [x] GC4 salas de grupo (remoto común,
-      cada cual su repo, en paralelo; misiones sobre origin, `gh pr merge`) · [ ] GC5 jefe final (4 filas y 4
-      columnas, tiempo) · [ ] GC6 demostración, docs y repaso.
+      cada cual su repo, en paralelo; misiones sobre origin, `gh pr merge`) · [x] GC5 jefe final (4 filas y 4
+      columnas, 30 min, sin ver a las demás) y pruebas de grupo con misiones por
+      persona (pedido por Alberto el 2026-10-22: todas usan todos los conceptos) · [ ] GC6 demostración, docs y repaso.
 - [ ] **#42 Curso de git** (grande, especificación de Alberto del 2026-10-18):
       - Solo desde un ordenador de un clúster (con sesión en un puesto).
       - Estética de juego: un **camino con puntos** con forma de ramas de git

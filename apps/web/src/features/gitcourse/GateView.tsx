@@ -78,15 +78,13 @@ export function GateView({ gate, me, course, onCourse, onBack, onReview }: GateV
       ) : (
         <>
           {result !== null && <GateResult result={result} />}
-          {state?.passed === true && gate.kind === 'group' ? (
+          {state?.passed === true ? (
             <>
               {course.stars[gate.id] !== undefined && (
                 <p className="git-won">★ {t('git.room.done')}</p>
               )}
               <GroupRooms gate={gate} me={me} />
             </>
-          ) : state?.passed === true ? (
-            <p className="git-won">✓ {t('git.gate.passed')}</p>
           ) : state !== undefined && state.retryAt !== null ? (
             <p className="notice">
               {t('git.gate.wait', { time: time(state.retryAt) })}{' '}

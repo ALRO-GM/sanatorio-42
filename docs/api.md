@@ -1309,10 +1309,14 @@ POST /gitcourse/rooms/:id/run     → GitRunInput { line (≤ 200) } → GitRunR
   de cada cual ya clonado, con su prefijo de ids (`a`, `b`, `d`…) y su papel
   por orden de llegada. `run` ejecuta la línea en el servidor con el mismo
   motor (403 si te levantas; 429 pasados 400 comandos); un error no cambia
-  nada. Las misiones (`check` de la prueba) se miran sobre origin; con todas
-  las no `extra` hechas, la sala acaba (`result: 'passed'`) y la prueba se
-  guarda en `git_progress` con 3 estrellas para cada cual. Hay una hora: luego,
-  `result: 'expired'`. Quien sale pierde su repositorio; la sala pasa a otra
+  nada. Las misiones (`check` de la prueba) se miran sobre origin y casi todas
+  son de una persona (`login`): todas hacen todo. Con todas hechas, la sala
+  acaba (`result: 'passed'`) y la prueba se guarda en `git_progress` con 3
+  estrellas para cada cual. Cada prueba tiene su tiempo (`minutes`: 45 o 60, el
+  jefe 30); luego, `result: 'expired'`. **Jefe final** (`boss`): para empezar y
+  para cada comando, los puestos de todas tienen que estar en clústeres
+  distintos o a 4 filas y 4 columnas (409 si no), y `last` de las demás
+  personas sale a `null`. Cada persona tiene su número `n` (orden de llegada). Quien sale pierde su repositorio; la sala pasa a otra
   persona y vacía se borra. Una tarea cada hora borra las salas sin empezar de
   más de 2 h y las demás de más de una semana.
 

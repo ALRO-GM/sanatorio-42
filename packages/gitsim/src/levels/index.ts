@@ -23,13 +23,13 @@ export type { Level, Theory } from './types.js'
 export { gateOf, GATES } from './gates.js'
 export type { Gate } from './gates.js'
 export {
+  farApart,
+  filled,
   GROUP_MISSIONS,
-  groupRemote,
-  groupRepo,
+  groupStart,
   MAX_PLAYERS,
   missionDone,
   missionOf,
   PREFIXES,
-  roleOf,
 } from './groups.js'
-export type { GroupMission, GroupPlayer, GroupRole, MissionItem } from './groups.js'
+export type { GroupMission, GroupPlayer, MissionItem } from './groups.js'

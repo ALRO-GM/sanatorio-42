@@ -218,31 +218,67 @@ describe('curso de git: pruebas de grupo', () => {
         `git add ${login}.txt`,
         'git commit -m "Mio"',
         `git push origin ${login}`,
+        'git switch main',
+        'git pull',
+        `git merge --no-ff ${login}`,
       )
     }
+    await play('ana', 'git push')
 
-    // Un error no cambia nada, pero se ve.
-    const wrong = await rooms.run(actor('bea'), id, { line: 'git merge nada' })
+    // Un error no cambia nada, pero se ve: bea tiene que traer main antes de subir.
+    const wrong = await rooms.run(actor('bea'), id, { line: 'git push' })
 
     expect(wrong.ok).toBe(false)
-    expect(wrong.room.players.find((p) => p.login === 'bea')?.last).toBe('git merge nada')
+    expect(wrong.room.players.find((p) => p.login === 'bea')?.last).toBe('git push')
+    // Aún falta lo de bea: la prueba no se da por superada solo con lo de ana.
+    expect(wrong.room.status).toBe('playing')
 
     // Levantarse del puesto: no se juega.
     await seat({ ana: 'c1r1s1' })
     await expectCode(rooms.run(actor('bea'), id, { line: 'git status' }), 'forbidden')
+    await seat({ ana: 'c1r1s1', bea: 'c1r1s2' })
 
-    await play(
-      'ana',
-      'git switch main',
-      'git fetch',
-      'git merge origin/ana',
-      'git merge origin/bea',
-    )
+    await play('bea', 'git pull')
 
-    const last = await rooms.run(actor('ana'), id, { line: 'git push' })
+    const last = await rooms.run(actor('bea'), id, { line: 'git push' })
 
     expect(last.room).toMatchObject({ status: 'done', result: 'passed' })
+    expect((await services.gitCourse.course(actor('ana'))).stars.group1).toBe(3)
     expect((await services.gitCourse.course(actor('bea'))).stars.group1).toBe(3)
+  })
+
+  it('jefe final: puestos lejos para empezar y para jugar, y sin ver lo que escriben los demás', async () => {
+    const { services, seat, db } = community
+    const { rooms } = services.gitCourse
+
+    for (const login of ['ana', 'bea']) {
+      await db.execute({
+        sql: "INSERT INTO git_gates (login, gate, passed_at) VALUES (?, 'boss', '2026-10-06T10:00:00.000Z')",
+        args: [login],
+      })
+    }
+    await seat({ ana: 'c1r1s1', bea: 'c1r2s2' })
+
+    const { id } = await rooms.create(actor('ana'), { gate: 'boss' })
+
+    await rooms.join(actor('bea'), id)
+    await expectCode(rooms.start(actor('ana'), id), 'conflict')
+    await seat({ ana: 'c1r1s1', bea: 'c1r5s6' })
+
+    const started = await rooms.start(actor('ana'), id)
+
+    expect(started.deadline).toBe(new Date(Date.parse(started.now) + 30 * 60_000).toISOString())
+    await rooms.run(actor('bea'), id, { line: 'git log' })
+    expect(
+      (await rooms.view(actor('ana'), id)).players.find((p) => p.login === 'bea')?.last,
+    ).toBeNull()
+    expect((await rooms.view(actor('bea'), id)).players.find((p) => p.login === 'bea')?.last).toBe(
+      'git log',
+    )
+
+    // Si alguien se acerca, nadie juega hasta que se separe.
+    await seat({ ana: 'c1r1s1', bea: 'c1r2s2' })
+    await expectCode(rooms.run(actor('ana'), id, { line: 'git log' }), 'conflict')
   })
 
   it('si se acaba el tiempo, se cierra sin superarla; salir deja la sala a otra persona', async () => {

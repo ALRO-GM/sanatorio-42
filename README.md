@@ -289,9 +289,11 @@ una terminal con git simulado. Los retos solo se juegan sentado en un puesto
 del clúster. Antes de cada prueba de grupo hay un test de preguntas rápidas
 que hay que acertar entero (si no, una hora de espera). Después, la prueba se
 juega en grupo, cada cual desde su puesto: una sala, un origin común y una
-misión con un papel para cada persona (unir ramas en main; GitHub flow con
-`gh pr merge` y un conflicto; Gitflow con una versión y un hotfix a la vez).
-El jefe final está en camino. Diseño:
+misión que cada persona tiene que cumplir entera (unir su rama en main;
+GitHub flow con `gh pr merge` y un conflicto que resolver; Gitflow con
+funcionalidad, hotfix y versión). Al final, el jefe: lejos unas de otras, sin
+hablar y en 30 minutos, cada cual deshace un commit roto con `revert`, mete su
+funcionalidad en un solo commit con `rebase` y publica su versión. Diseño:
 [docs/curso-git.md](docs/curso-git.md).
 
 ### Avisos del edificio
