@@ -1,4 +1,3 @@
-import { ExamsPage } from '../features/exams/ExamsPage'
 import { lazy, Suspense, useState } from 'react'
 
 import type { CurrentUser, Profile, ProjectSummary } from '@sanatorio/contracts'
@@ -43,6 +42,10 @@ const AdminPage = lazy(() =>
 )
 const NetworkPage = lazy(() =>
   import('../features/network/NetworkPage').then((m) => ({ default: m.NetworkPage })),
+)
+// Los exámenes también perezosos: son ~800 líneas que no toca cargar al entrar.
+const ExamsPage = lazy(() =>
+  import('../features/exams/ExamsPage').then((m) => ({ default: m.ExamsPage })),
 )
 const HelpStatsPage = lazy(() =>
   import('../features/stats/HelpStatsPage').then((m) => ({ default: m.HelpStatsPage })),
