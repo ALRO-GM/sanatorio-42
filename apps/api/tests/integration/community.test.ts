@@ -287,6 +287,22 @@ describe('réplica vista desde fuera', () => {
 })
 
 describe('comunidad por HTTP', () => {
+  it('un id de evento a medias no es un error interno', async () => {
+    const built = await app()
+    const http = client(built, await built.login())
+
+    // `help:booking` sin número: antes llegaba a la base como NaN y daba 500.
+    for (const id of ['help:booking', 'board:', 'group:x:2026-10-01', 'help:booking:1e3']) {
+      const read = await http.get(`/events/attendance?id=${encodeURIComponent(id)}`)
+
+      expect(read.statusCode).toBeGreaterThanOrEqual(400)
+      expect(read.statusCode).toBeLessThan(500)
+      expect((await http.post('/events/checkin', { id, code: '123456' })).statusCode).toBeLessThan(
+        500,
+      )
+    }
+  })
+
   it('ponerse de guardia desbloquea el primer logro', async () => {
     const built = await app()
     const http = client(built, await built.login())

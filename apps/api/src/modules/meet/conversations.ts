@@ -24,6 +24,14 @@ import { id as idSchema, parse } from '../../core/validation.js'
 import type { BoardsService } from '../boards/index.js'
 import type { HelpService } from '../help/index.js'
 import type { ReplicaRepository } from '../replica/index.js'
+
+/**
+ * El número de un trozo de id de evento (`board:12`, `help:booking:7`), o `-1`
+ * si no lo es: así un id a medias (`help:booking`) no llega a la base como
+ * `NaN`, que libsql rechaza con un error interno.
+ */
+const numberOf = (part: string | undefined): number =>
+  /^\d{1,12}$/.test(part ?? '') ? Number(part) : -1
 import type { TherapyService } from '../therapy/index.js'
 
 /** Conversaciones que se devuelven: las de actividad más reciente. */
@@ -100,16 +108,16 @@ export function createConversations(options: ConversationsOptions) {
       const kind = kindOf(id)
 
       if (kind === 'board') {
-        const board = boardList.find((entry) => entry.id === Number(second))
+        const board = boardList.find((entry) => entry.id === numberOf(second))
 
         if (board !== undefined) found.set(id, board.title)
       } else if (kind === 'group') {
-        const group = groupList.find((entry) => entry.id === Number(second))
+        const group = groupList.find((entry) => entry.id === numberOf(second))
 
         if (group?.projectName !== null && group !== undefined) found.set(id, group.projectName)
       } else if (kind === 'help' && second === 'booking') {
         // Una reserva que ya no existe o no es suya: se queda sin título.
-        const session = await help.session(actor, Number(third)).catch(() => null)
+        const session = await help.session(actor, numberOf(third)).catch(() => null)
 
         if (session !== null) found.set(id, session.event.title)
       }

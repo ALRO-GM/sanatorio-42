@@ -59,6 +59,12 @@ describe('segundo factor del panel', () => {
 
     expect(closed.statusCode).toBe(403)
     expect(json(closed)).toMatchObject({ error: 'second_factor' })
+    // Codificar una letra de la ruta no la saca de /admin: el enrutador la
+    // descodifica y sirve la misma ruta, así que la cerradura también.
+    const encoded = await send(built, 'GET', '/%61dmin/people', session)
+
+    expect(encoded.statusCode).toBe(403)
+    expect(json(encoded)).toMatchObject({ error: 'second_factor' })
     expect(json(await send(built, 'GET', '/admin/totp', session))).toEqual({
       enrolled: false,
       elevatedUntil: null,

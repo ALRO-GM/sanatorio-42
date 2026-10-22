@@ -45,6 +45,14 @@ import type { BoardsService } from '../boards/index.js'
 import type { CalendarService } from '../calendar/index.js'
 import type { HelpService } from '../help/index.js'
 import type { ReplicaRepository } from '../replica/index.js'
+
+/**
+ * El número de un trozo de id de evento (`board:12`, `help:booking:7`), o `-1`
+ * si no lo es: así un id a medias (`help:booking`) no llega a la base como
+ * `NaN`, que libsql rechaza con un error interno.
+ */
+const numberOf = (part: string | undefined): number =>
+  /^\d{1,12}$/.test(part ?? '') ? Number(part) : -1
 import type { TherapyService } from '../therapy/index.js'
 
 export type MeetServiceOptions = {
@@ -155,7 +163,7 @@ export function createMeetService(options: MeetServiceOptions) {
       if (kind === 'group' || kind === 'therapy') {
         return (await therapy.list(actor)).some(
           (group) =>
-            group.id === Number(second) &&
+            group.id === numberOf(second) &&
             group.joined &&
             (kind === 'group' || group.dates.includes(third ?? '')),
         )
@@ -174,12 +182,12 @@ export function createMeetService(options: MeetServiceOptions) {
       }
       if (kind === 'board') {
         return (await boards.list(actor)).some(
-          (board) => board.id === Number(second) && (board.joined || board.host === actor.login),
+          (board) => board.id === numberOf(second) && (board.joined || board.host === actor.login),
         )
       }
       if (kind === 'help' && second === 'booking') {
         // Una reserva sin aceptar todavía no es un compromiso: no tiene chat.
-        return help.session(actor, Number(third)).then(
+        return help.session(actor, numberOf(third)).then(
           () => true,
           () => false,
         )
@@ -215,7 +223,7 @@ export function createMeetService(options: MeetServiceOptions) {
     const [kind, second, third] = id.split(':')
 
     if (kind === 'board') {
-      const board = (await boards.list(actor)).find((entry) => entry.id === Number(second))
+      const board = (await boards.list(actor)).find((entry) => entry.id === numberOf(second))
 
       if (board !== undefined && (board.joined || board.host === actor.login)) {
         return {
@@ -234,7 +242,7 @@ export function createMeetService(options: MeetServiceOptions) {
       throw domainError('forbidden', 'Ese evento no está en tu calendario')
     }
     if (kind === 'help' && second === 'booking') {
-      return help.session(actor, Number(third))
+      return help.session(actor, numberOf(third))
     }
 
     throw domainError('invalid_input', 'Ese tipo de evento no valida la asistencia con códigos')
@@ -251,15 +259,15 @@ export function createMeetService(options: MeetServiceOptions) {
       return [second ?? '', third ?? '']
     }
     if (kind === 'board') {
-      return boards.people(Number(second))
+      return boards.people(numberOf(second))
     }
     if (kind === 'group' || kind === 'therapy') {
       return (
-        (await therapy.list(actor)).find((group) => group.id === Number(second))?.members ?? []
+        (await therapy.list(actor)).find((group) => group.id === numberOf(second))?.members ?? []
       ).map((member) => member.login)
     }
     if (kind === 'help' && second === 'booking') {
-      const { event, guest } = await help.session(actor, Number(third))
+      const { event, guest } = await help.session(actor, numberOf(third))
 
       return [event.host, guest]
     }

@@ -61,6 +61,25 @@ function isStaff(session: SessionReader, request: FastifyRequest): boolean {
   }
 }
 
+/**
+ * La ruta de una petición como la ve el enrutador: el patrón de la ruta que
+ * casó (`/admin/staff/:id`) o, si no casó ninguna, la ruta descodificada. Lo
+ * que mira prefijos (`/admin/`, `/staff/`) no puede fiarse de `request.url`:
+ * `%61` es `a` para el enrutador pero no para `startsWith`.
+ */
+function routePath(request: FastifyRequest): string {
+  const raw = request.url.split('?')[0] ?? ''
+  const matched = request.routeOptions.url
+
+  if (typeof matched === 'string' && matched !== '') return matched
+
+  try {
+    return decodeURIComponent(raw)
+  } catch {
+    return raw
+  }
+}
+
 export function createAdminModule(deps: AdminModuleDeps): AdminModule {
   const service = createAdminService(deps)
   const growth = createGrowthService(deps.db)
@@ -88,16 +107,22 @@ export function createAdminModule(deps: AdminModuleDeps): AdminModule {
     routes: (app, { session }) => {
       // --- Consumo: tope antes de servir, cuenta después ----------------------
       app.addHook('onRequest', async (request, reply) => {
+        // La ruta tal como la ha entendido el enrutador, no tal como vino: con
+        // `/%61dmin/people` el enrutador descodifica y sirve `/admin/people`,
+        // así que las cerraduras tienen que mirar lo descodificado. Para lo
+        // que no es ninguna ruta (404) se descodifica a mano.
+        const path = routePath(request)
+
         // Reglas del plan. Al 90 % del tráfico del mes solo entra quien
         // administra (y las rutas de sesión, para que pueda identificarse); al
         // 95 %, nadie. Siempre queda la comprobación de salud, que es lo que
         // mira Caddy y no pesa nada.
-        const level = request.url.startsWith('/health') ? 'ok' : await service.level()
+        const level = path.startsWith('/health') ? 'ok' : await service.level()
         const session_ = level === 'admin_only' ? loginOf(session, request) : null
         const passes =
           level === 'ok' ||
           (level === 'admin_only' &&
-            (request.url.startsWith('/auth/') ||
+            (path.startsWith('/auth/') ||
               (session_ !== null && (await service.accessOf(session_)).admin)))
 
         if (!passes) {
@@ -118,7 +143,6 @@ export function createAdminModule(deps: AdminModuleDeps): AdminModule {
         }
 
         const who = loginOf(session, request)
-        const path = request.url.split('?')[0] ?? ''
 
         // Una sesión de staff solo llega a lo suyo. Cada ruta de la gente ya la
         // rechaza al leer la sesión; esto cubre también las que no la leen. Lo
@@ -158,7 +182,7 @@ export function createAdminModule(deps: AdminModuleDeps): AdminModule {
 
         // Una cuenta bloqueada no pasa por ninguna ruta, pida o no el "actor".
         // Solo le quedan las de sesión, para saber que lo está y poder salir.
-        if (block !== null && !request.url.startsWith('/auth/')) {
+        if (block !== null && !path.startsWith('/auth/')) {
           await reply.code(403).send({
             error: 'forbidden',
             message: `Tu cuenta está bloqueada: ${block.reason}`,

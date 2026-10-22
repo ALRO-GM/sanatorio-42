@@ -31,6 +31,13 @@ que hacer, en orden. Este documento es el porqué; aquel, el qué.
   'infra/scripts/backup.sh; infra/scripts/deploy.sh' > infra/deploy.log 2>&1
   < /dev/null &)" < /dev/null` (con el paréntesis, el SSH vuelve al momento) y mirar `tail -1 infra/deploy.log` hasta «Desplegado y
   respondiendo».
+- **Máquina** (desde el 2026-10-22, 23:40): la misma instancia de Oracle
+  (`VM.Standard.A1.Flex`, Madrid, IP 51.170.34.214) ampliada en el sitio a
+  **4 OCPU, 24 GB y 200 GB de disco**, el máximo gratuito con pago por uso
+  (3 000 OCPU-h y 18 000 GB-h al mes de A1: justo 4/24 todo el mes). Se hizo
+  con `oci compute instance update --shape-config` y `oci bv boot-volume
+  update`; la partición la creció cloud-init al reiniciar. No pedir más: se
+  cobraría.
 - **Cupo de GitHub**: la API pública da 60 consultas por hora a la IP del
   servidor. `deploy.sh` consulta la CI a los 4 minutos y luego una por minuto,
   mira antes el cupo en `/rate_limit` (gratis) y, si solo queda el 10 % de
