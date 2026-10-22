@@ -24,3 +24,6 @@ backups/
 .vscode/
 *.swp
 .claude/settings.local.json
+
+# Copias de trabajo de los agentes (git worktree)
+.claude/
