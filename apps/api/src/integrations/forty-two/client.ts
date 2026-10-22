@@ -32,7 +32,6 @@ import type {
   ApiExam,
   ApiLocation,
   ApiProjectSession,
-  ApiProjectTeam,
   ApiProjectUser,
   ApiQuestUser,
   ApiScaleTeam,
@@ -290,20 +289,6 @@ export class FortyTwoClient {
   async getUserEventsUsers(userId: number): Promise<ApiEventsUser[]> {
     const page = await this.requestPage<ApiEventsUser>(
       `/users/${userId}/events_users?sort=-id&page=1&per_page=${this.pageSize}`,
-    )
-
-    return page.items
-  }
-
-  /**
-   * `GET /v2/teams?filter[id]=…`: esos equipos (hasta 100, una petición), con
-   * sus `teams_uploads`. Es de donde sale la nota de un examen sin cerrar.
-   */
-  async getTeams(ids: readonly number[]): Promise<ApiProjectTeam[]> {
-    if (ids.length === 0) return []
-
-    const page = await this.requestPage<ApiProjectTeam>(
-      `/teams?filter[id]=${ids.slice(0, 100).join(',')}&per_page=100`,
     )
 
     return page.items

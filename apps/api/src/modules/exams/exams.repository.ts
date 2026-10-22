@@ -79,30 +79,6 @@ export function createExamsRepository(db: Db) {
     },
 
     /**
-     * El equipo de examen sin cerrar de cada una de esas personas, creado desde
-     * `since` (el equipo se crea al apuntarse, antes de que empiece el examen).
-     */
-    async openTeams(logins: readonly string[], since: string): Promise<Map<string, number>> {
-      const teams = new Map<string, number>()
-
-      if (logins.length === 0) return teams
-
-      const result = await db.execute({
-        sql: `SELECT u.login, a.team_id FROM exam_attempts a
-              JOIN users u ON u.id = a.user_id
-              WHERE u.login IN (SELECT value FROM json_each(?))
-                AND a.validated IS NULL AND a.at >= ?
-              ORDER BY a.at`,
-        args: [JSON.stringify(logins), since],
-      })
-
-      // Por fecha: si hubiera dos, vale el último.
-      for (const row of result.rows) teams.set(toText(row.login), toNumber(row.team_id))
-
-      return teams
-    },
-
-    /**
      * Las filas de examen tocadas desde `since` de la gente del campus o de esos
      * logins: quien ha entrado en el examen aparece aunque la lista de
      * apuntados no haya llegado. La más reciente de cada cual va la última.

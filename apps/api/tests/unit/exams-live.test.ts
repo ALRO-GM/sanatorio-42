@@ -14,7 +14,6 @@ import { createExamsRepository } from '../../src/modules/exams/exams.repository.
 import {
   LIVE_AUTO_MS,
   LIVE_MANUAL_MS,
-  currentMark,
   examDay,
   examineeStatus,
   expectedExamSlug,
@@ -171,7 +170,7 @@ describe('el examen en vivo', () => {
   let db: Db
   let clock: number
   let examUsers: ApiExamUser[] | Error
-  let calls: { users: number; pages: number[]; teams: number[][] }
+  let calls: { users: number; pages: number[] }
   let quotaOk: boolean
   /** El círculo y el plan de cada cual, como los diría el plan de estudios. */
   const places = new Map<string, { circle: number | null; track: 'classic' | 'next' }>([
@@ -201,21 +200,6 @@ describe('el examen en vivo', () => {
           calls.pages.push(query.projectId ?? 0)
 
           return Promise.resolve({ items: [] as ApiProjectUser[], perPage: 100, total: 0 })
-        },
-        // El equipo de `mia`, que sigue dentro: dos ejercicios corregidos.
-        getTeams: (ids) => {
-          calls.teams.push([...ids])
-
-          return Promise.resolve(
-            ids.map((id) => ({
-              id,
-              final_mark: null,
-              teams_uploads: [
-                { final_mark: 25, created_at: '2026-10-22T07:20:00.000Z' },
-                { final_mark: 50, created_at: '2026-10-22T07:45:00.000Z' },
-              ],
-            })),
-          )
         },
       },
       replica,
@@ -256,7 +240,7 @@ describe('el examen en vivo', () => {
     db = await openDatabase({ url: 'file::memory:' })
     clock = NOW
     examUsers = [examUser('ana', 2), examUser('leo', 3)]
-    calls = { users: 0, pages: [], teams: [] }
+    calls = { users: 0, pages: [] }
     quotaOk = true
 
     const replica = createReplicaRepository(db)
@@ -300,24 +284,14 @@ describe('el examen en vivo', () => {
           updatedAt: '2026-10-15T10:00:00.000Z',
         }),
         // `mia` no sale en la lista de 42, pero ya está dentro del examen.
-        // `mia` sigue dentro. Su equipo se creó ayer, al apuntarse, y no tiene nota
-        // hasta cerrarse; la del proyecto (90) es de otra vez.
-        {
-          ...projectUser('mia', {
-            ...RANK_02,
-            status: 'in_progress',
-            finalMark: 90,
-            updatedAt: '2026-10-22T07:40:00.000Z',
-          }),
-          teams: [
-            {
-              id: 9100,
-              final_mark: null,
-              'validated?': null,
-              created_at: '2026-10-21T18:00:00.000Z',
-            },
-          ],
-        },
+        // `mia` sigue dentro: hasta que cierre, 42 no da nota (la del proyecto, 90,
+        // es de otra vez y no se enseña).
+        projectUser('mia', {
+          ...RANK_02,
+          status: 'in_progress',
+          finalMark: 90,
+          updatedAt: '2026-10-22T07:40:00.000Z',
+        }),
         // Alguien que hizo el 03 del plan nuevo: así se conoce el proyecto.
         projectUser('zoe', {
           ...NEXT_03,
@@ -373,10 +347,8 @@ describe('el examen en vivo', () => {
     ])
     // La nota es la del intento de hoy (75), no la mejor del proyecto (90).
     expect(live.groups[0]?.people[0]).toMatchObject({ mark: 75, track: 'classic', circle: 2 })
-    // Quien sigue dentro, con la nota de su último ejercicio corregido (50).
-    expect(live.groups[0]?.people[1]).toMatchObject({ login: 'mia', mark: 50 })
-    // Los equipos abiertos, todos en una petición.
-    expect(calls.teams).toEqual([[9100]])
+    // Quien sigue dentro no tiene nota todavía: la del proyecto no vale.
+    expect(live.groups[0]?.people[1]).toMatchObject({ login: 'mia', mark: null })
     // Solo se piden las notas de los exámenes que tocan a alguien, uno por petición.
     expect(calls.pages.sort()).toEqual([1320, 1321, 1400])
   })
@@ -448,7 +420,7 @@ describe('el examen en vivo', () => {
 
     const live = await build().live(actor('ana'))
 
-    expect(calls).toEqual({ users: 0, pages: [], teams: [] })
+    expect(calls).toEqual({ users: 0, pages: [] })
     expect(live.updatedAt).toBeNull()
     // Quien ya está dentro sale igual.
     expect(summary(live)[0]).toEqual(['Exam Rank 02', ['ana:failed', 'mia:inProgress']])
@@ -480,20 +452,5 @@ describe('el examen en vivo', () => {
       nextRefreshAt: null,
       refreshableAt: null,
     })
-  })
-})
-
-describe('nota de un examen sin cerrar', () => {
-  it('es la del último ejercicio corregido; sin ninguno con nota, no hay', () => {
-    expect(
-      currentMark([
-        { final_mark: 50, created_at: '2026-10-22T07:45:00Z' },
-        { final_mark: 25, created_at: '2026-10-22T07:20:00Z' },
-        { final_mark: null, created_at: '2026-10-22T07:50:00Z' },
-      ]),
-    ).toBe(50)
-    expect(currentMark([{ final_mark: 0, created_at: '2026-10-22T07:20:00Z' }])).toBe(0)
-    expect(currentMark([{ final_mark: 75, created_at: null }])).toBeNull()
-    expect(currentMark([])).toBeNull()
   })
 })

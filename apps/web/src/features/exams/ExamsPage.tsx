@@ -255,7 +255,14 @@ function LiveCard({
                     <span className="badge subtle">{t(`exams.track.${person.track}`)}</span>
                     <span className="badge exam-status">{t(`exams.status.${person.status}`)}</span>
                   </span>
-                  <strong className="exam-mark">{person.mark ?? '—'}</strong>
+                  {person.mark === null && person.status === 'inProgress' ? (
+                    // 42 no da nota hasta que se cierra el examen: no es un fallo.
+                    <small className="exam-mark pending" title={t('exams.markLaterHint')}>
+                      {t('exams.markLater')}
+                    </small>
+                  ) : (
+                    <strong className="exam-mark">{person.mark ?? '—'}</strong>
+                  )}
                 </li>
               ))}
             </ul>

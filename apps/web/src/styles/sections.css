@@ -1616,3 +1616,10 @@ dialog.layout-dialog.focus-dialog.wide {
   color: var(--accent-text);
   font-size: 0.85rem;
 }
+
+/* Examen en vivo: quien sigue dentro aún no tiene nota (42 la da al cerrar). */
+.exam-mark.pending {
+  color: var(--text-3);
+  font-weight: 500;
+  white-space: nowrap;
+}

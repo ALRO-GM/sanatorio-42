@@ -23,34 +23,23 @@ import { toNumber, toText } from '../../core/db/rows.js'
 import type { FortyTwoClient } from '../../integrations/forty-two/client.js'
 import type { Agenda, Curriculum, QuotaGate, ReplicaRepository } from '../replica/index.js'
 import type { ExamsRepository } from './exams.repository.js'
-import {
-  currentMark,
-  examDay,
-  examineeStatus,
-  expectedExamSlug,
-  liveRefreshPlan,
-} from './exams.rules.js'
+import { examDay, examineeStatus, expectedExamSlug, liveRefreshPlan } from './exams.rules.js'
 
 /** Hasta cuánto antes se enseña el siguiente examen. */
 const AHEAD_MS = 24 * 3_600_000
 /** Lo más que dura un examen: para buscar el que sigue en marcha. */
 const BEHIND_MS = 12 * 3_600_000
-/** Cuánto antes del examen puede haberse creado el equipo (al apuntarse). */
-const SIGNUP_MS = 7 * 24 * 3_600_000
 
 type ExamsLiveOptions = {
   db: Db
-  client: Pick<FortyTwoClient, 'getExamUsers' | 'getCampusProjectUsersPage' | 'getTeams'>
+  client: Pick<FortyTwoClient, 'getExamUsers' | 'getCampusProjectUsersPage'>
   replica: Pick<
     ReplicaRepository,
     'ingestProjectUsers' | 'imagesOf' | 'getState' | 'setState' | 'timeZoneOf'
   >
   agenda: Pick<Agenda, 'campusEvents'>
   curriculum: Pick<Curriculum, 'placesOf'>
-  exams: Pick<
-    ExamsRepository,
-    'exams' | 'agendaRegistered' | 'sessionRows' | 'fromElsewhere' | 'openTeams'
-  >
+  exams: Pick<ExamsRepository, 'exams' | 'agendaRegistered' | 'sessionRows' | 'fromElsewhere'>
   quota: QuotaGate
   now?: () => number
   log?: (message: string) => void
@@ -64,11 +53,8 @@ type ExamEvent = {
   endAt: string
 }
 
-/**
- * Lo que se guarda de cada examen en vivo: cuándo se refrescó, quién estaba
- * apuntado en 42 y la nota de quien sigue dentro (la de su último ejercicio).
- */
-type LiveState = { at: number; logins: [string, string | null][]; marks?: [string, number][] }
+/** Lo que se guarda de cada examen en vivo: cuándo se refrescó y quién estaba apuntado en 42. */
+type LiveState = { at: number; logins: [string, string | null][] }
 
 /** De dónde sale el refresco: el reloj de cinco minutos o el botón. */
 type RefreshMode = 'auto' | 'manual'
@@ -194,35 +180,6 @@ export function createExamsLive(options: ExamsLiveOptions) {
           log(`notas de ${project.name} en el examen ${exam.id}: ${describe(error)}`)
         }
       }
-
-      // La nota de quien sigue dentro: su equipo no la tiene hasta cerrarse,
-      // pero cada ejercicio corregido sí. Todos los equipos en una petición.
-      if (Date.parse(exam.beginAt) > now() || !quota.allows(tier)) return
-
-      const teams = await exams.openTeams(
-        logins,
-        new Date(Date.parse(exam.beginAt) - SIGNUP_MS).toISOString(),
-      )
-
-      if (teams.size === 0) return
-
-      try {
-        const byTeam = new Map(
-          (await client.getTeams([...teams.values()])).map((team) => [
-            team.id,
-            currentMark(team.teams_uploads ?? []),
-          ]),
-        )
-
-        next.marks = [...teams].flatMap(([login, team]) => {
-          const mark = byTeam.get(team)
-
-          return mark === undefined || mark === null ? [] : [[login, mark] as [string, number]]
-        })
-        await replica.setState(key, next)
-      } catch (error) {
-        log(`notas en curso del examen ${exam.id}: ${describe(error)}`)
-      }
     })().finally(() => {
       inFlight.delete(key)
     })
@@ -273,7 +230,6 @@ export function createExamsLive(options: ExamsLiveOptions) {
     const state = await stateOf(liveKey(campusId, exam.id))
     const logins = await registered(campusId, exam, state)
     const fromFortyTwo = new Map(state?.logins ?? [])
-    const liveMarks = new Map(running ? (state?.marks ?? []) : [])
     const [places, images, attempts, rows, projects, timeZone] = await Promise.all([
       curriculum.placesOf(logins),
       replica.imagesOf(logins),
@@ -302,10 +258,10 @@ export function createExamsLive(options: ExamsLiveOptions) {
         image: images.get(login) ?? fromFortyTwo.get(login) ?? null,
         track,
         circle,
-        // La del intento de esta sesión si ya se cerró; si sigue dentro, la de su
-        // último ejercicio corregido. Nunca la del proyecto: en 42 es la mejor.
-        mark: attempt?.mark ?? liveMarks.get(login) ?? null,
-        status: liveStatus(examineeStatus(row, attempt, exam.beginAt), liveMarks.has(login)),
+        // Solo la del intento de esta sesión: hasta que se cierra, 42 no da nota
+        // (ni del equipo ni de sus ejercicios), y la del proyecto es la mejor de todas.
+        mark: attempt?.mark ?? null,
+        status: examineeStatus(row, attempt, exam.beginAt),
       }
       const group = groups.get(projectId) ?? {
         projectId,
@@ -435,10 +391,6 @@ export function createExamsLive(options: ExamsLiveOptions) {
     return found
   }
 }
-
-/** Con un ejercicio corregido en esta sesión, ha entrado aunque su fila no lo diga aún. */
-const liveStatus = (status: LiveExaminee['status'], graded: boolean): LiveExaminee['status'] =>
-  status === 'pending' && graded ? 'inProgress' : status
 
 /** Sin examen en marcha no hay refrescos que contar. */
 const noRefresh = { nextRefreshAt: null, refreshableAt: null }

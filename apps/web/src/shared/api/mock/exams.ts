@@ -106,7 +106,7 @@ function liveNow(manual: boolean): LiveExam {
         people: [
           person('jdoe', 'classic', 2, 100, 'passed'),
           person('llorente', 'classic', 2, 50, 'failed'),
-          person('pvidal', 'classic', 2, 25, 'inProgress'),
+          person('pvidal', 'classic', 2, null, 'inProgress'),
           person('tmolina', 'classic', 2, null, 'pending'),
         ],
       },
@@ -114,7 +114,7 @@ function liveNow(manual: boolean): LiveExam {
         projectId: 1420,
         name: 'Exam Rank 02 · 42next',
         people: [
-          person('anavarro', 'next', 2, 75, 'inProgress'),
+          person('anavarro', 'next', 2, null, 'inProgress'),
           person('bcastro', 'next', 2, null, 'pending'),
         ],
       },

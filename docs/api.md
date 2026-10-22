@@ -1523,10 +1523,10 @@ POST /exams/live/refresh  → LiveExam. Lo mismo, pidiendo antes lo nuevo a 42 s
   círculo N es `exam-rank-0N`, o `42next-exam-rank-0N` en el plan nuevo.
 - Solo gente del campus de quien mira: se quita a quien consta en otro campus y
   no en este (quien no consta en ninguno se queda: puede no estar copiado aún).
-- `mark`: la del intento de esta sesión si ya se cerró; si sigue dentro, la de su
-  último ejercicio corregido, que en cada refresco se pide en una sola petición
-  para todos los equipos abiertos (`GET /v2/teams?filter[id]=…`, sus
-  `teams_uploads`). Nunca la del proyecto, que en 42 es la mejor de todas.
+- `mark`: la del intento de esta sesión, solo cuando se cierra. Mientras sigue
+  dentro es `null`: 42 no da nota hasta cerrar (comprobado el 2026-10-22 con
+  `GET /v2/teams`: equipos en curso sin `final_mark`, `teams_uploads` ni
+  `scale_teams`). Nunca la del proyecto, que en 42 es la mejor de todas.
 - `status`: `pending` (aún no ha entrado), `inProgress`, `passed` (cerrado con 100
   o más) o `failed` (cerrado sin llegar a 100, o sin validar). Solo cuenta la fila
   tocada en esta sesión.
