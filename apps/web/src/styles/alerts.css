@@ -552,3 +552,17 @@
 .review-gate textarea {
   width: 100%;
 }
+
+/* Aviso para quien entra desde un campus que aún no se copia. */
+.other-campus {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+.other-campus p {
+  margin: 0;
+  flex: 1 1 18rem;
+}

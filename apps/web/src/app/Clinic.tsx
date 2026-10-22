@@ -8,6 +8,7 @@ import { ReviewGate } from '../features/clicker/ReviewGate'
 import { calendarHref } from '../shared/links'
 import { HelpGate } from '../features/help/HelpGate'
 import { Welcome } from '../features/welcome/Welcome'
+import { OtherCampusNotice } from '../features/campus/OtherCampusNotice'
 import { FocusDialog } from '../features/focus/FocusDialog'
 import { FocusTimer } from '../features/focus/FocusTimer'
 import { loadFocus } from '../shared/focus'
@@ -173,6 +174,7 @@ export function Clinic({ me, onLogout }: ClinicProps) {
       {/* La red de correcciones necesita sitio: es la única sección a todo lo ancho. */}
       <main className={`container ${section === 'red' || section === 'clicker' ? 'wide' : ''}`}>
         <QuotaNotice status={pulse?.quota ?? null} />
+        <OtherCampusNotice campusId={me.campusId} />
         <LegalGate />
         <BroadcastGate pending={pulse?.broadcasts ?? 0} onChange={refresh} />
         <ReviewGate pending={pulse?.clickerReviews ?? 0} onChange={refresh} />
