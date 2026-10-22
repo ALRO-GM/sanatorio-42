@@ -264,21 +264,36 @@ junto y un solo push y despliegue (cupo de GitHub).
 
 ## 2f. Plan vigente: revisión completa y flujo de trabajo (pedido el 2026-10-22, noche)
 
-Alberto pidió: revisar todo el código (seguridad, calidad, textos, legibilidad,
-usabilidad, desacoplamiento, código repetido que unificar, funciones que
-generalizar) para una base sólida y reutilizable; analizar el mejor flujo para
-desarrollar de forma segura y constante (funcionalidades, seguridad, tests,
-despliegues); y crear skills y subagentes para lo recurrente (traducciones,
-tests, despliegues y lo que haga falta).
+Alberto pidió revisar todo el código (seguridad, calidad, textos, legibilidad,
+usabilidad, desacoplamiento, duplicación, generalización), analizar el flujo
+de desarrollo seguro y constante, y crear skills y subagentes para lo
+recurrente. Hecho el 22-23 de octubre:
 
-- [ ] Revisiones en paralelo (agentes de solo lectura, informes en el
-      scratchpad de la sesión): seguridad API, calidad API, calidad y
-      usabilidad web, textos, tests e infra. Consolidar en `docs/revision-2026-10.md`.
-- [ ] Skills en `.claude/skills/` y subagentes en `.claude/agents/` (se suben
-      al repo; `.gitignore` ya solo ignora `.claude/worktrees/`).
-- [ ] `docs/flujo-de-trabajo.md` con el flujo recomendado.
-- [ ] Arreglos por tandas, de más grave a menos, cada una con check, push y
-      despliegue.
+- [x] Cinco revisiones de solo lectura; informes en `docs/revision-2026-10/`
+      (índice y plan por tandas en su `README.md`).
+- [x] Skills (`.claude/skills/`: nueva-funcionalidad, traducir, migracion,
+      comprobar, revisar, desplegar, paralelo, retomar) y subagentes
+      (`.claude/agents/`: implementador, traductor, probador, revisor,
+      desplegador), apuntados en `AGENTS.md`. **Ojo**: los subagentes del
+      repo no aparecen como tipo de agente hasta la siguiente sesión; mientras,
+      se lanza `general-purpose` con la instrucción de leer su fichero.
+- [x] `docs/flujo-de-trabajo.md`.
+- [x] Máquina de Oracle ampliada al máximo gratis (4 OCPU, 24 GB, 200 GB).
+- [x] Tanda 1 de seguridad (desplegada): motor del Clicker en
+      `packages/clicker` y producción calculada en la API; `/admin/usage/heatmap`.
+- [x] Tanda 2 (desplegada): barrera `/admin/` sobre la ruta descodificada; ids
+      de evento a medias sin 500.
+- [x] Tanda 3 (desplegada): Slack escapado, `SESSION_SECRET` ≥ 32, salas
+      visibles solo para su campus o su gente.
+- [ ] **En curso con agentes (worktrees, sin push)**: textos (275 filas,
+      glosario, contextos), infra (logger a `warn` + `x-request-id`, migración
+      aparte con vuelta atrás, etiqueta `ci-ok/<sha>`, `/health/db` con sha),
+      datos personales (M6). Al volver: unir de una en una, `npm run check`,
+      un push y un despliegue (skill `paralelo`).
+- [ ] Después, por orden del `README.md` de la revisión: ca/eu de `gestion`,
+      `legal` y `juego`; los diez refactors de la API; los diez de la web;
+      tests (mínimos de la web, `docs/api.md` ↔ rutas); bajos de seguridad
+      restantes (B1 `POST` del documento, B3, B4, B6-B8); observabilidad.
 
 ## 3. A medias o por confirmar con Alberto
 
