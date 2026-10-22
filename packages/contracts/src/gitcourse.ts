@@ -109,7 +109,14 @@ export type GitRoomPlayer = {
   last: string | null
 }
 
-export type GitMissionItem = { text: string; done: boolean; login: string | null }
+export type GitMissionItem = {
+  text: string
+  done: boolean
+  login: string | null
+  /** La plantilla en español (con `{login}` y `{n}`) y el número: para traducirla. */
+  key: string
+  n: number | null
+}
 
 /** `GET /gitcourse/rooms/:id`: la sala, la misión y tu repositorio (la web lo pide cada dos segundos). */
 export type GitRoom = {

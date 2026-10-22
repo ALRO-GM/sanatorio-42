@@ -2,7 +2,7 @@ import { useState } from 'react'
 import type { KeyboardEvent } from 'react'
 
 import type { GitCourse } from '@sanatorio/contracts'
-import { GATES, LEVELS } from '@sanatorio/gitsim'
+import { GATES, levelIn, LEVELS } from '@sanatorio/gitsim'
 import type { Gate, Level } from '@sanatorio/gitsim'
 
 import { api } from '../../shared/api'
@@ -56,7 +56,7 @@ const TRUNK = STOPS.filter((stop) => stop.x === TRUNK_X)
  * desbloquean en orden y se marcan con estrellas.
  */
 export function GitCourseTab({ me, onReview }: { me: string; onReview: () => void }) {
-  const { t } = useI18n()
+  const { t, lang } = useI18n()
   const loaded = useAsync(() => api.getGitCourse(), [])
   const [course, setCourse] = useState<GitCourse | null>(null)
   const [open, setOpen] = useState<string | null>(null)
@@ -72,7 +72,8 @@ export function GitCourseTab({ me, onReview }: { me: string; onReview: () => voi
     return previous === undefined || done(previous.id)
   }
   const next = LEVELS.findIndex((level, index) => unlocked(index) && !done(level.id))
-  const level = LEVELS.find((each) => each.id === open)
+  const found = LEVELS.find((each) => each.id === open)
+  const level = found === undefined ? undefined : levelIn(found, lang)
   const gate = GATES.find((each) => each.id === open)
 
   if (gate !== undefined) {
@@ -272,6 +273,8 @@ function LevelStop({
   current: boolean
   onOpen: () => void
 }) {
+  const { lang } = useI18n()
+  const title = levelIn(stop.level, lang).title
   const big = stop.level.kind === 'world'
   const r = big ? 17 : 11
 
@@ -285,7 +288,7 @@ function LevelStop({
         role="button"
         tabIndex={open ? 0 : -1}
         aria-disabled={!open}
-        aria-label={stop.level.title}
+        aria-label={title}
         onClick={open ? onOpen : undefined}
         onKeyDown={open ? pressed(onOpen) : undefined}
       >
@@ -301,7 +304,7 @@ function LevelStop({
           </text>
         )}
         <text x={r + 10} y={stars > 0 ? -2 : 4} className={`git-stop-title ${big ? 'big' : ''}`}>
-          {stop.level.title}
+          {title}
         </text>
         {stars > 0 && (
           <text x={r + 10} y={13} className="git-stop-stars">

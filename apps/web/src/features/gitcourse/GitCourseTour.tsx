@@ -1,4 +1,4 @@
-import { emptyRepo, LEVELS, runAll } from '@sanatorio/gitsim'
+import { emptyRepo, levelIn, LEVELS, runAll } from '@sanatorio/gitsim'
 import type { World } from '@sanatorio/gitsim'
 
 import { useI18n } from '../../shared/i18n'
@@ -55,7 +55,7 @@ const AFTER = step([COMMAND])
  * cual cumple todas las misiones.
  */
 export function GitCourseTour() {
-  const { t } = useI18n()
+  const { t, lang } = useI18n()
 
   return (
     <Tour tour={TOUR} tab={() => t('notgames.tab.git')}>
@@ -70,7 +70,7 @@ export function GitCourseTour() {
                   className={`tour-item ${index === 0 && shot.picked ? 'on' : ''}`}
                 >
                   <span className="tour-chip">{index === 0 ? '●' : '○'}</span>
-                  {level.title}
+                  {levelIn(level, lang).title}
                 </span>
               ))}
             </div>

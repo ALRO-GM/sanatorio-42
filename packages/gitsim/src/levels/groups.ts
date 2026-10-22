@@ -30,6 +30,10 @@ export type MissionItem = {
   done: boolean
   /** De quién es la misión (si es de una persona). */
   login: string | null
+  /** La plantilla en español, con `{login}` y `{n}`: para enseñarla en otro idioma. */
+  key: string
+  /** El número de esa persona, para rellenar la plantilla. */
+  n: number | null
 }
 
 export type GroupMission = {
@@ -96,10 +100,12 @@ function taggedIn(remote: Remote, tag: string, branches: string[]): boolean {
   )
 }
 
-const item = (text: string, done: boolean, login: string | null = null): MissionItem => ({
+const item = (text: string, done: boolean): MissionItem => ({
   text,
   done,
-  login,
+  login: null,
+  key: text,
+  n: null,
 })
 
 /** Una misión por persona: `text` con `{login}` y `{n}`. */
@@ -107,7 +113,8 @@ const each = (
   players: readonly GroupPlayer[],
   text: string,
   done: (p: GroupPlayer) => boolean,
-): MissionItem[] => players.map((p) => item(filled(text, p), done(p), p.login))
+): MissionItem[] =>
+  players.map((p) => ({ text: filled(text, p), done: done(p), login: p.login, key: text, n: p.n }))
 
 /** Cambia `{login}` y `{n}` por los de esa persona. */
 export function filled(text: string, p: Pick<GroupPlayer, 'login' | 'n'>): string {

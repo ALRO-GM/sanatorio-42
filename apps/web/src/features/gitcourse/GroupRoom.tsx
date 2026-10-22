@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import type { GitRoom, GitRoomLobby } from '@sanatorio/contracts'
-import { filled, MAX_PLAYERS, missionOf } from '@sanatorio/gitsim'
+import { filled, MAX_PLAYERS, missionIn, missionItemIn, missionOf } from '@sanatorio/gitsim'
 import type { Gate, GroupMission } from '@sanatorio/gitsim'
 
 import { api } from '../../shared/api'
@@ -22,8 +22,9 @@ const WAITING_MS = 2500
  * Se entra en una (o se crea) y se juega dentro.
  */
 export function GroupRooms({ gate, me }: { gate: Gate; me: string }) {
-  const { t } = useI18n()
-  const mission = missionOf(gate.id)
+  const { t, lang } = useI18n()
+  const found = missionOf(gate.id)
+  const mission = found === undefined ? undefined : missionIn(found, lang)
   const [open, setOpen] = useState<number | null>(null)
   const [rooms, setRooms] = useState<GitRoomLobby[] | null>(null)
   const [error, setError] = useState<unknown>(null)
@@ -153,7 +154,7 @@ function GroupRoom({
   mission: GroupMission
   onExit: () => void
 }) {
-  const { t } = useI18n()
+  const { t, lang } = useI18n()
   const [room, setRoom] = useState<GitRoom | null>(null)
   const [error, setError] = useState<unknown>(null)
   const [entries, setEntries] = useState<TerminalEntry[]>([])
@@ -320,7 +321,7 @@ function GroupRoom({
             <ul className="git-missions">
               {room.missions.map((item) => (
                 <li key={item.text} className={item.done ? 'done' : ''}>
-                  {item.done ? '✓' : '○'} {item.text}
+                  {item.done ? '✓' : '○'} {missionItemIn(item, lang)}
                 </li>
               ))}
             </ul>
