@@ -17,8 +17,13 @@ describe('Not-games', () => {
     const user = userEvent.setup()
 
     await openApp('#/notgames')
+    // La página carga salas y textos a la vez: en la CI tarda más del segundo por defecto.
     await user.click(
-      await screen.findByRole('button', { name: new RegExp(text('notgames.create')) }),
+      await screen.findByRole(
+        'button',
+        { name: new RegExp(text('notgames.create')) },
+        { timeout: 5000 },
+      ),
     )
     await user.click(screen.getByRole('button', { name: new RegExp(text('notgames.mode.ffa')) }))
     await user.click(screen.getByRole('button', { name: text('notgames.createSend') }))
