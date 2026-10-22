@@ -1258,8 +1258,27 @@ POST /games/rooms/:id/resign   → abandona: gana el otro bando
 ```
 GET    /me/focus  → Focus { until, startedAt, settings }
 PUT    /me/focus  → FocusSettings { focusMinutes 5–180, breakMinutes 0–60, sections, show } → Focus
-DELETE /me/focus  → Focus (acaba antes de tiempo; los ajustes se guardan)
+DELETE /me/focus  → FocusExit { reasons } (opcional) → Focus (acaba antes de tiempo; los ajustes se guardan)
+POST   /me/focus/stay → FocusExit { reasons } → Focus (pulsaste «Acabar» y sigues)
+GET    /me/focus/stats?from=&to=&offset=&low=&high=    → MyFocusStats
+GET    /admin/focus/stats?from=&to=&offset=&low=&high= → FocusStats (solo admins)
 ```
+
+Cada sesión empezada se apunta en `focus_sessions` (#80 del buzón): lo
+planeado, cuándo acabó y cómo. `completed` si llegó a su hora (no hace falta
+avisar: se deduce al leerla), `cancelled` con los motivos marcados
+(`FocusReason`: `tired`, `break`, `distracted`, `someone`, `urgent`, `done`,
+`other`), o `replaced` si se volvió a empezar encima (cuenta su tiempo, no es
+una cancelación). `stay` suma una a las veces que quiso parar y siguió, con
+sus motivos. Las reglas están en `modules/focus/focus.rules.ts`.
+
+Las estadísticas: `from`/`to` son días en la hora de quien mira (`offset`, en
+minutos sobre UTC, de −840 a 840); sin `to`, hasta hoy; sin `from`, el total.
+Cada sesión cuenta en el día y la hora en que empezó, y su tiempo se reparte
+por las horas que ocupó. `low`/`high` eligen el tramo de quienes lo usan por
+tiempo concentrado en el periodo (como `segmentOf` de `usage`): en el panel
+filtra a quién se suma; en lo tuyo, `band` es la media por persona de ese tramo
+y `position` qué parte de quienes lo usan se concentra menos que tú.
 
 Mientras `until` no ha pasado, los demás ven `focusUntil` en la ficha
 (`PersonCard`), en el ocupante de su puesto del plano y en la sala de espera

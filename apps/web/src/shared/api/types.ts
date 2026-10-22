@@ -18,6 +18,9 @@ import type {
   GitRoomLobby,
   GitRunResult,
   FocusSettings,
+  FocusReason,
+  FocusStats,
+  MyFocusStats,
   ClickBatch,
   ClickHeatmap,
   ClickLayout,
@@ -170,6 +173,9 @@ export type SegmentQuery = { low?: number; high?: number }
 /** Lo que se pide a las estadísticas y a los recorridos: periodo, persona y tramo de gente. */
 export type UsageQuery = SegmentQuery & { from?: string; to?: string; login?: string }
 
+/** Estadísticas del Pomodoro: días locales (sin `from`, el total) y minutos sobre UTC. */
+export type FocusStatsQuery = SegmentQuery & { from?: string; to: string; offset: number }
+
 export type Api = {
   // --- Sesión
   getMe: () => Promise<CurrentUser>
@@ -305,7 +311,13 @@ export type Api = {
   startGitRoom: (id: number) => Promise<GitRoom>
   runGitRoom: (id: number, line: string) => Promise<GitRunResult>
   startFocus: (settings: FocusSettings) => Promise<Focus>
-  stopFocus: () => Promise<Focus>
+  stopFocus: (reasons?: FocusReason[]) => Promise<Focus>
+  /** Querías acabar el Pomodoro y sigues: se apunta con los motivos marcados. */
+  stayFocus: (reasons: FocusReason[]) => Promise<Focus>
+  /** Tus estadísticas del Pomodoro y la media del tramo elegido de quienes lo usan. */
+  getMyFocusStats: (query: FocusStatsQuery) => Promise<MyFocusStats>
+  /** Las del Pomodoro de todo el mundo (o de un tramo). Solo admins. */
+  getAdminFocusStats: (query: FocusStatsQuery) => Promise<FocusStats>
   /** Manda los clics de una sección para el mapa de calor. */
   sendClicks: (batch: ClickBatch) => Promise<void>
   /** El mapa de calor de clics de una sección. Solo admins. */

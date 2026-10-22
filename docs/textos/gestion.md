@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/gestion.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-463 textos. «—» es que falta la traducción: sale en español.
+468 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -470,3 +470,8 @@ Generado desde `apps/web/src/shared/i18n/textos/gestion.csv` con
 | `admin.clicks.dead` | Panel, mapa de calor de clics: no se puede pulsar, y aun así se pulsa | features/admin/ClickMap | No | No | No | Ez |
 | `admin.clicks.count` | Panel, mapa de calor de clics: columna de clics | features/admin/ClickMap | Clics | Clicks | Clics | Klikak |
 | `admin.clicks.hint` | Panel, mapa de calor de clics: explicación bajo el mapa | features/admin/ClickMap | En naranja, lo que se pulsa sin que haga nada: ahí la gente espera que algo pase. La rejilla es el contenido de la sección (24 columnas a lo ancho, filas de 40 px). Sin logins: solo recuentos. | In orange, what gets clicked without doing anything: people expect something there. The grid is the section content (24 columns across, 40 px rows). No logins: counts only. | En taronja, el que es prem sense que faci res: la gent hi espera alguna cosa. La graella és el contingut de la secció (24 columnes d'ample, files de 40 px). Sense logins: només recomptes. | Laranjaz, ezer egiten ez duen arren sakatzen dena: jendeak zerbait espero du hor. Sareta atalaren edukia da (24 zutabe zabalean, 40 px-eko errenkadak). Loginik gabe: zenbaketak bakarrik. |
+| `admin.tab.focus` | Panel de gestión: pestaña del panel | features/admin/AdminPage | Pomodoro | Pomodoro | Pomodoro | Pomodoro |
+| `admin.focus.title` | Panel de gestión: estadísticas del Pomodoro | features/admin/FocusPanel | Pomodoro: cómo se usa | Pomodoro: how it is used | Pomodoro: com s'utilitza | Pomodoro: nola erabiltzen den |
+| `admin.data.kind.focus_sessions` | Panel de gestión, «Limpiar datos»: un tipo de dato que se puede borrar | features/admin/DataPanel | Sesiones de Pomodoro | Pomodoro sessions | Sessions de Pomodoro | Pomodoro saioak |
+| `admin.data.kind.focus_sessions.summary` | Panel de gestión, «Limpiar datos»: un tipo de dato que se puede borrar | features/admin/DataPanel | Cada sesión de Pomodoro empezada, con cómo acabó. | Every Pomodoro session started, and how it ended. | Cada sessió de Pomodoro començada, amb com va acabar. | Hasitako Pomodoro saio bakoitza, nola amaitu zen. |
+| `admin.data.kind.focus_sessions.detail` | Panel de gestión, «Limpiar datos»: un tipo de dato que se puede borrar | features/admin/DataPanel | Una fila por sesión: quién, cuándo empezó, cuánto quería, si llegó a su hora o se paró y por qué, y las veces que quiso parar y siguió. De aquí salen las estadísticas del Pomodoro de cada persona y las del panel. Borrarlas no para a nadie que esté en concentración. | One row per session: who, when it started, how long it was meant to be, whether it reached its time or was stopped and why, and how many times they wanted to stop and kept going. It feeds everyone's Pomodoro statistics and the panel ones. Deleting them stops nobody who is focusing. | — | — |

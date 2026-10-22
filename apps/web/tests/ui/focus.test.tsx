@@ -1,9 +1,10 @@
-import { cleanup, screen, waitFor, within } from '@testing-library/react'
+import { act, cleanup, fireEvent, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import es from 'virtual:textos/es'
 import { afterEach, describe, expect, it } from 'vitest'
 
 import { api } from '../../src/shared/api'
+import { stopFocus } from '../../src/shared/focus'
 import { must } from './must'
 import { openApp } from './render'
 
@@ -46,10 +47,39 @@ describe('modo concentración (Pomodoro)', () => {
       expect(within(nav).getAllByRole('button').length).toBeLessThan(before)
     })
 
-    await user.click(within(timer).getByRole('button', { name: text('focus.stop') }))
+    // Acabar pregunta antes (eso se prueba en `focus-exit.test.tsx`): aquí se para sin más.
+    await act(() => stopFocus(['done']))
     await waitFor(() => {
       expect(document.documentElement.dataset.focus).toBe('off')
     })
     expect(within(nav).getAllByRole('button')).toHaveLength(before)
+  }, 20_000)
+
+  it('tus estadísticas: cifras con la media del tramo, por días, por horas y motivos', async () => {
+    const user = userEvent.setup()
+
+    await openApp('#/expediente')
+    await user.click(screen.getByRole('button', { name: /tu cuenta/i }))
+    await user.click(await screen.findByRole('menuitem', { name: text('focus.open') }))
+
+    const dialog = await screen.findByRole('dialog', { name: text('focus.title') })
+
+    await user.click(within(dialog).getByRole('tab', { name: text('focus.tab.stats') }))
+    await user.click(within(dialog).getByRole('button', { name: text('focus.period.total') }))
+
+    // La demostración trae meses de sesiones inventadas: hay de todo.
+    expect(await within(dialog).findByText(text('focus.stats.sessions'))).toBeTruthy()
+    expect(within(dialog).getAllByText(/^Media del tramo/).length).toBeGreaterThan(0)
+    expect(within(dialog).getByRole('img', { name: text('focus.stats.byDay') })).toBeTruthy()
+    expect(within(dialog).getByRole('img', { name: text('focus.stats.byHour') })).toBeTruthy()
+    expect(
+      within(dialog).getByRole('rowheader', { name: text('focus.reason.urgent') }),
+    ).toBeTruthy()
+
+    // El tramo: el tirador de la izquierda deja fuera a quien menos lo usa.
+    const low = within(dialog).getByRole('slider', { name: text('focus.band.low') })
+
+    fireEvent.change(low, { target: { value: '2' } })
+    expect(await within(dialog).findByText(/Comparas con el tramo del 10 %/)).toBeTruthy()
   }, 20_000)
 })

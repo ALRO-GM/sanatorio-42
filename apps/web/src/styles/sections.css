@@ -1427,3 +1427,135 @@ tr.dead-click td {
     animation: none;
   }
 }
+/* Pantalla completa (#80 del buzón): todo lo tapa, y el letrero se lee de lejos. */
+.focus-timer {
+  flex-wrap: wrap;
+  max-width: calc(100vw - 2rem);
+}
+dialog.focus-screen {
+  width: 100vw;
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  padding: clamp(1rem, 4vw, 3rem);
+  border: 0;
+  background: var(--bg);
+  color: var(--text);
+}
+dialog.focus-screen[open] {
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: clamp(1rem, 4vh, 2.5rem);
+  text-align: center;
+}
+dialog.focus-screen::backdrop {
+  background: var(--bg);
+}
+.focus-sign {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0.6rem 1.2rem;
+  border: 2px solid var(--warn);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--warn) 14%, var(--surface));
+  font-size: clamp(1.1rem, 4vw, 2rem);
+  font-weight: 700;
+  animation: focus-breathe 4s ease-in-out infinite;
+}
+.focus-big {
+  display: grid;
+  gap: 0.5rem;
+  justify-items: center;
+  width: min(90vw, 36rem);
+}
+.focus-big strong {
+  font-size: clamp(4rem, 22vw, 11rem);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.focus-big small {
+  color: var(--text-3);
+  font-size: 1rem;
+}
+.focus-big-bar {
+  display: block;
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+.focus-big-bar i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+  transition: width 0.5s linear;
+}
+.focus-screen .actions {
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.focus-exit .focus-choices {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: 0.3rem 1rem;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  border: 0;
+}
+.focus-exit .focus-choices legend {
+  margin-bottom: 0.35rem;
+  font-weight: 600;
+}
+.focus-later {
+  margin: 0.9rem 0 0;
+  padding: 0.6rem 0.8rem;
+  border-left: 3px solid var(--accent);
+  background: var(--surface-2);
+}
+.focus-cheer {
+  position: fixed;
+  right: 1rem;
+  bottom: 6.5rem;
+  z-index: 41;
+  max-width: min(22rem, calc(100vw - 2rem));
+  margin: 0;
+  padding: 0.6rem 0.9rem;
+  border: 2px solid var(--ok);
+  border-radius: 14px;
+  background: var(--surface);
+  font-weight: 600;
+  animation: focus-in 0.35s cubic-bezier(0.3, 1.5, 0.5, 1);
+}
+.focus-screen .focus-cheer {
+  position: static;
+}
+dialog.layout-dialog.focus-dialog.wide {
+  width: min(820px, calc(100vw - 1.5rem));
+}
+.focus-band-value {
+  color: var(--text-3);
+  font-size: 0.8rem;
+}
+.focus-day-bar {
+  fill: var(--accent);
+}
+@keyframes focus-breathe {
+  50% {
+    opacity: 0.75;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .focus-sign,
+  .focus-cheer {
+    animation: none;
+  }
+  .focus-big-bar i {
+    transition: none;
+  }
+}

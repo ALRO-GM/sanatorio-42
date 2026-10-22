@@ -8,7 +8,7 @@
 
 import { useSyncExternalStore } from 'react'
 
-import type { Focus, FocusSettings, FocusShow } from '@sanatorio/contracts'
+import type { Focus, FocusReason, FocusSettings, FocusShow } from '@sanatorio/contracts'
 
 import { api } from './api'
 
@@ -49,8 +49,14 @@ export async function startFocus(settings: FocusSettings): Promise<void> {
   set(await api.startFocus(settings))
 }
 
-export async function stopFocus(): Promise<void> {
-  set(await api.stopFocus())
+/** Acaba antes de tiempo, con los motivos marcados (#80 del buzón). */
+export async function stopFocus(reasons?: FocusReason[]): Promise<void> {
+  set(await api.stopFocus(reasons))
+}
+
+/** Quería acabar y, pensándolo, sigue: se apunta para sus estadísticas. */
+export async function stayFocused(reasons: FocusReason[]): Promise<void> {
+  set(await api.stayFocus(reasons))
 }
 
 export function useFocus(): Focus | null {

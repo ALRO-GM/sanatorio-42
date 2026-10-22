@@ -219,3 +219,56 @@ focus.badge,Lo que ven los demás de quien está concentrado,En concentración h
 focus.badgeHint,Explicación del aviso de concentración,Está en modo Pomodoro: mejor escribirle después.,In Pomodoro mode: better write later.,És en mode Pomodoro: millor escriure-li després.,Pomodoro moduan dago: hobe geroago idaztea.
 campus.other,"Aviso para quien entra desde un campus que aún no se copia; {campus} es el suyo y {tracked}, los que sí","Tu campus, {campus}, todavía no está en Sanatorio 42: lo que ves es de {tracked}. Si os juntáis cinco personas más de {campus}, lo añadimos; con diez, también vuestro idioma. ¡Corre la voz!","Your campus, {campus}, is not on Sanatorio 42 yet: what you see is from {tracked}. If five more people from {campus} join, we add it; with ten, your language too. Spread the word!","El teu campus, {campus}, encara no és a Sanatorio 42: el que veus és de {tracked}. Si us apunteu cinc persones més de {campus}, l'afegim; amb deu, també el vostre idioma. Feu-ho córrer!","Zure campusa, {campus}, oraindik ez dago Sanatorio 42n: ikusten duzuna {tracked}(e)koa da. {campus}(e)ko bost pertsona gehiago batzen bazarete, gehituko dugu; hamarrekin, zuen hizkuntza ere bai. Zabaldu!"
 campus.otherOk,Botón para cerrar el aviso de otro campus,Entendido,Got it,Entesos,Ulertuta
+focus.screen.open,Pomodoro: poner el temporizador a pantalla completa,Pantalla completa,Full screen,Pantalla completa,Pantaila osoa
+focus.screen.label,Pomodoro: nombre de la vista a pantalla completa,Pomodoro a pantalla completa,Full-screen Pomodoro,Pomodoro a pantalla completa,Pomodoro pantaila osoan
+focus.screen.sign,Pomodoro a pantalla completa: letrero para quien pase por al lado,En concentración · no molestar,Focusing · do not disturb,En concentració · no molesteu,Kontzentratuta · ez molestatu
+focus.screen.until,Pomodoro a pantalla completa: a qué hora acaba,Hasta las {time},Until {time},Fins a les {time},{time}ak arte
+focus.screen.shrink,Pomodoro a pantalla completa: volver al temporizador pequeño sin parar,Quitar pantalla completa,Exit full screen,Treure la pantalla completa,Irten pantaila osotik
+focus.screen.exit,Pomodoro a pantalla completa: querer acabar la sesión (pregunta antes),Acabar la sesión,End the session,Acabar la sessió,Saioa amaitu
+focus.exit.title,Pomodoro: pregunta al pulsar Acabar,¿Seguro que quieres parar?,Sure you want to stop?,Segur que vols parar?,Ziur gelditu nahi duzula?
+focus.exit.left,"Pomodoro: lo que queda, al querer parar",Quedan {time} de concentración. ¿De verdad hace falta acabar ahora?,{time} of focus left. Do you really need to stop now?,Queden {time} de concentració. De debò cal acabar ara?,{time} geratzen dira. Benetan orain amaitu behar duzu?
+focus.exit.why,Pomodoro: título de la lista de motivos para parar,¿Por qué quieres parar?,Why do you want to stop?,Per què vols parar?,Zergatik gelditu nahi duzu?
+focus.exit.later,Pomodoro: invitación a dejarlo para el final de la sesión,¿Podría esperar a que acabe la sesión? Apúntalo y hazlo en el descanso.,Could it wait until the session ends? Note it down and do it on your break.,Podria esperar que acabi la sessió? Apunta-ho i fes-ho al descans.,Saioa amaitu arte itxaron dezake? Idatzi eta atsedenaldian egin.
+focus.exit.wait,Pomodoro: cuenta atrás antes de poder parar,Piénsalo: {n} s…,Think it over: {n} s…,Pensa-t'ho: {n} s…,Pentsatu: {n} s…
+focus.exit.pick,Pomodoro: falta marcar un motivo para poder parar,Marca al menos un motivo para parar.,Tick at least one reason to stop.,Marca almenys un motiu per parar.,Markatu gutxienez arrazoi bat gelditzeko.
+focus.exit.stay,Pomodoro: botón para seguir concentrándose,Sigo concentrándome,I'll keep focusing,Continuo concentrant-me,Kontzentratzen jarraituko dut
+focus.exit.stop,Pomodoro: botón para parar de verdad (tras la cuenta atrás),"Sí, parar","Yes, stop","Sí, parar","Bai, gelditu"
+focus.exit.cheer,Pomodoro: felicitación al decidir seguir,¡Bien hecho! Sigues en concentración: lo otro puede esperar.,Well done! You are still focusing: the rest can wait.,Ben fet! Continues en concentració: la resta pot esperar.,Ondo! Kontzentratuta jarraitzen duzu: besteak itxaron dezake.
+focus.reason.tired,Pomodoro: motivo para parar,Me falta energía,I am out of energy,Em falta energia,Energiarik gabe nago
+focus.reason.break,Pomodoro: motivo para parar,Necesito un descanso,I need a break,Necessito un descans,Atseden bat behar dut
+focus.reason.distracted,Pomodoro: motivo para parar,No consigo concentrarme,I cannot focus,No aconsegueixo concentrar-me,Ezin naiz kontzentratu
+focus.reason.someone,Pomodoro: motivo para parar,Alguien me necesita,Someone needs me,Algú em necessita,Norbaitek behar nau
+focus.reason.urgent,Pomodoro: motivo para parar,Ha surgido algo urgente,Something urgent came up,Ha sorgit una cosa urgent,Zerbait larria sortu da
+focus.reason.done,Pomodoro: motivo para parar,Ya he terminado lo que quería,I have finished what I wanted,Ja he acabat el que volia,Nahi nuena amaitu dut
+focus.reason.other,Pomodoro: motivo para parar,Otro motivo,Another reason,Un altre motiu,Beste arrazoi bat
+focus.tab.settings,Pomodoro: pestaña de los ajustes en la ventana,Ajustes,Settings,Ajustos,Ezarpenak
+focus.tab.stats,Pomodoro: pestaña de tus estadísticas en la ventana,Tus estadísticas,Your statistics,Les teves estadístiques,Zure estatistikak
+focus.stats.period,Estadísticas del Pomodoro: grupo de botones del periodo,Periodo,Period,Període,Aldia
+focus.period.day,Estadísticas del Pomodoro: periodo,Hoy,Today,Avui,Gaur
+focus.period.week,Estadísticas del Pomodoro: periodo (últimos 7 días),Semana,Week,Setmana,Astea
+focus.period.month,Estadísticas del Pomodoro: periodo (últimos 30 días),Mes,Month,Mes,Hilabetea
+focus.period.total,Estadísticas del Pomodoro: periodo (desde siempre),Total,Total,Total,Guztira
+focus.stats.sessions,Estadísticas del Pomodoro: cifra,Sesiones,Sessions,Sessions,Saioak
+focus.stats.focusedSeconds,Estadísticas del Pomodoro: cifra,Tiempo en concentración,Time focused,Temps en concentració,Kontzentrazio denbora
+focus.stats.completed,Estadísticas del Pomodoro: sesiones que llegaron a su hora,Completadas,Completed,Completades,Osatuak
+focus.stats.cancelled,Estadísticas del Pomodoro: sesiones paradas antes,Paradas antes de tiempo,Stopped early,Aturades abans d'hora,Goiz geldituak
+focus.stats.stayed,Tus estadísticas del Pomodoro: veces que quisiste parar y seguiste,Quisiste parar y seguiste,"Wanted to stop, kept going",Volies parar i vas seguir,Gelditu nahi eta jarraitu zenuen
+focus.stats.stayedAll,Estadísticas del Pomodoro en el panel: veces que alguien quiso parar y siguió,Se quiso parar y se siguió,"Wanted to stop, kept going",Es volia parar i es va seguir,Gelditu nahi eta jarraitu zen
+focus.stats.people,Estadísticas del Pomodoro: cuántas personas lo usaron,Personas,People,Persones,Pertsonak
+focus.stats.band,"Tus estadísticas del Pomodoro: la media del tramo elegido, bajo tu cifra",Media del tramo: {value},Band average: {value},Mitjana del tram: {value},Tartearen batez bestekoa: {value}
+focus.stats.position,Tus estadísticas del Pomodoro: tu puesto entre quienes lo usan,Te concentras más que el {n} % de quienes usan el Pomodoro.,You focus more than {n}% of the people who use the Pomodoro.,Et concentres més que el {n} % de qui fa servir el Pomodoro.,Pomodoroa erabiltzen dutenen % {n} baino gehiago kontzentratzen zara.
+focus.stats.byDay,Estadísticas del Pomodoro: gráfica,Tiempo por días,Time by day,Temps per dies,Denbora egunka
+focus.stats.byHour,Estadísticas del Pomodoro: gráfica,Tiempo por horas,Time by hour,Temps per hores,Denbora orduka
+focus.stats.reasons,Estadísticas del Pomodoro: tabla de motivos,Motivos para querer parar,Reasons for wanting to stop,Motius per voler parar,Gelditu nahi izateko arrazoiak
+focus.stats.reason,Estadísticas del Pomodoro: columna,Motivo,Reason,Motiu,Arrazoia
+focus.stats.reasonStopped,"Estadísticas del Pomodoro: columna, veces que se paró por ese motivo",Al parar,When stopping,En parar,Gelditzean
+focus.stats.reasonStayed,"Estadísticas del Pomodoro: columna, veces que se siguió pese al motivo",Al seguir,When going on,En seguir,Jarraitzean
+focus.stats.empty,Estadísticas del Pomodoro: periodo sin sesiones,Aún no hay sesiones en este periodo.,No sessions in this period yet.,Encara no hi ha sessions en aquest període.,Oraindik ez dago saiorik aldi honetan.
+focus.time.hm,Estadísticas del Pomodoro: horas y minutos,{h} h {m} min,{h} h {m} min,{h} h {m} min,{h} h {m} min
+focus.band.all,Tus estadísticas del Pomodoro: comparación con todo el mundo,Comparas con todas las personas que lo usan,Comparing with everyone who uses it,Compares amb totes les persones que el fan servir,Erabiltzen duten guztiekin alderatzen duzu
+focus.band.some,Tus estadísticas del Pomodoro: tramo con el que te comparas,Comparas con el tramo del {low} % al {high} % por uso,Comparing with the {low}% to {high}% band by use,Compares amb el tram del {low} % al {high} % per ús,Erabileraren araberako % {low}–% {high} tartearekin alderatzen duzu
+focus.band.people,Tus estadísticas del Pomodoro: personas del tramo,{n} de {of},{n} of {of},{n} de {of},{of}tik {n}
+focus.band.low,Tus estadísticas del Pomodoro: tirador izquierdo del tramo,Dejar fuera a quien menos lo usa,Leave out those who use it least,Deixar fora qui menys el fa servir,Gutxien erabiltzen dutenak kanpoan utzi
+focus.band.high,Tus estadísticas del Pomodoro: tirador derecho del tramo,Dejar fuera a quien más lo usa,Leave out those who use it most,Deixar fora qui més el fa servir,Gehien erabiltzen dutenak kanpoan utzi
+focus.band.least,Tus estadísticas del Pomodoro: extremo del tramo,Menos uso,Least use,Menys ús,Erabilera gutxien
+focus.band.most,Tus estadísticas del Pomodoro: extremo del tramo,Más uso,Most use,Més ús,Erabilera gehien

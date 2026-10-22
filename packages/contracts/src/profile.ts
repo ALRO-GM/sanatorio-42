@@ -1,3 +1,5 @@
+import type { Segment } from './usage.js'
+
 /** Motivos por los que se gana XP. */
 export type XpKind =
   | 'therapy_session'
@@ -188,4 +190,60 @@ export type Focus = {
   startedAt: string | null
   /** Los últimos ajustes que usaste (o los de fábrica). */
   settings: FocusSettings
+}
+
+/**
+ * Por qué se quiere acabar un Pomodoro antes de tiempo (#80 del buzón). Se
+ * marca al pulsar «Acabar», tanto si al final se para como si se sigue.
+ */
+export type FocusReason = 'tired' | 'break' | 'distracted' | 'someone' | 'urgent' | 'done' | 'other'
+
+/**
+ * `DELETE /me/focus` (acabar) y `POST /me/focus/stay` (quería acabar y sigue):
+ * los motivos marcados.
+ */
+export type FocusExit = { reasons: FocusReason[] }
+
+/** Las cifras de un montón de sesiones de Pomodoro. */
+export type FocusFigures = {
+  /** Sesiones empezadas. */
+  sessions: number
+  /** Las que llegaron a su hora. */
+  completed: number
+  /** Las que se acabaron antes con «Acabar». */
+  cancelled: number
+  /** Veces que se pulsó «Acabar» y se eligió seguir. */
+  stayed: number
+  /** Segundos concentrados de verdad (hasta que acabó o se paró). */
+  focusedSeconds: number
+}
+
+/**
+ * Estadísticas del Pomodoro de un periodo: de todo el mundo (panel de gestión)
+ * o de una persona. Los días y las horas van en la hora de quien mira
+ * (`offset`, en minutos sobre UTC).
+ */
+export type FocusStats = {
+  /** Primer día (incluido), o `null` si es el total desde siempre. */
+  from: string | null
+  to: string
+  totals: FocusFigures & { people: number }
+  /** Solo los días con alguna sesión, en orden. */
+  days: (FocusFigures & { day: string })[]
+  /** Las 24 horas del día: sesiones empezadas a esa hora y tiempo concentrado en ella. */
+  hours: { hour: number; sessions: number; focusedSeconds: number }[]
+  /** Cuántas veces salió cada motivo al acabar y al decidir seguir. */
+  reasons: { reason: FocusReason; cancelled: number; stayed: number }[]
+  /** Quién entra, en el panel: el tramo elegido de gente que lo usa. */
+  segment: Segment
+}
+
+/**
+ * `GET /me/focus/stats`: lo tuyo, y al lado la media por persona de un tramo
+ * de quienes lo usan (del `low` % al `high` %, de menos a más tiempo).
+ */
+export type MyFocusStats = FocusStats & {
+  band: FocusFigures
+  /** Qué parte de quienes lo usan se concentra menos que tú (0–100), o `null` sin sesiones. */
+  position: number | null
 }

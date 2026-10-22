@@ -69,6 +69,7 @@ import { gitCourseSchema } from './0060-git-course.js'
 import { gitGatesSchema } from './0061-git-gates.js'
 import { gitRoomsSchema } from './0062-git-rooms.js'
 import { noClickerPoolSchema } from './0063-no-clicker-pool.js'
+import { focusSessionsSchema } from './0064-focus-sessions.js'
 import type { Migration } from './types.js'
 
 export const MIGRATIONS: readonly Migration[] = [
@@ -135,6 +136,7 @@ export const MIGRATIONS: readonly Migration[] = [
   gitGatesSchema,
   gitRoomsSchema,
   noClickerPoolSchema,
+  focusSessionsSchema,
 ]
 
 /** Versión más alta que existe en el código. */
