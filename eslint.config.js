@@ -21,7 +21,7 @@ const onlyTs = (configs) => configs.map((config) => ({ ...config, files: TS }))
  */
 export default defineConfig(
   {
-    ignores: ['**/dist/**', '**/node_modules/**', '**/coverage/**', '**/data/**'],
+    ignores: ['**/dist/**', '**/node_modules/**', '**/coverage/**', '**/data/**', '.claude/**'],
   },
   js.configs.recommended,
   ...onlyTs(tseslint.configs.strictTypeChecked),
