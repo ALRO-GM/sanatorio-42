@@ -9,7 +9,9 @@ import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { InfoTip } from '../../shared/ui/InfoTip'
 import { GateView } from './GateView'
+import { GitCourseTour } from './GitCourseTour'
 import { LevelView } from './LevelView'
 
 /** Un color por mundo: cada mundo es una rama que sale del tronco y vuelve. */
@@ -111,7 +113,12 @@ export function GitCourseTab({ me, onReview }: { me: string; onReview: () => voi
 
   return (
     <section className="git-course">
-      <p className="git-pitch">{t('git.pitch')}</p>
+      <p className="git-pitch">
+        {t('git.pitch')}{' '}
+        <InfoTip title={t('notgames.tab.git')}>
+          <GitCourseTour />
+        </InfoTip>
+      </p>
       {current.seat === null ? (
         <p className="notice">{t('git.needSeat')}</p>
       ) : (

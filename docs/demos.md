@@ -130,5 +130,6 @@ tema (nunca un color suelto) y se apunta en esta tabla.
 | `helpStats` | Estadísticas | Periodo, cifras de una sección, clasificación con fotos, tu fila, ir a un expediente |
 | `chess` | Ajedrez de Not-games | Mover, pregunta a los dos, quien acierta mueve, castigo por fallar |
 | `notGames` | Not-games | Elegir modo, contestar, ver la buena y por qué, marcador con vidas |
+| `gitCourse` | Curso de git (Not-games) | Elegir punto, animación y teoría, terminal y estrellas, misiones de grupo |
 
 Falta la de Exámenes.

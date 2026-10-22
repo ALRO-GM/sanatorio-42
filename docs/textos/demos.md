@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/demos.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-87 textos. «—» es que falta la traducción: sale en español.
+92 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -94,3 +94,8 @@ Generado desde `apps/web/src/shared/i18n/textos/demos.csv` con
 | `tour.chess.3` | Demostración animada del ajedrez de Not-games: frase del paso 3 | shared/tour/Tour | Quien acierta primero, mueve: puede ser dos veces seguidas. | First right answer moves: even twice in a row. | Qui l'encerta primer, mou: pot ser dues vegades seguides. | Lehenik asmatzen duenak mugitzen du: bi aldiz jarraian ere bai. |
 | `tour.chess.4` | Demostración animada del ajedrez de Not-games: frase del paso 4 | shared/tour/Tour | Quien falla pierde el 10 % de su tiempo y mueve el otro. | A wrong answer costs 10% of your time; the other moves. | Qui falla perd el 10 % del seu temps i mou l'altre. | Huts egiten duenak bere denboraren % 10 galtzen du; besteak mugitzen du. |
 | `tour.chess.5` | Demostración animada del ajedrez de Not-games: frase del paso 5 | shared/tour/Tour | Gana el jaque mate… o quien no se queda sin tiempo. | Checkmate wins… or whoever does not run out of time. | Guanya l'escac i mat… o qui no es queda sense temps. | Xake-mateak irabazten du… edo denborarik gabe geratzen ez denak. |
+| `tour.gitCourse.1` | Demostración animada del curso de git: frase del paso 1 | shared/tour/Tour | Elige el siguiente punto del camino: se abren en orden. | Pick the next point on the path: they open in order. | Tria el següent punt del camí: s'obren en ordre. | Aukeratu bideko hurrengo puntua: ordenan irekitzen dira. |
+| `tour.gitCourse.2` | Demostración animada del curso de git: frase del paso 2 | shared/tour/Tour | Mira cómo crecen las ramas y lee la teoría del comando. | Watch the branches grow and read the command's theory. | Mira com creixen les branques i llegeix la teoria de l'ordre. | Ikusi adarrak nola hazten diren eta irakurri aginduaren teoria. |
+| `tour.gitCourse.3` | Demostración animada del curso de git: frase del paso 3 | shared/tour/Tour | Escribe los comandos en la terminal hasta llegar al objetivo. | Type the commands in the terminal until you reach the goal. | Escriu les ordres al terminal fins arribar a l'objectiu. | Idatzi aginduak terminalean helburura iritsi arte. |
+| `tour.gitCourse.4` | Demostración animada del curso de git: frase del paso 4 | shared/tour/Tour | Con tantos comandos como la solución, tres estrellas. | As few commands as the solution: three stars. | Amb tantes ordres com la solució, tres estrelles. | Soluzioak beste agindurekin, hiru izar. |
+| `tour.gitCourse.5` | Demostración animada del curso de git: frase del paso 5 | shared/tour/Tour | En las pruebas de grupo, cada cual cumple todas las misiones. | In group tests, everyone completes every mission. | A les proves de grup, cadascú compleix totes les missions. | Talde-probetan, bakoitzak misio guztiak betetzen ditu. |

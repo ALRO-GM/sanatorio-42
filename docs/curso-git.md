@@ -134,4 +134,5 @@ cierto número de conceptos hay una **prueba de grupo**.
   entran solas y hacen su parte.
 - [x] Fase 5: el jefe final, y las pruebas de grupo rehechas para que todas
   las personas usen todos los conceptos (misiones por persona).
-- [ ] Fase 6: demostración y repaso.
+- [x] Fase 6: demostración animada (`GitCourseTour`, junto a la frase del
+  curso) y repaso de la documentación.
