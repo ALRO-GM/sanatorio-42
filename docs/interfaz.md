@@ -53,6 +53,8 @@ de datos.
 | Expediente | Horas validadas (descarga para el staff) | N | Se usa de tarde en tarde |
 | Expediente | Desglose de la XP | N (cerrado) · D (abierto) | Detalle |
 | Expediente | Tu red de correcciones, logros y reacciones, clasificación | N | Es reconocimiento, no utilidad |
+| Expediente | «Cómo lo entienden tras tus correcciones» (#91), junto a «Cómo llegas cuando pides ayuda» | N | Reconocimiento, como sus vecinas |
+| Toda la web | Ventana para valorar una corrección de 42 reciente (#91) | S | Sale sola tras la corrección y se puede saltar; sin ella no hay respuestas |
 | Guardia | Preevaluaciones, franjas de hoy, reservas | S | Es la guardia |
 | Guardia | Personas bloqueadas | N | Uso raro |
 | Sala de espera | Proyectos, quién ayuda, mapa de dónde se sienta, «solo de guardia», «a quien puedes pedir» | S | Es la sala de espera |

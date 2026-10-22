@@ -88,6 +88,9 @@ import type {
   HelperTag,
   HelpOffer,
   HelpReputation,
+  CorrectionFeedbackInput,
+  CorrectionPrompt,
+  CorrectionUnderstood,
   HolyGraph,
   HelpStats,
   StatsProgress,
@@ -418,6 +421,14 @@ export type Api = {
   getNetworkMine: () => Promise<NetworkMine>
   /** Logins que empiezan por lo escrito, para el buscador de la red. */
   searchNetworkPeople: (q: string, campuses?: string) => Promise<NetworkPerson[]>
+  /** Tus correcciones recientes de 42 por valorar, la última primero. */
+  getCorrectionPrompts: () => Promise<CorrectionPrompt[]>
+  /** Valora una corrección: una sola vez. */
+  rateCorrection: (id: number, input: CorrectionFeedbackInput) => Promise<void>
+  /** «Ahora no» (`forever: false`) o «No volver a preguntar» (`forever: true`). */
+  skipCorrection: (id: number, forever: boolean) => Promise<void>
+  /** Qué tal entendió, en total, la gente a la que corregiste. */
+  getCorrectionsUnderstood: () => Promise<CorrectionUnderstood>
 
   /** Fechas para el estado de salud: inicio, círculos completados y black hole. */
   getHealth: () => Promise<Health>

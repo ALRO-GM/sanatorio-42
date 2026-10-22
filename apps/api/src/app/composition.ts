@@ -117,6 +117,7 @@ export type Services = {
   calendar: CalendarModule['service']
   network: NetworkModule['service']
   corrections: NetworkModule['sync']
+  correctionFeedback: NetworkModule['feedback']
   exams: ExamsModule['service']
   examsSync: ExamsModule['sync']
   examsLive: ExamsModule['live']
@@ -196,6 +197,8 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     master: async (login) =>
       [...(await network.correctedByProject(login)).values()].filter((times) => times >= MASTER_AT)
         .length,
+    // Las reacciones que deja la gente corregida en 42 suman a las de la ayuda.
+    correctionReactions: (login) => network.feedback.reactionsTo(login),
   })
 
   // Presencia: quién tiene la web abierta. Se anota como mucho una vez por
@@ -222,6 +225,8 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     clickerReviews: async (actor) => (await clicker.service.reviews(actor)).length,
     // `help` también se monta después.
     help: (actor) => help.service.inboxCount(actor),
+    // `network`, también.
+    corrections: (actor) => network.feedback.pendingCount(actor),
     // `exams`, también.
     examLive: (actor) => exams.live.running(actor),
     ...clock,
@@ -275,6 +280,8 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
       available: (await peers.availability.get(login)).available,
       seat: await peers.peers.locationOf(login),
     }),
+    // `network` se monta después: cómo llegó cada quien a sus correcciones de 42.
+    correctionTags: (login) => network.feedback.tagsTo(login),
     // `calendar` se monta después (necesita la guardia): para cuando alguien pregunte ya estará.
     commitments: async (who, refresh, from, to) =>
       calendar.service.commitments(
@@ -490,6 +497,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
       calendar: calendar.service,
       network: network.service,
       corrections: network.sync,
+      correctionFeedback: network.feedback,
       exams: exams.service,
       examsSync: exams.sync,
       examsLive: exams.live,

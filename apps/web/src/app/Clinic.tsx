@@ -7,6 +7,7 @@ import { LegalGate } from '../features/legal/LegalGate'
 import { ReviewGate } from '../features/clicker/ReviewGate'
 import { calendarHref } from '../shared/links'
 import { HelpGate } from '../features/help/HelpGate'
+import { CorrectionGate } from '../features/network/CorrectionGate'
 import { Welcome } from '../features/welcome/Welcome'
 import { OtherCampusNotice } from '../features/campus/OtherCampusNotice'
 import { FocusDialog } from '../features/focus/FocusDialog'
@@ -179,6 +180,7 @@ export function Clinic({ me, onLogout }: ClinicProps) {
         <BroadcastGate pending={pulse?.broadcasts ?? 0} onChange={refresh} />
         <ReviewGate pending={pulse?.clickerReviews ?? 0} onChange={refresh} />
         <HelpGate pending={pulse?.help ?? 0} onChange={refresh} />
+        <CorrectionGate pending={pulse?.corrections ?? 0} onChange={refresh} />
         <Welcome
           open={welcoming}
           onGo={(next) => {

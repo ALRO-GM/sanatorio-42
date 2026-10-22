@@ -25,6 +25,8 @@ type HelpModuleDeps = {
   commitments?: Commitments
   /** Interruptor de guardia y puesto de alguien: lo sabe `peers`. */
   presenceOf?: (login: string) => Promise<{ available: boolean; seat: string | null }>
+  /** Cómo llegó alguien a sus correcciones de 42: lo sabe `network`. */
+  correctionTags?: (login: string) => Promise<Map<string, number>>
   now?: () => number
 }
 
@@ -40,6 +42,7 @@ export function createHelpModule(deps: HelpModuleDeps): HelpModule {
     ...(deps.notify === undefined ? {} : { notify: deps.notify }),
     ...(deps.commitments === undefined ? {} : { commitments: deps.commitments }),
     ...(deps.presenceOf === undefined ? {} : { presenceOf: deps.presenceOf }),
+    ...(deps.correctionTags === undefined ? {} : { correctionTags: deps.correctionTags }),
     ...(deps.now === undefined ? {} : { now: deps.now }),
   })
 

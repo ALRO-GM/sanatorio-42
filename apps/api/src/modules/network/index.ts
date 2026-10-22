@@ -7,6 +7,10 @@ import type { Db } from '../../core/db/database.js'
 import type { AppModule } from '../../core/module.js'
 import type { FortyTwoClient } from '../../integrations/forty-two/client.js'
 import type { QuotaGate, ReplicaRepository } from '../replica/index.js'
+import { createFeedbackRepository } from './feedback.repository.js'
+import { registerFeedbackRoutes } from './feedback.routes.js'
+import { createFeedbackService } from './feedback.service.js'
+import type { FeedbackService } from './feedback.service.js'
 import { createNetworkRepository } from './network.repository.js'
 import { registerNetworkRoutes } from './network.routes.js'
 import { createNetworkService } from './network.service.js'
@@ -30,7 +34,10 @@ type NetworkModuleDeps = {
 
 export type NetworkModule = AppModule & {
   service: NetworkService
-  sync: CorrectionSync /** Quién corrige más en un campus: lo usan las noticias del juego secreto. */
+  sync: CorrectionSync
+  /** Valoración de las correcciones recientes, y lo que suma a los expedientes. */
+  feedback: FeedbackService
+  /** Quién corrige más en un campus: lo usan las noticias del juego secreto. */
   topCorrectors: (campusId: number, limit: number) => Promise<string[]>
   /**
    * Con quién se ha corregido más alguien, en los dos sentidos (le corrigió o
@@ -61,11 +68,19 @@ export function createNetworkModule(deps: NetworkModuleDeps): NetworkModule {
     ...clock,
   })
   const service = createNetworkService({ corrections, replica: deps.replica, sync, ...clock })
+  const feedback = createFeedbackService({
+    feedback: createFeedbackRepository(deps.db),
+    replica: deps.replica,
+    campusIds: deps.campusIds,
+    ...clock,
+  })
 
   return {
     name: 'network',
+    personal: [{ table: 'correction_feedback', logins: ['rater'] }],
     service,
     sync,
+    feedback,
     topCorrectors: (campusId, limit) => corrections.topCorrectors(campusId, limit),
     partnersOf: async (campusId, login, limit) =>
       (await corrections.partnersOf(campusId, login)).slice(0, limit).map((entry) => entry.login),
@@ -73,6 +88,7 @@ export function createNetworkModule(deps: NetworkModuleDeps): NetworkModule {
     correctedSince: (campusId, since) => corrections.correctedSince(campusId, since),
     routes: (app, context) => {
       registerNetworkRoutes(app, context, service)
+      registerFeedbackRoutes(app, context, feedback)
     },
     jobs: [
       {

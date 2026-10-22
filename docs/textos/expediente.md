@@ -8,11 +8,11 @@ Generado desde `apps/web/src/shared/i18n/textos/expediente.csv` con
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
 | `record.styleOf` | Perfil ajeno: se ve con el estilo que eligió su dueño; {style} es el nombre del estilo | features/profile/PublicRecord | Así lo quiere ver {login}: con su estilo, {style}. | This is how {login} wants it seen: in their style, {style}. | Així el vol ensenyar {login}: amb el seu estil, {style}. | Horrela nahi du {login}(e)k: bere estiloarekin, {style}. |
-| `react.bug` | Reacción tras una ayuda: te ayudó a encontrar un fallo | features/help/BookingCard, features/profile/Achievements | Cazabugs | Bug hunter | Caçabugs | Bug-ehiztaria |
-| `react.code` | Reacción tras una ayuda: revisó tu código | features/help/BookingCard, features/profile/Achievements | Revisó mi código | Reviewed my code | Va revisar el meu codi | Nire kodea berrikusi zuen |
-| `react.concept` | Reacción tras una ayuda: explicó bien un concepto | features/help/BookingCard, features/profile/Achievements | Explica genial | Great explainer | Explica genial | Bikain azaltzen du |
-| `react.patient` | Reacción tras una ayuda: tuvo mucha paciencia | features/help/BookingCard, features/profile/Achievements | Muy paciente | Very patient | Molt pacient | Oso pazientea |
-| `react.cancel` | Botón para no valorar todavía | features/help/BookHelp, features/help/BookingCard, features/profile/Achievements | Ahora no | Not now | Ara no | Orain ez |
+| `react.bug` | Reacción tras una ayuda: te ayudó a encontrar un fallo | features/help/BookingCard, features/network/CorrectionGate, features/profile/Achievements | Cazabugs | Bug hunter | Caçabugs | Bug-ehiztaria |
+| `react.code` | Reacción tras una ayuda: revisó tu código | features/help/BookingCard, features/network/CorrectionGate, features/profile/Achievements | Revisó mi código | Reviewed my code | Va revisar el meu codi | Nire kodea berrikusi zuen |
+| `react.concept` | Reacción tras una ayuda: explicó bien un concepto | features/help/BookingCard, features/network/CorrectionGate, features/profile/Achievements | Explica genial | Great explainer | Explica genial | Bikain azaltzen du |
+| `react.patient` | Reacción tras una ayuda: tuvo mucha paciencia | features/help/BookingCard, features/network/CorrectionGate, features/profile/Achievements | Muy paciente | Very patient | Molt pacient | Oso pazientea |
+| `react.cancel` | Botón para no valorar todavía | features/help/BookHelp, features/help/BookingCard, features/network/CorrectionGate, features/profile/Achievements | Ahora no | Not now | Ara no | Orain ez |
 | `xp.title` | Título de la página de tu perfil | features/profile/Expediente | Tu expediente | Your record | El teu expedient | Zure espedientea |
 | `xp.loading` | Mientras carga tu perfil | features/profile/Expediente, features/profile/PublicRecord | Buscando tu expediente… | Fetching your record... | Buscant el teu expedient... | Zure espedientea bilatzen... |
 | `xp.level` | Etiqueta del nivel de XP | features/profile/Expediente, features/profile/PublicRecord, features/profile/RecordTour | Nivel | Level | Nivell | Maila |
