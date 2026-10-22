@@ -27,9 +27,9 @@ que hacer, en orden. Este documento es el porqué; aquel, el qué.
   anterior si la nueva no responde.
 - **Desplegar sin depender de la conexión** (desde el 2026-10-22, porque dos
   despliegues murieron al cortarse el SSH): `ssh ubuntu@51.170.34.214 "cd
-  /opt/sanatorio && git pull -q --ff-only && setsid nohup sh -c
+  /opt/sanatorio && git pull -q --ff-only && (setsid nohup sh -c
   'infra/scripts/backup.sh; infra/scripts/deploy.sh' > infra/deploy.log 2>&1
-  < /dev/null &"` y mirar `tail -1 infra/deploy.log` hasta «Desplegado y
+  < /dev/null &)" < /dev/null` (con el paréntesis, el SSH vuelve al momento) y mirar `tail -1 infra/deploy.log` hasta «Desplegado y
   respondiendo».
 - **Cupo de GitHub**: la API pública da 60 consultas por hora a la IP del
   servidor. `deploy.sh` consulta la CI a los 4 minutos y luego una por minuto,
