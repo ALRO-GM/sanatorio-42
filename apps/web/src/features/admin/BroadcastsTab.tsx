@@ -7,6 +7,7 @@ import { api } from '../../shared/api'
 import { useAction, useAsync } from '../../shared/hooks/useAsync'
 import { localeOf, useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { PersonInput } from '../../shared/ui/PersonInput'
 
 type Kind = BroadcastAudience['kind']
 
@@ -32,6 +33,7 @@ export function BroadcastsTab({ campusId }: { campusId: number | undefined }) {
   const [body, setBody] = useState('')
   const [kind, setKind] = useState<Kind>('all')
   const [logins, setLogins] = useState('')
+  const [adding, setAdding] = useState('')
   const [options, setOptions] = useState('')
   const [required, setRequired] = useState(false)
 
@@ -83,6 +85,22 @@ export function BroadcastsTab({ campusId }: { campusId: number | undefined }) {
             ))}
           </select>
         </label>
+        {kind === 'logins' && (
+          <PersonInput
+            value={adding}
+            label={t('admin.cast.addPerson')}
+            placeholder={t('admin.cast.addPerson')}
+            onChange={setAdding}
+            onPick={(login) => {
+              setLogins((current) =>
+                pieces(current, /[\s,;]+/).includes(login)
+                  ? current
+                  : [...pieces(current, /[\s,;]+/), login].join(', '),
+              )
+              setAdding('')
+            }}
+          />
+        )}
         {kind === 'logins' && (
           <label>
             {t('admin.cast.logins')}

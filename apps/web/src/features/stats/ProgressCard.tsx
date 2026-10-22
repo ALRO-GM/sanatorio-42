@@ -15,6 +15,7 @@ import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { InfoTip } from '../../shared/ui/InfoTip'
+import { PersonInput } from '../../shared/ui/PersonInput'
 
 const WIDTH = 640
 const HEIGHT = 280
@@ -122,13 +123,14 @@ export function ProgressCard() {
             setOther(typed.trim().toLowerCase() || null)
           }}
         >
-          <input
-            type="search"
+          <PersonInput
             value={typed}
+            label={t('stats.progress.compare')}
             placeholder={t('stats.progress.comparePlaceholder')}
-            aria-label={t('stats.progress.compare')}
-            onChange={(event) => {
-              setTyped(event.target.value)
+            onChange={setTyped}
+            onPick={(login) => {
+              setTyped(login)
+              setOther(login)
             }}
           />
           <button type="submit" className="pill">

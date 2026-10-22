@@ -6,7 +6,7 @@ import { Icon } from '../../shared/ui/Icon'
 import { recordHref } from '../../shared/links'
 import { forget, recentOf, remember } from '../../shared/recent'
 import type { RecentPerson } from '../../shared/recent'
-import { usePeopleSearch } from './usePeopleSearch'
+import { usePeopleSearch } from '../../shared/hooks/usePeopleSearch'
 
 /** Las recientes del buscador de la cabecera. */
 const RECENT_LIST = 'people'

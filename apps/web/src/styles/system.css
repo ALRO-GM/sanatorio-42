@@ -931,3 +931,47 @@ dialog::backdrop {
     grid-template-columns: 1fr;
   }
 }
+
+/* Hueco de login con sugerencias de perfiles (PersonInput). */
+.person-input {
+  position: relative;
+  min-width: 12rem;
+}
+.person-input input {
+  width: 100%;
+}
+.person-options {
+  position: absolute;
+  z-index: 20;
+  left: 0;
+  right: 0;
+  min-width: 14rem;
+  max-height: 18rem;
+  overflow-y: auto;
+  margin: 0.25rem 0 0;
+  padding: 0.25rem;
+  list-style: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
+}
+.person-options [role='option'] {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.35rem 0.5rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+.person-options [role='option'].active,
+.person-options [role='option']:hover {
+  background: var(--surface-2);
+}
+.person-options [role='option'] span {
+  display: grid;
+  line-height: 1.2;
+}
+.person-options small {
+  color: var(--text-3);
+}

@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/gestion.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-468 textos. «—» es que falta la traducción: sale en español.
+469 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -358,6 +358,7 @@ Generado desde `apps/web/src/shared/i18n/textos/gestion.csv` con
 | `admin.cast.to.all` | Panel de gestión, «Comunicados»: mensajes a toda la gente | features/admin/BroadcastsTab | Todo el mundo | Everyone | — | — |
 | `admin.cast.to.campus` | Panel de gestión, «Comunicados»: mensajes a toda la gente | features/admin/BroadcastsTab | El campus que estoy viendo | The campus I am looking at | — | — |
 | `admin.cast.to.logins` | Panel de gestión, «Comunicados»: mensajes a toda la gente | features/admin/BroadcastsTab | Personas concretas | Specific people | — | — |
+| `admin.cast.addPerson` | Panel de gestión, «Comunicados»: hueco que busca a una persona y la añade a la lista | features/admin/BroadcastsTab | Añadir a alguien | Add someone | Afegir algú | Norbait gehitu |
 | `admin.cast.logins` | Panel de gestión, «Comunicados»: mensajes a toda la gente | features/admin/BroadcastsTab | Logins, separados por comas o espacios | Logins, separated by commas or spaces | — | — |
 | `admin.cast.title` | Panel de gestión, «Comunicados»: mensajes a toda la gente | features/admin/BroadcastsTab, features/admin/CheatsPanel | Título | Title | — | — |
 | `admin.cast.body` | Panel de gestión, «Comunicados»: mensajes a toda la gente | features/admin/BroadcastsTab, features/admin/CheatsPanel | Mensaje | Message | — | — |

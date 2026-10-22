@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 
 import type { FoundPerson } from '@sanatorio/contracts'
 
-import { api } from '../../shared/api'
+import { api } from '../api'
 
 /** Lo que se espera tras la última tecla antes de preguntar a la API. */
 const WAIT_MS = 180
@@ -13,7 +13,7 @@ const MIN_LETTERS = 2
  * Quienes llevan `text` en el login o en el nombre, mientras se escribe.
  * `null` si aún no hay bastantes letras para buscar.
  *
- * Lo comparten el buscador de la cabecera y el del buzón, para que encontrar a
+ * Lo comparten el buscador de la cabecera, el del buzón y `PersonInput`, para que encontrar a
  * alguien funcione igual en los dos sitios.
  */
 export function usePeopleSearch(text: string): FoundPerson[] | null {

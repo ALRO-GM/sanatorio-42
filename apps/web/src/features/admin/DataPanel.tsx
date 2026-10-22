@@ -8,6 +8,7 @@ import { useI18n } from '../../shared/i18n'
 import { cellValue } from '../../shared/table-sort'
 import { DataTable } from '../../shared/ui/DataTable'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { PersonInput } from '../../shared/ui/PersonInput'
 
 const RANGES = ['all', 'before', 'from'] as const
 
@@ -89,12 +90,12 @@ export function DataPanel() {
           </label>
           <label>
             {t('admin.data.who')}
-            <input
+            <PersonInput
               value={login}
+              label={t('admin.data.who')}
               placeholder={t('admin.data.everyone')}
-              onChange={(event) => {
-                setLogin(event.target.value)
-              }}
+              onChange={setLogin}
+              onPick={setLogin}
             />
           </label>
           <label>

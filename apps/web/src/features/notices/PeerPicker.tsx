@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useI18n } from '../../shared/i18n'
 import { Avatar } from '../../shared/ui/Avatar'
 import { Icon } from '../../shared/ui/Icon'
-import { usePeopleSearch } from '../profile/usePeopleSearch'
+import { usePeopleSearch } from '../../shared/hooks/usePeopleSearch'
 
 /**
  * Elegir a quién escribir: se teclea un login o un nombre y van saliendo

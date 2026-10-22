@@ -24,6 +24,7 @@ import { Icon } from '../../shared/ui/Icon'
 import { StaffAccounts } from './StaffAccounts'
 import { InboxTab } from './InboxTab'
 import { PanelLock } from './PanelLock'
+import { PersonInput } from '../../shared/ui/PersonInput'
 
 const TABS = [
   'consumption',
@@ -374,13 +375,12 @@ function PeopleTab() {
             void act(() => api.setAdminRole(login, true))
           }}
         >
-          <input
+          <PersonInput
             value={login}
+            label={t('admin.people.login')}
             placeholder={t('admin.people.login')}
-            aria-label={t('admin.people.login')}
-            onChange={(event) => {
-              setLogin(event.target.value)
-            }}
+            onChange={setLogin}
+            onPick={setLogin}
           />
           <button type="submit" className="pill" disabled={action.busy || login.trim() === ''}>
             {t('admin.people.grant')}
@@ -417,13 +417,12 @@ function PeopleTab() {
           ))}
         </ul>
         <form className="admin-inline" onSubmit={block}>
-          <input
+          <PersonInput
             value={login}
+            label={t('admin.people.login')}
             placeholder={t('admin.people.login')}
-            aria-label={t('admin.people.login')}
-            onChange={(event) => {
-              setLogin(event.target.value)
-            }}
+            onChange={setLogin}
+            onPick={setLogin}
           />
           <input
             value={reason}
