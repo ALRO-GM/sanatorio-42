@@ -614,9 +614,17 @@ describe('code clicker', () => {
       })
 
       // Indultadas las otras dos, no queda rastro, y luce el título que tenía.
+      // Como ya va por delante de esas copias, se queda con la partida de ahora.
+      const { rev: now } = await clicker.state(ana)
+
       await clicker.pardon(boss, cheats[1]?.id)
       await clicker.pardon(boss, cheats[2]?.id)
-      expect(await clicker.state(ana)).toMatchObject({ caught: 0, saleDue: false })
+      expect(await clicker.state(ana)).toMatchObject({
+        caught: 0,
+        saleDue: false,
+        rev: now,
+        save: game({ total: 9e7 + 100, code: 8e7 + 100, owned }),
+      })
       expect(await xp.expediente(ana)).toMatchObject({ title: 'paciente', hacks: 0 })
       expect((await clicker.usage(boss, {})).cheats).toEqual([])
 

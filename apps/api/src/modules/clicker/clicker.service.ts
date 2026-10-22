@@ -701,7 +701,9 @@ export function createClickerService(options: ClickerServiceOptions) {
      * como estaba y la copia se borra. Solo para quien administra la web.
      *
      * La partida queda sin dueño (`holder`), así que una pestaña que la tuviera
-     * abierta ya no guarda encima: tiene que cargarla.
+     * abierta ya no guarda encima: tiene que cargarla. Si la de ahora va por
+     * delante (ha seguido jugando), se queda la de ahora y solo se quita la
+     * trampa.
      *
      * @throws {DomainError} `forbidden` si quien pregunta no es admin;
      *   `not_found` si esa copia no existe.
@@ -717,28 +719,39 @@ export function createClickerService(options: ClickerServiceOptions) {
       if (copy === undefined) throw domainError('not_found', 'Esa trampa ya no está')
 
       const login = toText(copy.login)
-      const left = Math.max(0, toNumber((await row(login))?.caught ?? 0) - 1)
+      const current = await row(login)
+      const left = Math.max(0, toNumber(current?.caught ?? 0) - 1)
+      // Si desde entonces ha seguido jugando y va por delante, se queda con la
+      // partida de ahora: devolverle la copia le quitaría lo que ha avanzado.
+      const ahead = Number(current?.total ?? 0) > Number(copy.total)
 
       await db.batch(
         [
-          {
-            sql: `UPDATE clicker SET save = ?, total = MAX(total, ?), last_total = ?,
+          ahead
+            ? {
+                sql: `UPDATE clicker SET sale_due = 0, caught = ?, caught_at = NULL,
+                        caught_why = NULL
+                      WHERE login = ?`,
+                args: [left, login],
+              }
+            : {
+                sql: `UPDATE clicker SET save = ?, total = MAX(total, ?), last_total = ?,
                     per_second = ?, achievements = ?, prestige = ?, updated_at = ?,
                     holder = NULL, rev = rev + 1, sale_due = 0, caught = ?,
                     caught_at = NULL, caught_why = NULL
                   WHERE login = ?`,
-            args: [
-              toText(copy.save),
-              Number(copy.total),
-              Number(copy.total),
-              Number(copy.per_second),
-              toNumber(copy.achievements),
-              toNumber(copy.prestige),
-              iso(),
-              left,
-              login,
-            ],
-          },
+                args: [
+                  toText(copy.save),
+                  Number(copy.total),
+                  Number(copy.total),
+                  Number(copy.per_second),
+                  toNumber(copy.achievements),
+                  toNumber(copy.prestige),
+                  iso(),
+                  left,
+                  login,
+                ],
+              },
           { sql: 'DELETE FROM clicker_cheats WHERE id = ?', args: [id] },
           {
             sql: 'UPDATE clicker_cheat_log SET pardoned_at = ? WHERE copy_id = ?',

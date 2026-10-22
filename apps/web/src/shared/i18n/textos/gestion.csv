@@ -342,7 +342,7 @@ admin.clicker.capital,"Panel de gestión, «Code Clicker»: uso, trampas y sanci
 admin.clicker.copies,"Panel de gestión, «Code Clicker»: uso, trampas y sanciones",Partidas rechazadas por trampa,Games refused as cheats,,
 admin.clicker.copy,"Panel de gestión, «Code Clicker»: uso, trampas y sanciones",{total} líneas · {perSecond} por segundo,{total} lines · {perSecond} per second,,
 admin.clicker.pardon,"Panel de gestión, «Code Clicker»: uso, trampas y sanciones",Indultar,Pardon,,
-admin.clicker.pardonAsk,"Panel de gestión, «Code Clicker»: uso, trampas y sanciones","Esta partida pasará a ser la que está en curso, se descontará una trampa y su banner volverá a como estaba. ¿Indultar?","This game will become the current one, one cheat will be taken off and the banner will go back to how it was. Pardon?",,
+admin.clicker.pardonAsk,"Panel de gestión, «Code Clicker»: uso, trampas y sanciones","Se descontará una trampa y su banner volverá a como estaba. Si su partida de ahora no va por delante de esta, esta pasará a ser la que está en curso. ¿Indultar?","One cheat will be taken off and the banner will go back to how it was. If their current game is not ahead of this one, this one will become the current game. Pardon?",,
 admin.clicker.empty,"Panel de gestión, «Code Clicker»: uso, trampas y sanciones",Nadie ha encontrado todavía el secreto.,Nobody has found the secret yet.,,
 admin.tab.casts,Panel de gestión: pestaña del panel,Comunicados,Announcements,,
 admin.cast.new,"Panel de gestión, «Comunicados»: mensajes a toda la gente",Nuevo comunicado,New announcement,,
