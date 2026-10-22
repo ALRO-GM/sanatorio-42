@@ -1,6 +1,7 @@
 /**
  * Módulo `exams`: estadísticas de los exámenes (intentos hasta aprobar y notas
- * de cada intento) y de cuánto se tarda en cada círculo.
+ * de cada intento), de cuánto se tarda en cada círculo y del black hole, por
+ * plan y por kickoff.
  *
  * Su tabla (`exam_attempts`) la llena la réplica al copiar las filas de los
  * exámenes; aquí hay además una copia de fondo de los intentos antiguos.
@@ -47,7 +48,12 @@ export function createExamsModule(deps: ExamsModuleDeps): ExamsModule {
     hourlyReserve: deps.hourlyReserve,
     ...(deps.log === undefined ? {} : { log: deps.log }),
   })
-  const service = createExamsService({ exams, sync })
+  const service = createExamsService({
+    exams,
+    sync,
+    curriculum: deps.curriculum,
+    ...(deps.now === undefined ? {} : { now: deps.now }),
+  })
   const live = createExamsLive({
     db: deps.db,
     client: deps.client,
@@ -68,11 +74,14 @@ export function createExamsModule(deps: ExamsModuleDeps): ExamsModule {
     // Los intentos de examen de cada cual, por su id de 42 (como `project_users`).
     personal: [{ table: 'exam_attempts', userIds: ['user_id'] }],
     routes: (app, { session }) => {
-      /** `GET /exams/stats` → exámenes y círculos del campus que miras. */
+      /**
+       * `GET /exams/stats?track=all|classic|next&kickoffs=AAAA-MM,…` → exámenes,
+       * círculos, kickoffs y black hole del campus que miras.
+       */
       app.get('/exams/stats', async (request, reply) => {
         reply.header('Cache-Control', 'private, max-age=300')
 
-        return reply.send(await service.stats(await session.actor(request)))
+        return reply.send(await service.stats(await session.actor(request), request.query))
       })
 
       /**

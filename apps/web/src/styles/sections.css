@@ -1144,6 +1144,90 @@ dialog.welcome .actions {
   font-size: 0.82rem;
 }
 
+/* Estadísticas de exámenes por plan y kickoff (#81). */
+.exam-filters {
+  display: grid;
+  gap: 0.4rem;
+  margin-bottom: 0.4rem;
+}
+.exam-kickoffs {
+  align-items: center;
+}
+.exam-small-kickoffs summary {
+  cursor: pointer;
+  color: var(--text-3);
+  font-size: 0.85rem;
+}
+.exam-small-kickoffs[open] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  width: 100%;
+}
+.exam-pairs {
+  display: grid;
+  gap: 0.8rem;
+  margin: 0.6rem 0 0.8rem;
+}
+/* Una fila por rango: el de C y el de Nexus, uno al lado del otro. */
+.exam-pair {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 0.8rem;
+}
+.exam-pair h4 {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+.exam-empty {
+  opacity: 0.7;
+}
+.exam-bars.wide li {
+  grid-template-columns: 5.5rem 1fr 7rem;
+}
+.exam-kickoff-table,
+.exam-black-hole {
+  margin-bottom: 0.8rem;
+}
+.exam-table-scroll {
+  overflow-x: auto;
+}
+.exam-table-scroll table {
+  width: 100%;
+  font-size: 0.82rem;
+  border-collapse: collapse;
+}
+.exam-table-scroll th,
+.exam-table-scroll td {
+  padding: 0.25rem 0.45rem;
+  text-align: right;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--border);
+}
+.exam-table-scroll th:first-child {
+  text-align: left;
+}
+.exam-soon {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.2rem;
+  margin: 0 0 0.8rem;
+  padding: 0;
+  list-style: none;
+}
+.exam-bh-lists {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 0.8rem;
+}
+.exam-bh-lists .exam-people {
+  grid-template-columns: 1fr;
+}
+.exam-when {
+  color: var(--text-3);
+  white-space: nowrap;
+}
+
 /* Pizarras ya pasadas: se ven, pero en segundo plano. */
 .board-past {
   opacity: 0.7;

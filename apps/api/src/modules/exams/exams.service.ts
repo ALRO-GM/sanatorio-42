@@ -1,38 +1,146 @@
 /**
- * Estadísticas de exámenes y de la duración de los círculos de un campus. Se
- * calculan con lo que ya está copiado; no se pide nada a 42 al preguntar.
+ * Estadísticas de exámenes, de la duración de los círculos y del black hole de
+ * un campus, por plan (C o Python) y por kickoff (#81 del buzón). Se calculan
+ * con lo que ya está copiado; no se pide nada a 42 al preguntar.
+ *
+ * Mirar a todo el campus cuesta (todos sus proyectos del common core), así que
+ * lo leído se guarda un rato por campus y cada filtro se calcula encima.
  */
 
-import type { ExamStats } from '@sanatorio/contracts'
+import type { ExamQuery, ExamStats } from '@sanatorio/contracts'
+import { z } from 'zod'
 
 import type { Actor } from '../../core/actor.js'
+import { parse } from '../../core/validation.js'
+import type { Curriculum } from '../replica/index.js'
 import type { ExamsRepository } from './exams.repository.js'
-import { circleDurations, examStat } from './exams.rules.js'
+import type { AttemptRow, ExamPerson, OccurrenceRow } from './exams.rules.js'
+import {
+  blackHoleStats,
+  circleDurations,
+  examPeople,
+  examStat,
+  kickoffRows,
+  kickoffsOf,
+  selectPeople,
+} from './exams.rules.js'
 import type { ExamsSync } from './exams.sync.js'
 
 type ExamsServiceOptions = {
   exams: ExamsRepository
   sync: Pick<ExamsSync, 'progress'>
+  curriculum: Pick<Curriculum, 'circles'>
+  now?: () => number
 }
 
-export function createExamsService({ exams, sync }: ExamsServiceOptions) {
+/** Lo mismo que el `max-age` de la respuesta: más fresco no se vería. */
+const CACHE_MS = 5 * 60_000
+
+const MONTH = /^\d{4}-(0[1-9]|1[0-2])$/
+
+const querySchema = z.object({
+  track: z.enum(['all', 'classic', 'next']).default('all'),
+  kickoffs: z
+    .string()
+    .max(400, 'kickoffs: demasiadas')
+    .optional()
+    .transform((value) => (value === undefined || value === '' ? [] : value.split(',')))
+    .refine((list) => list.every((month) => MONTH.test(month)), 'kickoffs: meses AAAA-MM'),
+})
+
+/** Lo leído de un campus: su gente, sus exámenes y sus intentos. */
+type Snapshot = {
+  at: number
+  projects: { id: number; name: string; slug: string }[]
+  attempts: AttemptRow[]
+  occurrences: OccurrenceRow[]
+  people: ExamPerson[]
+}
+
+export function createExamsService({
+  exams,
+  sync,
+  curriculum,
+  now = Date.now,
+}: ExamsServiceOptions) {
+  const cache = new Map<number, Snapshot>()
+
+  async function snapshot(campusId: number): Promise<Snapshot> {
+    const cached = cache.get(campusId)
+
+    if (cached !== undefined && now() - cached.at < CACHE_MS) return cached
+
+    const [classic, next] = await Promise.all([
+      curriculum.circles('classic'),
+      curriculum.circles('next'),
+    ])
+    const [projects, attempts, occurrences, members, rows] = await Promise.all([
+      exams.exams(),
+      exams.attempts(campusId),
+      exams.occurrences(campusId),
+      exams.members(campusId),
+      exams.planRows(campusId, [...new Set([...classic.keys(), ...next.keys()])]),
+    ])
+    const examUsers = new Set([...attempts, ...occurrences].map((row) => row.userId))
+    const fresh: Snapshot = {
+      at: now(),
+      projects,
+      attempts,
+      occurrences,
+      people: examPeople({ members, rows, circles: { classic, next }, examUsers }),
+    }
+
+    cache.set(campusId, fresh)
+
+    return fresh
+  }
+
   return {
-    /** Las del campus que mira quien pregunta. Solo exámenes que alguien ha hecho. */
-    async stats(actor: Actor): Promise<ExamStats> {
-      const [projects, attempts, occurrences, milestones, backfill] = await Promise.all([
-        exams.exams(),
-        exams.attempts(actor.campusId),
-        exams.occurrences(actor.campusId),
-        exams.milestones(actor.campusId),
-        sync.progress(),
-      ])
+    /**
+     * Las del campus que mira quien pregunta, de la gente de ese plan y esas
+     * kickoffs (sin elegir, todas). Solo exámenes que alguien ha hecho.
+     */
+    async stats(actor: Actor, input: unknown = {}): Promise<ExamStats> {
+      const query: ExamQuery = parse(querySchema, input)
+      const [data, backfill] = await Promise.all([snapshot(actor.campusId), sync.progress()])
+      const t = now()
+      const chosen = selectPeople(data.people, query)
+      const ids = new Set(chosen.map((person) => person.userId))
+      const attempts = data.attempts.filter((row) => ids.has(row.userId))
+      const occurrences = data.occurrences.filter((row) => ids.has(row.userId))
+      const stats = data.projects
+        .map((project) => examStat(project, attempts, occurrences))
+        .filter((stat) => stat.people > 0)
+      // Para comparar kickoffs vale el plan elegido, pero no el filtro de kickoffs.
+      const byTrack = selectPeople(data.people, { track: query.track, kickoffs: [] })
 
       return {
-        exams: projects
-          .map((project) => examStat(project, attempts, occurrences))
-          .filter((stat) => stat.people > 0),
-        circles: circleDurations(milestones),
+        exams: stats,
+        circles: circleDurations(
+          chosen.flatMap((person) =>
+            person.ranks === null
+              ? []
+              : [
+                  {
+                    begin: person.start === null ? null : new Date(person.start).toISOString(),
+                    ranks: person.ranks,
+                  },
+                ],
+          ),
+        ),
         backfill,
+        query,
+        people: chosen.length,
+        kickoffs: kickoffsOf(data.people),
+        byKickoff: kickoffRows({
+          people: byTrack,
+          chosen: query.kickoffs,
+          exams: stats.map((stat) => ({ id: stat.projectId })),
+          attempts: data.attempts,
+          occurrences: data.occurrences,
+          now: t,
+        }),
+        blackHole: blackHoleStats(chosen, t),
       }
     },
   }

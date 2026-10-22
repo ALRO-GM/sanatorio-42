@@ -1458,3 +1458,36 @@ POST /quiz/rooms/:id/answer   → QuizRoom. { question, option }: option es el i
   respuesta. Se cierra antes si han contestado todos.
 - Puntos: acertar suma 1; en competitivo, fallar resta 1. Supervivencia: fallar o
   no contestar quita una de las 3 vidas.
+
+## Exámenes (`modules/exams`)
+
+```
+GET /exams/live                                              → LiveExam
+GET /exams/stats?track=all|classic|next&kickoffs=AAAA-MM,…    → ExamStats
+```
+
+- `track`: el plan de la gente (`classic`, el core en C; `next`, el core en
+  Python). `kickoffs`: meses en que se empezó, separados por comas; sin él,
+  todos. Un plan desconocido o un mes mal escrito es 400. Tipos en
+  `packages/contracts/src/exams.ts`; las cuentas, en `exams.rules.ts`.
+- Kickoff de cada cual (#81 del buzón): el mes de `user_levels.begin_at` o, si
+  no lo tiene (no ha entrado en la web), el de su primer proyecto del common
+  core (`created_at_42`, o `updated_at_42` en las filas antiguas), como en
+  `GET /stats/progress`. Plan: `user_tracks.track` o, si no se sabe, el nuevo
+  si tiene algo de `python-module…` o `42next-…`.
+- Sale toda la gente del campus con kickoff o con algún examen, no solo la que
+  tiene los hitos. Cada `ExamStat` lleva `family` (`classic`: Exam Rank en C;
+  `next`: los de Nexus) y `rank` (el número), para ponerlos en la misma fila.
+  `attemptsToPass` y `byAttempt` no tienen tope de intentos. Quien aprobó en
+  una fila antigua sin el número de reintentos cuenta en `passed`, no en
+  `attemptsToPass`.
+- `kickoffs`: todas, con su gente de cada plan. `byKickoff`: las elegidas (sin
+  elegir, las de 5 personas o más), con quién intentó y aprobó cada examen y su
+  black hole; respeta el plan, no el filtro de kickoffs.
+- `blackHole`: solo de quien se sabe (`user_levels`, al entrar en la web).
+  Absorbido = `blackholed_at` ya pasado, salvo si después cambió algún proyecto
+  del common core (la fecha es vieja). El círculo es el que tenía al caer
+  (sus `ranks` hasta esa fecha o, sin ellos, el más alto con proyectos);
+  `circles[].reached` es cuánta gente llegó a ese círculo. `months`, absorbidos
+  por mes; `soon`, a 7, 30 y 90 días; `recent` (50) y `closest` (20), listas.
+- Se guarda lo leído 5 minutos por campus; los filtros se calculan encima.
