@@ -775,7 +775,16 @@ describe('exámenes en vivo', () => {
       ['Exam Rank 02', ['jdoe']],
       [null, ['mgomez']],
     ])
-    expect(live.groups[0]?.people[0]).toMatchObject({ mark: 100, passed: true })
+    expect(live.groups[0]?.people[0]).toMatchObject({ mark: 100, status: 'passed' })
+    expect(live.exam).toMatchObject({ when: 'today' })
+    expect(live.refreshableAt).not.toBeNull()
+
+    // Pulsar el botón al momento no pide nada nuevo: el minuto es de todo el campus.
+    const before = live.updatedAt
+    const pressed = await http.post('/exams/live/refresh', {})
+
+    expect(pressed.statusCode).toBe(200)
+    expect((json(pressed) as LiveExam).updatedAt).toBe(before)
   })
 
   it('sin examen hoy, no hay nada que enseñar', async () => {
@@ -790,6 +799,8 @@ describe('exámenes en vivo', () => {
       running: false,
       groups: [],
       updatedAt: null,
+      nextRefreshAt: null,
+      refreshableAt: null,
     })
   })
 })

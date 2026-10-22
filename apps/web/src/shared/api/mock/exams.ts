@@ -1,8 +1,13 @@
 /**
  * API de mentira: exámenes. Un examen en marcha desde hace media hora, con
- * gente de los dos planes, y estadísticas de los exámenes de C y de Nexus,
- * de los círculos y del black hole, que cambian con el plan y las kickoffs
- * elegidas (se reparten a escala; los logins son inventados).
+ * gente de los dos planes apuntada al examen de su círculo (quien aprueba,
+ * quien suspende, quien sigue dentro y quien aún no ha entrado), y
+ * estadísticas de los exámenes de C y de Nexus, de los círculos y del black
+ * hole, que cambian con el plan y las kickoffs elegidas (se reparten a escala;
+ * los logins son inventados).
+ *
+ * El reloj de refrescos es el de la API de verdad: solo cada cinco minutos, y
+ * a mano uno por minuto como mucho.
  */
 
 import type {
@@ -11,20 +16,35 @@ import type {
   ExamQuery,
   ExamStat,
   ExamStats,
+  LiveExam,
+  LiveExaminee,
 } from '@sanatorio/contracts'
 
 import type { Api } from '../types'
 import { delay } from './state'
 import { portrait } from './portrait'
 
-const at = (minutes: number): string => new Date(Date.now() + minutes * 60_000).toISOString()
+const MINUTE = 60_000
+/** Lo que dura el examen de mentira; cuando acaba, empieza otro. */
+const EXAM_MS = 3 * 60 * MINUTE
+const AUTO_MS = 5 * MINUTE
+const MANUAL_MS = MINUTE
+
+/** Cuándo empezó el examen y cuándo se refrescó por última vez. Se fijan al primer vistazo. */
+let begin: number | null = null
+let refreshedAt = 0
+
+const iso = (at: number): string => new Date(at).toISOString()
+/** Dentro de tantos minutos (o hace, si es negativo), en ISO. */
+const at = (minutes: number): string => iso(Date.now() + minutes * MINUTE)
 
 const person = (
   login: string,
-  track: 'classic' | 'next',
-  circle: number | null,
+  track: LiveExaminee['track'],
+  circle: number,
   mark: number | null,
-) => ({ login, image: portrait(login), track, circle, mark, passed: mark !== null && mark >= 100 })
+  status: LiveExaminee['status'],
+): LiveExaminee => ({ login, image: portrait(login), track, circle, mark, status })
 
 /** Las kickoffs del campus inventado: las grandes y alguna suelta. */
 const KICKOFFS: ExamKickoff[] = [
@@ -55,32 +75,76 @@ const passShare = (rank: number, attempt: number): number =>
 
 const LOGINS = ['ivega', 'tmolina', 'nruiz', 'pcampos', 'dserra', 'bolmo', 'kprieto', 'gnieto']
 
-export const examsMock: Pick<Api, 'getExamStats' | 'getLiveExam'> = {
+/** Lo que hay ahora; con `manual`, como si alguien pulsara el botón. */
+function liveNow(manual: boolean): LiveExam {
+  const now = Date.now()
+
+  if (begin === null || now - begin >= EXAM_MS) {
+    begin = now - 30 * MINUTE
+    // Se refrescó hace tres minutos: el botón ya se puede pulsar.
+    refreshedAt = now - 3 * MINUTE
+  }
+
+  const since = now - refreshedAt
+
+  if (since >= AUTO_MS || (manual && since >= MANUAL_MS)) refreshedAt = now
+
+  return {
+    exam: {
+      id: 710,
+      name: 'Exam Session',
+      location: 'c3',
+      beginAt: iso(begin),
+      endAt: iso(begin + EXAM_MS),
+      when: 'today',
+    },
+    running: true,
+    groups: [
+      {
+        projectId: 1320,
+        name: 'Exam Rank 02',
+        people: [
+          person('jdoe', 'classic', 2, 100, 'passed'),
+          person('llorente', 'classic', 2, 50, 'failed'),
+          person('pvidal', 'classic', 2, 25, 'inProgress'),
+          person('tmolina', 'classic', 2, null, 'pending'),
+        ],
+      },
+      {
+        projectId: 1420,
+        name: 'Exam Rank 02 · 42next',
+        people: [
+          person('anavarro', 'next', 2, 75, 'inProgress'),
+          person('bcastro', 'next', 2, null, 'pending'),
+        ],
+      },
+      {
+        projectId: 1321,
+        name: 'Exam Rank 03',
+        people: [
+          person('mgarcia', 'classic', 3, 100, 'passed'),
+          person('rsoto', 'classic', 3, 0, 'failed'),
+          person('cfernandez', 'classic', 3, null, 'pending'),
+        ],
+      },
+    ],
+    updatedAt: iso(refreshedAt),
+    nextRefreshAt: iso(refreshedAt + AUTO_MS),
+    refreshableAt: iso(refreshedAt + MANUAL_MS),
+  }
+}
+
+export const examsMock: Pick<Api, 'getExamStats' | 'getLiveExam' | 'refreshLiveExam'> = {
   async getLiveExam() {
     await delay(120)
 
-    return {
-      exam: { id: 710, name: 'Exam Session', location: 'c3', beginAt: at(-30), endAt: at(150) },
-      running: true,
-      groups: [
-        {
-          projectId: 1320,
-          name: 'Exam Rank 02',
-          people: [
-            person('jdoe', 'classic', 1, 100),
-            person('anavarro', 'next', 1, 75),
-            person('llorente', 'classic', 1, 0),
-          ],
-        },
-        {
-          projectId: 1321,
-          name: 'Exam Rank 03',
-          people: [person('mgarcia', 'next', 2, 100), person('rsoto', 'classic', 2, 40)],
-        },
-        { projectId: null, name: null, people: [person('cfernandez', 'classic', 3, null)] },
-      ],
-      updatedAt: at(-3),
-    }
+    return liveNow(false)
+  },
+
+  async refreshLiveExam() {
+    await delay(120)
+
+    return liveNow(true)
   },
 
   async getExamStats(query: ExamQuery): Promise<ExamStats> {

@@ -75,6 +75,7 @@ export const realApi: Api = {
       `/exams/stats?track=${track}${kickoffs.length === 0 ? '' : `&kickoffs=${kickoffs.join(',')}`}`,
     ),
   getLiveExam: () => getJson('/exams/live'),
+  refreshLiveExam: () => sendJson('POST', '/exams/live/refresh'),
   reportBrokenSeat: (host) => send('POST', `/map/seats/${encodeURIComponent(host)}/broken`),
   clearBrokenSeat: (host) => send('DELETE', `/map/seats/${encodeURIComponent(host)}/broken`),
   getConversations: () => getJson('/conversations'),

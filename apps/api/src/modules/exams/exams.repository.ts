@@ -4,7 +4,7 @@
 
 import type { Db } from '../../core/db/database.js'
 import { toNumber, toText } from '../../core/db/rows.js'
-import type { AttemptRow, MemberRow, OccurrenceRow, PlanRow } from './exams.rules.js'
+import type { AttemptRow, ExamRow, MemberRow, OccurrenceRow, PlanRow } from './exams.rules.js'
 
 /**
  * Los exámenes del common core: los Exam Rank, del plan clásico
@@ -42,6 +42,52 @@ export function createExamsRepository(db: Db) {
           ? `${toText(row.name)} · 42next`
           : toText(row.name),
         slug: toText(row.slug),
+      }))
+    },
+
+    /**
+     * Quién tiene apuntado ese examen en su agenda de 42 (la que se copia al
+     * abrir el calendario). Completa la lista de 42 si esa no se pudo pedir.
+     */
+    async agendaRegistered(examId: number): Promise<string[]> {
+      const result = await db.execute({
+        sql: `SELECT login FROM agenda_users
+              WHERE EXISTS (SELECT 1 FROM json_each(agenda_users.exams) WHERE value = ?)`,
+        args: [examId],
+      })
+
+      return result.rows.map((row) => toText(row.login))
+    },
+
+    /**
+     * Las filas de examen tocadas desde `since` de la gente del campus o de esos
+     * logins: quien ha entrado en el examen aparece aunque la lista de
+     * apuntados no haya llegado. La más reciente de cada cual va la última.
+     */
+    async sessionRows(
+      campusId: number,
+      since: string,
+      logins: readonly string[],
+    ): Promise<(ExamRow & { login: string; projectId: number })[]> {
+      const result = await db.execute({
+        sql: `SELECT u.login, pu.project_id, pu.status, pu.final_mark, pu.validated, pu.updated_at_42
+              FROM project_users pu
+              JOIN projects p ON p.id = pu.project_id
+              JOIN users u ON u.id = pu.user_id
+              LEFT JOIN campus_members cm ON cm.user_id = pu.user_id AND cm.campus_id = ?
+              WHERE ${EXAM_PROJECT} AND pu.updated_at_42 >= ?
+                AND (cm.user_id IS NOT NULL OR u.login IN (SELECT value FROM json_each(?)))
+              ORDER BY pu.updated_at_42`,
+        args: [campusId, since, JSON.stringify(logins)],
+      })
+
+      return result.rows.map((row) => ({
+        login: toText(row.login),
+        projectId: toNumber(row.project_id),
+        status: toText(row.status),
+        finalMark: row.final_mark === null ? null : toNumber(row.final_mark),
+        validated: triState(row.validated),
+        updatedAt: typeof row.updated_at_42 === 'string' ? row.updated_at_42 : null,
       }))
     },
 

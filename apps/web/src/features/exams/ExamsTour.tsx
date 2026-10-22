@@ -18,10 +18,10 @@ export const TOUR = defineTour<Exams>('exams', START, [
   ...cut<Exams>(9000, { scene: 2, caption: 4 }),
 ])
 
-/** Inventadas: quién está en el examen y su nota antes y después. */
+/** Inventadas: quién está en el examen (el de su círculo) y su nota antes y después. */
 const PEOPLE = [
-  { login: 'mgarcia', hue: 200, circle: 2, exam: 'Exam Rank 03', before: null, after: 100 },
-  { login: 'lperez', hue: 30, circle: 2, exam: 'Exam Rank 03', before: 25, after: 50 },
+  { login: 'mgarcia', hue: 200, circle: 3, exam: 'Exam Rank 03', before: null, after: 100 },
+  { login: 'lperez', hue: 30, circle: 3, exam: 'Exam Rank 03', before: 25, after: 50 },
   { login: 'ahernan', hue: 280, circle: 4, exam: 'Exam Rank 04', before: null, after: 75 },
 ]
 

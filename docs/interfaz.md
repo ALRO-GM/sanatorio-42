@@ -116,7 +116,7 @@ Revisado el 2026-10-17 sobre la demostración, en escritorio y móvil; mejoras h
 | Calendario | 5 | 4 | 4 | Todo en un sitio, colores por tipo, «te quedan X para lo siguiente» | — (2026-10-22: en semana el título ocupa hasta dos líneas y los bajitos no repiten la hora; los tipos van en una fila con «Ver:» delante) |
 | Red | 3 | 3 | 3 | Grafo rápido, ficha de cada persona, flechas por sentido | «Endogamia» necesita la explicación (2026-10-22: en móvil el grafo va antes que los filtros) |
 | Clústeres | 4 | 4 | 4 | Plano fiel, leyenda, resaltar a tu círculo o proyecto | — (el clic central tiene su aviso bajo el plano y la ficha del puesto enlaza al expediente) |
-| Exámenes | 4 | 4 | 4 | Aviso «en vivo» en la pestaña; notas al momento; demostración | — (2026-10-22: el detalle por intento, solo en el modo de datos; cada examen en vivo va con su nombre) |
+| Exámenes | 4 | 4 | 4 | Aviso «en vivo» en la pestaña; notas al momento; demostración | — (2026-10-22: el detalle por intento, solo en el modo de datos; cada examen en vivo va con su nombre; cuentas atrás, botón de refrescar y estado de cada cual, en el mismo bloque) |
 | Not-games | 4 | 4 | 4 | Modos explicados al elegir; cuenta atrás con la hora del servidor; el porqué de cada respuesta | Preguntas solo en español (2026-10-22: creando una sala, las abiertas se ven al lado) |
 | Buzón | 5 | 4 | 4 | Número rojo en la cabecera; avisos llevan a su sitio | — (2026-10-22: la pestaña de conversaciones lleva su número de sin leer) |
 | Personalizar | 4 | 4 | 4 | Orden manual, por tu uso o por la comunidad | — (2026-10-22: «Ordenar o plegar estos bloques» al final de cada página con bloques) |

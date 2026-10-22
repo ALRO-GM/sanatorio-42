@@ -1510,8 +1510,9 @@ POST /quiz/rooms/:id/answer   → QuizRoom. { question, option }: option es el i
 ## Exámenes (`modules/exams`)
 
 ```
-GET /exams/live                                              → LiveExam
-GET /exams/stats?track=all|classic|next&kickoffs=AAAA-MM,…    → ExamStats
+GET  /exams/stats?track=all|classic|next&kickoffs=AAAA-MM,…  → ExamStats. Por plan y kickoff.
+GET  /exams/live          → LiveExam. El examen en marcha en tu campus o el siguiente (24 h).
+POST /exams/live/refresh  → LiveExam. Lo mismo, pidiendo antes lo nuevo a 42 si toca.
 ```
 
 - `track`: el plan de la gente (`classic`, el core en C; `next`, el core en
@@ -1539,3 +1540,22 @@ GET /exams/stats?track=all|classic|next&kickoffs=AAAA-MM,…    → ExamStats
   `circles[].reached` es cuánta gente llegó a ese círculo. `months`, absorbidos
   por mes; `soon`, a 7, 30 y 90 días; `recent` (50) y `closest` (20), listas.
 - Se guarda lo leído 5 minutos por campus; los filtros se calculan encima.
+
+
+- `exam.when` (`today`, `tomorrow`, `later`) es el día en que empieza, contado en
+  la hora del campus (`campuses.time_zone`), no en UTC: a las 23:30 de Madrid, un
+  examen a las 00:30 es «mañana».
+- Quién sale: lo que dice 42 (`/exams/:id/exams_users`), quien lo tiene en su
+  agenda de 42 copiada (`agenda_users.exams`) y quien ya tiene una fila de examen
+  tocada desde que empezó. Cada cual va en el grupo del examen que ha empezado o,
+  si no, del que le toca por su círculo (`user_tracks` o sus proyectos): el del
+  círculo N es `exam-rank-0N`, o `42next-exam-rank-0N` en el plan nuevo.
+- `status`: `pending` (aún no ha entrado), `inProgress`, `passed` (cerrado con 100
+  o más) o `failed` (cerrado sin llegar a 100, o sin validar). Solo cuenta la fila
+  tocada en esta sesión.
+- Refrescos: con el examen en marcha se pide lo nuevo cada 5 minutos (un trabajo
+  de fondo, aunque nadie mire, o la visita si toca) y a mano como mucho una vez
+  por minuto. El reloj es uno por examen y campus para todo el mundo y se guarda
+  en `sync_state` (`exams:live:<campus>:<examen>`). `nextRefreshAt` y
+  `refreshableAt` dicen cuándo toca cada uno; sin examen en marcha son `null`.
+  Si no toca o no hay cuota de 42, `POST /exams/live/refresh` devuelve lo que hay.

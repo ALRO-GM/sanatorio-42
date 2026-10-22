@@ -151,7 +151,12 @@ Alberto pidió una revisión de todo; hecha y desplegada por bloques:
     la web. Estadísticas por examen y duración de círculos (de `user_tracks`).
     En vivo: `GET /exams/live`, quién está apuntado (`/exams/:id/exams_users`)
     y su última nota, refrescado cada 5 min mientras alguien mira; el pulso
-    enciende la pestaña («en vivo»). **Por confirmar** con datos reales que
+    enciende la pestaña («en vivo»). 2026-10-22: el día («hoy», «mañana») se
+    cuenta en la hora del campus; la lista junta 42, la agenda copiada y las
+    filas de examen de la sesión, con el examen que toca por círculo; quien lo
+    cierra sin 100 sale suspenso; refresco cada 5 min también de fondo y botón
+    de refrescar, uno por minuto para todo el campus (`sync_state`
+    `exams:live:…`), con cuentas atrás de fin y de refresco. **Por confirmar** con datos reales que
     42 manda `teams` en `/projects_users` (si no, cuenta por `occurrence`).
 - Base en la versión 51. `npm run check`: 595 tests de la API y 208 de la web.
 - El texto legal es de base: conviene que lo revise alguien de leyes.
