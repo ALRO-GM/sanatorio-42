@@ -176,6 +176,17 @@ GET /me/export → todo lo tuyo, tabla a tabla, como JSON para descargar
   }
 }
 
+POST /me/anonymize → `{ "confirm": <tu login> }` → `{ "changed" }`: anonimiza tu
+cuenta y cierra la sesión. En cada tabla de la app (las de `personal` con
+`source` de la app) tu login pasa a un identificador opaco y nuevo
+(`anon-<12 hex>`), también dentro de las listas de logins. Lo que hiciste sigue
+contando para los demás (las horas de una pizarra, una reserva, un grupo),
+pero ya no se sabe que fuiste tú. Lo copiado de 42 no se toca: es lo que 42
+publica al campus y vuelve en la siguiente copia. No se puede deshacer; si
+vuelves a entrar, empiezas de cero. `400` si `confirm` no es tu login.
+POST /admin/people/:login/anonymize → `{ "changed" }`: lo mismo, de alguien que
+lo ha pedido por otra vía. Solo admins.
+
 `source` dice si la tabla está copiada de 42 o es de la app. `truncated: true`
 avisa de que la tabla pasaba del tope (5 000 filas) y solo van las primeras.
 Cada módulo apunta en `personal` qué tablas suyas tienen datos de alguien y en

@@ -22,8 +22,8 @@ de salas solo para su campus o su gente), M3 (motor del Clicker en
 `packages/clicker`, producción calculada en la API), M4
 (`/admin/usage/heatmap`), M5 (Slack escapado), M6 (exportación de datos sin
 datos de terceros, tablas declaradas, secretos omitidos, truncado señalado),
-B1 (el documento de horas solo por `POST`), B2 (secreto de 32), B3 (búsqueda de personas con caché por campus), B4 y B12 (con M6). M7 (borrado de cuenta) queda documentado en
-`docs/contexto.md`, pendiente de decisión. Del informe de los juegos, todos hechos: FFA en
+B1 (el documento de horas solo por `POST`), B2 (secreto de 32), B3 (búsqueda de personas con caché por campus), B4 y B12 (con M6). M7: se anonimiza (decisión de Alberto), con
+`POST /me/anonymize` y su versión de admin. Del informe de los juegos, todos hechos: FFA en
 solitario sin victoria, `remember` tras deduplicar, irse a media partida
 apunta derrota, cerrojo por persona en el Clicker (`plus`, `choose`, `save`,
 `pardon`, `sanction`), ids de texto del curso de git con `slugParam`, el tramo

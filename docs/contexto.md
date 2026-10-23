@@ -381,16 +381,14 @@ Estado a 2026-10-23, tras el hallazgo M6/M7 de `revision-2026-10/seguridad-api.m
   y `git_room_players`); `staff_accounts.name` y `staff_checks.staff` (el staff
   no tiene cuenta en la web y no descarga); `seats.host`, `presence.host`,
   `broken_seats.host` son nombres de ordenador, no personas.
-- **Borrado de cuenta (M7): pendiente de decisión**. Hoy no hay
-  `DELETE /me` ni anonimización. El borrado administrativo por `stores` cubre
-  unas 14 tablas y ningún padre declara `children`. Cuando alguien lo pida se
-  hace a mano desde el panel y por SQL sobre la base. Decidir con Alberto: si
-  borrar o anonimizar (sustituir el login por un identificador opaco para que
-  las horas de los demás, las correcciones y los grupos sigan cuadrando),
-  qué pasa con lo que ya recibió otra persona (una reserva, un mensaje) y si
-  la réplica de 42 se borra con la cuenta o se queda porque vuelve en la
-  siguiente copia. Hasta entonces el texto legal sigue diciendo «puedes pedir
-  que se borre», y se cumple a mano.
+- **Borrado de cuenta (M7): se anonimiza** (decidido por Alberto el
+  2026-10-23). `POST /me/anonymize` (escribiendo el propio login) o
+  `POST /admin/people/:login/anonymize`: en cada tabla de la app declarada en
+  `personal` el login pasa a un `anon-<hex>` aleatorio, también dentro de las
+  listas (`anonymizePersonalData`). Así las horas, reservas y grupos de los
+  demás siguen cuadrando. La réplica de 42 no se toca (es pública en la intra y
+  vuelve en la siguiente copia). Irreversible; quien vuelva a entrar empieza de
+  cero.
 
 ## Pendiente de confirmar o de hacer
 

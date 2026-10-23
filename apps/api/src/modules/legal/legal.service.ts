@@ -3,12 +3,15 @@
  * la descarga de los datos de cada cual.
  */
 
+import { randomBytes } from 'node:crypto'
+
 import type { LegalStatus, PersonalExport } from '@sanatorio/contracts'
 import { z } from 'zod'
 
+import { assertAdmin } from '../../core/actor.js'
 import type { Actor } from '../../core/actor.js'
 import type { Db } from '../../core/db/database.js'
-import { personalData } from '../../core/db/personal-data.js'
+import { anonymizePersonalData, personalData } from '../../core/db/personal-data.js'
 import type { PersonalTable } from '../../core/db/personal-data.js'
 import { toText } from '../../core/db/rows.js'
 import { domainError } from '../../core/errors.js'
@@ -29,6 +32,16 @@ export type LegalServiceOptions = {
 }
 
 const acceptSchema = z.object({ version: z.string().regex(/^\d{4}-\d{2}-\d{2}$/) })
+/** Para anonimizar hay que escribir el propio login: no se hace por un clic suelto. */
+const confirmSchema = z.object({ confirm: z.string().trim().toLowerCase() })
+const loginSchema = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .regex(/^[a-z0-9-]{1,40}$/, 'login no válido')
+
+/** Un identificador opaco y nuevo: no se puede volver de él al login. */
+const newAlias = (): string => `anon-${randomBytes(6).toString('hex')}`
 
 export function createLegalService(options: LegalServiceOptions) {
   const { db } = options
@@ -68,6 +81,39 @@ export function createLegalService(options: LegalServiceOptions) {
       })
 
       return this.status(actor)
+    },
+
+    /**
+     * Anonimiza la cuenta de quien pregunta (`anonymizePersonalData`): su login
+     * se cambia por un identificador opaco en todo lo de la app. No se puede
+     * deshacer; si vuelve a entrar, empieza de cero.
+     *
+     * @throws {DomainError} `invalid_input` si `confirm` no es su login.
+     */
+    async anonymize(actor: Actor, input: unknown): Promise<{ changed: number }> {
+      const { confirm } = parse(confirmSchema, input)
+
+      if (confirm !== actor.login) {
+        throw domainError('invalid_input', 'Escribe tu login para confirmarlo')
+      }
+
+      return {
+        changed: await anonymizePersonalData(db, options.personal(), actor.login, newAlias()),
+      }
+    },
+
+    /** Lo mismo, de otra persona que lo ha pedido por otra vía. Solo admins. */
+    async anonymizeOther(actor: Actor, login: unknown): Promise<{ changed: number }> {
+      assertAdmin(actor)
+
+      return {
+        changed: await anonymizePersonalData(
+          db,
+          options.personal(),
+          parse(loginSchema, login),
+          newAlias(),
+        ),
+      }
     },
 
     /**
