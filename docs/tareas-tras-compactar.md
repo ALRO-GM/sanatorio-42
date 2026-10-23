@@ -308,8 +308,8 @@ recurrente. Hecho el 22-23 de octubre:
       `base-web`), unida y desplegada el 23-oct. M7: anonimizar (API, botón en
       Privacidad, texto legal y versión 2026-10-23).
 - [x] Recorridos: asistencia, guardia, pizarra, terapia, tablón y test del
-      cliente real (falta el del Code Clicker).
-- [ ] Queda: recorrido del Code Clicker, monitor externo (cuenta gratuita: Alberto),
+      cliente real, y el secreto de la cruz hasta Code Clicker.
+- [ ] Queda: monitor externo (cuenta gratuita: Alberto),
       destino
       de las copias fuera de la máquina (bucket gratuito de Oracle + rclone +
       frase: decisión y pasos con Alberto).
