@@ -778,7 +778,8 @@ dialog::backdrop {
   box-shadow: 0 16px 40px -12px var(--shadow);
   list-style: none;
 }
-.finder-list button {
+.finder-list button,
+.finder-list [role='option'] {
   display: flex;
   align-items: center;
   gap: 0.6rem;
@@ -792,7 +793,9 @@ dialog::backdrop {
   cursor: pointer;
 }
 .finder-list button:hover,
-.finder-list button:focus-visible {
+.finder-list button:focus-visible,
+.finder-list [role='option']:hover,
+.finder-list [role='option'].active {
   background: var(--accent-soft);
 }
 .finder-list strong,

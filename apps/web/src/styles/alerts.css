@@ -408,7 +408,7 @@
   overflow-y: auto;
   list-style: none;
 }
-.peer-picker .peer-list button {
+.peer-picker .peer-list [role='option'] {
   display: flex;
   align-items: center;
   gap: 0.6rem;
@@ -421,8 +421,8 @@
   text-align: left;
   cursor: pointer;
 }
-.peer-picker .peer-list button:hover,
-.peer-picker .peer-list button:focus-visible {
+.peer-picker .peer-list [role='option']:hover,
+.peer-picker .peer-list [role='option'].active {
   background: var(--accent-soft);
 }
 .peer-picker .peer-list strong,

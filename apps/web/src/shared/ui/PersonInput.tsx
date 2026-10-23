@@ -1,8 +1,7 @@
 import { useId, useState } from 'react'
 
 import { usePeopleSearch } from '../hooks/usePeopleSearch'
-import { useI18n } from '../i18n'
-import { Avatar } from './Avatar'
+import { comboboxProps, PeopleResults, usePeopleKeys } from './PeopleResults'
 
 /**
  * Un hueco para escribir un login que, mientras se escribe, sugiere los
@@ -24,10 +23,8 @@ export function PersonInput(props: {
   exclude?: readonly string[]
   required?: boolean
 }) {
-  const { t } = useI18n()
   const id = useId()
   const [open, setOpen] = useState(false)
-  const [active, setActive] = useState(0)
   const found = usePeopleSearch(props.value)
   const people =
     found?.filter((person) => !(props.exclude ?? []).includes(person.login)).slice(0, 8) ?? null
@@ -38,17 +35,22 @@ export function PersonInput(props: {
     props.onPick(login)
     setOpen(false)
   }
+  const keys = usePeopleKeys(
+    shown ? people : null,
+    (person) => {
+      pick(person.login)
+    },
+    () => {
+      setOpen(false)
+    },
+  )
 
   return (
     <div className="person-input">
       <input
         type="search"
-        role="combobox"
+        {...comboboxProps(id, shown, people, keys.active)}
         aria-label={props.label}
-        aria-expanded={shown}
-        aria-controls={`${id}-list`}
-        aria-autocomplete="list"
-        aria-activedescendant={shown && people.length > 0 ? `${id}-${String(active)}` : undefined}
         value={props.value}
         placeholder={props.placeholder}
         required={props.required}
@@ -58,7 +60,7 @@ export function PersonInput(props: {
         maxLength={60}
         onChange={(event) => {
           props.onChange(event.target.value)
-          setActive(0)
+          keys.reset()
           setOpen(true)
         }}
         onFocus={() => {
@@ -67,55 +69,20 @@ export function PersonInput(props: {
         onBlur={() => {
           setOpen(false)
         }}
-        onKeyDown={(event) => {
-          if (!shown || people.length === 0) return
-          if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
-            event.preventDefault()
-            setActive((index) => {
-              const step = event.key === 'ArrowDown' ? 1 : -1
-
-              return (index + step + people.length) % people.length
-            })
-          } else if (event.key === 'Enter') {
-            const person = people[active]
-
-            // Con la lista abierta, Enter elige; no envía el formulario.
-            if (person !== undefined) {
-              event.preventDefault()
-              pick(person.login)
-            }
-          } else if (event.key === 'Escape') {
-            setOpen(false)
-          }
-        }}
+        onKeyDown={keys.onKeyDown}
       />
       {shown && (
-        <ul id={`${id}-list`} role="listbox" className="person-options" aria-label={props.label}>
-          {people.length === 0 ? (
-            <li className="finder-none">{t('finder.none')}</li>
-          ) : (
-            people.map((person, index) => (
-              <li
-                key={person.login}
-                id={`${id}-${String(index)}`}
-                role="option"
-                aria-selected={index === active}
-                className={index === active ? 'active' : ''}
-                // Antes que el blur del hueco, que cerraría la lista.
-                onMouseDown={(event) => {
-                  event.preventDefault()
-                  pick(person.login)
-                }}
-              >
-                <Avatar login={person.login} image={person.image} size={28} />
-                <span>
-                  <strong>{person.login}</strong>
-                  {person.name !== null && <small>{person.name}</small>}
-                </span>
-              </li>
-            ))
-          )}
-        </ul>
+        <PeopleResults
+          id={id}
+          className="person-options"
+          people={people}
+          active={keys.active}
+          label={props.label}
+          size={28}
+          onPick={(person) => {
+            pick(person.login)
+          }}
+        />
       )}
     </div>
   )

@@ -17,9 +17,8 @@ import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { useFormat } from '../../shared/i18n/useFormat'
 import type { Translate } from '../../shared/i18n'
-import { Avatar } from '../../shared/ui/Avatar'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
-import { PersonLink } from '../../shared/ui/PersonLink'
+import { ExamPeople } from './ExamPeople'
 
 /** Qué exámenes se ven: los de C, los de Nexus o los dos, uno al lado del otro. */
 type FamilyFilter = ExamFamily | 'both'
@@ -507,23 +506,14 @@ function PeopleList(props: { title: string; people: readonly BlackHolePerson[]; 
       {props.people.length === 0 ? (
         <p className="estado">{t('exams.bh.nobody')}</p>
       ) : (
-        <ul className="exam-people" aria-label={props.title}>
-          {props.people.map((person) => (
-            <li key={person.login}>
-              <Avatar login={person.login} image={person.image} size={32} />
-              <PersonLink login={person.login} className="" />
-              <span className="exam-badges">
-                {person.circle !== null && (
-                  <span className="badge subtle">{t('graph.circle', { n: person.circle })}</span>
-                )}
-                {person.kickoff !== null && (
-                  <span className="badge subtle">{month(person.kickoff)}</span>
-                )}
-              </span>
-              <small className="exam-when">{when(person)}</small>
-            </li>
-          ))}
-        </ul>
+        <ExamPeople
+          people={props.people}
+          label={props.title}
+          badges={(person) =>
+            person.kickoff !== null && <span className="badge subtle">{month(person.kickoff)}</span>
+          }
+          end={(person) => <small className="exam-when">{when(person)}</small>}
+        />
       )}
     </section>
   )

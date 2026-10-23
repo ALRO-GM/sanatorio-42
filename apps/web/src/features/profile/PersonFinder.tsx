@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 
 import { useI18n } from '../../shared/i18n'
 import { Avatar } from '../../shared/ui/Avatar'
@@ -7,6 +7,7 @@ import { recordHref } from '../../shared/links'
 import { forget, recentOf, remember } from '../../shared/recent'
 import type { RecentPerson } from '../../shared/recent'
 import { usePeopleSearch } from '../../shared/hooks/usePeopleSearch'
+import { comboboxProps, PeopleResults, usePeopleKeys } from '../../shared/ui/PeopleResults'
 
 /** Las recientes del buscador de la cabecera. */
 const RECENT_LIST = 'people'
@@ -59,6 +60,14 @@ export function PersonFinder() {
     window.location.hash = recordHref(login)
     close()
   }
+  const id = useId()
+  const keys = usePeopleKeys(
+    found,
+    (person) => {
+      go(person.login, person.image)
+    },
+    close,
+  )
 
   return (
     <div ref={box} className={`finder ${open ? 'open' : ''}`}>
@@ -81,6 +90,7 @@ export function PersonFinder() {
         <input
           ref={input}
           type="search"
+          {...comboboxProps(id, found !== null, found, keys.active)}
           value={text}
           placeholder={t('finder.placeholder')}
           aria-label={t('finder.label')}
@@ -89,16 +99,12 @@ export function PersonFinder() {
           spellCheck={false}
           onChange={(event) => {
             setText(event.target.value)
+            keys.reset()
           }}
           onFocus={() => {
             setFocused(true)
           }}
-          onKeyDown={(event) => {
-            if (event.key === 'Escape') close()
-            if (event.key === 'Enter' && found?.[0] !== undefined) {
-              go(found[0].login, found[0].image)
-            }
-          }}
+          onKeyDown={keys.onKeyDown}
         />
         {showRecent && (
           <ul className="finder-list">
@@ -133,28 +139,16 @@ export function PersonFinder() {
           </ul>
         )}
         {found !== null && (
-          <ul className="finder-list">
-            {found.length === 0 ? (
-              <li className="finder-none">{t('finder.none')}</li>
-            ) : (
-              found.map((person) => (
-                <li key={person.login}>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      go(person.login, person.image)
-                    }}
-                  >
-                    <Avatar login={person.login} image={person.image} size={32} />
-                    <span>
-                      <strong>{person.login}</strong>
-                      {person.name !== null && <small>{person.name}</small>}
-                    </span>
-                  </button>
-                </li>
-              ))
-            )}
-          </ul>
+          <PeopleResults
+            id={id}
+            className="finder-list"
+            people={found}
+            active={keys.active}
+            label={t('finder.label')}
+            onPick={(person) => {
+              go(person.login, person.image)
+            }}
+          />
         )}
       </div>
     </div>
