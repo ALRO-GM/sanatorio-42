@@ -2,6 +2,7 @@ import type { FocusFigures, FocusStats } from '@sanatorio/contracts'
 
 import type { FocusStatsQuery } from '../../shared/api/types'
 import { localeOf, useI18n } from '../../shared/i18n'
+import { durationText } from '../../shared/time'
 import { PillGroup } from '../../shared/ui/PillGroup'
 
 /** Los periodos que se pueden mirar (#80 del buzón): hoy, semana, mes y total. */
@@ -59,22 +60,6 @@ export function PeriodPills({
   )
 }
 
-/** «25 min», «3 h 05 min». */
-function useFocusTime(): (seconds: number) => string {
-  const { t } = useI18n()
-
-  return (seconds) => {
-    const minutes = Math.round(seconds / 60)
-
-    return minutes < 60
-      ? t('focus.minutesN', { n: minutes })
-      : t('focus.time.hm', {
-          h: Math.floor(minutes / 60),
-          m: String(minutes % 60).padStart(2, '0'),
-        })
-  }
-}
-
 const FIGURES = ['sessions', 'focusedSeconds', 'completed', 'cancelled', 'stayed'] as const
 
 /**
@@ -95,9 +80,8 @@ export function FocusFigureCards({
   people?: number
 }) {
   const { t, lang } = useI18n()
-  const time = useFocusTime()
   const show = (key: (typeof FIGURES)[number], value: number): string =>
-    key === 'focusedSeconds' ? time(value) : value.toLocaleString(localeOf(lang))
+    key === 'focusedSeconds' ? durationText(value) : value.toLocaleString(localeOf(lang))
 
   return (
     <div className="stat-cards">
@@ -147,7 +131,6 @@ function everyDay(stats: FocusStats): { day: string; seconds: number }[] {
  */
 export function FocusCharts({ stats }: { stats: FocusStats }) {
   const { t } = useI18n()
-  const time = useFocusTime()
   const days = everyDay(stats)
   const topDay = Math.max(1, ...days.map((one) => one.seconds))
   const topHour = Math.max(1, ...stats.hours.map((hour) => hour.focusedSeconds))
@@ -173,7 +156,7 @@ export function FocusCharts({ stats }: { stats: FocusStats }) {
                 width={Math.max(1, step * 0.8)}
                 height={height}
               >
-                <title>{`${one.day} · ${time(one.seconds)}`}</title>
+                <title>{`${one.day} · ${durationText(one.seconds)}`}</title>
               </rect>
             )
           })}
@@ -192,7 +175,7 @@ export function FocusCharts({ stats }: { stats: FocusStats }) {
           <div
             key={hour.hour}
             className="stat-hour"
-            title={`${String(hour.hour).padStart(2, '0')}:00 · ${time(hour.focusedSeconds)} · ${hour.sessions}`}
+            title={`${String(hour.hour).padStart(2, '0')}:00 · ${durationText(hour.focusedSeconds)} · ${hour.sessions}`}
           >
             <span className="stat-bar">
               <i className="seen" style={{ height: `${(hour.focusedSeconds / topHour) * 100}%` }} />

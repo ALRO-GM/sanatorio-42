@@ -4,6 +4,7 @@ import type { QuizPlayer, QuizQuestion, QuizRoom, QuizTeam } from '@sanatorio/co
 
 import { api } from '../../shared/api'
 import { useAction } from '../../shared/hooks/useAsync'
+import { useNow } from '../../shared/hooks/useNow'
 import { useI18n } from '../../shared/i18n'
 import { notGamesHref } from '../../shared/links'
 import { Avatar } from '../../shared/ui/Avatar'
@@ -250,18 +251,8 @@ type QuestionProps = {
 /** La pregunta de ahora: cuenta atrás, enunciado, código y respuestas; al cerrarse, la buena. */
 function Question({ room, question, me, playing, offset, onAnswer }: QuestionProps) {
   const { t } = useI18n()
-  const [now, setNow] = useState(() => Date.now() + offset)
+  const now = useNow(200, { offset })
   const sounds = useGameSounds()
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setNow(Date.now() + offset)
-    }, 200)
-
-    return () => {
-      clearInterval(timer)
-    }
-  }, [offset])
 
   const startsAt = Date.parse(question.startsAt)
   const endsAt = Date.parse(question.endsAt)

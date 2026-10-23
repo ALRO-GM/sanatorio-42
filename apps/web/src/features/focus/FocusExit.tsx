@@ -4,6 +4,7 @@ import type { FocusReason } from '@sanatorio/contracts'
 
 import { stayFocused, stopFocus } from '../../shared/focus'
 import { useAction } from '../../shared/hooks/useAsync'
+import { useNow } from '../../shared/hooks/useNow'
 import { useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 
@@ -35,7 +36,12 @@ const REASONS: readonly FocusReason[] = [
 export function FocusExit({ left, onDone }: { left: string; onDone: (stopped: boolean) => void }) {
   const { t } = useI18n()
   const dialog = useRef<HTMLDialogElement>(null)
-  const [wait, setWait] = useState(THINK_SECONDS)
+  // Contra una hora fija y no restando de uno en uno: una pestaña en segundo
+  // plano retrasa los temporizadores, y los diez segundos tienen que ser diez.
+  const [until] = useState(() => Date.now() + THINK_SECONDS * 1000)
+  const [over, setOver] = useState(false)
+  const now = useNow(250, { active: !over })
+  const wait = Math.max(0, Math.ceil((until - now) / 1000))
   const [reasons, setReasons] = useState<FocusReason[]>([])
   const { busy, error, run } = useAction()
 
@@ -43,21 +49,10 @@ export function FocusExit({ left, onDone }: { left: string; onDone: (stopped: bo
     if (dialog.current?.open === false) dialog.current.showModal()
   }, [])
 
-  // Contra una hora fija y no restando de uno en uno: una pestaña en segundo
-  // plano retrasa los temporizadores, y los diez segundos tienen que ser diez.
+  // Al llegar a cero el reloj se suelta: no hay nada más que contar.
   useEffect(() => {
-    const until = Date.now() + THINK_SECONDS * 1000
-    const tick = window.setInterval(() => {
-      const left = Math.max(0, Math.ceil((until - Date.now()) / 1000))
-
-      setWait(left)
-      if (left === 0) window.clearInterval(tick)
-    }, 250)
-
-    return () => {
-      window.clearInterval(tick)
-    }
-  }, [])
+    if (wait === 0) setOver(true)
+  }, [wait])
 
   const stay = (): void => {
     void run(async () => {

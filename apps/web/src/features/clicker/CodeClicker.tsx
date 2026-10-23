@@ -58,7 +58,7 @@ import {
   donationBonus,
 } from '@sanatorio/clicker'
 import type { Game } from '@sanatorio/clicker'
-import { buildingShare, levelProgress, reach } from './insight'
+import { buildingShare, levelProgress, reach, span } from './insight'
 import { Backdrop, Coffee, CursorRing, drinkOf, hueOf, Skyline } from './scene'
 import { Mini, miniOn, setMini } from './Mini'
 import { play, setSound, soundOn } from './sound'
@@ -115,13 +115,6 @@ type Toast = { id: number; icon: string; title: string; text: string; tier?: num
 
 /** El nivel dentro del juego: el mismo cálculo que hace la API para la clasificación. */
 const levelOf = (total: number): number => Math.floor(3 * Math.log10(1 + Math.max(0, total)))
-
-/** "12 min 05 s", para lo que queda de un parche. */
-function clock(ms: number): string {
-  const seconds = Math.max(0, Math.ceil(ms / 1000))
-
-  return `${Math.floor(seconds / 60)} min ${String(seconds % 60).padStart(2, '0')} s`
-}
 
 /**
  * Code Clicker: la sección secreta. Se pulsa una tecla para escribir líneas de
@@ -980,7 +973,7 @@ export function CodeClicker({
           {reached > 0 &&
             (now < current.hotfixUntil ? (
               <span className="cc-hotfix on">
-                {ui('hotfixOn', { n: clock(current.hotfixUntil - now) })}
+                {ui('hotfixOn', { n: span((current.hotfixUntil - now) / 1000) })}
               </span>
             ) : (
               <button

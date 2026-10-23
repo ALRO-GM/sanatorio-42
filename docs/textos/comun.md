@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/comun.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-273 textos. «—» es que falta la traducción: sale en español.
+272 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -205,7 +205,7 @@ Generado desde `apps/web/src/shared/i18n/textos/comun.csv` con
 | `focus.pitch` | Pomodoro: explicación en la ventana | features/focus/FocusDialog | Un rato sin distracciones: la web se queda con lo que elijas, los juegos se callan y los demás ven que estás en modo concentración | Some time without distractions: the web keeps only what you choose, games go quiet and others see you are focusing. | Una estona sense distraccions: la web es queda amb el que triïs, els jocs callen i els altres veuen que estàs concentrat. | Distrakziorik gabeko denbora: webak aukeratzen duzuna bakarrik uzten du, jokoak isiltzen dira eta besteek kontzentratuta zaudela ikusten dute. |
 | `focus.minutes` | Pomodoro: minutos de concentración | features/focus/FocusDialog | Concentración | Focus | Concentració | Kontzentrazioa |
 | `focus.break` | Pomodoro: minutos de descanso | features/focus/FocusDialog | Descanso | Break | Descans | Atsedena |
-| `focus.minutesN` | Pomodoro: duración | features/focus/FocusDialog, features/focus/FocusStatsView | {n} min | {n} min | {n} min | {n} min |
+| `focus.minutesN` | Pomodoro: duración | features/focus/FocusDialog | {n} min | {n} min | {n} min | {n} min |
 | `focus.noBreak` | Pomodoro: sin descanso | features/focus/FocusDialog | Sin descanso | No break | Sense descans | Atsedenik gabe |
 | `focus.sections` | Pomodoro: secciones que siguen en las pestañas | features/focus/FocusDialog | Pestañas que quieres ver | Tabs you want to see | Pestanyes que vols veure | Ikusi nahi dituzun fitxak |
 | `focus.show` | Pomodoro: avisos que siguen saliendo | features/focus/FocusDialog | Avisos que quieres recibir | Notices you want to get | Avisos que vols rebre | Jaso nahi dituzun abisuak |
@@ -272,7 +272,6 @@ Generado desde `apps/web/src/shared/i18n/textos/comun.csv` con
 | `focus.stats.reasonStopped` | Estadísticas del Pomodoro: columna, veces que se paró por ese motivo | features/focus/FocusStatsView | Al parar | When stopping | En parar | Gelditzean |
 | `focus.stats.reasonStayed` | Estadísticas del Pomodoro: columna, veces que se siguió pese al motivo | features/focus/FocusStatsView | Al seguir | When going on | En seguir | Jarraitzean |
 | `focus.stats.empty` | Estadísticas del Pomodoro: periodo sin sesiones | features/focus/FocusStatsView | Aún no hay sesiones en este periodo. | No sessions in this period yet. | Encara no hi ha sessions en aquest període. | Oraindik ez dago saiorik aldi honetan. |
-| `focus.time.hm` | Estadísticas del Pomodoro: horas y minutos | features/focus/FocusStatsView | {h} h {m} min | {h} h {m} min | {h} h {m} min | {h} h {m} min |
 | `focus.band.all` | Tus estadísticas del Pomodoro: comparación con todo el mundo | features/admin/SegmentSlider, features/focus/FocusMyStats | Comparas con todas las personas que lo usan | Comparing with everyone who uses it | Compares amb totes les persones que el fan servir | Erabiltzen duten guztiekin alderatzen duzu |
 | `focus.band.some` | Tus estadísticas del Pomodoro: tramo con el que te comparas | features/admin/SegmentSlider, features/focus/FocusMyStats | Comparas con el tramo del {low} % al {high} % por uso | Comparing with the {low}% to {high}% band by use | Compares amb el tram del {low} % al {high} % per ús | Erabileraren araberako % {low}–% {high} tartearekin alderatzen duzu |
 | `focus.band.people` | Tus estadísticas del Pomodoro: personas del tramo | features/admin/SegmentSlider, features/focus/FocusMyStats | {n} de {of} | {n} of {of} | {n} de {of} | {of}tik {n} |

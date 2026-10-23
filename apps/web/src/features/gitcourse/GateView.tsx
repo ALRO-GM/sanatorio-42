@@ -5,7 +5,9 @@ import type { Gate } from '@sanatorio/gitsim'
 
 import { api } from '../../shared/api'
 import { useAction } from '../../shared/hooks/useAsync'
+import { useNow } from '../../shared/hooks/useNow'
 import { localeOf, useI18n } from '../../shared/i18n'
+import { clock } from '../../shared/time'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { GroupRooms } from './GroupRoom'
 import { CodeText } from '../../shared/ui/CodeText'
@@ -122,7 +124,9 @@ function GateQuestions({
   onSend: () => void
 }) {
   const { t } = useI18n()
-  const left = useCountdown(quiz.deadline)
+  // Segundos que quedan, al segundo (solo mientras dura el test).
+  const now = useNow(1000)
+  const left = Math.max(0, Math.ceil((Date.parse(quiz.deadline) - now) / 1000))
   const answered = chosen.filter((value) => value !== null).length
 
   // Se acaba el tiempo: se manda lo que haya.
@@ -141,7 +145,7 @@ function GateQuestions({
       }}
     >
       <p className={`git-gate-clock ${left <= 20 ? 'late' : ''}`} aria-live="off">
-        ⏱ {Math.floor(left / 60)}:{String(left % 60).padStart(2, '0')}
+        ⏱ {clock(left)}
       </p>
       <ol>
         {quiz.questions.map((question, index) => (
@@ -204,22 +208,4 @@ function GateResult({ result }: { result: GitGateResult }) {
       </ol>
     </section>
   )
-}
-
-/** Segundos que quedan hasta `deadline`, al segundo (solo mientras dura el test). */
-function useCountdown(deadline: string): number {
-  const end = Date.parse(deadline)
-  const [now, setNow] = useState(Date.now)
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setNow(Date.now())
-    }, 1000)
-
-    return () => {
-      clearInterval(timer)
-    }
-  }, [end])
-
-  return Math.max(0, Math.ceil((end - now) / 1000))
 }

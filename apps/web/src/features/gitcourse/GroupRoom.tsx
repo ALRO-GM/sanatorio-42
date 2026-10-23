@@ -6,8 +6,10 @@ import type { Gate, GroupMission } from '@sanatorio/gitsim'
 
 import { api } from '../../shared/api'
 import { useAction } from '../../shared/hooks/useAsync'
+import { useNow } from '../../shared/hooks/useNow'
 import { useI18n } from '../../shared/i18n'
 import { Avatar } from '../../shared/ui/Avatar'
+import { clock } from '../../shared/time'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { WorldGraphs } from './GitGraph'
 import { Terminal } from './Terminal'
@@ -117,25 +119,6 @@ export function GroupRooms({ gate, me }: { gate: Gate; me: string }) {
   )
 }
 
-/** Minutos y segundos que quedan hasta `deadline`, con la hora del servidor. */
-function useLeft(deadline: string | null, offset: number): number | null {
-  const [now, setNow] = useState(Date.now)
-
-  useEffect(() => {
-    if (deadline === null) return undefined
-
-    const timer = setInterval(() => {
-      setNow(Date.now())
-    }, 1000)
-
-    return () => {
-      clearInterval(timer)
-    }
-  }, [deadline])
-
-  return deadline === null ? null : Math.max(0, Date.parse(deadline) - (now + offset))
-}
-
 /**
  * Una sala de prueba de grupo. Se pide al servidor cada dos segundos: los
  * demás cambian origin mientras juegas. Los comandos van al servidor, que los
@@ -180,7 +163,10 @@ function GroupRoom({
   }, [load])
 
   const status = room?.status
-  const left = useLeft(room?.deadline ?? null, offset.current)
+  // Milisegundos que quedan hasta el plazo, con la hora del servidor.
+  const deadline = room?.deadline ?? null
+  const now = useNow(1000, { active: deadline !== null, offset: offset.current })
+  const left = deadline === null ? null : Math.max(0, Date.parse(deadline) - now)
 
   useEffect(() => {
     if (status === 'done') return undefined
@@ -234,8 +220,7 @@ function GroupRoom({
         <span className="git-room-tools">
           {left !== null && room.status === 'playing' && (
             <span className={`git-gate-clock ${left < 5 * 60_000 ? 'late' : ''}`}>
-              ⏱ {Math.floor(left / 60_000)}:
-              {String(Math.floor((left % 60_000) / 1000)).padStart(2, '0')}
+              ⏱ {clock(left / 1000)}
             </span>
           )}
           <button type="button" className="pill" disabled={action.busy} onClick={leave}>

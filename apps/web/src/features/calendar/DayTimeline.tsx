@@ -1,7 +1,6 @@
-import { useEffect, useState } from 'react'
-
 import type { CalendarEvent } from '@sanatorio/contracts'
 
+import { useNow } from '../../shared/hooks/useNow'
 import { useI18n } from '../../shared/i18n'
 import { eventsOn, locale, sameDay } from './dates'
 import { EventChip } from './EventChip'
@@ -32,18 +31,8 @@ type DayTimelineProps = {
  */
 export function DayTimeline({ days, events, layout, week, onOpen, onOpenDay }: DayTimelineProps) {
   const { t, lang } = useI18n()
-  const [now, setNow] = useState(() => new Date())
-
   // La raya de ahora y lo que falta se mueven solos, cada minuto.
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setNow(new Date())
-    }, 60_000)
-
-    return () => {
-      clearInterval(timer)
-    }
-  }, [])
+  const now = new Date(useNow(60_000))
 
   const { from, to } = hourRange(layout, events, days, now)
   const hourPx = Math.min(MAX_HOUR_PX, Math.max(MIN_HOUR_PX, TARGET_PX / (to - from)))

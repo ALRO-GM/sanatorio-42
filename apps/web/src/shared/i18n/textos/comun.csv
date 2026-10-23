@@ -264,7 +264,6 @@ focus.stats.reason,Estadísticas del Pomodoro: columna,Motivo,Reason,Motiu,Arraz
 focus.stats.reasonStopped,"Estadísticas del Pomodoro: columna, veces que se paró por ese motivo",Al parar,When stopping,En parar,Gelditzean
 focus.stats.reasonStayed,"Estadísticas del Pomodoro: columna, veces que se siguió pese al motivo",Al seguir,When going on,En seguir,Jarraitzean
 focus.stats.empty,Estadísticas del Pomodoro: periodo sin sesiones,Aún no hay sesiones en este periodo.,No sessions in this period yet.,Encara no hi ha sessions en aquest període.,Oraindik ez dago saiorik aldi honetan.
-focus.time.hm,Estadísticas del Pomodoro: horas y minutos,{h} h {m} min,{h} h {m} min,{h} h {m} min,{h} h {m} min
 focus.band.all,Tus estadísticas del Pomodoro: comparación con todo el mundo,Comparas con todas las personas que lo usan,Comparing with everyone who uses it,Compares amb totes les persones que el fan servir,Erabiltzen duten guztiekin alderatzen duzu
 focus.band.some,Tus estadísticas del Pomodoro: tramo con el que te comparas,Comparas con el tramo del {low} % al {high} % por uso,Comparing with the {low}% to {high}% band by use,Compares amb el tram del {low} % al {high} % per ús,Erabileraren araberako % {low}–% {high} tartearekin alderatzen duzu
 focus.band.people,Tus estadísticas del Pomodoro: personas del tramo,{n} de {of},{n} of {of},{n} de {of},{of}tik {n}

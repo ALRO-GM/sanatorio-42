@@ -4,6 +4,7 @@ import type { TurnPlayer, TurnRoom, TurnSide } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
 import { useAction } from '../../shared/hooks/useAsync'
+import { useNow } from '../../shared/hooks/useNow'
 import { useI18n } from '../../shared/i18n'
 import { notGamesHref } from '../../shared/links'
 import { Avatar } from '../../shared/ui/Avatar'
@@ -16,6 +17,7 @@ import { ChessTour } from './ChessTour'
 import type { BoardStyle } from './ChessBoard'
 import { SoundToggle } from './SoundToggle'
 import { START_FEN } from '../../shared/chess'
+import { clock } from '../../shared/time'
 import { useGameSounds } from './sounds'
 import { CodeText } from '../../shared/ui/CodeText'
 
@@ -28,9 +30,7 @@ const LOW_MS = 20_000
 function clockText(ms: number): string {
   if (ms < 10_000) return (Math.max(0, ms) / 1000).toFixed(1)
 
-  const seconds = Math.ceil(ms / 1000)
-
-  return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`
+  return clock(Math.ceil(ms / 1000))
 }
 
 /**
@@ -324,20 +324,8 @@ function ChessLobby({
 /** Los dos relojes: el de quien mueve, corriendo. */
 function PlayerClocks({ room, me, offset }: { room: TurnRoom; me: string; offset: number }) {
   const { t } = useI18n()
-  const [now, setNow] = useState(() => Date.now() + offset)
   const running = room.status === 'playing' && room.mover !== null
-
-  useEffect(() => {
-    if (!running) return undefined
-
-    const timer = setInterval(() => {
-      setNow(Date.now() + offset)
-    }, 100)
-
-    return () => {
-      clearInterval(timer)
-    }
-  }, [running, offset])
+  const now = useNow(100, { active: running, offset })
 
   const since = Date.parse(room.now)
   const left = (player: TurnPlayer): number =>
@@ -422,18 +410,8 @@ function TurnQuestionCard({
   onAnswer: (option: number) => void
 }) {
   const { t } = useI18n()
-  const [now, setNow] = useState(() => Date.now() + offset)
+  const now = useNow(200, { offset })
   const question = room.question
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setNow(Date.now() + offset)
-    }, 200)
-
-    return () => {
-      clearInterval(timer)
-    }
-  }, [offset])
 
   if (question === null) return null
 
