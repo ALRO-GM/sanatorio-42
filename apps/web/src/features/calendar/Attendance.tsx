@@ -5,8 +5,10 @@ import type { MeetPresence } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
 import { useAction, useAsync } from '../../shared/hooks/useAsync'
-import { localeOf, useI18n } from '../../shared/i18n'
+import { useI18n } from '../../shared/i18n'
+import { formatsFor } from '../../shared/i18n/useFormat'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { PillGroup } from '../../shared/ui/PillGroup'
 import { Qr } from '../../shared/ui/Qr'
 
 /** La dirección que abre la web y valida el código sola: es lo que lleva el QR. */
@@ -15,12 +17,7 @@ function checkinUrl(eventId: string, code: string): string {
 }
 
 function hour(iso: string | null, lang: string): string {
-  return iso === null
-    ? '—'
-    : new Date(iso).toLocaleTimeString(localeOf(lang), {
-        hour: '2-digit',
-        minute: '2-digit',
-      })
+  return iso === null ? '—' : formatsFor(lang).time(iso)
 }
 
 /**
@@ -76,21 +73,13 @@ export function Attendance({ eventId }: { eventId: string }) {
         <span className="eyebrow">{t('meet.att.title')}</span>
         <p className="hint">{t('meet.att.hostHint')}</p>
         <p className="hint">{shown === 'start' ? startWindow : endWindow}</p>
-        <div className="filter-pills" role="group" aria-label={t('meet.att.title')}>
-          {(['start', 'end'] as const).map((phase) => (
-            <button
-              key={phase}
-              type="button"
-              className={`pill ${shown === phase ? 'active' : ''}`}
-              aria-pressed={shown === phase}
-              onClick={() => {
-                setShown(phase)
-              }}
-            >
-              {t(`meet.att.${phase}`)}
-            </button>
-          ))}
-        </div>
+        <PillGroup
+          options={['start', 'end'] as const}
+          value={shown}
+          onChange={setShown}
+          label={t('meet.att.title')}
+          text={(phase) => t(`meet.att.${phase}`)}
+        />
         <div className="meet-code">
           <Qr text={checkinUrl(eventId, current)} label={t(`meet.att.${shown}`)} />
           <div>

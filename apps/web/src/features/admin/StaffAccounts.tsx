@@ -3,7 +3,8 @@ import type { SyntheticEvent } from 'react'
 
 import { api } from '../../shared/api'
 import { useAction, useAsync } from '../../shared/hooks/useAsync'
-import { localeOf, useI18n } from '../../shared/i18n'
+import { useI18n } from '../../shared/i18n'
+import { useFormat } from '../../shared/i18n/useFormat'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 
 /**
@@ -12,13 +13,14 @@ import { ErrorNote } from '../../shared/ui/ErrorNote'
  * puede recuperar, solo retirar la cuenta y crear otra.
  */
 export function StaffAccounts() {
-  const { t, lang } = useI18n()
+  const { t } = useI18n()
+  const { date } = useFormat()
   const { data, loading, error, reload } = useAsync(() => api.getStaffAccounts(), [])
   const [name, setName] = useState('')
   const [fresh, setFresh] = useState<{ name: string; key: string } | null>(null)
   const [copied, setCopied] = useState(false)
   const action = useAction()
-  const day = (iso: string): string => new Date(iso).toLocaleDateString(localeOf(lang))
+  const day = (iso: string): string => date(iso)
 
   const create = (event: SyntheticEvent): void => {
     event.preventDefault()

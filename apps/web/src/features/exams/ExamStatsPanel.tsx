@@ -14,11 +14,11 @@ import type {
 import { api } from '../../shared/api'
 import { Show } from '../../shared/detail'
 import { useAsync } from '../../shared/hooks/useAsync'
-import { localeOf, useI18n } from '../../shared/i18n'
+import { useI18n } from '../../shared/i18n'
+import { useFormat } from '../../shared/i18n/useFormat'
 import type { Translate } from '../../shared/i18n'
-import { Avatar } from '../../shared/ui/Avatar'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
-import { PersonLink } from '../../shared/ui/PersonLink'
+import { ExamPeople } from './ExamPeople'
 
 /** Qué exámenes se ven: los de C, los de Nexus o los dos, uno al lado del otro. */
 type FamilyFilter = ExamFamily | 'both'
@@ -37,14 +37,9 @@ const pctOf = (t: Translate, part: number, whole: number): string =>
 
 /** «oct 2025»: el mes de una kickoff, en el idioma de la web. */
 function useMonth(): (month: string) => string {
-  const { lang } = useI18n()
-  const format = new Intl.DateTimeFormat(localeOf(lang), {
-    month: 'short',
-    year: 'numeric',
-    timeZone: 'UTC',
-  })
+  const { date } = useFormat()
 
-  return (month) => format.format(new Date(`${month}-01T00:00:00Z`))
+  return (month) => date(`${month}-01T00:00:00Z`, 'monthYear')
 }
 
 /** Un desplegable de los que solo vale una opción. */
@@ -251,8 +246,8 @@ function ExamPairs({ exams, family }: { exams: readonly ExamStat[]; family: Fami
 
 /** Las estadísticas de un examen: intentos hasta aprobar y cómo va cada intento, sin tope. */
 function ExamCard({ exam }: { exam: ExamStat }) {
-  const { t, lang } = useI18n()
-  const decimal = new Intl.NumberFormat(localeOf(lang), { maximumFractionDigits: 1 })
+  const { t } = useI18n()
+  const { number } = useFormat()
   const most = Math.max(1, ...exam.attemptsToPass)
   const known = exam.attemptsToPass.reduce((sum, count) => sum + count, 0)
   const bar = (count: number, index: number) => (
@@ -280,9 +275,7 @@ function ExamCard({ exam }: { exam: ExamStat }) {
       <span className="eyebrow">{exam.name}</span>
       <p>
         <strong>
-          {exam.avgAttempts === null
-            ? '—'
-            : t('exams.avg', { n: decimal.format(exam.avgAttempts) })}
+          {exam.avgAttempts === null ? '—' : t('exams.avg', { n: number(exam.avgAttempts, 1) })}
         </strong>{' '}
         <small className="hint">
           {t('exams.people', {
@@ -497,12 +490,12 @@ function BlackHole({ stats }: { stats: BlackHoleStats }) {
 
 /** Una lista de gente del black hole: cuándo, en qué círculo y de qué kickoff. */
 function PeopleList(props: { title: string; people: readonly BlackHolePerson[]; past: boolean }) {
-  const { t, lang } = useI18n()
+  const { t } = useI18n()
+  const { date } = useFormat()
   const month = useMonth()
-  const day = new Intl.DateTimeFormat(localeOf(lang), { dateStyle: 'medium' })
   const when = (person: BlackHolePerson): ReactNode =>
     props.past
-      ? day.format(new Date(person.at))
+      ? date(person.at, 'medium')
       : t('exams.bh.left', {
           n: Math.max(0, Math.ceil((Date.parse(person.at) - Date.now()) / DAY_MS)),
         })
@@ -513,23 +506,14 @@ function PeopleList(props: { title: string; people: readonly BlackHolePerson[]; 
       {props.people.length === 0 ? (
         <p className="estado">{t('exams.bh.nobody')}</p>
       ) : (
-        <ul className="exam-people" aria-label={props.title}>
-          {props.people.map((person) => (
-            <li key={person.login}>
-              <Avatar login={person.login} image={person.image} size={32} />
-              <PersonLink login={person.login} className="" />
-              <span className="exam-badges">
-                {person.circle !== null && (
-                  <span className="badge subtle">{t('graph.circle', { n: person.circle })}</span>
-                )}
-                {person.kickoff !== null && (
-                  <span className="badge subtle">{month(person.kickoff)}</span>
-                )}
-              </span>
-              <small className="exam-when">{when(person)}</small>
-            </li>
-          ))}
-        </ul>
+        <ExamPeople
+          people={props.people}
+          label={props.title}
+          badges={(person) =>
+            person.kickoff !== null && <span className="badge subtle">{month(person.kickoff)}</span>
+          }
+          end={(person) => <small className="exam-when">{when(person)}</small>}
+        />
       )}
     </section>
   )

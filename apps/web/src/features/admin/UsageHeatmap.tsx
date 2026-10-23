@@ -5,10 +5,12 @@ import type { UsageHeatmap as Heatmap } from '@sanatorio/contracts'
 import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
+import { useFormat } from '../../shared/i18n/useFormat'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { PillGroup } from '../../shared/ui/PillGroup'
 import { InfoTip } from '../../shared/ui/InfoTip'
-import { SegmentSlider } from './SegmentSlider'
-import type { SegmentRange } from './SegmentSlider'
+import { SegmentSlider } from '../../shared/ui/SegmentSlider'
+import type { SegmentRange } from '../../shared/ui/SegmentSlider'
 
 const GROUPINGS = [
   'total',
@@ -60,21 +62,13 @@ export function UsageHeatmap({
         </InfoTip>
       </h2>
 
-      <div className="filter-pills" role="group" aria-label={t('admin.usage.by')}>
-        {GROUPINGS.map((option) => (
-          <button
-            key={option}
-            type="button"
-            className={`pill ${by === option ? 'active' : ''}`}
-            aria-pressed={by === option}
-            onClick={() => {
-              setBy(option)
-            }}
-          >
-            {t(`admin.usage.by.${option}`)}
-          </button>
-        ))}
-      </div>
+      <PillGroup
+        options={GROUPINGS}
+        value={by}
+        onChange={setBy}
+        label={t('admin.usage.by')}
+        text={(option) => t(`admin.usage.by.${option}`)}
+      />
 
       <SegmentSlider value={segment} onChange={onSegment} told={data?.segment} />
 
@@ -98,6 +92,7 @@ type HeatTableProps = {
 
 function HeatTable({ data, nameOf, groupName }: HeatTableProps) {
   const { t } = useI18n()
+  const { number } = useFormat()
   // Usos totales de cada grupo: cada celda se pinta como parte de los suyos.
   const totals = data.groups.map((_, column) =>
     data.rows.reduce((sum, row) => sum + (row.counts[column] ?? 0), 0),
@@ -144,7 +139,7 @@ function HeatTable({ data, nameOf, groupName }: HeatTableProps) {
                     title={t('admin.usage.cell', { uses: count, pct: Math.round(part * 100) })}
                   >
                     {count === 0 ? '·' : `${Math.round(part * 100)} %`}
-                    {count > 0 && <small>{count.toLocaleString()}</small>}
+                    {count > 0 && <small>{number(count)}</small>}
                   </td>
                 )
               })}

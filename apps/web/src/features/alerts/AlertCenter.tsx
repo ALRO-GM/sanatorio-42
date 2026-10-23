@@ -5,6 +5,8 @@ import type { CalendarSection, EventAlert, MeetCheckin } from '@sanatorio/contra
 import { api } from '../../shared/api'
 import { shows as showsFocus, useFocus } from '../../shared/focus'
 import { useAction } from '../../shared/hooks/useAsync'
+import { usePolling } from '../../shared/hooks/usePolling'
+import { useNow } from '../../shared/hooks/useNow'
 import { useI18n } from '../../shared/i18n'
 import { usePrefs } from '../../shared/layout/store'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
@@ -65,10 +67,9 @@ export function AlertCenter({ me, onGo }: AlertCenterProps) {
   const [link, setLink] = useState<{ id: string; code: string } | null>(null)
   const validation = useAction()
 
-  // Lo último que dijo la API, y una marca que cambia cada medio minuto para
-  // volver a mirar la hora sin pedir nada.
+  // Lo último que dijo la API; la hora se vuelve a mirar cada medio minuto sin pedir nada.
   const [alerts, setAlerts] = useState<EventAlert[]>([])
-  const [, setTick] = useState(0)
+  const now = useNow(TICK_MS)
   const [dismissed, setDismissed] = useState<readonly string[]>(seenIds)
 
   const refresh = useCallback((): void => {
@@ -84,22 +85,13 @@ export function AlertCenter({ me, onGo }: AlertCenterProps) {
 
   useEffect(() => {
     refresh()
-
-    const fetching = setInterval(refresh, FETCH_MS)
-    const ticking = setInterval(() => {
-      setTick((tick) => tick + 1)
-    }, TICK_MS)
-
-    return () => {
-      clearInterval(fetching)
-      clearInterval(ticking)
-    }
   }, [refresh])
+  // Los avisos no se piden con la pestaña oculta: lo pendiente lo guarda la API y espera.
+  usePolling(refresh, FETCH_MS)
 
   // Los que ya toca enseñar, por orden de inicio. Lo que pide respuesta sale
   // aunque los avisos estén apagados: entonces, a la hora de empezar.
   const focus = useFocus()
-  const now = Date.now()
   const due = alerts.filter(({ event, state }) => {
     const start = Date.parse(event.start)
 

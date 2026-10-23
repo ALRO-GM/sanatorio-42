@@ -7,6 +7,7 @@ import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { DataTable } from '../../shared/ui/DataTable'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { PillGroup } from '../../shared/ui/PillGroup'
 import { RangePills } from './RangePills'
 
 const LAYOUTS: readonly ClickLayout[] = ['desktop', 'mobile']
@@ -49,19 +50,13 @@ export function ClickMap() {
             ))}
           </select>
         </label>
-        {LAYOUTS.map((option) => (
-          <button
-            key={option}
-            type="button"
-            className={`pill ${layout === option ? 'active' : ''}`}
-            aria-pressed={layout === option}
-            onClick={() => {
-              setLayout(option)
-            }}
-          >
-            {t(`admin.clicks.layout.${option}`)}
-          </button>
-        ))}
+        <PillGroup
+          options={LAYOUTS}
+          value={layout}
+          onChange={setLayout}
+          label={t('admin.clicks.title')}
+          text={(option) => t(`admin.clicks.layout.${option}`)}
+        />
       </div>
       <RangePills value={days} onChange={setDays} />
       {loading && data === undefined && <p className="estado">{t('app.loading')}</p>}

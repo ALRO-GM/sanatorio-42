@@ -11,8 +11,11 @@ import { api } from '../../shared/api'
 import { useAction, useAsync } from '../../shared/hooks/useAsync'
 import { localeOf, useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { useConfirm } from '../../shared/ui/useConfirm'
+import { PillGroup } from '../../shared/ui/PillGroup'
 import { Icon } from '../../shared/ui/Icon'
-import { INBOX_VIEWS, REPORT_REASONS, ticketsIn } from './inbox'
+import { REPORT_REASONS } from '../../shared/report'
+import { INBOX_VIEWS, ticketsIn } from './inbox'
 import type { InboxFilter, InboxView } from './inbox'
 
 export function InboxTab() {
@@ -31,39 +34,25 @@ export function InboxTab() {
 
   return (
     <>
-      <div className="filter-pills sub-tabs" role="tablist" aria-label={t('admin.tab.inbox')}>
-        {INBOX_VIEWS.map((option) => (
-          <button
-            key={option}
-            type="button"
-            role="tab"
-            aria-selected={view === option}
-            className={`pill ${view === option ? 'active' : ''}`}
-            onClick={() => {
-              setView(option)
-            }}
-          >
-            {t(`admin.inbox.view.${option}`)} ({ticketsIn(data, option).length})
-          </button>
-        ))}
-      </div>
+      <PillGroup
+        kind="tabs"
+        className="sub-tabs"
+        options={INBOX_VIEWS}
+        value={view}
+        onChange={setView}
+        label={t('admin.tab.inbox')}
+        text={(option) => `${t(`admin.inbox.view.${option}`)} (${ticketsIn(data, option).length})`}
+      />
       {(reports > 0 || filter !== 'all') && (
-        <div className="filter-pills" role="group" aria-label={t('admin.inbox.byReason')}>
-          {(['all', ...REPORT_REASONS] as const).map((option) => (
-            <button
-              key={option}
-              type="button"
-              aria-pressed={filter === option}
-              className={`pill ${filter === option ? 'active' : ''}`}
-              onClick={() => {
-                setFilter(option)
-              }}
-            >
-              {option === 'all' ? t('admin.inbox.allKinds') : t(`report.reason.${option}`)} (
-              {ticketsIn(data, view, option).length})
-            </button>
-          ))}
-        </div>
+        <PillGroup
+          options={['all', ...REPORT_REASONS] as const}
+          value={filter}
+          onChange={setFilter}
+          label={t('admin.inbox.byReason')}
+          text={(option) =>
+            `${option === 'all' ? t('admin.inbox.allKinds') : t(`report.reason.${option}`)} (${ticketsIn(data, view, option).length})`
+          }
+        />
       )}
       {shown.length === 0 && <p className="estado">{t('admin.inbox.empty')}</p>}
       {answered !== null && (
@@ -90,6 +79,7 @@ export function InboxTab() {
 function TicketRow({ ticket, onDone }: { ticket: Ticket; onDone: () => void }) {
   const { t, lang } = useI18n()
   const { busy, error, run } = useAction()
+  const confirm = useConfirm()
   const [answer, setAnswer] = useState(ticket.answer ?? '')
 
   const send = async (status: 'answered' | 'closed'): Promise<void> => {
@@ -150,16 +140,21 @@ function TicketRow({ ticket, onDone }: { ticket: Ticket; onDone: () => void }) {
           className="link"
           disabled={busy}
           onClick={() => {
-            if (window.confirm(t('admin.inbox.removeConfirm'))) {
-              void run(() => api.removeTicket(ticket.id)).then((ok) => {
-                if (ok) onDone()
+            void confirm
+              .ask({
+                body: t('admin.inbox.removeConfirm'),
+                okText: t('admin.inbox.remove'),
+                danger: true,
               })
-            }
+              .then(async (yes) => {
+                if (yes && (await run(() => api.removeTicket(ticket.id)))) onDone()
+              })
           }}
         >
           <Icon name="papelera" size={14} /> {t('admin.inbox.remove')}
         </button>
       </div>
+      {confirm.dialog}
     </li>
   )
 }

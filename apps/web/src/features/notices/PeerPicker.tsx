@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 
 import { useI18n } from '../../shared/i18n'
-import { Avatar } from '../../shared/ui/Avatar'
 import { Icon } from '../../shared/ui/Icon'
 import { usePeopleSearch } from '../../shared/hooks/usePeopleSearch'
+import { comboboxProps, PeopleResults, usePeopleKeys } from '../../shared/ui/PeopleResults'
 
 /**
  * Elegir a quién escribir: se teclea un login o un nombre y van saliendo
@@ -15,6 +15,10 @@ export function PeerPicker({ me, onPick }: { me: string; onPick: (login: string)
   const input = useRef<HTMLInputElement>(null)
   const found = usePeopleSearch(text)
   const people = found?.filter((person) => person.login !== me) ?? null
+  const id = useId()
+  const keys = usePeopleKeys(people, (person) => {
+    onPick(person.login)
+  })
 
   useEffect(() => {
     input.current?.focus()
@@ -28,6 +32,8 @@ export function PeerPicker({ me, onPick }: { me: string; onPick: (login: string)
         <input
           ref={input}
           type="search"
+          {...comboboxProps(id, people !== null, people, keys.active)}
+          aria-label={t('notices.peerLabel')}
           value={text}
           placeholder={t('notices.peerLabel')}
           autoComplete="off"
@@ -36,38 +42,22 @@ export function PeerPicker({ me, onPick }: { me: string; onPick: (login: string)
           maxLength={60}
           onChange={(event) => {
             setText(event.target.value)
+            keys.reset()
           }}
-          onKeyDown={(event) => {
-            if (event.key === 'Enter' && people?.[0] !== undefined) {
-              event.preventDefault()
-              onPick(people[0].login)
-            }
-          }}
+          onKeyDown={keys.onKeyDown}
         />
       </label>
       {people !== null && (
-        <ul className="peer-list">
-          {people.length === 0 ? (
-            <li className="finder-none">{t('finder.none')}</li>
-          ) : (
-            people.map((person) => (
-              <li key={person.login}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    onPick(person.login)
-                  }}
-                >
-                  <Avatar login={person.login} image={person.image} size={32} />
-                  <span>
-                    <strong>{person.login}</strong>
-                    {person.name !== null && <small>{person.name}</small>}
-                  </span>
-                </button>
-              </li>
-            ))
-          )}
-        </ul>
+        <PeopleResults
+          id={id}
+          className="peer-list"
+          people={people}
+          active={keys.active}
+          label={t('notices.peerLabel')}
+          onPick={(person) => {
+            onPick(person.login)
+          }}
+        />
       )}
     </div>
   )

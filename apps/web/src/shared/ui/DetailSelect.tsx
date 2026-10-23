@@ -1,5 +1,5 @@
-import { DETAILS, isDetail, setDetail, useDetail } from '../../shared/detail'
-import { useI18n } from '../../shared/i18n'
+import { DETAILS, isDetail, setDetail, useDetail } from '../detail'
+import { useI18n } from '../i18n'
 
 /** Selector del modo de la interfaz, en el pie y en Personalizar. */
 export function DetailSelect() {

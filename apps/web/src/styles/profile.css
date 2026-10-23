@@ -31,7 +31,7 @@
   color: var(--text-2);
 }
 .health-pace.gone {
-  background: color-mix(in srgb, #c0392b 18%, var(--surface));
+  background: color-mix(in srgb, var(--danger) 18%, var(--surface));
 }
 .health-summary {
   margin: 0;
@@ -154,7 +154,7 @@
   align-items: center;
 }
 .health-result.gone {
-  color: #c0392b;
+  color: var(--danger);
   font-weight: 700;
 }
 

@@ -8,9 +8,11 @@ import { useAction } from '../../shared/hooks/useAsync'
 import { localeOf, useI18n } from '../../shared/i18n'
 import { lastDay, untilText } from '../../shared/until'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { useConfirm } from '../../shared/ui/useConfirm'
+import { PillGroup } from '../../shared/ui/PillGroup'
 import { clusterName } from '../map/ClusterMapView'
 import { SeatPicker } from '../map/SeatPicker'
-import { parseSeat } from '../map/seats'
+import { parseSeat } from '../../shared/seats'
 import { shortDay, today } from './days'
 import { Icon } from '../../shared/ui/Icon'
 
@@ -79,8 +81,9 @@ const MAX_DATES = 14
  * Los días son fechas concretas: se añaden una a una.
  */
 export function GroupForm({ projects, defaultProject, group, onCancel, onSaved }: GroupFormProps) {
-  const { t, lang } = useI18n()
+  const { t, tn, lang } = useI18n()
   const { busy, error, run } = useAction()
+  const confirm = useConfirm()
   const [form, setForm] = useState<GroupFormState>(() =>
     group === undefined
       ? {
@@ -166,7 +169,7 @@ export function GroupForm({ projects, defaultProject, group, onCancel, onSaved }
     }
 
     return clusters.length === 1
-      ? `${clusters[0] ?? ''} · ${t(rows.length === 1 ? 'map.rowLong' : 'map.rowsLong', { rows: rows.join(', ') })}`
+      ? `${clusters[0] ?? ''} · ${tn('map.rowLong', rows.length, { rows: rows.join(', ') })}`
       : clusters.join(', ')
   }
 
@@ -227,7 +230,13 @@ export function GroupForm({ projects, defaultProject, group, onCancel, onSaved }
         in: untilText(startsAt.getTime() - Date.now(), t),
       })
 
-      if (!window.confirm(text)) return
+      if (
+        !(await confirm.ask({
+          body: text,
+          okText: t(group === undefined ? 'therapy.create' : 'therapy.saveEdit'),
+        }))
+      )
+        return
     }
 
     const ok = await run(() =>
@@ -243,21 +252,14 @@ export function GroupForm({ projects, defaultProject, group, onCancel, onSaved }
       {group === undefined && (
         <fieldset className="kind-field">
           <legend>{t('therapy.kind')}</legend>
-          <div className="filter-pills">
-            {(['study', 'review'] as const).map((kind) => (
-              <button
-                key={kind}
-                type="button"
-                className={`pill ${form.kind === kind ? 'active' : ''}`}
-                aria-pressed={form.kind === kind}
-                onClick={() => {
-                  setForm((current) => ({ ...current, kind }))
-                }}
-              >
-                {t(`therapy.kind.${kind}`)}
-              </button>
-            ))}
-          </div>
+          <PillGroup
+            options={['study', 'review'] as const}
+            value={form.kind}
+            onChange={(kind) => {
+              setForm((current) => ({ ...current, kind }))
+            }}
+            text={(kind) => t(`therapy.kind.${kind}`)}
+          />
           <p className="hint">{t(`therapy.kind.${form.kind}.hint`)}</p>
           {form.kind === 'study' && (
             <label>
@@ -428,6 +430,7 @@ export function GroupForm({ projects, defaultProject, group, onCancel, onSaved }
           {t('therapy.cancel')}
         </button>
       </div>
+      {confirm.dialog}
     </form>
   )
 }

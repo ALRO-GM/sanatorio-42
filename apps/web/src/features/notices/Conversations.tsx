@@ -4,13 +4,15 @@ import type { Conversation, ConversationKind, ConversationMark } from '@sanatori
 
 import { api } from '../../shared/api'
 import { useAction, useAsync } from '../../shared/hooks/useAsync'
-import { localeOf, useI18n } from '../../shared/i18n'
+import { useI18n } from '../../shared/i18n'
+import { useFormat } from '../../shared/i18n/useFormat'
 import { Avatar } from '../../shared/ui/Avatar'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { PillGroup } from '../../shared/ui/PillGroup'
 import { Icon } from '../../shared/ui/Icon'
 import type { IconName } from '../../shared/ui/Icon'
-import { Chat } from '../alerts/Chat'
-import { useThread } from '../alerts/useThread'
+import { Chat } from '../../shared/chat/Chat'
+import { useThread } from '../../shared/chat/useThread'
 import { kindsIn, matches, NO_FILTERS, projectsIn, remindTime } from './conversations'
 import type { Filters, RemindPreset, StateFilter } from './conversations'
 
@@ -40,7 +42,8 @@ type ConversationsProps = {
  * solo las no leídas o las pendientes, por tipo y por proyecto.
  */
 export function Conversations({ me, openId, onOpen, onChange }: ConversationsProps) {
-  const { t, lang } = useI18n()
+  const { t } = useI18n()
+  const format = useFormat()
   const { data, error, loading, reload } = useAsync(() => api.getConversations(), [])
   const [fresh, setFresh] = useState<Conversation[] | null>(null)
   const [filters, setFilters] = useState<Filters>(NO_FILTERS)
@@ -67,9 +70,7 @@ export function Conversations({ me, openId, onOpen, onChange }: ConversationsPro
     const date = new Date(at)
     const today = new Date().toDateString() === date.toDateString()
 
-    return today
-      ? date.toLocaleTimeString(localeOf(lang), { hour: '2-digit', minute: '2-digit' })
-      : date.toLocaleDateString(localeOf(lang), { day: 'numeric', month: 'short' })
+    return today ? format.time(date) : format.date(date, 'dayMonth')
   }
   const titleOf = (entry: Pick<Conversation, 'title' | 'kind'>): string =>
     entry.title ?? t(`chats.kind.${entry.kind}`)
@@ -138,26 +139,24 @@ export function Conversations({ me, openId, onOpen, onChange }: ConversationsPro
 
   return (
     <div className="conversations">
-      <div className="filter-pills" role="group" aria-label={t('chats.filter')}>
-        {STATES.map((state) => (
-          <button
-            key={state}
-            type="button"
-            className={`pill ${filters.state === state ? 'active' : ''}`}
-            aria-pressed={filters.state === state}
-            onClick={() => {
-              setFilters({ ...filters, state })
-            }}
-          >
+      <PillGroup
+        options={STATES}
+        value={filters.state}
+        onChange={(state) => {
+          setFilters({ ...filters, state })
+        }}
+        label={t('chats.filter')}
+        text={(state) => (
+          <>
             {t(`chats.state.${state}`)}
             {state !== 'all' && (
               <span className="pill-count">
                 {items.filter((entry) => matches(entry, { ...NO_FILTERS, state })).length}
               </span>
             )}
-          </button>
-        ))}
-      </div>
+          </>
+        )}
+      />
 
       {(kinds.length > 1 || projects.length > 0) && (
         <div className="conversation-filters">

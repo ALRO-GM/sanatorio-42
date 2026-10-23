@@ -1,4 +1,4 @@
-import { cleanup, render, screen, waitFor } from '@testing-library/react'
+import { cleanup, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import es from 'virtual:textos/es'
 import { afterEach, describe, expect, it, vi } from 'vitest'
@@ -34,7 +34,6 @@ describe('Proponer una pizarra', () => {
     const user = userEvent.setup()
     const saved = vi.fn()
     const create = vi.spyOn(api, 'createBoard')
-    const asked = vi.spyOn(window, 'confirm').mockReturnValue(true)
     const day = open(saved)
 
     await user.type(screen.getByLabelText(text('cal.f.title')), 'Punteros sin miedo')
@@ -43,10 +42,15 @@ describe('Proponer una pizarra', () => {
     await user.type(screen.getByLabelText(text('cal.f.capacity')), '6')
     await user.click(screen.getByRole('button', { name: text('cal.f.create') }))
 
+    // Antes de guardar, la ventana de la web pregunta; su botón dice qué hace.
+    const asked = await screen.findByRole('dialog', { name: text('confirm.title') })
+
+    expect(create).not.toHaveBeenCalled()
+    await user.click(within(asked).getByRole('button', { name: text('cal.f.create') }))
+
     await waitFor(() => {
       expect(saved).toHaveBeenCalledOnce()
     })
-    expect(asked).toHaveBeenCalledOnce()
     expect(create).toHaveBeenCalledWith(
       expect.objectContaining({
         title: 'Punteros sin miedo',
@@ -62,13 +66,16 @@ describe('Proponer una pizarra', () => {
     const user = userEvent.setup()
     const create = vi.spyOn(api, 'createBoard')
 
-    vi.spyOn(window, 'confirm').mockReturnValue(false)
     open(() => undefined)
 
     await user.type(screen.getByLabelText(text('cal.f.title')), 'Otra')
     await user.type(screen.getByLabelText(text('cal.f.place')), 'Cluster 2')
     await user.click(screen.getByRole('button', { name: text('cal.f.create') }))
 
+    const asked = await screen.findByRole('dialog', { name: text('confirm.title') })
+
+    await user.click(within(asked).getByRole('button', { name: text('confirm.cancel') }))
+    expect(screen.queryByRole('dialog')).toBeNull()
     expect(create).not.toHaveBeenCalled()
   })
 })

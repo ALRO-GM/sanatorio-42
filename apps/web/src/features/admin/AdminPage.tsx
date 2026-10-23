@@ -6,8 +6,10 @@ import type { Consumption } from '@sanatorio/contracts'
 import { api } from '../../shared/api'
 import { useAction, useAsync } from '../../shared/hooks/useAsync'
 import { localeOf, useI18n } from '../../shared/i18n'
+import { useFormat } from '../../shared/i18n/useFormat'
 import { DataTable } from '../../shared/ui/DataTable'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { PillGroup } from '../../shared/ui/PillGroup'
 import { PersonLink } from '../../shared/ui/PersonLink'
 import { HoursReport } from '../profile/HoursReport'
 import { BudgetCard } from './BudgetCard'
@@ -73,22 +75,14 @@ function AdminTabs({ campusId, me }: { campusId?: number | undefined; me: string
 
   return (
     <>
-      <div className="filter-pills" role="tablist" aria-label={t('admin.title')}>
-        {TABS.map((option) => (
-          <button
-            key={option}
-            type="button"
-            role="tab"
-            aria-selected={tab === option}
-            className={`pill ${tab === option ? 'active' : ''}`}
-            onClick={() => {
-              setTab(option)
-            }}
-          >
-            {t(`admin.tab.${option}`)}
-          </button>
-        ))}
-      </div>
+      <PillGroup
+        kind="tabs"
+        options={TABS}
+        value={tab}
+        onChange={setTab}
+        label={t('admin.title')}
+        text={(option) => t(`admin.tab.${option}`)}
+      />
       {tab === 'consumption' && <ConsumptionTab />}
       {tab === 'people' && <PeopleTab />}
       {tab === 'people' && <StaffAccounts />}
@@ -120,6 +114,7 @@ function AdminTabs({ campusId, me }: { campusId?: number | undefined; me: string
 
 function ConsumptionTab() {
   const { t } = useI18n()
+  const { number } = useFormat()
   const { data, error, loading, reload } = useAsync(() => api.getAdminConsumption(), [])
   const action = useAction()
 
@@ -148,10 +143,10 @@ function ConsumptionTab() {
       <div className="tiles">
         <div className="tile">
           <span className="eyebrow">{t('admin.cons.perPerson')}</span>
-          <strong>{data.limit.perPerson.toLocaleString()}</strong>
+          <strong>{number(data.limit.perPerson)}</strong>
           <small>
             {t('admin.cons.budget', {
-              budget: data.limit.budget.toLocaleString(),
+              budget: number(data.limit.budget),
               people: data.limit.activePeople,
             })}
           </small>
@@ -174,7 +169,7 @@ function ConsumptionTab() {
                 <Icon name="aviso" /> {t(`admin.weekday.${warning.weekday}`)}{' '}
                 {String(warning.hour).padStart(2, '0')}:00 ·{' '}
                 {t('admin.cons.warning', {
-                  n: warning.requests.toLocaleString(),
+                  n: number(warning.requests),
                   pct: Math.round(warning.share * 100),
                 })}
               </li>
@@ -214,7 +209,7 @@ function ConsumptionTab() {
               id: 'requests',
               label: t('admin.col.requests'),
               sort: (row) => row.requests,
-              cell: (row) => row.requests.toLocaleString(),
+              cell: (row) => number(row.requests),
             },
             {
               id: 'bytes',
@@ -321,7 +316,8 @@ function RecentBars({ data }: { data: Consumption }) {
 // --- Personas ------------------------------------------------------------------
 
 function PeopleTab() {
-  const { t, lang } = useI18n()
+  const { t } = useI18n()
+  const { date } = useFormat()
   const { data, error, loading, reload } = useAsync(() => api.getAdminPeople(), [])
   const action = useAction()
   const [login, setLogin] = useState('')
@@ -401,7 +397,7 @@ function PeopleTab() {
                   {entry.until === null
                     ? t('admin.people.forever')
                     : t('admin.people.until', {
-                        date: new Date(entry.until).toLocaleDateString(localeOf(lang)),
+                        date: date(entry.until),
                       })}
                 </small>
               </span>

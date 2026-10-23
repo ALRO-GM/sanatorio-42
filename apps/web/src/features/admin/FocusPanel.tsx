@@ -6,7 +6,7 @@ import { useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { FocusCharts, FocusFigureCards, PeriodPills, periodQuery } from '../focus/FocusStatsView'
 import type { FocusPeriod } from '../focus/FocusStatsView'
-import { EVERYONE, SegmentSlider } from './SegmentSlider'
+import { EVERYONE, SegmentSlider } from '../../shared/ui/SegmentSlider'
 
 /**
  * Panel de gestión: cómo se usa el Pomodoro (#80 del buzón). Por días y por

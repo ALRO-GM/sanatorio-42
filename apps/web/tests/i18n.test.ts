@@ -10,6 +10,7 @@ import ca from 'virtual:textos/ca'
 import en from 'virtual:textos/en'
 import es from 'virtual:textos/es'
 import eu from 'virtual:textos/eu'
+import { pluralOf } from '../src/shared/i18n'
 import { localeOf } from '../src/shared/i18n/locale'
 import { treeOf } from './tree-of'
 
@@ -62,6 +63,28 @@ describe('idiomas', () => {
   it('cada idioma escribe las fechas a su manera', () => {
     expect(LANGS.map(localeOf)).toEqual(['es-ES', 'en-GB', 'ca-ES', 'eu-ES'])
     expect(localeOf('xx')).toBe('es-ES')
+  })
+})
+
+describe('plurales', () => {
+  it('cada texto con forma «.one» tiene su «.many», y al revés', () => {
+    const keys = Object.keys(es)
+    const lonely = keys.filter(
+      (key) =>
+        (key.endsWith('.one') && !(key.replace(/\.one$/, '.many') in es)) ||
+        (key.endsWith('.many') && !(key.replace(/\.many$/, '.one') in es)),
+    )
+
+    expect(lonely).toEqual([])
+  })
+
+  it('la forma sale de las reglas del idioma: uno es «one»; cero, dos o 1,5, «many»', () => {
+    for (const lang of LANGS) {
+      expect(pluralOf(lang, 1)).toBe('one')
+      expect(pluralOf(lang, 0)).toBe('many')
+      expect(pluralOf(lang, 2)).toBe('many')
+      expect(pluralOf(lang, 1.5)).toBe('many')
+    }
   })
 })
 

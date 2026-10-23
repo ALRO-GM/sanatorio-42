@@ -3,7 +3,8 @@ import type { ReactNode, SyntheticEvent } from 'react'
 
 import { api } from '../../shared/api'
 import { useAction, useAsync } from '../../shared/hooks/useAsync'
-import { localeOf, useI18n } from '../../shared/i18n'
+import { useI18n } from '../../shared/i18n'
+import { useFormat } from '../../shared/i18n/useFormat'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { Icon } from '../../shared/ui/Icon'
 import { Qr } from '../../shared/ui/Qr'
@@ -25,7 +26,8 @@ function secretOf(uri: string): string {
  * evita enseñar un panel lleno de errores.
  */
 export function PanelLock({ children }: { children: ReactNode }) {
-  const { t, lang } = useI18n()
+  const { t } = useI18n()
+  const { time } = useFormat()
   const status = useAsync(() => api.getSecondFactor(), [])
   const { busy, error, run } = useAction()
   const [uri, setUri] = useState<string | null>(null)
@@ -57,10 +59,7 @@ export function PanelLock({ children }: { children: ReactNode }) {
         <p className="hint panel-open">
           <Icon name="escudo" size={14} />{' '}
           {t('admin.lock.openUntil', {
-            time: new Date(until).toLocaleTimeString(localeOf(lang), {
-              hour: '2-digit',
-              minute: '2-digit',
-            }),
+            time: time(until),
           })}{' '}
           <button
             type="button"

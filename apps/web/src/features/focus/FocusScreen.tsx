@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react'
 import type { ReactNode } from 'react'
 
-import { localeOf, useI18n } from '../../shared/i18n'
+import { useI18n } from '../../shared/i18n'
+import { useFormat } from '../../shared/i18n/useFormat'
 import { Icon } from '../../shared/ui/Icon'
 
 /**
@@ -32,7 +33,7 @@ export function FocusScreen({
   onShrink: () => void
   children?: ReactNode
 }) {
-  const { t, lang } = useI18n()
+  const { t } = useI18n()
   const dialog = useRef<HTMLDialogElement>(null)
   // Al quitarla con el botón, el aviso de que se ha salido no es una huida.
   const leaving = useRef(false)
@@ -64,10 +65,7 @@ export function FocusScreen({
     }
   }, [])
 
-  const time = new Date(until).toLocaleTimeString(localeOf(lang), {
-    hour: '2-digit',
-    minute: '2-digit',
-  })
+  const time = useFormat().time(until)
 
   return (
     <dialog

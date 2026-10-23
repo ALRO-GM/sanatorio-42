@@ -1,7 +1,7 @@
 import type { CalendarEvent } from '@sanatorio/contracts'
 
 import type { View } from './kinds'
-import { localeOf } from '../../shared/i18n/locale'
+import { formatsFor } from '../../shared/i18n/useFormat'
 
 /** Medianoche (hora del navegador) de ese día. */
 export function startOfDay(date: Date): Date {
@@ -65,11 +65,9 @@ export function eventsOn(events: readonly CalendarEvent[], day: Date): CalendarE
   return events.filter((event) => Date.parse(event.start) < to && Date.parse(event.end) > from)
 }
 
-export const locale = localeOf
-
 /** `16:00`, en la hora del navegador. */
 function time(iso: string, lang: string): string {
-  return new Date(iso).toLocaleTimeString(locale(lang), { hour: '2-digit', minute: '2-digit' })
+  return formatsFor(lang).time(iso)
 }
 
 /** La hora que enseña un evento en un día concreto: la de inicio, o nada si viene de antes. */
@@ -92,8 +90,7 @@ export function rangeOn(event: CalendarEvent, day: Date, lang: string): string {
 export function whenText(event: CalendarEvent, lang: string): string {
   const start = new Date(event.start)
   const end = new Date(event.end)
-  const date = (value: Date): string =>
-    value.toLocaleDateString(locale(lang), { weekday: 'long', day: 'numeric', month: 'long' })
+  const date = (value: Date): string => formatsFor(lang).date(value, 'long')
 
   return sameDay(start, end)
     ? `${date(start)} · ${time(event.start, lang)}–${time(event.end, lang)}`
@@ -107,19 +104,14 @@ export function rangeTitle(view: View, cursor: Date, lang: string): string {
   const last = days.at(-1) ?? cursor
 
   if (view === 'month') {
-    return cursor.toLocaleDateString(locale(lang), { month: 'long', year: 'numeric' })
+    return formatsFor(lang).date(cursor, 'monthLong')
   }
 
   if (view === 'day') {
-    return first.toLocaleDateString(locale(lang), {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-    })
+    return formatsFor(lang).date(first, 'long')
   }
 
-  const short = (date: Date): string =>
-    date.toLocaleDateString(locale(lang), { day: 'numeric', month: 'short' })
+  const short = (date: Date): string => formatsFor(lang).date(date, 'dayMonth')
 
   return `${short(first)} – ${short(last)}`
 }

@@ -1,7 +1,7 @@
-import { useEffect, useRef } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 
 import { useI18n } from '../i18n'
+import { Modal } from '../ui/Modal'
 import { arrange, move } from './order'
 import type { OrderMode } from './order'
 import { NAV_DEFAULT, PAGE_IDS, PAGES } from './registry'
@@ -9,7 +9,6 @@ import type { PageId } from './registry'
 import { resetPrefs, toggleFold, updatePrefs, usePrefs } from './store'
 import { themesFor } from '../../themes'
 import { useLook, usePalette, useStyle } from '../theme'
-import { Icon } from '../ui/Icon'
 
 /** Antelaciones del aviso que se pueden elegir, en minutos. `0` es sin avisos. */
 const LEADS = [0, 2, 5, 10, 15, 30, 60] as const
@@ -37,17 +36,10 @@ export function LayoutSettings({
 }) {
   const { t, lang } = useI18n()
   const prefs = usePrefs()
-  const dialog = useRef<HTMLDialogElement>(null)
   const manual = prefs.mode === 'manual'
   const [style, setStyle] = useStyle()
   const [palette, setPalette] = usePalette()
   const { theme } = useLook()
-
-  useEffect(() => {
-    // Sin limpieza a propósito: cerrar aquí dispararía `onClose` en el doble
-    // montaje de desarrollo y la ventana se cerraría nada más abrirse.
-    if (dialog.current?.open === false) dialog.current.showModal()
-  }, [])
 
   const navOrder = arrange(NAV_DEFAULT, prefs.nav, 'manual', {}, (id) => id)
 
@@ -74,14 +66,7 @@ export function LayoutSettings({
   }
 
   return (
-    <dialog ref={dialog} className="layout-dialog" onClose={onClose} aria-label={t('layout.title')}>
-      <div className="layout-head">
-        <h3>{t('layout.title')}</h3>
-        <button type="button" className="link" aria-label={t('layout.close')} onClick={onClose}>
-          <Icon name="cerrar" />
-        </button>
-      </div>
-
+    <Modal label={t('layout.title')} title={t('layout.title')} onClose={onClose}>
       <section className="layout-group">
         <h4>{t('layout.style')}</h4>
         <fieldset className="style-picker" aria-label={t('layout.style')}>
@@ -280,7 +265,7 @@ export function LayoutSettings({
           {t('layout.done')}
         </button>
       </div>
-    </dialog>
+    </Modal>
   )
 }
 

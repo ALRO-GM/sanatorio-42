@@ -1,18 +1,17 @@
 import { useEffect, useState } from 'react'
 
 import { focusing, startFocus, useFocus } from '../../shared/focus'
+import { useNow } from '../../shared/hooks/useNow'
 import { useI18n } from '../../shared/i18n'
+import { clock } from '../../shared/time'
 import { Icon } from '../../shared/ui/Icon'
 import { FocusExit } from './FocusExit'
 import { FocusScreen } from './FocusScreen'
 
 const RING = 2 * Math.PI * 26
 
-const mmss = (ms: number): string => {
-  const seconds = Math.max(0, Math.ceil(ms / 1000))
-
-  return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`
-}
+/** `m:ss` de lo que queda, redondeando hacia arriba: que el 0:00 sea el final de verdad. */
+const mmss = (ms: number): string => clock(Math.ceil(Math.max(0, ms) / 1000))
 
 /** Lo que dura el «¡bien hecho!» de seguir concentrándose. */
 const CHEER_MS = 6000
@@ -28,7 +27,6 @@ const CHEER_MS = 6000
 export function FocusTimer() {
   const { t } = useI18n()
   const focus = useFocus()
-  const [now, setNow] = useState(Date.now)
   const active = focusing(focus)
   const until = focus?.until === undefined || focus.until === null ? null : Date.parse(focus.until)
   const started =
@@ -38,6 +36,8 @@ export function FocusTimer() {
   const [screen, setScreen] = useState(false)
   const [asking, setAsking] = useState(false)
   const [cheer, setCheer] = useState(false)
+  // Medio segundo: el anillo se vacía fino y el reloj no se salta ningún segundo.
+  const now = useNow(500, { active: active || breakUntil !== null })
 
   useEffect(() => {
     if (!cheer) return undefined
@@ -50,18 +50,6 @@ export function FocusTimer() {
       window.clearTimeout(done)
     }
   }, [cheer])
-
-  useEffect(() => {
-    if (!active && breakUntil === null) return undefined
-
-    const tick = window.setInterval(() => {
-      setNow(Date.now())
-    }, 500)
-
-    return () => {
-      window.clearInterval(tick)
-    }
-  }, [active, breakUntil])
 
   // Cuando acaba la concentración a su hora, empieza el descanso.
   useEffect(() => {

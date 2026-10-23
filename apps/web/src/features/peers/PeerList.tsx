@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 import type { Peer, ProjectStatus, ProjectSummary } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
+import { usePolling } from '../../shared/hooks/usePolling'
 import { useI18n } from '../../shared/i18n'
 import { Show } from '../../shared/detail'
 import { Icon } from '../../shared/ui/Icon'
@@ -11,6 +12,7 @@ import { Avatar } from '../../shared/ui/Avatar'
 import { FocusBadge } from '../../shared/ui/FocusBadge'
 import { PersonLink } from '../../shared/ui/PersonLink'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { PillGroup } from '../../shared/ui/PillGroup'
 import { BookHelp } from '../help/BookHelp'
 import { ProjectMap } from '../map/ProjectMap'
 import { intraHref } from '../../shared/links'
@@ -62,18 +64,7 @@ export function PeerList({ project, onOpenTherapy }: PeerListProps) {
 
   const partial = data?.partial === true
 
-  useEffect(() => {
-    const timer = setInterval(
-      () => {
-        // Con la pestaña en segundo plano no se pregunta: nadie lo está mirando.
-        if (!document.hidden) void reload()
-      },
-      partial ? REFRESH_PARTIAL_MS : REFRESH_MS,
-    )
-    return () => {
-      clearInterval(timer)
-    }
-  }, [reload, partial])
+  usePolling(reload, partial ? REFRESH_PARTIAL_MS : REFRESH_MS)
 
   const title = <h2>{t('peers.title', { project: project.name })}</h2>
 
@@ -153,26 +144,19 @@ export function PeerList({ project, onOpenTherapy }: PeerListProps) {
       <ProjectMap projectId={project.id} spotlight={spotlight} />
       <div className="filters">
         <Show from="normal">
-          <div className="filter-pills">
-            {(
-              [
-                ['all', t('peers.all', { n: byDuty.length })],
-                ['finished', t('peers.specialists', { n: specialistsCount })],
-                ['in_progress', t('peers.patients', { n: inProgressCount })],
-              ] as const
-            ).map(([value, label]) => (
-              <button
-                key={value}
-                className={`pill ${typeFilter === value ? 'active' : ''}`}
-                aria-pressed={typeFilter === value}
-                onClick={() => {
-                  setTypeFilter(value)
-                }}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
+          <PillGroup<TypeFilter>
+            options={['all', 'finished', 'in_progress']}
+            value={typeFilter}
+            onChange={setTypeFilter}
+            label={t('peers.title', { project: project.name })}
+            text={(value) =>
+              value === 'all'
+                ? t('peers.all', { n: byDuty.length })
+                : value === 'finished'
+                  ? t('peers.specialists', { n: specialistsCount })
+                  : t('peers.patients', { n: inProgressCount })
+            }
+          />
         </Show>
         <label className="duty-check">
           <input

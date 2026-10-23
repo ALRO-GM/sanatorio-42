@@ -5,13 +5,14 @@ import type { ClusterMap, MapCluster, MapSeat, SeatReservation } from '@sanatori
 
 import { localeOf, useI18n } from '../../shared/i18n'
 import type { Translate } from '../../shared/i18n'
+import { PillGroup } from '../../shared/ui/PillGroup'
 import { recordHref } from '../../shared/links'
 import { loadLook, lookClasses, MATES, order, saveLook } from './look'
 import type { MapLook } from './look'
 import { SeatFace } from './SeatFace'
 import { SeatHoverCard } from './SeatHoverCard'
 import type { Hovered } from './SeatHoverCard'
-import { clusterName, seatName } from './seats'
+import { clusterName, seatName } from '../../shared/seats'
 
 // Quien pinta el mapa suele necesitar también el nombre de la sala.
 export { clusterName }
@@ -204,26 +205,28 @@ export function ClusterMapView({
 
   return (
     <div className="cluster-map">
-      <div className="filter-pills" role="group" aria-label={t('map.clusters')}>
-        {map.clusters.map((entry) => (
-          <button
-            key={entry.id}
-            type="button"
-            className={`pill ${entry.id === cluster.id ? 'active' : ''}`}
-            aria-pressed={entry.id === cluster.id}
-            onClick={() => {
-              setChosenCluster(entry.id)
-              setOpenHost(null)
-            }}
-          >
-            {clusterName(entry.id, t)}
-            <span className="pill-count">
-              {entry.onDuty > 0 && <span className="duty-dot" aria-hidden="true" />}
-              {entry.occupied}
-            </span>
-          </button>
-        ))}
-      </div>
+      <PillGroup
+        options={map.clusters.map((entry) => entry.id)}
+        value={cluster.id}
+        onChange={(id) => {
+          setChosenCluster(id)
+          setOpenHost(null)
+        }}
+        label={t('map.clusters')}
+        text={(id) => {
+          const entry = map.clusters.find((one) => one.id === id)
+
+          return (
+            <>
+              {clusterName(id, t)}
+              <span className="pill-count">
+                {(entry?.onDuty ?? 0) > 0 && <span className="duty-dot" aria-hidden="true" />}
+                {entry?.occupied}
+              </span>
+            </>
+          )
+        }}
+      />
 
       {tools && (
         <div className="map-tools" role="group" aria-label={t('map.look')}>

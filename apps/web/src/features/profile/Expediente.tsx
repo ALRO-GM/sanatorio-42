@@ -12,6 +12,7 @@ import { Show, useDetail } from '../../shared/detail'
 import { Blocks } from '../../shared/layout/Blocks'
 import { Avatar } from '../../shared/ui/Avatar'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { PillGroup } from '../../shared/ui/PillGroup'
 import { Achievements } from './Achievements'
 import { AskedCard } from './AskedCard'
 import { HealthCard } from './HealthCard'
@@ -44,7 +45,7 @@ type ExpedienteProps = {
  * porque el pie también lo necesita para saber qué campus estás mirando.
  */
 export function Expediente({ me, profile }: ExpedienteProps) {
-  const { t } = useI18n()
+  const { t, tn } = useI18n()
   const { busy, error, run } = useAction()
   // Cómo se gana XP y cuánta llevas con cada cosa: plegado hasta que se pide.
   const detail = useDetail()
@@ -153,11 +154,7 @@ export function Expediente({ me, profile }: ExpedienteProps) {
                         </span>
                         <span className="xp-got">
                           <strong>{t('xp.gotXp', { xp: earned[kind].xp })}</strong>
-                          <small>
-                            {t(earned[kind].times === 1 ? 'xp.gotOnce' : 'xp.gotTimes', {
-                              n: earned[kind].times,
-                            })}
-                          </small>
+                          <small>{tn('xp.got', earned[kind].times)}</small>
                         </span>
                       </li>
                     ))}
@@ -165,20 +162,25 @@ export function Expediente({ me, profile }: ExpedienteProps) {
                 )}
 
                 <span className="eyebrow">{t('xp.titles')}</span>
-                <div className="filter-pills">
-                  {titles.map((entry) => (
-                    <button
-                      key={entry.id}
-                      className={`pill ${entry.id === title ? 'active' : ''}`}
-                      disabled={!entry.unlocked || busy}
-                      aria-pressed={entry.id === title}
-                      onClick={() => void choose(entry.id)}
-                    >
-                      {titleText(t, entry.id, hacks, master)}
-                      {!entry.unlocked && ` · ${t('xp.locked', { level: entry.level })}`}
-                    </button>
-                  ))}
-                </div>
+                <PillGroup<TitleId>
+                  options={titles.map((entry) => entry.id)}
+                  value={titles.find((entry) => entry.id === title)?.id ?? null}
+                  onChange={(id) => void choose(id)}
+                  label={t('xp.titles')}
+                  disabled={(id) => busy || !titles.find((entry) => entry.id === id)?.unlocked}
+                  text={(id) => {
+                    const entry = titles.find((one) => one.id === id)
+
+                    return (
+                      <>
+                        {titleText(t, id, hacks, master)}
+                        {entry !== undefined &&
+                          !entry.unlocked &&
+                          ` · ${t('xp.locked', { level: entry.level })}`}
+                      </>
+                    )
+                  }}
+                />
                 <ErrorNote error={error} />
                 <Show from="normal">
                   <HoursReport />

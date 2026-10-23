@@ -4,12 +4,15 @@ import type { ClickerVerdict } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
 import { useAction, useAsync } from '../../shared/hooks/useAsync'
-import { localeOf, useI18n } from '../../shared/i18n'
+import { useI18n } from '../../shared/i18n'
+import { useFormat } from '../../shared/i18n/useFormat'
 import { DataTable } from '../../shared/ui/DataTable'
+import { durationText } from '../../shared/time'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { useConfirm } from '../../shared/ui/useConfirm'
+import { PillGroup } from '../../shared/ui/PillGroup'
 import { CapitalChart } from '../clicker/CapitalChart'
 import { CapitalHistory } from '../clicker/CapitalHistory'
-import { duration } from './StatsPanel'
 import { RangePills } from './RangePills'
 import { SanctionForm } from './SanctionForm'
 import { CheatsPanel } from './CheatsPanel'
@@ -36,20 +39,33 @@ export function ClickerPanel({ me }: { me: string }) {
   // El uso del juego o el apartado de las trampas.
   const [view, setView] = useState<'usage' | 'cheats'>('usage')
   const { data, error, loading, reload } = useAsync(() => api.getClickerUsage(days), [days])
-  const compact = new Intl.NumberFormat(localeOf(lang), {
-    notation: 'compact',
-    maximumFractionDigits: 1,
-  })
-  const when = new Intl.DateTimeFormat(localeOf(lang), { dateStyle: 'short', timeStyle: 'short' })
+  const { compact: compactOf, dateTime } = useFormat()
+  const compact = { format: compactOf }
+  const when = { format: dateTime }
   const one = data?.players.find((player) => player.login === login)
   const action = useAction()
+  const confirm = useConfirm()
   const pardon = async (id: number): Promise<void> => {
-    if (!window.confirm(t('admin.clicker.pardonAsk'))) return
+    if (
+      !(await confirm.ask({
+        body: t('admin.clicker.pardonAsk'),
+        okText: t('admin.clicker.pardon'),
+      }))
+    )
+      return
     if (await action.run(() => api.pardonClickerCheat(id))) await reload()
   }
   /** Lo que se decide sobre un salto. La trampa requisa todo: se pregunta antes. */
   const review = async (id: number, verdict: ClickerVerdict): Promise<void> => {
-    if (verdict === 'cheat' && !window.confirm(t('admin.clicker.cheatAsk'))) return
+    if (
+      verdict === 'cheat' &&
+      !(await confirm.ask({
+        body: t('admin.clicker.cheatAsk'),
+        okText: t('admin.clicker.verdict.cheat'),
+        danger: true,
+      }))
+    )
+      return
     if (await action.run(() => api.reviewClickerAlert(id, verdict))) await reload()
   }
 
@@ -63,22 +79,14 @@ export function ClickerPanel({ me }: { me: string }) {
             : t('admin.clicker.of', { login: one.login })}
       </h2>
 
-      <div className="filter-pills" role="tablist" aria-label={t('admin.clicker.title')}>
-        {(['usage', 'cheats'] as const).map((option) => (
-          <button
-            key={option}
-            type="button"
-            role="tab"
-            aria-selected={view === option}
-            className={`pill ${view === option ? 'active' : ''}`}
-            onClick={() => {
-              setView(option)
-            }}
-          >
-            {t(`admin.clicker.view.${option}`)}
-          </button>
-        ))}
-      </div>
+      <PillGroup
+        kind="tabs"
+        options={['usage', 'cheats'] as const}
+        value={view}
+        onChange={setView}
+        label={t('admin.clicker.title')}
+        text={(option) => t(`admin.clicker.view.${option}`)}
+      />
 
       {view === 'cheats' ? (
         <CheatsPanel
@@ -111,9 +119,9 @@ export function ClickerPanel({ me }: { me: string }) {
           ) : one !== undefined ? (
             <>
               <div className="stat-cards">
-                <Figure label={t('admin.stats.seen')} value={duration(one.seen)} strong />
-                <Figure label={t('admin.stats.back')} value={duration(one.back)} />
-                <Figure label={t('admin.stats.hidden')} value={duration(one.hidden)} />
+                <Figure label={t('admin.stats.seen')} value={durationText(one.seen)} strong />
+                <Figure label={t('admin.stats.back')} value={durationText(one.back)} />
+                <Figure label={t('admin.stats.hidden')} value={durationText(one.hidden)} />
                 <Figure label={t('admin.clicker.plus')} value={String(one.plus)} />
                 <Figure
                   label={t('admin.clicker.pill')}
@@ -217,9 +225,13 @@ export function ClickerPanel({ me }: { me: string }) {
           ) : (
             <>
               <div className="stat-cards">
-                <Figure label={t('admin.stats.seen')} value={duration(data.totals.seen)} strong />
-                <Figure label={t('admin.stats.back')} value={duration(data.totals.back)} />
-                <Figure label={t('admin.stats.hidden')} value={duration(data.totals.hidden)} />
+                <Figure
+                  label={t('admin.stats.seen')}
+                  value={durationText(data.totals.seen)}
+                  strong
+                />
+                <Figure label={t('admin.stats.back')} value={durationText(data.totals.back)} />
+                <Figure label={t('admin.stats.hidden')} value={durationText(data.totals.hidden)} />
                 <Figure label={t('admin.clicker.active')} value={String(data.totals.active)} />
                 <Figure
                   label={t('admin.clicker.lines')}
@@ -380,19 +392,19 @@ export function ClickerPanel({ me }: { me: string }) {
                       id: 'seen',
                       label: t('admin.stats.seen'),
                       sort: (row) => (row.seen > 0 ? row.seen : null),
-                      cell: (row) => (row.seen > 0 ? duration(row.seen) : '—'),
+                      cell: (row) => (row.seen > 0 ? durationText(row.seen) : '—'),
                     },
                     {
                       id: 'back',
                       label: t('admin.stats.back'),
                       sort: (row) => (row.back > 0 ? row.back : null),
-                      cell: (row) => (row.back > 0 ? duration(row.back) : '—'),
+                      cell: (row) => (row.back > 0 ? durationText(row.back) : '—'),
                     },
                     {
                       id: 'hidden',
                       label: t('admin.stats.hidden'),
                       sort: (row) => (row.hidden > 0 ? row.hidden : null),
-                      cell: (row) => (row.hidden > 0 ? duration(row.hidden) : '—'),
+                      cell: (row) => (row.hidden > 0 ? durationText(row.hidden) : '—'),
                     },
                     {
                       id: 'caught',
@@ -414,6 +426,7 @@ export function ClickerPanel({ me }: { me: string }) {
           )}
         </>
       )}
+      {confirm.dialog}
     </section>
   )
 }

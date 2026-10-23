@@ -4,10 +4,13 @@ import type { ClickerCheatEntry, ClickerCheater } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
 import { useAction, useAsync } from '../../shared/hooks/useAsync'
-import { localeOf, useI18n } from '../../shared/i18n'
+import { useI18n } from '../../shared/i18n'
+import { useFormat } from '../../shared/i18n/useFormat'
 import { DataTable } from '../../shared/ui/DataTable'
 import type { Column } from '../../shared/ui/DataTable'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { useConfirm } from '../../shared/ui/useConfirm'
+import { PillGroup } from '../../shared/ui/PillGroup'
 import { Icon } from '../../shared/ui/Icon'
 import { directChatId, openChat } from '../notices/conversations'
 import { Figure } from './Figure'
@@ -21,22 +24,24 @@ type CheatsPanelProps = {
   onWatch: (login: string) => void
 }
 
+/** La pastilla «de cualquier motivo» del filtro; no choca con los motivos, que son palabras. */
+const ANY_WHY = '*'
+
 /**
  * Las trampas de Code Clicker: quién las ha hecho, cuándo, cómo se vieron y
  * qué se le requisó, con lo que se puede hacer con cada cual (escribirle, ver
  * su partida, indultar) y un comunicado solo para quienes salen en la lista.
  */
 export function CheatsPanel({ me, onWatch }: CheatsPanelProps) {
-  const { t, lang } = useI18n()
+  const { t } = useI18n()
   const { data, error, loading, reload } = useAsync(() => api.getClickerCheats(), [])
   const [why, setWhy] = useState<string | null>(null)
   const [writing, setWriting] = useState(false)
   const action = useAction()
-  const compact = new Intl.NumberFormat(localeOf(lang), {
-    notation: 'compact',
-    maximumFractionDigits: 1,
-  })
-  const when = new Intl.DateTimeFormat(localeOf(lang), { dateStyle: 'short', timeStyle: 'short' })
+  const confirm = useConfirm()
+  const { compact: compactOf, dateTime } = useFormat()
+  const compact = { format: compactOf }
+  const when = { format: dateTime }
   const date = (iso: string): string => when.format(new Date(iso))
   const whyText = (value: string): string => t(`admin.clicker.why.${value}`)
 
@@ -51,7 +56,13 @@ export function CheatsPanel({ me, onWatch }: CheatsPanelProps) {
   const whys = [...new Set(data.entries.map((entry) => entry.why))]
 
   const pardon = async (id: number): Promise<void> => {
-    if (!window.confirm(t('admin.clicker.pardonAsk'))) return
+    if (
+      !(await confirm.ask({
+        body: t('admin.clicker.pardonAsk'),
+        okText: t('admin.clicker.pardon'),
+      }))
+    )
+      return
     if (await action.run(() => api.pardonClickerCheat(id))) await reload()
   }
 
@@ -215,31 +226,15 @@ export function CheatsPanel({ me, onWatch }: CheatsPanelProps) {
       </div>
 
       {whys.length > 1 && (
-        <div className="filter-pills" role="group" aria-label={t('admin.clicker.why')}>
-          <button
-            type="button"
-            className={`pill ${why === null ? 'active' : ''}`}
-            aria-pressed={why === null}
-            onClick={() => {
-              setWhy(null)
-            }}
-          >
-            {t('admin.inbox.allKinds')}
-          </button>
-          {whys.map((value) => (
-            <button
-              key={value}
-              type="button"
-              className={`pill ${why === value ? 'active' : ''}`}
-              aria-pressed={why === value}
-              onClick={() => {
-                setWhy(value)
-              }}
-            >
-              {whyText(value)}
-            </button>
-          ))}
-        </div>
+        <PillGroup
+          options={[ANY_WHY, ...whys]}
+          value={why ?? ANY_WHY}
+          onChange={(option) => {
+            setWhy(option === ANY_WHY ? null : option)
+          }}
+          label={t('admin.clicker.why')}
+          text={(option) => (option === ANY_WHY ? t('admin.inbox.allKinds') : whyText(option))}
+        />
       )}
 
       <article className="card">
@@ -292,6 +287,7 @@ export function CheatsPanel({ me, onWatch }: CheatsPanelProps) {
           />
         )}
       </article>
+      {confirm.dialog}
     </>
   )
 }

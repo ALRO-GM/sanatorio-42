@@ -5,7 +5,8 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { byLocalHour, duration } from '../src/features/admin/StatsPanel'
+import { byLocalHour } from '../src/features/admin/StatsPanel'
+import { durationText } from '../src/shared/time'
 import { createViewClock } from '../src/shared/layout/view-clock'
 
 const SECOND = 1000
@@ -94,8 +95,8 @@ describe('estadísticas', () => {
   })
 
   it('escribe las duraciones de forma que se lean', () => {
-    expect(duration(40)).toBe('40 s')
-    expect(duration(7 * 60)).toBe('7 min')
-    expect(duration(2 * 3600 + 5 * 60)).toBe('2 h 05 min')
+    expect(durationText(40)).toBe('40 s')
+    expect(durationText(7 * 60)).toBe('7 min')
+    expect(durationText(2 * 3600 + 5 * 60)).toBe('2 h 05 min')
   })
 })

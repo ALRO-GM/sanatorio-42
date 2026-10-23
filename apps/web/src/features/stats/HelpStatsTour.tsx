@@ -84,7 +84,7 @@ export function HelpStatsTour() {
                 <strong>9</strong>
                 <span className="tour-avatar">P</span>
                 <span>plopez-l</span>
-                <span className="tour-chip">{t('stats.you')}</span>
+                <span className="tour-chip">{t('rank.you')}</span>
                 <span className="tour-chip tour-end">{t('stats.tablon.value', { n: 2 })}</span>
               </span>
             </div>

@@ -8,6 +8,7 @@ import { api } from '../../shared/api'
 import { useAction } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { PillGroup } from '../../shared/ui/PillGroup'
 import { WorldGraphs } from './GitGraph'
 import { Terminal } from './Terminal'
 import type { TerminalEntry } from './Terminal'
@@ -43,22 +44,14 @@ export function LevelView({ level, best, seat, onDone, onBack }: LevelViewProps)
         </h3>
         <p className="git-goal">{level.goal}</p>
       </header>
-      <div className="filter-pills" role="tablist" aria-label={level.title}>
-        {STEPS.map((option, index) => (
-          <button
-            key={option}
-            type="button"
-            role="tab"
-            className={`pill ${step === option ? 'active' : ''}`}
-            aria-selected={step === option}
-            onClick={() => {
-              setStep(option)
-            }}
-          >
-            {index + 1}. {t(`git.step.${option}`)}
-          </button>
-        ))}
-      </div>
+      <PillGroup
+        kind="tabs"
+        options={STEPS}
+        value={step}
+        onChange={setStep}
+        label={level.title}
+        text={(option) => `${STEPS.indexOf(option) + 1}. ${t(`git.step.${option}`)}`}
+      />
       {step === 'animation' && (
         <Animation
           level={level}

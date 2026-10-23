@@ -4,6 +4,8 @@ import type { QuizPlayer, QuizQuestion, QuizRoom, QuizTeam } from '@sanatorio/co
 
 import { api } from '../../shared/api'
 import { useAction } from '../../shared/hooks/useAsync'
+import { usePolling } from '../../shared/hooks/usePolling'
+import { useNow } from '../../shared/hooks/useNow'
 import { useI18n } from '../../shared/i18n'
 import { notGamesHref } from '../../shared/links'
 import { Avatar } from '../../shared/ui/Avatar'
@@ -61,20 +63,7 @@ export function RoomView({ id, me }: RoomViewProps) {
 
   const status = room?.status
 
-  useEffect(() => {
-    if (status === 'done') return undefined
-
-    const timer = setInterval(
-      () => {
-        if (!document.hidden) void load()
-      },
-      status === 'playing' ? PLAYING_MS : WAITING_MS,
-    )
-
-    return () => {
-      clearInterval(timer)
-    }
-  }, [status, load])
+  usePolling(load, status === 'done' ? null : status === 'playing' ? PLAYING_MS : WAITING_MS)
 
   if (room === null) {
     return error === null ? (
@@ -250,18 +239,8 @@ type QuestionProps = {
 /** La pregunta de ahora: cuenta atrás, enunciado, código y respuestas; al cerrarse, la buena. */
 function Question({ room, question, me, playing, offset, onAnswer }: QuestionProps) {
   const { t } = useI18n()
-  const [now, setNow] = useState(() => Date.now() + offset)
+  const now = useNow(200, { offset })
   const sounds = useGameSounds()
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setNow(Date.now() + offset)
-    }, 200)
-
-    return () => {
-      clearInterval(timer)
-    }
-  }, [offset])
 
   const startsAt = Date.parse(question.startsAt)
   const endsAt = Date.parse(question.endsAt)
@@ -405,6 +384,7 @@ function Scores({ room, me }: { room: QuizRoom; me: string }) {
             <Avatar login={player.login} image={player.image} size={32} />
             <span className="quiz-name">
               {player.login}
+              {player.login === me && <small> · {t('rank.you')}</small>}
               {player.team !== null && <small> · {t(`notgames.team.${player.team}`)}</small>}
             </span>
             {survival ? (

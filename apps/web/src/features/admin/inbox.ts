@@ -38,18 +38,6 @@ export function sectionFor(
 
 export const INBOX_VIEWS = ['pending', 'done'] as const
 
-export const REPORT_REASONS = [
-  'spam',
-  'harassment',
-  'insults',
-  'other',
-] as const satisfies readonly ReportReason[]
-
-/** Una denuncia se puede mandar con un motivo claro sin más; con «otro» hay que explicarlo. */
-export function reportIsReady(reason: ReportReason, why: string): boolean {
-  return reason !== 'other' || why.trim().length >= 5
-}
-
 /** Qué mensajes se enseñan: todos, o solo las denuncias de un motivo. */
 export type InboxFilter = 'all' | ReportReason
 

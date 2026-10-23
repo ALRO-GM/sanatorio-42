@@ -1,8 +1,8 @@
-import { useEffect, useRef } from 'react'
-import { createPortal } from 'react-dom'
+import { useRef } from 'react'
 
 import type { ClickerSeizure, Lang } from '@sanatorio/contracts'
 import { Icon } from '../../shared/ui/Icon'
+import { Modal } from '../../shared/ui/Modal'
 import { Tile } from './art'
 import { bustText, fill, policeText, short, textsOf } from './texts'
 
@@ -41,12 +41,8 @@ export function Bust({ bust, lang, onClose }: { bust: Busted; lang: Lang; onClos
               rate: short(evidence.perSecond, lang),
             })}${evidence.golden ? '' : `, ${ui.policeNoGolden ?? ''}`}.`))
 
-  useEffect(() => {
-    if (dialog.current?.open === false) dialog.current.showModal()
-  }, [])
-
-  return createPortal(
-    <dialog ref={dialog} className="layout-dialog cc-bust" aria-label={title} onClose={onClose}>
+  return (
+    <Modal ref={dialog} portal label={title} className="cc-bust" onClose={onClose}>
       <span className="cc-bust-icon" aria-hidden="true">
         {seizure === null ? <Icon name="escudo" size={28} /> : <Tile icon="loot" size={40} />}
       </span>
@@ -74,7 +70,6 @@ export function Bust({ bust, lang, onClose }: { bust: Busted; lang: Lang; onClos
       >
         {ui.bustOk}
       </button>
-    </dialog>,
-    document.body,
+    </Modal>
   )
 }

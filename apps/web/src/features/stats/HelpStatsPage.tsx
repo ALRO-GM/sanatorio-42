@@ -5,11 +5,11 @@ import type { LeaderboardPeriod, StatsEntry, StatsSection } from '@sanatorio/con
 import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
-import { localeOf } from '../../shared/i18n/locale'
-import { Avatar } from '../../shared/ui/Avatar'
-import { PersonLink } from '../../shared/ui/PersonLink'
+import { useFormat } from '../../shared/i18n/useFormat'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { PillGroup } from '../../shared/ui/PillGroup'
 import { InfoTip } from '../../shared/ui/InfoTip'
+import { RankingList, withMe } from '../../shared/ui/RankingList'
 import { HelpStatsTour } from './HelpStatsTour'
 import { ProgressCard } from './ProgressCard'
 
@@ -34,21 +34,13 @@ export function HelpStatsPage({ me }: { me: string }) {
             <HelpStatsTour />
           </InfoTip>
         </h2>
-        <div className="filter-pills" role="group" aria-label={t('stats.period')}>
-          {PERIODS.map((option) => (
-            <button
-              key={option}
-              type="button"
-              className={`pill ${period === option ? 'active' : ''}`}
-              aria-pressed={period === option}
-              onClick={() => {
-                setPeriod(option)
-              }}
-            >
-              {t(`rank.${option}`)}
-            </button>
-          ))}
-        </div>
+        <PillGroup
+          options={PERIODS}
+          value={period}
+          onChange={setPeriod}
+          label={t('stats.period')}
+          text={(option) => t(`rank.${option}`)}
+        />
       </div>
 
       {loading && data === undefined && <p className="estado">{t('app.loading')}</p>}
@@ -66,13 +58,10 @@ export function HelpStatsPage({ me }: { me: string }) {
 }
 
 function SectionCard({ section, me }: { section: StatsSection; me: string }) {
-  const { t, lang } = useI18n()
-  const locale = localeOf(lang)
+  const { t } = useI18n()
+  const { number } = useFormat()
   const mine = section.me
-  const rows: StatsEntry[] =
-    mine !== null && !section.ranking.some((entry) => entry.login === mine.login)
-      ? [...section.ranking, mine]
-      : section.ranking
+  const rows: StatsEntry[] = withMe(section.ranking, mine)
 
   return (
     <article className="card help-stats-card" aria-labelledby={`stats-${section.id}`}>
@@ -86,8 +75,8 @@ function SectionCard({ section, me }: { section: StatsSection; me: string }) {
             <dd>
               {/* Las horas llegan en minutos: se enseñan en horas, con un decimal. */}
               {total.key === 'minutes'
-                ? (Math.round(total.value / 6) / 10).toLocaleString(locale)
-                : total.value.toLocaleString(locale)}
+                ? number(Math.round(total.value / 6) / 10)
+                : number(total.value)}
             </dd>
           </div>
         ))}
@@ -97,29 +86,22 @@ function SectionCard({ section, me }: { section: StatsSection; me: string }) {
       {rows.length === 0 ? (
         <p className="estado">{t('stats.empty')}</p>
       ) : (
-        <ol className="rows ranking" aria-label={t(`stats.${section.id}.rank`)}>
-          {rows.map((entry) => (
-            <li key={entry.login} className={`row plain ${entry.login === me ? 'me' : ''}`}>
-              <span className="rank" aria-label={t('rank.place', { n: entry.rank })}>
-                <span className={entry.rank <= 3 ? `medal medal-${entry.rank}` : undefined}>
-                  {entry.rank}
-                </span>
-              </span>
-              <Avatar login={entry.login} image={entry.image} size={28} />
-              <PersonLink login={entry.login} />
-              {entry.login === me && <span className="chip">{t('stats.you')}</span>}
-              <span className="row-count">
-                <strong>{t(`stats.${section.id}.value`, { n: entry.value })}</strong>
-                <small>
-                  {/* En el ritmo, 0 es «más lento que el pace de 24 meses». */}
-                  {section.id === 'ritmo' && entry.extra === 0
-                    ? t('stats.ritmo.slow')
-                    : t(`stats.${section.id}.extra`, { n: entry.extra })}
-                </small>
-              </span>
-            </li>
-          ))}
-        </ol>
+        <RankingList
+          rows={rows}
+          me={me}
+          label={t(`stats.${section.id}.rank`)}
+          value={(entry) => (
+            <span className="row-count">
+              <strong>{t(`stats.${section.id}.value`, { n: entry.value })}</strong>
+              <small>
+                {/* En el ritmo, 0 es «más lento que el pace de 24 meses». */}
+                {section.id === 'ritmo' && entry.extra === 0
+                  ? t('stats.ritmo.slow')
+                  : t(`stats.${section.id}.extra`, { n: entry.extra })}
+              </small>
+            </span>
+          )}
+        />
       )}
       {rows.length > 0 && mine === null && <p className="hint">{t('stats.notYet')}</p>}
     </article>

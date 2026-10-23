@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { seatName } from '../map/seats'
+import { seatName } from '../../shared/seats'
 import type { GroupView, ProjectSummary } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
@@ -8,7 +8,8 @@ import { useAction } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { Avatar } from '../../shared/ui/Avatar'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
-import { ChatRoom } from '../alerts/Chat'
+import { useConfirm } from '../../shared/ui/useConfirm'
+import { ChatRoom } from '../../shared/chat/Chat'
 import { shortDay, today } from './days'
 import { GroupForm } from './GroupForm'
 import { Icon } from '../../shared/ui/Icon'
@@ -29,6 +30,7 @@ const MEMBERS_SHOWN = 4
 export function GroupCard({ group, projects, onChange, me }: GroupCardProps) {
   const { t, lang } = useI18n()
   const { busy, error, run } = useAction()
+  const confirm = useConfirm()
   const [copied, setCopied] = useState(false)
   const [editing, setEditing] = useState(false)
   // Al apuntarse se pregunta cómo se lleva el proyecto; en uno de repaso, ya está al 100.
@@ -257,9 +259,12 @@ export function GroupCard({ group, projects, onChange, me }: GroupCardProps) {
             className="pill"
             disabled={busy}
             onClick={() => {
-              if (window.confirm(t('therapy.inviteAsk', { project: group.projectName ?? '' }))) {
-                void act(() => api.inviteGroup(group.id))
-              }
+              void confirm
+                .ask({
+                  body: t('therapy.inviteAsk', { project: group.projectName ?? '' }),
+                  okText: t('therapy.invite'),
+                })
+                .then((ok) => (ok ? act(() => api.inviteGroup(group.id)) : undefined))
             }}
           >
             <Icon name="campana" /> {t('therapy.invite')}
@@ -274,9 +279,13 @@ export function GroupCard({ group, projects, onChange, me }: GroupCardProps) {
             className="link"
             disabled={busy}
             onClick={() => {
-              if (window.confirm(t('therapy.removeAsk', { creator: group.creator }))) {
-                void act(() => api.closeGroup(group.id))
-              }
+              void confirm
+                .ask({
+                  body: t('therapy.removeAsk', { creator: group.creator }),
+                  okText: t('therapy.remove'),
+                  danger: true,
+                })
+                .then((ok) => (ok ? act(() => api.closeGroup(group.id)) : undefined))
             }}
           >
             {t('therapy.remove')}
@@ -284,6 +293,7 @@ export function GroupCard({ group, projects, onChange, me }: GroupCardProps) {
         )}
       </div>
       <ErrorNote error={error} />
+      {confirm.dialog}
     </article>
   )
 }

@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event'
 import es from 'virtual:textos/es'
 import { afterEach, describe, expect, it } from 'vitest'
 
-import { Attendance } from '../../src/features/alerts/Attendance'
+import { Attendance } from '../../src/features/calendar/Attendance'
 import { I18nProvider } from '../../src/shared/i18n'
 import { must } from './must'
 

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 
 import type { FocusSettings, FocusShow } from '@sanatorio/contracts'
 
@@ -8,7 +8,9 @@ import { startFocus, useFocus } from '../../shared/focus'
 import { useAction } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { PillGroup } from '../../shared/ui/PillGroup'
 import { Icon } from '../../shared/ui/Icon'
+import { Modal } from '../../shared/ui/Modal'
 import { FocusMyStats } from './FocusMyStats'
 
 const FOCUS_MINUTES = [25, 50, 90] as const
@@ -45,50 +47,31 @@ export function FocusDialog({ onClose }: { onClose: () => void }) {
   const { busy, error, run } = useAction()
   const [tab, setTab] = useState<(typeof TABS)[number]>('settings')
 
-  useEffect(() => {
-    if (dialog.current?.open === false) dialog.current.showModal()
-  }, [])
-
   const toggle = <T extends string>(list: readonly T[], item: T): T[] =>
     list.includes(item) ? list.filter((one) => one !== item) : [...list, item]
 
   return (
-    <dialog
+    <Modal
       ref={dialog}
-      className={`layout-dialog focus-dialog ${tab === 'stats' ? 'wide' : ''}`}
-      aria-label={t('focus.title')}
+      label={t('focus.title')}
+      className={`focus-dialog ${tab === 'stats' ? 'wide' : ''}`}
       onClose={onClose}
-    >
-      <div className="layout-head">
-        <h3>
+      title={
+        <>
           <Icon name="reloj" /> {t('focus.title')}
-        </h3>
-        <button
-          type="button"
-          className="link"
-          aria-label={t('layout.close')}
-          onClick={() => dialog.current?.close()}
-        >
-          <Icon name="cerrar" />
-        </button>
-      </div>
+        </>
+      }
+    >
       <Show from="normal">
-        <div className="filter-pills sub-tabs" role="tablist" aria-label={t('focus.title')}>
-          {TABS.map((option) => (
-            <button
-              key={option}
-              type="button"
-              role="tab"
-              aria-selected={tab === option}
-              className={`pill ${tab === option ? 'active' : ''}`}
-              onClick={() => {
-                setTab(option)
-              }}
-            >
-              {t(`focus.tab.${option}`)}
-            </button>
-          ))}
-        </div>
+        <PillGroup
+          kind="tabs"
+          className="sub-tabs"
+          options={TABS}
+          value={tab}
+          onChange={setTab}
+          label={t('focus.title')}
+          text={(option) => t(`focus.tab.${option}`)}
+        />
       </Show>
       {tab === 'stats' && <FocusMyStats />}
       {tab === 'settings' && (
@@ -179,6 +162,6 @@ export function FocusDialog({ onClose }: { onClose: () => void }) {
           </div>
         </>
       )}
-    </dialog>
+    </Modal>
   )
 }

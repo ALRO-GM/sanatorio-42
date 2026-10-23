@@ -5,6 +5,7 @@ import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { Show, shows, useDetail } from '../../shared/detail'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { PillGroup } from '../../shared/ui/PillGroup'
 import { DoubtDetailCard } from './DoubtDetailCard'
 import { DoubtForm } from './DoubtForm'
 import { firstInProgress } from './graph'
@@ -68,21 +69,14 @@ export function DoubtBoard({ initialProject }: DoubtBoardProps) {
       ) : (
         <>
           <Show from="normal">
-            <div className="filter-pills graph-views" role="group" aria-label={t('cgraph.views')}>
-              {(['progress', 'corrections'] as const).map((option) => (
-                <button
-                  key={option}
-                  type="button"
-                  className={`pill ${view === option ? 'active' : ''}`}
-                  aria-pressed={view === option}
-                  onClick={() => {
-                    setView(option)
-                  }}
-                >
-                  {t(`cgraph.view.${option}`)}
-                </button>
-              ))}
-            </div>
+            <PillGroup
+              className="graph-views"
+              options={['progress', 'corrections'] as const}
+              value={view}
+              onChange={setView}
+              label={t('cgraph.views')}
+              text={(option) => t(`cgraph.view.${option}`)}
+            />
           </Show>
           {/* En el modo simplificado solo está el grafo de tu avance. */}
           {view === 'progress' || !shows(detail, 'normal') ? (

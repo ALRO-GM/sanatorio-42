@@ -1,4 +1,4 @@
-import { isLang, LANGS, useI18n } from '../../shared/i18n'
+import { isLang, LANGS, useI18n } from '../i18n'
 
 export function LangSelect() {
   const { lang, setLang, t } = useI18n()

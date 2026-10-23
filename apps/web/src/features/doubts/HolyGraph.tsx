@@ -5,8 +5,10 @@ import type { GraphProject, HolyGraph as HolyGraphData } from '@sanatorio/contra
 
 import { useMediaQuery } from '../../shared/hooks/useMediaQuery'
 import { localeOf, useI18n } from '../../shared/i18n'
-import type { Translate } from '../../shared/i18n'
+import type { Translate, TranslateCount } from '../../shared/i18n'
+import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { Icon } from '../../shared/ui/Icon'
+import { PillGroup } from '../../shared/ui/PillGroup'
 import {
   completion,
   countSignals,
@@ -128,7 +130,7 @@ const sizeOf = (item: RingItem): number =>
 const percent = (fraction: number): string => `${Math.round(fraction * 100)} %`
 
 /** Lo que lee un lector de pantalla (y lo que enseña la barra de detalle) de un proyecto. */
-function describe(project: GraphProject, circle: number, t: Translate): string {
+function describe(project: GraphProject, circle: number, t: Translate, tn: TranslateCount): string {
   const parts = [project.name, t('graph.circle', { n: circle })]
   const { signals } = project
 
@@ -136,18 +138,10 @@ function describe(project: GraphProject, circle: number, t: Translate): string {
   if (project.hours !== null) parts.push(t('graph.hours', { n: Math.round(project.hours) }))
 
   if (signals.unanswered > 0) {
-    parts.push(
-      t(signals.unanswered === 1 ? 'graph.one.unanswered' : 'graph.count.unanswered', {
-        n: signals.unanswered,
-      }),
-    )
+    parts.push(tn('graph.todo.unanswered', signals.unanswered))
   }
   if (signals.proposals > 0) {
-    parts.push(
-      t(signals.proposals === 1 ? 'graph.one.proposals' : 'graph.count.proposals', {
-        n: signals.proposals,
-      }),
-    )
+    parts.push(tn('graph.todo.proposals', signals.proposals))
   }
   if (signals.missingGuide) parts.push(t('graph.signal.missingGuide'))
 
@@ -185,7 +179,7 @@ function describeSeries(series: string, projects: readonly GraphProject[], t: Tr
  * dejarían de leerse.
  */
 export function HolyGraph({ graph, selected, onSelect }: HolyGraphProps) {
-  const { t, lang } = useI18n()
+  const { t, tn, lang } = useI18n()
   const narrow = useMediaQuery('(max-width: 700px)')
   // Aviso con el que se filtra el grafo: los proyectos que no lo tienen se apagan.
   const [focus, setFocus] = useState<Signal | null>(null)
@@ -297,14 +291,14 @@ export function HolyGraph({ graph, selected, onSelect }: HolyGraphProps) {
           return describeSeries(item.series, item.projects, t)
         }
         if (item.kind === 'project' && hovered === `project:${item.project.projectId}`) {
-          return describe(item.project, ring.circle, t)
+          return describe(item.project, ring.circle, t, tn)
         }
       }
     }
 
     return selectedEntry === undefined
       ? t('graph.pick')
-      : describe(selectedEntry.project, selectedEntry.circle, t)
+      : describe(selectedEntry.project, selectedEntry.circle, t, tn)
   }
 
   /** Atributos comunes de una burbuja pulsable del dibujo. */
@@ -372,30 +366,33 @@ export function HolyGraph({ graph, selected, onSelect }: HolyGraphProps) {
         )}
       </header>
 
+      {/* Sin el estado de salud el grafo sale sin pace ni plazos: que no parezca que no los hay. */}
+      {health.data === undefined && !health.loading && health.error !== null && (
+        <>
+          <p className="hint">{t('graph.healthFailed')}</p>
+          <ErrorNote error={health.error} onRetry={() => void health.reload()} />
+        </>
+      )}
       {(active.length > 0 || allSeries.length > 0) && (
         <div className="graph-summary">
           {active.length > 0 && (
-            <div className="filter-pills" role="group" aria-label={t('graph.needsYou')}>
-              <span className="eyebrow">{t('graph.needsYou')}</span>
-              {active.map((signal) => (
-                <button
-                  key={signal}
-                  type="button"
-                  className={`pill ${focus === signal ? 'active' : ''}`}
-                  aria-pressed={focus === signal}
-                  onClick={() => {
-                    setFocus(focus === signal ? null : signal)
-                  }}
-                >
+            <PillGroup
+              options={active}
+              value={focus}
+              onChange={(signal) => {
+                setFocus(focus === signal ? null : signal)
+              }}
+              label={t('graph.needsYou')}
+              before={<span className="eyebrow">{t('graph.needsYou')}</span>}
+              text={(signal) => (
+                <>
                   <span className={`graph-mark ${signal}`} aria-hidden="true">
                     {SIGNAL_GLYPH[signal]}
                   </span>
-                  {t(`graph.${totals[signal] === 1 ? 'one' : 'count'}.${signal}`, {
-                    n: totals[signal],
-                  })}
-                </button>
-              ))}
-            </div>
+                  {tn(`graph.todo.${signal}`, totals[signal])}
+                </>
+              )}
+            />
           )}
           {allSeries.length > 0 && (
             <div className="filter-pills" role="group" aria-label={t('graph.series')}>
@@ -457,7 +454,7 @@ export function HolyGraph({ graph, selected, onSelect }: HolyGraphProps) {
                       type="button"
                       className={`graph-node ${lookOf(item.project)} ${item.project.perfect ? 'perfect' : ''} ${item.project.projectId === selected ? 'selected' : ''} ${dimmed([item.project]) ? 'dimmed' : ''}`}
                       aria-pressed={item.project.projectId === selected}
-                      aria-label={describe(item.project, circle, t)}
+                      aria-label={describe(item.project, circle, t, tn)}
                       onClick={() => {
                         onSelect(item.project.projectId)
                       }}
@@ -726,7 +723,7 @@ export function HolyGraph({ graph, selected, onSelect }: HolyGraphProps) {
                       className={`graph-node ${lookOf(project)} ${project.perfect ? 'perfect' : ''} ${project.projectId === selected ? 'selected' : ''} ${dimmed([project]) ? 'dimmed' : ''}`}
                       {...bubble(
                         key,
-                        describe(project, circle, t),
+                        describe(project, circle, t, tn),
                         project.projectId === selected,
                         () => {
                           // De un círculo al que aún no se ha llegado se ve qué hay, pero no se abre.

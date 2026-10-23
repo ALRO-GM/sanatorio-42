@@ -11,8 +11,8 @@ import { DataTable } from '../../shared/ui/DataTable'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { Logo } from '../../shared/ui/Logo'
 import { FacilityList } from '../facility/FacilityList'
-import { LangSelect } from '../settings/LangSelect'
-import { ThemeSelect } from '../settings/ThemeSelect'
+import { LangSelect } from '../../shared/ui/LangSelect'
+import { ThemeSelect } from '../../shared/ui/ThemeSelect'
 import { codeFromName, hoursText } from './code'
 
 /**

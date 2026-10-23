@@ -6,7 +6,7 @@ import { useI18n } from '../../shared/i18n'
 import { Avatar } from '../../shared/ui/Avatar'
 import { FocusBadge } from '../../shared/ui/FocusBadge'
 import { Icon } from '../../shared/ui/Icon'
-import { seatName } from './seats'
+import { seatName } from '../../shared/seats'
 import { recordHref } from '../../shared/links'
 
 /** Un puesto y el botón que lo pinta: la ficha se coloca junto a él. */

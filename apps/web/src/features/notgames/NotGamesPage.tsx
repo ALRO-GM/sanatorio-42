@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import type { SyntheticEvent } from 'react'
 
 import type {
@@ -14,9 +14,11 @@ import type {
 
 import { api } from '../../shared/api'
 import { useAction, useAsync } from '../../shared/hooks/useAsync'
+import { usePolling } from '../../shared/hooks/usePolling'
 import { useI18n } from '../../shared/i18n'
 import { notGamesHref, turnGameHref } from '../../shared/links'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { PillGroup } from '../../shared/ui/PillGroup'
 import { GitCourseTab } from '../gitcourse/GitCourseTab'
 import { Icon } from '../../shared/ui/Icon'
 import { InfoTip } from '../../shared/ui/InfoTip'
@@ -80,22 +82,14 @@ function Lobby({ me, initial }: { me: string; initial: Tab }) {
 
   return (
     <>
-      <div className="filter-pills" role="tablist" aria-label={t('nav.notgames')}>
-        {TABS.map((option) => (
-          <button
-            key={option}
-            type="button"
-            role="tab"
-            className={`pill ${tab === option ? 'active' : ''}`}
-            aria-selected={tab === option}
-            onClick={() => {
-              setTab(option)
-            }}
-          >
-            {t(`notgames.tab.${option}`)}
-          </button>
-        ))}
-      </div>
+      <PillGroup
+        kind="tabs"
+        options={TABS}
+        value={tab}
+        onChange={setTab}
+        label={t('nav.notgames')}
+        text={(option) => t(`notgames.tab.${option}`)}
+      />
       {tab === 'rooms' && <Rooms />}
       {tab === 'review' && <ReviewTab />}
       {tab === 'git' && (
@@ -127,15 +121,7 @@ function Rooms() {
   const { reload } = rooms
 
   // La lista se pone al día sola: las salas se llenan y se abren mientras miras.
-  useEffect(() => {
-    const timer = setInterval(() => {
-      if (!document.hidden) void reload()
-    }, LIST_REFRESH_MS)
-
-    return () => {
-      clearInterval(timer)
-    }
-  }, [reload])
+  usePolling(reload, LIST_REFRESH_MS)
 
   return (
     <>

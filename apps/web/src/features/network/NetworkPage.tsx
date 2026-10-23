@@ -4,9 +4,12 @@ import type { CurrentUser, NetworkGraph, NetworkNode } from '@sanatorio/contract
 
 import { api } from '../../shared/api'
 import type { NetworkParams } from '../../shared/api/types'
+import { usePolling } from '../../shared/hooks/usePolling'
 import { useI18n } from '../../shared/i18n'
+import { useFormat } from '../../shared/i18n/useFormat'
 import { Blocks } from '../../shared/layout/Blocks'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { PillGroup } from '../../shared/ui/PillGroup'
 import {
   COLOR_MODES,
   colorOf,
@@ -99,6 +102,7 @@ function paramsOf(filters: Filters): NetworkParams {
  */
 export function NetworkPage({ me }: { me: CurrentUser }) {
   const { t } = useI18n()
+  const { number } = useFormat()
   const [filters, setFilters] = useState<Filters>({
     // Un enlace a una persona enseña su historia entera; el campus, el último año.
     period: loginInUrl() === null ? 'year' : 'all',
@@ -162,17 +166,12 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
   // Mientras se copia el histórico, el grafo crece solo.
   const copying = graph !== null && graph.sync.phase !== 'done'
 
-  useEffect(() => {
-    if (!copying) return undefined
-
-    const timer = setInterval(() => {
+  usePolling(
+    () => {
       setReloads((count) => count + 1)
-    }, REFRESH_WHILE_COPYING_MS)
-
-    return () => {
-      clearInterval(timer)
-    }
-  }, [copying])
+    },
+    copying ? REFRESH_WHILE_COPYING_MS : null,
+  )
 
   const change = useCallback((patch: Partial<Filters>) => {
     setFilters((current) => ({ ...current, ...patch }))
@@ -302,8 +301,8 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
                   {graph.sync.total === null
                     ? t('net.sync.pending')
                     : t('net.sync.copying', {
-                        rows: graph.sync.rows.toLocaleString(),
-                        total: graph.sync.total.toLocaleString(),
+                        rows: number(graph.sync.rows),
+                        total: number(graph.sync.total),
                       })}
                 </span>
                 {graph.sync.first !== null && graph.sync.last !== null && (
@@ -322,64 +321,54 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
             {graph !== null && graph.available.length > 1 && (
               <div className="net-filter">
                 <span className="eyebrow">{t('net.campuses')}</span>
-                <div className="filter-pills" role="group" aria-label={t('net.campuses')}>
-                  {graph.available.map((campus) => {
-                    const on = graph.campuses.includes(campus.id)
-
-                    return (
-                      <button
-                        key={campus.id}
-                        type="button"
-                        className={`pill ${on ? 'active' : ''}`}
-                        aria-pressed={on}
-                        onClick={() => {
-                          const next = on
-                            ? graph.campuses.filter((id) => id !== campus.id)
-                            : [...graph.campuses, campus.id]
-
-                          // Sin ninguno no hay grafo: el último no se puede quitar.
-                          if (next.length === 0) return
-
-                          change({ campuses: next })
-                          // Con más de uno, lo que interesa ver es de cuál es cada quien.
-                          if (next.length > 1) setMode('campus')
-                        }}
-                      >
-                        {campus.name}
-                      </button>
-                    )
-                  })}
-                  <button
-                    type="button"
-                    className={`pill ${graph.campuses.length === graph.available.length ? 'active' : ''}`}
-                    aria-pressed={graph.campuses.length === graph.available.length}
-                    onClick={() => {
+                <PillGroup<number | 'all'>
+                  options={[...graph.available.map((campus) => campus.id), 'all']}
+                  value={null}
+                  pressed={(option) =>
+                    option === 'all'
+                      ? graph.campuses.length === graph.available.length
+                      : graph.campuses.includes(option)
+                  }
+                  onChange={(option) => {
+                    if (option === 'all') {
                       change({ campuses: 'all' })
                       setMode('campus')
-                    }}
-                  >
-                    {t('net.campuses.all')}
-                  </button>
-                </div>
+
+                      return
+                    }
+
+                    const on = graph.campuses.includes(option)
+                    const next = on
+                      ? graph.campuses.filter((id) => id !== option)
+                      : [...graph.campuses, option]
+
+                    // Sin ninguno no hay grafo: el último no se puede quitar.
+                    if (next.length === 0) return
+
+                    change({ campuses: next })
+                    // Con más de uno, lo que interesa ver es de cuál es cada quien.
+                    if (next.length > 1) setMode('campus')
+                  }}
+                  label={t('net.campuses')}
+                  text={(option) =>
+                    option === 'all'
+                      ? t('net.campuses.all')
+                      : graph.available.find((campus) => campus.id === option)?.name
+                  }
+                />
               </div>
             )}
             <div className="net-filter">
               <span className="eyebrow">{t('net.period')}</span>
-              <div className="filter-pills" role="group" aria-label={t('net.period')}>
-                {PERIODS.map((period) => (
-                  <button
-                    key={period}
-                    type="button"
-                    className={`pill ${filters.period === period ? 'active' : ''}`}
-                    aria-pressed={filters.period === period}
-                    onClick={() => {
-                      change({ period })
-                    }}
-                  >
-                    {t(`net.period.${period}`)}
-                  </button>
-                ))}
-              </div>
+              <PillGroup
+                options={PERIODS}
+                value={filters.period}
+                onChange={(period) => {
+                  change({ period })
+                }}
+                label={t('net.period')}
+                text={(period) => t(`net.period.${period}`)}
+              />
               {filters.period === 'custom' && (
                 <div className="net-dates">
                   <label>
@@ -545,18 +534,18 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
                       <div className="net-totals">
                         <div className="tile">
                           <span className="eyebrow">{t('net.total.corrections')}</span>
-                          <strong>{graph.totals.corrections.toLocaleString()}</strong>
+                          <strong>{number(graph.totals.corrections)}</strong>
                         </div>
                         <div className="tile">
                           <span className="eyebrow">{t('net.total.people')}</span>
-                          <strong>{graph.totals.people.toLocaleString()}</strong>
+                          <strong>{number(graph.totals.people)}</strong>
                         </div>
                         <div className="tile">
                           <span className="eyebrow">{t('net.total.pairs')}</span>
-                          <strong>{graph.totals.pairs.toLocaleString()}</strong>
+                          <strong>{number(graph.totals.pairs)}</strong>
                           <small>
                             {t('net.total.mutual', {
-                              n: graph.totals.mutualPairs.toLocaleString(),
+                              n: number(graph.totals.mutualPairs),
                               pct:
                                 graph.totals.pairs === 0
                                   ? 0
@@ -568,7 +557,7 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
                         </div>
                         <div className="tile">
                           <span className="eyebrow">{t('net.total.communities')}</span>
-                          <strong>{graph.totals.communities.toLocaleString()}</strong>
+                          <strong>{number(graph.totals.communities)}</strong>
                         </div>
                         <div className="tile wide">
                           <Meter label={t('net.total.endogamy')} value={graph.totals.endogamy} />
@@ -684,8 +673,8 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
                                         <div className="net-span">
                                           <span>
                                             {t('net.projects.span', {
-                                              min: spanLow.toLocaleString(),
-                                              max: spanHigh.toLocaleString(),
+                                              min: number(spanLow),
+                                              max: number(spanHigh),
                                             })}
                                           </span>
                                           <RangeSlider
@@ -741,7 +730,7 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
                                             {project.name}
                                           </span>
                                           <span className="net-row-count">
-                                            {project.corrections.toLocaleString()}
+                                            {number(project.corrections)}
                                             {project.passRate !== null && (
                                               <span
                                                 className="net-row-badge"

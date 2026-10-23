@@ -6,7 +6,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import type { CalendarEvent, Notice, NoticeKind } from '@sanatorio/contracts'
 
-import { hasCodes, hasRoom } from '../src/features/alerts/eligible'
+import { hasCodes, hasRoom } from '../src/features/calendar/eligible'
 import { addDays, daysOf, eventsOn, move, rangeOn, sameDay } from '../src/features/calendar/dates'
 import { iconOf, targetOf } from '../src/features/notices/routes'
 import { titleText } from '../src/features/profile/title'

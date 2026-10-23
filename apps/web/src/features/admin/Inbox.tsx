@@ -1,14 +1,16 @@
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import type { SyntheticEvent } from 'react'
 
 import type { TicketCategory } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
 import { useAction, useAsync } from '../../shared/hooks/useAsync'
-import { localeOf, useI18n } from '../../shared/i18n'
+import { useI18n } from '../../shared/i18n'
+import { useFormat } from '../../shared/i18n/useFormat'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { Icon } from '../../shared/ui/Icon'
 import { InfoTip } from '../../shared/ui/InfoTip'
+import { Modal } from '../../shared/ui/Modal'
 import { InboxTour } from './InboxTour'
 
 import { CATEGORIES, kindOf, reportableSections, sectionFor } from './inbox'
@@ -30,18 +32,13 @@ export function Inbox({
   section: string
   sections: readonly { id: string; inNav: boolean }[]
 }) {
-  const { t, lang } = useI18n()
-  const dialog = useRef<HTMLDialogElement>(null)
+  const { t } = useI18n()
+  const { date } = useFormat()
   const mine = useAsync(() => api.getMyTickets(), [])
   const { busy, error, run } = useAction()
   const [category, setCategory] = useState<TicketCategory>('bug')
   const [where, setWhere] = useState(() => sectionFor(section, sections))
   const [body, setBody] = useState('')
-
-  useEffect(() => {
-    // Sin limpieza a propósito: ver `LayoutSettings`.
-    if (dialog.current?.open === false) dialog.current.showModal()
-  }, [])
 
   const submit = async (event: SyntheticEvent): Promise<void> => {
     event.preventDefault()
@@ -60,19 +57,18 @@ export function Inbox({
   }
 
   return (
-    <dialog ref={dialog} className="layout-dialog" onClose={onClose} aria-label={t('inbox.title')}>
-      <div className="layout-head">
-        <h3>
+    <Modal
+      label={t('inbox.title')}
+      onClose={onClose}
+      title={
+        <>
           {t('inbox.title')}
           <InfoTip title={t('inbox.title')}>
             <InboxTour />
           </InfoTip>
-        </h3>
-        <button type="button" className="link" aria-label={t('layout.close')} onClick={onClose}>
-          <Icon name="cerrar" />
-        </button>
-      </div>
-
+        </>
+      }
+    >
       <form className="inbox-form" onSubmit={(event) => void submit(event)}>
         <p className="hint inbox-to">
           <Icon name="buzon" size={14} /> {t('inbox.to')}
@@ -141,7 +137,7 @@ export function Inbox({
                 )}
               </span>
               <strong>{ticket.subject}</strong>
-              <small>{new Date(ticket.createdAt).toLocaleDateString(localeOf(lang))}</small>
+              <small>{date(ticket.createdAt)}</small>
             </div>
             <p>{ticket.body}</p>
             {ticket.withdrawUntil !== null && Date.parse(ticket.withdrawUntil) > Date.now() && (
@@ -169,6 +165,6 @@ export function Inbox({
           </li>
         ))}
       </ul>
-    </dialog>
+    </Modal>
   )
 }

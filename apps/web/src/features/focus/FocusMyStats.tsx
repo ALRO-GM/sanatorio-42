@@ -4,7 +4,7 @@ import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
-import { EVERYONE, SegmentSlider } from '../admin/SegmentSlider'
+import { EVERYONE, SegmentSlider } from '../../shared/ui/SegmentSlider'
 import { FocusCharts, FocusFigureCards, PeriodPills, periodQuery } from './FocusStatsView'
 import type { FocusPeriod } from './FocusStatsView'
 

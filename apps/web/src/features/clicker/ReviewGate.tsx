@@ -5,7 +5,8 @@ import type { ClickerReview } from '@sanatorio/contracts'
 import { api } from '../../shared/api'
 import { useAction } from '../../shared/hooks/useAsync'
 import { useGateQueue } from '../../shared/hooks/useGateQueue'
-import { localeOf, useI18n } from '../../shared/i18n'
+import { useI18n } from '../../shared/i18n'
+import { useFormat } from '../../shared/i18n/useFormat'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { Icon } from '../../shared/ui/Icon'
 
@@ -25,14 +26,14 @@ type ReviewGateProps = {
  * no se cierra sin contestar: ni con Escape ni pulsando fuera.
  */
 export function ReviewGate({ pending, onChange }: ReviewGateProps) {
-  const { t, lang } = useI18n()
+  const { t } = useI18n()
   const [answer, setAnswer] = useState('')
   const { setQueue, current, dialog, left } = useGateQueue<ClickerReview>(pending, () =>
     api.getClickerReviews(),
   )
   const { busy, error, run } = useAction()
-  const number = (value: number): string =>
-    new Intl.NumberFormat(localeOf(lang), { maximumFractionDigits: 0 }).format(value)
+  const { number: digits } = useFormat()
+  const number = (value: number): string => digits(value, 0)
 
   if (current === undefined) return null
 

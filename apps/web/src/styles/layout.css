@@ -241,3 +241,28 @@ dialog.layout-dialog::backdrop {
   margin: 1rem 0 0;
   font-size: 0.85rem;
 }
+
+/* Confirmar algo que no se deshace (`useConfirm`): la pregunta y dos botones,
+   el que confirma a la derecha y en rojo si borra o retira. */
+dialog.confirm-dialog {
+  width: min(420px, calc(100vw - 1.5rem));
+}
+.confirm-dialog h3 {
+  margin: 0 0 0.5rem;
+}
+.confirm-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+.confirm-actions button.danger {
+  border: 1px solid var(--danger);
+  border-radius: 999px;
+  padding: 0.35rem 1rem;
+  background: var(--danger);
+  color: var(--on-accent);
+  font-weight: 600;
+  cursor: pointer;
+}

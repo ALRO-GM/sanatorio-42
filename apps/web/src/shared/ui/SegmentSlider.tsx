@@ -1,7 +1,7 @@
 import type { Segment } from '@sanatorio/contracts'
 
-import { useI18n } from '../../shared/i18n'
-import { RangeSlider } from '../../shared/ui/RangeSlider'
+import { useI18n } from '../i18n'
+import { RangeSlider } from './RangeSlider'
 
 /** De cuánto en cuánto se mueve el tramo, en tantos por ciento. */
 const STEP = 5

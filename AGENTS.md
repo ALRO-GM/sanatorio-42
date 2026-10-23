@@ -77,6 +77,9 @@ regla de aquí, cambia también la skill que la repite.
   la clave que deja de usarse se borra. Después, `npm run textos -- --write` y
   `npm run check`. Las reglas y el estilo de redacción están en `docs/textos.md`;
   no hay excepciones.
+- Web: una funcionalidad no importa de otra (`features/a` → `features/b`); lo
+  que se comparte va a `shared/` (`shared/ui`, `shared/chat`…). El linter lo
+  comprueba; las pocas excepciones, con su porqué, están en `eslint.config.js`.
 - Web: las direcciones se construyen con `shared/links.ts` (`recordHref`,
   `networkHref`, `intraHref`) y se leen con `decodePart`. Nada de montar un
   `#/…/${login}` a mano.
@@ -94,7 +97,9 @@ regla de aquí, cambia también la skill que la repite.
   lo hace `notices` al oír el evento. El texto del aviso va en la tabla `buzon`
   (`notices.kind.*`).
 - Web: lo que haya que preguntar de fondo va en `GET /pulse` (`usePulse`), no en
-  un sondeo nuevo.
+  un sondeo nuevo. Lo que una pantalla pide de nuevo mientras se mira (salas,
+  mapa, conectados) va por `usePolling` (`shared/hooks/usePolling.ts`), que se
+  para con la pestaña oculta; nada de `setInterval(reload)` a mano.
 - **Límites del plan**: al 90 % de un límite gratuito de Oracle solo entra quien
   administra y no corre nada de fondo; al 95 % no entra nadie (`STOP_SHARE` y
   `HARD_STOP_SHARE` en `modules/admin/budget.rules.ts`, y

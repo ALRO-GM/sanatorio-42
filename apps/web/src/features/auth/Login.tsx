@@ -1,7 +1,7 @@
 import { useI18n } from '../../shared/i18n'
 import { Logo } from '../../shared/ui/Logo'
-import { LangSelect } from '../settings/LangSelect'
-import { ThemeSelect } from '../settings/ThemeSelect'
+import { LangSelect } from '../../shared/ui/LangSelect'
+import { ThemeSelect } from '../../shared/ui/ThemeSelect'
 import { Icon } from '../../shared/ui/Icon'
 import type { IconName } from '../../shared/ui/Icon'
 

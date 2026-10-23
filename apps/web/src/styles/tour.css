@@ -97,7 +97,7 @@ dialog.info-dialog {
   padding: 0 0.3em;
   border-radius: 1em;
   background: var(--danger);
-  color: #fff;
+  color: var(--on-accent);
   font-size: 0.8em;
   font-style: normal;
   font-weight: 700;
@@ -253,7 +253,7 @@ dialog.info-dialog {
   height: 1.25em;
   border: 2px solid var(--border-strong);
   border-radius: 0.3em;
-  color: #fff;
+  color: var(--on-accent);
   transition: background 0.15s;
 }
 .tour-check.on {
@@ -274,6 +274,7 @@ dialog.info-dialog {
   width: 1.1em;
   height: 1.1em;
   border-radius: 50%;
+  /* Fijo a propósito, como el de `.switch`: el botón es claro en los dos modos. */
   background: #fff;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
   transition: transform 0.2s;
@@ -448,7 +449,7 @@ dialog.info-dialog {
   background: var(--accent);
 }
 .tour-day.on.dot::after {
-  background: #fff;
+  background: var(--on-accent);
 }
 .tour-week {
   display: grid;
@@ -527,7 +528,7 @@ dialog.info-dialog {
   margin: -0.55em 0 0 -0.55em;
   border: 2px solid var(--accent);
   border-radius: 50%;
-  background: #fff;
+  background: var(--surface);
   transition: left calc(0.94s * var(--pace)) cubic-bezier(0.4, 0.1, 0.3, 1);
 }
 .tour-fade {

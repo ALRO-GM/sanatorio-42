@@ -3,7 +3,6 @@ stats.title,Estadísticas de Ayuda: título de la sección,Estadísticas de Ayud
 stats.period,Estadísticas de Ayuda: grupo de botones para elegir el periodo,Periodo,Period,Període,Aldia
 stats.ranking,Estadísticas de Ayuda: encabezado de la clasificación de una sección,Clasificación,Leaderboard,Classificació,Sailkapena
 stats.empty,Estadísticas de Ayuda: clasificación sin nadie todavía,Aún no hay nadie: estrénala tú.,Nobody yet: be the first.,Encara no hi ha ningú: estrena-la tu.,Oraindik ez dago inor: estreinatu zuk.
-stats.you,Estadísticas de Ayuda: marca junto a tu fila en la clasificación,Tú,You,Tu,Zu
 stats.notYet,Estadísticas de Ayuda: no sales en esta clasificación,Aún no sales aquí.,You are not here yet.,Encara no hi surts.,Oraindik ez zaude hemen.
 stats.consulta.sessions,"Estadísticas de Ayuda, sala de espera: sesiones de ayuda aceptadas",Sesiones aceptadas,Accepted sessions,Sessions acceptades,Onartutako saioak
 stats.consulta.verified,"Estadísticas de Ayuda, sala de espera: sesiones con los dos códigos validados",Validadas con código,Verified with codes,Validades amb codi,Kodearekin baliozkotuak

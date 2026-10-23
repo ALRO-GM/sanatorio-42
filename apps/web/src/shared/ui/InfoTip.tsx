@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import type { ReactNode } from 'react'
-import { createPortal } from 'react-dom'
 
 import { useI18n } from '../i18n'
 import { usePrefs } from '../layout/store'
 import { Icon } from './Icon'
+import { Modal } from './Modal'
 
 type InfoTipProps = {
   /** De qué habla la explicación: título de la ventana y nombre del botón. */
@@ -24,13 +24,8 @@ type InfoTipProps = {
 export function InfoTip({ title, children }: InfoTipProps) {
   const { t } = useI18n()
   const [open, setOpen] = useState(false)
-  const dialog = useRef<HTMLDialogElement>(null)
   // Quien ya se sabe la web puede esconderlos en Personalizar.
   const hidden = usePrefs().tips === false
-
-  useEffect(() => {
-    if (open && dialog.current?.open === false) dialog.current.showModal()
-  }, [open])
 
   if (hidden) return null
 
@@ -47,38 +42,20 @@ export function InfoTip({ title, children }: InfoTipProps) {
       >
         <Icon name="info" />
       </button>
-      {/* Fuera del título: dentro heredaría su tamaño de letra. */}
-      {open &&
-        createPortal(
-          <dialog
-            ref={dialog}
-            className="layout-dialog info-dialog"
-            aria-label={title}
-            onClose={() => {
-              setOpen(false)
-            }}
-            onClick={(event) => {
-              // Un clic en el fondo (fuera de la ficha) la cierra.
-              if (event.target === dialog.current) dialog.current.close()
-            }}
-          >
-            <div className="layout-head">
-              <h3>{title}</h3>
-              <button
-                type="button"
-                className="link"
-                aria-label={t('layout.close')}
-                onClick={() => {
-                  dialog.current?.close()
-                }}
-              >
-                <Icon name="cerrar" />
-              </button>
-            </div>
-            <div className="info-body">{children}</div>
-          </dialog>,
-          document.body,
-        )}
+      {/* Fuera del título (en `body`): dentro heredaría su tamaño de letra. */}
+      {open && (
+        <Modal
+          portal
+          label={title}
+          title={title}
+          className="info-dialog"
+          onClose={() => {
+            setOpen(false)
+          }}
+        >
+          <div className="info-body">{children}</div>
+        </Modal>
+      )}
     </>
   )
 }

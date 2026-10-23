@@ -1,9 +1,10 @@
 import { useState } from 'react'
 
 import { useI18n } from '../../shared/i18n'
+import { PillGroup } from '../../shared/ui/PillGroup'
 import { ClickMap } from './ClickMap'
 import { FlowsPanel } from './FlowsPanel'
-import { EVERYONE } from './SegmentSlider'
+import { EVERYONE } from '../../shared/ui/SegmentSlider'
 import { UsageHeatmap } from './UsageHeatmap'
 
 const VIEWS = ['heat', 'flows', 'clicks'] as const
@@ -17,22 +18,15 @@ export function UsageTab() {
 
   return (
     <section>
-      <div className="filter-pills sub-tabs" role="tablist" aria-label={t('admin.tab.usage')}>
-        {VIEWS.map((option) => (
-          <button
-            key={option}
-            type="button"
-            role="tab"
-            aria-selected={view === option}
-            className={`pill ${view === option ? 'active' : ''}`}
-            onClick={() => {
-              setView(option)
-            }}
-          >
-            {t(`admin.usage.view.${option}`)}
-          </button>
-        ))}
-      </div>
+      <PillGroup
+        kind="tabs"
+        className="sub-tabs"
+        options={VIEWS}
+        value={view}
+        onChange={setView}
+        label={t('admin.tab.usage')}
+        text={(option) => t(`admin.usage.view.${option}`)}
+      />
       {view === 'heat' && <UsageHeatmap segment={segment} onSegment={setSegment} />}
       {view === 'flows' && (
         <>

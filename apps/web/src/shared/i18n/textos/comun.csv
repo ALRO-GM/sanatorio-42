@@ -101,6 +101,9 @@ layout.open,Menú de la cuenta: abrir la personalización,Personalizar la web,Cu
 layout.title,Título de la ventana de personalización,Personalizar,Customise,Personalitza,Pertsonalizatu
 layout.customizeHere,Enlace al final de una página con bloques: abre Personalizar,Ordenar o plegar estos bloques,Reorder or fold these blocks,Ordena o plega aquests blocs,Blokeak ordenatu edo tolestu
 layout.close,Botón para cerrar una ventana,Cerrar,Close,Tanca,Itxi
+confirm.title,Título de la ventana que pide confirmar algo que no se deshace,¿Lo confirmas?,Are you sure?,Ho confirmes?,Baieztatzen duzu?
+confirm.ok,Botón para confirmar en la ventana de confirmación (si no se dice otro verbo),"Sí, adelante","Yes, go ahead","Sí, endavant","Bai, aurrera"
+confirm.cancel,Botón para no hacerlo en la ventana de confirmación,Mejor no,Not now,Millor no,Hobe ez
 layout.done,Botón para terminar y cerrar la personalización,Listo,Done,Fet,Eginda
 layout.reset,Botón para volver al orden original,Volver al orden de fábrica,Back to the default order,Torna a l'ordre de fàbrica,Itzuli fabrikako ordenara
 layout.mode,Personalizar: quién decide el orden de pestañas y bloques,Quién decide el orden,Who decides the order,Qui decideix l'ordre,Nork erabakitzen du ordena
@@ -265,7 +268,6 @@ focus.stats.reason,Estadísticas del Pomodoro: columna,Motivo,Reason,Motiu,Arraz
 focus.stats.reasonStopped,"Estadísticas del Pomodoro: columna, veces que se paró por ese motivo",Al parar,When stopping,En parar,Gelditzean
 focus.stats.reasonStayed,"Estadísticas del Pomodoro: columna, veces que se siguió pese al motivo",Al seguir,When going on,En seguir,Jarraitzean
 focus.stats.empty,Estadísticas del Pomodoro: periodo sin sesiones,Aún no hay sesiones en este periodo.,No sessions in this period yet.,Encara no hi ha sessions en aquest període.,Oraindik ez dago saiorik aldi honetan.
-focus.time.hm,Estadísticas del Pomodoro: horas y minutos,{h} h {m} min,{h} h {m} min,{h} h {m} min,{h} h {m} min
 focus.band.all,Tus estadísticas del Pomodoro: comparación con todo el mundo,Comparas con todas las personas que lo usan,Comparing with everyone who uses it,Compares amb totes les persones que el fan servir,Erabiltzen duten guztiekin alderatzen duzu
 focus.band.some,Tus estadísticas del Pomodoro: tramo con el que te comparas,Comparas con el tramo del {low} % al {high} % por uso,Comparing with the {low}% to {high}% band by use,Compares amb el tram del {low} % al {high} % per ús,Erabileraren araberako % {low}–% {high} tartearekin alderatzen duzu
 focus.band.people,Tus estadísticas del Pomodoro: personas del tramo,{n} de {of},{n} of {of},{n} de {of},{of}tik {n}

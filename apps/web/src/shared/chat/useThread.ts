@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react'
 
 import type { MeetMessage, MeetMessageInput } from '@sanatorio/contracts'
 
-import { api } from '../../shared/api'
-import { useAction } from '../../shared/hooks/useAsync'
+import { api } from '../api'
+import { useAction } from '../hooks/useAsync'
 
 /**
  * Cada cuánto se mira si hay mensajes nuevos, con el chat abierto. Mientras

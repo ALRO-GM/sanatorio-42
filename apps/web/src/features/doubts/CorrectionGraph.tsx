@@ -16,7 +16,7 @@ type CorrectionGraphProps = {
  * nadie corrige ya en tu campus no salen.
  */
 export function CorrectionGraph({ graph, selected, onSelect }: CorrectionGraphProps) {
-  const { t } = useI18n()
+  const { t, tn } = useI18n()
   const rings = correctionRings(graph)
   const counts = tierCounts(graph)
   const master = counts[CORRECTION_TIERS.length - 1] ?? 0
@@ -26,7 +26,7 @@ export function CorrectionGraph({ graph, selected, onSelect }: CorrectionGraphPr
       <p className="hint">{t('cgraph.intro')}</p>
       {master > 0 && (
         <p className="cgraph-master" role="status">
-          ✦ {master === 1 ? t('cgraph.master1') : t('cgraph.master', { n: master })}
+          ✦ {tn('cgraph.master', master)}
         </p>
       )}
       <ul className="cgraph-legend">

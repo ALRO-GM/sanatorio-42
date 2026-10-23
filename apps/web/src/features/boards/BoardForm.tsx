@@ -8,6 +8,7 @@ import { useAction } from '../../shared/hooks/useAsync'
 import { localeOf, useI18n } from '../../shared/i18n'
 import { lastDay, untilText } from '../../shared/until'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { useConfirm } from '../../shared/ui/useConfirm'
 import { dayKey, hhmm } from '../../shared/day'
 
 type BoardFormProps = {
@@ -23,6 +24,7 @@ type BoardFormProps = {
 export function BoardForm({ defaultDay, board, onCancel, onSaved }: BoardFormProps) {
   const { t, lang } = useI18n()
   const { busy, error, run } = useAction()
+  const confirm = useConfirm()
   const [form, setForm] = useState(() =>
     board === undefined
       ? {
@@ -84,7 +86,14 @@ export function BoardForm({ defaultDay, board, onCancel, onSaved }: BoardFormPro
     // aquí. Al retocar una pizarra sin moverle la hora no hace falta.
     const moved = board === undefined || input.startsAt !== new Date(board.startsAt).toISOString()
 
-    if (moved && !window.confirm(confirmText(input.startsAt))) return
+    if (
+      moved &&
+      !(await confirm.ask({
+        body: confirmText(input.startsAt),
+        okText: t(board === undefined ? 'cal.f.create' : 'edit.save'),
+      }))
+    )
+      return
 
     const ok = await run(() =>
       board === undefined ? api.createBoard(input) : api.updateBoard(board.id, input),
@@ -174,6 +183,7 @@ export function BoardForm({ defaultDay, board, onCancel, onSaved }: BoardFormPro
           {t('board.cancel')}
         </button>
       </div>
+      {confirm.dialog}
     </form>
   )
 }

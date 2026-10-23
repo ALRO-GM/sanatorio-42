@@ -5,7 +5,7 @@
  * (`apps/api/src/modules/map/seat-layout.ts`); aquí se usa para decir con
  * palabras dónde está un puesto.
  */
-import type { Translate } from '../../shared/i18n'
+import type { Translate } from './i18n'
 
 type SeatPosition = { cluster: string; row: number; seat: number }
 

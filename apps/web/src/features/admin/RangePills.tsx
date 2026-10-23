@@ -1,9 +1,10 @@
 import type { ReactNode } from 'react'
 
 import { useI18n } from '../../shared/i18n'
+import { PillGroup } from '../../shared/ui/PillGroup'
 
 /** Los periodos que ofrecen las pestañas del panel, en días. */
-const RANGES = [1, 7, 30, 90] as const
+const RANGES: readonly number[] = [1, 7, 30, 90]
 
 /**
  * El selector de periodo de las pestañas del panel: último día, semana, mes o
@@ -22,21 +23,14 @@ export function RangePills({
   const { t } = useI18n()
 
   return (
-    <div className="filter-pills" role="group" aria-label={t('admin.stats.range')}>
-      {RANGES.map((option) => (
-        <button
-          key={option}
-          type="button"
-          className={`pill ${value === option ? 'active' : ''}`}
-          aria-pressed={value === option}
-          onClick={() => {
-            onChange(option)
-          }}
-        >
-          {t('admin.stats.days', { n: option })}
-        </button>
-      ))}
+    <PillGroup
+      options={RANGES}
+      value={value}
+      onChange={onChange}
+      label={t('admin.stats.range')}
+      text={(option) => t('admin.stats.days', { n: option })}
+    >
       {children}
-    </div>
+    </PillGroup>
   )
 }

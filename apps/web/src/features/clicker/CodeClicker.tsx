@@ -7,6 +7,9 @@ import { api, ApiError } from '../../shared/api'
 import { useI18n } from '../../shared/i18n'
 import { useStill } from '../../shared/still'
 import { Avatar } from '../../shared/ui/Avatar'
+import { PillGroup } from '../../shared/ui/PillGroup'
+import { withMe } from '../../shared/ui/RankingList'
+import { useConfirm } from '../../shared/ui/useConfirm'
 import { BigKey, Tile } from './art'
 import { CardView } from './Card'
 import { cardFor } from './cards'
@@ -57,7 +60,7 @@ import {
   donationBonus,
 } from '@sanatorio/clicker'
 import type { Game } from '@sanatorio/clicker'
-import { buildingShare, levelProgress, reach } from './insight'
+import { buildingShare, levelProgress, reach, span } from './insight'
 import { Backdrop, Coffee, CursorRing, drinkOf, hueOf, Skyline } from './scene'
 import { Mini, miniOn, setMini } from './Mini'
 import { play, setSound, soundOn } from './sound'
@@ -115,13 +118,6 @@ type Toast = { id: number; icon: string; title: string; text: string; tier?: num
 /** El nivel dentro del juego: el mismo cálculo que hace la API para la clasificación. */
 const levelOf = (total: number): number => Math.floor(3 * Math.log10(1 + Math.max(0, total)))
 
-/** "12 min 05 s", para lo que queda de un parche. */
-function clock(ms: number): string {
-  const seconds = Math.max(0, Math.ceil(ms / 1000))
-
-  return `${Math.floor(seconds / 60)} min ${String(seconds % 60).padStart(2, '0')} s`
-}
-
 /**
  * Code Clicker: la sección secreta. Se pulsa una tecla para escribir líneas de
  * código, se compran cosas que las escriben solas y, si se investiga lo que no
@@ -159,6 +155,7 @@ export function CodeClicker({
     [texts],
   )
   const egg = useEgg()
+  const confirm = useConfirm()
   // Con el pace en riesgo, media hora al día (no cuenta en segundo plano ni viendo otra).
   const limit = usePlayLimit(!background && spectate === undefined)
   const still = useStill()
@@ -770,21 +767,7 @@ export function CodeClicker({
     >
       <header className="cc-head">
         <h2 className="cc-title">{reached >= 3 ? '42 > ./reality' : ui('title')}</h2>
-        <div className="filter-pills" role="tablist">
-          {TABS.map((option) => (
-            <button
-              key={option}
-              type="button"
-              role="tab"
-              aria-selected={tab === option}
-              className={`pill ${tab === option ? 'active' : ''}`}
-              onClick={() => {
-                setTab(option)
-              }}
-            >
-              {ui(option)}
-            </button>
-          ))}
+        <PillGroup kind="tabs" options={TABS} value={tab} onChange={setTab} text={ui}>
           <button
             type="button"
             className="pill"
@@ -812,7 +795,7 @@ export function CodeClicker({
           <button type="button" className="pill" onClick={onExit}>
             {ui('back')}
           </button>
-        </div>
+        </PillGroup>
       </header>
 
       {limit.pace !== null && (
@@ -993,7 +976,7 @@ export function CodeClicker({
           {reached > 0 &&
             (now < current.hotfixUntil ? (
               <span className="cc-hotfix on">
-                {ui('hotfixOn', { n: clock(current.hotfixUntil - now) })}
+                {ui('hotfixOn', { n: span((current.hotfixUntil - now) / 1000) })}
               </span>
             ) : (
               <button
@@ -1125,10 +1108,17 @@ export function CodeClicker({
                     type="button"
                     className="cc-recompile"
                     onClick={() => {
-                      if (window.confirm(ui('recompileAsk', { n: prestigeAfter(current) }))) {
-                        game.current = recompile(current, Date.now())
-                        save(true)
-                      }
+                      void confirm
+                        .ask({
+                          body: ui('recompileAsk', { n: prestigeAfter(current) }),
+                          okText: ui('recompile'),
+                          danger: true,
+                        })
+                        .then((ok) => {
+                          if (!ok || game.current === null) return
+                          game.current = recompile(game.current, Date.now())
+                          save(true)
+                        })
                     }}
                   >
                     {ui('recompile')}
@@ -1206,17 +1196,15 @@ export function CodeClicker({
                 <>
                   <p className="cc-hint">{ui('boardHint')}</p>
                   <ol>
-                    {[
-                      ...board.entries,
-                      ...(board.me !== null && !board.entries.some((row) => row.login === me)
-                        ? [board.me]
-                        : []),
-                    ].map((row) => (
+                    {withMe(board.entries, board.me).map((row) => (
                       <li key={row.login} className={row.login === me ? 'me' : ''}>
                         <b>{row.rank}</b>
                         <Avatar login={row.login} image={row.image} size={28} />
                         <span>
-                          <strong>{row.login}</strong>
+                          <strong>
+                            {row.login}
+                            {row.login === me && ` · ${ui('you')}`}
+                          </strong>
                           <small>
                             {ui('wealth')} {number(row.wealth, 1)} · {ui('level')} {row.level} ·{' '}
                             {row.achievements} <Tile icon="trophy" size={14} />
@@ -1374,6 +1362,7 @@ export function CodeClicker({
           {...(touch.current && card.price !== undefined ? { hint: ui('cardTouch') } : {})}
         />
       )}
+      {confirm.dialog}
     </section>
   )
 }

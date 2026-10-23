@@ -14,6 +14,7 @@ import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { PillGroup } from '../../shared/ui/PillGroup'
 import { InfoTip } from '../../shared/ui/InfoTip'
 import { PersonInput } from '../../shared/ui/PersonInput'
 
@@ -70,23 +71,7 @@ export function ProgressCard() {
     current: T,
     set: (value: T) => void,
     text: (value: T) => string,
-  ) => (
-    <div className="filter-pills" role="group" aria-label={label}>
-      {options.map((option) => (
-        <button
-          key={option}
-          type="button"
-          className={`pill ${current === option ? 'active' : ''}`}
-          aria-pressed={current === option}
-          onClick={() => {
-            set(option)
-          }}
-        >
-          {text(option)}
-        </button>
-      ))}
-    </div>
-  )
+  ) => <PillGroup options={options} value={current} onChange={set} label={label} text={text} />
 
   return (
     <article className="card help-stats-card progress-card" aria-labelledby="stats-progress">

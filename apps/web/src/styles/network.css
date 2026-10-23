@@ -549,10 +549,10 @@
   text-align: center;
 }
 .net-pair-mark.pass {
-  background: color-mix(in srgb, #3fae74 28%, var(--surface));
+  background: color-mix(in srgb, var(--ok) 28%, var(--surface));
 }
 .net-pair-mark.fail {
-  background: color-mix(in srgb, #d9534f 30%, var(--surface));
+  background: color-mix(in srgb, var(--danger) 30%, var(--surface));
 }
 .net-pair .hint {
   margin: 0;
@@ -688,13 +688,13 @@
   height: 6px;
   border-radius: 999px;
   /* Lo que no es aprobado es suspenso: el fondo de la barra es su parte. */
-  background: color-mix(in srgb, #d9534f 55%, var(--surface));
+  background: color-mix(in srgb, var(--danger) 55%, var(--surface));
   overflow: hidden;
 }
 .net-verdict-bar span {
   display: block;
   height: 100%;
-  background: #3fae74;
+  background: var(--ok);
 }
 .net-verdict-line {
   display: flex;

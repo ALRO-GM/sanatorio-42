@@ -71,7 +71,7 @@
 }
 .meet-chat li.kind-late strong,
 .meet-chat li.kind-absent strong {
-  color: #b3621a;
+  color: var(--warn);
 }
 .meet-write,
 .meet-code-form {
@@ -215,10 +215,10 @@
   gap: 0.7rem;
 }
 .meet-people .valid {
-  color: #2f8f5b;
+  color: var(--ok);
 }
 .meet-people .pending {
-  color: #b3621a;
+  color: var(--warn);
   font-weight: 400;
 }
 .meet-toast {
@@ -252,8 +252,8 @@
   height: 1.15rem;
   padding: 0 0.3rem;
   border-radius: 999px;
-  background: #e5484d;
-  color: #fff;
+  background: var(--danger);
+  color: var(--on-accent);
   font-size: 0.7rem;
   font-weight: 700;
   line-height: 1;
@@ -359,7 +359,7 @@
   height: 0.6rem;
   margin-top: 0.35rem;
   border-radius: 50%;
-  background: #e5484d;
+  background: var(--danger);
 }
 /* Texto solo para lectores de pantalla: el punto rojo no se oye. */
 .sr-only {
@@ -408,7 +408,7 @@
   overflow-y: auto;
   list-style: none;
 }
-.peer-picker .peer-list button {
+.peer-picker .peer-list [role='option'] {
   display: flex;
   align-items: center;
   gap: 0.6rem;
@@ -421,8 +421,8 @@
   text-align: left;
   cursor: pointer;
 }
-.peer-picker .peer-list button:hover,
-.peer-picker .peer-list button:focus-visible {
+.peer-picker .peer-list [role='option']:hover,
+.peer-picker .peer-list [role='option'].active {
   background: var(--accent-soft);
 }
 .peer-picker .peer-list strong,

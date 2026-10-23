@@ -5,7 +5,7 @@ import { api } from '../../shared/api'
 import { useAction, useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
-import { ReportButton } from '../admin/ReportButton'
+import { ReportButton } from '../../shared/ui/ReportButton'
 
 type DoubtDetailCardProps = {
   doubtId: number

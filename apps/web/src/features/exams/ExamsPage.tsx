@@ -5,10 +5,9 @@ import type { LiveExam, LiveExaminee } from '@sanatorio/contracts'
 import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { localeOf, useI18n } from '../../shared/i18n'
-import { Avatar } from '../../shared/ui/Avatar'
-import { PersonLink } from '../../shared/ui/PersonLink'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { InfoTip } from '../../shared/ui/InfoTip'
+import { ExamPeople } from './ExamPeople'
 import { ExamStatsPanel } from './ExamStatsPanel'
 import { ExamsTour } from './ExamsTour'
 
@@ -241,34 +240,29 @@ function LiveCard({
             <h4>
               {group.name ?? t('exams.unknownExam')} <small>({people.length})</small>
             </h4>
-            <ul className="exam-people">
-              {people.map((person) => (
-                <li key={person.login} className={`status-${person.status}`}>
-                  <Avatar login={person.login} image={person.image} size={32} />
-                  <PersonLink login={person.login} className="" />
-                  <span className="exam-badges">
-                    {person.circle !== null && (
-                      <span className="badge subtle">
-                        {t('graph.circle', { n: person.circle })}
-                      </span>
-                    )}
-                    <span className="badge subtle">{t(`exams.track.${person.track}`)}</span>
-                    <span className="badge exam-status">{t(`exams.status.${person.status}`)}</span>
-                  </span>
-                  {person.mark === null && person.status === 'inProgress' ? (
-                    // 42 no da nota hasta que se cierra el examen: mientras, la de su
-                    // último intento cerrado (la de su expediente), si tiene.
-                    <small className="exam-mark pending" title={t('exams.markLaterHint')}>
-                      {person.previousMark === null
-                        ? t('exams.markLater')
-                        : t('exams.previousMark', { n: person.previousMark })}
-                    </small>
-                  ) : (
-                    <strong className="exam-mark">{person.mark ?? '—'}</strong>
-                  )}
-                </li>
-              ))}
-            </ul>
+            <ExamPeople
+              people={people}
+              rowClass={(person) => `status-${person.status}`}
+              badges={(person) => (
+                <>
+                  <span className="badge subtle">{t(`exams.track.${person.track}`)}</span>
+                  <span className="badge exam-status">{t(`exams.status.${person.status}`)}</span>
+                </>
+              )}
+              end={(person) =>
+                person.mark === null && person.status === 'inProgress' ? (
+                  // 42 no da nota hasta que se cierra el examen: mientras, la de su
+                  // último intento cerrado (la de su expediente), si tiene.
+                  <small className="exam-mark pending" title={t('exams.markLaterHint')}>
+                    {person.previousMark === null
+                      ? t('exams.markLater')
+                      : t('exams.previousMark', { n: person.previousMark })}
+                  </small>
+                ) : (
+                  <strong className="exam-mark">{person.mark ?? '—'}</strong>
+                )
+              }
+            />
           </section>
         )
       })}

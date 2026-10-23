@@ -1,15 +1,18 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import type { Notice } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
 import { useAction, useAsync } from '../../shared/hooks/useAsync'
-import { localeOf, useI18n } from '../../shared/i18n'
+import { useI18n } from '../../shared/i18n'
+import { useFormat } from '../../shared/i18n/useFormat'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { PillGroup } from '../../shared/ui/PillGroup'
 import { calendarEventOf, iconOf, noticesIn, removableCount, targetOf } from './routes'
 import type { NoticeFilter, NoticeTarget } from './routes'
 import { Icon } from '../../shared/ui/Icon'
 import { InfoTip } from '../../shared/ui/InfoTip'
+import { Modal } from '../../shared/ui/Modal'
 import { MailboxTour } from './MailboxTour'
 import { Conversations } from './Conversations'
 import { directChatId } from './conversations'
@@ -35,8 +38,8 @@ type MailboxProps = {
  * has leído primero. Cada aviso lleva al sitio donde se ve.
  */
 export function Mailbox({ me, chat, onChat, onClose, onOpen, onChange }: MailboxProps) {
-  const { t, lang } = useI18n()
-  const dialog = useRef<HTMLDialogElement>(null)
+  const { t } = useI18n()
+  const { date } = useFormat()
   const { data, error, loading, reload } = useAsync(() => api.getNotices(), [])
   const action = useAction()
   /** A quién se va a escribir: aún no se ha dicho, o a alguien del campus. */
@@ -48,11 +51,6 @@ export function Mailbox({ me, chat, onChat, onClose, onOpen, onChange }: Mailbox
   useEffect(() => {
     if (chat !== null) setTab('chats')
   }, [chat])
-
-  useEffect(() => {
-    // Sin limpieza a propósito: ver `LayoutSettings`.
-    if (dialog.current?.open === false) dialog.current.showModal()
-  }, [])
 
   const markAll = async (): Promise<void> => {
     if (await action.run(() => api.readNotices())) {
@@ -90,10 +88,7 @@ export function Mailbox({ me, chat, onChat, onClose, onOpen, onChange }: Mailbox
     if (minutes < 60) return t('notices.minutesAgo', { n: minutes })
     if (minutes < 24 * 60) return t('notices.hoursAgo', { n: Math.round(minutes / 60) })
 
-    return new Date(at).toLocaleDateString(localeOf(lang), {
-      day: 'numeric',
-      month: 'short',
-    })
+    return date(at, 'dayMonth')
   }
 
   const all = data?.items ?? []
@@ -106,45 +101,38 @@ export function Mailbox({ me, chat, onChat, onClose, onOpen, onChange }: Mailbox
   const removable = removableCount(all)
 
   return (
-    <dialog
-      ref={dialog}
-      className="layout-dialog mailbox"
+    <Modal
+      label={t('notices.title')}
+      className="mailbox"
       onClose={onClose}
-      aria-label={t('notices.title')}
-    >
-      <div className="layout-head">
-        <h3>
+      title={
+        <>
           {t('notices.title')}
           {unread > 0 && <span className="count-badge">{unread}</span>}
           <InfoTip title={t('notices.title')}>
             <MailboxTour />
           </InfoTip>
-        </h3>
-        <button type="button" className="link" aria-label={t('layout.close')} onClick={onClose}>
-          <Icon name="cerrar" />
-        </button>
-      </div>
-
-      <div className="filter-pills mailbox-tabs" role="tablist">
-        {(['notices', 'chats'] as const).map((option) => (
-          <button
-            key={option}
-            type="button"
-            role="tab"
-            className={`pill ${tab === option ? 'active' : ''}`}
-            aria-selected={tab === option}
-            onClick={() => {
-              setTab(option)
-              onChat(null)
-            }}
-          >
+        </>
+      }
+    >
+      <PillGroup
+        kind="tabs"
+        className="mailbox-tabs"
+        options={['notices', 'chats'] as const}
+        value={tab}
+        onChange={(option) => {
+          setTab(option)
+          onChat(null)
+        }}
+        text={(option) => (
+          <>
             {t(`notices.tab.${option}`)}
             {option === 'chats' && chatsUnread > 0 && (
               <span className="count-badge">{chatsUnread}</span>
             )}
-          </button>
-        ))}
-      </div>
+          </>
+        )}
+      />
 
       {tab === 'chats' ? (
         <Conversations me={me} openId={chat} onOpen={onChat} onChange={onChange} />
@@ -155,21 +143,13 @@ export function Mailbox({ me, chat, onChat, onClose, onOpen, onChange }: Mailbox
             <ErrorNote error={error} onRetry={() => void reload()} />
           )}
           {all.some((notice) => notice.saved) && (
-            <div className="filter-pills" role="group" aria-label={t('notices.filter')}>
-              {(['all', 'saved'] as const).map((option) => (
-                <button
-                  key={option}
-                  type="button"
-                  aria-pressed={filter === option}
-                  className={`pill ${filter === option ? 'active' : ''}`}
-                  onClick={() => {
-                    setFilter(option)
-                  }}
-                >
-                  {t(`notices.filter.${option}`)}
-                </button>
-              ))}
-            </div>
+            <PillGroup
+              options={['all', 'saved'] as const}
+              value={filter}
+              onChange={setFilter}
+              label={t('notices.filter')}
+              text={(option) => t(`notices.filter.${option}`)}
+            />
           )}
           {data !== undefined && items.length === 0 && (
             <p className="hint">{t(filter === 'saved' ? 'notices.noneSaved' : 'notices.empty')}</p>
@@ -303,6 +283,6 @@ export function Mailbox({ me, chat, onChat, onClose, onOpen, onChange }: Mailbox
           )}
         </div>
       )}
-    </dialog>
+    </Modal>
   )
 }

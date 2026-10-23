@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/expediente.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-134 textos. «—» es que falta la traducción: sale en español.
+135 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -18,8 +18,8 @@ Generado desde `apps/web/src/shared/i18n/textos/expediente.csv` con
 | `xp.level` | Etiqueta del nivel de XP | features/profile/Expediente, features/profile/PublicRecord, features/profile/RecordTour | Nivel | Level | Nivell | Maila |
 | `xp.howTo` | Botón que despliega cómo se gana la XP y cuánta llevas | features/profile/Expediente | Cómo se gana XP y cuánta llevas | How XP is earned and how much you have | Com es guanya XP i quanta en portes | Nola irabazten den XP eta zenbat daramazun |
 | `xp.gotXp` | XP ganada con una actividad | features/profile/Expediente | {xp} XP | {xp} XP | {xp} XP | {xp} XP |
-| `xp.gotOnce` | Veces que hiciste una actividad (una) | features/profile/Expediente | {n} vez | {n} time | {n} vegada | {n} aldiz |
-| `xp.gotTimes` | Veces que hiciste una actividad (varias) | features/profile/Expediente | {n} veces | {n} times | {n} vegades | {n} aldiz |
+| `xp.got.one` | Veces que hiciste una actividad (una) | features/profile/Expediente, shared/i18n/index | {n} vez | {n} time | {n} vegada | {n} aldiz |
+| `xp.got.many` | Veces que hiciste una actividad (varias) | features/profile/Expediente, shared/i18n/index | {n} veces | {n} times | {n} vegades | {n} aldiz |
 | `xp.progress` | XP actual y la que hace falta para el siguiente nivel | features/profile/Expediente, features/profile/PublicRecord, features/profile/RecordTour | {xp} de {next} XP | {xp} of {next} XP | {xp} de {next} XP | {next} XPtik {xp} |
 | `xp.max` | XP actual cuando ya estás en el último nivel | features/profile/Expediente, features/profile/PublicRecord | {xp} XP · nivel máximo | {xp} XP · max level | {xp} XP · nivell màxim | {xp} XP · gehieneko maila |
 | `xp.nextTitle` | Siguiente título que desbloquearás | features/profile/Expediente | Siguiente: {title} | Next: {title} | Següent: {title} | Hurrengoa: {title} |
@@ -54,7 +54,8 @@ Generado desde `apps/web/src/shared/i18n/textos/expediente.csv` con
 | `rank.hint` | Explicación de qué cuenta en la clasificación | features/profile/LeaderboardCard, features/stats/HelpStatsPage | Cuenta la XP de ayudar: sesiones de ayuda, dudas resueltas, guías y pizarras. | Counts XP from helping: help sessions, solved questions, guides and whiteboards. | Compta l'XP d'ajudar: sessions d'ajuda, dubtes resolts, guies i pissarres. | Laguntzearen XPa zenbatzen da: laguntza-saioak, ebatzitako zalantzak, gidak eta arbelak. |
 | `rank.empty` | Clasificación vacía | features/profile/LeaderboardCard, features/stats/HelpStatsPage | Todavía no hay nadie. El primer lugar está libre. | Nobody yet. First place is free. | Encara no hi ha ningú. El primer lloc és lliure. | Oraindik ez dago inor. Lehen lekua libre dago. |
 | `rank.notYet` | No sales en la clasificación todavía | features/profile/LeaderboardCard, features/stats/HelpStatsPage | Aún no apareces: ayuda a alguien y entrarás. | You are not on it yet: help someone and you will be. | Encara no hi apareixes: ajuda algú i hi entraràs. | Oraindik ez zara agertzen: lagundu norbaiti eta sartuko zara. |
-| `rank.place` | Tu puesto en la clasificación | features/profile/LeaderboardCard, features/stats/HelpStatsPage | Posición {n} | Rank {n} | Posició {n} | {n}. posizioa |
+| `rank.place` | Tu puesto en la clasificación | features/profile/LeaderboardCard, features/stats/HelpStatsPage, shared/ui/RankingList | Posición {n} | Rank {n} | Posició {n} | {n}. posizioa |
+| `rank.you` | Marca «tú» junto a tu fila en cualquier clasificación (expediente, estadísticas, salas) | features/notgames/RoomView, features/profile/LeaderboardCard, features/stats/HelpStatsPage, features/stats/HelpStatsTour, shared/ui/RankingList | Tú | You | Tu | Zu |
 | `rank.xp` | XP de una fila de la clasificación | features/profile/LeaderboardCard, features/stats/HelpStatsPage | {xp} XP | {xp} XP | {xp} XP | {xp} XP |
 | `xp.rule.specialist_help` | Cuánta XP da ayudar en un proyecto que ya aprobaste | features/profile/Expediente | +{xp} XP por una sesión de ayuda, con sus dos códigos, en un proyecto que ya aprobaste | +{xp} XP for a help session, with both codes, on a project you passed | +{xp} XP per una sessió d'ajuda, amb els seus dos codis, en un projecte que ja has aprovat | +{xp} XP laguntza-saio batengatik, bere bi kodeekin, dagoeneko gainditu duzun proiektu batean |
 | `xp.rule.peer_help` | Cuánta XP da ayudar en otro proyecto | features/profile/Expediente | +{xp} XP por una sesión de ayuda, con sus dos códigos, en cualquier otro proyecto | +{xp} XP for a help session, with both codes, on any other project | +{xp} XP per una sessió d'ajuda, amb els seus dos codis, en qualsevol altre projecte | +{xp} XP laguntza-saio batengatik, bere bi kodeekin, beste edozein proiektutan |

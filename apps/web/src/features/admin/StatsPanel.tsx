@@ -1,14 +1,17 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 import type { StatTotals, UsageStats } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
-import { localeOf, useI18n } from '../../shared/i18n'
+import { usePolling } from '../../shared/hooks/usePolling'
+import { useI18n } from '../../shared/i18n'
+import { useFormat } from '../../shared/i18n/useFormat'
 import { DataTable } from '../../shared/ui/DataTable'
 import { Avatar } from '../../shared/ui/Avatar'
+import { durationText } from '../../shared/time'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
-import { EVERYONE, SegmentSlider } from './SegmentSlider'
+import { EVERYONE, SegmentSlider } from '../../shared/ui/SegmentSlider'
 import { RangePills } from './RangePills'
 import { Figure } from './Figure'
 
@@ -16,17 +19,6 @@ const DAY_MS = 24 * 60 * 60_000
 
 /** `YYYY-MM-DD` en UTC: los días de las estadísticas van en UTC. */
 const dayOf = (at: number): string => new Date(at).toISOString().slice(0, 10)
-
-/** "2 h 05 min", "7 min", "40 s". */
-export function duration(seconds: number): string {
-  if (seconds < 60) return `${seconds} s`
-
-  const minutes = Math.round(seconds / 60)
-
-  return minutes < 60
-    ? `${minutes} min`
-    : `${Math.floor(minutes / 60)} h ${String(minutes % 60).padStart(2, '0')} min`
-}
 
 /** "2h", "45m", "30s": lo justo para caber encima de una barra. */
 function briefTime(seconds: number): string {
@@ -133,9 +125,9 @@ export function StatsPanel() {
       ) : (
         <>
           <div className="stat-cards">
-            <Figure label={t('admin.stats.seen')} value={duration(data.totals.seen)} strong />
-            <Figure label={t('admin.stats.back')} value={duration(data.totals.back)} />
-            <Figure label={t('admin.stats.hidden')} value={duration(data.totals.hidden)} />
+            <Figure label={t('admin.stats.seen')} value={durationText(data.totals.seen)} strong />
+            <Figure label={t('admin.stats.back')} value={durationText(data.totals.back)} />
+            <Figure label={t('admin.stats.hidden')} value={durationText(data.totals.hidden)} />
             <Figure label={t('admin.stats.clicks')} value={String(data.totals.clicks)} />
             <Figure
               label={t('admin.stats.traffic')}
@@ -180,19 +172,19 @@ export function StatsPanel() {
                   id: 'seen',
                   label: t('admin.stats.seen'),
                   sort: (row) => row.seen,
-                  cell: (row) => (row.seen > 0 ? duration(row.seen) : '—'),
+                  cell: (row) => (row.seen > 0 ? durationText(row.seen) : '—'),
                 },
                 {
                   id: 'back',
                   label: t('admin.stats.back'),
                   sort: (row) => row.back,
-                  cell: (row) => (row.back > 0 ? duration(row.back) : '—'),
+                  cell: (row) => (row.back > 0 ? durationText(row.back) : '—'),
                 },
                 {
                   id: 'hidden',
                   label: t('admin.stats.hidden'),
                   sort: (row) => row.hidden,
-                  cell: (row) => (row.hidden > 0 ? duration(row.hidden) : '—'),
+                  cell: (row) => (row.hidden > 0 ? durationText(row.hidden) : '—'),
                 },
                 {
                   id: 'clicks',
@@ -245,19 +237,19 @@ export function StatsPanel() {
                     id: 'seen',
                     label: t('admin.stats.seen'),
                     sort: (row) => row.seen,
-                    cell: (row) => duration(row.seen),
+                    cell: (row) => durationText(row.seen),
                   },
                   {
                     id: 'back',
                     label: t('admin.stats.back'),
                     sort: (row) => row.back,
-                    cell: (row) => duration(row.back),
+                    cell: (row) => durationText(row.back),
                   },
                   {
                     id: 'hidden',
                     label: t('admin.stats.hidden'),
                     sort: (row) => row.hidden,
-                    cell: (row) => duration(row.hidden),
+                    cell: (row) => durationText(row.hidden),
                   },
                   {
                     id: 'clicks',
@@ -297,7 +289,7 @@ function HourChart({ hours }: { hours: StatTotals[] }) {
         <div
           key={index}
           className="stat-hour"
-          title={`${String(index).padStart(2, '0')}:00 · ${duration(hour.seen)} / ${duration(hour.back)} / ${duration(hour.hidden)} · ${hour.requests}`}
+          title={`${String(index).padStart(2, '0')}:00 · ${durationText(hour.seen)} / ${durationText(hour.back)} / ${durationText(hour.hidden)} · ${hour.requests}`}
         >
           <b className="stat-value">
             {hour.seen + hour.back + hour.hidden > 0
@@ -321,12 +313,13 @@ function HourChart({ hours }: { hours: StatTotals[] }) {
  * último ajuste: cuántas personas la aceleran, la frenan o la dejan.
  */
 function TourSpeeds() {
-  const { t, lang } = useI18n()
+  const { t } = useI18n()
+  const { number } = useFormat()
   const { data } = useAsync(() => api.getTourStats(), [])
 
   if (data === undefined || data.tours.length === 0) return null
 
-  const times = (value: number): string => `×${value.toLocaleString(localeOf(lang))}`
+  const times = (value: number): string => `×${number(value)}`
 
   return (
     <article className="card">
@@ -397,15 +390,7 @@ function OnlineCard({ onPick }: { onPick: (login: string) => void }) {
   const { t } = useI18n()
   const { data, reload } = useAsync(() => api.getOnline(), [])
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      if (!document.hidden) void reload()
-    }, ONLINE_EVERY_MS)
-
-    return () => {
-      clearInterval(timer)
-    }
-  }, [reload])
+  usePolling(reload, ONLINE_EVERY_MS)
 
   if (data === undefined) return null
 
@@ -433,7 +418,9 @@ function OnlineCard({ onPick }: { onPick: (login: string) => void }) {
                 <Avatar login={person.login} image={person.image} size={28} />
                 <span>
                   <strong>{person.login}</strong>
-                  <small>{t('admin.online.for', { time: duration(since(person.since)) })}</small>
+                  <small>
+                    {t('admin.online.for', { time: durationText(since(person.since)) })}
+                  </small>
                 </span>
               </button>
             </li>

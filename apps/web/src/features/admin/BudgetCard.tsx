@@ -6,6 +6,7 @@ import type { BudgetSettings, BudgetStatus } from '@sanatorio/contracts'
 import { api } from '../../shared/api'
 import { useAction } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
+import { useFormat } from '../../shared/i18n/useFormat'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { LimitActions, NumberField, Tile } from './LimitParts'
 
@@ -36,6 +37,7 @@ const draftOf = (settings: BudgetSettings): Draft => ({
  */
 export function BudgetCard({ status, onChange }: { status: BudgetStatus; onChange: () => void }) {
   const { t } = useI18n()
+  const { number } = useFormat()
   const action = useAction()
   const [draft, setDraft] = useState(() => draftOf(status.settings))
   const { day, month, settings } = status
@@ -78,12 +80,12 @@ export function BudgetCard({ status, onChange }: { status: BudgetStatus; onChang
       <div className="tiles">
         <Tile
           label={t('admin.budget.today')}
-          value={`${day.used.toLocaleString()} / ${day.allowance.toLocaleString()}`}
-          hint={t(`admin.budget.limitedBy.${day.limitedBy}`, { left: day.left.toLocaleString() })}
+          value={`${number(day.used)} / ${number(day.allowance)}`}
+          hint={t(`admin.budget.limitedBy.${day.limitedBy}`, { left: number(day.left) })}
         />
         <Tile
           label={t('admin.budget.forecast')}
-          value={day.forecast.toLocaleString()}
+          value={number(day.forecast)}
           hint={t(
             day.forecast > day.allowance ? 'admin.budget.forecastOver' : 'admin.budget.forecastOk',
           )}
