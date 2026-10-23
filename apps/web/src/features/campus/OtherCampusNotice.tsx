@@ -49,7 +49,7 @@ export function OtherCampusNotice({ campusId }: { campusId: number }) {
           setClosed(true)
         }}
       >
-        {t('campus.otherOk')}
+        {t('common.ok')}
       </button>
     </aside>
   )

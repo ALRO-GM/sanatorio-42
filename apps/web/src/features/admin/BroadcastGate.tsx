@@ -103,7 +103,7 @@ export function BroadcastGate({ pending, onChange }: BroadcastGateProps) {
               answer(null)
             }}
           >
-            {t(current.options.length === 0 ? 'broadcast.ok' : 'broadcast.later')}
+            {t(current.options.length === 0 ? 'common.ok' : 'broadcast.later')}
           </button>
         )}
       </div>

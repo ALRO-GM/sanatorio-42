@@ -161,9 +161,9 @@ export function GuardTour() {
                     ) : (
                       <span className="tour-row">
                         <span className="tour-button" data-tour="accept">
-                          {t('help.accept')}
+                          {t('common.accept')}
                         </span>
-                        <span className="tour-pill">{t('help.decline')}</span>
+                        <span className="tour-pill">{t('common.decline')}</span>
                       </span>
                     )}
                   </div>

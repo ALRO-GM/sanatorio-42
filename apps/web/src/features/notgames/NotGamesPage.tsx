@@ -134,7 +134,7 @@ function Rooms() {
             setCreating(true)
           }}
         >
-          <Icon name="mas" size={16} /> {t('notgames.create')}
+          <Icon name="mas" size={16} /> {t('common.createRoom')}
         </button>
       )}
 
@@ -167,7 +167,7 @@ function Rooms() {
         </div>
       </div>
       <button type="button" className="link" onClick={() => void rooms.reload()}>
-        {t('agenda.refresh')}
+        {t('common.refresh')}
       </button>
     </>
   )
@@ -224,7 +224,7 @@ function TurnCard({ lobby }: { lobby: TurnLobby }) {
               })
           }}
         >
-          {t('notgames.join')}
+          {t('common.join')}
         </button>
       ) : (
         <a className="pill" href={turnGameHref(lobby.id)}>
@@ -278,7 +278,7 @@ function CreateRoom({ onCancel }: { onCancel: () => void }) {
 
   return (
     <form className="card quiz-create" onSubmit={submit}>
-      <span className="eyebrow">{t('notgames.create')}</span>
+      <span className="eyebrow">{t('common.createRoom')}</span>
 
       <fieldset className="quiz-modes">
         <legend>{t('notgames.game.label')}</legend>
@@ -439,7 +439,7 @@ function CreateRoom({ onCancel }: { onCancel: () => void }) {
           {t('notgames.createSend')}
         </button>
         <button type="button" className="pill" onClick={onCancel}>
-          {t('therapy.cancel')}
+          {t('common.cancel')}
         </button>
       </div>
     </form>

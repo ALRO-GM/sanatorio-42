@@ -215,7 +215,6 @@ focus.always,Pomodoro: lo que sale siempre,Los avisos obligatorios de un evento 
 focus.start,Pomodoro: empezar,Empezar a concentrarme,Start focusing,Començar a concentrar-me,Kontzentratzen hasi
 focus.stop,Pomodoro: parar antes,Parar,Stop,Parar,Gelditu
 focus.again,Pomodoro: otra vuelta tras el descanso,Otra vuelta,Another round,Una altra volta,Beste txanda bat
-focus.close,Pomodoro: cerrar el aviso del descanso,Cerrar,Close,Tanca,Itxi
 focus.focusing,Pomodoro: etiqueta del temporizador,En concentración,Focusing,Concentrat,Kontzentratuta
 focus.resting,Pomodoro: etiqueta del descanso,Descanso,Break,Descans,Atsedena
 focus.breakOver,Pomodoro: el descanso ha acabado,¡A por otra!,Let's go again!,A per una altra!,Goazen beste baterako!
@@ -223,7 +222,6 @@ focus.timerLabel,Pomodoro: temporizador para lectores de pantalla,Tiempo de conc
 focus.badge,Lo que ven los demás de quien está concentrado,En concentración hasta las {time} · no me distraigas,Focusing until {time} · please don't disturb,Concentrat fins a les {time} · no em distreguis,{time}ak arte kontzentratuta · ez nazazu distraitu
 focus.badgeHint,Explicación del aviso de concentración,Está en modo Pomodoro: mejor escribirle después.,In Pomodoro mode: better write later.,És en mode Pomodoro: millor escriure-li després.,Pomodoro moduan dago: hobe geroago idaztea.
 campus.other,"Aviso para quien entra desde un campus que aún no se copia; {campus} es el suyo y {tracked}, los que sí","Tu campus, {campus}, todavía no está en Sanatorio 42: lo que ves es de {tracked}. Si se apuntan cinco personas más de {campus}, lo añadimos; con diez, también el idioma. ¡Corre la voz!","Your campus, {campus}, is not on Sanatorio 42 yet: what you see is from {tracked}. If five more people from {campus} join, we add it; with ten, the language too. Spread the word!","El teu campus, {campus}, encara no és a Sanatorio 42: el que veus és de {tracked}. Si s'apunten cinc persones més de {campus}, l'afegim; amb deu, també l'idioma. Fes-ho córrer!","Zure campusa, {campus}, oraindik ez dago Sanatorio 42n: ikusten duzuna {tracked}(e)koa da. {campus}(e)ko bost pertsona gehiago batzen badira, gehituko dugu; hamarrekin, hizkuntza ere bai. Zabaldu mezua!"
-campus.otherOk,Botón para cerrar el aviso de otro campus,Entendido,Got it,Entesos,Ulertuta
 focus.screen.open,Pomodoro: poner el temporizador a pantalla completa,Pantalla completa,Full screen,Pantalla completa,Pantaila osoa
 focus.screen.label,Pomodoro: nombre de la vista a pantalla completa,Pomodoro a pantalla completa,Full-screen Pomodoro,Pomodoro a pantalla completa,Pomodoro pantaila osoan
 focus.screen.sign,Pomodoro a pantalla completa: letrero para quien pase por al lado,En concentración · no molestar,Focusing · do not disturb,En concentració · no molesteu,Kontzentratuta · ez molestatu
@@ -276,3 +274,24 @@ focus.band.low,Tus estadísticas del Pomodoro: tirador izquierdo del tramo,Dejar
 focus.band.high,Tus estadísticas del Pomodoro: tirador derecho del tramo,Dejar fuera a quien más lo usa,Leave out those who use it most,Deixar fora qui més el fa servir,Gehien erabiltzen dutenak kanpoan utzi
 focus.band.least,Tus estadísticas del Pomodoro: extremo del tramo,Menos uso,Least use,Menys ús,Erabilera gutxien
 focus.band.most,Tus estadísticas del Pomodoro: extremo del tramo,Más uso,Most use,Més ús,Erabilera gehien
+common.save,Botón genérico: guardar,Guardar,Save,Desa,Gorde
+common.remove,Botón genérico: borrar algo,Borrar,Delete,Esborra,Ezabatu
+common.send,Botón genérico: enviar,Enviar,Send,Envia,Bidali
+common.withdraw,Botón genérico: retirar algo publicado,Retirar,Withdraw,Retira,Kendu
+common.reason,Etiqueta genérica: el motivo de algo,Motivo,Reason,Motiu,Arrazoia
+common.cancel,Botón genérico: cancelar lo que se está haciendo,Cancelar,Cancel,Cancel·la,Utzi
+common.ok,Botón genérico para cerrar un aviso,Entendido,Got it,Entesos,Ulertuta
+common.prev,Botón genérico: ir al anterior,Anterior,Previous,Anterior,Aurrekoa
+common.next,Botón genérico: ir al siguiente,Siguiente,Next,Següent,Hurrengoa
+common.refresh,Botón genérico: volver a cargar los datos,Actualizar,Refresh,Actualitza,Eguneratu
+common.close,Botón genérico: cerrar una ventana o panel,Cerrar,Close,Tanca,Itxi
+common.from,Campo genérico: inicio de un periodo o franja,Desde,From,Des de,Noiztik
+common.to,Campo genérico: fin de un periodo o franja,Hasta,To,Fins a,Noiz arte
+common.period,Etiqueta genérica: el periodo que se mira,Periodo,Period,Període,Aldia
+common.people,Etiqueta o columna genérica: número de personas,Personas,People,Persones,Pertsonak
+common.person,Columna genérica: la persona de la fila,Persona,Person,Persona,Pertsona
+common.accept,Botón genérico: aceptar una petición,Aceptar,Accept,Accepta,Onartu
+common.decline,Botón genérico: rechazar una petición,Rechazar,Decline,Rebutja,Baztertu
+common.createRoom,Botón de los juegos: crear una sala,Crear una sala,Create a room,Crea una sala,Sortu gela bat
+common.join,Botón de los juegos: entrar en una sala,Entrar,Join,Entra,Sartu
+common.leave,Botón de los juegos: salir de la sala,Salir,Leave,Surt,Irten

@@ -265,7 +265,7 @@ function Flows({
             },
             {
               id: 'people',
-              label: t('admin.stats.people'),
+              label: t('common.people'),
               sort: (flow) => flow.people,
               cell: (flow) => flow.people,
             },

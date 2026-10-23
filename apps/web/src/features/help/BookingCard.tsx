@@ -132,7 +132,7 @@ export function BookingCard({ booking, today, onChange }: BookingCardProps) {
                 disabled={busy}
                 onClick={() => void act(() => api.respondBooking(booking.id, true))}
               >
-                {t('help.accept')}
+                {t('common.accept')}
               </button>
               <button
                 type="button"
@@ -140,7 +140,7 @@ export function BookingCard({ booking, today, onChange }: BookingCardProps) {
                 disabled={busy}
                 onClick={() => void act(() => api.respondBooking(booking.id, false))}
               >
-                {t('help.decline')}
+                {t('common.decline')}
               </button>
             </>
           )}

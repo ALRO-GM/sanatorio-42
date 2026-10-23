@@ -52,7 +52,7 @@ describe('exámenes: el examen en vivo', () => {
     expect(screen.getByRole('heading', { name: /Exam Rank 02 · 42next/ })).toBeTruthy()
 
     // Hace más de un minuto del último refresco: se puede pulsar.
-    const button = screen.getByRole('button', { name: text('exams.refresh') })
+    const button = screen.getByRole('button', { name: text('common.refresh') })
 
     expect((button as HTMLButtonElement).disabled).toBe(false)
     await act(async () => {

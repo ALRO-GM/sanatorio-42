@@ -53,7 +53,8 @@ semánticos, `Async` y plurales, `PeopleResults`), unidos el 23 de octubre.
 
 **Textos** (`textos.md`): las 275 filas, el glosario y los contextos
 aplicados; catalán y euskera completos en todas las tablas (1 009 filas).
-Quedan los cambios que tocan código: unificar unas 55 claves repetidas y
+Claves repetidas: 55 unidas en 21 `common.*` (botones y etiquetas genéricas;
+las que se montan con plantilla y las de contexto distinto se quedan). Queda
 pintar como icono los glifos (★ ✦ ← →) que hoy van en el texto.
 
 **Tests e infraestructura** (`tests-infra.md`): hechos los puntos 1, 2, 5 y

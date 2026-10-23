@@ -92,7 +92,7 @@ export function GroupRooms({ gate, me }: { gate: Gate; me: string }) {
             enter(() => api.createGitRoom(gate.id))
           }}
         >
-          {t('git.room.create')}
+          {t('common.createRoom')}
         </button>
       </div>
       {rooms !== null && rooms.length === 0 && <p className="muted">{t('git.room.none')}</p>}
@@ -111,7 +111,7 @@ export function GroupRooms({ gate, me }: { gate: Gate; me: string }) {
                 enter(() => (room.joined ? api.getGitRoom(room.id) : api.joinGitRoom(room.id)))
               }}
             >
-              {t(room.joined ? 'git.room.back' : 'git.room.join')}
+              {t(room.joined ? 'git.room.back' : 'common.join')}
             </button>
           </li>
         ))}
@@ -212,7 +212,7 @@ function GroupRoom({
             </span>
           )}
           <button type="button" className="pill" disabled={action.busy} onClick={leave}>
-            {t('git.room.leave')}
+            {t('common.leave')}
           </button>
         </span>
       </div>

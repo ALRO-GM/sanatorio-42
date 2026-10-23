@@ -28,7 +28,7 @@ describe('curso de git: prueba de grupo', () => {
         <GroupRooms gate={gate} me={ME.login} />
       </I18nProvider>,
     )
-    await user.click(await screen.findByRole('button', { name: text('git.room.create') }))
+    await user.click(await screen.findByRole('button', { name: text('common.createRoom') }))
 
     // Sola no se puede empezar; la compañera de mentira entra enseguida.
     const start = await screen.findByRole('button', { name: text('git.room.start') })
@@ -49,7 +49,7 @@ describe('curso de git: prueba de grupo', () => {
     expect(screen.getByText(new RegExp(`origin/${ME.login} tiene un commit`))).toBeTruthy()
 
     // Salir vuelve a la lista.
-    await user.click(screen.getByRole('button', { name: text('git.room.leave') }))
-    expect(await screen.findByRole('button', { name: text('git.room.create') })).toBeTruthy()
+    await user.click(screen.getByRole('button', { name: text('common.leave') }))
+    expect(await screen.findByRole('button', { name: text('common.createRoom') })).toBeTruthy()
   }, 20_000)
 })

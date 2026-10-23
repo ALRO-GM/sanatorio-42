@@ -199,7 +199,7 @@ export function EventDialog({
         {must === 'missed' && (
           <footer className="actions">
             <button type="button" className="primary small" onClick={onClose}>
-              {t('meet.missedOk')}
+              {t('common.ok')}
             </button>
           </footer>
         )}

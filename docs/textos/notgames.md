@@ -3,18 +3,16 @@
 Generado desde `apps/web/src/shared/i18n/textos/notgames.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-199 textos. «—» es que falta la traducción: sale en español.
+189 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
 | `notgames.pitch` | Not-games: frase bajo el título que explica la sección | features/notgames/NotGamesPage | Preguntas de programación para aprender con más gente. Cada cual recibe lo que ha estudiado. | Programming questions to learn with other people. Everyone gets what they have studied. | Preguntes de programació per aprendre amb més gent. Cadascú rep el que ha estudiat. | Programazio-galderak jende gehiagorekin ikasteko. Bakoitzak ikasi duena jasotzen du. |
-| `notgames.create` | Not-games: botón para crear una sala | features/notgames/NotGamesPage | Crear una sala | Create a room | Crea una sala | Sortu gela bat |
 | `notgames.createSend` | Not-games: botón que crea la sala con los ajustes elegidos | features/notgames/NotGamesPage, features/notgames/NotGamesTour | Crear y entrar | Create and join | Crea i entra | Sortu eta sartu |
 | `notgames.rooms` | Not-games: título de la lista de salas | features/notgames/NotGamesPage | Salas abiertas | Open rooms | Sales obertes | Gela irekiak |
 | `notgames.noRooms` | Not-games: no hay salas | features/notgames/NotGamesPage | Ahora mismo no hay salas. Crea una y avisa a tu gente. | No rooms right now. Create one and tell your people. | Ara mateix no hi ha sales. Crea'n una i avisa la teva gent. | Orain ez dago gelarik. Sortu bat eta abisatu zure jendeari. |
 | `notgames.hostAndPlayers` | Not-games: quién creó la sala y cuántas personas hay | features/notgames/NotGamesPage | De {host} · {n} dentro | By {host} · {n} inside | De {host} · {n} a dins | {host}-rena · {n} barruan |
 | `notgames.open` | Not-games: botón para abrir una sala en la que ya estás | features/notgames/NotGamesPage | Abrir | Open | Obre | Ireki |
-| `notgames.join` | Not-games: botón para entrar en una sala | features/notgames/NotGamesPage, features/notgames/RoomView, features/notgames/TurnRoomView | Entrar | Join | Entra | Sartu |
 | `notgames.modeLabel` | Not-games: elegir el modo de partida | features/notgames/NotGamesPage, features/notgames/NotGamesTour | Modo | Mode | Mode | Modua |
 | `notgames.mode.duel` | Not-games: modo de dos personas | features/notgames/NotGamesPage, features/notgames/NotGamesTour, features/notgames/RoomView | Duelo | Duel | Duel | Dueloa |
 | `notgames.mode.duel.hint` | Not-games: explicación del duelo | features/notgames/NotGamesPage, features/notgames/NotGamesTour, features/notgames/RoomView | Dos personas: gana quien más acierta. | Two people: whoever gets most right wins. | Dues persones: guanya qui més encerta. | Bi pertsona: gehien asmatzen duenak irabazten du. |
@@ -52,7 +50,6 @@ Generado desde `apps/web/src/shared/i18n/textos/notgames.csv` con
 | `notgames.switchTeam` | Not-games: pasarse a ese equipo | features/notgames/RoomView | Cambiarme aquí | Switch here | Canvia't aquí | Aldatu hona |
 | `notgames.start` | Not-games: botón para empezar la partida (quien creó la sala) | features/notgames/RoomView, features/notgames/TurnRoomView | Empezar | Start | Comença | Hasi |
 | `notgames.waitHost` | Not-games: esperando a quien creó la sala | features/notgames/RoomView, features/notgames/TurnRoomView | Empieza {host} cuando esté todo el grupo. | {host} starts when everyone is here. | {host} comença quan hi sigui tot el grup. | {host}-k hasiko du talde osoa dagoenean. |
-| `notgames.leave` | Not-games: salir de la sala | features/notgames/RoomView, features/notgames/TurnRoomView | Salir | Leave | Surt | Irten |
 | `notgames.questionOf` | Not-games: número de pregunta | features/notgames/NotGamesTour, features/notgames/RoomView | Pregunta {n} de {total} | Question {n} of {total} | Pregunta {n} de {total} | {total}tik {n}. galdera |
 | `notgames.kind.quick` | Not-games: etiqueta de pregunta rápida | features/notgames/NotGamesTour, features/notgames/RoomView, features/notgames/TurnRoomView | Rápida | Quick | Ràpida | Azkarra |
 | `notgames.kind.long` | Not-games: etiqueta de pregunta larga | features/notgames/RoomView, features/notgames/TurnRoomView | Larga | Long | Llarga | Luzea |
@@ -147,8 +144,6 @@ Generado desde `apps/web/src/shared/i18n/textos/notgames.csv` con
 | `git.step.theory` | Curso de git: pestaña de la teoría | features/gitcourse/GateView, features/gitcourse/GitCourseTab, features/gitcourse/GitCourseTour, features/gitcourse/LevelView | Teoría | Theory | Teoria | Teoria |
 | `git.step.challenge` | Curso de git: pestaña del reto | features/gitcourse/GateView, features/gitcourse/GitCourseTab, features/gitcourse/GitCourseTour, features/gitcourse/LevelView | Reto | Challenge | Repte | Erronka |
 | `git.anim.start` | Curso de git: primer fotograma de la animación | features/gitcourse/GateView, features/gitcourse/GitCourseTab, features/gitcourse/LevelView | Así empieza el repositorio. | This is how the repository starts. | Així comença el repositori. | Horrela hasten da biltegia. |
-| `git.anim.prev` | Curso de git: paso anterior de la animación | features/gitcourse/GateView, features/gitcourse/GitCourseTab, features/gitcourse/LevelView | Anterior | Previous | Anterior | Aurrekoa |
-| `git.anim.next` | Curso de git: paso siguiente de la animación | features/gitcourse/GateView, features/gitcourse/GitCourseTab, features/gitcourse/LevelView | Siguiente | Next | Següent | Hurrengoa |
 | `git.anim.replay` | Curso de git: volver a ver la animación | features/gitcourse/GateView, features/gitcourse/GitCourseTab, features/gitcourse/LevelView | Repetir | Replay | Repeteix | Errepikatu |
 | `git.toTheory` | Curso de git: botón para ir a la teoría | features/gitcourse/GateView, features/gitcourse/GitCourseTab, features/gitcourse/LevelView | Ver la teoría | Read the theory | Mira la teoria | Ikusi teoria |
 | `git.toChallenge` | Curso de git: botón para ir al reto | features/gitcourse/GateView, features/gitcourse/GitCourseTab, features/gitcourse/LevelView | Al reto | To the challenge | Al repte | Erronkara |
@@ -176,16 +171,13 @@ Generado desde `apps/web/src/shared/i18n/textos/notgames.csv` con
 | `git.gate.wait` | Curso de git: cuándo se puede repetir el test previo | features/gitcourse/GateView, features/gitcourse/GitCourseTab | Podrás repetirlo a las {time}. | You can retry at {time}. | El podràs repetir a les {time}. | {time}etan errepika dezakezu. |
 | `git.gate.toReview` | Curso de git: enlace al Repaso desde el test previo | features/gitcourse/GateView, features/gitcourse/GitCourseTab | Ir al Repaso | Go to Review | Ves al Repàs | Joan Errepasora |
 | `git.room.who` | Curso de git: cuánta gente cabe en una prueba de grupo | features/gitcourse/GateView, features/gitcourse/GitCourseTab, features/gitcourse/GroupRoom | De {min} a {max} personas, cada una en su puesto del clúster. | From {min} to {max} people, each at their own cluster seat. | De {min} a {max} persones, cadascuna al seu lloc del clúster. | {min}etik {max}era pertsona, bakoitza klusterreko bere postuan. |
-| `git.room.create` | Curso de git: crear una sala de prueba de grupo | features/gitcourse/GateView, features/gitcourse/GitCourseTab, features/gitcourse/GroupRoom | Crear una sala | Create a room | Crea una sala | Sortu gela bat |
 | `git.room.none` | Curso de git: no hay salas de esa prueba | features/gitcourse/GateView, features/gitcourse/GitCourseTab, features/gitcourse/GroupRoom | Aún no hay salas abiertas. Crea una y avisa a tu grupo. | No open rooms yet. Create one and tell your group. | Encara no hi ha sales obertes. Crea'n una i avisa el teu grup. | Oraindik ez dago gela irekirik. Sortu bat eta abisatu zure taldeari. |
 | `git.room.players` | Curso de git: cuántas personas hay en una sala | features/gitcourse/GateView, features/gitcourse/GitCourseTab, features/gitcourse/GroupRoom | {n} en la sala | {n} in the room | {n} a la sala | {n} gelan |
 | `git.room.status.lobby` | Curso de git: sala sin empezar | features/gitcourse/GateView, features/gitcourse/GitCourseTab, features/gitcourse/GroupRoom | esperando | waiting | esperant | zain |
 | `git.room.status.playing` | Curso de git: sala jugando | features/gitcourse/GateView, features/gitcourse/GitCourseTab, features/gitcourse/GroupRoom | jugando | playing | jugant | jokoan |
 | `git.room.status.done` | Curso de git: sala acabada | features/gitcourse/GateView, features/gitcourse/GitCourseTab, features/gitcourse/GroupRoom | acabada | finished | acabada | amaituta |
-| `git.room.join` | Curso de git: entrar en una sala | features/gitcourse/GateView, features/gitcourse/GitCourseTab, features/gitcourse/GroupRoom | Entrar | Join | Entra | Sartu |
 | `git.room.back` | Curso de git: volver a una sala en la que ya estás | features/gitcourse/GateView, features/gitcourse/GitCourseTab, features/gitcourse/GroupRoom | Volver | Go back | Torna | Itzuli |
 | `git.room.list` | Curso de git: volver a la lista de salas | features/gitcourse/GateView, features/gitcourse/GitCourseTab, features/gitcourse/GroupRoom | Salas | Rooms | Sales | Gelak |
-| `git.room.leave` | Curso de git: salir de la sala | features/gitcourse/GateView, features/gitcourse/GitCourseTab, features/gitcourse/GroupRoom | Salir | Leave | Surt | Irten |
 | `git.room.start` | Curso de git: empezar la prueba de grupo | features/gitcourse/GateView, features/gitcourse/GitCourseTab, features/gitcourse/GroupRoom | Empezar | Start | Comença | Hasi |
 | `git.room.missing` | Curso de git: cuántas personas faltan para empezar | features/gitcourse/GateView, features/gitcourse/GitCourseTab, features/gitcourse/GroupRoom | Faltan {n} | {n} more needed | En falten {n} | {n} falta dira |
 | `git.room.waiting` | Curso de git: esperando a quien creó la sala | features/gitcourse/GateView, features/gitcourse/GitCourseTab, features/gitcourse/GroupRoom | Esperando a que {host} empiece. | Waiting for {host} to start. | Esperant que {host} comenci. | {host} hasi arte zain. |
@@ -204,5 +196,3 @@ Generado desde `apps/web/src/shared/i18n/textos/notgames.csv` con
 | `notgames.chess.review` | Ajedrez: botón para repasar la partida acabada | features/notgames/TurnRoomView | Repasar la partida | Review the game | Repassa la partida | Errepasatu partida |
 | `notgames.chess.reviewStart` | Ajedrez: repaso, la posición inicial | features/notgames/TurnRoomView | Posición inicial | Starting position | Posició inicial | Hasierako posizioa |
 | `notgames.chess.reviewStep` | Ajedrez: repaso, qué jugada se ve; {move} en notación algebraica | features/notgames/TurnRoomView | Jugada {n} de {total}: {move} | Move {n} of {total}: {move} | Jugada {n} de {total}: {move} | {total}tik {n}. jokaldia: {move} |
-| `notgames.chess.reviewPrev` | Ajedrez: repaso, jugada anterior | features/notgames/TurnRoomView | Anterior | Previous | Anterior | Aurrekoa |
-| `notgames.chess.reviewNext` | Ajedrez: repaso, jugada siguiente | features/notgames/TurnRoomView | Siguiente | Next | Següent | Hurrengoa |

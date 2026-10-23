@@ -157,11 +157,11 @@ export function BoardForm({ defaultDay, board, onCancel, onSaved }: BoardFormPro
           />
         </label>
         <label>
-          {t('cal.f.start')}
+          {t('common.from')}
           <input type="time" value={form.start} onChange={set('start')} required />
         </label>
         <label>
-          {t('cal.f.end')}
+          {t('common.to')}
           <input type="time" value={form.end} onChange={set('end')} required />
         </label>
         <label className="span-2">

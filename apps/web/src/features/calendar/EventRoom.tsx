@@ -121,7 +121,7 @@ export function EventRoom({
             </label>
           )}
           <label>
-            {t('meet.why')}
+            {t('common.reason')}
             <select
               value={reason}
               onChange={(change) => {

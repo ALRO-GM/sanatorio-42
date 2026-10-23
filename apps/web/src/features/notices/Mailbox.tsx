@@ -187,8 +187,8 @@ export function Mailbox({ me, chat, onChat, onClose, onOpen, onChange }: Mailbox
                     type="button"
                     className={`link ${notice.saved ? 'on' : ''}`}
                     aria-pressed={notice.saved}
-                    aria-label={t(notice.saved ? 'notices.unsave' : 'notices.save')}
-                    title={t(notice.saved ? 'notices.unsave' : 'notices.save')}
+                    aria-label={t(notice.saved ? 'notices.unsave' : 'common.save')}
+                    title={t(notice.saved ? 'notices.unsave' : 'common.save')}
                     disabled={action.busy}
                     onClick={() => void change(() => api.saveNotice(notice.id, !notice.saved))}
                   >
@@ -197,8 +197,8 @@ export function Mailbox({ me, chat, onChat, onClose, onOpen, onChange }: Mailbox
                   <button
                     type="button"
                     className="link"
-                    aria-label={t('notices.remove')}
-                    title={t('notices.remove')}
+                    aria-label={t('common.remove')}
+                    title={t('common.remove')}
                     disabled={action.busy}
                     onClick={() => void change(() => api.removeNotices({ ids: [notice.id] }))}
                   >

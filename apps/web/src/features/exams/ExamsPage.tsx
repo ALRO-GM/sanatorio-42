@@ -187,7 +187,7 @@ function LiveCard({
             disabled={locked || refreshing}
             onClick={onRefresh}
           >
-            {t('exams.refresh')}
+            {t('common.refresh')}
           </button>
           {locked && live.refreshableAt !== null && (
             <small className="hint">

@@ -27,7 +27,7 @@ export function RangePills({
       options={RANGES}
       value={value}
       onChange={onChange}
-      label={t('admin.stats.range')}
+      label={t('common.period')}
       text={(option) => t('admin.stats.days', { n: option })}
     >
       {children}

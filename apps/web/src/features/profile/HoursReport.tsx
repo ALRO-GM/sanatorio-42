@@ -55,7 +55,7 @@ export function HoursReport({ everyone = false }: { everyone?: boolean }) {
       </span>
       <div className="hours-form">
         <label>
-          {t('hours.from')}
+          {t('common.from')}
           <input
             type="date"
             value={from}
@@ -66,7 +66,7 @@ export function HoursReport({ everyone = false }: { everyone?: boolean }) {
           />
         </label>
         <label>
-          {t('hours.to')}
+          {t('common.to')}
           <input
             type="date"
             value={to}

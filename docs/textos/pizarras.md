@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/pizarras.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-38 textos. «—» es que falta la traducción: sale en español.
+36 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -39,8 +39,6 @@ Generado desde `apps/web/src/shared/i18n/textos/pizarras.csv` con
 | `cal.f.place` | Formulario: sala | features/boards/BoardForm | Sala | Room | Sala | Gela |
 | `cal.f.placeHint` | Ejemplo de sala | features/boards/BoardForm | Clúster 1, sala de pizarras | Cluster 1, whiteboard room | Clúster 1, sala de pissarres | 1. klusterra, arbelen gela |
 | `cal.f.date` | Formulario: día | features/boards/BoardForm | Día | Day | Dia | Eguna |
-| `cal.f.start` | Formulario: hora de inicio | features/boards/BoardForm | Desde | From | Des de | Noiztik |
-| `cal.f.end` | Formulario: hora de fin | features/boards/BoardForm | Hasta | To | Fins a | Noiz arte |
 | `cal.f.capacity` | Formulario: plazas | features/boards/BoardForm | Plazas | Seats | Places | Plazak |
 | `cal.f.description` | Formulario: descripción opcional | features/boards/BoardForm | De qué va (opcional) | What it's about (optional) | De què va (opcional) | Zertaz den (aukerakoa) |
 | `cal.f.create` | Formulario: botón para proponer | features/boards/BoardForm | Proponer | Propose | Proposa | Proposatu |

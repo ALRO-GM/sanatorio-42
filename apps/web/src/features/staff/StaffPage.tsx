@@ -196,7 +196,7 @@ function Document({ found }: { found: StaffDocument }) {
           <dd>{found.login ?? t('staff.everyone')}</dd>
         </div>
         <div>
-          <dt>{t('staff.period')}</dt>
+          <dt>{t('common.period')}</dt>
           <dd>{t('staff.range', { from: found.from, to: found.to })}</dd>
         </div>
         <div>

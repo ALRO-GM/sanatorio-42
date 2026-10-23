@@ -200,7 +200,7 @@ function ConsumptionTab() {
           columns={[
             {
               id: 'login',
-              label: t('admin.col.login'),
+              label: t('common.person'),
               sort: (row) => row.login,
               first: 'asc',
               cell: (row) => <PersonLink login={row.login} />,
@@ -422,8 +422,8 @@ function PeopleTab() {
           />
           <input
             value={reason}
-            placeholder={t('admin.people.reason')}
-            aria-label={t('admin.people.reason')}
+            placeholder={t('common.reason')}
+            aria-label={t('common.reason')}
             onChange={(event) => {
               setReason(event.target.value)
             }}
@@ -530,7 +530,7 @@ function MessagesTab() {
           },
           {
             id: 'login',
-            label: t('admin.col.login'),
+            label: t('common.person'),
             sort: (message) => message.login,
             first: 'asc',
             cell: (message) => message.login,

@@ -58,7 +58,6 @@ facility.note,Aviso al staff: nota opcional,Nota (opcional),Note (optional),Nota
 facility.noteRequired,Aviso al staff: nota obligatoria con «otro»,Cuéntanos qué pasa,Tell us what's wrong,Explica'ns què passa,Kontatu iezaguzu zer gertatzen den
 facility.send,Aviso al staff: enviar,Avisar,Report,Avisar,Jakinarazi
 facility.sent,Aviso al staff: confirmación,Aviso enviado al staff. ¡Gracias!,Sent to the staff. Thanks!,Avís enviat a l'staff. Gràcies!,Staffari bidalia. Eskerrik asko!
-facility.close,Aviso al staff: cerrar la confirmación,Cerrar,Close,Tanca,Itxi
 facility.none,Lista de avisos del edificio vacía,No hay avisos pendientes.,No pending reports.,No hi ha avisos pendents.,Ez dago jakinarazpenik zain.
 facility.by,Lista de avisos: quién y cuándo,Avisó {login} · {when},Reported by {login} · {when},Avisat per {login} · {when},{login}(e)k jakinarazia · {when}
 facility.resolvedBy,Lista de avisos: quién lo resolvió y cuándo,resuelto por {by} · {when},resolved by {by} · {when},resolt per {by} · {when},{by}(e)k konponduta · {when}

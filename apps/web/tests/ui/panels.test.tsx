@@ -96,7 +96,7 @@ describe('ventanas y paneles', () => {
           .map((cell) => cell.textContent)
 
       // Primero por quién, después por trampas: manda trampas y desempata el login.
-      await user.click(within(table).getByRole('button', { name: text('admin.stats.person') }))
+      await user.click(within(table).getByRole('button', { name: text('common.person') }))
       await user.click(within(table).getByRole('button', { name: text('admin.cheats.times') }))
       const rows = order()
 
@@ -110,7 +110,7 @@ describe('ventanas y paneles', () => {
         within(card).getByLabelText(text('admin.cast.body')),
         'Hablamos de tu partida.',
       )
-      await user.click(within(card).getByRole('button', { name: text('admin.cast.send') }))
+      await user.click(within(card).getByRole('button', { name: text('common.send') }))
       await settle()
       expect(sent).toHaveBeenCalledWith({
         title: 'Aviso',
@@ -179,7 +179,7 @@ describe('ventanas y paneles', () => {
 
         if (button !== null) await user.click(button)
       }
-      await user.click(screen.getByRole('button', { name: text('agenda.next') }))
+      await user.click(screen.getByRole('button', { name: text('common.next') }))
       await user.click(screen.getByRole('button', { name: text('agenda.today') }))
     })
   }, 30_000)
@@ -191,7 +191,7 @@ describe('ventanas y paneles', () => {
       await openApp('#/terapia')
       await user.click(await screen.findByRole('button', { name: text('therapy.new') }, WAIT))
       expect(await screen.findByText(text('therapy.newHint'), {}, WAIT)).toBeTruthy()
-      await user.click(screen.getByRole('button', { name: text('therapy.cancel') }))
+      await user.click(screen.getByRole('button', { name: text('common.cancel') }))
     })
   }, 30_000)
 

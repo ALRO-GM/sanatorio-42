@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/terapia.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-60 textos. «—» es que falta la traducción: sale en español.
+57 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -40,12 +40,9 @@ Generado desde `apps/web/src/shared/i18n/textos/terapia.csv` con
 | `therapy.project` | Formulario: proyecto | features/therapy/GroupForm | Proyecto | Project | Projecte | Proiektua |
 | `therapy.place` | Formulario: lugar | features/therapy/GroupForm | Lugar de quedada | Meeting place | Lloc de trobada | Elkartzeko lekua |
 | `therapy.placeHint` | Ejemplo de lugar | features/therapy/GroupForm | Clúster 1 · Planta 2 | Cluster 1 · Floor 2 | Clúster 1 · Planta 2 | 1. klusterra · 2. solairua |
-| `therapy.start` | Formulario: hora de inicio | features/therapy/GroupForm | Desde | From | Des de | Noiztik |
-| `therapy.end` | Formulario: hora de fin | features/therapy/GroupForm | Hasta | To | Fins a | Noiz arte |
 | `therapy.note` | Formulario: nota opcional | features/therapy/GroupForm | Nota (opcional) | Note (optional) | Nota (opcional) | Oharra (aukerakoa) |
 | `therapy.noteHint` | Ejemplo de nota | features/therapy/GroupForm | Qué parte queréis atacar | Which part you want to tackle | Quina part voleu atacar | Zein zatiri heldu nahi diozuen |
 | `therapy.create` | Formulario: botón para abrir el grupo | features/therapy/GroupForm, features/therapy/TherapyTour | Abrir grupo | Open group | Obre el grup | Ireki taldea |
-| `therapy.cancel` | Formulario: cancelar | features/facility/FacilityForm, features/notgames/NotGamesPage, features/therapy/GroupForm | Cancelar | Cancel | Cancel·la | Utzi |
 | `therapy.needProject` | No tienes ningún proyecto en curso | features/therapy/GroupForm | Para abrir un grupo necesitas tener algún proyecto en curso. | You need a project in progress to open a group. | Per obrir un grup has de tenir algun projecte en curs. | Talde bat irekitzeko proiekturen bat abian izan behar duzu. |
 | `therapy.attendance` | Cómo se comprueba la asistencia y da XP | features/therapy/GroupCard | La asistencia se comprueba sola cada media hora: da XP a quien esté en uno de los puestos reservados, si sois al menos dos. | Attendance is checked automatically every half hour: XP goes to whoever is at a reserved seat, if at least two of you are. | L'assistència es comprova sola cada mitja hora: dona XP a qui sigui en un dels llocs reservats, si sou almenys dos. | Bertaratzea ordu erdiro egiaztatzen da berez: erreserbatutako postu batean dagoenari XP ematen dio, gutxienez bi bazarete. |
 | `therapy.attendanceNoSeats` | Sin puestos no hay XP | features/therapy/GroupCard | Sin puestos reservados no se puede comprobar la asistencia, así que este grupo no da XP. | Without reserved seats attendance cannot be checked, so this group gives no XP. | Sense llocs reservats no es pot comprovar l'assistència, així que aquest grup no dona XP. | Erreserbatutako posturik gabe ezin da bertaratzea egiaztatu, beraz talde honek ez du XPrik ematen. |

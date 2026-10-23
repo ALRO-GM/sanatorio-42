@@ -119,7 +119,7 @@ export function Inbox({
         />
         <ErrorNote error={error} />
         <button type="submit" className="primary small" disabled={busy}>
-          {t('inbox.send')}
+          {t('common.send')}
         </button>
       </form>
 
@@ -152,7 +152,7 @@ export function Inbox({
                   })
                 }
               >
-                <Icon name="papelera" size={14} /> {t('inbox.withdraw')}
+                <Icon name="papelera" size={14} /> {t('common.withdraw')}
               </button>
             )}
             {ticket.answer === null ? (

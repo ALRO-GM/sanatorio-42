@@ -138,7 +138,7 @@ export function CalendarPage({ focus = null, onGo, me }: CalendarPageProps) {
             <button
               type="button"
               className="icon-btn"
-              aria-label={t('agenda.prev')}
+              aria-label={t('common.prev')}
               onClick={() => {
                 setCursor(move(view, cursor, -1))
               }}
@@ -157,7 +157,7 @@ export function CalendarPage({ focus = null, onGo, me }: CalendarPageProps) {
             <button
               type="button"
               className="icon-btn"
-              aria-label={t('agenda.next')}
+              aria-label={t('common.next')}
               onClick={() => {
                 setCursor(move(view, cursor, 1))
               }}
@@ -321,7 +321,7 @@ export function CalendarPage({ focus = null, onGo, me }: CalendarPageProps) {
                   min: Math.max(0, Math.round((Date.now() - Date.parse(data.fortyTwoAt)) / 60_000)),
                 })}{' '}
             <button type="button" className="link" disabled={loading} onClick={() => void reload()}>
-              {t('agenda.refresh')}
+              {t('common.refresh')}
             </button>
           </p>
         )}

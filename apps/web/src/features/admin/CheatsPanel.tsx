@@ -69,7 +69,7 @@ export function CheatsPanel({ me, onWatch }: CheatsPanelProps) {
   const peopleColumns: Column<ClickerCheater>[] = [
     {
       id: 'login',
-      label: t('admin.stats.person'),
+      label: t('common.person'),
       cell: (row) => row.login,
       sort: (row) => row.login,
       first: 'asc',
@@ -150,7 +150,7 @@ export function CheatsPanel({ me, onWatch }: CheatsPanelProps) {
     { id: 'at', label: t('admin.cheats.when'), cell: (row) => date(row.at), sort: (row) => row.at },
     {
       id: 'login',
-      label: t('admin.stats.person'),
+      label: t('common.person'),
       cell: (row) => row.login,
       sort: (row) => row.login,
       first: 'asc',
@@ -337,7 +337,7 @@ function WriteToCheaters({ logins, onSent }: { logins: string[]; onSent: () => v
       <ErrorNote error={error} />
       <div className="actions">
         <button type="submit" className="primary small" disabled={busy}>
-          {t('admin.cast.send')}
+          {t('common.send')}
         </button>
       </div>
     </form>

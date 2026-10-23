@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/guardia.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-79 textos. «—» es que falta la traducción: sale en español.
+74 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -40,8 +40,6 @@ Generado desde `apps/web/src/shared/i18n/textos/guardia.csv` con
 | `help.closedXpMine` | Sesión cerrada: tú ganas XP | features/help/BookingCard | Sesión cerrada: ganas {xp} XP. | Session closed: you earn {xp} XP. | Sessió tancada: guanyes {xp} XP. | Saioa itxita: {xp} XP irabazi duzu. |
 | `help.waitingCode` | Falta validar el código de fin de la sesión | features/help/BookingCard | Valorada por las dos partes. Falta validar el código de fin para cerrarla. | Rated by both. The end code still has to be validated to close it. | Valorada per les dues parts. Falta validar el codi de fi per tancar-la. | Bi aldeek baloratuta. Amaierako kodea balidatzea falta da ixteko. |
 | `help.closedNoXp` | Sesión cerrada sin XP y por qué | features/help/BookingCard | Sesión cerrada sin XP: no se validaron los dos códigos (inicio y fin) o esta pareja ya había sumado XP hoy. | Session closed with no XP: the two codes (start and end) were not validated, or this pair had already earned XP today. | Sessió tancada sense XP: no es van validar els dos codis (inici i fi) o aquesta parella ja havia sumat XP avui. | Saioa XPrik gabe itxita: ez ziren bi kodeak balidatu (hasiera eta amaiera) edo bikote honek gaur jada XP gehitu zuen. |
-| `help.accept` | Botón para aceptar una petición | features/help/BookingCard, features/help/GuardTour | Aceptar | Accept | Accepta | Onartu |
-| `help.decline` | Botón para rechazar una petición | features/help/BookingCard, features/help/GuardTour | Rechazar | Decline | Rebutja | Baztertu |
 | `help.cancel` | Botón para anular una reserva | features/help/BookingCard | Anular | Cancel | Anul·la | Bertan behera utzi |
 | `help.didNotHappen` | Botón: la sesión no llegó a hacerse | features/help/BookingCard | Al final no quedamos | It did not happen | Al final no vam quedar | Azkenean ez ginen elkartu |
 | `help.block` | Botón para no ayudar más a esa persona | features/help/BookingCard | No ayudar más a {login} | Stop helping {login} | No ajudis més {login} | Ez lagundu gehiago {login}(r)i |
@@ -53,9 +51,6 @@ Generado desde `apps/web/src/shared/i18n/textos/guardia.csv` con
 | `helpGate.cancelled` | Han anulado tu reserva | features/help/HelpGate | {login} ha anulado la reserva | {login} cancelled the booking | {login} ha anul·lat la reserva | {login}(e)k erreserba bertan behera utzi du |
 | `helpGate.when` | Cuándo es la reserva: día y horas | features/help/HelpGate | {day}, de {when} | {day}, {when} | {day}, de {when} | {day}, {when} |
 | `helpGate.today` | Hoy | features/help/HelpGate | Hoy | Today | Avui | Gaur |
-| `helpGate.accept` | Botón para aceptar | features/help/HelpGate | Aceptar | Accept | Accepta | Onartu |
-| `helpGate.decline` | Botón para rechazar | features/help/HelpGate | Rechazar | Decline | Rebutja | Baztertu |
-| `helpGate.ok` | Botón para dar por leído | features/help/HelpGate | Entendido | Got it | Entesos | Ulertuta |
 | `helpGate.newsHint` | Qué hacer cuando te rechazan o anulan | features/help/HelpGate | Esa media hora vuelve a quedar libre. Puedes pedírsela a otra persona en la sala de espera. | That half hour is free again. You can ask someone else in the waiting room. | Aquesta mitja hora torna a quedar lliure. Pots demanar-la a una altra persona a la sala d'espera. | Ordu erdi hori libre geratu da berriro. Beste norbaiti eska diezaiokezu itxaron gelan. |
 | `helpGate.more` | Cuántas peticiones más quedan | features/help/HelpGate | y {n} más | and {n} more | i {n} més | eta beste {n} |
 | `help.bookTitle` | Título del formulario para reservar ayuda | features/help/BookHelp, features/peers/WaitingTour | Reservar un rato con {login} | Book some time with {login} | Reserva una estona amb {login} | Erreserbatu tarte bat {login}(r)ekin |

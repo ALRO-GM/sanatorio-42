@@ -105,7 +105,6 @@ admin.cons.empty,"Panel de gestión, «Consumo»: peticiones por persona y hora.
 admin.cons.hour,"Panel de gestión, «Consumo»: peticiones por persona y hora. Una línea de la lista de las últimas horas. {day} es el día de la semana, {hour} la hora (UTC), {requests} las peticiones, {people} las personas y {size} el tamaño descargado.",{day} {hour}:00 · {requests} peticiones · {people} personas · {size},{day} {hour}:00 · {requests} requests · {people} people · {size},{day} {hour}:00 · {requests} peticions · {people} persones · {size},{day} {hour}:00 · {requests} eskaera · {people} pertsona · {size}
 admin.cons.top,"Panel de gestión, «Consumo»: peticiones por persona y hora. Título de la lista de quién más consume.",Quién más consume (últimas 24 h),Top consumers (last 24 h),Qui consumeix més (darreres 24 h),Nork gehien kontsumitzen duen (azken 24 h)
 admin.cons.topHint,"Panel de gestión, «Consumo»: peticiones por persona y hora. Texto de ayuda de esa lista.",El tope se reparte solo entre quienes están conectados. Pulsa el de alguien para ponerle uno a mano; vacío vuelve al automático.,The cap is split automatically among whoever is connected. Click a cap to set one by hand; empty goes back to automatic.,El topall es reparteix sol entre qui està connectat. Prem el d'algú per posar-ne un a mà; buit torna a l'automàtic.,"Muga bere kabuz banatzen da konektatuta daudenen artean. Sakatu norbaiten muga eskuz bat jartzeko; hutsik utziz gero, automatikora itzultzen da."
-admin.col.login,Panel de gestión: columna de una tabla de consumo. Cabecera de columna de la tabla de consumo.,Persona,Person,Persona,Pertsona
 admin.col.requests,Panel de gestión: columna de una tabla de consumo. Cabecera de columna de la tabla de consumo.,Peticiones,Requests,Peticions,Eskaerak
 admin.col.bytes,Panel de gestión: columna de una tabla de consumo. Cabecera de columna de la tabla de consumo.,Descargado,Downloaded,Descarregat,Deskargatua
 admin.col.limited,Panel de gestión: columna de una tabla de consumo. Cabecera de columna de la tabla de consumo.,Rechazadas,Rejected,Rebutjades,Baztertuak
@@ -126,7 +125,6 @@ admin.people.grant,"Panel de gestión, «Permisos y bloqueos». Botón para dar 
 admin.people.login,"Panel de gestión, «Permisos y bloqueos». Etiqueta del campo del login.",Login,Login,Login,Login-a
 admin.people.blocks,"Panel de gestión, «Permisos y bloqueos». Título de la lista de cuentas bloqueadas.",Cuentas bloqueadas,Blocked accounts,Comptes bloquejats,Blokeatutako kontuak
 admin.people.noBlocks,"Panel de gestión, «Permisos y bloqueos». Mensaje cuando no hay bloqueos.",No hay nadie bloqueado.,Nobody is blocked.,No hi ha ningú bloquejat.,Ez dago inor blokeatuta.
-admin.people.reason,"Panel de gestión, «Permisos y bloqueos». Etiqueta del campo del motivo del bloqueo.",Motivo,Reason,Motiu,Arrazoia
 admin.people.duration,"Panel de gestión, «Permisos y bloqueos». Etiqueta del campo de la duración del bloqueo.",Duración,Duration,Durada,Iraupena
 admin.people.days,"Panel de gestión, «Permisos y bloqueos». Opción de duración del bloqueo. {n} son los días de bloqueo.",{n} días,{n} days,{n} dies,{n} egun
 admin.people.forever,"Panel de gestión, «Permisos y bloqueos». Opción de duración del bloqueo: indefinido.",Sin fecha de fin,No end date,Sense data de fi,Amaiera-datarik gabe
@@ -137,7 +135,6 @@ admin.people.limits,"Panel de gestión, «Permisos y bloqueos». Título de la l
 admin.people.noLimits,"Panel de gestión, «Permisos y bloqueos». Mensaje cuando no hay topes a mano.",Todo el mundo lleva el tope automático.,Everyone has the automatic cap.,Tothom porta el topall automàtic.,Jende guztiak muga automatikoa du.
 admin.people.perHour,"Panel de gestión, «Permisos y bloqueos». Tope de una persona en la lista. {n} son las peticiones por hora.",{n} por hora,{n} per hour,{n} per hora,{n} orduko
 admin.inbox.empty,"Panel de gestión, «Buzón»: incidencias y denuncias. Mensaje cuando no hay nada.",No hay incidencias.,There are no issues.,No hi ha incidències.,Ez dago intzidentziarik.
-admin.inbox.remove,"Panel de gestión, «Buzón»: incidencias y denuncias. Botón para borrar un mensaje.",Borrar,Delete,Esborra,Ezabatu
 admin.inbox.removeConfirm,"Panel de gestión, «Buzón»: incidencias y denuncias. Pregunta de confirmación antes de borrar.",¿Borrar este mensaje? No se puede deshacer.,Delete this message? This cannot be undone.,Vols esborrar aquest missatge? No es pot desfer.,Mezu hau ezabatu nahi duzu? Ezin da desegin.
 admin.inbox.byReason,"Panel de gestión, «Buzón»: incidencias y denuncias. Etiqueta del filtro por motivo.",Por motivo,By reason,Per motiu,Arrazoiaren arabera
 admin.inbox.allKinds,"Panel de gestión, «Buzón»: incidencias y denuncias. Opción del filtro: sin filtrar.",Todo,All,Tot,Dena
@@ -155,7 +152,6 @@ admin.messages.empty,"Panel de gestión, «Mensajes»: revisar chats denunciados
 admin.tab.stats,Panel de gestión: pestaña del panel. Nombre de una pestaña del panel.,Estadísticas,Statistics,Estadístiques,Estatistikak
 admin.stats.title,"Panel de gestión, «Estadísticas»: tiempo y uso por persona. Título de la vista.",Estadísticas de uso,Usage statistics,Estadístiques d'ús,Erabilera-estatistikak
 admin.stats.of,"Panel de gestión, «Estadísticas»: tiempo y uso por persona. Título de la vista de una persona. {login} es la persona.",Estadísticas de {login},Statistics for {login},Estadístiques de {login},{login}(r)en estatistikak
-admin.stats.range,"Panel de gestión, «Estadísticas»: tiempo y uso por persona. Etiqueta del selector de periodo.",Periodo,Period,Període,Aldia
 admin.stats.days,"Panel de gestión, «Estadísticas»: tiempo y uso por persona. Opción del selector de periodo. {n} son los días del periodo.",{n} d,{n} d,{n} d,{n} e
 admin.stats.everyone,"Panel de gestión, «Estadísticas»: tiempo y uso por persona. Enlace para volver a las estadísticas de todo el mundo.",← Todo el mundo,← Everyone,← Tothom,← Jende guztia
 admin.stats.seen,"Panel de gestión, «Estadísticas»: tiempo y uso por persona. Estado de la pestaña de la web para medir el tiempo de uso.",En primer plano,In the foreground,En primer pla,Lehen planoan
@@ -165,8 +161,6 @@ admin.stats.clicks,"Panel de gestión, «Estadísticas»: tiempo y uso por perso
 admin.stats.traffic,"Panel de gestión, «Estadísticas»: tiempo y uso por persona. Cabecera de columna de la tabla.",Peticiones · tamaño,Requests · size,Peticions · mida,Eskaerak · tamaina
 admin.stats.requests,"Panel de gestión, «Estadísticas»: tiempo y uso por persona. Cabecera de columna de la tabla.",Peticiones,Requests,Peticions,Eskaerak
 admin.stats.size,"Panel de gestión, «Estadísticas»: tiempo y uso por persona. Cabecera de columna de la tabla.",Tamaño,Size,Mida,Tamaina
-admin.stats.people,"Panel de gestión, «Estadísticas»: tiempo y uso por persona. Cabecera de columna de la tabla.",Personas,People,Persones,Pertsonak
-admin.stats.person,"Panel de gestión, «Estadísticas»: tiempo y uso por persona. Cabecera de columna de la tabla.",Persona,Person,Persona,Pertsona
 admin.stats.element,"Panel de gestión, «Estadísticas»: tiempo y uso por persona. Cabecera de columna de la tabla.",Sección o bloque,Section or block,Secció o bloc,Atala edo blokea
 admin.stats.byHour,"Panel de gestión, «Estadísticas»: tiempo y uso por persona. Título de un bloque de la vista.",Tiempo por hora del día,Time by hour of day,Temps per hora del dia,Denbora eguneko orduaren arabera
 admin.stats.byKey,"Panel de gestión, «Estadísticas»: tiempo y uso por persona. Título de un bloque de la vista.",Tiempo y pulsaciones por elemento,Time and clicks by element,Temps i clics per element,Denbora eta klikak elementuko
@@ -356,11 +350,9 @@ admin.cast.title,"Panel de gestión, «Comunicados»: mensajes a toda la gente. 
 admin.cast.body,"Panel de gestión, «Comunicados»: mensajes a toda la gente. Etiqueta de un campo del formulario.",Mensaje,Message,Missatge,Mezua
 admin.cast.options,"Panel de gestión, «Comunicados»: mensajes a toda la gente. Etiqueta de un campo del formulario.","Opciones para elegir, una por línea (hasta 6; vacío si no hacen falta)","Options to choose from, one per line (up to 6; empty if not needed)","Opcions per triar, una per línia (fins a 6; buit si no calen)","Aukeratzeko aukerak, bat lerroko (6ra arte; hutsik behar ez badira)"
 admin.cast.required,"Panel de gestión, «Comunicados»: mensajes a toda la gente. Casilla: obligar a elegir una opción.",No se puede cerrar la ventana sin elegir una opción,The window cannot be closed without choosing an option,No es pot tancar la finestra sense triar una opció,Ezin da leihoa itxi aukera bat aukeratu gabe
-admin.cast.send,"Panel de gestión, «Comunicados»: mensajes a toda la gente. Botón para enviar.",Enviar,Send,Envia,Bidali
 admin.cast.none,"Panel de gestión, «Comunicados»: mensajes a toda la gente. Mensaje cuando aún no hay comunicados.",Todavía no se ha mandado ningún comunicado.,No announcement has been sent yet.,Encara no s'ha enviat cap comunicat.,Oraindik ez da komunikaturik bidali.
 admin.cast.seen,"Panel de gestión, «Comunicados»: mensajes a toda la gente. Etiqueta de las respuestas de un comunicado.",Visto sin elegir,Seen without choosing,Vist sense triar,Aukeratu gabe ikusia
 admin.cast.who,"Panel de gestión, «Comunicados»: mensajes a toda la gente. Etiqueta de las respuestas de un comunicado. {n} es el número de personas que han respondido.",Quién ha respondido ({n}),Who has answered ({n}),Qui ha respost ({n}),Nork erantzun duen ({n})
-admin.cast.remove,"Panel de gestión, «Comunicados»: mensajes a toda la gente. Botón para retirar un comunicado.",Retirar,Withdraw,Retira,Kendu
 admin.cast.wasRequired,"Panel de gestión, «Comunicados»: mensajes a toda la gente. Estado de un comunicado enviado.",había que elegir,a choice was required,calia triar,aukeratu behar zen
 admin.cast.wasOptional,"Panel de gestión, «Comunicados»: mensajes a toda la gente. Estado de un comunicado enviado.",se podía cerrar sin elegir,could be closed without choosing,es podia tancar sense triar,aukeratu gabe itxi zitekeen
 staff.title,Página del staff de 42 para comprobar informes de horas. Título de la página.,Validar un documento,Verify a document,Validar un document,Dokumentu bat balidatu
@@ -377,7 +369,6 @@ staff.check,Página del staff de 42 para comprobar informes de horas. Botón par
 staff.found,Página del staff de 42 para comprobar informes de horas. Aviso: el código es válido. {code} es el código del documento.,El código {code} es de un documento emitido por Sanatorio 42. Esto es lo que decía al emitirse:,Code {code} belongs to a document issued by Sanatorio 42. This is what it said when it was issued:,El codi {code} és d'un document emès per Sanatorio 42. Això és el que deia quan es va emetre:,{code} kodea Sanatorio 42k igorritako dokumentu batena da. Hau zioen igorri zenean:
 staff.of,Página del staff de 42 para comprobar informes de horas. Dato del documento emitido.,Horas de,Hours of,Hores de,Norenak
 staff.everyone,Página del staff de 42 para comprobar informes de horas. Dato del documento emitido.,Todo el mundo,Everyone,Tothom,Denenak
-staff.period,Página del staff de 42 para comprobar informes de horas. Dato del documento emitido.,Periodo,Period,Període,Aldia
 staff.range,Página del staff de 42 para comprobar informes de horas. Dato del documento emitido. {from} y {to} son las fechas de inicio y fin del periodo.,Del {from} al {to},From {from} to {to},Del {from} al {to},{from} – {to}
 staff.total,Página del staff de 42 para comprobar informes de horas. Dato del documento emitido.,Tiempo validado,Validated time,Temps validat,Balidatutako denbora
 staff.rows,Página del staff de 42 para comprobar informes de horas. Dato del documento emitido. {n} es el número de filas del documento.,{n} filas,{n} rows,{n} files,{n} lerro

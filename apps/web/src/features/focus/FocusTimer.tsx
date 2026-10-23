@@ -186,7 +186,7 @@ export function FocusTimer() {
           setBreakUntil(null)
         }}
       >
-        {t('focus.close')}
+        {t('common.close')}
       </button>
     </aside>
   )

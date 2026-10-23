@@ -55,7 +55,7 @@ export function InboxTour() {
               </div>
               <div className="tour-row">
                 <span className="tour-button" data-tour="send">
-                  {t('inbox.send')}
+                  {t('common.send')}
                 </span>
                 {shot.sent && (
                   <span className="tour-saved">

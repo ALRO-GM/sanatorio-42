@@ -106,7 +106,7 @@ export function Chat({ thread, me, direct = false }: ChatProps) {
           className="primary small"
           disabled={thread.sending || text.trim() === ''}
         >
-          {t('meet.sendText')}
+          {t('common.send')}
         </button>
       </form>
       <ErrorNote error={thread.sendError} />

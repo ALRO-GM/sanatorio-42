@@ -28,7 +28,7 @@ describe('aviso para otros campus', () => {
     localStorage.setItem('sanatorio_lang', 'es')
     show(58)
     expect(await screen.findByText(/Tu campus, Barcelona, todavía no está/)).toBeTruthy()
-    await user.click(screen.getByRole('button', { name: text('campus.otherOk') }))
+    await user.click(screen.getByRole('button', { name: text('common.ok') }))
     expect(screen.queryByText(/Tu campus, Barcelona/)).toBeNull()
 
     cleanup()

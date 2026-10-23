@@ -21,7 +21,7 @@ describe('Not-games', () => {
     await user.click(
       await screen.findByRole(
         'button',
-        { name: new RegExp(text('notgames.create')) },
+        { name: new RegExp(text('common.createRoom')) },
         { timeout: 5000 },
       ),
     )
@@ -59,7 +59,7 @@ describe('Not-games', () => {
     expect(screen.getByText(text('notgames.scores'))).toBeTruthy()
 
     // Se puede salir en plena partida: vuelve a la lista y la sala, sin nadie, ya no está.
-    await user.click(screen.getByRole('button', { name: new RegExp(text('notgames.leave')) }))
+    await user.click(screen.getByRole('button', { name: new RegExp(text('common.leave')) }))
     await waitFor(() => {
       expect(window.location.hash).toBe('#/notgames')
     })
@@ -71,7 +71,7 @@ describe('Not-games', () => {
 
     await openApp('#/notgames')
     await user.click(
-      await screen.findByRole('button', { name: new RegExp(text('notgames.create')) }),
+      await screen.findByRole('button', { name: new RegExp(text('common.createRoom')) }),
     )
     for (const mode of ['duel', 'teams', 'ffa', 'survival']) {
       expect(screen.getByText(text(`notgames.mode.${mode}.hint`))).toBeTruthy()
@@ -88,7 +88,7 @@ describe('Not-games', () => {
 
     await openApp('#/notgames')
     await user.click(
-      await screen.findByRole('button', { name: new RegExp(text('notgames.create')) }),
+      await screen.findByRole('button', { name: new RegExp(text('common.createRoom')) }),
     )
     await user.click(
       screen.getByRole('button', { name: new RegExp(`^${text('notgames.game.chess')}`) }),

@@ -324,7 +324,7 @@ export function ClickerPanel({ me }: { me: string }) {
                   columns={[
                     {
                       id: 'login',
-                      label: t('admin.stats.person'),
+                      label: t('common.person'),
                       sort: (row) => row.login,
                       first: 'asc',
                       cell: (row) => (

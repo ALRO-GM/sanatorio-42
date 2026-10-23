@@ -98,7 +98,7 @@ export function RoomView({ id, me }: RoomViewProps) {
           <SoundToggle />
           {present && (
             <button type="button" className="pill" disabled={action.busy} onClick={leave}>
-              <Icon name="salir" size={14} /> {t('notgames.leave')}
+              <Icon name="salir" size={14} /> {t('common.leave')}
             </button>
           )}
         </span>
@@ -197,7 +197,7 @@ function Waiting({ room, me, busy, onJoin, onStart }: WaitingProps) {
               onJoin(null)
             }}
           >
-            {t('notgames.join')}
+            {t('common.join')}
           </button>
         )}
         {room.host === me && (

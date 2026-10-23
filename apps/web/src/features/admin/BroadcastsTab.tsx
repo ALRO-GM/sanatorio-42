@@ -161,7 +161,7 @@ export function BroadcastsTab({ campusId }: { campusId: number | undefined }) {
         <ErrorNote error={sending.error} />
         <div className="actions">
           <button type="submit" className="primary small" disabled={sending.busy}>
-            {t('admin.cast.send')}
+            {t('common.send')}
           </button>
         </div>
       </form>
@@ -253,7 +253,7 @@ function Sent({ report, onRemoved }: { report: BroadcastReport; onRemoved: () =>
               })
           }
         >
-          {t('admin.cast.remove')}
+          {t('common.withdraw')}
         </button>
       </div>
     </article>

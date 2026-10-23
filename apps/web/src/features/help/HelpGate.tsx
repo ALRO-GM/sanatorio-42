@@ -106,7 +106,7 @@ export function HelpGate({ pending, onChange }: HelpGateProps) {
                 next(() => api.respondBooking(current.id, false))
               }}
             >
-              {t('helpGate.decline')}
+              {t('common.decline')}
             </button>
             <button
               type="button"
@@ -116,7 +116,7 @@ export function HelpGate({ pending, onChange }: HelpGateProps) {
                 next(() => api.respondBooking(current.id, true))
               }}
             >
-              {t('helpGate.accept')}
+              {t('common.accept')}
             </button>
           </>
         ) : (
@@ -128,7 +128,7 @@ export function HelpGate({ pending, onChange }: HelpGateProps) {
               next(() => api.seenBooking(current.id))
             }}
           >
-            {t('helpGate.ok')}
+            {t('common.ok')}
           </button>
         )}
       </div>

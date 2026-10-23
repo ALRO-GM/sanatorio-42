@@ -359,20 +359,20 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
               </div>
             )}
             <div className="net-filter">
-              <span className="eyebrow">{t('net.period')}</span>
+              <span className="eyebrow">{t('common.period')}</span>
               <PillGroup
                 options={PERIODS}
                 value={filters.period}
                 onChange={(period) => {
                   change({ period })
                 }}
-                label={t('net.period')}
+                label={t('common.period')}
                 text={(period) => t(`net.period.${period}`)}
               />
               {filters.period === 'custom' && (
                 <div className="net-dates">
                   <label>
-                    {t('net.from')}
+                    {t('common.from')}
                     <input
                       type="date"
                       value={filters.from}
@@ -383,7 +383,7 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
                     />
                   </label>
                   <label>
-                    {t('net.to')}
+                    {t('common.to')}
                     <input
                       type="date"
                       value={filters.to}
@@ -409,7 +409,7 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
             )}
 
             <div className="net-filter">
-              <span className="eyebrow">{t('net.person')}</span>
+              <span className="eyebrow">{t('common.person')}</span>
               <PersonSearch
                 value={filters.login}
                 me={me.login}
@@ -537,7 +537,7 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
                           <strong>{number(graph.totals.corrections)}</strong>
                         </div>
                         <div className="tile">
-                          <span className="eyebrow">{t('net.total.people')}</span>
+                          <span className="eyebrow">{t('common.people')}</span>
                           <strong>{number(graph.totals.people)}</strong>
                         </div>
                         <div className="tile">

@@ -446,7 +446,7 @@ function PaceForm({ health, onSaved, onCancel, cancelLabel }: PaceFormProps) {
           {t('health.formSave')}
         </button>
         <button type="button" className="pill" onClick={onCancel}>
-          {cancelLabel ?? t('health.formCancel')}
+          {cancelLabel ?? t('common.cancel')}
         </button>
       </div>
       <ErrorNote error={error} />

@@ -143,7 +143,7 @@ function TicketRow({ ticket, onDone }: { ticket: Ticket; onDone: () => void }) {
             void confirm
               .ask({
                 body: t('admin.inbox.removeConfirm'),
-                okText: t('admin.inbox.remove'),
+                okText: t('common.remove'),
                 danger: true,
               })
               .then(async (yes) => {
@@ -151,7 +151,7 @@ function TicketRow({ ticket, onDone }: { ticket: Ticket; onDone: () => void }) {
               })
           }}
         >
-          <Icon name="papelera" size={14} /> {t('admin.inbox.remove')}
+          <Icon name="papelera" size={14} /> {t('common.remove')}
         </button>
       </div>
       {confirm.dialog}

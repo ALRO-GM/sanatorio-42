@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/buzon.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-121 textos. «—» es que falta la traducción: sale en español.
+114 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -12,9 +12,7 @@ Generado desde `apps/web/src/shared/i18n/textos/buzon.csv` con
 | `notices.openUnread` | Nombre accesible del buzón con avisos sin leer | app/Header | Abrir el buzón: {n} sin leer | Open the mailbox: {n} unread | Obre la bústia: {n} sense llegir | Ireki postontzia: {n} irakurri gabe |
 | `notices.empty` | Buzón vacío | features/notices/Mailbox | No tienes ningún aviso. | You have no notices. | No tens cap avís. | Ez duzu abisurik. |
 | `notices.readAll` | Botón para marcar todo como leído | features/notices/Mailbox | Marcar todo como leído | Mark all as read | Marca-ho tot com a llegit | Markatu dena irakurrita gisa |
-| `notices.save` | Botón para guardar un aviso | features/notices/Mailbox | Guardar | Save | Desa | Gorde |
 | `notices.unsave` | Botón para dejar de guardar un aviso | features/notices/Mailbox | Dejar de guardar | Unsave | Deixa de desar | Ez gorde |
-| `notices.remove` | Botón para borrar un aviso | features/notices/Mailbox | Borrar | Delete | Esborra | Ezabatu |
 | `notices.removeRead` | Botón para borrar los avisos leídos | features/notices/Mailbox | Borrar los leídos ({n}) | Delete read ({n}) | Esborra els llegits ({n}) | Ezabatu irakurritakoak ({n}) |
 | `notices.filter` | Filtro de avisos | features/notices/Mailbox | Qué avisos | Which notices | Quins avisos | Zein abisu |
 | `notices.filter.all` | Filtro: todos | features/notices/Mailbox | Todos | All | Tots | Denak |
@@ -69,26 +67,21 @@ Generado desde `apps/web/src/shared/i18n/textos/buzon.csv` con
 | `inbox.kind.idea` | Tipo de envío: mejora | features/admin/Inbox, features/admin/InboxTab | Mejora | Improvement | Millora | Hobekuntza |
 | `inbox.kind.report` | Tipo de envío: denuncia | features/admin/Inbox, features/admin/InboxTab | Denuncia | Report | Denúncia | Salaketa |
 | `inbox.bodyLabel` | Formulario: detalle | features/admin/Inbox | Detalle | Details | Detall | Xehetasuna |
-| `inbox.send` | Botón de enviar | features/admin/Inbox, features/admin/InboxTour | Enviar | Send | Envia | Bidali |
 | `inbox.mine` | Lista de lo que has enviado | features/admin/Inbox | Lo que has enviado | What you have sent | El que has enviat | Bidali duzuna |
 | `inbox.none` | No has enviado nada | features/admin/Inbox | Todavía no has enviado nada. | You have not sent anything yet. | Encara no has enviat res. | Oraindik ez duzu ezer bidali. |
 | `inbox.pending` | Sin respuesta todavía | features/admin/Inbox | Pendiente de respuesta | Waiting for an answer | Pendent de resposta | Erantzunaren zain |
-| `inbox.withdraw` | Botón para retirar un envío | features/admin/Inbox | Retirar | Withdraw | Retira | Kendu |
 | `inbox.answer` | Prefijo de la respuesta de admin | features/admin/Inbox | Respuesta: | Answer: | Resposta: | Erantzuna: |
 | `report.button` | Botón para denunciar un mensaje | shared/ui/ReportButton | Denunciar | Report | Denuncia | Salatu |
 | `report.why` | Formulario de denuncia: qué pasa | shared/ui/ReportButton | Qué pasa con este mensaje | What is wrong with this message | Què passa amb aquest missatge | Zer gertatzen da mezu honekin |
 | `report.send` | Botón para enviar la denuncia | shared/ui/ReportButton | Enviar denuncia | Send report | Envia la denúncia | Bidali salaketa |
-| `report.reason` | Motivo de la denuncia | shared/ui/ReportButton | Motivo | Reason | Motiu | Arrazoia |
 | `report.reason.spam` | Motivo: spam | features/admin/InboxTab, shared/ui/ReportButton | Spam | Spam | Correu brossa | Spama |
 | `report.reason.harassment` | Motivo: acoso | features/admin/InboxTab, shared/ui/ReportButton | Acoso | Harassment | Assetjament | Jazarpena |
 | `report.reason.insults` | Motivo: insultos | features/admin/InboxTab, shared/ui/ReportButton | Insultos | Insults | Insults | Irainak |
 | `report.reason.other` | Motivo: otro | features/admin/InboxTab, shared/ui/ReportButton | Otro motivo | Another reason | Un altre motiu | Beste arrazoi bat |
 | `report.whyOptional` | Detalle opcional | shared/ui/ReportButton | Algo más que contar (opcional) | Anything else to add (optional) | Alguna cosa més a explicar (opcional) | Beste zerbait kontatzeko (aukerakoa) |
-| `report.cancel` | Botón para cancelar | shared/ui/ReportButton | Cancelar | Cancel | Cancel·la | Utzi |
 | `report.sent` | Confirmación de denuncia | shared/ui/ReportButton | Denuncia enviada. Gracias por avisar. | Report sent. Thanks for letting us know. | Denúncia enviada. Gràcies per avisar. | Salaketa bidalita. Eskerrik asko abisatzeagatik. |
 | `broadcast.from` | Comunicado de quien administra | features/admin/BroadcastGate | Comunicado de {login} | Message from {login} | Comunicat de {login} | {login}(r)en jakinarazpena |
 | `broadcast.must` | El comunicado obliga a elegir | features/admin/BroadcastGate | Elige una opción para cerrar este mensaje. | Pick an option to close this message. | Tria una opció per tancar aquest missatge. | Aukeratu aukera bat mezu hau ixteko. |
-| `broadcast.ok` | Botón para dar por leído | features/admin/BroadcastGate | Entendido | Got it | Entesos | Ulertuta |
 | `broadcast.later` | Botón para verlo luego | features/admin/BroadcastGate | Ahora no | Not now | Ara no | Orain ez |
 | `notices.compose` | Botón para escribir un mensaje | features/notices/Mailbox | Escribir un mensaje | Write a message | Escriu un missatge | Idatzi mezu bat |
 | `notices.toAdmin` | Destinatario: administración | features/notices/Mailbox | A quien administra | To the admins | A qui administra | Kudeatzaileari |

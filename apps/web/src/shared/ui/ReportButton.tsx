@@ -68,7 +68,7 @@ export function ReportButton({ target, summary }: ReportButtonProps) {
     <form className="report-form" onSubmit={(event) => void submit(event)}>
       <select
         value={reason}
-        aria-label={t('report.reason')}
+        aria-label={t('common.reason')}
         onChange={(event) => {
           setReason(event.target.value as ReportReason)
         }}
@@ -98,7 +98,7 @@ export function ReportButton({ target, summary }: ReportButtonProps) {
           setOpen(false)
         }}
       >
-        {t('report.cancel')}
+        {t('common.cancel')}
       </button>
       <ErrorNote error={error} />
     </form>

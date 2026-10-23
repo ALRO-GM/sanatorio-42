@@ -53,7 +53,7 @@ export function FacilityForm({ onDone }: { onDone: () => void }) {
           <Icon name="visto" size={16} /> {t('facility.sent')}
         </strong>
         <button type="button" className="pill" onClick={onDone}>
-          {t('facility.close')}
+          {t('common.close')}
         </button>
       </div>
     )
@@ -99,7 +99,7 @@ export function FacilityForm({ onDone }: { onDone: () => void }) {
           {t('facility.send')}
         </button>
         <button type="button" className="pill" onClick={onDone}>
-          {t('therapy.cancel')}
+          {t('common.cancel')}
         </button>
       </div>
     </form>

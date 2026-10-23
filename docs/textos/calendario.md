@@ -3,13 +3,11 @@
 Generado desde `apps/web/src/shared/i18n/textos/calendario.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-105 textos. «—» es que falta la traducción: sale en español.
+99 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
 | `agenda.title` | Título de la página del calendario | features/calendar/CalendarPage | Tu calendario | Your calendar | El teu calendari | Zure egutegia |
-| `agenda.prev` | Botón: periodo anterior | features/calendar/CalendarPage | Anterior | Previous | Anterior | Aurrekoa |
-| `agenda.next` | Botón: periodo siguiente | features/calendar/CalendarPage | Siguiente | Next | Següent | Hurrengoa |
 | `agenda.today` | Botón: volver a hoy | features/calendar/CalendarPage | Hoy | Today | Avui | Gaur |
 | `agenda.view` | Selector de vista: día, semana o mes | features/calendar/CalendarPage | Vista | View | Vista | Ikuspegia |
 | `agenda.layout` | Selector de cómo se dibuja el día | features/calendar/CalendarPage | Cómo ver el día | How to see the day | Com veure el dia | Eguna nola ikusi |
@@ -42,7 +40,6 @@ Generado desde `apps/web/src/shared/i18n/textos/calendario.csv` con
 | `agenda.empty` | Día sin nada | features/calendar/CalendarPage, features/calendar/DayTimeline | Nada | Nothing | Res | Ezer ez |
 | `agenda.no42` | No se pudo leer 42 | features/calendar/CalendarPage | No se han podido leer los datos de 42: solo ves lo de Sanatorio. | Couldn't read the 42 data: you only see Sanatorio events. | No s'han pogut llegir les dades de 42: només veus el de Sanatorio. | Ezin izan dira 42ko datuak irakurri: Sanatoriokoak bakarrik ikusten dituzu. |
 | `agenda.from42` | Cuándo se leyeron los datos de 42 | features/calendar/CalendarPage | Eventos, exámenes y correcciones de 42 leídos hace {min} min. | 42 events, exams and evaluations read {min} min ago. | Esdeveniments, exàmens i correccions de 42 llegits fa {min} min. | 42ko ekitaldiak, azterketak eta zuzenketak duela {min} min irakurrita. |
-| `agenda.refresh` | Botón para volver a leer los datos | features/calendar/CalendarPage, features/notgames/NotGamesPage | Actualizar | Refresh | Actualitza | Eguneratu |
 | `agenda.back` | Botón para volver al calendario desde un evento | features/calendar/EventDialog | Volver al calendario | Back to the calendar | Torna al calendari | Itzuli egutegira |
 | `agenda.join` | Calendario: botón de la ficha para apuntarse a una pizarra o un grupo | features/calendar/EventDialog | Apuntarme | Join | Apunta'm | Izena eman |
 | `agenda.when` | Ficha del evento: cuándo | features/calendar/EventDialog | Cuándo | When | Quan | Noiz |
@@ -67,13 +64,11 @@ Generado desde `apps/web/src/shared/i18n/textos/calendario.csv` con
 | `meet.seen` | Respuesta al aviso: voy | features/calendar/AgendaTour, features/calendar/EventRoom, features/help/GuardTour | Voy | Going | Hi vaig | Banoa |
 | `meet.mustReply` | Por qué hay que responder el aviso | features/calendar/EventDialog | Di si vas, si te retrasas o si no vas: el aviso se cierra al responder. | Say whether you are going, running late or not going: the notice closes when you answer. | Digues si hi vas, si fas tard o si no hi vas: l'avís es tanca en responder. | Esan bazoazen, berandu zabiltzan edo ez zoazen: abisua erantzutean ixten da. |
 | `meet.missed` | No contestaste y se te marca como ausente | features/calendar/EventDialog | No respondiste al aviso y ya ha pasado media hora desde el inicio, así que figuras como ausente. | You didn't answer the notice and half an hour has passed since the start, so you're marked as absent. | No vas responder l'avís i ja ha passat mitja hora des de l'inici, així que figures com a absent. | Ez zenion abisuari erantzun eta ordu erdi igaro da hasi zenetik, beraz absente gisa agertzen zara. |
-| `meet.missedOk` | Botón para dar por leído | features/calendar/EventDialog | Entendido | Got it | Entesos | Ulertuta |
 | `meet.queued` | Cuántos avisos más quedan | features/admin/BroadcastGate, features/calendar/EventDialog | {n} más después | {n} more after this | {n} més després | {n} gehiago gero |
 | `meet.late` | Respuesta al aviso: llego tarde | features/calendar/AgendaTour, features/calendar/EventRoom, features/help/GuardTour | Me retraso | I'll be late | Faig tard | Berandu nabil |
 | `meet.absent` | Respuesta al aviso: no puedo ir | features/calendar/AgendaTour, features/calendar/EventRoom, features/help/GuardTour | No puedo ir | I can't make it | No hi puc anar | Ezin naiz joan |
 | `meet.howLong` | Cuánto tiempo de retraso | features/calendar/EventRoom | Cuánto tiempo | How long | Quant temps | Zenbat denbora |
 | `meet.minutes` | Minutos de retraso | features/calendar/EventRoom | {n} min | {n} min | {n} min | {n} min |
-| `meet.why` | Motivo del retraso o la ausencia | features/calendar/EventRoom | Motivo | Reason | Motiu | Arrazoia |
 | `meet.tell` | Botón para enviar la respuesta | features/calendar/EventRoom | Avisar | Let them know | Avisa | Abisatu |
 | `meet.reason.evaluation` | Motivo: corrección | features/calendar/EventRoom, shared/chat/Chat | Estoy en una corrección | I'm in an evaluation | Soc en una correcció | Zuzenketa batean nago |
 | `meet.reason.other_event` | Motivo: otro evento | features/calendar/EventRoom, shared/chat/Chat | Estoy en otro evento | I'm at another event | Soc en un altre esdeveniment | Beste ekitaldi batean nago |
@@ -88,7 +83,6 @@ Generado desde `apps/web/src/shared/i18n/textos/calendario.csv` con
 | `meet.chatNotice` | Aviso de privacidad del chat | features/notices/Conversations, shared/chat/Chat | Los mensajes se guardan. Quien administra la web puede leerlos si hay una denuncia. | Messages are kept. Whoever runs the site can read them if there is a report. | Els missatges es guarden. Qui administra la web els pot llegir si hi ha una denúncia. | Mezuak gorde egiten dira. Weba kudeatzen duenak irakur ditzake salaketa bat badago. |
 | `meet.chatEmpty` | Chat sin mensajes | shared/chat/Chat | Nadie ha escrito todavía. Lo que pongas lo ve toda la gente del evento. | Nobody has written yet. Everyone in the event sees what you post. | Ningú ha escrit encara. El que posis ho veu tota la gent de l'esdeveniment. | Inork ez du oraindik idatzi. Jartzen duzuna ekitaldiko guztiek ikusten dute. |
 | `meet.write` | Campo para escribir un mensaje | shared/chat/Chat | Escribe un mensaje… | Write a message… | Escriu un missatge… | Idatzi mezu bat… |
-| `meet.sendText` | Botón para enviar | shared/chat/Chat | Enviar | Send | Envia | Bidali |
 | `meet.att.title` | Apartado de asistencia con códigos | features/alerts/AlertCenter, features/boards/BoardsTour, features/calendar/Attendance | Asistencia | Attendance | Assistència | Bertaratzea |
 | `meet.att.hostHint` | Instrucciones para quien organiza | features/calendar/Attendance | Enseña el código de inicio al empezar y el de fin al terminar. Quien asiste lo escribe o escanea el QR; sin los dos no cuenta. | Show the start code at the beginning and the end code when you finish. Attendees type it or scan the QR; without both it does not count. | Ensenya el codi d'inici en començar i el de fi en acabar. Qui hi assisteix l'escriu o escaneja el QR; sense tots dos no compta. | Erakutsi hasierako kodea hastean eta amaierakoa bukatzean. Bertaratzen denak idatzi edo QRa eskaneatzen du; biak gabe ez du balio. |
 | `meet.att.start` | Inicio | features/boards/BoardsTour, features/calendar/Attendance | Inicio | Start | Inici | Hasiera |

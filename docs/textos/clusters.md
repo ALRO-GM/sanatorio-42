@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/clusters.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-72 textos. «—» es que falta la traducción: sale en español.
+71 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -66,7 +66,6 @@ Generado desde `apps/web/src/shared/i18n/textos/clusters.csv` con
 | `facility.noteRequired` | Aviso al staff: nota obligatoria con «otro» | features/facility/FacilityForm | Cuéntanos qué pasa | Tell us what's wrong | Explica'ns què passa | Kontatu iezaguzu zer gertatzen den |
 | `facility.send` | Aviso al staff: enviar | features/facility/FacilityForm | Avisar | Report | Avisar | Jakinarazi |
 | `facility.sent` | Aviso al staff: confirmación | features/facility/FacilityForm | Aviso enviado al staff. ¡Gracias! | Sent to the staff. Thanks! | Avís enviat a l'staff. Gràcies! | Staffari bidalia. Eskerrik asko! |
-| `facility.close` | Aviso al staff: cerrar la confirmación | features/facility/FacilityForm | Cerrar | Close | Tanca | Itxi |
 | `facility.none` | Lista de avisos del edificio vacía | features/facility/FacilityList | No hay avisos pendientes. | No pending reports. | No hi ha avisos pendents. | Ez dago jakinarazpenik zain. |
 | `facility.by` | Lista de avisos: quién y cuándo | features/facility/FacilityList | Avisó {login} · {when} | Reported by {login} · {when} | Avisat per {login} · {when} | {login}(e)k jakinarazia · {when} |
 | `facility.resolvedBy` | Lista de avisos: quién lo resolvió y cuándo | features/facility/FacilityList | resuelto por {by} · {when} | resolved by {by} · {when} | resolt per {by} · {when} | {by}(e)k konponduta · {when} |

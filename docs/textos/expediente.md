@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/expediente.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-135 textos. «—» es que falta la traducción: sale en español.
+132 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -116,7 +116,6 @@ Generado desde `apps/web/src/shared/i18n/textos/expediente.csv` con
 | `health.formPace` | Formulario: tu pace | features/profile/HealthCard, features/profile/RecordTour | Tu pace | Your pace | El teu pace | Zure pacea |
 | `health.formDeadline` | Formulario: fecha límite del círculo, como la llama 42 | features/profile/HealthCard | Milestone Deadline (círculo {circle}) | Milestone Deadline (circle {circle}) | Milestone Deadline (cercle {circle}) | Milestone Deadline ({circle}. zirkulua) |
 | `health.formSave` | Formulario: guardar y calcular | features/profile/HealthCard, features/profile/RecordTour | Guardar y calcular | Save and calculate | Desa i calcula | Gorde eta kalkulatu |
-| `health.formCancel` | Formulario: cancelar | features/profile/HealthCard | Cancelar | Cancel | Cancel·la | Utzi |
 | `health.formWhere` | Formulario del pace: dónde se miran los dos datos | features/profile/HealthCard | Los dos salen en tu perfil de la intra, en el recuadro del pace (Milestone). | Both are on your intra profile, in the pace box (Milestone). | Tots dos surten al teu perfil de la intra, al requadre del pace (Milestone). | Biak zure intrako profilean daude, pacearen laukian (Milestone). |
 | `health.formIntra` | Formulario del pace: enlace a tu perfil de la intra | features/profile/HealthCard | Abrir la intra | Open the intra | Obre la intra | Ireki intra |
 | `pace.label` | Selector de tu pace | features/doubts/HolyGraph | Tu pace | Your pace | El teu pace | Zure pacea |
@@ -135,8 +134,6 @@ Generado desde `apps/web/src/shared/i18n/textos/expediente.csv` con
 | `hours.title` | Tarjeta de horas validadas (para enseñar al staff) | features/profile/HoursReport | Horas validadas | Validated hours | Hores validades | Balidatutako orduak |
 | `hours.hint` | Explicación de las horas validadas y del código de autenticidad | features/profile/HoursReport | Tu tiempo en pizarras y sesiones de ayuda, validado con los códigos de inicio y fin. Descárgalo para enseñárselo al staff: el nombre del fichero lleva un código de cuatro caracteres para comprobar que es auténtico. | Your time in whiteboards and help sessions, validated with the start and end codes. Download it to show the staff: the file name ends in a four-character code they can use to check it is genuine. | El teu temps en pissarres i sessions d'ajuda, validat amb els codis d'inici i fi. Baixa-te'l per ensenyar-lo a l'staff: el nom del fitxer acaba en un codi de quatre caràcters amb què es pot comprovar que és autèntic. | Arbeletan eta laguntza-saioetan emandako denbora, hasierako eta amaierako kodeekin balidatuta. Deskargatu staffari erakusteko: fitxategiaren izenak lau karaktereko kode batekin amaitzen da, eta harekin benetakoa dela egiazta daiteke. |
 | `hours.hintAll` | Panel: horas de todo el mundo | features/profile/HoursReport | El tiempo de todo el mundo en pizarras y sesiones de ayuda, validado con los códigos de inicio y fin. | Everyone's time in whiteboards and help sessions, validated with the start and end codes. | El temps de tothom en pissarres i sessions d'ajuda, validat amb els codis d'inici i fi. | Denek arbeletan eta laguntza-saioetan emandako denbora, hasierako eta amaierako kodeekin balidatuta. |
-| `hours.from` | Fecha de inicio del periodo | features/profile/HoursReport | Desde | From | Des de | Noiztik |
-| `hours.to` | Fecha de fin del periodo | features/profile/HoursReport | Hasta | To | Fins a | Noiz arte |
 | `hours.download` | Botón para descargar las horas en una hoja de cálculo | features/profile/HoursReport | Descargar hoja de cálculo (CSV) | Download spreadsheet (CSV) | Baixa el full de càlcul (CSV) | Deskargatu kalkulu-orria (CSV) |
 | `record.write` | Botón para escribir un mensaje a esa persona | features/admin/CheatsPanel, features/profile/PublicRecord | Escribir a {login} | Message {login} | Escriu a {login} | Idatzi {login} erabiltzaileari |
 | `health.lostAll` | Estado de salud: los paces cuyo plazo ya pasó, en una línea; {paces} es la lista | features/profile/HealthCard | Plazos ya pasados: pace {paces} | Deadlines already gone: pace {paces} | Terminis ja passats: pace {paces} | Iragandako epeak: {paces} pacea |

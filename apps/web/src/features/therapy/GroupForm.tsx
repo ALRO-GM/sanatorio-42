@@ -192,7 +192,7 @@ export function GroupForm({ projects, defaultProject, group, onCancel, onSaved }
       <div className="card form">
         <p className="estado">{t('therapy.needProject')}</p>
         <button className="pill" onClick={onCancel}>
-          {t('therapy.cancel')}
+          {t('common.cancel')}
         </button>
       </div>
     )
@@ -355,11 +355,11 @@ export function GroupForm({ projects, defaultProject, group, onCancel, onSaved }
           />
         </label>
         <label>
-          {t('therapy.start')}
+          {t('common.from')}
           <input type="time" value={form.start} onChange={set('start')} required />
         </label>
         <label>
-          {t('therapy.end')}
+          {t('common.to')}
           <input type="time" value={form.end} onChange={set('end')} required />
         </label>
         <label>
@@ -427,7 +427,7 @@ export function GroupForm({ projects, defaultProject, group, onCancel, onSaved }
           {t(group === undefined ? 'therapy.create' : 'therapy.saveEdit')}
         </button>
         <button type="button" className="pill" onClick={onCancel}>
-          {t('therapy.cancel')}
+          {t('common.cancel')}
         </button>
       </div>
       {confirm.dialog}

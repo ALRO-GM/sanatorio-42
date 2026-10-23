@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/comun.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-277 textos. «—» es que falta la traducción: sale en español.
+296 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -223,7 +223,6 @@ Generado desde `apps/web/src/shared/i18n/textos/comun.csv` con
 | `focus.start` | Pomodoro: empezar | features/focus/FocusDialog | Empezar a concentrarme | Start focusing | Començar a concentrar-me | Kontzentratzen hasi |
 | `focus.stop` | Pomodoro: parar antes | features/focus/FocusTimer | Parar | Stop | Parar | Gelditu |
 | `focus.again` | Pomodoro: otra vuelta tras el descanso | features/focus/FocusTimer | Otra vuelta | Another round | Una altra volta | Beste txanda bat |
-| `focus.close` | Pomodoro: cerrar el aviso del descanso | features/focus/FocusTimer | Cerrar | Close | Tanca | Itxi |
 | `focus.focusing` | Pomodoro: etiqueta del temporizador | features/focus/FocusTimer | En concentración | Focusing | Concentrat | Kontzentratuta |
 | `focus.resting` | Pomodoro: etiqueta del descanso | features/focus/FocusTimer | Descanso | Break | Descans | Atsedena |
 | `focus.breakOver` | Pomodoro: el descanso ha acabado | features/focus/FocusTimer | ¡A por otra! | Let's go again! | A per una altra! | Goazen beste baterako! |
@@ -231,7 +230,6 @@ Generado desde `apps/web/src/shared/i18n/textos/comun.csv` con
 | `focus.badge` | Lo que ven los demás de quien está concentrado | shared/ui/FocusBadge | En concentración hasta las {time} · no me distraigas | Focusing until {time} · please don't disturb | Concentrat fins a les {time} · no em distreguis | {time}ak arte kontzentratuta · ez nazazu distraitu |
 | `focus.badgeHint` | Explicación del aviso de concentración | shared/ui/FocusBadge | Está en modo Pomodoro: mejor escribirle después. | In Pomodoro mode: better write later. | És en mode Pomodoro: millor escriure-li després. | Pomodoro moduan dago: hobe geroago idaztea. |
 | `campus.other` | Aviso para quien entra desde un campus que aún no se copia; {campus} es el suyo y {tracked}, los que sí | features/campus/OtherCampusNotice | Tu campus, {campus}, todavía no está en Sanatorio 42: lo que ves es de {tracked}. Si se apuntan cinco personas más de {campus}, lo añadimos; con diez, también el idioma. ¡Corre la voz! | Your campus, {campus}, is not on Sanatorio 42 yet: what you see is from {tracked}. If five more people from {campus} join, we add it; with ten, the language too. Spread the word! | El teu campus, {campus}, encara no és a Sanatorio 42: el que veus és de {tracked}. Si s'apunten cinc persones més de {campus}, l'afegim; amb deu, també l'idioma. Fes-ho córrer! | Zure campusa, {campus}, oraindik ez dago Sanatorio 42n: ikusten duzuna {tracked}(e)koa da. {campus}(e)ko bost pertsona gehiago batzen badira, gehituko dugu; hamarrekin, hizkuntza ere bai. Zabaldu mezua! |
-| `campus.otherOk` | Botón para cerrar el aviso de otro campus | features/campus/OtherCampusNotice | Entendido | Got it | Entesos | Ulertuta |
 | `focus.screen.open` | Pomodoro: poner el temporizador a pantalla completa | features/focus/FocusTimer | Pantalla completa | Full screen | Pantalla completa | Pantaila osoa |
 | `focus.screen.label` | Pomodoro: nombre de la vista a pantalla completa | features/focus/FocusScreen | Pomodoro a pantalla completa | Full-screen Pomodoro | Pomodoro a pantalla completa | Pomodoro pantaila osoan |
 | `focus.screen.sign` | Pomodoro a pantalla completa: letrero para quien pase por al lado | features/focus/FocusScreen | En concentración · no molestar | Focusing · do not disturb | En concentració · no molesteu | Kontzentratuta · ez molestatu |
@@ -284,3 +282,24 @@ Generado desde `apps/web/src/shared/i18n/textos/comun.csv` con
 | `focus.band.high` | Tus estadísticas del Pomodoro: tirador derecho del tramo | features/focus/FocusMyStats, shared/ui/SegmentSlider | Dejar fuera a quien más lo usa | Leave out those who use it most | Deixar fora qui més el fa servir | Gehien erabiltzen dutenak kanpoan utzi |
 | `focus.band.least` | Tus estadísticas del Pomodoro: extremo del tramo | features/focus/FocusMyStats, shared/ui/SegmentSlider | Menos uso | Least use | Menys ús | Erabilera gutxien |
 | `focus.band.most` | Tus estadísticas del Pomodoro: extremo del tramo | features/focus/FocusMyStats, shared/ui/SegmentSlider | Más uso | Most use | Més ús | Erabilera gehien |
+| `common.save` | Botón genérico: guardar | features/notices/Mailbox | Guardar | Save | Desa | Gorde |
+| `common.remove` | Botón genérico: borrar algo | features/admin/InboxTab, features/notices/Mailbox | Borrar | Delete | Esborra | Ezabatu |
+| `common.send` | Botón genérico: enviar | features/admin/BroadcastsTab, features/admin/CheatsPanel, features/admin/Inbox, features/admin/InboxTour, shared/chat/Chat | Enviar | Send | Envia | Bidali |
+| `common.withdraw` | Botón genérico: retirar algo publicado | features/admin/BroadcastsTab, features/admin/Inbox | Retirar | Withdraw | Retira | Kendu |
+| `common.reason` | Etiqueta genérica: el motivo de algo | features/admin/AdminPage, features/calendar/EventRoom, shared/ui/ReportButton | Motivo | Reason | Motiu | Arrazoia |
+| `common.cancel` | Botón genérico: cancelar lo que se está haciendo | features/facility/FacilityForm, features/notgames/NotGamesPage, features/profile/HealthCard, features/therapy/GroupForm, shared/ui/ReportButton | Cancelar | Cancel | Cancel·la | Utzi |
+| `common.ok` | Botón genérico para cerrar un aviso | features/admin/BroadcastGate, features/calendar/EventDialog, features/campus/OtherCampusNotice, features/help/HelpGate | Entendido | Got it | Entesos | Ulertuta |
+| `common.prev` | Botón genérico: ir al anterior | features/calendar/CalendarPage, features/gitcourse/LevelView, features/notgames/TurnRoomView | Anterior | Previous | Anterior | Aurrekoa |
+| `common.next` | Botón genérico: ir al siguiente | features/calendar/CalendarPage, features/gitcourse/LevelView, features/notgames/TurnRoomView | Siguiente | Next | Següent | Hurrengoa |
+| `common.refresh` | Botón genérico: volver a cargar los datos | features/calendar/CalendarPage, features/exams/ExamsPage, features/notgames/NotGamesPage | Actualizar | Refresh | Actualitza | Eguneratu |
+| `common.close` | Botón genérico: cerrar una ventana o panel | features/facility/FacilityForm, features/focus/FocusTimer | Cerrar | Close | Tanca | Itxi |
+| `common.from` | Campo genérico: inicio de un periodo o franja | features/boards/BoardForm, features/network/NetworkPage, features/profile/HoursReport, features/therapy/GroupForm | Desde | From | Des de | Noiztik |
+| `common.to` | Campo genérico: fin de un periodo o franja | features/boards/BoardForm, features/network/NetworkPage, features/profile/HoursReport, features/therapy/GroupForm | Hasta | To | Fins a | Noiz arte |
+| `common.period` | Etiqueta genérica: el periodo que se mira | features/admin/RangePills, features/network/NetworkPage, features/staff/StaffPage | Periodo | Period | Període | Aldia |
+| `common.people` | Etiqueta o columna genérica: número de personas | features/admin/FlowsPanel, features/admin/StatsPanel, features/exams/ExamStatsPanel, features/network/NetworkPage | Personas | People | Persones | Pertsonak |
+| `common.person` | Columna genérica: la persona de la fila | features/admin/AdminPage, features/admin/CheatsPanel, features/admin/ClickerPanel, features/admin/StatsPanel, features/network/NetworkPage, features/network/PersonSearch | Persona | Person | Persona | Pertsona |
+| `common.accept` | Botón genérico: aceptar una petición | features/help/BookingCard, features/help/GuardTour, features/help/HelpGate | Aceptar | Accept | Accepta | Onartu |
+| `common.decline` | Botón genérico: rechazar una petición | features/help/BookingCard, features/help/GuardTour, features/help/HelpGate | Rechazar | Decline | Rebutja | Baztertu |
+| `common.createRoom` | Botón de los juegos: crear una sala | features/gitcourse/GroupRoom, features/notgames/NotGamesPage | Crear una sala | Create a room | Crea una sala | Sortu gela bat |
+| `common.join` | Botón de los juegos: entrar en una sala | features/gitcourse/GroupRoom, features/notgames/NotGamesPage, features/notgames/RoomView, features/notgames/TurnRoomView | Entrar | Join | Entra | Sartu |
+| `common.leave` | Botón de los juegos: salir de la sala | features/gitcourse/GroupRoom, features/notgames/RoomView, features/notgames/TurnRoomView | Salir | Leave | Surt | Irten |

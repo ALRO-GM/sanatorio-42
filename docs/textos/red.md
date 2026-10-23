@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/red.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-137 textos. «—» es que falta la traducción: sale en español.
+132 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -12,15 +12,11 @@ Generado desde `apps/web/src/shared/i18n/textos/red.csv` con
 | `net.sync.pending` | Aún no se ha empezado a copiar el historial de 42 | features/network/NetworkPage | Todavía no se ha empezado a copiar el historial de correcciones de 42. | The evaluation history has not started copying from 42 yet. | Encara no s'ha començat a copiar l'historial de correccions de 42. | Oraindik ez da hasi 42ko zuzenketen historia kopiatzen. |
 | `net.sync.copying` | Progreso de la copia del historial | features/network/NetworkPage | Copiando el historial de 42: {rows} de {total} correcciones. El grafo irá creciendo solo. | Copying history from 42: {rows} of {total} evaluations. The graph will keep growing. | Copiant l'historial de 42: {rows} de {total} correccions. El graf anirà creixent sol. | 42ko historia kopiatzen: {total} zuzenketatik {rows}. Grafoa berez haziko da. |
 | `net.sync.range` | Fechas copiadas hasta ahora | features/network/NetworkPage | Por ahora, del {from} al {to} | So far, from {from} to {to} | De moment, del {from} al {to} | Oraingoz, {from} – {to} |
-| `net.period` | Filtro de periodo | features/network/NetworkPage | Periodo | Period | Període | Aldia |
 | `net.period.all` | Periodo: todo | features/network/NetworkPage | Todo | All | Tot | Dena |
 | `net.period.month` | Periodo: último mes | features/network/NetworkPage | Último mes | Last month | Últim mes | Azken hilabetea |
 | `net.period.quarter` | Periodo: tres meses | features/network/NetworkPage | 3 meses | 3 months | 3 mesos | 3 hilabete |
 | `net.period.year` | Periodo: último año | features/network/NetworkPage | Último año | Last year | Últim any | Azken urtea |
 | `net.period.custom` | Periodo: elegir fechas | features/network/NetworkPage | Fechas… | Dates… | Dates… | Datak… |
-| `net.from` | Fecha de inicio | features/network/NetworkPage | Desde | From | Des de | Noiztik |
-| `net.to` | Fecha de fin | features/network/NetworkPage | Hasta | To | Fins a | Noiz arte |
-| `net.person` | Filtro por persona | features/network/NetworkPage, features/network/PersonSearch | Persona | Person | Persona | Pertsona |
 | `net.person.placeholder` | Ejemplo dentro del buscador de persona | features/network/PersonSearch | Buscar un login… | Search a login… | Cerca un login… | Bilatu login bat… |
 | `net.person.me` | Botón: ver tu red | features/network/PersonSearch | Mi red | My network | La meva xarxa | Nire sarea |
 | `net.person.clear` | Botón: volver a todo el campus | features/network/PersonSearch | Volver a todo el campus | Back to the whole campus | Torna a tot el campus | Itzuli campus osora |
@@ -45,7 +41,6 @@ Generado desde `apps/web/src/shared/i18n/textos/red.csv` con
 | `net.legend.campus` | Leyenda: del campus | features/network/colors | Del campus | From campus | Del campus | Campusekoa |
 | `net.legend.external` | Leyenda: de otro campus | features/network/colors | De fuera | From outside | De fora | Kanpokoa |
 | `net.total.corrections` | Total: correcciones | features/network/NetworkPage | Correcciones | Evaluations | Correccions | Zuzenketak |
-| `net.total.people` | Total: personas | features/network/NetworkPage | Personas | People | Persones | Pertsonak |
 | `net.total.pairs` | Total: parejas | features/network/NetworkPage | Parejas | Pairs | Parelles | Bikoteak |
 | `net.total.mutual` | Total: parejas que se corrigen en los dos sentidos | features/network/NetworkPage | {n} mutuas ({pct} %) | {n} mutual ({pct}%) | {n} mútues ({pct} %) | {n} elkarrekiko (% {pct}) |
 | `net.total.endogamy` | Total: endogamia media del campus | features/network/NetworkPage | Endogamia del campus | Campus endogamy | Endogàmia del campus | Campuseko endogamia |

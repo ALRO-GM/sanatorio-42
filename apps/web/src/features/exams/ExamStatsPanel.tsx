@@ -348,7 +348,7 @@ function KickoffTable({ data, family }: { data: ExamStats; family: FamilyFilter 
           <thead>
             <tr>
               <th scope="col">{t('exams.col.kickoff')}</th>
-              <th scope="col">{t('exams.col.people')}</th>
+              <th scope="col">{t('common.people')}</th>
               {exams.map((exam) => (
                 <th key={exam.projectId} scope="col">
                   {exam.name}

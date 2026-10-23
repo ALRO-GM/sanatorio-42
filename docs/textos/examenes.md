@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/examenes.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-73 textos. «—» es que falta la traducción: sale en español.
+71 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -24,7 +24,6 @@ Generado desde `apps/web/src/shared/i18n/textos/examenes.csv` con
 | `exams.endsInLabel` | Nombre del reloj de lo que falta para acabar el examen | features/exams/ExamsPage | Tiempo hasta que acaba el examen | Time until the exam ends | Temps fins que acaba l'examen | Azterketa amaitu arteko denbora |
 | `exams.nextRefresh` | Cuenta atrás hasta que la lista y las notas se ponen al día solas | features/exams/ExamsPage | Se pone al día en {time} | Updates in {time} | S'actualitza en {time} | {time} barru eguneratzen da |
 | `exams.nextRefreshLabel` | Nombre del reloj de lo que falta para el siguiente refresco | features/exams/ExamsPage | Tiempo hasta el siguiente refresco | Time until the next update | Temps fins a la propera actualització | Hurrengo eguneraketara arteko denbora |
-| `exams.refresh` | Botón para pedir ya la lista y las notas (una vez por minuto para todo el campus) | features/exams/ExamsPage | Actualizar | Refresh | Actualitza | Eguneratu |
 | `exams.refreshIn` | Cuánto falta para poder volver a pulsar Actualizar | features/exams/ExamsPage | Podrás actualizar otra vez en {time} | You can refresh again in {time} | Podràs tornar a actualitzar en {time} | {time} barru berriro eguneratu ahal izango duzu |
 | `exams.status.pending` | Estado: apuntado al examen pero aún sin entrar | features/exams/ExamsPage | Sin empezar | Not started | Sense començar | Hasi gabe |
 | `exams.status.inProgress` | Estado: haciendo el examen ahora | features/exams/ExamsPage | Haciéndolo | Taking it | Fent-lo | Egiten |
@@ -63,7 +62,6 @@ Generado desde `apps/web/src/shared/i18n/textos/examenes.csv` con
 | `exams.bar` | Una cifra y qué parte es del total | features/exams/ExamStatsPanel | {n} · {pct} | {n} · {pct} | {n} · {pct} | {n} · {pct} |
 | `exams.byKickoff` | Tabla: las kickoffs una al lado de otra | features/exams/ExamStatsPanel | Kickoffs, una al lado de otra | Kickoffs side by side | Kickoffs, una al costat de l'altra | Kickoff-ak, bata bestearen ondoan |
 | `exams.col.kickoff` | Columna: la kickoff | features/exams/ExamStatsPanel | Kickoff | Kickoff | Kickoff | Kickoff |
-| `exams.col.people` | Columna: cuánta gente empezó en esa kickoff | features/exams/ExamStatsPanel | Personas | People | Persones | Pertsonak |
 | `exams.col.absorbed` | Columna: cuánta gente de la kickoff se llevó el black hole | features/exams/ExamStatsPanel | Black hole | Black hole | Black hole | Black hole |
 | `exams.bh.title` | Bloque del black hole | features/exams/ExamStatsPanel | Black hole | Black hole | Black hole | Black hole |
 | `exams.bh.total` | Cuánta gente se ha llevado el black hole, de la que se sabe | features/exams/ExamStatsPanel | Absorbidas por el black hole: {n} de {known} personas con datos · {pct} | Absorbed by the black hole: {n} of {known} people with data · {pct} | Absorbides pel black hole: {n} de {known} persones amb dades · {pct} | Black holeak irentsiak: datuak dituzten {known} pertsonatik {n} · {pct} |

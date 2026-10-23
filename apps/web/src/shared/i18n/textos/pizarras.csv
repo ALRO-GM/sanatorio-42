@@ -31,8 +31,6 @@ cal.f.topicHint,Ejemplo de tema,ft_printf,ft_printf,ft_printf,ft_printf
 cal.f.place,Formulario: sala,Sala,Room,Sala,Gela
 cal.f.placeHint,Ejemplo de sala,"Clúster 1, sala de pizarras","Cluster 1, whiteboard room","Clúster 1, sala de pissarres","1. klusterra, arbelen gela"
 cal.f.date,Formulario: día,Día,Day,Dia,Eguna
-cal.f.start,Formulario: hora de inicio,Desde,From,Des de,Noiztik
-cal.f.end,Formulario: hora de fin,Hasta,To,Fins a,Noiz arte
 cal.f.capacity,Formulario: plazas,Plazas,Seats,Places,Plazak
 cal.f.description,Formulario: descripción opcional,De qué va (opcional),What it's about (optional),De què va (opcional),Zertaz den (aukerakoa)
 cal.f.create,Formulario: botón para proponer,Proponer,Propose,Proposa,Proposatu

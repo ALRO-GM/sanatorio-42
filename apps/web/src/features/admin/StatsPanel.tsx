@@ -134,7 +134,7 @@ export function StatsPanel() {
               value={`${data.totals.requests} · ${size(data.totals.bytes)}`}
             />
             {login === null && (
-              <Figure label={t('admin.stats.people')} value={String(data.totals.people)} />
+              <Figure label={t('common.people')} value={String(data.totals.people)} />
             )}
           </div>
 
@@ -196,7 +196,7 @@ export function StatsPanel() {
                   ? [
                       {
                         id: 'people',
-                        label: t('admin.stats.people'),
+                        label: t('common.people'),
                         sort: (row: (typeof data.keys)[number]) => row.people,
                         cell: (row: (typeof data.keys)[number]) => row.people,
                       },
@@ -218,7 +218,7 @@ export function StatsPanel() {
                 columns={[
                   {
                     id: 'login',
-                    label: t('admin.stats.person'),
+                    label: t('common.person'),
                     sort: (row) => row.login,
                     first: 'asc',
                     cell: (row) => (

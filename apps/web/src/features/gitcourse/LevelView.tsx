@@ -139,7 +139,7 @@ function Animation({ level, onNext }: { level: Level; onNext: () => void }) {
             setIndex(index - 1)
           }}
         >
-          ‹ {t('git.anim.prev')}
+          ‹ {t('common.prev')}
         </button>
         <button
           type="button"
@@ -160,7 +160,7 @@ function Animation({ level, onNext }: { level: Level; onNext: () => void }) {
             setIndex(index + 1)
           }}
         >
-          {t('git.anim.next')} ›
+          {t('common.next')} ›
         </button>
         <button type="button" onClick={onNext}>
           {t('git.toTheory')}

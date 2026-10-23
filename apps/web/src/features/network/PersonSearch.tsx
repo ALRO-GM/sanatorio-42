@@ -95,7 +95,7 @@ export function PersonSearch({ value, me, onChange, campuses }: PersonSearchProp
           type="search"
           value={text}
           placeholder={t('net.person.placeholder')}
-          aria-label={t('net.person')}
+          aria-label={t('common.person')}
           onChange={(event) => {
             setText(event.target.value)
           }}

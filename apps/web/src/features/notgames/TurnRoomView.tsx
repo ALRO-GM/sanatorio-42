@@ -116,7 +116,7 @@ export function TurnRoomView({ id, me }: { id: number; me: string }) {
           <SoundToggle />
           {mine !== null && (
             <button type="button" className="pill" disabled={action.busy} onClick={leave}>
-              <Icon name="salir" size={14} /> {t('notgames.leave')}
+              <Icon name="salir" size={14} /> {t('common.leave')}
             </button>
           )}
         </span>
@@ -288,7 +288,7 @@ function ChessLobby({
             disabled={busy || !room.joinable}
             onClick={onJoin}
           >
-            {t('notgames.join')}
+            {t('common.join')}
           </button>
         )}
         {room.host === me && (
@@ -587,7 +587,7 @@ function TurnFinal({
                 onStep(step - 1)
               }}
             >
-              ‹ {t('notgames.chess.reviewPrev')}
+              ‹ {t('common.prev')}
             </button>
             <button
               type="button"
@@ -597,7 +597,7 @@ function TurnFinal({
                 onStep(step + 1)
               }}
             >
-              {t('notgames.chess.reviewNext')} ›
+              {t('common.next')} ›
             </button>
             <a className="primary small" href={notGamesHref()}>
               {t('notgames.again')}
