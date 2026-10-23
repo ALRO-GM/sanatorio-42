@@ -8,6 +8,7 @@ import type { StatsSectionId } from '@sanatorio/contracts'
 
 import type { Db } from '../../core/db/database.js'
 import { toNumber, toText } from '../../core/db/rows.js'
+import { inList, listArg } from '../../core/db/sql.js'
 
 export type RankRow = { login: string; image: string | null; value: number; extra: number }
 
@@ -238,8 +239,8 @@ export function createProgressRepository(db: Db) {
       if (ids.length === 0) return new Map()
 
       const result = await db.execute({
-        sql: `SELECT id, slug, hours FROM projects WHERE id IN (${ids.map(() => '?').join(', ')})`,
-        args: [...ids],
+        sql: `SELECT id, slug, hours FROM projects WHERE ${inList('id')}`,
+        args: [listArg(ids)],
       })
 
       return new Map(
@@ -265,8 +266,8 @@ export function createProgressRepository(db: Db) {
               LEFT JOIN user_levels ul ON ul.login = u.login
               LEFT JOIN user_tracks ut ON ut.login = u.login
               LEFT JOIN campus_members m ON m.user_id = u.id AND m.campus_id = ?
-              WHERE pu.project_id IN (${ids.map(() => '?').join(', ')})`,
-        args: [campus, ...ids],
+              WHERE ${inList('pu.project_id')}`,
+        args: [campus, listArg(ids)],
       })
 
       return result.rows.map((row) => ({

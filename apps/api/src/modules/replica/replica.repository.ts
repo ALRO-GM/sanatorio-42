@@ -16,6 +16,7 @@ import type { InStatement } from '@libsql/client'
 import type { Db } from '../../core/db/database.js'
 import { nowIso } from '../../core/db/database.js'
 import { toNumber, toText } from '../../core/db/rows.js'
+import { inList, listArg } from '../../core/db/sql.js'
 import { avatarUrlOf } from '../../integrations/forty-two/avatar.js'
 import { PROJECT_STATUS } from './replica.domain.js'
 import type {
@@ -292,8 +293,8 @@ export function createReplicaRepository(db: Db) {
       }
 
       const result = await db.execute({
-        sql: `SELECT id, name, hours FROM projects WHERE id IN (${ids.map(() => '?').join(', ')})`,
-        args: [...ids],
+        sql: `SELECT id, name, hours FROM projects WHERE ${inList('id')}`,
+        args: [listArg(ids)],
       })
 
       return new Map(
@@ -353,21 +354,18 @@ export function createReplicaRepository(db: Db) {
 
       if (projectIds.length === 0) return marks
 
-      for (let from = 0; from < logins.length; from += BATCH_SIZE) {
-        const batch = logins.slice(from, from + BATCH_SIZE)
-        const result = await db.execute({
-          sql: `SELECT u.login, MAX(pu.final_mark) AS mark
-                FROM users u
-                JOIN project_users pu ON pu.user_id = u.id
-                WHERE u.login IN (${batch.map(() => '?').join(', ')})
-                  AND pu.project_id IN (${projectIds.map(() => '?').join(', ')})
-                  AND pu.status = 'finished' AND pu.validated = 1 AND pu.final_mark IS NOT NULL
-                GROUP BY u.login`,
-          args: [...batch, ...projectIds],
-        })
+      const result = await db.execute({
+        sql: `SELECT u.login, MAX(pu.final_mark) AS mark
+              FROM users u
+              JOIN project_users pu ON pu.user_id = u.id
+              WHERE ${inList('u.login')}
+                AND ${inList('pu.project_id')}
+                AND pu.status = 'finished' AND pu.validated = 1 AND pu.final_mark IS NOT NULL
+              GROUP BY u.login`,
+        args: [listArg(logins), listArg(projectIds)],
+      })
 
-        for (const row of result.rows) marks.set(toText(row.login), toNumber(row.mark))
-      }
+      for (const row of result.rows) marks.set(toText(row.login), toNumber(row.mark))
 
       return marks
     },
@@ -376,24 +374,21 @@ export function createReplicaRepository(db: Db) {
     async activeProjectsOf(logins: readonly string[]): Promise<Map<string, string[]>> {
       const projects = new Map<string, string[]>()
 
-      for (let from = 0; from < logins.length; from += BATCH_SIZE) {
-        const batch = logins.slice(from, from + BATCH_SIZE)
-        const result = await db.execute({
-          sql: `SELECT u.login, p.name
-                FROM users u
-                JOIN project_users pu ON pu.user_id = u.id AND pu.status = 'in_progress'
-                JOIN projects p ON p.id = pu.project_id
-                WHERE u.login IN (${batch.map(() => '?').join(', ')})
-                  AND ${STUDENT_PROJECT}
-                ORDER BY pu.updated_at_42 DESC`,
-          args: [...batch],
-        })
+      const result = await db.execute({
+        sql: `SELECT u.login, p.name
+              FROM users u
+              JOIN project_users pu ON pu.user_id = u.id AND pu.status = 'in_progress'
+              JOIN projects p ON p.id = pu.project_id
+              WHERE ${inList('u.login')}
+                AND ${STUDENT_PROJECT}
+              ORDER BY pu.updated_at_42 DESC`,
+        args: [listArg(logins)],
+      })
 
-        for (const row of result.rows) {
-          const login = toText(row.login)
+      for (const row of result.rows) {
+        const login = toText(row.login)
 
-          projects.set(login, [...(projects.get(login) ?? []), toText(row.name)])
-        }
+        projects.set(login, [...(projects.get(login) ?? []), toText(row.name)])
       }
 
       return projects
@@ -658,9 +653,8 @@ export function createReplicaRepository(db: Db) {
       }
 
       const result = await db.execute({
-        sql: `SELECT id, name FROM projects
-              WHERE id IN (${projectIds.map(() => '?').join(', ')})`,
-        args: [...projectIds],
+        sql: `SELECT id, name FROM projects WHERE ${inList('id')}`,
+        args: [listArg(projectIds)],
       })
 
       for (const row of result.rows) {
@@ -795,8 +789,8 @@ export function createReplicaRepository(db: Db) {
       }
 
       const result = await db.execute({
-        sql: `SELECT login, image FROM users WHERE login IN (${unique.map(() => '?').join(', ')})`,
-        args: unique,
+        sql: `SELECT login, image FROM users WHERE ${inList('login')}`,
+        args: [listArg(unique)],
       })
 
       for (const row of result.rows) {

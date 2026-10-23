@@ -14,6 +14,7 @@ import type { Db } from '../../core/db/database.js'
 import { toText } from '../../core/db/rows.js'
 import { domainError } from '../../core/errors.js'
 import { day, parse } from '../../core/validation.js'
+import { inList, listArg } from '../../core/db/sql.js'
 import { segmentOf } from '../usage/index.js'
 import { averageOf, focusedByLogin, positionOf, REASONS, settle, summarize } from './focus.rules.js'
 import type { SessionLog } from './focus.sessions.js'
@@ -64,8 +65,8 @@ export function createFocusRepository(db: Db) {
       if (logins.length === 0) return new Map()
 
       const result = await db.execute({
-        sql: `SELECT login, until FROM focus WHERE until > ? AND login IN (${logins.map(() => '?').join(', ')})`,
-        args: [now, ...logins],
+        sql: `SELECT login, until FROM focus WHERE until > ? AND ${inList('login')}`,
+        args: [now, listArg(logins)],
       })
 
       return new Map(result.rows.map((row) => [toText(row.login), toText(row.until)]))

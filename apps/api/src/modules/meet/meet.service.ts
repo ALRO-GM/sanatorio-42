@@ -36,6 +36,7 @@ import { toNumber, toText } from '../../core/db/rows.js'
 import { domainError } from '../../core/errors.js'
 import { createTtlCache } from '../../core/ttl-cache.js'
 import { parse } from '../../core/validation.js'
+import { inList, listArg } from '../../core/db/sql.js'
 import { createConversations } from './conversations.js'
 import { needsReply } from './meet.rules.js'
 import { EVENT_ID } from '../attendance/index.js'
@@ -456,8 +457,8 @@ export function createMeetService(options: MeetServiceOptions) {
         const result = await db.execute({
           sql: `SELECT DISTINCT event_id FROM event_messages
                 WHERE login = ? AND kind IN ('seen', 'late', 'absent')
-                  AND event_id IN (${mine.map(() => '?').join(', ')})`,
-          args: [actor.login, ...mine.map((event) => event.id)],
+                  AND ${inList('event_id')}`,
+          args: [actor.login, listArg(mine.map((event) => event.id))],
         })
 
         for (const row of result.rows) replied.add(toText(row.event_id))

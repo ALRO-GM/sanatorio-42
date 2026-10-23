@@ -4,6 +4,7 @@
 
 import type { Db } from '../../core/db/database.js'
 import { toNumber, toText } from '../../core/db/rows.js'
+import { inList, listArg } from '../../core/db/sql.js'
 import type { AttemptRow, ExamRow, MemberRow, OccurrenceRow, PlanRow } from './exams.rules.js'
 
 /**
@@ -217,9 +218,9 @@ export function createExamsRepository(db: Db) {
               FROM project_users pu
               JOIN campus_members cm ON cm.user_id = pu.user_id AND cm.campus_id = ?
               JOIN projects p ON p.id = pu.project_id
-              WHERE pu.project_id IN (${ids.length === 0 ? 'NULL' : ids.map(() => '?').join(', ')})
+              WHERE ${inList('pu.project_id')}
                  OR p.slug LIKE 'python-module%' OR p.slug LIKE '42next-%'`,
-        args: [campusId, ...ids],
+        args: [campusId, listArg(ids)],
       })
 
       return result.rows.map((row) => ({

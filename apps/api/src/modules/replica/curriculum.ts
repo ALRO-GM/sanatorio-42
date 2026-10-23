@@ -30,6 +30,7 @@
 
 import type { Db } from '../../core/db/database.js'
 import { toNumber, toText } from '../../core/db/rows.js'
+import { inList, listArg } from '../../core/db/sql.js'
 import type { FortyTwoClient } from '../../integrations/forty-two/client.js'
 import { hourlyQuota } from './quota.js'
 import type { QuotaGate } from './quota.js'
@@ -277,8 +278,8 @@ export function createCurriculum(options: CurriculumOptions) {
       )
       const slugs = [...bySlug.keys()]
       const known = await db.execute({
-        sql: `SELECT id, slug FROM projects WHERE slug IN (${slugs.map(() => '?').join(', ')})`,
-        args: slugs,
+        sql: `SELECT id, slug FROM projects WHERE ${inList('slug')}`,
+        args: [listArg(slugs)],
       })
 
       return new Map(
@@ -465,18 +466,17 @@ export function createCurriculum(options: CurriculumOptions) {
 
       if (logins.length === 0) return found
 
-      const marks = logins.map(() => '?').join(', ')
       const [tracks, projects, classic, next] = await Promise.all([
         db.execute({
-          sql: `SELECT login, track, rank FROM user_tracks WHERE login IN (${marks})`,
-          args: [...logins],
+          sql: `SELECT login, track, rank FROM user_tracks WHERE ${inList('login')}`,
+          args: [listArg(logins)],
         }),
         db.execute({
           sql: `SELECT u.login, pu.project_id, p.slug FROM project_users pu
                 JOIN users u ON u.id = pu.user_id
                 JOIN projects p ON p.id = pu.project_id
-                WHERE u.login IN (${marks})`,
-          args: [...logins],
+                WHERE ${inList('u.login')}`,
+          args: [listArg(logins)],
         }),
         curriculum.circles('classic'),
         curriculum.circles('next'),
@@ -534,8 +534,8 @@ export function createCurriculum(options: CurriculumOptions) {
       const seed = SEED[track]
       const slugs = seed.flat()
       const known = await db.execute({
-        sql: `SELECT id, slug FROM projects WHERE slug IN (${slugs.map(() => '?').join(', ')})`,
-        args: slugs,
+        sql: `SELECT id, slug FROM projects WHERE ${inList('slug')}`,
+        args: [listArg(slugs)],
       })
       const idOf = new Map(known.rows.map((row) => [toText(row.slug), toNumber(row.id)]))
 

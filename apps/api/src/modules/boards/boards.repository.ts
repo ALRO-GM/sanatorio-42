@@ -5,6 +5,7 @@
 import type { Db } from '../../core/db/database.js'
 import { nowIso } from '../../core/db/database.js'
 import { toNumber, toText } from '../../core/db/rows.js'
+import { inList, listArg } from '../../core/db/sql.js'
 
 export type BoardRow = {
   id: number
@@ -33,8 +34,8 @@ export function createBoardsRepository(db: Db) {
     if (ids.length > 0) {
       const rows = await db.execute({
         sql: `SELECT board_id, login FROM board_attendees
-              WHERE board_id IN (${ids.map(() => '?').join(', ')}) ORDER BY joined_at`,
-        args: ids,
+              WHERE ${inList('board_id')} ORDER BY joined_at`,
+        args: [listArg(ids)],
       })
 
       for (const row of rows.rows) {
