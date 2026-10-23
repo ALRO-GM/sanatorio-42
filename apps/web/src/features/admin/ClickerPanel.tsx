@@ -4,7 +4,8 @@ import type { ClickerVerdict } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
 import { useAction, useAsync } from '../../shared/hooks/useAsync'
-import { localeOf, useI18n } from '../../shared/i18n'
+import { useI18n } from '../../shared/i18n'
+import { useFormat } from '../../shared/i18n/useFormat'
 import { DataTable } from '../../shared/ui/DataTable'
 import { durationText } from '../../shared/time'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
@@ -37,11 +38,9 @@ export function ClickerPanel({ me }: { me: string }) {
   // El uso del juego o el apartado de las trampas.
   const [view, setView] = useState<'usage' | 'cheats'>('usage')
   const { data, error, loading, reload } = useAsync(() => api.getClickerUsage(days), [days])
-  const compact = new Intl.NumberFormat(localeOf(lang), {
-    notation: 'compact',
-    maximumFractionDigits: 1,
-  })
-  const when = new Intl.DateTimeFormat(localeOf(lang), { dateStyle: 'short', timeStyle: 'short' })
+  const { compact: compactOf, dateTime } = useFormat()
+  const compact = { format: compactOf }
+  const when = { format: dateTime }
   const one = data?.players.find((player) => player.login === login)
   const action = useAction()
   const pardon = async (id: number): Promise<void> => {

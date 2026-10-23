@@ -1,4 +1,5 @@
-import { localeOf, useI18n } from '../i18n'
+import { useI18n } from '../i18n'
+import { useFormat } from '../i18n/useFormat'
 import { Icon } from './Icon'
 
 /**
@@ -6,14 +7,12 @@ import { Icon } from './Icon'
  * demás de quien está en modo Pomodoro. No sale si ya ha acabado.
  */
 export function FocusBadge({ until }: { until: string | null }) {
-  const { t, lang } = useI18n()
+  const { t } = useI18n()
+  const format = useFormat()
 
   if (until === null || Date.parse(until) <= Date.now()) return null
 
-  const time = new Date(until).toLocaleTimeString(localeOf(lang), {
-    hour: '2-digit',
-    minute: '2-digit',
-  })
+  const time = format.time(until)
 
   return (
     <span className="badge focus-badge" title={t('focus.badgeHint')}>

@@ -5,7 +5,8 @@ import type { StatTotals, UsageStats } from '@sanatorio/contracts'
 import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { usePolling } from '../../shared/hooks/usePolling'
-import { localeOf, useI18n } from '../../shared/i18n'
+import { useI18n } from '../../shared/i18n'
+import { useFormat } from '../../shared/i18n/useFormat'
 import { DataTable } from '../../shared/ui/DataTable'
 import { Avatar } from '../../shared/ui/Avatar'
 import { durationText } from '../../shared/time'
@@ -312,12 +313,13 @@ function HourChart({ hours }: { hours: StatTotals[] }) {
  * último ajuste: cuántas personas la aceleran, la frenan o la dejan.
  */
 function TourSpeeds() {
-  const { t, lang } = useI18n()
+  const { t } = useI18n()
+  const { number } = useFormat()
   const { data } = useAsync(() => api.getTourStats(), [])
 
   if (data === undefined || data.tours.length === 0) return null
 
-  const times = (value: number): string => `×${value.toLocaleString(localeOf(lang))}`
+  const times = (value: number): string => `×${number(value)}`
 
   return (
     <article className="card">

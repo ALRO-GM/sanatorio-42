@@ -5,6 +5,7 @@ import type { DataPreview, DataWipe } from '@sanatorio/contracts'
 import { api } from '../../shared/api'
 import { useAction, useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
+import { useFormat } from '../../shared/i18n/useFormat'
 import { cellValue } from '../../shared/table-sort'
 import { DataTable } from '../../shared/ui/DataTable'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
@@ -25,6 +26,7 @@ type Range = (typeof RANGES)[number]
  */
 export function DataPanel() {
   const { t } = useI18n()
+  const { number } = useFormat()
   const { data, error, loading, reload } = useAsync(() => api.getAdminData(), [])
   const action = useAction()
   const [kind, setKind] = useState('')
@@ -83,7 +85,7 @@ export function DataPanel() {
               <option value="">{t('admin.data.choose')}</option>
               {data.kinds.map((entry) => (
                 <option key={entry.id} value={entry.id}>
-                  {t(`admin.data.kind.${entry.id}`)} ({entry.rows.toLocaleString()})
+                  {t(`admin.data.kind.${entry.id}`)} ({number(entry.rows)})
                 </option>
               ))}
             </select>
@@ -156,7 +158,7 @@ export function DataPanel() {
             <div key={entry.id}>
               <dt>
                 {t(`admin.data.kind.${entry.id}`)}
-                <small>{t('admin.data.total', { n: entry.rows.toLocaleString() })}</small>
+                <small>{t('admin.data.total', { n: number(entry.rows) })}</small>
               </dt>
               <dd>{t(`admin.data.kind.${entry.id}.summary`)}</dd>
             </div>
@@ -206,6 +208,7 @@ function Review({
   onClose: () => void
 }) {
   const { t } = useI18n()
+  const { number } = useFormat()
   const dialog = useRef<HTMLDialogElement>(null)
 
   useEffect(() => {
@@ -222,7 +225,7 @@ function Review({
       <span className="eyebrow">{t('admin.data.review')}</span>
       <h3>{title}</h3>
       <p>
-        <strong>{t('admin.data.total', { n: preview.rows.toLocaleString() })}</strong>
+        <strong>{t('admin.data.total', { n: number(preview.rows) })}</strong>
         {preview.rows > preview.sample.length &&
           ` ${t('admin.data.showing', { n: preview.sample.length })}`}
       </p>
@@ -253,7 +256,7 @@ function Review({
           disabled={busy || preview.rows === 0}
           onClick={onDelete}
         >
-          {t('admin.data.deleteN', { n: preview.rows.toLocaleString() })}
+          {t('admin.data.deleteN', { n: number(preview.rows) })}
         </button>
         <button
           type="button"

@@ -2,7 +2,8 @@ import type { CalendarEvent } from '@sanatorio/contracts'
 
 import { useNow } from '../../shared/hooks/useNow'
 import { useI18n } from '../../shared/i18n'
-import { eventsOn, locale, sameDay } from './dates'
+import { useFormat } from '../../shared/i18n/useFormat'
+import { eventsOn, sameDay } from './dates'
 import { EventChip } from './EventChip'
 import { hourRange, hoursIn, lanesOf, minutesUntilNext } from './timeline'
 import type { Layout } from './timeline'
@@ -30,7 +31,8 @@ type DayTimelineProps = {
  * los que se pisan van uno al lado del otro. Una raya marca la hora actual.
  */
 export function DayTimeline({ days, events, layout, week, onOpen, onOpenDay }: DayTimelineProps) {
-  const { t, lang } = useI18n()
+  const { t } = useI18n()
+  const { date } = useFormat()
   // La raya de ahora y lo que falta se mueven solos, cada minuto.
   const now = new Date(useNow(60_000))
 
@@ -71,7 +73,7 @@ export function DayTimeline({ days, events, layout, week, onOpen, onOpenDay }: D
                 onOpenDay(day)
               }}
             >
-              <span>{day.toLocaleDateString(locale(lang), { weekday: 'short' })}</span>
+              <span>{date(day, 'weekday')}</span>
               <strong>{day.getDate()}</strong>
             </button>
           ))}

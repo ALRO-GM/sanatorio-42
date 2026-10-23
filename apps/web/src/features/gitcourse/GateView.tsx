@@ -6,7 +6,8 @@ import type { Gate } from '@sanatorio/gitsim'
 import { api } from '../../shared/api'
 import { useAction } from '../../shared/hooks/useAsync'
 import { useNow } from '../../shared/hooks/useNow'
-import { localeOf, useI18n } from '../../shared/i18n'
+import { useI18n } from '../../shared/i18n'
+import { useFormat } from '../../shared/i18n/useFormat'
 import { clock } from '../../shared/time'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { GroupRooms } from './GroupRoom'
@@ -26,15 +27,14 @@ type GateViewProps = {
  * pasar; si no, una hora de espera (mientras, el Repaso enseña lo fallado).
  */
 export function GateView({ gate, me, course, onCourse, onBack, onReview }: GateViewProps) {
-  const { t, lang } = useI18n()
+  const { t } = useI18n()
   const [quiz, setQuiz] = useState<GitGateQuiz | null>(null)
   const [chosen, setChosen] = useState<(number | null)[]>([])
   const [result, setResult] = useState<GitGateResult | null>(null)
   const { busy, error, run } = useAction()
   const state = course.gates[gate.id]
   const name = t(`git.${gate.kind}`, { n: gate.min })
-  const time = (iso: string) =>
-    new Date(iso).toLocaleTimeString(localeOf(lang), { hour: '2-digit', minute: '2-digit' })
+  const { time } = useFormat()
 
   function start() {
     void run(async () => {

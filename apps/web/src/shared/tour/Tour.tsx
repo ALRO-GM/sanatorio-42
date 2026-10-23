@@ -2,7 +2,8 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 
 import { api } from '../api'
-import { localeOf, useI18n } from '../i18n'
+import { useI18n } from '../i18n'
+import { useFormat } from '../i18n/useFormat'
 import { Icon } from '../ui/Icon'
 import { RATES, useTourSpeed } from './speed'
 
@@ -137,7 +138,8 @@ type TourProps<S> = {
  */
 export function Tour<S extends object>({ tour, tab, bell, children }: TourProps<S>) {
   const { name, start, script, steps } = tour
-  const { t, lang } = useI18n()
+  const { t } = useI18n()
+  const { number } = useFormat()
   const [still] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches)
   const [take, setTake] = useState(0)
   const [shot, setShot] = useState<Shot<S>>({ ...start, ...BASE })
@@ -254,7 +256,7 @@ export function Tour<S extends object>({ tour, tab, bell, children }: TourProps<
       </p>
       <div className="actions">
         <label className="tour-speed">
-          <span>{t('tour.speed', { n: rate.toLocaleString(localeOf(lang)) })}</span>
+          <span>{t('tour.speed', { n: number(rate) })}</span>
           <input
             type="range"
             min={0}

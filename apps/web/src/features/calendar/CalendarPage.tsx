@@ -5,10 +5,11 @@ import type { CalendarEvent, CalendarKind, CalendarSection } from '@sanatorio/co
 import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
+import { useFormat } from '../../shared/i18n/useFormat'
 import { Show } from '../../shared/detail'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { PillGroup } from '../../shared/ui/PillGroup'
-import { addDays, daysOf, eventsOn, locale, move, rangeTitle, sameDay, startOfDay } from './dates'
+import { addDays, daysOf, eventsOn, move, rangeTitle, sameDay, startOfDay } from './dates'
 import { EventChip } from './EventChip'
 import { EventDialog } from './EventDialog'
 import { KINDS, loadHidden, loadView, saveHidden, saveView, VIEWS } from './kinds'
@@ -42,6 +43,7 @@ const MONTH_CELL_EVENTS = 3
  */
 export function CalendarPage({ focus = null, onGo, me }: CalendarPageProps) {
   const { t, lang } = useI18n()
+  const { date } = useFormat()
   const [view, setView] = useState<View>(loadView)
   const [cursor, setCursor] = useState(() => startOfDay(new Date()))
   const [hidden, setHidden] = useState(loadHidden)
@@ -119,9 +121,7 @@ export function CalendarPage({ focus = null, onGo, me }: CalendarPageProps) {
     changeView('day')
   }
 
-  const weekdays = (days.length >= 7 ? days.slice(0, 7) : []).map((day) =>
-    day.toLocaleDateString(locale(lang), { weekday: 'short' }),
-  )
+  const weekdays = (days.length >= 7 ? days.slice(0, 7) : []).map((day) => date(day, 'weekday'))
 
   return (
     <section>
@@ -243,11 +243,7 @@ export function CalendarPage({ focus = null, onGo, me }: CalendarPageProps) {
                   <button
                     type="button"
                     className="month-day"
-                    aria-label={day.toLocaleDateString(locale(lang), {
-                      weekday: 'long',
-                      day: 'numeric',
-                      month: 'long',
-                    })}
+                    aria-label={date(day, 'long')}
                     onClick={() => {
                       openDay(day)
                     }}
@@ -303,7 +299,7 @@ export function CalendarPage({ focus = null, onGo, me }: CalendarPageProps) {
                         openDay(day)
                       }}
                     >
-                      <span>{day.toLocaleDateString(locale(lang), { weekday: 'short' })}</span>
+                      <span>{date(day, 'weekday')}</span>
                       <strong>{day.getDate()}</strong>
                     </button>
                   )}

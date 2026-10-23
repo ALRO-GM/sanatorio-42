@@ -5,7 +5,8 @@ import type { TicketCategory } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
 import { useAction, useAsync } from '../../shared/hooks/useAsync'
-import { localeOf, useI18n } from '../../shared/i18n'
+import { useI18n } from '../../shared/i18n'
+import { useFormat } from '../../shared/i18n/useFormat'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { Icon } from '../../shared/ui/Icon'
 import { InfoTip } from '../../shared/ui/InfoTip'
@@ -30,7 +31,8 @@ export function Inbox({
   section: string
   sections: readonly { id: string; inNav: boolean }[]
 }) {
-  const { t, lang } = useI18n()
+  const { t } = useI18n()
+  const { date } = useFormat()
   const dialog = useRef<HTMLDialogElement>(null)
   const mine = useAsync(() => api.getMyTickets(), [])
   const { busy, error, run } = useAction()
@@ -141,7 +143,7 @@ export function Inbox({
                 )}
               </span>
               <strong>{ticket.subject}</strong>
-              <small>{new Date(ticket.createdAt).toLocaleDateString(localeOf(lang))}</small>
+              <small>{date(ticket.createdAt)}</small>
             </div>
             <p>{ticket.body}</p>
             {ticket.withdrawUntil !== null && Date.parse(ticket.withdrawUntil) > Date.now() && (

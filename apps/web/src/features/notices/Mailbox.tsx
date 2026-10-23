@@ -4,7 +4,8 @@ import type { Notice } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
 import { useAction, useAsync } from '../../shared/hooks/useAsync'
-import { localeOf, useI18n } from '../../shared/i18n'
+import { useI18n } from '../../shared/i18n'
+import { useFormat } from '../../shared/i18n/useFormat'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { PillGroup } from '../../shared/ui/PillGroup'
 import { calendarEventOf, iconOf, noticesIn, removableCount, targetOf } from './routes'
@@ -36,7 +37,8 @@ type MailboxProps = {
  * has leído primero. Cada aviso lleva al sitio donde se ve.
  */
 export function Mailbox({ me, chat, onChat, onClose, onOpen, onChange }: MailboxProps) {
-  const { t, lang } = useI18n()
+  const { t } = useI18n()
+  const { date } = useFormat()
   const dialog = useRef<HTMLDialogElement>(null)
   const { data, error, loading, reload } = useAsync(() => api.getNotices(), [])
   const action = useAction()
@@ -91,10 +93,7 @@ export function Mailbox({ me, chat, onChat, onClose, onOpen, onChange }: Mailbox
     if (minutes < 60) return t('notices.minutesAgo', { n: minutes })
     if (minutes < 24 * 60) return t('notices.hoursAgo', { n: Math.round(minutes / 60) })
 
-    return new Date(at).toLocaleDateString(localeOf(lang), {
-      day: 'numeric',
-      month: 'short',
-    })
+    return date(at, 'dayMonth')
   }
 
   const all = data?.items ?? []

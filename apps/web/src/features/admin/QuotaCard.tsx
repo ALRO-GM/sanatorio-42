@@ -6,6 +6,7 @@ import type { FortyTwoQuotaSettings } from '@sanatorio/contracts'
 import { api } from '../../shared/api'
 import { useAction, useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
+import { useFormat } from '../../shared/i18n/useFormat'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { LimitActions, NumberField, Tile } from './LimitParts'
 
@@ -18,6 +19,7 @@ const capOf = (text: string): number | null => (text.trim() === '' ? null : Numb
  */
 export function QuotaCard() {
   const { t } = useI18n()
+  const { number } = useFormat()
   const { data, error, loading, reload } = useAsync(() => api.getAdminQuota(), [])
   const action = useAction()
   const [draft, setDraft] = useState<{ daily: string; monthly: string; renewDay: string } | null>(
@@ -74,14 +76,14 @@ export function QuotaCard() {
           label={t('admin.quota.today')}
           value={
             day.allowance === null
-              ? day.spent.toLocaleString()
-              : `${day.spent.toLocaleString()} / ${day.allowance.toLocaleString()}`
+              ? number(day.spent)
+              : `${number(day.spent)} / ${number(day.allowance)}`
           }
           hint={t(day.allowance === null ? 'admin.quota.noCap' : 'admin.quota.cap')}
         />
         <Tile
           label={t('admin.quota.month')}
-          value={month.spent.toLocaleString()}
+          value={number(month.spent)}
           hint={t('admin.budget.renews', { n: month.daysLeft, day: month.renewsOn })}
         />
         <Tile

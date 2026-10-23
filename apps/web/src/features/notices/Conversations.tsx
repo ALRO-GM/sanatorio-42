@@ -4,7 +4,8 @@ import type { Conversation, ConversationKind, ConversationMark } from '@sanatori
 
 import { api } from '../../shared/api'
 import { useAction, useAsync } from '../../shared/hooks/useAsync'
-import { localeOf, useI18n } from '../../shared/i18n'
+import { useI18n } from '../../shared/i18n'
+import { useFormat } from '../../shared/i18n/useFormat'
 import { Avatar } from '../../shared/ui/Avatar'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { PillGroup } from '../../shared/ui/PillGroup'
@@ -41,7 +42,8 @@ type ConversationsProps = {
  * solo las no leídas o las pendientes, por tipo y por proyecto.
  */
 export function Conversations({ me, openId, onOpen, onChange }: ConversationsProps) {
-  const { t, lang } = useI18n()
+  const { t } = useI18n()
+  const format = useFormat()
   const { data, error, loading, reload } = useAsync(() => api.getConversations(), [])
   const [fresh, setFresh] = useState<Conversation[] | null>(null)
   const [filters, setFilters] = useState<Filters>(NO_FILTERS)
@@ -68,9 +70,7 @@ export function Conversations({ me, openId, onOpen, onChange }: ConversationsPro
     const date = new Date(at)
     const today = new Date().toDateString() === date.toDateString()
 
-    return today
-      ? date.toLocaleTimeString(localeOf(lang), { hour: '2-digit', minute: '2-digit' })
-      : date.toLocaleDateString(localeOf(lang), { day: 'numeric', month: 'short' })
+    return today ? format.time(date) : format.date(date, 'dayMonth')
   }
   const titleOf = (entry: Pick<Conversation, 'title' | 'kind'>): string =>
     entry.title ?? t(`chats.kind.${entry.kind}`)

@@ -5,7 +5,7 @@ import type { LeaderboardPeriod, StatsEntry, StatsSection } from '@sanatorio/con
 import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
-import { localeOf } from '../../shared/i18n/locale'
+import { useFormat } from '../../shared/i18n/useFormat'
 import { Avatar } from '../../shared/ui/Avatar'
 import { PersonLink } from '../../shared/ui/PersonLink'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
@@ -59,8 +59,8 @@ export function HelpStatsPage({ me }: { me: string }) {
 }
 
 function SectionCard({ section, me }: { section: StatsSection; me: string }) {
-  const { t, lang } = useI18n()
-  const locale = localeOf(lang)
+  const { t } = useI18n()
+  const { number } = useFormat()
   const mine = section.me
   const rows: StatsEntry[] =
     mine !== null && !section.ranking.some((entry) => entry.login === mine.login)
@@ -79,8 +79,8 @@ function SectionCard({ section, me }: { section: StatsSection; me: string }) {
             <dd>
               {/* Las horas llegan en minutos: se enseñan en horas, con un decimal. */}
               {total.key === 'minutes'
-                ? (Math.round(total.value / 6) / 10).toLocaleString(locale)
-                : total.value.toLocaleString(locale)}
+                ? number(Math.round(total.value / 6) / 10)
+                : number(total.value)}
             </dd>
           </div>
         ))}

@@ -5,6 +5,7 @@ import type { UsageFlows } from '@sanatorio/contracts'
 import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
+import { useFormat } from '../../shared/i18n/useFormat'
 import { DataTable } from '../../shared/ui/DataTable'
 import { durationText } from '../../shared/time'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
@@ -92,6 +93,7 @@ function Flows({
   onPick: (key: string | null) => void
 }) {
   const { t } = useI18n()
+  const { number } = useFormat()
   const { sections, flows, sessions } = data
   const most = <T,>(items: readonly T[], value: (item: T) => number): T | undefined =>
     items.reduce<T | undefined>(
@@ -112,7 +114,7 @@ function Flows({
   return (
     <>
       <div className="stat-cards">
-        <Figure label={t('admin.flows.sessions')} value={sessions.toLocaleString()} strong />
+        <Figure label={t('admin.flows.sessions')} value={number(sessions)} strong />
         <Figure
           label={t('admin.flows.depth')}
           value={(sessions === 0 ? 0 : steps / sessions).toFixed(1)}
@@ -185,7 +187,7 @@ function Flows({
               cell: (section) => (
                 <>
                   <Bar part={section.visits / topVisits} />
-                  {section.visits.toLocaleString()}
+                  {number(section.visits)}
                 </>
               ),
             },
@@ -251,7 +253,7 @@ function Flows({
               cell: (flow) => (
                 <>
                   <Bar part={flow.count / topFlow} />
-                  {flow.count.toLocaleString()}
+                  {number(flow.count)}
                 </>
               ),
             },

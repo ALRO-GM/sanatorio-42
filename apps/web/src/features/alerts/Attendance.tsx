@@ -5,7 +5,8 @@ import type { MeetPresence } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
 import { useAction, useAsync } from '../../shared/hooks/useAsync'
-import { localeOf, useI18n } from '../../shared/i18n'
+import { useI18n } from '../../shared/i18n'
+import { formatsFor } from '../../shared/i18n/useFormat'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { PillGroup } from '../../shared/ui/PillGroup'
 import { Qr } from '../../shared/ui/Qr'
@@ -16,12 +17,7 @@ function checkinUrl(eventId: string, code: string): string {
 }
 
 function hour(iso: string | null, lang: string): string {
-  return iso === null
-    ? '—'
-    : new Date(iso).toLocaleTimeString(localeOf(lang), {
-        hour: '2-digit',
-        minute: '2-digit',
-      })
+  return iso === null ? '—' : formatsFor(lang).time(iso)
 }
 
 /**

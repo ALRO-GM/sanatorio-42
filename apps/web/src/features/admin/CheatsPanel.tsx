@@ -4,7 +4,8 @@ import type { ClickerCheatEntry, ClickerCheater } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
 import { useAction, useAsync } from '../../shared/hooks/useAsync'
-import { localeOf, useI18n } from '../../shared/i18n'
+import { useI18n } from '../../shared/i18n'
+import { useFormat } from '../../shared/i18n/useFormat'
 import { DataTable } from '../../shared/ui/DataTable'
 import type { Column } from '../../shared/ui/DataTable'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
@@ -31,16 +32,14 @@ const ANY_WHY = '*'
  * su partida, indultar) y un comunicado solo para quienes salen en la lista.
  */
 export function CheatsPanel({ me, onWatch }: CheatsPanelProps) {
-  const { t, lang } = useI18n()
+  const { t } = useI18n()
   const { data, error, loading, reload } = useAsync(() => api.getClickerCheats(), [])
   const [why, setWhy] = useState<string | null>(null)
   const [writing, setWriting] = useState(false)
   const action = useAction()
-  const compact = new Intl.NumberFormat(localeOf(lang), {
-    notation: 'compact',
-    maximumFractionDigits: 1,
-  })
-  const when = new Intl.DateTimeFormat(localeOf(lang), { dateStyle: 'short', timeStyle: 'short' })
+  const { compact: compactOf, dateTime } = useFormat()
+  const compact = { format: compactOf }
+  const when = { format: dateTime }
   const date = (iso: string): string => when.format(new Date(iso))
   const whyText = (value: string): string => t(`admin.clicker.why.${value}`)
 

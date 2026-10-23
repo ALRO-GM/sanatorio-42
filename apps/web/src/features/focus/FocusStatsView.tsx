@@ -1,7 +1,8 @@
 import type { FocusFigures, FocusStats } from '@sanatorio/contracts'
 
 import type { FocusStatsQuery } from '../../shared/api/types'
-import { localeOf, useI18n } from '../../shared/i18n'
+import { useI18n } from '../../shared/i18n'
+import { useFormat } from '../../shared/i18n/useFormat'
 import { durationText } from '../../shared/time'
 import { PillGroup } from '../../shared/ui/PillGroup'
 
@@ -79,9 +80,10 @@ export function FocusFigureCards({
   who: 'me' | 'all'
   people?: number
 }) {
-  const { t, lang } = useI18n()
+  const { t } = useI18n()
+  const { number } = useFormat()
   const show = (key: (typeof FIGURES)[number], value: number): string =>
-    key === 'focusedSeconds' ? durationText(value) : value.toLocaleString(localeOf(lang))
+    key === 'focusedSeconds' ? durationText(value) : number(value)
 
   return (
     <div className="stat-cards">
@@ -101,7 +103,7 @@ export function FocusFigureCards({
       {people !== undefined && (
         <div className="stat-card">
           <span className="eyebrow">{t('focus.stats.people')}</span>
-          <strong>{people.toLocaleString(localeOf(lang))}</strong>
+          <strong>{number(people)}</strong>
         </div>
       )}
     </div>

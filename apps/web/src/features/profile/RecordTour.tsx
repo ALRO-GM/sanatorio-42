@@ -1,4 +1,5 @@
-import { localeOf, useI18n } from '../../shared/i18n'
+import { useI18n } from '../../shared/i18n'
+import { useFormat } from '../../shared/i18n/useFormat'
 import { click, cut, defineTour, Tour } from '../../shared/tour/Tour'
 import { Icon } from '../../shared/ui/Icon'
 
@@ -35,9 +36,9 @@ const STEPS = [
  * se anotan el pace y el plazo para ver todas las fechas.
  */
 export function RecordTour() {
-  const { t, lang } = useI18n()
-  const day = (date: Date): string =>
-    date.toLocaleDateString(localeOf(lang), { day: 'numeric', month: 'short' })
+  const { t } = useI18n()
+  const { date } = useFormat()
+  const day = (value: Date): string => date(value, 'dayMonth')
 
   return (
     <Tour tour={TOUR} tab={() => t('nav.expediente')}>
