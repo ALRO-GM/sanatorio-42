@@ -158,7 +158,7 @@ fotos nuevas por hora; una que 42 no da no se vuelve a pedir hasta pasada una ho
 `PUT /me/settings` admite `recordStyle`: el id de un estilo, `none` (cada cual
 lo ve con el suyo) o `default` (lo de fábrica: tu estilo exclusivo si tienes uno).
 Un estilo exclusivo de otra persona da `403`. `GET /me/profile` y
-`GET /profiles/:login` traen `recordStyle`, ya resuelto: con qué estilo se ve.
+`GET /users/:login/profile` traen `recordStyle`, ya resuelto: con qué estilo se ve.
 
 ## Privacidad y condiciones
 GET /me/legal → `{ "version": "2026-10-16", "acceptedAt": null }`: la versión vigente
@@ -223,7 +223,7 @@ Ids de logro: `first_duty`, `group_therapy`, `selfless_help`, `board_teacher`, `
 Los textos de unos y otros los pone el front (`apps/web/src/shared/i18n/`).
 
 `reactions` son las valoraciones recibidas al ayudar (ver «Guardia: ayuda
-reservada»). Ya no existe `POST /reactions`: la XP por ayudar sale solo de una
+reservada»). Ya no se dan valoraciones sueltas (la ruta `/reactions` se quitó): la XP por ayudar sale solo de una
 sesión reservada.
 
 GET /users/search?q= → hasta 8 personas cuyo login o nombre lleva lo escrito,
@@ -461,6 +461,8 @@ en `seats` y en el mapa salen en azul.
 - POST /groups/:id/join → 204 (409 si está completo)
 - DELETE /groups/:id/join → 204. Si era la última persona, el grupo se cierra.
 - DELETE /groups/:id → 204. Solo quien lo abrió.
+- POST /groups/:id/invite → `{ "invited" }`: avisa del grupo a quien hace el
+  proyecto en el campus. Solo quien lo abrió, y una vez.
 
 Las terapias son para **días concretos** (`dates`, de uno a catorce), no se
 repiten cada semana. Un grupo se cierra solo cuando pasa su último día o cuando
@@ -577,7 +579,7 @@ GET /projects/:id/doubts
 - DELETE /doubts/:id → 204. Solo quien la puso.
 - PUT /projects/:id/guide `{ "start": [], "problems": [], "concepts": [] }` → la guía. Solo especialistas.
 - POST /projects/:id/guide/proposals `{ "section": "problems", "body": "…" }` → 204. Cualquiera.
-- POST /guide-proposals/:id/accept y /guide-proposals/:id/reject → 204. Solo especialistas.
+- POST /guide-proposals/:id/accept · POST /guide-proposals/:id/reject → 204. Solo especialistas.
 
 ## Pizarras
 GET /boards?from=<ISO>&to=<ISO> → pizarras del campus que empiezan en ese intervalo
@@ -672,7 +674,11 @@ ayudar en persona.
   `[{ "login": "jdoe", "freeStarts": ["17:00", "17:30"], "remainingMinutes": 60 }]`.
 - POST /help/bookings → `{ "helper", "start", "minutes", "projectId"?, "note"? }`
   (`minutes`: 30, 60, 90 o 120). Queda `pending`.
-- POST /help/bookings/:id/accept · …/decline → 204. Solo quien ayuda.
+- POST /help/bookings/:id/accept · POST /help/bookings/:id/decline → 204. Solo
+  quien ayuda.
+- GET /help/inbox → las peticiones que tienes por contestar y las tuyas que se
+  rechazaron o anularon y aún no has visto.
+- POST /help/bookings/:id/seen → 204: ya has visto que se rechazó o anuló.
 - DELETE /help/bookings/:id → 204. Cualquiera de las dos personas, antes o
   después de la hora ("al final no quedamos").
 - POST /help/bookings/:id/rating → `{ "tag" }`. Devuelve `{ "xp" }`: `null` si
@@ -782,6 +788,10 @@ la copia se borra. `404` si ya no está. Quien tuviera la partida abierta recibe
 
 DELETE /admin/clicker/alerts/:id → 204. Solo admins. Descarta un aviso de salto.
 
+POST /admin/clicker/sanction → `{ login, code, wipe, note }` → 204. Solo admins.
+Le deja ese código de sanción y, con `wipe`, sin edificios ni mejoras; lo verá
+en el juego.
+
 Pulsar más de lo que aguanta una persona también es trampa (motivo `clicks`).
 No se mira segundo a segundo, sino el total de cada tramo seguido: más de 50
 por segundo durante un minuto, más de 9 durante media hora, y de media más de 6
@@ -808,12 +818,6 @@ Solo admins. Lo que se decide sobre un salto de capital sospechoso:
   cuadraron (`seizure` en `GET /clicker`, hasta `POST /clicker/seizure/ack`).
   El aviso lleva `n` (veces pillado: elige el mensaje) y `shared` (entre
   cuántas personas se repartió).
-
-La bolsa común (`pool` en `GET /clicker`) se reparte en el juego: de vez en
-cuando sale una placa, y quien la coge (`POST /clicker/pool/claim` →
-`{ "amount", "pool" }`) se lleva diez commits de la suerte según su última
-partida guardada, sin pasar de lo que hay y como mucho una vez cada cinco
-minutos. Lo cobrado vale como escrito en su siguiente guardado.
 
 GET /admin/clicker/game?login= → `{ login, save, caught, perSecond }`: la
 partida de alguien, para verla en su pantalla de juego sin guardar nada. Solo admins.
@@ -993,6 +997,9 @@ por defecto la última semana, y 92 días como mucho.
 GET /map → el plano del campus (el mismo de `GET /projects/:id/map`, sin nadie
 resaltado). Cada `occupant` lleva `online`: `true` si tiene Sanatorio abierto.
 
+POST /map/seats/:host/broken → 204: ese puesto no funciona (se ve así una
+semana). DELETE /map/seats/:host/broken → 204: ya funciona.
+
 - "Abierto" es haber pedido `GET /pulse` en los últimos 6 minutos: es lo único
   que toda pestaña pregunta de fondo, y se anota como mucho una vez por minuto.
 
@@ -1000,7 +1007,7 @@ Las conversaciones directas salen, con todas las demás, en `GET /conversations`
 (ver «Avisos, chat y asistencia de un evento»).
 
 - Un chat directo es un chat más: se lee y se escribe con
-  `GET /events/messages?id=dm:<a>:<b>` y `POST /events/messages`, con los dos
+  `GET /events/thread?id=dm:<a>:<b>` y `POST /events/messages`, con los dos
   logins en orden alfabético. `403` si no eres uno de los dos, si el orden no
   es ese o si alguno no existe.
 - Valen los mismos topes de mensajes por minuto, no se borran solos y

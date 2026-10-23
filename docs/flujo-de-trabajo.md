@@ -83,6 +83,7 @@ De la lista priorizada de `docs/revision-2026-10/tests-infra.md`:
    despliegue lo compruebe.
 5. Copias: retención por tiempo, verificación y destino fuera de la máquina
    (cifradas).
-7. Subir los mínimos de cobertura de la web; test de `docs/api.md` ↔ rutas.
+7. Subir los mínimos de cobertura de la web (el test de `docs/api.md` ↔ rutas
+   ya está).
 8. Avisos a Slack del despliegue y un monitor externo gratuito.
 9. Ramas con PR y CI obligatoria cuando haya más de una persona.

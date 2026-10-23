@@ -56,8 +56,8 @@ pintar como icono los glifos (★ ✦ ← →) que hoy van en el texto.
 6 de su lista (logger a `warn` con `x-request-id`, migración aparte con
 vuelta atrás y cerrojo, `/health/db` con sha y esquema, espera a la CI por
 etiqueta `ci-ok/<sha>`). Pendientes: copias fuera de la máquina y cifradas,
-hooks de git y `check:quick`, mínimos de cobertura de la web, `docs/api.md` ↔
-rutas, recorridos de pantalla que faltan, Slack de despliegues y monitor
+hooks de git y `check:quick` (hechos), mínimos de cobertura de la web,
+`docs/api.md` ↔ rutas (hecho: `tests/integration/api-docs.test.ts`), recorridos de pantalla que faltan, Slack de despliegues y monitor
 externo, errores de cliente.
 
 **Flujo**: skills y subagentes en `.claude/`, `docs/flujo-de-trabajo.md`.
