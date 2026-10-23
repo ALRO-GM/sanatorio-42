@@ -432,7 +432,8 @@ export function createQuizService(options: QuizServiceOptions) {
     },
 
     /**
-     * Sale de la sala, esté como esté: sin empezar, jugando o acabada. Si se va
+     * Sale de la sala, esté como esté: sin empezar, jugando o acabada (jugando,
+     * se apunta como derrota). Si se va
      * quien la creó, la sala pasa a quien entró después; si no queda nadie, la
      * sala se borra. Jugando, si ya no hay con quién jugar (un duelo o una
      * supervivencia con una sola persona, un equipo vacío), la partida acaba.
@@ -442,7 +443,29 @@ export function createQuizService(options: QuizServiceOptions) {
         const room = await advance(await mustRoom(id))
         const players = await quiz.players(id)
 
-        if (!players.some((p) => p.login === actor.login)) return
+        const leaving = players.find((p) => p.login === actor.login)
+
+        if (leaving === undefined) return
+        // Irse a media partida cuenta como perderla: si no, salir justo antes
+        // del final borraría una derrota.
+        if (room.status === 'playing') {
+          await quiz.record(
+            'quiz',
+            room.settings.mode,
+            id,
+            room.campusId,
+            [
+              {
+                login: leaving.login,
+                won: false,
+                correct: leaving.correct,
+                wrong: leaving.wrong,
+                score: leaving.score,
+              },
+            ],
+            isoAt(now()),
+          )
+        }
 
         await quiz.remove(id, actor.login)
 
