@@ -647,8 +647,12 @@ Lo que impide que una funcionalidad nueva rompa otra, por orden de cuándo actú
     mínimos de cobertura (solo suben), la compilación y que la imagen de Docker
     construye.
 12. **El despliegue se protege a sí mismo.** `deploy.sh` no despliega un commit
-    cuya CI no haya pasado (si aún corre, espera), guarda la imagen que funciona
-    y, si la nueva no contesta en `/health/db`, vuelve sola a la anterior.
+    cuya CI no haya pasado (la CI lo dice con una etiqueta `ci-ok/<sha>` en el
+    propio repositorio; si aún corre, espera), hace una copia comprobada de la
+    base, guarda la imagen que funciona, aplica las migraciones aparte antes de
+    tocar el contenedor y, si la nueva no contesta en `/health/db` con el
+    commit y el esquema esperados, vuelve sola a la anterior (y a la copia, si
+    hubo migraciones).
 13. **Normas escritas** en [AGENTS.md](AGENTS.md): reglas de código y de
     producto que cualquier persona o asistente lee antes de tocar nada; entre
     ellas, dónde va una funcionalidad nueva (categoría, modo e importancia) y que
@@ -710,12 +714,16 @@ Docker: la app en un contenedor y Caddy en otro, con HTTPS automático.
 flowchart LR
   A["npm run check"] --> B["git push"]
   B --> C["CI: tipos, lint, formato,<br/>tests, build e imagen"]
+  C --> T["etiqueta ci-ok/sha"]
   B --> D["ssh a la máquina<br/>deploy.sh"]
-  D --> E["git pull y<br/>docker compose up --build"]
-  E --> F["migraciones<br/>al arrancar"]
-  F --> G{"¿contesta<br/>/health/db?"}
+  D --> E["git pull y espera<br/>a ci-ok/sha"]
+  T -.-> E
+  E --> K["copia comprobada<br/>y docker compose build"]
+  K --> F["migraciones aparte<br/>(compose run migrate.js)"]
+  F --> U["docker compose up -d"]
+  U --> G{"¿/health/db con el<br/>commit y el esquema?"}
   G -->|sí| H["Desplegado"]
-  G -->|no en 60 s| I["Error y registro"]
+  G -->|no en 180 s| I["Imagen anterior<br/>(y copia si hubo migración)"]
 ```
 
 Actualizar es una orden:

@@ -8,6 +8,11 @@
 #
 #   infra/scripts/backup.sh              deja la copia en infra/backups/
 #
+# La copia se comprueba antes de darla por buena (`PRAGMA integrity_check` sobre
+# la copia y `gzip -t` sobre el comprimido), y la ruta de la última buena queda
+# en infra/backups/ultima: es la que `deploy.sh` restaura si hay que volver
+# atrás.
+#
 # Si existe BACKUP_REMOTE (un destino de rclone, p. ej. un bucket de Oracle
 # Object Storage: `oci:sanatorio-backups`), la copia se sube también allí. Una
 # copia que vive en la misma máquina que la base no protege de perder la máquina.
@@ -40,26 +45,44 @@ fi
 # La copia se hace primero dentro del contenedor. Pase lo que pase después, ese
 # temporal se borra al salir: si se quedara, la siguiente copia fallaría con
 # «output file already exists». Y se borra también antes de empezar, por si
-# quedó de una vez anterior.
+# quedó de una vez anterior. Con sus -wal y -shm, que la comprobación puede
+# dejar.
 cleanup() {
-  docker compose exec -T app rm -f /data/backup.db > /dev/null 2>&1 || true
+  docker compose exec -T app sh -c 'rm -f /data/backup.db /data/backup.db-wal /data/backup.db-shm' > /dev/null 2>&1 || true
 }
 trap cleanup EXIT
 cleanup
 
+# Después del VACUUM, la propia copia pasa por `integrity_check`: una copia
+# corrupta que se descubre al restaurar no sirve de nada.
 docker compose exec -T app node -e "
   import('@libsql/client').then(async ({ createClient }) => {
     const db = createClient({ url: process.env.DATABASE_URL })
     await db.execute(\"VACUUM INTO '/data/backup.db'\")
     db.close()
+
+    const copy = createClient({ url: 'file:/data/backup.db' })
+    const check = await copy.execute('PRAGMA integrity_check')
+    copy.close()
+    const verdict = check.rows.map((row) => String(row.integrity_check)).join('; ')
+    if (verdict !== 'ok') {
+      process.stderr.write('La copia no pasa integrity_check: ' + verdict + '\n')
+      process.exit(1)
+    }
   })
 "
 docker compose cp app:/data/backup.db "$file"
 gzip "$file"
+gzip -t "$file.gz"
 
-# Se guardan las 14 últimas.
+# La última copia buena, para quien tenga que restaurar sin preguntar.
+printf '%s\n' "$file.gz" > backups/ultima
+
+# Se guardan las 14 últimas. Los nombres los pone este script (fecha y hora, sin
+# espacios ni rarezas), así que `ls` por fecha vale.
+# shellcheck disable=SC2012
 ls -1t backups/sanatorio-*.db.gz | tail -n +15 | xargs -r rm --
-echo "Copia guardada en infra/$file.gz"
+echo "Copia guardada y comprobada en infra/$file.gz"
 
 if [ -n "${BACKUP_REMOTE:-}" ] && [ "$guard_level" -ge 90 ]; then
   echo "Corte por los límites del plan: la copia no se sube a $BACKUP_REMOTE."

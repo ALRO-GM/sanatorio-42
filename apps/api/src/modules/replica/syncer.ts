@@ -753,6 +753,27 @@ export function createSyncer(options: SyncerOptions) {
       await loop
     },
 
+    /**
+     * Instante (ms) de lo último que se trajo de 42 para un campus seguido:
+     * la foto de puestos o los cambios de proyectos, lo más reciente de los
+     * dos. `null` si aún no ha habido ninguna. Lo lee `GET /health/db`, así
+     * que no cuenta filas: solo mira el estado guardado.
+     */
+    async lastSyncAt(): Promise<number | null> {
+      let latest: number | null = null
+
+      for (const id of config.trackedCampusIds) {
+        const locations = await replica.getState<LocationsState>(locationsKey(id))
+        const delta = await replica.getState<DeltaState>(deltaKey(id))
+
+        for (const at of [locations?.at ?? 0, delta?.at ?? 0]) {
+          if (at > 0 && (latest === null || at > latest)) latest = at
+        }
+      }
+
+      return latest
+    },
+
     /** Estado de la réplica, para `GET /sync/status`. */
     async status(): Promise<SyncStatus> {
       const campuses: SyncStatus['campuses'] = []

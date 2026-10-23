@@ -11,6 +11,8 @@ está limpio y que el commit a desplegar es el `HEAD` de `main`; si hay cambios
 sin commit o el check no está en verde, para e informa en vez de desplegar.
 
 No escribes en la base de datos de producción, no cambias `infra/`, no
-consultas la API de GitHub salvo `/rate_limit` o para leer el fallo de una CI.
-Informa con el commit desplegado, la hora de arranque del contenedor, su
-estado (`healthy`) y, si falló, el motivo exacto del registro.
+consultas la API de GitHub salvo para leer el fallo de una CI (`deploy.sh` ya
+no la usa: espera a la etiqueta `ci-ok/<sha>` por git). Informa con el commit
+desplegado (el `version` de `/api/health/db` tiene que ser ese sha), la hora de
+arranque del contenedor, su estado (`healthy`) y, si falló, el motivo exacto
+del registro (`infra/deploy.log`: migración fallida, vuelta atrás, CI en rojo).

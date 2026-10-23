@@ -26,6 +26,9 @@ function makeEnv(overrides: Partial<NodeJS.ProcessEnv> = {}): Env {
     // añadiría segundos de espera, así que se deja casi a cero: los tests del
     // `Throttle` ya cubren el retraso con reloj falso.
     MIN_REQUEST_INTERVAL_MS: '0',
+    // Los tests no escriben nada en la salida; el que quiera leer el registro
+    // pasa su propio destino a `makeApp` y sube el nivel.
+    LOG_LEVEL: 'silent',
     ...overrides,
   })
 }
@@ -260,6 +263,7 @@ export type TestApp = BuiltApp & {
 export async function makeApp(
   envOverrides: Partial<NodeJS.ProcessEnv> = {},
   providerOptions: ProviderOptions = {},
+  buildOptions: { logDestination?: { write: (line: string) => void } } = {},
 ): Promise<TestApp> {
   const env = makeEnv(envOverrides)
   const provider = makeProvider(providerOptions)
@@ -269,7 +273,7 @@ export async function makeApp(
   // `available: true` de un test se colaría en otro y los fallos dependerían
   // del orden de ejecución.
   const db = await openDatabase({ url: 'file::memory:' })
-  const built = await buildApp({ env, db, fetchImpl: provider.fetchImpl })
+  const built = await buildApp({ env, db, fetchImpl: provider.fetchImpl, ...buildOptions })
 
   async function login(): Promise<string> {
     const start = await built.app.inject({ method: 'GET', url: '/auth/login' })

@@ -203,8 +203,27 @@ const envSchema = z.object({
    */
   GUARD_LEVEL_FILE: z.string().default(''),
 
-  /** Registra cada petición HTTP en la salida. */
+  /**
+   * Nivel del registro (pino, en JSON por la salida estándar).
+   *
+   * `warn` por defecto, también en producción: así un 500 deja siempre una
+   * línea con su `reqId`, que es lo único que permite relacionar lo que cuenta
+   * una persona con lo que pasó dentro. Los tests lo ponen en `silent`.
+   */
+  LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'silent']).default('warn'),
+
+  /**
+   * Registra cada petición HTTP (entrada y respuesta, a nivel `info`). Útil
+   * para depurar; en producción sobra, porque hay una línea por petición.
+   */
   LOG_REQUESTS: z.enum(['true', 'false']).default('false'),
+
+  /**
+   * Commit desplegado. Lo escribe la imagen de Docker (`ARG GIT_SHA`) y lo
+   * devuelve `GET /health/db`, para que quien despliega compruebe que lo que
+   * responde es lo que acaba de subir. Vacío en local.
+   */
+  GIT_SHA: z.string().default(''),
 
   /**
    * Separación mínima entre peticiones a la API de 42, en milisegundos.
