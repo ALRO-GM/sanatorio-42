@@ -4,7 +4,7 @@ import { useI18n } from '../../shared/i18n'
 import { PillGroup } from '../../shared/ui/PillGroup'
 import { ClickMap } from './ClickMap'
 import { FlowsPanel } from './FlowsPanel'
-import { EVERYONE } from './SegmentSlider'
+import { EVERYONE } from '../../shared/ui/SegmentSlider'
 import { UsageHeatmap } from './UsageHeatmap'
 
 const VIEWS = ['heat', 'flows', 'clicks'] as const

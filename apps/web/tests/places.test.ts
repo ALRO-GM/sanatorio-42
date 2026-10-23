@@ -5,7 +5,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { duration, slotsOf, toMinutes, toTime, windowsOf } from '../src/features/help/time'
-import { clusterName, parseSeat, seatName } from '../src/features/map/seats'
+import { clusterName, parseSeat, seatName } from '../src/shared/seats'
 
 const t = (key: string, vars: Record<string, string | number> = {}): string =>
   key === 'map.cluster'

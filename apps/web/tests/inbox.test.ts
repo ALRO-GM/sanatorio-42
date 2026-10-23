@@ -9,11 +9,11 @@ import type { ReportReason, Ticket, TicketStatus } from '@sanatorio/contracts'
 import {
   CATEGORIES,
   kindOf,
-  reportIsReady,
   reportableSections,
   sectionFor,
   ticketsIn,
 } from '../src/features/admin/inbox'
+import { reportIsReady } from '../src/shared/report'
 
 const ticket = (id: number, status: TicketStatus): Ticket =>
   ({ id, status, login: 'ana', kind: 'issue', subject: 's', body: 'b' }) as Ticket

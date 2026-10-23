@@ -12,7 +12,7 @@ import { useConfirm } from '../../shared/ui/useConfirm'
 import { PillGroup } from '../../shared/ui/PillGroup'
 import { clusterName } from '../map/ClusterMapView'
 import { SeatPicker } from '../map/SeatPicker'
-import { parseSeat } from '../map/seats'
+import { parseSeat } from '../../shared/seats'
 import { shortDay, today } from './days'
 import { Icon } from '../../shared/ui/Icon'
 

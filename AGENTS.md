@@ -77,6 +77,9 @@ regla de aquí, cambia también la skill que la repite.
   la clave que deja de usarse se borra. Después, `npm run textos -- --write` y
   `npm run check`. Las reglas y el estilo de redacción están en `docs/textos.md`;
   no hay excepciones.
+- Web: una funcionalidad no importa de otra (`features/a` → `features/b`); lo
+  que se comparte va a `shared/` (`shared/ui`, `shared/chat`…). El linter lo
+  comprueba; las pocas excepciones, con su porqué, están en `eslint.config.js`.
 - Web: las direcciones se construyen con `shared/links.ts` (`recordHref`,
   `networkHref`, `intraHref`) y se leen con `decodePart`. Nada de montar un
   `#/…/${login}` a mano.

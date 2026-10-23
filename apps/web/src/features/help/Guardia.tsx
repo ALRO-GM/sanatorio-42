@@ -10,7 +10,7 @@ import { BookingCard } from './BookingCard'
 import { cheerFor } from './cheers'
 import { DayEditor } from './DayEditor'
 import { GuardStatus } from './GuardStatus'
-import { onAvailability } from '../peers/availability-events'
+import { onAvailability } from '../../shared/availability'
 import { GuardTour } from './GuardTour'
 import { PreReviewToggle } from './PreReviewToggle'
 

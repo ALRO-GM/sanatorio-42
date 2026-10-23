@@ -1,5 +1,5 @@
-import { useI18n } from '../../shared/i18n'
-import { THEME_CHOICES, useTheme } from '../../shared/theme'
+import { useI18n } from '../i18n'
+import { THEME_CHOICES, useTheme } from '../theme'
 
 /** Selector de tema: el del sistema, claro o nocturno. */
 export function ThemeSelect() {

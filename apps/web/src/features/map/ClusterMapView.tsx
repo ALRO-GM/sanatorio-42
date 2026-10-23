@@ -12,7 +12,7 @@ import type { MapLook } from './look'
 import { SeatFace } from './SeatFace'
 import { SeatHoverCard } from './SeatHoverCard'
 import type { Hovered } from './SeatHoverCard'
-import { clusterName, seatName } from './seats'
+import { clusterName, seatName } from '../../shared/seats'
 
 // Quien pinta el mapa suele necesitar también el nombre de la sala.
 export { clusterName }

@@ -77,7 +77,7 @@ podría perder las últimas escrituras, nunca corromper la base. Las copias
 ## 3. El chat solo pide lo nuevo (medido)
 
 **Dónde**: `modules/meet/meet.service.ts` (`thread`, parámetro `after`) y
-`features/alerts/useThread.ts`.
+`shared/chat/useThread.ts`.
 
 **Antes.** Con un chat abierto, la web pedía el chat **entero** cada 8 segundos:
 hasta 200 mensajes, con su consulta, su búsqueda de fotos de perfil y su JSON,

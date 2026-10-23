@@ -9,8 +9,8 @@ import { useFormat } from '../../shared/i18n/useFormat'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { PillGroup } from '../../shared/ui/PillGroup'
 import { InfoTip } from '../../shared/ui/InfoTip'
-import { SegmentSlider } from './SegmentSlider'
-import type { SegmentRange } from './SegmentSlider'
+import { SegmentSlider } from '../../shared/ui/SegmentSlider'
+import type { SegmentRange } from '../../shared/ui/SegmentSlider'
 
 const GROUPINGS = [
   'total',

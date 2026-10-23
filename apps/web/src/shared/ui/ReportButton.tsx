@@ -3,12 +3,12 @@ import type { SyntheticEvent } from 'react'
 
 import type { ReportReason } from '@sanatorio/contracts'
 
-import { api } from '../../shared/api'
-import { useAction } from '../../shared/hooks/useAsync'
-import { useI18n } from '../../shared/i18n'
-import { ErrorNote } from '../../shared/ui/ErrorNote'
-import { Icon } from '../../shared/ui/Icon'
-import { REPORT_REASONS, reportIsReady } from './inbox'
+import { api } from '../api'
+import { useAction } from '../hooks/useAsync'
+import { useI18n } from '../i18n'
+import { ErrorNote } from './ErrorNote'
+import { Icon } from './Icon'
+import { REPORT_REASONS, reportIsReady } from '../report'
 
 type ReportButtonProps = {
   /** Qué se denuncia: `message:12`, `board:3`, `doubt:5`. */

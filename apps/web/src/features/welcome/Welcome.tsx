@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 
 import type { Section } from '../../app/sections'
-import { DetailCards } from '../settings/DetailSelect'
+import { DetailCards } from '../../shared/ui/DetailSelect'
 import { useI18n } from '../../shared/i18n'
 import { Icon } from '../../shared/ui/Icon'
 import type { IconName } from '../../shared/ui/Icon'

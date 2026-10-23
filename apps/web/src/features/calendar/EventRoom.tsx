@@ -5,8 +5,8 @@ import type { MeetReason } from '@sanatorio/contracts'
 import { useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { Attendance } from './Attendance'
-import { Chat } from './Chat'
-import { useThread } from './useThread'
+import { Chat } from '../../shared/chat/Chat'
+import { useThread } from '../../shared/chat/useThread'
 import { Icon } from '../../shared/ui/Icon'
 
 const DELAYS = [5, 10, 15, 30] as const

@@ -75,17 +75,17 @@ Generado desde `apps/web/src/shared/i18n/textos/buzon.csv` con
 | `inbox.pending` | Sin respuesta todavía | features/admin/Inbox | Pendiente de respuesta | Waiting for an answer | Pendent de resposta | Erantzunaren zain |
 | `inbox.withdraw` | Botón para retirar un envío | features/admin/Inbox | Retirar | Withdraw | Retira | Kendu |
 | `inbox.answer` | Prefijo de la respuesta de admin | features/admin/Inbox | Respuesta: | Answer: | Resposta: | Erantzuna: |
-| `report.button` | Botón para denunciar un mensaje | features/admin/ReportButton | Denunciar | Report | Denuncia | Salatu |
-| `report.why` | Formulario de denuncia: qué pasa | features/admin/ReportButton | Qué pasa con este mensaje | What is wrong with this message | Què passa amb aquest missatge | Zer gertatzen da mezu honekin |
-| `report.send` | Botón para enviar la denuncia | features/admin/ReportButton | Enviar denuncia | Send report | Envia la denúncia | Bidali salaketa |
-| `report.reason` | Motivo de la denuncia | features/admin/ReportButton | Motivo | Reason | Motiu | Arrazoia |
-| `report.reason.spam` | Motivo: spam | features/admin/InboxTab, features/admin/ReportButton | Spam | Spam | Correu brossa | Spama |
-| `report.reason.harassment` | Motivo: acoso | features/admin/InboxTab, features/admin/ReportButton | Acoso | Harassment | Assetjament | Jazarpena |
-| `report.reason.insults` | Motivo: insultos | features/admin/InboxTab, features/admin/ReportButton | Insultos | Insults | Insults | Irainak |
-| `report.reason.other` | Motivo: otro | features/admin/InboxTab, features/admin/ReportButton | Otro motivo | Another reason | Un altre motiu | Beste arrazoi bat |
-| `report.whyOptional` | Detalle opcional | features/admin/ReportButton | Algo más que contar (opcional) | Anything else to add (optional) | Alguna cosa més a explicar (opcional) | Beste zerbait kontatzeko (aukerakoa) |
-| `report.cancel` | Botón para cancelar | features/admin/ReportButton | Cancelar | Cancel | Cancel·la | Utzi |
-| `report.sent` | Confirmación de denuncia | features/admin/ReportButton | Denuncia enviada. Gracias por avisar. | Report sent. Thanks for letting us know. | Denúncia enviada. Gràcies per avisar. | Salaketa bidalita. Eskerrik asko abisatzeagatik. |
+| `report.button` | Botón para denunciar un mensaje | shared/ui/ReportButton | Denunciar | Report | Denuncia | Salatu |
+| `report.why` | Formulario de denuncia: qué pasa | shared/ui/ReportButton | Qué pasa con este mensaje | What is wrong with this message | Què passa amb aquest missatge | Zer gertatzen da mezu honekin |
+| `report.send` | Botón para enviar la denuncia | shared/ui/ReportButton | Enviar denuncia | Send report | Envia la denúncia | Bidali salaketa |
+| `report.reason` | Motivo de la denuncia | shared/ui/ReportButton | Motivo | Reason | Motiu | Arrazoia |
+| `report.reason.spam` | Motivo: spam | features/admin/InboxTab, shared/ui/ReportButton | Spam | Spam | Correu brossa | Spama |
+| `report.reason.harassment` | Motivo: acoso | features/admin/InboxTab, shared/ui/ReportButton | Acoso | Harassment | Assetjament | Jazarpena |
+| `report.reason.insults` | Motivo: insultos | features/admin/InboxTab, shared/ui/ReportButton | Insultos | Insults | Insults | Irainak |
+| `report.reason.other` | Motivo: otro | features/admin/InboxTab, shared/ui/ReportButton | Otro motivo | Another reason | Un altre motiu | Beste arrazoi bat |
+| `report.whyOptional` | Detalle opcional | shared/ui/ReportButton | Algo más que contar (opcional) | Anything else to add (optional) | Alguna cosa més a explicar (opcional) | Beste zerbait kontatzeko (aukerakoa) |
+| `report.cancel` | Botón para cancelar | shared/ui/ReportButton | Cancelar | Cancel | Cancel·la | Utzi |
+| `report.sent` | Confirmación de denuncia | shared/ui/ReportButton | Denuncia enviada. Gracias por avisar. | Report sent. Thanks for letting us know. | Denúncia enviada. Gràcies per avisar. | Salaketa bidalita. Eskerrik asko abisatzeagatik. |
 | `broadcast.from` | Comunicado de quien administra | features/admin/BroadcastGate | Comunicado de {login} | Message from {login} | Comunicat de {login} | {login}(r)en jakinarazpena |
 | `broadcast.must` | El comunicado obliga a elegir | features/admin/BroadcastGate | Elige una opción para cerrar este mensaje. | Pick an option to close this message. | Tria una opció per tancar aquest missatge. | Aukeratu aukera bat mezu hau ixteko. |
 | `broadcast.ok` | Botón para dar por leído | features/admin/BroadcastGate | Entendido | Got it | Entesos | Ulertuta |

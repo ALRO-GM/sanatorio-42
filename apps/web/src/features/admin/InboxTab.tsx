@@ -14,7 +14,8 @@ import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { useConfirm } from '../../shared/ui/useConfirm'
 import { PillGroup } from '../../shared/ui/PillGroup'
 import { Icon } from '../../shared/ui/Icon'
-import { INBOX_VIEWS, REPORT_REASONS, ticketsIn } from './inbox'
+import { REPORT_REASONS } from '../../shared/report'
+import { INBOX_VIEWS, ticketsIn } from './inbox'
 import type { InboxFilter, InboxView } from './inbox'
 
 export function InboxTab() {

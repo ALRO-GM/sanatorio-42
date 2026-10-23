@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 
 import { api } from '../../shared/api'
 import { useI18n } from '../../shared/i18n'
-import { announceAvailability } from './availability-events'
+import { announceAvailability } from '../../shared/availability'
 
 type AvailabilityToggleProps = {
   /** Se acaba de poner de guardia: buen momento para abrir sus franjas de hoy. */

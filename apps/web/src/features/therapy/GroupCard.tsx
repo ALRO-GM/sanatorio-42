@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { seatName } from '../map/seats'
+import { seatName } from '../../shared/seats'
 import type { GroupView, ProjectSummary } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
@@ -9,7 +9,7 @@ import { useI18n } from '../../shared/i18n'
 import { Avatar } from '../../shared/ui/Avatar'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { useConfirm } from '../../shared/ui/useConfirm'
-import { ChatRoom } from '../alerts/Chat'
+import { ChatRoom } from '../../shared/chat/Chat'
 import { shortDay, today } from './days'
 import { GroupForm } from './GroupForm'
 import { Icon } from '../../shared/ui/Icon'

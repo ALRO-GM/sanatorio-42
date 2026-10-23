@@ -3,11 +3,11 @@ import type { SyntheticEvent } from 'react'
 
 import type { MeetMessage } from '@sanatorio/contracts'
 
-import { useI18n } from '../../shared/i18n'
-import { useFormat } from '../../shared/i18n/useFormat'
-import { Avatar } from '../../shared/ui/Avatar'
-import { ErrorNote } from '../../shared/ui/ErrorNote'
-import { ReportButton } from '../admin/ReportButton'
+import { useI18n } from '../i18n'
+import { useFormat } from '../i18n/useFormat'
+import { Avatar } from '../ui/Avatar'
+import { ErrorNote } from '../ui/ErrorNote'
+import { ReportButton } from '../ui/ReportButton'
 import { useThread } from './useThread'
 import type { Thread } from './useThread'
 

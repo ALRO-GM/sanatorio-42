@@ -11,7 +11,7 @@ import { DataTable } from '../../shared/ui/DataTable'
 import { Avatar } from '../../shared/ui/Avatar'
 import { durationText } from '../../shared/time'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
-import { EVERYONE, SegmentSlider } from './SegmentSlider'
+import { EVERYONE, SegmentSlider } from '../../shared/ui/SegmentSlider'
 import { RangePills } from './RangePills'
 import { Figure } from './Figure'
 

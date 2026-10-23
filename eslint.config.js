@@ -123,6 +123,46 @@ export default defineConfig(
     },
   },
   {
+    /**
+     * Fronteras entre funcionalidades de la web: una no importa las tripas de
+     * otra. Lo que se comparte de hecho va a `shared/`. Quedan estas
+     * excepciones, cada una porque una sección enseña, a propósito, una pieza
+     * de otra:
+     * - `notices/conversations`: `openChat` abre una conversación desde
+     *   cualquier sitio (lo pide AGENTS.md).
+     * - `calendar/EventDialog`: los avisos de `alerts` abren la ficha del evento.
+     * - `facility/FacilityList|FacilityForm`: el panel, el staff y el mapa
+     *   recogen y enseñan las incidencias de las instalaciones.
+     * - `profile/HoursReport`: el panel enseña el informe de horas de cualquiera.
+     * - `clicker/CapitalChart|CapitalHistory`: el panel sigue la partida de
+     *   alguien con la misma gráfica que ve quien juega.
+     * - `focus/FocusStatsView`: el panel enseña las cifras del Pomodoro de todos
+     *   con la misma vista que cada cual ve de las suyas.
+     * - `gitcourse/GitCourseTab`: el curso de git es una pestaña de Not-games.
+     * - `map/ProjectMap|ClusterMapView|SeatPicker`: la consulta y las terapias
+     *   enseñan el mapa del clúster y eligen puestos en él.
+     * - `help/BookHelp|tags`: la consulta reserva ayuda y el expediente enseña
+     *   cómo te describieron quienes te ayudaron.
+     * - `network/Meter|VerdictStats`: el expediente resume tu red de correcciones.
+     */
+    files: ['apps/web/src/features/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              regex:
+                '^\\.\\./(?!\\.\\./)(?!(notices/conversations|calendar/EventDialog|facility/(FacilityList|FacilityForm)|profile/HoursReport|clicker/(CapitalChart|CapitalHistory)|focus/FocusStatsView|gitcourse/GitCourseTab|map/(ProjectMap|ClusterMapView|SeatPicker)|help/(BookHelp|tags)|network/(Meter|VerdictStats))$)[a-z-]+/',
+              message:
+                'Una funcionalidad no importa de otra: lo compartido va a `shared/`. Las excepciones, con su porqué, están en eslint.config.js.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
     files: ['apps/web/**/*.{ts,tsx}'],
     languageOptions: { globals: globals.browser },
     plugins: { 'react-hooks': reactHooks },

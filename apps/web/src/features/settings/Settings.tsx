@@ -7,9 +7,9 @@ import { usePolling } from '../../shared/hooks/usePolling'
 import { useI18n } from '../../shared/i18n'
 import { Show } from '../../shared/detail'
 import { ComfortSettings } from './ComfortSettings'
-import { DetailSelect } from './DetailSelect'
-import { LangSelect } from './LangSelect'
-import { ThemeSelect } from './ThemeSelect'
+import { DetailSelect } from '../../shared/ui/DetailSelect'
+import { LangSelect } from '../../shared/ui/LangSelect'
+import { ThemeSelect } from '../../shared/ui/ThemeSelect'
 
 type SettingsProps = {
   /** Campus que se está mirando. `undefined` mientras carga el perfil. */

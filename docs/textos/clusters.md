@@ -11,8 +11,8 @@ Generado desde `apps/web/src/shared/i18n/textos/clusters.csv` con
 | `map.loading` | Mientras se dibuja el mapa | features/map/ClustersPage, features/map/ProjectMap, features/map/SeatPicker | Dibujando el mapa… | Drawing the map… | Dibuixant el mapa… | Mapa marrazten… |
 | `map.empty` | Aún no hay plano del campus | features/map/ClusterMapView | Todavía no hay plano de este campus: se dibuja a medida que la gente se sienta. | No map for this campus yet: it gets drawn as people sit down. | Encara no hi ha plànol d'aquest campus: es va dibuixant a mesura que la gent s'asseu. | Oraindik ez dago campus honen planorik: jendea esertzen den heinean marrazten da. |
 | `map.clusters` | Selector de sala | features/map/ClusterMapView | Clústeres | Clusters | Clústers | Klusterrak |
-| `map.cluster` | Nombre de una sala del campus (en 42 se llaman así) | features/map/ClustersTour, features/map/seats | Clúster {n} | Cluster {n} | Clúster {n} | {n}. klusterra |
-| `map.seatName` | Nombre completo de un puesto: clúster, fila y puesto | features/map/seats | {cluster} · Fila {row} · Puesto {seat} | {cluster} · Row {row} · Seat {seat} | {cluster} · Fila {row} · Lloc {seat} | {cluster} · {row}. ilara · {seat}. postua |
+| `map.cluster` | Nombre de una sala del campus (en 42 se llaman así) | features/map/ClustersTour, shared/seats | Clúster {n} | Cluster {n} | Clúster {n} | {n}. klusterra |
+| `map.seatName` | Nombre completo de un puesto: clúster, fila y puesto | shared/seats | {cluster} · Fila {row} · Puesto {seat} | {cluster} · Row {row} · Seat {seat} | {cluster} · Fila {row} · Lloc {seat} | {cluster} · {row}. ilara · {seat}. postua |
 | `map.row` | Fila, abreviado | features/map/ClusterMapView | F{n} | R{n} | F{n} | E{n} |
 | `map.rowLong` | Una fila | features/therapy/GroupForm | fila {rows} | row {rows} | fila {rows} | {rows} ilara |
 | `map.rowsLong` | Varias filas | features/therapy/GroupForm | filas {rows} | rows {rows} | files {rows} | {rows} ilarak |
@@ -55,8 +55,8 @@ Generado desde `apps/web/src/shared/i18n/textos/clusters.csv` con
 | `clusters.online` | Etiqueta: tiene la web abierta | features/map/SeatHoverCard, features/notices/Conversations, shared/ui/PersonLink | Con Sanatorio abierto | Has Sanatorio open | Amb Sanatorio obert | Sanatorio irekita du |
 | `clusters.write` | Botón para escribir a alguien | features/admin/CheatsPanel, features/map/ClustersTour, features/map/SeatHoverCard | Escribir | Message | Escriu-li | Idatzi |
 | `map.legend.online` | Leyenda: tiene Sanatorio abierto | features/map/ClusterMapView | Con Sanatorio abierto | Has Sanatorio open | Amb Sanatorio obert | Sanatorio irekita du |
-| `clusters.chat` | Chat directo con alguien | features/alerts/Chat | Chat directo | Direct chat | Xat directe | Txat zuzena |
-| `clusters.chatEmpty` | Chat directo vacío | features/alerts/Chat | Nadie ha escrito todavía. Lo que pongas solo lo ve quien participa en este chat. | Nobody has written yet. Only the people in this chat can see what you write. | Ningú ha escrit encara. El que posis només ho veu qui participa en aquest xat. | Inork ez du oraindik idatzi. Jartzen duzuna txat honetan parte hartzen dutenek soilik ikusten dute. |
+| `clusters.chat` | Chat directo con alguien | shared/chat/Chat | Chat directo | Direct chat | Xat directe | Txat zuzena |
+| `clusters.chatEmpty` | Chat directo vacío | shared/chat/Chat | Nadie ha escrito todavía. Lo que pongas solo lo ve quien participa en este chat. | Nobody has written yet. Only the people in this chat can see what you write. | Ningú ha escrit encara. El que posis només ho veu qui participa en aquest xat. | Inork ez du oraindik idatzi. Jartzen duzuna txat honetan parte hartzen dutenek soilik ikusten dute. |
 | `facility.open` | Clústeres: botón para avisar al staff de un problema del edificio o de un ordenador | features/map/ClustersPage | Avisar de un problema | Report a problem | Avisar d'un problema | Arazo baten berri eman |
 | `facility.title` | Aviso al staff: título del formulario | features/facility/FacilityForm | Avisar al staff | Tell the staff | Avisar l'staff | Staffari jakinarazi |
 | `facility.what` | Aviso al staff: qué pasa | features/facility/FacilityForm | ¿Qué pasa? | What is wrong? | Què passa? | Zer gertatzen da? |
