@@ -29,6 +29,7 @@ import { toNumber, toText } from '../../core/db/rows.js'
 import { domainError } from '../../core/errors.js'
 import { createLocks } from '../../core/lock.js'
 import { parse } from '../../core/validation.js'
+import { isoAt } from '../../core/time.js'
 
 /** Comandos por persona y partida: de sobra para jugar, no para llenar la base. */
 const MAX_COMMANDS = 400
@@ -197,7 +198,6 @@ export function createRoomService(deps: {
   now: () => number
 }) {
   const { rooms } = deps
-  const iso = (ms: number) => new Date(ms).toISOString()
   const locked = createLocks()
 
   function missionFor(gate: string): GroupMission {
@@ -287,7 +287,7 @@ export function createRoomService(deps: {
 
     const done: State = { ...state, result: 'expired' }
 
-    await rooms.save(room.id, 'done', done, iso(deps.now()))
+    await rooms.save(room.id, 'done', done, isoAt(deps.now()))
 
     return { ...room, status: 'done', state: done }
   }
@@ -344,7 +344,7 @@ export function createRoomService(deps: {
       remote: state?.remote ?? null,
       deadline: state?.deadline ?? null,
       result: state?.result ?? null,
-      now: iso(deps.now()),
+      now: isoAt(deps.now()),
       joinable: reason === null && !logins.includes(actor.login),
       whyNot: reason,
     }
@@ -362,7 +362,7 @@ export function createRoomService(deps: {
         gate,
         actor.campusId,
         actor.login,
-        iso(deps.now() - 6 * 3_600_000),
+        isoAt(deps.now() - 6 * 3_600_000),
       )
 
       return rows.map((room) => ({
@@ -384,9 +384,9 @@ export function createRoomService(deps: {
         throw domainError('conflict', 'Antes tienes que pasar el test de esta prueba')
       await mustBeFree(actor.login)
 
-      const id = await rooms.create(gate, actor.campusId, actor.login, iso(deps.now()))
+      const id = await rooms.create(gate, actor.campusId, actor.login, isoAt(deps.now()))
 
-      await rooms.join(id, actor.login, iso(deps.now()))
+      await rooms.join(id, actor.login, isoAt(deps.now()))
 
       return viewOf(actor, await mustRoom(id))
     },
@@ -413,7 +413,7 @@ export function createRoomService(deps: {
         if (reason !== null) throw domainError('conflict', reason)
         await mustSeat(actor.login)
         await mustBeFree(actor.login, id)
-        await rooms.join(id, actor.login, iso(deps.now()))
+        await rooms.join(id, actor.login, isoAt(deps.now()))
 
         return viewOf(actor, room)
       })
@@ -473,7 +473,7 @@ export function createRoomService(deps: {
           commands: {},
           last: {},
           players,
-          deadline: iso(deps.now() + mission.minutes * 60_000),
+          deadline: isoAt(deps.now() + mission.minutes * 60_000),
           result: null,
         }
 
@@ -515,7 +515,7 @@ export function createRoomService(deps: {
         const logins = await rooms.players(id)
         const present = next.players.filter((p) => logins.includes(p.login))
         const finished = missionDone(missionFor(room.gate).check(next.remote, present))
-        const at = iso(deps.now())
+        const at = isoAt(deps.now())
 
         if (finished) {
           next.result = 'passed'
@@ -539,7 +539,7 @@ export function createRoomService(deps: {
     async prune(): Promise<number> {
       const t = deps.now()
 
-      return rooms.prune(iso(t - LOBBY_TTL_MS), iso(t - DONE_TTL_MS))
+      return rooms.prune(isoAt(t - LOBBY_TTL_MS), isoAt(t - DONE_TTL_MS))
     },
   }
 }

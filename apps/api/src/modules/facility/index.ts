@@ -10,6 +10,7 @@ import type { IdParams } from '../../core/http/params.js'
 import type { AppModule } from '../../core/module.js'
 import { createFacilityService } from './facility.service.js'
 import type { FacilityService } from './facility.service.js'
+import { given } from '../../core/options.js'
 
 type FacilityDeps = {
   db: Db
@@ -28,8 +29,7 @@ export function createFacilityModule(deps: FacilityDeps): FacilityModule {
     db: deps.db,
     seatOf: deps.seatOf,
     slack: deps.slack ?? null,
-    ...(deps.markBroken === undefined ? {} : { markBroken: deps.markBroken }),
-    ...(deps.now === undefined ? {} : { now: deps.now }),
+    ...given({ markBroken: deps.markBroken, now: deps.now }),
   })
   const report = (id: string): number => idParam(id, 'El aviso')
 

@@ -38,6 +38,7 @@ import type { AchievementId, XpKind } from './xp.rules.js'
 import { day, id, parse } from '../../core/validation.js'
 import { canUseStyle, isStyle, NO_RECORD_STYLE, recordStyleOf } from './styles.rules.js'
 import type { Actor } from '../../core/actor.js'
+import { dayOf } from '../../core/time.js'
 
 export type XpServiceOptions = {
   xp: XpRepository
@@ -91,7 +92,7 @@ export function createXpService(options: XpServiceOptions) {
   const now = options.now ?? Date.now
 
   /** Día UTC de hoy, que es la unidad de "una reacción por pareja y día". */
-  const today = (): string => new Date(now()).toISOString().slice(0, 10)
+  const today = (): string => dayOf(now())
   /** Si no se puede saber, es que no hay título: el expediente no se cae por esto. */
   const masterOf = async (login: string): Promise<number> =>
     (await options.master?.(login).catch(() => 0)) ?? 0

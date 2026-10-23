@@ -24,7 +24,7 @@ import type { Calendar, CalendarEvent } from '@sanatorio/contracts'
 
 import type { Actor } from '../../core/actor.js'
 import { domainError } from '../../core/errors.js'
-import { minutesOf, zonedInstant } from '../../core/time.js'
+import { isoAt, minutesOf, zonedInstant } from '../../core/time.js'
 import type { BoardsService } from '../boards/index.js'
 import type { HelpService } from '../help/index.js'
 import { FRESH_USER_TTL_MS } from '../replica/index.js'
@@ -60,13 +60,11 @@ const BASE = {
 export function createCalendarService(options: CalendarServiceOptions) {
   const { replica, agenda, help, therapy, boards } = options
 
-  const iso = (at: number): string => new Date(at).toISOString()
-
   /** Franjas de guardia de hoy y reservas de ayuda. */
   async function helpEvents(actor: Actor, timeZone: string | undefined): Promise<CalendarEvent[]> {
     const day = await help.today(actor)
     const at = (date: string, time: string): string =>
-      iso(zonedInstant(date, minutesOf(time), timeZone))
+      isoAt(zonedInstant(date, minutesOf(time), timeZone))
 
     return [
       // Una franja que ya ha terminado no pinta nada en el calendario, y de la
@@ -125,8 +123,8 @@ export function createCalendarService(options: CalendarServiceOptions) {
             id: `therapy:${group.id}:${day}`,
             kind: 'therapy',
             title: `Terapia de ${group.projectName ?? 'grupo'}`,
-            start: iso(start),
-            end: iso(end),
+            start: isoAt(start),
+            end: isoAt(end),
             place: group.place,
             description: group.note,
             joined: true,
@@ -142,7 +140,7 @@ export function createCalendarService(options: CalendarServiceOptions) {
   }
 
   async function boardEvents(actor: Actor, from: number, to: number): Promise<CalendarEvent[]> {
-    return (await boards.list(actor, iso(from), iso(to))).map((board) => ({
+    return (await boards.list(actor, isoAt(from), isoAt(to))).map((board) => ({
       ...BASE,
       id: `board:${board.id}`,
       kind: 'board',
@@ -167,7 +165,7 @@ export function createCalendarService(options: CalendarServiceOptions) {
     fresh = false,
   ): Promise<{ events: CalendarEvent[]; at: string | null }> {
     const [campus, mine] = await Promise.all([
-      agenda.campusEvents(actor.campusId, iso(from), iso(to)),
+      agenda.campusEvents(actor.campusId, isoAt(from), isoAt(to)),
       fresh
         ? agenda.userAgenda(actor.login, userId, FRESH_USER_TTL_MS)
         : agenda.userAgenda(actor.login, userId),

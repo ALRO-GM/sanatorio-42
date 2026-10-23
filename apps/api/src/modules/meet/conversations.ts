@@ -33,6 +33,7 @@ import type { ReplicaRepository } from '../replica/index.js'
 const numberOf = (part: string | undefined): number =>
   /^\d{1,12}$/.test(part ?? '') ? Number(part) : -1
 import type { TherapyService } from '../therapy/index.js'
+import { isoAt } from '../../core/time.js'
 
 /** Conversaciones que se devuelven: las de actividad más reciente. */
 const MAX_CONVERSATIONS = 100
@@ -89,7 +90,7 @@ export function peerOf(id: string, me: string): string | null {
 
 export function createConversations(options: ConversationsOptions) {
   const { db, replica, boards, therapy, help, notify, now } = options
-  const iso = (at = now()): string => new Date(at).toISOString()
+  const iso = (at = now()): string => isoAt(at)
   const marks = (count: number): string => Array.from({ length: count }, () => '?').join(', ')
 
   /** Los títulos de las conversaciones que no son directas, hasta donde se sabe. */

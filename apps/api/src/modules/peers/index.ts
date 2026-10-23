@@ -13,6 +13,7 @@ import type { AvailabilityService } from './availability.service.js'
 import { registerPeersRoutes } from './peers.routes.js'
 import { createPeersService } from './peers.service.js'
 import type { PeersService } from './peers.service.js'
+import { given } from '../../core/options.js'
 
 type PeersModuleDeps = {
   db: Db
@@ -36,8 +37,7 @@ export function createPeersModule(deps: PeersModuleDeps): PeersModule {
   const peers = createPeersService({
     replica: deps.replica,
     sync: deps.sync,
-    ...(deps.focusOf === undefined ? {} : { focusOf: deps.focusOf }),
-    ...(deps.now === undefined ? {} : { now: deps.now }),
+    ...given({ focusOf: deps.focusOf, now: deps.now }),
   })
 
   return {

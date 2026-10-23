@@ -13,6 +13,7 @@ import { createNetworkService } from './network.service.js'
 import type { NetworkService } from './network.service.js'
 import { createCorrectionSync } from './network.sync.js'
 import type { CorrectionSync } from './network.sync.js'
+import { given } from '../../core/options.js'
 
 type NetworkModuleDeps = {
   db: Db
@@ -55,9 +56,7 @@ export function createNetworkModule(deps: NetworkModuleDeps): NetworkModule {
     replica: deps.replica,
     campusIds: deps.campusIds,
     hourlyReserve: deps.hourlyReserve,
-    ...(deps.quota === undefined ? {} : { quota: deps.quota }),
-    ...(deps.isActive === undefined ? {} : { isActive: deps.isActive }),
-    ...(deps.log === undefined ? {} : { log: deps.log }),
+    ...given({ quota: deps.quota, isActive: deps.isActive, log: deps.log }),
     ...clock,
   })
   const service = createNetworkService({ corrections, replica: deps.replica, sync, ...clock })

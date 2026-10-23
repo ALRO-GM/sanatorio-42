@@ -30,7 +30,7 @@ import type { Db } from '../../core/db/database.js'
 import { toNumber, toText } from '../../core/db/rows.js'
 import { domainError } from '../../core/errors.js'
 import { createRateLimit } from '../../core/rate-limit.js'
-import { parse, startOfDayIso } from '../../core/validation.js'
+import { parse } from '../../core/validation.js'
 import {
   CODE_LABEL,
   fileName,
@@ -43,6 +43,8 @@ import {
   STAFF_NAME,
   withCode,
 } from './staff.rules.js'
+import { isoAt, startOfDayIso } from '../../core/time.js'
+import { given } from '../../core/options.js'
 
 const derive = promisify(scrypt) as (
   password: string,
@@ -112,11 +114,11 @@ export function createStaffService(options: StaffServiceOptions) {
   const { db } = options
   const now = options.now ?? Date.now
   const pick = options.pick ?? randomInt
-  const iso = (): string => new Date(now()).toISOString()
+  const iso = (): string => isoAt(now())
   const checks = createRateLimit({
     max: CHECKS_PER_WINDOW,
     windowMs: CHECK_WINDOW_MS,
-    ...(options.now === undefined ? {} : { now: options.now }),
+    ...given({ now: options.now }),
   })
 
   const hashKey = async (secret: string, salt: Buffer): Promise<Buffer> =>

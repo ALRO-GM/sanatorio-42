@@ -18,6 +18,7 @@ import { inList, listArg } from '../../core/db/sql.js'
 import { segmentOf } from '../usage/index.js'
 import { averageOf, focusedByLogin, positionOf, REASONS, settle, summarize } from './focus.rules.js'
 import type { SessionLog } from './focus.sessions.js'
+import { isoAt } from '../../core/time.js'
 
 const DEFAULT_FOCUS: FocusSettings = {
   focusMinutes: 25,
@@ -113,8 +114,6 @@ export function createFocusService(
   log: SessionLog,
   now: () => number = Date.now,
 ) {
-  const iso = (ms: number): string => new Date(ms).toISOString()
-
   async function view(login: string): Promise<Focus> {
     const found = await focus.get(login)
     const active = found !== null && Date.parse(found.until) > now()
@@ -141,19 +140,19 @@ export function createFocusService(
   function period(input: unknown) {
     const asked = parse(statsSchema, input ?? {})
     const shift = asked.offset * 60_000
-    const to = asked.to ?? iso(now() + shift).slice(0, 10)
+    const to = asked.to ?? isoAt(now() + shift).slice(0, 10)
     const from = asked.from ?? null
 
     if (from !== null && from > to) throw domainError('invalid_input', 'from: va antes que to')
 
-    const at = (local: string): string => iso(Date.parse(`${local}T00:00:00.000Z`) - shift)
+    const at = (local: string): string => isoAt(Date.parse(`${local}T00:00:00.000Z`) - shift)
 
     return {
       ...asked,
       from,
       to,
       since: from === null ? null : at(from),
-      until: iso(Date.parse(at(to)) + 86_400_000),
+      until: isoAt(Date.parse(at(to)) + 86_400_000),
     }
   }
 
@@ -177,9 +176,9 @@ export function createFocusService(
       const before = await running(actor.login)
 
       // Volver a empezar no es rendirse: la de antes cuenta su tiempo, sin motivos.
-      if (before !== null) await log.close(before.id, iso(t), 'replaced', [])
-      await focus.save(actor.login, iso(t), iso(t + settings.focusMinutes * 60_000), settings)
-      await log.open(actor.login, iso(t), settings.focusMinutes * 60)
+      if (before !== null) await log.close(before.id, isoAt(t), 'replaced', [])
+      await focus.save(actor.login, isoAt(t), isoAt(t + settings.focusMinutes * 60_000), settings)
+      await log.open(actor.login, isoAt(t), settings.focusMinutes * 60)
 
       return view(actor.login)
     },
@@ -193,8 +192,9 @@ export function createFocusService(
       const found = await focus.get(actor.login)
       const open = await running(actor.login)
 
-      if (found !== null) await focus.save(actor.login, found.startedAt, iso(now()), found.settings)
-      if (open !== null) await log.close(open.id, iso(now()), 'cancelled', reasons)
+      if (found !== null)
+        await focus.save(actor.login, found.startedAt, isoAt(now()), found.settings)
+      if (open !== null) await log.close(open.id, isoAt(now()), 'cancelled', reasons)
 
       return view(actor.login)
     },

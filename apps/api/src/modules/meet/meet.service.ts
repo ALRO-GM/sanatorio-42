@@ -55,6 +55,7 @@ import type { ReplicaRepository } from '../replica/index.js'
 const numberOf = (part: string | undefined): number =>
   /^\d{1,12}$/.test(part ?? '') ? Number(part) : -1
 import type { TherapyService } from '../therapy/index.js'
+import { given } from '../../core/options.js'
 
 export type MeetServiceOptions = {
   db: Db
@@ -297,7 +298,7 @@ export function createMeetService(options: MeetServiceOptions) {
     notify,
     now,
     assertParticipant,
-    ...(options.online === undefined ? {} : { online: options.online }),
+    ...given({ online: options.online }),
   })
 
   return {

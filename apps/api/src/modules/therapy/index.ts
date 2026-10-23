@@ -12,6 +12,7 @@ import { createTherapyRepository } from './therapy.repository.js'
 import { registerTherapyRoutes } from './therapy.routes.js'
 import { createTherapyService } from './therapy.service.js'
 import type { TherapyService } from './therapy.service.js'
+import { given } from '../../core/options.js'
 
 type TherapyModuleDeps = {
   db: Db
@@ -30,8 +31,7 @@ export function createTherapyModule(deps: TherapyModuleDeps): TherapyModule {
     replica: deps.replica,
     sync: deps.sync,
     xp: deps.xp,
-    ...(deps.notify === undefined ? {} : { notify: deps.notify }),
-    ...(deps.now === undefined ? {} : { now: deps.now }),
+    ...given({ notify: deps.notify, now: deps.now }),
   })
 
   return {

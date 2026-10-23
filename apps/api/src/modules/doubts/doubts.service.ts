@@ -28,10 +28,11 @@ import type { XpService } from '../profile/index.js'
 import { LAST_CIRCLE, SEEDED_UP_TO } from '../replica/index.js'
 import type { Curriculum, ReplicaRepository } from '../replica/index.js'
 import { domainError } from '../../core/errors.js'
-import { parse, startOfDayIso, text } from '../../core/validation.js'
+import { parse, text } from '../../core/validation.js'
 import type { GuideChangesRepository, StrikeRole } from './guide-changes.repository.js'
 import type { Actor } from '../../core/actor.js'
 import type { Notify } from '../../core/events.js'
+import { isoAt, startOfDayIso } from '../../core/time.js'
 
 export type DoubtsServiceOptions = {
   doubts: DoubtsRepository
@@ -186,8 +187,6 @@ export function createDoubtsService(options: DoubtsServiceOptions) {
     return name
   }
 
-  const iso = (at: number): string => new Date(at).toISOString()
-
   /**
    * Hasta cuándo está bloqueada una persona en ese papel, o `null`.
    *
@@ -204,7 +203,7 @@ export function createDoubtsService(options: DoubtsServiceOptions) {
 
     const until = Date.parse(last) + BLOCK_DAYS * DAY
 
-    return until > now() ? iso(until) : null
+    return until > now() ? isoAt(until) : null
   }
 
   async function mustNotBeBlocked(login: string, role: StrikeRole): Promise<void> {
@@ -384,7 +383,7 @@ export function createDoubtsService(options: DoubtsServiceOptions) {
           doubts.list(actor.campusId, projectId),
           canEditGuide ? doubts.proposals(actor.campusId, projectId) : Promise.resolve([]),
           canEditGuide
-            ? changes.recent(actor.campusId, projectId, iso(now() - FLAG_WINDOW_DAYS * DAY))
+            ? changes.recent(actor.campusId, projectId, isoAt(now() - FLAG_WINDOW_DAYS * DAY))
             : Promise.resolve([]),
           blockedUntil(actor.login, 'proposer'),
           blockedUntil(actor.login, 'validator'),
@@ -533,7 +532,7 @@ export function createDoubtsService(options: DoubtsServiceOptions) {
       }
 
       if (!resolved) {
-        await doubts.setSolved(doubtId, null, iso(now()))
+        await doubts.setSolved(doubtId, null, isoAt(now()))
         return
       }
 
@@ -552,7 +551,7 @@ export function createDoubtsService(options: DoubtsServiceOptions) {
         (await doubts.solvedBetweenSince(doubt.author, solver.author, today)) === 0 &&
         (await xp.countSince(solver.author, XP_KIND.DOUBT_SOLVED, today)) < MAX_SOLVED_XP_PER_DAY
 
-      await doubts.setSolved(doubtId, solver.id, iso(now()))
+      await doubts.setSolved(doubtId, solver.id, isoAt(now()))
 
       if (rewardable) {
         await xp.award(solver.author, XP_KIND.DOUBT_SOLVED, ref)
@@ -637,7 +636,7 @@ export function createDoubtsService(options: DoubtsServiceOptions) {
 
       await mustNotBeBlocked(actor.login, 'validator')
 
-      const at = iso(now())
+      const at = isoAt(now())
 
       await notify({
         to: [proposal.author],
@@ -669,7 +668,7 @@ export function createDoubtsService(options: DoubtsServiceOptions) {
           !(await changes.pairRewardedSince(
             proposal.author,
             actor.login,
-            iso(now() - PAIR_COOLDOWN_DAYS * DAY),
+            isoAt(now() - PAIR_COOLDOWN_DAYS * DAY),
           )) &&
           (await xp.countSince(actor.login, XP_KIND.GUIDE_REVIEW, startOfDayIso(now()))) <
             MAX_REVIEW_XP_PER_DAY
@@ -722,7 +721,7 @@ export function createDoubtsService(options: DoubtsServiceOptions) {
         throw domainError('conflict', 'Ese cambio lleva ya demasiado tiempo en la guía')
       }
 
-      const at = iso(now())
+      const at = isoAt(now())
       const flags = await changes.flag(changeId, actor.login, at)
 
       if (flags === undefined) {

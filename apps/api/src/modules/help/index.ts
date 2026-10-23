@@ -13,6 +13,7 @@ import { createHelpRepository } from './help.repository.js'
 import { registerHelpRoutes } from './help.routes.js'
 import { createHelpService } from './help.service.js'
 import type { Commitments, HelpService } from './help.service.js'
+import { given } from '../../core/options.js'
 
 type HelpModuleDeps = {
   db: Db
@@ -37,10 +38,12 @@ export function createHelpModule(deps: HelpModuleDeps): HelpModule {
     agenda: deps.agenda,
     xp: deps.xp,
     attendance: deps.attendance,
-    ...(deps.notify === undefined ? {} : { notify: deps.notify }),
-    ...(deps.commitments === undefined ? {} : { commitments: deps.commitments }),
-    ...(deps.presenceOf === undefined ? {} : { presenceOf: deps.presenceOf }),
-    ...(deps.now === undefined ? {} : { now: deps.now }),
+    ...given({
+      notify: deps.notify,
+      commitments: deps.commitments,
+      presenceOf: deps.presenceOf,
+      now: deps.now,
+    }),
   })
 
   return {

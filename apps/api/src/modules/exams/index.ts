@@ -18,6 +18,7 @@ import { createExamsService } from './exams.service.js'
 import type { ExamsService } from './exams.service.js'
 import { createExamsSync } from './exams.sync.js'
 import type { ExamsSync } from './exams.sync.js'
+import { given } from '../../core/options.js'
 
 type ExamsModuleDeps = {
   db: Db
@@ -48,13 +49,13 @@ export function createExamsModule(deps: ExamsModuleDeps): ExamsModule {
     campusIds: deps.campusIds,
     quota: deps.quota,
     hourlyReserve: deps.hourlyReserve,
-    ...(deps.log === undefined ? {} : { log: deps.log }),
+    ...given({ log: deps.log }),
   })
   const service = createExamsService({
     exams,
     sync,
     curriculum: deps.curriculum,
-    ...(deps.now === undefined ? {} : { now: deps.now }),
+    ...given({ now: deps.now }),
   })
   const live = createExamsLive({
     db: deps.db,
@@ -64,8 +65,7 @@ export function createExamsModule(deps: ExamsModuleDeps): ExamsModule {
     curriculum: deps.curriculum,
     exams,
     quota: deps.quota,
-    ...(deps.now === undefined ? {} : { now: deps.now }),
-    ...(deps.log === undefined ? {} : { log: deps.log }),
+    ...given({ now: deps.now, log: deps.log }),
   })
 
   return {

@@ -70,6 +70,7 @@ import { createUsageModule } from '../modules/usage/index.js'
 import type { UsageModule } from '../modules/usage/index.js'
 import { createTherapyModule } from '../modules/therapy/index.js'
 import type { TherapyModule } from '../modules/therapy/index.js'
+import { given } from '../core/options.js'
 
 /** Cada cuánto se anota, como mucho, que alguien sigue con la web abierta. */
 const PRESENCE_BEAT_MS = 60_000
@@ -164,15 +165,14 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     db,
     client,
     config: config.sync,
-    ...(config.backgroundSync === undefined ? {} : { backgroundSync: config.backgroundSync }),
+    ...given({ backgroundSync: config.backgroundSync }),
     priority: (login) => {
       refreshPanelAdmins()
 
       return (config.admins ?? []).includes(login) || panelAdmins.has(login)
     },
     halted: () => halted(),
-    ...(config.photos === undefined ? {} : { photos: config.photos }),
-    ...(config.log === undefined ? {} : { log: config.log }),
+    ...given({ photos: config.photos, log: config.log }),
     ...clock,
   })
   // El Pomodoro va pronto: la sala de espera y el plano preguntan quién está concentrado.
@@ -300,7 +300,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     hourlyReserve: config.sync.hourlyReserve,
     quota: replica.quota,
     isActive: () => replica.sync.isActive(),
-    ...(config.log === undefined ? {} : { log: config.log }),
+    ...given({ log: config.log }),
     ...clock,
   })
 
@@ -313,7 +313,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     campusIds: config.sync.trackedCampusIds,
     hourlyReserve: config.sync.hourlyReserve,
     quota: replica.quota,
-    ...(config.log === undefined ? {} : { log: config.log }),
+    ...given({ log: config.log }),
     ...clock,
   })
 
@@ -350,10 +350,10 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     db,
     fixedAdmins: config.admins ?? [],
     fortyTwoRemaining: () => client.hourlyRemaining(),
-    ...(config.guardLevel === undefined ? {} : { guardLevel: config.guardLevel }),
+    ...given({ guardLevel: config.guardLevel }),
     notify,
     settle: (about) => events.emit('notice.settled', about),
-    ...(config.secret === undefined ? {} : { secret: config.secret }),
+    ...given({ secret: config.secret }),
     // Los demás módulos se montan después: para cuando alguien pregunte ya estarán.
     stores: () => modules.flatMap((module) => module.stores ?? []),
     ...clock,

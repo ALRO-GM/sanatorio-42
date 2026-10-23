@@ -36,7 +36,7 @@ import { z } from 'zod'
 import type { Db } from '../../core/db/database.js'
 import { toNumber, toText } from '../../core/db/rows.js'
 import { domainError } from '../../core/errors.js'
-import { localMoment } from '../../core/time.js'
+import { isoAt, localMoment } from '../../core/time.js'
 import { day, parse } from '../../core/validation.js'
 import {
   MAX_FAILED_ATTEMPTS,
@@ -104,8 +104,6 @@ function newCode(other?: string): string {
   }
 }
 
-const iso = (at: number): string => new Date(at).toISOString()
-
 function presenceOf(row: Record<string, unknown>): MeetPresence {
   return {
     login: toText(row.login),
@@ -141,7 +139,7 @@ export function createAttendanceService(options: AttendanceServiceOptions) {
     await db.execute({
       sql: `INSERT OR IGNORE INTO event_codes (event_id, start_code, end_code, created_at)
             VALUES (?, ?, ?, ?)`,
-      args: [eventId, start, newCode(start), iso(now())],
+      args: [eventId, start, newCode(start), isoAt(now())],
     })
 
     const row = (
@@ -164,7 +162,7 @@ export function createAttendanceService(options: AttendanceServiceOptions) {
     await db.execute({
       sql: `INSERT INTO event_checkins (event_id, login, code, phase, outcome, created_at)
             VALUES (?, ?, ?, ?, ?, ?)`,
-      args: [eventId, login, code, phase, outcome, iso(now())],
+      args: [eventId, login, code, phase, outcome, isoAt(now())],
     })
   }
 
@@ -195,7 +193,7 @@ export function createAttendanceService(options: AttendanceServiceOptions) {
             WHERE valid_minutes > 0 AND valid_from >= ? AND valid_from < ?
               ${login === null ? '' : 'AND (login = ?3 OR host = ?3)'}
             ORDER BY valid_from, event_id, login`,
-      args: login === null ? [iso(from), iso(to)] : [iso(from), iso(to), login],
+      args: login === null ? [isoAt(from), isoAt(to)] : [isoAt(from), isoAt(to), login],
     })
     const zones = new Map<number, string | undefined>()
     const rows: ReportRow[] = []
@@ -240,8 +238,8 @@ export function createAttendanceService(options: AttendanceServiceOptions) {
             ...common,
             login: span.login,
             role: 'guest',
-            from: iso(span.from),
-            to: iso(span.to),
+            from: isoAt(span.from),
+            to: isoAt(span.to),
             minutes: span.minutes,
             with: [host],
           })
@@ -255,8 +253,8 @@ export function createAttendanceService(options: AttendanceServiceOptions) {
           ...common,
           login: host,
           role: 'host',
-          from: iso(Math.min(...spans.map((span) => span.from))),
-          to: iso(Math.max(...spans.map((span) => span.to))),
+          from: isoAt(Math.min(...spans.map((span) => span.from))),
+          to: isoAt(Math.max(...spans.map((span) => span.to))),
           minutes: Math.min(scheduledMinutes, unionMinutes(spans)),
           with: spans.map((span) => span.login),
         })
@@ -274,9 +272,9 @@ export function createAttendanceService(options: AttendanceServiceOptions) {
   /** El periodo pedido, en días y en instantes. Sin fechas, los últimos treinta días. */
   function period(input: unknown): { from: string; to: string; start: number; end: number } {
     const wanted = parse(reportSchema, input)
-    const to = wanted.to ?? iso(now()).slice(0, 10)
+    const to = wanted.to ?? isoAt(now()).slice(0, 10)
     const end = Date.parse(`${to}T00:00:00.000Z`) + DAY
-    const from = wanted.from ?? iso(end - REPORT_DEFAULT_DAYS * DAY).slice(0, 10)
+    const from = wanted.from ?? isoAt(end - REPORT_DEFAULT_DAYS * DAY).slice(0, 10)
     const start = Date.parse(`${from}T00:00:00.000Z`)
 
     if (Number.isNaN(start) || Number.isNaN(end) || start >= end) {
@@ -297,9 +295,9 @@ export function createAttendanceService(options: AttendanceServiceOptions) {
       const window = windowOf(event)
 
       return {
-        startFrom: iso(window.startFrom),
-        startUntil: iso(window.startUntil),
-        endUntil: iso(window.endUntil),
+        startFrom: isoAt(window.startFrom),
+        startUntil: isoAt(window.startUntil),
+        endUntil: isoAt(window.endUntil),
         minStay: MIN_STAY_MS / MINUTE,
       }
     },
@@ -421,12 +419,12 @@ export function createAttendanceService(options: AttendanceServiceOptions) {
           args: [
             event.id,
             login,
-            iso(at),
+            isoAt(at),
             event.campusId,
             event.host,
             event.title,
-            iso(event.startsAt),
-            iso(event.endsAt),
+            isoAt(event.startsAt),
+            isoAt(event.endsAt),
           ],
         })
       } else {
@@ -470,15 +468,15 @@ export function createAttendanceService(options: AttendanceServiceOptions) {
                   campus_id = ?, host = ?, title = ?, starts_at = ?, ends_at = ?
                 WHERE event_id = ? AND login = ? AND ended_at IS NULL`,
           args: [
-            iso(at),
-            iso(span.from),
-            iso(span.to),
+            isoAt(at),
+            isoAt(span.from),
+            isoAt(span.to),
             span.minutes,
             event.campusId,
             event.host,
             event.title,
-            iso(event.startsAt),
-            iso(event.endsAt),
+            isoAt(event.startsAt),
+            isoAt(event.endsAt),
             event.id,
             login,
           ],

@@ -13,6 +13,7 @@ import { createGuideChangesRepository } from './guide-changes.repository.js'
 import { registerDoubtsRoutes } from './doubts.routes.js'
 import { createDoubtsService } from './doubts.service.js'
 import type { DoubtsService, DoubtsServiceOptions } from './doubts.service.js'
+import { given } from '../../core/options.js'
 
 type DoubtsModuleDeps = {
   db: Db
@@ -34,9 +35,7 @@ export function createDoubtsModule(deps: DoubtsModuleDeps): DoubtsModule {
     curriculum: deps.curriculum,
     xp: deps.xp,
     replica: deps.replica,
-    ...(deps.notify === undefined ? {} : { notify: deps.notify }),
-    ...(deps.corrections === undefined ? {} : { corrections: deps.corrections }),
-    ...(deps.now === undefined ? {} : { now: deps.now }),
+    ...given({ notify: deps.notify, corrections: deps.corrections, now: deps.now }),
   })
 
   return {

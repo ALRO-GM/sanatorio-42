@@ -62,6 +62,7 @@ import {
   subjectFrom,
   withdrawUntil,
 } from './tickets.rules.js'
+import { isoAt } from '../../core/time.js'
 
 export type AdminServiceOptions = {
   db: Db
@@ -200,7 +201,7 @@ export function createAdminService(options: AdminServiceOptions) {
   const now = options.now ?? Date.now
   const notify: Notify = options.notify ?? (() => Promise.resolve())
   const settle: Settle = options.settle ?? (() => Promise.resolve())
-  const iso = (): string => new Date(now()).toISOString()
+  const iso = (): string => isoAt(now())
   // Permisos y bloqueos se miran en cada petición con sesión: se recuerdan medio minuto.
   const access = createTtlCache<{
     admin: boolean

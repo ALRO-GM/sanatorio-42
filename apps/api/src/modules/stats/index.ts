@@ -13,6 +13,7 @@ import {
 } from './stats.repository.js'
 import { createStatsService } from './stats.service.js'
 import type { StatsService } from './stats.service.js'
+import { given } from '../../core/options.js'
 
 export type StatsModule = AppModule & { service: StatsService }
 
@@ -25,13 +26,13 @@ export function createStatsModule(deps: {
   const service = createStatsService({
     stats: createStatsRepository(deps.db),
     paces: createPaceRepository(deps.db),
-    ...(deps.now === undefined ? {} : { now: deps.now }),
+    ...given({ now: deps.now }),
   })
 
   const progress = createProgressService({
     progress: createProgressRepository(deps.db),
     circles: deps.circles ?? (() => Promise.resolve(new Map<number, number>())),
-    ...(deps.now === undefined ? {} : { now: deps.now }),
+    ...given({ now: deps.now }),
   })
 
   return {

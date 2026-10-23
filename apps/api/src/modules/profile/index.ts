@@ -16,6 +16,7 @@ import type { ProfilesRepository } from './profiles.repository.js'
 import { createXpRepository } from './xp.repository.js'
 import { createXpService } from './xp.service.js'
 import type { XpService, XpServiceOptions } from './xp.service.js'
+import { given } from '../../core/options.js'
 
 type ProfileModuleDeps = {
   db: Db
@@ -39,9 +40,7 @@ export function createProfileModule(deps: ProfileModuleDeps): ProfileModule {
     profiles,
     replica: deps.replica,
     curriculum: deps.curriculum,
-    ...(deps.hacker === undefined ? {} : { hacker: deps.hacker }),
-    ...(deps.master === undefined ? {} : { master: deps.master }),
-    ...(deps.now === undefined ? {} : { now: deps.now }),
+    ...given({ hacker: deps.hacker, master: deps.master, now: deps.now }),
   })
 
   deps.events.on('duty.started', ({ login }) => xp.markFirstDuty(login))

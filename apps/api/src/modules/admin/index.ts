@@ -22,6 +22,7 @@ import type { AdminService, AdminServiceOptions } from './admin.service.js'
 import { createGrowthService } from './growth.js'
 import { ELEVATION_COOKIE, ELEVATION_MS, createSecondFactor } from './second-factor.js'
 import type { SecondFactor } from './second-factor.js'
+import { given } from '../../core/options.js'
 
 export type AdminModule = AppModule & { service: AdminService; secondFactor: SecondFactor }
 
@@ -86,7 +87,7 @@ export function createAdminModule(deps: AdminModuleDeps): AdminModule {
   const secondFactor = createSecondFactor({
     db: deps.db,
     secret: deps.secret ?? randomBytes(32).toString('hex'),
-    ...(deps.now === undefined ? {} : { now: deps.now }),
+    ...given({ now: deps.now }),
   })
   const panelCookie = (request: FastifyRequest): string | undefined =>
     readCookie(request.headers.cookie, ELEVATION_COOKIE)

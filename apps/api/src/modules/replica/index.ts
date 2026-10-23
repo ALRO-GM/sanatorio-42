@@ -24,6 +24,7 @@ import type { ReplicaRepository } from './replica.repository.js'
 import { registerReplicaRoutes } from './replica.routes.js'
 import { createSyncer } from './syncer.js'
 import type { Syncer, SyncerConfig } from './syncer.js'
+import { given } from '../../core/options.js'
 
 type ReplicaModuleDeps = {
   db: Db
@@ -59,18 +60,14 @@ export function createReplicaModule(deps: ReplicaModuleDeps): ReplicaModule {
     db: deps.db,
     client: deps.client,
     hourlyReserve: deps.config.hourlyReserve,
-    ...(deps.priority === undefined ? {} : { priority: deps.priority }),
-    ...(deps.halted === undefined ? {} : { halted: deps.halted }),
-    ...(deps.now === undefined ? {} : { now: deps.now }),
-    ...(deps.log === undefined ? {} : { log: deps.log }),
+    ...given({ priority: deps.priority, halted: deps.halted, now: deps.now, log: deps.log }),
   })
   const sync = createSyncer({
     client: deps.client,
     replica: repository,
     config: deps.config,
     quota,
-    ...(deps.now === undefined ? {} : { now: deps.now }),
-    ...(deps.log === undefined ? {} : { log: deps.log }),
+    ...given({ now: deps.now, log: deps.log }),
   })
   const campuses = createCampusesService({
     replica: repository,
@@ -83,8 +80,7 @@ export function createReplicaModule(deps: ReplicaModuleDeps): ReplicaModule {
     client: deps.client,
     hourlyReserve: deps.config.hourlyReserve,
     quota,
-    ...(deps.now === undefined ? {} : { now: deps.now }),
-    ...(deps.log === undefined ? {} : { log: deps.log }),
+    ...given({ now: deps.now, log: deps.log }),
   })
 
   const curriculum = createCurriculum({
@@ -92,17 +88,14 @@ export function createReplicaModule(deps: ReplicaModuleDeps): ReplicaModule {
     client: deps.client,
     hourlyReserve: deps.config.hourlyReserve,
     quota,
-    ...(deps.now === undefined ? {} : { now: deps.now }),
-    ...(deps.log === undefined ? {} : { log: deps.log }),
+    ...given({ now: deps.now, log: deps.log }),
   })
 
   const photos = createPhotos({
     db: deps.db,
     client: deps.client,
     store: deps.photos ?? memoryPhotoStore(),
-    ...(deps.halted === undefined ? {} : { halted: deps.halted }),
-    ...(deps.now === undefined ? {} : { now: deps.now }),
-    ...(deps.log === undefined ? {} : { log: deps.log }),
+    ...given({ halted: deps.halted, now: deps.now, log: deps.log }),
   })
 
   // Lo que se hace cuando le llega el turno a quien esperaba: lo mismo que se

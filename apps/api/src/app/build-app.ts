@@ -30,6 +30,7 @@ import type { Services } from './composition.js'
 import { registerCors } from './cors.js'
 import { registerErrorHandler } from './error-handler.js'
 import { registerHealth } from './health.js'
+import { given } from '../core/options.js'
 
 type BuildOptions = {
   env?: Env
@@ -106,7 +107,7 @@ export async function buildApp(options: BuildOptions = {}): Promise<BuiltApp> {
     log: (detail) => {
       process.stderr.write(`[42] ${detail}\n`)
     },
-    ...(options.now === undefined ? {} : { now: options.now }),
+    ...given({ now: options.now }),
   })
 
   const auth = createAuthModule({
@@ -143,7 +144,7 @@ export async function buildApp(options: BuildOptions = {}): Promise<BuiltApp> {
     // origen, y lo que sí llevaría una cookie o un token se quita por si acaso.
     logger: {
       level: logLevel,
-      ...(options.logDestination === undefined ? {} : { stream: options.logDestination }),
+      ...given({ stream: options.logDestination }),
       redact: {
         paths: [
           'req.headers.cookie',

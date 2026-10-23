@@ -20,6 +20,7 @@ import { toNumber, toText } from '../../core/db/rows.js'
 import type { NoticeEvent } from '../../core/events.js'
 import { parse } from '../../core/validation.js'
 import { inList, listArg } from '../../core/db/sql.js'
+import { isoAt } from '../../core/time.js'
 
 export type NoticesServiceOptions = {
   db: Db
@@ -49,7 +50,7 @@ const saveSchema = z.object({ id: z.number().int().positive(), saved: z.boolean(
 export function createNoticesService(options: NoticesServiceOptions) {
   const { db } = options
   const now = options.now ?? Date.now
-  const iso = (at = now()): string => new Date(at).toISOString()
+  const iso = (at = now()): string => isoAt(at)
 
   async function unread(login: string): Promise<number> {
     const result = await db.execute({

@@ -16,6 +16,7 @@ import type { Db } from '../../core/db/database.js'
 import { toText } from '../../core/db/rows.js'
 import { domainError } from '../../core/errors.js'
 import { parse } from '../../core/validation.js'
+import { isoAt } from '../../core/time.js'
 
 /** Lo que el banco de preguntas monta de un concepto (ver `modules/quiz`). */
 export type GateRound = {
@@ -136,13 +137,12 @@ export function createGateService(deps: {
   now: () => number
   random: () => number
 }) {
-  const iso = (ms: number) => new Date(ms).toISOString()
   const retryOf = (state: Stored): string | null => {
     if (state.passedAt !== null || state.failedAt === null) return null
 
     const at = Date.parse(state.failedAt) + RETRY_MS
 
-    return at > deps.now() ? iso(at) : null
+    return at > deps.now() ? isoAt(at) : null
   }
   const shown = (rounds: readonly GateRound[], lang: Lang): GateRound[] =>
     rounds.map((round) => deps.questions.localize?.(round, lang) ?? round)
@@ -153,7 +153,7 @@ export function createGateService(deps: {
       code,
       options,
     })),
-    deadline: state.deadline ?? iso(deps.now()),
+    deadline: state.deadline ?? isoAt(deps.now()),
   })
 
   /** Un test empezado cuyo plazo pasó sin contestar cuenta como fallado. */
@@ -222,7 +222,7 @@ export function createGateService(deps: {
       const started: Stored = {
         ...state,
         rounds,
-        deadline: iso(deps.now() + rounds.length * SECONDS_EACH * 1000),
+        deadline: isoAt(deps.now() + rounds.length * SECONDS_EACH * 1000),
       }
 
       await deps.gates.save(login, id, started)
@@ -246,7 +246,7 @@ export function createGateService(deps: {
       }
 
       const late = Date.parse(deadline) < deps.now()
-      const at = iso(deps.now())
+      const at = isoAt(deps.now())
       const review = shown(rounds, lang).map((round, index) => ({
         prompt: round.prompt,
         code: round.code,

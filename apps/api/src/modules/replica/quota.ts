@@ -35,6 +35,7 @@ import { toNumber, toText } from '../../core/db/rows.js'
 import { periodOf } from '../../core/period.js'
 import { parse } from '../../core/validation.js'
 import type { FortyTwoClient } from '../../integrations/forty-two/client.js'
+import { dayOf, isoAt } from '../../core/time.js'
 
 type QuotaTier = 'background' | 'deferrable' | 'critical'
 
@@ -125,9 +126,7 @@ export function createQuota(options: QuotaOptions) {
   /** Personas esperando turno, y a quién se está atendiendo ahora. */
   let queued = 0
   let serving: string | null = null
-
-  const iso = (at: number): string => new Date(at).toISOString()
-  const today = (): string => iso(now()).slice(0, 10)
+  const today = (): string => dayOf(now())
 
   /** Apunta lo pedido a 42 desde la última vez que se miró. */
   const sample = (): void => {
@@ -237,7 +236,7 @@ export function createQuota(options: QuotaOptions) {
 
     day = today()
 
-    const since = iso(periodOf(now(), settings.renewDay).start).slice(0, 10)
+    const since = isoAt(periodOf(now(), settings.renewDay).start).slice(0, 10)
     const [mine, before, waiting] = await Promise.all([
       db.execute({ sql: 'SELECT requests FROM forty_two_stats WHERE day = ?', args: [day] }),
       db.execute({
@@ -285,7 +284,7 @@ export function createQuota(options: QuotaOptions) {
               SELECT ?1, ?2, ?3 WHERE NOT EXISTS (
                 SELECT 1 FROM quota_queue WHERE login = ?1 AND task = ?2 AND served_at IS NULL
               )`,
-        args: [login, task, iso(now())],
+        args: [login, task, isoAt(now())],
       })
 
       queued += added.rowsAffected
@@ -333,7 +332,7 @@ export function createQuota(options: QuotaOptions) {
 
         await db.execute({
           sql: 'UPDATE quota_queue SET served_at = ? WHERE id = ?',
-          args: [iso(now()), toNumber(next.id)],
+          args: [isoAt(now()), toNumber(next.id)],
         })
         queued = Math.max(0, queued - 1)
         served += 1
@@ -341,7 +340,7 @@ export function createQuota(options: QuotaOptions) {
 
       await db.execute({
         sql: 'DELETE FROM quota_queue WHERE served_at IS NOT NULL AND served_at < ?',
-        args: [iso(now() - KEEP_SERVED_MS)],
+        args: [isoAt(now() - KEEP_SERVED_MS)],
       })
 
       return served
@@ -418,7 +417,7 @@ export function createQuota(options: QuotaOptions) {
         month: {
           spent: spentBefore + spentToday,
           daysLeft: period.daysLeft,
-          renewsOn: iso(period.end).slice(0, 10),
+          renewsOn: isoAt(period.end).slice(0, 10),
         },
         queued,
       }
@@ -433,7 +432,7 @@ export function createQuota(options: QuotaOptions) {
       await db.execute({
         sql: `INSERT OR REPLACE INTO settings (key, value, updated_by, updated_at)
               VALUES ('quota42', ?, ?, ?)`,
-        args: [JSON.stringify(next), by, iso(now())],
+        args: [JSON.stringify(next), by, isoAt(now())],
       })
       await refresh(true)
 

@@ -12,11 +12,17 @@ import { z } from 'zod'
 import type { GroupRow, TherapyRepository } from './therapy.repository.js'
 import type { ReplicaRepository, Syncer } from '../replica/index.js'
 import { domainError } from '../../core/errors.js'
-import { beyondHorizon, EVENT_HORIZON_DAYS, localMoment, minutesOf } from '../../core/time.js'
+import {
+  EVENT_HORIZON_DAYS,
+  beyondHorizon,
+  localMoment,
+  minutesOf,
+  startOfDayIso,
+} from '../../core/time.js'
 import { LOCATION_MAX_AGE_MS } from '../replica/index.js'
 import { XP_KIND } from '../profile/index.js'
 import type { XpService } from '../profile/index.js'
-import { id, optionalText, parse, startOfDayIso, text } from '../../core/validation.js'
+import { id, optionalText, parse, text } from '../../core/validation.js'
 import type { Actor } from '../../core/actor.js'
 import type { Notify } from '../../core/events.js'
 

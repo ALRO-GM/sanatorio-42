@@ -50,6 +50,7 @@ import {
 import { CLICK_HISTORY_S, overClicked } from './clicks.rules.js'
 import type { ClickSample } from './clicks.rules.js'
 import { hackerTitle, readSave, giftShare, seizedValue, wealthOf, verdict } from './cheat.rules.js'
+import { dayOf, isoAt } from '../../core/time.js'
 
 /** Pulsaciones de la cruz que abren la pregunta de las pastillas. */
 const PLUS_GOAL = 42
@@ -181,7 +182,7 @@ function stored(value: unknown): unknown {
 export function createClickerService(options: ClickerServiceOptions) {
   const { db, replica } = options
   const now = options.now ?? Date.now
-  const iso = (): string => new Date(now()).toISOString()
+  const iso = (): string => isoAt(now())
   const notify: Notify = options.notify ?? (() => Promise.resolve())
 
   /**
@@ -1157,7 +1158,6 @@ export function createClickerService(options: ClickerServiceOptions) {
       assertAdmin(actor)
 
       const { days } = parse(usageSchema, input)
-      const dayOf = (at: number): string => new Date(at).toISOString().slice(0, 10)
       const from = dayOf(now() - (days - 1) * DAY_MS)
       const [result, time, alerts, cheats] = await Promise.all([
         // De la partida solo se mira cuánto se ha pulsado la tecla, y solo si

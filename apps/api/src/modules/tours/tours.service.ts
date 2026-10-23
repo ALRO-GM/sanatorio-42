@@ -19,6 +19,7 @@ import type { Actor } from '../../core/actor.js'
 import type { Db } from '../../core/db/database.js'
 import { toNumber, toText } from '../../core/db/rows.js'
 import { parse } from '../../core/validation.js'
+import { isoAt } from '../../core/time.js'
 
 /** Lo más lento y lo más rápido que puede poner alguien el deslizador. */
 const MIN_RATE = 0.5
@@ -50,7 +51,7 @@ export function meanRate(rates: readonly number[]): number {
 export function createToursService(options: { db: Db; now?: () => number }) {
   const { db } = options
   const now = options.now ?? Date.now
-  const iso = (): string => new Date(now()).toISOString()
+  const iso = (): string => isoAt(now())
 
   return {
     /** A cuánto va cada demostración de fábrica. Las que no salen van a `1`. */

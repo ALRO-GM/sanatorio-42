@@ -13,6 +13,7 @@ import { createAuthService } from './auth.service.js'
 import type { AuthService } from './auth.service.js'
 import { createOAuthClient } from './oauth-client.js'
 import { createSessionReader } from './session.js'
+import { given } from '../../core/options.js'
 
 type AuthModuleDeps = {
   env: Env
@@ -65,8 +66,7 @@ export function createAuthModule(deps: AuthModuleDeps): AuthModule {
     profiles: deps.profiles,
     defaultCampusId: env.DEFAULT_CAMPUS_ID,
     adminLogins: env.adminLogins,
-    ...(deps.access === undefined ? {} : { access: deps.access }),
-    ...(deps.onActivity === undefined ? {} : { onActivity: deps.onActivity }),
+    ...given({ access: deps.access, onActivity: deps.onActivity }),
   })
 
   return {
@@ -77,7 +77,7 @@ export function createAuthModule(deps: AuthModuleDeps): AuthModule {
       registerAuthRoutes(app, {
         auth: service,
         frontendUrl: env.FRONTEND_URL,
-        ...(deps.staff === undefined ? {} : { staff: deps.staff }),
+        ...given({ staff: deps.staff }),
       })
     },
   }

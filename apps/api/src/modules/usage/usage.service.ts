@@ -25,6 +25,7 @@ import { createTtlCache } from '../../core/ttl-cache.js'
 import { day, parse } from '../../core/validation.js'
 import type { ReplicaRepository } from '../replica/index.js'
 import { sectionsOf, START } from './flows.rules.js'
+import { given } from '../../core/options.js'
 
 /** Claves como `nav.tablon` o `expediente.health`: dos palabras en minúsculas. */
 const KEY = /^[a-z]{2,20}\.[a-z_]{2,30}$/
@@ -161,7 +162,7 @@ export function createUsageService(options: {
   const totals = createTtlCache<UsageCounts>({
     ttlMs: 5 * 60_000,
     maxEntries: 1,
-    ...(options.now === undefined ? {} : { now: options.now }),
+    ...given({ now: options.now }),
   })
 
   /** El periodo que se pide: por defecto la última semana, y nunca más de `STATS_MAX_DAYS`. */

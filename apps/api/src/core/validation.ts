@@ -66,8 +66,3 @@ export const day = z
 
     return !Number.isNaN(at) && new Date(at).toISOString().slice(0, 10) === value
   }, 'esa fecha no existe')
-
-/** Principio del día UTC de un instante, en ISO. Para los topes diarios. */
-export function startOfDayIso(at: number): string {
-  return `${new Date(at).toISOString().slice(0, 10)}T00:00:00.000Z`
-}
