@@ -17,7 +17,7 @@ este fichero y se hace lo que dice, en orden.
 - Si una tarea necesita una decisión de Alberto, se le pregunta antes de seguir
   con esa; las demás no esperan.
 
-Última puesta al día: 2026-10-22. En producción desde el 2026-10-11.
+Última puesta al día: 2026-10-23. En producción desde el 2026-10-11.
 
 ## 1. Arranque (siempre, en cada sesión nueva)
 
@@ -296,13 +296,22 @@ recurrente. Hecho el 22-23 de octubre:
 - [ ] **En curso con un agente**: base reutilizable de la web (los diez de
       `calidad-web.md`), rama `worktree-agent-a6d0ea6693a137ffe`. Al volver:
       unir, `npm run check`, push y despliegue.
-- [ ] Después: B1 (documento de horas por POST; toca `HoursReport.tsx`, el
-      cliente y la ruta), B3 (búsqueda de personas con LIKE e índice), B6-B8,
-      bajos de juegos, A2+L4 (`presence` y `wire()`), tests (mínimos de la
-      web, `docs/api.md` ↔ rutas, recorridos), observabilidad (Slack de
-      despliegues ya avisa si hay webhook; falta monitor externo y errores de
-      cliente), textos que tocan código (claves repetidas, glifos), M7
-      (borrado de cuenta: decisión de Alberto).
+- [x] Hecho y desplegado el 23-oct (tarde, sin agentes): B1 (documento de
+      horas por `POST /events/report/csv`), B3, bajos de juegos (irse = perder,
+      cerrojo del Clicker, `slugParam`, tramo del Pomodoro ≥ 5, `TourName`, tope
+      de claves de uso), B6 (análisis de la red por persona), B7 (tope de
+      telemetría), B8 (copias de fuera cifradas con gpg; falta crear el
+      destino), B9 (`externalHref`), B10 (`paintable`), test `docs/api.md` ↔
+      rutas, mínimos de cobertura de la web a 64 %, A2 + L4 (`createLate`,
+      módulo `presence`, `replica.points`, ESLint en `app/`).
+- [ ] **Agentes en pausa** (Alberto, 23-oct: «pausa los agentes hasta que te
+      diga»). No reanudar el de la web hasta que lo diga.
+- [ ] Queda: recorridos de pantalla que faltan, monitor externo y errores de
+      cliente (`ErrorBoundary`; esperar al agente de la web, toca `shared/`),
+      textos que tocan código (claves repetidas, glifos; también web), destino
+      de las copias fuera de la máquina (bucket gratuito de Oracle + rclone +
+      frase: decisión y pasos con Alberto), M7 (borrado de cuenta: decisión de
+      Alberto).
 
 ## 3. A medias o por confirmar con Alberto
 
