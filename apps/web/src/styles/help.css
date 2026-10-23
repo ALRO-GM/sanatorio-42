@@ -61,7 +61,8 @@ button.slot.joined-below {
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
 }
-/* Una corrección de 42 pisa esa media hora: naranja, como en el calendario. */
+/* Una corrección de 42 pisa esa media hora: naranja, como en el calendario
+   (fijo a propósito: es el color de las correcciones en `calendar.css`). */
 button.slot.busy {
   border-color: #d9822b;
   border-style: dashed;
@@ -159,7 +160,7 @@ button.slot.active:disabled {
 
 /* ── Tablón: la respuesta que resolvió la duda ───────────────────────────── */
 .replies li.solution {
-  box-shadow: inset 3px 0 0 #3fae74;
+  box-shadow: inset 3px 0 0 var(--ok);
   background: var(--accent-soft);
 }
 .replies li .pill {

@@ -90,7 +90,7 @@
   list-style: none;
   display: grid;
   gap: 0.25rem;
-  color: #b3621a;
+  color: var(--warn);
   font-size: 0.88rem;
 }
 .week-pattern {
@@ -113,7 +113,7 @@
   background: color-mix(in srgb, var(--accent) calc(var(--heat) * 90%), var(--surface-2));
 }
 .week-row > span.over {
-  outline: 2px solid #d9534f;
+  outline: 2px solid var(--danger);
   outline-offset: -1px;
 }
 .recent-bars {
@@ -143,7 +143,7 @@
   vertical-align: top;
 }
 .admin-table td.bad {
-  color: #d9534f;
+  color: var(--danger);
   font-weight: 700;
 }
 .admin-inline {
@@ -192,7 +192,7 @@
   background: var(--accent-soft);
 }
 .ticket.status-open {
-  border-left: 4px solid #e8952c;
+  border-left: 4px solid var(--warn);
 }
 .ticket textarea,
 .inbox-form textarea,
@@ -210,7 +210,7 @@
   justify-self: start;
 }
 .report-link:hover {
-  color: #d9534f;
+  color: var(--danger);
 }
 .report-form {
   display: flex;
@@ -234,8 +234,8 @@
   margin: 0.6rem 0 0;
   padding: 0.6rem 0.8rem;
   border-radius: 10px;
-  background: #e5484d;
-  color: #fff;
+  background: var(--danger);
+  color: var(--on-accent);
   font-weight: 700;
 }
 

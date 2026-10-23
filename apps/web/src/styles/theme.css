@@ -47,6 +47,11 @@
   --danger: #d6403f;
   --danger-soft: #fbe6e5;
   --gold: #b8861c;
+  /* Las medallas de las clasificaciones. Salen de los colores de cada estilo
+     (su oro, su gris y su fondo), así que ningún tema tiene que repetirlas. */
+  --gold-soft: color-mix(in srgb, var(--gold) 45%, var(--surface));
+  --silver: color-mix(in srgb, var(--text-4) 45%, var(--surface));
+  --bronze: color-mix(in srgb, #b8733a 45%, var(--surface));
 
   /* La sombra es solo para lo que flota (menús, ventanas, avisos). */
   --shadow-soft: rgba(23, 33, 29, 0.05);

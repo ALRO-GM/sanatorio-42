@@ -280,7 +280,7 @@ button.link {
 
 .badge.on {
   background: var(--surface-2);
-  color: #4a8f6a;
+  color: var(--ok);
 }
 .group-therapy {
   background: var(--accent-soft);
@@ -342,7 +342,7 @@ button.link {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #6fbf8f;
+  background: var(--ok);
   /* Late al aparecer y se queda quieto: latiendo siempre, la pantalla no deja
      de redibujarse (y en una lista hay muchos). */
   animation: pulse 1.6s ease-in-out 3;
@@ -445,7 +445,7 @@ button.link {
 .count {
   display: inline-block;
   background: var(--surface-2);
-  color: #4a8f6a;
+  color: var(--ok);
   border-radius: 999px;
   padding: 0.4rem 1.1rem;
   font-weight: 600;
@@ -555,7 +555,7 @@ button.link {
 
 .estado.error {
   background: var(--surface-2);
-  color: #8f4a41;
+  color: var(--danger);
 }
 
 .estado.aviso {
