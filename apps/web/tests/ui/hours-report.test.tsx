@@ -18,6 +18,7 @@ describe('Descarga de las horas validadas', () => {
   it('el botón pide el documento y lo guarda con el nombre que trae el código', async () => {
     const user = userEvent.setup()
 
+    localStorage.setItem('sanatorio_lang', 'es')
     render(
       <I18nProvider>
         <HoursReport />
