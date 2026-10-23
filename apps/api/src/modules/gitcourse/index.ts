@@ -3,7 +3,7 @@
  */
 
 import type { Db } from '../../core/db/database.js'
-import { idParam } from '../../core/http/params.js'
+import { idParam, slugParam } from '../../core/http/params.js'
 import type { IdParams } from '../../core/http/params.js'
 import type { AppModule } from '../../core/module.js'
 import { createGateRepository, createGateService } from './gates.js'
@@ -59,6 +59,10 @@ export function createGitCourseModule(deps: {
     ],
     service,
     routes: (app, { session }) => {
+      const room = (id: string): number => idParam(id, 'La sala')
+      const gate = (id: string): string => slugParam(id, 'La prueba')
+      const level = (id: string): string => slugParam(id, 'Ese punto del camino')
+
       /** `GET /gitcourse` → `GitCourse`: tus estrellas y desde qué puesto juegas. */
       app.get('/gitcourse', async (request, reply) => {
         return reply.send(await service.course(await session.actor(request)))
@@ -66,7 +70,9 @@ export function createGitCourseModule(deps: {
 
       /** `POST /gitcourse/gates/:id/start` → `GitGateQuiz`: empieza (o retoma) el test previo. */
       app.post<{ Params: { id: string } }>('/gitcourse/gates/:id/start', async (request, reply) => {
-        return reply.send(await service.startGate(await session.actor(request), request.params.id))
+        return reply.send(
+          await service.startGate(await session.actor(request), gate(request.params.id)),
+        )
       })
 
       /** `POST /gitcourse/gates/:id/answer` → `GitGateAnswerInput` → `GitGateResult`. */
@@ -74,7 +80,11 @@ export function createGitCourseModule(deps: {
         '/gitcourse/gates/:id/answer',
         async (request, reply) => {
           return reply.send(
-            await service.answerGate(await session.actor(request), request.params.id, request.body),
+            await service.answerGate(
+              await session.actor(request),
+              gate(request.params.id),
+              request.body,
+            ),
           )
         },
       )
@@ -82,15 +92,19 @@ export function createGitCourseModule(deps: {
       /** `POST /gitcourse/levels/:id` → `GitAttemptResult`: corrige un reto. */
       app.post<{ Params: { id: string } }>('/gitcourse/levels/:id', async (request, reply) => {
         return reply.send(
-          await service.attempt(await session.actor(request), request.params.id, request.body),
+          await service.attempt(
+            await session.actor(request),
+            level(request.params.id),
+            request.body,
+          ),
         )
       })
 
-      const room = (id: string): number => idParam(id, 'La sala')
-
       /** `GET /gitcourse/rooms?gate=group1` → `GitRoomLobby[]`: salas de esa prueba. */
       app.get<{ Querystring: { gate?: string } }>('/gitcourse/rooms', async (request, reply) => {
-        return reply.send(await rooms.list(await session.actor(request), request.query.gate ?? ''))
+        return reply.send(
+          await rooms.list(await session.actor(request), gate(request.query.gate ?? '')),
+        )
       })
 
       /** `POST /gitcourse/rooms` → `{ gate }` → `GitRoom`: crea una sala y entras. */

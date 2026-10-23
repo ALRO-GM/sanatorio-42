@@ -11,7 +11,7 @@
  * prisa no le cambian el ritmo a las demás.
  */
 
-import type { TourSpeeds, TourSpeedStats } from '@sanatorio/contracts'
+import type { TourName, TourSpeeds, TourSpeedStats } from '@sanatorio/contracts'
 import { z } from 'zod'
 
 import { assertAdmin } from '../../core/actor.js'
@@ -32,8 +32,32 @@ const MAX_SPEED = 3
 /** Por debajo de esto, la media es «la dejan como está»: no se toca. */
 const DEAD_ZONE = 0.05
 
+/**
+ * Las demostraciones de la web: solo de estas se apunta la velocidad. Es un
+ * `Record` para que una demostración nueva (o una de menos) no compile.
+ */
+const TOURS: Record<TourName, true> = {
+  agenda: true,
+  board: true,
+  boards: true,
+  chess: true,
+  clusters: true,
+  exams: true,
+  gitCourse: true,
+  guard: true,
+  helpStats: true,
+  inbox: true,
+  mailbox: true,
+  network: true,
+  notGames: true,
+  record: true,
+  therapy: true,
+  waiting: true,
+}
+const TOUR_NAMES = Object.keys(TOURS) as [TourName, ...TourName[]]
+
 const rateSchema = z.object({
-  name: z.string().regex(/^[a-z][a-z0-9_-]{1,39}$/, 'nombre no válido'),
+  name: z.enum(TOUR_NAMES),
   rate: z.number().min(MIN_RATE).max(MAX_RATE),
 })
 

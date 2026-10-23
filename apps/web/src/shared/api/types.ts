@@ -127,6 +127,7 @@ import type {
   SyncStatus,
   Ticket,
   TicketInput,
+  TourName,
   TourSpeeds,
   TourSpeedStats,
   UsageCounts,
@@ -336,7 +337,7 @@ export type Api = {
   /** A cuánto va cada demostración de fábrica. */
   getTourSpeeds: () => Promise<TourSpeeds>
   /** Dice a cuánto has visto una demostración, respecto a la de fábrica. */
-  sendTourSpeed: (name: string, rate: number) => Promise<{ speed: number }>
+  sendTourSpeed: (name: TourName, rate: number) => Promise<{ speed: number }>
   /** Velocidad y recuento de cada demostración. Solo admins. */
   getTourStats: () => Promise<TourSpeedStats>
   /** Personas cuyo login o nombre lleva lo escrito. */

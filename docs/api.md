@@ -1324,7 +1324,9 @@ Cada sesión cuenta en el día y la hora en que empezó, y su tiempo se reparte
 por las horas que ocupó. `low`/`high` eligen el tramo de quienes lo usan por
 tiempo concentrado en el periodo (como `segmentOf` de `usage`): en el panel
 filtra a quién se suma; en lo tuyo, `band` es la media por persona de ese tramo
-y `position` qué parte de quienes lo usan se concentra menos que tú.
+y `position` qué parte de quienes lo usan se concentra menos que tú. En lo
+tuyo el tramo no baja de cinco personas (se ensancha hasta tenerlas): una media
+más estrecha sería la cifra de alguien en concreto.
 
 Mientras `until` no ha pasado, los demás ven `focusUntil` en la ficha
 (`PersonCard`), en el ocupante de su puesto del plano y en la sala de espera

@@ -4,7 +4,7 @@ import type { z } from 'zod'
 import { assertAdmin } from '../../src/core/actor.js'
 import { DomainError } from '../../src/core/errors.js'
 import { mapError } from '../../src/core/http/errors.js'
-import { idParam } from '../../src/core/http/params.js'
+import { idParam, slugParam } from '../../src/core/http/params.js'
 import { day, id, optionalText, parse, text } from '../../src/core/validation.js'
 
 const ok = (schema: z.ZodType, value: unknown): boolean => schema.safeParse(value).success
@@ -89,6 +89,15 @@ describe('textos e identificadores', () => {
 
     for (const raw of ['', '-1', '1.5', '1e3', ' 1', '0x10', '9999999999999', 'abc', '१२३']) {
       expect(() => idParam(raw, 'Eso'), raw).toThrow(DomainError)
+    }
+  })
+
+  it('el id de texto de una ruta: minúsculas, cifras y guiones, hasta cuarenta', () => {
+    expect(slugParam('w0-commit', 'Eso')).toBe('w0-commit')
+    expect(slugParam('group1', 'Eso')).toBe('group1')
+
+    for (const raw of ['', 'W0', 'a b', '../x', 'a'.repeat(41), 'é', '%2e']) {
+      expect(() => slugParam(raw, 'Eso'), raw).toThrow(DomainError)
     }
   })
 })

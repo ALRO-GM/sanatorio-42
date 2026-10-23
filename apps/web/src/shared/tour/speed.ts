@@ -6,6 +6,8 @@
 
 import { useEffect, useState } from 'react'
 
+import type { TourName } from '@sanatorio/contracts'
+
 import { api } from '../api'
 
 /** Las velocidades entre las que se elige, respecto a la de fábrica. */
@@ -52,7 +54,7 @@ const nearestRate = (rate: number): number =>
  * @returns `base`, la de fábrica; `rate`, el ajuste de esta persona sobre ella;
  *   y `choose`, para cambiarlo.
  */
-export function useTourSpeed(name: string): {
+export function useTourSpeed(name: TourName): {
   base: number
   rate: number
   choose: (rate: number) => void

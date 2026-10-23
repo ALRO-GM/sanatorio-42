@@ -23,11 +23,14 @@ de salas solo para su campus o su gente), M3 (motor del Clicker en
 (`/admin/usage/heatmap`), M5 (Slack escapado), M6 (exportación de datos sin
 datos de terceros, tablas declaradas, secretos omitidos, truncado señalado),
 B1 (el documento de horas solo por `POST`), B2 (secreto de 32), B3 (búsqueda de personas con caché por campus), B4 y B12 (con M6). M7 (borrado de cuenta) queda documentado en
-`docs/contexto.md`, pendiente de decisión. Pendientes: B6–B11 y los bajos del
-informe de juegos (FFA en solitario y `remember` antes de deduplicar ya
-hechos; quedan abandonar borra el resultado, carreras en `save`/`choose`,
-parámetros crudos en gitcourse, tramo estrecho en pomodoro, nombres de demo y
-claves de uso libres).
+`docs/contexto.md`, pendiente de decisión. Del informe de los juegos, todos hechos: FFA en
+solitario sin victoria, `remember` tras deduplicar, irse a media partida
+apunta derrota, cerrojo por persona en el Clicker (`plus`, `choose`, `save`,
+`pardon`, `sanction`), ids de texto del curso de git con `slugParam`, el tramo
+del Pomodoro de al menos cinco personas, nombres de demostración de una lista
+cerrada (`TourName`; de paso, `helpStats`, `gitCourse` y `notGames` ya pueden
+guardar su velocidad) y tope de mil claves de uso por persona. Pendientes:
+B6–B11.
 
 **Calidad de la API** (`calidad-api.md`): hechos los diez refactors salvo A2
 + L4 (módulo `presence` y `wire()` en `composition.ts`): helpers de filas y

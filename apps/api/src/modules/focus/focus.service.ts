@@ -45,6 +45,9 @@ const exitSchema = z
   })
   .default({ reasons: [] })
 
+/** Gente mínima del tramo con el que se compara cada cual. */
+const MIN_BAND_PEOPLE = 5
+
 /** Del 0 al 100: el tramo de gente, de quien menos lo usa a quien más. */
 const share = z.coerce.number().int().min(0).max(100)
 
@@ -156,12 +159,15 @@ export function createFocusService(
     }
   }
 
-  /** Todas las sesiones del periodo y el tramo pedido de gente, por tiempo concentrado. */
-  async function chosen(input: unknown) {
+  /**
+   * Todas las sesiones del periodo y el tramo pedido de gente, por tiempo
+   * concentrado. Con `minPeople`, el tramo tiene al menos esa gente.
+   */
+  async function chosen(input: unknown, minPeople = 0) {
     const asked = period(input)
     const sessions = await log.between(asked.since, asked.until)
     const activity = focusedByLogin(sessions, now())
-    const segment = segmentOf(activity, asked.low, asked.high)
+    const segment = segmentOf(activity, asked.low, asked.high, minPeople)
 
     return { asked, sessions, activity, segment }
   }
@@ -217,7 +223,9 @@ export function createFocusService(
      * elegido de quienes lo usan (`low`–`high`, de menos a más tiempo).
      */
     async myStats(actor: Actor, input: unknown): Promise<MyFocusStats> {
-      const { asked, sessions, activity, segment } = await chosen(input)
+      // Cualquiera puede mirar esto: el tramo no baja de cinco personas, para
+      // que la media no sea la de alguien en concreto.
+      const { asked, sessions, activity, segment } = await chosen(input, MIN_BAND_PEOPLE)
       const mine = sessions.filter((session) => session.login === actor.login)
       const band = sessions.filter((session) => segment.keep(session.login))
 
