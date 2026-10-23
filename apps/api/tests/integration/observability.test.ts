@@ -202,7 +202,7 @@ describe('configuración del registro', () => {
   const minimal = {
     FORTY_TWO_UID: 'u',
     FORTY_TWO_SECRET: 's',
-    SESSION_SECRET: 'secreto-de-sesion-para-pruebas',
+    SESSION_SECRET: 'secreto-de-sesion-para-pruebas-de-treinta-y-dos',
     FRONTEND_URL: 'https://front.test',
     FORTY_TWO_REDIRECT_URI: 'https://back.test/api/auth/callback',
   }
