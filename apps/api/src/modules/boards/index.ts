@@ -13,6 +13,7 @@ import { createBoardsRepository } from './boards.repository.js'
 import { registerBoardsRoutes } from './boards.routes.js'
 import { createBoardsService } from './boards.service.js'
 import type { BoardsService } from './boards.service.js'
+import { given } from '../../core/options.js'
 
 type BoardsModuleDeps = {
   db: Db
@@ -32,8 +33,7 @@ export function createBoardsModule(deps: BoardsModuleDeps): BoardsModule {
     replica: deps.replica,
     xp: deps.xp,
     attendance: deps.attendance,
-    ...(deps.notify === undefined ? {} : { notify: deps.notify }),
-    ...(deps.now === undefined ? {} : { now: deps.now }),
+    ...given({ notify: deps.notify, now: deps.now }),
   })
 
   // La XP de impartir una pizarra se reparte cuando ya ha pasado. Se aprovecha

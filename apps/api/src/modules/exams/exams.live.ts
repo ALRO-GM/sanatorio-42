@@ -18,6 +18,8 @@
 import type { LiveExam, LiveExamGroup, LiveExaminee } from '@sanatorio/contracts'
 
 import type { Actor } from '../../core/actor.js'
+import { clockOf, loggerOf } from '../../core/options.js'
+import type { Clock, Logger } from '../../core/options.js'
 import type { Db } from '../../core/db/database.js'
 import { toNumber, toText } from '../../core/db/rows.js'
 import type { FortyTwoClient } from '../../integrations/forty-two/client.js'
@@ -44,9 +46,8 @@ type ExamsLiveOptions = {
     'exams' | 'agendaRegistered' | 'sessionRows' | 'fromElsewhere' | 'lastClosedMarks'
   >
   quota: QuotaGate
-  now?: () => number
-  log?: (message: string) => void
-}
+} & Clock &
+  Logger
 
 type ExamEvent = {
   id: number
@@ -68,8 +69,8 @@ type Attempt = { projectId: number; mark: number | null; passed: boolean }
 
 export function createExamsLive(options: ExamsLiveOptions) {
   const { db, client, replica, agenda, curriculum, exams, quota } = options
-  const now = options.now ?? Date.now
-  const log = options.log ?? (() => undefined)
+  const now = clockOf(options)
+  const log = loggerOf(options)
   /** Lo último de cada examen, para no leer la base en cada visita. */
   const states = new Map<string, LiveState>()
   /** El refresco en curso de cada examen: quien llega a la vez espera a ese, no pide otro. */

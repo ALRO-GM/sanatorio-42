@@ -17,6 +17,7 @@ import type { Round } from './quiz.rules.js'
 import { registerQuizRoutes } from './quiz.routes.js'
 import { createQuizService } from './quiz.service.js'
 import type { QuizService } from './quiz.service.js'
+import { given } from '../../core/options.js'
 
 type QuizModuleDeps = {
   db: Db
@@ -43,8 +44,7 @@ export type QuizModule = AppModule & {
 export function createQuizModule(deps: QuizModuleDeps): QuizModule {
   const quiz = createQuizRepository(deps.db)
   const clock = {
-    ...(deps.now === undefined ? {} : { now: deps.now }),
-    ...(deps.random === undefined ? {} : { random: deps.random }),
+    ...given({ now: deps.now, random: deps.random }),
   }
   const service = createQuizService({
     quiz,

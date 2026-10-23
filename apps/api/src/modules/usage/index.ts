@@ -5,6 +5,8 @@
 
 import type { Db } from '../../core/db/database.js'
 import { tableStore } from '../../core/db/data-store.js'
+import type { Actor } from '../../core/actor.js'
+import { createRateLimit } from '../../core/rate-limit.js'
 import type { AppModule } from '../../core/module.js'
 import type { ReplicaRepository } from '../replica/index.js'
 import { createClicksService } from './clicks.js'
@@ -13,6 +15,9 @@ import type { Online, Traffic } from './usage.service.js'
 import type { UsageService } from './usage.service.js'
 
 export type UsageModule = AppModule & { service: UsageService }
+
+/** Envíos de estadística que se apuntan por persona y minuto. */
+export const TELEMETRY_PER_MINUTE = 40
 
 export function createUsageModule(deps: {
   db: Db
@@ -49,6 +54,12 @@ export function createUsageModule(deps: {
       }),
     ],
     routes: (app, { session }) => {
+      // Envíos de estadística por persona y minuto (uso y clics juntos). La web
+      // manda uno de uso y uno de clics por sección cada minuto: lo que pase de
+      // aquí se tira sin error, que es estadística y no hace falta avisar.
+      const telemetry = createRateLimit({ max: TELEMETRY_PER_MINUTE, windowMs: 60_000 })
+      const counted = (actor: Actor): boolean => telemetry.hit(actor.login)
+
       /** `GET /usage` → cuánto usa la comunidad cada elemento: `{ counts: { "nav.tablon": 120 } }`. */
       app.get('/usage', async (request, reply) => {
         session.user(request)
@@ -70,42 +81,38 @@ export function createUsageModule(deps: {
        * persona, con el tráfico de la API. Solo admins.
        */
       app.get<{ Querystring: Record<string, string> }>('/admin/stats', async (request, reply) => {
-        reply.header('Cache-Control', 'private, no-store')
-
         return reply.send(await service.stats(await session.actor(request), request.query))
       })
 
       /** `GET /admin/flows?from=&to=&login=` → cómo se navega entre secciones. Solo admins. */
       app.get<{ Querystring: Record<string, string> }>('/admin/flows', async (request, reply) => {
-        reply.header('Cache-Control', 'private, no-store')
-
         return reply.send(await service.flows(await session.actor(request), request.query))
       })
 
       /** `GET /admin/online` → quién tiene la web abierta y cuánto lleva. Solo admins. */
       app.get('/admin/online', async (request, reply) => {
-        reply.header('Cache-Control', 'private, no-store')
-
         return reply.send(await service.online(await session.actor(request)))
       })
 
       /** `POST /usage/clicks` → `ClickBatch`: los clics de una sección desde el último envío. 204. */
       app.post('/usage/clicks', async (request, reply) => {
-        await clicks.record(await session.actor(request), request.body)
+        const actor = await session.actor(request)
+
+        if (counted(actor)) await clicks.record(actor, request.body)
 
         return reply.code(204).send()
       })
 
       /** `GET /admin/clicks?section=&layout=&days=` → el mapa de calor de clics de una sección. */
       app.get<{ Querystring: Record<string, string> }>('/admin/clicks', async (request, reply) => {
-        reply.header('Cache-Control', 'private, no-store')
-
         return reply.send(await clicks.heatmap(await session.actor(request), request.query))
       })
 
       /** `POST /usage` → suma lo que has usado desde el último envío. 204. */
       app.post('/usage', async (request, reply) => {
-        await service.record(await session.actor(request), request.body)
+        const actor = await session.actor(request)
+
+        if (counted(actor)) await service.record(actor, request.body)
 
         return reply.code(204).send()
       })

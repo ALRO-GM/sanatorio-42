@@ -25,9 +25,18 @@ import { createTtlCache } from '../../core/ttl-cache.js'
 import { day, parse } from '../../core/validation.js'
 import type { ReplicaRepository } from '../replica/index.js'
 import { sectionsOf, START } from './flows.rules.js'
+import { given } from '../../core/options.js'
 
 /** Claves como `nav.tablon` o `expediente.health`: dos palabras en minúsculas. */
 const KEY = /^[a-z]{2,20}\.[a-z_]{2,30}$/
+
+/**
+ * Claves distintas que se le apuntan a una persona, de por vida. La web tiene
+ * unos cientos; las claves son libres (las pone la web), así que esto es lo que
+ * impide que alguien llene la tabla inventándolas. Las que ya tiene siguen
+ * sumando.
+ */
+const MAX_KEYS_PER_PERSON = 1000
 
 /** Usos que cuentan de una persona en un envío. Más es ruido (o alguien jugando). */
 const MAX_PER_SEND = 200
@@ -115,6 +124,7 @@ export function segmentOf(
   activity: ReadonlyMap<string, number>,
   low: number,
   high: number,
+  minPeople = 0,
 ): { keep: (login: string) => boolean; people: number; of: number } {
   const of = activity.size
 
@@ -122,11 +132,17 @@ export function segmentOf(
 
   // De menos a más activa; a igualdad, por login, para que salga siempre igual.
   const ranked = [...activity].sort(([a, x], [b, y]) => x - y || (a < b ? -1 : 1))
-  const chosen = new Set(
-    ranked
-      .slice(Math.floor((of * low) / 100), Math.ceil((of * Math.max(low, high)) / 100))
-      .map(([login]) => login),
-  )
+  let start = Math.floor((of * low) / 100)
+  let end = Math.ceil((of * Math.max(low, high)) / 100)
+
+  // Con `minPeople`, el tramo se ensancha hasta tener a esa gente: una media
+  // de una o dos personas sería ya la cifra de alguien.
+  while (end - start < Math.min(minPeople, of)) {
+    if (end < of) end++
+    if (end - start < minPeople && start > 0) start--
+  }
+
+  const chosen = new Set(ranked.slice(start, end).map(([login]) => login))
 
   return { keep: (login) => chosen.has(login), people: chosen.size, of }
 }
@@ -161,7 +177,7 @@ export function createUsageService(options: {
   const totals = createTtlCache<UsageCounts>({
     ttlMs: 5 * 60_000,
     maxEntries: 1,
-    ...(options.now === undefined ? {} : { now: options.now }),
+    ...given({ now: options.now }),
   })
 
   /** El periodo que se pide: por defecto la última semana, y nunca más de `STATS_MAX_DAYS`. */
@@ -210,12 +226,37 @@ export function createUsageService(options: {
     of,
   })
 
+  /** De esas claves, las que se le pueden apuntar: las que ya tiene y nuevas hasta el tope. */
+  async function keysThatFit(login: string, sent: readonly string[]): Promise<Set<string>> {
+    const known = new Set(
+      (
+        await db.execute({ sql: 'SELECT key FROM usage_counts WHERE login = ?', args: [login] })
+      ).rows.map((row) => toText(row.key)),
+    )
+    const fits = new Set<string>()
+    let room = MAX_KEYS_PER_PERSON - known.size
+
+    for (const key of sent) {
+      if (known.has(key) || fits.has(key)) fits.add(key)
+      else if (room > 0) {
+        fits.add(key)
+        room -= 1
+      }
+    }
+
+    return fits
+  }
+
   return {
-    /** Suma lo que la web ha contado desde el último envío. */
+    /** Suma lo que la web ha contado desde el último envío (`MAX_KEYS_PER_PERSON`). */
     async record(actor: Actor, input: unknown): Promise<void> {
       const sent = parse(sendSchema, input)
-      const entries = Object.entries(sent.counts)
-      const time = Object.entries(sent.time ?? {})
+      const fits = await keysThatFit(actor.login, [
+        ...Object.keys(sent.counts),
+        ...Object.keys(sent.time ?? {}),
+      ])
+      const entries = Object.entries(sent.counts).filter(([key]) => fits.has(key))
+      const time = Object.entries(sent.time ?? {}).filter(([key]) => fits.has(key))
       const flows = Object.entries(sent.flows ?? {})
 
       if (entries.length === 0 && time.length === 0 && flows.length === 0) {
@@ -229,10 +270,12 @@ export function createUsageService(options: {
 
       await db.batch(
         [
-          ...entries.map(([key, count]) => ({
+          // Las claves que solo traen tiempo también quedan aquí, con cero usos:
+          // es la lista de claves de cada cual con la que se mide su tope.
+          ...[...keys].map((key) => ({
             sql: `INSERT INTO usage_counts (key, login, count) VALUES (?, ?, ?)
                   ON CONFLICT (key, login) DO UPDATE SET count = count + excluded.count`,
-            args: [key, actor.login, count],
+            args: [key, actor.login, sent.counts[key] ?? 0],
           })),
           ...flows.map(([step, count]) => {
             const [from = '', to = ''] = step.split('>')
@@ -490,7 +533,7 @@ export function createUsageService(options: {
     community(): Promise<UsageCounts> {
       return totals.get('all', async () => {
         const result = await db.execute({
-          sql: 'SELECT key, SUM(MIN(count, ?)) AS total FROM usage_counts GROUP BY key',
+          sql: 'SELECT key, SUM(MIN(count, ?)) AS total FROM usage_counts WHERE count > 0 GROUP BY key',
           args: [PERSON_CAP],
         })
 
@@ -515,7 +558,7 @@ export function createUsageService(options: {
 
       const { by, low, high } = parse(heatmapSchema, input)
       const [result, cohorts] = await Promise.all([
-        db.execute('SELECT key, login, count FROM usage_counts'),
+        db.execute('SELECT key, login, count FROM usage_counts WHERE count > 0'),
         by === 'track' || by === 'cohort' ? replica.cohorts() : Promise.resolve(new Map()),
       ])
       const everyRow = result.rows.map((row) => ({

@@ -60,6 +60,13 @@ COPY --from=build /repo/packages/gitsim/dist packages/gitsim/dist
 COPY --from=build /repo/packages/clicker/package.json packages/clicker/
 COPY --from=build /repo/packages/clicker/dist packages/clicker/dist
 
+# El commit que se está construyendo: `GET /health/db` lo devuelve y quien
+# despliega comprueba que responde lo que subió. Va en la última etapa y al
+# final a propósito: cambia en cada commit y no debe invalidar las capas de
+# compilación ni de dependencias.
+ARG GIT_SHA=
+ENV GIT_SHA=$GIT_SHA
+
 # Sin root: el proceso solo necesita escribir en /data.
 RUN mkdir -p /data && chown node:node /data
 USER node

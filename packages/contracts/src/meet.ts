@@ -121,7 +121,7 @@ export type AttendanceReportRow = {
   with: string[]
 }
 
-/** `GET /events/report?from=&to=&login=`: las horas validadas con códigos. */
+/** `GET /events/report?from=&to=&login=`: las horas validadas con códigos (y su CSV, `POST /events/report/csv`). */
 export type AttendanceReport = {
   /** Periodo pedido, en días (`YYYY-MM-DD`), los dos incluidos. */
   from: string

@@ -4,6 +4,7 @@
 
 import type { Db } from '../../core/db/database.js'
 import { toNumber, toText } from '../../core/db/rows.js'
+import { listArg, notInList } from '../../core/db/sql.js'
 
 /** Una corrección a una persona, lista para guardar. */
 export type CorrectionRow = {
@@ -168,8 +169,8 @@ export function createNetworkRepository(db: Db) {
       const result = await db.execute({
         sql: `DELETE FROM corrections
               WHERE campus_id = ? AND id > ? AND id <= ?
-                ${keep.length === 0 ? '' : `AND id NOT IN (${keep.map(() => '?').join(', ')})`}`,
-        args: [campusId, afterId, upToId, ...keep],
+                AND ${notInList('id')}`,
+        args: [campusId, afterId, upToId, listArg(keep)],
       })
 
       return result.rowsAffected

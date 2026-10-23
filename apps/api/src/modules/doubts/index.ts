@@ -13,6 +13,7 @@ import { createGuideChangesRepository } from './guide-changes.repository.js'
 import { registerDoubtsRoutes } from './doubts.routes.js'
 import { createDoubtsService } from './doubts.service.js'
 import type { DoubtsService, DoubtsServiceOptions } from './doubts.service.js'
+import { given } from '../../core/options.js'
 
 type DoubtsModuleDeps = {
   db: Db
@@ -34,9 +35,7 @@ export function createDoubtsModule(deps: DoubtsModuleDeps): DoubtsModule {
     curriculum: deps.curriculum,
     xp: deps.xp,
     replica: deps.replica,
-    ...(deps.notify === undefined ? {} : { notify: deps.notify }),
-    ...(deps.corrections === undefined ? {} : { corrections: deps.corrections }),
-    ...(deps.now === undefined ? {} : { now: deps.now }),
+    ...given({ notify: deps.notify, corrections: deps.corrections, now: deps.now }),
   })
 
   return {
@@ -46,7 +45,22 @@ export function createDoubtsModule(deps: DoubtsModuleDeps): DoubtsModule {
       { table: 'doubt_answers', logins: ['author'] },
       { table: 'guides', logins: ['updated_by'] },
       { table: 'guide_proposals', logins: ['author'] },
-      { table: 'guide_changes', logins: ['proposer'] },
+      // Quien validó un cambio se lleva que lo validó; el texto es de quien lo propuso.
+      {
+        table: 'guide_changes',
+        logins: ['proposer', 'validator'],
+        give: {
+          validator: [
+            'id',
+            'campus_id',
+            'project_id',
+            'section',
+            'validator',
+            'accepted_at',
+            'revoked_at',
+          ],
+        },
+      },
       { table: 'guide_change_flags', logins: ['login'] },
       { table: 'guide_strikes', logins: ['login'] },
     ],

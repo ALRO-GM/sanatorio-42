@@ -25,8 +25,6 @@ export function createMeetModule(deps: MeetServiceOptions): MeetModule {
       app.get<{ Querystring: { id?: string; after?: string } }>(
         '/events/thread',
         async (request, reply) => {
-          reply.header('Cache-Control', 'private, no-store')
-
           return reply.send(
             await service.thread(
               await session.actor(request),
@@ -63,8 +61,6 @@ export function createMeetModule(deps: MeetServiceOptions): MeetModule {
       })
 
       app.get('/events/alerts', async (request, reply) => {
-        reply.header('Cache-Control', 'private, no-store')
-
         return reply.send(
           await service.alerts(await session.actor(request), session.user(request).id),
         )
@@ -85,8 +81,6 @@ export function createMeetModule(deps: MeetServiceOptions): MeetModule {
 
       /** `GET /events/attendance?id=` → códigos (quien organiza) o lo validado (quien asiste). */
       app.get<{ Querystring: { id?: string } }>('/events/attendance', async (request, reply) => {
-        reply.header('Cache-Control', 'private, no-store')
-
         return reply.send(await service.attendance(await session.actor(request), request.query.id))
       })
 
@@ -95,21 +89,18 @@ export function createMeetModule(deps: MeetServiceOptions): MeetModule {
         return reply.send(await service.checkin(await session.actor(request), request.body))
       })
 
+      /** `GET /events/report?from=&to=&login=` → las horas validadas con códigos. */
+      app.get('/events/report', async (request, reply) => {
+        return reply.send(await service.report(await session.actor(request), request.query))
+      })
+
       /**
-       * `GET /events/report?from=&to=&login=&format=` → las horas validadas con
-       * códigos. Con `format=csv`, como fichero para una hoja de cálculo.
+       * `POST /events/report/csv` → `{ from?, to?, login? }`: el mismo informe como
+       * fichero para una hoja de cálculo. Es `POST` porque emite un documento
+       * (y gasta del cupo diario): un enlace desde otra web no puede pedirlo.
        */
-      app.get<{ Querystring: { format?: string } }>('/events/report', async (request, reply) => {
-        const { format, ...query } = request.query
-        const actor = await session.actor(request)
-
-        reply.header('Cache-Control', 'private, no-store')
-
-        if (format !== 'csv') {
-          return reply.send(await service.report(actor, query))
-        }
-
-        const issued = await service.reportCsv(actor, query)
+      app.post('/events/report/csv', async (request, reply) => {
+        const issued = await service.reportCsv(await session.actor(request), request.body ?? {})
 
         return reply
           .header('Content-Type', 'text/csv; charset=utf-8')
@@ -120,8 +111,6 @@ export function createMeetModule(deps: MeetServiceOptions): MeetModule {
 
       /** `GET /admin/checkins?id=` → cada intento de validar un código de un evento. Solo admins. */
       app.get<{ Querystring: { id?: string } }>('/admin/checkins', async (request, reply) => {
-        reply.header('Cache-Control', 'private, no-store')
-
         return reply.send(await service.checkins(await session.actor(request), request.query.id))
       })
     },

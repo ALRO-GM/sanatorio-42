@@ -1,6 +1,8 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 
+import type { TourName } from '@sanatorio/contracts'
+
 import { api } from '../api'
 import { useI18n } from '../i18n'
 import { useFormat } from '../i18n/useFormat'
@@ -90,7 +92,7 @@ export function typing<S>(at: number, key: keyof S, letters: number, step = 60):
 /** Una demostración: su nombre, cómo empieza y su guion. Se hace con `defineTour`. */
 export type TourDef<S> = {
   /** Nombre de la demostración: sus frases son `tour.<name>.1`, `.2`… (tabla `demos`). */
-  name: string
+  name: TourName
   /** Cómo empieza lo propio de esta demostración. */
   start: S
   script: readonly Cue<S>[]
@@ -106,7 +108,7 @@ export type TourDef<S> = {
  * tests la encuentran sin apuntarla en ningún sitio (`tests/tours.test.ts`).
  */
 export function defineTour<S extends object>(
-  name: string,
+  name: TourName,
   start: S,
   script: readonly Cue<S>[],
 ): TourDef<S> {

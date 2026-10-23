@@ -7,6 +7,9 @@
  * primera en vez de lanzar otra consulta igual.
  */
 
+import { clockOf } from './options.js'
+import type { Clock } from './options.js'
+
 type TtlCache<T> = {
   /** El valor de `key`: el guardado si sigue vigente; si no, el que dé `load`. */
   get: (key: string, load: () => Promise<T>) => Promise<T>
@@ -14,14 +17,15 @@ type TtlCache<T> = {
   clear: () => void
 }
 
-export function createTtlCache<T>(options: {
-  ttlMs: number
-  /** Entradas que se recuerdan a la vez. Al pasarse, se tira la más antigua. */
-  maxEntries: number
-  now?: () => number
-}): TtlCache<T> {
+export function createTtlCache<T>(
+  options: Clock & {
+    ttlMs: number
+    /** Entradas que se recuerdan a la vez. Al pasarse, se tira la más antigua. */
+    maxEntries: number
+  },
+): TtlCache<T> {
   const { ttlMs, maxEntries } = options
-  const now = options.now ?? Date.now
+  const now = clockOf(options)
   const entries = new Map<string, { at: number; value: Promise<T> }>()
 
   return {

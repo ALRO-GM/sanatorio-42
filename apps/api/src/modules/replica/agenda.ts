@@ -16,6 +16,7 @@ import type { FortyTwoClient } from '../../integrations/forty-two/client.js'
 import { hourlyQuota } from './quota.js'
 import type { QuotaGate } from './quota.js'
 import type { ApiEvent, ApiExam, ApiScaleTeam } from '../../integrations/forty-two/types.js'
+import { isoAt } from '../../core/time.js'
 
 type AgendaEvent = {
   source: 'event' | 'exam'
@@ -97,11 +98,9 @@ export function createAgenda(options: AgendaOptions) {
   const log = options.log ?? (() => undefined)
   /** Última vez que se pidió lo de cada campus. En memoria: perderlo solo cuesta una petición. */
   const campusFetchedAt = new Map<number, number>()
-
-  const iso = (at: number): string => new Date(at).toISOString()
   const window = (): [string, string] => [
-    iso(now() - PAST_DAYS * DAY),
-    iso(now() + FUTURE_DAYS * DAY),
+    isoAt(now() - PAST_DAYS * DAY),
+    isoAt(now() + FUTURE_DAYS * DAY),
   ]
 
   const quota = options.quota ?? hourlyQuota(client, options.hourlyReserve)
@@ -155,7 +154,7 @@ export function createAgenda(options: AgendaOptions) {
     return {
       id: scaleTeam.id,
       beginAt: scaleTeam.begin_at,
-      endAt: iso(begin + (typeof seconds === 'number' ? seconds * 1000 : DEFAULT_EVALUATION_MS)),
+      endAt: isoAt(begin + (typeof seconds === 'number' ? seconds * 1000 : DEFAULT_EVALUATION_MS)),
       projectId: scaleTeam.team?.project_id ?? null,
       // Si quien corrige viene oculto, es que no es esta persona: la corrigen a ella.
       role:
@@ -255,7 +254,7 @@ export function createAgenda(options: AgendaOptions) {
           await client.getUserEventsUsers(userId),
           await client.getUserExams(userId, start, end),
           // Las correcciones solo interesan de ayer en adelante.
-          await client.getUserScaleTeams(userId, iso(now() - DAY), end),
+          await client.getUserScaleTeams(userId, isoAt(now() - DAY), end),
         ]
 
         await db.execute({
@@ -266,7 +265,7 @@ export function createAgenda(options: AgendaOptions) {
             JSON.stringify(inscriptions.map((inscription) => inscription.event_id)),
             JSON.stringify(exams.map((exam) => exam.id)),
             JSON.stringify(scaleTeams.map((scaleTeam) => toEvaluation(scaleTeam, userId))),
-            iso(now()),
+            isoAt(now()),
           ],
         })
 

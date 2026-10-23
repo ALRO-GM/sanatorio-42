@@ -17,7 +17,17 @@ export function createBroadcastsModule(deps: BroadcastsServiceOptions): Broadcas
   return {
     name: 'broadcasts',
     personal: [
-      { table: 'broadcasts', logins: ['from_login'] },
+      // `audience` puede ser una lista de hasta 200 logins: quien la mandó no
+      // se la lleva (es gente ajena) y cada destinatario recibe el mensaje con
+      // solo su login en ella. Un público «campus» no nombra a nadie.
+      {
+        table: 'broadcasts',
+        logins: ['from_login'],
+        lists: [{ column: 'audience', format: 'json', path: '$.logins' }],
+        give: {
+          audience: ['id', 'title', 'body', 'options', 'required', 'audience', 'created_at'],
+        },
+      },
       { table: 'broadcast_answers', logins: ['login'] },
     ],
     service,
@@ -34,8 +44,6 @@ export function createBroadcastsModule(deps: BroadcastsServiceOptions): Broadcas
     routes: (app, { session }) => {
       /** `GET /broadcasts` → los comunicados que tienes por leer, el más antiguo primero. */
       app.get('/broadcasts', async (request, reply) => {
-        reply.header('Cache-Control', 'private, no-store')
-
         return reply.send(await service.pending(await session.actor(request)))
       })
 
@@ -52,8 +60,6 @@ export function createBroadcastsModule(deps: BroadcastsServiceOptions): Broadcas
 
       /** `GET /admin/broadcasts` → los últimos comunicados y lo contestado. Solo admins. */
       app.get('/admin/broadcasts', async (request, reply) => {
-        reply.header('Cache-Control', 'private, no-store')
-
         return reply.send(await service.reports(await session.actor(request)))
       })
 

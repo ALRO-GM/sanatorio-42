@@ -6,7 +6,7 @@ hace la web está en el [README](../README.md); cómo está montada, en
 [architecture.md](architecture.md); el contrato HTTP, en [api.md](api.md). Aquí
 va lo que no está en el código.
 
-Última puesta al día: 2026-10-22.
+Última puesta al día: 2026-10-23.
 
 **Al retomar con el contexto vacío, lo primero es
 [tareas-tras-compactar.md](tareas-tras-compactar.md)**: es la lista de lo que hay
@@ -21,16 +21,30 @@ que hacer, en orden. Este documento es el porqué; aquel, el qué.
 - Antes de dar algo por hecho: `npm run check` (tipos, lint, formato, código
   sin uso, duplicados, textos y tests).
 - Desplegar: `ssh ubuntu@51.170.34.214 "cd /opt/sanatorio && git pull -q
-  --ff-only && infra/scripts/backup.sh; infra/scripts/deploy.sh"`. Hacer el
-  `git pull` aparte evita reescribir `deploy.sh` mientras se ejecuta. El script
-  espera a la CI del commit (no despliega si falla) y vuelve a la imagen
-  anterior si la nueva no responde.
+  --ff-only && infra/scripts/deploy.sh"`. Hacer el `git pull` aparte evita
+  reescribir `deploy.sh` mientras se ejecuta. **La secuencia de `deploy.sh`**
+  (desde el 2026-10-23; detalle en `docs/deploy-oracle.md` §5): cerrojo
+  (`flock`, no corren dos a la vez) → espera a la etiqueta `ci-ok/<sha>` que
+  deja la CI (por `git ls-remote`, sin la API de GitHub; `ci-ko/<sha>` = CI en
+  rojo, para) → copia comprobada de la base (`backup.sh`, la hace él si no hay
+  una de menos de 10 min; sin copia no sigue) → imagen que funciona etiquetada
+  `previous` y construcción de la nueva con `GIT_SHA` → **migraciones aparte**
+  (`docker compose run --rm app node dist/cli/migrate.js`; si fallan, el
+  contenedor viejo sigue y se avisa) → `up -d` → hasta 180 s a que
+  `/health/db` devuelva el commit subido y `schema.actual === expected` → si
+  no, vuelta a `previous` y, si hubo migraciones, `restore.sh --yes <copia>`.
+  Avisos a Slack por `infra/scripts/notify-slack.sh` (webhook de `infra/.env`).
 - **Desplegar sin depender de la conexión** (desde el 2026-10-22, porque dos
   despliegues murieron al cortarse el SSH): `ssh ubuntu@51.170.34.214 "cd
-  /opt/sanatorio && git pull -q --ff-only && (setsid nohup sh -c
-  'infra/scripts/backup.sh; infra/scripts/deploy.sh' > infra/deploy.log 2>&1
-  < /dev/null &)" < /dev/null` (con el paréntesis, el SSH vuelve al momento) y mirar `tail -1 infra/deploy.log` hasta «Desplegado y
-  respondiendo».
+  /opt/sanatorio && git pull -q --ff-only && (setsid nohup
+  infra/scripts/deploy.sh > infra/deploy.log 2>&1 < /dev/null &)" < /dev/null`
+  (con el paréntesis, el SSH vuelve al momento) y mirar `tail -1
+  infra/deploy.log` hasta «Desplegado y respondiendo». Ya no hace falta
+  `backup.sh;` delante: `deploy.sh` hace la copia (y con `&&`, no `;`).
+- **Registro de la API** (desde el 2026-10-23): siempre encendido a `warn`
+  (`LOG_LEVEL`); un `500` deja una línea JSON con `reqId`, el mismo valor que la
+  cabecera `x-request-id` de la respuesta. Para buscar lo que cuenta alguien:
+  `docker logs --since 1h sanatorio-app-1 | grep <id>`. Sin cuerpos ni cookies.
 - **Máquina** (desde el 2026-10-22, 23:40): la misma instancia de Oracle
   (`VM.Standard.A1.Flex`, Madrid, IP 51.170.34.214) ampliada en el sitio a
   **4 OCPU, 24 GB y 200 GB de disco**, el máximo gratuito con pago por uso
@@ -39,10 +53,12 @@ que hacer, en orden. Este documento es el porqué; aquel, el qué.
   update`; la partición la creció cloud-init al reiniciar. No pedir más: se
   cobraría.
 - **Cupo de GitHub**: la API pública da 60 consultas por hora a la IP del
-  servidor. `deploy.sh` consulta la CI a los 4 minutos y luego una por minuto,
-  mira antes el cupo en `/rate_limit` (gratis) y, si solo queda el 10 % de
-  reserva, para y dice cuándo se renueva. Alberto pidió (2026-10-22) no pasar
-  del 90 %: agrupar los cambios en pocos despliegues.
+  servidor. Desde el 2026-10-23 `deploy.sh` **no la usa**: la CI publica el
+  veredicto como etiqueta de git (`ci-ok/<sha>` o `ci-ko/<sha>`, trabajo
+  `veredicto` de `ci.yml`, que borra las de más de 30 días) y el guion la mira
+  con `git ls-remote` por SSH. El cupo solo lo gasta leer el fallo de una CI
+  desde el portátil; sigue valiendo la regla de Alberto (2026-10-22) de no
+  pasar del 90 % y agrupar los cambios en pocos despliegues.
 - Los cambios de la web se prueban con `npm run dev:mock` y Chrome sin ventana.
 
 ## Estado a 2026-10-22
@@ -338,6 +354,43 @@ conviene agotar la sesión en otras tareas si él avisa de que va justa.
   enseña a cada quien su número y por cuál va, como un tique de sala de espera
   de hospital. Hecho.
 - **Administración**: `albrodri` es admin (`ADMIN_LOGINS` en local y producción).
+
+## Datos personales: qué se guarda, qué se da y qué se borra
+
+Estado a 2026-10-23, tras el hallazgo M6/M7 de `revision-2026-10/seguridad-api.md`.
+
+- **Qué se guarda y por qué**. Dos bloques, que la descarga (`GET /me/export`)
+  etiqueta con `source`: la **réplica de 42** (`users`, `project_users`,
+  `corrections`, `presence`, `exam_attempts`…), que es lo que 42 ya publica al
+  campus y se copia para no pedirlo a cada clic; y lo **de la app**
+  (`sanatorio`): lo que cada cual hace aquí (guardia, reservas, terapias,
+  tablón, pizarras, XP, mensajes, juegos, uso). Se conserva mientras la cuenta
+  exista porque la XP, las horas validadas (que Alberto quiere usar para
+  negociar *compensation days*) y los informes del staff dependen de poder
+  reconstruir el historial; nada se borra solo por viejo.
+- **Qué se da**. Cada módulo declara sus tablas en `personal` (`core/db/personal-data.ts`);
+  un test recorre el esquema entero y falla si una columna de persona queda sin
+  declarar. En las tablas «entre dos» cada parte se lleva lo suyo (`give`): la
+  nota y la etiqueta de la otra persona, el CSV de horas de otra, quién
+  reaccionó, la lista de 200 logins de un comunicado o quién bloqueó a alguien
+  no salen. Los secretos (`event_checkins.code`, `report_exports.hash`, claves
+  del staff, segundo factor) no salen nunca. Tope de 5 000 filas por tabla,
+  señalado con `truncated: true`.
+- **Qué no se da y por qué**. `git_rooms.state` (repos y comandos de todos los
+  jugadores de una partida, transitorio: lo de cada cual está en `git_progress`
+  y `git_room_players`); `staff_accounts.name` y `staff_checks.staff` (el staff
+  no tiene cuenta en la web y no descarga); `seats.host`, `presence.host`,
+  `broken_seats.host` son nombres de ordenador, no personas.
+- **Borrado de cuenta (M7): pendiente de decisión**. Hoy no hay
+  `DELETE /me` ni anonimización. El borrado administrativo por `stores` cubre
+  unas 14 tablas y ningún padre declara `children`. Cuando alguien lo pida se
+  hace a mano desde el panel y por SQL sobre la base. Decidir con Alberto: si
+  borrar o anonimizar (sustituir el login por un identificador opaco para que
+  las horas de los demás, las correcciones y los grupos sigan cuadrando),
+  qué pasa con lo que ya recibió otra persona (una reserva, un mensaje) y si
+  la réplica de 42 se borra con la cuenta o se queda porque vuelve en la
+  siguiente copia. Hasta entonces el texto legal sigue diciendo «puedes pedir
+  que se borre», y se cumple a mano.
 
 ## Pendiente de confirmar o de hacer
 

@@ -102,3 +102,12 @@ const DAY_MS = 24 * 60 * 60_000
 /** `true` si ese instante cae más allá de lo que se deja reservar. */
 export const beyondHorizon = (at: number, now: number): boolean =>
   at - now > EVENT_HORIZON_DAYS * DAY_MS
+
+/** Un instante en ISO 8601. La única forma de escribir fechas en la base. */
+export const isoAt = (ms: number): string => new Date(ms).toISOString()
+
+/** El día UTC de un instante, `AAAA-MM-DD`. */
+export const dayOf = (ms: number): string => isoAt(ms).slice(0, 10)
+
+/** Principio del día UTC de un instante, en ISO. Para los topes diarios. */
+export const startOfDayIso = (at: number): string => `${dayOf(at)}T00:00:00.000Z`

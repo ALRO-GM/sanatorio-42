@@ -13,6 +13,7 @@ import { createHelpRepository } from './help.repository.js'
 import { registerHelpRoutes } from './help.routes.js'
 import { createHelpService } from './help.service.js'
 import type { Commitments, HelpService } from './help.service.js'
+import { given } from '../../core/options.js'
 
 type HelpModuleDeps = {
   db: Db
@@ -37,17 +38,63 @@ export function createHelpModule(deps: HelpModuleDeps): HelpModule {
     agenda: deps.agenda,
     xp: deps.xp,
     attendance: deps.attendance,
-    ...(deps.notify === undefined ? {} : { notify: deps.notify }),
-    ...(deps.commitments === undefined ? {} : { commitments: deps.commitments }),
-    ...(deps.presenceOf === undefined ? {} : { presenceOf: deps.presenceOf }),
-    ...(deps.now === undefined ? {} : { now: deps.now }),
+    ...given({
+      notify: deps.notify,
+      commitments: deps.commitments,
+      presenceOf: deps.presenceOf,
+      now: deps.now,
+    }),
   })
 
   return {
     name: 'help',
     personal: [
       { table: 'help_days', logins: ['login'] },
-      { table: 'help_bookings', logins: ['helper', 'requester'] },
+      // Una reserva es de las dos partes, pero cada cual se lleva lo suyo: la
+      // nota la escribió quien pidió; `helper_tag` describe a quien ayudó y
+      // `requester_tag` a quien pidió, así que cada etiqueta va a quien describe.
+      // `news_for` siempre es una de las dos personas: solo aporta el estado.
+      {
+        table: 'help_bookings',
+        logins: ['helper', 'requester', 'news_for'],
+        give: {
+          helper: [
+            'id',
+            'campus_id',
+            'helper',
+            'requester',
+            'project_id',
+            'day',
+            'start_min',
+            'minutes',
+            'status',
+            'verified',
+            'helper_tag',
+            'xp',
+            'created_at',
+          ],
+          requester: [
+            'id',
+            'campus_id',
+            'helper',
+            'requester',
+            'project_id',
+            'day',
+            'start_min',
+            'minutes',
+            'note',
+            'status',
+            'verified',
+            'requester_tag',
+            'xp',
+            'created_at',
+          ],
+          news_for: ['id', 'status', 'news_for'],
+        },
+      },
+      // Bloquear es decisión de quien bloquea; a quien bloquearon no se le dice
+      // quién fue (la web tampoco lo enseña), solo que pasó y cuándo.
+      { table: 'help_blocks', logins: ['blocker', 'blocked'], give: { blocked: ['created_at'] } },
     ],
     service,
     routes: (app, context) => {

@@ -33,8 +33,6 @@ export function createToursModule(deps: { db: Db; now?: () => number }): ToursMo
 
       /** `GET /admin/tours` → velocidad y recuento de cada demostración. Solo admins. */
       app.get('/admin/tours', async (request, reply) => {
-        reply.header('Cache-Control', 'private, no-store')
-
         return reply.send(await service.stats(await session.actor(request)))
       })
     },

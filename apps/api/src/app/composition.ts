@@ -37,7 +37,6 @@ import type { LegalModule } from '../modules/legal/index.js'
 import { createBrokenSeats, createMapModule } from '../modules/map/index.js'
 import { createExamsModule } from '../modules/exams/index.js'
 import type { ExamsModule } from '../modules/exams/index.js'
-import { donatedPoints } from '../modules/clicker/donations.rules.js'
 import type { MapModule } from '../modules/map/index.js'
 import { createMeetModule } from '../modules/meet/index.js'
 import type { MeetModule } from '../modules/meet/index.js'
@@ -70,11 +69,9 @@ import { createUsageModule } from '../modules/usage/index.js'
 import type { UsageModule } from '../modules/usage/index.js'
 import { createTherapyModule } from '../modules/therapy/index.js'
 import type { TherapyModule } from '../modules/therapy/index.js'
-
-/** Cada cuánto se anota, como mucho, que alguien sigue con la web abierta. */
-const PRESENCE_BEAT_MS = 60_000
-/** La web pregunta el pulso cada pocos minutos: pasado esto sin señales, se fue. */
-const PRESENCE_WINDOW_MS = 6 * 60_000
+import { given } from '../core/options.js'
+import { createLate } from '../core/late.js'
+import { createPresence } from '../modules/presence/index.js'
 
 type CompositionConfig = {
   sync: SyncerConfig
@@ -149,30 +146,53 @@ type Composition = {
 export function compose(db: Db, client: FortyTwoClient, config: CompositionConfig): Composition {
   const events = createEventBus()
   const clock = config.now === undefined ? {} : { now: config.now }
+  const now = config.now ?? Date.now
+  // Lo que se monta después y otros preguntan antes: se conecta con
+  // `late.wire()` al final. Nadie lo usa mientras se construye.
+  const late = createLate<{
+    admin: AdminModule
+    calendar: CalendarModule
+    clicker: ClickerModule
+    exams: ExamsModule
+    help: HelpModule
+    modules: AppModule[]
+    network: NetworkModule
+    usage: UsageModule
+  }>()
 
-  // Con un corte por el límite del plan no se pide nada a 42. Quien lo sabe es
-  // `admin`, que se monta después: de momento, nadie está cortado.
-  let halted = (): boolean => false
   // Quién pasa sin turno en la cola de 42: quien administra por configuración y
   // quien tiene el permiso desde el panel. Esto último vive en la base y la
   // cola pregunta sin esperar, así que se guarda una copia que se pone al día
   // (como mucho, una vez por minuto) cuando se mira.
   let panelAdmins: ReadonlySet<string> = new Set()
-  let refreshPanelAdmins = (): void => undefined
+  let adminsAt = Number.NEGATIVE_INFINITY
+  const refreshPanelAdmins = (): void => {
+    if (!late.ready() || now() - adminsAt < 60_000) return
+    adminsAt = now()
+    late
+      .get('admin')
+      .service.adminLogins()
+      .then(
+        (logins) => {
+          panelAdmins = new Set(logins)
+        },
+        () => undefined,
+      )
+  }
 
   const replica = createReplicaModule({
     db,
     client,
     config: config.sync,
-    ...(config.backgroundSync === undefined ? {} : { backgroundSync: config.backgroundSync }),
+    ...given({ backgroundSync: config.backgroundSync }),
     priority: (login) => {
       refreshPanelAdmins()
 
       return (config.admins ?? []).includes(login) || panelAdmins.has(login)
     },
-    halted: () => halted(),
-    ...(config.photos === undefined ? {} : { photos: config.photos }),
-    ...(config.log === undefined ? {} : { log: config.log }),
+    // Con un corte por el límite del plan no se pide nada a 42. Lo sabe `admin`.
+    halted: () => late.ready() && late.get('admin').service.halted(),
+    ...given({ photos: config.photos, log: config.log }),
     ...clock,
   })
   // El Pomodoro va pronto: la sala de espera y el plano preguntan quién está concentrado.
@@ -186,44 +206,33 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     ...common,
     curriculum: replica.curriculum,
     events,
-    // `clicker` se monta después: para cuando alguien pregunte ya estará.
     hacker: async (login) => {
-      const caught = await clicker.service.caughtOf(login)
+      const caught = await late.get('clicker').service.caughtOf(login)
 
       return { title: hackerTitle(caught), caught }
     },
-    // `network` también se monta después.
     master: async (login) =>
-      [...(await network.correctedByProject(login)).values()].filter((times) => times >= MASTER_AT)
-        .length,
+      [...(await late.get('network').correctedByProject(login)).values()].filter(
+        (times) => times >= MASTER_AT,
+      ).length,
   })
-
-  // Presencia: quién tiene la web abierta. Se anota como mucho una vez por
-  // minuto y persona, que es de sobra para un "está conectado".
-  const beats = new Map<string, number>()
-  const now = config.now ?? Date.now
-  const beat = (login: string): void => {
-    if (now() - (beats.get(login) ?? 0) < PRESENCE_BEAT_MS) return
-
-    beats.set(login, now())
-    void profile.profiles.touch(login, new Date(now()).toISOString()).catch(() => undefined)
-  }
-  const online = (): Promise<Set<string>> =>
-    profile.profiles.seenSince(new Date(now() - PRESENCE_WINDOW_MS).toISOString())
+  const presence = createPresence({
+    profiles: profile.profiles,
+    replica: replica.repository,
+    ...clock,
+  })
+  const online = presence.online
 
   const broadcasts = createBroadcastsModule({ db, ...clock })
   const notices = createNoticesModule({
     db,
     events,
     quota: replica.quota,
-    onPulse: beat,
+    onPulse: presence.beat,
     broadcasts: (actor) => broadcasts.service.count(actor),
-    // `clicker` se monta después: para cuando alguien pregunte ya estará.
-    clickerReviews: async (actor) => (await clicker.service.reviews(actor)).length,
-    // `help` también se monta después.
-    help: (actor) => help.service.inboxCount(actor),
-    // `exams`, también.
-    examLive: (actor) => exams.live.running(actor),
+    clickerReviews: async (actor) => (await late.get('clicker').service.reviews(actor)).length,
+    help: (actor) => late.get('help').service.inboxCount(actor),
+    examLive: (actor) => late.get('exams').live.running(actor),
     ...clock,
   })
 
@@ -234,10 +243,9 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     curriculum: replica.curriculum,
     xp: profile.xp,
     notify,
-    // `network` se monta después: para cuando alguien pregunte ya estará.
     corrections: {
-      byProject: (login) => network.correctedByProject(login),
-      since: (campusId, since) => network.correctedSince(campusId, since),
+      byProject: (login) => late.get('network').correctedByProject(login),
+      since: (campusId, since) => late.get('network').correctedSince(campusId, since),
     },
   })
   const attendance = createAttendanceModule({
@@ -275,14 +283,16 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
       available: (await peers.availability.get(login)).available,
       seat: await peers.peers.locationOf(login),
     }),
-    // `calendar` se monta después (necesita la guardia): para cuando alguien pregunte ya estará.
+    // `calendar` se monta después: necesita la guardia.
     commitments: async (who, refresh, from, to) =>
-      calendar.service.commitments(
-        who,
-        refresh ? await replica.repository.userIdOf(who.login) : null,
-        from,
-        to,
-      ),
+      late
+        .get('calendar')
+        .service.commitments(
+          who,
+          refresh ? await replica.repository.userIdOf(who.login) : null,
+          from,
+          to,
+        ),
   })
   const calendar = createCalendarModule({
     replica: replica.repository,
@@ -300,7 +310,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     hourlyReserve: config.sync.hourlyReserve,
     quota: replica.quota,
     isActive: () => replica.sync.isActive(),
-    ...(config.log === undefined ? {} : { log: config.log }),
+    ...given({ log: config.log }),
     ...clock,
   })
 
@@ -313,19 +323,14 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     campusIds: config.sync.trackedCampusIds,
     hourlyReserve: config.sync.hourlyReserve,
     quota: replica.quota,
-    ...(config.log === undefined ? {} : { log: config.log }),
+    ...given({ log: config.log }),
     ...clock,
   })
 
   const staff = createStaffModule({ db, ...clock })
   const facility = createFacilityModule({
     db,
-    seatOf: async (campusId, login) => {
-      const since = new Date(now() - PRESENCE_WINDOW_MS).toISOString()
-      const present = await replica.repository.presenceIn(campusId, since)
-
-      return present.find((person) => person.login === login)?.host ?? null
-    },
+    seatOf: presence.seatOf,
     slack: config.slack ?? null,
     markBroken: (actor, host) => map.service.reportBroken(actor, host),
     staffActive: (id) => staff.service.active(id),
@@ -350,12 +355,11 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     db,
     fixedAdmins: config.admins ?? [],
     fortyTwoRemaining: () => client.hourlyRemaining(),
-    ...(config.guardLevel === undefined ? {} : { guardLevel: config.guardLevel }),
+    ...given({ guardLevel: config.guardLevel }),
     notify,
     settle: (about) => events.emit('notice.settled', about),
-    ...(config.secret === undefined ? {} : { secret: config.secret }),
-    // Los demás módulos se montan después: para cuando alguien pregunte ya estarán.
-    stores: () => modules.flatMap((module) => module.stores ?? []),
+    ...given({ secret: config.secret }),
+    stores: () => late.get('modules').flatMap((module) => module.stores ?? []),
     ...clock,
   })
 
@@ -364,8 +368,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     replica: replica.repository,
     topCorrectors: (campusId, limit) => network.topCorrectors(campusId, limit),
     partnersOf: (campusId, login, limit) => network.partnersOf(campusId, login, limit),
-    // `usage` se monta después: para cuando alguien pregunte ya estará.
-    timeOn: (key, from, to) => usage.service.timeOn(key, from, to),
+    timeOn: (key, from, to) => late.get('usage').service.timeOn(key, from, to),
     brand: async (login, title) => {
       const before = (await profile.profiles.get(login))?.title ?? null
 
@@ -376,13 +379,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     notify,
     admins: () => admin.service.adminLogins(),
     // Lo donado a la bolsa: una petición a 42 al día por persona, si hay cuota.
-    donated: async (login) => {
-      const userId = await replica.repository.userIdOf(login)
-
-      if (userId === null || !replica.quota.allows('deferrable')) return null
-
-      return donatedPoints(await client.getCorrectionPoints(userId))
-    },
+    pointMoves: (login) => replica.points.movesOf(login),
     ...clock,
   })
 
@@ -392,33 +389,17 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     circles: (track) => replica.curriculum.circles(track),
     ...clock,
   })
-  // `modules` se monta justo después: para cuando alguien descargue sus datos ya estará.
   const legal = createLegalModule({
     db,
-    personal: () => modules.flatMap((module) => module.personal ?? []),
+    personal: () => late.get('modules').flatMap((module) => module.personal ?? []),
     ...clock,
   })
 
-  halted = () => admin.service.halted()
-  let adminsAt = Number.NEGATIVE_INFINITY
-
-  refreshPanelAdmins = () => {
-    const at = (config.now ?? Date.now)()
-
-    if (at - adminsAt < 60_000) return
-    adminsAt = at
-    admin.service.adminLogins().then(
-      (logins) => {
-        panelAdmins = new Set(logins)
-      },
-      () => undefined,
-    )
-  }
   const usage = createUsageModule({
     db,
     replica: replica.repository,
     traffic: (from, to, login) => admin.service.traffic(from, to, login),
-    online: () => profile.profiles.online(new Date(now() - PRESENCE_WINDOW_MS).toISOString()),
+    online: presence.onlineList,
     ...clock,
   })
 
@@ -466,6 +447,8 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     focus,
     gitCourse,
   ]
+
+  late.wire({ admin, calendar, clicker, exams, help, modules, network, usage })
 
   return {
     events,

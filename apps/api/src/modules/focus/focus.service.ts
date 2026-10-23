@@ -14,9 +14,11 @@ import type { Db } from '../../core/db/database.js'
 import { toText } from '../../core/db/rows.js'
 import { domainError } from '../../core/errors.js'
 import { day, parse } from '../../core/validation.js'
+import { inList, listArg } from '../../core/db/sql.js'
 import { segmentOf } from '../usage/index.js'
 import { averageOf, focusedByLogin, positionOf, REASONS, settle, summarize } from './focus.rules.js'
 import type { SessionLog } from './focus.sessions.js'
+import { isoAt } from '../../core/time.js'
 
 const DEFAULT_FOCUS: FocusSettings = {
   focusMinutes: 25,
@@ -43,6 +45,9 @@ const exitSchema = z
   })
   .default({ reasons: [] })
 
+/** Gente mínima del tramo con el que se compara cada cual. */
+const MIN_BAND_PEOPLE = 5
+
 /** Del 0 al 100: el tramo de gente, de quien menos lo usa a quien más. */
 const share = z.coerce.number().int().min(0).max(100)
 
@@ -64,8 +69,8 @@ export function createFocusRepository(db: Db) {
       if (logins.length === 0) return new Map()
 
       const result = await db.execute({
-        sql: `SELECT login, until FROM focus WHERE until > ? AND login IN (${logins.map(() => '?').join(', ')})`,
-        args: [now, ...logins],
+        sql: `SELECT login, until FROM focus WHERE until > ? AND ${inList('login')}`,
+        args: [now, listArg(logins)],
       })
 
       return new Map(result.rows.map((row) => [toText(row.login), toText(row.until)]))
@@ -112,8 +117,6 @@ export function createFocusService(
   log: SessionLog,
   now: () => number = Date.now,
 ) {
-  const iso = (ms: number): string => new Date(ms).toISOString()
-
   async function view(login: string): Promise<Focus> {
     const found = await focus.get(login)
     const active = found !== null && Date.parse(found.until) > now()
@@ -140,28 +143,31 @@ export function createFocusService(
   function period(input: unknown) {
     const asked = parse(statsSchema, input ?? {})
     const shift = asked.offset * 60_000
-    const to = asked.to ?? iso(now() + shift).slice(0, 10)
+    const to = asked.to ?? isoAt(now() + shift).slice(0, 10)
     const from = asked.from ?? null
 
     if (from !== null && from > to) throw domainError('invalid_input', 'from: va antes que to')
 
-    const at = (local: string): string => iso(Date.parse(`${local}T00:00:00.000Z`) - shift)
+    const at = (local: string): string => isoAt(Date.parse(`${local}T00:00:00.000Z`) - shift)
 
     return {
       ...asked,
       from,
       to,
       since: from === null ? null : at(from),
-      until: iso(Date.parse(at(to)) + 86_400_000),
+      until: isoAt(Date.parse(at(to)) + 86_400_000),
     }
   }
 
-  /** Todas las sesiones del periodo y el tramo pedido de gente, por tiempo concentrado. */
-  async function chosen(input: unknown) {
+  /**
+   * Todas las sesiones del periodo y el tramo pedido de gente, por tiempo
+   * concentrado. Con `minPeople`, el tramo tiene al menos esa gente.
+   */
+  async function chosen(input: unknown, minPeople = 0) {
     const asked = period(input)
     const sessions = await log.between(asked.since, asked.until)
     const activity = focusedByLogin(sessions, now())
-    const segment = segmentOf(activity, asked.low, asked.high)
+    const segment = segmentOf(activity, asked.low, asked.high, minPeople)
 
     return { asked, sessions, activity, segment }
   }
@@ -176,9 +182,9 @@ export function createFocusService(
       const before = await running(actor.login)
 
       // Volver a empezar no es rendirse: la de antes cuenta su tiempo, sin motivos.
-      if (before !== null) await log.close(before.id, iso(t), 'replaced', [])
-      await focus.save(actor.login, iso(t), iso(t + settings.focusMinutes * 60_000), settings)
-      await log.open(actor.login, iso(t), settings.focusMinutes * 60)
+      if (before !== null) await log.close(before.id, isoAt(t), 'replaced', [])
+      await focus.save(actor.login, isoAt(t), isoAt(t + settings.focusMinutes * 60_000), settings)
+      await log.open(actor.login, isoAt(t), settings.focusMinutes * 60)
 
       return view(actor.login)
     },
@@ -192,8 +198,9 @@ export function createFocusService(
       const found = await focus.get(actor.login)
       const open = await running(actor.login)
 
-      if (found !== null) await focus.save(actor.login, found.startedAt, iso(now()), found.settings)
-      if (open !== null) await log.close(open.id, iso(now()), 'cancelled', reasons)
+      if (found !== null)
+        await focus.save(actor.login, found.startedAt, isoAt(now()), found.settings)
+      if (open !== null) await log.close(open.id, isoAt(now()), 'cancelled', reasons)
 
       return view(actor.login)
     },
@@ -216,7 +223,9 @@ export function createFocusService(
      * elegido de quienes lo usan (`low`–`high`, de menos a más tiempo).
      */
     async myStats(actor: Actor, input: unknown): Promise<MyFocusStats> {
-      const { asked, sessions, activity, segment } = await chosen(input)
+      // Cualquiera puede mirar esto: el tramo no baja de cinco personas, para
+      // que la media no sea la de alguien en concreto.
+      const { asked, sessions, activity, segment } = await chosen(input, MIN_BAND_PEOPLE)
       const mine = sessions.filter((session) => session.login === actor.login)
       const band = sessions.filter((session) => segment.keep(session.login))
 

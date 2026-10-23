@@ -7,6 +7,7 @@ import type { QuizSettings, QuizTeam } from '@sanatorio/contracts'
 
 import type { Db } from '../../core/db/database.js'
 import { toNumber, toText } from '../../core/db/rows.js'
+import { inList, listArg } from '../../core/db/sql.js'
 import type { Round } from './quiz.rules.js'
 
 export type RoomRow = {
@@ -441,9 +442,9 @@ export function createQuizRepository(db: Db) {
       const result = await db.execute({
         sql: `SELECT u.login, p.slug FROM project_users pu
               JOIN users u ON u.id = pu.user_id JOIN projects p ON p.id = pu.project_id
-              WHERE u.login IN (${logins.map(() => '?').join(', ')})
+              WHERE ${inList('u.login')}
                 AND (pu.status = 'in_progress' OR (pu.status = 'finished' AND pu.validated = 1))`,
-        args: [...logins],
+        args: [listArg(logins)],
       })
 
       for (const row of result.rows) found.get(toText(row.login))?.add(toText(row.slug))

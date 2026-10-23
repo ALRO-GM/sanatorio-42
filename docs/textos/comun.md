@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/comun.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-272 textos. «—» es que falta la traducción: sale en español.
+276 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -28,6 +28,7 @@ Generado desde `apps/web/src/shared/i18n/textos/comun.csv` con
 | `legal.notAccepted` | Estado: no has aceptado la versión vigente de las condiciones | features/legal/LegalPage | Aún no has aceptado esta versión. | You haven't accepted this version yet. | Encara no has acceptat aquesta versió. | Oraindik ez duzu bertsio hau onartu. |
 | `legal.acceptedOn` | Estado: fecha en que aceptaste las condiciones | features/legal/LegalPage | Aceptaste esta versión el {date}. | You accepted this version on {date}. | Vas acceptar aquesta versió el {date}. | Bertsio hau {date}(e)an onartu zenuen. |
 | `legal.export` | Botón para descargar todos tus datos en un fichero | features/legal/LegalPage | Descargar mis datos | Download my data | Descarrega les meves dades | Deskargatu nire datuak |
+| `legal.exportHint` | Nota bajo el botón de descargar tus datos: de dónde sale cada tabla y que una muy larga va recortada | features/legal/LegalPage | Cada tabla dice de dónde sale (42 o Sanatorio). Si alguna pasa de 5000 filas, va recortada y lo marca con «truncated». | Each table says where it comes from (42 or Sanatorio). If one has more than 5,000 rows it is cut short and marked «truncated». | Cada taula diu d'on surt (42 o Sanatorio). Si alguna passa de 5000 files, va retallada i ho marca amb «truncated». | Taula bakoitzak nondik datorren dio (42 edo Sanatorio). Batek 5000 lerro baino gehiago baditu, moztuta doa eta «truncated» markarekin adierazten du. |
 | `legal.gateKind` | Encabezado de la ventana obligatoria de condiciones | features/legal/LegalGate | Antes de seguir | Before you go on | Abans de continuar | Jarraitu aurretik |
 | `legal.readAll` | Enlace para abrir el texto legal completo | features/legal/LegalGate | Leer el texto entero | Read the full text | Llegeix el text sencer | Irakurri testu osoa |
 | `legal.accept` | Botón para aceptar las condiciones y seguir | features/legal/LegalGate | Lo he leído y lo acepto | I have read it and I accept | L'he llegit i l'accepto | Irakurri dut eta onartzen dut |
@@ -107,7 +108,10 @@ Generado desde `apps/web/src/shared/i18n/textos/comun.csv` con
 | `layout.open` | Menú de la cuenta: abrir la personalización | app/Header, features/admin/StatsPanel, features/admin/UsageHeatmap, shared/layout/Blocks, shared/layout/LayoutSettings | Personalizar la web | Customise the site | Personalitza la web | Pertsonalizatu weba |
 | `layout.title` | Título de la ventana de personalización | features/admin/StatsPanel, features/admin/UsageHeatmap, shared/layout/Blocks, shared/layout/LayoutSettings | Personalizar | Customise | Personalitza | Pertsonalizatu |
 | `layout.customizeHere` | Enlace al final de una página con bloques: abre Personalizar | features/admin/StatsPanel, features/admin/UsageHeatmap, shared/layout/Blocks, shared/layout/LayoutSettings | Ordenar o plegar estos bloques | Reorder or fold these blocks | Ordena o plega aquests blocs | Blokeak ordenatu edo tolestu |
-| `layout.close` | Botón para cerrar una ventana | features/admin/Inbox, features/admin/StatsPanel, features/admin/UsageHeatmap, features/focus/FocusDialog, features/map/SeatHoverCard, features/notices/Mailbox, shared/layout/Blocks, shared/layout/LayoutSettings, shared/ui/InfoTip | Cerrar | Close | Tanca | Itxi |
+| `layout.close` | Botón para cerrar una ventana | features/admin/StatsPanel, features/admin/UsageHeatmap, features/map/SeatHoverCard, shared/layout/Blocks, shared/layout/LayoutSettings, shared/ui/Modal | Cerrar | Close | Tanca | Itxi |
+| `confirm.title` | Título de la ventana que pide confirmar algo que no se deshace | shared/ui/useConfirm | ¿Lo confirmas? | Are you sure? | Ho confirmes? | Baieztatzen duzu? |
+| `confirm.ok` | Botón para confirmar en la ventana de confirmación (si no se dice otro verbo) | shared/ui/useConfirm | Sí, adelante | Yes, go ahead | Sí, endavant | Bai, aurrera |
+| `confirm.cancel` | Botón para no hacerlo en la ventana de confirmación | shared/ui/useConfirm | Mejor no | Not now | Millor no | Hobe ez |
 | `layout.done` | Botón para terminar y cerrar la personalización | features/admin/StatsPanel, features/admin/UsageHeatmap, shared/layout/Blocks, shared/layout/LayoutSettings | Listo | Done | Fet | Eginda |
 | `layout.reset` | Botón para volver al orden original | features/admin/StatsPanel, features/admin/UsageHeatmap, shared/layout/Blocks, shared/layout/LayoutSettings | Volver al orden de fábrica | Back to the default order | Torna a l'ordre de fàbrica | Itzuli fabrikako ordenara |
 | `layout.mode` | Personalizar: quién decide el orden de pestañas y bloques | features/admin/StatsPanel, features/admin/UsageHeatmap, shared/layout/Blocks, shared/layout/LayoutSettings | Quién decide el orden | Who decides the order | Qui decideix l'ordre | Nork erabakitzen du ordena |

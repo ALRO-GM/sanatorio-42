@@ -47,7 +47,10 @@ export type AppModule = {
   readonly stores?: readonly DataStore[]
   /**
    * Las tablas del módulo con datos de una persona: es lo que se le da al
-   * descargar sus datos (`GET /me/export`). Toda tabla con un login va aquí.
+   * descargar sus datos (`GET /me/export`). Toda tabla con un login va aquí,
+   * también la columna de «quién hizo algo» (`*_by`, `validator`, `host`…); en
+   * las tablas «entre dos», `give` recorta la fila a lo de cada parte. Un test
+   * recorre el esquema y avisa de la columna que falte.
    */
   readonly personal?: readonly PersonalTable[]
   /** Arranca el trabajo de fondo, si lo tiene. Solo lo llama `main.ts`. */

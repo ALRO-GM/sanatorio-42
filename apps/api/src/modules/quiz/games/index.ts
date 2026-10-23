@@ -12,6 +12,7 @@ import type { ChessBoard } from './chess.game.js'
 import { createTurnsRepository } from './turns.repository.js'
 import { createTurnsService } from './turns.service.js'
 import type { TurnGameState } from './turns.service.js'
+import { given } from '../../../core/options.js'
 
 type ChessDeps = {
   db: Db
@@ -31,8 +32,7 @@ export function createChessService(deps: ChessDeps) {
     bank: deps.bank,
     circlesOf: deps.circlesOf,
     imagesOf: deps.imagesOf,
-    ...(deps.now === undefined ? {} : { now: deps.now }),
-    ...(deps.random === undefined ? {} : { random: deps.random }),
+    ...given({ now: deps.now, random: deps.random }),
   })
 }
 

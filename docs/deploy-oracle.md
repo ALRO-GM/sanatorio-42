@@ -77,7 +77,43 @@ En la máquina:
 /opt/sanatorio/infra/scripts/deploy.sh
 ```
 
-Actualiza el código, reconstruye, y espera a que la app responda.
+La secuencia, con una barrera en cada paso (`set -e`: lo que falla, para):
+
+1. **Cerrojo** (`flock` sobre `/tmp/sanatorio-deploy.lock`): dos despliegues a
+   la vez no pueden correr; el segundo sale diciendo que ya hay uno.
+2. **`git pull` y espera a la CI** de ese commit. La CI de GitHub, al acabar en
+   `main`, publica una etiqueta en el propio repositorio: `ci-ok/<sha>` si todo
+   pasó, `ci-ko/<sha>` si algo falló. `deploy.sh` la mira cada 30 s con
+   `git ls-remote` por el mismo SSH que el `pull`: **sin la API de GitHub y sin
+   su cupo** de 60 consultas por hora. Hasta 20 minutos (`CI_WAIT_S`). Si
+   aparece `ci-ko`, o `main` ya apunta a otro commit (la CI se canceló), para y
+   lo dice. Solo con GitHub caído: `SIN_CI=1 infra/scripts/deploy.sh`.
+3. **Copia de seguridad comprobada**: `backup.sh` (`PRAGMA integrity_check`
+   sobre la copia y `gzip -t`), que deja la ruta de la última buena en
+   `infra/backups/ultima`. Si ya hay una de hace menos de 10 minutos, vale esa.
+   Sin copia buena no se sigue.
+4. La imagen que funciona se etiqueta `sanatorio-42:previous` y se construye la
+   nueva con el commit dentro (`GIT_SHA`, que `/health/db` devuelve).
+5. **Migraciones aparte, antes de tocar el contenedor**:
+   `docker compose run --rm app node dist/cli/migrate.js` con la imagen nueva.
+   Si fallan, el contenedor viejo sigue sirviendo con el esquema viejo (cada
+   migración es atómica), se avisa a Slack y se sale con error.
+6. `docker compose up -d` y hasta **180 s** a que `GET /health/db` responda con
+   `version` igual al commit subido, `schema.actual === schema.expected` y la
+   web (`/`) en 200.
+7. Si no responde: vuelta a `sanatorio-42:previous` y, si el paso 5 aplicó
+   alguna migración, `restore.sh --yes <copia del paso 3>` (el código anterior
+   no arranca con un esquema más nuevo; lo escrito entre la copia y la vuelta
+   atrás se pierde). Aviso a Slack con el motivo.
+
+Los avisos salen por `infra/scripts/notify-slack.sh`, que usa el
+`SLACK_WEBHOOK_URL` de `infra/.env`; sin webhook no avisa y no pasa nada. Todo
+queda en `infra/deploy.log` cuando se lanza con `nohup` (ver `docs/contexto.md`).
+
+Para leer el registro de la app (errores `500` con su `x-request-id`):
+`docker logs --since 1h sanatorio-app-1 | grep '"level":50'`. El nivel se
+regula con `LOG_LEVEL` en `infra/.env` (`warn` por defecto; `LOG_REQUESTS=true`
+registra además cada petición).
 
 **Desde GitHub** (opcional): el workflow `Deploy` construye la imagen para x86
 y ARM, la publica en GHCR y lanza ese mismo script por SSH. Necesita:
@@ -160,13 +196,22 @@ eligible".
 ## Copias de seguridad
 
 ```sh
-infra/scripts/backup.sh                       # a infra/backups/, guarda las 14 últimas
+infra/scripts/backup.sh                       # a infra/backups/, comprobada, guarda las 14 últimas
 infra/scripts/restore.sh infra/backups/<copia>.db.gz
+infra/scripts/restore.sh --yes <copia>        # sin preguntar (lo usa deploy.sh al volver atrás)
 ```
+
+Cada copia pasa `PRAGMA integrity_check` y `gzip -t` antes de darse por buena;
+la ruta de la última buena queda en `infra/backups/ultima`.
 
 El cloud-init programa una cada noche a las 04:00. Esas copias están en la
 misma máquina que la base: para sacarlas fuera, configura `rclone` con un bucket
-(Oracle Object Storage tiene capa gratuita) y define `BACKUP_REMOTE` en el cron.
+(Oracle Object Storage tiene capa gratuita) y define `BACKUP_REMOTE` en el cron,
+junto con `BACKUP_PASSPHRASE_FILE`: un fichero solo legible por el usuario del
+cron con la frase (`openssl rand -base64 48 > ~/.sanatorio-backup-frase && chmod
+600 …`). Lo que sube va cifrado con ella (AES-256, gpg) y sin ella no sube nada.
+Guarda la frase también fuera de la máquina: sin ella las copias de fuera no se
+pueden abrir.
 
 Lo que importa de la copia es lo propio (guardias, XP, grupos, dudas,
 pizarras). La réplica de 42 se puede volver a bajar.

@@ -7,7 +7,8 @@
 import type { StatsSectionId } from '@sanatorio/contracts'
 
 import type { Db } from '../../core/db/database.js'
-import { toNumber, toText } from '../../core/db/rows.js'
+import { toNumber, toText, toTextOrNull } from '../../core/db/rows.js'
+import { inList, listArg } from '../../core/db/sql.js'
 
 export type RankRow = { login: string; image: string | null; value: number; extra: number }
 
@@ -146,29 +147,56 @@ export function createStatsRepository(db: Db) {
       return result.columns.map((key) => ({ key, value: toNumber(row?.[key] ?? 0) }))
     },
 
-    /** La clasificación entera de una sección, de mejor a peor, sin quien no ha hecho nada. */
+    /**
+     * Los `limit` primeros de una sección, de mejor a peor, sin quien no ha
+     * hecho nada; y aparte la fila de `login` con su puesto, salga o no en
+     * esos primeros. Así la respuesta no crece con el campus: la clasificación
+     * entera no se lee nunca.
+     */
     async ranking(
       section: Exclude<StatsSectionId, 'ritmo'>,
       campus: number,
       since: string | null,
       now: string,
-    ): Promise<RankRow[]> {
+      limit: number,
+      login: string,
+    ): Promise<{ top: RankRow[]; me: (RankRow & { rank: number }) | null }> {
       const inner = QUERIES[section].ranking(campus, since, now)
-      const result = await db.execute({
-        sql: `SELECT r.login, u.image, r.value, r.extra
-              FROM (${inner.sql}) r
-              LEFT JOIN users u ON u.login = r.login
-              WHERE r.value > 0
-              ORDER BY r.value DESC, r.extra DESC, r.login`,
-        args: inner.args,
-      })
-
-      return result.rows.map((row) => ({
+      const rowOf = (row: Record<string, unknown>): RankRow => ({
         login: toText(row.login),
-        image: typeof row.image === 'string' ? row.image : null,
+        image: toTextOrNull(row.image),
         value: toNumber(row.value),
         extra: toNumber(row.extra ?? 0),
-      }))
+      })
+      const [top, mine] = await Promise.all([
+        db.execute({
+          sql: `SELECT r.login, u.image, r.value, r.extra
+                FROM (${inner.sql}) r
+                LEFT JOIN users u ON u.login = r.login
+                WHERE r.value > 0
+                ORDER BY r.value DESC, r.extra DESC, r.login
+                LIMIT ?`,
+          args: [...inner.args, limit],
+        }),
+        // El puesto propio: uno más que quienes van por delante (misma regla
+        // de empate que `ranked`: igual valor y extra, mismo puesto).
+        db.execute({
+          sql: `SELECT r.login, u.image, r.value, r.extra,
+                       (SELECT COUNT(*) FROM (${inner.sql}) o
+                         WHERE o.value > 0
+                           AND (o.value > r.value OR (o.value = r.value AND o.extra > r.extra))) + 1 AS rank
+                FROM (${inner.sql}) r
+                LEFT JOIN users u ON u.login = r.login
+                WHERE r.login = ? AND r.value > 0`,
+          args: [...inner.args, ...inner.args, login],
+        }),
+      ])
+      const me = mine.rows[0]
+
+      return {
+        top: top.rows.map(rowOf),
+        me: me === undefined ? null : { ...rowOf(me), rank: toNumber(me.rank) },
+      }
     },
   }
 }
@@ -238,8 +266,8 @@ export function createProgressRepository(db: Db) {
       if (ids.length === 0) return new Map()
 
       const result = await db.execute({
-        sql: `SELECT id, slug, hours FROM projects WHERE id IN (${ids.map(() => '?').join(', ')})`,
-        args: [...ids],
+        sql: `SELECT id, slug, hours FROM projects WHERE ${inList('id')}`,
+        args: [listArg(ids)],
       })
 
       return new Map(
@@ -265,8 +293,8 @@ export function createProgressRepository(db: Db) {
               LEFT JOIN user_levels ul ON ul.login = u.login
               LEFT JOIN user_tracks ut ON ut.login = u.login
               LEFT JOIN campus_members m ON m.user_id = u.id AND m.campus_id = ?
-              WHERE pu.project_id IN (${ids.map(() => '?').join(', ')})`,
-        args: [campus, ...ids],
+              WHERE ${inList('pu.project_id')}`,
+        args: [campus, listArg(ids)],
       })
 
       return result.rows.map((row) => ({

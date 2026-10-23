@@ -94,6 +94,22 @@ describe('estadísticas de Ayuda', () => {
 
     expect(board(all, 'consulta').map(([, login]) => login)).toEqual(['ana', 'eva', 'leo'])
     expect(board(all, 'consulta')[1]?.[0]).toBe(2)
+
+    // Con más gente que puestos a la vista, la clasificación se queda en diez y
+    // quien mira conserva su puesto aunque no salga: aquí `leo` cae al doce.
+    for (let index = 0; index < 11; index++) {
+      const helper = `h${String(index)}`
+
+      await booking(helper, 'uma', 1, '2026-10-05')
+      await booking(helper, 'uma', 1, '2026-10-06')
+      await booking(helper, 'uma', 1, '2026-10-07')
+    }
+
+    const crowded = await services.stats.help(actor('leo'), 'month')
+
+    expect(board(crowded, 'consulta')).toHaveLength(10)
+    expect(board(crowded, 'consulta').map(([, login]) => login)).not.toContain('leo')
+    expect(section(crowded, 'consulta').me).toMatchObject({ rank: 13, login: 'leo', value: 1 })
   })
 
   it('tablón: clasifica las respuestas que resuelven, sin contar las de la propia duda', async () => {

@@ -224,6 +224,26 @@ export type LegalStatus = {
   acceptedAt: string | null
 }
 
+/** Una tabla de `GET /me/export`. */
+export type PersonalExportTable = {
+  /** De dónde salen las filas: copiadas de la API de 42 (`42`) o hechas aquí (`sanatorio`). */
+  source: '42' | 'sanatorio'
+  /** `true` si la tabla tenía más filas que el tope (5 000) y faltan las demás. */
+  truncated: boolean
+  /** Las filas, ya recortadas a lo de la persona y sin secretos. */
+  rows: Record<string, unknown>[]
+}
+
+/** `GET /me/export`: todo lo que Sanatorio 42 guarda de quien lo pide, tabla a tabla. */
+export type PersonalExport = {
+  login: string
+  /** Cuándo se hizo la descarga (ISO-8601). */
+  exportedAt: string
+  /** Versión de la privacidad y condiciones vigente al descargar. */
+  legalVersion: string
+  tables: Record<string, PersonalExportTable>
+}
+
 /**
  * `GET /admin/growth?from=&to=&campus=22,58`: uso por campus y crecimiento
  * (#71 del buzón). Sin `campus`, todos. Días en UTC.

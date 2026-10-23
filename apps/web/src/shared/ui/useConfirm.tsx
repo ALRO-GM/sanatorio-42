@@ -7,7 +7,7 @@ import { Modal } from './Modal'
 type ConfirmOptions = {
   /** La pregunta («¿Retirar la pizarra de jdoe?»). */
   body: string
-  /** Encima de la pregunta; sin él, «¿Seguro?». */
+  /** Encima de la pregunta; sin él, «¿Lo confirmas?». */
   title?: string
   /** El botón que confirma, con su verbo («Retirar»); sin él, «Sí, adelante». */
   okText?: string

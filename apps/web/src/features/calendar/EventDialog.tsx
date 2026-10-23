@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { CalendarEvent, CalendarSection } from '@sanatorio/contracts'
 
 import { useI18n } from '../../shared/i18n'
+import { externalHref } from '../../shared/links'
 import { hasCodes, hasRoom } from '../alerts/eligible'
 import { EventRoom } from '../alerts/EventRoom'
 import { whenText } from './dates'
@@ -64,6 +65,7 @@ export function EventDialog({
   const [joining, setJoining] = useState(false)
   const [joinError, setJoinError] = useState<unknown>(null)
   // Se puede apuntar a pizarras y grupos a los que no va, si queda sitio.
+  const link = externalHref(event.url)
   const joinable =
     onJoin !== undefined &&
     event.joined === false &&
@@ -203,8 +205,8 @@ export function EventDialog({
         )}
         <ErrorNote error={joinError} />
         <footer className="actions" hidden={must !== undefined}>
-          {event.url !== null && (
-            <a className="button primary small" href={event.url} target="_blank" rel="noreferrer">
+          {link !== null && (
+            <a className="button primary small" href={link} target="_blank" rel="noreferrer">
               {t('agenda.open42')} ↗
             </a>
           )}

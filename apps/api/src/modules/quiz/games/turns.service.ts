@@ -43,6 +43,7 @@ import {
 } from '../turns.rules.js'
 import type { Side, TurnState } from '../turns.rules.js'
 import type { TurnPlayerRow, TurnRoomRow, TurnsRepository } from './turns.repository.js'
+import { isoAt } from '../../../core/time.js'
 
 /** Lo que tiene que dar cada juego. `Board` es su tablero; `View`, cómo lo ve la web. */
 export type TurnGame<Board, View> = {
@@ -111,7 +112,6 @@ export function createTurnsService<Board, View>(options: TurnsServiceOptions<Boa
   const { turns, quiz, game, bank } = options
   const now = options.now ?? Date.now
   const random = options.random ?? Math.random
-  const iso = (ms: number): string => new Date(ms).toISOString()
   const concepts = new Map(bank.map((concept) => [concept.id, concept]))
 
   type Row = TurnRoomRow<TurnGameState<Board>>
@@ -177,7 +177,7 @@ export function createTurnsService<Board, View>(options: TurnsServiceOptions<Boa
       end,
     }
 
-    await turns.save(room.id, 'done', done, iso(t))
+    await turns.save(room.id, 'done', done, isoAt(t))
 
     const players = await turns.players(room.id)
 
@@ -194,7 +194,7 @@ export function createTurnsService<Board, View>(options: TurnsServiceOptions<Boa
         // Victoria 2, tablas 1, derrota 0: que las tablas cuenten algo.
         score: end.winner === null ? 1 : end.winner === p.side ? 2 : 0,
       })),
-      iso(t),
+      isoAt(t),
     )
 
     return { ...room, status: 'done', state: done }
@@ -336,8 +336,8 @@ export function createTurnsService<Board, View>(options: TurnsServiceOptions<Boa
             prompt: round.prompt,
             code: round.code,
             options: optionsFor(round, actor.login),
-            startsAt: iso(question.startsAt),
-            endsAt: iso(question.endsAt),
+            startsAt: isoAt(question.startsAt),
+            endsAt: isoAt(question.endsAt),
             mine: question.answers.find((a) => a.side === mySide)?.option ?? null,
           }
 
@@ -373,7 +373,7 @@ export function createTurnsService<Board, View>(options: TurnsServiceOptions<Boa
       last: lastView,
       board: state === null ? null : (game.view(state.board) as TurnRoom['board']),
       end: state?.end ?? null,
-      now: iso(t),
+      now: isoAt(t),
       joinable: whyNot === null,
       whyNot,
     }
@@ -401,7 +401,7 @@ export function createTurnsService<Board, View>(options: TurnsServiceOptions<Boa
 
   return {
     async list(actor: Actor): Promise<TurnLobby[]> {
-      const rows = await turns.rooms(actor.campusId, actor.login, iso(now() - 6 * 3_600_000))
+      const rows = await turns.rooms(actor.campusId, actor.login, isoAt(now() - 6 * 3_600_000))
 
       return rows.map((room) => ({
         id: room.id,
@@ -418,9 +418,9 @@ export function createTurnsService<Board, View>(options: TurnsServiceOptions<Boa
 
       await mustBeFree(actor.login)
 
-      const id = await turns.create(actor.campusId, actor.login, settings, iso(now()))
+      const id = await turns.create(actor.campusId, actor.login, settings, isoAt(now()))
 
-      await turns.join(id, actor.login, 'a', iso(now()))
+      await turns.join(id, actor.login, 'a', isoAt(now()))
 
       return viewOf(actor, await mustRoom(id))
     },
@@ -448,7 +448,7 @@ export function createTurnsService<Board, View>(options: TurnsServiceOptions<Boa
 
         const taken = new Set(players.map((p) => p.side))
 
-        await turns.join(id, actor.login, taken.has('a') ? 'b' : 'a', iso(now()))
+        await turns.join(id, actor.login, taken.has('a') ? 'b' : 'a', isoAt(now()))
 
         return viewOf(actor, room)
       })
@@ -607,7 +607,7 @@ export function createTurnsService<Board, View>(options: TurnsServiceOptions<Boa
 
         const correct = option === round.answer
 
-        await quiz.remember(actor.login, round.conceptId, correct, iso(now()))
+        await quiz.remember(actor.login, round.conceptId, correct, isoAt(now()))
         const counts = {
           ...state.counts,
           [side]: {
@@ -644,7 +644,7 @@ export function createTurnsService<Board, View>(options: TurnsServiceOptions<Boa
     async prune(): Promise<number> {
       const t = now()
 
-      return turns.prune(iso(t - LOBBY_TTL_MS), iso(t - DONE_TTL_MS))
+      return turns.prune(isoAt(t - LOBBY_TTL_MS), isoAt(t - DONE_TTL_MS))
     },
   }
 }

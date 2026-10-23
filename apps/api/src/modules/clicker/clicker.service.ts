@@ -34,6 +34,7 @@ import type { Notify } from '../../core/events.js'
 import type { Db } from '../../core/db/database.js'
 import { toNumber, toText } from '../../core/db/rows.js'
 import { domainError } from '../../core/errors.js'
+import { createLocks } from '../../core/lock.js'
 import { parse } from '../../core/validation.js'
 import type { ReplicaRepository } from '../replica/index.js'
 import {
@@ -48,8 +49,10 @@ import {
   thin,
 } from './capital.rules.js'
 import { CLICK_HISTORY_S, overClicked } from './clicks.rules.js'
+import { donatedPoints } from './donations.rules.js'
 import type { ClickSample } from './clicks.rules.js'
 import { hackerTitle, readSave, giftShare, seizedValue, wealthOf, verdict } from './cheat.rules.js'
+import { dayOf, isoAt } from '../../core/time.js'
 
 /** Pulsaciones de la cruz que abren la pregunta de las pastillas. */
 const PLUS_GOAL = 42
@@ -153,11 +156,12 @@ export type ClickerServiceOptions = {
   admins?: () => Promise<readonly string[]>
   now?: () => number
   /**
-   * Puntos de evaluación que esa persona ha donado a la bolsa de 42, o `null`
-   * si ahora no se puede saber (sin cuota, 42 caído). Se pregunta como mucho
-   * una vez al día por persona (`DONATED_TTL_MS`).
+   * El historial de puntos de evaluación de esa persona en 42, o `null` si
+   * ahora no se puede saber (sin cuota). De ahí sale lo donado a la bolsa
+   * (`donations.rules.ts`). Se pregunta como mucho una vez al día por persona
+   * (`DONATED_TTL_MS`).
    */
-  donated?: (login: string) => Promise<number | null>
+  pointMoves?: (login: string) => Promise<readonly { reason: string; sum: number }[] | null>
 }
 
 /** Lo que tiene que escribir quien se defiende, como poco. */
@@ -181,8 +185,11 @@ function stored(value: unknown): unknown {
 export function createClickerService(options: ClickerServiceOptions) {
   const { db, replica } = options
   const now = options.now ?? Date.now
-  const iso = (): string => new Date(now()).toISOString()
+  const iso = (): string => isoAt(now())
   const notify: Notify = options.notify ?? (() => Promise.resolve())
+  // Lo que lee la partida de alguien y la vuelve a escribir va de una en una
+  // por persona: dos guardados (o un guardado y un indulto) a la vez no se pisan.
+  const locked = createLocks()
 
   /**
    * `clicks` si pulsa más de lo que aguanta una persona, o `null`. Se mira lo
@@ -323,13 +330,15 @@ export function createClickerService(options: ClickerServiceOptions) {
     const known = toNumber(found?.donated ?? 0)
     const at = typeof found?.donated_at === 'string' ? Date.parse(found.donated_at) : 0
 
-    if (options.donated === undefined || now() - at < DONATED_TTL_MS) return known
+    if (options.pointMoves === undefined || now() - at < DONATED_TTL_MS) return known
 
     // Sin cuota se vuelve a intentar en la siguiente visita; si 42 falla, mañana:
     // no se le pregunta en cada visita algo que no va a contestar.
-    const fresh = await options.donated(login).catch(() => 'failed' as const)
+    const moves = await options.pointMoves(login).catch(() => 'failed' as const)
 
-    if (fresh === null) return known
+    if (moves === null) return known
+
+    const fresh = moves === 'failed' ? moves : donatedPoints(moves)
 
     await db.execute({
       sql: 'UPDATE clicker SET donated = ?, donated_at = ? WHERE login = ?',
@@ -372,20 +381,23 @@ export function createClickerService(options: ClickerServiceOptions) {
      */
     async plus(actor: Actor, input: unknown): Promise<{ plus: number; pill: Pill | null }> {
       const { count } = parse(plusSchema, input)
-      const before = await row(actor.login)
 
-      if (pillOf(before) !== null) {
-        return { plus: toNumber(before?.plus ?? 0), pill: pillOf(before) }
-      }
+      return locked(actor.login, async () => {
+        const before = await row(actor.login)
 
-      await db.execute({
-        sql: `INSERT INTO clicker (login, plus, updated_at) VALUES (?, ?, ?)
+        if (pillOf(before) !== null) {
+          return { plus: toNumber(before?.plus ?? 0), pill: pillOf(before) }
+        }
+
+        await db.execute({
+          sql: `INSERT INTO clicker (login, plus, updated_at) VALUES (?, ?, ?)
               ON CONFLICT (login) DO UPDATE SET plus = plus + excluded.plus,
                                                 updated_at = excluded.updated_at`,
-        args: [actor.login, count, iso()],
-      })
+          args: [actor.login, count, iso()],
+        })
 
-      return { plus: toNumber(before?.plus ?? 0) + count, pill: null }
+        return { plus: toNumber(before?.plus ?? 0) + count, pill: null }
+      })
     },
 
     /**
@@ -395,21 +407,24 @@ export function createClickerService(options: ClickerServiceOptions) {
      */
     async choose(actor: Actor, input: unknown): Promise<ClickerState> {
       const { pill } = parse(pillSchema, input)
-      const before = await row(actor.login)
 
-      if (toNumber(before?.plus ?? 0) < PLUS_GOAL) {
-        throw domainError('conflict', 'Todavía no has llegado hasta aquí')
-      }
-      if (pillOf(before) !== null) {
-        throw domainError('conflict', 'Ya elegiste, y no hay vuelta atrás')
-      }
+      return locked(actor.login, async () => {
+        const before = await row(actor.login)
 
-      await db.execute({
-        sql: 'UPDATE clicker SET pill = ?, updated_at = ? WHERE login = ?',
-        args: [pill, iso(), actor.login],
+        if (toNumber(before?.plus ?? 0) < PLUS_GOAL) {
+          throw domainError('conflict', 'Todavía no has llegado hasta aquí')
+        }
+        if (pillOf(before) !== null) {
+          throw domainError('conflict', 'Ya elegiste, y no hay vuelta atrás')
+        }
+
+        await db.execute({
+          sql: 'UPDATE clicker SET pill = ?, updated_at = ? WHERE login = ?',
+          args: [pill, iso(), actor.login],
+        })
+
+        return this.state(actor)
       })
-
-      return this.state(actor)
     },
 
     /**
@@ -430,221 +445,224 @@ export function createClickerService(options: ClickerServiceOptions) {
      */
     async save(actor: Actor, input: unknown): Promise<ClickerSaved> {
       const sent = parse(saveSchema, input)
-      const found = await row(actor.login)
 
-      if (pillOf(found) !== 'red') {
-        throw domainError('forbidden', 'Esto no existe')
-      }
+      return locked(actor.login, async () => {
+        const found = await row(actor.login)
 
-      const ledger = readSave(sent.save)
-
-      if (ledger === null) {
-        throw domainError('invalid_input', 'Eso no es una partida')
-      }
-
-      const rev = toNumber(found?.rev ?? 0)
-      const stale = (): never => {
-        throw domainError('conflict', 'Esta partida se ha seguido en otro dispositivo')
-      }
-
-      // Antes que nada: una partida vieja de otro dispositivo no es una trampa.
-      if (rev !== sent.rev && found?.holder !== sent.session) stale()
-
-      let caught = toNumber(found?.caught ?? 0)
-      const second = Math.floor(now() / 1000)
-      const why =
-        verdict(
-          {
-            total: Number(found?.last_total ?? 0),
-            at: Date.parse(toText(found?.updated_at ?? iso())),
-            ledger: typeof found?.save === 'string' ? readSave(found.save) : null,
-            credited: creditedSince(
-              readGifts(found?.gifts),
-              Date.parse(toText(found?.updated_at ?? iso())) / 1000,
-            ),
-          },
-          sent,
-          ledger,
-          now(),
-        ) ?? (await tooManyClicks(actor.login, second, ledger.clicks, clean(sent.clicks, now())))
-
-      if (why !== null) {
-        const last = typeof found?.caught_at === 'string' ? Date.parse(found.caught_at) : 0
-
-        if (now() - last >= CAUGHT_COOLDOWN_MS) {
-          caught += 1
-          await db.execute({
-            sql: `UPDATE clicker SET caught = ?, caught_at = ?, caught_why = ? WHERE login = ?`,
-            args: [caught, iso(), why, actor.login],
-          })
-
-          const title = hackerTitle(caught)
-          // El título es un adorno: si no se puede poner, la trampa cuenta igual.
-          const before =
-            title === null
-              ? null
-              : ((await options.brand?.(actor.login, title).catch(() => null)) ?? null)
-
-          // La política de trampas, en cada una (si no tiene ya la venta pendiente).
-          const seized =
-            toNumber(found?.sale_due ?? 0) === 0
-              ? await confiscate(actor.login, found, 'auto', null, caught)
-              : 0
-
-          // Se guarda la partida tal como llegó, por si hay que indultarla.
-          const copy = await db.execute({
-            sql: `INSERT INTO clicker_cheats
-                    (login, at, why, save, total, per_second, achievements, prestige, title_before)
-                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            args: [
-              actor.login,
-              iso(),
-              why,
-              sent.save,
-              sent.total,
-              sent.perSecond,
-              sent.achievements,
-              sent.prestige,
-              before,
-            ],
-          })
-
-          await logCheat({
-            login: actor.login,
-            how: 'auto',
-            why,
-            total: sent.total,
-            perSecond: sent.perSecond,
-            seized,
-            copyId: copy.lastInsertRowid === undefined ? null : Number(copy.lastInsertRowid),
-          })
-          await db.execute({
-            sql: `DELETE FROM clicker_cheats WHERE login = ? AND id NOT IN
-                    (SELECT id FROM clicker_cheats WHERE login = ? ORDER BY id DESC LIMIT ?)`,
-            args: [actor.login, actor.login, CHEATS_KEPT],
-          })
-        } else {
-          // La misma trampa, que sigue llegando: la copia se queda con lo último.
-          await db.execute({
-            sql: `UPDATE clicker_cheats SET save = ?, total = ?, per_second = ?, achievements = ?,
-                    prestige = ?
-                  WHERE id = (SELECT MAX(id) FROM clicker_cheats WHERE login = ?)`,
-            args: [
-              sent.save,
-              sent.total,
-              sent.perSecond,
-              sent.achievements,
-              sent.prestige,
-              actor.login,
-            ],
-          })
+        if (pillOf(found) !== 'red') {
+          throw domainError('forbidden', 'Esto no existe')
         }
 
-        return { rev, caught, refused: true, gift: 0 }
-      }
+        const ledger = readSave(sent.save)
 
-      // Con la venta pendiente no vale seguir con los edificios puestos.
-      if (toNumber(found?.sale_due ?? 0) === 1 && ledger.holdings > 0) {
-        return { rev, caught, refused: true, gift: 0 }
-      }
+        if (ledger === null) {
+          throw domainError('invalid_input', 'Eso no es una partida')
+        }
 
-      const result = await db.execute({
-        sql: `UPDATE clicker SET save = ?, total = MAX(total, ?), last_total = ?, per_second = ?,
+        const rev = toNumber(found?.rev ?? 0)
+        const stale = (): never => {
+          throw domainError('conflict', 'Esta partida se ha seguido en otro dispositivo')
+        }
+
+        // Antes que nada: una partida vieja de otro dispositivo no es una trampa.
+        if (rev !== sent.rev && found?.holder !== sent.session) stale()
+
+        let caught = toNumber(found?.caught ?? 0)
+        const second = Math.floor(now() / 1000)
+        const why =
+          verdict(
+            {
+              total: Number(found?.last_total ?? 0),
+              at: Date.parse(toText(found?.updated_at ?? iso())),
+              ledger: typeof found?.save === 'string' ? readSave(found.save) : null,
+              credited: creditedSince(
+                readGifts(found?.gifts),
+                Date.parse(toText(found?.updated_at ?? iso())) / 1000,
+              ),
+            },
+            sent,
+            ledger,
+            now(),
+          ) ?? (await tooManyClicks(actor.login, second, ledger.clicks, clean(sent.clicks, now())))
+
+        if (why !== null) {
+          const last = typeof found?.caught_at === 'string' ? Date.parse(found.caught_at) : 0
+
+          if (now() - last >= CAUGHT_COOLDOWN_MS) {
+            caught += 1
+            await db.execute({
+              sql: `UPDATE clicker SET caught = ?, caught_at = ?, caught_why = ? WHERE login = ?`,
+              args: [caught, iso(), why, actor.login],
+            })
+
+            const title = hackerTitle(caught)
+            // El título es un adorno: si no se puede poner, la trampa cuenta igual.
+            const before =
+              title === null
+                ? null
+                : ((await options.brand?.(actor.login, title).catch(() => null)) ?? null)
+
+            // La política de trampas, en cada una (si no tiene ya la venta pendiente).
+            const seized =
+              toNumber(found?.sale_due ?? 0) === 0
+                ? await confiscate(actor.login, found, 'auto', null, caught)
+                : 0
+
+            // Se guarda la partida tal como llegó, por si hay que indultarla.
+            const copy = await db.execute({
+              sql: `INSERT INTO clicker_cheats
+                    (login, at, why, save, total, per_second, achievements, prestige, title_before)
+                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+              args: [
+                actor.login,
+                iso(),
+                why,
+                sent.save,
+                sent.total,
+                sent.perSecond,
+                sent.achievements,
+                sent.prestige,
+                before,
+              ],
+            })
+
+            await logCheat({
+              login: actor.login,
+              how: 'auto',
+              why,
+              total: sent.total,
+              perSecond: sent.perSecond,
+              seized,
+              copyId: copy.lastInsertRowid === undefined ? null : Number(copy.lastInsertRowid),
+            })
+            await db.execute({
+              sql: `DELETE FROM clicker_cheats WHERE login = ? AND id NOT IN
+                    (SELECT id FROM clicker_cheats WHERE login = ? ORDER BY id DESC LIMIT ?)`,
+              args: [actor.login, actor.login, CHEATS_KEPT],
+            })
+          } else {
+            // La misma trampa, que sigue llegando: la copia se queda con lo último.
+            await db.execute({
+              sql: `UPDATE clicker_cheats SET save = ?, total = ?, per_second = ?, achievements = ?,
+                    prestige = ?
+                  WHERE id = (SELECT MAX(id) FROM clicker_cheats WHERE login = ?)`,
+              args: [
+                sent.save,
+                sent.total,
+                sent.perSecond,
+                sent.achievements,
+                sent.prestige,
+                actor.login,
+              ],
+            })
+          }
+
+          return { rev, caught, refused: true, gift: 0 }
+        }
+
+        // Con la venta pendiente no vale seguir con los edificios puestos.
+        if (toNumber(found?.sale_due ?? 0) === 1 && ledger.holdings > 0) {
+          return { rev, caught, refused: true, gift: 0 }
+        }
+
+        const result = await db.execute({
+          sql: `UPDATE clicker SET save = ?, total = MAX(total, ?), last_total = ?, per_second = ?,
                 achievements = ?, prestige = ?, updated_at = ?, holder = ?, rev = rev + 1,
                 sale_due = 0, pool_bonus = pending_gift, pending_gift = 0
               WHERE login = ? AND (rev = ? OR holder = ?)
               RETURNING rev, pool_bonus AS gift`,
-        args: [
-          sent.save,
-          sent.total,
-          sent.total,
-          sent.perSecond,
-          sent.achievements,
-          sent.prestige,
-          iso(),
-          sent.session,
-          actor.login,
-          sent.rev,
-          sent.session,
-        ],
-      })
-      const saved = result.rows[0]
-
-      if (saved === undefined) stale()
-
-      // Lo que acaba de cobrar del reparto, apuntado para no tomarlo por un salto.
-      const gifts = rememberGifts(readGifts(found?.gifts), second, Number(saved?.gift ?? 0))
-
-      if (JSON.stringify(gifts) !== toText(found?.gifts ?? '[]')) {
-        await db.execute({
-          sql: 'UPDATE clicker SET gifts = ? WHERE login = ?',
-          args: [JSON.stringify(gifts), actor.login],
+          args: [
+            sent.save,
+            sent.total,
+            sent.total,
+            sent.perSecond,
+            sent.achievements,
+            sent.prestige,
+            iso(),
+            sent.session,
+            actor.login,
+            sent.rev,
+            sent.session,
+          ],
         })
-      }
+        const saved = result.rows[0]
 
-      // El contador de este guardado, con la hora de aquí, para los tramos largos.
-      await db.batch(
-        [
-          {
-            sql: `INSERT INTO clicker_clicks (login, at, clicks) VALUES (?, ?, ?)
-                  ON CONFLICT (login, at) DO UPDATE SET clicks = excluded.clicks`,
-            args: [actor.login, second, ledger.clicks],
-          },
-          {
-            sql: 'DELETE FROM clicker_clicks WHERE login = ? AND at < ?',
-            args: [actor.login, second - CLICK_HISTORY_S],
-          },
-        ],
-        'write',
-      )
+        if (saved === undefined) stale()
 
-      // El historial de capital, y el aviso si hay un salto que no se explica.
-      const samples = clean(sent.capital, now())
+        // Lo que acaba de cobrar del reparto, apuntado para no tomarlo por un salto.
+        const gifts = rememberGifts(readGifts(found?.gifts), second, Number(saved?.gift ?? 0))
 
-      if (samples.length > 0) {
-        // Los repartos de antes de este guardado: el de ahora aún no está en la web.
-        const leap = jump(samples, readGifts(found?.gifts))
-        const before = typeof found?.save === 'string' ? readSave(found.save) : null
+        if (JSON.stringify(gifts) !== toText(found?.gifts ?? '[]')) {
+          await db.execute({
+            sql: 'UPDATE clicker SET gifts = ? WHERE login = ?',
+            args: [JSON.stringify(gifts), actor.login],
+          })
+        }
 
+        // El contador de este guardado, con la hora de aquí, para los tramos largos.
         await db.batch(
           [
-            ...coarse(samples).map(([at, capital]) => ({
-              sql: `INSERT INTO clicker_capital (login, at, capital) VALUES (?, ?, ?)
-                    ON CONFLICT (login, at) DO UPDATE SET capital = excluded.capital`,
-              args: [actor.login, at, capital],
-            })),
-            ...(leap === null
-              ? []
-              : [
-                  {
-                    sql: `INSERT INTO clicker_alerts
-                            (login, at, seconds, from_capital, to_capital, golden, trace)
-                          VALUES (?, ?, ?, ?, ?, ?, ?)`,
-                    args: [
-                      actor.login,
-                      new Date(leap.at * 1000).toISOString(),
-                      leap.seconds,
-                      leap.from,
-                      leap.to,
-                      // Una dorada abierta desde el último guardado lo explica casi siempre.
-                      Number(ledger.golden !== (before?.golden ?? 0)),
-                      JSON.stringify(leap.trace),
-                    ],
-                  },
-                ]),
+            {
+              sql: `INSERT INTO clicker_clicks (login, at, clicks) VALUES (?, ?, ?)
+                  ON CONFLICT (login, at) DO UPDATE SET clicks = excluded.clicks`,
+              args: [actor.login, second, ledger.clicks],
+            },
+            {
+              sql: 'DELETE FROM clicker_clicks WHERE login = ? AND at < ?',
+              args: [actor.login, second - CLICK_HISTORY_S],
+            },
           ],
           'write',
         )
-      }
 
-      // Lo que le llega del reparto se suma en la web, y vale como escrito en los
-      // guardados siguientes (`gifts`, `creditedSince`).
-      return {
-        rev: toNumber(saved?.rev ?? rev),
-        caught,
-        refused: false,
-        gift: Number(saved?.gift ?? 0),
-      }
+        // El historial de capital, y el aviso si hay un salto que no se explica.
+        const samples = clean(sent.capital, now())
+
+        if (samples.length > 0) {
+          // Los repartos de antes de este guardado: el de ahora aún no está en la web.
+          const leap = jump(samples, readGifts(found?.gifts))
+          const before = typeof found?.save === 'string' ? readSave(found.save) : null
+
+          await db.batch(
+            [
+              ...coarse(samples).map(([at, capital]) => ({
+                sql: `INSERT INTO clicker_capital (login, at, capital) VALUES (?, ?, ?)
+                    ON CONFLICT (login, at) DO UPDATE SET capital = excluded.capital`,
+                args: [actor.login, at, capital],
+              })),
+              ...(leap === null
+                ? []
+                : [
+                    {
+                      sql: `INSERT INTO clicker_alerts
+                            (login, at, seconds, from_capital, to_capital, golden, trace)
+                          VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                      args: [
+                        actor.login,
+                        new Date(leap.at * 1000).toISOString(),
+                        leap.seconds,
+                        leap.from,
+                        leap.to,
+                        // Una dorada abierta desde el último guardado lo explica casi siempre.
+                        Number(ledger.golden !== (before?.golden ?? 0)),
+                        JSON.stringify(leap.trace),
+                      ],
+                    },
+                  ]),
+            ],
+            'write',
+          )
+        }
+
+        // Lo que le llega del reparto se suma en la web, y vale como escrito en los
+        // guardados siguientes (`gifts`, `creditedSince`).
+        return {
+          rev: toNumber(saved?.rev ?? rev),
+          caught,
+          refused: false,
+          gift: Number(saved?.gift ?? 0),
+        }
+      })
     },
 
     /**
@@ -718,53 +736,56 @@ export function createClickerService(options: ClickerServiceOptions) {
       if (copy === undefined) throw domainError('not_found', 'Esa trampa ya no está')
 
       const login = toText(copy.login)
-      const current = await row(login)
-      const left = Math.max(0, toNumber(current?.caught ?? 0) - 1)
-      // Si desde entonces ha seguido jugando y va por delante, se queda con la
-      // partida de ahora: devolverle la copia le quitaría lo que ha avanzado.
-      const ahead = Number(current?.total ?? 0) > Number(copy.total)
 
-      await db.batch(
-        [
-          ahead
-            ? {
-                sql: `UPDATE clicker SET sale_due = 0, caught = ?, caught_at = NULL,
+      return locked(login, async () => {
+        const current = await row(login)
+        const left = Math.max(0, toNumber(current?.caught ?? 0) - 1)
+        // Si desde entonces ha seguido jugando y va por delante, se queda con la
+        // partida de ahora: devolverle la copia le quitaría lo que ha avanzado.
+        const ahead = Number(current?.total ?? 0) > Number(copy.total)
+
+        await db.batch(
+          [
+            ahead
+              ? {
+                  sql: `UPDATE clicker SET sale_due = 0, caught = ?, caught_at = NULL,
                         caught_why = NULL
                       WHERE login = ?`,
-                args: [left, login],
-              }
-            : {
-                sql: `UPDATE clicker SET save = ?, total = MAX(total, ?), last_total = ?,
+                  args: [left, login],
+                }
+              : {
+                  sql: `UPDATE clicker SET save = ?, total = MAX(total, ?), last_total = ?,
                     per_second = ?, achievements = ?, prestige = ?, updated_at = ?,
                     holder = NULL, rev = rev + 1, sale_due = 0, caught = ?,
                     caught_at = NULL, caught_why = NULL
                   WHERE login = ?`,
-                args: [
-                  toText(copy.save),
-                  Number(copy.total),
-                  Number(copy.total),
-                  Number(copy.per_second),
-                  toNumber(copy.achievements),
-                  toNumber(copy.prestige),
-                  iso(),
-                  left,
-                  login,
-                ],
-              },
-          { sql: 'DELETE FROM clicker_cheats WHERE id = ?', args: [id] },
-          {
-            sql: 'UPDATE clicker_cheat_log SET pardoned_at = ? WHERE copy_id = ?',
-            args: [iso(), id],
-          },
-        ],
-        'write',
-      )
+                  args: [
+                    toText(copy.save),
+                    Number(copy.total),
+                    Number(copy.total),
+                    Number(copy.per_second),
+                    toNumber(copy.achievements),
+                    toNumber(copy.prestige),
+                    iso(),
+                    left,
+                    login,
+                  ],
+                },
+            { sql: 'DELETE FROM clicker_cheats WHERE id = ?', args: [id] },
+            {
+              sql: 'UPDATE clicker_cheat_log SET pardoned_at = ? WHERE copy_id = ?',
+              args: [iso(), id],
+            },
+          ],
+          'write',
+        )
 
-      // El título que tenía antes; si no había elegido ninguno, al quedarse sin
-      // el de hacker el expediente le pone solo el que le toca por nivel.
-      const title = typeof copy.title_before === 'string' ? copy.title_before : hackerTitle(left)
+        // El título que tenía antes; si no había elegido ninguno, al quedarse sin
+        // el de hacker el expediente le pone solo el que le toca por nivel.
+        const title = typeof copy.title_before === 'string' ? copy.title_before : hackerTitle(left)
 
-      if (title !== null) await options.brand?.(login, title).catch(() => null)
+        if (title !== null) await options.brand?.(login, title).catch(() => null)
+      })
     },
 
     /**
@@ -929,47 +950,50 @@ export function createClickerService(options: ClickerServiceOptions) {
       assertAdmin(actor)
 
       const { login, code, wipe, note } = parse(sanctionSchema, input)
-      const found = await row(login)
-      let game: Record<string, unknown> | null = null
 
-      try {
-        const read: unknown = typeof found?.save === 'string' ? JSON.parse(found.save) : null
+      return locked(login, async () => {
+        const found = await row(login)
+        let game: Record<string, unknown> | null = null
 
-        if (typeof read === 'object' && read !== null && !Array.isArray(read)) {
-          game = read as Record<string, unknown>
+        try {
+          const read: unknown = typeof found?.save === 'string' ? JSON.parse(found.save) : null
+
+          if (typeof read === 'object' && read !== null && !Array.isArray(read)) {
+            game = read as Record<string, unknown>
+          }
+        } catch {
+          game = null
         }
-      } catch {
-        game = null
-      }
 
-      if (game === null) throw domainError('not_found', 'Esa persona no tiene partida')
+        if (game === null) throw domainError('not_found', 'Esa persona no tiene partida')
 
-      const total = Math.max(Number(game.total) || 0, code)
-      const next = wipe
-        ? { ...game, code, total, owned: {}, made: {}, bought: [], buffs: [], bugs: [] }
-        : { ...game, code, total }
-      const seizure: ClickerSeizure = {
-        by: 'admin',
-        amount: 0,
-        n: toNumber(found?.caught ?? 0),
-        shared: 0,
-        evidence: null,
-        note,
-      }
+        const total = Math.max(Number(game.total) || 0, code)
+        const next = wipe
+          ? { ...game, code, total, owned: {}, made: {}, bought: [], buffs: [], bugs: [] }
+          : { ...game, code, total }
+        const seizure: ClickerSeizure = {
+          by: 'admin',
+          amount: 0,
+          n: toNumber(found?.caught ?? 0),
+          shared: 0,
+          evidence: null,
+          note,
+        }
 
-      await db.execute({
-        sql: `UPDATE clicker SET save = ?, per_second = ?, updated_at = ?, holder = NULL,
+        await db.execute({
+          sql: `UPDATE clicker SET save = ?, per_second = ?, updated_at = ?, holder = NULL,
                 rev = rev + 1, sale_due = 0, seizure = ?
               WHERE login = ?`,
-        args: [
-          JSON.stringify(next),
-          wipe ? 0 : Number(found?.per_second ?? 0),
-          iso(),
-          JSON.stringify(seizure),
-          login,
-        ],
+          args: [
+            JSON.stringify(next),
+            wipe ? 0 : Number(found?.per_second ?? 0),
+            iso(),
+            JSON.stringify(seizure),
+            login,
+          ],
+        })
+        await logCheat({ login, how: 'sanction', why: 'manual', detail: { note, code, wipe } })
       })
-      await logCheat({ login, how: 'sanction', why: 'manual', detail: { note, code, wipe } })
     },
 
     /** Ya ha visto el aviso de la policía del código. */
@@ -1157,7 +1181,6 @@ export function createClickerService(options: ClickerServiceOptions) {
       assertAdmin(actor)
 
       const { days } = parse(usageSchema, input)
-      const dayOf = (at: number): string => new Date(at).toISOString().slice(0, 10)
       const from = dayOf(now() - (days - 1) * DAY_MS)
       const [result, time, alerts, cheats] = await Promise.all([
         // De la partida solo se mira cuánto se ha pulsado la tecla, y solo si

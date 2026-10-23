@@ -127,6 +127,21 @@ let borrowed: ThemeManifest | null = null
 let painted: string[] = []
 const listeners = new Set<() => void>()
 
+/** Nombre de variable de CSS y valor que se acepta en ella (un color, una medida…). */
+const VAR_NAME = /^--[a-z0-9-]+$/
+const VAR_VALUE = /^[#\w\s.,%()+\-/]{1,100}$/
+
+/**
+ * Las variables de una paleta que se pueden pintar: con nombre de variable y
+ * un valor sencillo, sin `url(…)` ni nada que cierre la declaración. La paleta
+ * puede venir de lo guardado en el navegador o de un estilo prestado.
+ */
+export function paintable(vars: Readonly<Record<string, string>>): [string, string][] {
+  return Object.entries(vars).filter(
+    ([name, value]) => VAR_NAME.test(name) && VAR_VALUE.test(value) && !/url\s*\(/i.test(value),
+  )
+}
+
 /** Escribe el estilo y la paleta en `<html>` y los deja guardados. */
 function paint(): void {
   // Sin página (en los tests) no hay dónde escribirlo.
@@ -139,8 +154,10 @@ function paint(): void {
 
   root.dataset.style = shown.id
   for (const name of painted) root.style.removeProperty(name)
-  for (const [name, value] of Object.entries(vars)) root.style.setProperty(name, value)
-  painted = Object.keys(vars)
+  const shownVars = paintable(vars)
+
+  for (const [name, value] of shownVars) root.style.setProperty(name, value)
+  painted = shownVars.map(([name]) => name)
 
   // Lo guardado es siempre lo tuyo, aunque ahora se vea un estilo prestado.
   write(STYLE_KEY, look.theme.id)

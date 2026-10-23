@@ -36,6 +36,7 @@ import { toNumber, toText } from '../../core/db/rows.js'
 import { domainError } from '../../core/errors.js'
 import { createTtlCache } from '../../core/ttl-cache.js'
 import { parse } from '../../core/validation.js'
+import { inList, listArg } from '../../core/db/sql.js'
 import { createConversations } from './conversations.js'
 import { needsReply } from './meet.rules.js'
 import { EVENT_ID } from '../attendance/index.js'
@@ -54,6 +55,7 @@ import type { ReplicaRepository } from '../replica/index.js'
 const numberOf = (part: string | undefined): number =>
   /^\d{1,12}$/.test(part ?? '') ? Number(part) : -1
 import type { TherapyService } from '../therapy/index.js'
+import { given } from '../../core/options.js'
 
 export type MeetServiceOptions = {
   db: Db
@@ -171,13 +173,14 @@ export function createMeetService(options: MeetServiceOptions) {
       // Un chat directo es de sus dos logins, en orden alfabético para que
       // haya un solo chat por pareja, y los dos tienen que existir.
       if (kind === 'dm') {
-        const pair = [second ?? '', third ?? '']
+        const a = second ?? ''
+        const b = third ?? ''
 
         return (
-          pair.includes(actor.login) &&
-          pair[0] !== pair[1] &&
-          [...pair].sort().join() === pair.join() &&
-          (await Promise.all(pair.map((login) => replica.userExists(login)))).every(Boolean)
+          (a === actor.login || b === actor.login) &&
+          a !== b &&
+          [a, b].sort().join() === [a, b].join() &&
+          (await Promise.all([a, b].map((login) => replica.userExists(login)))).every(Boolean)
         )
       }
       if (kind === 'board') {
@@ -207,6 +210,17 @@ export function createMeetService(options: MeetServiceOptions) {
 
     if (!takesPart) {
       throw domainError('forbidden', 'Ese evento no está en tu calendario')
+    }
+
+    // Un bloqueo en la ayuda corta también el chat directo, en los dos
+    // sentidos: vale para todo lo que es de persona a persona. Se mira fuera
+    // de la memoria de arriba para que surta efecto al momento.
+    if (id.startsWith('dm:')) {
+      const [, a = '', b = ''] = id.split(':')
+
+      if (await help.blockedBetween(a, b)) {
+        throw domainError('forbidden', 'No podéis escribiros')
+      }
     }
   }
 
@@ -296,7 +310,7 @@ export function createMeetService(options: MeetServiceOptions) {
     notify,
     now,
     assertParticipant,
-    ...(options.online === undefined ? {} : { online: options.online }),
+    ...given({ online: options.online }),
   })
 
   return {
@@ -456,8 +470,8 @@ export function createMeetService(options: MeetServiceOptions) {
         const result = await db.execute({
           sql: `SELECT DISTINCT event_id FROM event_messages
                 WHERE login = ? AND kind IN ('seen', 'late', 'absent')
-                  AND event_id IN (${mine.map(() => '?').join(', ')})`,
-          args: [actor.login, ...mine.map((event) => event.id)],
+                  AND ${inList('event_id')}`,
+          args: [actor.login, listArg(mine.map((event) => event.id))],
         })
 
         for (const row of result.rows) replied.add(toText(row.event_id))

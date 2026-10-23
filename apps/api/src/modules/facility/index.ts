@@ -10,6 +10,7 @@ import type { IdParams } from '../../core/http/params.js'
 import type { AppModule } from '../../core/module.js'
 import { createFacilityService } from './facility.service.js'
 import type { FacilityService } from './facility.service.js'
+import { given } from '../../core/options.js'
 
 type FacilityDeps = {
   db: Db
@@ -28,14 +29,22 @@ export function createFacilityModule(deps: FacilityDeps): FacilityModule {
     db: deps.db,
     seatOf: deps.seatOf,
     slack: deps.slack ?? null,
-    ...(deps.markBroken === undefined ? {} : { markBroken: deps.markBroken }),
-    ...(deps.now === undefined ? {} : { now: deps.now }),
+    ...given({ markBroken: deps.markBroken, now: deps.now }),
   })
   const report = (id: string): number => idParam(id, 'El aviso')
 
   return {
     name: 'facility',
-    personal: [{ table: 'facility_reports', logins: ['login', 'resolved_by'] }],
+    personal: [
+      // Quien lo resolvió se lleva que lo resolvió; quién avisó y su nota son de quien avisó.
+      {
+        table: 'facility_reports',
+        logins: ['login', 'resolved_by'],
+        give: {
+          resolved_by: ['id', 'campus_id', 'category', 'place', 'resolved_at', 'resolved_by'],
+        },
+      },
+    ],
     service,
     routes: (app, { session }) => {
       /** `POST /facility/reports` → `FacilityReportInput`: avisa al staff de un problema. 201. */
@@ -47,8 +56,6 @@ export function createFacilityModule(deps: FacilityDeps): FacilityModule {
 
       /** `GET /admin/facility` → los avisos del campus (abiertos y los resueltos esta semana). */
       app.get('/admin/facility', async (request, reply) => {
-        reply.header('Cache-Control', 'private, no-store')
-
         return reply.send(await service.forAdmin(await session.actor(request)))
       })
 
@@ -68,7 +75,6 @@ export function createFacilityModule(deps: FacilityDeps): FacilityModule {
             .code(401)
             .send({ error: 'unauthenticated', message: 'Esa cuenta de staff ya no tiene acceso' })
         }
-        reply.header('Cache-Control', 'private, no-store')
 
         return reply.send(await service.forStaff())
       })

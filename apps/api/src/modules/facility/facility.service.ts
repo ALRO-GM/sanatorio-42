@@ -15,6 +15,7 @@ import type { Db } from '../../core/db/database.js'
 import { toNumber, toText } from '../../core/db/rows.js'
 import { domainError } from '../../core/errors.js'
 import { parse } from '../../core/validation.js'
+import { isoAt } from '../../core/time.js'
 
 const FACILITY_CATEGORIES = [
   'computer',
@@ -73,7 +74,6 @@ type FacilityOptions = {
 export function createFacilityService(options: FacilityOptions) {
   const { db } = options
   const now = options.now ?? Date.now
-  const iso = (ms: number): string => new Date(ms).toISOString()
 
   const rowOf = (row: Record<string, unknown>): FacilityReport => ({
     id: toNumber(row.id),
@@ -95,7 +95,7 @@ export function createFacilityService(options: FacilityOptions) {
             WHERE (f.resolved_at IS NULL OR f.resolved_at >= ?)
               AND (? IS NULL OR f.campus_id = ?)
             ORDER BY f.resolved_at IS NOT NULL, f.id DESC LIMIT 200`,
-      args: [iso(now() - RESOLVED_SHOWN_MS), campusId, campusId],
+      args: [isoAt(now() - RESOLVED_SHOWN_MS), campusId, campusId],
     })
 
     return result.rows.map(rowOf)
@@ -104,7 +104,7 @@ export function createFacilityService(options: FacilityOptions) {
   async function resolve(id: number, by: string): Promise<void> {
     const result = await db.execute({
       sql: 'UPDATE facility_reports SET resolved_at = ?, resolved_by = ? WHERE id = ? AND resolved_at IS NULL',
-      args: [iso(now()), by, id],
+      args: [isoAt(now()), by, id],
     })
 
     if (result.rowsAffected === 0)
@@ -117,7 +117,7 @@ export function createFacilityService(options: FacilityOptions) {
       const { category, place, note } = parse(reportSchema, input)
       const today = await db.execute({
         sql: 'SELECT COUNT(*) AS n FROM facility_reports WHERE login = ? AND created_at >= ?',
-        args: [actor.login, iso(now() - DAY_MS)],
+        args: [actor.login, isoAt(now() - DAY_MS)],
       })
 
       if (toNumber(today.rows[0]?.n) >= PER_DAY) {
@@ -139,7 +139,7 @@ export function createFacilityService(options: FacilityOptions) {
       const inserted = await db.execute({
         sql: `INSERT INTO facility_reports (campus_id, login, category, place, note, created_at)
               VALUES (?, ?, ?, ?, ?, ?) RETURNING id`,
-        args: [actor.campusId, actor.login, category, where, note ?? null, iso(now())],
+        args: [actor.campusId, actor.login, category, where, note ?? null, isoAt(now())],
       })
       const id = toNumber(inserted.rows[0]?.id)
 

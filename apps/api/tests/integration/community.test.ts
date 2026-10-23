@@ -270,7 +270,6 @@ describe('réplica vista desde fuera', () => {
       '/events/report',
       '/quota',
       '/admin/quota',
-      '/events/report?format=csv',
       '/admin/checkins?id=board:1',
       '/network',
       '/network/mine',

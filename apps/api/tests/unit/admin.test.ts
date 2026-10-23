@@ -109,6 +109,38 @@ describe('comunidad', () => {
       )
     })
 
+    it('a nadie se le apuntan más de mil claves distintas, pero las suyas siguen sumando', async () => {
+      const { usage } = services
+      const keys = (from: number, to: number): string[] =>
+        Array.from({ length: to - from }, (_, index) => {
+          const n = from + index
+
+          return `inventada.k${String.fromCharCode(97 + (Math.floor(n / 26 / 26) % 26))}${String.fromCharCode(97 + (Math.floor(n / 26) % 26))}${String.fromCharCode(97 + (n % 26))}`
+        })
+
+      for (let start = 0; start < 1000; start += 50) {
+        await usage.record(actor('ana'), {
+          counts: Object.fromEntries(keys(start, start + 50).map((key) => [key, 1])),
+        })
+      }
+      await usage.record(actor('ana'), {
+        counts: { 'inventada.zzz': 1, [keys(0, 1)[0] ?? '']: 2 },
+        time: { 'otra.cosa': [60, 0, 0] },
+      })
+
+      const rows = await db.execute({
+        sql: 'SELECT key, count FROM usage_counts WHERE login = ?',
+        args: ['ana'],
+      })
+
+      expect(rows.rows).toHaveLength(1000)
+      expect(rows.rows.find((row) => row.key === keys(0, 1)[0])?.count).toBe(3)
+      expect(rows.rows.some((row) => row.key === 'inventada.zzz')).toBe(false)
+      expect(
+        (await db.execute("SELECT 1 FROM usage_time WHERE key = 'otra.cosa'")).rows,
+      ).toHaveLength(0)
+    })
+
     it('los recorridos dicen por dónde se entra, por dónde se pasa y dónde se acaba', async () => {
       const { usage } = services
       const boss = actor('eva', { admin: true })

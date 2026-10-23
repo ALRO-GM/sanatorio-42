@@ -29,6 +29,7 @@ import type { Concept, ReviewEntry } from './bank/types.js'
 import type { PlayerRow, QuizRepository, RoomRow, RoundRow } from './quiz.repository.js'
 import { localizeRound, localizeText, reviewIn } from './bank/localize.js'
 import { buildRound, levelOf, LIVES, orderFor, pickConcepts, pointsFor } from './quiz.rules.js'
+import { isoAt } from '../../core/time.js'
 
 type QuizServiceOptions = {
   quiz: QuizRepository
@@ -85,7 +86,6 @@ export function createQuizService(options: QuizServiceOptions) {
   const { quiz, bank } = options
   const now = options.now ?? Date.now
   const random = options.random ?? Math.random
-  const iso = (ms: number): string => new Date(ms).toISOString()
 
   /** Una cosa cada vez por sala: que dos peticiones no cierren la misma pregunta. */
   const locked = createLocks()
@@ -102,7 +102,7 @@ export function createQuizService(options: QuizServiceOptions) {
   async function finish(room: RoomRow, t: number): Promise<RoomRow> {
     const done: RoomRow = { ...room, phase: null, phaseUntil: null, status: 'done' }
 
-    await quiz.setPhase(room.id, { phase: null, until: null, status: 'done', finishedAt: iso(t) })
+    await quiz.setPhase(room.id, { phase: null, until: null, status: 'done', finishedAt: isoAt(t) })
 
     const players = await quiz.players(room.id)
     const winners = winnersOf(done, players)
@@ -114,12 +114,17 @@ export function createQuizService(options: QuizServiceOptions) {
       room.campusId,
       players.map((p) => ({
         login: p.login,
-        won: winners.includes(p.login) || (p.team !== null && winners.includes(p.team)),
+        // Empezar solo (solo se puede en «todos contra todos») vale para
+        // practicar, no para ganar: sin rival no hay victoria que apuntar. En
+        // un duelo con una sola persona es que la otra se fue: esa sí cuenta.
+        won:
+          (players.length > 1 || room.settings.mode !== 'ffa') &&
+          (winners.includes(p.login) || (p.team !== null && winners.includes(p.team))),
         correct: p.correct,
         wrong: p.wrong,
         score: p.score,
       })),
-      iso(t),
+      isoAt(t),
     )
 
     return done
@@ -300,7 +305,7 @@ export function createQuizService(options: QuizServiceOptions) {
         round === null || room.status === 'done'
           ? null
           : questionView(actor, room, round, answers, players, await quiz.rounds(room.id), t),
-      now: iso(t),
+      now: isoAt(t),
       winners: winnersOf(room, players),
       joinable: whyNot === null,
       whyNot,
@@ -330,8 +335,8 @@ export function createQuizService(options: QuizServiceOptions) {
       prompt: waiting ? '' : round.prompt,
       code: waiting ? null : round.code,
       options: waiting ? [] : order.map((id) => ({ id, text: round.options[id] ?? '' })),
-      startsAt: iso(startsAt),
-      endsAt: iso(round.endsAt ?? t),
+      startsAt: isoAt(startsAt),
+      endsAt: isoAt(round.endsAt ?? t),
       mine: answers.find((a) => a.login === actor.login)?.option ?? null,
       answer: reveal ? round.answer : null,
       why: reveal ? round.why : null,
@@ -361,7 +366,7 @@ export function createQuizService(options: QuizServiceOptions) {
   return {
     /** Las salas abiertas del campus y las tuyas de las últimas horas. */
     async list(actor: Actor): Promise<QuizLobby[]> {
-      const rows = await quiz.rooms(actor.campusId, actor.login, iso(now() - 6 * 3_600_000))
+      const rows = await quiz.rooms(actor.campusId, actor.login, isoAt(now() - 6 * 3_600_000))
 
       return rows.map((room) => ({
         id: room.id,
@@ -378,9 +383,9 @@ export function createQuizService(options: QuizServiceOptions) {
 
       await mustBeFree(actor.login)
 
-      const id = await quiz.createRoom(actor.campusId, actor.login, settings, iso(now()))
+      const id = await quiz.createRoom(actor.campusId, actor.login, settings, isoAt(now()))
 
-      await quiz.join(id, actor.login, settings.mode === 'teams' ? 'a' : null, iso(now()))
+      await quiz.join(id, actor.login, settings.mode === 'teams' ? 'a' : null, isoAt(now()))
 
       return viewOf(actor, await mustRoom(id))
     },
@@ -420,14 +425,15 @@ export function createQuizService(options: QuizServiceOptions) {
                 ? 'a'
                 : 'b'))
 
-        await quiz.join(id, actor.login, chosen, iso(now()))
+        await quiz.join(id, actor.login, chosen, isoAt(now()))
 
         return viewOf(actor, room)
       })
     },
 
     /**
-     * Sale de la sala, esté como esté: sin empezar, jugando o acabada. Si se va
+     * Sale de la sala, esté como esté: sin empezar, jugando o acabada (jugando,
+     * se apunta como derrota). Si se va
      * quien la creó, la sala pasa a quien entró después; si no queda nadie, la
      * sala se borra. Jugando, si ya no hay con quién jugar (un duelo o una
      * supervivencia con una sola persona, un equipo vacío), la partida acaba.
@@ -437,7 +443,29 @@ export function createQuizService(options: QuizServiceOptions) {
         const room = await advance(await mustRoom(id))
         const players = await quiz.players(id)
 
-        if (!players.some((p) => p.login === actor.login)) return
+        const leaving = players.find((p) => p.login === actor.login)
+
+        if (leaving === undefined) return
+        // Irse a media partida cuenta como perderla: si no, salir justo antes
+        // del final borraría una derrota.
+        if (room.status === 'playing') {
+          await quiz.record(
+            'quiz',
+            room.settings.mode,
+            id,
+            room.campusId,
+            [
+              {
+                login: leaving.login,
+                won: false,
+                correct: leaving.correct,
+                wrong: leaving.wrong,
+                score: leaving.score,
+              },
+            ],
+            isoAt(now()),
+          )
+        }
 
         await quiz.remove(id, actor.login)
 
@@ -525,7 +553,13 @@ export function createQuizService(options: QuizServiceOptions) {
         })
         const first = rounds[0]
 
-        await quiz.start(id, rounds, mode === 'survival' ? LIVES : null, first?.endsAt ?? t, iso(t))
+        await quiz.start(
+          id,
+          rounds,
+          mode === 'survival' ? LIVES : null,
+          first?.endsAt ?? t,
+          isoAt(t),
+        )
 
         return viewOf(actor, await mustRoom(id))
       })
@@ -559,14 +593,17 @@ export function createQuizService(options: QuizServiceOptions) {
             ? Math.max(0, (me.lives ?? LIVES) - (correct ? 0 : 1))
             : me.lives
 
-        await quiz.remember(actor.login, round.conceptId, correct, iso(t))
-        await quiz.answer(
+        const counted = await quiz.answer(
           id,
           question,
           actor.login,
           { login: actor.login, option, correct, ms: t - round.startsAt },
           { points: pointsFor(correct, room.settings.competitive), lives, out: lives === 0 },
         )
+
+        // Solo la primera respuesta cuenta para el Repaso: repetir la petición
+        // no suma fallos ni aciertos.
+        if (counted) await quiz.remember(actor.login, round.conceptId, correct, isoAt(t))
 
         return viewOf(actor, room)
       })
@@ -607,7 +644,7 @@ export function createQuizService(options: QuizServiceOptions) {
     async prune(): Promise<number> {
       const t = now()
 
-      return quiz.prune(iso(t - LOBBY_TTL_MS), iso(t - DONE_TTL_MS))
+      return quiz.prune(isoAt(t - LOBBY_TTL_MS), isoAt(t - DONE_TTL_MS))
     },
   }
 }

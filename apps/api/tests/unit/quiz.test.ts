@@ -409,7 +409,7 @@ describe('partidas de Not-games', () => {
     ).resolves.toMatchObject({ host: 'leo' })
   })
 
-  it('un duelo acaba si se va uno, y el resultado queda guardado', async () => {
+  it('un duelo acaba si se va uno, y queda guardado: quien se fue, como derrota', async () => {
     const { quiz } = services
     const { id } = await quiz.create(actor('ana'), { mode: 'duel', pool: 'general', questions: 5 })
 
@@ -422,6 +422,7 @@ describe('partidas de Not-games', () => {
     const results = await db.execute('SELECT game, mode, login, won FROM game_results')
 
     expect(results.rows).toEqual([
+      expect.objectContaining({ game: 'quiz', mode: 'duel', login: 'leo', won: 0 }),
       expect.objectContaining({ game: 'quiz', mode: 'duel', login: 'ana', won: 1 }),
     ])
 

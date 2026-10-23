@@ -17,7 +17,7 @@ export const meetMock: Pick<
   | 'sendEventMessage'
   | 'getEventAttendance'
   | 'checkinEvent'
-  | 'attendanceReportUrl'
+  | 'attendanceReport'
   | 'getConversations'
   | 'markConversation'
 > = {
@@ -172,16 +172,25 @@ export const meetMock: Pick<
       : { ...common, role: 'guest', codes: null, mine: presences.get(id) ?? null, people: [] }
   },
 
-  attendanceReportUrl: ({ from = '', to = '' }) =>
-    `data:text/csv;charset=utf-8,${encodeURIComponent(
-      [
-        'login;rol;tipo;evento;titulo;fecha;inicio;fin;minutos_validados;minutos_previstos;con',
-        `${ME.login};organiza;pizarra;board:1;Ejemplo de ${from} a ${to};${to};16:30;18:00;90;90;jdoe mgarcia`,
-        // El código con el que el staff puede comprobarlo (en la web de mentira, siempre este).
-        'codigo_de_verificacion;K7QF',
-        '',
-      ].join('\r\n'),
-    )}`,
+  async attendanceReport({ from = '', to = '' }) {
+    await delay(80)
+
+    return {
+      fileName: `horas-validadas_${ME.login}_${from}_${to}_K7QF.csv`,
+      data: new Blob(
+        [
+          [
+            'login;rol;tipo;evento;titulo;fecha;inicio;fin;minutos_validados;minutos_previstos;con',
+            `${ME.login};organiza;pizarra;board:1;Ejemplo de ${from} a ${to};${to};16:30;18:00;90;90;jdoe mgarcia`,
+            // El código con el que el staff puede comprobarlo (en la web de mentira, siempre este).
+            'codigo_de_verificacion;K7QF',
+            '',
+          ].join('\r\n'),
+        ],
+        { type: 'text/csv;charset=utf-8' },
+      ),
+    }
+  },
 
   async checkinEvent(id, code) {
     await delay(200)

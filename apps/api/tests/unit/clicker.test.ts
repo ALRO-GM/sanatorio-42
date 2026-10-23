@@ -125,6 +125,20 @@ describe('code clicker', () => {
     await expectCode(clicker.board(actor('leo')), 'forbidden')
   })
 
+  it('dos elecciones a la vez: entra una sola pastilla', async () => {
+    const { clicker } = services
+
+    await press('eva', 100)
+
+    const both = await Promise.allSettled([
+      clicker.choose(actor('eva'), { pill: 'red' }),
+      clicker.choose(actor('eva'), { pill: 'blue' }),
+    ])
+
+    expect(both.map((result) => result.status)).toEqual(['fulfilled', 'rejected'])
+    expect(await clicker.state(actor('eva'))).toMatchObject({ pill: 'red' })
+  })
+
   it('quien pidió no salir en la clasificación no sale, ni para los demás ni para sí', async () => {
     const { clicker } = services
 

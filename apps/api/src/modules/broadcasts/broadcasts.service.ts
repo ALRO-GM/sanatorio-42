@@ -16,6 +16,7 @@ import type { Db } from '../../core/db/database.js'
 import { toNumber, toText } from '../../core/db/rows.js'
 import { domainError } from '../../core/errors.js'
 import { id, parse } from '../../core/validation.js'
+import { isoAt } from '../../core/time.js'
 
 const DAY_MS = 24 * 60 * 60_000
 /** Un comunicado sin contestar deja de salir pasado esto: ya no es noticia. */
@@ -65,7 +66,6 @@ export type BroadcastsServiceOptions = {
 export function createBroadcastsService(options: BroadcastsServiceOptions) {
   const { db } = options
   const now = options.now ?? Date.now
-  const iso = (at: number): string => new Date(at).toISOString()
 
   type Stored = Broadcast & { audience: BroadcastAudience }
 
@@ -89,7 +89,7 @@ export function createBroadcastsService(options: BroadcastsServiceOptions) {
                 SELECT 1 FROM broadcast_answers a WHERE a.broadcast_id = b.id AND a.login = ?
               )
             ORDER BY b.id`,
-      args: [iso(now() - SHOWN_DAYS * DAY_MS), actor.login],
+      args: [isoAt(now() - SHOWN_DAYS * DAY_MS), actor.login],
     })
 
     return result.rows.map(stored).filter((broadcast) => reaches(broadcast.audience, actor))
@@ -117,7 +117,7 @@ export function createBroadcastsService(options: BroadcastsServiceOptions) {
           JSON.stringify(message.options),
           Number(message.required),
           JSON.stringify(message.audience),
-          iso(now()),
+          isoAt(now()),
         ],
       })
 
@@ -163,7 +163,7 @@ export function createBroadcastsService(options: BroadcastsServiceOptions) {
       await db.execute({
         sql: `INSERT INTO broadcast_answers (broadcast_id, login, option, answered_at)
               VALUES (?, ?, ?, ?) ON CONFLICT (broadcast_id, login) DO NOTHING`,
-        args: [broadcastId, actor.login, option, iso(now())],
+        args: [broadcastId, actor.login, option, isoAt(now())],
       })
 
       return this.pending(actor)

@@ -18,12 +18,15 @@ import { DRAIN_EVERY_MS, createQuota } from './quota.js'
 import type { Quota } from './quota.js'
 import type { CampusesService } from './campuses.service.js'
 import { createPhotos, memoryPhotoStore } from './photos.js'
+import { createPoints } from './points.js'
+import type { Points } from './points.js'
 import type { PhotoStore } from './photos.js'
 import { createReplicaRepository } from './replica.repository.js'
 import type { ReplicaRepository } from './replica.repository.js'
 import { registerReplicaRoutes } from './replica.routes.js'
 import { createSyncer } from './syncer.js'
 import type { Syncer, SyncerConfig } from './syncer.js'
+import { given } from '../../core/options.js'
 
 type ReplicaModuleDeps = {
   db: Db
@@ -51,6 +54,8 @@ export type ReplicaModule = AppModule & {
   curriculum: Curriculum
   /** La cuota de 42: quién puede gastarla y la cola de quien espera. */
   quota: Quota
+  /** El historial de puntos de evaluación de cada cual, bajo demanda. */
+  points: Points
 }
 
 export function createReplicaModule(deps: ReplicaModuleDeps): ReplicaModule {
@@ -59,18 +64,14 @@ export function createReplicaModule(deps: ReplicaModuleDeps): ReplicaModule {
     db: deps.db,
     client: deps.client,
     hourlyReserve: deps.config.hourlyReserve,
-    ...(deps.priority === undefined ? {} : { priority: deps.priority }),
-    ...(deps.halted === undefined ? {} : { halted: deps.halted }),
-    ...(deps.now === undefined ? {} : { now: deps.now }),
-    ...(deps.log === undefined ? {} : { log: deps.log }),
+    ...given({ priority: deps.priority, halted: deps.halted, now: deps.now, log: deps.log }),
   })
   const sync = createSyncer({
     client: deps.client,
     replica: repository,
     config: deps.config,
     quota,
-    ...(deps.now === undefined ? {} : { now: deps.now }),
-    ...(deps.log === undefined ? {} : { log: deps.log }),
+    ...given({ now: deps.now, log: deps.log }),
   })
   const campuses = createCampusesService({
     replica: repository,
@@ -83,8 +84,7 @@ export function createReplicaModule(deps: ReplicaModuleDeps): ReplicaModule {
     client: deps.client,
     hourlyReserve: deps.config.hourlyReserve,
     quota,
-    ...(deps.now === undefined ? {} : { now: deps.now }),
-    ...(deps.log === undefined ? {} : { log: deps.log }),
+    ...given({ now: deps.now, log: deps.log }),
   })
 
   const curriculum = createCurriculum({
@@ -92,17 +92,16 @@ export function createReplicaModule(deps: ReplicaModuleDeps): ReplicaModule {
     client: deps.client,
     hourlyReserve: deps.config.hourlyReserve,
     quota,
-    ...(deps.now === undefined ? {} : { now: deps.now }),
-    ...(deps.log === undefined ? {} : { log: deps.log }),
+    ...given({ now: deps.now, log: deps.log }),
   })
+
+  const points = createPoints({ client: deps.client, quota, replica: repository })
 
   const photos = createPhotos({
     db: deps.db,
     client: deps.client,
     store: deps.photos ?? memoryPhotoStore(),
-    ...(deps.halted === undefined ? {} : { halted: deps.halted }),
-    ...(deps.now === undefined ? {} : { now: deps.now }),
-    ...(deps.log === undefined ? {} : { log: deps.log }),
+    ...given({ halted: deps.halted, now: deps.now, log: deps.log }),
   })
 
   // Lo que se hace cuando le llega el turno a quien esperaba: lo mismo que se
@@ -120,14 +119,24 @@ export function createReplicaModule(deps: ReplicaModuleDeps): ReplicaModule {
   return {
     name: 'replica',
     personal: [
-      { table: 'users', logins: ['login'] },
-      { table: 'campus_members', userIds: ['user_id'] },
-      { table: 'project_users', userIds: ['user_id'] },
-      { table: 'presence', userIds: ['user_id'] },
-      { table: 'corrections', logins: ['corrector', 'corrected'] },
-      { table: 'agenda_users', logins: ['login'] },
-      { table: 'user_tracks', logins: ['login'] },
-      { table: 'user_levels', logins: ['login'] },
+      // Lo copiado de 42 va marcado como tal: en la descarga se distingue de lo
+      // que la app sabe por sí misma (la cola y los votos son de la app).
+      { table: 'users', logins: ['login'], source: '42' },
+      { table: 'campus_members', userIds: ['user_id'], source: '42' },
+      { table: 'project_users', userIds: ['user_id'], source: '42' },
+      { table: 'presence', userIds: ['user_id'], source: '42' },
+      // La nota es de quien fue corregido; quien corrigió se lleva que corrigió.
+      {
+        table: 'corrections',
+        logins: ['corrector', 'corrected'],
+        source: '42',
+        give: {
+          corrector: ['id', 'campus_id', 'corrector', 'corrected', 'project_id', 'begin_at'],
+        },
+      },
+      { table: 'agenda_users', logins: ['login'], source: '42' },
+      { table: 'user_tracks', logins: ['login'], source: '42' },
+      { table: 'user_levels', logins: ['login'], source: '42' },
       { table: 'quota_queue', logins: ['login'] },
       { table: 'curriculum_votes', logins: ['login'] },
     ],
@@ -137,6 +146,7 @@ export function createReplicaModule(deps: ReplicaModuleDeps): ReplicaModule {
     sync,
     campuses,
     quota,
+    points,
     routes: (app, context) => {
       registerReplicaRoutes(app, context, { campuses, sync, quota, photos })
     },

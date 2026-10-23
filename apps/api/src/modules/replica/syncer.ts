@@ -37,6 +37,7 @@ import { hourlyQuota } from './quota.js'
 import type { QuotaGate } from './quota.js'
 import type { ReplicaRepository } from './replica.repository.js'
 import type { ApiLocation, ApiUser } from '../../integrations/forty-two/types.js'
+import { isoAt } from '../../core/time.js'
 
 export type SyncerConfig = {
   /** Campus que se replican en segundo plano. */
@@ -228,7 +229,6 @@ export function createSyncer(options: SyncerOptions) {
   const quota = options.quota ?? hourlyQuota(client, config.hourlyReserve)
   const isTracked = (campusId: number): boolean => config.trackedCampusIds.includes(campusId)
   const isActive = (): boolean => now() - lastActivityAt < ACTIVITY_WINDOW_MS
-  const iso = (ms: number): string => new Date(ms).toISOString()
 
   /**
    * `true` si se puede gastar en trabajo de fondo.
@@ -283,7 +283,7 @@ export function createSyncer(options: SyncerOptions) {
       const from = state?.cursor ?? backfill.anchor
       // Si la vuelta anterior no terminó su ventana, se sigue con la misma: sin
       // orden garantizado, cambiar de ventana a media paginación saltaría filas.
-      const until = state?.until ?? iso(now())
+      const until = state?.until ?? isoAt(now())
       let page = state?.page ?? 1
 
       for (let fetched = 0; fetched < DELTA_MAX_PAGES; fetched += 1) {
@@ -297,7 +297,7 @@ export function createSyncer(options: SyncerOptions) {
 
         if (result.items.length < result.perPage) {
           await replica.setState(deltaKey(campusId), {
-            cursor: iso(Date.parse(until) - DELTA_OVERLAP_MS),
+            cursor: isoAt(Date.parse(until) - DELTA_OVERLAP_MS),
             at: now(),
           } satisfies DeltaState)
 
@@ -325,7 +325,7 @@ export function createSyncer(options: SyncerOptions) {
       return stored
     }
 
-    const anchor = iso(now())
+    const anchor = isoAt(now())
     const fresh: BackfillState = {
       phase: 'in_progress',
       anchor,
@@ -352,11 +352,11 @@ export function createSyncer(options: SyncerOptions) {
       return undefined
     }
 
-    const to = iso(Date.parse(state.from) + 1)
+    const to = isoAt(Date.parse(state.from) + 1)
     const from = Date.parse(state.from) - BACKFILL_WINDOW_MS
     const recentLimit = Date.parse(state.anchor) - BACKFILL_RECENT_WINDOWS * BACKFILL_WINDOW_MS
 
-    return { from: from <= recentLimit ? EPOCH : iso(from), to }
+    return { from: from <= recentLimit ? EPOCH : isoAt(from), to }
   }
 
   /**
@@ -407,7 +407,7 @@ export function createSyncer(options: SyncerOptions) {
 
           Object.assign(next, {
             phase: 'all',
-            from: iso(Date.parse(state.anchor) - BACKFILL_WINDOW_MS),
+            from: isoAt(Date.parse(state.anchor) - BACKFILL_WINDOW_MS),
             to: state.anchor,
             page: 1,
             total: whole.total,
@@ -417,7 +417,7 @@ export function createSyncer(options: SyncerOptions) {
           const following = nextWindow(state)
 
           if (following === undefined) {
-            Object.assign(next, { phase: 'done', finishedAt: iso(now()) })
+            Object.assign(next, { phase: 'done', finishedAt: isoAt(now()) })
             log(`campus ${campusId}: réplica completa (${next.rows} filas)`)
           } else {
             Object.assign(next, { ...following, page: 1 })
@@ -753,6 +753,27 @@ export function createSyncer(options: SyncerOptions) {
       await loop
     },
 
+    /**
+     * Instante (ms) de lo último que se trajo de 42 para un campus seguido:
+     * la foto de puestos o los cambios de proyectos, lo más reciente de los
+     * dos. `null` si aún no ha habido ninguna. Lo lee `GET /health/db`, así
+     * que no cuenta filas: solo mira el estado guardado.
+     */
+    async lastSyncAt(): Promise<number | null> {
+      let latest: number | null = null
+
+      for (const id of config.trackedCampusIds) {
+        const locations = await replica.getState<LocationsState>(locationsKey(id))
+        const delta = await replica.getState<DeltaState>(deltaKey(id))
+
+        for (const at of [locations?.at ?? 0, delta?.at ?? 0]) {
+          if (at > 0 && (latest === null || at > latest)) latest = at
+        }
+      }
+
+      return latest
+    },
+
     /** Estado de la réplica, para `GET /sync/status`. */
     async status(): Promise<SyncStatus> {
       const campuses: SyncStatus['campuses'] = []
@@ -764,9 +785,9 @@ export function createSyncer(options: SyncerOptions) {
 
         campuses.push({
           id,
-          locationsAt: locations === undefined ? null : iso(locations.at),
+          locationsAt: locations === undefined ? null : isoAt(locations.at),
           present: locations?.count ?? 0,
-          deltaAt: delta === undefined || delta.at === 0 ? null : iso(delta.at),
+          deltaAt: delta === undefined || delta.at === 0 ? null : isoAt(delta.at),
           backfill: {
             phase: backfill?.phase ?? 'in_progress',
             rows: backfill?.rows ?? 0,

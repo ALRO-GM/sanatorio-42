@@ -17,7 +17,7 @@ este fichero y se hace lo que dice, en orden.
 - Si una tarea necesita una decisión de Alberto, se le pregunta antes de seguir
   con esa; las demás no esperan.
 
-Última puesta al día: 2026-10-22. En producción desde el 2026-10-11.
+Última puesta al día: 2026-10-23. En producción desde el 2026-10-11.
 
 ## 1. Arranque (siempre, en cada sesión nueva)
 
@@ -285,15 +285,35 @@ recurrente. Hecho el 22-23 de octubre:
       de evento a medias sin 500.
 - [x] Tanda 3 (desplegada): Slack escapado, `SESSION_SECRET` ≥ 32, salas
       visibles solo para su campus o su gente.
-- [ ] **En curso con agentes (worktrees, sin push)**: textos (275 filas,
-      glosario, contextos), infra (logger a `warn` + `x-request-id`, migración
-      aparte con vuelta atrás, etiqueta `ci-ok/<sha>`, `/health/db` con sha),
-      datos personales (M6). Al volver: unir de una en una, `npm run check`,
-      un push y un despliegue (skill `paralelo`).
-- [ ] Después, por orden del `README.md` de la revisión: ca/eu de `gestion`,
-      `legal` y `juego`; los diez refactors de la API; los diez de la web;
-      tests (mínimos de la web, `docs/api.md` ↔ rutas); bajos de seguridad
-      restantes (B1 `POST` del documento, B3, B4, B6-B8); observabilidad.
+- [x] Unidas y desplegadas (23-oct por la mañana): textos (es/en + ca/eu
+      completos), operación (logger a warn + x-request-id, migración aparte
+      con vuelta atrás, `ci-ok/<sha>`, `/health/db` con sha), datos
+      personales (M6), y los refactors de la API (helpers de filas, `inList`,
+      caché TTL, guarda de jobs, `isoAt`/`given`, regla de 42, índice y
+      LIMIT en estadísticas), B4 (bloqueos cortan DMs), hooks de git y
+      `check:quick` (`npm run hooks`). El estado por hallazgo está en
+      `docs/revision-2026-10/README.md`.
+- [ ] **En curso con un agente**: base reutilizable de la web (los diez de
+      `calidad-web.md`), rama `worktree-agent-a6d0ea6693a137ffe`. Al volver:
+      unir, `npm run check`, push y despliegue.
+- [x] Hecho y desplegado el 23-oct (tarde, sin agentes): B1 (documento de
+      horas por `POST /events/report/csv`), B3, bajos de juegos (irse = perder,
+      cerrojo del Clicker, `slugParam`, tramo del Pomodoro ≥ 5, `TourName`, tope
+      de claves de uso), B6 (análisis de la red por persona), B7 (tope de
+      telemetría), B8 (copias de fuera cifradas con gpg; falta crear el
+      destino), B9 (`externalHref`), B10 (`paintable`), test `docs/api.md` ↔
+      rutas, mínimos de cobertura de la web a 64 %, A2 + L4 (`createLate`,
+      módulo `presence`, `replica.points`, ESLint en `app/`).
+- [ ] **Agentes en pausa** (Alberto, 23-oct: «pausa los agentes hasta que te
+      diga»). No reanudar el de la web hasta que lo diga.
+- [x] Recorridos: asistencia, guardia, pizarra, terapia, tablón y test del
+      cliente real (falta el del Code Clicker).
+- [ ] Queda: recorrido del Code Clicker, monitor externo y errores de
+      cliente (`ErrorBoundary`; esperar al agente de la web, toca `shared/`),
+      textos que tocan código (claves repetidas, glifos; también web), destino
+      de las copias fuera de la máquina (bucket gratuito de Oracle + rclone +
+      frase: decisión y pasos con Alberto), M7 (borrado de cuenta: decisión de
+      Alberto).
 
 ## 3. A medias o por confirmar con Alberto
 

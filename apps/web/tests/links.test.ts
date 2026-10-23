@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { decodePart, intraHref, networkHref, recordHref } from '../src/shared/links'
+import { decodePart, externalHref, intraHref, networkHref, recordHref } from '../src/shared/links'
 
 describe('direcciones de la web', () => {
   it('un login normal va tal cual', () => {
@@ -31,5 +31,24 @@ describe('direcciones de la web', () => {
     expect(decodePart('%E0%A4%A')).toBeNull()
     expect(decodePart('%zz')).toBeNull()
     expect(decodePart('')).toBe('')
+  })
+})
+
+describe('direcciones de fuera', () => {
+  it('solo pasan las https', () => {
+    expect(externalHref('https://profile.intra.42.fr/events/1')).toBe(
+      'https://profile.intra.42.fr/events/1',
+    )
+
+    for (const url of [
+      null,
+      'javascript:alert(1)',
+      'JavaScript:x',
+      'http://x',
+      'data:text/html,x',
+      '//x',
+    ]) {
+      expect(externalHref(url), String(url)).toBeNull()
+    }
   })
 })

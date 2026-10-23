@@ -6,6 +6,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 
 import { actor, expectCode, useCommunity } from '../helpers/community.js'
 import type { Community } from '../helpers/community.js'
+import { segmentOf } from '../../src/modules/usage/index.js'
 
 const MINUTE = 60_000
 const settings = {
@@ -187,8 +188,10 @@ describe('registro y estadísticas del Pomodoro (#80)', () => {
     const top = await focus.myStats(actor('mar'), { low: 50, high: 100 })
 
     expect(top.position).toBe(67)
-    expect(top.segment).toEqual({ low: 50, high: 100, people: 2, of: 4 })
-    expect(top.band.focusedSeconds).toBe(35 * 60)
+    // El tramo pedido tiene dos personas: se ensancha hasta cinco (aquí, las
+    // cuatro que hay), para que la media no sea la de nadie en concreto.
+    expect(top.segment).toEqual({ low: 50, high: 100, people: 4, of: 4 })
+    expect(top.band.focusedSeconds).toBe(25 * 60)
     // Lo suyo sigue siendo solo lo suyo.
     expect(top.totals.focusedSeconds).toBe(30 * 60)
 
@@ -197,6 +200,21 @@ describe('registro y estadísticas del Pomodoro (#80)', () => {
     expect(everyone.totals).toMatchObject({ sessions: 4, cancelled: 4, people: 4 })
     expect(everyone.reasons.find((one) => one.reason === 'done')?.cancelled).toBe(4)
     expect((await focus.adminStats(root, { low: 0, high: 50 })).totals.focusedSeconds).toBe(30 * 60)
+  })
+
+  it('el tramo con un mínimo de gente se ensancha hacia los lados que puede', () => {
+    const activity = new Map([1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => [`p${String(n)}`, n]))
+    const people = (low: number, high: number, min = 0): string[] => {
+      const { keep } = segmentOf(activity, low, high, min)
+
+      return [...activity.keys()].filter(keep)
+    }
+
+    expect(people(90, 100)).toEqual(['p10'])
+    expect(people(90, 100, 5)).toEqual(['p6', 'p7', 'p8', 'p9', 'p10'])
+    expect(people(0, 10, 5)).toEqual(['p1', 'p2', 'p3', 'p4', 'p5'])
+    expect(people(40, 60, 5)).toEqual(['p4', 'p5', 'p6', 'p7', 'p8'])
+    expect(people(40, 60, 50)).toHaveLength(10)
   })
 
   it('las del panel, solo para quien administra', async () => {

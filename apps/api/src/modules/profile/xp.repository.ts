@@ -9,6 +9,7 @@
 import type { Db } from '../../core/db/database.js'
 import { nowIso } from '../../core/db/database.js'
 import { toNumber, toText } from '../../core/db/rows.js'
+import { inList, listArg } from '../../core/db/sql.js'
 
 export function createXpRepository(db: Db) {
   return {
@@ -67,12 +68,12 @@ export function createXpRepository(db: Db) {
               FROM xp_events e
               JOIN users u ON u.login = e.login
               JOIN campus_members m ON m.user_id = u.id AND m.campus_id = ?
-              WHERE e.kind IN (${kinds.map(() => '?').join(', ')})
+              WHERE ${inList('e.kind')}
                 AND (? IS NULL OR e.created_at >= ?)
               GROUP BY e.login
               HAVING SUM(e.amount) > 0
               ORDER BY xp DESC, e.login`,
-        args: [campusId, ...kinds, since, since],
+        args: [campusId, listArg(kinds), since, since],
       })
 
       return result.rows.map((row) => ({

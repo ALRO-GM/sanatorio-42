@@ -31,9 +31,12 @@ recurrente tiene su skill en `.claude/skills/` y su subagente en
    test directo, servicio con reloj inyectado, ruta con zod, pantalla con su
    recorrido por rol y nombre, mock a la par del cliente real, textos en las
    cuatro lenguas (skill `traducir`).
-4. **Iterar rápido.** Mientras se trabaja: `npx vitest run <fichero>`,
-   `npm run typecheck`, `npx prettier --check`. Antes de cerrar: `npm run
-   check` entero (skill `comprobar`), que tarda poco más de un minuto.
+4. **Iterar rápido.** Mientras se trabaja: `npx vitest run <fichero>` y
+   `npm run check:quick` (tipos, lint, formato y textos, sin tests: medio
+   minuto). Antes de cerrar: `npm run check` entero (skill `comprobar`), que
+   tarda poco más de un minuto. Con `npm run hooks` (una vez por clon) el
+   pre-commit pasa formato, lint y textos sobre lo preparado, y el pre-push
+   pasa el check entero: nada rojo sale del portátil.
 5. **Revisar** (skill `revisar`, subagente `revisor` para una segunda
    opinión): seguridad, permisos, cuota, textos, tests y docs sobre el diff.
 6. **Commit** en español que explique el porqué, en `main` o en una rama corta
@@ -80,8 +83,7 @@ De la lista priorizada de `docs/revision-2026-10/tests-infra.md`:
    despliegue lo compruebe.
 5. Copias: retención por tiempo, verificación y destino fuera de la máquina
    (cifradas).
-6. Hooks de git (pre-commit con lo preparado, pre-push con el check) y
-   `check:quick`.
-7. Subir los mínimos de cobertura de la web; test de `docs/api.md` ↔ rutas.
+7. Seguir subiendo los mínimos de cobertura de la web (hoy 64 % de líneas;
+   el test de `docs/api.md` ↔ rutas ya está).
 8. Avisos a Slack del despliegue y un monitor externo gratuito.
 9. Ramas con PR y CI obligatoria cuando haya más de una persona.

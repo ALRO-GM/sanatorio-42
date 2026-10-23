@@ -225,6 +225,22 @@ describe('red de correcciones', () => {
       closeDatabase(db)
     })
 
+    it('cada persona puede pedir veinte análisis nuevos por minuto; los ya hechos no cuentan', async () => {
+      const graph = (from: string) => services.network.graph(actor('ana'), { from })
+      const days = Array.from({ length: 20 }, (_, day) => `2026-01-${String(day + 10)}`)
+
+      for (const from of days) await graph(from)
+      // Repetir uno calculado no recalcula nada: sale de lo guardado.
+      await expect(graph(days[19] ?? '')).resolves.toBeDefined()
+      await expect(graph('2026-02-01')).rejects.toMatchObject({ code: 'rate_limited' })
+      // A otra persona no le afecta, y pasado el minuto vuelve a poder.
+      await expect(
+        services.network.graph(actor('leo'), { from: '2026-02-01' }),
+      ).resolves.toBeDefined()
+      clock.advance(MINUTE)
+      await expect(graph('2026-02-02')).resolves.toBeDefined()
+    })
+
     /** Da vueltas hasta que el histórico está copiado. */
     const copyAll = async (): Promise<void> => {
       for (let turn = 0; turn < 10; turn += 1) {

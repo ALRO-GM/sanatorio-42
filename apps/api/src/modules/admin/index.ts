@@ -22,6 +22,7 @@ import type { AdminService, AdminServiceOptions } from './admin.service.js'
 import { createGrowthService } from './growth.js'
 import { ELEVATION_COOKIE, ELEVATION_MS, createSecondFactor } from './second-factor.js'
 import type { SecondFactor } from './second-factor.js'
+import { given } from '../../core/options.js'
 
 export type AdminModule = AppModule & { service: AdminService; secondFactor: SecondFactor }
 
@@ -86,7 +87,7 @@ export function createAdminModule(deps: AdminModuleDeps): AdminModule {
   const secondFactor = createSecondFactor({
     db: deps.db,
     secret: deps.secret ?? randomBytes(32).toString('hex'),
-    ...(deps.now === undefined ? {} : { now: deps.now }),
+    ...given({ now: deps.now }),
   })
   const panelCookie = (request: FastifyRequest): string | undefined =>
     readCookie(request.headers.cookie, ELEVATION_COOKIE)
@@ -94,9 +95,40 @@ export function createAdminModule(deps: AdminModuleDeps): AdminModule {
   return {
     name: 'admin',
     personal: [
-      { table: 'user_roles', logins: ['login'] },
-      { table: 'user_blocks', logins: ['login'] },
-      { table: 'tickets', logins: ['login'] },
+      // Quien administra se lleva lo que hizo desde el panel (un rol dado, un
+      // bloqueo, una respuesta), pero no a quién ni lo que esa persona escribió.
+      {
+        table: 'user_roles',
+        logins: ['login', 'granted_by'],
+        give: { granted_by: ['role', 'granted_by', 'created_at'] },
+      },
+      {
+        table: 'user_blocks',
+        logins: ['login', 'blocked_by'],
+        give: { blocked_by: ['until', 'blocked_by', 'created_at'] },
+      },
+      {
+        table: 'tickets',
+        logins: ['login', 'answered_by'],
+        give: {
+          answered_by: [
+            'id',
+            'kind',
+            'status',
+            'answer',
+            'answered_by',
+            'answered_at',
+            'category',
+            'section',
+          ],
+        },
+      },
+      // Los ajustes son de la app; de quien los tocó solo cuenta que los tocó.
+      {
+        table: 'settings',
+        logins: ['updated_by'],
+        give: { updated_by: ['key', 'updated_by', 'updated_at'] },
+      },
       { table: 'request_stats', logins: ['login'] },
       { table: 'user_limits', logins: ['login'] },
       // El secreto del segundo factor no se da nunca: con él se sacan códigos.
@@ -310,8 +342,6 @@ export function createAdminModule(deps: AdminModuleDeps): AdminModule {
 
       /** `GET /admin/growth?from=&to=&campus=` → uso por campus y usuarios totales y nuevos por día. */
       app.get('/admin/growth', async (request, reply) => {
-        reply.header('Cache-Control', 'private, no-store')
-
         return reply.send(await growth.growth(await session.actor(request), request.query))
       })
 
@@ -355,8 +385,6 @@ export function createAdminModule(deps: AdminModuleDeps): AdminModule {
 
       /** `GET /admin/data` → los tipos de dato que se pueden borrar y cuántas filas tienen. */
       app.get('/admin/data', async (request, reply) => {
-        reply.header('Cache-Control', 'private, no-store')
-
         return reply.send(await service.data(await session.actor(request)))
       })
 

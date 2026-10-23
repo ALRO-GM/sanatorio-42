@@ -5,6 +5,7 @@
 import type { Db } from '../../core/db/database.js'
 import { nowIso } from '../../core/db/database.js'
 import { toNumber, toText } from '../../core/db/rows.js'
+import { inList, listArg } from '../../core/db/sql.js'
 
 export type GroupRow = {
   id: number
@@ -51,9 +52,9 @@ export function createTherapyRepository(db: Db) {
 
     const result = await db.execute({
       sql: `SELECT group_id, login, progress FROM therapy_members
-            WHERE group_id IN (${groupIds.map(() => '?').join(', ')})
+            WHERE ${inList('group_id')}
             ORDER BY joined_at`,
-      args: [...groupIds],
+      args: [listArg(groupIds)],
     })
 
     for (const row of result.rows) {

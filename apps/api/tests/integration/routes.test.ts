@@ -12,6 +12,7 @@
 
 import { afterEach, describe, expect, it } from 'vitest'
 
+import { TELEMETRY_PER_MINUTE } from '../../src/modules/usage/index.js'
 import { makeApp } from '../helpers/test-app.js'
 import type { TestApp } from '../helpers/test-app.js'
 
@@ -380,5 +381,26 @@ describe('lo que devuelve la API no se guarda en ningún sitio', () => {
     const usage = await built.app.inject({ method: 'GET', url: '/usage', headers: { cookie } })
 
     expect(usage.headers['cache-control']).toBe('private, max-age=300')
+  })
+})
+
+describe('estadística de uso', () => {
+  it('pasado el tope por minuto, los envíos se tiran sin mirarlos ni dar error', async () => {
+    const built = await app()
+    const cookie = await built.login()
+    const post = (url: string) =>
+      built.app.inject({
+        method: 'POST',
+        url,
+        headers: { cookie, 'content-type': 'application/json' },
+        payload: JSON.stringify({ counts: { roto: 1 } }),
+      })
+
+    // Mal hecho, se rechaza mientras se apunta…
+    expect((await post('/usage')).statusCode).toBe(400)
+    for (let sent = 1; sent < TELEMETRY_PER_MINUTE; sent += 1) await post('/usage/clicks')
+    // …y pasado el tope ya ni se mira: es estadística.
+    expect((await post('/usage')).statusCode).toBe(204)
+    expect((await post('/usage/clicks')).statusCode).toBe(204)
   })
 })

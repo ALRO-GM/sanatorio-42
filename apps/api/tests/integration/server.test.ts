@@ -9,8 +9,15 @@
 
 import { afterEach, describe, expect, it } from 'vitest'
 
+import { LATEST_VERSION } from '../../src/core/db/migrations/index.js'
 import { cookieValue, json, makeApp } from '../helpers/test-app.js'
-import type { AvailabilityResponse, CurrentUser, Peer, ProjectSummary } from '@sanatorio/contracts'
+import type {
+  AvailabilityResponse,
+  CurrentUser,
+  DbHealth,
+  Peer,
+  ProjectSummary,
+} from '@sanatorio/contracts'
 import type { TestApp } from '../helpers/test-app.js'
 
 const apps: TestApp[] = []
@@ -46,6 +53,60 @@ describe('salud', () => {
 
     expect(response.statusCode).toBe(200)
     expect(json(response) as { status: string }).toEqual({ status: 'ok' })
+  })
+
+  it('GET /health/db dice el esquema que espera el código y el que tiene la base', async () => {
+    const built = await app()
+
+    const response = await built.app.inject({ method: 'GET', url: '/health/db' })
+
+    expect(response.statusCode).toBe(200)
+    const health = json(response) as DbHealth
+    expect(health).toEqual({
+      status: 'ok',
+      database: 'ok',
+      // Sin `GIT_SHA` (en local y en los tests) no se sabe qué commit es.
+      version: null,
+      schema: { expected: LATEST_VERSION, actual: LATEST_VERSION },
+      // Nada sincronizado todavía.
+      syncAgeSeconds: null,
+    })
+    expect(health.schema.expected).toBeGreaterThan(0)
+  })
+
+  it('GET /health/db devuelve el commit que la imagen lleva en GIT_SHA', async () => {
+    const built = await app({ GIT_SHA: '0123abcd0123abcd0123abcd0123abcd0123abcd' })
+
+    const health = json(await built.app.inject({ method: 'GET', url: '/health/db' })) as DbHealth
+
+    expect(health.version).toBe('0123abcd0123abcd0123abcd0123abcd0123abcd')
+  })
+
+  it('GET /health/db da la edad de lo último traído de 42, lo más reciente de puestos o cambios', async () => {
+    const built = await app()
+    const replica = built.services.repositories.replica
+    await replica.setState('locations:22', { at: Date.now() - 10 * 60_000, count: 3 })
+    await replica.setState('delta:22', {
+      cursor: '2026-01-01T00:00:00.000Z',
+      at: Date.now() - 120_000,
+    })
+
+    const health = json(await built.app.inject({ method: 'GET', url: '/health/db' })) as DbHealth
+
+    expect(health.syncAgeSeconds).toBeGreaterThanOrEqual(119)
+    expect(health.syncAgeSeconds).toBeLessThan(130)
+  })
+
+  it('GET /health/db no da una edad negativa si el reloj va por detrás', async () => {
+    const built = await app()
+    await built.services.repositories.replica.setState('locations:22', {
+      at: Date.now() + 60_000,
+      count: 1,
+    })
+
+    const health = json(await built.app.inject({ method: 'GET', url: '/health/db' })) as DbHealth
+
+    expect(health.syncAgeSeconds).toBe(0)
   })
 })
 

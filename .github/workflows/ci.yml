@@ -9,10 +9,15 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+# Solo leer, salvo el trabajo que publica el veredicto, que lo pide aparte.
+permissions:
+  contents: read
+
 jobs:
   check:
     name: Tipos, lint, tests y build
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
@@ -35,6 +40,7 @@ jobs:
   image:
     name: La imagen de Docker construye
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
@@ -43,5 +49,66 @@ jobs:
           context: .
           file: infra/docker/Dockerfile
           push: false
+          # Igual que en la máquina: el commit dentro de la imagen.
+          build-args: GIT_SHA=${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  # El veredicto, en el propio repositorio: una etiqueta `ci-ok/<sha>` si todo
+  # pasó, `ci-ko/<sha>` si algo falló. La máquina de producción la mira con
+  # `git ls-remote` por SSH (infra/scripts/deploy.sh), sin la API de GitHub y
+  # sin su cupo de 60 consultas por hora. Solo en `main`: es lo que se despliega.
+  # Si la CI se cancela porque llegó otro commit, no hay etiqueta, y deploy.sh
+  # lo detecta porque `main` ya apunta a otro sitio.
+  veredicto:
+    name: Etiqueta ci-ok / ci-ko
+    needs: [check, image]
+    if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      # Con historia entera: hace falta la fecha de los commits etiquetados
+      # para borrar los veredictos viejos (el repositorio es pequeño).
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Publicar el veredicto
+        env:
+          CHECK: ${{ needs.check.result }}
+          IMAGE: ${{ needs.image.result }}
+        run: |
+          set -eu
+          if [ "$CHECK" = success ] && [ "$IMAGE" = success ]; then
+            tag="ci-ok/$GITHUB_SHA"
+          else
+            tag="ci-ko/$GITHUB_SHA"
+          fi
+          git tag "$tag" "$GITHUB_SHA"
+          git push origin "refs/tags/$tag"
+          echo "Etiqueta $tag publicada."
+
+      # Limpieza: los veredictos de commits de hace más de 30 días ya no sirven
+      # (lo que se despliega es siempre reciente). Se mira la fecha del commit;
+      # una etiqueta cuyo commit ya no existe (un commit reescrito) también sobra.
+      - name: Borrar veredictos de hace más de 30 días
+        run: |
+          set -eu
+          git fetch --quiet origin '+refs/tags/ci-ok/*:refs/tags/ci-ok/*' '+refs/tags/ci-ko/*:refs/tags/ci-ko/*' || true
+          cutoff=$(( $(date +%s) - 30 * 86400 ))
+          old=''
+          for ref in $(git for-each-ref --format='%(refname)' 'refs/tags/ci-ok/*' 'refs/tags/ci-ko/*'); do
+            when=$(git log -1 --format=%ct "$ref" 2>/dev/null || echo 0)
+            if [ "$when" -lt "$cutoff" ]; then
+              old="$old $ref"
+            fi
+          done
+          if [ -n "$old" ]; then
+            # shellcheck disable=SC2086
+            git push origin --delete $old
+            echo "Borradas:$old"
+          else
+            echo "Nada que borrar."
+          fi

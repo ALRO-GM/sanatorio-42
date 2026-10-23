@@ -8,6 +8,7 @@
 
 import type { Db } from '../../core/db/database.js'
 import { toNumber, toText } from '../../core/db/rows.js'
+import { inList, listArg } from '../../core/db/sql.js'
 import type { GuideSection } from './doubts.repository.js'
 
 type ChangeRow = {
@@ -37,8 +38,8 @@ export function createGuideChangesRepository(db: Db) {
     if (ids.length > 0) {
       const result = await db.execute({
         sql: `SELECT change_id, login FROM guide_change_flags
-              WHERE change_id IN (${ids.map(() => '?').join(', ')}) ORDER BY created_at`,
-        args: ids,
+              WHERE ${inList('change_id')} ORDER BY created_at`,
+        args: [listArg(ids)],
       })
 
       for (const row of result.rows) {

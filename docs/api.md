@@ -44,7 +44,7 @@ Lo que vale para todas las rutas:
 
 ## Documentos verificables y staff
 
-Quien se descarga sus horas (`GET /events/report?format=csv`) puede entregar el
+Quien se descarga sus horas (`POST /events/report/csv`) puede entregar el
 fichero al staff de 42. Para que el staff sepa que no se ha retocado, hay cuentas
 de staff: no son de 42, las crea quien administra y **solo** llegan a las rutas
 de este apartado. Cualquier otra ruta les contesta `403`.
@@ -158,7 +158,7 @@ fotos nuevas por hora; una que 42 no da no se vuelve a pedir hasta pasada una ho
 `PUT /me/settings` admite `recordStyle`: el id de un estilo, `none` (cada cual
 lo ve con el suyo) o `default` (lo de fábrica: tu estilo exclusivo si tienes uno).
 Un estilo exclusivo de otra persona da `403`. `GET /me/profile` y
-`GET /profiles/:login` traen `recordStyle`, ya resuelto: con qué estilo se ve.
+`GET /users/:login/profile` traen `recordStyle`, ya resuelto: con qué estilo se ve.
 
 ## Privacidad y condiciones
 GET /me/legal → `{ "version": "2026-10-16", "acceptedAt": null }`: la versión vigente
@@ -166,9 +166,27 @@ y cuándo la aceptaste. La web no deja seguir hasta aceptarla.
 POST /me/legal/accept → `{ "version" }`: hay que mandar la vigente (si cambió
 mientras se leía, `409`).
 GET /me/export → todo lo tuyo, tabla a tabla, como JSON para descargar
-(`Content-Disposition: attachment`). Cada módulo apunta en `personal` qué tablas
-suyas tienen datos de alguien; un test comprueba que no falta ninguna. Los
-secretos (el del segundo factor) no salen nunca.
+(`Content-Disposition: attachment`; tipo `PersonalExport`).
+{
+  "login": "legomez", "exportedAt": "2026-10-23T10:00:00.000Z", "legalVersion": "2026-10-16",
+  "tables": {
+    "users": { "source": "42", "truncated": false, "rows": [{ "id": 1, "login": "legomez", … }] },
+    "help_bookings": { "source": "sanatorio", "truncated": false, "rows": [ … ] },
+    "usage_time": { "source": "sanatorio", "truncated": true, "rows": [ …5000 filas… ] }
+  }
+}
+
+`source` dice si la tabla está copiada de 42 o es de la app. `truncated: true`
+avisa de que la tabla pasaba del tope (5 000 filas) y solo van las primeras.
+Cada módulo apunta en `personal` qué tablas suyas tienen datos de alguien y en
+qué columnas; un test recorre el esquema y comprueba que no falta ninguna
+columna de persona. En las tablas «entre dos» (una reserva, una corrección, un
+aviso) cada fila va recortada a lo de quien descarga: ni la nota ni las
+etiquetas de la otra persona, ni el CSV de horas de otra, ni quién reaccionó.
+Las listas de logins (`therapy_checks.present`, `broadcasts.audience`) salen
+solo con el propio login. Los secretos (el del segundo factor, los códigos de
+asistencia escritos, el `hash` de los informes, las claves del staff) no salen
+nunca.
 
 ## Campus y preferencias
 GET /campuses
@@ -205,7 +223,7 @@ Ids de logro: `first_duty`, `group_therapy`, `selfless_help`, `board_teacher`, `
 Los textos de unos y otros los pone el front (`apps/web/src/shared/i18n/`).
 
 `reactions` son las valoraciones recibidas al ayudar (ver «Guardia: ayuda
-reservada»). Ya no existe `POST /reactions`: la XP por ayudar sale solo de una
+reservada»). Ya no se dan valoraciones sueltas (la ruta `/reactions` se quitó): la XP por ayudar sale solo de una
 sesión reservada.
 
 GET /users/search?q= → hasta 8 personas cuyo login o nombre lleva lo escrito,
@@ -247,13 +265,16 @@ calendario (y va a ir) puede leer o escribir; el resto recibe `403`.
   `minutes` es `null` mientras falte uno: sin los dos no hay asistencia. `409`
   si no es el momento de ese código, `400` si el código no es de ese evento,
   `403` si ya has agotado los intentos.
-- GET /events/report?from=&to=&login=&format= → las horas validadas con códigos
+- GET /events/report?from=&to=&login= → las horas validadas con códigos
   en un periodo (días `YYYY-MM-DD`, los dos incluidos; por defecto, los últimos
   treinta): `{ "from", "to", "totalMinutes", "rows": [{ "login", "role", "eventId",
   "kind", "title", "day", "from", "to", "minutes", "scheduledMinutes", "with" }] }`.
   Sin `login`, las tuyas; las de otra persona o las de todo el mundo
-  (`login=all`), solo quien administra. Con `format=csv` es un fichero para una
-  hoja de cálculo, con las horas del campus. El fichero es un **documento
+  (`login=all`), solo quien administra.
+- POST /events/report/csv → `{ "from"?, "to"?, "login"? }`, lo mismo que la
+  anterior: el informe como fichero para una hoja de cálculo, con las horas del
+  campus. Es `POST` porque emite un documento y gasta del cupo diario: un
+  enlace desde otra web no puede pedirlo. El fichero es un **documento
   verificable**: se guarda una copia con un código de cuatro caracteres, que va
   en el nombre (`horas-validadas_<login>_<desde>_<hasta>_<CÓDIGO>.csv`), en la
   cabecera `X-Verification-Code` y en la última línea
@@ -440,6 +461,8 @@ en `seats` y en el mapa salen en azul.
 - POST /groups/:id/join → 204 (409 si está completo)
 - DELETE /groups/:id/join → 204. Si era la última persona, el grupo se cierra.
 - DELETE /groups/:id → 204. Solo quien lo abrió.
+- POST /groups/:id/invite → `{ "invited" }`: avisa del grupo a quien hace el
+  proyecto en el campus. Solo quien lo abrió, y una vez.
 
 Las terapias son para **días concretos** (`dates`, de uno a catorce), no se
 repiten cada semana. Un grupo se cierra solo cuando pasa su último día o cuando
@@ -556,7 +579,7 @@ GET /projects/:id/doubts
 - DELETE /doubts/:id → 204. Solo quien la puso.
 - PUT /projects/:id/guide `{ "start": [], "problems": [], "concepts": [] }` → la guía. Solo especialistas.
 - POST /projects/:id/guide/proposals `{ "section": "problems", "body": "…" }` → 204. Cualquiera.
-- POST /guide-proposals/:id/accept y /guide-proposals/:id/reject → 204. Solo especialistas.
+- POST /guide-proposals/:id/accept · POST /guide-proposals/:id/reject → 204. Solo especialistas.
 
 ## Pizarras
 GET /boards?from=<ISO>&to=<ISO> → pizarras del campus que empiezan en ese intervalo
@@ -651,7 +674,11 @@ ayudar en persona.
   `[{ "login": "jdoe", "freeStarts": ["17:00", "17:30"], "remainingMinutes": 60 }]`.
 - POST /help/bookings → `{ "helper", "start", "minutes", "projectId"?, "note"? }`
   (`minutes`: 30, 60, 90 o 120). Queda `pending`.
-- POST /help/bookings/:id/accept · …/decline → 204. Solo quien ayuda.
+- POST /help/bookings/:id/accept · POST /help/bookings/:id/decline → 204. Solo
+  quien ayuda.
+- GET /help/inbox → las peticiones que tienes por contestar y las tuyas que se
+  rechazaron o anularon y aún no has visto.
+- POST /help/bookings/:id/seen → 204: ya has visto que se rechazó o anuló.
 - DELETE /help/bookings/:id → 204. Cualquiera de las dos personas, antes o
   después de la hora ("al final no quedamos").
 - POST /help/bookings/:id/rating → `{ "tag" }`. Devuelve `{ "xp" }`: `null` si
@@ -761,6 +788,10 @@ la copia se borra. `404` si ya no está. Quien tuviera la partida abierta recibe
 
 DELETE /admin/clicker/alerts/:id → 204. Solo admins. Descarta un aviso de salto.
 
+POST /admin/clicker/sanction → `{ login, code, wipe, note }` → 204. Solo admins.
+Le deja ese código de sanción y, con `wipe`, sin edificios ni mejoras; lo verá
+en el juego.
+
 Pulsar más de lo que aguanta una persona también es trampa (motivo `clicks`).
 No se mira segundo a segundo, sino el total de cada tramo seguido: más de 50
 por segundo durante un minuto, más de 9 durante media hora, y de media más de 6
@@ -787,12 +818,6 @@ Solo admins. Lo que se decide sobre un salto de capital sospechoso:
   cuadraron (`seizure` en `GET /clicker`, hasta `POST /clicker/seizure/ack`).
   El aviso lleva `n` (veces pillado: elige el mensaje) y `shared` (entre
   cuántas personas se repartió).
-
-La bolsa común (`pool` en `GET /clicker`) se reparte en el juego: de vez en
-cuando sale una placa, y quien la coge (`POST /clicker/pool/claim` →
-`{ "amount", "pool" }`) se lleva diez commits de la suerte según su última
-partida guardada, sin pasar de lo que hay y como mucho una vez cada cinco
-minutos. Lo cobrado vale como escrito en su siguiente guardado.
 
 GET /admin/clicker/game?login= → `{ login, save, caught, perSecond }`: la
 partida de alguien, para verla en su pantalla de juego sin guardar nada. Solo admins.
@@ -972,6 +997,9 @@ por defecto la última semana, y 92 días como mucho.
 GET /map → el plano del campus (el mismo de `GET /projects/:id/map`, sin nadie
 resaltado). Cada `occupant` lleva `online`: `true` si tiene Sanatorio abierto.
 
+POST /map/seats/:host/broken → 204: ese puesto no funciona (se ve así una
+semana). DELETE /map/seats/:host/broken → 204: ya funciona.
+
 - "Abierto" es haber pedido `GET /pulse` en los últimos 6 minutos: es lo único
   que toda pestaña pregunta de fondo, y se anota como mucho una vez por minuto.
 
@@ -979,7 +1007,7 @@ Las conversaciones directas salen, con todas las demás, en `GET /conversations`
 (ver «Avisos, chat y asistencia de un evento»).
 
 - Un chat directo es un chat más: se lee y se escribe con
-  `GET /events/messages?id=dm:<a>:<b>` y `POST /events/messages`, con los dos
+  `GET /events/thread?id=dm:<a>:<b>` y `POST /events/messages`, con los dos
   logins en orden alfabético. `403` si no eres uno de los dos, si el orden no
   es ese o si alguno no existe.
 - Valen los mismos topes de mensajes por minuto, no se borran solos y
@@ -1217,10 +1245,35 @@ mismo que vuelve a pasar (otro mensaje en el mismo chat) no crea otro: sube
 
 ## Salud del servicio
 
-Sin sesión: las usan Caddy y quien despliega.
+Sin sesión y sin datos personales: las usan Caddy, Docker y quien despliega.
 
-- GET /health → `{ "status": "ok" }` si el proceso responde.
-- GET /health/db → lo mismo si además la base contesta; `503` si no.
+- GET /health → `{ "status": "ok" }` si el proceso responde. No toca la base.
+- GET /health/db → `DbHealth`; `503` con `status: "degraded"` si la base no
+  contesta. Es el *smoke* del despliegue (`infra/scripts/deploy.sh` espera a
+  que `version` sea el commit subido y `schema.actual === schema.expected`):
+
+  ```json
+  {
+    "status": "ok",
+    "database": "ok",
+    "version": "0954f1b…",
+    "schema": { "expected": 66, "actual": 66 },
+    "syncAgeSeconds": 94
+  }
+  ```
+
+  `version` es el `GIT_SHA` que la imagen lleva dentro (`null` en local).
+  `schema` es la versión de esquema que espera el código y la que tiene la base
+  (`actual: null` si no se pudo leer). `syncAgeSeconds` son los segundos desde
+  lo último que se trajo de 42 para un campus seguido (puestos o cambios de
+  proyectos), o `null` si aún nada.
+
+Toda respuesta de la API lleva la cabecera `x-request-id` (12 caracteres al
+azar). Un error interno (`500`) deja una línea en el registro del contenedor con
+ese mismo valor en `reqId` y `requestId`: es lo que hay que pedir a quien cuenta
+un fallo para encontrarlo (`docker logs sanatorio-app-1 | grep <id>`). El
+registro va a nivel `warn` por defecto (`LOG_LEVEL`); los errores de cliente
+(4xx) van a `info` y no salen.
 
 ## Not-games por turnos: ajedrez (`modules/quiz/games`)
 
@@ -1278,7 +1331,9 @@ Cada sesión cuenta en el día y la hora en que empezó, y su tiempo se reparte
 por las horas que ocupó. `low`/`high` eligen el tramo de quienes lo usan por
 tiempo concentrado en el periodo (como `segmentOf` de `usage`): en el panel
 filtra a quién se suma; en lo tuyo, `band` es la media por persona de ese tramo
-y `position` qué parte de quienes lo usan se concentra menos que tú.
+y `position` qué parte de quienes lo usan se concentra menos que tú. En lo
+tuyo el tramo no baja de cinco personas (se ensancha hasta tenerlas): una media
+más estrecha sería la cifra de alguien en concreto.
 
 Mientras `until` no ha pasado, los demás ven `focusUntil` en la ficha
 (`PersonCard`), en el ocupante de su puesto del plano y en la sala de espera

@@ -3,6 +3,28 @@
  */
 
 /**
+ * Las demostraciones que hay (`defineTour` en la web). La API solo apunta
+ * velocidades de estas: una nueva se añade aquí y en su lista de la API.
+ */
+export type TourName =
+  | 'agenda'
+  | 'board'
+  | 'boards'
+  | 'chess'
+  | 'clusters'
+  | 'exams'
+  | 'gitCourse'
+  | 'guard'
+  | 'helpStats'
+  | 'inbox'
+  | 'mailbox'
+  | 'network'
+  | 'notGames'
+  | 'record'
+  | 'therapy'
+  | 'waiting'
+
+/**
  * `GET /tours/speeds`: a cuánto va cada demostración de fábrica. `1` es el
  * ritmo con el que se escribió; las que no salen van a `1`.
  */
@@ -15,7 +37,7 @@ export type TourSpeeds = {
  * respecto a la de fábrica. `1` si no tocó el deslizador; entre `0.5` y `2`.
  */
 export type TourRate = {
-  name: string
+  name: TourName
   rate: number
 }
 

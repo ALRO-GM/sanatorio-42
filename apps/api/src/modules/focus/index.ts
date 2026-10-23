@@ -36,8 +36,6 @@ export function createFocusModule(deps: { db: Db; now?: () => number }): FocusMo
     routes: (app, { session }) => {
       /** `GET /me/focus` → si estás concentrado, hasta cuándo, y tus ajustes. */
       app.get('/me/focus', async (request, reply) => {
-        reply.header('Cache-Control', 'private, no-store')
-
         return reply.send(await service.view(await session.actor(request)))
       })
 
@@ -58,15 +56,11 @@ export function createFocusModule(deps: { db: Db; now?: () => number }): FocusMo
 
       /** `GET /me/focus/stats?from=&to=&offset=&low=&high=` → `MyFocusStats`. */
       app.get('/me/focus/stats', async (request, reply) => {
-        reply.header('Cache-Control', 'private, no-store')
-
         return reply.send(await service.myStats(await session.actor(request), request.query))
       })
 
       /** `GET /admin/focus/stats?from=&to=&offset=&low=&high=` → `FocusStats`. Solo admins. */
       app.get('/admin/focus/stats', async (request, reply) => {
-        reply.header('Cache-Control', 'private, no-store')
-
         return reply.send(await service.adminStats(await session.actor(request), request.query))
       })
     },

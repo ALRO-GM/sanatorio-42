@@ -8,10 +8,11 @@
  * módulos (`composition.ts`) y se le pide a cada uno que registre lo suyo.
  */
 
+import { randomBytes } from 'node:crypto'
 import { readFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 
-import Fastify from 'fastify'
+import Fastify, { LogController } from 'fastify'
 import type { FastifyInstance } from 'fastify'
 
 import { loadEnv } from '../config/env.js'
@@ -29,6 +30,7 @@ import type { Services } from './composition.js'
 import { registerCors } from './cors.js'
 import { registerErrorHandler } from './error-handler.js'
 import { registerHealth } from './health.js'
+import { given } from '../core/options.js'
 
 type BuildOptions = {
   env?: Env
@@ -38,7 +40,11 @@ type BuildOptions = {
   fetchImpl?: typeof fetch
   /** Reloj inyectable, para los tests que dependen de la hora. */
   now?: () => number
-  logger?: boolean
+  /**
+   * Dónde escribe el registro. Por defecto, la salida estándar; los tests
+   * pasan un destino propio para leer lo que se registra.
+   */
+  logDestination?: { write: (line: string) => void }
 }
 
 export type BuiltApp = {
@@ -101,7 +107,7 @@ export async function buildApp(options: BuildOptions = {}): Promise<BuiltApp> {
     log: (detail) => {
       process.stderr.write(`[42] ${detail}\n`)
     },
-    ...(options.now === undefined ? {} : { now: options.now }),
+    ...given({ now: options.now }),
   })
 
   const auth = createAuthModule({
@@ -127,8 +133,33 @@ export async function buildApp(options: BuildOptions = {}): Promise<BuiltApp> {
   /** Temporizadores de los trabajos periódicos, para pararlos al cerrar. */
   const timers: NodeJS.Timeout[] = []
 
+  // Con `LOG_REQUESTS` se registra cada petición, y eso solo sale a nivel `info`.
+  const logRequests = env.LOG_REQUESTS === 'true'
+  const logLevel = logRequests && env.LOG_LEVEL !== 'debug' ? 'info' : env.LOG_LEVEL
+
   const app = Fastify({
-    logger: options.logger ?? false,
+    // Siempre encendido: a `warn` solo escribe lo que va mal (un 500 y poco
+    // más), que es justo lo que hace falta leer tras un despliegue. Sin
+    // cuerpos ni cookies: Fastify registra de la petición solo método, ruta y
+    // origen, y lo que sí llevaría una cookie o un token se quita por si acaso.
+    logger: {
+      level: logLevel,
+      ...given({ stream: options.logDestination }),
+      redact: {
+        paths: [
+          'req.headers.cookie',
+          'req.headers.authorization',
+          'res.headers["set-cookie"]',
+          'err.config.headers.authorization',
+        ],
+        remove: true,
+      },
+    },
+    logController: new LogController({ disableRequestLogging: !logRequests }),
+    // Un identificador por petición que no se repite entre arranques (el
+    // `req-1` de serie sí): es lo que une la cabecera `x-request-id` que ve una
+    // persona con la línea del registro.
+    genReqId: () => randomBytes(9).toString('base64url'),
     // Siempre hay un proxy delante (Caddy) que añade `x-forwarded-for`.
     trustProxy: true,
     // Sin límite de cuerpo, un POST gigante se come la memoria.
@@ -148,9 +179,21 @@ export async function buildApp(options: BuildOptions = {}): Promise<BuiltApp> {
     }
   })
 
+  // El identificador va en cada respuesta, también en las que fallan: con él
+  // se encuentra la línea del registro (`reqId`) de lo que alguien cuenta.
+  app.addHook('onRequest', (request, reply, done) => {
+    reply.header('x-request-id', request.id)
+    done()
+  })
+
   registerCors(app, env.allowedOrigins)
   registerErrorHandler(app)
-  registerHealth(app, db)
+  registerHealth(app, {
+    db,
+    version: env.GIT_SHA === '' ? null : env.GIT_SHA,
+    lastSyncAt: () => services.sync.lastSyncAt(),
+    now: options.now ?? Date.now,
+  })
 
   for (const module of modules) {
     module.routes?.(app, { session: auth.session })
@@ -171,17 +214,28 @@ export async function buildApp(options: BuildOptions = {}): Promise<BuiltApp> {
         module.start?.()
 
         for (const job of module.jobs ?? []) {
+          // Una vuelta cada vez: si la anterior aún no ha acabado (42 lenta, una
+          // copia larga), no se lanza otra encima, que gastaría cuota y pisaría
+          // lo mismo. `everyMs` es la pausa entre vueltas, no un periodo fijo.
+          let busy = false
+
           timers.push(
             setInterval(() => {
               // Con un corte por el límite del plan no corre nada de fondo: no
               // tiene que salir tráfico aunque no haya nadie. Lo de `admin` sí:
               // es quien guarda la cuenta de lo servido.
-              if (module.name !== 'admin' && services.admin.halted()) return
+              if (busy || (module.name !== 'admin' && services.admin.halted())) return
 
-              job.run().catch((error: unknown) => {
-                const message = error instanceof Error ? error.message : String(error)
-                process.stderr.write(`[${job.name}] ${message}\n`)
-              })
+              busy = true
+              job
+                .run()
+                .catch((error: unknown) => {
+                  const message = error instanceof Error ? error.message : String(error)
+                  process.stderr.write(`[${job.name}] ${message}\n`)
+                })
+                .finally(() => {
+                  busy = false
+                })
             }, job.everyMs),
           )
         }

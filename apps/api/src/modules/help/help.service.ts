@@ -870,6 +870,16 @@ export function createHelpService(options: HelpServiceOptions) {
       await help.unblock(actor.login, login)
     },
 
+    /**
+     * Si una de las dos personas ha bloqueado a la otra. Un bloqueo corta en
+     * las dos direcciones: quien bloquea tampoco quiere escribirle.
+     */
+    async blockedBetween(a: string, b: string): Promise<boolean> {
+      const [blockersOfA, blockersOfB] = await Promise.all([help.blockersOf(a), help.blockersOf(b)])
+
+      return blockersOfA.includes(b) || blockersOfB.includes(a)
+    },
+
     /** Cómo han descrito a quien pregunta las personas que le ayudaron. */
     async reputation(actor: Actor): Promise<HelpReputation> {
       const tags = await help.requesterTags(actor.login)

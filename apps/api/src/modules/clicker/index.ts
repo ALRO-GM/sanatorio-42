@@ -56,8 +56,6 @@ export function createClickerModule(deps: ClickerServiceOptions): ClickerModule 
     routes: (app, { session }) => {
       /** `GET /clicker` → cuánto llevas pulsado, qué pastilla elegiste y tu partida. */
       app.get('/clicker', async (request, reply) => {
-        reply.header('Cache-Control', 'private, no-store')
-
         return reply.send(await service.state(await session.actor(request)))
       })
 
@@ -78,8 +76,6 @@ export function createClickerModule(deps: ClickerServiceOptions): ClickerModule 
 
       /** `GET /clicker/reviews` → revisiones de trampas que tienes que contestar. */
       app.get('/clicker/reviews', async (request, reply) => {
-        reply.header('Cache-Control', 'private, no-store')
-
         return reply.send(await service.reviews(await session.actor(request)))
       })
 
@@ -99,8 +95,6 @@ export function createClickerModule(deps: ClickerServiceOptions): ClickerModule 
 
       /** `GET /clicker/board` → quién ha escrito más código. */
       app.get('/clicker/board', async (request, reply) => {
-        reply.header('Cache-Control', 'private, no-store')
-
         return reply.send(await service.board(await session.actor(request)))
       })
 
@@ -108,8 +102,6 @@ export function createClickerModule(deps: ClickerServiceOptions): ClickerModule 
       app.get<{ Querystring: Record<string, string> }>(
         '/clicker/capital',
         async (request, reply) => {
-          reply.header('Cache-Control', 'private, no-store')
-
           return reply.send(await service.capital(await session.actor(request), request.query))
         },
       )
@@ -118,16 +110,12 @@ export function createClickerModule(deps: ClickerServiceOptions): ClickerModule 
       app.get<{ Querystring: Record<string, string> }>(
         '/admin/clicker/capital',
         async (request, reply) => {
-          reply.header('Cache-Control', 'private, no-store')
-
           return reply.send(await service.capitalFor(await session.actor(request), request.query))
         },
       )
 
       /** `GET /admin/clicker/cheats` → el registro de trampas (`ClickerCheats`). Solo admins. */
       app.get('/admin/clicker/cheats', async (request, reply) => {
-        reply.header('Cache-Control', 'private, no-store')
-
         return reply.send(await service.cheats(await session.actor(request)))
       })
 
@@ -178,16 +166,12 @@ export function createClickerModule(deps: ClickerServiceOptions): ClickerModule 
       app.get<{ Querystring: Record<string, string> }>(
         '/admin/clicker/game',
         async (request, reply) => {
-          reply.header('Cache-Control', 'private, no-store')
-
           return reply.send(await service.gameOf(await session.actor(request), request.query))
         },
       )
 
       /** `GET /admin/clicker?days=` → el uso del juego, general y por persona. Solo admins. */
       app.get<{ Querystring: Record<string, string> }>('/admin/clicker', async (request, reply) => {
-        reply.header('Cache-Control', 'private, no-store')
-
         return reply.send(await service.usage(await session.actor(request), request.query))
       })
     },

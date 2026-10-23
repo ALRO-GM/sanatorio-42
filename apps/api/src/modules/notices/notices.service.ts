@@ -19,6 +19,8 @@ import type { Db } from '../../core/db/database.js'
 import { toNumber, toText } from '../../core/db/rows.js'
 import type { NoticeEvent } from '../../core/events.js'
 import { parse } from '../../core/validation.js'
+import { inList, listArg } from '../../core/db/sql.js'
+import { isoAt } from '../../core/time.js'
 
 export type NoticesServiceOptions = {
   db: Db
@@ -48,7 +50,7 @@ const saveSchema = z.object({ id: z.number().int().positive(), saved: z.boolean(
 export function createNoticesService(options: NoticesServiceOptions) {
   const { db } = options
   const now = options.now ?? Date.now
-  const iso = (at = now()): string => new Date(at).toISOString()
+  const iso = (at = now()): string => isoAt(at)
 
   async function unread(login: string): Promise<number> {
     const result = await db.execute({
@@ -133,8 +135,8 @@ export function createNoticesService(options: NoticesServiceOptions) {
       } else if (ids.length > 0) {
         await db.execute({
           sql: `UPDATE notices SET read_at = ? WHERE login = ? AND read_at IS NULL
-                AND id IN (${ids.map(() => '?').join(', ')})`,
-          args: [iso(), actor.login, ...ids],
+                AND ${inList('id')}`,
+          args: [iso(), actor.login, listArg(ids)],
         })
       }
 
@@ -151,8 +153,8 @@ export function createNoticesService(options: NoticesServiceOptions) {
       if ('ids' in which) {
         await db.execute({
           sql: `DELETE FROM notices WHERE login = ?
-                AND id IN (${which.ids.map(() => '?').join(', ')})`,
-          args: [actor.login, ...which.ids],
+                AND ${inList('id')}`,
+          args: [actor.login, listArg(which.ids)],
         })
       } else {
         await db.execute({

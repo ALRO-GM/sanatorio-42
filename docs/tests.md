@@ -47,8 +47,9 @@ Y además, según lo que sea:
   dos veces lo mismo, que el tope corte en el valor exacto y que una trampa
   conocida no cuele.
 - **Lo que habla con 42**: sin cuota, 42 caída, página vacía, paginación con
-  la última página justa, y que no se llame a 42 desde donde no toca (los tests
-  lo prohíben salvo en `replica`).
+  la última página justa, y que no se llame a 42 desde donde no toca
+  (`tests/unit/forty-two-callers.test.ts` tiene la lista cerrada de quién
+  recibe el cliente y comprueba que pregunta antes a `quota`).
 - **Migraciones**: que se aplican sobre la base de la versión anterior con
   datos dentro, no solo sobre una vacía.
 - **Fechas y zonas horarias**: el día del calendario es el de la hora del
@@ -85,13 +86,17 @@ traducir. Una sección nueva entra sola.
    suben: si un cambio los baja, faltan tests de lo nuevo. A día de hoy:
    API 96 % de líneas y 89 % de ramas; web 48 % de líneas, ya sin contar los textos (sube con cada
    pantalla probada).
-4. **`deploy.sh` no despliega un commit sin la CI en verde**: si aún corre,
-   espera; si ha fallado, se niega. Solo en una emergencia con GitHub caído:
-   `SIN_CI=1`.
+4. **`deploy.sh` no despliega un commit sin la CI en verde**: la CI deja una
+   etiqueta `ci-ok/<sha>` (o `ci-ko/<sha>`) en el repositorio y el guion la
+   espera con `git ls-remote`; si aún corre, espera; si ha fallado, se niega.
+   Solo en una emergencia con GitHub caído: `SIN_CI=1`.
 5. **Vuelta atrás automática**: antes de construir guarda la imagen que
-   funciona; si la nueva no contesta en `/health/db`, vuelve a la anterior.
-6. **Copia de la base antes de cada despliegue** (`backup.sh`), y las
-   migraciones nunca se editan: solo se añaden.
+   funciona; las migraciones corren aparte antes de tocar el contenedor; si la
+   nueva no contesta en `/health/db` con su commit y el esquema esperado en
+   180 s, vuelve a la anterior y, si hubo migraciones, a la copia previa.
+6. **Copia de la base comprobada antes de cada despliegue** (`backup.sh`:
+   `integrity_check` y `gzip -t`), y las migraciones nunca se editan: solo se
+   añaden.
 
 ## Cómo se ejecutan
 

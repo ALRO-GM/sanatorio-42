@@ -91,6 +91,23 @@ export default defineConfig(
     },
   },
   {
+    // La composición también: de cada módulo, solo lo que publica su `index.js`.
+    files: ['apps/api/src/app/**/*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              regex: '^\\.\\./modules/[a-z-]+/(?!index\\.js$).+',
+              message: 'De un módulo solo se importa su `index.js`.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
     /**
      * Relajas solo para los tests de la API, y por razones concretas:
      * - `require-await`: un doble de `sleep` devuelve una promesa sin esperar nada.

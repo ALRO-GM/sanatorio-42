@@ -18,6 +18,7 @@ import { createExamsService } from './exams.service.js'
 import type { ExamsService } from './exams.service.js'
 import { createExamsSync } from './exams.sync.js'
 import type { ExamsSync } from './exams.sync.js'
+import { given } from '../../core/options.js'
 
 type ExamsModuleDeps = {
   db: Db
@@ -48,13 +49,13 @@ export function createExamsModule(deps: ExamsModuleDeps): ExamsModule {
     campusIds: deps.campusIds,
     quota: deps.quota,
     hourlyReserve: deps.hourlyReserve,
-    ...(deps.log === undefined ? {} : { log: deps.log }),
+    ...given({ log: deps.log }),
   })
   const service = createExamsService({
     exams,
     sync,
     curriculum: deps.curriculum,
-    ...(deps.now === undefined ? {} : { now: deps.now }),
+    ...given({ now: deps.now }),
   })
   const live = createExamsLive({
     db: deps.db,
@@ -64,8 +65,7 @@ export function createExamsModule(deps: ExamsModuleDeps): ExamsModule {
     curriculum: deps.curriculum,
     exams,
     quota: deps.quota,
-    ...(deps.now === undefined ? {} : { now: deps.now }),
-    ...(deps.log === undefined ? {} : { log: deps.log }),
+    ...given({ now: deps.now, log: deps.log }),
   })
 
   return {
@@ -74,7 +74,7 @@ export function createExamsModule(deps: ExamsModuleDeps): ExamsModule {
     sync,
     live,
     // Los intentos de examen de cada cual, por su id de 42 (como `project_users`).
-    personal: [{ table: 'exam_attempts', userIds: ['user_id'] }],
+    personal: [{ table: 'exam_attempts', userIds: ['user_id'], source: '42' }],
     routes: (app, { session }) => {
       /**
        * `GET /exams/stats?track=all|classic|next&kickoffs=AAAA-MM,…` → exámenes,
@@ -91,8 +91,6 @@ export function createExamsModule(deps: ExamsModuleDeps): ExamsModule {
        * de hoy): quién está apuntado, qué examen hace y su última nota.
        */
       app.get('/exams/live', async (request, reply) => {
-        reply.header('Cache-Control', 'private, no-store')
-
         return reply.send(await live.live(await session.actor(request)))
       })
 
@@ -101,8 +99,6 @@ export function createExamsModule(deps: ExamsModuleDeps): ExamsModule {
        * hace al menos un minuto del último refresco (de quien sea).
        */
       app.post('/exams/live/refresh', async (request, reply) => {
-        reply.header('Cache-Control', 'private, no-store')
-
         return reply.send(await live.refreshNow(await session.actor(request)))
       })
     },

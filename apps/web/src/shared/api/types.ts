@@ -127,6 +127,7 @@ import type {
   SyncStatus,
   Ticket,
   TicketInput,
+  TourName,
   TourSpeeds,
   TourSpeedStats,
   UsageCounts,
@@ -230,10 +231,15 @@ export type Api = {
   /** Valida el código de inicio o el de fin de un evento. */
   checkinEvent: (eventId: string, code: string) => Promise<MeetCheckin>
   /**
-   * Dirección del CSV con las horas validadas con códigos en un periodo (días
-   * `YYYY-MM-DD`). Sin `login`, las tuyas; `all` es para quien administra.
+   * El CSV con las horas validadas con códigos en un periodo (días
+   * `YYYY-MM-DD`), con el nombre de fichero que trae el código de verificación.
+   * Sin `login`, las tuyas; `all` es para quien administra.
    */
-  attendanceReportUrl: (query: { from?: string; to?: string; login?: string }) => string
+  attendanceReport: (query: {
+    from?: string
+    to?: string
+    login?: string
+  }) => Promise<{ fileName: string; data: Blob }>
 
   // --- Documentos verificables y cuentas de staff
   /** Abre una sesión de staff con su clave. Falla con 401 si no vale. */
@@ -331,7 +337,7 @@ export type Api = {
   /** A cuánto va cada demostración de fábrica. */
   getTourSpeeds: () => Promise<TourSpeeds>
   /** Dice a cuánto has visto una demostración, respecto a la de fábrica. */
-  sendTourSpeed: (name: string, rate: number) => Promise<{ speed: number }>
+  sendTourSpeed: (name: TourName, rate: number) => Promise<{ speed: number }>
   /** Velocidad y recuento de cada demostración. Solo admins. */
   getTourStats: () => Promise<TourSpeedStats>
   /** Personas cuyo login o nombre lleva lo escrito. */
