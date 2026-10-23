@@ -7,6 +7,7 @@ import type { NetworkParams } from '../../shared/api/types'
 import { useI18n } from '../../shared/i18n'
 import { Blocks } from '../../shared/layout/Blocks'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { PillGroup } from '../../shared/ui/PillGroup'
 import {
   COLOR_MODES,
   colorOf,
@@ -322,64 +323,54 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
             {graph !== null && graph.available.length > 1 && (
               <div className="net-filter">
                 <span className="eyebrow">{t('net.campuses')}</span>
-                <div className="filter-pills" role="group" aria-label={t('net.campuses')}>
-                  {graph.available.map((campus) => {
-                    const on = graph.campuses.includes(campus.id)
-
-                    return (
-                      <button
-                        key={campus.id}
-                        type="button"
-                        className={`pill ${on ? 'active' : ''}`}
-                        aria-pressed={on}
-                        onClick={() => {
-                          const next = on
-                            ? graph.campuses.filter((id) => id !== campus.id)
-                            : [...graph.campuses, campus.id]
-
-                          // Sin ninguno no hay grafo: el último no se puede quitar.
-                          if (next.length === 0) return
-
-                          change({ campuses: next })
-                          // Con más de uno, lo que interesa ver es de cuál es cada quien.
-                          if (next.length > 1) setMode('campus')
-                        }}
-                      >
-                        {campus.name}
-                      </button>
-                    )
-                  })}
-                  <button
-                    type="button"
-                    className={`pill ${graph.campuses.length === graph.available.length ? 'active' : ''}`}
-                    aria-pressed={graph.campuses.length === graph.available.length}
-                    onClick={() => {
+                <PillGroup<number | 'all'>
+                  options={[...graph.available.map((campus) => campus.id), 'all']}
+                  value={null}
+                  pressed={(option) =>
+                    option === 'all'
+                      ? graph.campuses.length === graph.available.length
+                      : graph.campuses.includes(option)
+                  }
+                  onChange={(option) => {
+                    if (option === 'all') {
                       change({ campuses: 'all' })
                       setMode('campus')
-                    }}
-                  >
-                    {t('net.campuses.all')}
-                  </button>
-                </div>
+
+                      return
+                    }
+
+                    const on = graph.campuses.includes(option)
+                    const next = on
+                      ? graph.campuses.filter((id) => id !== option)
+                      : [...graph.campuses, option]
+
+                    // Sin ninguno no hay grafo: el último no se puede quitar.
+                    if (next.length === 0) return
+
+                    change({ campuses: next })
+                    // Con más de uno, lo que interesa ver es de cuál es cada quien.
+                    if (next.length > 1) setMode('campus')
+                  }}
+                  label={t('net.campuses')}
+                  text={(option) =>
+                    option === 'all'
+                      ? t('net.campuses.all')
+                      : graph.available.find((campus) => campus.id === option)?.name
+                  }
+                />
               </div>
             )}
             <div className="net-filter">
               <span className="eyebrow">{t('net.period')}</span>
-              <div className="filter-pills" role="group" aria-label={t('net.period')}>
-                {PERIODS.map((period) => (
-                  <button
-                    key={period}
-                    type="button"
-                    className={`pill ${filters.period === period ? 'active' : ''}`}
-                    aria-pressed={filters.period === period}
-                    onClick={() => {
-                      change({ period })
-                    }}
-                  >
-                    {t(`net.period.${period}`)}
-                  </button>
-                ))}
-              </div>
+              <PillGroup
+                options={PERIODS}
+                value={filters.period}
+                onChange={(period) => {
+                  change({ period })
+                }}
+                label={t('net.period')}
+                text={(period) => t(`net.period.${period}`)}
+              />
               {filters.period === 'custom' && (
                 <div className="net-dates">
                   <label>

@@ -7,6 +7,7 @@ import { useAction, useAsync } from '../../shared/hooks/useAsync'
 import { localeOf, useI18n } from '../../shared/i18n'
 import { DataTable } from '../../shared/ui/DataTable'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { PillGroup } from '../../shared/ui/PillGroup'
 import { CapitalChart } from '../clicker/CapitalChart'
 import { CapitalHistory } from '../clicker/CapitalHistory'
 import { duration } from './StatsPanel'
@@ -63,22 +64,14 @@ export function ClickerPanel({ me }: { me: string }) {
             : t('admin.clicker.of', { login: one.login })}
       </h2>
 
-      <div className="filter-pills" role="tablist" aria-label={t('admin.clicker.title')}>
-        {(['usage', 'cheats'] as const).map((option) => (
-          <button
-            key={option}
-            type="button"
-            role="tab"
-            aria-selected={view === option}
-            className={`pill ${view === option ? 'active' : ''}`}
-            onClick={() => {
-              setView(option)
-            }}
-          >
-            {t(`admin.clicker.view.${option}`)}
-          </button>
-        ))}
-      </div>
+      <PillGroup
+        kind="tabs"
+        options={['usage', 'cheats'] as const}
+        value={view}
+        onChange={setView}
+        label={t('admin.clicker.title')}
+        text={(option) => t(`admin.clicker.view.${option}`)}
+      />
 
       {view === 'cheats' ? (
         <CheatsPanel

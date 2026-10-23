@@ -7,6 +7,7 @@ import { api, ApiError } from '../../shared/api'
 import { useI18n } from '../../shared/i18n'
 import { useStill } from '../../shared/still'
 import { Avatar } from '../../shared/ui/Avatar'
+import { PillGroup } from '../../shared/ui/PillGroup'
 import { BigKey, Tile } from './art'
 import { CardView } from './Card'
 import { cardFor } from './cards'
@@ -770,21 +771,7 @@ export function CodeClicker({
     >
       <header className="cc-head">
         <h2 className="cc-title">{reached >= 3 ? '42 > ./reality' : ui('title')}</h2>
-        <div className="filter-pills" role="tablist">
-          {TABS.map((option) => (
-            <button
-              key={option}
-              type="button"
-              role="tab"
-              aria-selected={tab === option}
-              className={`pill ${tab === option ? 'active' : ''}`}
-              onClick={() => {
-                setTab(option)
-              }}
-            >
-              {ui(option)}
-            </button>
-          ))}
+        <PillGroup kind="tabs" options={TABS} value={tab} onChange={setTab} text={ui}>
           <button
             type="button"
             className="pill"
@@ -812,7 +799,7 @@ export function CodeClicker({
           <button type="button" className="pill" onClick={onExit}>
             {ui('back')}
           </button>
-        </div>
+        </PillGroup>
       </header>
 
       {limit.pace !== null && (

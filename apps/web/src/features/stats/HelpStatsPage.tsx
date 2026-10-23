@@ -9,6 +9,7 @@ import { localeOf } from '../../shared/i18n/locale'
 import { Avatar } from '../../shared/ui/Avatar'
 import { PersonLink } from '../../shared/ui/PersonLink'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { PillGroup } from '../../shared/ui/PillGroup'
 import { InfoTip } from '../../shared/ui/InfoTip'
 import { HelpStatsTour } from './HelpStatsTour'
 import { ProgressCard } from './ProgressCard'
@@ -34,21 +35,13 @@ export function HelpStatsPage({ me }: { me: string }) {
             <HelpStatsTour />
           </InfoTip>
         </h2>
-        <div className="filter-pills" role="group" aria-label={t('stats.period')}>
-          {PERIODS.map((option) => (
-            <button
-              key={option}
-              type="button"
-              className={`pill ${period === option ? 'active' : ''}`}
-              aria-pressed={period === option}
-              onClick={() => {
-                setPeriod(option)
-              }}
-            >
-              {t(`rank.${option}`)}
-            </button>
-          ))}
-        </div>
+        <PillGroup
+          options={PERIODS}
+          value={period}
+          onChange={setPeriod}
+          label={t('stats.period')}
+          text={(option) => t(`rank.${option}`)}
+        />
       </div>
 
       {loading && data === undefined && <p className="estado">{t('app.loading')}</p>}

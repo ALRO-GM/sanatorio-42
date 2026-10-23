@@ -6,6 +6,7 @@ import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { PillGroup } from '../../shared/ui/PillGroup'
 import { Figure } from './Figure'
 import { RangePills } from './RangePills'
 
@@ -113,35 +114,29 @@ export function GrowthPanel() {
     )
   }
 
+  const campuses = (data?.campuses ?? []).slice(0, SHOWN_CAMPUSES)
+
   return (
     <article className="card growth">
       <span className="eyebrow">{t('admin.growth.title')}</span>
       <RangePills value={range} onChange={setRange} />
-      <div className="filter-pills" role="group" aria-label={t('admin.growth.campuses')}>
-        <button
-          type="button"
-          className={`pill ${picked.length === 0 ? 'active' : ''}`}
-          aria-pressed={picked.length === 0}
-          onClick={() => {
-            setPicked([])
-          }}
-        >
-          {t('admin.growth.all')}
-        </button>
-        {(data?.campuses ?? []).slice(0, SHOWN_CAMPUSES).map((campus) => (
-          <button
-            key={campus.id}
-            type="button"
-            className={`pill ${picked.includes(campus.id) ? 'active' : ''}`}
-            aria-pressed={picked.includes(campus.id)}
-            onClick={() => {
-              toggle(campus.id)
-            }}
-          >
-            {campus.name === '' ? t('admin.growth.noCampus') : campus.name} · {campus.people}
-          </button>
-        ))}
-      </div>
+      <PillGroup<number | 'all'>
+        options={['all', ...campuses.map((campus) => campus.id)]}
+        value={null}
+        pressed={(option) => (option === 'all' ? picked.length === 0 : picked.includes(option))}
+        onChange={(option) => {
+          if (option === 'all') setPicked([])
+          else toggle(option)
+        }}
+        label={t('admin.growth.campuses')}
+        text={(option) => {
+          const campus = campuses.find((one) => one.id === option)
+
+          if (option === 'all' || campus === undefined) return t('admin.growth.all')
+
+          return `${campus.name === '' ? t('admin.growth.noCampus') : campus.name} · ${campus.people}`
+        }}
+      />
       {loading && data === undefined && <p className="estado">{t('app.loading')}</p>}
       <ErrorNote error={error} onRetry={() => void reload()} />
       {data !== undefined && <GrowthCharts data={data} />}

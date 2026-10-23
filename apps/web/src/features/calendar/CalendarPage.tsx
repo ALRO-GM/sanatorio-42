@@ -7,6 +7,7 @@ import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { Show } from '../../shared/detail'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { PillGroup } from '../../shared/ui/PillGroup'
 import { addDays, daysOf, eventsOn, locale, move, rangeTitle, sameDay, startOfDay } from './dates'
 import { EventChip } from './EventChip'
 import { EventDialog } from './EventDialog'
@@ -167,46 +168,29 @@ export function CalendarPage({ focus = null, onGo, me }: CalendarPageProps) {
               {rangeTitle(view, cursor, lang)}
             </strong>
           </div>
-          <div className="filter-pills" role="group" aria-label={t('agenda.view')}>
-            {VIEWS.map((option) => (
-              <button
-                key={option}
-                type="button"
-                className={`pill ${view === option ? 'active' : ''}`}
-                aria-pressed={view === option}
-                onClick={() => {
-                  changeView(option)
-                }}
-              >
-                {t(`agenda.view.${option}`)}
-              </button>
-            ))}
-          </div>
+          <PillGroup
+            options={VIEWS}
+            value={view}
+            onChange={changeView}
+            label={t('agenda.view')}
+            text={(option) => t(`agenda.view.${option}`)}
+          />
         </div>
 
         {view !== 'month' && (
           <Show from="normal">
-            <div
-              className="filter-pills agenda-layouts"
-              role="group"
-              aria-label={t('agenda.layout')}
-            >
-              {LAYOUTS.map((option) => (
-                <button
-                  key={option}
-                  type="button"
-                  className={`pill ${layout === option ? 'active' : ''}`}
-                  aria-pressed={layout === option}
-                  title={t(`agenda.layout.${option}.hint`)}
-                  onClick={() => {
-                    saveLayout(option)
-                    setLayout(option)
-                  }}
-                >
-                  {t(`agenda.layout.${option}`)}
-                </button>
-              ))}
-            </div>
+            <PillGroup
+              className="agenda-layouts"
+              options={LAYOUTS}
+              value={layout}
+              onChange={(option) => {
+                saveLayout(option)
+                setLayout(option)
+              }}
+              label={t('agenda.layout')}
+              title={(option) => t(`agenda.layout.${option}.hint`)}
+              text={(option) => t(`agenda.layout.${option}`)}
+            />
           </Show>
         )}
 

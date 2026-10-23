@@ -6,6 +6,7 @@ import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { PillGroup } from '../../shared/ui/PillGroup'
 import { InfoTip } from '../../shared/ui/InfoTip'
 import { SegmentSlider } from './SegmentSlider'
 import type { SegmentRange } from './SegmentSlider'
@@ -60,21 +61,13 @@ export function UsageHeatmap({
         </InfoTip>
       </h2>
 
-      <div className="filter-pills" role="group" aria-label={t('admin.usage.by')}>
-        {GROUPINGS.map((option) => (
-          <button
-            key={option}
-            type="button"
-            className={`pill ${by === option ? 'active' : ''}`}
-            aria-pressed={by === option}
-            onClick={() => {
-              setBy(option)
-            }}
-          >
-            {t(`admin.usage.by.${option}`)}
-          </button>
-        ))}
-      </div>
+      <PillGroup
+        options={GROUPINGS}
+        value={by}
+        onChange={setBy}
+        label={t('admin.usage.by')}
+        text={(option) => t(`admin.usage.by.${option}`)}
+      />
 
       <SegmentSlider value={segment} onChange={onSegment} told={data?.segment} />
 

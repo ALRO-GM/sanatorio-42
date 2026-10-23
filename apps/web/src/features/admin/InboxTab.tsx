@@ -11,6 +11,7 @@ import { api } from '../../shared/api'
 import { useAction, useAsync } from '../../shared/hooks/useAsync'
 import { localeOf, useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { PillGroup } from '../../shared/ui/PillGroup'
 import { Icon } from '../../shared/ui/Icon'
 import { INBOX_VIEWS, REPORT_REASONS, ticketsIn } from './inbox'
 import type { InboxFilter, InboxView } from './inbox'
@@ -31,39 +32,25 @@ export function InboxTab() {
 
   return (
     <>
-      <div className="filter-pills sub-tabs" role="tablist" aria-label={t('admin.tab.inbox')}>
-        {INBOX_VIEWS.map((option) => (
-          <button
-            key={option}
-            type="button"
-            role="tab"
-            aria-selected={view === option}
-            className={`pill ${view === option ? 'active' : ''}`}
-            onClick={() => {
-              setView(option)
-            }}
-          >
-            {t(`admin.inbox.view.${option}`)} ({ticketsIn(data, option).length})
-          </button>
-        ))}
-      </div>
+      <PillGroup
+        kind="tabs"
+        className="sub-tabs"
+        options={INBOX_VIEWS}
+        value={view}
+        onChange={setView}
+        label={t('admin.tab.inbox')}
+        text={(option) => `${t(`admin.inbox.view.${option}`)} (${ticketsIn(data, option).length})`}
+      />
       {(reports > 0 || filter !== 'all') && (
-        <div className="filter-pills" role="group" aria-label={t('admin.inbox.byReason')}>
-          {(['all', ...REPORT_REASONS] as const).map((option) => (
-            <button
-              key={option}
-              type="button"
-              aria-pressed={filter === option}
-              className={`pill ${filter === option ? 'active' : ''}`}
-              onClick={() => {
-                setFilter(option)
-              }}
-            >
-              {option === 'all' ? t('admin.inbox.allKinds') : t(`report.reason.${option}`)} (
-              {ticketsIn(data, view, option).length})
-            </button>
-          ))}
-        </div>
+        <PillGroup
+          options={['all', ...REPORT_REASONS] as const}
+          value={filter}
+          onChange={setFilter}
+          label={t('admin.inbox.byReason')}
+          text={(option) =>
+            `${option === 'all' ? t('admin.inbox.allKinds') : t(`report.reason.${option}`)} (${ticketsIn(data, view, option).length})`
+          }
+        />
       )}
       {shown.length === 0 && <p className="estado">{t('admin.inbox.empty')}</p>}
       {answered !== null && (

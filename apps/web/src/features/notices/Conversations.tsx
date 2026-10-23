@@ -7,6 +7,7 @@ import { useAction, useAsync } from '../../shared/hooks/useAsync'
 import { localeOf, useI18n } from '../../shared/i18n'
 import { Avatar } from '../../shared/ui/Avatar'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { PillGroup } from '../../shared/ui/PillGroup'
 import { Icon } from '../../shared/ui/Icon'
 import type { IconName } from '../../shared/ui/Icon'
 import { Chat } from '../alerts/Chat'
@@ -138,26 +139,24 @@ export function Conversations({ me, openId, onOpen, onChange }: ConversationsPro
 
   return (
     <div className="conversations">
-      <div className="filter-pills" role="group" aria-label={t('chats.filter')}>
-        {STATES.map((state) => (
-          <button
-            key={state}
-            type="button"
-            className={`pill ${filters.state === state ? 'active' : ''}`}
-            aria-pressed={filters.state === state}
-            onClick={() => {
-              setFilters({ ...filters, state })
-            }}
-          >
+      <PillGroup
+        options={STATES}
+        value={filters.state}
+        onChange={(state) => {
+          setFilters({ ...filters, state })
+        }}
+        label={t('chats.filter')}
+        text={(state) => (
+          <>
             {t(`chats.state.${state}`)}
             {state !== 'all' && (
               <span className="pill-count">
                 {items.filter((entry) => matches(entry, { ...NO_FILTERS, state })).length}
               </span>
             )}
-          </button>
-        ))}
-      </div>
+          </>
+        )}
+      />
 
       {(kinds.length > 1 || projects.length > 0) && (
         <div className="conversation-filters">

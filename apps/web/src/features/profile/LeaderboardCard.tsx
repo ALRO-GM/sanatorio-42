@@ -8,6 +8,7 @@ import { useI18n } from '../../shared/i18n'
 import { Avatar } from '../../shared/ui/Avatar'
 import { PersonLink } from '../../shared/ui/PersonLink'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { PillGroup } from '../../shared/ui/PillGroup'
 import { InfoTip } from '../../shared/ui/InfoTip'
 
 const PERIODS = ['month', 'all'] as const satisfies readonly LeaderboardPeriod[]
@@ -38,21 +39,13 @@ export function LeaderboardCard({ me }: { me: string }) {
             <p>{t('rank.hint')}</p>
           </InfoTip>
         </span>
-        <div className="filter-pills" role="group" aria-label={t('rank.period')}>
-          {PERIODS.map((option) => (
-            <button
-              key={option}
-              type="button"
-              className={`pill ${period === option ? 'active' : ''}`}
-              aria-pressed={period === option}
-              onClick={() => {
-                setPeriod(option)
-              }}
-            >
-              {t(`rank.${option}`)}
-            </button>
-          ))}
-        </div>
+        <PillGroup
+          options={PERIODS}
+          value={period}
+          onChange={setPeriod}
+          label={t('rank.period')}
+          text={(option) => t(`rank.${option}`)}
+        />
       </div>
 
       {loading && <p>{t('app.loading')}</p>}

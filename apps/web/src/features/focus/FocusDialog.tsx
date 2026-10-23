@@ -8,6 +8,7 @@ import { startFocus, useFocus } from '../../shared/focus'
 import { useAction } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { PillGroup } from '../../shared/ui/PillGroup'
 import { Icon } from '../../shared/ui/Icon'
 import { FocusMyStats } from './FocusMyStats'
 
@@ -73,22 +74,15 @@ export function FocusDialog({ onClose }: { onClose: () => void }) {
         </button>
       </div>
       <Show from="normal">
-        <div className="filter-pills sub-tabs" role="tablist" aria-label={t('focus.title')}>
-          {TABS.map((option) => (
-            <button
-              key={option}
-              type="button"
-              role="tab"
-              aria-selected={tab === option}
-              className={`pill ${tab === option ? 'active' : ''}`}
-              onClick={() => {
-                setTab(option)
-              }}
-            >
-              {t(`focus.tab.${option}`)}
-            </button>
-          ))}
-        </div>
+        <PillGroup
+          kind="tabs"
+          className="sub-tabs"
+          options={TABS}
+          value={tab}
+          onChange={setTab}
+          label={t('focus.title')}
+          text={(option) => t(`focus.tab.${option}`)}
+        />
       </Show>
       {tab === 'stats' && <FocusMyStats />}
       {tab === 'settings' && (

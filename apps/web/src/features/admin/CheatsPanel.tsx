@@ -8,6 +8,7 @@ import { localeOf, useI18n } from '../../shared/i18n'
 import { DataTable } from '../../shared/ui/DataTable'
 import type { Column } from '../../shared/ui/DataTable'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { PillGroup } from '../../shared/ui/PillGroup'
 import { Icon } from '../../shared/ui/Icon'
 import { directChatId, openChat } from '../notices/conversations'
 import { Figure } from './Figure'
@@ -20,6 +21,9 @@ type CheatsPanelProps = {
   /** Ver la partida de alguien (en la vista de uso). */
   onWatch: (login: string) => void
 }
+
+/** La pastilla «de cualquier motivo» del filtro; no choca con los motivos, que son palabras. */
+const ANY_WHY = '*'
 
 /**
  * Las trampas de Code Clicker: quién las ha hecho, cuándo, cómo se vieron y
@@ -215,31 +219,15 @@ export function CheatsPanel({ me, onWatch }: CheatsPanelProps) {
       </div>
 
       {whys.length > 1 && (
-        <div className="filter-pills" role="group" aria-label={t('admin.clicker.why')}>
-          <button
-            type="button"
-            className={`pill ${why === null ? 'active' : ''}`}
-            aria-pressed={why === null}
-            onClick={() => {
-              setWhy(null)
-            }}
-          >
-            {t('admin.inbox.allKinds')}
-          </button>
-          {whys.map((value) => (
-            <button
-              key={value}
-              type="button"
-              className={`pill ${why === value ? 'active' : ''}`}
-              aria-pressed={why === value}
-              onClick={() => {
-                setWhy(value)
-              }}
-            >
-              {whyText(value)}
-            </button>
-          ))}
-        </div>
+        <PillGroup
+          options={[ANY_WHY, ...whys]}
+          value={why ?? ANY_WHY}
+          onChange={(option) => {
+            setWhy(option === ANY_WHY ? null : option)
+          }}
+          label={t('admin.clicker.why')}
+          text={(option) => (option === ANY_WHY ? t('admin.inbox.allKinds') : whyText(option))}
+        />
       )}
 
       <article className="card">

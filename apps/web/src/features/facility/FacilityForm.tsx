@@ -7,6 +7,7 @@ import { api } from '../../shared/api'
 import { useAction } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { PillGroup } from '../../shared/ui/PillGroup'
 import { Icon } from '../../shared/ui/Icon'
 
 const FACILITY_CATEGORIES: readonly FacilityCategory[] = [
@@ -63,19 +64,12 @@ export function FacilityForm({ onDone }: { onDone: () => void }) {
       <span className="eyebrow">{t('facility.title')}</span>
       <fieldset className="facility-kinds">
         <legend>{t('facility.what')}</legend>
-        {FACILITY_CATEGORIES.map((option) => (
-          <button
-            key={option}
-            type="button"
-            className={`pill ${category === option ? 'active' : ''}`}
-            aria-pressed={category === option}
-            onClick={() => {
-              setCategory(option)
-            }}
-          >
-            {t(`facility.category.${option}`)}
-          </button>
-        ))}
+        <PillGroup
+          options={FACILITY_CATEGORIES}
+          value={category}
+          onChange={setCategory}
+          text={(option) => t(`facility.category.${option}`)}
+        />
       </fieldset>
       <label>
         {t('facility.where')}

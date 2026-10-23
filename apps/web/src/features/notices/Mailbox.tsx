@@ -6,6 +6,7 @@ import { api } from '../../shared/api'
 import { useAction, useAsync } from '../../shared/hooks/useAsync'
 import { localeOf, useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { PillGroup } from '../../shared/ui/PillGroup'
 import { calendarEventOf, iconOf, noticesIn, removableCount, targetOf } from './routes'
 import type { NoticeFilter, NoticeTarget } from './routes'
 import { Icon } from '../../shared/ui/Icon'
@@ -125,26 +126,24 @@ export function Mailbox({ me, chat, onChat, onClose, onOpen, onChange }: Mailbox
         </button>
       </div>
 
-      <div className="filter-pills mailbox-tabs" role="tablist">
-        {(['notices', 'chats'] as const).map((option) => (
-          <button
-            key={option}
-            type="button"
-            role="tab"
-            className={`pill ${tab === option ? 'active' : ''}`}
-            aria-selected={tab === option}
-            onClick={() => {
-              setTab(option)
-              onChat(null)
-            }}
-          >
+      <PillGroup
+        kind="tabs"
+        className="mailbox-tabs"
+        options={['notices', 'chats'] as const}
+        value={tab}
+        onChange={(option) => {
+          setTab(option)
+          onChat(null)
+        }}
+        text={(option) => (
+          <>
             {t(`notices.tab.${option}`)}
             {option === 'chats' && chatsUnread > 0 && (
               <span className="count-badge">{chatsUnread}</span>
             )}
-          </button>
-        ))}
-      </div>
+          </>
+        )}
+      />
 
       {tab === 'chats' ? (
         <Conversations me={me} openId={chat} onOpen={onChat} onChange={onChange} />
@@ -155,21 +154,13 @@ export function Mailbox({ me, chat, onChat, onClose, onOpen, onChange }: Mailbox
             <ErrorNote error={error} onRetry={() => void reload()} />
           )}
           {all.some((notice) => notice.saved) && (
-            <div className="filter-pills" role="group" aria-label={t('notices.filter')}>
-              {(['all', 'saved'] as const).map((option) => (
-                <button
-                  key={option}
-                  type="button"
-                  aria-pressed={filter === option}
-                  className={`pill ${filter === option ? 'active' : ''}`}
-                  onClick={() => {
-                    setFilter(option)
-                  }}
-                >
-                  {t(`notices.filter.${option}`)}
-                </button>
-              ))}
-            </div>
+            <PillGroup
+              options={['all', 'saved'] as const}
+              value={filter}
+              onChange={setFilter}
+              label={t('notices.filter')}
+              text={(option) => t(`notices.filter.${option}`)}
+            />
           )}
           {data !== undefined && items.length === 0 && (
             <p className="hint">{t(filter === 'saved' ? 'notices.noneSaved' : 'notices.empty')}</p>

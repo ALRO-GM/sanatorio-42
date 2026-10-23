@@ -8,6 +8,7 @@ import { useAction } from '../../shared/hooks/useAsync'
 import { localeOf, useI18n } from '../../shared/i18n'
 import { lastDay, untilText } from '../../shared/until'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { PillGroup } from '../../shared/ui/PillGroup'
 import { clusterName } from '../map/ClusterMapView'
 import { SeatPicker } from '../map/SeatPicker'
 import { parseSeat } from '../map/seats'
@@ -243,21 +244,14 @@ export function GroupForm({ projects, defaultProject, group, onCancel, onSaved }
       {group === undefined && (
         <fieldset className="kind-field">
           <legend>{t('therapy.kind')}</legend>
-          <div className="filter-pills">
-            {(['study', 'review'] as const).map((kind) => (
-              <button
-                key={kind}
-                type="button"
-                className={`pill ${form.kind === kind ? 'active' : ''}`}
-                aria-pressed={form.kind === kind}
-                onClick={() => {
-                  setForm((current) => ({ ...current, kind }))
-                }}
-              >
-                {t(`therapy.kind.${kind}`)}
-              </button>
-            ))}
-          </div>
+          <PillGroup
+            options={['study', 'review'] as const}
+            value={form.kind}
+            onChange={(kind) => {
+              setForm((current) => ({ ...current, kind }))
+            }}
+            text={(kind) => t(`therapy.kind.${kind}`)}
+          />
           <p className="hint">{t(`therapy.kind.${form.kind}.hint`)}</p>
           {form.kind === 'study' && (
             <label>

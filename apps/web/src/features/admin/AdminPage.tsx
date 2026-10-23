@@ -8,6 +8,7 @@ import { useAction, useAsync } from '../../shared/hooks/useAsync'
 import { localeOf, useI18n } from '../../shared/i18n'
 import { DataTable } from '../../shared/ui/DataTable'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { PillGroup } from '../../shared/ui/PillGroup'
 import { PersonLink } from '../../shared/ui/PersonLink'
 import { HoursReport } from '../profile/HoursReport'
 import { BudgetCard } from './BudgetCard'
@@ -73,22 +74,14 @@ function AdminTabs({ campusId, me }: { campusId?: number | undefined; me: string
 
   return (
     <>
-      <div className="filter-pills" role="tablist" aria-label={t('admin.title')}>
-        {TABS.map((option) => (
-          <button
-            key={option}
-            type="button"
-            role="tab"
-            aria-selected={tab === option}
-            className={`pill ${tab === option ? 'active' : ''}`}
-            onClick={() => {
-              setTab(option)
-            }}
-          >
-            {t(`admin.tab.${option}`)}
-          </button>
-        ))}
-      </div>
+      <PillGroup
+        kind="tabs"
+        options={TABS}
+        value={tab}
+        onChange={setTab}
+        label={t('admin.title')}
+        text={(option) => t(`admin.tab.${option}`)}
+      />
       {tab === 'consumption' && <ConsumptionTab />}
       {tab === 'people' && <PeopleTab />}
       {tab === 'people' && <StaffAccounts />}

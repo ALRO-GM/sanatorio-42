@@ -8,6 +8,7 @@ import { useI18n } from '../../shared/i18n'
 import { notGamesHref } from '../../shared/links'
 import { Avatar } from '../../shared/ui/Avatar'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { PillGroup } from '../../shared/ui/PillGroup'
 import { Icon } from '../../shared/ui/Icon'
 import { InfoTip } from '../../shared/ui/InfoTip'
 import { BOARD_STYLES, ChessBoard, loadBoardStyle, saveBoardStyle } from './ChessBoard'
@@ -191,22 +192,21 @@ export function TurnRoomView({ id, me }: { id: number; me: string }) {
                 />
               )}
             </div>
-            <div className="filter-pills" role="group" aria-label={t('notgames.chess.boardStyle')}>
-              {BOARD_STYLES.map((option) => (
-                <button
-                  key={option}
-                  type="button"
-                  className={`pill board-swatch board-${option} ${style === option ? 'active' : ''}`}
-                  aria-pressed={style === option}
-                  onClick={() => {
-                    setStyle(option)
-                    saveBoardStyle(option)
-                  }}
-                >
+            <PillGroup
+              options={BOARD_STYLES}
+              value={style}
+              onChange={(option) => {
+                setStyle(option)
+                saveBoardStyle(option)
+              }}
+              label={t('notgames.chess.boardStyle')}
+              pillClass={(option) => `board-swatch board-${option}`}
+              text={(option) => (
+                <>
                   <i aria-hidden="true" /> {t(`notgames.chess.board.${option}`)}
-                </button>
-              ))}
-            </div>
+                </>
+              )}
+            />
           </div>
 
           <div className="turn-side">

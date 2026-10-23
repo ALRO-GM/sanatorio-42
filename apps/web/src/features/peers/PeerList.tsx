@@ -11,6 +11,7 @@ import { Avatar } from '../../shared/ui/Avatar'
 import { FocusBadge } from '../../shared/ui/FocusBadge'
 import { PersonLink } from '../../shared/ui/PersonLink'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { PillGroup } from '../../shared/ui/PillGroup'
 import { BookHelp } from '../help/BookHelp'
 import { ProjectMap } from '../map/ProjectMap'
 import { intraHref } from '../../shared/links'
@@ -153,26 +154,19 @@ export function PeerList({ project, onOpenTherapy }: PeerListProps) {
       <ProjectMap projectId={project.id} spotlight={spotlight} />
       <div className="filters">
         <Show from="normal">
-          <div className="filter-pills">
-            {(
-              [
-                ['all', t('peers.all', { n: byDuty.length })],
-                ['finished', t('peers.specialists', { n: specialistsCount })],
-                ['in_progress', t('peers.patients', { n: inProgressCount })],
-              ] as const
-            ).map(([value, label]) => (
-              <button
-                key={value}
-                className={`pill ${typeFilter === value ? 'active' : ''}`}
-                aria-pressed={typeFilter === value}
-                onClick={() => {
-                  setTypeFilter(value)
-                }}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
+          <PillGroup<TypeFilter>
+            options={['all', 'finished', 'in_progress']}
+            value={typeFilter}
+            onChange={setTypeFilter}
+            label={t('peers.title', { project: project.name })}
+            text={(value) =>
+              value === 'all'
+                ? t('peers.all', { n: byDuty.length })
+                : value === 'finished'
+                  ? t('peers.specialists', { n: specialistsCount })
+                  : t('peers.patients', { n: inProgressCount })
+            }
+          />
         </Show>
         <label className="duty-check">
           <input

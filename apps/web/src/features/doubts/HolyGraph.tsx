@@ -7,6 +7,7 @@ import { useMediaQuery } from '../../shared/hooks/useMediaQuery'
 import { localeOf, useI18n } from '../../shared/i18n'
 import type { Translate } from '../../shared/i18n'
 import { Icon } from '../../shared/ui/Icon'
+import { PillGroup } from '../../shared/ui/PillGroup'
 import {
   completion,
   countSignals,
@@ -375,27 +376,25 @@ export function HolyGraph({ graph, selected, onSelect }: HolyGraphProps) {
       {(active.length > 0 || allSeries.length > 0) && (
         <div className="graph-summary">
           {active.length > 0 && (
-            <div className="filter-pills" role="group" aria-label={t('graph.needsYou')}>
-              <span className="eyebrow">{t('graph.needsYou')}</span>
-              {active.map((signal) => (
-                <button
-                  key={signal}
-                  type="button"
-                  className={`pill ${focus === signal ? 'active' : ''}`}
-                  aria-pressed={focus === signal}
-                  onClick={() => {
-                    setFocus(focus === signal ? null : signal)
-                  }}
-                >
+            <PillGroup
+              options={active}
+              value={focus}
+              onChange={(signal) => {
+                setFocus(focus === signal ? null : signal)
+              }}
+              label={t('graph.needsYou')}
+              before={<span className="eyebrow">{t('graph.needsYou')}</span>}
+              text={(signal) => (
+                <>
                   <span className={`graph-mark ${signal}`} aria-hidden="true">
                     {SIGNAL_GLYPH[signal]}
                   </span>
                   {t(`graph.${totals[signal] === 1 ? 'one' : 'count'}.${signal}`, {
                     n: totals[signal],
                   })}
-                </button>
-              ))}
-            </div>
+                </>
+              )}
+            />
           )}
           {allSeries.length > 0 && (
             <div className="filter-pills" role="group" aria-label={t('graph.series')}>

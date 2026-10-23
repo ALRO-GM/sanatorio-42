@@ -2,6 +2,7 @@ import type { FocusFigures, FocusStats } from '@sanatorio/contracts'
 
 import type { FocusStatsQuery } from '../../shared/api/types'
 import { localeOf, useI18n } from '../../shared/i18n'
+import { PillGroup } from '../../shared/ui/PillGroup'
 
 /** Los periodos que se pueden mirar (#80 del buzón): hoy, semana, mes y total. */
 export const PERIODS = ['day', 'week', 'month', 'total'] as const
@@ -48,21 +49,13 @@ export function PeriodPills({
   const { t } = useI18n()
 
   return (
-    <div className="filter-pills" role="group" aria-label={t('focus.stats.period')}>
-      {PERIODS.map((option) => (
-        <button
-          key={option}
-          type="button"
-          className={`pill ${value === option ? 'active' : ''}`}
-          aria-pressed={value === option}
-          onClick={() => {
-            onChange(option)
-          }}
-        >
-          {t(`focus.period.${option}`)}
-        </button>
-      ))}
-    </div>
+    <PillGroup
+      options={PERIODS}
+      value={value}
+      onChange={onChange}
+      label={t('focus.stats.period')}
+      text={(option) => t(`focus.period.${option}`)}
+    />
   )
 }
 

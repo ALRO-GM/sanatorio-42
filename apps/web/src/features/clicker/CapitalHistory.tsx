@@ -5,6 +5,7 @@ import type { Lang } from '@sanatorio/contracts'
 import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
+import { PillGroup } from '../../shared/ui/PillGroup'
 import { CapitalChart } from './CapitalChart'
 
 const DAY_S = 86_400
@@ -83,21 +84,17 @@ export function CapitalHistory({
   return (
     <div className="cc-history">
       <div className="cc-history-controls">
-        <span className="filter-pills" role="group" aria-label={t('clicker.chart.span')}>
-          {SPANS.map(([id, days]) => (
-            <button
-              key={id}
-              type="button"
-              className={`pill ${preset === id ? 'active' : ''}`}
-              aria-pressed={preset === id}
-              onClick={() => {
-                setRange({ from: days === null ? null : now - days * DAY_S, to: null })
-              }}
-            >
-              {t(`clicker.chart.${id}`)}
-            </button>
-          ))}
-        </span>
+        <PillGroup
+          options={SPANS.map(([id]) => id)}
+          value={preset ?? null}
+          onChange={(id) => {
+            const days = SPANS.find(([one]) => one === id)?.[1] ?? null
+
+            setRange({ from: days === null ? null : now - days * DAY_S, to: null })
+          }}
+          label={t('clicker.chart.span')}
+          text={(id) => t(`clicker.chart.${id}`)}
+        />
         <label>
           {t('clicker.chart.from')}
           <input
