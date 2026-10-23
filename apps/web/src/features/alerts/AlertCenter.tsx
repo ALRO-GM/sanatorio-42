@@ -5,6 +5,7 @@ import type { CalendarSection, EventAlert, MeetCheckin } from '@sanatorio/contra
 import { api } from '../../shared/api'
 import { shows as showsFocus, useFocus } from '../../shared/focus'
 import { useAction } from '../../shared/hooks/useAsync'
+import { usePolling } from '../../shared/hooks/usePolling'
 import { useNow } from '../../shared/hooks/useNow'
 import { useI18n } from '../../shared/i18n'
 import { usePrefs } from '../../shared/layout/store'
@@ -84,13 +85,9 @@ export function AlertCenter({ me, onGo }: AlertCenterProps) {
 
   useEffect(() => {
     refresh()
-
-    const fetching = setInterval(refresh, FETCH_MS)
-
-    return () => {
-      clearInterval(fetching)
-    }
   }, [refresh])
+  // Los avisos no se piden con la pestaña oculta: lo pendiente lo guarda la API y espera.
+  usePolling(refresh, FETCH_MS)
 
   // Los que ya toca enseñar, por orden de inicio. Lo que pide respuesta sale
   // aunque los avisos estén apagados: entonces, a la hora de empezar.

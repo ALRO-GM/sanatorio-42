@@ -6,6 +6,7 @@ import type { Gate, GroupMission } from '@sanatorio/gitsim'
 
 import { api } from '../../shared/api'
 import { useAction } from '../../shared/hooks/useAsync'
+import { usePolling } from '../../shared/hooks/usePolling'
 import { useNow } from '../../shared/hooks/useNow'
 import { useI18n } from '../../shared/i18n'
 import { Avatar } from '../../shared/ui/Avatar'
@@ -168,20 +169,7 @@ function GroupRoom({
   const now = useNow(1000, { active: deadline !== null, offset: offset.current })
   const left = deadline === null ? null : Math.max(0, Date.parse(deadline) - now)
 
-  useEffect(() => {
-    if (status === 'done') return undefined
-
-    const timer = setInterval(
-      () => {
-        if (!document.hidden) void load()
-      },
-      status === 'playing' ? PLAYING_MS : WAITING_MS,
-    )
-
-    return () => {
-      clearInterval(timer)
-    }
-  }, [status, load])
+  usePolling(load, status === 'done' ? null : status === 'playing' ? PLAYING_MS : WAITING_MS)
 
   if (room === null) {
     return error === null ? (

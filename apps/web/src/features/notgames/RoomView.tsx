@@ -4,6 +4,7 @@ import type { QuizPlayer, QuizQuestion, QuizRoom, QuizTeam } from '@sanatorio/co
 
 import { api } from '../../shared/api'
 import { useAction } from '../../shared/hooks/useAsync'
+import { usePolling } from '../../shared/hooks/usePolling'
 import { useNow } from '../../shared/hooks/useNow'
 import { useI18n } from '../../shared/i18n'
 import { notGamesHref } from '../../shared/links'
@@ -62,20 +63,7 @@ export function RoomView({ id, me }: RoomViewProps) {
 
   const status = room?.status
 
-  useEffect(() => {
-    if (status === 'done') return undefined
-
-    const timer = setInterval(
-      () => {
-        if (!document.hidden) void load()
-      },
-      status === 'playing' ? PLAYING_MS : WAITING_MS,
-    )
-
-    return () => {
-      clearInterval(timer)
-    }
-  }, [status, load])
+  usePolling(load, status === 'done' ? null : status === 'playing' ? PLAYING_MS : WAITING_MS)
 
   if (room === null) {
     return error === null ? (

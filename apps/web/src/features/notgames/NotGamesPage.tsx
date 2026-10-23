@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import type { SyntheticEvent } from 'react'
 
 import type {
@@ -14,6 +14,7 @@ import type {
 
 import { api } from '../../shared/api'
 import { useAction, useAsync } from '../../shared/hooks/useAsync'
+import { usePolling } from '../../shared/hooks/usePolling'
 import { useI18n } from '../../shared/i18n'
 import { notGamesHref, turnGameHref } from '../../shared/links'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
@@ -120,15 +121,7 @@ function Rooms() {
   const { reload } = rooms
 
   // La lista se pone al día sola: las salas se llenan y se abren mientras miras.
-  useEffect(() => {
-    const timer = setInterval(() => {
-      if (!document.hidden) void reload()
-    }, LIST_REFRESH_MS)
-
-    return () => {
-      clearInterval(timer)
-    }
-  }, [reload])
+  usePolling(reload, LIST_REFRESH_MS)
 
   return (
     <>

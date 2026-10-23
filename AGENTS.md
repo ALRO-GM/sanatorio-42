@@ -91,7 +91,9 @@ regla de aquí, cambia también la skill que la repite.
   lo hace `notices` al oír el evento. El texto del aviso va en la tabla `buzon`
   (`notices.kind.*`).
 - Web: lo que haya que preguntar de fondo va en `GET /pulse` (`usePulse`), no en
-  un sondeo nuevo.
+  un sondeo nuevo. Lo que una pantalla pide de nuevo mientras se mira (salas,
+  mapa, conectados) va por `usePolling` (`shared/hooks/usePolling.ts`), que se
+  para con la pestaña oculta; nada de `setInterval(reload)` a mano.
 - **Límites del plan**: al 90 % de un límite gratuito de Oracle solo entra quien
   administra y no corre nada de fondo; al 95 % no entra nadie (`STOP_SHARE` y
   `HARD_STOP_SHARE` en `modules/admin/budget.rules.ts`, y

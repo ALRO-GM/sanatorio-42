@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 import type { Peer, ProjectStatus, ProjectSummary } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
+import { usePolling } from '../../shared/hooks/usePolling'
 import { useI18n } from '../../shared/i18n'
 import { Show } from '../../shared/detail'
 import { Icon } from '../../shared/ui/Icon'
@@ -63,18 +64,7 @@ export function PeerList({ project, onOpenTherapy }: PeerListProps) {
 
   const partial = data?.partial === true
 
-  useEffect(() => {
-    const timer = setInterval(
-      () => {
-        // Con la pestaña en segundo plano no se pregunta: nadie lo está mirando.
-        if (!document.hidden) void reload()
-      },
-      partial ? REFRESH_PARTIAL_MS : REFRESH_MS,
-    )
-    return () => {
-      clearInterval(timer)
-    }
-  }, [reload, partial])
+  usePolling(reload, partial ? REFRESH_PARTIAL_MS : REFRESH_MS)
 
   const title = <h2>{t('peers.title', { project: project.name })}</h2>
 

@@ -1,10 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import type { ChangeEvent } from 'react'
-
-import type { SyncStatus } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
+import { usePolling } from '../../shared/hooks/usePolling'
 import { useI18n } from '../../shared/i18n'
 import { Show } from '../../shared/detail'
 import { ComfortSettings } from './ComfortSettings'
@@ -70,31 +69,12 @@ export function Settings({ campusId, onCampusChange }: SettingsProps) {
 /** "Puestos actualizados hace 2 min", o cuánto falta por copiar del campus. */
 function SyncNote({ campusId }: { campusId: number | undefined }) {
   const { t } = useI18n()
-  const [status, setStatus] = useState<SyncStatus | null>(null)
+  // Es informativo: si falla, simplemente no se enseña.
+  const status = useAsync(() => api.getSyncStatus(), [])
 
-  useEffect(() => {
-    let current = true
-    const load = (): void => {
-      api.getSyncStatus().then(
-        (next) => {
-          if (current) setStatus(next)
-        },
-        () => {
-          // Es informativo: si falla, simplemente no se enseña.
-        },
-      )
-    }
+  usePolling(status.reload, 60_000)
 
-    load()
-    const timer = setInterval(load, 60_000)
-
-    return () => {
-      current = false
-      clearInterval(timer)
-    }
-  }, [])
-
-  const campus = status?.campuses.find((entry) => entry.id === campusId)
+  const campus = status.data?.campuses.find((entry) => entry.id === campusId)
 
   if (campus === undefined) {
     return null

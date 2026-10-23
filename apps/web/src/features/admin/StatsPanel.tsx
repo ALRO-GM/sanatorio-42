@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 import type { StatTotals, UsageStats } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
+import { usePolling } from '../../shared/hooks/usePolling'
 import { localeOf, useI18n } from '../../shared/i18n'
 import { DataTable } from '../../shared/ui/DataTable'
 import { Avatar } from '../../shared/ui/Avatar'
@@ -387,15 +388,7 @@ function OnlineCard({ onPick }: { onPick: (login: string) => void }) {
   const { t } = useI18n()
   const { data, reload } = useAsync(() => api.getOnline(), [])
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      if (!document.hidden) void reload()
-    }, ONLINE_EVERY_MS)
-
-    return () => {
-      clearInterval(timer)
-    }
-  }, [reload])
+  usePolling(reload, ONLINE_EVERY_MS)
 
   if (data === undefined) return null
 

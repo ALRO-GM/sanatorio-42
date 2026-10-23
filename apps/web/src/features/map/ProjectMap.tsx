@@ -1,7 +1,6 @@
-import { useEffect } from 'react'
-
 import { api } from '../../shared/api'
 import { useAction, useAsync } from '../../shared/hooks/useAsync'
+import { usePolling } from '../../shared/hooks/usePolling'
 import { useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { ClusterMapView } from './ClusterMapView'
@@ -25,16 +24,7 @@ export function ProjectMap({
   const marking = useAction()
   const { data, error, loading, reload } = useAsync(() => api.getProjectMap(projectId), [projectId])
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      // Con la pestaña en segundo plano no se pregunta: nadie lo está mirando.
-      if (!document.hidden) void reload()
-    }, REFRESH_MS)
-
-    return () => {
-      clearInterval(timer)
-    }
-  }, [reload])
+  usePolling(reload, REFRESH_MS)
 
   return (
     <section className="card map-card" aria-label={t('map.title')}>

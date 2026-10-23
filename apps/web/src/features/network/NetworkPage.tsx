@@ -4,6 +4,7 @@ import type { CurrentUser, NetworkGraph, NetworkNode } from '@sanatorio/contract
 
 import { api } from '../../shared/api'
 import type { NetworkParams } from '../../shared/api/types'
+import { usePolling } from '../../shared/hooks/usePolling'
 import { useI18n } from '../../shared/i18n'
 import { Blocks } from '../../shared/layout/Blocks'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
@@ -163,17 +164,12 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
   // Mientras se copia el histórico, el grafo crece solo.
   const copying = graph !== null && graph.sync.phase !== 'done'
 
-  useEffect(() => {
-    if (!copying) return undefined
-
-    const timer = setInterval(() => {
+  usePolling(
+    () => {
       setReloads((count) => count + 1)
-    }, REFRESH_WHILE_COPYING_MS)
-
-    return () => {
-      clearInterval(timer)
-    }
-  }, [copying])
+    },
+    copying ? REFRESH_WHILE_COPYING_MS : null,
+  )
 
   const change = useCallback((patch: Partial<Filters>) => {
     setFilters((current) => ({ ...current, ...patch }))
