@@ -25,6 +25,8 @@
     "format:check": "prettier --check .",
     "test": "npm run test --workspaces --if-present",
     "check": "npm run typecheck && npm run lint && npm run format:check && npm run deadcode && npm run duplicates && npm run textos && npm run test",
+    "check:quick": "npm run typecheck && npm run lint && npm run format:check && npm run textos",
+    "hooks": "git config core.hooksPath .githooks && echo 'Hooks de git activados (.githooks)'",
     "sync:status": "npm run sync:status -w @sanatorio/api",
     "sync:run": "npm run sync:run -w @sanatorio/api",
     "deadcode": "knip --no-progress",

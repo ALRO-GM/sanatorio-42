@@ -1,0 +1,16 @@
+#!/bin/sh
+# Antes de cada commit: formato, lint y textos de lo que va en él. Lo largo
+# (tests enteros) va en pre-push. Se activa con `npm run hooks`.
+set -e
+cd "$(git rev-parse --show-toplevel)"
+files=$(git diff --cached --name-only --diff-filter=ACM)
+[ -z "$files" ] && exit 0
+code=$(echo "$files" | grep -E '\.(ts|tsx|js|mjs|cjs|json|css|md|yml|yaml)$' || true)
+if [ -n "$code" ]; then
+  echo "$code" | xargs npx prettier --check --
+  ts=$(echo "$code" | grep -E '\.(ts|tsx)$' || true)
+  [ -n "$ts" ] && echo "$ts" | xargs npx eslint --max-warnings 0 --
+fi
+if echo "$files" | grep -qE 'textos/.*\.csv$|docs/textos/'; then
+  npm run textos --silent
+fi

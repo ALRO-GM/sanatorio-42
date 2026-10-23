@@ -1,0 +1,5 @@
+#!/bin/sh
+# Antes de empujar: el check entero (tipos, lint, formato, knip, jscpd,
+# textos y tests). Nada rojo sale del portátil. Para saltarlo una vez en
+# una emergencia: `git push --no-verify`.
+cd "$(git rev-parse --show-toplevel)" && npm run check

@@ -14,16 +14,47 @@ paralelo, cada una con su informe entero en esta carpeta:
 Las cifras de partida: 126 000 líneas de TypeScript, 1 708 tests (API al 98 %
 de líneas, web al 66 %), `npm run check` en 1 m 18 s, 183 rutas.
 
-## Qué se hizo ya (22-23 de octubre)
+## Estado (23 de octubre, mañana)
 
-- **Seguridad**: el motor del Code Clicker pasó a `packages/clicker`, compartido
-  por web y API, y la API rehace la producción de cada partida en vez de
-  fiarse del `perSecond` del cliente. `/usage/heatmap` pasó a
-  `/admin/usage/heatmap`. La barrera de `/admin/` compara la ruta
-  descodificada (con test para `/%61dmin/people`). Los ids de evento a medias
-  (`help:booking`) ya no dan 500.
-- **Flujo**: skills y subagentes en `.claude/`, y `docs/flujo-de-trabajo.md`.
-- **Máquina**: ampliada al máximo gratuito de Oracle (4 OCPU, 24 GB, 200 GB).
+**Seguridad** (`seguridad-api.md`): resueltos y en producción A1 (barrera de
+`/admin/` sobre la ruta descodificada), M1 (ids de evento a medias), M2 (vista
+de salas solo para su campus o su gente), M3 (motor del Clicker en
+`packages/clicker`, producción calculada en la API), M4
+(`/admin/usage/heatmap`), M5 (Slack escapado), M6 (exportación de datos sin
+datos de terceros, tablas declaradas, secretos omitidos, truncado señalado),
+B2 (secreto de 32) y B12 (con M6). M7 (borrado de cuenta) queda documentado en
+`docs/contexto.md`, pendiente de decisión. Pendientes: B1, B3, B4, B6–B11 y
+los bajos del informe de juegos (FFA en solitario, `remember` antes de
+deduplicar, abandonar borra el resultado, carreras en `save`/`choose`,
+parámetros crudos en gitcourse, tramo estrecho en pomodoro, nombres de demo y
+claves de uso libres).
+
+**Calidad de la API** (`calidad-api.md`): hechos los diez refactors salvo A2
++ L4 (módulo `presence` y `wire()` en `composition.ts`): helpers de filas y
+`toJson`, `inList` con `json_each` (22 sitios), `Cache-Control` solo en el
+gancho global (46 líneas), `given()` y `Clock`/`Logger`, caché TTL compartida,
+guarda de reentrada en los `jobs`, `isoAt`/`dayOf`/`startOfDayIso` (22
+definiciones), regla verificable de quién habla con 42, índice de
+`help_bookings` y `LIMIT` en la clasificación.
+
+**Calidad de la web** (`calidad-web.md`): la página de exámenes perezosa
+(hecho); los diez refactors restantes están en curso con un agente.
+
+**Textos** (`textos.md`): las 275 filas, el glosario y los contextos
+aplicados; catalán y euskera completos en todas las tablas (1 009 filas).
+Quedan los cambios que tocan código: unificar unas 55 claves repetidas y
+pintar como icono los glifos (★ ✦ ← →) que hoy van en el texto.
+
+**Tests e infraestructura** (`tests-infra.md`): hechos los puntos 1, 2, 5 y
+6 de su lista (logger a `warn` con `x-request-id`, migración aparte con
+vuelta atrás y cerrojo, `/health/db` con sha y esquema, espera a la CI por
+etiqueta `ci-ok/<sha>`). Pendientes: copias fuera de la máquina y cifradas,
+hooks de git y `check:quick`, mínimos de cobertura de la web, `docs/api.md` ↔
+rutas, recorridos de pantalla que faltan, Slack de despliegues y monitor
+externo, errores de cliente.
+
+**Flujo**: skills y subagentes en `.claude/`, `docs/flujo-de-trabajo.md`.
+**Máquina**: ampliada al máximo gratuito de Oracle (4 OCPU, 24 GB, 200 GB).
 
 ## Plan de arreglos, por tandas
 
