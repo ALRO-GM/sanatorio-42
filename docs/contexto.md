@@ -388,7 +388,8 @@ Estado a 2026-10-23, tras el hallazgo M6/M7 de `revision-2026-10/seguridad-api.m
   listas (`anonymizePersonalData`). Así las horas, reservas y grupos de los
   demás siguen cuadrando. La réplica de 42 no se toca (es pública en la intra y
   vuelve en la siguiente copia). Irreversible; quien vuelva a entrar empieza de
-  cero.
+  cero. En las clasificaciones las cuentas `anon-…` se muestran (Alberto,
+  2026-10-23: «por ahora»).
 
 ## Pendiente de confirmar o de hacer
 
