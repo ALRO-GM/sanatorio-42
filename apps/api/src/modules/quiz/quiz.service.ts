@@ -114,7 +114,12 @@ export function createQuizService(options: QuizServiceOptions) {
       room.campusId,
       players.map((p) => ({
         login: p.login,
-        won: winners.includes(p.login) || (p.team !== null && winners.includes(p.team)),
+        // Empezar solo (solo se puede en «todos contra todos») vale para
+        // practicar, no para ganar: sin rival no hay victoria que apuntar. En
+        // un duelo con una sola persona es que la otra se fue: esa sí cuenta.
+        won:
+          (players.length > 1 || room.settings.mode !== 'ffa') &&
+          (winners.includes(p.login) || (p.team !== null && winners.includes(p.team))),
         correct: p.correct,
         wrong: p.wrong,
         score: p.score,
@@ -565,14 +570,17 @@ export function createQuizService(options: QuizServiceOptions) {
             ? Math.max(0, (me.lives ?? LIVES) - (correct ? 0 : 1))
             : me.lives
 
-        await quiz.remember(actor.login, round.conceptId, correct, isoAt(t))
-        await quiz.answer(
+        const counted = await quiz.answer(
           id,
           question,
           actor.login,
           { login: actor.login, option, correct, ms: t - round.startsAt },
           { points: pointsFor(correct, room.settings.competitive), lives, out: lives === 0 },
         )
+
+        // Solo la primera respuesta cuenta para el Repaso: repetir la petición
+        // no suma fallos ni aciertos.
+        if (counted) await quiz.remember(actor.login, round.conceptId, correct, isoAt(t))
 
         return viewOf(actor, room)
       })
