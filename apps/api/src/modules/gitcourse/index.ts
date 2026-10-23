@@ -58,8 +58,6 @@ export function createGitCourseModule(deps: {
     routes: (app, { session }) => {
       /** `GET /gitcourse` → `GitCourse`: tus estrellas y desde qué puesto juegas. */
       app.get('/gitcourse', async (request, reply) => {
-        reply.header('Cache-Control', 'private, no-store')
-
         return reply.send(await service.course(await session.actor(request)))
       })
 
@@ -89,8 +87,6 @@ export function createGitCourseModule(deps: {
 
       /** `GET /gitcourse/rooms?gate=group1` → `GitRoomLobby[]`: salas de esa prueba. */
       app.get<{ Querystring: { gate?: string } }>('/gitcourse/rooms', async (request, reply) => {
-        reply.header('Cache-Control', 'private, no-store')
-
         return reply.send(await rooms.list(await session.actor(request), request.query.gate ?? ''))
       })
 
@@ -101,8 +97,6 @@ export function createGitCourseModule(deps: {
 
       /** `GET /gitcourse/rooms/:id` → `GitRoom` (la web lo pide cada dos segundos). */
       app.get<IdParams>('/gitcourse/rooms/:id', async (request, reply) => {
-        reply.header('Cache-Control', 'private, no-store')
-
         return reply.send(await rooms.view(await session.actor(request), room(request.params.id)))
       })
 

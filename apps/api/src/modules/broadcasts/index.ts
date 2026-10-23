@@ -34,8 +34,6 @@ export function createBroadcastsModule(deps: BroadcastsServiceOptions): Broadcas
     routes: (app, { session }) => {
       /** `GET /broadcasts` → los comunicados que tienes por leer, el más antiguo primero. */
       app.get('/broadcasts', async (request, reply) => {
-        reply.header('Cache-Control', 'private, no-store')
-
         return reply.send(await service.pending(await session.actor(request)))
       })
 
@@ -52,8 +50,6 @@ export function createBroadcastsModule(deps: BroadcastsServiceOptions): Broadcas
 
       /** `GET /admin/broadcasts` → los últimos comunicados y lo contestado. Solo admins. */
       app.get('/admin/broadcasts', async (request, reply) => {
-        reply.header('Cache-Control', 'private, no-store')
-
         return reply.send(await service.reports(await session.actor(request)))
       })
 

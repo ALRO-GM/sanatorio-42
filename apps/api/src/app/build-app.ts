@@ -213,17 +213,28 @@ export async function buildApp(options: BuildOptions = {}): Promise<BuiltApp> {
         module.start?.()
 
         for (const job of module.jobs ?? []) {
+          // Una vuelta cada vez: si la anterior aún no ha acabado (42 lenta, una
+          // copia larga), no se lanza otra encima, que gastaría cuota y pisaría
+          // lo mismo. `everyMs` es la pausa entre vueltas, no un periodo fijo.
+          let busy = false
+
           timers.push(
             setInterval(() => {
               // Con un corte por el límite del plan no corre nada de fondo: no
               // tiene que salir tráfico aunque no haya nadie. Lo de `admin` sí:
               // es quien guarda la cuenta de lo servido.
-              if (module.name !== 'admin' && services.admin.halted()) return
+              if (busy || (module.name !== 'admin' && services.admin.halted())) return
 
-              job.run().catch((error: unknown) => {
-                const message = error instanceof Error ? error.message : String(error)
-                process.stderr.write(`[${job.name}] ${message}\n`)
-              })
+              busy = true
+              job
+                .run()
+                .catch((error: unknown) => {
+                  const message = error instanceof Error ? error.message : String(error)
+                  process.stderr.write(`[${job.name}] ${message}\n`)
+                })
+                .finally(() => {
+                  busy = false
+                })
             }, job.everyMs),
           )
         }

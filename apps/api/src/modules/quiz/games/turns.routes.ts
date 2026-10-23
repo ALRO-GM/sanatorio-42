@@ -18,8 +18,6 @@ export function registerTurnRoutes(
 
   /** `GET /games/rooms` → las salas por turnos abiertas del campus y las tuyas recientes. */
   app.get('/games/rooms', async (request, reply) => {
-    reply.header('Cache-Control', 'private, no-store')
-
     return reply.send(await games.list(await session.actor(request)))
   })
 
@@ -30,8 +28,6 @@ export function registerTurnRoutes(
 
   /** `GET /games/rooms/:id` → cómo va la partida ahora (la web lo pide cada segundo). */
   app.get<IdParams>('/games/rooms/:id', async (request, reply) => {
-    reply.header('Cache-Control', 'private, no-store')
-
     return reply.send(await games.view(await session.actor(request), room(request.params.id)))
   })
 

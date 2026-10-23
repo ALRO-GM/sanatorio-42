@@ -25,8 +25,6 @@ export function createMeetModule(deps: MeetServiceOptions): MeetModule {
       app.get<{ Querystring: { id?: string; after?: string } }>(
         '/events/thread',
         async (request, reply) => {
-          reply.header('Cache-Control', 'private, no-store')
-
           return reply.send(
             await service.thread(
               await session.actor(request),
@@ -63,8 +61,6 @@ export function createMeetModule(deps: MeetServiceOptions): MeetModule {
       })
 
       app.get('/events/alerts', async (request, reply) => {
-        reply.header('Cache-Control', 'private, no-store')
-
         return reply.send(
           await service.alerts(await session.actor(request), session.user(request).id),
         )
@@ -85,8 +81,6 @@ export function createMeetModule(deps: MeetServiceOptions): MeetModule {
 
       /** `GET /events/attendance?id=` → códigos (quien organiza) o lo validado (quien asiste). */
       app.get<{ Querystring: { id?: string } }>('/events/attendance', async (request, reply) => {
-        reply.header('Cache-Control', 'private, no-store')
-
         return reply.send(await service.attendance(await session.actor(request), request.query.id))
       })
 
@@ -103,8 +97,6 @@ export function createMeetModule(deps: MeetServiceOptions): MeetModule {
         const { format, ...query } = request.query
         const actor = await session.actor(request)
 
-        reply.header('Cache-Control', 'private, no-store')
-
         if (format !== 'csv') {
           return reply.send(await service.report(actor, query))
         }
@@ -120,8 +112,6 @@ export function createMeetModule(deps: MeetServiceOptions): MeetModule {
 
       /** `GET /admin/checkins?id=` → cada intento de validar un código de un evento. Solo admins. */
       app.get<{ Querystring: { id?: string } }>('/admin/checkins', async (request, reply) => {
-        reply.header('Cache-Control', 'private, no-store')
-
         return reply.send(await service.checkins(await session.actor(request), request.query.id))
       })
     },

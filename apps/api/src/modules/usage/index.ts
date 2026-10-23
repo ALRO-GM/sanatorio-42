@@ -70,22 +70,16 @@ export function createUsageModule(deps: {
        * persona, con el tráfico de la API. Solo admins.
        */
       app.get<{ Querystring: Record<string, string> }>('/admin/stats', async (request, reply) => {
-        reply.header('Cache-Control', 'private, no-store')
-
         return reply.send(await service.stats(await session.actor(request), request.query))
       })
 
       /** `GET /admin/flows?from=&to=&login=` → cómo se navega entre secciones. Solo admins. */
       app.get<{ Querystring: Record<string, string> }>('/admin/flows', async (request, reply) => {
-        reply.header('Cache-Control', 'private, no-store')
-
         return reply.send(await service.flows(await session.actor(request), request.query))
       })
 
       /** `GET /admin/online` → quién tiene la web abierta y cuánto lleva. Solo admins. */
       app.get('/admin/online', async (request, reply) => {
-        reply.header('Cache-Control', 'private, no-store')
-
         return reply.send(await service.online(await session.actor(request)))
       })
 
@@ -98,8 +92,6 @@ export function createUsageModule(deps: {
 
       /** `GET /admin/clicks?section=&layout=&days=` → el mapa de calor de clics de una sección. */
       app.get<{ Querystring: Record<string, string> }>('/admin/clicks', async (request, reply) => {
-        reply.header('Cache-Control', 'private, no-store')
-
         return reply.send(await clicks.heatmap(await session.actor(request), request.query))
       })
 

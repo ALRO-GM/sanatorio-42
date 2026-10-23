@@ -49,10 +49,9 @@ export function createNoticesModule(deps: NoticesModuleDeps): NoticesModule {
        * `GET /pulse` → avisos sin leer y estado de la cuota de 42, en una sola
        * petición: es lo único que la web pregunta de fondo además del calendario.
        */
-      app.get('/pulse', async (request, reply): Promise<Pulse> => {
+      app.get('/pulse', async (request): Promise<Pulse> => {
         const { login } = session.user(request)
 
-        reply.header('Cache-Control', 'private, no-store')
         deps.onPulse?.(login)
 
         return {
@@ -68,8 +67,6 @@ export function createNoticesModule(deps: NoticesModuleDeps): NoticesModule {
 
       /** `GET /notices` → tu buzón: lo que no has leído primero. */
       app.get('/notices', async (request, reply) => {
-        reply.header('Cache-Control', 'private, no-store')
-
         return reply.send(await service.list(await session.actor(request)))
       })
 

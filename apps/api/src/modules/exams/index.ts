@@ -91,8 +91,6 @@ export function createExamsModule(deps: ExamsModuleDeps): ExamsModule {
        * de hoy): quién está apuntado, qué examen hace y su última nota.
        */
       app.get('/exams/live', async (request, reply) => {
-        reply.header('Cache-Control', 'private, no-store')
-
         return reply.send(await live.live(await session.actor(request)))
       })
 
@@ -101,8 +99,6 @@ export function createExamsModule(deps: ExamsModuleDeps): ExamsModule {
        * hace al menos un minuto del último refresco (de quien sea).
        */
       app.post('/exams/live/refresh', async (request, reply) => {
-        reply.header('Cache-Control', 'private, no-store')
-
         return reply.send(await live.refreshNow(await session.actor(request)))
       })
     },

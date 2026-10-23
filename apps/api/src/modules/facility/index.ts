@@ -47,8 +47,6 @@ export function createFacilityModule(deps: FacilityDeps): FacilityModule {
 
       /** `GET /admin/facility` → los avisos del campus (abiertos y los resueltos esta semana). */
       app.get('/admin/facility', async (request, reply) => {
-        reply.header('Cache-Control', 'private, no-store')
-
         return reply.send(await service.forAdmin(await session.actor(request)))
       })
 
@@ -68,7 +66,6 @@ export function createFacilityModule(deps: FacilityDeps): FacilityModule {
             .code(401)
             .send({ error: 'unauthenticated', message: 'Esa cuenta de staff ya no tiene acceso' })
         }
-        reply.header('Cache-Control', 'private, no-store')
 
         return reply.send(await service.forStaff())
       })

@@ -18,15 +18,11 @@ export function registerQuizRoutes(
 
   /** `GET /quiz/rooms` → las salas abiertas del campus y las tuyas recientes. */
   app.get('/quiz/rooms', async (request, reply) => {
-    reply.header('Cache-Control', 'private, no-store')
-
     return reply.send(await quiz.list(await session.actor(request)))
   })
 
   /** `GET /quiz/review` → lo que has fallado, con definición y ejemplo para estudiarlo. */
   app.get('/quiz/review', async (request, reply) => {
-    reply.header('Cache-Control', 'private, no-store')
-
     return reply.send(await quiz.review(await session.actor(request)))
   })
 
@@ -37,8 +33,6 @@ export function registerQuizRoutes(
 
   /** `GET /quiz/rooms/:id` → cómo va la sala ahora (la web lo pide cada segundo jugando). */
   app.get<IdParams>('/quiz/rooms/:id', async (request, reply) => {
-    reply.header('Cache-Control', 'private, no-store')
-
     return reply.send(await quiz.view(await session.actor(request), room(request.params.id)))
   })
 

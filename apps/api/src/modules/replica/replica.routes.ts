@@ -77,8 +77,6 @@ export function registerReplicaRoutes(
    * Es lo que mira el rótulo de aviso y el tique de la sala de espera.
    */
   app.get('/quota', async (request, reply) => {
-    reply.header('Cache-Control', 'private, no-store')
-
     return reply.send(await quota.statusFor(session.user(request).login))
   })
 

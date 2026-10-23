@@ -310,8 +310,6 @@ export function createAdminModule(deps: AdminModuleDeps): AdminModule {
 
       /** `GET /admin/growth?from=&to=&campus=` → uso por campus y usuarios totales y nuevos por día. */
       app.get('/admin/growth', async (request, reply) => {
-        reply.header('Cache-Control', 'private, no-store')
-
         return reply.send(await growth.growth(await session.actor(request), request.query))
       })
 
@@ -355,8 +353,6 @@ export function createAdminModule(deps: AdminModuleDeps): AdminModule {
 
       /** `GET /admin/data` → los tipos de dato que se pueden borrar y cuántas filas tienen. */
       app.get('/admin/data', async (request, reply) => {
-        reply.header('Cache-Control', 'private, no-store')
-
         return reply.send(await service.data(await session.actor(request)))
       })
 

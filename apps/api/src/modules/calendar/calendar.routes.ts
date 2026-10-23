@@ -28,8 +28,6 @@ export function registerCalendarRoutes(
       const actor = await session.actor(request)
       const { fresh } = parse(freshQuery, request.query)
 
-      reply.header('Cache-Control', 'private, no-store')
-
       return reply.send(
         await calendar.between(
           actor,

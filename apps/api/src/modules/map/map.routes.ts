@@ -23,7 +23,6 @@ export function registerMapRoutes(
     const actor = await session.actor(request)
 
     // Depende de quién pregunta (`me`) y cambia cada pocos minutos.
-    reply.header('Cache-Control', 'private, no-store')
 
     return reply.send(await map.forCampus(actor, idParam(request.params.id, 'El proyecto')))
   })
@@ -40,8 +39,6 @@ export function registerMapRoutes(
   })
 
   app.get('/map', async (request, reply) => {
-    reply.header('Cache-Control', 'private, no-store')
-
     return reply.send(await map.forCampus(await session.actor(request)))
   })
 

@@ -49,8 +49,6 @@ export function registerHelpRoutes(
 
   /** `GET /help/inbox` → peticiones por contestar y rechazos sin ver. */
   app.get('/help/inbox', async (request, reply) => {
-    reply.header('Cache-Control', 'private, no-store')
-
     return reply.send(await help.inbox(await session.actor(request)))
   })
 

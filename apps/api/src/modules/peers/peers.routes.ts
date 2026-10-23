@@ -70,7 +70,6 @@ export function registerPeersRoutes(
     // La respuesta depende de quién pregunta y de quién está de guardia, así que
     // no puede cachearla ningún intermediario. `Cache-Control` y no `Vary`:
     // `Vary` lo usa ya el hook de CORS con `Origin`.
-    reply.header('Cache-Control', 'private, no-store')
 
     return reply.send(result.peers)
   })
