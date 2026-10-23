@@ -3,7 +3,7 @@
  * la descarga de los datos de cada cual.
  */
 
-import type { LegalStatus } from '@sanatorio/contracts'
+import type { LegalStatus, PersonalExport } from '@sanatorio/contracts'
 import { z } from 'zod'
 
 import type { Actor } from '../../core/actor.js'
@@ -70,8 +70,11 @@ export function createLegalService(options: LegalServiceOptions) {
       return this.status(actor)
     },
 
-    /** Todo lo que Sanatorio 42 guarda de quien pregunta, tabla a tabla. */
-    async export(actor: Actor, userId: number | null) {
+    /**
+     * Todo lo que Sanatorio 42 guarda de quien pregunta, tabla a tabla, con el
+     * origen de cada una (42 o la app) y si alguna se quedó corta.
+     */
+    async export(actor: Actor, userId: number | null): Promise<PersonalExport> {
       return {
         login: actor.login,
         exportedAt: new Date(now()).toISOString(),

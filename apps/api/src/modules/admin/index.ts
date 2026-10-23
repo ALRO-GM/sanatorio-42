@@ -94,9 +94,40 @@ export function createAdminModule(deps: AdminModuleDeps): AdminModule {
   return {
     name: 'admin',
     personal: [
-      { table: 'user_roles', logins: ['login'] },
-      { table: 'user_blocks', logins: ['login'] },
-      { table: 'tickets', logins: ['login'] },
+      // Quien administra se lleva lo que hizo desde el panel (un rol dado, un
+      // bloqueo, una respuesta), pero no a quién ni lo que esa persona escribió.
+      {
+        table: 'user_roles',
+        logins: ['login', 'granted_by'],
+        give: { granted_by: ['role', 'granted_by', 'created_at'] },
+      },
+      {
+        table: 'user_blocks',
+        logins: ['login', 'blocked_by'],
+        give: { blocked_by: ['until', 'blocked_by', 'created_at'] },
+      },
+      {
+        table: 'tickets',
+        logins: ['login', 'answered_by'],
+        give: {
+          answered_by: [
+            'id',
+            'kind',
+            'status',
+            'answer',
+            'answered_by',
+            'answered_at',
+            'category',
+            'section',
+          ],
+        },
+      },
+      // Los ajustes son de la app; de quien los tocó solo cuenta que los tocó.
+      {
+        table: 'settings',
+        logins: ['updated_by'],
+        give: { updated_by: ['key', 'updated_by', 'updated_at'] },
+      },
       { table: 'request_stats', logins: ['login'] },
       { table: 'user_limits', logins: ['login'] },
       // El secreto del segundo factor no se da nunca: con él se sacan códigos.

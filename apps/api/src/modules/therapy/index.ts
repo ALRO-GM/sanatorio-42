@@ -39,6 +39,9 @@ export function createTherapyModule(deps: TherapyModuleDeps): TherapyModule {
     personal: [
       { table: 'therapy_groups', logins: ['creator'] },
       { table: 'therapy_members', logins: ['login'] },
+      // `present` es la lista de quienes estaban, separada por comas: cada cual
+      // se lleva las sesiones en las que estuvo, con solo su login.
+      { table: 'therapy_checks', lists: [{ column: 'present', format: 'csv' }] },
     ],
     service,
     routes: (app, context) => {

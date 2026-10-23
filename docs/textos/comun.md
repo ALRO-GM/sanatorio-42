@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/comun.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-273 textos. «—» es que falta la traducción: sale en español.
+274 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -28,6 +28,7 @@ Generado desde `apps/web/src/shared/i18n/textos/comun.csv` con
 | `legal.notAccepted` | Estado: no has aceptado la versión vigente de las condiciones | features/legal/LegalPage | Aún no has aceptado esta versión. | You have not accepted this version yet. | Encara no has acceptat aquesta versió. | Oraindik ez duzu bertsio hau onartu. |
 | `legal.acceptedOn` | Estado: fecha en que aceptaste las condiciones | features/legal/LegalPage | Aceptaste esta versión el {date}. | You accepted this version on {date}. | Vas acceptar aquesta versió el {date}. | Bertsio hau {date}(e)an onartu zenuen. |
 | `legal.export` | Botón para descargar todos tus datos en un fichero | features/legal/LegalPage | Descargar mis datos | Download my data | Descarrega les meves dades | Deskargatu nire datuak |
+| `legal.exportHint` | Nota bajo el botón de descargar tus datos: de dónde sale cada tabla y que una muy larga va recortada | features/legal/LegalPage | Cada tabla dice de dónde sale (42 o Sanatorio). Si alguna pasa de 5000 filas, va recortada y lo marca con «truncated». | Each table says where it comes from (42 or Sanatorio). If one has more than 5,000 rows it is cut short and marked «truncated». | Cada taula diu d'on surt (42 o Sanatorio). Si alguna passa de 5000 files, va retallada i ho marca amb «truncated». | Taula bakoitzak nondik datorren dio (42 edo Sanatorio). Batek 5000 lerro baino gehiago baditu, moztuta doa eta «truncated» markarekin adierazten du. |
 | `legal.gateKind` | Encabezado de la ventana obligatoria de condiciones | features/legal/LegalGate | Antes de seguir | Before you go on | Abans de continuar | Jarraitu aurretik |
 | `legal.readAll` | Enlace para abrir el texto legal completo | features/legal/LegalGate | Leer el texto entero | Read the full text | Llegeix el text sencer | Irakurri testu osoa |
 | `legal.accept` | Botón para aceptar las condiciones y seguir | features/legal/LegalGate | Lo he leído y lo acepto | I have read it and I accept | L'he llegit i l'accepto | Irakurri dut eta onartzen dut |

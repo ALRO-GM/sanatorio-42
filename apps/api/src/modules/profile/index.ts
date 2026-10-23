@@ -51,7 +51,14 @@ export function createProfileModule(deps: ProfileModuleDeps): ProfileModule {
     personal: [
       { table: 'profiles', logins: ['login'] },
       { table: 'xp_events', logins: ['login'] },
-      { table: 'reactions', logins: ['from_login', 'to_login'] },
+      // Las reacciones recibidas se enseñan sin quién las dio: en la descarga, igual.
+      {
+        table: 'reactions',
+        logins: ['from_login', 'to_login'],
+        give: {
+          to_login: ['id', 'to_login', 'kind', 'project_id', 'specialist', 'day', 'created_at'],
+        },
+      },
       { table: 'pace_refs', logins: ['login'] },
     ],
     xp,

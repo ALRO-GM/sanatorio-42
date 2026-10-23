@@ -166,9 +166,27 @@ y cuándo la aceptaste. La web no deja seguir hasta aceptarla.
 POST /me/legal/accept → `{ "version" }`: hay que mandar la vigente (si cambió
 mientras se leía, `409`).
 GET /me/export → todo lo tuyo, tabla a tabla, como JSON para descargar
-(`Content-Disposition: attachment`). Cada módulo apunta en `personal` qué tablas
-suyas tienen datos de alguien; un test comprueba que no falta ninguna. Los
-secretos (el del segundo factor) no salen nunca.
+(`Content-Disposition: attachment`; tipo `PersonalExport`).
+{
+  "login": "legomez", "exportedAt": "2026-10-23T10:00:00.000Z", "legalVersion": "2026-10-16",
+  "tables": {
+    "users": { "source": "42", "truncated": false, "rows": [{ "id": 1, "login": "legomez", … }] },
+    "help_bookings": { "source": "sanatorio", "truncated": false, "rows": [ … ] },
+    "usage_time": { "source": "sanatorio", "truncated": true, "rows": [ …5000 filas… ] }
+  }
+}
+
+`source` dice si la tabla está copiada de 42 o es de la app. `truncated: true`
+avisa de que la tabla pasaba del tope (5 000 filas) y solo van las primeras.
+Cada módulo apunta en `personal` qué tablas suyas tienen datos de alguien y en
+qué columnas; un test recorre el esquema y comprueba que no falta ninguna
+columna de persona. En las tablas «entre dos» (una reserva, una corrección, un
+aviso) cada fila va recortada a lo de quien descarga: ni la nota ni las
+etiquetas de la otra persona, ni el CSV de horas de otra, ni quién reaccionó.
+Las listas de logins (`therapy_checks.present`, `broadcasts.audience`) salen
+solo con el propio login. Los secretos (el del segundo factor, los códigos de
+asistencia escritos, el `hash` de los informes, las claves del staff) no salen
+nunca.
 
 ## Campus y preferencias
 GET /campuses

@@ -35,7 +35,16 @@ export function createFacilityModule(deps: FacilityDeps): FacilityModule {
 
   return {
     name: 'facility',
-    personal: [{ table: 'facility_reports', logins: ['login', 'resolved_by'] }],
+    personal: [
+      // Quien lo resolvió se lleva que lo resolvió; quién avisó y su nota son de quien avisó.
+      {
+        table: 'facility_reports',
+        logins: ['login', 'resolved_by'],
+        give: {
+          resolved_by: ['id', 'campus_id', 'category', 'place', 'resolved_at', 'resolved_by'],
+        },
+      },
+    ],
     service,
     routes: (app, { session }) => {
       /** `POST /facility/reports` → `FacilityReportInput`: avisa al staff de un problema. 201. */

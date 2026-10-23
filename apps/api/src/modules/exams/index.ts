@@ -74,7 +74,7 @@ export function createExamsModule(deps: ExamsModuleDeps): ExamsModule {
     sync,
     live,
     // Los intentos de examen de cada cual, por su id de 42 (como `project_users`).
-    personal: [{ table: 'exam_attempts', userIds: ['user_id'] }],
+    personal: [{ table: 'exam_attempts', userIds: ['user_id'], source: '42' }],
     routes: (app, { session }) => {
       /**
        * `GET /exams/stats?track=all|classic|next&kickoffs=AAAA-MM,…` → exámenes,

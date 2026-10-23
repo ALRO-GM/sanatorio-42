@@ -31,6 +31,9 @@ export function LegalPage({ signedIn }: { signedIn: boolean }) {
           <a className="button primary small" href={api.exportUrl()} download>
             <Icon name="abajo" size={14} /> {t('legal.export')}
           </a>
+          {/* El fichero se descarga directo del enlace: la web no lo lee, así
+              que avisa de antemano de cómo viene marcado. */}
+          <p className="hint">{t('legal.exportHint')}</p>
         </article>
       )}
       <article className="card">

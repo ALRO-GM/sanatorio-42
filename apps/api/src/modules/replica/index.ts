@@ -120,14 +120,24 @@ export function createReplicaModule(deps: ReplicaModuleDeps): ReplicaModule {
   return {
     name: 'replica',
     personal: [
-      { table: 'users', logins: ['login'] },
-      { table: 'campus_members', userIds: ['user_id'] },
-      { table: 'project_users', userIds: ['user_id'] },
-      { table: 'presence', userIds: ['user_id'] },
-      { table: 'corrections', logins: ['corrector', 'corrected'] },
-      { table: 'agenda_users', logins: ['login'] },
-      { table: 'user_tracks', logins: ['login'] },
-      { table: 'user_levels', logins: ['login'] },
+      // Lo copiado de 42 va marcado como tal: en la descarga se distingue de lo
+      // que la app sabe por sí misma (la cola y los votos son de la app).
+      { table: 'users', logins: ['login'], source: '42' },
+      { table: 'campus_members', userIds: ['user_id'], source: '42' },
+      { table: 'project_users', userIds: ['user_id'], source: '42' },
+      { table: 'presence', userIds: ['user_id'], source: '42' },
+      // La nota es de quien fue corregido; quien corrigió se lleva que corrigió.
+      {
+        table: 'corrections',
+        logins: ['corrector', 'corrected'],
+        source: '42',
+        give: {
+          corrector: ['id', 'campus_id', 'corrector', 'corrected', 'project_id', 'begin_at'],
+        },
+      },
+      { table: 'agenda_users', logins: ['login'], source: '42' },
+      { table: 'user_tracks', logins: ['login'], source: '42' },
+      { table: 'user_levels', logins: ['login'], source: '42' },
       { table: 'quota_queue', logins: ['login'] },
       { table: 'curriculum_votes', logins: ['login'] },
     ],

@@ -46,7 +46,22 @@ export function createDoubtsModule(deps: DoubtsModuleDeps): DoubtsModule {
       { table: 'doubt_answers', logins: ['author'] },
       { table: 'guides', logins: ['updated_by'] },
       { table: 'guide_proposals', logins: ['author'] },
-      { table: 'guide_changes', logins: ['proposer'] },
+      // Quien validó un cambio se lleva que lo validó; el texto es de quien lo propuso.
+      {
+        table: 'guide_changes',
+        logins: ['proposer', 'validator'],
+        give: {
+          validator: [
+            'id',
+            'campus_id',
+            'project_id',
+            'section',
+            'validator',
+            'accepted_at',
+            'revoked_at',
+          ],
+        },
+      },
       { table: 'guide_change_flags', logins: ['login'] },
       { table: 'guide_strikes', logins: ['login'] },
     ],
