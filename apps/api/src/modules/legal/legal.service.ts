@@ -22,7 +22,7 @@ import { parse } from '../../core/validation.js'
  * cambia algo de lo que dice `features/legal` en la web: entonces se vuelve a
  * pedir a todo el mundo.
  */
-export const LEGAL_VERSION = '2026-10-16'
+export const LEGAL_VERSION = '2026-10-23'
 
 export type LegalServiceOptions = {
   db: Db

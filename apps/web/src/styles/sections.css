@@ -1623,3 +1623,9 @@ dialog.layout-dialog.focus-dialog.wide {
   font-weight: 500;
   white-space: nowrap;
 }
+
+.anonymize {
+  display: grid;
+  gap: 0.5rem;
+  justify-items: start;
+}

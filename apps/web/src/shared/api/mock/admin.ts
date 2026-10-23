@@ -22,7 +22,7 @@ import {
 
 /** La versión de mentira de la privacidad y las condiciones, y si se ha aceptado. */
 const legal: { version: string; acceptedAt: string | null } = {
-  version: '2026-10-16',
+  version: '2026-10-23',
   acceptedAt: null,
 }
 
@@ -58,6 +58,7 @@ export const adminMock: Pick<
   | 'getLegal'
   | 'acceptLegal'
   | 'exportUrl'
+  | 'anonymizeMe'
   | 'getSecondFactor'
   | 'setupSecondFactor'
   | 'confirmSecondFactor'
@@ -213,6 +214,16 @@ export const adminMock: Pick<
     return URL.createObjectURL(
       new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }),
     )
+  },
+
+  // En la web de mentira no se anonimiza nada: solo se comprueba el login.
+  async anonymizeMe(confirm) {
+    await delay(80)
+
+    if (confirm.trim().toLowerCase() !== ME.login)
+      throw fail(400, 'Escribe tu login para confirmarlo')
+
+    return { changed: 0 }
   },
 
   // Segundo factor de mentira: cualquier código de seis cifras vale, menos 000000.

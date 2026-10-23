@@ -2,6 +2,7 @@ import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { localeOf, useI18n } from '../../shared/i18n'
 import { Icon } from '../../shared/ui/Icon'
+import { AnonymizeAccount } from './AnonymizeAccount'
 import { LegalDocument } from './LegalDocument'
 import { legalText } from './text'
 
@@ -13,6 +14,7 @@ export function LegalPage({ signedIn }: { signedIn: boolean }) {
   const { t, lang, tree } = useI18n()
   const status = useAsync(() => (signedIn ? api.getLegal() : Promise.resolve(null)), [signedIn])
   const accepted = status.data?.acceptedAt ?? null
+  const me = useAsync(() => (signedIn ? api.getMe() : Promise.resolve(null)), [signedIn])
 
   return (
     <section className="legal-page">
@@ -34,6 +36,7 @@ export function LegalPage({ signedIn }: { signedIn: boolean }) {
           {/* El fichero se descarga directo del enlace: la web no lo lee, así
               que avisa de antemano de cómo viene marcado. */}
           <p className="hint">{t('legal.exportHint')}</p>
+          {me.data !== undefined && me.data !== null && <AnonymizeAccount login={me.data.login} />}
         </article>
       )}
       <article className="card">

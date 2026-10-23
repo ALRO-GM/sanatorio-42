@@ -285,6 +285,8 @@ export type Api = {
   acceptLegal: (version: string) => Promise<LegalStatus>
   /** Dirección de la descarga de todos tus datos (JSON). */
   exportUrl: () => string
+  /** Anonimiza tu cuenta escribiendo tu login (`confirm`) y cierra la sesión. */
+  anonymizeMe: (confirm: string) => Promise<{ changed: number }>
   // Segundo factor del panel.
   getSecondFactor: () => Promise<SecondFactorStatus>
   setupSecondFactor: () => Promise<{ uri: string }>
