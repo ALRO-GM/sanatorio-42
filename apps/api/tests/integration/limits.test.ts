@@ -171,7 +171,14 @@ describe('cuando falla algo por dentro', () => {
     const route = await get(built, '/me/profile', cookie)
 
     expect(health.statusCode).toBe(503)
-    expect(json(health)).toMatchObject({ status: 'degraded', database: 'error' })
+    expect(json(health)).toMatchObject({
+      status: 'degraded',
+      database: 'error',
+      // Sin base no hay versión de esquema que leer; lo demás sigue diciéndose.
+      schema: { actual: null },
+      version: null,
+    })
+    expect(health.headers['x-request-id']).toBeDefined()
     // La comprobación ligera sigue respondiendo: no toca la base.
     expect((await get(built, '/health')).statusCode).toBe(200)
     expect(route.statusCode).toBe(500)

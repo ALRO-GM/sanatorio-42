@@ -16,9 +16,17 @@ export function registerErrorHandler(app: FastifyInstance): void {
     const mapped = mapError(error)
 
     if (mapped.status >= 500) {
-      request.log.error({ err: error }, 'error no controlado')
+      // Con el `requestId` explícito además del `reqId` que pino ya pone: es
+      // el mismo valor que la cabecera `x-request-id` de la respuesta, y así
+      // se busca por el mismo nombre que se le da a quien lo reporta.
+      request.log.error(
+        { err: error, requestId: request.id, status: mapped.status, route: request.url },
+        'error no controlado',
+      )
     } else {
-      request.log.warn({ err: error }, 'error de cliente')
+      // Un 401 sin sesión o un 400 por un dato mal escrito son del día a día:
+      // a `info`, para que el registro a `warn` solo tenga lo que va mal.
+      request.log.info({ err: error, status: mapped.status }, 'error de cliente')
     }
 
     if (error instanceof ApiError) {

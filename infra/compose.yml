@@ -18,6 +18,11 @@ services:
     build:
       context: ..
       dockerfile: infra/docker/Dockerfile
+      args:
+        # El commit que lleva dentro, para que `GET /health/db` lo diga y
+        # deploy.sh compruebe que responde lo que acaba de subir. Lo pone
+        # deploy.sh (`GIT_SHA=<sha> docker compose build app`).
+        GIT_SHA: ${GIT_SHA:-}
     restart: unless-stopped
     env_file: .env
     environment:

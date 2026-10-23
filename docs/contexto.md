@@ -21,16 +21,30 @@ que hacer, en orden. Este documento es el porqué; aquel, el qué.
 - Antes de dar algo por hecho: `npm run check` (tipos, lint, formato, código
   sin uso, duplicados, textos y tests).
 - Desplegar: `ssh ubuntu@51.170.34.214 "cd /opt/sanatorio && git pull -q
-  --ff-only && infra/scripts/backup.sh; infra/scripts/deploy.sh"`. Hacer el
-  `git pull` aparte evita reescribir `deploy.sh` mientras se ejecuta. El script
-  espera a la CI del commit (no despliega si falla) y vuelve a la imagen
-  anterior si la nueva no responde.
+  --ff-only && infra/scripts/deploy.sh"`. Hacer el `git pull` aparte evita
+  reescribir `deploy.sh` mientras se ejecuta. **La secuencia de `deploy.sh`**
+  (desde el 2026-10-23; detalle en `docs/deploy-oracle.md` §5): cerrojo
+  (`flock`, no corren dos a la vez) → espera a la etiqueta `ci-ok/<sha>` que
+  deja la CI (por `git ls-remote`, sin la API de GitHub; `ci-ko/<sha>` = CI en
+  rojo, para) → copia comprobada de la base (`backup.sh`, la hace él si no hay
+  una de menos de 10 min; sin copia no sigue) → imagen que funciona etiquetada
+  `previous` y construcción de la nueva con `GIT_SHA` → **migraciones aparte**
+  (`docker compose run --rm app node dist/cli/migrate.js`; si fallan, el
+  contenedor viejo sigue y se avisa) → `up -d` → hasta 180 s a que
+  `/health/db` devuelva el commit subido y `schema.actual === expected` → si
+  no, vuelta a `previous` y, si hubo migraciones, `restore.sh --yes <copia>`.
+  Avisos a Slack por `infra/scripts/notify-slack.sh` (webhook de `infra/.env`).
 - **Desplegar sin depender de la conexión** (desde el 2026-10-22, porque dos
   despliegues murieron al cortarse el SSH): `ssh ubuntu@51.170.34.214 "cd
-  /opt/sanatorio && git pull -q --ff-only && (setsid nohup sh -c
-  'infra/scripts/backup.sh; infra/scripts/deploy.sh' > infra/deploy.log 2>&1
-  < /dev/null &)" < /dev/null` (con el paréntesis, el SSH vuelve al momento) y mirar `tail -1 infra/deploy.log` hasta «Desplegado y
-  respondiendo».
+  /opt/sanatorio && git pull -q --ff-only && (setsid nohup
+  infra/scripts/deploy.sh > infra/deploy.log 2>&1 < /dev/null &)" < /dev/null`
+  (con el paréntesis, el SSH vuelve al momento) y mirar `tail -1
+  infra/deploy.log` hasta «Desplegado y respondiendo». Ya no hace falta
+  `backup.sh;` delante: `deploy.sh` hace la copia (y con `&&`, no `;`).
+- **Registro de la API** (desde el 2026-10-23): siempre encendido a `warn`
+  (`LOG_LEVEL`); un `500` deja una línea JSON con `reqId`, el mismo valor que la
+  cabecera `x-request-id` de la respuesta. Para buscar lo que cuenta alguien:
+  `docker logs --since 1h sanatorio-app-1 | grep <id>`. Sin cuerpos ni cookies.
 - **Máquina** (desde el 2026-10-22, 23:40): la misma instancia de Oracle
   (`VM.Standard.A1.Flex`, Madrid, IP 51.170.34.214) ampliada en el sitio a
   **4 OCPU, 24 GB y 200 GB de disco**, el máximo gratuito con pago por uso
@@ -39,10 +53,12 @@ que hacer, en orden. Este documento es el porqué; aquel, el qué.
   update`; la partición la creció cloud-init al reiniciar. No pedir más: se
   cobraría.
 - **Cupo de GitHub**: la API pública da 60 consultas por hora a la IP del
-  servidor. `deploy.sh` consulta la CI a los 4 minutos y luego una por minuto,
-  mira antes el cupo en `/rate_limit` (gratis) y, si solo queda el 10 % de
-  reserva, para y dice cuándo se renueva. Alberto pidió (2026-10-22) no pasar
-  del 90 %: agrupar los cambios en pocos despliegues.
+  servidor. Desde el 2026-10-23 `deploy.sh` **no la usa**: la CI publica el
+  veredicto como etiqueta de git (`ci-ok/<sha>` o `ci-ko/<sha>`, trabajo
+  `veredicto` de `ci.yml`, que borra las de más de 30 días) y el guion la mira
+  con `git ls-remote` por SSH. El cupo solo lo gasta leer el fallo de una CI
+  desde el portátil; sigue valiendo la regla de Alberto (2026-10-22) de no
+  pasar del 90 % y agrupar los cambios en pocos despliegues.
 - Los cambios de la web se prueban con `npm run dev:mock` y Chrome sin ventana.
 
 ## Estado a 2026-10-22

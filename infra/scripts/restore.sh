@@ -3,17 +3,30 @@
 # vuelve a arrancar.
 #
 #   infra/scripts/restore.sh infra/backups/sanatorio-20261010-040000.db.gz
+#   infra/scripts/restore.sh --yes <copia>     sin preguntar (lo usa deploy.sh
+#                                              para volver atrás sin nadie delante)
 set -eu
 
-[ $# -eq 1 ] || { echo "Uso: $0 <copia.db.gz>" >&2; exit 1; }
+yes=0
+if [ "${1:-}" = "--yes" ]; then
+  yes=1
+  shift
+fi
+
+[ $# -eq 1 ] || { echo "Uso: $0 [--yes] <copia.db.gz>" >&2; exit 1; }
 backup=$(realpath "$1")
 [ -f "$backup" ] || { echo "No existe $backup" >&2; exit 1; }
 
 cd "$(dirname "$0")/.."
 
-printf 'Se va a sustituir la base actual por %s. ¿Seguir? [s/N] ' "$backup"
-read -r answer
-[ "$answer" = "s" ] || exit 1
+if [ "$yes" != 1 ]; then
+  printf 'Se va a sustituir la base actual por %s. ¿Seguir? [s/N] ' "$backup"
+  read -r answer
+  [ "$answer" = "s" ] || exit 1
+fi
+
+# Una copia rota no sustituye a la base que hay.
+gzip -t "$backup"
 
 tmp=$(mktemp)
 gunzip -c "$backup" > "$tmp"
@@ -26,7 +39,9 @@ docker compose run --rm --no-deps -T --user root --entrypoint sh app \
 docker compose cp "$tmp" app:/data/sanatorio.db
 docker compose run --rm --no-deps -T --user root --entrypoint sh app \
   -c 'chown node:node /data/sanatorio.db'
-docker compose start app
+# `up` y no `start`: si mientras tanto ha cambiado la imagen (una vuelta atrás
+# del despliegue), el contenedor se rehace con la que toca.
+docker compose up -d app
 rm -f "$tmp"
 
 echo "Base restaurada."

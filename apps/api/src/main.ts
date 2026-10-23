@@ -9,7 +9,7 @@ import { buildApp } from './app/build-app.js'
 import { loadEnv } from './config/env.js'
 
 const env = loadEnv()
-const built = await buildApp({ env, logger: env.LOG_REQUESTS === 'true' })
+const built = await buildApp({ env })
 const { app } = built
 
 let closing = false

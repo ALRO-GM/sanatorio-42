@@ -1217,10 +1217,35 @@ mismo que vuelve a pasar (otro mensaje en el mismo chat) no crea otro: sube
 
 ## Salud del servicio
 
-Sin sesión: las usan Caddy y quien despliega.
+Sin sesión y sin datos personales: las usan Caddy, Docker y quien despliega.
 
-- GET /health → `{ "status": "ok" }` si el proceso responde.
-- GET /health/db → lo mismo si además la base contesta; `503` si no.
+- GET /health → `{ "status": "ok" }` si el proceso responde. No toca la base.
+- GET /health/db → `DbHealth`; `503` con `status: "degraded"` si la base no
+  contesta. Es el *smoke* del despliegue (`infra/scripts/deploy.sh` espera a
+  que `version` sea el commit subido y `schema.actual === schema.expected`):
+
+  ```json
+  {
+    "status": "ok",
+    "database": "ok",
+    "version": "0954f1b…",
+    "schema": { "expected": 66, "actual": 66 },
+    "syncAgeSeconds": 94
+  }
+  ```
+
+  `version` es el `GIT_SHA` que la imagen lleva dentro (`null` en local).
+  `schema` es la versión de esquema que espera el código y la que tiene la base
+  (`actual: null` si no se pudo leer). `syncAgeSeconds` son los segundos desde
+  lo último que se trajo de 42 para un campus seguido (puestos o cambios de
+  proyectos), o `null` si aún nada.
+
+Toda respuesta de la API lleva la cabecera `x-request-id` (12 caracteres al
+azar). Un error interno (`500`) deja una línea en el registro del contenedor con
+ese mismo valor en `reqId` y `requestId`: es lo que hay que pedir a quien cuenta
+un fallo para encontrarlo (`docker logs sanatorio-app-1 | grep <id>`). El
+registro va a nivel `warn` por defecto (`LOG_LEVEL`); los errores de cliente
+(4xx) van a `info` y no salen.
 
 ## Not-games por turnos: ajedrez (`modules/quiz/games`)
 
