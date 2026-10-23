@@ -18,6 +18,8 @@ import { DRAIN_EVERY_MS, createQuota } from './quota.js'
 import type { Quota } from './quota.js'
 import type { CampusesService } from './campuses.service.js'
 import { createPhotos, memoryPhotoStore } from './photos.js'
+import { createPoints } from './points.js'
+import type { Points } from './points.js'
 import type { PhotoStore } from './photos.js'
 import { createReplicaRepository } from './replica.repository.js'
 import type { ReplicaRepository } from './replica.repository.js'
@@ -52,6 +54,8 @@ export type ReplicaModule = AppModule & {
   curriculum: Curriculum
   /** La cuota de 42: quién puede gastarla y la cola de quien espera. */
   quota: Quota
+  /** El historial de puntos de evaluación de cada cual, bajo demanda. */
+  points: Points
 }
 
 export function createReplicaModule(deps: ReplicaModuleDeps): ReplicaModule {
@@ -90,6 +94,8 @@ export function createReplicaModule(deps: ReplicaModuleDeps): ReplicaModule {
     quota,
     ...given({ now: deps.now, log: deps.log }),
   })
+
+  const points = createPoints({ client: deps.client, quota, replica: repository })
 
   const photos = createPhotos({
     db: deps.db,
@@ -140,6 +146,7 @@ export function createReplicaModule(deps: ReplicaModuleDeps): ReplicaModule {
     sync,
     campuses,
     quota,
+    points,
     routes: (app, context) => {
       registerReplicaRoutes(app, context, { campuses, sync, quota, photos })
     },

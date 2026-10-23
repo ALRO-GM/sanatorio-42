@@ -49,6 +49,7 @@ import {
   thin,
 } from './capital.rules.js'
 import { CLICK_HISTORY_S, overClicked } from './clicks.rules.js'
+import { donatedPoints } from './donations.rules.js'
 import type { ClickSample } from './clicks.rules.js'
 import { hackerTitle, readSave, giftShare, seizedValue, wealthOf, verdict } from './cheat.rules.js'
 import { dayOf, isoAt } from '../../core/time.js'
@@ -155,11 +156,12 @@ export type ClickerServiceOptions = {
   admins?: () => Promise<readonly string[]>
   now?: () => number
   /**
-   * Puntos de evaluación que esa persona ha donado a la bolsa de 42, o `null`
-   * si ahora no se puede saber (sin cuota, 42 caído). Se pregunta como mucho
-   * una vez al día por persona (`DONATED_TTL_MS`).
+   * El historial de puntos de evaluación de esa persona en 42, o `null` si
+   * ahora no se puede saber (sin cuota). De ahí sale lo donado a la bolsa
+   * (`donations.rules.ts`). Se pregunta como mucho una vez al día por persona
+   * (`DONATED_TTL_MS`).
    */
-  donated?: (login: string) => Promise<number | null>
+  pointMoves?: (login: string) => Promise<readonly { reason: string; sum: number }[] | null>
 }
 
 /** Lo que tiene que escribir quien se defiende, como poco. */
@@ -328,13 +330,15 @@ export function createClickerService(options: ClickerServiceOptions) {
     const known = toNumber(found?.donated ?? 0)
     const at = typeof found?.donated_at === 'string' ? Date.parse(found.donated_at) : 0
 
-    if (options.donated === undefined || now() - at < DONATED_TTL_MS) return known
+    if (options.pointMoves === undefined || now() - at < DONATED_TTL_MS) return known
 
     // Sin cuota se vuelve a intentar en la siguiente visita; si 42 falla, mañana:
     // no se le pregunta en cada visita algo que no va a contestar.
-    const fresh = await options.donated(login).catch(() => 'failed' as const)
+    const moves = await options.pointMoves(login).catch(() => 'failed' as const)
 
-    if (fresh === null) return known
+    if (moves === null) return known
+
+    const fresh = moves === 'failed' ? moves : donatedPoints(moves)
 
     await db.execute({
       sql: 'UPDATE clicker SET donated = ?, donated_at = ? WHERE login = ?',

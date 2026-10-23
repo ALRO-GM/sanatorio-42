@@ -36,8 +36,10 @@ falta crear el destino), B9 (`externalHref`: solo `https://`) y B10
 (`paintable`: valores de paleta sencillos). B11 se acepta: son logins y fotos
 públicas de la intra, validados al leer, y el buscador los necesita.
 
-**Calidad de la API** (`calidad-api.md`): hechos los diez refactors salvo A2
-+ L4 (módulo `presence` y `wire()` en `composition.ts`): helpers de filas y
+**Calidad de la API** (`calidad-api.md`): hechos los diez refactors, también
+A2 + L4 (módulo `presence`, `createLate` con `wire()` al final de
+`composition.ts` en vez de diez referencias adelantadas, lo donado al Clicker
+leído por `replica.points` y la regla de imports también sobre `app/`): helpers de filas y
 `toJson`, `inList` con `json_each` (22 sitios), `Cache-Control` solo en el
 gancho global (46 líneas), `given()` y `Clock`/`Logger`, caché TTL compartida,
 guarda de reentrada en los `jobs`, `isoAt`/`dayOf`/`startOfDayIso` (22

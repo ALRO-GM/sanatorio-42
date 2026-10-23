@@ -19,6 +19,8 @@ const ALLOWED: Record<string, string> = {
   'modules/replica/curriculum.ts': 'rangos y plan de estudios de cada persona',
   'modules/replica/index.ts': 'cableado del módulo que copia 42',
   'modules/replica/photos.ts': 'las fotos; la cuota la mira quien lo llama (el bucle de copia)',
+  'modules/replica/points.ts':
+    'el historial de puntos (lo donado a la bolsa, para el Code Clicker)',
   'modules/replica/quota.ts': 'la cuota misma',
   'modules/replica/syncer.ts': 'el bucle que copia el campus',
   'modules/network/index.ts': 'cableado del módulo',
@@ -26,7 +28,7 @@ const ALLOWED: Record<string, string> = {
   'modules/exams/index.ts': 'cableado del módulo',
   'modules/exams/exams.sync.ts': 'la copia de los intentos de examen',
   'modules/exams/exams.live.ts': 'el examen en marcha: apuntados y notas',
-  'app/composition.ts': 'monta el cliente y los puntos donados (pendiente de mover a clicker)',
+  'app/composition.ts': 'recibe el cliente y se lo pasa a replica, network y exams',
 }
 
 /** Los que solo cablean no gastan cuota: no se les pide `quota`. */
@@ -36,6 +38,7 @@ const NO_QUOTA = new Set([
   'modules/replica/photos.ts',
   'modules/network/index.ts',
   'modules/exams/index.ts',
+  'app/composition.ts',
 ])
 
 function files(dir: string): string[] {
