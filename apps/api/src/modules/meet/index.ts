@@ -89,19 +89,18 @@ export function createMeetModule(deps: MeetServiceOptions): MeetModule {
         return reply.send(await service.checkin(await session.actor(request), request.body))
       })
 
+      /** `GET /events/report?from=&to=&login=` → las horas validadas con códigos. */
+      app.get('/events/report', async (request, reply) => {
+        return reply.send(await service.report(await session.actor(request), request.query))
+      })
+
       /**
-       * `GET /events/report?from=&to=&login=&format=` → las horas validadas con
-       * códigos. Con `format=csv`, como fichero para una hoja de cálculo.
+       * `POST /events/report/csv` → `{ from?, to?, login? }`: el mismo informe como
+       * fichero para una hoja de cálculo. Es `POST` porque emite un documento
+       * (y gasta del cupo diario): un enlace desde otra web no puede pedirlo.
        */
-      app.get<{ Querystring: { format?: string } }>('/events/report', async (request, reply) => {
-        const { format, ...query } = request.query
-        const actor = await session.actor(request)
-
-        if (format !== 'csv') {
-          return reply.send(await service.report(actor, query))
-        }
-
-        const issued = await service.reportCsv(actor, query)
+      app.post('/events/report/csv', async (request, reply) => {
+        const issued = await service.reportCsv(await session.actor(request), request.body ?? {})
 
         return reply
           .header('Content-Type', 'text/csv; charset=utf-8')

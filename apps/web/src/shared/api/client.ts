@@ -92,8 +92,16 @@ export const realApi: Api = {
   sendEventMessage: (message) => sendJson('POST', '/events/messages', message),
   getEventAttendance: (id) => getJson(`/events/attendance?id=${encodeURIComponent(id)}`),
   checkinEvent: (id, code) => sendJson('POST', '/events/checkin', { id, code }),
-  attendanceReportUrl: (query) =>
-    apiUrl(`/events/report?${new URLSearchParams({ ...query, format: 'csv' }).toString()}`),
+  attendanceReport: async (query) => {
+    const response = await fetchApi('/events/report/csv', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(query),
+    })
+    const named = /filename="([^"]+)"/.exec(response.headers.get('Content-Disposition') ?? '')
+
+    return { fileName: named?.[1] ?? 'horas-validadas.csv', data: await response.blob() }
+  },
   staffLogin: (key) => send('POST', '/auth/staff', { key }),
   getStaffMe: () => getJson('/staff/me'),
   getStaffFacility: () => getJson('/staff/facility'),

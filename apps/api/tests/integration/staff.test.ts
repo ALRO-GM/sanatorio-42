@@ -213,12 +213,10 @@ describe('cuenta de staff', () => {
 describe('el documento, de la descarga a la comprobación', () => {
   it('el CSV sale con el código en el nombre y el staff lo encuentra con él', async () => {
     const { built, admin, staff } = await withStaff()
-    const download = await send(
-      built,
-      'GET',
-      '/events/report?format=csv&from=2026-09-01&to=2026-09-30',
-      admin,
-    )
+    const download = await send(built, 'POST', '/events/report/csv', admin, {
+      from: '2026-09-01',
+      to: '2026-09-30',
+    })
     const code = String(download.headers['x-verification-code'])
 
     expect(download.statusCode).toBe(200)
@@ -248,7 +246,7 @@ describe('el documento, de la descarga a la comprobación', () => {
 
   it('el fichero tal cual es idéntico; con una cifra cambiada, no', async () => {
     const { built, admin, staff } = await withStaff()
-    const download = await send(built, 'GET', '/events/report?format=csv', admin)
+    const download = await send(built, 'POST', '/events/report/csv', admin, {})
     const code = String(download.headers['x-verification-code'])
     const same = await send(built, 'POST', `/staff/documents/${code}/compare`, staff, {
       content: download.body,
@@ -263,24 +261,18 @@ describe('el documento, de la descarga a la comprobación', () => {
 
   it('descargar dos veces lo mismo da el mismo código', async () => {
     const { built, admin } = await withStaff()
-    const first = await send(
-      built,
-      'GET',
-      '/events/report?format=csv&from=2026-09-01&to=2026-09-30',
-      admin,
-    )
-    const second = await send(
-      built,
-      'GET',
-      '/events/report?format=csv&from=2026-09-01&to=2026-09-30',
-      admin,
-    )
-    const other = await send(
-      built,
-      'GET',
-      '/events/report?format=csv&from=2026-09-02&to=2026-09-30',
-      admin,
-    )
+    const first = await send(built, 'POST', '/events/report/csv', admin, {
+      from: '2026-09-01',
+      to: '2026-09-30',
+    })
+    const second = await send(built, 'POST', '/events/report/csv', admin, {
+      from: '2026-09-01',
+      to: '2026-09-30',
+    })
+    const other = await send(built, 'POST', '/events/report/csv', admin, {
+      from: '2026-09-02',
+      to: '2026-09-30',
+    })
 
     expect(second.headers['x-verification-code']).toBe(first.headers['x-verification-code'])
     expect(other.headers['x-verification-code']).not.toBe(first.headers['x-verification-code'])
@@ -303,7 +295,7 @@ describe('el documento, de la descarga a la comprobación', () => {
 
   it('un fichero enorme para comparar se rechaza sin tumbar nada', async () => {
     const { built, admin, staff } = await withStaff()
-    const download = await send(built, 'GET', '/events/report?format=csv', admin)
+    const download = await send(built, 'POST', '/events/report/csv', admin, {})
     const code = String(download.headers['x-verification-code'])
     const big = await send(built, 'POST', `/staff/documents/${code}/compare`, staff, {
       content: 'x'.repeat(1_000_001),
@@ -321,11 +313,22 @@ describe('el documento, de la descarga a la comprobación', () => {
     const cookie = await built.login()
 
     expect(
-      (await send(built, 'GET', '/events/report?format=csv&login=all', cookie)).statusCode,
+      (await send(built, 'POST', '/events/report/csv', cookie, { login: 'all' })).statusCode,
     ).toBe(403)
     expect(
-      (await send(built, 'GET', '/events/report?format=csv&login=jdoe', cookie)).statusCode,
+      (await send(built, 'POST', '/events/report/csv', cookie, { login: 'jdoe' })).statusCode,
     ).toBe(403)
-    expect((await send(built, 'GET', '/events/report?format=csv', cookie)).statusCode).toBe(200)
+    expect((await send(built, 'POST', '/events/report/csv', cookie, {})).statusCode).toBe(200)
+  })
+
+  it('un GET no emite documentos: un enlace desde otra web no gasta el cupo', async () => {
+    const built = await app()
+    const cookie = await built.login()
+    const viaGet = await send(built, 'GET', '/events/report?format=csv', cookie)
+
+    expect(viaGet.statusCode).toBe(200)
+    expect(viaGet.headers['content-type']).toContain('application/json')
+    expect(viaGet.headers['x-verification-code']).toBeUndefined()
+    expect((await send(built, 'POST', '/events/report/csv', null, {})).statusCode).toBe(401)
   })
 })

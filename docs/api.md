@@ -44,7 +44,7 @@ Lo que vale para todas las rutas:
 
 ## Documentos verificables y staff
 
-Quien se descarga sus horas (`GET /events/report?format=csv`) puede entregar el
+Quien se descarga sus horas (`POST /events/report/csv`) puede entregar el
 fichero al staff de 42. Para que el staff sepa que no se ha retocado, hay cuentas
 de staff: no son de 42, las crea quien administra y **solo** llegan a las rutas
 de este apartado. Cualquier otra ruta les contesta `403`.
@@ -265,13 +265,16 @@ calendario (y va a ir) puede leer o escribir; el resto recibe `403`.
   `minutes` es `null` mientras falte uno: sin los dos no hay asistencia. `409`
   si no es el momento de ese código, `400` si el código no es de ese evento,
   `403` si ya has agotado los intentos.
-- GET /events/report?from=&to=&login=&format= → las horas validadas con códigos
+- GET /events/report?from=&to=&login= → las horas validadas con códigos
   en un periodo (días `YYYY-MM-DD`, los dos incluidos; por defecto, los últimos
   treinta): `{ "from", "to", "totalMinutes", "rows": [{ "login", "role", "eventId",
   "kind", "title", "day", "from", "to", "minutes", "scheduledMinutes", "with" }] }`.
   Sin `login`, las tuyas; las de otra persona o las de todo el mundo
-  (`login=all`), solo quien administra. Con `format=csv` es un fichero para una
-  hoja de cálculo, con las horas del campus. El fichero es un **documento
+  (`login=all`), solo quien administra.
+- POST /events/report/csv → `{ "from"?, "to"?, "login"? }`, lo mismo que la
+  anterior: el informe como fichero para una hoja de cálculo, con las horas del
+  campus. Es `POST` porque emite un documento y gasta del cupo diario: un
+  enlace desde otra web no puede pedirlo. El fichero es un **documento
   verificable**: se guarda una copia con un código de cuatro caracteres, que va
   en el nombre (`horas-validadas_<login>_<desde>_<hasta>_<CÓDIGO>.csv`), en la
   cabecera `X-Verification-Code` y en la última línea
