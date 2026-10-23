@@ -147,3 +147,24 @@ respuesta a quien la pidió):
    `from` del bloque en `shared/layout/registry.ts`.
 4. **Importancia**: su fila en la tabla de arriba, con el porqué.
 5. **Uso**: su fila en la valoración, con lo que se sabe al terminarla.
+
+## Piezas comunes de la web
+
+Antes de escribir una a mano, se usa la que ya existe en `apps/web/src/shared/`:
+
+- **Elegir entre pocas opciones**: con 4 opciones o menos y sitio en la fila,
+  pastillas (`ui/PillGroup`; `kind="tabs"` si cambian lo que hay debajo). Con
+  más opciones, o dentro de un formulario, un `<select>`. Un desplegable de dos
+  opciones cuesta dos clics donde dos pastillas cuestan uno.
+- **Ventanas**: `ui/Modal` (se cierra con su botón, Escape y el fondo; las
+  obligatorias con `cancelable={false}`). Para preguntar antes de algo que no se
+  deshace, `ui/useConfirm`, nunca `window.confirm`.
+- **Cargar datos**: `ui/Async` (cargando, error con reintento y vacío) o, si no
+  encaja, `ErrorNote`: un fallo nunca deja la sección en blanco sin decir nada.
+- **Clasificaciones**: `ui/RankingList` y `withMe` (tu fila siempre, con «tú»
+  en texto). **Personas buscadas**: `ui/PeopleResults` y `usePeopleKeys`.
+- **Tiempo**: `hooks/useNow` (un reloj compartido por cadencia) y `time.ts`
+  (`clock`, `durationText`). **Sondeo de lo que se mira**: `hooks/usePolling`.
+- **Fechas y números**: `i18n/useFormat` (o `formatsFor(lang)` fuera de un
+  componente), en el idioma elegido. **Plurales**: `tn(clave, n)` con las claves
+  `clave.one` y `clave.many`.
