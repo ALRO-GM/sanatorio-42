@@ -17,6 +17,7 @@ import type { Db } from '../../core/db/database.js'
 import { nowIso } from '../../core/db/database.js'
 import { toNumber, toText } from '../../core/db/rows.js'
 import { inList, listArg } from '../../core/db/sql.js'
+import { createTtlCache } from '../../core/ttl-cache.js'
 import { avatarUrlOf } from '../../integrations/forty-two/avatar.js'
 import { PROJECT_STATUS } from './replica.domain.js'
 import type {
@@ -79,6 +80,11 @@ function plain(text: string): string {
 }
 
 export function createReplicaRepository(db: Db) {
+  /** Ver `searchUsers`: la lista de gente activa, por campus, durante un minuto. */
+  const searchable = createTtlCache<
+    { login: string; name: string | null; image: string | null; here: boolean }[]
+  >({ ttlMs: 60_000, maxEntries: 20 })
+
   /** Ejecuta las sentencias en lotes atómicos. */
   async function run(statements: InStatement[]): Promise<void> {
     for (let index = 0; index < statements.length; index += BATCH_SIZE) {
@@ -750,21 +756,26 @@ export function createReplicaRepository(db: Db) {
       limit: number,
     ): Promise<{ login: string; name: string | null; image: string | null }[]> {
       const wanted = plain(text)
-      const result = await db.execute({
-        sql: `SELECT u.login, u.name, u.image,
-                     EXISTS (SELECT 1 FROM campus_members m
-                             WHERE m.user_id = u.id AND m.campus_id = ?) AS here
-              FROM users u WHERE u.active = 1`,
-        args: [campusId],
-      })
+      // La gente activa, ya normalizada, se recuerda un minuto por campus: cada
+      // tecla del buscador no vuelve a leer y ordenar miles de filas.
+      const people = await searchable.get(String(campusId), async () => {
+        const result = await db.execute({
+          sql: `SELECT u.login, u.name, u.image,
+                       EXISTS (SELECT 1 FROM campus_members m
+                               WHERE m.user_id = u.id AND m.campus_id = ?) AS here
+                FROM users u WHERE u.active = 1`,
+          args: [campusId],
+        })
 
-      return result.rows
-        .map((row) => ({
+        return result.rows.map((row) => ({
           login: toText(row.login),
           name: typeof row.name === 'string' && row.name !== '' ? row.name : null,
           image: typeof row.image === 'string' ? row.image : null,
           here: toNumber(row.here) === 1,
         }))
+      })
+
+      return people
         .filter(
           (person) =>
             plain(person.login).includes(wanted) || plain(person.name ?? '').includes(wanted),

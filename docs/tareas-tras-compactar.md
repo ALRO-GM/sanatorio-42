@@ -285,15 +285,24 @@ recurrente. Hecho el 22-23 de octubre:
       de evento a medias sin 500.
 - [x] Tanda 3 (desplegada): Slack escapado, `SESSION_SECRET` ≥ 32, salas
       visibles solo para su campus o su gente.
-- [ ] **En curso con agentes (worktrees, sin push)**: textos (275 filas,
-      glosario, contextos), infra (logger a `warn` + `x-request-id`, migración
-      aparte con vuelta atrás, etiqueta `ci-ok/<sha>`, `/health/db` con sha),
-      datos personales (M6). Al volver: unir de una en una, `npm run check`,
-      un push y un despliegue (skill `paralelo`).
-- [ ] Después, por orden del `README.md` de la revisión: ca/eu de `gestion`,
-      `legal` y `juego`; los diez refactors de la API; los diez de la web;
-      tests (mínimos de la web, `docs/api.md` ↔ rutas); bajos de seguridad
-      restantes (B1 `POST` del documento, B3, B4, B6-B8); observabilidad.
+- [x] Unidas y desplegadas (23-oct por la mañana): textos (es/en + ca/eu
+      completos), operación (logger a warn + x-request-id, migración aparte
+      con vuelta atrás, `ci-ok/<sha>`, `/health/db` con sha), datos
+      personales (M6), y los refactors de la API (helpers de filas, `inList`,
+      caché TTL, guarda de jobs, `isoAt`/`given`, regla de 42, índice y
+      LIMIT en estadísticas), B4 (bloqueos cortan DMs), hooks de git y
+      `check:quick` (`npm run hooks`). El estado por hallazgo está en
+      `docs/revision-2026-10/README.md`.
+- [ ] **En curso con un agente**: base reutilizable de la web (los diez de
+      `calidad-web.md`), rama `worktree-agent-a6d0ea6693a137ffe`. Al volver:
+      unir, `npm run check`, push y despliegue.
+- [ ] Después: B1 (documento de horas por POST; toca `HoursReport.tsx`, el
+      cliente y la ruta), B3 (búsqueda de personas con LIKE e índice), B6-B8,
+      bajos de juegos, A2+L4 (`presence` y `wire()`), tests (mínimos de la
+      web, `docs/api.md` ↔ rutas, recorridos), observabilidad (Slack de
+      despliegues ya avisa si hay webhook; falta monitor externo y errores de
+      cliente), textos que tocan código (claves repetidas, glifos), M7
+      (borrado de cuenta: decisión de Alberto).
 
 ## 3. A medias o por confirmar con Alberto
 
