@@ -58,3 +58,12 @@ export function decodePart(part: string): string | null {
     return null
   }
 }
+
+/**
+ * Una dirección de fuera que llega de la API (un evento de 42), solo si es
+ * `https://`. Hoy la API siempre las hace así; esto es por si un día no, para
+ * que un `javascript:` nunca acabe en un enlace.
+ */
+export function externalHref(url: string | null): string | null {
+  return url !== null && /^https:\/\//i.test(url) ? url : null
+}

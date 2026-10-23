@@ -79,8 +79,16 @@
 
   if (vars !== null && typeof vars === 'object') {
     Object.keys(vars).forEach(function (name) {
-      // Solo variables de CSS: lo guardado no puede tocar otra cosa.
-      if (/^--[a-z0-9-]+$/.test(name)) root.style.setProperty(name, String(vars[name]))
+      // Solo variables de CSS con un valor sencillo (como `paintable` de
+      // `shared/theme`): lo guardado no puede tocar otra cosa.
+      var value = String(vars[name])
+
+      if (
+        /^--[a-z0-9-]+$/.test(name) &&
+        /^[#\w\s.,%()+\-/]{1,100}$/.test(value) &&
+        !/url\s*\(/i.test(value)
+      )
+        root.style.setProperty(name, value)
     })
   }
 })()

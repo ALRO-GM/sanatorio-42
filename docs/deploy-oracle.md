@@ -206,7 +206,12 @@ la ruta de la última buena queda en `infra/backups/ultima`.
 
 El cloud-init programa una cada noche a las 04:00. Esas copias están en la
 misma máquina que la base: para sacarlas fuera, configura `rclone` con un bucket
-(Oracle Object Storage tiene capa gratuita) y define `BACKUP_REMOTE` en el cron.
+(Oracle Object Storage tiene capa gratuita) y define `BACKUP_REMOTE` en el cron,
+junto con `BACKUP_PASSPHRASE_FILE`: un fichero solo legible por el usuario del
+cron con la frase (`openssl rand -base64 48 > ~/.sanatorio-backup-frase && chmod
+600 …`). Lo que sube va cifrado con ella (AES-256, gpg) y sin ella no sube nada.
+Guarda la frase también fuera de la máquina: sin ella las copias de fuera no se
+pueden abrir.
 
 Lo que importa de la copia es lo propio (guardias, XP, grupos, dudas,
 pizarras). La réplica de 42 se puede volver a bajar.

@@ -29,8 +29,12 @@ apunta derrota, cerrojo por persona en el Clicker (`plus`, `choose`, `save`,
 `pardon`, `sanction`), ids de texto del curso de git con `slugParam`, el tramo
 del Pomodoro de al menos cinco personas, nombres de demostración de una lista
 cerrada (`TourName`; de paso, `helpStats`, `gitCourse` y `notGames` ya pueden
-guardar su velocidad) y tope de mil claves de uso por persona. Pendientes:
-B6–B11.
+guardar su velocidad) y tope de mil claves de uso por persona. También B6
+(veinte análisis nuevos de la red por persona y minuto), B7 (cuarenta envíos
+de estadística por persona y minuto), B8 (lo que sale de la máquina, cifrado;
+falta crear el destino), B9 (`externalHref`: solo `https://`) y B10
+(`paintable`: valores de paleta sencillos). B11 se acepta: son logins y fotos
+públicas de la intra, validados al leer, y el buscador los necesita.
 
 **Calidad de la API** (`calidad-api.md`): hechos los diez refactors salvo A2
 + L4 (módulo `presence` y `wire()` en `composition.ts`): helpers de filas y

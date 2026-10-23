@@ -17,6 +17,8 @@ import type {
 import { z } from 'zod'
 
 import type { Actor } from '../../core/actor.js'
+import { domainError } from '../../core/errors.js'
+import { createRateLimit } from '../../core/rate-limit.js'
 import { createTtlCache } from '../../core/ttl-cache.js'
 import { parse } from '../../core/validation.js'
 import type { ReplicaRepository } from '../replica/index.js'
@@ -37,6 +39,9 @@ const CACHE_TTL_MS = 60_000
 
 /** Cuánto vale el catálogo (años de llegada, proyectos): cambia con cuentagotas. */
 const CATALOGUE_TTL_MS = 5 * 60_000
+
+/** Análisis que cada persona puede pedir calcular de nuevo en un minuto. */
+const FRESH_PER_MINUTE = 20
 
 /** Análisis distintos que se recuerdan a la vez. */
 const CACHE_SIZE = 12
@@ -167,7 +172,13 @@ export function createNetworkService(options: NetworkServiceOptions) {
   })
 
   /** El análisis de unos filtros, del caché si es reciente. */
+  // Análisis nuevos (los que no están ya calculados) por persona y minuto. Las
+  // fechas y los filtros los elige quien pregunta: sin esto, variándolos se
+  // podría hacer recalcular la red entera sin parar.
+  const fresh = createRateLimit({ max: FRESH_PER_MINUTE, windowMs: 60_000, now })
+
   const analysisFor = (
+    actor: Actor,
     campusId: readonly number[],
     from: string | null,
     to: string | null,
@@ -177,6 +188,13 @@ export function createNetworkService(options: NetworkServiceOptions) {
     analyses.get(
       `${campusId.join(',')}|${from ?? ''}|${to ?? ''}|${projectId ?? ''}|${passed ?? ''}`,
       async () => {
+        if (!fresh.hit(actor.login)) {
+          throw domainError(
+            'rate_limited',
+            'Demasiados análisis distintos seguidos: espera un minuto',
+          )
+        }
+
         const [rows, perCampus, given, received, timeline] = await Promise.all([
           corrections.pairs({ campusId, from, to, projectId, passed }),
           Promise.all(campusId.map((id) => replica.membersOf(id))),
@@ -272,7 +290,7 @@ export function createNetworkService(options: NetworkServiceOptions) {
         available,
         names,
       ] = await Promise.all([
-        analysisFor(campuses, from, to, projectId, passedOf(query.verdict)),
+        analysisFor(actor, campuses, from, to, projectId, passedOf(query.verdict)),
         catalogueOf(campuses),
         sync.status(actor.campusId),
         known.get('all', () => corrections.campuses()),
@@ -398,6 +416,7 @@ export function createNetworkService(options: NetworkServiceOptions) {
     async strictest(actor: Actor, input: unknown): Promise<NetworkStrictest> {
       const query = parse(strictSchema, input)
       const { analysis, members, given } = await analysisFor(
+        actor,
         await campusesOf(actor, query.campuses),
         query.from ?? null,
         endOf(query.to),

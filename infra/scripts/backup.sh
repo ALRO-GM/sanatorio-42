@@ -16,6 +16,10 @@
 # Si existe BACKUP_REMOTE (un destino de rclone, p. ej. un bucket de Oracle
 # Object Storage: `oci:sanatorio-backups`), la copia se sube también allí. Una
 # copia que vive en la misma máquina que la base no protege de perder la máquina.
+# Lo que sale de la máquina sale cifrado (AES-256 con gpg) con la frase de
+# BACKUP_PASSPHRASE_FILE; sin ella no se sube nada. Para restaurar una de fuera:
+#   gpg --batch --pinentry-mode loopback --passphrase-file <frase> \
+#     -o sanatorio-….db.gz -d sanatorio-….db.gz.gpg
 set -eu
 
 cd "$(dirname "$0")/.."
@@ -86,7 +90,16 @@ echo "Copia guardada y comprobada en infra/$file.gz"
 
 if [ -n "${BACKUP_REMOTE:-}" ] && [ "$guard_level" -ge 90 ]; then
   echo "Corte por los límites del plan: la copia no se sube a $BACKUP_REMOTE."
+elif [ -n "${BACKUP_REMOTE:-}" ] && ! [ -r "${BACKUP_PASSPHRASE_FILE:-}" ]; then
+  # La base lleva datos personales: sin cifrar no sale de aquí.
+  # Se avisa sin fallar: la copia local está hecha y un despliegue no debe
+  # pararse por esto.
+  echo "Sin BACKUP_PASSPHRASE_FILE legible: la copia no se sube a $BACKUP_REMOTE." >&2
 elif [ -n "${BACKUP_REMOTE:-}" ]; then
-  rclone copy "$file.gz" "$BACKUP_REMOTE"
-  echo "Copia subida a $BACKUP_REMOTE"
+  gpg --batch --yes --pinentry-mode loopback --passphrase-file "$BACKUP_PASSPHRASE_FILE" \
+    --symmetric --cipher-algo AES256 -o "$file.gz.gpg" "$file.gz"
+  # El cifrado sube, y aquí se queda solo el de siempre.
+  rclone copy "$file.gz.gpg" "$BACKUP_REMOTE"
+  rm -f "$file.gz.gpg"
+  echo "Copia cifrada y subida a $BACKUP_REMOTE"
 fi
