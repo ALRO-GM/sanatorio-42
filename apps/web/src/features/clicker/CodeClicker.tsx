@@ -9,6 +9,7 @@ import { useStill } from '../../shared/still'
 import { Avatar } from '../../shared/ui/Avatar'
 import { PillGroup } from '../../shared/ui/PillGroup'
 import { withMe } from '../../shared/ui/RankingList'
+import { useConfirm } from '../../shared/ui/useConfirm'
 import { BigKey, Tile } from './art'
 import { CardView } from './Card'
 import { cardFor } from './cards'
@@ -154,6 +155,7 @@ export function CodeClicker({
     [texts],
   )
   const egg = useEgg()
+  const confirm = useConfirm()
   // Con el pace en riesgo, media hora al día (no cuenta en segundo plano ni viendo otra).
   const limit = usePlayLimit(!background && spectate === undefined)
   const still = useStill()
@@ -1106,10 +1108,17 @@ export function CodeClicker({
                     type="button"
                     className="cc-recompile"
                     onClick={() => {
-                      if (window.confirm(ui('recompileAsk', { n: prestigeAfter(current) }))) {
-                        game.current = recompile(current, Date.now())
-                        save(true)
-                      }
+                      void confirm
+                        .ask({
+                          body: ui('recompileAsk', { n: prestigeAfter(current) }),
+                          okText: ui('recompile'),
+                          danger: true,
+                        })
+                        .then((ok) => {
+                          if (!ok || game.current === null) return
+                          game.current = recompile(game.current, Date.now())
+                          save(true)
+                        })
                     }}
                   >
                     {ui('recompile')}
@@ -1353,6 +1362,7 @@ export function CodeClicker({
           {...(touch.current && card.price !== undefined ? { hint: ui('cardTouch') } : {})}
         />
       )}
+      {confirm.dialog}
     </section>
   )
 }

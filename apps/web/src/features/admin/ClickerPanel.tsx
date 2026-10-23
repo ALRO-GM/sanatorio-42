@@ -9,6 +9,7 @@ import { useFormat } from '../../shared/i18n/useFormat'
 import { DataTable } from '../../shared/ui/DataTable'
 import { durationText } from '../../shared/time'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { useConfirm } from '../../shared/ui/useConfirm'
 import { PillGroup } from '../../shared/ui/PillGroup'
 import { CapitalChart } from '../clicker/CapitalChart'
 import { CapitalHistory } from '../clicker/CapitalHistory'
@@ -43,13 +44,28 @@ export function ClickerPanel({ me }: { me: string }) {
   const when = { format: dateTime }
   const one = data?.players.find((player) => player.login === login)
   const action = useAction()
+  const confirm = useConfirm()
   const pardon = async (id: number): Promise<void> => {
-    if (!window.confirm(t('admin.clicker.pardonAsk'))) return
+    if (
+      !(await confirm.ask({
+        body: t('admin.clicker.pardonAsk'),
+        okText: t('admin.clicker.pardon'),
+      }))
+    )
+      return
     if (await action.run(() => api.pardonClickerCheat(id))) await reload()
   }
   /** Lo que se decide sobre un salto. La trampa requisa todo: se pregunta antes. */
   const review = async (id: number, verdict: ClickerVerdict): Promise<void> => {
-    if (verdict === 'cheat' && !window.confirm(t('admin.clicker.cheatAsk'))) return
+    if (
+      verdict === 'cheat' &&
+      !(await confirm.ask({
+        body: t('admin.clicker.cheatAsk'),
+        okText: t('admin.clicker.verdict.cheat'),
+        danger: true,
+      }))
+    )
+      return
     if (await action.run(() => api.reviewClickerAlert(id, verdict))) await reload()
   }
 
@@ -410,6 +426,7 @@ export function ClickerPanel({ me }: { me: string }) {
           )}
         </>
       )}
+      {confirm.dialog}
     </section>
   )
 }

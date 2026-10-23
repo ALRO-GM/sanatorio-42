@@ -9,6 +9,7 @@ import { useFormat } from '../../shared/i18n/useFormat'
 import { DataTable } from '../../shared/ui/DataTable'
 import type { Column } from '../../shared/ui/DataTable'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { useConfirm } from '../../shared/ui/useConfirm'
 import { PillGroup } from '../../shared/ui/PillGroup'
 import { Icon } from '../../shared/ui/Icon'
 import { directChatId, openChat } from '../notices/conversations'
@@ -37,6 +38,7 @@ export function CheatsPanel({ me, onWatch }: CheatsPanelProps) {
   const [why, setWhy] = useState<string | null>(null)
   const [writing, setWriting] = useState(false)
   const action = useAction()
+  const confirm = useConfirm()
   const { compact: compactOf, dateTime } = useFormat()
   const compact = { format: compactOf }
   const when = { format: dateTime }
@@ -54,7 +56,13 @@ export function CheatsPanel({ me, onWatch }: CheatsPanelProps) {
   const whys = [...new Set(data.entries.map((entry) => entry.why))]
 
   const pardon = async (id: number): Promise<void> => {
-    if (!window.confirm(t('admin.clicker.pardonAsk'))) return
+    if (
+      !(await confirm.ask({
+        body: t('admin.clicker.pardonAsk'),
+        okText: t('admin.clicker.pardon'),
+      }))
+    )
+      return
     if (await action.run(() => api.pardonClickerCheat(id))) await reload()
   }
 
@@ -279,6 +287,7 @@ export function CheatsPanel({ me, onWatch }: CheatsPanelProps) {
           />
         )}
       </article>
+      {confirm.dialog}
     </>
   )
 }

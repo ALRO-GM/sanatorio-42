@@ -11,6 +11,7 @@ import { api } from '../../shared/api'
 import { useAction, useAsync } from '../../shared/hooks/useAsync'
 import { localeOf, useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { useConfirm } from '../../shared/ui/useConfirm'
 import { PillGroup } from '../../shared/ui/PillGroup'
 import { Icon } from '../../shared/ui/Icon'
 import { INBOX_VIEWS, REPORT_REASONS, ticketsIn } from './inbox'
@@ -77,6 +78,7 @@ export function InboxTab() {
 function TicketRow({ ticket, onDone }: { ticket: Ticket; onDone: () => void }) {
   const { t, lang } = useI18n()
   const { busy, error, run } = useAction()
+  const confirm = useConfirm()
   const [answer, setAnswer] = useState(ticket.answer ?? '')
 
   const send = async (status: 'answered' | 'closed'): Promise<void> => {
@@ -137,16 +139,21 @@ function TicketRow({ ticket, onDone }: { ticket: Ticket; onDone: () => void }) {
           className="link"
           disabled={busy}
           onClick={() => {
-            if (window.confirm(t('admin.inbox.removeConfirm'))) {
-              void run(() => api.removeTicket(ticket.id)).then((ok) => {
-                if (ok) onDone()
+            void confirm
+              .ask({
+                body: t('admin.inbox.removeConfirm'),
+                okText: t('admin.inbox.remove'),
+                danger: true,
               })
-            }
+              .then(async (yes) => {
+                if (yes && (await run(() => api.removeTicket(ticket.id)))) onDone()
+              })
           }}
         >
           <Icon name="papelera" size={14} /> {t('admin.inbox.remove')}
         </button>
       </div>
+      {confirm.dialog}
     </li>
   )
 }

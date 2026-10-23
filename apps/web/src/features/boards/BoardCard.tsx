@@ -8,6 +8,7 @@ import { useI18n } from '../../shared/i18n'
 import { Avatar } from '../../shared/ui/Avatar'
 import { ReportButton } from '../admin/ReportButton'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { useConfirm } from '../../shared/ui/useConfirm'
 import { BoardForm } from './BoardForm'
 import { dayKey, hhmm } from '../../shared/day'
 
@@ -21,6 +22,7 @@ type BoardCardProps = {
 export function BoardCard({ board, featured, onChange }: BoardCardProps) {
   const { t } = useI18n()
   const { busy, error, run } = useAction()
+  const confirm = useConfirm()
   const [editing, setEditing] = useState(false)
   const start = new Date(board.startsAt)
   const past = Date.parse(board.endsAt) <= Date.now()
@@ -113,9 +115,13 @@ export function BoardCard({ board, featured, onChange }: BoardCardProps) {
             className="link"
             disabled={busy}
             onClick={() => {
-              if (window.confirm(t('cal.removeAsk', { host: board.host }))) {
-                void act(() => api.cancelBoard(board.id))
-              }
+              void confirm
+                .ask({
+                  body: t('cal.removeAsk', { host: board.host }),
+                  okText: t('cal.remove'),
+                  danger: true,
+                })
+                .then((ok) => (ok ? act(() => api.cancelBoard(board.id)) : undefined))
             }}
           >
             {t('cal.remove')}
@@ -125,6 +131,7 @@ export function BoardCard({ board, featured, onChange }: BoardCardProps) {
       {!board.mine && (
         <ReportButton target={`board:${board.id}`} summary={`${board.host}: ${board.title}`} />
       )}
+      {confirm.dialog}
     </article>
   )
 }

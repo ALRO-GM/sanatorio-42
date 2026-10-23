@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import es from 'virtual:textos/es'
 import { afterEach, describe, expect, it, vi } from 'vitest'
@@ -23,7 +23,6 @@ describe('Abrir un grupo de terapia', () => {
     const create = vi.spyOn(api, 'createGroup')
     const day = dayKey(new Date(Date.now() + 3 * 24 * 3_600_000))
 
-    vi.spyOn(window, 'confirm').mockReturnValue(true)
     localStorage.setItem('sanatorio_lang', 'es')
     render(
       <I18nProvider>
@@ -54,6 +53,13 @@ describe('Abrir un grupo de terapia', () => {
       'Clúster 1 · fila 2',
     )
     await user.click(open)
+    // Se dice cuándo es y cuánto falta, y se confirma en la ventana de la web.
+    await user.click(
+      within(await screen.findByRole('dialog', { name: text('confirm.title') })).getByRole(
+        'button',
+        { name: text('therapy.create') },
+      ),
+    )
 
     await waitFor(() => {
       expect(saved).toHaveBeenCalledOnce()

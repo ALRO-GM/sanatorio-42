@@ -5,6 +5,7 @@ import { api } from '../../shared/api'
 import { useAction } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { useConfirm } from '../../shared/ui/useConfirm'
 
 /**
  * Una sanción a mano en Code Clicker: le deja el código que se diga y, si se
@@ -16,11 +17,19 @@ export function SanctionForm({ login, onDone }: { login: string; onDone: () => v
   const [wipe, setWipe] = useState(true)
   const [note, setNote] = useState('')
   const action = useAction()
+  const confirm = useConfirm()
 
   const submit = async (event: SyntheticEvent): Promise<void> => {
     event.preventDefault()
 
-    if (!window.confirm(t('admin.clicker.sanctionAsk', { login }))) return
+    if (
+      !(await confirm.ask({
+        body: t('admin.clicker.sanctionAsk', { login }),
+        okText: t('admin.clicker.sanctionSend'),
+        danger: true,
+      }))
+    )
+      return
     if (
       await action.run(() =>
         api.sanctionClicker({ login, code: Number(code), wipe, note: note.trim() }),
@@ -75,6 +84,7 @@ export function SanctionForm({ login, onDone }: { login: string; onDone: () => v
           {t('admin.clicker.sanctionSend')}
         </button>
       </div>
+      {confirm.dialog}
     </form>
   )
 }

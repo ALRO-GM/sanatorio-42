@@ -8,6 +8,7 @@ import { useAction } from '../../shared/hooks/useAsync'
 import { localeOf, useI18n } from '../../shared/i18n'
 import { lastDay, untilText } from '../../shared/until'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { useConfirm } from '../../shared/ui/useConfirm'
 import { PillGroup } from '../../shared/ui/PillGroup'
 import { clusterName } from '../map/ClusterMapView'
 import { SeatPicker } from '../map/SeatPicker'
@@ -82,6 +83,7 @@ const MAX_DATES = 14
 export function GroupForm({ projects, defaultProject, group, onCancel, onSaved }: GroupFormProps) {
   const { t, lang } = useI18n()
   const { busy, error, run } = useAction()
+  const confirm = useConfirm()
   const [form, setForm] = useState<GroupFormState>(() =>
     group === undefined
       ? {
@@ -228,7 +230,13 @@ export function GroupForm({ projects, defaultProject, group, onCancel, onSaved }
         in: untilText(startsAt.getTime() - Date.now(), t),
       })
 
-      if (!window.confirm(text)) return
+      if (
+        !(await confirm.ask({
+          body: text,
+          okText: t(group === undefined ? 'therapy.create' : 'therapy.saveEdit'),
+        }))
+      )
+        return
     }
 
     const ok = await run(() =>
@@ -422,6 +430,7 @@ export function GroupForm({ projects, defaultProject, group, onCancel, onSaved }
           {t('therapy.cancel')}
         </button>
       </div>
+      {confirm.dialog}
     </form>
   )
 }
