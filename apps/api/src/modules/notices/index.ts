@@ -42,7 +42,15 @@ export function createNoticesModule(deps: NoticesModuleDeps): NoticesModule {
 
   return {
     name: 'notices',
-    personal: [{ table: 'notices', logins: ['login'] }],
+    personal: [
+      // El aviso es de quien lo recibe; quien lo provocó se lleva que lo
+      // provocó, no el texto que leyó la otra persona.
+      {
+        table: 'notices',
+        logins: ['login', 'from_login'],
+        give: { from_login: ['id', 'kind', 'from_login', 'created_at'] },
+      },
+    ],
     service,
     routes: (app, { session }) => {
       /**

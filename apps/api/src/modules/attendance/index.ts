@@ -17,8 +17,15 @@ export function createAttendanceModule(deps: AttendanceServiceOptions): Attendan
   return {
     name: 'attendance',
     personal: [
-      { table: 'event_attendance', logins: ['login', 'host'] },
-      { table: 'event_checkins', logins: ['login'] },
+      // Quien organizó se lleva que hubo asistencia a su evento, no quién ni a
+      // qué hora: eso es de cada asistente.
+      {
+        table: 'event_attendance',
+        logins: ['login', 'host'],
+        give: { host: ['event_id', 'host', 'campus_id', 'title', 'starts_at', 'ends_at'] },
+      },
+      // El código escrito es el del evento: con él se validaría a otra persona.
+      { table: 'event_checkins', logins: ['login'], omit: ['code'] },
     ],
     service,
     stores: [

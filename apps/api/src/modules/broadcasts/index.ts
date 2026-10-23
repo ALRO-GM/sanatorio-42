@@ -17,7 +17,17 @@ export function createBroadcastsModule(deps: BroadcastsServiceOptions): Broadcas
   return {
     name: 'broadcasts',
     personal: [
-      { table: 'broadcasts', logins: ['from_login'] },
+      // `audience` puede ser una lista de hasta 200 logins: quien la mandó no
+      // se la lleva (es gente ajena) y cada destinatario recibe el mensaje con
+      // solo su login en ella. Un público «campus» no nombra a nadie.
+      {
+        table: 'broadcasts',
+        logins: ['from_login'],
+        lists: [{ column: 'audience', format: 'json', path: '$.logins' }],
+        give: {
+          audience: ['id', 'title', 'body', 'options', 'required', 'audience', 'created_at'],
+        },
+      },
       { table: 'broadcast_answers', logins: ['login'] },
     ],
     service,

@@ -51,7 +51,10 @@ export function createGitCourseModule(deps: {
     personal: [
       { table: 'git_progress', logins: ['login'] },
       { table: 'git_gates', logins: ['login'] },
-      { table: 'git_rooms', logins: ['host'] },
+      // `state` mezcla los repos y comandos de todos los jugadores de la
+      // partida: no se da. Lo de cada cual está en `git_progress` y su paso por
+      // la sala en `git_room_players`.
+      { table: 'git_rooms', logins: ['host'], omit: ['state'] },
       { table: 'git_room_players', logins: ['login'] },
     ],
     service,

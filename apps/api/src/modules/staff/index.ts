@@ -20,7 +20,33 @@ export function createStaffModule(deps: StaffServiceOptions): StaffModule {
 
   return {
     name: 'staff',
-    personal: [{ table: 'report_exports', logins: ['login', 'requested_by'] }],
+    personal: [
+      // El informe es de la persona de la que habla (`login`): quien lo pidió
+      // para otra se lleva que lo pidió, no las horas ni el CSV. El `hash` es
+      // lo que permite al staff comprobar un documento: no se da.
+      {
+        table: 'report_exports',
+        logins: ['login', 'requested_by'],
+        omit: ['hash'],
+        give: {
+          requested_by: [
+            'code',
+            'requested_by',
+            'period_from',
+            'period_to',
+            'row_count',
+            'created_at',
+          ],
+        },
+      },
+      // Quien administra creó la cuenta; el nombre del staff y su clave no son suyos.
+      {
+        table: 'staff_accounts',
+        logins: ['created_by'],
+        omit: ['key_hash', 'salt'],
+        give: { created_by: ['id', 'created_by', 'created_at', 'revoked_at'] },
+      },
+    ],
     service,
     stores: [
       tableStore(deps.db, {
