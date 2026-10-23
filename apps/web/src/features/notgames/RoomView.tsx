@@ -384,6 +384,7 @@ function Scores({ room, me }: { room: QuizRoom; me: string }) {
             <Avatar login={player.login} image={player.image} size={32} />
             <span className="quiz-name">
               {player.login}
+              {player.login === me && <small> · {t('rank.you')}</small>}
               {player.team !== null && <small> · {t(`notgames.team.${player.team}`)}</small>}
             </span>
             {survival ? (

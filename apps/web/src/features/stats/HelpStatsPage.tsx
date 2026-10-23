@@ -6,11 +6,10 @@ import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { useFormat } from '../../shared/i18n/useFormat'
-import { Avatar } from '../../shared/ui/Avatar'
-import { PersonLink } from '../../shared/ui/PersonLink'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { PillGroup } from '../../shared/ui/PillGroup'
 import { InfoTip } from '../../shared/ui/InfoTip'
+import { RankingList, withMe } from '../../shared/ui/RankingList'
 import { HelpStatsTour } from './HelpStatsTour'
 import { ProgressCard } from './ProgressCard'
 
@@ -62,10 +61,7 @@ function SectionCard({ section, me }: { section: StatsSection; me: string }) {
   const { t } = useI18n()
   const { number } = useFormat()
   const mine = section.me
-  const rows: StatsEntry[] =
-    mine !== null && !section.ranking.some((entry) => entry.login === mine.login)
-      ? [...section.ranking, mine]
-      : section.ranking
+  const rows: StatsEntry[] = withMe(section.ranking, mine)
 
   return (
     <article className="card help-stats-card" aria-labelledby={`stats-${section.id}`}>
@@ -90,29 +86,22 @@ function SectionCard({ section, me }: { section: StatsSection; me: string }) {
       {rows.length === 0 ? (
         <p className="estado">{t('stats.empty')}</p>
       ) : (
-        <ol className="rows ranking" aria-label={t(`stats.${section.id}.rank`)}>
-          {rows.map((entry) => (
-            <li key={entry.login} className={`row plain ${entry.login === me ? 'me' : ''}`}>
-              <span className="rank" aria-label={t('rank.place', { n: entry.rank })}>
-                <span className={entry.rank <= 3 ? `medal medal-${entry.rank}` : undefined}>
-                  {entry.rank}
-                </span>
-              </span>
-              <Avatar login={entry.login} image={entry.image} size={28} />
-              <PersonLink login={entry.login} />
-              {entry.login === me && <span className="chip">{t('stats.you')}</span>}
-              <span className="row-count">
-                <strong>{t(`stats.${section.id}.value`, { n: entry.value })}</strong>
-                <small>
-                  {/* En el ritmo, 0 es «más lento que el pace de 24 meses». */}
-                  {section.id === 'ritmo' && entry.extra === 0
-                    ? t('stats.ritmo.slow')
-                    : t(`stats.${section.id}.extra`, { n: entry.extra })}
-                </small>
-              </span>
-            </li>
-          ))}
-        </ol>
+        <RankingList
+          rows={rows}
+          me={me}
+          label={t(`stats.${section.id}.rank`)}
+          value={(entry) => (
+            <span className="row-count">
+              <strong>{t(`stats.${section.id}.value`, { n: entry.value })}</strong>
+              <small>
+                {/* En el ritmo, 0 es «más lento que el pace de 24 meses». */}
+                {section.id === 'ritmo' && entry.extra === 0
+                  ? t('stats.ritmo.slow')
+                  : t(`stats.${section.id}.extra`, { n: entry.extra })}
+              </small>
+            </span>
+          )}
+        />
       )}
       {rows.length > 0 && mine === null && <p className="hint">{t('stats.notYet')}</p>}
     </article>

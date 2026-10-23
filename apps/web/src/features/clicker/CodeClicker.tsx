@@ -8,6 +8,7 @@ import { useI18n } from '../../shared/i18n'
 import { useStill } from '../../shared/still'
 import { Avatar } from '../../shared/ui/Avatar'
 import { PillGroup } from '../../shared/ui/PillGroup'
+import { withMe } from '../../shared/ui/RankingList'
 import { BigKey, Tile } from './art'
 import { CardView } from './Card'
 import { cardFor } from './cards'
@@ -1186,17 +1187,15 @@ export function CodeClicker({
                 <>
                   <p className="cc-hint">{ui('boardHint')}</p>
                   <ol>
-                    {[
-                      ...board.entries,
-                      ...(board.me !== null && !board.entries.some((row) => row.login === me)
-                        ? [board.me]
-                        : []),
-                    ].map((row) => (
+                    {withMe(board.entries, board.me).map((row) => (
                       <li key={row.login} className={row.login === me ? 'me' : ''}>
                         <b>{row.rank}</b>
                         <Avatar login={row.login} image={row.image} size={28} />
                         <span>
-                          <strong>{row.login}</strong>
+                          <strong>
+                            {row.login}
+                            {row.login === me && ` · ${ui('you')}`}
+                          </strong>
                           <small>
                             {ui('wealth')} {number(row.wealth, 1)} · {ui('level')} {row.level} ·{' '}
                             {row.achievements} <Tile icon="trophy" size={14} />

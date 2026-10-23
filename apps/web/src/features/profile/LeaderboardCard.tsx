@@ -5,11 +5,10 @@ import type { LeaderboardEntry, LeaderboardPeriod } from '@sanatorio/contracts'
 import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
-import { Avatar } from '../../shared/ui/Avatar'
-import { PersonLink } from '../../shared/ui/PersonLink'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { PillGroup } from '../../shared/ui/PillGroup'
 import { InfoTip } from '../../shared/ui/InfoTip'
+import { RankingList, withMe } from '../../shared/ui/RankingList'
 
 const PERIODS = ['month', 'all'] as const satisfies readonly LeaderboardPeriod[]
 
@@ -25,10 +24,8 @@ export function LeaderboardCard({ me }: { me: string }) {
   const [period, setPeriod] = useState<LeaderboardPeriod>('month')
   const { data, error, loading, reload } = useAsync(() => api.getLeaderboard(period), [period])
 
-  const top = data?.entries.slice(0, SHOWN) ?? []
   const mine = data?.me ?? null
-  const rows: LeaderboardEntry[] =
-    mine !== null && !top.some((entry) => entry.login === mine.login) ? [...top, mine] : top
+  const rows: LeaderboardEntry[] = withMe(data?.entries.slice(0, SHOWN) ?? [], mine)
 
   return (
     <article className="card">
@@ -55,20 +52,12 @@ export function LeaderboardCard({ me }: { me: string }) {
         <p className="hint">{t('rank.notYet')}</p>
       )}
 
-      <ol className="rows ranking">
-        {rows.map((entry) => (
-          <li key={entry.login} className={`row plain ${entry.login === me ? 'me' : ''}`}>
-            <span className="rank" aria-label={t('rank.place', { n: entry.rank })}>
-              <span className={entry.rank <= 3 ? `medal medal-${entry.rank}` : undefined}>
-                {entry.rank}
-              </span>
-            </span>
-            <Avatar login={entry.login} image={entry.image} size={28} />
-            <PersonLink login={entry.login} />
-            <strong className="row-count">{t('rank.xp', { xp: entry.xp })}</strong>
-          </li>
-        ))}
-      </ol>
+      <RankingList
+        rows={rows}
+        me={me}
+        label={t('rank.title')}
+        value={(entry) => <strong className="row-count">{t('rank.xp', { xp: entry.xp })}</strong>}
+      />
     </article>
   )
 }
