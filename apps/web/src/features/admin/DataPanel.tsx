@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 
 import type { DataPreview, DataWipe } from '@sanatorio/contracts'
 
@@ -9,6 +9,7 @@ import { useFormat } from '../../shared/i18n/useFormat'
 import { cellValue } from '../../shared/table-sort'
 import { DataTable } from '../../shared/ui/DataTable'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { Modal } from '../../shared/ui/Modal'
 import { PersonInput } from '../../shared/ui/PersonInput'
 
 const RANGES = ['all', 'before', 'from'] as const
@@ -211,17 +212,8 @@ function Review({
   const { number } = useFormat()
   const dialog = useRef<HTMLDialogElement>(null)
 
-  useEffect(() => {
-    if (dialog.current?.open === false) dialog.current.showModal()
-  }, [])
-
   return (
-    <dialog
-      ref={dialog}
-      className="layout-dialog data-review"
-      aria-label={t('admin.data.review')}
-      onClose={onClose}
-    >
+    <Modal ref={dialog} label={t('admin.data.review')} className="data-review" onClose={onClose}>
       <span className="eyebrow">{t('admin.data.review')}</span>
       <h3>{title}</h3>
       <p>
@@ -268,6 +260,6 @@ function Review({
           {t('admin.data.close')}
         </button>
       </div>
-    </dialog>
+    </Modal>
   )
 }

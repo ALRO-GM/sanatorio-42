@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import type { Notice } from '@sanatorio/contracts'
 
@@ -12,6 +12,7 @@ import { calendarEventOf, iconOf, noticesIn, removableCount, targetOf } from './
 import type { NoticeFilter, NoticeTarget } from './routes'
 import { Icon } from '../../shared/ui/Icon'
 import { InfoTip } from '../../shared/ui/InfoTip'
+import { Modal } from '../../shared/ui/Modal'
 import { MailboxTour } from './MailboxTour'
 import { Conversations } from './Conversations'
 import { directChatId } from './conversations'
@@ -39,7 +40,6 @@ type MailboxProps = {
 export function Mailbox({ me, chat, onChat, onClose, onOpen, onChange }: MailboxProps) {
   const { t } = useI18n()
   const { date } = useFormat()
-  const dialog = useRef<HTMLDialogElement>(null)
   const { data, error, loading, reload } = useAsync(() => api.getNotices(), [])
   const action = useAction()
   /** A quién se va a escribir: aún no se ha dicho, o a alguien del campus. */
@@ -51,11 +51,6 @@ export function Mailbox({ me, chat, onChat, onClose, onOpen, onChange }: Mailbox
   useEffect(() => {
     if (chat !== null) setTab('chats')
   }, [chat])
-
-  useEffect(() => {
-    // Sin limpieza a propósito: ver `LayoutSettings`.
-    if (dialog.current?.open === false) dialog.current.showModal()
-  }, [])
 
   const markAll = async (): Promise<void> => {
     if (await action.run(() => api.readNotices())) {
@@ -106,25 +101,20 @@ export function Mailbox({ me, chat, onChat, onClose, onOpen, onChange }: Mailbox
   const removable = removableCount(all)
 
   return (
-    <dialog
-      ref={dialog}
-      className="layout-dialog mailbox"
+    <Modal
+      label={t('notices.title')}
+      className="mailbox"
       onClose={onClose}
-      aria-label={t('notices.title')}
-    >
-      <div className="layout-head">
-        <h3>
+      title={
+        <>
           {t('notices.title')}
           {unread > 0 && <span className="count-badge">{unread}</span>}
           <InfoTip title={t('notices.title')}>
             <MailboxTour />
           </InfoTip>
-        </h3>
-        <button type="button" className="link" aria-label={t('layout.close')} onClick={onClose}>
-          <Icon name="cerrar" />
-        </button>
-      </div>
-
+        </>
+      }
+    >
       <PillGroup
         kind="tabs"
         className="mailbox-tabs"
@@ -293,6 +283,6 @@ export function Mailbox({ me, chat, onChat, onClose, onOpen, onChange }: Mailbox
           )}
         </div>
       )}
-    </dialog>
+    </Modal>
   )
 }

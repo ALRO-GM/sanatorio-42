@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/juego.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-488 textos. «—» es que falta la traducción: sale en español.
+489 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -58,6 +58,7 @@ Generado desde `apps/web/src/shared/i18n/textos/juego.csv` con
 | `game.ui.level` | Juego: texto de la interfaz | features/clicker/texts | Nivel | Level | — | — |
 | `game.ui.noBoard` | Juego: texto de la interfaz | features/clicker/texts | Todavía no hay nadie. Sé la primera persona. | Nobody here yet. Be the first. | — | — |
 | `game.ui.wealth` | Juego: texto de la interfaz | features/clicker/texts | Patrimonio | Net worth | — | — |
+| `game.ui.you` | Juego: marca «tú» junto a tu fila en la clasificación | features/clicker/texts | Tú | You | — | — |
 | `game.ui.boardHint` | Juego: texto de la interfaz | features/clicker/texts | Por patrimonio: el código sin gastar más lo que costaron los edificios, según el último guardado. | By net worth: unspent code plus what the buildings cost, as of the last save. | — | — |
 | `game.ui.saved` | Juego: texto de la interfaz | features/clicker/texts | Partida guardada | Game saved | — | — |
 | `game.ui.back` | Juego: texto de la interfaz | features/clicker/texts | Salir del juego | Leave the game | — | — |

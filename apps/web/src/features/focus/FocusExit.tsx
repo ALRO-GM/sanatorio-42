@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import type { FocusReason } from '@sanatorio/contracts'
 
@@ -7,6 +7,7 @@ import { useAction } from '../../shared/hooks/useAsync'
 import { useNow } from '../../shared/hooks/useNow'
 import { useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { Modal } from '../../shared/ui/Modal'
 
 /** Segundos para pensárselo antes de poder parar (#80 del buzón). */
 export const THINK_SECONDS = 10
@@ -35,7 +36,6 @@ const REASONS: readonly FocusReason[] = [
  */
 export function FocusExit({ left, onDone }: { left: string; onDone: (stopped: boolean) => void }) {
   const { t } = useI18n()
-  const dialog = useRef<HTMLDialogElement>(null)
   // Contra una hora fija y no restando de uno en uno: una pestaña en segundo
   // plano retrasa los temporizadores, y los diez segundos tienen que ser diez.
   const [until] = useState(() => Date.now() + THINK_SECONDS * 1000)
@@ -44,10 +44,6 @@ export function FocusExit({ left, onDone }: { left: string; onDone: (stopped: bo
   const wait = Math.max(0, Math.ceil((until - now) / 1000))
   const [reasons, setReasons] = useState<FocusReason[]>([])
   const { busy, error, run } = useAction()
-
-  useEffect(() => {
-    if (dialog.current?.open === false) dialog.current.showModal()
-  }, [])
 
   // Al llegar a cero el reloj se suelta: no hay nada más que contar.
   useEffect(() => {
@@ -62,14 +58,15 @@ export function FocusExit({ left, onDone }: { left: string; onDone: (stopped: bo
   }
 
   return (
-    <dialog
-      ref={dialog}
-      className="layout-dialog focus-exit"
-      aria-labelledby="focus-exit-title"
-      onCancel={(event) => {
-        event.preventDefault()
+    <Modal
+      label={t('focus.exit.title')}
+      className="focus-exit"
+      closeOnBackdrop={false}
+      // Escape no cierra sin más: cuenta como seguir concentrándose.
+      onEscape={() => {
         if (!busy) stay()
       }}
+      onClose={() => undefined}
     >
       <h3 id="focus-exit-title">{t('focus.exit.title')}</h3>
       <p>{t('focus.exit.left', { time: left })}</p>
@@ -118,6 +115,6 @@ export function FocusExit({ left, onDone }: { left: string; onDone: (stopped: bo
           {t('focus.exit.stop')}
         </button>
       </div>
-    </dialog>
+    </Modal>
   )
 }

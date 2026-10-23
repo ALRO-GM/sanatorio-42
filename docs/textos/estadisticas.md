@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/estadisticas.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-72 textos. «—» es que falta la traducción: sale en español.
+71 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -11,7 +11,6 @@ Generado desde `apps/web/src/shared/i18n/textos/estadisticas.csv` con
 | `stats.period` | Estadísticas de Ayuda: grupo de botones para elegir el periodo | features/stats/HelpStatsPage | Periodo | Period | Període | Aldia |
 | `stats.ranking` | Estadísticas de Ayuda: encabezado de la clasificación de una sección | features/stats/HelpStatsPage | Clasificación | Leaderboard | Classificació | Sailkapena |
 | `stats.empty` | Estadísticas de Ayuda: clasificación sin nadie todavía | features/stats/HelpStatsPage | Aún no hay nadie: estrénala tú. | Nobody yet: be the first. | Encara no hi ha ningú: estrena-la tu. | Oraindik ez dago inor: estreinatu zuk. |
-| `stats.you` | Estadísticas de Ayuda: marca junto a tu fila en la clasificación | features/stats/HelpStatsPage, features/stats/HelpStatsTour | Tú | You | Tu | Zu |
 | `stats.notYet` | Estadísticas de Ayuda: no sales en esta clasificación | features/stats/HelpStatsPage | Aún no sales aquí. | You are not here yet. | Encara no hi surts. | Oraindik ez zaude hemen. |
 | `stats.consulta.sessions` | Estadísticas de Ayuda, sala de espera: sesiones de ayuda aceptadas | features/stats/HelpStatsPage | Sesiones aceptadas | Accepted sessions | Sessions acceptades | Onartutako saioak |
 | `stats.consulta.verified` | Estadísticas de Ayuda, sala de espera: sesiones con los dos códigos validados | features/stats/HelpStatsPage | Validadas con código | Verified with codes | Validades amb codi | Kodearekin baliozkotuak |
