@@ -133,6 +133,7 @@ export const realApi: Api = {
   getLegal: () => getJson('/me/legal'),
   acceptLegal: (version) => sendJson('POST', '/me/legal/accept', { version }),
   exportUrl: () => apiUrl('/me/export'),
+  reportClientError: (report) => send('POST', '/client-errors', report),
   anonymizeMe: (confirm) => sendJson('POST', '/me/anonymize', { confirm }),
 
   getSecondFactor: () => getJson('/admin/totp'),

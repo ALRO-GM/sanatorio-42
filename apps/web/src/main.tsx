@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 
 import { App } from './app/App'
 import { I18nProvider, initialLang, loadLang } from './shared/i18n'
+import { watchErrors } from './shared/errors'
 import { watchStill } from './shared/still'
 import './styles/index.css'
 // Después de las hojas de la web: cada estilo manda sobre ellas. Con cada uno
@@ -18,6 +19,9 @@ if (root === null) {
 // Los textos del idioma de la persona, antes de pintar: así no ve un instante
 // la web en español. Si no llegan, se pinta en español igualmente.
 await loadLang(initialLang()).catch(() => undefined)
+
+// Un fallo que no recoge ninguna sección también deja rastro en el servidor.
+watchErrors()
 
 // Sin nadie mirando, las animaciones se paran (y no calientan el equipo).
 watchStill()

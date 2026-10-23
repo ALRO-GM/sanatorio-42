@@ -176,6 +176,11 @@ GET /me/export → todo lo tuyo, tabla a tabla, como JSON para descargar
   }
 }
 
+POST /client-errors → `{ "message", "stack"?, "where", "version"? }` → 204: un
+fallo de la web en el navegador (una sección que no se pudo pintar, o `where:
+"page"` para uno suelto). Sin sesión, con tope de 10 por IP y minuto (lo que
+pasa se tira sin error); queda en el registro del servidor a nivel `warn`.
+
 POST /me/anonymize → `{ "confirm": <tu login> }` → `{ "changed" }`: anonimiza tu
 cuenta y cierra la sesión. En cada tabla de la app (las de `personal` con
 `source` de la app) tu login pasa a un identificador opaco y nuevo

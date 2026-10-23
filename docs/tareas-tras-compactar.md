@@ -304,16 +304,15 @@ recurrente. Hecho el 22-23 de octubre:
       destino), B9 (`externalHref`), B10 (`paintable`), test `docs/api.md` ↔
       rutas, mínimos de cobertura de la web a 64 %, A2 + L4 (`createLate`,
       módulo `presence`, `replica.points`, ESLint en `app/`).
-- [ ] **Agentes en pausa** (Alberto, 23-oct: «pausa los agentes hasta que te
-      diga»). No reanudar el de la web hasta que lo diga.
+- [x] Base reutilizable de la web (los diez de `calidad-web.md`, rama
+      `base-web`), unida y desplegada el 23-oct. M7: anonimizar (API, botón en
+      Privacidad, texto legal y versión 2026-10-23).
 - [x] Recorridos: asistencia, guardia, pizarra, terapia, tablón y test del
       cliente real (falta el del Code Clicker).
-- [ ] Queda: recorrido del Code Clicker, monitor externo y errores de
-      cliente (`ErrorBoundary`; esperar al agente de la web, toca `shared/`),
+- [ ] Queda: recorrido del Code Clicker, monitor externo (cuenta gratuita: Alberto),
       textos que tocan código (claves repetidas, glifos; también web), destino
       de las copias fuera de la máquina (bucket gratuito de Oracle + rclone +
-      frase: decisión y pasos con Alberto), M7 (borrado de cuenta: decisión de
-      Alberto).
+      frase: decisión y pasos con Alberto).
 
 ## 3. A medias o por confirmar con Alberto
 

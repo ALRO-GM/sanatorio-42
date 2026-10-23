@@ -59,6 +59,7 @@ export const adminMock: Pick<
   | 'acceptLegal'
   | 'exportUrl'
   | 'anonymizeMe'
+  | 'reportClientError'
   | 'getSecondFactor'
   | 'setupSecondFactor'
   | 'confirmSecondFactor'
@@ -214,6 +215,12 @@ export const adminMock: Pick<
     return URL.createObjectURL(
       new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }),
     )
+  },
+
+  // En la web de mentira los fallos se quedan en la consola.
+  async reportClientError(report) {
+    await delay(0)
+    console.warn('fallo en la web', report)
   },
 
   // En la web de mentira no se anonimiza nada: solo se comprueba el login.

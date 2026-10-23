@@ -38,6 +38,8 @@ const OPEN = new Set([
   'GET /auth/callback',
   'POST /auth/logout',
   'POST /auth/staff',
+  // Los fallos de la web, también de la pantalla de entrada (con tope por IP).
+  'POST /client-errors',
   'OPTIONS /*',
 ])
 

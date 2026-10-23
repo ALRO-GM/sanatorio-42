@@ -22,6 +22,7 @@ import { useAsync } from '../shared/hooks/useAsync'
 import { usePulse } from '../shared/hooks/usePulse'
 import { LayoutSettings } from '../shared/layout/LayoutSettings'
 import { DetailSelect } from '../shared/ui/DetailSelect'
+import { ErrorBoundary } from '../shared/ui/ErrorBoundary'
 import { DEFAULT_THEME, useStyle } from '../shared/theme'
 import { canUseStyle } from '../themes'
 import { RecordStylePicker } from '../features/profile/RecordStylePicker'
@@ -223,16 +224,18 @@ export function Clinic({ me, onLogout }: ClinicProps) {
 
         {/* Con otro campus, la sección se monta de nuevo: también se olvida el proyecto elegido. */}
         <div key={campusVersion}>
-          <SectionView
-            section={section}
-            me={me}
-            profile={profile}
-            projects={projects.data ?? []}
-            focusProject={focusProject}
-            otherRecord={otherRecord}
-            param={param}
-            onGo={openSection}
-          />
+          <ErrorBoundary key={section} where={section}>
+            <SectionView
+              section={section}
+              me={me}
+              profile={profile}
+              projects={projects.data ?? []}
+              focusProject={focusProject}
+              otherRecord={otherRecord}
+              param={param}
+              onGo={openSection}
+            />
+          </ErrorBoundary>
         </div>
 
         <Footer campusId={profile.data?.campusId} onCampusChange={onCampusChange} />

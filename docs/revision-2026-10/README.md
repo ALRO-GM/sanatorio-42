@@ -47,7 +47,9 @@ definiciones), regla verificable de quién habla con 42, índice de
 `help_bookings` y `LIMIT` en la clasificación.
 
 **Calidad de la web** (`calidad-web.md`): la página de exámenes perezosa
-(hecho); los diez refactors restantes están en curso con un agente.
+(hecho) y los diez refactors (`PillGroup`, `useNow`, `usePolling`,
+`useFormat`, `RankingList`, `Modal`/`useConfirm`, piezas a `shared/`, colores
+semánticos, `Async` y plurales, `PeopleResults`), unidos el 23 de octubre.
 
 **Textos** (`textos.md`): las 275 filas, el glosario y los contextos
 aplicados; catalán y euskera completos en todas las tablas (1 009 filas).
@@ -63,7 +65,8 @@ hooks de git y `check:quick` (hechos), mínimos de cobertura de la web
 `docs/api.md` ↔ rutas (hecho: `tests/integration/api-docs.test.ts`), recorridos de pantalla (hechos: asistencia, guardia en la sala de espera,
 pizarra, terapia, tablón y el cliente real contra un `fetch` falso; falta el
 Code Clicker), Slack de despliegues y monitor
-externo, errores de cliente.
+externo (falta la cuenta). Errores de cliente: hechos (`ErrorBoundary` por
+sección y `POST /client-errors` al registro).
 
 **Flujo**: skills y subagentes en `.claude/`, `docs/flujo-de-trabajo.md`.
 **Máquina**: ampliada al máximo gratuito de Oracle (4 OCPU, 24 GB, 200 GB).

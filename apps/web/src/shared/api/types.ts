@@ -285,6 +285,8 @@ export type Api = {
   acceptLegal: (version: string) => Promise<LegalStatus>
   /** Dirección de la descarga de todos tus datos (JSON). */
   exportUrl: () => string
+  /** Un fallo de la web en el navegador, para el registro del servidor. */
+  reportClientError: (report: { message: string; where: string; stack?: string }) => Promise<void>
   /** Anonimiza tu cuenta escribiendo tu login (`confirm`) y cierra la sesión. */
   anonymizeMe: (confirm: string) => Promise<{ changed: number }>
   // Segundo factor del panel.

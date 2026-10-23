@@ -27,6 +27,7 @@ import type { BroadcastsModule } from '../modules/broadcasts/index.js'
 import { createCalendarModule } from '../modules/calendar/index.js'
 import type { CalendarModule } from '../modules/calendar/index.js'
 import { createClickerModule, hackerTitle } from '../modules/clicker/index.js'
+import { createClientErrorsModule } from '../modules/client-errors/index.js'
 import type { ClickerModule } from '../modules/clicker/index.js'
 import { createDoubtsModule } from '../modules/doubts/index.js'
 import type { DoubtsModule } from '../modules/doubts/index.js'
@@ -446,6 +447,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     facility,
     focus,
     gitCourse,
+    createClientErrorsModule(),
   ]
 
   late.wire({ admin, calendar, clicker, exams, help, modules, network, usage })

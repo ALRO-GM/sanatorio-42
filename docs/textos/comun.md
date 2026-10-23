@@ -3,14 +3,15 @@
 Generado desde `apps/web/src/shared/i18n/textos/comun.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-276 textos. «—» es que falta la traducción: sale en español.
+277 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
 | `app.loading` | Mensaje mientras carga algo | app/App, features/admin/AdminPage, features/admin/BroadcastsTab, features/admin/CheatsPanel, features/admin/ClickMap, features/admin/ClickerPanel, features/admin/DataPanel, features/admin/FlowsPanel, features/admin/FocusPanel, features/admin/GrowthPanel, features/admin/InboxTab, features/admin/PanelLock, features/admin/QuotaCard, features/admin/StaffAccounts, features/admin/StatsPanel, features/admin/UsageHeatmap, features/calendar/Attendance, features/doubts/DoubtDetailCard, features/exams/ExamStatsPanel, features/focus/FocusMyStats, features/gitcourse/GitCourseTab, features/gitcourse/GroupRoom, features/help/Guardia, features/notgames/NotGamesPage, features/notgames/ReviewTab, features/notgames/RoomView, features/notgames/TurnRoomView, features/notices/Conversations, features/notices/Mailbox, features/staff/StaffPage, features/stats/HelpStatsPage, shared/chat/Chat, shared/ui/Async | Cargando… | Loading… | Carregant… | Kargatzen… |
 | `app.footer` | Pie de página, al final de todas las pantallas | app/Footer, features/auth/Login | Sanatorio 42 · Hecho en la Hackathon de 42 Madrid | Sanatorio 42 · Made at the 42 Madrid Hackathon | Sanatorio 42 · Fet a la Hackathon de 42 Madrid | Sanatorio 42 · 42 Madrilgo Hackathonean egina |
 | `app.serverDown` | Pantalla de error cuando la API no responde | app/App | No se puede conectar con el servidor. Puede que esté arrancando; prueba en un momento. | Can't reach the server. It may be starting up; try again in a moment. | No es pot connectar amb el servidor. Pot ser que estigui arrencant; prova-ho d'aquí un moment. | Ezin da zerbitzariarekin konektatu. Baliteke abiarazten egotea; saiatu berriro une batean. |
-| `app.retry` | Botón para volver a intentar conectar | app/App, shared/ui/ErrorNote | Volver a probar | Try again | Torna-ho a provar | Saiatu berriro |
+| `app.retry` | Botón para volver a intentar conectar | app/App, shared/ui/ErrorBoundary, shared/ui/ErrorNote | Volver a probar | Try again | Torna-ho a provar | Saiatu berriro |
+| `app.sectionFailed` | Una parte de la web ha fallado al pintarse; el fallo ya se ha enviado | shared/ui/ErrorBoundary | Esta parte ha fallado. Ya nos ha llegado el aviso. | This part has failed. We have already been notified. | Aquesta part ha fallat. Ja ens ha arribat l'avís. | Zati honek huts egin du. Abisua iritsi zaigu jada. |
 | `app.logout` | Opción del menú de la cuenta para cerrar sesión | app/Header, features/staff/StaffPage | Salir | Log out | Surt | Irten |
 | `app.back` | Botón para volver de la lista de personas a la elección de proyecto | app/SectionView | Volver a la sala de espera | Back to the waiting room | Torna a la sala d'espera | Itzuli itxarongelara |
 | `nav.label` | Nombre accesible de la barra de pestañas | app/Nav, features/admin/ClickMap, features/admin/FlowsPanel, features/admin/Inbox, features/admin/InboxTab, features/admin/StatsPanel, features/admin/UsageHeatmap, features/calendar/EventDialog, features/focus/FocusDialog, features/stats/HelpStatsPage, shared/layout/LayoutSettings, shared/layout/store | Secciones | Sections | Seccions | Atalak |

@@ -11,6 +11,7 @@ import { afterEach, describe, expect, it } from 'vitest'
 
 import { loadEnv } from '../../src/config/env.js'
 import { closeDatabase } from '../../src/core/db/database.js'
+import { CLIENT_ERRORS_PER_MINUTE } from '../../src/modules/client-errors/index.js'
 import { json, makeApp } from '../helpers/test-app.js'
 import type { TestApp } from '../helpers/test-app.js'
 
@@ -217,5 +218,43 @@ describe('configuración del registro', () => {
 
   it('un nivel que no existe no arranca', () => {
     expect(() => loadEnv({ ...minimal, LOG_LEVEL: 'ruidoso' })).toThrow()
+  })
+})
+
+describe('fallos de la web', () => {
+  it('se apuntan sin sesión, con su sección, hasta el tope por minuto', async () => {
+    const log = collector()
+    const built = await appLoggingTo(log)
+    const send = (body: unknown) =>
+      built.app.inject({
+        method: 'POST',
+        url: '/client-errors',
+        headers: { 'content-type': 'application/json' },
+        payload: JSON.stringify(body),
+      })
+
+    expect((await send({ message: 'x', where: '../roto' })).statusCode).toBe(400)
+
+    const first = await send({
+      message: 'Cannot read x',
+      stack: 'at A',
+      where: 'tablon',
+      version: 'abc',
+    })
+
+    expect(first.statusCode).toBe(204)
+    expect(log.lines.find((line) => line.clientError !== undefined)).toMatchObject({
+      level: 40,
+      reqId: requestId(first.headers),
+      clientError: { message: 'Cannot read x', where: 'tablon', version: 'abc' },
+    })
+
+    for (let sent = 2; sent <= CLIENT_ERRORS_PER_MINUTE + 3; sent += 1) {
+      expect((await send({ message: String(sent), where: 'page' })).statusCode).toBe(204)
+    }
+    // El primero de todos (el 400) también contó: apuntados, el tope menos ese.
+    expect(log.lines.filter((line) => line.clientError !== undefined)).toHaveLength(
+      CLIENT_ERRORS_PER_MINUTE - 1,
+    )
   })
 })
