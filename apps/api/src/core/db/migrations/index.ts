@@ -72,6 +72,7 @@ import { noClickerPoolSchema } from './0063-no-clicker-pool.js'
 import { focusSessionsSchema } from './0064-focus-sessions.js'
 import { correctionFeedbackSchema } from './0065-correction-feedback.js'
 import { noCorrectionFeedbackSchema } from './0066-no-correction-feedback.js'
+import { helpBookingsCampusSchema } from './0067-help-bookings-campus.js'
 import type { Migration } from './types.js'
 
 export const MIGRATIONS: readonly Migration[] = [
@@ -141,6 +142,7 @@ export const MIGRATIONS: readonly Migration[] = [
   focusSessionsSchema,
   correctionFeedbackSchema,
   noCorrectionFeedbackSchema,
+  helpBookingsCampusSchema,
 ]
 
 /** Versión más alta que existe en el código. */

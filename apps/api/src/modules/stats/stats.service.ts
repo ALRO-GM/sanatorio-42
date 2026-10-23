@@ -82,17 +82,17 @@ export function createStatsService(options: {
 
       const sections = await Promise.all(
         STATS_SECTIONS.map(async (id): Promise<StatsSection> => {
-          const [totals, rows] = await Promise.all([
+          const [totals, { top, me }] = await Promise.all([
             stats.totals(id, actor.campusId, since, at),
-            stats.ranking(id, actor.campusId, since, at),
+            stats.ranking(id, actor.campusId, since, at, TOP, actor.login),
           ])
-          const entries = ranked(rows)
+          const entries = ranked(top)
 
           return {
             id,
             totals,
-            ranking: entries.slice(0, TOP),
-            me: entries.find((entry) => entry.login === actor.login) ?? null,
+            ranking: entries,
+            me: entries.find((entry) => entry.login === actor.login) ?? me,
           }
         }),
       )
