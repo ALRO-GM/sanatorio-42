@@ -60,8 +60,11 @@ regla de aquí, cambia también la skill que la repite.
   (normal, límite, vacío y enorme, imprevisible, permisos). Una pantalla nueva
   lleva su recorrido en `apps/web/tests/ui/`, buscando por rol y nombre como
   lo haría una persona. Los mínimos de cobertura (`thresholds`) solo suben.
-- API: ningún módulo llama a la API de 42 salvo `replica`. Los demás leen de la
-  réplica.
+- API: el cliente de 42 solo lo reciben `replica`, `network` (correcciones),
+  `exams` (intentos y examen en vivo); `auth` hace OAuth con el token de la persona. Los demás leen de la
+  réplica. La lista cerrada, con el porqué de cada uno, está en
+  `tests/unit/forty-two-callers.test.ts`: un módulo nuevo que lo importe tiene
+  que entrar ahí.
 - API: antes de pedir algo a 42 se pregunta a `replica.quota` con su escalón
   (`background`, `deferrable` o `critical`). Lo que es de una persona y puede
   esperar usa `quota.defer`, que le da turno en la cola si no hay cuota.

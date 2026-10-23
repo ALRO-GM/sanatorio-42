@@ -47,8 +47,9 @@ Y además, según lo que sea:
   dos veces lo mismo, que el tope corte en el valor exacto y que una trampa
   conocida no cuele.
 - **Lo que habla con 42**: sin cuota, 42 caída, página vacía, paginación con
-  la última página justa, y que no se llame a 42 desde donde no toca (los tests
-  lo prohíben salvo en `replica`).
+  la última página justa, y que no se llame a 42 desde donde no toca
+  (`tests/unit/forty-two-callers.test.ts` tiene la lista cerrada de quién
+  recibe el cliente y comprueba que pregunta antes a `quota`).
 - **Migraciones**: que se aplican sobre la base de la versión anterior con
   datos dentro, no solo sobre una vacía.
 - **Fechas y zonas horarias**: el día del calendario es el de la hora del
