@@ -25,6 +25,7 @@ import {
   selectPeople,
 } from './exams.rules.js'
 import type { ExamsSync } from './exams.sync.js'
+import { createTtlCache } from '../../core/ttl-cache.js'
 
 type ExamsServiceOptions = {
   exams: ExamsRepository
@@ -63,13 +64,14 @@ export function createExamsService({
   curriculum,
   now = Date.now,
 }: ExamsServiceOptions) {
-  const cache = new Map<number, Snapshot>()
+  // Un agregado por campus que cambia despacio: dos visitas a la vez comparten
+  // la misma carga en vez de lanzar dos.
+  const snapshots = createTtlCache<Snapshot>({ ttlMs: CACHE_MS, maxEntries: 50, now })
 
-  async function snapshot(campusId: number): Promise<Snapshot> {
-    const cached = cache.get(campusId)
+  const snapshot = (campusId: number): Promise<Snapshot> =>
+    snapshots.get(String(campusId), () => build(campusId))
 
-    if (cached !== undefined && now() - cached.at < CACHE_MS) return cached
-
+  async function build(campusId: number): Promise<Snapshot> {
     const [classic, next] = await Promise.all([
       curriculum.circles('classic'),
       curriculum.circles('next'),
@@ -82,17 +84,13 @@ export function createExamsService({
       exams.planRows(campusId, [...new Set([...classic.keys(), ...next.keys()])]),
     ])
     const examUsers = new Set([...attempts, ...occurrences].map((row) => row.userId))
-    const fresh: Snapshot = {
+    return {
       at: now(),
       projects,
       attempts,
       occurrences,
       people: examPeople({ members, rows, circles: { classic, next }, examUsers }),
     }
-
-    cache.set(campusId, fresh)
-
-    return fresh
   }
 
   return {

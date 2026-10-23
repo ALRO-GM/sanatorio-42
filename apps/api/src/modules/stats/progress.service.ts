@@ -25,6 +25,7 @@ import { COURSE_DAYS } from './pace.rules.js'
 import { curveOf, paceLines, unitsOf } from './progress.rules.js'
 import type { PlanProject, Unit } from './progress.rules.js'
 import type { ProgressRepository } from './stats.repository.js'
+import { createTtlCache } from '../../core/ttl-cache.js'
 
 type Track = 'classic' | 'next'
 
@@ -72,7 +73,11 @@ export function createProgressService(options: {
   now?: () => number
 }) {
   const now = options.now ?? Date.now
-  const cache = new Map<number, Snapshot>()
+  // Un agregado por campus que cambia despacio: dos visitas a la vez comparten
+  // la misma carga en vez de lanzar dos.
+  const snapshots = createTtlCache<Snapshot>({ ttlMs: CACHE_MS, maxEntries: 50, now })
+  const snapshot = (campus: number): Promise<Snapshot> =>
+    snapshots.get(String(campus), () => build(campus))
 
   async function plans(): Promise<Record<Track, PlanProject[]>> {
     const [classic, next] = await Promise.all([options.circles('classic'), options.circles('next')])
@@ -92,11 +97,8 @@ export function createProgressService(options: {
   const nextSlug = (slug: string): boolean =>
     slug.startsWith('python-module') || slug.startsWith('42next-')
 
-  async function snapshot(campus: number): Promise<Snapshot> {
-    const cached = cache.get(campus)
+  async function build(campus: number): Promise<Snapshot> {
     const t = now()
-
-    if (cached !== undefined && t - cached.at < CACHE_MS) return cached
 
     const plan = await plans()
     const units = { classic: unitsOf(plan.classic, CHOICES), next: unitsOf(plan.next, CHOICES) }
@@ -180,11 +182,7 @@ export function createProgressService(options: {
         Object.fromEntries(GROUPS.map((group) => [group, mean(sums[measure][group])])),
       ]),
     ) as StatsProgress['averages']
-    const fresh: Snapshot = { at: t, units, people: kept, averages, counts }
-
-    cache.set(campus, fresh)
-
-    return fresh
+    return { at: t, units, people: kept, averages, counts }
   }
 
   return {
