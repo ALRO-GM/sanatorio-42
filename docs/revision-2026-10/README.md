@@ -60,7 +60,9 @@ vuelta atrás y cerrojo, `/health/db` con sha y esquema, espera a la CI por
 etiqueta `ci-ok/<sha>`). Pendientes: copias fuera de la máquina y cifradas,
 hooks de git y `check:quick` (hechos), mínimos de cobertura de la web
 (subidos a lo que hay: 64 % de líneas, 51 % de funciones, 79 % de ramas),
-`docs/api.md` ↔ rutas (hecho: `tests/integration/api-docs.test.ts`), recorridos de pantalla que faltan, Slack de despliegues y monitor
+`docs/api.md` ↔ rutas (hecho: `tests/integration/api-docs.test.ts`), recorridos de pantalla (hechos: asistencia, guardia en la sala de espera,
+pizarra, terapia, tablón y el cliente real contra un `fetch` falso; falta el
+Code Clicker), Slack de despliegues y monitor
 externo, errores de cliente.
 
 **Flujo**: skills y subagentes en `.claude/`, `docs/flujo-de-trabajo.md`.

@@ -306,7 +306,9 @@ recurrente. Hecho el 22-23 de octubre:
       módulo `presence`, `replica.points`, ESLint en `app/`).
 - [ ] **Agentes en pausa** (Alberto, 23-oct: «pausa los agentes hasta que te
       diga»). No reanudar el de la web hasta que lo diga.
-- [ ] Queda: recorridos de pantalla que faltan, monitor externo y errores de
+- [x] Recorridos: asistencia, guardia, pizarra, terapia, tablón y test del
+      cliente real (falta el del Code Clicker).
+- [ ] Queda: recorrido del Code Clicker, monitor externo y errores de
       cliente (`ErrorBoundary`; esperar al agente de la web, toca `shared/`),
       textos que tocan código (claves repetidas, glifos; también web), destino
       de las copias fuera de la máquina (bucket gratuito de Oracle + rclone +
