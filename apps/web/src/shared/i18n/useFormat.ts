@@ -6,7 +6,7 @@ import { localeOf } from './locale'
 type Moment = string | number | Date
 
 /** Los estilos de fecha que usa la web, con nombre, para que no se repitan las opciones. */
-export type DateStyle =
+type DateStyle =
   /** `13/10/2025`. */
   | 'short'
   /** `13 oct 2025`. */
@@ -22,7 +22,7 @@ export type DateStyle =
   /** `octubre de 2025`. */
   | 'monthLong'
 
-export type Formats = {
+type Formats = {
   /** `1.234` con, como mucho, `digits` decimales. */
   number: (value: number, digits?: number) => string
   /** `1,2 M`. */

@@ -153,7 +153,7 @@ Generado desde `apps/web/src/shared/i18n/textos/comun.csv` con
 | `info.open` | Nombre accesible del botón (i) que abre la demostración; {title} es la sección | shared/ui/InfoTip | Cómo funciona: {title} | How it works: {title} | Com funciona: {title} | Nola dabil: {title} |
 | `finder.label` | Buscador de personas de la cabecera | features/profile/PersonFinder | Buscar personas | Find people | Cerca persones | Bilatu pertsonak |
 | `finder.placeholder` | Texto de ejemplo dentro del buscador | features/profile/PersonFinder | Buscar a alguien… | Find someone… | Cerca algú… | Bilatu norbait… |
-| `finder.none` | Buscador: no hay nadie con ese login | features/notices/PeerPicker, features/profile/PersonFinder, shared/ui/PersonInput | Nadie se llama así | Nobody by that name | Ningú es diu així | Inor ez da horrela deitzen |
+| `finder.none` | Buscador: no hay nadie con ese login | shared/ui/PeopleResults | Nadie se llama así | Nobody by that name | Ningú es diu així | Inor ez da horrela deitzen |
 | `finder.recent` | Buscador: últimas búsquedas | features/network/PersonSearch, features/profile/PersonFinder | Búsquedas recientes | Recent searches | Cerques recents | Azken bilaketak |
 | `finder.recentClear` | Buscador: borrar las últimas búsquedas | features/network/PersonSearch, features/profile/PersonFinder | Borrar | Clear | Esborra | Ezabatu |
 | `layout.tips` | Personalizar: apartado de ayuda | features/admin/StatsPanel, features/admin/UsageHeatmap, shared/layout/Blocks, shared/layout/LayoutSettings | Ayuda | Help | Ajuda | Laguntza |
