@@ -8,8 +8,9 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import { closeDatabase, openDatabase } from '../../src/core/db/database.js'
 import type { Db } from '../../src/core/db/database.js'
-import { personalData } from '../../src/core/db/personal-data.js'
+import { anonymizePersonalData, personalData } from '../../src/core/db/personal-data.js'
 import type { PersonalTable } from '../../src/core/db/personal-data.js'
+import { toText } from '../../src/core/db/rows.js'
 
 const ANA = { login: 'ana', userId: null }
 const ACCEPTANCES: PersonalTable = { table: 'legal_acceptances', logins: ['login'] }
@@ -116,5 +117,46 @@ describe('descarga de datos personales', () => {
     const [whole] = (await personalData(db, [BROADCASTS], ANA)).broadcasts?.rows ?? []
 
     expect(whole).toMatchObject({ from_login: 'ana', body: 'cuerpo', audience: 'ana' })
+  })
+
+  it('anonimizar cambia su login en todo, también dentro de las listas, y nada de lo demás', async () => {
+    await accept(2)
+    await db.execute(
+      `INSERT INTO therapy_checks (group_id, day, slot, present, checked_at) VALUES
+         (1, 'd1', 0, 'leo,ana,anabel', 'x'), (1, 'd2', 0, 'anabel', 'x')`,
+    )
+    await db.execute(
+      `INSERT INTO broadcasts (from_login, title, body, audience, created_at) VALUES
+         ('ana', 'suyo', 'b', '{"kind":"campus","campusId":22}', 'x'),
+         ('eva', 'para', 'b', '{"kind":"logins","logins":["leo","ana"]}', 'x')`,
+    )
+    const tables = [
+      ACCEPTANCES,
+      CHECKS,
+      BROADCASTS,
+      { table: 'users', source: '42' as const, logins: ['login'] },
+    ]
+
+    expect(await anonymizePersonalData(db, tables, 'ana', 'anon-1')).toBe(5)
+    expect(
+      Object.values(await personalData(db, tables.slice(0, 3), ANA)).flatMap((t) => t.rows),
+    ).toEqual([])
+
+    const alias = await personalData(db, tables.slice(0, 3), { login: 'anon-1', userId: null })
+
+    expect(alias.legal_acceptances?.rows).toHaveLength(2)
+    expect(
+      (await db.execute('SELECT present FROM therapy_checks ORDER BY day')).rows.map(
+        (r) => r.present,
+      ),
+    ).toEqual(['leo,anon-1,anabel', 'anabel'])
+    expect(
+      (await db.execute('SELECT from_login, audience FROM broadcasts ORDER BY title')).rows.map(
+        (r): unknown[] => [r.from_login, JSON.parse(toText(r.audience)) as unknown],
+      ),
+    ).toEqual([
+      ['eva', { kind: 'logins', logins: ['leo', 'anon-1'] }],
+      ['anon-1', { kind: 'campus', campusId: 22 }],
+    ])
   })
 })

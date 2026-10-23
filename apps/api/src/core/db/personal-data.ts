@@ -12,6 +12,7 @@
  */
 
 import type { Db } from './database.js'
+import { toText } from './rows.js'
 
 /** De dónde salen las filas: copiadas de la API de 42 o hechas aquí. */
 export type PersonalSource = '42' | 'sanatorio'
@@ -220,4 +221,92 @@ export async function personalData(
   }
 
   return out
+}
+
+/** La lista de esa columna con `login` cambiado por `alias` (misma regla que `listHas`). */
+function relisted(value: unknown, list: PersonalList, login: string, alias: string): unknown {
+  if (typeof value !== 'string') return value
+  if (list.format === 'csv') {
+    return value
+      .split(',')
+      .map((entry) => (entry === login ? alias : entry))
+      .join(',')
+  }
+
+  const parsed: unknown = JSON.parse(value)
+  const steps = (list.path ?? '$')
+    .replace(/^\$\.?/, '')
+    .split('.')
+    .filter((step) => step !== '')
+  const swap = (node: unknown, rest: readonly string[]): unknown => {
+    if (rest.length === 0) {
+      return Array.isArray(node)
+        ? (node as unknown[]).map((entry) => (entry === login ? alias : entry))
+        : node
+    }
+    if (node === null || typeof node !== 'object') return node
+
+    const [step = '', ...tail] = rest
+
+    return { ...(node as Row), [step]: swap((node as Row)[step], tail) }
+  }
+
+  return JSON.stringify(swap(parsed, steps))
+}
+
+/**
+ * Anonimiza a una persona: en cada tabla de la app, su login pasa a ser
+ * `alias` (un identificador opaco y nuevo). Lo que hizo sigue contando para
+ * las demás personas (las horas de una pizarra, una reserva, un grupo), pero ya
+ * no se sabe que fue ella.
+ *
+ * Lo copiado de 42 (`source: '42'`) no se toca: es lo que 42 publica al campus
+ * y volvería en la siguiente copia.
+ *
+ * @returns Las filas cambiadas.
+ */
+export async function anonymizePersonalData(
+  db: Db,
+  tables: readonly PersonalTable[],
+  login: string,
+  alias: string,
+): Promise<number> {
+  let changed = 0
+
+  for (const spec of tables) {
+    if ((spec.source ?? 'sanatorio') !== 'sanatorio') continue
+
+    for (const column of spec.logins ?? []) {
+      const result = await db.execute({
+        sql: `UPDATE ${spec.table} SET ${column} = ? WHERE ${column} = ?`,
+        args: [alias, login],
+      })
+
+      changed += result.rowsAffected
+    }
+
+    for (const list of spec.lists ?? []) {
+      const where = whereOf({ table: spec.table, lists: [list] }, { login, userId: null })
+
+      if (where === null) continue
+
+      // Por el valor de antes y no por `rowid`: hay tablas `WITHOUT ROWID`.
+      // Filas con la misma lista acaban con la misma lista nueva, que es lo justo.
+      const found = await db.execute({
+        sql: `SELECT DISTINCT ${list.column} AS value FROM ${spec.table} WHERE ${where.sql}`,
+        args: where.args,
+      })
+
+      for (const row of found.rows) {
+        const result = await db.execute({
+          sql: `UPDATE ${spec.table} SET ${list.column} = ? WHERE ${list.column} = ?`,
+          args: [relisted(row.value, list, login, alias) as string, toText(row.value)],
+        })
+
+        changed += result.rowsAffected
+      }
+    }
+  }
+
+  return changed
 }

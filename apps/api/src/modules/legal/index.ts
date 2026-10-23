@@ -3,6 +3,7 @@
  * descarga de los datos de cada persona.
  */
 
+import { clearCookie, SESSION_COOKIE_NAME } from '../../core/http/cookies.js'
 import type { AppModule } from '../../core/module.js'
 import { createLegalService } from './legal.service.js'
 import type { LegalService, LegalServiceOptions } from './legal.service.js'
@@ -26,6 +27,28 @@ export function createLegalModule(deps: LegalServiceOptions): LegalModule {
       app.post('/me/legal/accept', async (request, reply) => {
         return reply.send(await service.accept(await session.actor(request), request.body))
       })
+
+      /**
+       * `POST /me/anonymize` → `{ confirm: <tu login> }`: anonimiza tu cuenta y
+       * cierra la sesión. `{ changed }`, las filas cambiadas.
+       */
+      app.post('/me/anonymize', async (request, reply) => {
+        const done = await service.anonymize(await session.actor(request), request.body)
+
+        reply.header('Set-Cookie', clearCookie(SESSION_COOKIE_NAME, { maxAgeMs: 0, path: '/' }))
+
+        return reply.send(done)
+      })
+
+      /** `POST /admin/people/:login/anonymize` → `{ changed }`. Solo admins. */
+      app.post<{ Params: { login: string } }>(
+        '/admin/people/:login/anonymize',
+        async (request, reply) => {
+          return reply.send(
+            await service.anonymizeOther(await session.actor(request), request.params.login),
+          )
+        },
+      )
 
       /** `GET /me/export` → todo lo tuyo, en un JSON para descargar. */
       app.get('/me/export', async (request, reply) => {
