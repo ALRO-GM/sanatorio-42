@@ -14,8 +14,8 @@ Generado desde `apps/web/src/shared/i18n/textos/clusters.csv` con
 | `map.cluster` | Nombre de una sala del campus (en 42 se llaman así) | features/map/ClustersTour, shared/seats | Clúster {n} | Cluster {n} | Clúster {n} | {n}. klusterra |
 | `map.seatName` | Nombre completo de un puesto: clúster, fila y puesto | shared/seats | {cluster} · Fila {row} · Puesto {seat} | {cluster} · Row {row} · Seat {seat} | {cluster} · Fila {row} · Lloc {seat} | {cluster} · {row}. ilara · {seat}. postua |
 | `map.row` | Fila, abreviado | features/map/ClusterMapView | F{n} | R{n} | F{n} | E{n} |
-| `map.rowLong` | Una fila | features/therapy/GroupForm | fila {rows} | row {rows} | fila {rows} | {rows} ilara |
-| `map.rowsLong` | Varias filas | features/therapy/GroupForm | filas {rows} | rows {rows} | files {rows} | {rows} ilarak |
+| `map.rowLong.one` | Una fila | features/therapy/GroupForm | fila {rows} | row {rows} | fila {rows} | {rows} ilara |
+| `map.rowLong.many` | Varias filas | features/therapy/GroupForm | filas {rows} | rows {rows} | files {rows} | {rows} ilarak |
 | `map.seatFree` | Puesto libre | features/map/ClusterMapView | Libre | Free | Lliure | Libre |
 | `map.seatReserved` | Puesto reservado por un grupo de terapia | features/map/ClusterMapView | Reservado por una terapia | Reserved by a therapy group | Reservat per una teràpia | Terapia batek erreserbatuta |
 | `map.you` | Tu puesto | features/map/SeatHoverCard, features/notices/Conversations, shared/ui/PersonLink | Tú | You | Tu | Zu |

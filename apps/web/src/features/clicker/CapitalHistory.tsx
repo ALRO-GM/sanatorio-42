@@ -5,6 +5,7 @@ import type { Lang } from '@sanatorio/contracts'
 import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
+import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { PillGroup } from '../../shared/ui/PillGroup'
 import { CapitalChart } from './CapitalChart'
 
@@ -57,7 +58,7 @@ export function CapitalHistory({
     from: null,
     to: null,
   })
-  const { data } = useAsync(
+  const { data, error, reload } = useAsync(
     () =>
       api.getClickerCapital({
         ...(login === undefined ? {} : { login }),
@@ -133,6 +134,7 @@ export function CapitalHistory({
           />
         </label>
       </div>
+      <ErrorNote error={error} onRetry={() => void reload()} />
       {points.length < 2 ? (
         <p className="cc-chart-empty">{t('clicker.chart.empty')}</p>
       ) : (

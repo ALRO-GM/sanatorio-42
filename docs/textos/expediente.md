@@ -18,8 +18,8 @@ Generado desde `apps/web/src/shared/i18n/textos/expediente.csv` con
 | `xp.level` | Etiqueta del nivel de XP | features/profile/Expediente, features/profile/PublicRecord, features/profile/RecordTour | Nivel | Level | Nivell | Maila |
 | `xp.howTo` | Botón que despliega cómo se gana la XP y cuánta llevas | features/profile/Expediente | Cómo se gana XP y cuánta llevas | How XP is earned and how much you have | Com es guanya XP i quanta en portes | Nola irabazten den XP eta zenbat daramazun |
 | `xp.gotXp` | XP ganada con una actividad | features/profile/Expediente | {xp} XP | {xp} XP | {xp} XP | {xp} XP |
-| `xp.gotOnce` | Veces que hiciste una actividad (una) | features/profile/Expediente | {n} vez | {n} time | {n} vegada | {n} aldiz |
-| `xp.gotTimes` | Veces que hiciste una actividad (varias) | features/profile/Expediente | {n} veces | {n} times | {n} vegades | {n} aldiz |
+| `xp.got.one` | Veces que hiciste una actividad (una) | features/profile/Expediente, shared/i18n/index | {n} vez | {n} time | {n} vegada | {n} aldiz |
+| `xp.got.many` | Veces que hiciste una actividad (varias) | features/profile/Expediente, shared/i18n/index | {n} veces | {n} times | {n} vegades | {n} aldiz |
 | `xp.progress` | XP actual y la que hace falta para el siguiente nivel | features/profile/Expediente, features/profile/PublicRecord, features/profile/RecordTour | {xp} de {next} XP | {xp} of {next} XP | {xp} de {next} XP | {next} XPtik {xp} |
 | `xp.max` | XP actual cuando ya estás en el último nivel | features/profile/Expediente, features/profile/PublicRecord | {xp} XP · nivel máximo | {xp} XP · max level | {xp} XP · nivell màxim | {xp} XP · gehieneko maila |
 | `xp.nextTitle` | Siguiente título que desbloquearás | features/profile/Expediente | Siguiente: {title} | Next: {title} | Següent: {title} | Hurrengoa: {title} |

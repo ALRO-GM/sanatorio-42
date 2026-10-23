@@ -33,14 +33,37 @@ export async function loadLang(lang: Lang): Promise<void> {
   loaded[lang] ??= (await LANGS[lang].load()).default
 }
 
-export { localeOf } from './locale'
+import { localeOf } from './locale'
+
+export { localeOf }
 
 export type Translate = (key: string, vars?: Record<string, string | number>) => string
+
+/**
+ * Un texto que cambia con una cantidad: `tn('xp.got', 3)` lee `xp.got.many`
+ * con `{n}` = 3, y `tn('xp.got', 1)`, `xp.got.one`. Una sola regla para todos
+ * los plurales, en vez de un `n === 1 ? … : …` distinto en cada sitio.
+ */
+export type TranslateCount = (
+  key: string,
+  n: number,
+  vars?: Record<string, string | number>,
+) => string
+
+/**
+ * `one` o `many` según las reglas de plural del idioma (`Intl.PluralRules`).
+ * Para los cuatro de la web solo hay dos formas; un idioma con más («few»,
+ * «two»…) caería en `many` hasta que sus tablas tengan esas columnas.
+ */
+export function pluralOf(lang: string, n: number): 'one' | 'many' {
+  return new Intl.PluralRules(localeOf(lang)).select(n) === 'one' ? 'one' : 'many'
+}
 
 type I18n = {
   lang: Lang
   setLang: (next: Lang) => void
   t: Translate
+  tn: TranslateCount
   /**
    * Un texto largo guardado en muchas claves (una lista, un documento): su
    * estructura en este idioma o, si no está traducido, en español. Ver `tree.ts`.
@@ -71,6 +94,7 @@ const I18nContext = createContext<I18n>({
   lang: 'es',
   setLang: () => undefined,
   t: (key) => key,
+  tn: (key, n) => `${key}.${pluralOf('es', n)}`,
   tree: (prefix) => ({ value: unflatten(es, prefix), translated: true }),
 })
 
@@ -128,13 +152,18 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     [lang, arrived],
   )
 
+  const tn = useCallback<TranslateCount>(
+    (key, n, vars = {}) => t(`${key}.${pluralOf(lang, n)}`, { n, ...vars }),
+    [t, lang],
+  )
+
   const tree = useCallback(
     (prefix: string) => pickTree(loaded[lang], es, prefix, lang === 'es'),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [lang, arrived],
   )
 
-  const value = useMemo(() => ({ lang, setLang, t, tree }), [lang, setLang, t, tree])
+  const value = useMemo(() => ({ lang, setLang, t, tn, tree }), [lang, setLang, t, tn, tree])
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>
 }

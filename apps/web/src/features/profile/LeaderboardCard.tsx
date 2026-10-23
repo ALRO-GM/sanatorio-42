@@ -5,7 +5,7 @@ import type { LeaderboardEntry, LeaderboardPeriod } from '@sanatorio/contracts'
 import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
-import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { Async } from '../../shared/ui/Async'
 import { PillGroup } from '../../shared/ui/PillGroup'
 import { InfoTip } from '../../shared/ui/InfoTip'
 import { RankingList, withMe } from '../../shared/ui/RankingList'
@@ -22,10 +22,11 @@ const SHOWN = 10
 export function LeaderboardCard({ me }: { me: string }) {
   const { t } = useI18n()
   const [period, setPeriod] = useState<LeaderboardPeriod>('month')
-  const { data, error, loading, reload } = useAsync(() => api.getLeaderboard(period), [period])
+  const board = useAsync(() => api.getLeaderboard(period), [period])
 
-  const mine = data?.me ?? null
-  const rows: LeaderboardEntry[] = withMe(data?.entries.slice(0, SHOWN) ?? [], mine)
+  /** Los diez primeros y, si no sales entre ellos, tu fila al final. */
+  const rowsOf = (data: { entries: LeaderboardEntry[]; me: LeaderboardEntry | null }) =>
+    withMe(data.entries.slice(0, SHOWN), data.me)
 
   return (
     <article className="card">
@@ -45,19 +46,21 @@ export function LeaderboardCard({ me }: { me: string }) {
         />
       </div>
 
-      {loading && <p>{t('app.loading')}</p>}
-      {data === undefined && <ErrorNote error={error} onRetry={() => void reload()} />}
-      {data !== undefined && rows.length === 0 && <p className="estado">{t('rank.empty')}</p>}
-      {data !== undefined && mine === null && rows.length > 0 && (
-        <p className="hint">{t('rank.notYet')}</p>
-      )}
-
-      <RankingList
-        rows={rows}
-        me={me}
-        label={t('rank.title')}
-        value={(entry) => <strong className="row-count">{t('rank.xp', { xp: entry.xp })}</strong>}
-      />
+      <Async state={board} empty={(data) => rowsOf(data).length === 0} emptyText={t('rank.empty')}>
+        {(data) => (
+          <>
+            {data.me === null && <p className="hint">{t('rank.notYet')}</p>}
+            <RankingList
+              rows={rowsOf(data)}
+              me={me}
+              label={t('rank.title')}
+              value={(entry) => (
+                <strong className="row-count">{t('rank.xp', { xp: entry.xp })}</strong>
+              )}
+            />
+          </>
+        )}
+      </Async>
     </article>
   )
 }

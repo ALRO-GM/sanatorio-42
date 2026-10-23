@@ -6,6 +6,7 @@ import { useAsync } from '../../shared/hooks/useAsync'
 import { usePolling } from '../../shared/hooks/usePolling'
 import { useI18n } from '../../shared/i18n'
 import { Show } from '../../shared/detail'
+import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { ComfortSettings } from './ComfortSettings'
 import { DetailSelect } from '../../shared/ui/DetailSelect'
 import { LangSelect } from '../../shared/ui/LangSelect'
@@ -44,6 +45,8 @@ export function Settings({ campusId, onCampusChange }: SettingsProps) {
       <LangSelect />
       <ThemeSelect />
       <ComfortSettings />
+      {/* Sin la lista no se puede cambiar de campus: se dice y se deja reintentar. */}
+      <ErrorNote error={campuses.error} onRetry={() => void campuses.reload()} />
       {campuses.data !== undefined && campuses.data.length > 0 && campusId !== undefined && (
         <Show from="normal">
           <label className="setting">

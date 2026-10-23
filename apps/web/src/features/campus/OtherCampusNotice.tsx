@@ -21,6 +21,7 @@ const seen = (campusId: number): boolean => {
  */
 export function OtherCampusNotice({ campusId }: { campusId: number }) {
   const { t } = useI18n()
+  // Es informativo: mientras carga o si falla, el aviso no sale (no hay nada que arreglar).
   const campuses = useAsync(() => api.getCampuses(), [])
   const [closed, setClosed] = useState(() => seen(campusId))
   const mine = campuses.data?.find((campus) => campus.id === campusId)

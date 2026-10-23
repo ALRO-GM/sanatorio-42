@@ -6,8 +6,8 @@ map.clusters,Selector de sala,Clústeres,Clusters,Clústers,Klusterrak
 map.cluster,Nombre de una sala del campus (en 42 se llaman así),Clúster {n},Cluster {n},Clúster {n},{n}. klusterra
 map.seatName,"Nombre completo de un puesto: clúster, fila y puesto",{cluster} · Fila {row} · Puesto {seat},{cluster} · Row {row} · Seat {seat},{cluster} · Fila {row} · Lloc {seat},{cluster} · {row}. ilara · {seat}. postua
 map.row,"Fila, abreviado",F{n},R{n},F{n},E{n}
-map.rowLong,Una fila,fila {rows},row {rows},fila {rows},{rows} ilara
-map.rowsLong,Varias filas,filas {rows},rows {rows},files {rows},{rows} ilarak
+map.rowLong.one,Una fila,fila {rows},row {rows},fila {rows},{rows} ilara
+map.rowLong.many,Varias filas,filas {rows},rows {rows},files {rows},{rows} ilarak
 map.seatFree,Puesto libre,Libre,Free,Lliure,Libre
 map.seatReserved,Puesto reservado por un grupo de terapia,Reservado por una terapia,Reserved by a therapy group,Reservat per una teràpia,Terapia batek erreserbatuta
 map.you,Tu puesto,Tú,You,Tu,Zu

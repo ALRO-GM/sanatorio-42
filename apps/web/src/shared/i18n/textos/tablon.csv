@@ -4,7 +4,6 @@ graph.title,Título del grafo de proyectos de tu plan de estudios,Tu plan del co
 graph.loading,Mientras se dibuja el grafo,Dibujando el grafo…,Drawing the graph…,Dibuixant el graf…,Grafoa marrazten…
 graph.pick,Indicación: elegir un proyecto en el grafo,Elige un proyecto en el grafo para abrir su tablón.,Pick a project on the graph to open its board.,Tria un projecte al graf per obrir-ne el tauler.,Aukeratu proiektu bat grafoan haren taula irekitzeko.
 graph.circle,Nombre de un círculo (nivel del plan de 42),Círculo {n},Circle {n},Cercle {n},{n}. zirkulua
-graph.unknown,Proyecto que aún no ha hecho nadie del campus,nadie de tu campus lo ha hecho todavía,nobody on your campus has done it yet,ningú del teu campus l'ha fet encara,zure campuseko inork ez du oraindik egin
 graph.needsYou,Marca de un proyecto donde puedes ayudar,Aquí puedes echar una mano,You can lend a hand here,Aquí pots donar un cop de mà,Hemen lagun dezakezu
 graph.status.finished,Estado del proyecto: aprobado,Aprobado,Passed,Aprovat,Gaindituta
 graph.status.in_progress,Estado del proyecto: en curso,En curso,In progress,En curs,Abian
@@ -12,12 +11,12 @@ graph.status.todo,Estado del proyecto: lo puedes empezar,Disponible,Available,Di
 graph.signal.unanswered,Leyenda: dudas sin responder,Dudas sin responder,Unanswered questions,Dubtes sense resposta,Erantzunik gabeko zalantzak
 graph.signal.proposals,Leyenda: cambios propuestos a la guía,Propuestas para la guía,Guide suggestions,Propostes per a la guia,Gidarako proposamenak
 graph.signal.missingGuide,Leyenda: proyecto sin guía,Sin guía todavía,No guide yet,Encara sense guia,Oraindik gidarik gabe
-graph.one.unanswered,Una duda sin responder,1 duda sin responder,1 unanswered question,1 dubte sense resposta,Erantzunik gabeko zalantza 1
-graph.one.proposals,Una propuesta por revisar,1 propuesta por revisar,1 suggestion to review,1 proposta per revisar,Proposamen 1 berrikusteko
-graph.one.missingGuide,Una guía por escribir,1 guía por escribir,1 guide to write,1 guia per escriure,Gida 1 idazteko
-graph.count.unanswered,Varias dudas sin responder,{n} dudas sin responder,{n} unanswered questions,{n} dubtes sense resposta,Erantzunik gabeko {n} zalantza
-graph.count.proposals,Varias propuestas por revisar,{n} propuestas por revisar,{n} suggestions to review,{n} propostes per revisar,{n} proposamen berrikusteko
-graph.count.missingGuide,Varias guías por escribir,{n} guías por escribir,{n} guides to write,{n} guies per escriure,{n} gida idazteko
+graph.todo.unanswered.one,Una duda sin responder,1 duda sin responder,1 unanswered question,1 dubte sense resposta,Erantzunik gabeko zalantza 1
+graph.todo.proposals.one,Una propuesta por revisar,1 propuesta por revisar,1 suggestion to review,1 proposta per revisar,Proposamen 1 berrikusteko
+graph.todo.missingGuide.one,Una guía por escribir,1 guía por escribir,1 guide to write,1 guia per escriure,Gida 1 idazteko
+graph.todo.unanswered.many,Varias dudas sin responder,{n} dudas sin responder,{n} unanswered questions,{n} dubtes sense resposta,Erantzunik gabeko {n} zalantza
+graph.todo.proposals.many,Varias propuestas por revisar,{n} propuestas por revisar,{n} suggestions to review,{n} propostes per revisar,{n} proposamen berrikusteko
+graph.todo.missingGuide.many,Varias guías por escribir,{n} guías por escribir,{n} guides to write,{n} guies per escriure,{n} gida idazteko
 board.loading,Mientras carga el tablón de un proyecto,Abriendo el tablón…,Opening the board…,Obrint el tauler…,Taula irekitzen…
 board.guide,Título de la guía del proyecto,Guía de {project},{project} guide,Guia de {project},{project} proiektuaren gida
 board.guideBy,Quién escribe la guía,Escrita y mantenida por especialistas,Written and maintained by specialists,Escrita i mantinguda per especialistes,Espezialistek idatzia eta mantendua
@@ -57,8 +56,8 @@ cgraph.views,Selector entre los dos grafos del tablón,Qué grafo ver,Which grap
 cgraph.view.progress,Grafo: tu avance en los proyectos,Mi avance,My progress,El meu avanç,Nire aurrerapena
 cgraph.view.corrections,Grafo: cuántas veces has corregido cada proyecto,Mis correcciones,My evaluations,Les meves correccions,Nire zuzenketak
 cgraph.intro,Explicación del grafo de correcciones,"Proyectos que puedes corregir, por círculos: el color dice cuántas veces los has corregido. Los de trazos los podrás corregir cuando los apruebes; los que nadie corrige ya en tu campus no salen.","Projects you can evaluate, by circle: the colour shows how many times you have evaluated each one. Dashed ones become available once you pass them; those nobody evaluates any more on your campus are left out.","Projectes que pots corregir, per cercles: el color diu quantes vegades els has corregit. Els de traços els podràs corregir quan els aprovis; els que ja no corregeix ningú al teu campus no surten.","Zuzen ditzakezun proiektuak, zirkuluka: koloreak zenbat aldiz zuzendu dituzun adierazten du. Marratuak gainditzen dituzunean zuzendu ahal izango dituzu; zure campusean inork zuzentzen ez dituenak ez dira ageri."
-cgraph.master,Título de maestro en varios proyectos,Maestría del código en {n} proyectos: puedes lucirla en tu perfil,Code mastery in {n} projects: you can show it on your profile,Mestria del codi en {n} projectes: la pots lluir al teu perfil,Kodearen maisutasuna {n} proiektutan: zure profilean eraman dezakezu
-cgraph.master1,Título de maestro en un proyecto,Maestría del código en un proyecto: puedes lucirla en tu perfil,Code mastery in one project: you can show it on your profile,Mestria del codi en un projecte: la pots lluir al teu perfil,Kodearen maisutasuna proiektu batean: zure profilean eraman dezakezu
+cgraph.master.many,Título de maestro en varios proyectos,Maestría del código en {n} proyectos: puedes lucirla en tu perfil,Code mastery in {n} projects: you can show it on your profile,Mestria del codi en {n} projectes: la pots lluir al teu perfil,Kodearen maisutasuna {n} proiektutan: zure profilean eraman dezakezu
+cgraph.master.one,Título de maestro en un proyecto,Maestría del código en un proyecto: puedes lucirla en tu perfil,Code mastery in one project: you can show it on your profile,Mestria del codi en un projecte: la pots lluir al teu perfil,Kodearen maisutasuna proiektu batean: zure profilean eraman dezakezu
 cgraph.tier1,Leyenda: corregido pocas veces,Corregido {n} vez,Evaluated {n} time,Corregit {n} vegada,{n} aldiz zuzendua
 cgraph.tier2,Leyenda: corregido algunas veces (mismo texto que tier3 a propósito: cambia el color),{n} veces,{n} times,{n} vegades,{n} aldiz
 cgraph.tier3,Leyenda: corregido bastantes veces,{n} veces,{n} times,{n} vegades,{n} aldiz
@@ -78,6 +77,7 @@ board.flagged,Ya lo has señalado,Lo has señalado.,You flagged it.,L'has asseny
 board.flags,Señales recibidas de las dos necesarias,{n} de 2 señales,{n} of 2 flags,{n} de 2 senyals,2 seinaletik {n}
 graph.track.classic,"Plan de estudios clásico, todo en C",Plan clásico · C,Classic plan · C,Pla clàssic · C,Plan klasikoa · C
 graph.track.next,"Plan de estudios nuevo, con C y Python",Plan nuevo · C y Python,New plan · C and Python,Pla nou · C i Python,Plan berria · C eta Python
+graph.healthFailed,Aviso del grafo del tablón cuando no se pudo leer tu estado de salud,"No hemos podido leer tu estado de salud: el grafo sale sin pace ni plazos.","We could not load your health status: the graph shows no pace or deadlines.","No hem pogut llegir el teu estat de salut: el graf surt sense pace ni terminis.","Ezin izan dugu zure osasun-egoera irakurri: grafoak ez du pacerik ez eperik erakusten."
 graph.here,En qué círculo vas,Vas por el círculo {n},You are on circle {n},Vas pel cercle {n},{n}. zirkuluan zoaz
 graph.youAreHere,Marca de tu círculo actual,estás aquí,you are here,ets aquí,hemen zaude
 graph.status.locked,Proyecto de un círculo al que aún no has llegado,Aún no disponible,Not available yet,Encara no disponible,Oraindik ez dago erabilgarri

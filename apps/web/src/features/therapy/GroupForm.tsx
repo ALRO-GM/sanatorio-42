@@ -81,7 +81,7 @@ const MAX_DATES = 14
  * Los días son fechas concretas: se añaden una a una.
  */
 export function GroupForm({ projects, defaultProject, group, onCancel, onSaved }: GroupFormProps) {
-  const { t, lang } = useI18n()
+  const { t, tn, lang } = useI18n()
   const { busy, error, run } = useAction()
   const confirm = useConfirm()
   const [form, setForm] = useState<GroupFormState>(() =>
@@ -169,7 +169,7 @@ export function GroupForm({ projects, defaultProject, group, onCancel, onSaved }
     }
 
     return clusters.length === 1
-      ? `${clusters[0] ?? ''} · ${t(rows.length === 1 ? 'map.rowLong' : 'map.rowsLong', { rows: rows.join(', ') })}`
+      ? `${clusters[0] ?? ''} · ${tn('map.rowLong', rows.length, { rows: rows.join(', ') })}`
       : clusters.join(', ')
   }
 

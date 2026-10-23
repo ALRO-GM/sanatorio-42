@@ -45,7 +45,7 @@ type ExpedienteProps = {
  * porque el pie también lo necesita para saber qué campus estás mirando.
  */
 export function Expediente({ me, profile }: ExpedienteProps) {
-  const { t } = useI18n()
+  const { t, tn } = useI18n()
   const { busy, error, run } = useAction()
   // Cómo se gana XP y cuánta llevas con cada cosa: plegado hasta que se pide.
   const detail = useDetail()
@@ -154,11 +154,7 @@ export function Expediente({ me, profile }: ExpedienteProps) {
                         </span>
                         <span className="xp-got">
                           <strong>{t('xp.gotXp', { xp: earned[kind].xp })}</strong>
-                          <small>
-                            {t(earned[kind].times === 1 ? 'xp.gotOnce' : 'xp.gotTimes', {
-                              n: earned[kind].times,
-                            })}
-                          </small>
+                          <small>{tn('xp.got', earned[kind].times)}</small>
                         </span>
                       </li>
                     ))}

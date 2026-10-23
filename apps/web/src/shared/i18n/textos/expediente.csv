@@ -10,8 +10,8 @@ xp.loading,Mientras carga tu perfil,Buscando tu expediente…,Fetching your reco
 xp.level,Etiqueta del nivel de XP,Nivel,Level,Nivell,Maila
 xp.howTo,Botón que despliega cómo se gana la XP y cuánta llevas,Cómo se gana XP y cuánta llevas,How XP is earned and how much you have,Com es guanya XP i quanta en portes,Nola irabazten den XP eta zenbat daramazun
 xp.gotXp,XP ganada con una actividad,{xp} XP,{xp} XP,{xp} XP,{xp} XP
-xp.gotOnce,Veces que hiciste una actividad (una),{n} vez,{n} time,{n} vegada,{n} aldiz
-xp.gotTimes,Veces que hiciste una actividad (varias),{n} veces,{n} times,{n} vegades,{n} aldiz
+xp.got.one,Veces que hiciste una actividad (una),{n} vez,{n} time,{n} vegada,{n} aldiz
+xp.got.many,Veces que hiciste una actividad (varias),{n} veces,{n} times,{n} vegades,{n} aldiz
 xp.progress,XP actual y la que hace falta para el siguiente nivel,{xp} de {next} XP,{xp} of {next} XP,{xp} de {next} XP,{next} XPtik {xp}
 xp.max,XP actual cuando ya estás en el último nivel,{xp} XP · nivel máximo,{xp} XP · max level,{xp} XP · nivell màxim,{xp} XP · gehieneko maila
 xp.nextTitle,Siguiente título que desbloquearás,Siguiente: {title},Next: {title},Següent: {title},Hurrengoa: {title}
