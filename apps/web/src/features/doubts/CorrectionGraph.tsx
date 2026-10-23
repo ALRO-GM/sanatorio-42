@@ -1,6 +1,7 @@
 import type { HolyGraph } from '@sanatorio/contracts'
 
 import { useI18n } from '../../shared/i18n'
+import { Icon } from '../../shared/ui/Icon'
 import { CORRECTION_TIERS, correctionRings, tierCounts } from './corrections'
 
 type CorrectionGraphProps = {
@@ -26,7 +27,7 @@ export function CorrectionGraph({ graph, selected, onSelect }: CorrectionGraphPr
       <p className="hint">{t('cgraph.intro')}</p>
       {master > 0 && (
         <p className="cgraph-master" role="status">
-          ✦ {tn('cgraph.master', master)}
+          <Icon name="chispa" size={13} /> {tn('cgraph.master', master)}
         </p>
       )}
       <ul className="cgraph-legend">

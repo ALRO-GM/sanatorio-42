@@ -44,7 +44,7 @@ board.answers1,Una respuesta,1 respuesta,1 answer,1 resposta,Erantzun 1
 board.answersN,Varias respuestas,{n} respuestas,{n} answers,{n} respostes,{n} erantzun
 board.status.open,Estado de la duda: abierta,Abierta,Open,Obert,Irekita
 board.status.resolved,Estado de la duda: resuelta,Resuelta,Solved,Resolt,Ebatzita
-board.status.specialist,Respuesta de alguien que aprobó el proyecto,★ Especialista,★ Specialist,★ Especialista,★ Espezialista
+board.status.specialist,Respuesta de alguien que aprobó el proyecto,Especialista,Specialist,Especialista,Espezialista
 board.noAnswers,Nadie ha respondido todavía,Nadie ha respondido todavía. ¿Sabes la respuesta?,No answers yet. Do you know this one?,Ningú ha respost encara. Saps la resposta?,Inork ez du oraindik erantzun. Ba al dakizu erantzuna?
 board.answerHint,Campo de respuesta,Escribe tu respuesta,Write your answer,Escriu la teva resposta,Idatzi zure erantzuna
 board.answer,Botón para responder,Responder,Answer,Respon,Erantzun

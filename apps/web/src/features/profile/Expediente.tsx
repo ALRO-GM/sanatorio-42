@@ -20,6 +20,7 @@ import { HoursReport } from './HoursReport'
 import { LeaderboardCard } from './LeaderboardCard'
 import { NetworkCard } from './NetworkCard'
 import { InfoTip } from '../../shared/ui/InfoTip'
+import { Icon } from '../../shared/ui/Icon'
 import { RecordTour } from './RecordTour'
 
 /** Lo que da XP, en el orden en que se explica. */
@@ -116,7 +117,7 @@ export function Expediente({ me, profile }: ExpedienteProps) {
                     target="_blank"
                     rel="noreferrer"
                   >
-                    {t('record.intra')}
+                    {t('record.intra')} <Icon name="fuera" size={14} />
                   </a>
                 </div>
                 <div className="xp-row">

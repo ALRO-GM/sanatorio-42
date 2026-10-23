@@ -110,7 +110,7 @@ export function TurnRoomView({ id, me }: { id: number; me: string }) {
     <div className="quiz-room turn-room">
       <div className="quiz-room-bar">
         <a className="back-btn" href={notGamesHref()}>
-          {t('notgames.back')}
+          <Icon name="atras" size={14} /> {t('notgames.back')}
         </a>
         <span className="quiz-room-tools">
           <SoundToggle />

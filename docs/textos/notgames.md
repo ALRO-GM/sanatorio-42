@@ -42,7 +42,7 @@ Generado desde `apps/web/src/shared/i18n/textos/notgames.csv` con
 | `notgames.competitiveShort` | Not-games: etiqueta corta de competitivo | features/notgames/settings-text | Competitivo | Competitive | Competitiu | Lehiakorra |
 | `notgames.nQuestions` | Not-games: número de preguntas de una sala | features/notgames/settings-text | {n} preguntas | {n} questions | {n} preguntes | {n} galdera |
 | `notgames.fromCircle` | Not-games: círculo mínimo para entrar | features/notgames/NotGamesPage, features/notgames/settings-text | Desde el círculo {n} | From circle {n} | Des del cercle {n} | {n}. zirkulutik |
-| `notgames.back` | Not-games: enlace para volver a la lista de salas | features/notgames/RoomView, features/notgames/TurnRoomView | ← Salas | ← Rooms | ← Sales | ← Gelak |
+| `notgames.back` | Not-games: enlace para volver a la lista de salas | features/notgames/RoomView, features/notgames/TurnRoomView | Salas | Rooms | Sales | Gelak |
 | `notgames.waiting` | Not-games: cuánta gente hay esperando | features/notgames/RoomView, features/notgames/TurnRoomView | Esperando a empezar · {n} dentro | Waiting to start · {n} inside | Esperant per començar · {n} a dins | Hasteko zain · {n} barruan |
 | `notgames.team.a` | Not-games: nombre del equipo A | features/notgames/RoomView | Equipo A | Team A | Equip A | A taldea |
 | `notgames.team.b` | Not-games: nombre del equipo B | features/notgames/RoomView | Equipo B | Team B | Equip B | B taldea |

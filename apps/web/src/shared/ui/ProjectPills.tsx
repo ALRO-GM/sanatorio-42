@@ -2,6 +2,7 @@ import type { ProjectSummary } from '@sanatorio/contracts'
 
 import { useI18n } from '../i18n'
 import { PillGroup } from './PillGroup'
+import { Icon } from './Icon'
 
 type ProjectPillsProps = {
   projects: readonly ProjectSummary[]
@@ -45,7 +46,7 @@ export function ProjectPills({ projects, value, onChange, allLabel }: ProjectPil
 
         return (
           <>
-            {project?.status === 'finished' && <span aria-hidden="true">★ </span>}
+            {project?.status === 'finished' && <Icon name="estrella" size={13} />}
             {project?.name}
           </>
         )

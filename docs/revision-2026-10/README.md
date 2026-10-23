@@ -54,8 +54,11 @@ semánticos, `Async` y plurales, `PeopleResults`), unidos el 23 de octubre.
 **Textos** (`textos.md`): las 275 filas, el glosario y los contextos
 aplicados; catalán y euskera completos en todas las tablas (1 009 filas).
 Claves repetidas: 55 unidas en 21 `common.*` (botones y etiquetas genéricas;
-las que se montan con plantilla y las de contexto distinto se quedan). Queda
-pintar como icono los glifos (★ ✦ ← →) que hoy van en el texto.
+las que se montan con plantilla y las de contexto distinto se quedan). Los
+glifos decorativos (★ ✦ ← → ↗) salen del texto y se pintan con `Icon`
+(nuevos: `atras`, `adelante`, `fuera`, `chispa`); las flechas de la leyenda
+de la red y las estrellas de puntuación del curso de git se quedan, porque
+son contenido.
 
 **Tests e infraestructura** (`tests-infra.md`): hechos los puntos 1, 2, 5 y
 6 de su lista (logger a `warn` con `x-request-id`, migración aparte con

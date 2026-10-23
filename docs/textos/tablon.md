@@ -52,7 +52,7 @@ Generado desde `apps/web/src/shared/i18n/textos/tablon.csv` con
 | `board.answersN` | Varias respuestas | features/doubts/DoubtBoard, features/doubts/GuidePanel | {n} respuestas | {n} answers | {n} respostes | {n} erantzun |
 | `board.status.open` | Estado de la duda: abierta | features/doubts/DoubtBoard, features/doubts/DoubtDetailCard, features/doubts/GuidePanel | Abierta | Open | Obert | Irekita |
 | `board.status.resolved` | Estado de la duda: resuelta | features/doubts/DoubtBoard, features/doubts/DoubtDetailCard, features/doubts/GuidePanel | Resuelta | Solved | Resolt | Ebatzita |
-| `board.status.specialist` | Respuesta de alguien que aprobó el proyecto | features/doubts/DoubtBoard, features/doubts/DoubtDetailCard, features/doubts/GuidePanel | ★ Especialista | ★ Specialist | ★ Especialista | ★ Espezialista |
+| `board.status.specialist` | Respuesta de alguien que aprobó el proyecto | features/doubts/DoubtBoard, features/doubts/DoubtDetailCard, features/doubts/GuidePanel | Especialista | Specialist | Especialista | Espezialista |
 | `board.noAnswers` | Nadie ha respondido todavía | features/doubts/DoubtDetailCard, features/doubts/GuidePanel | Nadie ha respondido todavía. ¿Sabes la respuesta? | No answers yet. Do you know this one? | Ningú ha respost encara. Saps la resposta? | Inork ez du oraindik erantzun. Ba al dakizu erantzuna? |
 | `board.answerHint` | Campo de respuesta | features/doubts/DoubtDetailCard, features/doubts/GuidePanel | Escribe tu respuesta | Write your answer | Escriu la teva resposta | Idatzi zure erantzuna |
 | `board.answer` | Botón para responder | features/doubts/DoubtDetailCard, features/doubts/GuidePanel | Responder | Answer | Respon | Erantzun |

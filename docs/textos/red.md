@@ -86,7 +86,7 @@ Generado desde `apps/web/src/shared/i18n/textos/red.csv` con
 | `net.scale.fit` | Botón: ajustar la escala a lo visible | features/network/NetworkPage | Ajustar a lo que se ve | Fit to what is shown | Ajusta al que es veu | Doitu ikusten denera |
 | `net.scale.reset` | Botón: escala completa | features/network/NetworkPage | Escala completa | Full scale | Escala completa | Eskala osoa |
 | `net.card.title` | Tarjeta del perfil: tu red de correcciones | features/profile/NetworkCard | Tu red de correcciones | Your evaluation network | La teva xarxa de correccions | Zure zuzenketen sarea |
-| `net.card.open` | Enlace al grafo completo | features/profile/NetworkCard | Ver el grafo → | Open the graph → | Veure el graf → | Ikusi grafoa → |
+| `net.card.open` | Enlace al grafo completo | features/profile/NetworkCard | Ver el grafo | Open the graph | Veure el graf | Ikusi grafoa |
 | `net.card.empty` | Sin correcciones todavía | features/profile/NetworkCard | Todavía no tienes correcciones en el 42cursus de este campus. | You have no 42cursus evaluations on this campus yet. | Encara no tens correccions al 42cursus d'aquest campus. | Oraindik ez duzu zuzenketarik campus honetako 42cursusean. |
 | `net.card.copying` | El historial aún se está copiando | features/profile/NetworkCard | Aún se está copiando el historial de correcciones de 42. Vuelve en un rato. | The evaluation history is still being copied from 42. Come back in a while. | Encara s'està copiant l'historial de correccions de 42. Torna d'aquí a una estona. | Oraindik 42ko zuzenketen historia kopiatzen ari da. Itzuli pixka bat barru. |
 | `net.verdict` | Filtro por resultado | features/network/NetworkPage | Veredicto | Verdict | Veredicte | Epaia |

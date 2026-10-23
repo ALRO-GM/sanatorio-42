@@ -310,7 +310,7 @@ recurrente. Hecho el 22-23 de octubre:
 - [x] Recorridos: asistencia, guardia, pizarra, terapia, tablón y test del
       cliente real (falta el del Code Clicker).
 - [ ] Queda: recorrido del Code Clicker, monitor externo (cuenta gratuita: Alberto),
-      textos que tocan código (claves repetidas, glifos; también web), destino
+      destino
       de las copias fuera de la máquina (bucket gratuito de Oracle + rclone +
       frase: decisión y pasos con Alberto).
 

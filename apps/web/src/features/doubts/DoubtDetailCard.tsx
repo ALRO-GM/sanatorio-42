@@ -6,6 +6,7 @@ import { useAction, useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { ReportButton } from '../../shared/ui/ReportButton'
+import { Icon } from '../../shared/ui/Icon'
 
 type DoubtDetailCardProps = {
   doubtId: number
@@ -118,7 +119,10 @@ export function DoubtDetailCard({ doubtId, onClose, onChange }: DoubtDetailCardP
             </div>
           </form>
         )}
-        <span className={`postit-status ${doubt.status}`}>{t(`board.status.${doubt.status}`)}</span>
+        <span className={`postit-status ${doubt.status}`}>
+          {doubt.status === 'specialist' && <Icon name="estrella" size={13} />}{' '}
+          {t(`board.status.${doubt.status}`)}
+        </span>
       </header>
       <p className="hint">{doubt.author}</p>
 
@@ -137,7 +141,9 @@ export function DoubtDetailCard({ doubtId, onClose, onChange }: DoubtDetailCardP
           >
             <strong>{entry.author}</strong>
             {entry.specialist && (
-              <span className="badge specialist">★ {t('board.specialistTag')}</span>
+              <span className="badge specialist">
+                <Icon name="estrella" size={13} /> {t('board.specialistTag')}
+              </span>
             )}
             {entry.id === doubt.solvedAnswerId && (
               <span className="badge on">{t('board.solution')}</span>

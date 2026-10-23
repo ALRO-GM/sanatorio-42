@@ -13,6 +13,7 @@ import { GuidePanel } from './GuidePanel'
 import { HolyGraph } from './HolyGraph'
 import { CorrectionGraph } from './CorrectionGraph'
 import { InfoTip } from '../../shared/ui/InfoTip'
+import { Icon } from '../../shared/ui/Icon'
 import { BoardTour } from './BoardTour'
 
 type DoubtBoardProps = {
@@ -175,6 +176,7 @@ function ProjectBoard({ projectId, onChange }: { projectId: number; onChange: ()
                       : t('board.answersN', { n: doubt.answers })}
                   </span>
                   <span className={`postit-status ${doubt.status}`}>
+                    {doubt.status === 'specialist' && <Icon name="estrella" size={13} />}{' '}
                     {t(`board.status.${doubt.status}`)}
                   </span>
                 </span>

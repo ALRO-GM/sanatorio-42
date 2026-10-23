@@ -33,7 +33,7 @@ export function PublicRecord({ login, me }: { login: string; me: string }) {
     return (
       <section>
         <a className="back-btn" href="#/expediente">
-          {t('record.backToMine')}
+          <Icon name="atras" size={14} /> {t('record.backToMine')}
         </a>
         <ErrorNote error={error} onRetry={() => void reload()} />
       </section>
@@ -47,7 +47,7 @@ export function PublicRecord({ login, me }: { login: string; me: string }) {
   return (
     <section>
       <a className="back-btn" href="#/expediente">
-        {t('record.backToMine')}
+        <Icon name="atras" size={14} /> {t('record.backToMine')}
       </a>
       <h2>{t('record.of', { login: data.login })}</h2>
       {style !== null && (
@@ -94,7 +94,7 @@ export function PublicRecord({ login, me }: { login: string; me: string }) {
               : t('xp.progress', { xp: xp.total, next: xp.next })}
           </span>
           <a className="profile-link" href={intraHref(data.login)} target="_blank" rel="noreferrer">
-            {t('record.intra')}
+            {t('record.intra')} <Icon name="fuera" size={14} />
           </a>
         </div>
         <div

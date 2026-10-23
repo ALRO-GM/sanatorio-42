@@ -34,7 +34,7 @@ notgames.competitive,Not-games: casilla de versión competitiva,Competitivo: fal
 notgames.competitiveShort,Not-games: etiqueta corta de competitivo,Competitivo,Competitive,Competitiu,Lehiakorra
 notgames.nQuestions,Not-games: número de preguntas de una sala,{n} preguntas,{n} questions,{n} preguntes,{n} galdera
 notgames.fromCircle,Not-games: círculo mínimo para entrar,Desde el círculo {n},From circle {n},Des del cercle {n},{n}. zirkulutik
-notgames.back,Not-games: enlace para volver a la lista de salas,← Salas,← Rooms,← Sales,← Gelak
+notgames.back,Not-games: enlace para volver a la lista de salas,Salas,Rooms,Sales,Gelak
 notgames.waiting,Not-games: cuánta gente hay esperando,Esperando a empezar · {n} dentro,Waiting to start · {n} inside,Esperant per començar · {n} a dins,Hasteko zain · {n} barruan
 notgames.team.a,Not-games: nombre del equipo A,Equipo A,Team A,Equip A,A taldea
 notgames.team.b,Not-games: nombre del equipo B,Equipo B,Team B,Equip B,B taldea

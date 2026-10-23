@@ -61,7 +61,9 @@ export function WaitingTour() {
                       <strong>mgarcia</strong>
                       <span className="tour-muted">c1r2s4</span>
                     </span>
-                    <span className="tour-chip star tour-end">{t('peers.specialist')}</span>
+                    <span className="tour-chip star tour-end">
+                      <Icon name="estrella" size={13} /> {t('peers.specialist')}
+                    </span>
                   </span>
                   <span className="tour-item">
                     <span className="tour-avatar" style={{ ['--hue' as string]: 280 }}>

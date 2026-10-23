@@ -29,14 +29,14 @@ peers.attendsAt,Puesto donde está sentada esa persona,Te atiende en {location},
 peers.away,Esa persona no está en el campus,Fuera del centro,Off campus,Fora del centre,Zentrotik kanpo
 peers.badgeOn,Etiqueta: está de guardia,De guardia,On duty,De guàrdia,Guardian
 peers.badgeOff,Etiqueta: no está de guardia,Fuera de turno,Off duty,Fora de torn,Txandatik kanpo
-peers.specialist,Etiqueta: aprobó el proyecto,★ Especialista,★ Specialist,★ Especialista,★ Espezialista
+peers.specialist,Etiqueta: aprobó el proyecto,Especialista,Specialist,Especialista,Espezialista
 peers.patient,Etiqueta: está haciendo el mismo proyecto,Paciente como tú,Patient like you,Pacient com tu,Zu bezalako pazientea
 peers.profile,Enlace al perfil de esa persona,Ver perfil,View profile,Veure el perfil,Ikusi profila
 peers.groupHint,Sugerencia de montar un grupo de terapia con quien hace lo mismo,Hay {n} pacientes como tú de guardia con el mismo proyecto. ¿Montas una terapia de grupo?,{n} patients like you are on duty on the same project. Start a therapy group?,Hi ha {n} pacients com tu de guàrdia amb el mateix projecte. Muntes una teràpia de grup?,Zure proiektu bera duten {n} paziente daude guardian. Talde-terapia antolatuko duzu?
 peers.groupOpen,Hay varios grupos de terapia abiertos,Hay {n} grupos de terapia abiertos para este proyecto.,There are {n} therapy groups open for this project.,Hi ha {n} grups de teràpia oberts per a aquest projecte.,{n} terapia-talde daude irekita proiektu honetarako.
 peers.groupOpen1,Hay un grupo de terapia abierto,Hay un grupo de terapia abierto para este proyecto.,There's a therapy group open for this project.,Hi ha un grup de teràpia obert per a aquest projecte.,Terapia-talde bat dago irekita proiektu honetarako.
 peers.groupGo,Botón para ir a los grupos de terapia,Ver terapias de grupo,See therapy groups,Veure teràpies de grup,Ikusi talde-terapiak
-peers.eminence,Etiqueta: aprobó con la nota máxima (125),✦ Eminencia,✦ Eminence,✦ Eminència,✦ Eminentzia
+peers.eminence,Etiqueta: aprobó con la nota máxima (125),Eminencia,Eminence,Eminència,Eminentzia
 peers.eminenceHint,Explicación de la etiqueta de nota máxima,Lo aprobó con 125: el proyecto entero y todos los bonus,Passed with 125: the whole project and every bonus,El va aprovar amb 125: el projecte sencer i tots els bonus,125ekin gainditu zuen: proiektu osoa eta bonus guztiak
 peers.crossed,Cuántas veces os habéis corregido entre los dos,Ya os conocéis. Le has corregido: {gave}. Te ha corregido: {got}.,You know each other. You evaluated them: {gave}. They evaluated you: {got}.,Ja us coneixeu. L'has corregit: {gave}. T'ha corregit: {got}.,Ezagutzen duzue elkar. Zuk zuzendu diozu: {gave}. Berak zuzendu dizu: {got}.
 peers.neverCrossed,Nunca os habéis corregido,Cara nueva: nunca os habéis corregido,New face: you have never evaluated each other,Cara nova: no us heu corregit mai,Aurpegi berria: ez duzue inoiz elkar zuzendu

@@ -130,6 +130,21 @@ const PATHS = {
   ),
   cerrar: <path d="M6 6l12 12M18 6L6 18" />,
   abajo: <path d="M6 9l6 6 6-6" />,
+  /** Volver: una flecha a la izquierda. */
+  atras: <path d="M19 12H5M11 6l-6 6 6 6" />,
+  /** Ir a más: una flecha a la derecha. */
+  adelante: <path d="M5 12h14M13 6l6 6-6 6" />,
+  /** Se abre fuera de la web (la intra): una flecha que sale de la caja. */
+  fuera: (
+    <>
+      <path d="M14 5h5v5M19 5l-8 8" />
+      <path d="M17 14v5H5V7h5" />
+    </>
+  ),
+  /** Eminencia: un destello de cuatro puntas. */
+  chispa: (
+    <path d="M12 3c.6 4.6 2.4 6.4 7 7-4.6.6-6.4 2.4-7 7-.6-4.6-2.4-6.4-7-7 4.6-.6 6.4-2.4 7-7z" />
+  ),
   mas: <path d="M12 5v14M5 12h14" />,
   hecho: <path d="M5 12.5l4.5 4.5L19 7.5" />,
   info: (

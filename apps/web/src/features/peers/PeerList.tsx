@@ -243,10 +243,12 @@ export function PeerList({ project, onOpenTherapy }: PeerListProps) {
                 <span className="peer-badges">
                   {peer.perfect ? (
                     <span className="badge eminence" title={t('peers.eminenceHint')}>
-                      {t('peers.eminence')}
+                      <Icon name="chispa" size={13} /> {t('peers.eminence')}
                     </span>
                   ) : peer.status === 'finished' ? (
-                    <span className="badge specialist">{t('peers.specialist')}</span>
+                    <span className="badge specialist">
+                      <Icon name="estrella" size={13} /> {t('peers.specialist')}
+                    </span>
                   ) : (
                     <span className="badge subtle">{t('peers.patient')}</span>
                   )}
