@@ -173,13 +173,14 @@ export function createMeetService(options: MeetServiceOptions) {
       // Un chat directo es de sus dos logins, en orden alfabético para que
       // haya un solo chat por pareja, y los dos tienen que existir.
       if (kind === 'dm') {
-        const pair = [second ?? '', third ?? '']
+        const a = second ?? ''
+        const b = third ?? ''
 
         return (
-          pair.includes(actor.login) &&
-          pair[0] !== pair[1] &&
-          [...pair].sort().join() === pair.join() &&
-          (await Promise.all(pair.map((login) => replica.userExists(login)))).every(Boolean)
+          (a === actor.login || b === actor.login) &&
+          a !== b &&
+          [a, b].sort().join() === [a, b].join() &&
+          (await Promise.all([a, b].map((login) => replica.userExists(login)))).every(Boolean)
         )
       }
       if (kind === 'board') {
@@ -209,6 +210,17 @@ export function createMeetService(options: MeetServiceOptions) {
 
     if (!takesPart) {
       throw domainError('forbidden', 'Ese evento no está en tu calendario')
+    }
+
+    // Un bloqueo en la ayuda corta también el chat directo, en los dos
+    // sentidos: vale para todo lo que es de persona a persona. Se mira fuera
+    // de la memoria de arriba para que surta efecto al momento.
+    if (id.startsWith('dm:')) {
+      const [, a = '', b = ''] = id.split(':')
+
+      if (await help.blockedBetween(a, b)) {
+        throw domainError('forbidden', 'No podéis escribiros')
+      }
     }
   }
 

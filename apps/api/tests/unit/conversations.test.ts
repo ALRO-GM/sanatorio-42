@@ -106,6 +106,19 @@ describe('conversaciones', () => {
       expect(await list('leo')).toEqual([])
     })
 
+    it('un bloqueo en la ayuda corta la directa en los dos sentidos; quitarlo la devuelve', async () => {
+      await say('eva', DM, 'Hola, Ana')
+      await services.help.block(actor('ana'), { login: 'eva' })
+
+      await expectCode(say('eva', DM, '¿Sigues ahí?'), 'forbidden')
+      await expectCode(say('ana', DM, 'Ahora no'), 'forbidden')
+      await expectCode(open('eva', DM), 'forbidden')
+
+      await services.help.unblock(actor('ana'), 'eva')
+      await say('eva', DM, 'Perdona')
+      expect((await list('ana'))[0]?.last).toMatchObject({ body: 'Perdona' })
+    })
+
     it('la de actividad más reciente va primero, y dice quién sigue conectado', async () => {
       await say('eva', DM, 'Hola, Ana')
       clock.advance(MINUTE)
