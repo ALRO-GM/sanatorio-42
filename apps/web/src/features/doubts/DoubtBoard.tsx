@@ -15,6 +15,7 @@ import { CorrectionGraph } from './CorrectionGraph'
 import { InfoTip } from '../../shared/ui/InfoTip'
 import { Icon } from '../../shared/ui/Icon'
 import { BoardTour } from './BoardTour'
+import { PoolOnly } from '../../shared/ui/PoolOnly'
 
 type DoubtBoardProps = {
   /** Proyecto con el que se abre, si se llega desde otra sección. */
@@ -81,9 +82,13 @@ export function DoubtBoard({ initialProject }: DoubtBoardProps) {
           </Show>
           {/* En el modo simplificado solo está el grafo de tu avance. */}
           {view === 'progress' || !shows(detail, 'normal') ? (
-            <HolyGraph graph={graph.data} selected={projectId} onSelect={select} />
+            <PoolOnly k="tablon.graph">
+              <HolyGraph graph={graph.data} selected={projectId} onSelect={select} />
+            </PoolOnly>
           ) : (
-            <CorrectionGraph graph={graph.data} selected={projectId} onSelect={select} />
+            <PoolOnly k="tablon.corrections">
+              <CorrectionGraph graph={graph.data} selected={projectId} onSelect={select} />
+            </PoolOnly>
           )}
         </>
       )}

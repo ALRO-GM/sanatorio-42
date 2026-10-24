@@ -105,6 +105,7 @@ export function createSessionReader(options: SessionReaderOptions): SessionReade
         campusId: profile?.campusId ?? homeCampus(session),
         admin: access?.admin ?? options.adminLogins.includes(session.login.toLowerCase()),
         lang: request.headers['x-lang'] === 'en' ? 'en' : 'es',
+        ...(session.role === 'pool' ? { pool: true } : {}),
       }
     },
   }

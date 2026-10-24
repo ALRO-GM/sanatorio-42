@@ -15,8 +15,14 @@ export async function settle(ms = 600): Promise<void> {
  * Pinta la web entera en esa dirección, con la API de mentira y en español, sin
  * la bienvenida ni las condiciones delante.
  */
-export async function openApp(hash: string): Promise<void> {
+export async function openApp(
+  hash: string,
+  { pool = false, detail }: { pool?: boolean; detail?: 'simple' | 'normal' | 'datos' } = {},
+): Promise<void> {
   localStorage.clear()
+  // Como piscinero (`docs/piscineros.md`): la API de mentira contesta con lo permitido.
+  if (pool) localStorage.setItem('mock_pool', 'true')
+  if (detail !== undefined) localStorage.setItem('sanatorio_detail', detail)
   localStorage.setItem('sanatorio_welcome_seen', '1')
   localStorage.setItem('sanatorio_lang', 'es')
   // Alguien que ya aceptó las condiciones: su ventana no tapa lo que se prueba.

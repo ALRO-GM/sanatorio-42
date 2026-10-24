@@ -16,6 +16,7 @@ import { PillGroup } from '../../shared/ui/PillGroup'
 import { BookHelp } from '../help/BookHelp'
 import { ProjectMap } from '../map/ProjectMap'
 import { intraHref } from '../../shared/links'
+import { PoolOnly } from '../../shared/ui/PoolOnly'
 
 // 0: especialista de guardia · 1: paciente como tú de guardia
 // 2: especialista que no está de guardia · 3: paciente como tú que no está de guardia
@@ -141,7 +142,9 @@ export function PeerList({ project, onOpenTherapy }: PeerListProps) {
         </p>
       )}
       {peers.length === 0 && <p>{t('peers.nobody')}</p>}
-      <ProjectMap projectId={project.id} spotlight={spotlight} />
+      <PoolOnly k="consulta.map">
+        <ProjectMap projectId={project.id} spotlight={spotlight} />
+      </PoolOnly>
       <div className="filters">
         <Show from="normal">
           <PillGroup<TypeFilter>

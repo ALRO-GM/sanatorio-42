@@ -83,7 +83,7 @@ describe('quién entra', () => {
     })
 
     expect(saved.statusCode).toBe(200)
-    expect(json(saved) as PoolSettings).toEqual({
+    expect(json(saved) as PoolSettings).toMatchObject({
       open: false,
       message: 'La piscina abre el lunes.',
     })

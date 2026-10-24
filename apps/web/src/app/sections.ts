@@ -1,4 +1,7 @@
+import type { PoolAccess, PoolKey } from '@sanatorio/contracts'
+
 import type { Detail } from '../shared/detail'
+import { poolAllows } from '../shared/pool'
 import type { IconName } from '../shared/ui/Icon'
 /**
  * Secciones de la web. La portada (`HOME`) es el expediente: lo primero que se
@@ -99,6 +102,39 @@ export function sectionsOfCategory(category: Category): SectionInfo[] {
 }
 
 export const HOME: Section = 'expediente'
+
+/**
+ * El permiso de piscinero de cada sección (`docs/piscineros.md`); `null` la
+ * que no depende de él: privacidad, siempre; gestión, solo quien administra.
+ */
+const POOL_KEY: Record<Section, PoolKey | null> = {
+  consulta: 'consulta',
+  tablon: 'tablon',
+  terapia: 'terapia',
+  pizarras: 'pizarras',
+  notgames: 'notgames',
+  estadisticas: 'estadisticas',
+  calendario: 'calendario',
+  red: 'red',
+  avance: 'avance',
+  clusters: 'clusters',
+  examenes: 'examenes',
+  guardia: 'guardia',
+  expediente: 'expediente',
+  clicker: 'clicker',
+  gestion: null,
+  privacidad: null,
+}
+
+/**
+ * Si un piscinero no puede abrir esta sección. La portada nunca se cierra: es
+ * adonde se vuelve, y sin el permiso enseña solo un saludo.
+ */
+export function blockedForPool(section: Section, access: PoolAccess): boolean {
+  const key = POOL_KEY[section]
+
+  return section !== HOME && key !== null && !poolAllows(key, access)
+}
 
 /**
  * Si, en Pomodoro, esta sección queda fuera: una de las pestañas que no se ha

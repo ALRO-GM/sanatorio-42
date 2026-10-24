@@ -1553,8 +1553,9 @@ POST /quiz/rooms/:id/answer   → QuizRoom. { question, option }: option es el i
 
 ```
 GET /pool/notice   → PoolNotice, sin sesión: el aviso de la piscina cerrada
+GET /pool/access   → PoolAccess: si eres piscinero y qué puedes ver
 GET /admin/pool    → PoolSettings (solo admins)
-PUT /admin/pool    → { message } → PoolSettings (solo admins)
+PUT /admin/pool    → { open?, message?, allow? } → PoolSettings (solo admins)
 ```
 
 - Quién entra se decide al volver de 42 (`docs/piscineros.md`): con el
@@ -1562,7 +1563,15 @@ PUT /admin/pool    → { message } → PoolSettings (solo admins)
   demás, no. Quien no entra vuelve al front con `?error=not_student` o
   `?error=pool_closed` (`status=403`) y sin sesión.
 - La cookie lleva el grupo (`aud`); una de antes, sin él, ya no vale.
-- `open` es `false` hasta que estén los permisos de piscineros.
+- Con una sesión de piscinero, cada petición pasa por un corte antes de la
+  ruta: si la plantilla de la ruta no es de la base ni de un permiso concedido
+  (`modules/pool/pool.keys.ts`), `403`. Un elemento (`red.rankings`) solo vale
+  con su pestaña (`red`). Toda ruta nueva se apunta en esa tabla (lo exige
+  `tests/integration/pool-gate.test.ts`).
+- `allow`: los permisos (`PoolKey` en `packages/contracts/src/pool.ts`); sin
+  ajustes guardados, `POOL_DEFAULT`.
+- `open: true` da `409` mientras lo de piscina no esté separado de lo de
+  estudiantes (fase 3 de `docs/piscineros.md`).
 
 ## Exámenes (`modules/exams`)
 

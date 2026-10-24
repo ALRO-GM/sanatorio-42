@@ -28,6 +28,7 @@ import { ChessTour } from './ChessTour'
 import { ReviewTab } from './ReviewTab'
 import { TurnRoomView } from './TurnRoomView'
 import { settingsText } from './settings-text'
+import { usePoolAllows } from '../../shared/pool'
 
 const MODES: readonly QuizMode[] = ['duel', 'teams', 'ffa', 'survival']
 const KINDS: readonly QuizKinds[] = ['mixed', 'quick', 'long']
@@ -79,20 +80,24 @@ type Tab = (typeof TABS)[number]
 function Lobby({ me, initial }: { me: string; initial: Tab }) {
   const { t } = useI18n()
   const [tab, setTab] = useState<Tab>(initial)
+  // Un piscinero, solo las pestañas que permite el panel (`docs/piscineros.md`).
+  const review = usePoolAllows('notgames.review')
+  const git = usePoolAllows('gitcourse')
+  const tabs = TABS.filter((each) => (each !== 'review' || review) && (each !== 'git' || git))
 
   return (
     <>
       <PillGroup
         kind="tabs"
-        options={TABS}
+        options={tabs}
         value={tab}
         onChange={setTab}
         label={t('nav.notgames')}
         text={(option) => t(`notgames.tab.${option}`)}
       />
       {tab === 'rooms' && <Rooms />}
-      {tab === 'review' && <ReviewTab />}
-      {tab === 'git' && (
+      {tab === 'review' && review && <ReviewTab />}
+      {tab === 'git' && git && (
         <GitCourseTab
           me={me}
           onReview={() => {
@@ -247,7 +252,9 @@ function CreateRoom({ onCancel }: { onCancel: () => void }) {
     questions: 10,
     minCircle: null,
   })
+  const chess = usePoolAllows('notgames.chess')
   const [game, setGame] = useState<Game>('quiz')
+  const games = GAMES.filter((each) => each !== 'chess' || chess)
   const [minutes, setMinutes] = useState<TurnSettings['minutes']>(5)
   const { busy, error, run } = useAction()
   const change = (next: Partial<QuizSettings>): void => {
@@ -282,7 +289,7 @@ function CreateRoom({ onCancel }: { onCancel: () => void }) {
 
       <fieldset className="quiz-modes">
         <legend>{t('notgames.game.label')}</legend>
-        {GAMES.map((option) => (
+        {games.map((option) => (
           <button
             key={option}
             type="button"

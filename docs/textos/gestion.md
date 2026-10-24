@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/gestion.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-469 textos. «—» es que falta la traducción: sale en español.
+515 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -466,10 +466,56 @@ Generado desde `apps/web/src/shared/i18n/textos/gestion.csv` con
 | `admin.tab.pool` | Panel de gestión: pestaña de la piscina (quién entra) | features/admin/AdminPage | Piscina | Piscine | Piscina | Igerilekua |
 | `admin.pool.title` | Panel, Piscina: título | features/admin/PoolPanel | Piscina | Piscine | Piscina | Igerilekua |
 | `admin.pool.who` | Panel, Piscina: quién entra | features/admin/PoolPanel | Solo entran estudiantes (con el 42cursus). Un piscinero de una piscina en curso ve el aviso de abajo; el resto, que su cuenta no es de estudiante. | Only students (with the 42cursus) can sign in. Someone in a current piscine sees the notice below; everyone else is told their account is not a student one. | Només hi entren estudiants (amb el 42cursus). Un piscinista d'una piscina en curs veu l'avís de sota; la resta, que el seu compte no és d'estudiant. | Ikasleak bakarrik sartzen dira (42cursus-arekin). Martxan dagoen igerileku bateko igerilariak beheko oharra ikusten du; besteek, haien kontua ez dela ikaslearena. |
-| `admin.pool.closed` | Panel, Piscina: estado cerrado | features/admin/PoolPanel | Cerrada para piscineros | Closed to piscine students | Tancada per als piscinistes | Itxita igerilarientzat |
-| `admin.pool.open` | Panel, Piscina: estado abierto | features/admin/PoolPanel | Abierta para piscineros | Open to piscine students | Oberta per als piscinistes | Irekita igerilarientzat |
 | `admin.pool.message` | Panel, Piscina: hueco del aviso | features/admin/PoolPanel | Aviso para piscineros | Notice for piscine students | Avís per als piscinistes | Igerilarientzako oharra |
 | `admin.pool.messageHint` | Panel, Piscina: qué pasa si se deja vacío | features/admin/PoolPanel | Vacío: sale el aviso de fábrica. | Empty: the default notice is shown. | Buit: surt l'avís per defecte. | Hutsik: lehenetsitako oharra agertzen da. |
+| `admin.pool.openLabel` | Panel, Piscina: casilla para dejar entrar a piscineros | features/admin/PoolPanel | Dejar entrar a piscineros de una piscina en curso | Let in students of a current piscine | Deixar entrar piscinistes d'una piscina en curs | Martxan dagoen igerileku bateko igerilariak sartzen utzi |
+| `admin.pool.allow` | Panel, Piscina: título del árbol de permisos | features/admin/PoolPanel | Qué pueden ver | What they can see | Què poden veure | Zer ikus dezaketen |
+| `admin.pool.allowHint` | Panel, Piscina: cómo funciona el árbol | features/admin/PoolPanel | Un elemento solo se ve si su pestaña está marcada. Solo ven piscineros de su campus, nunca estudiantes. | An item is only shown if its tab is ticked. They only see piscine students of their campus, never students. | Un element només es veu si la seva pestanya està marcada. Només veuen piscinistes del seu campus, mai estudiants. | Elementu bat bere fitxa markatuta badago bakarrik ikusten da. Beren campuseko igerilariak bakarrik ikusten dituzte, inoiz ez ikasleak. |
+| `pool.key.expediente` | Panel, Piscina: permiso «expediente» | features/admin/PoolPanel | Expediente: nivel, títulos y XP | Record: level, titles and XP | Expedient: nivell, títols i XP | Espedientea: maila, tituluak eta XP |
+| `pool.key.expediente.health` | Panel, Piscina: permiso «expediente.health» | features/admin/PoolPanel | Estado de salud (pace y black hole) | Health status (pace and black hole) | Estat de salut (pace i black hole) | Osasun egoera (pacea eta black holea) |
+| `pool.key.expediente.hours` | Panel, Piscina: permiso «expediente.hours» | features/admin/PoolPanel | Horas validadas (documento para el staff) | Validated hours (document for staff) | Hores validades (document per al staff) | Balidatutako orduak (staffarentzako dokumentua) |
+| `pool.key.expediente.network` | Panel, Piscina: permiso «expediente.network» | features/admin/PoolPanel | Tu red de correcciones | Your evaluation network | La teva xarxa de correccions | Zure zuzenketa sarea |
+| `pool.key.expediente.achievements` | Panel, Piscina: permiso «expediente.achievements» | features/admin/PoolPanel | Logros y reacciones | Achievements and reactions | Assoliments i reaccions | Lorpenak eta erreakzioak |
+| `pool.key.expediente.ranking` | Panel, Piscina: permiso «expediente.ranking» | features/admin/PoolPanel | Clasificación | Ranking | Classificació | Sailkapena |
+| `pool.key.consulta` | Panel, Piscina: permiso «consulta» | features/admin/PoolPanel | Sala de espera: quién ayuda en cada proyecto | Waiting room: who helps with each project | Sala d'espera: qui ajuda a cada projecte | Itxarongela: nork laguntzen duen proiektu bakoitzean |
+| `pool.key.consulta.map` | Panel, Piscina: permiso «consulta.map» | features/admin/PoolPanel | Mapa de dónde se sienta | Map of where they sit | Mapa d'on seu | Non eserita dagoen mapa |
+| `pool.key.guardia` | Panel, Piscina: permiso «guardia» | features/admin/PoolPanel | Guardia: ofrecerse a ayudar | On duty: offer to help | Guàrdia: oferir-se a ajudar | Guardia: laguntzeko eskaini |
+| `pool.key.tablon` | Panel, Piscina: permiso «tablon» | features/admin/PoolPanel | Tablón: guía y dudas | Board: guide and questions | Tauler: guia i dubtes | Taula: gida eta zalantzak |
+| `pool.key.tablon.graph` | Panel, Piscina: permiso «tablon.graph» | features/admin/PoolPanel | Grafo de tu avance | Graph of your progress | Graf del teu avenç | Zure aurrerapenaren grafoa |
+| `pool.key.tablon.corrections` | Panel, Piscina: permiso «tablon.corrections» | features/admin/PoolPanel | Grafo de tus correcciones | Graph of your evaluations | Graf de les teves correccions | Zure zuzenketen grafoa |
+| `pool.key.terapia` | Panel, Piscina: permiso «terapia» | features/admin/PoolPanel | Terapias de grupo | Group therapy | Teràpies de grup | Talde terapiak |
+| `pool.key.pizarras` | Panel, Piscina: permiso «pizarras» | features/admin/PoolPanel | Pizarras | Whiteboards | Pissarres | Arbelak |
+| `pool.key.notgames` | Panel, Piscina: permiso «notgames» | features/admin/PoolPanel | Not-games: salas de preguntas | Not-games: question rooms | Not-games: sales de preguntes | Not-games: galdera gelak |
+| `pool.key.notgames.chess` | Panel, Piscina: permiso «notgames.chess» | features/admin/PoolPanel | Ajedrez | Chess | Escacs | Xakea |
+| `pool.key.notgames.review` | Panel, Piscina: permiso «notgames.review» | features/admin/PoolPanel | Repaso de lo fallado | Review of what you missed | Repàs del que has fallat | Huts egindakoaren errepasoa |
+| `pool.key.gitcourse` | Panel, Piscina: permiso «gitcourse» | features/admin/PoolPanel | Curso de git | Git course | Curs de git | Git ikastaroa |
+| `pool.key.gitcourse.groups` | Panel, Piscina: permiso «gitcourse.groups» | features/admin/PoolPanel | Pruebas de grupo del curso | Group tests of the course | Proves de grup del curs | Ikastaroko talde probak |
+| `pool.key.estadisticas` | Panel, Piscina: permiso «estadisticas» | features/admin/PoolPanel | Estadísticas de Ayuda | Help statistics | Estadístiques d'Ajuda | Laguntzaren estatistikak |
+| `pool.key.calendario` | Panel, Piscina: permiso «calendario» | features/admin/PoolPanel | Calendario, avisos y sala de cada evento | Calendar, alerts and event rooms | Calendari, avisos i sala de cada esdeveniment | Egutegia, abisuak eta ekitaldi bakoitzaren gela |
+| `pool.key.clusters` | Panel, Piscina: permiso «clusters» | features/admin/PoolPanel | Mapa de clústeres | Cluster map | Mapa de clústers | Klusterren mapa |
+| `pool.key.clusters.online` | Panel, Piscina: permiso «clusters.online» | features/admin/PoolPanel | Cuánta gente tiene Sanatorio abierto | How many people have Sanatorio open | Quanta gent té Sanatorio obert | Zenbat jendek duen Sanatorio irekita |
+| `pool.key.clusters.broken` | Panel, Piscina: permiso «clusters.broken» | features/admin/PoolPanel | Marcar puestos rotos | Mark broken seats | Marcar llocs trencats | Postu hautsiak markatu |
+| `pool.key.clusters.report` | Panel, Piscina: permiso «clusters.report» | features/admin/PoolPanel | Avisar de un problema del edificio | Report a building problem | Avisar d'un problema de l'edifici | Eraikineko arazo baten berri eman |
+| `pool.key.red` | Panel, Piscina: permiso «red» | features/admin/PoolPanel | Red de correcciones | Evaluation network | Xarxa de correccions | Zuzenketen sarea |
+| `pool.key.red.rankings` | Panel, Piscina: permiso «red.rankings» | features/admin/PoolPanel | Listas: endogamia, parejas, más estrictos, proyectos | Lists: endogamy, pairs, strictest, projects | Llistes: endogàmia, parelles, més estrictes, projectes | Zerrendak: endogamia, bikoteak, zorrotzenak, proiektuak |
+| `pool.key.avance` | Panel, Piscina: permiso «avance» | features/admin/PoolPanel | Avance en el common core | Common core progress | Avenç al common core | Common core-ko aurrerapena |
+| `pool.key.avance.compare` | Panel, Piscina: permiso «avance.compare» | features/admin/PoolPanel | Compararse con otra persona | Compare with someone | Comparar-se amb una altra persona | Beste pertsona batekin alderatu |
+| `pool.key.examenes` | Panel, Piscina: permiso «examenes» | features/admin/PoolPanel | Exámenes | Exams | Exàmens | Azterketak |
+| `pool.key.examenes.live` | Panel, Piscina: permiso «examenes.live» | features/admin/PoolPanel | Examen en vivo | Live exam | Examen en directe | Zuzeneko azterketa |
+| `pool.key.examenes.stats` | Panel, Piscina: permiso «examenes.stats» | features/admin/PoolPanel | Estadísticas de cada examen | Statistics of each exam | Estadístiques de cada examen | Azterketa bakoitzaren estatistikak |
+| `pool.key.clicker` | Panel, Piscina: permiso «clicker» | features/admin/PoolPanel | Code Clicker | Code Clicker | Code Clicker | Code Clicker |
+| `pool.key.focus` | Panel, Piscina: permiso «focus» | features/admin/PoolPanel | Pomodoro | Pomodoro | Pomodoro | Pomodoroa |
+| `pool.key.focus.stats` | Panel, Piscina: permiso «focus.stats» | features/admin/PoolPanel | Estadísticas del Pomodoro | Pomodoro statistics | Estadístiques del Pomodoro | Pomodoroaren estatistikak |
+| `pool.key.mailbox` | Panel, Piscina: permiso «mailbox» | features/admin/PoolPanel | Buzón y chats | Mailbox and chats | Bústia i xats | Postontzia eta txatak |
+| `pool.key.people` | Panel, Piscina: permiso «people» | features/admin/PoolPanel | Buscador de personas y sus fichas | People search and their cards | Cercador de persones i les seves fitxes | Pertsona bilatzailea eta haien fitxak |
+| `pool.key.broadcasts` | Panel, Piscina: permiso «broadcasts» | features/admin/PoolPanel | Comunicados | Announcements | Comunicats | Oharrak |
+| `pool.key.tickets` | Panel, Piscina: permiso «tickets» | features/admin/PoolPanel | Escribir a quien administra | Write to the admins | Escriure a qui administra | Administratzaileari idatzi |
+| `pool.group.expediente` | Panel, Piscina: grupo del árbol de permisos | features/admin/PoolPanel | Expediente | Record | Expedient | Espedientea |
+| `pool.group.ayuda` | Panel, Piscina: grupo del árbol de permisos | features/admin/PoolPanel | Ayuda | Help | Ajuda | Laguntza |
+| `pool.group.calendario` | Panel, Piscina: grupo del árbol de permisos | features/admin/PoolPanel | Calendario | Calendar | Calendari | Egutegia |
+| `pool.group.clusters` | Panel, Piscina: grupo del árbol de permisos | features/admin/PoolPanel | Clústeres | Clusters | Clústers | Klusterrak |
+| `pool.group.datos` | Panel, Piscina: grupo del árbol de permisos | features/admin/PoolPanel | Datos | Data | Dades | Datuak |
+| `pool.group.extra` | Panel, Piscina: grupo del árbol de permisos | features/admin/PoolPanel | Fuera de las pestañas | Outside the tabs | Fora de les pestanyes | Fitxetatik kanpo |
 | `admin.pool.save` | Panel, Piscina: botón de guardar | features/admin/PoolPanel | Guardar | Save | Desar | Gorde |
 | `admin.pool.saved` | Panel, Piscina: guardado | features/admin/PoolPanel | Guardado. | Saved. | Desat. | Gordeta. |
 | `admin.focus.title` | Panel de gestión: estadísticas del Pomodoro | features/admin/FocusPanel | Pomodoro: cómo se usa | Pomodoro: how it is used | Pomodoro: com s'utilitza | Pomodoro: nola erabiltzen den |

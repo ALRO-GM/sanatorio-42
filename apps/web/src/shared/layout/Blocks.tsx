@@ -1,11 +1,26 @@
 import type { ReactNode } from 'react'
 
+import type { PoolKey } from '@sanatorio/contracts'
+
 import { shows, useDetail } from '../detail'
+import { poolAllows, usePoolAccess } from '../pool'
 import { useI18n } from '../i18n'
 import { openCustomize } from './customize'
 import { PAGES } from './registry'
 import type { PageId } from './registry'
 import { toggleFold, track, usePageLayout } from './store'
+
+/** El permiso de piscinero de los bloques que lo tienen (`docs/piscineros.md`). */
+const POOL_BLOCKS: Partial<Record<string, PoolKey>> = {
+  'expediente.health': 'expediente.health',
+  'expediente.network': 'expediente.network',
+  'expediente.achievements': 'expediente.achievements',
+  'expediente.ranking': 'expediente.ranking',
+  'red.endogamy': 'red.rankings',
+  'red.pairs': 'red.rankings',
+  'red.strictest': 'red.rankings',
+  'red.projects': 'red.rankings',
+}
 
 type Block = {
   id: string
@@ -35,10 +50,17 @@ export function Blocks({ page, blocks }: BlocksProps) {
   const { t } = useI18n()
   const { order, folded } = usePageLayout(page)
   const detail = useDetail()
+  const pool = usePoolAccess()
   const byId = new Map(blocks.map((block) => [block.id, block]))
   // Lo que no toca en este modo de la interfaz no se pinta.
   const hidden = new Set<string>(
-    PAGES[page].filter((block) => !shows(detail, block.from)).map((block) => block.id),
+    PAGES[page]
+      .filter((block) => {
+        const key = POOL_BLOCKS[`${page}.${block.id}`]
+
+        return !shows(detail, block.from) || (key !== undefined && !poolAllows(key, pool))
+      })
+      .map((block) => block.id),
   )
 
   return (

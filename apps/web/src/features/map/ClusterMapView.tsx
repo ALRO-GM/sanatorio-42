@@ -40,7 +40,7 @@ type ClusterMapViewProps = {
   /** Si viene, se resalta a esta gente y se apaga al resto (los filtros de una lista). */
   spotlight?: ReadonlySet<string> | null
   /** Si viene, en un puesto libre se puede avisar de que no funciona, o de que ya sí. */
-  onBroken?: (host: string, broken: boolean) => void
+  onBroken?: ((host: string, broken: boolean) => void) | undefined
 }
 
 /** Abre el expediente de quien ocupa un puesto en otra pestaña. */

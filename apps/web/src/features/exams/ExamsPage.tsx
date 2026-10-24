@@ -10,6 +10,7 @@ import { InfoTip } from '../../shared/ui/InfoTip'
 import { ExamPeople } from './ExamPeople'
 import { ExamStatsPanel } from './ExamStatsPanel'
 import { ExamsTour } from './ExamsTour'
+import { PoolOnly } from '../../shared/ui/PoolOnly'
 
 /** Sin examen en marcha, cada cuánto se mira si ha aparecido uno. */
 const IDLE_REFRESH_MS = 5 * 60_000
@@ -25,6 +26,28 @@ type TrackFilter = 'all' | LiveExaminee['track']
  */
 export function ExamsPage() {
   const { t } = useI18n()
+
+  return (
+    <section>
+      <h2>
+        {t('exams.title')}
+        <InfoTip title={t('exams.title')}>
+          <ExamsTour />
+        </InfoTip>
+      </h2>
+      {/* Un piscinero, solo lo que permite el panel (`docs/piscineros.md`). */}
+      <PoolOnly k="examenes.live">
+        <LiveSection />
+      </PoolOnly>
+      <PoolOnly k="examenes.stats">
+        <ExamStatsPanel />
+      </PoolOnly>
+    </section>
+  )
+}
+
+/** El examen en marcha (o el siguiente), que se pone al día solo. */
+function LiveSection() {
   const live = useAsync(() => api.getLiveExam(), [])
   const [refreshing, setRefreshing] = useState(false)
   const { reload, setData } = live
@@ -68,20 +91,12 @@ export function ExamsPage() {
   }, [setData])
 
   return (
-    <section>
-      <h2>
-        {t('exams.title')}
-        <InfoTip title={t('exams.title')}>
-          <ExamsTour />
-        </InfoTip>
-      </h2>
+    <>
       {live.data !== undefined && (
         <LiveCard live={live.data} refreshing={refreshing} onRefresh={() => void refresh()} />
       )}
       <ErrorNote error={live.error} onRetry={() => void live.reload()} />
-
-      <ExamStatsPanel />
-    </section>
+    </>
   )
 }
 

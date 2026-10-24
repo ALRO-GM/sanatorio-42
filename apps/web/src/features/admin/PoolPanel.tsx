@@ -1,61 +1,117 @@
 import { useEffect, useState } from 'react'
 
+import type { PoolKey, PoolSettings } from '@sanatorio/contracts'
+
 import { api } from '../../shared/api'
 import { useAction, useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { GROUPS, sectionsOf } from './pool-tree'
 
 /**
  * Panel de gestión: la piscina (`docs/piscineros.md`). Solo entran
- * estudiantes; un piscinero de una piscina en curso ve, al volver de 42, el
- * aviso que se escribe aquí.
+ * estudiantes; aquí se abre o se cierra la entrada a piscineros de una piscina
+ * en curso, el aviso que ven con ella cerrada y, pestaña a pestaña y elemento a
+ * elemento, lo que pueden ver. Un elemento solo vale con su pestaña marcada.
  */
 export function PoolPanel() {
   const { t } = useI18n()
   const { data, error, reload } = useAsync(() => api.getPoolSettings(), [])
-  const [message, setMessage] = useState('')
+  const [draft, setDraft] = useState<PoolSettings | null>(null)
   const [saved, setSaved] = useState(false)
   const save = useAction()
 
   useEffect(() => {
-    if (data !== undefined) setMessage(data.message)
+    if (data !== undefined) setDraft(data)
   }, [data])
 
+  const change = (next: Partial<PoolSettings>): void => {
+    setSaved(false)
+    setDraft((current) => (current === null ? current : { ...current, ...next }))
+  }
+  const has = (key: PoolKey): boolean => draft?.allow.includes(key) === true
+  const toggle = (key: PoolKey): void => {
+    if (draft === null) return
+    change({
+      allow: has(key) ? draft.allow.filter((each) => each !== key) : [...draft.allow, key],
+    })
+  }
+  const box = (key: PoolKey, disabled = false) => (
+    <label key={key} className={`duty-check ${disabled ? 'muted' : ''}`}>
+      <input
+        type="checkbox"
+        checked={has(key)}
+        disabled={disabled}
+        onChange={() => {
+          toggle(key)
+        }}
+      />
+      {t(`pool.key.${key}`)}
+    </label>
+  )
+
   return (
-    <article className="card">
+    <article className="card pool-panel">
       <span className="eyebrow">{t('admin.pool.title')}</span>
       <p className="hint">{t('admin.pool.who')}</p>
       <ErrorNote error={error} onRetry={() => void reload()} />
-      {data !== undefined && (
+      {draft !== null && (
         <form
           className="form"
           onSubmit={(event) => {
             event.preventDefault()
             setSaved(false)
             void save
-              .run(() => api.updatePoolSettings({ message }))
+              .run(async () => {
+                setDraft(await api.updatePoolSettings(draft))
+              })
               .then((ok) => {
                 setSaved(ok)
               })
           }}
         >
-          <p>
-            <strong>{t(data.open ? 'admin.pool.open' : 'admin.pool.closed')}</strong>
-          </p>
+          <label className="duty-check pool-open">
+            <input
+              type="checkbox"
+              checked={draft.open}
+              onChange={(event) => {
+                change({ open: event.target.checked })
+              }}
+            />
+            <strong>{t('admin.pool.openLabel')}</strong>
+          </label>
           <label>
             {t('admin.pool.message')}
             <textarea
-              rows={4}
-              value={message}
+              rows={3}
+              value={draft.message}
               maxLength={2000}
               placeholder={t('login.poolClosed')}
               onChange={(event) => {
-                setMessage(event.target.value)
-                setSaved(false)
+                change({ message: event.target.value })
               }}
             />
           </label>
           <p className="hint">{t('admin.pool.messageHint')}</p>
+
+          <h3>{t('admin.pool.allow')}</h3>
+          <p className="hint">{t('admin.pool.allowHint')}</p>
+          <div className="pool-tree">
+            {GROUPS.map((group) => (
+              <fieldset key={group} className="pool-group">
+                <legend>{t(`pool.group.${group}`)}</legend>
+                {sectionsOf(group).map(({ key, items }) => (
+                  <div key={key} className="pool-section">
+                    {box(key)}
+                    {items.length > 0 && (
+                      <div className="pool-items">{items.map((item) => box(item, !has(key)))}</div>
+                    )}
+                  </div>
+                ))}
+              </fieldset>
+            ))}
+          </div>
+
           <button type="submit" className="primary" disabled={save.busy}>
             {t('admin.pool.save')}
           </button>

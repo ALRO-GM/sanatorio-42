@@ -43,3 +43,17 @@ describe('quién entra', () => {
     expect(audienceOf(someone(undefined), NOW)).toBe('student')
   })
 })
+
+describe('permisos de piscineros', () => {
+  it('un elemento solo vale con su pestaña; la base, siempre', async () => {
+    const { effective, poolAllows } = await import('../../src/modules/pool/pool.keys.js')
+    const allowed = effective(['consulta.map', 'tablon', 'tablon.graph', 'red.rankings'])
+
+    expect([...allowed].sort()).toEqual(['tablon', 'tablon.graph'])
+    expect(poolAllows('/doubts/graph', allowed)).toBe(true)
+    expect(poolAllows('/projects/:id/map', allowed)).toBe(false)
+    expect(poolAllows('/network/strictest', allowed)).toBe(false)
+    expect(poolAllows('/me/settings', allowed)).toBe(true)
+    expect(poolAllows('/no/existe', allowed)).toBe(false)
+  })
+})

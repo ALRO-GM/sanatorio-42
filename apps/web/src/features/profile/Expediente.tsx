@@ -22,6 +22,7 @@ import { NetworkCard } from './NetworkCard'
 import { InfoTip } from '../../shared/ui/InfoTip'
 import { Icon } from '../../shared/ui/Icon'
 import { RecordTour } from './RecordTour'
+import { PoolOnly } from '../../shared/ui/PoolOnly'
 
 /** Lo que da XP, en el orden en que se explica. */
 const RULES = [
@@ -184,7 +185,9 @@ export function Expediente({ me, profile }: ExpedienteProps) {
                 />
                 <ErrorNote error={error} />
                 <Show from="normal">
-                  <HoursReport />
+                  <PoolOnly k="expediente.hours">
+                    <HoursReport />
+                  </PoolOnly>
                 </Show>
               </article>
             ),

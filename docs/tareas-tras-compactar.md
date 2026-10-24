@@ -300,8 +300,10 @@ separados. Cada fase con check, commit, push y despliegue.
 - [x] **P1. Entrada** (2026-10-25): clasificación (`modules/pool`), `aud` en la
       cookie, avisos en la entrada y pestaña Piscina con el texto. El
       interruptor de abrir va en P2 (`open` es siempre `false` hasta entonces).
-- [ ] **P2. Permisos**: claves, rutas por clave, corte en `actor()`, web y
-      árbol de casillas en el panel.
+- [x] **P2. Permisos** (2026-10-25): `PoolKey` en el contrato, rutas por clave
+      (`modules/pool/pool.keys.ts`), corte global en `build-app.ts`, `GET
+      /pool/access`, la web esconde pestañas y elementos (`PoolOnly`) y el árbol
+      de casillas del panel. `open` sigue sin poder activarse (`canOpen`).
 - [ ] **P3. Datos de piscina**: gente, correcciones y eventos del cursus 9;
       red, sala de espera, mapa, buscador y calendario separados.
 - [ ] **P4. Documentación y demostración.**

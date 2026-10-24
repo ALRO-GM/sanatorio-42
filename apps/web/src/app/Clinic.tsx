@@ -30,7 +30,9 @@ import { startUsage, viewing } from '../shared/layout/store'
 import { Footer } from './Footer'
 import { Header } from './Header'
 import { SectionView } from './SectionView'
-import { HOME, SECTIONS, hiddenInFocus } from './sections'
+import { loadPoolAccess, resetPoolAccess, usePoolAccess } from '../shared/pool'
+import { PoolOnly } from '../shared/ui/PoolOnly'
+import { blockedForPool, HOME, SECTIONS, hiddenInFocus } from './sections'
 import type { Section } from './sections'
 import { useRoute } from './useRoute'
 
@@ -100,7 +102,17 @@ export function Clinic({ me, onLogout }: ClinicProps) {
     startUsage()
     // El Pomodoro, si lo había empezado (en esta u otra pestaña).
     void loadFocus()
+    // Qué puede ver: todo un estudiante; un piscinero, lo que diga el panel.
+    void loadPoolAccess()
+
+    return resetPoolAccess
   }, [])
+  const pool = usePoolAccess()
+
+  // Un piscinero que llega por un enlace a algo que no tiene vuelve al expediente.
+  useEffect(() => {
+    if (blockedForPool(section, pool)) go(HOME)
+  }, [pool, section, go])
   const [focusOpen, setFocusOpen] = useState(false)
 
   // El tiempo de uso se apunta a la sección que se está mirando.
@@ -171,7 +183,9 @@ export function Clinic({ me, onLogout }: ClinicProps) {
         onLogout={onLogout}
       />
       {/* El Pomodoro: el temporizador flota a la vista mientras dura. */}
-      <FocusTimer />
+      <PoolOnly k="focus">
+        <FocusTimer />
+      </PoolOnly>
       {focusOpen && (
         <FocusDialog
           onClose={() => {
@@ -185,10 +199,16 @@ export function Clinic({ me, onLogout }: ClinicProps) {
         <QuotaNotice status={pulse?.quota ?? null} />
         <OtherCampusNotice campusId={me.campusId} />
         <LegalGate />
-        <BroadcastGate pending={pulse?.broadcasts ?? 0} onChange={refresh} />
-        <ReviewGate pending={pulse?.clickerReviews ?? 0} onChange={refresh} />
+        <PoolOnly k="broadcasts">
+          <BroadcastGate pending={pulse?.broadcasts ?? 0} onChange={refresh} />
+        </PoolOnly>
+        <PoolOnly k="clicker">
+          <ReviewGate pending={pulse?.clickerReviews ?? 0} onChange={refresh} />
+        </PoolOnly>
         {/* Valorar puede esperar: en Pomodoro no se interrumpe, sale al acabar. */}
-        <HelpGate pending={concentrated ? 0 : (pulse?.help ?? 0)} onChange={refresh} />
+        <PoolOnly k="consulta">
+          <HelpGate pending={concentrated ? 0 : (pulse?.help ?? 0)} onChange={refresh} />
+        </PoolOnly>
         <Welcome
           open={welcoming}
           onGo={(next) => {
@@ -198,17 +218,21 @@ export function Clinic({ me, onLogout }: ClinicProps) {
             setWelcoming(false)
           }}
         />
-        <EasterEgg
-          onRed={() => {
-            openSection('clicker')
-          }}
-        />
-        <AlertCenter
-          me={me.login}
-          onGo={(next) => {
-            openSection(next)
-          }}
-        />
+        <PoolOnly k="clicker">
+          <EasterEgg
+            onRed={() => {
+              openSection('clicker')
+            }}
+          />
+        </PoolOnly>
+        <PoolOnly k="calendario">
+          <AlertCenter
+            me={me.login}
+            onGo={(next) => {
+              openSection(next)
+            }}
+          />
+        </PoolOnly>
 
         {customizing && (
           <LayoutSettings

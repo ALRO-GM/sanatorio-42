@@ -8,6 +8,7 @@ import { useI18n } from '../i18n'
 import { recordHref } from '../links'
 import { Avatar } from './Avatar'
 import { FocusBadge } from './FocusBadge'
+import { usePoolAllows } from '../pool'
 
 /** Lo que se tarda en sacar la ficha al pasar el ratón: así no salta al cruzar la lista. */
 const HOVER_DELAY_MS = 350
@@ -49,6 +50,7 @@ export function PersonLink({ login, className = 'record-link', children }: Perso
   const timer = useRef<number | undefined>(undefined)
   const [card, setCard] = useState<PersonCard | null>(null)
   const [open, setOpen] = useState(false)
+  const cards = usePoolAllows('people')
 
   useEffect(
     () => () => {
@@ -58,6 +60,8 @@ export function PersonLink({ login, className = 'record-link', children }: Perso
   )
 
   const show = (): void => {
+    // Sin el permiso de fichas (un piscinero, `docs/piscineros.md`), solo el enlace.
+    if (!cards) return
     window.clearTimeout(timer.current)
     timer.current = window.setTimeout(() => {
       setOpen(true)

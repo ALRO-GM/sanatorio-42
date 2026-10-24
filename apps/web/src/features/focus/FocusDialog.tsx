@@ -12,6 +12,7 @@ import { PillGroup } from '../../shared/ui/PillGroup'
 import { Icon } from '../../shared/ui/Icon'
 import { Modal } from '../../shared/ui/Modal'
 import { FocusMyStats } from './FocusMyStats'
+import { usePoolAllows } from '../../shared/pool'
 
 const FOCUS_MINUTES = [25, 50, 90] as const
 const BREAK_MINUTES = [5, 10, 15, 0] as const
@@ -43,6 +44,7 @@ export function FocusDialog({ onClose }: { onClose: () => void }) {
       },
   )
   const { busy, error, run } = useAction()
+  const stats = usePoolAllows('focus.stats')
   const [tab, setTab] = useState<(typeof TABS)[number]>('settings')
 
   const toggle = <T extends string>(list: readonly T[], item: T): T[] =>
@@ -64,14 +66,14 @@ export function FocusDialog({ onClose }: { onClose: () => void }) {
         <PillGroup
           kind="tabs"
           className="sub-tabs"
-          options={TABS}
+          options={stats ? TABS : TABS.filter((each) => each !== 'stats')}
           value={tab}
           onChange={setTab}
           label={t('focus.title')}
           text={(option) => t(`focus.tab.${option}`)}
         />
       </Show>
-      {tab === 'stats' && <FocusMyStats />}
+      {tab === 'stats' && stats && <FocusMyStats />}
       {tab === 'settings' && (
         <>
           <p className="hint">{t('focus.pitch')}</p>

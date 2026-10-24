@@ -17,6 +17,7 @@ import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { PillGroup } from '../../shared/ui/PillGroup'
 import { InfoTip } from '../../shared/ui/InfoTip'
 import { PersonInput } from '../../shared/ui/PersonInput'
+import { PoolOnly } from '../../shared/ui/PoolOnly'
 
 const WIDTH = 640
 const HEIGHT = 280
@@ -107,39 +108,41 @@ export function ProgressPage() {
             />{' '}
             {t('stats.progress.paces')}
           </label>
-          <form
-            className="progress-compare"
-            onSubmit={(event) => {
-              event.preventDefault()
-              setOther(typed.trim().toLowerCase() || null)
-            }}
-          >
-            <PersonInput
-              value={typed}
-              label={t('stats.progress.compare')}
-              placeholder={t('stats.progress.comparePlaceholder')}
-              onChange={setTyped}
-              onPick={(login) => {
-                setTyped(login)
-                setOther(login)
+          <PoolOnly k="avance.compare">
+            <form
+              className="progress-compare"
+              onSubmit={(event) => {
+                event.preventDefault()
+                setOther(typed.trim().toLowerCase() || null)
               }}
-            />
-            <button type="submit" className="pill">
-              {t('stats.progress.compare')}
-            </button>
-            {other !== null && (
-              <button
-                type="button"
-                className="pill"
-                onClick={() => {
-                  setOther(null)
-                  setTyped('')
+            >
+              <PersonInput
+                value={typed}
+                label={t('stats.progress.compare')}
+                placeholder={t('stats.progress.comparePlaceholder')}
+                onChange={setTyped}
+                onPick={(login) => {
+                  setTyped(login)
+                  setOther(login)
                 }}
-              >
-                {t('stats.progress.compareClear')}
+              />
+              <button type="submit" className="pill">
+                {t('stats.progress.compare')}
               </button>
-            )}
-          </form>
+              {other !== null && (
+                <button
+                  type="button"
+                  className="pill"
+                  onClick={() => {
+                    setOther(null)
+                    setTyped('')
+                  }}
+                >
+                  {t('stats.progress.compareClear')}
+                </button>
+              )}
+            </form>
+          </PoolOnly>
         </div>
 
         {data === undefined ? (

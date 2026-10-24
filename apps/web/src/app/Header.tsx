@@ -12,6 +12,8 @@ import { Nav } from './Nav'
 import type { Section } from './sections'
 import { UserMenu } from './UserMenu'
 import { PLUS_GOAL, pressPlus, useEgg } from '../features/clicker/egg'
+import type { PoolKey } from '@sanatorio/contracts'
+import { poolAllows, usePoolAccess } from '../shared/pool'
 
 type HeaderProps = {
   me: CurrentUser
@@ -57,6 +59,9 @@ export function Header({
   onLogout,
 }: HeaderProps) {
   const { t } = useI18n()
+  // Un piscinero, solo lo que permite el panel (`docs/piscineros.md`).
+  const pool = usePoolAccess()
+  const may = (key: PoolKey): boolean => poolAllows(key, pool)
   const egg = useEgg()
   // Al bajar, la barra gana una raya que la separa de lo que pasa por debajo.
   const [scrolled, setScrolled] = useState(false)
@@ -140,31 +145,37 @@ export function Header({
           </button>
 
           <div className="appbar-actions">
-            <PersonFinder />
-            <AvailabilityToggle
-              active={section === 'guardia'}
-              onOpen={() => {
-                track('nav.guardia')
-                onGo('guardia')
-              }}
-              onTurnedOn={() => {
-                onGo('guardia')
-              }}
-            />
-            <button
-              type="button"
-              className="icon-btn mailbox-btn"
-              aria-label={unread === 0 ? t('notices.open') : t('notices.openUnread', { n: unread })}
-              title={t('notices.title')}
-              onClick={onMailbox}
-            >
-              <Icon name="buzon" size={20} />
-              {unread > 0 && (
-                <span className="count-badge" aria-hidden="true">
-                  {unread > 99 ? '99+' : unread}
-                </span>
-              )}
-            </button>
+            {may('people') && <PersonFinder />}
+            {may('guardia') && (
+              <AvailabilityToggle
+                active={section === 'guardia'}
+                onOpen={() => {
+                  track('nav.guardia')
+                  onGo('guardia')
+                }}
+                onTurnedOn={() => {
+                  onGo('guardia')
+                }}
+              />
+            )}
+            {may('mailbox') && (
+              <button
+                type="button"
+                className="icon-btn mailbox-btn"
+                aria-label={
+                  unread === 0 ? t('notices.open') : t('notices.openUnread', { n: unread })
+                }
+                title={t('notices.title')}
+                onClick={onMailbox}
+              >
+                <Icon name="buzon" size={20} />
+                {unread > 0 && (
+                  <span className="count-badge" aria-hidden="true">
+                    {unread > 99 ? '99+' : unread}
+                  </span>
+                )}
+              </button>
+            )}
             <UserMenu
               me={me}
               items={[
@@ -176,14 +187,18 @@ export function Header({
                     onGo('expediente')
                   },
                 },
-                {
-                  id: 'guardia',
-                  icon: 'guardia',
-                  label: t('menu.duty'),
-                  run: () => {
-                    onGo('guardia')
-                  },
-                },
+                ...(may('guardia')
+                  ? [
+                      {
+                        id: 'guardia',
+                        icon: 'guardia' as const,
+                        label: t('menu.duty'),
+                        run: () => {
+                          onGo('guardia')
+                        },
+                      },
+                    ]
+                  : []),
                 ...(admin
                   ? [
                       {
@@ -197,7 +212,7 @@ export function Header({
                     ]
                   : []),
                 // Solo para quien eligió la pastilla roja.
-                ...(egg.pill === 'red'
+                ...(egg.pill === 'red' && may('clicker')
                   ? [
                       {
                         id: 'clicker',
@@ -210,9 +225,27 @@ export function Header({
                     ]
                   : []),
                 null,
-                { id: 'pomodoro', icon: 'reloj', label: t('focus.open'), run: onFocus },
+                ...(may('focus')
+                  ? [
+                      {
+                        id: 'pomodoro',
+                        icon: 'reloj' as const,
+                        label: t('focus.open'),
+                        run: onFocus,
+                      },
+                    ]
+                  : []),
                 { id: 'personalizar', icon: 'ajustes', label: t('layout.open'), run: onCustomize },
-                { id: 'incidencias', icon: 'bicho', label: t('inbox.open'), run: onInbox },
+                ...(may('tickets')
+                  ? [
+                      {
+                        id: 'incidencias',
+                        icon: 'bicho' as const,
+                        label: t('inbox.open'),
+                        run: onInbox,
+                      },
+                    ]
+                  : []),
                 { id: 'bienvenida', icon: 'pregunta', label: t('welcome.open'), run: onWelcome },
                 null,
                 { id: 'salir', icon: 'salir', label: t('app.logout'), run: onLogout, danger: true },

@@ -127,6 +127,7 @@ export async function buildApp(options: BuildOptions = {}): Promise<BuiltApp> {
     },
     access: (login) => services.admin.accessOf(login),
     admit: (profile) => services.pool.admit(profile),
+    onPoolLogin: (profile) => services.pool.enter(profile),
     staff: (key) => services.staff.authenticate(key),
   })
 
@@ -194,6 +195,29 @@ export async function buildApp(options: BuildOptions = {}): Promise<BuiltApp> {
     version: env.GIT_SHA === '' ? null : env.GIT_SHA,
     lastSyncAt: () => services.sync.lastSyncAt(),
     now: options.now ?? Date.now,
+  })
+
+  // Un piscinero solo llega a lo que permite el panel (`docs/piscineros.md`).
+  // Antes que las rutas, como la barrera de `/admin/`: mira la plantilla de la
+  // ruta (lo que el enrutador ha entendido), no la URL tal como vino.
+  app.addHook('onRequest', async (request, reply) => {
+    const route = request.routeOptions.url
+
+    if (typeof route !== 'string' || route === '') return
+
+    let role: string | null = null
+
+    try {
+      role = auth.session.user(request).role
+    } catch {
+      return
+    }
+
+    if (role !== 'pool' || (await services.pool.allows(route))) return
+
+    await reply
+      .code(403)
+      .send({ error: 'forbidden', message: 'Esto no está abierto para piscineros' })
   })
 
   for (const module of modules) {

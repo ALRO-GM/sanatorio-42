@@ -11,6 +11,8 @@ import { Show } from '../../shared/detail'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { directChatId, openChat } from '../notices/conversations'
 import { ClusterMapView } from './ClusterMapView'
+import { PoolOnly } from '../../shared/ui/PoolOnly'
+import { usePoolAllows } from '../../shared/pool'
 
 /**
  * Los clusters del campus, sin proyecto de por medio: quién está sentado dónde
@@ -24,6 +26,9 @@ export function ClustersPage({ me }: { me: string }) {
   const map = useAsync(() => api.getCampusMap(), [])
 
   const seated = map.data?.clusters.flatMap((cluster) => cluster.seats) ?? []
+  // Un piscinero, solo lo que permite el panel (`docs/piscineros.md`).
+  const report = usePoolAllows('clusters.report')
+  const broken = usePoolAllows('clusters.broken')
   const online = seated.filter((seat) => seat.occupant?.online === true).length
   const occupied = seated.filter((seat) => seat.occupant !== null).length
 
@@ -35,7 +40,7 @@ export function ClustersPage({ me }: { me: string }) {
           <ClustersTour />
         </InfoTip>
       </h2>
-      {reporting ? (
+      {!report ? null : reporting ? (
         <FacilityForm
           onDone={() => {
             setReporting(false)
@@ -60,20 +65,28 @@ export function ClustersPage({ me }: { me: string }) {
       {map.data !== undefined && (
         <>
           <Show from="datos">
-            <p className="clusters-count" role="status">
-              <span className="seat-online sample" /> {t('clusters.count', { online, occupied })}
-            </p>
+            <PoolOnly k="clusters.online">
+              <p className="clusters-count" role="status">
+                <span className="seat-online sample" /> {t('clusters.count', { online, occupied })}
+              </p>
+            </PoolOnly>
           </Show>
           <div className="card">
             <ClusterMapView
               map={map.data}
               legend={['online', 'occupied', 'reserved', 'free', 'broken']}
-              onBroken={(host, broken) => {
-                // Si falla, se dice (antes se callaba y parecía que no hacía nada).
-                void marking
-                  .run(() => (broken ? api.reportBrokenSeat(host) : api.clearBrokenSeat(host)))
-                  .then((done) => (done ? map.reload() : undefined))
-              }}
+              onBroken={
+                !broken
+                  ? undefined
+                  : (host, isBroken) => {
+                      // Si falla, se dice (antes se callaba y parecía que no hacía nada).
+                      void marking
+                        .run(() =>
+                          isBroken ? api.reportBrokenSeat(host) : api.clearBrokenSeat(host),
+                        )
+                        .then((done) => (done ? map.reload() : undefined))
+                    }
+              }
               onChat={(login) => {
                 openChat(directChatId(me, login))
               }}

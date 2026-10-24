@@ -5,6 +5,7 @@ import type { CurrentUser, Profile, ProjectSummary } from '@sanatorio/contracts'
 import { PeerList } from '../features/peers/PeerList'
 import { ProjectSelect } from '../features/peers/ProjectSelect'
 import type { AsyncState } from '../shared/hooks/useAsync'
+import { poolAllows } from '../shared/pool'
 import { useI18n } from '../shared/i18n'
 import type { Section } from './sections'
 import { useEgg } from '../features/clicker/egg'
@@ -164,7 +165,9 @@ export function SectionView({
           <p className="estado">{t('admin.only')}</p>
         ))}
       {section === 'expediente' &&
-        (otherRecord === null ? (
+        (!poolAllows('expediente') ? (
+          <p className="estado">{t('pool.home')}</p>
+        ) : otherRecord === null ? (
           <Expediente me={me} profile={profile} />
         ) : (
           <PublicRecord key={otherRecord} login={otherRecord} me={me.login} />

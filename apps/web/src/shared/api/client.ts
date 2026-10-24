@@ -172,6 +172,7 @@ export const realApi: Api = {
   getPoolNotice: () => getJson('/pool/notice'),
   getPoolSettings: () => getJson('/admin/pool'),
   updatePoolSettings: (changes) => sendJson('PUT', '/admin/pool', changes),
+  getPoolAccess: () => getJson('/pool/access'),
   sendClicks: (batch) => send('POST', '/usage/clicks', batch),
   getClickHeatmap: (section, layout, days) =>
     getJson(

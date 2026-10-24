@@ -15,6 +15,8 @@ export type Actor = {
   admin: boolean
   /** El idioma de su web (cabecera `x-lang`), para lo que se le enseña ya escrito. */
   lang?: 'es' | 'en'
+  /** `true` si es piscinero: solo ve piscineros de su campus (`docs/piscineros.md`). */
+  pool?: boolean
 }
 
 /**

@@ -8,6 +8,7 @@
 
 import type {
   Focus,
+  PoolAccess,
   PoolNotice,
   PoolSettings,
   GitAttemptInput,
@@ -336,7 +337,9 @@ export type Api = {
   getPoolNotice: () => Promise<PoolNotice>
   /** Los ajustes de la piscina. Solo admins. */
   getPoolSettings: () => Promise<PoolSettings>
-  updatePoolSettings: (changes: { message: string }) => Promise<PoolSettings>
+  updatePoolSettings: (changes: Partial<PoolSettings>) => Promise<PoolSettings>
+  /** Si eres piscinero y qué puedes ver. */
+  getPoolAccess: () => Promise<PoolAccess>
   /** Manda los clics de una sección para el mapa de calor. */
   sendClicks: (batch: ClickBatch) => Promise<void>
   /** El mapa de calor de clics de una sección. Solo admins. */

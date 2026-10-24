@@ -12,6 +12,7 @@ import { clock } from '../../shared/time'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { GroupRooms } from './GroupRoom'
 import { CodeText } from '../../shared/ui/CodeText'
+import { PoolOnly } from '../../shared/ui/PoolOnly'
 
 type GateViewProps = {
   gate: Gate
@@ -86,7 +87,9 @@ export function GateView({ gate, me, course, onCourse, onBack, onReview }: GateV
               {course.stars[gate.id] !== undefined && (
                 <p className="git-won">★ {t('git.room.done')}</p>
               )}
-              <GroupRooms gate={gate} me={me} />
+              <PoolOnly k="gitcourse.groups">
+                <GroupRooms gate={gate} me={me} />
+              </PoolOnly>
             </>
           ) : state !== undefined && state.retryAt !== null ? (
             <p className="notice">

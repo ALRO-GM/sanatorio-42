@@ -5,7 +5,14 @@ import { useI18n } from '../shared/i18n'
 import { track, useNavOrder } from '../shared/layout/store'
 import { Icon } from '../shared/ui/Icon'
 import { focusing, useFocus } from '../shared/focus'
-import { CATEGORIES, categoryOf, hiddenInFocus, sectionsOfCategory } from './sections'
+import { usePoolAccess } from '../shared/pool'
+import {
+  blockedForPool,
+  CATEGORIES,
+  categoryOf,
+  hiddenInFocus,
+  sectionsOfCategory,
+} from './sections'
 import type { Category, Section } from './sections'
 
 type NavProps = {
@@ -45,6 +52,7 @@ export function Nav({ section, onGo, examLive = false }: NavProps) {
   }, [section])
 
   const focus = useFocus()
+  const pool = usePoolAccess()
 
   // Las de la categoría que tocan en este modo; las que se pueden reordenar, en
   // el orden elegido.
@@ -57,6 +65,8 @@ export function Nav({ section, onGo, examLive = false }: NavProps) {
         ...order.flatMap((id) => all.filter((entry) => entry.id === id && entry.inNav)),
       ]
         .filter((entry) => shows(detail, entry.from ?? 'simple'))
+        // Un piscinero, solo lo que permite el panel (el expediente, siempre).
+        .filter((entry) => !blockedForPool(entry.id, pool))
         // En Pomodoro, solo lo elegido (y el expediente).
         .filter(
           (entry) => !focusing(focus) || !hiddenInFocus(entry.id, focus?.settings.sections ?? []),

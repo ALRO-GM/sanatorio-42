@@ -23,9 +23,10 @@ export type SessionUser = {
   /**
    * `staff` en las sesiones abiertas con una clave de staff: no son de nadie
    * de 42 y solo sirven para validar documentos. `id` es entonces el de la
-   * cuenta de staff y `login`, su nombre.
+   * cuenta de staff y `login`, su nombre. `pool`: un piscinero, que solo llega
+   * a lo que permite el panel (`docs/piscineros.md`).
    */
-  role: 'student' | 'staff'
+  role: 'student' | 'pool' | 'staff'
 }
 
 export type SessionReader = {
