@@ -27,6 +27,8 @@ type AuthModuleDeps = {
   onLogin: (profile: ApiUser) => Promise<{ campusId: number }>
   /** Aviso de actividad, para que la sincronización sepa que hay alguien mirando. */
   onActivity?: () => void
+  /** Si quien vuelve de 42 puede entrar: `null` si sí, o por qué no (`modules/pool`). */
+  admit?: (profile: ApiUser) => Promise<'not_student' | 'pool_closed' | null>
   /** La cuenta de staff a la que corresponde una clave, o `null`. */
   staff?: (key: unknown) => Promise<{ id: number; name: string } | null>
   /** Permisos y bloqueos del panel de administración. */
@@ -59,6 +61,7 @@ export function createAuthModule(deps: AuthModuleDeps): AuthModule {
     secret: env.SESSION_SECRET,
     frontendUrl: env.FRONTEND_URL,
     onLogin: deps.onLogin,
+    ...given({ admit: deps.admit }),
   })
 
   const session = createSessionReader({

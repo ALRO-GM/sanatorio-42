@@ -8,6 +8,8 @@
 
 import type {
   Focus,
+  PoolNotice,
+  PoolSettings,
   GitAttemptInput,
   GitAttemptResult,
   GitCourse,
@@ -330,6 +332,11 @@ export type Api = {
   getMyFocusStats: (query: FocusStatsQuery) => Promise<MyFocusStats>
   /** Las del Pomodoro de todo el mundo (o de un tramo). Solo admins. */
   getAdminFocusStats: (query: FocusStatsQuery) => Promise<FocusStats>
+  /** El aviso de la piscina cerrada, sin sesión (`docs/piscineros.md`). */
+  getPoolNotice: () => Promise<PoolNotice>
+  /** Los ajustes de la piscina. Solo admins. */
+  getPoolSettings: () => Promise<PoolSettings>
+  updatePoolSettings: (changes: { message: string }) => Promise<PoolSettings>
   /** Manda los clics de una sección para el mapa de calor. */
   sendClicks: (batch: ClickBatch) => Promise<void>
   /** El mapa de calor de clics de una sección. Solo admins. */

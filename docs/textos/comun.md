@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/comun.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-297 textos. «—» es que falta la traducción: sale en español.
+299 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -49,6 +49,8 @@ Generado desde `apps/web/src/shared/i18n/textos/comun.csv` con
 | `login.step3d` | Pantalla de entrada: detalle del paso 3 | features/auth/Login | Nada como explicarlo cara a cara | Nothing beats explaining it face to face | Res com explicar-ho cara a cara | Aurrez aurre azaltzea bezalakorik ez dago |
 | `login.cancelled` | Aviso al volver de 42 sin haber dado permiso | app/App | Has cancelado el inicio de sesión. Puedes probar cuando quieras. | You cancelled the sign-in. Try again whenever you like. | Has cancel·lat l'inici de sessió. Pots provar-ho quan vulguis. | Saio-hasiera bertan behera utzi duzu. Nahi duzunean saia zaitezke. |
 | `login.failed` | Aviso cuando falla el inicio de sesión; {code} es el código de error | app/App | El inicio de sesión con 42 ha fallado ({code}). Prueba otra vez. | Signing in with 42 failed ({code}). Please try again. | L'inici de sessió amb 42 ha fallat ({code}). Torna-ho a provar. | 42rekin saioa hasteak huts egin du ({code}). Saiatu berriro. |
+| `login.notStudent` | Aviso al volver de 42 con una cuenta que no es de estudiante (Discovery, piscina antigua…) | app/App | Sanatorio 42 es solo para estudiantes de 42. Tu cuenta tiene otra categoría (por ejemplo, Discovery o una piscina), así que no puede entrar. | Sanatorio 42 is only for 42 students. Your account has another category (for example, Discovery or a piscine), so it cannot sign in. | Sanatorio 42 és només per a estudiants de 42. El teu compte té una altra categoria (per exemple, Discovery o una piscina), així que no pot entrar. | Sanatorio 42 42ko ikasleentzat bakarrik da. Zure kontuak beste kategoria bat du (adibidez, Discovery edo igerileku bat), eta ezin da sartu. |
+| `login.poolClosed` | Aviso de fábrica al volver de 42 siendo piscinero con la piscina cerrada | app/App, features/admin/PoolPanel | Estás en la piscina: Sanatorio 42 todavía no está abierto para piscineros. | You are in the piscine: Sanatorio 42 is not open to piscine students yet. | Ets a la piscina: Sanatorio 42 encara no està obert per als piscinistes. | Igerilekuan zaude: Sanatorio 42 ez dago oraindik igerilarientzat irekita. |
 | `error.network` | Error: no hay conexión con el servidor | shared/i18n/index | No se puede conectar con el servidor | Can't reach the server | No es pot connectar amb el servidor | Ezin da zerbitzariarekin konektatu |
 | `error.generic` | Error sin explicación conocida; {detail} es el detalle técnico | shared/i18n/index | Algo no ha ido bien ({detail}). | Something went wrong ({detail}). | Alguna cosa no ha anat bé ({detail}). | Zerbait ez da ondo joan ({detail}). |
 | `error.409` | Error: la acción choca con el estado actual (ya está lleno, ya existe…) | shared/i18n/index | Ahora mismo no se puede: puede que ya esté lleno o que ya exista. Prueba otra vez en un rato. | That's not possible right now: it may be full or already exist. Try again in a bit. | Ara mateix no es pot: potser ja és ple o ja existeix. Torna-ho a provar d'aquí una estona. | Une honetan ezin da: baliteke beteta egotea edo jada existitzea. Saiatu berriro pixka bat geroago. |

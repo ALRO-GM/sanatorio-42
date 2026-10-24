@@ -126,6 +126,7 @@ export async function buildApp(options: BuildOptions = {}): Promise<BuiltApp> {
       services.sync.touch()
     },
     access: (login) => services.admin.accessOf(login),
+    admit: (profile) => services.pool.admit(profile),
     staff: (key) => services.staff.authenticate(key),
   })
 

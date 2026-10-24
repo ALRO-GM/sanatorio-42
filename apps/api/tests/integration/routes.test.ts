@@ -40,6 +40,8 @@ const OPEN = new Set([
   'POST /auth/staff',
   // Los fallos de la web, también de la pantalla de entrada (con tope por IP).
   'POST /client-errors',
+  // El aviso de la piscina cerrada sale en la pantalla de entrada (`docs/piscineros.md`).
+  'GET /pool/notice',
   'OPTIONS /*',
 ])
 

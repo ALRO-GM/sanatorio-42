@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/gestion.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-460 textos. «—» es que falta la traducción: sale en español.
+469 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -463,6 +463,15 @@ Generado desde `apps/web/src/shared/i18n/textos/gestion.csv` con
 | `admin.clicks.count` | Panel, mapa de calor de clics: columna de clics | features/admin/ClickMap | Clics | Clicks | Clics | Klikak |
 | `admin.clicks.hint` | Panel, mapa de calor de clics: explicación bajo el mapa | features/admin/ClickMap | En naranja, lo que se pulsa sin que haga nada: ahí la gente espera que algo pase. La rejilla es el contenido de la sección (24 columnas a lo ancho, filas de 40 px). Sin logins: solo recuentos. | In orange, what gets clicked without doing anything: people expect something there. The grid is the section content (24 columns across, 40 px rows). No logins: counts only. | En taronja, el que es prem sense que faci res: la gent hi espera alguna cosa. La graella és el contingut de la secció (24 columnes d'ample, files de 40 px). Sense logins: només recomptes. | Laranjaz, ezer egiten ez duen arren sakatzen dena: jendeak zerbait espero du hor. Sareta atalaren edukia da (24 zutabe zabalean, 40 px-eko errenkadak). Loginik gabe: zenbaketak bakarrik. |
 | `admin.tab.focus` | Panel de gestión: pestaña del panel. Nombre de una pestaña del panel. | features/admin/AdminPage | Pomodoro | Pomodoro | Pomodoro | Pomodoro |
+| `admin.tab.pool` | Panel de gestión: pestaña de la piscina (quién entra) | features/admin/AdminPage | Piscina | Piscine | Piscina | Igerilekua |
+| `admin.pool.title` | Panel, Piscina: título | features/admin/PoolPanel | Piscina | Piscine | Piscina | Igerilekua |
+| `admin.pool.who` | Panel, Piscina: quién entra | features/admin/PoolPanel | Solo entran estudiantes (con el 42cursus). Un piscinero de una piscina en curso ve el aviso de abajo; el resto, que su cuenta no es de estudiante. | Only students (with the 42cursus) can sign in. Someone in a current piscine sees the notice below; everyone else is told their account is not a student one. | Només hi entren estudiants (amb el 42cursus). Un piscinista d'una piscina en curs veu l'avís de sota; la resta, que el seu compte no és d'estudiant. | Ikasleak bakarrik sartzen dira (42cursus-arekin). Martxan dagoen igerileku bateko igerilariak beheko oharra ikusten du; besteek, haien kontua ez dela ikaslearena. |
+| `admin.pool.closed` | Panel, Piscina: estado cerrado | features/admin/PoolPanel | Cerrada para piscineros | Closed to piscine students | Tancada per als piscinistes | Itxita igerilarientzat |
+| `admin.pool.open` | Panel, Piscina: estado abierto | features/admin/PoolPanel | Abierta para piscineros | Open to piscine students | Oberta per als piscinistes | Irekita igerilarientzat |
+| `admin.pool.message` | Panel, Piscina: hueco del aviso | features/admin/PoolPanel | Aviso para piscineros | Notice for piscine students | Avís per als piscinistes | Igerilarientzako oharra |
+| `admin.pool.messageHint` | Panel, Piscina: qué pasa si se deja vacío | features/admin/PoolPanel | Vacío: sale el aviso de fábrica. | Empty: the default notice is shown. | Buit: surt l'avís per defecte. | Hutsik: lehenetsitako oharra agertzen da. |
+| `admin.pool.save` | Panel, Piscina: botón de guardar | features/admin/PoolPanel | Guardar | Save | Desar | Gorde |
+| `admin.pool.saved` | Panel, Piscina: guardado | features/admin/PoolPanel | Guardado. | Saved. | Desat. | Gordeta. |
 | `admin.focus.title` | Panel de gestión: estadísticas del Pomodoro | features/admin/FocusPanel | Pomodoro: cómo se usa | Pomodoro: how it is used | Pomodoro: com s'utilitza | Pomodoro: nola erabiltzen den |
 | `admin.data.kind.focus_sessions` | Panel de gestión, «Limpiar datos»: un tipo de dato que se puede borrar. Nombre de un tipo de dato en la lista. | features/admin/DataPanel | Sesiones de Pomodoro | Pomodoro sessions | Sessions de Pomodoro | Pomodoro saioak |
 | `admin.data.kind.focus_sessions.summary` | Panel de gestión, «Limpiar datos»: un tipo de dato que se puede borrar. Resumen de un tipo de dato (qué contiene). | features/admin/DataPanel | Cada sesión de Pomodoro empezada, con cómo acabó. | Every Pomodoro session started, and how it ended. | Cada sessió de Pomodoro començada, amb com va acabar. | Hasitako Pomodoro saio bakoitza, nola amaitu zen. |

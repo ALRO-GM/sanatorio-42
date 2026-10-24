@@ -290,6 +290,22 @@ recurrente. Hecho el 22-23 de octubre:
       día (`infra/scripts/pull-backups.sh`, 2026-10-25). El monitor externo,
       aparcado por Alberto.
 
+## 2g. Plan vigente: piscineros (pedido el 2026-10-25)
+
+Diseño, decisiones y fases en [piscineros.md](piscineros.md). Solo entran
+estudiantes; los piscineros de una piscina en curso, a una versión propia si
+el panel la abre, con permisos por pestaña, bloque y funcionalidad. Mundos
+separados. Cada fase con check, commit, push y despliegue.
+
+- [x] **P1. Entrada** (2026-10-25): clasificación (`modules/pool`), `aud` en la
+      cookie, avisos en la entrada y pestaña Piscina con el texto. El
+      interruptor de abrir va en P2 (`open` es siempre `false` hasta entonces).
+- [ ] **P2. Permisos**: claves, rutas por clave, corte en `actor()`, web y
+      árbol de casillas en el panel.
+- [ ] **P3. Datos de piscina**: gente, correcciones y eventos del cursus 9;
+      red, sala de espera, mapa, buscador y calendario separados.
+- [ ] **P4. Documentación y demostración.**
+
 ## 3. A medias o por confirmar con Alberto
 
 - ~~Intentos de examen~~: comprobado el 2026-10-22: la copia de fondo acabó el

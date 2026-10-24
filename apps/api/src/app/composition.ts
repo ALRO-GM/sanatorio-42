@@ -54,6 +54,8 @@ import type { ProfileModule } from '../modules/profile/index.js'
 import { createReplicaModule } from '../modules/replica/index.js'
 import type { PhotoStore, ReplicaModule, SyncerConfig } from '../modules/replica/index.js'
 import { createFacilityModule } from '../modules/facility/index.js'
+import { createPoolModule } from '../modules/pool/index.js'
+import type { PoolModule } from '../modules/pool/index.js'
 import { createFocusModule } from '../modules/focus/index.js'
 import type { FocusModule } from '../modules/focus/index.js'
 import { createGitCourseModule } from '../modules/gitcourse/index.js'
@@ -134,6 +136,7 @@ export type Services = {
   facility: FacilityModule['service']
   focus: FocusModule['service']
   gitCourse: GitCourseModule['service']
+  pool: PoolModule['service']
 }
 
 type Composition = {
@@ -338,6 +341,12 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     ...clock,
   })
 
+  const pool = createPoolModule({
+    db,
+    isAdmin: async (login) => (await admin.service.accessOf(login)).admin,
+    ...clock,
+  })
+
   const meet = createMeetModule({
     db,
     documents: staff.service,
@@ -447,6 +456,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     facility,
     focus,
     gitCourse,
+    pool,
     createClientErrorsModule(),
   ]
 
@@ -494,6 +504,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
       facility: facility.service,
       focus: focus.service,
       gitCourse: gitCourse.service,
+      pool: pool.service,
     },
   }
 }

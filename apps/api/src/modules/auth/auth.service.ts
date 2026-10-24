@@ -53,7 +53,22 @@ type AuthServiceOptions = {
    * Si falla no se bloquea el login: se entra igual, sin campus en la sesión.
    */
   onLogin?: (profile: ApiUser) => Promise<{ campusId: number }>
+  /**
+   * Si quien vuelve de 42 puede entrar: `null` si sí, o por qué no. Va antes
+   * de `onLogin`: de quien no entra no se guarda nada.
+   */
+  admit?: (profile: ApiUser) => Promise<LoginRefusal | null>
   now?: () => number
+}
+
+/** Por qué no se deja entrar a alguien (`modules/pool`). */
+type LoginRefusal = 'not_student' | 'pool_closed'
+
+/** Un login que 42 da por bueno pero Sanatorio no deja pasar. */
+export class LoginRefused extends Error {
+  constructor(readonly reason: LoginRefusal) {
+    super(`Sin acceso: ${reason}`)
+  }
 }
 
 /** Valor del cookie de estado, ya serializado. */
@@ -148,6 +163,10 @@ export function createAuthService(options: AuthServiceOptions) {
       verifier: payload.verifier,
     })
 
+    const refusal = (await options.admit?.(profile)) ?? null
+
+    if (refusal !== null) throw new LoginRefused(refusal)
+
     let campusId: number | null = null
 
     try {
@@ -182,7 +201,10 @@ export function createAuthService(options: AuthServiceOptions) {
     }
 
     const expiresAt = now() + sessionTtlMs
-    const payload = Buffer.from(JSON.stringify({ ...user, exp: expiresAt })).toString('base64url')
+    // `aud`: el grupo, comprobado al entrar (`docs/piscineros.md`).
+    const payload = Buffer.from(
+      JSON.stringify({ ...user, aud: 'student', exp: expiresAt }),
+    ).toString('base64url')
 
     return {
       login: user.login,
@@ -356,9 +378,16 @@ function readSessionUser(parsed: unknown): SessionUser | undefined {
     image?: unknown
     campusId?: unknown
     role?: unknown
+    aud?: unknown
   }
 
   if (typeof candidate.login !== 'string' || candidate.login === '') {
+    return undefined
+  }
+
+  // Una sesión de persona sin el grupo es de antes de comprobarlo al entrar
+  // (`docs/piscineros.md`): no vale, y se vuelve a entrar.
+  if (candidate.role !== 'staff' && candidate.aud !== 'student') {
     return undefined
   }
 

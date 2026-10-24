@@ -1549,6 +1549,21 @@ POST /quiz/rooms/:id/answer   → QuizRoom. { question, option }: option es el i
 - Puntos: acertar suma 1; en competitivo, fallar resta 1. Supervivencia: fallar o
   no contestar quita una de las 3 vidas.
 
+## Piscina (`modules/pool`)
+
+```
+GET /pool/notice   → PoolNotice, sin sesión: el aviso de la piscina cerrada
+GET /admin/pool    → PoolSettings (solo admins)
+PUT /admin/pool    → { message } → PoolSettings (solo admins)
+```
+
+- Quién entra se decide al volver de 42 (`docs/piscineros.md`): con el
+  42cursus, estudiante; sin él y con la C Piscine en curso, piscinero; lo
+  demás, no. Quien no entra vuelve al front con `?error=not_student` o
+  `?error=pool_closed` (`status=403`) y sin sesión.
+- La cookie lleva el grupo (`aud`); una de antes, sin él, ya no vale.
+- `open` es `false` hasta que estén los permisos de piscineros.
+
 ## Exámenes (`modules/exams`)
 
 ```

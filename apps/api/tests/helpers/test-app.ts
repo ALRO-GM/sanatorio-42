@@ -105,6 +105,8 @@ const DEFAULT_PROFILE = {
   login: 'albrodri',
   image: AVATAR,
   campus_users: [{ campus_id: 22, is_primary: true }],
+  // Estudiante: tiene el 42cursus (`docs/piscineros.md`).
+  cursus_users: [{ cursus_id: 21, level: 3.5, begin_at: '2024-10-07T08:00:00.000Z' }],
   projects_users: [
     { id: 101, status: 'in_progress', 'validated?': null, project: { id: 10, name: 'ft_printf' } },
     { id: 102, status: 'finished', 'validated?': true, project: { id: 11, name: 'libft' } },

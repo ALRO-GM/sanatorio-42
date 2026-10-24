@@ -20,6 +20,7 @@ import { DataPanel } from './DataPanel'
 import { FacilityList } from '../facility/FacilityList'
 import { GrowthPanel } from './GrowthPanel'
 import { FocusPanel } from './FocusPanel'
+import { PoolPanel } from './PoolPanel'
 import { StatsPanel } from './StatsPanel'
 import { UsageTab } from './UsageTab'
 import { Icon } from '../../shared/ui/Icon'
@@ -39,6 +40,7 @@ const TABS = [
   'casts',
   'facility',
   'focus',
+  'pool',
   'data',
 ] as const
 
@@ -99,6 +101,7 @@ function AdminTabs({ campusId, me }: { campusId?: number | undefined; me: string
       {tab === 'clicker' && <ClickerPanel me={me} />}
       {tab === 'data' && <DataPanel />}
       {tab === 'focus' && <FocusPanel />}
+      {tab === 'pool' && <PoolPanel />}
       {tab === 'casts' && <BroadcastsTab campusId={campusId} />}
       {tab === 'facility' && (
         <FacilityList

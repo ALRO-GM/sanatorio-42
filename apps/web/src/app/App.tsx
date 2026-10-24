@@ -4,6 +4,7 @@ import { Login } from '../features/auth/Login'
 import { LegalPage } from '../features/legal/LegalPage'
 import { useAuth } from '../features/auth/useAuth'
 import { StaffPage } from '../features/staff/StaffPage'
+import { api } from '../shared/api'
 import { useI18n } from '../shared/i18n'
 import { Logo } from '../shared/ui/Logo'
 import { Clinic } from './Clinic'
@@ -81,6 +82,18 @@ function StudentApp() {
   const { t } = useI18n()
   const { me, loading, error, retry, login, logout } = useAuth()
   const [oauthError] = useState(readOAuthError)
+  // Con la piscina cerrada, el aviso lo escribe quien administra (`docs/piscineros.md`).
+  const [poolNotice, setPoolNotice] = useState('')
+
+  useEffect(() => {
+    if (oauthError !== 'pool_closed') return
+    api
+      .getPoolNotice()
+      .then((notice) => {
+        setPoolNotice(notice.message)
+      })
+      .catch(() => undefined)
+  }, [oauthError])
 
   useEffect(() => {
     document.title = me === null ? BASE_TITLE : `${BASE_TITLE} - ${me.login}`
@@ -122,7 +135,11 @@ function StudentApp() {
         ? null
         : oauthError === 'access_denied'
           ? t('login.cancelled')
-          : t('login.failed', { code: oauthError })
+          : oauthError === 'not_student'
+            ? t('login.notStudent')
+            : oauthError === 'pool_closed'
+              ? poolNotice || t('login.poolClosed')
+              : t('login.failed', { code: oauthError })
 
     return <Login onLogin={() => void login()} notice={notice} />
   }

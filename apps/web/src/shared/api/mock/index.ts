@@ -22,6 +22,7 @@ import { statsMock } from './stats'
 import { turnsMock } from './turns'
 import { facilityMock } from './facility'
 import { focusMock } from './focus'
+import { poolMock } from './pool'
 import { gitCourseMock } from './gitcourse'
 import { gitRoomsMock } from './gitrooms'
 import { replicaMock } from './replica'
@@ -47,6 +48,7 @@ export const mockApi: Api = {
   ...turnsMock,
   ...facilityMock,
   ...focusMock,
+  ...poolMock,
   ...gitCourseMock,
   ...gitRoomsMock,
 }

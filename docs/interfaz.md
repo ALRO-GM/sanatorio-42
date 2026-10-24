@@ -72,6 +72,7 @@ de datos.
 | Pomodoro | Pantalla completa con «en concentración · no molestar» y la pregunta al acabar (motivos, diez segundos, seguir con felicitación) | S | Es el propio Pomodoro: ayuda a no rendirse a la primera (#80) |
 | Pomodoro | «Tus estadísticas» (pestaña de su ventana): periodo, días, horas, paradas y motivos, y la media del tramo elegido de quienes lo usan | N | Son cifras: el simplificado no las enseña (#80) |
 | Panel de gestión | Pestaña Pomodoro: uso por días y horas, paradas, motivos y tramo de gente | Admins | Solo de quien administra (#80) |
+| Panel de gestión | Pestaña Piscina: quién entra y el aviso para piscineros con la piscina cerrada (`docs/piscineros.md`) | Admins | Solo de quien administra |
 | Clústeres | Avisar de un problema (edificio u ordenador) | N | Al lado del plano, donde se ve el puesto |
 | Pestañas | Estadísticas (en Ayuda) | N | Clasificaciones: el simplificado no enseña rankings |
 | Estadísticas | Cifras del campus y clasificación de cada sección, con fotos | N | La sección en sí |

@@ -169,6 +169,9 @@ export const realApi: Api = {
   stayFocus: (reasons) => sendJson('POST', '/me/focus/stay', { reasons }),
   getMyFocusStats: (query) => getJson(`/me/focus/stats?${search(query)}`),
   getAdminFocusStats: (query) => getJson(`/admin/focus/stats?${search(query)}`),
+  getPoolNotice: () => getJson('/pool/notice'),
+  getPoolSettings: () => getJson('/admin/pool'),
+  updatePoolSettings: (changes) => sendJson('PUT', '/admin/pool', changes),
   sendClicks: (batch) => send('POST', '/usage/clicks', batch),
   getClickHeatmap: (section, layout, days) =>
     getJson(

@@ -11,6 +11,7 @@ import { DomainError } from '../../core/errors.js'
 import { createRateLimit } from '../../core/rate-limit.js'
 import type { RateLimit } from '../../core/rate-limit.js'
 import type { AuthService } from './auth.service.js'
+import { LoginRefused } from './auth.service.js'
 import { mapError } from '../../core/http/errors.js'
 import {
   OAUTH_STATE_COOKIE_NAME,
@@ -165,9 +166,15 @@ export function registerAuthRoutes(app: FastifyInstance, options: AuthRoutesOpti
 
         return await reply.redirect(result.redirectUrl, 302)
       } catch (error) {
+        setCookies(reply, [forgetState()])
+
+        // No es un fallo: 42 dice quién es y Sanatorio no le deja pasar.
+        if (error instanceof LoginRefused) {
+          return await reply.redirect(frontWithError(options.frontendUrl, error.reason, 403), 302)
+        }
+
         const mapped = mapError(error)
         request.log.warn({ err: error }, 'fallo en el callback de OAuth')
-        setCookies(reply, [forgetState()])
 
         return await reply.redirect(
           frontWithError(options.frontendUrl, mapped.body.error, mapped.status),
