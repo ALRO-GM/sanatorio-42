@@ -141,7 +141,31 @@ describe('acabar un Pomodoro antes de tiempo', () => {
 
     fireEvent.click(button(text('focus.screen.shrink'), full))
     expect(screen.queryByRole('dialog')).toBeNull()
+    expect(document.documentElement.dataset.covered).toBe('off')
     expect(screen.getByRole('timer', { name: text('focus.timerLabel') })).toBeTruthy()
     expect(focusing()).toBe(true)
+  })
+
+  it('a pantalla completa lo tapa todo: va fuera de la web, la deja quieta y se pone delante de otra ventana', async () => {
+    fireEvent.click(button(text('focus.screen.open')))
+
+    const full = screen.getByRole('dialog', { name: text('focus.screen.label') })
+
+    expect(full.parentElement).toBe(document.body)
+    expect(document.documentElement.dataset.covered).toBe('on')
+    expect(document.documentElement.dataset.still).toBe('on')
+
+    // Un aviso que se abre después: la pantalla vuelve a ponerse delante, una vez.
+    const raise = vi.spyOn(full as HTMLDialogElement, 'showModal')
+    const other = document.createElement('dialog')
+
+    document.body.append(other)
+    other.setAttribute('open', '')
+    await pass(0)
+    expect(raise).toHaveBeenCalledTimes(1)
+    document.body.append(document.createElement('p'))
+    await pass(0)
+    expect(raise).toHaveBeenCalledTimes(1)
+    other.remove()
   })
 })

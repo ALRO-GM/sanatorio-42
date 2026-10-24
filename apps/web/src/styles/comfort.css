@@ -75,6 +75,12 @@
    pausan: una de entrada (algo que aparece desde transparente) se quedaría a
    medias, invisible. Las demostraciones, tal cual: quien las mira no suele
    mover el ratón. */
+/* Con el Pomodoro a pantalla completa (`cover` en `src/shared/still.ts`), la
+   web de debajo ni se pinta: no gasta en animaciones que nadie ve. */
+:root[data-covered='on'] #root {
+  content-visibility: hidden;
+}
+
 :root[data-still='on'] :not(.tour, .tour *),
 :root[data-still='on'] :not(.tour, .tour *)::before,
 :root[data-still='on'] :not(.tour, .tour *)::after {

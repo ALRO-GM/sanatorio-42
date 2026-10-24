@@ -111,8 +111,9 @@ export function FocusTimer() {
             }}
           >
             {cheering}
+            {/* Dentro: la pregunta va encima de la pantalla, que tapa todo lo demás. */}
+            {exit}
           </FocusScreen>
-          {exit}
         </>
       )
     }

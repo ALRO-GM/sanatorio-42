@@ -1,16 +1,21 @@
 import { useEffect, useRef } from 'react'
 import type { ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 
 import { useI18n } from '../../shared/i18n'
 import { useFormat } from '../../shared/i18n/useFormat'
+import { cover } from '../../shared/still'
 import { Icon } from '../../shared/ui/Icon'
 
 /**
  * El Pomodoro a pantalla completa (#80 del buzón): el tiempo que queda en
  * grande y, para quien pase por al lado, «en concentración · no molestar».
  *
- * Es una ventana modal que tapa toda la página y, si el navegador deja, pide
- * además la pantalla completa de verdad. Salir de ella (el botón, Escape o
+ * Es una ventana modal, fuera de la web (en `body`), que la tapa entera y,
+ * si el navegador deja, pide además la pantalla completa de verdad. Va siempre
+ * encima: si se abre otra ventana (un aviso, una petición de ayuda), se vuelve
+ * a poner delante. Mientras está, la web de debajo ni se pinta ni gasta
+ * (`cover`). Salir de ella (el botón, Escape o
  * cuando el navegador quita la pantalla completa) pregunta si de verdad se
  * quiere parar; «quitar pantalla completa» solo la cierra, sin parar nada.
  *
@@ -45,6 +50,33 @@ export function FocusScreen({
     const element = dialog.current
 
     if (element?.open === false) element.showModal()
+    cover(true)
+
+    // Otra ventana modal se abriría por encima: se vuelve a poner delante.
+    // Solo por las que se abren nuevas (las de dentro, como la pregunta de
+    // parar, ya van encima): cerrar y abrir esta también cambia el DOM.
+    const seen = new Set<Element>()
+    const front = (): void => {
+      if (element === null) return
+      for (const old of seen) if (!old.hasAttribute('open')) seen.delete(old)
+
+      const fresh = [...document.querySelectorAll('dialog[open]')].filter(
+        (other) => other !== element && !element.contains(other) && !seen.has(other),
+      )
+
+      if (fresh.length === 0) return
+      for (const other of fresh) seen.add(other)
+      element.close()
+      element.showModal()
+    }
+    const watcher = new MutationObserver(front)
+
+    watcher.observe(document.body, {
+      subtree: true,
+      childList: true,
+      attributes: true,
+      attributeFilter: ['open'],
+    })
 
     // La de verdad es un extra: sin ella (o sin permiso, o en un móvil que no
     // la tiene) la ventana ya lo tapa todo.
@@ -60,6 +92,8 @@ export function FocusScreen({
 
     return () => {
       leaving.current = true
+      watcher.disconnect()
+      cover(false)
       document.removeEventListener('fullscreenchange', changed)
       if (document.fullscreenElement) void document.exitFullscreen().catch(() => undefined)
     }
@@ -67,7 +101,7 @@ export function FocusScreen({
 
   const time = useFormat().time(until)
 
-  return (
+  return createPortal(
     <dialog
       ref={dialog}
       className="focus-screen"
@@ -102,6 +136,7 @@ export function FocusScreen({
           {t('focus.screen.exit')}
         </button>
       </div>
-    </dialog>
+    </dialog>,
+    document.body,
   )
 }

@@ -1,8 +1,10 @@
 import { useEffect, useRef } from 'react'
 
+import { isCovered } from '../still'
+
 /**
  * Vuelve a pedir algo cada `everyMs` milisegundos mientras la pantalla se está
- * mirando: una lista de salas que se llenan, el mapa de un proyecto, quién
+ * mirando (y no la tapa el Pomodoro a pantalla completa): una lista de salas que se llenan, el mapa de un proyecto, quién
  * está conectado. Con la pestaña en segundo plano no se pide nada, que nadie
  * lo ve (lo mismo que hace `usePulse`); al volver, la siguiente vuelta lo pone
  * al día.
@@ -27,7 +29,7 @@ export function usePolling(
     if (everyMs === null) return undefined
 
     const timer = window.setInterval(() => {
-      if (whileHidden || !document.hidden) void latest.current()
+      if (whileHidden || (!document.hidden && !isCovered())) void latest.current()
     }, everyMs)
 
     return () => {
