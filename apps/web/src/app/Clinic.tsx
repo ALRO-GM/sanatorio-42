@@ -30,7 +30,7 @@ import { startUsage, viewing } from '../shared/layout/store'
 import { Footer } from './Footer'
 import { Header } from './Header'
 import { SectionView } from './SectionView'
-import { SECTIONS } from './sections'
+import { HOME, SECTIONS, hiddenInFocus } from './sections'
 import type { Section } from './sections'
 import { useRoute } from './useRoute'
 
@@ -87,7 +87,14 @@ export function Clinic({ me, onLogout }: ClinicProps) {
     [],
   )
   const { pulse, refresh } = usePulse()
-  const concentrated = focusing(useFocus())
+  const focus = useFocus()
+  const concentrated = focusing(focus)
+
+  // En Pomodoro no se queda abierta una sección que no se ha elegido: al
+  // empezarlo (o al llegar por un enlace), se vuelve al expediente.
+  useEffect(() => {
+    if (concentrated && hiddenInFocus(section, focus?.settings.sections ?? [])) go(HOME)
+  }, [concentrated, focus, section, go])
 
   useEffect(() => {
     startUsage()

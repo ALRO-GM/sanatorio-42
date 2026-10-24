@@ -16,10 +16,8 @@ import { FocusMyStats } from './FocusMyStats'
 const FOCUS_MINUTES = [25, 50, 90] as const
 const BREAK_MINUTES = [5, 10, 15, 0] as const
 const SHOWS: readonly FocusShow[] = ['corrections', 'events', 'messages', 'guard', 'notices']
-/** Las secciones que se pueden dejar a la vista (las de las pestañas). */
-const CHOOSABLE = SECTIONS.filter((section) => section.inNav || section.id === 'expediente').map(
-  (section) => section.id,
-)
+/** Las secciones que se pueden dejar a la vista (las de las pestañas; el expediente, siempre). */
+const CHOOSABLE = SECTIONS.filter((section) => section.inNav).map((section) => section.id)
 
 const TABS = ['settings', 'stats'] as const
 
@@ -40,7 +38,7 @@ export function FocusDialog({ onClose }: { onClose: () => void }) {
       focus?.settings ?? {
         focusMinutes: 25,
         breakMinutes: 5,
-        sections: ['calendario', 'expediente'],
+        sections: ['calendario'],
         show: ['corrections', 'events'],
       },
   )

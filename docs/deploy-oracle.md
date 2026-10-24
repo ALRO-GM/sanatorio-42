@@ -213,6 +213,16 @@ cron con la frase (`openssl rand -base64 48 > ~/.sanatorio-backup-frase && chmod
 Guarda la frase también fuera de la máquina: sin ella las copias de fuera no se
 pueden abrir.
 
+**Copia fuera de la máquina (desde el 2026-10-25)**: el ordenador de Alberto se
+trae cada día la última copia buena por SSH con
+`infra/scripts/pull-backups.sh` (a `~/sanatorio-copias`, carpeta 700, guarda
+las 30 últimas y comprueba el gzip). Lo programa `pull-backups.sh --instalar`
+como temporizador de systemd de usuario a las 05:00 con `Persistent=true`: si
+el ordenador estaba apagado, la trae al encenderlo. Ver si va:
+`systemctl --user list-timers sanatorio-copias.timer` y
+`journalctl --user -u sanatorio-copias`. El bucket con rclone queda como
+alternativa, sin configurar.
+
 Lo que importa de la copia es lo propio (guardias, XP, grupos, dudas,
 pizarras). La réplica de 42 se puede volver a bajar.
 

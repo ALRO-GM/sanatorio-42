@@ -28,7 +28,7 @@ describe('modo concentración (Pomodoro)', () => {
 
     const dialog = await screen.findByRole('dialog', { name: text('focus.title') })
 
-    // Por defecto: expediente y calendario; los juegos, fuera.
+    // Por defecto: el calendario (el expediente siempre se ve); los juegos, fuera.
     expect(within(dialog).getByRole('checkbox', { name: text('nav.calendario') })).toHaveProperty(
       'checked',
       true,
@@ -53,6 +53,38 @@ describe('modo concentración (Pomodoro)', () => {
       expect(document.documentElement.dataset.focus).toBe('off')
     })
     expect(within(nav).getAllByRole('button')).toHaveLength(before)
+  }, 20_000)
+
+  it('al empezarlo, una pestaña que no se ha elegido se cierra y se vuelve al expediente', async () => {
+    const user = userEvent.setup()
+    const start = async (): Promise<void> => {
+      await user.click(screen.getByRole('button', { name: /tu cuenta/i }))
+      await user.click(await screen.findByRole('menuitem', { name: text('focus.open') }))
+      const dialog = await screen.findByRole('dialog', { name: text('focus.title') })
+
+      await user.click(
+        within(dialog).getByRole('button', { name: new RegExp(text('focus.start')) }),
+      )
+      await screen.findByRole('timer', { name: text('focus.timerLabel') })
+    }
+
+    // El calendario está elegido por defecto: se queda donde está.
+    await openApp('#/calendario')
+    await start()
+    expect(window.location.hash).toBe('#/calendario')
+    await act(() => stopFocus(['done']))
+    cleanup()
+
+    // El tablón no: se vuelve al expediente, y por un enlace tampoco se entra.
+    await openApp('#/tablon')
+    await start()
+    await waitFor(() => {
+      expect(window.location.hash).toMatch(/^#\/expediente/)
+    })
+    window.location.hash = '#/tablon'
+    await waitFor(() => {
+      expect(window.location.hash).toMatch(/^#\/expediente/)
+    })
   }, 20_000)
 
   it('tus estadísticas: cifras con la media del tramo, por días, por horas y motivos', async () => {

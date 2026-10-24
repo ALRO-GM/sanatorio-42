@@ -64,10 +64,8 @@ fija, apartado de trampas de Code Clicker, estado de salud ordenado y nombres
 de las noticias del juego por correcciones.
 
 - [x] **Tanda de la valoración de uso** (2026-10-22): las mejoras de la última
-      columna de `docs/interfaz.md`, hechas y desplegadas. Queda abierto solo
-      el grafo del tablón en móvil (en perspectiva cuesta; falta decidir con
-      Alberto cómo verlo). «Endogamia» explicada el 2026-10-24; Not-games ya
-      está en castellano e inglés (decisión del 22-oct).
+      columna de `docs/interfaz.md`, hechas y desplegadas. El grafo del tablón en móvil se deja
+      como está (decisión de Alberto, 2026-10-25).
 
 ## 2b. Plan vigente: Not-games (pedido el 2026-10-17)
 
@@ -222,7 +220,7 @@ respetando el cupo de GitHub (ver `contexto.md`).
       misiones), desplegado. Las rondas se traducen al enseñarlas (`bank/localize.ts`,
       cabecera `x-lang` → `Actor.lang`).
 - [x] Indulto de Code Clicker: ya no devuelve una partida más atrasada que la de
-      ahora. **Lo pulsa Alberto en el panel** (filas: dstanimi #1, reiascan #6,
+      ahora. Resuelto por Alberto en el panel (filas: dstanimi #1, reiascan #6,
       ilopez-f #8 y #39, acanadil #10, dparra-s #13, acuevas #40, legomez #41,
       albrodri #38 y #42). Fuera: autoclickers (clicks), vistebel, salegari, stelescu.
 - [x] #88 ajedrez: jaque sin pregunta, otra pregunta si nadie contesta (hasta 2),
@@ -243,9 +241,6 @@ respetando el cupo de GitHub (ver `contexto.md`).
       pestaña Ayuda). La migración 65 creó la tabla; la 66 la borra.
 
 Las ramas de agentes están todas unidas; sus worktrees se borraron el 2026-10-24.
-- [ ] **Cerrar y contestar** #42, 46, 48, 50, 69, 70, 71, 76, 77, 79, 83: la
-      escritura remota en la base de datos está bloqueada; respuestas en el
-      scratchpad `answer.mjs` o desde el panel.
 
 ## 2f. Plan vigente: revisión completa y flujo de trabajo (pedido el 2026-10-22, noche)
 
@@ -291,10 +286,9 @@ recurrente. Hecho el 22-23 de octubre:
       Privacidad, texto legal y versión 2026-10-23).
 - [x] Recorridos: asistencia, guardia, pizarra, terapia, tablón y test del
       cliente real, y el secreto de la cruz hasta Code Clicker.
-- [ ] Queda: monitor externo (cuenta gratuita: Alberto),
-      destino
-      de las copias fuera de la máquina (bucket gratuito de Oracle + rclone +
-      frase: decisión y pasos con Alberto).
+- [x] Copias fuera de la máquina: el ordenador de Alberto se las trae cada
+      día (`infra/scripts/pull-backups.sh`, 2026-10-25). El monitor externo,
+      aparcado por Alberto.
 
 ## 3. A medias o por confirmar con Alberto
 
@@ -303,8 +297,6 @@ recurrente. Hecho el 22-23 de octubre:
 - ~~Bolsa común de Code Clicker~~: quitada el 2026-10-22 (migración 63). No
   estaba dormida (9,9·10¹⁵ líneas) y cobrarla a la vez que se guardaba daba
   trampas que no lo eran.
-- **Saltos de Code Clicker pendientes** en el panel (55 a 2026-10-16): los
-  revisa Alberto.
 - **Cifras de los límites** (se cambian desde el panel, pestaña "Consumo"): el
   tráfico de salida de Oracle está puesto a 10 TB al mes y se renueva el día 1,
   con el corte fijo al 90 % (9 TB); el tope diario o mensual de

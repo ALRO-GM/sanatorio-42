@@ -5,7 +5,7 @@ import { useI18n } from '../shared/i18n'
 import { track, useNavOrder } from '../shared/layout/store'
 import { Icon } from '../shared/ui/Icon'
 import { focusing, useFocus } from '../shared/focus'
-import { CATEGORIES, categoryOf, sectionsOfCategory } from './sections'
+import { CATEGORIES, categoryOf, hiddenInFocus, sectionsOfCategory } from './sections'
 import type { Category, Section } from './sections'
 
 type NavProps = {
@@ -57,12 +57,9 @@ export function Nav({ section, onGo, examLive = false }: NavProps) {
         ...order.flatMap((id) => all.filter((entry) => entry.id === id && entry.inNav)),
       ]
         .filter((entry) => shows(detail, entry.from ?? 'simple'))
-        // En Pomodoro, solo lo elegido (y la sección en la que se está).
+        // En Pomodoro, solo lo elegido (y el expediente).
         .filter(
-          (entry) =>
-            !focusing(focus) ||
-            entry.id === section ||
-            (focus?.settings.sections.includes(entry.id) ?? true),
+          (entry) => !focusing(focus) || !hiddenInFocus(entry.id, focus?.settings.sections ?? []),
         )
     )
   }

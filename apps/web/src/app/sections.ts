@@ -98,6 +98,20 @@ export function sectionsOfCategory(category: Category): SectionInfo[] {
 
 export const HOME: Section = 'expediente'
 
+/**
+ * Si, en Pomodoro, esta sección queda fuera: una de las pestañas que no se ha
+ * elegido, o el juego. El expediente (la portada) siempre se puede ver: es
+ * adonde se vuelve. Gestión, guardia y privacidad no se eligen y no se cierran.
+ */
+export function hiddenInFocus(section: Section, chosen: readonly string[]): boolean {
+  if (section === HOME) return false
+  if (section === 'clicker') return true
+
+  return (
+    SECTION_INFO.some((entry) => entry.id === section && entry.inNav) && !chosen.includes(section)
+  )
+}
+
 export function isSection(name: string): name is Section {
   return SECTIONS.some((section) => section.id === name)
 }
