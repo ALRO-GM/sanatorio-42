@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/red.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-132 textos. «—» es que falta la traducción: sale en español.
+133 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -46,6 +46,7 @@ Generado desde `apps/web/src/shared/i18n/textos/red.csv` con
 | `net.total.endogamy` | Total: endogamia media del campus | features/network/NetworkPage | Endogamia del campus | Campus endogamy | Endogàmia del campus | Campuseko endogamia |
 | `net.endogamy` | Etiqueta: endogamia (repetir siempre con la misma gente) | features/network/PersonPanel, features/profile/NetworkCard | Endogamia | Endogamy | Endogàmia | Endogamia |
 | `net.personBreakdown` | Desglose de la endogamia de una persona | features/network/NetworkPage, features/network/PersonPanel, features/profile/NetworkCard | Repite con la misma gente: {repetition} % · correcciones devueltas: {reciprocity} % | Repeats with the same people: {repetition}% · returned evaluations: {reciprocity}% | Repeteix amb la mateixa gent: {repetition} % · correccions tornades: {reciprocity} % | Jende berarekin errepikatzen du: % {repetition} · itzulitako zuzenketak: % {reciprocity} |
+| `net.endogamyScale` | Escala de la endogamia, junto al total y la lista | features/network/NetworkPage | De 0 (nunca repites con nadie) a 100 (siempre con las mismas personas). | From 0 (you never repeat with anyone) to 100 (always the same people). | De 0 (no repeteixes mai amb ningú) a 100 (sempre amb les mateixes persones). | 0tik (inorekin ez duzu errepikatzen) 100era (beti pertsona berberekin). |
 | `net.empty` | Sin resultados con estos filtros | features/network/NetworkPage | No hay correcciones con estos filtros. Prueba a ampliar el periodo o a bajar el mínimo. | No evaluations match these filters. Try a longer period or a lower minimum. | No hi ha correccions amb aquests filtres. Prova d'ampliar el període o d'abaixar el mínim. | Ez dago zuzenketarik iragazki hauekin. Saiatu aldia zabaltzen edo gutxienekoa jaisten. |
 | `net.emptyPerson` | Esa persona no tiene correcciones con estos filtros | features/network/NetworkPage | Esa persona no tiene correcciones con estos filtros. | That person has no evaluations with these filters. | Aquesta persona no té correccions amb aquests filtres. | Pertsona horrek ez du zuzenketarik iragazki hauekin. |
 | `net.graphLabel` | Nombre accesible del grafo | features/network/NetworkPage | Grafo de correcciones: {people} personas y {links} uniones | Evaluation graph: {people} people and {links} links | Graf de correccions: {people} persones i {links} unions | Zuzenketen grafoa: {people} pertsona eta {links} lotura |

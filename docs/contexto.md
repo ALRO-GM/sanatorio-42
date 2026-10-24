@@ -6,7 +6,7 @@ hace la web está en el [README](../README.md); cómo está montada, en
 [architecture.md](architecture.md); el contrato HTTP, en [api.md](api.md). Aquí
 va lo que no está en el código.
 
-Última puesta al día: 2026-10-23.
+Última puesta al día: 2026-10-24.
 
 **Al retomar con el contexto vacío, lo primero es
 [tareas-tras-compactar.md](tareas-tras-compactar.md)**: es la lista de lo que hay

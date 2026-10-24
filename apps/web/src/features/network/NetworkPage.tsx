@@ -561,6 +561,7 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
                         </div>
                         <div className="tile wide">
                           <Meter label={t('net.total.endogamy')} value={graph.totals.endogamy} />
+                          <small>{t('net.endogamyScale')}</small>
                           <small>
                             {t('net.personBreakdown', {
                               repetition: Math.round(graph.totals.repetition * 100),
@@ -590,7 +591,7 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
                                 <p className="hint">
                                   {ranking.length === 0
                                     ? t('net.rankingEmpty')
-                                    : t('net.rankingHint')}
+                                    : `${t('net.endogamyScale')} ${t('net.rankingHint')}`}
                                 </p>
                               }
                             >

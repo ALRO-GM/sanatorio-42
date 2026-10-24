@@ -157,6 +157,7 @@
   grid-column: 1 / -1;
 }
 .net-totals .tile small {
+  display: block;
   color: var(--text-3);
   font-size: 0.75rem;
 }

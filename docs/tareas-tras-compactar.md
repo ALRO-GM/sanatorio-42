@@ -17,24 +17,11 @@ este fichero y se hace lo que dice, en orden.
 - Si una tarea necesita una decisión de Alberto, se le pregunta antes de seguir
   con esa; las demás no esperan.
 
-Última puesta al día: 2026-10-23. En producción desde el 2026-10-11.
+Última puesta al día: 2026-10-24. En producción desde el 2026-10-11.
 
 ## 1. Arranque (siempre, en cada sesión nueva)
 
 - [ ] Leer [contexto.md](contexto.md) entero.
-- [ ] Reintentos de Oracle: mirar el registro y relanzar el proceso si ha muerto.
-
-  ```sh
-  tail -3 ~/.local/share/sanatorio-oracle/oracle-retry.log
-  pgrep -af 'retry.sh' || (cd ~/.local/share/sanatorio-oracle && setsid nohup bash ./retry.sh > /dev/null 2>&1 < /dev/null &)
-  ```
-
-  Si la última línea dice `Listo. La máquina está en: <IP>`: avisar a Alberto
-  para que ponga esa IP en DuckDNS y hacer el despliegue (pasos en `contexto.md`)
-  **antes** que cualquier otra tarea de esta lista.
-
-- [ ] Volver a poner el vigilante en segundo plano (la orden exacta está en
-      `contexto.md`, "Tareas recurrentes"). Avisa cuando Oracle dé la máquina.
 - [ ] Ver qué hay sin subir: `git status --short | wc -l` y `git log --oneline -3`.
 - [ ] `npm run check`, para partir de un estado conocido.
 - [ ] Decir a Alberto en dos líneas cómo está todo antes de empezar con el plan.
@@ -77,9 +64,10 @@ fija, apartado de trampas de Code Clicker, estado de salud ordenado y nombres
 de las noticias del juego por correcciones.
 
 - [x] **Tanda de la valoración de uso** (2026-10-22): las mejoras de la última
-      columna de `docs/interfaz.md`, hechas y desplegadas. Quedan abiertas solo
-      las que dicen sin «—»: grafo del tablón en móvil, «endogamia» en la Red y
-      las preguntas de Not-games en otros idiomas (el banco está en castellano).
+      columna de `docs/interfaz.md`, hechas y desplegadas. Queda abierto solo
+      el grafo del tablón en móvil (en perspectiva cuesta; falta decidir con
+      Alberto cómo verlo). «Endogamia» explicada el 2026-10-24; Not-games ya
+      está en castellano e inglés (decisión del 22-oct).
 
 ## 2b. Plan vigente: Not-games (pedido el 2026-10-17)
 
@@ -241,12 +229,12 @@ respetando el cupo de GitHub (ver `contexto.md`).
       quién mueve encima del tablero. · [x] #89 repaso de la partida.
 - [x] #68 cifras en las flechas de la red. · [x] #82 · [x] #86 · [x] #92.
 - [x] #87 gráfica de avance (`stats/progress.*`, `GET /stats/progress`).
-- [ ] **#81 exámenes**: kickoff por mes y año (inicio = `begin_at` o primer
+- [x] **#81 exámenes** (unido y desplegado el 2026-10-23): kickoff por mes y año (inicio = `begin_at` o primer
       proyecto, como en el avance), C frente a Python/Nexus lado a lado (rank 3
       con rank 3 Nexus…), todos los intentos (sin tope en 6), agujero negro por
       círculo, historial de absorbidos y de los más cercanos, total y %.
       Revisar también que salga toda la gente.
-- [ ] **#80 pomodoro**: pantalla completa «Enfocado, no molestar»; al salir,
+- [x] **#80 pomodoro** (unido y desplegado el 2026-10-23): pantalla completa «Enfocado, no molestar»; al salir,
       motivos y 10 s para pensarlo; estadísticas (admin y de cada cual) por
       día/hora/uso/cancelaciones/motivos, por fechas, con comparación a la media
       (doble deslizador por percentil de uso).
@@ -254,10 +242,7 @@ respetando el cupo de GitHub (ver `contexto.md`).
       y **quitada** el mismo día por decisión de Alberto (solo se valora en la
       pestaña Ayuda). La migración 65 creó la tabla; la 66 la borra.
 
-**En paralelo (2026-10-22)**: #81 (migración 65), #80 (migración 64) y #91
-(migración 66) los hacen agentes, cada uno en su worktree y rama, sin push.
-Al acabar: unir las ramas a `main` de una en una, `npm run check` con todo
-junto y un solo push y despliegue (cupo de GitHub).
+Las ramas de agentes están todas unidas; sus worktrees se borraron el 2026-10-24.
 - [ ] **Cerrar y contestar** #42, 46, 48, 50, 69, 70, 71, 76, 77, 79, 83: la
       escritura remota en la base de datos está bloqueada; respuestas en el
       scratchpad `answer.mjs` o desde el panel.
@@ -293,9 +278,6 @@ recurrente. Hecho el 22-23 de octubre:
       LIMIT en estadísticas), B4 (bloqueos cortan DMs), hooks de git y
       `check:quick` (`npm run hooks`). El estado por hallazgo está en
       `docs/revision-2026-10/README.md`.
-- [ ] **En curso con un agente**: base reutilizable de la web (los diez de
-      `calidad-web.md`), rama `worktree-agent-a6d0ea6693a137ffe`. Al volver:
-      unir, `npm run check`, push y despliegue.
 - [x] Hecho y desplegado el 23-oct (tarde, sin agentes): B1 (documento de
       horas por `POST /events/report/csv`), B3, bajos de juegos (irse = perder,
       cerrojo del Clicker, `slugParam`, tramo del Pomodoro ≥ 5, `TourName`, tope
