@@ -297,7 +297,7 @@ Generado desde `apps/web/src/shared/i18n/textos/comun.csv` con
 | `common.from` | Campo genérico: inicio de un periodo o franja | features/boards/BoardForm, features/network/NetworkPage, features/profile/HoursReport, features/therapy/GroupForm | Desde | From | Des de | Noiztik |
 | `common.to` | Campo genérico: fin de un periodo o franja | features/boards/BoardForm, features/network/NetworkPage, features/profile/HoursReport, features/therapy/GroupForm | Hasta | To | Fins a | Noiz arte |
 | `common.period` | Etiqueta genérica: el periodo que se mira | features/admin/RangePills, features/network/NetworkPage, features/staff/StaffPage | Periodo | Period | Període | Aldia |
-| `common.people` | Etiqueta o columna genérica: número de personas | features/admin/FlowsPanel, features/admin/StatsPanel, features/exams/ExamStatsPanel, features/network/NetworkPage | Personas | People | Persones | Pertsonak |
+| `common.people` | Etiqueta o columna genérica: número de personas | features/admin/FlowsPanel, features/admin/StatsPanel, features/network/NetworkPage | Personas | People | Persones | Pertsonak |
 | `common.person` | Columna genérica: la persona de la fila | features/admin/AdminPage, features/admin/CheatsPanel, features/admin/ClickerPanel, features/admin/StatsPanel, features/network/NetworkPage, features/network/PersonSearch | Persona | Person | Persona | Pertsona |
 | `common.accept` | Botón genérico: aceptar una petición | features/help/BookingCard, features/help/GuardTour, features/help/HelpGate | Aceptar | Accept | Accepta | Onartu |
 | `common.decline` | Botón genérico: rechazar una petición | features/help/BookingCard, features/help/GuardTour, features/help/HelpGate | Rechazar | Decline | Rebutja | Baztertu |

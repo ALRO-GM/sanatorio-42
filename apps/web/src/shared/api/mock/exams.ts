@@ -11,7 +11,6 @@
  */
 
 import type {
-  BlackHolePerson,
   ExamKickoff,
   ExamQuery,
   ExamStat,
@@ -35,8 +34,6 @@ let begin: number | null = null
 let refreshedAt = 0
 
 const iso = (at: number): string => new Date(at).toISOString()
-/** Dentro de tantos minutos (o hace, si es negativo), en ISO. */
-const at = (minutes: number): string => iso(Date.now() + minutes * MINUTE)
 
 const person = (
   login: string,
@@ -73,8 +70,6 @@ const EXAMS: Pick<ExamStat, 'projectId' | 'name' | 'family' | 'rank' | 'people'>
 /** Qué parte aprueba a cada intento: los de rango alto cuestan más. */
 const passShare = (rank: number, attempt: number): number =>
   Math.max(0.12, 0.55 - rank * 0.05 + attempt * 0.04)
-
-const LOGINS = ['ivega', 'tmolina', 'nruiz', 'pcampos', 'dserra', 'bolmo', 'kprieto', 'gnieto']
 
 /** Lo que hay ahora; con `manual`, como si alguien pulsara el botón. */
 function liveNow(manual: boolean): LiveExam {
@@ -180,7 +175,8 @@ export const examsMock: Pick<Api, 'getExamStats' | 'getLiveExam' | 'refreshLiveE
         byAttempt.push({
           attempt,
           people: left,
-          avgMark: Math.min(95, 35 + attempt * 7 - rank * 2),
+          // Las notas van a saltos de pregunta: la mediana cae en uno de ellos.
+          medianMark: Math.min(100, 25 * Math.floor((attempt + 3 - rank / 2) / 2)),
           passRate: left === 0 ? 0 : passed / left,
         })
         attemptsToPass.push(passed)
@@ -202,20 +198,7 @@ export const examsMock: Pick<Api, 'getExamStats' | 'getLiveExam' | 'refreshLiveE
       ]
     })
 
-    const known = Math.round(people * 0.45)
     const scale = (value: number): number => Math.round(value * (people / 336))
-    const absorbedBy = [4, 9, 7, 4, 2, 1, 0].map(scale)
-    const reachedBy = [1, 0.84, 0.6, 0.41, 0.26, 0.15, 0.07].map((part) => Math.round(known * part))
-    const someone = (index: number, days: number): BlackHolePerson => ({
-      login: LOGINS[index % LOGINS.length] ?? 'ivega',
-      image: portrait(LOGINS[index % LOGINS.length] ?? 'ivega'),
-      at: at(days * 24 * 60),
-      circle: index % 4,
-      kickoff: chosen[index % Math.max(1, chosen.length)]?.month ?? null,
-      track:
-        query.track === 'next' || (query.track === 'all' && index % 3 === 0) ? 'next' : 'classic',
-    })
-    const absorbed = absorbedBy.reduce((sum, value) => sum + value, 0)
 
     return {
       exams,
@@ -231,53 +214,6 @@ export const examsMock: Pick<Api, 'getExamStats' | 'getLiveExam' | 'refreshLiveE
       query,
       people,
       kickoffs: KICKOFFS,
-      byKickoff: (query.kickoffs.length === 0
-        ? chosen.filter((kickoff) => kickoff.classic + kickoff.next >= 5)
-        : chosen
-      ).map((kickoff, index) => {
-        const mine = count([kickoff], 'classic') + count([kickoff], 'next')
-
-        return {
-          month: kickoff.month,
-          people: mine,
-          exams: exams.map((exam) => {
-            const part =
-              share([kickoff], exam.family) / Math.max(0.0001, share(chosen, exam.family))
-            const tried = Math.round(exam.people * part)
-
-            return {
-              projectId: exam.projectId,
-              people: tried,
-              passed: Math.round(tried * (0.85 - exam.family.length * 0.01 - index * 0.06)),
-            }
-          }),
-          known: Math.round(mine * 0.45),
-          absorbed: Math.round(mine * 0.04 * (index + 1)),
-        }
-      }),
-      blackHole: {
-        known,
-        absorbed,
-        circles:
-          known === 0
-            ? []
-            : reachedBy.map((reached, circle) => ({
-                circle,
-                reached,
-                absorbed: Math.min(reached, absorbedBy[circle] ?? 0),
-              })),
-        months: ['2025-12', '2026-02', '2026-04', '2026-06', '2026-08', '2026-10'].map(
-          (month, index) => ({ month, absorbed: scale([3, 6, 2, 5, 8, 3][index] ?? 0) }),
-        ),
-        soon: [
-          { days: 7, people: scale(2) },
-          { days: 30, people: scale(9) },
-          { days: 90, people: scale(23) },
-        ],
-        recent: people === 0 ? [] : [3, 11, 26, 40, 58].map((days, index) => someone(index, -days)),
-        closest:
-          people === 0 ? [] : [2, 5, 9, 16, 24, 31].map((days, index) => someone(index + 3, days)),
-      },
     }
   },
 }

@@ -1,15 +1,6 @@
 import { useRef, useState } from 'react'
-import type { ReactNode } from 'react'
 
-import type {
-  BlackHolePerson,
-  BlackHoleStats,
-  ExamFamily,
-  ExamKickoff,
-  ExamStat,
-  ExamStats,
-  ExamTrack,
-} from '@sanatorio/contracts'
+import type { ExamFamily, ExamKickoff, ExamStat, ExamStats, ExamTrack } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
 import { Show } from '../../shared/detail'
@@ -18,18 +9,16 @@ import { useI18n } from '../../shared/i18n'
 import { useFormat } from '../../shared/i18n/useFormat'
 import type { Translate } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
-import { ExamPeople } from './ExamPeople'
 
 /** Qué exámenes se ven: los de C, los de Nexus o los dos, uno al lado del otro. */
 type FamilyFilter = ExamFamily | 'both'
 
 const TRACKS: readonly ExamTrack[] = ['all', 'classic', 'next']
 const FAMILIES: readonly FamilyFilter[] = ['classic', 'next', 'both']
-/** Con menos gente, una kickoff va aparte (suele ser alguien con la fecha mal deducida). */
 /** Intentos que se ven de entrada; los demás, al desplegar. */
-const SHOWN_ATTEMPTS = 5
+const SHOWN_ATTEMPTS = 3
+/** Con menos gente, una kickoff va aparte (suele ser alguien con la fecha mal deducida). */
 const SMALL_KICKOFF = 5
-const DAY_MS = 86_400_000
 
 /** «12 %», o «—» si no hay de dónde sacarlo. */
 const pctOf = (t: Translate, part: number, whole: number): string =>
@@ -74,8 +63,8 @@ function Choice<T extends string>(props: {
 /**
  * Las estadísticas de exámenes del campus (#81 del buzón): se elige el plan de
  * la gente (C o Python), qué exámenes (los de C, los de Nexus o los dos, el
- * mismo rango en la misma fila) y una o varias kickoffs. Debajo, las kickoffs
- * una al lado de otra, la duración de los círculos y el black hole.
+ * mismo rango en la misma fila) y una o varias kickoffs. Debajo, la duración
+ * de los círculos. El black hole no sale: la fecha que da 42 no es de fiar.
  */
 export function ExamStatsPanel() {
   const { t } = useI18n()
@@ -138,9 +127,7 @@ export function ExamStatsPanel() {
           </div>
           <p className="hint">{t('exams.selection', { n: data.people })}</p>
           <ExamPairs exams={data.exams} family={family} />
-          <KickoffTable data={data} family={family} />
           <Circles data={data} />
-          <BlackHole stats={data.blackHole} />
         </>
       )}
     </>
@@ -262,7 +249,7 @@ function ExamCard({ exam }: { exam: ExamStat }) {
       <span>{t('exams.attempt', { n: attempt.attempt })}</span>
       <span>
         {t('exams.attemptLine', {
-          mark: attempt.avgMark === null ? '—' : Math.round(attempt.avgMark),
+          mark: attempt.medianMark === null ? '—' : Math.round(attempt.medianMark),
           pct: Math.round(attempt.passRate * 100),
           n: attempt.people,
         })}
@@ -307,79 +294,15 @@ function ExamCard({ exam }: { exam: ExamStat }) {
           )}
         </>
       )}
-      {/* El detalle por intento es denso: solo para quien quiere los datos. */}
+      {/* El detalle por intento es denso: plegado, y solo para quien quiere los datos. */}
       {exam.byAttempt.length > 0 && (
         <Show from="datos">
-          <span className="eyebrow">{t('exams.byAttempt')}</span>
-          <ul className="rows exam-attempts">
-            {exam.byAttempt.slice(0, SHOWN_ATTEMPTS).map(line)}
-          </ul>
-          {exam.byAttempt.length > SHOWN_ATTEMPTS && (
-            <details className="exam-more">
-              <summary>
-                {t('exams.moreAttempts', { n: exam.byAttempt.length - SHOWN_ATTEMPTS })}
-              </summary>
-              <ul className="rows exam-attempts">
-                {exam.byAttempt.slice(SHOWN_ATTEMPTS).map(line)}
-              </ul>
-            </details>
-          )}
+          <details className="exam-more">
+            <summary>{t('exams.byAttempt')}</summary>
+            <ul className="rows exam-attempts">{exam.byAttempt.map(line)}</ul>
+          </details>
         </Show>
       )}
-    </article>
-  )
-}
-
-/** Las kickoffs una al lado de otra: su gente, quién aprobó cada examen y el black hole. */
-function KickoffTable({ data, family }: { data: ExamStats; family: FamilyFilter }) {
-  const { t } = useI18n()
-  const month = useMonth()
-  const exams = data.exams
-    .filter((exam) => family === 'both' || exam.family === family)
-    .sort((a, b) => (a.rank ?? 99) - (b.rank ?? 99) || a.family.localeCompare(b.family))
-
-  if (data.byKickoff.length === 0) return null
-
-  return (
-    <article className="card exam-kickoff-table">
-      <span className="eyebrow">{t('exams.byKickoff')}</span>
-      <div className="exam-table-scroll">
-        <table>
-          <thead>
-            <tr>
-              <th scope="col">{t('exams.col.kickoff')}</th>
-              <th scope="col">{t('common.people')}</th>
-              {exams.map((exam) => (
-                <th key={exam.projectId} scope="col">
-                  {exam.name}
-                </th>
-              ))}
-              <th scope="col">{t('exams.col.absorbed')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.byKickoff.map((row) => (
-              <tr key={row.month}>
-                <th scope="row">{month(row.month)}</th>
-                <td>{row.people}</td>
-                {exams.map((exam) => {
-                  const cell = row.exams.find((one) => one.projectId === exam.projectId)
-                  const passed = cell?.passed ?? 0
-
-                  return (
-                    <td key={exam.projectId}>
-                      {t('exams.bar', { n: passed, pct: pctOf(t, passed, row.people) })}
-                    </td>
-                  )
-                })}
-                <td>
-                  {t('exams.bar', { n: row.absorbed, pct: pctOf(t, row.absorbed, row.known) })}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
     </article>
   )
 }
@@ -408,113 +331,5 @@ function Circles({ data }: { data: ExamStats }) {
         </ul>
       </article>
     </Show>
-  )
-}
-
-/** El black hole: cuánta gente se lleva en cada círculo, cada mes, y quién está cerca. */
-function BlackHole({ stats }: { stats: BlackHoleStats }) {
-  const { t } = useI18n()
-  const month = useMonth()
-
-  if (stats.known === 0) return null
-
-  const mostCircle = Math.max(1, ...stats.circles.map((circle) => circle.absorbed))
-  const mostMonth = Math.max(1, ...stats.months.map((each) => each.absorbed))
-
-  return (
-    <article className="card exam-black-hole">
-      <span className="eyebrow">{t('exams.bh.title')}</span>
-      <p>
-        <strong>
-          {t('exams.bh.total', {
-            n: stats.absorbed,
-            known: stats.known,
-            pct: pctOf(t, stats.absorbed, stats.known),
-          })}
-        </strong>
-      </p>
-      <span className="eyebrow">{t('exams.bh.circles')}</span>
-      <ul className="exam-bars wide" aria-label={t('exams.bh.circles')}>
-        {stats.circles.map((circle) => (
-          <li key={circle.circle}>
-            <span>{t('graph.circle', { n: circle.circle })}</span>
-            <i style={{ width: `${(circle.absorbed / mostCircle) * 100}%` }} />
-            <small>
-              {t('exams.bh.circleLine', {
-                n: circle.absorbed,
-                reached: circle.reached,
-                pct: pctOf(t, circle.absorbed, circle.reached),
-              })}
-            </small>
-          </li>
-        ))}
-      </ul>
-      <ul className="exam-soon">
-        {stats.soon.map((each) => (
-          <li key={each.days}>
-            <strong>
-              {t('exams.bar', { n: each.people, pct: pctOf(t, each.people, stats.known) })}
-            </strong>{' '}
-            <small className="hint">{t('exams.bh.soon', { n: each.days })}</small>
-          </li>
-        ))}
-      </ul>
-      <Show from="datos">
-        {stats.months.length > 0 && (
-          <>
-            <span className="eyebrow">{t('exams.bh.months')}</span>
-            <ul className="exam-bars wide" aria-label={t('exams.bh.months')}>
-              {stats.months.map((each) => (
-                <li key={each.month}>
-                  <span>{month(each.month)}</span>
-                  <i style={{ width: `${(each.absorbed / mostMonth) * 100}%` }} />
-                  <small>
-                    {t('exams.bar', {
-                      n: each.absorbed,
-                      pct: pctOf(t, each.absorbed, stats.known),
-                    })}
-                  </small>
-                </li>
-              ))}
-            </ul>
-          </>
-        )}
-        <div className="exam-bh-lists">
-          <PeopleList title={t('exams.bh.recent')} people={stats.recent} past />
-          <PeopleList title={t('exams.bh.closest')} people={stats.closest} past={false} />
-        </div>
-      </Show>
-    </article>
-  )
-}
-
-/** Una lista de gente del black hole: cuándo, en qué círculo y de qué kickoff. */
-function PeopleList(props: { title: string; people: readonly BlackHolePerson[]; past: boolean }) {
-  const { t } = useI18n()
-  const { date } = useFormat()
-  const month = useMonth()
-  const when = (person: BlackHolePerson): ReactNode =>
-    props.past
-      ? date(person.at, 'medium')
-      : t('exams.bh.left', {
-          n: Math.max(0, Math.ceil((Date.parse(person.at) - Date.now()) / DAY_MS)),
-        })
-
-  return (
-    <section>
-      <h4>{props.title}</h4>
-      {props.people.length === 0 ? (
-        <p className="estado">{t('exams.bh.nobody')}</p>
-      ) : (
-        <ExamPeople
-          people={props.people}
-          label={props.title}
-          badges={(person) =>
-            person.kickoff !== null && <span className="badge subtle">{month(person.kickoff)}</span>
-          }
-          end={(person) => <small className="exam-when">{when(person)}</small>}
-        />
-      )}
-    </section>
   )
 }

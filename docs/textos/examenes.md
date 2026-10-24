@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/examenes.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-71 textos. «—» es que falta la traducción: sale en español.
+58 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -39,9 +39,9 @@ Generado desde `apps/web/src/shared/i18n/textos/examenes.csv` con
 | `exams.avg` | Intentos de media | features/exams/ExamStatsPanel | {n} intentos de media | {n} attempts on average | {n} intents de mitjana | {n} saiakera batez beste |
 | `exams.people` | Cuánta gente aprobó, y qué parte es | features/exams/ExamStatsPanel | Aprobaron {passed} de {people} · {pct} | {passed} passed out of {people} · {pct} | Han aprovat {passed} de {people} · {pct} | {passed} gainditu, {people}tik · {pct} |
 | `exams.toPass` | En qué intento se aprueba | features/exams/ExamStatsPanel, features/exams/ExamsTour | Aprobado al intento… | Passed on attempt… | Aprovat a l'intent… | Gainditua saiakeran… |
-| `exams.byAttempt` | Datos por intento | features/exams/ExamStatsPanel | Cada intento | Each attempt | Cada intent | Saiakera bakoitza |
+| `exams.byAttempt` | Desplegable con los datos de cada intento | features/exams/ExamStatsPanel | Cada intento: nota mediana, aprobados y personas | Each attempt: median mark, passes and people | Cada intent: nota mediana, aprovats i persones | Saiakera bakoitza: nota mediana, gaindituak eta pertsonak |
 | `exams.attempt` | Número de intento | features/exams/ExamStatsPanel | {n}.º intento | Attempt {n} | {n}r intent | {n}. saiakera |
-| `exams.attemptLine` | Nota media, porcentaje de aprobados y personas de un intento | features/exams/ExamStatsPanel | nota media {mark} · aprueba el {pct} % · {n} personas | average mark {mark} · {pct}% pass · {n} people | nota mitjana {mark} · aprova el {pct} % · {n} persones | batez besteko nota {mark} · %{pct} gainditzen du · {n} pertsona |
+| `exams.attemptLine` | Nota mediana, porcentaje de aprobados y personas de un intento | features/exams/ExamStatsPanel | nota mediana {mark} · aprueba el {pct} % · {n} personas | median mark {mark} · {pct}% pass · {n} people | nota mediana {mark} · aprova el {pct} % · {n} persones | nota mediana {mark} · %{pct} gainditzen du · {n} pertsona |
 | `exams.trackFilter` | Estadísticas: desplegable del plan que sigue la gente | features/exams/ExamStatsPanel | Plan de la gente | People's plan | Pla de la gent | Jendearen plana |
 | `exams.plan.all` | Estadísticas: gente de los dos planes | features/exams/ExamStatsPanel | Toda la gente | Everyone | Tothom | Jende guztia |
 | `exams.plan.classic` | Estadísticas: gente del common core antiguo, en C | features/exams/ExamStatsPanel | Core en C | C core | Core en C | C core-a |
@@ -60,21 +60,8 @@ Generado desde `apps/web/src/shared/i18n/textos/examenes.csv` con
 | `exams.noAttempts` | Un examen de esa fila que nadie de lo elegido ha hecho | features/exams/ExamStatsPanel | Nadie lo ha intentado aún. | Nobody has tried it yet. | Encara no ho ha intentat ningú. | Oraindik inork ez du saiatu. |
 | `exams.pct` | Un porcentaje | features/exams/ExamStatsPanel | {n} % | {n}% | {n} % | % {n} |
 | `exams.bar` | Una cifra y qué parte es del total | features/exams/ExamStatsPanel | {n} · {pct} | {n} · {pct} | {n} · {pct} | {n} · {pct} |
-| `exams.byKickoff` | Tabla: las kickoffs una al lado de otra | features/exams/ExamStatsPanel | Kickoffs, una al lado de otra | Kickoffs side by side | Kickoffs, una al costat de l'altra | Kickoff-ak, bata bestearen ondoan |
-| `exams.col.kickoff` | Columna: la kickoff | features/exams/ExamStatsPanel | Kickoff | Kickoff | Kickoff | Kickoff |
-| `exams.col.absorbed` | Columna: cuánta gente de la kickoff se llevó el black hole | features/exams/ExamStatsPanel | Black hole | Black hole | Black hole | Black hole |
-| `exams.bh.title` | Bloque del black hole | features/exams/ExamStatsPanel | Black hole | Black hole | Black hole | Black hole |
-| `exams.bh.total` | Cuánta gente se ha llevado el black hole, de la que se sabe | features/exams/ExamStatsPanel | Absorbidas por el black hole: {n} de {known} personas con datos · {pct} | Absorbed by the black hole: {n} of {known} people with data · {pct} | Absorbides pel black hole: {n} de {known} persones amb dades · {pct} | Black holeak irentsiak: datuak dituzten {known} pertsonatik {n} · {pct} |
-| `exams.bh.circles` | Black hole: cuánta gente se lleva en cada círculo | features/exams/ExamStatsPanel | En qué círculo ocurre | Circle where it happened | En quin cercle passa | Zein zirkulutan gertatzen den |
-| `exams.bh.circleLine` | Black hole: absorbidos en un círculo de los que llegaron a él | features/exams/ExamStatsPanel | {n} de {reached} · {pct} | {n} of {reached} · {pct} | {n} de {reached} · {pct} | {n} / {reached} · {pct} |
-| `exams.bh.soon` | Black hole: gente que lo tiene a esos días o menos | features/exams/ExamStatsPanel | a {n} días o menos | {n} days or less away | a {n} dies o menys | {n} egun edo gutxiagora |
-| `exams.bh.months` | Black hole: histórico de absorbidos por mes | features/exams/ExamStatsPanel | Absorbidos cada mes | Absorbed each month | Absorbits cada mes | Hilabete bakoitzean irentsiak |
-| `exams.bh.recent` | Black hole: lista de los últimos absorbidos | features/exams/ExamStatsPanel | Absorciones recientes | Most recent | Absorcions recents | Azken irenspenak |
-| `exams.bh.closest` | Black hole: lista de quien lo tiene más cerca | features/exams/ExamStatsPanel | Quien lo tiene más cerca | Closest to it | Qui el té més a prop | Hurbilen dutenak |
-| `exams.bh.left` | Black hole: días que le quedan a alguien | features/exams/ExamStatsPanel | Días que le quedan: {n} | Days left: {n} | Dies que li queden: {n} | Geratzen zaizkion egunak: {n} |
-| `exams.bh.nobody` | Black hole: lista vacía | features/exams/ExamStatsPanel | Nadie, por ahora. | Nobody, for now. | Ningú, de moment. | Inor ez, oraingoz. |
 | `exams.kickoff.chosen` | Texto del desplegable de kickoffs cuando hay varias marcadas | features/exams/ExamStatsPanel | {n} kickoffs | {n} kickoffs | {n} kickoffs | {n} kickoff |
-| `exams.moreAttempts` | Desplegable con los intentos a partir del sexto | features/exams/ExamStatsPanel | Ver {n} intentos más | Show {n} more attempts | Veure {n} intents més | Ikusi {n} saiakera gehiago |
+| `exams.moreAttempts` | Desplegable con los intentos a partir del cuarto | features/exams/ExamStatsPanel | Ver {n} intentos más | Show {n} more attempts | Veure {n} intents més | Ikusi {n} saiakera gehiago |
 | `exams.markLater` | Examen en vivo: en lugar de la nota de quien sigue dentro | features/exams/ExamsPage | Nota al cerrar | Mark when it closes | Nota en tancar | Nota ixtean |
 | `exams.markLaterHint` | Examen en vivo: explicación al pasar el ratón por «Nota al cerrar» | features/exams/ExamsPage | 42 no da la nota de un examen hasta que se cierra. Mientras sigue dentro, se ve la de su último intento (la de su expediente). | 42 does not give an exam's mark until it closes. While they are still in, you see the one from their last attempt (the one on their record). | 42 no dona la nota d'un examen fins que es tanca. Mentre hi és, es veu la del seu últim intent (la del seu expedient). | 42k ez du azterketaren nota ematen itxi arte. Barruan dagoen bitartean, azken saiakerarena ikusten da (bere espedientekoa). |
 | `exams.previousMark` | Examen en vivo: quien sigue dentro, con la nota de su último intento cerrado | features/exams/ExamsPage | Último: {n} | Last: {n} | Últim: {n} | Azkena: {n} |

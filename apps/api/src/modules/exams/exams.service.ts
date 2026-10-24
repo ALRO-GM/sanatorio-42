@@ -1,6 +1,5 @@
 /**
- * Estadísticas de exámenes, de la duración de los círculos y del black hole de
- * un campus, por plan (C o Python) y por kickoff (#81 del buzón). Se calculan
+ * Estadísticas de exámenes y de la duración de los círculos de un campus, por plan (C o Python) y por kickoff (#81 del buzón). Se calculan
  * con lo que ya está copiado; no se pide nada a 42 al preguntar.
  *
  * Mirar a todo el campus cuesta (todos sus proyectos del common core), así que
@@ -15,15 +14,7 @@ import { parse } from '../../core/validation.js'
 import type { Curriculum } from '../replica/index.js'
 import type { ExamsRepository } from './exams.repository.js'
 import type { AttemptRow, ExamPerson, OccurrenceRow } from './exams.rules.js'
-import {
-  blackHoleStats,
-  circleDurations,
-  examPeople,
-  examStat,
-  kickoffRows,
-  kickoffsOf,
-  selectPeople,
-} from './exams.rules.js'
+import { circleDurations, examPeople, examStat, kickoffsOf, selectPeople } from './exams.rules.js'
 import type { ExamsSync } from './exams.sync.js'
 import { createTtlCache } from '../../core/ttl-cache.js'
 
@@ -101,7 +92,6 @@ export function createExamsService({
     async stats(actor: Actor, input: unknown = {}): Promise<ExamStats> {
       const query: ExamQuery = parse(querySchema, input)
       const [data, backfill] = await Promise.all([snapshot(actor.campusId), sync.progress()])
-      const t = now()
       const chosen = selectPeople(data.people, query)
       const ids = new Set(chosen.map((person) => person.userId))
       const attempts = data.attempts.filter((row) => ids.has(row.userId))
@@ -109,8 +99,6 @@ export function createExamsService({
       const stats = data.projects
         .map((project) => examStat(project, attempts, occurrences))
         .filter((stat) => stat.people > 0)
-      // Para comparar kickoffs vale el plan elegido, pero no el filtro de kickoffs.
-      const byTrack = selectPeople(data.people, { track: query.track, kickoffs: [] })
 
       return {
         exams: stats,
@@ -130,15 +118,6 @@ export function createExamsService({
         query,
         people: chosen.length,
         kickoffs: kickoffsOf(data.people),
-        byKickoff: kickoffRows({
-          people: byTrack,
-          chosen: query.kickoffs,
-          exams: stats.map((stat) => ({ id: stat.projectId })),
-          attempts: data.attempts,
-          occurrences: data.occurrences,
-          now: t,
-        }),
-        blackHole: blackHoleStats(chosen, t),
       }
     },
   }

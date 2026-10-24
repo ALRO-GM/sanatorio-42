@@ -60,7 +60,7 @@ describe('Estadísticas de exámenes', () => {
 
     expect(within(row).getByText('Exam Rank 03')).toBeTruthy()
     expect(within(row).getByText('Exam Rank 03 · 42next')).toBeTruthy()
-    // De entrada, hasta el quinto intento; los demás, al desplegar.
+    // De entrada, hasta el tercer intento; los demás, al desplegar.
     expect(within(row).getAllByText(pattern('exams.moreAttempts')).length).toBeGreaterThan(0)
 
     // Solo Nexus: el de C desaparece.
@@ -90,21 +90,24 @@ describe('Estadísticas de exámenes', () => {
     expect(within(rankRow(3)).getByText('Exam Rank 03')).toBeTruthy()
   }, 30_000)
 
-  it('el black hole: por círculo, cada mes, los últimos absorbidos y quien está más cerca', async () => {
+  it('cada intento va plegado, con la nota mediana; sin black hole ni tabla de kickoffs', async () => {
+    const user = userEvent.setup()
+
     await openExams()
+    await screen.findByRole('combobox', { name: text('exams.familyFilter') }, WAIT)
 
-    const circles = await screen.findByRole('list', { name: text('exams.bh.circles') }, WAIT)
+    const folded = must(
+      within(rankRow(3)).getAllByText(text('exams.byAttempt'), { selector: 'summary' })[0],
+      'el desplegable de cada intento',
+    )
+    const details = must(folded.closest('details'), 'su details')
 
-    expect(within(circles).getAllByRole('listitem').length).toBeGreaterThan(0)
-    // Cada cifra va con su porcentaje.
-    expect(within(circles).getAllByText(/%/).length).toBeGreaterThan(0)
-    expect(screen.getByRole('list', { name: text('exams.bh.months') })).toBeTruthy()
-    for (const key of ['exams.bh.recent', 'exams.bh.closest']) {
-      const list = screen.getByRole('list', { name: text(key) })
+    expect(details.open).toBe(false)
+    await user.click(folded)
+    expect(details.open).toBe(true)
+    expect(within(details).getAllByText(/^nota mediana \d+ ·/).length).toBeGreaterThan(0)
 
-      expect(within(list).getAllByRole('link').length).toBeGreaterThan(0)
-    }
-    // Las kickoffs, una al lado de otra.
-    expect(screen.getByRole('columnheader', { name: text('exams.col.kickoff') })).toBeTruthy()
+    expect(screen.queryByText(/black hole/i)).toBeNull()
+    expect(screen.queryByRole('table')).toBeNull()
   }, 30_000)
 })

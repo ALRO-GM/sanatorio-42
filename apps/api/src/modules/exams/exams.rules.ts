@@ -1,15 +1,12 @@
 /**
- * Las cuentas de las estadísticas de exámenes, de la duración de los círculos,
- * de las kickoffs y del black hole. Sin base de datos: se prueban solas.
+ * Las cuentas de las estadísticas de exámenes, de la duración de los círculos
+ * y de las kickoffs. Sin base de datos: se prueban solas.
  */
 
 import type {
-  BlackHolePerson,
-  BlackHoleStats,
   CircleDuration,
   ExamFamily,
   ExamKickoff,
-  ExamKickoffRow,
   ExamQuery,
   ExamStat,
   LiveExam,
@@ -39,6 +36,18 @@ const DAY_MS = 24 * 3_600_000
 
 const average = (values: readonly number[]): number | null =>
   values.length === 0 ? null : values.reduce((sum, value) => sum + value, 0) / values.length
+
+/**
+ * La nota mediana de un intento. Las notas de examen van a saltos (cada
+ * pregunta suma lo mismo), así que la media da notas que nadie saca.
+ */
+const median = (values: readonly number[]): number | null =>
+  values.length === 0
+    ? null
+    : quantile(
+        [...values].sort((a, b) => a - b),
+        0.5,
+      )
 
 /** De un slug de examen: su plan y su número de rango (`42next-exam-rank-03` → Nexus, 3). */
 export function examMeta(slug: string): { family: ExamFamily; rank: number | null } {
@@ -121,7 +130,7 @@ export function examStat(
       .map(([attempt, entry]) => ({
         attempt,
         people: entry.people,
-        avgMark: average(entry.marks),
+        medianMark: median(entry.marks),
         passRate: entry.people === 0 ? 0 : entry.passed / entry.people,
       })),
   }
@@ -197,9 +206,6 @@ export type MemberRow = {
   login: string
   image: string | null
   beginAt: string | null
-  blackholedAt: string | null
-  /** `true` si se le ha preguntado a 42 por su cursus (tiene fila en `user_levels`). */
-  asked: boolean
   /** Su plan y las fechas de cada círculo validado, si se le han mirado; `null` si no. */
   track: Track | null
   ranks: string[] | null
@@ -214,7 +220,7 @@ export type PlanRow = {
   slug: string
 }
 
-/** Alguien del campus, ya con su kickoff, su plan, su círculo y su black hole. */
+/** Alguien del campus, ya con su kickoff, su plan y su círculo. */
 export type ExamPerson = {
   userId: number
   login: string
@@ -228,18 +234,9 @@ export type ExamPerson = {
   ranks: string[] | null
   /** El círculo más alto en el que tiene algún proyecto, para quien no tiene `ranks`. */
   projectCircle: number | null
-  /** Si se sabe de su black hole (se le ha preguntado a 42). */
-  asked: boolean
-  /** Su black hole (ms), si es de fiar; `null` si no tiene o no se sabe. */
-  blackHole: number | null
 }
 
-/** Con esta gente o más, una kickoff sale entre las de comparar sin elegirla. */
-export const MIN_KICKOFF = 5
 const LAST_CIRCLE = 6
-const SOON_DAYS = [7, 30, 90] as const
-const RECENT = 50
-const CLOSEST = 20
 
 const msOf = (value: string | null): number | null => {
   const ms = value === null ? NaN : Date.parse(value)
@@ -255,16 +252,14 @@ const nextSlug = (slug: string): boolean =>
   slug.startsWith('python-module') || slug.startsWith('42next-')
 
 /**
- * La gente del campus con su kickoff, plan, círculo y black hole.
+ * La gente del campus con su kickoff, plan y círculo.
  *
  * La kickoff es el mes de su fecha de entrada al cursus (solo de quien ha
  * entrado en la web) o, si no, el de su primer proyecto del common core, como
  * en el avance de Estadísticas (`stats/progress.service.ts`): las filas
  * antiguas no traen cuándo se apuntó y vale la última vez que cambiaron.
  *
- * Un black hole ya pasado no es de fiar si después siguió cambiando proyectos
- * del common core (42 le dio días y la fecha guardada es vieja): queda como no
- * sabido. Sale quien tiene kickoff o algún examen (`examUsers`).
+ * Sale quien tiene kickoff o algún examen (`examUsers`).
  */
 export function examPeople(input: {
   members: readonly MemberRow[]
@@ -274,24 +269,21 @@ export function examPeople(input: {
 }): ExamPerson[] {
   const byUser = new Map<
     number,
-    { first: number; last: number; python: boolean; reached: Record<Track, number> }
+    { first: number; python: boolean; reached: Record<Track, number> }
   >()
 
   for (const row of input.rows) {
     const entry = byUser.get(row.userId) ?? {
       first: Infinity,
-      last: -Infinity,
       python: false,
       reached: { classic: -1, next: -1 },
     }
     const classic = input.circles.classic.get(row.projectId)
     const next = input.circles.next.get(row.projectId)
     const created = msOf(row.createdAt) ?? msOf(row.updatedAt)
-    const updated = msOf(row.updatedAt)
 
-    if (classic !== undefined || next !== undefined) {
-      if (created !== null) entry.first = Math.min(entry.first, created)
-      if (updated !== null) entry.last = Math.max(entry.last, updated)
+    if ((classic !== undefined || next !== undefined) && created !== null) {
+      entry.first = Math.min(entry.first, created)
     }
     if (classic !== undefined) entry.reached.classic = Math.max(entry.reached.classic, classic)
     if (next !== undefined) entry.reached.next = Math.max(entry.reached.next, next)
@@ -307,8 +299,6 @@ export function examPeople(input: {
 
     if (start === null && !input.examUsers.has(member.userId)) return []
 
-    const hole = msOf(member.blackholedAt)
-    const stale = hole !== null && entry !== undefined && entry.last > hole + DAY_MS
     const reached = entry?.reached[track] ?? -1
 
     return [
@@ -321,28 +311,9 @@ export function examPeople(input: {
         start,
         ranks: member.ranks,
         projectCircle: reached < 0 ? null : Math.min(LAST_CIRCLE, reached),
-        asked: member.asked,
-        blackHole: stale ? null : hole,
       },
     ]
   })
-}
-
-/**
- * El círculo en que estaba alguien en ese momento (o ahora): los círculos que
- * ya había validado según 42 o, si no se le han mirado, el más alto en el que
- * tiene algún proyecto.
- */
-export function circleAt(person: ExamPerson, at: number): number | null {
-  if (person.ranks === null) return person.projectCircle
-
-  const done = person.ranks.filter((date) => {
-    const ms = Date.parse(date)
-
-    return !Number.isNaN(ms) && ms <= at
-  }).length
-
-  return Math.min(LAST_CIRCLE, done)
 }
 
 /** Todas las kickoffs, de la más reciente a la más antigua, con su gente de cada plan. */
@@ -370,142 +341,6 @@ export function selectPeople(people: readonly ExamPerson[], query: ExamQuery): E
       (query.track === 'all' || person.track === query.track) &&
       (kickoffs.size === 0 || (person.kickoff !== null && kickoffs.has(person.kickoff))),
   )
-}
-
-/** Si alguien ya ha caído en el black hole. */
-const isAbsorbed = (person: ExamPerson, now: number): boolean =>
-  person.blackHole !== null && person.blackHole <= now
-
-/**
- * Cada kickoff elegida (o, sin elegir, las que tienen `MIN_KICKOFF` personas o
- * más), con quién intentó y aprobó cada examen y cuánta gente se llevó el
- * black hole.
- */
-export function kickoffRows(input: {
-  people: readonly ExamPerson[]
-  chosen: readonly string[]
-  exams: readonly { id: number }[]
-  attempts: readonly AttemptRow[]
-  occurrences: readonly OccurrenceRow[]
-  now: number
-}): ExamKickoffRow[] {
-  /** Por persona y examen: si aprobó. Si está, lo intentó. */
-  const outcome = new Map<number, Map<number, boolean>>()
-  const note = (userId: number, projectId: number, passed: boolean): void => {
-    const mine = outcome.get(userId) ?? new Map<number, boolean>()
-
-    mine.set(projectId, (mine.get(projectId) ?? false) || passed)
-    outcome.set(userId, mine)
-  }
-
-  for (const attempt of input.attempts) {
-    note(attempt.userId, attempt.projectId, attempt.validated === true)
-  }
-  for (const row of input.occurrences) note(row.userId, row.projectId, row.validated === true)
-
-  const groups = new Map<string, ExamPerson[]>()
-
-  for (const person of input.people) {
-    if (person.kickoff === null) continue
-    groups.set(person.kickoff, [...(groups.get(person.kickoff) ?? []), person])
-  }
-
-  const wanted =
-    input.chosen.length > 0
-      ? input.chosen
-      : [...groups].filter(([, list]) => list.length >= MIN_KICKOFF).map(([month]) => month)
-
-  return [...new Set(wanted)]
-    .sort((a, b) => b.localeCompare(a))
-    .map((month) => {
-      const list = groups.get(month) ?? []
-
-      return {
-        month,
-        people: list.length,
-        exams: input.exams.map((exam) => {
-          let people = 0
-          let passed = 0
-
-          for (const person of list) {
-            const result = outcome.get(person.userId)?.get(exam.id)
-
-            if (result === undefined) continue
-            people += 1
-            if (result) passed += 1
-          }
-
-          return { projectId: exam.id, people, passed }
-        }),
-        known: list.filter((person) => person.asked).length,
-        absorbed: list.filter((person) => isAbsorbed(person, input.now)).length,
-      }
-    })
-}
-
-/**
- * El black hole de la gente elegida: cuánta se lleva en cada círculo (de la que
- * llegó a él), cuánta cada mes, quién cayó la última y quién lo tiene más
- * cerca. Solo cuenta quien tiene la fecha, que se sabe al entrar en la web.
- */
-export function blackHoleStats(people: readonly ExamPerson[], now: number): BlackHoleStats {
-  const known = people.filter((person) => person.asked)
-  const reached = Array.from({ length: LAST_CIRCLE + 1 }, () => 0)
-  const fell = Array.from({ length: LAST_CIRCLE + 1 }, () => 0)
-  const months = new Map<string, number>()
-  const gone: ExamPerson[] = []
-  const coming: ExamPerson[] = []
-
-  for (const person of known) {
-    const hole = person.blackHole
-    const absorbed = hole !== null && hole <= now
-    const circle = circleAt(person, absorbed ? hole : now)
-
-    if (circle !== null) {
-      for (let each = 0; each <= circle; each++) reached[each] = (reached[each] ?? 0) + 1
-      if (absorbed) fell[circle] = (fell[circle] ?? 0) + 1
-    }
-    if (hole === null) continue
-    if (absorbed) {
-      gone.push(person)
-      months.set(monthOf(hole), (months.get(monthOf(hole)) ?? 0) + 1)
-    } else {
-      coming.push(person)
-    }
-  }
-
-  const holeOf = (person: ExamPerson): number => person.blackHole ?? now
-  const shown = (person: ExamPerson): BlackHolePerson => ({
-    login: person.login,
-    image: person.image,
-    at: new Date(holeOf(person)).toISOString(),
-    circle: circleAt(person, Math.min(holeOf(person), now)),
-    kickoff: person.kickoff,
-    track: person.track,
-  })
-
-  return {
-    known: known.length,
-    absorbed: gone.length,
-    circles: reached.flatMap((count, circle) =>
-      count === 0 ? [] : [{ circle, reached: count, absorbed: fell[circle] ?? 0 }],
-    ),
-    months: [...months]
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([month, count]) => ({ month, absorbed: count })),
-    soon: SOON_DAYS.map((days) => ({
-      days,
-      people: coming.filter((person) => holeOf(person) - now <= days * DAY_MS).length,
-    })),
-    recent: gone
-      .sort((a, b) => holeOf(b) - holeOf(a))
-      .slice(0, RECENT)
-      .map(shown),
-    closest: coming
-      .sort((a, b) => holeOf(a) - holeOf(b))
-      .slice(0, CLOSEST)
-      .map(shown),
-  }
 }
 
 /** Con el examen en marcha, cada cuánto se vuelven a pedir solas la lista y las notas. */

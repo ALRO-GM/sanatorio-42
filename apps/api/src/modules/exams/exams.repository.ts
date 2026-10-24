@@ -185,8 +185,7 @@ export function createExamsRepository(db: Db) {
      */
     async members(campusId: number): Promise<MemberRow[]> {
       const result = await db.execute({
-        sql: `SELECT u.id, u.login, u.image, ul.begin_at, ul.blackholed_at,
-                     ul.login IS NOT NULL AS asked, ut.track, ut.ranks
+        sql: `SELECT u.id, u.login, u.image, ul.begin_at, ut.track, ut.ranks
               FROM campus_members cm
               JOIN users u ON u.id = cm.user_id
               LEFT JOIN user_levels ul ON ul.login = u.login
@@ -200,8 +199,6 @@ export function createExamsRepository(db: Db) {
         login: toText(row.login),
         image: typeof row.image === 'string' ? row.image : null,
         beginAt: typeof row.begin_at === 'string' ? row.begin_at : null,
-        blackholedAt: typeof row.blackholed_at === 'string' ? row.blackholed_at : null,
-        asked: toNumber(row.asked) === 1,
         track: row.track === 'classic' || row.track === 'next' ? row.track : null,
         ranks: row.track === null || row.track === undefined ? null : parseDates(row.ranks),
       }))

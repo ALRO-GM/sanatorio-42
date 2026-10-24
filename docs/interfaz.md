@@ -85,8 +85,7 @@ de datos.
 | Exámenes | Examen en vivo y estadísticas de cada examen | N | La sección en sí |
 | Exámenes | Cuánto se tarda en cada círculo | D | Estadística |
 | Exámenes | Filtros de plan (C o Python), exámenes (C, Nexus o los dos) y kickoffs; un rango por fila con C y Nexus juntos (#81) | N | Es lo que se viene a mirar |
-| Exámenes | Kickoffs una al lado de otra y black hole por círculo, con cifras y % (#81) | N | Comparar es la petición |
-| Exámenes | Histórico de absorbidos por mes, últimos absorbidos y quien está más cerca del black hole (#81) | D | Listas con nombres: para quien quiere los datos |
+| Exámenes | Cada intento (nota mediana, aprobados, personas), plegado; en qué intento se aprueba, los 3 primeros y el resto al desplegar | D | Detalle (2026-10-25: sin tabla de kickoffs ni black hole, que no eran de fiar) |
 | Pie | Modo, idioma, tema, texto, daltonismo, zen | S | Accesibilidad |
 | Pie | Campus | N | Casi nadie cambia de campus |
 | Pie | «Puestos actualizados hace N min» | D | Dato técnico |

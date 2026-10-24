@@ -318,7 +318,7 @@ staff.
 Cuando empieza un examen en tu campus, la pestaña de Datos lo avisa «en vivo»:
 quién está dentro, de qué examen y círculo, y su última nota, que se pone al día
 cada cinco minutos. Debajo, las estadísticas de cada examen (en qué intento se
-aprueba, nota media por intento) y, en el modo de datos, cuánto se tarda en
+aprueba y, plegado, la nota mediana de cada intento) y, en el modo de datos, cuánto se tarda en
 cada círculo.
 
 ### Buscador de personas

@@ -54,7 +54,7 @@ describe('exámenes', () => {
 
     expect(exam).toMatchObject({ people: 2, passed: 2, avgAttempts: 1.5 })
     expect(exam?.attemptsToPass).toEqual([1, 1])
-    expect(exam?.byAttempt[0]).toMatchObject({ attempt: 1, people: 2, avgMark: 50 })
+    expect(exam?.byAttempt[0]).toMatchObject({ attempt: 1, people: 2, medianMark: 50 })
   })
 
   it('filtra por plan y kickoff, y rechaza lo que no es un mes', async () => {

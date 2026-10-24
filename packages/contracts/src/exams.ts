@@ -19,8 +19,8 @@ export type ExamStat = {
    * reintentos cuenta en `passed` pero no aquí.
    */
   attemptsToPass: number[]
-  /** Por número de intento, todos: cuánta gente lo hizo, la nota media y qué parte aprobó. */
-  byAttempt: { attempt: number; people: number; avgMark: number | null; passRate: number }[]
+  /** Por número de intento, todos: cuánta gente lo hizo, la nota mediana y qué parte aprobó. */
+  byAttempt: { attempt: number; people: number; medianMark: number | null; passRate: number }[]
 }
 
 /** Cuánto se tarda en completar un círculo, en días, sin los casos extremos. */
@@ -41,46 +41,7 @@ export type ExamQuery = { track: ExamTrack; kickoffs: string[] }
 /** Una kickoff (mes en que se empezó el common core) y cuánta gente de cada plan entró. */
 export type ExamKickoff = { month: string; classic: number; next: number }
 
-/** Una kickoff de las elegidas, para compararlas: su gente, sus exámenes y su black hole. */
-export type ExamKickoffRow = {
-  month: string
-  people: number
-  /** Por examen: cuánta gente de esta kickoff lo intentó y cuánta lo aprobó. */
-  exams: { projectId: number; people: number; passed: number }[]
-  /** Gente de la que se sabe el black hole, y cuánta ha absorbido. */
-  known: number
-  absorbed: number
-}
-
-/** Alguien absorbido por el black hole o cerca de él. */
-export type BlackHolePerson = {
-  login: string
-  image: string | null
-  /** Cuándo la absorbió (o la absorberá). */
-  at: string
-  /** El círculo en que estaba (o está), si se sabe. */
-  circle: number | null
-  kickoff: string | null
-  track: 'classic' | 'next'
-}
-
-/** El black hole de la gente elegida. Solo cuenta quien tiene la fecha (ha entrado en la web). */
-export type BlackHoleStats = {
-  known: number
-  absorbed: number
-  /** Por círculo: cuánta gente llegó a él (de la que se sabe) y cuánta absorbió allí. */
-  circles: { circle: number; reached: number; absorbed: number }[]
-  /** Absorbidos de cada mes (`AAAA-MM`), del más antiguo al más reciente. */
-  months: { month: string; absorbed: number }[]
-  /** Cuánta gente tiene el black hole a 7, 30 y 90 días o menos. */
-  soon: { days: number; people: number }[]
-  /** Los últimos absorbidos, del más reciente al más antiguo (como mucho 50). */
-  recent: BlackHolePerson[]
-  /** Quien lo tiene más cerca, de menos a más tiempo (como mucho 20). */
-  closest: BlackHolePerson[]
-}
-
-/** `GET /exams/stats`: exámenes, círculos y black hole del campus que se mira. */
+/** `GET /exams/stats`: exámenes y círculos del campus que se mira. */
 export type ExamStats = {
   exams: ExamStat[]
   circles: CircleDuration[]
@@ -92,9 +53,6 @@ export type ExamStats = {
   people: number
   /** Todas las kickoffs del campus, de la más reciente a la más antigua, para elegir. */
   kickoffs: ExamKickoff[]
-  /** Las kickoffs elegidas (o todas), de la más reciente a la más antigua. */
-  byKickoff: ExamKickoffRow[]
-  blackHole: BlackHoleStats
 }
 
 /** Alguien apuntado a un examen que está en marcha. */
