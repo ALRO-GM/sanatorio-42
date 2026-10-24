@@ -16,7 +16,7 @@ describe('Hueco de login con perfiles sugeridos', () => {
   it('al escribir salen los perfiles, y con las flechas y Enter se elige uno', async () => {
     const user = userEvent.setup()
 
-    await openApp('#/estadisticas')
+    await openApp('#/avance')
 
     const box = await screen.findByRole(
       'combobox',

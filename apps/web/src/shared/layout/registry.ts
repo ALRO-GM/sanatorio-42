@@ -20,6 +20,7 @@ export const NAV_DEFAULT = [
   'estadisticas',
   'calendario',
   'red',
+  'avance',
   'clusters',
   'examenes',
 ] as const

@@ -111,7 +111,7 @@ Las capturas son del estado actual de la web, con los datos simulados de
 Arriba hay cinco pestañas agrupadas por para qué sirve cada cosa: **Expediente**
 (lo tuyo), **Ayuda** (sala de espera, tablón, terapia y pizarras: quedar con
 gente para pedir y dar ayuda, aprender y enseñar), **Calendario**,
-**Clústeres** (el plano del campus) y **Datos** (red y exámenes). La abierta enseña sus secciones en una segunda
+**Clústeres** (el plano del campus) y **Datos** (red, avance y exámenes). La abierta enseña sus secciones en una segunda
 fila, y al volver a ella se abre la última que se miró.
 
 Cada cual elige cuánto enseña la web, en el pie o en la bienvenida:
@@ -244,6 +244,14 @@ responder, pedir que se te recuerde (dentro de una hora, mañana o el lunes) y
 asociar a un proyecto. Se filtran por no leídas, pendientes, tipo y proyecto.
 Desde ahí se escribe a quien administra o a alguien del campus, que se busca por
 login o por nombre.
+
+### Avance en el common core
+
+Una pestaña en Datos con tu avance desde que empezaste, frente a la media (del
+campus o de todos, de un plan o de los dos), a lo que pide cada pace y a quien
+quieras comparar. **Por círculos**: el % aprobado de cada círculo, con todos sus
+proyectos, y cada círculo pesa igual. **Por horas estimadas**: las horas que 42
+estima que dura cada proyecto aprobado, sobre las de todo el common core.
 
 ### Red de correcciones
 

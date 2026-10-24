@@ -47,6 +47,9 @@ const NetworkPage = lazy(() =>
 const ExamsPage = lazy(() =>
   import('../features/exams/ExamsPage').then((m) => ({ default: m.ExamsPage })),
 )
+const ProgressPage = lazy(() =>
+  import('../features/stats/ProgressPage').then((m) => ({ default: m.ProgressPage })),
+)
 const HelpStatsPage = lazy(() =>
   import('../features/stats/HelpStatsPage').then((m) => ({ default: m.HelpStatsPage })),
 )
@@ -129,6 +132,7 @@ export function SectionView({
       {section === 'notgames' && <NotGamesPage me={me.login} room={param} />}
       {section === 'estadisticas' && <HelpStatsPage me={me.login} />}
       {section === 'red' && <NetworkPage me={me} />}
+      {section === 'avance' && <ProgressPage />}
       {/* Quien eligió la roja lleva el juego puesto en toda la web: fuera de su
           sección sigue corriendo y solo enseña una ventanita. Con su propia
           espera, para que al cargarse no tape la sección que se está mirando. */}

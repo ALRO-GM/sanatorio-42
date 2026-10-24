@@ -16,7 +16,7 @@ volver a una categoría se abre la última sección que se miró en ella.
 | **Ayuda** | Quedar con gente: pedir y dar ayuda, aprender y enseñar | Sala de espera · Tablón · Terapia · Pizarras · Not-games · Estadísticas | |
 | **Calendario** | Todo lo que tienes, en el tiempo | Calendario | |
 | **Clústeres** | El plano del campus: quién está, dónde y de guardia | Clústeres | |
-| **Datos** | El campus en cifras | Red · Exámenes | |
+| **Datos** | El campus en cifras | Red · Avance · Exámenes | |
 
 Fuera de las pestañas, a propósito:
 
@@ -47,7 +47,7 @@ de datos.
 | Página | Elemento | Modo | Por qué |
 | --- | --- | --- | --- |
 | Pestañas | Expediente, Ayuda (las cuatro) y Calendario | S | Son para lo que existe la web |
-| Pestañas | Datos (red, clústeres, exámenes) | N | Informan, no resuelven un atasco |
+| Pestañas | Datos (red, avance, exámenes) y Clústeres | N | Informan, no resuelven un atasco |
 | Expediente | Nivel, títulos y XP | S | Lo primero que se ve al entrar |
 | Expediente | Estado de salud (pace y black hole) | S | Afecta a la vida académica |
 | Expediente | Horas validadas (descarga para el staff) | N | Se usa de tarde en tarde |
@@ -79,6 +79,7 @@ de datos.
 | Calendario | Formas del día (lista, entera, ajustada, desde ahora) | N | Comodidad |
 | Red | Grafo, filtros, totales, cómo se lee | N | La sección en sí |
 | Red | Endogamia, parejas, los más estrictos, proyectos más corregidos | D | Rankings |
+| Avance | Tu avance en el common core frente a la media y los paces, por círculos o por horas estimadas, y con quien te compares (#87; en Datos desde el 2026-10-25) | N | La sección en sí |
 | Clústeres | Mapa, opciones de vista, resaltar | N | La sección en sí |
 | Clústeres | «N de M personas tienen Sanatorio abierto» | D | Cifra |
 | Exámenes | Examen en vivo y estadísticas de cada examen | N | La sección en sí |

@@ -27,6 +27,8 @@ export const SECTIONS = [
   { id: 'estadisticas', icon: 'cifras', inNav: true, category: 'ayuda', from: 'normal' },
   { id: 'calendario', icon: 'calendario', inNav: true, category: 'calendario', from: 'simple' },
   { id: 'red', icon: 'red', inNav: true, category: 'datos', from: 'normal' },
+  // Avance en el common core frente a la media y los paces (#87).
+  { id: 'avance', icon: 'despegue', inNav: true, category: 'datos', from: 'normal' },
   // Clústeres: el plano del campus, en su propia pestaña de arriba.
   { id: 'clusters', icon: 'capas', inNav: true, category: 'clusters', from: 'normal' },
   // Exámenes: el de ahora (en vivo) y sus estadísticas.

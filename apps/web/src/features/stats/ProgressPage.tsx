@@ -51,11 +51,11 @@ function pathOf(days: readonly number[], line: ProgressLine): string {
 }
 
 /**
- * El avance en el common core a lo largo del tiempo (#87): tu línea, la media
+ * La pestaña Avance, en Datos: el avance en el common core a lo largo del tiempo (#87): tu línea, la media
  * (del campus o de todos, de un plan o de los dos), la de alguien con quien te
  * comparas y lo que pide cada pace. Se mide por círculos o por horas.
  */
-export function ProgressCard() {
+export function ProgressPage() {
   const { t } = useI18n()
   const [measure, setMeasure] = useState<ProgressMeasure>('circles')
   const [scope, setScope] = useState<ProgressScope>('campus')
@@ -74,80 +74,87 @@ export function ProgressCard() {
   ) => <PillGroup options={options} value={current} onChange={set} label={label} text={text} />
 
   return (
-    <article className="card help-stats-card progress-card" aria-labelledby="stats-progress">
-      <h3 id="stats-progress">
-        {t('stats.progress.title')}
-        <InfoTip title={t('stats.progress.title')}>
-          <p>{t('stats.progress.info')}</p>
-        </InfoTip>
-      </h3>
-      <div className="progress-controls">
-        {pills(t('stats.progress.measure'), MEASURES, measure, setMeasure, (value) =>
-          t(`stats.progress.measure.${value}`),
-        )}
-        {pills(t('stats.progress.scope'), SCOPES, scope, setScope, (value) =>
-          t(`stats.progress.scope.${value}`),
-        )}
-        {pills(t('stats.progress.plan'), PLANS, plan, setPlan, (value) =>
-          t(`stats.progress.plan.${value}`),
-        )}
-        <label className="progress-toggle">
-          <input
-            type="checkbox"
-            checked={paces}
-            onChange={(event) => {
-              setPaces(event.target.checked)
-            }}
-          />{' '}
-          {t('stats.progress.paces')}
-        </label>
-        <form
-          className="progress-compare"
-          onSubmit={(event) => {
-            event.preventDefault()
-            setOther(typed.trim().toLowerCase() || null)
-          }}
-        >
-          <PersonInput
-            value={typed}
-            label={t('stats.progress.compare')}
-            placeholder={t('stats.progress.comparePlaceholder')}
-            onChange={setTyped}
-            onPick={(login) => {
-              setTyped(login)
-              setOther(login)
-            }}
-          />
-          <button type="submit" className="pill">
-            {t('stats.progress.compare')}
-          </button>
-          {other !== null && (
-            <button
-              type="button"
-              className="pill"
-              onClick={() => {
-                setOther(null)
-                setTyped('')
-              }}
-            >
-              {t('stats.progress.compareClear')}
-            </button>
-          )}
-        </form>
+    <section className="progress-page" aria-labelledby="stats-progress">
+      <div className="section-head">
+        <h2 id="stats-progress">
+          {t('stats.progress.title')}
+          <InfoTip title={t('stats.progress.title')}>
+            <p>{t('stats.progress.info')}</p>
+          </InfoTip>
+        </h2>
       </div>
+      <article className="card progress-card">
+        <div className="progress-controls">
+          {pills(t('stats.progress.measure'), MEASURES, measure, setMeasure, (value) =>
+            t(`stats.progress.measure.${value}`),
+          )}
+          <p className="hint progress-measure-hint">
+            {t(`stats.progress.measure.${measure}.hint`)}
+          </p>
+          {pills(t('stats.progress.scope'), SCOPES, scope, setScope, (value) =>
+            t(`stats.progress.scope.${value}`),
+          )}
+          {pills(t('stats.progress.plan'), PLANS, plan, setPlan, (value) =>
+            t(`stats.progress.plan.${value}`),
+          )}
+          <label className="progress-toggle">
+            <input
+              type="checkbox"
+              checked={paces}
+              onChange={(event) => {
+                setPaces(event.target.checked)
+              }}
+            />{' '}
+            {t('stats.progress.paces')}
+          </label>
+          <form
+            className="progress-compare"
+            onSubmit={(event) => {
+              event.preventDefault()
+              setOther(typed.trim().toLowerCase() || null)
+            }}
+          >
+            <PersonInput
+              value={typed}
+              label={t('stats.progress.compare')}
+              placeholder={t('stats.progress.comparePlaceholder')}
+              onChange={setTyped}
+              onPick={(login) => {
+                setTyped(login)
+                setOther(login)
+              }}
+            />
+            <button type="submit" className="pill">
+              {t('stats.progress.compare')}
+            </button>
+            {other !== null && (
+              <button
+                type="button"
+                className="pill"
+                onClick={() => {
+                  setOther(null)
+                  setTyped('')
+                }}
+              >
+                {t('stats.progress.compareClear')}
+              </button>
+            )}
+          </form>
+        </div>
 
-      {data === undefined ? (
-        <ErrorNote error={error} onRetry={() => void reload()} />
-      ) : (
-        <ProgressChart
-          data={data}
-          measure={measure}
-          group={`${scope}-${plan}`}
-          paces={paces}
-          other={other}
-        />
-      )}
-    </article>
+        {data === undefined ? (
+          <ErrorNote error={error} onRetry={() => void reload()} />
+        ) : (
+          <ProgressChart
+            data={data}
+            measure={measure}
+            group={`${scope}-${plan}`}
+            paces={paces}
+            other={other}
+          />
+        )}
+      </article>
+    </section>
   )
 }
 

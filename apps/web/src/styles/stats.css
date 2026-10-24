@@ -57,7 +57,13 @@
 
 /* --- Avance (#87): tu línea, la media, la de con quien te comparas y los paces. */
 .progress-card {
-  margin-top: 1rem;
+  display: grid;
+  align-content: start;
+  gap: 0.6rem;
+}
+.progress-measure-hint {
+  flex-basis: 100%;
+  margin: 0;
 }
 .progress-controls {
   display: flex;
