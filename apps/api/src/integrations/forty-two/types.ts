@@ -155,6 +155,13 @@ export type ApiCursusUser = {
   blackholed_at?: string | null
 }
 
+/** Alguien en un cursus, de `GET /v2/cursus/:id/cursus_users`: con la persona dentro. */
+export type ApiCursusMember = {
+  id: number
+  begin_at?: string | null
+  user?: ApiUser | null
+}
+
 /** Un campus, de `GET /v2/campus`. */
 export type ApiCampus = {
   id: number

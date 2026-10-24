@@ -23,6 +23,8 @@ import type {
 import { z } from 'zod'
 
 import type { Actor } from '../../core/actor.js'
+import { NO_POOL, seesFor } from '../../core/audience.js'
+import type { Audience } from '../../core/audience.js'
 import type { PeersService } from '../peers/index.js'
 import { LOCATION_MAX_AGE_MS } from '../replica/index.js'
 import type { ReplicaRepository, Syncer } from '../replica/index.js'
@@ -36,6 +38,8 @@ import type { SeatPosition } from './seat-layout.js'
 
 export type MapServiceOptions = {
   replica: ReplicaRepository
+  /** Quién ve a quién: estudiantes y piscineros separados (`docs/piscineros.md`). */
+  audience?: Audience
   sync: Syncer
   peers: PeersService
   therapy: TherapyService
@@ -68,6 +72,7 @@ const MAX_PROJECTS = 4
 export function createMapService(options: MapServiceOptions) {
   const { replica, sync, peers, therapy } = options
   const now = options.now ?? Date.now
+  const audience = options.audience ?? NO_POOL
 
   /** Desde cuándo vale un aviso de puesto roto. */
   const brokenSince = (): string => new Date(now() - BROKEN_FOR_MS).toISOString()
@@ -121,6 +126,12 @@ export function createMapService(options: MapServiceOptions) {
      */
     async personCard(actor: Actor, login: unknown): Promise<PersonCard> {
       const who = parse(loginSchema, login)
+
+      // Del otro mundo (estudiante o piscinero) no hay ficha.
+      if (!(await seesFor(audience, actor))(who)) {
+        throw domainError('not_found', 'No hay nadie con ese login')
+      }
+
       const since = new Date(now() - LOCATION_MAX_AGE_MS).toISOString()
       const [present, images, active, circles, online, available, focusing] = await Promise.all([
         replica.presenceIn(actor.campusId, since),
@@ -158,14 +169,17 @@ export function createMapService(options: MapServiceOptions) {
       }
 
       const since = new Date(now() - LOCATION_MAX_AGE_MS).toISOString()
-      const [known, present, reservations, online, broken] = await Promise.all([
+      const [known, everyone, reservations, online, broken, sees] = await Promise.all([
         replica.knownSeats(actor.campusId),
         replica.presenceIn(actor.campusId, since),
         therapy.reservations(actor.campusId),
         options.online?.() ?? new Set<string>(),
         options.broken?.listSince(actor.campusId, brokenSince()) ??
           new Map<string, { by: string; at: string }>(),
+        seesFor(audience, actor),
       ])
+      // Solo la gente de su mundo: a un estudiante, los piscineros no le salen.
+      const present = everyone.filter((person) => sees(person.login))
 
       // De guardia = disponible y sentado. Misma regla que en la lista.
       const duty = new Map<string, SeatDuty>()

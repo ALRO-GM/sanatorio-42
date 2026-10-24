@@ -91,6 +91,7 @@ describe('migraciones', () => {
       'legal_acceptances',
       'notices',
       'pace_refs',
+      'pool_members',
       'presence',
       'profiles',
       'project_pass_marks',

@@ -102,7 +102,11 @@ export function createSessionReader(options: SessionReaderOptions): SessionReade
 
       return {
         login: session.login,
-        campusId: profile?.campusId ?? homeCampus(session),
+        // Un piscinero mira siempre su campus: solo ve a los piscineros de él.
+        campusId:
+          session.role === 'pool'
+            ? homeCampus(session)
+            : (profile?.campusId ?? homeCampus(session)),
         admin: access?.admin ?? options.adminLogins.includes(session.login.toLowerCase()),
         lang: request.headers['x-lang'] === 'en' ? 'en' : 'es',
         ...(session.role === 'pool' ? { pool: true } : {}),

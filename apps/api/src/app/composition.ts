@@ -52,6 +52,8 @@ import type { PeersModule } from '../modules/peers/index.js'
 import { createProfileModule, MASTER_AT } from '../modules/profile/index.js'
 import type { ProfileModule } from '../modules/profile/index.js'
 import { createReplicaModule } from '../modules/replica/index.js'
+import { createAudience } from '../core/audience.js'
+import type { Audience } from '../core/audience.js'
 import type { PhotoStore, ReplicaModule, SyncerConfig } from '../modules/replica/index.js'
 import { createFacilityModule } from '../modules/facility/index.js'
 import { createPoolModule } from '../modules/pool/index.js'
@@ -137,6 +139,9 @@ export type Services = {
   focus: FocusModule['service']
   gitCourse: GitCourseModule['service']
   pool: PoolModule['service']
+  poolMembers: ReplicaModule['poolMembers']
+  /** Quién ve a quién: estudiantes y piscineros separados. */
+  audience: Audience
 }
 
 type Composition = {
@@ -199,6 +204,8 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     ...given({ photos: config.photos, log: config.log }),
     ...clock,
   })
+  // Quién ve a quién (`docs/piscineros.md`): lo usan los módulos que enseñan gente.
+  const audience = createAudience((campusId) => replica.poolMembers.loginsIn(campusId), now)
   // El Pomodoro va pronto: la sala de espera y el plano preguntan quién está concentrado.
   const focus = createFocusModule({ db, ...clock })
   const focusOf = (logins: readonly string[]) =>
@@ -266,6 +273,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
   })
   const map = createMapModule({
     replica: replica.repository,
+    audience,
     sync: replica.sync,
     peers: peers.peers,
     therapy: therapy.service,
@@ -505,6 +513,8 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
       focus: focus.service,
       gitCourse: gitCourse.service,
       pool: pool.service,
+      poolMembers: replica.poolMembers,
+      audience,
     },
   }
 }

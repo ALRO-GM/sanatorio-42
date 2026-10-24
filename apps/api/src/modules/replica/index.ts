@@ -19,6 +19,8 @@ import type { Quota } from './quota.js'
 import type { CampusesService } from './campuses.service.js'
 import { createPhotos, memoryPhotoStore } from './photos.js'
 import { createPoints } from './points.js'
+import { createPoolMembers } from './pool-members.js'
+import type { PoolMembers } from './pool-members.js'
 import type { Points } from './points.js'
 import type { PhotoStore } from './photos.js'
 import { createReplicaRepository } from './replica.repository.js'
@@ -56,6 +58,8 @@ export type ReplicaModule = AppModule & {
   quota: Quota
   /** El historial de puntos de evaluación de cada cual, bajo demanda. */
   points: Points
+  /** Los piscineros en curso de cada campus (`docs/piscineros.md`). */
+  poolMembers: PoolMembers
 }
 
 export function createReplicaModule(deps: ReplicaModuleDeps): ReplicaModule {
@@ -97,6 +101,15 @@ export function createReplicaModule(deps: ReplicaModuleDeps): ReplicaModule {
 
   const points = createPoints({ client: deps.client, quota, replica: repository })
 
+  const poolMembers = createPoolMembers({
+    db: deps.db,
+    client: deps.client,
+    campusIds: deps.config.trackedCampusIds,
+    hourlyReserve: deps.config.hourlyReserve,
+    quota,
+    ...given({ now: deps.now, log: deps.log }),
+  })
+
   const photos = createPhotos({
     db: deps.db,
     client: deps.client,
@@ -135,6 +148,7 @@ export function createReplicaModule(deps: ReplicaModuleDeps): ReplicaModule {
         },
       },
       { table: 'agenda_users', logins: ['login'], source: '42' },
+      { table: 'pool_members', logins: ['login'], userIds: ['user_id'], source: '42' },
       { table: 'user_tracks', logins: ['login'], source: '42' },
       { table: 'user_levels', logins: ['login'], source: '42' },
       { table: 'quota_queue', logins: ['login'] },
@@ -147,6 +161,7 @@ export function createReplicaModule(deps: ReplicaModuleDeps): ReplicaModule {
     campuses,
     quota,
     points,
+    poolMembers,
     routes: (app, context) => {
       registerReplicaRoutes(app, context, { campuses, sync, quota, photos })
     },
@@ -157,6 +172,11 @@ export function createReplicaModule(deps: ReplicaModuleDeps): ReplicaModule {
         run: async () => {
           await quota.drain()
         },
+      },
+      {
+        name: 'copia de piscineros',
+        everyMs: 60_000,
+        run: () => poolMembers.step(),
       },
       {
         // Es de toda la base, no solo de la réplica: va aquí porque este módulo

@@ -73,6 +73,7 @@ import { focusSessionsSchema } from './0064-focus-sessions.js'
 import { correctionFeedbackSchema } from './0065-correction-feedback.js'
 import { noCorrectionFeedbackSchema } from './0066-no-correction-feedback.js'
 import { helpBookingsCampusSchema } from './0067-help-bookings-campus.js'
+import { poolMembersSchema } from './0068-pool-members.js'
 import type { Migration } from './types.js'
 
 export const MIGRATIONS: readonly Migration[] = [
@@ -143,6 +144,7 @@ export const MIGRATIONS: readonly Migration[] = [
   correctionFeedbackSchema,
   noCorrectionFeedbackSchema,
   helpBookingsCampusSchema,
+  poolMembersSchema,
 ]
 
 /** Versión más alta que existe en el código. */

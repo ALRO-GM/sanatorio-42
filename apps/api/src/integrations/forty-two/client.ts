@@ -27,6 +27,7 @@ import { ApiError, apiErrorFromNetwork, apiErrorFromResponse, endpointFromUrl } 
 import type {
   ApiCampus,
   ApiCursusUser,
+  ApiCursusMember,
   ApiEvent,
   ApiEventsUser,
   ApiExam,
@@ -98,6 +99,8 @@ type ScaleTeamsQuery = {
 
 /** El 42cursus. Las correcciones de la piscina no interesan. */
 const CORE_CURSUS_ID = 21
+/** La C Piscine. */
+const PISCINE_CURSUS_ID = 9
 
 /** Tope superior de un `range[id]` abierto. */
 const MAX_ID = 2_000_000_000
@@ -234,6 +237,28 @@ export class FortyTwoClient {
     params.push(`page=${query.page ?? 1}`, `per_page=${this.pageSize}`)
 
     return this.requestPage<ApiScaleTeam>(`/scale_teams?${params.join('&')}`)
+  }
+
+  /**
+   * `GET /v2/cursus/9/cursus_users` de un campus, **una página**: quien empezó
+   * la C Piscine entre esas dos fechas (`docs/piscineros.md`).
+   */
+  async getPiscinePage(query: {
+    campusId: number
+    beginFrom: string
+    beginTo: string
+    page: number
+  }): Promise<Page<ApiCursusMember>> {
+    const params = [
+      `filter[campus_id]=${query.campusId}`,
+      `range[begin_at]=${query.beginFrom},${query.beginTo}`,
+      `page=${query.page}`,
+      `per_page=${this.pageSize}`,
+    ]
+
+    return this.requestPage<ApiCursusMember>(
+      `/cursus/${PISCINE_CURSUS_ID}/cursus_users?${params.join('&')}`,
+    )
   }
 
   /** `GET /v2/users/:id/cursus_users`: nivel, inicio y black hole en cada cursus. */

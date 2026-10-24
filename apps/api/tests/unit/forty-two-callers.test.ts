@@ -23,6 +23,7 @@ const ALLOWED: Record<string, string> = {
     'el historial de puntos (lo donado a la bolsa, para el Code Clicker)',
   'modules/replica/quota.ts': 'la cuota misma',
   'modules/replica/syncer.ts': 'el bucle que copia el campus',
+  'modules/replica/pool-members.ts': 'los piscineros en curso de cada campus (docs/piscineros.md)',
   'modules/network/index.ts': 'cableado del módulo',
   'modules/network/network.sync.ts': 'la copia de las correcciones, por páginas',
   'modules/exams/index.ts': 'cableado del módulo',

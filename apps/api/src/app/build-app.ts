@@ -127,7 +127,13 @@ export async function buildApp(options: BuildOptions = {}): Promise<BuiltApp> {
     },
     access: (login) => services.admin.accessOf(login),
     admit: (profile) => services.pool.admit(profile),
-    onPoolLogin: (profile) => services.pool.enter(profile),
+    onPoolLogin: async (profile) => {
+      const entered = await services.pool.enter(profile)
+
+      if (entered.campusId !== null) await services.poolMembers.enter(entered.campusId, profile)
+
+      return entered
+    },
     staff: (key) => services.staff.authenticate(key),
   })
 
