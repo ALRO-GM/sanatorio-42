@@ -391,72 +391,98 @@ export function ForceGraph({
       const touches = (link: SimLink): boolean =>
         (link.source as SimNode).login === focus || (link.target as SimNode).login === focus
       /**
-       * Las uniones de quien está elegido, con sentido: una flecha hacia quien
-       * fue corregido, en un color si corrigió esa persona y en otro si la
-       * corrigieron. Si fueron las dos cosas, dos flechas una junto a otra.
+       * Las uniones de quien está elegido, con sentido, en una sola recta: la
+       * punta va hacia quien fue corregido, en un color si corrigió esa persona
+       * y en otro si la corrigieron. Si fueron las dos cosas, la recta se parte
+       * por la mitad: cada mitad lleva su color y su punta hacia su burbuja.
        */
       const directed = (link: SimLink): void => {
         if (!crosses(link)) return
 
         const source = link.source as SimNode
         const target = link.target as SimNode
-        const ways: [SimNode, SimNode, number][] = []
+        const x1 = source.x ?? 0
+        const y1 = source.y ?? 0
+        const x2 = target.x ?? 0
+        const y2 = target.y ?? 0
+        const length = Math.hypot(x2 - x1, y2 - y1)
 
-        if (link.forth > 0) ways.push([source, target, link.forth])
-        if (link.back > 0) ways.push([target, source, link.back])
+        if (length < source.r + target.r) return
 
-        for (const [index, [from, to, count]] of ways.entries()) {
-          const x1 = from.x ?? 0
-          const y1 = from.y ?? 0
-          const x2 = to.x ?? 0
-          const y2 = to.y ?? 0
-          const length = Math.hypot(x2 - x1, y2 - y1)
+        const ux = (x2 - x1) / length
+        const uy = (y2 - y1) / length
+        // Los bordes de las dos burbujas, y el punto medio entre ellos.
+        const ax = x1 + ux * (source.r + 1 / view.k)
+        const ay = y1 + uy * (source.r + 1 / view.k)
+        const bx = x2 - ux * (target.r + 1 / view.k)
+        const by = y2 - uy * (target.r + 1 / view.k)
+        const both = link.forth > 0 && link.back > 0
+        const midX = (ax + bx) / 2
+        const midY = (ay + by) / 2
+        const size = 11 / view.k
+        // Con dos cifras y la recta corta, cada una a un lado para no pisarse.
+        const apart = both && Math.hypot(bx - ax, by - ay) / 2 < size * 4 ? size * 0.9 : 0
 
-          if (length < from.r + to.r) continue
+        /** Un tramo de `(fx, fy)` a la punta `(tx, ty)`, con su cifra en medio. */
+        const arrow = (
+          fx: number,
+          fy: number,
+          tx: number,
+          ty: number,
+          count: number,
+          colour: string,
+          side: number,
+        ): void => {
+          const dx = tx - fx
+          const dy = ty - fy
+          const span = Math.hypot(dx, dy)
 
-          const ux = (x2 - x1) / length
-          const uy = (y2 - y1) / length
+          if (span === 0) return
+
+          const vx = dx / span
+          const vy = dy / span
           const width = (0.8 + Math.sqrt(count) * 0.75) / Math.sqrt(view.k)
-          // Con dos flechas, cada una hacia su lado de la línea, sin pisarse.
-          const gap = width + 3 / view.k
-          const shift = ways.length === 2 ? (index === 0 ? gap : -gap) : 0
-          const ox = -uy * shift
-          const oy = ux * shift
-          const head = Math.max(6 / view.k, width * 3)
-          // La punta, en el borde de la burbuja de quien fue corregido.
-          const tipX = x2 - ux * (to.r + 1 / view.k) + ox
-          const tipY = y2 - uy * (to.r + 1 / view.k) + oy
-          const colour = from.login === focus ? palette.gave : palette.got
+          const head = Math.min(span * 0.6, Math.max(6 / view.k, width * 3))
 
           context.globalAlpha = 0.95
           context.strokeStyle = colour
           context.fillStyle = colour
           context.lineWidth = width
           context.beginPath()
-          context.moveTo(x1 + ux * from.r + ox, y1 + uy * from.r + oy)
-          context.lineTo(tipX - ux * head * 0.8, tipY - uy * head * 0.8)
+          context.moveTo(fx, fy)
+          context.lineTo(tx - vx * head * 0.8, ty - vy * head * 0.8)
           context.stroke()
           context.beginPath()
-          context.moveTo(tipX, tipY)
-          context.lineTo(tipX - ux * head - uy * head * 0.55, tipY - uy * head + ux * head * 0.55)
-          context.lineTo(tipX - ux * head + uy * head * 0.55, tipY - uy * head - ux * head * 0.55)
+          context.moveTo(tx, ty)
+          context.lineTo(tx - vx * head - vy * head * 0.55, ty - vy * head + vx * head * 0.55)
+          context.lineTo(tx - vx * head + vy * head * 0.55, ty - vy * head - vx * head * 0.55)
           context.closePath()
           context.fill()
 
-          // La cifra, a media flecha: cuántas (corregidas, aprobadas o
+          // La cifra, en medio del tramo: cuántas (corregidas, aprobadas o
           // suspendidas, según el filtro) le hizo una burbuja a la otra.
-          const size = 11 / view.k
-          const midX = (x1 + ux * from.r + tipX) / 2 + ox
-          const midY = (y1 + uy * from.r + tipY) / 2 + oy
+          const labelX = (fx + tx) / 2 - vy * side
+          const labelY = (fy + ty) / 2 + vx * side
 
           context.font = `600 ${String(size)}px system-ui, sans-serif`
           context.textAlign = 'center'
           context.textBaseline = 'middle'
           context.lineWidth = 3 / view.k
           context.strokeStyle = palette.surface
-          context.strokeText(String(count), midX, midY)
+          context.strokeText(String(count), labelX, labelY)
           context.fillStyle = colour
-          context.fillText(String(count), midX, midY)
+          context.fillText(String(count), labelX, labelY)
+        }
+        const colourOf = (from: SimNode): string =>
+          from.login === focus ? palette.gave : palette.got
+
+        if (both) {
+          arrow(midX, midY, bx, by, link.forth, colourOf(source), apart)
+          arrow(midX, midY, ax, ay, link.back, colourOf(target), apart)
+        } else if (link.forth > 0) {
+          arrow(ax, ay, bx, by, link.forth, colourOf(source), 0)
+        } else if (link.back > 0) {
+          arrow(bx, by, ax, ay, link.back, colourOf(target), 0)
         }
       }
 
