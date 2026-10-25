@@ -36,8 +36,11 @@ export type Fake42 = {
   quests: Map<number, ApiQuestUser[]>
   /** Paso por cada cursus, por id de persona. */
   cursus: Map<number, ApiCursusUser[]>
-  /** Correcciones por campus. `updated_at` solo lo usa el filtro de novedades. */
-  scaleTeams: Map<number, (ApiScaleTeam & { updated_at?: string })[]>
+  /**
+   * Correcciones por campus. `updated_at` solo lo usa el filtro de novedades;
+   * `cursus_id`, el de cursus (sin él, son del 42cursus).
+   */
+  scaleTeams: Map<number, (ApiScaleTeam & { updated_at?: string; cursus_id?: number })[]>
   /** Historial de puntos de evaluación, por id de persona. */
   points: Map<
     number,
@@ -118,10 +121,12 @@ export function createFake42(pageSize = 2): Fake42 {
     } else if (path === '/scale_teams') {
       const ids = url.searchParams.get('range[id]')?.split(',').map(Number)
       const updated = url.searchParams.get('range[updated_at]')?.split(',')
+      const cursus = Number(url.searchParams.get('filter[cursus_id]') ?? '21')
 
       items = (state.scaleTeams.get(Number(url.searchParams.get('filter[campus_id]'))) ?? [])
         .filter(
           (row) =>
+            (row.cursus_id ?? 21) === cursus &&
             (ids === undefined || (row.id >= (ids[0] ?? 0) && row.id <= (ids[1] ?? Infinity))) &&
             (updated === undefined ||
               ((row.updated_at ?? '') >= (updated[0] ?? '') &&

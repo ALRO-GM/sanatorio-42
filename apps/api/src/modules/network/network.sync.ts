@@ -7,6 +7,11 @@
  * por fin tienen nota.
  *
  * Nunca gasta la reserva horaria de la API: las lecturas de la web van antes.
+ *
+ * Hay dos copias: la del 42cursus (`21`), con todo el histórico, y la de la
+ * C Piscine (`9`, `docs/piscineros.md`), que solo trae lo reciente
+ * (`recentMs`): de la piscina solo importa la que está en curso, así que no
+ * hay histórico ni repaso, solo novedades desde hace `recentMs`.
  */
 
 import type { NetworkSync } from '@sanatorio/contracts'
@@ -35,6 +40,13 @@ type CorrectionSyncOptions = {
   isActive?: () => boolean
   now?: () => number
   log?: (message: string) => void
+  /** De qué cursus se copia. Sin él, el 42cursus. */
+  cursus?: number
+  /**
+   * Solo lo que ha cambiado en este rato hacia atrás, sin histórico ni repaso.
+   * Es la copia de la piscina: lo anterior es de piscinas ya terminadas.
+   */
+  recentMs?: number
 }
 
 /** Lo que se guarda entre una vuelta y la siguiente. */
@@ -89,7 +101,25 @@ const SWEEP_MARGIN = 150
 /** Tope de páginas de novedades por vuelta. Un cinturón, no un límite real. */
 const DELTA_MAX_PAGES = 20
 
-const stateKey = (campusId: number): string => `corrections:${campusId}`
+/**
+ * Lo más largo que pide de novedades de una vez la copia de la piscina. Empieza
+ * `recentMs` atrás, con la piscina entera por delante: avanza por tramos, cada
+ * uno cabe en `DELTA_MAX_PAGES` y lo hecho no se vuelve a pedir. La del
+ * 42cursus no lo necesita: su histórico deja las novedades al día.
+ */
+const DELTA_SPAN_MS = 24 * 60 * 60_000
+
+/** El 42cursus. */
+export const CORE_CURSUS = 21
+
+/** La C Piscine: las correcciones de los piscineros. */
+export const PISCINE_CURSUS = 9
+
+/** La del 42cursus conserva la clave de siempre: así no se vuelve a copiar todo. */
+const stateKeyOf =
+  (cursus: number) =>
+  (campusId: number): string =>
+    cursus === CORE_CURSUS ? `corrections:${campusId}` : `corrections:${cursus}:${campusId}`
 
 /**
  * Las filas que salen de una corrección: una por persona corregida.
@@ -97,7 +127,11 @@ const stateKey = (campusId: number): string => `corrections:${campusId}`
  * Se descartan las que aún no se han hecho (sin nota) y las que 42 oculta
  * (`"invisible"` en vez de personas, antes de la cita).
  */
-export function rowsOf(item: ApiScaleTeam, campusId: number): CorrectionRow[] {
+export function rowsOf(
+  item: ApiScaleTeam,
+  campusId: number,
+  cursus = CORE_CURSUS,
+): CorrectionRow[] {
   const { corrector, correcteds } = item
 
   if (
@@ -115,6 +149,7 @@ export function rowsOf(item: ApiScaleTeam, campusId: number): CorrectionRow[] {
     .map((person) => ({
       id: item.id,
       campusId,
+      cursus,
       corrector: corrector.login,
       corrected: person.login,
       projectId: item.team?.project_id ?? null,
@@ -129,6 +164,9 @@ export function createCorrectionSync(options: CorrectionSyncOptions) {
   const now = options.now ?? Date.now
   const log = options.log ?? (() => undefined)
   const isActive = options.isActive ?? (() => false)
+  const cursus = options.cursus ?? CORE_CURSUS
+  const { recentMs } = options
+  const stateKey = stateKeyOf(cursus)
   let running = false
 
   const quota = options.quota ?? hourlyQuota(client, hourlyReserve)
@@ -136,16 +174,15 @@ export function createCorrectionSync(options: CorrectionSyncOptions) {
   const canSpend = (): boolean => quota.allows('background', hourlyReserve + BUDGET_MARGIN)
 
   const load = async (campusId: number): Promise<State> =>
-    (await replica.getState<State>(stateKey(campusId))) ?? {
-      cursor: 0,
-      done: false,
-      total: null,
-      deltaAt: null,
-    }
+    (await replica.getState<State>(stateKey(campusId))) ??
+    (recentMs === undefined
+      ? { cursor: 0, done: false, total: null, deltaAt: null }
+      : // Sin histórico: se da por hecho y las novedades empiezan `recentMs` atrás.
+        { cursor: 0, done: true, total: null, deltaAt: new Date(now() - recentMs).toISOString() })
 
   /** Guarda una página y le pone veredicto a lo guardado. */
   const store = async (items: readonly ApiScaleTeam[], campusId: number): Promise<void> => {
-    const rows = items.flatMap((item) => rowsOf(item, campusId))
+    const rows = items.flatMap((item) => rowsOf(item, campusId, cursus))
 
     if (rows.length === 0) {
       return
@@ -213,7 +250,11 @@ export function createCorrectionSync(options: CorrectionSyncOptions) {
 
     for (let page = 0; (page === 0 || Date.now() < deadline) && roomy() && !isActive(); page += 1) {
       const from = cursor
-      const result = await client.getCampusScaleTeamsPage({ campusId, afterId: from })
+      const result = await client.getCampusScaleTeamsPage({
+        campusId,
+        cursusId: cursus,
+        afterId: from,
+      })
       const ids = result.items.map((item) => item.id)
       const finished = result.items.length < result.perPage
       const upTo = ids.reduce((max, id) => Math.max(max, id), from)
@@ -222,10 +263,11 @@ export function createCorrectionSync(options: CorrectionSyncOptions) {
 
       // Lo que la base tiene en este tramo y 42 no: ya no existe. Se borra
       // también lo guardado de citas que han vuelto a quedar sin nota.
-      const kept = result.items.filter((item) => rowsOf(item, campusId).length > 0)
+      const kept = result.items.filter((item) => rowsOf(item, campusId, cursus).length > 0)
 
       await corrections.prune(
         campusId,
+        cursus,
         from,
         upTo,
         kept.map((item) => item.id),
@@ -255,7 +297,11 @@ export function createCorrectionSync(options: CorrectionSyncOptions) {
     // El reloj de verdad, no el inyectado: mide lo que tarda la red.
     for (let page = 0; (page === 0 || Date.now() < deadline) && canSpend(); page += 1) {
       const startedAt = new Date(now()).toISOString()
-      const result = await client.getCampusScaleTeamsPage({ campusId, afterId: state.cursor })
+      const result = await client.getCampusScaleTeamsPage({
+        campusId,
+        cursusId: cursus,
+        afterId: state.cursor,
+      })
 
       await store(result.items, campusId)
 
@@ -281,7 +327,11 @@ export function createCorrectionSync(options: CorrectionSyncOptions) {
     }
   }
 
-  /** Trae lo que ha cambiado desde la última vez. */
+  /**
+   * Trae lo que ha cambiado desde la última vez; la piscina, por tramos de
+   * como mucho `DELTA_SPAN_MS`. Cada tramo terminado mueve `deltaAt`: si la cuota o el
+   * tiempo se acaban a mitad, la siguiente vuelta sigue desde ahí.
+   */
   const delta = async (campusId: number, state: State): Promise<void> => {
     const since = Date.parse(state.deltaAt ?? '')
 
@@ -289,25 +339,48 @@ export function createCorrectionSync(options: CorrectionSyncOptions) {
       return
     }
 
-    const to = new Date(now()).toISOString()
-    const from = new Date((Number.isNaN(since) ? now() : since) - DELTA_OVERLAP_MS).toISOString()
+    const deadline = Date.now() + STEP_BUDGET_MS
+    // La copia de la piscina no mira más atrás de `recentMs`, aunque lleve
+    // mucho parada: lo anterior ya no le importa a nadie.
+    const floor = recentMs === undefined ? -Infinity : now() - recentMs
+    const span = recentMs === undefined ? Infinity : DELTA_SPAN_MS
+    let start = Math.max(Number.isNaN(since) ? now() : since, floor)
 
-    for (let page = 1; page <= DELTA_MAX_PAGES && canSpend(); page += 1) {
-      const result = await client.getCampusScaleTeamsPage({
-        campusId,
-        updatedFrom: from,
-        updatedTo: to,
-        page,
-      })
+    for (let slice = 0; slice === 0 || (Date.now() < deadline && canSpend()); slice += 1) {
+      const end = Math.min(now(), start + span)
+      const to = new Date(end).toISOString()
+      const from = new Date(start - DELTA_OVERLAP_MS).toISOString()
+      let finished = false
 
-      await store(result.items, campusId)
+      for (let page = 1; page <= DELTA_MAX_PAGES && canSpend(); page += 1) {
+        const result = await client.getCampusScaleTeamsPage({
+          campusId,
+          cursusId: cursus,
+          updatedFrom: from,
+          updatedTo: to,
+          page,
+        })
 
-      if (result.items.length < result.perPage) {
-        state.deltaAt = to
-        await replica.setState(stateKey(campusId), state)
+        await store(result.items, campusId)
 
+        if (result.items.length < result.perPage) {
+          finished = true
+          break
+        }
+      }
+
+      if (!finished) {
         return
       }
+
+      state.deltaAt = to
+      await replica.setState(stateKey(campusId), state)
+
+      if (end >= now()) {
+        return
+      }
+
+      start = end
     }
   }
 
@@ -339,7 +412,12 @@ export function createCorrectionSync(options: CorrectionSyncOptions) {
           // réplica y cambian despacio: al terminar el histórico y cada pocas horas.
           const judged = Date.parse(state.judgedAt ?? '')
 
-          if (state.done && (Number.isNaN(judged) || now() - judged >= JUDGE_EVERY_MS)) {
+          // Lo hace la copia del 42cursus, que vuelve a juzgar todas las filas.
+          if (
+            recentMs === undefined &&
+            state.done &&
+            (Number.isNaN(judged) || now() - judged >= JUDGE_EVERY_MS)
+          ) {
             await judgeAll()
             state.judgedAt = new Date(now()).toISOString()
             await replica.setState(stateKey(campusId), state)
@@ -348,7 +426,7 @@ export function createCorrectionSync(options: CorrectionSyncOptions) {
           if (state.done) {
             await delta(campusId, state)
 
-            if (!isActive()) {
+            if (recentMs === undefined && !isActive()) {
               await sweep(campusId, state)
             }
           }
@@ -362,7 +440,7 @@ export function createCorrectionSync(options: CorrectionSyncOptions) {
     async status(campusId: number): Promise<NetworkSync> {
       const [state, extent] = await Promise.all([
         replica.getState<State>(stateKey(campusId)),
-        corrections.extent(campusId),
+        corrections.extent(campusId, cursus),
       ])
 
       return {

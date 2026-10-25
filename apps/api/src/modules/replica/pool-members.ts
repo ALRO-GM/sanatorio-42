@@ -95,6 +95,21 @@ export function createPoolMembers(options: PoolMembersOptions) {
       return result.rows.map((row) => toText(row.login))
     },
 
+    /** Los piscineros en curso de un campus, con su avatar (la red de la piscina). */
+    async membersIn(campusId: number): Promise<Map<string, string | null>> {
+      const result = await db.execute({
+        sql: 'SELECT login, image FROM pool_members WHERE campus_id = ? AND begin_at >= ?',
+        args: [campusId, iso(now() - AFTER_MS)],
+      })
+
+      return new Map(
+        result.rows.map((row) => [
+          toText(row.login),
+          typeof row.image === 'string' ? row.image : null,
+        ]),
+      )
+    },
+
     /** Una vuelta: repasa el campus que más tiempo lleva sin repasar, si toca y hay cuota. */
     async step(): Promise<void> {
       if (running) return

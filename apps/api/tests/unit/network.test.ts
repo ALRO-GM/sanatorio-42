@@ -691,5 +691,153 @@ describe('red de correcciones', () => {
       expect(await services.network.people(actor('ana'), '%')).toEqual([])
       expect(await services.network.people(actor('ana'), undefined)).toEqual([])
     })
+
+    describe('piscineros: mundos separados', () => {
+      const DAY = 24 * 60 * MINUTE
+      const recent = new Date(NOW - 5 * DAY).toISOString()
+      const piscinero = (login: string): Actor => ({ ...actor(login), pool: true })
+
+      /** Una corrección de la piscina, cambiada hace `ago`. */
+      const poolTeam = (corrector: string, corrected: string, ago = 5 * DAY) => ({
+        ...scaleTeam(corrector, corrected, {
+          begin_at: recent,
+          updated_at: new Date(NOW - ago).toISOString(),
+        }),
+        cursus_id: 9,
+      })
+
+      /** Apunta piscineros en curso del campus, como lo haría la copia de 42. */
+      const enrol = async (...logins: string[]): Promise<void> => {
+        for (const login of logins) {
+          await db.execute({
+            sql: `INSERT INTO pool_members (campus_id, user_id, login, image, begin_at, updated_at)
+                  VALUES (?, ?, ?, ?, ?, ?)`,
+            args: [MADRID, userId(login), login, `https://img/${login}.png`, recent, recent],
+          })
+        }
+      }
+
+      const stateOf = async (key: string): Promise<unknown> =>
+        (await db.execute({ sql: 'SELECT value FROM sync_state WHERE key = ?', args: [key] }))
+          .rows[0]?.value
+
+      it('copia la piscina aparte, con su estado, y solo los últimos 90 días', async () => {
+        api.scaleTeams.set(MADRID, [
+          poolTeam('pia', 'pol'),
+          // Límite: de una piscina ya terminada, fuera de la ventana.
+          poolTeam('pia', 'pol', 91 * DAY),
+          scaleTeam('eva', 'ana'),
+        ])
+
+        await services.poolCorrections.step()
+
+        expect(api.calls.every((call) => call.includes('filter[cursus_id]=9'))).toBe(true)
+        // Empieza 90 días atrás (menos el solape) y no antes.
+        expect(api.calls[0]).toContain(
+          `range[updated_at]=${new Date(NOW - 90 * DAY - 2 * MINUTE).toISOString()},`,
+        )
+        expect(await services.poolCorrections.status(MADRID)).toMatchObject({
+          phase: 'done',
+          rows: 1,
+        })
+        // La del 42cursus no se ha tocado: su estado y sus filas son otros.
+        expect(await services.corrections.status(MADRID)).toMatchObject({
+          phase: 'pending',
+          rows: 0,
+        })
+        expect(await stateOf('corrections:9:22')).toBeDefined()
+        expect(await stateOf('corrections:22')).toBeUndefined()
+        const stored = await db.execute('SELECT cursus, corrector FROM corrections')
+
+        expect(stored.rows.map((row) => [row.cursus, row.corrector])).toEqual([[9, 'pia']])
+
+        // Con todo al día, la vuelta siguiente no pide nada.
+        api.calls.length = 0
+        await services.poolCorrections.step()
+        expect(api.calls).toHaveLength(0)
+      })
+
+      it('un piscinero solo ve la piscina de su campus; un estudiante, nunca a un piscinero', async () => {
+        await enrol('pia', 'pol')
+        api.scaleTeams.set(MADRID, [
+          poolTeam('pia', 'pol'),
+          poolTeam('pol', 'pia'),
+          // Imprevisible: un estudiante que corrige en la piscina, y un
+          // piscinero que aparece en una corrección del 42cursus.
+          poolTeam('eva', 'pia'),
+          scaleTeam('eva', 'ana'),
+          scaleTeam('pia', 'leo'),
+        ])
+        await services.poolCorrections.step()
+        await copyAll()
+
+        const pool = await services.network.graph(piscinero('pia'), { campuses: 'all' })
+
+        expect(pool.campuses).toEqual([MADRID])
+        expect(pool.nodes.map((node) => node.login).sort()).toEqual(['pia', 'pol'])
+        expect(pool.nodes.find((node) => node.login === 'pol')?.image).toBe('https://img/pol.png')
+        expect(pool.sync).toMatchObject({ phase: 'done', rows: 3 })
+
+        const student = await services.network.graph(actor('ana'), {})
+        const seen = student.nodes.map((node) => node.login)
+
+        expect(seen).not.toContain('pia')
+        expect(seen).not.toContain('pol')
+        expect(seen).toContain('eva')
+
+        // Permisos: ni el detalle de una pareja, ni el buscador, ni «con quién».
+        expect(await services.network.pair(actor('leo'), { a: 'pia', b: 'leo' })).toMatchObject({
+          forth: 0,
+          back: 0,
+          corrections: [],
+        })
+        expect(
+          (await services.network.pair(piscinero('pia'), { a: 'pia', b: 'pol' })).corrections,
+        ).toHaveLength(2)
+        expect(await services.network.pair(piscinero('pia'), { a: 'eva', b: 'pia' })).toMatchObject(
+          { corrections: [] },
+        )
+        expect(await services.network.people(actor('ana'), 'p')).toEqual([])
+        expect(await services.network.people(piscinero('pol'), 'p')).toEqual([
+          // Sus correcciones de la piscina, también la que le hizo un estudiante.
+          { login: 'pia', image: 'https://img/pia.png', corrections: 3 },
+          { login: 'pol', image: 'https://img/pol.png', corrections: 2 },
+        ])
+        expect(await services.network.people(piscinero('pol'), 'e')).toEqual([])
+        expect((await services.network.mine(actor('leo'))).partners).toEqual([])
+        expect((await services.network.mine(piscinero('pia'))).partners).toEqual([
+          { login: 'pol', gave: 1, got: 1 },
+        ])
+        const strict = await services.network.strictest(piscinero('pia'), { min: 1 })
+
+        expect(strict.people.map((person) => person.login).sort()).toEqual(['pia', 'pol'])
+      })
+
+      it('sin piscina copiada, un piscinero ve una red vacía', async () => {
+        await enrol('pia')
+        api.scaleTeams.set(MADRID, [scaleTeam('eva', 'ana')])
+        await copyAll()
+
+        const graph = await services.network.graph(piscinero('pia'), {})
+
+        expect(graph.nodes).toEqual([])
+        expect(graph.available.map((campus) => campus.id)).toEqual([MADRID])
+        expect(graph.sync).toMatchObject({ phase: 'pending', rows: 0 })
+      })
+
+      it('el repaso del 42cursus no borra la piscina, aunque sus ids se crucen', async () => {
+        api.scaleTeams.set(MADRID, [scaleTeam('eva', 'ana'), poolTeam('pia', 'pol')])
+        api.scaleTeams.get(MADRID)?.push(scaleTeam('ana', 'eva'))
+        await services.poolCorrections.step()
+        await copyAll()
+
+        // Al día siguiente, sin nadie en la web, el repaso recorre el 42cursus entero.
+        clock.advance(25 * 60 * MINUTE)
+        await services.corrections.step()
+        expect(api.calls.some((call) => call.includes('filter[cursus_id]=21&sort=id'))).toBe(true)
+        expect(await services.poolCorrections.status(MADRID)).toMatchObject({ rows: 1 })
+        expect(await services.corrections.status(MADRID)).toMatchObject({ rows: 2 })
+      })
+    })
   })
 })

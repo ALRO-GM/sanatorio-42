@@ -89,6 +89,8 @@ type ProjectUsersQuery = {
 /** Filtros de `getCampusScaleTeamsPage`. */
 type ScaleTeamsQuery = {
   campusId: number
+  /** De qué cursus: el 42cursus si no se dice; la C Piscine (`9`) para los piscineros. */
+  cursusId?: number | undefined
   /** Solo las de id mayor que este, ordenadas por id. */
   afterId?: number | undefined
   /** Límites de `updated_at`, en ISO-8601. Van los dos o ninguno. */
@@ -97,7 +99,7 @@ type ScaleTeamsQuery = {
   page?: number | undefined
 }
 
-/** El 42cursus. Las correcciones de la piscina no interesan. */
+/** El 42cursus: lo que se copia si no se pide otro. */
 const CORE_CURSUS_ID = 21
 /** La C Piscine. */
 const PISCINE_CURSUS_ID = 9
@@ -226,7 +228,10 @@ export class FortyTwoClient {
    *    mantenerlo al día (correcciones nuevas y las que por fin tienen nota).
    */
   async getCampusScaleTeamsPage(query: ScaleTeamsQuery): Promise<Page<ApiScaleTeam>> {
-    const params = [`filter[campus_id]=${query.campusId}`, `filter[cursus_id]=${CORE_CURSUS_ID}`]
+    const params = [
+      `filter[campus_id]=${query.campusId}`,
+      `filter[cursus_id]=${query.cursusId ?? CORE_CURSUS_ID}`,
+    ]
 
     if (query.afterId !== undefined) {
       params.push('sort=id', `range[id]=${query.afterId + 1},${MAX_ID}`)

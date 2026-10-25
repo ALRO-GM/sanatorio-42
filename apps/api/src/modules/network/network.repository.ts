@@ -1,5 +1,9 @@
 /**
  * Correcciones copiadas de 42. Solo SQL.
+ *
+ * Cada fila es de un cursus (`docs/piscineros.md`): el 42cursus (`21`) o la
+ * C Piscine (`9`). Las lecturas miran uno solo, el 42cursus si no se dice:
+ * lo de la piscina no se mezcla con lo de los estudiantes.
  */
 
 import type { Db } from '../../core/db/database.js'
@@ -10,6 +14,8 @@ import { listArg, notInList } from '../../core/db/sql.js'
 export type CorrectionRow = {
   id: number
   campusId: number
+  /** `21` (42cursus) o `9` (C Piscine). */
+  cursus: number
   corrector: string
   corrected: string
   projectId: number | null
@@ -39,6 +45,8 @@ const IN_SCOPE = 'campus_id IN (SELECT value FROM json_each(?))'
 /** Qué correcciones se miran. */
 type CorrectionFilter = {
   campusId: Campuses
+  /** Sin él, el 42cursus. */
+  cursus?: number
   from?: string | null
   to?: string | null
   projectId?: number | null
@@ -46,14 +54,17 @@ type CorrectionFilter = {
   passed?: boolean | null
 }
 
-/** Filas por sentencia al guardar: 8 columnas × 100 queda lejos del tope de SQLite. */
+/** Filas por sentencia al guardar: 9 columnas × 100 queda lejos del tope de SQLite. */
 const BATCH = 100
+
+/** El cursus que se mira si no se dice otro: el de los estudiantes. */
+const STUDENTS = 21
 
 export function createNetworkRepository(db: Db) {
   /** El `WHERE` de un filtro y sus argumentos. */
   const where = (filter: CorrectionFilter): { sql: string; args: (string | number)[] } => {
-    const clauses = [IN_SCOPE]
-    const args: (string | number)[] = [scope(filter.campusId)]
+    const clauses = [IN_SCOPE, 'cursus = ?']
+    const args: (string | number)[] = [scope(filter.campusId), filter.cursus ?? STUDENTS]
 
     if (filter.from !== null && filter.from !== undefined) {
       clauses.push('begin_at >= ?')
@@ -87,9 +98,11 @@ export function createNetworkRepository(db: Db) {
 
         await db.execute({
           sql: `INSERT INTO corrections
-                  (id, campus_id, corrector, corrected, project_id, begin_at, final_mark, positive)
-                VALUES ${batch.map(() => '(?, ?, ?, ?, ?, ?, ?, ?)').join(', ')}
+                  (id, campus_id, cursus, corrector, corrected, project_id, begin_at,
+                   final_mark, positive)
+                VALUES ${batch.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?)').join(', ')}
                 ON CONFLICT (id, corrected) DO UPDATE SET
+                  cursus = excluded.cursus,
                   corrector = excluded.corrector,
                   project_id = excluded.project_id,
                   begin_at = excluded.begin_at,
@@ -98,6 +111,7 @@ export function createNetworkRepository(db: Db) {
           args: batch.flatMap((row) => [
             row.id,
             row.campusId,
+            row.cursus,
             row.corrector,
             row.corrected,
             row.projectId,
@@ -155,37 +169,42 @@ export function createNetworkRepository(db: Db) {
 
     /**
      * Borra las correcciones de un tramo de ids que ya no están en 42 (citas
-     * anuladas, cuentas borradas).
+     * anuladas, cuentas borradas). Solo del cursus que se repasa: 42 manda
+     * cada cursus por separado y los ids se intercalan.
      *
      * @param keep Ids que 42 sí ha devuelto en ese tramo.
      * @returns Cuántas filas se han borrado.
      */
     async prune(
       campusId: number,
+      cursus: number,
       afterId: number,
       upToId: number,
       keep: readonly number[],
     ): Promise<number> {
       const result = await db.execute({
         sql: `DELETE FROM corrections
-              WHERE campus_id = ? AND id > ? AND id <= ?
+              WHERE campus_id = ? AND cursus = ? AND id > ? AND id <= ?
                 AND ${notInList('id')}`,
-        args: [campusId, afterId, upToId, listArg(keep)],
+        args: [campusId, cursus, afterId, upToId, listArg(keep)],
       })
 
       return result.rowsAffected
     },
 
     /** Cuántas hay copiadas y entre qué fechas. */
-    async extent(campusId: number): Promise<{
+    async extent(
+      campusId: number,
+      cursus = STUDENTS,
+    ): Promise<{
       rows: number
       first: string | null
       last: string | null
     }> {
       const result = await db.execute({
         sql: `SELECT COUNT(*) AS total, MIN(begin_at) AS first, MAX(begin_at) AS last
-              FROM corrections WHERE campus_id = ?`,
-        args: [campusId],
+              FROM corrections WHERE campus_id = ? AND cursus = ?`,
+        args: [campusId, cursus],
       })
       const row = result.rows[0]
 
@@ -266,7 +285,7 @@ export function createNetworkRepository(db: Db) {
     ): Promise<StoredCorrection[]> {
       const { sql, args } = where(filter)
       const result = await db.execute({
-        sql: `SELECT id, campus_id, corrector, corrected, project_id, begin_at, final_mark, positive,
+        sql: `SELECT id, campus_id, cursus, corrector, corrected, project_id, begin_at, final_mark, positive,
                      passed
               FROM corrections
               WHERE ${sql} AND ((corrector = ? AND corrected = ?) OR (corrector = ? AND corrected = ?))
@@ -277,6 +296,7 @@ export function createNetworkRepository(db: Db) {
       return result.rows.map((row) => ({
         id: toNumber(row.id),
         campusId: toNumber(row.campus_id),
+        cursus: toNumber(row.cursus),
         corrector: toText(row.corrector),
         corrected: toText(row.corrected),
         projectId: row.project_id === null ? null : toNumber(row.project_id),
@@ -308,12 +328,13 @@ export function createNetworkRepository(db: Db) {
 
     /**
      * Cuántas correcciones ha hecho alguien de cada proyecto, en cualquier
-     * campus. Una corrección a un grupo cuenta una vez.
+     * campus y solo del 42cursus. Una corrección a un grupo cuenta una vez.
      */
     async correctedByProject(login: string): Promise<Map<number, number>> {
       const result = await db.execute({
         sql: `SELECT project_id, COUNT(DISTINCT id) AS times FROM corrections
               WHERE corrector = ? AND corrected <> corrector AND project_id IS NOT NULL
+                AND cursus = ${STUDENTS}
               GROUP BY project_id`,
         args: [login],
       })
@@ -325,17 +346,19 @@ export function createNetworkRepository(db: Db) {
     async correctedSince(campusId: number, since: string): Promise<Set<number>> {
       const result = await db.execute({
         sql: `SELECT DISTINCT project_id FROM corrections
-              WHERE campus_id = ? AND begin_at >= ? AND project_id IS NOT NULL`,
+              WHERE campus_id = ? AND cursus = ${STUDENTS} AND begin_at >= ?
+                AND project_id IS NOT NULL`,
         args: [campusId, since],
       })
 
       return new Set(result.rows.map((row) => toNumber(row.project_id)))
     },
 
-    /** Los logins que más correcciones han hecho en un campus, el que más primero. */
+    /** Los logins que más correcciones han hecho en un campus (42cursus), el que más primero. */
     async topCorrectors(campusId: number, limit: number): Promise<string[]> {
       const result = await db.execute({
-        sql: `SELECT corrector FROM corrections WHERE campus_id = ? AND corrector <> corrected
+        sql: `SELECT corrector FROM corrections
+              WHERE campus_id = ? AND cursus = ${STUDENTS} AND corrector <> corrected
               GROUP BY corrector ORDER BY COUNT(*) DESC, corrector LIMIT ?`,
         args: [campusId, limit],
       })
@@ -347,16 +370,17 @@ export function createNetworkRepository(db: Db) {
     async partnersOf(
       campusId: number,
       login: string,
+      cursus = STUDENTS,
     ): Promise<{ login: string; gave: number; got: number }[]> {
       const result = await db.execute({
         sql: `SELECT other, SUM(gave) AS gave, SUM(got) AS got FROM (
                 SELECT corrected AS other, COUNT(*) AS gave, 0 AS got FROM corrections
-                WHERE campus_id = ? AND corrector = ? GROUP BY corrected
+                WHERE campus_id = ? AND cursus = ? AND corrector = ? GROUP BY corrected
                 UNION ALL
                 SELECT corrector AS other, 0 AS gave, COUNT(*) AS got FROM corrections
-                WHERE campus_id = ? AND corrected = ? GROUP BY corrector
+                WHERE campus_id = ? AND cursus = ? AND corrected = ? GROUP BY corrector
               ) WHERE other <> ? GROUP BY other ORDER BY gave + got DESC, other`,
-        args: [campusId, login, campusId, login, login],
+        args: [campusId, cursus, login, campusId, cursus, login, login],
       })
 
       return result.rows.map((row) => ({
@@ -366,26 +390,26 @@ export function createNetworkRepository(db: Db) {
       }))
     },
 
-    /** Los campus de los que hay correcciones copiadas. */
+    /** Los campus de los que hay correcciones copiadas del 42cursus. */
     async campuses(): Promise<number[]> {
       const result = await db.execute(
-        'SELECT DISTINCT campus_id FROM corrections ORDER BY campus_id',
+        `SELECT DISTINCT campus_id FROM corrections WHERE cursus = ${STUDENTS} ORDER BY campus_id`,
       )
 
       return result.rows.map((row) => toNumber(row.campus_id))
     },
 
     /** Año de la primera corrección de cada persona, hecha o recibida. */
-    async firstYears(campusId: Campuses): Promise<Map<string, number>> {
+    async firstYears(campusId: Campuses, cursus = STUDENTS): Promise<Map<string, number>> {
       const result = await db.execute({
         sql: `SELECT login, MIN(first) AS first FROM (
                 SELECT corrector AS login, MIN(begin_at) AS first
-                FROM corrections WHERE ${IN_SCOPE} GROUP BY corrector
+                FROM corrections WHERE ${IN_SCOPE} AND cursus = ? GROUP BY corrector
                 UNION ALL
                 SELECT corrected AS login, MIN(begin_at) AS first
-                FROM corrections WHERE ${IN_SCOPE} GROUP BY corrected
+                FROM corrections WHERE ${IN_SCOPE} AND cursus = ? GROUP BY corrected
               ) GROUP BY login`,
-        args: [scope(campusId), scope(campusId)],
+        args: [scope(campusId), cursus, scope(campusId), cursus],
       })
 
       return new Map(
@@ -396,12 +420,13 @@ export function createNetworkRepository(db: Db) {
     /** Proyectos con correcciones: cuántas tiene cada uno y qué parte aprobó. */
     async projects(
       campusId: Campuses,
+      cursus = STUDENTS,
     ): Promise<{ id: number; corrections: number; passRate: number | null }[]> {
       const result = await db.execute({
         sql: `SELECT project_id, COUNT(*) AS total, AVG(passed) AS pass_rate FROM corrections
-              WHERE ${IN_SCOPE} AND project_id IS NOT NULL
+              WHERE ${IN_SCOPE} AND cursus = ? AND project_id IS NOT NULL
               GROUP BY project_id ORDER BY total DESC`,
-        args: [scope(campusId)],
+        args: [scope(campusId), cursus],
       })
 
       return result.rows.map((row) => ({
@@ -416,18 +441,21 @@ export function createNetworkRepository(db: Db) {
       campusId: Campuses,
       prefix: string,
       limit: number,
+      cursus = STUDENTS,
     ): Promise<{ login: string; corrections: number }[]> {
       // `LIKE` trata `%` y `_` como comodines: se escapan para buscar lo escrito.
       const pattern = `${prefix.replace(/[\\%_]/g, '\\$&')}%`
       const result = await db.execute({
         sql: `SELECT login, SUM(total) AS total FROM (
                 SELECT corrector AS login, COUNT(*) AS total FROM corrections
-                WHERE ${IN_SCOPE} AND corrector LIKE ? ESCAPE '\\' GROUP BY corrector
+                WHERE ${IN_SCOPE} AND cursus = ? AND corrector LIKE ? ESCAPE '\\'
+                GROUP BY corrector
                 UNION ALL
                 SELECT corrected AS login, COUNT(*) AS total FROM corrections
-                WHERE ${IN_SCOPE} AND corrected LIKE ? ESCAPE '\\' GROUP BY corrected
+                WHERE ${IN_SCOPE} AND cursus = ? AND corrected LIKE ? ESCAPE '\\'
+                GROUP BY corrected
               ) GROUP BY login ORDER BY total DESC, login LIMIT ?`,
-        args: [scope(campusId), pattern, scope(campusId), pattern, limit],
+        args: [scope(campusId), cursus, pattern, scope(campusId), cursus, pattern, limit],
       })
 
       return result.rows.map((row) => ({
