@@ -82,6 +82,9 @@ describe('mapa de calor de los puestos', () => {
         id: 'c3',
         rows: 2,
         seatsPerRow: 2,
+        // El puesto de fuera del plano no suma ni horas ni gente al clúster.
+        hours: 3.5,
+        people: 2,
         cells: [
           { host: 'c3r1p1', row: 1, seat: 1, hours: 0, people: 0 },
           { host: 'c3r1p2', row: 1, seat: 2, hours: 3.5, people: 2 },
@@ -90,6 +93,34 @@ describe('mapa de calor de los puestos', () => {
         ],
       },
     ])
+  })
+
+  it('la gente de un clúster es distinta, no la suma de sus puestos, y las horas son suyas', () => {
+    const heat = seatHeatOf(
+      [
+        // Ana pasa por tres puestos de c1: una persona, no tres.
+        { login: 'ana', host: 'c1r1s1', begin: 0, end: HOUR },
+        { login: 'ana', host: 'c1r1s2', begin: HOUR, end: 2 * HOUR },
+        { login: 'ana', host: 'c1r2s1', begin: 2 * HOUR, end: 2.25 * HOUR },
+        { login: 'bea', host: 'c1r1s1', begin: 0, end: HOUR / 4 },
+        // Dos sesiones de un cuarto de hora: cada puesto redondea a 0,3 h, el clúster da 0,5.
+        { login: 'eva', host: 'c2r1s1', begin: 0, end: HOUR / 4 },
+        { login: 'eva', host: 'c2r1s2', begin: 0, end: HOUR / 4 },
+      ],
+      ['c3r1s1'],
+    )
+    const totals = heat.clusters.map(({ id, hours, people }) => ({ id, hours, people }))
+
+    expect(totals).toEqual([
+      { id: 'c1', hours: 2.5, people: 2 },
+      { id: 'c2', hours: 0.5, people: 1 },
+      { id: 'c3', hours: 0, people: 0 },
+    ])
+    // Por puesto, la suma de personas da 4 en c1; por clúster, 2.
+    const c1 = heat.clusters[0]?.cells ?? []
+
+    expect(c1.reduce((sum, cell) => sum + cell.people, 0)).toBe(4)
+    expect(heat.clusters[1]?.cells.map((cell) => cell.hours)).toEqual([0.3, 0.3])
   })
 
   it('sin puestos ni sesiones no hay clústeres', () => {

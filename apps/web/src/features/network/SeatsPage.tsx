@@ -19,7 +19,7 @@ import { Avatar } from '../../shared/ui/Avatar'
 import { PersonLink } from '../../shared/ui/PersonLink'
 import { colorOf, scaleColor } from './colors'
 import { ForceGraph } from './ForceGraph'
-import { SeatHeatMap } from '../map/SeatHeatMap'
+import { SeatHeatMap } from './SeatHeatMap'
 
 /** Días hacia atrás que se pueden mirar. */
 const DAYS = [7, 14, 30, 90] as const

@@ -142,8 +142,6 @@ export default defineConfig(
      *   shell son pestañas de Not-games.
      * - `map/ProjectMap|ClusterMapView|SeatPicker`: la consulta y las terapias
      *   enseñan el mapa del clúster y eligen puestos en él.
-     * - `map/SeatHeatMap`: la red de asientos enseña el uso de cada puesto sobre
-     *   el plano del mapa, girado como cada cual lo tiene puesto allí.
      * - `help/BookHelp|tags`: la consulta reserva ayuda y el expediente enseña
      *   cómo te describieron quienes te ayudaron.
      * - `network/Meter|VerdictStats`: el expediente resume tu red de correcciones.
@@ -160,7 +158,7 @@ export default defineConfig(
           patterns: [
             {
               regex:
-                '^\\.\\./(?!\\.\\./)(?!(notices/conversations|calendar/EventDialog|facility/(FacilityList|FacilityForm)|profile/HoursReport|clicker/(CapitalChart|CapitalHistory)|focus/FocusStatsView|gitcourse/GitCourseTab|shellcourse/ShellCourseTab|map/(ProjectMap|ClusterMapView|SeatPicker|SeatHeatMap)|help/(BookHelp|tags)|network/(Meter|VerdictStats)|countdowns/(CountdownDock|CountdownPicker)|agenda/GoalForm)$)[a-z-]+/',
+                '^\\.\\./(?!\\.\\./)(?!(notices/conversations|calendar/EventDialog|facility/(FacilityList|FacilityForm)|profile/HoursReport|clicker/(CapitalChart|CapitalHistory)|focus/FocusStatsView|gitcourse/GitCourseTab|shellcourse/ShellCourseTab|map/(ProjectMap|ClusterMapView|SeatPicker)|help/(BookHelp|tags)|network/(Meter|VerdictStats)|countdowns/(CountdownDock|CountdownPicker)|agenda/GoalForm)$)[a-z-]+/',
               message:
                 'Una funcionalidad no importa de otra: lo compartido va a `shared/`. Las excepciones, con su porqué, están en eslint.config.js.',
             },

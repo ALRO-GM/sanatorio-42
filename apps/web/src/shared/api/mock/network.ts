@@ -435,7 +435,18 @@ export function mockSeatHeat(days: number): SeatHeat {
       }
     }
 
-    return { id, rows, seatsPerRow, cells }
+    const hours = cells.reduce((sum, cell) => sum + cell.hours, 0)
+    // La gente del clúster no es la suma de sus puestos: casi todo el mundo repite.
+    const seated = cells.reduce((sum, cell) => sum + cell.people, 0)
+
+    return {
+      id,
+      rows,
+      seatsPerRow,
+      hours: Math.round(hours * 10) / 10,
+      people: Math.round(seated / 3),
+      cells,
+    }
   })
 
   return { days, clusters, max }

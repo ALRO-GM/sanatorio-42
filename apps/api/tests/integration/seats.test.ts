@@ -198,6 +198,16 @@ describe('red de asientos (docs/asientos.md)', () => {
     expect(cell('c2r2s5')?.hours).toBeLessThanOrEqual(2.3)
     expect(cell('c3r1s1')).toMatchObject({ hours: 12, people: 1 })
     expect(heat.max).toBe(12)
+    // Por clúster: c2, las horas de sus puestos y tres personas distintas
+    // (albrodri, ayer y atascado); c3, la sesión larga.
+    const c2 = heat.clusters[0]
+
+    expect(c2?.people).toBe(3)
+    expect(c2?.hours).toBeCloseTo(
+      (c2?.cells ?? []).reduce((sum, one) => sum + one.hours, 0),
+      0,
+    )
+    expect(heat.clusters[1]).toMatchObject({ id: 'c3', hours: 12, people: 1 })
 
     // Las mismas horas que el grafo, persona a persona.
     const hoursOf = (login: string) => graph.people.find((one) => one.login === login)?.hours
@@ -240,7 +250,9 @@ describe('red de asientos (docs/asientos.md)', () => {
     ) as SeatHeat
 
     expect(heat).toMatchObject({ days: 30, max: 0 })
-    expect(heat.clusters).toEqual([expect.objectContaining({ id: 'c1', rows: 2, seatsPerRow: 3 })])
+    expect(heat.clusters).toEqual([
+      expect.objectContaining({ id: 'c1', rows: 2, seatsPerRow: 3, hours: 0, people: 0 }),
+    ])
     expect(heat.clusters[0]?.cells.every((one) => one.hours === 0 && one.people === 0)).toBe(true)
   })
 })
