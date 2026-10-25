@@ -93,6 +93,25 @@ const settingsSchema = z.object({
     .optional(),
 })
 
+/**
+ * El título que luce alguien (y con él, su banner): el que eligió, si todavía
+ * le corresponde; si no eligió (o ya no le vale), el más alto de su nivel.
+ */
+function activeTitle(
+  chosen: string | null,
+  level: number,
+  hacker: TitleId | null,
+  master: number,
+): TitleId {
+  if (chosen !== null && chosen === hacker) return hacker
+  if (chosen === 'maestro' && master > 0) return 'maestro'
+
+  const picked = TITLES.find((title) => title.id === chosen && level >= title.level)
+  const best = [...TITLES].reverse().find((title) => level >= title.level) ?? TITLES[0]
+
+  return (picked ?? best).id
+}
+
 export function createXpService(options: XpServiceOptions) {
   const { xp, profiles, replica, curriculum } = options
   const now = options.now ?? Date.now
@@ -110,6 +129,21 @@ export function createXpService(options: XpServiceOptions) {
     /** Otorga XP una sola vez por referencia. */
     async award(login: string, kind: XpKind, ref: string): Promise<boolean> {
       return xp.award(login, kind, XP_AMOUNT[kind], ref)
+    },
+
+    /**
+     * El título que luce alguien, para pintar su banner donde sale su ficha.
+     * Cuesta lo mismo que la cabecera de su expediente, sin logros ni desglose.
+     */
+    async titleOf(login: string): Promise<TitleId> {
+      const [total, profile, hacker, master] = await Promise.all([
+        xp.total(login),
+        profiles.get(login),
+        hackerOf(login),
+        masterOf(login),
+      ])
+
+      return activeTitle(profile?.title ?? null, levelFor(total).level, hacker.title, master)
     },
 
     /** Anota la primera vez que alguien se pone de guardia. */
@@ -209,17 +243,7 @@ export function createXpService(options: XpServiceOptions) {
         campus_guardian: count(XP_KIND.SPECIALIST_HELP) + count(XP_KIND.PEER_HELP),
       }
 
-      // Si no ha elegido título (o el elegido ya no le corresponde), luce el
-      // más alto que tenga.
-      const best = [...TITLES].reverse().find((title) => level.level >= title.level) ?? TITLES[0]
-      const chosen = profile?.title ?? null
-      const title =
-        chosen !== null &&
-        (titleUnlocked(chosen, level.level) ||
-          chosen === hacker.title ||
-          (chosen === 'maestro' && master > 0))
-          ? chosen
-          : best.id
+      const title = activeTitle(profile?.title ?? null, level.level, hacker.title, master)
 
       return {
         login: actor.login,

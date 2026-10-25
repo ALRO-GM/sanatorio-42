@@ -19,6 +19,7 @@ import type {
   Peer,
   PersonCard,
   SeatDuty,
+  TitleId,
 } from '@sanatorio/contracts'
 import { z } from 'zod'
 
@@ -53,6 +54,8 @@ export type MapServiceOptions = {
   availableOf?: (login: string) => Promise<boolean>
   /** Quién de esos está en modo Pomodoro, y hasta cuándo. */
   focusOf?: (logins: readonly string[]) => Promise<Map<string, string>>
+  /** El título que luce alguien: su ficha lleva el banner de ese título. */
+  titleOf?: (login: string) => Promise<TitleId>
   now?: () => number
 }
 
@@ -133,15 +136,18 @@ export function createMapService(options: MapServiceOptions) {
       }
 
       const since = new Date(now() - LOCATION_MAX_AGE_MS).toISOString()
-      const [present, images, active, circles, online, available, focusing] = await Promise.all([
-        replica.presenceIn(actor.campusId, since),
-        replica.imagesOf([who]),
-        replica.activeProjectsOf([who]),
-        options.circlesOf?.([who]) ?? new Map<string, number>(),
-        options.online?.() ?? new Set<string>(),
-        options.availableOf?.(who) ?? false,
-        options.focusOf?.([who]) ?? new Map<string, string>(),
-      ])
+      const [present, images, active, circles, online, available, focusing, title] =
+        await Promise.all([
+          replica.presenceIn(actor.campusId, since),
+          replica.imagesOf([who]),
+          replica.activeProjectsOf([who]),
+          options.circlesOf?.([who]) ?? new Map<string, number>(),
+          options.online?.() ?? new Set<string>(),
+          options.availableOf?.(who) ?? false,
+          options.focusOf?.([who]) ?? new Map<string, string>(),
+          // Sin título, la ficha sale sin banner: no se cae por esto.
+          options.titleOf?.(who).catch(() => null) ?? null,
+        ])
       const seat = present.find((person) => person.login === who)?.host ?? null
 
       return {
@@ -154,6 +160,7 @@ export function createMapService(options: MapServiceOptions) {
         online: online.has(who),
         me: who === actor.login,
         focusUntil: focusing.get(who) ?? null,
+        title,
       }
     },
 

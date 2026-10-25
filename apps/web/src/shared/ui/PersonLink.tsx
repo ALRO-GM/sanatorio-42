@@ -8,6 +8,7 @@ import { useI18n } from '../i18n'
 import { recordHref } from '../links'
 import { Avatar } from './Avatar'
 import { FocusBadge } from './FocusBadge'
+import { TitleBanner } from './TitleBanner'
 import { usePoolAllows } from '../pool'
 
 /** Lo que se tarda en sacar la ficha al pasar el ratón: así no salta al cruzar la lista. */
@@ -104,6 +105,7 @@ export function PersonLink({ login, className = 'record-link', children }: Perso
           style={{ left, top: above ? rect.top - 10 : rect.bottom + 10 }}
           role="tooltip"
         >
+          {card.title !== null && <TitleBanner title={card.title} />}
           <Avatar login={card.login} image={card.image} size={96} />
           <strong>{card.login}</strong>
           <span className="seat-host">

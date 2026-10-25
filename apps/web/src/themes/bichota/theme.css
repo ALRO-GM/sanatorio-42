@@ -60,6 +60,8 @@
   --banner-image:
     url('./assets/leopard.svg') 0 0 / 200px 200px,
     linear-gradient(115deg, #ff3fa4, #e6007e, #ff6fbf);
+  /* Los banners de los títulos, encima del leopardo: es su seña (banners.css). */
+  --title-banner-base: var(--banner-image);
 
   --stage-bg:
     radial-gradient(70% 60% at 15% 0%, rgba(255, 79, 179, 0.35), transparent 70%),

@@ -51,7 +51,8 @@ de datos.
 | Expediente | Nivel, títulos y XP | S | Lo primero que se ve al entrar |
 | Expediente | Estado de salud (pace y black hole) | S | Afecta a la vida académica |
 | Expediente | Horas validadas (descarga para el staff) | N | Se usa de tarde en tarde |
-| Expediente | Desglose de la XP | N (cerrado) · D (abierto) | Detalle |
+| Expediente | Cómo se gana XP (y cuánta llevas): se abre al pulsar el número del nivel | S (cerrado) | Detalle, a un clic de donde se mira |
+| Expediente | Título y banner: desplegable con el activo a la vista; cada título trae su banner, que se ve también en tu perfil público y en tu ficha | S (cerrado) | Lo tuyo, sin ocupar sitio fijo |
 | Expediente | Tu red de correcciones, logros y reacciones, clasificación | N | Es reconocimiento, no utilidad |
 | Guardia | Preevaluaciones, franjas de hoy, reservas | S | Es la guardia |
 | Guardia | Personas bloqueadas | N | Uso raro |

@@ -3,13 +3,13 @@
  */
 
 import { mockHacker } from './clicker'
-import type { PaceRef } from '@sanatorio/contracts'
+import type { PaceRef, TitleId } from '@sanatorio/contracts'
 
 import { LEVEL_FLOORS, ME, RANKING, TITLES } from './data'
 import { poolPreviewing } from './pool'
 import { portrait } from './portrait'
 import type { Api } from '../types'
-import { AVAILABLE_KEY, state, delay, levelFor, achievement } from './state'
+import { AVAILABLE_KEY, state, delay, fail, levelFor, achievement } from './state'
 
 /** Lo que se anota en la tarjeta de salud: dura lo que dure la pestaña. */
 // Con `?pace=riesgo`, un pace 24 a diez días del plazo: sale el tope de Code Clicker.
@@ -22,6 +22,30 @@ let declared: PaceRef | null =
         updatedAt: new Date().toISOString(),
       }
     : null
+
+/**
+ * El título de alguien de mentira, siempre el mismo: sale de su login. Unos
+ * cuantos lucen uno de los especiales, para que en la demo se vean sus banners.
+ */
+function mockTitleOf(login: string): TitleId {
+  const special: Record<string, TitleId> = {
+    mgarcia: 'maestro',
+    jdoe: 'hacker_etico',
+    lruiz: 'hacker_cazado',
+  }
+  const seed = Array.from(login).reduce((sum, char) => sum + char.charCodeAt(0), 0)
+  const level = LEVEL_FLOORS.filter((floor) => 40 + (seed % 9) * 85 >= floor).length
+
+  return (
+    special[login] ?? [...TITLES].reverse().find((entry) => level >= entry.level)?.id ?? 'paciente'
+  )
+}
+
+/**
+ * Las trampas pilladas cuando se eligió título a mano. Como en la API, una
+ * trampa nueva pone sola su título; hasta entonces, manda lo elegido.
+ */
+const picked: { caught: number | null } = { caught: null }
 
 /** Con qué estilo ven los demás el expediente de la persona de mentira. */
 const recordStyle: { current: string | null } = { current: null }
@@ -56,6 +80,7 @@ export const profileMock: Pick<
       online: n % 2 === 1,
       me: login === ME.login,
       focusUntil: login === 'lsoto' ? new Date(Date.now() + 20 * 60_000).toISOString() : null,
+      title: login === ME.login ? (await this.getProfile()).title : mockTitleOf(login),
     }
   },
 
@@ -80,7 +105,7 @@ export const profileMock: Pick<
         floor: LEVEL_FLOORS[level - 1] ?? 0,
         next: LEVEL_FLOORS[level] ?? null,
       },
-      title: [...TITLES].reverse().find((entry) => level >= entry.level)?.id ?? 'paciente',
+      title: mockTitleOf(login),
       achievements: [
         achievement('first_duty', 1, 1),
         achievement('group_therapy', seed % 10, 10),
@@ -110,7 +135,7 @@ export const profileMock: Pick<
       recordStyle: recordStyle.current,
       xp,
       // Como en la API: al pillar una trampa, el título se pone solo.
-      title: hacker.title ?? state.title,
+      title: hacker.title !== null && picked.caught !== hacker.caught ? hacker.title : state.title,
       hacks: hacker.caught,
       // Maestro del código en un proyecto (Libft), como en el grafo de mentira.
       master: 1,
@@ -166,9 +191,15 @@ export const profileMock: Pick<
           : settings.recordStyle
     }
 
-    const title = TITLES.find((candidate) => candidate.id === settings.title)
+    if (settings.title === undefined) return
 
-    if (title !== undefined) state.title = title.id
+    // Como en la API: solo uno que ya tengas (el maestro, en la demo, siempre).
+    const { titles } = await this.getProfile()
+    const title = titles.find((entry) => entry.id === settings.title && entry.unlocked)
+
+    if (title === undefined) throw fail(403, 'Ese título todavía no lo has desbloqueado')
+    state.title = title.id
+    picked.caught = mockHacker().caught
   },
 
   async getHealth() {

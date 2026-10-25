@@ -158,17 +158,8 @@
   font-weight: 700;
 }
 
-/* --- Expediente: desglose de XP, plegado tras la flecha de la barra */
-.xp-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.6rem;
-}
-.xp-row .xp-bar {
-  min-width: 10rem;
-  flex: 1;
-}
+/* --- Expediente: el botón que pliega (estado de salud) y el desglose de XP,
+   que sale al pulsar el nivel. */
 .xp-toggle {
   display: inline-flex;
   align-items: center;
