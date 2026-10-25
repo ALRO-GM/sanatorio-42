@@ -29,8 +29,8 @@ export const PYTHON: readonly Concept[] = [
         ],
         right: ['None, y crear la lista dentro si items es None'],
         wrong: [
-          'list, sin paréntesis',
-          '[], escrito dos veces',
+          'list (la clase, sin llamarla)',
+          'list() en vez de []',
           'Una variable global con la lista',
         ],
       },
@@ -183,7 +183,7 @@ export const PYTHON: readonly Concept[] = [
         ask: ['¿Qué hace `yield` en una función?', '¿Qué cambia en una función que usa yield?'],
         right: [
           'La convierte en generador: da valores de uno en uno, cuando se piden',
-          'Que devuelve un generador que calcula sobre la marcha',
+          'Hace que devuelva un generador que calcula sobre la marcha',
         ],
       },
     ],
@@ -398,7 +398,7 @@ export const PYTHON: readonly Concept[] = [
       {
         ask: [
           '¿Qué genera un modelo de lenguaje en cada paso?',
-          '¿De cuánto en cuánto escribe un LLM?',
+          '¿En qué unidades va escribiendo un LLM?',
         ],
         right: ['El siguiente token, elegido según probabilidades', 'Un token cada vez'],
         wrong: [

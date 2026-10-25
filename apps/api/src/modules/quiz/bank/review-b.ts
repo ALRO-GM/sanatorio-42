@@ -7,10 +7,11 @@ import type { ReviewEntry } from './types.js'
 
 export const REVIEW_B: Record<string, ReviewEntry> = {
   'algo-sort-complexity': {
-    title: 'Límite de ordenar comparando',
+    title: 'El límite de ordenar comparando',
     definition:
-      'Cualquier ordenación que solo compare elementos necesita, en el peor caso, del orden de n·log n comparaciones. Por debajo solo se baja sin comparar (radix, counting sort).',
-    example: '100 números: unas 700 comparaciones como mínimo; la burbuja hace hasta 4950.',
+      'Cualquier ordenación que solo compare elementos necesita, en el peor caso, del orden de n·log n comparaciones. Solo se puede bajar de ahí sin comparar (radix, counting sort).',
+    example:
+      '100 números: unas 525 comparaciones como mínimo (log₂ 100!); la burbuja hace hasta 4950.',
   },
   'algo-stack': {
     title: 'Pilas y colas en push_swap',
@@ -67,7 +68,7 @@ export const REVIEW_B: Record<string, ReviewEntry> = {
     definition:
       'Un laberinto es perfecto si entre dos casillas cualesquiera hay exactamente un camino: no tiene ciclos ni zonas aisladas. Como grafo, es un árbol.',
     example:
-      'En una cuadrícula de 10 × 10 perfecta hay 100 casillas y exactamente 99 pasos abiertos.',
+      'En una cuadrícula de 10 × 10 perfecta hay 100 casillas y exactamente 99 paredes tiradas entre ellas.',
   },
   'algo-maze-gen': {
     title: 'Generar laberintos con DFS',
@@ -96,7 +97,7 @@ export const REVIEW_B: Record<string, ReviewEntry> = {
   'thr-mutex': {
     title: 'Mutex',
     definition:
-      'Un mutex es un candado: solo un hilo a la vez puede tenerlo; los demás esperan en lock. Protege una sección que no debe ejecutarse a la vez. Bloquear dos veces el mismo (no recursivo) te bloquea a ti.',
+      'Un mutex es un candado: solo un hilo a la vez puede tenerlo; los demás esperan en lock. Protege una sección que no debe ejecutarse a la vez. Si un hilo bloquea dos veces el mismo mutex (no recursivo), se queda bloqueado él solo.',
     example: 'pthread_mutex_init(&m, NULL); … lock … unlock … pthread_mutex_destroy(&m);',
   },
   'thr-join-detach': {
@@ -108,7 +109,7 @@ export const REVIEW_B: Record<string, ReviewEntry> = {
   'thr-usleep': {
     title: 'Medir el tiempo con hilos',
     definition:
-      'usleep puede dormir más de lo pedido, y un vigilante que duerme mucho anuncia tarde. Se duerme en trozos cortos comprobando el reloj (gettimeofday) y se vigila cada pocos milisegundos.',
+      'usleep puede dormir más de lo pedido, y un vigilante que duerme mucho anuncia tarde una muerte. Se duerme en trozos cortos comprobando el reloj (gettimeofday) y se vigila cada pocos milisegundos.',
     example: 'while (now() - start < ms) usleep(500);',
   },
   'thr-print': {
@@ -126,7 +127,7 @@ export const REVIEW_B: Record<string, ReviewEntry> = {
   'gfx-color': {
     title: 'Colores ARGB',
     definition:
-      'Un color en un entero de 32 bits: un byte para la transparencia y uno para rojo, verde y azul (0xAARRGGBB). Se montan desplazando bits.',
+      'Un color en un entero de 32 bits: un byte para la transparencia y uno para cada color: rojo, verde y azul (0xAARRGGBB). Se montan desplazando bits.',
     example: 'int color = (r << 16) | (g << 8) | b; 0x00FF00 es verde.',
   },
   'gfx-events': {
@@ -190,7 +191,7 @@ export const REVIEW_B: Record<string, ReviewEntry> = {
     title: 'Mapas cerrados',
     definition:
       'El borde del mapa tiene que ser pared: si no, el jugador o un rayo se salen del mapa y se lee memoria que no es suya. Se comprueba antes de jugar, también los huecos de los mapas irregulares.',
-    example: 'Cada casilla transitable no puede tocar ni el borde ni un espacio vacío.',
+    example: 'Ninguna casilla transitable puede tocar el borde ni un espacio vacío.',
   },
   'gfx-dot-product': {
     title: 'Producto escalar',
@@ -238,7 +239,8 @@ export const REVIEW_B: Record<string, ReviewEntry> = {
     title: 'Direcciones privadas',
     definition:
       'Hay rangos reservados para redes locales, que no se enrutan en Internet: 10.0.0.0/8, 172.16.0.0/12 y 192.168.0.0/16. 127.0.0.1 es la propia máquina.',
-    example: 'Tu portátil en casa: 192.168.1.34. Un servidor público: no puede ser privada.',
+    example:
+      'Tu portátil en casa: 192.168.1.34. Un servidor público, en Internet: su dirección no puede ser privada.',
   },
   'net-gateway': {
     title: 'Puerta de enlace y rutas',
@@ -549,7 +551,7 @@ export const REVIEW_B: Record<string, ReviewEntry> = {
   'py-main-guard': {
     title: 'if __name__ == "__main__"',
     definition:
-      'Al ejecutar un fichero, __name__ vale "__main__"; al importarlo, el nombre del módulo. El if deja código que solo corre al ejecutar el fichero, no al importarlo.',
+      'Al ejecutar un fichero, __name__ vale "__main__"; al importarlo, el nombre del módulo. El if guarda el código que solo debe correr al ejecutar el fichero, no al importarlo.',
     example: 'if __name__ == "__main__":\\n    main()',
   },
   'py-json': {

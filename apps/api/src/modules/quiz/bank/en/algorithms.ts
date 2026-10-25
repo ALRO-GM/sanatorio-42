@@ -8,7 +8,7 @@ export const ALGORITHMS_EN: Readonly<Record<string, ConceptText>> = {
       {
         ask: [
           'In the worst case, at least how many comparisons does any comparison sort make?',
-          'In the worst case, below what cost can sorting by comparing not go?',
+          'What is the lowest worst-case cost a comparison sort can reach?',
         ],
         right: ['O(n log n)'],
         wrong: ['O(n)', 'O(1)', 'O(log n)', 'O(n²)'],
@@ -60,7 +60,7 @@ export const ALGORITHMS_EN: Readonly<Record<string, ConceptText>> = {
     forms: [
       {
         ask: [
-          'Stack a is 1 2 3 4 5 (1 on top). What does it look like after `ra`?',
+          'Stack a is 1 2 3 4 5, with the 1 on top. What does it look like after `ra`?',
           'With a = 1 2 3 4 5 (top on the left), what does rotating up once give?',
         ],
         right: ['2 3 4 5 1'],
@@ -68,7 +68,7 @@ export const ALGORITHMS_EN: Readonly<Record<string, ConceptText>> = {
       },
       {
         ask: [
-          'Stack a is 1 2 3 4 5 (1 on top). What does it look like after `rra`?',
+          'Stack a is 1 2 3 4 5, with the 1 on top. What does it look like after `rra`?',
           'With a = 1 2 3 4 5 (top on the left), what does rotating down once give?',
         ],
         right: ['5 1 2 3 4'],
@@ -116,14 +116,11 @@ export const ALGORITHMS_EN: Readonly<Record<string, ConceptText>> = {
           'When does quicksort hit its worst case, O(n²)?',
           'What makes quicksort become quadratic?',
         ],
-        right: [
-          'The pivot always being the minimum or the maximum',
-          'The partitions coming out very unbalanced',
-        ],
+        right: ['A pivot that is always the minimum or the maximum', 'Very unbalanced partitions'],
         wrong: [
-          'There being repeated numbers',
-          'The list being very short',
-          'There being negative numbers',
+          'Repeated numbers',
+          'A very short list',
+          'Negative numbers',
           'Nothing: it is always n log n',
         ],
       },
@@ -136,11 +133,7 @@ export const ALGORITHMS_EN: Readonly<Record<string, ConceptText>> = {
         wrong: ['Quicksort', 'Bubble sort', 'Insertion sort', 'Radix sort'],
       },
     ],
-    wrong: [
-      'There being repeated numbers',
-      'The list being very short',
-      'There being negative numbers',
-    ],
+    wrong: ['Repeated numbers', 'A very short list', 'Negative numbers'],
     why: 'Quicksort depends on the pivot; merge sort always splits in half and always costs n log n.',
   },
   'algo-binary-search': {
@@ -178,7 +171,7 @@ export const ALGORITHMS_EN: Readonly<Record<string, ConceptText>> = {
       {
         ask: [
           'What structure does a depth-first search (DFS) use without recursion?',
-          'A hand-written DFS keeps the pending nodes where?',
+          'Where does a hand-written DFS keep the nodes still to visit?',
         ],
         right: ['In a stack'],
         wrong: ['In a queue', 'In a heap', 'In a hash table'],
@@ -202,7 +195,7 @@ export const ALGORITHMS_EN: Readonly<Record<string, ConceptText>> = {
         ],
       },
       {
-        ask: ['What does Dijkstra not allow?', 'With what can Dijkstra fail?'],
+        ask: ['When does Dijkstra not work?', 'With what kind of graph can Dijkstra fail?'],
         right: ['With negative-weight edges'],
         wrong: ['With cycles', 'With more than 100 nodes', 'With decimal weights'],
       },
@@ -431,7 +424,7 @@ export const ALGORITHMS_EN: Readonly<Record<string, ConceptText>> = {
         ],
         right: [
           'They get mixed or come out after a death is announced',
-          'They cut into each other or come out after the "died"',
+          'They interrupt each other or come out after the "died"',
         ],
       },
     ],

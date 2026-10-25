@@ -28,10 +28,11 @@ vocabulario: `AGENTS.md` («Reglas de producto»).
 ## Banco de preguntas (Not-games) y curso de git
 
 - Español en `apps/api/src/modules/quiz/bank/*.ts`; inglés en `bank/en/*.ts`
-  con **la misma forma** (mismas formas, preguntas, buenas y malas, en el mismo
+  y francés en `bank/fr/*.ts`, con **la misma forma** (mismas formas, preguntas, buenas y malas, en el mismo
   orden): se traduce por posición al enseñar (`bank/localize.ts`). El test
-  `tests/unit/quiz-bank-en.test.ts` lo comprueba. Repaso: `bank/review-*.ts`
-  y `bank/en/review-*.ts`, mismas claves.
+  `tests/unit/quiz-bank-lang.test.ts` lo comprueba. Repaso: `bank/review-*.ts`
+  y `bank/{en,fr}/review-*.ts`, mismas claves. Lo que falta en francés sale
+  en inglés.
 - Curso de git: `packages/gitsim/src/levels/*.ts` y `levels/en/*.ts`
   (`LevelText` por id; misiones por plantilla en `en/groups.ts`). Test:
   `apps/api/tests/unit/gitcourse-en.test.ts`. Comandos, ficheros y ramas no

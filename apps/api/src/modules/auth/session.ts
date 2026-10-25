@@ -11,7 +11,7 @@ import type { FastifyRequest } from 'fastify'
 import type { AuthService } from './auth.service.js'
 import type { ProfilesRepository } from '../profile/index.js'
 import { DomainError } from '../../core/errors.js'
-import type { Actor } from '../../core/actor.js'
+import type { Actor, Lang } from '../../core/actor.js'
 import type { SessionReader, SessionUser } from '../../core/session.js'
 import { readCookie, SESSION_COOKIE_NAME } from '../../core/http/cookies.js'
 
@@ -112,14 +112,19 @@ export function createSessionReader(options: SessionReaderOptions): SessionReade
         admin:
           session.preview !== true &&
           (access?.admin ?? options.adminLogins.includes(session.login.toLowerCase())),
-        // Lo escrito en el servidor (preguntas de Not-games) solo está en
-        // español e inglés. El francés ve el inglés: en la sede de 42 en
-        // Francia se lee mejor que el castellano. El catalán y el euskera,
-        // el castellano.
-        lang:
-          request.headers['x-lang'] === 'en' || request.headers['x-lang'] === 'fr' ? 'en' : 'es',
+        // Lo escrito en el servidor (preguntas de Not-games) está en español,
+        // inglés y francés; lo que falte en francés sale en inglés
+        // (`bank/localize.ts`). El catalán y el euskera ven el español.
+        lang: langOf(request.headers['x-lang']),
         ...(session.role === 'pool' ? { pool: true } : {}),
       }
     },
   }
+}
+
+/** El idioma de la cabecera `x-lang` (`fr`, `fr-FR`…); cualquier otro, español. */
+function langOf(header: string | string[] | undefined): Lang {
+  const code = (Array.isArray(header) ? header[0] : header)?.slice(0, 2).toLowerCase()
+
+  return code === 'en' || code === 'fr' ? code : 'es'
 }

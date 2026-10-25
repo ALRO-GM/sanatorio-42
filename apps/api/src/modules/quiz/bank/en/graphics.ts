@@ -55,8 +55,8 @@ export const GRAPHICS_EN: Readonly<Record<string, ConceptText>> = {
       },
       {
         ask: [
-          'Why do you have to handle the close-window event (the cross)?',
-          'What happens if the window cross is not handled?',
+          'Why do you have to handle the close-window event (the X button)?',
+          "What happens if the window's close button is not handled?",
         ],
         right: [
           'The program does not end when you click it',
@@ -156,7 +156,7 @@ export const GRAPHICS_EN: Readonly<Record<string, ConceptText>> = {
       },
       {
         ask: [
-          'When is a point taken to escape (not to be in the set)?',
+          'When do you consider that a point escapes (is not in the set)?',
           'When do you stop iterating a point?',
         ],
         right: ['When |z| goes over 2'],
@@ -175,7 +175,7 @@ export const GRAPHICS_EN: Readonly<Record<string, ConceptText>> = {
         ],
         right: [
           'c is fixed and the screen point is the starting z',
-          'What is fixed: c does not change and z starts at the pixel',
+          'c stays the same and z starts at the pixel',
         ],
         wrong: [
           'It uses z³ instead of z²',

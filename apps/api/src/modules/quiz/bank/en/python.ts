@@ -16,7 +16,11 @@ export const PYTHON_EN: Readonly<Record<string, ConceptText>> = {
           'Which default value should items use?',
         ],
         right: ['None, and create the list inside if items is None'],
-        wrong: ['list, without brackets', '[], written twice', 'A global variable with the list'],
+        wrong: [
+          'list (the class itself, without calling it)',
+          'list() instead of []',
+          'A global variable with the list',
+        ],
       },
     ],
     wrong: ['[2]', '[1]', '[]'],
@@ -215,7 +219,7 @@ export const PYTHON_EN: Readonly<Record<string, ConceptText>> = {
       'It raises TypeError',
       'It converts x to int',
       'It does not compile',
-      'It always warns with a warning',
+      'It always prints a warning',
     ],
     why: 'Annotations are information; what checks them is mypy (or similar), not the interpreter.',
   },
@@ -314,7 +318,7 @@ export const PYTHON_EN: Readonly<Record<string, ConceptText>> = {
       {
         ask: [
           'What does a language model generate at each step?',
-          'In what steps does an LLM write?',
+          'In what units does an LLM write its answer?',
         ],
         right: ['The next token, chosen according to probabilities', 'One token at a time'],
         wrong: [

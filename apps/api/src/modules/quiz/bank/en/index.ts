@@ -1,6 +1,6 @@
 /**
  * El banco de Not-games en inglés, por concepto. Cada fichero traduce el suyo
- * del español con la misma forma (lo comprueba `tests/unit/quiz-bank-en.test.ts`).
+ * del español con la misma forma (lo comprueba `tests/unit/quiz-bank-lang.test.ts`).
  */
 
 import type { ConceptText } from '../types.js'

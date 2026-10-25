@@ -8,6 +8,8 @@ import type { QuizRoom } from '@sanatorio/contracts'
 
 import { BANK_EN } from '../../src/modules/quiz/bank/en/index.js'
 import { REVIEW_EN } from '../../src/modules/quiz/bank/en/review.js'
+import { BANK_FR } from '../../src/modules/quiz/bank/fr/index.js'
+import { REVIEW_FR } from '../../src/modules/quiz/bank/fr/review.js'
 import type { Concept } from '../../src/modules/quiz/bank/types.js'
 import {
   fits,
@@ -467,6 +469,11 @@ describe('partidas de Not-games', () => {
     const shown = (await quiz.view(english, id)).question
 
     expect(BANK_EN[missed]?.forms.flatMap((form) => form.ask)).toContain(shown?.prompt)
+    // Y con la web en francés, en francés.
+    const french = { ...actor('ana'), lang: 'fr' as const }
+    const shownFr = (await quiz.view(french, id)).question
+
+    expect(BANK_FR[missed]?.forms.flatMap((form) => form.ask)).toContain(shownFr?.prompt)
 
     await quiz.answer(actor('ana'), id, { question: 0, option: await wrongOf(room) })
 
@@ -483,6 +490,10 @@ describe('partidas de Not-games', () => {
     expect((await quiz.review(english))[0]).toMatchObject({
       title: REVIEW_EN[missed]?.title,
       why: BANK_EN[missed]?.why,
+    })
+    expect((await quiz.review(french))[0]).toMatchObject({
+      title: REVIEW_FR[missed]?.title,
+      why: BANK_FR[missed]?.why,
     })
 
     // Acertarlo después lo marca como superado (sigue a la vista, abajo).

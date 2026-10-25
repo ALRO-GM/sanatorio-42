@@ -70,7 +70,7 @@ export const REVIEW_A: Record<string, ReviewEntry> = {
   'gen-list-vs-array': {
     title: 'Array frente a lista enlazada',
     definition:
-      'Un array está seguido en memoria: el elemento i se calcula al momento (O(1)). Una lista enlazada son nodos sueltos que apuntan al siguiente: llegar al i cuesta i pasos, pero insertar al principio es inmediato.',
+      'Un array ocupa memoria contigua: la dirección del elemento i se calcula al momento (O(1)). Una lista enlazada son nodos sueltos que apuntan al siguiente: llegar al i cuesta i pasos, pero insertar al principio es inmediato.',
     example: 'a[500] es directo; en una lista hay que hacer 500 veces node = node->next.',
   },
   'gen-recursion-base': {
@@ -137,7 +137,7 @@ export const REVIEW_A: Record<string, ReviewEntry> = {
     title: 'Tablas hash y colisiones',
     definition:
       'Una tabla hash calcula, a partir de la clave, en qué casilla guardar el valor: buscar es casi inmediato. Si dos claves dan la misma casilla hay colisión, y se resuelve encadenando o buscando otra casilla.',
-    example: 'Un diccionario de Python o un std::map sin ordenar (unordered_map) son tablas hash.',
+    example: 'Un diccionario de Python o un std::unordered_map de C++ son tablas hash.',
   },
   'c-string-end': {
     title: 'Cadenas en C',

@@ -13,7 +13,7 @@ export const GIT_EN: Readonly<Record<string, ConceptText>> = {
         ],
       },
       {
-        ask: ['What goes into a commit?', 'When you run git commit, what is saved is…'],
+        ask: ['What goes into a commit?', 'When you run git commit, git saves…'],
         right: ['What is in the index (what was staged with git add)'],
         wrong: [
           'Everything in the folder, always',
@@ -359,7 +359,7 @@ export const GIT_EN: Readonly<Record<string, ConceptText>> = {
       'Downloads the version on the remote',
       'Undoes the last push',
     ],
-    why: 'reset moves the branch: --soft leaves what was undone staged, the plain one unstaged and --hard deletes it.',
+    why: 'reset moves the branch: --soft leaves what was undone staged, the default (--mixed) leaves it unstaged and --hard deletes it.',
   },
   'git-revert': {
     forms: [

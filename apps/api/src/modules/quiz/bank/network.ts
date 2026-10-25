@@ -149,7 +149,10 @@ export const NETWORK_BANK: readonly Concept[] = [
         ],
       },
       {
-        ask: ['¿Qué significa la ruta 0.0.0.0/0?', '¿A qué destinos lleva una ruta 0.0.0.0/0?'],
+        ask: [
+          '¿A qué destinos se aplica la ruta 0.0.0.0/0?',
+          '¿A qué destinos lleva una ruta 0.0.0.0/0?',
+        ],
         right: ['A todos los que no tengan otra ruta (la ruta por defecto)'],
         wrong: ['A ninguno', 'Solo a la red local', 'Solo a la propia máquina'],
       },
@@ -499,7 +502,7 @@ export const NETWORK_BANK: readonly Concept[] = [
       {
         ask: [
           '¿En qué se diferencia un contenedor de una máquina virtual?',
-          '¿Qué no tiene un contenedor que sí tiene una máquina virtual?',
+          '¿Por qué un contenedor pesa menos que una máquina virtual?',
         ],
         right: ['Comparte el núcleo del sistema anfitrión: no lleva kernel propio'],
         wrong: [

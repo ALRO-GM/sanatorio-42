@@ -222,7 +222,7 @@ export const GRAPHICS: readonly Concept[] = [
         ],
         right: [
           'c es fijo y el punto de la pantalla es el z inicial',
-          'Qué es fijo: c no varía y z empieza en el píxel',
+          'c no varía y z empieza en el píxel',
         ],
         wrong: [
           'Usa z³ en vez de z²',
