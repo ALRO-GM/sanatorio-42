@@ -30,6 +30,10 @@ type NoticesModuleDeps = NoticesServiceOptions & {
   help?: (actor: Actor) => Promise<number>
   /** Si hay un examen en marcha en su campus. */
   examLive?: (actor: Actor) => Promise<boolean>
+  /** La huella de los avisos con cuenta atrás que esa persona tiene a la vista. */
+  countdowns?: (actor: Actor) => Promise<number>
+  /** Si la web está en mantenimiento. */
+  maintenance?: () => Promise<boolean>
 }
 
 export type NoticesModule = AppModule & { service: NoticesService }
@@ -69,6 +73,8 @@ export function createNoticesModule(deps: NoticesModuleDeps): NoticesModule {
           help: (await deps.help?.(await session.actor(request))) ?? 0,
           examLive:
             (await deps.examLive?.(await session.actor(request)).catch(() => false)) ?? false,
+          countdowns: (await deps.countdowns?.(await session.actor(request))) ?? 0,
+          maintenance: (await deps.maintenance?.()) ?? false,
           quota: await deps.quota.statusFor(login),
         }
       })

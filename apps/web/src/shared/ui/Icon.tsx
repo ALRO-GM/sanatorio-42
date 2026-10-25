@@ -248,6 +248,12 @@ const PATHS = {
       <path d="M5.7 5.7l12.6 12.6" />
     </>
   ),
+  /** Fijar una cuenta atrás (`features/countdowns`): una chincheta. */
+  chincheta: <path d="M9 3.5h6M10 3.5v5.5l-3.5 4h11L14 9V3.5M12 13v7.5" />,
+  /** El modo mantenimiento: una llave inglesa. */
+  llave: (
+    <path d="M14.7 3.6a5 5 0 0 0-4.3 6.8L3.8 17a2.2 2.2 0 0 0 3.1 3.1l6.6-6.6a5 5 0 0 0 6.8-4.3l-3 1.6-2.4-.8-.8-2.4z" />
+  ),
 
   // --- Cómo te ayudaron y cómo llegaste --------------------------------------
   bicho: (

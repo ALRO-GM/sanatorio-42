@@ -10,6 +10,7 @@ import { whenText } from './dates'
 import { iconOf } from './kinds'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { Icon } from '../../shared/ui/Icon'
+import { PinCountdown } from './PinCountdown'
 
 /** Minutos que faltan para un instante, redondeando hacia arriba. */
 function minutesTo(iso: string): number {
@@ -243,6 +244,7 @@ export function EventDialog({
               {t('agenda.goTo', { section: t(`nav.${event.section}`) })}
             </button>
           )}
+          <PinCountdown event={event} />
           <button type="button" className="pill" onClick={onClose}>
             {t('agenda.back')}
           </button>

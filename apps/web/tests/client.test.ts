@@ -8,7 +8,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { realApi } from '../src/shared/api/client'
-import { ApiError } from '../src/shared/api/http'
+import { ApiError, onMaintenance } from '../src/shared/api/http'
 
 type Sent = { url: string; method: string; body: unknown; headers: Headers; credentials?: string }
 
@@ -120,6 +120,59 @@ describe('cliente de la API', () => {
       network: false,
       serverMessage: 'El grupo está completo',
     })
+  })
+
+  it('un 503 de mantenimiento avisa a quien escucha, con la hora de acabar', async () => {
+    const heard: (string | null)[] = []
+    const stop = onMaintenance((until) => {
+      heard.push(until)
+    })
+
+    reply = () =>
+      Response.json(
+        { error: 'maintenance', message: 'En mantenimiento', until: '2026-10-25T14:00:00.000Z' },
+        { status: 503 },
+      )
+    await expect(realApi.getPulse()).rejects.toMatchObject({ status: 503 })
+    // Otro 503 (el tope del plan) no es mantenimiento.
+    reply = () => Response.json({ error: 'service_stopped', message: 'Parado' }, { status: 503 })
+    await expect(realApi.getPulse()).rejects.toMatchObject({ status: 503 })
+    stop()
+    reply = () => Response.json({ error: 'maintenance', message: 'x' }, { status: 503 })
+    await expect(realApi.getPulse()).rejects.toMatchObject({ status: 503 })
+
+    expect(heard).toEqual(['2026-10-25T14:00:00.000Z'])
+  })
+
+  it('mantenimiento y cuentas atrás, cada una a su ruta', async () => {
+    reply = () => Response.json([])
+    await realApi.getMaintenance()
+    expect(last()).toMatchObject({ url: '/api/maintenance', method: 'GET' })
+    await realApi.setMaintenance({ on: true, until: null })
+    expect(last()).toMatchObject({
+      url: '/api/admin/maintenance',
+      method: 'PUT',
+      body: { on: true },
+    })
+    await realApi.getCountdowns()
+    expect(last()).toMatchObject({ url: '/api/countdowns', method: 'GET' })
+    await realApi.pinCountdown({ kind: 'next' })
+    expect(last()).toMatchObject({
+      url: '/api/countdowns/pins',
+      method: 'POST',
+      body: { kind: 'next' },
+    })
+    await realApi.unpinCountdown(4)
+    expect(last()).toMatchObject({ url: '/api/countdowns/pins/4', method: 'DELETE' })
+    await realApi.dismissCountdown(5)
+    expect(last()).toMatchObject({ url: '/api/countdowns/notices/5/dismiss', method: 'POST' })
+    await realApi.getAdminCountdowns()
+    expect(last()).toMatchObject({ url: '/api/admin/countdowns', method: 'GET' })
+    await realApi.sendCountdown({ preset: 'lockers', at: '2026-10-30T08:00:00.000Z', group: 'all' })
+    expect(last()).toMatchObject({ url: '/api/admin/countdowns', method: 'POST' })
+    reply = () => new Response(null, { status: 204 })
+    await realApi.removeCountdown(6)
+    expect(last()).toMatchObject({ url: '/api/admin/countdowns/6', method: 'DELETE' })
   })
 
   it('sin cuerpo legible se queda el código; sin respuesta es de red', async () => {

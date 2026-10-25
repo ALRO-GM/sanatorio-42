@@ -79,5 +79,12 @@ export type Pulse = {
   help: number
   /** `true` si ahora hay un examen en tu campus: la pestaña de exámenes se enciende. */
   examLive: boolean
+  /**
+   * Avisos con cuenta atrás de quien administra que tienes a la vista y la
+   * suma de sus ids: si cambia, la ventanita los vuelve a pedir.
+   */
+  countdowns: number
+  /** `true` si la web está en mantenimiento (a quien no administra, la API ya le corta). */
+  maintenance: boolean
   quota: QuotaStatus
 }

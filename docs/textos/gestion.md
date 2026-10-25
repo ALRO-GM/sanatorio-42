@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/gestion.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-541 textos. «—» es que falta la traducción: sale en español.
+573 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -548,3 +548,35 @@ Generado desde `apps/web/src/shared/i18n/textos/gestion.csv` con
 | `admin.hidden.by` | Panel, Personas ocultas: quién la ocultó y cuándo. {by}: login; {date}: fecha y hora | features/admin/HiddenPanel | Por {by}, {date} | By {by}, {date} | Per {by}, {date} | {by}, {date} |
 | `admin.hidden.remove` | Panel, Personas ocultas: botón para volver a enseñar a alguien | features/admin/HiddenPanel | Quitar | Remove | Treu | Kendu |
 | `admin.hidden.removeOne` | Panel, Personas ocultas: nombre accesible del botón «Quitar». {login}: la persona | features/admin/HiddenPanel | Quitar a {login} de la lista | Remove {login} from the list | Treu {login} de la llista | Kendu {login} zerrendatik |
+| `admin.tab.countdowns` | Panel de gestión: pestaña de los avisos con cuenta atrás | features/admin/AdminPage | Cuentas atrás | Countdowns | Comptes enrere | Atzerako kontaketak |
+| `admin.tab.maintenance` | Panel de gestión: pestaña del modo mantenimiento | features/admin/AdminPage | Mantenimiento | Maintenance | Manteniment | Mantentze-lanak |
+| `admin.maint.title` | Panel de gestión, mantenimiento: título de la tarjeta | features/admin/MaintenancePanel | Modo mantenimiento | Maintenance mode | Mode manteniment | Mantentze-modua |
+| `admin.maint.isOn` | Panel de gestión, mantenimiento: estado puesto | features/admin/MaintenancePanel | En mantenimiento. | Under maintenance. | En manteniment. | Mantentze-lanetan. |
+| `admin.maint.isOff` | Panel de gestión, mantenimiento: estado quitado | features/admin/MaintenancePanel | La web está abierta. | The site is open. | La web està oberta. | Webgunea irekita dago. |
+| `admin.maint.since` | Panel de gestión, mantenimiento: desde cuándo está puesto | features/admin/MaintenancePanel | Desde {date}. | Since {date}. | Des de {date}. | {date} geroztik. |
+| `admin.maint.hint` | Panel de gestión, mantenimiento: qué hace | features/admin/MaintenancePanel | Mientras dura, solo quien administra usa la web; el resto ve «No disponible» y la cuenta atrás hasta la hora prevista. | While it lasts, only admins can use the site; everyone else sees “Unavailable” and the countdown to the expected end. | Mentre dura, només qui administra fa servir la web; la resta veu «No disponible» i el compte enrere fins a l'hora prevista. | Irauten duen bitartean, administratzaileek bakarrik erabiltzen dute webgunea; besteek «Ez dago erabilgarri» eta aurreikusitako ordurainoko atzerako kontaketa ikusten dute. |
+| `admin.maint.message` | Panel de gestión, mantenimiento: campo del mensaje | features/admin/MaintenancePanel | Mensaje (opcional) | Message (optional) | Missatge (opcional) | Mezua (aukerakoa) |
+| `admin.maint.messagePlaceholder` | Panel de gestión, mantenimiento: ejemplo dentro del campo del mensaje | features/admin/MaintenancePanel | Migramos la base de datos. Tus commits están a salvo. | We're migrating the database. Your commits are safe. | Migrem la base de dades. Els teus commits estan a salvo. | Datu-basea migratzen ari gara. Zure commit-ak salbu daude. |
+| `admin.maint.until` | Panel de gestión, mantenimiento: grupo de campos de la hora de acabar | features/admin/MaintenancePanel | Hora prevista de acabar (opcional) | Expected end (optional) | Hora prevista d'acabar (opcional) | Amaitzeko aurreikusitako ordua (aukerakoa) |
+| `admin.maint.quick` | Panel de gestión, mantenimiento: atajo que pone el final dentro de un rato («+30 min») | features/admin/MaintenancePanel | +{n} | +{n} | +{n} | +{n} |
+| `admin.maint.noUntil` | Panel de gestión, mantenimiento: botón para dejar sin hora de acabar | features/admin/MaintenancePanel | Sin hora | No end time | Sense hora | Ordurik gabe |
+| `admin.maint.on` | Panel de gestión, mantenimiento: botón para ponerlo | features/admin/MaintenancePanel | Poner en mantenimiento | Turn maintenance on | Posar en manteniment | Mantentze-modua aktibatu |
+| `admin.maint.update` | Panel de gestión, mantenimiento: botón para guardar el mensaje o la hora | features/admin/MaintenancePanel | Guardar cambios | Save changes | Desa els canvis | Aldaketak gorde |
+| `admin.maint.off` | Panel de gestión, mantenimiento: botón para quitarlo y abrir la web | features/admin/MaintenancePanel | Quitar el mantenimiento | Turn maintenance off | Treure el manteniment | Mantentze-modua kendu |
+| `admin.countdown.new` | Panel de gestión, cuentas atrás: título del formulario | features/admin/CountdownsPanel | Nuevo aviso con cuenta atrás | New countdown notice | Nou avís amb compte enrere | Atzerako kontaketadun ohar berria |
+| `admin.countdown.kind` | Panel de gestión, cuentas atrás: grupo para elegir el tipo de aviso | features/admin/CountdownsPanel | Tipo de aviso | Kind of notice | Tipus d'avís | Ohar mota |
+| `admin.countdown.kind.lockers` | Panel de gestión, cuentas atrás: aviso ya escrito de limpieza de taquillas | features/admin/CountdownsPanel | Limpieza de taquillas | Locker clean-up | Neteja de taquilles | Armairuen garbiketa |
+| `admin.countdown.kind.custom` | Panel de gestión, cuentas atrás: aviso con título y texto propios | features/admin/CountdownsPanel | Otro aviso | Other notice | Un altre avís | Beste ohar bat |
+| `admin.countdown.lockersHint` | Panel de gestión, cuentas atrás: bajo el texto ya escrito de las taquillas | features/admin/CountdownsPanel | A cada cual le sale en su idioma. Solo falta el día y la hora. | Everyone gets it in their own language. Just pick the day and time. | A cadascú li surt en el seu idioma. Només falta el dia i l'hora. | Bakoitzari bere hizkuntzan agertzen zaio. Eguna eta ordua bakarrik falta dira. |
+| `admin.countdown.title` | Panel de gestión, cuentas atrás: campo del título | features/admin/CountdownsPanel | Título | Title | Títol | Izenburua |
+| `admin.countdown.body` | Panel de gestión, cuentas atrás: campo del texto | features/admin/CountdownsPanel | Texto (opcional) | Text (optional) | Text (opcional) | Testua (aukerakoa) |
+| `admin.countdown.to` | Panel de gestión, cuentas atrás: a qué grupo va | features/admin/CountdownsPanel | Para | To | Per a | Norentzat |
+| `admin.countdown.to.all` | Panel de gestión, cuentas atrás: a todo el mundo | features/admin/CountdownsPanel | Todo el mundo | Everyone | Tothom | Denentzat |
+| `admin.countdown.to.students` | Panel de gestión, cuentas atrás: solo a estudiantes | features/admin/CountdownsPanel | Estudiantes | Students | Estudiants | Ikasleak |
+| `admin.countdown.to.pool` | Panel de gestión, cuentas atrás: solo a piscineros | features/admin/CountdownsPanel | Piscineros | Piscine | Piscina | Igerilekukoak |
+| `admin.countdown.onlyHere` | Panel de gestión, cuentas atrás: casilla para limitarlo al campus que se mira | features/admin/CountdownsPanel | Solo a quien mira este campus | Only people viewing this campus | Només a qui mira aquest campus | Campus hau ikusten dutenei bakarrik |
+| `admin.countdown.send` | Panel de gestión, cuentas atrás: botón para mandarlo | features/admin/CountdownsPanel | Mandar aviso | Send notice | Envia l'avís | Oharra bidali |
+| `admin.countdown.sent` | Panel de gestión, cuentas atrás: lista de los ya mandados | features/admin/CountdownsPanel | Avisos mandados | Sent notices | Avisos enviats | Bidalitako oharrak |
+| `admin.countdown.none` | Panel de gestión, cuentas atrás: aún no hay ninguno | features/admin/CountdownsPanel | Aún no has mandado ninguno. | You haven't sent any yet. | Encara no n'has enviat cap. | Oraindik ez duzu bat ere bidali. |
+| `admin.countdown.dismissed` | Panel de gestión, cuentas atrás: cuánta gente lo ha cerrado | features/admin/CountdownsPanel | {n} lo han cerrado | {n} dismissed | {n} l'han tancat | {n}(e)k itxi dute |
+| `admin.countdown.removeOne` | Panel de gestión, cuentas atrás: nombre accesible del botón de retirar uno | features/admin/CountdownsPanel | Retirar «{title}» | Withdraw “{title}” | Retira «{title}» | «{title}» kendu |

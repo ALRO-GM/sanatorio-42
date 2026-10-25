@@ -7,6 +7,13 @@
  */
 
 import type {
+  Countdown,
+  CountdownNoticeInput,
+  CountdownNoticeReport,
+  CountdownPinInput,
+  Maintenance,
+  MaintenanceInput,
+  MaintenanceStatus,
   Focus,
   PoolAccess,
   PoolNotice,
@@ -438,6 +445,20 @@ export type Api = {
   getAdminBroadcasts: () => Promise<BroadcastReport[]>
   sendBroadcast: (message: BroadcastInput) => Promise<BroadcastReport>
   removeBroadcast: (id: number) => Promise<void>
+  /** Si la web está en mantenimiento y si quien mira puede seguir (`docs/mantenimiento.md`). */
+  getMaintenance: () => Promise<MaintenanceStatus>
+  /** Lo pone o lo quita. Solo admins. */
+  setMaintenance: (input: MaintenanceInput) => Promise<Maintenance>
+  /** Tus cuentas atrás: avisos de quien administra y lo fijado (`docs/avisos-cuenta-atras.md`). */
+  getCountdowns: () => Promise<Countdown[]>
+  /** Fija una cuenta atrás (un evento, el próximo compromiso o una propia); devuelve todas. */
+  pinCountdown: (input: CountdownPinInput) => Promise<Countdown[]>
+  unpinCountdown: (id: number) => Promise<Countdown[]>
+  /** Cierra un aviso de quien administra: ya no te sale en ningún navegador. */
+  dismissCountdown: (id: number) => Promise<Countdown[]>
+  getAdminCountdowns: () => Promise<CountdownNoticeReport[]>
+  sendCountdown: (input: CountdownNoticeInput) => Promise<CountdownNoticeReport>
+  removeCountdown: (id: number) => Promise<void>
   /** Tu buzón de avisos, lo que no has leído primero. */
   getNotices: () => Promise<Notices>
   /** Da por leídos esos avisos, o todos si no se dice cuáles. Devuelve el buzón. */

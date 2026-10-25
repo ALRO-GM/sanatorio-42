@@ -33,6 +33,7 @@ Google Sheets, Excel) o con un editor de texto:
 | Tabla | Qué textos |
 | --- | --- |
 | `comun` | Navegación, cabecera, pie, entrada, bienvenida, errores, personalizar |
+| `avisos` | Pantalla de mantenimiento y ventanita de cuentas atrás |
 | `expediente` | Perfil: XP, títulos, logros, clasificación, estado de salud, horas |
 | `sala-de-espera` | Elegir proyecto, quién ayuda, interruptor de guardia |
 | `guardia` | Tu guardia, reservas de ayuda, valoraciones, preevaluaciones |
