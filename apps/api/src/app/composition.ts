@@ -17,6 +17,8 @@ import type { EventBus, Notify } from '../core/events.js'
 import type { AppModule } from '../core/module.js'
 import type { FortyTwoClient } from '../integrations/forty-two/client.js'
 import { createAdminModule } from '../modules/admin/index.js'
+import { createAgendaModule } from '../modules/agenda/index.js'
+import type { AgendaModule } from '../modules/agenda/index.js'
 import type { AdminModule } from '../modules/admin/index.js'
 import { createAttendanceModule } from '../modules/attendance/index.js'
 import type { AttendanceModule } from '../modules/attendance/index.js'
@@ -116,6 +118,7 @@ export type Services = {
   availability: PeersModule['availability']
   xp: ProfileModule['xp']
   therapy: TherapyModule['service']
+  agenda: AgendaModule['service']
   doubts: DoubtsModule['service']
   boards: BoardsModule['service']
   map: MapModule['service']
@@ -350,6 +353,37 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     ...clock,
   })
 
+  // La agenda (`docs/agenda.md`): sus proyectos y su plan salen de la réplica,
+  // lo de 42 del calendario ya copiado y el tablero de los sprints de terapia.
+  // Nada de esto pide a 42.
+  const agenda = createAgendaModule({
+    db,
+    audience,
+    projectsOf: (login) => replica.repository.projectsOf(login, true),
+    projectNames: (ids) => replica.repository.projectNames(ids),
+    imagesOf: (logins) => replica.repository.imagesOf(logins),
+    timeZoneOf: (campusId) => replica.repository.timeZoneOf(campusId),
+    plan: async (login) => {
+      const place = (await replica.curriculum.placesOf([login])).get(login)
+
+      return replica.curriculum.circles(place?.track ?? 'classic')
+    },
+    events: async (actor, from, to) =>
+      (
+        await calendar.service.between(
+          actor,
+          null,
+          new Date(from).toISOString(),
+          new Date(to).toISOString(),
+        )
+      ).events,
+    sprints: {
+      roster: (groupId, campusId) => therapy.service.roster(groupId, campusId),
+      joinedBy: (login, campusId) => therapy.service.joinedBy(login, campusId),
+    },
+    ...clock,
+  })
+
   const network = createNetworkModule({
     db,
     client,
@@ -505,6 +539,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     notices,
     broadcasts,
     countdowns,
+    agenda,
     clicker,
     tours,
     staff,
@@ -537,6 +572,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
       availability: peers.availability,
       xp: profile.xp,
       therapy: therapy.service,
+      agenda: agenda.service,
       doubts: doubts.service,
       boards: boards.service,
       map: map.service,

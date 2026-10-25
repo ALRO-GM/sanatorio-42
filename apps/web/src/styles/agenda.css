@@ -1,0 +1,364 @@
+/* ── Agenda: metas, checkpoints, dailies y el tablero del sprint ───────────
+   `docs/agenda.md`. Solo variables del tema: se ve igual de bien en todos los
+   estilos, en claro y en oscuro. Dentro de una tarjeta, nada lleva borde de
+   tarjeta: los bloques se separan con fondo suave o con una línea. */
+
+.scrum-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(15rem, 20rem);
+  gap: 1rem;
+  align-items: start;
+}
+.scrum-main {
+  min-width: 0;
+}
+.scrum-side {
+  position: sticky;
+  top: 5rem;
+  padding: 0.9rem 1rem;
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+.scrum-side h3 {
+  margin: 0 0 0.6rem;
+  font-size: 1rem;
+}
+.scrum-events {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.scrum-event {
+  display: grid;
+  gap: 0.15rem;
+  padding-left: 0.6rem;
+  border-left: 3px solid var(--border-strong);
+}
+.scrum-event.kind-exam {
+  border-left-color: var(--warn);
+}
+.scrum-event.kind-evaluation {
+  border-left-color: var(--accent);
+}
+.scrum-event .link {
+  justify-self: start;
+  font-size: 0.8rem;
+}
+
+.scrum-goal.closed {
+  opacity: 0.8;
+}
+.scrum-goal .card-head {
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* El marco del sprint: lo que va con tu grupo, a la vista. */
+.scrum-frame {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.4rem 0 0.8rem;
+  padding: 0.55rem 0.8rem;
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius-sm);
+  background: var(--accent-soft);
+  color: var(--accent-text);
+  font-size: 0.9rem;
+}
+.scrum-frame .sprint-board {
+  flex-basis: 100%;
+  /* Sin esto, la tabla ancha estira el marco y se mete bajo la columna de al lado. */
+  min-width: 0;
+  max-width: 100%;
+}
+
+.scrum-facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.8rem;
+  margin: 0.4rem 0 0.6rem;
+}
+.scrum-facts > div {
+  display: grid;
+  gap: 0.25rem;
+  align-content: start;
+}
+.scrum-facts select {
+  max-width: 14rem;
+}
+.scrum-late {
+  color: var(--warn);
+  font-weight: 600;
+}
+.scrum-note {
+  margin: 0 0 0.6rem;
+}
+
+/* El avance: una barra con su cifra dentro. */
+.scrum-meter {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 5.5rem;
+  height: 1.1rem;
+  border-radius: 999px;
+  background: var(--surface-3);
+  overflow: hidden;
+  vertical-align: middle;
+}
+.scrum-meter.big {
+  width: 100%;
+  max-width: 14rem;
+  height: 1.3rem;
+}
+.scrum-meter > span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: color-mix(in srgb, var(--accent) 50%, transparent);
+}
+.scrum-meter small {
+  position: relative;
+  width: 100%;
+  text-align: center;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.scrum-checks {
+  display: grid;
+  gap: 0.15rem;
+  margin: 0.3rem 0 0.6rem;
+  padding: 0;
+  list-style: none;
+}
+.scrum-checks li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.25rem 0.4rem;
+  border-radius: var(--radius-sm);
+}
+.scrum-checks li:hover {
+  background: var(--surface-2);
+}
+.scrum-checks li.done {
+  color: var(--text-3);
+}
+.scrum-checks li.done label {
+  text-decoration: line-through;
+}
+.scrum-checks.readonly li {
+  justify-content: flex-start;
+}
+.scrum-checks.readonly li.done svg {
+  color: var(--ok);
+}
+.scrum-checks .check,
+.scrum-entry label.check {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+.scrum-checks input[type='checkbox'] {
+  width: 1.05rem;
+  height: 1.05rem;
+  accent-color: var(--accent);
+}
+
+.scrum-add {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.6rem;
+}
+.scrum-add select,
+.scrum-add input {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.scrum-entries {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0.3rem 0 0.4rem;
+  padding: 0;
+  list-style: none;
+  font-size: 0.9rem;
+}
+.scrum-entries li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+}
+.badge.scrum-stuck {
+  padding: 0.15rem 0.6rem;
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+
+.scrum-entry,
+.scrum-pick {
+  margin: 0.6rem 0;
+}
+.scrum-entry {
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--border);
+}
+.scrum-pick {
+  padding: 0;
+  border: 0;
+}
+.scrum-pick legend {
+  margin-bottom: 0.3rem;
+  font-size: 0.85rem;
+  color: var(--text-2);
+}
+
+/* El tablero del sprint: como el de un equipo, una fila por persona. */
+.sprint-board {
+  margin: 0.5rem 0;
+  overflow-x: auto;
+  color: var(--text);
+  /* El tablero decide su forma por su propio ancho, no por el de la pantalla:
+     en la tarjeta de una meta es estrecho aunque la pantalla sea ancha. */
+  container: sprint / inline-size;
+}
+.sprint-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+/* Las etiquetas y la barra no se parten en la tabla ancha. */
+.sprint-row .badge,
+.sprint-row .scrum-meter {
+  white-space: nowrap;
+}
+.sprint-table caption {
+  padding-bottom: 0.4rem;
+  text-align: left;
+  font-weight: 600;
+}
+.sprint-table th,
+.sprint-table td {
+  padding: 0.45rem 0.5rem;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  vertical-align: middle;
+}
+.sprint-table thead th {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.sprint-row.stuck > th {
+  box-shadow: inset 3px 0 0 var(--warn);
+}
+.sprint-row > th .link {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.78rem;
+  font-weight: 400;
+}
+.sprint-due small {
+  display: block;
+}
+.sprint-who {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  white-space: nowrap;
+}
+.sprint-detail td {
+  background: var(--surface-2);
+}
+.sprint-more p {
+  margin: 0 0 0.4rem;
+}
+
+/* La meta no crece con su tablero: el tablero se desliza dentro de ella. */
+.scrum-main .stack > li,
+.scrum-goal,
+.scrum-frame {
+  min-width: 0;
+  max-width: 100%;
+}
+/* En la tarjeta del sprint, «Ver el tablero» va al lado del chat, con aire. */
+.group-card button.link + button.link {
+  margin-left: 1rem;
+}
+
+@media (max-width: 860px) {
+  .scrum-layout {
+    grid-template-columns: 1fr;
+  }
+  .scrum-side {
+    position: static;
+    order: -1;
+  }
+}
+
+@media (max-width: 640px) {
+  .scrum-facts {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Con poco sitio (el móvil, o la tarjeta de una meta), cada fila del tablero
+   se vuelve una ficha con sus rótulos. */
+@container sprint (max-width: 46rem) {
+  .sprint-table thead {
+    display: none;
+  }
+  .sprint-table {
+    min-width: 0;
+  }
+  .sprint-table caption {
+    display: block;
+    width: 100%;
+  }
+  .sprint-row td,
+  .sprint-row .badge {
+    white-space: normal;
+  }
+  .sprint-table,
+  .sprint-table tbody,
+  .sprint-table tr,
+  .sprint-table th,
+  .sprint-table td {
+    display: block;
+    width: 100%;
+  }
+  .sprint-table tr.sprint-row {
+    padding: 0.4rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .sprint-table th,
+  .sprint-table td {
+    padding: 0.2rem 0.3rem;
+    border: 0;
+  }
+  .sprint-due small {
+    display: inline;
+    margin-left: 0.4rem;
+  }
+  .sprint-table td[data-label]::before {
+    content: attr(data-label) ' · ';
+    color: var(--text-3);
+    font-size: 0.78rem;
+  }
+}

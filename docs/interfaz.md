@@ -12,7 +12,7 @@ volver a una categoría se abre la última sección que se miró en ella.
 
 | Categoría | Para qué | Secciones | Dónde está |
 | --- | --- | --- | --- |
-| **Expediente** | Lo tuyo | Expediente (la portada) | `app/sections.ts` |
+| **Expediente** | Lo tuyo | Expediente (la portada) · Agenda | `app/sections.ts` |
 | **Ayuda** | Quedar con gente: pedir y dar ayuda, aprender y enseñar | Sala de espera · Tablón · Terapia · Pizarras · Not-games · Estadísticas | |
 | **Calendario** | Todo lo que tienes, en el tiempo | Calendario | |
 | **Clústeres** | El plano del campus: quién está, dónde y de guardia | Clústeres | |
@@ -48,6 +48,9 @@ de datos.
 | --- | --- | --- | --- |
 | Pestañas | Expediente, Ayuda (las cuatro) y Calendario | S | Son para lo que existe la web |
 | Pestañas | Datos (red, avance, exámenes) y Clústeres | N | Informan, no resuelven un atasco |
+| Pestañas | Agenda (en Perfil, junto a la portada): metas por proyecto con checkpoints, dailies y weeklies elegidos de listas, y lo de 42 a lo que vas (`docs/agenda.md`) | N | Es tu progreso («lo tuyo»), pero quien solo quiere pedir o dar ayuda no la necesita: como el Avance |
+| Agenda | Fijar la entrega de una meta o un evento de 42 como cuenta atrás; «Cuenta atrás» y «Ver el calendario» arriba | N | Bloque de la agenda: reutiliza la ventanita de cuentas atrás, no inventa otra |
+| Sprints y Agenda | Tablero del sprint: una fila por persona del grupo con entrega, %, checkpoints, último daily y atasco; en la tarjeta del grupo y enmarcado en cada meta | N | Bloque, no sección: solo lo ve quien está en el grupo, y es para ir a echar una mano |
 | Expediente | Nivel, títulos y XP | S | Lo primero que se ve al entrar |
 | Expediente | Estado de salud (pace y black hole) | S | Afecta a la vida académica |
 | Expediente | Horas validadas (descarga para el staff) | N | Se usa de tarde en tarde |
@@ -128,6 +131,7 @@ Revisado el 2026-10-17 sobre la demostración, en escritorio y móvil; mejoras h
 | Not-games | 4 | 4 | 4 | Modos explicados al elegir; cuenta atrás con la hora del servidor; el porqué de cada respuesta | Preguntas solo en español (2026-10-22: creando una sala, las abiertas se ven al lado) |
 | Buzón | 5 | 4 | 4 | Número rojo en la cabecera; avisos llevan a su sitio | — (2026-10-22: la pestaña de conversaciones lleva su número de sin leer) |
 | Personalizar | 4 | 4 | 4 | Orden manual, por tu uso o por la comunidad | — (2026-10-22: «Ordenar o plegar estos bloques» al final de cada página con bloques) |
+| Agenda | 4 | 4 | 4 | Todo se elige de listas; los checkpoints de fábrica salen del tipo de proyecto; el sprint se ve enmarcado (2026-10-25, recién hecha) | Probarla con gente: ¿faltan atascos o checkpoints en las listas? |
 | Pie (ajustes) | 4 | 5 | 5 | Todo a la vista y con nombres claros | — (2026-10-22: el modo de la interfaz también está en Personalizar; además, en la bienvenida) |
 
 Las mejoras de la última columna son el punto de partida de la siguiente

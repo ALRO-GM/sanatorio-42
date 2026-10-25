@@ -19,6 +19,9 @@ import type { IconName } from '../shared/ui/Icon'
  * personalización (`shared/layout`).
  */
 export const SECTIONS = [
+  // Agenda: tu Scrum individual por proyecto (`docs/agenda.md`). Es «lo tuyo»,
+  // así que va con el perfil; desde el modo normal, como el avance.
+  { id: 'agenda', icon: 'agenda', inNav: true, category: 'expediente', from: 'normal' },
   { id: 'consulta', icon: 'consulta', inNav: true, category: 'ayuda', from: 'simple' },
   { id: 'tablon', icon: 'tablon', inNav: true, category: 'ayuda', from: 'simple' },
   { id: 'terapia', icon: 'terapia', inNav: true, category: 'ayuda', from: 'simple' },
@@ -60,7 +63,7 @@ export type Section = (typeof SECTIONS)[number]['id']
 /**
  * Las pestañas de arriba: las secciones van agrupadas por para qué sirven.
  *
- * - Expediente: lo tuyo. Es la portada.
+ * - Expediente: lo tuyo. Es la portada; con ella, tu agenda.
  * - Ayuda: quedar con gente para pedir y dar ayuda, aprender y enseñar.
  * - Calendario: todo lo que tienes, en el tiempo.
  * - Clústeres: el plano del campus, quién está y dónde.
@@ -108,6 +111,7 @@ export const HOME: Section = 'expediente'
  * que no depende de él: privacidad, siempre; gestión, solo quien administra.
  */
 const POOL_KEY: Record<Section, PoolKey | null> = {
+  agenda: 'agenda',
   consulta: 'consulta',
   tablon: 'tablon',
   terapia: 'terapia',

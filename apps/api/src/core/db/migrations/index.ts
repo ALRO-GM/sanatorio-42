@@ -81,6 +81,7 @@ import { hiddenPeopleSchema } from './0072-hidden-people.js'
 import { countdownsSchema } from './0073-countdowns.js'
 import { shellCourseSchema } from './0074-shell-course.js'
 import { courseTimesSchema } from './0075-course-times.js'
+import { agendaScrumSchema } from './0076-agenda-scrum.js'
 import type { Migration } from './types.js'
 
 export const MIGRATIONS: readonly Migration[] = [
@@ -159,6 +160,7 @@ export const MIGRATIONS: readonly Migration[] = [
   countdownsSchema,
   shellCourseSchema,
   courseTimesSchema,
+  agendaScrumSchema,
 ]
 
 /** Versión más alta que existe en el código. */

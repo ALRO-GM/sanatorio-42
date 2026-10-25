@@ -573,3 +573,5 @@ admin.countdown.none,"Panel de gestión, cuentas atrás: aún no hay ninguno",A�
 admin.countdown.dismissed,"Panel de gestión, cuentas atrás: cuánta gente lo ha cerrado",{n} lo han cerrado,{n} dismissed,{n} l'han tancat,{n}(e)k itxi dute
 admin.countdown.removeOne,"Panel de gestión, cuentas atrás: nombre accesible del botón de retirar uno",Retirar «{title}»,Withdraw “{title}”,Retira «{title}»,«{title}» kendu
 pool.key.shellcourse,"Panel, Piscina: permiso «shellcourse»",Curso de shell,Shell course,Curs de shell,Shell ikastaroa
+pool.key.agenda,"Panel, Piscina: permiso «agenda»","Agenda: metas, checkpoints y dailies","Agenda: goals, checkpoints and dailies","Agenda: fites, checkpoints i dailies","Agenda: helburuak, checkpointak eta daily-ak"
+pool.key.agenda.sprint,"Panel, Piscina: permiso «agenda.sprint»",Tablero del sprint,Sprint board,Tauler de l'sprint,Sprintaren taula

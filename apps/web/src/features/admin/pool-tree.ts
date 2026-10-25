@@ -17,6 +17,8 @@ const TREE: Record<PoolKey, Group> = {
   'expediente.network': 'expediente',
   'expediente.achievements': 'expediente',
   'expediente.ranking': 'expediente',
+  agenda: 'expediente',
+  'agenda.sprint': 'expediente',
   consulta: 'ayuda',
   'consulta.map': 'ayuda',
   guardia: 'ayuda',

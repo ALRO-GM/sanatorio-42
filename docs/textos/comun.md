@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/comun.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-301 textos. «—» es que falta la traducción: sale en español.
+302 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -288,11 +288,11 @@ Generado desde `apps/web/src/shared/i18n/textos/comun.csv` con
 | `focus.band.least` | Tus estadísticas del Pomodoro: extremo del tramo | features/focus/FocusMyStats, shared/ui/SegmentSlider | Menos uso | Least use | Menys ús | Erabilera gutxien |
 | `focus.band.most` | Tus estadísticas del Pomodoro: extremo del tramo | features/focus/FocusMyStats, shared/ui/SegmentSlider | Más uso | Most use | Més ús | Erabilera gehien |
 | `common.save` | Botón genérico: guardar | features/notices/Mailbox | Guardar | Save | Desa | Gorde |
-| `common.remove` | Botón genérico: borrar algo | features/admin/InboxTab, features/notices/Mailbox | Borrar | Delete | Esborra | Ezabatu |
+| `common.remove` | Botón genérico: borrar algo | features/admin/InboxTab, features/agenda/GoalCard, features/notices/Mailbox | Borrar | Delete | Esborra | Ezabatu |
 | `common.send` | Botón genérico: enviar | features/admin/BroadcastsTab, features/admin/CheatsPanel, features/admin/Inbox, features/admin/InboxTour, shared/chat/Chat | Enviar | Send | Envia | Bidali |
 | `common.withdraw` | Botón genérico: retirar algo publicado | features/admin/BroadcastsTab, features/admin/CountdownsPanel, features/admin/Inbox | Retirar | Withdraw | Retira | Kendu |
 | `common.reason` | Etiqueta genérica: el motivo de algo | features/admin/AdminPage, features/calendar/EventRoom, shared/ui/ReportButton | Motivo | Reason | Motiu | Arrazoia |
-| `common.cancel` | Botón genérico: cancelar lo que se está haciendo | features/countdowns/CountdownPicker, features/facility/FacilityForm, features/notgames/NotGamesPage, features/profile/HealthCard, features/therapy/GroupForm, shared/ui/ReportButton | Cancelar | Cancel | Cancel·la | Utzi |
+| `common.cancel` | Botón genérico: cancelar lo que se está haciendo | features/agenda/EntryForm, features/agenda/GoalForm, features/countdowns/CountdownPicker, features/facility/FacilityForm, features/notgames/NotGamesPage, features/profile/HealthCard, features/therapy/GroupForm, shared/ui/ReportButton | Cancelar | Cancel | Cancel·la | Utzi |
 | `common.ok` | Botón genérico para cerrar un aviso | features/admin/BroadcastGate, features/calendar/EventDialog, features/campus/OtherCampusNotice, features/help/HelpGate | Entendido | Got it | Entesos | Ulertuta |
 | `common.prev` | Botón genérico: ir al anterior | features/calendar/CalendarPage, features/gitcourse/LevelView, features/notgames/TurnRoomView | Anterior | Previous | Anterior | Aurrekoa |
 | `common.next` | Botón genérico: ir al siguiente | features/calendar/CalendarPage, features/gitcourse/LevelView, features/notgames/TurnRoomView | Siguiente | Next | Següent | Hurrengoa |
@@ -308,3 +308,4 @@ Generado desde `apps/web/src/shared/i18n/textos/comun.csv` con
 | `common.createRoom` | Botón de los juegos: crear una sala | features/gitcourse/GroupRoom, features/notgames/NotGamesPage | Crear una sala | Create a room | Crea una sala | Sortu gela bat |
 | `common.join` | Botón de los juegos: entrar en una sala | features/gitcourse/GroupRoom, features/notgames/NotGamesPage, features/notgames/RoomView, features/notgames/TurnRoomView | Entrar | Join | Entra | Sartu |
 | `common.leave` | Botón de los juegos: salir de la sala | features/gitcourse/GroupRoom, features/notgames/RoomView, features/notgames/TurnRoomView | Salir | Leave | Surt | Irten |
+| `nav.agenda` | Pestaña de Perfil: tu agenda (Scrum individual por proyecto) | app/Nav, features/admin/ClickMap, features/admin/FlowsPanel, features/admin/Inbox, features/admin/InboxTab, features/admin/StatsPanel, features/admin/UsageHeatmap, features/agenda/ScrumTour, features/calendar/EventDialog, features/focus/FocusDialog, features/stats/HelpStatsPage, shared/layout/LayoutSettings, shared/layout/store | Agenda | Agenda | Agenda | Agenda |

@@ -10,6 +10,8 @@ import { Avatar } from '../../shared/ui/Avatar'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { useConfirm } from '../../shared/ui/useConfirm'
 import { ChatRoom } from '../../shared/chat/Chat'
+import { SprintBoardView } from '../../shared/agenda/SprintBoardView'
+import { usePoolAllows } from '../../shared/pool'
 import { shortDay, today } from './days'
 import { GroupForm } from './GroupForm'
 import { Icon } from '../../shared/ui/Icon'
@@ -37,6 +39,9 @@ export function GroupCard({ group, projects, onChange, me }: GroupCardProps) {
   const [joining, setJoining] = useState(false)
   const [progress, setProgress] = useState(group.kind === 'review' ? 100 : 50)
   const [chat, setChat] = useState(false)
+  // El tablero del sprint: la agenda de cada cual para este proyecto (`docs/agenda.md`).
+  const [board, setBoard] = useState(false)
+  const boardAllowed = usePoolAllows('agenda.sprint')
   const [allMembers, setAllMembers] = useState(false)
   const now = today()
   const full = group.members.length >= group.capacity
@@ -207,6 +212,19 @@ export function GroupCard({ group, projects, onChange, me }: GroupCardProps) {
         </button>
       )}
       {group.joined && chat && <ChatRoom chatId={`group:${group.id}`} me={me} />}
+      {group.joined && boardAllowed && (
+        <button
+          type="button"
+          className="link"
+          aria-expanded={board}
+          onClick={() => {
+            setBoard(!board)
+          }}
+        >
+          <Icon name="agenda" /> {t(board ? 'scrum.sprint.hide' : 'scrum.sprint.show')}
+        </button>
+      )}
+      {group.joined && board && <SprintBoardView groupId={group.id} me={me} />}
 
       <div className="actions">
         {group.joined ? (

@@ -1024,6 +1024,109 @@ Solo admins:
 Un piscinero recibe los avisos siempre; fijarse algo va con el permiso del
 calendario (`POOL_ROUTES`).
 
+## Agenda: Scrum individual (`modules/agenda`)
+
+Tus metas por proyecto, con checkpoints, dailies y weeklies elegidos de listas
+cerradas, y el tablero de cada sprint para su grupo (`docs/agenda.md`, donde
+están las listas). No pide nada nuevo a 42: proyectos y plan de la réplica, lo
+de 42 del calendario ya copiado.
+
+GET /agenda → tus metas (activas y las cerradas en los últimos 30 días), los
+proyectos que puedes elegir y lo de 42 a lo que vas en los próximos 14 días.
+
+```json
+{
+  "today": "2026-10-25",
+  "goals": [{
+    "id": 4, "projectId": 1314, "projectName": "ft_printf", "projectKind": "c",
+    "targetDay": "2026-10-30", "progress": 60, "note": "Falta %p y los flags",
+    "status": "active", "createdAt": "…", "closedAt": null,
+    "checkpoints": [{ "id": 31, "key": "works", "text": null, "done": true },
+                    { "id": 39, "key": null, "text": "Comparar con printf", "done": false }],
+    "entries": [{
+      "id": 8, "kind": "daily", "day": "2026-10-25", "plan": [31],
+      "outcome": "partial", "problem": "other", "problemOther": "El Makefile relinkea",
+      "solution": "docs", "solutionOther": null, "progress": 60, "note": null,
+      "updatedAt": "…"
+    }],
+    "sprints": [{ "groupId": 7, "place": "Cluster 1", "members": 3 }]
+  }],
+  "projects": [{ "id": 1314, "name": "ft_printf", "status": "in_progress", "kind": "c", "circle": 1 },
+               { "id": 1471, "name": "push_swap", "status": "next", "kind": "c", "circle": 2 }],
+  "events": [ /* CalendarEvent: event_joined, exam y evaluation */ ]
+}
+```
+
+- `projects`: lo que tienes en curso y los 10 siguientes de tu plan (los de
+  círculo más bajo que aún no has tocado). `kind` sale del nombre y decide los
+  checkpoints de fábrica.
+- `entries`: los 14 últimos, lo más reciente primero. `sprints`: tus grupos de
+  terapia abiertos del mismo proyecto; ahí lo ve tu grupo.
+
+POST /agenda/goals → `201` con la meta. `{ projectId, targetDay, progress?, note?, checkpoints? }`.
+
+- `targetDay` de hoy a 180 días (`400`); `progress` de 0 a 100, de 5 en 5;
+  `note` hasta 200 caracteres. Sin `checkpoints`, los de fábrica del tipo de
+  proyecto. Proyecto que no está en la réplica: `404`. Como mucho 8 en marcha (`409`).
+
+PUT /agenda/goals/:id → la meta. Solo lo que cambia: `targetDay`, `progress`,
+`note` (vacío la borra) y `status` (`active`, `done`, `dropped`; cerrarla
+apunta `closedAt`).
+
+DELETE /agenda/goals/:id → `204`. Con sus checkpoints y entradas.
+
+POST /agenda/goals/:id/checkpoints → `201` con la meta. `{ "key": "leaks" }` o
+`{ "text": "Probar con -fsanitize" }` (hasta 80). Uno de la lista que ya está no
+se repite; como mucho 15 (`409`).
+
+PUT /agenda/goals/:id/checkpoints/:checkpoint → `{ "done": true }`; devuelve la meta.
+
+DELETE /agenda/goals/:id/checkpoints/:checkpoint → lo quita; devuelve la meta.
+
+POST /agenda/goals/:id/entries → apunta o reescribe el daily o weekly de ese
+día; devuelve la meta.
+
+```json
+{ "kind": "daily", "day": "2026-10-25", "plan": [31, 32], "outcome": "partial",
+  "problem": "other", "problemOther": "El Makefile relinkea",
+  "solution": "pair", "progress": 60, "note": "Mañana, con alguien del sprint" }
+```
+
+- Uno por meta, tipo y día: el weekly va al lunes de su semana. Se puede
+  adelantar el de mañana (o la semana que viene) y recuperar uno de los
+  últimos 14 días; fuera de eso, `400`.
+- `plan`: ids de checkpoints de la meta (`400` si alguno no lo es).
+- `problem` y `solution` de sus listas; con `other` hace falta su texto
+  (`problemOther`, `solutionOther`, hasta 120) y sin `other` se descarta. Una
+  `solution` sin `problem`, `400`. Con `progress`, es el nuevo avance de la meta.
+- Meta cerrada: `409`. La de otra persona: `404`.
+
+GET /agenda/sprints/:id → el tablero del sprint `:id` (un grupo de terapia): la
+meta de cada persona del grupo para su proyecto. Solo quien está dentro
+(`403`); grupo que no existe, cerrado o de otro campus, `404`. Quien está oculto
+o es del otro mundo no sale.
+
+```json
+{
+  "groupId": 7, "projectId": 1314, "projectName": "ft_printf", "place": "Cluster 1",
+  "members": [{
+    "login": "mgarcia", "image": null,
+    "goal": {
+      "id": 9, "targetDay": "2026-10-29", "progress": 35, "status": "active", "note": null,
+      "checkpoints": [ … ], "done": 2, "total": 8,
+      "stuckOn": { "id": 52, "key": "leaks", "text": null, "done": false },
+      "blocker": { "day": "2026-10-25", "problem": "memory", "problemOther": null,
+                   "solution": "pair", "solutionOther": null },
+      "entries": [ /* sus 5 últimos */ ]
+    }
+  }]
+}
+```
+
+`goal` es `null` si esa persona aún no tiene meta de ese proyecto. `blocker`
+es el último daily o weekly si apuntó un atasco; uno posterior sin atasco lo
+cierra.
+
 ## Modo mantenimiento (`modules/admin/maintenance.ts`)
 
 `docs/mantenimiento.md`. Se guarda en `settings` (clave `maintenance`).

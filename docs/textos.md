@@ -39,6 +39,7 @@ Google Sheets, Excel) o con un editor de texto:
 | `guardia` | Tu guardia, reservas de ayuda, valoraciones, preevaluaciones |
 | `tablon` | Grafo de proyectos, guías, dudas y respuestas |
 | `terapia` | Grupos de terapia |
+| `agenda` | La agenda: metas, checkpoints, dailies, listas de atascos y salidas, y el tablero del sprint |
 | `pizarras` | Calendario de pizarras |
 | `calendario` | Tu calendario, avisos de eventos, chats y códigos de asistencia |
 | `buzon` | Avisos, conversaciones, incidencias y denuncias |

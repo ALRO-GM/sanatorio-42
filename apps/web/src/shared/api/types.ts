@@ -7,6 +7,13 @@
  */
 
 import type {
+  AgendaCheckpointInput,
+  AgendaEntryInput,
+  AgendaGoal,
+  AgendaGoalInput,
+  AgendaGoalUpdate,
+  AgendaView,
+  SprintBoard,
   Countdown,
   CountdownNoticeInput,
   CountdownNoticeReport,
@@ -535,6 +542,21 @@ export type Api = {
   closeGroup: (id: number) => Promise<void>
   /** Avisa del grupo a quien hace el proyecto en el campus (una vez, quien lo abrió). */
   inviteGroup: (id: number) => Promise<{ invited: number }>
+
+  // --- Agenda: Scrum individual (`docs/agenda.md`)
+  /** Tus metas, los proyectos que puedes elegir, lo de 42 a lo que vas y las listas. */
+  getAgenda: () => Promise<AgendaView>
+  createAgendaGoal: (input: AgendaGoalInput) => Promise<AgendaGoal>
+  /** Solo lo que cambia: día, avance, nota o estado. */
+  updateAgendaGoal: (id: number, change: AgendaGoalUpdate) => Promise<AgendaGoal>
+  removeAgendaGoal: (id: number) => Promise<void>
+  addAgendaCheckpoint: (goalId: number, input: AgendaCheckpointInput) => Promise<AgendaGoal>
+  markAgendaCheckpoint: (goalId: number, checkpointId: number, done: boolean) => Promise<AgendaGoal>
+  removeAgendaCheckpoint: (goalId: number, checkpointId: number) => Promise<AgendaGoal>
+  /** Apunta o reescribe el daily o weekly de ese día. */
+  saveAgendaEntry: (goalId: number, input: AgendaEntryInput) => Promise<AgendaGoal>
+  /** El tablero de un sprint tuyo: la agenda de tu grupo para su proyecto. */
+  getSprintBoard: (groupId: number) => Promise<SprintBoard>
 
   // --- Tablón de dudas
   /** El common core por círculos, con tu estado y dónde hace falta una mano. */

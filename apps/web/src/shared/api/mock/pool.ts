@@ -14,6 +14,8 @@ import { delay, fail } from './state'
 const DEFAULT: PoolKey[] = [
   'expediente',
   'expediente.achievements',
+  'agenda',
+  'agenda.sprint',
   'consulta',
   'consulta.map',
   'guardia',

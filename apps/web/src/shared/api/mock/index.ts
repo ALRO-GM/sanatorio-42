@@ -9,6 +9,7 @@
 
 import type { Api } from '../types'
 import { adminMock } from './admin'
+import { agendaMock } from './agenda'
 import { boardsMock } from './boards'
 import { clickerMock } from './clicker'
 import { countdownsMock } from './countdowns'
@@ -60,4 +61,5 @@ export const mockApi: Api = withHidden({
   ...shellCourseMock,
   ...gitRoomsMock,
   ...countdownsMock,
+  ...agendaMock,
 })

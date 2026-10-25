@@ -35,6 +35,8 @@ que hacer, en orden. Este documento es el porqué; aquel, el qué.
 - Personas ocultas a un grupo desde el panel (`docs/personas-ocultas.md`, migración 72).
 - Decidido: la red de asientos también para estudiantes (cada mundo la suya).
 
+- **Agenda** (`docs/agenda.md`, migración 76 `scrum_*`): Scrum individual por proyecto en Perfil · Agenda, con checkpoints de fábrica por tipo de proyecto, dailies y weeklies de listas cerradas, cuenta atrás de la entrega y el tablero de cada sprint para su grupo; el gancho con la ayuda (`onBlocker`) queda sin conectar.
+
 ## Curso de shell (2026-10-25)
 
 Pedido por Alberto: un curso de shell de Linux por niveles, con teoría,

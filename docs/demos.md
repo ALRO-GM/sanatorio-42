@@ -131,5 +131,6 @@ tema (nunca un color suelto) y se apunta en esta tabla.
 | `chess` | Ajedrez de Not-games | Mover, pregunta a los dos, quien acierta mueve, castigo por fallar |
 | `notGames` | Not-games | Elegir modo, contestar, ver la buena y por qué, marcador con vidas |
 | `exams` | Exámenes | Aviso en vivo en la pestaña, quién está y su nota, intentos hasta aprobar |
+| `scrum` | Agenda | Marcar un checkpoint, daily con un atasco de la lista, tablero del sprint |
 | `gitCourse` | Curso de git (Not-games) | Elegir punto, animación y teoría, terminal y estrellas, misiones de grupo |
 
