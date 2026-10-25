@@ -80,11 +80,15 @@ describe('un piscinero, con la piscina abierta', () => {
     expect((await get(built, '/leaderboard', cookie)).statusCode).toBe(403)
     expect((await get(built, '/me/legal', cookie)).statusCode).toBe(200)
 
-    // En el mapa, él sí y el estudiante no.
+    // En el mapa, él con nombre; el puesto del estudiante, ocupado sin nombre.
     const map = json(await get(built, '/map', cookie)) as ClusterMap
+    const taken = map.clusters.flatMap((cluster) => cluster.seats.filter((seat) => seat.taken))
 
     expect(occupants(map)).toContain('pisci')
     expect(occupants(map)).not.toContain('albrodri')
+    expect(taken.length).toBeGreaterThan(0)
+    expect(taken.every((seat) => seat.occupant === null)).toBe(true)
+    expect(JSON.stringify(taken)).not.toContain('albrodri')
     expect((await get(built, '/people/albrodri/card', cookie)).statusCode).toBe(404)
     expect(json(await get(built, '/users/search?q=alb', cookie))).toEqual([])
     expect(
@@ -104,7 +108,7 @@ describe('un piscinero, con la piscina abierta', () => {
 })
 
 describe('un estudiante', () => {
-  it('no ve a los piscineros: ni en el mapa, ni en el buscador, ni su ficha', async () => {
+  it('ve a los piscineros sentados en el mapa, pero no en el buscador ni su ficha', async () => {
     const built = await app()
 
     await built.db.execute({
@@ -116,8 +120,9 @@ describe('un estudiante', () => {
     const cookie = await built.login()
     const map = json(await get(built, '/map', cookie)) as ClusterMap
 
-    expect(occupants(map)).toContain('albrodri')
-    expect(occupants(map)).not.toContain('pisci')
+    // En la sala está quien esté sentado, sea del grupo que sea.
+    expect(occupants(map)).toEqual(expect.arrayContaining(['albrodri', 'pisci']))
+    expect(map.clusters.every((cluster) => cluster.seats.every((seat) => !seat.taken))).toBe(true)
     expect(json(await get(built, '/users/search?q=pis', cookie))).toEqual([])
     expect((await get(built, '/people/pisci/card', cookie)).statusCode).toBe(404)
     expect((await get(built, '/users/pisci/profile', cookie)).statusCode).toBe(404)

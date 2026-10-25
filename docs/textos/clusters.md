@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/clusters.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-75 textos. «—» es que falta la traducción: sale en español.
+76 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -16,6 +16,7 @@ Generado desde `apps/web/src/shared/i18n/textos/clusters.csv` con
 | `map.row` | Fila, abreviado | features/map/ClusterMapView | F{n} | R{n} | F{n} | E{n} |
 | `map.rowLong.one` | Una fila | features/map/ClusterMapView, features/therapy/GroupForm | fila {rows} | row {rows} | fila {rows} | {rows} ilara |
 | `map.rowLong.many` | Varias filas | features/map/ClusterMapView, features/therapy/GroupForm | filas {rows} | rows {rows} | files {rows} | {rows} ilarak |
+| `map.seatTaken` | Puesto ocupado por alguien a quien no puedes ver (otro grupo, u oculto) | features/map/ClusterMapView | Ocupado | Taken | Ocupat | Hartuta |
 | `map.seatFree` | Puesto libre | features/map/ClusterMapView | Libre | Free | Lliure | Libre |
 | `map.seatReserved` | Puesto reservado por un sprint | features/map/ClusterMapView | Reservado por un sprint | Reserved by a sprint | Reservat per un sprint | Sprint batek erreserbatuta |
 | `map.you` | Tu puesto | features/map/ClusterMapView, features/map/SeatHoverCard, features/notices/Conversations, shared/ui/PersonLink | Tú | You | Tu | Zu |

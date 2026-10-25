@@ -91,11 +91,13 @@ function mostRelevant(clusters: readonly MapCluster[]): string | null {
 function seatClasses(seat: MapSeat, picked: boolean, reserved: boolean): string {
   return [
     'seat',
-    seat.occupant === null ? 'free' : 'occupied',
+    seat.occupant === null && !seat.taken ? 'free' : 'occupied',
+    // Alguien a quien no puedes ver: ocupado, sin cara.
+    seat.taken ? 'taken' : '',
     seat.occupant?.duty ?? '',
     seat.occupant?.me === true ? 'me' : '',
     // Roto solo se pinta si está libre: si hay alguien sentado, funciona.
-    seat.broken !== null && seat.occupant === null ? 'broken' : '',
+    seat.broken !== null && seat.occupant === null && !seat.taken ? 'broken' : '',
     reserved ? 'reserved' : '',
     reserved && seat.reservation?.inSession === true ? 'in-session' : '',
     picked ? 'picked' : '',
@@ -108,7 +110,9 @@ function seatClasses(seat: MapSeat, picked: boolean, reserved: boolean): string 
 function seatLabel(seat: MapSeat, t: Translate, reserved: boolean): string {
   const parts = [seatName(seat.host, t)]
 
-  if (seat.occupant === null) {
+  if (seat.taken) {
+    parts.push(t('map.seatTaken'))
+  } else if (seat.occupant === null) {
     parts.push(t('map.seatFree'))
   } else {
     parts.push(seat.occupant.login)
@@ -116,7 +120,7 @@ function seatLabel(seat: MapSeat, t: Translate, reserved: boolean): string {
   }
 
   if (reserved) parts.push(t('map.seatReserved'))
-  if (seat.broken !== null && seat.occupant === null) parts.push(t('map.seatBroken'))
+  if (seat.broken !== null && seat.occupant === null && !seat.taken) parts.push(t('map.seatBroken'))
 
   return parts.join(' · ')
 }
@@ -386,9 +390,15 @@ export function ClusterMapView({
           <strong className="seat-host" title={open.host}>
             {seatName(open.host, t)}
           </strong>
-          <span>{open.broken === null ? t('map.seatFree') : t('map.seatBroken')}</span>
+          <span>
+            {open.taken
+              ? t('map.seatTaken')
+              : open.broken === null
+                ? t('map.seatFree')
+                : t('map.seatBroken')}
+          </span>
           {openReservation !== null && <ReservationNote reservation={openReservation} />}
-          {onBroken !== undefined && (
+          {onBroken !== undefined && !open.taken && (
             <button
               type="button"
               className="pill"

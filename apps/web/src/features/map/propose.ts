@@ -98,7 +98,7 @@ export function proposeSeats(
     const free = new Map<string, Cell>()
 
     for (const seat of cluster.seats) {
-      if (seat.occupant === null && seat.broken === null && !blocked(seat)) {
+      if (seat.occupant === null && !seat.taken && seat.broken === null && !blocked(seat)) {
         free.set(key(seat.row, seat.seat), { host: seat.host, row: seat.row, seat: seat.seat })
       }
     }

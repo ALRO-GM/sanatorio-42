@@ -1,5 +1,5 @@
 import type { Peer } from '@sanatorio/contracts'
-import { cleanup, render, screen, within } from '@testing-library/react'
+import { cleanup, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import es from 'virtual:textos/es'
 import { afterEach, describe, expect, it, vi } from 'vitest'
@@ -63,8 +63,11 @@ describe('Sala de espera: quién está de guardia', () => {
     expect(at('p-sentada')).toBeLessThan(at('p-fuera'))
 
     await user.click(screen.getByLabelText(text('peers.onlyOnDuty')))
-    expect(within(list()).queryByText('p-guardia')).not.toBeNull()
-    expect(within(list()).queryByText('p-sentada')).toBeNull()
-    expect(within(list()).queryByText('p-fuera')).toBeNull()
+    // La lista se vuelve a pintar al filtrar: en la CI, lenta, puede tardar un poco.
+    await waitFor(() => {
+      expect(within(list()).queryByText('p-guardia')).not.toBeNull()
+      expect(within(list()).queryByText('p-sentada')).toBeNull()
+      expect(within(list()).queryByText('p-fuera')).toBeNull()
+    })
   })
 })

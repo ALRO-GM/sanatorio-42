@@ -30,7 +30,7 @@ export function ClustersPage({ me }: { me: string }) {
   const report = usePoolAllows('clusters.report')
   const broken = usePoolAllows('clusters.broken')
   const online = seated.filter((seat) => seat.occupant?.online === true).length
-  const occupied = seated.filter((seat) => seat.occupant !== null).length
+  const occupied = seated.filter((seat) => seat.occupant !== null || seat.taken).length
 
   return (
     <section>

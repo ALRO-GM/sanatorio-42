@@ -24,7 +24,7 @@ import type {
 import { z } from 'zod'
 
 import type { Actor } from '../../core/actor.js'
-import { NO_POOL, seesFor } from '../../core/audience.js'
+import { NO_POOL, seesFor, shownFor } from '../../core/audience.js'
 import type { Audience } from '../../core/audience.js'
 import type { PeersService } from '../peers/index.js'
 import { LOCATION_MAX_AGE_MS } from '../replica/index.js'
@@ -178,7 +178,7 @@ export function createMapService(options: MapServiceOptions) {
       }
 
       const since = new Date(now() - LOCATION_MAX_AGE_MS).toISOString()
-      const [known, everyone, reservations, online, broken, sees] = await Promise.all([
+      const [known, everyone, reservations, online, broken, sees, shown] = await Promise.all([
         replica.knownSeats(actor.campusId),
         replica.presenceIn(actor.campusId, since),
         therapy.reservations(actor.campusId),
@@ -186,9 +186,15 @@ export function createMapService(options: MapServiceOptions) {
         options.broken?.listSince(actor.campusId, brokenSince()) ??
           new Map<string, { by: string; at: string }>(),
         seesFor(audience, actor),
+        shownFor(audience, actor),
       ])
-      // Solo la gente de su mundo: a un estudiante, los piscineros no le salen.
-      const present = everyone.filter((person) => sees(person.login))
+      // Quién sale con nombre en el plano. Un estudiante ve a todo el que esté
+      // sentado (piscineros, discovery…: es lo que hay en la sala); un
+      // piscinero, solo a los de su piscina. Los ocultos a su grupo, a nadie.
+      // Lo que no sale con nombre sale ocupado, sin más: el puesto no está libre.
+      const named = (login: string): boolean => (actor.pool === true ? sees(login) : shown(login))
+      const present = everyone.filter((person) => named(person.login))
+      const taken = everyone.filter((person) => !named(person.login))
 
       // De guardia = disponible y sentado. Misma regla que en la lista.
       const duty = new Map<string, SeatDuty>()
@@ -220,6 +226,7 @@ export function createMapService(options: MapServiceOptions) {
           host,
           ...position,
           occupant: null,
+          taken: false,
           reservation: null,
           broken: broken.get(host) ?? null,
         }
@@ -231,7 +238,7 @@ export function createMapService(options: MapServiceOptions) {
 
       // Un puesto roto en el que alguien ha iniciado sesión después del aviso
       // funciona: se da por arreglado.
-      for (const person of present) {
+      for (const person of everyone) {
         const report = broken.get(person.host)
 
         if (report !== undefined && (person.beginAt === null || person.beginAt >= report.at)) {
@@ -286,6 +293,12 @@ export function createMapService(options: MapServiceOptions) {
         }
       }
 
+      for (const person of taken) {
+        const seat = seatAt(person.host)
+
+        if (seat !== null && seat.occupant === null) seat.taken = true
+      }
+
       const clusters = new Map<string, MapCluster>()
 
       // El plano se completa: dentro del rectángulo que forman los puestos
@@ -326,7 +339,7 @@ export function createMapService(options: MapServiceOptions) {
         cluster.rows = Math.max(cluster.rows, seat.row)
         cluster.seatsPerRow = Math.max(cluster.seatsPerRow, seat.seat)
         cluster.seats.push(seat)
-        cluster.occupied += seat.occupant === null ? 0 : 1
+        cluster.occupied += seat.occupant === null && !seat.taken ? 0 : 1
         cluster.onDuty += seat.occupant?.duty === null || seat.occupant === null ? 0 : 1
         clusters.set(id, cluster)
       }

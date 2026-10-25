@@ -30,6 +30,7 @@ const seat = (occupant: Partial<NonNullable<MapSeat['occupant']>> | null): MapSe
   host: 'c1r1s1',
   row: 1,
   seat: 1,
+  taken: false,
   reservation: null,
   broken: null,
   occupant:

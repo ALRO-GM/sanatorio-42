@@ -14,6 +14,7 @@ function cluster(id: string, plan: string[]): ClusterMap['clusters'][number] {
       host: `${id}r${r + 1}s${s + 1}`,
       row: r + 1,
       seat: s + 1,
+      taken: false,
       reservation: null,
       broken: mark === '#' ? { by: 'ana', at: '2026-10-16T10:00:00.000Z' } : null,
       occupant:

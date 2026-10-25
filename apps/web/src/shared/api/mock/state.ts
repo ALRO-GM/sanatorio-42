@@ -163,6 +163,9 @@ function projectsOf(login: string): string[] {
   ).map((project) => project.name)
 }
 
+/** Puestos con alguien a quien no se ve (del otro grupo u oculto): salen ocupados, sin cara. */
+const TAKEN = new Set(['c1r3s2', 'c1r3s3', 'c2r1s4'])
+
 /** El plano de mentira: todos los puestos de `CLUSTER_SIZES`, con quien toque sentado. */
 export function buildMap(projectId?: number): ClusterMap {
   const peers = projectId === undefined ? [] : (PEERS[projectId] ?? [])
@@ -215,6 +218,7 @@ export function buildMap(projectId?: number): ClusterMap {
             row,
             seat,
             occupant: seated.get(host) ?? null,
+            taken: !seated.has(host) && TAKEN.has(host),
             broken: brokenSeats.get(host) ?? null,
             reservation:
               group === undefined

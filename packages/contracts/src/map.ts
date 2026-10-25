@@ -46,6 +46,12 @@ export type MapSeat = {
      */
     finishedMine: number | null
   } | null
+  /**
+   * Hay alguien sentado a quien quien mira no puede ver (a un piscinero, los
+   * estudiantes; a cualquiera, los ocultos a su grupo): sale ocupado, sin
+   * nombre ni foto. Con `occupant`, siempre `false`.
+   */
+  taken: boolean
   reservation: SeatReservation | null
   /**
    * Si alguien ha avisado de que no funciona (vale una semana): quién y

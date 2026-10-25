@@ -65,7 +65,7 @@ export function SeatPicker({ value, onToggle, when, onPropose, max }: SeatPicker
   const broken = new Set(
     data.clusters
       .flatMap((cluster) => cluster.seats)
-      .filter((seat) => seat.broken !== null && seat.occupant === null)
+      .filter((seat) => seat.broken !== null && seat.occupant === null && !seat.taken)
       .map((seat) => seat.host),
   )
 

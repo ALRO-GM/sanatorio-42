@@ -8,6 +8,7 @@ map.seatName,"Nombre completo de un puesto: clúster, fila y puesto",{cluster} �
 map.row,"Fila, abreviado",F{n},R{n},F{n},E{n}
 map.rowLong.one,Una fila,fila {rows},row {rows},fila {rows},{rows} ilara
 map.rowLong.many,Varias filas,filas {rows},rows {rows},files {rows},{rows} ilarak
+map.seatTaken,"Puesto ocupado por alguien a quien no puedes ver (otro grupo, u oculto)",Ocupado,Taken,Ocupat,Hartuta
 map.seatFree,Puesto libre,Libre,Free,Lliure,Libre
 map.seatReserved,Puesto reservado por un sprint,Reservado por un sprint,Reserved by a sprint,Reservat per un sprint,Sprint batek erreserbatuta
 map.you,Tu puesto,Tú,You,Tu,Zu

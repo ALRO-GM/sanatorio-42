@@ -618,6 +618,7 @@ describe('mapa de clusters', () => {
       row: 1,
       seat: 2,
       occupant: null,
+      taken: false,
       reservation: null,
       broken: null,
     })
@@ -662,7 +663,15 @@ describe('mapa de clusters', () => {
     const map = json(await http.get('/map')) as ClusterMap
 
     expect(map.clusters[0]?.seats).toEqual([
-      { host: 'c2r1s1', row: 1, seat: 1, occupant: null, reservation: null, broken: null },
+      {
+        host: 'c2r1s1',
+        row: 1,
+        seat: 1,
+        occupant: null,
+        taken: false,
+        reservation: null,
+        broken: null,
+      },
     ])
   })
 

@@ -164,6 +164,15 @@ export function NetworkPage({ me, switcher }: { me: CurrentUser; switcher?: Reac
     }
   }, [params, reloads])
 
+  // Las opciones de los filtros (campus, meses, proyectos) salen del último
+  // grafo con gente: si unos filtros no dejan a nadie, siguen ahí para
+  // cambiarlos, en vez de desaparecer con el grafo.
+  const [lastFull, setLastFull] = useState<NetworkGraph | null>(null)
+
+  if (graph !== null && graph.nodes.length > 0 && graph !== lastFull) setLastFull(graph)
+
+  const options = graph !== null && graph.nodes.length === 0 ? (lastFull ?? graph) : graph
+
   // Mientras se copia el histórico, el grafo crece solo.
   const copying = graph !== null && graph.sync.phase !== 'done'
 
@@ -219,7 +228,7 @@ export function NetworkPage({ me, switcher }: { me: CurrentUser; switcher?: Reac
     [t],
   )
   const nodes = graph?.nodes
-  const available = graph?.available
+  const available = options?.available
   const legend = useMemo(
     () => legendOf(nodes ?? [], mode, t, scale, available),
     [nodes, mode, t, scale, available],
@@ -254,7 +263,7 @@ export function NetworkPage({ me, switcher }: { me: CurrentUser; switcher?: Reac
       ),
     [topPairs, orders.pairs],
   )
-  const allProjects = graph?.projects
+  const allProjects = options?.projects
   // Entre cuántas correcciones tiene que tener un proyecto para salir en su
   // lista; `null` es sin tope por ese lado. Los pasos del deslizador son las
   // cantidades que hay de verdad: de uno en uno, casi todo el recorrido serían
@@ -320,15 +329,15 @@ export function NetworkPage({ me, switcher }: { me: CurrentUser; switcher?: Reac
           </div>
 
           <div className="card net-filters">
-            {graph !== null && graph.available.length > 1 && (
+            {graph !== null && options !== null && options.available.length > 1 && (
               <div className="net-filter">
                 <span className="eyebrow">{t('net.campuses')}</span>
                 <PillGroup<number | 'all'>
-                  options={[...graph.available.map((campus) => campus.id), 'all']}
+                  options={[...options.available.map((campus) => campus.id), 'all']}
                   value={null}
                   pressed={(option) =>
                     option === 'all'
-                      ? graph.campuses.length === graph.available.length
+                      ? graph.campuses.length === options.available.length
                       : graph.campuses.includes(option)
                   }
                   onChange={(option) => {
@@ -355,7 +364,7 @@ export function NetworkPage({ me, switcher }: { me: CurrentUser; switcher?: Reac
                   text={(option) =>
                     option === 'all'
                       ? t('net.campuses.all')
-                      : graph.available.find((campus) => campus.id === option)?.name
+                      : options.available.find((campus) => campus.id === option)?.name
                   }
                 />
               </div>
@@ -401,7 +410,7 @@ export function NetworkPage({ me, switcher }: { me: CurrentUser; switcher?: Reac
 
             {graph !== null && (
               <Timeline
-                months={graph.timeline}
+                months={(options ?? graph).timeline}
                 from={params.from ?? null}
                 to={params.to ?? null}
                 onSelect={(from, to) => {
@@ -432,7 +441,7 @@ export function NetworkPage({ me, switcher }: { me: CurrentUser; switcher?: Reac
                   }}
                 >
                   <option value="">{t('net.project.all')}</option>
-                  {(graph?.projects ?? []).map((project) => (
+                  {(options?.projects ?? []).map((project) => (
                     <option key={project.id} value={project.id}>
                       {project.name} ({project.corrections})
                     </option>
