@@ -3,9 +3,6 @@ import type { Segment } from '@sanatorio/contracts'
 import { useI18n } from '../i18n'
 import { RangeSlider } from './RangeSlider'
 
-/** De cuánto en cuánto se mueve el tramo, en tantos por ciento. */
-const STEP = 5
-
 /** El tramo de gente que se mira: del `low` % al `high` %, de menos a más activa. */
 export type SegmentRange = { low: number; high: number }
 
@@ -45,14 +42,18 @@ export function SegmentSlider({
         )}
       </span>
       <RangeSlider
-        max={100 / STEP}
-        low={value.low / STEP}
-        high={value.high / STEP}
+        max={100}
+        low={value.low}
+        high={value.high}
+        // Un tramo vacío no enseña nada: los tiradores no llegan a tocarse.
+        minGap={1}
+        // Cada cambio pregunta a la API: al soltar, no a cada paso.
+        commit="release"
+        format={(n) => t('range.percent', { n })}
         lowLabel={t(`${texts}.low`)}
         highLabel={t(`${texts}.high`)}
         onChange={(low, high) => {
-          // Un tramo vacío no enseña nada: los tiradores no llegan a tocarse.
-          if (high > low) onChange({ low: low * STEP, high: high * STEP })
+          onChange({ low, high })
         }}
       />
       <small className="segment-ends">

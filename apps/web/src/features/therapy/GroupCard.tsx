@@ -15,6 +15,7 @@ import { usePoolAllows } from '../../shared/pool'
 import { shortDay, today } from './days'
 import { GroupForm } from './GroupForm'
 import { Icon } from '../../shared/ui/Icon'
+import { Slider } from '../../shared/ui/RangeSlider'
 
 type GroupCardProps = {
   group: GroupView
@@ -177,20 +178,17 @@ export function GroupCard({ group, projects, onChange, me }: GroupCardProps) {
 
       {joining && !group.joined && (
         <div className="join-box">
-          <label>
-            {t('therapy.progressAsk', { n: progress })}
-            <input
-              type="range"
-              min={0}
+          <div className="progress-ask">
+            <span>{t('therapy.progressAsk', { n: progress })}</span>
+            <Slider
               max={100}
-              step={5}
               value={progress}
+              label={t('therapy.progressLabel')}
+              format={(n) => t('range.percent', { n })}
               disabled={group.kind === 'review'}
-              onChange={(event) => {
-                setProgress(Number(event.target.value))
-              }}
+              onChange={setProgress}
             />
-          </label>
+          </div>
           {group.kind === 'review' && <p className="hint">{t('therapy.kind.review.join')}</p>}
           <button
             className="primary small"

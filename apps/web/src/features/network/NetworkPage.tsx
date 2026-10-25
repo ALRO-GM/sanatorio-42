@@ -31,7 +31,7 @@ import { STEPS, startOf } from './period'
 import type { Period } from './period'
 import { PersonPanel } from './PersonPanel'
 import { PersonSearch } from './PersonSearch'
-import { RangeSlider } from '../../shared/ui/RangeSlider'
+import { RangeSlider, Slider } from '../../shared/ui/RangeSlider'
 import { RankCard, ranked } from './RankCard'
 import type { Order } from './RankCard'
 import { StrictestCard } from './StrictestCard'
@@ -283,9 +283,8 @@ export function NetworkPage({ me, switcher }: { me: CurrentUser; switcher?: Reac
   )
   const allProjects = options?.projects
   // Entre cuántas correcciones tiene que tener un proyecto para salir en su
-  // lista; `null` es sin tope por ese lado. Los pasos del deslizador son las
-  // cantidades que hay de verdad: de uno en uno, casi todo el recorrido serían
-  // los cuatro proyectos que más tienen.
+  // lista; `null` es sin tope por ese lado. Se puede elegir cualquier cantidad;
+  // las que hay de verdad salen como marcas en la barra.
   const [projectSpan, setProjectSpan] = useState<{ min: number | null; max: number | null }>({
     min: null,
     max: null,
@@ -440,18 +439,20 @@ export function NetworkPage({ me, switcher }: { me: CurrentUser; switcher?: Reac
                   ))}
                 </select>
               </label>
-              <label>
-                {t('net.min', { n: filters.min })}
-                <input
-                  type="range"
+              <div className="net-min">
+                <span>{t('net.min', { n: filters.min })}</span>
+                <Slider
                   min={1}
                   max={12}
                   value={filters.min}
-                  onChange={(event) => {
-                    change({ min: Number(event.target.value) })
+                  label={t('net.minLabel')}
+                  // Cada cambio vuelve a pedir el grafo: al soltar.
+                  commit="release"
+                  onChange={(min) => {
+                    change({ min })
                   }}
                 />
-              </label>
+              </div>
               <label>
                 {t('net.limit')}
                 <select
@@ -691,29 +692,24 @@ export function NetworkPage({ me, switcher }: { me: CurrentUser; switcher?: Reac
                                             })}
                                           </span>
                                           <RangeSlider
-                                            max={projectSteps.length - 1}
-                                            // El paso más cercano por dentro del tramo elegido.
-                                            low={Math.max(
-                                              0,
-                                              projectSteps.findIndex((step) => step >= spanLow),
-                                            )}
-                                            high={Math.max(
-                                              0,
-                                              projectSteps.findLastIndex(
-                                                (step) => step <= spanHigh,
-                                              ),
-                                            )}
+                                            // Cualquier cantidad, no solo las que hay: las
+                                            // que hay salen como marcas. En curva
+                                            // logarítmica, porque unos pocos proyectos
+                                            // tienen muchísimas más que el resto.
+                                            min={projectSteps[0] ?? 0}
+                                            max={projectSteps.at(-1) ?? 0}
+                                            curve="log"
+                                            ticks={projectSteps}
+                                            low={spanLow}
+                                            high={spanHigh}
                                             lowLabel={t('net.projects.min')}
                                             highLabel={t('net.projects.max')}
                                             onChange={(low, high) => {
                                               // En los extremos no se fija nada: si cambian
                                               // los datos, el tramo sigue siendo "todos".
                                               setProjectSpan({
-                                                min: low === 0 ? null : (projectSteps[low] ?? null),
-                                                max:
-                                                  high === projectSteps.length - 1
-                                                    ? null
-                                                    : (projectSteps[high] ?? null),
+                                                min: low === projectSteps[0] ? null : low,
+                                                max: high === projectSteps.at(-1) ? null : high,
                                               })
                                             }}
                                           />
@@ -842,43 +838,25 @@ export function NetworkPage({ me, switcher }: { me: CurrentUser; switcher?: Reac
                           .join(', ')})`,
                       }}
                     />
-                    <label>
-                      <span>{t('net.scale.from', { n: scale.min })}</span>
-                      <input
-                        type="range"
-                        min={0}
-                        max={99}
-                        step={1}
-                        value={scale.min}
-                        onChange={(event) => {
-                          const min = Number(event.target.value)
-
-                          // El mínimo empuja al máximo si lo alcanza: siempre queda un punto de tramo.
-                          setScales((current) => ({
-                            ...current,
-                            [mode]: { min, max: Math.max(min + 1, scale.max) },
-                          }))
-                        }}
-                      />
-                    </label>
-                    <label>
-                      <span>{t('net.scale.to', { n: scale.max })}</span>
-                      <input
-                        type="range"
-                        min={1}
+                    <div className="net-scale-range">
+                      <span>
+                        {t('net.scale.from', { n: scale.min })} ·{' '}
+                        {t('net.scale.to', { n: scale.max })}
+                      </span>
+                      <RangeSlider
                         max={100}
-                        step={1}
-                        value={scale.max}
-                        onChange={(event) => {
-                          const max = Number(event.target.value)
-
-                          setScales((current) => ({
-                            ...current,
-                            [mode]: { min: Math.min(max - 1, scale.min), max },
-                          }))
+                        low={scale.min}
+                        high={scale.max}
+                        // Siempre queda al menos un punto de tramo.
+                        minGap={1}
+                        format={(n) => t('range.percent', { n })}
+                        lowLabel={t('net.scale.low')}
+                        highLabel={t('net.scale.high')}
+                        onChange={(min, max) => {
+                          setScales((current) => ({ ...current, [mode]: { min, max } }))
                         }}
                       />
-                    </label>
+                    </div>
                     <div className="net-scale-actions">
                       <button
                         type="button"

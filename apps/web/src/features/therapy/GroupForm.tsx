@@ -15,6 +15,7 @@ import { SeatPicker } from '../map/SeatPicker'
 import { parseSeat } from '../../shared/seats'
 import { shortDay, today } from './days'
 import { Icon } from '../../shared/ui/Icon'
+import { Slider } from '../../shared/ui/RangeSlider'
 
 type GroupFormProps = {
   projects: readonly ProjectSummary[]
@@ -262,19 +263,18 @@ export function GroupForm({ projects, defaultProject, group, onCancel, onSaved }
           />
           <p className="hint">{t(`therapy.kind.${form.kind}.hint`)}</p>
           {form.kind === 'study' && (
-            <label>
-              {t('therapy.progressAsk', { n: form.progress })}
-              <input
-                type="range"
-                min={0}
+            <div className="progress-ask">
+              <span>{t('therapy.progressAsk', { n: form.progress })}</span>
+              <Slider
                 max={100}
-                step={5}
                 value={form.progress}
-                onChange={(event) => {
-                  setForm((current) => ({ ...current, progress: Number(event.target.value) }))
+                label={t('therapy.progressLabel')}
+                format={(n) => t('range.percent', { n })}
+                onChange={(progress) => {
+                  setForm((current) => ({ ...current, progress }))
                 }}
               />
-            </label>
+            </div>
           )}
         </fieldset>
       )}

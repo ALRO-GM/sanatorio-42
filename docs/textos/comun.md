@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/comun.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-324 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
+328 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera | Francés |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -167,6 +167,10 @@ Generado desde `apps/web/src/shared/i18n/textos/comun.csv` con
 | `layout.alerts.off` | Opción: no avisar | app/studio/Miniature, app/studio/Studio, features/admin/StatsPanel, features/admin/UsageHeatmap, shared/layout/Blocks | No avisarme | Don't remind me | No m'avisis | Ez abisatu | Ne pas m'alerter |
 | `layout.alerts.minutes` | Opción: avisar {n} minutos antes | app/studio/Miniature, app/studio/Studio, features/admin/StatsPanel, features/admin/UsageHeatmap, shared/layout/Blocks | {n} min antes | {n} min before | {n} min abans | {n} min lehenago | {n} min avant |
 | `info.open` | Nombre accesible del botón (i) que abre la demostración; {title} es la sección | shared/ui/InfoTip | Cómo funciona: {title} | How it works: {title} | Com funciona: {title} | Nola dabil: {title} | Comment ça marche : {title} |
+| `range.edit` | Deslizador: nombre del valor que sale encima de cada tirador; al pulsarlo se escribe a mano. {what} es lo que mide ese tirador | shared/ui/RangeSlider | Escribir el valor: {what} | Type the value: {what} | Escriure el valor: {what} | Idatzi balioa: {what} | Saisir la valeur : {what} |
+| `range.fine` | Deslizador: aviso mientras se arrastra lejos de la barra; {n} es cuántas veces más fino va | shared/ui/RangeSlider | Ajuste fino ×{n} | Fine adjust ×{n} | Ajust fi ×{n} | Doikuntza fina ×{n} | Réglage fin ×{n} |
+| `range.away` | Deslizador: pista mientras se arrastra, para afinar | shared/ui/RangeSlider | Aleja el puntero de la barra para afinar | Move the pointer away from the bar to fine-tune | Allunya el punter de la barra per afinar | Urrundu erakuslea barratik doitzeko | Éloigne le pointeur de la barre pour affiner |
+| `range.percent` | Deslizador: un porcentaje en el globo de un tirador | features/network/NetworkPage, features/stats/ProgressRanking, features/therapy/GroupCard, features/therapy/GroupForm, shared/ui/SegmentSlider | {n} % | {n}% | {n} % | % {n} | {n} % |
 | `finder.label` | Buscador de personas de la cabecera | features/profile/PersonFinder | Buscar personas | Find people | Cerca persones | Bilatu pertsonak | Chercher des personnes |
 | `finder.placeholder` | Texto de ejemplo dentro del buscador | features/profile/PersonFinder | Buscar a alguien… | Find someone… | Cerca algú… | Bilatu norbait… | Chercher quelqu'un… |
 | `finder.none` | Buscador: no hay nadie con ese login | shared/ui/PeopleResults | Nadie se llama así | Nobody by that name | Ningú es diu així | Inor ez da horrela deitzen | Personne ne s'appelle comme ça |
