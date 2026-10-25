@@ -226,11 +226,16 @@ describe('curso de shell: las unidades', () => {
     }
   })
 
-  it('en francés, mientras no tenga sus textos, el curso sale en inglés; en catalán, en castellano', () => {
+  it('en francés el curso sale en francés (o en inglés si le faltara); en catalán, en castellano', () => {
     for (const unit of UNITS) {
-      expect(unitIn(unit, 'fr'), unit.id).toBe(unit.en)
+      expect(unitIn(unit, 'fr'), unit.id).toBe(unit.fr ?? unit.en)
+      expect(unitIn(unit, 'en'), unit.id).toBe(unit.en)
       expect(unitIn(unit, 'ca'), unit.id).toBe(unit.es)
     }
+    const [first] = UNITS
+    if (first === undefined) return
+    const { fr: _fr, ...withoutFr } = first
+    expect(unitIn(withoutFr, 'fr')).toBe(first.en)
   })
 
   it('cada unidad se gana con su solución, con tres estrellas, y no empieza ganada', () => {

@@ -129,9 +129,11 @@ enseña el de ese idioma antes que el español. El francés lo tiene puesto al
 inglés (`fallback: 'en'`): al elegir «Français» se descargan los dos y cada
 clave sale en francés, si no en inglés y si no en español. Un texto largo
 (`tree`, como el legal) que sale del inglés dice `translated: false`, y la web
-avisa de que no está en ese idioma. Lo mismo hacen Code Clicker
-(`features/clicker/texts.ts`) y los cursos de git y de shell (`courseLang` en
-`packages/course`), cuyo texto solo existe en español e inglés. En la API, la
+avisa de que no está en ese idioma. Lo mismo hace Code Clicker
+(`features/clicker/texts.ts`). Los cursos de git y de shell ya tienen su
+francés (`levels/fr/` en `packages/gitsim`; `fr` en cada unidad y bloque de
+`packages/shellsim`): `courseLang` y `courseText` (`packages/course`) lo eligen
+y, si a algo le faltara, sacan el inglés. En la API, la
 cabecera `x-lang: fr` se lee como inglés para las preguntas de Not-games.
 
 Cuando el francés esté completo: `FR_REQUIRED = true` en

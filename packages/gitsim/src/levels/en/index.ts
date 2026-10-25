@@ -6,6 +6,7 @@
 
 import { courseLang } from '@sanatorio/course'
 
+import { GROUPS_FR, LEVELS_FR, MISSION_ITEMS_FR } from '../fr/index.js'
 import type { GroupMission, MissionItem } from '../groups.js'
 import { filled } from '../groups.js'
 import type { Level } from '../types.js'
@@ -16,16 +17,30 @@ import type { LevelText } from './types.js'
 
 const LEVELS_EN: Readonly<Record<string, LevelText>> = { ...BASICS_EN, ...SHARED_EN }
 
+type Table<T> = Readonly<Record<string, T>>
+
+/**
+ * El texto de `key` en ese idioma, o nada si se lee en español (el original).
+ * Lo que le falte al francés sale en inglés, como en el resto de la web.
+ */
+function textIn<T>(key: string, lang: string, en: Table<T>, fr: Table<T>): T | undefined {
+  const course = courseLang(lang)
+
+  if (course === 'es') return undefined
+
+  return (course === 'fr' ? fr[key] : undefined) ?? en[key]
+}
+
 /** Un punto del curso con sus textos en ese idioma (los que falten, en español). */
 export function levelIn(level: Level, lang: string): Level {
-  const text = courseLang(lang) === 'en' ? LEVELS_EN[level.id] : undefined
+  const text = textIn(level.id, lang, LEVELS_EN, LEVELS_FR)
 
   return text === undefined ? level : { ...level, ...text }
 }
 
 /** Una prueba de grupo con su historia y sus tareas en ese idioma. */
 export function missionIn(mission: GroupMission, lang: string): GroupMission {
-  const text = courseLang(lang) === 'en' ? GROUPS_EN[mission.gate] : undefined
+  const text = textIn(mission.gate, lang, GROUPS_EN, GROUPS_FR)
 
   return text === undefined ? mission : { ...mission, ...text }
 }
@@ -35,7 +50,7 @@ export function missionItemIn(
   item: Pick<MissionItem, 'text' | 'login' | 'key' | 'n'>,
   lang: string,
 ): string {
-  const template = courseLang(lang) === 'en' ? MISSION_ITEMS_EN[item.key] : undefined
+  const template = textIn(item.key, lang, MISSION_ITEMS_EN, MISSION_ITEMS_FR)
 
   if (template === undefined) return item.text
 

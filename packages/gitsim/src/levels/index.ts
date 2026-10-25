@@ -29,6 +29,7 @@ export {
 export type { Level, Theory } from './types.js'
 export { levelIn, LEVELS_EN, missionIn, missionItemIn } from './en/index.js'
 export { GROUPS_EN, MISSION_ITEMS_EN } from './en/groups.js'
+export { GROUPS_FR, LEVELS_FR, MISSION_ITEMS_FR } from './fr/index.js'
 export { gateOf, GATES } from './gates.js'
 export type { Gate } from './gates.js'
 export {

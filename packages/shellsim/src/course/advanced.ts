@@ -113,6 +113,25 @@ export const ADVANCED: Unit[] = [
       },
       example: 'You store the date in a variable, compare quotes and do some arithmetic.',
     },
+    fr: {
+      title: 'Variables, guillemets et $(…)',
+      goal: 'Garde une copie de ~/notas.txt sous ~/backups/notas-DATE.txt, avec la date du jour obtenue avec date +%F (pas tapée à la main).',
+      theory: {
+        what: '$(commande) est remplacé par ce qu’affiche la commande. Entre guillemets doubles, les variables sont développées ; entre apostrophes, non. $((…)) fait des calculs.',
+        how: [
+          'AUJ=$(date +%F)',
+          'echo "on est le $AUJ"',
+          "echo 'littéral : $AUJ'",
+          'cp app.log "app-$(date +%F).log"',
+          'echo $((3 * 7))',
+        ],
+        when: 'Des noms datés pour les sauvegardes et les logs, et garder le résultat d’une commande pour s’en servir plus tard.',
+        problems:
+          'Mets des guillemets doubles autour des variables ("$f") : un nom avec des espaces serait coupé en deux.',
+      },
+      example:
+        'Tu ranges la date dans une variable, tu compares les guillemets et tu fais un calcul.',
+    },
     example: [
       'HOY=$(date +%F)',
       'echo "hoy es $HOY"',
@@ -164,6 +183,24 @@ export const ADVANCED: Unit[] = [
           'The spaces inside [ ] are required and so are the quotes in "$var": [ -f $f ] breaks if f is empty.',
       },
       example: 'You try conditions with directories, numbers and patterns.',
+    },
+    fr: {
+      title: 'Conditions : if, test et [[ ]]',
+      goal: 'Écris ~/check.sh : si /etc/peer4u/app.env existe, il affiche ok ; sinon, il affiche falta et sort avec le code 1. Il sera testé avec bash ~/check.sh, avec et sans le fichier.',
+      theory: {
+        what: 'if lance une commande et regarde son code : 0 veut dire vrai. [ ] (test) vérifie des fichiers (-f, -d), des textes (=, -z) et des nombres (-eq, -gt) ; [[ ]] comprend en plus les motifs et les regex.',
+        how: [
+          'if [ -f fichier ]; then\n  echo oui\nelse\n  echo absent\nfi',
+          'if [ "$n" -gt 5 ]; then …',
+          '[[ $f == *.log ]]',
+          'if grep -q ERROR app.log; then …',
+          "cat > script.sh <<'EOF'   # écrire un script",
+        ],
+        when: 'Chaque fois qu’un script doit décider : est-ce que ça existe, est-ce que ça répond, est-ce qu’il y a des erreurs.',
+        problems:
+          'Les espaces à l’intérieur de [ ] sont obligatoires, tout comme les guillemets dans "$var" : [ -f $f ] plante si f est vide.',
+      },
+      example: 'Tu testes des conditions sur des dossiers, des nombres et des motifs.',
     },
     example: [
       'if [ -d /srv ]; then echo "hay /srv"; else echo "no"; fi',
@@ -220,6 +257,24 @@ export const ADVANCED: Unit[] = [
           'A while that never changes its condition never ends (here the simulator stops it at 1000 turns).',
       },
       example: 'You loop with for, count lines of each log, use while and read users one by one.',
+    },
+    fr: {
+      title: 'Boucles : for et while',
+      goal: 'Pour chaque .conf de ~/configs, laisse à côté une copie en .bak (a.conf → a.conf.bak). leeme.txt n’est pas copié.',
+      theory: {
+        what: 'for répète pour chaque mot d’une liste (ou chaque fichier d’un joker) ; while répète tant qu’une commande réussit. while read lit une entrée ligne par ligne.',
+        how: [
+          'for f in *.conf; do cp "$f" "$f.bak"; done',
+          'for i in {1..5}; do echo $i; done',
+          'while [ $n -lt 3 ]; do n=$((n+1)); done',
+          'cut -d: -f1 /etc/passwd | while read -r u; do echo "$u"; done',
+        ],
+        when: 'Pour faire la même chose sur beaucoup de fichiers, de serveurs ou d’utilisateurs.',
+        problems:
+          'Un while dont la condition ne change jamais ne s’arrête jamais (ici, le simulateur l’arrête au bout de 1000 tours).',
+      },
+      example:
+        'Tu fais des tours de boucle avec for, tu comptes les lignes de chaque log, tu utilises while et tu lis les utilisateurs un par un.',
     },
     example: [
       'for i in 1 2 3; do echo "vuelta $i"; done',
@@ -278,6 +333,24 @@ export const ADVANCED: Unit[] = [
       },
       example: 'You write a script that counts its arguments and run it two ways.',
     },
+    fr: {
+      title: 'De vrais scripts : arguments et set -euo pipefail',
+      goal: 'Écris ~/deploy.sh, exécutable : sans argument, il écrit « uso: deploy.sh VERSION » sur la sortie d’erreur et sort avec 1 ; avec une version, il crée ~/releases/VERSION et affiche « desplegada VERSION ».',
+      theory: {
+        what: 'Un script commence par #!/bin/bash et, après chmod +x, se lance avec ./script.sh. $1, $2… sont les arguments, $# leur nombre, $@ tous. exit N sort avec ce code. set -euo pipefail arrête tout à la première erreur, sur une variable non définie ou sur une erreur dans un tube.',
+        how: [
+          '#!/bin/bash',
+          'set -euo pipefail',
+          'if [ $# -lt 1 ]; then echo "usage : $0 X" >&2; exit 1; fi',
+          'echo "premier : $1, tous : $@"',
+          'chmod +x script.sh && ./script.sh v1',
+        ],
+        when: 'Tout ce que tu répètes plus de deux fois : déploiements, sauvegardes, nettoyages, création d’utilisateurs.',
+        problems:
+          'Sans set -e, un script continue tranquillement après une erreur et peut faire des dégâts avec des données à moitié traitées.',
+      },
+      example: 'Tu écris un script qui compte ses arguments et tu le lances de deux façons.',
+    },
     example: [
       'printf \'#!/bin/bash\\necho "me llamo $0 y tengo $# argumentos: $@"\\n\' > args.sh',
       'chmod +x args.sh',
@@ -318,6 +391,19 @@ export const ADVANCED: Unit[] = [
         'It archives ~/proyectos into ~/backups/proyectos-DATE.tar.gz (DATE from date +%F).',
         'It prints «copia: » and the full path of the file.',
         'Run it once.',
+      ],
+    },
+    fr: {
+      title: 'Boss : la sauvegarde de chaque nuit',
+      goal: 'Automatise la sauvegarde de ~/proyectos avec un script qui marche même si ~/backups n’existe pas.',
+      story:
+        'La sauvegarde se faisait à la main, et un jour quelqu’un a oublié. À toi de la mettre dans un script.',
+      tasks: [
+        'Écris ~/backup.sh, exécutable.',
+        'Il crée ~/backups s’il n’existe pas.',
+        'Il archive ~/proyectos dans ~/backups/proyectos-DATE.tar.gz (DATE avec date +%F).',
+        'Il affiche « copia: » suivi du chemin complet du fichier.',
+        'Lance-le une fois.',
       ],
     },
     solution: [BACKUP_SH, 'chmod +x ~/backup.sh', '~/backup.sh'],
@@ -372,6 +458,25 @@ export const ADVANCED: Unit[] = [
       example:
         'You check ssh’s status, whether nginx is active, the failed services, and restart cron.',
     },
+    fr: {
+      title: 'Services : systemctl',
+      goal: 'nginx est arrêté et ne démarre pas avec la machine. Démarre-le et fais en sorte qu’il se lance tout seul quand la machine s’allume.',
+      theory: {
+        what: 'systemd gère les services. systemctl status dit si un service tourne et affiche ses dernières lignes de log ; start, stop et restart le démarrent, l’arrêtent et le redémarrent ; enable et disable décident s’il se lance au démarrage.',
+        how: [
+          'systemctl status nginx',
+          'sudo systemctl restart nginx',
+          'sudo systemctl enable --now nginx',
+          'systemctl is-active nginx',
+          'systemctl list-units --failed',
+        ],
+        when: 'Après avoir modifié une configuration (reload ou restart), après une panne et quand tu installes quelque chose de nouveau.',
+        whenNot:
+          'Ne tue pas le processus d’un service avec kill : systemd peut le relancer ou le laisser en « failed ». Utilise systemctl.',
+      },
+      example:
+        'Tu regardes l’état de ssh, si nginx est actif, les services en échec, et tu redémarres cron.',
+    },
     example: [
       'systemctl status ssh',
       'systemctl is-active nginx',
@@ -425,6 +530,24 @@ export const ADVANCED: Unit[] = [
           'If you are not in the adm (or systemd-journal) group, you only see your own: sudo.',
       },
       example: 'You look at the latest system log, nginx’s, only errors and the last half hour.',
+    },
+    fr: {
+      title: 'Logs système : journalctl',
+      goal: 'L’API (peer4u-api) ne démarre pas. Cherche pourquoi dans son log, corrige /etc/peer4u/app.env (PORT=3000) et démarre-la.',
+      theory: {
+        what: 'journalctl lit le journal de systemd : -u pour un service, -n les N dernières lignes, -p err seulement les erreurs, --since à partir de quand, -e directement à la fin, -f en suivant.',
+        how: [
+          'journalctl -u peer4u-api -n 20',
+          'journalctl -p err --since "1 hour ago"',
+          'journalctl -xeu nginx',
+          'tail -f /var/log/nginx/error.log',
+        ],
+        when: 'Quand un service tombe en panne : la raison est presque toujours dans les dernières lignes de son log.',
+        problems:
+          'Si tu n’es pas dans le groupe adm (ou systemd-journal), tu ne vois que ce qui te concerne : sudo.',
+      },
+      example:
+        'Tu regardes les derniers messages du système, ceux de nginx, seulement les erreurs et ceux de la dernière demi-heure.',
     },
     example: [
       'journalctl -n 5',
@@ -483,6 +606,26 @@ export const ADVANCED: Unit[] = [
       },
       example: 'You look at your table and the system one, load a test one and remove it.',
     },
+    fr: {
+      title: 'Tâches planifiées : cron',
+      goal: 'Programme /home/peer/backup.sh dans ta crontab pour qu’il s’exécute tous les jours à 03:30.',
+      theory: {
+        what: 'cron lance des commandes à heure fixe. Chaque ligne de la crontab : minute, heure, jour du mois, mois, jour de la semaine et la commande (* veut dire « n’importe lequel », */5 « toutes les 5 »).',
+        how: [
+          'crontab -l',
+          '30 3 * * * /home/peer/backup.sh',
+          '*/5 * * * * /home/peer/bin/sante.sh',
+          "echo '0 2 * * 0 /chemin/script.sh' | crontab -",
+          'crontab fichier.txt',
+          'crontab -r',
+        ],
+        when: 'Les sauvegardes, nettoyages, rapports et vérifications qui doivent se faire tout seuls.',
+        problems:
+          'cron ne charge pas ton .bashrc : utilise des chemins absolus (et redirige la sortie vers un fichier pour voir si ça échoue).',
+      },
+      example:
+        'Tu regardes ta table et celle du système, tu en charges une pour tester et tu la supprimes.',
+    },
     example: [
       'crontab -l',
       'cat /etc/crontab',
@@ -524,6 +667,19 @@ export const ADVANCED: Unit[] = [
         'Fix the API: /etc/peer4u/app.env must say PORT=3000.',
         'Start both.',
         'Check with curl that http://localhost/api/health answers.',
+      ],
+    },
+    fr: {
+      title: 'Boss : panne à trois heures du matin',
+      goal: 'Remets nginx et l’API sur pied et vérifie que le site répond.',
+      story:
+        'Quelqu’un a déployé une configuration à minuit et est allé se coucher. Maintenant, ni le site ni l’API ne marchent. La personne d’astreinte précédente a laissé une bonne copie de nginx dans /etc/nginx/nginx.conf.bak.',
+      tasks: [
+        'Regarde quels services sont tombés et pourquoi (systemctl, journalctl).',
+        'Répare nginx : remets sa bonne configuration et teste-la avec nginx -t.',
+        'Répare l’API : /etc/peer4u/app.env doit contenir PORT=3000.',
+        'Démarre les deux.',
+        'Vérifie avec curl que http://localhost/api/health répond.',
       ],
     },
     solution: [...FIX_SERVICES, 'curl -s http://localhost/api/health'],
@@ -578,6 +734,25 @@ export const ADVANCED: Unit[] = [
       },
       example: 'You look at the ports, the site headers, the health check, db1 and DNS.',
     },
+    fr: {
+      title: 'Le réseau vu de l’intérieur : ss, ping et curl',
+      goal: 'Demande l’état de l’API en passant par nginx (http://localhost/api/health) et enregistre la réponse dans ~/health.json.',
+      theory: {
+        what: 'ss -tlnp affiche les ports en écoute et le processus derrière chacun ; ping dit si une machine répond ; dig interroge le DNS ; curl parle HTTP (-I seulement les en-têtes, -s sans barre de progression, -o vers un fichier, -f échoue sur un 4xx/5xx).',
+        how: [
+          'ss -tlnp',
+          'ping -c 3 db1',
+          'dig +short api.peer4u.dev',
+          'curl -I http://localhost',
+          'curl -s http://localhost/api/health',
+          "curl -s -o /dev/null -w '%{http_code}' http://localhost",
+        ],
+        when: 'Pour savoir si le problème vient du service, du port, du nom ou du réseau : de l’intérieur vers l’extérieur.',
+        problems:
+          '« Connection refused » veut dire que personne n’écoute sur ce port ; « 502 Bad Gateway », que nginx tourne mais pas ce qu’il y a derrière.',
+      },
+      example: 'Tu regardes les ports, les en-têtes du site, le health check, db1 et le DNS.',
+    },
     example: [
       'ss -tln',
       'curl -I http://localhost',
@@ -629,6 +804,25 @@ export const ADVANCED: Unit[] = [
       },
       example: 'You ask db1 its name from outside, log in, look at the backups and come back.',
     },
+    fr: {
+      title: 'D’autres machines : ssh et scp',
+      goal: 'Ramène dans ~/restore/ (sur web1) le dump le plus récent de db1, qui se trouve dans /var/backups/db.',
+      theory: {
+        what: 'ssh ouvre une session sur une autre machine (exit pour revenir) ou y lance une seule commande. scp copie des fichiers entre machines : machine:chemin désigne un chemin sur l’autre machine.',
+        how: [
+          'ssh db1',
+          "ssh db1 'df -h /'",
+          'scp fichier db1:/tmp/',
+          'scp db1:/var/backups/db/x.sql.gz ~/restore/',
+          'scp -r dossier db1:~/',
+        ],
+        when: 'Pour administrer plusieurs machines depuis une seule, récupérer des sauvegardes et des logs, envoyer des configurations.',
+        problems:
+          'Fais attention à la machine sur laquelle tu es (le nom dans le prompt) : un rm sur la mauvaise machine, ça fait mal.',
+      },
+      example:
+        'Tu demandes son nom à db1 depuis l’extérieur, tu t’y connectes, tu regardes les sauvegardes et tu reviens.',
+    },
     example: ['ssh db1 hostname', 'ssh db1', 'ls -lh /var/backups/db', 'exit', 'hostname'],
     solution: [
       'mkdir -p ~/restore',
@@ -677,6 +871,24 @@ export const ADVANCED: Unit[] = [
       },
       example: 'You do a dry run, sync a local directory and look at the result.',
     },
+    fr: {
+      title: 'Synchroniser : rsync',
+      goal: 'Rends db1:/home/peer/espejo/ identique à /var/www/html/ sur web1 : ce qui manque, copié ; ce qui est en trop, supprimé.',
+      theory: {
+        what: 'rsync ne copie que ce qui a changé, en local ou entre machines. -a conserve les permissions et les dates, -v raconte ce qu’il fait, -n fait un essai à blanc sans rien toucher, --delete supprime dans la destination ce qui n’est plus dans la source.',
+        how: [
+          'rsync -av source/ destination/',
+          'rsync -av dossier/ db1:/srv/copie/',
+          'rsync -avn --delete a/ b/   # d’abord, à blanc',
+          'rsync -av --delete a/ b/',
+        ],
+        when: 'Les sauvegardes incrémentales, les miroirs d’un site, le transfert de gros volumes de données sans repartir de zéro.',
+        problems:
+          'La barre oblique finale compte : source/ copie ce qu’il y a dedans ; source copie le dossier lui-même dans la destination.',
+      },
+      example:
+        'Tu fais un essai à blanc, tu synchronises un dossier local et tu regardes le résultat.',
+    },
     example: [
       'rsync -avn /var/www/html/ /tmp/web/',
       'rsync -av /var/www/html/ /tmp/web/',
@@ -713,6 +925,18 @@ export const ADVANCED: Unit[] = [
         'Bring the most recent dump from db1 (/var/backups/db) to ~/restore/ on web1.',
         'Leave a copy of web1’s /etc/nginx/nginx.conf on db1, in /home/peer/configs/.',
         'Save the answer of http://localhost/api/health in ~/health.json.',
+      ],
+    },
+    fr: {
+      title: 'Boss : la base de données ne répond plus',
+      goal: 'Relance PostgreSQL sur db1, récupère la dernière sauvegarde et vérifie tout depuis web1.',
+      story:
+        'L’API affiche « db connection refused (db1:5432) ». Il faut aller voir sur l’autre machine.',
+      tasks: [
+        'Démarre postgresql sur db1 (en ssh, avec sudo).',
+        'Ramène le dump le plus récent de db1 (/var/backups/db) dans ~/restore/ sur web1.',
+        'Laisse une copie du /etc/nginx/nginx.conf de web1 sur db1, dans /home/peer/configs/.',
+        'Enregistre dans ~/health.json la réponse de http://localhost/api/health.',
       ],
     },
     solution: [
@@ -777,6 +1001,20 @@ export const ADVANCED: Unit[] = [
         'Write ~/bin/salud.sh, executable: if curl -sf http://localhost/api/health succeeds it prints ok; otherwise it prints caida and exits 1.',
         'Schedule it in your crontab every 5 minutes: */5 * * * * /home/peer/bin/salud.sh',
         'Bring the most recent dump from db1 (/var/backups/db) to ~/restore/.',
+      ],
+    },
+    fr: {
+      title: 'Boss final : avancé',
+      goal: 'Une panne complète de la production, et ce qu’il faut pour qu’elle ne te reprenne plus par surprise : tout le cours, contre la montre. Si tu réussis, tu obtiens le certificat avancé.',
+      story:
+        'Lundi, 9 h. Le site ne charge pas, le disque est plein, quelque chose dévore le CPU et la dernière sauvegarde est sur db1. Et ensuite, on veut que la prochaine fois, une alerte parte toute seule.',
+      tasks: [
+        'Relance nginx (bonne copie dans /etc/nginx/nginx.conf.bak) et l’API (PORT=3000 dans /etc/peer4u/app.env).',
+        'Arrête le miner.py de deploy.',
+        'Fais passer le disque sous les 80 % sans supprimer /var/log/peer4u/debug.log.',
+        'Écris ~/bin/salud.sh, exécutable : si curl -sf http://localhost/api/health réussit, il affiche ok ; sinon, il affiche caida et sort avec 1.',
+        'Programme-le dans ta crontab toutes les 5 minutes : */5 * * * * /home/peer/bin/salud.sh',
+        'Ramène dans ~/restore/ le dump le plus récent de db1 (/var/backups/db).',
       ],
     },
     solution: [

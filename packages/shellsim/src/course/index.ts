@@ -1,6 +1,6 @@
 /** El camino del curso de shell: las unidades en orden y cómo leer cada una en un idioma. */
 
-import { courseLang } from '@sanatorio/course'
+import { courseText } from '@sanatorio/course'
 
 import { ADVANCED } from './advanced.js'
 import { BEGINNER } from './beginner.js'
@@ -14,11 +14,11 @@ export function unitOf(id: string): Unit | undefined {
 }
 
 /**
- * Los textos de una unidad en ese idioma: inglés para `en` y `fr` (que cae al
- * inglés, `courseLang`); si no, castellano, como el curso de git.
+ * Los textos de una unidad en ese idioma: inglés para `en`, francés para `fr`
+ * (o inglés si le faltara) y, si no, castellano, como el curso de git.
  */
 export function unitIn(unit: Unit, lang: string): UnitText {
-  return courseLang(lang) === 'en' ? unit.en : unit.es
+  return courseText(unit, lang)
 }
 
 /** El jefe final que certifica cada nivel. */
