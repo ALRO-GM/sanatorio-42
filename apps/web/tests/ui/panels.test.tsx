@@ -1,4 +1,4 @@
-import { cleanup, screen, within } from '@testing-library/react'
+import { cleanup, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import es from 'virtual:textos/es'
 import { afterEach, describe, expect, it, vi } from 'vitest'
@@ -150,10 +150,16 @@ describe('ventanas y paneles', () => {
 
       await user.click(screen.getByRole('button', { name: /tu cuenta/i }))
       await user.click(await screen.findByRole('menuitem', { name: text('welcome.open') }, WAIT))
-      // La bienvenida espera a que no haya otra ventana delante.
-      await answerGates()
-
-      await screen.findByRole('button', { name: text('welcome.next') }, WAIT)
+      // La bienvenida espera a que no haya otra ventana delante. Una puede
+      // llegar tarde (el aviso de una guardia que empieza ya): se cierra hasta
+      // que la bienvenida sale.
+      await waitFor(
+        async () => {
+          await answerGates()
+          expect(screen.getByRole('button', { name: text('welcome.next') })).toBeTruthy()
+        },
+        { timeout: 12_000, interval: 500 },
+      )
 
       for (let step = 0; step < 12; step++) {
         const next = screen.queryByRole('button', { name: text('welcome.next') })

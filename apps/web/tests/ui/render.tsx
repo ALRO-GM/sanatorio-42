@@ -56,7 +56,11 @@ export async function answerGates(): Promise<void> {
     const gate = [...document.querySelectorAll<HTMLDialogElement>('dialog[open]')].find(
       (dialog) => !dialog.classList.contains('welcome') && !dialog.classList.contains('legal-gate'),
     )
-    const button = gate?.querySelector<HTMLButtonElement>('.actions button:not([disabled])')
+    // El aviso de un evento que empieza ya (una guardia de mentira cerca de la
+    // hora a la que corre el test) no tiene botones de acción: se cierra.
+    const button =
+      gate?.querySelector<HTMLButtonElement>('.actions button:not([disabled])') ??
+      gate?.querySelector<HTMLButtonElement>('.event-sheet-head .icon-btn')
 
     if (button === undefined || button === null) return
 

@@ -1,7 +1,11 @@
 /**
- * Cómo quiere ver cada cual el mapa de clusters: girado o no, con el círculo
+ * Cómo quiere ver cada cual el mapa de clusters: hacia dónde, con el círculo
  * de cada persona y a quién resaltar. Se guarda en el navegador; si no deja
  * guardar, se ve como de fábrica.
+ *
+ * De fábrica, como están los clusters (`docs/asientos.md`): la fila 1 abajo,
+ * el puesto 1 a la izquierda, los impares mirando al norte y los pares al sur,
+ * y cada puesto un poco desplazado hacia el lado contrario de su pantalla.
  */
 
 import type { ClusterMap, MapSeat } from '@sanatorio/contracts'
@@ -12,8 +16,14 @@ export type Mate = 'circle' | 'project' | 'done'
 export const MATES: readonly Mate[] = ['circle', 'project', 'done']
 
 export type MapLook = {
-  /** El plano dado la vuelta: la última fila arriba y el último puesto a la izquierda. */
-  flip: boolean
+  /** La fila 1 arriba en vez de abajo. */
+  flipRows: boolean
+  /** El último puesto a la izquierda en vez del primero. */
+  flipSeats: boolean
+  /** Los impares miran al sur y los pares al norte. */
+  flipFacing: boolean
+  /** Los puestos alineados, sin el desplazamiento de hacia dónde miran. */
+  flat: boolean
   /** El número del círculo en la esquina de cada puesto ocupado. */
   circles: boolean
   /** A quién resaltar; con alguno marcado, el resto se apaga. */
@@ -25,7 +35,14 @@ const PERFECT_MARK = 125
 
 const KEY = 'sanatorio_map_look'
 
-export const DEFAULT_LOOK: MapLook = { flip: false, circles: false, mates: [] }
+export const DEFAULT_LOOK: MapLook = {
+  flipRows: false,
+  flipSeats: false,
+  flipFacing: false,
+  flat: false,
+  circles: false,
+  mates: [],
+}
 
 type Store = Pick<Storage, 'getItem' | 'setItem'>
 
@@ -43,7 +60,10 @@ export function loadLook(store: Store | null = storage()): MapLook {
     const read = JSON.parse(store?.getItem(KEY) ?? 'null') as Partial<MapLook> | null
 
     return {
-      flip: read?.flip === true,
+      flipRows: read?.flipRows === true,
+      flipSeats: read?.flipSeats === true,
+      flipFacing: read?.flipFacing === true,
+      flat: read?.flat === true,
       circles: read?.circles === true,
       mates: Array.isArray(read?.mates)
         ? MATES.filter((mate) => read.mates?.includes(mate) === true)
@@ -101,4 +121,18 @@ export function order(count: number, flip: boolean): number[] {
   const all = Array.from({ length: count }, (_, index) => index + 1)
 
   return flip ? all.reverse() : all
+}
+
+/** Las filas de arriba abajo: de fábrica, la 1 abajo. */
+export const rowsTopDown = (count: number, look: MapLook): number[] => order(count, !look.flipRows)
+
+/**
+ * Hacia dónde queda en pantalla la del ordenador de un puesto: arriba o
+ * abajo. Un impar mira al norte, que está arriba salvo con las filas dadas la
+ * vuelta.
+ */
+export function screenSide(seat: number, look: MapLook): 'up' | 'down' {
+  const north = (seat % 2 === 1) !== look.flipFacing
+
+  return north !== look.flipRows ? 'up' : 'down'
 }

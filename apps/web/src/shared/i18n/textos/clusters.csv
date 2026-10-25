@@ -25,7 +25,10 @@ map.noProjects,Esa persona no tiene proyectos en curso,Sin proyectos en curso,No
 map.legend.clash,Leyenda: reservado a esa hora,Reservado a esa hora,Reserved at that time,Reservat a aquesta hora,Ordu horretan erreserbatuta
 map.profile,Enlace al perfil,Ver perfil,View profile,Veure el perfil,Ikusi profila
 map.look,Opciones de vista del plano,Cómo ver el plano,How to see the map,Com veure el plànol,Planoa nola ikusi
-map.flip,Botón para girar el plano,Girar 180°,Rotate 180°,Gira 180°,Biratu 180°
+map.flipRows,Opción del plano: la fila 1 arriba en vez de abajo,Invertir en vertical,Flip vertically,Inverteix en vertical,Bertikalean irauli
+map.flipSeats,Opción del plano: el primer puesto a la derecha en vez de a la izquierda,Invertir en horizontal,Flip horizontally,Inverteix en horitzontal,Horizontalean irauli
+map.flipFacing,Opción del plano: los impares miran al sur y los pares al norte,Invertir hacia dónde miran,Flip which way seats face,Inverteix cap a on miren,Begiratzeko norabidea irauli
+map.flat,"Opción del plano: puestos alineados, sin el desplazamiento de hacia dónde miran",Alinear,Align,Alinea,Lerrokatu
 map.circles,Casilla: marcar el círculo de cada persona,Círculos,Circles,Cercles,Zirkuluak
 map.highlight,Opciones de resaltado,Resaltar:,Highlight:,Ressalta:,Nabarmendu:
 map.mate.circle,Resaltar: gente de tu círculo,Mi círculo,My circle,El meu cercle,Nire zirkulua

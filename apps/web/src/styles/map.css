@@ -560,3 +560,22 @@ button.seat.open {
   z-index: 60;
   pointer-events: none;
 }
+
+/* Hacia dónde mira cada puesto (`features/map/look.ts`): el canto grueso es el
+   lado de la pantalla, y el puesto se corre un poco hacia el otro lado, donde
+   se sienta la persona. Con «alinear», sin desplazamiento. */
+.seat-grid.staggered {
+  row-gap: 22px;
+}
+.seat.screen-up {
+  border-top-width: 5px;
+}
+.seat.screen-down {
+  border-bottom-width: 5px;
+}
+.seat-grid.staggered .seat.screen-up {
+  top: 6px;
+}
+.seat-grid.staggered .seat.screen-down {
+  top: -6px;
+}

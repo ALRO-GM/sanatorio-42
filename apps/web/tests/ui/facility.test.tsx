@@ -39,3 +39,27 @@ describe('avisar al staff de un problema', () => {
     )
   }, 20_000)
 })
+
+describe('un ordenador que no funciona', () => {
+  it('se marca desde cualquier sitio: pulsar el botón no cierra el puesto antes del clic', async () => {
+    const user = userEvent.setup()
+
+    await openApp('#/clusters')
+
+    const free = await screen.findAllByRole(
+      'button',
+      { name: new RegExp(`· ${text('map.seatFree')}$`) },
+      { timeout: 5000 },
+    )
+
+    await user.click(must(free[0], 'un puesto libre'))
+    await user.click(screen.getByRole('button', { name: text('map.reportBroken') }))
+    expect(
+      await screen.findByRole('button', { name: text('map.fixed') }, { timeout: 5000 }),
+    ).toBeTruthy()
+    await user.click(screen.getByRole('button', { name: text('map.fixed') }))
+    expect(
+      await screen.findByRole('button', { name: text('map.reportBroken') }, { timeout: 5000 }),
+    ).toBeTruthy()
+  }, 20_000)
+})

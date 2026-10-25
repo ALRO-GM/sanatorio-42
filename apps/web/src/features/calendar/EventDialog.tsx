@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 
 import type { CalendarEvent, CalendarSection } from '@sanatorio/contracts'
 
@@ -62,6 +62,8 @@ export function EventDialog({
   onJoin,
 }: EventDialogProps) {
   const { t, lang } = useI18n()
+  // Único por ficha: el calendario y el aviso de un evento pueden tener una abierta cada uno.
+  const titleId = useId()
   const [joining, setJoining] = useState(false)
   const [joinError, setJoinError] = useState<unknown>(null)
   // Se puede apuntar a pizarras y grupos a los que no va, si queda sitio.
@@ -87,7 +89,7 @@ export function EventDialog({
     <dialog
       ref={ref}
       className={`event-dialog kind-${event.kind}`}
-      aria-labelledby="event-dialog-title"
+      aria-labelledby={titleId}
       onClose={() => {
         // El navegador deja cerrar con Escape a la segunda, aunque se le diga que
         // no. Un aviso que pide respuesta se vuelve a abrir.
@@ -145,7 +147,7 @@ export function EventDialog({
             {t('meet.alert', { minutes: Math.max(0, minutesTo(event.start)) })}
           </p>
         )}
-        <h3 id="event-dialog-title">{event.title}</h3>
+        <h3 id={titleId}>{event.title}</h3>
 
         <dl className="event-facts">
           <dt>{t('agenda.when')}</dt>

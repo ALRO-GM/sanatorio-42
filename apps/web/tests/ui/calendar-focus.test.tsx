@@ -28,7 +28,9 @@ describe('calendario: abrir un evento desde la dirección', () => {
 
     await openApp(`#/calendario/${encodeURIComponent(board.id)}`)
 
-    const dialog = await screen.findByRole('dialog', {}, { timeout: 5000 })
+    // Por su título: a según qué hora el calendario abre también el aviso de un
+    // evento que empieza ya (una guardia), en otro diálogo.
+    const dialog = await screen.findByRole('dialog', { name: board.title }, { timeout: 5000 })
 
     expect(within(dialog).getByText(board.title)).toBeTruthy()
     // La dirección vuelve a la del calendario: recargar no la reabre.

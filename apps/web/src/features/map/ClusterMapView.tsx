@@ -7,7 +7,16 @@ import { localeOf, useI18n } from '../../shared/i18n'
 import type { Translate } from '../../shared/i18n'
 import { PillGroup } from '../../shared/ui/PillGroup'
 import { recordHref } from '../../shared/links'
-import { loadLook, lookClasses, MATES, order, saveLook } from './look'
+import {
+  DEFAULT_LOOK,
+  loadLook,
+  lookClasses,
+  MATES,
+  order,
+  rowsTopDown,
+  saveLook,
+  screenSide,
+} from './look'
 import type { MapLook } from './look'
 import { SeatFace } from './SeatFace'
 import { SeatHoverCard } from './SeatHoverCard'
@@ -42,6 +51,9 @@ type ClusterMapViewProps = {
   /** Si viene, en un puesto libre se puede avisar de que no funciona, o de que ya sí. */
   onBroken?: ((host: string, broken: boolean) => void) | undefined
 }
+
+/** Las opciones de hacia dónde se ve el plano, en el orden de los botones. */
+const ORIENTATION = ['flipRows', 'flipSeats', 'flipFacing', 'flat'] as const
 
 /** Abre el expediente de quien ocupa un puesto en otra pestaña. */
 function openRecord(seat: MapSeat): void {
@@ -139,9 +151,9 @@ export function ClusterMapView({
     setLook(next)
     saveLook(next)
   }
-  // Al elegir puestos el plano se ve tal cual: sin giros ni resaltados.
+  // Al elegir puestos el plano se ve de fábrica: sin giros ni resaltados.
   const tools = onPick === undefined
-  const shown: MapLook = tools ? look : { flip: false, circles: false, mates: [] }
+  const shown: MapLook = tools ? look : DEFAULT_LOOK
 
   const hover = (seat: MapSeat) => (event: MouseEvent | FocusEvent) => {
     if (seat.occupant !== null) {
@@ -163,8 +175,13 @@ export function ClusterMapView({
     const onDown = (event: PointerEvent): void => {
       const target = event.target
 
-      // Pulsar otro puesto ya cambia de ficha: eso lo lleva su propio clic.
-      if (target instanceof Element && target.closest('.seat-hover.pinned, .seat') !== null) return
+      // Pulsar otro puesto ya cambia de ficha: eso lo lleva su propio clic. Y
+      // lo de debajo del plano (avisar de que no funciona) es del puesto abierto.
+      if (
+        target instanceof Element &&
+        target.closest('.seat-hover.pinned, .seat, .seat-detail') !== null
+      )
+        return
 
       setOpenHost(null)
     }
@@ -200,8 +217,8 @@ export function ClusterMapView({
   const openReservation = reservation !== null && showReservation(reservation) ? reservation : null
   // El puesto abierto, si hay alguien sentado: es el que lleva ficha fijada.
   const openTaken = open?.occupant === undefined || open.occupant === null ? null : open
-  const rows = order(cluster.rows, shown.flip)
-  const columns = order(cluster.seatsPerRow, shown.flip)
+  const rows = rowsTopDown(cluster.rows, shown)
+  const columns = order(cluster.seatsPerRow, shown.flipSeats)
 
   return (
     <div className="cluster-map">
@@ -230,16 +247,19 @@ export function ClusterMapView({
 
       {tools && (
         <div className="map-tools" role="group" aria-label={t('map.look')}>
-          <button
-            type="button"
-            className={`pill ${look.flip ? 'active' : ''}`}
-            aria-pressed={look.flip}
-            onClick={() => {
-              change({ ...look, flip: !look.flip })
-            }}
-          >
-            ⟲ {t('map.flip')}
-          </button>
+          {ORIENTATION.map((option) => (
+            <button
+              key={option}
+              type="button"
+              className={`pill ${look[option] ? 'active' : ''}`}
+              aria-pressed={look[option]}
+              onClick={() => {
+                change({ ...look, [option]: !look[option] })
+              }}
+            >
+              {t(`map.${option}`)}
+            </button>
+          ))}
           <button
             type="button"
             className={`pill ${look.circles ? 'active' : ''}`}
@@ -278,7 +298,7 @@ export function ClusterMapView({
 
       <div className="map-scroll">
         <div
-          className="seat-grid"
+          className={`seat-grid ${shown.flat ? '' : 'staggered'}`}
           style={{ gridTemplateColumns: `auto repeat(${cluster.seatsPerRow}, var(--seat))` }}
           role="group"
           aria-label={clusterName(cluster.id, t)}
@@ -306,6 +326,7 @@ export function ClusterMapView({
                     type="button"
                     className={[
                       seatClasses(seat, isPicked, reserved),
+                      `screen-${screenSide(seat.seat, shown)}`,
                       seat.host === openHost ? 'open' : '',
                       ...lookClasses(seat, map.me, shown),
                       ...(spotlight === null || seat.occupant === null

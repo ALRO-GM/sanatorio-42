@@ -8,7 +8,9 @@ import {
   lookClasses,
   matesOf,
   order,
+  rowsTopDown,
   saveLook,
+  screenSide,
 } from '../src/features/map/look'
 
 const me = { circle: 2, projects: ['ft_printf'] }
@@ -84,12 +86,31 @@ describe('cómo se ve el mapa', () => {
     }
 
     expect(loadLook(store)).toEqual(DEFAULT_LOOK)
-    saveLook({ flip: true, circles: true, mates: ['project'] }, store)
-    expect(loadLook(store)).toEqual({ flip: true, circles: true, mates: ['project'] })
-    // Lo que no se entiende se queda fuera.
-    saved.set('sanatorio_map_look', '{"flip":"sí","mates":["x","done"]}')
-    expect(loadLook(store)).toEqual({ flip: false, circles: false, mates: ['done'] })
+    const turned = { ...DEFAULT_LOOK, flipRows: true, flat: true, circles: true }
+
+    saveLook({ ...turned, mates: ['project'] }, store)
+    expect(loadLook(store)).toEqual({ ...turned, mates: ['project'] })
+    // Lo que no se entiende se queda fuera, y el giro de antes ya no vale.
+    saved.set('sanatorio_map_look', '{"flip":true,"flipSeats":"sí","mates":["x","done"]}')
+    expect(loadLook(store)).toEqual({ ...DEFAULT_LOOK, mates: ['done'] })
     saved.set('sanatorio_map_look', 'no es json')
     expect(loadLook(store)).toEqual(DEFAULT_LOOK)
+  })
+})
+
+describe('hacia dónde se ve el plano (docs/asientos.md)', () => {
+  it('de fábrica, la fila 1 abajo y los impares con la pantalla arriba (al norte)', () => {
+    expect(rowsTopDown(3, DEFAULT_LOOK)).toEqual([3, 2, 1])
+    expect(screenSide(3, DEFAULT_LOOK)).toBe('up')
+    expect(screenSide(4, DEFAULT_LOOK)).toBe('down')
+  })
+
+  it('con las filas al revés el norte queda abajo; invertir hacia dónde miran lo cambia otra vez', () => {
+    const rows = { ...DEFAULT_LOOK, flipRows: true }
+
+    expect(rowsTopDown(3, rows)).toEqual([1, 2, 3])
+    expect(screenSide(3, rows)).toBe('down')
+    expect(screenSide(3, { ...rows, flipFacing: true })).toBe('up')
+    expect(screenSide(3, { ...DEFAULT_LOOK, flipFacing: true })).toBe('down')
   })
 })

@@ -54,3 +54,11 @@ amigos) salen con el mismo Louvain que la red de correcciones.
 `GET /network/seats?days=` (`docs/api.md`), en la web `features/network/SeatsPage.tsx`
 dentro de la pestaña Red (`RedPage.tsx`). Para piscineros, permiso
 `red.seats` en el panel (dentro de la Red).
+
+## El plano de los clústeres
+
+La pestaña Clústeres pinta el plano igual de fábrica (`features/map/look.ts`):
+la fila 1 abajo, el puesto 1 a la izquierda, y cada puesto un poco desplazado
+hacia donde se sienta la persona, con el canto grueso del lado de su pantalla.
+Opciones (se recuerdan en el navegador): invertir en vertical, en horizontal,
+hacia dónde miran los asientos, y alinear sin desplazamiento.
