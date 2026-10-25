@@ -1,23 +1,23 @@
-# Tareas tras compactar (2026-10-25)
+# Tareas tras compactar (2026-10-25, noche)
 
-Francés como quinto idioma y repaso de textos (pedido por Alberto).
+Desplegado: 9650f72 (París en `SYNC_CAMPUS_IDS` del servidor, selector de
+escuelas con 2 s, quitar a los de fuera). En main sin desplegar (e5b8088):
+todo el francés de la fase 2 (tablas, banco, lecciones) con `fr` oculto del
+selector (`unlisted: true`).
 
-- Fase 1 (hecha, en main 69274da, sin desplegar): infraestructura del francés,
-  columna `fr` vacía con el inglés de reserva, `FR_REQUIRED = false` en
-  `apps/web/tools/textos-cli.ts`.
-- Fase 2 (en marcha, 7 agentes en worktrees, sin push): cada uno repasa
-  es/en/ca/eu de sus tablas y escribe el francés. Encargo común en
-  `/tmp/claude-1000/-home-alberto-Desktop-ideas/57dad75e-f532-4dbb-a822-ebdccca067cc/scratchpad/brief-textos.md`.
-  - A: comun, legal, agenda, avisos, calendario
-  - B: juego/juego.csv, code-clicker
-  - C: gestion
-  - D: notgames, curso-shell, red, estadisticas, examenes
-  - E: expediente, animos, demos, buzon, tablon, terapia, guardia, clusters,
-    pizarras, sala-de-espera
-  - F: lecciones del curso de git (`levels/fr/`) y de shell (`fr` en cada unidad)
-  - G: banco de preguntas de Not-games (`bank/fr/`, `Actor.lang` con `fr`)
-- Al unir: conflictos solo en `docs/textos/*.md` (regenerar con
-  `npm run textos -- --write`).
-- Fase 3: un agente distinto relee todo el francés (doble comprobación) y
-  coherencia del glosario; luego `FR_REQUIRED = true`, check, cobertura,
-  push y despliegue.
+En marcha (worktrees, sin push):
+
+- Revisor 1: todo el `fr` de las tablas CSV, glosario único
+  (`docs/glosario-frances.md`), comprobaciones automáticas, `FR_REQUIRED = true`
+  y quitar `unlisted`. Glosario de partida:
+  `/tmp/claude-1000/-home-alberto-Desktop-ideas/57dad75e-f532-4dbb-a822-ebdccca067cc/scratchpad/glosario-fr.md`.
+- Revisor 2: banco de preguntas en francés (`bank/fr`).
+- Revisor 3: lecciones de git y shell en francés.
+- Burbuja de sugerencias de mejora (migración 0078).
+- Avance: selecciones múltiples (plan, población, alcance), varias personas,
+  «los más rápidos», terminados de Python (si son pocos, línea individual).
+
+Al unir: conflictos de `docs/textos/*.md` se regeneran con
+`npm run textos -- --write`; las filas nuevas de otros agentes tienen que
+llevar `fr` (con `FR_REQUIRED` encendido). Después: check, cobertura, push y
+despliegue.
