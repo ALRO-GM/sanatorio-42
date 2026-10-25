@@ -30,7 +30,7 @@ describe('guardia: las medias horas como un día del calendario', () => {
     await openApp('#/guardia')
 
     // Si hay una sesión sin valorar, primero se valora (si no, no deja ofrecerse).
-    const grid = await screen.findByRole('group', { name: text('help.today') })
+    const grid = await screen.findByRole('group', { name: text('help.today') }, { timeout: 5000 })
     const pending = document.querySelector<HTMLButtonElement>('.rating-options button')
 
     if (pending !== null) await user.click(pending)

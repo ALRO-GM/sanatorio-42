@@ -27,6 +27,11 @@ type LangEntry = {
    * mejor que el castellano mientras se traduce.
    */
   fallback?: Lang
+  /**
+   * Aún no se ofrece en el selector (se traduce y se revisa). Quien ya lo tenga
+   * elegido lo sigue viendo. Se quita cuando `FR_REQUIRED` pase a `true`.
+   */
+  unlisted?: boolean
 }
 
 export const LANGS: Record<Lang, LangEntry> = {
@@ -34,7 +39,12 @@ export const LANGS: Record<Lang, LangEntry> = {
   en: { name: 'English', load: () => import('virtual:textos/en') },
   ca: { name: 'Català', load: () => import('virtual:textos/ca') },
   eu: { name: 'Euskara', load: () => import('virtual:textos/eu') },
-  fr: { name: 'Français', load: () => import('virtual:textos/fr'), fallback: 'en' },
+  fr: {
+    name: 'Français',
+    load: () => import('virtual:textos/fr'),
+    fallback: 'en',
+    unlisted: true,
+  },
 }
 
 /** Los idiomas ya descargados. */

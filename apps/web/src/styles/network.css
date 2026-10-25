@@ -938,3 +938,37 @@ ol.net-rows .net-row-name {
   color: var(--text-3);
   font-size: 0.85em;
 }
+/* Escuelas marcadas o quitadas que aún no se han pedido: con borde discontinuo. */
+.campus-picker .pill.pending {
+  border-style: dashed;
+}
+/* La espera de dos segundos, como una barra que se vacía. */
+.campus-wait {
+  display: grid;
+  gap: 0.2rem;
+  margin-top: 0.35rem;
+}
+.campus-wait small {
+  color: var(--text-3);
+}
+.campus-wait-bar {
+  display: block;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--accent);
+  transform-origin: left;
+  animation: campus-wait 2s linear forwards;
+}
+@keyframes campus-wait {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .campus-wait-bar {
+    animation: none;
+  }
+}

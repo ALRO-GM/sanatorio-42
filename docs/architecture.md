@@ -114,7 +114,10 @@ por prioridad:
 - Mientras la copia no ha terminado, lo que falte para una pantalla concreta se
   pide en el momento (`ensureFresh`), con tope.
 - Los campus de `SYNC_CAMPUS_IDS` se copian enteros; el resto funcionan bajo
-  demanda.
+  demanda. En producción: Madrid (22), Málaga (37), Urduliz (40), Barcelona
+  (46) y, desde el 2026-10-25, París (1). París es el más grande: unas 404 000
+  correcciones (unas 4 000 peticiones la primera vez, con la cuota que sobra) y
+  unas 24 000 personas.
 
 `npm run sync:status` enseña por dónde va.
 

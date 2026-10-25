@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it } from 'vitest'
 import en from 'virtual:textos/en'
 import es from 'virtual:textos/es'
 import fr from 'virtual:textos/fr'
+import { LANGS } from '../../src/shared/i18n'
 import { must } from './must'
 import { openApp, settle } from './render'
 
@@ -100,6 +101,11 @@ describe('lo que hace la gente en la web, de principio a fin', () => {
     const user = userEvent.setup()
 
     await openApp('#/expediente')
+    // Mientras se revisa la traducción no se ofrece en el selector.
+    expect(screen.queryByRole('option', { name: 'Français' })).toBeNull()
+    cleanup()
+    LANGS.fr.unlisted = false
+    await openApp('#/expediente')
     await user.selectOptions(
       screen.getByRole('combobox', { name: text('settings.lang') }),
       screen.getByRole('option', { name: 'Français' }),
@@ -111,6 +117,7 @@ describe('lo que hace la gente en la web, de principio a fin', () => {
       screen.getAllByText(fr['nav.cat.ayuda'] ?? en['nav.cat.ayuda'] ?? '?').length,
     ).toBeGreaterThan(0)
     expect(screen.queryByText(text('nav.cat.ayuda'))).toBeNull()
+    LANGS.fr.unlisted = true
   }, 20_000)
 
   it('una dirección que no existe lleva a la portada, no a una pantalla en blanco', async () => {

@@ -23,7 +23,7 @@ Cómo se trabaja con ellas: [docs/textos.md](../textos.md).
 | [legal](legal.md) | 56 | 0 | 0 | 0 | 56 |
 | [notgames](notgames.md) | 224 | 0 | 0 | 0 | 224 |
 | [pizarras](pizarras.md) | 36 | 0 | 0 | 0 | 36 |
-| [red](red.md) | 160 | 0 | 0 | 0 | 160 |
+| [red](red.md) | 164 | 0 | 0 | 0 | 160 |
 | [sala-de-espera](sala-de-espera.md) | 46 | 0 | 0 | 0 | 46 |
 | [tablon](tablon.md) | 93 | 0 | 0 | 0 | 93 |
 | [terapia](terapia.md) | 57 | 0 | 0 | 0 | 57 |

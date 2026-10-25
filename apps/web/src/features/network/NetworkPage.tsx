@@ -10,6 +10,7 @@ import { useI18n } from '../../shared/i18n'
 import { useFormat } from '../../shared/i18n/useFormat'
 import { Blocks } from '../../shared/layout/Blocks'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { CampusPicker } from './CampusPicker'
 import { PillGroup } from '../../shared/ui/PillGroup'
 import {
   COLOR_MODES,
@@ -173,6 +174,21 @@ export function NetworkPage({ me, switcher }: { me: CurrentUser; switcher?: Reac
 
   const options = graph !== null && graph.nodes.length === 0 ? (lastFull ?? graph) : graph
 
+  // Sin quien no es de ninguna de las escuelas elegidas: solo llenan de líneas.
+  const [onlyInside, setOnlyInside] = useState(false)
+  const shownGraph = useMemo(() => {
+    if (graph === null || !onlyInside) return graph
+
+    const nodes = graph.nodes.filter((node) => !node.external)
+    const inside = new Set(nodes.map((node) => node.login))
+
+    return {
+      ...graph,
+      nodes,
+      links: graph.links.filter((link) => inside.has(link.source) && inside.has(link.target)),
+    }
+  }, [graph, onlyInside])
+
   // Mientras se copia el histórico, el grafo crece solo.
   const copying = graph !== null && graph.sync.phase !== 'done'
 
@@ -332,40 +348,14 @@ export function NetworkPage({ me, switcher }: { me: CurrentUser; switcher?: Reac
             {graph !== null && options !== null && options.available.length > 1 && (
               <div className="net-filter">
                 <span className="eyebrow">{t('net.campuses')}</span>
-                <PillGroup<number | 'all'>
-                  options={[...options.available.map((campus) => campus.id), 'all']}
-                  value={null}
-                  pressed={(option) =>
-                    option === 'all'
-                      ? graph.campuses.length === options.available.length
-                      : graph.campuses.includes(option)
-                  }
-                  onChange={(option) => {
-                    if (option === 'all') {
-                      change({ campuses: 'all' })
-                      setMode('campus')
-
-                      return
-                    }
-
-                    const on = graph.campuses.includes(option)
-                    const next = on
-                      ? graph.campuses.filter((id) => id !== option)
-                      : [...graph.campuses, option]
-
-                    // Sin ninguno no hay grafo: el último no se puede quitar.
-                    if (next.length === 0) return
-
+                <CampusPicker
+                  available={options.available}
+                  current={graph.campuses}
+                  onApply={(next) => {
                     change({ campuses: next })
-                    // Con más de uno, lo que interesa ver es de cuál es cada quien.
-                    if (next.length > 1) setMode('campus')
+                    // Con más de una, lo que interesa ver es de cuál es cada quien.
+                    if (next === 'all' || next.length > 1) setMode('campus')
                   }}
-                  label={t('net.campuses')}
-                  text={(option) =>
-                    option === 'all'
-                      ? t('net.campuses.all')
-                      : options.available.find((campus) => campus.id === option)?.name
-                  }
                 />
               </div>
             )}
@@ -516,6 +506,16 @@ export function NetworkPage({ me, switcher }: { me: CurrentUser; switcher?: Reac
                   }}
                 />
                 {t('net.mutualOnly')}
+              </label>
+              <label className="net-check">
+                <input
+                  type="checkbox"
+                  checked={onlyInside}
+                  onChange={(event) => {
+                    setOnlyInside(event.target.checked)
+                  }}
+                />
+                {t('net.onlyInside')}
               </label>
             </div>
           </div>
@@ -799,20 +799,20 @@ export function NetworkPage({ me, switcher }: { me: CurrentUser; switcher?: Reac
         {graph !== null && (
           <>
             <div className={`net-stage ${loading ? 'loading' : ''}`}>
-              {graph.nodes.length === 0 ? (
+              {(shownGraph ?? graph).nodes.length === 0 ? (
                 <p className="estado">
                   {graph.query.login === null ? t('net.empty') : t('net.emptyPerson')}
                 </p>
               ) : (
                 <ForceGraph
-                  nodes={graph.nodes}
-                  links={graph.links}
+                  nodes={(shownGraph ?? graph).nodes}
+                  links={(shownGraph ?? graph).links}
                   colorOf={paint}
                   selected={selected}
                   onSelect={setSelected}
                   label={t('net.graphLabel', {
-                    people: graph.nodes.length,
-                    links: graph.links.length,
+                    people: (shownGraph ?? graph).nodes.length,
+                    links: (shownGraph ?? graph).links.length,
                   })}
                   tooltip={tooltip}
                   controls={controls}
@@ -885,7 +885,7 @@ export function NetworkPage({ me, switcher }: { me: CurrentUser; switcher?: Reac
                         onClick={() => {
                           setScales((current) => ({
                             ...current,
-                            [mode]: fitScale(graph.nodes, mode),
+                            [mode]: fitScale((shownGraph ?? graph).nodes, mode),
                           }))
                         }}
                       >
@@ -906,7 +906,10 @@ export function NetworkPage({ me, switcher }: { me: CurrentUser; switcher?: Reac
               </div>
               <p className="net-help">{t('net.help')}</p>
               <p className="net-shown" role="status">
-                {t('net.shown', { people: graph.nodes.length, links: graph.links.length })}
+                {t('net.shown', {
+                  people: (shownGraph ?? graph).nodes.length,
+                  links: (shownGraph ?? graph).links.length,
+                })}
                 {graph.hidden !== null &&
                   ` · ${t('net.hidden', { people: graph.hidden.nodes, links: graph.hidden.links })}`}
               </p>
