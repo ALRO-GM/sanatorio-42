@@ -185,6 +185,8 @@ export type ApiEvent = {
   nbr_subscribers?: number | null
   begin_at: string
   end_at: string
+  /** De qué cursus es: `9` la piscina, `21` el 42cursus. Puede venir vacía. */
+  cursus_ids?: number[] | null
 }
 
 /** La inscripción de alguien a un evento, de `GET /v2/users/:id/events_users`. */
@@ -203,6 +205,8 @@ export type ApiExam = {
   nbr_subscribers?: number | null
   begin_at: string
   end_at: string
+  /** De qué cursus es (`9` la piscina, `21` el 42cursus). Puede venir vacía. */
+  cursus?: { id: number }[] | null
 }
 
 /**

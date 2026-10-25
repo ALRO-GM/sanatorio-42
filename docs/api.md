@@ -256,7 +256,11 @@ si no conocemos a nadie con ese login.
 
 Un evento se nombra con su id del calendario (`board:12`, `help:booking:7`,
 `therapy:3:2026-10-12`, `evaluation:9690094`). Solo quien lo tiene en su
-calendario (y va a ir) puede leer o escribir; el resto recibe `403`.
+calendario (y va a ir) puede leer o escribir; el resto recibe `403`. Una sala
+con alguien del otro mundo (estudiante o piscinero: quien organiza la pizarra
+o la terapia, las dos partes de una ayuda o de un chat directo) también da
+`403`, y en el chat, la asistencia, los avisos y la lista de conversaciones no
+sale nadie del otro mundo.
 
 - GET /events/thread?id= → `{ "messages": [{ "id", "login", "image", "kind", "minutes", "reason", "body", "at" }] }`.
 - POST /events/messages → `{ "id", "kind", "minutes"?, "reason"?, "body"? }`; devuelve el chat.
@@ -668,6 +672,13 @@ corrección recién reservada. `fresh` solo admite `0` o `1`.
 - De una corrección no se dice con quién: 42 lo oculta hasta que llega la hora.
 - Las **franjas abiertas para corregir** no están: 42 solo las da con el permiso
   `projects` (de escritura), que esta web no pide.
+- **Mundos separados** (`docs/piscineros.md`): los eventos y exámenes del
+  campus se filtran por cursus (`cursus_ids` de los eventos, `cursus` de los
+  exámenes, guardados en `agenda_events.cursus`). Un estudiante ve los del
+  42cursus (`21`) y los que no dicen de qué cursus son (lista vacía o filas de
+  antes); un piscinero, solo los de la piscina (`9`). Lo que va con otra
+  persona (`withLogin`) solo sale si es de tu mundo. Lo tuyo de 42
+  (inscripciones, exámenes y correcciones) sale siempre.
 
 Lo de 42 se pide solo cuando alguien abre su calendario y se guarda: lo del
 campus (eventos y exámenes, 2 peticiones) una hora; lo de cada persona

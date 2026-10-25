@@ -14,6 +14,11 @@
  * | `event_open`   | Eventos de 42 del campus a los que no                    |
  * | `exam`         | Exámenes de 42 del campus                                |
  *
+ * Mundos separados (`docs/piscineros.md`): lo de 42 del campus llega ya
+ * filtrado por cursus (un estudiante, lo del 42cursus; un piscinero, lo de la
+ * piscina) y lo que va con otra persona (`withLogin`) solo sale si esa persona
+ * es de su mundo.
+ *
  * Las **franjas abiertas para corregir** no están: 42 solo las enseña a
  * aplicaciones con permiso de escritura sobre proyectos (`projects`), que esta
  * web no pide. Sí están las correcciones ya concertadas, que es lo que acaba
@@ -23,6 +28,8 @@
 import type { Calendar, CalendarEvent } from '@sanatorio/contracts'
 
 import type { Actor } from '../../core/actor.js'
+import { NO_POOL, seesFor } from '../../core/audience.js'
+import type { Audience } from '../../core/audience.js'
 import { domainError } from '../../core/errors.js'
 import { isoAt, minutesOf, zonedInstant } from '../../core/time.js'
 import type { BoardsService } from '../boards/index.js'
@@ -37,6 +44,8 @@ type CalendarServiceOptions = {
   help: HelpService
   therapy: TherapyService
   boards: BoardsService
+  /** Quién ve a quién. Sin ella, nadie es piscinero. */
+  audience?: Audience
 }
 
 const DAY = 24 * 60 * 60_000
@@ -59,6 +68,7 @@ const BASE = {
 
 export function createCalendarService(options: CalendarServiceOptions) {
   const { replica, agenda, help, therapy, boards } = options
+  const audience = options.audience ?? NO_POOL
 
   /** Franjas de guardia de hoy y reservas de ayuda. */
   async function helpEvents(actor: Actor, timeZone: string | undefined): Promise<CalendarEvent[]> {
@@ -165,7 +175,12 @@ export function createCalendarService(options: CalendarServiceOptions) {
     fresh = false,
   ): Promise<{ events: CalendarEvent[]; at: string | null }> {
     const [campus, mine] = await Promise.all([
-      agenda.campusEvents(actor.campusId, isoAt(from), isoAt(to)),
+      agenda.campusEvents(
+        actor.campusId,
+        isoAt(from),
+        isoAt(to),
+        actor.pool === true ? 'pool' : 'student',
+      ),
       fresh
         ? agenda.userAgenda(actor.login, userId, FRESH_USER_TTL_MS)
         : agenda.userAgenda(actor.login, userId),
@@ -248,14 +263,18 @@ export function createCalendarService(options: CalendarServiceOptions) {
       }
 
       const timeZone = await replica.timeZoneOf(actor.campusId)
-      const [own, sessions, whiteboards, fortyTwo] = await Promise.all([
+      const [own, sessions, whiteboards, fortyTwo, sees] = await Promise.all([
         helpEvents(actor, timeZone),
         therapyEvents(actor, from, to, timeZone),
         boardEvents(actor, from, to),
         fortyTwoEvents(actor, userId, from, to, fresh),
+        seesFor(audience, actor),
       ])
+      // Lo que va con alguien del otro mundo no se enseña: ni su login ni el evento.
       const inRange = (event: CalendarEvent): boolean =>
-        Date.parse(event.start) < to && Date.parse(event.end) > from
+        Date.parse(event.start) < to &&
+        Date.parse(event.end) > from &&
+        (event.withLogin === null || event.withLogin === actor.login || sees(event.withLogin))
 
       return {
         events: [...own, ...sessions, ...whiteboards, ...fortyTwo.events]

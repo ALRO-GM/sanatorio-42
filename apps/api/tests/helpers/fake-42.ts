@@ -19,6 +19,8 @@ import type {
   ApiLocation,
   ApiProjectUser,
   ApiCursusUser,
+  ApiEvent,
+  ApiExam,
   ApiQuestUser,
   ApiScaleTeam,
 } from '../../src/integrations/forty-two/types.js'
@@ -41,6 +43,9 @@ export type Fake42 = {
     number,
     { id: number; reason: string; sum: number; total: number; created_at: string }[]
   >
+  /** Eventos y exámenes de cada campus (`/campus/:id/events` y `/exams`), sin filtrar por fecha. */
+  events: Map<number, ApiEvent[]>
+  exams: Map<number, ApiExam[]>
   /** Rutas pedidas, en orden, sin el host. */
   calls: string[]
   /** Lo que dirá `x-hourly-ratelimit-remaining` en la próxima respuesta. */
@@ -58,6 +63,8 @@ export function createFake42(pageSize = 2): Fake42 {
     cursus: new Map(),
     scaleTeams: new Map(),
     points: new Map(),
+    events: new Map(),
+    exams: new Map(),
     calls: [],
     hourlyRemaining: 1200,
     failOn: null,
@@ -81,9 +88,14 @@ export function createFake42(pageSize = 2): Fake42 {
 
     let items: unknown[] = []
     const campusLocations = /^\/campus\/(\d+)\/locations$/.exec(path)
+    const campusAgenda = /^\/campus\/(\d+)\/(events|exams)$/.exec(path)
 
     if (campusLocations !== null) {
       items = state.locations.get(Number(campusLocations[1])) ?? []
+    } else if (campusAgenda !== null) {
+      items =
+        (campusAgenda[2] === 'events' ? state.events : state.exams).get(Number(campusAgenda[1])) ??
+        []
     } else if (path === '/projects_users') {
       const range = url.searchParams.get('range[updated_at]')?.split(',')
       const projectId = url.searchParams.get('filter[project_id]')

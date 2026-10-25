@@ -82,6 +82,34 @@ const FUTURE_DAYS = 92
 /** Lo que dura una corrección si 42 no lo dice. */
 const DEFAULT_EVALUATION_MS = 30 * MINUTE
 
+const CORE_CURSUS_ID = 21
+const PISCINE_CURSUS_ID = 9
+
+/**
+ * Para quién se leen los eventos del campus (`docs/piscineros.md`, mundos
+ * separados): un estudiante ve lo del 42cursus y lo que no dice de qué cursus
+ * es (las filas de antes, sin `cursus`); un piscinero, solo lo de la piscina.
+ */
+type AgendaAudience = 'student' | 'pool'
+
+const AUDIENCE_SQL: Record<AgendaAudience, string> = {
+  student: `(cursus IS NULL OR cursus = '[]'
+             OR EXISTS (SELECT 1 FROM json_each(cursus) WHERE value = ${CORE_CURSUS_ID}))`,
+  pool: `EXISTS (SELECT 1 FROM json_each(cursus) WHERE value = ${PISCINE_CURSUS_ID})`,
+}
+
+/** Los ids de cursus de un evento o examen de 42, en JSON; `null` si 42 no los dice. */
+function cursusOf(item: ApiEvent | ApiExam): string | null {
+  const ids =
+    'cursus_ids' in item
+      ? item.cursus_ids
+      : 'cursus' in item
+        ? item.cursus?.map((cursus) => cursus.id)
+        : undefined
+
+  return Array.isArray(ids) ? JSON.stringify(ids.filter((id) => Number.isInteger(id))) : null
+}
+
 function parseList<T>(value: unknown): T[] {
   try {
     const parsed: unknown = JSON.parse(toText(value))
@@ -126,8 +154,8 @@ export function createAgenda(options: AgendaOptions) {
       ...items.map((item) => ({
         sql: `INSERT OR REPLACE INTO agenda_events
                 (source, id, campus_id, name, description, location, kind,
-                 begin_at, end_at, max_people, subscribers)
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                 begin_at, end_at, max_people, subscribers, cursus)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         args: [
           source,
           item.id,
@@ -141,6 +169,7 @@ export function createAgenda(options: AgendaOptions) {
           // En 42, `max_people: 0` significa "sin tope", igual que `null`.
           item.max_people === 0 ? null : (item.max_people ?? null),
           item.nbr_subscribers ?? null,
+          cursusOf(item),
         ],
       })),
     ])
@@ -165,8 +194,17 @@ export function createAgenda(options: AgendaOptions) {
   }
 
   return {
-    /** Eventos y exámenes de un campus, refrescándolos antes si toca. */
-    async campusEvents(campusId: number, from: string, to: string): Promise<AgendaEvent[]> {
+    /**
+     * Eventos y exámenes de un campus, refrescándolos antes si toca.
+     *
+     * @param audience Para quién: de fábrica, lo que ve un estudiante.
+     */
+    async campusEvents(
+      campusId: number,
+      from: string,
+      to: string,
+      audience: AgendaAudience = 'student',
+    ): Promise<AgendaEvent[]> {
       if (now() - (campusFetchedAt.get(campusId) ?? 0) >= CAMPUS_TTL_MS && canSpend()) {
         const [start, end] = window()
 
@@ -191,7 +229,8 @@ export function createAgenda(options: AgendaOptions) {
 
       const result = await db.execute({
         sql: `SELECT * FROM agenda_events
-              WHERE campus_id = ? AND begin_at < ? AND end_at > ? ORDER BY begin_at`,
+              WHERE campus_id = ? AND begin_at < ? AND end_at > ? AND ${AUDIENCE_SQL[audience]}
+              ORDER BY begin_at`,
         args: [campusId, to, from],
       })
 

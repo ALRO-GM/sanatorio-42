@@ -5,6 +5,7 @@
  * de 42 de `replica`.
  */
 
+import type { Audience } from '../../core/audience.js'
 import type { AppModule } from '../../core/module.js'
 import type { BoardsService } from '../boards/index.js'
 import type { HelpService } from '../help/index.js'
@@ -20,6 +21,7 @@ type CalendarModuleDeps = {
   help: HelpService
   therapy: TherapyService
   boards: BoardsService
+  audience?: Audience
 }
 
 export type CalendarModule = AppModule & { service: CalendarService }

@@ -66,6 +66,8 @@ type ConversationsOptions = {
   now: () => number
   /** Corta con `forbidden` si esa persona no participa en ese chat. */
   assertParticipant: (actor: Actor, userId: number | null, id: string) => Promise<void>
+  /** A quién puede ver `actor` (mundos separados, `docs/piscineros.md`). */
+  seerOf: (actor: Actor) => Promise<(login: string) => boolean>
 }
 
 /** De qué es un chat, por cómo empieza su id. */
@@ -191,7 +193,15 @@ export function createConversations(options: ConversationsOptions) {
               ) GROUP BY chat ORDER BY at DESC LIMIT ?`,
         args: [me, `dm:${me}:%`, `dm:%:${me}`, me, me, MAX_CONVERSATIONS],
       })
-      const ids = mine.rows.map((row) => toText(row.chat))
+      const sees = await options.seerOf(actor)
+      // Un chat directo con alguien del otro mundo no sale en la lista.
+      const ids = mine.rows
+        .map((row) => toText(row.chat))
+        .filter((id) => {
+          const peer = peerOf(id, me)
+
+          return peer === null || sees(peer)
+        })
 
       if (ids.length === 0) return { items: [] }
 
@@ -262,8 +272,9 @@ export function createConversations(options: ConversationsOptions) {
             peer,
             image: peer === null ? null : (images.get(peer) ?? null),
             online: peer !== null && online.has(peer),
+            // Si lo último lo escribió alguien del otro mundo, no se dice quién ni qué.
             last:
-              last === undefined
+              last === undefined || !sees(toText(last.login))
                 ? null
                 : {
                     from: toText(last.login),

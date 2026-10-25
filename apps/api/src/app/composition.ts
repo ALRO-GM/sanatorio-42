@@ -312,6 +312,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     help: help.service,
     therapy: therapy.service,
     boards: boards.service,
+    audience,
   })
 
   const network = createNetworkModule({
@@ -364,6 +365,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     attendance: attendance.service,
     therapy: therapy.service,
     replica: replica.repository,
+    audience,
     notify,
     onRead: (login, eventId) => notices.service.readAbout(login, 'chat', eventId),
     online,
