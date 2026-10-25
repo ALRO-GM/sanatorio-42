@@ -28,6 +28,8 @@ import { createCalendarModule } from '../modules/calendar/index.js'
 import type { CalendarModule } from '../modules/calendar/index.js'
 import { createClickerModule, hackerTitle } from '../modules/clicker/index.js'
 import { createClientErrorsModule } from '../modules/client-errors/index.js'
+import { createCountdownsModule } from '../modules/countdowns/index.js'
+import type { CountdownsModule } from '../modules/countdowns/index.js'
 import type { ClickerModule } from '../modules/clicker/index.js'
 import { createDoubtsModule } from '../modules/doubts/index.js'
 import type { DoubtsModule } from '../modules/doubts/index.js'
@@ -131,6 +133,9 @@ export type Services = {
   admin: AdminModule['service']
   notices: NoticesModule['service']
   broadcasts: BroadcastsModule['service']
+  countdowns: CountdownsModule['service']
+  /** El modo mantenimiento (`docs/mantenimiento.md`): lo guarda `admin`. */
+  maintenance: AdminModule['maintenance']
   clicker: ClickerModule['service']
   tours: ToursModule['service']
   legal: LegalModule['service']
@@ -164,6 +169,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     admin: AdminModule
     calendar: CalendarModule
     clicker: ClickerModule
+    countdowns: CountdownsModule
     exams: ExamsModule
     help: HelpModule
     modules: AppModule[]
@@ -252,6 +258,8 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     clickerReviews: async (actor) => (await late.get('clicker').service.reviews(actor)).length,
     help: (actor) => late.get('help').service.inboxCount(actor),
     examLive: (actor) => late.get('exams').live.running(actor),
+    countdowns: (actor) => late.get('countdowns').service.stamp(actor),
+    maintenance: async () => (await late.get('admin').maintenance.current()).on,
     ...clock,
   })
 
@@ -322,6 +330,21 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     therapy: therapy.service,
     boards: boards.service,
     audience,
+  })
+  // Avisos con cuenta atrás: lo que se fija sale del calendario (con lo de 42
+  // ya guardado, sin pedir nada nuevo).
+  const countdowns = createCountdownsModule({
+    db,
+    events: async (actor, from, to) =>
+      (
+        await calendar.service.between(
+          actor,
+          null,
+          new Date(from).toISOString(),
+          new Date(to).toISOString(),
+        )
+      ).events,
+    ...clock,
   })
 
   const network = createNetworkModule({
@@ -476,6 +499,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     meet,
     notices,
     broadcasts,
+    countdowns,
     clicker,
     tours,
     staff,
@@ -489,7 +513,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     createClientErrorsModule(),
   ]
 
-  late.wire({ admin, calendar, clicker, exams, help, modules, network, usage })
+  late.wire({ admin, calendar, clicker, countdowns, exams, help, modules, network, usage })
 
   return {
     events,
@@ -525,6 +549,8 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
       admin: admin.service,
       notices: notices.service,
       broadcasts: broadcasts.service,
+      countdowns: countdowns.service,
+      maintenance: admin.maintenance,
       clicker: clicker.service,
       tours: tours.service,
       legal: legal.service,

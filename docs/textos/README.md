@@ -6,6 +6,7 @@ Cómo se trabaja con ellas: [docs/textos.md](../textos.md).
 | Tema | Textos | Falta en Inglés | Falta en Catalán | Falta en Euskera |
 | --- | --- | --- | --- | --- |
 | [animos](animos.md) | 100 | 0 | 0 | 0 |
+| [avisos](avisos.md) | 40 | 0 | 0 | 0 |
 | [buzon](buzon.md) | 114 | 0 | 0 | 0 |
 | [calendario](calendario.md) | 99 | 0 | 0 | 0 |
 | [clusters](clusters.md) | 75 | 0 | 0 | 0 |
@@ -15,7 +16,7 @@ Cómo se trabaja con ellas: [docs/textos.md](../textos.md).
 | [estadisticas](estadisticas.md) | 73 | 0 | 0 | 0 |
 | [examenes](examenes.md) | 58 | 0 | 0 | 0 |
 | [expediente](expediente.md) | 134 | 0 | 0 | 0 |
-| [gestion](gestion.md) | 541 | 0 | 0 | 0 |
+| [gestion](gestion.md) | 573 | 0 | 0 | 0 |
 | [guardia](guardia.md) | 74 | 0 | 0 | 0 |
 | [legal](legal.md) | 56 | 0 | 0 | 0 |
 | [notgames](notgames.md) | 211 | 0 | 0 | 0 |

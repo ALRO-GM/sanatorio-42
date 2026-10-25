@@ -37,6 +37,11 @@ export const POOL_BASE: readonly string[] = [
   '/avatars/:login',
   '/quota',
   '/sync/status',
+  // El mantenimiento y los avisos de quien administra (la limpieza de
+  // taquillas) son para todo el mundo: también para los piscineros.
+  '/maintenance',
+  '/countdowns',
+  '/countdowns/notices/:id/dismiss',
 ]
 
 /** Las rutas de cada permiso. Un elemento (`a.b`) necesita además su pestaña (`a`). */
@@ -117,6 +122,9 @@ export const POOL_ROUTES: Record<PoolKey, readonly string[]> = {
   estadisticas: ['/stats'],
   calendario: [
     '/calendar',
+    // Fijarse una cuenta atrás sale del calendario (`docs/avisos-cuenta-atras.md`).
+    '/countdowns/pins',
+    '/countdowns/pins/:id',
     '/events/alerts',
     '/events/alerts/ack',
     '/events/attendance',

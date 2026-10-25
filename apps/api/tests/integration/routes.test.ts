@@ -42,6 +42,8 @@ const OPEN = new Set([
   'POST /client-errors',
   // El aviso de la piscina cerrada sale en la pantalla de entrada (`docs/piscineros.md`).
   'GET /pool/notice',
+  // Si la web está en mantenimiento: lo pregunta también la pantalla de entrada (`docs/mantenimiento.md`).
+  'GET /maintenance',
   'OPTIONS /*',
 ])
 

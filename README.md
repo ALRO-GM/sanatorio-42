@@ -80,6 +80,7 @@ Lo que este proyecto enseña de quien lo ha hecho:
   - [Red de correcciones](#red-de-correcciones)
   - [Clústeres](#clústeres)
   - [Modo concentración (Pomodoro)](#modo-concentración-pomodoro)
+  - [Avisos con cuenta atrás](#avisos-con-cuenta-atrás)
   - [Curso de git](#curso-de-git)
   - [Avisos del edificio](#avisos-del-edificio)
   - [Exámenes](#exámenes)
@@ -295,6 +296,15 @@ elegidos (correcciones, eventos, mensajes, guardia o el resto del buzón); los
 obligatorios de un evento con más gente, siempre. Los demás ven «concentrado,
 no me distraigas» en tu ficha, tu puesto y la sala de espera.
 
+### Avisos con cuenta atrás
+
+En la otra esquina que el Pomodoro, una ventanita con lo que falta para algo
+importante: los avisos de quien administra (la limpieza de taquillas: se abren
+y se tira lo que haya dentro) y lo que te fijas tú desde el calendario (un
+evento, tu próximo compromiso o algo tuyo). Se cierra, se pliega o se arrastra;
+lo cerrado no vuelve a salir en ningún navegador
+([docs/avisos-cuenta-atras.md](docs/avisos-cuenta-atras.md)).
+
 ### Curso de git
 
 En Not-games, la pestaña «Curso de git»: un camino de puntos con forma de ramas
@@ -414,6 +424,8 @@ Solo para quien administra. Trece pestañas:
 | Estadísticas         | Tiempo de uso por persona, quién está conectado ahora y cuánto lleva                                   |
 | Code Clicker         | Uso del juego y un apartado de trampas: quién, cuándo, cómo se vio, qué se requisó, indulto, avisos de saltos y un comunicado solo para quienes las hicieron |
 | Comunicados          | Mensajes para todo el mundo                                                                            |
+| Cuentas atrás        | Avisos con cuenta atrás para un grupo: la limpieza de taquillas con solo el día y la hora ([docs/avisos-cuenta-atras.md](docs/avisos-cuenta-atras.md)) |
+| Mantenimiento        | Cerrar la web a quien no administra con un mensaje y la hora prevista de vuelta ([docs/mantenimiento.md](docs/mantenimiento.md)) |
 | Avisos del edificio  | Problemas de ordenadores o del edificio que manda la gente, para resolverlos
 | Pomodoro             | Uso por días y horas, paradas y sus motivos, por tramo de gente
 | Piscina              | Quién entra, el aviso de la piscina cerrada y lo que puede ver un piscinero
@@ -617,6 +629,7 @@ pie showData title Líneas por parte
 | `notices`    | Buzón de avisos de cada persona y el pulso que la web pregunta de fondo           |
 | `attendance` | Códigos de inicio y fin, tiempo validado, registro de intentos e informe de horas |
 | `broadcasts` | Comunicados de quien administra para todo el mundo                                |
+| `countdowns` | Avisos con cuenta atrás: los de quien administra y lo que fija cada cual          |
 | `tours`      | Velocidad de las demostraciones: la de cada persona y la que vota la comunidad    |
 | `clicker`    | Partidas del juego, comprobación de trampas e historial de capital                |
 | `quiz`       | Not-games: banco de preguntas, salas, partidas y dificultad que se reajusta       |
@@ -625,7 +638,7 @@ pie showData title Líneas por parte
 | `focus`      | Modo concentración (Pomodoro): quién está concentrado y hasta cuándo              |
 | `gitcourse`  | Curso de git: progreso del camino, corregido otra vez con el git simulado         |
 | `staff` | Documentos con código de verificación y las cuentas de staff que los comprueban |
-| `admin`      | Permisos, bloqueos, buzón, consumo, presupuesto de peticiones y limpieza de datos |
+| `admin`      | Permisos, bloqueos, buzón, consumo, presupuesto, mantenimiento y limpieza de datos |
 
 Cómo encajan las piezas y cómo añadir una funcionalidad:
 [docs/architecture.md](docs/architecture.md).

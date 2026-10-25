@@ -15,6 +15,9 @@ import { focusing, loadFocus, useFocus } from '../shared/focus'
 import { AlertCenter } from '../features/alerts/AlertCenter'
 import { EasterEgg } from '../features/clicker/EasterEgg'
 import { QuotaNotice } from '../features/alerts/QuotaNotice'
+import { CountdownDock } from '../features/countdowns/CountdownDock'
+import { MaintenanceBanner } from '../features/maintenance/MaintenanceBanner'
+import { loadMaintenance, useMaintenance } from '../shared/maintenance'
 import { onOpenChat } from '../features/notices/conversations'
 import { onOpenCustomize } from '../shared/layout/customize'
 import { api } from '../shared/api'
@@ -90,6 +93,16 @@ export function Clinic({ me, onLogout }: ClinicProps) {
     [],
   )
   const { pulse, refresh } = usePulse()
+  const maintenance = useMaintenance()
+  const maintenanceOn = pulse?.maintenance
+
+  // Quien administra sigue dentro durante el mantenimiento: si otra persona lo
+  // pone o lo quita, el pulso lo cuenta y la franja de aviso se pone al día.
+  useEffect(() => {
+    if (maintenanceOn !== undefined && maintenanceOn !== (maintenance?.on ?? false)) {
+      void loadMaintenance()
+    }
+  }, [maintenanceOn, maintenance?.on])
   const focus = useFocus()
   const concentrated = focusing(focus)
 
@@ -189,6 +202,8 @@ export function Clinic({ me, onLogout }: ClinicProps) {
       <PoolOnly k="focus">
         <FocusTimer />
       </PoolOnly>
+      {/* Los avisos con cuenta atrás: en la otra esquina que el Pomodoro. */}
+      <CountdownDock stamp={pulse?.countdowns ?? null} />
       {focusOpen && (
         <FocusDialog
           onClose={() => {
@@ -199,6 +214,11 @@ export function Clinic({ me, onLogout }: ClinicProps) {
 
       {/* La red de correcciones necesita sitio: es la única sección a todo lo ancho. */}
       <main className={`container ${section === 'red' || section === 'clicker' ? 'wide' : ''}`}>
+        <MaintenanceBanner
+          onPanel={() => {
+            openSection('gestion')
+          }}
+        />
         <QuotaNotice status={pulse?.quota ?? null} />
         <OtherCampusNotice campusId={me.campusId} />
         <LegalGate />

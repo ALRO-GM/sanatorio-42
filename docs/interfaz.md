@@ -76,6 +76,10 @@ de datos.
 | Panel de gestión | Pestaña Piscina: quién entra y el aviso para piscineros con la piscina cerrada (`docs/piscineros.md`) | Admins | Solo de quien administra |
 | Panel de gestión | Pestaña Piscina: «Ver como piscinero» y, mientras dura, la franja fija de arriba con «Volver» (`docs/piscineros.md`) | Admins | Bloque de la pestaña Piscina, no una sección: es para comprobar lo que se ha marcado |
 | Panel de gestión | Pestaña Personas ocultas: buscar a alguien de cualquier grupo, ocultarlo a estudiantes, piscineros o los dos, con motivo, y la lista con quién y cuándo (`docs/personas-ocultas.md`) | Admins | Pestaña propia y no bloque de Piscina: vale también para estudiantes |
+| Toda la web | Ventanita de cuentas atrás, flotando abajo a la izquierda (el Pomodoro va a la derecha): avisos de quien administra y lo fijado; se arrastra, se ancla y se pliega (`docs/avisos-cuenta-atras.md`) | S | Como el Pomodoro: un aviso importante (las taquillas) lo tiene que ver todo el mundo. En el móvil empieza plegada |
+| Calendario | «Cuenta atrás» en la barra (próximo compromiso o una propia) y «Fijar cuenta atrás» en la ficha de cada evento | S | Bloque de Calendario, no sección nueva: lo que se fija sale de ahí |
+| Panel de gestión | Pestaña Cuentas atrás: la limpieza de taquillas (solo día y hora) u otro aviso, a un grupo y campus, y cuánta gente lo ha cerrado | Admins | Pestaña propia, al lado de Comunicados: no pide contestar |
+| Panel de gestión | Pestaña Mantenimiento: ponerlo y quitarlo, mensaje y hora prevista; mientras dura, franja arriba para quien administra y pantalla «No disponible» con cuenta atrás para el resto (`docs/mantenimiento.md`) | Admins | La pantalla del resto no es una sección: sustituye a toda la web |
 | Clústeres | Avisar de un problema (edificio u ordenador) | N | Al lado del plano, donde se ve el puesto |
 | Pestañas | Estadísticas (en Ayuda) | N | Clasificaciones: el simplificado no enseña rankings |
 | Estadísticas | Cifras del campus y clasificación de cada sección, con fotos | N | La sección en sí |

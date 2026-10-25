@@ -540,3 +540,35 @@ admin.hidden.hiddenFrom.both,"Panel, Personas ocultas: de quién está oculta la
 admin.hidden.by,"Panel, Personas ocultas: quién la ocultó y cuándo. {by}: login; {date}: fecha y hora","Por {by}, {date}","By {by}, {date}","Per {by}, {date}","{by}, {date}"
 admin.hidden.remove,"Panel, Personas ocultas: botón para volver a enseñar a alguien",Quitar,Remove,Treu,Kendu
 admin.hidden.removeOne,"Panel, Personas ocultas: nombre accesible del botón «Quitar». {login}: la persona",Quitar a {login} de la lista,Remove {login} from the list,Treu {login} de la llista,Kendu {login} zerrendatik
+admin.tab.countdowns,Panel de gestión: pestaña de los avisos con cuenta atrás,Cuentas atrás,Countdowns,Comptes enrere,Atzerako kontaketak
+admin.tab.maintenance,Panel de gestión: pestaña del modo mantenimiento,Mantenimiento,Maintenance,Manteniment,Mantentze-lanak
+admin.maint.title,"Panel de gestión, mantenimiento: título de la tarjeta",Modo mantenimiento,Maintenance mode,Mode manteniment,Mantentze-modua
+admin.maint.isOn,"Panel de gestión, mantenimiento: estado puesto",En mantenimiento.,Under maintenance.,En manteniment.,Mantentze-lanetan.
+admin.maint.isOff,"Panel de gestión, mantenimiento: estado quitado",La web está abierta.,The site is open.,La web està oberta.,Webgunea irekita dago.
+admin.maint.since,"Panel de gestión, mantenimiento: desde cuándo está puesto",Desde {date}.,Since {date}.,Des de {date}.,{date} geroztik.
+admin.maint.hint,"Panel de gestión, mantenimiento: qué hace","Mientras dura, solo quien administra usa la web; el resto ve «No disponible» y la cuenta atrás hasta la hora prevista.","While it lasts, only admins can use the site; everyone else sees “Unavailable” and the countdown to the expected end.","Mentre dura, només qui administra fa servir la web; la resta veu «No disponible» i el compte enrere fins a l'hora prevista.","Irauten duen bitartean, administratzaileek bakarrik erabiltzen dute webgunea; besteek «Ez dago erabilgarri» eta aurreikusitako ordurainoko atzerako kontaketa ikusten dute."
+admin.maint.message,"Panel de gestión, mantenimiento: campo del mensaje",Mensaje (opcional),Message (optional),Missatge (opcional),Mezua (aukerakoa)
+admin.maint.messagePlaceholder,"Panel de gestión, mantenimiento: ejemplo dentro del campo del mensaje",Migramos la base de datos. Tus commits están a salvo.,We're migrating the database. Your commits are safe.,Migrem la base de dades. Els teus commits estan a salvo.,Datu-basea migratzen ari gara. Zure commit-ak salbu daude.
+admin.maint.until,"Panel de gestión, mantenimiento: grupo de campos de la hora de acabar",Hora prevista de acabar (opcional),Expected end (optional),Hora prevista d'acabar (opcional),Amaitzeko aurreikusitako ordua (aukerakoa)
+admin.maint.quick,"Panel de gestión, mantenimiento: atajo que pone el final dentro de un rato («+30 min»)",+{n},+{n},+{n},+{n}
+admin.maint.noUntil,"Panel de gestión, mantenimiento: botón para dejar sin hora de acabar",Sin hora,No end time,Sense hora,Ordurik gabe
+admin.maint.on,"Panel de gestión, mantenimiento: botón para ponerlo",Poner en mantenimiento,Turn maintenance on,Posar en manteniment,Mantentze-modua aktibatu
+admin.maint.update,"Panel de gestión, mantenimiento: botón para guardar el mensaje o la hora",Guardar cambios,Save changes,Desa els canvis,Aldaketak gorde
+admin.maint.off,"Panel de gestión, mantenimiento: botón para quitarlo y abrir la web",Quitar el mantenimiento,Turn maintenance off,Treure el manteniment,Mantentze-modua kendu
+admin.countdown.new,"Panel de gestión, cuentas atrás: título del formulario",Nuevo aviso con cuenta atrás,New countdown notice,Nou avís amb compte enrere,Atzerako kontaketadun ohar berria
+admin.countdown.kind,"Panel de gestión, cuentas atrás: grupo para elegir el tipo de aviso",Tipo de aviso,Kind of notice,Tipus d'avís,Ohar mota
+admin.countdown.kind.lockers,"Panel de gestión, cuentas atrás: aviso ya escrito de limpieza de taquillas",Limpieza de taquillas,Locker clean-up,Neteja de taquilles,Armairuen garbiketa
+admin.countdown.kind.custom,"Panel de gestión, cuentas atrás: aviso con título y texto propios",Otro aviso,Other notice,Un altre avís,Beste ohar bat
+admin.countdown.lockersHint,"Panel de gestión, cuentas atrás: bajo el texto ya escrito de las taquillas",A cada cual le sale en su idioma. Solo falta el día y la hora.,Everyone gets it in their own language. Just pick the day and time.,A cadascú li surt en el seu idioma. Només falta el dia i l'hora.,Bakoitzari bere hizkuntzan agertzen zaio. Eguna eta ordua bakarrik falta dira.
+admin.countdown.title,"Panel de gestión, cuentas atrás: campo del título",Título,Title,Títol,Izenburua
+admin.countdown.body,"Panel de gestión, cuentas atrás: campo del texto",Texto (opcional),Text (optional),Text (opcional),Testua (aukerakoa)
+admin.countdown.to,"Panel de gestión, cuentas atrás: a qué grupo va",Para,To,Per a,Norentzat
+admin.countdown.to.all,"Panel de gestión, cuentas atrás: a todo el mundo",Todo el mundo,Everyone,Tothom,Denentzat
+admin.countdown.to.students,"Panel de gestión, cuentas atrás: solo a estudiantes",Estudiantes,Students,Estudiants,Ikasleak
+admin.countdown.to.pool,"Panel de gestión, cuentas atrás: solo a piscineros",Piscineros,Piscine,Piscina,Igerilekukoak
+admin.countdown.onlyHere,"Panel de gestión, cuentas atrás: casilla para limitarlo al campus que se mira",Solo a quien mira este campus,Only people viewing this campus,Només a qui mira aquest campus,Campus hau ikusten dutenei bakarrik
+admin.countdown.send,"Panel de gestión, cuentas atrás: botón para mandarlo",Mandar aviso,Send notice,Envia l'avís,Oharra bidali
+admin.countdown.sent,"Panel de gestión, cuentas atrás: lista de los ya mandados",Avisos mandados,Sent notices,Avisos enviats,Bidalitako oharrak
+admin.countdown.none,"Panel de gestión, cuentas atrás: aún no hay ninguno",Aún no has mandado ninguno.,You haven't sent any yet.,Encara no n'has enviat cap.,Oraindik ez duzu bat ere bidali.
+admin.countdown.dismissed,"Panel de gestión, cuentas atrás: cuánta gente lo ha cerrado",{n} lo han cerrado,{n} dismissed,{n} l'han tancat,{n}(e)k itxi dute
+admin.countdown.removeOne,"Panel de gestión, cuentas atrás: nombre accesible del botón de retirar uno",Retirar «{title}»,Withdraw “{title}”,Retira «{title}»,«{title}» kendu

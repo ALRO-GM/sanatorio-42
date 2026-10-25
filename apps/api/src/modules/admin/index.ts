@@ -20,11 +20,17 @@ import { ANONYMOUS, createAdminService } from './admin.service.js'
 import { RESPONSE_OVERHEAD_BYTES } from './budget.rules.js'
 import type { AdminService, AdminServiceOptions } from './admin.service.js'
 import { createGrowthService } from './growth.js'
+import { createMaintenance, openDuringMaintenance } from './maintenance.js'
+import type { MaintenanceService } from './maintenance.js'
 import { ELEVATION_COOKIE, ELEVATION_MS, createSecondFactor } from './second-factor.js'
 import type { SecondFactor } from './second-factor.js'
 import { given } from '../../core/options.js'
 
-export type AdminModule = AppModule & { service: AdminService; secondFactor: SecondFactor }
+export type AdminModule = AppModule & {
+  service: AdminService
+  secondFactor: SecondFactor
+  maintenance: MaintenanceService
+}
 
 type AdminModuleDeps = AdminServiceOptions & {
   /**
@@ -89,6 +95,8 @@ export function createAdminModule(deps: AdminModuleDeps): AdminModule {
     secret: deps.secret ?? randomBytes(32).toString('hex'),
     ...given({ now: deps.now }),
   })
+  const clock = deps.now ?? Date.now
+  const maintenance = createMaintenance({ db: deps.db, now: clock })
   const panelCookie = (request: FastifyRequest): string | undefined =>
     readCookie(request.headers.cookie, ELEVATION_COOKIE)
 
@@ -136,6 +144,7 @@ export function createAdminModule(deps: AdminModuleDeps): AdminModule {
     ],
     service,
     secondFactor,
+    maintenance,
     routes: (app, { session }) => {
       // --- Consumo: tope antes de servir, cuenta después ----------------------
       app.addHook('onRequest', async (request, reply) => {
@@ -175,6 +184,28 @@ export function createAdminModule(deps: AdminModuleDeps): AdminModule {
         }
 
         const who = loginOf(session, request)
+
+        // Mantenimiento (`docs/mantenimiento.md`): solo pasa quien administra.
+        // Lo que no es una ruta de la API (la propia web) se sirve igual: es la
+        // web la que enseña la pantalla de mantenimiento.
+        if (!request.is404 && !openDuringMaintenance(path)) {
+          const state = await maintenance.current()
+
+          if (state.on && (who === null || !(await service.accessOf(who)).admin)) {
+            const left = state.until === null ? 0 : Date.parse(state.until) - clock()
+
+            await reply
+              .code(503)
+              .header('Retry-After', String(Math.max(60, Math.ceil(left / 1000))))
+              .send({
+                error: 'maintenance',
+                message: 'Peer4U está en mantenimiento. Vuelve en un rato.',
+                until: state.until,
+              })
+
+            return
+          }
+        }
 
         // Una sesión de staff solo llega a lo suyo. Cada ruta de la gente ya la
         // rechaza al leer la sesión; esto cubre también las que no la leen. Lo
@@ -309,6 +340,24 @@ export function createAdminModule(deps: AdminModuleDeps): AdminModule {
         setCookies(reply, [elevationCookie('', 0)])
 
         return reply.code(204).send()
+      })
+
+      // --- Mantenimiento ------------------------------------------------------
+      /**
+       * `GET /maintenance` → `{ on, message, until, since, exempt }`. Sin sesión
+       * también: la pantalla de entrada tiene que saber que la web está cerrada.
+       */
+      app.get('/maintenance', async (request, reply) => {
+        const who = loginOf(session, request)
+
+        return reply.send(
+          await maintenance.status(who !== null && (await service.accessOf(who)).admin),
+        )
+      })
+
+      /** `PUT /admin/maintenance` → `{ on, message?, until? }`; devuelve cómo queda. */
+      app.put('/admin/maintenance', async (request, reply) => {
+        return reply.send(await maintenance.set(await session.actor(request), request.body))
       })
 
       // --- Buzón de la gente ---------------------------------------------------

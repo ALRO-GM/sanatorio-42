@@ -51,4 +51,6 @@
 @import './notgames.css';
 /* Estadísticas de Ayuda. */
 @import './stats.css';
+/* Mantenimiento y la ventanita de avisos con cuenta atrás. */
+@import './countdowns.css';
 @import './comfort.css';

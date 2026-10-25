@@ -9,6 +9,7 @@ import { mockNetwork, mockPair, mockPeople, mockSeats, mockStrictest } from './n
 import { helpInbox } from './help'
 import type { Api } from '../types'
 import { clickerMock } from './clicker'
+import { countdownPulse } from './countdowns'
 import { delay, notices, quotaSettings, quotaQueue, quotaStatus } from './state'
 
 /**
@@ -132,6 +133,7 @@ export const replicaMock: Pick<
         clickerReviews: await pendingReviews(),
         help: helpInbox().requests.length + helpInbox().news.length,
         examLive: true,
+        ...countdownPulse(),
         quota: { level: 'ok', ticket: null },
       }
     }
@@ -146,6 +148,7 @@ export const replicaMock: Pick<
       clickerReviews: await pendingReviews(),
       help: helpInbox().requests.length + helpInbox().news.length,
       examLive: true,
+      ...countdownPulse(),
       quota: {
         level: 'tight',
         ticket: {

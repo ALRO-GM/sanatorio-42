@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react'
 import type { CalendarEvent, CalendarKind, CalendarSection } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
+import { openCountdownPicker } from '../../shared/countdowns'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { useFormat } from '../../shared/i18n/useFormat'
@@ -174,7 +175,12 @@ export function CalendarPage({ focus = null, onGo, me }: CalendarPageProps) {
             onChange={changeView}
             label={t('agenda.view')}
             text={(option) => t(`agenda.view.${option}`)}
-          />
+          >
+            {/* Fijarse el próximo compromiso o algo propio (`docs/avisos-cuenta-atras.md`). */}
+            <button type="button" className="pill" onClick={openCountdownPicker}>
+              <Icon name="chincheta" size={14} /> {t('countdown.open')}
+            </button>
+          </PillGroup>
         </div>
 
         {view !== 'month' && (

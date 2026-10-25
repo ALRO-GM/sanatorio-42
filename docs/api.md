@@ -959,6 +959,94 @@ Solo admins:
 A quién le toca se decide al preguntar, no al mandarlo: le llega también a
 quien entra días después. El campus es el que esa persona está mirando.
 
+## Avisos con cuenta atrás (`modules/countdowns`)
+
+La ventanita flotante de la web (`docs/avisos-cuenta-atras.md`): avisos de
+quien administra (la limpieza de taquillas) y lo que cada cual se fija.
+
+GET /countdowns → lo tuyo, lo más cercano primero (lo que no tiene hora, al final).
+
+```json
+[
+  {
+    "id": 3,
+    "kind": "notice",
+    "title": null,
+    "body": null,
+    "preset": "lockers",
+    "at": "2026-10-30T08:00:00.000Z",
+    "eventId": null,
+    "from": "albrodri"
+  },
+  {
+    "id": 12,
+    "kind": "next",
+    "title": "malloc: dónde vive tu memoria",
+    "body": null,
+    "preset": null,
+    "at": "2026-10-27T16:00:00.000Z",
+    "eventId": "board:7",
+    "from": null
+  }
+]
+```
+
+- `kind`: `notice` (de quien administra), `event` (un evento fijado), `next`
+  (tu próximo compromiso: se busca en cada petición, así que cambia solo) o
+  `custom` (uno tuyo). Con `preset: "lockers"` y sin título, el texto lo pone
+  la web en cada idioma. `next` sin nada a la vista va con `title` y `at` a `null`.
+- Lo que ya ha pasado se sigue dando 30 minutos («ya ha pasado») y luego deja
+  de salir.
+
+POST /countdowns/pins → `201`. `{ "kind": "event", "eventId": "board:7" }`,
+`{ "kind": "next" }` o `{ "kind": "custom", "title", "at" }`. Devuelve todas.
+
+- El evento tiene que estar en tu calendario (de aquí a 60 días; `404` si no) y
+  no haber empezado; la hora propia, en el futuro y a menos de un año (`400`).
+- Fijar dos veces lo mismo no lo repite. Como mucho 12 a la vez (`409`).
+
+DELETE /countdowns/pins/:id → quita una tuya; devuelve todas. La de otra
+persona no se toca.
+
+POST /countdowns/notices/:id/dismiss → cierra un aviso de quien administra: no
+te vuelve a salir en ningún navegador. Devuelve todas. `404` si no es para ti o
+ya lo cerraste.
+
+Solo admins:
+
+- GET /admin/countdowns → los últimos 50, con `group`, `campusId`, `dismissed`
+  (cuánta gente lo ha cerrado) y `createdAt`.
+- POST /admin/countdowns → `201`. `{ title?, body?, preset?, at, group, campusId? }`.
+  Sin `preset` hace falta `title`. `group`: `all`, `students` o `pool` (mundos
+  separados, `docs/piscineros.md`); con `campusId`, solo a quien mira ese campus.
+- DELETE /admin/countdowns/:id → `204`. Lo retira para todo el mundo.
+
+Un piscinero recibe los avisos siempre; fijarse algo va con el permiso del
+calendario (`POOL_ROUTES`).
+
+## Modo mantenimiento (`modules/admin/maintenance.ts`)
+
+`docs/mantenimiento.md`. Se guarda en `settings` (clave `maintenance`).
+
+GET /maintenance → `{ "on", "message", "until", "since", "exempt" }`. Sin
+sesión también: la pantalla de entrada tiene que saberlo. `exempt` es `true`
+si quien pregunta administra.
+
+PUT /admin/maintenance → `{ "on": true, "message"?, "until"? }` o
+`{ "on": false }`; devuelve cómo queda (sin `exempt`). `until` en el futuro y a
+menos de una semana; `message`, hasta 500 caracteres. Cambiar el mensaje o la
+hora no cambia `since`.
+
+Mientras está puesto, a quien no administra (con sesión o sin ella) la API le
+contesta `503` con `Retry-After` y
+
+```json
+{ "error": "maintenance", "message": "Peer4U está en mantenimiento…", "until": "…" }
+```
+
+salvo en `/health…`, `/auth/…`, `/maintenance`, `/client-errors`,
+`/pool/notice` y lo que no es una ruta de la API (la propia web).
+
 ## Estadísticas de uso
 
 POST /usage acepta, además de `counts`, el tiempo pasado en cada sección:
@@ -1273,8 +1361,11 @@ Lo que cada persona tiene que saber porque otra ha hecho algo que le toca.
 Ningún módulo escribe en el buzón: cada uno emite un evento `notice` y el módulo
 `notices` lo guarda. El texto lo redacta la web a partir de `kind`.
 
-- GET /pulse → `{ "unread": 2, "quota": { "level", "ticket" } }`. Lo único que
-  la web pregunta de fondo además del calendario: avisos sin leer y cuota de 42.
+- GET /pulse → `{ "unread": 2, "broadcasts", "clickerReviews", "help",
+  "examLive", "countdowns", "maintenance", "quota": { "level", "ticket" } }`.
+  Lo único que la web pregunta de fondo además del calendario. `countdowns` es
+  una huella de los avisos con cuenta atrás a la vista (si cambia, la web los
+  vuelve a pedir) y `maintenance`, si la web está en mantenimiento.
 - GET /notices → `{ "unread", "items": [{ "id", "kind", "ref", "from", "text",
   "count", "at", "read", "saved" }] }`, lo que no se ha leído primero.
 - POST /notices/read → `{ "ids"? }`: da por leídos esos avisos, o todos. Devuelve

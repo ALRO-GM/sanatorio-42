@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
 
 import { Login } from '../features/auth/Login'
+import { MaintenanceScreen } from '../features/maintenance/MaintenanceScreen'
 import { LegalPage } from '../features/legal/LegalPage'
 import { useAuth } from '../features/auth/useAuth'
 import { StaffPage } from '../features/staff/StaffPage'
 import { api } from '../shared/api'
 import { useI18n } from '../shared/i18n'
+import { loadMaintenance, shutOut, useMaintenance } from '../shared/maintenance'
 import { Logo } from '../shared/ui/Logo'
 import { Clinic } from './Clinic'
 import { DemoBadge } from './DemoBadge'
@@ -84,6 +86,16 @@ function StudentApp() {
   const [oauthError] = useState(readOAuthError)
   // Con la piscina cerrada, el aviso lo escribe quien administra (`docs/piscineros.md`).
   const [poolNotice, setPoolNotice] = useState('')
+  // El mantenimiento se mira antes de enseñar nada: a quien no administra no
+  // se le llega a montar la web, que solo recibiría `503`.
+  const maintenance = useMaintenance()
+  const [maintenanceAsked, setMaintenanceAsked] = useState(false)
+
+  useEffect(() => {
+    void loadMaintenance().finally(() => {
+      setMaintenanceAsked(true)
+    })
+  }, [])
 
   useEffect(() => {
     if (oauthError !== 'pool_closed') return
@@ -99,7 +111,7 @@ function StudentApp() {
     document.title = me === null ? BASE_TITLE : `${BASE_TITLE} - ${me.login}`
   }, [me])
 
-  if (loading) {
+  if (loading || !maintenanceAsked) {
     return <p className="center">{t('app.loading')}</p>
   }
 
@@ -117,6 +129,17 @@ function StudentApp() {
           {t('app.retry')}
         </button>
       </main>
+    )
+  }
+
+  // En mantenimiento, quien no administra solo ve la pantalla de mantenimiento.
+  // Sin sesión puede entrar: es como entra quien administra.
+  if (shutOut(maintenance)) {
+    return (
+      <MaintenanceScreen
+        status={maintenance}
+        {...(me === null ? { onLogin: () => void login() } : {})}
+      />
     )
   }
 

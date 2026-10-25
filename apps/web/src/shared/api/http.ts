@@ -40,6 +40,22 @@ export class ApiError extends Error {
   }
 }
 
+/** Quien quiere saber que la API ha cerrado por mantenimiento (`docs/mantenimiento.md`). */
+const maintenanceListeners = new Set<(until: string | null) => void>()
+
+/**
+ * Avisa cuando una respuesta dice que la web está en mantenimiento (un `503`
+ * con `error: 'maintenance'`): así se pasa a la pantalla de mantenimiento
+ * desde cualquier petición, sin preguntar aparte. Devuelve cómo dejar de oír.
+ */
+export function onMaintenance(listener: (until: string | null) => void): () => void {
+  maintenanceListeners.add(listener)
+
+  return () => {
+    maintenanceListeners.delete(listener)
+  }
+}
+
 /** URL completa de una ruta de la API, para las navegaciones (login). */
 export function apiUrl(path: string): string {
   return BASE + path
@@ -72,7 +88,12 @@ export async function fetchApi(path: string, init: RequestInit = {}): Promise<Re
     let serverMessage: string | undefined
 
     try {
-      serverMessage = ((await response.json()) as Partial<ErrorBody>).message
+      const body = (await response.json()) as Partial<ErrorBody> & { until?: string | null }
+
+      serverMessage = body.message
+      if (response.status === 503 && body.error === 'maintenance') {
+        for (const listener of maintenanceListeners) listener(body.until ?? null)
+      }
     } catch {
       // Sin cuerpo legible: se queda el código de estado.
     }

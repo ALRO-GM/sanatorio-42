@@ -22,6 +22,8 @@ import { GrowthPanel } from './GrowthPanel'
 import { FocusPanel } from './FocusPanel'
 import { PoolPanel } from './PoolPanel'
 import { HiddenPanel } from './HiddenPanel'
+import { MaintenancePanel } from './MaintenancePanel'
+import { CountdownsPanel } from './CountdownsPanel'
 import { StatsPanel } from './StatsPanel'
 import { UsageTab } from './UsageTab'
 import { Icon } from '../../shared/ui/Icon'
@@ -39,6 +41,8 @@ const TABS = [
   'stats',
   'clicker',
   'casts',
+  'countdowns',
+  'maintenance',
   'facility',
   'focus',
   'pool',
@@ -106,6 +110,8 @@ function AdminTabs({ campusId, me }: { campusId?: number | undefined; me: string
       {tab === 'pool' && <PoolPanel />}
       {tab === 'hidden' && <HiddenPanel />}
       {tab === 'casts' && <BroadcastsTab campusId={campusId} />}
+      {tab === 'countdowns' && <CountdownsPanel campusId={campusId} />}
+      {tab === 'maintenance' && <MaintenancePanel />}
       {tab === 'facility' && (
         <FacilityList
           load={() => api.getAdminFacility()}
