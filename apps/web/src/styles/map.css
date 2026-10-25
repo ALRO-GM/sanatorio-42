@@ -579,3 +579,23 @@ button.seat.open {
 .seat-grid.staggered .seat.screen-down {
   top: -6px;
 }
+
+/* Entre los resaltados y la marca de círculos, una raya fina. */
+.map-tools-sep {
+  width: 1px;
+  height: 1.4rem;
+  margin: 0 0.3rem;
+  background: var(--border);
+}
+.map-placement {
+  margin: 0.5rem 0 0.25rem;
+}
+.map-placement summary {
+  cursor: pointer;
+  width: fit-content;
+  color: var(--accent-text);
+  font-size: 0.85rem;
+}
+.map-placement .map-tools {
+  margin: 0.5rem 0 0.25rem;
+}

@@ -247,29 +247,6 @@ export function ClusterMapView({
 
       {tools && (
         <div className="map-tools" role="group" aria-label={t('map.look')}>
-          {ORIENTATION.map((option) => (
-            <button
-              key={option}
-              type="button"
-              className={`pill ${look[option] ? 'active' : ''}`}
-              aria-pressed={look[option]}
-              onClick={() => {
-                change({ ...look, [option]: !look[option] })
-              }}
-            >
-              {t(`map.${option}`)}
-            </button>
-          ))}
-          <button
-            type="button"
-            className={`pill ${look.circles ? 'active' : ''}`}
-            aria-pressed={look.circles}
-            onClick={() => {
-              change({ ...look, circles: !look.circles })
-            }}
-          >
-            {t('map.circles')}
-          </button>
           <span className="map-tools-label">{t('map.highlight')}</span>
           {MATES.map((mate) => {
             const on = look.mates.includes(mate)
@@ -293,6 +270,17 @@ export function ClusterMapView({
               </button>
             )
           })}
+          <span className="map-tools-sep" aria-hidden="true" />
+          <button
+            type="button"
+            className={`pill ${look.circles ? 'active' : ''}`}
+            aria-pressed={look.circles}
+            onClick={() => {
+              change({ ...look, circles: !look.circles })
+            }}
+          >
+            {t('map.circles')}
+          </button>
         </div>
       )}
 
@@ -412,6 +400,28 @@ export function ClusterMapView({
             </button>
           )}
         </div>
+      )}
+
+      {/* La colocación se ajusta una vez y se olvida: plegada, debajo del plano. */}
+      {tools && (
+        <details className="map-placement">
+          <summary>{t('map.placement')}</summary>
+          <div className="map-tools" role="group" aria-label={t('map.placement')}>
+            {ORIENTATION.map((option) => (
+              <button
+                key={option}
+                type="button"
+                className={`pill ${look[option] ? 'active' : ''}`}
+                aria-pressed={look[option]}
+                onClick={() => {
+                  change({ ...look, [option]: !look[option] })
+                }}
+              >
+                {t(`map.${option}`)}
+              </button>
+            ))}
+          </div>
+        </details>
       )}
 
       <ul className="map-legend">

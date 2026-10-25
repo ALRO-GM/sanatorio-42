@@ -28,6 +28,7 @@ map.look,Opciones de vista del plano,Cómo ver el plano,How to see the map,Com v
 map.flipRows,Opción del plano: la fila 1 arriba en vez de abajo,Invertir en vertical,Flip vertically,Inverteix en vertical,Bertikalean irauli
 map.flipSeats,Opción del plano: el primer puesto a la derecha en vez de a la izquierda,Invertir en horizontal,Flip horizontally,Inverteix en horitzontal,Horizontalean irauli
 map.flipFacing,Opción del plano: los impares miran al sur y los pares al norte,Invertir hacia dónde miran,Flip which way seats face,Inverteix cap a on miren,Begiratzeko norabidea irauli
+map.placement,Desplegable bajo el plano: invertir y alinear las filas,Colocación de los puestos,Seat layout,Col·locació dels llocs,Postuen kokapena
 map.flat,"Opción del plano: puestos alineados, sin el desplazamiento de hacia dónde miran",Alinear,Align,Alinea,Lerrokatu
 map.circles,Casilla: marcar el círculo de cada persona,Círculos,Circles,Cercles,Zirkuluak
 map.highlight,Opciones de resaltado,Resaltar:,Highlight:,Ressalta:,Nabarmendu:

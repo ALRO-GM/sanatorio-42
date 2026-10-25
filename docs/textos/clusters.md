@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/clusters.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-74 textos. «—» es que falta la traducción: sale en español.
+75 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -36,6 +36,7 @@ Generado desde `apps/web/src/shared/i18n/textos/clusters.csv` con
 | `map.flipRows` | Opción del plano: la fila 1 arriba en vez de abajo | features/map/ClusterMapView | Invertir en vertical | Flip vertically | Inverteix en vertical | Bertikalean irauli |
 | `map.flipSeats` | Opción del plano: el primer puesto a la derecha en vez de a la izquierda | features/map/ClusterMapView | Invertir en horizontal | Flip horizontally | Inverteix en horitzontal | Horizontalean irauli |
 | `map.flipFacing` | Opción del plano: los impares miran al sur y los pares al norte | features/map/ClusterMapView | Invertir hacia dónde miran | Flip which way seats face | Inverteix cap a on miren | Begiratzeko norabidea irauli |
+| `map.placement` | Desplegable bajo el plano: invertir y alinear las filas | features/map/ClusterMapView | Colocación de los puestos | Seat layout | Col·locació dels llocs | Postuen kokapena |
 | `map.flat` | Opción del plano: puestos alineados, sin el desplazamiento de hacia dónde miran | features/map/ClusterMapView | Alinear | Align | Alinea | Lerrokatu |
 | `map.circles` | Casilla: marcar el círculo de cada persona | features/map/ClusterMapView | Círculos | Circles | Cercles | Zirkuluak |
 | `map.highlight` | Opciones de resaltado | features/map/ClusterMapView, features/map/ClustersTour | Resaltar: | Highlight: | Ressalta: | Nabarmendu: |
