@@ -107,6 +107,7 @@ describe('migraciones', () => {
       'reactions',
       'report_exports',
       'request_stats',
+      'seat_sessions',
       'seats',
       'settings',
       'staff_accounts',

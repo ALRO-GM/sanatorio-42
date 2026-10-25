@@ -13,6 +13,9 @@ import type {
   NetworkPairDetail,
   NetworkPerson,
   NetworkStrictest,
+  SeatGraph,
+  SeatLink,
+  SeatPerson,
 } from '@sanatorio/contracts'
 
 import type { NetworkParams } from '../types'
@@ -339,5 +342,62 @@ export function mockStrictest(me: string, min: number, order: 'asc' | 'desc'): N
           b.judged - a.judged,
       )
       .slice(0, 100),
+  }
+}
+
+/**
+ * Red de asientos de mentira: la misma gente, sentada por grupos. Cada grupo
+ * ocupa su trozo de fila; quien queda suelto se sienta casi siempre solo.
+ */
+export function mockSeats(me: string, days: number): SeatGraph {
+  const random = seeded(7 + days)
+  const people = world(me)
+    .people.filter((person) => !person.external)
+    .slice(0, 60)
+  const links: SeatLink[] = []
+
+  for (const [index, left] of people.entries()) {
+    for (const right of people.slice(index + 1)) {
+      if (random() > (left.group === right.group ? 0.35 : 0.02)) continue
+
+      const hours = Math.round(days * random() * 20) / 10
+
+      links.push({
+        source: left.login,
+        target: right.login,
+        hours,
+        closeness: Math.round(hours * (1.5 + random() * 1.5)),
+      })
+    }
+  }
+
+  const seated = people.map((person, index): SeatPerson => {
+    const own = links.filter((link) => link.source === person.login || link.target === person.login)
+    const hours = Math.round(days * (2 + random() * 4) * 10) / 10
+
+    return {
+      login: person.login,
+      image: portrait(person.login),
+      hours,
+      closeness: own.reduce((sum, link) => sum + link.closeness, 0),
+      partners: own.length,
+      alone: own.length === 0 ? 1 : Math.round(random() * 60) / 100,
+      community: person.group,
+      usual: [
+        `c${String(1 + (person.group % 3))}r${String(1 + (index % 8))}s${String(1 + (index % 12))}`,
+      ],
+    }
+  })
+
+  return {
+    days,
+    people: seated,
+    links,
+    totals: {
+      people: seated.length,
+      pairs: links.length,
+      communities: GROUPS,
+      hours: Math.round(seated.reduce((sum, person) => sum + person.hours, 0)),
+    },
   }
 }

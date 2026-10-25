@@ -490,6 +490,7 @@ pool.key.clusters.broken,"Panel, Piscina: permiso «clusters.broken»",Marcar pu
 pool.key.clusters.report,"Panel, Piscina: permiso «clusters.report»",Avisar de un problema del edificio,Report a building problem,Avisar d'un problema de l'edifici,Eraikineko arazo baten berri eman
 pool.key.red,"Panel, Piscina: permiso «red»",Red de correcciones,Evaluation network,Xarxa de correccions,Zuzenketen sarea
 pool.key.red.rankings,"Panel, Piscina: permiso «red.rankings»","Listas: endogamia, parejas, más estrictos, proyectos","Lists: endogamy, pairs, strictest, projects","Llistes: endogàmia, parelles, més estrictes, projectes","Zerrendak: endogamia, bikoteak, zorrotzenak, proiektuak"
+pool.key.red.seats,"Panel, Piscina: permiso «red.seats»",Red de asientos: con quién se sienta cada cual,Seating network: who sits with whom,Xarxa de seients: amb qui seu cadascú,Eserlekuen sarea: nor norekin esertzen den
 pool.key.avance,"Panel, Piscina: permiso «avance»",Avance en el common core,Common core progress,Avenç al common core,Common core-ko aurrerapena
 pool.key.avance.compare,"Panel, Piscina: permiso «avance.compare»",Compararse con otra persona,Compare with someone,Comparar-se amb una altra persona,Beste pertsona batekin alderatu
 pool.key.examenes,"Panel, Piscina: permiso «examenes»",Exámenes,Exams,Exàmens,Azterketak

@@ -161,8 +161,11 @@ const envSchema = z.object({
 
   /** Cada cuánto se refrescan los puestos del campus si hay alguien usando la web. */
   LOCATIONS_TTL_SECONDS: z.coerce.number().int().positive().default(120),
-  /** Lo mismo cuando no hay nadie: no tiene sentido mirar un cluster que nadie consulta. */
-  LOCATIONS_IDLE_SECONDS: z.coerce.number().int().positive().default(900),
+  /**
+   * Lo mismo cuando no hay nadie. Cinco minutos y no más: de esta foto sale el
+   * historial de asientos (`docs/asientos.md`). Son 1-4 peticiones por campus.
+   */
+  LOCATIONS_IDLE_SECONDS: z.coerce.number().int().positive().default(300),
 
   /** Cada cuánto se piden los cambios de proyectos (`range[updated_at]`) con gente dentro. */
   DELTA_TTL_SECONDS: z.coerce.number().int().positive().default(300),

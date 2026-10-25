@@ -15,12 +15,12 @@ Cómo se trabaja con ellas: [docs/textos.md](../textos.md).
 | [estadisticas](estadisticas.md) | 73 | 0 | 0 | 0 |
 | [examenes](examenes.md) | 58 | 0 | 0 | 0 |
 | [expediente](expediente.md) | 132 | 0 | 0 | 0 |
-| [gestion](gestion.md) | 515 | 0 | 0 | 0 |
+| [gestion](gestion.md) | 516 | 0 | 0 | 0 |
 | [guardia](guardia.md) | 74 | 0 | 0 | 0 |
 | [legal](legal.md) | 56 | 0 | 0 | 0 |
 | [notgames](notgames.md) | 189 | 0 | 0 | 0 |
 | [pizarras](pizarras.md) | 36 | 0 | 0 | 0 |
-| [red](red.md) | 133 | 0 | 0 | 0 |
+| [red](red.md) | 160 | 0 | 0 | 0 |
 | [sala-de-espera](sala-de-espera.md) | 46 | 0 | 0 | 0 |
 | [tablon](tablon.md) | 93 | 0 | 0 | 0 |
 | [terapia](terapia.md) | 57 | 0 | 0 | 0 |

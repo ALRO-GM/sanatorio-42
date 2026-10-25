@@ -41,8 +41,8 @@ const PublicRecord = lazy(() =>
 const AdminPage = lazy(() =>
   import('../features/admin/AdminPage').then((m) => ({ default: m.AdminPage })),
 )
-const NetworkPage = lazy(() =>
-  import('../features/network/NetworkPage').then((m) => ({ default: m.NetworkPage })),
+const RedPage = lazy(() =>
+  import('../features/network/RedPage').then((m) => ({ default: m.RedPage })),
 )
 // Los exámenes también perezosos: son ~800 líneas que no toca cargar al entrar.
 const ExamsPage = lazy(() =>
@@ -132,7 +132,7 @@ export function SectionView({
       {section === 'pizarras' && <BoardsCalendar />}
       {section === 'notgames' && <NotGamesPage me={me.login} room={param} />}
       {section === 'estadisticas' && <HelpStatsPage me={me.login} />}
-      {section === 'red' && <NetworkPage me={me} />}
+      {section === 'red' && <RedPage me={me} />}
       {section === 'avance' && <ProgressPage />}
       {/* Quien eligió la roja lleva el juego puesto en toda la web: fuera de su
           sección sigue corriendo y solo enseña una ventanita. Con su propia

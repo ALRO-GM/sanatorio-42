@@ -102,7 +102,7 @@ por prioridad:
 
 | Tarea                         | Cadencia                                   |
 | ----------------------------- | ------------------------------------------ |
-| Puestos ocupados del campus   | 2 min con gente en la web, 15 min sin ella |
+| Puestos ocupados del campus   | 2 min con gente en la web, 5 min sin ella  |
 | Cambios en proyectos          | 5 min / 30 min                             |
 | Catálogo de campus            | Semanal                                    |
 | Copia inicial del campus      | Una petición cada 5 s hasta terminar       |

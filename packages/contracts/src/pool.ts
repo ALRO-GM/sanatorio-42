@@ -37,6 +37,7 @@ export type PoolKey =
   // Datos
   | 'red'
   | 'red.rankings'
+  | 'red.seats'
   | 'avance'
   | 'avance.compare'
   | 'examenes'

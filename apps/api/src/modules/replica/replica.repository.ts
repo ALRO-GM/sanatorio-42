@@ -286,6 +286,24 @@ export function createReplicaRepository(db: Db) {
                 ON CONFLICT (campus_id, host) DO UPDATE SET seen_at = excluded.seen_at`,
           args: [campusId, location.host, now],
         })
+        // El historial de dónde se sienta cada cual (`docs/asientos.md`): la
+        // sesión se alarga hasta la última vez que se la ve abierta.
+        if (isId(location.id)) {
+          statements.push({
+            sql: `INSERT INTO seat_sessions (location_id, campus_id, user_id, login, host, begin_at, seen_at)
+                  VALUES (?, ?, ?, ?, ?, ?, ?)
+                  ON CONFLICT (location_id) DO UPDATE SET seen_at = excluded.seen_at`,
+            args: [
+              location.id,
+              campusId,
+              user.id,
+              user.login.toLowerCase(),
+              location.host,
+              location.begin_at ?? now,
+              now,
+            ],
+          })
+        }
         saved += 1
       }
 

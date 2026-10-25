@@ -38,6 +38,7 @@ const TREE: Record<PoolKey, Group> = {
   'clusters.report': 'clusters',
   red: 'datos',
   'red.rankings': 'datos',
+  'red.seats': 'datos',
   avance: 'datos',
   'avance.compare': 'datos',
   examenes: 'datos',

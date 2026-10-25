@@ -55,7 +55,9 @@ Hecho: entrada (fase 1), permisos (fase 2) y separación de datos (fase 3). Los
 piscineros en curso de cada campus se copian de 42 cada seis horas
 (`replica/pool-members.ts`, tabla `pool_members`); la red copia aparte las
 correcciones de la piscina y el calendario guarda los cursus de cada evento.
-Quién ve a quién está en `core/audience.ts` (`seesFor`, `visibleTo`).
+Quién ve a quién está en `core/audience.ts` (`seesFor`, `visibleTo`). La Red
+de un piscinero abre por la red de asientos (`docs/asientos.md`, permiso
+`red.seats`).
 
 Lo que no separa nada porque no enseña a nadie: las cifras sueltas de las
 estadísticas (totales de cada sección) y las medias del avance, que son de

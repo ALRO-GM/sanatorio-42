@@ -37,6 +37,11 @@ type ForceGraphProps = {
     gave: string
     got: string
   }
+  /**
+   * Uniones sin sentido (la red de asientos): una recta con su cifra, sin
+   * puntas ni leyenda de flechas. La cifra es `forth`.
+   */
+  undirected?: boolean
 }
 
 /** Una persona dentro de la simulación: los datos y dónde está. */
@@ -218,6 +223,7 @@ export function ForceGraph({
   label,
   tooltip,
   controls,
+  undirected = false,
 }: ForceGraphProps) {
   // La burbuja bajo el ratón y dónde está en pantalla, para su etiqueta flotante.
   const [tip, setTip] = useState<{ node: NetworkNode; x: number; y: number } | null>(null)
@@ -245,9 +251,9 @@ export function ForceGraph({
     version: 0,
   })
   // Lo último que llegó por props, a mano para el dibujo sin volver a montar nada.
-  const live = useRef({ colorOf, selected, onSelect })
+  const live = useRef({ colorOf, selected, onSelect, undirected })
 
-  live.current = { colorOf, selected, onSelect }
+  live.current = { colorOf, selected, onSelect, undirected }
 
   /** Pide un repintado para el siguiente fotograma. Varias peticiones son una. */
   const schedule = useRef<() => void>(() => undefined)
@@ -450,14 +456,21 @@ export function ForceGraph({
           context.lineWidth = width
           context.beginPath()
           context.moveTo(fx, fy)
-          context.lineTo(tx - vx * head * 0.8, ty - vy * head * 0.8)
-          context.stroke()
+
+          if (live.current.undirected) {
+            context.lineTo(tx, ty)
+            context.stroke()
+          } else {
+            context.lineTo(tx - vx * head * 0.8, ty - vy * head * 0.8)
+            context.stroke()
+          }
+
           context.beginPath()
           context.moveTo(tx, ty)
           context.lineTo(tx - vx * head - vy * head * 0.55, ty - vy * head + vx * head * 0.55)
           context.lineTo(tx - vx * head + vy * head * 0.55, ty - vy * head - vx * head * 0.55)
           context.closePath()
-          context.fill()
+          if (!live.current.undirected) context.fill()
 
           // La cifra, en medio del tramo: cuántas (corregidas, aprobadas o
           // suspendidas, según el filtro) le hizo una burbuja a la otra.
@@ -476,7 +489,9 @@ export function ForceGraph({
         const colourOf = (from: SimNode): string =>
           from.login === focus ? palette.gave : palette.got
 
-        if (both) {
+        if (live.current.undirected) {
+          arrow(ax, ay, bx, by, link.forth, palette.gave, 0)
+        } else if (both) {
           arrow(midX, midY, bx, by, link.forth, colourOf(source), apart)
           arrow(midX, midY, ax, ay, link.back, colourOf(target), apart)
         } else if (link.forth > 0) {
@@ -1147,7 +1162,7 @@ export function ForceGraph({
           </ul>
         )}
       </div>
-      {selected !== null && (
+      {selected !== null && !undirected && (
         <ul className="force-arrows" aria-label={`${controls.gave} · ${controls.got}`}>
           <li>
             <i className="gave" aria-hidden="true" />

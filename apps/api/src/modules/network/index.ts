@@ -12,6 +12,7 @@ import { createNetworkRepository } from './network.repository.js'
 import { registerNetworkRoutes } from './network.routes.js'
 import { createNetworkService } from './network.service.js'
 import type { NetworkService } from './network.service.js'
+import { createSeatingService } from './seating.service.js'
 import { createCorrectionSync, PISCINE_CURSUS } from './network.sync.js'
 import type { CorrectionSync } from './network.sync.js'
 import { given } from '../../core/options.js'
@@ -90,6 +91,11 @@ export function createNetworkModule(deps: NetworkModuleDeps): NetworkModule {
     ...given({ audience: deps.audience, poolMembersOf: deps.poolMembersOf }),
     ...clock,
   })
+  const seating = createSeatingService({
+    db: deps.db,
+    ...given({ audience: deps.audience }),
+    ...clock,
+  })
 
   return {
     name: 'network',
@@ -102,7 +108,7 @@ export function createNetworkModule(deps: NetworkModuleDeps): NetworkModule {
     correctedByProject: (login) => corrections.correctedByProject(login),
     correctedSince: (campusId, since) => corrections.correctedSince(campusId, since),
     routes: (app, context) => {
-      registerNetworkRoutes(app, context, service)
+      registerNetworkRoutes(app, context, service, seating)
     },
     jobs: [
       {

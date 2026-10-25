@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/gestion.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-515 textos. «—» es que falta la traducción: sale en español.
+516 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -498,6 +498,7 @@ Generado desde `apps/web/src/shared/i18n/textos/gestion.csv` con
 | `pool.key.clusters.report` | Panel, Piscina: permiso «clusters.report» | features/admin/PoolPanel | Avisar de un problema del edificio | Report a building problem | Avisar d'un problema de l'edifici | Eraikineko arazo baten berri eman |
 | `pool.key.red` | Panel, Piscina: permiso «red» | features/admin/PoolPanel | Red de correcciones | Evaluation network | Xarxa de correccions | Zuzenketen sarea |
 | `pool.key.red.rankings` | Panel, Piscina: permiso «red.rankings» | features/admin/PoolPanel | Listas: endogamia, parejas, más estrictos, proyectos | Lists: endogamy, pairs, strictest, projects | Llistes: endogàmia, parelles, més estrictes, projectes | Zerrendak: endogamia, bikoteak, zorrotzenak, proiektuak |
+| `pool.key.red.seats` | Panel, Piscina: permiso «red.seats» | features/admin/PoolPanel | Red de asientos: con quién se sienta cada cual | Seating network: who sits with whom | Xarxa de seients: amb qui seu cadascú | Eserlekuen sarea: nor norekin esertzen den |
 | `pool.key.avance` | Panel, Piscina: permiso «avance» | features/admin/PoolPanel | Avance en el common core | Common core progress | Avenç al common core | Common core-ko aurrerapena |
 | `pool.key.avance.compare` | Panel, Piscina: permiso «avance.compare» | features/admin/PoolPanel | Compararse con otra persona | Compare with someone | Comparar-se amb una altra persona | Beste pertsona batekin alderatu |
 | `pool.key.examenes` | Panel, Piscina: permiso «examenes» | features/admin/PoolPanel | Exámenes | Exams | Exàmens | Azterketak |

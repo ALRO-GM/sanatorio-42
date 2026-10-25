@@ -1203,6 +1203,26 @@ GET /network/mine → con quién te has corregido tú, en todo el histórico:
 GET /network/people?q=jd → hasta 8 logins que empiezan así, los más activos
 primero: `[{ "login": "jdoe", "image": "https://…", "corrections": 79 }]`.
 
+GET /network/seats?days=30 → la red de asientos (`docs/asientos.md`): quién se
+sienta cerca de quién en los clústeres del campus, en los últimos `days` días
+(1-365, por defecto 30).
+
+```json
+{
+  "days": 30,
+  "people": [{ "login": "jdoe", "image": null, "hours": 61.5, "closeness": 240,
+               "partners": 6, "alone": 0.18, "community": 0, "usual": ["c2r4s3"] }],
+  "links": [{ "source": "jdoe", "target": "mgomez", "closeness": 96, "hours": 32 }],
+  "totals": { "people": 73, "pairs": 140, "communities": 7, "hours": 3900 }
+}
+```
+
+`closeness` son horas sentados a la vez por el peso de lo cerca que estaban (3 al
+lado, 2 enfrente, 1,5 en la fila de atrás); una pareja sale con 2 o más. `alone`
+es la parte de sus horas sin nadie en un puesto cercano. Un piscinero solo ve a
+piscineros de su campus y un estudiante, a estudiantes. Permiso de piscina
+`red.seats`.
+
 ## Ranking
 
 GET /leaderboard?period=month|all → quién ayuda más en el campus que miro.

@@ -924,3 +924,17 @@ ol.net-rows .net-row-name {
 .force-arrows i.got {
   background: var(--stage-got, #ffb36b);
 }
+
+/* La red de asientos: listas de con quién se sienta alguien y de quién se sienta solo. */
+.seats-partners {
+  margin: 0.5rem 0 0;
+  padding-left: 1.4rem;
+  display: grid;
+  gap: 0.25rem;
+}
+
+.seats-partners li span {
+  margin-left: 0.5rem;
+  color: var(--text-3);
+  font-size: 0.85em;
+}

@@ -149,6 +149,7 @@ export function createReplicaModule(deps: ReplicaModuleDeps): ReplicaModule {
       },
       { table: 'agenda_users', logins: ['login'], source: '42' },
       { table: 'pool_members', logins: ['login'], userIds: ['user_id'], source: '42' },
+      { table: 'seat_sessions', logins: ['login'], userIds: ['user_id'], source: '42' },
       { table: 'user_tracks', logins: ['login'], source: '42' },
       { table: 'user_levels', logins: ['login'], source: '42' },
       { table: 'quota_queue', logins: ['login'] },

@@ -96,7 +96,10 @@ export function mergePairs(rows: readonly PairRow[], members: ReadonlySet<string
  * Sin azar: el orden es siempre el alfabético y los empates los gana el número
  * menor, así que el mismo grafo da siempre las mismas comunidades.
  */
-function communitiesOf(pairs: readonly Pair[], logins: readonly string[]): Map<string, number> {
+export function communitiesOf(
+  pairs: readonly Pair[],
+  logins: readonly string[],
+): Map<string, number> {
   const order = [...logins].sort()
   const indexOf = new Map(order.map((login, index) => [login, index]))
   // A qué burbuja del nivel actual pertenece cada persona.

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import type { ReactNode } from 'react'
 
 import type { CurrentUser, NetworkGraph, NetworkNode } from '@sanatorio/contracts'
 
@@ -100,7 +101,7 @@ function paramsOf(filters: Filters): NetworkParams {
  * Red de correcciones: quién ha corregido a quién en el campus, como un grafo
  * de burbujas que se recoloca solo, con filtros y el cálculo de endogamia.
  */
-export function NetworkPage({ me }: { me: CurrentUser }) {
+export function NetworkPage({ me, switcher }: { me: CurrentUser; switcher?: ReactNode }) {
   const { t } = useI18n()
   const { number } = useFormat()
   const [filters, setFilters] = useState<Filters>({
@@ -294,6 +295,7 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
                 <NetworkTour />
               </InfoTip>
             </h2>
+            {switcher}
 
             {graph !== null && graph.sync.phase !== 'done' && (
               <div className="net-sync" role="status">

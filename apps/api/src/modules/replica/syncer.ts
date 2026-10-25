@@ -7,7 +7,7 @@
  *
  * | Tarea        | Qué pide                                              | Coste              | Cadencia |
  * |--------------|-------------------------------------------------------|--------------------|----------|
- * | Puestos      | `/campus/:id/locations?filter[active]=true`           | 1-4 peticiones     | 2 min con gente, 15 min sin nadie |
+ * | Puestos      | `/campus/:id/locations?filter[active]=true`           | 1-4 peticiones     | 2 min con gente, 5 min sin nadie  |
  * | Proyecto     | `projects_users` de **un** proyecto y campus          | 1-3 peticiones     | una vez, al abrirlo, si el campus aún no está copiado |
  * | Cambios      | `projects_users?range[updated_at]=<cursor>,<ahora>`   | casi siempre 1     | 5 min con gente, 30 min sin nadie |
  * | Catálogo     | `/campus`                                             | 1 petición         | semanal |

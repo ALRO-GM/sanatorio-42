@@ -221,7 +221,12 @@ describe('privacidad y condiciones', () => {
 
     // Columnas que parecen nombrar a alguien pero no son una persona: el puesto
     // (`host`) de un ordenador del cluster.
-    const notPeople = new Set(['seats.host', 'broken_seats.host', 'presence.host'])
+    const notPeople = new Set([
+      'seats.host',
+      'broken_seats.host',
+      'presence.host',
+      'seat_sessions.host',
+    ])
     // Columnas con gente dentro que no son un login suelto ni una lista: se
     // declaran como lista en su módulo (`therapy_checks.present`,
     // `broadcasts.audience`) o se omiten con el porqué (`git_rooms.state`).

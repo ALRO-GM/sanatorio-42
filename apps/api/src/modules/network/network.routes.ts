@@ -6,11 +6,13 @@ import type { FastifyInstance } from 'fastify'
 
 import type { RouteContext } from '../../core/module.js'
 import type { NetworkService } from './network.service.js'
+import type { SeatingService } from './seating.service.js'
 
 export function registerNetworkRoutes(
   app: FastifyInstance,
   { session }: RouteContext,
   network: NetworkService,
+  seating: SeatingService,
 ): void {
   /**
    * `GET /network?from=&to=&login=&projectId=&min=&limit=` → quién ha corregido
@@ -46,6 +48,19 @@ export function registerNetworkRoutes(
       reply.header('Cache-Control', 'private, max-age=30')
 
       return reply.send(await network.strictest(await session.actor(request), request.query))
+    },
+  )
+
+  /**
+   * `GET /network/seats?days=` → la red de asientos: quién se sienta cerca de
+   * quién en los clústeres, en los últimos `days` días (`docs/asientos.md`).
+   */
+  app.get<{ Querystring: Record<string, string | undefined> }>(
+    '/network/seats',
+    async (request, reply) => {
+      reply.header('Cache-Control', 'private, max-age=60')
+
+      return reply.send(await seating.graph(await session.actor(request), request.query))
     },
   )
 

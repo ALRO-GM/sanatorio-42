@@ -23,6 +23,7 @@ const DEFAULT: PoolKey[] = [
   'clusters',
   'clusters.report',
   'red',
+  'red.seats',
   'focus',
   'mailbox',
   'people',

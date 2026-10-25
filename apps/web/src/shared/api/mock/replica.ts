@@ -5,7 +5,7 @@ import type { BroadcastReport } from '@sanatorio/contracts'
  */
 
 import { ME, PEERS } from './data'
-import { mockNetwork, mockPair, mockPeople, mockStrictest } from './network'
+import { mockNetwork, mockPair, mockPeople, mockSeats, mockStrictest } from './network'
 import { helpInbox } from './help'
 import type { Api } from '../types'
 import { clickerMock } from './clicker'
@@ -54,6 +54,7 @@ export const replicaMock: Pick<
   | 'getNetwork'
   | 'getNetworkPair'
   | 'getNetworkStrictest'
+  | 'getSeatGraph'
   | 'getNetworkMine'
   | 'searchNetworkPeople'
 > = {
@@ -207,6 +208,12 @@ export const replicaMock: Pick<
     await delay(200)
 
     return mockStrictest(ME.login, min, order)
+  },
+
+  async getSeatGraph(days) {
+    await delay(200)
+
+    return mockSeats(ME.login, days)
   },
 
   async getNetworkMine() {
