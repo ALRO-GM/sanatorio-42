@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from 'react'
 import type { CalendarEvent, CalendarKind, CalendarSection } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
-import { openCountdownPicker } from '../../shared/countdowns'
+import { CALENDAR_TAB_KEY, onOpenCountdownsPage } from '../../shared/countdowns'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { useFormat } from '../../shared/i18n/useFormat'
@@ -18,6 +18,7 @@ import type { View } from './kinds'
 import { Icon } from '../../shared/ui/Icon'
 import { InfoTip } from '../../shared/ui/InfoTip'
 import { AgendaTour } from './AgendaTour'
+import { CountdownsView } from './CountdownsView'
 import { DayTimeline } from './DayTimeline'
 import { LAYOUTS, loadLayout, saveLayout } from './timeline'
 import type { Layout } from './timeline'
@@ -34,6 +35,27 @@ type CalendarPageProps = {
   me: string
 }
 
+/** Las dos vistas de la pestaña: el calendario y las cuentas atrás. */
+const TABS = ['calendar', 'countdowns'] as const
+
+type Tab = (typeof TABS)[number]
+
+function loadTab(): Tab {
+  try {
+    return localStorage.getItem(CALENDAR_TAB_KEY) === 'countdowns' ? 'countdowns' : 'calendar'
+  } catch {
+    return 'calendar'
+  }
+}
+
+function saveTab(tab: Tab): void {
+  try {
+    localStorage.setItem(CALENDAR_TAB_KEY, tab)
+  } catch {
+    // Sin almacenamiento, al volver sale el calendario: no pasa nada.
+  }
+}
+
 /** Eventos que caben en cada casilla del mes antes de resumir el resto en "+N". */
 const MONTH_CELL_EVENTS = 3
 
@@ -45,6 +67,7 @@ const MONTH_CELL_EVENTS = 3
 export function CalendarPage({ focus = null, onGo, me }: CalendarPageProps) {
   const { t, lang } = useI18n()
   const { date } = useFormat()
+  const [tab, setTab] = useState<Tab>(loadTab)
   const [view, setView] = useState<View>(loadView)
   const [cursor, setCursor] = useState(() => startOfDay(new Date()))
   const [hidden, setHidden] = useState(loadHidden)
@@ -56,6 +79,20 @@ export function CalendarPage({ focus = null, onGo, me }: CalendarPageProps) {
   const from = (days[0] ?? cursor).toISOString()
   const to = addDays(days.at(-1) ?? cursor, 1).toISOString()
   const { data, error, loading, reload } = useAsync(() => api.getCalendar(from, to), [from, to])
+
+  // Desde la ventanita («ver todas»): a la vista de cuentas atrás.
+  useEffect(
+    () =>
+      onOpenCountdownsPage(() => {
+        setTab('countdowns')
+      }),
+    [],
+  )
+
+  const changeTab = (next: Tab): void => {
+    saveTab(next)
+    setTab(next)
+  }
 
   // El evento de la dirección: su próxima vez en los dos meses que vienen.
   useEffect(() => {
@@ -74,6 +111,7 @@ export function CalendarPage({ focus = null, onGo, me }: CalendarPageProps) {
           ) ?? found.events.find((one) => one.id === focus)
 
         if (event !== undefined) {
+          setTab('calendar')
           setCursor(startOfDay(new Date(event.start)))
           setOpen(event)
         }
@@ -133,205 +171,229 @@ export function CalendarPage({ focus = null, onGo, me }: CalendarPageProps) {
         </InfoTip>
       </h2>
 
-      <div className="card agenda">
-        <div className="agenda-bar">
-          <div className="agenda-nav">
-            <button
-              type="button"
-              className="icon-btn"
-              aria-label={t('common.prev')}
-              onClick={() => {
-                setCursor(move(view, cursor, -1))
-              }}
-            >
-              ‹
-            </button>
-            <button
-              type="button"
-              className="pill"
-              onClick={() => {
-                setCursor(today)
-              }}
-            >
-              {t('agenda.today')}
-            </button>
-            <button
-              type="button"
-              className="icon-btn"
-              aria-label={t('common.next')}
-              onClick={() => {
-                setCursor(move(view, cursor, 1))
-              }}
-            >
-              ›
-            </button>
-            <strong className="agenda-range" aria-live="polite">
-              {rangeTitle(view, cursor, lang)}
-            </strong>
-          </div>
-          <PillGroup
-            options={VIEWS}
-            value={view}
-            onChange={changeView}
-            label={t('agenda.view')}
-            text={(option) => t(`agenda.view.${option}`)}
-          >
-            {/* Fijarse el próximo compromiso o algo propio (`docs/avisos-cuenta-atras.md`). */}
-            <button type="button" className="pill" onClick={openCountdownPicker}>
-              <Icon name="chincheta" size={14} /> {t('countdown.open')}
-            </button>
-          </PillGroup>
-        </div>
+      <PillGroup
+        className="calendar-tabs"
+        kind="tabs"
+        options={TABS}
+        value={tab}
+        onChange={changeTab}
+        label={t('agenda.tabs')}
+        text={(option) => (
+          <>
+            <Icon name={option === 'calendar' ? 'calendario' : 'reloj'} size={14} />{' '}
+            {t(`agenda.tab.${option}`)}
+          </>
+        )}
+      />
 
-        {view !== 'month' && (
-          <Show from="normal">
+      {tab === 'countdowns' ? (
+        <div className="card agenda">
+          <CountdownsView onOpen={setOpen} />
+        </div>
+      ) : (
+        <div className="card agenda">
+          <div className="agenda-bar">
+            <div className="agenda-nav">
+              <button
+                type="button"
+                className="icon-btn"
+                aria-label={t('common.prev')}
+                onClick={() => {
+                  setCursor(move(view, cursor, -1))
+                }}
+              >
+                ‹
+              </button>
+              <button
+                type="button"
+                className="pill"
+                onClick={() => {
+                  setCursor(today)
+                }}
+              >
+                {t('agenda.today')}
+              </button>
+              <button
+                type="button"
+                className="icon-btn"
+                aria-label={t('common.next')}
+                onClick={() => {
+                  setCursor(move(view, cursor, 1))
+                }}
+              >
+                ›
+              </button>
+              <strong className="agenda-range" aria-live="polite">
+                {rangeTitle(view, cursor, lang)}
+              </strong>
+            </div>
             <PillGroup
-              className="agenda-layouts"
-              options={LAYOUTS}
-              value={layout}
-              onChange={(option) => {
-                saveLayout(option)
-                setLayout(option)
-              }}
-              label={t('agenda.layout')}
-              title={(option) => t(`agenda.layout.${option}.hint`)}
-              text={(option) => t(`agenda.layout.${option}`)}
+              options={VIEWS}
+              value={view}
+              onChange={changeView}
+              label={t('agenda.view')}
+              text={(option) => t(`agenda.view.${option}`)}
             />
-          </Show>
-        )}
+          </div>
 
-        <div className="agenda-kinds" role="group" aria-label={t('agenda.kinds')}>
-          {/* Que se vea que son filtros: cada tipo se enciende o se apaga. */}
-          <span className="agenda-kinds-label" aria-hidden="true">
-            {t('agenda.kindsShow')}
-          </span>
-          {KINDS.map(({ kind, icon }) => (
-            <button
-              key={kind}
-              type="button"
-              className={`kind-toggle kind-${kind} ${hidden.has(kind) ? 'off' : ''}`}
-              aria-pressed={!hidden.has(kind)}
-              onClick={() => {
-                toggleKind(kind)
-              }}
-            >
-              <span className="kind-dot" aria-hidden="true" />
-              <Icon name={icon} />
-              {t(`agenda.kind.${kind}`)}
-              {(counts.get(kind) ?? 0) > 0 && (
-                <span className="kind-count">{counts.get(kind)}</span>
-              )}
-            </button>
-          ))}
-        </div>
+          {view !== 'month' && (
+            <Show from="normal">
+              <PillGroup
+                className="agenda-layouts"
+                options={LAYOUTS}
+                value={layout}
+                onChange={(option) => {
+                  saveLayout(option)
+                  setLayout(option)
+                }}
+                label={t('agenda.layout')}
+                title={(option) => t(`agenda.layout.${option}.hint`)}
+                text={(option) => t(`agenda.layout.${option}`)}
+              />
+            </Show>
+          )}
 
-        {loading && <p>{t('agenda.loading')}</p>}
-        {data === undefined && <ErrorNote error={error} onRetry={() => void reload()} />}
-
-        {data !== undefined && view === 'month' && (
-          <div className="month-grid">
-            {/* Por posición: en inglés martes y jueves empiezan igual, y sábado y domingo. */}
-            {weekdays.map((name, index) => (
-              <span key={index} className="month-dow" aria-hidden="true">
-                {name}
-              </span>
+          <div className="agenda-kinds" role="group" aria-label={t('agenda.kinds')}>
+            {/* Que se vea que son filtros: cada tipo se enciende o se apaga. */}
+            <span className="agenda-kinds-label" aria-hidden="true">
+              {t('agenda.kindsShow')}
+            </span>
+            {KINDS.map(({ kind, icon }) => (
+              <button
+                key={kind}
+                type="button"
+                className={`kind-toggle kind-${kind} ${hidden.has(kind) ? 'off' : ''}`}
+                aria-pressed={!hidden.has(kind)}
+                onClick={() => {
+                  toggleKind(kind)
+                }}
+              >
+                <span className="kind-dot" aria-hidden="true" />
+                <Icon name={icon} />
+                {t(`agenda.kind.${kind}`)}
+                {(counts.get(kind) ?? 0) > 0 && (
+                  <span className="kind-count">{counts.get(kind)}</span>
+                )}
+              </button>
             ))}
-            {days.map((day) => {
-              const events = eventsOn(visible, day)
-              const shown = events.slice(0, MONTH_CELL_EVENTS)
-              const outside = day.getMonth() !== cursor.getMonth()
+          </div>
 
-              return (
-                <div
-                  key={day.toISOString()}
-                  className={`month-cell ${outside ? 'outside' : ''} ${sameDay(day, today) ? 'today' : ''}`}
-                >
-                  <button
-                    type="button"
-                    className="month-day"
-                    aria-label={date(day, 'long')}
-                    onClick={() => {
-                      openDay(day)
-                    }}
+          {loading && <p>{t('agenda.loading')}</p>}
+          {data === undefined && <ErrorNote error={error} onRetry={() => void reload()} />}
+
+          {data !== undefined && view === 'month' && (
+            <div className="month-grid">
+              {/* Por posición: en inglés martes y jueves empiezan igual, y sábado y domingo. */}
+              {weekdays.map((name, index) => (
+                <span key={index} className="month-dow" aria-hidden="true">
+                  {name}
+                </span>
+              ))}
+              {days.map((day) => {
+                const events = eventsOn(visible, day)
+                const shown = events.slice(0, MONTH_CELL_EVENTS)
+                const outside = day.getMonth() !== cursor.getMonth()
+
+                return (
+                  <div
+                    key={day.toISOString()}
+                    className={`month-cell ${outside ? 'outside' : ''} ${sameDay(day, today) ? 'today' : ''}`}
                   >
-                    {day.getDate()}
-                  </button>
-                  {shown.map((event) => (
-                    <EventChip key={event.id} event={event} day={day} compact onOpen={setOpen} />
-                  ))}
-                  {events.length > shown.length && (
                     <button
                       type="button"
-                      className="month-more"
+                      className="month-day"
+                      aria-label={date(day, 'long')}
                       onClick={() => {
                         openDay(day)
                       }}
                     >
-                      {t('agenda.more', { n: events.length - shown.length })}
+                      {day.getDate()}
                     </button>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-        )}
+                    {shown.map((event) => (
+                      <EventChip key={event.id} event={event} day={day} compact onOpen={setOpen} />
+                    ))}
+                    {events.length > shown.length && (
+                      <button
+                        type="button"
+                        className="month-more"
+                        onClick={() => {
+                          openDay(day)
+                        }}
+                      >
+                        {t('agenda.more', { n: events.length - shown.length })}
+                      </button>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          )}
 
-        {data !== undefined && view !== 'month' && layout !== 'list' && (
-          <DayTimeline
-            days={days}
-            events={visible}
-            layout={layout}
-            week={view === 'week'}
-            onOpen={setOpen}
-            onOpenDay={openDay}
-          />
-        )}
+          {data !== undefined && view !== 'month' && layout !== 'list' && (
+            <DayTimeline
+              days={days}
+              events={visible}
+              layout={layout}
+              week={view === 'week'}
+              onOpen={setOpen}
+              onOpenDay={openDay}
+            />
+          )}
 
-        {data !== undefined && view !== 'month' && layout === 'list' && (
-          <div className={`day-columns view-${view}`}>
-            {days.map((day) => {
-              const events = eventsOn(visible, day)
+          {data !== undefined && view !== 'month' && layout === 'list' && (
+            <div className={`day-columns view-${view}`}>
+              {days.map((day) => {
+                const events = eventsOn(visible, day)
 
-              return (
-                <div
-                  key={day.toISOString()}
-                  className={`day-column ${sameDay(day, today) ? 'today' : ''}`}
-                >
-                  {view === 'week' && (
-                    <button
-                      type="button"
-                      className="day-head"
-                      onClick={() => {
-                        openDay(day)
-                      }}
-                    >
-                      <span>{date(day, 'weekday')}</span>
-                      <strong>{day.getDate()}</strong>
-                    </button>
-                  )}
-                  {events.length === 0 && <p className="day-empty">{t('agenda.empty')}</p>}
-                  {events.map((event) => (
-                    <EventChip key={event.id} event={event} day={day} onOpen={setOpen} />
-                  ))}
-                </div>
-              )
-            })}
-          </div>
-        )}
+                return (
+                  <div
+                    key={day.toISOString()}
+                    className={`day-column ${sameDay(day, today) ? 'today' : ''}`}
+                  >
+                    {view === 'week' && (
+                      <button
+                        type="button"
+                        className="day-head"
+                        onClick={() => {
+                          openDay(day)
+                        }}
+                      >
+                        <span>{date(day, 'weekday')}</span>
+                        <strong>{day.getDate()}</strong>
+                      </button>
+                    )}
+                    {events.length === 0 && <p className="day-empty">{t('agenda.empty')}</p>}
+                    {events.map((event) => (
+                      <EventChip key={event.id} event={event} day={day} onOpen={setOpen} />
+                    ))}
+                  </div>
+                )
+              })}
+            </div>
+          )}
 
-        {data !== undefined && (
-          <p className="hint agenda-source">
-            {data.fortyTwoAt === null
-              ? t('agenda.no42')
-              : t('agenda.from42', {
-                  min: Math.max(0, Math.round((Date.now() - Date.parse(data.fortyTwoAt)) / 60_000)),
-                })}{' '}
-            <button type="button" className="link" disabled={loading} onClick={() => void reload()}>
-              {t('common.refresh')}
-            </button>
-          </p>
-        )}
-      </div>
+          {data !== undefined && (
+            <p className="hint agenda-source">
+              {data.fortyTwoAt === null
+                ? t('agenda.no42')
+                : t('agenda.from42', {
+                    min: Math.max(
+                      0,
+                      Math.round((Date.now() - Date.parse(data.fortyTwoAt)) / 60_000),
+                    ),
+                  })}{' '}
+              <button
+                type="button"
+                className="link"
+                disabled={loading}
+                onClick={() => void reload()}
+              >
+                {t('common.refresh')}
+              </button>
+            </p>
+          )}
+        </div>
+      )}
 
       {open !== null && (
         <EventDialog

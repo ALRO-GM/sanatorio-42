@@ -44,19 +44,27 @@ export async function dismissCountdown(id: number): Promise<void> {
   set(await api.dismissCountdown(id))
 }
 
-const PICK_EVENT = 'sanatorio:countdown-pick'
+const PAGE_EVENT = 'sanatorio:countdown-page'
+/** La vista del calendario elegida (calendario o cuentas atrás), en este navegador. */
+export const CALENDAR_TAB_KEY = 'sanatorio_calendar_tab'
 
-/** Abre la ventanita con el formulario de fijar (el próximo compromiso o uno propio). */
-export function openCountdownPicker(): void {
-  window.dispatchEvent(new CustomEvent(PICK_EVENT))
+/** Lleva al calendario, a su vista de cuentas atrás. */
+export function openCountdownsPage(): void {
+  try {
+    localStorage.setItem(CALENDAR_TAB_KEY, 'countdowns')
+  } catch {
+    // Sin almacenamiento, el aviso de abajo basta si el calendario ya está abierto.
+  }
+  window.dispatchEvent(new CustomEvent(PAGE_EVENT))
+  window.location.hash = '#/calendario'
 }
 
-/** Escucha las peticiones de `openCountdownPicker`. Devuelve cómo dejar de escuchar. */
-export function onOpenCountdownPicker(listener: () => void): () => void {
-  window.addEventListener(PICK_EVENT, listener)
+/** Escucha las peticiones de `openCountdownsPage`. Devuelve cómo dejar de escuchar. */
+export function onOpenCountdownsPage(listener: () => void): () => void {
+  window.addEventListener(PAGE_EVENT, listener)
 
   return () => {
-    window.removeEventListener(PICK_EVENT, listener)
+    window.removeEventListener(PAGE_EVENT, listener)
   }
 }
 

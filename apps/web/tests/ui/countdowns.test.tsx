@@ -93,32 +93,51 @@ describe('avisos con cuenta atrás', () => {
     }, WAIT)
   }, 20_000)
 
-  it('desde el calendario: el próximo compromiso y una cuenta atrás propia', async () => {
+  it('desde la vista de cuentas atrás del calendario: el próximo, una propia y un evento', async () => {
     const user = userEvent.setup()
 
     await openApp('#/calendario')
-    await user.click(await screen.findByRole('button', { name: text('countdown.open') }, WAIT))
+    await user.click(await screen.findByRole('tab', { name: text('agenda.tab.countdowns') }, WAIT))
 
-    const window_ = await dock()
+    const mine = (): HTMLElement => screen.getByRole('region', { name: text('countdown.mine') })
 
-    await user.click(within(window_).getByRole('button', { name: text('countdown.pinNext') }))
-    expect(await within(window_).findByText(text('countdown.kind.next'), {}, WAIT)).toBeTruthy()
+    await user.click(await screen.findByRole('button', { name: text('countdown.pinNext') }, WAIT))
+    expect(await within(mine()).findByText(text('countdown.kind.next'), {}, WAIT)).toBeTruthy()
 
-    await user.click(within(window_).getByRole('button', { name: text('countdown.add') }))
-    await user.type(within(window_).getByLabelText(text('countdown.customTitle')), 'Entrega')
+    await user.type(screen.getByLabelText(text('countdown.customTitle')), 'Entrega')
     // Mañana a esta hora, como lo escribiría el navegador.
     const tomorrow = new Date(Date.now() + 86_400_000)
     const pad = (value: number): string => String(value).padStart(2, '0')
 
     await user.type(
-      within(window_).getByLabelText(text('countdown.day')),
+      screen.getByLabelText(text('countdown.day')),
       `${tomorrow.getFullYear()}-${pad(tomorrow.getMonth() + 1)}-${pad(tomorrow.getDate())}`,
     )
-    await user.type(within(window_).getByLabelText(text('countdown.time')), '10:30')
-    await user.click(within(window_).getByRole('button', { name: text('countdown.pin') }))
+    await user.type(screen.getByLabelText(text('countdown.time')), '10:30')
+    await user.click(screen.getByRole('button', { name: text('countdown.pin') }))
 
-    expect(await within(window_).findByText('Entrega', {}, WAIT)).toBeTruthy()
-    expect(within(window_).getByText(text('countdown.kind.custom'))).toBeTruthy()
+    expect(await within(mine()).findByText('Entrega', {}, WAIT)).toBeTruthy()
+    expect(within(mine()).getByText(text('countdown.kind.custom'))).toBeTruthy()
+
+    // Un evento de lo que viene, con su botón, sin buscarlo en el calendario.
+    const coming = screen.getByRole('region', { name: fill('countdown.coming', { n: '30' }) })
+    const [first] = await within(coming).findAllByRole(
+      'button',
+      { name: text('countdown.pinEvent') },
+      WAIT,
+    )
+
+    await user.click(must(first, 'un evento que fijar'))
+    expect(await within(mine()).findByText(text('countdown.kind.event'), {}, WAIT)).toBeTruthy()
+
+    // Fuera de esta vista vuelve la ventanita, con lo mismo.
+    expect(document.documentElement.dataset.countdownsPage).toBe('')
+    await user.click(screen.getByRole('tab', { name: text('agenda.tab.calendar') }))
+    expect(document.documentElement.dataset.countdownsPage).toBeUndefined()
+
+    const window_ = await dock()
+
+    expect(within(window_).getByText('Entrega')).toBeTruthy()
   }, 20_000)
 })
 

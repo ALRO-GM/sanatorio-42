@@ -499,3 +499,86 @@ a.button {
 .timeline-day button.event-chip.short .event-place {
   display: none;
 }
+
+/* En el ordenador no se desliza de lado con la rueda: los filtros bajan de
+   línea en vez de esconderse por la derecha. En el móvil siguen en una fila. */
+@media (min-width: 641px) {
+  .agenda-kinds {
+    flex-wrap: wrap;
+    overflow-x: visible;
+    mask-image: none;
+  }
+}
+
+/* Calendario o cuentas atrás, encima de la tarjeta. */
+.calendar-tabs {
+  margin-bottom: 0.75rem;
+}
+.countdowns-view {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  gap: 1rem 1.5rem;
+  align-items: start;
+}
+.countdowns-view h3 {
+  margin: 0 0 0.6rem;
+  font-size: 1rem;
+}
+.countdowns-coming {
+  grid-column: 1 / -1;
+}
+.countdowns-add .countdown-picker {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+.countdowns-events {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.countdowns-event {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+  padding: 0.5rem 0.6rem;
+  border-left: 3px solid var(--kind, var(--accent));
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+}
+button.countdowns-event-open {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+  min-width: 0;
+  flex: 1 1 10rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  text-align: left;
+}
+.countdowns-event-open span {
+  display: grid;
+  min-width: 0;
+}
+.countdowns-event-open strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.countdowns-event-open small {
+  color: var(--text-3);
+}
+@media (max-width: 760px) {
+  .countdowns-view {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+:root[data-countdowns-page] .countdown-dock {
+  display: none;
+}

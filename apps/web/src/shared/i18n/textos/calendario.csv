@@ -1,6 +1,9 @@
 clave,contexto,es,en,ca,eu
 agenda.title,Título de la página del calendario,Tu calendario,Your calendar,El teu calendari,Zure egutegia
 agenda.today,Botón: volver a hoy,Hoy,Today,Avui,Gaur
+agenda.tabs,Calendario: las dos vistas de la pestaña,Qué ver,What to see,Què veure,Zer ikusi
+agenda.tab.calendar,Calendario: la vista del calendario,Calendario,Calendar,Calendari,Egutegia
+agenda.tab.countdowns,Calendario: la vista de cuentas atrás,Cuentas atrás,Countdowns,Comptes enrere,Atzerako kontaketak
 agenda.view,"Selector de vista: día, semana o mes",Vista,View,Vista,Ikuspegia
 agenda.layout,Selector de cómo se dibuja el día,Cómo ver el día,How to see the day,Com veure el dia,Eguna nola ikusi
 agenda.layout.list,Forma del día: lista,Lista,List,Llista,Zerrenda

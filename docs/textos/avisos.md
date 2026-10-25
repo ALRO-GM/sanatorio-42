@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/avisos.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-40 textos. «—» es que falta la traducción: sale en español.
+44 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -22,7 +22,7 @@ Generado desde `apps/web/src/shared/i18n/textos/avisos.csv` con
 | `countdown.day` | Campo de fecha de una cuenta atrás | shared/ui/DayTimeFields | Día | Day | Dia | Eguna |
 | `countdown.time` | Campo de hora de una cuenta atrás | shared/ui/DayTimeFields | Hora | Time | Hora | Ordua |
 | `countdown.title` | Ventanita flotante de cuentas atrás: su título | features/countdowns/CountdownDock | Cuenta atrás | Countdown | Compte enrere | Atzerako kontaketa |
-| `countdown.add` | Ventanita de cuentas atrás: botón «+» para fijar una | features/countdowns/CountdownDock | Fijar una cuenta atrás | Pin a countdown | Fixar un compte enrere | Atzerako kontaketa bat finkatu |
+| `countdown.add` | Ventanita de cuentas atrás: botón «+» para fijar una | features/calendar/CountdownsView, features/countdowns/CountdownDock | Fijar una cuenta atrás | Pin a countdown | Fixar un compte enrere | Atzerako kontaketa bat finkatu |
 | `countdown.dock` | Ventanita de cuentas atrás, ya arrastrada: botón para devolverla a su esquina | features/countdowns/CountdownDock | Volver a la esquina | Dock to the corner | Tornar a la cantonada | Izkinara itzuli |
 | `countdown.fold` | Ventanita de cuentas atrás: botón para plegarla | features/countdowns/CountdownDock | Plegar | Minimise | Plegar | Tolestu |
 | `countdown.unfold` | Ventanita de cuentas atrás plegada: botón para desplegarla | features/countdowns/CountdownDock | Desplegar | Expand | Desplegar | Zabaldu |
@@ -46,4 +46,8 @@ Generado desde `apps/web/src/shared/i18n/textos/avisos.csv` con
 | `countdown.fromCalendar` | Ventanita de cuentas atrás: pista bajo el formulario | features/countdowns/CountdownPicker | Un evento concreto se fija desde su ficha del calendario. | To pin a specific event, open it in your calendar. | Un esdeveniment concret es fixa des de la seva fitxa del calendari. | Ekitaldi zehatz bat egutegiko bere fitxatik finkatzen da. |
 | `countdown.pinEvent` | Ficha de un evento del calendario: botón para fijar su cuenta atrás | features/calendar/PinCountdown | Fijar cuenta atrás | Pin countdown | Fixa el compte enrere | Atzerako kontaketa finkatu |
 | `countdown.unpinEvent` | Ficha de un evento del calendario ya fijado: botón para quitar su cuenta atrás | features/calendar/PinCountdown | Quitar cuenta atrás | Unpin countdown | Treu el compte enrere | Atzerako kontaketa kendu |
-| `countdown.open` | Calendario: botón que abre la ventanita para fijar una cuenta atrás | features/calendar/CalendarPage | Cuenta atrás | Countdown | Compte enrere | Atzerako kontaketa |
+| `countdown.mine` | Vista de cuentas atrás: las que tienes | features/calendar/CountdownsView | Tus cuentas atrás | Your countdowns | Els teus comptes enrere | Zure atzerako kontaketak |
+| `countdown.none` | Vista de cuentas atrás: aún no tienes ninguna | features/calendar/CountdownsView | Ninguna todavía: fija tu próximo compromiso, algo tuyo o un evento de abajo. | None yet: pin your next commitment, something of yours or an event below. | Cap encara: fixa el teu proper compromís, alguna cosa teva o un esdeveniment de sota. | Bat ere ez oraindik: finkatu zure hurrengo konpromisoa, zure zerbait edo beheko ekitaldi bat. |
+| `countdown.coming` | Vista de cuentas atrás: los eventos de los próximos días, para fijarlos | features/calendar/CountdownsView | Lo que viene (próximos {n} días) | Coming up (next {n} days) | El que ve (propers {n} dies) | Datozenak (hurrengo {n} egunak) |
+| `countdown.comingNone` | Vista de cuentas atrás: no hay eventos próximos | features/calendar/CountdownsView | Nada en tu calendario en este tiempo. | Nothing in your calendar in this period. | Res al teu calendari en aquest temps. | Ezer ez zure egutegian epe honetan. |
+| `countdown.seeAll` | Ventanita de cuentas atrás: enlace a la vista de cuentas atrás del calendario | features/countdowns/CountdownPicker | Ver todo en el calendario | See it all in the calendar | Veure-ho tot al calendari | Dena egutegian ikusi |

@@ -6,7 +6,6 @@ import type { Countdown } from '@sanatorio/contracts'
 import {
   dismissCountdown,
   loadCountdowns,
-  onOpenCountdownPicker,
   unpinCountdown,
   useCountdowns,
 } from '../../shared/countdowns'
@@ -85,16 +84,6 @@ export function CountdownDock({ stamp }: { stamp: number | null }) {
   useEffect(() => {
     void loadCountdowns()
   }, [stamp])
-
-  useEffect(
-    () =>
-      onOpenCountdownPicker(() => {
-        setAdding(true)
-        setFolded(false)
-        store(MIN_KEY, false)
-      }),
-    [],
-  )
 
   if (shown.length === 0 && !adding) return null
 
@@ -230,7 +219,7 @@ function titleOf(entry: Countdown, t: Translate): string {
 }
 
 /** Una cuenta atrás de la lista, con lo que falta y cómo quitarla. */
-function CountdownItem({ entry, now }: { entry: Countdown; now: number }) {
+export function CountdownItem({ entry, now }: { entry: Countdown; now: number }) {
   const { t } = useI18n()
   const { dateTime } = useFormat()
   const action = useAction()

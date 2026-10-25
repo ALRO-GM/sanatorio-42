@@ -47,6 +47,13 @@ algo que contar.
 
 Como mucho 12 propias a la vez; fijar dos veces lo mismo no lo repite.
 
+La pestaña **Calendario** tiene dos vistas, **Calendario** y **Cuentas atrás**
+(se recuerda la última en el navegador). La de cuentas atrás enseña las tuyas
+en grande, el formulario de fijar (el próximo compromiso o una tuya) y lo que
+viene en los próximos 30 días, cada evento con su botón de fijar. Mientras está
+abierta, la ventanita flotante se esconde: sería lo mismo dos veces. Desde la
+ventanita, «Ver todo en el calendario» lleva a esa vista.
+
 ## Cómo funciona
 
 - Tablas (migración 73): `countdown_notices` (los avisos, con `target_group`

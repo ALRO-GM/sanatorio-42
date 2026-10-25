@@ -2,7 +2,7 @@ import { useState } from 'react'
 
 import type { Countdown } from '@sanatorio/contracts'
 
-import { pinCountdown } from '../../shared/countdowns'
+import { openCountdownsPage, pinCountdown } from '../../shared/countdowns'
 import { useAction } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { DayTimeFields, instantOf } from '../../shared/ui/DayTimeFields'
@@ -14,7 +14,17 @@ import { Icon } from '../../shared/ui/Icon'
  * calendario (cambia solo cuando pasa) o algo propio con título y hora. Un
  * evento concreto se fija desde su ficha del calendario.
  */
-export function CountdownPicker({ list, onDone }: { list: Countdown[]; onDone: () => void }) {
+export function CountdownPicker({
+  list,
+  onDone,
+  inPage = false,
+}: {
+  list: Countdown[]
+  /** Al fijar (o cancelar, en la ventanita). */
+  onDone: () => void
+  /** Dentro de la vista de cuentas atrás del calendario: sin cancelar ni enlace a sí misma. */
+  inPage?: boolean
+}) {
   const { t } = useI18n()
   const action = useAction()
   const [title, setTitle] = useState('')
@@ -64,9 +74,11 @@ export function CountdownPicker({ list, onDone }: { list: Countdown[]; onDone: (
         </label>
         <DayTimeFields day={day} time={time} onDay={setDay} onTime={setTime} />
         <div className="actions">
-          <button type="button" className="link" onClick={onDone}>
-            {t('common.cancel')}
-          </button>
+          {!inPage && (
+            <button type="button" className="link" onClick={onDone}>
+              {t('common.cancel')}
+            </button>
+          )}
           <button
             type="submit"
             className="pill"
@@ -76,7 +88,14 @@ export function CountdownPicker({ list, onDone }: { list: Countdown[]; onDone: (
           </button>
         </div>
       </form>
-      <small className="hint">{t('countdown.fromCalendar')}</small>
+      {inPage ? null : (
+        <small className="hint">
+          {t('countdown.fromCalendar')}{' '}
+          <button type="button" className="link" onClick={openCountdownsPage}>
+            {t('countdown.seeAll')}
+          </button>
+        </small>
+      )}
       <ErrorNote error={action.error} />
     </div>
   )

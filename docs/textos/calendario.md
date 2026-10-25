@@ -3,12 +3,15 @@
 Generado desde `apps/web/src/shared/i18n/textos/calendario.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-99 textos. «—» es que falta la traducción: sale en español.
+102 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
 | `agenda.title` | Título de la página del calendario | features/calendar/CalendarPage | Tu calendario | Your calendar | El teu calendari | Zure egutegia |
 | `agenda.today` | Botón: volver a hoy | features/calendar/CalendarPage | Hoy | Today | Avui | Gaur |
+| `agenda.tabs` | Calendario: las dos vistas de la pestaña | features/calendar/CalendarPage | Qué ver | What to see | Què veure | Zer ikusi |
+| `agenda.tab.calendar` | Calendario: la vista del calendario | features/calendar/CalendarPage | Calendario | Calendar | Calendari | Egutegia |
+| `agenda.tab.countdowns` | Calendario: la vista de cuentas atrás | features/calendar/CalendarPage | Cuentas atrás | Countdowns | Comptes enrere | Atzerako kontaketak |
 | `agenda.view` | Selector de vista: día, semana o mes | features/calendar/CalendarPage | Vista | View | Vista | Ikuspegia |
 | `agenda.layout` | Selector de cómo se dibuja el día | features/calendar/CalendarPage | Cómo ver el día | How to see the day | Com veure el dia | Eguna nola ikusi |
 | `agenda.layout.list` | Forma del día: lista | features/calendar/CalendarPage | Lista | List | Llista | Zerrenda |
@@ -28,13 +31,13 @@ Generado desde `apps/web/src/shared/i18n/textos/calendario.csv` con
 | `agenda.view.month` | Vista: mes | features/calendar/CalendarPage | Mes | Month | Mes | Hilabetea |
 | `agenda.kinds` | Filtro de tipos de evento | features/calendar/CalendarPage | Tipos de evento | Event types | Tipus d'esdeveniment | Ekitaldi motak |
 | `agenda.kindsShow` | Calendario: delante de los tipos de evento, para que se vea que filtran | features/calendar/CalendarPage | Ver: | Show: | Mostra: | Erakutsi: |
-| `agenda.kind.help` | Tipo de evento: tu on-call y reservas de ayuda | features/calendar/AgendaTour, features/calendar/CalendarPage, features/calendar/EventChip, features/calendar/EventDialog | On-call | On-call | On-call | On-call |
-| `agenda.kind.therapy` | Tipo de evento: sprints | features/calendar/AgendaTour, features/calendar/CalendarPage, features/calendar/EventChip, features/calendar/EventDialog | Sprints | Sprints | Sprints | Sprintak |
-| `agenda.kind.board` | Tipo de evento: pizarras | features/calendar/AgendaTour, features/calendar/CalendarPage, features/calendar/EventChip, features/calendar/EventDialog | Pizarras | Whiteboards | Pissarres | Arbelak |
-| `agenda.kind.evaluation` | Tipo de evento: correcciones de 42 | features/calendar/AgendaTour, features/calendar/CalendarPage, features/calendar/EventChip, features/calendar/EventDialog | Correcciones | Evaluations | Correccions | Zuzenketak |
-| `agenda.kind.event_joined` | Tipo de evento: eventos de 42 a los que vas | features/calendar/AgendaTour, features/calendar/CalendarPage, features/calendar/EventChip, features/calendar/EventDialog | Eventos a los que vas | Events you're going to | Esdeveniments on vas | Joango zaren ekitaldiak |
-| `agenda.kind.event_open` | Tipo de evento: eventos de 42 a los que no te has apuntado | features/calendar/AgendaTour, features/calendar/CalendarPage, features/calendar/EventChip, features/calendar/EventDialog | Otros eventos de 42 | Other 42 events | Altres esdeveniments de 42 | 42ko beste ekitaldiak |
-| `agenda.kind.exam` | Tipo de evento: exámenes de 42 | features/calendar/AgendaTour, features/calendar/CalendarPage, features/calendar/EventChip, features/calendar/EventDialog | Exámenes | Exams | Exàmens | Azterketak |
+| `agenda.kind.help` | Tipo de evento: tu on-call y reservas de ayuda | features/calendar/AgendaTour, features/calendar/CalendarPage, features/calendar/CountdownsView, features/calendar/EventChip, features/calendar/EventDialog | On-call | On-call | On-call | On-call |
+| `agenda.kind.therapy` | Tipo de evento: sprints | features/calendar/AgendaTour, features/calendar/CalendarPage, features/calendar/CountdownsView, features/calendar/EventChip, features/calendar/EventDialog | Sprints | Sprints | Sprints | Sprintak |
+| `agenda.kind.board` | Tipo de evento: pizarras | features/calendar/AgendaTour, features/calendar/CalendarPage, features/calendar/CountdownsView, features/calendar/EventChip, features/calendar/EventDialog | Pizarras | Whiteboards | Pissarres | Arbelak |
+| `agenda.kind.evaluation` | Tipo de evento: correcciones de 42 | features/calendar/AgendaTour, features/calendar/CalendarPage, features/calendar/CountdownsView, features/calendar/EventChip, features/calendar/EventDialog | Correcciones | Evaluations | Correccions | Zuzenketak |
+| `agenda.kind.event_joined` | Tipo de evento: eventos de 42 a los que vas | features/calendar/AgendaTour, features/calendar/CalendarPage, features/calendar/CountdownsView, features/calendar/EventChip, features/calendar/EventDialog | Eventos a los que vas | Events you're going to | Esdeveniments on vas | Joango zaren ekitaldiak |
+| `agenda.kind.event_open` | Tipo de evento: eventos de 42 a los que no te has apuntado | features/calendar/AgendaTour, features/calendar/CalendarPage, features/calendar/CountdownsView, features/calendar/EventChip, features/calendar/EventDialog | Otros eventos de 42 | Other 42 events | Altres esdeveniments de 42 | 42ko beste ekitaldiak |
+| `agenda.kind.exam` | Tipo de evento: exámenes de 42 | features/calendar/AgendaTour, features/calendar/CalendarPage, features/calendar/CountdownsView, features/calendar/EventChip, features/calendar/EventDialog | Exámenes | Exams | Exàmens | Azterketak |
 | `agenda.loading` | Mientras carga el calendario | features/calendar/CalendarPage | Preparando tu calendario… | Getting your calendar ready… | Preparant el teu calendari… | Zure egutegia prestatzen… |
 | `agenda.more` | Cuántos eventos más hay ese día | features/calendar/CalendarPage | +{n} más | +{n} more | +{n} més | +{n} gehiago |
 | `agenda.empty` | Día sin nada | features/calendar/CalendarPage, features/calendar/DayTimeline | Nada | Nothing | Res | Ezer ez |

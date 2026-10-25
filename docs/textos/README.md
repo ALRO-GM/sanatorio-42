@@ -6,9 +6,9 @@ Cómo se trabaja con ellas: [docs/textos.md](../textos.md).
 | Tema | Textos | Falta en Inglés | Falta en Catalán | Falta en Euskera |
 | --- | --- | --- | --- | --- |
 | [animos](animos.md) | 100 | 0 | 0 | 0 |
-| [avisos](avisos.md) | 40 | 0 | 0 | 0 |
+| [avisos](avisos.md) | 44 | 0 | 0 | 0 |
 | [buzon](buzon.md) | 114 | 0 | 0 | 0 |
-| [calendario](calendario.md) | 99 | 0 | 0 | 0 |
+| [calendario](calendario.md) | 102 | 0 | 0 | 0 |
 | [clusters](clusters.md) | 75 | 0 | 0 | 0 |
 | [code-clicker](code-clicker.md) | 27 | 0 | 0 | 0 |
 | [comun](comun.md) | 301 | 0 | 0 | 0 |
