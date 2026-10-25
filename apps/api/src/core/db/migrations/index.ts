@@ -79,7 +79,7 @@ import { agendaCursusSchema } from './0070-agenda-cursus.js'
 import { seatLogSchema } from './0071-seat-log.js'
 import { hiddenPeopleSchema } from './0072-hidden-people.js'
 import { countdownsSchema } from './0073-countdowns.js'
-import { shellCourseSchema } from './0075-shell-course.js'
+import { shellCourseSchema } from './0074-shell-course.js'
 import type { Migration } from './types.js'
 
 export const MIGRATIONS: readonly Migration[] = [

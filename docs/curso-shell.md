@@ -129,7 +129,7 @@ investigación):
   - `course/`: los bloques, las unidades (castellano e inglés) y la
     corrección (`checkAttempt`, `goalOf`, `starGoals`, `timeGoalsOf`).
 - `apps/api/src/modules/shellcourse`: progreso (`shell_progress`), relojes de
-  los jefes (`shell_runs`), migración 75. Ver `docs/api.md`.
+  los jefes (`shell_runs`), migración 74. Ver `docs/api.md`.
 - `apps/web/src/features/shellcourse`: el camino, la unidad (teoría, ejemplo
   y prueba), los jefes y la demostración animada; usa la terminal y las
   estrellas de `shared/course`.

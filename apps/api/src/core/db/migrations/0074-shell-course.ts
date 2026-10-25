@@ -8,7 +8,7 @@
 import type { Migration } from './types.js'
 
 export const shellCourseSchema: Migration = {
-  version: 75,
+  version: 74,
   name: 'shell-course',
   statements: [
     `CREATE TABLE shell_progress (

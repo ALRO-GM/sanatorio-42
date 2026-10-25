@@ -12,7 +12,7 @@ va lo que no está en el código.
 [tareas-tras-compactar.md](tareas-tras-compactar.md)**: es la lista de lo que hay
 que hacer, en orden. Este documento es el porqué; aquel, el qué.
 
-## Estado a 2026-10-25 (desplegado, esquema 73)
+## Estado a 2026-10-25 (desplegado, esquema 74)
 
 - Piscineros: entrada, permisos, mundos separados y **ver como piscinero**
   desde el panel (`docs/piscineros.md`).
@@ -41,7 +41,7 @@ Pedido por Alberto: un curso de shell de Linux por niveles, con teoría,
 ejemplo y prueba por conocimiento, jefes contrarreloj y jefes finales que
 certifican principiante, intermedio y avanzado. Hecho con una shell simulada
 (`packages/shellsim`), la plantilla común de cursos (`packages/course`,
-`shared/course`) y el módulo `shellcourse` (migración 75). Investigación,
+`shared/course`) y el módulo `shellcourse` (migración 74). Investigación,
 roadmap y decisiones en `docs/curso-shell-investigacion.md`,
 `docs/curso-shell.md` y `docs/plantilla-cursos.md`. No pide puesto del
 clúster (a diferencia del de git).
