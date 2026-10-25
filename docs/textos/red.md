@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/red.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-188 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
+191 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera | Francés |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -24,6 +24,7 @@ Generado desde `apps/web/src/shared/i18n/textos/red.csv` con
 | `net.project` | Filtro por proyecto | features/network/NetworkPage | Proyecto | Project | Projecte | Proiektua | Projet |
 | `net.project.all` | Proyecto: todos | features/network/NetworkPage | Todos | All | Tots | Denak | Tous |
 | `net.min` | Mínimo de correcciones entre dos personas para dibujar la unión | features/network/NetworkPage | Mínimo por pareja: {n} | Minimum per pair: {n} | Mínim per parella: {n} | Bikoteko gutxienekoa: {n} | Minimum par paire : {n} |
+| `net.minLabel` | Nombre del deslizador del mínimo de correcciones por pareja (para lectores de pantalla) | features/network/NetworkPage | Mínimo por pareja | Minimum per pair | Mínim per parella | Bikoteko gutxienekoa | Minimum par paire |
 | `net.limit` | Tope de personas en el grafo | features/network/NetworkPage | Personas, como mucho | People, at most | Persones, com a molt | Pertsonak, gehienez | Personnes, au maximum |
 | `net.color` | Selector de qué colorea las burbujas | features/network/NetworkPage | Color según | Colour by | Color segons | Kolorea honen arabera | Couleur selon |
 | `net.color.community` | Color: grupo de gente que se corrige entre sí | features/network/NetworkPage | Comunidad | Community | Comunitat | Komunitatea | Communauté |
@@ -88,6 +89,8 @@ Generado desde `apps/web/src/shared/i18n/textos/red.csv` con
 | `net.legend.unknown` | Leyenda: sin datos | features/network/colors | Sin datos | No data | Sense dades | Daturik gabe | Pas de données |
 | `net.scale.from` | Escala de color: verde hasta un porcentaje | features/network/NetworkPage | Verde hasta el {n} % | Green up to {n}% | Verd fins al {n} % | Berdea % {n} arte | Vert jusqu'à {n} % |
 | `net.scale.to` | Escala de color: rojo desde un porcentaje | features/network/NetworkPage | Rojo desde el {n} % | Red from {n}% | Vermell des del {n} % | Gorria % {n}tik aurrera | Rouge à partir de {n} % |
+| `net.scale.low` | Escala de color: tirador del porcentaje hasta el que todo es verde (para lectores de pantalla) | features/network/NetworkPage | Fin del verde | End of green | Final del verd | Berdearen amaiera | Fin du vert |
+| `net.scale.high` | Escala de color: tirador del porcentaje desde el que todo es rojo (para lectores de pantalla) | features/network/NetworkPage | Inicio del rojo | Start of red | Inici del vermell | Gorriaren hasiera | Début du rouge |
 | `net.scale.fit` | Botón: ajustar la escala a lo visible | features/network/NetworkPage | Ajustar a lo que se ve | Fit to what is shown | Ajusta al que es veu | Doitu ikusten denera | Ajuster à l'affichage |
 | `net.scale.reset` | Botón: escala completa | features/network/NetworkPage | Escala completa | Full scale | Escala completa | Eskala osoa | Échelle complète |
 | `net.card.title` | Tarjeta del perfil: tu red de correcciones | features/profile/NetworkCard | Tu red de correcciones | Your evaluation network | La teva xarxa de correccions | Zure zuzenketen sarea | Ton réseau de corrections |

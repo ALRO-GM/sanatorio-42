@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/terapia.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-60 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
+61 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera | Francés |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -64,6 +64,7 @@ Generado desde `apps/web/src/shared/i18n/textos/terapia.csv` con
 | `therapy.kind.review.join` | Aviso al unirse a un grupo de repaso | features/therapy/GroupCard, features/therapy/GroupForm | Este grupo es de repaso: solo para quien ya tiene el proyecto terminado. | This is a review group: only for people who already finished the project. | Aquest grup és de repàs: només per a qui ja té el projecte acabat. | Talde hau errepasokoa da: proiektua amaituta duenarentzat bakarrik. | C'est un groupe de révision : réservé aux personnes qui ont déjà terminé le projet. |
 | `therapy.progress` | Cuánto lleva cada miembro del proyecto | features/therapy/GroupCard | Cómo van con el proyecto | How far along they are | Com van amb el projecte | Proiektuarekin zer-nolako aurrerapena duten | Où en est chaque personne sur le projet |
 | `therapy.progressAsk` | Pregunta al unirse: cuánto llevas | features/therapy/GroupCard, features/therapy/GroupForm | Cómo llevas el proyecto: {n} % | How far along you are: {n}% | Com portes el projecte: {n} % | Nola daramazun proiektua: % {n} | Où tu en es sur le projet : {n} % |
+| `therapy.progressLabel` | Nombre del deslizador de cuánto llevas del proyecto (para lectores de pantalla) | features/therapy/GroupCard, features/therapy/GroupForm | Cómo llevas el proyecto | How far along you are | Com portes el projecte | Nola daramazun proiektua | Où tu en es sur le projet |
 | `therapy.joinConfirm` | Botón para confirmar la unión | features/therapy/GroupCard | Apuntarme | Join | Apunta-m'hi | Eman izena | Rejoindre |
 | `therapy.chatShow` | Botón para abrir el chat del grupo | features/therapy/GroupCard | Abrir el chat del grupo | Open the group chat | Obre el xat del grup | Ireki taldearen txata | Ouvrir la discussion du groupe |
 | `therapy.chatHide` | Botón para ocultar el chat | features/therapy/GroupCard | Ocultar el chat | Hide the chat | Amaga el xat | Ezkutatu txata | Masquer la discussion |

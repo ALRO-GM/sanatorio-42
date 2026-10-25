@@ -368,15 +368,19 @@ describe('Quién va más rápido', () => {
     await screen.findByText(/^40 personas/, {}, { timeout: 5000 })
     expect(group('stats.ranking.cohort')).toBeTruthy()
 
-    // Solo quien terminó: el círculo mínimo, al tope.
-    fireEvent.change(screen.getByRole('slider', { name: text('stats.ranking.circleMin') }), {
-      target: { value: '7' },
-    })
+    // Solo quien terminó: el círculo mínimo, al tope (Fin).
+    const circleMin = screen.getByRole('slider', { name: text('stats.ranking.circleMin') })
+
+    circleMin.focus()
+    await user.keyboard('{End}')
     expect(await screen.findByText(/^Círculos: de Terminado a Terminado/)).toBeTruthy()
-    // Y como mucho un 10 %: quien terminó lleva el 100 %, así que nadie.
-    fireEvent.change(screen.getByRole('slider', { name: text('stats.ranking.pctMax') }), {
-      target: { value: '10' },
-    })
+    // Y como mucho un 10 %, escrito a mano: quien terminó lleva el 100 %, así que nadie.
+    await user.click(
+      screen.getByRole('button', {
+        name: text('range.edit').replace('{what}', text('stats.ranking.pctMax')),
+      }),
+    )
+    await user.keyboard('{Control>}a{/Control}10{Enter}')
     expect(await screen.findByText(text('stats.ranking.empty'), {}, { timeout: 5000 })).toBeTruthy()
 
     // Por horas: el rango de % es el de horas.

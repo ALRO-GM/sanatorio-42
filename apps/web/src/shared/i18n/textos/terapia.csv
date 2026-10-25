@@ -56,6 +56,7 @@ therapy.kind.review.hint,Explicación del tipo de repaso,Para quien ya lo tiene 
 therapy.kind.review.join,Aviso al unirse a un grupo de repaso,Este grupo es de repaso: solo para quien ya tiene el proyecto terminado.,This is a review group: only for people who already finished the project.,Aquest grup és de repàs: només per a qui ja té el projecte acabat.,Talde hau errepasokoa da: proiektua amaituta duenarentzat bakarrik.,C'est un groupe de révision : réservé aux personnes qui ont déjà terminé le projet.
 therapy.progress,Cuánto lleva cada miembro del proyecto,Cómo van con el proyecto,How far along they are,Com van amb el projecte,Proiektuarekin zer-nolako aurrerapena duten,Où en est chaque personne sur le projet
 therapy.progressAsk,Pregunta al unirse: cuánto llevas,Cómo llevas el proyecto: {n} %,How far along you are: {n}%,Com portes el projecte: {n} %,Nola daramazun proiektua: % {n},Où tu en es sur le projet : {n} %
+therapy.progressLabel,"Nombre del deslizador de cuánto llevas del proyecto (para lectores de pantalla)",Cómo llevas el proyecto,How far along you are,Com portes el projecte,Nola daramazun proiektua,Où tu en es sur le projet
 therapy.joinConfirm,Botón para confirmar la unión,Apuntarme,Join,Apunta-m'hi,Eman izena,Rejoindre
 therapy.chatShow,Botón para abrir el chat del grupo,Abrir el chat del grupo,Open the group chat,Obre el xat del grup,Ireki taldearen txata,Ouvrir la discussion du groupe
 therapy.chatHide,Botón para ocultar el chat,Ocultar el chat,Hide the chat,Amaga el xat,Ezkutatu txata,Masquer la discussion

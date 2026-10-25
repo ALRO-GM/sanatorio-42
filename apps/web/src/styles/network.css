@@ -71,15 +71,12 @@
   gap: 0.6rem 0.8rem;
 }
 .net-filter-grid label,
+.net-filter-grid .net-min,
 .net-dates label {
   display: grid;
   gap: 0.25rem;
   font-size: 0.8rem;
   color: var(--text-3);
-}
-.net-filter-grid input[type='range'] {
-  width: 100%;
-  accent-color: var(--accent);
 }
 .net-dates {
   display: flex;
@@ -246,18 +243,10 @@
   height: 8px;
   border-radius: 999px;
 }
-.net-scale label {
+.net-scale-range {
   display: grid;
-  grid-template-columns: 9.5rem 1fr;
-  align-items: center;
-  gap: 0.5rem;
-}
-.net-scale input[type='range'] {
-  width: 100%;
-  padding: 0;
-  border: 0;
-  background: none;
-  accent-color: var(--accent);
+  gap: 0.2rem;
+  min-width: 0;
 }
 .net-scale-actions {
   display: flex;
@@ -793,14 +782,13 @@ ol.net-rows .net-row-name {
   font-size: 0.75rem;
 }
 
-/* La escala, en una fila: la barra, los dos mandos y los botones. */
+/* La escala, en una fila: la barra, el deslizador de dos tiradores y los botones.
+   El texto va encima del deslizador, no a su lado: si fuera al lado, al cambiar
+   de ancho («9 %» → «14 %») movería la barra bajo el ratón y el tirador temblaría. */
 .net-scale {
-  grid-template-columns: minmax(8rem, 1fr) minmax(0, 1.4fr) minmax(0, 1.4fr) auto;
+  grid-template-columns: minmax(8rem, 1fr) minmax(0, 2.8fr) auto;
   align-items: center;
   gap: 0.4rem 0.9rem;
-}
-.net-scale label {
-  grid-template-columns: auto 1fr;
 }
 @media (max-width: 900px) {
   .net-scale {

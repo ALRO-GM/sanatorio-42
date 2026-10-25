@@ -232,6 +232,37 @@ Antes de escribir una a mano, se usa la que ya existe en `apps/web/src/shared/`:
   Pomodoro y las pestañas del panel con periodo. Lo que solo tiene dos opciones («este mes» / «siempre»)
   sigue en pastillas; el capital de Code Clicker también, porque sus tramos
   conviven con fechas a mano y a veces no hay ninguno elegido.
+- **Deslizadores** (un tramo o un número en una escala): `ui/RangeSlider`, con
+  dos tiradores, o `Slider`, con uno; nunca un `<input type="range">` suelto.
+  Lo pidió Alberto (2026-10-26) porque los de antes temblaban y saltaban
+  valores. Cómo es:
+  - **Cualquier valor de su rejilla** (`min`, `max`, `step`; los porcentajes,
+    de uno en uno), no solo los que hay en los datos: esos se pasan en `ticks`
+    y salen como marcas. Para recuentos en los que unos pocos valores enormes
+    se comerían la barra, `curve="log"` (Red → proyectos).
+  - **Ajuste fino**: mientras se arrastra, al alejar el puntero o el dedo de la
+    barra (en vertical) se mueve más despacio, en proporción inversa a la
+    distancia (a partir de 32 px, hasta ocho veces), y sigue el movimiento
+    desde donde empezó a afinar, sin saltar a donde está el puntero. Un aviso
+    sobre la barra dice cómo afinar y, afinando, cuánto («Ajuste fino ×4»).
+  - **Imán**: se pega a los valores redondos (0, 5, 10… 25, 50, 75, 100 en
+    porcentajes) al pasar cerca, sin comerse a sus vecinos; y un valor no se
+    deja hasta pasar algo más de medio paso, para que un pulso en la frontera
+    no salte entre dos números.
+  - **Valor a la vista y a mano**: cada tirador enseña su valor encima; al
+    pulsarlo (o con Intro desde el tirador) se escribe el exacto.
+  - **Teclado**: flechas ±1 paso, Mayúsculas o Re Pág/Av Pág ±10, Inicio y Fin.
+    `role="slider"` con sus `aria-value*` y nombre; los tiradores no se cruzan
+    (`minGap`).
+  - **Quieto mientras se arrastra**: lo que se enseña no depende de lo que
+    llegue de la API hasta soltar, ni cambian sus topes. Si cada cambio
+    pregunta a la API, `commit="release"` avisa solo al soltar. El texto que lo
+    acompaña va encima o debajo, nunca al lado: si al lado cambiara de ancho
+    («9 %» → «14 %»), movería la barra bajo el puntero y el tirador temblaría.
+    Sin animaciones con movimiento reducido.
+  - Lo que elige un escalón de una lista corta y fija (la velocidad de las
+    demos, el mínimo de «Quién suspende más») sigue con un `range` nativo sobre
+    el índice: ahí no hay valores intermedios que afinar.
 - **Gráficas con opciones**: la gráfica a la izquierda y sus opciones en un
   panel a la derecha (como Red y Avance: `.net-layout`/`.net-rail`,
   `.progress-layout`/`.progress-rail`). La gráfica se queda quieta a la vista

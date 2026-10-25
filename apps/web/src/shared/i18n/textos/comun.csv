@@ -159,6 +159,10 @@ layout.alerts.lead,Personalizar: cuánto antes avisar de un evento,Avisarme ante
 layout.alerts.off,Opción: no avisar,No avisarme,Don't remind me,No m'avisis,Ez abisatu,Ne pas m'alerter
 layout.alerts.minutes,Opción: avisar {n} minutos antes,{n} min antes,{n} min before,{n} min abans,{n} min lehenago,{n} min avant
 info.open,Nombre accesible del botón (i) que abre la demostración; {title} es la sección,Cómo funciona: {title},How it works: {title},Com funciona: {title},Nola dabil: {title},Comment ça marche : {title}
+range.edit,"Deslizador: nombre del valor que sale encima de cada tirador; al pulsarlo se escribe a mano. {what} es lo que mide ese tirador",Escribir el valor: {what},Type the value: {what},Escriure el valor: {what},Idatzi balioa: {what},Saisir la valeur : {what}
+range.fine,"Deslizador: aviso mientras se arrastra lejos de la barra; {n} es cuántas veces más fino va",Ajuste fino ×{n},Fine adjust ×{n},Ajust fi ×{n},Doikuntza fina ×{n},Réglage fin ×{n}
+range.away,"Deslizador: pista mientras se arrastra, para afinar",Aleja el puntero de la barra para afinar,Move the pointer away from the bar to fine-tune,Allunya el punter de la barra per afinar,Urrundu erakuslea barratik doitzeko,Éloigne le pointeur de la barre pour affiner
+range.percent,"Deslizador: un porcentaje en el globo de un tirador",{n} %,{n}%,{n} %,% {n},{n} %
 finder.label,Buscador de personas de la cabecera,Buscar personas,Find people,Cerca persones,Bilatu pertsonak,Chercher des personnes
 finder.placeholder,Texto de ejemplo dentro del buscador,Buscar a alguien…,Find someone…,Cerca algú…,Bilatu norbait…,Chercher quelqu'un…
 finder.none,Buscador: no hay nadie con ese login,Nadie se llama así,Nobody by that name,Ningú es diu així,Inor ez da horrela deitzen,Personne ne s'appelle comme ça

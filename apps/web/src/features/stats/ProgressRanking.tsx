@@ -159,6 +159,7 @@ export function ProgressRanking() {
             max={FINISHED}
             low={filters.circleMin}
             high={filters.circleMax}
+            format={circleText}
             onChange={(circleMin, circleMax) => {
               set({ circleMin, circleMax })
             }}
@@ -178,6 +179,7 @@ export function ProgressRanking() {
             max={100}
             low={filters.pctMin}
             high={filters.pctMax}
+            format={(n) => t('range.percent', { n })}
             onChange={(pctMin, pctMax) => {
               set({ pctMin, pctMax })
             }}

@@ -8,17 +8,12 @@
   border: 1.5px solid var(--border);
   border-radius: 12px;
 }
-.kind-field label,
-.join-box label {
+.kind-field .progress-ask,
+.join-box .progress-ask {
   display: grid;
   gap: 0.25rem;
   font-size: 0.85rem;
   color: var(--text-2);
-}
-.kind-field input[type='range'],
-.join-box input[type='range'] {
-  width: 100%;
-  accent-color: var(--accent);
 }
 .kind-field .hint,
 .join-box .hint {

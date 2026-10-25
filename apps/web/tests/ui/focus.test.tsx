@@ -1,4 +1,4 @@
-import { act, cleanup, fireEvent, screen, waitFor, within } from '@testing-library/react'
+import { act, cleanup, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import es from 'virtual:textos/es'
 import { afterEach, describe, expect, it } from 'vitest'
@@ -113,9 +113,19 @@ describe('modo concentración (Pomodoro)', () => {
     ).toBeTruthy()
 
     // El tramo: el tirador de la izquierda deja fuera a quien menos lo usa.
+    // Con el teclado: Mayúsculas y la flecha, de diez en diez.
     const low = within(dialog).getByRole('slider', { name: text('focus.band.low') })
 
-    fireEvent.change(low, { target: { value: '2' } })
+    low.focus()
+    await user.keyboard('{Shift>}{ArrowRight}{/Shift}')
     expect(await within(dialog).findByText(/Comparas con el tramo del 10 %/)).toBeTruthy()
+    // O escribiendo el número exacto: cualquiera, no solo de cinco en cinco.
+    await user.click(
+      within(dialog).getByRole('button', {
+        name: text('range.edit').replace('{what}', text('focus.band.low')),
+      }),
+    )
+    await user.keyboard('{Control>}a{/Control}14{Enter}')
+    expect(await within(dialog).findByText(/Comparas con el tramo del 14 %/)).toBeTruthy()
   }, 20_000)
 })
