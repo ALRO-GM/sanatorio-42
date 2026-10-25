@@ -18,8 +18,9 @@ describe('curso de git', () => {
 
     await openApp('#/notgames/git')
 
-    // Solo el primer punto está abierto.
-    const first = await screen.findByRole('button', { name: 'Tu primer commit' })
+    // Solo el primer punto está abierto. La página es perezosa: en la CI, con
+    // cobertura, tarda más del segundo de espera de fábrica.
+    const first = await screen.findByRole('button', { name: 'Tu primer commit' }, { timeout: 5000 })
 
     expect(
       screen.getByRole('button', { name: 'El índice: git add' }).getAttribute('aria-disabled'),
