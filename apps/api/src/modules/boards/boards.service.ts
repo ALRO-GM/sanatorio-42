@@ -9,6 +9,8 @@
  * temporizador: así funciona igual con o sin proceso de fondo.
  */
 
+import { NO_POOL, seesFor } from '../../core/audience.js'
+import type { Audience } from '../../core/audience.js'
 import type { BoardView } from '@sanatorio/contracts'
 import { z } from 'zod'
 
@@ -26,6 +28,8 @@ import type { Notify } from '../../core/events.js'
 
 type BoardsServiceOptions = {
   boards: BoardsRepository
+  /** Quién ve a quién: del otro grupo no se apunta nadie (`docs/piscineros.md`). */
+  audience?: Audience
   replica: ReplicaRepository
   xp: XpService
   /** Quién validó su asistencia con los códigos: de ahí sale si hay XP. */
@@ -246,6 +250,11 @@ export function createBoardsService(options: BoardsServiceOptions) {
     /** Reserva plaza. `409` si está completa o ya ha pasado. */
     async join(actor: Actor, boardId: number): Promise<void> {
       const board = await mustGet(boardId, actor)
+
+      // La pizarra de alguien del otro grupo, para quien mira, no existe.
+      if (!(await seesFor(options.audience ?? NO_POOL, actor))(board.host)) {
+        throw domainError('not_found', 'Esa pizarra no existe')
+      }
 
       if (board.attendees.includes(actor.login)) {
         return

@@ -99,11 +99,14 @@ export function createExamsLive(options: ExamsLiveOptions) {
   async function examOf(
     campusId: number,
     at: number,
+    pool = false,
   ): Promise<{ exam: ExamEvent; running: boolean } | null> {
+    // Un piscinero, los exámenes de la piscina; un estudiante, los suyos.
     const events = await agenda.campusEvents(
       campusId,
       new Date(at - BEHIND_MS).toISOString(),
       new Date(at + AHEAD_MS).toISOString(),
+      pool ? 'pool' : 'student',
     )
     const examEvents = events.filter((event) => event.source === 'exam')
     const running = examEvents.find(
@@ -322,6 +325,7 @@ export function createExamsLive(options: ExamsLiveOptions) {
         actor.campusId,
         new Date(at - BEHIND_MS).toISOString(),
         new Date(at + 60_000).toISOString(),
+        actor.pool === true ? 'pool' : 'student',
       )
 
       return events.some(
@@ -334,7 +338,7 @@ export function createExamsLive(options: ExamsLiveOptions) {
 
     /** El examen de ahora en el campus de quien pregunta, o el siguiente. Refresca si toca. */
     async live(actor: Actor): Promise<LiveExam> {
-      const found = await examOf(actor.campusId, now())
+      const found = await examOf(actor.campusId, now(), actor.pool === true)
 
       if (found?.running === true) {
         await refresh(actor.campusId, found.exam, 'auto', 'deferrable')
@@ -348,7 +352,7 @@ export function createExamsLive(options: ExamsLiveOptions) {
      * último refresco de quien sea. Si no, devuelve lo que hay.
      */
     async refreshNow(actor: Actor): Promise<LiveExam> {
-      const found = await examOf(actor.campusId, now())
+      const found = await examOf(actor.campusId, now(), actor.pool === true)
 
       if (found?.running === true) {
         await refresh(actor.campusId, found.exam, 'manual', 'deferrable')

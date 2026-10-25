@@ -35,7 +35,7 @@ export function createTherapyModule(deps: TherapyModuleDeps): TherapyModule {
     replica: deps.replica,
     sync: deps.sync,
     xp: deps.xp,
-    ...given({ notify: deps.notify, now: deps.now }),
+    ...given({ audience: deps.audience, notify: deps.notify, now: deps.now }),
   })
 
   return {

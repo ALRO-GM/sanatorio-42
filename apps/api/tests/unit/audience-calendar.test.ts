@@ -140,6 +140,12 @@ describe('mundos separados en el calendario y los eventos', () => {
     }
     const create = (who: typeof ana) =>
       services.boards.create(who, { ...board, startsAt: at(26), endsAt: at(27) })
+    /** Alguien que ya estaba apuntado (de antes de separar los grupos): sin pasar por `join`. */
+    const sneak = (id: number, login: string) =>
+      community.db.execute({
+        sql: 'INSERT INTO board_attendees (board_id, login, joined_at) VALUES (?, ?, ?)',
+        args: [id, login, at(0)],
+      })
 
     it('una pizarra de un piscinero no sale en el calendario de un estudiante', async () => {
       const mine = await create(pia)
@@ -148,10 +154,11 @@ describe('mundos separados en el calendario y los eventos', () => {
       expect(await idsOf(pia)).toContain(`board:${mine.id}`)
     })
 
-    it('un piscinero no abre la sala de una pizarra de estudiantes, aunque se apunte', async () => {
+    it('un piscinero no se apunta a una pizarra de estudiantes, ni abre su sala aunque estuviera dentro', async () => {
       const theirs = await create(ana)
 
-      await services.boards.join(pia, theirs.id)
+      await expectCode(services.boards.join(pia, theirs.id), 'not_found')
+      await sneak(theirs.id, 'pia')
 
       await expectCode(services.meet.thread(pia, null, `board:${theirs.id}`), 'forbidden')
       await expectCode(
@@ -164,7 +171,8 @@ describe('mundos separados en el calendario y los eventos', () => {
     it('ni un estudiante la de un piscinero', async () => {
       const mine = await create(pia)
 
-      await services.boards.join(ana, mine.id)
+      await expectCode(services.boards.join(ana, mine.id), 'not_found')
+      await sneak(mine.id, 'ana')
 
       await expectCode(services.meet.thread(ana, null, `board:${mine.id}`), 'forbidden')
     })
@@ -201,7 +209,7 @@ describe('mundos separados en el calendario y los eventos', () => {
       const theirs = await create(ana)
       const id = `board:${theirs.id}`
 
-      await services.boards.join(pia, theirs.id)
+      await sneak(theirs.id, 'pia')
       await services.boards.join(actor('leo'), theirs.id)
       await services.meet.send(ana, null, { id, kind: 'text', body: '¿Venís?' })
 

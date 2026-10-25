@@ -6,6 +6,8 @@
  * del horario y, si sabemos dónde está cada cual, estando en el campus.
  */
 
+import { NO_POOL, seesFor } from '../../core/audience.js'
+import type { Audience } from '../../core/audience.js'
 import type { GroupView, SeatReservation } from '@sanatorio/contracts'
 import { z } from 'zod'
 
@@ -28,6 +30,8 @@ import type { Notify } from '../../core/events.js'
 
 type TherapyServiceOptions = {
   therapy: TherapyRepository
+  /** Quién ve a quién: del otro grupo no se apunta nadie (`docs/piscineros.md`). */
+  audience?: Audience
   replica: ReplicaRepository
   sync: Syncer
   xp: XpService
@@ -366,6 +370,11 @@ export function createTherapyService(options: TherapyServiceOptions) {
      */
     async join(actor: Actor, groupId: number, input?: unknown): Promise<void> {
       const group = await mustGet(groupId, actor)
+
+      // El grupo de alguien del otro grupo, para quien mira, no existe.
+      if (!(await seesFor(options.audience ?? NO_POOL, actor))(group.creator)) {
+        throw domainError('not_found', 'Ese grupo no existe')
+      }
       const { progress: mine } = parse(joinSchema, input ?? {})
 
       if (group.members.includes(actor.login)) {

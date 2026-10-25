@@ -37,7 +37,7 @@ export function createBoardsModule(deps: BoardsModuleDeps): BoardsModule {
     replica: deps.replica,
     xp: deps.xp,
     attendance: deps.attendance,
-    ...given({ notify: deps.notify, now: deps.now }),
+    ...given({ audience: deps.audience, notify: deps.notify, now: deps.now }),
   })
 
   // La XP de impartir una pizarra se reparte cuando ya ha pasado. Se aprovecha
