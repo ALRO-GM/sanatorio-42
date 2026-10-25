@@ -1,37 +1,37 @@
 clave,contexto,es,en,ca,eu,fr
-cal.title,Título de la página de pizarras (charlas abiertas sobre un tema),Calendario de pizarras,Whiteboard calendar,Calendari de pissarres,Arbelen egutegia,
-cal.loading,Mientras carga el calendario de pizarras,Mirando la agenda…,Checking the schedule…,Mirant l'agenda…,Agenda begiratzen…,
-cal.months,"Nombres de los meses, separados por comas","Enero,Febrero,Marzo,Abril,Mayo,Junio,Julio,Agosto,Septiembre,Octubre,Noviembre,Diciembre","January,February,March,April,May,June,July,August,September,October,November,December","Gener,Febrer,Març,Abril,Maig,Juny,Juliol,Agost,Setembre,Octubre,Novembre,Desembre","Urtarrila,Otsaila,Martxoa,Apirila,Maiatza,Ekaina,Uztaila,Abuztua,Iraila,Urria,Azaroa,Abendua",
-cal.monthsShort,"Meses abreviados en mayúsculas, separados por comas","ENE,FEB,MAR,ABR,MAY,JUN,JUL,AGO,SEP,OCT,NOV,DIC","JAN,FEB,MAR,APR,MAY,JUN,JUL,AUG,SEP,OCT,NOV,DEC","GEN,FEB,MAR,ABR,MAI,JUN,JUL,AGO,SET,OCT,NOV,DES","URT,OTS,MAR,API,MAI,EKA,UZT,ABU,IRA,URR,AZA,ABE",
-cal.weekdaysShort,"Días abreviados en mayúsculas, de lunes a domingo, separados por comas","LUN,MAR,MIÉ,JUE,VIE,SÁB,DOM","MON,TUE,WED,THU,FRI,SAT,SUN","DL,DT,DC,DJ,DV,DS,DG","AL,AR,AZ,OG,OR,LR,IG",
-cal.legend,Leyenda del calendario,Hoy: marcado en turquesa · Punto: hay pizarra,Today: in turquoise · Dot: there is a whiteboard,Avui: marcat en turquesa · Punt: hi ha pissarra,Gaur: turkesaz markatuta · Puntua: arbela dago,
-cal.prev,Botón: mes anterior,Mes anterior,Previous month,Mes anterior,Aurreko hilabetea,
-cal.next,Botón: mes siguiente,Mes siguiente,Next month,Mes següent,Hurrengo hilabetea,
-cal.nextBoard,Etiqueta de la próxima pizarra,Próxima pizarra,Next whiteboard,Pròxima pissarra,Hurrengo arbela,
-cal.seats,Plazas ocupadas y totales,{taken} de {capacity} plazas,{taken} of {capacity} seats,{taken} de {capacity} places,{capacity} plazatik {taken},
-cal.join,Botón para apuntarse,Apuntarme,Join,Apunta-m'hi,Eman izena,
-cal.upcoming,Lista de las próximas pizarras con plaza (sin día elegido),Próximas pizarras con plaza,Upcoming whiteboards with seats,Properes pissarres amb lloc,Leku libreko hurrengo arbelak,
-cal.pastTitle,"Pizarras: encabezado de las ya pasadas del mes que se ve, debajo de las próximas",Ya pasadas,Already held,Ja passades,Dagoeneko eginak,
-cal.upcomingEmpty,No hay pizarras próximas con plaza,No hay pizarras con plaza en los próximos dos meses. ¿Propones tú una?,No whiteboards with seats in the next two months. Want to propose one?,No hi ha pissarres amb lloc als propers dos mesos. En proposes una?,Ez dago leku libreko arbelik hurrengo bi hilabeteetan. Zuk proposatu nahi duzu bat?,
-cal.leave,Botón para desapuntarse,Desapuntarme,Leave,Desapunta-me'n,Kendu izena,
-cal.full,Pizarra completa,Completa,Full,Completa,Beteta,
-cal.cancel,Botón para cancelar tu pizarra,Cancelar pizarra,Cancel whiteboard,Cancel·la la pissarra,Bertan behera utzi arbela,
-cal.remove,Botón de moderación para retirar una pizarra,Retirar como moderación,Remove as moderator,Retira com a moderació,Kendu moderazio gisa,
-cal.removeAsk,Confirmación antes de retirar una pizarra,¿Retirar la pizarra de {host}? Se cancela y se avisa a quien se había apuntado.,Remove {host}'s whiteboard? It is cancelled and everyone signed up is told.,Vols retirar la pissarra de {host}? Es cancel·la i s'avisa qui s'hi havia apuntat.,{host}(r)en arbela kendu? Bertan behera geratzen da eta izena emandakoei abisatzen zaie.,
-cal.past,Pizarra ya pasada,Ya pasó,Already held,Ja ha passat,Pasa da,
-cal.empty,No hay pizarras ese mes,Este mes no hay pizarras.,No whiteboards this month.,Aquest mes no hi ha pissarres.,Hilabete honetan ez dago arbelik.,
-cal.yours,Invitación a proponer una pizarra en un hueco,Tu pizarra puede estar aquí,Your whiteboard could be here,La teva pissarra pot ser aquí,Zure arbela hemen egon daiteke,
-cal.pitchTitle,Título de la invitación a dar una pizarra,¿Dominas un concepto?,Know a concept inside out?,Domines un concepte?,Kontzeptu bat menderatzen duzu?,
-cal.pitch,Texto de la invitación a dar una pizarra,"Da una pizarra, reserva una sala y gana XP ayudando a toda la comunidad.","Run a whiteboard, book a room and earn XP for helping the whole community.","Fes una pissarra, reserva una sala i guanya XP per ajudar tota la comunitat.","Eman arbel bat, erreserbatu gela bat eta irabazi XP komunitate osoari laguntzeagatik.",
-cal.proposeBtn,Botón para proponer una pizarra,Proponer una pizarra,Propose a whiteboard,Proposa una pissarra,Proposatu arbel bat,
-cal.f.title,Formulario: título,Título,Title,Títol,Izenburua,
-cal.f.titleHint,Ejemplo de título,malloc: dónde vive tu memoria,malloc: where your memory lives,malloc: on viu la teva memòria,malloc: non bizi den zure memoria,
-cal.f.topic,Formulario: tema o proyecto,Tema o proyecto,Topic or project,Tema o projecte,Gaia edo proiektua,
-cal.f.topicHint,Ejemplo de tema,ft_printf,ft_printf,ft_printf,ft_printf,
-cal.f.place,Formulario: sala,Sala,Room,Sala,Gela,
-cal.f.placeHint,Ejemplo de sala,"Clúster 1, sala de pizarras","Cluster 1, whiteboard room","Clúster 1, sala de pissarres","1. klusterra, arbelen gela",
-cal.f.date,Formulario: día,Día,Day,Dia,Eguna,
-cal.f.capacity,Formulario: plazas,Plazas,Seats,Places,Plazak,
-cal.f.description,Formulario: descripción opcional,De qué va (opcional),What it's about (optional),De què va (opcional),Zertaz den (aukerakoa),
-cal.f.create,Formulario: botón para proponer,Proponer,Propose,Proposa,Proposatu,
-cal.editTitle,Título del formulario de edición,Cambiar la pizarra,Change the whiteboard,Canvia la pissarra,Aldatu arbela,
+cal.title,Título de la página de pizarras (charlas abiertas sobre un tema),Calendario de pizarras,Whiteboard calendar,Calendari de pissarres,Arbelen egutegia,Calendrier des tableaux blancs
+cal.loading,Mientras carga el calendario de pizarras,Mirando la agenda…,Checking the schedule…,Mirant l'agenda…,Agenda begiratzen…,Coup d'œil à l'agenda…
+cal.months,"Nombres de los meses, separados por comas","Enero,Febrero,Marzo,Abril,Mayo,Junio,Julio,Agosto,Septiembre,Octubre,Noviembre,Diciembre","January,February,March,April,May,June,July,August,September,October,November,December","Gener,Febrer,Març,Abril,Maig,Juny,Juliol,Agost,Setembre,Octubre,Novembre,Desembre","Urtarrila,Otsaila,Martxoa,Apirila,Maiatza,Ekaina,Uztaila,Abuztua,Iraila,Urria,Azaroa,Abendua","Janvier,Février,Mars,Avril,Mai,Juin,Juillet,Août,Septembre,Octobre,Novembre,Décembre"
+cal.monthsShort,"Meses abreviados en mayúsculas, separados por comas","ENE,FEB,MAR,ABR,MAY,JUN,JUL,AGO,SEP,OCT,NOV,DIC","JAN,FEB,MAR,APR,MAY,JUN,JUL,AUG,SEP,OCT,NOV,DEC","GEN,FEB,MAR,ABR,MAI,JUN,JUL,AGO,SET,OCT,NOV,DES","URT,OTS,MAR,API,MAI,EKA,UZT,ABU,IRA,URR,AZA,ABE","JAN,FÉV,MARS,AVR,MAI,JUIN,JUIL,AOÛT,SEPT,OCT,NOV,DÉC"
+cal.weekdaysShort,"Días abreviados en mayúsculas, de lunes a domingo, separados por comas","LUN,MAR,MIÉ,JUE,VIE,SÁB,DOM","MON,TUE,WED,THU,FRI,SAT,SUN","DL,DT,DC,DJ,DV,DS,DG","AL,AR,AZ,OG,OR,LR,IG","LUN,MAR,MER,JEU,VEN,SAM,DIM"
+cal.legend,Leyenda del calendario,Hoy: resaltado · Punto: hay pizarra,Today: highlighted · Dot: there is a whiteboard,Avui: ressaltat · Punt: hi ha pissarra,Gaur: nabarmenduta · Puntua: arbela dago,Aujourd'hui : mis en avant · Point : il y a un tableau blanc
+cal.prev,Botón: mes anterior,Mes anterior,Previous month,Mes anterior,Aurreko hilabetea,Mois précédent
+cal.next,Botón: mes siguiente,Mes siguiente,Next month,Mes següent,Hurrengo hilabetea,Mois suivant
+cal.nextBoard,Etiqueta de la próxima pizarra,Próxima pizarra,Next whiteboard,Pròxima pissarra,Hurrengo arbela,Prochain tableau blanc
+cal.seats,Plazas ocupadas y totales,{taken} de {capacity} plazas,{taken} of {capacity} seats,{taken} de {capacity} places,{capacity} plazatik {taken},{taken} places prises sur {capacity}
+cal.join,Botón para apuntarse,Apuntarme,Join,Apunta-m'hi,Eman izena,M'inscrire
+cal.upcoming,Lista de las próximas pizarras con plaza (sin día elegido),Próximas pizarras con plaza,Upcoming whiteboards with seats,Properes pissarres amb lloc,Leku libreko hurrengo arbelak,Prochains tableaux blancs avec des places
+cal.pastTitle,"Pizarras: encabezado de las ya pasadas del mes que se ve, debajo de las próximas",Ya pasadas,Already held,Ja passades,Dagoeneko eginak,Déjà passés
+cal.upcomingEmpty,No hay pizarras próximas con plaza,No hay pizarras con plaza en los próximos dos meses. ¿Propones tú una?,No whiteboards with seats in the next two months. Want to propose one?,No hi ha pissarres amb lloc als propers dos mesos. En proposes una?,Ez dago leku libreko arbelik hurrengo bi hilabeteetan. Zuk proposatu nahi duzu bat?,Aucun tableau blanc avec des places dans les deux prochains mois. Tu en proposes un ?
+cal.leave,Botón para desapuntarse,Desapuntarme,Leave,Desapunta-me'n,Kendu izena,Me désinscrire
+cal.full,Pizarra completa,Completa,Full,Completa,Beteta,Complet
+cal.cancel,Botón para cancelar tu pizarra,Cancelar pizarra,Cancel whiteboard,Cancel·la la pissarra,Bertan behera utzi arbela,Annuler le tableau blanc
+cal.remove,Botón de moderación para retirar una pizarra,Retirar (moderación),Remove (moderation),Retira (moderació),Kendu (moderazioa),Retirer (modération)
+cal.removeAsk,Confirmación antes de retirar una pizarra,¿Retirar la pizarra de {host}? Se cancela y se avisa a quien se había apuntado.,Remove {host}'s whiteboard? It is cancelled and everyone signed up is told.,Vols retirar la pissarra de {host}? Es cancel·la i s'avisa qui s'hi havia apuntat.,{host}(r)en arbela kendu? Bertan behera geratzen da eta izena emandakoei abisatzen zaie.,Retirer le tableau blanc de {host} ? Il sera annulé et les personnes inscrites seront prévenues.
+cal.past,Pizarra ya pasada,Ya pasó,Already held,Ja ha passat,Pasa da,Déjà passé
+cal.empty,No hay pizarras ese mes,Este mes no hay pizarras.,No whiteboards this month.,Aquest mes no hi ha pissarres.,Hilabete honetan ez dago arbelik.,Aucun tableau blanc ce mois-ci.
+cal.yours,Invitación a proponer una pizarra en un hueco,Tu pizarra puede estar aquí,Your whiteboard could be here,La teva pissarra pot ser aquí,Zure arbela hemen egon daiteke,Ton tableau blanc pourrait être ici
+cal.pitchTitle,Título de la invitación a dar una pizarra,¿Dominas un concepto?,Know a concept inside out?,Domines un concepte?,Kontzeptu bat menderatzen duzu?,Tu maîtrises une notion ?
+cal.pitch,Texto de la invitación a dar una pizarra,"Da una pizarra, reserva una sala y gana XP ayudando a toda la comunidad.","Run a whiteboard, book a room and earn XP for helping the whole community.","Fes una pissarra, reserva una sala i guanya XP per ajudar tota la comunitat.","Eman arbel bat, erreserbatu gela bat eta irabazi XP komunitate osoari laguntzeagatik.","Anime un tableau blanc, réserve une salle et gagne de l'XP en aidant toute la communauté."
+cal.proposeBtn,Botón para proponer una pizarra,Proponer una pizarra,Propose a whiteboard,Proposa una pissarra,Proposatu arbel bat,Proposer un tableau blanc
+cal.f.title,Formulario: título,Título,Title,Títol,Izenburua,Titre
+cal.f.titleHint,Ejemplo de título,malloc: dónde vive tu memoria,malloc: where your memory lives,malloc: on viu la teva memòria,malloc: non bizi den zure memoria,malloc : où vit ta mémoire
+cal.f.topic,Formulario: tema o proyecto,Tema o proyecto,Topic or project,Tema o projecte,Gaia edo proiektua,Sujet ou projet
+cal.f.topicHint,Ejemplo de tema,ft_printf,ft_printf,ft_printf,ft_printf,ft_printf
+cal.f.place,Formulario: sala,Sala,Room,Sala,Gela,Salle
+cal.f.placeHint,Ejemplo de sala,"Clúster 1, sala de pizarras","Cluster 1, whiteboard room","Clúster 1, sala de pissarres","1. klusterra, arbelen gela","Cluster 1, salle des tableaux blancs"
+cal.f.date,Formulario: día,Día,Day,Dia,Eguna,Jour
+cal.f.capacity,Formulario: plazas,Plazas,Seats,Places,Plazak,Places
+cal.f.description,Formulario: descripción opcional,De qué va (opcional),What it's about (optional),De què va (opcional),Zertaz den (aukerakoa),De quoi ça parle (facultatif)
+cal.f.create,Formulario: botón para proponer,Proponer,Propose,Proposa,Proposatu,Proposer
+cal.editTitle,Título del formulario de edición,Cambiar la pizarra,Change the whiteboard,Canvia la pissarra,Aldatu arbela,Modifier le tableau blanc
