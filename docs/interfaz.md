@@ -185,7 +185,7 @@ detrás cambia a la vez; «Listo» solo cierra.
   debajo.
 
 Las categorías no se ordenan solas por uso: el perfil va el primero salvo que
-la persona lo mueva a mano (`categories` en `shared/layout/store.ts`).
+la persona lo mueva a mano (se puede, decidido con Alberto el 2026-10-25) (`categories` en `shared/layout/store.ts`).
 
 ## Regla para una funcionalidad nueva
 

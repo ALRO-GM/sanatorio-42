@@ -132,7 +132,8 @@ regla de aquí, cambia también la skill que la repite.
 - Textos en segunda persona y con lenguaje inclusivo (evitar formas con género
   cuando se pueda).
 - Lo primero que se ve al entrar es el perfil (el expediente del código): es la
-  portada y la primera pestaña. La navegación va en su propia fila, debajo de
+  portada y, de fábrica, la primera pestaña. Cada cual puede mover la categoría
+  Perfil a otro sitio en Personalizar (decidido con Alberto el 2026-10-25). La navegación va en su propia fila, debajo de
   la marca: cinco categorías (Perfil, Ayuda, Calendario, Clústeres, Datos) y, debajo, las secciones de
   la abierta (`CATEGORIES` en `app/sections.ts`).
 - **Funcionalidad nueva**: antes de escribir código se decide su categoría, si
