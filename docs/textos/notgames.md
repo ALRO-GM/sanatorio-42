@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/notgames.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-224 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
+225 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera | Francés |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -64,7 +64,8 @@ Generado desde `apps/web/src/shared/i18n/textos/notgames.csv` con
 | `notgames.scores` | Not-games: título del marcador | features/notgames/NotGamesTour, features/notgames/RoomView | Marcador | Scoreboard | Marcador | Markagailua | Scores |
 | `notgames.lives` | Not-games: vidas que quedan | features/notgames/NotGamesTour, features/notgames/RoomView | Vidas: {n} | Lives: {n} | Vides: {n} | Bizitzak: {n} | Vies : {n} |
 | `notgames.points` | Not-games: puntos | features/notgames/RoomView | {n} pts | {n} pts | {n} pts | {n} pt | {n} pts |
-| `notgames.hits` | Not-games: aciertos | features/notgames/RoomView, features/notgames/TurnRoomView | {n} aciertos | {n} right | {n} encerts | {n} asmatze | Bonnes réponses : {n} |
+| `notgames.hits.one` | Not-games: aciertos (una) | features/notgames/RoomView, features/notgames/TurnRoomView | {n} acierto | {n} right | {n} encert | {n} asmatze | Bonnes réponses : {n} |
+| `notgames.hits.many` | Not-games: aciertos (varias) | features/notgames/RoomView, features/notgames/TurnRoomView | {n} aciertos | {n} right | {n} encerts | {n} asmatze | Bonnes réponses : {n} |
 | `notgames.over` | Not-games: la partida ha terminado | features/notgames/RoomView, features/notgames/TurnRoomView | Fin de la partida | Game over | Fi de la partida | Partida amaitu da | Fin de la partie |
 | `notgames.youWon` | Not-games: has ganado | features/notgames/RoomView, features/notgames/TurnRoomView | ¡Has ganado! | You won! | Has guanyat! | Irabazi duzu! | Tu as gagné ! |
 | `notgames.winner` | Not-games: quién ha ganado | features/notgames/RoomView, features/notgames/TurnRoomView | Ha ganado {names} | {names} won | Ha guanyat {names} | {names}-k irabazi du | Victoire de {names} |

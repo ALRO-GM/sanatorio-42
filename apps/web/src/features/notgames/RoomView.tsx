@@ -356,7 +356,7 @@ function Question({ room, question, me, playing, offset, onAnswer }: QuestionPro
 
 /** El marcador: puntos (o vidas), aciertos y quién ha contestado ya. */
 function Scores({ room, me }: { room: QuizRoom; me: string }) {
-  const { t } = useI18n()
+  const { t, tn } = useI18n()
   const survival = room.settings.mode === 'survival'
   const ranked = [...room.players].sort((a, b) =>
     survival
@@ -404,7 +404,7 @@ function Scores({ room, me }: { room: QuizRoom; me: string }) {
             ) : (
               <strong>{t('notgames.points', { n: player.score })}</strong>
             )}
-            <small>{t('notgames.hits', { n: player.correct })}</small>
+            <small>{tn('notgames.hits', player.correct)}</small>
             {player.answered && <Icon name="visto" size={14} />}
           </li>
         ))}

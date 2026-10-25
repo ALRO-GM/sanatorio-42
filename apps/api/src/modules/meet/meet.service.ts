@@ -50,6 +50,7 @@ import type { AttendanceEvent, AttendanceService } from '../attendance/index.js'
 import type { IssuedExport, StaffService } from '../staff/index.js'
 import type { BoardsService } from '../boards/index.js'
 import type { CalendarService } from '../calendar/index.js'
+import { labelOf } from '../calendar/index.js'
 import type { HelpService } from '../help/index.js'
 import type { ReplicaRepository } from '../replica/index.js'
 
@@ -569,7 +570,9 @@ export function createMeetService(options: MeetServiceOptions) {
 
       for (const row of missed.rows) {
         try {
-          const event = JSON.parse(toText(row.event)) as CalendarEvent
+          const saved = JSON.parse(toText(row.event)) as CalendarEvent
+          // Uno guardado antes de `label` lo lleva escrito en español en `title`.
+          const event = { ...saved, label: saved.label ?? labelOf(saved.title, saved.id) }
 
           // Uno guardado antes de separar los mundos puede ser con alguien del otro.
           if (event.withLogin === null || sees(event.withLogin)) {

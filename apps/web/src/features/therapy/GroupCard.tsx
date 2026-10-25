@@ -30,7 +30,7 @@ type GroupCardProps = {
 const MEMBERS_SHOWN = 4
 
 export function GroupCard({ group, projects, onChange, me }: GroupCardProps) {
-  const { t, lang } = useI18n()
+  const { t, tn, lang } = useI18n()
   const { busy, error, run } = useAction()
   const confirm = useConfirm()
   const [copied, setCopied] = useState(false)
@@ -94,8 +94,11 @@ export function GroupCard({ group, projects, onChange, me }: GroupCardProps) {
         )}
         <span className={`badge ${full ? 'off' : 'on plain'}`}>
           {full
-            ? t('therapy.full', { capacity: group.capacity })
-            : t('therapy.open', { taken: group.members.length, capacity: group.capacity })}
+            ? tn('therapy.full', group.capacity, { capacity: group.capacity })
+            : tn('therapy.open', group.capacity, {
+                taken: group.members.length,
+                capacity: group.capacity,
+              })}
         </span>
         {group.inSession && <span className="badge on">{t('therapy.inSession')}</span>}
       </header>
@@ -289,7 +292,7 @@ export function GroupCard({ group, projects, onChange, me }: GroupCardProps) {
           </button>
         )}
         {group.mine && group.invited !== null && (
-          <span className="hint">{t('therapy.invited', { n: group.invited })}</span>
+          <span className="hint">{tn('therapy.invited', group.invited)}</span>
         )}
         {/* Quien modera puede retirar el de otra persona, pero no cambiarlo. */}
         {!group.mine && group.canClose && (

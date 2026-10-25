@@ -48,7 +48,7 @@ type PeerListProps = {
 
 /** Quién puede ayudarte con un proyecto: de guardia primero. */
 export function PeerList({ project, onOpenTherapy }: PeerListProps) {
-  const { t } = useI18n()
+  const { t, tn } = useI18n()
   const { data, error, loading, reload } = useAsync(() => api.getPeers(project.id), [project.id])
   const groups = useAsync(() => api.getGroups(project.id), [project.id])
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('all')
@@ -112,7 +112,7 @@ export function PeerList({ project, onOpenTherapy }: PeerListProps) {
       {title}
       {onDutyCount > 0 ? (
         <p className="count">
-          {t('peers.onDuty', { n: onDutyCount })}
+          {tn('peers.onDuty', onDutyCount)}
           {onDutySpecialists > 0 && (
             <>
               {' '}

@@ -22,11 +22,41 @@ export type CalendarKind =
 /** Sección de la web desde la que se gestiona un evento propio. */
 export type CalendarSection = 'guardia' | 'terapia' | 'pizarras'
 
+/**
+ * De qué es un título que pone Peer4U, para escribirlo en el idioma de quien
+ * mira (`event.name.*` en las tablas de la web):
+ *
+ * - `help_window`: te ofreces a ayudar (una franja de tu guardia).
+ * - `helping` / `helped`: ayudas a `login` / `login` te ayuda.
+ * - `sprint`: la sesión de un sprint de `project` (o de grupo, sin proyecto).
+ * - `correcting` / `corrected`: corriges / te corrigen `project` en 42.
+ */
+export type EventTitleKind =
+  'help_window' | 'helping' | 'helped' | 'sprint' | 'correcting' | 'corrected'
+
+export type EventTitle = {
+  kind: EventTitleKind
+  /** El proyecto del que va, si se sabe. */
+  project: string | null
+  /** Con quién, en una reserva de ayuda. */
+  login: string | null
+}
+
 export type CalendarEvent = {
   /** Único dentro del calendario (`board:12`, `event:44687`). */
   id: string
   kind: CalendarKind
+  /**
+   * El título, ya escrito. Si es de los que pone Peer4U, en español: la web
+   * enseña `label` en su lugar. Se mantiene para lo que no lea `label`.
+   */
   title: string
+  /**
+   * De qué es el título, si lo pone Peer4U; `null` si es propio (una pizarra,
+   * un evento o examen de 42), que no se traduce. Puede faltar en un evento
+   * guardado antes de que existiera.
+   */
+  label: EventTitle | null
   /** ISO-8601 en UTC. */
   start: string
   end: string

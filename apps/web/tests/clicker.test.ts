@@ -403,9 +403,30 @@ describe('code clicker: textos', () => {
     expect(short(1_500_000, 'en')).toBe('1.5 million')
     expect(short(1_500_000, 'es')).toBe('1,5 millones')
     // En español, mil millones no son un billón.
-    expect(short(2e9, 'es')).toBe('2 miles de millones')
+    expect(short(2e9, 'es')).toBe('2 mil millones')
     expect(short(2e9, 'en')).toBe('2 billion')
     expect(short(3e12, 'es')).toBe('3 billones')
+  })
+
+  it('el sufijo va en singular o en plural según el idioma y la cifra escrita', () => {
+    // Español y catalán: singular solo con 1 (también si redondeando sale 1).
+    expect(short(1e6, 'es')).toBe('1 millón')
+    expect(short(1_000_200, 'es')).toBe('1 millón')
+    expect(short(1_500_000, 'es')).toBe('1,5 millones')
+    expect(short(1e12, 'es')).toBe('1 billón')
+    expect(short(1e6, 'ca')).toBe('1 milió')
+    expect(short(2_500_000, 'ca')).toBe('2,5 milions')
+    // Inglés y euskera no cambian el sufijo.
+    expect(short(1e6, 'en')).toBe('1 million')
+    expect(short(1e6, 'eu')).toBe('1 milioi')
+    expect(short(3e6, 'eu')).toBe('3 milioi')
+    // Francés: por debajo de 2, singular («1,5 million»); de 2 en adelante, plural.
+    expect(short(1e6, 'fr')).toBe('1 million')
+    expect(short(1_500_000, 'fr')).toBe('1,5 million')
+    expect(short(2e6, 'fr')).toBe('2 millions')
+    expect(short(1e9, 'fr')).toBe('1 milliard')
+    expect(short(51_300_000_000, 'fr')).toBe('51,3 milliards')
+    expect(short(1_234, 'fr')).toBe('1\u202f234')
   })
 
   it('las noticias cambian con la partida: del presente a un mundo escrito en código', () => {

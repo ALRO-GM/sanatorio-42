@@ -177,6 +177,8 @@ describe('avisos con cuenta atrás', () => {
           preset: null,
           at: at(TUESDAY_AFTERNOON + 30 * HOUR),
           eventId: `board:${created.id}`,
+          // Una pizarra tiene su propio título: no se traduce.
+          label: null,
           from: null,
         },
       ])

@@ -9,12 +9,19 @@ import { openApp, settle } from './render'
 
 const WAIT = { timeout: 5000 }
 const text = (key: string): string => must(es[key], `el texto ${key}`)
-/** Un texto con huecos, como expresión: los huecos valen cualquier cosa. */
+/**
+ * Un texto con huecos, como expresión: los huecos valen cualquier cosa. Si la
+ * clave tiene singular y plural (`.one`, `.many`), vale cualquiera de los dos.
+ */
 const pattern = (key: string): RegExp =>
   new RegExp(
-    text(key)
-      .replace(/[.*+?^$()|[\]\\]/g, '\\$&')
-      .replace(/\{\w+\}/g, '.+'),
+    (key in es ? [key] : [`${key}.one`, `${key}.many`])
+      .map((each) =>
+        text(each)
+          .replace(/[.*+?^$()|[\]\\]/g, '\\$&')
+          .replace(/\{\w+\}/g, '.+'),
+      )
+      .join('|'),
   )
 
 afterEach(() => {

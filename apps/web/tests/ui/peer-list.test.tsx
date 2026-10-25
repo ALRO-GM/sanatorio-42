@@ -52,7 +52,7 @@ describe('Sala de espera: quién está de guardia', () => {
       </I18nProvider>,
     )
 
-    expect(await screen.findByText(text('peers.onDuty', 1))).toBeTruthy()
+    expect(await screen.findByText(text('peers.onDuty.one', 1))).toBeTruthy()
 
     const list = (): HTMLElement => must(screen.getAllByRole('list')[0], 'la lista')
     const at = (login: string): number => list().textContent.indexOf(login)

@@ -25,7 +25,7 @@ function lastDayOf(month: string): string {
  * más correcciones y para elegir el periodo arrastrando sobre las barras.
  */
 export function Timeline({ months, from, to, onSelect }: TimelineProps) {
-  const { t } = useI18n()
+  const { t, tn } = useI18n()
   // Mientras se arrastra: de qué barra a qué barra.
   const [drag, setDrag] = useState<{ start: number; end: number } | null>(null)
   const dragging = useRef(false)
@@ -78,8 +78,8 @@ export function Timeline({ months, from, to, onSelect }: TimelineProps) {
             key={entry.month}
             type="button"
             className={inRange(index, entry.month) ? 'on' : ''}
-            title={t('net.timeline.month', { month: entry.month, n: entry.corrections })}
-            aria-label={t('net.timeline.month', { month: entry.month, n: entry.corrections })}
+            title={tn('net.timeline.month', entry.corrections, { month: entry.month })}
+            aria-label={tn('net.timeline.month', entry.corrections, { month: entry.month })}
             onPointerDown={(event) => {
               // Sin esto el navegador se queda el puntero en la primera barra.
               event.currentTarget.releasePointerCapture(event.pointerId)

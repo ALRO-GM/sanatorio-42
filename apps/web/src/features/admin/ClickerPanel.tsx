@@ -122,12 +122,12 @@ export function ClickerPanel({ me }: { me: string }) {
                 <Figure label={t('admin.stats.seen')} value={durationText(one.seen)} strong />
                 <Figure label={t('admin.stats.back')} value={durationText(one.back)} />
                 <Figure label={t('admin.stats.hidden')} value={durationText(one.hidden)} />
-                <Figure label={t('admin.clicker.plus')} value={String(one.plus)} />
+                <Figure label={t('admin.clicker.plus')} value={one.plus} />
                 <Figure
                   label={t('admin.clicker.pill')}
                   value={t(`admin.clicker.pill.${one.pill ?? 'none'}`)}
                 />
-                <Figure label={t('admin.clicker.level')} value={String(one.level)} />
+                <Figure label={t('admin.clicker.level')} value={one.level} />
                 <Figure label={t('admin.clicker.lines')} value={compact.format(one.total)} />
                 <Figure
                   label={t('admin.clicker.perSecond')}
@@ -135,17 +135,17 @@ export function ClickerPanel({ me }: { me: string }) {
                 />
                 <Figure label={t('admin.clicker.code')} value={compact.format(one.code)} />
                 <Figure label={t('admin.clicker.wealth')} value={compact.format(one.wealth)} />
-                <Figure label={t('admin.clicker.buildings')} value={String(one.buildings)} />
-                <Figure label={t('admin.clicker.upgrades')} value={String(one.upgrades)} />
+                <Figure label={t('admin.clicker.buildings')} value={one.buildings} />
+                <Figure label={t('admin.clicker.upgrades')} value={one.upgrades} />
                 <Figure label={t('admin.clicker.keys')} value={compact.format(one.clicks)} />
-                <Figure label={t('admin.clicker.achievements')} value={String(one.achievements)} />
-                <Figure label={t('admin.clicker.prestige')} value={String(one.prestige)} />
-                <Figure label={t('admin.clicker.saves')} value={String(one.saves)} />
+                <Figure label={t('admin.clicker.achievements')} value={one.achievements} />
+                <Figure label={t('admin.clicker.prestige')} value={one.prestige} />
+                <Figure label={t('admin.clicker.saves')} value={one.saves} />
                 <Figure
                   label={t('admin.clicker.last')}
                   value={when.format(new Date(one.updatedAt))}
                 />
-                <Figure label={t('admin.clicker.caught')} value={String(one.caught)} />
+                <Figure label={t('admin.clicker.caught')} value={one.caught} />
                 {one.caughtWhy !== null && (
                   <Figure
                     label={t('admin.clicker.why')}
@@ -232,13 +232,13 @@ export function ClickerPanel({ me }: { me: string }) {
                 />
                 <Figure label={t('admin.stats.back')} value={durationText(data.totals.back)} />
                 <Figure label={t('admin.stats.hidden')} value={durationText(data.totals.hidden)} />
-                <Figure label={t('admin.clicker.active')} value={String(data.totals.active)} />
+                <Figure label={t('admin.clicker.active')} value={data.totals.active} />
                 <Figure
                   label={t('admin.clicker.lines')}
                   value={compact.format(data.totals.total)}
                 />
-                <Figure label={t('admin.clicker.saves')} value={String(data.totals.saves)} />
-                <Figure label={t('admin.clicker.cheaters')} value={String(data.totals.caught)} />
+                <Figure label={t('admin.clicker.saves')} value={data.totals.saves} />
+                <Figure label={t('admin.clicker.cheaters')} value={data.totals.caught} />
               </div>
 
               {data.alerts.length > 0 && (
@@ -260,7 +260,7 @@ export function ClickerPanel({ me }: { me: string }) {
                             </button>{' '}
                             ·{' '}
                             {t('admin.clicker.jump', {
-                              times: (alert.to / Math.max(1, alert.from)).toFixed(1),
+                              times: Math.round((10 * alert.to) / Math.max(1, alert.from)) / 10,
                               seconds: alert.seconds,
                             })}
                           </strong>
@@ -308,11 +308,11 @@ export function ClickerPanel({ me }: { me: string }) {
               {/* Sin tarjeta alrededor: las cifras ya son tarjetas. */}
               <span className="eyebrow">{t('admin.clicker.funnel')}</span>
               <div className="stat-cards">
-                <Figure label={t('admin.clicker.pressed')} value={String(data.totals.pressed)} />
-                <Figure label={t('admin.clicker.reached')} value={String(data.totals.reached)} />
-                <Figure label={t('admin.clicker.red')} value={String(data.totals.red)} />
-                <Figure label={t('admin.clicker.blue')} value={String(data.totals.blue)} />
-                <Figure label={t('admin.clicker.players')} value={String(data.totals.players)} />
+                <Figure label={t('admin.clicker.pressed')} value={data.totals.pressed} />
+                <Figure label={t('admin.clicker.reached')} value={data.totals.reached} />
+                <Figure label={t('admin.clicker.red')} value={data.totals.red} />
+                <Figure label={t('admin.clicker.blue')} value={data.totals.blue} />
+                <Figure label={t('admin.clicker.players')} value={data.totals.players} />
               </div>
 
               <article className="card">

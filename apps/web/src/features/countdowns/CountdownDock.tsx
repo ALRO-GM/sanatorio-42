@@ -9,6 +9,7 @@ import {
   unpinCountdown,
   useCountdowns,
 } from '../../shared/countdowns'
+import { eventTitle } from '../../shared/eventTitle'
 import { focusing, useFocus } from '../../shared/focus'
 import { useAction } from '../../shared/hooks/useAsync'
 import { useNow } from '../../shared/hooks/useNow'
@@ -210,9 +211,12 @@ export function CountdownDock({ stamp }: { stamp: number | null }) {
   )
 }
 
-/** El título de una cuenta atrás: el escrito, el de la limpieza de taquillas o «nada a la vista». */
+/**
+ * El título de una cuenta atrás: el de su evento en el idioma de quien mira
+ * (`eventTitle`), el escrito, el de la limpieza de taquillas o «nada a la vista».
+ */
 function titleOf(entry: Countdown, t: Translate): string {
-  if (entry.title !== null) return entry.title
+  if (entry.title !== null) return eventTitle(t, entry)
   if (entry.preset === 'lockers') return t('countdown.lockers.title')
 
   return t('countdown.next.none')

@@ -14,6 +14,26 @@ describe('formatsFor: números y fechas en el idioma elegido', () => {
     expect(formatsFor('en').compact(1_250_000)).toMatch(/^1\.3[mM]$/)
   })
 
+  it('los tamaños llevan la unidad del idioma: GB en español e inglés, Go en francés', () => {
+    expect(formatsFor('es').bytes(38_000_000_000)).toBe('38 GB')
+    expect(formatsFor('es').bytes(9_040_000_000_000)).toBe('9 TB')
+    expect(formatsFor('es').bytes(9_440_000_000_000)).toBe('9,4 TB')
+    expect(formatsFor('en').bytes(9_440_000_000_000)).toBe('9.4 TB')
+    expect(formatsFor('en').bytes(1_250_000)).toBe('1.3 MB')
+    expect(formatsFor('en').bytes(340_400)).toBe('340 kB')
+    expect(formatsFor('fr').bytes(38_000_000_000)).toBe('38\u202fGo')
+    expect(formatsFor('fr').bytes(9_440_000_000_000)).toBe('9,4\u202fTo')
+    expect(formatsFor('fr').bytes(1_250_000)).toBe('1,3\u202fMo')
+    // Lo que no llega a un kilobyte se cuenta en kilobytes: «0 kB».
+    expect(formatsFor('es').bytes(0)).toBe('0 kB')
+  })
+
+  it('los miles van con el separador del idioma', () => {
+    expect(formatsFor('fr').number(551_600)).toBe('551\u202f600')
+    expect(formatsFor('es').number(551_600)).toBe('551.600')
+    expect(formatsFor('en').number(81_723)).toBe('81,723')
+  })
+
   it('cada estilo de fecha tiene su forma', () => {
     const en = formatsFor('en')
 

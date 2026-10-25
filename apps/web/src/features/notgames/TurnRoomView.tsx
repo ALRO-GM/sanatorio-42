@@ -311,7 +311,7 @@ function ChessLobby({
 
 /** Los dos relojes: el de quien mueve, corriendo. */
 function PlayerClocks({ room, me, offset }: { room: TurnRoom; me: string; offset: number }) {
-  const { t } = useI18n()
+  const { t, tn } = useI18n()
   const running = room.status === 'playing' && room.mover !== null
   const now = useNow(100, { active: running, offset })
 
@@ -342,8 +342,7 @@ function PlayerClocks({ room, me, offset }: { room: TurnRoom; me: string; offset
             <span className="turn-clock-name">
               <strong>{player.login}</strong>
               <small>
-                {t(`notgames.chess.side.${player.side}`)} ·{' '}
-                {t('notgames.hits', { n: player.correct })}
+                {t(`notgames.chess.side.${player.side}`)} · {tn('notgames.hits', player.correct)}
               </small>
             </span>
             <strong

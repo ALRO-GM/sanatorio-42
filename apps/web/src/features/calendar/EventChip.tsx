@@ -2,6 +2,7 @@ import type { CSSProperties } from 'react'
 
 import type { CalendarEvent } from '@sanatorio/contracts'
 
+import { eventTitle } from '../../shared/eventTitle'
 import { useI18n } from '../../shared/i18n'
 import { rangeOn, timeOn } from './dates'
 import { iconOf } from './kinds'
@@ -35,7 +36,8 @@ export function EventChip({
   const { t, lang } = useI18n()
   // En el mes solo cabe el inicio; en lo demás, inicio y fin.
   const hour = compact ? timeOn(event, day, lang) : rangeOn(event, day, lang)
-  const label = [t(`agenda.kind.${event.kind}`), hour, event.title].filter(Boolean).join(' · ')
+  const title = eventTitle(t, event)
+  const label = [t(`agenda.kind.${event.kind}`), hour, title].filter(Boolean).join(' · ')
 
   return (
     <button
@@ -52,7 +54,7 @@ export function EventChip({
         <Icon name={iconOf(event.kind)} size={14} />
       </span>
       {hour !== '' && <span className="event-time">{hour}</span>}
-      <span className="event-title">{event.title}</span>
+      <span className="event-title">{title}</span>
       {!compact && event.place !== null && <span className="event-place">{event.place}</span>}
     </button>
   )

@@ -51,7 +51,7 @@ export function CorrectionGraph({ graph, selected, onSelect }: CorrectionGraphPr
                   title={
                     project.future
                       ? t('cgraph.future', { name: project.name })
-                      : t('cgraph.times', { name: project.name, n: project.corrected })
+                      : tn('cgraph.times', project.corrected, { name: project.name })
                   }
                   onClick={() => {
                     onSelect(project.projectId)

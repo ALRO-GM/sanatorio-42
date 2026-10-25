@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/calendario.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-102 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
+111 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera | Francés |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -109,3 +109,12 @@ Generado desde `apps/web/src/shared/i18n/textos/calendario.csv` con
 | `meet.qr.confirm` | Confirmación al abrir un QR | features/alerts/AlertCenter | ¿Validar tu asistencia con el código {code}? | Validate your attendance with code {code}? | Vols validar la teva assistència amb el codi {code}? | Zure bertaratzea {code} kodearekin balidatu nahi duzu? | Valider ta présence avec le code {code} ? |
 | `event.confirm` | Confirmación de la fecha de un evento nuevo | features/boards/BoardForm, features/therapy/GroupForm | Va a ser el {when}: dentro de {in}. ¿Es correcto? | It will be on {when}: in {in}. Is that right? | Serà el {when}: d'aquí a {in}. És correcte? | {when} izango da: {in} barru. Zuzena da? | Ce sera le {when}, dans {in}. C'est bien ça ? |
 | `event.horizon` | Límite para crear eventos: dos meses | features/boards/BoardForm, features/therapy/GroupForm | Como mucho, con dos meses de antelación | At most two months ahead | Com a màxim, amb dos mesos d'antelació | Gehienez, bi hilabete lehenago | Deux mois à l'avance au maximum |
+| `event.name.help_window` | Título de un evento del calendario, la agenda o una cuenta atrás: una franja de tu guardia | shared/eventTitle | Te ofreces a ayudar | You offer help | T'ofereixes a ajudar | Laguntza eskaintzen duzu | Tu proposes ton aide |
+| `event.name.helping` | Título de un evento del calendario, la agenda o una cuenta atrás: una reserva en la que ayudas tú; {login} es a quién | shared/eventTitle | Ayudas a {login} | You help {login} | Ajudes {login} | {login} laguntzen duzu | Tu aides {login} |
+| `event.name.helped` | Título de un evento del calendario, la agenda o una cuenta atrás: una reserva en la que te ayudan; {login} es quién | shared/eventTitle | {login} te ayuda | {login} helps you | {login} t'ajuda | {login}(e)k laguntzen dizu | {login} t'aide |
+| `event.name.sprint` | Título de un evento del calendario, la agenda o una cuenta atrás: la sesión de un sprint; {project} es el proyecto | shared/eventTitle | Sprint de {project} | {project} sprint | Sprint de {project} | {project} sprinta | Sprint {project} |
+| `event.name.sprintGroup` | Título de un evento del calendario, la agenda o una cuenta atrás: la sesión de un sprint sin proyecto | shared/eventTitle | Sprint de grupo | Group sprint | Sprint de grup | Talde-sprinta | Sprint de groupe |
+| `event.name.correcting` | Título de un evento del calendario, la agenda o una cuenta atrás: una corrección de 42 en la que corriges tú; {project} es el proyecto | shared/eventTitle | Corriges {project} | You evaluate {project} | Corregeixes {project} | {project} zuzentzen duzu | Tu corriges {project} |
+| `event.name.correctingAny` | Título de un evento del calendario, la agenda o una cuenta atrás: una corrección de 42 en la que corriges tú, sin saber el proyecto | shared/eventTitle | Corriges | You're evaluating | Corregeixes | Zuzentzen duzu | Tu corriges |
+| `event.name.corrected` | Título de un evento del calendario, la agenda o una cuenta atrás: una corrección de 42 de tu proyecto; {project} es el proyecto | shared/eventTitle | Te corrigen {project} | Evaluation of your {project} | Et corregeixen {project} | {project} zuzentzen dizute | Correction de ton {project} |
+| `event.name.correctedAny` | Título de un evento del calendario, la agenda o una cuenta atrás: una corrección de 42 de tu proyecto, sin saber cuál | shared/eventTitle | Te corrigen | You're being evaluated | Et corregeixen | Zuzentzen zaituzte | On te corrige |

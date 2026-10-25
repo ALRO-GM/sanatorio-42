@@ -5,6 +5,8 @@
  * cada cual (un evento del calendario, su próximo compromiso, algo suyo).
  */
 
+import type { EventTitle } from './calendar.js'
+
 /** De dónde sale una cuenta atrás. */
 export type CountdownKind =
   /** Un aviso de quien administra. */
@@ -35,6 +37,12 @@ export type Countdown = {
   at: string | null
   /** El evento del calendario (`board:12`, `event:44687`), si sale de uno. */
   eventId: string | null
+  /**
+   * De qué es el título, si es de un evento con título puesto por Peer4U
+   * (`CalendarEvent['label']`): la web lo escribe en su idioma en vez de
+   * `title`, que va en español.
+   */
+  label: EventTitle | null
   /** Quién mandó el aviso; `null` en lo tuyo. */
   from: string | null
 }

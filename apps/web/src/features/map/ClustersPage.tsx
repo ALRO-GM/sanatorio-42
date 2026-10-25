@@ -21,7 +21,7 @@ import { usePoolAllows } from '../../shared/pool'
  */
 export function ClustersPage({ me }: { me: string }) {
   const [reporting, setReporting] = useState(false)
-  const { t } = useI18n()
+  const { t, tn } = useI18n()
   const marking = useAction()
   const map = useAsync(() => api.getCampusMap(), [])
 
@@ -67,7 +67,8 @@ export function ClustersPage({ me }: { me: string }) {
           <Show from="datos">
             <PoolOnly k="clusters.online">
               <p className="clusters-count" role="status">
-                <span className="seat-online sample" /> {t('clusters.count', { online, occupied })}
+                <span className="seat-online sample" />{' '}
+                {tn('clusters.count', occupied, { online, occupied })}
               </p>
             </PoolOnly>
           </Show>

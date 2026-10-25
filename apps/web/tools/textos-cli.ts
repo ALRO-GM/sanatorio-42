@@ -14,6 +14,8 @@
  * - el francés no sigue su tipografía (espacios sin corte, « », `…`; ver
  *   `textos-fr.ts`);
  * - una clave no tiene contexto;
+ * - un texto pone una cantidad delante de un nombre en plural («{n} días») y
+ *   no tiene sus formas `.one` y `.many` (`COUNTED`);
  * - `docs/textos/` no está al día con las tablas.
  */
 
@@ -23,6 +25,7 @@ import { fileURLToPath } from 'node:url'
 
 import { LANG_CODES, readGroup, tableGroups } from './textos.ts'
 import { frenchTypography } from './textos-fr.ts'
+import { ALWAYS_MANY, needsPlural } from './textos-plural.ts'
 import type { TextRow } from './textos.ts'
 
 const WEB = fileURLToPath(new URL('..', import.meta.url))
@@ -224,6 +227,11 @@ function main(): void {
     }
     if (row.text.es.trim() === '') problems.push(`${where}: «${row.key}» no tiene texto en español`)
     if (row.context === '') problems.push(`${where}: «${row.key}» no tiene contexto`)
+    if (needsPlural(row)) {
+      problems.push(
+        `${where}: «${row.key}» cuenta algo en plural y con 1 diría «1 …s»: pártela en «${row.key}.one» y «${row.key}.many» y pídela con tn()`,
+      )
+    }
 
     for (const lang of LANG_CODES) {
       const text = row.text[lang]
@@ -253,6 +261,10 @@ function main(): void {
 
   for (const { key, file } of usage.missing) {
     problems.push(`${file}: pide «${key}», que no está en ninguna tabla`)
+  }
+  for (const key of Object.keys(ALWAYS_MANY)) {
+    if (!seen.has(key))
+      problems.push(`textos-cli.ts: ALWAYS_MANY nombra «${key}», que ya no existe`)
   }
   for (const row of rows) {
     if (!usage.used.has(row.key)) {

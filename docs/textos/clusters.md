@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/clusters.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-76 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
+77 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera | Francés |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -56,7 +56,8 @@ Generado desde `apps/web/src/shared/i18n/textos/clusters.csv` con
 | `map.seatBroken` | Etiqueta: ordenador averiado | features/map/ClusterMapView | No funciona | Not working | No funciona | Ez dabil | En panne |
 | `map.finishedMine` | Cuánta gente cerca aprobó tu proyecto | features/map/ClusterMapView, features/map/SeatHoverCard | Aprobaron tu proyecto: {n} | Passed your project: {n} | Han aprovat el teu projecte: {n} | Zure proiektua gainditu dute: {n} | Ont validé ton projet : {n} |
 | `clusters.title` | Título de la página del mapa | features/map/ClustersPage | Clústeres del campus | Campus clusters | Clústers del campus | Campuseko klusterrak | Clusters du campus |
-| `clusters.count` | Cuánta gente sentada tiene la web abierta | features/map/ClustersPage | Con Peer4U abierto: {online} de {occupied} personas sentadas | With Peer4U open: {online} of {occupied} people seated | Amb Peer4U obert: {online} de {occupied} persones assegudes | Peer4U irekita dutenak: eserita dauden {occupied} pertsonetatik {online} | Avec Peer4U ouvert : {online} sur {occupied} postes occupés |
+| `clusters.count.one` | Cuánta gente sentada tiene la web abierta (una) | features/map/ClustersPage | Con Peer4U abierto: {online} de {occupied} persona sentada | With Peer4U open: {online} of {occupied} person seated | Amb Peer4U obert: {online} de {occupied} persona asseguda | Peer4U irekita dutenak: eserita dagoen {occupied} pertsonatik {online} | Avec Peer4U ouvert : {online} sur {occupied} poste occupé |
+| `clusters.count.many` | Cuánta gente sentada tiene la web abierta (varias) | features/map/ClustersPage | Con Peer4U abierto: {online} de {occupied} personas sentadas | With Peer4U open: {online} of {occupied} people seated | Amb Peer4U obert: {online} de {occupied} persones assegudes | Peer4U irekita dutenak: eserita dauden {occupied} pertsonetatik {online} | Avec Peer4U ouvert : {online} sur {occupied} postes occupés |
 | `clusters.online` | Etiqueta: tiene la web abierta | features/admin/pool-tree, features/map/ClustersPage, features/map/SeatHoverCard, features/notices/Conversations, shared/ui/PersonLink | Con Peer4U abierto | Has Peer4U open | Amb Peer4U obert | Peer4U irekita du | Peer4U ouvert |
 | `clusters.write` | Botón para escribir a alguien | features/admin/CheatsPanel, features/map/ClustersTour, features/map/SeatHoverCard | Escribir | Message | Escriu-li | Idatzi | Écrire |
 | `map.legend.online` | Leyenda: tiene Peer4U abierto | features/map/ClusterMapView | Con Peer4U abierto | Has Peer4U open | Amb Peer4U obert | Peer4U irekita du | Peer4U ouvert |

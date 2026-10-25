@@ -169,7 +169,7 @@ function Checker({ name, onLeave }: { name: string; onLeave: () => void }) {
 }
 
 function Document({ found }: { found: StaffDocument }) {
-  const { t, lang } = useI18n()
+  const { t, tn, lang } = useI18n()
   const [verdict, setVerdict] = useState<boolean | null>(null)
   const action = useAction()
   const date = (iso: string): string =>
@@ -203,7 +203,7 @@ function Document({ found }: { found: StaffDocument }) {
           <dt>{t('staff.total')}</dt>
           <dd>
             <strong>{hoursText(found.totalMinutes)}</strong>
-            <small> · {t('staff.rows', { n: found.rows })}</small>
+            <small> · {tn('staff.rows', found.rows)}</small>
           </dd>
         </div>
         <div>

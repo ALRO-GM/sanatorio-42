@@ -388,7 +388,7 @@ function ProgressChart({
   paces: boolean
   range: Range
 }) {
-  const { t } = useI18n()
+  const { t, tn } = useI18n()
   const { number } = useFormat()
   const [hover, setHover] = useState<number | null>(null)
   // El eje del tiempo acaba donde acaba el periodo; con «Todo», en el último dato.
@@ -492,7 +492,7 @@ function ProgressChart({
   return (
     <>
       {data.me === null && <p className="hint">{t('stats.progress.noMe')}</p>}
-      {unknown > 0 && <p className="hint">{t('stats.progress.unknown', { n: unknown })}</p>}
+      {unknown > 0 && <p className="hint">{tn('stats.progress.unknown', unknown)}</p>}
       {tooMany && (
         <p className="hint progress-too-many" role="status">
           {t('stats.progress.tooMany', { n: groups.series.length, max: MAX_LINES })}

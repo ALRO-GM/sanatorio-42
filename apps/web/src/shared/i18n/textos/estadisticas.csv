@@ -83,7 +83,8 @@ stats.progress.population,Avance: grupo de botones de qué gente entra en la med
 stats.progress.population.finished,Avance: media solo de quien terminó el common core,Terminado,Finished,Acabat,Amaituta,Terminé
 stats.progress.population.current,Avance: media de quien sigue en el common core más quien lo terminó,En curso + terminado,Ongoing + finished,En curs + acabat,Martxan + amaituta,En cours + terminé
 stats.progress.population.blackholed,Avance: media de quien se tragó el black hole,Black hole,Black hole,Black hole,Black hole,Black Hole
-stats.progress.unknown,Avance: aviso de cuánta gente no entra en las medias porque no se sabe si sigue,{n} personas no entran en ninguna media porque no se sabe si siguen en el cursus.,{n} people are left out of every average because it is not known whether they are still in the cursus.,{n} persones no entren a cap mitjana perquè no se sap si continuen al cursus.,"{n} pertsona ez dira batez bestekoetan sartzen, ez baita jakiten cursusean jarraitzen duten.",Personnes hors moyennes (on ne sait pas si elles sont encore dans le cursus) : {n}
+stats.progress.unknown.one,Avance: aviso cuando una persona no entra en las medias porque no se sabe si sigue,{n} persona no entra en ninguna media porque no se sabe si sigue en el cursus.,{n} person is left out of every average because it is not known whether they are still in the cursus.,{n} persona no entra a cap mitjana perquè no se sap si continua al cursus.,"Pertsona {n} ez da batez bestekoetan sartzen, ez baita jakiten cursusean jarraitzen duen.",Une personne hors moyennes (on ne sait pas si elle est encore dans le cursus) : {n}
+stats.progress.unknown.many,Avance: aviso de cuánta gente no entra en las medias porque no se sabe si sigue,{n} personas no entran en ninguna media porque no se sabe si siguen en el cursus.,{n} people are left out of every average because it is not known whether they are still in the cursus.,{n} persones no entren a cap mitjana perquè no se sap si continuen al cursus.,"{n} pertsona ez dira batez bestekoetan sartzen, ez baita jakiten cursusean jarraitzen duten.",Personnes hors moyennes (on ne sait pas si elles sont encore dans le cursus) : {n}
 stats.progress.axisStart,"Avance: marca del eje vertical en el 0, por círculos",Inicio,Start,Inici,Hasiera,Début
 stats.progress.axisCircle,Avance: marca del eje vertical donde se acaba un círculo,Círculo {n},Circle {n},Cercle {n},{n}. zirkulua,Cercle {n}
 stats.progress.hours,"Avance: unas horas, en el eje y en la ficha",{n} h,{n} h,{n} h,{n} h,{n} h
@@ -94,7 +95,8 @@ stats.ranking.by.circles,"Avance, quién va más rápido: ordenar por el % hecho
 stats.ranking.by.hours,"Avance, quién va más rápido: ordenar por el % de horas hecho",% por horas,% by hours,% per hores,% orduka,% par heures
 stats.ranking.kickoff,"Avance, quién va más rápido: desplegable del mes de entrada (kickoff)",Kickoff,Kickoff,Kickoff,Kickoff,Kick-off
 stats.ranking.kickoff.all,"Avance, quién va más rápido: opción del desplegable sin filtrar por kickoff",Todo el mundo,Everyone,Tothom,Denak,Tout le monde
-stats.ranking.kickoff.month,"Avance, quién va más rápido: un kickoff del desplegable, con su gente",{month} ({n} personas),{month} ({n} people),{month} ({n} persones),{month} ({n} pertsona),{month} ({n} pers.)
+stats.ranking.kickoff.month.one,"Avance, quién va más rápido: un kickoff del desplegable con una sola persona",{month} ({n} persona),{month} ({n} person),{month} ({n} persona),{month} ({n} pertsona),{month} ({n} pers.)
+stats.ranking.kickoff.month.many,"Avance, quién va más rápido: un kickoff del desplegable, con su gente",{month} ({n} personas),{month} ({n} people),{month} ({n} persones),{month} ({n} pertsona),{month} ({n} pers.)
 stats.ranking.cohort,"Avance, quién va más rápido: grupo de botones de si va solo ese kickoff o también los siguientes",Qué kickoffs,Which kickoffs,Quins kickoffs,Zein kickoff,Quels kick-offs
 stats.ranking.cohort.only,"Avance, quién va más rápido: solo el kickoff elegido",Solo ese,Only that one,Només aquest,Hori bakarrik,Seulement celui-ci
 stats.ranking.cohort.since,"Avance, quién va más rápido: el kickoff elegido y los que vinieron después",Ese y los siguientes,That one and later,Aquest i els següents,Hori eta hurrengoak,Celui-ci et les suivants
@@ -108,7 +110,8 @@ stats.ranking.circle,"Avance, quién va más rápido: el círculo en el que est�
 stats.ranking.finished,"Avance, quién va más rápido: quien terminó el common core",Terminado,Finished,Acabat,Amaituta,Terminé
 stats.ranking.pctCircles,"Avance, quién va más rápido: % hecho por círculos",{n} % por círculos,{n}% by circles,{n} % per cercles,% {n} zirkuluka,{n} % par cercles
 stats.ranking.pctHours,"Avance, quién va más rápido: % de las horas de su plan hecho",{n} % de horas,{n}% of hours,{n} % de les hores,Orduen % {n},{n} % des heures
-stats.ranking.total,"Avance, quién va más rápido: cuánta gente entra con los filtros",{n} personas,{n} people,{n} persones,{n} pertsona,Personnes : {n}
+stats.ranking.total.one,"Avance, quién va más rápido: con los filtros entra una sola persona",{n} persona,{n} person,{n} persona,Pertsona {n},Personnes : {n}
+stats.ranking.total.many,"Avance, quién va más rápido: cuánta gente entra con los filtros",{n} personas,{n} people,{n} persones,{n} pertsona,Personnes : {n}
 stats.ranking.notIn,"Avance, quién va más rápido: quien mira no entra con estos filtros",Con estos filtros no sales.,You are not in with these filters.,Amb aquests filtres no hi surts.,Iragazki hauekin ez zaude.,Tu n'apparais pas avec ces filtres.
 stats.ranking.empty,"Avance, quién va más rápido: nadie entra con estos filtros",Nadie con estos filtros.,Nobody matches these filters.,Ningú amb aquests filtres.,Inor ez iragazki hauekin.,Personne avec ces filtres.
 stats.ranking.more,"Avance, quién va más rápido: botón para cargar más puestos",Ver más,Show more,Veure més,Gehiago ikusi,Voir plus

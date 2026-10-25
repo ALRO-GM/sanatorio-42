@@ -32,7 +32,7 @@ type Filters = Omit<RankingQuery, 'offset' | 'limit'>
  * tu fila se queda fija abajo hasta llegar a tu puesto, y arriba después.
  */
 export function ProgressRanking() {
-  const { t } = useI18n()
+  const { t, tn } = useI18n()
   const { number, date } = useFormat()
   const [filters, setFilters] = useState<Filters>({
     by: 'circle',
@@ -130,9 +130,8 @@ export function ProgressRanking() {
             <option value="">{t('stats.ranking.kickoff.all')}</option>
             {data?.kickoffs.map((kickoff) => (
               <option key={kickoff.month} value={kickoff.month}>
-                {t('stats.ranking.kickoff.month', {
+                {tn('stats.ranking.kickoff.month', kickoff.people, {
                   month: month(kickoff.month),
-                  n: kickoff.people,
                 })}
               </option>
             ))}
@@ -197,7 +196,7 @@ export function ProgressRanking() {
       ) : (
         <>
           <p className="hint" role="status">
-            {t('stats.ranking.total', { n: data.total })}
+            {tn('stats.ranking.total', data.total)}
             {mine === null && data.total > 0 && ` · ${t('stats.ranking.notIn')}`}
           </p>
           {rows.length === 0 ? (

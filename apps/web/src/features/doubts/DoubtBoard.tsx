@@ -111,7 +111,7 @@ export function DoubtBoard({ initialProject }: DoubtBoardProps) {
 
 /** La guía y el corcho de un proyecto. */
 function ProjectBoard({ projectId, onChange }: { projectId: number; onChange: () => void }) {
-  const { t } = useI18n()
+  const { t, tn } = useI18n()
   const board = useAsync(() => api.getDoubtBoard(projectId), [projectId])
   const [writing, setWriting] = useState(false)
   const [open, setOpen] = useState<number | null>(null)
@@ -175,10 +175,7 @@ function ProjectBoard({ projectId, onChange }: { projectId: number; onChange: ()
                 <strong>{doubt.body}</strong>
                 <span className="postit-foot">
                   <span>
-                    {doubt.author} ·{' '}
-                    {doubt.answers === 1
-                      ? t('board.answers1')
-                      : t('board.answersN', { n: doubt.answers })}
+                    {doubt.author} · {tn('board.answers', doubt.answers)}
                   </span>
                   <span className={`postit-status ${doubt.status}`}>
                     {doubt.status === 'specialist' && <Icon name="estrella" size={13} />}{' '}

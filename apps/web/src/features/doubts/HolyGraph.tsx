@@ -351,7 +351,7 @@ export function HolyGraph({ graph, selected, onSelect }: HolyGraphProps) {
         <span className="graph-here">{t('graph.here', { n: graph.currentCircle })}</span>
         {graph.level !== null && (
           <span className="graph-level" title={t('graph.levelHint')}>
-            {t('graph.level', { level: graph.level.toFixed(2) })}
+            {t('graph.level', { level: Math.round(graph.level * 100) / 100 })}
             <span
               className="graph-level-bar"
               role="progressbar"
@@ -829,8 +829,8 @@ export function HolyGraph({ graph, selected, onSelect }: HolyGraphProps) {
                       {completed
                         ? t('pace.done')
                         : daysLeft < 0
-                          ? t('pace.late', { n: -daysLeft })
-                          : t('pace.left', { n: daysLeft })}
+                          ? tn('pace.late', -daysLeft)
+                          : tn('pace.left', daysLeft)}
                     </span>
                   </li>
                 )

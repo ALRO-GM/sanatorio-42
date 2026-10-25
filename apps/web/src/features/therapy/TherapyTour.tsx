@@ -34,7 +34,7 @@ const BUSY = [1, 4, 11]
  * tuyo eligiendo puestos que se toquen y los días en que quedáis.
  */
 export function TherapyTour() {
-  const { t } = useI18n()
+  const { t, tn } = useI18n()
   const days = t('tour.days').split(',')
 
   return (
@@ -45,7 +45,7 @@ export function TherapyTour() {
             <div className="tour-card">
               <strong>{t('tour.therapy.group')}</strong>
               <span className="tour-muted">
-                {t('therapy.open', { taken: shot.joined ? 3 : 2, capacity: 4 })}
+                {tn('therapy.open', 4, { taken: shot.joined ? 3 : 2, capacity: 4 })}
               </span>
               <span>Cluster 1 · 16:00–18:00</span>
               <div className="tour-row">

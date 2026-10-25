@@ -24,8 +24,13 @@ vocabulario: `AGENTS.md` («Reglas de producto»).
 3. Español: segunda persona, lenguaje inclusivo (evita formas con género),
    comillas «», puntos suspensivos «…», tono de clínica cálida. Inglés natural
    (no literal). Mismos `{placeholders}` en todas las columnas.
-4. `npm run textos -- --write` (regenera `docs/textos/*.md`) y `npm run check`.
-5. La clave que deja de usarse se borra de la tabla.
+4. Si el texto cuenta algo («{n} días»), van dos filas, `clave.one` y
+   `clave.many`, y el código usa `tn('clave', n)`: en francés `one` vale
+   también para 0 y 1,5 («0 personne»). Los números de los huecos ya salen con
+   el formato del idioma. Ver «Singular y plural» en `docs/textos.md`;
+   `npm run textos` avisa del que falte.
+5. `npm run textos -- --write` (regenera `docs/textos/*.md`) y `npm run check`.
+6. La clave que deja de usarse se borra de la tabla.
 
 ## Banco de preguntas (Not-games) y curso de git
 
