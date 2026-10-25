@@ -1027,7 +1027,7 @@ describe('calendario', () => {
     // Tres días concretos: tres sesiones, una por día.
     expect(kinds('therapy')).toHaveLength(3)
     expect(kinds('therapy')[0]).toMatchObject({
-      title: 'Terapia de ft_printf',
+      title: 'Sprint de ft_printf',
       place: 'Cluster 1',
       section: 'terapia',
       seats: { taken: 1, max: 5 },

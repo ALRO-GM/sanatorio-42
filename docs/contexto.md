@@ -12,6 +12,14 @@ va lo que no está en el código.
 [tareas-tras-compactar.md](tareas-tras-compactar.md)**: es la lista de lo que hay
 que hacer, en orden. Este documento es el porqué; aquel, el qué.
 
+## Peer4U (2026-10-25)
+
+Alberto cambió el nombre a **Peer4U** y la temática de hospital por una de
+programación, más internacional. Solo cambia lo que se ve (tablas de textos,
+título, manifiesto, logo, cabecera, emisor del segundo factor); claves, rutas,
+código, tablas, API, dominio y repositorio siguen con los nombres de
+Sanatorio. Equivalencias en el README y en `AGENTS.md`.
+
 ## Quién y cómo
 
 - Autor: Alberto (`albrodri` en 42, `ALRO-GM` en GitHub). Se trabaja en español.

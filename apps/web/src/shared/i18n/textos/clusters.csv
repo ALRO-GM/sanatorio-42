@@ -9,15 +9,15 @@ map.row,"Fila, abreviado",F{n},R{n},F{n},E{n}
 map.rowLong.one,Una fila,fila {rows},row {rows},fila {rows},{rows} ilara
 map.rowLong.many,Varias filas,filas {rows},rows {rows},files {rows},{rows} ilarak
 map.seatFree,Puesto libre,Libre,Free,Lliure,Libre
-map.seatReserved,Puesto reservado por un grupo de terapia,Reservado por una terapia,Reserved by a therapy group,Reservat per una teràpia,Terapia batek erreserbatuta
+map.seatReserved,Puesto reservado por un sprint,Reservado por un sprint,Reserved by a sprint,Reservat per un sprint,Sprint batek erreserbatuta
 map.you,Tu puesto,Tú,You,Tu,Zu
-map.duty.patient,Alguien de guardia que hace tu proyecto,Paciente de guardia,Patient on duty,Pacient de guàrdia,Pazientea guardian
-map.duty.specialist,Alguien de guardia que aprobó tu proyecto,Especialista de guardia,Specialist on duty,Especialista de guàrdia,Espezialista guardian
-map.reservedFor,Para qué grupo está reservado y cuándo,Reservado para terapia de {project} · {days} · {start}–{end},Reserved for {project} therapy · {days} · {start}–{end},Reservat per a teràpia de {project} · {days} · {start}–{end},{project} terapiarako erreserbatuta · {days} · {start}–{end}
+map.duty.patient,Alguien disponible que hace tu proyecto,Peer disponible,Peer available,Peer disponible,Peerra eskuragarri
+map.duty.specialist,Alguien disponible que aprobó tu proyecto,Senior disponible,Senior available,Sènior disponible,Seniorra eskuragarri
+map.reservedFor,Para qué grupo está reservado y cuándo,Reservado para el sprint de {project} · {days} · {start}–{end},Reserved for {project} sprint · {days} · {start}–{end},Reservat per a l'sprint de {project} · {days} · {start}–{end},{project} sprinterako erreserbatuta · {days} · {start}–{end}
 map.unplaced,Gente cuyo puesto no sale en el plano,Sin sitio en el plano:,Not on the map:,Sense lloc al plànol:,Planoan lekurik gabe:
-map.legend.specialist,Leyenda: especialista de guardia,Especialista de guardia,Specialist on duty,Especialista de guàrdia,Espezialista guardian
-map.legend.patient,Leyenda: paciente de guardia,Paciente de guardia,Patient on duty,Pacient de guàrdia,Pazientea guardian
-map.legend.reserved,Leyenda: terapia reunida ahora,Terapia en curso,Therapy in session,Teràpia en curs,Terapia abian
+map.legend.specialist,Leyenda: senior disponible,Senior disponible,Senior available,Sènior disponible,Seniorra eskuragarri
+map.legend.patient,Leyenda: peer disponible,Peer disponible,Peer available,Peer disponible,Peerra eskuragarri
+map.legend.reserved,Leyenda: sprint reunido ahora,Sprint en curso,Sprint in session,Sprint en curs,Sprinta abian
 map.legend.occupied,Leyenda: ocupado,Ocupado,Taken,Ocupat,Okupatuta
 map.legend.free,Leyenda: libre,Libre,Free,Lliure,Libre
 map.legend.picked,Leyenda: elegido para un grupo,Elegido,Chosen,Triat,Aukeratuta
@@ -31,7 +31,7 @@ map.highlight,Opciones de resaltado,Resaltar:,Highlight:,Ressalta:,Nabarmendu:
 map.mate.circle,Resaltar: gente de tu círculo,Mi círculo,My circle,El meu cercle,Nire zirkulua
 map.mate.project,Resaltar: gente de tu proyecto,Mi proyecto,My project,El meu projecte,Nire proiektua
 map.mate.done,Resaltar: gente que aprobó tu proyecto,Lo aprobaron,Passed it,L'han aprovat,Gainditu dutenak
-map.middleClick,Truco para abrir un perfil en otra pestaña,Clic central (o Ctrl + clic) en un puesto: abre su expediente en otra pestaña.,Middle click (or Ctrl + click) on a seat opens their record in a new tab.,Clic central (o Ctrl + clic) en un lloc: obre el seu expedient en una altra pestanya.,Erdiko klik (edo Ctrl + klik) postu batean: haren espedientea beste fitxa batean irekitzen du.
+map.middleClick,Truco para abrir un perfil en otra pestaña,Clic central (o Ctrl + clic) en un puesto: abre su perfil en otra pestaña.,Middle click (or Ctrl + click) on a seat opens their profile in a new tab.,Clic central (o Ctrl + clic) en un lloc: obre el seu perfil en una altra pestanya.,Erdiko klik (edo Ctrl + klik) postu batean: haren profila beste fitxa batean irekitzen du.
 map.circle,Círculo de una persona,Círculo {n},Circle {n},Cercle {n},{n}. zirkulua
 map.proposeNone,No hay tantos puestos juntos libres,No hay tantos puestos juntos libres: prueba con menos.,There are not that many free seats together: try fewer.,No hi ha tants llocs junts lliures: prova amb menys.,Ez dago hainbeste postu libre elkarren ondoan: saiatu gutxiagorekin.
 map.proposeHint,Qué hace proponer puestos,"Busca puestos juntos, libres y que funcionen, lo más cerca de ti.","Finds free, working seats together, as close to you as possible.","Busca llocs junts, lliures i que funcionin, com més a prop teu millor.","Elkarren ondoko postu libre eta erabilgarriak bilatzen ditu, zugandik ahalik eta hurbilen."
@@ -43,10 +43,10 @@ map.reportBroken,Botón: avisar de que un ordenador no funciona,Avisar de que no
 map.seatBroken,Etiqueta: ordenador averiado,No funciona,Not working,No funciona,Ez dabil
 map.finishedMine,Cuánta gente cerca aprobó tu proyecto,Aprobaron tu proyecto: {n},Passed your project: {n},Han aprovat el teu projecte: {n},Zure proiektua gainditu dute: {n}
 clusters.title,Título de la página del mapa,Clústeres del campus,Campus clusters,Clústers del campus,Campuseko klusterrak
-clusters.count,Cuánta gente sentada tiene la web abierta,Con Sanatorio abierto: {online} de {occupied} personas sentadas,With Sanatorio open: {online} of {occupied} people seated,Amb Sanatorio obert: {online} de {occupied} persones assegudes,Sanatorio irekita dutenak: eserita dauden {occupied} pertsonetatik {online}
-clusters.online,Etiqueta: tiene la web abierta,Con Sanatorio abierto,Has Sanatorio open,Amb Sanatorio obert,Sanatorio irekita du
+clusters.count,Cuánta gente sentada tiene la web abierta,Con Peer4U abierto: {online} de {occupied} personas sentadas,With Peer4U open: {online} of {occupied} people seated,Amb Peer4U obert: {online} de {occupied} persones assegudes,Peer4U irekita dutenak: eserita dauden {occupied} pertsonetatik {online}
+clusters.online,Etiqueta: tiene la web abierta,Con Peer4U abierto,Has Peer4U open,Amb Peer4U obert,Peer4U irekita du
 clusters.write,Botón para escribir a alguien,Escribir,Message,Escriu-li,Idatzi
-map.legend.online,Leyenda: tiene Sanatorio abierto,Con Sanatorio abierto,Has Sanatorio open,Amb Sanatorio obert,Sanatorio irekita du
+map.legend.online,Leyenda: tiene Peer4U abierto,Con Peer4U abierto,Has Peer4U open,Amb Peer4U obert,Peer4U irekita du
 clusters.chat,Chat directo con alguien,Chat directo,Direct chat,Xat directe,Txat zuzena
 clusters.chatEmpty,Chat directo vacío,Nadie ha escrito todavía. Lo que pongas solo lo ve quien participa en este chat.,Nobody has written yet. Only the people in this chat can see what you write.,Ningú ha escrit encara. El que posis només ho veu qui participa en aquest xat.,Inork ez du oraindik idatzi. Jartzen duzuna txat honetan parte hartzen dutenek soilik ikusten dute.
 facility.open,Clústeres: botón para avisar al staff de un problema del edificio o de un ordenador,Avisar de un problema,Report a problem,Avisar d'un problema,Arazo baten berri eman

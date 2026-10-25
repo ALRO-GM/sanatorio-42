@@ -60,7 +60,7 @@ function seeded(seed: number): () => number {
 function invent(): Logged[] {
   const random = seeded(42)
   const pick = (): FocusReason => REASONS[Math.floor(random() * REASONS.length)] ?? 'other'
-  const people = [ME, ...Array.from({ length: 40 }, (_, at) => `paciente${at + 1}`)]
+  const people = [ME, ...Array.from({ length: 40 }, (_, at) => `peer${at + 1}`)]
   const out: Logged[] = []
   const today = Date.now() - (Date.now() % DAY_MS)
 

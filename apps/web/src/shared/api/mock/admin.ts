@@ -244,7 +244,7 @@ export const adminMock: Pick<
     await delay(80)
 
     return {
-      uri: 'otpauth://totp/Sanatorio%2042%3Aplopez-l?secret=JBSWY3DPEHPK3PXP&issuer=Sanatorio%2042',
+      uri: 'otpauth://totp/Peer4U%3Aplopez-l?secret=JBSWY3DPEHPK3PXP&issuer=Peer4U',
     }
   },
 

@@ -5,12 +5,13 @@ import type { ThemeManifest } from '../types'
 import './theme.css'
 
 /**
- * Clínica: la sala de un hospital nuevo. Turquesa, mucho blanco y superficies
- * con relieve: luz por arriba, sombra suave por abajo y botones con brillo.
+ * Clean code (la carpeta sigue llamándose `clinica`, su nombre de antes):
+ * turquesa, mucho blanco y superficies con relieve: luz por arriba, sombra
+ * suave por abajo y botones con brillo.
  */
 export const clinica: ThemeManifest = {
   id: 'clinica',
-  name: { es: 'Clínica', en: 'Clinic', ca: 'Clínica', eu: 'Klinika' },
+  name: { es: 'Clean code', en: 'Clean code', ca: 'Clean code', eu: 'Clean code' },
   hint: {
     es: 'Luminoso, con relieve y turquesa',
     en: 'Bright, with depth and turquoise',

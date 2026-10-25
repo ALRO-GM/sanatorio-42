@@ -6,13 +6,13 @@ import type { ThemeManifest } from '../types'
 import './theme.css'
 
 /**
- * Historial: el expediente en papel de toda la vida. Títulos escritos a pluma,
- * texto de libro, rótulos a máquina de escribir, papel con su grano y notas
- * sujetas con celo.
+ * Cuaderno (la carpeta sigue llamándose `historial`, su nombre de antes): el
+ * cuaderno de toda la vida. Títulos escritos a pluma, texto de libro, rótulos
+ * a máquina de escribir, papel con su grano y notas sujetas con celo.
  */
 export const historial: ThemeManifest = {
   id: 'historial',
-  name: { es: 'Historial', en: 'Chart', ca: 'Historial', eu: 'Historiala' },
+  name: { es: 'Cuaderno', en: 'Notebook', ca: 'Quadern', eu: 'Koadernoa' },
   hint: {
     es: 'Cálido: papel, tinta y notas a mano',
     en: 'Warm: paper, ink and handwritten notes',

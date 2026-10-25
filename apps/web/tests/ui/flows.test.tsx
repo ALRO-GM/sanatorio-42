@@ -34,7 +34,7 @@ describe('lo que hace la gente en la web, de principio a fin', () => {
     expect(await screen.findByRole('button', { name: text('app.back') }, WAIT)).toBeTruthy()
 
     await user.click(screen.getByRole('button', { name: text('app.back') }))
-    expect(await screen.findByRole('heading', { name: /Qué te duele/ }, WAIT)).toBeTruthy()
+    expect(await screen.findByRole('heading', { name: /Qué estás depurando/ }, WAIT)).toBeTruthy()
   }, 20_000)
 
   it('pizarras: apuntarse y desapuntarse de una actividad', async () => {

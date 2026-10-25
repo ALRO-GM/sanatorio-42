@@ -2,11 +2,20 @@
 
 ## El proyecto
 
-Sanatorio 42: web para estudiantes de 42. Cuando te atascas en un proyecto
-("¿Qué te duele hoy?"), ves quién te puede ayudar: "pacientes como tú" (lo están
-haciendo) y "especialistas" (ya lo aprobaron), su puesto en el cluster y si
-están "de guardia". Alrededor: terapias de grupo, tablón de dudas, pizarras y
-expediente con XP.
+Peer4U (antes Sanatorio 42): web para estudiantes de 42. Cuando te atascas en
+un proyecto ("¿Qué estás depurando hoy?"), ves quién te puede ayudar: "peers
+como tú" (lo están haciendo) y "seniors" (ya lo aprobaron), su puesto en el
+cluster y si están "disponibles". Alrededor: sprints en grupo, dudas por
+proyecto, pizarras y perfil con XP.
+
+El nombre y la temática cambiaron en octubre de 2026 (de hospital a
+programación), pero solo en lo que se ve: las claves de texto, las rutas
+(`#/consulta`, `#/tablon`, `#/terapia`, `#/guardia`, `#/expediente`), los
+identificadores, las tablas y la API conservan los nombres viejos. Equivalencias
+visibles: Sala de espera → Peer to peer, Tablón → Proyectos, Terapia → Sprints,
+Guardia → On-call, «De guardia» → «Disponible», Expediente → Perfil,
+Especialista → Senior, Eminencia → Guru, Paciente → Peer, Estado de salud →
+Health check.
 
 ## Estructura
 
@@ -112,18 +121,19 @@ regla de aquí, cambia también la skill que la repite.
 
 ## Reglas de producto
 
-- "Eminencia" es quien aprobó un proyecto con 125; está por encima de
-  "especialista" y se enseña en dorado.
-- Regla de guardia: alguien está "de guardia" solo si `available: true` y
+- "Guru" (la eminencia del código) es quien aprobó un proyecto con 125; está
+  por encima de "senior" (el especialista) y se enseña en dorado.
+- Regla de guardia: alguien está "disponible" (en el código, de guardia) solo si `available: true` y
   `location` no es `null`. Está en `onDuty`, en `features/peers/PeerList.tsx`.
-- Tono: clínica cálida y con humor amable. Vocabulario: "de guardia", "fuera de
-  turno", "fuera del centro", "especialista", "paciente como tú", "sala de
-  espera", "terapia de grupo".
+- Tono: equipo de programación cálido y con humor amable (bugs, commits,
+  code review, on-call, producción), nada de hospital. Vocabulario:
+  "disponible", "no disponible", "fuera del campus", "senior", "peer como tú",
+  "Peer to peer", "sprint", "on-call", "perfil", "health check".
 - Textos en segunda persona y con lenguaje inclusivo (evitar formas con género
   cuando se pueda).
-- Lo primero que se ve al entrar es el expediente: es la portada y la primera
-  pestaña. La navegación va en su propia fila, debajo de la marca: cinco
-  categorías (Expediente, Ayuda, Calendario, Clústeres, Datos) y, debajo, las secciones de
+- Lo primero que se ve al entrar es el perfil (el expediente del código): es la
+  portada y la primera pestaña. La navegación va en su propia fila, debajo de
+  la marca: cinco categorías (Perfil, Ayuda, Calendario, Clústeres, Datos) y, debajo, las secciones de
   la abierta (`CATEGORIES` en `app/sections.ts`).
 - **Funcionalidad nueva**: antes de escribir código se decide su categoría, si
   es sección o bloque, desde qué modo de la interfaz sale (simplificado,
@@ -153,8 +163,8 @@ regla de aquí, cambia también la skill que la repite.
 - Un aviso de un evento con más gente no se puede cerrar sin contestar (voy, me
   retraso, no voy). Lo pendiente lo guarda la API (`GET /events/alerts`), no el
   navegador. No añadas una forma de saltárselo.
-- Mapa de clusters: dorado = especialista de guardia, verde = paciente de
-  guardia, gris = ocupado sin más. El azul de terapia solo se pinta mientras el
+- Mapa de clusters: dorado = senior disponible, verde = peer disponible, gris =
+  ocupado sin más. El azul de sprint (terapia en el código) solo se pinta mientras el
   grupo está reunido (o, al elegir puestos, si choca con el día y la hora).
 - Grafo del tablón: es el plan de cada persona, no un catálogo. Turquesa =
   aprobado, blanco = en curso, gris = disponible, gris con candado = aún no.

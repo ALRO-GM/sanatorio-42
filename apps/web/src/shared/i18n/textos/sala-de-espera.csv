@@ -1,47 +1,47 @@
 clave,contexto,es,en,ca,eu
-duty.label,Cabecera: botón que abre tu guardia (cuándo te ofreces a ayudar),De guardia,On duty,De guàrdia,Guardian
-duty.hint,Explicación junto al interruptor de guardia,Solo aparecerás de guardia cuando estés en el campus,You'll only show as on duty while you're on campus,Només apareixeràs de guàrdia quan siguis al campus,Campusean zaudenean bakarrik agertuko zara guardian
-duty.saveError,Error al guardar el interruptor de guardia,No se ha podido guardar. Prueba otra vez.,Couldn't save. Please try again.,No s'ha pogut desar. Torna-ho a provar.,Ezin izan da gorde. Saiatu berriro.
-projects.title,Título de la sala de espera: elegir el proyecto en el que necesitas ayuda (juego con el tema del hospital),¿Qué te duele hoy?,Where does it hurt today?,Què et fa mal avui?,Zer duzu gaur minduta?
+duty.label,Cabecera: botón que abre tu on-call (cuándo te ofreces a ayudar),Disponible,Available,Disponible,Eskuragarri
+duty.hint,Explicación junto al interruptor de disponible,Solo aparecerás disponible cuando estés en el campus,You'll only show as available while you're on campus,Només apareixeràs disponible quan siguis al campus,Campusean zaudenean bakarrik agertuko zara eskuragarri
+duty.saveError,Error al guardar el interruptor de disponible,No se ha podido guardar. Prueba otra vez.,Couldn't save. Please try again.,No s'ha pogut desar. Torna-ho a provar.,Ezin izan da gorde. Saiatu berriro.
+projects.title,Título de Peer to peer: elegir el proyecto en el que necesitas ayuda (juego con la depuración),¿Qué estás depurando hoy?,What are you debugging today?,Què estàs depurant avui?,Zer ari zara arazten gaur?
 projects.loading,Mientras cargan tus proyectos,Cargando proyectos…,Loading projects…,Carregant projectes…,Proiektuak kargatzen…
 projects.empty,No tienes proyectos en curso,"No tienes proyectos en curso. ¡Buen momento para descansar! Si acabas de empezar uno, aparecerá aquí en unos minutos.","You have no projects in progress. Good time for a break! If you've just started one, come back in a few minutes.","No tens projectes en curs. Bon moment per descansar! Si n'acabes de començar un, torna d'aquí a uns minuts i apareixerà aquí.","Ez duzu proiekturik abian. Atseden hartzeko une ona! Bat hasi berri baduzu, itzuli minutu batzuk barru eta hemen agertuko da."
 projects.pick,Indicación para elegir un proyecto,Elige un proyecto,Pick a project,Tria un projecte,Aukeratu proiektu bat
 projects.doing,Etiqueta de un proyecto en curso,en curso,in progress,en curs,abian
 projects.passed,Etiqueta de un proyecto aprobado,aprobado,passed,aprovat,gaindituta
 peers.title,Título de la lista de personas que pueden ayudar en un proyecto,Quién te puede atender en {project},Who can help you with {project},Qui et pot atendre a {project},Nork artatu zaitzake {project} proiektuan
-peers.loading,Mientras carga la lista de personas,Buscando quién está de guardia…,Checking who's on duty…,Buscant qui està de guàrdia…,Guardian nor dagoen bilatzen…
-peers.onDuty,Cuántas personas están de guardia ahora,{n} de guardia ahora mismo,{n} on duty right now,{n} de guàrdia ara mateix,{n} guardian une honetan
-peers.specialists1,Hay una persona que aprobó el proyecto,1 especialista,1 specialist,1 especialista,Espezialista 1
-peers.specialistsN,Cuántas personas aprobaron el proyecto,{n} especialistas,{n} specialists,{n} especialistes,{n} espezialista
-peers.nobodyOnDuty,Nadie de guardia en ese proyecto: invita a ponerte,Hoy no hay nadie de guardia en este proyecto. ¿Y si te pones tú?,Nobody is on duty for this project today. How about you?,Avui no hi ha ningú de guàrdia en aquest projecte. I si t'hi poses tu?,Gaur ez dago inor guardian proiektu honetan. Eta zu jartzen bazara?
+peers.loading,Mientras carga la lista de personas,Buscando quién está disponible…,Checking who's available…,Buscant qui està disponible…,Eskuragarri nor dagoen bilatzen…
+peers.onDuty,Cuántas personas están disponibles ahora,{n} disponibles ahora mismo,{n} available right now,{n} disponibles ara mateix,{n} eskuragarri une honetan
+peers.specialists1,Hay una persona que aprobó el proyecto,1 senior,1 senior,1 sènior,Senior 1
+peers.specialistsN,Cuántas personas aprobaron el proyecto,{n} seniors,{n} seniors,{n} sèniors,{n} senior
+peers.nobodyOnDuty,Nadie disponible en ese proyecto: invita a ponerte,Hoy no hay nadie disponible en este proyecto. ¿Y si te pones tú?,Nobody is available for this project today. How about you?,Avui no hi ha ningú disponible en aquest projecte. I si t'hi poses tu?,Gaur ez dago inor eskuragarri proiektu honetan. Eta zu jartzen bazara?
 peers.totalOf,Cuántas de las personas del proyecto pueden ayudar ahora,{shown} de {total} personas pueden atenderte ahora mismo.,{shown} of {total} people can help you right now.,{shown} de {total} persones et poden atendre ara mateix.,{total} pertsonatik {shown}k artatu zaitzakete une honetan.
 peers.total1,Una persona puede ayudar ahora,1 persona puede atenderte ahora mismo.,1 person can see you right now.,1 persona et pot atendre ara mateix.,Pertsona 1ek artatu zaitzake une honetan.
 peers.totalN,Varias personas pueden ayudar ahora,{n} personas pueden atenderte ahora mismo.,{n} people can see you right now.,{n} persones et poden atendre ara mateix.,{n} pertsonak artatu zaitzakete une honetan.
 peers.partial,La copia de ese proyecto desde 42 aún no ha terminado,Todavía estamos copiando este proyecto de 42 y faltan personas. En un momento habrá más.,"We're still copying this project from 42, so some people are missing. More in a moment.",Encara estem copiant aquest projecte de 42 i hi falten persones. D'aquí a un moment n'hi haurà més.,Oraindik proiektu hau 42tik kopiatzen ari gara eta jendea falta da. Laster gehiago egongo dira.
-peers.nobody,No hay nadie disponible ahora,Ahora mismo no hay nadie de guardia. Puedes volver a mirar más tarde.,Nobody is on duty right now. You can check again later.,Ara mateix no hi ha ningú de guàrdia. Pots tornar a mirar més tard.,Une honetan ez dago inor guardian. Geroago berriro begiratu dezakezu.
+peers.nobody,No hay nadie disponible ahora,Ahora mismo no hay nadie disponible. Puedes volver a mirar más tarde.,Nobody is available right now. You can check again later.,Ara mateix no hi ha ningú disponible. Pots tornar a mirar més tard.,Une honetan ez dago inor eskuragarri. Geroago berriro begiratu dezakezu.
 peers.all,Filtro: todas las personas,Todos ({n}),Everyone ({n}),Tots ({n}),Denak ({n})
-peers.specialists,Filtro: quien aprobó el proyecto,Especialistas ({n}),Specialists ({n}),Especialistes ({n}),Espezialistak ({n})
-peers.patients,"Filtro: quien lo está haciendo, como tú",Pacientes como tú ({n}),Patients like you ({n}),Pacients com tu ({n}),Zu bezalako pazienteak ({n})
-peers.onlyOnDuty,Filtro: solo quien está de guardia,Solo de guardia,On duty only,Només de guàrdia,Guardian daudenak bakarrik
+peers.specialists,Filtro: quien aprobó el proyecto,Seniors ({n}),Seniors ({n}),Sèniors ({n}),Seniorrak ({n})
+peers.patients,"Filtro: quien lo está haciendo, como tú",Peers como tú ({n}),Peers like you ({n}),Peers com tu ({n}),Zu bezalako peerrak ({n})
+peers.onlyOnDuty,Filtro: solo quien está disponible,Solo disponibles,Available only,Només disponibles,Eskuragarri daudenak bakarrik
 peers.onlyBookable,Filtro: solo a quien puedes reservar una ayuda,Solo a quien puedes pedir ayuda ({n}),Only people you can ask for help ({n}),Només a qui pots demanar ajuda ({n}),Laguntza eska diezaiekezunak bakarrik ({n})
-peers.noneFilter,Nadie cumple el filtro elegido,Ahora mismo no hay nadie así de guardia. Prueba con otro filtro.,Nobody like that is on duty right now. Try another filter.,Ara mateix no hi ha ningú així de guàrdia. Prova amb un altre filtre.,Une honetan ez dago horrelakorik guardian. Probatu beste iragazki batekin.
+peers.noneFilter,Nadie cumple el filtro elegido,Ahora mismo no hay nadie así disponible. Prueba con otro filtro.,Nobody like that is available right now. Try another filter.,Ara mateix no hi ha ningú així disponible. Prova amb un altre filtre.,Une honetan ez dago horrelakorik eskuragarri. Probatu beste iragazki batekin.
 peers.attendsAt,Puesto donde está sentada esa persona,Te atiende en {location},Find them at {location},T'atén a {location},{location} postuan artatuko zaitu
-peers.away,Esa persona no está en el campus,Fuera del centro,Off campus,Fora del centre,Zentrotik kanpo
-peers.badgeOn,Etiqueta: está de guardia,De guardia,On duty,De guàrdia,Guardian
-peers.badgeOff,Etiqueta: no está de guardia,Fuera de turno,Off duty,Fora de torn,Txandatik kanpo
-peers.specialist,Etiqueta: aprobó el proyecto,Especialista,Specialist,Especialista,Espezialista
-peers.patient,Etiqueta: está haciendo el mismo proyecto,Paciente como tú,Patient like you,Pacient com tu,Zu bezalako pazientea
+peers.away,Esa persona no está en el campus,Fuera del campus,Off campus,Fora del campus,Campusetik kanpo
+peers.badgeOn,Etiqueta: está disponible,Disponible,Available,Disponible,Eskuragarri
+peers.badgeOff,Etiqueta: no está disponible,No disponible,Unavailable,No disponible,Ez eskuragarri
+peers.specialist,Etiqueta: aprobó el proyecto,Senior,Senior,Sènior,Senior
+peers.patient,Etiqueta: está haciendo el mismo proyecto,Peer como tú,Peer like you,Peer com tu,Zu bezalako peerra
 peers.profile,Enlace al perfil de esa persona,Ver perfil,View profile,Veure el perfil,Ikusi profila
-peers.groupHint,Sugerencia de montar un grupo de terapia con quien hace lo mismo,Hay {n} pacientes como tú de guardia con el mismo proyecto. ¿Montas una terapia de grupo?,{n} patients like you are on duty on the same project. Start a therapy group?,Hi ha {n} pacients com tu de guàrdia amb el mateix projecte. Muntes una teràpia de grup?,Zure proiektu bera duten {n} paziente daude guardian. Talde-terapia antolatuko duzu?
-peers.groupOpen,Hay varios grupos de terapia abiertos,Hay {n} grupos de terapia abiertos para este proyecto.,There are {n} therapy groups open for this project.,Hi ha {n} grups de teràpia oberts per a aquest projecte.,{n} terapia-talde daude irekita proiektu honetarako.
-peers.groupOpen1,Hay un grupo de terapia abierto,Hay un grupo de terapia abierto para este proyecto.,There's a therapy group open for this project.,Hi ha un grup de teràpia obert per a aquest projecte.,Terapia-talde bat dago irekita proiektu honetarako.
-peers.groupGo,Botón para ir a los grupos de terapia,Ver terapias de grupo,See therapy groups,Veure teràpies de grup,Ikusi talde-terapiak
-peers.eminence,Etiqueta: aprobó con la nota máxima (125),Eminencia,Eminence,Eminència,Eminentzia
+peers.groupHint,Sugerencia de montar un sprint con quien hace lo mismo,Hay {n} peers como tú disponibles con el mismo proyecto. ¿Montáis un sprint?,{n} peers like you are available on the same project. Start a sprint?,Hi ha {n} peers com tu disponibles amb el mateix projecte. Munteu un sprint?,Zure proiektu bera duten {n} peer daude eskuragarri. Sprint bat antolatuko duzue?
+peers.groupOpen,Hay varios sprints abiertos,Hay {n} sprints abiertos para este proyecto.,There are {n} sprints open for this project.,Hi ha {n} sprints oberts per a aquest projecte.,{n} sprint daude irekita proiektu honetarako.
+peers.groupOpen1,Hay un sprint abierto,Hay un sprint abierto para este proyecto.,There's a sprint open for this project.,Hi ha un sprint obert per a aquest projecte.,Sprint bat dago irekita proiektu honetarako.
+peers.groupGo,Botón para ir a los sprints,Ver sprints,See sprints,Veure sprints,Ikusi sprintak
+peers.eminence,Etiqueta: aprobó con la nota máxima (125),Guru,Guru,Guru,Guru
 peers.eminenceHint,Explicación de la etiqueta de nota máxima,Lo aprobó con 125: el proyecto entero y todos los bonus,Passed with 125: the whole project and every bonus,El va aprovar amb 125: el projecte sencer i tots els bonus,125ekin gainditu zuen: proiektu osoa eta bonus guztiak
 peers.crossed,Cuántas veces os habéis corregido entre los dos,Ya os conocéis. Le has corregido: {gave}. Te ha corregido: {got}.,You know each other. You evaluated them: {gave}. They evaluated you: {got}.,Ja us coneixeu. L'has corregit: {gave}. T'ha corregit: {got}.,Ezagutzen duzue elkar. Zuk zuzendu diozu: {gave}. Berak zuzendu dizu: {got}.
 peers.neverCrossed,Nunca os habéis corregido,Cara nueva: nunca os habéis corregido,New face: you have never evaluated each other,Cara nova: no us heu corregit mai,Aurpegi berria: ez duzue inoiz elkar zuzendu
-duty.open,Nombre accesible del botón «De guardia»,Abrir tu guardia de hoy,Open today's duty,Obre la teva guàrdia d'avui,Ireki zure gaurko guardia
-duty.switch,Nombre accesible del interruptor para ponerte de guardia,Ponerte de guardia,Go on duty,Posa't de guàrdia,Jarri guardian
+duty.open,Nombre accesible del botón «Disponible»,Abrir tu on-call de hoy,Open today's on-call,Obre el teu on-call d'avui,Ireki zure gaurko on-call-a
+duty.switch,Nombre accesible del interruptor para ponerte disponible,Ponerte disponible,Make yourself available,Posa't disponible,Jarri eskuragarri
 peers.preReview,Etiqueta: se ofrece a preevaluar (ensayo de corrección),Preevalúa,Pre-evaluates,Preavalua,Aurre-ebaluatzen du
 peers.preReview.hint,Explicación de preevaluar,"Se ofrece a revisar tu proyecto cuando lo tengas terminado, como ensayo de la corrección.","Offers to review your project once it is finished, as a rehearsal for the evaluation.","S'ofereix a revisar el teu projecte quan el tinguis acabat, com a assaig de la correcció.","Zure proiektua berrikusteko eskaintzen da amaituta duzunean, zuzenketaren entsegu gisa."
 peers.preReview.only,Filtro: solo quien preevalúa,Solo quien preevalúa ({n}),Only pre-reviewers ({n}),Només qui preavalua ({n}),Aurre-ebaluatzen dutenak bakarrik ({n})

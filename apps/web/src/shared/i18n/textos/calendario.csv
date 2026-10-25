@@ -20,8 +20,8 @@ agenda.view.week,Vista: semana,Semana,Week,Setmana,Astea
 agenda.view.month,Vista: mes,Mes,Month,Mes,Hilabetea
 agenda.kinds,Filtro de tipos de evento,Tipos de evento,Event types,Tipus d'esdeveniment,Ekitaldi motak
 agenda.kindsShow,"Calendario: delante de los tipos de evento, para que se vea que filtran",Ver:,Show:,Mostra:,Erakutsi:
-agenda.kind.help,Tipo de evento: tu guardia y reservas de ayuda,Guardia,On duty,Guàrdia,Guardia
-agenda.kind.therapy,Tipo de evento: terapias,Terapias,Therapy,Teràpies,Terapiak
+agenda.kind.help,Tipo de evento: tu on-call y reservas de ayuda,On-call,On-call,On-call,On-call
+agenda.kind.therapy,Tipo de evento: sprints,Sprints,Sprints,Sprints,Sprintak
 agenda.kind.board,Tipo de evento: pizarras,Pizarras,Whiteboards,Pissarres,Arbelak
 agenda.kind.evaluation,Tipo de evento: correcciones de 42,Correcciones,Evaluations,Correccions,Zuzenketak
 agenda.kind.event_joined,Tipo de evento: eventos de 42 a los que vas,Eventos a los que vas,Events you're going to,Esdeveniments on vas,Joango zaren ekitaldiak
@@ -30,7 +30,7 @@ agenda.kind.exam,Tipo de evento: exámenes de 42,Exámenes,Exams,Exàmens,Azterk
 agenda.loading,Mientras carga el calendario,Preparando tu calendario…,Getting your calendar ready…,Preparant el teu calendari…,Zure egutegia prestatzen…
 agenda.more,Cuántos eventos más hay ese día,+{n} más,+{n} more,+{n} més,+{n} gehiago
 agenda.empty,Día sin nada,Nada,Nothing,Res,Ezer ez
-agenda.no42,No se pudo leer 42,No se han podido leer los datos de 42: solo ves lo de Sanatorio.,Couldn't read the 42 data: you only see Sanatorio events.,No s'han pogut llegir les dades de 42: només veus el de Sanatorio.,Ezin izan dira 42ko datuak irakurri: Sanatoriokoak bakarrik ikusten dituzu.
+agenda.no42,No se pudo leer 42,No se han podido leer los datos de 42: solo ves lo de Peer4U.,Couldn't read the 42 data: you only see Peer4U events.,No s'han pogut llegir les dades de 42: només veus el de Peer4U.,Ezin izan dira 42ko datuak irakurri: Peer4U-koak bakarrik ikusten dituzu.
 agenda.from42,Cuándo se leyeron los datos de 42,"Eventos, exámenes y correcciones de 42 leídos hace {min} min.","42 events, exams and evaluations read {min} min ago.","Esdeveniments, exàmens i correccions de 42 llegits fa {min} min.","42ko ekitaldiak, azterketak eta zuzenketak duela {min} min irakurrita."
 agenda.back,Botón para volver al calendario desde un evento,Volver al calendario,Back to the calendar,Torna al calendari,Itzuli egutegira
 agenda.join,Calendario: botón de la ficha para apuntarse a una pizarra o un grupo,Apuntarme,Join,Apunta'm,Izena eman

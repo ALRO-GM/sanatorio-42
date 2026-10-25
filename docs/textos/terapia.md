@@ -7,7 +7,7 @@ Generado desde `apps/web/src/shared/i18n/textos/terapia.csv` con
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
-| `therapy.title` | Título de la página de grupos de terapia (quedar para sacar un proyecto juntos) | features/therapy/TherapyGroups | Terapia de grupo | Group therapy | Teràpia de grup | Talde-terapia |
+| `therapy.title` | Título de la página de sprints en grupo (quedar para sacar un proyecto juntos) | features/therapy/TherapyGroups | Sprints en grupo | Group sprints | Sprints en grup | Talde-sprintak |
 | `therapy.allProjects` | Filtro: todos los proyectos | features/therapy/TherapyGroups | Todos los proyectos | All projects | Tots els projectes | Proiektu guztiak |
 | `therapy.loading` | Mientras cargan los grupos | features/therapy/TherapyGroups | Buscando grupos… | Looking for groups… | Buscant grups… | Taldeak bilatzen… |
 | `therapy.empty` | No hay grupos abiertos | features/therapy/TherapyGroups | Todavía no hay ningún grupo abierto aquí. ¿Abres tú el primero? | No open groups here yet. Want to open the first one? | Encara no hi ha cap grup obert aquí. Obres tu el primer? | Oraindik ez dago talde irekirik hemen. Zuk irekiko duzu lehena? |
@@ -18,7 +18,7 @@ Generado desde `apps/web/src/shared/i18n/textos/terapia.csv` con
 | `therapy.timeRange` | Hora de inicio y fin | features/therapy/GroupCard | {start} a {end} | {start} to {end} | {start} a {end} | {start}etatik {end}etara |
 | `therapy.days` | Etiqueta: días en que se queda | features/therapy/GroupCard, features/therapy/GroupForm | Días de quedada | Meeting days | Dies de trobada | Elkartzeko egunak |
 | `therapy.members` | Lista de miembros del grupo | features/therapy/GroupCard | Gente del grupo | People in the group | Gent del grup | Taldeko jendea |
-| `therapy.moreMembers` | Terapia: enlace para ver el resto de personas del grupo | features/therapy/GroupCard | y {n} más | and {n} more | i {n} més | eta beste {n} |
+| `therapy.moreMembers` | Sprint: enlace para ver el resto de personas del grupo | features/therapy/GroupCard | y {n} más | and {n} more | i {n} més | eta beste {n} |
 | `therapy.seats` | Puestos del campus reservados para el grupo | features/therapy/GroupCard | Puestos reservados | Reserved seats | Llocs reservats | Erreserbatutako postuak |
 | `therapy.pickSeats` | Elegir puestos en el mapa | features/therapy/GroupForm | ¿Dónde y cuántas plazas? | Where, and how many seats? | On i quantes places? | Non eta zenbat plaza? |
 | `therapy.pickSeatsHint` | Cómo elegir los puestos del grupo | features/therapy/GroupForm | Elige de 2 a 6 puestos juntos: al lado, delante, detrás o en diagonal. Cada puesto es una plaza del grupo. | Pick 2 to 6 seats next to each other: beside, in front, behind or diagonal. Each seat is one place in the group. | Tria de 2 a 6 llocs junts: al costat, davant, darrere o en diagonal. Cada lloc és una plaça del grup. | Aukeratu 2tik 6ra postu elkarrekin: ondoan, aurrean, atzean edo diagonalean. Postu bakoitza taldeko plaza bat da. |

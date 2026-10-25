@@ -1,7 +1,7 @@
 {
   "name": "@sanatorio/web",
   "version": "1.0.0",
-  "description": "Web de Sanatorio 42",
+  "description": "Web de Peer4U (antes Sanatorio 42)",
   "private": true,
   "type": "module",
   "scripts": {
