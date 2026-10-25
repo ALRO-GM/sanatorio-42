@@ -99,7 +99,10 @@ const pythonModules = Array.from(
  * Círculo de partida de cada proyecto, por slug.
  *
  * El plan nuevo solo está hasta el círculo 3 (más los exámenes, que llevan el
- * círculo en el nombre): es lo que se ha podido comprobar. El resto se aprende.
+ * círculo en el nombre): es lo que se ha podido comprobar. El resto se aprende,
+ * salvo ft_transcendence, que cierra el último círculo en los dos planes:
+ * hasta que alguien del plan nuevo la termine no se aprendería, y sin ella
+ * quien aprueba el examen 6 salía con el 100 % (pasó en Avance).
  */
 const SEED: Record<Track, readonly (readonly string[])[]> = {
   classic: COMMON_CORE.map((circle) =>
@@ -120,7 +123,7 @@ const SEED: Record<Track, readonly (readonly string[])[]> = {
     ['codexion', 'fly-in', 'call-me-maybe', '42next-exam-rank-03'],
     ['42next-exam-rank-04'],
     ['42next-exam-rank-05'],
-    ['42next-exam-rank-06'],
+    ['42next-exam-rank-06', 'ft_transcendence'],
   ],
 }
 
