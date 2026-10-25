@@ -19,6 +19,10 @@ export default defineConfig({
   test: {
     environmentMatchGlobs: [['tests/ui/**', 'jsdom']],
     setupFiles: ['tests/ui/setup.ts'],
+    // En la CI la máquina es más lenta y algún test de pantalla se pasa de
+    // tiempo de vez en cuando (y entonces no se despliega). Allí se repite
+    // hasta dos veces; en local, no, para que un fallo de verdad se vea.
+    retry: process.env.CI === undefined ? 0 : 2,
     coverage: {
       provider: 'v8',
       include: ['src/**/*.{ts,tsx}'],
