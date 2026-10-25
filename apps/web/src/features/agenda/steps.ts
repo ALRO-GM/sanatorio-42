@@ -20,8 +20,3 @@ export const progressLabel = (t: Translate, step: number): string =>
 export function plusDays(day: string, days: number): string {
   return new Date(Date.parse(`${day}T12:00:00Z`) + days * 86_400_000).toISOString().slice(0, 10)
 }
-
-/** El instante con el que se fija la cuenta atrás de una meta: el final de su día, en tu hora. */
-export function deadlineOf(day: string): string {
-  return new Date(`${day}T23:59:00`).toISOString()
-}

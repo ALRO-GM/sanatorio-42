@@ -8,10 +8,12 @@ import { useI18n } from '../../shared/i18n'
 import { DayTimeFields, instantOf } from '../../shared/ui/DayTimeFields'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { Icon } from '../../shared/ui/Icon'
+import { GoalPins } from './GoalPins'
 
 /**
  * Fijarse una cuenta atrás desde la ventanita: el próximo compromiso del
- * calendario (cambia solo cuando pasa) o algo propio con título y hora. Un
+ * calendario (cambia solo cuando pasa), la entrega de una meta de la agenda
+ * (`GoalPins`) o algo propio con título y hora. Un
  * evento concreto se fija desde su ficha del calendario.
  */
 export function CountdownPicker({
@@ -53,6 +55,7 @@ export function CountdownPicker({
       >
         <Icon name="calendario" size={14} /> {t('countdown.pinNext')}
       </button>
+      <GoalPins inPage={inPage} />
       <form
         className="countdown-custom"
         onSubmit={(event) => {

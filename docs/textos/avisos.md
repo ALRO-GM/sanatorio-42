@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/avisos.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-44 textos. «—» es que falta la traducción: sale en español.
+47 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -46,6 +46,9 @@ Generado desde `apps/web/src/shared/i18n/textos/avisos.csv` con
 | `countdown.fromCalendar` | Ventanita de cuentas atrás: pista bajo el formulario | features/countdowns/CountdownPicker | Un evento concreto se fija desde su ficha del calendario. | To pin a specific event, open it in your calendar. | Un esdeveniment concret es fixa des de la seva fitxa del calendari. | Ekitaldi zehatz bat egutegiko bere fitxatik finkatzen da. |
 | `countdown.pinEvent` | Ficha de un evento del calendario: botón para fijar su cuenta atrás | features/agenda/AgendaPage, features/calendar/PinCountdown | Fijar cuenta atrás | Pin countdown | Fixa el compte enrere | Atzerako kontaketa finkatu |
 | `countdown.unpinEvent` | Ficha de un evento del calendario ya fijado: botón para quitar su cuenta atrás | features/agenda/AgendaPage, features/calendar/PinCountdown | Quitar cuenta atrás | Unpin countdown | Treu el compte enrere | Atzerako kontaketa kendu |
+| `countdown.goals` | Formulario de fijar cuenta atrás: rótulo de las metas de la agenda | features/countdowns/GoalPins | Entrega de una meta | A goal's hand-in | Lliurament d'una meta | Helburu baten entrega |
+| `countdown.goalsNone` | Formulario de fijar cuenta atrás: no hay metas en marcha | features/countdowns/GoalPins | No tienes metas en marcha en tu agenda. | You have no active goals in your agenda. | No tens metes en marxa a la teva agenda. | Ez duzu helbururik martxan zure agendan. |
+| `countdown.goalNew` | Formulario de fijar cuenta atrás: poner una meta nueva de un proyecto | features/countdowns/GoalPins | Nueva meta de un proyecto | New project goal | Nova meta d'un projecte | Proiektu baten helburu berria |
 | `countdown.mine` | Vista de cuentas atrás: las que tienes | features/calendar/CountdownsView | Tus cuentas atrás | Your countdowns | Els teus comptes enrere | Zure atzerako kontaketak |
 | `countdown.none` | Vista de cuentas atrás: aún no tienes ninguna | features/calendar/CountdownsView | Ninguna todavía: fija tu próximo compromiso, algo tuyo o un evento de abajo. | None yet: pin your next commitment, something of yours or an event below. | Cap encara: fixa el teu proper compromís, alguna cosa teva o un esdeveniment de sota. | Bat ere ez oraindik: finkatu zure hurrengo konpromisoa, zure zerbait edo beheko ekitaldi bat. |
 | `countdown.coming` | Vista de cuentas atrás: los eventos de los próximos días, para fijarlos | features/calendar/CountdownsView | Lo que viene (próximos {n} días) | Coming up (next {n} days) | El que ve (propers {n} dies) | Datozenak (hurrengo {n} egunak) |

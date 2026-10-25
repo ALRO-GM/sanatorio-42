@@ -43,6 +43,12 @@ algo que contar.
   las que te ofreces a ayudar ni los eventos a los que no vas). Se busca en cada
   petición, así que cambia solo cuando pasa. Sin nada a la vista en 60 días, lo
   dice.
+- **La entrega de una meta de la agenda** (`docs/agenda.md`): en el formulario
+  de fijar salen tus metas en marcha, cada una con su botón; cuenta hasta el
+  final de su día. En la vista de cuentas atrás del calendario se puede poner
+  una meta nueva ahí mismo (el formulario de la agenda) y queda fijada; en la
+  ventanita, el botón lleva a la agenda. Es una propia con el título de la
+  meta: la agenda y este formulario la reconocen igual.
 - **Uno tuyo**: título, día y hora.
 
 Como mucho 12 propias a la vez; fijar dos veces lo mismo no lo repite.

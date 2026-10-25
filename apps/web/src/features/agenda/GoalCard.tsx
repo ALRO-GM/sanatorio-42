@@ -11,7 +11,13 @@ import {
 } from '../../shared/agenda/labels'
 import { SprintBoardView } from '../../shared/agenda/SprintBoardView'
 import { api } from '../../shared/api'
-import { pinCountdown, unpinCountdown, useCountdowns } from '../../shared/countdowns'
+import {
+  goalDeadline,
+  goalPinOf,
+  pinCountdown,
+  unpinCountdown,
+  useCountdowns,
+} from '../../shared/countdowns'
 import { useAction } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { useFormat } from '../../shared/i18n/useFormat'
@@ -19,7 +25,7 @@ import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { Icon } from '../../shared/ui/Icon'
 import { useConfirm } from '../../shared/ui/useConfirm'
 import { EntryForm } from './EntryForm'
-import { deadlineOf, progressLabel, progressSteps } from './steps'
+import { progressLabel, progressSteps } from './steps'
 
 type GoalCardProps = {
   goal: AgendaGoal
@@ -70,12 +76,7 @@ export function GoalCard({
   )
   // La cuenta atrás de la meta es una propia con su título y su hora: así se reconoce.
   const pinTitle = t('scrum.pin.title', { project: goal.projectName })
-  const pin = (countdowns ?? []).find(
-    (entry) =>
-      entry.kind === 'custom' &&
-      entry.title === pinTitle &&
-      entry.at === deadlineOf(goal.targetDay),
-  )
+  const pin = goalPinOf(countdowns, pinTitle, goal.targetDay)
   const late = goal.targetDay < today
 
   const change = async (fn: () => Promise<AgendaGoal>): Promise<void> => {
@@ -335,7 +336,7 @@ export function GoalCard({
                   ? pinCountdown({
                       kind: 'custom',
                       title: pinTitle,
-                      at: deadlineOf(goal.targetDay),
+                      at: goalDeadline(goal.targetDay),
                     })
                   : unpinCountdown(pin.id),
               )

@@ -354,3 +354,31 @@
 .countdown-preview p {
   margin: 0.3rem 0;
 }
+
+/* Las metas de la agenda, en el formulario de fijar: una píldora por meta. */
+.countdown-goals {
+  display: grid;
+  gap: 0.35rem;
+}
+.countdown-goals-label {
+  color: var(--text-3);
+  font-size: 0.8rem;
+}
+.countdown-goal-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.countdown-goal-list .pill small {
+  margin-left: 0.35rem;
+  color: var(--text-3);
+}
+.countdown-goals > .link {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}

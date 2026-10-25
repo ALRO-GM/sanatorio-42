@@ -141,6 +141,48 @@ describe('avisos con cuenta atrás', () => {
   }, 20_000)
 })
 
+describe('metas de la agenda en la cuenta atrás', () => {
+  it('se fija la entrega de una meta y se pone una meta nueva, ya fijada', async () => {
+    const user = userEvent.setup()
+
+    await openApp('#/calendario')
+    await user.click(await screen.findByRole('tab', { name: text('agenda.tab.countdowns') }, WAIT))
+
+    const mine = (): HTMLElement => screen.getByRole('region', { name: text('countdown.mine') })
+    const printf = fill('scrum.pin.title', { project: 'ft_printf' })
+
+    // La meta de ft_printf, con su botón, entre las metas.
+    const goals = must(
+      (await screen.findByText(text('countdown.goals'), {}, WAIT)).parentElement,
+      'las metas',
+    )
+
+    await user.click(within(goals).getByRole('button', { name: /ft_printf/ }))
+    expect(await within(mine()).findByText(printf, {}, WAIT)).toBeTruthy()
+
+    // Una meta nueva desde aquí: se crea en la agenda y queda fijada.
+    await user.click(screen.getByRole('button', { name: text('countdown.goalNew') }))
+
+    const form = await screen.findByRole('form', { name: text('scrum.new') }, WAIT)
+    const project = within(form).getByLabelText(text('scrum.project'))
+    const choice = must(
+      within(project)
+        .getAllByRole('option')
+        .find((option) => !/ft_printf|get_next_line/.test(option.textContent)),
+      'un proyecto sin meta',
+    )
+
+    await user.selectOptions(project, choice)
+    await user.click(within(form).getByRole('button', { name: text('scrum.create') }))
+
+    const name = must(choice.textContent, 'el nombre del proyecto').trim()
+
+    expect(
+      await within(mine()).findByText(fill('scrum.pin.title', { project: name }), {}, WAIT),
+    ).toBeTruthy()
+  }, 20_000)
+})
+
 describe('modo mantenimiento', () => {
   it('quien no administra ve «No disponible» con la cuenta atrás, y nada más', async () => {
     const until = new Date(Date.now() + 90 * 60_000).toISOString()

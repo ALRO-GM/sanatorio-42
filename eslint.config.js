@@ -147,6 +147,8 @@ export default defineConfig(
      * - `network/Meter|VerdictStats`: el expediente resume tu red de correcciones.
      * - `countdowns/CountdownDock|CountdownPicker`: el calendario tiene una vista de
      *   cuentas atrás con las mismas fichas y el mismo formulario que la ventanita.
+     * - `agenda/GoalForm`: desde la vista de cuentas atrás se pone una meta nueva
+     *   (y queda fijada) con el mismo formulario que en la agenda.
      */
     files: ['apps/web/src/features/**/*.{ts,tsx}'],
     rules: {
@@ -156,7 +158,7 @@ export default defineConfig(
           patterns: [
             {
               regex:
-                '^\\.\\./(?!\\.\\./)(?!(notices/conversations|calendar/EventDialog|facility/(FacilityList|FacilityForm)|profile/HoursReport|clicker/(CapitalChart|CapitalHistory)|focus/FocusStatsView|gitcourse/GitCourseTab|shellcourse/ShellCourseTab|map/(ProjectMap|ClusterMapView|SeatPicker)|help/(BookHelp|tags)|network/(Meter|VerdictStats)|countdowns/(CountdownDock|CountdownPicker))$)[a-z-]+/',
+                '^\\.\\./(?!\\.\\./)(?!(notices/conversations|calendar/EventDialog|facility/(FacilityList|FacilityForm)|profile/HoursReport|clicker/(CapitalChart|CapitalHistory)|focus/FocusStatsView|gitcourse/GitCourseTab|shellcourse/ShellCourseTab|map/(ProjectMap|ClusterMapView|SeatPicker)|help/(BookHelp|tags)|network/(Meter|VerdictStats)|countdowns/(CountdownDock|CountdownPicker)|agenda/GoalForm)$)[a-z-]+/',
               message:
                 'Una funcionalidad no importa de otra: lo compartido va a `shared/`. Las excepciones, con su porqué, están en eslint.config.js.',
             },
