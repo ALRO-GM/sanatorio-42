@@ -1,0 +1,551 @@
+/* Personalizar: el estudio (`app/studio`). Una ventana algo menor que la
+   página: la web en pequeño a la izquierda y las opciones a la derecha. En el
+   móvil ocupa toda la pantalla y las opciones van encima. */
+
+dialog.layout-dialog.studio[open] {
+  display: flex;
+  flex-direction: column;
+  width: min(1180px, calc(100vw - 3rem));
+  max-width: none;
+  height: min(820px, calc(100dvh - 3rem));
+  max-height: none;
+  overflow: hidden;
+  overscroll-behavior: contain;
+}
+.studio .actions {
+  justify-content: flex-end;
+  margin-top: 0.75rem;
+}
+.studio-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 380px);
+  gap: 1rem;
+  flex: 1;
+  min-height: 0;
+  margin-top: 0.75rem;
+}
+.studio-preview,
+.studio-panel {
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+.studio-preview {
+  padding: 0.75rem;
+  border-radius: 14px;
+  background: var(--surface-2);
+}
+.studio-preview > .hint {
+  margin: 0 0 0.6rem;
+  font-size: 0.8rem;
+  color: var(--text-3);
+}
+.studio-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.studio-tabs {
+  flex-shrink: 0;
+}
+.studio-tabpanel {
+  display: grid;
+  align-content: start;
+  gap: 0.75rem;
+}
+.studio-tabpanel > .pill {
+  justify-self: start;
+}
+.studio-tabpanel .hint {
+  margin: 0;
+  font-size: 0.8rem;
+}
+.studio-tabpanel .layout-modes {
+  margin: 0;
+}
+.studio-field {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+}
+.studio-field select {
+  justify-self: start;
+}
+.studio .detail-cards {
+  grid-template-columns: 1fr;
+  margin: 0;
+}
+.studio-settings {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.6rem;
+}
+.studio-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+}
+
+/* --- Estilos: una tarjeta por estilo, con su muestra ------------------------ */
+.studio-styles,
+.studio-palettes {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+.studio-styles legend,
+.studio-palettes legend {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 0.45rem;
+  padding: 0;
+  font-size: 0.8rem;
+  color: var(--text-3);
+}
+.studio-palettes legend strong {
+  color: var(--text);
+}
+.studio-styles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.5rem;
+}
+.studio-style {
+  position: relative;
+  display: grid;
+  gap: 0.3rem;
+  align-content: start;
+  padding: 0.5rem;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  background: var(--sample-bg);
+  color: var(--sample-text);
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+.studio-style:has(input:checked) {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--glow);
+}
+.studio-style:has(input:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.studio-style input,
+.studio-palettes input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.studio-style strong {
+  font-family: var(--sample-font);
+  font-size: 0.95rem;
+}
+.studio-style small {
+  font-size: 0.7rem;
+  line-height: 1.3;
+  opacity: 0.75;
+}
+/* La muestra: una cabecera, una tarjeta con dos líneas y un botón, con los
+   colores, la letra y las esquinas del estilo. */
+.studio-sample {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.3rem;
+  border-radius: var(--sample-radius);
+  background: color-mix(in srgb, var(--sample-text) 6%, var(--sample-bg));
+}
+.studio-sample i {
+  display: block;
+}
+.studio-sample .sample-bar {
+  height: 0.4rem;
+  border-radius: var(--sample-radius);
+  background: var(--sample-surface);
+}
+.studio-sample .sample-card {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.35rem;
+  border-radius: var(--sample-radius);
+  background: var(--sample-surface);
+}
+.studio-sample .sample-card i {
+  height: 0.28rem;
+  border-radius: var(--sample-radius);
+  background: color-mix(in srgb, var(--sample-text) 25%, transparent);
+}
+.studio-sample .sample-card i:last-child {
+  width: 60%;
+}
+.studio-sample .sample-button {
+  justify-self: end;
+  width: 2.2rem;
+  height: 0.55rem;
+  border-radius: var(--sample-radius);
+  background: var(--sample-accent);
+}
+
+/* Las paletas del estilo elegido: muestras redondas, iguales en todos los
+   estilos; el nombre, al pasar o en la leyenda. */
+.studio-palettes > div {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 2.1rem);
+  gap: 0.4rem;
+  max-height: 7.2rem;
+  overflow-y: auto;
+  padding: 3px;
+}
+.studio-palettes label {
+  position: relative;
+  width: 2.1rem;
+  height: 2.1rem;
+  padding: 2px;
+  border: 2px solid var(--border);
+  border-radius: 50%;
+  cursor: pointer;
+}
+.studio-palettes label:has(input:checked) {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--glow);
+}
+.studio-palettes label:has(input:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.studio-palettes i {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+
+/* --- La web en pequeño ------------------------------------------------------ */
+.mini {
+  overflow: hidden;
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  background: var(--bg);
+  color: var(--text);
+  box-shadow: 0 8px 24px var(--shadow-soft);
+  user-select: none;
+  -webkit-user-select: none;
+}
+.mini ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.mini button {
+  margin: 0;
+  font: inherit;
+  color: inherit;
+}
+.mini-appbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.45rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+.mini-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.mini-brand i {
+  display: block;
+  height: 0.5rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text) 22%, transparent);
+}
+.mini-brand i:first-child {
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: var(--radius-sm, 6px);
+  background: var(--accent);
+}
+.mini-brand i:last-child {
+  width: 3.5rem;
+}
+.mini-oncall {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.55rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  font-size: 0.75rem !important;
+  cursor: pointer;
+}
+.mini-oncall.active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-text) !important;
+}
+.mini-tabs,
+.mini-subtabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  padding: 0.55rem 0.75rem;
+}
+.mini-tabs {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+.mini-subtabs {
+  border-bottom: 1px dashed var(--border);
+}
+.mini-tab,
+.mini-subtab {
+  display: inline-flex;
+  align-items: center;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm, 10px);
+  background: var(--surface);
+  font-size: 0.8rem;
+  cursor: grab;
+}
+.mini-subtab {
+  font-size: 0.75rem;
+  background: var(--surface-2);
+}
+.mini-subtab.fixed {
+  cursor: default;
+  padding-left: 0.4rem;
+}
+.mini-tab.active,
+.mini-subtab.active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+.mini-tab-open {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.6rem 0.3rem 0.1rem;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+/* El asa: los puntos por donde se coge. Con el dedo, la página no se desliza al
+   arrastrar desde aquí. */
+.mini-grip {
+  display: inline-flex;
+  align-items: center;
+  align-self: stretch;
+  padding: 0 0.2rem 0 0.35rem;
+  border: 0;
+  border-radius: var(--radius-sm, 8px);
+  background: transparent;
+  color: var(--text-3);
+  cursor: grab;
+  touch-action: none;
+}
+.mini-grip:hover,
+.mini-grip[aria-pressed='true'] {
+  color: var(--accent);
+}
+.mini-grip:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+/* Lo cogido con el puntero deja su hueco; con el teclado, se levanta. */
+.mini .is-placeholder {
+  border-style: dashed;
+  border-color: var(--accent);
+  background: transparent;
+  opacity: 0.5;
+}
+.mini .is-lifted {
+  border-color: var(--accent);
+  box-shadow:
+    0 0 0 3px var(--glow),
+    0 10px 24px var(--shadow-soft);
+  transform: translateY(-2px);
+}
+.mini-page {
+  padding: 0.75rem;
+}
+.mini-page-title {
+  margin: 0 0 0.6rem;
+  font-family: var(--font-display);
+  font-weight: var(--display-weight, 700);
+  font-size: 1rem;
+}
+.mini-blocks {
+  display: grid;
+  gap: 0.5rem;
+}
+.mini-blocks.is-sorting {
+  gap: 0.3rem;
+}
+.mini-block {
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius, 12px);
+  background: var(--surface);
+  box-shadow: 0 2px 0 var(--shadow-soft);
+  cursor: grab;
+}
+.mini-block-head {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 2rem;
+  padding: 0 0.4rem 0 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+.mini-block-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mini-fold {
+  display: inline-flex;
+  padding: 0.25rem;
+  border: 0;
+  border-radius: var(--radius-sm, 8px);
+  background: transparent;
+  color: var(--text-3);
+  cursor: pointer;
+}
+.mini-fold:hover {
+  color: var(--accent);
+}
+.mini-fold .icon {
+  transition: transform 0.2s ease;
+}
+.mini-block.folded .mini-fold .icon {
+  transform: rotate(-90deg);
+}
+/* El cuerpo del bloque, unas rayas grises. Se pliega animando la fila de la
+   rejilla (de 1fr a 0fr): plegado, mientras se arrastra un bloque o si está
+   plegado de verdad. */
+.mini-block-body {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 0.22s ease;
+}
+.mini-block-body > div {
+  min-height: 0;
+  overflow: hidden;
+}
+.mini-block-body i {
+  display: block;
+  height: 0.45rem;
+  margin: 0 0.75rem 0.45rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text) 12%, transparent);
+}
+.mini-block-body i:first-child {
+  height: 1.6rem;
+  border-radius: var(--radius-sm, 8px);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+}
+.mini-block-body i:last-child {
+  width: 55%;
+  margin-bottom: 0.7rem;
+}
+.mini-block.folded .mini-block-body,
+.mini-blocks.is-sorting .mini-block-body {
+  grid-template-rows: 0fr;
+}
+.mini-skeleton {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 0.5rem;
+}
+.mini-skeleton i {
+  display: block;
+  height: 4.5rem;
+  border-radius: var(--radius, 12px);
+  background: color-mix(in srgb, var(--text) 8%, transparent);
+}
+.mini-skeleton i:first-child {
+  grid-row: span 2;
+  height: auto;
+}
+.mini-empty {
+  margin: 0.75rem 0 0;
+  font-size: 0.8rem;
+  color: var(--text-3);
+}
+/* La copia flotante que sigue al puntero. */
+.mini-ghost {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2rem;
+  padding: 0 0.6rem 0 0.35rem;
+  border: 1.5px solid var(--accent);
+  border-radius: var(--radius-sm, 10px);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 14px 32px var(--shadow);
+  font-size: 0.82rem;
+  font-weight: 600;
+  pointer-events: none;
+  cursor: grabbing;
+}
+.mini-ghost .icon {
+  color: var(--accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mini-block-body,
+  .mini-fold .icon,
+  .studio-style {
+    transition: none;
+  }
+  .mini .is-lifted {
+    transform: none;
+  }
+}
+
+/* Móvil: a pantalla completa, con las opciones arriba y la vista previa debajo. */
+@media (max-width: 760px) {
+  dialog.layout-dialog.studio[open] {
+    width: 100vw;
+    height: 100dvh;
+    margin: 0;
+    padding: 0.75rem;
+    border: 0;
+    border-radius: 0;
+  }
+  .studio-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin-top: 0.5rem;
+  }
+  .studio-panel {
+    order: -1;
+    flex-shrink: 0;
+    max-height: 42dvh;
+  }
+  .studio-preview {
+    flex: 1;
+    padding: 0.5rem;
+  }
+  .studio .actions {
+    margin-top: 0.5rem;
+  }
+}

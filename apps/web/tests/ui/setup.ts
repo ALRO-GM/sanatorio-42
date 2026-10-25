@@ -71,6 +71,23 @@ if (typeof window !== 'undefined') {
   }
 
   fill(window, 'ResizeObserver', Observer)
+  // jsdom no trae eventos de puntero: uno de ratón con su identificador y su tipo.
+  fill(
+    window,
+    'PointerEvent',
+    class PointerEvent extends MouseEvent {
+      pointerId: number
+      pointerType: string
+      isPrimary: boolean
+
+      constructor(type: string, init: PointerEventInit = {}) {
+        super(type, init)
+        this.pointerId = init.pointerId ?? 1
+        this.pointerType = init.pointerType ?? 'mouse'
+        this.isPrimary = init.isPrimary ?? true
+      }
+    },
+  )
   fill(window, 'IntersectionObserver', Observer)
   Object.defineProperty(window, 'scrollTo', { value: noop, writable: true })
   fill(Element.prototype, 'scrollIntoView', noop)

@@ -299,6 +299,17 @@ const PATHS = {
       <path d="M8.5 3l3.5 6.5L15.5 3" />
     </>
   ),
+  /** El asa de lo que se arrastra (Personalizar): dos columnas de puntos. */
+  agarrar: (
+    <>
+      <circle cx="9" cy="6" r="1" />
+      <circle cx="15" cy="6" r="1" />
+      <circle cx="9" cy="12" r="1" />
+      <circle cx="15" cy="12" r="1" />
+      <circle cx="9" cy="18" r="1" />
+      <circle cx="15" cy="18" r="1" />
+    </>
+  ),
   /** El black hole: un pozo. */
   pozo: (
     <>

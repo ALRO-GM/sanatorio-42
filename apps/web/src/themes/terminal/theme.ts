@@ -8,7 +8,7 @@ import './theme.css'
  * Terminal: la otra mitad de Sanatorio 42, el código. Todo en letra de máquina,
  * sin una curva ni una sombra, con los colores de una consola: verde fósforo
  * para lo que manda y los de siempre para avisos y errores. O, si se prefiere,
- * los colores de un tema de VS Code (`palettes.ts`), en un desplegable.
+ * los colores de un tema de VS Code (`palettes.ts`).
  */
 export const terminal: ThemeManifest = {
   id: 'terminal',
@@ -29,5 +29,4 @@ export const terminal: ThemeManifest = {
     radius: '0',
   },
   palettes: TERMINAL_PALETTES,
-  paletteMenu: true,
 }

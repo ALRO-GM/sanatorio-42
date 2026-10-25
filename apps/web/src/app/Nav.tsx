@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 
 import { shows, useDetail } from '../shared/detail'
 import { useI18n } from '../shared/i18n'
-import { track, useNavOrder } from '../shared/layout/store'
+import { track, useNavOrder, useOrder } from '../shared/layout/store'
 import { Icon } from '../shared/ui/Icon'
 import { focusing, useFocus } from '../shared/focus'
 import { usePoolAccess } from '../shared/pool'
@@ -27,13 +27,14 @@ const lastOf = new Map<Category, Section>()
 
 /**
  * Las pestañas, en su propia fila debajo de la marca: arriba las categorías
- * (Expediente, Ayuda, Calendario, Datos) y, si la abierta tiene varias
- * secciones, una segunda fila con ellas, en el orden que la persona ha elegido
- * (o el automático). Solo sale lo que toca en el modo de la interfaz.
+ * (Perfil, Ayuda, Calendario, Clústeres, Datos), en el orden elegido, y, si la
+ * abierta tiene varias secciones, una segunda fila con ellas, en el orden que
+ * la persona ha elegido (o el automático). Solo sale lo que toca en el modo de la interfaz.
  */
 export function Nav({ section, onGo, examLive = false }: NavProps) {
   const { t } = useI18n()
   const order = useNavOrder()
+  const categoryOrder = useOrder('categories')
   const detail = useDetail()
   const active = categoryOf(section)
 
@@ -74,7 +75,10 @@ export function Nav({ section, onGo, examLive = false }: NavProps) {
     )
   }
 
-  const categories = CATEGORIES.filter(({ id }) => sectionsOf(id).length > 0)
+  // Las categorías, en el orden que haya puesto la persona en Personalizar.
+  const categories = CATEGORIES.filter(({ id }) => sectionsOf(id).length > 0).sort(
+    (a, b) => categoryOrder.indexOf(a.id) - categoryOrder.indexOf(b.id),
+  )
   const subs = active === null ? [] : sectionsOf(active)
   const open = (category: Category): void => {
     const choices = sectionsOf(category)

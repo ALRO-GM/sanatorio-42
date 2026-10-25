@@ -20,11 +20,10 @@ import { MaintenanceBanner } from '../features/maintenance/MaintenanceBanner'
 import { loadMaintenance, useMaintenance } from '../shared/maintenance'
 import { onOpenChat } from '../features/notices/conversations'
 import { onOpenCustomize } from '../shared/layout/customize'
+import type { StudioTab } from '../shared/layout/customize'
 import { api } from '../shared/api'
 import { useAsync } from '../shared/hooks/useAsync'
 import { usePulse } from '../shared/hooks/usePulse'
-import { LayoutSettings } from '../shared/layout/LayoutSettings'
-import { DetailSelect } from '../shared/ui/DetailSelect'
 import { ErrorBoundary } from '../shared/ui/ErrorBoundary'
 import { DEFAULT_THEME, useStyle } from '../shared/theme'
 import { canUseStyle } from '../themes'
@@ -32,6 +31,7 @@ import { RecordStylePicker } from '../features/profile/RecordStylePicker'
 import { startUsage, viewing } from '../shared/layout/store'
 import { Footer } from './Footer'
 import { Header } from './Header'
+import { Studio } from './studio/Studio'
 import { PoolPreviewBar } from './PoolPreviewBar'
 import { SectionView } from './SectionView'
 import { loadPoolAccess, resetPoolAccess, usePoolAccess } from '../shared/pool'
@@ -66,7 +66,8 @@ export function Clinic({ me, onLogout }: ClinicProps) {
   const [focusProject, setFocusProject] = useState<number | null>(null)
   // Cambia al elegir otro campus: todo lo que depende del campus se vuelve a montar.
   const [campusVersion, setCampusVersion] = useState(0)
-  const [customizing, setCustomizing] = useState(false)
+  // Personalizar abierto, y con qué pestaña de opciones; `null`, cerrado.
+  const [customizing, setCustomizing] = useState<StudioTab | null>(null)
   // La bienvenida, abierta a mano desde el menú de la cuenta.
   const [welcoming, setWelcoming] = useState(false)
   // Qué buzón está abierto: el de avisos, o el de escribir a quien administra.
@@ -87,8 +88,8 @@ export function Clinic({ me, onLogout }: ClinicProps) {
   // «Personalizar» también se abre desde el pie de cada página con bloques.
   useEffect(
     () =>
-      onOpenCustomize(() => {
-        setCustomizing(true)
+      onOpenCustomize((tab) => {
+        setCustomizing(tab)
       }),
     [],
   )
@@ -185,7 +186,7 @@ export function Clinic({ me, onLogout }: ClinicProps) {
           openSection(next)
         }}
         onCustomize={() => {
-          setCustomizing(true)
+          setCustomizing('style')
         }}
         onInbox={() => {
           setBox('inbox')
@@ -257,13 +258,14 @@ export function Clinic({ me, onLogout }: ClinicProps) {
           />
         </PoolOnly>
 
-        {customizing && (
-          <LayoutSettings
+        {customizing !== null && (
+          <Studio
             me={me.login}
+            section={section}
+            tab={customizing}
             onClose={() => {
-              setCustomizing(false)
+              setCustomizing(null)
             }}
-            interfaceMode={<DetailSelect />}
             recordStyle={
               profile.data !== undefined && (
                 <RecordStylePicker

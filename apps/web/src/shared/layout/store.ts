@@ -13,14 +13,16 @@ import { api } from '../api'
 import { startClicks } from './clicks'
 import { arrange } from './order'
 import type { OrderMode } from './order'
-import { NAV_DEFAULT, PAGES } from './registry'
+import { CATEGORY_DEFAULT, NAV_DEFAULT, PAGE_IDS, PAGES } from './registry'
 import type { PageId } from './registry'
 import { createViewClock, windowState } from './view-clock'
 
 type Prefs = {
   mode: OrderMode
-  /** Orden manual de las pestañas. */
+  /** Orden manual de las pestañas (las secciones de cada categoría). */
   nav: string[]
+  /** Orden manual de las categorías de arriba. */
+  categories?: string[]
   /** Orden manual y bloques plegados de cada página. */
   pages: Partial<Record<PageId, { order: string[]; folded: string[] }>>
   /** Minutos antes de un evento a los que salta el aviso. `0` lo apaga. Por defecto, 5. */
@@ -102,6 +104,66 @@ export function updatePrefs(change: (prefs: Prefs) => Prefs): void {
 
   persist(PREFS_KEY, prefs)
   set({ prefs })
+}
+
+/** Qué se ordena: las categorías, las pestañas o los bloques de una página. */
+type OrderTarget = 'categories' | 'nav' | PageId
+
+/** El orden que se ve ahora de `target`, con lo guardado, el modo y los usos. */
+function shownOrder(prefs: Prefs, target: OrderTarget): string[] {
+  const counts = countsFor(prefs.mode)
+
+  if (target === 'categories') {
+    // Las categorías no se ordenan solas: el perfil, la portada, va el primero
+    // salvo que la persona lo mueva a mano.
+    return arrange(CATEGORY_DEFAULT, prefs.categories ?? [], 'manual', {}, (id) => id)
+  }
+  if (target === 'nav') {
+    return arrange(NAV_DEFAULT, prefs.nav, prefs.mode, counts, (id) => `nav.${id}`)
+  }
+
+  return arrange(
+    PAGES[target].map((block) => block.id),
+    prefs.pages[target]?.order ?? [],
+    prefs.mode,
+    counts,
+    (id) => `${target}.${id}`,
+  )
+}
+
+/**
+ * Guarda un orden puesto a mano. Si se estaba ordenando solo (por tu uso o el
+ * de la comunidad), se pasa a «a mano» con lo que se veía en todo lo demás:
+ * así nada salta de sitio al soltar.
+ */
+export function saveOrder(target: OrderTarget, order: readonly string[]): void {
+  updatePrefs((prefs) => {
+    const frozen: Prefs =
+      prefs.mode === 'manual'
+        ? prefs
+        : {
+            ...prefs,
+            mode: 'manual',
+            nav: shownOrder(prefs, 'nav'),
+            pages: Object.fromEntries(
+              PAGE_IDS.map((page) => [
+                page,
+                { folded: prefs.pages[page]?.folded ?? [], order: shownOrder(prefs, page) },
+              ]),
+            ),
+          }
+
+    if (target === 'categories') return { ...frozen, categories: [...order] }
+    if (target === 'nav') return { ...frozen, nav: [...order] }
+
+    return {
+      ...frozen,
+      pages: {
+        ...frozen.pages,
+        [target]: { folded: frozen.pages[target]?.folded ?? [], order: [...order] },
+      },
+    }
+  })
 }
 
 /** Vuelve al orden de fábrica, con todo desplegado. */
@@ -220,13 +282,21 @@ function countsFor(mode: OrderMode): Record<string, number> {
   return mode === 'community' ? (state.community ?? {}) : mineAtStart
 }
 
-/** Las pestañas, en el orden que toca. */
-export function useNavOrder(): string[] {
+/**
+ * Lo que se ve ahora de `target`, en su orden: las categorías, las pestañas o
+ * los bloques de una página.
+ */
+export function useOrder(target: OrderTarget): string[] {
   const prefs = usePrefs()
   // Solo para repintar cuando lleguen los usos de la comunidad.
   useSyncExternalStore(subscribe, () => state.community)
 
-  return arrange(NAV_DEFAULT, prefs.nav, prefs.mode, countsFor(prefs.mode), (id) => `nav.${id}`)
+  return shownOrder(prefs, target)
+}
+
+/** Las pestañas, en el orden que toca. */
+export function useNavOrder(): string[] {
+  return useOrder('nav')
 }
 
 /** Los bloques de una página, en el orden que toca, y cuáles están plegados. */
@@ -235,16 +305,5 @@ export function usePageLayout(page: PageId): { order: string[]; folded: readonly
   // Solo para repintar cuando lleguen los usos de la comunidad.
   useSyncExternalStore(subscribe, () => state.community)
 
-  const saved = prefs.pages[page]
-
-  return {
-    order: arrange(
-      PAGES[page].map((block) => block.id),
-      saved?.order ?? [],
-      prefs.mode,
-      countsFor(prefs.mode),
-      (id) => `${page}.${id}`,
-    ),
-    folded: saved?.folded ?? [],
-  }
+  return { order: shownOrder(prefs, page), folded: prefs.pages[page]?.folded ?? [] }
 }
