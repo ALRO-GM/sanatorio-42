@@ -52,6 +52,17 @@ export const POOL_ROUTES: Record<PoolKey, readonly string[]> = {
   'expediente.network': ['/network/mine'],
   'expediente.achievements': [],
   'expediente.ranking': ['/leaderboard'],
+  // La agenda (`docs/agenda.md`): tus metas, checkpoints, dailies y weeklies.
+  agenda: [
+    '/agenda',
+    '/agenda/goals',
+    '/agenda/goals/:id',
+    '/agenda/goals/:id/checkpoints',
+    '/agenda/goals/:id/checkpoints/:checkpoint',
+    '/agenda/goals/:id/entries',
+  ],
+  // El tablero del sprint: la agenda de tu grupo para su proyecto.
+  'agenda.sprint': ['/agenda/sprints/:id'],
   consulta: [
     '/projects/:id/peers',
     '/help/offers',
@@ -182,6 +193,8 @@ export const POOL_KEYS = Object.keys(POOL_ROUTES) as PoolKey[]
 export const POOL_DEFAULT: readonly PoolKey[] = [
   'expediente',
   'expediente.achievements',
+  'agenda',
+  'agenda.sprint',
   'consulta',
   'consulta.map',
   'guardia',

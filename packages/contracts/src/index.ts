@@ -5,6 +5,7 @@
  */
 
 export type * from './admin.js'
+export type * from './agenda.js'
 export type * from './auth.js'
 export type * from './boards.js'
 export type * from './broadcasts.js'

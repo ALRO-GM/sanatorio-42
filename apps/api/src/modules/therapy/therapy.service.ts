@@ -143,6 +143,23 @@ const groupSchema = z
     path: ['end'],
   })
 
+/** Un grupo visto desde la agenda: su proyecto, dónde queda y quién está. */
+export type SprintRoster = {
+  id: number
+  projectId: number
+  projectName: string | null
+  place: string
+  members: string[]
+}
+
+const rosterOf = (group: GroupRow): SprintRoster => ({
+  id: group.id,
+  projectId: group.projectId,
+  projectName: group.projectName,
+  place: group.place,
+  members: group.members,
+})
+
 /** Grupos abiertos que puede tener una persona a la vez. */
 const MAX_OPEN_GROUPS = 3
 
@@ -467,6 +484,24 @@ export function createTherapyService(options: TherapyServiceOptions) {
         from: actor.login,
         text: group.projectName,
       })
+    },
+
+    /**
+     * El grupo y su gente, para el tablero del sprint de la agenda
+     * (`docs/agenda.md`). `null` si no existe, es de otro campus o está
+     * cerrado: para la agenda, es lo mismo. Quién puede verlo lo decide ella.
+     */
+    async roster(groupId: number, campusId: number): Promise<SprintRoster | null> {
+      const group = await therapy.get(groupId)
+
+      return group?.campusId !== campusId || group.closed ? null : rosterOf(group)
+    },
+
+    /** Los grupos abiertos de un campus en los que está esa persona: sus sprints. */
+    async joinedBy(login: string, campusId: number): Promise<SprintRoster[]> {
+      return (await therapy.listOpen(campusId))
+        .filter((group) => group.members.includes(login))
+        .map(rosterOf)
     },
 
     /**

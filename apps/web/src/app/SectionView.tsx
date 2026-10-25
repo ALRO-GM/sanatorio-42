@@ -57,6 +57,9 @@ const HelpStatsPage = lazy(() =>
 const NotGamesPage = lazy(() =>
   import('../features/notgames/NotGamesPage').then((m) => ({ default: m.NotGamesPage })),
 )
+const AgendaPage = lazy(() =>
+  import('../features/agenda/AgendaPage').then((m) => ({ default: m.AgendaPage })),
+)
 const TherapyGroups = lazy(() =>
   import('../features/therapy/TherapyGroups').then((m) => ({ default: m.TherapyGroups })),
 )
@@ -134,6 +137,14 @@ export function SectionView({
       {section === 'estadisticas' && <HelpStatsPage me={me.login} />}
       {section === 'red' && <RedPage me={me} />}
       {section === 'avance' && <ProgressPage />}
+      {section === 'agenda' && (
+        <AgendaPage
+          me={me.login}
+          onGo={(next, projectId) => {
+            onGo(next, projectId ?? null)
+          }}
+        />
+      )}
       {/* Quien eligió la roja lleva el juego puesto en toda la web: fuera de su
           sección sigue corriendo y solo enseña una ventanita. Con su propia
           espera, para que al cargarse no tape la sección que se está mirando. */}

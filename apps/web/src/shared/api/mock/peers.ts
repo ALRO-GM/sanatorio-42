@@ -2,6 +2,7 @@
  * API de mentira: la sesión, la sala de espera, el calendario personal y el mapa.
  */
 
+import { resetAgenda } from './agenda'
 import { CAMPUSES, ME, PEERS, PROJECTS } from './data'
 import { calendarEvents } from './calendar'
 import type { Api } from '../types'
@@ -58,6 +59,7 @@ export const peersMock: Pick<
     localStorage.removeItem(LOGGED_KEY)
     closeStaffSession()
     resetState()
+    resetAgenda()
   },
 
   // --- Consulta ----------------------------------------------------------------

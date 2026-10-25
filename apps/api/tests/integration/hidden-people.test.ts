@@ -16,9 +16,8 @@ import type {
   Peer,
   SeatGraph,
 } from '@sanatorio/contracts'
-import { sign } from '../../src/modules/auth/signed-cookie.js'
 import { userId } from '../helpers/fixtures.js'
-import { json, makeApp } from '../helpers/test-app.js'
+import { cookieAs, json, makeApp } from '../helpers/test-app.js'
 import type { TestApp } from '../helpers/test-app.js'
 
 const apps: TestApp[] = []
@@ -27,8 +26,6 @@ afterEach(async () => {
   for (const built of apps.splice(0)) await built.close()
 })
 
-/** El `SESSION_SECRET` de `makeApp`. */
-const SECRET = 'secreto-de-sesion-para-pruebas-de-treinta-y-dos'
 const HOUR = 3_600_000
 const ago = (hours: number): string => new Date(Date.now() - hours * HOUR).toISOString()
 const seated = (login: string, host: string) => ({
@@ -48,17 +45,6 @@ const LOCATIONS = {
     seated('pisci', 'c1r1s1'),
     seated('pisci2', 'c1r1s2'),
   ],
-}
-
-/** Una cookie de sesión como la de `base`, pero de otra persona y grupo. */
-function cookieAs(base: string, login: string, aud: 'student' | 'pool'): string {
-  const [name = '', value = ''] = base.split('=')
-  const payload = JSON.parse(
-    Buffer.from(value.split('.')[0] ?? '', 'base64url').toString('utf8'),
-  ) as Record<string, unknown>
-  const next = { ...payload, id: userId(login), login, role: aud, aud, campusId: 22 }
-
-  return `${name}=${sign(SECRET, Buffer.from(JSON.stringify(next)).toString('base64url'))}`
 }
 
 const get = (built: TestApp, url: string, cookie: string) =>

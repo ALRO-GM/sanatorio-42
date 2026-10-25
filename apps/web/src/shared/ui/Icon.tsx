@@ -67,6 +67,14 @@ const PATHS = {
       <path d="M8 14h3M8 17h6" />
     </>
   ),
+  /** Agenda (Scrum individual): una tablilla con dos checkpoints marcados y uno pendiente. */
+  agenda: (
+    <>
+      <rect x="5" y="4.5" width="14" height="16" rx="2" />
+      <path d="M9.5 3h5v3h-5z" />
+      <path d="M8 10.5l1.2 1.2 2-2M8 15l1.2 1.2 2-2M13.5 11h3M13.5 15.5h3" />
+    </>
+  ),
   /** Red de correcciones: nodos unidos. */
   red: (
     <>

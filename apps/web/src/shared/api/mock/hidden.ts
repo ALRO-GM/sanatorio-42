@@ -150,6 +150,11 @@ export function withHidden(api: Api): Api {
         ),
       }
     },
+    async getSprintBoard(groupId) {
+      const board = await api.getSprintBoard(groupId)
+
+      return { ...board, members: board.members.filter((member) => !hiddenFromMe(member.login)) }
+    },
     async getSeatGraph(days) {
       const graph = await api.getSeatGraph(days)
 

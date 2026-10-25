@@ -644,6 +644,7 @@ pie showData title Líneas por parte
 | `attendance` | Códigos de inicio y fin, tiempo validado, registro de intentos e informe de horas |
 | `broadcasts` | Comunicados de quien administra para todo el mundo                                |
 | `countdowns` | Avisos con cuenta atrás: los de quien administra y lo que fija cada cual          |
+| `agenda`     | Agenda: Scrum individual por proyecto (metas, checkpoints, dailies) y el tablero del sprint |
 | `tours`      | Velocidad de las demostraciones: la de cada persona y la que vota la comunidad    |
 | `clicker`    | Partidas del juego, comprobación de trampas e historial de capital                |
 | `quiz`       | Not-games: banco de preguntas, salas, partidas y dificultad que se reajusta       |

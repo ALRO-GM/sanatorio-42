@@ -9,9 +9,11 @@
  * Orden de fábrica de las pestañas. Sigue el camino habitual de quien se
  * atasca: ver quién le puede ayudar, preguntar en el tablón, buscar un grupo o
  * una pizarra, y lo que se consulta de tarde en tarde (calendario, red) al
- * final. La guardia no está: se abre desde "De guardia", en la cabecera.
+ * final. La guardia no está: se abre desde "De guardia", en la cabecera. La
+ * agenda va la primera, pero sale junto al perfil, en su propia categoría.
  */
 export const NAV_DEFAULT = [
+  'agenda',
   'consulta',
   'tablon',
   'terapia',

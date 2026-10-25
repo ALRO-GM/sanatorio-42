@@ -83,4 +83,4 @@ export function createTherapyModule(deps: TherapyModuleDeps): TherapyModule {
   }
 }
 
-export type { TherapyService } from './therapy.service.js'
+export type { SprintRoster, TherapyService } from './therapy.service.js'

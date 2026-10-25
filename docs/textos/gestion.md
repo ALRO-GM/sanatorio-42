@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/gestion.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-574 textos. «—» es que falta la traducción: sale en español.
+576 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -581,3 +581,5 @@ Generado desde `apps/web/src/shared/i18n/textos/gestion.csv` con
 | `admin.countdown.dismissed` | Panel de gestión, cuentas atrás: cuánta gente lo ha cerrado | features/admin/CountdownsPanel | {n} lo han cerrado | {n} dismissed | {n} l'han tancat | {n}(e)k itxi dute |
 | `admin.countdown.removeOne` | Panel de gestión, cuentas atrás: nombre accesible del botón de retirar uno | features/admin/CountdownsPanel | Retirar «{title}» | Withdraw “{title}” | Retira «{title}» | «{title}» kendu |
 | `pool.key.shellcourse` | Panel, Piscina: permiso «shellcourse» | features/admin/PoolPanel | Curso de shell | Shell course | Curs de shell | Shell ikastaroa |
+| `pool.key.agenda` | Panel, Piscina: permiso «agenda» | features/admin/PoolPanel | Agenda: metas, checkpoints y dailies | Agenda: goals, checkpoints and dailies | Agenda: fites, checkpoints i dailies | Agenda: helburuak, checkpointak eta daily-ak |
+| `pool.key.agenda.sprint` | Panel, Piscina: permiso «agenda.sprint» | features/admin/PoolPanel | Tablero del sprint | Sprint board | Tauler de l'sprint | Sprintaren taula |

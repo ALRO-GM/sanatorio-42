@@ -312,6 +312,18 @@ export const realApi: Api = {
   unblockHelp: (login) => send('DELETE', `/help/blocks/${encodeURIComponent(login)}`),
   getHelpReputation: () => getJson('/help/reputation'),
 
+  getAgenda: () => getJson('/agenda'),
+  createAgendaGoal: (input) => sendJson('POST', '/agenda/goals', input),
+  updateAgendaGoal: (id, change) => sendJson('PUT', `/agenda/goals/${id}`, change),
+  removeAgendaGoal: (id) => send('DELETE', `/agenda/goals/${id}`),
+  addAgendaCheckpoint: (goalId, input) =>
+    sendJson('POST', `/agenda/goals/${goalId}/checkpoints`, input),
+  markAgendaCheckpoint: (goalId, checkpointId, done) =>
+    sendJson('PUT', `/agenda/goals/${goalId}/checkpoints/${checkpointId}`, { done }),
+  removeAgendaCheckpoint: (goalId, checkpointId) =>
+    sendJson('DELETE', `/agenda/goals/${goalId}/checkpoints/${checkpointId}`),
+  saveAgendaEntry: (goalId, input) => sendJson('POST', `/agenda/goals/${goalId}/entries`, input),
+  getSprintBoard: (groupId) => getJson(`/agenda/sprints/${groupId}`),
   getGroups: (projectId) =>
     getJson(
       projectId === undefined || projectId === null ? '/groups' : `/groups?project=${projectId}`,

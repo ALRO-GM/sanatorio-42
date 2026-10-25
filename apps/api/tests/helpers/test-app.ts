@@ -10,15 +10,19 @@ import type { BuiltApp } from '../../src/app/build-app.js'
 import { loadEnv } from '../../src/config/env.js'
 import { closeDatabase, openDatabase } from '../../src/core/db/database.js'
 import { base32Decode, codeAt, stepOf } from '../../src/modules/admin/totp.js'
+import { sign } from '../../src/modules/auth/signed-cookie.js'
 import type { Env } from '../../src/config/env.js'
-import { activeLocation, projectUser } from './fixtures.js'
+import { activeLocation, projectUser, userId } from './fixtures.js'
 
 /** Entorno válido, con lo único que no se puede inventar siendo parametrizado. */
+/** El `SESSION_SECRET` de las pruebas: con él se firman sesiones de otras personas. */
+const SECRET = 'secreto-de-sesion-para-pruebas-de-treinta-y-dos'
+
 function makeEnv(overrides: Partial<NodeJS.ProcessEnv> = {}): Env {
   return loadEnv({
     FORTY_TWO_UID: 'u-test',
     FORTY_TWO_SECRET: 's-test',
-    SESSION_SECRET: 'secreto-de-sesion-para-pruebas-de-treinta-y-dos',
+    SESSION_SECRET: SECRET,
     FRONTEND_ORIGINS: 'https://front.test',
     FRONTEND_URL: 'https://front.test',
     FORTY_TWO_REDIRECT_URI: 'https://back.test/api/auth/callback',
@@ -366,4 +370,18 @@ export function cookieValue(setCookie: unknown, name: string): string {
   }
 
   throw new Error(`no se ha encontrado la cookie ${name} en ${JSON.stringify(setCookie)}`)
+}
+
+/**
+ * Una cookie de sesión como la de `base` (la de `login()`), pero de otra
+ * persona y grupo: para probar lo que ve cada cual sin pasar por 42.
+ */
+export function cookieAs(base: string, login: string, aud: 'student' | 'pool'): string {
+  const [name = '', value = ''] = base.split('=')
+  const payload = JSON.parse(
+    Buffer.from(value.split('.')[0] ?? '', 'base64url').toString('utf8'),
+  ) as Record<string, unknown>
+  const next = { ...payload, id: userId(login), login, role: aud, aud, campusId: 22 }
+
+  return `${name}=${sign(SECRET, Buffer.from(JSON.stringify(next)).toString('base64url'))}`
 }

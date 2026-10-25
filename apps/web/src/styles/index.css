@@ -54,4 +54,6 @@
 @import './stats.css';
 /* Mantenimiento y la ventanita de avisos con cuenta atrás. */
 @import './countdowns.css';
+/* La agenda: metas, checkpoints, dailies y el tablero del sprint. */
+@import './agenda.css';
 @import './comfort.css';

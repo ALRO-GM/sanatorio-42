@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/demos.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-100 textos. «—» es que falta la traducción: sale en español.
+104 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -107,3 +107,7 @@ Generado desde `apps/web/src/shared/i18n/textos/demos.csv` con
 | `tour.shellCourse.2` | Demostración animada del curso de shell: frase del paso 2 | shared/tour/Tour | Cada unidad: teoría, un ejemplo de verdad y tu prueba. | Each unit: theory, a real example and your test. | Cada unitat: teoria, un exemple de veritat i la teva prova. | Unitate bakoitza: teoria, benetako adibide bat eta zure proba. |
 | `tour.shellCourse.3` | Demostración animada del curso de shell: frase del paso 3 | shared/tour/Tour | Escribe en la terminal: los objetivos se marcan solos. | Type in the terminal: the goals tick themselves. | Escriu al terminal: els objectius es marquen sols. | Idatzi terminalean: helburuak berez markatzen dira. |
 | `tour.shellCourse.4` | Demostración animada del curso de shell: frase del paso 4 | shared/tour/Tour | Cada bloque acaba en un jefe contrarreloj. | Each block ends with a timed boss. | Cada bloc acaba amb un cap contrarellotge. | Bloke bakoitza erlojuaren aurkako buruzagi batekin amaitzen da. |
+| `tour.scrum.1` | Demostración animada de la agenda: frase del paso 1 | shared/tour/Tour | Ponte una meta: un proyecto y su fecha de entrega. | Set a goal: a project and its hand-in date. | Posa't una fita: un projecte i la seva data de lliurament. | Jarri helburu bat: proiektu bat eta bere entrega-data. |
+| `tour.scrum.2` | Demostración animada de la agenda: frase del paso 2 | shared/tour/Tour | Marca cada checkpoint según lo cierras. | Tick each checkpoint as you close it. | Marca cada checkpoint a mesura que el tanques. | Markatu checkpoint bakoitza ixten duzun heinean. |
+| `tour.scrum.3` | Demostración animada de la agenda: frase del paso 3 | shared/tour/Tour | En el daily, elige de la lista qué te atascó. | In your daily, pick what blocked you from the list. | Al daily, tria de la llista què et va encallar. | Daily-an, aukeratu zerrendatik zerk blokeatu zintuen. |
+| `tour.scrum.4` | Demostración animada de la agenda: frase del paso 4 | shared/tour/Tour | Tu sprint lo ve en su tablero y puede echarte una mano. | Your sprint sees it on its board and can lend a hand. | El teu sprint ho veu al seu tauler i et pot donar un cop de mà. | Zure sprintak bere taulan ikusten du eta lagun zaitzake. |

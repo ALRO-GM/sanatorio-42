@@ -12,6 +12,9 @@ export type PoolKey =
   | 'expediente.network'
   | 'expediente.achievements'
   | 'expediente.ranking'
+  // La agenda (Scrum individual) y el tablero de su sprint (`docs/agenda.md`)
+  | 'agenda'
+  | 'agenda.sprint'
   // Ayuda
   | 'consulta'
   | 'consulta.map'
