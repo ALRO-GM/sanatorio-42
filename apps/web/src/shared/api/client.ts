@@ -116,6 +116,7 @@ export const realApi: Api = {
   createStaffAccount: (name) => sendJson('POST', '/admin/staff', { name }),
   revokeStaffAccount: (id) => send('DELETE', `/admin/staff/${id}`),
   openTicket: (ticket) => sendJson('POST', '/tickets', ticket),
+  sendSuggestion: (suggestion) => sendJson('POST', '/tickets/suggestion', suggestion),
   getMyTickets: () => getJson('/tickets/mine'),
 
   withdrawTicket: (id) => send('DELETE', `/tickets/${id}`),

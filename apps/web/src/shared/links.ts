@@ -36,6 +36,14 @@ export function calendarHref(event: string | null = null): string {
   return event === null ? '#/calendario' : `#/calendario/${encodeURIComponent(event)}`
 }
 
+/**
+ * Dónde se soltó una sugerencia (`docs/sugerencias.md`): la dirección que
+ * había entonces si es de la web (`#/…`, sin espacios) y, si no, la sección.
+ */
+export function placeHref(hash: string, section: string): string {
+  return /^#\/\S*$/.test(hash) ? hash : `#/${encodeURIComponent(section)}`
+}
+
 /** El perfil de alguien en la intra de 42. */
 /** Tu propio perfil de la intra (la intra lo abre con tu sesión). */
 export const INTRA_HOME = 'https://profile.intra.42.fr/'

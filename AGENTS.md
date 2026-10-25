@@ -140,8 +140,8 @@ regla de aquí, cambia también la skill que la repite.
   normal o loco por los datos: `from` y `<Show>` de `shared/detail.tsx`) y su
   importancia, siguiendo la regla de `docs/interfaz.md`; se apunta allí y se
   dice en la respuesta. Mejor un bloque en una sección que existe que una
-  sección nueva. Arriba a la derecha solo hay cuatro cosas: el buscador de personas, la
-  guardia, el buzón y el menú de la cuenta, que recoge lo demás (panel,
+  sección nueva. Arriba a la derecha solo hay cinco cosas: el buscador de personas, la
+  guardia, la burbuja de sugerencias (`docs/sugerencias.md`, pedida ahí por Alberto), el buzón y el menú de la cuenta, que recoge lo demás (panel,
   personalizar, incidencias y sugerencias, salir). No añadas botones sueltos a la cabecera: van al menú. El
   idioma y campus van en el pie.
 - Iconos: solo los de `shared/ui/Icon.tsx`, nunca emojis. Uno nuevo se dibuja en

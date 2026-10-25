@@ -179,7 +179,7 @@ export const POOL_ROUTES: Record<PoolKey, readonly string[]> = {
   ],
   people: ['/users/search', '/people/:login/card'],
   broadcasts: ['/broadcasts', '/broadcasts/:id/answer'],
-  tickets: ['/tickets', '/tickets/:id', '/tickets/mine'],
+  tickets: ['/tickets', '/tickets/:id', '/tickets/mine', '/tickets/suggestion'],
 }
 
 /** Todas las claves, en el orden de la tabla. */

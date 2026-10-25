@@ -5,10 +5,13 @@ import type { CurrentUser } from '@sanatorio/contracts'
 
 import { AvailabilityToggle } from '../features/peers/AvailabilityToggle'
 import { PersonFinder } from '../features/profile/PersonFinder'
+import { reportableSections } from '../features/admin/inbox'
+import { SuggestBubble } from '../features/suggest/SuggestBubble'
 import { useI18n } from '../shared/i18n'
 import { track } from '../shared/layout/store'
 import { Icon } from '../shared/ui/Icon'
 import { Nav } from './Nav'
+import { SECTIONS } from './sections'
 import type { Section } from './sections'
 import { UserMenu } from './UserMenu'
 import { PLUS_GOAL, pressPlus, useEgg } from '../features/clicker/egg'
@@ -34,6 +37,16 @@ type HeaderProps = {
   /** Hay un examen en marcha en el campus. */
   examLive?: boolean
   onLogout: () => void
+}
+
+/**
+ * Las secciones de las que se puede sugerir algo: las del buzón y, si no está
+ * entre ellas (el panel), la abierta.
+ */
+function suggestable(section: Section): string[] {
+  const ids = reportableSections(SECTIONS)
+
+  return ids.includes(section) ? ids : [section, ...ids]
 }
 
 /**
@@ -108,7 +121,7 @@ export function Header({
   }, [])
 
   return (
-    <div ref={bar} className={`appbar ${scrolled ? 'scrolled' : ''}`}>
+    <div ref={bar} className={`appbar ${scrolled ? 'scrolled' : ''}`} data-feedback="cabecera">
       <div className="appbar-inner">
         <header className="appbar-row">
           <button
@@ -160,6 +173,8 @@ export function Header({
                 }}
               />
             )}
+            {/* Sugerir una mejora: se arrastra hasta el sitio (`docs/sugerencias.md`). */}
+            {may('tickets') && <SuggestBubble section={section} sections={suggestable(section)} />}
             {may('mailbox') && (
               <button
                 type="button"

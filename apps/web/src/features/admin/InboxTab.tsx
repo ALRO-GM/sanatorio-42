@@ -15,6 +15,7 @@ import { useConfirm } from '../../shared/ui/useConfirm'
 import { PillGroup } from '../../shared/ui/PillGroup'
 import { Icon } from '../../shared/ui/Icon'
 import { REPORT_REASONS } from '../../shared/report'
+import { placeHref } from '../../shared/links'
 import { INBOX_VIEWS, ticketsIn } from './inbox'
 import type { InboxFilter, InboxView } from './inbox'
 
@@ -106,6 +107,20 @@ function TicketRow({ ticket, onDone }: { ticket: Ticket; onDone: () => void }) {
         </small>
       </div>
       <p>{ticket.body}</p>
+      {ticket.proposal !== null && (
+        <p className="ticket-proposal">
+          <strong>{t('suggest.proposalShort')}</strong> {ticket.proposal}
+        </p>
+      )}
+      {ticket.place !== null && (
+        <p className="hint">
+          <Icon name="idea" size={14} /> {ticket.place.label}
+          {ticket.place.detail !== null && ` · ${ticket.place.detail}`}
+          {` · ${ticket.place.viewport.width}×${ticket.place.viewport.height} · ${ticket.place.theme} · ${ticket.place.lang} · ${ticket.place.mode}`}
+          {ticket.place.version !== null && ` · ${ticket.place.version.slice(0, 7)}`}{' '}
+          <a href={placeHref(ticket.place.hash, ticket.place.section)}>{t('suggest.goPlace')}</a>
+        </p>
+      )}
       <textarea
         value={answer}
         rows={2}

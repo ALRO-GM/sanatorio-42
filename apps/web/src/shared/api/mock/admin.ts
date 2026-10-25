@@ -46,6 +46,7 @@ const clickElements = new Map<string, number>()
 export const adminMock: Pick<
   Api,
   | 'openTicket'
+  | 'sendSuggestion'
   | 'getMyTickets'
   | 'getAdminTickets'
   | 'answerTicket'
@@ -110,6 +111,51 @@ export const adminMock: Pick<
       createdAt: new Date().toISOString(),
       answeredAt: null,
       withdrawUntil: new Date(Date.now() + 15 * 60_000).toISOString(),
+      proposal: null,
+      place: null,
+    }
+
+    tickets.unshift(created)
+
+    return created
+  },
+
+  async sendSuggestion({ problem, proposal, place }) {
+    await delay(200)
+
+    // Como la API: un problema de cinco letras y, como mucho, diez al día.
+    if (problem.trim().length < 5) throw fail(400, 'problem: cuéntalo con un poco más de detalle')
+
+    const today = tickets.filter(
+      (ticket) =>
+        ticket.login === ME.login &&
+        ticket.place !== null &&
+        Date.parse(ticket.createdAt) > Date.now() - 86_400_000,
+    )
+
+    if (today.length >= 10) {
+      throw fail(409, 'Ya has mandado muchas sugerencias hoy: gracias, sigue mañana')
+    }
+
+    const text = problem.trim()
+    const created: Ticket = {
+      id: Math.max(0, ...tickets.map((ticket) => ticket.id)) + 1,
+      login: ME.login,
+      kind: 'idea',
+      subject: text.split('\n')[0]?.slice(0, 80) ?? '',
+      body: text,
+      target: null,
+      category: 'improvement',
+      section: place.section,
+      reason: null,
+      status: 'open',
+      answer: null,
+      answeredBy: null,
+      createdAt: new Date().toISOString(),
+      answeredAt: null,
+      withdrawUntil: new Date(Date.now() + 15 * 60_000).toISOString(),
+      proposal: proposal === undefined || proposal.trim() === '' ? null : proposal.trim(),
+      place: { ...place, version: 'demo' },
     }
 
     tickets.unshift(created)

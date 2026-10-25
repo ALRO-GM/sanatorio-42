@@ -63,6 +63,7 @@ import {
   withdrawUntil,
 } from './tickets.rules.js'
 import { isoAt } from '../../core/time.js'
+import { SUGGESTIONS_PER_DAY, placeFrom, suggestionSchema } from './suggestions.js'
 
 export type AdminServiceOptions = {
   db: Db
@@ -81,6 +82,8 @@ export type AdminServiceOptions = {
   settle?: Settle
   /** Los datos que cada módulo deja borrar a mano: los junta quien monta la app. */
   stores?: () => readonly DataStore[]
+  /** Commit desplegado (`GIT_SHA`): se apunta en cada sugerencia. */
+  version?: string
   now?: () => number
 }
 
@@ -193,6 +196,8 @@ function toTicket(row: Record<string, unknown>, now: number): Ticket {
     createdAt: toText(row.created_at),
     answeredAt: text(row.answered_at),
     withdrawUntil: withdrawUntil({ createdAt, status, answer }, now),
+    proposal: text(row.proposal),
+    place: placeFrom(row.place),
   }
 }
 
@@ -711,7 +716,77 @@ export function createAdminService(options: AdminServiceOptions) {
       if (!bodyIsEnough(ticket.body, ticket.reason)) {
         throw domainError('invalid_input', 'body: cuéntalo con un poco más de detalle')
       }
+      await this.assertRoom(actor)
 
+      const result = await db.execute({
+        sql: `INSERT INTO tickets
+                (login, kind, subject, body, target, category, section, reason, created_at)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING *`,
+        args: [
+          actor.login,
+          ticket.kind,
+          ticket.subject ?? (subjectFrom(ticket.body) || 'Denuncia'),
+          ticket.body,
+          ticket.target ?? null,
+          ticket.category ?? null,
+          ticket.section ?? null,
+          ticket.reason ?? null,
+          iso(),
+        ],
+      })
+
+      return this.announce(actor, toTicket(result.rows[0] ?? {}, now()))
+    },
+
+    /**
+     * Una sugerencia de mejora soltada con la burbuja de la cabecera
+     * (`docs/sugerencias.md`): entra en el mismo buzón, como mejora de la
+     * sección donde se soltó, con la propuesta y el sitio aparte.
+     */
+    async openSuggestion(actor: Actor, input: unknown): Promise<Ticket> {
+      const suggestion = parse(suggestionSchema, input)
+
+      await this.assertRoom(actor)
+
+      const today = await db.execute({
+        sql: `SELECT COUNT(*) AS total FROM tickets
+              WHERE login = ? AND place IS NOT NULL AND created_at > ?`,
+        args: [actor.login, isoAt(now() - 24 * HOUR)],
+      })
+
+      if (toNumber(today.rows[0]?.total) >= SUGGESTIONS_PER_DAY) {
+        throw domainError(
+          'conflict',
+          'Ya has mandado muchas sugerencias hoy: gracias, sigue mañana',
+        )
+      }
+
+      const version =
+        options.version === undefined || options.version === '' ? null : options.version
+      const place = { ...suggestion.place, version }
+      const result = await db.execute({
+        sql: `INSERT INTO tickets
+                (login, kind, subject, body, category, section, proposal, place, created_at)
+              VALUES (?, 'idea', ?, ?, 'improvement', ?, ?, ?, ?) RETURNING *`,
+        args: [
+          actor.login,
+          subjectFrom(suggestion.problem),
+          suggestion.problem,
+          place.section,
+          suggestion.proposal,
+          JSON.stringify(place),
+          iso(),
+        ],
+      })
+
+      return this.announce(actor, toTicket(result.rows[0] ?? {}, now()))
+    },
+
+    /**
+     * Si la persona puede mandar otro mensaje: el buzón no es un chat (pocos
+     * abiertos a la vez) ni se llena de golpe (pocos en diez minutos).
+     */
+    async assertRoom(actor: Actor): Promise<void> {
       const open = await db.execute({
         sql: "SELECT COUNT(*) AS total FROM tickets WHERE login = ? AND status = 'open'",
         args: [actor.login],
@@ -732,25 +807,10 @@ export function createAdminService(options: AdminServiceOptions) {
       if (toNumber(recent.rows[0]?.total) >= MAX_TICKETS_PER_WINDOW) {
         throw domainError('conflict', 'Has mandado varios avisos seguidos: espera unos minutos')
       }
+    },
 
-      const result = await db.execute({
-        sql: `INSERT INTO tickets
-                (login, kind, subject, body, target, category, section, reason, created_at)
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING *`,
-        args: [
-          actor.login,
-          ticket.kind,
-          ticket.subject ?? (subjectFrom(ticket.body) || 'Denuncia'),
-          ticket.body,
-          ticket.target ?? null,
-          ticket.category ?? null,
-          ticket.section ?? null,
-          ticket.reason ?? null,
-          iso(),
-        ],
-      })
-      const created = toTicket(result.rows[0] ?? {}, now())
-
+    /** Avisa a quien administra de un mensaje recién llegado y lo devuelve. */
+    async announce(actor: Actor, created: Ticket): Promise<Ticket> {
       // A quien administra, para que no dependa de que alguien abra el panel.
       await notify({
         to: await this.adminLogins(),

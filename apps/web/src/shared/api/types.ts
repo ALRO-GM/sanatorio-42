@@ -151,6 +151,7 @@ import type {
   StaffComparison,
   StaffDocument,
   StaffMe,
+  SuggestionInput,
   SyncStatus,
   Ticket,
   TicketInput,
@@ -306,6 +307,8 @@ export type Api = {
   // --- Buzón y administración
   /** Manda una incidencia, una sugerencia o una denuncia. */
   openTicket: (ticket: TicketInput) => Promise<Ticket>
+  /** Manda una sugerencia de mejora con el sitio donde se soltó la burbuja. */
+  sendSuggestion: (suggestion: SuggestionInput) => Promise<Ticket>
   getMyTickets: () => Promise<Ticket[]>
   /** Retira un mensaje propio, si aún se puede (`withdrawUntil`). */
   withdrawTicket: (id: number) => Promise<void>

@@ -402,6 +402,14 @@ cola. El modo ahorro deja pasar solo lo crítico.
   `target` (`message:12`, `board:3`, `doubt:5`) y puede llevar `reason`
   (`spam`, `harassment`, `insults`, `other`); con un motivo que no sea `other`
   el `body` puede ir vacío.
+- POST /tickets/suggestion → una sugerencia de mejora soltada con la burbuja de
+  la cabecera (`docs/sugerencias.md`): `{ "problem" (5-500), "proposal"? (≤ 500),
+  "place": { "section", "label" (≤ 80), "detail" (≤ 120 o `null`), "selector",
+  "hash", "viewport": { "width", "height" }, "theme", "lang", "mode" } }`. Se
+  guarda como un mensaje más (`kind: "idea"`, `category: "improvement"`,
+  `section` = `place.section`) con `proposal` y `place`; `place.version` (el
+  commit desplegado) lo pone la API. 201 con el mensaje. Además de los topes del
+  buzón (10 abiertos, 3 cada 10 min), 10 sugerencias cada 24 h por persona: 409.
 - GET /tickets/mine → lo que has mandado, con su `answer` si la tiene y
   `withdrawUntil`: hasta cuándo puedes retirarlo (15 min y sin respuesta), o `null`.
 - DELETE /tickets/:id → retira un mensaje tuyo mientras `withdrawUntil` no haya
@@ -432,7 +440,9 @@ Con el panel abierto:
   `{ login, perHour }` (`null` vuelve al tope automático).
 - GET /admin/tickets · POST /admin/tickets/:id/answer `{ answer, status? }` ·
   DELETE /admin/tickets/:id (spam, bromas; 204). Responder o borrar un mensaje
-  da por leído su `ticket_new` a todo quien administra.
+  da por leído su `ticket_new` a todo quien administra. Cada mensaje trae
+  `proposal` y `place` (con `version`) si es una sugerencia de la burbuja, o
+  `null`.
 - GET /admin/messages → los últimos mensajes de los chats de eventos.
 
 Toda petición con sesión cuenta para el consumo de esa persona. Si se pasa de su

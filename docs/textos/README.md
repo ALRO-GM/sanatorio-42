@@ -8,7 +8,7 @@ Cómo se trabaja con ellas: [docs/textos.md](../textos.md).
 | [agenda](agenda.md) | 144 | 0 | 0 | 0 | 0 |
 | [animos](animos.md) | 100 | 0 | 0 | 0 | 0 |
 | [avisos](avisos.md) | 47 | 0 | 0 | 0 | 0 |
-| [buzon](buzon.md) | 114 | 0 | 0 | 0 | 0 |
+| [buzon](buzon.md) | 132 | 0 | 0 | 0 | 0 |
 | [calendario](calendario.md) | 102 | 0 | 0 | 0 | 0 |
 | [clusters](clusters.md) | 76 | 0 | 0 | 0 | 0 |
 | [code-clicker](code-clicker.md) | 27 | 0 | 0 | 0 | 0 |

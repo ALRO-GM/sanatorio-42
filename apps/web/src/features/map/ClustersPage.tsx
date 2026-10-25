@@ -71,7 +71,7 @@ export function ClustersPage({ me }: { me: string }) {
               </p>
             </PoolOnly>
           </Show>
-          <div className="card">
+          <div className="card" data-feedback="clusters.map">
             <ClusterMapView
               map={map.data}
               legend={['online', 'occupied', 'reserved', 'free', 'broken']}
