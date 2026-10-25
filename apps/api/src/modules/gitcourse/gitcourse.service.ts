@@ -6,19 +6,29 @@
  */
 
 import type { GitAttemptResult, GitCourse, GitGateQuiz, GitGateResult } from '@sanatorio/contracts'
-import { checkAttempt, LEVELS } from '@sanatorio/gitsim'
+import { checkAttempt, LEVELS, LIMITS } from '@sanatorio/gitsim'
 import { z } from 'zod'
 
 import type { Actor } from '../../core/actor.js'
 import type { Db } from '../../core/db/database.js'
 import { toNumber, toText } from '../../core/db/rows.js'
 import { domainError } from '../../core/errors.js'
+import { createRateLimit } from '../../core/rate-limit.js'
 import { parse } from '../../core/validation.js'
 import type { GateService } from './gates.js'
 
+// Los mismos topes que la terminal: la API vuelve a ejecutar cada línea.
 const attemptSchema = z.object({
-  lines: z.array(z.string().max(200)).max(300),
+  lines: z.array(z.string().max(LIMITS.line)).max(LIMITS.attemptLines),
 })
+
+/**
+ * Intentos por persona: la web manda uno al llegar al objetivo, así que 30 en
+ * diez minutos es repetir un punto muchas veces. Más es un guion, y cada
+ * intento vuelve a ejecutar hasta 300 líneas.
+ */
+const ATTEMPTS_PER_WINDOW = 30
+const ATTEMPT_WINDOW_MS = 10 * 60_000
 
 type Stars = 1 | 2 | 3
 
@@ -63,6 +73,7 @@ export function createGitCourseService(deps: {
   now?: () => number
 }) {
   const now = deps.now ?? Date.now
+  const attempts = createRateLimit({ max: ATTEMPTS_PER_WINDOW, windowMs: ATTEMPT_WINDOW_MS, now })
 
   async function course(login: string): Promise<GitCourse> {
     const [seat, stars, gates] = await Promise.all([
@@ -95,6 +106,10 @@ export function createGitCourseService(deps: {
       if (level === undefined) throw domainError('not_found', 'Ese punto del camino no existe')
 
       const { lines } = parse(attemptSchema, input)
+
+      if (!attempts.hit(actor.login))
+        throw domainError('rate_limited', 'Demasiados intentos seguidos: espera unos minutos')
+
       const before = await seated(actor.login)
 
       const previous = LEVELS[index - 1]
@@ -118,6 +133,7 @@ export function createGitCourseService(deps: {
       return {
         done: result.done,
         stars: result.stars,
+        commands: result.commands,
         misses: result.misses.map((miss) => miss.name),
         course: await course(actor.login),
       }

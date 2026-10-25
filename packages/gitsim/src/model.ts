@@ -39,6 +39,8 @@ export type Repo = {
   /** Prefijo de los ids de esta persona y el siguiente número. */
   prefix: string
   next: number
+  /** La rama en la que estabas antes de cambiar (para `git switch -`). */
+  previous?: string
 }
 
 /** El remoto común (`origin`): solo commits, ramas y tags. */
@@ -121,13 +123,16 @@ export function isAncestor(commits: Record<string, Commit>, maybe: string, of: s
 export function mergeBase(commits: Record<string, Commit>, a: string, b: string): string | null {
   const ofA = ancestors(commits, a)
   const common = [...ancestors(commits, b)].filter((id) => ofA.has(id))
+  // Lo que es ancestro (estricto) de algún común no es el más cercano. Se
+  // calcula una vez por común, no por pareja: con muchos commits, mirar cada
+  // pareja por separado se disparaba (n³).
+  const covered = new Set<string>()
 
-  // El que no es ancestro de ningún otro común.
-  return (
-    common.find((candidate) =>
-      common.every((other) => other === candidate || !isAncestor(commits, candidate, other)),
-    ) ?? null
-  )
+  for (const id of common) {
+    for (const each of ancestors(commits, id)) if (each !== id) covered.add(each)
+  }
+
+  return common.find((candidate) => !covered.has(candidate)) ?? null
 }
 
 /** Un id nuevo para un commit de esta persona. */

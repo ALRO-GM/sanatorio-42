@@ -350,7 +350,16 @@ describe('el camino del curso', () => {
         'git log',
         'git commit -m x',
       ]),
-    ).toMatchObject({ done: true, stars: 2, commands: 3 })
+      // Crear la rama y cambiarse a ella cuenta uno, como `switch -c`.
+    ).toMatchObject({ done: true, stars: 3, commands: 2 })
+    expect(
+      checkAttempt(level, [
+        'git switch -c feature',
+        'git commit',
+        'git branch x',
+        'git branch -D x',
+      ]),
+    ).toMatchObject({ done: true, stars: 2, commands: 4 })
     expect(
       checkAttempt(level, ['git merge nada', 'git switch -c feature', 'git commit']),
     ).toMatchObject({

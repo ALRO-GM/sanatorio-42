@@ -2,7 +2,7 @@
  * Curso de git: solo desde un puesto del clúster, en orden, y la API vuelve a
  * ejecutar los comandos antes de dar el punto (con la mejor vez guardada).
  */
-import { LEVELS } from '@sanatorio/gitsim'
+import { LEVELS, LIMITS } from '@sanatorio/gitsim'
 import { beforeEach, describe, expect, it } from 'vitest'
 
 import { CONCEPTS_BY_WORLD } from '../../src/modules/gitcourse/gates.js'
@@ -71,6 +71,49 @@ describe('curso de git', () => {
     expect(
       (await gitCourse.attempt(actor('ana'), second.id, { lines: second.solution })).done,
     ).toBe(true)
+  })
+})
+
+describe('curso de git: lo que manda la web no se cree', () => {
+  const community = useCommunity()
+
+  it('las estrellas las calcula la API; topes de líneas y de intentos seguidos', async () => {
+    const { gitCourse } = community.services
+
+    if (first === undefined) throw new Error('faltan niveles')
+    await community.seat({ ana: 'c1r2s3' })
+    // La web no manda estrellas ni recuento: si los manda, no se usan.
+    expect(
+      await gitCourse.attempt(actor('ana'), first.id, {
+        lines: ['git commit', 'git branch x', 'git branch -D x', 'git commit'],
+        stars: 3,
+        commands: 1,
+      }),
+    ).toMatchObject({ done: true, stars: 2, commands: 4 })
+    await expectCode(
+      gitCourse.attempt(actor('ana'), first.id, { lines: ['x'.repeat(LIMITS.line + 1)] }),
+      'invalid_input',
+    )
+    await expectCode(
+      gitCourse.attempt(actor('ana'), first.id, {
+        lines: Array.from({ length: LIMITS.attemptLines + 1 }, () => 'git status'),
+      }),
+      'invalid_input',
+    )
+    // Lo que intenta salir del repositorio o llenarlo falla y no cuenta.
+    expect(
+      await gitCourse.attempt(actor('ana'), first.id, {
+        lines: ['echo x > /etc/passwd', 'sudo rm -rf /', ...first.solution],
+      }),
+    ).toMatchObject({ done: true, stars: 3 })
+
+    // Dos intentos ya hechos (los que no pasan la validación no cuentan) y 28 más: 30.
+    for (let i = 0; i < 28; i++)
+      await gitCourse.attempt(actor('ana'), first.id, { lines: first.solution })
+    await expectCode(
+      gitCourse.attempt(actor('ana'), first.id, { lines: first.solution }),
+      'rate_limited',
+    )
   })
 })
 
@@ -239,6 +282,16 @@ describe('curso de git: pruebas de grupo', () => {
     await seat({ ana: 'c1r1s1', bea: 'c1r1s2' })
 
     await play('bea', 'git pull')
+    // Un intento de llenar la sala falla con un mensaje y no cambia nada.
+    for (const line of ['echo x > ../../etc/passwd', 'git add . && rm -rf /']) {
+      const result = await rooms.run(actor('bea'), id, { line })
+
+      expect(result.ok, line).toBe(false)
+    }
+    await expectCode(
+      rooms.run(actor('bea'), id, { line: 'x'.repeat(LIMITS.line + 1) }),
+      'invalid_input',
+    )
 
     const last = await rooms.run(actor('bea'), id, { line: 'git push' })
 
@@ -279,6 +332,23 @@ describe('curso de git: pruebas de grupo', () => {
     // Si alguien se acerca, nadie juega hasta que se separe.
     await seat({ ana: 'c1r1s1', bea: 'c1r2s2' })
     await expectCode(rooms.run(actor('ana'), id, { line: 'git log' }), 'conflict')
+  })
+
+  it('cada cual tiene un tope de comandos por minuto', async () => {
+    const { services, seat } = community
+    const { rooms } = services.gitCourse
+
+    await seat({ ana: 'c1r1s1', bea: 'c1r1s2' })
+    await pass('ana', 'bea')
+
+    const { id } = await rooms.create(actor('ana'), { gate: 'group1' })
+
+    await rooms.join(actor('bea'), id)
+    await rooms.start(actor('ana'), id)
+    for (let i = 0; i < 60; i++) await rooms.run(actor('ana'), id, { line: 'git status' })
+    await expectCode(rooms.run(actor('ana'), id, { line: 'git status' }), 'rate_limited')
+    // El tope es de cada cual: bea sigue jugando.
+    expect((await rooms.run(actor('bea'), id, { line: 'git status' })).ok).toBe(true)
   })
 
   it('si se acaba el tiempo, se cierra sin superarla; salir deja la sala a otra persona', async () => {

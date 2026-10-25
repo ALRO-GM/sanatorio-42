@@ -121,6 +121,7 @@ export const gitCourseMock: Pick<
     return {
       done: result.done,
       stars: result.stars,
+      commands: result.commands,
       misses: result.misses.map((miss) => miss.name),
       course: snapshot(),
     }

@@ -17,8 +17,8 @@ export function levelOf(id: string): Level | undefined {
   return LEVELS.find((level) => level.id === id)
 }
 
-export { checkAttempt, goalOfLevel, solvedOf, starsOf, startOf } from './build.js'
-export type { Attempt } from './build.js'
+export { checkAttempt, goalOfLevel, solvedOf, starGoals, starsOf, startOf, tally } from './build.js'
+export type { Attempt, Tally } from './build.js'
 export type { Level, Theory } from './types.js'
 export { levelIn, LEVELS_EN, missionIn, missionItemIn } from './en/index.js'
 export { GROUPS_EN, MISSION_ITEMS_EN } from './en/groups.js'

@@ -1,7 +1,17 @@
 import { useEffect, useMemo, useState } from 'react'
 
 import type { GitAttemptResult } from '@sanatorio/contracts'
-import { goalOfLevel, missing, run, solvedOf, startOf } from '@sanatorio/gitsim'
+import {
+  goalOfLevel,
+  LIMITS,
+  missing,
+  run,
+  solvedOf,
+  starGoals,
+  starsOf,
+  startOf,
+  tally,
+} from '@sanatorio/gitsim'
 import type { Level, World } from '@sanatorio/gitsim'
 
 import { api } from '../../shared/api'
@@ -42,7 +52,10 @@ export function LevelView({ level, best, seat, onDone, onBack }: LevelViewProps)
           {level.title}
           {best > 0 && <span className="git-stars"> {'★'.repeat(best)}</span>}
         </h3>
-        <p className="git-goal">{level.goal}</p>
+        <p className="git-goal">
+          <strong>{t('git.goal')}:</strong> {level.goal}
+        </p>
+        <StarRules level={level} />
       </header>
       <PillGroup
         kind="tabs"
@@ -70,6 +83,65 @@ export function LevelView({ level, best, seat, onDone, onBack }: LevelViewProps)
       )}
       {step === 'challenge' && <Challenge level={level} seat={seat} onDone={onDone} />}
     </article>
+  )
+}
+
+/** Estrellas, de 1 a 3, como texto: `★★☆`. */
+const starText = (stars: number): string => '★'.repeat(stars) + '☆'.repeat(3 - stars)
+
+/**
+ * Cuántos comandos hacen falta para cada estrella, a la vista desde el
+ * principio, y qué cuenta como comando. Los números salen de `starGoals`, lo
+ * mismo que usa la API al corregir.
+ */
+function StarRules({ level }: { level: Level }) {
+  const { t, tn } = useI18n()
+  const goals = starGoals(level)
+
+  return (
+    <div className="git-star-rules">
+      <ul aria-label={t('git.stars.title')}>
+        <li>
+          <span className="git-stars" aria-hidden="true">
+            {starText(3)}
+          </span>{' '}
+          {tn('git.stars.three', goals.three)}
+        </li>
+        <li>
+          <span className="git-stars" aria-hidden="true">
+            {starText(2)}
+          </span>{' '}
+          {tn('git.stars.two', goals.two)}
+        </li>
+        <li>
+          <span className="git-stars" aria-hidden="true">
+            {starText(1)}
+          </span>{' '}
+          {t('git.stars.any')}
+        </li>
+      </ul>
+      <details>
+        <summary>{t('git.stars.what')}</summary>
+        <p>{t('git.stars.rule')}</p>
+      </details>
+    </div>
+  )
+}
+
+/** Por qué salieron esas estrellas: con cuántos comandos, y qué faltaba para más. */
+function StarsWhy({ level, commands }: { level: Level; commands: number }) {
+  const { tn } = useI18n()
+  const goals = starGoals(level)
+  const stars = starsOf(level, commands)
+
+  return (
+    <p className="git-why">
+      {stars === 3
+        ? tn('git.why.three', commands, { three: goals.three })
+        : stars === 2
+          ? tn('git.why.two', commands, { three: goals.three })
+          : tn('git.why.one', commands, { two: goals.two, three: goals.three })}
+    </p>
   )
 }
 
@@ -219,19 +291,22 @@ function Challenge({
   seat: string | null
   onDone: (result: GitAttemptResult) => void
 }) {
-  const { t } = useI18n()
+  const { t, tn } = useI18n()
   const goal = useMemo(() => goalOfLevel(level), [level])
   const solved = useMemo(() => solvedOf(level), [level])
-  const [world, setWorld] = useState<World>(() => startOf(level))
   const [lines, setLines] = useState<string[]>([])
   const [entries, setEntries] = useState<TerminalEntry[]>([])
   const [result, setResult] = useState<GitAttemptResult | null>(null)
   const { busy, error, run: act } = useAction()
+  // El repositorio y el recuento salen de volver a ejecutar las líneas, como
+  // hace la API: así lo que se ve aquí es lo que se corrige allí.
+  const counted = useMemo(() => tally(level, lines), [level, lines])
+  const { world, commands } = counted
   const reached = missing(world.repo, world.remote, goal).length === 0
   const branch = world.repo.head.kind === 'branch' ? world.repo.head.name : world.repo.head.id
+  const full = lines.length >= LIMITS.attemptLines
 
   function reset() {
-    setWorld(startOf(level))
     setLines([])
     setEntries([])
     setResult(null)
@@ -247,19 +322,40 @@ function Challenge({
   }
 
   function onRun(line: string) {
+    if (full) {
+      setEntries([
+        ...entries,
+        { line, output: [t('git.term.full', { n: LIMITS.attemptLines })], ok: false },
+      ])
+
+      return
+    }
+
     const next = run(world, line)
     const all = [...lines, line]
+    const after = tally(level, all)
+    const mark = after.lines.at(-1)
 
     setLines(all)
-    setEntries([...entries, { line, output: next.output, ok: next.ok }])
+    setEntries([
+      ...entries,
+      {
+        line,
+        output: next.output,
+        ok: next.ok,
+        counted: mark?.counted === true ? after.commands : null,
+      },
+    ])
     if (!next.ok) return
-
-    const after = { repo: next.repo, remote: next.remote }
-
-    setWorld(after)
-    if (seat !== null && result === null && missing(after.repo, after.remote, goal).length === 0)
+    if (
+      seat !== null &&
+      result === null &&
+      missing(after.world.repo, after.world.remote, goal).length === 0
+    )
       submit(all)
   }
+
+  const won = result?.done === true
 
   return (
     <section className="git-challenge">
@@ -267,10 +363,19 @@ function Challenge({
       {seat === null && <p className="notice">{t('git.practice')}</p>}
       <div className="git-challenge-grid">
         <div>
+          <p className="git-count" aria-live="polite">
+            {tn('git.count', won ? result.commands : commands)}{' '}
+            <span className="git-stars" title={t('git.starsNow')}>
+              <span aria-hidden="true">{starText(starsOf(level, commands))}</span>
+              <span className="sr-only">
+                {t('git.starsNowValue', { stars: starsOf(level, commands) })}
+              </span>
+            </span>
+          </p>
           <Terminal
             entries={entries}
             prompt={`${seat ?? 'pc'}:~/repo (${branch})$`}
-            disabled={result?.done === true}
+            disabled={won}
             onRun={onRun}
             onClear={() => {
               setEntries([])
@@ -283,19 +388,22 @@ function Challenge({
           </div>
           {busy && <p className="muted">{t('git.checking')}</p>}
           <ErrorNote error={error} />
-          {result?.done === true && (
-            <p className="git-won" role="status">
-              <span className="git-stars">
-                {'★'.repeat(result.stars)}
-                {'☆'.repeat(3 - result.stars)}
-              </span>{' '}
-              {t('git.won')}
-            </p>
+          {won && (
+            <div className="git-won" role="status">
+              <p>
+                <span className="git-stars">{starText(result.stars)}</span> {t('git.won')}
+              </p>
+              <StarsWhy level={level} commands={result.commands} />
+            </div>
           )}
           {seat === null && reached && (
-            <p className="notice" role="status">
-              {t('git.practiceDone')}
-            </p>
+            <div className="notice" role="status">
+              <p>
+                <span className="git-stars">{starText(starsOf(level, commands))}</span>{' '}
+                {t('git.practiceDone')}
+              </p>
+              <StarsWhy level={level} commands={commands} />
+            </div>
           )}
           {result !== null && !result.done && (
             <p className="notice">{t('git.notYet', { misses: result.misses.join(', ') })}</p>
