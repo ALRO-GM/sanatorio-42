@@ -12,15 +12,20 @@ va lo que no está en el código.
 [tareas-tras-compactar.md](tareas-tras-compactar.md)**: es la lista de lo que hay
 que hacer, en orden. Este documento es el porqué; aquel, el qué.
 
-## Estado a 2026-10-25 (desplegado, esquema 72)
+## Estado a 2026-10-25 (desplegado, esquema 73)
 
 - Piscineros: entrada, permisos, mundos separados y **ver como piscinero**
   desde el panel (`docs/piscineros.md`).
 - **Red de asientos** (`docs/asientos.md`, migración 71 `seat_sessions`):
   historial de dónde se sienta cada cual, cercanía 3/2/1,5, aislamiento;
   puestos cada 2 min con gente y 5 sin ella. Pestaña Red → Asientos.
-- Plano de clústeres: fila 1 abajo, desplazamiento por hacia dónde miran,
-  opciones de invertir y alinear. Arreglado el botón de «no funciona».
+- Plano de clústeres: fila 1 abajo, desplazamiento por hacia dónde miran.
+  Resaltados arriba; invertir y alinear, plegados bajo el plano. Arreglado el
+  botón de «no funciona».
+- **Mantenimiento** desde el panel, con hora de vuelta (`docs/mantenimiento.md`)
+  y **cuentas atrás** (`docs/avisos-cuenta-atras.md`, migración 73): avisos del
+  panel (limpieza de taquillas) y los que cada cual fija del calendario.
+- Estilo Terminal: temas de VS Code en un desplegable (`themes/terminal/palettes.ts`).
 - Rebranding a **Peer4U** (textos, logo, iconos); texto legal en versión
   `2026-10-25` (todo el mundo lo vuelve a aceptar).
 - Curso de git: objetivo y comandos por estrella, comandos equivalentes,
