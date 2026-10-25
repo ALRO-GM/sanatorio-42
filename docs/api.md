@@ -1084,6 +1084,15 @@ como `AAAA-MM-DD` o queda a más de 800 días, o si ya completaste el common cor
 Quién ha corregido a quién en el 42cursus del campus que miras. Sale de una
 copia local de las correcciones de 42 que se va completando sola.
 
+Piscineros (`docs/piscineros.md`): un piscinero ve la misma red, pero solo con
+las correcciones de la C Piscine (cursus `9`) de su campus y solo con
+piscineros; `campuses` no le cambia nada y su `sync` es el de la copia de la
+piscina. Un estudiante solo ve las del 42cursus y nunca a un piscinero (ni en
+el grafo, ni en el buscador, ni en `/network/pair`, `/network/strictest` o
+`/network/mine`). La copia de la piscina va aparte (estado
+`corrections:9:<campus>`): sin histórico ni repaso, solo las novedades desde
+hace 90 días, por tramos de un día.
+
 Varias escuelas. `/network`, `/network/pair`, `/network/strictest` y
 `/network/people` admiten `campuses`: los ids de los campus que se miran juntos,
 separados por comas, o `all` para todos los que tienen correcciones copiadas.

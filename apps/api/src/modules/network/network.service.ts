@@ -4,6 +4,10 @@
  * Las cuentas se hacen sobre todo lo que cumple los filtros (fechas, proyecto)
  * y se guardan un rato en memoria: mover el tope de personas o elegir a alguien
  * no vuelve a leer la base.
+ *
+ * Mundos separados (`docs/piscineros.md`): un estudiante ve las correcciones
+ * del 42cursus y nunca a un piscinero; un piscinero, solo las de la piscina de
+ * su campus y solo a piscineros.
  */
 
 import type {
@@ -17,6 +21,8 @@ import type {
 import { z } from 'zod'
 
 import type { Actor } from '../../core/actor.js'
+import { NO_POOL, seesFor } from '../../core/audience.js'
+import type { Audience } from '../../core/audience.js'
 import { domainError } from '../../core/errors.js'
 import { createRateLimit } from '../../core/rate-limit.js'
 import { createTtlCache } from '../../core/ttl-cache.js'
@@ -25,14 +31,28 @@ import type { ReplicaRepository } from '../replica/index.js'
 import { analyse, isAnonymised, mergePairs, select, toLink } from './network.analysis.js'
 import type { Analysis } from './network.analysis.js'
 import type { NetworkRepository } from './network.repository.js'
+import { CORE_CURSUS, PISCINE_CURSUS } from './network.sync.js'
 import type { CorrectionSync } from './network.sync.js'
 
 type NetworkServiceOptions = {
   corrections: NetworkRepository
   replica: ReplicaRepository
   sync: CorrectionSync
+  /** La copia de la piscina: su estado es el que ve un piscinero. Sin ella, el de `sync`. */
+  poolSync?: CorrectionSync
+  /** Quién ve a quién. Sin ella, nadie es piscinero. */
+  audience?: Audience
+  /** Los piscineros en curso de un campus, con su avatar: la «gente de dentro» de su red. */
+  poolMembersOf?: (campusId: number) => Promise<Map<string, string | null>>
   now?: () => number
 }
+
+/** Las correcciones que ve cada cual: las de la piscina o las del 42cursus. */
+const cursusOf = (actor: Actor): number => (actor.pool === true ? PISCINE_CURSUS : CORE_CURSUS)
+
+/** Se queda con lo de un mapa que se puede ver. */
+const visible = <T>(map: Map<string, T>, sees: (login: string) => boolean): Map<string, T> =>
+  new Map([...map].filter(([login]) => sees(login)))
 
 /** Cuánto vale un análisis guardado. La copia avanza por detrás: no hace falta más fresco. */
 const CACHE_TTL_MS = 60_000
@@ -95,6 +115,9 @@ const strictSchema = z.object({
   to: moment.optional(),
   projectId: z.coerce.number().int().positive().optional(),
 })
+
+/** Personas que da el buscador. */
+const PEOPLE_SHOWN = 8
 
 /** Personas que salen en el ranking de estrictos. */
 const STRICTEST_SHOWN = 100
@@ -164,6 +187,35 @@ type Catalogue = {
 export function createNetworkService(options: NetworkServiceOptions) {
   const { corrections, replica, sync } = options
   const now = options.now ?? Date.now
+  const audience = options.audience ?? NO_POOL
+  const poolSync = options.poolSync ?? sync
+  const poolMembersOf =
+    options.poolMembersOf ?? (() => Promise.resolve(new Map<string, string | null>()))
+
+  /**
+   * A quién puede ver `actor` en la red de esos campus. Un piscinero solo mira
+   * el suyo; un estudiante no ve a los piscineros de ninguno de los que mira.
+   */
+  const seesIn = async (
+    actor: Actor,
+    campuses: readonly number[],
+  ): Promise<(login: string) => boolean> => {
+    if (actor.pool === true) return seesFor(audience, actor)
+
+    const checks = await Promise.all(
+      [...new Set([actor.campusId, ...campuses])].map((campusId) =>
+        seesFor(audience, { campusId, pool: false }),
+      ),
+    )
+
+    return (login) => checks.every((sees) => sees(login))
+  }
+
+  /** La gente de dentro de cada campus, con su avatar: piscineros o estudiantes. */
+  const membersIn = (actor: Actor, campuses: readonly number[]) =>
+    Promise.all(
+      campuses.map((id) => (actor.pool === true ? poolMembersOf(id) : replica.membersOf(id))),
+    )
   const analyses = createTtlCache<Cached>({ ttlMs: CACHE_TTL_MS, maxEntries: CACHE_SIZE, now })
   const catalogues = createTtlCache<Catalogue>({
     ttlMs: CATALOGUE_TTL_MS,
@@ -186,7 +238,7 @@ export function createNetworkService(options: NetworkServiceOptions) {
     passed: boolean | null,
   ): Promise<Cached> =>
     analyses.get(
-      `${campusId.join(',')}|${from ?? ''}|${to ?? ''}|${projectId ?? ''}|${passed ?? ''}`,
+      `${cursusOf(actor)}|${campusId.join(',')}|${from ?? ''}|${to ?? ''}|${projectId ?? ''}|${passed ?? ''}`,
       async () => {
         if (!fresh.hit(actor.login)) {
           throw domainError(
@@ -195,14 +247,22 @@ export function createNetworkService(options: NetworkServiceOptions) {
           )
         }
 
-        const [rows, perCampus, given, received, timeline] = await Promise.all([
-          corrections.pairs({ campusId, from, to, projectId, passed }),
-          Promise.all(campusId.map((id) => replica.membersOf(id))),
-          corrections.verdicts({ campusId, from, to, projectId }, 'corrector'),
-          corrections.verdicts({ campusId, from, to, projectId }, 'corrected'),
+        const cursus = cursusOf(actor)
+        const [all, everyCampus, givenAll, receivedAll, timeline, sees] = await Promise.all([
+          corrections.pairs({ campusId, cursus, from, to, projectId, passed }),
+          membersIn(actor, campusId),
+          corrections.verdicts({ campusId, cursus, from, to, projectId }, 'corrector'),
+          corrections.verdicts({ campusId, cursus, from, to, projectId }, 'corrected'),
           // La línea de tiempo no lleva fechas: enseña todo para poder elegirlas.
-          corrections.timeline({ campusId, projectId }),
+          corrections.timeline({ campusId, cursus, projectId }),
+          seesIn(actor, campusId),
         ])
+        // Una pareja con alguien que no se puede ver no sale, ni cuenta como de
+        // dentro: así un piscinero no entra en la red de un estudiante, ni al revés.
+        const rows = all.filter((row) => sees(row.corrector) && sees(row.corrected))
+        const perCampus = everyCampus.map((campus) => visible(campus, sees))
+        const given = visible(givenAll, sees)
+        const received = visible(receivedAll, sees)
         const members = new Map(perCampus.flatMap((campus) => [...campus]))
         const homes = new Map(
           perCampus.flatMap((campus, index) =>
@@ -229,11 +289,11 @@ export function createNetworkService(options: NetworkServiceOptions) {
     )
 
   /** Lo que no depende de los filtros: año de llegada de cada quien y proyectos con correcciones. */
-  const catalogueOf = (campusId: readonly number[]): Promise<Catalogue> =>
-    catalogues.get(campusId.join(','), async () => {
+  const catalogueOf = (campusId: readonly number[], cursus: number): Promise<Catalogue> =>
+    catalogues.get(`${cursus}|${campusId.join(',')}`, async () => {
       const [years, projects] = await Promise.all([
-        corrections.firstYears(campusId),
-        corrections.projects(campusId),
+        corrections.firstYears(campusId, cursus),
+        corrections.projects(campusId, cursus),
       ])
       const names = await replica.projectNames(projects.map((project) => project.id))
 
@@ -255,7 +315,8 @@ export function createNetworkService(options: NetworkServiceOptions) {
    * copiadas, más el de quien pregunta; si no queda ninguno, el suyo.
    */
   const campusesOf = async (actor: Actor, asked: string | undefined): Promise<number[]> => {
-    if (asked === undefined) return [actor.campusId]
+    // Un piscinero solo ve la piscina de su campus.
+    if (asked === undefined || actor.pool === true) return [actor.campusId]
 
     const available = new Set([
       ...(await known.get('all', () => corrections.campuses())),
@@ -291,9 +352,9 @@ export function createNetworkService(options: NetworkServiceOptions) {
         names,
       ] = await Promise.all([
         analysisFor(actor, campuses, from, to, projectId, passedOf(query.verdict)),
-        catalogueOf(campuses),
-        sync.status(actor.campusId),
-        known.get('all', () => corrections.campuses()),
+        catalogueOf(campuses, cursusOf(actor)),
+        (actor.pool === true ? poolSync : sync).status(actor.campusId),
+        actor.pool === true ? [] : known.get('all', () => corrections.campuses()),
         replica.listCampuses([]),
       ])
       const shown = select(analysis, {
@@ -367,8 +428,17 @@ export function createNetworkService(options: NetworkServiceOptions) {
      */
     async pair(actor: Actor, input: unknown): Promise<NetworkPairDetail> {
       const query = parse(pairSchema, input)
+      const campusId = await campusesOf(actor, query.campuses)
+      const sees = await seesIn(actor, campusId)
+
+      // Con alguien a quien no se puede ver no hay nada que enseñar.
+      if (!sees(query.a) || !sees(query.b)) {
+        return { a: query.a, b: query.b, forth: 0, back: 0, corrections: [] }
+      }
+
       const filter = {
-        campusId: await campusesOf(actor, query.campuses),
+        campusId,
+        cursus: cursusOf(actor),
         from: query.from ?? null,
         to: endOf(query.to),
         projectId: query.projectId ?? null,
@@ -404,7 +474,12 @@ export function createNetworkService(options: NetworkServiceOptions) {
      * se conocen de corregirse.
      */
     async mine(actor: Actor): Promise<NetworkMine> {
-      return { partners: await corrections.partnersOf(actor.campusId, actor.login) }
+      const [partners, sees] = await Promise.all([
+        corrections.partnersOf(actor.campusId, actor.login, cursusOf(actor)),
+        seesIn(actor, [actor.campusId]),
+      ])
+
+      return { partners: partners.filter((partner) => sees(partner.login)) }
     },
 
     /**
@@ -464,12 +539,17 @@ export function createNetworkService(options: NetworkServiceOptions) {
       }
 
       const asked = campusesField.safeParse(campuses)
-      const found = await corrections.search(
-        await campusesOf(actor, asked.success ? asked.data : undefined),
-        prefix,
-        8,
-      )
-      const images = await replica.imagesOf(found.map((person) => person.login))
+      const chosen = await campusesOf(actor, asked.success ? asked.data : undefined)
+      const [candidates, sees] = await Promise.all([
+        // Se piden de más: algunos pueden quedar fuera por no poder verse.
+        corrections.search(chosen, prefix, 2 * PEOPLE_SHOWN, cursusOf(actor)),
+        seesIn(actor, chosen),
+      ])
+      const found = candidates.filter((person) => sees(person.login)).slice(0, PEOPLE_SHOWN)
+      const logins = found.map((person) => person.login)
+      // Los avatares de los piscineros están con ellos, no en la réplica de estudiantes.
+      const images =
+        actor.pool === true ? await poolMembersOf(actor.campusId) : await replica.imagesOf(logins)
 
       return found.map((person) => ({ ...person, image: images.get(person.login) ?? null }))
     },

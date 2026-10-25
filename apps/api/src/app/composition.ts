@@ -119,6 +119,8 @@ export type Services = {
   calendar: CalendarModule['service']
   network: NetworkModule['service']
   corrections: NetworkModule['sync']
+  /** La copia de las correcciones de la piscina (cursus 9). */
+  poolCorrections: NetworkModule['poolSync']
   exams: ExamsModule['service']
   examsSync: ExamsModule['sync']
   examsLive: ExamsModule['live']
@@ -322,6 +324,8 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     hourlyReserve: config.sync.hourlyReserve,
     quota: replica.quota,
     isActive: () => replica.sync.isActive(),
+    audience,
+    poolMembersOf: (campusId) => replica.poolMembers.membersIn(campusId),
     ...given({ log: config.log }),
     ...clock,
   })
@@ -493,6 +497,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
       calendar: calendar.service,
       network: network.service,
       corrections: network.sync,
+      poolCorrections: network.poolSync,
       exams: exams.service,
       examsSync: exams.sync,
       examsLive: exams.live,
