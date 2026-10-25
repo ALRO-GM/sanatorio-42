@@ -14,25 +14,44 @@ const HOUR_MS = 3_600_000
 
 const round1 = (value: number): number => Math.round(value * 10) / 10
 
+type Usage = { ms: number; people: Set<string> }
+
+const emptyUsage = (): Usage => ({ ms: 0, people: new Set<string>() })
+
 /**
  * Las horas y la gente de cada puesto, por clúster. El plano se completa como
  * en el mapa (`map.service.ts`): dentro del rectángulo de los puestos conocidos
  * de cada clúster, los que faltan salen con 0. Lo que no sigue el patrón de
  * nombre de puesto (`parseHost`) no se puede colocar y no sale.
+ *
+ * Cada clúster lleva también sus horas y su gente. La gente se cuenta aquí,
+ * con los logins, y no sumando la de sus puestos: quien se sienta en tres
+ * puestos del clúster es una persona, no tres.
  */
 export function seatHeatOf(
   sessions: readonly SeatSession[],
   known: readonly string[],
 ): { clusters: SeatHeatCluster[]; max: number } {
-  const usage = new Map<string, { ms: number; people: Set<string> }>()
+  const usage = new Map<string, Usage>()
+  const byCluster = new Map<string, Usage>()
 
   for (const session of sessions) {
     const host = session.host.trim().toLowerCase()
-    const entry = usage.get(host) ?? { ms: 0, people: new Set<string>() }
+    const position = parseHost(host)
 
-    entry.ms += session.end - session.begin
-    entry.people.add(session.login)
-    usage.set(host, entry)
+    // Lo que no se puede colocar en un plano no cuenta en ningún clúster.
+    if (position === null) continue
+
+    for (const [map, key] of [
+      [usage, host],
+      [byCluster, position.cluster],
+    ] as const) {
+      const entry = map.get(key) ?? emptyUsage()
+
+      entry.ms += session.end - session.begin
+      entry.people.add(session.login)
+      map.set(key, entry)
+    }
   }
 
   // El tamaño de cada clúster y la letra de sus puestos (`s` o `p`).
@@ -71,7 +90,16 @@ export function seatHeatOf(
         }
       }
 
-      return { id: limit.cluster, rows: limit.row, seatsPerRow: limit.seat, cells }
+      const total = byCluster.get(limit.cluster) ?? emptyUsage()
+
+      return {
+        id: limit.cluster,
+        rows: limit.row,
+        seatsPerRow: limit.seat,
+        hours: round1(total.ms / HOUR_MS),
+        people: total.people.size,
+        cells,
+      }
     })
 
   return { clusters, max }

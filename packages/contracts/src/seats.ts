@@ -63,6 +63,10 @@ export type SeatHeatCluster = {
   id: string
   rows: number
   seatsPerRow: number
+  /** Horas de uso de todo el clúster en el periodo, con un decimal. */
+  hours: number
+  /** Personas distintas que se han sentado en el clúster (no la suma de sus puestos). */
+  people: number
   /** Ordenados por fila y puesto. */
   cells: SeatHeatCell[]
 }

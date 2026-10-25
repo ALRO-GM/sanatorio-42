@@ -1462,7 +1462,7 @@ GET /network/seats/heat?days=30 → el mapa de calor de los puestos
 ```json
 {
   "days": 30,
-  "clusters": [{ "id": "c2", "rows": 7, "seatsPerRow": 8,
+  "clusters": [{ "id": "c2", "rows": 7, "seatsPerRow": 8, "hours": 2010.4, "people": 61,
                  "cells": [{ "host": "c2r1s1", "row": 1, "seat": 1, "hours": 37.5, "people": 9 }] }],
   "max": 112.4
 }
@@ -1472,7 +1472,10 @@ Las horas se miden igual que en `GET /network/seats` (desde `first_seen_at`,
 12 h como mucho por sesión, recortadas al periodo) y solo cuentan las de la
 gente que ves en esa red: tu mundo, sin las personas ocultas. Cada clúster va
 entero, como en `GET /map`: los puestos conocidos sin uso salen con `0`. Sin
-logins. `max` son las horas del puesto más usado. Caché de 5 minutos por campus
+logins. Cada clúster lleva sus `hours` (todas sus sesiones, con un decimal; la
+suma de las casillas redondeadas puede variar en alguna décima) y sus `people`:
+personas **distintas** que se han sentado en él, contadas con los logins, no
+sumando las de sus puestos. `max` son las horas del puesto más usado. Caché de 5 minutos por campus
 y mundo. Permiso de piscina `red.seats`.
 
 ## Ranking
