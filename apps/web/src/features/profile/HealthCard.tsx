@@ -6,7 +6,7 @@ import type { Health, PaceRef } from '@sanatorio/contracts'
 import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { localeOf, useI18n } from '../../shared/i18n'
-import { INTRA_HOME } from '../../shared/links'
+import { INTRA_HOME, progressHref } from '../../shared/links'
 import { daysBetween, originOf, paceOn, PACES, SLOWEST, stepsFor } from '../../shared/pace'
 import type { PaceStep } from '../../shared/pace'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
@@ -51,7 +51,25 @@ export function HealthCard({ health }: HealthCardProps) {
 
   return (
     <article className="card health">
-      <span className="eyebrow">{t('health.title')}</span>
+      <div className="card-head">
+        <span className="eyebrow">{t('health.title')}</span>
+        {/* Tu estado, comparado: en el Avance, con tu plan, quien sigue y quien se
+            tragó el black hole de tu campus, los paces y tu línea. */}
+        {health === undefined && data !== undefined && (
+          <a
+            className="link"
+            href={progressHref({
+              plan: [data.track],
+              pop: ['current', 'blackholed'],
+              scope: ['campus'],
+              paces: true,
+              me: true,
+            })}
+          >
+            {t('health.compare')} <Icon name="adelante" size={14} />
+          </a>
+        )}
+      </div>
       {loading && <p className="estado">{t('health.loading')}</p>}
       {!loading && data === undefined && <ErrorNote error={error} onRetry={() => void reload()} />}
       {data !== undefined &&

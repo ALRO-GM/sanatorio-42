@@ -3,6 +3,12 @@
   display: grid;
   gap: 0.75rem;
 }
+/* El título y, a la derecha, el enlace para compararte en el Avance. */
+.health > .card-head {
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+}
 .health-head {
   display: flex;
   align-items: center;

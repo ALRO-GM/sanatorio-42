@@ -243,14 +243,14 @@ const flagOf = (value: unknown): boolean | null =>
 
 export function createProgressRepository(db: Db) {
   return {
-    /** Slug y horas de cada uno de esos proyectos. */
+    /** Slug, nombre y horas de cada uno de esos proyectos. */
     async projects(
       ids: readonly number[],
-    ): Promise<Map<number, { slug: string; hours: number | null }>> {
+    ): Promise<Map<number, { slug: string; name: string; hours: number | null }>> {
       if (ids.length === 0) return new Map()
 
       const result = await db.execute({
-        sql: `SELECT id, slug, hours FROM projects WHERE ${inList('id')}`,
+        sql: `SELECT id, slug, name, hours FROM projects WHERE ${inList('id')}`,
         args: [listArg(ids)],
       })
 
@@ -259,6 +259,7 @@ export function createProgressRepository(db: Db) {
           toNumber(row.id),
           {
             slug: typeof row.slug === 'string' ? row.slug : '',
+            name: typeof row.name === 'string' && row.name !== '' ? row.name : toText(row.slug),
             hours: typeof row.hours === 'number' && row.hours > 0 ? row.hours : null,
           },
         ]),
@@ -311,7 +312,7 @@ export function createProgressRepository(db: Db) {
       if (ids.length === 0) return []
 
       const result = await db.execute({
-        sql: `SELECT u.login, u.image, pu.project_id, pu.status, pu.validated, pu.created_at_42,
+        sql: `SELECT u.login, u.image, pu.project_id, pu.status, pu.validated, pu.final_mark, pu.created_at_42,
                      pu.updated_at_42, ul.begin_at, ut.track,
                      (m.user_id IS NOT NULL OR cc.campus_id = ?) AS here,
                      cc.user_id AS cc_user, cc.campus_id AS cc_campus, cc.begin_at AS cc_begin, cc.end_at, cc.blackholed_at,
@@ -330,8 +331,12 @@ export function createProgressRepository(db: Db) {
         login: toText(row.login),
         image: toTextOrNull(row.image),
         projectId: toNumber(row.project_id),
+        // Aprobado: validado, aunque lo esté repitiendo (para subir nota): 42 deja
+        // en la fila la nota y el `validated?` del último intento cerrado. Así
+        // salía sin hacer agent-smith de smarin-s (`searching_a_group`, 98).
         doneAt:
-          row.status === 'finished' && toNumber(row.validated ?? 0) === 1
+          toNumber(row.validated ?? 0) === 1 &&
+          (row.status === 'finished' || (row.final_mark !== null && row.final_mark !== undefined))
             ? msOf(row.updated_at_42)
             : null,
         // Las filas antiguas no traen cuándo se apuntó: la última vez que cambió

@@ -162,6 +162,8 @@ export type Health = {
   blackholedAt: string | null
   /** Pace y plazo que ha anotado la persona, o `null` si aún no lo ha hecho. */
   declared: PaceRef | null
+  /** Tu plan del common core: el clásico (C) o el nuevo (Python). */
+  track: 'classic' | 'next'
   /** Círculo en el que estás: el siguiente al último que completaste. */
   currentCircle: number
   /**

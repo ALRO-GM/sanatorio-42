@@ -11,6 +11,8 @@
  * salen en la cabecera `Referer` al seguir un enlace a otra web.
  */
 
+import type { CoreTrack, ProgressPopulation, ProgressScope } from '@sanatorio/contracts'
+
 /** El expediente público de alguien. */
 export function recordHref(login: string): string {
   return `#/expediente/${encodeURIComponent(login)}`
@@ -19,6 +21,93 @@ export function recordHref(login: string): string {
 /** La red de correcciones, centrada en alguien si se dice quién. */
 export function networkHref(login: string | null = null): string {
   return login === null ? '#/red' : `#/red/${encodeURIComponent(login)}`
+}
+
+/**
+ * Lo que se enciende al abrir el Avance desde un enlace (el health check, por
+ * ejemplo). Lo que no se dice queda como lo tenga cada cual.
+ */
+type ProgressPreset = {
+  plan?: CoreTrack[] | undefined
+  pop?: ProgressPopulation[] | undefined
+  scope?: ProgressScope[] | undefined
+  paces?: boolean | undefined
+  /** Si se ve tu línea. */
+  me?: boolean | undefined
+  /** El periodo (`8`…`24` meses o `all`), solo para esa visita. */
+  range?: string | undefined
+}
+
+const PLAN_PARAM: Record<CoreTrack, string> = { classic: 'c', next: 'python' }
+const PLAN_OF: Record<string, CoreTrack> = {
+  c: 'classic',
+  classic: 'classic',
+  python: 'next',
+  next: 'next',
+}
+const POP_OF: Record<string, ProgressPopulation> = {
+  active: 'current',
+  current: 'current',
+  finished: 'finished',
+  blackholed: 'blackholed',
+}
+const SCOPE_OF: Record<string, ProgressScope> = { campus: 'campus', all: 'all' }
+
+/**
+ * El Avance, con opciones encendidas: `#/avance?plan=python&pop=current,blackholed&scope=campus&paces=1&me=1`.
+ * Se leen una vez al abrirlo (`readProgressPreset`) y la dirección vuelve a `#/avance`.
+ */
+export function progressHref(preset: ProgressPreset = {}): string {
+  const query = new URLSearchParams()
+
+  if (preset.plan !== undefined)
+    query.set('plan', preset.plan.map((each) => PLAN_PARAM[each]).join(','))
+  if (preset.pop !== undefined) query.set('pop', preset.pop.join(','))
+  if (preset.scope !== undefined) query.set('scope', preset.scope.join(','))
+  if (preset.paces !== undefined) query.set('paces', preset.paces ? '1' : '0')
+  if (preset.me !== undefined) query.set('me', preset.me ? '1' : '0')
+  if (preset.range !== undefined) query.set('range', preset.range)
+
+  const text = query.toString().replace(/%2C/g, ',')
+
+  return text === '' ? '#/avance' : `#/avance?${text}`
+}
+
+/**
+ * Lo que pide una dirección del Avance (`progressHref`), o `null` si no pide
+ * nada. Lo que no se entiende se ignora: la dirección la escribe cualquiera.
+ */
+export function readProgressPreset(hash: string): ProgressPreset | null {
+  const at = hash.indexOf('?')
+
+  if (!/^#\/?avance(\?|$)/.test(hash) || at === -1) return null
+  const query = new URLSearchParams(hash.slice(at + 1))
+  const list = <T>(key: string, known: Record<string, T>): T[] | undefined => {
+    const raw = query.get(key)
+
+    if (raw === null) return undefined
+    const found = [
+      ...new Set(raw.split(',').flatMap((each) => (each in known ? [known[each] as T] : []))),
+    ]
+
+    // Sin nada que se entienda, como si no lo dijera: mejor lo de siempre que nada encendido.
+    return found.length === 0 ? undefined : found
+  }
+  const flag = (key: string): boolean | undefined => {
+    const raw = query.get(key)
+
+    return raw === null ? undefined : raw === '1' || raw === 'true'
+  }
+  const preset: ProgressPreset = {
+    plan: list('plan', PLAN_OF),
+    pop: list('pop', POP_OF),
+    scope: list('scope', SCOPE_OF),
+    paces: flag('paces'),
+    me: flag('me'),
+    range: query.get('range') ?? undefined,
+  }
+
+  return Object.values(preset).some((value) => value !== undefined) ? preset : null
 }
 
 /** Not-games: la lista de salas, o una sala si se dice cuál. */

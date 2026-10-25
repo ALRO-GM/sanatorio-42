@@ -21,7 +21,7 @@ con su 42cursus (`cursus_users` del cursus 21):
 
 | Estado | Cuándo |
 |---|---|
-| `finished` | `grade` es `Transcender`, `Alumni` o `Member` (el nombre antiguo), o `alumni?` es verdadero. |
+| `finished` | `grade` es `Transcender`, `Alumni` o `Member` (el nombre antiguo), o `alumni?` es verdadero, **y** tiene aprobados ft_transcendence y el examen 6 (`exam-rank-06` o `42next-exam-rank-06`). Con el grado sin las dos, `unknown` (abajo). |
 | `blackholed` | Tiene `end_at`, hace **30 días o más**, y la cuenta está cerrada (`active?` falso). Y no se ha apuntado a nada ni ha movido un proyecto abierto más de 30 días después de `end_at`. |
 | `active` | Sin `end_at`, cuenta activa, y la fecha de black hole es futura (o no hay) **o** ha hecho algo en los últimos **120 días**. |
 | `unknown` | Todo lo demás: sin copia del cursus; `end_at` reciente; `end_at` con la cuenta abierta; cuenta cerrada sin `end_at`; fecha de black hole pasada y nada hecho en 120 días (congelaciones, días extra sin moverse). |
@@ -215,6 +215,102 @@ grupo pesan casi lo mismo, así que elegir uno u otro apenas mueve el total.
 El eje del Avance por horas va en horas del plan de quien mira; cada línea va en
 % de su propio plan, así que con los dos planes cada línea es correcta aunque
 los totales difieran.
+
+## Terminar pide ft_transcendence y el examen 6 (2026-10-25)
+
+Alberto vio que la media «Terminado» subía y no pasaba del círculo 5. Quien
+terminó tiene que haber llegado arriba: ft_transcendence y el examen del
+círculo 6 son imprescindibles. Mirado en producción (solo lectura):
+
+**Quién tiene el grado sin las dos pruebas** (fuera de París), y qué se hace:
+
+| Caso | Personas | Qué es | Queda |
+|---|---|---|---|
+| `Alumni` de 2017-2018 (y uno de 2020) sin ft_transcendence ni examen 6 | Madrid 3 (mrodrigu, tholzheu, sraccah), Barcelona 4 (jagarcia, thdelmas, ydemange, crfernan) | Plan de antes de 2020 (fillit, lem_in, corewar, wolf3d…): terminaron otro common core | `unknown` |
+| Con el examen 6, sin ft_transcendence | Barcelona 2 (abambi, tmeizo; kickoff 2020, ft_services y ft_containers) | Plan de 2020: ni rastro de transcendence en la réplica | `unknown` |
+| Cuentas de pruebas o de staff | Madrid madridqa, madridqa2, sultan; Barcelona qa-bcn, fletcher, oktorok; Málaga tmalaga, totodile | 1 a 31 proyectos, grado puesto a mano | `unknown` |
+| París | 5 862 de 6 057 | La réplica de París solo tiene proyectos de quien entra en la web | `unknown` |
+
+Ninguno pasa a `active`: no siguen en este common core, y en una media lo
+bajarían todo. Python no cambia: smarin-s y dmena-li tienen las dos.
+
+| Campus | Plan | Terminado antes | Terminado ahora |
+|---|---|---|---|
+| Madrid | C | 305 | 299 |
+| Madrid | Python | 1 | 1 |
+| Barcelona | C | 237 | 228 |
+| Barcelona | Python | 1 | 1 |
+| Málaga | C | 166 | 164 |
+| Urduliz | C | 108 | 108 |
+| París | C | 6 056 | 195 |
+
+(Plan como lo deduce el Avance; París, cortado.)
+
+**Por qué la media no pasaba del círculo 5** (Madrid C: como mucho 84,4 %,
+y el círculo 5 acaba en el 85,7 %):
+
+1. Cada cual se medía contra el plan de hoy. Quien terminó en 2021-2023 hizo
+   ft_server, ft_services, libasm o ft_containers, y no tiene NetPractice, el
+   CPP 09 o la versión nueva de un proyecto: se quedaba en el 80-95 %.
+2. La línea de cada cual acaba hoy. Los últimos días de la curva solo tenían a
+   quien empezó hace más tiempo (planes viejos, menos %): Barcelona bajaba del
+   89,3 % al 56,5 % al final.
+3. El grado sin las pruebas (arriba): gente al 0-30 % dentro de la media.
+
+**Ahora** (`progress.rules.ts`, `ownUnits`; `progress.service.ts`):
+
+- Quien terminó se mide contra **lo que hizo hasta terminar**: las casillas
+  que tenía aprobadas el día que terminó (`finishedOn`: lo último que aprobó
+  del último círculo del plan; sin nada de él, lo último aprobado). Por
+  círculos, cada círculo que tiene pesa lo mismo; por horas, sus horas sobre
+  las de lo que hizo. Su línea llega al 100 % ese día, de las dos maneras, y
+  ahí se queda. Lo que hizo después (un proyecto suelto años más tarde) no la
+  mueve. Quien sigue o se fue se mide contra el plan, como antes.
+- En la media «Terminado», quien ya terminó cuenta como 100 % los días que aún
+  no ha vivido: si no, el final de la curva era de unos pocos.
+- Lo aprobado que se está repitiendo (`validated` con nota, aunque el estado
+  no sea `finished`) cuenta como aprobado: a smarin-s le faltaba agent-smith
+  (98, `searching_a_group`), que fue lo que le validó el rango 5.
+
+Con los datos de producción (C, campus copiados salvo París):
+
+| | Antes: máximo | Antes: al final | Ahora: al final |
+|---|---|---|---|
+| Madrid | 84,4 % | 80,7 % | 100 % |
+| Barcelona | 89,3 % | 56,5 % | 100 % |
+| Málaga | 94,9 % | 94,2 % | 100 % |
+| Urduliz | 94,7 % | 93,7 % | 100 % |
+
+Por horas, igual: cada línea acaba en su 100 % (las horas de lo que hizo) y
+el eje sigue en las horas de quien mira, sin reescalar (Alberto lo prefiere
+así aunque una media acabe un poco por debajo de arriba).
+
+### smarin-s y dmena-li
+
+- **smarin-s** salía con 96,4 % por círculos y 94 % por horas: agent-smith
+  (círculo 5 del plan de Python, aprendido de un solo voto) tenía nota 98 y
+  `validated`, pero estado `searching_a_group` (se volvió a apuntar), y no
+  contaba. Con lo que hizo hasta terminar (el examen 6 del 2026-08-06), 100 %;
+  sus horas son 1 701.
+- **dmena-li** ya llegaba al 100 % con el plan de hoy. Las 1 456 h eran las de
+  un plan sin ft_transcendence (antes del último arreglo, 1 701 − 245), y la
+  ficha enseñaba las horas del plan (o del eje), no las suyas. Ahora cada línea
+  lleva sus horas (`hours`): 1 681 h, lo que hizo.
+
+## Hitos de cada línea
+
+Cada línea de una persona (la tuya, con quien te comparas y las sueltas de una
+media con poca gente) trae `milestones`: un `{ day, projects, value }` por día
+en que aprobó algo que mueve su línea, con el nombre de cada proyecto y el %
+en que queda. La web pone un punto en cada uno y, al pasar o con el teclado,
+los nombra en la ficha. Las medias no llevan. Las de quien se tragó el black
+hole también, sin login: los proyectos solos no dicen quién es, y su línea ya
+se veía. Quien no se ve (mundos separados, ocultos) no sale, como su línea.
+
+Tamaño (`GET /stats/progress`, sin comprimir / con gzip, que pone Caddy): con
+medias de 10 o más, tu línea y cinco personas, 28 KB / 1,9 KB (13 KB / 1,2 KB
+sin hitos); si todas las medias son de personas sueltas (un campus casi vacío),
+hasta 100 KB / 2,5 KB.
 
 ## Límites
 

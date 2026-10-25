@@ -18,16 +18,23 @@ const cadet = (facts: Partial<CoreFacts> = {}): CoreFacts => ({
   active: true,
   alumni: false,
   lastActivity: ago(3),
+  closedCore: false,
   ...facts,
 })
 
 describe('estado en el common core', () => {
   it('normal: Transcender, Alumni o Member terminaron; un Cadet sin fin sigue', () => {
-    expect(coreStatusOf(cadet({ grade: 'Transcender' }), NOW)).toBe('finished')
-    expect(coreStatusOf(cadet({ grade: 'Alumni', active: false }), NOW)).toBe('finished')
-    expect(coreStatusOf(cadet({ grade: 'Member' }), NOW)).toBe('finished')
+    const closed = { closedCore: true }
+
+    expect(coreStatusOf(cadet({ grade: 'Transcender', ...closed }), NOW)).toBe('finished')
+    expect(coreStatusOf(cadet({ grade: 'Alumni', active: false, ...closed }), NOW)).toBe('finished')
+    expect(coreStatusOf(cadet({ grade: 'Member', ...closed }), NOW)).toBe('finished')
     // Alumni sin grado (filas viejas): también terminó.
-    expect(coreStatusOf(cadet({ grade: null, alumni: true }), NOW)).toBe('finished')
+    expect(coreStatusOf(cadet({ grade: null, alumni: true, ...closed }), NOW)).toBe('finished')
+    // Sin ft_transcendence y el examen 6 aprobados, el grado no basta: `Alumni` del
+    // plan de antes de 2020, cuentas de pruebas con el grado a mano.
+    expect(coreStatusOf(cadet({ grade: 'Transcender' }), NOW)).toBe('unknown')
+    expect(coreStatusOf(cadet({ grade: null, alumni: true }), NOW)).toBe('unknown')
     expect(coreStatusOf(cadet({ blackholedAt: ago(-60) }), NOW)).toBe('active')
   })
 

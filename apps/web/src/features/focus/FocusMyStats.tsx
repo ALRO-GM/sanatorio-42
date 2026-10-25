@@ -5,7 +5,7 @@ import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { EVERYONE, SegmentSlider } from '../../shared/ui/SegmentSlider'
-import { FocusCharts, FocusFigureCards, PeriodPills, periodQuery } from './FocusStatsView'
+import { FocusCharts, FocusFigureCards, PeriodPicker, periodQuery } from './FocusStatsView'
 import type { FocusPeriod } from './FocusStatsView'
 
 /**
@@ -26,7 +26,7 @@ export function FocusMyStats() {
 
   return (
     <section className="focus-stats" aria-label={t('focus.tab.stats')}>
-      <PeriodPills value={period} onChange={setPeriod} />
+      <PeriodPicker value={period} onChange={setPeriod} />
 
       <SegmentSlider value={band} onChange={setBand} told={data?.segment} texts="focus.band" />
 

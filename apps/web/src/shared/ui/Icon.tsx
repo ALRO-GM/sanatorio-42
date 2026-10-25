@@ -301,6 +301,14 @@ const PATHS = {
       <path d="M8.5 3l3.5 6.5L15.5 3" />
     </>
   ),
+  /** Quien terminó el common core (Avance): una copa con sus asas. */
+  trofeo: (
+    <>
+      <path d="M7.5 4h9v5a4.5 4.5 0 0 1-9 0z" />
+      <path d="M7.5 6H5a2.5 2.5 0 0 0 3 3.5M16.5 6H19a2.5 2.5 0 0 1-3 3.5" />
+      <path d="M12 13.5V17M8.5 20h7M10 17h4" />
+    </>
+  ),
   /** El asa de lo que se arrastra (Personalizar): dos columnas de puntos. */
   agarrar: (
     <>

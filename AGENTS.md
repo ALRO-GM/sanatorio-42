@@ -15,7 +15,8 @@ identificadores, las tablas y la API conservan los nombres viejos. Equivalencias
 visibles: Sala de espera → Peer to peer, Tablón → Proyectos, Terapia → Sprints,
 Guardia → On-call, «De guardia» → «Disponible», Expediente → Perfil,
 Especialista → Senior, Eminencia → Guru, Paciente → Peer, Estado de salud →
-Health check.
+Health check (en español, el bloque se llama «Tu estado de salud»; en los
+demás idiomas, Health check).
 
 ## Estructura
 
@@ -128,7 +129,8 @@ regla de aquí, cambia también la skill que la repite.
 - Tono: equipo de programación cálido y con humor amable (bugs, commits,
   code review, on-call, producción), nada de hospital. Vocabulario:
   "disponible", "no disponible", "fuera del campus", "senior", "peer como tú",
-  "Peer to peer", "sprint", "on-call", "perfil", "health check".
+  "Peer to peer", "sprint", "on-call", "perfil", "health check" (en español,
+  "estado de salud").
 - Textos en segunda persona y con lenguaje inclusivo (evitar formas con género
   cuando se pueda).
 - Lo primero que se ve al entrar es el perfil (el expediente del código): es la
@@ -186,6 +188,11 @@ regla de aquí, cambia también la skill que la repite.
   códigos de color del mapa y del grafo).
 - Paleta: la pone el estilo. "No disponible" va en gris neutro, nunca en rojo.
 - La cabecera tiene que caber en una sola fila y todo verse bien en móvil.
+- Gráficas con opciones: la gráfica a la izquierda, quieta a la vista, y sus
+  opciones en un panel a la derecha (como Red y Avance); en el móvil, la gráfica
+  primero y las opciones debajo. Un periodo o escalón se elige con
+  `shared/ui/StepPicker` (desplegable en escritorio, rueda en el móvil). Regla en
+  `docs/interfaz.md` («Piezas comunes»).
 - No hagas commits: los hace la persona.
 
 ## XP y anti-trampas

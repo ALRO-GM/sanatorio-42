@@ -11,7 +11,7 @@ import { useFormat } from '../../shared/i18n/useFormat'
 import { Blocks } from '../../shared/layout/Blocks'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { CampusPicker } from './CampusPicker'
-import { PillGroup } from '../../shared/ui/PillGroup'
+import { StepPicker } from '../../shared/ui/StepPicker'
 import {
   COLOR_MODES,
   colorOf,
@@ -27,7 +27,7 @@ import type { Scale, ScaleMode } from './colors'
 import type { ColorMode } from './colors'
 import { ForceGraph } from './ForceGraph'
 import { Meter } from './Meter'
-import { PERIODS, startOf } from './period'
+import { STEPS, startOf } from './period'
 import type { Period } from './period'
 import { PersonPanel } from './PersonPanel'
 import { PersonSearch } from './PersonSearch'
@@ -362,9 +362,9 @@ export function NetworkPage({ me, switcher }: { me: CurrentUser; switcher?: Reac
               </div>
             )}
             <div className="net-filter">
-              <span className="eyebrow">{t('common.period')}</span>
-              <PillGroup
-                options={PERIODS}
+              {/* El selector de periodo de toda la web: de menos a más, y al final «a mano». */}
+              <StepPicker
+                options={STEPS}
                 value={filters.period}
                 onChange={(period) => {
                   change({ period })

@@ -1274,6 +1274,7 @@ GET /me/health → las fechas para saber cómo vas de tiempo en el common core.
 {
   "startedAt": "2026-05-18T07:42:00.000Z",
   "blackholedAt": "2027-04-03T07:42:00.000Z",
+  "track": "next",
   "currentCircle": 3,
   "milestones": [
     "2026-05-19T11:37:22.148Z",
@@ -1288,6 +1289,11 @@ GET /me/health → las fechas para saber cómo vas de tiempo en el common core.
   }
 }
 ```
+
+`track` es tu plan (`classic` o `next`): con él, «Compararte en Avance» abre
+el Avance con tu plan encendido (`#/avance?plan=c|python&pop=current,blackholed&scope=campus&paces=1&me=1`,
+`progressHref` en `shared/links.ts`; se lee una vez y la dirección vuelve a
+`#/avance`).
 
 PUT /me/health/pace → anota el pace y el *Milestone Deadline* que ves en tu
 perfil de la intra, y devuelve lo mismo que `GET /me/health`.
@@ -1861,8 +1867,16 @@ GET /stats/ranking?by=circle|circles|hours&plan=all|classic|next&kickoff=AAAA-MM
   línea de quien se tragó el black hole acaba el día de su `end_at`. Un punto
   con menos de `minPeople` (10) personas es `null`. Unos 7 KB sin comprimir; con personas
   sueltas (abajo), hasta unos 15 KB.
+- Cada línea de una persona (`me`, `others[]`, `individuals`) es un
+  `ProgressTrace`: `line` (las dos medidas), `hours` (las de su common core: su
+  plan o, si terminó, lo que hizo), `finished` (el día en que terminó, o
+  `null`) y `milestones` (`{ day, projects, value }` por día con algo aprobado,
+  con el nombre de cada proyecto y el % en que queda). Quien terminó se mide
+  contra lo que hizo hasta terminar: acaba en el 100 % de las dos maneras
+  (`docs/blackhole.md`). Con hitos, unos 28 KB sin comprimir con tu línea y
+  cinco personas; hasta 100 KB si todas las medias son de personas sueltas.
 - `individuals[población][grupo]`: si una media tiene menos de `minPeople`
-  personas, la línea de cada una (`{ login, line }`) en su lugar; con bastante
+  personas, la línea de cada una (`{ login, …ProgressTrace }`) en su lugar; con bastante
   gente, vacío. Sin quien no ves (mundos separados, personas ocultas), aunque
   cuente en `people`. En `blackholed`, `login` es `null`: se ve el camino, no
   quién. Nada más sensible que compararse con alguien (`with`).

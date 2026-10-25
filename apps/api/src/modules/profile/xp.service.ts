@@ -338,7 +338,7 @@ export function createXpService(options: XpServiceOptions) {
      * @param userId Su id en 42, para preguntar por sus rangos.
      */
     async health(actor: Actor, userId: number | null): Promise<Health> {
-      const [{ rank, ranks }, cursus, declared] = await Promise.all([
+      const [{ track, rank, ranks }, cursus, declared] = await Promise.all([
         curriculum.trackOf(actor.login, userId),
         curriculum.cursusOf(actor.login, userId),
         profiles.paceRef(actor.login),
@@ -347,6 +347,7 @@ export function createXpService(options: XpServiceOptions) {
       return {
         startedAt: cursus.startedAt,
         blackholedAt: cursus.blackholedAt,
+        track,
         currentCircle: Math.min(LAST_CIRCLE, (rank ?? -1) + 1),
         milestones: ranks,
         declared: declared ?? null,

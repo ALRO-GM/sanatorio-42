@@ -99,6 +99,8 @@ de datos.
 | Red | Endogamia, parejas, los más estrictos, proyectos más corregidos | D | Rankings |
 | Red | Asientos: mapa de calor de los puestos bajo el grafo (horas por ordenador, con el plano de cada cual y «Ver como tabla»; `docs/asientos.md`) | N | Bloque de la red de asientos, pedido por Alberto (2026-10-25): el mismo periodo y las mismas horas que el grafo |
 | Avance | Tu avance en el common core frente a las medias y los paces, por círculos o por horas estimadas, y con hasta 5 personas (#87; en Datos desde el 2026-10-25). Plan, población (terminado, en curso + terminado, black hole: `docs/blackhole.md`) y alcance se encienden a la vez, una línea por combinación | N | La sección en sí |
+| Avance | Hitos de cada persona (un punto por día con algo aprobado, y sus proyectos en la ficha) y, de quien terminó, el tramo del 100 % resaltado con un trofeo el día exacto (`docs/blackhole.md`) | N | Pedido por Alberto (2026-10-25): leer la línea de alguien sin abrir su perfil |
+| Perfil | «Compararte en Avance» en tu estado de salud: abre el Avance con tu plan, quien sigue y quien se tragó el black hole de tu campus, los paces y tu línea (`progressHref`) | N | Pedido por Alberto (2026-10-25): el estado de salud dice cómo vas; el Avance, frente a quién |
 | Avance | «Los más rápidos» (dentro de comparar): quien terminó antes, de tu campus y el primero de cada campus, para añadirlo con un clic | N | Es la misma comparación, para quien no tiene a nadie en mente |
 | Avance | Quién va más rápido (bloque bajo la gráfica, antes en Ayuda → Estadísticas): por círculo o %, con plan, kickoff y rangos; tu fila fija | N | Ranking, pero del curso: es lo que se viene a mirar al Avance |
 | Clústeres | Mapa, opciones de vista, resaltar | N | La sección en sí |
@@ -222,6 +224,22 @@ Antes de escribir una a mano, se usa la que ya existe en `apps/web/src/shared/`:
   pastillas (`ui/PillGroup`; `kind="tabs"` si cambian lo que hay debajo). Con
   más opciones, o dentro de un formulario, un `<select>`. Un desplegable de dos
   opciones cuesta dos clics donde dos pastillas cuestan uno.
+- **Periodo o escalón** (meses, días, «más o menos de algo» en orden):
+  `ui/StepPicker`. En escritorio, un `<select>` nativo y compacto; en el móvil
+  (640 px o menos), una rueda que se desliza arriba y abajo (`role="spinbutton"`,
+  con flechas, `Home` y `End`, y sin animación con movimiento reducido). Es el
+  mismo en toda la web: Avance, Red, las cifras del Pomodoro y las pestañas del
+  panel con periodo. Lo que solo tiene dos opciones («este mes» / «siempre»)
+  sigue en pastillas; el capital de Code Clicker también, porque sus tramos
+  conviven con fechas a mano y a veces no hay ninguno elegido. Falta Red →
+  Asientos (los días), que se estaba tocando a la vez.
+- **Gráficas con opciones**: la gráfica a la izquierda y sus opciones en un
+  panel a la derecha (como Red y Avance: `.net-layout`/`.net-rail`,
+  `.progress-layout`/`.progress-rail`). La gráfica se queda quieta a la vista
+  (`position: sticky`) y, si el panel no cabe, se desplaza él solo: al cambiar
+  una opción se ve el efecto sin subir ni bajar. Nada de filas de botones encima
+  de la gráfica. En el móvil, la gráfica primero y las opciones debajo,
+  compactas. Pedido por Alberto (2026-10-25).
 - **Ventanas**: `ui/Modal` (se cierra con su botón, Escape y el fondo; las
   obligatorias con `cancelable={false}`). Para preguntar antes de algo que no se
   deshace, `ui/useConfirm`, nunca `window.confirm`.

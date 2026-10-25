@@ -2,9 +2,10 @@
  * Periodos del filtro de fechas de la red de correcciones.
  */
 
-export const PERIODS = ['all', 'month', 'quarter', 'year', 'custom'] as const
+/** En el orden del selector (`StepPicker`): de menos a más y, al final, a mano. */
+export const STEPS = ['month', 'quarter', 'year', 'all', 'custom'] as const
 
-export type Period = (typeof PERIODS)[number]
+export type Period = (typeof STEPS)[number]
 
 const DAY_MS = 24 * 60 * 60_000
 

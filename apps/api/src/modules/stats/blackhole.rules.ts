@@ -36,11 +36,22 @@ export type CoreFacts = {
    * cuándo cambió uno aprobado: 42 los toca en lote años después.
    */
   lastActivity: number | null
+  /**
+   * Si aprobó lo que cierra el common core: ft_transcendence y el examen 6
+   * (`exam-rank-06` o `42next-exam-rank-06`). Sin eso, el grado no basta.
+   */
+  closedCore: boolean
 }
 
 export function coreStatusOf(facts: CoreFacts | null, now: number): CoreStatus {
   if (facts === null) return 'unknown'
-  if (facts.alumni || (facts.grade !== null && FINISHED_GRADES.has(facts.grade))) return 'finished'
+  if (facts.alumni || (facts.grade !== null && FINISHED_GRADES.has(facts.grade))) {
+    // El grado solo con las dos pruebas: hay `Alumni` del plan de antes de 2020
+    // (sin ft_transcendence ni examen 6), cuentas de staff y de pruebas con el
+    // grado puesto a mano y quien no tiene sus proyectos en la réplica. No
+    // terminaron este common core ni siguen en él: no se sabe.
+    return facts.closedCore ? 'finished' : 'unknown'
+  }
 
   if (facts.endAt !== null) {
     const settled = facts.endAt <= now - SETTLE_DAYS * DAY_MS

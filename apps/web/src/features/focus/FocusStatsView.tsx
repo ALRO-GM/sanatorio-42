@@ -4,7 +4,7 @@ import type { FocusStatsQuery } from '../../shared/api/types'
 import { useI18n } from '../../shared/i18n'
 import { useFormat } from '../../shared/i18n/useFormat'
 import { durationText } from '../../shared/time'
-import { PillGroup } from '../../shared/ui/PillGroup'
+import { StepPicker } from '../../shared/ui/StepPicker'
 
 /** Los periodos que se pueden mirar (#80 del buzón): hoy, semana, mes y total. */
 export const PERIODS = ['day', 'week', 'month', 'total'] as const
@@ -40,8 +40,8 @@ export function periodQuery(
   }
 }
 
-/** El selector de periodo. */
-export function PeriodPills({
+/** El selector de periodo: hoy, la semana, el mes o todo (`StepPicker`, el de toda la web). */
+export function PeriodPicker({
   value,
   onChange,
 }: {
@@ -51,7 +51,7 @@ export function PeriodPills({
   const { t } = useI18n()
 
   return (
-    <PillGroup
+    <StepPicker
       options={PERIODS}
       value={value}
       onChange={onChange}

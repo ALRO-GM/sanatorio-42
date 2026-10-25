@@ -12,7 +12,9 @@ import type {
   ProgressIndividual,
   ProgressLine,
   ProgressMeasure,
+  ProgressMilestone,
   ProgressPopulation,
+  ProgressTrace,
   RankingEntry,
   StatsEntry,
   StatsFastest,
@@ -170,24 +172,104 @@ const C_FINISHERS: { login: string; campus: string; days: number }[] = [
   { login: 'pnube', campus: 'Urduliz', days: 356 },
 ]
 
-/** La línea de una persona de mentira, siempre igual para el mismo login. */
-function personLine(login: string, until = LAST_DAY): Record<ProgressMeasure, ProgressLine> {
+/**
+ * Los proyectos del plan de Python, en orden y con sus horas: de ellos salen
+ * los hitos de cada persona de mentira (nombres de proyectos, no de gente).
+ */
+const PROJECTS: [name: string, hours: number][] = [
+  ['Libft', 70],
+  ['ft_printf', 55],
+  ['get_next_line', 55],
+  ['push_swap', 70],
+  ['Born2beroot', 50],
+  ...Array.from({ length: 11 }, (_, n): [string, number] => [
+    `Python Module ${String(n).padStart(2, '0')}`,
+    4 + Math.floor(n / 2),
+  ]),
+  ['A-Maze-ing', 50],
+  ['Exam Rank 02', 0],
+  ['Codexion', 80],
+  ['Fly-in', 120],
+  ['Call Me Maybe', 80],
+  ['Exam Rank 03', 0],
+  ['NetPractice', 50],
+  ['Pac-Man', 150],
+  ['RAG against the machine', 150],
+  ['Exam Rank 04', 0],
+  ['Inception', 150],
+  ['The Answer Protocol', 150],
+  ['Agent Smith', 100],
+  ['Exam Rank 05', 0],
+  ['ft_transcendence', 245],
+  ['Exam Rank 06', 0],
+]
+const PLAN_HOURS = PROJECTS.reduce((sum, [, hours]) => sum + hours, 0)
+
+/**
+ * La línea de una persona de mentira, con sus hitos, siempre igual para el
+ * mismo login: aprueba `share` del plan (en orden) repartido hasta el día
+ * `last`, y sale de los datos el día `until`. Con `share` 1 terminó: su línea
+ * llega al 100 % el día `last` y ahí se queda, como en la API.
+ */
+function traceOf(login: string, share: number, last: number, until = LAST_DAY): ProgressTrace {
   let seed = 0
 
   for (let index = 0; index < login.length; index++) seed += login.charCodeAt(index)
-  const top = 55 + noise(seed) * 45
-  const speed = 160 + noise(seed + 1) * 200
+  const count = Math.max(1, Math.round(share * PROJECTS.length))
+  const passed = PROJECTS.slice(0, count)
+  const finished = count === PROJECTS.length
+  // Por círculos, cada proyecto pesa lo mismo; por horas, sus horas sobre las de lo que hizo.
+  const total = finished ? passed.reduce((sum, [, hours]) => sum + hours, 0) : PLAN_HOURS
+  const milestones: ProgressMilestone[] = []
+  let hours = 0
 
-  return { circles: curve(top, speed, until), hours: curve(top * 0.9, speed * 1.1, until) }
+  passed.forEach(([name, each], index) => {
+    // Al principio más deprisa, al final más despacio; con algo de ruido, y días enteros.
+    const at = Math.round(last * ((index + 1) / count) ** (1.2 + noise(seed) * 0.4))
+    const day = index === count - 1 ? last : Math.min(last, at)
+
+    hours += each
+    const value = {
+      circles: Math.round(((index + 1) / PROJECTS.length) * 1000) / 10,
+      hours: Math.round((hours / total) * 1000) / 10,
+    }
+    const same = milestones.at(-1)
+
+    if (same?.day === day) {
+      same.projects.push(name)
+      same.value = value
+    } else {
+      milestones.push({ day, projects: [name], value })
+    }
+  })
+
+  const at = (day: number, measure: ProgressMeasure): number | null => {
+    if (day > until) return null
+    let value = 0
+
+    for (const milestone of milestones) if (milestone.day <= day) value = milestone.value[measure]
+
+    return value
+  }
+
+  return {
+    line: {
+      circles: DAYS.map((day) => at(day, 'circles')),
+      hours: DAYS.map((day) => at(day, 'hours')),
+    },
+    hours: Math.round(total),
+    finished: finished ? last : null,
+    milestones: milestones.filter((milestone) => milestone.day <= until),
+  }
 }
 
-/** Quien terminó en `days`: llega al 100 % ese día y ahí se queda. */
-function finisherLine(days: number): Record<ProgressMeasure, ProgressLine> {
-  const line = DAYS.map((day) =>
-    day >= days ? 100 : Math.round(100 * (1 - Math.exp((-day / days) * 2.6)) * 10) / 10,
-  )
+/** La línea de alguien que sigue: entre el 55 y el 100 % sin terminar, hasta el día `until`. */
+function personLine(login: string, until = LAST_DAY): ProgressTrace {
+  let seed = 0
 
-  return { circles: line, hours: line.map((value) => Math.round(value * 0.97 * 10) / 10) }
+  for (let index = 0; index < login.length; index++) seed += login.charCodeAt(index)
+
+  return traceOf(login, Math.min(0.95, 0.55 + noise(seed) * 0.45), until - 30, until)
 }
 
 function individualsMock(): StatsProgress['individuals'] {
@@ -199,12 +281,12 @@ function individualsMock(): StatsProgress['individuals'] {
   })
   const finished = PYTHON_FINISHERS.map((each) => ({
     login: each.login,
-    line: finisherLine(each.days),
+    ...traceOf(each.login, 1, each.days),
   }))
-  // Quien se tragó el black hole, sin nombre.
+  // Quien se tragó el black hole, sin nombre (pero con lo que aprobó).
   const gone = [0, 1, 2, 3].map((n) => ({
+    ...personLine(`bh${String(n)}`, 200 + n * 60),
     login: null,
-    line: personLine(`bh${String(n)}`, 200 + n * 60),
   }))
 
   return {
@@ -268,7 +350,7 @@ function progressMock(others: readonly string[]): StatsProgress {
   return {
     days: DAYS,
     track: 'next',
-    me: { circles: curve(70, 200, 300), hours: curve(55, 220, 300) },
+    me: { ...traceOf(ME.login, 0.62, 290, 300), hours: 1456 },
     campus: 'Madrid',
     // Como la API: sin una misma y como mucho cinco.
     others: [...new Set(others)]
@@ -277,7 +359,10 @@ function progressMock(others: readonly string[]): StatsProgress {
       .map((login) => {
         const days = finishers.get(login)
 
-        return { login, line: days === undefined ? personLine(login, 1100) : finisherLine(days) }
+        return {
+          login,
+          ...(days === undefined ? personLine(login, 1100) : traceOf(login, 1, days)),
+        }
       }),
     averages: { circles: byPopulation(1), hours: byPopulation(0.8) },
     individuals: individualsMock(),

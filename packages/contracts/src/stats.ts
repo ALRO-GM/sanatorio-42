@@ -59,16 +59,36 @@ export type ProgressPopulation = 'finished' | 'current' | 'blackholed'
 export type CoreTrack = 'classic' | 'next'
 /** Un valor (en %) por cada día de `StatsProgress.days`; `null` donde aún no se llega. */
 export type ProgressLine = (number | null)[]
-/** La línea de una persona, de las dos maneras de medir. */
-export type ProgressPersonLine = { login: string; line: Record<ProgressMeasure, ProgressLine> }
+/**
+ * Un día en que una persona aprobó algo que mueve su línea: el día (desde su
+ * inicio), el nombre de cada proyecto y el % en que queda, de las dos maneras.
+ */
+export type ProgressMilestone = {
+  day: number
+  projects: string[]
+  value: Record<ProgressMeasure, number>
+}
+/**
+ * La línea de una persona, de las dos maneras de medir, con sus hitos. Quien
+ * terminó se mide contra lo que hizo hasta terminar: su línea acaba en el 100 %.
+ */
+export type ProgressTrace = {
+  line: Record<ProgressMeasure, ProgressLine>
+  /** Las horas de su common core: las de su plan o, si terminó, las de lo que hizo. */
+  hours: number
+  /** El día (desde su inicio) en que terminó el common core; `null` si no lo ha terminado. */
+  finished: number | null
+  /** Cada día en que aprobó algo, del primero al último. */
+  milestones: ProgressMilestone[]
+}
+/** La línea de una persona con quien se compara. */
+export type ProgressPersonLine = ProgressTrace & { login: string }
 /**
  * La línea de una persona de una media con muy poca gente (`StatsProgress.minPeople`).
- * `login` es `null` en la de quien se tragó el black hole: se ve el camino, no quién.
+ * `login` es `null` en la de quien se tragó el black hole: se ve el camino (y lo
+ * que aprobó), no quién.
  */
-export type ProgressIndividual = {
-  login: string | null
-  line: Record<ProgressMeasure, ProgressLine>
-}
+export type ProgressIndividual = ProgressTrace & { login: string | null }
 
 /** `GET /stats/progress`: el avance en el common core a lo largo del tiempo (#87). */
 export type StatsProgress = {
@@ -76,7 +96,7 @@ export type StatsProgress = {
   days: number[]
   /** El plan de quien mira (o de con quién se compara), si se sabe. */
   track: CoreTrack | null
-  me: Record<ProgressMeasure, ProgressLine> | null
+  me: ProgressTrace | null
   /** El nombre del campus de quien mira, para rotular sus medias; `null` si no se sabe. */
   campus: string | null
   /**
@@ -100,7 +120,8 @@ export type StatsProgress = {
   /**
    * Para los ejes. `circles[n]`: el % de tener completos los círculos 0…n, con el
    * plan de quien mira. `hours`: las horas de todo el common core de quien mira
-   * (con su versión de cada proyecto) y las de cada plan.
+   * (con su versión de cada proyecto; si terminó, las de lo que hizo) y las de
+   * cada plan.
    */
   axis: { circles: number[]; hours: number; planHours: Record<CoreTrack, number> }
   /** Lo que pide cada pace, en `[día, %]`, con el plan de quien mira. */

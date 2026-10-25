@@ -65,13 +65,25 @@ describe('ventanas y paneles', () => {
         .map((tab) => tab.textContent)
 
       expect(names.length).toBeGreaterThan(5)
+      // Las pestañas con periodo lo eligen con el selector de toda la web (`StepPicker`).
+      let periods = 0
 
       for (const name of names) {
         await user.click(within(tabs).getByRole('tab', { name: must(name, 'pestaña') }))
         await settle(500)
         expect(within(tabs).getByRole('tab', { selected: true }).textContent).toBe(name)
         expect(must(document.querySelector('main'), 'main').textContent.length).toBeGreaterThan(50)
+        const picker = screen.queryAllByRole('combobox', { name: text('common.period') })[0]
+
+        if (picker !== undefined) {
+          periods += 1
+          const last = must(within(picker).getAllByRole('option').at(-1), 'la última opción')
+
+          await user.selectOptions(picker, last)
+          expect((picker as HTMLSelectElement).value).toBe((last as HTMLOptionElement).value)
+        }
       }
+      expect(periods).toBeGreaterThan(0)
     })
   }, 60_000)
 

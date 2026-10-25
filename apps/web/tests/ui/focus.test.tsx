@@ -97,7 +97,11 @@ describe('modo concentración (Pomodoro)', () => {
     const dialog = await screen.findByRole('dialog', { name: text('focus.title') })
 
     await user.click(within(dialog).getByRole('tab', { name: text('focus.tab.stats') }))
-    await user.click(within(dialog).getByRole('button', { name: text('focus.period.total') }))
+    // El periodo, con el selector de toda la web (`StepPicker`): un desplegable.
+    await user.selectOptions(
+      within(dialog).getByRole('combobox', { name: text('focus.stats.period') }),
+      text('focus.period.total'),
+    )
 
     // La demostración trae meses de sesiones inventadas: hay de todo.
     expect(await within(dialog).findByText(text('focus.stats.sessions'))).toBeTruthy()

@@ -10,6 +10,9 @@ const text = (key: string): string => must(es[key], `el texto ${key}`)
 /** El grupo de botones de la gráfica (el primero) o de la clasificación (el segundo). */
 const group = (key: string, index = 0): HTMLElement =>
   must(screen.getAllByRole('group', { name: text(key) })[index], `el grupo ${key}`)
+/** El periodo del eje del tiempo, en el panel de opciones. */
+const picker = (): HTMLSelectElement =>
+  screen.getByRole<HTMLSelectElement>('combobox', { name: text('rank.period') })
 const chartCard = (): HTMLElement =>
   must(document.querySelector<HTMLElement>('.progress-card'), 'la gráfica')
 const axis = (): string[] =>
@@ -173,15 +176,14 @@ describe('Avance: el periodo del eje del tiempo', () => {
     await openApp('#/avance')
     await ready()
 
-    const period = group('rank.period')
+    // El periodo es un desplegable (`StepPicker`): en escritorio, un `<select>` nativo.
+    const period = picker()
 
-    expect(within(period).getByRole('button', { name: '24 m' }).getAttribute('aria-pressed')).toBe(
-      'true',
-    )
+    expect(period.value).toBe('24')
     expect(months()).toEqual(['0 m', '3 m', '6 m', '9 m', '12 m', '15 m', '18 m', '21 m', '24 m'])
     const wide = myEnd()
 
-    await user.click(within(period).getByRole('button', { name: '8 m' }))
+    await user.selectOptions(period, '8 m')
     expect(months()).toEqual(['0 m', '1 m', '2 m', '3 m', '4 m', '5 m', '6 m', '7 m', '8 m'])
     // El pace de 8 meses acaba justo en el borde: se ve con su rótulo; los demás, cortados.
     expect(paceLabels()).toEqual(['8 m'])
@@ -195,9 +197,7 @@ describe('Avance: el periodo del eje del tiempo', () => {
 
     await openApp('#/avance')
     await ready()
-    await user.click(
-      within(group('rank.period')).getByRole('button', { name: text('net.period.all') }),
-    )
+    await user.selectOptions(picker(), text('net.period.all'))
 
     // Cuatro años de datos en la API de mentira: una marca al año.
     expect(months()).toEqual(['0 m', '12 m', '24 m', '36 m', '48 m'])
@@ -218,11 +218,7 @@ describe('Avance: el periodo del eje del tiempo', () => {
     )
     window.location.hash = '#/avance'
     await ready()
-    expect(
-      within(group('rank.period'))
-        .getByRole('button', { name: text('net.period.all') })
-        .getAttribute('aria-pressed'),
-    ).toBe('true')
+    expect(picker().value).toBe('all')
   })
 
   it('sin almacenamiento del navegador, vuelve a dos años sin romperse', async () => {
@@ -238,11 +234,7 @@ describe('Avance: el periodo del eje del tiempo', () => {
     try {
       await openApp('#/avance')
       await ready()
-      expect(
-        within(group('rank.period'))
-          .getByRole('button', { name: '24 m' })
-          .getAttribute('aria-pressed'),
-      ).toBe('true')
+      expect(picker().value).toBe('24')
     } finally {
       spy.mockRestore()
     }

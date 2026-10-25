@@ -787,6 +787,7 @@ describe('comunidad', () => {
       expect(await services.xp.health(actor('nex'), userId('nex'))).toEqual({
         startedAt: '2026-05-18T07:42:00.000Z',
         blackholedAt: '2027-04-03T07:42:00.000Z',
+        track: 'classic',
         currentCircle: 2,
         milestones: ['2026-05-19T11:37:00.000Z', '2026-06-18T14:40:00.000Z'],
         declared: null,
@@ -817,6 +818,7 @@ describe('comunidad', () => {
       expect(await services.xp.health(actor('leo'), null)).toEqual({
         startedAt: null,
         blackholedAt: null,
+        track: 'classic',
         currentCircle: 0,
         milestones: [],
         declared: null,

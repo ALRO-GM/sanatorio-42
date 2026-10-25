@@ -16,6 +16,12 @@
  * Un proyecto entre los que se elige uno (`CHOICES`: so_long, FdF o fract-ol) o
  * con dos versiones (`VERSIONS`) es una sola casilla: con aprobar cualquiera,
  * está hecha.
+ *
+ * **Quien terminó** el common core se mide contra lo que hizo hasta terminar,
+ * no contra el plan de hoy (`ownUnits`): el plan cambia (proyectos que entran,
+ * versiones nuevas, el plan de Python que se aprende de los votos), y quien
+ * terminó con otro juego de proyectos se quedaba en el 96 %. Así su línea
+ * llega al 100 % justo el día que terminó, de las dos maneras.
  */
 
 import type { ProgressMeasure } from '@sanatorio/contracts'
@@ -134,14 +140,16 @@ function weightsOf(units: readonly Unit[], done: Done): Record<ProgressMeasure, 
 
   const hours = ownHours(units, done)
   const total = hours.reduce((sum, each) => sum + each, 0)
+  const circles = units.map((unit) => 1 / (perCircle.get(unit.circle) ?? 1) / perCircle.size)
 
-  return {
-    circles: units.map((unit) => 1 / (perCircle.get(unit.circle) ?? 1) / perCircle.size),
-    hours: hours.map((each) => (total === 0 ? 0 : each / total)),
-  }
+  // Sin ninguna hora conocida (solo exámenes), por horas cuenta como por círculos.
+  return { circles, hours: total === 0 ? circles : hours.map((each) => each / total) }
 }
 
 const percent = (share: number): number => Math.round(share * 1000) / 10
+
+/** El día (desde `start`) en que cae `at`: el primer punto de las líneas que ya lo cuenta. */
+const dayOf = (at: number, start: number): number => Math.max(0, Math.ceil((at - start) / DAY_MS))
 
 /**
  * El avance de una persona (en %) en cada uno de `days` (días desde `start`),
@@ -263,4 +271,71 @@ export function finishedOn(units: readonly Unit[], done: Done): number | null {
   })
 
   return at
+}
+
+/**
+ * Las casillas contra las que se mide quien terminó: las que tenía hechas el
+ * día que terminó (`finishedOn`; sin nada del último círculo, lo último que
+ * aprobó del plan). Lo que hizo después, o lo que el plan añadió y no hizo, no
+ * cuenta. Sin nada hecho, el plan entero (no hay con qué medir).
+ */
+export function ownUnits(units: readonly Unit[], done: Done): readonly Unit[] {
+  const at = finishedAt(units, done)
+  const passed = at.map(({ at: when }) => when).filter((when) => when !== Infinity)
+
+  if (passed.length === 0) return units
+  const end = finishedOn(units, done) ?? Math.max(...passed)
+
+  return units.filter((_, index) => (at[index]?.at ?? Infinity) <= end)
+}
+
+/** Lo aprobado de un mismo día: los proyectos (por id) y dónde deja la línea. */
+type Milestone = { day: number; ids: number[]; value: Record<ProgressMeasure, number> }
+
+/**
+ * Los hitos de una línea: cada día (desde `start`) en que aprobó algo que la
+ * mueve, con qué proyecto de cada casilla y el % en que queda ese día. Hasta
+ * `now` o hasta `until` (el día que salió quien ya no está). Lo que se aprobó
+ * antes del inicio (quien vino trasladado) va en el día 0.
+ */
+export function milestonesOf(
+  units: readonly Unit[],
+  done: Done,
+  start: number,
+  now: number,
+  until = Infinity,
+): Milestone[] {
+  const weights = weightsOf(units, done)
+  const last = Math.min(now, until)
+  const order = finishedAt(units, done)
+    .map(({ at, id }, index) => ({ at, id, index }))
+    .filter((each) => each.at <= last && each.id !== null)
+    .sort((a, b) => a.at - b.at)
+  const sums = { circles: 0, hours: 0 }
+  const milestones: Milestone[] = []
+
+  for (const { at, id, index } of order) {
+    const day = dayOf(at, start)
+    let current = milestones.at(-1)
+
+    if (current?.day !== day) {
+      current = { day, ids: [], value: { circles: 0, hours: 0 } }
+      milestones.push(current)
+    }
+    sums.circles += weights.circles[index] ?? 0
+    sums.hours += weights.hours[index] ?? 0
+    current.ids.push(id ?? 0)
+    current.value = { circles: percent(sums.circles), hours: percent(sums.hours) }
+  }
+
+  return milestones
+}
+
+/** El día (desde `start`) en que quien terminó aprobó lo último de sus casillas. */
+export function finishedDay(units: readonly Unit[], done: Done, start: number): number | null {
+  const passed = finishedAt(units, done)
+    .map(({ at }) => at)
+    .filter((at) => at !== Infinity)
+
+  return passed.length === 0 ? null : dayOf(Math.max(...passed), start)
 }

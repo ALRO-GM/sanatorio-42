@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest'
 
-import { decodePart, externalHref, intraHref, networkHref, recordHref } from '../src/shared/links'
+import {
+  decodePart,
+  externalHref,
+  intraHref,
+  networkHref,
+  progressHref,
+  readProgressPreset,
+  recordHref,
+} from '../src/shared/links'
 
 describe('direcciones de la web', () => {
   it('un login normal va tal cual', () => {
@@ -50,5 +58,46 @@ describe('direcciones de fuera', () => {
     ]) {
       expect(externalHref(url), String(url)).toBeNull()
     }
+  })
+})
+
+describe('el Avance con opciones', () => {
+  const health = (plan: 'classic' | 'next') =>
+    progressHref({
+      plan: [plan],
+      pop: ['current', 'blackholed'],
+      scope: ['campus'],
+      paces: true,
+      me: true,
+    })
+
+  it('el enlace del estado de salud, para C y para Python', () => {
+    expect(health('classic')).toBe(
+      '#/avance?plan=c&pop=current,blackholed&scope=campus&paces=1&me=1',
+    )
+    expect(health('next')).toBe(
+      '#/avance?plan=python&pop=current,blackholed&scope=campus&paces=1&me=1',
+    )
+    expect(progressHref()).toBe('#/avance')
+  })
+
+  it('se lee lo que se entiende; lo demás, fuera', () => {
+    expect(readProgressPreset(health('next'))).toEqual({
+      plan: ['next'],
+      pop: ['current', 'blackholed'],
+      scope: ['campus'],
+      paces: true,
+      me: true,
+      range: undefined,
+    })
+    // `active` es «en curso + terminado»; lo raro no se cuela.
+    expect(readProgressPreset('#/avance?pop=active,zzz&plan=java&range=8')).toMatchObject({
+      pop: ['current'],
+      plan: undefined,
+      range: '8',
+    })
+    expect(readProgressPreset('#/avance')).toBeNull()
+    expect(readProgressPreset('#/red?plan=c')).toBeNull()
+    expect(readProgressPreset('#/avance?x=1')).toBeNull()
   })
 })

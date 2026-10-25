@@ -14,6 +14,8 @@
  * - Una persona suelta (de una media con poca gente) va con su plan y su trazo,
  *   más fina y con un punto al final. Tú, en el acento; con quien te comparas,
  *   cada cual con su color y su login al final de la línea.
+ * - Una persona (no una media) lleva sus hitos (`trace`): un punto por cada día
+ *   en que aprobó algo y, si terminó, el tramo del 100 % resaltado y un trofeo.
  */
 
 import type {
@@ -22,6 +24,7 @@ import type {
   ProgressMeasure,
   ProgressPopulation,
   ProgressScope,
+  ProgressTrace,
   StatsProgress,
 } from '@sanatorio/contracts'
 
@@ -53,6 +56,8 @@ export type Series = {
   style: LineStyle
   /** El login que se escribe al final de la línea (con quien te comparas). */
   tag?: string
+  /** Lo de una persona: sus hitos y si terminó. Las medias no lo llevan. */
+  trace?: ProgressTrace
 }
 
 const PLAN_COLOR: Record<CoreTrack, string> = {
@@ -193,8 +198,9 @@ export function groupSeries(
             key: each,
             label,
             line: person.line[measure],
-            hours: data.axis.planHours[track],
+            hours: person.hours,
             style: one,
+            trace: person,
           })
           keys.push({ key: each, label, style: one, empty: false })
         })

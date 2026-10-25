@@ -26,6 +26,7 @@ import type {
   ProgressMeasure,
   ProgressPopulation,
   ProgressScope,
+  ProgressTrace,
   StatsFastest,
   StatsProgress,
   StatsRanking,
@@ -34,12 +35,16 @@ import type {
 import type { Actor } from '../../core/actor.js'
 import { CHOICES, VERSIONS } from '../replica/index.js'
 import { coreStatusOf } from './blackhole.rules.js'
+import type { CoreFacts } from './blackhole.rules.js'
 import { COURSE_DAYS } from './pace.rules.js'
 import {
   FINISHED_CIRCLE,
   circleMarks,
   curveOf,
+  finishedDay,
   finishedOn,
+  milestonesOf,
+  ownUnits,
   paceLines,
   standingOf,
   totalHours,
@@ -50,6 +55,15 @@ import { kickoffsOf, rankRunners } from './ranking.rules.js'
 import type { RankingFilters, Runner } from './ranking.rules.js'
 import type { ProgressRepository } from './stats.repository.js'
 import { createTtlCache } from '../../core/ttl-cache.js'
+
+/**
+ * Lo que hay que tener aprobado para haber terminado el common core, además del
+ * grado (`docs/blackhole.md`): ft_transcendence y el examen 6, el clásico o el nuevo.
+ */
+const CLOSERS = {
+  transcendence: ['ft_transcendence'],
+  exam: ['exam-rank-06', '42next-exam-rank-06'],
+} as const
 
 /** Cada cuántos días va un punto de las líneas. */
 const STEP_DAYS = 15
@@ -132,7 +146,7 @@ type Cells = { sum: number; n: number }[]
 type Finisher = Omit<FastestEntry, 'campus'> & { track: CoreTrack; here: boolean; campus: number }
 
 /** Una línea de una media con poca gente, aún con su login para saber si se ve. */
-type Member = { login: string; line: ProgressIndividual['line'] }
+type Member = ProgressTrace & { login: string }
 
 type Snapshot = {
   units: Record<CoreTrack, Unit[]>
@@ -145,6 +159,8 @@ type Snapshot = {
   counts: StatsProgress['people']
   census: StatsProgress['census']
   planHours: Record<CoreTrack, number>
+  /** El nombre de cada proyecto del plan (id → nombre), para los hitos. */
+  names: Map<number, string>
   runners: Runner[]
   finishers: Finisher[]
   campusNames: Map<number, string>
@@ -155,6 +171,35 @@ const filled = <K extends string, V>(keys: readonly K[], value: (key: K) => V): 
 
 const monthOf = (ms: number): string => new Date(ms).toISOString().slice(0, 7)
 const DAY_MS = 86_400_000
+
+/**
+ * La línea de una persona con sus hitos. Quien terminó se mide contra lo que
+ * hizo hasta terminar (`ownUnits`): acaba en el 100 % el día que terminó, de
+ * las dos maneras. Quien sigue o se fue, contra su plan. Quien se fue, solo
+ * hasta el día en que salió.
+ */
+function traceOf(
+  plan: readonly Unit[],
+  person: Person,
+  days: readonly number[],
+  now: number,
+  names: ReadonlyMap<number, string>,
+): ProgressTrace {
+  const finished = person.status === 'finished'
+  const units = finished ? ownUnits(plan, person.done) : plan
+  const until = person.status === 'blackholed' ? (person.endAt ?? Infinity) : Infinity
+
+  return {
+    line: curveOf(units, person.done, person.start, days, now, until),
+    hours: Math.round(totalHours(units, person.done)),
+    finished: finished ? finishedDay(units, person.done, person.start) : null,
+    milestones: milestonesOf(units, person.done, person.start, now, until).map((each) => ({
+      day: each.day,
+      projects: each.ids.map((id) => names.get(id) ?? String(id)),
+      value: each.value,
+    })),
+  }
+}
 
 export function createProgressService(options: {
   progress: ProgressRepository
@@ -173,7 +218,9 @@ export function createProgressService(options: {
    * Los proyectos de cada plan, con las otras versiones de cada uno (la vieja y
    * la de `42next-`): quien hizo cualquiera tiene el hueco hecho.
    */
-  async function plans(): Promise<Record<CoreTrack, PlanProject[]>> {
+  async function plans(): Promise<
+    Record<CoreTrack, PlanProject[]> & { names: Map<number, string> }
+  > {
     const [classic, next] = await Promise.all([options.circles('classic'), options.circles('next')])
     const planIds = [...new Set([...classic.keys(), ...next.keys()])]
     const extra = await options.progress.idsOf(Object.values(VERSIONS).flat())
@@ -191,8 +238,9 @@ export function createProgressService(options: {
             : [{ id: versionId, circle, slug: version, hours: info.get(versionId)?.hours ?? null }]
         })
       })
+    const names = new Map([...info].map(([id, each]) => [id, each.name]))
 
-    return { classic: listOf(classic), next: listOf(next) }
+    return { classic: listOf(classic), next: listOf(next), names }
   }
 
   /**
@@ -228,8 +276,19 @@ export function createProgressService(options: {
     }
     const slugOf = new Map([...plan.classic, ...plan.next].map((p) => [p.id, p.slug]))
     const hint = signals(plan)
+    // Lo que cierra el common core, esté o no en el plan aprendido: ft_transcendence y
+    // el examen 6 de cualquiera de los dos planes. Sin los dos, nadie ha terminado.
+    const closers = await options.progress.idsOf([...CLOSERS.transcendence, ...CLOSERS.exam])
+    const idsOf = (slugs: readonly string[]): number[] =>
+      slugs.flatMap((slug) => {
+        const id = closers.get(slug)
+
+        return id === undefined ? [] : [id]
+      })
+    const transcendence = idsOf(CLOSERS.transcendence)
+    const lastExam = idsOf(CLOSERS.exam)
     const [rows, activity, campusNames] = await Promise.all([
-      options.progress.rows(campus, [...slugOf.keys()]),
+      options.progress.rows(campus, [...new Set([...slugOf.keys(), ...closers.values()])]),
       options.progress.activity(),
       options.progress.campusNames(),
     ])
@@ -240,6 +299,7 @@ export function createProgressService(options: {
         begin: number | null
         votes: Record<CoreTrack, Set<number>>
         known: boolean
+        facts: Omit<CoreFacts, 'closedCore'> | null
       }
     >()
 
@@ -260,7 +320,9 @@ export function createProgressService(options: {
           done: new Map(),
           here: row.here,
           votes: { classic: new Set(), next: new Set() },
-          status: coreStatusOf(
+          // Se decide con todas sus filas: terminar pide ft_transcendence y el examen 6.
+          status: 'unknown',
+          facts:
             cursus === null
               ? null
               : {
@@ -271,8 +333,6 @@ export function createProgressService(options: {
                   alumni: cursus.alumni,
                   lastActivity: activity.get(row.login) ?? null,
                 },
-            t,
-          ),
           endAt: cursus?.endAt ?? null,
           campus: cursus?.campusId ?? null,
         }
@@ -290,6 +350,14 @@ export function createProgressService(options: {
     let longest = 0
 
     for (const person of people.values()) {
+      const has = (ids: readonly number[]) => ids.some((id) => person.done.has(id))
+
+      person.status = coreStatusOf(
+        person.facts === null
+          ? null
+          : { ...person.facts, closedCore: has(transcendence) && has(lastExam) },
+        t,
+      )
       person.start = person.begin ?? person.first
       if (!Number.isFinite(person.start) || person.start > t) continue
       const end = person.status === 'blackholed' ? Math.min(t, person.endAt ?? t) : t
@@ -319,9 +387,10 @@ export function createProgressService(options: {
       census.all[person.track][person.status] += 1
       if (person.here) census.campus[person.track][person.status] += 1
 
-      // Quien ya no está, solo hasta el día en que salió: después no avanza.
-      const until = person.status === 'blackholed' ? (person.endAt ?? Infinity) : Infinity
-      const curve = curveOf(units[person.track], person.done, person.start, days, t, until)
+      // Quien ya no está, solo hasta el día en que salió: después no avanza. Quien
+      // terminó, contra lo que hizo: su línea (y la media) llega al 100 %.
+      const trace = traceOf(units[person.track], person, days, t, plan.names)
+      const curve = trace.line
       const groups = GROUPS.filter((group) => {
         const [scope, plan] = group.split('-') as [ProgressScope, CoreTrack]
 
@@ -333,11 +402,17 @@ export function createProgressService(options: {
           counts[population][group] += 1
           // Por si la media se queda corta: entonces van estas líneas.
           if (members[population][group].length < MIN_PEOPLE) {
-            members[population][group].push({ login: person.login, line: curve })
+            members[population][group].push({ login: person.login, ...trace })
           }
+          // En la media de quien terminó, quien ya terminó sigue en el 100 % los días que
+          // aún no ha vivido: sin eso, el final de la curva solo tenía a quien empezó hace
+          // más tiempo (planes viejos, menos %) y bajaba (Barcelona, del 89 % al 56 %).
+          const carry = population === 'finished'
+
           for (const measure of MEASURES) {
-            curve[measure].forEach((value, index) => {
+            curve[measure].forEach((each, index) => {
               const cell = sums[measure][population][group][index]
+              const value = each ?? (carry ? 100 : null)
 
               if (value !== null && cell !== undefined) {
                 cell.sum += value
@@ -398,6 +473,7 @@ export function createProgressService(options: {
       counts,
       census,
       planHours: filled(TRACKS, (track) => totalHours(units[track])),
+      names: plan.names,
       runners,
       finishers: finishers.sort((a, b) => a.days - b.days || a.login.localeCompare(b.login)),
       campusNames,
@@ -423,10 +499,7 @@ export function createProgressService(options: {
 
         return person === undefined
           ? null
-          : {
-              person,
-              line: curveOf(data.units[person.track], person.done, person.start, data.days, t),
-            }
+          : { person, trace: traceOf(data.units[person.track], person, data.days, t, data.names) }
       }
       const mine = lineOf(actor.login)
       const theirs = [...new Set(others)]
@@ -435,7 +508,7 @@ export function createProgressService(options: {
         .flatMap((login) => {
           const found = lineOf(login)
 
-          return found === null ? [] : [{ login: found.person.login, line: found.line }]
+          return found === null ? [] : [{ login: found.person.login, ...found.trace }]
         })
       const track = mine?.person.track ?? data.people.get(theirs[0]?.login ?? '')?.track ?? null
       const units = data.units[track ?? 'classic']
@@ -447,8 +520,8 @@ export function createProgressService(options: {
             : data.members[population][group]
                 .filter((member) => member.login === actor.login || sees(member.login))
                 .map((member) => ({
+                  ...member,
                   login: population === 'blackholed' ? null : member.login,
-                  line: member.line,
                 })),
         ),
       )
@@ -456,7 +529,7 @@ export function createProgressService(options: {
       return {
         days: data.days,
         track,
-        me: mine?.line ?? null,
+        me: mine?.trace ?? null,
         campus: data.campusNames.get(actor.campusId) ?? null,
         others: theirs,
         averages: data.averages,
@@ -466,8 +539,9 @@ export function createProgressService(options: {
         census: data.census,
         axis: {
           circles: circleMarks(units),
-          // Las horas del eje son las de quien mira, con su versión de cada proyecto.
-          hours: Math.round(totalHours(units, mine?.person.done)),
+          // Las horas del eje son las de quien mira, con su versión de cada proyecto
+          // (si terminó, las de lo que hizo: su 100 %).
+          hours: mine?.trace.hours ?? Math.round(totalHours(units)),
           planHours: filled(TRACKS, (each) => Math.round(data.planHours[each])),
         },
         paces: paceLines(units),

@@ -205,6 +205,136 @@
   font-size: 0.85rem;
   color: var(--text-2);
 }
+/* La gráfica a la izquierda, quieta a la vista, y sus opciones en un panel a la
+   derecha (como la Red; regla en `docs/interfaz.md`). */
+.progress-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 0.9rem;
+  align-items: start;
+}
+.progress-layout > .progress-card {
+  position: sticky;
+  top: calc(var(--appbar-h, 98px) + 0.6rem);
+}
+.progress-rail {
+  display: grid;
+  gap: 0.9rem;
+  align-content: start;
+  max-height: calc(100dvh - var(--appbar-h, 98px) - 1.2rem);
+  overflow-y: auto;
+  position: sticky;
+  top: calc(var(--appbar-h, 98px) + 0.6rem);
+  scrollbar-width: thin;
+}
+.progress-option {
+  display: grid;
+  gap: 0.4rem;
+  align-content: start;
+}
+.progress-option-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem 1rem;
+}
+.progress-rail .filter-pills {
+  flex-wrap: wrap;
+}
+/* En el móvil (y en ventanas estrechas), la gráfica primero y las opciones debajo. */
+@media (max-width: 900px) {
+  .progress-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .progress-layout > .progress-card,
+  .progress-rail {
+    position: static;
+    max-height: none;
+    overflow: visible;
+  }
+  .progress-rail {
+    gap: 0.6rem;
+  }
+}
+.progress-chart > svg:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
+}
+/* Los rótulos de los paces, legibles aunque una línea pase por encima. */
+.progress-pace text {
+  paint-order: stroke;
+  stroke: var(--surface);
+  stroke-width: 3px;
+  stroke-dasharray: none;
+}
+/* Los hitos de una persona: un punto hueco por cada día en que aprobó algo. */
+.progress-milestone {
+  fill: var(--surface);
+  stroke-width: 1.5;
+}
+.progress-milestone.on {
+  fill: currentColor;
+}
+/* Lo que lleva terminado quien terminó: el mismo tono, más intenso, con un
+   halo suave. `color` es el de su línea (lo pone `ProgressChart`). */
+.progress-finished {
+  fill: none;
+  stroke-linecap: round;
+  filter: saturate(1.7) brightness(1.05) drop-shadow(0 0 3px currentColor);
+}
+.progress-trophy circle {
+  fill: currentColor;
+  stroke: var(--surface);
+  stroke-width: 1.5;
+  filter: drop-shadow(0 0 2.5px currentColor);
+}
+.progress-trophy .icon {
+  color: var(--surface);
+}
+/* El trofeo aparece con un pequeño salto; sin él si se pide menos movimiento. */
+@media (prefers-reduced-motion: no-preference) {
+  .progress-trophy > * {
+    animation: progress-trophy-in 0.45s ease-out both;
+  }
+}
+@keyframes progress-trophy-in {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.progress-tip-projects {
+  max-width: 18rem;
+  white-space: normal;
+  color: var(--text-2);
+}
+.progress-tip-done {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-weight: 600;
+}
+.progress-swatch.milestone {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  border: 1.5px solid var(--text-2);
+  background: var(--surface);
+}
+.progress-swatch.trophy {
+  display: inline-grid;
+  place-items: center;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--on-accent);
+}
 /* Una media sin nadie: se dice (con su 0), pero no hay línea. */
 .progress-legend li.empty {
   opacity: 0.5;

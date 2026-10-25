@@ -154,6 +154,8 @@ async function person(
     printf?: number | null
     cursus?: { grade: string; end?: number; active: number | null } | null
     track?: 'classic' | 'next'
+    /** Si terminó (grado de terminar): sin ft_transcendence y el examen 6 aprobados (`false`). */
+    closed?: boolean
   },
 ): Promise<void> {
   const campus = options.campus ?? MADRID
@@ -185,6 +187,23 @@ async function person(
         iso(NOW),
       ],
     })
+  }
+  // Quien tiene el grado de terminar aprobó ft_transcendence y el examen 6 (salvo `closed: false`).
+  if (['Transcender', 'Alumni'].includes(options.cursus?.grade ?? '') && options.closed !== false) {
+    for (const project of [1337, options.track === 'next' ? 2712 : 1324]) {
+      statements.push({
+        sql: `INSERT INTO project_users (id, user_id, project_id, status, validated, updated_at_42, created_at_42, synced_at)
+              VALUES (?, ?, ?, 'finished', 1, ?, ?, ?)`,
+        args: [
+          nextRow++,
+          id,
+          project,
+          iso(options.printf ?? options.begin + 20 * DAY),
+          iso(options.begin),
+          iso(NOW),
+        ],
+      })
+    }
   }
   if (options.track !== undefined) {
     statements.push({
@@ -235,6 +254,9 @@ async function projects(): Promise<void> {
     [1316, '42cursus-ft_printf', 55],
     [2687, '42next-push_swap', 70],
     [1471, '42cursus-push_swap', 50],
+    [1337, 'ft_transcendence', 245],
+    [1324, 'exam-rank-06', 0],
+    [2712, '42next-exam-rank-06', 0],
   ] as const) {
     await db.execute({
       sql: 'INSERT INTO projects (id, name, slug, hours) VALUES (?, ?, ?, ?)',
@@ -318,7 +340,7 @@ describe('medias por población', () => {
     const progress = await service().progress(actor('pyt'), [], () => true)
 
     expect(progress.track).toBe('next')
-    expect(progress.me?.circles.filter((value) => value !== null).at(-1)).toBe(100)
+    expect(progress.me?.line.circles.filter((value) => value !== null).at(-1)).toBe(100)
     // Su plan: Libft (70) y la push_swap vieja (50).
     expect(progress.axis.hours).toBe(120)
   })
@@ -714,8 +736,199 @@ describe('«Todo»: las líneas llegan hasta quien más tiempo lleva', () => {
     const at = progress.days.findIndex((day) => day >= 1600)
 
     expect(progress.days.at(-1)).toBeGreaterThanOrEqual(5 * 365)
-    expect(progress.me?.circles[at]).toBe(100)
-    expect(progress.me?.circles[progress.days.indexOf(730)]).toBe(50)
+    expect(progress.me?.line.circles[at]).toBe(100)
+    expect(progress.me?.line.circles[progress.days.indexOf(730)]).toBe(50)
     expect(JSON.stringify(progress).length).toBeLessThan(40_000)
+  })
+})
+
+describe('quien terminó acaba en el 100 %, con sus hitos', () => {
+  /** Un plan que hoy pide además la push_swap (1471) en el círculo 0. */
+  const grown = () =>
+    createProgressService({
+      progress: createProgressRepository(db),
+      circles: () =>
+        Promise.resolve(
+          new Map([
+            [1314, 0],
+            [1316, 1],
+            [1471, 0],
+          ]),
+        ),
+      now: () => NOW,
+    })
+  /** Un aprobado más de alguien (`status` por si lo está repitiendo). */
+  const pass = async (user: number, project: number, at: number, status = 'finished') => {
+    await db.execute({
+      sql: `INSERT INTO project_users (id, user_id, project_id, status, validated, final_mark, updated_at_42, created_at_42, synced_at)
+            VALUES (?, ?, ?, ?, 1, 100, ?, ?, ?)`,
+      args: [nextRow++, user, project, status, iso(at), iso(at - DAY), iso(NOW)],
+    })
+  }
+
+  it('mide a quien terminó contra lo que hizo, y a quien sigue contra el plan', async () => {
+    await projects()
+    await db.execute("UPDATE projects SET name = 'Libft' WHERE id = 1314")
+    await db.execute("UPDATE projects SET name = 'ft_printf' WHERE id = 1316")
+    const begin = NOW - 300 * DAY
+
+    // Las dos hicieron Libft (día 10) y printf (día 40), no la push_swap que el plan pide hoy.
+    await person(1, 'fin', {
+      begin,
+      printf: begin + 40 * DAY,
+      cursus: { grade: 'Transcender', active: 1 },
+    })
+    await person(2, 'sigue', {
+      begin,
+      printf: begin + 40 * DAY,
+      cursus: { grade: 'Cadet', active: 1 },
+    })
+    await person(3, 'oculta', {
+      begin,
+      printf: begin + 50 * DAY,
+      cursus: { grade: 'Transcender', active: 1 },
+    })
+    // Quien terminó hace la push_swap meses después: no mueve su línea.
+    await pass(1, 1471, begin + 200 * DAY)
+
+    const sees = (login: string) => login !== 'oculta'
+    const progress = await grown().progress(actor('fin'), ['sigue', 'oculta'], sees)
+    const at = (day: number) => progress.days.indexOf(day)
+
+    // Por círculos y por horas, el 100 % justo el día 45 (el primer punto tras el 40).
+    expect(progress.me?.line.circles[at(30)]).toBe(50)
+    expect(progress.me?.line.circles[at(45)]).toBe(100)
+    expect(progress.me?.line.hours[at(45)]).toBe(100)
+    // 70 de 125 h.
+    expect(progress.me?.line.hours[at(30)]).toBe(56)
+    expect(progress.me?.line.circles.filter((value) => value !== null).at(-1)).toBe(100)
+    expect(progress.me?.finished).toBe(40)
+    // Sus horas son las de lo que hizo: Libft (70) y printf (55).
+    expect(progress.me?.hours).toBe(125)
+    expect(progress.axis.hours).toBe(125)
+    // Sus hitos, por día y con el nombre de cada proyecto; la push_swap no.
+    expect(progress.me?.milestones).toEqual([
+      { day: 10, projects: ['Libft'], value: { circles: 50, hours: 56 } },
+      { day: 40, projects: ['ft_printf'], value: { circles: 100, hours: 100 } },
+    ])
+
+    // Quien sigue, contra el plan de hoy: medio círculo 0 por hacer.
+    const [other] = progress.others
+
+    expect(progress.others.map((each) => each.login)).toEqual(['sigue'])
+    expect(other?.finished).toBeNull()
+    expect(other?.line.circles[at(45)]).toBe(75)
+    expect(other?.hours).toBe(175)
+    expect(other?.milestones.map((each) => each.day)).toEqual([10, 40])
+
+    // Las medias de quien terminó lo heredan; quien no se ve no sale en las sueltas.
+    expect(progress.individuals.finished['campus-classic'].map((each) => each.login)).toEqual([
+      'fin',
+    ])
+    expect(progress.individuals.finished['campus-classic'][0]?.milestones).toHaveLength(2)
+    // En la clasificación, quien terminó va con el 100 %.
+    const ranking = await grown().ranking(
+      actor('fin'),
+      {
+        by: 'circles',
+        plan: 'all',
+        kickoff: null,
+        cohort: 'only',
+        circleMin: 0,
+        circleMax: 7,
+        pctMin: 0,
+        pctMax: 100,
+      },
+      { offset: 0, limit: 10 },
+      sees,
+    )
+
+    expect(ranking.me).toMatchObject({ circle: 7, circles: 100, hours: 100 })
+  })
+
+  it('sin ft_transcendence y el examen 6, el grado no basta: no se sabe', async () => {
+    await projects()
+    const begin = NOW - 300 * DAY
+
+    await person(1, 'grado', {
+      begin,
+      printf: begin + 40 * DAY,
+      cursus: { grade: 'Transcender', active: 1 },
+      closed: false,
+    })
+    await person(2, 'cerrado', {
+      begin,
+      printf: begin + 40 * DAY,
+      cursus: { grade: 'Alumni', active: 0 },
+    })
+
+    const progress = await service().progress(actor('grado'), [], () => true)
+
+    expect(progress.census.campus.classic).toMatchObject({ finished: 1, unknown: 1 })
+    expect(progress.me?.finished).toBeNull()
+  })
+
+  it('la media de quien terminó llega arriba y cada cual se queda en el 100 %', async () => {
+    await projects()
+    // Diez que terminaron: unos hace años y otros hace nada (no han vivido el día 600).
+    for (let n = 0; n < 10; n++) {
+      const begin = NOW - (n < 5 ? 900 : 80) * DAY
+
+      await person(n + 1, `fin${String(n)}`, {
+        begin,
+        printf: begin + (30 + n * 5) * DAY,
+        cursus: { grade: 'Transcender', active: 1 },
+      })
+    }
+
+    const progress = await grown().progress(actor('fin0'), [], () => true)
+    const average = progress.averages.circles.finished['campus-classic']
+    const hours = progress.averages.hours.finished['campus-classic']
+
+    // Arriba del todo (el final del círculo 6), y ahí se queda hasta el último punto.
+    expect(average.at(-1)).toBe(100)
+    expect(hours.at(-1)).toBe(100)
+    expect(average[progress.days.indexOf(600)]).toBe(100)
+    expect(progress.axis.circles.at(-1)).toBe(100)
+    // La línea de quien terminó, plana en el 100 % desde que terminó hasta hoy.
+    const line = progress.me?.line.circles ?? []
+    const from = line.indexOf(100)
+
+    expect(progress.days[from]).toBe(30)
+    expect(line.slice(from).filter((value) => value !== null)).toEqual(
+      line
+        .slice(from)
+        .filter((value) => value !== null)
+        .map(() => 100),
+    )
+    expect(line.filter((value) => value !== null).length).toBeGreaterThan(from + 50)
+  })
+
+  it('lo aprobado que está repitiendo cuenta; quien se fue, sin nombre pero con sus hitos', async () => {
+    await projects()
+    const begin = NOW - 300 * DAY
+
+    await person(1, 'repite', { begin, cursus: { grade: 'Cadet', active: 1 } })
+    await pass(1, 1316, begin + 30 * DAY, 'in_progress')
+    await person(2, 'se-fue', {
+      begin,
+      printf: begin + 20 * DAY,
+      cursus: { grade: 'Cadet', end: begin + 100 * DAY, active: 0 },
+    })
+
+    const progress = await service().progress(actor('repite'), [], () => true)
+
+    expect(progress.me?.milestones.map((each) => each.projects)).toEqual([
+      ['42cursus-libft'],
+      ['42cursus-ft_printf'],
+    ])
+    const [gone] = progress.individuals.blackholed['campus-classic']
+
+    expect(gone?.login).toBeNull()
+    expect(gone?.milestones.at(-1)).toEqual({
+      day: 20,
+      projects: ['42cursus-ft_printf'],
+      value: { circles: 100, hours: 100 },
+    })
   })
 })

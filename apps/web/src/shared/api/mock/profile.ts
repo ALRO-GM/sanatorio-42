@@ -212,6 +212,8 @@ export const profileMock: Pick<
     return {
       startedAt: at(0),
       blackholedAt: at(320),
+      // Como el Avance de mentira: tu plan es el de Python.
+      track: 'next' as const,
       currentCircle: 3,
       milestones: [at(1), at(31), at(94)],
       declared,
