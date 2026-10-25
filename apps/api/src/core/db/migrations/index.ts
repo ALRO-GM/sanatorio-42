@@ -74,6 +74,7 @@ import { correctionFeedbackSchema } from './0065-correction-feedback.js'
 import { noCorrectionFeedbackSchema } from './0066-no-correction-feedback.js'
 import { helpBookingsCampusSchema } from './0067-help-bookings-campus.js'
 import { poolMembersSchema } from './0068-pool-members.js'
+import { agendaCursusSchema } from './0070-agenda-cursus.js'
 import type { Migration } from './types.js'
 
 export const MIGRATIONS: readonly Migration[] = [
@@ -145,6 +146,7 @@ export const MIGRATIONS: readonly Migration[] = [
   noCorrectionFeedbackSchema,
   helpBookingsCampusSchema,
   poolMembersSchema,
+  agendaCursusSchema,
 ]
 
 /** Versión más alta que existe en el código. */

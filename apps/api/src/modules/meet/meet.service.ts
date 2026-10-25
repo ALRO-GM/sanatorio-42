@@ -10,6 +10,10 @@
  *
  * Quién participa en qué lo dice el módulo de cada cosa (pizarras, ayuda,
  * terapias); para lo de 42, el calendario de cada persona.
+ *
+ * Mundos separados (`docs/piscineros.md`): una sala con alguien del otro mundo
+ * (estudiante o piscinero) no se abre, y de lo que se enseña de la gente (quién
+ * escribe, quién asiste, a quién se avisa) solo sale la de su mundo.
  */
 
 import type {
@@ -30,6 +34,8 @@ import { z } from 'zod'
 
 import { assertAdmin } from '../../core/actor.js'
 import type { Actor } from '../../core/actor.js'
+import { NO_POOL, seesFor } from '../../core/audience.js'
+import type { Audience } from '../../core/audience.js'
 import type { Notify } from '../../core/events.js'
 import type { Db } from '../../core/db/database.js'
 import { toNumber, toText } from '../../core/db/rows.js'
@@ -68,6 +74,8 @@ export type MeetServiceOptions = {
   /** Para el chat de cada grupo de terapia (`group:<id>`), que no es un evento del calendario. */
   therapy: TherapyService
   replica: ReplicaRepository
+  /** Quién ve a quién. Sin ella, nadie es piscinero. */
+  audience?: Audience
   /** Quién tiene la web abierta ahora mismo. */
   online?: () => Promise<Set<string>>
   /** Para dejar un aviso en el buzón de quien tiene que enterarse. Sin él, no se avisa. */
@@ -142,6 +150,14 @@ export function createMeetService(options: MeetServiceOptions) {
   const { db, calendar, boards, help, attendance, therapy, replica } = options
   const now = options.now ?? Date.now
   const notify: Notify = options.notify ?? (() => Promise.resolve())
+  const audience = options.audience ?? NO_POOL
+
+  /** A quién puede ver `actor`: a la gente de su mundo y, siempre, a sí mismo. */
+  const seerOf = async (actor: Actor): Promise<(login: string) => boolean> => {
+    const sees = await seesFor(audience, actor)
+
+    return (login) => login === actor.login || sees(login)
+  }
   // Preguntar al calendario en cada mensaje del chat sería caro: se recuerda un rato.
   const membership = createTtlCache<boolean>({ ttlMs: 5 * 60_000, maxEntries: 500, now })
 
@@ -155,8 +171,12 @@ export function createMeetService(options: MeetServiceOptions) {
     userId: number | null,
     id: string,
   ): Promise<void> => {
-    const takesPart = await membership.get(`${actor.login}|${actor.campusId}|${id}`, async () => {
+    const world = actor.pool === true ? 'pool' : 'student'
+    const key = `${actor.login}|${actor.campusId}|${world}|${id}`
+    const takesPart = await membership.get(key, async () => {
       const [kind, second, third] = id.split(':')
+      // Una sala con alguien del otro mundo no es de quien pregunta.
+      const sees = await seerOf(actor)
 
       // Lo de Sanatorio se pregunta a quien lo sabe: calcular el calendario
       // entero (con la agenda de 42 incluida) para saber si alguien está en una
@@ -167,6 +187,7 @@ export function createMeetService(options: MeetServiceOptions) {
           (group) =>
             group.id === numberOf(second) &&
             group.joined &&
+            sees(group.creator) &&
             (kind === 'group' || group.dates.includes(third ?? '')),
         )
       }
@@ -180,18 +201,23 @@ export function createMeetService(options: MeetServiceOptions) {
           (a === actor.login || b === actor.login) &&
           a !== b &&
           [a, b].sort().join() === [a, b].join() &&
+          sees(a) &&
+          sees(b) &&
           (await Promise.all([a, b].map((login) => replica.userExists(login)))).every(Boolean)
         )
       }
       if (kind === 'board') {
         return (await boards.list(actor)).some(
-          (board) => board.id === numberOf(second) && (board.joined || board.host === actor.login),
+          (board) =>
+            board.id === numberOf(second) &&
+            (board.joined || board.host === actor.login) &&
+            sees(board.host),
         )
       }
       if (kind === 'help' && second === 'booking') {
         // Una reserva sin aceptar todavía no es un compromiso: no tiene chat.
         return help.session(actor, numberOf(third)).then(
-          () => true,
+          ({ event, guest }) => sees(event.host) && sees(guest),
           () => false,
         )
       }
@@ -235,11 +261,12 @@ export function createMeetService(options: MeetServiceOptions) {
     id: string,
   ): Promise<{ role: 'host' | 'guest'; event: AttendanceEvent }> => {
     const [kind, second, third] = id.split(':')
+    const sees = await seerOf(actor)
 
     if (kind === 'board') {
       const board = (await boards.list(actor)).find((entry) => entry.id === numberOf(second))
 
-      if (board !== undefined && (board.joined || board.host === actor.login)) {
+      if (board !== undefined && (board.joined || board.host === actor.login) && sees(board.host)) {
         return {
           role: board.host === actor.login ? 'host' : 'guest',
           event: {
@@ -256,7 +283,13 @@ export function createMeetService(options: MeetServiceOptions) {
       throw domainError('forbidden', 'Ese evento no está en tu calendario')
     }
     if (kind === 'help' && second === 'booking') {
-      return help.session(actor, numberOf(third))
+      const session = await help.session(actor, numberOf(third))
+
+      if (!sees(session.event.host) || !sees(session.guest)) {
+        throw domainError('forbidden', 'Ese evento no está en tu calendario')
+      }
+
+      return session
     }
 
     throw domainError('invalid_input', 'Ese tipo de evento no valida la asistencia con códigos')
@@ -267,6 +300,12 @@ export function createMeetService(options: MeetServiceOptions) {
    * (correcciones, eventos) no se sabe: ahí no se avisa a nadie.
    */
   const peopleIn = async (actor: Actor, id: string): Promise<string[]> => {
+    const sees = await seerOf(actor)
+
+    return (await everyoneIn(actor, id)).filter(sees)
+  }
+
+  const everyoneIn = async (actor: Actor, id: string): Promise<string[]> => {
     const [kind, second, third] = id.split(':')
 
     if (kind === 'dm') {
@@ -310,6 +349,7 @@ export function createMeetService(options: MeetServiceOptions) {
     notify,
     now,
     assertParticipant,
+    seerOf,
     ...given({ online: options.online }),
   })
 
@@ -341,10 +381,13 @@ export function createMeetService(options: MeetServiceOptions) {
               ) ORDER BY id`,
         args: [event, since, THREAD_LIMIT],
       })
-      const images = await replica.imagesOf(result.rows.map((row) => toText(row.login)))
+      // Lo que escribió alguien del otro mundo no sale, ni su login.
+      const sees = await seerOf(actor)
+      const rows = result.rows.filter((row) => sees(toText(row.login)))
+      const images = await replica.imagesOf(rows.map((row) => toText(row.login)))
 
       return {
-        messages: result.rows.map((row): MeetMessage => ({
+        messages: rows.map((row): MeetMessage => ({
           id: toNumber(row.id),
           login: toText(row.login),
           image: images.get(toText(row.login)) ?? null,
@@ -521,9 +564,16 @@ export function createMeetService(options: MeetServiceOptions) {
         args: [actor.login],
       })
 
+      const sees = await seerOf(actor)
+
       for (const row of missed.rows) {
         try {
-          alerts.push({ event: JSON.parse(toText(row.event)) as CalendarEvent, state: 'missed' })
+          const event = JSON.parse(toText(row.event)) as CalendarEvent
+
+          // Uno guardado antes de separar los mundos puede ser con alguien del otro.
+          if (event.withLogin === null || sees(event.withLogin)) {
+            alerts.push({ event, state: 'missed' })
+          }
         } catch {
           // Un aviso ilegible no se puede enseñar: se queda sin salir.
         }
@@ -544,7 +594,8 @@ export function createMeetService(options: MeetServiceOptions) {
     /** La asistencia de un evento: los códigos para quien organiza, lo validado para quien asiste. */
     async attendance(actor: Actor, id: unknown): Promise<MeetAttendance> {
       const { role, event } = await resolve(actor, parse(eventId, id))
-      const people = await attendance.presences(event.id)
+      const sees = await seerOf(actor)
+      const people = (await attendance.presences(event.id)).filter((entry) => sees(entry.login))
       const common = {
         role,
         window: attendance.window(event),
