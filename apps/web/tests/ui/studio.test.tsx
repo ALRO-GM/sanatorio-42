@@ -148,7 +148,7 @@ describe('Personalizar: el estudio', () => {
     const user = userEvent.setup()
     const mini = await openStudio(user)
     const clusters = text('nav.cat.clusters')
-    const live = must(document.querySelector('[aria-live]'), 'la región viva')
+    const live = must(document.querySelector('[aria-live]:not([data-dock-said])'), 'la región viva')
 
     within(mini)
       .getByRole('button', { name: fill('studio.grab', { name: clusters }) })
