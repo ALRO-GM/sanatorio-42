@@ -13,7 +13,7 @@ type PairDetailProps = {
 
 /** Las correcciones que se han hecho dos personas: cuándo, de qué y con qué nota. */
 export function PairDetail({ a, b, params }: PairDetailProps) {
-  const { t, lang } = useI18n()
+  const { t, tn, lang } = useI18n()
   const { data, error, loading, reload } = useAsync(
     () => api.getNetworkPair(a, b, params),
     [a, b, params],
@@ -24,7 +24,9 @@ export function PairDetail({ a, b, params }: PairDetailProps) {
 
   return (
     <div className="net-pair">
-      <p className="hint">{t('net.pair.summary', { a, b, forth: data.forth, back: data.back })}</p>
+      <p className="hint">
+        {tn('net.pair.summary', data.forth, { a, b, forth: data.forth, back: data.back })}
+      </p>
       <ol>
         {data.corrections.map((row) => (
           <li key={`${row.id}-${row.corrected}`}>

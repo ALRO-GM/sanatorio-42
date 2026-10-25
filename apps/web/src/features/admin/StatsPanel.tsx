@@ -30,10 +30,6 @@ function briefTime(seconds: number): string {
   return `${hours.toFixed(hours < 10 ? 1 : 0)}h`
 }
 
-/** "1,2 MB", "340 kB". */
-const size = (bytes: number): string =>
-  bytes >= 1_000_000 ? `${(bytes / 1_000_000).toFixed(1)} MB` : `${Math.round(bytes / 1000)} kB`
-
 /**
  * El uso de cada hora del día, sumando todos los días del periodo, en la hora
  * de quien mira: la API las da en UTC.
@@ -75,6 +71,7 @@ export function byLocalHour(hours: UsageStats['hours']): StatTotals[] {
  */
 export function StatsPanel() {
   const { t } = useI18n()
+  const { number, bytes: size } = useFormat()
   const [days, setDays] = useState<number>(7)
   const [login, setLogin] = useState<string | null>(null)
   const [segment, setSegment] = useState(EVERYONE)
@@ -128,13 +125,13 @@ export function StatsPanel() {
             <Figure label={t('admin.stats.seen')} value={durationText(data.totals.seen)} strong />
             <Figure label={t('admin.stats.back')} value={durationText(data.totals.back)} />
             <Figure label={t('admin.stats.hidden')} value={durationText(data.totals.hidden)} />
-            <Figure label={t('admin.stats.clicks')} value={String(data.totals.clicks)} />
+            <Figure label={t('admin.stats.clicks')} value={number(data.totals.clicks)} />
             <Figure
               label={t('admin.stats.traffic')}
-              value={`${data.totals.requests} · ${size(data.totals.bytes)}`}
+              value={`${number(data.totals.requests)} · ${size(data.totals.bytes)}`}
             />
             {login === null && (
-              <Figure label={t('common.people')} value={String(data.totals.people)} />
+              <Figure label={t('common.people')} value={number(data.totals.people)} />
             )}
           </div>
 
@@ -190,7 +187,7 @@ export function StatsPanel() {
                   id: 'clicks',
                   label: t('admin.stats.clicks'),
                   sort: (row) => row.clicks,
-                  cell: (row) => row.clicks,
+                  cell: (row) => number(row.clicks),
                 },
                 ...(login === null
                   ? [
@@ -198,7 +195,7 @@ export function StatsPanel() {
                         id: 'people',
                         label: t('common.people'),
                         sort: (row: (typeof data.keys)[number]) => row.people,
-                        cell: (row: (typeof data.keys)[number]) => row.people,
+                        cell: (row: (typeof data.keys)[number]) => number(row.people),
                       },
                     ]
                   : []),
@@ -255,13 +252,13 @@ export function StatsPanel() {
                     id: 'clicks',
                     label: t('admin.stats.clicks'),
                     sort: (row) => row.clicks,
-                    cell: (row) => row.clicks,
+                    cell: (row) => number(row.clicks),
                   },
                   {
                     id: 'requests',
                     label: t('admin.stats.requests'),
                     sort: (row) => row.requests,
-                    cell: (row) => row.requests,
+                    cell: (row) => number(row.requests),
                   },
                   {
                     id: 'bytes',

@@ -32,6 +32,7 @@ import { clockOf } from '../../core/options.js'
 import type { Clock } from '../../core/options.js'
 import { isoAt } from '../../core/time.js'
 import { id, optionalText, parse, text } from '../../core/validation.js'
+import { labelOf } from '../calendar/index.js'
 
 const MINUTE = 60_000
 const DAY = 24 * 60 * MINUTE
@@ -118,6 +119,7 @@ export function createCountdownsService(options: CountdownsServiceOptions) {
     preset: toTextOrNull(row.preset) === 'lockers' ? 'lockers' : null,
     at: toText(row.target_at),
     eventId: null,
+    label: null,
     from: toText(row.created_by),
   })
 
@@ -170,12 +172,16 @@ export function createCountdownsService(options: CountdownsServiceOptions) {
             title: next?.title ?? null,
             at: next?.start ?? null,
             eventId: next?.id ?? null,
+            label: next?.label ?? null,
           }
         : {
             ...base,
             title: toTextOrNull(row.title),
             at: toTextOrNull(row.target_at),
             eventId: toTextOrNull(row.event_id),
+            // Se guardó el título en español: se reconoce para escribirlo en el
+            // idioma de quien mira (`calendar/titles.ts`).
+            label: labelOf(toTextOrNull(row.title) ?? '', toTextOrNull(row.event_id)),
           }
     })
   }

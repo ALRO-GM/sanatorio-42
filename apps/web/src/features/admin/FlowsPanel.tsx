@@ -117,7 +117,7 @@ function Flows({
         <Figure label={t('admin.flows.sessions')} value={number(sessions)} strong />
         <Figure
           label={t('admin.flows.depth')}
-          value={(sessions === 0 ? 0 : steps / sessions).toFixed(1)}
+          value={sessions === 0 ? 0 : Math.round((10 * steps) / sessions) / 10}
         />
         {longest !== undefined && (
           <Figure

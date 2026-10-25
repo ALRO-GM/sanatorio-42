@@ -212,13 +212,10 @@ export function CheatsPanel({ me, onWatch }: CheatsPanelProps) {
   return (
     <>
       <div className="stat-cards">
-        <Figure label={t('admin.cheats.people')} value={String(data.people.length)} />
-        <Figure label={t('admin.cheats.total')} value={String(live.length)} />
-        <Figure label={t('admin.cheats.recent')} value={String(recent.length)} />
-        <Figure
-          label={t('admin.cheats.pardonedCount')}
-          value={String(data.entries.length - live.length)}
-        />
+        <Figure label={t('admin.cheats.people')} value={data.people.length} />
+        <Figure label={t('admin.cheats.total')} value={live.length} />
+        <Figure label={t('admin.cheats.recent')} value={recent.length} />
+        <Figure label={t('admin.cheats.pardonedCount')} value={data.entries.length - live.length} />
         <Figure
           label={t('admin.cheats.seized')}
           value={compact.format(live.reduce((sum, entry) => sum + entry.seized, 0))}

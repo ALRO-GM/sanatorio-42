@@ -135,7 +135,7 @@ game.ui.totalAbout,Juego: texto de la interfaz,Líneas escritas en total: {n}.,L
 game.ui.cpsAbout,Juego: texto de la interfaz,Líneas por segundo: {n}.,Lines per second: {n}.,Línies per segon: {n}.,Lerroak segundoko: {n}.,Lignes par seconde : {n}.
 game.ui.handAbout,Juego: texto de la interfaz,Escribe {n} líneas a mano.,Write {n} lines by hand.,Escriu {n} línies a mà.,Idatzi {n} lerro eskuz.,Écris {n} lignes à la main.
 game.ui.goldenAbout,Juego: texto de la interfaz,Pull requests doradas abiertas: {n}.,Golden pull requests opened: {n}.,Pull requests daurades obertes: {n}.,Irekitako urrezko pull requestak: {n}.,Pull requests dorées ouvertes : {n}.
-game.ui.bugAbout,Juego: texto de la interfaz,Aplasta {n} bugs.,Squash {n} bugs.,Aixafa {n} bugs.,Zapaldu {n} bug.,Écrase {n} bugs.
+game.ui.bugAbout,Juego: texto de la interfaz,Bugs aplastados: {n}.,Bugs squashed: {n}.,Bugs aixafats: {n}.,Zapaldutako bugak: {n}.,Bugs écrasés : {n}.
 game.ui.prestigeAbout2,Juego: texto de la interfaz,Llega a prestigio {n}.,Reach prestige {n}.,Arriba a prestigi {n}.,Iritsi {n}. prestigiora.,Atteins le prestige {n}.
 game.buildings.cursor.1,Juego: nombre del edificio «cursor»,Cursor,Cursor,Cursor,Kurtsorea,Curseur
 game.buildings.cursor.2,Juego: plural del edificio «cursor»,cursores,cursors,cursors,kurtsore,curseurs
@@ -362,20 +362,35 @@ game.busts.12.2,Juego: texto del aviso al pillar una trampa; {n} son las veces,{
 game.busts.13.1,Juego: título del aviso al pillar una trampa,Sin comentarios,No comment,Sense comentaris,Iruzkinik ez,Sans commentaire
 game.busts.13.2,Juego: texto del aviso al pillar una trampa; {n} son las veces,"{n}. Vendido todo. Aquí seguiremos, tú y nosotros, hasta que alguien se canse. Nosotros somos un servidor: no nos cansamos.","{n}. Everything sold. We will stay here, you and us, until someone gets tired. We are a server: we do not get tired.","{n}. Tot venut. Aquí seguirem, tu i nosaltres, fins que algú es cansi. Nosaltres som un servidor: no ens cansem.","{n}. Dena saldua. Hemen jarraituko dugu, zuk eta guk, norbait nekatu arte. Gu zerbitzari bat gara: ez gara nekatzen.","{n}. Tout est vendu. On restera là, toi et nous, jusqu'à ce que quelqu'un se lasse. Nous, on est un serveur : on ne se lasse pas."
 game.scale.1,"Juego: sufijo de los números grandes (millones, billones…)",millones,million,milions,milioi,millions
-game.scale.2,"Juego: sufijo de los números grandes (millones, billones…)",miles de millones,billion,mil milions,mila milioi,milliards
+game.scale.2,"Juego: sufijo de los números grandes (millones, billones…)",mil millones,billion,mil milions,mila milioi,milliards
 game.scale.3,"Juego: sufijo de los números grandes (millones, billones…)",billones,trillion,bilions,bilioi,billions
-game.scale.4,"Juego: sufijo de los números grandes (millones, billones…)",miles de billones,quadrillion,mil bilions,mila bilioi,billiards
+game.scale.4,"Juego: sufijo de los números grandes (millones, billones…)",mil billones,quadrillion,mil bilions,mila bilioi,billiards
 game.scale.5,"Juego: sufijo de los números grandes (millones, billones…)",trillones,quintillion,trilions,trilioi,trillions
-game.scale.6,"Juego: sufijo de los números grandes (millones, billones…)",miles de trillones,sextillion,mil trilions,mila trilioi,trilliards
+game.scale.6,"Juego: sufijo de los números grandes (millones, billones…)",mil trillones,sextillion,mil trilions,mila trilioi,trilliards
 game.scale.7,"Juego: sufijo de los números grandes (millones, billones…)",cuatrillones,septillion,quadrilions,kuatrilioi,quadrillions
-game.scale.8,"Juego: sufijo de los números grandes (millones, billones…)",miles de cuatrillones,octillion,mil quadrilions,mila kuatrilioi,quadrilliards
+game.scale.8,"Juego: sufijo de los números grandes (millones, billones…)",mil cuatrillones,octillion,mil quadrilions,mila kuatrilioi,quadrilliards
 game.scale.9,"Juego: sufijo de los números grandes (millones, billones…)",quintillones,nonillion,quintilions,kintilioi,quintillions
-game.scale.10,"Juego: sufijo de los números grandes (millones, billones…)",miles de quintillones,decillion,mil quintilions,mila kintilioi,quintilliards
+game.scale.10,"Juego: sufijo de los números grandes (millones, billones…)",mil quintillones,decillion,mil quintilions,mila kintilioi,quintilliards
 game.scale.11,"Juego: sufijo de los números grandes (millones, billones…)",sextillones,undecillion,sextilions,sextilioi,sextillions
-game.scale.12,"Juego: sufijo de los números grandes (millones, billones…)",miles de sextillones,duodecillion,mil sextilions,mila sextilioi,sextilliards
+game.scale.12,"Juego: sufijo de los números grandes (millones, billones…)",mil sextillones,duodecillion,mil sextilions,mila sextilioi,sextilliards
 game.scale.13,"Juego: sufijo de los números grandes (millones, billones…)",septillones,tredecillion,septilions,septilioi,septillions
-game.scale.14,"Juego: sufijo de los números grandes (millones, billones…)",miles de septillones,quattuordecillion,mil septilions,mila septilioi,septilliards
+game.scale.14,"Juego: sufijo de los números grandes (millones, billones…)",mil septillones,quattuordecillion,mil septilions,mila septilioi,septilliards
 game.scale.15,"Juego: sufijo de los números grandes (millones, billones…)",octillones,quindecillion,octilions,oktilioi,octillions
+game.scaleOne.1,"Juego: sufijo de los números grandes con la cifra en singular (1 millón; en francés, también 1,5 million)",millón,million,milió,milioi,million
+game.scaleOne.2,"Juego: sufijo de los números grandes con la cifra en singular (1 millón; en francés, también 1,5 million)",mil millones,billion,mil milions,mila milioi,milliard
+game.scaleOne.3,"Juego: sufijo de los números grandes con la cifra en singular (1 millón; en francés, también 1,5 million)",billón,trillion,bilió,bilioi,billion
+game.scaleOne.4,"Juego: sufijo de los números grandes con la cifra en singular (1 millón; en francés, también 1,5 million)",mil billones,quadrillion,mil bilions,mila bilioi,billiard
+game.scaleOne.5,"Juego: sufijo de los números grandes con la cifra en singular (1 millón; en francés, también 1,5 million)",trillón,quintillion,trilió,trilioi,trillion
+game.scaleOne.6,"Juego: sufijo de los números grandes con la cifra en singular (1 millón; en francés, también 1,5 million)",mil trillones,sextillion,mil trilions,mila trilioi,trilliard
+game.scaleOne.7,"Juego: sufijo de los números grandes con la cifra en singular (1 millón; en francés, también 1,5 million)",cuatrillón,septillion,quadrilió,kuatrilioi,quadrillion
+game.scaleOne.8,"Juego: sufijo de los números grandes con la cifra en singular (1 millón; en francés, también 1,5 million)",mil cuatrillones,octillion,mil quadrilions,mila kuatrilioi,quadrilliard
+game.scaleOne.9,"Juego: sufijo de los números grandes con la cifra en singular (1 millón; en francés, también 1,5 million)",quintillón,nonillion,quintilió,kintilioi,quintillion
+game.scaleOne.10,"Juego: sufijo de los números grandes con la cifra en singular (1 millón; en francés, también 1,5 million)",mil quintillones,decillion,mil quintilions,mila kintilioi,quintilliard
+game.scaleOne.11,"Juego: sufijo de los números grandes con la cifra en singular (1 millón; en francés, también 1,5 million)",sextillón,undecillion,sextilió,sextilioi,sextillion
+game.scaleOne.12,"Juego: sufijo de los números grandes con la cifra en singular (1 millón; en francés, también 1,5 million)",mil sextillones,duodecillion,mil sextilions,mila sextilioi,sextilliard
+game.scaleOne.13,"Juego: sufijo de los números grandes con la cifra en singular (1 millón; en francés, también 1,5 million)",septillón,tredecillion,septilió,septilioi,septillion
+game.scaleOne.14,"Juego: sufijo de los números grandes con la cifra en singular (1 millón; en francés, también 1,5 million)",mil septillones,quattuordecillion,mil septilions,mila septilioi,septilliard
+game.scaleOne.15,"Juego: sufijo de los números grandes con la cifra en singular (1 millón; en francés, también 1,5 million)",octillón,quindecillion,octilió,oktilioi,octillion
 game.news.early.1,Juego: noticia del rótulo al principio de la partida,Tu código compila. Tu madre está orgullosa.,Your code compiles. Your mother is proud.,El teu codi compila. La teva mare n'està orgullosa.,Zure kodea konpilatzen da. Zure amak harro dago.,Ton code compile. Ta mère est fière de toi.
 game.news.early.2,Juego: noticia del rótulo al principio de la partida,Noticias: {name} dice que tu código «no está mal para ser de un pisciner».,News: {name} says your code is “not bad for a pisciner”.,Notícies: {name} diu que el teu codi «no està malament per ser d'un pisciner».,Albisteak: {name}(e)k dio zure kodea «ez dagoela gaizki pisciner batentzat».,"Infos : {name} trouve que ton code « n'est pas mal, pour du code de piscine »."
 game.news.early.3,Juego: noticia del rótulo al principio de la partida,Tu repositorio tiene una estrella. Es tuya.,Your repository has one star. It is yours.,El teu repositori té una estrella. És teva.,Zure biltegiak izar bat du. Zurea da.,Ton dépôt a une étoile. C'est la tienne.

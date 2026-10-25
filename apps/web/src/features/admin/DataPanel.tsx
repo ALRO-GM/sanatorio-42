@@ -26,7 +26,7 @@ type Range = (typeof RANGES)[number]
  * vuelve.
  */
 export function DataPanel() {
-  const { t } = useI18n()
+  const { t, tn } = useI18n()
   const { number } = useFormat()
   const { data, error, loading, reload } = useAsync(() => api.getAdminData(), [])
   const action = useAction()
@@ -147,7 +147,7 @@ export function DataPanel() {
           >
             {t('admin.data.see')}
           </button>
-          {deleted !== null && <span role="status">{t('admin.data.deleted', { n: deleted })}</span>}
+          {deleted !== null && <span role="status">{tn('admin.data.deleted', deleted)}</span>}
         </div>
         <ErrorNote error={action.error} />
       </article>
@@ -159,7 +159,7 @@ export function DataPanel() {
             <div key={entry.id}>
               <dt>
                 {t(`admin.data.kind.${entry.id}`)}
-                <small>{t('admin.data.total', { n: number(entry.rows) })}</small>
+                <small>{tn('admin.data.total', entry.rows)}</small>
               </dt>
               <dd>{t(`admin.data.kind.${entry.id}.summary`)}</dd>
             </div>
@@ -208,8 +208,7 @@ function Review({
   onDelete: () => void
   onClose: () => void
 }) {
-  const { t } = useI18n()
-  const { number } = useFormat()
+  const { t, tn } = useI18n()
   const dialog = useRef<HTMLDialogElement>(null)
 
   return (
@@ -217,7 +216,7 @@ function Review({
       <span className="eyebrow">{t('admin.data.review')}</span>
       <h3>{title}</h3>
       <p>
-        <strong>{t('admin.data.total', { n: number(preview.rows) })}</strong>
+        <strong>{tn('admin.data.total', preview.rows)}</strong>
         {preview.rows > preview.sample.length &&
           ` ${t('admin.data.showing', { n: preview.sample.length })}`}
       </p>
@@ -248,7 +247,7 @@ function Review({
           disabled={busy || preview.rows === 0}
           onClick={onDelete}
         >
-          {t('admin.data.deleteN', { n: number(preview.rows) })}
+          {tn('admin.data.deleteN', preview.rows)}
         </button>
         <button
           type="button"

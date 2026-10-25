@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/sala-de-espera.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-46 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
+47 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera | Francés |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -18,7 +18,8 @@ Generado desde `apps/web/src/shared/i18n/textos/sala-de-espera.csv` con
 | `projects.passed` | Etiqueta de un proyecto aprobado | shared/ui/ProjectPills | aprobado | passed | aprovat | gaindituta | validé |
 | `peers.title` | Título de la lista de personas que pueden ayudar en un proyecto | features/peers/PeerList | Quién te puede ayudar con {project} | Who can help you with {project} | Qui et pot ajudar amb {project} | Nork lagun zaitzake {project} proiektuan | Qui peut t'aider sur {project} |
 | `peers.loading` | Mientras carga la lista de personas | features/peers/PeerList | Buscando quién está disponible… | Checking who's available… | Buscant qui està disponible… | Eskuragarri nor dagoen bilatzen… | On regarde qui est disponible… |
-| `peers.onDuty` | Cuántas personas están disponibles ahora | features/peers/PeerList | {n} disponibles ahora mismo | {n} available right now | {n} disponibles ara mateix | {n} eskuragarri une honetan | Disponibles en ce moment : {n} |
+| `peers.onDuty.one` | Cuántas personas están disponibles ahora (una) | features/peers/PeerList | {n} disponible ahora mismo | {n} available right now | {n} disponible ara mateix | {n} eskuragarri une honetan | Disponibles en ce moment : {n} |
+| `peers.onDuty.many` | Cuántas personas están disponibles ahora (varias) | features/peers/PeerList | {n} disponibles ahora mismo | {n} available right now | {n} disponibles ara mateix | {n} eskuragarri une honetan | Disponibles en ce moment : {n} |
 | `peers.specialists1` | Hay una persona que aprobó el proyecto | features/peers/PeerList | 1 senior | 1 senior | 1 sènior | Senior 1 | 1 senior |
 | `peers.specialistsN` | Cuántas personas aprobaron el proyecto | features/peers/PeerList | {n} seniors | {n} seniors | {n} sèniors | {n} senior | {n} seniors |
 | `peers.nobodyOnDuty` | Nadie disponible en ese proyecto: invita a ponerte | features/peers/PeerList | Hoy no hay nadie disponible en este proyecto. ¿Y si te pones tú? | Nobody is available for this project today. How about you? | Avui no hi ha ningú disponible en aquest projecte. I si t'hi poses tu? | Gaur ez dago inor eskuragarri proiektu honetan. Eta zu jartzen bazara? | Personne n'est disponible sur ce projet aujourd'hui. Et si c'était toi ? |

@@ -14,7 +14,7 @@ import { Icon } from '../../shared/ui/Icon'
  * espera se te ve marcado en esos proyectos.
  */
 export function PreReviewToggle() {
-  const { t } = useI18n()
+  const { t, tn } = useI18n()
   const profile = useAsync(() => api.getProfile(), [])
   const mine = useAsync(() => api.getMyProjects(true), [])
   const { busy, error, run } = useAction()
@@ -41,7 +41,7 @@ export function PreReviewToggle() {
         <p>
           {on
             ? passed > 0
-              ? t('help.preReview.on', { n: passed })
+              ? tn('help.preReview.on', passed)
               : t('help.preReview.onNone')
             : t('help.preReview.off')}
         </p>

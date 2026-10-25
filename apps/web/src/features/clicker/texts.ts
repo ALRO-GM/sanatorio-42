@@ -3,15 +3,17 @@
  *
  * Van en un grupo de tablas aparte y no con los de la web porque son un juego
  * entero (y secreto): cientos de frases que solo se descargan con el juego.
- * Catalán y euskera usan los del español mientras no tengan los suyos; el
- * francés, lo que le falte, del inglés.
+ * A cada idioma, lo que le falte le llega del español; al francés, del inglés.
  */
 
 import type { Lang } from '@sanatorio/contracts'
+import gameCa from 'virtual:textos/juego/ca'
 import gameEn from 'virtual:textos/juego/en'
 import gameEs from 'virtual:textos/juego/es'
+import gameEu from 'virtual:textos/juego/eu'
 import gameFr from 'virtual:textos/juego/fr'
 
+import { localeOf } from '../../shared/i18n/locale'
 import { unflatten } from '../../shared/i18n/tree'
 
 import {
@@ -55,6 +57,12 @@ type Texts = {
   /** Sufijos de los números grandes, de mil en mil a partir del millón. */
   scale: string[]
   /**
+   * Los mismos con la cifra en singular, según las reglas del idioma: «1
+   * millón» pero «1,5 millones»; en francés, «1,5 million» (por debajo de 2
+   * va en singular).
+   */
+  scaleOne: string[]
+  /**
    * Las noticias del rótulo, por época. `{name}` es alguien del campus;
    * `{n}`, las líneas escritas.
    */
@@ -89,11 +97,13 @@ function fromTable(...dicts: Readonly<Record<string, string>>[]): Texts {
   return texts
 }
 
-const es = fromTable(gameEs)
-const en = fromTable(gameEn)
-const fr = fromTable(gameEn, gameFr)
-
-const TEXTS: Record<Lang, Texts> = { es, en, ca: es, eu: es, fr }
+const TEXTS: Record<Lang, Texts> = {
+  es: fromTable(gameEs),
+  en: fromTable(gameEn),
+  ca: fromTable(gameCa),
+  eu: fromTable(gameEu),
+  fr: fromTable(gameEn, gameFr),
+}
 
 export const textsOf = (lang: Lang): Texts => TEXTS[lang]
 
@@ -103,11 +113,13 @@ export function fill(template: string, vars: Record<string, string | number>): s
 }
 
 /**
- * Un número grande, legible: "1,234 millones", "12 trillion". Hasta un millón
- * se escribe entero, con separador de miles.
+ * Un número grande, legible: "1 millón", "1,234 millones", "12 trillion",
+ * "1,5 million" en francés. Hasta un millón se escribe entero, con separador de
+ * miles. El sufijo va en singular o en plural según las reglas del idioma
+ * (`Intl.PluralRules`) para la cifra tal como se escribe, ya redondeada.
  */
 export function short(value: number, lang: Lang, decimals = 3): string {
-  const locale = lang === 'en' ? 'en-GB' : lang === 'fr' ? 'fr-FR' : 'es-ES'
+  const locale = localeOf(lang)
 
   if (!Number.isFinite(value)) return '∞'
   if (Math.abs(value) < 1e6) {
@@ -116,10 +128,14 @@ export function short(value: number, lang: Lang, decimals = 3): string {
     })
   }
 
-  const scale = textsOf(lang).scale
+  const { scale, scaleOne } = textsOf(lang)
   const step = Math.min(scale.length - 1, Math.floor(Math.log10(Math.abs(value)) / 3) - 2)
+  const figure = value / 10 ** ((step + 2) * 3)
+  const options = { maximumFractionDigits: decimals }
+  const one = new Intl.PluralRules(locale, options).select(figure) === 'one'
+  const suffix = (one ? scaleOne[step] : undefined) ?? scale[step] ?? ''
 
-  return `${(value / 10 ** ((step + 2) * 3)).toLocaleString(locale, { maximumFractionDigits: decimals })} ${scale[step] ?? ''}`
+  return `${figure.toLocaleString(locale, options)} ${suffix}`
 }
 
 /** Título y mensaje de la ventana de la trampa número `n`. */

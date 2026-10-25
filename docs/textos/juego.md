@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/juego.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-489 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
+504 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera | Francés |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -143,7 +143,7 @@ Generado desde `apps/web/src/shared/i18n/textos/juego.csv` con
 | `game.ui.cpsAbout` | Juego: texto de la interfaz | features/clicker/texts | Líneas por segundo: {n}. | Lines per second: {n}. | Línies per segon: {n}. | Lerroak segundoko: {n}. | Lignes par seconde : {n}. |
 | `game.ui.handAbout` | Juego: texto de la interfaz | features/clicker/texts | Escribe {n} líneas a mano. | Write {n} lines by hand. | Escriu {n} línies a mà. | Idatzi {n} lerro eskuz. | Écris {n} lignes à la main. |
 | `game.ui.goldenAbout` | Juego: texto de la interfaz | features/clicker/texts | Pull requests doradas abiertas: {n}. | Golden pull requests opened: {n}. | Pull requests daurades obertes: {n}. | Irekitako urrezko pull requestak: {n}. | Pull requests dorées ouvertes : {n}. |
-| `game.ui.bugAbout` | Juego: texto de la interfaz | features/clicker/texts | Aplasta {n} bugs. | Squash {n} bugs. | Aixafa {n} bugs. | Zapaldu {n} bug. | Écrase {n} bugs. |
+| `game.ui.bugAbout` | Juego: texto de la interfaz | features/clicker/texts | Bugs aplastados: {n}. | Bugs squashed: {n}. | Bugs aixafats: {n}. | Zapaldutako bugak: {n}. | Bugs écrasés : {n}. |
 | `game.ui.prestigeAbout2` | Juego: texto de la interfaz | features/clicker/texts | Llega a prestigio {n}. | Reach prestige {n}. | Arriba a prestigi {n}. | Iritsi {n}. prestigiora. | Atteins le prestige {n}. |
 | `game.buildings.cursor.1` | Juego: nombre del edificio «cursor» | features/clicker/texts | Cursor | Cursor | Cursor | Kurtsorea | Curseur |
 | `game.buildings.cursor.2` | Juego: plural del edificio «cursor» | features/clicker/texts | cursores | cursors | cursors | kurtsore | curseurs |
@@ -370,20 +370,35 @@ Generado desde `apps/web/src/shared/i18n/textos/juego.csv` con
 | `game.busts.13.1` | Juego: título del aviso al pillar una trampa | features/clicker/texts | Sin comentarios | No comment | Sense comentaris | Iruzkinik ez | Sans commentaire |
 | `game.busts.13.2` | Juego: texto del aviso al pillar una trampa; {n} son las veces | features/clicker/texts | {n}. Vendido todo. Aquí seguiremos, tú y nosotros, hasta que alguien se canse. Nosotros somos un servidor: no nos cansamos. | {n}. Everything sold. We will stay here, you and us, until someone gets tired. We are a server: we do not get tired. | {n}. Tot venut. Aquí seguirem, tu i nosaltres, fins que algú es cansi. Nosaltres som un servidor: no ens cansem. | {n}. Dena saldua. Hemen jarraituko dugu, zuk eta guk, norbait nekatu arte. Gu zerbitzari bat gara: ez gara nekatzen. | {n}. Tout est vendu. On restera là, toi et nous, jusqu'à ce que quelqu'un se lasse. Nous, on est un serveur : on ne se lasse pas. |
 | `game.scale.1` | Juego: sufijo de los números grandes (millones, billones…) | features/clicker/texts | millones | million | milions | milioi | millions |
-| `game.scale.2` | Juego: sufijo de los números grandes (millones, billones…) | features/clicker/texts | miles de millones | billion | mil milions | mila milioi | milliards |
+| `game.scale.2` | Juego: sufijo de los números grandes (millones, billones…) | features/clicker/texts | mil millones | billion | mil milions | mila milioi | milliards |
 | `game.scale.3` | Juego: sufijo de los números grandes (millones, billones…) | features/clicker/texts | billones | trillion | bilions | bilioi | billions |
-| `game.scale.4` | Juego: sufijo de los números grandes (millones, billones…) | features/clicker/texts | miles de billones | quadrillion | mil bilions | mila bilioi | billiards |
+| `game.scale.4` | Juego: sufijo de los números grandes (millones, billones…) | features/clicker/texts | mil billones | quadrillion | mil bilions | mila bilioi | billiards |
 | `game.scale.5` | Juego: sufijo de los números grandes (millones, billones…) | features/clicker/texts | trillones | quintillion | trilions | trilioi | trillions |
-| `game.scale.6` | Juego: sufijo de los números grandes (millones, billones…) | features/clicker/texts | miles de trillones | sextillion | mil trilions | mila trilioi | trilliards |
+| `game.scale.6` | Juego: sufijo de los números grandes (millones, billones…) | features/clicker/texts | mil trillones | sextillion | mil trilions | mila trilioi | trilliards |
 | `game.scale.7` | Juego: sufijo de los números grandes (millones, billones…) | features/clicker/texts | cuatrillones | septillion | quadrilions | kuatrilioi | quadrillions |
-| `game.scale.8` | Juego: sufijo de los números grandes (millones, billones…) | features/clicker/texts | miles de cuatrillones | octillion | mil quadrilions | mila kuatrilioi | quadrilliards |
+| `game.scale.8` | Juego: sufijo de los números grandes (millones, billones…) | features/clicker/texts | mil cuatrillones | octillion | mil quadrilions | mila kuatrilioi | quadrilliards |
 | `game.scale.9` | Juego: sufijo de los números grandes (millones, billones…) | features/clicker/texts | quintillones | nonillion | quintilions | kintilioi | quintillions |
-| `game.scale.10` | Juego: sufijo de los números grandes (millones, billones…) | features/clicker/texts | miles de quintillones | decillion | mil quintilions | mila kintilioi | quintilliards |
+| `game.scale.10` | Juego: sufijo de los números grandes (millones, billones…) | features/clicker/texts | mil quintillones | decillion | mil quintilions | mila kintilioi | quintilliards |
 | `game.scale.11` | Juego: sufijo de los números grandes (millones, billones…) | features/clicker/texts | sextillones | undecillion | sextilions | sextilioi | sextillions |
-| `game.scale.12` | Juego: sufijo de los números grandes (millones, billones…) | features/clicker/texts | miles de sextillones | duodecillion | mil sextilions | mila sextilioi | sextilliards |
+| `game.scale.12` | Juego: sufijo de los números grandes (millones, billones…) | features/clicker/texts | mil sextillones | duodecillion | mil sextilions | mila sextilioi | sextilliards |
 | `game.scale.13` | Juego: sufijo de los números grandes (millones, billones…) | features/clicker/texts | septillones | tredecillion | septilions | septilioi | septillions |
-| `game.scale.14` | Juego: sufijo de los números grandes (millones, billones…) | features/clicker/texts | miles de septillones | quattuordecillion | mil septilions | mila septilioi | septilliards |
+| `game.scale.14` | Juego: sufijo de los números grandes (millones, billones…) | features/clicker/texts | mil septillones | quattuordecillion | mil septilions | mila septilioi | septilliards |
 | `game.scale.15` | Juego: sufijo de los números grandes (millones, billones…) | features/clicker/texts | octillones | quindecillion | octilions | oktilioi | octillions |
+| `game.scaleOne.1` | Juego: sufijo de los números grandes con la cifra en singular (1 millón; en francés, también 1,5 million) | features/clicker/texts | millón | million | milió | milioi | million |
+| `game.scaleOne.2` | Juego: sufijo de los números grandes con la cifra en singular (1 millón; en francés, también 1,5 million) | features/clicker/texts | mil millones | billion | mil milions | mila milioi | milliard |
+| `game.scaleOne.3` | Juego: sufijo de los números grandes con la cifra en singular (1 millón; en francés, también 1,5 million) | features/clicker/texts | billón | trillion | bilió | bilioi | billion |
+| `game.scaleOne.4` | Juego: sufijo de los números grandes con la cifra en singular (1 millón; en francés, también 1,5 million) | features/clicker/texts | mil billones | quadrillion | mil bilions | mila bilioi | billiard |
+| `game.scaleOne.5` | Juego: sufijo de los números grandes con la cifra en singular (1 millón; en francés, también 1,5 million) | features/clicker/texts | trillón | quintillion | trilió | trilioi | trillion |
+| `game.scaleOne.6` | Juego: sufijo de los números grandes con la cifra en singular (1 millón; en francés, también 1,5 million) | features/clicker/texts | mil trillones | sextillion | mil trilions | mila trilioi | trilliard |
+| `game.scaleOne.7` | Juego: sufijo de los números grandes con la cifra en singular (1 millón; en francés, también 1,5 million) | features/clicker/texts | cuatrillón | septillion | quadrilió | kuatrilioi | quadrillion |
+| `game.scaleOne.8` | Juego: sufijo de los números grandes con la cifra en singular (1 millón; en francés, también 1,5 million) | features/clicker/texts | mil cuatrillones | octillion | mil quadrilions | mila kuatrilioi | quadrilliard |
+| `game.scaleOne.9` | Juego: sufijo de los números grandes con la cifra en singular (1 millón; en francés, también 1,5 million) | features/clicker/texts | quintillón | nonillion | quintilió | kintilioi | quintillion |
+| `game.scaleOne.10` | Juego: sufijo de los números grandes con la cifra en singular (1 millón; en francés, también 1,5 million) | features/clicker/texts | mil quintillones | decillion | mil quintilions | mila kintilioi | quintilliard |
+| `game.scaleOne.11` | Juego: sufijo de los números grandes con la cifra en singular (1 millón; en francés, también 1,5 million) | features/clicker/texts | sextillón | undecillion | sextilió | sextilioi | sextillion |
+| `game.scaleOne.12` | Juego: sufijo de los números grandes con la cifra en singular (1 millón; en francés, también 1,5 million) | features/clicker/texts | mil sextillones | duodecillion | mil sextilions | mila sextilioi | sextilliard |
+| `game.scaleOne.13` | Juego: sufijo de los números grandes con la cifra en singular (1 millón; en francés, también 1,5 million) | features/clicker/texts | septillón | tredecillion | septilió | septilioi | septillion |
+| `game.scaleOne.14` | Juego: sufijo de los números grandes con la cifra en singular (1 millón; en francés, también 1,5 million) | features/clicker/texts | mil septillones | quattuordecillion | mil septilions | mila septilioi | septilliard |
+| `game.scaleOne.15` | Juego: sufijo de los números grandes con la cifra en singular (1 millón; en francés, también 1,5 million) | features/clicker/texts | octillón | quindecillion | octilió | oktilioi | octillion |
 | `game.news.early.1` | Juego: noticia del rótulo al principio de la partida | features/clicker/texts | Tu código compila. Tu madre está orgullosa. | Your code compiles. Your mother is proud. | El teu codi compila. La teva mare n'està orgullosa. | Zure kodea konpilatzen da. Zure amak harro dago. | Ton code compile. Ta mère est fière de toi. |
 | `game.news.early.2` | Juego: noticia del rótulo al principio de la partida | features/clicker/texts | Noticias: {name} dice que tu código «no está mal para ser de un pisciner». | News: {name} says your code is “not bad for a pisciner”. | Notícies: {name} diu que el teu codi «no està malament per ser d'un pisciner». | Albisteak: {name}(e)k dio zure kodea «ez dagoela gaizki pisciner batentzat». | Infos : {name} trouve que ton code « n'est pas mal, pour du code de piscine ». |
 | `game.news.early.3` | Juego: noticia del rótulo al principio de la partida | features/clicker/texts | Tu repositorio tiene una estrella. Es tuya. | Your repository has one star. It is yours. | El teu repositori té una estrella. És teva. | Zure biltegiak izar bat du. Zurea da. | Ton dépôt a une étoile. C'est la tienne. |

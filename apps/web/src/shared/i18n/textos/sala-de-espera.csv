@@ -10,7 +10,8 @@ projects.doing,Etiqueta de un proyecto en curso,en curso,in progress,en curs,abi
 projects.passed,Etiqueta de un proyecto aprobado,aprobado,passed,aprovat,gaindituta,validé
 peers.title,Título de la lista de personas que pueden ayudar en un proyecto,Quién te puede ayudar con {project},Who can help you with {project},Qui et pot ajudar amb {project},Nork lagun zaitzake {project} proiektuan,Qui peut t'aider sur {project}
 peers.loading,Mientras carga la lista de personas,Buscando quién está disponible…,Checking who's available…,Buscant qui està disponible…,Eskuragarri nor dagoen bilatzen…,On regarde qui est disponible…
-peers.onDuty,Cuántas personas están disponibles ahora,{n} disponibles ahora mismo,{n} available right now,{n} disponibles ara mateix,{n} eskuragarri une honetan,Disponibles en ce moment : {n}
+peers.onDuty.one,Cuántas personas están disponibles ahora (una),{n} disponible ahora mismo,{n} available right now,{n} disponible ara mateix,{n} eskuragarri une honetan,Disponibles en ce moment : {n}
+peers.onDuty.many,Cuántas personas están disponibles ahora (varias),{n} disponibles ahora mismo,{n} available right now,{n} disponibles ara mateix,{n} eskuragarri une honetan,Disponibles en ce moment : {n}
 peers.specialists1,Hay una persona que aprobó el proyecto,1 senior,1 senior,1 sènior,Senior 1,1 senior
 peers.specialistsN,Cuántas personas aprobaron el proyecto,{n} seniors,{n} seniors,{n} sèniors,{n} senior,{n} seniors
 peers.nobodyOnDuty,Nadie disponible en ese proyecto: invita a ponerte,Hoy no hay nadie disponible en este proyecto. ¿Y si te pones tú?,Nobody is available for this project today. How about you?,Avui no hi ha ningú disponible en aquest projecte. I si t'hi poses tu?,Gaur ez dago inor eskuragarri proiektu honetan. Eta zu jartzen bazara?,Personne n'est disponible sur ce projet aujourd'hui. Et si c'était toi ?

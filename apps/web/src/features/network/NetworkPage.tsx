@@ -103,7 +103,7 @@ function paramsOf(filters: Filters): NetworkParams {
  * de burbujas que se recoloca solo, con filtros y el cálculo de endogamia.
  */
 export function NetworkPage({ me, switcher }: { me: CurrentUser; switcher?: ReactNode }) {
-  const { t } = useI18n()
+  const { t, tn } = useI18n()
   const { number } = useFormat()
   const [filters, setFilters] = useState<Filters>({
     // Un enlace a una persona enseña su historia entera; el campus, el último año.
@@ -226,10 +226,12 @@ export function NetworkPage({ me, switcher }: { me: CurrentUser; switcher?: Reac
         {node.receivedPassRate !== null && (
           <span>{t('net.tip.received', { pct: Math.round(node.receivedPassRate * 100) })}</span>
         )}
-        <span>{t('net.tip.endogamy', { n: node.endogamy, partners: node.partners })}</span>
+        <span>
+          {tn('net.tip.endogamy', node.partners, { n: node.endogamy, partners: node.partners })}
+        </span>
       </>
     ),
-    [t],
+    [t, tn],
   )
   const controls = useMemo(
     () => ({
@@ -327,9 +329,9 @@ export function NetworkPage({ me, switcher }: { me: CurrentUser; switcher?: Reac
                 <span>
                   {graph.sync.total === null
                     ? t('net.sync.pending')
-                    : t('net.sync.copying', {
+                    : tn('net.sync.copying', graph.sync.total, {
                         rows: number(graph.sync.rows),
-                        total: number(graph.sync.total),
+                        total: graph.sync.total,
                       })}
                 </span>
                 {graph.sync.first !== null && graph.sync.last !== null && (
@@ -555,8 +557,7 @@ export function NetworkPage({ me, switcher }: { me: CurrentUser; switcher?: Reac
                           <span className="eyebrow">{t('net.total.pairs')}</span>
                           <strong>{number(graph.totals.pairs)}</strong>
                           <small>
-                            {t('net.total.mutual', {
-                              n: number(graph.totals.mutualPairs),
+                            {tn('net.total.mutual', graph.totals.mutualPairs, {
                               pct:
                                 graph.totals.pairs === 0
                                   ? 0

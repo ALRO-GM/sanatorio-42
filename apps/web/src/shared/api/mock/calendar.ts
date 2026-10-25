@@ -10,6 +10,7 @@ import { inDays, ME } from './data'
 import type { MockState } from './data'
 
 const BASE = {
+  label: null,
   place: null,
   description: null,
   joined: null,
@@ -84,6 +85,7 @@ function fortyTwo(): CalendarEvent[] {
       id: 'evaluation:1',
       kind: 'evaluation',
       title: 'Te corrigen ft_printf',
+      label: { kind: 'corrected', project: 'ft_printf', login: null },
       start: inDays(1, 11),
       end: inDays(1, 11, 30),
       url: `${INTRA}/`,
@@ -93,6 +95,7 @@ function fortyTwo(): CalendarEvent[] {
       id: 'evaluation:2',
       kind: 'evaluation',
       title: 'Corriges Libft',
+      label: { kind: 'correcting', project: 'Libft', login: null },
       start: inDays(3, 16),
       end: inDays(3, 16, 30),
       url: `${INTRA}/`,
@@ -109,6 +112,7 @@ export function calendarEvents(state: MockState): CalendarEvent[] {
       id: `help:window:${window.start}`,
       kind: 'help',
       title: 'Te ofreces a ayudar',
+      label: { kind: 'help_window', project: null, login: null },
       start: todayAt(window.start),
       end: todayAt(window.end),
       section: 'guardia',
@@ -126,6 +130,11 @@ export function calendarEvents(state: MockState): CalendarEvent[] {
         booking.role === 'helper'
           ? `Ayudas a ${booking.peer.login}`
           : `${booking.peer.login} te ayuda`,
+      label: {
+        kind: booking.role === 'helper' ? 'helping' : 'helped',
+        project: null,
+        login: booking.peer.login,
+      },
       start: todayAt(booking.start),
       end: todayAt(booking.end),
       description: [booking.projectName, booking.note].filter((part) => part !== null).join(' · '),
@@ -143,6 +152,7 @@ export function calendarEvents(state: MockState): CalendarEvent[] {
         id: `therapy:${group.id}:${day}`,
         kind: 'therapy',
         title: `Sprint de ${group.projectName ?? 'grupo'}`,
+        label: { kind: 'sprint', project: group.projectName, login: null },
         // Sin zona: el navegador lo toma como hora local, que es lo que se quiere.
         start: new Date(`${day}T${group.start}:00`).toISOString(),
         end: new Date(`${day}T${group.end}:00`).toISOString(),

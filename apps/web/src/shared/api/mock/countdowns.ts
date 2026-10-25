@@ -56,6 +56,7 @@ let notices: CountdownNoticeReport[] = [
     preset: 'lockers',
     at: nextFriday(),
     eventId: null,
+    label: null,
     from: 'albrodri',
     group: 'all',
     campusId: null,
@@ -102,6 +103,7 @@ function mine(): Countdown[] {
               title: upcoming?.title ?? null,
               at: upcoming?.start ?? null,
               eventId: upcoming?.id ?? null,
+              label: upcoming?.label ?? null,
             }
           : pin,
       ),
@@ -161,7 +163,15 @@ export const countdownsMock: Pick<
     if (live.length >= MAX_PINS) throw fail(409, `Como mucho, ${MAX_PINS} cuentas atrás a la vez`)
 
     if (input.kind === 'next') {
-      pins.push({ ...PIN, id: nextId++, kind: 'next', title: null, at: null, eventId: null })
+      pins.push({
+        ...PIN,
+        id: nextId++,
+        kind: 'next',
+        title: null,
+        at: null,
+        eventId: null,
+        label: null,
+      })
     } else if (input.kind === 'event') {
       const event = calendarEvents(state).find((each) => each.id === input.eventId)
 
@@ -174,6 +184,7 @@ export const countdownsMock: Pick<
         title: event.title,
         at: event.start,
         eventId: event.id,
+        label: event.label,
       })
     } else {
       if (input.title.trim() === '') throw fail(400, 'title: no puede estar vacío')
@@ -185,6 +196,7 @@ export const countdownsMock: Pick<
         title: input.title.trim(),
         at: new Date(input.at).toISOString(),
         eventId: null,
+        label: null,
       })
     }
 
@@ -231,6 +243,7 @@ export const countdownsMock: Pick<
       preset: input.preset ?? null,
       at: new Date(input.at).toISOString(),
       eventId: null,
+      label: null,
       from: ME.login,
       group: input.group,
       campusId: input.campusId ?? null,

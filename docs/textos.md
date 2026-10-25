@@ -30,7 +30,10 @@ Google Sheets, Excel) o con un editor de texto:
   de 42 en Francia. Los términos y la tipografía, en el
   [glosario de francés](glosario-frances.md).
 - `{login}`, `{n}`…: huecos que rellena la web. Cada traducción tiene que llevar
-  los mismos huecos que el español (se comprueba).
+  los mismos huecos que el español (se comprueba). Un número se escribe a la
+  manera del idioma (`51.300`, `51,300`, `51 300`) sin hacer nada; los huecos
+  `{year}`, `{code}` e `{id}` (y los que acaban en `Year`, `Code` o `Id`) van
+  tal cual, para que un año no salga como `2,026`.
 - Las listas separadas por comas (`cal.months`) llevan los mismos elementos en
   todos los idiomas.
 
@@ -96,7 +99,34 @@ cientos de frases del juego solo se descargan al jugar.
   y `%` y dentro de « », fino sin corte (U+202F) antes de `;` `?` `!` y en los
   miles, `…`, sin ¿ ¡ ñ ni comillas inglesas (`tools/textos-fr.ts`; deja en
   paz el código, las URL, los huecos y las horas como `10:30`);
+- un texto cuenta algo en plural («{n} días») y no tiene sus formas `.one` y
+  `.many` (ver «Singular y plural»);
 - `docs/textos/` no está al día con las tablas.
+
+## Singular y plural
+
+Un texto que cuenta algo («3 días», «1 persona») tiene dos filas: `clave.one`
+y `clave.many`, y el código lo pide con `tn('clave', n)` (`shared/i18n`), que
+elige con las reglas de cada idioma (`Intl.PluralRules`):
+
+| clave | es | en | fr |
+| --- | --- | --- | --- |
+| `pace.left.one` | queda {n} día | {n} day left | encore {n} j |
+| `pace.left.many` | quedan {n} días | {n} days left | encore {n} j |
+
+- En español, inglés, catalán y euskera, `one` es solo el 1. En francés,
+  también el 0 y lo que no llega a 2: «0 personne», «1,5 tentative».
+- Las dos formas llevan `{n}` (en francés, `one` también sirve para el 0). Si
+  la cantidad que manda es otro hueco (`{capacity}`, `{total}`), se pasa dos
+  veces: `tn('cal.seats', capacity, { taken, capacity })`.
+- Donde hay dos cantidades, una manda y la otra se escribe como etiqueta
+  («Personas: {people} · uniones: {links}»), que vale con cualquier número.
+- `npm run textos` avisa de un texto que pone un hueco delante de un nombre en
+  plural (`{n} días`, `{total} personas`) sin sus formas `.one` y `.many`
+  (`tools/textos-plural.ts`). La lista de nombres es cerrada para no dar
+  falsos avisos; lo que nunca vale 1 va en `ALWAYS_MANY`, con su porqué. Code
+  Clicker (`game.*`) no pasa por `tn`: sus números grandes eligen el sufijo con
+  `game.scale.*` y `game.scaleOne.*` (`short` en `features/clicker/texts.ts`).
 
 ## Cómo se escriben
 
@@ -113,7 +143,11 @@ cientos de frases del juego solo se descargan al jugar.
 
 El plugin de `apps/web/tools/textos.ts` convierte las tablas en un módulo por
 idioma (`virtual:textos/es`, `virtual:textos/en`…). El español viaja con la web;
-los demás se descargan solo al elegirlos, unos 20 KB comprimidos cada uno. Al
+los demás se descargan solo al elegirlos, unos 20 KB comprimidos cada uno.
+Nunca se pinta un idioma a medias: `main.tsx` descarga el elegido (y su
+`fallback`) antes de pintar, y al cambiar de idioma se sigue viendo el anterior
+hasta que llegan los dos (`I18nProvider`). Así nadie ve un instante el español,
+ni el inglés de reserva del francés. Al
 editar una tabla con `npm run dev` abierto, la web se recarga con el texto
 nuevo.
 

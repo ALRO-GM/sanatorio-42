@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 
 import type { CalendarSection, EventAlert, MeetCheckin } from '@sanatorio/contracts'
 
+import { eventTitle } from '../../shared/eventTitle'
 import { api } from '../../shared/api'
 import { shows as showsFocus, useFocus } from '../../shared/focus'
 import { useAction } from '../../shared/hooks/useAsync'
@@ -116,7 +117,7 @@ export function AlertCenter({ me, onGo }: AlertCenterProps) {
     if (current === null || !document.hidden) return
     if (!('Notification' in window) || Notification.permission !== 'granted') return
 
-    new Notification(current.event.title, {
+    new Notification(eventTitle(t, current.event), {
       body: current.event.place ?? '',
       tag: current.event.id,
     })

@@ -78,7 +78,7 @@ type HealthBodyProps = {
 }
 
 function HealthBody({ health, startedAt, mine, onSaved }: HealthBodyProps) {
-  const { t, lang } = useI18n()
+  const { t, tn, lang } = useI18n()
   // En el expediente de otra persona, las frases van en tercera persona (`…Other`).
   // Se fija al montar: las cuentas no deben bailar entre un render y el siguiente.
   const [now] = useState(() => Date.now())
@@ -164,7 +164,7 @@ function HealthBody({ health, startedAt, mine, onSaved }: HealthBodyProps) {
         <p className="health-summary">
           {current === null
             ? t(mine ? 'health.summaryGone' : 'health.summaryGoneOther', { circle })
-            : t(mine ? 'health.summary' : 'health.summaryOther', {
+            : tn(mine ? 'health.summary' : 'health.summaryOther', current.daysLeft, {
                 circle,
                 pace: current.pace,
                 date: day(current.date),
@@ -239,8 +239,8 @@ function HealthBody({ health, startedAt, mine, onSaved }: HealthBodyProps) {
               </span>
               <span className="health-left">
                 {hole.daysLeft >= 0
-                  ? t('pace.left', { n: hole.daysLeft })
-                  : t('pace.late', { n: -hole.daysLeft })}
+                  ? tn('pace.left', hole.daysLeft)
+                  : tn('pace.late', -hole.daysLeft)}
               </span>
             </li>
           )}
@@ -273,7 +273,7 @@ function HealthBody({ health, startedAt, mine, onSaved }: HealthBodyProps) {
             deadline: day(`${declared.deadline}T12:00:00`),
             updated: day(declared.updatedAt),
           })}{' '}
-          {bonusDays > 0 && t(mine ? 'health.bonus' : 'health.bonusOther', { n: bonusDays })}
+          {bonusDays > 0 && tn(mine ? 'health.bonus' : 'health.bonusOther', bonusDays)}
         </p>
         {mine &&
           (editing ? (
@@ -464,7 +464,7 @@ type StepRowProps = {
 
 /** Un pace y hasta cuándo se puede conservar. */
 function StepRow({ step, next, current, day }: StepRowProps) {
-  const { t } = useI18n()
+  const { t, tn } = useI18n()
   const lost = step.daysLeft < 0
 
   return (
@@ -483,7 +483,7 @@ function StepRow({ step, next, current, day }: StepRowProps) {
         )}
       </span>
       <span className="health-left">
-        {lost ? t('health.lost') : t('pace.left', { n: step.daysLeft })}
+        {lost ? t('health.lost') : tn('pace.left', step.daysLeft)}
       </span>
     </li>
   )
@@ -500,7 +500,7 @@ type CalculatorProps = {
 
 /** "Si termino el círculo N tal día, ¿en qué pace me quedo?" */
 function Calculator({ origin, from, now, day }: CalculatorProps) {
-  const { t } = useI18n()
+  const { t, tn } = useI18n()
   const [circle, setCircle] = useState(from)
   const [date, setDate] = useState(() => inputDay(new Date(now)))
   // Plegada por defecto: lo primero que se ve es el estado, no las cuentas.
@@ -569,9 +569,9 @@ function Calculator({ origin, from, now, day }: CalculatorProps) {
               ) : (
                 <>
                   <strong>{t('health.calcPace', { pace })}</strong>{' '}
-                  {t('health.calcMargin', { n: kept.daysLeft, date: day(kept.date) })}
+                  {tn('health.calcMargin', kept.daysLeft, { date: day(kept.date) })}
                   {faster !== undefined &&
-                    ` ${t('health.calcFaster', { pace: faster.pace, n: Math.max(1, -faster.daysLeft) })}`}
+                    ` ${tn('health.calcFaster', Math.max(1, -faster.daysLeft), { pace: faster.pace })}`}
                   {pace === SLOWEST && ` ${t('health.calcSlowest')}`}
                 </>
               )}

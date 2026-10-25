@@ -2,6 +2,7 @@ import { useEffect, useId, useRef, useState } from 'react'
 
 import type { CalendarEvent, CalendarSection } from '@sanatorio/contracts'
 
+import { eventTitle } from '../../shared/eventTitle'
 import { useI18n } from '../../shared/i18n'
 import { externalHref } from '../../shared/links'
 import { hasCodes, hasRoom } from './eligible'
@@ -148,7 +149,7 @@ export function EventDialog({
             {t('meet.alert', { minutes: Math.max(0, minutesTo(event.start)) })}
           </p>
         )}
-        <h3 id={titleId}>{event.title}</h3>
+        <h3 id={titleId}>{eventTitle(t, event)}</h3>
 
         <dl className="event-facts">
           <dt>{t('agenda.when')}</dt>

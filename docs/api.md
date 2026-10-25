@@ -654,12 +654,18 @@ corrección recién reservada. `fresh` solo admite `0` o `1`.
   "events": [
     {
       "id": "event:44804", "kind": "event_joined",
-      "title": "[FOUNDERS on the Stage]",
+      "title": "[FOUNDERS on the Stage]", "label": null,
       "start": "2026-10-14T14:00:00.000Z", "end": "2026-10-14T16:00:00.000Z",
       "place": "Auditorio", "description": "…",
       "joined": true, "seats": { "taken": 86, "max": 120 },
       "withLogin": null,
       "url": "https://profile.intra.42.fr/events/44804", "section": null
+    },
+    {
+      "id": "evaluation:900", "kind": "evaluation",
+      "title": "Te corrigen ft_printf",
+      "label": { "kind": "corrected", "project": "ft_printf", "login": null },
+      "…": "…"
     }
   ],
   "fortyTwoAt": "2026-10-10T20:05:00.000Z"
@@ -677,6 +683,14 @@ corrección recién reservada. `fresh` solo admite `0` o `1`.
 | `exam`         | Exámenes del campus                                 | 42            |
 
 - `joined`: `true`/`false` si te has apuntado o no; `null` si no aplica.
+- `title` y `label`: un título que pone Peer4U llega escrito en español en
+  `title` y, aparte, como `label` (`{ kind, project, login }`) para que la web
+  lo escriba en su idioma (`event.name.*`): `help_window` (te ofreces a
+  ayudar), `helping` / `helped` (ayudas a `login` / `login` te ayuda),
+  `sprint` (de `project`, o de grupo si es `null`), `correcting` /
+  `corrected` (corriges / te corrigen `project`). Lo que tiene título propio
+  (pizarras, eventos y exámenes de 42) va con `label: null` y no se traduce.
+  `title` se mantiene para quien no lea `label` (`modules/calendar/titles.ts`).
 - `url`: página del evento en la intra. Solo en lo de 42.
 - `section`: sección de la web donde se gestiona (`guardia`, `terapia`,
   `pizarras`). Solo en lo de Sanatorio.
@@ -986,6 +1000,7 @@ GET /countdowns → lo tuyo, lo más cercano primero (lo que no tiene hora, al f
     "preset": "lockers",
     "at": "2026-10-30T08:00:00.000Z",
     "eventId": null,
+    "label": null,
     "from": "albrodri"
   },
   {
@@ -996,6 +1011,7 @@ GET /countdowns → lo tuyo, lo más cercano primero (lo que no tiene hora, al f
     "preset": null,
     "at": "2026-10-27T16:00:00.000Z",
     "eventId": "board:7",
+    "label": null,
     "from": null
   }
 ]
@@ -1005,6 +1021,11 @@ GET /countdowns → lo tuyo, lo más cercano primero (lo que no tiene hora, al f
   (tu próximo compromiso: se busca en cada petición, así que cambia solo) o
   `custom` (uno tuyo). Con `preset: "lockers"` y sin título, el texto lo pone
   la web en cada idioma. `next` sin nada a la vista va con `title` y `at` a `null`.
+- `label`: como en el calendario, de qué es el título de un evento que pone
+  Peer4U, para que la web lo escriba en su idioma. Lo fijado guarda solo el
+  título en español; al dar la lista se reconoce de vuelta por el id del evento
+  y la forma del título (`labelOf`). Si no se reconoce, `null` y se enseña
+  `title`.
 - Lo que ya ha pasado se sigue dando 30 minutos («ya ha pasado») y luego deja
   de salir.
 

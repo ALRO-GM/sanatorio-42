@@ -20,7 +20,7 @@ type BoardCardProps = {
 }
 
 export function BoardCard({ board, featured, onChange }: BoardCardProps) {
-  const { t } = useI18n()
+  const { t, tn } = useI18n()
   const { busy, error, run } = useAction()
   const confirm = useConfirm()
   const [editing, setEditing] = useState(false)
@@ -65,7 +65,7 @@ export function BoardCard({ board, featured, onChange }: BoardCardProps) {
           <Avatar login={board.host} image={board.hostImage} size={24} />
           <strong>{board.host}</strong>
           <span className="hint">
-            {t('cal.seats', { taken: board.attendees, capacity: board.capacity })}
+            {tn('cal.seats', board.capacity, { taken: board.attendees, capacity: board.capacity })}
           </span>
         </p>
         <ErrorNote error={error} />

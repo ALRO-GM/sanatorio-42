@@ -27,6 +27,11 @@ type Formats = {
   number: (value: number, digits?: number) => string
   /** `1,2 M`. */
   compact: (value: number) => string
+  /**
+   * Un tamaño en bytes, con la unidad del idioma: `38 GB`, `9 TB`; en
+   * francés, `38 Go`, `9 To`. Unidades de mil (kB, MB, GB, TB).
+   */
+  bytes: (value: number) => string
   /** `16:05`. */
   time: (value: Moment) => string
   date: (value: Moment, style?: DateStyle) => string
@@ -45,6 +50,14 @@ const DATE_OPTIONS: Record<DateStyle, Intl.DateTimeFormatOptions> = {
 }
 
 const toDate = (value: Moment): Date => (value instanceof Date ? value : new Date(value))
+
+/** Las unidades de `bytes`, de mayor a menor, con lo que vale cada una. */
+const BYTE_UNITS = [
+  ['terabyte', 1e12],
+  ['gigabyte', 1e9],
+  ['megabyte', 1e6],
+  ['kilobyte', 1e3],
+] as const
 
 /** Los formateadores de cada idioma, creados una vez: `Intl.*Format` es caro de montar. */
 const cache = new Map<string, Formats>()
@@ -88,9 +101,33 @@ export function formatsFor(lang: string): Formats {
     return format
   }
 
+  const units = new Map<string, Intl.NumberFormat>()
+  const bytes = (value: number): string => {
+    const [unit, size] =
+      BYTE_UNITS.find(([, each]) => Math.abs(value) >= each) ?? (['kilobyte', 1e3] as const)
+    const scaled = value / size
+    // Un decimal solo donde dice algo: «9,4 TB», pero «38 GB» y «340 kB».
+    const digits = unit === 'kilobyte' || Math.abs(scaled) >= 10 ? 0 : 1
+    const id = `${unit}:${digits}`
+    let format = units.get(id)
+
+    if (format === undefined) {
+      format = new Intl.NumberFormat(locale, {
+        style: 'unit',
+        unit,
+        unitDisplay: 'short',
+        maximumFractionDigits: digits,
+      })
+      units.set(id, format)
+    }
+
+    return format.format(scaled)
+  }
+
   const formats: Formats = {
     number: (value, digits) => numberOf(digits).format(value),
     compact: (value) => compact.format(value),
+    bytes,
     time: (value) => time.format(toDate(value)),
     date: (value, style = 'short') => dateOf(style).format(toDate(value)),
     dateTime: (value) => dateTime.format(toDate(value)),

@@ -76,4 +76,10 @@ if (typeof window !== 'undefined') {
   fill(Element.prototype, 'scrollIntoView', noop)
   fill(URL, 'createObjectURL', () => 'blob:prueba')
   fill(URL, 'revokeObjectURL', noop)
+
+  // Como `main.tsx`: los textos del idioma del navegador, antes de pintar. Sin
+  // ellos, `I18nProvider` no pinta nada hasta que llegan.
+  const { initialLang, loadLang } = await import('../../src/shared/i18n')
+
+  await loadLang(initialLang())
 }

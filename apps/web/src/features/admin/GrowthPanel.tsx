@@ -183,7 +183,10 @@ function GrowthCharts({ data }: { data: AdminGrowth }) {
         <Figure label={t('admin.growth.new')} value={String(fresh.reduce((a, b) => a + b, 0))} />
         <Figure
           label={t('admin.growth.activeAvg')}
-          value={(activeTotal.reduce((a, b) => a + b, 0) / Math.max(1, days.length)).toFixed(1)}
+          value={
+            Math.round((10 * activeTotal.reduce((a, b) => a + b, 0)) / Math.max(1, days.length)) /
+            10
+          }
         />
       </div>
       <span className="eyebrow">{t('admin.growth.activeByCampus')}</span>

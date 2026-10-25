@@ -67,7 +67,7 @@ function Choice<T extends string>(props: {
  * de los círculos. El black hole no sale: la fecha que da 42 no es de fiar.
  */
 export function ExamStatsPanel() {
-  const { t } = useI18n()
+  const { t, tn } = useI18n()
   const [track, setTrack] = useState<ExamTrack>('all')
   const [family, setFamily] = useState<FamilyFilter>('both')
   const [kickoffs, setKickoffs] = useState<string[]>([])
@@ -94,7 +94,7 @@ export function ExamStatsPanel() {
         <>
           {data.backfill.done < data.backfill.total && (
             <p className="hint">
-              {t('exams.backfill', {
+              {tn('exams.backfill', data.backfill.total, {
                 done: data.backfill.done,
                 total: data.backfill.total,
               })}
@@ -125,7 +125,7 @@ export function ExamStatsPanel() {
               }}
             />
           </div>
-          <p className="hint">{t('exams.selection', { n: data.people })}</p>
+          <p className="hint">{tn('exams.selection', data.people)}</p>
           <ExamPairs exams={data.exams} family={family} />
           <Circles data={data} />
         </>
@@ -233,8 +233,7 @@ function ExamPairs({ exams, family }: { exams: readonly ExamStat[]; family: Fami
 
 /** Las estadísticas de un examen: intentos hasta aprobar y cómo va cada intento, sin tope. */
 function ExamCard({ exam }: { exam: ExamStat }) {
-  const { t } = useI18n()
-  const { number } = useFormat()
+  const { t, tn } = useI18n()
   const most = Math.max(1, ...exam.attemptsToPass)
   const known = exam.attemptsToPass.reduce((sum, count) => sum + count, 0)
   const bar = (count: number, index: number) => (
@@ -248,10 +247,9 @@ function ExamCard({ exam }: { exam: ExamStat }) {
     <li key={attempt.attempt} className="row">
       <span>{t('exams.attempt', { n: attempt.attempt })}</span>
       <span>
-        {t('exams.attemptLine', {
+        {tn('exams.attemptLine', attempt.people, {
           mark: attempt.medianMark === null ? '—' : Math.round(attempt.medianMark),
           pct: Math.round(attempt.passRate * 100),
-          n: attempt.people,
         })}
       </span>
     </li>
@@ -262,7 +260,9 @@ function ExamCard({ exam }: { exam: ExamStat }) {
       <span className="eyebrow">{exam.name}</span>
       <p>
         <strong>
-          {exam.avgAttempts === null ? '—' : t('exams.avg', { n: number(exam.avgAttempts, 1) })}
+          {exam.avgAttempts === null
+            ? '—'
+            : tn('exams.avg', Math.round(exam.avgAttempts * 10) / 10)}
         </strong>{' '}
         <small className="hint">
           {t('exams.people', {
@@ -281,9 +281,7 @@ function ExamCard({ exam }: { exam: ExamStat }) {
           {exam.attemptsToPass.length > SHOWN_ATTEMPTS && (
             <details className="exam-more">
               <summary>
-                {t('exams.moreAttempts', {
-                  n: exam.attemptsToPass.length - SHOWN_ATTEMPTS,
-                })}
+                {tn('exams.moreAttempts', exam.attemptsToPass.length - SHOWN_ATTEMPTS)}
               </summary>
               <ul className="exam-bars">
                 {exam.attemptsToPass
@@ -309,7 +307,7 @@ function ExamCard({ exam }: { exam: ExamStat }) {
 
 /** Cuánto se tarda en cada círculo, de la gente elegida. */
 function Circles({ data }: { data: ExamStats }) {
-  const { t } = useI18n()
+  const { t, tn } = useI18n()
 
   if (data.circles.length === 0) return null
 
@@ -322,9 +320,9 @@ function Circles({ data }: { data: ExamStats }) {
           {data.circles.map((circle) => (
             <li key={circle.circle} className="row">
               <span>{t('graph.circle', { n: circle.circle })}</span>
-              <strong>{t('exams.days', { n: circle.median })}</strong>
+              <strong>{tn('exams.days', circle.median)}</strong>
               <small className="hint">
-                {t('exams.range', { p25: circle.p25, p75: circle.p75, n: circle.people })}
+                {tn('exams.range', circle.people, { p25: circle.p25, p75: circle.p75 })}
               </small>
             </li>
           ))}

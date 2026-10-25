@@ -2,6 +2,7 @@ import { useState } from 'react'
 
 import type { AgendaGoal, AgendaView, CalendarEvent } from '@sanatorio/contracts'
 
+import { eventTitle } from '../../shared/eventTitle'
 import { api } from '../../shared/api'
 import {
   openCountdownsPage,
@@ -210,7 +211,7 @@ function EventRow({ event }: { event: CalendarEvent }) {
       <span className="eyebrow">
         {t(`agenda.kind.${event.kind}`)} · {format.dateTime(event.start)}
       </span>
-      <strong>{event.title}</strong>
+      <strong>{eventTitle(t, event)}</strong>
       <button
         type="button"
         className="link"

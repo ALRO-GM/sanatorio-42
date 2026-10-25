@@ -11,14 +11,14 @@ import { passColor, badgeStyle } from './colors'
  *    se los aprobaron.
  */
 export function VerdictStats({ node }: { node: NetworkNode }) {
-  const { t } = useI18n()
+  const { t, tn } = useI18n()
 
   return (
     <div className="net-verdicts">
       <Side
         title={t('net.asCorrector')}
         subtitle={t('net.asCorrector.hint')}
-        count={t('net.asCorrector.count', { n: node.given })}
+        count={tn('net.asCorrector.count', node.given)}
         rate={node.givenPassRate}
         passes={(pct) => t('net.asCorrector.pass', { pct })}
         fails={(pct) => t('net.asCorrector.fail', { pct })}
@@ -27,7 +27,7 @@ export function VerdictStats({ node }: { node: NetworkNode }) {
       <Side
         title={t('net.asCorrected')}
         subtitle={t('net.asCorrected.hint')}
-        count={t('net.asCorrected.count', { n: node.received })}
+        count={tn('net.asCorrected.count', node.received)}
         rate={node.receivedPassRate}
         passes={(pct) => t('net.asCorrected.pass', { pct })}
         fails={(pct) => t('net.asCorrected.fail', { pct })}

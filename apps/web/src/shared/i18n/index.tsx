@@ -57,13 +57,21 @@ const needed = (lang: Lang): Lang[] => {
   return fallback === undefined ? [lang] : [lang, fallback]
 }
 
-/** Descarga los textos de un idioma (y los de su `fallback`), si no lo estaban ya. */
+/** ¿Están ya los textos de un idioma y los de su `fallback`? */
+const isReady = (lang: Lang): boolean => needed(lang).every((code) => loaded[code] !== undefined)
+
+/**
+ * Descarga los textos de un idioma (y los de su `fallback`), si no lo estaban
+ * ya. Se guardan todos a la vez, al final: si el inglés llegara antes que el
+ * francés, la web pintaría un instante en inglés lo que pidió en francés.
+ */
 export async function loadLang(lang: Lang): Promise<void> {
-  await Promise.all(
-    needed(lang).map(async (code) => {
-      loaded[code] ??= (await LANGS[code].load()).default
-    }),
+  const missing = needed(lang).filter((code) => loaded[code] === undefined)
+  const dicts = await Promise.all(
+    missing.map(async (code) => [code, (await LANGS[code].load()).default] as const),
   )
+
+  for (const [code, dict] of dicts) loaded[code] ??= dict
 }
 
 /**
@@ -81,6 +89,44 @@ export function lookup(lang: Lang, key: string): string | undefined {
 import { localeOf } from './locale'
 
 export { localeOf }
+
+/**
+ * Los huecos que llevan un número que no es una cantidad: un año (`2026`, no
+ * `2.026`), un código o un id. Esos se escriben tal cual.
+ */
+const RAW_NUMBER = /^(year|code|id)$|(Year|Code|Id)$/
+
+const numberFormats = new Map<string, Intl.NumberFormat>()
+
+/** Un número de un hueco, con los separadores del idioma (`1.234`, `1,234`, `1 234`). */
+function numberIn(lang: string, value: number): string {
+  const locale = localeOf(lang)
+  let format = numberFormats.get(locale)
+
+  if (format === undefined) {
+    format = new Intl.NumberFormat(locale)
+    numberFormats.set(locale, format)
+  }
+
+  return format.format(value)
+}
+
+/**
+ * Rellena los `{huecos}` de un texto. Un número se escribe a la manera del
+ * idioma («51 300 corrections sur 81 723», no «81723»), salvo los de
+ * `RAW_NUMBER`; una cadena va tal cual.
+ */
+function fillText(lang: string, template: string, vars: Record<string, string | number>): string {
+  return template.replace(/\{(\w+)\}/g, (match, name: string) => {
+    if (!(name in vars)) return match
+
+    const value = vars[name]
+
+    return typeof value === 'number' && Number.isFinite(value) && !RAW_NUMBER.test(name)
+      ? numberIn(lang, value)
+      : String(value)
+  })
+}
 
 export type Translate = (key: string, vars?: Record<string, string | number>) => string
 
@@ -145,37 +191,68 @@ const I18nContext = createContext<I18n>({
   tree: (prefix) => ({ value: unflatten(es, prefix), translated: true }),
 })
 
+/**
+ * Los textos del idioma elegido para toda la web.
+ *
+ * Nunca se pinta un idioma a medias: mientras llegan los textos del elegido
+ * (y los de su `fallback`), se sigue pintando el anterior, y la primera vez,
+ * nada. Si no, quien elige el francés vería un instante el español, o el
+ * inglés de reserva si llega antes, como pasaba en la ventana de privacidad.
+ * `main.tsx` ya los pide antes de pintar, así que lo normal es no esperar.
+ */
 export function I18nProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState(initialLang)
-  // Cambia cuando termina de llegar un idioma: obliga a pintar con sus textos.
-  const [arrived, setArrived] = useState(0)
+  // El idioma pedido y el que se pinta, que es el último ya descargado.
+  const [wanted, setWanted] = useState(initialLang)
+  const [shown, setShown] = useState<Lang | null>(null)
+  const lang = isReady(wanted) ? wanted : shown
 
   useEffect(() => {
-    if (needed(lang).every((code) => loaded[code] !== undefined)) return
+    if (isReady(wanted)) return
 
     let alive = true
+    // Si no llegan, se pinta igualmente: lo que falte sale en español.
+    const show = (): void => {
+      if (alive) setShown(wanted)
+    }
 
-    loadLang(lang).then(
-      () => {
-        if (alive) setArrived((count) => count + 1)
-      },
-      () => undefined,
-    )
+    loadLang(wanted).then(show, show)
 
     return () => {
       alive = false
     }
-  }, [lang])
+  }, [wanted])
 
   useEffect(() => {
-    document.documentElement.lang = lang
+    if (lang !== null) document.documentElement.lang = lang
   }, [lang])
 
-  const setLang = useCallback((next: Lang) => {
-    localStorage.setItem(STORAGE_KEY, next)
-    setLangState(next)
-  }, [])
+  const setLang = useCallback(
+    (next: Lang) => {
+      localStorage.setItem(STORAGE_KEY, next)
+      // Lo que se pinta ahora sigue mientras llega el nuevo.
+      setShown(lang)
+      setWanted(next)
+    },
+    [lang],
+  )
 
+  return lang === null ? null : (
+    <Texts lang={lang} setLang={setLang}>
+      {children}
+    </Texts>
+  )
+}
+
+/** El contexto de un idioma ya descargado. */
+function Texts({
+  lang,
+  setLang,
+  children,
+}: {
+  lang: Lang
+  setLang: (next: Lang) => void
+  children: ReactNode
+}) {
   /**
    * Texto de una clave, con `{variables}` sustituidas.
    *
@@ -186,17 +263,9 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     (key, vars) => {
       const template = lookup(lang, key) ?? key
 
-      if (vars === undefined) {
-        return template
-      }
-
-      return template.replace(/\{(\w+)\}/g, (match, name: string) =>
-        name in vars ? String(vars[name]) : match,
-      )
+      return vars === undefined ? template : fillText(lang, template, vars)
     },
-    // `arrived`: al llegar los textos del idioma, `t` cambia y se repinta todo.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [lang, arrived],
+    [lang],
   )
 
   const tn = useCallback<TranslateCount>(
@@ -216,8 +285,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
         fallback === undefined ? undefined : loaded[fallback],
       )
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [lang, arrived],
+    [lang],
   )
 
   const value = useMemo(() => ({ lang, setLang, t, tn, tree }), [lang, setLang, t, tn, tree])

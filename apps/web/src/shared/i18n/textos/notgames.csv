@@ -56,7 +56,8 @@ notgames.wrong,Not-games: has fallado,No era esa,Not that one,No era aquesta,Ez 
 notgames.scores,Not-games: título del marcador,Marcador,Scoreboard,Marcador,Markagailua,Scores
 notgames.lives,Not-games: vidas que quedan,Vidas: {n},Lives: {n},Vides: {n},Bizitzak: {n},Vies : {n}
 notgames.points,Not-games: puntos,{n} pts,{n} pts,{n} pts,{n} pt,{n} pts
-notgames.hits,Not-games: aciertos,{n} aciertos,{n} right,{n} encerts,{n} asmatze,Bonnes réponses : {n}
+notgames.hits.one,Not-games: aciertos (una),{n} acierto,{n} right,{n} encert,{n} asmatze,Bonnes réponses : {n}
+notgames.hits.many,Not-games: aciertos (varias),{n} aciertos,{n} right,{n} encerts,{n} asmatze,Bonnes réponses : {n}
 notgames.over,Not-games: la partida ha terminado,Fin de la partida,Game over,Fi de la partida,Partida amaitu da,Fin de la partie
 notgames.youWon,Not-games: has ganado,¡Has ganado!,You won!,Has guanyat!,Irabazi duzu!,Tu as gagné !
 notgames.winner,Not-games: quién ha ganado,Ha ganado {names},{names} won,Ha guanyat {names},{names}-k irabazi du,Victoire de {names}

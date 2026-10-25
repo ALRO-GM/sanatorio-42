@@ -39,3 +39,4 @@ export function createCalendarModule(deps: CalendarModuleDeps): CalendarModule {
 }
 
 export type { CalendarService } from './calendar.service.js'
+export { labelOf } from './titles.js'

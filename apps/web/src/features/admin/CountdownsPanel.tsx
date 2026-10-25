@@ -175,7 +175,7 @@ function SentCountdown({
   report: CountdownNoticeReport
   onRemoved: () => void
 }) {
-  const { t } = useI18n()
+  const { t, tn } = useI18n()
   const { dateTime } = useFormat()
   const removing = useAction()
   const title = report.title ?? (report.preset === 'lockers' ? t('countdown.lockers.title') : '')
@@ -188,7 +188,7 @@ function SentCountdown({
           {report.at === null ? '' : dateTime(report.at)} ·{' '}
           {t(`admin.countdown.to.${report.group}`)}
           {report.campusId === null ? '' : ` · #${report.campusId}`} ·{' '}
-          {t('admin.countdown.dismissed', { n: report.dismissed })}
+          {tn('admin.countdown.dismissed', report.dismissed)}
         </small>
         <ErrorNote error={removing.error} />
       </span>

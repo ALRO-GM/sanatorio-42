@@ -12,13 +12,6 @@ import { LimitActions, NumberField, Tile } from './LimitParts'
 
 const GB = 1_000_000_000
 
-/** "9,4 TB", "120 GB". */
-function traffic(bytes: number): string {
-  return bytes >= 1000 * GB
-    ? `${(bytes / (1000 * GB)).toFixed(1)} TB`
-    : `${(bytes / GB).toFixed(bytes >= 10 * GB ? 0 : 1)} GB`
-}
-
 /** Lo que se escribe en el formulario: todo texto, como lo da un `<input>`. */
 type Draft = Record<'daily' | 'monthlyGb' | 'renewDay' | 'share' | 'min' | 'max', string>
 
@@ -36,8 +29,8 @@ const draftOf = (settings: BudgetSettings): Draft => ({
  * regularlo a mano. Las cuentas son de la API; aquí solo se enseñan y se editan.
  */
 export function BudgetCard({ status, onChange }: { status: BudgetStatus; onChange: () => void }) {
-  const { t } = useI18n()
-  const { number } = useFormat()
+  const { t, tn } = useI18n()
+  const { number, bytes: traffic } = useFormat()
   const action = useAction()
   const [draft, setDraft] = useState(() => draftOf(status.settings))
   const { day, month, settings } = status
@@ -100,7 +93,7 @@ export function BudgetCard({ status, onChange }: { status: BudgetStatus; onChang
           hint={
             <>
               {month.stopAt !== null && `${t('admin.budget.stopAt')} `}
-              {t('admin.budget.renews', { n: month.daysLeft, day: month.renewsOn })}
+              {tn('admin.budget.renews', month.daysLeft, { day: month.renewsOn })}
             </>
           }
         />

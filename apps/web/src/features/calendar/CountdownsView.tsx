@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 
 import type { CalendarEvent } from '@sanatorio/contracts'
 
+import { eventTitle } from '../../shared/eventTitle'
 import { api } from '../../shared/api'
 import { useCountdowns } from '../../shared/countdowns'
 import { useAsync } from '../../shared/hooks/useAsync'
@@ -87,7 +88,7 @@ export function CountdownsView({ onOpen }: { onOpen: (event: CalendarEvent) => v
               >
                 <Icon name={iconOf(event.kind)} size={16} />
                 <span>
-                  <strong>{event.title}</strong>
+                  <strong>{eventTitle(t, event)}</strong>
                   <small>
                     {t(`agenda.kind.${event.kind}`)} · {dateTime(Date.parse(event.start))}
                   </small>

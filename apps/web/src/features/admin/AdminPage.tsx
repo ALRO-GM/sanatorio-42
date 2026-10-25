@@ -52,13 +52,6 @@ const TABS = [
 
 type Tab = (typeof TABS)[number]
 
-/** "1,2 MB", "340 kB". */
-function size(bytes: number): string {
-  return bytes >= 1_000_000
-    ? `${(bytes / 1_000_000).toFixed(1)} MB`
-    : `${Math.round(bytes / 1000)} kB`
-}
-
 /**
  * Panel de gestión: consumo y límites, permisos y bloqueos, buzón, registro de
  * mensajes y mapa de calor de uso. Solo lo ve quien administra la web.
@@ -125,8 +118,8 @@ function AdminTabs({ campusId, me }: { campusId?: number | undefined; me: string
 // --- Consumo -----------------------------------------------------------------
 
 function ConsumptionTab() {
-  const { t } = useI18n()
-  const { number } = useFormat()
+  const { t, tn } = useI18n()
+  const { number, bytes: size } = useFormat()
   const { data, error, loading, reload } = useAsync(() => api.getAdminConsumption(), [])
   const action = useAction()
 
@@ -157,7 +150,7 @@ function ConsumptionTab() {
           <span className="eyebrow">{t('admin.cons.perPerson')}</span>
           <strong>{number(data.limit.perPerson)}</strong>
           <small>
-            {t('admin.cons.budget', {
+            {tn('admin.cons.budget', data.limit.activePeople, {
               budget: number(data.limit.budget),
               people: data.limit.activePeople,
             })}
@@ -180,8 +173,7 @@ function ConsumptionTab() {
               <li key={`${warning.weekday}-${warning.hour}`}>
                 <Icon name="aviso" /> {t(`admin.weekday.${warning.weekday}`)}{' '}
                 {String(warning.hour).padStart(2, '0')}:00 ·{' '}
-                {t('admin.cons.warning', {
-                  n: number(warning.requests),
+                {tn('admin.cons.warning', warning.requests, {
                   pct: Math.round(warning.share * 100),
                 })}
               </li>
@@ -301,6 +293,7 @@ const brief = (value: number): string =>
 /** Peticiones de las últimas 48 horas, una barra por hora. */
 function RecentBars({ data }: { data: Consumption }) {
   const { t } = useI18n()
+  const { bytes: size } = useFormat()
   const peak = Math.max(1, ...data.recent.map((hour) => hour.requests))
 
   if (data.recent.length === 0) return <p className="hint">{t('admin.cons.empty')}</p>
@@ -328,7 +321,7 @@ function RecentBars({ data }: { data: Consumption }) {
 // --- Personas ------------------------------------------------------------------
 
 function PeopleTab() {
-  const { t } = useI18n()
+  const { t, tn } = useI18n()
   const { date } = useFormat()
   const { data, error, loading, reload } = useAsync(() => api.getAdminPeople(), [])
   const action = useAction()
@@ -449,7 +442,9 @@ function PeopleTab() {
           >
             {['1', '7', '30', ''].map((option) => (
               <option key={option} value={option}>
-                {option === '' ? t('admin.people.forever') : t('admin.people.days', { n: option })}
+                {option === ''
+                  ? t('admin.people.forever')
+                  : tn('admin.people.days', Number(option))}
               </option>
             ))}
           </select>

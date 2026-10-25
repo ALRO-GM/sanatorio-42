@@ -91,7 +91,7 @@ type HeatTableProps = {
 }
 
 function HeatTable({ data, nameOf, groupName }: HeatTableProps) {
-  const { t } = useI18n()
+  const { t, tn } = useI18n()
   const { number } = useFormat()
   // Usos totales de cada grupo: cada celda se pinta como parte de los suyos.
   const totals = data.groups.map((_, column) =>
@@ -119,7 +119,7 @@ function HeatTable({ data, nameOf, groupName }: HeatTableProps) {
               <th key={group.id} scope="col">
                 {groupName(group.id)}
                 <small>
-                  {t('admin.usage.people', { n: group.people, uses: totals[column] ?? 0 })}
+                  {tn('admin.usage.people', group.people, { uses: totals[column] ?? 0 })}
                 </small>
               </th>
             ))}
@@ -136,7 +136,10 @@ function HeatTable({ data, nameOf, groupName }: HeatTableProps) {
                   <td
                     key={data.groups[column]?.id ?? column}
                     style={{ '--heat': (part / peak).toFixed(3) } as React.CSSProperties}
-                    title={t('admin.usage.cell', { uses: count, pct: Math.round(part * 100) })}
+                    title={tn('admin.usage.cell', count, {
+                      uses: count,
+                      pct: Math.round(part * 100),
+                    })}
                   >
                     {count === 0 ? '·' : `${Math.round(part * 100)} %`}
                     {count > 0 && <small>{number(count)}</small>}

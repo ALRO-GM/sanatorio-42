@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/tablon.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-93 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
+94 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera | Francés |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -48,8 +48,8 @@ Generado desde `apps/web/src/shared/i18n/textos/tablon.csv` con
 | `board.pasteHere` | Título del formulario de duda (como un pósit) | features/doubts/DoubtBoard, features/doubts/GuidePanel | Pega tu duda aquí | Stick your question here | Enganxa el teu dubte aquí | Itsatsi zure zalantza hemen | Colle ta question ici |
 | `board.doubtHint` | Indicación para escribir la duda | features/doubts/DoubtForm, features/doubts/GuidePanel | ¿Qué se te resiste? Cuanto más concreta, mejor. | What's giving you trouble? The more specific, the better. | Què se't resisteix? Com més concret, millor. | Zer ari zaizu kostatzen? Zenbat eta zehatzago, hobe. | Qu'est-ce qui te résiste ? Plus c'est précis, mieux c'est. |
 | `board.post` | Botón para publicar la duda | features/doubts/BoardTour, features/doubts/DoubtForm, features/doubts/GuidePanel | Publicar la duda | Post the question | Publica el dubte | Argitaratu zalantza | Publier la question |
-| `board.answers1` | Una respuesta | features/doubts/DoubtBoard, features/doubts/GuidePanel | 1 respuesta | 1 answer | 1 resposta | Erantzun 1 | 1 réponse |
-| `board.answersN` | Varias respuestas | features/doubts/DoubtBoard, features/doubts/GuidePanel | {n} respuestas | {n} answers | {n} respostes | {n} erantzun | {n} réponses |
+| `board.answers.one` | Respuestas de una duda (una) | features/doubts/DoubtBoard, features/doubts/GuidePanel | {n} respuesta | {n} answer | {n} resposta | Erantzun {n} | {n} réponse |
+| `board.answers.many` | Respuestas de una duda (varias) | features/doubts/DoubtBoard, features/doubts/GuidePanel | {n} respuestas | {n} answers | {n} respostes | {n} erantzun | {n} réponses |
 | `board.status.open` | Estado de la duda: abierta | features/doubts/DoubtBoard, features/doubts/DoubtDetailCard, features/doubts/GuidePanel | Abierta | Open | Obert | Irekita | Ouverte |
 | `board.status.resolved` | Estado de la duda: resuelta | features/doubts/DoubtBoard, features/doubts/DoubtDetailCard, features/doubts/GuidePanel | Resuelta | Solved | Resolt | Ebatzita | Résolue |
 | `board.status.specialist` | Respuesta de alguien que aprobó el proyecto | features/doubts/DoubtBoard, features/doubts/DoubtDetailCard, features/doubts/GuidePanel | Senior | Senior | Sènior | Senior | Senior |
@@ -71,7 +71,8 @@ Generado desde `apps/web/src/shared/i18n/textos/tablon.csv` con
 | `cgraph.tier3` | Leyenda: corregido bastantes veces | features/doubts/CorrectionGraph | {n} veces | {n} times | {n} vegades | {n} aldiz | {n} fois |
 | `cgraph.tier4` | Leyenda: corregido diez veces o más (maestro) | features/doubts/CorrectionGraph | {n} veces: maestría | {n} times: mastery | {n} vegades: mestria | {n} aldiz: maisutasuna | {n} fois : maîtrise |
 | `cgraph.future` | Proyecto que aún no puedes corregir | features/doubts/CorrectionGraph | {name}: lo podrás corregir cuando lo apruebes | {name}: you can evaluate it once you pass it | {name}: el podràs corregir quan l'aprovis | {name}: gainditzen duzunean zuzendu ahal izango duzu | {name} : tu pourras le corriger une fois que tu l'auras validé |
-| `cgraph.times` | Veces que has corregido un proyecto | features/doubts/CorrectionGraph | {name}: lo has corregido {n} veces | {name}: you have evaluated it {n} times | {name}: l'has corregit {n} vegades | {name}: {n} aldiz zuzendu duzu | {name} : tu l'as corrigé {n} fois |
+| `cgraph.times.one` | Veces que has corregido un proyecto (una) | features/doubts/CorrectionGraph | {name}: lo has corregido {n} vez | {name}: you have evaluated it {n} time | {name}: l'has corregit {n} vegada | {name}: {n} aldiz zuzendu duzu | {name} : tu l'as corrigé {n} fois |
+| `cgraph.times.many` | Veces que has corregido un proyecto (varias) | features/doubts/CorrectionGraph | {name}: lo has corregido {n} veces | {name}: you have evaluated it {n} times | {name}: l'has corregit {n} vegades | {name}: {n} aldiz zuzendu duzu | {name} : tu l'as corrigé {n} fois |
 | `board.solution` | Marca de la respuesta que resolvió la duda | features/doubts/DoubtDetailCard, features/doubts/GuidePanel | La resolvió | Solved it | El va resoldre | Berak ebatzi zuen | A résolu la question |
 | `board.solvedByThis` | Botón para marcar la respuesta que te resolvió la duda | features/doubts/BoardTour, features/doubts/DoubtDetailCard, features/doubts/GuidePanel | Esta me la resolvió | This one solved it | Aquesta me'l va resoldre | Honek ebatzi zidan | Celle-ci a résolu ma question |
 | `board.resolveHint` | Cómo se da una duda por resuelta | features/doubts/DoubtDetailCard, features/doubts/GuidePanel | Para darla por resuelta, marca la respuesta que te la resolvió: quien la escribió gana XP. | To mark it solved, pick the answer that solved it: whoever wrote it earns XP. | Per donar-lo per resolt, marca la resposta que te'l va resoldre: qui la va escriure guanya XP. | Ebatzitzat emateko, markatu ebatzi zizun erantzuna: idatzi zuenak XP irabazten du. | Pour marquer la question comme résolue, choisis la réponse qui l'a résolue : la personne qui l'a écrite gagne de l'XP. |

@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/terapia.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-57 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
+60 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera | Francés |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -11,8 +11,10 @@ Generado desde `apps/web/src/shared/i18n/textos/terapia.csv` con
 | `therapy.allProjects` | Filtro: todos los proyectos | features/therapy/TherapyGroups | Todos los proyectos | All projects | Tots els projectes | Proiektu guztiak | Tous les projets |
 | `therapy.loading` | Mientras cargan los grupos | features/therapy/TherapyGroups | Buscando grupos… | Looking for groups… | Buscant grups… | Taldeak bilatzen… | Recherche de groupes… |
 | `therapy.empty` | No hay grupos abiertos | features/therapy/TherapyGroups | Todavía no hay ningún grupo abierto aquí. ¿Abres tú el primero? | No open groups here yet. Want to open the first one? | Encara no hi ha cap grup obert aquí. Obres tu el primer? | Oraindik ez dago talde irekirik hemen. Zuk irekiko duzu lehena? | Aucun groupe ouvert ici pour l'instant. Tu ouvres le premier ? |
-| `therapy.open` | Grupo con plazas libres: ocupadas y totales | features/therapy/GroupCard, features/therapy/TherapyTour | Grupo abierto · {taken} de {capacity} plazas | Open group · {taken} of {capacity} seats | Grup obert · {taken} de {capacity} places | Talde irekia · {capacity} plazatik {taken} | Groupe ouvert · places : {taken} sur {capacity} |
-| `therapy.full` | Grupo lleno | features/therapy/GroupCard | Completo · {capacity} plazas | Full · {capacity} seats | Complet · {capacity} places | Beteta · {capacity} plaza | Complet · {capacity} places |
+| `therapy.open.one` | Grupo con plazas libres: ocupadas y totales (una) | features/therapy/GroupCard, features/therapy/TherapyTour | Grupo abierto · {taken} de {capacity} plaza | Open group · {taken} of {capacity} seat | Grup obert · {taken} de {capacity} plaça | Talde irekia · {capacity} plazatik {taken} | Groupe ouvert · places : {taken} sur {capacity} |
+| `therapy.open.many` | Grupo con plazas libres: ocupadas y totales (varias) | features/therapy/GroupCard, features/therapy/TherapyTour | Grupo abierto · {taken} de {capacity} plazas | Open group · {taken} of {capacity} seats | Grup obert · {taken} de {capacity} places | Talde irekia · {capacity} plazatik {taken} | Groupe ouvert · places : {taken} sur {capacity} |
+| `therapy.full.one` | Grupo lleno (una) | features/therapy/GroupCard | Completo · {capacity} plaza | Full · {capacity} seat | Complet · {capacity} plaça | Beteta · {capacity} plaza | Complet · {capacity} place |
+| `therapy.full.many` | Grupo lleno (varias) | features/therapy/GroupCard | Completo · {capacity} plazas | Full · {capacity} seats | Complet · {capacity} places | Beteta · {capacity} plaza | Complet · {capacity} places |
 | `therapy.where` | Etiqueta: lugar | features/therapy/GroupCard | Dónde | Where | On | Non | Où |
 | `therapy.when` | Etiqueta: horario | features/therapy/GroupCard | Horario | Schedule | Horari | Ordutegia | Horaires |
 | `therapy.timeRange` | Hora de inicio y fin | features/therapy/GroupCard | {start} a {end} | {start} to {end} | {start} a {end} | {start}etatik {end}etara | De {start} à {end} |
@@ -27,7 +29,8 @@ Generado desde `apps/web/src/shared/i18n/textos/terapia.csv` con
 | `therapy.join` | Botón para unirse al grupo | features/therapy/GroupCard, features/therapy/TherapyTour | Apuntarme al grupo | Join the group | Apunta'm al grup | Eman izena taldean | Rejoindre le groupe |
 | `therapy.leave` | Botón para salir del grupo | features/therapy/GroupCard | Salir del grupo | Leave the group | Surt del grup | Irten taldetik | Quitter le groupe |
 | `therapy.close` | Botón para cerrar el grupo (quien lo creó) | features/therapy/GroupCard | Cerrar grupo | Close group | Tanca el grup | Itxi taldea | Fermer le groupe |
-| `therapy.invited` | Ya avisaste a la gente del proyecto | features/therapy/GroupCard | Avisaste a {n} personas que hacen el proyecto | You told {n} people doing the project | Has avisat {n} persones que fan el projecte | Proiektua egiten ari diren {n} pertsonari abisatu diezu | Tu as prévenu les personnes qui font le projet ({n}) |
+| `therapy.invited.one` | Ya avisaste a la gente del proyecto (una) | features/therapy/GroupCard | Avisaste a {n} persona que hace el proyecto | You told {n} person doing the project | Has avisat {n} persona que fa el projecte | Proiektua egiten ari den {n} pertsonari abisatu diozu | Tu as prévenu {n} personne qui fait le projet |
+| `therapy.invited.many` | Ya avisaste a la gente del proyecto (varias) | features/therapy/GroupCard | Avisaste a {n} personas que hacen el proyecto | You told {n} people doing the project | Has avisat {n} persones que fan el projecte | Proiektua egiten ari diren {n} pertsonari abisatu diezu | Tu as prévenu {n} personnes qui font le projet |
 | `therapy.inviteAsk` | Confirmación antes de avisar | features/therapy/GroupCard | ¿Avisar del grupo a quien está haciendo {project} en tu campus? Se puede hacer una sola vez. | Tell everyone doing {project} on your campus about the group? You can only do it once. | Vols avisar del grup qui fa {project} al teu campus? Només es pot fer una vegada. | Zure campusean {project} egiten ari direnei taldearen berri eman? Behin bakarrik egin daiteke. | Prévenir de ce groupe les personnes qui font {project} sur ton campus ? Tu ne peux le faire qu'une fois. |
 | `therapy.invite` | Botón para avisar a quien hace el proyecto | features/therapy/GroupCard | Avisar a quien hace el proyecto | Tell whoever is doing the project | Avisa qui fa el projecte | Proiektua egiten ari direnei abisatu | Prévenir les personnes qui font le projet |
 | `therapy.remove` | Botón de moderación para retirar un grupo | features/therapy/GroupCard | Retirar (moderación) | Remove (moderation) | Retira (moderació) | Kendu (moderazioa) | Retirer (modération) |

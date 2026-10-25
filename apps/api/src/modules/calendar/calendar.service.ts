@@ -37,6 +37,7 @@ import type { HelpService } from '../help/index.js'
 import { FRESH_USER_TTL_MS } from '../replica/index.js'
 import type { Agenda, ReplicaRepository } from '../replica/index.js'
 import type { TherapyService } from '../therapy/index.js'
+import { titled } from './titles.js'
 
 type CalendarServiceOptions = {
   replica: ReplicaRepository
@@ -57,6 +58,7 @@ const INTRA = 'https://profile.intra.42.fr'
 
 /** Lo que cada tipo no necesita, para no repetirlo en cada evento. */
 const BASE = {
+  label: null,
   place: null,
   description: null,
   joined: null,
@@ -85,7 +87,7 @@ export function createCalendarService(options: CalendarServiceOptions) {
           ...BASE,
           id: `help:window:${day.day}:${window.start}`,
           kind: 'help',
-          title: 'Te ofreces a ayudar',
+          ...titled({ kind: 'help_window', project: null, login: null }),
           start: at(day.day, window.start > day.now ? window.start : day.now),
           end: at(day.day, window.end),
           section: 'guardia',
@@ -96,10 +98,11 @@ export function createCalendarService(options: CalendarServiceOptions) {
           ...BASE,
           id: `help:booking:${booking.id}`,
           kind: 'help',
-          title:
-            booking.role === 'helper'
-              ? `Ayudas a ${booking.peer.login}`
-              : `${booking.peer.login} te ayuda`,
+          ...titled({
+            kind: booking.role === 'helper' ? 'helping' : 'helped',
+            project: null,
+            login: booking.peer.login,
+          }),
           start: at(booking.day, booking.start),
           end: at(booking.day, booking.end),
           description:
@@ -132,7 +135,7 @@ export function createCalendarService(options: CalendarServiceOptions) {
             ...BASE,
             id: `therapy:${group.id}:${day}`,
             kind: 'therapy',
-            title: `Sprint de ${group.projectName ?? 'grupo'}`,
+            ...titled({ kind: 'sprint', project: group.projectName, login: null }),
             start: isoAt(start),
             end: isoAt(end),
             place: group.place,
@@ -222,10 +225,11 @@ export function createCalendarService(options: CalendarServiceOptions) {
         id: `evaluation:${evaluation.id}`,
         kind: 'evaluation',
         // No se dice con quién: 42 lo oculta hasta que llega la hora.
-        title:
-          evaluation.role === 'corrector'
-            ? `Corriges${project === null ? '' : ` ${project}`}`
-            : `Te corrigen${project === null ? '' : ` ${project}`}`,
+        ...titled({
+          kind: evaluation.role === 'corrector' ? 'correcting' : 'corrected',
+          project,
+          login: null,
+        }),
         start: evaluation.beginAt,
         end: evaluation.endAt,
         url: `${INTRA}/`,

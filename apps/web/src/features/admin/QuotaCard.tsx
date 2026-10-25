@@ -18,7 +18,7 @@ const capOf = (text: string): number | null => (text.trim() === '' ? null : Numb
  * cuánta gente espera turno y los topes para regularla a mano.
  */
 export function QuotaCard() {
-  const { t } = useI18n()
+  const { t, tn } = useI18n()
   const { number } = useFormat()
   const { data, error, loading, reload } = useAsync(() => api.getAdminQuota(), [])
   const action = useAction()
@@ -84,7 +84,7 @@ export function QuotaCard() {
         <Tile
           label={t('admin.quota.month')}
           value={number(month.spent)}
-          hint={t('admin.budget.renews', { n: month.daysLeft, day: month.renewsOn })}
+          hint={tn('admin.budget.renews', month.daysLeft, { day: month.renewsOn })}
         />
         <Tile
           label={t('admin.quota.queued')}

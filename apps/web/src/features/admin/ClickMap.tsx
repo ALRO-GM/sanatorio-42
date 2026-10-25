@@ -5,6 +5,7 @@ import type { ClickLayout } from '@sanatorio/contracts'
 import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
+import { useFormat } from '../../shared/i18n/useFormat'
 import { DataTable } from '../../shared/ui/DataTable'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { PillGroup } from '../../shared/ui/PillGroup'
@@ -20,6 +21,7 @@ const LAYOUTS: readonly ClickLayout[] = ['desktop', 'mobile']
  */
 export function ClickMap() {
   const { t } = useI18n()
+  const { number } = useFormat()
   const [section, setSection] = useState<string | null>(null)
   const [layout, setLayout] = useState<ClickLayout>('desktop')
   const [days, setDays] = useState(30)
@@ -106,7 +108,7 @@ export function ClickMap() {
                 id: 'n',
                 label: t('admin.clicks.count'),
                 sort: (row) => row.n,
-                cell: (row) => row.n,
+                cell: (row) => number(row.n),
               },
             ]}
           />

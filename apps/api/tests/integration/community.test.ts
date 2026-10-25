@@ -933,7 +933,9 @@ describe('calendario', () => {
     // De la corrección no se dice con quién: 42 lo oculta hasta la hora.
     expect(byId.get('evaluation:900')).toMatchObject({
       kind: 'evaluation',
+      // El título en español y, aparte, de qué es: la web lo escribe en su idioma.
       title: 'Te corrigen ft_printf',
+      label: { kind: 'corrected', project: 'ft_printf', login: null },
       withLogin: null,
       end: new Date(Date.parse(tomorrow(12)) + 30 * 60_000).toISOString(),
     })
@@ -1041,11 +1043,18 @@ describe('calendario', () => {
     const calendar = json(await http.get(`/calendar?${range}`)) as Calendar
     const kinds = (kind: string) => calendar.events.filter((event) => event.kind === kind)
 
-    expect(kinds('help')).toMatchObject([{ title: 'Te ofreces a ayudar', section: 'guardia' }])
+    expect(kinds('help')).toMatchObject([
+      {
+        title: 'Te ofreces a ayudar',
+        label: { kind: 'help_window', project: null, login: null },
+        section: 'guardia',
+      },
+    ])
     // Tres días concretos: tres sesiones, una por día.
     expect(kinds('therapy')).toHaveLength(3)
     expect(kinds('therapy')[0]).toMatchObject({
       title: 'Sprint de ft_printf',
+      label: { kind: 'sprint', project: 'ft_printf', login: null },
       place: 'Cluster 1',
       section: 'terapia',
       seats: { taken: 1, max: 5 },

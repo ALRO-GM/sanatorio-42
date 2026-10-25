@@ -48,6 +48,7 @@ describe('calendario', () => {
     id: 'board:1',
     kind: 'board',
     title: 'Pizarra',
+    label: null,
     start: start.toISOString(),
     end: end.toISOString(),
     place: null,
