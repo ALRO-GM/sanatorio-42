@@ -98,10 +98,11 @@ lo que tiene elegido quien mira.
 Un estilo puede dejar elegir color. En su manifiesto, `palettes` es una lista en
 la que cada paleta da valor a variables de CSS (`vars`); el `theme.css` calcula
 sus colores a partir de ellas. `libre` lo hace con `--hue` y `--chroma`. La
-primera de la lista es la de fábrica. Con `paletteMenu: true` salen en un
-desplegable en vez de en fila: `terminal` lo usa para los temas de VS Code más
-instalados (`terminal/palettes.ts`), cada uno con su versión de día (`--tl-*`) y
-de noche (`--td-*`).
+primera de la lista es la de fábrica. En Personalizar todas salen igual, sean
+pocas o muchas: una rejilla de muestras de color debajo de las tarjetas de los
+estilos, con el nombre de cada una al pasar o enfocar. `terminal` trae los temas
+de VS Code más instalados (`terminal/palettes.ts`), cada uno con su versión de
+día (`--tl-*`) y de noche (`--td-*`).
 
 ## Iconos e imágenes
 

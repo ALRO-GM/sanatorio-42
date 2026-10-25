@@ -28,6 +28,13 @@ export const NAV_DEFAULT = [
 ] as const
 
 /**
+ * Orden de fábrica de las categorías de arriba (`CATEGORIES` en
+ * `app/sections.ts`, que tiene sus iconos). El perfil, la portada, va el
+ * primero; la persona puede moverlas a mano en Personalizar.
+ */
+export const CATEGORY_DEFAULT = ['expediente', 'ayuda', 'calendario', 'clusters', 'datos'] as const
+
+/**
  * Bloques de cada página, en su orden de fábrica. `foldable`: se puede plegar.
  * `from`: desde qué modo de la interfaz sale (`shared/detail.tsx`).
  */

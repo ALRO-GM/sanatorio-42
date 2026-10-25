@@ -25,7 +25,7 @@ que hacer, en orden. Este documento es el porqué; aquel, el qué.
 - **Mantenimiento** desde el panel, con hora de vuelta (`docs/mantenimiento.md`)
   y **cuentas atrás** (`docs/avisos-cuenta-atras.md`, migración 73): avisos del
   panel (limpieza de taquillas) y los que cada cual fija del calendario.
-- Estilo Terminal: temas de VS Code en un desplegable (`themes/terminal/palettes.ts`).
+- Estilo Terminal: temas de VS Code como muestras de color en el estudio de Personalizar (`themes/terminal/palettes.ts`).
 - Rebranding a **Peer4U** (textos, logo, iconos); texto legal en versión
   `2026-10-25` (todo el mundo lo vuelve a aceptar).
 - Curso de git: objetivo y comandos por estrella, comandos equivalentes,

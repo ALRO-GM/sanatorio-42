@@ -104,6 +104,23 @@ nav.avance,Pestaña de Datos: avance en el common core frente a la media y los p
 app.loadingSection,Mientras se descarga una sección,Abriendo…,Opening…,Obrint…,Irekitzen…,Ouverture…
 layout.open,Menú de la cuenta: abrir la personalización,Personalizar la web,Customise the site,Personalitza la web,Pertsonalizatu weba,Personnaliser le site
 layout.title,Título de la ventana de personalización,Personalizar,Customise,Personalitza,Pertsonalizatu,Personnaliser
+studio.tab.style,Personalizar: pestaña de opciones del estilo visual,Estilo,Style,Estil,Estiloa,Style
+studio.tab.order,Personalizar: pestaña de opciones del orden de pestañas y bloques,Orden,Order,Ordre,Ordena,Ordre
+studio.tab.settings,"Personalizar: pestaña con el resto de ajustes (modo, avisos, idioma…)",Ajustes,Settings,Ajustos,Ezarpenak,Réglages
+studio.preview,Personalizar: nombre accesible de la web en pequeño que se ordena arrastrando,Vista previa de la web,Site preview,Previsualització del web,Webaren aurrebista,Aperçu du site
+studio.hint,Personalizar: una línea encima de la vista previa,Arrastra por el asa para cambiar el orden. Toca una pestaña para entrar.,Drag by the handle to change the order. Tap a tab to open it.,Arrossega per la nansa per canviar l'ordre. Toca una pestanya per entrar-hi.,Arrastatu heldulekutik ordena aldatzeko. Sakatu fitxa bat sartzeko.,Fais glisser la poignée pour changer l'ordre. Touche un onglet pour l'ouvrir.
+studio.categories,Personalizar: nombre accesible de la fila de categorías de la vista previa,Categorías,Categories,Categories,Kategoriak,Catégories
+studio.blocks,Personalizar: nombre accesible de la lista de bloques de una página; {name} es la página,Bloques de {name},{name} blocks,Blocs de {name},{name}: blokeak,Blocs de {name}
+studio.grab,Personalizar: asa para arrastrar algo; {name} es lo que se mueve,Mover {name},Move {name},Mou {name},Mugitu {name},Déplacer {name}
+studio.keys,"Personalizar: cómo mover con el teclado, para lectores de pantalla","Espacio para cogerlo, flechas para moverlo, Espacio para soltarlo y Escape para cancelar.","Space to pick it up, arrows to move it, Space to drop it and Escape to cancel.","Espai per agafar-lo, fletxes per moure'l, Espai per deixar-lo i Escape per cancel·lar.","Zuriunea hartzeko, geziak mugitzeko, Zuriunea uzteko eta Escape bertan behera uzteko.","Espace pour le prendre, flèches pour le déplacer, Espace pour le lâcher et Échap pour annuler."
+studio.lift,"Personalizar, para lectores de pantalla: se ha cogido algo; {name} es qué, {pos} y {total} su posición","{name}, cogido: posición {pos} de {total}.",{name} picked up: position {pos} of {total}.,"{name}, agafat: posició {pos} de {total}.",{name} hartuta: {pos}. posizioa ({total} guztira).,{name} pris : position {pos} sur {total}.
+studio.move,"Personalizar, para lectores de pantalla: algo cogido ha cambiado de sitio",{name}: posición {pos} de {total}.,{name}: position {pos} of {total}.,{name}: posició {pos} de {total}.,{name}: {pos}. posizioa ({total} guztira).,{name} : position {pos} sur {total}.
+studio.drop,"Personalizar, para lectores de pantalla: se ha soltado algo y queda guardado","{name}, soltado en la posición {pos} de {total}.",{name} dropped at position {pos} of {total}.,"{name}, deixat a la posició {pos} de {total}.",{name} utzita {pos}. posizioan ({total} guztira).,{name} lâché en position {pos} sur {total}.
+studio.cancel,"Personalizar, para lectores de pantalla: se ha cancelado el arrastre",Cancelado: {name} vuelve a la posición {pos} de {total}.,Cancelled: {name} goes back to position {pos} of {total}.,Cancel·lat: {name} torna a la posició {pos} de {total}.,Bertan behera: {name} {pos}. posiziora itzuli da ({total} guztira).,Annulé : {name} revient en position {pos} sur {total}.
+studio.fold,Personalizar: botón para plegar un bloque; {name} es el bloque,Plegar {name},Fold {name},Plega {name},Tolestu {name},Replier {name}
+studio.unfold,Personalizar: botón para desplegar un bloque plegado; {name} es el bloque,Desplegar {name},Unfold {name},Desplega {name},Zabaldu {name},Déplier {name}
+studio.noBlocks,Personalizar: la página elegida en la vista previa no tiene bloques que mover,Esta página no tiene bloques que ordenar.,This page has no blocks to reorder.,Aquesta pàgina no té blocs per ordenar.,Orri honek ez du ordenatzeko blokerik.,Cette page n'a pas de blocs à réordonner.
+studio.autoNote,"Personalizar: con orden automático, avisa de que mover algo lo pasa a mano","Ahora se ordena solo. Si mueves algo, pasa a ser a mano.",It sorts itself now. Move something and it switches to by hand.,"Ara s'ordena sol. Si mous alguna cosa, passa a ser a mà.","Orain berez ordenatzen da. Zerbait mugitzen baduzu, eskuz izatera pasatzen da.","L'ordre est automatique. Si tu déplaces quelque chose, il passe à la main."
 layout.customizeHere,Enlace al final de una página con bloques: abre Personalizar,Ordenar o plegar estos bloques,Reorder or fold these blocks,Ordena o plega aquests blocs,Blokeak ordenatu edo tolestu,Réorganiser ou replier ces blocs
 layout.close,Botón para cerrar una ventana,Cerrar,Close,Tanca,Itxi,Fermer
 confirm.title,Título de la ventana que pide confirmar algo que no se deshace,¿Lo confirmas?,Are you sure?,Ho confirmes?,Baieztatzen duzu?,Tu confirmes ?
@@ -113,17 +130,11 @@ layout.done,Botón para terminar y cerrar la personalización,Listo,Done,Fet,Egi
 layout.reset,Botón para volver al orden original,Volver al orden de fábrica,Back to the default order,Torna a l'ordre de fàbrica,Itzuli fabrikako ordenara,Revenir à l'ordre par défaut
 layout.mode,Personalizar: quién decide el orden de pestañas y bloques,Quién decide el orden,Who decides the order,Qui decideix l'ordre,Nork erabakitzen du ordena,Qui décide de l'ordre
 layout.mode.manual,Orden: lo decides tú,A mano,By hand,A mà,Eskuz,À la main
-layout.mode.manual.hint,Explicación del orden manual,El orden que pongas aquí con las flechas.,The order you set here with the arrows.,L'ordre que posis aquí amb les fletxes.,Hemen geziekin jartzen duzun ordena.,L'ordre que tu définis ici avec les flèches.
+layout.mode.manual.hint,Explicación del orden manual,El que pongas arrastrando en la vista previa.,The one you set by dragging in the preview.,El que posis arrossegant a la previsualització.,Aurrebistan arrastatuz jartzen duzuna.,Celui que tu définis en faisant glisser dans l'aperçu.
 layout.mode.mine,Orden: según lo que más usas,Mi uso,My usage,El meu ús,Nire erabilera,Mon usage
 layout.mode.mine.hint,Explicación del orden por tu uso,Lo que más usas tú sube solo al principio.,What you use most moves to the front by itself.,El que més fas servir tu puja sol al principi.,Zuk gehien erabiltzen duzuna berez igotzen da hasierara.,Ce que tu utilises le plus remonte tout seul en tête.
 layout.mode.community,Orden: según lo que más usa todo el mundo,La comunidad,The community,La comunitat,Komunitatea,La communauté
 layout.mode.community.hint,Explicación del orden por uso de la comunidad,Lo que más usa todo el mundo va primero.,What everybody uses most goes first.,El que més fa servir tothom va primer.,Denek gehien erabiltzen dutena lehenengo doa.,Ce que tout le monde utilise le plus passe en premier.
-layout.autoNote,Aviso: con orden automático no se puede mover a mano,Con el orden automático las flechas no hacen nada: se ordena solo. Lo plegado sí se respeta.,With automatic order the arrows do nothing: it rearranges itself. Folded items are still respected.,Amb l'ordre automàtic les fletxes no fan res: es recol·loca sol. El que està plegat sí que es respecta.,Ordena automatikoarekin geziek ez dute ezer egiten: berez kokatzen da. Tolestutakoa errespetatzen da.,"En ordre automatique, les flèches ne font rien : tout se range tout seul. Ce qui est replié reste replié."
-layout.nav,Personalizar: apartado de las pestañas,Pestañas,Tabs,Pestanyes,Fitxak,Onglets
-layout.folded,Etiqueta de un bloque plegado,plegado,folded,plegat,tolestuta,replié
-layout.up,Botón para subir un elemento; {name} es su nombre,Subir {name},Move {name} up,Puja {name},Igo {name},Monter {name}
-layout.down,Botón para bajar un elemento; {name} es su nombre,Bajar {name},Move {name} down,Baixa {name},Jaitsi {name},Descendre {name}
-layout.fold,Casilla para plegar un bloque,plegar,fold,plega,tolestu,replier
 layout.page.expediente,Personalizar: bloques del perfil,Perfil,Profile,Perfil,Profila,Profil
 layout.page.guardia,Personalizar: bloques del on-call,On-call,On-call,On-call,On-call,On-call
 layout.page.red,Personalizar: bloques de la red,Red,Network,Xarxa,Sarea,Réseau
@@ -156,7 +167,6 @@ finder.recentClear,Buscador: borrar las últimas búsquedas,Borrar,Clear,Esborra
 layout.tips,Personalizar: apartado de ayuda,Ayuda,Help,Ajuda,Laguntza,Aide
 layout.tips.show,Casilla para enseñar u ocultar los botones (i) de demostración,Enseñar los iconos de información con las demostraciones,Show the information icons with their demos,Mostra les icones d'informació amb les demostracions,Erakutsi informazio-ikonoak beren demoekin,Afficher les icônes d'information avec leurs démos
 layout.style,Personalizar: estilo visual de la web,Estilo,Style,Estil,Estiloa,Style
-layout.paletteMenu,Personalizar: desplegable con los temas de colores (los de VS Code en Terminal),Tema de colores,Colour theme,Tema de colors,Kolore-gaia,Thème de couleurs
 layout.palette,Personalizar: color de acento,Color,Colour,Color,Kolorea,Couleur
 nav.clusters,"Pestaña: mapa de los clústeres, quién se sienta dónde",Clústeres,Clusters,Clústers,Klusterrak,Clusters
 nav.examenes,"Pestaña: exámenes, en vivo y estadísticas",Exámenes,Exams,Exàmens,Azterketak,Examens

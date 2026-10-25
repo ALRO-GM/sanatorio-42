@@ -101,7 +101,13 @@ export function Blocks({ page, blocks }: BlocksProps) {
           </div>
         )
       })}
-      <button type="button" className="link blocks-customize" onClick={openCustomize}>
+      <button
+        type="button"
+        className="link blocks-customize"
+        onClick={() => {
+          openCustomize('order')
+        }}
+      >
         {t('layout.customizeHere')}
       </button>
     </>

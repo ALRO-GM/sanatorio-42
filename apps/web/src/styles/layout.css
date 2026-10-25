@@ -137,8 +137,7 @@ dialog.layout-dialog::backdrop {
   align-items: center;
   justify-content: space-between;
 }
-.layout-head h3,
-.layout-group h4 {
+.layout-head h3 {
   margin: 0;
 }
 .layout-modes {
@@ -171,58 +170,6 @@ dialog.layout-dialog::backdrop {
 }
 .layout-modes small {
   color: var(--text-3);
-}
-.layout-group {
-  margin-top: 1rem;
-}
-.layout-group .hint {
-  margin: 0.2rem 0 0;
-  font-size: 0.75rem;
-}
-.layout-list {
-  display: grid;
-  gap: 0.25rem;
-  margin: 0.4rem 0 0;
-  padding: 0;
-  list-style: none;
-}
-.layout-list li {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  padding: 0.3rem 0.4rem 0.3rem 0.7rem;
-  border-radius: 10px;
-  background: var(--surface-2);
-  font-size: 0.88rem;
-}
-.layout-list li > span:first-child {
-  flex: 1;
-  min-width: 0;
-}
-.layout-fold {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  font-size: 0.75rem;
-  color: var(--text-3);
-}
-.layout-arrows {
-  display: inline-flex;
-  gap: 0.2rem;
-}
-.layout-arrows button {
-  width: 1.7rem;
-  height: 1.7rem;
-  padding: 0;
-  border-radius: 8px;
-  border: 1.5px solid var(--border);
-  background: var(--surface);
-  color: var(--text-2);
-  cursor: pointer;
-}
-.layout-arrows button:disabled {
-  opacity: 0.35;
-  cursor: default;
 }
 .layout-dialog .actions {
   margin-top: 1.1rem;

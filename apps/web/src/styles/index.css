@@ -28,6 +28,8 @@
 @import './network.css';
 /* Cabecera fija, bloques plegables y ventana de personalización. */
 @import './layout.css';
+/* Personalizar: el estudio, con la web en pequeño para ordenarla arrastrando. */
+@import './studio.css';
 /* Avisos, chat del evento, asistencia con códigos y tique de la cuota de 42. */
 @import './alerts.css';
 /* Panel de gestión: consumo, presupuesto, buzón y denuncias. */

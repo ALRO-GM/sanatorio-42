@@ -10,7 +10,7 @@
  * un fogonazo con el aspecto de fábrica. Si cambias una clave, cámbiala allí.
  */
 
-import { useCallback, useEffect, useState, useSyncExternalStore } from 'react'
+import { useCallback, useEffect, useSyncExternalStore } from 'react'
 
 import { DEFAULT_THEME, themeOf } from '../../themes'
 import type { ThemeManifest, ThemePalette } from '../../themes'
@@ -63,9 +63,21 @@ function apply(choice: ThemeChoice): void {
   document.documentElement.dataset.theme = resolve(choice)
 }
 
+/** El tema elegido, compartido: el pie y Personalizar lo cambian a la vez. */
+let themeChoice: ThemeChoice | null = null
+const themeListeners = new Set<() => void>()
+
+function subscribeTheme(listener: () => void): () => void {
+  themeListeners.add(listener)
+
+  return () => {
+    themeListeners.delete(listener)
+  }
+}
+
 /** La elección de tema y cómo cambiarla. Con `auto`, sigue al sistema en vivo. */
 export function useTheme(): [ThemeChoice, (next: ThemeChoice) => void] {
-  const [choice, setChoice] = useState(stored)
+  const choice = useSyncExternalStore(subscribeTheme, () => (themeChoice ??= stored()))
 
   useEffect(() => {
     apply(choice)
@@ -88,7 +100,8 @@ export function useTheme(): [ThemeChoice, (next: ThemeChoice) => void] {
 
   const change = useCallback((next: ThemeChoice) => {
     write(STORAGE_KEY, next)
-    setChoice(next)
+    themeChoice = next
+    for (const listener of themeListeners) listener()
   }, [])
 
   return [choice, change]

@@ -6,9 +6,11 @@ final y en `AGENTS.md`).
 
 ## Categorías
 
-Arriba hay cuatro pestañas, agrupadas por para qué sirve cada cosa. Si la
+Arriba hay cinco pestañas, agrupadas por para qué sirve cada cosa. Si la
 categoría abierta tiene varias secciones, salen debajo en una segunda fila. Al
-volver a una categoría se abre la última sección que se miró en ella.
+volver a una categoría se abre la última sección que se miró en ella. El orden
+de fábrica es el de la tabla; cada cual puede cambiarlo en Personalizar (ver
+abajo).
 
 | Categoría | Para qué | Secciones | Dónde está |
 | --- | --- | --- | --- |
@@ -134,13 +136,56 @@ Revisado el 2026-10-17 sobre la demostración, en escritorio y móvil; mejoras h
 | Exámenes | 4 | 4 | 4 | Aviso «en vivo» en la pestaña; notas al momento; demostración | — (2026-10-22: el detalle por intento, solo en el modo de datos; cada examen en vivo va con su nombre; cuentas atrás, botón de refrescar y estado de cada cual, en el mismo bloque) |
 | Not-games | 4 | 4 | 4 | Modos explicados al elegir; cuenta atrás con la hora del servidor; el porqué de cada respuesta | Preguntas solo en español (2026-10-22: creando una sala, las abiertas se ven al lado) |
 | Buzón | 5 | 4 | 4 | Número rojo en la cabecera; avisos llevan a su sitio | — (2026-10-22: la pestaña de conversaciones lleva su número de sin leer) |
-| Personalizar | 4 | 4 | 4 | Orden manual, por tu uso o por la comunidad | — (2026-10-22: «Ordenar o plegar estos bloques» al final de cada página con bloques) |
+| Personalizar | 4 | 5 | 4 | Un estudio: la web en pequeño que se ordena arrastrando, y el estilo, el orden y los ajustes al lado (2026-10-25) | Probar con gente si se descubre el asa sin la línea de ayuda |
 | Agenda | 4 | 4 | 4 | Todo se elige de listas; los checkpoints de fábrica salen del tipo de proyecto; el sprint se ve enmarcado (2026-10-25, recién hecha) | Probarla con gente: ¿faltan atascos o checkpoints en las listas? |
 | Sugerencias (burbuja) | 4 | 4 | 5 | Se ve qué se señala al arrastrar; el panel dice dónde y separa problema y propuesta (2026-10-25, recién hecha) | Probar con gente si se entiende que se arrastra sin la ayuda del título |
 | Pie (ajustes) | 4 | 5 | 5 | Todo a la vista y con nombres claros | — (2026-10-22: el modo de la interfaz también está en Personalizar; además, en la bienvenida) |
 
 Las mejoras de la última columna son el punto de partida de la siguiente
 tanda; cuando se haga una, se actualiza la fila.
+
+## Personalizar: el estudio
+
+Desde el menú de la cuenta («Personalizar la web») o desde «Ordenar o plegar
+estos bloques», al final de cada página con bloques, se abre una sola ventana,
+algo menor que la página (`app/studio/`). Todo se guarda al momento y la web de
+detrás cambia a la vez; «Listo» solo cierra.
+
+- **A la izquierda, la web en pequeño** (`Miniature.tsx`): la fila de
+  categorías, la de pestañas de la abierta y los bloques de la página elegida,
+  como tarjetas con su nombre (el de los idiomas) y unas rayas grises por
+  cuerpo. No pinta las páginas de verdad. Se entra en cada categoría y pestaña
+  tocándola; el on-call, desde su botón, como en la cabecera. Salen todas las
+  categorías, pestañas y páginas con bloques registradas (`registry.ts`,
+  `app/sections.ts`), también las que el modo de la interfaz esconde ahora.
+- **Arrastrar** (`shared/layout/sortable.ts`): todo lo que se mueve tiene un asa
+  (los puntos, icono `agarrar`). Con el dedo se coge por el asa, que no deja
+  deslizar la página; con el ratón, también por el resto. Una copia flotante
+  sigue al puntero y los demás se apartan con una animación corta. Al coger un
+  bloque, todos se pliegan en barras de una línea; al soltar se guarda y se
+  despliegan. El perfil (la portada) va siempre el primero de su fila de
+  pestañas y no tiene asa.
+- **Con el teclado**: en el asa, Espacio o Intro lo cogen, las flechas lo
+  mueven, Espacio o Intro lo sueltan y Escape lo devuelve a su sitio sin cerrar
+  la ventana. Cada paso se anuncia en una región viva.
+- **Plegar**: la flecha de cada tarjeta de bloque.
+- **A la derecha, las opciones**, en tres pestañas:
+  - *Estilo*: una tarjeta por estilo con su muestra (cabecera, tarjeta y botón
+    con sus colores, letra y esquinas); las paletas del elegido, como muestras
+    redondas iguales en todos los estilos (el nombre, al pasar y en la
+    leyenda); el tema (como el sistema, claro, nocturno), y con qué estilo ven
+    los demás tu perfil. Un estilo se aplica a toda la página: limitarlo a la
+    vista previa obligaría a duplicar cada hoja de estilos.
+  - *Orden*: quién decide el orden (a mano, tu uso, la comunidad) y volver al
+    orden de fábrica. Si se ordena solo y mueves algo, pasa a «a mano»
+    guardando lo que se veía, para que nada salte de sitio.
+  - *Ajustes*: el modo de la interfaz, cuánto antes avisar de un evento, los
+    iconos de información, el idioma, el tamaño del texto, daltonismo y zen.
+- **Móvil**: a pantalla completa, con las opciones arriba y la vista previa
+  debajo.
+
+Las categorías no se ordenan solas por uso: el perfil va el primero salvo que
+la persona lo mueva a mano (`categories` en `shared/layout/store.ts`).
 
 ## Regla para una funcionalidad nueva
 
