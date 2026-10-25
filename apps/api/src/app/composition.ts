@@ -285,6 +285,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     circlesOf: (logins) => replica.curriculum.circlesOf(logins),
     availableOf: (login) => peers.availabilityRepository.get(login),
     focusOf,
+    titleOf: (login) => profile.xp.titleOf(login),
     broken: createBrokenSeats(db),
     ...clock,
   })

@@ -5,6 +5,7 @@ import { useBorrowedStyle } from '../../shared/theme'
 import { themeOf } from '../../themes'
 import { useI18n } from '../../shared/i18n'
 import { Avatar } from '../../shared/ui/Avatar'
+import { TitleBanner } from '../../shared/ui/TitleBanner'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { Achievements } from './Achievements'
 import { HealthCard } from './HealthCard'
@@ -61,7 +62,8 @@ export function PublicRecord({ login, me }: { login: string; me: string }) {
       )}
 
       <article className="card record">
-        <div className="banner" />
+        {/* El banner del título que luce: lo eligió al elegir el título. */}
+        <TitleBanner title={title} />
         <div className="record-head">
           <Avatar login={data.login} image={data.image} size={72} />
           <div className="record-name">

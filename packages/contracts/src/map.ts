@@ -1,3 +1,5 @@
+import type { TitleId } from './profile.js'
+
 /** Por qué se resalta a alguien en el mapa: está de guardia para ese proyecto. */
 export type SeatDuty =
   /** Lo está haciendo: "paciente como tú". Verde. */
@@ -97,6 +99,8 @@ export type PersonCard = {
   me: boolean
   /** En modo Pomodoro hasta esa hora (ISO): «concentrado, no me distraigas». */
   focusUntil: string | null
+  /** El título que luce, que decide el banner de la ficha; `null` si no se sabe. */
+  title: TitleId | null
 }
 
 /** Qué tipo de problema del edificio o de los ordenadores es (#77 del buzón). */

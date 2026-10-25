@@ -217,7 +217,11 @@ PUT /me/settings → 204. Todos los campos son opcionales.
 `lang` es `es`, `en`, `ca` o `eu`.
 
 Cambiar `campusId` cambia de qué campus son **todas** las listas (compañeros,
-terapias, tablón y pizarras). `title` solo se acepta si ya está desbloqueado.
+terapias, tablón y pizarras). `title` solo se acepta si ya está desbloqueado
+(por nivel, el de Code Clicker que te toca o el de maestro si lo eres; si no,
+403). El título elegido se guarda en `profiles.title` y decide el banner de tu
+perfil: cada título trae el suyo (`apps/web/src/styles/banners.css`). Si ya no
+te vale (o no elegiste), luces el más alto de tu nivel.
 
 GET /sync/status → cómo va la copia de 42 (para el "actualizado hace 2 min" del pie)
 
@@ -1512,13 +1516,14 @@ números separados por comas es 400.
 ## Ficha de una persona (`modules/map`)
 
 ```
-GET /people/:login/card  → PersonCard { login, image, seat, circle, projects, onDuty, online, me }
+GET /people/:login/card  → PersonCard { login, image, seat, circle, projects, onDuty, online, me, focusUntil, title }
 ```
 
 La que sale al pasar el ratón por un login en cualquier parte de la web
 (`shared/ui/PersonLink.tsx`): dónde está sentada ahora en el campus que se mira,
 su círculo, hasta 4 proyectos en curso, si está de guardia (interruptor y
-sentada) y si tiene la web abierta. Un login con caracteres raros es 400. Sin
+sentada), si tiene la web abierta y el título que luce (`title`, que pone el
+banner de la ficha; `null` si no se sabe). Un login con caracteres raros es 400. Sin
 peticiones a 42: sale de la réplica.
 
 ## Estadísticas de Ayuda (`modules/stats`)

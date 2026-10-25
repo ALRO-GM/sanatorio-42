@@ -8,14 +8,16 @@ react.cancel,Botón para no valorar todavía,Ahora no,Not now,Ara no,Orain ez
 xp.title,Título de la página de tu perfil,Tu perfil,Your profile,El teu perfil,Zure profila
 xp.loading,Mientras carga tu perfil,Cargando tu perfil…,Loading your profile…,Carregant el teu perfil…,Zure profila kargatzen…
 xp.level,Etiqueta del nivel de XP,Nivel,Level,Nivell,Maila
-xp.howTo,Botón que despliega cómo se gana la XP y cuánta llevas,Cómo se gana XP y cuánta llevas,How XP is earned and how much you have,Com es guanya XP i quanta en portes,Nola irabazten den XP eta zenbat daramazun
+xp.howTo,"Al pulsar el número del nivel: título de la ventana con cómo se gana la XP y cuánta llevas",Cómo se gana XP y cuánta llevas,How XP is earned and how much you have,Com es guanya XP i quanta en portes,Nola irabazten den XP eta zenbat daramazun
+xp.levelHow,"Nombre accesible del número del nivel, que abre cómo se gana XP",Nivel {level}: cómo se gana XP,Level {level}: how XP is earned,Nivell {level}: com es guanya XP,{level}. maila: nola irabazten den XP
 xp.gotXp,XP ganada con una actividad,{xp} XP,{xp} XP,{xp} XP,{xp} XP
 xp.got.one,Veces que hiciste una actividad (una),{n} vez,{n} time,{n} vegada,{n} aldiz
 xp.got.many,Veces que hiciste una actividad (varias),{n} veces,{n} times,{n} vegades,{n} aldiz
 xp.progress,XP actual y la que hace falta para el siguiente nivel,{xp} de {next} XP,{xp} of {next} XP,{xp} de {next} XP,{next} XPtik {xp}
 xp.max,XP actual cuando ya estás en el último nivel,{xp} XP · nivel máximo,{xp} XP · max level,{xp} XP · nivell màxim,{xp} XP · gehieneko maila
 xp.nextTitle,Siguiente título que desbloquearás,Siguiente: {title},Next: {title},Següent: {title},Hurrengoa: {title}
-xp.titles,Título de la lista de títulos para lucir en el perfil,Títulos para lucir en tu perfil,Titles to show on your profile,Títols per lluir al teu perfil,Zure profilean erakusteko tituluak
+xp.titles,"Rótulo del desplegable de títulos: el que eliges pone también el banner de tu perfil",Título y banner,Title and banner,Títol i bàner,Titulua eta bannerra
+xp.titleActive,En el desplegable de títulos: el que luces ahora,El que luces,Showing now,El que lluus,Orain erakusten duzuna
 xp.locked,Junto a un título bloqueado: el nivel que lo desbloquea,bloqueado · nivel {level},locked · level {level},bloquejat · nivell {level},blokeatuta · {level}. maila
 xp.achievements,Título de la tarjeta de logros,Logros,Achievements,Assoliments,Lorpenak
 xp.reactions,Título de la tarjeta de reacciones recibidas,Reacciones recibidas,Reactions received,Reaccions rebudes,Jasotako erreakzioak

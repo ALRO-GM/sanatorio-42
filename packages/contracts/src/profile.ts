@@ -54,8 +54,8 @@ export type Expediente = {
     /** XP con la que empieza el siguiente, o `null` en el último. */
     next: number | null
   }
-  /** Título que luce en el banner. */
-  title: string
+  /** Título que luce: el elegido si aún le vale, o el más alto. Decide su banner. */
+  title: TitleId
   /** Veces que le han pillado haciendo trampas en Code Clicker: sale junto al último título. */
   hacks: number
   /** Proyectos que ha corregido diez veces o más: el título de maestro lleva esa cuenta. */
