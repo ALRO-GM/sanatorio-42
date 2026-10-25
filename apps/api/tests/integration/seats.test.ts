@@ -49,6 +49,9 @@ describe('red de asientos (docs/asientos.md)', () => {
 
     const log = await built.db.execute('SELECT login, host FROM seat_sessions ORDER BY login')
 
+    // Como si se hubieran visto desde que entraron (la foto va cada pocos minutos).
+    await built.db.execute('UPDATE seat_sessions SET first_seen_at = begin_at')
+
     expect(log.rows.map((row) => `${row.login as string}@${row.host as string}`)).toEqual([
       'albrodri@c2r2s3',
       'amiga@c2r2s5',
@@ -87,5 +90,48 @@ describe('red de asientos (docs/asientos.md)', () => {
         })
       ).statusCode,
     ).toBe(400)
+  })
+
+  it('cuenta desde que se vio la sesión y como mucho 12 h seguidas', async () => {
+    // Un puesto de examen que no echa a nadie: 42 da la entrada de hace cuatro días.
+    const built = await makeApp(
+      {},
+      {
+        routes: {
+          '/v2/campus/22/locations': [
+            seated(1, 'albrodri', 'c2r2s3', 4),
+            seated(2, 'atascado', 'c2r2s5', 96),
+            seated(3, 'larga', 'c3r1s1', 20),
+          ],
+        },
+      },
+    )
+
+    apps.push(built)
+
+    const cookie = await built.login()
+
+    await built.app.inject({ method: 'GET', url: '/map', headers: { cookie } })
+    // A `atascado` se le vio por primera vez hace 2 h; `larga` lleva 20 h vista.
+    await built.db.execute({
+      sql: 'UPDATE seat_sessions SET first_seen_at = ? WHERE login = ?',
+      args: [ago(2), 'atascado'],
+    })
+    await built.db.execute({
+      sql: "UPDATE seat_sessions SET first_seen_at = begin_at WHERE login IN ('albrodri', 'larga')",
+    })
+
+    const graph = json(
+      await built.app.inject({ method: 'GET', url: '/network/seats?days=7', headers: { cookie } }),
+    ) as SeatGraph
+    const hours = (login: string): number | undefined =>
+      graph.people.find((person) => person.login === login)?.hours
+
+    // 2 h vistas (más el margen de la foto), no 96.
+    expect(hours('atascado')).toBeGreaterThanOrEqual(2)
+    expect(hours('atascado')).toBeLessThanOrEqual(2.3)
+    // 20 h seguidas cuentan como 12.
+    expect(hours('larga')).toBe(12)
+    expect(hours('albrodri')).toBe(4)
   })
 })

@@ -35,6 +35,21 @@ const DAY_MS = 86_400_000
 /** La foto de los puestos se repite cada pocos minutos: no hace falta más fresco. */
 const CACHE_TTL_MS = 5 * 60_000
 
+/**
+ * Lo más que cuenta una sesión seguida. En los puestos de examen que no se
+ * reinician bien no se echa a nadie por inactividad y la sesión puede seguir
+ * abierta un día entero: eso no es estar sentado.
+ */
+const MAX_SESSION_MS = 12 * 3_600_000
+
+/**
+ * Margen entre la entrada que da 42 y la primera vez que se ve la sesión aquí:
+ * la foto de los puestos va cada 2 o 5 minutos. Con más diferencia, no se
+ * estaba mirando (antes del historial, o un puesto que no echa a nadie) y las
+ * horas cuentan desde que se vio.
+ */
+const SEEN_SLACK_MS = 15 * 60_000
+
 /** Por debajo de esto (una hora al lado, más o menos) dos personas no se unen. */
 const MIN_CLOSENESS = 2
 
@@ -53,7 +68,7 @@ export function createSeatingService(options: SeatingOptions): SeatingService {
     const since = until - days * DAY_MS
     const sees = await seesFor(audience, actor)
     const result = await db.execute({
-      sql: `SELECT s.login, s.host, s.begin_at, s.seen_at, u.image
+      sql: `SELECT s.login, s.host, s.begin_at, s.first_seen_at, s.seen_at, u.image
             FROM seat_sessions s LEFT JOIN users u ON u.id = s.user_id
             WHERE s.campus_id = ? AND s.seen_at >= ?`,
       args: [actor.campusId, new Date(since).toISOString()],
@@ -67,12 +82,13 @@ export function createSeatingService(options: SeatingOptions): SeatingService {
       if (!sees(login)) continue
 
       images.set(login, typeof row.image === 'string' ? row.image : null)
-      sessions.push({
-        login,
-        host: toText(row.host),
-        begin: Math.max(since, Date.parse(toText(row.begin_at))),
-        end: Math.min(until, Date.parse(toText(row.seen_at))),
-      })
+
+      // Desde que se vio aquí, no desde la entrada que da 42 (puede ser de días antes).
+      const seen = typeof row.first_seen_at === 'string' ? Date.parse(row.first_seen_at) : 0
+      const begin = Math.max(since, Date.parse(toText(row.begin_at)), seen - SEEN_SLACK_MS)
+      const end = Math.min(until, Date.parse(toText(row.seen_at)), begin + MAX_SESSION_MS)
+
+      if (end > begin) sessions.push({ login, host: toText(row.host), begin, end })
     }
 
     const seating = seatingOf(sessions)

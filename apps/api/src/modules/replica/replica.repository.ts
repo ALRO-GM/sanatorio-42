@@ -301,8 +301,9 @@ export function createReplicaRepository(db: Db) {
         // sesión se alarga hasta la última vez que se la ve abierta.
         if (isId(location.id)) {
           statements.push({
-            sql: `INSERT INTO seat_sessions (location_id, campus_id, user_id, login, host, begin_at, seen_at)
-                  VALUES (?, ?, ?, ?, ?, ?, ?)
+            sql: `INSERT INTO seat_sessions
+                    (location_id, campus_id, user_id, login, host, begin_at, seen_at, first_seen_at)
+                  VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                   ON CONFLICT (location_id) DO UPDATE SET seen_at = excluded.seen_at`,
             args: [
               location.id,
@@ -311,6 +312,7 @@ export function createReplicaRepository(db: Db) {
               user.login.toLowerCase(),
               location.host,
               location.begin_at ?? now,
+              now,
               now,
             ],
           })

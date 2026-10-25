@@ -20,6 +20,13 @@ entera, no la cuenta, para poder cambiar después cómo se mide la cercanía, lo
 grupos de amigos o el aislamiento sin perder nada. Está en la lista de datos
 personales (se exporta y se borra con lo demás).
 
+**Las horas cuentan desde que se ve la sesión** (`first_seen_at`, migración
+79), no desde el `begin_at` de 42. Si 42 da una entrada más de 15 minutos
+anterior a la primera foto en que sale, no se estaba mirando: un puesto de
+examen que no se reinicia bien no echa a nadie por inactividad y la sesión
+puede seguir abierta días (pasó con una sesión abierta desde el 21 de octubre,
+que salía con 103 h). Además, **una sesión cuenta como mucho 12 h seguidas**.
+
 ## Cómo se mide
 
 Viendo el plano en vertical, la fila 1 es la de abajo y suben hacia arriba.
