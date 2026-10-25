@@ -156,6 +156,7 @@ finder.recentClear,Buscador: borrar las últimas búsquedas,Borrar,Clear,Esborra
 layout.tips,Personalizar: apartado de ayuda,Ayuda,Help,Ajuda,Laguntza
 layout.tips.show,Casilla para enseñar u ocultar los botones (i) de demostración,Enseñar los iconos de información con las demostraciones,Show the information icons with their demos,Mostra les icones d'informació amb les demostracions,Erakutsi informazio-ikonoak beren demoekin
 layout.style,Personalizar: estilo visual de la web,Estilo,Style,Estil,Estiloa
+layout.paletteMenu,Personalizar: desplegable con los temas de colores (los de VS Code en Terminal),Tema de colores,Colour theme,Tema de colors,Kolore-gaia
 layout.palette,Personalizar: color de acento,Color,Colour,Color,Kolorea
 nav.clusters,"Pestaña: mapa de los clústeres, quién se sienta dónde",Clústeres,Clusters,Clústers,Klusterrak
 nav.examenes,"Pestaña: exámenes, en vivo y estadísticas",Exámenes,Exams,Exàmens,Azterketak

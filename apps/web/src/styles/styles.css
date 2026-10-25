@@ -188,3 +188,33 @@ pre {
     grid-template-columns: 1fr;
   }
 }
+
+/* Las paletas en desplegable: la elegida a la vista y la lista al abrir. */
+.palette-menu {
+  margin: 0.75rem 0 0;
+}
+.palette-menu summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.palette-menu-label {
+  color: var(--text-3);
+}
+.palette-menu summary i {
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 50%;
+}
+.palette-menu .palette-picker {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+  max-height: 16rem;
+  overflow-y: auto;
+  margin-top: 0.5rem;
+}

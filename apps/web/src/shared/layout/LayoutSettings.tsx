@@ -1,3 +1,4 @@
+import { useRef } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 
 import { useI18n } from '../i18n'
@@ -8,6 +9,7 @@ import { NAV_DEFAULT, PAGE_IDS, PAGES } from './registry'
 import type { PageId } from './registry'
 import { resetPrefs, toggleFold, updatePrefs, usePrefs } from './store'
 import { themesFor } from '../../themes'
+import type { ThemePalette } from '../../themes/types'
 import { useLook, usePalette, useStyle } from '../theme'
 
 /** Antelaciones del aviso que se pueden elegir, en minutos. `0` es sin avisos. */
@@ -102,25 +104,28 @@ export function LayoutSettings({
             </label>
           ))}
         </fieldset>
-        {theme.palettes !== undefined && (
-          <fieldset className="palette-picker" aria-label={t('layout.palette')}>
-            <legend>{t('layout.palette')}</legend>
-            {theme.palettes.map((option) => (
-              <label key={option.id} title={option.name[lang] ?? option.name.es}>
-                <input
-                  type="radio"
-                  name="layout-palette"
-                  checked={palette === option.id}
-                  onChange={() => {
-                    setPalette(option.id)
-                  }}
-                />
-                <i style={{ background: option.swatch }} />
-                <span>{option.name[lang] ?? option.name.es}</span>
-              </label>
-            ))}
-          </fieldset>
-        )}
+        {theme.palettes !== undefined &&
+          (theme.paletteMenu === true ? (
+            <PaletteMenu palettes={theme.palettes} value={palette} onChange={setPalette} />
+          ) : (
+            <fieldset className="palette-picker" aria-label={t('layout.palette')}>
+              <legend>{t('layout.palette')}</legend>
+              {theme.palettes.map((option) => (
+                <label key={option.id} title={option.name[lang] ?? option.name.es}>
+                  <input
+                    type="radio"
+                    name="layout-palette"
+                    checked={palette === option.id}
+                    onChange={() => {
+                      setPalette(option.id)
+                    }}
+                  />
+                  <i style={{ background: option.swatch }} />
+                  <span>{option.name[lang] ?? option.name.es}</span>
+                </label>
+              ))}
+            </fieldset>
+          ))}
         {recordStyle}
       </section>
       {interfaceMode}
@@ -304,5 +309,55 @@ function Arrows({ disabled, first, last, label, onMove }: ArrowsProps) {
         ↓
       </button>
     </span>
+  )
+}
+
+/**
+ * Las paletas en un desplegable (`paletteMenu`): se ve la elegida y, al abrirlo,
+ * la lista. Al elegir una se cierra.
+ */
+function PaletteMenu({
+  palettes,
+  value,
+  onChange,
+}: {
+  palettes: readonly ThemePalette[]
+  value: string | null
+  onChange: (id: string) => void
+}) {
+  const { t, lang } = useI18n()
+  const menu = useRef<HTMLDetailsElement>(null)
+  const chosen = palettes.find((option) => option.id === value) ?? palettes[0]
+  const nameOf = (option: ThemePalette): string => option.name[lang] ?? option.name.es
+
+  return (
+    <details className="palette-menu" ref={menu}>
+      <summary>
+        <span className="palette-menu-label">{t('layout.paletteMenu')}</span>
+        {chosen !== undefined && (
+          <>
+            <i style={{ background: chosen.swatch }} aria-hidden="true" />
+            <strong>{nameOf(chosen)}</strong>
+          </>
+        )}
+      </summary>
+      <fieldset className="palette-picker" aria-label={t('layout.paletteMenu')}>
+        {palettes.map((option) => (
+          <label key={option.id}>
+            <input
+              type="radio"
+              name="layout-palette"
+              checked={chosen?.id === option.id}
+              onChange={() => {
+                onChange(option.id)
+                if (menu.current !== null) menu.current.open = false
+              }}
+            />
+            <i style={{ background: option.swatch }} />
+            <span>{nameOf(option)}</span>
+          </label>
+        ))}
+      </fieldset>
+    </details>
   )
 }

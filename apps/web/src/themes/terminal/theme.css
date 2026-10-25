@@ -4,6 +4,9 @@
    azul y magenta para lo demás, como en el resaltado de un editor.
 
    En claro es el mismo editor con el tema de día: papel blanco y tinta.
+
+   Las paletas (`palettes.ts`, los temas de VS Code) dan valor a `--tl-*` (de
+   día) y `--td-*` (de noche); sin ellas, los colores de aquí: fósforo.
    ──────────────────────────────────────────────────────────────────────────── */
 :root[data-style='terminal'] {
   --font: 'JetBrains Mono Variable', ui-monospace, 'SFMono-Regular', Menlo, monospace;
@@ -16,33 +19,33 @@
   --radius: 0;
   --radius-sm: 0;
 
-  --bg: #f3f4f1;
-  --surface: #ffffff;
-  --surface-2: #eceee9;
-  --surface-3: #dfe2db;
-  --border: #1f2328;
-  --border-strong: #1f2328;
-  --fill-muted: #9aa39a;
-  --text: #16191d;
-  --text-2: #2f363d;
-  --text-3: #57606a;
-  --text-4: #8c959f;
-  --accent: #116329;
-  --accent-hover: #0b4d1e;
-  --accent-soft: #d6f5d9;
-  --accent-text: #116329;
-  --on-accent: #ffffff;
-  --ok: #1a7f37;
-  --ok-soft: #dafbe1;
-  --warn: #9a6700;
-  --warn-soft: #fff4c2;
-  --danger: #cf222e;
-  --danger-soft: #ffe2e0;
-  --gold: #bf8700;
+  --bg: var(--tl-bg, #f3f4f1);
+  --surface: var(--tl-surface, #ffffff);
+  --surface-2: var(--tl-surface-2, #eceee9);
+  --surface-3: var(--tl-surface-3, #dfe2db);
+  --border: var(--tl-border, #1f2328);
+  --border-strong: var(--tl-border-strong, #1f2328);
+  --fill-muted: var(--tl-fill-muted, #9aa39a);
+  --text: var(--tl-text, #16191d);
+  --text-2: var(--tl-text-2, #2f363d);
+  --text-3: var(--tl-text-3, #57606a);
+  --text-4: var(--tl-text-4, #8c959f);
+  --accent: var(--tl-accent, #116329);
+  --accent-hover: var(--tl-accent-hover, #0b4d1e);
+  --accent-soft: var(--tl-accent-soft, #d6f5d9);
+  --accent-text: var(--tl-accent-text, #116329);
+  --on-accent: var(--tl-on-accent, #ffffff);
+  --ok: var(--tl-ok, #1a7f37);
+  --ok-soft: var(--tl-ok-soft, #dafbe1);
+  --warn: var(--tl-warn, #9a6700);
+  --warn-soft: var(--tl-warn-soft, #fff4c2);
+  --danger: var(--tl-danger, #cf222e);
+  --danger-soft: var(--tl-danger-soft, #ffe2e0);
+  --gold: var(--tl-gold, #bf8700);
   /* Los otros colores del resaltado, para rótulos y marcas. */
-  --term-blue: #0550ae;
-  --term-magenta: #8250df;
-  --glow: rgba(17, 99, 41, 0.18);
+  --term-blue: var(--tl-term-blue, #0550ae);
+  --term-magenta: var(--tl-term-magenta, #8250df);
+  --glow: var(--tl-glow, rgba(17, 99, 41, 0.18));
   --shadow: rgba(0, 0, 0, 0.35);
 
   --page-image: url('./assets/grid.svg');
@@ -64,59 +67,59 @@
   font-size: 14px;
 
   /* De día, el editor con el tema oscuro "suave": gris pizarra, no negro. */
-  --stage-bg: url('./assets/grid.svg') 0 0 / 24px 24px, #2d333b;
-  --stage-text: #e6edf3;
-  --stage-muted: #9da7b3;
-  --stage-link: #8b949e;
-  --stage-halo: #2d333b;
-  --stage-accent: #7ee787;
+  --stage-bg: url('./assets/grid.svg') 0 0 / 24px 24px, var(--td-stage, #2d333b);
+  --stage-text: var(--td-stage-text, #e6edf3);
+  --stage-muted: var(--td-stage-muted, #9da7b3);
+  --stage-link: var(--td-stage-link, #8b949e);
+  --stage-halo: var(--td-stage-halo, #2d333b);
+  --stage-accent: var(--td-stage-accent, #7ee787);
 
-  --ring-from: #1a7f37;
-  --ring-to: #8250df;
+  --ring-from: var(--tl-ring-from, #1a7f37);
+  --ring-to: var(--tl-ring-to, #8250df);
   --ring-shade: #16191d;
 }
 :root[data-style='terminal'][data-theme='dark'] {
-  --bg: #050805;
-  --surface: #0b120c;
-  --surface-2: #111a12;
-  --surface-3: #18251a;
-  --border: #2a4a2f;
-  --border-strong: #3d7045;
-  --fill-muted: #2f5236;
-  --text: #d7e4d9;
-  --text-2: #a9bcac;
-  --text-3: #7b917f;
-  --text-4: #526656;
-  --accent: #4af626;
-  --accent-hover: #8dff75;
-  --accent-soft: #0f2a0c;
-  --accent-text: #4af626;
-  --on-accent: #041003;
-  --ok: #4af626;
-  --ok-soft: #0f2a0c;
-  --warn: #ffbd2e;
-  --warn-soft: #2e2408;
-  --danger: #ff5f56;
-  --danger-soft: #321110;
-  --gold: #ffd75f;
-  --term-blue: #58a6ff;
-  --term-magenta: #d2a8ff;
-  --glow: rgba(74, 246, 38, 0.2);
+  --bg: var(--td-bg, #050805);
+  --surface: var(--td-surface, #0b120c);
+  --surface-2: var(--td-surface-2, #111a12);
+  --surface-3: var(--td-surface-3, #18251a);
+  --border: var(--td-border, #2a4a2f);
+  --border-strong: var(--td-border-strong, #3d7045);
+  --fill-muted: var(--td-fill-muted, #2f5236);
+  --text: var(--td-text, #d7e4d9);
+  --text-2: var(--td-text-2, #a9bcac);
+  --text-3: var(--td-text-3, #7b917f);
+  --text-4: var(--td-text-4, #526656);
+  --accent: var(--td-accent, #4af626);
+  --accent-hover: var(--td-accent-hover, #8dff75);
+  --accent-soft: var(--td-accent-soft, #0f2a0c);
+  --accent-text: var(--td-accent-text, #4af626);
+  --on-accent: var(--td-on-accent, #041003);
+  --ok: var(--td-ok, #4af626);
+  --ok-soft: var(--td-ok-soft, #0f2a0c);
+  --warn: var(--td-warn, #ffbd2e);
+  --warn-soft: var(--td-warn-soft, #2e2408);
+  --danger: var(--td-danger, #ff5f56);
+  --danger-soft: var(--td-danger-soft, #321110);
+  --gold: var(--td-gold, #ffd75f);
+  --term-blue: var(--td-term-blue, #58a6ff);
+  --term-magenta: var(--td-term-magenta, #d2a8ff);
+  --glow: var(--td-glow, rgba(74, 246, 38, 0.2));
   --shadow: rgba(0, 0, 0, 0.8);
 
   --card-shadow: 4px 4px 0 var(--border);
   --primary-shadow: 3px 3px 0 var(--border-strong);
 
-  --ring-from: #4af626;
-  --ring-to: #d2a8ff;
+  --ring-from: var(--td-ring-from, #4af626);
+  --ring-to: var(--td-ring-to, #d2a8ff);
   --ring-shade: #000000;
 
-  --stage-bg: url('./assets/grid.svg') 0 0 / 24px 24px, #030603;
-  --stage-text: #d7e4d9;
-  --stage-muted: #7b917f;
-  --stage-link: #3d7045;
-  --stage-halo: #030603;
-  --stage-accent: #4af626;
+  --stage-bg: url('./assets/grid.svg') 0 0 / 24px 24px, var(--td-stage, #030603);
+  --stage-text: var(--td-stage-text, #d7e4d9);
+  --stage-muted: var(--td-stage-muted, #7b917f);
+  --stage-link: var(--td-stage-link, #3d7045);
+  --stage-halo: var(--td-stage-halo, #030603);
+  --stage-accent: var(--td-stage-accent, #4af626);
 }
 
 /* Ni una curva: muchas reglas llevan su radio escrito. Se libran los retratos y

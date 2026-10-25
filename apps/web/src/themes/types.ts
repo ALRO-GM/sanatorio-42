@@ -34,6 +34,11 @@ export type ThemeManifest = {
    */
   palettes?: readonly ThemePalette[]
   /**
+   * Las paletas, en un desplegable en vez de en fila: para cuando son muchas o
+   * tienen nombre propio (los temas de VS Code de `terminal`).
+   */
+  paletteMenu?: boolean
+  /**
    * Iconos que este estilo dibuja a su manera, por nombre (`shared/ui/Icon`).
    * Los que no estén aquí son los de siempre.
    */

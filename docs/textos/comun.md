@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/comun.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-300 textos. «—» es que falta la traducción: sale en español.
+301 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -164,6 +164,7 @@ Generado desde `apps/web/src/shared/i18n/textos/comun.csv` con
 | `layout.tips` | Personalizar: apartado de ayuda | features/admin/StatsPanel, features/admin/UsageHeatmap, shared/layout/Blocks, shared/layout/LayoutSettings | Ayuda | Help | Ajuda | Laguntza |
 | `layout.tips.show` | Casilla para enseñar u ocultar los botones (i) de demostración | features/admin/StatsPanel, features/admin/UsageHeatmap, shared/layout/Blocks, shared/layout/LayoutSettings | Enseñar los iconos de información con las demostraciones | Show the information icons with their demos | Mostra les icones d'informació amb les demostracions | Erakutsi informazio-ikonoak beren demoekin |
 | `layout.style` | Personalizar: estilo visual de la web | features/admin/StatsPanel, features/admin/UsageHeatmap, shared/layout/Blocks, shared/layout/LayoutSettings | Estilo | Style | Estil | Estiloa |
+| `layout.paletteMenu` | Personalizar: desplegable con los temas de colores (los de VS Code en Terminal) | features/admin/StatsPanel, features/admin/UsageHeatmap, shared/layout/Blocks, shared/layout/LayoutSettings | Tema de colores | Colour theme | Tema de colors | Kolore-gaia |
 | `layout.palette` | Personalizar: color de acento | features/admin/StatsPanel, features/admin/UsageHeatmap, shared/layout/Blocks, shared/layout/LayoutSettings | Color | Colour | Color | Kolorea |
 | `nav.clusters` | Pestaña: mapa de los clústeres, quién se sienta dónde | app/Nav, features/admin/ClickMap, features/admin/FlowsPanel, features/admin/Inbox, features/admin/InboxTab, features/admin/StatsPanel, features/admin/UsageHeatmap, features/calendar/EventDialog, features/focus/FocusDialog, features/map/ClustersTour, features/stats/HelpStatsPage, shared/layout/LayoutSettings, shared/layout/store | Clústeres | Clusters | Clústers | Klusterrak |
 | `nav.examenes` | Pestaña: exámenes, en vivo y estadísticas | app/Nav, features/admin/ClickMap, features/admin/FlowsPanel, features/admin/Inbox, features/admin/InboxTab, features/admin/StatsPanel, features/admin/UsageHeatmap, features/calendar/EventDialog, features/exams/ExamsTour, features/focus/FocusDialog, features/stats/HelpStatsPage, shared/layout/LayoutSettings, shared/layout/store | Exámenes | Exams | Exàmens | Azterketak |
