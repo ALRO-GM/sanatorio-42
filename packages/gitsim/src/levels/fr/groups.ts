@@ -12,7 +12,7 @@ export const GROUPS_FR: Readonly<Record<string, MissionText>> = {
   group1: {
     title: 'Une branche par personne, et tout dans main',
     story:
-      'Vous partagez un dépôt sur origin et vous l’avez déjà cloné. Chaque personne crée une branche à son login, y enregistre un fichier à elle et la pousse. Ensuite, chaque personne fusionne sa branche dans main avec un commit de merge et pousse main : qui arrive en dernier trouve main modifiée et doit d’abord la récupérer.',
+      'Vous partagez un dépôt sur origin et vous l’avez déjà cloné. Chaque personne crée une branche qui porte son login, y enregistre son propre fichier dans un commit et la pousse. Ensuite, chaque personne fusionne sa branche dans main avec un commit de merge et pousse main : qui arrive en dernier trouve main modifiée et doit d’abord la récupérer.',
     tasks: [
       'git switch -c {login}',
       'echo "hola" > {login}.txt, git add {login}.txt et git commit -m "Mon fichier"',

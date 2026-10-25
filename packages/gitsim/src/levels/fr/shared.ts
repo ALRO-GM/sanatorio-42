@@ -12,7 +12,7 @@ export const SHARED_FR: Readonly<Record<string, LevelText>> = {
       when: 'clone une seule fois, au début ; push quand ton travail est prêt à être vu par les autres.',
       whenNot: 'Pousser du code qui ne compile pas sur une branche que d’autres utilisent.',
       looks:
-        'origin/main apparaît : c’est là où était main sur origin la dernière fois que tu lui as parlé.',
+        'origin/main apparaît : c’est la position de main sur origin la dernière fois que tu as communiqué avec lui.',
       problems:
         'Oublier le push : ton travail n’existe que sur ton ordinateur (et à 42, les postes sont effacés).',
     },
@@ -35,7 +35,7 @@ export const SHARED_FR: Readonly<Record<string, LevelText>> = {
       how: ['git pull', 'git push'],
       when: 'Avant de commencer à travailler et avant de pousser.',
       whenNot:
-        'Si tu ne veux pas un commit de merge à chaque pull, utilise git pull --rebase (tu le verras bientôt).',
+        'Si tu ne veux pas de commit de merge à chaque pull, utilise git pull --rebase (tu le verras bientôt).',
       looks: 'Un commit de merge qui relie ta branche main à origin/main.',
       problems:
         'Push refusé (« origin a des commits que tu n’as pas ») : c’est le signal qu’il faut faire un pull.',
@@ -48,7 +48,7 @@ export const SHARED_FR: Readonly<Record<string, LevelText>> = {
       what: 'Tu peux pousser n’importe quelle branche : git push origin branche. En équipe, main est souvent protégée et on y entre par une pull request.',
       how: ['git switch -c login', 'git commit -m "formulaire"', 'git push origin login'],
       when: 'Dès que tu travailles en équipe : ta branche sur origin, c’est ta sauvegarde et ce que les autres relisent.',
-      looks: 'origin/login apparaît à côté de ton login.',
+      looks: 'origin/login apparaît à côté de ta branche login.',
       problems:
         'Pousser directement sur main alors que l’équipe attend des relectures : le dépôt distant refuse.',
     },
@@ -80,11 +80,11 @@ export const SHARED_FR: Readonly<Record<string, LevelText>> = {
   },
   'w3-amend': {
     title: 'Refaire le dernier : --amend',
-    goal: 'Le message du dernier commit est faux : refais-le avec le message « Arregla el parser ».',
+    goal: 'Le message du dernier commit est faux : refais-le avec le message « Arregla el parser », en espagnol et tel quel.',
     theory: {
       what: 'commit --amend modifie le dernier commit (message ou fichiers). En réalité, il en crée un nouveau et laisse l’ancien sans branche.',
       how: [
-        'git commit --amend -m "Corrige le parser"',
+        'git commit --amend -m "Arregla el parser"',
         'git add olvidado.c',
         'git commit --amend',
       ],
@@ -139,7 +139,7 @@ export const SHARED_FR: Readonly<Record<string, LevelText>> = {
       how: ['git reset HEAD~2', 'git reset --soft HEAD~1', 'git reset --hard HEAD~2'],
       when: 'Pour annuler des commits que personne d’autre n’a.',
       whenNot:
-        'Sur des commits déjà sur origin : utilise revert. Et --hard sans réfléchir : ce qu’il supprime ne revient pas.',
+        'Pour des commits déjà présents sur origin : utilise revert. Et --hard sans réfléchir : ce qu’il supprime ne revient pas.',
       looks: 'L’étiquette main recule ; les cercles qui étaient devant se retrouvent sans branche.',
     },
   },
@@ -157,7 +157,7 @@ export const SHARED_FR: Readonly<Record<string, LevelText>> = {
   },
   'w4-stash': {
     title: 'Mettre de côté : stash',
-    goal: 'Tu es au milieu de quelque chose sur main et on te demande une correction : mets tes changements de côté, fais un commit sur fix, reviens et committe ce que tu avais.',
+    goal: 'Tu as du travail en cours sur main et on te demande une correction : mets tes changements de côté, fais un commit sur fix, reviens et committe ce que tu avais.',
     theory: {
       what: 'stash range tes changements non committés sur une pile et laisse le répertoire propre. stash pop les ramène.',
       how: ['git stash', 'git switch fix', 'git switch main', 'git stash pop'],
@@ -169,7 +169,7 @@ export const SHARED_FR: Readonly<Record<string, LevelText>> = {
   },
   'w4-conflict': {
     title: 'Conflits',
-    goal: 'Fusionne rama dans main ; le conflit dans f.c se résout en gardant la ligne « los dos ».',
+    goal: 'Fusionne la branche rama dans main ; résous le conflit dans f.c en ne gardant que la ligne « los dos », telle quelle.',
     theory: {
       what: 'Si les deux branches modifient la même ligne, git ne sait pas laquelle garder : il marque le fichier avec <<<<<<< ======= >>>>>>> et attend que tu corriges.',
       how: [
@@ -261,7 +261,7 @@ export const SHARED_FR: Readonly<Record<string, LevelText>> = {
     title: 'Workflows : trunk-based',
     goal: 'Travaille sur le tronc : crée une branche courte, mini, avec un commit ; mets-la à jour avec ce qu’il y a sur origin, fusionne-la dans main de façon linéaire, pousse-la et supprime mini.',
     theory: {
-      what: 'Trunk-based : tout le monde fusionne dans main plusieurs fois par jour, avec des branches qui vivent quelques heures. Il faut des tests automatisés pour le protéger.',
+      what: 'Trunk-based : tout le monde fusionne dans main plusieurs fois par jour, avec des branches qui vivent quelques heures. Il faut des tests automatisés pour protéger main.',
       how: [
         'git switch -c mini',
         'git commit',

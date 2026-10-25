@@ -267,7 +267,7 @@ export const INTERMEDIATE: Unit[] = [
           '... | sort | uniq -c | sort -rn | head',
           'sort -u',
         ],
-        when: 'Le « top N » de n’importe quoi : IP, chemins, erreurs, utilisateurs. C’est le tube le plus utilisé de ce cours.',
+        when: 'Le « top N » de n’importe quoi : IP, chemins, erreurs, utilisateurs. C’est l’enchaînement de tubes le plus utilisé de ce cours.',
         problems:
           'uniq sans sort avant compte mal : il ne regroupe que les lignes répétées qui se suivent.',
       },
@@ -451,7 +451,7 @@ export const INTERMEDIATE: Unit[] = [
         'Crée ~/informe.',
         'Dans ~/informe/atacante.txt, seulement l’IP qui a le plus de lignes « Failed password ».',
         'Dans ~/informe/fallos.txt, le nombre de lignes « Failed password » (seulement le nombre).',
-        'Dans ~/informe/usuarios.txt, les utilisateurs essayés (celui qui suit « invalid user »), sans doublons et triés.',
+        'Dans ~/informe/usuarios.txt, les noms d’utilisateur tentés (le mot qui suit « invalid user »), sans doublons et triés.',
       ],
     },
     solution: [
@@ -509,7 +509,7 @@ export const INTERMEDIATE: Unit[] = [
     },
     fr: {
       title: 'Chercher des fichiers : find',
-      goal: 'Affiche les fichiers .log de /var/log (sous-dossiers compris) qui font plus de 2 Ko.',
+      goal: 'Affiche les fichiers .log de /var/log (sous-dossiers compris) qui font plus de 2 Ko.',
       theory: {
         what: 'find parcourt des dossiers et affiche ce qui remplit les conditions : -name (jokers entre apostrophes), -type f/d, -size +10M, -mtime +7 (plus de 7 jours), -user, -empty.',
         how: [
@@ -519,7 +519,7 @@ export const INTERMEDIATE: Unit[] = [
           'find /tmp -mtime +7',
           'find ~ -empty',
         ],
-        when: 'Quand tu ne sais pas où se trouve quelque chose ou que tu veux tout ce qui remplit un critère (vieux, gros, à quelqu’un).',
+        when: 'Quand tu ne sais pas où se trouve quelque chose ou que tu veux tout ce qui remplit un critère (ancien, volumineux, appartenant à quelqu’un).',
         problems:
           'Sans apostrophes, *.log est développé par le shell avant d’arriver à find, et la recherche se passe mal.',
       },
@@ -808,15 +808,15 @@ export const INTERMEDIATE: Unit[] = [
       ],
     },
     fr: {
-      title: 'Boss : disque plein à 97 %',
-      goal: 'Fais passer le disque de web1 sous les 80 % sans supprimer le log que l’API a ouvert.',
+      title: 'Boss : disque plein à 97 %',
+      goal: 'Fais passer le disque de web1 sous les 80 % sans supprimer le log que l’API garde ouvert.',
       story:
-        'Il est 4 h 12 et l’alerte sonne : le disque de web1 est presque plein et l’API commence à échouer en écriture.',
+        'Il est 4 h 12 et l’alerte sonne : le disque de web1 est presque plein et l’API commence à échouer en écriture.',
       tasks: [
         'Trouve ce qui remplit le disque (df, du, find).',
-        'Vide /var/log/peer4u/debug.log sans le supprimer : l’API l’a ouvert.',
+        'Vide /var/log/peer4u/debug.log sans le supprimer : l’API le garde ouvert.',
         'Compresse avec gzip les logs de nginx déjà passés en rotation (access.log.1 et access.log.2).',
-        'Vérifie avec df que le disque est passé sous les 80 %.',
+        'Vérifie avec df que le disque est passé sous les 80 %.',
       ],
     },
     solution: [
@@ -959,7 +959,7 @@ export const INTERMEDIATE: Unit[] = [
     },
     fr: {
       title: 'Arrêter des processus : kill et signaux',
-      goal: 'Arrête les deux yes et miner.py. Attention : miner.py ignore le signal normal.',
+      goal: 'Arrête les deux processus yes et miner.py. Attention : miner.py ignore le signal normal.',
       theory: {
         what: 'kill envoie un signal à un PID : TERM (15, celui par défaut) lui demande de se terminer ; KILL (9) le tue sans discuter ; HUP (1) recharge en général la configuration. pkill et killall font la même chose par nom.',
         how: [
@@ -1035,13 +1035,13 @@ export const INTERMEDIATE: Unit[] = [
     },
     fr: {
       title: 'Variables, export et PATH',
-      goal: 'Exporte ENTORNO=staging, ajoute ~/bin au PATH et lance hola par son nom (sans chemin).',
+      goal: 'Exporte ENTORNO=staging, ajoute ~/bin au PATH et lance le programme hola par son nom (sans chemin).',
       theory: {
         what: 'Une variable contient un texte ($NOM l’utilise). Avec export, elle est transmise aux programmes que tu lances. PATH est la liste des dossiers où le shell cherche les commandes.',
         how: [
           'NOM=peer            # pas d’espace autour du =',
           'echo "salut, $NOM"',
-          'export ENV=prod',
+          'export ENTORNO=prod',
           'export PATH="$PATH:$HOME/bin"',
           'which ls',
           'env | sort',
@@ -1176,7 +1176,7 @@ export const INTERMEDIATE: Unit[] = [
       story:
         'Les requêtes prennent 8 secondes. Quelqu’un a laissé tourner en production des tests de charge, et quelque chose de pire.',
       tasks: [
-        'Arrête tous les stress-ng (ils ne sont pas à toi : sudo).',
+        'Arrête tous les processus stress-ng (ils ne sont pas à toi : sudo).',
         'Arrête miner.py (il ignore TERM).',
         'Écris dans ~/culpable.txt l’utilisateur qui a lancé miner.py.',
         'Écris dans ~/deploy-procs.txt combien de processus il reste à deploy (seulement le nombre).',
@@ -1240,7 +1240,7 @@ export const INTERMEDIATE: Unit[] = [
       title: 'Boss final : intermédiaire',
       goal: 'Le rapport du matin et le ménage, contre la montre. Si tu réussis, tu obtiens le certificat intermédiaire.',
       story:
-        'Réunion d’équipe dans dix minutes : on te demande des chiffres et de l’ordre sur web1.',
+        'Réunion d’équipe dans dix minutes : on attend de toi des chiffres, et que web1 soit remis en ordre.',
       tasks: [
         'Crée ~/final.',
         'Dans ~/final/top-rutas.txt, les 3 chemins (colonne 7) les plus demandés dans access.log avec leur nombre, du plus au moins demandé (sort | uniq -c | sort -rn).',
