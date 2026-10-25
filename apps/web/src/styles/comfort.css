@@ -86,3 +86,13 @@
 :root[data-still='on'] :not(.tour, .tour *)::after {
   animation-iteration-count: 1 !important;
 }
+/* Avance: las medias (C y Python) y la gente con quien te comparas, con la
+   misma paleta; el trazo y el grosor ya dicen población y alcance. */
+:root[data-cvd='on'] .progress-card {
+  --plan-c: #0072b2;
+  --plan-python: #cc79a7;
+  --person-2: #d55e00;
+  --person-3: #009e73;
+  --person-4: #56b4e9;
+  --person-5: #f0e442;
+}

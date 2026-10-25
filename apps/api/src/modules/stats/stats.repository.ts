@@ -205,6 +205,8 @@ export type StatsRepository = ReturnType<typeof createStatsRepository>
 
 /** Lo que dice el 42cursus de alguien (`core_cursus`), fechas en ms. */
 type CursusRow = {
+  /** El campus de su 42cursus. */
+  campusId: number
   beginAt: number | null
   endAt: number | null
   blackholedAt: number | null
@@ -263,6 +265,13 @@ export function createProgressRepository(db: Db) {
       )
     },
 
+    /** El nombre de cada campus (id → nombre), para rotular medias y sugerencias. */
+    async campusNames(): Promise<Map<number, string>> {
+      const result = await db.execute('SELECT id, name FROM campuses')
+
+      return new Map(result.rows.map((row) => [toNumber(row.id), toText(row.name)]))
+    },
+
     /** El id de cada uno de esos slugs que esté en la réplica (las otras versiones de un proyecto). */
     async idsOf(slugs: readonly string[]): Promise<Map<string, number>> {
       if (slugs.length === 0) return new Map()
@@ -305,7 +314,7 @@ export function createProgressRepository(db: Db) {
         sql: `SELECT u.login, u.image, pu.project_id, pu.status, pu.validated, pu.created_at_42,
                      pu.updated_at_42, ul.begin_at, ut.track,
                      (m.user_id IS NOT NULL OR cc.campus_id = ?) AS here,
-                     cc.user_id AS cc_user, cc.begin_at AS cc_begin, cc.end_at, cc.blackholed_at,
+                     cc.user_id AS cc_user, cc.campus_id AS cc_campus, cc.begin_at AS cc_begin, cc.end_at, cc.blackholed_at,
                      cc.grade, cc.active, cc.alumni
               FROM project_users pu
               JOIN users u ON u.id = pu.user_id
@@ -335,6 +344,7 @@ export function createProgressRepository(db: Db) {
           row.cc_user === null || row.cc_user === undefined
             ? null
             : {
+                campusId: toNumber(row.cc_campus),
                 beginAt: msOf(row.cc_begin),
                 endAt: msOf(row.end_at),
                 blackholedAt: msOf(row.blackholed_at),

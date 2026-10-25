@@ -1,10 +1,12 @@
 /**
  * El avance en el common core a lo largo del tiempo (#87 del buzón): la línea
- * de quien mira, la media de su campus y la de todos, por plan (C, Python o
- * los dos), por población (quien terminó, quien sigue más quien terminó, o
- * quien se tragó el black hole: `docs/blackhole.md`) y las líneas de cada pace.
- * También quién va más rápido (`ranking.rules.ts`). Las reglas del avance
- * están en `progress.rules.ts`.
+ * de quien mira, la de hasta cinco personas con quien se compara, todas las
+ * medias (alcance × plan × población: quien terminó, quien sigue más quien
+ * terminó, o quien se tragó el black hole: `docs/blackhole.md`) y las líneas de
+ * cada pace. Una media con menos de `MIN_PEOPLE` personas no dice nada: en su
+ * lugar va la línea de cada una. También quién va más rápido
+ * (`ranking.rules.ts`) y quién terminó antes, para sugerir con quién
+ * compararse. Las reglas del avance están en `progress.rules.ts`.
  *
  * El inicio de cada cual es su fecha de entrada al 42cursus (la copia del
  * cursus o, si no, la de quien ha entrado en la web) o, si no se sabe, cuándo
@@ -17,12 +19,14 @@
 import type {
   CoreStatus,
   CoreTrack,
+  FastestEntry,
   ProgressGroup,
+  ProgressIndividual,
   ProgressLine,
   ProgressMeasure,
-  ProgressPlan,
   ProgressPopulation,
   ProgressScope,
+  StatsFastest,
   StatsProgress,
   StatsRanking,
 } from '@sanatorio/contracts'
@@ -35,6 +39,7 @@ import {
   FINISHED_CIRCLE,
   circleMarks,
   curveOf,
+  finishedOn,
   paceLines,
   standingOf,
   totalHours,
@@ -48,22 +53,53 @@ import { createTtlCache } from '../../core/ttl-cache.js'
 
 /** Cada cuántos días va un punto de las líneas. */
 const STEP_DAYS = 15
-const DAYS = Array.from({ length: Math.ceil(COURSE_DAYS / STEP_DAYS) + 1 }, (_, index) =>
-  Math.min(COURSE_DAYS, index * STEP_DAYS),
-)
+/** Pasados los dos años, cada cuántos días: a ese plazo un mes más o menos no se nota. */
+const LONG_STEP_DAYS = 30
+/** Hasta dónde se dibuja como mucho: nadie lleva más de diez años en el common core. */
+const MAX_DAYS = 3650
+
+/**
+ * Los días de cada punto de las líneas: cada 15 hasta los dos años (el plazo
+ * del pace más lento) y, después, cada 30 hasta lo que lleva quien más tiempo
+ * lleva (`last`), para que «Todo» llegue al último dato. Unos 50 puntos para
+ * dos años, unos 150 para diez.
+ */
+export function daysUpTo(last: number): number[] {
+  const days = Array.from({ length: Math.ceil(COURSE_DAYS / STEP_DAYS) + 1 }, (_, index) =>
+    Math.min(COURSE_DAYS, index * STEP_DAYS),
+  )
+  const end = Math.min(MAX_DAYS, last)
+
+  for (let day = COURSE_DAYS + 20; day - LONG_STEP_DAYS < end; day += LONG_STEP_DAYS) {
+    days.push(day)
+  }
+
+  return days
+}
 const CACHE_MS = 30 * 60_000
-/** Con menos gente que esto en un punto, la media no dice nada: no se enseña. */
+/**
+ * Con menos gente que esto en un punto, la media no dice nada: no se enseña. Y
+ * si la media entera tiene menos, va la línea de cada persona.
+ */
 const MIN_PEOPLE = 10
+/** Con cuánta gente se compara uno como mucho: más líneas no se leen. */
+export const MAX_OTHERS = 5
+/** Cuántas sugerencias de quien terminó antes, del campus de quien mira. */
+const FASTEST_HERE = 5
+/**
+ * Lo que tiene que tener aprobado del plan (en %, por círculos) quien terminó
+ * para sugerirlo: quien viene trasladado tiene sus proyectos en otro cursus y
+ * parecería terminar en días.
+ */
+const FASTEST_MIN_SHARE = 50
 const MEASURES: readonly ProgressMeasure[] = ['circles', 'hours']
 const POPULATIONS: readonly ProgressPopulation[] = ['finished', 'current', 'blackholed']
 const SCOPES: readonly ProgressScope[] = ['campus', 'all']
 const TRACKS: readonly CoreTrack[] = ['classic', 'next']
 const STATUSES: readonly CoreStatus[] = ['finished', 'active', 'blackholed', 'unknown']
 const GROUPS: readonly ProgressGroup[] = [
-  'campus-all',
   'campus-classic',
   'campus-next',
-  'all-all',
   'all-classic',
   'all-next',
 ]
@@ -86,24 +122,39 @@ type Person = {
   status: CoreStatus
   /** Cuándo salió del cursus, si salió. */
   endAt: number | null
+  /** El campus de su 42cursus, si está copiado. */
+  campus: number | null
 }
 
 type Cells = { sum: number; n: number }[]
 
+/** Quien terminó, con cuánto tardó: para sugerir con quién compararse. */
+type Finisher = Omit<FastestEntry, 'campus'> & { track: CoreTrack; here: boolean; campus: number }
+
+/** Una línea de una media con poca gente, aún con su login para saber si se ve. */
+type Member = { login: string; line: ProgressIndividual['line'] }
+
 type Snapshot = {
   units: Record<CoreTrack, Unit[]>
+  /** Los días de cada punto, hasta lo que lleva quien más tiempo lleva. */
+  days: number[]
   people: Map<string, Person>
   averages: StatsProgress['averages']
+  /** Las primeras `MIN_PEOPLE` personas de cada media: si no hay más, van ellas. */
+  members: Record<ProgressPopulation, Record<ProgressGroup, Member[]>>
   counts: StatsProgress['people']
   census: StatsProgress['census']
   planHours: Record<CoreTrack, number>
   runners: Runner[]
+  finishers: Finisher[]
+  campusNames: Map<number, string>
 }
 
 const filled = <K extends string, V>(keys: readonly K[], value: (key: K) => V): Record<K, V> =>
   Object.fromEntries(keys.map((key) => [key, value(key)])) as Record<K, V>
 
 const monthOf = (ms: number): string => new Date(ms).toISOString().slice(0, 7)
+const DAY_MS = 86_400_000
 
 export function createProgressService(options: {
   progress: ProgressRepository
@@ -144,9 +195,28 @@ export function createProgressService(options: {
     return { classic: listOf(classic), next: listOf(next) }
   }
 
-  /** De quien no se sabe el plan: el nuevo si tiene algo de Python o de `42next`. */
-  const nextSlug = (slug: string): boolean =>
-    slug.startsWith('python-module') || slug.startsWith('42next-')
+  /**
+   * Las pistas del plan de quien no lo tiene dicho por 42. Del nuevo: un módulo
+   * de Python, un proyecto que solo tiene el plan nuevo o una versión `42next-`
+   * que no sea un examen. Del clásico: un proyecto que solo tiene el clásico.
+   * Los exámenes `42next-` no cuentan: desde el cambio los hace todo el mundo,
+   * también quien sigue en C (en producción salían en Python dos personas de C
+   * por un examen; y quien terminó C y luego hizo un proyecto de Python sigue
+   * siendo de C).
+   */
+  function signals(plan: Record<CoreTrack, PlanProject[]>) {
+    const classic = new Set(plan.classic.map((project) => project.slug))
+    const next = new Set(plan.next.map((project) => project.slug))
+
+    return {
+      next: (slug: string): boolean =>
+        slug.startsWith('python-module') ||
+        (slug.startsWith('42next-') && !slug.startsWith('42next-exam-')) ||
+        (next.has(slug) && !classic.has(slug)),
+      classic: (slug: string): boolean =>
+        classic.has(slug) && !next.has(slug) && !slug.startsWith('42next-'),
+    }
+  }
 
   async function build(campus: number): Promise<Snapshot> {
     const t = now()
@@ -157,13 +227,20 @@ export function createProgressService(options: {
       next: unitsOf(plan.next, CHOICES, VERSIONS),
     }
     const slugOf = new Map([...plan.classic, ...plan.next].map((p) => [p.id, p.slug]))
-    const [rows, activity] = await Promise.all([
+    const hint = signals(plan)
+    const [rows, activity, campusNames] = await Promise.all([
       options.progress.rows(campus, [...slugOf.keys()]),
       options.progress.activity(),
+      options.progress.campusNames(),
     ])
     const people = new Map<
       string,
-      Person & { first: number; begin: number | null; python: boolean; known: boolean }
+      Person & {
+        first: number
+        begin: number | null
+        votes: Record<CoreTrack, Set<number>>
+        known: boolean
+      }
     >()
 
     for (const row of rows) {
@@ -182,7 +259,7 @@ export function createProgressService(options: {
           begin: cursus?.beginAt ?? row.beginAt,
           done: new Map(),
           here: row.here,
-          python: false,
+          votes: { classic: new Set(), next: new Set() },
           status: coreStatusOf(
             cursus === null
               ? null
@@ -197,25 +274,45 @@ export function createProgressService(options: {
             t,
           ),
           endAt: cursus?.endAt ?? null,
+          campus: cursus?.campusId ?? null,
         }
         people.set(row.login, person)
       }
       if (row.createdAt !== null) person.first = Math.min(person.first, row.createdAt)
       if (row.doneAt !== null) person.done.set(row.projectId, row.doneAt)
-      if (nextSlug(slugOf.get(row.projectId) ?? '')) person.python = true
+      const slug = slugOf.get(row.projectId) ?? ''
+
+      if (hint.next(slug)) person.votes.next.add(row.projectId)
+      if (hint.classic(slug)) person.votes.classic.add(row.projectId)
     }
 
+    // Cuánto lleva quien más tiempo lleva (hasta hoy o hasta que salió): ahí acaba «Todo».
+    let longest = 0
+
+    for (const person of people.values()) {
+      person.start = person.begin ?? person.first
+      if (!Number.isFinite(person.start) || person.start > t) continue
+      const end = person.status === 'blackholed' ? Math.min(t, person.endAt ?? t) : t
+
+      longest = Math.max(longest, (end - person.start) / DAY_MS)
+    }
+
+    const days = daysUpTo(longest)
     const sums = filled(MEASURES, () =>
-      filled(POPULATIONS, () => filled(GROUPS, (): Cells => DAYS.map(() => ({ sum: 0, n: 0 })))),
+      filled(POPULATIONS, () => filled(GROUPS, (): Cells => days.map(() => ({ sum: 0, n: 0 })))),
     )
     const counts = filled(POPULATIONS, () => filled(GROUPS, () => 0))
+    const members = filled(POPULATIONS, () => filled(GROUPS, (): Member[] => []))
+    const finishers: Finisher[] = []
     const census = filled(SCOPES, () => filled(TRACKS, () => filled(STATUSES, () => 0)))
     const kept = new Map<string, Person>()
     const runners: Runner[] = []
 
     for (const person of people.values()) {
-      if (!person.known) person.track = person.python ? 'next' : 'classic'
-      person.start = person.begin ?? person.first
+      // Sin plan dicho por 42, el de la mayoría de sus pistas; sin pistas, el clásico.
+      if (!person.known) {
+        person.track = person.votes.next.size > person.votes.classic.size ? 'next' : 'classic'
+      }
       if (!Number.isFinite(person.start) || person.start > t) continue
       kept.set(person.login, person)
 
@@ -224,16 +321,20 @@ export function createProgressService(options: {
 
       // Quien ya no está, solo hasta el día en que salió: después no avanza.
       const until = person.status === 'blackholed' ? (person.endAt ?? Infinity) : Infinity
-      const curve = curveOf(units[person.track], person.done, person.start, DAYS, t, until)
+      const curve = curveOf(units[person.track], person.done, person.start, days, t, until)
       const groups = GROUPS.filter((group) => {
-        const [scope, plan] = group.split('-') as [ProgressScope, ProgressPlan]
+        const [scope, plan] = group.split('-') as [ProgressScope, CoreTrack]
 
-        return (scope === 'all' || person.here) && (plan === 'all' || plan === person.track)
+        return (scope === 'all' || person.here) && plan === person.track
       })
 
       for (const population of POPULATIONS_OF[person.status]) {
         for (const group of groups) {
           counts[population][group] += 1
+          // Por si la media se queda corta: entonces van estas líneas.
+          if (members[population][group].length < MIN_PEOPLE) {
+            members[population][group].push({ login: person.login, line: curve })
+          }
           for (const measure of MEASURES) {
             curve[measure].forEach((value, index) => {
               const cell = sums[measure][population][group][index]
@@ -244,6 +345,22 @@ export function createProgressService(options: {
               }
             })
           }
+        }
+      }
+
+      if (person.status === 'finished' && person.campus !== null && person.begin !== null) {
+        const finished = finishedOn(units[person.track], person.done)
+        const share = standingOf(units[person.track], person.done).circles
+
+        if (finished !== null && finished > person.start && share >= FASTEST_MIN_SHARE) {
+          finishers.push({
+            login: person.login,
+            image: person.image,
+            track: person.track,
+            here: person.here,
+            campus: person.campus,
+            days: Math.round((finished - person.start) / DAY_MS),
+          })
         }
       }
 
@@ -274,21 +391,31 @@ export function createProgressService(options: {
 
     return {
       units,
+      days,
       people: kept,
       averages,
+      members,
       counts,
       census,
       planHours: filled(TRACKS, (track) => totalHours(units[track])),
       runners,
+      finishers: finishers.sort((a, b) => a.days - b.days || a.login.localeCompare(b.login)),
+      campusNames,
     }
   }
 
   return {
     /**
-     * El avance de quien mira, con las medias y los paces. Con `other`, además
-     * la línea de esa persona, para compararse.
+     * El avance de quien mira, con todas las medias y los paces. Con `others`,
+     * además la línea de cada una de esas personas (como mucho `MAX_OTHERS`),
+     * para compararse. `sees` quita a quien no puede ver (mundos separados,
+     * personas ocultas) de las líneas con nombre.
      */
-    async progress(actor: Actor, other: string | null): Promise<StatsProgress> {
+    async progress(
+      actor: Actor,
+      others: readonly string[],
+      sees: (login: string) => boolean,
+    ): Promise<StatsProgress> {
       const data = await snapshot(actor.campusId)
       const t = now()
       const lineOf = (login: string) => {
@@ -298,20 +425,43 @@ export function createProgressService(options: {
           ? null
           : {
               person,
-              line: curveOf(data.units[person.track], person.done, person.start, DAYS, t),
+              line: curveOf(data.units[person.track], person.done, person.start, data.days, t),
             }
       }
       const mine = lineOf(actor.login)
-      const theirs = other === null || other === actor.login ? null : lineOf(other)
-      const track = mine?.person.track ?? theirs?.person.track ?? null
+      const theirs = [...new Set(others)]
+        .filter((login) => login !== actor.login && sees(login))
+        .slice(0, MAX_OTHERS)
+        .flatMap((login) => {
+          const found = lineOf(login)
+
+          return found === null ? [] : [{ login: found.person.login, line: found.line }]
+        })
+      const track = mine?.person.track ?? data.people.get(theirs[0]?.login ?? '')?.track ?? null
       const units = data.units[track ?? 'classic']
+      // Una media corta enseña a cada cual; quien se tragó el black hole, sin nombre.
+      const individuals = filled(POPULATIONS, (population) =>
+        filled(GROUPS, (group): ProgressIndividual[] =>
+          data.counts[population][group] >= MIN_PEOPLE
+            ? []
+            : data.members[population][group]
+                .filter((member) => member.login === actor.login || sees(member.login))
+                .map((member) => ({
+                  login: population === 'blackholed' ? null : member.login,
+                  line: member.line,
+                })),
+        ),
+      )
 
       return {
-        days: DAYS,
+        days: data.days,
         track,
         me: mine?.line ?? null,
-        other: theirs === null ? null : { login: theirs.person.login, line: theirs.line },
+        campus: data.campusNames.get(actor.campusId) ?? null,
+        others: theirs,
         averages: data.averages,
+        individuals,
+        minPeople: MIN_PEOPLE,
         people: data.counts,
         census: data.census,
         axis: {
@@ -322,6 +472,45 @@ export function createProgressService(options: {
         },
         paces: paceLines(units),
       }
+    },
+
+    /**
+     * Quien terminó el common core más deprisa, por plan: los primeros del
+     * campus de quien mira y el primero de cada campus. Sin quien no se ve.
+     */
+    async fastest(actor: Actor, sees: (login: string) => boolean): Promise<StatsFastest> {
+      const data = await snapshot(actor.campusId)
+      const visible = data.finishers.filter(
+        (each) => each.login === actor.login || sees(each.login),
+      )
+      const entry = (each: Finisher): FastestEntry => ({
+        login: each.login,
+        image: each.image,
+        campus: data.campusNames.get(each.campus) ?? null,
+        days: each.days,
+      })
+      // Ya van del más rápido al más lento: el primero de cada campus es el suyo.
+      const firstOfEach = (list: Finisher[]): Finisher[] => {
+        const seen = new Set<number>()
+
+        return list.filter((each) => {
+          if (seen.has(each.campus)) return false
+          seen.add(each.campus)
+          return true
+        })
+      }
+
+      return filled(SCOPES, (scope) =>
+        filled(TRACKS, (track) => {
+          const ofTrack = visible.filter((each) => each.track === track)
+
+          return (
+            scope === 'campus'
+              ? ofTrack.filter((each) => each.here).slice(0, FASTEST_HERE)
+              : firstOfEach(ofTrack)
+          ).map(entry)
+        }),
+      )
     },
 
     /**

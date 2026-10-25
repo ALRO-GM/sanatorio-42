@@ -136,7 +136,7 @@ export function SectionView({
       {section === 'notgames' && <NotGamesPage me={me.login} room={param} />}
       {section === 'estadisticas' && <HelpStatsPage me={me.login} />}
       {section === 'red' && <RedPage me={me} />}
-      {section === 'avance' && <ProgressPage />}
+      {section === 'avance' && <ProgressPage me={me.login} />}
       {section === 'agenda' && (
         <AgendaPage
           me={me.login}

@@ -152,7 +152,7 @@ export const POOL_ROUTES: Record<PoolKey, readonly string[]> = {
   'red.rankings': ['/network/strictest'],
   'red.seats': ['/network/seats'],
   avance: ['/stats/progress', '/stats/ranking'],
-  'avance.compare': [],
+  'avance.compare': ['/stats/progress/fastest'],
   examenes: [],
   'examenes.live': ['/exams/live', '/exams/live/refresh'],
   'examenes.stats': ['/exams/stats'],

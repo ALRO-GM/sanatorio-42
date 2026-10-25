@@ -10,7 +10,7 @@ import { NO_POOL, seesFor, visibleTo } from '../../core/audience.js'
 import type { Audience } from '../../core/audience.js'
 import type { Db } from '../../core/db/database.js'
 import type { AppModule } from '../../core/module.js'
-import { createProgressService } from './progress.service.js'
+import { MAX_OTHERS, createProgressService } from './progress.service.js'
 import { createProgressRepository, createStatsRepository } from './stats.repository.js'
 import { createStatsService } from './stats.service.js'
 import type { StatsService } from './stats.service.js'
@@ -37,6 +37,28 @@ const rankingQuery = z
   .refine((query) => query.circleMin <= query.circleMax && query.pctMin <= query.pctMax, {
     message: 'el mínimo no puede pasar del máximo',
   })
+
+/**
+ * `GET /stats/progress?with=a,b`: los logins con quien compararse, separados por
+ * comas. Lo que no parece un login se ignora (como antes con uno solo) y se
+ * queda en los `MAX_OTHERS` primeros.
+ */
+const progressQuery = z.object({
+  with: z
+    .string()
+    .max(1000)
+    .optional()
+    .transform((value) =>
+      [
+        ...new Set(
+          (value ?? '')
+            .split(',')
+            .map((login) => login.trim().toLowerCase())
+            .filter((login) => /^[a-z0-9-]{1,32}$/.test(login)),
+        ),
+      ].slice(0, MAX_OTHERS),
+    ),
+})
 
 export type StatsModule = AppModule & { service: StatsService }
 
@@ -114,21 +136,32 @@ export function createStatsModule(deps: {
         )
       })
 
-      /** `GET /stats/progress?with=login` → el avance a lo largo del tiempo, con medias y paces. */
-      app.get<{ Querystring: { with?: string } }>('/stats/progress', async (request, reply) => {
+      /**
+       * `GET /stats/progress?with=login,login` → el avance a lo largo del tiempo,
+       * con todas las medias, los paces y hasta cinco personas con quien compararse.
+       */
+      app.get('/stats/progress', async (request, reply) => {
         reply.header('Cache-Control', 'private, max-age=300')
 
-        const other = request.query.with?.trim().toLowerCase() ?? ''
+        const query = parse(progressQuery, request.query)
         const actor = await session.actor(request)
-        // Con alguien del otro mundo no se compara: como si no existiera.
+        // Con alguien del otro mundo o oculto no se compara: como si no existiera.
         const sees = await seesFor(deps.audience ?? NO_POOL, actor)
 
-        return reply.send(
-          await progress.progress(
-            actor,
-            /^[a-z0-9-]{1,32}$/.test(other) && sees(other) ? other : null,
-          ),
-        )
+        return reply.send(await progress.progress(actor, query.with, sees))
+      })
+
+      /**
+       * `GET /stats/progress/fastest` → quien terminó el common core más deprisa,
+       * por plan: en el campus de quien mira y el primero de cada campus.
+       */
+      app.get('/stats/progress/fastest', async (request, reply) => {
+        reply.header('Cache-Control', 'private, max-age=300')
+
+        const actor = await session.actor(request)
+        const sees = await seesFor(deps.audience ?? NO_POOL, actor)
+
+        return reply.send(await progress.fastest(actor, sees))
       })
     },
   }

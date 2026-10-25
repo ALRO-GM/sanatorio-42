@@ -34,8 +34,10 @@ describe('Hueco de login con perfiles sugeridos', () => {
 
     await user.keyboard('{ArrowDown}{ArrowUp}{Enter}')
 
-    // Elegido: el hueco lleva su login, la lista se cierra y sale su línea.
-    expect(box).toHaveProperty('value', 'jdoe')
+    // Elegido: se añade a la gráfica (su pastilla, para quitarla), el hueco se
+    // vacía para el siguiente y la lista se cierra.
+    expect(await screen.findByRole('button', { name: 'Quitar a jdoe' })).toBeTruthy()
+    expect(box).toHaveProperty('value', '')
     expect(screen.queryByRole('listbox')).toBeNull()
     expect(await screen.findAllByText('jdoe')).not.toHaveLength(0)
   }, 20_000)

@@ -6,12 +6,16 @@
 
 import type {
   CoreTrack,
+  FastestEntry,
   HelpStats,
   ProgressGroup,
+  ProgressIndividual,
   ProgressLine,
+  ProgressMeasure,
   ProgressPopulation,
   RankingEntry,
   StatsEntry,
+  StatsFastest,
   StatsProgress,
   StatsRanking,
   StatsSection,
@@ -103,7 +107,20 @@ function sectionOf(id: StatsSectionId, times: number): StatsSection {
 
 // --- Avance (#87): curvas suaves, de mentira, que se parecen a las de verdad.
 
-const DAYS = Array.from({ length: 50 }, (_, index) => Math.min(730, index * 15))
+/** Un número de 0 a 1 que siempre sale igual para el mismo `n`. */
+const noise = (n: number): number => {
+  const x = Math.sin(n * 12.9898) * 43758.5453
+
+  return x - Math.floor(x)
+}
+
+/** Como la API: cada 15 días hasta los dos años y, después, cada 30 hasta cuatro años («Todo»). */
+const DAYS = [
+  ...Array.from({ length: 50 }, (_, index) => Math.min(730, index * 15)),
+  ...Array.from({ length: 25 }, (_, index) => 750 + index * 30),
+]
+/** El último día con datos: quien más tiempo lleva. */
+const LAST_DAY = 1470
 const PACE_DAYS: Record<number, number[]> = {
   8: [8, 32, 54, 90, 141, 212, 244],
   12: [13, 48, 81, 134, 211, 318, 365],
@@ -115,32 +132,103 @@ const PACE_DAYS: Record<number, number[]> = {
 const HOURS_SHARE = [3, 8, 22, 34, 58, 82, 100]
 
 /** Una curva que tiende a `top` (en %) con esa rapidez, hasta el día `until`. */
-const curve = (top: number, speed: number, until = 730): ProgressLine =>
+const curve = (top: number, speed: number, until = LAST_DAY): ProgressLine =>
   DAYS.map((day) => (day > until ? null : Math.round(top * (1 - Math.exp(-day / speed)) * 10) / 10))
 
 /** Lo que cambia cada población frente a «en curso + terminado»: hasta dónde llega y cuánto tarda. */
 const POPULATION_SHAPE: Record<ProgressPopulation, { scale: number; until: number }> = {
-  finished: { scale: 1.45, until: 730 },
-  current: { scale: 1, until: 730 },
+  finished: { scale: 1.45, until: LAST_DAY },
+  current: { scale: 1, until: LAST_DAY },
   // Quien se fue no pasa del año: después ya no está.
   blackholed: { scale: 0.45, until: 420 },
 }
 
-function progressMock(other: string | null): StatsProgress {
+/**
+ * Cuánta gente hay en cada media. Python en el campus tiene muy poca gente que
+ * terminó o se fue: ahí van las líneas de cada persona, como en la API.
+ */
+const PEOPLE: Record<ProgressPopulation, Record<ProgressGroup, number>> = {
+  finished: { 'campus-classic': 93, 'campus-next': 1, 'all-classic': 1410, 'all-next': 3 },
+  current: { 'campus-classic': 310, 'campus-next': 110, 'all-classic': 4700, 'all-next': 600 },
+  blackholed: { 'campus-classic': 651, 'campus-next': 4, 'all-classic': 9870, 'all-next': 140 },
+}
+const MIN_PEOPLE = 10
+/** Quien terminó Python: de este campus, la primera; las otras, de otros. */
+const PYTHON_FINISHERS: { login: string; campus: string; days: number }[] = [
+  { login: 'nvelasco', campus: 'Madrid', days: 212 },
+  { login: 'ktorres', campus: 'Barcelona', days: 297 },
+  { login: 'rmolina', campus: 'Málaga', days: 341 },
+]
+const C_FINISHERS: { login: string; campus: string; days: number }[] = [
+  { login: 'aprado', campus: 'Madrid', days: 268 },
+  { login: 'jroble', campus: 'Madrid', days: 301 },
+  { login: 'msauce', campus: 'Madrid', days: 333 },
+  { login: 'lgarza', campus: 'Madrid', days: 352 },
+  { login: 'dolmo', campus: 'Madrid', days: 379 },
+  { login: 'ifresno', campus: 'Barcelona', days: 289 },
+  { login: 'etrigo', campus: 'Málaga', days: 318 },
+  { login: 'pnube', campus: 'Urduliz', days: 356 },
+]
+
+/** La línea de una persona de mentira, siempre igual para el mismo login. */
+function personLine(login: string, until = LAST_DAY): Record<ProgressMeasure, ProgressLine> {
+  let seed = 0
+
+  for (let index = 0; index < login.length; index++) seed += login.charCodeAt(index)
+  const top = 55 + noise(seed) * 45
+  const speed = 160 + noise(seed + 1) * 200
+
+  return { circles: curve(top, speed, until), hours: curve(top * 0.9, speed * 1.1, until) }
+}
+
+/** Quien terminó en `days`: llega al 100 % ese día y ahí se queda. */
+function finisherLine(days: number): Record<ProgressMeasure, ProgressLine> {
+  const line = DAYS.map((day) =>
+    day >= days ? 100 : Math.round(100 * (1 - Math.exp((-day / days) * 2.6)) * 10) / 10,
+  )
+
+  return { circles: line, hours: line.map((value) => Math.round(value * 0.97 * 10) / 10) }
+}
+
+function individualsMock(): StatsProgress['individuals'] {
+  const none = (): Record<ProgressGroup, ProgressIndividual[]> => ({
+    'campus-classic': [],
+    'campus-next': [],
+    'all-classic': [],
+    'all-next': [],
+  })
+  const finished = PYTHON_FINISHERS.map((each) => ({
+    login: each.login,
+    line: finisherLine(each.days),
+  }))
+  // Quien se tragó el black hole, sin nombre.
+  const gone = [0, 1, 2, 3].map((n) => ({
+    login: null,
+    line: personLine(`bh${String(n)}`, 200 + n * 60),
+  }))
+
+  return {
+    finished: { ...none(), 'campus-next': finished.slice(0, 1), 'all-next': finished },
+    current: none(),
+    blackholed: { ...none(), 'campus-next': gone },
+  }
+}
+
+function progressMock(others: readonly string[]): StatsProgress {
   const groups = (
     scale: number,
     population: ProgressPopulation,
   ): Record<ProgressGroup, ProgressLine> => {
     const { scale: shape, until } = POPULATION_SHAPE[population]
     const top = (value: number): number => Math.min(100, value * scale * shape)
+    const average = (group: ProgressGroup, line: ProgressLine): ProgressLine =>
+      PEOPLE[population][group] < MIN_PEOPLE ? line.map(() => null) : line
 
     return {
-      'campus-all': curve(top(62), 260, until),
-      'campus-classic': curve(top(58), 280, until),
-      'campus-next': curve(top(66), 230, Math.min(until, 450)),
-      'all-all': curve(top(55), 280, until),
-      'all-classic': curve(top(52), 300, until),
-      'all-next': curve(top(60), 250, Math.min(until, 450)),
+      'campus-classic': average('campus-classic', curve(top(58), 280, until)),
+      'campus-next': average('campus-next', curve(top(66), 230, Math.min(until, 450))),
+      'all-classic': average('all-classic', curve(top(52), 300, until)),
+      'all-next': average('all-next', curve(top(60), 250, Math.min(until, 450))),
     }
   }
   const byPopulation = (scale: number) => ({
@@ -148,27 +236,19 @@ function progressMock(other: string | null): StatsProgress {
     current: groups(scale, 'current'),
     blackholed: groups(scale, 'blackholed'),
   })
-  const people = (factor: number): Record<ProgressGroup, number> => ({
-    'campus-all': Math.round(420 * factor),
-    'campus-classic': Math.round(310 * factor),
-    'campus-next': Math.round(110 * factor),
-    'all-all': Math.round(5300 * factor),
-    'all-classic': Math.round(4700 * factor),
-    'all-next': Math.round(600 * factor),
-  })
   const census = (
     factor: number,
   ): Record<CoreTrack, StatsProgress['census']['campus']['classic']> => ({
     classic: {
-      finished: Math.round(95 * factor),
-      active: Math.round(215 * factor),
-      blackholed: Math.round(640 * factor),
+      finished: Math.round(93 * factor),
+      active: Math.round(217 * factor),
+      blackholed: Math.round(651 * factor),
       unknown: Math.round(38 * factor),
     },
     next: {
-      finished: 0,
-      active: Math.round(110 * factor),
-      blackholed: Math.round(12 * factor),
+      finished: factor === 1 ? 1 : 3,
+      active: Math.round(109 * factor),
+      blackholed: factor === 1 ? 4 : 140,
       unknown: Math.round(9 * factor),
     },
   })
@@ -181,17 +261,28 @@ function progressMock(other: string | null): StatsProgress {
       ],
     }))
   const circles = (circle: number): number => Math.round(((circle + 1) / 7) * 1000) / 10
+  const finishers = new Map(
+    [...PYTHON_FINISHERS, ...C_FINISHERS].map((each) => [each.login, each.days]),
+  )
 
   return {
     days: DAYS,
     track: 'next',
     me: { circles: curve(70, 200, 300), hours: curve(55, 220, 300) },
-    other:
-      other === null
-        ? null
-        : { login: other, line: { circles: curve(60, 260, 420), hours: curve(48, 280, 420) } },
+    campus: 'Madrid',
+    // Como la API: sin una misma y como mucho cinco.
+    others: [...new Set(others)]
+      .filter((login) => login !== ME.login)
+      .slice(0, 5)
+      .map((login) => {
+        const days = finishers.get(login)
+
+        return { login, line: days === undefined ? personLine(login, 1100) : finisherLine(days) }
+      }),
     averages: { circles: byPopulation(1), hours: byPopulation(0.8) },
-    people: { finished: people(0.3), current: people(1), blackholed: people(2.1) },
+    individuals: individualsMock(),
+    minPeople: MIN_PEOPLE,
+    people: PEOPLE,
     census: { campus: census(1), all: census(12) },
     axis: {
       circles: [0, 1, 2, 3, 4, 5, 6].map(circles),
@@ -201,6 +292,28 @@ function progressMock(other: string | null): StatsProgress {
     paces: {
       circles: paces(circles),
       hours: paces((circle) => HOURS_SHARE[circle] ?? 100),
+    },
+  }
+}
+
+function fastestMock(): StatsFastest {
+  const entry = (each: { login: string; campus: string; days: number }): FastestEntry => ({
+    ...each,
+    image: portrait(each.login),
+  })
+  const firstOfEach = (list: typeof C_FINISHERS) =>
+    list.filter((each, index) => list.findIndex((other) => other.campus === each.campus) === index)
+
+  return {
+    campus: {
+      classic: C_FINISHERS.filter((each) => each.campus === 'Madrid').map(entry),
+      next: PYTHON_FINISHERS.filter((each) => each.campus === 'Madrid').map(entry),
+    },
+    all: {
+      classic: firstOfEach(C_FINISHERS)
+        .sort((a, b) => a.days - b.days)
+        .map(entry),
+      next: firstOfEach(PYTHON_FINISHERS).map(entry),
     },
   }
 }
@@ -226,13 +339,6 @@ const LAST = [
   'trigo',
 ]
 const KICKOFFS = ['2026-09', '2026-02', '2025-09', '2025-02', '2024-09', '2024-03']
-
-/** Un número de 0 a 1 que siempre sale igual para el mismo `n`. */
-const noise = (n: number): number => {
-  const x = Math.sin(n * 12.9898) * 43758.5453
-
-  return x - Math.floor(x)
-}
 
 type MockRunner = Omit<RankingEntry, 'rank'> & { kickoff: string }
 
@@ -306,11 +412,20 @@ function rankingMock(query: RankingQuery): StatsRanking {
   }
 }
 
-export const statsMock: Pick<Api, 'getHelpStats' | 'getStatsProgress' | 'getStatsRanking'> = {
-  async getStatsProgress(other): Promise<StatsProgress> {
+export const statsMock: Pick<
+  Api,
+  'getHelpStats' | 'getStatsProgress' | 'getStatsFastest' | 'getStatsRanking'
+> = {
+  async getStatsProgress(others): Promise<StatsProgress> {
     await delay(200)
 
-    return progressMock(other)
+    return progressMock(others)
+  },
+
+  async getStatsFastest(): Promise<StatsFastest> {
+    await delay(150)
+
+    return fastestMock()
   },
 
   async getStatsRanking(query): Promise<StatsRanking> {

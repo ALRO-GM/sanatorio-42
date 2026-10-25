@@ -247,3 +247,20 @@ export function paceLines(
 
   return { circles: line('circles'), hours: line('hours') }
 }
+
+/**
+ * Cuándo terminó alguien el common core: lo último que aprobó del último
+ * círculo de su plan (ft_transcendence o el examen 6). El grado no lleva fecha
+ * y lo último aprobado del plan no vale: hay quien vuelve años después a hacer
+ * un proyecto suelto. `null` si no tiene nada de ese círculo.
+ */
+export function finishedOn(units: readonly Unit[], done: Done): number | null {
+  const last = Math.max(...units.map((unit) => unit.circle))
+  let at: number | null = null
+
+  finishedAt(units, done).forEach(({ at: when }, index) => {
+    if (units[index]?.circle === last && when !== Infinity) at = Math.max(at ?? when, when)
+  })
+
+  return at
+}

@@ -2,8 +2,8 @@
 
 Pedido por Alberto (2026-10-25): en Datos → Avance, las medias de C y de Python
 salían manchadas por la gente a la que se tragó el black hole y nunca terminó.
-Ahora la media se elige por población, por plan (C, Python o los dos, cada uno
-en su línea):
+Ahora la media se elige por población y por plan (C o Python, cada uno en su
+línea):
 
 1. **Terminado**: quien completó el common core, en C o en Python.
 2. **En curso + terminado** (por defecto): quien sigue sin que se lo haya
@@ -103,6 +103,85 @@ de quien entra en la web, 247 personas, que además no es de fiar). Se añadió:
   `people[población][grupo]`; `census[alcance][plan][estado]` cuenta a todos.
   La línea de quien se tragó el black hole acaba el día de su `end_at`: después
   no avanza y bajaría la media sin decir nada.
+- Con menos de 10 personas (`minPeople`) no hay media: `individuals` trae la
+  línea de cada una (sin nombre en `blackholed`) y la web las pinta sueltas.
+- La gráfica (pedido de Alberto del 2026-10-25): plan, quién cuenta y alcance
+  son botones que se encienden a la vez; cada combinación es una línea (ver
+  abajo). Te comparas con hasta 5 personas, y «Los más rápidos» sugiere a
+  quien terminó antes (`GET /stats/progress/fastest`).
+
+## La gráfica: varias líneas a la vez
+
+`apps/web/src/features/stats/progressSeries.ts`. Cada combinación encendida de
+plan × quién cuenta × alcance es una línea, y se distinguen sin fiarlo todo al
+color:
+
+| | Qué dice | Cómo |
+|---|---|---|
+| Color | El plan | C azul, Python violeta (con daltonismo, los de Okabe e Ito) |
+| Trazo | Quién cuenta | En curso + terminado continuo; terminado a rayas; black hole a puntos |
+| Grosor | El alcance | Tu campus grueso y opaco; todos los campus fino y medio transparente |
+| Punto al final | Una persona, no una media | La misma línea, más fina |
+
+Tú vas en el acento y cada persona con quien te comparas en su color (oro,
+naranja, verde, rosa, lima), con su login escrito en la línea. La leyenda
+nombra cada línea («C · Terminado · Madrid (93)», «Python · Terminado:
+login»), como la ficha al pasar y la tabla. Más de 10 líneas de medias a la vez
+no se pintan: se avisa para que quites alguna opción.
+
+El eje del tiempo se elige con «Periodo»: lo que pide cada pace (8, 12, 15,
+18, 22 o 24 meses; por defecto 24) o «Todo», hasta el último dato (la API
+alarga las líneas hasta quien más tiempo lleva, cada 30 días pasados los dos
+años). Las marcas de meses van cada 1, 2, 3, 6 o 12 según lo que abarque; un
+pace más largo que el periodo se corta en el borde. La elección se guarda en el
+navegador (`sanatorio_progress_range`).
+
+## Quién terminó Python (2026-10-25)
+
+Alberto creía que alguien había terminado el common core de Python y no salía
+la línea «Python · Terminado». Mirado en producción (solo lectura):
+
+- **Sí hay dos**: `smarin-s` (Madrid, kickoff 2026-01-12: ft_transcendence el
+  2026-07-22 y el examen 6 nuevo el 2026-08-06, unos 7 meses) y `dmena-li`
+  (Barcelona, kickoff 2025-09-22, examen 6 el 2026-08-31, unos 11 meses).
+  Las dos con grado `Transcender`, todos los módulos de Python, a-maze-ing,
+  codexion, fly-in, call-me-maybe, pac-man, rag-against-the-machine,
+  ft_transcendence y el `42next-exam-rank-06`. La regla del grado basta.
+- **No salía por el mínimo**: una media necesita 10 personas en cada punto, y
+  eran 1 en Madrid y 4 en todos los campus (2 de verdad y 2 mal puestas en
+  Python). Ahora, por debajo de 10, va la línea de cada persona.
+- **Dos de C salían en Python**: el plan de quien no tiene `user_tracks` se
+  adivinaba con «tiene algo `42next-`», y desde el cambio los exámenes
+  `42next-exam-rank-0x` los hace todo el mundo. Un traslado `Transcender` con
+  solo el examen 6 nuevo (aprobado el día de su `begin_at`) y otro con el
+  examen 2 nuevo contaban como Python terminado. Ahora decide la mayoría de
+  pistas sin contar los exámenes (en Madrid, una `Alumni` de 2019 que luego
+  hizo call-me-maybe sigue en C).
+- **Gente que entra**: toda la del 42cursus copiado, no solo quien usa
+  Peer4U: Madrid 2 598 en `core_cursus`, 2 558 en `users` y 2 557 con
+  proyectos (las 40 que faltan no están en la réplica de usuarios). París se
+  quedaba en 8 000 filas justas: el tope de 80 páginas de la copia lo cortaba;
+  sube a 250. De París solo hay proyectos de quien entra en la web (campus a
+  demanda), así que sus medias no son de fiar.
+
+Cifras con la regla (`core_cursus` de 2026-10-25; plan como lo calcula el
+avance):
+
+| Campus | Plan | Terminado | En curso | Blackhole | No se sabe |
+|---|---|---|---|---|---|
+| Madrid | C | 305 | 278 | 1 598 | 113 |
+| Madrid | Python | 1 | 224 | 30 | 49 |
+| Barcelona | C | 237 | 151 | 925 | 28 |
+| Barcelona | Python | 1 | 93 | 27 | 16 |
+| Málaga | C | 166 | 148 | 1 075 | 51 |
+| Málaga | Python | 0 | 122 | 3 | 25 |
+| Urduliz | C | 108 | 68 | 392 | 22 |
+| Urduliz | Python | 0 | 45 | 8 | 7 |
+| París (cortado) | C | 5 651 | 624 | 1 327 | 398 |
+
+«Los más rápidos» mide de `begin_at` del 42cursus al último aprobado del
+último círculo del plan, y solo sugiere a quien tiene al menos la mitad del
+plan aprobado en la réplica: un traslado parecería terminar en días.
 - Clasificación (`GET /stats/ranking`): solo `active` y `finished` del campus.
 - Detalle en `docs/api.md` (Avance).
 

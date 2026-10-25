@@ -1796,7 +1796,9 @@ GET /stats?period=month|all  → HelpStats: { period, sections: StatsSection[] }
 ## Avance (`modules/stats`, Datos → Avance)
 
 ```
-GET /stats/progress?with=login → StatsProgress. Tu avance, las medias y los paces.
+GET /stats/progress?with=login,login → StatsProgress. Tu avance, todas las medias, los paces
+                  y hasta 5 personas con quien compararte.
+GET /stats/progress/fastest → StatsFastest. Quien terminó el common core más deprisa, por plan.
 GET /stats/ranking?by=circle|circles|hours&plan=all|classic|next&kickoff=AAAA-MM&cohort=only|since
                   &circleMin=0&circleMax=7&pctMin=0&pctMax=100&offset=0&limit=50 → StatsRanking.
 ```
@@ -1809,11 +1811,40 @@ GET /stats/ranking?by=circle|circles|hours&plan=all|classic|next&kickoff=AAAA-MM
   futura o algo hecho en los últimos 120 días) y `unknown` (lo demás, o sin
   copia del 42cursus). Sale de `core_cursus`, que copia
   `GET /v2/cursus/21/cursus_users` por campus una vez al día.
-- `StatsProgress.averages[medida][población][grupo]`: `population` es
-  `finished`, `current` (en curso + terminado) o `blackholed`; `unknown` no entra
-  en ninguna. `people` tiene la misma forma, y `census[alcance][plan][estado]`
-  cuenta a todo el mundo, `unknown` incluido. La línea de quien se tragó el
-  black hole acaba el día de su `end_at`. Un punto con menos de 10 personas es `null`.
+- `StatsProgress.averages[medida][población][grupo]`: todas las combinaciones
+  en una respuesta. `grupo` es `alcance-plan` (`campus-classic`, `campus-next`,
+  `all-classic`, `all-next`: cada plan va en su línea, ya no hay media de los
+  dos juntos); `population` es `finished`, `current` (en curso + terminado) o
+  `blackholed`; `unknown` no entra en ninguna. `people` tiene la misma forma, y
+  `census[alcance][plan][estado]` cuenta a todo el mundo, `unknown` incluido. La
+  línea de quien se tragó el black hole acaba el día de su `end_at`. Un punto
+  con menos de `minPeople` (10) personas es `null`. Unos 7 KB sin comprimir; con personas
+  sueltas (abajo), hasta unos 15 KB.
+- `individuals[población][grupo]`: si una media tiene menos de `minPeople`
+  personas, la línea de cada una (`{ login, line }`) en su lugar; con bastante
+  gente, vacío. Sin quien no ves (mundos separados, personas ocultas), aunque
+  cuente en `people`. En `blackholed`, `login` es `null`: se ve el camino, no
+  quién. Nada más sensible que compararse con alguien (`with`).
+- `campus`: el nombre del campus de quien mira, para rotular sus medias.
+- `days`: cada 15 días hasta los dos años (730) y, después, cada 30 hasta lo que
+  lleva quien más tiempo lleva en los datos (hasta diez años como mucho): con
+  eso la web dibuja «Todo». Con diez años, ~150 puntos por línea: unos 20 KB
+  sin comprimir, 40 con personas sueltas.
+- `with`: logins separados por comas; lo que no parece un login se ignora y se
+  queda en los 5 primeros. `others` trae, en ese orden, a quien tiene datos y
+  ves; ni tú ni quien no ves.
+- `GET /stats/progress/fastest`: `StatsFastest[alcance][plan]` es una lista de
+  `{ login, image, campus, days }`. `campus`: los 5 que antes terminaron de tu
+  campus; `all`: el primero de cada campus copiado. Solo `finished`; `days` va
+  de su `begin_at` del 42cursus al último aprobado del último círculo de su
+  plan, y hace falta tener al menos la mitad del plan aprobado en la réplica
+  (quien vino trasladado parecería terminar en días). Sin quien no ves. Es del
+  permiso `avance.compare` de los piscineros.
+- **Plan** de quien 42 no lo ha dicho (`user_tracks`): el de la mayoría de sus
+  pistas. Del nuevo, un `python-module…`, un proyecto que solo tiene el plan
+  nuevo o una versión `42next-` que no sea examen; del clásico, un proyecto que
+  solo tiene el clásico. Los exámenes `42next-` no cuentan: los hace también
+  quien sigue en C.
 - **Horas**: cada cual sobre su propio plan, con las horas de la versión que
   hizo de cada proyecto (la vieja o la de `42next-`, o el que eligió de un
   grupo); de lo que no ha hecho, las del más corto. Las dos versiones de un

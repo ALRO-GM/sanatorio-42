@@ -36,6 +36,7 @@ que hacer, en orden. Este documento es el porqué; aquel, el qué.
 - Decidido: la red de asientos también para estudiantes (cada mundo la suya).
 
 - **Avance por población** (`docs/blackhole.md`, migración 77 `core_cursus`): medias de terminados, en curso + terminados y absorbidos por el black hole (regla: `end_at` + cuenta cerrada; ~70 peticiones/día), ejes en círculos y en horas del plan de cada cual, y quién va más rápido movido de Ayuda al Avance con filtros y fila fija.
+- **Avance con varias líneas** (`docs/blackhole.md`, 2026-10-25): plan, quién cuenta y alcance se encienden a la vez (color = plan, trazo = población, grosor = alcance, tope de 10 líneas), comparar con hasta 5 personas, «Los más rápidos» (`GET /stats/progress/fastest`), líneas sueltas donde una media tiene < 10 personas (Python terminado: `smarin-s` y `dmena-li`), plan adivinado sin los exámenes `42next-` y copia del 42cursus hasta 250 páginas (París se cortaba en 8 000); el eje del tiempo se elige (8–24 meses o «Todo», recordado en el navegador).
 - **Agenda** (`docs/agenda.md`, migración 76 `scrum_*`): Scrum individual por proyecto en Perfil · Agenda, con checkpoints de fábrica por tipo de proyecto, dailies y weeklies de listas cerradas, cuenta atrás de la entrega y el tablero de cada sprint para su grupo; el gancho con la ayuda (`onBlocker`) queda sin conectar.
 
 ## Curso de shell (2026-10-25)

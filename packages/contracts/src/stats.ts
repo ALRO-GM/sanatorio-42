@@ -41,9 +41,10 @@ export type HelpStats = {
 export type ProgressMeasure = 'circles' | 'hours'
 /** Con quién se compara: el campus de quien mira, o todos los campus. */
 export type ProgressScope = 'campus' | 'all'
-/** De qué plan: los dos juntos, el clásico (C) o el nuevo (Python). */
+/** De qué plan, en la clasificación: los dos juntos, el clásico (C) o el nuevo (Python). */
 export type ProgressPlan = 'all' | 'classic' | 'next'
-export type ProgressGroup = `${ProgressScope}-${ProgressPlan}`
+/** Una media de la gráfica: un alcance y un plan (cada plan va siempre en su línea). */
+export type ProgressGroup = `${ProgressScope}-${CoreTrack}`
 /**
  * Dónde está cada cual en el common core (`docs/blackhole.md`): lo terminó, sigue
  * en él, se lo tragó el black hole (se fue sin terminar) o no se sabe seguro.
@@ -58,6 +59,16 @@ export type ProgressPopulation = 'finished' | 'current' | 'blackholed'
 export type CoreTrack = 'classic' | 'next'
 /** Un valor (en %) por cada día de `StatsProgress.days`; `null` donde aún no se llega. */
 export type ProgressLine = (number | null)[]
+/** La línea de una persona, de las dos maneras de medir. */
+export type ProgressPersonLine = { login: string; line: Record<ProgressMeasure, ProgressLine> }
+/**
+ * La línea de una persona de una media con muy poca gente (`StatsProgress.minPeople`).
+ * `login` es `null` en la de quien se tragó el black hole: se ve el camino, no quién.
+ */
+export type ProgressIndividual = {
+  login: string | null
+  line: Record<ProgressMeasure, ProgressLine>
+}
 
 /** `GET /stats/progress`: el avance en el common core a lo largo del tiempo (#87). */
 export type StatsProgress = {
@@ -66,9 +77,22 @@ export type StatsProgress = {
   /** El plan de quien mira (o de con quién se compara), si se sabe. */
   track: CoreTrack | null
   me: Record<ProgressMeasure, ProgressLine> | null
-  /** La otra persona con la que se compara (`?with=login`), si la hay. */
-  other: { login: string; line: Record<ProgressMeasure, ProgressLine> } | null
+  /** El nombre del campus de quien mira, para rotular sus medias; `null` si no se sabe. */
+  campus: string | null
+  /**
+   * Las personas con las que se compara (`?with=a,b`), en el orden pedido. Quien
+   * no tiene datos o no se ve (otro mundo, oculta) no sale.
+   */
+  others: ProgressPersonLine[]
+  /** Todas las medias: medida × población × alcance × plan. Sin bastante gente, `null` en cada punto. */
   averages: Record<ProgressMeasure, Record<ProgressPopulation, Record<ProgressGroup, ProgressLine>>>
+  /**
+   * Donde una media tiene menos de `minPeople` personas, la línea de cada una en
+   * su lugar (sin quien no se ve). Con bastante gente, vacío: va la media.
+   */
+  individuals: Record<ProgressPopulation, Record<ProgressGroup, ProgressIndividual[]>>
+  /** Con cuánta gente se hace media. */
+  minPeople: number
   /** Cuánta gente hay en cada media. */
   people: Record<ProgressPopulation, Record<ProgressGroup, number>>
   /** Cuánta gente hay en cada estado, por alcance y plan; `unknown` no entra en ninguna media. */
@@ -82,6 +106,23 @@ export type StatsProgress = {
   /** Lo que pide cada pace, en `[día, %]`, con el plan de quien mira. */
   paces: Record<ProgressMeasure, { pace: number; points: [number, number][] }[]>
 }
+
+/** Una persona que terminó el common core deprisa: sugerencia para compararse. */
+export type FastestEntry = {
+  login: string
+  image: string | null
+  /** El nombre de su campus, si se sabe. */
+  campus: string | null
+  /** Días desde su inicio en el 42cursus hasta terminar. */
+  days: number
+}
+
+/**
+ * `GET /stats/progress/fastest`: quien terminó el common core más deprisa, por
+ * plan. `campus`: los primeros del campus de quien mira; `all`: el primero de
+ * cada campus. Sin quien no se ve.
+ */
+export type StatsFastest = Record<ProgressScope, Record<CoreTrack, FastestEntry[]>>
 
 /** Por qué se ordena quién va más rápido: el círculo en el que está, o el % hecho por círculos o por horas. */
 export type RankingBy = 'circle' | 'circles' | 'hours'

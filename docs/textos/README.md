@@ -15,7 +15,7 @@ Cómo se trabaja con ellas: [docs/textos.md](../textos.md).
 | [comun](comun.md) | 302 | 0 | 0 | 0 | 0 |
 | [curso-shell](curso-shell.md) | 67 | 0 | 0 | 0 | 0 |
 | [demos](demos.md) | 104 | 0 | 0 | 0 | 0 |
-| [estadisticas](estadisticas.md) | 100 | 0 | 0 | 0 | 0 |
+| [estadisticas](estadisticas.md) | 113 | 0 | 0 | 0 | 0 |
 | [examenes](examenes.md) | 58 | 0 | 0 | 0 | 0 |
 | [expediente](expediente.md) | 134 | 0 | 0 | 0 | 0 |
 | [gestion](gestion.md) | 576 | 0 | 0 | 0 | 0 |

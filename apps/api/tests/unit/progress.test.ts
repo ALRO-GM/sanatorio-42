@@ -9,7 +9,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { closeDatabase, openDatabase } from '../../src/core/db/database.js'
 import type { Db } from '../../src/core/db/database.js'
 import { actor } from '../helpers/community.js'
-import { createProgressService } from '../../src/modules/stats/progress.service.js'
+import { createProgressService, daysUpTo } from '../../src/modules/stats/progress.service.js'
 import {
   circleMarks,
   curveOf,
@@ -270,7 +270,7 @@ describe('medias por población', () => {
     await person(id++, 'nose', { begin, printf: begin + 20 * DAY, cursus: null })
     await person(id++, 'raro', { begin, cursus: { grade: 'Cadet', end: begin, active: 1 } })
 
-    const progress = await service().progress(actor('sigue0'), null)
+    const progress = await service().progress(actor('sigue0'), [], () => true)
 
     expect(progress.people.current['campus-classic']).toBe(24)
     expect(progress.people.finished['campus-classic']).toBe(12)
@@ -315,7 +315,7 @@ describe('medias por población', () => {
       args: [iso(NOW - 50 * DAY), iso(NOW - 80 * DAY), iso(NOW)],
     })
 
-    const progress = await service().progress(actor('pyt'), null)
+    const progress = await service().progress(actor('pyt'), [], () => true)
 
     expect(progress.track).toBe('next')
     expect(progress.me?.circles.filter((value) => value !== null).at(-1)).toBe(100)
@@ -431,5 +431,291 @@ describe('quién va más rápido', () => {
     const python = await service().ranking(actor('leo'), { ...filters, plan: 'next' }, page, all)
 
     expect(python).toEqual({ kickoffs: [], total: 0, offset: 0, entries: [], me: null })
+  })
+})
+
+// --- Todas las líneas, personas sueltas donde no hay media y quién terminó antes.
+
+const everyone = () => true
+
+async function campuses(): Promise<void> {
+  for (const [id, name] of [
+    [MADRID, 'Madrid'],
+    [46, 'Barcelona'],
+    [37, 'Malaga'],
+  ] as const) {
+    await db.execute({
+      sql: 'INSERT INTO campuses (id, name, synced_at) VALUES (?, ?, ?)',
+      args: [id, name, iso(NOW)],
+    })
+  }
+}
+
+describe('todas las líneas en una respuesta', () => {
+  it('alcance × plan × población, de las dos medidas, con su gente', async () => {
+    await projects()
+    await campuses()
+    const begin = NOW - 300 * DAY
+    let id = 100
+
+    for (let n = 0; n < 10; n++) {
+      await person(id++, `c${String(n)}`, {
+        begin,
+        printf: null,
+        cursus: { grade: 'Cadet', active: 1 },
+      })
+      await person(id++, `p${String(n)}`, {
+        campus: 46,
+        begin,
+        printf: null,
+        track: 'next',
+        cursus: { grade: 'Cadet', active: 1 },
+      })
+    }
+
+    const progress = await service().progress(actor('c0'), [], everyone)
+
+    for (const measure of ['circles', 'hours'] as const) {
+      for (const population of ['finished', 'current', 'blackholed'] as const) {
+        expect(Object.keys(progress.averages[measure][population]).sort()).toEqual([
+          'all-classic',
+          'all-next',
+          'campus-classic',
+          'campus-next',
+        ])
+      }
+    }
+    expect(progress.people.current).toEqual({
+      'campus-classic': 10,
+      'campus-next': 0,
+      'all-classic': 10,
+      'all-next': 10,
+    })
+    expect(progress.averages.circles.current['all-next'][progress.days.indexOf(30)]).toBe(50)
+    expect(progress.campus).toBe('Madrid')
+    expect(progress.minPeople).toBe(10)
+    // Diez por media: hay media, no personas sueltas.
+    expect(progress.individuals.current['campus-classic']).toEqual([])
+    expect(progress.individuals.current['campus-next']).toEqual([])
+    // Lo que pesa: cuatro grupos, tres poblaciones, dos medidas; unos pocos KB.
+    expect(JSON.stringify(progress).length).toBeLessThan(30_000)
+  })
+
+  it('sin nadie: todo vacío, sin romperse', async () => {
+    await projects()
+
+    const progress = await service().progress(actor('nadie'), ['tampoco'], everyone)
+
+    expect(progress.me).toBeNull()
+    expect(progress.campus).toBeNull()
+    expect(progress.others).toEqual([])
+    expect(progress.individuals.finished['all-next']).toEqual([])
+    expect(progress.people.current['all-classic']).toBe(0)
+  })
+})
+
+describe('con poca gente, la línea de cada persona', () => {
+  it('una persona que terminó Python es su línea; con diez, la media', async () => {
+    await projects()
+    await campuses()
+    const begin = NOW - 300 * DAY
+
+    await person(1, 'yo', { begin, printf: null, cursus: { grade: 'Cadet', active: 1 } })
+    await person(2, 'rapida', {
+      begin,
+      printf: begin + 40 * DAY,
+      track: 'next',
+      cursus: { grade: 'Transcender', active: 1 },
+    })
+    await person(3, 'oculta', {
+      campus: 46,
+      begin,
+      printf: begin + 50 * DAY,
+      track: 'next',
+      cursus: { grade: 'Transcender', active: 1 },
+    })
+    await person(4, 'se-fue', {
+      begin,
+      track: 'next',
+      cursus: { grade: 'Cadet', end: begin + 100 * DAY, active: 0 },
+    })
+
+    const sees = (login: string) => login !== 'oculta'
+    const progress = await service().progress(actor('yo'), [], sees)
+
+    expect(progress.people.finished['campus-next']).toBe(1)
+    expect(progress.averages.circles.finished['campus-next'].every((value) => value === null)).toBe(
+      true,
+    )
+    const [only] = progress.individuals.finished['campus-next']
+
+    expect(progress.individuals.finished['campus-next']).toHaveLength(1)
+    expect(only?.login).toBe('rapida')
+    expect(only?.line.circles[progress.days.indexOf(45)]).toBe(100)
+    // En todos los campus son dos, pero quien no se ve no sale (aunque cuente).
+    expect(progress.people.finished['all-next']).toBe(2)
+    expect(progress.individuals.finished['all-next'].map((each) => each.login)).toEqual(['rapida'])
+    // Quien se tragó el black hole sale sin nombre, y solo hasta que se fue.
+    const [gone] = progress.individuals.blackholed['campus-next']
+
+    expect(gone?.login).toBeNull()
+    expect(gone?.line.circles[progress.days.indexOf(120)]).toBeNull()
+
+    // Con diez que terminaron, ya hay media y no van sueltas.
+    for (let n = 0; n < 9; n++) {
+      await person(10 + n, `fin${String(n)}`, {
+        begin,
+        printf: begin + 40 * DAY,
+        track: 'next',
+        cursus: { grade: 'Transcender', active: 1 },
+      })
+    }
+    const more = await service().progress(actor('yo'), [], sees)
+
+    expect(more.people.finished['campus-next']).toBe(10)
+    expect(more.individuals.finished['campus-next']).toEqual([])
+    expect(more.averages.circles.finished['campus-next'][more.days.indexOf(45)]).toBe(100)
+  })
+})
+
+describe('compararse con varias personas', () => {
+  it('en el orden pedido, sin una misma, sin quien no se ve y como mucho cinco', async () => {
+    await projects()
+    const begin = NOW - 100 * DAY
+    const logins = ['ana', 'bea', 'cris', 'dani', 'eli', 'fran', 'gus']
+
+    for (const [index, login] of logins.entries()) {
+      await person(index + 1, login, { begin, cursus: { grade: 'Cadet', active: 1 } })
+    }
+
+    const progress = await service().progress(
+      actor('ana'),
+      ['gus', 'ana', 'bea', 'nadie', 'cris', 'dani', 'eli', 'fran'],
+      (login) => login !== 'bea',
+    )
+
+    // Se queda con las cinco primeras que se ven (gus, nadie, cris, dani, eli);
+    // nadie no tiene datos y no sale.
+    expect(progress.others.map((each) => each.login)).toEqual(['gus', 'cris', 'dani', 'eli'])
+    expect(progress.others[0]?.line.circles[0]).toBe(0)
+  })
+})
+
+describe('quién terminó antes', () => {
+  it('los del campus en orden y el primero de cada campus, sin ocultos ni traslados', async () => {
+    await projects()
+    await campuses()
+    const begin = NOW - 400 * DAY
+    const finished = { grade: 'Transcender', active: 1 }
+
+    await person(1, 'yo', { begin, printf: null, cursus: { grade: 'Cadet', active: 1 } })
+    await person(2, 'lenta', { begin, printf: begin + 90 * DAY, cursus: finished })
+    await person(3, 'veloz', { begin, printf: begin + 30 * DAY, cursus: finished })
+    await person(4, 'oculta', { begin, printf: begin + 10 * DAY, cursus: finished })
+    await person(5, 'barna', { campus: 46, begin, printf: begin + 60 * DAY, cursus: finished })
+    await person(6, 'barna2', { campus: 46, begin, printf: begin + 80 * DAY, cursus: finished })
+    await person(7, 'pyt', {
+      campus: 37,
+      begin,
+      printf: begin + 20 * DAY,
+      track: 'next',
+      cursus: finished,
+    })
+    // Sigue en el cursus: aunque lo tenga todo, no terminó.
+    await person(8, 'cadete', {
+      begin,
+      printf: begin + 5 * DAY,
+      cursus: { grade: 'Cadet', active: 1 },
+    })
+    // Trasladada: Transcender sin el plan aquí; no sirve de ejemplo.
+    await person(9, 'traslado', { begin, cursus: finished })
+
+    const fastest = await service().fastest(actor('yo'), (login) => login !== 'oculta')
+    const logins = (list: { login: string }[]) => list.map((each) => each.login)
+
+    expect(logins(fastest.campus.classic)).toEqual(['veloz', 'lenta'])
+    expect(fastest.campus.classic[0]).toEqual({
+      login: 'veloz',
+      image: 'https://img/veloz.jpg',
+      campus: 'Madrid',
+      days: 30,
+    })
+    expect(logins(fastest.all.classic)).toEqual(['veloz', 'barna'])
+    expect(fastest.all.classic[1]?.campus).toBe('Barcelona')
+    expect(fastest.campus.next).toEqual([])
+    expect(logins(fastest.all.next)).toEqual(['pyt'])
+  })
+})
+
+describe('el plan de quien no lo tiene dicho', () => {
+  it('un examen 42next no hace a nadie de Python; un proyecto solo de Python, sí', async () => {
+    await projects()
+    await db.execute({
+      sql: 'INSERT INTO projects (id, name, slug, hours) VALUES (?, ?, ?, ?), (?, ?, ?, ?)',
+      args: [1320, 'exam', 'exam-rank-02', null, 1321, 'exam', '42next-exam-rank-02', null],
+    })
+    const begin = NOW - 100 * DAY
+
+    await person(1, 'c-examen', { begin })
+    await person(2, 'python', { begin })
+    for (const [row, user, project] of [
+      [900, 1, 1321],
+      [901, 2, 2687],
+    ] as const) {
+      await db.execute({
+        sql: `INSERT INTO project_users (id, user_id, project_id, status, validated, updated_at_42, created_at_42, synced_at)
+              VALUES (?, ?, ?, 'finished', 1, ?, ?, ?)`,
+        args: [row, user, project, iso(begin + 30 * DAY), iso(begin + 25 * DAY), iso(NOW)],
+      })
+    }
+
+    const withExams = createProgressService({
+      progress: createProgressRepository(db),
+      circles: (track) =>
+        Promise.resolve(
+          new Map([
+            [1314, 0],
+            [track === 'classic' ? 1316 : 2687, 1],
+            [1320, 1],
+          ]),
+        ),
+      now: () => NOW,
+    })
+
+    expect((await withExams.progress(actor('c-examen'), [], everyone)).track).toBe('classic')
+    expect((await withExams.progress(actor('python'), [], everyone)).track).toBe('next')
+  })
+})
+
+describe('«Todo»: las líneas llegan hasta quien más tiempo lleva', () => {
+  it('cada 15 días hasta los dos años y, después, cada 30 hasta el último dato', () => {
+    expect(daysUpTo(0).at(-1)).toBe(730)
+    expect(daysUpTo(0)).toHaveLength(50)
+    const long = daysUpTo(1000)
+
+    expect(long.slice(48, 52)).toEqual([720, 730, 750, 780])
+    expect(long.at(-1)).toBe(1020)
+    // Con un dato absurdo (un inicio de hace 30 años), diez años como mucho.
+    expect(daysUpTo(11_000).at(-1)).toBeLessThanOrEqual(3680)
+    expect(daysUpTo(11_000).length).toBeLessThan(150)
+  })
+
+  it('con alguien de hace cinco años, su línea y la media siguen pasados los dos', async () => {
+    await projects()
+    const old = NOW - 5 * 365 * DAY
+
+    await person(1, 'veterana', {
+      begin: old,
+      printf: old + 1500 * DAY,
+      cursus: { grade: 'Cadet', active: 1 },
+    })
+
+    const progress = await service().progress(actor('veterana'), [], everyone)
+    const at = progress.days.findIndex((day) => day >= 1600)
+
+    expect(progress.days.at(-1)).toBeGreaterThanOrEqual(5 * 365)
+    expect(progress.me?.circles[at]).toBe(100)
+    expect(progress.me?.circles[progress.days.indexOf(730)]).toBe(50)
+    expect(JSON.stringify(progress).length).toBeLessThan(40_000)
   })
 })

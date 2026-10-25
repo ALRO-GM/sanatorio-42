@@ -118,6 +118,7 @@ import type {
   HelpReputation,
   HolyGraph,
   HelpStats,
+  StatsFastest,
   StatsProgress,
   StatsRanking,
   RankingBy,
@@ -507,8 +508,10 @@ export type Api = {
   getLeaderboard: (period: LeaderboardPeriod) => Promise<Leaderboard>
   /** Estadísticas de Ayuda: cifras y clasificación de cada sección. */
   getHelpStats: (period: LeaderboardPeriod) => Promise<HelpStats>
-  /** El avance en el common core a lo largo del tiempo; con `other`, también el de esa persona. */
-  getStatsProgress: (other: string | null) => Promise<StatsProgress>
+  /** El avance en el common core a lo largo del tiempo; con `others`, también el de esas personas (hasta 5). */
+  getStatsProgress: (others: readonly string[]) => Promise<StatsProgress>
+  /** Quien terminó el common core más deprisa, por plan: en tu campus y el primero de cada campus. */
+  getStatsFastest: () => Promise<StatsFastest>
   /** Quién va más rápido en el campus, con esos filtros, por páginas. */
   getStatsRanking: (query: RankingQuery) => Promise<StatsRanking>
   // --- Red de correcciones

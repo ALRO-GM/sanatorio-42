@@ -260,8 +260,11 @@ export const realApi: Api = {
 
   getLeaderboard: (period) => getJson(`/leaderboard?period=${period}`),
   getHelpStats: (period) => getJson(`/stats?period=${period}`),
-  getStatsProgress: (other) =>
-    getJson(`/stats/progress${other === null ? '' : `?with=${encodeURIComponent(other)}`}`),
+  getStatsProgress: (others) =>
+    getJson(
+      `/stats/progress${others.length === 0 ? '' : `?with=${encodeURIComponent(others.join(','))}`}`,
+    ),
+  getStatsFastest: () => getJson('/stats/progress/fastest'),
   getStatsRanking: (query) => {
     const params = new URLSearchParams()
 

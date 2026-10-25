@@ -75,18 +75,10 @@
   font-size: 0.9rem;
   color: var(--text-2);
 }
-.progress-compare {
-  display: flex;
-  gap: 0.4rem;
-  align-items: center;
-}
-.progress-compare input {
-  width: 12rem;
-}
 .progress-chart {
   position: relative;
 }
-.progress-chart svg {
+.progress-chart > svg {
   display: block;
   width: 100%;
   height: auto;
@@ -108,33 +100,29 @@
   stroke-width: 1;
   stroke-dasharray: 4 4;
 }
-/* Los dos planes, siempre con el mismo color (en todos los estilos): azul C,
-   violeta Python; ni el acento (tu línea) ni el oro (con quien te comparas). */
+/* Los colores de las líneas (`progressSeries.ts`), los mismos en todos los
+   estilos y en claro y oscuro: azul C y violeta Python para las medias; el
+   acento es tu línea; oro y cuatro más, cada persona con quien te comparas.
+   Tonos medios que se leen sobre fondo claro y oscuro. */
 .progress-card {
   --plan-c: #3d8bfd;
   --plan-python: #b26ce6;
+  --person-2: #f08c00;
+  --person-3: #0ca678;
+  --person-4: #e64980;
+  --person-5: #82c91e;
 }
 .progress-line {
   fill: none;
-  stroke-width: 2;
   stroke-linejoin: round;
   stroke-linecap: round;
 }
-.progress-line.me {
-  stroke: var(--accent);
-  stroke-width: 3;
-}
-.progress-line.average {
-  stroke: var(--text-3);
-}
-.progress-line.average-c {
-  stroke: var(--plan-c);
-}
-.progress-line.average-python {
-  stroke: var(--plan-python);
-}
-.progress-line.other {
-  stroke: var(--gold);
+.progress-tag {
+  font-size: 11px;
+  font-weight: 600;
+  paint-order: stroke;
+  stroke: var(--surface);
+  stroke-width: 3px;
 }
 .progress-hover line {
   stroke: var(--text-3);
@@ -144,30 +132,12 @@
   stroke: var(--surface);
   stroke-width: 2;
 }
-.progress-dot.me,
-.progress-swatch.me {
-  fill: var(--accent);
-  background: var(--accent);
-}
-.progress-dot.average,
-.progress-swatch.average {
-  fill: var(--text-3);
-  background: var(--text-3);
-}
-.progress-dot.average-c,
-.progress-swatch.average-c {
-  fill: var(--plan-c);
-  background: var(--plan-c);
-}
-.progress-dot.average-python,
-.progress-swatch.average-python {
-  fill: var(--plan-python);
-  background: var(--plan-python);
-}
-.progress-dot.other,
-.progress-swatch.other {
-  fill: var(--gold);
-  background: var(--gold);
+.progress-key {
+  display: inline-block;
+  width: 1.6rem;
+  height: 0.5rem;
+  vertical-align: middle;
+  overflow: visible;
 }
 .progress-swatch {
   display: inline-block;
@@ -190,10 +160,40 @@
   background: var(--surface);
   border: 1px solid var(--border);
   box-shadow: var(--shadow-soft);
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: var(--text);
   pointer-events: none;
   white-space: nowrap;
+}
+/* Al lado de la raya del día, hacia donde hay sitio. */
+.progress-tip.left {
+  transform: translateX(calc(-100% - 0.5rem));
+}
+.progress-tip.right {
+  transform: translateX(0.5rem);
+}
+/* En el móvil no cabe encima de la gráfica sin taparla: va debajo, a lo ancho. */
+@media (max-width: 640px) {
+  /* La gráfica se encoge a la mitad: sus rótulos, en unidades del dibujo, crecen. */
+  .progress-grid text,
+  .progress-axis {
+    font-size: 14px;
+  }
+  .progress-pace text {
+    font-size: 13px;
+  }
+  .progress-tag {
+    font-size: 16px;
+  }
+  .progress-tip,
+  .progress-tip.left,
+  .progress-tip.right {
+    position: static;
+    left: auto !important;
+    transform: none;
+    margin-top: 0.4rem;
+    white-space: normal;
+  }
 }
 .progress-legend {
   display: flex;
@@ -204,6 +204,91 @@
   list-style: none;
   font-size: 0.85rem;
   color: var(--text-2);
+}
+/* Una media sin nadie: se dice (con su 0), pero no hay línea. */
+.progress-legend li.empty {
+  opacity: 0.5;
+}
+.progress-encoding {
+  margin: 0;
+  font-size: 0.8rem;
+}
+.progress-table-scroll {
+  overflow-x: auto;
+}
+/* Con quién te comparas: el buscador, las pastillas de cada cual y las sugerencias. */
+.progress-compare {
+  display: grid;
+  gap: 0.4rem;
+  flex-basis: 100%;
+}
+.progress-compare-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+}
+.progress-compare-row .person-input {
+  flex: 1 1 14rem;
+}
+.progress-compare-row input {
+  width: 100%;
+}
+.progress-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.progress-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.15rem 0.3rem 0.15rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.85rem;
+  color: var(--text);
+}
+.progress-chip button {
+  display: inline-flex;
+  padding: 0.2rem;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--text-3);
+  cursor: pointer;
+}
+.progress-chip button:hover,
+.progress-chip button:focus-visible {
+  color: var(--text);
+  background: var(--surface-2);
+}
+.progress-chip-dot {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+}
+.progress-fastest {
+  display: grid;
+  gap: 0.5rem;
+  padding-top: 0.25rem;
+  border-top: 1px solid var(--border);
+}
+.progress-fastest p {
+  margin: 0;
+}
+.progress-fastest h4 {
+  margin: 0 0 0.25rem;
+  font-size: 0.85rem;
+  color: var(--text-2);
+}
+.progress-fastest-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
 }
 .progress-table table {
   width: 100%;
@@ -259,4 +344,10 @@
   z-index: 1;
   background: linear-gradient(var(--accent-soft), var(--accent-soft)), var(--surface);
   box-shadow: var(--shadow-soft);
+}
+/* El rótulo del periodo, delante de sus pastillas: «8 m» suelto no se entiende. */
+.progress-range-label {
+  font-size: 0.85rem;
+  color: var(--text-2);
+  margin-right: 0.25rem;
 }

@@ -1,13 +1,12 @@
 import { cleanup, fireEvent, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import es from 'virtual:textos/es'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { must } from './must'
 import { openApp } from './render'
 
 const text = (key: string): string => must(es[key], `el texto ${key}`)
-const legend = (key: string): RegExp => new RegExp(`^${text(key).split(' (')[0] ?? ''}`)
 /** El grupo de botones de la gráfica (el primero) o de la clasificación (el segundo). */
 const group = (key: string, index = 0): HTMLElement =>
   must(screen.getAllByRole('group', { name: text(key) })[index], `el grupo ${key}`)
@@ -20,69 +19,120 @@ afterEach(() => {
   cleanup()
 })
 
-describe('Avance por plan', () => {
-  it('sale con el plan de quien mira y, con los dos, una media para C y otra para Python', async () => {
-    const user = userEvent.setup()
+/** La gráfica ya cargada: su media por defecto está en la leyenda. */
+const ready = () =>
+  screen.findAllByText(/^Python · En curso \+ terminado · Madrid/, {}, { timeout: 5000 })
+const series = (): string[] =>
+  [...chartCard().querySelectorAll<SVGGElement>('.progress-series')].map(
+    (node) => node.dataset.series ?? '',
+  )
+const legendItems = (): string[] =>
+  [...chartCard().querySelectorAll('.progress-legend li')].map((node) => node.textContent.trim())
+const toggle = async (user: ReturnType<typeof userEvent.setup>, groupKey: string, name: string) => {
+  await user.click(within(group(groupKey)).getByRole('button', { name }))
+}
 
+describe('Avance: cada opción encendida suma sus líneas', () => {
+  it('por defecto tu plan, en curso + terminado y tu campus: una media, con su gente', async () => {
     await openApp('#/avance')
+    await ready()
 
-    // El de prueba es del plan con Python: una sola media, la suya.
+    const pressed = (key: string) =>
+      within(group(key))
+        .getAllByRole('button')
+        .filter((button) => button.getAttribute('aria-pressed') === 'true')
+        .map((button) => button.textContent)
+
+    expect(pressed('stats.progress.plan')).toEqual(['Python'])
+    expect(pressed('stats.progress.population')).toEqual([
+      text('stats.progress.population.current'),
+    ])
+    expect(pressed('stats.progress.scope')).toEqual(['Madrid'])
+    // Ya no hay «Los dos»: cada plan es un botón aparte.
     expect(
-      await screen.findAllByText(legend('stats.progress.average'), {}, { timeout: 5000 }),
-    ).not.toHaveLength(0)
-    expect(screen.queryByText(legend('stats.progress.averageC'))).toBeNull()
-
-    await user.click(
-      within(group('stats.progress.plan')).getByRole('button', {
+      within(group('stats.progress.plan')).queryByRole('button', {
         name: text('stats.progress.plan.all'),
       }),
-    )
-
-    expect(screen.getAllByText(legend('stats.progress.averageC'))).not.toHaveLength(0)
-    expect(screen.getAllByText(legend('stats.progress.averagePython'))).not.toHaveLength(0)
-    expect(document.querySelector('.progress-line.average-c')).not.toBeNull()
-    expect(document.querySelector('.progress-line.average-python')).not.toBeNull()
-    expect(document.querySelector('.progress-line.average')).toBeNull()
+    ).toBeNull()
+    expect(series()).toEqual(['next-current-campus', 'me'])
+    // Quien no se sabe si sigue no entra: se dice cuántos son.
+    expect(screen.getByText(/9 personas no entran en ninguna media/)).toBeTruthy()
   })
-})
 
-describe('Avance por población', () => {
-  it('por defecto en curso + terminado; cada población con su gente en la leyenda', async () => {
+  it('plan × quién cuenta × alcance; quitar una opción quita sus líneas', async () => {
     const user = userEvent.setup()
 
     await openApp('#/avance')
-    await screen.findAllByText(legend('stats.progress.average'), {}, { timeout: 5000 })
+    await screen.findAllByText(/^Python · En curso \+ terminado · Madrid/, {}, { timeout: 5000 })
 
-    const populations = group('stats.progress.population')
+    await toggle(user, 'stats.progress.plan', 'C')
+    await toggle(user, 'stats.progress.scope', text('stats.progress.scope.all'))
+    expect(series()).toEqual([
+      'classic-current-campus',
+      'classic-current-all',
+      'next-current-campus',
+      'next-current-all',
+      'me',
+    ])
+    expect(legendItems()).toContain('C · En curso + terminado · Todos los campus (4700)')
 
-    expect(
-      within(populations)
-        .getByRole('button', { name: text('stats.progress.population.current') })
-        .getAttribute('aria-pressed'),
-    ).toBe('true')
-    // En curso + terminado del plan con Python, en el campus: 110 personas.
-    expect(within(chartCard()).getAllByText(/\(110 personas\)/)).not.toHaveLength(0)
+    // Con muy poca gente que terminó Python no hay media: va cada persona, una vez.
+    await toggle(user, 'stats.progress.population', text('stats.progress.population.finished'))
+    expect(series()).toContain('next-finished-campus-nvelasco')
+    expect(series()).toContain('next-finished-all-ktorres')
+    expect(series().filter((key) => key.endsWith('nvelasco'))).toHaveLength(1)
+    expect(legendItems()).toContain('Python · Terminado: nvelasco')
+    expect(screen.getByText(/Con menos de 10 personas no se hace media/)).toBeTruthy()
 
-    await user.click(
-      within(populations).getByRole('button', {
-        name: text('stats.progress.population.blackholed'),
-      }),
+    // Black hole encendido: demasiadas líneas, se avisa y no se pintan las medias.
+    await toggle(user, 'stats.progress.population', text('stats.progress.population.blackholed'))
+    expect(screen.getByText(/^Son 16 líneas a la vez y caben 10/)).toBeTruthy()
+    expect(series()).toEqual(['me'])
+
+    // Se quita Python y el alcance de todos: vuelven a caber.
+    await toggle(user, 'stats.progress.plan', 'Python')
+    await toggle(user, 'stats.progress.scope', text('stats.progress.scope.all'))
+    expect(series()).toEqual([
+      'classic-current-campus',
+      'classic-finished-campus',
+      'classic-blackholed-campus',
+      'me',
+    ])
+  })
+
+  it('la ficha al pasar y la tabla nombran cada línea', async () => {
+    const user = userEvent.setup()
+
+    await openApp('#/avance')
+    await screen.findAllByText(/^Python · En curso \+ terminado · Madrid/, {}, { timeout: 5000 })
+    await toggle(user, 'stats.progress.plan', 'C')
+
+    const svg = must(chartCard().querySelector('.progress-chart svg'), 'la gráfica')
+
+    fireEvent.pointerMove(svg, { clientX: 10 })
+    const tip = await screen.findByRole('status')
+
+    expect(tip.textContent).toContain('C · En curso + terminado · Madrid (310)')
+    expect(tip.textContent).toContain('Python · En curso + terminado · Madrid (110)')
+    expect(tip.textContent).toContain(text('stats.progress.me'))
+
+    const headers = [...chartCard().querySelectorAll('.progress-table th')].map(
+      (node) => node.textContent,
     )
-    expect(within(chartCard()).getAllByText(/\(231 personas\)/)).not.toHaveLength(0)
-    await user.click(
-      within(populations).getByRole('button', { name: text('stats.progress.population.finished') }),
-    )
-    expect(within(chartCard()).getAllByText(/\(33 personas\)/)).not.toHaveLength(0)
 
-    // Quien no se sabe si sigue no entra: se dice cuántos son.
-    expect(screen.getByText(/9 personas no entran en ninguna media/)).toBeTruthy()
+    expect(headers).toEqual([
+      text('stats.progress.tableMonth'),
+      'C · En curso + terminado · Madrid (310)',
+      'Python · En curso + terminado · Madrid (110)',
+      text('stats.progress.me'),
+    ])
   })
 
   it('el eje marca los círculos y, por horas, las horas de tu plan', async () => {
     const user = userEvent.setup()
 
     await openApp('#/avance')
-    await screen.findAllByText(legend('stats.progress.average'), {}, { timeout: 5000 })
+    await screen.findAllByText(/^Python · En curso \+ terminado · Madrid/, {}, { timeout: 5000 })
 
     expect(axis()).toEqual(['Inicio', ...[0, 1, 2, 3, 4, 5, 6].map((n) => `Círculo ${String(n)}`)])
 
@@ -97,6 +147,182 @@ describe('Avance por población', () => {
     // Arriba, las horas de todo tu common core (1456 en la API de mentira).
     expect(hours.at(-1)?.replace(/\D/g, '')).toBe('1456')
     expect(screen.getByText(/1\.?456 h\)/)).toBeTruthy()
+  })
+})
+
+describe('Avance: el periodo del eje del tiempo', () => {
+  const months = (): string[] =>
+    [...chartCard().querySelectorAll('.progress-axis')].map((node) => node.textContent)
+  const paceLabels = (): string[] =>
+    [...chartCard().querySelectorAll('.progress-pace text')].map((node) => node.textContent)
+  /** El último punto (en x) de tu línea. */
+  const myEnd = (): number => {
+    const d = chartCard().querySelector('[data-series="me"] path')?.getAttribute('d') ?? ''
+    const xs = [...d.matchAll(/[ML]([\d.]+),/g)].map((match) => Number(match[1]))
+
+    return Math.max(...xs)
+  }
+
+  afterEach(() => {
+    localStorage.removeItem('sanatorio_progress_range')
+  })
+
+  it('por defecto dos años; con 8 meses, marca cada mes y el pace de 8 sigue', async () => {
+    const user = userEvent.setup()
+
+    await openApp('#/avance')
+    await ready()
+
+    const period = group('rank.period')
+
+    expect(within(period).getByRole('button', { name: '24 m' }).getAttribute('aria-pressed')).toBe(
+      'true',
+    )
+    expect(months()).toEqual(['0 m', '3 m', '6 m', '9 m', '12 m', '15 m', '18 m', '21 m', '24 m'])
+    const wide = myEnd()
+
+    await user.click(within(period).getByRole('button', { name: '8 m' }))
+    expect(months()).toEqual(['0 m', '1 m', '2 m', '3 m', '4 m', '5 m', '6 m', '7 m', '8 m'])
+    // El pace de 8 meses acaba justo en el borde: se ve con su rótulo; los demás, cortados.
+    expect(paceLabels()).toEqual(['8 m'])
+    // La misma línea, estirada: llega más a la derecha.
+    expect(myEnd()).toBeGreaterThan(wide)
+    expect(localStorage.getItem('sanatorio_progress_range')).toBe('8')
+  })
+
+  it('«Todo» llega hasta el último dato, y se recuerda al volver', async () => {
+    const user = userEvent.setup()
+
+    await openApp('#/avance')
+    await ready()
+    await user.click(
+      within(group('rank.period')).getByRole('button', { name: text('net.period.all') }),
+    )
+
+    // Cuatro años de datos en la API de mentira: una marca al año.
+    expect(months()).toEqual(['0 m', '12 m', '24 m', '36 m', '48 m'])
+    // Todos los paces acaban antes: se ven enteros; de los rótulos, los que no se pisan.
+    expect(chartCard().querySelectorAll('.progress-pace path')).toHaveLength(6)
+    expect(paceLabels()).toEqual(expect.arrayContaining(['8 m', '24 m']))
+    const rows = [...chartCard().querySelectorAll('.progress-table tbody tr')]
+
+    expect(rows.at(-1)?.firstElementChild?.textContent).toBe('47')
+    expect(localStorage.getItem('sanatorio_progress_range')).toBe('all')
+
+    // Se va a otra sección y se vuelve: el Avance se monta de nuevo y lo recuerda.
+    window.location.hash = '#/red'
+    await screen.findByText(
+      (_, node) => node === document.body && document.querySelector('.progress-card') === null,
+      {},
+      { timeout: 5000 },
+    )
+    window.location.hash = '#/avance'
+    await ready()
+    expect(
+      within(group('rank.period'))
+        .getByRole('button', { name: text('net.period.all') })
+        .getAttribute('aria-pressed'),
+    ).toBe('true')
+  })
+
+  it('sin almacenamiento del navegador, vuelve a dos años sin romperse', async () => {
+    const original = localStorage.getItem.bind(localStorage)
+    const spy = vi.spyOn(Storage.prototype, 'getItem').mockImplementation(function (
+      this: Storage,
+      key: string,
+    ) {
+      if (key === 'sanatorio_progress_range') throw new Error('bloqueado')
+      return original(key)
+    })
+
+    try {
+      await openApp('#/avance')
+      await ready()
+      expect(
+        within(group('rank.period'))
+          .getByRole('button', { name: '24 m' })
+          .getAttribute('aria-pressed'),
+      ).toBe('true')
+    } finally {
+      spy.mockRestore()
+    }
+  })
+})
+
+describe('Avance: compararte con varias personas', () => {
+  const input = (): HTMLElement =>
+    screen.getByRole('combobox', { name: text('stats.progress.compare') })
+
+  it('se añaden de una en una, cada cual con su línea y su pastilla; × la quita', async () => {
+    const user = userEvent.setup()
+
+    await openApp('#/avance')
+    await screen.findAllByText(/^Python · En curso \+ terminado · Madrid/, {}, { timeout: 5000 })
+
+    for (const login of ['jdoe', 'mgarcia']) {
+      await user.type(input(), login)
+      await user.click(screen.getByRole('button', { name: text('stats.progress.compareAdd') }))
+    }
+    await screen.findByText(
+      (_, node) => node?.getAttribute('data-series') === 'other-mgarcia',
+      {},
+      { timeout: 5000 },
+    )
+    expect(series()).toEqual(['next-current-campus', 'other-jdoe', 'other-mgarcia', 'me'])
+    // Cada persona, con su color.
+    const strokes = ['other-jdoe', 'other-mgarcia'].map((key) =>
+      chartCard().querySelector(`[data-series="${key}"] path`)?.getAttribute('stroke'),
+    )
+
+    expect(new Set(strokes).size).toBe(2)
+
+    await user.click(screen.getByRole('button', { name: 'Quitar a jdoe' }))
+    await screen.findByText(
+      (_, node) =>
+        node === chartCard() &&
+        series().includes('other-mgarcia') &&
+        !series().includes('other-jdoe'),
+      {},
+      { timeout: 5000 },
+    )
+    expect(series()).toEqual(['next-current-campus', 'other-mgarcia', 'me'])
+  })
+
+  it('«Los más rápidos» sugiere quién terminó antes y con un clic se añaden, hasta cinco', async () => {
+    const user = userEvent.setup()
+
+    await openApp('#/avance')
+    await screen.findAllByText(/^Python · En curso \+ terminado · Madrid/, {}, { timeout: 5000 })
+    await toggle(user, 'stats.progress.plan', 'C')
+    await toggle(user, 'stats.progress.scope', text('stats.progress.scope.all'))
+    await user.click(screen.getByRole('button', { name: text('stats.progress.fastest') }))
+
+    const campus = await screen.findByRole('region', { name: 'C · Madrid' }, { timeout: 5000 })
+    const each = screen.getByRole('region', {
+      name: 'C · quien antes terminó en cada campus',
+    })
+
+    expect(within(campus).getAllByRole('button')[0]?.textContent).toBe('aprado · 8,8 meses')
+    // Uno por campus, con su campus.
+    expect(within(each).getByRole('button', { name: /ifresno · Barcelona/ })).toBeTruthy()
+    expect(
+      within(screen.getByRole('region', { name: 'Python · Madrid' })).getByRole('button', {
+        name: /^nvelasco/,
+      }),
+    ).toBeTruthy()
+
+    await user.click(within(each).getByRole('button', { name: /ifresno/ }))
+    await user.click(
+      within(campus).getByRole('button', { name: text('stats.progress.fastest.addAll') }),
+    )
+    await screen.findByText(
+      text('stats.progress.compareFull').replace('{n}', '5'),
+      {},
+      { timeout: 5000 },
+    )
+    expect(screen.getAllByRole('button', { name: /^Quitar a / })).toHaveLength(5)
+    // Ya está: no se puede añadir más.
+    expect(within(campus).getByRole('button', { name: /^dolmo/ })).toHaveProperty('disabled', true)
   })
 })
 

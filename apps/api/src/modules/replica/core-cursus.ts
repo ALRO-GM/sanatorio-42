@@ -17,8 +17,13 @@ import type { QuotaGate } from './quota.js'
 
 /** Cada cuánto se repasa un campus: el grado y el fin cambian despacio. */
 const EVERY_MS = 24 * 60 * 60_000
-/** Tope de páginas por campus y vuelta: Madrid son 26; con margen para crecer. */
-const MAX_PAGES = 80
+/**
+ * Tope de páginas por campus y vuelta, por si 42 no deja de dar páginas llenas.
+ * Madrid son 26, pero París pasa de 80: con 80 se quedaba en 8 000 filas justas
+ * (visto en producción el 2026-10-25) y faltaba gente. Una vuelta al día por
+ * campus, de fondo y con cuota, así que un tope alto cuesta poco.
+ */
+const MAX_PAGES = 250
 
 type CoreCursusOptions = {
   db: Db
