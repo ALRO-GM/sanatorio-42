@@ -20,6 +20,7 @@ import { notGamesHref, turnGameHref } from '../../shared/links'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { PillGroup } from '../../shared/ui/PillGroup'
 import { GitCourseTab } from '../gitcourse/GitCourseTab'
+import { ShellCourseTab } from '../shellcourse/ShellCourseTab'
 import { Icon } from '../../shared/ui/Icon'
 import { InfoTip } from '../../shared/ui/InfoTip'
 import { NotGamesTour } from './NotGamesTour'
@@ -67,23 +68,27 @@ export function NotGamesPage({ me, room }: NotGamesPageProps) {
       </h2>
       {valid && turn && <TurnRoomView id={id} me={me} />}
       {valid && !turn && <RoomView id={id} me={me} />}
-      {!valid && <Lobby me={me} initial={room === 'git' ? 'git' : 'rooms'} />}
+      {!valid && <Lobby me={me} initial={room === 'git' || room === 'shell' ? room : 'rooms'} />}
     </section>
   )
 }
 
-const TABS = ['rooms', 'review', 'git'] as const
+const TABS = ['rooms', 'review', 'git', 'shell'] as const
 
 type Tab = (typeof TABS)[number]
 
-/** La portada de Not-games: las salas, tu Repaso o el curso de git (`#/notgames/git`). */
+/** La portada de Not-games: las salas, tu Repaso o los cursos de git (`#/notgames/git`) y de shell (`#/notgames/shell`). */
 function Lobby({ me, initial }: { me: string; initial: Tab }) {
   const { t } = useI18n()
   const [tab, setTab] = useState<Tab>(initial)
   // Un piscinero, solo las pestañas que permite el panel (`docs/piscineros.md`).
   const review = usePoolAllows('notgames.review')
   const git = usePoolAllows('gitcourse')
-  const tabs = TABS.filter((each) => (each !== 'review' || review) && (each !== 'git' || git))
+  const shell = usePoolAllows('shellcourse')
+  const tabs = TABS.filter(
+    (each) =>
+      (each !== 'review' || review) && (each !== 'git' || git) && (each !== 'shell' || shell),
+  )
 
   return (
     <>
@@ -105,6 +110,7 @@ function Lobby({ me, initial }: { me: string; initial: Tab }) {
           }}
         />
       )}
+      {tab === 'shell' && shell && <ShellCourseTab />}
     </>
   )
 }

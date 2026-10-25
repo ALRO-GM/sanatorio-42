@@ -1553,6 +1553,41 @@ POST /gitcourse/rooms/:id/run     → GitRunInput { line (≤ 200) } → GitRunR
   persona y vacía se borra. Una tarea cada hora borra las salas sin empezar de
   más de 2 h y las demás de más de una semana.
 
+## Curso de shell (`modules/shellcourse`)
+
+```
+GET  /shellcourse                   → ShellCourse { stars: { [punto]: 1–3 }, best: { [punto]: { commands, seconds } }, runs: { [jefe]: { startedAt, deadline } }, certificates: { tier, stars, seconds, at }[] }
+POST /shellcourse/units/:id         → ShellAttemptInput { entries: string[] (≤ 300, ≤ 2000 caracteres) } → ShellAttemptResult { done, stars, commands, seconds, misses, course }
+POST /shellcourse/bosses/:id/start  → ShellBossStart { unit, run: { startedAt, deadline }, course }
+```
+
+- Las unidades, los jefes y los jefes finales (teoría, ejemplo, preparación,
+  solución y lo que se comprueba) están en `@sanatorio/shellsim` (`UNITS`),
+  el mismo paquete que usa la web; las reglas de estrellas, en
+  `@sanatorio/course` (`docs/plantilla-cursos.md`).
+- El intento se corrige **volviendo a ejecutar** `entries` en la shell
+  simulada desde el mundo de partida de la unidad. Hecho si el mundo coincide
+  con el de la solución en lo que mira la unidad (ficheros, permisos,
+  servicios, procesos, usuarios, crontab, sondas de guiones…) y, si pide una
+  respuesta, alguna orden la escribió (`misses` dice qué falta:
+  `file:/ruta`, `service:nginx`, `output`, `requires:du`, `time`…). Lo que
+  mande la web aparte de `entries` no se usa.
+- **Unidades**: estrellas por comandos (`starGoals`): cuenta cada tubería que
+  sale bien y no es solo mirar; 3 con tantas como la solución, 2 hasta la
+  mitad más uno, 1 con más. `seconds` es `null`.
+- **Jefes y jefes finales** (`limit` en la unidad): primero `bosses/:id/start`,
+  que apunta la hora en `shell_runs` (otra vez: el reloj vuelve a cero). Al
+  corregir, la API mide `seconds` con su reloj (5 s de margen por la red):
+  3 estrellas en la mitad del límite, 2 hasta tres cuartos, 1 dentro del
+  límite; pasado, `done: false` y `misses: ['time']`. Sin empezar, 409; una
+  unidad sin reloj, 400. Superado, el reloj se borra.
+- Un jefe final superado (`final-beginner`, `final-intermediate`,
+  `final-advanced`) es el certificado de su nivel (`certificates`).
+- Se guarda la mejor vez (`shell_progress`: más estrellas, menos comandos y
+  menos segundos). En orden: sin el punto anterior, 409. Punto que no existe,
+  404. Topes: 30 intentos por persona cada diez minutos y 20 salidas de
+  contrarreloj (429). No pide estar en un puesto del clúster.
+
 ## Mapa de calor de clics (`modules/usage/clicks.ts`)
 
 ```

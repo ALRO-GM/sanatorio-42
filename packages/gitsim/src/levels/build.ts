@@ -4,6 +4,9 @@
  * llaman a lo mismo, así que lo que la web da por bueno la API también.
  */
 
+import { commandGoals, starsFor } from '@sanatorio/course'
+import type { StarGoals, Stars } from '@sanatorio/course'
+
 import { goalOf, missing } from '../compare.js'
 import { createCounter } from '../count.js'
 import type { Goal, Miss } from '../compare.js'
@@ -110,19 +113,13 @@ function parOf(level: Level): number {
  * tantos como la solución; dos con la mitad más uno; una, con lo que sea. Lo
  * enseña la web antes de empezar y lo usa la API al corregir: es lo mismo.
  */
-export function starGoals(level: Level): { three: number; two: number } {
-  const three = parOf(level)
-
-  return { three, two: Math.ceil(three * 1.5) + 1 }
+export function starGoals(level: Level): StarGoals {
+  // La regla es la de todos los cursos (`@sanatorio/course`).
+  return commandGoals(parOf(level))
 }
 
-export function starsOf(level: Level, used: number): 1 | 2 | 3 {
-  const goals = starGoals(level)
-
-  if (used <= goals.three) return 3
-  if (used <= goals.two) return 2
-
-  return 1
+export function starsOf(level: Level, used: number): Stars {
+  return starsFor(used, starGoals(level))
 }
 
 export type Attempt = { done: boolean; misses: Miss[]; stars: 0 | 1 | 2 | 3; commands: number }

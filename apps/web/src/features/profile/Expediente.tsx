@@ -21,6 +21,7 @@ import { RecordTour } from './RecordTour'
 import { LevelButton } from './LevelButton'
 import { TitlePicker } from './TitlePicker'
 import { PoolOnly } from '../../shared/ui/PoolOnly'
+import { MyShellCertificates } from '../../shared/course/Certificates'
 
 type ExpedienteProps = {
   me: CurrentUser
@@ -110,6 +111,10 @@ export function Expediente({ me, profile }: ExpedienteProps) {
                   master={master}
                   onSaved={profile.reload}
                 />
+                {/* Los niveles del curso de shell superados (jefes finales). */}
+                <PoolOnly k="shellcourse">
+                  <MyShellCertificates />
+                </PoolOnly>
                 <Show from="normal">
                   <PoolOnly k="expediente.hours">
                     <HoursReport />

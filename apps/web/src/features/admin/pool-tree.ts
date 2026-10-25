@@ -30,6 +30,7 @@ const TREE: Record<PoolKey, Group> = {
   'notgames.review': 'ayuda',
   gitcourse: 'ayuda',
   'gitcourse.groups': 'ayuda',
+  shellcourse: 'ayuda',
   estadisticas: 'ayuda',
   calendario: 'calendario',
   clusters: 'clusters',

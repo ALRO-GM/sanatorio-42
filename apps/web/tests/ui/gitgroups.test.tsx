@@ -42,7 +42,7 @@ describe('curso de git: prueba de grupo', () => {
     expect(await screen.findByText(text('git.room.missions'))).toBeTruthy()
     expect(screen.getByText(`git switch -c ${ME.login}`)).toBeTruthy()
 
-    const input = screen.getByRole('textbox', { name: text('git.term.input') })
+    const input = screen.getByRole('textbox', { name: text('course.term.input') })
 
     await user.type(input, `git switch -c ${ME.login}{Enter}`)
     expect(await screen.findByText(new RegExp(`Ahora en la nueva rama ${ME.login}`))).toBeTruthy()

@@ -136,6 +136,11 @@ tendrías tres estrellas: empieza de nuevo para mejorar».
 
 ## Cómo está hecho
 
+- Sigue la [plantilla de cursos](plantilla-cursos.md): las reglas de las
+  estrellas son las de `@sanatorio/course` y la terminal, las estrellas a la
+  vista y el porqué son las piezas de `apps/web/src/shared/course`, las
+  mismas que usa el [curso de shell](curso-shell.md).
+
 - `packages/gitsim`: el motor de git simulado (repositorio, comandos, remotos,
   conflictos) y la comparación con la estructura objetivo. Lo usan la web y la
   API, para que el resultado sea el mismo en los dos sitios. Los ids de commit

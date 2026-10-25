@@ -114,6 +114,8 @@ describe('migraciones', () => {
       'seat_sessions',
       'seats',
       'settings',
+      'shell_progress',
+      'shell_runs',
       'staff_accounts',
       'staff_checks',
       'sync_state',

@@ -19,6 +19,8 @@ COPY apps/api/package.json apps/api/
 COPY apps/web/package.json apps/web/
 COPY packages/contracts/package.json packages/contracts/
 COPY packages/gitsim/package.json packages/gitsim/
+COPY packages/course/package.json packages/course/
+COPY packages/shellsim/package.json packages/shellsim/
 COPY packages/clicker/package.json packages/clicker/
 RUN npm ci
 
@@ -36,6 +38,8 @@ COPY apps/api/package.json apps/api/
 COPY apps/web/package.json apps/web/
 COPY packages/contracts/package.json packages/contracts/
 COPY packages/gitsim/package.json packages/gitsim/
+COPY packages/course/package.json packages/course/
+COPY packages/shellsim/package.json packages/shellsim/
 COPY packages/clicker/package.json packages/clicker/
 RUN npm ci --omit=dev --workspace @sanatorio/api
 
@@ -56,6 +60,11 @@ COPY --from=build /repo/apps/web/dist web
 # es un enlace a ../../packages/gitsim (el workspace).
 COPY --from=build /repo/packages/gitsim/package.json packages/gitsim/
 COPY --from=build /repo/packages/gitsim/dist packages/gitsim/dist
+# La plantilla de los cursos (estrellas) y la shell simulada del curso de shell.
+COPY --from=build /repo/packages/course/package.json packages/course/
+COPY --from=build /repo/packages/course/dist packages/course/dist
+COPY --from=build /repo/packages/shellsim/package.json packages/shellsim/
+COPY --from=build /repo/packages/shellsim/dist packages/shellsim/dist
 # Y el motor del Code Clicker, que la API usa para rehacer las cuentas.
 COPY --from=build /repo/packages/clicker/package.json packages/clicker/
 COPY --from=build /repo/packages/clicker/dist packages/clicker/dist

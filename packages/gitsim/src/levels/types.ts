@@ -5,19 +5,12 @@
  * no puede quedar desfasado del motor.
  */
 
-export type Theory = {
-  /** Para qué sirve, en una o dos frases. */
-  what: string
-  /** Cómo se usa: comandos de ejemplo, uno por línea. */
-  how: string[]
-  /** Cuándo usarlo. */
-  when: string
-  /** Cuándo no (opcional: no todos los puntos lo necesitan). */
-  whenNot?: string
+import type { Theory as CourseTheory } from '@sanatorio/course'
+
+/** La teoría de la plantilla de cursos (`@sanatorio/course`) más cómo se ve en las ramas. */
+export type Theory = CourseTheory & {
   /** Cómo se ve en las ramas. */
   looks: string
-  /** Qué problemas puede dar (opcional). */
-  problems?: string
 }
 
 export type Level = {

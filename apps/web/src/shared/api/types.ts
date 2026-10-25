@@ -22,6 +22,10 @@ import type {
   HiddenPerson,
   HiddenPersonInput,
   GitAttemptInput,
+  ShellAttemptInput,
+  ShellAttemptResult,
+  ShellBossStart,
+  ShellCourse,
   GitAttemptResult,
   GitCourse,
   GitGateAnswerInput,
@@ -336,6 +340,10 @@ export type Api = {
   leaveGitRoom: (id: number) => Promise<void>
   startGitRoom: (id: number) => Promise<GitRoom>
   runGitRoom: (id: number, line: string) => Promise<GitRunResult>
+  /** El curso de shell: lo que llevas, corregir una prueba y empezar un contrarreloj. */
+  getShellCourse: () => Promise<ShellCourse>
+  submitShellAttempt: (unit: string, input: ShellAttemptInput) => Promise<ShellAttemptResult>
+  startShellBoss: (unit: string) => Promise<ShellBossStart>
   startFocus: (settings: FocusSettings) => Promise<Focus>
   stopFocus: (reasons?: FocusReason[]) => Promise<Focus>
   /** Querías acabar el Pomodoro y sigues: se apunta con los motivos marcados. */

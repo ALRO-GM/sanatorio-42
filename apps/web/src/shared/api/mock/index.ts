@@ -26,6 +26,7 @@ import { focusMock } from './focus'
 import { hiddenMock, withHidden } from './hidden'
 import { poolMock } from './pool'
 import { gitCourseMock } from './gitcourse'
+import { shellCourseMock } from './shellcourse'
 import { gitRoomsMock } from './gitrooms'
 import { replicaMock } from './replica'
 import { staffMock } from './staff'
@@ -56,6 +57,7 @@ export const mockApi: Api = withHidden({
   ...poolMock,
   ...hiddenMock,
   ...gitCourseMock,
+  ...shellCourseMock,
   ...gitRoomsMock,
   ...countdownsMock,
 })

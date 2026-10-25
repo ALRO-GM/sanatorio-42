@@ -138,7 +138,8 @@ export default defineConfig(
      *   alguien con la misma gráfica que ve quien juega.
      * - `focus/FocusStatsView`: el panel enseña las cifras del Pomodoro de todos
      *   con la misma vista que cada cual ve de las suyas.
-     * - `gitcourse/GitCourseTab`: el curso de git es una pestaña de Not-games.
+     * - `gitcourse/GitCourseTab` y `shellcourse/ShellCourseTab`: los cursos de git y de
+     *   shell son pestañas de Not-games.
      * - `map/ProjectMap|ClusterMapView|SeatPicker`: la consulta y las terapias
      *   enseñan el mapa del clúster y eligen puestos en él.
      * - `help/BookHelp|tags`: la consulta reserva ayuda y el expediente enseña
@@ -153,7 +154,7 @@ export default defineConfig(
           patterns: [
             {
               regex:
-                '^\\.\\./(?!\\.\\./)(?!(notices/conversations|calendar/EventDialog|facility/(FacilityList|FacilityForm)|profile/HoursReport|clicker/(CapitalChart|CapitalHistory)|focus/FocusStatsView|gitcourse/GitCourseTab|map/(ProjectMap|ClusterMapView|SeatPicker)|help/(BookHelp|tags)|network/(Meter|VerdictStats))$)[a-z-]+/',
+                '^\\.\\./(?!\\.\\./)(?!(notices/conversations|calendar/EventDialog|facility/(FacilityList|FacilityForm)|profile/HoursReport|clicker/(CapitalChart|CapitalHistory)|focus/FocusStatsView|gitcourse/GitCourseTab|shellcourse/ShellCourseTab|map/(ProjectMap|ClusterMapView|SeatPicker)|help/(BookHelp|tags)|network/(Meter|VerdictStats))$)[a-z-]+/',
               message:
                 'Una funcionalidad no importa de otra: lo compartido va a `shared/`. Las excepciones, con su porqué, están en eslint.config.js.',
             },

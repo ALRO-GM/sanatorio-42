@@ -126,7 +126,7 @@ export function GitCourseTab({ me, onReview }: { me: string; onReview: () => voi
         <p className="muted">{t('git.atSeat', { seat: current.seat })}</p>
       )}
       <p className="git-total">
-        <span className="git-stars">★</span> {total} / {LEVELS.length * 3}
+        <span className="course-stars">★</span> {total} / {LEVELS.length * 3}
       </p>
       <svg
         className="git-path"

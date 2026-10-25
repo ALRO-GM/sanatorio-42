@@ -35,6 +35,17 @@ que hacer, en orden. Este documento es el porqué; aquel, el qué.
 - Personas ocultas a un grupo desde el panel (`docs/personas-ocultas.md`, migración 72).
 - Decidido: la red de asientos también para estudiantes (cada mundo la suya).
 
+## Curso de shell (2026-10-25)
+
+Pedido por Alberto: un curso de shell de Linux por niveles, con teoría,
+ejemplo y prueba por conocimiento, jefes contrarreloj y jefes finales que
+certifican principiante, intermedio y avanzado. Hecho con una shell simulada
+(`packages/shellsim`), la plantilla común de cursos (`packages/course`,
+`shared/course`) y el módulo `shellcourse` (migración 75). Investigación,
+roadmap y decisiones en `docs/curso-shell-investigacion.md`,
+`docs/curso-shell.md` y `docs/plantilla-cursos.md`. No pide puesto del
+clúster (a diferencia del de git).
+
 ## Peer4U (2026-10-25)
 
 Alberto cambió el nombre a **Peer4U** y la temática de hospital por una de

@@ -26,6 +26,7 @@ export type PoolKey =
   | 'notgames.review'
   | 'gitcourse'
   | 'gitcourse.groups'
+  | 'shellcourse'
   | 'estadisticas'
   // Calendario
   | 'calendario'

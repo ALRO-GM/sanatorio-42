@@ -66,6 +66,8 @@ de datos.
 | Not-games | Salas, crear sala, partida y marcador | N | La sección en sí |
 | Not-games | Curso de git: camino, animación, teoría y terminal | N | Aprender jugando, como el resto de Not-games |
 | Not-games | Curso de git: pruebas de grupo (sala, misiones, origin común) | N | Va con el curso: después del test previo de cada prueba |
+| Not-games | Curso de shell: camino por niveles, unidad (teoría, ejemplo, prueba), jefes contrarreloj | N | Aprender jugando, como el curso de git: una pestaña más de Not-games, no una sección |
+| Perfil | Certificados del curso de shell (jefes finales superados), en la tarjeta del perfil | S | Lo ganado se enseña donde está el resto de lo tuyo; si no hay ninguno, no ocupa nada |
 | Toda la web | Aviso para quien entra desde un campus que aún no se copia (#92) | S | Se ve una vez, arriba, y se cierra: explica por qué ve datos de otro campus |
 | Not-games | Repaso: lo fallado con definición y ejemplo | N | Para estudiar después de jugar |
 | Not-games | Ajedrez: tablero, relojes, pregunta encima del tablero, estilos de tablero, sonido | N | Un juego más de la sección |

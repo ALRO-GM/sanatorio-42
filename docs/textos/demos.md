@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/demos.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-96 textos. «—» es que falta la traducción: sale en español.
+100 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -103,3 +103,7 @@ Generado desde `apps/web/src/shared/i18n/textos/demos.csv` con
 | `tour.exams.2` | Demostración animada de Exámenes: frase del paso 2 | shared/tour/Tour | Ves quién está dentro, de qué examen y su círculo. | You see who is in, which exam and their circle. | Veus qui hi és, de quin examen i el seu cercle. | Nor dagoen ikusten duzu, zein azterketa eta bere zirkulua. |
 | `tour.exams.3` | Demostración animada de Exámenes: frase del paso 3 | shared/tour/Tour | Las notas se ponen al día solas cada cinco minutos. | Marks update on their own every five minutes. | Les notes s'actualitzen soles cada cinc minuts. | Notak bost minuturo eguneratzen dira berez. |
 | `tour.exams.4` | Demostración animada de Exámenes: frase del paso 4 | shared/tour/Tour | Debajo, en qué intento se suele aprobar cada examen. | Below, on which attempt each exam is usually passed. | A sota, en quin intent s'acostuma a aprovar cada examen. | Behean, azterketa bakoitza zein saiakeratan gainditzen den. |
+| `tour.shellCourse.1` | Demostración animada del curso de shell: frase del paso 1 | shared/tour/Tour | Elige la siguiente unidad: se abren en orden. | Pick the next unit: they open in order. | Tria la unitat següent: s'obren en ordre. | Aukeratu hurrengo unitatea: ordenan irekitzen dira. |
+| `tour.shellCourse.2` | Demostración animada del curso de shell: frase del paso 2 | shared/tour/Tour | Cada unidad: teoría, un ejemplo de verdad y tu prueba. | Each unit: theory, a real example and your test. | Cada unitat: teoria, un exemple de veritat i la teva prova. | Unitate bakoitza: teoria, benetako adibide bat eta zure proba. |
+| `tour.shellCourse.3` | Demostración animada del curso de shell: frase del paso 3 | shared/tour/Tour | Escribe en la terminal: los objetivos se marcan solos. | Type in the terminal: the goals tick themselves. | Escriu al terminal: els objectius es marquen sols. | Idatzi terminalean: helburuak berez markatzen dira. |
+| `tour.shellCourse.4` | Demostración animada del curso de shell: frase del paso 4 | shared/tour/Tour | Cada bloque acaba en un jefe contrarreloj. | Each block ends with a timed boss. | Cada bloc acaba amb un cap contrarellotge. | Bloke bakoitza erlojuaren aurkako buruzagi batekin amaitzen da. |

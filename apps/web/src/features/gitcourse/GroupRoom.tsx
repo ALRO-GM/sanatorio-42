@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import type { GitRoom, GitRoomLobby } from '@sanatorio/contracts'
-import { filled, MAX_PLAYERS, missionIn, missionItemIn, missionOf } from '@sanatorio/gitsim'
+import { filled, LIMITS, MAX_PLAYERS, missionIn, missionItemIn, missionOf } from '@sanatorio/gitsim'
 import type { Gate, GroupMission } from '@sanatorio/gitsim'
 
 import { api } from '../../shared/api'
@@ -13,8 +13,8 @@ import { Avatar } from '../../shared/ui/Avatar'
 import { clock } from '../../shared/time'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { WorldGraphs } from './GitGraph'
-import { Terminal } from './Terminal'
-import type { TerminalEntry } from './Terminal'
+import { Terminal } from '../../shared/course/Terminal'
+import type { TerminalEntry } from '../../shared/course/Terminal'
 
 const LIST_MS = 3000
 const PLAYING_MS = 2000
@@ -281,6 +281,8 @@ function GroupRoom({
             <Terminal
               entries={entries}
               prompt={`${mySeat ?? 'pc'}:~/repo (${branch})$`}
+              hint={t('git.term.hint')}
+              maxLength={LIMITS.line}
               disabled={room.status !== 'playing' || action.busy}
               onRun={onRun}
               onClear={() => {

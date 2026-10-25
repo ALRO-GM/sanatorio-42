@@ -111,6 +111,7 @@ export const POOL_ROUTES: Record<PoolKey, readonly string[]> = {
     '/gitcourse/gates/:id/start',
     '/gitcourse/levels/:id',
   ],
+  shellcourse: ['/shellcourse', '/shellcourse/bosses/:id/start', '/shellcourse/units/:id'],
   'gitcourse.groups': [
     '/gitcourse/rooms',
     '/gitcourse/rooms/:id',

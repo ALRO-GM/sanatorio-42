@@ -82,6 +82,7 @@ Lo que este proyecto enseña de quien lo ha hecho:
   - [Modo concentración (Pomodoro)](#modo-concentración-pomodoro)
   - [Avisos con cuenta atrás](#avisos-con-cuenta-atrás)
   - [Curso de git](#curso-de-git)
+  - [Curso de shell](#curso-de-shell)
   - [Avisos del edificio](#avisos-del-edificio)
   - [Exámenes](#exámenes)
   - [Buscador de personas](#buscador-de-personas)
@@ -304,6 +305,19 @@ y se tira lo que haya dentro) y lo que te fijas tú desde el calendario (un
 evento, tu próximo compromiso o algo tuyo). Se cierra, se pliega o se arrastra;
 lo cerrado no vuelve a salir en ningún navegador
 ([docs/avisos-cuenta-atras.md](docs/avisos-cuenta-atras.md)).
+### Curso de shell
+
+En Not-games, la pestaña «Curso de shell»: tres niveles (principiante,
+intermedio, avanzado) y nueve bloques para manejarse en un servidor Linux,
+de `pwd` a `journalctl`, `rsync` y guiones con `set -euo pipefail`. Cada
+unidad tiene teoría, un ejemplo que se ejecuta solo y una prueba en una shell
+simulada (no toca ningún ordenador), con dos servidores de mentira (`web1` y
+`db1`). Cada bloque acaba en un jefe contrarreloj (el disco al 97 %, una caída
+a las tres de la mañana) y cada nivel en un jefe final que da su certificado,
+que sale también en el perfil. Las estrellas van por comandos en las unidades
+y por tiempo en los jefes; las calcula la API volviendo a ejecutar el intento.
+Detalle en [docs/curso-shell.md](docs/curso-shell.md); la plantilla común de
+los cursos, en [docs/plantilla-cursos.md](docs/plantilla-cursos.md).
 
 ### Curso de git
 
@@ -637,6 +651,7 @@ pie showData title Líneas por parte
 | `facility`   | Avisos al staff de problemas del edificio y de los ordenadores (y Slack)          |
 | `focus`      | Modo concentración (Pomodoro): quién está concentrado y hasta cuándo              |
 | `gitcourse`  | Curso de git: progreso del camino, corregido otra vez con el git simulado         |
+| `shellcourse` | Curso de shell: progreso, relojes de los jefes y certificados, corregido otra vez con la shell simulada |
 | `staff` | Documentos con código de verificación y las cuentas de staff que los comprueban |
 | `admin`      | Permisos, bloqueos, buzón, consumo, presupuesto, mantenimiento y limpieza de datos |
 

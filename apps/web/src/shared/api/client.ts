@@ -156,6 +156,11 @@ export const realApi: Api = {
   startGitGate: (gate) => sendJson('POST', `/gitcourse/gates/${encodeURIComponent(gate)}/start`),
   answerGitGate: (gate, input) =>
     sendJson('POST', `/gitcourse/gates/${encodeURIComponent(gate)}/answer`, input),
+  getShellCourse: () => getJson('/shellcourse'),
+  submitShellAttempt: (unit, input) =>
+    sendJson('POST', `/shellcourse/units/${encodeURIComponent(unit)}`, input),
+  startShellBoss: (unit) =>
+    sendJson('POST', `/shellcourse/bosses/${encodeURIComponent(unit)}/start`),
   getGitRooms: (gate) => getJson(`/gitcourse/rooms?gate=${encodeURIComponent(gate)}`),
   createGitRoom: (gate) => sendJson('POST', '/gitcourse/rooms', { gate }),
   getGitRoom: (id) => getJson(`/gitcourse/rooms/${id}`),

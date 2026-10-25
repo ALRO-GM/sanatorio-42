@@ -677,7 +677,7 @@
 .git-total {
   font-weight: 600;
 }
-.git-stars {
+.course-stars {
   color: #f0b400;
   letter-spacing: 0.05em;
 }
@@ -772,10 +772,10 @@
   font-weight: 600;
 }
 /* Cuántos comandos caben en cada estrella: a la vista en los tres pasos. */
-.git-star-rules {
+.course-star-rules {
   margin: 0 0 0.6rem;
 }
-.git-star-rules ul {
+.course-star-rules ul {
   display: flex;
   flex-wrap: wrap;
   gap: 0.25rem 1.1rem;
@@ -783,19 +783,19 @@
   padding: 0;
   list-style: none;
 }
-.git-star-rules details {
+.course-star-rules details {
   margin-top: 0.3rem;
   color: var(--text-2);
   font-size: 0.9rem;
 }
-.git-star-rules summary {
+.course-star-rules summary {
   cursor: pointer;
 }
-.git-star-rules details p {
+.course-star-rules details p {
   margin: 0.3rem 0 0;
   max-width: 46rem;
 }
-.git-count {
+.course-count {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
@@ -805,10 +805,10 @@
   font-variant-numeric: tabular-nums;
 }
 .git-won p,
-.git-why {
+.course-why {
   margin: 0.3rem 0;
 }
-.git-why {
+.course-why {
   font-weight: 400;
 }
 .git-actions {
@@ -921,7 +921,7 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
-.git-terminal {
+.course-terminal {
   height: 22rem;
   padding: 0.6rem 0.75rem;
   border-radius: 0.6rem;
@@ -933,18 +933,18 @@
   overflow-y: auto;
   cursor: text;
 }
-.git-term-hint {
+.course-term-hint {
   margin: 0 0 0.5rem;
   color: #8a8a94;
 }
-.git-term-line {
+.course-term-line {
   display: flex;
   gap: 0.4rem;
   color: #fff;
   overflow-wrap: anywhere;
 }
 /* El número de cada comando que cuenta para las estrellas, al final de su línea. */
-.git-term-count {
+.course-term-count {
   margin-left: auto;
   padding: 0 0.4rem;
   border-radius: 0.6rem;
@@ -952,22 +952,22 @@
   color: #f0b400;
   font-variant-numeric: tabular-nums;
 }
-.git-term-out {
+.course-term-out {
   white-space: pre-wrap;
   color: #b9c3cf;
 }
-.git-term-out.error {
+.course-term-out.error {
   color: #ff8a80;
 }
-.git-prompt {
+.course-prompt {
   color: #7ee787;
 }
-.git-term-input {
+.course-term-input {
   display: flex;
   gap: 0.5rem;
   align-items: baseline;
 }
-.git-term-input input {
+.course-term-input input {
   flex: 1;
   min-width: 0;
   padding: 0;

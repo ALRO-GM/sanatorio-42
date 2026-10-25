@@ -17,11 +17,12 @@ import type { Level, World } from '@sanatorio/gitsim'
 import { api } from '../../shared/api'
 import { useAction } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
+import { StarRules, StarsWhy, starText } from '../../shared/course/Stars'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { PillGroup } from '../../shared/ui/PillGroup'
 import { WorldGraphs } from './GitGraph'
-import { Terminal } from './Terminal'
-import type { TerminalEntry } from './Terminal'
+import { Terminal } from '../../shared/course/Terminal'
+import type { TerminalEntry } from '../../shared/course/Terminal'
 
 const STEPS = ['animation', 'theory', 'challenge'] as const
 
@@ -50,12 +51,12 @@ export function LevelView({ level, best, seat, onDone, onBack }: LevelViewProps)
         </button>
         <h3>
           {level.title}
-          {best > 0 && <span className="git-stars"> {'★'.repeat(best)}</span>}
+          {best > 0 && <span className="course-stars"> {'★'.repeat(best)}</span>}
         </h3>
         <p className="git-goal">
           <strong>{t('git.goal')}:</strong> {level.goal}
         </p>
-        <StarRules level={level} />
+        <StarRules goals={starGoals(level)} rule={t('git.stars.rule')} />
       </header>
       <PillGroup
         kind="tabs"
@@ -83,65 +84,6 @@ export function LevelView({ level, best, seat, onDone, onBack }: LevelViewProps)
       )}
       {step === 'challenge' && <Challenge level={level} seat={seat} onDone={onDone} />}
     </article>
-  )
-}
-
-/** Estrellas, de 1 a 3, como texto: `★★☆`. */
-const starText = (stars: number): string => '★'.repeat(stars) + '☆'.repeat(3 - stars)
-
-/**
- * Cuántos comandos hacen falta para cada estrella, a la vista desde el
- * principio, y qué cuenta como comando. Los números salen de `starGoals`, lo
- * mismo que usa la API al corregir.
- */
-function StarRules({ level }: { level: Level }) {
-  const { t, tn } = useI18n()
-  const goals = starGoals(level)
-
-  return (
-    <div className="git-star-rules">
-      <ul aria-label={t('git.stars.title')}>
-        <li>
-          <span className="git-stars" aria-hidden="true">
-            {starText(3)}
-          </span>{' '}
-          {tn('git.stars.three', goals.three)}
-        </li>
-        <li>
-          <span className="git-stars" aria-hidden="true">
-            {starText(2)}
-          </span>{' '}
-          {tn('git.stars.two', goals.two)}
-        </li>
-        <li>
-          <span className="git-stars" aria-hidden="true">
-            {starText(1)}
-          </span>{' '}
-          {t('git.stars.any')}
-        </li>
-      </ul>
-      <details>
-        <summary>{t('git.stars.what')}</summary>
-        <p>{t('git.stars.rule')}</p>
-      </details>
-    </div>
-  )
-}
-
-/** Por qué salieron esas estrellas: con cuántos comandos, y qué faltaba para más. */
-function StarsWhy({ level, commands }: { level: Level; commands: number }) {
-  const { tn } = useI18n()
-  const goals = starGoals(level)
-  const stars = starsOf(level, commands)
-
-  return (
-    <p className="git-why">
-      {stars === 3
-        ? tn('git.why.three', commands, { three: goals.three })
-        : stars === 2
-          ? tn('git.why.two', commands, { three: goals.three })
-          : tn('git.why.one', commands, { two: goals.two, three: goals.three })}
-    </p>
   )
 }
 
@@ -325,7 +267,7 @@ function Challenge({
     if (full) {
       setEntries([
         ...entries,
-        { line, output: [t('git.term.full', { n: LIMITS.attemptLines })], ok: false },
+        { line, output: [t('course.term.full', { n: LIMITS.attemptLines })], ok: false },
       ])
 
       return
@@ -363,18 +305,20 @@ function Challenge({
       {seat === null && <p className="notice">{t('git.practice')}</p>}
       <div className="git-challenge-grid">
         <div>
-          <p className="git-count" aria-live="polite">
-            {tn('git.count', won ? result.commands : commands)}{' '}
-            <span className="git-stars" title={t('git.starsNow')}>
+          <p className="course-count" aria-live="polite">
+            {tn('course.count', won ? result.commands : commands)}{' '}
+            <span className="course-stars" title={t('course.starsNow')}>
               <span aria-hidden="true">{starText(starsOf(level, commands))}</span>
               <span className="sr-only">
-                {t('git.starsNowValue', { stars: starsOf(level, commands) })}
+                {t('course.starsNowValue', { stars: starsOf(level, commands) })}
               </span>
             </span>
           </p>
           <Terminal
             entries={entries}
             prompt={`${seat ?? 'pc'}:~/repo (${branch})$`}
+            hint={t('git.term.hint')}
+            maxLength={LIMITS.line}
             disabled={won}
             onRun={onRun}
             onClear={() => {
@@ -391,18 +335,18 @@ function Challenge({
           {won && (
             <div className="git-won" role="status">
               <p>
-                <span className="git-stars">{starText(result.stars)}</span> {t('git.won')}
+                <span className="course-stars">{starText(result.stars)}</span> {t('git.won')}
               </p>
-              <StarsWhy level={level} commands={result.commands} />
+              <StarsWhy goals={starGoals(level)} commands={result.commands} />
             </div>
           )}
           {seat === null && reached && (
             <div className="notice" role="status">
               <p>
-                <span className="git-stars">{starText(starsOf(level, commands))}</span>{' '}
+                <span className="course-stars">{starText(starsOf(level, commands))}</span>{' '}
                 {t('git.practiceDone')}
               </p>
-              <StarsWhy level={level} commands={commands} />
+              <StarsWhy goals={starGoals(level)} commands={commands} />
             </div>
           )}
           {result !== null && !result.done && (

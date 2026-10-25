@@ -1,0 +1,204 @@
+/* ── Curso de shell: niveles, bloques como tuberías, jefes y certificados ───── */
+/* La terminal, las estrellas y la teoría son las de los cursos (notgames.css). */
+
+.shell-tier {
+  margin: 1.25rem 0 0.5rem;
+}
+.shell-tier > h3 {
+  margin: 0 0 0.25rem;
+}
+.shell-block {
+  margin: 0.75rem 0 1rem;
+  padding-left: 0.75rem;
+  border-left: 3px solid var(--border);
+}
+.shell-block h4 {
+  margin: 0;
+}
+.shell-block > p {
+  margin: 0.15rem 0;
+}
+.shell-block-n {
+  color: var(--text-2);
+  font-weight: 600;
+}
+.shell-jobs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.4rem;
+  align-items: center;
+  font-size: 0.85rem;
+  color: var(--text-2);
+}
+.shell-job {
+  padding: 0 0.45rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+}
+/* Las unidades de un bloque van unidas como una tubería: a | b | c | jefe. */
+.shell-pipe {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.shell-pipe li {
+  display: flex;
+  align-items: center;
+}
+.shell-pipe li + li::before {
+  content: '';
+  width: 1rem;
+  border-top: 3px solid var(--border);
+}
+.shell-stop {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  max-width: 15rem;
+  padding: 0.3rem 0.65rem 0.3rem 0.3rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+.shell-stop:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.shell-stop:not(:disabled):hover {
+  border-color: var(--accent);
+}
+.shell-stop-mark {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 50%;
+  background: var(--border);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.shell-stop.done .shell-stop-mark {
+  background: var(--ok);
+  color: #fff;
+}
+.shell-stop.current {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-soft);
+}
+.shell-stop.current .shell-stop-mark {
+  background: var(--accent);
+  color: var(--accent-text);
+}
+.shell-stop.boss .shell-stop-mark {
+  border-radius: 0.35rem;
+}
+.shell-stop.final {
+  margin: 0.25rem 0 0.5rem;
+  max-width: 22rem;
+  border-width: 2px;
+  border-color: #f0b400;
+}
+.shell-stop.final .shell-stop-mark {
+  width: 2.4rem;
+  height: 2.4rem;
+  background: #f0b400;
+  color: #3a2a00;
+}
+.shell-stop-text {
+  display: grid;
+  line-height: 1.2;
+  font-size: 0.88rem;
+}
+.shell-stop-text small {
+  color: var(--text-2);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.shell-example-screen {
+  height: auto;
+  min-height: 10rem;
+  max-height: 24rem;
+  cursor: default;
+}
+.shell-story {
+  max-width: 50rem;
+}
+.shell-story p {
+  margin: 0 0 0.4rem;
+  font-style: italic;
+}
+.shell-story ol {
+  margin: 0 0 0.6rem;
+  padding-left: 1.3rem;
+}
+.shell-timer {
+  display: inline-block;
+  margin: 0 0 0.4rem;
+  padding: 0.2rem 0.7rem;
+  border-radius: 999px;
+  background: var(--warn);
+  color: #1d1d1d;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.shell-timer.hurry {
+  background: var(--danger);
+  color: #fff;
+}
+.shell-objectives-title {
+  margin: 0.5rem 0 0.3rem;
+}
+.shell-objectives {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
+}
+.shell-objectives li {
+  padding: 0.15rem 0;
+  color: var(--text-2);
+}
+.shell-objectives li.ok {
+  color: var(--ok);
+}
+.shell-won.final {
+  padding: 0.6rem 0.8rem;
+  border-left: 4px solid #f0b400;
+}
+.shell-cert-won {
+  font-weight: 400;
+}
+.course-certificates {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.5rem 0;
+  padding: 0;
+  list-style: none;
+}
+/* Sin borde: puede ir dentro de la tarjeta del perfil (no se anidan tarjetas). */
+.course-certificate {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.2rem 0.4rem;
+}
+.course-certificate > svg {
+  color: #f0b400;
+}
+.course-certificate span {
+  display: grid;
+}
+.course-certificate small {
+  color: var(--text-2);
+}

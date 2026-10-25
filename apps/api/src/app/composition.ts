@@ -64,6 +64,8 @@ import { createFocusModule } from '../modules/focus/index.js'
 import type { FocusModule } from '../modules/focus/index.js'
 import { createGitCourseModule } from '../modules/gitcourse/index.js'
 import type { GitCourseModule } from '../modules/gitcourse/index.js'
+import { createShellCourseModule } from '../modules/shellcourse/index.js'
+import type { ShellCourseModule } from '../modules/shellcourse/index.js'
 import type { FacilityModule } from '../modules/facility/index.js'
 import { createStatsModule } from '../modules/stats/index.js'
 import type { StatsModule } from '../modules/stats/index.js'
@@ -145,6 +147,7 @@ export type Services = {
   facility: FacilityModule['service']
   focus: FocusModule['service']
   gitCourse: GitCourseModule['service']
+  shellCourse: ShellCourseModule['service']
   pool: PoolModule['service']
   poolMembers: ReplicaModule['poolMembers']
   /** Quién ve a quién: estudiantes y piscineros separados. */
@@ -479,6 +482,8 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     ...clock,
   })
 
+  const shellCourse = createShellCourseModule({ db, ...clock })
+
   // `admin` va el primero: sus ganchos de consumo solo ven las rutas que se
   // registran después.
   const modules: AppModule[] = [
@@ -509,6 +514,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     facility,
     focus,
     gitCourse,
+    shellCourse,
     pool,
     createClientErrorsModule(),
   ]
@@ -560,6 +566,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
       facility: facility.service,
       focus: focus.service,
       gitCourse: gitCourse.service,
+      shellCourse: shellCourse.service,
       pool: pool.service,
       poolMembers: replica.poolMembers,
       audience,

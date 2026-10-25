@@ -299,7 +299,9 @@ describe('git simulado: no toca el sistema', () => {
 
     expect(sources.length).toBeGreaterThan(5)
     for (const source of sources) {
-      for (const [, from] of source.matchAll(/from '([^']+)'/g)) expect(from).toMatch(/^\.\.?\//)
+      // Solo sus ficheros y la plantilla de cursos (que pasa la misma prueba en shellsim.test.ts).
+      for (const [, from] of source.matchAll(/from '([^']+)'/g))
+        expect(from).toMatch(/^(\.\.?\/|@sanatorio\/course$)/)
       expect(source).not.toMatch(/\beval\(|new Function|require\(|import\(|process\.|globalThis/)
     }
   })

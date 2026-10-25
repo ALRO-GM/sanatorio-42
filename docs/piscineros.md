@@ -36,7 +36,7 @@ Se elige en el panel, pestaña **Piscina**:
   cerrada.
 - **Permisos**: cada pestaña de la web y, dentro de cada una, cada bloque (los
   de `shared/layout/registry.ts`), y además lo que no es una pestaña: Code
-  Clicker, Not-games, curso de git, Pomodoro, buzón y chats, buscador de
+  Clicker, Not-games, curso de git, curso de shell (`shellcourse`), Pomodoro, buzón y chats, buscador de
   personas. La lista de claves vive en `packages/contracts/src/pool.ts`; la
   web y la API leen la misma.
 - Sin marcar, no se ve. Al abrir la piscina por primera vez solo está el

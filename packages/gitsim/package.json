@@ -11,6 +11,9 @@
       "default": "./dist/index.js"
     }
   },
+  "dependencies": {
+    "@sanatorio/course": "*"
+  },
   "scripts": {
     "build": "tsc --project tsconfig.build.json",
     "typecheck": "tsc --noEmit"
