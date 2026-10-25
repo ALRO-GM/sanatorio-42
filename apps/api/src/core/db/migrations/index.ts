@@ -83,6 +83,7 @@ import { shellCourseSchema } from './0074-shell-course.js'
 import { courseTimesSchema } from './0075-course-times.js'
 import { agendaScrumSchema } from './0076-agenda-scrum.js'
 import { coreCursusSchema } from './0077-core-cursus.js'
+import { ticketPlaceSchema } from './0078-ticket-place.js'
 import type { Migration } from './types.js'
 
 export const MIGRATIONS: readonly Migration[] = [
@@ -163,6 +164,7 @@ export const MIGRATIONS: readonly Migration[] = [
   courseTimesSchema,
   agendaScrumSchema,
   coreCursusSchema,
+  ticketPlaceSchema,
 ]
 
 /** Versión más alta que existe en el código. */

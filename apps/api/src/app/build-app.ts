@@ -94,6 +94,7 @@ export async function buildApp(options: BuildOptions = {}): Promise<BuiltApp> {
     }),
     photos: diskPhotoStore(photoDirOf(env.DATABASE_URL)),
     secret: env.SESSION_SECRET,
+    version: env.GIT_SHA,
     ...(env.GUARD_LEVEL_FILE === ''
       ? {}
       : {

@@ -100,6 +100,8 @@ type CompositionConfig = {
   secret?: string
   /** Webhook de Slack del staff (`SLACK_WEBHOOK_URL`) para los avisos del edificio. */
   slack?: SlackPoster | null
+  /** Commit desplegado (`GIT_SHA`), o vacío en local. */
+  version?: string
   /** Reloj inyectable, para los tests. */
   now?: () => number
 }
@@ -453,7 +455,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     ...given({ guardLevel: config.guardLevel }),
     notify,
     settle: (about) => events.emit('notice.settled', about),
-    ...given({ secret: config.secret }),
+    ...given({ secret: config.secret, version: config.version }),
     stores: () => late.get('modules').flatMap((module) => module.stores ?? []),
     ...clock,
   })

@@ -43,6 +43,47 @@ export type Ticket = {
    * de mandarlo y mientras nadie lo haya respondido. `null` si ya no se puede.
    */
   withdrawUntil: string | null
+  /** La propuesta de una sugerencia de mejora (`POST /tickets/suggestion`), o `null`. */
+  proposal: string | null
+  /** Dónde se soltó la burbuja de sugerencias, o `null` si no viene de ella. */
+  place: TicketPlace | null
+}
+
+/**
+ * Dónde de la web va una sugerencia: lo que detectó la burbuja al soltarla (o
+ * lo que eligió quien escribe) y cómo estaba la pantalla. Sin capturas ni
+ * contenido de la página: solo el nombre del sitio y su ruta en el documento
+ * (`docs/sugerencias.md`).
+ */
+export type TicketPlace = {
+  /** Id de la sección (`tablon`, `red`…), como `section` del mensaje. */
+  section: string
+  /** Nombre del sitio que se enseñó: el título de la tarjeta o del bloque. */
+  label: string
+  /** Lo que añadió a mano quien escribe, si lo detectado no bastaba. */
+  detail: string | null
+  /** Ruta del elemento en el documento (`main > .card[data-feedback=mapa]`). */
+  selector: string
+  /** La dirección de la web en ese momento (`#/tablon/12`). */
+  hash: string
+  viewport: { width: number; height: number }
+  /** Estilo y si era claro u oscuro (`classic-dark`). */
+  theme: string
+  lang: string
+  /** Modo de la interfaz: `simple`, `normal` o `datos`. */
+  mode: 'simple' | 'normal' | 'datos'
+  /** Commit desplegado al recibirla (lo pone la API), o `null` en local. */
+  version: string | null
+}
+
+/** `POST /tickets/suggestion`: una mejora soltada sobre un sitio de la web. */
+export type SuggestionInput = {
+  /** Lo que pasa, en corto. */
+  problem: string
+  /** Cómo lo arreglarías, si se te ocurre. */
+  proposal?: string
+  /** Dónde: todo menos `version`, que la pone la API. */
+  place: Omit<TicketPlace, 'version'>
 }
 
 /** `POST /tickets`. */

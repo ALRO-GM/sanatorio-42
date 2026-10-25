@@ -1,0 +1,207 @@
+/*
+ * La burbuja de sugerencias de la cabecera (`docs/sugerencias.md`): el botón,
+ * la burbuja suelta que sigue al puntero, el marco del sitio de debajo y el
+ * panel. Todo con las variables del tema: vale en cada estilo, claro y oscuro.
+ */
+
+.suggest-slot {
+  position: relative;
+  display: inline-grid;
+}
+.suggest-bubble {
+  /* Sin esto, en el móvil el dedo desplazaría la página en vez de arrastrar. */
+  touch-action: none;
+  cursor: grab;
+  color: var(--accent);
+}
+.suggest-bubble:active {
+  cursor: grabbing;
+}
+/* Mientras está suelta, en la cabecera queda su hueco. */
+.suggest-bubble.away,
+.suggest-bubble.away:hover {
+  background: none;
+  color: transparent;
+  outline: 1.5px dashed var(--border);
+  outline-offset: -4px;
+}
+.suggest-bubble.away .icon {
+  opacity: 0;
+}
+
+.suggest-ghost {
+  position: fixed;
+  z-index: 1001;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--bg);
+  box-shadow: 0 6px 18px var(--shadow);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.suggest-ghost.returning {
+  transition:
+    left 0.36s cubic-bezier(0.3, 0.7, 0.2, 1),
+    top 0.36s cubic-bezier(0.3, 0.7, 0.2, 1),
+    transform 0.36s ease;
+  transform: translate(-50%, -50%) scale(0.8);
+}
+
+.suggest-outline {
+  position: fixed;
+  z-index: 1000;
+  border: 2px solid var(--accent);
+  border-radius: var(--radius-sm, 6px);
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  pointer-events: none;
+  transition:
+    left 0.08s,
+    top 0.08s,
+    width 0.08s,
+    height 0.08s;
+}
+.suggest-outline.held {
+  border-style: dashed;
+  background: none;
+}
+.suggest-outline-label {
+  position: absolute;
+  left: -2px;
+  bottom: 100%;
+  max-width: min(320px, 80vw);
+  margin-bottom: 4px;
+  padding: 0.1rem 0.45rem;
+  overflow: hidden;
+  border-radius: var(--radius-sm, 6px);
+  background: var(--accent);
+  color: var(--bg);
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+/* Pegado arriba de la pantalla, el nombre va por dentro del marco. */
+.suggest-outline-label.inside {
+  top: 2px;
+  bottom: auto;
+  left: 2px;
+  margin: 0;
+}
+
+.suggest-panel {
+  position: fixed;
+  z-index: 1002;
+  display: grid;
+  gap: 0.5rem;
+  width: 320px;
+  padding: 0.75rem 0.85rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius, 10px);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 10px 30px var(--shadow);
+  font-size: 0.9rem;
+}
+/* En el móvil: abajo, a todo lo ancho, por encima del teclado. */
+.suggest-panel.docked {
+  right: 8px;
+  bottom: 8px;
+  left: 8px;
+  width: auto;
+}
+.suggest-panel label {
+  display: grid;
+  gap: 0.2rem;
+  font-size: 0.8rem;
+  color: var(--text-2);
+}
+.suggest-panel textarea,
+.suggest-panel input,
+.suggest-panel select {
+  width: 100%;
+  font-size: 0.9rem;
+  color: var(--text);
+}
+.suggest-panel textarea {
+  resize: vertical;
+  min-height: 2.6rem;
+}
+.suggest-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.suggest-head strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.suggest-head .icon-btn {
+  width: 28px;
+  height: 28px;
+}
+.suggest-where {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.35rem 0.55rem;
+  border-radius: var(--radius-sm, 6px);
+  background: var(--surface-2);
+}
+.suggest-where-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.suggest-where small {
+  color: var(--text-2);
+}
+.suggest-where-edit {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+.suggest-panel .actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.suggest-thanks {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 5;
+  padding: 0.3rem 0.6rem;
+  border-radius: var(--radius-sm, 6px);
+  background: var(--text);
+  color: var(--bg);
+  font-size: 0.78rem;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px var(--shadow);
+}
+
+/* En el buzón: la propuesta y el sitio de una sugerencia. */
+.ticket-proposal {
+  margin: 0.2rem 0 0;
+  color: var(--text-2);
+}
+
+@media (max-width: 560px) {
+  .suggest-where-edit {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .suggest-ghost.returning,
+  .suggest-outline {
+    transition: none;
+  }
+}

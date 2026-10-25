@@ -140,6 +140,11 @@ export function Inbox({
               <small>{date(ticket.createdAt)}</small>
             </div>
             <p>{ticket.body}</p>
+            {ticket.proposal !== null && (
+              <p className="ticket-proposal">
+                <strong>{t('suggest.proposalShort')}</strong> {ticket.proposal}
+              </p>
+            )}
             {ticket.withdrawUntil !== null && Date.parse(ticket.withdrawUntil) > Date.now() && (
               <button
                 type="button"

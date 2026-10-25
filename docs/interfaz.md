@@ -24,6 +24,7 @@ Fuera de las pestañas, a propósito:
 | --- | --- | --- |
 | Guardia | «De guardia», en la cabecera | Es un interruptor que se toca a diario, no una página que se visita |
 | Buscador de personas, buzón, menú de la cuenta | Cabecera | Se usan desde cualquier sitio |
+| Burbuja de sugerencias (`docs/sugerencias.md`) | Cabecera, junto al buzón | La pidió Alberto ahí: se arrastra hasta lo que se mejoraría, desde cualquier sitio |
 | Panel de gestión, incidencias, personalizar, bienvenida | Menú de la cuenta | Son de vez en cuando o solo de quien administra |
 | Modo, idioma, tema, texto, daltonismo, zen, campus | Pie | Se eligen una vez |
 | Privacidad, Code Clicker | Enlace del pie / secreto | No son del uso diario |
@@ -86,6 +87,7 @@ de datos.
 | Panel de gestión | Pestaña Cuentas atrás: la limpieza de taquillas (solo día y hora) u otro aviso, a un grupo y campus, y cuánta gente lo ha cerrado | Admins | Pestaña propia, al lado de Comunicados: no pide contestar |
 | Panel de gestión | Pestaña Mantenimiento: ponerlo y quitarlo, mensaje y hora prevista; mientras dura, franja arriba para quien administra y pantalla «No disponible» con cuenta atrás para el resto (`docs/mantenimiento.md`) | Admins | La pantalla del resto no es una sección: sustituye a toda la web |
 | Clústeres | Avisar de un problema (edificio u ordenador) | N | Al lado del plano, donde se ve el puesto |
+| Cabecera | Burbuja de sugerencias: se arrastra hasta un sitio (o se pulsa), panel con dónde, el problema y tu propuesta; va al buzón de incidencias como mejora con el sitio (`docs/sugerencias.md`) | S | Contar que algo no se entiende es justo para quien se pierde; pequeña y sin abrir nada hasta que se usa |
 | Pestañas | Estadísticas (en Ayuda) | N | Clasificaciones: el simplificado no enseña rankings |
 | Estadísticas | Cifras del campus y clasificación de cada sección, con fotos | N | La sección en sí |
 | Calendario | Vistas día/semana/mes, tipos de evento (también leyenda) | S | Básico |
@@ -133,6 +135,7 @@ Revisado el 2026-10-17 sobre la demostración, en escritorio y móvil; mejoras h
 | Buzón | 5 | 4 | 4 | Número rojo en la cabecera; avisos llevan a su sitio | — (2026-10-22: la pestaña de conversaciones lleva su número de sin leer) |
 | Personalizar | 4 | 4 | 4 | Orden manual, por tu uso o por la comunidad | — (2026-10-22: «Ordenar o plegar estos bloques» al final de cada página con bloques) |
 | Agenda | 4 | 4 | 4 | Todo se elige de listas; los checkpoints de fábrica salen del tipo de proyecto; el sprint se ve enmarcado (2026-10-25, recién hecha) | Probarla con gente: ¿faltan atascos o checkpoints en las listas? |
+| Sugerencias (burbuja) | 4 | 4 | 5 | Se ve qué se señala al arrastrar; el panel dice dónde y separa problema y propuesta (2026-10-25, recién hecha) | Probar con gente si se entiende que se arrastra sin la ayuda del título |
 | Pie (ajustes) | 4 | 5 | 5 | Todo a la vista y con nombres claros | — (2026-10-22: el modo de la interfaz también está en Personalizar; además, en la bienvenida) |
 
 Las mejoras de la última columna son el punto de partida de la siguiente

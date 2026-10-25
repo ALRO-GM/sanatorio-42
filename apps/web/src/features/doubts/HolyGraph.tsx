@@ -345,7 +345,7 @@ export function HolyGraph({ graph, selected, onSelect }: HolyGraphProps) {
   }
 
   return (
-    <div className="card holy-graph">
+    <div className="card holy-graph" data-feedback="tablon.graph">
       <header className="graph-head">
         <span className={`graph-track ${graph.track}`}>{t(`graph.track.${graph.track}`)}</span>
         <span className="graph-here">{t('graph.here', { n: graph.currentCircle })}</span>

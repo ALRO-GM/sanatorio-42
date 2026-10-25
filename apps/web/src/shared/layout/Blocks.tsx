@@ -76,6 +76,8 @@ export function Blocks({ page, blocks }: BlocksProps) {
           <div
             key={id}
             className={`block ${block.chrome === false ? 'bare' : ''} ${isFolded ? 'folded' : ''}`}
+            // Para la burbuja de sugerencias: el bloque se reconoce por su id.
+            data-feedback={`${page}.${id}`}
             onClickCapture={() => {
               track(`${page}.${id}`)
             }}

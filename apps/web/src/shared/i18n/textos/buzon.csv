@@ -113,3 +113,21 @@ chats.remind.tomorrow,Recordatorio: mañana,Mañana a las 9:00,Tomorrow at 9:00,
 chats.remind.monday,Recordatorio: el lunes,El lunes a las 9:00,On Monday at 9:00,Dilluns a les 9:00,Astelehenean 9:00etan,
 chats.remind.none,Quitar el recordatorio,Quitar el recordatorio,Remove the reminder,Treu el recordatori,Kendu gogorarazpena,
 chats.project,Elegir de qué proyecto va la conversación,¿De qué proyecto va?,Which project is it about?,De quin projecte va?,Zein proiekturi buruzkoa da?,
+suggest.open,Burbuja de sugerencias de la cabecera: su nombre y el título de su panel,Sugerir una mejora,Suggest an improvement,Suggerir una millora,Hobekuntza bat iradoki,Suggérer une amélioration
+suggest.hint,Burbuja de sugerencias: lo que sale al pasar el ratón,"Arrástrala hasta lo que mejorarías, o púlsala","Drag it onto what you would improve, or click it","Arrossega-la fins al que milloraries, o prem-la","Arrastatu hobetuko zenukeen tokira, edo sakatu","Fais-la glisser sur ce que tu améliorerais, ou clique dessus"
+suggest.where,Panel de sugerencia: delante del sitio detectado,Dónde:,Where:,On:,Non:,Où :
+suggest.change,Panel de sugerencia: cambiar el sitio detectado,Cambiar,Change,Canvia,Aldatu,Modifier
+suggest.section,Panel de sugerencia: lista de secciones,Sección,Section,Secció,Atala,Section
+suggest.detail,Panel de sugerencia: precisar el sitio a mano,Detalle (opcional),Detail (optional),Detall (opcional),Xehetasuna (aukerakoa),Précision (facultatif)
+suggest.detail.example,Panel de sugerencia: ejemplo de detalle,Ej.: el filtro de seniors,E.g. the seniors filter,P. ex.: el filtre de seniors,Adib.: seniorren iragazkia,Ex. : le filtre des seniors
+suggest.problem,Panel de sugerencia: qué problema tuviste,El problema,The problem,El problema,Arazoa,Le problème
+suggest.problem.example,Panel de sugerencia: ejemplo de problema,Ej.: no veo a quién preguntar,E.g. I can’t see who to ask,P. ex.: no veig a qui preguntar,Adib.: ez dut ikusten nori galdetu,Ex. : je ne vois pas à qui demander
+suggest.proposal,Panel de sugerencia: cómo lo arreglarías,Tu propuesta (opcional),Your proposal (optional),La teva proposta (opcional),Zure proposamena (aukerakoa),Ta proposition (facultatif)
+suggest.proposal.example,Panel de sugerencia: ejemplo de propuesta,Ej.: un botón más grande arriba,E.g. a bigger button at the top,P. ex.: un botó més gran a dalt,Adib.: botoi handiago bat goian,Ex. : un bouton plus grand en haut
+suggest.thanks,Burbuja de sugerencias: después de mandar una,¡Gracias! La verás en el menú de tu cuenta,Thanks! You’ll find it in your account menu,Gràcies! La veuràs al menú del teu compte,Eskerrik asko! Zure kontuaren menuan ikusiko duzu,Merci ! Tu la retrouveras dans le menu de ton compte
+suggest.part.header,Sitio de una sugerencia: la cabecera,Barra de arriba,Top bar,Barra de dalt,Goiko barra,Barre du haut
+suggest.part.footer,Sitio de una sugerencia: el pie,Pie de la página,Page footer,Peu de pàgina,Orri-oina,Pied de page
+suggest.part.graph,Sitio de una sugerencia: el grafo de Proyectos,Grafo de tus proyectos,Your projects graph,Graf dels teus projectes,Zure proiektuen grafoa,Graphe de tes projets
+suggest.part.map,Sitio de una sugerencia: el plano de Clústeres,Plano del clúster,Cluster map,Plànol del clúster,Klusterraren planoa,Plan du cluster
+suggest.proposalShort,Buzón: delante de la propuesta de una sugerencia,Propuesta:,Proposal:,Proposta:,Proposamena:,Proposition :
+suggest.goPlace,Buzón del panel: abrir el sitio de una sugerencia,Ir al sitio,Go there,Ves-hi,Joan hara,Y aller

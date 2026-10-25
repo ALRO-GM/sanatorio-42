@@ -11,7 +11,7 @@ export function Footer({ campusId, onCampusChange }: FooterProps) {
   const { t } = useI18n()
 
   return (
-    <footer className="footer">
+    <footer className="footer" data-feedback="pie">
       <Settings campusId={campusId} onCampusChange={onCampusChange} />
       <p>
         {t('app.footer')} ·{' '}

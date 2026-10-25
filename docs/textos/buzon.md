@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/buzon.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-114 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
+132 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera | Francés |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -121,3 +121,21 @@ Generado desde `apps/web/src/shared/i18n/textos/buzon.csv` con
 | `chats.remind.monday` | Recordatorio: el lunes | features/notices/Conversations | El lunes a las 9:00 | On Monday at 9:00 | Dilluns a les 9:00 | Astelehenean 9:00etan | — |
 | `chats.remind.none` | Quitar el recordatorio | features/notices/Conversations | Quitar el recordatorio | Remove the reminder | Treu el recordatori | Kendu gogorarazpena | — |
 | `chats.project` | Elegir de qué proyecto va la conversación | features/notices/Conversations | ¿De qué proyecto va? | Which project is it about? | De quin projecte va? | Zein proiekturi buruzkoa da? | — |
+| `suggest.open` | Burbuja de sugerencias de la cabecera: su nombre y el título de su panel | features/suggest/SuggestBubble, features/suggest/SuggestPanel | Sugerir una mejora | Suggest an improvement | Suggerir una millora | Hobekuntza bat iradoki | Suggérer une amélioration |
+| `suggest.hint` | Burbuja de sugerencias: lo que sale al pasar el ratón | features/suggest/SuggestBubble | Arrástrala hasta lo que mejorarías, o púlsala | Drag it onto what you would improve, or click it | Arrossega-la fins al que milloraries, o prem-la | Arrastatu hobetuko zenukeen tokira, edo sakatu | Fais-la glisser sur ce que tu améliorerais, ou clique dessus |
+| `suggest.where` | Panel de sugerencia: delante del sitio detectado | features/suggest/SuggestPanel | Dónde: | Where: | On: | Non: | Où : |
+| `suggest.change` | Panel de sugerencia: cambiar el sitio detectado | features/suggest/SuggestPanel | Cambiar | Change | Canvia | Aldatu | Modifier |
+| `suggest.section` | Panel de sugerencia: lista de secciones | features/suggest/SuggestPanel | Sección | Section | Secció | Atala | Section |
+| `suggest.detail` | Panel de sugerencia: precisar el sitio a mano | features/suggest/SuggestPanel | Detalle (opcional) | Detail (optional) | Detall (opcional) | Xehetasuna (aukerakoa) | Précision (facultatif) |
+| `suggest.detail.example` | Panel de sugerencia: ejemplo de detalle | features/suggest/SuggestPanel | Ej.: el filtro de seniors | E.g. the seniors filter | P. ex.: el filtre de seniors | Adib.: seniorren iragazkia | Ex. : le filtre des seniors |
+| `suggest.problem` | Panel de sugerencia: qué problema tuviste | features/suggest/SuggestPanel | El problema | The problem | El problema | Arazoa | Le problème |
+| `suggest.problem.example` | Panel de sugerencia: ejemplo de problema | features/suggest/SuggestPanel | Ej.: no veo a quién preguntar | E.g. I can’t see who to ask | P. ex.: no veig a qui preguntar | Adib.: ez dut ikusten nori galdetu | Ex. : je ne vois pas à qui demander |
+| `suggest.proposal` | Panel de sugerencia: cómo lo arreglarías | features/suggest/SuggestPanel | Tu propuesta (opcional) | Your proposal (optional) | La teva proposta (opcional) | Zure proposamena (aukerakoa) | Ta proposition (facultatif) |
+| `suggest.proposal.example` | Panel de sugerencia: ejemplo de propuesta | features/suggest/SuggestPanel | Ej.: un botón más grande arriba | E.g. a bigger button at the top | P. ex.: un botó més gran a dalt | Adib.: botoi handiago bat goian | Ex. : un bouton plus grand en haut |
+| `suggest.thanks` | Burbuja de sugerencias: después de mandar una | features/suggest/SuggestBubble | ¡Gracias! La verás en el menú de tu cuenta | Thanks! You’ll find it in your account menu | Gràcies! La veuràs al menú del teu compte | Eskerrik asko! Zure kontuaren menuan ikusiko duzu | Merci ! Tu la retrouveras dans le menu de ton compte |
+| `suggest.part.header` | Sitio de una sugerencia: la cabecera | features/suggest/detect | Barra de arriba | Top bar | Barra de dalt | Goiko barra | Barre du haut |
+| `suggest.part.footer` | Sitio de una sugerencia: el pie | features/suggest/detect | Pie de la página | Page footer | Peu de pàgina | Orri-oina | Pied de page |
+| `suggest.part.graph` | Sitio de una sugerencia: el grafo de Proyectos | features/suggest/detect | Grafo de tus proyectos | Your projects graph | Graf dels teus projectes | Zure proiektuen grafoa | Graphe de tes projets |
+| `suggest.part.map` | Sitio de una sugerencia: el plano de Clústeres | features/suggest/detect | Plano del clúster | Cluster map | Plànol del clúster | Klusterraren planoa | Plan du cluster |
+| `suggest.proposalShort` | Buzón: delante de la propuesta de una sugerencia | features/admin/Inbox, features/admin/InboxTab | Propuesta: | Proposal: | Proposta: | Proposamena: | Proposition : |
+| `suggest.goPlace` | Buzón del panel: abrir el sitio de una sugerencia | features/admin/InboxTab | Ir al sitio | Go there | Ves-hi | Joan hara | Y aller |

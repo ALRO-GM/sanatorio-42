@@ -368,6 +368,16 @@ export function createAdminModule(deps: AdminModuleDeps): AdminModule {
           .send(await service.openTicket(await session.actor(request), request.body))
       })
 
+      /**
+       * `POST /tickets/suggestion` → una mejora soltada con la burbuja de la
+       * cabecera: `{ problem, proposal?, place }` (`docs/sugerencias.md`).
+       */
+      app.post('/tickets/suggestion', async (request, reply) => {
+        return reply
+          .code(201)
+          .send(await service.openSuggestion(await session.actor(request), request.body))
+      })
+
       /** `DELETE /tickets/:id` → retira un mensaje tuyo, si aún se puede. 204. */
       app.delete<{ Params: { id: string } }>('/tickets/:id', async (request, reply) => {
         await service.withdrawTicket(
