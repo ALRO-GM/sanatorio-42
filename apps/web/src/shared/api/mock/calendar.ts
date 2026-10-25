@@ -142,7 +142,7 @@ export function calendarEvents(state: MockState): CalendarEvent[] {
         ...BASE,
         id: `therapy:${group.id}:${day}`,
         kind: 'therapy',
-        title: `Terapia de ${group.projectName ?? 'grupo'}`,
+        title: `Sprint de ${group.projectName ?? 'grupo'}`,
         // Sin zona: el navegador lo toma como hora local, que es lo que se quiere.
         start: new Date(`${day}T${group.start}:00`).toISOString(),
         end: new Date(`${day}T${group.end}:00`).toISOString(),

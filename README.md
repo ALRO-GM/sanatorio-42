@@ -1,4 +1,12 @@
-# Sanatorio 42
+# Peer4U
+
+> **Antes se llamaba Sanatorio 42.** En octubre de 2026 dejó la temática de
+> hospital por una de programación: Sala de espera → Peer to peer, Tablón →
+> Proyectos, Expediente → Perfil, Terapia de grupo → Sprints, Guardia →
+> On-call (con «De guardia» → «Disponible»), Especialista → Senior,
+> Eminencia → Guru y Paciente como tú → Peer como tú. Las rutas (`#/consulta`,
+> `#/tablon`…), el código y buena parte de la documentación técnica conservan
+> los nombres de antes.
 
 [![CI](https://github.com/ALRO-GM/sanatorio-42/actions/workflows/ci.yml/badge.svg)](https://github.com/ALRO-GM/sanatorio-42/actions/workflows/ci.yml)
 ![Node 22](https://img.shields.io/badge/Node-22-339933)
@@ -21,10 +29,10 @@ web entera, sin registrarte y sin que salga nadie real.
 ## En un minuto
 
 42 es una escuela de programación sin profesores: se aprende preguntando a quien
-tienes al lado. El problema es saber **a quién**. Sanatorio 42 lo resuelve con
+tienes al lado. El problema es saber **a quién**. Peer4U lo resuelve con
 los datos de la propia escuela y, alrededor, monta lo que hace falta para que la
-ayuda ocurra: guardias, grupos de estudio, pizarras, un tablón de dudas y un
-calendario.
+ayuda ocurra: turnos de on-call, sprints en grupo, pizarras, dudas por proyecto
+y un calendario.
 
 Es un proyecto personal de [Alberto](https://github.com/ALRO-GM) (`albrodri` en 42),
 hecho de principio a fin: producto, diseño, código, despliegue y operación.

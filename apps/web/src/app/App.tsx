@@ -10,7 +10,7 @@ import { Logo } from '../shared/ui/Logo'
 import { Clinic } from './Clinic'
 import { DemoBadge } from './DemoBadge'
 
-const BASE_TITLE = 'Sanatorio 42'
+const BASE_TITLE = 'Peer4U'
 
 /**
  * Lee el error con el que la API devuelve a casa tras un login fallido.

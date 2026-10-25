@@ -132,15 +132,17 @@ export function Header({
             >
               <svg viewBox="0 0 24 24" width="18" height="18">
                 <path
-                  d="M12 5v14M5 12h14"
+                  d="M9 6l-6 6 6 6M15 6l6 6-6 6"
+                  fill="none"
                   stroke="currentColor"
-                  strokeWidth="3"
+                  strokeWidth="2.6"
                   strokeLinecap="round"
+                  strokeLinejoin="round"
                 />
               </svg>
             </span>
             <span className="brand-name">
-              Sanatorio <b>42</b>
+              Peer<b>4U</b>
             </span>
           </button>
 

@@ -1,7 +1,7 @@
 {
-  "name": "Sanatorio 42",
-  "short_name": "Sanatorio 42",
-  "description": "¿Te has atascado? Pasa a consulta: aquí siempre hay alguien de guardia.",
+  "name": "Peer4U",
+  "short_name": "Peer4U",
+  "description": "¿Te has atascado? Abre un peer to peer: siempre hay alguien disponible.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#faf8f3",

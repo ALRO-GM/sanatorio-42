@@ -42,7 +42,7 @@ export const ELEVATION_COOKIE = '__Host-sanatorio_admin'
 const MAX_FAILURES = 5
 const FAILURE_WINDOW_MS = 15 * 60_000
 
-const ISSUER = 'Sanatorio 42'
+const ISSUER = 'Peer4U'
 
 const codeSchema = z.object({ code: z.string().regex(/^\d{6}$/, 'escribe las seis cifras') })
 

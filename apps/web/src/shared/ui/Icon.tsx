@@ -10,8 +10,8 @@ import { useShownTheme } from '../theme'
  * remates redondos, y se pintan con `currentColor`, así que toman el color del
  * texto que los rodea en claro y en oscuro.
  *
- * El motivo mezcla las dos cosas que es Sanatorio 42: la clínica (fonendo,
- * expediente con su pulso, salvavidas) y lo que se estudia (corchetes de
+ * El motivo es el de Peer4U: gente que se ayuda (dos peers conectados, la
+ * ficha de un perfil, el busca del on-call) y lo que se estudia (corchetes de
  * código en la pizarra, nodos de un grafo, el cursor de una terminal).
  *
  * Para añadir uno: dibújalo en la misma rejilla, solo con trazos, y apúntalo
@@ -19,13 +19,12 @@ import { useShownTheme } from '../theme'
  */
 const PATHS = {
   // --- Secciones -------------------------------------------------------------
-  /** Sala de espera: un fonendo. */
+  /** Peer to peer (la sección `consulta`): dos peers que se pasan algo. */
   consulta: (
     <>
-      <path d="M5 3v5a4 4 0 0 0 8 0V3" />
-      <path d="M3.8 3h2.4M11.8 3h2.4" />
-      <path d="M9 12v3a5 5 0 0 0 10 0v-2" />
-      <circle cx="19" cy="11" r="2" />
+      <circle cx="5.5" cy="12" r="2.8" />
+      <circle cx="18.5" cy="12" r="2.8" />
+      <path d="M9.5 9.5h5l-1.6-1.6M14.5 14.5h-5l1.6 1.6" />
     </>
   ),
   /** Tablón: una nota con la esquina doblada. */
@@ -77,20 +76,19 @@ const PATHS = {
       <path d="M8.3 6.4l7.4 1.2M7 8.1l3 7.8M16.6 9.9l-4.2 6.2" />
     </>
   ),
-  /** De guardia: un salvavidas. */
+  /** On-call (la sección `guardia`): la campana que avisa. */
   guardia: (
     <>
-      <circle cx="12" cy="12" r="9" />
-      <circle cx="12" cy="12" r="3.6" />
-      <path d="M5.6 5.6l3.8 3.8M14.6 14.6l3.8 3.8M18.4 5.6l-3.8 3.8M9.4 14.6l-3.8 3.8" />
+      <path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15z" />
+      <path d="M10 20.5a2 2 0 0 0 4 0M12 3v2" />
     </>
   ),
-  /** Expediente: la carpeta de la consulta, con su pulso. */
+  /** Perfil (la sección `expediente`): la ficha con tu foto y tus datos. */
   expediente: (
     <>
-      <path d="M8 5.5H7a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-11a2 2 0 0 0-2-2h-1" />
-      <rect x="8" y="3.5" width="8" height="4" rx="1" />
-      <path d="M7.5 14h2l1.5-3 2 5 1.5-2h2" />
+      <rect x="3" y="5" width="18" height="14" rx="2" />
+      <circle cx="9" cy="10.5" r="2.2" />
+      <path d="M5.8 16a3.4 3.4 0 0 1 6.4 0M14 10h4M14 13.5h3" />
     </>
   ),
   /** Panel de gestión. */

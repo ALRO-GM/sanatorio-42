@@ -132,7 +132,7 @@ export function createCalendarService(options: CalendarServiceOptions) {
             ...BASE,
             id: `therapy:${group.id}:${day}`,
             kind: 'therapy',
-            title: `Terapia de ${group.projectName ?? 'grupo'}`,
+            title: `Sprint de ${group.projectName ?? 'grupo'}`,
             start: isoAt(start),
             end: isoAt(end),
             place: group.place,

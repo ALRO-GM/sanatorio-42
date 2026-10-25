@@ -168,7 +168,7 @@ export function createAdminModule(deps: AdminModuleDeps): AdminModule {
             )
             .send({
               error: 'service_stopped',
-              message: `Sanatorio 42 está parado hasta el ${renews.slice(0, 10)}: se ha llegado al tope de tráfico del mes.`,
+              message: `Peer4U está parado hasta el ${renews.slice(0, 10)}: se ha llegado al tope de tráfico del mes.`,
             })
 
           return

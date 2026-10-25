@@ -1,5 +1,5 @@
-/* ── Clínica ─────────────────────────────────────────────────────────────────
-   La sala de un hospital nuevo: turquesa, blanco y relieve. Nada es plano: la
+/* ── Clean code (carpeta clinica) ────────────────────────────────────────────
+   Limpio como un código bien hecho: turquesa, blanco y relieve. Nada es plano: la
    página tiene luz de fondo, las tarjetas flotan un poco y lo que se pulsa
    brilla. Es el estilo de fábrica.
    ──────────────────────────────────────────────────────────────────────────── */
@@ -24,7 +24,7 @@
   --accent-hover: #0a9d9c;
   --accent-soft: #d9f5f2;
   --accent-text: #067f80;
-  /* El segundo tono de los degradados: el azul de las batas. */
+  /* El segundo tono de los degradados: un azul de editor. */
   --accent-2: #0a8fb0;
   --glow: rgba(15, 181, 176, 0.18);
 
@@ -107,12 +107,12 @@
   --stage-accent: #3ee9e2;
 }
 
-/* La marca: una cruz con luz propia. */
+/* La marca: los corchetes, con luz propia. */
 :root[data-style='clinica'] .brand-mark {
   background: var(--primary-image);
   box-shadow: var(--primary-shadow);
 }
-/* El título, con su pulso debajo. */
+/* El título, con una señal digital debajo (el fichero se sigue llamando pulse.svg). */
 :root[data-style='clinica'] h2::after {
   content: '';
   display: block;

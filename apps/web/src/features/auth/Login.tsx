@@ -23,7 +23,7 @@ export function Login({ onLogin, notice }: LoginProps) {
   return (
     <main className="center">
       <Logo />
-      <h1>Sanatorio 42</h1>
+      <h1>Peer4U</h1>
       {notice !== null && <p className="estado aviso">{notice}</p>}
       <p>{t('login.pitch')}</p>
       <button className="primary" onClick={onLogin}>

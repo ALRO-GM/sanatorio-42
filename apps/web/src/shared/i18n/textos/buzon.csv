@@ -17,10 +17,10 @@ notices.minutesAgo,Hace unos minutos,hace {n} min,{n} min ago,fa {n} min,duela {
 notices.hoursAgo,Hace unas horas,hace {n} h,{n} h ago,fa {n} h,duela {n} h
 notices.go.inbox,Enlace del aviso: ver la respuesta,ver la respuesta,see the answer,veure la resposta,ikusi erantzuna
 notices.go.gestion,Enlace del aviso: ir al panel,ir al panel,go to the panel,ves al panell,joan panelera
-notices.go.guardia,Enlace del aviso: ir a tu guardia,ir a tu guardia,go to your duty,ves a la teva guàrdia,joan zure guardiara
-notices.go.tablon,Enlace del aviso: ir al tablón,ir al tablón,go to the board,ves al tauler,joan taulara
+notices.go.guardia,Enlace del aviso: ir a tu on-call,ir a tu on-call,go to your on-call,ves al teu on-call,joan zure on-call-era
+notices.go.tablon,Enlace del aviso: ir a proyectos,ir a proyectos,go to projects,ves a projectes,joan proiektuetara
 notices.go.pizarras,Enlace del aviso: ir a pizarras,ir a pizarras,go to whiteboards,ves a pissarres,joan arbeletara
-notices.go.terapia,Enlace del aviso: ir a terapias,ir a terapias,go to therapy,ves a teràpies,joan terapietara
+notices.go.terapia,Enlace del aviso: ir a sprints,ir a sprints,go to sprints,ves a sprints,joan sprintetara
 notices.go.calendario,Enlace del aviso: ir al calendario,ir al calendario,go to the calendar,ves al calendari,joan egutegira
 notices.kind.ticket_answered,Aviso: respondieron a tu incidencia,{from} ha respondido a lo que enviaste,{from} answered what you sent,{from} ha respost al que vas enviar,{from}(e)k bidali zenuenari erantzun dio
 notices.kind.ticket_new,Aviso para admins: incidencia nueva,{from} ha escrito al buzón,{from} wrote to the mailbox,{from} ha escrit a la bústia,{from}(e)k postontzira idatzi du
@@ -35,14 +35,14 @@ notices.kind.proposal_accepted,Aviso: validaron tu cambio en una guía,{from} ha
 notices.kind.proposal_rejected,Aviso: rechazaron tu cambio en una guía,{from} ha rechazado tu cambio en una guía,{from} rejected your change to a guide,{from} ha rebutjat el teu canvi en una guia,{from}(e)k gida bateko zure aldaketa baztertu du
 notices.kind.board_changed,Aviso: cambió una pizarra,{from} ha cambiado la hora o el sitio de una pizarra,{from} changed the time or place of a whiteboard,{from} ha canviat l'hora o el lloc d'una pissarra,{from}(e)k arbel baten ordua edo lekua aldatu du
 notices.kind.board_cancelled,Aviso: se canceló una pizarra,{from} ha cancelado una pizarra,{from} cancelled a whiteboard,{from} ha cancel·lat una pissarra,{from}(e)k arbel bat bertan behera utzi du
-notices.kind.group_joined,Aviso: alguien entró en tu grupo,{from} se ha apuntado a tu grupo de terapia,{from} joined your therapy group,{from} s'ha apuntat al teu grup de teràpia,{from}(e)k zure terapia-taldean izena eman du
-notices.kind.group_closed,Aviso: se cerró un grupo,{from} ha cerrado un grupo de terapia,{from} closed a therapy group,{from} ha tancat un grup de teràpia,{from}(e)k terapia-talde bat itxi du
-notices.kind.group_invite,Aviso: hay un grupo de tu proyecto,{from} ha abierto un grupo de terapia de un proyecto que estás haciendo,{from} opened a therapy group for a project you are doing,{from} ha obert un grup de teràpia d'un projecte que estàs fent,{from}(e)k egiten ari zaren proiektu baten terapia-taldea ireki du
+notices.kind.group_joined,Aviso: alguien entró en tu grupo,{from} se ha apuntado a tu sprint,{from} joined your sprint,{from} s'ha apuntat al teu sprint,{from}(e)k zure sprintean izena eman du
+notices.kind.group_closed,Aviso: se cerró un grupo,{from} ha cerrado un sprint,{from} closed a sprint,{from} ha tancat un sprint,{from}(e)k sprint bat itxi du
+notices.kind.group_invite,Aviso: hay un grupo de tu proyecto,{from} ha abierto un sprint de un proyecto que estás haciendo,{from} opened a sprint for a project you are doing,{from} ha obert un sprint d'un projecte que estàs fent,{from}(e)k egiten ari zaren proiektu baten sprinta ireki du
 notices.kind.clicker_defense,Aviso para admins: alguien explicó su partida,{from} ha explicado su partida de Code Clicker tras una revisión,{from} explained their Code Clicker run after a review,{from} ha explicat la seva partida de Code Clicker després d'una revisió,{from}(e)k Code Clickerreko bere partida azaldu du berrikuspen baten ondoren
 inbox.open,Menú de la cuenta: incidencias y sugerencias,Incidencias y sugerencias,Issues and suggestions,Incidències i suggeriments,Gorabeherak eta iradokizunak
 inbox.title,Título del formulario de incidencias,Incidencias y sugerencias,Issues and suggestions,Incidències i suggeriments,Gorabeherak eta iradokizunak
 inbox.kind,Formulario: tipo,Tipo,Type,Tipus,Mota
-inbox.to,A quién llega y dónde se responde,Para: quien administra Sanatorio 42. La respuesta aparece aquí y te llega un aviso al buzón.,To: whoever runs Sanatorio 42. The answer shows up here and you get a notice in your mailbox.,Per a: qui administra Sanatorio 42. La resposta apareix aquí i t'arriba un avís a la bústia.,Norentzat: Sanatorio 42 kudeatzen duenarentzat. Erantzuna hemen agertuko da eta abisu bat iritsiko zaizu postontzira.
+inbox.to,A quién llega y dónde se responde,Para: quien administra Peer4U. La respuesta aparece aquí y te llega un aviso al buzón.,To: whoever runs Peer4U. The answer shows up here and you get a notice in your mailbox.,Per a: qui administra Peer4U. La resposta apareix aquí i t'arriba un avís a la bústia.,Norentzat: Peer4U kudeatzen duenarentzat. Erantzuna hemen agertuko da eta abisu bat iritsiko zaizu postontzira.
 inbox.section,Formulario: sección afectada,Sección,Section,Secció,Atala
 inbox.section.general,Sección: toda la web,Toda la web,The whole site,Tot el web,Web osoa
 inbox.category.bug,Tipo: algo falla,Fallo,Bug,Error,Akatsa
@@ -93,7 +93,7 @@ chats.allKinds,Filtro: todos los tipos,Todos los tipos,All types,Tots els tipus,
 chats.byProject,Filtro por proyecto,Por proyecto,By project,Per projecte,Proiektuaren arabera
 chats.allProjects,Filtro: cualquier proyecto,Cualquier proyecto,Any project,Qualsevol projecte,Edozein proiektu
 chats.kind.direct,Tipo: mensaje directo,Mensaje directo,Direct message,Missatge directe,Mezu zuzena
-chats.kind.group,Tipo: grupo de terapia,Grupo de terapia,Therapy group,Grup de teràpia,Terapia-taldea
+chats.kind.group,Tipo: sprint en grupo,Sprint,Sprint,Sprint,Sprinta
 chats.kind.board,Tipo: pizarra,Pizarra,Whiteboard,Pissarra,Arbela
 chats.kind.help,Tipo: sesión de ayuda,Sesión de ayuda,Help session,Sessió d'ajuda,Laguntza-saioa
 chats.kind.event,Tipo: evento,Evento,Event,Esdeveniment,Ekitaldia
