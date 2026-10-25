@@ -612,6 +612,9 @@ input[type='checkbox'] {
   background: linear-gradient(120deg, var(--blob-1), var(--blob-2));
 }
 .record-head {
+  /* Por encima del banner, que va posicionado: la foto sube sobre él. */
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: flex-end;
   gap: 0.9rem;

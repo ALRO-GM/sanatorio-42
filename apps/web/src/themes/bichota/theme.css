@@ -212,10 +212,6 @@
 :root[data-style='bichota'] .record .banner {
   height: 44px;
 }
-:root[data-style='bichota'] .record-head {
-  position: relative;
-  z-index: 1;
-}
 :root[data-style='bichota'] .record-head .avatar-fallback,
 :root[data-style='bichota'] .record-head img {
   border-color: #e2ae32;

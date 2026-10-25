@@ -171,6 +171,8 @@
 }
 .person-hover .title-banner + .avatar-fallback,
 .person-hover .title-banner + img {
+  position: relative;
+  z-index: 1;
   margin-top: -1.6rem;
   border: 3px solid var(--surface);
   box-sizing: content-box;
