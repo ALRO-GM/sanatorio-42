@@ -7,6 +7,13 @@
 
 import { DomainError } from './errors.js'
 
+/**
+ * Los idiomas en que el servidor tiene textos ya escritos (las preguntas de
+ * Not-games). Lo que falta en francés sale en inglés; el catalán y el euskera
+ * ven el español.
+ */
+export type Lang = 'es' | 'en' | 'fr'
+
 /** Quién hace la petición y en qué campus está mirando. */
 export type Actor = {
   login: string
@@ -14,7 +21,7 @@ export type Actor = {
   /** `true` si su login está en `ADMIN_LOGINS`. */
   admin: boolean
   /** El idioma de su web (cabecera `x-lang`), para lo que se le enseña ya escrito. */
-  lang?: 'es' | 'en'
+  lang?: Lang
   /** `true` si es piscinero: solo ve piscineros de su campus (`docs/piscineros.md`). */
   pool?: boolean
 }

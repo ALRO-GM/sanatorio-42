@@ -100,7 +100,7 @@ export const GENERAL: readonly Concept[] = [
       {
         ask: [
           '¿Qué le hace `x >> 1` a un entero positivo?',
-          'Desplazar un bit a la derecha un entero positivo equivale a…',
+          'Desplazar un entero positivo un bit a la derecha equivale a…',
         ],
         right: [
           'Dividirlo entre 2 (redondeando hacia abajo)',

@@ -7,7 +7,8 @@ export const REVIEW_B_EN: Readonly<Record<string, ReviewEntry>> = {
     title: 'The limit of comparison sorting',
     definition:
       'Any sort that only compares elements needs, in the worst case, about n·log n comparisons. You can only beat that by not comparing (radix, counting sort).',
-    example: '100 numbers: at least about 700 comparisons; bubble sort does up to 4950.',
+    example:
+      '100 numbers: at least about 525 comparisons (log₂ 100!); bubble sort does up to 4950.',
   },
   'algo-stack': {
     title: 'Stacks and queues in push_swap',
@@ -64,7 +65,8 @@ export const REVIEW_B_EN: Readonly<Record<string, ReviewEntry>> = {
     title: 'Perfect maze',
     definition:
       'A maze is perfect if there is exactly one path between any two cells: no cycles and no isolated areas. As a graph, it is a tree.',
-    example: 'In a perfect 10 × 10 grid there are 100 cells and exactly 99 open passages.',
+    example:
+      'In a perfect 10 × 10 grid there are 100 cells and exactly 99 knocked-down walls between them.',
   },
   'algo-maze-gen': {
     title: 'Generating mazes with DFS',
@@ -93,7 +95,7 @@ export const REVIEW_B_EN: Readonly<Record<string, ReviewEntry>> = {
   'thr-mutex': {
     title: 'Mutex',
     definition:
-      'A mutex is a lock: only one thread at a time can hold it; the others wait in lock. It protects a section that must not run at the same time. Locking the same (non-recursive) one twice blocks you.',
+      'A mutex is a lock: only one thread at a time can hold it; the others wait in lock. It protects a section that must not run at the same time. A thread that locks the same (non-recursive) mutex twice deadlocks itself.',
     example: 'pthread_mutex_init(&m, NULL); … lock … unlock … pthread_mutex_destroy(&m);',
   },
   'thr-join-detach': {
@@ -105,7 +107,7 @@ export const REVIEW_B_EN: Readonly<Record<string, ReviewEntry>> = {
   'thr-usleep': {
     title: 'Measuring time with threads',
     definition:
-      'usleep can sleep longer than asked, and a monitor that sleeps too long reports late. Sleep in short slices while checking the clock (gettimeofday), and monitor every few milliseconds.',
+      'usleep can sleep longer than asked, and a monitor that sleeps too long reports a death late. Sleep in short slices while checking the clock (gettimeofday), and monitor every few milliseconds.',
     example: 'while (now() - start < ms) usleep(500);',
   },
   'thr-print': {
@@ -187,7 +189,7 @@ export const REVIEW_B_EN: Readonly<Record<string, ReviewEntry>> = {
     title: 'Closed maps',
     definition:
       'The border of the map has to be wall: otherwise the player or a ray goes outside the map and reads memory that is not theirs. Check it before playing, including the gaps in irregular maps.',
-    example: 'Every walkable cell must not touch the border or an empty space.',
+    example: 'No walkable cell may touch the border or an empty space.',
   },
   'gfx-dot-product': {
     title: 'Dot product',
@@ -235,7 +237,8 @@ export const REVIEW_B_EN: Readonly<Record<string, ReviewEntry>> = {
     title: 'Private addresses',
     definition:
       'There are ranges reserved for local networks, which are not routed on the Internet: 10.0.0.0/8, 172.16.0.0/12 and 192.168.0.0/16. 127.0.0.1 is the machine itself.',
-    example: 'Your laptop at home: 192.168.1.34. A public server: it cannot be private.',
+    example:
+      'Your laptop at home: 192.168.1.34. A public server on the Internet: its address cannot be private.',
   },
   'net-gateway': {
     title: 'Gateway and routes',
@@ -547,7 +550,7 @@ export const REVIEW_B_EN: Readonly<Record<string, ReviewEntry>> = {
   'py-main-guard': {
     title: 'if __name__ == "__main__"',
     definition:
-      'When you run a file, __name__ is "__main__"; when you import it, it is the module name. The if keeps code that only runs when the file is executed, not when it is imported.',
+      'When you run a file, __name__ is "__main__"; when you import it, it is the module name. The if holds the code that should run only when the file is executed, not when it is imported.',
     example: 'if __name__ == "__main__":\\n    main()',
   },
   'py-json': {

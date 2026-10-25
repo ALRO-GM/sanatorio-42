@@ -255,7 +255,7 @@ export const ALGORITHMS: readonly Concept[] = [
         ],
       },
       {
-        ask: ['¿Qué no admite Dijkstra?', '¿Con qué puede fallar Dijkstra?'],
+        ask: ['¿En qué caso no sirve Dijkstra?', '¿Con qué tipo de grafo puede fallar Dijkstra?'],
         right: ['Con aristas de peso negativo'],
         wrong: ['Con ciclos', 'Con más de 100 nodos', 'Con pesos decimales'],
       },

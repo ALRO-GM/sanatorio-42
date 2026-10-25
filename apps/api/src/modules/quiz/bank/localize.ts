@@ -3,19 +3,26 @@
  *
  * Una ronda se monta y se guarda en español; al enseñarla se traduce texto a
  * texto. Cada concepto traducido tiene la misma forma que el original (lo
- * comprueba `tests/unit/quiz-bank-en.test.ts`), así que lo que está en una
+ * comprueba `tests/unit/quiz-bank-lang.test.ts`), así que lo que está en una
  * posición del español se traduce por lo que está en la misma posición del
- * otro idioma. Lo que no se encuentra (un concepto que no está traducido, o
- * una ronda guardada antes de cambiar el texto) se queda como estaba.
+ * otro idioma. Lo que falta en francés sale en
+ * inglés; lo que no se encuentra en ninguno (un concepto sin traducir, o una
+ * ronda guardada antes de cambiar el texto) se queda como estaba.
  */
 
+import type { Lang } from '../../../core/actor.js'
 import { BANK_EN } from './en/index.js'
 import { REVIEW_EN } from './en/review.js'
+import { BANK_FR } from './fr/index.js'
+import { REVIEW_FR } from './fr/review.js'
 import { BANK } from './index.js'
 import type { Concept, ConceptText, ReviewEntry } from './types.js'
 
-/** Los idiomas de las preguntas (`Actor.lang`). Cualquier otro ve las de español. */
-type Lang = 'es' | 'en'
+/** Cada idioma con su traducción y la de reserva, por orden: lo último manda. */
+const LAYERS: Record<Exclude<Lang, 'es'>, readonly Readonly<Record<string, ConceptText>>[]> = {
+  en: [BANK_EN],
+  fr: [BANK_EN, BANK_FR],
+}
 
 const SPANISH = new Map(BANK.map((concept) => [concept.id, concept]))
 const tables = new Map<string, Map<string, string>>()
@@ -48,15 +55,25 @@ function translator(conceptId: string, lang: Lang): ((text: string) => string) |
   if (lang === 'es') return null
 
   const concept = SPANISH.get(conceptId)
-  const other = BANK_EN[conceptId]
 
-  if (concept === undefined || other === undefined) return null
+  if (concept === undefined || LAYERS[lang].every((layer) => layer[conceptId] === undefined)) {
+    return null
+  }
 
-  let table = tables.get(conceptId)
+  const key = `${lang}:${conceptId}`
+  let table = tables.get(key)
 
   if (table === undefined) {
-    table = tableOf(concept, other)
-    tables.set(conceptId, table)
+    // Primero la reserva y encima la traducción: un texto que falte en
+    // francés se queda en inglés.
+    table = new Map(
+      LAYERS[lang].flatMap((layer) => {
+        const other = layer[conceptId]
+
+        return other === undefined ? [] : [...tableOf(concept, other)]
+      }),
+    )
+    tables.set(key, table)
   }
 
   const found = table
@@ -79,7 +96,13 @@ export function localizeRound<T extends Localizable>(round: T, lang: Lang): T {
 
   if (text === null) return round
 
-  const code = BANK_EN[round.conceptId]?.code
+  const code =
+    lang === 'es'
+      ? undefined
+      : LAYERS[lang].reduce<string | undefined>(
+          (found, layer) => layer[round.conceptId]?.code ?? found,
+          undefined,
+        )
 
   return {
     ...round,
@@ -101,5 +124,7 @@ export function reviewIn(
   lang: Lang,
   spanish: Readonly<Record<string, ReviewEntry>> | undefined,
 ): ReviewEntry | undefined {
-  return (lang === 'en' ? REVIEW_EN[conceptId] : undefined) ?? spanish?.[conceptId]
+  const fallback = lang === 'es' ? undefined : REVIEW_EN[conceptId]
+
+  return (lang === 'fr' ? REVIEW_FR[conceptId] : undefined) ?? fallback ?? spanish?.[conceptId]
 }

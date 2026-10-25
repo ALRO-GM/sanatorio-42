@@ -116,7 +116,7 @@ export const NETWORK_EN: Readonly<Record<string, ConceptText>> = {
       },
       {
         ask: [
-          'What does the route 0.0.0.0/0 mean?',
+          'Which destinations does the route 0.0.0.0/0 apply to?',
           'Which destinations does a 0.0.0.0/0 route lead to?',
         ],
         right: ['All those that have no other route (the default route)'],
@@ -358,8 +358,8 @@ export const NETWORK_EN: Readonly<Record<string, ConceptText>> = {
     forms: [
       {
         ask: [
-          'Which IRC command is used to join a channel?',
-          'Which command do you send to join #42?',
+          'Which IRC command makes you a member of a channel?',
+          'Which command do you send to get into #42?',
         ],
         right: ['JOIN'],
         wrong: ['ENTER', 'PRIVMSG', 'NICK', 'CONNECT'],
@@ -416,7 +416,7 @@ export const NETWORK_EN: Readonly<Record<string, ConceptText>> = {
       {
         ask: [
           'How is a container different from a virtual machine?',
-          'What does a virtual machine have that a container does not?',
+          'Why is a container lighter than a virtual machine?',
         ],
         right: ['It shares the kernel of the host system: it has no kernel of its own'],
         wrong: [

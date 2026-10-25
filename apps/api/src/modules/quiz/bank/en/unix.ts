@@ -96,7 +96,7 @@ export const UNIX_EN: Readonly<Record<string, ConceptText>> = {
       {
         ask: [
           'Where are password hashes stored in Linux?',
-          'In which file are the (encrypted) user passwords?',
+          'Which file holds the hashes of the user passwords?',
         ],
         right: ['/etc/shadow'],
         wrong: ['/etc/passwd', '/etc/group', '/etc/sudoers', '/var/log/auth.log'],

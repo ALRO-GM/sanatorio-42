@@ -125,7 +125,7 @@ export const C_BASICS_EN: Readonly<Record<string, ConceptText>> = {
           'A pointer to memory that is no longer valid is called…',
         ],
         right: ['Dangling (dangling pointer)'],
-        wrong: ['Null', 'Wild, for not being initialised', 'A function pointer'],
+        wrong: ['Null', 'Wild, because it was never initialised', 'A function pointer'],
       },
     ],
     wrong: ['It is missing a cast to int*', 'n should be unsigned', 'Nothing is wrong'],
@@ -411,7 +411,7 @@ export const C_BASICS_EN: Readonly<Record<string, ConceptText>> = {
       {
         ask: [
           'What happens in C if a signed int goes past INT_MAX?',
-          'What is adding 1 to INT_MAX in an int?',
+          'What happens when you add 1 to INT_MAX in an int?',
         ],
         right: ['Undefined behaviour', 'Undefined: the standard does not say what happens'],
         wrong: [

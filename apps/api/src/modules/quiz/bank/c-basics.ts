@@ -167,7 +167,7 @@ export const C_BASICS: readonly Concept[] = [
           'Un puntero a memoria que ya no es válida se llama…',
         ],
         right: ['Colgante (dangling pointer)'],
-        wrong: ['Nulo', 'Salvaje por no inicializar', 'Puntero a función'],
+        wrong: ['Nulo', 'Salvaje, porque nunca se inicializó', 'Puntero a función'],
       },
     ],
     wrong: ['Falta un cast a int*', 'n debería ser unsigned', 'No falla nada'],
@@ -521,7 +521,7 @@ export const C_BASICS: readonly Concept[] = [
       {
         ask: [
           '¿Qué pasa en C si un int con signo pasa de INT_MAX?',
-          '¿Qué es sumar 1 a INT_MAX en un int?',
+          '¿Qué pasa al sumar 1 a INT_MAX en un int?',
         ],
         right: ['Comportamiento indefinido', 'Indefinido: el estándar no dice qué pasa'],
         wrong: [

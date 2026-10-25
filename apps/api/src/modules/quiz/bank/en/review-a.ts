@@ -68,7 +68,7 @@ export const REVIEW_A_EN: Readonly<Record<string, ReviewEntry>> = {
   'gen-list-vs-array': {
     title: 'Array vs linked list',
     definition:
-      'An array is contiguous in memory: element i is computed instantly (O(1)). A linked list is a set of separate nodes, each pointing to the next: reaching element i takes i steps, but inserting at the start is immediate.',
+      'An array is contiguous in memory: the address of element i is computed instantly (O(1)). A linked list is a set of separate nodes, each pointing to the next: reaching element i takes i steps, but inserting at the start is immediate.',
     example: 'a[500] is direct; in a list you have to do node = node->next 500 times.',
   },
   'gen-recursion-base': {
@@ -137,7 +137,7 @@ export const REVIEW_A_EN: Readonly<Record<string, ReviewEntry>> = {
     title: 'Hash tables and collisions',
     definition:
       'A hash table uses the key to work out which slot to store the value in: lookup is almost instant. If two keys give the same slot there is a collision, which is resolved by chaining or by looking for another slot.',
-    example: 'A Python dictionary or an unordered std::map (unordered_map) are hash tables.',
+    example: 'A Python dictionary and a C++ std::unordered_map are both hash tables.',
   },
   'c-string-end': {
     title: 'Strings in C',

@@ -12,6 +12,7 @@ import type { GitGateQuiz, GitGateResult, GitGateState } from '@sanatorio/contra
 import { gateOf, LEVELS } from '@sanatorio/gitsim'
 import { z } from 'zod'
 
+import type { Lang } from '../../core/actor.js'
 import type { Db } from '../../core/db/database.js'
 import { toText } from '../../core/db/rows.js'
 import { domainError } from '../../core/errors.js'
@@ -34,8 +35,6 @@ export type GateQuestions = {
   /** La pregunta en el idioma de quien la mira; sin esto, tal como se montó. */
   localize?: <T extends GateRound>(round: T, lang: Lang) => T
 }
-
-type Lang = 'es' | 'en'
 
 /** Los conceptos del banco que enseña cada mundo del curso. */
 export const CONCEPTS_BY_WORLD: Readonly<Record<number, readonly string[]>> = {

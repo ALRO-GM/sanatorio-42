@@ -454,7 +454,7 @@ export const GIT: readonly Concept[] = [
       'Descarga la versión del remoto',
       'Deshace el último push',
     ],
-    why: 'reset mueve la rama: --soft deja lo deshecho preparado, el normal sin preparar y --hard lo borra.',
+    why: 'reset mueve la rama: --soft deja lo deshecho preparado; sin opción (--mixed), sin preparar; y --hard lo borra.',
   },
   {
     id: 'git-revert',
@@ -509,7 +509,7 @@ export const GIT: readonly Concept[] = [
       'Sube los cambios a una rama oculta del remoto',
       'Ignora los ficheros nuevos',
     ],
-    why: 'stash guarda lo no comprometido en una pila; con pop vuelve donde estés.',
+    why: 'stash guarda en una pila lo que aún no tiene commit; con pop vuelve donde estés.',
   },
 
   // --- Mundo 5: flujos ----------------------------------------------------------

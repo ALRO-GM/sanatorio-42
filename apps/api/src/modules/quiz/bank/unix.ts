@@ -131,7 +131,7 @@ export const UNIX: readonly Concept[] = [
       {
         ask: [
           '¿Dónde se guardan los hashes de las contraseñas en Linux?',
-          '¿En qué fichero están las contraseñas (cifradas) de los usuarios?',
+          '¿Qué fichero guarda los hashes de las contraseñas de los usuarios?',
         ],
         right: ['/etc/shadow'],
         wrong: ['/etc/passwd', '/etc/group', '/etc/sudoers', '/var/log/auth.log'],
