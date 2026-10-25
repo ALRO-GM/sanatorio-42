@@ -75,7 +75,7 @@ describe('Avance por población', () => {
     expect(within(chartCard()).getAllByText(/\(33 personas\)/)).not.toHaveLength(0)
 
     // Quien no se sabe si sigue no entra: se dice cuántos son.
-    expect(screen.getByText(/9 personas sin estado seguro/)).toBeTruthy()
+    expect(screen.getByText(/9 personas no entran en ninguna media/)).toBeTruthy()
   })
 
   it('el eje marca los círculos y, por horas, las horas de tu plan', async () => {
