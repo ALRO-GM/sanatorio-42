@@ -5,14 +5,14 @@ Cómo se trabaja con ellas: [docs/textos.md](../textos.md).
 
 | Tema | Textos | Falta en Inglés | Falta en Catalán | Falta en Euskera | Falta en Francés |
 | --- | --- | --- | --- | --- | --- |
-| [agenda](agenda.md) | 144 | 0 | 0 | 0 | 144 |
+| [agenda](agenda.md) | 144 | 0 | 0 | 0 | 0 |
 | [animos](animos.md) | 100 | 0 | 0 | 0 | 100 |
-| [avisos](avisos.md) | 47 | 0 | 0 | 0 | 47 |
+| [avisos](avisos.md) | 47 | 0 | 0 | 0 | 0 |
 | [buzon](buzon.md) | 114 | 0 | 0 | 0 | 114 |
-| [calendario](calendario.md) | 102 | 0 | 0 | 0 | 102 |
+| [calendario](calendario.md) | 102 | 0 | 0 | 0 | 0 |
 | [clusters](clusters.md) | 76 | 0 | 0 | 0 | 76 |
 | [code-clicker](code-clicker.md) | 27 | 0 | 0 | 0 | 27 |
-| [comun](comun.md) | 302 | 0 | 0 | 0 | 302 |
+| [comun](comun.md) | 302 | 0 | 0 | 0 | 0 |
 | [curso-shell](curso-shell.md) | 67 | 0 | 0 | 0 | 67 |
 | [demos](demos.md) | 104 | 0 | 0 | 0 | 104 |
 | [estadisticas](estadisticas.md) | 100 | 0 | 0 | 0 | 100 |
@@ -20,7 +20,7 @@ Cómo se trabaja con ellas: [docs/textos.md](../textos.md).
 | [expediente](expediente.md) | 134 | 0 | 0 | 0 | 134 |
 | [gestion](gestion.md) | 576 | 0 | 0 | 0 | 576 |
 | [guardia](guardia.md) | 74 | 0 | 0 | 0 | 74 |
-| [legal](legal.md) | 56 | 0 | 0 | 0 | 56 |
+| [legal](legal.md) | 56 | 0 | 0 | 0 | 0 |
 | [notgames](notgames.md) | 224 | 0 | 0 | 0 | 224 |
 | [pizarras](pizarras.md) | 36 | 0 | 0 | 0 | 36 |
 | [red](red.md) | 160 | 0 | 0 | 0 | 160 |
