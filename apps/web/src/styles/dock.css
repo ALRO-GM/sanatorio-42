@@ -1,0 +1,78 @@
+/* ── Las ventanitas de la esquina (`shared/dock`) ──────────────────────────────
+ * Cada ventanita flotante (cuenta atrás, Pomodoro, Code Clicker) va dentro de
+ * un hueco que coloca el gestor: `left` y `bottom` en la pila, `left` y `top`
+ * si flota. Aquí solo el aspecto común: el gestor pone las posiciones. */
+.dock-slot {
+  position: fixed;
+  z-index: 39;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.4rem;
+  max-width: calc(100vw - 1rem);
+  /* Las demás se apartan con suavidad cuando una cambia de sitio. */
+  transition:
+    left 0.25s ease,
+    bottom 0.25s ease;
+}
+/* Lo de dentro encoge si la pila no cabe: su cuerpo se desplaza. */
+.dock-slot > * {
+  flex: 0 1 auto;
+  min-height: 0;
+  max-width: 100%;
+}
+.dock-slot.floating {
+  z-index: 41;
+  transition: none;
+}
+.dock-slot.dragging {
+  z-index: 45;
+  transition: none;
+  cursor: grabbing;
+  opacity: 0.94;
+}
+.dock-slot.dragging > :last-child {
+  box-shadow:
+    0 18px 40px rgba(0, 0, 0, 0.35),
+    0 0 0 5px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+/* Cogida con el teclado: se nota cuál se está moviendo. */
+.dock-slot.grabbed > :last-child {
+  outline: 2px dashed var(--accent);
+  outline-offset: 4px;
+}
+.dock-grip {
+  flex: none;
+  color: var(--text-3);
+  cursor: grab;
+  touch-action: none;
+}
+.dock-grip:hover,
+.dock-grip[aria-pressed='true'] {
+  color: var(--accent);
+}
+[data-dock-handle] {
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+/* El final de la página se puede subir por encima de la pila: nada queda
+   debajo para siempre (en el escritorio, la cuenta atrás desplegada tapaba el
+   final de la página). */
+body {
+  padding-bottom: var(--dock-room, 0px);
+}
+@media (max-width: 640px) {
+  /* Píldoras estrechas, para que quepan varias en la misma fila. */
+  .dock-slot .dock-grip {
+    width: 24px;
+  }
+  .dock-slot .icon-btn {
+    width: 30px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dock-slot {
+    transition: none;
+  }
+}

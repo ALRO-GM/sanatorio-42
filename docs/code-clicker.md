@@ -161,8 +161,8 @@ pulsaciones puede dar un salto así jugando limpio, y el aviso lo dice.
 Quien eligió la roja lleva el juego puesto en toda la web, no solo en su
 sección: está pensado para que se tenga Sanatorio abierto, no solo el juego.
 En cualquier otra sección sigue haciendo cuentas (una vez por segundo, que
-basta) y guardando, y abajo a la izquierda sale una ventanita con las líneas que
-se llevan. Pulsarla lleva al juego; la cruz la quita, y se vuelve a poner con el
+basta) y guardando, y en la pila de ventanitas de la esquina (`shared/dock`)
+sale una con las líneas que se llevan; concentrado (Pomodoro), no. Pulsarla lleva al juego; la cruz la quita, y se vuelve a poner con el
 botón «Ventanita» del juego. Las pull requests doradas siguen saliendo solo
 dentro del juego: fuera no se ven, así que se pierden.
 

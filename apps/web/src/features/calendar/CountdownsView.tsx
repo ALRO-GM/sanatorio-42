@@ -4,7 +4,7 @@ import type { CalendarEvent } from '@sanatorio/contracts'
 
 import { eventTitle } from '../../shared/eventTitle'
 import { api } from '../../shared/api'
-import { useCountdowns } from '../../shared/countdowns'
+import { markCountdownsPage, useCountdowns } from '../../shared/countdowns'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useNow } from '../../shared/hooks/useNow'
 import { useI18n } from '../../shared/i18n'
@@ -40,10 +40,10 @@ export function CountdownsView({ onOpen }: { onOpen: (event: CalendarEvent) => v
     .sort((a, b) => Date.parse(a.start) - Date.parse(b.start))
   // Aquí ya está todo en grande: la ventanita flotante sobra y taparía la lista.
   useEffect(() => {
-    document.documentElement.dataset.countdownsPage = ''
+    markCountdownsPage(true)
 
     return () => {
-      delete document.documentElement.dataset.countdownsPage
+      markCountdownsPage(false)
     }
   }, [])
 

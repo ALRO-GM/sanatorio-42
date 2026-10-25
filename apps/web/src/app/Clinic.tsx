@@ -16,6 +16,7 @@ import { AlertCenter } from '../features/alerts/AlertCenter'
 import { EasterEgg } from '../features/clicker/EasterEgg'
 import { QuotaNotice } from '../features/alerts/QuotaNotice'
 import { CountdownDock } from '../features/countdowns/CountdownDock'
+import { DockHost } from '../shared/dock/DockItem'
 import { MaintenanceBanner } from '../features/maintenance/MaintenanceBanner'
 import { loadMaintenance, useMaintenance } from '../shared/maintenance'
 import { onOpenChat } from '../features/notices/conversations'
@@ -198,11 +199,13 @@ export function Clinic({ me, onLogout }: ClinicProps) {
         }}
         onLogout={onLogout}
       />
-      {/* El Pomodoro: el temporizador flota a la vista mientras dura. */}
+      {/* Las ventanitas flotantes van en una pila en la esquina (`shared/dock`):
+          el Pomodoro mientras dura, los avisos con cuenta atrás y la de Code
+          Clicker (en `SectionView`). Aquí, lo que comparten. */}
+      <DockHost />
       <PoolOnly k="focus">
         <FocusTimer />
       </PoolOnly>
-      {/* Los avisos con cuenta atrás: en la otra esquina que el Pomodoro. */}
       <CountdownDock stamp={pulse?.countdowns ?? null} />
       {focusOpen && (
         <FocusDialog

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 
+import { DockItem } from '../../shared/dock/DockItem'
 import { focusing, startFocus, useFocus } from '../../shared/focus'
 import { useNow } from '../../shared/hooks/useNow'
 import { useI18n } from '../../shared/i18n'
@@ -9,6 +10,9 @@ import { FocusExit } from './FocusExit'
 import { FocusScreen } from './FocusScreen'
 
 const RING = 2 * Math.PI * 26
+/** Lo que mide la píldora, desplegada y plegada, hasta que la pila la mide de verdad. */
+const PILL = { width: 380, height: 80 }
+const PILL_FOLDED = { width: 190, height: 64 }
 
 /** `m:ss` de lo que queda, redondeando hacia arriba: que el 0:00 sea el final de verdad. */
 const mmss = (ms: number): string => clock(Math.ceil(Math.max(0, ms) / 1000))
@@ -20,6 +24,9 @@ const CHEER_MS = 6000
  * El temporizador del Pomodoro, flotando y bien a la vista: un anillo que se
  * vacía con el tiempo que queda. Al acabar la concentración, el descanso; al
  * acabar el descanso, otra vuelta con un botón.
+ *
+ * Va en la pila de la esquina (`shared/dock`), con las demás ventanitas:
+ * plegado queda el anillo con el tiempo. A pantalla completa sale de la pila.
  *
  * Se puede poner a pantalla completa (#80 del buzón). «Acabar», salir de la
  * pantalla completa o Escape no paran en seco: preguntan (`FocusExit`).
@@ -120,75 +127,104 @@ export function FocusTimer() {
 
     return (
       <>
-        <aside className="focus-timer" role="timer" aria-label={t('focus.timerLabel')}>
-          <svg viewBox="0 0 60 60" aria-hidden="true">
-            <circle cx="30" cy="30" r="26" className="focus-track" />
-            <circle
-              cx="30"
-              cy="30"
-              r="26"
-              className="focus-ring"
-              strokeDasharray={RING}
-              strokeDashoffset={RING * (1 - share)}
-            />
-          </svg>
-          <span className="focus-text">
-            <strong>{left}</strong>
-            <small>{t('focus.focusing')}</small>
-          </span>
-          <button
-            type="button"
-            className="pill"
-            onClick={() => {
-              setScreen(true)
-            }}
-          >
-            {t('focus.screen.open')}
-          </button>
-          <button
-            type="button"
-            className="pill"
-            onClick={() => {
-              setAsking(true)
-            }}
-          >
-            {t('focus.stop')}
-          </button>
-        </aside>
+        <DockItem id="focus" title={t('focus.dockName')} size={PILL} foldedSize={PILL_FOLDED}>
+          {({ folded, grip, controls }) => (
+            <>
+              {cheering}
+              <aside
+                className={`focus-timer ${folded ? 'folded' : ''}`}
+                role="timer"
+                aria-label={t('focus.timerLabel')}
+                data-dock-handle=""
+              >
+                {grip}
+                <svg className="focus-dial" viewBox="0 0 60 60" aria-hidden="true">
+                  <circle cx="30" cy="30" r="26" className="focus-track" />
+                  <circle
+                    cx="30"
+                    cy="30"
+                    r="26"
+                    className="focus-ring"
+                    strokeDasharray={RING}
+                    strokeDashoffset={RING * (1 - share)}
+                  />
+                </svg>
+                <span className="focus-text">
+                  <strong>{left}</strong>
+                  {!folded && <small>{t('focus.focusing')}</small>}
+                </span>
+                {!folded && (
+                  <>
+                    <button
+                      type="button"
+                      className="pill"
+                      onClick={() => {
+                        setScreen(true)
+                      }}
+                    >
+                      {t('focus.screen.open')}
+                    </button>
+                    <button
+                      type="button"
+                      className="pill"
+                      onClick={() => {
+                        setAsking(true)
+                      }}
+                    >
+                      {t('focus.stop')}
+                    </button>
+                  </>
+                )}
+                {controls}
+              </aside>
+            </>
+          )}
+        </DockItem>
         {exit}
-        {cheering}
       </>
     )
   }
 
   return (
-    <aside className="focus-timer resting" role="status">
-      <Icon name="reloj" size={22} />
-      <span className="focus-text">
-        <strong>{resting ? mmss(breakUntil - now) : t('focus.breakOver')}</strong>
-        <small>{t('focus.resting')}</small>
-      </span>
-      {focus !== null && (
-        <button
-          type="button"
-          className="primary small"
-          onClick={() => {
-            setBreakUntil(null)
-            void startFocus(focus.settings)
-          }}
+    <DockItem id="focus" title={t('focus.dockName')} size={PILL} foldedSize={PILL_FOLDED}>
+      {({ folded, grip, controls }) => (
+        <aside
+          className={`focus-timer resting ${folded ? 'folded' : ''}`}
+          role="status"
+          data-dock-handle=""
         >
-          {t('focus.again')}
-        </button>
+          {grip}
+          <Icon name="reloj" size={22} />
+          <span className="focus-text">
+            <strong>{resting ? mmss(breakUntil - now) : t('focus.breakOver')}</strong>
+            {!folded && <small>{t('focus.resting')}</small>}
+          </span>
+          {!folded && focus !== null && (
+            <button
+              type="button"
+              className="primary small"
+              onClick={() => {
+                setBreakUntil(null)
+                void startFocus(focus.settings)
+              }}
+            >
+              {t('focus.again')}
+            </button>
+          )}
+          {!folded && (
+            <button
+              type="button"
+              className="link"
+              onClick={() => {
+                setBreakUntil(null)
+              }}
+            >
+              {t('common.close')}
+            </button>
+          )}
+          {controls}
+        </aside>
       )}
-      <button
-        type="button"
-        className="link"
-        onClick={() => {
-          setBreakUntil(null)
-        }}
-      >
-        {t('common.close')}
-      </button>
-    </aside>
+    </DockItem>
   )
 }

@@ -54,6 +54,8 @@
 @import './stats.css';
 /* Mantenimiento y la ventanita de avisos con cuenta atrás. */
 @import './countdowns.css';
+/* Las ventanitas flotantes de la esquina: la pila que las ordena sin taparse. */
+@import './dock.css';
 /* La burbuja de sugerencias de la cabecera y su panel. */
 @import './suggest.css';
 /* La agenda: metas, checkpoints, dailies y el tablero del sprint. */

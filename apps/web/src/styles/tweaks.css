@@ -111,16 +111,13 @@
    Pequeña y en una esquina: avisa de que los datos son inventados sin tapar la
    web que se está enseñando. */
 .demo-badge {
-  position: fixed;
-  left: 0.75rem;
-  bottom: 0.75rem;
-  z-index: 60;
+  /* Dónde va lo decide la pila de la esquina (`shared/dock`). */
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 0.35rem 0.6rem;
-  max-width: min(30rem, calc(100vw - 1.5rem));
-  padding: 0.45rem 0.7rem;
+  max-width: min(30rem, calc(100vw - 1rem));
+  padding: 0.3rem 0.7rem 0.3rem 0.2rem;
   border: 1px solid var(--border);
   border-radius: 14px;
   background: var(--surface);

@@ -82,7 +82,8 @@ de datos.
 | Panel de gestión | Pestaña Piscina: quién entra y el aviso para piscineros con la piscina cerrada (`docs/piscineros.md`) | Admins | Solo de quien administra |
 | Panel de gestión | Pestaña Piscina: «Ver como piscinero» y, mientras dura, la franja fija de arriba con «Volver» (`docs/piscineros.md`) | Admins | Bloque de la pestaña Piscina, no una sección: es para comprobar lo que se ha marcado |
 | Panel de gestión | Pestaña Personas ocultas: buscar a alguien de cualquier grupo, ocultarlo a estudiantes, piscineros o los dos, con motivo, y la lista con quién y cuándo (`docs/personas-ocultas.md`) | Admins | Pestaña propia y no bloque de Piscina: vale también para estudiantes |
-| Toda la web | Ventanita de cuentas atrás, flotando abajo a la izquierda (el Pomodoro va a la derecha): avisos de quien administra y lo fijado; se arrastra, se ancla y se pliega (`docs/avisos-cuenta-atras.md`) | S | Como el Pomodoro: un aviso importante (las taquillas) lo tiene que ver todo el mundo. En el móvil empieza plegada |
+| Toda la web | Ventanita de cuentas atrás, en la pila de la esquina: avisos de quien administra y lo fijado; se arrastra, se reordena, se saca a flotar y se pliega (`docs/avisos-cuenta-atras.md`) | S | Como el Pomodoro: un aviso importante (las taquillas) lo tiene que ver todo el mundo. En el móvil empieza plegada |
+| Toda la web | Pila de la esquina (`shared/dock`): las ventanitas flotantes (cuenta atrás, Pomodoro, Code Clicker) en una lista abajo a la izquierda, cada una en su hueco; ver «Ventanitas de la esquina» | S | Pedida por Alberto (2026-10-25): se tapaban entre sí y con la página |
 | Calendario | «Cuenta atrás» en la barra (próximo compromiso o una propia) y «Fijar cuenta atrás» en la ficha de cada evento | S | Bloque de Calendario, no sección nueva: lo que se fija sale de ahí |
 | Panel de gestión | Pestaña Cuentas atrás: la limpieza de taquillas (solo día y hora) u otro aviso, a un grupo y campus, y cuánta gente lo ha cerrado | Admins | Pestaña propia, al lado de Comunicados: no pide contestar |
 | Panel de gestión | Pestaña Mantenimiento: ponerlo y quitarlo, mensaje y hora prevista; mientras dura, franja arriba para quien administra y pantalla «No disponible» con cuenta atrás para el resto (`docs/mantenimiento.md`) | Admins | La pantalla del resto no es una sección: sustituye a toda la web |
@@ -184,6 +185,48 @@ Antes de escribir una a mano, se usa la que ya existe en `apps/web/src/shared/`:
   en texto). **Personas buscadas**: `ui/PeopleResults` y `usePeopleKeys`.
 - **Tiempo**: `hooks/useNow` (un reloj compartido por cadencia) y `time.ts`
   (`clock`, `durationText`). **Sondeo de lo que se mira**: `hooks/usePolling`.
+- **Ventanitas flotantes**: `dock/DockItem` (ver «Ventanitas de la esquina»),
+  nunca un `position: fixed` propio en una esquina.
 - **Fechas y números**: `i18n/useFormat` (o `formatsFor(lang)` fuera de un
   componente), en el idioma elegido. **Plurales**: `tn(clave, n)` con las claves
   `clave.one` y `clave.many`.
+
+## Ventanitas de la esquina
+
+Pedido por Alberto el 2026-10-25: las ventanitas flotantes se tapaban entre
+sí (la cuenta atrás desplegada, encima del Pomodoro) y con la página. Ahora
+las coloca un gestor común, `shared/dock`: cada una se apunta con
+`<DockItem id title size foldedSize>` y el gestor le da un hueco.
+
+| Ventanita | Dónde | En la pila |
+| --- | --- | --- |
+| Cuenta atrás | `features/countdowns/CountdownDock.tsx` | Sí. No ocupa sitio sin nada que contar ni con la vista de cuentas atrás del calendario abierta |
+| Pomodoro | `features/focus/FocusTimer.tsx` | Sí, concentrado y en el descanso. A pantalla completa sale de la pila. El «¡bien hecho!» va en su hueco |
+| Code Clicker | `features/clicker/Mini.tsx` | Sí, fuera del juego. Concentrado no sale (es un juego) |
+| Etiqueta de la demostración (`/demo/`) | `app/DemoBadge.tsx` | Sí: estaba en la misma esquina y tapaba la pila. Se pliega con su propio botón |
+| Avisos de eventos, comunicados, mantenimiento | Ventanas (`ui/Modal`) | No: son ventanas que hay que contestar, no flotan |
+| Burbuja de sugerencias y su panel | `features/suggest` | No: vive en la cabecera y el panel sale junto a lo señalado |
+| Avisos de un momento (`meet-toast`, logros y fichas de Code Clicker, ficha de un puesto o de una persona) | Cada funcionalidad | No: duran unos segundos o siguen al ratón |
+| Franja de «ver como piscinero» | `app/PoolPreviewBar.tsx` | No: es una franja de arriba a abajo, no una ventanita |
+
+Cómo funciona:
+
+- **La pila** sale de la esquina de abajo a la izquierda (donde ya estaban la
+  cuenta atrás y Code Clicker) y es una lista: cada ventanita encima de la
+  anterior, sin pisarse. En el móvil (hasta 640 px) son filas de píldoras:
+  las que caben van una al lado de otra, y ahí empiezan plegadas.
+- **Cambiar el orden**: se arrastra por el asa (los seis puntos) o por su
+  cabecera. Mientras se arrastra, las demás se apartan para dejarle el hueco
+  (con animación, salvo con «reducir movimiento»). Con el teclado, en el asa:
+  Espacio la coge, las flechas la mueven (arriba o derecha, lejos de la
+  esquina), Espacio la suelta y Escape lo deshace; un lector de pantalla oye
+  cada paso.
+- **Sacarla de la pila**: soltada lejos de cualquier hueco, flota donde se
+  deja. La chincheta («Volver a la esquina») la devuelve a su sitio de antes.
+- **Plegar**: cada una tiene su botón; plegada, su hueco encoge. Se pueden
+  plegar todas.
+- **Nada queda debajo**: la pila dice cuánto mide (`--dock-room`) y la página
+  deja ese espacio al final, para poder subir lo último por encima.
+- Se recuerda en el navegador (`sanatorio_dock`): el orden (también de las que
+  ahora no se ven, para que vuelvan a su sitio), dónde flota cada una y cuáles
+  están plegadas. Lo guardado con mala forma se ignora.

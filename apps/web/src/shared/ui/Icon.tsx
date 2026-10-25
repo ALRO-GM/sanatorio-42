@@ -256,6 +256,8 @@ const PATHS = {
       <path d="M5.7 5.7l12.6 12.6" />
     </>
   ),
+  /** El asa de lo que se arrastra (las ventanitas de la esquina): seis puntos. */
+  asa: <path d="M9 6h.01M15 6h.01M9 12h.01M15 12h.01M9 18h.01M15 18h.01" strokeWidth="3" />,
   /** Fijar una cuenta atrás (`features/countdowns`): una chincheta. */
   chincheta: <path d="M9 3.5h6M10 3.5v5.5l-3.5 4h11L14 9V3.5M12 13v7.5" />,
   /** El modo mantenimiento: una llave inglesa. */
