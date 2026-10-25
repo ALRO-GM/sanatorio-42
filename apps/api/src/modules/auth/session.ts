@@ -112,7 +112,12 @@ export function createSessionReader(options: SessionReaderOptions): SessionReade
         admin:
           session.preview !== true &&
           (access?.admin ?? options.adminLogins.includes(session.login.toLowerCase())),
-        lang: request.headers['x-lang'] === 'en' ? 'en' : 'es',
+        // Lo escrito en el servidor (preguntas de Not-games) solo está en
+        // español e inglés. El francés ve el inglés: en la sede de 42 en
+        // Francia se lee mejor que el castellano. El catalán y el euskera,
+        // el castellano.
+        lang:
+          request.headers['x-lang'] === 'en' || request.headers['x-lang'] === 'fr' ? 'en' : 'es',
         ...(session.role === 'pool' ? { pool: true } : {}),
       }
     },

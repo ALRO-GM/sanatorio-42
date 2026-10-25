@@ -1,48 +1,48 @@
-clave,contexto,es,en,ca,eu
-maint.badge,Pantalla de mantenimiento: etiqueta encima del título,Mantenimiento,Maintenance,Manteniment,Mantentze-lanak
-maint.title,Pantalla de mantenimiento: título grande que ve quien no administra,No disponible: estamos en labores de mantenimiento,Unavailable: we're doing some maintenance,No disponible: estem fent tasques de manteniment,Ez dago erabilgarri: mantentze-lanetan ari gara
-maint.lead,Pantalla de mantenimiento: frase bajo el título,Estamos desplegando mejoras en Peer4U. Tus datos están a salvo: vuelve en un rato y todo seguirá donde lo dejaste.,We're deploying improvements to Peer4U. Your data is safe: come back in a bit and everything will be where you left it.,Estem desplegant millores a Peer4U. Les teves dades estan a salvo: torna d'aquí a una estona i tot serà on ho vas deixar.,Peer4U-n hobekuntzak zabaltzen ari gara. Zure datuak salbu daude: itzuli pixka bat barru eta dena utzi zenuen lekuan egongo da.
-maint.backIn,Pantalla de mantenimiento: rótulo sobre la cuenta atrás hasta que acabe,Volvemos en,Back in,Tornem d'aquí a,Itzuliko gara:
-maint.around,"Pantalla de mantenimiento: la hora prevista de acabar, bajo la cuenta atrás",Hacia las {time},Around {time},Cap a les {time},{time} aldera
-maint.overdue,Pantalla de mantenimiento: la hora prevista ya ha pasado y sigue cerrado,Ya debería estar al caer: estamos con el último commit.,Any minute now: we're on the last commit.,Ja hauria d'estar a punt: estem amb l'últim commit.,Edozein unetan: azken commit-arekin ari gara.
-maint.check,Pantalla de mantenimiento: botón para volver a preguntar si ya ha acabado,Volver a mirar,Check again,Tornar a mirar,Berriro begiratu
-maint.adminLogin,Pantalla de mantenimiento sin sesión: enlace para que entre quien administra,Entrar (administración),Sign in (admins),Entrar (administració),Sartu (administrazioa)
-maint.banner.title,"Franja arriba de la web, solo para quien administra, mientras hay mantenimiento",Mantenimiento activado.,Maintenance mode is on.,Manteniment activat.,Mantentze-modua aktibatuta.
-maint.banner.body,Franja de mantenimiento para quien administra: qué ve el resto,Solo quien administra ve la web; el resto ve la pantalla de mantenimiento.,Only admins can see the site; everyone else gets the maintenance screen.,Només qui administra veu la web; la resta veu la pantalla de manteniment.,Administratzaileek bakarrik ikusten dute webgunea; besteek mantentze-pantaila ikusten dute.
-maint.banner.go,Franja de mantenimiento: botón que abre el panel de gestión,Ir al panel,Go to the panel,Anar al panell,Panelera joan
-countdown.days,Cuenta atrás: abreviatura de días («2 d 04:12:09»),d,d,d,e
-countdown.day,Campo de fecha de una cuenta atrás,Día,Day,Dia,Eguna
-countdown.time,Campo de hora de una cuenta atrás,Hora,Time,Hora,Ordua
-countdown.title,Ventanita flotante de cuentas atrás: su título,Cuenta atrás,Countdown,Compte enrere,Atzerako kontaketa
-countdown.add,Ventanita de cuentas atrás: botón «+» para fijar una,Fijar una cuenta atrás,Pin a countdown,Fixar un compte enrere,Atzerako kontaketa bat finkatu
-countdown.dock,"Ventanita de cuentas atrás, ya arrastrada: botón para devolverla a su esquina",Volver a la esquina,Dock to the corner,Tornar a la cantonada,Izkinara itzuli
-countdown.fold,Ventanita de cuentas atrás: botón para plegarla,Plegar,Minimise,Plegar,Tolestu
-countdown.unfold,Ventanita de cuentas atrás plegada: botón para desplegarla,Desplegar,Expand,Desplegar,Zabaldu
-countdown.lockers.title,Aviso de quien administra: título del aviso de limpieza de taquillas,Limpieza de taquillas,Locker clean-up,Neteja de taquilles,Armairuen garbiketa
-countdown.lockers.body,Aviso de limpieza de taquillas: qué pasa y qué hacer,"Ese día se abren todas las taquillas y se tira lo que haya dentro. Si tienes algo, sácalo antes: aquí no hay rollback.","That day every locker gets opened and whatever is inside goes in the bin. If you have stuff in yours, take it out before: there's no rollback.","Aquell dia s'obren totes les taquilles i es llença el que hi hagi a dins. Si hi tens alguna cosa, treu-la abans: aquí no hi ha rollback.","Egun horretan armairu guztiak irekiko dira eta barruan dagoena botako da. Zerbait baduzu, atera aurretik: hemen ez dago rollback-ik."
-countdown.next.none,Cuenta atrás «tu próximo compromiso» cuando no hay ninguno: su título,Tu próximo compromiso,Your next commitment,El teu proper compromís,Zure hurrengo konpromisoa
-countdown.next.empty,Cuenta atrás «tu próximo compromiso»: no hay nada en el calendario,"Nada a la vista en tu calendario: sin deadlines, de momento.",Nothing coming up in your calendar: no deadlines for now.,"Res a la vista al teu calendari: sense deadlines, de moment.","Ezer ez zure egutegian: deadline-rik ez, oraingoz."
-countdown.kind.notice,Etiqueta de una cuenta atrás: aviso de quien administra,Aviso,Notice,Avís,Oharra
-countdown.kind.event,Etiqueta de una cuenta atrás: un evento del calendario fijado,Evento,Event,Esdeveniment,Ekitaldia
-countdown.kind.next,"Etiqueta de una cuenta atrás: el próximo compromiso, que cambia solo",Próximo,Up next,Següent,Hurrengoa
-countdown.kind.custom,"Etiqueta de una cuenta atrás: una propia, con título y hora a mano",Tuya,Yours,Teva,Zurea
-countdown.dismiss,Botón (solo icono) para cerrar un aviso de quien administra; nombre accesible,Cerrar el aviso «{title}»,Dismiss the notice “{title}”,Tancar l'avís «{title}»,«{title}» oharra itxi
-countdown.unpin,Botón (solo icono) para quitar una cuenta atrás propia; nombre accesible,Quitar «{title}»,Unpin “{title}”,Treure «{title}»,«{title}» kendu
-countdown.dismissHint,Pista al pasar por el botón de cerrar un aviso,Cerrar: no te volverá a salir,Dismiss: it won't show up again,Tancar: no et tornarà a sortir,Itxi: ez zaizu berriro agertuko
-countdown.unpinHint,Pista al pasar por el botón de quitar una cuenta atrás propia,Quitar de la ventanita,Remove from the window,Treure de la finestreta,Leihotik kendu
-countdown.past,Cuenta atrás que ya ha llegado a cero (sale un rato y luego se va),Ya ha pasado,Already happened,Ja ha passat,Dagoeneko pasatu da
-countdown.pinNext,Ventanita de cuentas atrás: botón para fijar el próximo compromiso del calendario,Mi próximo compromiso,My next commitment,El meu proper compromís,Nire hurrengo konpromisoa
-countdown.customTitle,Ventanita de cuentas atrás: campo del título de una propia,Algo tuyo,Something of yours,Alguna cosa teva,Zure zerbait
-countdown.customPlaceholder,Ejemplo dentro del campo del título de una cuenta atrás propia,Entrega de minishell,minishell deadline,Entrega de minishell,minishell-en entrega
-countdown.pin,Ventanita de cuentas atrás: botón para fijar la propia,Fijar,Pin,Fixa,Finkatu
-countdown.fromCalendar,Ventanita de cuentas atrás: pista bajo el formulario,Un evento concreto se fija desde su ficha del calendario.,"To pin a specific event, open it in your calendar.",Un esdeveniment concret es fixa des de la seva fitxa del calendari.,Ekitaldi zehatz bat egutegiko bere fitxatik finkatzen da.
-countdown.pinEvent,Ficha de un evento del calendario: botón para fijar su cuenta atrás,Fijar cuenta atrás,Pin countdown,Fixa el compte enrere,Atzerako kontaketa finkatu
-countdown.unpinEvent,Ficha de un evento del calendario ya fijado: botón para quitar su cuenta atrás,Quitar cuenta atrás,Unpin countdown,Treu el compte enrere,Atzerako kontaketa kendu
-countdown.goals,Formulario de fijar cuenta atrás: rótulo de las metas de la agenda,Entrega de una meta,A goal's hand-in,Lliurament d'una meta,Helburu baten entrega
-countdown.goalsNone,Formulario de fijar cuenta atrás: no hay metas en marcha,No tienes metas en marcha en tu agenda.,You have no active goals in your agenda.,No tens metes en marxa a la teva agenda.,Ez duzu helbururik martxan zure agendan.
-countdown.goalNew,Formulario de fijar cuenta atrás: poner una meta nueva de un proyecto,Nueva meta de un proyecto,New project goal,Nova meta d'un projecte,Proiektu baten helburu berria
-countdown.mine,Vista de cuentas atrás: las que tienes,Tus cuentas atrás,Your countdowns,Els teus comptes enrere,Zure atzerako kontaketak
-countdown.none,Vista de cuentas atrás: aún no tienes ninguna,"Ninguna todavía: fija tu próximo compromiso, algo tuyo o un evento de abajo.","None yet: pin your next commitment, something of yours or an event below.","Cap encara: fixa el teu proper compromís, alguna cosa teva o un esdeveniment de sota.","Bat ere ez oraindik: finkatu zure hurrengo konpromisoa, zure zerbait edo beheko ekitaldi bat."
-countdown.coming,"Vista de cuentas atrás: los eventos de los próximos días, para fijarlos",Lo que viene (próximos {n} días),Coming up (next {n} days),El que ve (propers {n} dies),Datozenak (hurrengo {n} egunak)
-countdown.comingNone,Vista de cuentas atrás: no hay eventos próximos,Nada en tu calendario en este tiempo.,Nothing in your calendar in this period.,Res al teu calendari en aquest temps.,Ezer ez zure egutegian epe honetan.
-countdown.seeAll,Ventanita de cuentas atrás: enlace a la vista de cuentas atrás del calendario,Ver todo en el calendario,See it all in the calendar,Veure-ho tot al calendari,Dena egutegian ikusi
+clave,contexto,es,en,ca,eu,fr
+maint.badge,Pantalla de mantenimiento: etiqueta encima del título,Mantenimiento,Maintenance,Manteniment,Mantentze-lanak,
+maint.title,Pantalla de mantenimiento: título grande que ve quien no administra,No disponible: estamos en labores de mantenimiento,Unavailable: we're doing some maintenance,No disponible: estem fent tasques de manteniment,Ez dago erabilgarri: mantentze-lanetan ari gara,
+maint.lead,Pantalla de mantenimiento: frase bajo el título,Estamos desplegando mejoras en Peer4U. Tus datos están a salvo: vuelve en un rato y todo seguirá donde lo dejaste.,We're deploying improvements to Peer4U. Your data is safe: come back in a bit and everything will be where you left it.,Estem desplegant millores a Peer4U. Les teves dades estan a salvo: torna d'aquí a una estona i tot serà on ho vas deixar.,Peer4U-n hobekuntzak zabaltzen ari gara. Zure datuak salbu daude: itzuli pixka bat barru eta dena utzi zenuen lekuan egongo da.,
+maint.backIn,Pantalla de mantenimiento: rótulo sobre la cuenta atrás hasta que acabe,Volvemos en,Back in,Tornem d'aquí a,Itzuliko gara:,
+maint.around,"Pantalla de mantenimiento: la hora prevista de acabar, bajo la cuenta atrás",Hacia las {time},Around {time},Cap a les {time},{time} aldera,
+maint.overdue,Pantalla de mantenimiento: la hora prevista ya ha pasado y sigue cerrado,Ya debería estar al caer: estamos con el último commit.,Any minute now: we're on the last commit.,Ja hauria d'estar a punt: estem amb l'últim commit.,Edozein unetan: azken commit-arekin ari gara.,
+maint.check,Pantalla de mantenimiento: botón para volver a preguntar si ya ha acabado,Volver a mirar,Check again,Tornar a mirar,Berriro begiratu,
+maint.adminLogin,Pantalla de mantenimiento sin sesión: enlace para que entre quien administra,Entrar (administración),Sign in (admins),Entrar (administració),Sartu (administrazioa),
+maint.banner.title,"Franja arriba de la web, solo para quien administra, mientras hay mantenimiento",Mantenimiento activado.,Maintenance mode is on.,Manteniment activat.,Mantentze-modua aktibatuta.,
+maint.banner.body,Franja de mantenimiento para quien administra: qué ve el resto,Solo quien administra ve la web; el resto ve la pantalla de mantenimiento.,Only admins can see the site; everyone else gets the maintenance screen.,Només qui administra veu la web; la resta veu la pantalla de manteniment.,Administratzaileek bakarrik ikusten dute webgunea; besteek mantentze-pantaila ikusten dute.,
+maint.banner.go,Franja de mantenimiento: botón que abre el panel de gestión,Ir al panel,Go to the panel,Anar al panell,Panelera joan,
+countdown.days,Cuenta atrás: abreviatura de días («2 d 04:12:09»),d,d,d,e,
+countdown.day,Campo de fecha de una cuenta atrás,Día,Day,Dia,Eguna,
+countdown.time,Campo de hora de una cuenta atrás,Hora,Time,Hora,Ordua,
+countdown.title,Ventanita flotante de cuentas atrás: su título,Cuenta atrás,Countdown,Compte enrere,Atzerako kontaketa,
+countdown.add,Ventanita de cuentas atrás: botón «+» para fijar una,Fijar una cuenta atrás,Pin a countdown,Fixar un compte enrere,Atzerako kontaketa bat finkatu,
+countdown.dock,"Ventanita de cuentas atrás, ya arrastrada: botón para devolverla a su esquina",Volver a la esquina,Dock to the corner,Tornar a la cantonada,Izkinara itzuli,
+countdown.fold,Ventanita de cuentas atrás: botón para plegarla,Plegar,Minimise,Plegar,Tolestu,
+countdown.unfold,Ventanita de cuentas atrás plegada: botón para desplegarla,Desplegar,Expand,Desplegar,Zabaldu,
+countdown.lockers.title,Aviso de quien administra: título del aviso de limpieza de taquillas,Limpieza de taquillas,Locker clean-up,Neteja de taquilles,Armairuen garbiketa,
+countdown.lockers.body,Aviso de limpieza de taquillas: qué pasa y qué hacer,"Ese día se abren todas las taquillas y se tira lo que haya dentro. Si tienes algo, sácalo antes: aquí no hay rollback.","That day every locker gets opened and whatever is inside goes in the bin. If you have stuff in yours, take it out before: there's no rollback.","Aquell dia s'obren totes les taquilles i es llença el que hi hagi a dins. Si hi tens alguna cosa, treu-la abans: aquí no hi ha rollback.","Egun horretan armairu guztiak irekiko dira eta barruan dagoena botako da. Zerbait baduzu, atera aurretik: hemen ez dago rollback-ik.",
+countdown.next.none,Cuenta atrás «tu próximo compromiso» cuando no hay ninguno: su título,Tu próximo compromiso,Your next commitment,El teu proper compromís,Zure hurrengo konpromisoa,
+countdown.next.empty,Cuenta atrás «tu próximo compromiso»: no hay nada en el calendario,"Nada a la vista en tu calendario: sin deadlines, de momento.",Nothing coming up in your calendar: no deadlines for now.,"Res a la vista al teu calendari: sense deadlines, de moment.","Ezer ez zure egutegian: deadline-rik ez, oraingoz.",
+countdown.kind.notice,Etiqueta de una cuenta atrás: aviso de quien administra,Aviso,Notice,Avís,Oharra,
+countdown.kind.event,Etiqueta de una cuenta atrás: un evento del calendario fijado,Evento,Event,Esdeveniment,Ekitaldia,
+countdown.kind.next,"Etiqueta de una cuenta atrás: el próximo compromiso, que cambia solo",Próximo,Up next,Següent,Hurrengoa,
+countdown.kind.custom,"Etiqueta de una cuenta atrás: una propia, con título y hora a mano",Tuya,Yours,Teva,Zurea,
+countdown.dismiss,Botón (solo icono) para cerrar un aviso de quien administra; nombre accesible,Cerrar el aviso «{title}»,Dismiss the notice “{title}”,Tancar l'avís «{title}»,«{title}» oharra itxi,
+countdown.unpin,Botón (solo icono) para quitar una cuenta atrás propia; nombre accesible,Quitar «{title}»,Unpin “{title}”,Treure «{title}»,«{title}» kendu,
+countdown.dismissHint,Pista al pasar por el botón de cerrar un aviso,Cerrar: no te volverá a salir,Dismiss: it won't show up again,Tancar: no et tornarà a sortir,Itxi: ez zaizu berriro agertuko,
+countdown.unpinHint,Pista al pasar por el botón de quitar una cuenta atrás propia,Quitar de la ventanita,Remove from the window,Treure de la finestreta,Leihotik kendu,
+countdown.past,Cuenta atrás que ya ha llegado a cero (sale un rato y luego se va),Ya ha pasado,Already happened,Ja ha passat,Dagoeneko pasatu da,
+countdown.pinNext,Ventanita de cuentas atrás: botón para fijar el próximo compromiso del calendario,Mi próximo compromiso,My next commitment,El meu proper compromís,Nire hurrengo konpromisoa,
+countdown.customTitle,Ventanita de cuentas atrás: campo del título de una propia,Algo tuyo,Something of yours,Alguna cosa teva,Zure zerbait,
+countdown.customPlaceholder,Ejemplo dentro del campo del título de una cuenta atrás propia,Entrega de minishell,minishell deadline,Entrega de minishell,minishell-en entrega,
+countdown.pin,Ventanita de cuentas atrás: botón para fijar la propia,Fijar,Pin,Fixa,Finkatu,
+countdown.fromCalendar,Ventanita de cuentas atrás: pista bajo el formulario,Un evento concreto se fija desde su ficha del calendario.,"To pin a specific event, open it in your calendar.",Un esdeveniment concret es fixa des de la seva fitxa del calendari.,Ekitaldi zehatz bat egutegiko bere fitxatik finkatzen da.,
+countdown.pinEvent,Ficha de un evento del calendario: botón para fijar su cuenta atrás,Fijar cuenta atrás,Pin countdown,Fixa el compte enrere,Atzerako kontaketa finkatu,
+countdown.unpinEvent,Ficha de un evento del calendario ya fijado: botón para quitar su cuenta atrás,Quitar cuenta atrás,Unpin countdown,Treu el compte enrere,Atzerako kontaketa kendu,
+countdown.goals,Formulario de fijar cuenta atrás: rótulo de las metas de la agenda,Entrega de una meta,A goal's hand-in,Lliurament d'una meta,Helburu baten entrega,
+countdown.goalsNone,Formulario de fijar cuenta atrás: no hay metas en marcha,No tienes metas en marcha en tu agenda.,You have no active goals in your agenda.,No tens metes en marxa a la teva agenda.,Ez duzu helbururik martxan zure agendan.,
+countdown.goalNew,Formulario de fijar cuenta atrás: poner una meta nueva de un proyecto,Nueva meta de un proyecto,New project goal,Nova meta d'un projecte,Proiektu baten helburu berria,
+countdown.mine,Vista de cuentas atrás: las que tienes,Tus cuentas atrás,Your countdowns,Els teus comptes enrere,Zure atzerako kontaketak,
+countdown.none,Vista de cuentas atrás: aún no tienes ninguna,"Ninguna todavía: fija tu próximo compromiso, algo tuyo o un evento de abajo.","None yet: pin your next commitment, something of yours or an event below.","Cap encara: fixa el teu proper compromís, alguna cosa teva o un esdeveniment de sota.","Bat ere ez oraindik: finkatu zure hurrengo konpromisoa, zure zerbait edo beheko ekitaldi bat.",
+countdown.coming,"Vista de cuentas atrás: los eventos de los próximos días, para fijarlos",Lo que viene (próximos {n} días),Coming up (next {n} days),El que ve (propers {n} dies),Datozenak (hurrengo {n} egunak),
+countdown.comingNone,Vista de cuentas atrás: no hay eventos próximos,Nada en tu calendario en este tiempo.,Nothing in your calendar in this period.,Res al teu calendari en aquest temps.,Ezer ez zure egutegian epe honetan.,
+countdown.seeAll,Ventanita de cuentas atrás: enlace a la vista de cuentas atrás del calendario,Ver todo en el calendario,See it all in the calendar,Veure-ho tot al calendari,Dena egutegian ikusi,

@@ -214,7 +214,7 @@ pero la primera vez que se abre un proyecto tarda algo más.
 PUT /me/settings → 204. Todos los campos son opcionales.
 { "campusId": 58, "lang": "en", "title": "residente" }
 
-`lang` es `es`, `en`, `ca` o `eu`.
+`lang` es `es`, `en`, `ca`, `eu` o `fr`.
 
 Cambiar `campusId` cambia de qué campus son **todas** las listas (compañeros,
 terapias, tablón y pizarras). `title` solo se acepta si ya está desbloqueado

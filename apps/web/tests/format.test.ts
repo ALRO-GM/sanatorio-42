@@ -38,5 +38,6 @@ describe('formatsFor: números y fechas en el idioma elegido', () => {
   it('los formateadores se crean una vez por idioma', () => {
     expect(formatsFor('ca')).toBe(formatsFor('ca'))
     expect(formatsFor('ca')).not.toBe(formatsFor('eu'))
+    expect(formatsFor('fr')).not.toBe(formatsFor('en'))
   })
 })

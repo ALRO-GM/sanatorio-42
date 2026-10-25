@@ -58,22 +58,29 @@ function toTree(node: unknown): Tree {
 }
 
 /**
- * Lo que cuelga de `prefix` en un idioma, o en el de reserva si ese idioma no
- * lo tiene. `translated` dice si es del idioma pedido.
+ * Lo que cuelga de `prefix` en un idioma o, si ese idioma no lo tiene, en el de
+ * reserva: primero `middle` (el `fallback` del idioma, como el inglés para el
+ * francés) y después el español. `translated` dice si es del idioma pedido.
  *
  * @param own      Los textos del idioma pedido (`undefined` si no se conoce).
  * @param fallback Los del español.
  * @param isFallback `true` si el idioma pedido es el propio español.
+ * @param middle   Los del idioma al que cae el pedido antes que al español.
  */
 export function pickTree(
   own: Readonly<Record<string, string>> | undefined,
   fallback: Readonly<Record<string, string>>,
   prefix: string,
   isFallback: boolean,
+  middle?: Readonly<Record<string, string>>,
 ): { value: unknown; translated: boolean } {
   const mine = own === undefined ? undefined : unflatten(own, prefix)
 
-  return mine === undefined
+  if (mine !== undefined) return { value: mine, translated: true }
+
+  const second = middle === undefined ? undefined : unflatten(middle, prefix)
+
+  return second === undefined
     ? { value: unflatten(fallback, prefix), translated: isFallback }
-    : { value: mine, translated: true }
+    : { value: second, translated: false }
 }

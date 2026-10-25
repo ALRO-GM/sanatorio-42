@@ -14,7 +14,7 @@ import { readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-export const LANG_CODES = ['es', 'en', 'ca', 'eu'] as const
+export const LANG_CODES = ['es', 'en', 'ca', 'eu', 'fr'] as const
 export type LangCode = (typeof LANG_CODES)[number]
 
 const TEXTOS_DIR = fileURLToPath(new URL('../src/shared/i18n/textos', import.meta.url))
@@ -124,7 +124,11 @@ export function readTables(dir = TEXTOS_DIR): TextRow[] {
   return tableFiles(dir).flatMap(({ theme, file }) => readTable(theme, readFileSync(file, 'utf8')))
 }
 
-/** El diccionario de un idioma: solo lo que tiene texto (lo vacío cae al español). */
+/**
+ * El diccionario de un idioma: solo lo que tiene texto. Lo vacío lo pone la web
+ * en su idioma de reserva (`fallback` en `LANGS`, el inglés para el francés) o
+ * en español.
+ */
 export function dictionaryOf(rows: readonly TextRow[], lang: LangCode): Record<string, string> {
   return Object.fromEntries(
     rows.filter((row) => row.text[lang] !== '').map((row) => [row.key, row.text[lang]]),

@@ -10,12 +10,14 @@ import ca from 'virtual:textos/ca'
 import en from 'virtual:textos/en'
 import es from 'virtual:textos/es'
 import eu from 'virtual:textos/eu'
-import { pluralOf } from '../src/shared/i18n'
+import fr from 'virtual:textos/fr'
+import { LANGS as ALL, loadLang, lookup, pluralOf } from '../src/shared/i18n'
+import { pickTree } from '../src/shared/i18n/tree'
 import { localeOf } from '../src/shared/i18n/locale'
 import { treeOf } from './tree-of'
 
-const LANGS = ['es', 'en', 'ca', 'eu'] as const
-const OTHERS = { en, ca, eu }
+const LANGS = ['es', 'en', 'ca', 'eu', 'fr'] as const
+const OTHERS = { en, ca, eu, fr }
 
 /** Los huecos de un texto (`{login}`, `{n}`…), ordenados. */
 const holes = (text: string): string[] => (text.match(/\{\w+\}/g) ?? []).sort()
@@ -61,8 +63,45 @@ describe('idiomas', () => {
   })
 
   it('cada idioma escribe las fechas a su manera', () => {
-    expect(LANGS.map(localeOf)).toEqual(['es-ES', 'en-GB', 'ca-ES', 'eu-ES'])
+    expect(LANGS.map(localeOf)).toEqual(['es-ES', 'en-GB', 'ca-ES', 'eu-ES', 'fr-FR'])
     expect(localeOf('xx')).toBe('es-ES')
+  })
+})
+
+describe('francés', () => {
+  it('sale en el selector como «Français» y cae al inglés', () => {
+    expect(ALL.fr.name).toBe('Français')
+    expect(ALL.fr.fallback).toBe('en')
+  })
+
+  it('un texto sin francés sale en inglés; sin inglés, en español', async () => {
+    await loadLang('fr')
+
+    for (const key of Object.keys(es)) {
+      expect(lookup('fr', key)).toBe(fr[key] ?? en[key] ?? es[key])
+    }
+    // Mientras la tabla no tenga su francés, lo que se ve es el inglés.
+    if (fr['app.loading'] === undefined) expect(lookup('fr', 'app.loading')).toBe('Loading…')
+    expect(lookup('fr', 'no.existe')).toBeUndefined()
+  })
+
+  it('un texto largo sin francés sale en inglés y dice que no está traducido', () => {
+    const own = { 'x.doc.title': 'Titre' }
+    const english = { 'x.doc.title': 'Title', 'x.list.1': 'One' }
+    const spanish = { 'x.doc.title': 'Título', 'x.list.1': 'Uno', 'x.only.1': 'Solo' }
+
+    expect(pickTree(own, spanish, 'x.doc', false, english)).toEqual({
+      value: { title: 'Titre' },
+      translated: true,
+    })
+    expect(pickTree(own, spanish, 'x.list', false, english)).toEqual({
+      value: ['One'],
+      translated: false,
+    })
+    expect(pickTree(own, spanish, 'x.only', false, english)).toEqual({
+      value: ['Solo'],
+      translated: false,
+    })
   })
 })
 
@@ -79,12 +118,21 @@ describe('plurales', () => {
   })
 
   it('la forma sale de las reglas del idioma: uno es «one»; cero, dos o 1,5, «many»', () => {
-    for (const lang of LANGS) {
+    for (const lang of LANGS.filter((code) => code !== 'fr')) {
       expect(pluralOf(lang, 1)).toBe('one')
       expect(pluralOf(lang, 0)).toBe('many')
       expect(pluralOf(lang, 2)).toBe('many')
       expect(pluralOf(lang, 1.5)).toBe('many')
     }
+  })
+
+  it('en francés, cero y 1,5 van en singular («0 réponse»); dos y un millón, en plural', () => {
+    expect(pluralOf('fr', 0)).toBe('one')
+    expect(pluralOf('fr', 1)).toBe('one')
+    expect(pluralOf('fr', 1.5)).toBe('one')
+    expect(pluralOf('fr', 2)).toBe('many')
+    // Intl llama «many» a la forma de los millones («1 000 000 de réponses»).
+    expect(pluralOf('fr', 1_000_000)).toBe('many')
   })
 })
 

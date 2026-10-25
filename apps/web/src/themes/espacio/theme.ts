@@ -11,12 +11,13 @@ import './theme.css'
  */
 export const espacio: ThemeManifest = {
   id: 'espacio',
-  name: { es: 'Espacial', en: 'Space', ca: 'Espacial', eu: 'Espaziala' },
+  name: { es: 'Espacial', en: 'Space', ca: 'Espacial', eu: 'Espaziala', fr: 'Spatial' },
   hint: {
     es: 'Ciencia ficción: nebulosas, planetas y neón',
     en: 'Sci-fi: nebulae, planets and neon',
     ca: 'Ciència-ficció: nebuloses, planetes i neó',
     eu: 'Zientzia-fikzioa: nebulosak, planetak eta neoia',
+    fr: 'Science-fiction : nébuleuses, planètes et néon',
   },
   preview: {
     bg: 'radial-gradient(circle at 80% 10%, #6a3fd0, #0a0b24 70%)',

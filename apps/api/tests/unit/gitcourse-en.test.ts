@@ -35,6 +35,8 @@ describe('curso de git en inglés', () => {
       expect(en?.theory.how).toHaveLength(level.theory.how.length)
       expect(levelIn(level, 'en').title).toBe(en?.title)
       expect(levelIn(level, 'es')).toBe(level)
+      // El francés cae al inglés mientras no tenga sus textos.
+      expect(levelIn(level, 'fr')).toEqual(levelIn(level, 'en'))
     },
   )
 
@@ -45,6 +47,7 @@ describe('curso de git en inglés', () => {
 
       expect(en?.tasks).toHaveLength(mission.tasks.length)
       expect(missionIn(mission, 'en').story).toBe(en?.story)
+      expect(missionIn(mission, 'fr').story).toBe(en?.story)
 
       // Las misiones salen de comprobar un origin vacío: ninguna cumplida.
       const remote: Remote = { commits: {}, branches: {}, tags: {}, locked: [] }

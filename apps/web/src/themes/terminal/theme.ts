@@ -12,12 +12,13 @@ import './theme.css'
  */
 export const terminal: ThemeManifest = {
   id: 'terminal',
-  name: { es: 'Terminal', en: 'Terminal', ca: 'Terminal', eu: 'Terminala' },
+  name: { es: 'Terminal', en: 'Terminal', ca: 'Terminal', eu: 'Terminala', fr: 'Terminal' },
   hint: {
     es: 'Crudo: consola, monoespaciada y líneas rectas',
     en: 'Raw: console, monospace and straight lines',
     ca: 'Cru: consola, monoespaiada i línies rectes',
     eu: 'Gordina: kontsola, tarte bakarrekoa eta lerro zuzenak',
+    fr: 'Brut : console, chasse fixe et lignes droites',
   },
   preview: {
     bg: '#050805',

@@ -46,6 +46,16 @@ describe('texto legal', () => {
     }
   })
 
+  it('el francés, mientras no tenga su texto, ve el inglés y lo dice', () => {
+    const fr = legalText(treeOf('fr'))
+
+    if (fr.translated) {
+      expect(fr.text.sections).toHaveLength(es.sections.length)
+    } else {
+      expect(fr.text).toEqual(en)
+    }
+  })
+
   it('un idioma sin traducción ve el castellano, y lo dice', () => {
     expect(legalText(treeOf('xx'))).toEqual({ text: es, translated: false })
     expect(legalText(treeOf('es')).translated).toBe(true)

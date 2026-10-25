@@ -14,23 +14,58 @@ type Dictionary = Record<string, string>
  * Idiomas disponibles. Los textos salen de las tablas de `textos/` (una por
  * tema, con una columna por idioma): añadir un idioma es añadir su columna a
  * las tablas, su código en `tools/textos.ts` y su entrada aquí. Lo que le falte
- * cae al español.
+ * cae a su `fallback`, si lo tiene, y si no al español.
  *
  * Solo el español viaja con la web; los demás se descargan al elegirlos.
  */
-export const LANGS: Record<Lang, { name: string; load: () => Promise<{ default: Dictionary }> }> = {
+type LangEntry = {
+  name: string
+  load: () => Promise<{ default: Dictionary }>
+  /**
+   * El idioma que se enseña donde a este le falta el texto, antes que el
+   * español. El francés cae al inglés: en la sede de 42 en Francia se lee
+   * mejor que el castellano mientras se traduce.
+   */
+  fallback?: Lang
+}
+
+export const LANGS: Record<Lang, LangEntry> = {
   es: { name: 'Español', load: () => Promise.resolve({ default: es }) },
   en: { name: 'English', load: () => import('virtual:textos/en') },
   ca: { name: 'Català', load: () => import('virtual:textos/ca') },
   eu: { name: 'Euskara', load: () => import('virtual:textos/eu') },
+  fr: { name: 'Français', load: () => import('virtual:textos/fr'), fallback: 'en' },
 }
 
 /** Los idiomas ya descargados. */
 const loaded: Partial<Record<Lang, Dictionary>> = { es }
 
-/** Descarga los textos de un idioma, si no lo estaban ya. */
+/** Un idioma y el de su `fallback`, los dos: lo que hace falta para pintarlo. */
+const needed = (lang: Lang): Lang[] => {
+  const { fallback } = LANGS[lang]
+
+  return fallback === undefined ? [lang] : [lang, fallback]
+}
+
+/** Descarga los textos de un idioma (y los de su `fallback`), si no lo estaban ya. */
 export async function loadLang(lang: Lang): Promise<void> {
-  loaded[lang] ??= (await LANGS[lang].load()).default
+  await Promise.all(
+    needed(lang).map(async (code) => {
+      loaded[code] ??= (await LANGS[code].load()).default
+    }),
+  )
+}
+
+/**
+ * El texto de una clave en un idioma: el suyo, si no el de su `fallback` y si
+ * no el español. `undefined` si no está en ninguno.
+ */
+export function lookup(lang: Lang, key: string): string | undefined {
+  const { fallback } = LANGS[lang]
+
+  return (
+    loaded[lang]?.[key] ?? (fallback === undefined ? undefined : loaded[fallback]?.[key]) ?? es[key]
+  )
 }
 
 import { localeOf } from './locale'
@@ -52,8 +87,9 @@ export type TranslateCount = (
 
 /**
  * `one` o `many` según las reglas de plural del idioma (`Intl.PluralRules`).
- * Para los cuatro de la web solo hay dos formas; un idioma con más («few»,
- * «two»…) caería en `many` hasta que sus tablas tengan esas columnas.
+ * Para los cinco de la web solo hay dos formas; un idioma con más («few»,
+ * «two»…) caería en `many` hasta que sus tablas tengan esas columnas. En
+ * francés el cero y 1,5 van en singular («0 réponse»): les toca `one`.
  */
 export function pluralOf(lang: string, n: number): 'one' | 'many' {
   return new Intl.PluralRules(localeOf(lang)).select(n) === 'one' ? 'one' : 'many'
@@ -66,7 +102,8 @@ type I18n = {
   tn: TranslateCount
   /**
    * Un texto largo guardado en muchas claves (una lista, un documento): su
-   * estructura en este idioma o, si no está traducido, en español. Ver `tree.ts`.
+   * estructura en este idioma o, si no está traducido, en el de su `fallback`
+   * o en español (`translated: false`). Ver `tree.ts`.
    */
   tree: (prefix: string) => { value: unknown; translated: boolean }
 }
@@ -104,7 +141,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   const [arrived, setArrived] = useState(0)
 
   useEffect(() => {
-    if (loaded[lang] !== undefined) return
+    if (needed(lang).every((code) => loaded[code] !== undefined)) return
 
     let alive = true
 
@@ -137,7 +174,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
    */
   const t = useCallback<Translate>(
     (key, vars) => {
-      const template = loaded[lang]?.[key] ?? es[key] ?? key
+      const template = lookup(lang, key) ?? key
 
       if (vars === undefined) {
         return template
@@ -158,7 +195,17 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   )
 
   const tree = useCallback(
-    (prefix: string) => pickTree(loaded[lang], es, prefix, lang === 'es'),
+    (prefix: string) => {
+      const { fallback } = LANGS[lang]
+
+      return pickTree(
+        loaded[lang],
+        es,
+        prefix,
+        lang === 'es',
+        fallback === undefined ? undefined : loaded[fallback],
+      )
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [lang, arrived],
   )

@@ -29,7 +29,7 @@ Monorepo con workspaces de npm. Ver `README.md` y `docs/architecture.md`.
 ## Skills y subagentes
 
 En `.claude/skills/` hay una skill por acción recurrente: `nueva-funcionalidad`
-(de la idea a producción), `traducir` (textos en las cuatro lenguas, banco de
+(de la idea a producción), `traducir` (textos en las cinco lenguas, banco de
 preguntas y curso de git), `migracion`, `comprobar` (`npm run check` y cómo
 leer sus fallos), `revisar` (lista de revisión de este fichero), `desplegar`
 (push, despliegue desacoplado del SSH, vigilancia y cupo de GitHub),
@@ -80,7 +80,7 @@ regla de aquí, cambia también la skill que la repite.
 - API: un cambio de esquema es una migración nueva en
   `src/core/db/migrations/`; las existentes no se editan.
 - Web: **los textos solo viven en las tablas** de `shared/i18n/textos/*.csv`
-  (una por tema; clave, contexto, español, inglés, catalán y euskera). Los
+  (una por tema; clave, contexto, español, inglés, catalán, euskera y francés). Los
   componentes no llevan texto escrito: usan `t('clave')`. Cada texto nuevo o
   cambiado se edita en su tabla, con su contexto y al menos español e inglés;
   la clave que deja de usarse se borra. Después, `npm run textos -- --write` y

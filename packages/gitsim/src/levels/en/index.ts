@@ -4,6 +4,8 @@
  * idiomas (los comprueba el motor), así que solo cambia lo que se lee.
  */
 
+import { courseLang } from '@sanatorio/course'
+
 import type { GroupMission, MissionItem } from '../groups.js'
 import { filled } from '../groups.js'
 import type { Level } from '../types.js'
@@ -16,14 +18,14 @@ const LEVELS_EN: Readonly<Record<string, LevelText>> = { ...BASICS_EN, ...SHARED
 
 /** Un punto del curso con sus textos en ese idioma (los que falten, en español). */
 export function levelIn(level: Level, lang: string): Level {
-  const text = lang === 'en' ? LEVELS_EN[level.id] : undefined
+  const text = courseLang(lang) === 'en' ? LEVELS_EN[level.id] : undefined
 
   return text === undefined ? level : { ...level, ...text }
 }
 
 /** Una prueba de grupo con su historia y sus tareas en ese idioma. */
 export function missionIn(mission: GroupMission, lang: string): GroupMission {
-  const text = lang === 'en' ? GROUPS_EN[mission.gate] : undefined
+  const text = courseLang(lang) === 'en' ? GROUPS_EN[mission.gate] : undefined
 
   return text === undefined ? mission : { ...mission, ...text }
 }
@@ -33,7 +35,7 @@ export function missionItemIn(
   item: Pick<MissionItem, 'text' | 'login' | 'key' | 'n'>,
   lang: string,
 ): string {
-  const template = lang === 'en' ? MISSION_ITEMS_EN[item.key] : undefined
+  const template = courseLang(lang) === 'en' ? MISSION_ITEMS_EN[item.key] : undefined
 
   if (template === undefined) return item.text
 

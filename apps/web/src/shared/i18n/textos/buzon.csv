@@ -1,115 +1,115 @@
-clave,contexto,es,en,ca,eu
-notices.title,Título del buzón de avisos y conversaciones (cabecera),Buzón,Mailbox,Bústia,Postontzia
-notices.open,Nombre accesible del botón del buzón,Abrir el buzón,Open the mailbox,Obre la bústia,Ireki postontzia
-notices.openUnread,Nombre accesible del buzón con avisos sin leer,Abrir el buzón: {n} sin leer,Open the mailbox: {n} unread,Obre la bústia: {n} sense llegir,Ireki postontzia: {n} irakurri gabe
-notices.empty,Buzón vacío,No tienes ningún aviso.,You have no notices.,No tens cap avís.,Ez duzu abisurik.
-notices.readAll,Botón para marcar todo como leído,Marcar todo como leído,Mark all as read,Marca-ho tot com a llegit,Markatu dena irakurrita gisa
-notices.unsave,Botón para dejar de guardar un aviso,Dejar de guardar,Unsave,Deixa de desar,Ez gorde
-notices.removeRead,Botón para borrar los avisos leídos,Borrar los leídos ({n}),Delete read ({n}),Esborra els llegits ({n}),Ezabatu irakurritakoak ({n})
-notices.filter,Filtro de avisos,Qué avisos,Which notices,Quins avisos,Zein abisu
-notices.filter.all,Filtro: todos,Todos,All,Tots,Denak
-notices.filter.saved,Filtro: guardados,Guardados,Saved,Desats,Gordetakoak
-notices.noneSaved,No hay avisos guardados,No tienes avisos guardados.,You have no saved notices.,No tens avisos desats.,Ez duzu abisu gordeturik.
-notices.unreadMark,Prefijo accesible de un aviso sin leer,Sin leer:,Unread:,Sense llegir:,Irakurri gabe:
-notices.someone,Cuando no se sabe quién provocó el aviso,Alguien,Someone,Algú,Norbait
-notices.now,Hace un momento,ahora mismo,just now,ara mateix,oraintxe
-notices.minutesAgo,Hace unos minutos,hace {n} min,{n} min ago,fa {n} min,duela {n} min
-notices.hoursAgo,Hace unas horas,hace {n} h,{n} h ago,fa {n} h,duela {n} h
-notices.go.inbox,Enlace del aviso: ver la respuesta,ver la respuesta,see the answer,veure la resposta,ikusi erantzuna
-notices.go.gestion,Enlace del aviso: ir al panel,ir al panel,go to the panel,ves al panell,joan panelera
-notices.go.guardia,Enlace del aviso: ir a tu on-call,ir a tu on-call,go to your on-call,ves al teu on-call,joan zure on-call-era
-notices.go.tablon,Enlace del aviso: ir a proyectos,ir a proyectos,go to projects,ves a projectes,joan proiektuetara
-notices.go.pizarras,Enlace del aviso: ir a pizarras,ir a pizarras,go to whiteboards,ves a pissarres,joan arbeletara
-notices.go.terapia,Enlace del aviso: ir a sprints,ir a sprints,go to sprints,ves a sprints,joan sprintetara
-notices.go.calendario,Enlace del aviso: ir al calendario,ir al calendario,go to the calendar,ves al calendari,joan egutegira
-notices.kind.ticket_answered,Aviso: respondieron a tu incidencia,{from} ha respondido a lo que enviaste,{from} answered what you sent,{from} ha respost al que vas enviar,{from}(e)k bidali zenuenari erantzun dio
-notices.kind.ticket_new,Aviso para admins: incidencia nueva,{from} ha escrito al buzón,{from} wrote to the mailbox,{from} ha escrit a la bústia,{from}(e)k postontzira idatzi du
-notices.kind.chat,Aviso: mensajes nuevos en un chat; {n} es cuántos,{from} ha escrito en un chat tuyo ({n}),{from} wrote in one of your chats ({n}),{from} ha escrit en un xat teu ({n}),{from}(e)k zure txat batean idatzi du ({n})
-notices.kind.booking_requested,Aviso: te piden ayuda,{from} te pide un rato de ayuda,{from} asks you for some help,{from} et demana una estona d'ajuda,{from}(e)k laguntza-tarte bat eskatzen dizu
-notices.kind.booking_accepted,Aviso: aceptaron tu reserva,{from} ha aceptado tu reserva,{from} accepted your booking,{from} ha acceptat la teva reserva,{from}(e)k zure erreserba onartu du
-notices.kind.booking_declined,Aviso: rechazaron tu reserva,{from} no puede atender tu reserva,{from} can't take your booking,{from} no pot atendre la teva reserva,{from}(e)k ezin du zure erreserba artatu
-notices.kind.booking_cancelled,Aviso: anularon una reserva,{from} ha anulado una reserva,{from} cancelled a booking,{from} ha anul·lat una reserva,{from}(e)k erreserba bat bertan behera utzi du
-notices.kind.doubt_answered,Aviso: respondieron a tu duda,{from} ha respondido a tu duda,{from} answered your question,{from} ha respost al teu dubte,{from}(e)k zure zalantzari erantzun dio
-notices.kind.doubt_solved,Aviso: tu respuesta resolvió una duda,{from} dice que tu respuesta resolvió su duda,{from} says your answer solved their question,{from} diu que la teva resposta va resoldre el seu dubte,{from}(e)k dio zure erantzunak bere zalantza ebatzi zuela
-notices.kind.proposal_accepted,Aviso: validaron tu cambio en una guía,{from} ha validado tu cambio en una guía,{from} validated your change to a guide,{from} ha validat el teu canvi en una guia,{from}(e)k gida bateko zure aldaketa balidatu du
-notices.kind.proposal_rejected,Aviso: rechazaron tu cambio en una guía,{from} ha rechazado tu cambio en una guía,{from} rejected your change to a guide,{from} ha rebutjat el teu canvi en una guia,{from}(e)k gida bateko zure aldaketa baztertu du
-notices.kind.board_changed,Aviso: cambió una pizarra,{from} ha cambiado la hora o el sitio de una pizarra,{from} changed the time or place of a whiteboard,{from} ha canviat l'hora o el lloc d'una pissarra,{from}(e)k arbel baten ordua edo lekua aldatu du
-notices.kind.board_cancelled,Aviso: se canceló una pizarra,{from} ha cancelado una pizarra,{from} cancelled a whiteboard,{from} ha cancel·lat una pissarra,{from}(e)k arbel bat bertan behera utzi du
-notices.kind.group_joined,Aviso: alguien entró en tu grupo,{from} se ha apuntado a tu sprint,{from} joined your sprint,{from} s'ha apuntat al teu sprint,{from}(e)k zure sprintean izena eman du
-notices.kind.group_closed,Aviso: se cerró un grupo,{from} ha cerrado un sprint,{from} closed a sprint,{from} ha tancat un sprint,{from}(e)k sprint bat itxi du
-notices.kind.group_invite,Aviso: hay un grupo de tu proyecto,{from} ha abierto un sprint de un proyecto que estás haciendo,{from} opened a sprint for a project you are doing,{from} ha obert un sprint d'un projecte que estàs fent,{from}(e)k egiten ari zaren proiektu baten sprinta ireki du
-notices.kind.clicker_defense,Aviso para admins: alguien explicó su partida,{from} ha explicado su partida de Code Clicker tras una revisión,{from} explained their Code Clicker run after a review,{from} ha explicat la seva partida de Code Clicker després d'una revisió,{from}(e)k Code Clickerreko bere partida azaldu du berrikuspen baten ondoren
-inbox.open,Menú de la cuenta: incidencias y sugerencias,Incidencias y sugerencias,Issues and suggestions,Incidències i suggeriments,Gorabeherak eta iradokizunak
-inbox.title,Título del formulario de incidencias,Incidencias y sugerencias,Issues and suggestions,Incidències i suggeriments,Gorabeherak eta iradokizunak
-inbox.kind,Formulario: tipo,Tipo,Type,Tipus,Mota
-inbox.to,A quién llega y dónde se responde,Para: quien administra Peer4U. La respuesta aparece aquí y te llega un aviso al buzón.,To: whoever runs Peer4U. The answer shows up here and you get a notice in your mailbox.,Per a: qui administra Peer4U. La resposta apareix aquí i t'arriba un avís a la bústia.,Norentzat: Peer4U kudeatzen duenarentzat. Erantzuna hemen agertuko da eta abisu bat iritsiko zaizu postontzira.
-inbox.section,Formulario: sección afectada,Sección,Section,Secció,Atala
-inbox.section.general,Sección: toda la web,Toda la web,The whole site,Tot el web,Web osoa
-inbox.category.bug,Tipo: algo falla,Fallo,Bug,Error,Akatsa
-inbox.category.improvement,Tipo: mejorar algo,Mejora de algo que ya hay,Improve something that exists,Millora del que ja hi ha,Lehendik dagoen zerbaiten hobekuntza
-inbox.category.idea,Tipo: idea nueva,Idea nueva,New idea,Idea nova,Ideia berria
-inbox.category.translation,Tipo: traducción,Traducción,Translation,Traducció,Itzulpena
-inbox.category.other,Tipo: otra cosa,Otra cosa,Something else,Una altra cosa,Beste zerbait
-inbox.body.bug,Indicación para describir un fallo,Qué estabas haciendo y qué ha pasado,What you were doing and what happened,Què estaves fent i què ha passat,Zer ari zinen egiten eta zer gertatu da
-inbox.body.improvement,Indicación para una mejora,Qué cambiarías y por qué,What you would change and why,Què canviaries i per què,Zer aldatuko zenuke eta zergatik
-inbox.body.idea,Indicación para una idea,Qué te gustaría poder hacer,What you would like to be able to do,Què t'agradaria poder fer,Zer egin ahal izatea gustatuko litzaizuke
-inbox.body.translation,Indicación para una traducción,Qué texto está mal y cómo debería decir,Which text is wrong and what it should say,Quin text està malament i com hauria de dir,Zein testu dago gaizki eta nola esan beharko luke
-inbox.body.other,Indicación genérica,Cuéntanos,Tell us,Explica-ho,Kontatu
-inbox.kind.issue,Tipo de envío: algo no va,Fallo,Bug,Error,Akatsa
-inbox.kind.idea,Tipo de envío: mejora,Mejora,Improvement,Millora,Hobekuntza
-inbox.kind.report,Tipo de envío: denuncia,Denuncia,Report,Denúncia,Salaketa
-inbox.bodyLabel,Formulario: detalle,Detalle,Details,Detall,Xehetasuna
-inbox.mine,Lista de lo que has enviado,Lo que has enviado,What you have sent,El que has enviat,Bidali duzuna
-inbox.none,No has enviado nada,Todavía no has enviado nada.,You have not sent anything yet.,Encara no has enviat res.,Oraindik ez duzu ezer bidali.
-inbox.pending,Sin respuesta todavía,Pendiente de respuesta,Waiting for an answer,Pendent de resposta,Erantzunaren zain
-inbox.answer,Prefijo de la respuesta de admin,Respuesta:,Answer:,Resposta:,Erantzuna:
-report.button,Botón para denunciar un mensaje,Denunciar,Report,Denuncia,Salatu
-report.why,Formulario de denuncia: qué pasa,Qué pasa con este mensaje,What is wrong with this message,Què passa amb aquest missatge,Zer gertatzen da mezu honekin
-report.send,Botón para enviar la denuncia,Enviar denuncia,Send report,Envia la denúncia,Bidali salaketa
-report.reason.spam,Motivo: spam,Spam,Spam,Correu brossa,Spama
-report.reason.harassment,Motivo: acoso,Acoso,Harassment,Assetjament,Jazarpena
-report.reason.insults,Motivo: insultos,Insultos,Insults,Insults,Irainak
-report.reason.other,Motivo: otro,Otro motivo,Another reason,Un altre motiu,Beste arrazoi bat
-report.whyOptional,Detalle opcional,Algo más que contar (opcional),Anything else to add (optional),Alguna cosa més a explicar (opcional),Beste zerbait kontatzeko (aukerakoa)
-report.sent,Confirmación de denuncia,Denuncia enviada. Gracias por avisar.,Report sent. Thanks for letting us know.,Denúncia enviada. Gràcies per avisar.,Salaketa bidalita. Eskerrik asko abisatzeagatik.
-broadcast.from,Comunicado de quien administra,Comunicado de {login},Message from {login},Comunicat de {login},{login}(r)en jakinarazpena
-broadcast.must,El comunicado obliga a elegir,Elige una opción para cerrar este mensaje.,Pick an option to close this message.,Tria una opció per tancar aquest missatge.,Aukeratu aukera bat mezu hau ixteko.
-broadcast.later,Botón para verlo luego,Ahora no,Not now,Ara no,Orain ez
-notices.compose,Botón para escribir un mensaje,Escribir un mensaje,Write a message,Escriu un missatge,Idatzi mezu bat
-notices.toAdmin,Destinatario: administración,A quien administra,To the admins,A qui administra,Kudeatzaileari
-notices.toPeer,Destinatario: otra persona,A alguien del campus,To someone on campus,A algú del campus,Campuseko norbaiti
-notices.peerLabel,Buscador de destinatario,Busca por login o por nombre,Search by login or name,Cerca per login o per nom,Bilatu loginaren edo izenaren arabera
-notices.tab.notices,Pestaña del buzón: avisos,Avisos,Notices,Avisos,Oharrak
-notices.tab.chats,Pestaña del buzón: conversaciones,Conversaciones,Conversations,Converses,Elkarrizketak
-notices.go.conversations,Enlace del aviso: abrir la conversación,abrir la conversación,open the conversation,obre la conversa,ireki elkarrizketa
-notices.kind.chat_reminder,Recordatorio que te pusiste,Recordatorio: tienes pendiente responder a {from},Reminder: you still have to answer {from},Et recordo que tens pendent respondre a {from},Gogoratu: {from} erabiltzaileari erantzuteko duzu
-chats.back,Botón para volver a la lista de conversaciones,Conversaciones,Conversations,Converses,Elkarrizketak
-chats.filter,Filtro de conversaciones,Qué conversaciones se ven,Which conversations are shown,Quines converses es veuen,Zein elkarrizketa ikusten diren
-chats.state.all,Filtro: todas,Todas,All,Totes,Denak
-chats.state.unread,Filtro: sin leer,No leídas,Unread,No llegides,Irakurri gabeak
-chats.state.pending,Filtro: pendientes de responder,Pendientes,Pending,Pendents,Zain daudenak
-chats.byKind,Filtro por tipo,Por tipo,By type,Per tipus,Motaren arabera
-chats.allKinds,Filtro: todos los tipos,Todos los tipos,All types,Tots els tipus,Mota guztiak
-chats.byProject,Filtro por proyecto,Por proyecto,By project,Per projecte,Proiektuaren arabera
-chats.allProjects,Filtro: cualquier proyecto,Cualquier proyecto,Any project,Qualsevol projecte,Edozein proiektu
-chats.kind.direct,Tipo: mensaje directo,Mensaje directo,Direct message,Missatge directe,Mezu zuzena
-chats.kind.group,Tipo: sprint en grupo,Sprint,Sprint,Sprint,Sprinta
-chats.kind.board,Tipo: pizarra,Pizarra,Whiteboard,Pissarra,Arbela
-chats.kind.help,Tipo: sesión de ayuda,Sesión de ayuda,Help session,Sessió d'ajuda,Laguntza-saioa
-chats.kind.event,Tipo: evento,Evento,Event,Esdeveniment,Ekitaldia
-chats.said.seen,Respuesta al aviso: lo ha visto,Lo ha visto,Has seen it,Ho ha vist,Ikusi du
-chats.said.late,Respuesta al aviso: llega tarde,Se retrasa,Running late,Fa tard,Berandu dator
-chats.said.absent,Respuesta al aviso: no va,No puede ir,Can't make it,No hi pot anar,Ezin du joan
-chats.said.text,Mensaje de texto (se abrevia),…,…,…,…
-chats.empty,Sin conversaciones,Todavía no tienes ninguna conversación. Escribe a alguien desde aquí.,You have no conversations yet. Write to someone from here.,Encara no tens cap conversa. Escriu a algú des d'aquí.,Oraindik ez duzu elkarrizketarik. Idatzi norbaiti hemendik.
-chats.noneShown,Ninguna cumple los filtros,Ninguna conversación cumple esos filtros.,No conversation matches those filters.,Cap conversa compleix aquests filtres.,Ez dago iragazki horiek betetzen dituen elkarrizketarik.
-chats.pending,Etiqueta: pendiente de responder,Pendiente,Pending,Pendent,Zain
-chats.markUnread,Botón para marcar como no leída,Marcar como no leída,Mark as unread,Marca com a no llegida,Markatu irakurri gabe gisa
-chats.unreadCount,Mensajes sin leer,{n} sin leer,{n} unread,{n} sense llegir,{n} irakurri gabe
-chats.remind,Botón para programar un recordatorio,Recordármelo…,Remind me…,Recorda-m'ho…,Gogorarazi…
-chats.remindSet,Cuándo salta el recordatorio,Recordatorio: {when},Reminder: {when},Recordatori: {when},Gogorarazpena: {when}
-chats.remind.hour,Recordatorio: en una hora,Dentro de una hora,In an hour,D'aquí a una hora,Ordubete barru
-chats.remind.tomorrow,Recordatorio: mañana,Mañana a las 9:00,Tomorrow at 9:00,Demà a les 9:00,Bihar 9:00etan
-chats.remind.monday,Recordatorio: el lunes,El lunes a las 9:00,On Monday at 9:00,Dilluns a les 9:00,Astelehenean 9:00etan
-chats.remind.none,Quitar el recordatorio,Quitar el recordatorio,Remove the reminder,Treu el recordatori,Kendu gogorarazpena
-chats.project,Elegir de qué proyecto va la conversación,¿De qué proyecto va?,Which project is it about?,De quin projecte va?,Zein proiekturi buruzkoa da?
+clave,contexto,es,en,ca,eu,fr
+notices.title,Título del buzón de avisos y conversaciones (cabecera),Buzón,Mailbox,Bústia,Postontzia,
+notices.open,Nombre accesible del botón del buzón,Abrir el buzón,Open the mailbox,Obre la bústia,Ireki postontzia,
+notices.openUnread,Nombre accesible del buzón con avisos sin leer,Abrir el buzón: {n} sin leer,Open the mailbox: {n} unread,Obre la bústia: {n} sense llegir,Ireki postontzia: {n} irakurri gabe,
+notices.empty,Buzón vacío,No tienes ningún aviso.,You have no notices.,No tens cap avís.,Ez duzu abisurik.,
+notices.readAll,Botón para marcar todo como leído,Marcar todo como leído,Mark all as read,Marca-ho tot com a llegit,Markatu dena irakurrita gisa,
+notices.unsave,Botón para dejar de guardar un aviso,Dejar de guardar,Unsave,Deixa de desar,Ez gorde,
+notices.removeRead,Botón para borrar los avisos leídos,Borrar los leídos ({n}),Delete read ({n}),Esborra els llegits ({n}),Ezabatu irakurritakoak ({n}),
+notices.filter,Filtro de avisos,Qué avisos,Which notices,Quins avisos,Zein abisu,
+notices.filter.all,Filtro: todos,Todos,All,Tots,Denak,
+notices.filter.saved,Filtro: guardados,Guardados,Saved,Desats,Gordetakoak,
+notices.noneSaved,No hay avisos guardados,No tienes avisos guardados.,You have no saved notices.,No tens avisos desats.,Ez duzu abisu gordeturik.,
+notices.unreadMark,Prefijo accesible de un aviso sin leer,Sin leer:,Unread:,Sense llegir:,Irakurri gabe:,
+notices.someone,Cuando no se sabe quién provocó el aviso,Alguien,Someone,Algú,Norbait,
+notices.now,Hace un momento,ahora mismo,just now,ara mateix,oraintxe,
+notices.minutesAgo,Hace unos minutos,hace {n} min,{n} min ago,fa {n} min,duela {n} min,
+notices.hoursAgo,Hace unas horas,hace {n} h,{n} h ago,fa {n} h,duela {n} h,
+notices.go.inbox,Enlace del aviso: ver la respuesta,ver la respuesta,see the answer,veure la resposta,ikusi erantzuna,
+notices.go.gestion,Enlace del aviso: ir al panel,ir al panel,go to the panel,ves al panell,joan panelera,
+notices.go.guardia,Enlace del aviso: ir a tu on-call,ir a tu on-call,go to your on-call,ves al teu on-call,joan zure on-call-era,
+notices.go.tablon,Enlace del aviso: ir a proyectos,ir a proyectos,go to projects,ves a projectes,joan proiektuetara,
+notices.go.pizarras,Enlace del aviso: ir a pizarras,ir a pizarras,go to whiteboards,ves a pissarres,joan arbeletara,
+notices.go.terapia,Enlace del aviso: ir a sprints,ir a sprints,go to sprints,ves a sprints,joan sprintetara,
+notices.go.calendario,Enlace del aviso: ir al calendario,ir al calendario,go to the calendar,ves al calendari,joan egutegira,
+notices.kind.ticket_answered,Aviso: respondieron a tu incidencia,{from} ha respondido a lo que enviaste,{from} answered what you sent,{from} ha respost al que vas enviar,{from}(e)k bidali zenuenari erantzun dio,
+notices.kind.ticket_new,Aviso para admins: incidencia nueva,{from} ha escrito al buzón,{from} wrote to the mailbox,{from} ha escrit a la bústia,{from}(e)k postontzira idatzi du,
+notices.kind.chat,Aviso: mensajes nuevos en un chat; {n} es cuántos,{from} ha escrito en un chat tuyo ({n}),{from} wrote in one of your chats ({n}),{from} ha escrit en un xat teu ({n}),{from}(e)k zure txat batean idatzi du ({n}),
+notices.kind.booking_requested,Aviso: te piden ayuda,{from} te pide un rato de ayuda,{from} asks you for some help,{from} et demana una estona d'ajuda,{from}(e)k laguntza-tarte bat eskatzen dizu,
+notices.kind.booking_accepted,Aviso: aceptaron tu reserva,{from} ha aceptado tu reserva,{from} accepted your booking,{from} ha acceptat la teva reserva,{from}(e)k zure erreserba onartu du,
+notices.kind.booking_declined,Aviso: rechazaron tu reserva,{from} no puede atender tu reserva,{from} can't take your booking,{from} no pot atendre la teva reserva,{from}(e)k ezin du zure erreserba artatu,
+notices.kind.booking_cancelled,Aviso: anularon una reserva,{from} ha anulado una reserva,{from} cancelled a booking,{from} ha anul·lat una reserva,{from}(e)k erreserba bat bertan behera utzi du,
+notices.kind.doubt_answered,Aviso: respondieron a tu duda,{from} ha respondido a tu duda,{from} answered your question,{from} ha respost al teu dubte,{from}(e)k zure zalantzari erantzun dio,
+notices.kind.doubt_solved,Aviso: tu respuesta resolvió una duda,{from} dice que tu respuesta resolvió su duda,{from} says your answer solved their question,{from} diu que la teva resposta va resoldre el seu dubte,{from}(e)k dio zure erantzunak bere zalantza ebatzi zuela,
+notices.kind.proposal_accepted,Aviso: validaron tu cambio en una guía,{from} ha validado tu cambio en una guía,{from} validated your change to a guide,{from} ha validat el teu canvi en una guia,{from}(e)k gida bateko zure aldaketa balidatu du,
+notices.kind.proposal_rejected,Aviso: rechazaron tu cambio en una guía,{from} ha rechazado tu cambio en una guía,{from} rejected your change to a guide,{from} ha rebutjat el teu canvi en una guia,{from}(e)k gida bateko zure aldaketa baztertu du,
+notices.kind.board_changed,Aviso: cambió una pizarra,{from} ha cambiado la hora o el sitio de una pizarra,{from} changed the time or place of a whiteboard,{from} ha canviat l'hora o el lloc d'una pissarra,{from}(e)k arbel baten ordua edo lekua aldatu du,
+notices.kind.board_cancelled,Aviso: se canceló una pizarra,{from} ha cancelado una pizarra,{from} cancelled a whiteboard,{from} ha cancel·lat una pissarra,{from}(e)k arbel bat bertan behera utzi du,
+notices.kind.group_joined,Aviso: alguien entró en tu grupo,{from} se ha apuntado a tu sprint,{from} joined your sprint,{from} s'ha apuntat al teu sprint,{from}(e)k zure sprintean izena eman du,
+notices.kind.group_closed,Aviso: se cerró un grupo,{from} ha cerrado un sprint,{from} closed a sprint,{from} ha tancat un sprint,{from}(e)k sprint bat itxi du,
+notices.kind.group_invite,Aviso: hay un grupo de tu proyecto,{from} ha abierto un sprint de un proyecto que estás haciendo,{from} opened a sprint for a project you are doing,{from} ha obert un sprint d'un projecte que estàs fent,{from}(e)k egiten ari zaren proiektu baten sprinta ireki du,
+notices.kind.clicker_defense,Aviso para admins: alguien explicó su partida,{from} ha explicado su partida de Code Clicker tras una revisión,{from} explained their Code Clicker run after a review,{from} ha explicat la seva partida de Code Clicker després d'una revisió,{from}(e)k Code Clickerreko bere partida azaldu du berrikuspen baten ondoren,
+inbox.open,Menú de la cuenta: incidencias y sugerencias,Incidencias y sugerencias,Issues and suggestions,Incidències i suggeriments,Gorabeherak eta iradokizunak,
+inbox.title,Título del formulario de incidencias,Incidencias y sugerencias,Issues and suggestions,Incidències i suggeriments,Gorabeherak eta iradokizunak,
+inbox.kind,Formulario: tipo,Tipo,Type,Tipus,Mota,
+inbox.to,A quién llega y dónde se responde,Para: quien administra Peer4U. La respuesta aparece aquí y te llega un aviso al buzón.,To: whoever runs Peer4U. The answer shows up here and you get a notice in your mailbox.,Per a: qui administra Peer4U. La resposta apareix aquí i t'arriba un avís a la bústia.,Norentzat: Peer4U kudeatzen duenarentzat. Erantzuna hemen agertuko da eta abisu bat iritsiko zaizu postontzira.,
+inbox.section,Formulario: sección afectada,Sección,Section,Secció,Atala,
+inbox.section.general,Sección: toda la web,Toda la web,The whole site,Tot el web,Web osoa,
+inbox.category.bug,Tipo: algo falla,Fallo,Bug,Error,Akatsa,
+inbox.category.improvement,Tipo: mejorar algo,Mejora de algo que ya hay,Improve something that exists,Millora del que ja hi ha,Lehendik dagoen zerbaiten hobekuntza,
+inbox.category.idea,Tipo: idea nueva,Idea nueva,New idea,Idea nova,Ideia berria,
+inbox.category.translation,Tipo: traducción,Traducción,Translation,Traducció,Itzulpena,
+inbox.category.other,Tipo: otra cosa,Otra cosa,Something else,Una altra cosa,Beste zerbait,
+inbox.body.bug,Indicación para describir un fallo,Qué estabas haciendo y qué ha pasado,What you were doing and what happened,Què estaves fent i què ha passat,Zer ari zinen egiten eta zer gertatu da,
+inbox.body.improvement,Indicación para una mejora,Qué cambiarías y por qué,What you would change and why,Què canviaries i per què,Zer aldatuko zenuke eta zergatik,
+inbox.body.idea,Indicación para una idea,Qué te gustaría poder hacer,What you would like to be able to do,Què t'agradaria poder fer,Zer egin ahal izatea gustatuko litzaizuke,
+inbox.body.translation,Indicación para una traducción,Qué texto está mal y cómo debería decir,Which text is wrong and what it should say,Quin text està malament i com hauria de dir,Zein testu dago gaizki eta nola esan beharko luke,
+inbox.body.other,Indicación genérica,Cuéntanos,Tell us,Explica-ho,Kontatu,
+inbox.kind.issue,Tipo de envío: algo no va,Fallo,Bug,Error,Akatsa,
+inbox.kind.idea,Tipo de envío: mejora,Mejora,Improvement,Millora,Hobekuntza,
+inbox.kind.report,Tipo de envío: denuncia,Denuncia,Report,Denúncia,Salaketa,
+inbox.bodyLabel,Formulario: detalle,Detalle,Details,Detall,Xehetasuna,
+inbox.mine,Lista de lo que has enviado,Lo que has enviado,What you have sent,El que has enviat,Bidali duzuna,
+inbox.none,No has enviado nada,Todavía no has enviado nada.,You have not sent anything yet.,Encara no has enviat res.,Oraindik ez duzu ezer bidali.,
+inbox.pending,Sin respuesta todavía,Pendiente de respuesta,Waiting for an answer,Pendent de resposta,Erantzunaren zain,
+inbox.answer,Prefijo de la respuesta de admin,Respuesta:,Answer:,Resposta:,Erantzuna:,
+report.button,Botón para denunciar un mensaje,Denunciar,Report,Denuncia,Salatu,
+report.why,Formulario de denuncia: qué pasa,Qué pasa con este mensaje,What is wrong with this message,Què passa amb aquest missatge,Zer gertatzen da mezu honekin,
+report.send,Botón para enviar la denuncia,Enviar denuncia,Send report,Envia la denúncia,Bidali salaketa,
+report.reason.spam,Motivo: spam,Spam,Spam,Correu brossa,Spama,
+report.reason.harassment,Motivo: acoso,Acoso,Harassment,Assetjament,Jazarpena,
+report.reason.insults,Motivo: insultos,Insultos,Insults,Insults,Irainak,
+report.reason.other,Motivo: otro,Otro motivo,Another reason,Un altre motiu,Beste arrazoi bat,
+report.whyOptional,Detalle opcional,Algo más que contar (opcional),Anything else to add (optional),Alguna cosa més a explicar (opcional),Beste zerbait kontatzeko (aukerakoa),
+report.sent,Confirmación de denuncia,Denuncia enviada. Gracias por avisar.,Report sent. Thanks for letting us know.,Denúncia enviada. Gràcies per avisar.,Salaketa bidalita. Eskerrik asko abisatzeagatik.,
+broadcast.from,Comunicado de quien administra,Comunicado de {login},Message from {login},Comunicat de {login},{login}(r)en jakinarazpena,
+broadcast.must,El comunicado obliga a elegir,Elige una opción para cerrar este mensaje.,Pick an option to close this message.,Tria una opció per tancar aquest missatge.,Aukeratu aukera bat mezu hau ixteko.,
+broadcast.later,Botón para verlo luego,Ahora no,Not now,Ara no,Orain ez,
+notices.compose,Botón para escribir un mensaje,Escribir un mensaje,Write a message,Escriu un missatge,Idatzi mezu bat,
+notices.toAdmin,Destinatario: administración,A quien administra,To the admins,A qui administra,Kudeatzaileari,
+notices.toPeer,Destinatario: otra persona,A alguien del campus,To someone on campus,A algú del campus,Campuseko norbaiti,
+notices.peerLabel,Buscador de destinatario,Busca por login o por nombre,Search by login or name,Cerca per login o per nom,Bilatu loginaren edo izenaren arabera,
+notices.tab.notices,Pestaña del buzón: avisos,Avisos,Notices,Avisos,Oharrak,
+notices.tab.chats,Pestaña del buzón: conversaciones,Conversaciones,Conversations,Converses,Elkarrizketak,
+notices.go.conversations,Enlace del aviso: abrir la conversación,abrir la conversación,open the conversation,obre la conversa,ireki elkarrizketa,
+notices.kind.chat_reminder,Recordatorio que te pusiste,Recordatorio: tienes pendiente responder a {from},Reminder: you still have to answer {from},Et recordo que tens pendent respondre a {from},Gogoratu: {from} erabiltzaileari erantzuteko duzu,
+chats.back,Botón para volver a la lista de conversaciones,Conversaciones,Conversations,Converses,Elkarrizketak,
+chats.filter,Filtro de conversaciones,Qué conversaciones se ven,Which conversations are shown,Quines converses es veuen,Zein elkarrizketa ikusten diren,
+chats.state.all,Filtro: todas,Todas,All,Totes,Denak,
+chats.state.unread,Filtro: sin leer,No leídas,Unread,No llegides,Irakurri gabeak,
+chats.state.pending,Filtro: pendientes de responder,Pendientes,Pending,Pendents,Zain daudenak,
+chats.byKind,Filtro por tipo,Por tipo,By type,Per tipus,Motaren arabera,
+chats.allKinds,Filtro: todos los tipos,Todos los tipos,All types,Tots els tipus,Mota guztiak,
+chats.byProject,Filtro por proyecto,Por proyecto,By project,Per projecte,Proiektuaren arabera,
+chats.allProjects,Filtro: cualquier proyecto,Cualquier proyecto,Any project,Qualsevol projecte,Edozein proiektu,
+chats.kind.direct,Tipo: mensaje directo,Mensaje directo,Direct message,Missatge directe,Mezu zuzena,
+chats.kind.group,Tipo: sprint en grupo,Sprint,Sprint,Sprint,Sprinta,
+chats.kind.board,Tipo: pizarra,Pizarra,Whiteboard,Pissarra,Arbela,
+chats.kind.help,Tipo: sesión de ayuda,Sesión de ayuda,Help session,Sessió d'ajuda,Laguntza-saioa,
+chats.kind.event,Tipo: evento,Evento,Event,Esdeveniment,Ekitaldia,
+chats.said.seen,Respuesta al aviso: lo ha visto,Lo ha visto,Has seen it,Ho ha vist,Ikusi du,
+chats.said.late,Respuesta al aviso: llega tarde,Se retrasa,Running late,Fa tard,Berandu dator,
+chats.said.absent,Respuesta al aviso: no va,No puede ir,Can't make it,No hi pot anar,Ezin du joan,
+chats.said.text,Mensaje de texto (se abrevia),…,…,…,…,
+chats.empty,Sin conversaciones,Todavía no tienes ninguna conversación. Escribe a alguien desde aquí.,You have no conversations yet. Write to someone from here.,Encara no tens cap conversa. Escriu a algú des d'aquí.,Oraindik ez duzu elkarrizketarik. Idatzi norbaiti hemendik.,
+chats.noneShown,Ninguna cumple los filtros,Ninguna conversación cumple esos filtros.,No conversation matches those filters.,Cap conversa compleix aquests filtres.,Ez dago iragazki horiek betetzen dituen elkarrizketarik.,
+chats.pending,Etiqueta: pendiente de responder,Pendiente,Pending,Pendent,Zain,
+chats.markUnread,Botón para marcar como no leída,Marcar como no leída,Mark as unread,Marca com a no llegida,Markatu irakurri gabe gisa,
+chats.unreadCount,Mensajes sin leer,{n} sin leer,{n} unread,{n} sense llegir,{n} irakurri gabe,
+chats.remind,Botón para programar un recordatorio,Recordármelo…,Remind me…,Recorda-m'ho…,Gogorarazi…,
+chats.remindSet,Cuándo salta el recordatorio,Recordatorio: {when},Reminder: {when},Recordatori: {when},Gogorarazpena: {when},
+chats.remind.hour,Recordatorio: en una hora,Dentro de una hora,In an hour,D'aquí a una hora,Ordubete barru,
+chats.remind.tomorrow,Recordatorio: mañana,Mañana a las 9:00,Tomorrow at 9:00,Demà a les 9:00,Bihar 9:00etan,
+chats.remind.monday,Recordatorio: el lunes,El lunes a las 9:00,On Monday at 9:00,Dilluns a les 9:00,Astelehenean 9:00etan,
+chats.remind.none,Quitar el recordatorio,Quitar el recordatorio,Remove the reminder,Treu el recordatori,Kendu gogorarazpena,
+chats.project,Elegir de qué proyecto va la conversación,¿De qué proyecto va?,Which project is it about?,De quin projecte va?,Zein proiekturi buruzkoa da?,

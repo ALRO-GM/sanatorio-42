@@ -3,6 +3,8 @@
  */
 
 import { describe, expect, it } from 'vitest'
+import gameEn from 'virtual:textos/juego/en'
+import gameFr from 'virtual:textos/juego/fr'
 
 import {
   ACHIEVEMENTS,
@@ -190,6 +192,15 @@ describe('code clicker: mejoras', () => {
         expect(about.length, upgrade.id).toBeGreaterThan(5)
         expect(`${name}${about}`).not.toMatch(/\{\w+\}/)
       }
+    }
+  })
+
+  it('en francés, lo que no tiene traducción sale en inglés y no en español', () => {
+    const ui = textsOf('fr').ui
+
+    for (const [key, english] of Object.entries(gameEn)) {
+      if (!key.startsWith('game.ui.')) continue
+      expect(ui[key.slice('game.ui.'.length)], key).toBe(gameFr[key] ?? english)
     }
   })
 })

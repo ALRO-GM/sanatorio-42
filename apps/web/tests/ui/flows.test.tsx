@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it } from 'vitest'
 
 import en from 'virtual:textos/en'
 import es from 'virtual:textos/es'
+import fr from 'virtual:textos/fr'
 import { must } from './must'
 import { openApp, settle } from './render'
 
@@ -93,6 +94,23 @@ describe('lo que hace la gente en la web, de principio a fin', () => {
     await user.selectOptions(screen.getByRole('combobox', { name: text('settings.lang') }), 'en')
     await settle(100)
     expect(screen.getAllByText(en['nav.cat.ayuda'] ?? '?').length).toBeGreaterThan(0)
+  }, 20_000)
+
+  it('idioma: elegir «Français» pone la web en francés y, lo que no tiene, en inglés', async () => {
+    const user = userEvent.setup()
+
+    await openApp('#/expediente')
+    await user.selectOptions(
+      screen.getByRole('combobox', { name: text('settings.lang') }),
+      screen.getByRole('option', { name: 'Français' }),
+    )
+    await settle(100)
+    expect(document.documentElement.lang).toBe('fr')
+    // Sin su celda en francés, la pestaña sale en inglés y no en español.
+    expect(
+      screen.getAllByText(fr['nav.cat.ayuda'] ?? en['nav.cat.ayuda'] ?? '?').length,
+    ).toBeGreaterThan(0)
+    expect(screen.queryByText(text('nav.cat.ayuda'))).toBeNull()
   }, 20_000)
 
   it('una dirección que no existe lleva a la portada, no a una pantalla en blanco', async () => {

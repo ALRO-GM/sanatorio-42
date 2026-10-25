@@ -301,10 +301,12 @@ describe('comunidad', () => {
       const { xp, repositories } = services
 
       await xp.updateSettings(actor('ana'), { lang: 'en' })
-      // Los cuatro idiomas de la web valen; uno inventado, no.
+      // Los cinco idiomas de la web valen; uno inventado, no.
       await xp.updateSettings(actor('ana'), { lang: 'ca' })
       await xp.updateSettings(actor('ana'), { lang: 'eu' })
-      await expectCode(xp.updateSettings(actor('ana'), { lang: 'fr' }), 'invalid_input')
+      await xp.updateSettings(actor('ana'), { lang: 'fr' })
+      expect(await repositories.profiles.get('ana')).toMatchObject({ lang: 'fr' })
+      await expectCode(xp.updateSettings(actor('ana'), { lang: 'de' }), 'invalid_input')
       await xp.updateSettings(actor('ana'), { lang: 'en' })
       await xp.updateSettings(actor('ana'), { campusId: 58 })
 

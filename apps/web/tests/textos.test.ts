@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest'
 
 import { dictionaryOf, parseCsv, readTable, readTables } from '../tools/textos'
 
-const HEAD = 'clave,contexto,es,en,ca,eu'
+const HEAD = 'clave,contexto,es,en,ca,eu,fr'
 
 describe('lector de CSV', () => {
   it('separa por comas y por líneas', () => {
@@ -40,14 +40,14 @@ describe('tablas', () => {
   it('lee cada fila con su tema y su línea, y se salta las vacías', () => {
     const rows = readTable(
       'prueba',
-      `${HEAD}\nx.uno,Botón,Uno,One,U,Bat\n,,,,,\nx.dos,Título,Dos,,,\n`,
+      `${HEAD}\nx.uno,Botón,Uno,One,U,Bat,Un\n,,,,,,\nx.dos,Título,Dos,,,,\n`,
     )
 
     expect(rows.map((row) => [row.key, row.line, row.theme])).toEqual([
       ['x.uno', 2, 'prueba'],
       ['x.dos', 4, 'prueba'],
     ])
-    expect(rows[0]?.text).toEqual({ es: 'Uno', en: 'One', ca: 'U', eu: 'Bat' })
+    expect(rows[0]?.text).toEqual({ es: 'Uno', en: 'One', ca: 'U', eu: 'Bat', fr: 'Un' })
   })
 
   it('una cabecera distinta o una fila sin todas sus columnas es un error con su sitio', () => {
@@ -56,10 +56,11 @@ describe('tablas', () => {
   })
 
   it('el diccionario de un idioma no lleva lo que está vacío', () => {
-    const rows = readTable('prueba', `${HEAD}\nx.uno,C,Uno,One,,\nx.dos,C,Dos,,,\n`)
+    const rows = readTable('prueba', `${HEAD}\nx.uno,C,Uno,One,,,\nx.dos,C,Dos,,,,\n`)
 
     expect(dictionaryOf(rows, 'en')).toEqual({ 'x.uno': 'One' })
     expect(dictionaryOf(rows, 'ca')).toEqual({})
+    expect(dictionaryOf(rows, 'fr')).toEqual({})
     expect(dictionaryOf(rows, 'es')).toEqual({ 'x.uno': 'Uno', 'x.dos': 'Dos' })
   })
 

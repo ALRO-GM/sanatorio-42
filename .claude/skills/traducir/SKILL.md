@@ -1,12 +1,12 @@
 ---
 name: traducir
-description: Añadir o cambiar textos de la web (tablas CSV con es/en/ca/eu), traducir el banco de preguntas o el curso de git, y comprobar que nada se queda sin traducir. Úsala para cualquier texto nuevo o cambiado.
+description: Añadir o cambiar textos de la web (tablas CSV con es/en/ca/eu/fr), traducir el banco de preguntas o el curso de git, y comprobar que nada se queda sin traducir. Úsala para cualquier texto nuevo o cambiado.
 ---
 
 # Traducir y mantener los textos
 
 Los textos de la web **solo** viven en `apps/web/src/shared/i18n/textos/*.csv`
-(una tabla por tema; columnas `clave, contexto, es, en, ca, eu`). Los
+(una tabla por tema; columnas `clave, contexto, es, en, ca, eu, fr`). Los
 componentes usan `t('clave')`. Reglas de redacción: `docs/textos.md`; tono y
 vocabulario: `AGENTS.md` («Reglas de producto»).
 
@@ -14,8 +14,10 @@ vocabulario: `AGENTS.md` («Reglas de producto»).
 
 1. Elige la tabla por tema (`comun`, `expediente`, `guardia`, `examenes`…) y
    un prefijo de clave coherente con las de esa tabla.
-2. Escribe la fila con **las cuatro lenguas** (un test obliga a ca y eu en todo
+2. Escribe la fila con **las cinco lenguas** (un test obliga a ca y eu en todo
    lo visible) y un `contexto` que diga dónde sale y qué es cada `{variable}`.
+   El francés se puede dejar vacío mientras `FR_REQUIRED` sea `false`
+   (`apps/web/tools/textos-cli.ts`): sale el inglés. Francés natural y tuteando.
    Si el contexto lleva comas, va entre comillas dobles.
 3. Español: segunda persona, lenguaje inclusivo (evita formas con género),
    comillas «», puntos suspensivos «…», tono de clínica cálida. Inglés natural

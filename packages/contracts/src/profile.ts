@@ -30,7 +30,7 @@ export type TitleId =
   // Quien ha corregido diez veces un mismo proyecto. Lleva al lado en cuántos.
   | 'maestro'
 
-export type Lang = 'es' | 'en' | 'ca' | 'eu'
+export type Lang = 'es' | 'en' | 'ca' | 'eu' | 'fr'
 
 /** `GET /me/profile` (la API añade además `homeCampusId`, ver `Profile`). */
 export type Expediente = {

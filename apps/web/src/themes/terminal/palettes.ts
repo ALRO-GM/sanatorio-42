@@ -120,7 +120,7 @@ export const TERMINAL_PALETTES: readonly ThemePalette[] = [
   // La de siempre: sin variables, los colores escritos en `theme.css`.
   {
     id: 'fosforo',
-    name: { es: 'Fósforo', en: 'Phosphor', ca: 'Fòsfor', eu: 'Fosforoa' },
+    name: { es: 'Fósforo', en: 'Phosphor', ca: 'Fòsfor', eu: 'Fosforoa', fr: 'Phosphore' },
     swatch: 'linear-gradient(135deg, #050805 0 50%, #4af626 50% 100%)',
     vars: {},
   },

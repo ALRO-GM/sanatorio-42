@@ -50,7 +50,9 @@ type Context = { game: Game; now: number; lang: Lang; selling: boolean; amount: 
 
 /** `12,3 %`, sin decimales de más. */
 const percent = (share: number, lang: Lang): string =>
-  (share * 100).toLocaleString(lang === 'en' ? 'en' : 'es', { maximumFractionDigits: 1 })
+  (share * 100).toLocaleString(lang === 'en' ? 'en' : lang === 'fr' ? 'fr' : 'es', {
+    maximumFractionDigits: 1,
+  })
 
 function buildingCard(id: BuildingId, context: Context, known: boolean): Card {
   const { game, now, lang, selling, amount } = context

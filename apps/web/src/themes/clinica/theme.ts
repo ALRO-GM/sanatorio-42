@@ -11,12 +11,19 @@ import './theme.css'
  */
 export const clinica: ThemeManifest = {
   id: 'clinica',
-  name: { es: 'Clean code', en: 'Clean code', ca: 'Clean code', eu: 'Clean code' },
+  name: {
+    es: 'Clean code',
+    en: 'Clean code',
+    ca: 'Clean code',
+    eu: 'Clean code',
+    fr: 'Clean code',
+  },
   hint: {
     es: 'Luminoso, con relieve y turquesa',
     en: 'Bright, with depth and turquoise',
     ca: 'Lluminós, amb relleu i turquesa',
     eu: 'Argitsua, erliebearekin eta turkesa',
+    fr: 'Lumineux, avec du relief et du turquoise',
   },
   preview: {
     bg: 'linear-gradient(135deg, #dff5f1, #eef3fb)',

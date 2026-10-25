@@ -10,6 +10,7 @@
  * - el código pide una clave que no está en ninguna tabla;
  * - hay una clave en las tablas que el código no usa;
  * - una traducción no conserva los huecos del español (`{login}`, `{n}`…);
+ * - falta el inglés (o el francés, con `FR_REQUIRED`) fuera del panel de gestión;
  * - una clave no tiene contexto;
  * - `docs/textos/` no está al día con las tablas.
  */
@@ -31,7 +32,20 @@ const LANG_NAMES: Record<string, string> = {
   en: 'Inglés',
   ca: 'Catalán',
   eu: 'Euskera',
+  fr: 'Francés',
 }
+
+/**
+ * ¿Es obligatorio el francés? Mientras se traduce, `false`: una celda `fr`
+ * vacía se acepta y la web enseña el inglés en su lugar. Cuando estén todas
+ * las traducciones se pone a `true` y una celda `fr` vacía es un error, igual
+ * que el inglés (salvo en el panel de gestión, `SPANISH_ONLY`). El `as boolean`
+ * es para que el linter no dé por muerta la otra rama mientras vale `false`.
+ */
+const FR_REQUIRED = false as boolean
+
+/** Los idiomas que no pueden quedarse vacíos fuera del panel de gestión. */
+const REQUIRED: readonly string[] = FR_REQUIRED ? ['en', 'fr'] : ['en']
 
 /** Lo que se queda en español a propósito en los demás idiomas. */
 const SPANISH_ONLY = /^(admin|quota|staff)\./
@@ -133,10 +147,10 @@ function themeDoc(theme: string, rows: readonly TextRow[], usage: Usage): string
     `Generado desde \`apps/web/src/shared/i18n/textos/${theme}.csv\` con`,
     '`npm run textos -- --write`. **No se edita a mano**: se edita la tabla.',
     '',
-    `${rows.length} textos. «—» es que falta la traducción: sale en español.`,
+    `${rows.length} textos. «—» es que falta la traducción: sale en español (en francés, en inglés).`,
     '',
-    '| Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |',
-    '| --- | --- | --- | --- | --- | --- | --- |',
+    `| Clave | Contexto | Dónde | ${LANG_CODES.map((lang) => LANG_NAMES[lang] ?? lang).join(' | ')} |`,
+    `| --- | --- | --- | ${LANG_CODES.map(() => '---').join(' | ')} |`,
   ]
 
   for (const row of rows) {
@@ -219,8 +233,10 @@ function main(): void {
           `${where}: «${row.key}» en ${lang} tiene los huecos ${holes(text) || 'ninguno'} y el español ${holes(row.text.es) || 'ninguno'}`,
         )
       }
-      if (lang === 'en' && text === '' && !SPANISH_ONLY.test(row.key)) {
-        problems.push(`${where}: «${row.key}» no está traducida al inglés`)
+      if (REQUIRED.includes(lang) && text === '' && !SPANISH_ONLY.test(row.key)) {
+        problems.push(
+          `${where}: «${row.key}» no está traducida al ${(LANG_NAMES[lang] ?? lang).toLowerCase()}`,
+        )
       }
     }
   }

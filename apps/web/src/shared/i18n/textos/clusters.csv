@@ -1,77 +1,77 @@
-clave,contexto,es,en,ca,eu
-map.title,Título del mapa de puestos del campus,Mapa de los clústeres,Cluster map,Mapa de clústers,Klusterren mapa
-map.loading,Mientras se dibuja el mapa,Dibujando el mapa…,Drawing the map…,Dibuixant el mapa…,Mapa marrazten…
-map.empty,Aún no hay plano del campus,Todavía no hay plano de este campus: se dibuja a medida que la gente se sienta.,No map for this campus yet: it gets drawn as people sit down.,Encara no hi ha plànol d'aquest campus: es va dibuixant a mesura que la gent s'asseu.,Oraindik ez dago campus honen planorik: jendea esertzen den heinean marrazten da.
-map.clusters,Selector de sala,Clústeres,Clusters,Clústers,Klusterrak
-map.cluster,Nombre de una sala del campus (en 42 se llaman así),Clúster {n},Cluster {n},Clúster {n},{n}. klusterra
-map.seatName,"Nombre completo de un puesto: clúster, fila y puesto",{cluster} · Fila {row} · Puesto {seat},{cluster} · Row {row} · Seat {seat},{cluster} · Fila {row} · Lloc {seat},{cluster} · {row}. ilara · {seat}. postua
-map.row,"Fila, abreviado",F{n},R{n},F{n},E{n}
-map.rowLong.one,Una fila,fila {rows},row {rows},fila {rows},{rows} ilara
-map.rowLong.many,Varias filas,filas {rows},rows {rows},files {rows},{rows} ilarak
-map.seatTaken,"Puesto ocupado por alguien a quien no puedes ver (otro grupo, u oculto)",Ocupado,Taken,Ocupat,Hartuta
-map.seatFree,Puesto libre,Libre,Free,Lliure,Libre
-map.seatReserved,Puesto reservado por un sprint,Reservado por un sprint,Reserved by a sprint,Reservat per un sprint,Sprint batek erreserbatuta
-map.you,Tu puesto,Tú,You,Tu,Zu
-map.duty.patient,Alguien disponible que hace tu proyecto,Peer disponible,Peer available,Peer disponible,Peerra eskuragarri
-map.duty.specialist,Alguien disponible que aprobó tu proyecto,Senior disponible,Senior available,Sènior disponible,Seniorra eskuragarri
-map.reservedFor,Para qué grupo está reservado y cuándo,Reservado para el sprint de {project} · {days} · {start}–{end},Reserved for {project} sprint · {days} · {start}–{end},Reservat per a l'sprint de {project} · {days} · {start}–{end},{project} sprinterako erreserbatuta · {days} · {start}–{end}
-map.unplaced,Gente cuyo puesto no sale en el plano,Sin sitio en el plano:,Not on the map:,Sense lloc al plànol:,Planoan lekurik gabe:
-map.legend.specialist,Leyenda: senior disponible,Senior disponible,Senior available,Sènior disponible,Seniorra eskuragarri
-map.legend.patient,Leyenda: peer disponible,Peer disponible,Peer available,Peer disponible,Peerra eskuragarri
-map.legend.reserved,Leyenda: sprint reunido ahora,Sprint en curso,Sprint in session,Sprint en curs,Sprinta abian
-map.legend.occupied,Leyenda: ocupado,Ocupado,Taken,Ocupat,Okupatuta
-map.legend.free,Leyenda: libre,Libre,Free,Lliure,Libre
-map.legend.picked,Leyenda: elegido para un grupo,Elegido,Chosen,Triat,Aukeratuta
-map.noProjects,Esa persona no tiene proyectos en curso,Sin proyectos en curso,No projects in progress,Sense projectes en curs,Abian den proiekturik gabe
-map.legend.clash,Leyenda: reservado a esa hora,Reservado a esa hora,Reserved at that time,Reservat a aquesta hora,Ordu horretan erreserbatuta
-map.profile,Enlace al perfil,Ver perfil,View profile,Veure el perfil,Ikusi profila
-map.look,Opciones de vista del plano,Cómo ver el plano,How to see the map,Com veure el plànol,Planoa nola ikusi
-map.flipRows,Opción del plano: la fila 1 arriba en vez de abajo,Invertir en vertical,Flip vertically,Inverteix en vertical,Bertikalean irauli
-map.flipSeats,Opción del plano: el primer puesto a la derecha en vez de a la izquierda,Invertir en horizontal,Flip horizontally,Inverteix en horitzontal,Horizontalean irauli
-map.flipFacing,Opción del plano: los impares miran al sur y los pares al norte,Invertir hacia dónde miran,Flip which way seats face,Inverteix cap a on miren,Begiratzeko norabidea irauli
-map.placement,Desplegable bajo el plano: invertir y alinear las filas,Colocación de los puestos,Seat layout,Col·locació dels llocs,Postuen kokapena
-map.flat,"Opción del plano: puestos alineados, sin el desplazamiento de hacia dónde miran",Alinear,Align,Alinea,Lerrokatu
-map.circles,Casilla: marcar el círculo de cada persona,Círculos,Circles,Cercles,Zirkuluak
-map.highlight,Opciones de resaltado,Resaltar:,Highlight:,Ressalta:,Nabarmendu:
-map.mate.circle,Resaltar: gente de tu círculo,Mi círculo,My circle,El meu cercle,Nire zirkulua
-map.mate.project,Resaltar: gente de tu proyecto,Mi proyecto,My project,El meu projecte,Nire proiektua
-map.mate.done,Resaltar: gente que aprobó tu proyecto,Lo aprobaron,Passed it,L'han aprovat,Gainditu dutenak
-map.middleClick,Truco para abrir un perfil en otra pestaña,Clic central (o Ctrl + clic) en un puesto: abre su perfil en otra pestaña.,Middle click (or Ctrl + click) on a seat opens their profile in a new tab.,Clic central (o Ctrl + clic) en un lloc: obre el seu perfil en una altra pestanya.,Erdiko klik (edo Ctrl + klik) postu batean: haren profila beste fitxa batean irekitzen du.
-map.circle,Círculo de una persona,Círculo {n},Circle {n},Cercle {n},{n}. zirkulua
-map.proposeNone,No hay tantos puestos juntos libres,No hay tantos puestos juntos libres: prueba con menos.,There are not that many free seats together: try fewer.,No hi ha tants llocs junts lliures: prova amb menys.,Ez dago hainbeste postu libre elkarren ondoan: saiatu gutxiagorekin.
-map.proposeHint,Qué hace proponer puestos,"Busca puestos juntos, libres y que funcionen, lo más cerca de ti.","Finds free, working seats together, as close to you as possible.","Busca llocs junts, lliures i que funcionin, com més a prop teu millor.","Elkarren ondoko postu libre eta erabilgarriak bilatzen ditu, zugandik ahalik eta hurbilen."
-map.propose,Botón para que la web proponga puestos,Proponer puestos,Suggest seats,Proposa llocs,Postuak proposatu
-map.proposeHow,Cuántos puestos proponer,Puestos,Seats,Llocs,Postuak
-map.legend.broken,Leyenda: ordenador averiado,No funciona (avisado esta semana),Not working (reported this week),No funciona (avisat aquesta setmana),Ez dabil (aste honetan abisatua)
-map.fixed,Botón: el ordenador ya funciona,Ya funciona,It works now,Ja funciona,Badabil jada
-map.reportBroken,Botón: avisar de que un ordenador no funciona,Avisar de que no funciona,Report it is not working,Avisa que no funciona,Ez dabilela abisatu
-map.seatBroken,Etiqueta: ordenador averiado,No funciona,Not working,No funciona,Ez dabil
-map.finishedMine,Cuánta gente cerca aprobó tu proyecto,Aprobaron tu proyecto: {n},Passed your project: {n},Han aprovat el teu projecte: {n},Zure proiektua gainditu dute: {n}
-clusters.title,Título de la página del mapa,Clústeres del campus,Campus clusters,Clústers del campus,Campuseko klusterrak
-clusters.count,Cuánta gente sentada tiene la web abierta,Con Peer4U abierto: {online} de {occupied} personas sentadas,With Peer4U open: {online} of {occupied} people seated,Amb Peer4U obert: {online} de {occupied} persones assegudes,Peer4U irekita dutenak: eserita dauden {occupied} pertsonetatik {online}
-clusters.online,Etiqueta: tiene la web abierta,Con Peer4U abierto,Has Peer4U open,Amb Peer4U obert,Peer4U irekita du
-clusters.write,Botón para escribir a alguien,Escribir,Message,Escriu-li,Idatzi
-map.legend.online,Leyenda: tiene Peer4U abierto,Con Peer4U abierto,Has Peer4U open,Amb Peer4U obert,Peer4U irekita du
-clusters.chat,Chat directo con alguien,Chat directo,Direct chat,Xat directe,Txat zuzena
-clusters.chatEmpty,Chat directo vacío,Nadie ha escrito todavía. Lo que pongas solo lo ve quien participa en este chat.,Nobody has written yet. Only the people in this chat can see what you write.,Ningú ha escrit encara. El que posis només ho veu qui participa en aquest xat.,Inork ez du oraindik idatzi. Jartzen duzuna txat honetan parte hartzen dutenek soilik ikusten dute.
-facility.open,Clústeres: botón para avisar al staff de un problema del edificio o de un ordenador,Avisar de un problema,Report a problem,Avisar d'un problema,Arazo baten berri eman
-facility.title,Aviso al staff: título del formulario,Avisar al staff,Tell the staff,Avisar l'staff,Staffari jakinarazi
-facility.what,Aviso al staff: qué pasa,¿Qué pasa?,What is wrong?,Què passa?,Zer gertatzen da?
-facility.where,Aviso al staff: dónde,¿Dónde?,Where?,On?,Non?
-facility.wherePlaceholder,Aviso al staff: ayuda del campo «dónde»,"Si no dices nada, tu puesto",Leave empty for your seat,"Si no dius res, el teu lloc","Ezer esaten ez baduzu, zure postua"
-facility.note,Aviso al staff: nota opcional,Nota (opcional),Note (optional),Nota (opcional),Oharra (aukerakoa)
-facility.noteRequired,Aviso al staff: nota obligatoria con «otro»,Cuéntanos qué pasa,Tell us what's wrong,Explica'ns què passa,Kontatu iezaguzu zer gertatzen den
-facility.send,Aviso al staff: enviar,Avisar,Report,Avisar,Jakinarazi
-facility.sent,Aviso al staff: confirmación,Aviso enviado al staff. ¡Gracias!,Sent to the staff. Thanks!,Avís enviat a l'staff. Gràcies!,Staffari bidalia. Eskerrik asko!
-facility.none,Lista de avisos del edificio vacía,No hay avisos pendientes.,No pending reports.,No hi ha avisos pendents.,Ez dago jakinarazpenik zain.
-facility.by,Lista de avisos: quién y cuándo,Avisó {login} · {when},Reported by {login} · {when},Avisat per {login} · {when},{login}(e)k jakinarazia · {when}
-facility.resolvedBy,Lista de avisos: quién lo resolvió y cuándo,resuelto por {by} · {when},resolved by {by} · {when},resolt per {by} · {when},{by}(e)k konponduta · {when}
-facility.resolve,Lista de avisos: darlo por resuelto,Marcar como resuelto,Mark as resolved,Marca com a resolt,Markatu konponduta bezala
-facility.category.computer,Tipo de problema: el ordenador,Ordenador,Computer,Ordinador,Ordenagailua
-facility.category.peripheral,"Tipo de problema: pantalla, teclado o ratón","Pantalla, teclado o ratón","Screen, keyboard or mouse","Pantalla, teclat o ratolí","Pantaila, teklatua edo sagua"
-facility.category.network,Tipo de problema: la red o el wifi,Red o wifi,Network or wifi,Xarxa o wifi,Sarea edo wifia
-facility.category.toilets,Tipo de problema: los baños,Baños,Toilets,Lavabos,Komunak
-facility.category.temperature,Tipo de problema: frío o calor,Temperatura,Temperature,Temperatura,Tenperatura
-facility.category.light,Tipo de problema: la luz,Luz,Light,Llum,Argia
-facility.category.cleaning,Tipo de problema: limpieza,Limpieza,Cleaning,Neteja,Garbiketa
-facility.category.other,Tipo de problema: otro,Otro,Other,Altre,Bestelakoa
+clave,contexto,es,en,ca,eu,fr
+map.title,Título del mapa de puestos del campus,Mapa de los clústeres,Cluster map,Mapa de clústers,Klusterren mapa,
+map.loading,Mientras se dibuja el mapa,Dibujando el mapa…,Drawing the map…,Dibuixant el mapa…,Mapa marrazten…,
+map.empty,Aún no hay plano del campus,Todavía no hay plano de este campus: se dibuja a medida que la gente se sienta.,No map for this campus yet: it gets drawn as people sit down.,Encara no hi ha plànol d'aquest campus: es va dibuixant a mesura que la gent s'asseu.,Oraindik ez dago campus honen planorik: jendea esertzen den heinean marrazten da.,
+map.clusters,Selector de sala,Clústeres,Clusters,Clústers,Klusterrak,
+map.cluster,Nombre de una sala del campus (en 42 se llaman así),Clúster {n},Cluster {n},Clúster {n},{n}. klusterra,
+map.seatName,"Nombre completo de un puesto: clúster, fila y puesto",{cluster} · Fila {row} · Puesto {seat},{cluster} · Row {row} · Seat {seat},{cluster} · Fila {row} · Lloc {seat},{cluster} · {row}. ilara · {seat}. postua,
+map.row,"Fila, abreviado",F{n},R{n},F{n},E{n},
+map.rowLong.one,Una fila,fila {rows},row {rows},fila {rows},{rows} ilara,
+map.rowLong.many,Varias filas,filas {rows},rows {rows},files {rows},{rows} ilarak,
+map.seatTaken,"Puesto ocupado por alguien a quien no puedes ver (otro grupo, u oculto)",Ocupado,Taken,Ocupat,Hartuta,
+map.seatFree,Puesto libre,Libre,Free,Lliure,Libre,
+map.seatReserved,Puesto reservado por un sprint,Reservado por un sprint,Reserved by a sprint,Reservat per un sprint,Sprint batek erreserbatuta,
+map.you,Tu puesto,Tú,You,Tu,Zu,
+map.duty.patient,Alguien disponible que hace tu proyecto,Peer disponible,Peer available,Peer disponible,Peerra eskuragarri,
+map.duty.specialist,Alguien disponible que aprobó tu proyecto,Senior disponible,Senior available,Sènior disponible,Seniorra eskuragarri,
+map.reservedFor,Para qué grupo está reservado y cuándo,Reservado para el sprint de {project} · {days} · {start}–{end},Reserved for {project} sprint · {days} · {start}–{end},Reservat per a l'sprint de {project} · {days} · {start}–{end},{project} sprinterako erreserbatuta · {days} · {start}–{end},
+map.unplaced,Gente cuyo puesto no sale en el plano,Sin sitio en el plano:,Not on the map:,Sense lloc al plànol:,Planoan lekurik gabe:,
+map.legend.specialist,Leyenda: senior disponible,Senior disponible,Senior available,Sènior disponible,Seniorra eskuragarri,
+map.legend.patient,Leyenda: peer disponible,Peer disponible,Peer available,Peer disponible,Peerra eskuragarri,
+map.legend.reserved,Leyenda: sprint reunido ahora,Sprint en curso,Sprint in session,Sprint en curs,Sprinta abian,
+map.legend.occupied,Leyenda: ocupado,Ocupado,Taken,Ocupat,Okupatuta,
+map.legend.free,Leyenda: libre,Libre,Free,Lliure,Libre,
+map.legend.picked,Leyenda: elegido para un grupo,Elegido,Chosen,Triat,Aukeratuta,
+map.noProjects,Esa persona no tiene proyectos en curso,Sin proyectos en curso,No projects in progress,Sense projectes en curs,Abian den proiekturik gabe,
+map.legend.clash,Leyenda: reservado a esa hora,Reservado a esa hora,Reserved at that time,Reservat a aquesta hora,Ordu horretan erreserbatuta,
+map.profile,Enlace al perfil,Ver perfil,View profile,Veure el perfil,Ikusi profila,
+map.look,Opciones de vista del plano,Cómo ver el plano,How to see the map,Com veure el plànol,Planoa nola ikusi,
+map.flipRows,Opción del plano: la fila 1 arriba en vez de abajo,Invertir en vertical,Flip vertically,Inverteix en vertical,Bertikalean irauli,
+map.flipSeats,Opción del plano: el primer puesto a la derecha en vez de a la izquierda,Invertir en horizontal,Flip horizontally,Inverteix en horitzontal,Horizontalean irauli,
+map.flipFacing,Opción del plano: los impares miran al sur y los pares al norte,Invertir hacia dónde miran,Flip which way seats face,Inverteix cap a on miren,Begiratzeko norabidea irauli,
+map.placement,Desplegable bajo el plano: invertir y alinear las filas,Colocación de los puestos,Seat layout,Col·locació dels llocs,Postuen kokapena,
+map.flat,"Opción del plano: puestos alineados, sin el desplazamiento de hacia dónde miran",Alinear,Align,Alinea,Lerrokatu,
+map.circles,Casilla: marcar el círculo de cada persona,Círculos,Circles,Cercles,Zirkuluak,
+map.highlight,Opciones de resaltado,Resaltar:,Highlight:,Ressalta:,Nabarmendu:,
+map.mate.circle,Resaltar: gente de tu círculo,Mi círculo,My circle,El meu cercle,Nire zirkulua,
+map.mate.project,Resaltar: gente de tu proyecto,Mi proyecto,My project,El meu projecte,Nire proiektua,
+map.mate.done,Resaltar: gente que aprobó tu proyecto,Lo aprobaron,Passed it,L'han aprovat,Gainditu dutenak,
+map.middleClick,Truco para abrir un perfil en otra pestaña,Clic central (o Ctrl + clic) en un puesto: abre su perfil en otra pestaña.,Middle click (or Ctrl + click) on a seat opens their profile in a new tab.,Clic central (o Ctrl + clic) en un lloc: obre el seu perfil en una altra pestanya.,Erdiko klik (edo Ctrl + klik) postu batean: haren profila beste fitxa batean irekitzen du.,
+map.circle,Círculo de una persona,Círculo {n},Circle {n},Cercle {n},{n}. zirkulua,
+map.proposeNone,No hay tantos puestos juntos libres,No hay tantos puestos juntos libres: prueba con menos.,There are not that many free seats together: try fewer.,No hi ha tants llocs junts lliures: prova amb menys.,Ez dago hainbeste postu libre elkarren ondoan: saiatu gutxiagorekin.,
+map.proposeHint,Qué hace proponer puestos,"Busca puestos juntos, libres y que funcionen, lo más cerca de ti.","Finds free, working seats together, as close to you as possible.","Busca llocs junts, lliures i que funcionin, com més a prop teu millor.","Elkarren ondoko postu libre eta erabilgarriak bilatzen ditu, zugandik ahalik eta hurbilen.",
+map.propose,Botón para que la web proponga puestos,Proponer puestos,Suggest seats,Proposa llocs,Postuak proposatu,
+map.proposeHow,Cuántos puestos proponer,Puestos,Seats,Llocs,Postuak,
+map.legend.broken,Leyenda: ordenador averiado,No funciona (avisado esta semana),Not working (reported this week),No funciona (avisat aquesta setmana),Ez dabil (aste honetan abisatua),
+map.fixed,Botón: el ordenador ya funciona,Ya funciona,It works now,Ja funciona,Badabil jada,
+map.reportBroken,Botón: avisar de que un ordenador no funciona,Avisar de que no funciona,Report it is not working,Avisa que no funciona,Ez dabilela abisatu,
+map.seatBroken,Etiqueta: ordenador averiado,No funciona,Not working,No funciona,Ez dabil,
+map.finishedMine,Cuánta gente cerca aprobó tu proyecto,Aprobaron tu proyecto: {n},Passed your project: {n},Han aprovat el teu projecte: {n},Zure proiektua gainditu dute: {n},
+clusters.title,Título de la página del mapa,Clústeres del campus,Campus clusters,Clústers del campus,Campuseko klusterrak,
+clusters.count,Cuánta gente sentada tiene la web abierta,Con Peer4U abierto: {online} de {occupied} personas sentadas,With Peer4U open: {online} of {occupied} people seated,Amb Peer4U obert: {online} de {occupied} persones assegudes,Peer4U irekita dutenak: eserita dauden {occupied} pertsonetatik {online},
+clusters.online,Etiqueta: tiene la web abierta,Con Peer4U abierto,Has Peer4U open,Amb Peer4U obert,Peer4U irekita du,
+clusters.write,Botón para escribir a alguien,Escribir,Message,Escriu-li,Idatzi,
+map.legend.online,Leyenda: tiene Peer4U abierto,Con Peer4U abierto,Has Peer4U open,Amb Peer4U obert,Peer4U irekita du,
+clusters.chat,Chat directo con alguien,Chat directo,Direct chat,Xat directe,Txat zuzena,
+clusters.chatEmpty,Chat directo vacío,Nadie ha escrito todavía. Lo que pongas solo lo ve quien participa en este chat.,Nobody has written yet. Only the people in this chat can see what you write.,Ningú ha escrit encara. El que posis només ho veu qui participa en aquest xat.,Inork ez du oraindik idatzi. Jartzen duzuna txat honetan parte hartzen dutenek soilik ikusten dute.,
+facility.open,Clústeres: botón para avisar al staff de un problema del edificio o de un ordenador,Avisar de un problema,Report a problem,Avisar d'un problema,Arazo baten berri eman,
+facility.title,Aviso al staff: título del formulario,Avisar al staff,Tell the staff,Avisar l'staff,Staffari jakinarazi,
+facility.what,Aviso al staff: qué pasa,¿Qué pasa?,What is wrong?,Què passa?,Zer gertatzen da?,
+facility.where,Aviso al staff: dónde,¿Dónde?,Where?,On?,Non?,
+facility.wherePlaceholder,Aviso al staff: ayuda del campo «dónde»,"Si no dices nada, tu puesto",Leave empty for your seat,"Si no dius res, el teu lloc","Ezer esaten ez baduzu, zure postua",
+facility.note,Aviso al staff: nota opcional,Nota (opcional),Note (optional),Nota (opcional),Oharra (aukerakoa),
+facility.noteRequired,Aviso al staff: nota obligatoria con «otro»,Cuéntanos qué pasa,Tell us what's wrong,Explica'ns què passa,Kontatu iezaguzu zer gertatzen den,
+facility.send,Aviso al staff: enviar,Avisar,Report,Avisar,Jakinarazi,
+facility.sent,Aviso al staff: confirmación,Aviso enviado al staff. ¡Gracias!,Sent to the staff. Thanks!,Avís enviat a l'staff. Gràcies!,Staffari bidalia. Eskerrik asko!,
+facility.none,Lista de avisos del edificio vacía,No hay avisos pendientes.,No pending reports.,No hi ha avisos pendents.,Ez dago jakinarazpenik zain.,
+facility.by,Lista de avisos: quién y cuándo,Avisó {login} · {when},Reported by {login} · {when},Avisat per {login} · {when},{login}(e)k jakinarazia · {when},
+facility.resolvedBy,Lista de avisos: quién lo resolvió y cuándo,resuelto por {by} · {when},resolved by {by} · {when},resolt per {by} · {when},{by}(e)k konponduta · {when},
+facility.resolve,Lista de avisos: darlo por resuelto,Marcar como resuelto,Mark as resolved,Marca com a resolt,Markatu konponduta bezala,
+facility.category.computer,Tipo de problema: el ordenador,Ordenador,Computer,Ordinador,Ordenagailua,
+facility.category.peripheral,"Tipo de problema: pantalla, teclado o ratón","Pantalla, teclado o ratón","Screen, keyboard or mouse","Pantalla, teclat o ratolí","Pantaila, teklatua edo sagua",
+facility.category.network,Tipo de problema: la red o el wifi,Red o wifi,Network or wifi,Xarxa o wifi,Sarea edo wifia,
+facility.category.toilets,Tipo de problema: los baños,Baños,Toilets,Lavabos,Komunak,
+facility.category.temperature,Tipo de problema: frío o calor,Temperatura,Temperature,Temperatura,Tenperatura,
+facility.category.light,Tipo de problema: la luz,Luz,Light,Llum,Argia,
+facility.category.cleaning,Tipo de problema: limpieza,Limpieza,Cleaning,Neteja,Garbiketa,
+facility.category.other,Tipo de problema: otro,Otro,Other,Altre,Bestelakoa,

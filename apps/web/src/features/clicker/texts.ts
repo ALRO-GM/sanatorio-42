@@ -3,12 +3,14 @@
  *
  * Van en un grupo de tablas aparte y no con los de la web porque son un juego
  * entero (y secreto): cientos de frases que solo se descargan con el juego.
- * Catalán y euskera usan los del español mientras no tengan los suyos.
+ * Catalán y euskera usan los del español mientras no tengan los suyos; el
+ * francés, lo que le falte, del inglés.
  */
 
 import type { Lang } from '@sanatorio/contracts'
 import gameEn from 'virtual:textos/juego/en'
 import gameEs from 'virtual:textos/juego/es'
+import gameFr from 'virtual:textos/juego/fr'
 
 import { unflatten } from '../../shared/i18n/tree'
 
@@ -73,10 +75,11 @@ type Texts = {
 
 /**
  * Los textos de un idioma a partir de su tabla (`textos/juego/juego.csv`); lo
- * que no tenga, del español.
+ * que no tenga, del idioma anterior de la lista y, al final, del español.
  */
-function fromTable(dict: Readonly<Record<string, string>>): Texts {
-  const texts = unflatten({ ...gameEs, ...dict }, 'game') as Texts
+function fromTable(...dicts: Readonly<Record<string, string>>[]): Texts {
+  const all = dicts.reduce<Record<string, string>>((sum, dict) => ({ ...sum, ...dict }), gameEs)
+  const texts = unflatten(all, 'game') as Texts
 
   // En las claves de la tabla, el «:» de un logro se escribe «-» (plus-1 es plus:1).
   texts.achievements = Object.fromEntries(
@@ -88,8 +91,9 @@ function fromTable(dict: Readonly<Record<string, string>>): Texts {
 
 const es = fromTable(gameEs)
 const en = fromTable(gameEn)
+const fr = fromTable(gameEn, gameFr)
 
-const TEXTS: Record<Lang, Texts> = { es, en, ca: es, eu: es }
+const TEXTS: Record<Lang, Texts> = { es, en, ca: es, eu: es, fr }
 
 export const textsOf = (lang: Lang): Texts => TEXTS[lang]
 
@@ -103,7 +107,7 @@ export function fill(template: string, vars: Record<string, string | number>): s
  * se escribe entero, con separador de miles.
  */
 export function short(value: number, lang: Lang, decimals = 3): string {
-  const locale = lang === 'en' ? 'en-GB' : 'es-ES'
+  const locale = lang === 'en' ? 'en-GB' : lang === 'fr' ? 'fr-FR' : 'es-ES'
 
   if (!Number.isFinite(value)) return '∞'
   if (Math.abs(value) < 1e6) {

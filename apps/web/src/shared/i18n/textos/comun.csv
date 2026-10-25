@@ -1,303 +1,303 @@
-clave,contexto,es,en,ca,eu
-app.loading,Mensaje mientras carga algo,Cargando…,Loading…,Carregant…,Kargatzen…
-app.footer,"Pie de página, al final de todas las pantallas",Peer4U · Hecho en la Hackathon de 42 Madrid,Peer4U · Made at the 42 Madrid Hackathon,Peer4U · Fet a la Hackathon de 42 Madrid,Peer4U · 42 Madrilgo Hackathonean egina
-app.serverDown,Pantalla de error cuando la API no responde,No se puede conectar con el servidor. Puede que esté arrancando; prueba en un momento.,Can't reach the server. It may be starting up; try again in a moment.,No es pot connectar amb el servidor. Pot ser que estigui arrencant; prova-ho d'aquí un moment.,Ezin da zerbitzariarekin konektatu. Baliteke abiarazten egotea; saiatu berriro une batean.
-app.retry,Botón para volver a intentar conectar,Volver a probar,Try again,Torna-ho a provar,Saiatu berriro
-app.sectionFailed,Una parte de la web ha fallado al pintarse; el fallo ya se ha enviado,Esta parte ha fallado. Ya nos ha llegado el aviso.,This part has failed. We have already been notified.,Aquesta part ha fallat. Ja ens ha arribat l'avís.,Zati honek huts egin du. Abisua iritsi zaigu jada.
-app.logout,Opción del menú de la cuenta para cerrar sesión,Salir,Log out,Surt,Irten
-app.back,Botón para volver de la lista de personas a la elección de proyecto,Volver a Peer to peer,Back to Peer to peer,Torna a Peer to peer,Itzuli Peer to peer-era
-nav.label,Nombre accesible de la barra de pestañas,Secciones,Sections,Seccions,Atalak
-nav.consulta,"Pestaña: Peer to peer, donde se busca quién ayuda con un proyecto",Peer to peer,Peer to peer,Peer to peer,Peer to peer
-nav.terapia,Pestaña: sprints (quedar en grupo para hacer un proyecto juntos),Sprints,Sprints,Sprints,Sprintak
-nav.tablon,"Pestaña: proyectos, con las dudas de cada uno",Proyectos,Projects,Projectes,Proiektuak
-nav.pizarras,Pestaña: pizarras (charlas abiertas para explicar un tema),Pizarras,Whiteboards,Pissarres,Arbelak
-nav.expediente,"Pestaña: tu perfil, con nivel, logros y estado",Perfil,Profile,Perfil,Profila
-layout.recordStyle,Personalizar: elegir con qué estilo visual ven tu perfil los demás,Con qué estilo ven tu perfil los demás,Which style others see your profile in,Amb quin estil veuen els altres el teu perfil,Zein estilorekin ikusten duten besteek zure profila
-layout.recordStyle.none,Opción: cada visitante ve tu perfil con su propio estilo,"Con el suyo, cada cual",Each person's own,"Amb el seu, cadascú",Bakoitzak berearekin
-layout.recordStyle.yours,Etiqueta junto a un estilo exclusivo que solo tiene esa persona,solo tuyo,yours only,només teu,zuretzat bakarrik
-nav.privacidad,Pestaña oculta: página de privacidad y condiciones,Privacidad,Privacy,Privacitat,Pribatutasuna
-legal.link,Enlace del pie a la página de privacidad,Privacidad y condiciones,Privacy and terms,Privacitat i condicions,Pribatutasuna eta baldintzak
-legal.untranslated,Aviso: el texto legal no está en el idioma elegido,Este texto solo está en español y en inglés.,This text is only available in Spanish and English.,Aquest text només és en espanyol i en anglès.,Testu hau gaztelaniaz eta ingelesez bakarrik dago.
-legal.notAccepted,Estado: no has aceptado la versión vigente de las condiciones,Aún no has aceptado esta versión.,You haven't accepted this version yet.,Encara no has acceptat aquesta versió.,Oraindik ez duzu bertsio hau onartu.
-legal.acceptedOn,Estado: fecha en que aceptaste las condiciones,Aceptaste esta versión el {date}.,You accepted this version on {date}.,Vas acceptar aquesta versió el {date}.,Bertsio hau {date}(e)an onartu zenuen.
-legal.export,Botón para descargar todos tus datos en un fichero,Descargar mis datos,Download my data,Descarrega les meves dades,Deskargatu nire datuak
-legal.exportHint,Nota bajo el botón de descargar tus datos: de dónde sale cada tabla y que una muy larga va recortada,"Cada tabla dice de dónde sale (42 o Peer4U). Si alguna pasa de 5000 filas, va recortada y lo marca con «truncated».","Each table says where it comes from (42 or Peer4U). If one has more than 5,000 rows it is cut short and marked «truncated».","Cada taula diu d'on surt (42 o Peer4U). Si alguna passa de 5000 files, va retallada i ho marca amb «truncated».","Taula bakoitzak nondik datorren dio (42 edo Peer4U). Batek 5000 lerro baino gehiago baditu, moztuta doa eta «truncated» markarekin adierazten du."
-legal.gateKind,Encabezado de la ventana obligatoria de condiciones,Antes de seguir,Before you go on,Abans de continuar,Jarraitu aurretik
-legal.readAll,Enlace para abrir el texto legal completo,Leer el texto entero,Read the full text,Llegeix el text sencer,Irakurri testu osoa
-legal.accept,Botón para aceptar las condiciones y seguir,Lo he leído y lo acepto,I have read it and I accept,L'he llegit i l'accepto,Irakurri dut eta onartzen dut
-legal.back,Botón para volver a la pantalla de entrada,Volver a la entrada,Back to sign in,Torna a l'entrada,Itzuli sarrerara
-nav.openRecord,Nombre accesible del logo: lleva a tu perfil,Peer4U: ir a tu perfil,Peer4U: go to your profile,Peer4U: ves al teu perfil,Peer4U: joan zure profilera
-menu.open,Nombre accesible del botón del menú de la cuenta,"Tu cuenta, {login}","Your account, {login}","El teu compte, {login}","Zure kontua, {login}"
-menu.record,Opción del menú de la cuenta: ir a tu perfil,Mi perfil,My profile,El meu perfil,Nire profila
-menu.duty,Opción del menú de la cuenta: ir a tu on-call (cuándo puedes ayudar y tus reservas),Mi on-call,My on-call,El meu on-call,Nire on-call-a
-login.pitch,Pantalla de entrada: frase que explica para qué sirve la web,"¿Te has atascado? Abre un peer to peer: siempre hay alguien disponible. Y si hoy puedes, ponte disponible y haz de peer.","Stuck? Open a peer to peer: there's always someone available. And if you can today, make yourself available and be someone's peer.","T'has encallat? Obre un peer to peer: sempre hi ha algú disponible. I si avui pots, posa't disponible i fes de peer.","Trabatuta zaude? Ireki peer to peer bat: beti dago norbait eskuragarri. Eta gaur ahal baduzu, jarri eskuragarri eta izan norbaiten peerra."
-login.button,Pantalla de entrada: botón para iniciar sesión con la cuenta de 42,Entrar con 42,Sign in with 42,Entra amb 42,Sartu 42rekin
-login.how,Pantalla de entrada: título de los tres pasos,Cómo funciona,How it works,Com funciona,Nola dabil
-login.step1,Pantalla de entrada: paso 1,1. Cuéntanos dónde está tu bug,1. Tell us where your bug is,1. Explica'ns on és el teu bug,1. Esan non dagoen zure bug-a
-login.step1d,Pantalla de entrada: detalle del paso 1,Elige tu proyecto,Pick your project,Tria el teu projecte,Aukeratu zure proiektua
-login.step2,Pantalla de entrada: paso 2,2. Mira quién está disponible,2. See who's available,2. Mira qui està disponible,2. Begiratu nor dagoen eskuragarri
-login.step2d,Pantalla de entrada: detalle del paso 2,Gente disponible y su puesto,Who's available and where they sit,Gent disponible i el seu lloc,Jende erabilgarria eta haien postua
-login.step3,Pantalla de entrada: paso 3,3. Ve a su puesto y pide ayuda,3. Walk over and ask,3. Ves al seu lloc i demana ajuda,3. Joan haren postura eta eskatu laguntza
-login.step3d,Pantalla de entrada: detalle del paso 3,Nada como explicarlo cara a cara,Nothing beats explaining it face to face,Res com explicar-ho cara a cara,Aurrez aurre azaltzea bezalakorik ez dago
-login.cancelled,Aviso al volver de 42 sin haber dado permiso,Has cancelado el inicio de sesión. Puedes probar cuando quieras.,You cancelled the sign-in. Try again whenever you like.,Has cancel·lat l'inici de sessió. Pots provar-ho quan vulguis.,Saio-hasiera bertan behera utzi duzu. Nahi duzunean saia zaitezke.
-login.failed,Aviso cuando falla el inicio de sesión; {code} es el código de error,El inicio de sesión con 42 ha fallado ({code}). Prueba otra vez.,Signing in with 42 failed ({code}). Please try again.,L'inici de sessió amb 42 ha fallat ({code}). Torna-ho a provar.,42rekin saioa hasteak huts egin du ({code}). Saiatu berriro.
-login.notStudent,"Aviso al volver de 42 con una cuenta que no es de estudiante (Discovery, piscina antigua…)","Peer4U es solo para estudiantes de 42. Tu cuenta tiene otra categoría (por ejemplo, Discovery o una piscina), así que no puede entrar.","Peer4U is only for 42 students. Your account has another category (for example, Discovery or a piscine), so it cannot sign in.","Peer4U és només per a estudiants de 42. El teu compte té una altra categoria (per exemple, Discovery o una piscina), així que no pot entrar.","Peer4U 42ko ikasleentzat bakarrik da. Zure kontuak beste kategoria bat du (adibidez, Discovery edo igerileku bat), eta ezin da sartu."
-login.poolClosed,Aviso de fábrica al volver de 42 siendo piscinero con la piscina cerrada,Estás en la piscina: Peer4U todavía no está abierto para piscineros.,You are in the piscine: Peer4U is not open to piscine students yet.,Ets a la piscina: Peer4U encara no està obert per als piscinistes.,Igerilekuan zaude: Peer4U ez dago oraindik igerilarientzat irekita.
-pool.home,Portada de un piscinero sin el perfil permitido,Bienvenido a Peer4U para piscineros. Usa las pestañas de arriba.,Welcome to Peer4U for piscine students. Use the tabs above.,Benvingut a Peer4U per a piscinistes. Fes servir les pestanyes de dalt.,Ongi etorri igerilarientzako Peer4U-ra. Erabili goiko fitxak.
-error.network,Error: no hay conexión con el servidor,No se puede conectar con el servidor,Can't reach the server,No es pot connectar amb el servidor,Ezin da zerbitzariarekin konektatu
-error.generic,Error sin explicación conocida; {detail} es el detalle técnico,Algo no ha ido bien ({detail}).,Something went wrong ({detail}).,Alguna cosa no ha anat bé ({detail}).,Zerbait ez da ondo joan ({detail}).
-error.409,"Error: la acción choca con el estado actual (ya está lleno, ya existe…)",Ahora mismo no se puede: puede que ya esté lleno o que ya exista. Prueba otra vez en un rato.,That's not possible right now: it may be full or already exist. Try again in a bit.,Ara mateix no es pot: potser ja és ple o ja existeix. Torna-ho a provar d'aquí una estona.,Une honetan ezin da: baliteke beteta egotea edo jada existitzea. Saiatu berriro pixka bat geroago.
-error.403,Error: no tienes permiso,No tienes permiso para eso.,You're not allowed to do that.,No tens permís per a això.,Ez duzu horretarako baimenik.
-error.404,Error: lo que buscas ya no existe,Eso ya no existe.,That no longer exists.,Això ja no existeix.,Hori ez da existitzen jada.
-error.400,Error: los datos enviados no son válidos,Algo de lo que has escrito no es válido. Revísalo y prueba otra vez.,Something you entered isn't valid. Check it and try again.,Alguna cosa del que has escrit no és vàlida. Revisa-ho i torna-ho a provar.,Idatzi duzunen zerbait ez da baliozkoa. Berrikusi eta saiatu berriro.
-days.short,"Iniciales de los días de la semana, de lunes a domingo, separadas por comas","L,M,X,J,V,S,D","M,T,W,T,F,S,S","Dl,Dt,Dc,Dj,Dv,Ds,Dg","Al,Ar,Az,Og,Or,Lr,Ig"
-settings.label,Nombre accesible de los ajustes del pie,Ajustes,Settings,Configuració,Ezarpenak
-settings.lang,Pie: selector de idioma,Idioma,Language,Idioma,Hizkuntza
-settings.campus,Pie: selector del campus que estás viendo,Campus,Campus,Campus,Campusa
-settings.campusLazy,Junto a un campus que se copia solo cuando alguien lo pide,bajo demanda,on demand,sota demanda,eskatu ahala
-sync.fresh,Pie: cuándo se leyeron los puestos de 42; {min} son minutos,Puestos de 42 actualizados hace {min} min,42 seats updated {min} min ago,Llocs de 42 actualitzats fa {min} min,42ko postuak duela {min} min eguneratuta
-sync.now,Pie: los puestos se acaban de leer,Puestos de 42 recién actualizados,42 seats just updated,Llocs de 42 acabats d'actualitzar,42ko postuak oraintxe eguneratuta
-sync.copying,Pie: progreso de la primera copia del campus; {pct} es el porcentaje,Copiando el campus desde 42: {pct} %,Copying the campus from 42: {pct}%,Copiant el campus des de 42: {pct} %,Campusa 42tik kopiatzen: % {pct}
-sync.copyingStart,Pie: empieza la primera copia del campus,Copiando el campus desde 42…,Copying the campus from 42…,Copiant el campus des de 42…,Campusa 42tik kopiatzen…
-nav.guardia,Sección: tu on-call (cuándo puedes ayudar y tus reservas),On-call,On-call,On-call,On-call
-nav.calendario,Pestaña: calendario con todo lo tuyo,Calendario,Calendar,Calendari,Egutegia
-settings.theme,Pie: selector de tema claro u oscuro,Tema,Theme,Tema,Gaia
-welcome.open,Menú de la cuenta: volver a ver la bienvenida,Ver la bienvenida,See the welcome tour,Mira la benvinguda,Ikusi ongietorria
-welcome.title,Título de la ventana de bienvenida,Bienvenida a Peer4U,Welcome to Peer4U,Benvinguda a Peer4U,Ongi etorri Peer4U-ra
-welcome.step,Bienvenida: paso actual de un total,{n} de {total},{n} of {total},{n} de {total},{n} / {total}
-welcome.go,Bienvenida: botón que abre la sección que se explica,Llévame ahí,Take me there,Porta-m'hi,Eraman nazazu
-welcome.skip,Bienvenida: botón para cerrarla,Saltar,Skip,Salta,Saltatu
-welcome.back,Bienvenida: paso anterior,Anterior,Back,Enrere,Aurrekoa
-welcome.next,Bienvenida: paso siguiente,Siguiente,Next,Següent,Hurrengoa
-welcome.done,Bienvenida: botón del último paso,Empezar,Start,Comença,Hasi
-welcome.hello.title,"Bienvenida, paso 1: título",Bienvenida a Peer4U,Welcome to Peer4U,Benvinguda a Peer4U,Ongi etorri Peer4U-ra
-welcome.hello.body,"Bienvenida, paso 1: qué es la web","Aquí la gente de 42 se ayuda. Verás quién te puede echar una mano con tu proyecto, dónde se sienta y cuándo. Lo básico, en un minuto.","This is where 42 people help each other: who can give you a hand with your project, where they sit and when. Here are the basics in a minute.","Aquí la gent de 42 s'ajuda: qui et pot donar un cop de mà amb el teu projecte, on seu i quan. T'ensenyem el bàsic en un minut.","Hemen 42ko jendeak elkar laguntzen du: nork lagun zaitzakeen zure proiektuarekin, non dagoen eta noiz. Oinarrizkoa minutu batean."
-welcome.record.title,Bienvenida: paso del perfil,Tu perfil,Your profile,El teu perfil,Zure profila
-welcome.record.body,Bienvenida: qué hay en el perfil,"Tu nivel, tus títulos y tu health check: a qué pace vas y cuándo llegaría el black hole. Anota tu pace para ver todas tus fechas.","Your level, your titles and your health check: the pace you are on and when the black hole would catch you. Enter your pace to see all your dates.","El teu nivell, els teus títols i el teu health check: el pace que portes i quan t'atraparia el black hole.","Zure maila, tituluak eta health check-a: zein pacetan zauden eta noiz harrapatuko zintuzkeen black holeak."
-welcome.waiting.title,Bienvenida: paso de Peer to peer,Peer to peer,Peer to peer,Peer to peer,Peer to peer
-welcome.waiting.body,Bienvenida: cómo se busca ayuda,"Elige un proyecto. Verás quién lo aprobó, quién lo está haciendo, quién está disponible y dónde se sienta. A quien se ofrece, le puedes pedir ayuda.","Pick a project to see who passed it or is doing it, who is available and where they sit on the map. You can ask those who offer for help.","Tria un projecte i veuràs qui l'ha aprovat o l'està fent, qui està disponible i on seu al mapa.","Aukeratu proiektu bat eta ikusi nork gainditu duen edo egiten ari den, nor dagoen eskuragarri eta non eserita dagoen."
-welcome.duty.title,Bienvenida: paso del on-call,Disponible,Available,Disponible,Eskuragarri
-welcome.duty.body,Bienvenida: cómo ofrecer ayuda,Enciende «Disponible» y marca las medias horas en que puedes ayudar. Te reservarán un rato y ganarás XP. Lo que ya tienes en el calendario no se puede reservar.,Switch on “Available” and mark the half hours when you can help. People will book you and you will earn XP. Whatever is already in your calendar cannot be booked.,Activa «Disponible» i marca les mitges hores en què pots ajudar. Et demanaran una estona i guanyaràs XP.,Piztu «Eskuragarri» eta markatu lagun dezakezun ordu erdiak. Denbora eskatuko dizute eta XP irabaziko duzu.
-welcome.board.title,Bienvenida: paso de Proyectos,Proyectos,Projects,Projectes,Proiektuak
-welcome.board.body,Bienvenida: para qué sirve Proyectos,"Las dudas de cada proyecto, por círculos. Pregunta, responde y lee la guía que mantiene quien ya lo aprobó.","Questions for each project, ordered by circles. Ask, answer and read the guide kept by those who already passed it.","Els dubtes de cada projecte, per cercles. Pregunta, respon i mira la guia.","Proiektu bakoitzeko zalantzak, zirkuluka. Galdetu, erantzun eta irakurri gida."
-welcome.groups.title,Bienvenida: paso de sprints y pizarras,Sprints y pizarras,Sprints and whiteboards,Sprints i pissarres,Sprintak eta arbelak
-welcome.groups.body,Bienvenida: diferencia entre sprint y pizarra,"Sprint: quedar para sacar un proyecto en grupo, con puestos reservados. Pizarra: explicar un tema a quien quiera venir.","Meet to get a project done together (sprints, with reserved seats) or to explain a concept to anyone who wants to come (whiteboards).",Quedeu per treure un projecte junts (sprints) o per explicar un concepte (pissarres).,Elkartu proiektu bat batera ateratzeko (sprintak) edo kontzeptu bat azaltzeko (arbelak).
-welcome.agenda.title,Bienvenida: paso del calendario,Calendario,Calendar,Calendari,Egutegia
-welcome.agenda.body,Bienvenida: qué junta el calendario,"Todo en un sitio: tus correcciones, exámenes y eventos de 42, tu on-call, sprints y pizarras. En lista o por horas.","Everything in one place: your 42 evaluations, exams and events, your on-call, sprints and whiteboards. As a list or with the hours in view.","Tot en un lloc: correccions, exàmens i esdeveniments de 42, el teu on-call, sprints i pissarres.","Dena leku bakarrean: 42ko zuzenketak, azterketak eta ekitaldiak, on-call-a, sprintak eta arbelak."
-welcome.net.title,Bienvenida: paso de la red y el mapa,Red y clústeres,Network and clusters,Xarxa i clústers,Sarea eta klusterrak
-welcome.net.body,Bienvenida: qué enseñan la red y el mapa,Con quién te has corregido y quién se sienta dónde ahora. En el mapa puedes resaltar tu círculo o a quien aprobó tu proyecto.,Who you have evaluated with and who sits where right now. On the map you can highlight your circle or whoever passed your project.,Amb qui t'has corregit i qui seu on ara mateix.,Norekin zuzendu duzun eta nor non dagoen eserita orain.
-welcome.comfort.title,Bienvenida: paso de los ajustes,A tu medida,Make it yours,A la teva mida,Zure neurrira
-welcome.comfort.body,"Bienvenida: dónde se cambian idioma, tema y comodidad","En el pie cambias idioma, tema, tamaño del texto, colores para daltonismo y modo zen. En tu menú, las pestañas y esta bienvenida.","In the footer you can change language, theme, text size, colour-blind mode and zen mode. In your menu: the tabs, and this welcome.","Al peu pots canviar idioma, tema, mida del text, colors per a daltonisme i el mode zen. Aquesta benvinguda també és al teu menú.","Orri-oinean hizkuntza, gaia, testuaren tamaina, daltonismorako koloreak eta zen modua alda ditzakezu. Ongietorri hau zure menuan ere badago."
-settings.text,Pie: selector del tamaño del texto,Texto,Text,Text,Testua
-settings.text.auto,Tamaño de texto automático según la pantalla,Automático,Automatic,Automàtic,Automatikoa
-settings.cvd,Pie: casilla de colores para daltonismo,Daltonismo,Colour blindness,Daltonisme,Daltonismoa
-settings.cvdHint,Explicación de la casilla de daltonismo,"Azul y naranja en vez de verde y rojo, y más contraste donde solo cambia el color","Blue and orange instead of green and red, and more contrast where only colour tells things apart","Blau i taronja en lloc de verd i vermell, i més contrast on només el color diferencia les coses","Urdina eta laranja berdea eta gorriaren ordez, eta kontraste gehiago kolorea bakarrik bereizten duen tokietan"
-settings.zen,Pie: casilla del modo zen (sin adornos),Modo zen,Zen mode,Mode zen,Zen modua
-settings.zenHint,Explicación de la casilla del modo zen,"Lo mínimo: sin animaciones, ventanitas ni avisos de adorno","The bare minimum: no animations, pop-ups or decorative notices","El mínim: sense animacions, finestretes ni avisos decoratius","Gutxienekoa: animaziorik, leihotxorik eta apaingarrizko oharrik gabe"
-settings.theme.auto,Tema: el mismo que el sistema,Como el sistema,Match system,Com el sistema,Sistemak bezala
-settings.theme.light,Tema claro,Claro,Light,Clar,Argia
-settings.theme.dark,Tema oscuro,Nocturno,Dark,Nocturn,Gauekoa
-edit.edit,Botón para editar algo propio,Editar,Edit,Edita,Editatu
-edit.save,Botón para guardar lo editado,Guardar cambios,Save changes,Desa els canvis,Gorde aldaketak
-nav.red,Pestaña: red de correcciones entre estudiantes,Red,Network,Xarxa,Sarea
-nav.avance,Pestaña de Datos: avance en el common core frente a la media y los paces,Avance,Progress,Avenç,Aurrerapena
-app.loadingSection,Mientras se descarga una sección,Abriendo…,Opening…,Obrint…,Irekitzen…
-layout.open,Menú de la cuenta: abrir la personalización,Personalizar la web,Customise the site,Personalitza la web,Pertsonalizatu weba
-layout.title,Título de la ventana de personalización,Personalizar,Customise,Personalitza,Pertsonalizatu
-layout.customizeHere,Enlace al final de una página con bloques: abre Personalizar,Ordenar o plegar estos bloques,Reorder or fold these blocks,Ordena o plega aquests blocs,Blokeak ordenatu edo tolestu
-layout.close,Botón para cerrar una ventana,Cerrar,Close,Tanca,Itxi
-confirm.title,Título de la ventana que pide confirmar algo que no se deshace,¿Lo confirmas?,Are you sure?,Ho confirmes?,Baieztatzen duzu?
-confirm.ok,Botón para confirmar en la ventana de confirmación (si no se dice otro verbo),"Sí, adelante","Yes, go ahead","Sí, endavant","Bai, aurrera"
-confirm.cancel,Botón para no hacerlo en la ventana de confirmación,Mejor no,Not now,Millor no,Hobe ez
-layout.done,Botón para terminar y cerrar la personalización,Listo,Done,Fet,Eginda
-layout.reset,Botón para volver al orden original,Volver al orden de fábrica,Back to the default order,Torna a l'ordre de fàbrica,Itzuli fabrikako ordenara
-layout.mode,Personalizar: quién decide el orden de pestañas y bloques,Quién decide el orden,Who decides the order,Qui decideix l'ordre,Nork erabakitzen du ordena
-layout.mode.manual,Orden: lo decides tú,A mano,By hand,A mà,Eskuz
-layout.mode.manual.hint,Explicación del orden manual,El orden que pongas aquí con las flechas.,The order you set here with the arrows.,L'ordre que posis aquí amb les fletxes.,Hemen geziekin jartzen duzun ordena.
-layout.mode.mine,Orden: según lo que más usas,Mi uso,My usage,El meu ús,Nire erabilera
-layout.mode.mine.hint,Explicación del orden por tu uso,Lo que más usas tú sube solo al principio.,What you use most moves to the front by itself.,El que més fas servir tu puja sol al principi.,Zuk gehien erabiltzen duzuna berez igotzen da hasierara.
-layout.mode.community,Orden: según lo que más usa todo el mundo,La comunidad,The community,La comunitat,Komunitatea
-layout.mode.community.hint,Explicación del orden por uso de la comunidad,Lo que más usa todo el mundo va primero.,What everybody uses most goes first.,El que més fa servir tothom va primer.,Denek gehien erabiltzen dutena lehenengo doa.
-layout.autoNote,Aviso: con orden automático no se puede mover a mano,Con el orden automático las flechas no hacen nada: se ordena solo. Lo plegado sí se respeta.,With automatic order the arrows do nothing: it rearranges itself. Folded items are still respected.,Amb l'ordre automàtic les fletxes no fan res: es recol·loca sol. El que està plegat sí que es respecta.,Ordena automatikoarekin geziek ez dute ezer egiten: berez kokatzen da. Tolestutakoa errespetatzen da.
-layout.nav,Personalizar: apartado de las pestañas,Pestañas,Tabs,Pestanyes,Fitxak
-layout.folded,Etiqueta de un bloque plegado,plegado,folded,plegat,tolestuta
-layout.up,Botón para subir un elemento; {name} es su nombre,Subir {name},Move {name} up,Puja {name},Igo {name}
-layout.down,Botón para bajar un elemento; {name} es su nombre,Bajar {name},Move {name} down,Baixa {name},Jaitsi {name}
-layout.fold,Casilla para plegar un bloque,plegar,fold,plega,tolestu
-layout.page.expediente,Personalizar: bloques del perfil,Perfil,Profile,Perfil,Profila
-layout.page.guardia,Personalizar: bloques del on-call,On-call,On-call,On-call,On-call
-layout.page.red,Personalizar: bloques de la red,Red,Network,Xarxa,Sarea
-layout.expediente.record,Bloque del perfil: nivel y títulos,Nivel y títulos,Level and titles,Nivell i títols,Maila eta tituluak
-layout.expediente.health,Bloque del perfil: health check (pace y black hole),Health check,Health check,Health check,Health check
-layout.expediente.network,Bloque del perfil: tu red de correcciones,Tu red de correcciones,Your evaluation network,La teva xarxa de correccions,Zure zuzenketen sarea
-layout.expediente.achievements,Bloque del perfil: logros y reacciones,Logros y reacciones,Achievements and reactions,Assoliments i reaccions,Lorpenak eta erreakzioak
-layout.expediente.ranking,Bloque del perfil: clasificación y tus dudas,Ranking y tus dudas,Ranking and your questions,Rànquing i els teus dubtes,Rankinga eta zure zalantzak
-layout.guardia.prereview,Bloque del on-call: preevaluaciones,Preevaluaciones,Pre-reviews,Preavaluacions,Aurreebaluazioak
-layout.guardia.today,Bloque del on-call: tus franjas de hoy,Tus franjas de hoy,Today's slots,Les teves franges d'avui,Zure gaurko tarteak
-layout.guardia.bookings,Bloque del on-call: reservas,Reservas,Bookings,Reserves,Erreserbak
-layout.guardia.blocked,Bloque del on-call: personas bloqueadas,Personas bloqueadas,Blocked people,Persones bloquejades,Blokeatutako pertsonak
-layout.red.totals,Bloque de la red: totales,Totales,Totals,Totals,Guztizkoak
-layout.red.endogamy,Bloque de la red: quién se corrige siempre con la misma gente,Más endogamia,Most endogamous,Més endogàmia,Endogamia handiena
-layout.red.pairs,Bloque de la red: parejas que más se corrigen,Parejas que más se corrigen,Pairs that evaluate each other most,Parelles que més es corregeixen,Elkar gehien zuzentzen duten bikoteak
-layout.red.strictest,Bloque de la red: quién pone las notas más bajas,Quién suspende más al corregir,Strictest evaluators,Qui suspèn més en corregir,Nork suspenditzen duen gehien zuzentzean
-layout.red.projects,Bloque de la red: proyectos más corregidos,Proyectos más corregidos,Most evaluated projects,Projectes més corregits,Gehien zuzendutako proiektuak
-layout.red.about,Bloque de la red: cómo leer el grafo,Cómo se lee,How to read it,Com es llegeix,Nola irakurtzen den
-nav.gestion,Sección oculta: panel de gestión para quien administra,Gestión,Admin,Gestió,Kudeaketa
-layout.alerts,Personalizar: apartado de avisos,Avisos,Notices,Avisos,Abisuak
-layout.alerts.lead,Personalizar: cuánto antes avisar de un evento,Avisarme antes de cada evento,Remind me before each event,Avisa'm abans de cada esdeveniment,Abisatu ekitaldi bakoitzaren aurretik
-layout.alerts.off,Opción: no avisar,No avisarme,Don't remind me,No m'avisis,Ez abisatu
-layout.alerts.minutes,Opción: avisar {n} minutos antes,{n} min antes,{n} min before,{n} min abans,{n} min lehenago
-info.open,Nombre accesible del botón (i) que abre la demostración; {title} es la sección,Cómo funciona: {title},How it works: {title},Com funciona: {title},Nola dabil: {title}
-finder.label,Buscador de personas de la cabecera,Buscar personas,Find people,Cerca persones,Bilatu pertsonak
-finder.placeholder,Texto de ejemplo dentro del buscador,Buscar a alguien…,Find someone…,Cerca algú…,Bilatu norbait…
-finder.none,Buscador: no hay nadie con ese login,Nadie se llama así,Nobody by that name,Ningú es diu així,Inor ez da horrela deitzen
-finder.recent,Buscador: últimas búsquedas,Búsquedas recientes,Recent searches,Cerques recents,Azken bilaketak
-finder.recentClear,Buscador: borrar las últimas búsquedas,Borrar,Clear,Esborra,Ezabatu
-layout.tips,Personalizar: apartado de ayuda,Ayuda,Help,Ajuda,Laguntza
-layout.tips.show,Casilla para enseñar u ocultar los botones (i) de demostración,Enseñar los iconos de información con las demostraciones,Show the information icons with their demos,Mostra les icones d'informació amb les demostracions,Erakutsi informazio-ikonoak beren demoekin
-layout.style,Personalizar: estilo visual de la web,Estilo,Style,Estil,Estiloa
-layout.paletteMenu,Personalizar: desplegable con los temas de colores (los de VS Code en Terminal),Tema de colores,Colour theme,Tema de colors,Kolore-gaia
-layout.palette,Personalizar: color de acento,Color,Colour,Color,Kolorea
-nav.clusters,"Pestaña: mapa de los clústeres, quién se sienta dónde",Clústeres,Clusters,Clústers,Klusterrak
-nav.examenes,"Pestaña: exámenes, en vivo y estadísticas",Exámenes,Exams,Exàmens,Azterketak
-nav.examenesLive,Etiqueta junto a Exámenes cuando hay uno en curso,en vivo,live,en directe,zuzenean
-until.now,Tiempo restante cuando es casi nada,un momento,a moment,un moment,une bat
-until.and,Une dos cantidades de tiempo: «2 horas y 5 minutos»,{a} y {b},{a} and {b},{a} i {b},{a} eta {b}
-until.minute.one,Tiempo: un minuto,{n} minuto,{n} minute,{n} minut,minutu {n}
-until.minute.many,Tiempo: varios minutos,{n} minutos,{n} minutes,{n} minuts,{n} minutu
-until.hour.one,Tiempo: una hora,{n} hora,{n} hour,{n} hora,ordu {n}
-until.hour.many,Tiempo: varias horas,{n} horas,{n} hours,{n} hores,{n} ordu
-until.day.one,Tiempo: un día,{n} día,{n} day,{n} dia,egun {n}
-until.day.many,Tiempo: varios días,{n} días,{n} days,{n} dies,{n} egun
-until.month.one,Tiempo: un mes,{n} mes,{n} month,{n} mes,hilabete {n}
-until.month.many,Tiempo: varios meses,{n} meses,{n} months,{n} mesos,{n} hilabete
-nav.clicker,Sección secreta: el juego Code Clicker,Code Clicker,Code Clicker,Code Clicker,Code Clicker
-login.staff,Pantalla de entrada: enlace para el personal de 42,Soy del staff: validar un documento,I'm staff: verify a document,Soc de l'staff: validar un document,Staffekoa naiz: dokumentu bat balidatu
-login.demo,Pantalla de entrada: enlace a la demostración,Ver una demostración sin cuenta,See a demo without an account,Mira una demostració sense compte,Ikusi erakustaldi bat konturik gabe
-demo.title,Etiqueta de la demostración pública,Demostración,Demo,Demostració,Erakustaldia
-demo.about,Explicación de la demostración,Datos inventados. Nada de lo que hagas aquí se guarda.,Made-up data. Nothing you do here is saved.,Dades inventades. Res del que facis aquí es desa.,Asmatutako datuak. Hemen egiten duzun ezer ez da gordetzen.
-demo.real,Enlace de la demostración a la web real,Ir a la web de verdad,Go to the real site,Ves al web de veritat,Joan benetako webgunera
-demo.staff,Pista de la demostración para probar la validación de documentos,"En la demostración vale cualquier clave que empiece por «s42-», y el documento de ejemplo tiene el código K7QF.","In the demo any key starting with “s42-” works, and the sample document has the code K7QF.","A la demostració val qualsevol clau que comenci per «s42-», i el document d'exemple té el codi K7QF.","Erakustaldian «s42-» hasten den edozein gakok balio du, eta adibideko dokumentuak K7QF kodea du."
-nav.cat.expediente,Pestaña de arriba: tu perfil (la portada),Perfil,Profile,Perfil,Profila
-nav.cat.expediente.hint,Explicación al pasar el ratón por la pestaña,"Lo tuyo: nivel, logros, health check y tu red","Yours: level, achievements, health check and your network","El teu: nivell, assoliments, health check i la teva xarxa","Zurea: maila, lorpenak, health check-a eta zure sarea"
-nav.cat.ayuda,"Pestaña de arriba que agrupa Peer to peer, proyectos, sprints y pizarras",Ayuda,Help,Ajuda,Laguntza
-nav.cat.ayuda.hint,Explicación al pasar el ratón por la pestaña,"Quedar con gente: pedir y dar ayuda, aprender y enseñar","Meet people: ask for and give help, learn and teach","Quedar amb gent: demanar i donar ajuda, aprendre i ensenyar","Jendearekin elkartu: laguntza eskatu eta eman, ikasi eta irakatsi"
-nav.cat.calendario,Pestaña de arriba: tu calendario,Calendario,Calendar,Calendari,Egutegia
-nav.cat.calendario.hint,Explicación al pasar el ratón por la pestaña,"Todo lo que tienes, de aquí y de 42, en el tiempo","Everything you have, from here and from 42, over time","Tot el que tens, d'aquí i de 42, en el temps","Duzun guztia, hemengoa eta 42koa, denboran"
-nav.cat.clusters,Pestaña de arriba: el plano de los clústeres,Clústeres,Clusters,Clústers,Klusterrak
-nav.cat.clusters.hint,Explicación al pasar el ratón por la pestaña,"El plano del campus: quién está, dónde y si está disponible","The campus map: who is in, where and who is available","El plànol del campus: qui hi és, on i si està disponible","Campuseko planoa: nor dagoen, non eta eskuragarri dagoen"
-nav.cat.datos,"Pestaña de arriba que agrupa red, avance y exámenes",Datos,Data,Dades,Datuak
-nav.cat.datos.hint,Explicación al pasar el ratón por la pestaña,"El campus en cifras: correcciones, avance y exámenes","The campus in numbers: evaluations, progress and exams","El campus en xifres: correccions, avenç i exàmens","Campusa zenbakitan: zuzenketak, aurrerapena eta azterketak"
-settings.detail,Pie y bienvenida: cuánto enseña la web (modo de la interfaz),Modo,Mode,Mode,Modua
-settings.detail.simple,Modo de la interfaz: lo mínimo,Simplificado,Simplified,Simplificat,Erraztua
-settings.detail.simple.hint,Qué enseña el modo simplificado,Lo justo para pedir y dar ayuda. Sin cifras ni rankings.,Just what you need to ask for and give help. No numbers or rankings.,El just per demanar i donar ajuda. Sense xifres ni rànquings.,Laguntza eskatzeko eta emateko behar dena. Zenbakirik eta sailkapenik gabe.
-settings.detail.normal,Modo de la interfaz: el de siempre,Normal,Normal,Normal,Arrunta
-settings.detail.normal.hint,Qué enseña el modo normal,"Toda la web, con las cifras principales.","The whole site, with the main numbers.","Tot el web, amb les xifres principals.","Webgune osoa, zenbaki nagusiekin."
-settings.detail.datos,"Modo de la interfaz: todo, con estadísticas (lo pidió así quien hizo la web)",Loco por los datos,Data nerd,Boig per les dades,Datu-zalea
-settings.detail.datos.hint,Qué enseña el modo de datos,"Todo: rankings, estadísticas y desgloses abiertos.","Everything: rankings, statistics and breakdowns open.","Tot: rànquings, estadístiques i desglossaments oberts.","Dena: sailkapenak, estatistikak eta xehetasunak irekita."
-welcome.mode.title,"Bienvenida, paso 2: elegir el modo de la interfaz",¿Cuánto quieres ver?,How much do you want to see?,Quant vols veure?,Zenbat ikusi nahi duzu?
-welcome.mode.body,"Bienvenida, paso 2: explicación del modo",Elige cuánto enseña la web. Lo puedes cambiar cuando quieras en el pie.,Choose how much the site shows. You can change it any time in the footer.,Tria quant ensenya el web. Ho pots canviar quan vulguis al peu.,Aukeratu webguneak zenbat erakusten duen. Oinean alda dezakezu nahi duzunean.
-table.sortedBy,"Tablas: por qué columnas está ordenada, de la que más manda a la que menos",Ordenado por {columns},Sorted by {columns},Ordenat per {columns},Honen arabera ordenatuta: {columns}
-table.unsort,Tablas: botón para quitar el orden,Quitar el orden,Clear sorting,Treu l'ordre,Kendu ordena
-table.sortHint,Tablas: explicación al pasar por una cabecera,Ordenar por esta columna. Lo que ordenaste antes decide los empates.,Sort by this column. What you sorted before breaks ties.,Ordena per aquesta columna. El que vas ordenar abans decideix els empats.,Ordenatu zutabe honen arabera. Lehen ordenatutakoak erabakitzen ditu berdinketak.
-nav.notgames,Pestaña de Ayuda: preguntas de programación para aprender jugando (no se llama juego a propósito),Not-games,Not-games,Not-games,Not-games
-nav.estadisticas,Pestaña de Ayuda: cifras y clasificación de cada sección,Estadísticas,Statistics,Estadístiques,Estatistikak
-focus.open,Menú de la cuenta: abrir el Pomodoro,Modo concentración (Pomodoro),Focus mode (Pomodoro),Mode concentració (Pomodoro),Kontzentrazio modua (Pomodoro)
-focus.title,Pomodoro: título de la ventana,Modo concentración,Focus mode,Mode concentració,Kontzentrazio modua
-focus.pitch,Pomodoro: explicación en la ventana,"Un rato sin distracciones: la web se queda con lo que elijas, los juegos se callan y los demás ven que estás en modo concentración","Some time without distractions: the web keeps only what you choose, games go quiet and others see you are focusing.","Una estona sense distraccions: la web es queda amb el que triïs, els jocs callen i els altres veuen que estàs concentrat.","Distrakziorik gabeko denbora: webak aukeratzen duzuna bakarrik uzten du, jokoak isiltzen dira eta besteek kontzentratuta zaudela ikusten dute."
-focus.minutes,Pomodoro: minutos de concentración,Concentración,Focus,Concentració,Kontzentrazioa
-focus.break,Pomodoro: minutos de descanso,Descanso,Break,Descans,Atsedena
-focus.minutesN,Pomodoro: duración,{n} min,{n} min,{n} min,{n} min
-focus.noBreak,Pomodoro: sin descanso,Sin descanso,No break,Sense descans,Atsedenik gabe
-focus.sections,Pomodoro: secciones que siguen en las pestañas,Pestañas que quieres ver,Tabs you want to see,Pestanyes que vols veure,Ikusi nahi dituzun fitxak
-focus.show,Pomodoro: avisos que siguen saliendo,Avisos que quieres recibir,Notices you want to get,Avisos que vols rebre,Jaso nahi dituzun abisuak
-focus.show.corrections,Pomodoro: avisos de correcciones,Correcciones,Evaluations,Correccions,Zuzenketak
-focus.show.events,Pomodoro: avisos de eventos,Eventos,Events,Esdeveniments,Ekitaldiak
-focus.show.messages,Pomodoro: mensajes,Mensajes,Messages,Missatges,Mezuak
-focus.show.guard,Pomodoro: avisos del on-call,On-call (reservas),On-call (bookings),On-call (reserves),On-call (erreserbak)
-focus.show.notices,Pomodoro: el resto del buzón,Resto del buzón,Rest of the mailbox,Resta de la bústia,Postontziaren gainerakoa
-focus.always,Pomodoro: lo que sale siempre,Los avisos obligatorios de un evento con más gente salen siempre: hay que responderlos.,Mandatory notices of an event with other people always show up: they need an answer.,Els avisos obligatoris d'un esdeveniment amb més gent surten sempre: cal contestar-los.,Jende gehiagorekin dagoen ekitaldi baten derrigorrezko abisuak beti agertzen dira: erantzun behar dira.
-focus.start,Pomodoro: empezar,Empezar a concentrarme,Start focusing,Començar a concentrar-me,Kontzentratzen hasi
-focus.stop,Pomodoro: parar antes,Parar,Stop,Parar,Gelditu
-focus.again,Pomodoro: otra vuelta tras el descanso,Otra vuelta,Another round,Una altra volta,Beste txanda bat
-focus.focusing,Pomodoro: etiqueta del temporizador,En concentración,Focusing,Concentrat,Kontzentratuta
-focus.resting,Pomodoro: etiqueta del descanso,Descanso,Break,Descans,Atsedena
-focus.breakOver,Pomodoro: el descanso ha acabado,¡A por otra!,Let's go again!,A per una altra!,Goazen beste baterako!
-focus.timerLabel,Pomodoro: temporizador para lectores de pantalla,Tiempo de concentración que queda,Focus time left,Temps de concentració que queda,Geratzen den kontzentrazio denbora
-focus.badge,Lo que ven los demás de quien está concentrado,En concentración hasta las {time} · no me distraigas,Focusing until {time} · please don't disturb,Concentrat fins a les {time} · no em distreguis,{time}ak arte kontzentratuta · ez nazazu distraitu
-focus.badgeHint,Explicación del aviso de concentración,Está en modo Pomodoro: mejor escribirle después.,In Pomodoro mode: better write later.,És en mode Pomodoro: millor escriure-li després.,Pomodoro moduan dago: hobe geroago idaztea.
-campus.other,"Aviso para quien entra desde un campus que aún no se copia; {campus} es el suyo y {tracked}, los que sí","Tu campus, {campus}, todavía no está en Peer4U: lo que ves es de {tracked}. Si se apuntan cinco personas más de {campus}, lo añadimos; con diez, también el idioma. ¡Corre la voz!","Your campus, {campus}, is not on Peer4U yet: what you see is from {tracked}. If five more people from {campus} join, we add it; with ten, the language too. Spread the word!","El teu campus, {campus}, encara no és a Peer4U: el que veus és de {tracked}. Si s'apunten cinc persones més de {campus}, l'afegim; amb deu, també l'idioma. Fes-ho córrer!","Zure campusa, {campus}, oraindik ez dago Peer4U-n: ikusten duzuna {tracked}(e)koa da. {campus}(e)ko bost pertsona gehiago batzen badira, gehituko dugu; hamarrekin, hizkuntza ere bai. Zabaldu mezua!"
-focus.screen.open,Pomodoro: poner el temporizador a pantalla completa,Pantalla completa,Full screen,Pantalla completa,Pantaila osoa
-focus.screen.label,Pomodoro: nombre de la vista a pantalla completa,Pomodoro a pantalla completa,Full-screen Pomodoro,Pomodoro a pantalla completa,Pomodoro pantaila osoan
-focus.screen.sign,Pomodoro a pantalla completa: letrero para quien pase por al lado,En concentración · no molestar,Focusing · do not disturb,En concentració · no molesteu,Kontzentratuta · ez molestatu
-focus.screen.until,Pomodoro a pantalla completa: a qué hora acaba,Hasta las {time},Until {time},Fins a les {time},{time}ak arte
-focus.screen.shrink,Pomodoro a pantalla completa: volver al temporizador pequeño sin parar,Quitar pantalla completa,Exit full screen,Treure la pantalla completa,Irten pantaila osotik
-focus.screen.exit,Pomodoro a pantalla completa: querer parar la sesión (pregunta antes),Parar la sesión,Stop the session,Parar la sessió,Saioa gelditu
-focus.exit.title,Pomodoro: pregunta al pulsar Parar,¿De verdad quieres parar?,Do you really want to stop?,De debò vols parar?,Benetan gelditu nahi duzu?
-focus.exit.left,"Pomodoro: lo que queda, al querer parar",Tiempo de concentración restante: {time}. ¿De verdad hace falta acabar ahora?,Focus time left: {time}. Do you really need to stop now?,Temps de concentració restant: {time}. De debò cal acabar ara?,Geratzen den kontzentrazio-denbora: {time}. Benetan orain amaitu behar duzu?
-focus.exit.why,Pomodoro: título de la lista de motivos para parar,¿Por qué quieres parar?,Why do you want to stop?,Per què vols parar?,Zergatik gelditu nahi duzu?
-focus.exit.later,Pomodoro: invitación a dejarlo para el final de la sesión,¿Podría esperar a que acabe la sesión? Apúntalo y hazlo en el descanso.,Could it wait until the session ends? Note it down and do it on your break.,Podria esperar que acabi la sessió? Apunta-ho i fes-ho al descans.,Saioa amaitu arte itxaron dezake? Idatzi eta atsedenaldian egin.
-focus.exit.wait,Pomodoro: cuenta atrás antes de poder parar,Piénsalo: {n} s…,Think it over: {n} s…,Pensa-t'ho: {n} s…,Pentsatu: {n} s…
-focus.exit.pick,Pomodoro: falta marcar un motivo para poder parar,Marca al menos un motivo para parar.,Tick at least one reason to stop.,Marca almenys un motiu per parar.,Markatu gutxienez arrazoi bat gelditzeko.
-focus.exit.stay,Pomodoro: botón para seguir concentrándose,Sigo concentrándome,I'll keep focusing,Continuo concentrant-me,Kontzentratzen jarraituko dut
-focus.exit.stop,Pomodoro: botón para parar de verdad (tras la cuenta atrás),"Sí, parar","Yes, stop","Sí, parar","Bai, gelditu"
-focus.exit.cheer,Pomodoro: felicitación al decidir seguir,¡Bien hecho! Sigues en concentración: lo otro puede esperar.,Well done! You are still focusing: the rest can wait.,Ben fet! Continues en concentració: la resta pot esperar.,Ondo! Kontzentratuta jarraitzen duzu: besteak itxaron dezake.
-focus.reason.tired,Pomodoro: motivo para parar,Me falta energía,I'm out of energy,Em falta energia,Energiarik gabe nago
-focus.reason.break,Pomodoro: motivo para parar,Necesito un descanso,I need a break,Necessito un descans,Atseden bat behar dut
-focus.reason.distracted,Pomodoro: motivo para parar,No consigo concentrarme,I can't focus,No aconsegueixo concentrar-me,Ezin naiz kontzentratu
-focus.reason.someone,Pomodoro: motivo para parar,Alguien me necesita,Someone needs me,Algú em necessita,Norbaitek behar nau
-focus.reason.urgent,Pomodoro: motivo para parar,Ha surgido algo urgente,Something urgent came up,Ha sorgit una cosa urgent,Zerbait larria sortu da
-focus.reason.done,Pomodoro: motivo para parar,Ya he terminado lo que quería,I have finished what I wanted,Ja he acabat el que volia,Nahi nuena amaitu dut
-focus.reason.other,Pomodoro: motivo para parar,Otro motivo,Another reason,Un altre motiu,Beste arrazoi bat
-focus.tab.settings,Pomodoro: pestaña de los ajustes en la ventana,Ajustes,Settings,Ajustos,Ezarpenak
-focus.tab.stats,Pomodoro: pestaña de tus estadísticas en la ventana,Tus estadísticas,Your statistics,Les teves estadístiques,Zure estatistikak
-focus.stats.period,Estadísticas del Pomodoro: grupo de botones del periodo,Periodo,Period,Període,Aldia
-focus.period.day,Estadísticas del Pomodoro: periodo,Hoy,Today,Avui,Gaur
-focus.period.week,Estadísticas del Pomodoro: periodo (últimos 7 días),Semana,Week,Setmana,Astea
-focus.period.month,Estadísticas del Pomodoro: periodo (últimos 30 días),Mes,Month,Mes,Hilabetea
-focus.period.total,Estadísticas del Pomodoro: periodo (desde siempre),Total,Total,Total,Guztira
-focus.stats.sessions,Estadísticas del Pomodoro: cifra,Sesiones,Sessions,Sessions,Saioak
-focus.stats.focusedSeconds,Estadísticas del Pomodoro: cifra,Tiempo en concentración,Time focused,Temps en concentració,Kontzentrazio denbora
-focus.stats.completed,Estadísticas del Pomodoro: sesiones que llegaron a su hora,Completadas,Completed,Completades,Osatuak
-focus.stats.cancelled,Estadísticas del Pomodoro: sesiones paradas antes,Paradas antes de tiempo,Stopped early,Aturades abans d'hora,Goiz geldituak
-focus.stats.stayed,Tus estadísticas del Pomodoro: veces que quisiste parar y seguiste,Quisiste parar y seguiste,"Wanted to stop, kept going",Volies parar i vas seguir,Gelditu nahi eta jarraitu zenuen
-focus.stats.stayedAll,Estadísticas del Pomodoro en el panel: veces que alguien quiso parar y siguió,Se quiso parar y se siguió,"Wanted to stop, kept going",Es volia parar i es va seguir,Gelditu nahi eta jarraitu zen
-focus.stats.people,Estadísticas del Pomodoro: cuántas personas lo usaron,Personas,People,Persones,Pertsonak
-focus.stats.band,"Tus estadísticas del Pomodoro: la media del tramo elegido, bajo tu cifra",Media del tramo: {value},Band average: {value},Mitjana del tram: {value},Tartearen batez bestekoa: {value}
-focus.stats.position,Tus estadísticas del Pomodoro: tu puesto entre quienes lo usan,Te concentras más que el {n} % de quienes usan el Pomodoro.,You focus more than {n}% of the people who use the Pomodoro.,Et concentres més que el {n} % de qui fa servir el Pomodoro.,Pomodoroa erabiltzen dutenen % {n} baino gehiago kontzentratzen zara.
-focus.stats.byDay,Estadísticas del Pomodoro: gráfica,Tiempo por días,Time by day,Temps per dies,Denbora egunka
-focus.stats.byHour,Estadísticas del Pomodoro: gráfica,Tiempo por horas,Time by hour,Temps per hores,Denbora orduka
-focus.stats.reasons,Estadísticas del Pomodoro: tabla de motivos,Motivos para querer parar,Reasons for wanting to stop,Motius per voler parar,Gelditu nahi izateko arrazoiak
-focus.stats.reason,Estadísticas del Pomodoro: columna,Motivo,Reason,Motiu,Arrazoia
-focus.stats.reasonStopped,"Estadísticas del Pomodoro: columna, veces que se paró por ese motivo",Al parar,When stopping,En parar,Gelditzean
-focus.stats.reasonStayed,"Estadísticas del Pomodoro: columna, veces que se siguió pese al motivo",Al seguir,When going on,En seguir,Jarraitzean
-focus.stats.empty,Estadísticas del Pomodoro: periodo sin sesiones,Aún no hay sesiones en este periodo.,No sessions in this period yet.,Encara no hi ha sessions en aquest període.,Oraindik ez dago saiorik aldi honetan.
-focus.band.all,Tus estadísticas del Pomodoro: comparación con todo el mundo,Comparas con todas las personas que lo usan,Comparing with everyone who uses it,Compares amb totes les persones que el fan servir,Erabiltzen duten guztiekin alderatzen duzu
-focus.band.some,Tus estadísticas del Pomodoro: tramo con el que te comparas,Comparas con el tramo del {low} % al {high} % por uso,Comparing with the {low}% to {high}% band by use,Compares amb el tram del {low} % al {high} % per ús,Erabileraren araberako % {low}–% {high} tartearekin alderatzen duzu
-focus.band.people,Tus estadísticas del Pomodoro: personas del tramo,{n} de {of},{n} of {of},{n} de {of},{of}tik {n}
-focus.band.low,Tus estadísticas del Pomodoro: tirador izquierdo del tramo,Dejar fuera a quien menos lo usa,Leave out those who use it least,Deixar fora qui menys el fa servir,Gutxien erabiltzen dutenak kanpoan utzi
-focus.band.high,Tus estadísticas del Pomodoro: tirador derecho del tramo,Dejar fuera a quien más lo usa,Leave out those who use it most,Deixar fora qui més el fa servir,Gehien erabiltzen dutenak kanpoan utzi
-focus.band.least,Tus estadísticas del Pomodoro: extremo del tramo,Menos uso,Least use,Menys ús,Erabilera gutxien
-focus.band.most,Tus estadísticas del Pomodoro: extremo del tramo,Más uso,Most use,Més ús,Erabilera gehien
-common.save,Botón genérico: guardar,Guardar,Save,Desa,Gorde
-common.remove,Botón genérico: borrar algo,Borrar,Delete,Esborra,Ezabatu
-common.send,Botón genérico: enviar,Enviar,Send,Envia,Bidali
-common.withdraw,Botón genérico: retirar algo publicado,Retirar,Withdraw,Retira,Kendu
-common.reason,Etiqueta genérica: el motivo de algo,Motivo,Reason,Motiu,Arrazoia
-common.cancel,Botón genérico: cancelar lo que se está haciendo,Cancelar,Cancel,Cancel·la,Utzi
-common.ok,Botón genérico para cerrar un aviso,Entendido,Got it,Entesos,Ulertuta
-common.prev,Botón genérico: ir al anterior,Anterior,Previous,Anterior,Aurrekoa
-common.next,Botón genérico: ir al siguiente,Siguiente,Next,Següent,Hurrengoa
-common.refresh,Botón genérico: volver a cargar los datos,Actualizar,Refresh,Actualitza,Eguneratu
-common.close,Botón genérico: cerrar una ventana o panel,Cerrar,Close,Tanca,Itxi
-common.from,Campo genérico: inicio de un periodo o franja,Desde,From,Des de,Noiztik
-common.to,Campo genérico: fin de un periodo o franja,Hasta,To,Fins a,Noiz arte
-common.period,Etiqueta genérica: el periodo que se mira,Periodo,Period,Període,Aldia
-common.people,Etiqueta o columna genérica: número de personas,Personas,People,Persones,Pertsonak
-common.person,Columna genérica: la persona de la fila,Persona,Person,Persona,Pertsona
-common.accept,Botón genérico: aceptar una petición,Aceptar,Accept,Accepta,Onartu
-common.decline,Botón genérico: rechazar una petición,Rechazar,Decline,Rebutja,Baztertu
-common.createRoom,Botón de los juegos: crear una sala,Crear una sala,Create a room,Crea una sala,Sortu gela bat
-common.join,Botón de los juegos: entrar en una sala,Entrar,Join,Entra,Sartu
-common.leave,Botón de los juegos: salir de la sala,Salir,Leave,Surt,Irten
-nav.agenda,Pestaña de Perfil: tu agenda (Scrum individual por proyecto),Agenda,Agenda,Agenda,Agenda
+clave,contexto,es,en,ca,eu,fr
+app.loading,Mensaje mientras carga algo,Cargando…,Loading…,Carregant…,Kargatzen…,
+app.footer,"Pie de página, al final de todas las pantallas",Peer4U · Hecho en la Hackathon de 42 Madrid,Peer4U · Made at the 42 Madrid Hackathon,Peer4U · Fet a la Hackathon de 42 Madrid,Peer4U · 42 Madrilgo Hackathonean egina,
+app.serverDown,Pantalla de error cuando la API no responde,No se puede conectar con el servidor. Puede que esté arrancando; prueba en un momento.,Can't reach the server. It may be starting up; try again in a moment.,No es pot connectar amb el servidor. Pot ser que estigui arrencant; prova-ho d'aquí un moment.,Ezin da zerbitzariarekin konektatu. Baliteke abiarazten egotea; saiatu berriro une batean.,
+app.retry,Botón para volver a intentar conectar,Volver a probar,Try again,Torna-ho a provar,Saiatu berriro,
+app.sectionFailed,Una parte de la web ha fallado al pintarse; el fallo ya se ha enviado,Esta parte ha fallado. Ya nos ha llegado el aviso.,This part has failed. We have already been notified.,Aquesta part ha fallat. Ja ens ha arribat l'avís.,Zati honek huts egin du. Abisua iritsi zaigu jada.,
+app.logout,Opción del menú de la cuenta para cerrar sesión,Salir,Log out,Surt,Irten,
+app.back,Botón para volver de la lista de personas a la elección de proyecto,Volver a Peer to peer,Back to Peer to peer,Torna a Peer to peer,Itzuli Peer to peer-era,
+nav.label,Nombre accesible de la barra de pestañas,Secciones,Sections,Seccions,Atalak,
+nav.consulta,"Pestaña: Peer to peer, donde se busca quién ayuda con un proyecto",Peer to peer,Peer to peer,Peer to peer,Peer to peer,
+nav.terapia,Pestaña: sprints (quedar en grupo para hacer un proyecto juntos),Sprints,Sprints,Sprints,Sprintak,
+nav.tablon,"Pestaña: proyectos, con las dudas de cada uno",Proyectos,Projects,Projectes,Proiektuak,
+nav.pizarras,Pestaña: pizarras (charlas abiertas para explicar un tema),Pizarras,Whiteboards,Pissarres,Arbelak,
+nav.expediente,"Pestaña: tu perfil, con nivel, logros y estado",Perfil,Profile,Perfil,Profila,
+layout.recordStyle,Personalizar: elegir con qué estilo visual ven tu perfil los demás,Con qué estilo ven tu perfil los demás,Which style others see your profile in,Amb quin estil veuen els altres el teu perfil,Zein estilorekin ikusten duten besteek zure profila,
+layout.recordStyle.none,Opción: cada visitante ve tu perfil con su propio estilo,"Con el suyo, cada cual",Each person's own,"Amb el seu, cadascú",Bakoitzak berearekin,
+layout.recordStyle.yours,Etiqueta junto a un estilo exclusivo que solo tiene esa persona,solo tuyo,yours only,només teu,zuretzat bakarrik,
+nav.privacidad,Pestaña oculta: página de privacidad y condiciones,Privacidad,Privacy,Privacitat,Pribatutasuna,
+legal.link,Enlace del pie a la página de privacidad,Privacidad y condiciones,Privacy and terms,Privacitat i condicions,Pribatutasuna eta baldintzak,
+legal.untranslated,Aviso: el texto legal no está en el idioma elegido,Este texto solo está en español y en inglés.,This text is only available in Spanish and English.,Aquest text només és en espanyol i en anglès.,Testu hau gaztelaniaz eta ingelesez bakarrik dago.,
+legal.notAccepted,Estado: no has aceptado la versión vigente de las condiciones,Aún no has aceptado esta versión.,You haven't accepted this version yet.,Encara no has acceptat aquesta versió.,Oraindik ez duzu bertsio hau onartu.,
+legal.acceptedOn,Estado: fecha en que aceptaste las condiciones,Aceptaste esta versión el {date}.,You accepted this version on {date}.,Vas acceptar aquesta versió el {date}.,Bertsio hau {date}(e)an onartu zenuen.,
+legal.export,Botón para descargar todos tus datos en un fichero,Descargar mis datos,Download my data,Descarrega les meves dades,Deskargatu nire datuak,
+legal.exportHint,Nota bajo el botón de descargar tus datos: de dónde sale cada tabla y que una muy larga va recortada,"Cada tabla dice de dónde sale (42 o Peer4U). Si alguna pasa de 5000 filas, va recortada y lo marca con «truncated».","Each table says where it comes from (42 or Peer4U). If one has more than 5,000 rows it is cut short and marked «truncated».","Cada taula diu d'on surt (42 o Peer4U). Si alguna passa de 5000 files, va retallada i ho marca amb «truncated».","Taula bakoitzak nondik datorren dio (42 edo Peer4U). Batek 5000 lerro baino gehiago baditu, moztuta doa eta «truncated» markarekin adierazten du.",
+legal.gateKind,Encabezado de la ventana obligatoria de condiciones,Antes de seguir,Before you go on,Abans de continuar,Jarraitu aurretik,
+legal.readAll,Enlace para abrir el texto legal completo,Leer el texto entero,Read the full text,Llegeix el text sencer,Irakurri testu osoa,
+legal.accept,Botón para aceptar las condiciones y seguir,Lo he leído y lo acepto,I have read it and I accept,L'he llegit i l'accepto,Irakurri dut eta onartzen dut,
+legal.back,Botón para volver a la pantalla de entrada,Volver a la entrada,Back to sign in,Torna a l'entrada,Itzuli sarrerara,
+nav.openRecord,Nombre accesible del logo: lleva a tu perfil,Peer4U: ir a tu perfil,Peer4U: go to your profile,Peer4U: ves al teu perfil,Peer4U: joan zure profilera,
+menu.open,Nombre accesible del botón del menú de la cuenta,"Tu cuenta, {login}","Your account, {login}","El teu compte, {login}","Zure kontua, {login}",
+menu.record,Opción del menú de la cuenta: ir a tu perfil,Mi perfil,My profile,El meu perfil,Nire profila,
+menu.duty,Opción del menú de la cuenta: ir a tu on-call (cuándo puedes ayudar y tus reservas),Mi on-call,My on-call,El meu on-call,Nire on-call-a,
+login.pitch,Pantalla de entrada: frase que explica para qué sirve la web,"¿Te has atascado? Abre un peer to peer: siempre hay alguien disponible. Y si hoy puedes, ponte disponible y haz de peer.","Stuck? Open a peer to peer: there's always someone available. And if you can today, make yourself available and be someone's peer.","T'has encallat? Obre un peer to peer: sempre hi ha algú disponible. I si avui pots, posa't disponible i fes de peer.","Trabatuta zaude? Ireki peer to peer bat: beti dago norbait eskuragarri. Eta gaur ahal baduzu, jarri eskuragarri eta izan norbaiten peerra.",
+login.button,Pantalla de entrada: botón para iniciar sesión con la cuenta de 42,Entrar con 42,Sign in with 42,Entra amb 42,Sartu 42rekin,
+login.how,Pantalla de entrada: título de los tres pasos,Cómo funciona,How it works,Com funciona,Nola dabil,
+login.step1,Pantalla de entrada: paso 1,1. Cuéntanos dónde está tu bug,1. Tell us where your bug is,1. Explica'ns on és el teu bug,1. Esan non dagoen zure bug-a,
+login.step1d,Pantalla de entrada: detalle del paso 1,Elige tu proyecto,Pick your project,Tria el teu projecte,Aukeratu zure proiektua,
+login.step2,Pantalla de entrada: paso 2,2. Mira quién está disponible,2. See who's available,2. Mira qui està disponible,2. Begiratu nor dagoen eskuragarri,
+login.step2d,Pantalla de entrada: detalle del paso 2,Gente disponible y su puesto,Who's available and where they sit,Gent disponible i el seu lloc,Jende erabilgarria eta haien postua,
+login.step3,Pantalla de entrada: paso 3,3. Ve a su puesto y pide ayuda,3. Walk over and ask,3. Ves al seu lloc i demana ajuda,3. Joan haren postura eta eskatu laguntza,
+login.step3d,Pantalla de entrada: detalle del paso 3,Nada como explicarlo cara a cara,Nothing beats explaining it face to face,Res com explicar-ho cara a cara,Aurrez aurre azaltzea bezalakorik ez dago,
+login.cancelled,Aviso al volver de 42 sin haber dado permiso,Has cancelado el inicio de sesión. Puedes probar cuando quieras.,You cancelled the sign-in. Try again whenever you like.,Has cancel·lat l'inici de sessió. Pots provar-ho quan vulguis.,Saio-hasiera bertan behera utzi duzu. Nahi duzunean saia zaitezke.,
+login.failed,Aviso cuando falla el inicio de sesión; {code} es el código de error,El inicio de sesión con 42 ha fallado ({code}). Prueba otra vez.,Signing in with 42 failed ({code}). Please try again.,L'inici de sessió amb 42 ha fallat ({code}). Torna-ho a provar.,42rekin saioa hasteak huts egin du ({code}). Saiatu berriro.,
+login.notStudent,"Aviso al volver de 42 con una cuenta que no es de estudiante (Discovery, piscina antigua…)","Peer4U es solo para estudiantes de 42. Tu cuenta tiene otra categoría (por ejemplo, Discovery o una piscina), así que no puede entrar.","Peer4U is only for 42 students. Your account has another category (for example, Discovery or a piscine), so it cannot sign in.","Peer4U és només per a estudiants de 42. El teu compte té una altra categoria (per exemple, Discovery o una piscina), així que no pot entrar.","Peer4U 42ko ikasleentzat bakarrik da. Zure kontuak beste kategoria bat du (adibidez, Discovery edo igerileku bat), eta ezin da sartu.",
+login.poolClosed,Aviso de fábrica al volver de 42 siendo piscinero con la piscina cerrada,Estás en la piscina: Peer4U todavía no está abierto para piscineros.,You are in the piscine: Peer4U is not open to piscine students yet.,Ets a la piscina: Peer4U encara no està obert per als piscinistes.,Igerilekuan zaude: Peer4U ez dago oraindik igerilarientzat irekita.,
+pool.home,Portada de un piscinero sin el perfil permitido,Bienvenido a Peer4U para piscineros. Usa las pestañas de arriba.,Welcome to Peer4U for piscine students. Use the tabs above.,Benvingut a Peer4U per a piscinistes. Fes servir les pestanyes de dalt.,Ongi etorri igerilarientzako Peer4U-ra. Erabili goiko fitxak.,
+error.network,Error: no hay conexión con el servidor,No se puede conectar con el servidor,Can't reach the server,No es pot connectar amb el servidor,Ezin da zerbitzariarekin konektatu,
+error.generic,Error sin explicación conocida; {detail} es el detalle técnico,Algo no ha ido bien ({detail}).,Something went wrong ({detail}).,Alguna cosa no ha anat bé ({detail}).,Zerbait ez da ondo joan ({detail}).,
+error.409,"Error: la acción choca con el estado actual (ya está lleno, ya existe…)",Ahora mismo no se puede: puede que ya esté lleno o que ya exista. Prueba otra vez en un rato.,That's not possible right now: it may be full or already exist. Try again in a bit.,Ara mateix no es pot: potser ja és ple o ja existeix. Torna-ho a provar d'aquí una estona.,Une honetan ezin da: baliteke beteta egotea edo jada existitzea. Saiatu berriro pixka bat geroago.,
+error.403,Error: no tienes permiso,No tienes permiso para eso.,You're not allowed to do that.,No tens permís per a això.,Ez duzu horretarako baimenik.,
+error.404,Error: lo que buscas ya no existe,Eso ya no existe.,That no longer exists.,Això ja no existeix.,Hori ez da existitzen jada.,
+error.400,Error: los datos enviados no son válidos,Algo de lo que has escrito no es válido. Revísalo y prueba otra vez.,Something you entered isn't valid. Check it and try again.,Alguna cosa del que has escrit no és vàlida. Revisa-ho i torna-ho a provar.,Idatzi duzunen zerbait ez da baliozkoa. Berrikusi eta saiatu berriro.,
+days.short,"Iniciales de los días de la semana, de lunes a domingo, separadas por comas","L,M,X,J,V,S,D","M,T,W,T,F,S,S","Dl,Dt,Dc,Dj,Dv,Ds,Dg","Al,Ar,Az,Og,Or,Lr,Ig",
+settings.label,Nombre accesible de los ajustes del pie,Ajustes,Settings,Configuració,Ezarpenak,
+settings.lang,Pie: selector de idioma,Idioma,Language,Idioma,Hizkuntza,
+settings.campus,Pie: selector del campus que estás viendo,Campus,Campus,Campus,Campusa,
+settings.campusLazy,Junto a un campus que se copia solo cuando alguien lo pide,bajo demanda,on demand,sota demanda,eskatu ahala,
+sync.fresh,Pie: cuándo se leyeron los puestos de 42; {min} son minutos,Puestos de 42 actualizados hace {min} min,42 seats updated {min} min ago,Llocs de 42 actualitzats fa {min} min,42ko postuak duela {min} min eguneratuta,
+sync.now,Pie: los puestos se acaban de leer,Puestos de 42 recién actualizados,42 seats just updated,Llocs de 42 acabats d'actualitzar,42ko postuak oraintxe eguneratuta,
+sync.copying,Pie: progreso de la primera copia del campus; {pct} es el porcentaje,Copiando el campus desde 42: {pct} %,Copying the campus from 42: {pct}%,Copiant el campus des de 42: {pct} %,Campusa 42tik kopiatzen: % {pct},
+sync.copyingStart,Pie: empieza la primera copia del campus,Copiando el campus desde 42…,Copying the campus from 42…,Copiant el campus des de 42…,Campusa 42tik kopiatzen…,
+nav.guardia,Sección: tu on-call (cuándo puedes ayudar y tus reservas),On-call,On-call,On-call,On-call,
+nav.calendario,Pestaña: calendario con todo lo tuyo,Calendario,Calendar,Calendari,Egutegia,
+settings.theme,Pie: selector de tema claro u oscuro,Tema,Theme,Tema,Gaia,
+welcome.open,Menú de la cuenta: volver a ver la bienvenida,Ver la bienvenida,See the welcome tour,Mira la benvinguda,Ikusi ongietorria,
+welcome.title,Título de la ventana de bienvenida,Bienvenida a Peer4U,Welcome to Peer4U,Benvinguda a Peer4U,Ongi etorri Peer4U-ra,
+welcome.step,Bienvenida: paso actual de un total,{n} de {total},{n} of {total},{n} de {total},{n} / {total},
+welcome.go,Bienvenida: botón que abre la sección que se explica,Llévame ahí,Take me there,Porta-m'hi,Eraman nazazu,
+welcome.skip,Bienvenida: botón para cerrarla,Saltar,Skip,Salta,Saltatu,
+welcome.back,Bienvenida: paso anterior,Anterior,Back,Enrere,Aurrekoa,
+welcome.next,Bienvenida: paso siguiente,Siguiente,Next,Següent,Hurrengoa,
+welcome.done,Bienvenida: botón del último paso,Empezar,Start,Comença,Hasi,
+welcome.hello.title,"Bienvenida, paso 1: título",Bienvenida a Peer4U,Welcome to Peer4U,Benvinguda a Peer4U,Ongi etorri Peer4U-ra,
+welcome.hello.body,"Bienvenida, paso 1: qué es la web","Aquí la gente de 42 se ayuda. Verás quién te puede echar una mano con tu proyecto, dónde se sienta y cuándo. Lo básico, en un minuto.","This is where 42 people help each other: who can give you a hand with your project, where they sit and when. Here are the basics in a minute.","Aquí la gent de 42 s'ajuda: qui et pot donar un cop de mà amb el teu projecte, on seu i quan. T'ensenyem el bàsic en un minut.","Hemen 42ko jendeak elkar laguntzen du: nork lagun zaitzakeen zure proiektuarekin, non dagoen eta noiz. Oinarrizkoa minutu batean.",
+welcome.record.title,Bienvenida: paso del perfil,Tu perfil,Your profile,El teu perfil,Zure profila,
+welcome.record.body,Bienvenida: qué hay en el perfil,"Tu nivel, tus títulos y tu health check: a qué pace vas y cuándo llegaría el black hole. Anota tu pace para ver todas tus fechas.","Your level, your titles and your health check: the pace you are on and when the black hole would catch you. Enter your pace to see all your dates.","El teu nivell, els teus títols i el teu health check: el pace que portes i quan t'atraparia el black hole.","Zure maila, tituluak eta health check-a: zein pacetan zauden eta noiz harrapatuko zintuzkeen black holeak.",
+welcome.waiting.title,Bienvenida: paso de Peer to peer,Peer to peer,Peer to peer,Peer to peer,Peer to peer,
+welcome.waiting.body,Bienvenida: cómo se busca ayuda,"Elige un proyecto. Verás quién lo aprobó, quién lo está haciendo, quién está disponible y dónde se sienta. A quien se ofrece, le puedes pedir ayuda.","Pick a project to see who passed it or is doing it, who is available and where they sit on the map. You can ask those who offer for help.","Tria un projecte i veuràs qui l'ha aprovat o l'està fent, qui està disponible i on seu al mapa.","Aukeratu proiektu bat eta ikusi nork gainditu duen edo egiten ari den, nor dagoen eskuragarri eta non eserita dagoen.",
+welcome.duty.title,Bienvenida: paso del on-call,Disponible,Available,Disponible,Eskuragarri,
+welcome.duty.body,Bienvenida: cómo ofrecer ayuda,Enciende «Disponible» y marca las medias horas en que puedes ayudar. Te reservarán un rato y ganarás XP. Lo que ya tienes en el calendario no se puede reservar.,Switch on “Available” and mark the half hours when you can help. People will book you and you will earn XP. Whatever is already in your calendar cannot be booked.,Activa «Disponible» i marca les mitges hores en què pots ajudar. Et demanaran una estona i guanyaràs XP.,Piztu «Eskuragarri» eta markatu lagun dezakezun ordu erdiak. Denbora eskatuko dizute eta XP irabaziko duzu.,
+welcome.board.title,Bienvenida: paso de Proyectos,Proyectos,Projects,Projectes,Proiektuak,
+welcome.board.body,Bienvenida: para qué sirve Proyectos,"Las dudas de cada proyecto, por círculos. Pregunta, responde y lee la guía que mantiene quien ya lo aprobó.","Questions for each project, ordered by circles. Ask, answer and read the guide kept by those who already passed it.","Els dubtes de cada projecte, per cercles. Pregunta, respon i mira la guia.","Proiektu bakoitzeko zalantzak, zirkuluka. Galdetu, erantzun eta irakurri gida.",
+welcome.groups.title,Bienvenida: paso de sprints y pizarras,Sprints y pizarras,Sprints and whiteboards,Sprints i pissarres,Sprintak eta arbelak,
+welcome.groups.body,Bienvenida: diferencia entre sprint y pizarra,"Sprint: quedar para sacar un proyecto en grupo, con puestos reservados. Pizarra: explicar un tema a quien quiera venir.","Meet to get a project done together (sprints, with reserved seats) or to explain a concept to anyone who wants to come (whiteboards).",Quedeu per treure un projecte junts (sprints) o per explicar un concepte (pissarres).,Elkartu proiektu bat batera ateratzeko (sprintak) edo kontzeptu bat azaltzeko (arbelak).,
+welcome.agenda.title,Bienvenida: paso del calendario,Calendario,Calendar,Calendari,Egutegia,
+welcome.agenda.body,Bienvenida: qué junta el calendario,"Todo en un sitio: tus correcciones, exámenes y eventos de 42, tu on-call, sprints y pizarras. En lista o por horas.","Everything in one place: your 42 evaluations, exams and events, your on-call, sprints and whiteboards. As a list or with the hours in view.","Tot en un lloc: correccions, exàmens i esdeveniments de 42, el teu on-call, sprints i pissarres.","Dena leku bakarrean: 42ko zuzenketak, azterketak eta ekitaldiak, on-call-a, sprintak eta arbelak.",
+welcome.net.title,Bienvenida: paso de la red y el mapa,Red y clústeres,Network and clusters,Xarxa i clústers,Sarea eta klusterrak,
+welcome.net.body,Bienvenida: qué enseñan la red y el mapa,Con quién te has corregido y quién se sienta dónde ahora. En el mapa puedes resaltar tu círculo o a quien aprobó tu proyecto.,Who you have evaluated with and who sits where right now. On the map you can highlight your circle or whoever passed your project.,Amb qui t'has corregit i qui seu on ara mateix.,Norekin zuzendu duzun eta nor non dagoen eserita orain.,
+welcome.comfort.title,Bienvenida: paso de los ajustes,A tu medida,Make it yours,A la teva mida,Zure neurrira,
+welcome.comfort.body,"Bienvenida: dónde se cambian idioma, tema y comodidad","En el pie cambias idioma, tema, tamaño del texto, colores para daltonismo y modo zen. En tu menú, las pestañas y esta bienvenida.","In the footer you can change language, theme, text size, colour-blind mode and zen mode. In your menu: the tabs, and this welcome.","Al peu pots canviar idioma, tema, mida del text, colors per a daltonisme i el mode zen. Aquesta benvinguda també és al teu menú.","Orri-oinean hizkuntza, gaia, testuaren tamaina, daltonismorako koloreak eta zen modua alda ditzakezu. Ongietorri hau zure menuan ere badago.",
+settings.text,Pie: selector del tamaño del texto,Texto,Text,Text,Testua,
+settings.text.auto,Tamaño de texto automático según la pantalla,Automático,Automatic,Automàtic,Automatikoa,
+settings.cvd,Pie: casilla de colores para daltonismo,Daltonismo,Colour blindness,Daltonisme,Daltonismoa,
+settings.cvdHint,Explicación de la casilla de daltonismo,"Azul y naranja en vez de verde y rojo, y más contraste donde solo cambia el color","Blue and orange instead of green and red, and more contrast where only colour tells things apart","Blau i taronja en lloc de verd i vermell, i més contrast on només el color diferencia les coses","Urdina eta laranja berdea eta gorriaren ordez, eta kontraste gehiago kolorea bakarrik bereizten duen tokietan",
+settings.zen,Pie: casilla del modo zen (sin adornos),Modo zen,Zen mode,Mode zen,Zen modua,
+settings.zenHint,Explicación de la casilla del modo zen,"Lo mínimo: sin animaciones, ventanitas ni avisos de adorno","The bare minimum: no animations, pop-ups or decorative notices","El mínim: sense animacions, finestretes ni avisos decoratius","Gutxienekoa: animaziorik, leihotxorik eta apaingarrizko oharrik gabe",
+settings.theme.auto,Tema: el mismo que el sistema,Como el sistema,Match system,Com el sistema,Sistemak bezala,
+settings.theme.light,Tema claro,Claro,Light,Clar,Argia,
+settings.theme.dark,Tema oscuro,Nocturno,Dark,Nocturn,Gauekoa,
+edit.edit,Botón para editar algo propio,Editar,Edit,Edita,Editatu,
+edit.save,Botón para guardar lo editado,Guardar cambios,Save changes,Desa els canvis,Gorde aldaketak,
+nav.red,Pestaña: red de correcciones entre estudiantes,Red,Network,Xarxa,Sarea,
+nav.avance,Pestaña de Datos: avance en el common core frente a la media y los paces,Avance,Progress,Avenç,Aurrerapena,
+app.loadingSection,Mientras se descarga una sección,Abriendo…,Opening…,Obrint…,Irekitzen…,
+layout.open,Menú de la cuenta: abrir la personalización,Personalizar la web,Customise the site,Personalitza la web,Pertsonalizatu weba,
+layout.title,Título de la ventana de personalización,Personalizar,Customise,Personalitza,Pertsonalizatu,
+layout.customizeHere,Enlace al final de una página con bloques: abre Personalizar,Ordenar o plegar estos bloques,Reorder or fold these blocks,Ordena o plega aquests blocs,Blokeak ordenatu edo tolestu,
+layout.close,Botón para cerrar una ventana,Cerrar,Close,Tanca,Itxi,
+confirm.title,Título de la ventana que pide confirmar algo que no se deshace,¿Lo confirmas?,Are you sure?,Ho confirmes?,Baieztatzen duzu?,
+confirm.ok,Botón para confirmar en la ventana de confirmación (si no se dice otro verbo),"Sí, adelante","Yes, go ahead","Sí, endavant","Bai, aurrera",
+confirm.cancel,Botón para no hacerlo en la ventana de confirmación,Mejor no,Not now,Millor no,Hobe ez,
+layout.done,Botón para terminar y cerrar la personalización,Listo,Done,Fet,Eginda,
+layout.reset,Botón para volver al orden original,Volver al orden de fábrica,Back to the default order,Torna a l'ordre de fàbrica,Itzuli fabrikako ordenara,
+layout.mode,Personalizar: quién decide el orden de pestañas y bloques,Quién decide el orden,Who decides the order,Qui decideix l'ordre,Nork erabakitzen du ordena,
+layout.mode.manual,Orden: lo decides tú,A mano,By hand,A mà,Eskuz,
+layout.mode.manual.hint,Explicación del orden manual,El orden que pongas aquí con las flechas.,The order you set here with the arrows.,L'ordre que posis aquí amb les fletxes.,Hemen geziekin jartzen duzun ordena.,
+layout.mode.mine,Orden: según lo que más usas,Mi uso,My usage,El meu ús,Nire erabilera,
+layout.mode.mine.hint,Explicación del orden por tu uso,Lo que más usas tú sube solo al principio.,What you use most moves to the front by itself.,El que més fas servir tu puja sol al principi.,Zuk gehien erabiltzen duzuna berez igotzen da hasierara.,
+layout.mode.community,Orden: según lo que más usa todo el mundo,La comunidad,The community,La comunitat,Komunitatea,
+layout.mode.community.hint,Explicación del orden por uso de la comunidad,Lo que más usa todo el mundo va primero.,What everybody uses most goes first.,El que més fa servir tothom va primer.,Denek gehien erabiltzen dutena lehenengo doa.,
+layout.autoNote,Aviso: con orden automático no se puede mover a mano,Con el orden automático las flechas no hacen nada: se ordena solo. Lo plegado sí se respeta.,With automatic order the arrows do nothing: it rearranges itself. Folded items are still respected.,Amb l'ordre automàtic les fletxes no fan res: es recol·loca sol. El que està plegat sí que es respecta.,Ordena automatikoarekin geziek ez dute ezer egiten: berez kokatzen da. Tolestutakoa errespetatzen da.,
+layout.nav,Personalizar: apartado de las pestañas,Pestañas,Tabs,Pestanyes,Fitxak,
+layout.folded,Etiqueta de un bloque plegado,plegado,folded,plegat,tolestuta,
+layout.up,Botón para subir un elemento; {name} es su nombre,Subir {name},Move {name} up,Puja {name},Igo {name},
+layout.down,Botón para bajar un elemento; {name} es su nombre,Bajar {name},Move {name} down,Baixa {name},Jaitsi {name},
+layout.fold,Casilla para plegar un bloque,plegar,fold,plega,tolestu,
+layout.page.expediente,Personalizar: bloques del perfil,Perfil,Profile,Perfil,Profila,
+layout.page.guardia,Personalizar: bloques del on-call,On-call,On-call,On-call,On-call,
+layout.page.red,Personalizar: bloques de la red,Red,Network,Xarxa,Sarea,
+layout.expediente.record,Bloque del perfil: nivel y títulos,Nivel y títulos,Level and titles,Nivell i títols,Maila eta tituluak,
+layout.expediente.health,Bloque del perfil: health check (pace y black hole),Health check,Health check,Health check,Health check,
+layout.expediente.network,Bloque del perfil: tu red de correcciones,Tu red de correcciones,Your evaluation network,La teva xarxa de correccions,Zure zuzenketen sarea,
+layout.expediente.achievements,Bloque del perfil: logros y reacciones,Logros y reacciones,Achievements and reactions,Assoliments i reaccions,Lorpenak eta erreakzioak,
+layout.expediente.ranking,Bloque del perfil: clasificación y tus dudas,Ranking y tus dudas,Ranking and your questions,Rànquing i els teus dubtes,Rankinga eta zure zalantzak,
+layout.guardia.prereview,Bloque del on-call: preevaluaciones,Preevaluaciones,Pre-reviews,Preavaluacions,Aurreebaluazioak,
+layout.guardia.today,Bloque del on-call: tus franjas de hoy,Tus franjas de hoy,Today's slots,Les teves franges d'avui,Zure gaurko tarteak,
+layout.guardia.bookings,Bloque del on-call: reservas,Reservas,Bookings,Reserves,Erreserbak,
+layout.guardia.blocked,Bloque del on-call: personas bloqueadas,Personas bloqueadas,Blocked people,Persones bloquejades,Blokeatutako pertsonak,
+layout.red.totals,Bloque de la red: totales,Totales,Totals,Totals,Guztizkoak,
+layout.red.endogamy,Bloque de la red: quién se corrige siempre con la misma gente,Más endogamia,Most endogamous,Més endogàmia,Endogamia handiena,
+layout.red.pairs,Bloque de la red: parejas que más se corrigen,Parejas que más se corrigen,Pairs that evaluate each other most,Parelles que més es corregeixen,Elkar gehien zuzentzen duten bikoteak,
+layout.red.strictest,Bloque de la red: quién pone las notas más bajas,Quién suspende más al corregir,Strictest evaluators,Qui suspèn més en corregir,Nork suspenditzen duen gehien zuzentzean,
+layout.red.projects,Bloque de la red: proyectos más corregidos,Proyectos más corregidos,Most evaluated projects,Projectes més corregits,Gehien zuzendutako proiektuak,
+layout.red.about,Bloque de la red: cómo leer el grafo,Cómo se lee,How to read it,Com es llegeix,Nola irakurtzen den,
+nav.gestion,Sección oculta: panel de gestión para quien administra,Gestión,Admin,Gestió,Kudeaketa,
+layout.alerts,Personalizar: apartado de avisos,Avisos,Notices,Avisos,Abisuak,
+layout.alerts.lead,Personalizar: cuánto antes avisar de un evento,Avisarme antes de cada evento,Remind me before each event,Avisa'm abans de cada esdeveniment,Abisatu ekitaldi bakoitzaren aurretik,
+layout.alerts.off,Opción: no avisar,No avisarme,Don't remind me,No m'avisis,Ez abisatu,
+layout.alerts.minutes,Opción: avisar {n} minutos antes,{n} min antes,{n} min before,{n} min abans,{n} min lehenago,
+info.open,Nombre accesible del botón (i) que abre la demostración; {title} es la sección,Cómo funciona: {title},How it works: {title},Com funciona: {title},Nola dabil: {title},
+finder.label,Buscador de personas de la cabecera,Buscar personas,Find people,Cerca persones,Bilatu pertsonak,
+finder.placeholder,Texto de ejemplo dentro del buscador,Buscar a alguien…,Find someone…,Cerca algú…,Bilatu norbait…,
+finder.none,Buscador: no hay nadie con ese login,Nadie se llama así,Nobody by that name,Ningú es diu així,Inor ez da horrela deitzen,
+finder.recent,Buscador: últimas búsquedas,Búsquedas recientes,Recent searches,Cerques recents,Azken bilaketak,
+finder.recentClear,Buscador: borrar las últimas búsquedas,Borrar,Clear,Esborra,Ezabatu,
+layout.tips,Personalizar: apartado de ayuda,Ayuda,Help,Ajuda,Laguntza,
+layout.tips.show,Casilla para enseñar u ocultar los botones (i) de demostración,Enseñar los iconos de información con las demostraciones,Show the information icons with their demos,Mostra les icones d'informació amb les demostracions,Erakutsi informazio-ikonoak beren demoekin,
+layout.style,Personalizar: estilo visual de la web,Estilo,Style,Estil,Estiloa,
+layout.paletteMenu,Personalizar: desplegable con los temas de colores (los de VS Code en Terminal),Tema de colores,Colour theme,Tema de colors,Kolore-gaia,
+layout.palette,Personalizar: color de acento,Color,Colour,Color,Kolorea,
+nav.clusters,"Pestaña: mapa de los clústeres, quién se sienta dónde",Clústeres,Clusters,Clústers,Klusterrak,
+nav.examenes,"Pestaña: exámenes, en vivo y estadísticas",Exámenes,Exams,Exàmens,Azterketak,
+nav.examenesLive,Etiqueta junto a Exámenes cuando hay uno en curso,en vivo,live,en directe,zuzenean,
+until.now,Tiempo restante cuando es casi nada,un momento,a moment,un moment,une bat,
+until.and,Une dos cantidades de tiempo: «2 horas y 5 minutos»,{a} y {b},{a} and {b},{a} i {b},{a} eta {b},
+until.minute.one,Tiempo: un minuto,{n} minuto,{n} minute,{n} minut,minutu {n},
+until.minute.many,Tiempo: varios minutos,{n} minutos,{n} minutes,{n} minuts,{n} minutu,
+until.hour.one,Tiempo: una hora,{n} hora,{n} hour,{n} hora,ordu {n},
+until.hour.many,Tiempo: varias horas,{n} horas,{n} hours,{n} hores,{n} ordu,
+until.day.one,Tiempo: un día,{n} día,{n} day,{n} dia,egun {n},
+until.day.many,Tiempo: varios días,{n} días,{n} days,{n} dies,{n} egun,
+until.month.one,Tiempo: un mes,{n} mes,{n} month,{n} mes,hilabete {n},
+until.month.many,Tiempo: varios meses,{n} meses,{n} months,{n} mesos,{n} hilabete,
+nav.clicker,Sección secreta: el juego Code Clicker,Code Clicker,Code Clicker,Code Clicker,Code Clicker,
+login.staff,Pantalla de entrada: enlace para el personal de 42,Soy del staff: validar un documento,I'm staff: verify a document,Soc de l'staff: validar un document,Staffekoa naiz: dokumentu bat balidatu,
+login.demo,Pantalla de entrada: enlace a la demostración,Ver una demostración sin cuenta,See a demo without an account,Mira una demostració sense compte,Ikusi erakustaldi bat konturik gabe,
+demo.title,Etiqueta de la demostración pública,Demostración,Demo,Demostració,Erakustaldia,
+demo.about,Explicación de la demostración,Datos inventados. Nada de lo que hagas aquí se guarda.,Made-up data. Nothing you do here is saved.,Dades inventades. Res del que facis aquí es desa.,Asmatutako datuak. Hemen egiten duzun ezer ez da gordetzen.,
+demo.real,Enlace de la demostración a la web real,Ir a la web de verdad,Go to the real site,Ves al web de veritat,Joan benetako webgunera,
+demo.staff,Pista de la demostración para probar la validación de documentos,"En la demostración vale cualquier clave que empiece por «s42-», y el documento de ejemplo tiene el código K7QF.","In the demo any key starting with “s42-” works, and the sample document has the code K7QF.","A la demostració val qualsevol clau que comenci per «s42-», i el document d'exemple té el codi K7QF.","Erakustaldian «s42-» hasten den edozein gakok balio du, eta adibideko dokumentuak K7QF kodea du.",
+nav.cat.expediente,Pestaña de arriba: tu perfil (la portada),Perfil,Profile,Perfil,Profila,
+nav.cat.expediente.hint,Explicación al pasar el ratón por la pestaña,"Lo tuyo: nivel, logros, health check y tu red","Yours: level, achievements, health check and your network","El teu: nivell, assoliments, health check i la teva xarxa","Zurea: maila, lorpenak, health check-a eta zure sarea",
+nav.cat.ayuda,"Pestaña de arriba que agrupa Peer to peer, proyectos, sprints y pizarras",Ayuda,Help,Ajuda,Laguntza,
+nav.cat.ayuda.hint,Explicación al pasar el ratón por la pestaña,"Quedar con gente: pedir y dar ayuda, aprender y enseñar","Meet people: ask for and give help, learn and teach","Quedar amb gent: demanar i donar ajuda, aprendre i ensenyar","Jendearekin elkartu: laguntza eskatu eta eman, ikasi eta irakatsi",
+nav.cat.calendario,Pestaña de arriba: tu calendario,Calendario,Calendar,Calendari,Egutegia,
+nav.cat.calendario.hint,Explicación al pasar el ratón por la pestaña,"Todo lo que tienes, de aquí y de 42, en el tiempo","Everything you have, from here and from 42, over time","Tot el que tens, d'aquí i de 42, en el temps","Duzun guztia, hemengoa eta 42koa, denboran",
+nav.cat.clusters,Pestaña de arriba: el plano de los clústeres,Clústeres,Clusters,Clústers,Klusterrak,
+nav.cat.clusters.hint,Explicación al pasar el ratón por la pestaña,"El plano del campus: quién está, dónde y si está disponible","The campus map: who is in, where and who is available","El plànol del campus: qui hi és, on i si està disponible","Campuseko planoa: nor dagoen, non eta eskuragarri dagoen",
+nav.cat.datos,"Pestaña de arriba que agrupa red, avance y exámenes",Datos,Data,Dades,Datuak,
+nav.cat.datos.hint,Explicación al pasar el ratón por la pestaña,"El campus en cifras: correcciones, avance y exámenes","The campus in numbers: evaluations, progress and exams","El campus en xifres: correccions, avenç i exàmens","Campusa zenbakitan: zuzenketak, aurrerapena eta azterketak",
+settings.detail,Pie y bienvenida: cuánto enseña la web (modo de la interfaz),Modo,Mode,Mode,Modua,
+settings.detail.simple,Modo de la interfaz: lo mínimo,Simplificado,Simplified,Simplificat,Erraztua,
+settings.detail.simple.hint,Qué enseña el modo simplificado,Lo justo para pedir y dar ayuda. Sin cifras ni rankings.,Just what you need to ask for and give help. No numbers or rankings.,El just per demanar i donar ajuda. Sense xifres ni rànquings.,Laguntza eskatzeko eta emateko behar dena. Zenbakirik eta sailkapenik gabe.,
+settings.detail.normal,Modo de la interfaz: el de siempre,Normal,Normal,Normal,Arrunta,
+settings.detail.normal.hint,Qué enseña el modo normal,"Toda la web, con las cifras principales.","The whole site, with the main numbers.","Tot el web, amb les xifres principals.","Webgune osoa, zenbaki nagusiekin.",
+settings.detail.datos,"Modo de la interfaz: todo, con estadísticas (lo pidió así quien hizo la web)",Loco por los datos,Data nerd,Boig per les dades,Datu-zalea,
+settings.detail.datos.hint,Qué enseña el modo de datos,"Todo: rankings, estadísticas y desgloses abiertos.","Everything: rankings, statistics and breakdowns open.","Tot: rànquings, estadístiques i desglossaments oberts.","Dena: sailkapenak, estatistikak eta xehetasunak irekita.",
+welcome.mode.title,"Bienvenida, paso 2: elegir el modo de la interfaz",¿Cuánto quieres ver?,How much do you want to see?,Quant vols veure?,Zenbat ikusi nahi duzu?,
+welcome.mode.body,"Bienvenida, paso 2: explicación del modo",Elige cuánto enseña la web. Lo puedes cambiar cuando quieras en el pie.,Choose how much the site shows. You can change it any time in the footer.,Tria quant ensenya el web. Ho pots canviar quan vulguis al peu.,Aukeratu webguneak zenbat erakusten duen. Oinean alda dezakezu nahi duzunean.,
+table.sortedBy,"Tablas: por qué columnas está ordenada, de la que más manda a la que menos",Ordenado por {columns},Sorted by {columns},Ordenat per {columns},Honen arabera ordenatuta: {columns},
+table.unsort,Tablas: botón para quitar el orden,Quitar el orden,Clear sorting,Treu l'ordre,Kendu ordena,
+table.sortHint,Tablas: explicación al pasar por una cabecera,Ordenar por esta columna. Lo que ordenaste antes decide los empates.,Sort by this column. What you sorted before breaks ties.,Ordena per aquesta columna. El que vas ordenar abans decideix els empats.,Ordenatu zutabe honen arabera. Lehen ordenatutakoak erabakitzen ditu berdinketak.,
+nav.notgames,Pestaña de Ayuda: preguntas de programación para aprender jugando (no se llama juego a propósito),Not-games,Not-games,Not-games,Not-games,
+nav.estadisticas,Pestaña de Ayuda: cifras y clasificación de cada sección,Estadísticas,Statistics,Estadístiques,Estatistikak,
+focus.open,Menú de la cuenta: abrir el Pomodoro,Modo concentración (Pomodoro),Focus mode (Pomodoro),Mode concentració (Pomodoro),Kontzentrazio modua (Pomodoro),
+focus.title,Pomodoro: título de la ventana,Modo concentración,Focus mode,Mode concentració,Kontzentrazio modua,
+focus.pitch,Pomodoro: explicación en la ventana,"Un rato sin distracciones: la web se queda con lo que elijas, los juegos se callan y los demás ven que estás en modo concentración","Some time without distractions: the web keeps only what you choose, games go quiet and others see you are focusing.","Una estona sense distraccions: la web es queda amb el que triïs, els jocs callen i els altres veuen que estàs concentrat.","Distrakziorik gabeko denbora: webak aukeratzen duzuna bakarrik uzten du, jokoak isiltzen dira eta besteek kontzentratuta zaudela ikusten dute.",
+focus.minutes,Pomodoro: minutos de concentración,Concentración,Focus,Concentració,Kontzentrazioa,
+focus.break,Pomodoro: minutos de descanso,Descanso,Break,Descans,Atsedena,
+focus.minutesN,Pomodoro: duración,{n} min,{n} min,{n} min,{n} min,
+focus.noBreak,Pomodoro: sin descanso,Sin descanso,No break,Sense descans,Atsedenik gabe,
+focus.sections,Pomodoro: secciones que siguen en las pestañas,Pestañas que quieres ver,Tabs you want to see,Pestanyes que vols veure,Ikusi nahi dituzun fitxak,
+focus.show,Pomodoro: avisos que siguen saliendo,Avisos que quieres recibir,Notices you want to get,Avisos que vols rebre,Jaso nahi dituzun abisuak,
+focus.show.corrections,Pomodoro: avisos de correcciones,Correcciones,Evaluations,Correccions,Zuzenketak,
+focus.show.events,Pomodoro: avisos de eventos,Eventos,Events,Esdeveniments,Ekitaldiak,
+focus.show.messages,Pomodoro: mensajes,Mensajes,Messages,Missatges,Mezuak,
+focus.show.guard,Pomodoro: avisos del on-call,On-call (reservas),On-call (bookings),On-call (reserves),On-call (erreserbak),
+focus.show.notices,Pomodoro: el resto del buzón,Resto del buzón,Rest of the mailbox,Resta de la bústia,Postontziaren gainerakoa,
+focus.always,Pomodoro: lo que sale siempre,Los avisos obligatorios de un evento con más gente salen siempre: hay que responderlos.,Mandatory notices of an event with other people always show up: they need an answer.,Els avisos obligatoris d'un esdeveniment amb més gent surten sempre: cal contestar-los.,Jende gehiagorekin dagoen ekitaldi baten derrigorrezko abisuak beti agertzen dira: erantzun behar dira.,
+focus.start,Pomodoro: empezar,Empezar a concentrarme,Start focusing,Començar a concentrar-me,Kontzentratzen hasi,
+focus.stop,Pomodoro: parar antes,Parar,Stop,Parar,Gelditu,
+focus.again,Pomodoro: otra vuelta tras el descanso,Otra vuelta,Another round,Una altra volta,Beste txanda bat,
+focus.focusing,Pomodoro: etiqueta del temporizador,En concentración,Focusing,Concentrat,Kontzentratuta,
+focus.resting,Pomodoro: etiqueta del descanso,Descanso,Break,Descans,Atsedena,
+focus.breakOver,Pomodoro: el descanso ha acabado,¡A por otra!,Let's go again!,A per una altra!,Goazen beste baterako!,
+focus.timerLabel,Pomodoro: temporizador para lectores de pantalla,Tiempo de concentración que queda,Focus time left,Temps de concentració que queda,Geratzen den kontzentrazio denbora,
+focus.badge,Lo que ven los demás de quien está concentrado,En concentración hasta las {time} · no me distraigas,Focusing until {time} · please don't disturb,Concentrat fins a les {time} · no em distreguis,{time}ak arte kontzentratuta · ez nazazu distraitu,
+focus.badgeHint,Explicación del aviso de concentración,Está en modo Pomodoro: mejor escribirle después.,In Pomodoro mode: better write later.,És en mode Pomodoro: millor escriure-li després.,Pomodoro moduan dago: hobe geroago idaztea.,
+campus.other,"Aviso para quien entra desde un campus que aún no se copia; {campus} es el suyo y {tracked}, los que sí","Tu campus, {campus}, todavía no está en Peer4U: lo que ves es de {tracked}. Si se apuntan cinco personas más de {campus}, lo añadimos; con diez, también el idioma. ¡Corre la voz!","Your campus, {campus}, is not on Peer4U yet: what you see is from {tracked}. If five more people from {campus} join, we add it; with ten, the language too. Spread the word!","El teu campus, {campus}, encara no és a Peer4U: el que veus és de {tracked}. Si s'apunten cinc persones més de {campus}, l'afegim; amb deu, també l'idioma. Fes-ho córrer!","Zure campusa, {campus}, oraindik ez dago Peer4U-n: ikusten duzuna {tracked}(e)koa da. {campus}(e)ko bost pertsona gehiago batzen badira, gehituko dugu; hamarrekin, hizkuntza ere bai. Zabaldu mezua!",
+focus.screen.open,Pomodoro: poner el temporizador a pantalla completa,Pantalla completa,Full screen,Pantalla completa,Pantaila osoa,
+focus.screen.label,Pomodoro: nombre de la vista a pantalla completa,Pomodoro a pantalla completa,Full-screen Pomodoro,Pomodoro a pantalla completa,Pomodoro pantaila osoan,
+focus.screen.sign,Pomodoro a pantalla completa: letrero para quien pase por al lado,En concentración · no molestar,Focusing · do not disturb,En concentració · no molesteu,Kontzentratuta · ez molestatu,
+focus.screen.until,Pomodoro a pantalla completa: a qué hora acaba,Hasta las {time},Until {time},Fins a les {time},{time}ak arte,
+focus.screen.shrink,Pomodoro a pantalla completa: volver al temporizador pequeño sin parar,Quitar pantalla completa,Exit full screen,Treure la pantalla completa,Irten pantaila osotik,
+focus.screen.exit,Pomodoro a pantalla completa: querer parar la sesión (pregunta antes),Parar la sesión,Stop the session,Parar la sessió,Saioa gelditu,
+focus.exit.title,Pomodoro: pregunta al pulsar Parar,¿De verdad quieres parar?,Do you really want to stop?,De debò vols parar?,Benetan gelditu nahi duzu?,
+focus.exit.left,"Pomodoro: lo que queda, al querer parar",Tiempo de concentración restante: {time}. ¿De verdad hace falta acabar ahora?,Focus time left: {time}. Do you really need to stop now?,Temps de concentració restant: {time}. De debò cal acabar ara?,Geratzen den kontzentrazio-denbora: {time}. Benetan orain amaitu behar duzu?,
+focus.exit.why,Pomodoro: título de la lista de motivos para parar,¿Por qué quieres parar?,Why do you want to stop?,Per què vols parar?,Zergatik gelditu nahi duzu?,
+focus.exit.later,Pomodoro: invitación a dejarlo para el final de la sesión,¿Podría esperar a que acabe la sesión? Apúntalo y hazlo en el descanso.,Could it wait until the session ends? Note it down and do it on your break.,Podria esperar que acabi la sessió? Apunta-ho i fes-ho al descans.,Saioa amaitu arte itxaron dezake? Idatzi eta atsedenaldian egin.,
+focus.exit.wait,Pomodoro: cuenta atrás antes de poder parar,Piénsalo: {n} s…,Think it over: {n} s…,Pensa-t'ho: {n} s…,Pentsatu: {n} s…,
+focus.exit.pick,Pomodoro: falta marcar un motivo para poder parar,Marca al menos un motivo para parar.,Tick at least one reason to stop.,Marca almenys un motiu per parar.,Markatu gutxienez arrazoi bat gelditzeko.,
+focus.exit.stay,Pomodoro: botón para seguir concentrándose,Sigo concentrándome,I'll keep focusing,Continuo concentrant-me,Kontzentratzen jarraituko dut,
+focus.exit.stop,Pomodoro: botón para parar de verdad (tras la cuenta atrás),"Sí, parar","Yes, stop","Sí, parar","Bai, gelditu",
+focus.exit.cheer,Pomodoro: felicitación al decidir seguir,¡Bien hecho! Sigues en concentración: lo otro puede esperar.,Well done! You are still focusing: the rest can wait.,Ben fet! Continues en concentració: la resta pot esperar.,Ondo! Kontzentratuta jarraitzen duzu: besteak itxaron dezake.,
+focus.reason.tired,Pomodoro: motivo para parar,Me falta energía,I'm out of energy,Em falta energia,Energiarik gabe nago,
+focus.reason.break,Pomodoro: motivo para parar,Necesito un descanso,I need a break,Necessito un descans,Atseden bat behar dut,
+focus.reason.distracted,Pomodoro: motivo para parar,No consigo concentrarme,I can't focus,No aconsegueixo concentrar-me,Ezin naiz kontzentratu,
+focus.reason.someone,Pomodoro: motivo para parar,Alguien me necesita,Someone needs me,Algú em necessita,Norbaitek behar nau,
+focus.reason.urgent,Pomodoro: motivo para parar,Ha surgido algo urgente,Something urgent came up,Ha sorgit una cosa urgent,Zerbait larria sortu da,
+focus.reason.done,Pomodoro: motivo para parar,Ya he terminado lo que quería,I have finished what I wanted,Ja he acabat el que volia,Nahi nuena amaitu dut,
+focus.reason.other,Pomodoro: motivo para parar,Otro motivo,Another reason,Un altre motiu,Beste arrazoi bat,
+focus.tab.settings,Pomodoro: pestaña de los ajustes en la ventana,Ajustes,Settings,Ajustos,Ezarpenak,
+focus.tab.stats,Pomodoro: pestaña de tus estadísticas en la ventana,Tus estadísticas,Your statistics,Les teves estadístiques,Zure estatistikak,
+focus.stats.period,Estadísticas del Pomodoro: grupo de botones del periodo,Periodo,Period,Període,Aldia,
+focus.period.day,Estadísticas del Pomodoro: periodo,Hoy,Today,Avui,Gaur,
+focus.period.week,Estadísticas del Pomodoro: periodo (últimos 7 días),Semana,Week,Setmana,Astea,
+focus.period.month,Estadísticas del Pomodoro: periodo (últimos 30 días),Mes,Month,Mes,Hilabetea,
+focus.period.total,Estadísticas del Pomodoro: periodo (desde siempre),Total,Total,Total,Guztira,
+focus.stats.sessions,Estadísticas del Pomodoro: cifra,Sesiones,Sessions,Sessions,Saioak,
+focus.stats.focusedSeconds,Estadísticas del Pomodoro: cifra,Tiempo en concentración,Time focused,Temps en concentració,Kontzentrazio denbora,
+focus.stats.completed,Estadísticas del Pomodoro: sesiones que llegaron a su hora,Completadas,Completed,Completades,Osatuak,
+focus.stats.cancelled,Estadísticas del Pomodoro: sesiones paradas antes,Paradas antes de tiempo,Stopped early,Aturades abans d'hora,Goiz geldituak,
+focus.stats.stayed,Tus estadísticas del Pomodoro: veces que quisiste parar y seguiste,Quisiste parar y seguiste,"Wanted to stop, kept going",Volies parar i vas seguir,Gelditu nahi eta jarraitu zenuen,
+focus.stats.stayedAll,Estadísticas del Pomodoro en el panel: veces que alguien quiso parar y siguió,Se quiso parar y se siguió,"Wanted to stop, kept going",Es volia parar i es va seguir,Gelditu nahi eta jarraitu zen,
+focus.stats.people,Estadísticas del Pomodoro: cuántas personas lo usaron,Personas,People,Persones,Pertsonak,
+focus.stats.band,"Tus estadísticas del Pomodoro: la media del tramo elegido, bajo tu cifra",Media del tramo: {value},Band average: {value},Mitjana del tram: {value},Tartearen batez bestekoa: {value},
+focus.stats.position,Tus estadísticas del Pomodoro: tu puesto entre quienes lo usan,Te concentras más que el {n} % de quienes usan el Pomodoro.,You focus more than {n}% of the people who use the Pomodoro.,Et concentres més que el {n} % de qui fa servir el Pomodoro.,Pomodoroa erabiltzen dutenen % {n} baino gehiago kontzentratzen zara.,
+focus.stats.byDay,Estadísticas del Pomodoro: gráfica,Tiempo por días,Time by day,Temps per dies,Denbora egunka,
+focus.stats.byHour,Estadísticas del Pomodoro: gráfica,Tiempo por horas,Time by hour,Temps per hores,Denbora orduka,
+focus.stats.reasons,Estadísticas del Pomodoro: tabla de motivos,Motivos para querer parar,Reasons for wanting to stop,Motius per voler parar,Gelditu nahi izateko arrazoiak,
+focus.stats.reason,Estadísticas del Pomodoro: columna,Motivo,Reason,Motiu,Arrazoia,
+focus.stats.reasonStopped,"Estadísticas del Pomodoro: columna, veces que se paró por ese motivo",Al parar,When stopping,En parar,Gelditzean,
+focus.stats.reasonStayed,"Estadísticas del Pomodoro: columna, veces que se siguió pese al motivo",Al seguir,When going on,En seguir,Jarraitzean,
+focus.stats.empty,Estadísticas del Pomodoro: periodo sin sesiones,Aún no hay sesiones en este periodo.,No sessions in this period yet.,Encara no hi ha sessions en aquest període.,Oraindik ez dago saiorik aldi honetan.,
+focus.band.all,Tus estadísticas del Pomodoro: comparación con todo el mundo,Comparas con todas las personas que lo usan,Comparing with everyone who uses it,Compares amb totes les persones que el fan servir,Erabiltzen duten guztiekin alderatzen duzu,
+focus.band.some,Tus estadísticas del Pomodoro: tramo con el que te comparas,Comparas con el tramo del {low} % al {high} % por uso,Comparing with the {low}% to {high}% band by use,Compares amb el tram del {low} % al {high} % per ús,Erabileraren araberako % {low}–% {high} tartearekin alderatzen duzu,
+focus.band.people,Tus estadísticas del Pomodoro: personas del tramo,{n} de {of},{n} of {of},{n} de {of},{of}tik {n},
+focus.band.low,Tus estadísticas del Pomodoro: tirador izquierdo del tramo,Dejar fuera a quien menos lo usa,Leave out those who use it least,Deixar fora qui menys el fa servir,Gutxien erabiltzen dutenak kanpoan utzi,
+focus.band.high,Tus estadísticas del Pomodoro: tirador derecho del tramo,Dejar fuera a quien más lo usa,Leave out those who use it most,Deixar fora qui més el fa servir,Gehien erabiltzen dutenak kanpoan utzi,
+focus.band.least,Tus estadísticas del Pomodoro: extremo del tramo,Menos uso,Least use,Menys ús,Erabilera gutxien,
+focus.band.most,Tus estadísticas del Pomodoro: extremo del tramo,Más uso,Most use,Més ús,Erabilera gehien,
+common.save,Botón genérico: guardar,Guardar,Save,Desa,Gorde,
+common.remove,Botón genérico: borrar algo,Borrar,Delete,Esborra,Ezabatu,
+common.send,Botón genérico: enviar,Enviar,Send,Envia,Bidali,
+common.withdraw,Botón genérico: retirar algo publicado,Retirar,Withdraw,Retira,Kendu,
+common.reason,Etiqueta genérica: el motivo de algo,Motivo,Reason,Motiu,Arrazoia,
+common.cancel,Botón genérico: cancelar lo que se está haciendo,Cancelar,Cancel,Cancel·la,Utzi,
+common.ok,Botón genérico para cerrar un aviso,Entendido,Got it,Entesos,Ulertuta,
+common.prev,Botón genérico: ir al anterior,Anterior,Previous,Anterior,Aurrekoa,
+common.next,Botón genérico: ir al siguiente,Siguiente,Next,Següent,Hurrengoa,
+common.refresh,Botón genérico: volver a cargar los datos,Actualizar,Refresh,Actualitza,Eguneratu,
+common.close,Botón genérico: cerrar una ventana o panel,Cerrar,Close,Tanca,Itxi,
+common.from,Campo genérico: inicio de un periodo o franja,Desde,From,Des de,Noiztik,
+common.to,Campo genérico: fin de un periodo o franja,Hasta,To,Fins a,Noiz arte,
+common.period,Etiqueta genérica: el periodo que se mira,Periodo,Period,Període,Aldia,
+common.people,Etiqueta o columna genérica: número de personas,Personas,People,Persones,Pertsonak,
+common.person,Columna genérica: la persona de la fila,Persona,Person,Persona,Pertsona,
+common.accept,Botón genérico: aceptar una petición,Aceptar,Accept,Accepta,Onartu,
+common.decline,Botón genérico: rechazar una petición,Rechazar,Decline,Rebutja,Baztertu,
+common.createRoom,Botón de los juegos: crear una sala,Crear una sala,Create a room,Crea una sala,Sortu gela bat,
+common.join,Botón de los juegos: entrar en una sala,Entrar,Join,Entra,Sartu,
+common.leave,Botón de los juegos: salir de la sala,Salir,Leave,Surt,Irten,
+nav.agenda,Pestaña de Perfil: tu agenda (Scrum individual por proyecto),Agenda,Agenda,Agenda,Agenda,

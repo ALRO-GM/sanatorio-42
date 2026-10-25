@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
 import type { ShellCourse } from '@sanatorio/contracts'
-import { firstOpen, unlocked } from '@sanatorio/course'
+import { courseLang, firstOpen, unlocked } from '@sanatorio/course'
 import {
   BLOCKS,
   estimateOf,
@@ -142,7 +142,7 @@ function BlockPath({
 
   if (block === undefined) return null
 
-  const text = lang === 'en' ? block.en : block.es
+  const text = courseLang(lang) === 'en' ? block.en : block.es
 
   return (
     <div className="shell-block">

@@ -395,7 +395,8 @@ ningún componente (lo explica
 ![Los cinco estilos y la ventana de personalizar](docs/img/estilos.webp)
 
 Idiomas: español, inglés, catalán y euskera, completos salvo el panel de
-gestión y el texto legal en catalán y euskera. Los textos no están en el código:
+gestión y el texto legal en catalán y euskera, y francés, que se está
+traduciendo (lo que le falta sale en inglés). Los textos no están en el código:
 viven en tablas por tema (un CSV con clave, contexto y una columna por idioma)
 que se editan como una hoja de cálculo; cada idioma se descarga solo si se usa
 ([docs/textos.md](docs/textos.md)).

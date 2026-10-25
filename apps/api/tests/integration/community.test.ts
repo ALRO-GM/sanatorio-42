@@ -133,6 +133,15 @@ describe('réplica vista desde fuera', () => {
     ])
   })
 
+  it('el francés es uno de los idiomas que se guardan; uno inventado, no', async () => {
+    const built = await app()
+    const http = client(built, await built.login())
+
+    expect((await http.put('/me/settings', { lang: 'fr' })).statusCode).toBe(204)
+    expect((json(await http.get('/me/profile')) as Expediente).lang).toBe('fr')
+    expect((await http.put('/me/settings', { lang: 'xx' })).statusCode).toBe(400)
+  })
+
   it('elegir otro campus cambia de quién es la lista', async () => {
     const built = await app()
     const http = client(built, await built.login())

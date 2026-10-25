@@ -1,225 +1,225 @@
-clave,contexto,es,en,ca,eu
-notgames.pitch,Not-games: frase bajo el título que explica la sección,Preguntas de programación para aprender con más gente. Cada cual recibe lo que ha estudiado.,Programming questions to learn with other people. Everyone gets what they have studied.,Preguntes de programació per aprendre amb més gent. Cadascú rep el que ha estudiat.,Programazio-galderak jende gehiagorekin ikasteko. Bakoitzak ikasi duena jasotzen du.
-notgames.createSend,Not-games: botón que crea la sala con los ajustes elegidos,Crear y entrar,Create and join,Crea i entra,Sortu eta sartu
-notgames.rooms,Not-games: título de la lista de salas,Salas abiertas,Open rooms,Sales obertes,Gela irekiak
-notgames.noRooms,Not-games: no hay salas,Ahora mismo no hay salas. Crea una y avisa a tu gente.,No rooms right now. Create one and tell your people.,Ara mateix no hi ha sales. Crea'n una i avisa la teva gent.,Orain ez dago gelarik. Sortu bat eta abisatu zure jendeari.
-notgames.hostAndPlayers,Not-games: quién creó la sala y cuántas personas hay,De {host} · {n} dentro,By {host} · {n} inside,De {host} · {n} a dins,{host}-rena · {n} barruan
-notgames.open,Not-games: botón para abrir una sala en la que ya estás,Abrir,Open,Obre,Ireki
-notgames.modeLabel,Not-games: elegir el modo de partida,Modo,Mode,Mode,Modua
-notgames.mode.duel,Not-games: modo de dos personas,Duelo,Duel,Duel,Dueloa
-notgames.mode.duel.hint,Not-games: explicación del duelo,Dos personas: gana quien más acierta.,Two people: whoever gets most right wins.,Dues persones: guanya qui més encerta.,Bi pertsona: gehien asmatzen duenak irabazten du.
-notgames.mode.teams,Not-games: modo equipo contra equipo,Equipos,Teams,Equips,Taldeak
-notgames.mode.teams.hint,Not-games: explicación de equipos,Equipo A contra equipo B: gana el que más aciertos suma.,Team A against team B: the one with most correct answers wins.,Equip A contra equip B: guanya el que suma més encerts.,A taldea B taldearen aurka: asmatze gehien batzen dituenak irabazten du.
-notgames.mode.ffa,Not-games: modo todos contra todos,Todos contra todos,Free for all,Tots contra tots,Denak denen aurka
-notgames.mode.ffa.hint,Not-games: explicación de todos contra todos,"Cada cual por su cuenta: gana quien más acierta. A solas, es una práctica.","Everyone on their own: whoever gets most right wins. Alone, it is practice.","Cadascú pel seu compte: guanya qui més encerta. Sol, és una pràctica.","Bakoitza bere kabuz: gehien asmatzen duenak irabazten du. Bakarrik, praktika da."
-notgames.mode.survival,Not-games: modo supervivencia,Supervivencia,Survival,Supervivència,Biziraupena
-notgames.mode.survival.hint,Not-games: explicación de supervivencia,Tres vidas: fallar o no responder quita una. Gana quien queda.,Three lives: a wrong or missing answer costs one. Last one standing wins.,Tres vides: fallar o no responder en treu una. Guanya qui queda.,Hiru bizitza: huts egiteak edo ez erantzuteak bat kentzen du. Geratzen denak irabazten du.
-notgames.pool,Not-games: qué preguntas entran,Contenido,Content,Contingut,Edukia
-notgames.pool.common,"Not-games: lo que saben todos los que juegan, según sus proyectos",Lo que sabe todo el grupo,What everyone in the group knows,El que sap tot el grup,Talde osoak dakiena
-notgames.pool.general,"Not-games: solo conceptos generales, para cualquiera",Solo lo general,General only,Només el general,Orokorra bakarrik
-notgames.kinds,Not-games: tipo de preguntas,Tipo,Type,Tipus,Mota
-notgames.kinds.mixed,Not-games: rápidas y largas,Rápidas y largas,Quick and long,Ràpides i llargues,Azkarrak eta luzeak
-notgames.kinds.quick,Not-games: solo rápidas (10 s),Solo rápidas,Quick only,Només ràpides,Azkarrak bakarrik
-notgames.kinds.long,Not-games: solo largas (razonar o leer código),Solo largas,Long only,Només llargues,Luzeak bakarrik
-notgames.difficulty,Not-games: dificultad,Dificultad,Difficulty,Dificultat,Zailtasuna
-notgames.difficulty.rising,Not-games: empieza fácil y va subiendo,De fácil a difícil,Easy to hard,De fàcil a difícil,Errazetik zailera
-notgames.difficulty.easy,Not-games: dificultad fácil,Fácil,Easy,Fàcil,Erraza
-notgames.difficulty.medium,Not-games: dificultad media,Media,Medium,Mitjana,Ertaina
-notgames.difficulty.hard,Not-games: dificultad difícil,Difícil,Hard,Difícil,Zaila
-notgames.questions,Not-games: número de preguntas,Preguntas,Questions,Preguntes,Galderak
-notgames.questionsMax,"Not-games: en supervivencia, preguntas como mucho","Preguntas, como mucho","Questions, at most","Preguntes, com a màxim","Galderak, gehienez"
-notgames.minCircle,Not-games: círculo mínimo para entrar,"Para entrar, desde el","To join, from","Per entrar, des del","Sartzeko, hemendik aurrera"
-notgames.minCircle.any,Not-games: puede entrar cualquiera,Cualquiera,Anyone,Qualsevol,Edonor
-notgames.competitive,Not-games: casilla de versión competitiva,Competitivo: fallar resta un punto,Competitive: a wrong answer costs a point,Competitiu: fallar resta un punt,Lehiakorra: huts egiteak puntu bat kentzen du
-notgames.competitiveShort,Not-games: etiqueta corta de competitivo,Competitivo,Competitive,Competitiu,Lehiakorra
-notgames.nQuestions,Not-games: número de preguntas de una sala,{n} preguntas,{n} questions,{n} preguntes,{n} galdera
-notgames.fromCircle,Not-games: círculo mínimo para entrar,Desde el círculo {n},From circle {n},Des del cercle {n},{n}. zirkulutik
-notgames.back,Not-games: enlace para volver a la lista de salas,Salas,Rooms,Sales,Gelak
-notgames.waiting,Not-games: cuánta gente hay esperando,Esperando a empezar · {n} dentro,Waiting to start · {n} inside,Esperant per començar · {n} a dins,Hasteko zain · {n} barruan
-notgames.team.a,Not-games: nombre del equipo A,Equipo A,Team A,Equip A,A taldea
-notgames.team.b,Not-games: nombre del equipo B,Equipo B,Team B,Equip B,B taldea
-notgames.joinTeam,Not-games: entrar en ese equipo,Entrar aquí,Join here,Entra aquí,Sartu hemen
-notgames.switchTeam,Not-games: pasarse a ese equipo,Cambiarme aquí,Switch here,Canvia't aquí,Aldatu hona
-notgames.start,Not-games: botón para empezar la partida (quien creó la sala),Empezar,Start,Comença,Hasi
-notgames.waitHost,Not-games: esperando a quien creó la sala,Empieza {host} cuando esté todo el grupo.,{host} starts when everyone is here.,{host} comença quan hi sigui tot el grup.,{host}-k hasiko du talde osoa dagoenean.
-notgames.questionOf,Not-games: número de pregunta,Pregunta {n} de {total},Question {n} of {total},Pregunta {n} de {total},{total}tik {n}. galdera
-notgames.kind.quick,Not-games: etiqueta de pregunta rápida,Rápida,Quick,Ràpida,Azkarra
-notgames.kind.long,Not-games: etiqueta de pregunta larga,Larga,Long,Llarga,Luzea
-notgames.level,"Not-games: dificultad de la pregunta, de 1 a 5",Nivel {n},Level {n},Nivell {n},{n}. maila
-notgames.levelHint,Not-games: de dónde sale el nivel,Sale de lo que falla la gente con esta pregunta,Based on how often people get it wrong,Surt del que falla la gent amb aquesta pregunta,Jendeak galdera honetan zenbat huts egiten duen
-notgames.secondsLeft,Not-games: nombre accesible de la barra de tiempo,Segundos que quedan: {n},Seconds left: {n},Segons que queden: {n},Geratzen diren segundoak: {n}
-notgames.answered,Not-games: ya has respondido,Respondido. Esperando al resto…,Answered. Waiting for the others…,Contestat. Esperant la resta…,Erantzunda. Besteen zain…
-notgames.watching,"Not-games: ya no juegas, solo miras",Ya no juegas: estás mirando.,You are out: just watching.,Ja no jugues: estàs mirant.,Jada ez zaude jokoan: begira zaude.
-notgames.noAnswer,Not-games: se acabó el tiempo sin responder,Sin responder,No answer,Sense responder,Erantzun gabe
-notgames.right,Not-games: has acertado,¡Bien!,Right!,Molt bé!,Ondo!
-notgames.wrong,Not-games: has fallado,No era esa,Not that one,No era aquesta,Ez zen hori
-notgames.scores,Not-games: título del marcador,Marcador,Scoreboard,Marcador,Markagailua
-notgames.lives,Not-games: vidas que quedan,Vidas: {n},Lives: {n},Vides: {n},Bizitzak: {n}
-notgames.points,Not-games: puntos,{n} pts,{n} pts,{n} pts,{n} pt
-notgames.hits,Not-games: aciertos,{n} aciertos,{n} right,{n} encerts,{n} asmatze
-notgames.over,Not-games: la partida ha terminado,Fin de la partida,Game over,Fi de la partida,Partida amaitu da
-notgames.youWon,Not-games: has ganado,¡Has ganado!,You won!,Has guanyat!,Irabazi duzu!
-notgames.winner,Not-games: quién ha ganado,Ha ganado {names},{names} won,Ha guanyat {names},{names}-k irabazi du
-notgames.again,Not-games: volver a la lista para otra partida,Otra partida,Another round,Una altra partida,Beste partida bat
-notgames.sound,Not-games: botón para encender o apagar los sonidos de los juegos,Sonidos,Sounds,Sons,Soinuak
-notgames.game.label,Not-games: qué juego tiene la sala nueva,Juego,Game,Joc,Jokoa
-notgames.game.quiz,Not-games: el juego de preguntas,Preguntas,Questions,Preguntes,Galderak
-notgames.game.quiz.hint,Not-games: explicación del juego de preguntas,"Preguntas de programación por rondas, en varios modos.","Programming questions in rounds, in several modes.","Preguntes de programació per rondes, en diversos modes.","Programazio-galderak txandaka, hainbat modutan."
-notgames.game.chess,Not-games: el juego de ajedrez,Ajedrez,Chess,Escacs,Xakea
-notgames.game.chess.hint,"Not-games, ajedrez: explicación del juego","Con reloj: tras cada jugada, una pregunta a los dos. Quien acierta primero, mueve.","With a clock: after each move, a question for both. Whoever answers right first moves.","Amb rellotge: després de cada jugada, una pregunta als dos. Qui l'encerta primer, mou.","Erlojuarekin: jokaldi bakoitzaren ondoren, galdera bat bientzat. Lehenik asmatzen duenak mugitzen du."
-notgames.minutes,"Not-games, ajedrez: tiempo de reloj de cada jugador",Reloj,Clock,Rellotge,Erlojua
-notgames.minutesN,"Not-games, ajedrez: minutos de reloj",{n} min por persona,{n} min each,{n} min per persona,{n} min pertsona bakoitzeko
-notgames.chess.board,"Not-games, ajedrez: nombre del tablero para lectores de pantalla",Tablero,Board,Tauler,Taula
-notgames.chess.boardStyle,"Not-games, ajedrez: grupo para elegir el estilo del tablero",Estilo del tablero,Board style,Estil del tauler,Taularen estiloa
-notgames.chess.board.tournament,"Not-games, ajedrez: estilo de tablero verde de torneo",Torneo,Tournament,Torneig,Txapelketa
-notgames.chess.board.wood,"Not-games, ajedrez: estilo de tablero de madera",Madera,Wood,Fusta,Egurra
-notgames.chess.board.ocean,"Not-games, ajedrez: estilo de tablero azul",Océano,Ocean,Oceà,Ozeanoa
-notgames.chess.board.contrast,"Not-games, ajedrez: estilo de tablero de alto contraste",Contraste,Contrast,Contrast,Kontrastea
-notgames.chess.clock,"Not-games, ajedrez: reloj de un jugador para lectores de pantalla",Reloj de {login},{login}'s clock,Rellotge de {login},{login}(r)en erlojua
-notgames.chess.side.a,"Not-games, ajedrez: bando de las blancas",Blancas,White,Blanques,Zuriak
-notgames.chess.side.b,"Not-games, ajedrez: bando de las negras",Negras,Black,Negres,Beltzak
-notgames.chess.waitingRival,"Not-games, ajedrez: hueco libre en la sala",Esperando rival…,Waiting for a rival…,Esperant rival…,Aurkariaren zain…
-notgames.chess.yourMove,"Not-games, ajedrez: te toca mover",Te toca mover: corre tu reloj.,Your move: your clock is running.,Et toca moure: corre el teu rellotge.,Zure txanda: zure erlojua dabil.
-notgames.chess.theirMove,"Not-games, ajedrez: le toca mover al otro",Mueve {login}.,{login} to move.,Mou {login}.,{login}(e)k mugitzen du.
-notgames.chess.inCheck,"Not-games, ajedrez: delante de a quién le toca, cuando está en jaque y mueve sin pregunta",¡Jaque! Sin pregunta:,Check! No question:,Escac! Sense pregunta:,Xake! Galderarik gabe:
-notgames.chess.question,"Not-games, ajedrez: aviso de que hay pregunta","Relojes parados: ¡quien acierte primero, mueve!",Clocks stopped: first right answer moves!,"Rellotges aturats: qui l'encerti primer, mou!",Erlojuak geldirik: lehenik asmatzen duenak mugitzen du!
-notgames.chess.questionTitle,"Not-games, ajedrez: título de la pregunta entre jugadas",Pregunta para los dos,Question for both,Pregunta per als dos,Galdera bientzat
-notgames.chess.firstRight,"Not-games, ajedrez: alguien acertó primero",{login} acertó primero y mueve.,{login} answered right first and moves.,{login} ha encertat primer i mou.,{login}(e)k asmatu du lehenik eta mugitzen du.
-notgames.chess.firstWrong,"Not-games, ajedrez: alguien falló primero",{login} falló: pierde el 10 % de su tiempo y mueve {other}.,{login} got it wrong: loses 10% of their time and {other} moves.,{login} ha fallat: perd el 10 % del seu temps i mou {other}.,{login}(e)k huts egin du: denboraren % 10 galdu du eta {other}(e)k mugitzen du.
-notgames.chess.nobody,"Not-games, ajedrez: nadie respondió la pregunta","Nadie respondió a tiempo: mueve {login}, como tocaba.","Nobody answered in time: {login} moves, as planned.","Ningú no ha contestat a temps: mou {login}, com tocava.","Inork ez du garaiz erantzun: {login}(e)k mugitzen du, zegokion bezala."
-notgames.chess.moves,"Not-games, ajedrez: jugadas de la partida, desplegable",Jugadas ({n}),Moves ({n}),Jugades ({n}),Jokaldiak ({n})
-notgames.chess.resign,"Not-games, ajedrez: botón para rendirse",Abandonar,Resign,Abandonar,Amore eman
-notgames.chess.promote,"Not-games, ajedrez: elegir la pieza al coronar",Coronar a:,Promote to:,Corona en:,Koroatu honela:
-notgames.end.checkmate,"Not-games, ajedrez: final por jaque mate",Jaque mate,Checkmate,Escac i mat,Xake-mate
-notgames.end.stalemate,"Not-games, ajedrez: final por ahogado",Tablas por ahogado,Stalemate,Taules per ofegat,Berdinketa itota
-notgames.end.draw,"Not-games, ajedrez: final en tablas",Tablas,Draw,Taules,Berdinketa
-notgames.end.time,"Not-games, ajedrez: final por tiempo",Sin tiempo,Out of time,Sense temps,Denborarik gabe
-notgames.end.resign,"Not-games, ajedrez: final por abandono",Abandono,Resignation,Abandonament,Amore ematea
-notgames.end.left,"Not-games, ajedrez: final porque alguien se fue",Se fue de la sala,Left the room,Ha sortit de la sala,Gelatik irten da
-notgames.end.drawResult,"Not-games, ajedrez: resultado en tablas",Tablas: nadie gana.,Draw: nobody wins.,Taules: no guanya ningú.,Berdinketa: inork ez du irabazten.
-notgames.chess.piece.ak,"Not-games, ajedrez: nombre de una pieza para lectores de pantalla",rey blanco,white king,rei blanc,errege zuria
-notgames.chess.piece.aq,"Not-games, ajedrez: nombre de una pieza para lectores de pantalla",dama blanca,white queen,dama blanca,dama zuria
-notgames.chess.piece.ar,"Not-games, ajedrez: nombre de una pieza para lectores de pantalla",torre blanca,white rook,torre blanca,dorrea zuria
-notgames.chess.piece.ab,"Not-games, ajedrez: nombre de una pieza para lectores de pantalla",alfil blanco,white bishop,alfil blanc,alfila zuria
-notgames.chess.piece.an,"Not-games, ajedrez: nombre de una pieza para lectores de pantalla",caballo blanco,white knight,cavall blanc,zaldia zuria
-notgames.chess.piece.ap,"Not-games, ajedrez: nombre de una pieza para lectores de pantalla",peón blanco,white pawn,peó blanc,peoia zuria
-notgames.chess.piece.bk,"Not-games, ajedrez: nombre de una pieza para lectores de pantalla",rey negro,black king,rei negre,errege beltza
-notgames.chess.piece.bq,"Not-games, ajedrez: nombre de una pieza para lectores de pantalla",dama negra,black queen,dama negra,dama beltza
-notgames.chess.piece.br,"Not-games, ajedrez: nombre de una pieza para lectores de pantalla",torre negra,black rook,torre negra,dorrea beltza
-notgames.chess.piece.bb,"Not-games, ajedrez: nombre de una pieza para lectores de pantalla",alfil negro,black bishop,alfil negre,alfila beltza
-notgames.chess.piece.bn,"Not-games, ajedrez: nombre de una pieza para lectores de pantalla",caballo negro,black knight,cavall negre,zaldia beltza
-notgames.chess.piece.bp,"Not-games, ajedrez: nombre de una pieza para lectores de pantalla",peón negro,black pawn,peó negre,peoia beltza
-notgames.chess.firstRightMe,"Not-games, ajedrez: acertaste tú primero",Acertaste primero: mueves tú.,You answered right first: your move.,Has encertat primer: mous tu.,Lehenik asmatu duzu: zuk mugitzen duzu.
-notgames.chess.firstWrongMe,"Not-games, ajedrez: fallaste tú primero",Fallaste: pierdes el 10 % de tu tiempo y mueve {other}.,Wrong: you lose 10% of your time and {other} moves.,Has fallat: perds el 10 % del teu temps i mou {other}.,Huts egin duzu: zure denboraren % 10 galdu duzu eta {other}(e)k mugitzen du.
-notgames.chess.firstWrongYouMove,"Not-games, ajedrez: el otro falló primero y mueves tú",{login} falló: pierde el 10 % de su tiempo y mueves tú.,{login} got it wrong: loses 10% of their time and you move.,{login} ha fallat: perd el 10 % del seu temps i mous tu.,{login}(e)k huts egin du: denboraren % 10 galdu du eta zuk mugitzen duzu.
-notgames.chess.nobodyMe,"Not-games, ajedrez: nadie respondió y te tocaba a ti","Nadie respondió a tiempo: mueves tú, como tocaba.","Nobody answered in time: you move, as planned.","Ningú no ha contestat a temps: mous tu, com tocava.","Inork ez du garaiz erantzun: zuk mugitzen duzu, zegokion bezala."
-notgames.tab.rooms,Not-games: pestaña de las salas,Salas,Rooms,Sales,Gelak
-notgames.tab.review,"Not-games: pestaña del Repaso, con lo que has fallado",Repaso,Review,Repàs,Errepasoa
-notgames.review.empty,"Not-games, Repaso: aún no has fallado nada","Aún no has fallado nada. Lo que falles en las partidas saldrá aquí, explicado.","Nothing missed yet. What you miss in games will show up here, explained.","Encara no has fallat res. El que fallis a les partides sortirà aquí, explicat.","Oraindik ez duzu ezer huts egin. Partidetan huts egiten duzuna hemen agertuko da, azalduta."
-notgames.review.pending,"Not-games, Repaso: cuántos conceptos quedan por repasar",Por repasar: {n}. Son los que fallaste y aún no has acertado.,To review: {n}. Missed and not yet answered right.,Per repassar: {n}. Són els que vas fallar i encara no has encertat.,Errepasatzeko: {n}. Huts egin eta oraindik asmatu ez dituzunak.
-notgames.review.mastered,"Not-games, Repaso: desplegar los ya superados",Superados ({n}),Mastered ({n}),Superats ({n}),Gaindituak ({n})
-notgames.review.masteredOne,"Not-games, Repaso: este lo acertaste después de fallarlo",Superado: lo acertaste después.,Mastered: you got it right later.,Superat: el vas encertar després.,Gaindituta: geroago asmatu zenuen.
-notgames.review.misses,"Not-games, Repaso: cuántas veces lo has fallado",Fallos: {n},Misses: {n},Errors: {n},Hutsak: {n}
-notgames.review.example,"Not-games, Repaso: encabezado del ejemplo",Ejemplo,Example,Exemple,Adibidea
-notgames.review.question,"Not-games, Repaso: desplegar cómo salía la pregunta",Cómo salía la pregunta,How the question looked,Com sortia la pregunta,Galdera nola zegoen
-notgames.tab.git,Not-games: pestaña del curso de git,Curso de git,Git course,Curs de git,Git ikastaroa
-git.pitch,Curso de git: frase bajo las pestañas,"Un camino de puntos con forma de ramas: en cada uno ves la animación, lees la teoría y lo haces tú en la terminal.","A path of points shaped like branches: in each one you watch the animation, read the theory and do it yourself in the terminal.","Un camí de punts amb forma de branques: a cada un veus l'animació, llegeixes la teoria i ho fas tu al terminal.","Adar itxurako puntuen bidea: bakoitzean animazioa ikusi, teoria irakurri eta zuk egiten duzu terminalean."
-git.needSeat,Curso de git: aviso de que solo se juega sentado en el clúster,Los puntos y las pruebas cuentan desde un puesto del clúster. Fuera puedes ver la animación y la teoría y practicar los retos.,Points and tests count from a cluster seat. Elsewhere you can watch the animation and theory and practise the challenges.,Els punts i les proves compten des d'un lloc del clúster. Fora pots veure l'animació i la teoria i practicar els reptes.,Puntuek eta probek klusterreko postu batetik balio dute. Kanpoan animazioa eta teoria ikus ditzakezu eta erronkak praktikatu.
-git.practice,"Curso de git: sin puesto en el clúster se puede practicar, pero no cuenta","Fuera del clúster puedes practicar, pero el punto solo cuenta si lo haces sentado en un puesto.","Outside the cluster you can practise, but the point only counts if you do it at a cluster seat.","Fora del clúster pots practicar, però el punt només compta si el fas assegut en un lloc.","Klusterretik kanpo prakti dezakezu, baina puntuak klusterreko postu batean eginda bakarrik balio du."
-git.practiceDone,Curso de git: reto conseguido practicando fuera del clúster,"¡Conseguido! Para que cuente en tu camino, repítelo desde un puesto del clúster.","Done! To count on your path, repeat it from a cluster seat.","Fet! Perquè compti al teu camí, repeteix-lo des d'un lloc del clúster.","Eginda! Zure bidean balio dezan, errepikatu klusterreko postu batetik."
-git.atSeat,Curso de git: desde qué puesto juegas,Juegas desde {seat}.,Playing from {seat}.,Jugues des de {seat}.,{seat} postutik jokatzen ari zara.
-git.path,Curso de git: nombre del camino para lectores de pantalla,Camino del curso de git,Git course path,Camí del curs de git,Git ikastaroaren bidea
-git.group,Curso de git: punto de prueba de grupo en el camino,Prueba de grupo ({n} o más),Group test ({n} or more),Prova de grup ({n} o més),Talde-proba ({n} edo gehiago)
-git.boss,Curso de git: el jefe final en el camino,Jefe final ({n} o más),Final boss ({n} or more),Cap final ({n} o més),Azken etsaia ({n} edo gehiago)
-git.back,Curso de git: volver al camino,Al camino,Back to the path,Al camí,Bidera
-git.step.animation,Curso de git: pestaña de la animación,Animación,Animation,Animació,Animazioa
-git.step.theory,Curso de git: pestaña de la teoría,Teoría,Theory,Teoria,Teoria
-git.step.challenge,Curso de git: pestaña del reto,Reto,Challenge,Repte,Erronka
-git.anim.start,Curso de git: primer fotograma de la animación,Así empieza el repositorio.,This is how the repository starts.,Així comença el repositori.,Horrela hasten da biltegia.
-git.anim.replay,Curso de git: volver a ver la animación,Repetir,Replay,Repeteix,Errepikatu
-git.toTheory,Curso de git: botón para ir a la teoría,Ver la teoría,Read the theory,Mira la teoria,Ikusi teoria
-git.toChallenge,Curso de git: botón para ir al reto,Al reto,To the challenge,Al repte,Erronkara
-git.theory.what,"Curso de git: teoría, para qué sirve",Para qué sirve,What it is for,Per a què serveix,Zertarako balio du
-git.theory.how,"Curso de git: teoría, cómo se usa",Cómo se usa,How to use it,Com s'utilitza,Nola erabili
-git.theory.when,"Curso de git: teoría, cuándo usarlo",Cuándo usarlo,When to use it,Quan utilitzar-ho,Noiz erabili
-git.theory.whenNot,"Curso de git: teoría, cuándo no usarlo",Cuándo no,When not to,Quan no,Noiz ez
-git.theory.looks,"Curso de git: teoría, cómo se ve en las ramas",Cómo se ve en las ramas,How it looks in the branches,Com es veu a les branques,Nola ikusten den adarretan
-git.theory.problems,"Curso de git: teoría, qué problemas da",Qué problemas da,What can go wrong,Quins problemes dona,Zer arazo ematen dituen
-git.graph.local,Curso de git: título del dibujo de tu repositorio,Tu repositorio,Your repository,El teu repositori,Zure biltegia
-git.target,Curso de git: el dibujo del objetivo,Objetivo,Goal,Objectiu,Helburua
-git.reset,Curso de git: volver a empezar el reto,Empezar de nuevo,Start over,Torna a començar,Hasi berriro
-git.checking,Curso de git: mientras la API corrige,Comprobando…,Checking…,Comprovant…,Egiaztatzen…
-git.won,Curso de git: reto superado,¡Conseguido! El siguiente punto ya está abierto.,Done! The next point is now open.,Aconseguit! El punt següent ja és obert.,Lortuta! Hurrengo puntua irekita dago.
-git.notYet,Curso de git: la API no da el reto por bueno,Aún no: falta {misses}.,Not yet: missing {misses}.,Encara no: falta {misses}.,Oraindik ez: falta da {misses}.
-git.goal,"Curso de git: etiqueta delante del objetivo de un punto («Objetivo: haz dos commits en main»)",Objetivo,Goal,Objectiu,Helburua
-course.stars.title,Cursos (git y shell): nombre para lectores de pantalla de la lista de cuántos comandos da cada estrella,Comandos para cada estrella,Commands for each star,Ordres per a cada estrella,Izar bakoitzerako aginduak
-course.stars.three.one,"Cursos (git y shell): tres estrellas, con un comando (va tras ★★★)",en {n} comando,in {n} command,en {n} ordre,agindu {n}ekin
-course.stars.three.many,"Cursos (git y shell): tres estrellas, con varios comandos o menos (va tras ★★★)",en {n} comandos o menos,in {n} commands or fewer,en {n} ordres o menys,{n} agindutan edo gutxiagotan
-course.stars.two.one,"Cursos (git y shell): dos estrellas, hasta un comando (va tras ★★☆)",hasta {n} comando,up to {n} command,fins a {n} ordre,{n} agindu arte
-course.stars.two.many,"Cursos (git y shell): dos estrellas, hasta tantos comandos (va tras ★★☆)",hasta {n} comandos,up to {n} commands,fins a {n} ordres,{n} agindu arte
-course.stars.any,"Cursos (git y shell): una estrella, se consigue con cualquier número de comandos (va tras ★☆☆)","con más, al conseguirlo","with more, once you make it","amb més, en aconseguir-ho","gehiagorekin, lortzean"
-course.stars.what,Cursos (git y shell): desplegable que explica qué comandos cuentan para las estrellas,¿Qué comandos cuentan?,Which commands count?,Quines ordres compten?,Zein agindu zenbatzen dira?
-git.stars.rule,Curso de git: qué cuenta como comando para las estrellas y qué no,"Cuenta cada comando que cambia algo: commits, ramas, HEAD, tags, stash u origin. No cuentan mirar (status, log, diff), preparar ficheros (echo, git add, git restore), git fetch ni los que fallan. Las formas equivalentes valen igual: git add . o -A o fichero a fichero, switch -c o checkout -b, y crear una rama y cambiarte a ella cuenta uno.","Every command that changes something counts: commits, branches, HEAD, tags, stash or origin. Looking (status, log, diff), preparing files (echo, git add, git restore), git fetch and failed commands don't. Equivalent forms count the same: git add . or -A or file by file, switch -c or checkout -b, and creating a branch and moving to it counts as one.","Compta cada ordre que canvia alguna cosa: commits, branques, HEAD, tags, stash o origin. No compten mirar (status, log, diff), preparar fitxers (echo, git add, git restore), git fetch ni les que fallen. Les formes equivalents valen igual: git add . o -A o fitxer a fitxer, switch -c o checkout -b, i crear una branca i canviar-t'hi compta una.","Zerbait aldatzen duen agindu bakoitza zenbatzen da: commitak, adarrak, HEAD, tagak, stasha edo origin. Ez dira zenbatzen begiratzea (status, log, diff), fitxategiak prestatzea (echo, git add, git restore), git fetch eta huts egiten dutenak. Forma baliokideek berdin balio dute: git add . edo -A edo fitxategiz fitxategi, switch -c edo checkout -b, eta adar bat sortu eta hara aldatzea bat da."
-course.count.one,Cursos (git y shell): cuántos comandos que cuentan llevas en el reto (uno),Llevas {n} comando que cuenta,{n} command counted so far,Portes {n} ordre que compta,Zenbatzen den agindu {n} daramazu
-course.count.many,Cursos (git y shell): cuántos comandos que cuentan llevas en el reto,Llevas {n} comandos que cuentan,{n} commands counted so far,Portes {n} ordres que compten,Zenbatzen diren {n} agindu daramatzazu
-course.starsNow,Cursos (git y shell): al pasar por las estrellas junto al recuento,Las estrellas que tendrías si lo consiguieras ahora,The stars you'd get if you made it now,Les estrelles que tindries si ho aconseguissis ara,Orain lortuko bazenu izango zenituzkeen izarrak
-course.starsNowValue,Cursos (git y shell): para lectores de pantalla; estrellas que tendrías ahora,"Si lo consigues ahora, {stars} de 3 estrellas","If you make it now, {stars} of 3 stars","Si ho aconsegueixes ara, {stars} de 3 estrelles","Orain lortzen baduzu, 3tik {stars} izar"
-course.term.counted.one,"Cursos (git y shell): junto a una línea de la terminal, su número si cuenta para las estrellas (el primero)",Cuenta: comando n.º {n},Counts: command #{n},Compta: ordre núm. {n},Zenbatzen da: {n}. agindua
-course.term.counted.many,"Cursos (git y shell): junto a una línea de la terminal, su número si cuenta para las estrellas",Cuenta: comando n.º {n},Counts: command #{n},Compta: ordre núm. {n},Zenbatzen da: {n}. agindua
-course.term.full,Cursos (git y shell): se ha llegado al máximo de líneas en un reto,Has llegado a {n} líneas: empieza de nuevo para seguir.,You've reached {n} lines: start over to go on.,Has arribat a {n} línies: torna a començar per continuar.,{n} lerrora iritsi zara: hasi berriro jarraitzeko.
-course.why.three.one,"Cursos (git y shell): por qué tres estrellas, con un comando",Lo has hecho en {n} comando: para tres estrellas valían {three} o menos.,You did it in {n} command: {three} or fewer gave three stars.,Ho has fet en {n} ordre: per a tres estrelles en valien {three} o menys.,Agindu {n}ekin egin duzu: hiru izarretarako {three} edo gutxiago balio zuten.
-course.why.three.many,"Cursos (git y shell): por qué tres estrellas",Lo has hecho en {n} comandos: para tres estrellas valían {three} o menos.,You did it in {n} commands: {three} or fewer gave three stars.,Ho has fet en {n} ordres: per a tres estrelles en valien {three} o menys.,{n} agindutan egin duzu: hiru izarretarako {three} edo gutxiago balio zuten.
-course.why.two.one,"Cursos (git y shell): por qué dos estrellas, con un comando",Lo has hecho en {n} comando. Con {three} o menos tendrías tres estrellas: empieza de nuevo para mejorar.,You did it in {n} command. With {three} or fewer you'd get three stars: start over to improve.,Ho has fet en {n} ordre. Amb {three} o menys tindries tres estrelles: torna a començar per millorar.,Agindu {n}ekin egin duzu. {three} edo gutxiagorekin hiru izar izango zenituzke: hasi berriro hobetzeko.
-course.why.two.many,"Cursos (git y shell): por qué dos estrellas",Lo has hecho en {n} comandos. Con {three} o menos tendrías tres estrellas: empieza de nuevo para mejorar.,You did it in {n} commands. With {three} or fewer you'd get three stars: start over to improve.,Ho has fet en {n} ordres. Amb {three} o menys tindries tres estrelles: torna a començar per millorar.,{n} agindutan egin duzu. {three} edo gutxiagorekin hiru izar izango zenituzke: hasi berriro hobetzeko.
-course.why.one.one,"Cursos (git y shell): por qué una estrella, con un comando","Lo has hecho en {n} comando. Con {two} o menos tendrías dos estrellas, y con {three} o menos, tres.","You did it in {n} command. With {two} or fewer you'd get two stars, and with {three} or fewer, three.","Ho has fet en {n} ordre. Amb {two} o menys tindries dues estrelles, i amb {three} o menys, tres.","Agindu {n}ekin egin duzu. {two} edo gutxiagorekin bi izar izango zenituzke, eta {three} edo gutxiagorekin, hiru."
-course.why.one.many,"Cursos (git y shell): por qué una estrella","Lo has hecho en {n} comandos. Con {two} o menos tendrías dos estrellas, y con {three} o menos, tres.","You did it in {n} commands. With {two} or fewer you'd get two stars, and with {three} or fewer, three.","Ho has fet en {n} ordres. Amb {two} o menys tindries dues estrelles, i amb {three} o menys, tres.","{n} agindutan egin duzu. {two} edo gutxiagorekin bi izar izango zenituzke, eta {three} edo gutxiagorekin, hiru."
-git.term.hint,Curso de git: ayuda arriba de la terminal,Escribe comandos de git y pulsa Intro. help para ver cuáles hay; flechas para los anteriores; clear limpia la pantalla.,Type git commands and press Enter. help lists them; arrows for previous ones; clear wipes the screen.,Escriu ordres de git i prem Retorn. help per veure quines hi ha; fletxes per a les anteriors; clear neteja la pantalla.,Idatzi git aginduak eta sakatu Sartu. help zein dauden ikusteko; geziak aurrekoentzat; clear pantaila garbitzeko.
-course.term.input,Cursos (git y shell): campo de la terminal para lectores de pantalla,Comando,Command,Ordre,Agindua
-git.gate.test,"Curso de git: bajo una prueba de grupo en el camino, el test que hay antes","Antes, test de preguntas","First, a quick quiz","Abans, test de preguntes","Lehenago, galdera-testa"
-git.gate.testPassed,Curso de git: el test previo ya está superado,Test superado,Quiz passed,Test superat,Testa gaindituta
-git.gate.rules,Curso de git: reglas del test previo a una prueba de grupo,"Antes de la prueba de grupo: 8 preguntas rápidas de lo aprendido, 20 segundos cada una. Hay que acertarlas todas. Si fallas una, puedes repetirlo una hora después; mientras, repasa lo fallado.","Before the group test: 8 quick questions on what you've learned, 20 seconds each. You must get them all right. If you miss one, you can retry an hour later; meanwhile, review what you missed.","Abans de la prova de grup: 8 preguntes ràpides del que has après, 20 segons cadascuna. Cal encertar-les totes. Si en falles una, pots repetir-ho una hora després; mentrestant, repassa el que has fallat.","Talde-probaren aurretik: ikasitakoaren 8 galdera azkar, 20 segundo bakoitza. Denak asmatu behar dira. Bat huts eginez gero, ordubete geroago errepika dezakezu; bitartean, errepasatu huts egindakoa."
-git.gate.start,Curso de git: empezar el test previo,Empezar el test,Start the quiz,Comença el test,Hasi testa
-git.gate.send,Curso de git: mandar las respuestas del test previo,Mandar ({n} de {total}),Send ({n} of {total}),Envia ({n} de {total}),Bidali ({n}/{total})
-git.gate.won,Curso de git: test previo aprobado,¡Todas bien ({right} de {total})! Test superado.,All right ({right} of {total})! Quiz passed.,Totes bé ({right} de {total})! Test superat.,Denak ondo ({right}/{total})! Testa gaindituta.
-git.gate.lost,Curso de git: test previo suspendido,{right} de {total}: hacen falta todas. Repasa lo fallado y vuelve dentro de una hora.,{right} of {total}: you need them all. Review what you missed and come back in an hour.,{right} de {total}: calen totes. Repassa el que has fallat i torna d'aquí a una hora.,{right}/{total}: denak behar dira. Errepasatu huts egindakoa eta itzuli ordubete barru.
-git.gate.wait,Curso de git: cuándo se puede repetir el test previo,Podrás repetirlo a las {time}.,You can retry at {time}.,El podràs repetir a les {time}.,{time}etan errepika dezakezu.
-git.gate.toReview,Curso de git: enlace al Repaso desde el test previo,Ir al Repaso,Go to Review,Ves al Repàs,Joan Errepasora
-git.room.who,Curso de git: cuánta gente cabe en una prueba de grupo,"De {min} a {max} personas, cada una en su puesto del clúster.","From {min} to {max} people, each at their own cluster seat.","De {min} a {max} persones, cadascuna al seu lloc del clúster.","{min}etik {max}era pertsona, bakoitza klusterreko bere postuan."
-git.room.none,Curso de git: no hay salas de esa prueba,Aún no hay salas abiertas. Crea una y avisa a tu grupo.,No open rooms yet. Create one and tell your group.,Encara no hi ha sales obertes. Crea'n una i avisa el teu grup.,Oraindik ez dago gela irekirik. Sortu bat eta abisatu zure taldeari.
-git.room.players,Curso de git: cuántas personas hay en una sala,{n} en la sala,{n} in the room,{n} a la sala,{n} gelan
-git.room.status.lobby,Curso de git: sala sin empezar,esperando,waiting,esperant,zain
-git.room.status.playing,Curso de git: sala jugando,jugando,playing,jugant,jokoan
-git.room.status.done,Curso de git: sala acabada,acabada,finished,acabada,amaituta
-git.room.back,Curso de git: volver a una sala en la que ya estás,Volver,Go back,Torna,Itzuli
-git.room.list,Curso de git: volver a la lista de salas,Salas,Rooms,Sales,Gelak
-git.room.start,Curso de git: empezar la prueba de grupo,Empezar,Start,Comença,Hasi
-git.room.missing,Curso de git: cuántas personas faltan para empezar,Faltan {n},{n} more needed,En falten {n},{n} falta dira
-git.room.waiting,Curso de git: esperando a quien creó la sala,Esperando a que {host} empiece.,Waiting for {host} to start.,Esperant que {host} comenci.,{host} hasi arte zain.
-git.room.standing,Curso de git: alguien no está sentado en un puesto,sin puesto,no seat,sense lloc,posturik gabe
-git.room.hints,Curso de git: comandos útiles bajo la terminal,Útiles: {hints},Handy: {hints},Útils: {hints},Erabilgarriak: {hints}
-git.room.missions,Curso de git: título de la lista de misiones,Misiones,Missions,Missions,Misioak
-git.room.people,Curso de git: título de la lista de personas de la sala,En la sala,In the room,A la sala,Gelan
-git.room.commands,Curso de git: comandos que lleva alguien,Comandos: {n},Commands: {n},Ordres: {n},Aginduak: {n}
-git.room.passed,Curso de git: prueba de grupo superada al acabar,¡Misión cumplida! La prueba de grupo queda superada para todo el grupo.,Mission accomplished! The whole group passes the group test.,Missió complerta! La prova de grup queda superada per a tot el grup.,Misioa beteta! Talde osoak gainditu du talde-proba.
-git.room.expired,Curso de git: se acabó el tiempo de la prueba de grupo,Se acabó el tiempo sin cumplir la misión. Podéis crear otra sala y volver a probar.,Time ran out before the mission was done. You can create another room and try again.,S'ha acabat el temps sense complir la missió. Podeu crear una altra sala i tornar-ho a provar.,Denbora amaitu da misioa bete gabe. Beste gela bat sortu eta berriro saia zaitezkete.
-git.room.done,Curso de git: prueba de grupo ya superada,Prueba superada,Test passed,Prova superada,Proba gaindituta
-git.room.apart,Curso de git: reglas del jefe final en la sala,"Jefe final: cada cual en un puesto a 4 filas y 4 columnas del resto (u otro clúster), sin hablar. Solo ves lo que escribes tú.","Final boss: everyone at a seat 4 rows and 4 columns away from the rest (or another cluster), no talking. You only see what you type.","Cap final: cadascú en un lloc a 4 files i 4 columnes de la resta (o un altre clúster), sense parlar. Només veus el que escrius tu.","Azken etsaia: bakoitza besteengandik 4 errenkada eta 4 zutabera dagoen postu batean (edo beste kluster batean), hitz egin gabe. Zuk idazten duzuna bakarrik ikusten duzu."
-git.room.number,Curso de git: el número de cada persona en la sala (sale en las tareas),n.º {n},#{n},núm. {n},{n}. zk.
-git.room.tasks,"Curso de git: título de las tareas, que hace cada persona",Lo que haces tú,What you do,El que fas tu,Zuk egiten duzuna
-notgames.chess.leaving,"Ajedrez: al acabar, cuenta atrás para volver a las salas",Vuelves a las salas en {n} s.,Back to the rooms in {n} s.,Tornes a les sales en {n} s.,{n} s barru geletara itzuliko zara.
-notgames.chess.review,Ajedrez: botón para repasar la partida acabada,Repasar la partida,Review the game,Repassa la partida,Errepasatu partida
-notgames.chess.reviewStart,"Ajedrez: repaso, la posición inicial",Posición inicial,Starting position,Posició inicial,Hasierako posizioa
-notgames.chess.reviewStep,"Ajedrez: repaso, qué jugada se ve; {move} en notación algebraica",Jugada {n} de {total}: {move},Move {n} of {total}: {move},Jugada {n} de {total}: {move},{total}tik {n}. jokaldia: {move}
-course.time.three,Cursos (git y shell): tres estrellas en un contrarreloj (va tras ★★★),en {time} o menos,in {time} or less,en {time} o menys,{time} edo gutxiagoan
-course.time.two,Cursos (git y shell): dos estrellas en un contrarreloj (va tras ★★☆),hasta {time},up to {time},fins a {time},{time} arte
-course.time.limit,"Cursos (git y shell): una estrella en un contrarreloj, el límite (va tras ★☆☆)","antes de {time}, el límite","before {time}, the limit","abans de {time}, el límit","{time} baino lehen, muga"
-course.time.what,Cursos (git y shell): desplegable que explica cómo se cuenta el tiempo,¿Cómo se cuenta el tiempo?,How is time counted?,Com es compta el temps?,Nola zenbatzen da denbora?
-course.estimate.minutes,"Cursos (git y shell): tiempo estimado en minutos, junto a un punto o un nivel",~{n} min,~{n} min,~{n} min,~{n} min
-course.estimate.hours,Cursos (git y shell): tiempo estimado en horas justas,~{h} h,~{h} h,~{h} h,~{h} h
-course.estimate.hoursMinutes,Cursos (git y shell): tiempo estimado en horas y minutos,~{h} h {m} min,~{h} h {m} min,~{h} h {m} min,~{h} h {m} min
-course.estimate.title,"Cursos (git y shell): al pasar por el tiempo de un punto, bloque o nivel",Tiempo estimado: {time},Estimated time: {time},Temps estimat: {time},Kalkulatutako denbora: {time}
-course.estimate.total,Cursos (git y shell): tiempo estimado del curso entero,Tiempo estimado: {time},Estimated time: {time},Temps estimat: {time},Kalkulatutako denbora: {time}
-course.estimate.parts,Cursos (git y shell): para lectores de pantalla; el reparto del tiempo estimado por nivel o mundo,Tiempo estimado de cada parte,Estimated time per part,Temps estimat de cada part,Zati bakoitzaren denbora
-course.estimate.hint,"Cursos (git y shell): al pasar por el tiempo estimado del curso, de dónde sale",Un cálculo de partida: se irá ajustando con lo que tarda de verdad quien lo supera.,A first guess: it will be tuned with how long it really takes people who pass it.,Un càlcul inicial: s'anirà ajustant amb el que tarda de debò qui el supera.,Hasierako kalkulua: gainditzen dutenek benetan behar dutenarekin doituko da.
-git.worldN,Curso de git: nombre de un mundo en el reparto del tiempo estimado,Mundo {n},World {n},Món {n},{n}. mundua
-notgames.tab.shell,Not-games: pestaña del curso de shell,Curso de shell,Shell course,Curs de shell,Shell ikastaroa
+clave,contexto,es,en,ca,eu,fr
+notgames.pitch,Not-games: frase bajo el título que explica la sección,Preguntas de programación para aprender con más gente. Cada cual recibe lo que ha estudiado.,Programming questions to learn with other people. Everyone gets what they have studied.,Preguntes de programació per aprendre amb més gent. Cadascú rep el que ha estudiat.,Programazio-galderak jende gehiagorekin ikasteko. Bakoitzak ikasi duena jasotzen du.,
+notgames.createSend,Not-games: botón que crea la sala con los ajustes elegidos,Crear y entrar,Create and join,Crea i entra,Sortu eta sartu,
+notgames.rooms,Not-games: título de la lista de salas,Salas abiertas,Open rooms,Sales obertes,Gela irekiak,
+notgames.noRooms,Not-games: no hay salas,Ahora mismo no hay salas. Crea una y avisa a tu gente.,No rooms right now. Create one and tell your people.,Ara mateix no hi ha sales. Crea'n una i avisa la teva gent.,Orain ez dago gelarik. Sortu bat eta abisatu zure jendeari.,
+notgames.hostAndPlayers,Not-games: quién creó la sala y cuántas personas hay,De {host} · {n} dentro,By {host} · {n} inside,De {host} · {n} a dins,{host}-rena · {n} barruan,
+notgames.open,Not-games: botón para abrir una sala en la que ya estás,Abrir,Open,Obre,Ireki,
+notgames.modeLabel,Not-games: elegir el modo de partida,Modo,Mode,Mode,Modua,
+notgames.mode.duel,Not-games: modo de dos personas,Duelo,Duel,Duel,Dueloa,
+notgames.mode.duel.hint,Not-games: explicación del duelo,Dos personas: gana quien más acierta.,Two people: whoever gets most right wins.,Dues persones: guanya qui més encerta.,Bi pertsona: gehien asmatzen duenak irabazten du.,
+notgames.mode.teams,Not-games: modo equipo contra equipo,Equipos,Teams,Equips,Taldeak,
+notgames.mode.teams.hint,Not-games: explicación de equipos,Equipo A contra equipo B: gana el que más aciertos suma.,Team A against team B: the one with most correct answers wins.,Equip A contra equip B: guanya el que suma més encerts.,A taldea B taldearen aurka: asmatze gehien batzen dituenak irabazten du.,
+notgames.mode.ffa,Not-games: modo todos contra todos,Todos contra todos,Free for all,Tots contra tots,Denak denen aurka,
+notgames.mode.ffa.hint,Not-games: explicación de todos contra todos,"Cada cual por su cuenta: gana quien más acierta. A solas, es una práctica.","Everyone on their own: whoever gets most right wins. Alone, it is practice.","Cadascú pel seu compte: guanya qui més encerta. Sol, és una pràctica.","Bakoitza bere kabuz: gehien asmatzen duenak irabazten du. Bakarrik, praktika da.",
+notgames.mode.survival,Not-games: modo supervivencia,Supervivencia,Survival,Supervivència,Biziraupena,
+notgames.mode.survival.hint,Not-games: explicación de supervivencia,Tres vidas: fallar o no responder quita una. Gana quien queda.,Three lives: a wrong or missing answer costs one. Last one standing wins.,Tres vides: fallar o no responder en treu una. Guanya qui queda.,Hiru bizitza: huts egiteak edo ez erantzuteak bat kentzen du. Geratzen denak irabazten du.,
+notgames.pool,Not-games: qué preguntas entran,Contenido,Content,Contingut,Edukia,
+notgames.pool.common,"Not-games: lo que saben todos los que juegan, según sus proyectos",Lo que sabe todo el grupo,What everyone in the group knows,El que sap tot el grup,Talde osoak dakiena,
+notgames.pool.general,"Not-games: solo conceptos generales, para cualquiera",Solo lo general,General only,Només el general,Orokorra bakarrik,
+notgames.kinds,Not-games: tipo de preguntas,Tipo,Type,Tipus,Mota,
+notgames.kinds.mixed,Not-games: rápidas y largas,Rápidas y largas,Quick and long,Ràpides i llargues,Azkarrak eta luzeak,
+notgames.kinds.quick,Not-games: solo rápidas (10 s),Solo rápidas,Quick only,Només ràpides,Azkarrak bakarrik,
+notgames.kinds.long,Not-games: solo largas (razonar o leer código),Solo largas,Long only,Només llargues,Luzeak bakarrik,
+notgames.difficulty,Not-games: dificultad,Dificultad,Difficulty,Dificultat,Zailtasuna,
+notgames.difficulty.rising,Not-games: empieza fácil y va subiendo,De fácil a difícil,Easy to hard,De fàcil a difícil,Errazetik zailera,
+notgames.difficulty.easy,Not-games: dificultad fácil,Fácil,Easy,Fàcil,Erraza,
+notgames.difficulty.medium,Not-games: dificultad media,Media,Medium,Mitjana,Ertaina,
+notgames.difficulty.hard,Not-games: dificultad difícil,Difícil,Hard,Difícil,Zaila,
+notgames.questions,Not-games: número de preguntas,Preguntas,Questions,Preguntes,Galderak,
+notgames.questionsMax,"Not-games: en supervivencia, preguntas como mucho","Preguntas, como mucho","Questions, at most","Preguntes, com a màxim","Galderak, gehienez",
+notgames.minCircle,Not-games: círculo mínimo para entrar,"Para entrar, desde el","To join, from","Per entrar, des del","Sartzeko, hemendik aurrera",
+notgames.minCircle.any,Not-games: puede entrar cualquiera,Cualquiera,Anyone,Qualsevol,Edonor,
+notgames.competitive,Not-games: casilla de versión competitiva,Competitivo: fallar resta un punto,Competitive: a wrong answer costs a point,Competitiu: fallar resta un punt,Lehiakorra: huts egiteak puntu bat kentzen du,
+notgames.competitiveShort,Not-games: etiqueta corta de competitivo,Competitivo,Competitive,Competitiu,Lehiakorra,
+notgames.nQuestions,Not-games: número de preguntas de una sala,{n} preguntas,{n} questions,{n} preguntes,{n} galdera,
+notgames.fromCircle,Not-games: círculo mínimo para entrar,Desde el círculo {n},From circle {n},Des del cercle {n},{n}. zirkulutik,
+notgames.back,Not-games: enlace para volver a la lista de salas,Salas,Rooms,Sales,Gelak,
+notgames.waiting,Not-games: cuánta gente hay esperando,Esperando a empezar · {n} dentro,Waiting to start · {n} inside,Esperant per començar · {n} a dins,Hasteko zain · {n} barruan,
+notgames.team.a,Not-games: nombre del equipo A,Equipo A,Team A,Equip A,A taldea,
+notgames.team.b,Not-games: nombre del equipo B,Equipo B,Team B,Equip B,B taldea,
+notgames.joinTeam,Not-games: entrar en ese equipo,Entrar aquí,Join here,Entra aquí,Sartu hemen,
+notgames.switchTeam,Not-games: pasarse a ese equipo,Cambiarme aquí,Switch here,Canvia't aquí,Aldatu hona,
+notgames.start,Not-games: botón para empezar la partida (quien creó la sala),Empezar,Start,Comença,Hasi,
+notgames.waitHost,Not-games: esperando a quien creó la sala,Empieza {host} cuando esté todo el grupo.,{host} starts when everyone is here.,{host} comença quan hi sigui tot el grup.,{host}-k hasiko du talde osoa dagoenean.,
+notgames.questionOf,Not-games: número de pregunta,Pregunta {n} de {total},Question {n} of {total},Pregunta {n} de {total},{total}tik {n}. galdera,
+notgames.kind.quick,Not-games: etiqueta de pregunta rápida,Rápida,Quick,Ràpida,Azkarra,
+notgames.kind.long,Not-games: etiqueta de pregunta larga,Larga,Long,Llarga,Luzea,
+notgames.level,"Not-games: dificultad de la pregunta, de 1 a 5",Nivel {n},Level {n},Nivell {n},{n}. maila,
+notgames.levelHint,Not-games: de dónde sale el nivel,Sale de lo que falla la gente con esta pregunta,Based on how often people get it wrong,Surt del que falla la gent amb aquesta pregunta,Jendeak galdera honetan zenbat huts egiten duen,
+notgames.secondsLeft,Not-games: nombre accesible de la barra de tiempo,Segundos que quedan: {n},Seconds left: {n},Segons que queden: {n},Geratzen diren segundoak: {n},
+notgames.answered,Not-games: ya has respondido,Respondido. Esperando al resto…,Answered. Waiting for the others…,Contestat. Esperant la resta…,Erantzunda. Besteen zain…,
+notgames.watching,"Not-games: ya no juegas, solo miras",Ya no juegas: estás mirando.,You are out: just watching.,Ja no jugues: estàs mirant.,Jada ez zaude jokoan: begira zaude.,
+notgames.noAnswer,Not-games: se acabó el tiempo sin responder,Sin responder,No answer,Sense responder,Erantzun gabe,
+notgames.right,Not-games: has acertado,¡Bien!,Right!,Molt bé!,Ondo!,
+notgames.wrong,Not-games: has fallado,No era esa,Not that one,No era aquesta,Ez zen hori,
+notgames.scores,Not-games: título del marcador,Marcador,Scoreboard,Marcador,Markagailua,
+notgames.lives,Not-games: vidas que quedan,Vidas: {n},Lives: {n},Vides: {n},Bizitzak: {n},
+notgames.points,Not-games: puntos,{n} pts,{n} pts,{n} pts,{n} pt,
+notgames.hits,Not-games: aciertos,{n} aciertos,{n} right,{n} encerts,{n} asmatze,
+notgames.over,Not-games: la partida ha terminado,Fin de la partida,Game over,Fi de la partida,Partida amaitu da,
+notgames.youWon,Not-games: has ganado,¡Has ganado!,You won!,Has guanyat!,Irabazi duzu!,
+notgames.winner,Not-games: quién ha ganado,Ha ganado {names},{names} won,Ha guanyat {names},{names}-k irabazi du,
+notgames.again,Not-games: volver a la lista para otra partida,Otra partida,Another round,Una altra partida,Beste partida bat,
+notgames.sound,Not-games: botón para encender o apagar los sonidos de los juegos,Sonidos,Sounds,Sons,Soinuak,
+notgames.game.label,Not-games: qué juego tiene la sala nueva,Juego,Game,Joc,Jokoa,
+notgames.game.quiz,Not-games: el juego de preguntas,Preguntas,Questions,Preguntes,Galderak,
+notgames.game.quiz.hint,Not-games: explicación del juego de preguntas,"Preguntas de programación por rondas, en varios modos.","Programming questions in rounds, in several modes.","Preguntes de programació per rondes, en diversos modes.","Programazio-galderak txandaka, hainbat modutan.",
+notgames.game.chess,Not-games: el juego de ajedrez,Ajedrez,Chess,Escacs,Xakea,
+notgames.game.chess.hint,"Not-games, ajedrez: explicación del juego","Con reloj: tras cada jugada, una pregunta a los dos. Quien acierta primero, mueve.","With a clock: after each move, a question for both. Whoever answers right first moves.","Amb rellotge: després de cada jugada, una pregunta als dos. Qui l'encerta primer, mou.","Erlojuarekin: jokaldi bakoitzaren ondoren, galdera bat bientzat. Lehenik asmatzen duenak mugitzen du.",
+notgames.minutes,"Not-games, ajedrez: tiempo de reloj de cada jugador",Reloj,Clock,Rellotge,Erlojua,
+notgames.minutesN,"Not-games, ajedrez: minutos de reloj",{n} min por persona,{n} min each,{n} min per persona,{n} min pertsona bakoitzeko,
+notgames.chess.board,"Not-games, ajedrez: nombre del tablero para lectores de pantalla",Tablero,Board,Tauler,Taula,
+notgames.chess.boardStyle,"Not-games, ajedrez: grupo para elegir el estilo del tablero",Estilo del tablero,Board style,Estil del tauler,Taularen estiloa,
+notgames.chess.board.tournament,"Not-games, ajedrez: estilo de tablero verde de torneo",Torneo,Tournament,Torneig,Txapelketa,
+notgames.chess.board.wood,"Not-games, ajedrez: estilo de tablero de madera",Madera,Wood,Fusta,Egurra,
+notgames.chess.board.ocean,"Not-games, ajedrez: estilo de tablero azul",Océano,Ocean,Oceà,Ozeanoa,
+notgames.chess.board.contrast,"Not-games, ajedrez: estilo de tablero de alto contraste",Contraste,Contrast,Contrast,Kontrastea,
+notgames.chess.clock,"Not-games, ajedrez: reloj de un jugador para lectores de pantalla",Reloj de {login},{login}'s clock,Rellotge de {login},{login}(r)en erlojua,
+notgames.chess.side.a,"Not-games, ajedrez: bando de las blancas",Blancas,White,Blanques,Zuriak,
+notgames.chess.side.b,"Not-games, ajedrez: bando de las negras",Negras,Black,Negres,Beltzak,
+notgames.chess.waitingRival,"Not-games, ajedrez: hueco libre en la sala",Esperando rival…,Waiting for a rival…,Esperant rival…,Aurkariaren zain…,
+notgames.chess.yourMove,"Not-games, ajedrez: te toca mover",Te toca mover: corre tu reloj.,Your move: your clock is running.,Et toca moure: corre el teu rellotge.,Zure txanda: zure erlojua dabil.,
+notgames.chess.theirMove,"Not-games, ajedrez: le toca mover al otro",Mueve {login}.,{login} to move.,Mou {login}.,{login}(e)k mugitzen du.,
+notgames.chess.inCheck,"Not-games, ajedrez: delante de a quién le toca, cuando está en jaque y mueve sin pregunta",¡Jaque! Sin pregunta:,Check! No question:,Escac! Sense pregunta:,Xake! Galderarik gabe:,
+notgames.chess.question,"Not-games, ajedrez: aviso de que hay pregunta","Relojes parados: ¡quien acierte primero, mueve!",Clocks stopped: first right answer moves!,"Rellotges aturats: qui l'encerti primer, mou!",Erlojuak geldirik: lehenik asmatzen duenak mugitzen du!,
+notgames.chess.questionTitle,"Not-games, ajedrez: título de la pregunta entre jugadas",Pregunta para los dos,Question for both,Pregunta per als dos,Galdera bientzat,
+notgames.chess.firstRight,"Not-games, ajedrez: alguien acertó primero",{login} acertó primero y mueve.,{login} answered right first and moves.,{login} ha encertat primer i mou.,{login}(e)k asmatu du lehenik eta mugitzen du.,
+notgames.chess.firstWrong,"Not-games, ajedrez: alguien falló primero",{login} falló: pierde el 10 % de su tiempo y mueve {other}.,{login} got it wrong: loses 10% of their time and {other} moves.,{login} ha fallat: perd el 10 % del seu temps i mou {other}.,{login}(e)k huts egin du: denboraren % 10 galdu du eta {other}(e)k mugitzen du.,
+notgames.chess.nobody,"Not-games, ajedrez: nadie respondió la pregunta","Nadie respondió a tiempo: mueve {login}, como tocaba.","Nobody answered in time: {login} moves, as planned.","Ningú no ha contestat a temps: mou {login}, com tocava.","Inork ez du garaiz erantzun: {login}(e)k mugitzen du, zegokion bezala.",
+notgames.chess.moves,"Not-games, ajedrez: jugadas de la partida, desplegable",Jugadas ({n}),Moves ({n}),Jugades ({n}),Jokaldiak ({n}),
+notgames.chess.resign,"Not-games, ajedrez: botón para rendirse",Abandonar,Resign,Abandonar,Amore eman,
+notgames.chess.promote,"Not-games, ajedrez: elegir la pieza al coronar",Coronar a:,Promote to:,Corona en:,Koroatu honela:,
+notgames.end.checkmate,"Not-games, ajedrez: final por jaque mate",Jaque mate,Checkmate,Escac i mat,Xake-mate,
+notgames.end.stalemate,"Not-games, ajedrez: final por ahogado",Tablas por ahogado,Stalemate,Taules per ofegat,Berdinketa itota,
+notgames.end.draw,"Not-games, ajedrez: final en tablas",Tablas,Draw,Taules,Berdinketa,
+notgames.end.time,"Not-games, ajedrez: final por tiempo",Sin tiempo,Out of time,Sense temps,Denborarik gabe,
+notgames.end.resign,"Not-games, ajedrez: final por abandono",Abandono,Resignation,Abandonament,Amore ematea,
+notgames.end.left,"Not-games, ajedrez: final porque alguien se fue",Se fue de la sala,Left the room,Ha sortit de la sala,Gelatik irten da,
+notgames.end.drawResult,"Not-games, ajedrez: resultado en tablas",Tablas: nadie gana.,Draw: nobody wins.,Taules: no guanya ningú.,Berdinketa: inork ez du irabazten.,
+notgames.chess.piece.ak,"Not-games, ajedrez: nombre de una pieza para lectores de pantalla",rey blanco,white king,rei blanc,errege zuria,
+notgames.chess.piece.aq,"Not-games, ajedrez: nombre de una pieza para lectores de pantalla",dama blanca,white queen,dama blanca,dama zuria,
+notgames.chess.piece.ar,"Not-games, ajedrez: nombre de una pieza para lectores de pantalla",torre blanca,white rook,torre blanca,dorrea zuria,
+notgames.chess.piece.ab,"Not-games, ajedrez: nombre de una pieza para lectores de pantalla",alfil blanco,white bishop,alfil blanc,alfila zuria,
+notgames.chess.piece.an,"Not-games, ajedrez: nombre de una pieza para lectores de pantalla",caballo blanco,white knight,cavall blanc,zaldia zuria,
+notgames.chess.piece.ap,"Not-games, ajedrez: nombre de una pieza para lectores de pantalla",peón blanco,white pawn,peó blanc,peoia zuria,
+notgames.chess.piece.bk,"Not-games, ajedrez: nombre de una pieza para lectores de pantalla",rey negro,black king,rei negre,errege beltza,
+notgames.chess.piece.bq,"Not-games, ajedrez: nombre de una pieza para lectores de pantalla",dama negra,black queen,dama negra,dama beltza,
+notgames.chess.piece.br,"Not-games, ajedrez: nombre de una pieza para lectores de pantalla",torre negra,black rook,torre negra,dorrea beltza,
+notgames.chess.piece.bb,"Not-games, ajedrez: nombre de una pieza para lectores de pantalla",alfil negro,black bishop,alfil negre,alfila beltza,
+notgames.chess.piece.bn,"Not-games, ajedrez: nombre de una pieza para lectores de pantalla",caballo negro,black knight,cavall negre,zaldia beltza,
+notgames.chess.piece.bp,"Not-games, ajedrez: nombre de una pieza para lectores de pantalla",peón negro,black pawn,peó negre,peoia beltza,
+notgames.chess.firstRightMe,"Not-games, ajedrez: acertaste tú primero",Acertaste primero: mueves tú.,You answered right first: your move.,Has encertat primer: mous tu.,Lehenik asmatu duzu: zuk mugitzen duzu.,
+notgames.chess.firstWrongMe,"Not-games, ajedrez: fallaste tú primero",Fallaste: pierdes el 10 % de tu tiempo y mueve {other}.,Wrong: you lose 10% of your time and {other} moves.,Has fallat: perds el 10 % del teu temps i mou {other}.,Huts egin duzu: zure denboraren % 10 galdu duzu eta {other}(e)k mugitzen du.,
+notgames.chess.firstWrongYouMove,"Not-games, ajedrez: el otro falló primero y mueves tú",{login} falló: pierde el 10 % de su tiempo y mueves tú.,{login} got it wrong: loses 10% of their time and you move.,{login} ha fallat: perd el 10 % del seu temps i mous tu.,{login}(e)k huts egin du: denboraren % 10 galdu du eta zuk mugitzen duzu.,
+notgames.chess.nobodyMe,"Not-games, ajedrez: nadie respondió y te tocaba a ti","Nadie respondió a tiempo: mueves tú, como tocaba.","Nobody answered in time: you move, as planned.","Ningú no ha contestat a temps: mous tu, com tocava.","Inork ez du garaiz erantzun: zuk mugitzen duzu, zegokion bezala.",
+notgames.tab.rooms,Not-games: pestaña de las salas,Salas,Rooms,Sales,Gelak,
+notgames.tab.review,"Not-games: pestaña del Repaso, con lo que has fallado",Repaso,Review,Repàs,Errepasoa,
+notgames.review.empty,"Not-games, Repaso: aún no has fallado nada","Aún no has fallado nada. Lo que falles en las partidas saldrá aquí, explicado.","Nothing missed yet. What you miss in games will show up here, explained.","Encara no has fallat res. El que fallis a les partides sortirà aquí, explicat.","Oraindik ez duzu ezer huts egin. Partidetan huts egiten duzuna hemen agertuko da, azalduta.",
+notgames.review.pending,"Not-games, Repaso: cuántos conceptos quedan por repasar",Por repasar: {n}. Son los que fallaste y aún no has acertado.,To review: {n}. Missed and not yet answered right.,Per repassar: {n}. Són els que vas fallar i encara no has encertat.,Errepasatzeko: {n}. Huts egin eta oraindik asmatu ez dituzunak.,
+notgames.review.mastered,"Not-games, Repaso: desplegar los ya superados",Superados ({n}),Mastered ({n}),Superats ({n}),Gaindituak ({n}),
+notgames.review.masteredOne,"Not-games, Repaso: este lo acertaste después de fallarlo",Superado: lo acertaste después.,Mastered: you got it right later.,Superat: el vas encertar després.,Gaindituta: geroago asmatu zenuen.,
+notgames.review.misses,"Not-games, Repaso: cuántas veces lo has fallado",Fallos: {n},Misses: {n},Errors: {n},Hutsak: {n},
+notgames.review.example,"Not-games, Repaso: encabezado del ejemplo",Ejemplo,Example,Exemple,Adibidea,
+notgames.review.question,"Not-games, Repaso: desplegar cómo salía la pregunta",Cómo salía la pregunta,How the question looked,Com sortia la pregunta,Galdera nola zegoen,
+notgames.tab.git,Not-games: pestaña del curso de git,Curso de git,Git course,Curs de git,Git ikastaroa,
+git.pitch,Curso de git: frase bajo las pestañas,"Un camino de puntos con forma de ramas: en cada uno ves la animación, lees la teoría y lo haces tú en la terminal.","A path of points shaped like branches: in each one you watch the animation, read the theory and do it yourself in the terminal.","Un camí de punts amb forma de branques: a cada un veus l'animació, llegeixes la teoria i ho fas tu al terminal.","Adar itxurako puntuen bidea: bakoitzean animazioa ikusi, teoria irakurri eta zuk egiten duzu terminalean.",
+git.needSeat,Curso de git: aviso de que solo se juega sentado en el clúster,Los puntos y las pruebas cuentan desde un puesto del clúster. Fuera puedes ver la animación y la teoría y practicar los retos.,Points and tests count from a cluster seat. Elsewhere you can watch the animation and theory and practise the challenges.,Els punts i les proves compten des d'un lloc del clúster. Fora pots veure l'animació i la teoria i practicar els reptes.,Puntuek eta probek klusterreko postu batetik balio dute. Kanpoan animazioa eta teoria ikus ditzakezu eta erronkak praktikatu.,
+git.practice,"Curso de git: sin puesto en el clúster se puede practicar, pero no cuenta","Fuera del clúster puedes practicar, pero el punto solo cuenta si lo haces sentado en un puesto.","Outside the cluster you can practise, but the point only counts if you do it at a cluster seat.","Fora del clúster pots practicar, però el punt només compta si el fas assegut en un lloc.","Klusterretik kanpo prakti dezakezu, baina puntuak klusterreko postu batean eginda bakarrik balio du.",
+git.practiceDone,Curso de git: reto conseguido practicando fuera del clúster,"¡Conseguido! Para que cuente en tu camino, repítelo desde un puesto del clúster.","Done! To count on your path, repeat it from a cluster seat.","Fet! Perquè compti al teu camí, repeteix-lo des d'un lloc del clúster.","Eginda! Zure bidean balio dezan, errepikatu klusterreko postu batetik.",
+git.atSeat,Curso de git: desde qué puesto juegas,Juegas desde {seat}.,Playing from {seat}.,Jugues des de {seat}.,{seat} postutik jokatzen ari zara.,
+git.path,Curso de git: nombre del camino para lectores de pantalla,Camino del curso de git,Git course path,Camí del curs de git,Git ikastaroaren bidea,
+git.group,Curso de git: punto de prueba de grupo en el camino,Prueba de grupo ({n} o más),Group test ({n} or more),Prova de grup ({n} o més),Talde-proba ({n} edo gehiago),
+git.boss,Curso de git: el jefe final en el camino,Jefe final ({n} o más),Final boss ({n} or more),Cap final ({n} o més),Azken etsaia ({n} edo gehiago),
+git.back,Curso de git: volver al camino,Al camino,Back to the path,Al camí,Bidera,
+git.step.animation,Curso de git: pestaña de la animación,Animación,Animation,Animació,Animazioa,
+git.step.theory,Curso de git: pestaña de la teoría,Teoría,Theory,Teoria,Teoria,
+git.step.challenge,Curso de git: pestaña del reto,Reto,Challenge,Repte,Erronka,
+git.anim.start,Curso de git: primer fotograma de la animación,Así empieza el repositorio.,This is how the repository starts.,Així comença el repositori.,Horrela hasten da biltegia.,
+git.anim.replay,Curso de git: volver a ver la animación,Repetir,Replay,Repeteix,Errepikatu,
+git.toTheory,Curso de git: botón para ir a la teoría,Ver la teoría,Read the theory,Mira la teoria,Ikusi teoria,
+git.toChallenge,Curso de git: botón para ir al reto,Al reto,To the challenge,Al repte,Erronkara,
+git.theory.what,"Curso de git: teoría, para qué sirve",Para qué sirve,What it is for,Per a què serveix,Zertarako balio du,
+git.theory.how,"Curso de git: teoría, cómo se usa",Cómo se usa,How to use it,Com s'utilitza,Nola erabili,
+git.theory.when,"Curso de git: teoría, cuándo usarlo",Cuándo usarlo,When to use it,Quan utilitzar-ho,Noiz erabili,
+git.theory.whenNot,"Curso de git: teoría, cuándo no usarlo",Cuándo no,When not to,Quan no,Noiz ez,
+git.theory.looks,"Curso de git: teoría, cómo se ve en las ramas",Cómo se ve en las ramas,How it looks in the branches,Com es veu a les branques,Nola ikusten den adarretan,
+git.theory.problems,"Curso de git: teoría, qué problemas da",Qué problemas da,What can go wrong,Quins problemes dona,Zer arazo ematen dituen,
+git.graph.local,Curso de git: título del dibujo de tu repositorio,Tu repositorio,Your repository,El teu repositori,Zure biltegia,
+git.target,Curso de git: el dibujo del objetivo,Objetivo,Goal,Objectiu,Helburua,
+git.reset,Curso de git: volver a empezar el reto,Empezar de nuevo,Start over,Torna a començar,Hasi berriro,
+git.checking,Curso de git: mientras la API corrige,Comprobando…,Checking…,Comprovant…,Egiaztatzen…,
+git.won,Curso de git: reto superado,¡Conseguido! El siguiente punto ya está abierto.,Done! The next point is now open.,Aconseguit! El punt següent ja és obert.,Lortuta! Hurrengo puntua irekita dago.,
+git.notYet,Curso de git: la API no da el reto por bueno,Aún no: falta {misses}.,Not yet: missing {misses}.,Encara no: falta {misses}.,Oraindik ez: falta da {misses}.,
+git.goal,"Curso de git: etiqueta delante del objetivo de un punto («Objetivo: haz dos commits en main»)",Objetivo,Goal,Objectiu,Helburua,
+course.stars.title,Cursos (git y shell): nombre para lectores de pantalla de la lista de cuántos comandos da cada estrella,Comandos para cada estrella,Commands for each star,Ordres per a cada estrella,Izar bakoitzerako aginduak,
+course.stars.three.one,"Cursos (git y shell): tres estrellas, con un comando (va tras ★★★)",en {n} comando,in {n} command,en {n} ordre,agindu {n}ekin,
+course.stars.three.many,"Cursos (git y shell): tres estrellas, con varios comandos o menos (va tras ★★★)",en {n} comandos o menos,in {n} commands or fewer,en {n} ordres o menys,{n} agindutan edo gutxiagotan,
+course.stars.two.one,"Cursos (git y shell): dos estrellas, hasta un comando (va tras ★★☆)",hasta {n} comando,up to {n} command,fins a {n} ordre,{n} agindu arte,
+course.stars.two.many,"Cursos (git y shell): dos estrellas, hasta tantos comandos (va tras ★★☆)",hasta {n} comandos,up to {n} commands,fins a {n} ordres,{n} agindu arte,
+course.stars.any,"Cursos (git y shell): una estrella, se consigue con cualquier número de comandos (va tras ★☆☆)","con más, al conseguirlo","with more, once you make it","amb més, en aconseguir-ho","gehiagorekin, lortzean",
+course.stars.what,Cursos (git y shell): desplegable que explica qué comandos cuentan para las estrellas,¿Qué comandos cuentan?,Which commands count?,Quines ordres compten?,Zein agindu zenbatzen dira?,
+git.stars.rule,Curso de git: qué cuenta como comando para las estrellas y qué no,"Cuenta cada comando que cambia algo: commits, ramas, HEAD, tags, stash u origin. No cuentan mirar (status, log, diff), preparar ficheros (echo, git add, git restore), git fetch ni los que fallan. Las formas equivalentes valen igual: git add . o -A o fichero a fichero, switch -c o checkout -b, y crear una rama y cambiarte a ella cuenta uno.","Every command that changes something counts: commits, branches, HEAD, tags, stash or origin. Looking (status, log, diff), preparing files (echo, git add, git restore), git fetch and failed commands don't. Equivalent forms count the same: git add . or -A or file by file, switch -c or checkout -b, and creating a branch and moving to it counts as one.","Compta cada ordre que canvia alguna cosa: commits, branques, HEAD, tags, stash o origin. No compten mirar (status, log, diff), preparar fitxers (echo, git add, git restore), git fetch ni les que fallen. Les formes equivalents valen igual: git add . o -A o fitxer a fitxer, switch -c o checkout -b, i crear una branca i canviar-t'hi compta una.","Zerbait aldatzen duen agindu bakoitza zenbatzen da: commitak, adarrak, HEAD, tagak, stasha edo origin. Ez dira zenbatzen begiratzea (status, log, diff), fitxategiak prestatzea (echo, git add, git restore), git fetch eta huts egiten dutenak. Forma baliokideek berdin balio dute: git add . edo -A edo fitxategiz fitxategi, switch -c edo checkout -b, eta adar bat sortu eta hara aldatzea bat da.",
+course.count.one,Cursos (git y shell): cuántos comandos que cuentan llevas en el reto (uno),Llevas {n} comando que cuenta,{n} command counted so far,Portes {n} ordre que compta,Zenbatzen den agindu {n} daramazu,
+course.count.many,Cursos (git y shell): cuántos comandos que cuentan llevas en el reto,Llevas {n} comandos que cuentan,{n} commands counted so far,Portes {n} ordres que compten,Zenbatzen diren {n} agindu daramatzazu,
+course.starsNow,Cursos (git y shell): al pasar por las estrellas junto al recuento,Las estrellas que tendrías si lo consiguieras ahora,The stars you'd get if you made it now,Les estrelles que tindries si ho aconseguissis ara,Orain lortuko bazenu izango zenituzkeen izarrak,
+course.starsNowValue,Cursos (git y shell): para lectores de pantalla; estrellas que tendrías ahora,"Si lo consigues ahora, {stars} de 3 estrellas","If you make it now, {stars} of 3 stars","Si ho aconsegueixes ara, {stars} de 3 estrelles","Orain lortzen baduzu, 3tik {stars} izar",
+course.term.counted.one,"Cursos (git y shell): junto a una línea de la terminal, su número si cuenta para las estrellas (el primero)",Cuenta: comando n.º {n},Counts: command #{n},Compta: ordre núm. {n},Zenbatzen da: {n}. agindua,
+course.term.counted.many,"Cursos (git y shell): junto a una línea de la terminal, su número si cuenta para las estrellas",Cuenta: comando n.º {n},Counts: command #{n},Compta: ordre núm. {n},Zenbatzen da: {n}. agindua,
+course.term.full,Cursos (git y shell): se ha llegado al máximo de líneas en un reto,Has llegado a {n} líneas: empieza de nuevo para seguir.,You've reached {n} lines: start over to go on.,Has arribat a {n} línies: torna a començar per continuar.,{n} lerrora iritsi zara: hasi berriro jarraitzeko.,
+course.why.three.one,"Cursos (git y shell): por qué tres estrellas, con un comando",Lo has hecho en {n} comando: para tres estrellas valían {three} o menos.,You did it in {n} command: {three} or fewer gave three stars.,Ho has fet en {n} ordre: per a tres estrelles en valien {three} o menys.,Agindu {n}ekin egin duzu: hiru izarretarako {three} edo gutxiago balio zuten.,
+course.why.three.many,"Cursos (git y shell): por qué tres estrellas",Lo has hecho en {n} comandos: para tres estrellas valían {three} o menos.,You did it in {n} commands: {three} or fewer gave three stars.,Ho has fet en {n} ordres: per a tres estrelles en valien {three} o menys.,{n} agindutan egin duzu: hiru izarretarako {three} edo gutxiago balio zuten.,
+course.why.two.one,"Cursos (git y shell): por qué dos estrellas, con un comando",Lo has hecho en {n} comando. Con {three} o menos tendrías tres estrellas: empieza de nuevo para mejorar.,You did it in {n} command. With {three} or fewer you'd get three stars: start over to improve.,Ho has fet en {n} ordre. Amb {three} o menys tindries tres estrelles: torna a començar per millorar.,Agindu {n}ekin egin duzu. {three} edo gutxiagorekin hiru izar izango zenituzke: hasi berriro hobetzeko.,
+course.why.two.many,"Cursos (git y shell): por qué dos estrellas",Lo has hecho en {n} comandos. Con {three} o menos tendrías tres estrellas: empieza de nuevo para mejorar.,You did it in {n} commands. With {three} or fewer you'd get three stars: start over to improve.,Ho has fet en {n} ordres. Amb {three} o menys tindries tres estrelles: torna a començar per millorar.,{n} agindutan egin duzu. {three} edo gutxiagorekin hiru izar izango zenituzke: hasi berriro hobetzeko.,
+course.why.one.one,"Cursos (git y shell): por qué una estrella, con un comando","Lo has hecho en {n} comando. Con {two} o menos tendrías dos estrellas, y con {three} o menos, tres.","You did it in {n} command. With {two} or fewer you'd get two stars, and with {three} or fewer, three.","Ho has fet en {n} ordre. Amb {two} o menys tindries dues estrelles, i amb {three} o menys, tres.","Agindu {n}ekin egin duzu. {two} edo gutxiagorekin bi izar izango zenituzke, eta {three} edo gutxiagorekin, hiru.",
+course.why.one.many,"Cursos (git y shell): por qué una estrella","Lo has hecho en {n} comandos. Con {two} o menos tendrías dos estrellas, y con {three} o menos, tres.","You did it in {n} commands. With {two} or fewer you'd get two stars, and with {three} or fewer, three.","Ho has fet en {n} ordres. Amb {two} o menys tindries dues estrelles, i amb {three} o menys, tres.","{n} agindutan egin duzu. {two} edo gutxiagorekin bi izar izango zenituzke, eta {three} edo gutxiagorekin, hiru.",
+git.term.hint,Curso de git: ayuda arriba de la terminal,Escribe comandos de git y pulsa Intro. help para ver cuáles hay; flechas para los anteriores; clear limpia la pantalla.,Type git commands and press Enter. help lists them; arrows for previous ones; clear wipes the screen.,Escriu ordres de git i prem Retorn. help per veure quines hi ha; fletxes per a les anteriors; clear neteja la pantalla.,Idatzi git aginduak eta sakatu Sartu. help zein dauden ikusteko; geziak aurrekoentzat; clear pantaila garbitzeko.,
+course.term.input,Cursos (git y shell): campo de la terminal para lectores de pantalla,Comando,Command,Ordre,Agindua,
+git.gate.test,"Curso de git: bajo una prueba de grupo en el camino, el test que hay antes","Antes, test de preguntas","First, a quick quiz","Abans, test de preguntes","Lehenago, galdera-testa",
+git.gate.testPassed,Curso de git: el test previo ya está superado,Test superado,Quiz passed,Test superat,Testa gaindituta,
+git.gate.rules,Curso de git: reglas del test previo a una prueba de grupo,"Antes de la prueba de grupo: 8 preguntas rápidas de lo aprendido, 20 segundos cada una. Hay que acertarlas todas. Si fallas una, puedes repetirlo una hora después; mientras, repasa lo fallado.","Before the group test: 8 quick questions on what you've learned, 20 seconds each. You must get them all right. If you miss one, you can retry an hour later; meanwhile, review what you missed.","Abans de la prova de grup: 8 preguntes ràpides del que has après, 20 segons cadascuna. Cal encertar-les totes. Si en falles una, pots repetir-ho una hora després; mentrestant, repassa el que has fallat.","Talde-probaren aurretik: ikasitakoaren 8 galdera azkar, 20 segundo bakoitza. Denak asmatu behar dira. Bat huts eginez gero, ordubete geroago errepika dezakezu; bitartean, errepasatu huts egindakoa.",
+git.gate.start,Curso de git: empezar el test previo,Empezar el test,Start the quiz,Comença el test,Hasi testa,
+git.gate.send,Curso de git: mandar las respuestas del test previo,Mandar ({n} de {total}),Send ({n} of {total}),Envia ({n} de {total}),Bidali ({n}/{total}),
+git.gate.won,Curso de git: test previo aprobado,¡Todas bien ({right} de {total})! Test superado.,All right ({right} of {total})! Quiz passed.,Totes bé ({right} de {total})! Test superat.,Denak ondo ({right}/{total})! Testa gaindituta.,
+git.gate.lost,Curso de git: test previo suspendido,{right} de {total}: hacen falta todas. Repasa lo fallado y vuelve dentro de una hora.,{right} of {total}: you need them all. Review what you missed and come back in an hour.,{right} de {total}: calen totes. Repassa el que has fallat i torna d'aquí a una hora.,{right}/{total}: denak behar dira. Errepasatu huts egindakoa eta itzuli ordubete barru.,
+git.gate.wait,Curso de git: cuándo se puede repetir el test previo,Podrás repetirlo a las {time}.,You can retry at {time}.,El podràs repetir a les {time}.,{time}etan errepika dezakezu.,
+git.gate.toReview,Curso de git: enlace al Repaso desde el test previo,Ir al Repaso,Go to Review,Ves al Repàs,Joan Errepasora,
+git.room.who,Curso de git: cuánta gente cabe en una prueba de grupo,"De {min} a {max} personas, cada una en su puesto del clúster.","From {min} to {max} people, each at their own cluster seat.","De {min} a {max} persones, cadascuna al seu lloc del clúster.","{min}etik {max}era pertsona, bakoitza klusterreko bere postuan.",
+git.room.none,Curso de git: no hay salas de esa prueba,Aún no hay salas abiertas. Crea una y avisa a tu grupo.,No open rooms yet. Create one and tell your group.,Encara no hi ha sales obertes. Crea'n una i avisa el teu grup.,Oraindik ez dago gela irekirik. Sortu bat eta abisatu zure taldeari.,
+git.room.players,Curso de git: cuántas personas hay en una sala,{n} en la sala,{n} in the room,{n} a la sala,{n} gelan,
+git.room.status.lobby,Curso de git: sala sin empezar,esperando,waiting,esperant,zain,
+git.room.status.playing,Curso de git: sala jugando,jugando,playing,jugant,jokoan,
+git.room.status.done,Curso de git: sala acabada,acabada,finished,acabada,amaituta,
+git.room.back,Curso de git: volver a una sala en la que ya estás,Volver,Go back,Torna,Itzuli,
+git.room.list,Curso de git: volver a la lista de salas,Salas,Rooms,Sales,Gelak,
+git.room.start,Curso de git: empezar la prueba de grupo,Empezar,Start,Comença,Hasi,
+git.room.missing,Curso de git: cuántas personas faltan para empezar,Faltan {n},{n} more needed,En falten {n},{n} falta dira,
+git.room.waiting,Curso de git: esperando a quien creó la sala,Esperando a que {host} empiece.,Waiting for {host} to start.,Esperant que {host} comenci.,{host} hasi arte zain.,
+git.room.standing,Curso de git: alguien no está sentado en un puesto,sin puesto,no seat,sense lloc,posturik gabe,
+git.room.hints,Curso de git: comandos útiles bajo la terminal,Útiles: {hints},Handy: {hints},Útils: {hints},Erabilgarriak: {hints},
+git.room.missions,Curso de git: título de la lista de misiones,Misiones,Missions,Missions,Misioak,
+git.room.people,Curso de git: título de la lista de personas de la sala,En la sala,In the room,A la sala,Gelan,
+git.room.commands,Curso de git: comandos que lleva alguien,Comandos: {n},Commands: {n},Ordres: {n},Aginduak: {n},
+git.room.passed,Curso de git: prueba de grupo superada al acabar,¡Misión cumplida! La prueba de grupo queda superada para todo el grupo.,Mission accomplished! The whole group passes the group test.,Missió complerta! La prova de grup queda superada per a tot el grup.,Misioa beteta! Talde osoak gainditu du talde-proba.,
+git.room.expired,Curso de git: se acabó el tiempo de la prueba de grupo,Se acabó el tiempo sin cumplir la misión. Podéis crear otra sala y volver a probar.,Time ran out before the mission was done. You can create another room and try again.,S'ha acabat el temps sense complir la missió. Podeu crear una altra sala i tornar-ho a provar.,Denbora amaitu da misioa bete gabe. Beste gela bat sortu eta berriro saia zaitezkete.,
+git.room.done,Curso de git: prueba de grupo ya superada,Prueba superada,Test passed,Prova superada,Proba gaindituta,
+git.room.apart,Curso de git: reglas del jefe final en la sala,"Jefe final: cada cual en un puesto a 4 filas y 4 columnas del resto (u otro clúster), sin hablar. Solo ves lo que escribes tú.","Final boss: everyone at a seat 4 rows and 4 columns away from the rest (or another cluster), no talking. You only see what you type.","Cap final: cadascú en un lloc a 4 files i 4 columnes de la resta (o un altre clúster), sense parlar. Només veus el que escrius tu.","Azken etsaia: bakoitza besteengandik 4 errenkada eta 4 zutabera dagoen postu batean (edo beste kluster batean), hitz egin gabe. Zuk idazten duzuna bakarrik ikusten duzu.",
+git.room.number,Curso de git: el número de cada persona en la sala (sale en las tareas),n.º {n},#{n},núm. {n},{n}. zk.,
+git.room.tasks,"Curso de git: título de las tareas, que hace cada persona",Lo que haces tú,What you do,El que fas tu,Zuk egiten duzuna,
+notgames.chess.leaving,"Ajedrez: al acabar, cuenta atrás para volver a las salas",Vuelves a las salas en {n} s.,Back to the rooms in {n} s.,Tornes a les sales en {n} s.,{n} s barru geletara itzuliko zara.,
+notgames.chess.review,Ajedrez: botón para repasar la partida acabada,Repasar la partida,Review the game,Repassa la partida,Errepasatu partida,
+notgames.chess.reviewStart,"Ajedrez: repaso, la posición inicial",Posición inicial,Starting position,Posició inicial,Hasierako posizioa,
+notgames.chess.reviewStep,"Ajedrez: repaso, qué jugada se ve; {move} en notación algebraica",Jugada {n} de {total}: {move},Move {n} of {total}: {move},Jugada {n} de {total}: {move},{total}tik {n}. jokaldia: {move},
+course.time.three,Cursos (git y shell): tres estrellas en un contrarreloj (va tras ★★★),en {time} o menos,in {time} or less,en {time} o menys,{time} edo gutxiagoan,
+course.time.two,Cursos (git y shell): dos estrellas en un contrarreloj (va tras ★★☆),hasta {time},up to {time},fins a {time},{time} arte,
+course.time.limit,"Cursos (git y shell): una estrella en un contrarreloj, el límite (va tras ★☆☆)","antes de {time}, el límite","before {time}, the limit","abans de {time}, el límit","{time} baino lehen, muga",
+course.time.what,Cursos (git y shell): desplegable que explica cómo se cuenta el tiempo,¿Cómo se cuenta el tiempo?,How is time counted?,Com es compta el temps?,Nola zenbatzen da denbora?,
+course.estimate.minutes,"Cursos (git y shell): tiempo estimado en minutos, junto a un punto o un nivel",~{n} min,~{n} min,~{n} min,~{n} min,
+course.estimate.hours,Cursos (git y shell): tiempo estimado en horas justas,~{h} h,~{h} h,~{h} h,~{h} h,
+course.estimate.hoursMinutes,Cursos (git y shell): tiempo estimado en horas y minutos,~{h} h {m} min,~{h} h {m} min,~{h} h {m} min,~{h} h {m} min,
+course.estimate.title,"Cursos (git y shell): al pasar por el tiempo de un punto, bloque o nivel",Tiempo estimado: {time},Estimated time: {time},Temps estimat: {time},Kalkulatutako denbora: {time},
+course.estimate.total,Cursos (git y shell): tiempo estimado del curso entero,Tiempo estimado: {time},Estimated time: {time},Temps estimat: {time},Kalkulatutako denbora: {time},
+course.estimate.parts,Cursos (git y shell): para lectores de pantalla; el reparto del tiempo estimado por nivel o mundo,Tiempo estimado de cada parte,Estimated time per part,Temps estimat de cada part,Zati bakoitzaren denbora,
+course.estimate.hint,"Cursos (git y shell): al pasar por el tiempo estimado del curso, de dónde sale",Un cálculo de partida: se irá ajustando con lo que tarda de verdad quien lo supera.,A first guess: it will be tuned with how long it really takes people who pass it.,Un càlcul inicial: s'anirà ajustant amb el que tarda de debò qui el supera.,Hasierako kalkulua: gainditzen dutenek benetan behar dutenarekin doituko da.,
+git.worldN,Curso de git: nombre de un mundo en el reparto del tiempo estimado,Mundo {n},World {n},Món {n},{n}. mundua,
+notgames.tab.shell,Not-games: pestaña del curso de shell,Curso de shell,Shell course,Curs de shell,Shell ikastaroa,

@@ -12,12 +12,13 @@ import './theme.css'
  */
 export const historial: ThemeManifest = {
   id: 'historial',
-  name: { es: 'Cuaderno', en: 'Notebook', ca: 'Quadern', eu: 'Koadernoa' },
+  name: { es: 'Cuaderno', en: 'Notebook', ca: 'Quadern', eu: 'Koadernoa', fr: 'Cahier' },
   hint: {
     es: 'Cálido: papel, tinta y notas a mano',
     en: 'Warm: paper, ink and handwritten notes',
     ca: 'Càlid: paper, tinta i notes a mà',
     eu: 'Epela: papera, tinta eta eskuzko oharrak',
+    fr: 'Chaleureux : papier, encre et notes à la main',
   },
   preview: {
     bg: '#eadfc8',

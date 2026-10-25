@@ -14,12 +14,13 @@ import './theme.css'
 export const bichota: ThemeManifest = {
   id: 'bichota',
   owners: EXCLUSIVE_STYLES.bichota ?? [],
-  name: { es: 'Bichota', en: 'Bichota', ca: 'Bichota', eu: 'Bichota' },
+  name: { es: 'Bichota', en: 'Bichota', ca: 'Bichota', eu: 'Bichota', fr: 'Bichota' },
   hint: {
     es: 'Leopardo, fucsia, negro y oro. Solo tuyo',
     en: 'Leopard, fuchsia, black and gold. Yours only',
     ca: 'Lleopard, fúcsia, negre i or. Només teu',
     eu: 'Lehoinabarra, fuksia, beltza eta urrea. Zuretzat bakarrik',
+    fr: 'Léopard, fuchsia, noir et or. Rien que pour toi',
   },
   preview: {
     bg: '#ffe1f0',
