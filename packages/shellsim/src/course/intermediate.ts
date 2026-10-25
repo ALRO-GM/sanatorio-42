@@ -1022,7 +1022,7 @@ export const INTERMEDIATE: Unit[] = [
         how: [
           'NAME=peer            # no spaces around =',
           'echo "hello, $NAME"',
-          'export ENV=prod',
+          'export ENTORNO=prod',
           'export PATH="$PATH:$HOME/bin"',
           'which ls',
           'env | sort',
