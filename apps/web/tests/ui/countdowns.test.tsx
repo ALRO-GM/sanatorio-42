@@ -44,9 +44,17 @@ describe('avisos con cuenta atrás', () => {
     expect(within(window_).getAllByRole('timer').length).toBeGreaterThan(0)
 
     // Plegada se queda la píldora con lo más cercano; se vuelve a abrir.
-    await user.click(within(window_).getByRole('button', { name: text('countdown.fold') }))
+    await user.click(
+      within(window_).getByRole('button', {
+        name: fill('dock.fold', { title: text('countdown.title') }),
+      }),
+    )
     expect(within(window_).queryByText(text('countdown.lockers.body'))).toBeNull()
-    await user.click(within(window_).getByRole('button', { name: text('countdown.unfold') }))
+    await user.click(
+      within(window_).getByRole('button', {
+        name: fill('dock.unfold', { title: text('countdown.title') }),
+      }),
+    )
 
     await user.click(
       within(window_).getByRole('button', {

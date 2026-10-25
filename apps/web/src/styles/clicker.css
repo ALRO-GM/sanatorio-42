@@ -1681,10 +1681,7 @@ dialog.cc-bust:not([open]) {
 /* La ventanita que acompaña fuera del juego. Con los colores del estilo que
    esté puesto, no con los del juego: aquí es parte de la web. */
 .cc-mini {
-  position: fixed;
-  bottom: 0.9rem;
-  left: 0.9rem;
-  z-index: 35;
+  /* Dónde va lo decide la pila de la esquina (`shared/dock`). */
   display: flex;
   align-items: stretch;
   border: 1px solid var(--border);

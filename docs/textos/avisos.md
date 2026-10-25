@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/avisos.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-47 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
+44 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera | Francés |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -23,9 +23,6 @@ Generado desde `apps/web/src/shared/i18n/textos/avisos.csv` con
 | `countdown.time` | Campo de hora de una cuenta atrás | shared/ui/DayTimeFields | Hora | Time | Hora | Ordua | Heure |
 | `countdown.title` | Ventanita flotante de cuentas atrás: su título | features/countdowns/CountdownDock | Cuenta atrás | Countdown | Compte enrere | Atzerako kontaketa | Compte à rebours |
 | `countdown.add` | Ventanita de cuentas atrás: botón «+» para fijar una | features/calendar/CountdownsView, features/countdowns/CountdownDock | Fijar una cuenta atrás | Pin a countdown | Fixar un compte enrere | Atzerako kontaketa bat finkatu | Épingler un compte à rebours |
-| `countdown.dock` | Ventanita de cuentas atrás, ya arrastrada: botón para devolverla a su esquina | features/countdowns/CountdownDock | Volver a la esquina | Dock to the corner | Tornar a la cantonada | Izkinara itzuli | Remettre dans le coin |
-| `countdown.fold` | Ventanita de cuentas atrás: botón para plegarla | features/countdowns/CountdownDock | Plegar | Minimise | Plegar | Tolestu | Réduire |
-| `countdown.unfold` | Ventanita de cuentas atrás plegada: botón para desplegarla | features/countdowns/CountdownDock | Desplegar | Expand | Desplegar | Zabaldu | Déplier |
 | `countdown.lockers.title` | Aviso de quien administra: título del aviso de limpieza de taquillas | features/admin/CountdownsPanel, features/countdowns/CountdownDock | Limpieza de taquillas | Locker clean-up | Neteja de taquilles | Armairuen garbiketa | Vidage des casiers |
 | `countdown.lockers.body` | Aviso de limpieza de taquillas: qué pasa y qué hacer | features/admin/CountdownsPanel, features/countdowns/CountdownDock | Ese día se abren todas las taquillas y se tira lo que haya dentro. Si tienes algo, sácalo antes: aquí no hay rollback. | That day every locker gets opened and whatever is inside goes in the bin. If you have stuff in yours, take it out before: there's no rollback. | Aquell dia s'obren totes les taquilles i es llença el que hi hagi a dins. Si hi tens alguna cosa, treu-la abans: aquí no hi ha rollback. | Egun horretan armairu guztiak irekiko dira eta barruan dagoena botako da. Zerbait baduzu, atera aurretik: hemen ez dago rollback-ik. | Ce jour-là, tous les casiers sont ouverts et leur contenu part à la poubelle. Si tu as des affaires dans le tien, récupère-les avant : ici, pas de rollback. |
 | `countdown.next.none` | Cuenta atrás «tu próximo compromiso» cuando no hay ninguno: su título | features/countdowns/CountdownDock | Tu próximo compromiso | Your next commitment | El teu proper compromís | Zure hurrengo konpromisoa | Ton prochain rendez-vous |

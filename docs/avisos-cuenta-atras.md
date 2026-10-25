@@ -10,8 +10,10 @@ la del Pomodoro.
 ## La ventanita
 
 `features/countdowns/CountdownDock.tsx`, montada en toda la web (`Clinic.tsx`).
-Flota abajo a la izquierda (el Pomodoro va a la derecha) y solo sale si hay
-algo que contar.
+Va en la pila de ventanitas de la esquina, abajo a la izquierda, con el
+Pomodoro y Code Clicker, sin taparlos (`shared/dock`, ver «Ventanitas de la
+esquina» en [interfaz.md](interfaz.md)). Solo sale, y solo ocupa su hueco, si
+hay algo que contar.
 
 - Cada cuenta atrás lleva su etiqueta (Aviso, Evento, Próximo, Tuya), el título,
   el texto si lo tiene, lo que falta (`4 d 20:54:12`) y la fecha. Menos de un
@@ -19,10 +21,10 @@ algo que contar.
   30 minutos; después deja de salir.
 - **Cerrar** un aviso de quien administra lo guarda la API: no vuelve a salir en
   ningún navegador. **Quitar** algo propio lo borra.
-- Se **arrastra** por la cabecera y se vuelve a **anclar** con la chincheta; se
-  **pliega** en una píldora con lo más cercano. Eso solo lo recuerda el
-  navegador (`sanatorio_countdowns_pos`, `sanatorio_countdowns_min`). En el móvil
-  empieza plegada, y si hay Pomodoro sube para no taparlo.
+- Se **arrastra** por el asa o la cabecera: dentro de la pila cambia su orden;
+  lejos, flota, y la chincheta la devuelve a su hueco. Se **pliega** en una
+  píldora con lo más cercano (en el móvil, solo lo que falta, y empieza
+  plegada). Eso solo lo recuerda el navegador (`sanatorio_dock`).
 - «+» abre el formulario: **Mi próximo compromiso** o **algo tuyo** (título,
   día y hora).
 

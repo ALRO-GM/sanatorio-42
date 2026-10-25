@@ -1306,15 +1306,12 @@ tr.dead-click td {
 }
 
 /* ── Pomodoro (`features/focus/`) ──────────────────────────────────────── */
+/* Dónde va lo decide la pila de la esquina (`shared/dock`, `styles/dock.css`). */
 .focus-timer {
-  position: fixed;
-  right: 1rem;
-  bottom: 1rem;
-  z-index: 40;
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  padding: 0.6rem 0.9rem 0.6rem 0.6rem;
+  padding: 0.6rem 0.6rem 0.6rem 0.3rem;
   border: 2px solid var(--accent);
   border-radius: 999px;
   background: var(--surface);
@@ -1325,9 +1322,20 @@ tr.dead-click td {
 }
 .focus-timer.resting {
   border-color: var(--ok);
-  padding-left: 0.9rem;
 }
-.focus-timer svg {
+/* Plegado: el anillo y el tiempo, nada más. */
+.focus-timer.folded {
+  gap: 0.25rem;
+  padding: 0.35rem 0.3rem 0.35rem 0.2rem;
+}
+.focus-timer.folded .focus-dial {
+  width: 40px;
+  height: 40px;
+}
+.focus-timer.folded .focus-text strong {
+  font-size: 1.15rem;
+}
+.focus-timer .focus-dial {
   width: 56px;
   height: 56px;
   transform: rotate(-90deg);
@@ -1378,8 +1386,8 @@ tr.dead-click td {
   background: color-mix(in srgb, var(--warn) 18%, var(--surface));
   color: var(--text);
 }
-/* Concentrado: fuera lo de los juegos (la ventanita, las noticias y los logros). */
-:root[data-focus='on'] .cc-mini,
+/* Concentrado: fuera lo de los juegos (las noticias y los logros; la ventanita
+   no se pinta, para no ocupar su hueco en la esquina). */
 :root[data-focus='on'] .cc-news,
 :root[data-focus='on'] .cc-egg-toast,
 :root[data-focus='on'] .cc-toast {
@@ -1393,7 +1401,7 @@ tr.dead-click td {
 /* Pantalla completa (#80 del buzón): todo lo tapa, y el letrero se lee de lejos. */
 .focus-timer {
   flex-wrap: wrap;
-  max-width: calc(100vw - 2rem);
+  max-width: calc(100vw - 1rem);
 }
 dialog.focus-screen {
   width: 100vw;
@@ -1481,11 +1489,8 @@ dialog.focus-screen::backdrop {
   border-left: 3px solid var(--accent);
   background: var(--surface-2);
 }
+/* Va en el hueco del Pomodoro en la pila, encima de la píldora. */
 .focus-cheer {
-  position: fixed;
-  right: 1rem;
-  bottom: 6.5rem;
-  z-index: 41;
   max-width: min(22rem, calc(100vw - 2rem));
   margin: 0;
   padding: 0.6rem 0.9rem;
@@ -1494,9 +1499,6 @@ dialog.focus-screen::backdrop {
   background: var(--surface);
   font-weight: 600;
   animation: focus-in 0.35s cubic-bezier(0.3, 1.5, 0.5, 1);
-}
-.focus-screen .focus-cheer {
-  position: static;
 }
 dialog.layout-dialog.focus-dialog.wide {
   width: min(820px, calc(100vw - 1.5rem));

@@ -2,6 +2,7 @@ import { act, render } from '@testing-library/react'
 
 import { App } from '../../src/app/App'
 import { api } from '../../src/shared/api'
+import { resetDock } from '../../src/shared/dock/store'
 import { I18nProvider } from '../../src/shared/i18n'
 
 /** Deja pasar el tiempo para que la API de mentira conteste y se pinte. */
@@ -31,6 +32,8 @@ export async function openApp(
   if (detail !== undefined) localStorage.setItem('sanatorio_detail', detail)
   localStorage.setItem('sanatorio_welcome_seen', '1')
   localStorage.setItem('sanatorio_lang', 'es')
+  // La pila de ventanitas de la esquina olvida el orden y lo plegado del test anterior.
+  resetDock()
   // Alguien que ya aceptó las condiciones: su ventana no tapa lo que se prueba.
   const legal = await api.getLegal()
 

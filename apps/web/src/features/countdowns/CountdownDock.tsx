@@ -1,5 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
-import type { PointerEvent as ReactPointerEvent } from 'react'
+import { useEffect, useState } from 'react'
 
 import type { Countdown } from '@sanatorio/contracts'
 
@@ -8,9 +7,10 @@ import {
   loadCountdowns,
   unpinCountdown,
   useCountdowns,
+  useCountdownsPageOpen,
 } from '../../shared/countdowns'
+import { DockItem } from '../../shared/dock/DockItem'
 import { eventTitle } from '../../shared/eventTitle'
-import { focusing, useFocus } from '../../shared/focus'
 import { useAction } from '../../shared/hooks/useAsync'
 import { useNow } from '../../shared/hooks/useNow'
 import { useI18n } from '../../shared/i18n'
@@ -23,191 +23,99 @@ import { CountdownPicker } from './CountdownPicker'
 
 /** Lo que queda por debajo de esto sale resaltado: es para hoy. */
 const URGENT_MS = 24 * 60 * 60_000
-/** Dónde se deja la ventanita al arrastrarla, y si está plegada (solo en este navegador). */
-const POS_KEY = 'sanatorio_countdowns_pos'
-const MIN_KEY = 'sanatorio_countdowns_min'
-
-type Pos = { x: number; y: number }
-
-/** Lee de `localStorage` sin romper si no se puede (modo privado, sin permiso). */
-function stored<T>(key: string, fallback: T): T {
-  try {
-    const raw = localStorage.getItem(key)
-
-    return raw === null ? fallback : (JSON.parse(raw) as T)
-  } catch {
-    return fallback
-  }
-}
-
-function store(key: string, value: unknown): void {
-  try {
-    if (value === null) localStorage.removeItem(key)
-    else localStorage.setItem(key, JSON.stringify(value))
-  } catch {
-    // Sin almacenamiento, se olvida al recargar: no pasa nada.
-  }
-}
-
-/** `true` en una pantalla estrecha (la del móvil). */
-const narrow = (): boolean => window.matchMedia('(max-width: 640px)').matches
-
-/** Una posición que cabe en la pantalla, con un margen. */
-const clamp = (pos: Pos, box: DOMRect): Pos => ({
-  x: Math.min(Math.max(8, pos.x), Math.max(8, window.innerWidth - box.width - 8)),
-  y: Math.min(Math.max(8, pos.y), Math.max(8, window.innerHeight - box.height - 8)),
-})
 
 /**
- * La ventanita de avisos con cuenta atrás (`docs/avisos-cuenta-atras.md`),
- * flotando como el Pomodoro pero en la otra esquina: los avisos de quien
- * administra (la limpieza de taquillas) y lo que cada cual se ha fijado.
+ * La ventanita de avisos con cuenta atrás (`docs/avisos-cuenta-atras.md`):
+ * los avisos de quien administra (la limpieza de taquillas) y lo que cada
+ * cual se ha fijado.
  *
- * Se arrastra por su cabecera y se vuelve a anclar con un botón; se pliega en
- * una píldora con lo más cercano. Cerrar un aviso lo guarda la API; plegarla
- * o moverla, solo este navegador.
+ * Va en la pila de la esquina (`shared/dock`), con el Pomodoro y Code
+ * Clicker: se arrastra por su cabecera, se reordena, se saca a flotar y se
+ * pliega en una píldora con lo más cercano. Cerrar un aviso lo guarda la API;
+ * lo demás, solo este navegador.
  *
  * @param stamp La huella de los avisos que llega con el pulso: si cambia, se piden otra vez.
  */
 export function CountdownDock({ stamp }: { stamp: number | null }) {
   const { t } = useI18n()
   const list = useCountdowns()
+  // En la vista de cuentas atrás del calendario ya está todo en grande.
+  const onPage = useCountdownsPageOpen()
   const [adding, setAdding] = useState(false)
-  // En el móvil empieza plegada (una píldora con lo más cercano): desplegada tapa media pantalla.
-  const [folded, setFolded] = useState(() => stored(MIN_KEY, narrow()))
-  const [pos, setPos] = useState<Pos | null>(() => stored<Pos | null>(POS_KEY, null))
-  const box = useRef<HTMLElement>(null)
-  const drag = useRef<{ dx: number; dy: number } | null>(null)
-  const pomodoro = focusing(useFocus())
   const shown = list ?? []
-  const now = useNow(1000, { active: shown.length > 0 })
+  const now = useNow(1000, { active: shown.length > 0 && !onPage })
 
   useEffect(() => {
     void loadCountdowns()
   }, [stamp])
 
-  if (shown.length === 0 && !adding) return null
-
-  const fold = (next: boolean): void => {
-    setFolded(next)
-    store(MIN_KEY, next)
-  }
-
-  const onPointerDown = (event: ReactPointerEvent<HTMLElement>): void => {
-    // Los botones de la cabecera se pulsan, no arrastran.
-    if ((event.target as HTMLElement).closest('button') !== null || box.current === null) return
-
-    const rect = box.current.getBoundingClientRect()
-
-    drag.current = { dx: event.clientX - rect.left, dy: event.clientY - rect.top }
-    event.currentTarget.setPointerCapture(event.pointerId)
-  }
-
-  const onPointerMove = (event: ReactPointerEvent<HTMLElement>): void => {
-    if (drag.current === null || box.current === null) return
-
-    setPos(
-      clamp(
-        { x: event.clientX - drag.current.dx, y: event.clientY - drag.current.dy },
-        box.current.getBoundingClientRect(),
-      ),
-    )
-  }
-
-  const onPointerUp = (): void => {
-    if (drag.current === null) return
-    drag.current = null
-    store(POS_KEY, pos)
-  }
+  // Sin nada que contar (o con la vista grande abierta) no ocupa sitio en la pila.
+  if ((shown.length === 0 && !adding) || onPage) return null
 
   const nearest = shown.find((entry) => entry.at !== null && Date.parse(entry.at) > now)
-  const style =
-    pos === null ? undefined : { left: pos.x, top: pos.y, right: 'auto', bottom: 'auto' }
-  const classes = ['countdown-dock', folded ? 'folded' : '', pos === null ? 'docked' : 'moved']
-
-  if (pomodoro) classes.push('beside-focus')
+  const title = t('countdown.title')
 
   return (
-    <aside ref={box} className={classes.join(' ')} style={style} aria-label={t('countdown.title')}>
-      <header
-        className="countdown-head"
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
-        onPointerCancel={onPointerUp}
-      >
-        <Icon name="reloj" />
-        {folded && nearest !== undefined ? (
-          <span className="countdown-peek">
-            <span className="countdown-peek-title">{titleOf(nearest, t)}</span>
-            <CountdownClock at={Date.parse(nearest.at ?? '')} now={now} />
-          </span>
-        ) : (
-          <strong className="countdown-name">
-            {t('countdown.title')}
-            {shown.length > 1 && <span className="badge subtle">{shown.length}</span>}
-          </strong>
-        )}
-        {!folded && (
-          <button
-            type="button"
-            className="icon-btn"
-            aria-label={t('countdown.add')}
-            aria-pressed={adding}
-            onClick={() => {
-              setAdding((open) => !open)
-            }}
-          >
-            <Icon name="mas" />
-          </button>
-        )}
-        {pos !== null && (
-          <button
-            type="button"
-            className="icon-btn"
-            aria-label={t('countdown.dock')}
-            title={t('countdown.dock')}
-            onClick={() => {
-              setPos(null)
-              store(POS_KEY, null)
-            }}
-          >
-            <Icon name="chincheta" />
-          </button>
-        )}
-        <button
-          type="button"
-          className="icon-btn"
-          aria-label={t(folded ? 'countdown.unfold' : 'countdown.fold')}
-          aria-expanded={!folded}
-          onClick={() => {
-            fold(!folded)
-          }}
-        >
-          <Icon name="abajo" className={folded ? 'flip' : ''} />
-        </button>
-      </header>
+    <DockItem
+      id="countdowns"
+      title={title}
+      size={{ width: 296, height: 260 }}
+      foldedSize={{ width: 230, height: 44 }}
+    >
+      {({ folded, grip, controls }) => (
+        <aside className={`countdown-dock ${folded ? 'folded' : ''}`} aria-label={title}>
+          <header className="countdown-head" data-dock-handle="">
+            {grip}
+            <Icon name="reloj" />
+            {folded && nearest !== undefined ? (
+              <span className="countdown-peek">
+                <span className="countdown-peek-title">{titleOf(nearest, t)}</span>
+                <CountdownClock at={Date.parse(nearest.at ?? '')} now={now} />
+              </span>
+            ) : (
+              <strong className="countdown-name">
+                {title}
+                {shown.length > 1 && <span className="badge subtle">{shown.length}</span>}
+              </strong>
+            )}
+            {!folded && (
+              <button
+                type="button"
+                className="icon-btn"
+                aria-label={t('countdown.add')}
+                aria-pressed={adding}
+                onClick={() => {
+                  setAdding((open) => !open)
+                }}
+              >
+                <Icon name="mas" />
+              </button>
+            )}
+            {controls}
+          </header>
 
-      {!folded && (
-        <div className="countdown-body">
-          {adding && (
-            <CountdownPicker
-              list={shown}
-              onDone={() => {
-                setAdding(false)
-              }}
-            />
+          {!folded && (
+            <div className="countdown-body">
+              {adding && (
+                <CountdownPicker
+                  list={shown}
+                  onDone={() => {
+                    setAdding(false)
+                  }}
+                />
+              )}
+              {shown.length > 0 && (
+                <ul className="countdown-list">
+                  {shown.map((entry) => (
+                    <CountdownItem key={`${entry.kind}-${entry.id}`} entry={entry} now={now} />
+                  ))}
+                </ul>
+              )}
+            </div>
           )}
-          {shown.length > 0 && (
-            <ul className="countdown-list">
-              {shown.map((entry) => (
-                <CountdownItem key={`${entry.kind}-${entry.id}`} entry={entry} now={now} />
-              ))}
-            </ul>
-          )}
-        </div>
+        </aside>
       )}
-    </aside>
+    </DockItem>
   )
 }
 

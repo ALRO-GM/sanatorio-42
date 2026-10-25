@@ -99,3 +99,29 @@ export function useCountdowns(): Countdown[] | null {
     () => current,
   )
 }
+
+/** Si la vista de cuentas atrás del calendario está abierta (ahí la ventanita sobra). */
+let pageOpen = false
+
+/**
+ * La vista de cuentas atrás del calendario dice que se abre o se cierra.
+ * Mientras está abierta, la ventanita flotante no se pinta ni ocupa su hueco
+ * en la pila de la esquina: sería lo mismo dos veces.
+ */
+export function markCountdownsPage(open: boolean): void {
+  pageOpen = open
+  if (open) document.documentElement.dataset.countdownsPage = ''
+  else delete document.documentElement.dataset.countdownsPage
+  for (const listener of listeners) listener()
+}
+
+export function useCountdownsPageOpen(): boolean {
+  return useSyncExternalStore(
+    (listener) => {
+      listeners.add(listener)
+
+      return () => listeners.delete(listener)
+    },
+    () => pageOpen,
+  )
+}

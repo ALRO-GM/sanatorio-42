@@ -4,6 +4,7 @@ import type { FocusEvent, PointerEvent } from 'react'
 import type { ClickerBoard } from '@sanatorio/contracts'
 
 import { api, ApiError } from '../../shared/api'
+import { focusing, useFocus } from '../../shared/focus'
 import { useI18n } from '../../shared/i18n'
 import { useStill } from '../../shared/still'
 import { Avatar } from '../../shared/ui/Avatar'
@@ -159,6 +160,8 @@ export function CodeClicker({
   // Con el pace en riesgo, media hora al día (no cuenta en segundo plano ni viendo otra).
   const limit = usePlayLimit(!background && spectate === undefined)
   const still = useStill()
+  // Concentrado, la ventanita no sale: es un juego (y así no ocupa sitio en la esquina).
+  const concentrating = focusing(useFocus())
   const game = useRef<Game | null>(null)
   const names = useRef<string[]>([])
   const [, setFrame] = useState(0)
@@ -603,11 +606,11 @@ export function CodeClicker({
 
   // En otra sección el juego sigue, pero de él solo queda la ventanita.
   if (background) {
-    return mini ? (
+    return mini && !concentrating ? (
       <Mini
         lines={short(Math.floor(current.code), lang, 2)}
         perSecond={ui('perSecond', { n: short(cpsOf(current, Date.now()), lang, 1) })}
-        labels={{ open: ui('miniOpen'), close: ui('miniClose') }}
+        labels={{ title: ui('title'), open: ui('miniOpen'), close: ui('miniClose') }}
         onOpen={() => onOpen?.()}
         onClose={() => {
           setMini(false)

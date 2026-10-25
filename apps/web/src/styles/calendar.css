@@ -579,6 +579,3 @@ button.countdowns-event-open {
     grid-template-columns: minmax(0, 1fr);
   }
 }
-:root[data-countdowns-page] .countdown-dock {
-  display: none;
-}
