@@ -12,7 +12,7 @@ va lo que no está en el código.
 [tareas-tras-compactar.md](tareas-tras-compactar.md)**: es la lista de lo que hay
 que hacer, en orden. Este documento es el porqué; aquel, el qué.
 
-## Estado a 2026-10-25 (desplegado, `7d17aa9`, esquema 71)
+## Estado a 2026-10-25 (desplegado, esquema 72)
 
 - Piscineros: entrada, permisos, mundos separados y **ver como piscinero**
   desde el panel (`docs/piscineros.md`).
@@ -27,8 +27,8 @@ que hacer, en orden. Este documento es el porqué; aquel, el qué.
   límites y estrellas recalculadas en la API (`docs/curso-git.md`).
 - Perfil: el nivel explica cómo se gana XP, títulos en desplegable y un
   banner por título.
-- Pendiente de decidir con Alberto: si la red de asientos queda también para
-  estudiantes (hoy cada mundo ve la suya); el banner tapa un poco la foto.
+- Personas ocultas a un grupo desde el panel (`docs/personas-ocultas.md`, migración 72).
+- Decidido: la red de asientos también para estudiantes (cada mundo la suya).
 
 ## Peer4U (2026-10-25)
 
