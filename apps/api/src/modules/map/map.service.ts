@@ -103,7 +103,10 @@ export function createMapService(options: MapServiceOptions) {
       const mine = (await options.broken?.countBy(actor.login, brokenSince())) ?? 0
 
       if (mine >= MAX_BROKEN_PER_PERSON) {
-        throw domainError('conflict', `Como mucho ${MAX_BROKEN_PER_PERSON} puestos rotos a la vez`)
+        throw domainError(
+          'conflict',
+          `Ya tienes ${MAX_BROKEN_PER_PERSON} puestos marcados como rotos esta semana: es el máximo por persona (no hay límite por clúster)`,
+        )
       }
 
       await options.broken?.report(actor.campusId, name, actor.login, new Date(now()).toISOString())
