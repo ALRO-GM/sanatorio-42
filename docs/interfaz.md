@@ -228,11 +228,10 @@ Antes de escribir una a mano, se usa la que ya existe en `apps/web/src/shared/`:
   `ui/StepPicker`. En escritorio, un `<select>` nativo y compacto; en el móvil
   (640 px o menos), una rueda que se desliza arriba y abajo (`role="spinbutton"`,
   con flechas, `Home` y `End`, y sin animación con movimiento reducido). Es el
-  mismo en toda la web: Avance, Red, las cifras del Pomodoro y las pestañas del
-  panel con periodo. Lo que solo tiene dos opciones («este mes» / «siempre»)
+  mismo en toda la web: Avance, Red, Red → Asientos (los días), las cifras del
+  Pomodoro y las pestañas del panel con periodo. Lo que solo tiene dos opciones («este mes» / «siempre»)
   sigue en pastillas; el capital de Code Clicker también, porque sus tramos
-  conviven con fechas a mano y a veces no hay ninguno elegido. Falta Red →
-  Asientos (los días), que se estaba tocando a la vez.
+  conviven con fechas a mano y a veces no hay ninguno elegido.
 - **Gráficas con opciones**: la gráfica a la izquierda y sus opciones en un
   panel a la derecha (como Red y Avance: `.net-layout`/`.net-rail`,
   `.progress-layout`/`.progress-rail`). La gráfica se queda quieta a la vista

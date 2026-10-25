@@ -15,6 +15,7 @@ import { useI18n } from '../../shared/i18n'
 import { useFormat } from '../../shared/i18n/useFormat'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { PillGroup } from '../../shared/ui/PillGroup'
+import { StepPicker } from '../../shared/ui/StepPicker'
 import { Avatar } from '../../shared/ui/Avatar'
 import { PersonLink } from '../../shared/ui/PersonLink'
 import { colorOf, scaleColor } from './colors'
@@ -162,8 +163,8 @@ export function SeatsPage({ switcher }: { switcher: ReactNode }) {
           </div>
           <div className="net-filters">
             <div className="net-filter">
-              <span className="eyebrow">{t('common.period')}</span>
-              <PillGroup
+              {/* El selector de periodo de toda la web (`shared/ui/StepPicker`). */}
+              <StepPicker
                 options={DAYS}
                 value={days}
                 onChange={(next) => {
