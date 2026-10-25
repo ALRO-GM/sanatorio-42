@@ -24,11 +24,11 @@ Google Sheets, Excel) o con un editor de texto:
 - **en, ca, eu, fr**: las traducciones. Si una celda se deja vacía, ese idioma
   enseña el español; el francés, el inglés (y si tampoco hay inglés, el
   español). El inglés es obligatorio salvo en el panel de gestión.
-- **fr**: el francés, para que la web sirva en la sede de 42 en Francia. Se
-  está traduciendo: mientras `FR_REQUIRED` (en `apps/web/tools/textos-cli.ts`)
-  sea `false`, una celda `fr` vacía se acepta. Cuando estén todas, se pone a
-  `true` y el francés pasa a ser obligatorio como el inglés (salvo en el panel
-  de gestión). Se tutea, como en el resto de 42 en Francia.
+- **fr**: el francés, para que la web sirva en la sede de 42 en Francia. Es
+  obligatorio como el inglés (salvo en el panel de gestión): `FR_REQUIRED`
+  está a `true` en `apps/web/tools/textos-cli.ts`. Se tutea, como en el resto
+  de 42 en Francia. Los términos y la tipografía, en el
+  [glosario de francés](glosario-frances.md).
 - `{login}`, `{n}`…: huecos que rellena la web. Cada traducción tiene que llevar
   los mismos huecos que el español (se comprueba).
 - Las listas separadas por comas (`cal.months`) llevan los mismos elementos en
@@ -77,8 +77,7 @@ cientos de frases del juego solo se descargan al jugar.
 **Cada cambio en un texto de la web pasa por las tablas**, sin excepción:
 
 1. Un texto nuevo es una fila nueva, con su contexto y, como mínimo, el español
-   y el inglés. Si se sabe, también catalán, euskera y francés (con
-   `FR_REQUIRED = true`, el francés es obligatorio).
+   el inglés y el francés. Si se sabe, también catalán y euskera.
 2. Cambiar un texto es cambiar su celda. Si cambia el sentido (no solo la
    forma), se cambian también las traducciones o se vacían para que salga el
    español hasta que alguien las haga.
@@ -91,9 +90,12 @@ cientos de frases del juego solo se descargan al jugar.
 - el código pide una clave que no está en ninguna tabla;
 - hay claves en las tablas que el código no usa;
 - una clave se repite, no tiene contexto o no tiene español;
-- falta el inglés fuera del panel de gestión (o el francés, con
-  `FR_REQUIRED = true`);
+- falta el inglés o el francés fuera del panel de gestión;
 - una traducción no conserva los huecos del español;
+- el francés no sigue su tipografía: espacio sin corte (U+00A0) antes de `:`
+  y `%` y dentro de « », fino sin corte (U+202F) antes de `;` `?` `!` y en los
+  miles, `…`, sin ¿ ¡ ñ ni comillas inglesas (`tools/textos-fr.ts`; deja en
+  paz el código, las URL, los huecos y las horas como `10:30`);
 - `docs/textos/` no está al día con las tablas.
 
 ## Cómo se escriben
@@ -127,7 +129,8 @@ estilos (`src/themes/*/theme.ts`) llevan nombre y descripción por idioma.
 Un idioma puede tener en `LANGS` un `fallback`: donde le falta un texto, se
 enseña el de ese idioma antes que el español. El francés lo tiene puesto al
 inglés (`fallback: 'en'`): al elegir «Français» se descargan los dos y cada
-clave sale en francés, si no en inglés y si no en español. Un texto largo
+clave sale en francés, si no en inglés y si no en español. Un idioma que aún
+se traduce lleva `unlisted: true` en `LANGS` y no sale en el selector. Un texto largo
 (`tree`, como el legal) que sale del inglés dice `translated: false`, y la web
 avisa de que no está en ese idioma. Lo mismo hace Code Clicker
 (`features/clicker/texts.ts`). Los cursos de git y de shell ya tienen su
@@ -136,5 +139,6 @@ francés (`levels/fr/` en `packages/gitsim`; `fr` en cada unidad y bloque de
 y, si a algo le faltara, sacan el inglés. En la API, la
 cabecera `x-lang: fr` se lee como inglés para las preguntas de Not-games.
 
-Cuando el francés esté completo: `FR_REQUIRED = true` en
-`tools/textos-cli.ts`, y `npm run textos` lo exigirá en cada clave visible.
+El francés está completo y revisado (octubre de 2026): `FR_REQUIRED = true`
+en `tools/textos-cli.ts`, así que `npm run textos` lo exige en cada clave
+visible, y ya se ofrece en el selector de idioma.

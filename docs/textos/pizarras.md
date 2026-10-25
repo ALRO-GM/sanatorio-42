@@ -16,7 +16,7 @@ Generado desde `apps/web/src/shared/i18n/textos/pizarras.csv` con
 | `cal.prev` | Botón: mes anterior | features/boards/BoardsCalendar | Mes anterior | Previous month | Mes anterior | Aurreko hilabetea | Mois précédent |
 | `cal.next` | Botón: mes siguiente | features/boards/BoardsCalendar | Mes siguiente | Next month | Mes següent | Hurrengo hilabetea | Mois suivant |
 | `cal.nextBoard` | Etiqueta de la próxima pizarra | features/boards/BoardCard | Próxima pizarra | Next whiteboard | Pròxima pissarra | Hurrengo arbela | Prochain tableau blanc |
-| `cal.seats` | Plazas ocupadas y totales | features/boards/BoardCard | {taken} de {capacity} plazas | {taken} of {capacity} seats | {taken} de {capacity} places | {capacity} plazatik {taken} | {taken} places prises sur {capacity} |
+| `cal.seats` | Plazas ocupadas y totales | features/boards/BoardCard | {taken} de {capacity} plazas | {taken} of {capacity} seats | {taken} de {capacity} places | {capacity} plazatik {taken} | Places : {taken} sur {capacity} |
 | `cal.join` | Botón para apuntarse | features/boards/BoardCard, features/boards/BoardsTour | Apuntarme | Join | Apunta-m'hi | Eman izena | M'inscrire |
 | `cal.upcoming` | Lista de las próximas pizarras con plaza (sin día elegido) | features/boards/BoardsCalendar | Próximas pizarras con plaza | Upcoming whiteboards with seats | Properes pissarres amb lloc | Leku libreko hurrengo arbelak | Prochains tableaux blancs avec des places |
 | `cal.pastTitle` | Pizarras: encabezado de las ya pasadas del mes que se ve, debajo de las próximas | features/boards/BoardsCalendar | Ya pasadas | Already held | Ja passades | Dagoeneko eginak | Déjà passés |

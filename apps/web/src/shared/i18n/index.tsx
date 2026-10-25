@@ -24,12 +24,13 @@ type LangEntry = {
   /**
    * El idioma que se enseña donde a este le falta el texto, antes que el
    * español. El francés cae al inglés: en la sede de 42 en Francia se lee
-   * mejor que el castellano mientras se traduce.
+   * mejor que el castellano si algún día falta una celda.
    */
   fallback?: Lang
   /**
-   * Aún no se ofrece en el selector (se traduce y se revisa). Quien ya lo tenga
-   * elegido lo sigue viendo. Se quita cuando `FR_REQUIRED` pase a `true`.
+   * Aún no se ofrece en el selector (un idioma que se está traduciendo). Quien
+   * ya lo tenga elegido lo sigue viendo. Se quita cuando sus textos son
+   * obligatorios en `tools/textos-cli.ts`, como pasó con el francés.
    */
   unlisted?: boolean
 }
@@ -43,7 +44,6 @@ export const LANGS: Record<Lang, LangEntry> = {
     name: 'Français',
     load: () => import('virtual:textos/fr'),
     fallback: 'en',
-    unlisted: true,
   },
 }
 
