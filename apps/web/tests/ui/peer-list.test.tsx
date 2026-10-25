@@ -54,7 +54,9 @@ describe('Sala de espera: quién está de guardia', () => {
 
     expect(await screen.findByText(text('peers.onDuty.one', 1))).toBeTruthy()
 
-    const list = (): HTMLElement => must(screen.getAllByRole('list')[0], 'la lista')
+    // La de la gente, no las del mapa del clúster (que llega a su ritmo y también tiene listas).
+    const list = (): HTMLElement =>
+      must(document.querySelector<HTMLElement>('ul.peer-list'), 'la lista de gente')
     const at = (login: string): number => list().textContent.indexOf(login)
 
     // De guardia primero; después la especialista, y al final quien no está.

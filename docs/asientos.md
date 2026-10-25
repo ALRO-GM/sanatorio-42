@@ -81,9 +81,10 @@ Asientos, cuánto se ha usado cada ordenador del clúster en el mismo periodo
   lleva nombres: solo horas y número de personas por puesto.
 - **Todos los clústeres a la vez, en miniatura** (rediseño pedido por Alberto
   el 2026-10-25). Cada clúster es una cuadrícula plana, sin imitar el plano:
-  nada de girar, desplazar ni canto de pantalla, y no sigue las opciones de la
-  pestaña Clústeres. **La fila 1 va arriba** y el puesto 1 a la izquierda, como
-  en una tabla; los números de puesto van encima y los de fila a la izquierda,
+  nada de desplazar ni canto de pantalla. **Filas y puestos van en el orden
+  del plano de cada cual** (pestaña Clústeres): de fábrica, la fila 1 abajo y
+  el puesto 1 a la izquierda; con «Invertir en vertical» u «horizontal», al
+  revés (pedido por Alberto el 2026-10-26); los números de puesto van encima y los de fila a la izquierda,
   pequeños. Las miniaturas van una al lado de otra y bajan de línea si no caben;
   en el móvil, la que no quepa a lo ancho se desliza sola. El plano se completa
   como en el mapa (los puestos conocidos de `replica.knownSeats` y los del

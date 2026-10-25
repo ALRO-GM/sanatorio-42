@@ -71,16 +71,16 @@ afterEach(() => {
 })
 
 describe('mapa de calor de los puestos', () => {
-  it('todos los clústeres a la vez, en cuadrícula: la fila 1 arriba y el puesto 1 a la izquierda', () => {
+  it('todos los clústeres a la vez, en cuadrícula: de fábrica, como el plano (fila 1 abajo)', () => {
     const cells = show()
 
     expect(hosts(cells)).toEqual([
-      'c1r1s1',
-      'c1r1s2',
-      'c1r1s3',
       'c1r2s1',
       'c1r2s2',
       'c1r2s3',
+      'c1r1s1',
+      'c1r1s2',
+      'c1r1s3',
       'c2r1s1',
       'c2r1s2',
     ])
@@ -96,8 +96,8 @@ describe('mapa de calor de los puestos', () => {
       '1',
       '2',
       '3',
-      '1',
       '2',
+      '1',
     ])
     // Nada del plano del mapa: ni puestos con relieve ni canto de pantalla.
     expect(document.querySelector('.seat, [class*="screen-"], .staggered')).toBeNull()
@@ -159,6 +159,27 @@ describe('mapa de calor de los puestos', () => {
     expect(screen.queryByRole('tooltip', { hidden: true })).toBeNull()
   })
 
+  it('sigue el orden de filas y puestos del plano de cada cual, sin lo demás', () => {
+    localStorage.setItem(
+      'sanatorio_map_look',
+      JSON.stringify({ flipRows: true, flipSeats: true, flipFacing: true, flat: false }),
+    )
+
+    const cells = show()
+
+    // Filas al revés (la 1 arriba) y puestos al revés (el 1 a la derecha).
+    expect(hosts(cells).slice(0, 6)).toEqual([
+      'c1r1s3',
+      'c1r1s2',
+      'c1r1s1',
+      'c1r2s3',
+      'c1r2s2',
+      'c1r2s1',
+    ])
+    // Ni escalonado ni canto de pantalla, aunque el plano los tenga.
+    expect(document.querySelector('.seat, [class*="screen-"], .staggered')).toBeNull()
+  })
+
   it('un clúster es una parada del tabulador y las flechas se mueven por él', () => {
     const cells = show()
     const at = (host: string) =>
@@ -174,11 +195,12 @@ describe('mapa de calor de los puestos', () => {
     at('c1r1s1').focus()
     fireEvent.keyDown(at('c1r1s1'), { key: 'ArrowRight' })
     expect(document.activeElement).toBe(at('c1r1s2'))
-    fireEvent.keyDown(at('c1r1s2'), { key: 'ArrowDown' })
+    // De fábrica la fila 1 va abajo: subir lleva a la fila 2.
+    fireEvent.keyDown(at('c1r1s2'), { key: 'ArrowUp' })
     expect(document.activeElement).toBe(at('c1r2s2'))
     expect(at('c1r2s2').tabIndex).toBe(0)
     // Por fuera del borde no pasa nada, y otra tecla tampoco.
-    fireEvent.keyDown(at('c1r2s2'), { key: 'ArrowDown' })
+    fireEvent.keyDown(at('c1r2s2'), { key: 'ArrowUp' })
     fireEvent.keyDown(at('c1r2s2'), { key: 'a' })
     expect(document.activeElement).toBe(at('c1r2s2'))
   })

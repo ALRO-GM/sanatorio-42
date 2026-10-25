@@ -9,6 +9,7 @@ import { useFormat } from '../../shared/i18n/useFormat'
 import { DataTable } from '../../shared/ui/DataTable'
 import type { Column } from '../../shared/ui/DataTable'
 import { clusterName } from '../../shared/seats'
+import { loadLook, order, rowsTopDown } from '../map/look'
 
 /** Paradas de la escala (`--heat-0` … `--heat-4` en `network.css`). */
 const STOPS = 5
@@ -40,8 +41,6 @@ function heatStyle(hours: number, { min, max }: Scale): CSSProperties {
     '--mix': `${String(Math.round((at - from) * 100))}%`,
   } as CSSProperties
 }
-
-const range = (count: number): number[] => Array.from({ length: count }, (_, index) => index + 1)
 
 /** «c2r3s4 · 37 h · 9 personas»: lo que dice la ficha y lee un lector de pantalla. */
 function cellText(
@@ -184,6 +183,12 @@ function HeatCluster({
   const { t } = useI18n()
   const { number } = useFormat()
   const [focus, setFocus] = useState<string | null>(null)
+  // Las filas y los puestos en el orden en que cada cual tiene el plano de los
+  // clústeres (fila 1 abajo o arriba, puesto 1 a la izquierda o a la derecha).
+  // Del resto del plano (hacia dónde miran, el escalonado) no se toma nada.
+  const look = useMemo(() => loadLook(), [])
+  const rows = rowsTopDown(cluster.rows, look)
+  const seats = order(cluster.seatsPerRow, look.flipSeats)
   const byPosition = new Map(cluster.cells.map((cell) => [`${cell.row}:${cell.seat}`, cell]))
   const used = cluster.cells.filter((cell) => cell.hours > 0).length
   const name = clusterName(cluster.id, t)
@@ -195,7 +200,10 @@ function HeatCluster({
 
     if (step === undefined) return
 
-    const next = byPosition.get(`${cell.row + step[0]}:${cell.seat + step[1]}`)
+    // Arriba y abajo, izquierda y derecha, tal como se ve en pantalla.
+    const row = rows[rows.indexOf(cell.row) + step[0]]
+    const seat = seats[seats.indexOf(cell.seat) + step[1]]
+    const next = byPosition.get(`${String(row)}:${String(seat)}`)
 
     event.preventDefault()
     if (next === undefined) return
@@ -218,17 +226,17 @@ function HeatCluster({
           aria-label={t('seats.heat.label', { cluster: name })}
         >
           <span aria-hidden="true" />
-          {range(cluster.seatsPerRow).map((seat) => (
+          {seats.map((seat) => (
             <span key={seat} className="heat-axis" aria-hidden="true">
               {seat}
             </span>
           ))}
-          {range(cluster.rows).map((row) => (
+          {rows.map((row) => (
             <Fragment key={row}>
               <span className="heat-axis heat-row" aria-hidden="true">
                 {row}
               </span>
-              {range(cluster.seatsPerRow).map((seat) => {
+              {seats.map((seat) => {
                 const cell = byPosition.get(`${row}:${seat}`)
 
                 if (cell === undefined) {
