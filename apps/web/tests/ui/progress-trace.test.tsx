@@ -78,6 +78,40 @@ describe('Avance: quien terminó y sus hitos', () => {
     expect(screen.getByText(text('stats.progress.finished'))).toBeTruthy()
   })
 
+  it('tu línea sube en escalón el día de Libft y cae justo en la raya del círculo 0', async () => {
+    await openApp('#/avance')
+    await ready()
+
+    const circle0 = must(
+      [...chartCard().querySelectorAll('.progress-grid')].find(
+        (grid) => grid.textContent === 'Círculo 0',
+      ),
+      'la raya del círculo 0',
+    )
+    const lineY = Number(circle0.querySelector('line')?.getAttribute('y1'))
+    const first = must(
+      chartCard().querySelector('[data-series="me"] .progress-milestone'),
+      'tu primer hito (Libft)',
+    )
+    const points = [
+      ...(chartCard()
+        .querySelector('[data-series="me"] .progress-line')
+        ?.getAttribute('d')
+        ?.matchAll(/[ML]([\d.]+),([\d.]+)/g) ?? []),
+    ].map(([, px, py]) => [Number(px), Number(py)] as const)
+    // El trazo va con un decimal; el hito, con todos.
+    const near = (a: number, b: number): boolean => Math.abs(a - b) < 0.06
+    const at = points.findIndex(
+      ([px, py]) => near(px, Number(first.getAttribute('cx'))) && near(py, lineY),
+    )
+
+    // El hito está en la raya, y el punto de antes es el mismo día, abajo: un escalón.
+    expect(Number(first.getAttribute('cy'))).toBeCloseTo(lineY, 5)
+    expect(at).toBeGreaterThan(0)
+    expect(points[at - 1]?.[0]).toBe(points[at]?.[0])
+    expect(points[at - 1]?.[1]).toBeGreaterThan(lineY)
+  })
+
   it('al pasar por un hito, la ficha dice qué se aprobó ese día', async () => {
     await openApp('#/avance')
     await ready()

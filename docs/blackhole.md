@@ -185,6 +185,100 @@ plan aprobado en la réplica: un traslado parecería terminar en días.
 - Clasificación (`GET /stats/ranking`): solo `active` y `finished` del campus.
 - Detalle en `docs/api.md` (Avance).
 
+## La medida por círculos: cada línea cae en las rayas (2026-10-26)
+
+Alberto vio que, midiendo por círculos, las líneas de la gente no coincidían
+con las rayas de los círculos del eje: terminar Libft (el primer salto) tiene
+que caer justo en «Círculo 0», y terminar todos los proyectos de un círculo,
+justo en su raya.
+
+**La regla** (`progress.rules.ts`): el eje tiene marcas fijas, Inicio = 0 y
+Círculo k = (k + 1) / 7 (`circleMarks`: 14,3, 28,6, 42,9, 57,1, 71,4, 85,7,
+100). Toda línea (la tuya, con quien te comparas, las sueltas, las de quien
+terminó con su propio juego y, por tanto, las medias) pesa cada círculo
+exactamente 1/7, y las casillas de un círculo se reparten ese 1/7 a partes
+iguales: las del plan para quien sigue o se fue, las suyas (`ownUnits`) para
+quien terminó. Completar los círculos 0…k deja la línea justo en la marca k.
+Los paces por círculos pasan por las mismas marcas.
+
+**Decisiones**:
+
+- **Un círculo sin casillas** en el juego de alguien (un plan viejo, un
+  traslado) se da por hecho con el siguiente que tenga: su 1/7 pasa a ese, y
+  completar ese círculo cae en su marca (pasa por la del que falta sin
+  pararse). Si no hay ninguno después, con el anterior. Antes, el peso era 1 /
+  (círculos presentes): con 6, el círculo 0 caía en el 16,7 % y no en el 14,3.
+- **Cada versión, en su círculo** (`moved`, `adopted`): en el plan de Python,
+  la versión de C de un proyecto cuenta en el círculo que tiene en C. Quien
+  empezó en C y pasó a Python hizo Born2beroot (la de C) en el círculo 1 y la
+  push_swap de C en el 2, al revés que el plan de Python (42next-push_swap en el
+  1, 42next-born2beroot en el 2). Lo que aún no ha hecho va donde iba en su
+  plan de antes si ya hizo alguna de esas versiones. En C no se hace al revés:
+  nadie de C ha hecho una versión `42next-` de esas.
+- **Libft, como tarde cuando se apuntó a lo siguiente** (`settled`): nadie se
+  apunta a ft_printf sin Libft. 42 reescribió en lote el `updated_at` de Libft
+  el 2023-08-08 (638 filas en Madrid, sin `created_at`), y la línea de esa
+  gente empezaba por ft_printf o get_next_line (un escalón de 4,8 %) y no por
+  Libft. Ahora Libft cuenta cuando se apuntó al primer proyecto de otro
+  círculo o, si no se sabe, un día antes de aprobarlo. Una fila de Libft que
+  sí dice cuándo se apuntó, y es después (lo repitió), se queda como está.
+- **Escalones en la web** (`stepped`, `progressTrace.ts`): las líneas de una
+  persona (la tuya, con quien te comparas y las sueltas) se dibujan con los
+  días exactos de sus hitos y en escalones: se quedan en su valor y suben de
+  golpe el día que aprobó. El escalón de completar un círculo cae en su raya
+  ese día, sin la rampa desde el punto de 15 días anterior. Las medias siguen
+  cada 15 días y en rampa.
+- Lo que no cambia: por horas, igual que antes; quien terminó acaba en el
+  100 % el día que terminó; las piscinas y lo que no es del plan no entran (las
+  filas solo son de proyectos del plan y de ft_transcendence y el examen 6).
+  `upTo` con «lo más corto» solo vale ya para las horas.
+
+**Medido en producción** (solo lectura; Madrid entero, 1 877 líneas de C y 321
+de Python; las fechas de rango son las de `user_tracks` de quien entra en la
+web, en C solo kickoffs desde 2024, que antes 42 puso los rangos a posteriori;
+«por debajo»: su línea, al día siguiente de validar el rango k, aún no llega a
+la marca k):
+
+| | Antes | Ahora |
+|---|---|---|
+| C: el primer salto no es Libft | 599 (32 %) | 6 |
+| C: el primer salto no cae en «Círculo 0» | 582 | 6 |
+| Python: el primer salto no cae en «Círculo 0» | 3 | 0 |
+| Python: por debajo al validar el rango 1 | 19 de 71 | 3 |
+| C: por debajo al validar el rango 0 / 1 / 2 | 6 / 11 / 13 de 68 | 3 / 9 / 12 |
+| Quien terminó, con su juego sin algún círculo (C) | 5, fuera de las marcas (3 con 6 círculos: el 0 en el 16,7 %) | en las marcas |
+| Quien terminó y acaba en el 100 % | 308 de 308 | 308 de 308 |
+
+Ejemplos: cdonaire, jvizcain y acaire-d (Python, kickoff 2025-09-29)
+validaron el rango 1 con la Born2beroot de C y sin push_swap; su línea se
+quedaba en el 24,8 % y no en la raya del 28,6. Ahora cae en ella. dabel-co y
+lvarela (C, terminaron) tenían Libft el día 856 y el 1 374 (la reescritura de
+2023): su línea empezaba en el 4,8 % y tenía un salto del 14,3 % años después.
+Ahora Libft va el día 26 y el 134, el primero. dmena-li (Python) tenía Libft
+el día 75, después de Born2beroot y ft_printf; ahora, el 41.
+
+**Lo que queda, y por qué**:
+
+- **El plan de Python aprendido pone RAG against the machine en el círculo
+  4**, y es del 5: de las 5 personas con el rango 4, 4 lo validaron sin RAG;
+  las 3 con el rango 5 lo tenían. Por eso cdonaire, cmelero- y smarin-s se
+  quedan 3,5 puntos por debajo de «Círculo 4» al validarlo. Se aprende de los
+  votos (cuántos rangos tenía quien se apuntó, y se apuntan estando en el 4).
+  Conviene fijar en la tabla de partida de `curriculum.ts` los círculos 4 a 6
+  de Python (`SEEDED_UP_TO.next = 6`): 4 = examen 4, NetPractice, Pac-Man; 5 =
+  examen 5, Inception, The Answer Protocol, Agent Smith y RAG; 6 = examen 6 y
+  ft_transcendence. No va en este cambio (es de la réplica).
+- En Python, 2 de 18 validaron el rango 3 sin Fly-in o sin Call Me Maybe (los
+  aprobaron después), 3 de 41 el 2 sin el módulo 10 y 1 de 3 el 5 sin Agent
+  Smith. Puede que 42 pida solo parte del círculo; con tan pocos casos, se deja.
+- `updated_at_42` es el último cambio de la fila, no el primer aprobado: quien
+  repite un proyecto (Born2beroot, so_long) o lo vio corregido otra vez lo
+  tiene más tarde, y su línea llega a la raya de ese círculo ese día, después
+  de validar el rango. Solo se corrige Libft, que siempre va primero; en otros
+  círculos los planes viejos tenían los proyectos en otro sitio (miniRT era
+  del 2) y no se puede deducir.
+- Las medias no caen en las rayas (son medias), y van cada 15 días.
+
 ## Horas del common core
 
 Cada cual se mide sobre su propio plan: de cada hueco cuentan las horas de la
@@ -262,7 +356,7 @@ y el círculo 5 acaba en el 85,7 %):
 - Quien terminó se mide contra **lo que hizo hasta terminar**: las casillas
   que tenía aprobadas el día que terminó (`finishedOn`: lo último que aprobó
   del último círculo del plan; sin nada de él, lo último aprobado). Por
-  círculos, cada círculo que tiene pesa lo mismo; por horas, sus horas sobre
+  círculos, cada círculo pesa 1/7 (ver «La medida por círculos»); por horas, sus horas sobre
   las de lo que hizo. Su línea llega al 100 % ese día, de las dos maneras, y
   ahí se queda. Lo que hizo después (un proyecto suelto años más tarde) no la
   mueve. Quien sigue o se fue se mide contra el plan, como antes.
@@ -303,7 +397,8 @@ Cada línea de una persona (la tuya, con quien te comparas y las sueltas de una
 media con poca gente) trae `milestones`: un `{ day, projects, value }` por día
 en que aprobó algo que mueve su línea, con el nombre de cada proyecto y el %
 en que queda. La web pone un punto en cada uno y, al pasar o con el teclado,
-los nombra en la ficha. Las medias no llevan. Las de quien se tragó el black
+los nombra en la ficha, y dibuja la línea en escalones por esos días (ver «La
+medida por círculos»). Las medias no llevan. Las de quien se tragó el black
 hole también, sin login: los proyectos solos no dicen quién es, y su línea ya
 se veía. Quien no se ve (mundos separados, ocultos) no sale, como su línea.
 

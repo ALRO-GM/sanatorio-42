@@ -204,6 +204,25 @@ const PROJECTS: [name: string, hours: number][] = [
   ['Exam Rank 06', 0],
 ]
 const PLAN_HOURS = PROJECTS.reduce((sum, [, hours]) => sum + hours, 0)
+/** Dónde acaba cada círculo (0…6) en `PROJECTS`: el índice del primero del siguiente. */
+const CIRCLE_ENDS = [1, 4, 18, 22, 26, 30, 32]
+
+/**
+ * El avance por círculos de tener aprobados los `count` primeros proyectos: como
+ * en la API, cada círculo pesa 1/7 y sus proyectos se lo reparten, así que
+ * completar un círculo cae justo en su marca del eje.
+ */
+function circlesUpTo(count: number): number {
+  let share = 0
+
+  CIRCLE_ENDS.forEach((end, circle) => {
+    const begin = CIRCLE_ENDS[circle - 1] ?? 0
+
+    share += Math.max(0, Math.min(count, end) - begin) / (end - begin) / CIRCLE_ENDS.length
+  })
+
+  return Math.round(share * 1000) / 10
+}
 
 /**
  * La línea de una persona de mentira, con sus hitos, siempre igual para el
@@ -218,7 +237,7 @@ function traceOf(login: string, share: number, last: number, until = LAST_DAY): 
   const count = Math.max(1, Math.round(share * PROJECTS.length))
   const passed = PROJECTS.slice(0, count)
   const finished = count === PROJECTS.length
-  // Por círculos, cada proyecto pesa lo mismo; por horas, sus horas sobre las de lo que hizo.
+  // Por círculos, 1/7 cada círculo; por horas, sus horas sobre las de lo que hizo.
   const total = finished ? passed.reduce((sum, [, hours]) => sum + hours, 0) : PLAN_HOURS
   const milestones: ProgressMilestone[] = []
   let hours = 0
@@ -230,7 +249,7 @@ function traceOf(login: string, share: number, last: number, until = LAST_DAY): 
 
     hours += each
     const value = {
-      circles: Math.round(((index + 1) / PROJECTS.length) * 1000) / 10,
+      circles: circlesUpTo(index + 1),
       hours: Math.round((hours / total) * 1000) / 10,
     }
     const same = milestones.at(-1)

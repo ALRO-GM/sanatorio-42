@@ -37,8 +37,8 @@ const CHOICES = { graphics: ['so_long', 'fdf'] }
 describe('avance en el common core', () => {
   it('un grupo a elegir es una sola casilla, con su círculo más bajo y las horas del más corto', () => {
     expect(unitsOf(PLAN, CHOICES)).toEqual([
-      { circle: 0, hours: 70, ids: [1], hoursById: new Map([[1, 70]]) },
-      { circle: 1, hours: 70, ids: [2], hoursById: new Map([[2, 70]]) },
+      { circle: 0, hours: 70, ids: [1], hoursById: new Map([[1, 70]]), moved: new Map() },
+      { circle: 1, hours: 70, ids: [2], hoursById: new Map([[2, 70]]), moved: new Map() },
       {
         circle: 1,
         hours: 60,
@@ -47,13 +47,14 @@ describe('avance en el common core', () => {
           [3, 60],
           [4, 100],
         ]),
+        moved: new Map(),
       },
     ])
     // Un proyecto repetido no se cuenta dos veces.
     expect(unitsOf([...PLAN, ...PLAN.slice(0, 1)], CHOICES)).toHaveLength(3)
   })
 
-  it('por círculos pesan lo mismo; por horas, las de lo que hizo cada cual', () => {
+  it('por círculos cada uno pesa 1/7; por horas, las de lo que hizo cada cual', () => {
     const units = unitsOf(PLAN, CHOICES)
     // libft el día 10 y fdf (del grupo) el día 40; printf, sin hacer.
     const done = new Map([
@@ -62,8 +63,9 @@ describe('avance en el common core', () => {
     ])
     const curve = curveOf(units, done, START, [0, 10, 30, 40, 60], START + 50 * DAY)
 
-    // Círculo 0 entero (1/2) y medio círculo 1 (1/4): 75 %.
-    expect(curve.circles).toEqual([0, 50, 50, 75, null])
+    // Círculo 0 entero (1/7) y medio círculo 1, que lleva también el peso de los
+    // círculos 2…6 que este plan no tiene (6/7 entre sus dos casillas): 4/7.
+    expect(curve.circles).toEqual([0, 14.3, 14.3, 57.1, null])
     // Su plan son 70 + 70 + 100 (hizo FdF, no so_long): 240 h; lleva 170.
     expect(curve.hours).toEqual([0, 29.2, 29.2, 70.8, null])
     expect(totalHours(units, done)).toBe(240)
@@ -82,14 +84,18 @@ describe('avance en el common core', () => {
       START + 20 * DAY,
     )
 
-    expect(curve.circles).toEqual([0, 50, null])
+    expect(curve.circles).toEqual([0, 14.3, null])
   })
 
   it('dónde está hoy: el primer círculo con algo sin hacer, o 7 si no queda nada', () => {
     const units = unitsOf(PLAN, CHOICES)
 
     expect(standingOf(units, new Map())).toEqual({ circle: 0, circles: 0, hours: 0 })
-    expect(standingOf(units, new Map([[1, START]]))).toEqual({ circle: 1, circles: 50, hours: 35 })
+    expect(standingOf(units, new Map([[1, START]]))).toEqual({
+      circle: 1,
+      circles: 14.3,
+      hours: 35,
+    })
     expect(
       standingOf(
         units,
@@ -102,12 +108,8 @@ describe('avance en el common core', () => {
     ).toEqual({ circle: 7, circles: 100, hours: 100 })
   })
 
-  it('las marcas del eje: dónde se acaba cada círculo', () => {
-    const marks = circleMarks(unitsOf(PLAN, CHOICES))
-
-    // Dos círculos: el 0 al 50 % y el 1 al 100 %; los que no hay, también al 100 %.
-    expect(marks.slice(0, 3)).toEqual([50, 100, 100])
-    expect(marks).toHaveLength(7)
+  it('las marcas del eje: (k + 1) / 7, fijas', () => {
+    expect(circleMarks()).toEqual([14.3, 28.6, 42.9, 57.1, 71.4, 85.7, 100])
   })
 
   it('cada pace pide tener cada círculo completo a sus días', () => {
@@ -115,11 +117,11 @@ describe('avance en el common core', () => {
     const fastest = lines.circles[0]
 
     expect(fastest?.pace).toBe(8)
-    // Empieza en 0; el círculo 0 a los 8 días (50 %) y el 1 a los 32 (100 %).
+    // Empieza en 0; cada círculo, en su marca: el 0 a los 8 días y el 1 a los 32.
     expect(fastest?.points.slice(0, 3)).toEqual([
       [0, 0],
-      [8, 50],
-      [32, 100],
+      [8, 14.3],
+      [32, 28.6],
     ])
     expect(lines.hours[0]?.points[1]).toEqual([8, 35])
     expect(lines.circles.map((line) => line.pace)).toEqual([8, 12, 15, 18, 22, 24])
@@ -303,12 +305,13 @@ describe('medias por población', () => {
       blackholed: 12,
       unknown: 2,
     })
-    // A los 60 días: los terminados llevan los dos círculos; los que siguen, uno.
+    // A los 60 días: los terminados llevan los dos círculos (el 1 se lleva el peso de
+    // los que este plan no tiene); los que siguen, el 0 (1/7).
     const at60 = progress.days.indexOf(60)
 
     expect(progress.averages.circles.finished['campus-classic'][at60]).toBe(100)
-    expect(progress.averages.circles.current['campus-classic'][at60]).toBe(75)
-    expect(progress.averages.circles.blackholed['campus-classic'][at60]).toBe(50)
+    expect(progress.averages.circles.current['campus-classic'][at60]).toBe(57.1)
+    expect(progress.averages.circles.blackholed['campus-classic'][at60]).toBe(14.3)
     // Los absorbidos no siguen después de salir (día 100).
     expect(
       progress.averages.circles.blackholed['campus-classic'][progress.days.indexOf(120)],
@@ -317,8 +320,8 @@ describe('medias por población', () => {
       true,
     )
 
-    // Ejes: el círculo 0 se acaba al 50 % y las horas son las de su plan (70 + 55).
-    expect(progress.axis.circles.slice(0, 2)).toEqual([50, 100])
+    // Ejes: las marcas fijas, (k + 1) / 7, y las horas son las de su plan (70 + 55).
+    expect(progress.axis.circles.slice(0, 2)).toEqual([14.3, 28.6])
     expect(progress.axis.hours).toBe(125)
     // En el plan nuevo, push_swap tiene dos versiones: cuenta la más corta.
     expect(progress.axis.planHours).toEqual({ classic: 125, next: 120 })
@@ -343,6 +346,60 @@ describe('medias por población', () => {
     expect(progress.me?.line.circles.filter((value) => value !== null).at(-1)).toBe(100)
     // Su plan: Libft (70) y la push_swap vieja (50).
     expect(progress.axis.hours).toBe(120)
+  })
+
+  it('la versión de C cuenta en su círculo de C, y Libft no va después de lo siguiente', async () => {
+    await projects()
+    const begin = NOW - 200 * DAY
+    // En C, push_swap es del círculo 2; en Python, del 1.
+    const adopting = createProgressService({
+      progress: createProgressRepository(db),
+      circles: (track) =>
+        Promise.resolve(
+          new Map(
+            track === 'classic'
+              ? [
+                  [1314, 0],
+                  [1316, 1],
+                  [1471, 2],
+                ]
+              : [
+                  [1314, 0],
+                  [1316, 1],
+                  [2687, 1],
+                ],
+          ),
+        ),
+      now: () => NOW,
+    })
+
+    await person(1, 'paso', { begin, track: 'next', cursus: { grade: 'Cadet', active: 1 } })
+    // 42 reescribió la fecha de su Libft (sin fecha de apuntarse) mucho después;
+    // ft_printf, apuntada el día 12 y aprobada el 30; la push_swap de C, el 60.
+    await db.execute({
+      sql: `UPDATE project_users SET updated_at_42 = ?, created_at_42 = NULL WHERE user_id = 1`,
+      args: [iso(begin + 150 * DAY)],
+    })
+    for (const [project, opened, done] of [
+      [1316, 12, 30],
+      [1471, 40, 60],
+    ] as const) {
+      await db.execute({
+        sql: `INSERT INTO project_users (id, user_id, project_id, status, validated, updated_at_42, created_at_42, synced_at)
+              VALUES (?, 1, ?, 'finished', 1, ?, ?, ?)`,
+        args: [nextRow++, project, iso(begin + done * DAY), iso(begin + opened * DAY), iso(NOW)],
+      })
+    }
+
+    const progress = await adopting.progress(actor('paso'), [], () => true)
+
+    // Libft, el día que se apuntó a ft_printf; con ella, el círculo 1 completo (la
+    // push_swap de C va en el 2, que se lleva el peso de los que este plan no tiene).
+    expect(progress.me?.milestones.map((each) => [each.day, each.value.circles])).toEqual([
+      [12, 14.3],
+      [30, 28.6],
+      [60, 100],
+    ])
   })
 })
 
@@ -394,7 +451,7 @@ describe('quién va más rápido', () => {
       // Quien terminó y quien ya lo tiene todo aprobado empatan.
       [1, 'ana', 7, 100],
       [1, 'eva', 7, 100],
-      [3, 'leo', 1, 50],
+      [3, 'leo', 1, 14.3],
     ])
     expect(ranking.total).toBe(3)
     expect(ranking.me).toMatchObject({ rank: 3, login: 'leo' })
@@ -513,7 +570,7 @@ describe('todas las líneas en una respuesta', () => {
       'all-classic': 10,
       'all-next': 10,
     })
-    expect(progress.averages.circles.current['all-next'][progress.days.indexOf(30)]).toBe(50)
+    expect(progress.averages.circles.current['all-next'][progress.days.indexOf(30)]).toBe(14.3)
     expect(progress.campus).toBe('Madrid')
     expect(progress.minPeople).toBe(10)
     // Diez por media: hay media, no personas sueltas.
@@ -737,7 +794,7 @@ describe('«Todo»: las líneas llegan hasta quien más tiempo lleva', () => {
 
     expect(progress.days.at(-1)).toBeGreaterThanOrEqual(5 * 365)
     expect(progress.me?.line.circles[at]).toBe(100)
-    expect(progress.me?.line.circles[progress.days.indexOf(730)]).toBe(50)
+    expect(progress.me?.line.circles[progress.days.indexOf(730)]).toBe(14.3)
     expect(JSON.stringify(progress).length).toBeLessThan(40_000)
   })
 })
@@ -796,7 +853,7 @@ describe('quien terminó acaba en el 100 %, con sus hitos', () => {
     const at = (day: number) => progress.days.indexOf(day)
 
     // Por círculos y por horas, el 100 % justo el día 45 (el primer punto tras el 40).
-    expect(progress.me?.line.circles[at(30)]).toBe(50)
+    expect(progress.me?.line.circles[at(30)]).toBe(14.3)
     expect(progress.me?.line.circles[at(45)]).toBe(100)
     expect(progress.me?.line.hours[at(45)]).toBe(100)
     // 70 de 125 h.
@@ -808,16 +865,16 @@ describe('quien terminó acaba en el 100 %, con sus hitos', () => {
     expect(progress.axis.hours).toBe(125)
     // Sus hitos, por día y con el nombre de cada proyecto; la push_swap no.
     expect(progress.me?.milestones).toEqual([
-      { day: 10, projects: ['Libft'], value: { circles: 50, hours: 56 } },
+      { day: 10, projects: ['Libft'], value: { circles: 14.3, hours: 56 } },
       { day: 40, projects: ['ft_printf'], value: { circles: 100, hours: 100 } },
     ])
 
-    // Quien sigue, contra el plan de hoy: medio círculo 0 por hacer.
+    // Quien sigue, contra el plan de hoy: medio círculo 0 por hacer (1/14 + 6/7).
     const [other] = progress.others
 
     expect(progress.others.map((each) => each.login)).toEqual(['sigue'])
     expect(other?.finished).toBeNull()
-    expect(other?.line.circles[at(45)]).toBe(75)
+    expect(other?.line.circles[at(45)]).toBe(92.9)
     expect(other?.hours).toBe(175)
     expect(other?.milestones.map((each) => each.day)).toEqual([10, 40])
 
