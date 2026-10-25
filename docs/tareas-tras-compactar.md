@@ -304,9 +304,11 @@ separados. Cada fase con check, commit, push y despliegue.
       (`modules/pool/pool.keys.ts`), corte global en `build-app.ts`, `GET
       /pool/access`, la web esconde pestañas y elementos (`PoolOnly`) y el árbol
       de casillas del panel. `open` sigue sin poder activarse (`canOpen`).
-- [ ] **P3. Datos de piscina**: gente, correcciones y eventos del cursus 9;
-      red, sala de espera, mapa, buscador y calendario separados.
-- [ ] **P4. Documentación y demostración.**
+- [x] **P3. Datos de piscina** (2026-10-25): `pool_members` (migración 68) y
+      `core/audience.ts`; mapa, buscador, fichas, sala de espera, guardia,
+      salas, grupos, pizarras, dudas y clasificaciones separados. Red
+      (migración 69) y calendario (migración 70) con agentes.
+- [x] **P4. Documentación**: README, `docs/api.md`, `docs/piscineros.md`.
 
 ## 3. A medias o por confirmar con Alberto
 

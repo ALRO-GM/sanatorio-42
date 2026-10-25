@@ -79,6 +79,7 @@ Lo que este proyecto enseña de quien lo ha hecho:
   - [Demostraciones animadas](#demostraciones-animadas)
   - [Personalizar y estilos](#personalizar-y-estilos)
   - [En el móvil](#en-el-móvil)
+  - [Piscineros](#piscineros)
   - [Panel de gestión](#panel-de-gestión)
   - [Validar documentos](#validar-documentos)
   - [Demostración sin cuenta](#demostración-sin-cuenta)
@@ -365,9 +366,27 @@ pestañas deslizables y los grafos con pellizco.
 
 <img src="docs/img/movil.webp" alt="Sala de espera en el móvil" width="300">
 
+### Piscineros
+
+Sanatorio es para estudiantes de 42: al volver de 42 se mira el cursus de cada
+cual. Quien tiene el 42cursus entra; quien está en una piscina en curso entra
+a una versión solo para piscineros si quien administra la abre; el resto
+(Discovery, piscinas antiguas) ve que su cuenta no es de estudiante.
+
+En el panel, pestaña **Piscina**: abrir o cerrar la entrada, el aviso para
+piscineros con la piscina cerrada y, pestaña a pestaña y elemento a elemento,
+lo que pueden ver (también Code Clicker, Pomodoro, buzón, buscador,
+comunicados). La API corta lo que no se permite, no solo la web.
+
+Mundos separados: un estudiante no ve a ningún piscinero, y un piscinero solo
+ve a los piscineros de su campus, en el mapa, el buscador, las fichas, la sala
+de espera, la guardia, la red, el calendario, las clasificaciones y lo que
+crea la gente (grupos, pizarras, dudas, salas). Detalle en
+[docs/piscineros.md](docs/piscineros.md).
+
 ### Panel de gestión
 
-Solo para quien administra. Nueve pestañas:
+Solo para quien administra. Doce pestañas:
 
 | Pestaña              | Qué enseña                                                                                             |
 | -------------------- | ------------------------------------------------------------------------------------------------------ |
@@ -379,6 +398,9 @@ Solo para quien administra. Nueve pestañas:
 | Estadísticas         | Tiempo de uso por persona, quién está conectado ahora y cuánto lleva                                   |
 | Code Clicker         | Uso del juego y un apartado de trampas: quién, cuándo, cómo se vio, qué se requisó, indulto, avisos de saltos y un comunicado solo para quienes las hicieron |
 | Comunicados          | Mensajes para todo el mundo                                                                            |
+| Avisos del edificio  | Problemas de ordenadores o del edificio que manda la gente, para resolverlos
+| Pomodoro             | Uso por días y horas, paradas y sus motivos, por tramo de gente
+| Piscina              | Quién entra, el aviso de la piscina cerrada y lo que puede ver un piscinero
 | Limpiar datos        | Borrado a mano de cualquier dato, global o de una persona, entero o desde una fecha                    |
 
 Nada se borra solo: lo único que elimina datos es «Limpiar datos», que antes

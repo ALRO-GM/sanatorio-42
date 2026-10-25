@@ -42,11 +42,24 @@ Se elige en el panel, pestaña **Piscina**:
 - Sin marcar, no se ve. Al abrir la piscina por primera vez solo está el
   expediente.
 
-Se aplica **en la API**, no solo escondiendo en la web: `session.actor()` sabe
-la ruta de cada petición y, con una sesión de piscinero, corta con 403 la que
-cuelga de algo no permitido. Una ruta que no está en la tabla de rutas de
-piscina queda cerrada para piscineros (y un test recorre todas las rutas con
-una sesión de piscinero para comprobarlo).
+Se aplica **en la API**, no solo escondiendo en la web: un gancho global
+(`app/build-app.ts`, antes de las rutas) mira la plantilla de la ruta de cada
+petición y, con una sesión de piscinero, corta con 403 la que no es de la base
+ni de un permiso concedido (`modules/pool/pool.keys.ts`). Una ruta que no está
+en esa tabla queda cerrada para piscineros, y un test exige que cada ruta nueva
+se apunte en ella (`tests/integration/pool-gate.test.ts`).
+
+## Estado (2026-10-25)
+
+Hecho: entrada (fase 1), permisos (fase 2) y separación de datos (fase 3). Los
+piscineros en curso de cada campus se copian de 42 cada seis horas
+(`replica/pool-members.ts`, tabla `pool_members`); la red copia aparte las
+correcciones de la piscina y el calendario guarda los cursus de cada evento.
+Quién ve a quién está en `core/audience.ts` (`seesFor`, `visibleTo`).
+
+Lo que no separa nada porque no enseña a nadie: las cifras sueltas de las
+estadísticas (totales de cada sección) y las medias del avance, que son de
+estudiantes; para un piscinero no dicen nada de nadie.
 
 ## Fases
 
