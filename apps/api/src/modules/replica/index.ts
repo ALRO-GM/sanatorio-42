@@ -20,6 +20,7 @@ import type { CampusesService } from './campuses.service.js'
 import { createPhotos, memoryPhotoStore } from './photos.js'
 import { createPoints } from './points.js'
 import { createPoolMembers } from './pool-members.js'
+import { createCoreCursus } from './core-cursus.js'
 import type { PoolMembers } from './pool-members.js'
 import type { Points } from './points.js'
 import type { PhotoStore } from './photos.js'
@@ -110,6 +111,15 @@ export function createReplicaModule(deps: ReplicaModuleDeps): ReplicaModule {
     ...given({ now: deps.now, log: deps.log }),
   })
 
+  const coreCursus = createCoreCursus({
+    db: deps.db,
+    client: deps.client,
+    campusIds: deps.config.trackedCampusIds,
+    hourlyReserve: deps.config.hourlyReserve,
+    quota,
+    ...given({ now: deps.now, log: deps.log }),
+  })
+
   const photos = createPhotos({
     db: deps.db,
     client: deps.client,
@@ -149,6 +159,7 @@ export function createReplicaModule(deps: ReplicaModuleDeps): ReplicaModule {
       },
       { table: 'agenda_users', logins: ['login'], source: '42' },
       { table: 'pool_members', logins: ['login'], userIds: ['user_id'], source: '42' },
+      { table: 'core_cursus', logins: ['login'], userIds: ['user_id'], source: '42' },
       { table: 'seat_sessions', logins: ['login'], userIds: ['user_id'], source: '42' },
       { table: 'user_tracks', logins: ['login'], source: '42' },
       { table: 'user_levels', logins: ['login'], source: '42' },
@@ -180,6 +191,12 @@ export function createReplicaModule(deps: ReplicaModuleDeps): ReplicaModule {
         run: () => poolMembers.step(),
       },
       {
+        // Grado, fin y black hole de todo el 42cursus de cada campus (`docs/blackhole.md`).
+        name: 'copia del 42cursus',
+        everyMs: 60_000,
+        run: () => coreCursus.step(),
+      },
+      {
         // Es de toda la base, no solo de la réplica: va aquí porque este módulo
         // es el que más escribe y el que está siempre.
         name: 'estadísticas de la base',
@@ -201,7 +218,7 @@ export { FRESH_USER_TTL_MS } from './agenda.js'
 export { diskPhotoStore } from './photos.js'
 export type { PhotoStore } from './photos.js'
 export { LAST_CIRCLE, SEEDED_UP_TO, parseHours } from './curriculum.js'
-export { CHOICES } from './common-core.js'
+export { CHOICES, VERSIONS } from './common-core.js'
 export type { Curriculum } from './curriculum.js'
 export { hourlyQuota } from './quota.js'
 export type { Quota, QuotaGate } from './quota.js'

@@ -36,21 +36,13 @@ stats.notgames.wrong,"Estadísticas de Ayuda, Not-games: respuestas falladas",Fa
 stats.notgames.rank,"Estadísticas de Ayuda, Not-games: de qué va la clasificación",Quién gana más partidas,Who wins the most games,Qui guanya més partides,Nork irabazten dituen partida gehien
 stats.notgames.value,"Estadísticas de Ayuda, Not-games: cifra de cada fila",Ganadas: {n},Won: {n},Guanyades: {n},Irabazitakoak: {n}
 stats.notgames.extra,"Estadísticas de Ayuda, Not-games: segunda cifra de cada fila",Aciertos: {n},Correct: {n},Encerts: {n},Asmatuak: {n}
-stats.ritmo.title,"Estadísticas, ritmo (quién va más rápido en el curso): título del apartado",Quién va más rápido,Who is going fastest,Qui va més ràpid,Nor doan azkarren
-stats.ritmo.people,"Estadísticas, ritmo (quién va más rápido en el curso): personas de las que se sabe el ritmo",Personas medidas,People measured,Persones mesurades,Neurtutako pertsonak
-stats.ritmo.median,"Estadísticas, ritmo (quién va más rápido en el curso): pace mediano, en meses",Pace mediano (meses),Median pace (months),Pace mitjà (mesos),Pace mediana (hilabeteak)
-stats.ritmo.fast,"Estadísticas, ritmo (quién va más rápido en el curso): personas a pace 12 o más rápido",A pace 12 o menos,At pace 12 or less,A pace 12 o menys,12ko pacean edo gutxiagoan
-stats.ritmo.rank,"Estadísticas, ritmo (quién va más rápido en el curso): de qué va la clasificación",Por pace y % del curso completado,By pace and % of the course done,Per pace i % del curs completat,Pacearen eta osatutako ikastaroaren %aren arabera
-stats.ritmo.value,"Estadísticas, ritmo (quién va más rápido en el curso): % del curso completado según el pace",{n} % del curso,{n}% of the course,{n} % del curs,Ikastaroaren % {n}
-stats.ritmo.extra,"Estadísticas, ritmo (quién va más rápido en el curso): pace al que va, en meses",pace {n} meses,pace {n} months,pace {n} mesos,{n} hilabeteko pacea
-stats.ritmo.slow,"Estadísticas, ritmo (quién va más rápido en el curso): va más lento que el pace más lento",más de 24 meses,over 24 months,més de 24 mesos,24 hilabete baino gehiago
 stats.progress.title,Avance: título del apartado,Avance en el common core,Common core progress,Avenç al common core,Common core-ko aurrerapena
 stats.progress.info,Avance: qué enseña la gráfica,"Tu avance desde que empezaste, frente a la media y a cada pace. Sin entrar en la web, el inicio es el primer proyecto.","Your progress since you started, against the average and each pace. For people who never logged in here, the start is their first project.","El teu avenç des que vas començar, davant la mitjana i cada pace. Sense entrar al web, l'inici és el primer projecte.","Hasi zinenetik zure aurrerapena, batez bestekoaren eta pace bakoitzaren aldean. Webgunean sartu gabe, hasiera lehen proiektua da."
 stats.progress.measure,Avance: grupo de botones de cómo se mide,Cómo se mide,How it is measured,Com es mesura,Nola neurtzen den
 stats.progress.measure.circles,Avance: medir por la parte hecha de cada círculo,Por círculos,By circles,Per cercles,Zirkuluka
 stats.progress.measure.hours,Avance: medir por horas estimadas de lo aprobado,Por horas estimadas,By estimated hours,Per hores estimades,Kalkulatutako orduka
-stats.progress.measure.circles.hint,Avance: qué es medir por círculos (frase corta bajo los botones),"% aprobado de cada círculo, con todos sus proyectos; cada círculo pesa igual.","% passed of each circle, counting all its projects; every circle weighs the same.","% aprovat de cada cercle, amb tots els seus projectes; cada cercle pesa igual.","Zirkulu bakoitzaren % gainditua, bere proiektu guztiekin; zirkulu guztiek berdin balio dute."
-stats.progress.measure.hours.hint,Avance: qué es medir por horas (frase corta bajo los botones),"Horas que 42 estima que dura cada proyecto aprobado, sobre las de todo el common core.","Hours 42 estimates each passed project takes, out of the whole common core.","Hores que 42 estima que dura cada projecte aprovat, sobre les de tot el common core.","42k gainditutako proiektu bakoitzari kalkulatzen dizkion orduak, common core osoaren gainean."
+stats.progress.measure.circles.hint,Avance: qué es medir por círculos (frase corta bajo los botones),% aprobado de cada círculo; cada círculo pesa igual. Las marcas del eje son el final de cada círculo.,% passed of each circle; every circle weighs the same. The axis marks where each circle ends.,% aprovat de cada cercle; cada cercle pesa igual. Les marques de l'eix són el final de cada cercle.,Zirkulu bakoitzaren % gainditua; zirkulu guztiek berdin balio dute. Ardatzeko markak zirkulu bakoitzaren amaiera dira.
+stats.progress.measure.hours.hint,"Avance: qué es medir por horas (frase corta bajo los botones); {n}, las horas de tu common core","Horas que 42 estima de lo aprobado. Cada línea va en % de su propio plan; el eje, en horas del tuyo ({n} h).",Hours 42 estimates for what was passed. Each line is a % of its own plan; the axis shows hours of yours ({n} h).,"Hores que 42 estima del que s'ha aprovat. Cada línia va en % del seu propi pla; l'eix, en hores del teu ({n} h).","42k gainditutakoari kalkulatzen dizkion orduak. Lerro bakoitza bere planaren %-an doa; ardatza, zure planaren orduetan ({n} h)."
 stats.progress.scope,Avance: grupo de botones de con qué media se compara,Media de,Average of,Mitjana de,Batez bestekoa
 stats.progress.scope.campus,Avance: media del campus,Tu campus,Your campus,El teu campus,Zure campusa
 stats.progress.scope.all,Avance: media de todos los campus,Todos los campus,All campuses,Tots els campus,Campus guztiak
@@ -74,3 +66,36 @@ stats.progress.noMe,Avance: aviso si no hay datos de quien mira,Aún no hay dato
 stats.progress.noOther,Avance: aviso si no hay datos de la persona con quien se compara,No hay datos del avance de {login}.,There is no progress data for {login}.,No hi ha dades de l'avenç de {login}.,Ez dago {login}(r)en aurrerapenaren daturik.
 stats.progress.table,Avance: desplegable para ver los datos en tabla,Ver como tabla,Show as a table,Veure com a taula,Taula gisa ikusi
 stats.progress.tableMonth,Avance: columna del mes en la tabla,Mes,Month,Mes,Hilabetea
+stats.progress.population,Avance: grupo de botones de qué gente entra en la media,Quién cuenta,Who counts,Qui compta,Nor zenbatzen da
+stats.progress.population.finished,Avance: media solo de quien terminó el common core,Terminado,Finished,Acabat,Amaituta
+stats.progress.population.current,Avance: media de quien sigue en el common core más quien lo terminó,En curso + terminado,Ongoing + finished,En curs + acabat,Martxan + amaituta
+stats.progress.population.blackholed,Avance: media de quien se tragó el black hole,Blackhole,Black hole,Black hole,Black hole
+stats.progress.unknown,Avance: aviso de cuánta gente no entra en las medias porque no se sabe si sigue,{n} personas sin estado seguro no entran en ninguna media.,{n} people without a certain status are left out of every average.,{n} persones sense estat segur no entren a cap mitjana.,Egoera ziurrik gabeko {n} pertsona ez dira batez bestekoetan sartzen.
+stats.progress.axisStart,"Avance: marca del eje vertical en el 0, por círculos",Inicio,Start,Inici,Hasiera
+stats.progress.axisCircle,Avance: marca del eje vertical donde se acaba un círculo,Círculo {n},Circle {n},Cercle {n},{n}. zirkulua
+stats.progress.hours,"Avance: unas horas, en el eje y en la ficha",{n} h,{n} h,{n} h,{n} h
+stats.ranking.title,"Avance, quién va más rápido: título del bloque",Quién va más rápido,Who is going fastest,Qui va més ràpid,Nor doan azkarren
+stats.ranking.by,"Avance, quién va más rápido: grupo de botones de por qué se ordena",Ordenar por,Sort by,Ordenar per,Ordenatu honen arabera
+stats.ranking.by.circle,"Avance, quién va más rápido: ordenar por el círculo en el que está cada cual",Círculo,Circle,Cercle,Zirkulua
+stats.ranking.by.circles,"Avance, quién va más rápido: ordenar por el % hecho por círculos",% por círculos,% by circles,% per cercles,% zirkuluka
+stats.ranking.by.hours,"Avance, quién va más rápido: ordenar por el % de horas hecho",% por horas,% by hours,% per hores,% orduka
+stats.ranking.kickoff,"Avance, quién va más rápido: desplegable del mes de entrada (kickoff)",Kickoff,Kickoff,Kickoff,Kickoff
+stats.ranking.kickoff.all,"Avance, quién va más rápido: opción del desplegable sin filtrar por kickoff",Todo el mundo,Everyone,Tothom,Denak
+stats.ranking.kickoff.month,"Avance, quién va más rápido: un kickoff del desplegable, con su gente",{month} ({n} personas),{month} ({n} people),{month} ({n} persones),{month} ({n} pertsona)
+stats.ranking.cohort,"Avance, quién va más rápido: grupo de botones de si va solo ese kickoff o también los siguientes",Qué kickoffs,Which kickoffs,Quins kickoffs,Zein kickoff
+stats.ranking.cohort.only,"Avance, quién va más rápido: solo el kickoff elegido",Solo ese,Only that one,Només aquest,Hori bakarrik
+stats.ranking.cohort.since,"Avance, quién va más rápido: el kickoff elegido y los que vinieron después",Ese y los siguientes,That one and later,Aquest i els següents,Hori eta hurrengoak
+stats.ranking.circleRange,"Avance, quién va más rápido: rango de círculos elegido con los dos tiradores",Círculos: de {low} a {high},Circles: from {low} to {high},Cercles: de {low} a {high},Zirkuluak: {low}tik {high}ra
+stats.ranking.circleMin,"Avance, quién va más rápido: tirador del círculo mínimo (para lectores de pantalla)",Círculo mínimo,Lowest circle,Cercle mínim,Gutxieneko zirkulua
+stats.ranking.circleMax,"Avance, quién va más rápido: tirador del círculo máximo (para lectores de pantalla)",Círculo máximo,Highest circle,Cercle màxim,Gehieneko zirkulua
+stats.ranking.pctRange,"Avance, quién va más rápido: rango de % elegido con los dos tiradores; {what} es por círculos o por horas",{what}: de {low} a {high} %,{what}: from {low} to {high}%,{what}: de {low} a {high} %,{what}: {low}tik {high}ra %
+stats.ranking.pctMin,"Avance, quién va más rápido: tirador del % mínimo (para lectores de pantalla)",% mínimo,Lowest %,% mínim,Gutxieneko %
+stats.ranking.pctMax,"Avance, quién va más rápido: tirador del % máximo (para lectores de pantalla)",% máximo,Highest %,% màxim,Gehieneko %
+stats.ranking.circle,"Avance, quién va más rápido: el círculo en el que está alguien",Círculo {n},Circle {n},Cercle {n},{n}. zirkulua
+stats.ranking.finished,"Avance, quién va más rápido: quien terminó el common core",Terminado,Finished,Acabat,Amaituta
+stats.ranking.pctCircles,"Avance, quién va más rápido: % hecho por círculos",{n} % por círculos,{n}% by circles,{n} % per cercles,% {n} zirkuluka
+stats.ranking.pctHours,"Avance, quién va más rápido: % de las horas de su plan hecho",{n} % de horas,{n}% of hours,{n} % de les hores,Orduen % {n}
+stats.ranking.total,"Avance, quién va más rápido: cuánta gente entra con los filtros",{n} personas,{n} people,{n} persones,{n} pertsona
+stats.ranking.notIn,"Avance, quién va más rápido: quien mira no entra con estos filtros",Con estos filtros no sales.,You are not in with these filters.,Amb aquests filtres no hi surts.,Iragazki hauekin ez zaude.
+stats.ranking.empty,"Avance, quién va más rápido: nadie entra con estos filtros",Nadie con estos filtros.,Nobody matches these filters.,Ningú amb aquests filtres.,Inor ez iragazki hauekin.
+stats.ranking.more,"Avance, quién va más rápido: botón para cargar más puestos",Ver más,Show more,Veure més,Gehiago ikusi

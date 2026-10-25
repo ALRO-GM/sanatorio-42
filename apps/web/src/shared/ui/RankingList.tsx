@@ -29,6 +29,8 @@ type RankingListProps<T extends RankingRow> = {
   /** Nombre de la lista para quien no la ve. */
   label?: string
   className?: string
+  /** Clase extra de una fila (la tuya fija arriba o abajo al desplazar, en el Avance). */
+  rowClass?: (row: T) => string
 }
 
 /**
@@ -43,13 +45,17 @@ export function RankingList<T extends RankingRow>({
   value,
   label,
   className = '',
+  rowClass,
 }: RankingListProps<T>) {
   const { t } = useI18n()
 
   return (
     <ol className={`rows ranking ${className}`.trim()} aria-label={label}>
       {rows.map((row) => (
-        <li key={row.login} className={`row plain ${row.login === me ? 'me' : ''}`.trim()}>
+        <li
+          key={row.login}
+          className={`row plain ${row.login === me ? 'me' : ''} ${rowClass?.(row) ?? ''}`.trim()}
+        >
           <span className="rank" aria-label={t('rank.place', { n: row.rank })}>
             <span className={row.rank <= 3 ? `medal medal-${row.rank}` : undefined}>
               {row.rank}

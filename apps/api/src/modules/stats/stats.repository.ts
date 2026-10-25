@@ -23,7 +23,7 @@ type SectionQueries = {
 
 const day = (iso: string | null): string | null => (iso === null ? null : iso.slice(0, 10))
 
-const QUERIES: Record<Exclude<StatsSectionId, 'ritmo'>, SectionQueries> = {
+const QUERIES: Record<StatsSectionId, SectionQueries> = {
   // Sala de espera: sesiones aceptadas y, de ellas, las validadas con los dos
   // códigos. La clasificación solo cuenta las validadas: son las que valen XP.
   consulta: {
@@ -130,13 +130,13 @@ const QUERIES: Record<Exclude<StatsSectionId, 'ritmo'>, SectionQueries> = {
   },
 }
 
-export const STATS_SECTIONS = Object.keys(QUERIES) as Exclude<StatsSectionId, 'ritmo'>[]
+export const STATS_SECTIONS = Object.keys(QUERIES) as StatsSectionId[]
 
 export function createStatsRepository(db: Db) {
   return {
     /** Las cifras de una sección, en el orden de sus columnas. */
     async totals(
-      section: Exclude<StatsSectionId, 'ritmo'>,
+      section: StatsSectionId,
       campus: number,
       since: string | null,
       now: string,
@@ -154,7 +154,7 @@ export function createStatsRepository(db: Db) {
      * entera no se lee nunca.
      */
     async ranking(
-      section: Exclude<StatsSectionId, 'ritmo'>,
+      section: StatsSectionId,
       campus: number,
       since: string | null,
       now: string,
@@ -201,45 +201,22 @@ export function createStatsRepository(db: Db) {
   }
 }
 
-/** Lo que hace falta para el ritmo de cada cual: cuándo empezó y cuándo completó cada círculo. */
-type PaceRow = {
-  login: string
-  image: string | null
-  startedAt: string
-  milestones: string[]
-}
-
-export function createPaceRepository(db: Db) {
-  return {
-    /** La gente del campus con fecha de inicio y algún círculo completado. */
-    async rows(campus: number): Promise<PaceRow[]> {
-      const result = await db.execute({
-        sql: `SELECT ut.login, u.image, ul.begin_at, ut.ranks
-              FROM user_tracks ut
-              JOIN user_levels ul ON ul.login = ut.login
-              JOIN users u ON u.login = ut.login
-              JOIN campus_members m ON m.user_id = u.id AND m.campus_id = ?
-              WHERE ul.begin_at IS NOT NULL AND ut.ranks IS NOT NULL AND ut.ranks != '[]'`,
-        args: [campus],
-      })
-
-      return result.rows.map((row) => ({
-        login: toText(row.login),
-        image: typeof row.image === 'string' ? row.image : null,
-        startedAt: toText(row.begin_at),
-        milestones: JSON.parse(toText(row.ranks)) as string[],
-      }))
-    },
-  }
-}
-
-export type PaceRepository = ReturnType<typeof createPaceRepository>
-
 export type StatsRepository = ReturnType<typeof createStatsRepository>
+
+/** Lo que dice el 42cursus de alguien (`core_cursus`), fechas en ms. */
+type CursusRow = {
+  beginAt: number | null
+  endAt: number | null
+  blackholedAt: number | null
+  grade: string | null
+  active: boolean | null
+  alumni: boolean
+}
 
 /** Un proyecto del plan aprobado o empezado por alguien, para su avance. */
 type ProgressRow = {
   login: string
+  image: string | null
   projectId: number
   /** Aprobado, y cuándo (ms); `null` si no. */
   doneAt: number | null
@@ -249,6 +226,8 @@ type ProgressRow = {
   track: 'classic' | 'next' | null
   /** Si es del campus de quien pregunta. */
   here: boolean
+  /** Su 42cursus, si está copiado. */
+  cursus: CursusRow | null
 }
 
 const msOf = (value: unknown): number | null => {
@@ -256,6 +235,9 @@ const msOf = (value: unknown): number | null => {
 
   return Number.isNaN(ms) ? null : ms
 }
+
+const flagOf = (value: unknown): boolean | null =>
+  value === null || value === undefined ? null : toNumber(value) === 1
 
 export function createProgressRepository(db: Db) {
   return {
@@ -281,24 +263,63 @@ export function createProgressRepository(db: Db) {
       )
     },
 
+    /** El id de cada uno de esos slugs que esté en la réplica (las otras versiones de un proyecto). */
+    async idsOf(slugs: readonly string[]): Promise<Map<string, number>> {
+      if (slugs.length === 0) return new Map()
+
+      const result = await db.execute({
+        sql: `SELECT id, slug FROM projects WHERE ${inList('slug')}`,
+        args: [listArg(slugs)],
+      })
+
+      return new Map(result.rows.map((row) => [toText(row.slug), toNumber(row.id)]))
+    },
+
+    /**
+     * Lo último que hizo cada persona con 42cursus copiado: apuntarse a un
+     * proyecto o mover uno abierto (`docs/blackhole.md`). Lo aprobado no
+     * cuenta: 42 retoca esas filas en lote años después.
+     */
+    async activity(): Promise<Map<string, number>> {
+      const result = await db.execute(
+        `SELECT cc.login, MAX(pu.created_at_42) AS created,
+                MAX(CASE WHEN pu.status != 'finished' THEN pu.updated_at_42 END) AS moved
+         FROM core_cursus cc JOIN project_users pu ON pu.user_id = cc.user_id
+         GROUP BY cc.login`,
+      )
+
+      return new Map(
+        result.rows.flatMap((row) => {
+          const last = Math.max(msOf(row.created) ?? -Infinity, msOf(row.moved) ?? -Infinity)
+
+          return Number.isFinite(last) ? [[toText(row.login), last] as const] : []
+        }),
+      )
+    },
+
     /** Los proyectos del plan de todo el mundo (de todos los campus), uno por fila. */
     async rows(campus: number, ids: readonly number[]): Promise<ProgressRow[]> {
       if (ids.length === 0) return []
 
       const result = await db.execute({
-        sql: `SELECT u.login, pu.project_id, pu.status, pu.validated, pu.created_at_42,
-                     pu.updated_at_42, ul.begin_at, ut.track, m.user_id IS NOT NULL AS here
+        sql: `SELECT u.login, u.image, pu.project_id, pu.status, pu.validated, pu.created_at_42,
+                     pu.updated_at_42, ul.begin_at, ut.track,
+                     (m.user_id IS NOT NULL OR cc.campus_id = ?) AS here,
+                     cc.user_id AS cc_user, cc.begin_at AS cc_begin, cc.end_at, cc.blackholed_at,
+                     cc.grade, cc.active, cc.alumni
               FROM project_users pu
               JOIN users u ON u.id = pu.user_id
               LEFT JOIN user_levels ul ON ul.login = u.login
               LEFT JOIN user_tracks ut ON ut.login = u.login
               LEFT JOIN campus_members m ON m.user_id = u.id AND m.campus_id = ?
+              LEFT JOIN core_cursus cc ON cc.user_id = u.id
               WHERE ${inList('pu.project_id')}`,
-        args: [campus, listArg(ids)],
+        args: [campus, campus, listArg(ids)],
       })
 
       return result.rows.map((row) => ({
         login: toText(row.login),
+        image: toTextOrNull(row.image),
         projectId: toNumber(row.project_id),
         doneAt:
           row.status === 'finished' && toNumber(row.validated ?? 0) === 1
@@ -309,7 +330,18 @@ export function createProgressRepository(db: Db) {
         createdAt: msOf(row.created_at_42) ?? msOf(row.updated_at_42),
         beginAt: msOf(row.begin_at),
         track: row.track === 'classic' || row.track === 'next' ? row.track : null,
-        here: toNumber(row.here) === 1,
+        here: toNumber(row.here ?? 0) === 1,
+        cursus:
+          row.cc_user === null || row.cc_user === undefined
+            ? null
+            : {
+                beginAt: msOf(row.cc_begin),
+                endAt: msOf(row.end_at),
+                blackholedAt: msOf(row.blackholed_at),
+                grade: toTextOrNull(row.grade),
+                active: flagOf(row.active),
+                alumni: toNumber(row.alumni ?? 0) === 1,
+              },
       }))
     },
   }

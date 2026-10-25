@@ -119,6 +119,8 @@ import type {
   HolyGraph,
   HelpStats,
   StatsProgress,
+  StatsRanking,
+  RankingBy,
   Leaderboard,
   LeaderboardPeriod,
   LoggedMessage,
@@ -174,6 +176,20 @@ export type PeersResult = {
 }
 
 /** Filtros de la red de correcciones. Lo que no se pasa, no filtra. */
+/** Los filtros de `GET /stats/ranking` (`docs/api.md`, Avance). `null`: sin ese filtro. */
+export type RankingQuery = {
+  by: RankingBy
+  plan: 'all' | 'classic' | 'next'
+  kickoff: string | null
+  cohort: 'only' | 'since'
+  circleMin: number
+  circleMax: number
+  pctMin: number
+  pctMax: number
+  offset: number
+  limit: number
+}
+
 export type NetworkParams = {
   /** `YYYY-MM-DD`. */
   from?: string
@@ -490,6 +506,8 @@ export type Api = {
   getHelpStats: (period: LeaderboardPeriod) => Promise<HelpStats>
   /** El avance en el common core a lo largo del tiempo; con `other`, también el de esa persona. */
   getStatsProgress: (other: string | null) => Promise<StatsProgress>
+  /** Quién va más rápido en el campus, con esos filtros, por páginas. */
+  getStatsRanking: (query: RankingQuery) => Promise<StatsRanking>
   // --- Red de correcciones
   /** Quién ha corregido a quién en el campus, con los filtros que se pasen. */
   getNetwork: (params: NetworkParams) => Promise<NetworkGraph>

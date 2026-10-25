@@ -261,6 +261,15 @@ export const realApi: Api = {
   getHelpStats: (period) => getJson(`/stats?period=${period}`),
   getStatsProgress: (other) =>
     getJson(`/stats/progress${other === null ? '' : `?with=${encodeURIComponent(other)}`}`),
+  getStatsRanking: (query) => {
+    const params = new URLSearchParams()
+
+    for (const [key, value] of Object.entries(query)) {
+      if (value !== null) params.set(key, String(value))
+    }
+
+    return getJson(`/stats/ranking?${params.toString()}`)
+  },
   getHealth: () => getJson('/me/health'),
   declarePace: (ref) => sendJson('PUT', '/me/health/pace', ref),
 

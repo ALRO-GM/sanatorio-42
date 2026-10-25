@@ -63,6 +63,8 @@ export type ApiUser = {
   last_name?: string | null
   /** `false` para cuentas congeladas o que ya no cursan. Lleva `?` en la API. */
   'active?'?: boolean | null
+  /** Si 42 la tiene por antigua alumna: terminó el common core (`docs/blackhole.md`). */
+  'alumni?'?: boolean | null
   /** Última modificación en 42. Es lo que permite pedir solo lo que ha cambiado. */
   updated_at?: string | null
   /** Solo en el perfil completo (`/v2/me`, `/v2/users/:login`). */
@@ -159,6 +161,11 @@ export type ApiCursusUser = {
 export type ApiCursusMember = {
   id: number
   begin_at?: string | null
+  /** Cuándo salió del cursus: lo pone 42 al tragárselo el black hole o al irse. */
+  end_at?: string | null
+  blackholed_at?: string | null
+  /** `Cadet` mientras hace el common core; `Transcender`, `Alumni` (o `Member`) al terminarlo. */
+  grade?: string | null
   user?: ApiUser | null
 }
 

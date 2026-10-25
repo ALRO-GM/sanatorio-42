@@ -24,6 +24,8 @@ const ALLOWED: Record<string, string> = {
   'modules/replica/quota.ts': 'la cuota misma',
   'modules/replica/syncer.ts': 'el bucle que copia el campus',
   'modules/replica/pool-members.ts': 'los piscineros en curso de cada campus (docs/piscineros.md)',
+  'modules/replica/core-cursus.ts':
+    'grado, fin y black hole del 42cursus de cada campus (docs/blackhole.md)',
   'modules/network/index.ts': 'cableado del módulo',
   'modules/network/network.sync.ts': 'la copia de las correcciones, por páginas',
   'modules/exams/index.ts': 'cableado del módulo',

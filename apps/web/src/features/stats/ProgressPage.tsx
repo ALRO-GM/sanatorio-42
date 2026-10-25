@@ -2,10 +2,12 @@ import { useState } from 'react'
 import type { PointerEvent } from 'react'
 
 import type {
+  CoreTrack,
   ProgressGroup,
   ProgressLine,
   ProgressMeasure,
   ProgressPlan,
+  ProgressPopulation,
   ProgressScope,
   StatsProgress,
 } from '@sanatorio/contracts'
@@ -18,15 +20,21 @@ import { PillGroup } from '../../shared/ui/PillGroup'
 import { InfoTip } from '../../shared/ui/InfoTip'
 import { PersonInput } from '../../shared/ui/PersonInput'
 import { PoolOnly } from '../../shared/ui/PoolOnly'
+import { useFormat } from '../../shared/i18n/useFormat'
+import { ProgressRanking } from './ProgressRanking'
 
 const WIDTH = 640
 const HEIGHT = 280
-const PAD = { left: 36, right: 40, top: 12, bottom: 28 }
+// A la izquierda caben los rótulos del eje: «Círculo 6» o «1 786 h».
+const PAD = { left: 64, right: 40, top: 12, bottom: 28 }
 const LAST_DAY = 730
 const MONTH = 730 / 24
 const MEASURES: readonly ProgressMeasure[] = ['circles', 'hours']
 const SCOPES: readonly ProgressScope[] = ['campus', 'all']
 const PLANS: readonly ProgressPlan[] = ['all', 'classic', 'next']
+const POPULATIONS: readonly ProgressPopulation[] = ['finished', 'current', 'blackholed']
+/** Cada cuántas horas va una marca del eje de horas. */
+const HOURS_STEP = 250
 
 const x = (day: number): number => PAD.left + (day / LAST_DAY) * (WIDTH - PAD.left - PAD.right)
 const y = (value: number): number =>
@@ -58,8 +66,11 @@ function pathOf(days: readonly number[], line: ProgressLine): string {
  */
 export function ProgressPage() {
   const { t } = useI18n()
+  const { number } = useFormat()
   const [measure, setMeasure] = useState<ProgressMeasure>('circles')
   const [scope, setScope] = useState<ProgressScope>('campus')
+  // Por defecto, quien sigue más quien terminó: la media de la gente que está.
+  const [population, setPopulation] = useState<ProgressPopulation>('current')
   // Sin elegir, el plan de quien mira (C o Python); si no se sabe, los dos.
   const [chosenPlan, setPlan] = useState<ProgressPlan | null>(null)
   const [paces, setPaces] = useState(true)
@@ -92,10 +103,13 @@ export function ProgressPage() {
             t(`stats.progress.measure.${value}`),
           )}
           <p className="hint progress-measure-hint">
-            {t(`stats.progress.measure.${measure}.hint`)}
+            {t(`stats.progress.measure.${measure}.hint`, { n: number(data?.axis.hours ?? 0) })}
           </p>
           {pills(t('stats.progress.scope'), SCOPES, scope, setScope, (value) =>
             t(`stats.progress.scope.${value}`),
+          )}
+          {pills(t('stats.progress.population'), POPULATIONS, population, setPopulation, (value) =>
+            t(`stats.progress.population.${value}`),
           )}
           {pills(t('stats.progress.plan'), PLANS, plan, setPlan, (value) =>
             t(`stats.progress.plan.${value}`),
@@ -154,20 +168,57 @@ export function ProgressPage() {
             data={data}
             measure={measure}
             scope={scope}
+            population={population}
             plan={plan}
             paces={paces}
             other={other}
           />
         )}
       </article>
+      <ProgressRanking />
     </section>
   )
+}
+
+/** Las marcas del eje vertical: dónde (en %) y qué dicen. */
+function axisTicks(
+  data: StatsProgress,
+  measure: ProgressMeasure,
+  t: ReturnType<typeof useI18n>['t'],
+  number: (value: number) => string,
+): { at: number; label: string }[] {
+  if (measure === 'circles') {
+    // Al terminar cada círculo: con siete que pesan igual, cada uno es 1/7.
+    return [
+      { at: 0, label: t('stats.progress.axisStart') },
+      ...data.axis.circles.map((at, circle) => ({
+        at,
+        label: t('stats.progress.axisCircle', { n: circle }),
+      })),
+    ]
+  }
+
+  // En horas del plan de quien mira; cada línea va en % de su propio plan.
+  const total = data.axis.hours
+  const ticks: { at: number; label: string }[] = []
+
+  if (total <= 0) return [{ at: 0, label: t('stats.progress.hours', { n: 0 }) }]
+  for (let hours = 0; hours < total - HOURS_STEP / 2; hours += HOURS_STEP) {
+    ticks.push({
+      at: (hours / total) * 100,
+      label: t('stats.progress.hours', { n: number(hours) }),
+    })
+  }
+  ticks.push({ at: 100, label: t('stats.progress.hours', { n: number(total) }) })
+
+  return ticks
 }
 
 function ProgressChart({
   data,
   measure,
   scope,
+  population,
   plan,
   paces,
   other,
@@ -175,11 +226,13 @@ function ProgressChart({
   data: StatsProgress
   measure: ProgressMeasure
   scope: ProgressScope
+  population: ProgressPopulation
   plan: ProgressPlan
   paces: boolean
   other: string | null
 }) {
   const { t } = useI18n()
+  const { number } = useFormat()
   const [hover, setHover] = useState<number | null>(null)
   const mine = data.me?.[measure] ?? null
   const theirs = data.other?.line[measure] ?? null
@@ -188,7 +241,13 @@ function ProgressChart({
   const averageOf = (one: ProgressPlan, key: string, label: string) => {
     const group: ProgressGroup = `${scope}-${one}`
 
-    return { key, label: t(label, { n: data.people[group] }), line: data.averages[measure][group] }
+    return {
+      key,
+      label: t(label, { n: data.people[population][group] }),
+      line: data.averages[measure][population][group],
+      // Las horas de su plan, para pasar el % a horas en la ficha.
+      hours: one === 'all' ? null : data.axis.planHours[one],
+    }
   }
   const averages =
     plan === 'all'
@@ -198,10 +257,23 @@ function ProgressChart({
         ]
       : [averageOf(plan, 'average', 'stats.progress.average')]
   const series = [
-    { key: 'me', label: t('stats.progress.me'), line: mine },
+    { key: 'me', label: t('stats.progress.me'), line: mine, hours: data.axis.hours },
     ...averages,
-    { key: 'other', label: data.other?.login ?? '', line: theirs },
-  ].filter((each): each is { key: string; label: string; line: ProgressLine } => each.line !== null)
+    { key: 'other', label: data.other?.login ?? '', line: theirs, hours: null },
+  ].filter(
+    (each): each is { key: string; label: string; line: ProgressLine; hours: number | null } =>
+      each.line !== null,
+  )
+  const tracks: readonly CoreTrack[] = plan === 'all' ? ['classic', 'next'] : [plan]
+  const unknown = tracks.reduce((sum, track) => sum + data.census[scope][track].unknown, 0)
+  const ticks = axisTicks(data, measure, t, number)
+  /** «48 %» y, por horas, «48 % · 690 h» con las horas del plan de esa línea. */
+  const valueOf = (value: number | null | undefined, hours: number | null): string =>
+    value === null || value === undefined
+      ? '—'
+      : measure === 'hours' && hours !== null
+        ? `${number(value)} % · ${t('stats.progress.hours', { n: number(Math.round((value / 100) * hours)) })}`
+        : `${number(value)} %`
 
   const onMove = (event: PointerEvent<SVGSVGElement>): void => {
     const box = event.currentTarget.getBoundingClientRect()
@@ -223,6 +295,7 @@ function ProgressChart({
       {other !== null && data.other === null && (
         <p className="hint">{t('stats.progress.noOther', { login: other })}</p>
       )}
+      {unknown > 0 && <p className="hint">{t('stats.progress.unknown', { n: unknown })}</p>}
       <div className="progress-chart">
         <svg
           viewBox={`0 0 ${String(WIDTH)} ${String(HEIGHT)}`}
@@ -233,11 +306,11 @@ function ProgressChart({
             setHover(null)
           }}
         >
-          {[0, 25, 50, 75, 100].map((value) => (
-            <g key={value} className="progress-grid">
-              <line x1={PAD.left} x2={WIDTH - PAD.right} y1={y(value)} y2={y(value)} />
-              <text x={PAD.left - 6} y={y(value)} textAnchor="end" dominantBaseline="middle">
-                {value} %
+          {ticks.map((tick) => (
+            <g key={tick.label} className="progress-grid">
+              <line x1={PAD.left} x2={WIDTH - PAD.right} y1={y(tick.at)} y2={y(tick.at)} />
+              <text x={PAD.left - 6} y={y(tick.at)} textAnchor="end" dominantBaseline="middle">
+                {tick.label}
               </text>
             </g>
           ))}
@@ -315,7 +388,7 @@ function ProgressChart({
             {series.map((each) => (
               <span key={each.key}>
                 <i className={`progress-swatch ${each.key}`} /> {each.label}:{' '}
-                {each.line[hover] ?? '—'} %
+                {valueOf(each.line[hover], each.hours)}
               </span>
             ))}
           </div>

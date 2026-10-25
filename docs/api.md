@@ -1769,7 +1769,7 @@ GET /stats?period=month|all  → HelpStats: { period, sections: StatsSection[] }
 ```
 
 - Una `StatsSection` por sección, en este orden: `consulta`, `tablon`,
-  `terapia`, `pizarras`, `notgames` y `ritmo`. Cada una trae `totals` (cifras del campus,
+  `terapia`, `pizarras` y `notgames`. Cada una trae `totals` (cifras del campus,
   `{ key, value }`), `ranking` (los 10 primeros) y `me` (tu puesto, aunque no
   entres en los 10; `null` si no sales).
 - Cada fila: `rank` (empates en las dos cifras comparten puesto), `login`,
@@ -1780,13 +1780,50 @@ GET /stats?period=month|all  → HelpStats: { period, sections: StatsSection[] }
   pizarras ya empezadas (extra: pizarras) y partidas ganadas de Not-games
   (extra: aciertos). Quien tiene 0 no sale.
 - «Este mes» empieza el día 1 en UTC, como la clasificación de XP.
-- La última sección es `ritmo` (#79 del buzón): quién va más rápido en el curso
-  según el sistema de pace, no por número de proyectos. `value` es el % del
-  curso (lo que suma el último círculo completado con los plazos del pace de 24
-  meses) y `extra`, el pace más rápido que habría cumplido desde que empezó (0:
-  más lento que 24). Ordena de pace más rápido a más lento y, a igual pace, por
-  % del curso. No depende del periodo. Sale de `user_levels.begin_at` y
-  `user_tracks.ranks` (`modules/stats/pace.rules.ts`).
+- Quién va más rápido (antes la sección `ritmo`) está desde el 2026-10-25 en
+  el Avance: `GET /stats/ranking`.
+
+## Avance (`modules/stats`, Datos → Avance)
+
+```
+GET /stats/progress?with=login → StatsProgress. Tu avance, las medias y los paces.
+GET /stats/ranking?by=circle|circles|hours&plan=all|classic|next&kickoff=AAAA-MM&cohort=only|since
+                  &circleMin=0&circleMax=7&pctMin=0&pctMax=100&offset=0&limit=50 → StatsRanking.
+```
+
+- Tipos en `packages/contracts/src/stats.ts`; reglas en `modules/stats/progress.rules.ts`
+  (avance), `blackhole.rules.ts` (estado de cada cual) y `ranking.rules.ts`.
+- **Estado** (`CoreStatus`, `docs/blackhole.md`): `finished` (grado `Transcender`,
+  `Alumni` o `Member`), `blackholed` (con `end_at` de hace 30 días o más y la
+  cuenta cerrada), `active` (sin `end_at`, cuenta activa y fecha de black hole
+  futura o algo hecho en los últimos 120 días) y `unknown` (lo demás, o sin
+  copia del 42cursus). Sale de `core_cursus`, que copia
+  `GET /v2/cursus/21/cursus_users` por campus una vez al día.
+- `StatsProgress.averages[medida][población][grupo]`: `population` es
+  `finished`, `current` (en curso + terminado) o `blackholed`; `unknown` no entra
+  en ninguna. `people` tiene la misma forma, y `census[alcance][plan][estado]`
+  cuenta a todo el mundo, `unknown` incluido. La línea de quien se tragó el
+  black hole acaba el día de su `end_at`. Un punto con menos de 10 personas es `null`.
+- **Horas**: cada cual sobre su propio plan, con las horas de la versión que
+  hizo de cada proyecto (la vieja o la de `42next-`, o el que eligió de un
+  grupo); de lo que no ha hecho, las del más corto. Las dos versiones de un
+  proyecto son una sola casilla (`VERSIONS` de `replica/common-core.ts`).
+- `axis.circles[n]`: el % (por círculos) de tener completos los círculos 0…n
+  con el plan de quien mira, para marcar los círculos en el eje. `axis.hours`:
+  las horas del common core de quien mira; `axis.planHours`, las de cada plan
+  con lo más corto (en octubre de 2026, C 1 786 h y Python 1 436 h, sin
+  contar lo que el plan nuevo aún no ha aprendido del círculo 6).
+- `GET /stats/ranking`: gente del campus de quien mira que sigue o terminó
+  (nunca `blackholed` ni `unknown`). Quien terminó cuenta como círculo 7 y
+  100 %. Ordena por `circle` (desempata el % de círculos y luego el de horas),
+  `circles` o `hours`; mismas cifras, mismo puesto. `pctMin`/`pctMax` filtran
+  por el % de lo que ordena (el de círculos con `circle`). `kickoff` es el mes
+  de entrada al 42cursus; `cohort=since` incluye los kickoffs siguientes.
+  `limit` hasta 50; `me` es tu fila aunque no salga en la página (`null` si no
+  entras con esos filtros). `kickoffs` cuenta la gente de cada mes con el plan
+  elegido. Quien no ves (mundos separados, personas ocultas) no sale ni ocupa
+  puesto. Un mínimo mayor que su máximo, o algo fuera de rango, es `400`.
+- Lo calculado se guarda 30 minutos por campus.
 
 ## Not-games (`modules/quiz`)
 

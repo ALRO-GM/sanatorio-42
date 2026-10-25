@@ -225,9 +225,8 @@ Una pestaña en Ayuda con lo que se mueve en el campus en cada sección (sala de
 espera, tablón, terapia, pizarras y Not-games), del mes o desde siempre, y la
 clasificación de cada una con la foto de cada cual: quién ayuda más en sesiones
 validadas, quién resuelve más dudas, quién va a más terapias, quién reúne a más
-gente en sus pizarras y quién gana más partidas. Y, aparte, quién va más rápido
-en el curso según el sistema de pace (el % del curso completado y a qué pace). Tu fila sale marcada aunque no
-estés entre los diez primeros. Sale desde el modo normal: el simplificado no
+gente en sus pizarras y quién gana más partidas. Tu fila sale marcada aunque no
+estés entre los diez primeros (quién va más rápido en el curso está en el Avance). Sale desde el modo normal: el simplificado no
 enseña rankings.
 
 ### Calendario
@@ -262,7 +261,17 @@ Una pestaña en Datos con tu avance desde que empezaste, frente a la media (del
 campus o de todos, de un plan o de los dos), a lo que pide cada pace y a quien
 quieras comparar. **Por círculos**: el % aprobado de cada círculo, con todos sus
 proyectos, y cada círculo pesa igual. **Por horas estimadas**: las horas que 42
-estima que dura cada proyecto aprobado, sobre las de todo el common core.
+estima que dura cada proyecto aprobado, sobre las de tu propio plan (con la
+versión de cada proyecto que hiciste); el eje va en horas de tu plan. La media
+se elige por población: quien terminó, quien sigue más quien terminó (por
+defecto) o quien se tragó el black hole, decidido con datos de 42 que no
+engañan (`docs/blackhole.md`); quien no se sabe seguro no entra.
+
+Debajo, **quién va más rápido** en tu campus: por el círculo en el que está
+cada cual o por el % hecho (por círculos o por horas), con filtros de plan,
+kickoff (solo ese o ese y los siguientes) y rangos de círculo y de %. Sin
+quien se tragó el black hole. Tu fila se queda fija abajo hasta que llegas a
+ella y arriba cuando la pasas.
 
 ### Red de correcciones
 

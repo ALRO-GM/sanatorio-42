@@ -17,7 +17,8 @@ const PERIODS = ['month', 'all'] as const satisfies readonly LeaderboardPeriod[]
 /**
  * Estadísticas de Ayuda: qué se mueve en el campus en cada sección (sala de
  * espera, tablón, terapia, pizarras y Not-games) y quién más lo mueve, del mes
- * o de siempre. Las cuentas son de la API.
+ * o de siempre. Las cuentas son de la API. Quién va más rápido en el curso
+ * está en el Avance (`ProgressRanking`).
  */
 export function HelpStatsPage({ me }: { me: string }) {
   const { t } = useI18n()
@@ -62,9 +63,7 @@ function SectionCard({ section, me }: { section: StatsSection; me: string }) {
 
   return (
     <article className="card help-stats-card" aria-labelledby={`stats-${section.id}`}>
-      <h3 id={`stats-${section.id}`}>
-        {section.id === 'ritmo' ? t('stats.ritmo.title') : t(`nav.${section.id}`)}
-      </h3>
+      <h3 id={`stats-${section.id}`}>{t(`nav.${section.id}`)}</h3>
       <dl className="help-stats-totals">
         {section.totals.map((total) => (
           <div key={total.key}>
@@ -90,12 +89,7 @@ function SectionCard({ section, me }: { section: StatsSection; me: string }) {
           value={(entry) => (
             <span className="row-count">
               <strong>{t(`stats.${section.id}.value`, { n: entry.value })}</strong>
-              <small>
-                {/* En el ritmo, 0 es «más lento que el pace de 24 meses». */}
-                {section.id === 'ritmo' && entry.extra === 0
-                  ? t('stats.ritmo.slow')
-                  : t(`stats.${section.id}.extra`, { n: entry.extra })}
-              </small>
+              <small>{t(`stats.${section.id}.extra`, { n: entry.extra })}</small>
             </span>
           )}
         />

@@ -13,6 +13,7 @@
  * | `/v2/projects_users?filter[campus]=:id`            | Estado **y** persona en la misma fila. Admite `filter[project_id]`, `filter[status]` y `range[updated_at]`. **Ignora `sort`**: el orden es el que quiera la API. |
  * | `/v2/users/:login/projects_users`                  | Los proyectos de una persona. Solo como último recurso: el login ya los trae en `/v2/me`. |
  * | `/v2/campus`                                       | 54 campus, una página. |
+ * | `/v2/cursus/21/cursus_users?filter[campus_id]=:id`  | El 42cursus entero del campus, con `grade`, `end_at`, `blackholed_at` y la persona (`active?`, `alumni?`). Madrid: 2 598 filas. |
  * | `/v2/me`                                           | Necesita token de **usuario**. Va en `auth/oauth-client.ts`, no aquí. |
  * | `?filter[project_id]=a,b`                          | Solo devuelve los del primer id. Un proyecto por petición. |
  *
@@ -263,6 +264,20 @@ export class FortyTwoClient {
 
     return this.requestPage<ApiCursusMember>(
       `/cursus/${PISCINE_CURSUS_ID}/cursus_users?${params.join('&')}`,
+    )
+  }
+
+  /**
+   * `GET /v2/cursus/21/cursus_users` de un campus, **una página**: todo su
+   * 42cursus, con grado, fin y black hole (`docs/blackhole.md`). Madrid son
+   * unas 26 páginas de 100.
+   */
+  async getCoreCursusPage(query: {
+    campusId: number
+    page: number
+  }): Promise<Page<ApiCursusMember>> {
+    return this.requestPage<ApiCursusMember>(
+      `/cursus/${CORE_CURSUS_ID}/cursus_users?filter[campus_id]=${query.campusId}&page=${query.page}&per_page=${this.pageSize}`,
     )
   }
 

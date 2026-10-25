@@ -61,6 +61,7 @@ describe('migraciones', () => {
       'clicker_cheats',
       'clicker_clicks',
       'conversation_marks',
+      'core_cursus',
       'corrections',
       'countdown_dismissals',
       'countdown_notices',

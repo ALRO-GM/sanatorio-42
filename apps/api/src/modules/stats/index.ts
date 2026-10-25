@@ -1,21 +1,42 @@
 /**
  * Módulo `stats`: las estadísticas de Ayuda (sala de espera, tablón, terapia,
- * pizarras y Not-games), con la clasificación de cada sección. Solo lee.
+ * pizarras y Not-games), con la clasificación de cada sección, y el Avance de
+ * Datos (la gráfica y quién va más rápido). Solo lee.
  */
+
+import { z } from 'zod'
 
 import { NO_POOL, seesFor, visibleTo } from '../../core/audience.js'
 import type { Audience } from '../../core/audience.js'
 import type { Db } from '../../core/db/database.js'
 import type { AppModule } from '../../core/module.js'
 import { createProgressService } from './progress.service.js'
-import {
-  createPaceRepository,
-  createProgressRepository,
-  createStatsRepository,
-} from './stats.repository.js'
+import { createProgressRepository, createStatsRepository } from './stats.repository.js'
 import { createStatsService } from './stats.service.js'
 import type { StatsService } from './stats.service.js'
 import { given } from '../../core/options.js'
+import { parse } from '../../core/validation.js'
+
+/** Los filtros de `GET /stats/ranking`. */
+const rankingQuery = z
+  .object({
+    by: z.enum(['circle', 'circles', 'hours']).default('circle'),
+    plan: z.enum(['all', 'classic', 'next']).default('all'),
+    kickoff: z
+      .string()
+      .regex(/^\d{4}-(0[1-9]|1[0-2])$/)
+      .optional(),
+    cohort: z.enum(['only', 'since']).default('only'),
+    circleMin: z.coerce.number().int().min(0).max(7).default(0),
+    circleMax: z.coerce.number().int().min(0).max(7).default(7),
+    pctMin: z.coerce.number().min(0).max(100).default(0),
+    pctMax: z.coerce.number().min(0).max(100).default(100),
+    offset: z.coerce.number().int().min(0).max(100_000).default(0),
+    limit: z.coerce.number().int().min(1).max(50).default(50),
+  })
+  .refine((query) => query.circleMin <= query.circleMax && query.pctMin <= query.pctMax, {
+    message: 'el mínimo no puede pasar del máximo',
+  })
 
 export type StatsModule = AppModule & { service: StatsService }
 
@@ -29,7 +50,6 @@ export function createStatsModule(deps: {
 }): StatsModule {
   const service = createStatsService({
     stats: createStatsRepository(deps.db),
-    paces: createPaceRepository(deps.db),
     ...given({ now: deps.now }),
   })
 
@@ -61,6 +81,37 @@ export function createStatsModule(deps: {
             })),
           ),
         })
+      })
+
+      /**
+       * `GET /stats/ranking?by=&plan=&kickoff=&cohort=&circleMin=&circleMax=&pctMin=&pctMax=&offset=&limit=`
+       * → quién va más rápido en el campus, por páginas, con el puesto de quien mira.
+       */
+      app.get('/stats/ranking', async (request, reply) => {
+        reply.header('Cache-Control', 'private, max-age=60')
+
+        const query = parse(rankingQuery, request.query)
+        const actor = await session.actor(request)
+        // Mundos separados y personas ocultas: quien no se ve, no ocupa puesto.
+        const sees = await seesFor(deps.audience ?? NO_POOL, actor)
+
+        return reply.send(
+          await progress.ranking(
+            actor,
+            {
+              by: query.by,
+              plan: query.plan,
+              kickoff: query.kickoff ?? null,
+              cohort: query.cohort,
+              circleMin: query.circleMin,
+              circleMax: query.circleMax,
+              pctMin: query.pctMin,
+              pctMax: query.pctMax,
+            },
+            { offset: query.offset, limit: query.limit },
+            sees,
+          ),
+        )
       })
 
       /** `GET /stats/progress?with=login` → el avance a lo largo del tiempo, con medias y paces. */

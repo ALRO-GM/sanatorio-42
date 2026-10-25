@@ -94,3 +94,14 @@ export const CHOICES: Readonly<Record<string, readonly string[]>> = {
   'python-05': ['python-module-05', 'python-module-05-bis'],
   'python-06': ['python-module-06', 'python-module-06-bis'],
 }
+
+/**
+ * Versiones de un mismo proyecto (la de siempre y la del plan nuevo,
+ * `42next-…`): quien hizo una tiene hecho el hueco, sea del plan que sea. Salen
+ * de la tabla de arriba: los proyectos con más de un slug.
+ */
+export const VERSIONS: Readonly<Record<string, readonly string[]>> = Object.fromEntries(
+  COMMON_CORE.flat()
+    .filter((project) => project.slugs.length > 1)
+    .map((project) => [`version-${project.key}`, project.slugs]),
+)
