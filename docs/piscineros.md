@@ -49,6 +49,35 @@ ni de un permiso concedido (`modules/pool/pool.keys.ts`). Una ruta que no está
 en esa tabla queda cerrada para piscineros, y un test exige que cada ruta nueva
 se apunte en ella (`tests/integration/pool-gate.test.ts`).
 
+## Ver como piscinero
+
+Pedido por Alberto el 2026-10-25. En la pestaña **Piscina** del panel, **Ver
+como piscinero** enseña la web exactamente como la vería un piscinero del
+campus de quien administra, con los permisos **guardados** (lo que no se haya
+guardado no cuenta). Funciona con la piscina cerrada, para probar antes de
+abrirla.
+
+- `POST /admin/pool/preview` (rutas en `modules/auth/auth.routes.ts`, porque
+  lo que hacen es volver a firmar la cookie): pide lo mismo que `PUT
+  /admin/pool` (administrar y el segundo factor) y firma la cookie con
+  `aud: 'pool'` y la marca `preview: true`. La caducidad no cambia.
+- Mientras dura es un piscinero a todos los efectos: el corte de la API
+  (también todo el panel, que da 403), los mundos separados, su campus de casa
+  y `admin: false` en `actor()`, así que tampoco modera.
+- La web pinta arriba del todo una franja fija, «Estás viendo Sanatorio como un
+  piscinero · Volver» (`app/PoolPreviewBar.tsx`), con `preview: true` de
+  `GET /pool/access`. «Volver» llama a `POST /pool/preview/exit`, que firma
+  otra vez la cookie como estudiante, y la web se recarga en el panel.
+- La salida es de la base de los piscineros, pero solo hace algo con la marca
+  firmada y si la persona sigue administrando. Un piscinero de verdad no la
+  tiene (y añadirla rompe la firma): recibe un 403 y sigue siendo piscinero
+  (`tests/integration/pool-preview.test.ts`).
+- Lo que no es igual: quien administra no está en `pool_members`, así que no
+  se ve a sí mismo en el mapa ni en el buscador, como un piscinero recién
+  llegado que aún no se ha copiado. Si deja de administrar estando dentro, no
+  puede volver: sale de la cuenta y entra otra vez (como estudiante).
+- API de mentira: `localStorage.mock_pool_preview = 'true'` es la vista previa.
+
 ## Estado (2026-10-25)
 
 Hecho: entrada (fase 1), permisos (fase 2) y separación de datos (fase 3). Los

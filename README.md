@@ -376,7 +376,10 @@ a una versión solo para piscineros si quien administra la abre; el resto
 En el panel, pestaña **Piscina**: abrir o cerrar la entrada, el aviso para
 piscineros con la piscina cerrada y, pestaña a pestaña y elemento a elemento,
 lo que pueden ver (también Code Clicker, Pomodoro, buzón, buscador,
-comunicados). La API corta lo que no se permite, no solo la web.
+comunicados). La API corta lo que no se permite, no solo la web. Con **Ver
+como piscinero**, quien administra ve la web como la vería un piscinero de su
+campus, con lo guardado (también con la piscina cerrada), y vuelve desde la
+franja de arriba.
 
 Mundos separados: un estudiante no ve a ningún piscinero, y un piscinero solo
 ve a los piscineros de su campus, en el mapa, el buscador, las fichas, la sala

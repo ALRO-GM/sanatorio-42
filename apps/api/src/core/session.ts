@@ -27,6 +27,12 @@ export type SessionUser = {
    * a lo que permite el panel (`docs/piscineros.md`).
    */
   role: 'student' | 'pool' | 'staff'
+  /**
+   * `true` en una sesión `pool` que es de alguien que administra viendo la web
+   * como un piscinero (`POST /admin/pool/preview`). Va firmado; solo con esto
+   * se puede volver a estudiante (`POST /pool/preview/exit`).
+   */
+  preview?: true
 }
 
 export type SessionReader = {

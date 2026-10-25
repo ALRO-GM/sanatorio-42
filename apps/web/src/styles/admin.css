@@ -869,3 +869,58 @@ dialog.data-review h3 {
 .pool-items .muted {
   opacity: 0.55;
 }
+.pool-preview {
+  display: grid;
+  justify-items: start;
+  gap: 0.35rem;
+  margin-top: 1rem;
+}
+
+/* ── La franja de la vista de piscinero (`app/PoolPreviewBar.tsx`) ──────────
+   Fija arriba y por encima de todo (también de la cabecera y las ventanas):
+   quien administra no debe olvidar que está viendo la web de otra manera. El
+   color es el de aviso; el texto oscuro, igual en los dos temas. Deja su hueco
+   arriba y la cabecera pegajosa se coloca debajo. */
+:root {
+  --pool-preview-height: 2.25rem;
+}
+.pool-preview-bar {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  height: var(--pool-preview-height);
+  padding: 0 0.75rem;
+  background: var(--warn);
+  color: #1b1300;
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.pool-preview-text,
+.pool-preview-failed {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pool-preview-failed {
+  font-weight: 400;
+}
+.pool-preview-bar button {
+  flex: none;
+  padding: 0.1rem 0.7rem;
+  border: 1px solid currentcolor;
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+:root[data-pool-preview='on'] body {
+  padding-top: var(--pool-preview-height);
+}
+:root[data-pool-preview='on'] .appbar {
+  top: var(--pool-preview-height);
+}

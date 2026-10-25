@@ -110,11 +110,16 @@ export function createPoolService(options: PoolServiceOptions) {
       return poolAllows(route, (await current()).allowed)
     },
 
-    /** Qué puede ver quien pregunta: todo un estudiante, lo permitido un piscinero. */
-    async access(pool: boolean): Promise<PoolAccess> {
-      return pool
-        ? { pool: true, allow: [...(await current()).allowed] }
-        : { pool: false, allow: null }
+    /**
+     * Qué puede ver quien pregunta: todo un estudiante, lo permitido un
+     * piscinero. `preview`: quien administra, en la vista de piscinero.
+     */
+    async access(pool: boolean, preview = false): Promise<PoolAccess> {
+      if (!pool) return { pool: false, allow: null }
+
+      const allow = [...(await current()).allowed]
+
+      return preview ? { pool: true, allow, preview: true } : { pool: true, allow }
     },
 
     /** El aviso para la portada, sin sesión. */

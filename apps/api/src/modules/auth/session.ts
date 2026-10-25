@@ -107,7 +107,11 @@ export function createSessionReader(options: SessionReaderOptions): SessionReade
           session.role === 'pool'
             ? homeCampus(session)
             : (profile?.campusId ?? homeCampus(session)),
-        admin: access?.admin ?? options.adminLogins.includes(session.login.toLowerCase()),
+        // En la vista de piscinero, quien administra no administra: es un
+        // piscinero a todos los efectos (moderar, borrar lo de otros…).
+        admin:
+          session.preview !== true &&
+          (access?.admin ?? options.adminLogins.includes(session.login.toLowerCase())),
         lang: request.headers['x-lang'] === 'en' ? 'en' : 'es',
         ...(session.role === 'pool' ? { pool: true } : {}),
       }
