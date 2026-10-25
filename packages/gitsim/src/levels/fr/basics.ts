@@ -84,7 +84,7 @@ export const BASICS_FR: Readonly<Record<string, LevelText>> = {
     title: 'HEAD : là où tu es',
     goal: 'Reviens sur main et fais un commit : main et feature divergent.',
     theory: {
-      what: 'HEAD, c’est là où tu es : en général, il pointe vers une branche, et la branche vers un commit. Quand tu fais un commit, c’est la branche pointée par HEAD qui avance.',
+      what: 'HEAD indique où tu es : en général, elle pointe vers une branche, et la branche vers un commit. Quand tu fais un commit, c’est la branche pointée par HEAD qui avance.',
       how: ['git switch main', 'git log --oneline --all'],
       when: 'Tu changes de branche pour travailler sur autre chose sans tout mélanger.',
       looks: 'Deux chemins qui partent du même commit : l’historique bifurque.',
@@ -152,7 +152,7 @@ export const BASICS_FR: Readonly<Record<string, LevelText>> = {
         'git merge b',
       ],
       when: 'Le quotidien d’une équipe : chaque personne sur sa branche, et main qui rassemble le travail.',
-      looks: 'main avance rapidement avec a, puis fait un merge avec b.',
+      looks: 'main avance en fast-forward jusqu’à a, puis fait un commit de merge avec b.',
     },
   },
 }

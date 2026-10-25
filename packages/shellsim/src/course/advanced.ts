@@ -186,7 +186,7 @@ export const ADVANCED: Unit[] = [
     },
     fr: {
       title: 'Conditions : if, test et [[ ]]',
-      goal: 'Écris ~/check.sh : si /etc/peer4u/app.env existe, il affiche ok ; sinon, il affiche falta et sort avec le code 1. Il sera testé avec bash ~/check.sh, avec et sans le fichier.',
+      goal: 'Écris ~/check.sh : si /etc/peer4u/app.env existe, il affiche « ok » ; sinon, il affiche « falta » et sort avec le code 1. Il sera testé avec bash ~/check.sh, avec et sans le fichier.',
       theory: {
         what: 'if lance une commande et regarde son code : 0 veut dire vrai. [ ] (test) vérifie des fichiers (-f, -d), des textes (=, -z) et des nombres (-eq, -gt) ; [[ ]] comprend en plus les motifs et les regex.',
         how: [
@@ -402,7 +402,7 @@ export const ADVANCED: Unit[] = [
         'Écris ~/backup.sh, exécutable.',
         'Il crée ~/backups s’il n’existe pas.',
         'Il archive ~/proyectos dans ~/backups/proyectos-DATE.tar.gz (DATE avec date +%F).',
-        'Il affiche « copia: » suivi du chemin complet du fichier.',
+        'Il affiche le texte espagnol « copia:  » suivi du chemin complet du fichier.',
         'Lance-le une fois.',
       ],
     },
@@ -608,7 +608,7 @@ export const ADVANCED: Unit[] = [
     },
     fr: {
       title: 'Tâches planifiées : cron',
-      goal: 'Programme /home/peer/backup.sh dans ta crontab pour qu’il s’exécute tous les jours à 03:30.',
+      goal: 'Programme /home/peer/backup.sh dans ta crontab pour qu’il s’exécute tous les jours à 3 h 30.',
       theory: {
         what: 'cron lance des commandes à heure fixe. Chaque ligne de la crontab : minute, heure, jour du mois, mois, jour de la semaine et la commande (* veut dire « n’importe lequel », */5 « toutes les 5 »).',
         how: [
@@ -673,10 +673,10 @@ export const ADVANCED: Unit[] = [
       title: 'Boss : panne à trois heures du matin',
       goal: 'Remets nginx et l’API sur pied et vérifie que le site répond.',
       story:
-        'Quelqu’un a déployé une configuration à minuit et est allé se coucher. Maintenant, ni le site ni l’API ne marchent. La personne d’astreinte précédente a laissé une bonne copie de nginx dans /etc/nginx/nginx.conf.bak.',
+        'Quelqu’un a déployé une configuration à minuit et est allé se coucher. Maintenant, ni le site ni l’API ne marchent. La personne d’astreinte précédente a laissé une copie saine de la configuration de nginx dans /etc/nginx/nginx.conf.bak.',
       tasks: [
         'Regarde quels services sont tombés et pourquoi (systemctl, journalctl).',
-        'Répare nginx : remets sa bonne configuration et teste-la avec nginx -t.',
+        'Répare nginx : remets sa configuration saine et teste-la avec nginx -t.',
         'Répare l’API : /etc/peer4u/app.env doit contenir PORT=3000.',
         'Démarre les deux.',
         'Vérifie avec curl que http://localhost/api/health répond.',
@@ -1005,14 +1005,14 @@ export const ADVANCED: Unit[] = [
     },
     fr: {
       title: 'Boss final : avancé',
-      goal: 'Une panne complète de la production, et ce qu’il faut pour qu’elle ne te reprenne plus par surprise : tout le cours, contre la montre. Si tu réussis, tu obtiens le certificat avancé.',
+      goal: 'Une panne complète de la production, et ce qu’il faut pour qu’elle ne te prenne plus par surprise : tout le cours, contre la montre. Si tu réussis, tu obtiens le certificat avancé.',
       story:
-        'Lundi, 9 h. Le site ne charge pas, le disque est plein, quelque chose dévore le CPU et la dernière sauvegarde est sur db1. Et ensuite, on veut que la prochaine fois, une alerte parte toute seule.',
+        'Lundi, 9 h. Le site ne charge pas, le disque est plein, quelque chose dévore le CPU et la dernière sauvegarde est sur db1. Et ensuite, on veut que la prochaine fois, une alerte parte toute seule.',
       tasks: [
-        'Relance nginx (bonne copie dans /etc/nginx/nginx.conf.bak) et l’API (PORT=3000 dans /etc/peer4u/app.env).',
+        'Relance nginx (copie saine dans /etc/nginx/nginx.conf.bak) et l’API (PORT=3000 dans /etc/peer4u/app.env).',
         'Arrête le miner.py de deploy.',
-        'Fais passer le disque sous les 80 % sans supprimer /var/log/peer4u/debug.log.',
-        'Écris ~/bin/salud.sh, exécutable : si curl -sf http://localhost/api/health réussit, il affiche ok ; sinon, il affiche caida et sort avec 1.',
+        'Fais passer le disque sous les 80 % sans supprimer /var/log/peer4u/debug.log.',
+        'Écris ~/bin/salud.sh, exécutable : si curl -sf http://localhost/api/health réussit, il affiche « ok » ; sinon, il affiche « caida » et sort avec 1.',
         'Programme-le dans ta crontab toutes les 5 minutes : */5 * * * * /home/peer/bin/salud.sh',
         'Ramène dans ~/restore/ le dump le plus récent de db1 (/var/backups/db).',
       ],

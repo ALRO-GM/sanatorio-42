@@ -354,7 +354,7 @@ export const BEGINNER: Unit[] = [
       title: 'Créer : mkdir et touch',
       goal: 'Crée ~/deploy avec les dossiers logs, config et releases, et un fichier vide ~/deploy/config/app.env.',
       theory: {
-        what: 'mkdir crée des dossiers (-p crée aussi ceux du milieu et ne se plaint pas s’ils existent déjà) ; touch crée un fichier vide ou le met à l’heure actuelle.',
+        what: 'mkdir crée des dossiers (-p crée aussi ceux du milieu et ne se plaint pas s’ils existent déjà) ; touch crée un fichier vide ou met à jour sa date de modification.',
         how: [
           'mkdir essais',
           'mkdir -p a/b/c',
@@ -420,7 +420,7 @@ export const BEGINNER: Unit[] = [
       title: 'Copier et déplacer : cp et mv',
       goal: 'Garde une copie de /etc/nginx/nginx.conf sous ~/backup/nginx.conf.bak et renomme ~/inbox/report.txt en ~/inbox/informe-octubre.txt.',
       theory: {
-        what: 'cp copie (cp -r pour des dossiers entiers) ; mv déplace ou renomme : c’est la même chose, changer le chemin.',
+        what: 'cp copie (cp -r pour des dossiers entiers) ; mv déplace ou renomme (c’est la même opération : changer le chemin).',
         how: [
           'cp source destination',
           'cp nginx.conf nginx.conf.bak      # sauvegarde avant de modifier',
@@ -561,7 +561,7 @@ export const BEGINNER: Unit[] = [
     },
     fr: {
       title: 'Écrire : echo, > et >>',
-      goal: 'Crée ~/motd.txt avec deux lignes : « Bienvenida a web1 » et « Mantenimiento: domingo 03:00 ».',
+      goal: 'Crée ~/motd.txt avec ces deux lignes, à recopier telles quelles : « Bienvenida a web1 » et « Mantenimiento: domingo 03:00 ».',
       theory: {
         what: 'echo écrit un texte. > envoie la sortie dans un fichier (en le vidant d’abord) ; >> l’ajoute à la fin ; 2> envoie les erreurs. C’est ce qu’on appelle une redirection.',
         how: [
@@ -724,7 +724,7 @@ export const BEGINNER: Unit[] = [
       title: 'Boss : la release v2',
       goal: 'Installe la v2 dans ~/app/releases/v2, nettoie les fichiers temporaires et marque la v2 comme version actuelle.',
       story:
-        'Le build de la v2 est arrivé dans ~/release-v2, avec des déchets dedans. La démo est dans quatre minutes.',
+        'Le build de la v2 est arrivé dans ~/release-v2, avec des fichiers inutiles dedans. La démo est dans quatre minutes.',
       tasks: [
         'Crée ~/app/releases/v2.',
         'Copie-y les .js et le .css de ~/release-v2.',
@@ -858,7 +858,7 @@ export const BEGINNER: Unit[] = [
         ],
         when: 'Pour rendre un script exécutable ou pour qu’une clé ne soit lisible par personne d’autre (ssh refuse les clés aux permissions trop ouvertes).',
         whenNot:
-          'chmod 777 « pour que ça marche » ouvre la porte à tout le monde : cherche la permission juste.',
+          'chmod 777 « pour que ça marche » ouvre la porte à tout le monde : donne seulement les permissions nécessaires.',
       },
       example: 'Tu changes les permissions de tes notes en octal et en lettres.',
     },
@@ -1033,7 +1033,7 @@ export const BEGINNER: Unit[] = [
         'Nora rejoint ops aujourd’hui. Il lui faut un compte et un dossier que seule son équipe peut voir.',
       tasks: [
         'Crée le groupe ops.',
-        'Crée nora, avec un dossier personnel et dans ops.',
+        'Crée le compte nora, avec un dossier personnel, dans le groupe ops.',
         'Ajoute peer (toi) à ops sans perdre tes groupes.',
         'Crée /srv/ops, appartenant à root et au groupe ops, avec les permissions 770.',
         'Copie ~/runbook.md dedans, en root:ops et avec les permissions 640.',
@@ -1108,11 +1108,11 @@ export const BEGINNER: Unit[] = [
         'Aujourd’hui, personne d’autre n’est d’astreinte. On t’a laissé une mission dans ~/ENCARGO.txt.',
       tasks: [
         'Crée ~/sitio avec les dossiers css et img.',
-        'Écris ~/sitio/index.html avec la ligne « <h1>Hola, peers</h1> ».',
+        'Écris ~/sitio/index.html avec la ligne « <h1>Hola, peers</h1> », telle quelle.',
         'Copie /var/www/html/index.html vers ~/sitio/index.original.html.',
         'Déplace ~/publicar.sh dans ~/sitio/ et mets-lui les permissions 750.',
         'Supprime les .bak de ~/viejo et le dossier ~/viejo/tmp (leeme.txt reste).',
-        'Crée rocio avec un dossier personnel et dans le groupe www-data.',
+        'Crée le compte rocio, avec un dossier personnel, dans le groupe www-data.',
         'Pour finir, affiche les 2 dernières lignes de /var/log/syslog.',
       ],
     },

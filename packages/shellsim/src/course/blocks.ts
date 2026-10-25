@@ -89,7 +89,7 @@ export const BLOCKS: Block[] = [
     },
     fr: {
       title: 'Chercher, archiver et disque',
-      pitch: 'find, xargs, tar, gzip, du et df : le disque plein de 4 h du matin.',
+      pitch: 'find, xargs, tar, gzip, du et df : le disque plein de 4 h du matin.',
     },
     jobs: ['sysadmin', 'sre', 'devops', 'cloud'],
   },
