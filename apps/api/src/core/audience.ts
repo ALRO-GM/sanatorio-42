@@ -55,3 +55,15 @@ export async function seesFor(
     ? (login) => pool.has(login.toLowerCase())
     : (login) => !pool.has(login.toLowerCase())
 }
+
+/** Lo de una lista que es de gente que quien pregunta puede ver (salas, grupos, pizarras…). */
+export async function visibleTo<T>(
+  audience: Audience,
+  actor: Pick<Actor, 'campusId' | 'pool'>,
+  items: readonly T[],
+  loginOf: (item: T) => string,
+): Promise<T[]> {
+  const sees = await seesFor(audience, actor)
+
+  return items.filter((item) => sees(loginOf(item)))
+}

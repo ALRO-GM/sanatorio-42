@@ -165,7 +165,9 @@ export function createMapService(options: MapServiceOptions) {
       if (projectId === undefined) {
         await sync.ensureFresh(actor.campusId)
       } else {
-        actionable = (await peers.findPeers(projectId, actor.campusId)).peers
+        actionable = (
+          await peers.findPeers(projectId, actor.campusId, undefined, actor.pool === true)
+        ).peers
       }
 
       const since = new Date(now() - LOCATION_MAX_AGE_MS).toISOString()

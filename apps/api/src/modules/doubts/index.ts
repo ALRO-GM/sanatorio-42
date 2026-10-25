@@ -3,6 +3,8 @@
  * que mantienen quienes ya lo aprobaron.
  */
 
+import { NO_POOL, visibleTo } from '../../core/audience.js'
+import type { Audience } from '../../core/audience.js'
 import type { Db } from '../../core/db/database.js'
 import type { Notify } from '../../core/events.js'
 import type { AppModule } from '../../core/module.js'
@@ -16,6 +18,8 @@ import type { DoubtsService, DoubtsServiceOptions } from './doubts.service.js'
 import { given } from '../../core/options.js'
 
 type DoubtsModuleDeps = {
+  /** Quién ve a quién: estudiantes y piscineros separados (`docs/piscineros.md`). */
+  audience?: Audience
   db: Db
   replica: ReplicaRepository
   curriculum: Curriculum
@@ -66,7 +70,20 @@ export function createDoubtsModule(deps: DoubtsModuleDeps): DoubtsModule {
     ],
     service,
     routes: (app, context) => {
-      registerDoubtsRoutes(app, context, service)
+      const audience = deps.audience ?? NO_POOL
+
+      // Cada cual, las dudas de gente de su mundo.
+      registerDoubtsRoutes(app, context, {
+        ...service,
+        board: async (actor, projectId) => {
+          const board = await service.board(actor, projectId)
+
+          return {
+            ...board,
+            doubts: await visibleTo(audience, actor, board.doubts, (doubt) => doubt.author),
+          }
+        },
+      })
     },
   }
 }

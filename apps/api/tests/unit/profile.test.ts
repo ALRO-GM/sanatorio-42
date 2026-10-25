@@ -12,6 +12,9 @@ import { levelFor, titleUnlocked } from '../../src/modules/profile/xp.rules.js'
 import { MADRID, TUESDAY_AFTERNOON, actor, expectCode, useCommunity } from '../helpers/community.js'
 import type { Community } from '../helpers/community.js'
 
+/** Quien mira un expediente ajeno: un estudiante cualquiera. */
+const VIEWER = { login: 'quien', campusId: 22, admin: false }
+
 describe('comunidad', () => {
   const community = useCommunity()
   const { helpSession } = community
@@ -133,7 +136,7 @@ describe('comunidad', () => {
 
       await xp.award('eva', 'specialist_help', 'help:1')
 
-      const record = await xp.publicProfile('EVA')
+      const record = await xp.publicProfile(VIEWER, 'EVA')
 
       expect(record).toMatchObject({
         login: 'eva',
@@ -160,8 +163,8 @@ describe('comunidad', () => {
         'title',
         'xp',
       ])
-      await expectCode(xp.publicProfile('nadie'), 'not_found')
-      await expectCode(xp.publicProfile('../etc'), 'not_found')
+      await expectCode(xp.publicProfile(VIEWER, 'nadie'), 'not_found')
+      await expectCode(xp.publicProfile(VIEWER, '../etc'), 'not_found')
       // Su estado de salud sí pregunta a 42 por sus hitos, una vez al día.
       api.calls.length = 0
     })
@@ -178,7 +181,7 @@ describe('comunidad', () => {
       expect(health.declared?.updatedAt).toEqual(expect.any(String))
       // Anotarlo otra vez sustituye lo anterior, y lo ve quien mire su expediente.
       await xp.declarePace(eva, null, { pace: 18, deadline: '2026-12-14' })
-      expect((await xp.publicProfile('eva')).health.declared).toMatchObject({
+      expect((await xp.publicProfile(VIEWER, 'eva')).health.declared).toMatchObject({
         pace: 18,
         deadline: '2026-12-14',
       })

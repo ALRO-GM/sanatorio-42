@@ -4,6 +4,8 @@
  * preguntas de lo que saben los que juegan.
  */
 
+import { NO_POOL, visibleTo } from '../../core/audience.js'
+import type { Audience } from '../../core/audience.js'
 import type { Db } from '../../core/db/database.js'
 import type { AppModule } from '../../core/module.js'
 import { BANK, REVIEW } from './bank/index.js'
@@ -20,6 +22,8 @@ import type { QuizService } from './quiz.service.js'
 import { given } from '../../core/options.js'
 
 type QuizModuleDeps = {
+  /** Quién ve a quién: estudiantes y piscineros separados (`docs/piscineros.md`). */
+  audience?: Audience
   db: Db
   circlesOf: (logins: readonly string[]) => Promise<Map<string, number>>
   imagesOf: (logins: readonly string[]) => Promise<Map<string, string | null>>
@@ -87,8 +91,19 @@ export function createQuizModule(deps: QuizModuleDeps): QuizModule {
       localize: localizeRound,
     },
     routes: (app, context) => {
-      registerQuizRoutes(app, context, service)
-      registerTurnRoutes(app, context, chess)
+      const audience = deps.audience ?? NO_POOL
+
+      // Cada cual, las salas de gente de su mundo.
+      registerQuizRoutes(app, context, {
+        ...service,
+        list: async (actor) =>
+          visibleTo(audience, actor, await service.list(actor), (room) => room.host),
+      })
+      registerTurnRoutes(app, context, {
+        ...chess,
+        list: async (actor) =>
+          visibleTo(audience, actor, await chess.list(actor), (room) => room.host),
+      })
     },
     jobs: [
       {

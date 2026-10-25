@@ -92,6 +92,8 @@ export function createPeersService(options: PeersServiceOptions) {
       projectId: number,
       campusId: number,
       excludeLogin?: string,
+      /** `true` si pregunta un piscinero: solo piscineros (`docs/piscineros.md`). */
+      pool = false,
     ): Promise<PeersResult> {
       assertValidProjectId(projectId)
 
@@ -102,8 +104,14 @@ export function createPeersService(options: PeersServiceOptions) {
       }
 
       const [peers, totalParticipants] = await Promise.all([
-        replica.findPeers({ projectId, campusId, excludeLogin, presenceSince: presenceSince() }),
-        replica.countParticipants(projectId, campusId),
+        replica.findPeers({
+          projectId,
+          campusId,
+          excludeLogin,
+          presenceSince: presenceSince(),
+          pool,
+        }),
+        replica.countParticipants(projectId, campusId, pool),
       ])
 
       const focusing =

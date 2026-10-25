@@ -3,6 +3,8 @@
  * sitio a unas horas, y ficha la asistencia.
  */
 
+import { NO_POOL, visibleTo } from '../../core/audience.js'
+import type { Audience } from '../../core/audience.js'
 import type { Db } from '../../core/db/database.js'
 import type { Notify } from '../../core/events.js'
 import type { AppModule } from '../../core/module.js'
@@ -16,6 +18,8 @@ import { given } from '../../core/options.js'
 
 type TherapyModuleDeps = {
   db: Db
+  /** Quién ve a quién: estudiantes y piscineros separados (`docs/piscineros.md`). */
+  audience?: Audience
   replica: ReplicaRepository
   sync: Syncer
   xp: XpService
@@ -45,7 +49,19 @@ export function createTherapyModule(deps: TherapyModuleDeps): TherapyModule {
     ],
     service,
     routes: (app, context) => {
-      registerTherapyRoutes(app, context, service)
+      const audience = deps.audience ?? NO_POOL
+
+      // Cada cual, los grupos de gente de su mundo.
+      registerTherapyRoutes(app, context, {
+        ...service,
+        list: async (actor, projectId) =>
+          visibleTo(
+            audience,
+            actor,
+            await service.list(actor, projectId),
+            (group) => group.creator,
+          ),
+      })
     },
     jobs: [
       {

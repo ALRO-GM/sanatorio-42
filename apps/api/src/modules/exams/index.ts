@@ -7,6 +7,10 @@
  * exámenes; aquí hay además una copia de fondo de los intentos antiguos.
  */
 
+import { NO_POOL, visibleTo } from '../../core/audience.js'
+import type { Actor } from '../../core/actor.js'
+import type { LiveExam } from '@sanatorio/contracts'
+import type { Audience } from '../../core/audience.js'
 import type { Db } from '../../core/db/database.js'
 import type { AppModule } from '../../core/module.js'
 import type { FortyTwoClient } from '../../integrations/forty-two/client.js'
@@ -22,6 +26,8 @@ import { given } from '../../core/options.js'
 
 type ExamsModuleDeps = {
   db: Db
+  /** Quién ve a quién: estudiantes y piscineros separados (`docs/piscineros.md`). */
+  audience?: Audience
   client: FortyTwoClient
   replica: ReplicaRepository
   agenda: Agenda
@@ -41,6 +47,16 @@ const BACKFILL_EVERY_MS = 60_000
 const LIVE_TICK_MS = 60_000
 
 export function createExamsModule(deps: ExamsModuleDeps): ExamsModule {
+  /** En el examen en vivo, solo la gente del mundo de quien mira. */
+  const seenLive = async (actor: Actor, exam: LiveExam): Promise<LiveExam> => ({
+    ...exam,
+    groups: await Promise.all(
+      exam.groups.map(async (group) => ({
+        ...group,
+        people: await visibleTo(deps.audience ?? NO_POOL, actor, group.people, (one) => one.login),
+      })),
+    ),
+  })
   const exams = createExamsRepository(deps.db)
   const sync = createExamsSync({
     client: deps.client,
@@ -91,7 +107,9 @@ export function createExamsModule(deps: ExamsModuleDeps): ExamsModule {
        * de hoy): quién está apuntado, qué examen hace y su última nota.
        */
       app.get('/exams/live', async (request, reply) => {
-        return reply.send(await live.live(await session.actor(request)))
+        const actor = await session.actor(request)
+
+        return reply.send(await seenLive(actor, await live.live(actor)))
       })
 
       /**
@@ -99,7 +117,9 @@ export function createExamsModule(deps: ExamsModuleDeps): ExamsModule {
        * hace al menos un minuto del último refresco (de quien sea).
        */
       app.post('/exams/live/refresh', async (request, reply) => {
-        return reply.send(await live.refreshNow(await session.actor(request)))
+        const actor = await session.actor(request)
+
+        return reply.send(await seenLive(actor, await live.refreshNow(actor)))
       })
     },
     jobs: [

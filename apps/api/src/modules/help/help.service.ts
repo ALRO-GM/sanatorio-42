@@ -31,6 +31,8 @@ import type {
 import { z } from 'zod'
 
 import type { Actor } from '../../core/actor.js'
+import { NO_POOL, seesFor } from '../../core/audience.js'
+import type { Audience } from '../../core/audience.js'
 import type { Notify } from '../../core/events.js'
 import { domainError } from '../../core/errors.js'
 import { localMoment, zonedInstant } from '../../core/time.js'
@@ -43,6 +45,8 @@ import type { BookingRow, HelpRepository, Span } from './help.repository.js'
 
 type HelpServiceOptions = {
   help: HelpRepository
+  /** Quién ve a quién: nadie se ofrece ni reserva a alguien del otro grupo. */
+  audience?: Audience
   replica: ReplicaRepository
   /** Agenda de 42: de ahí salen las correcciones que pisan la guardia. */
   agenda: Agenda
@@ -577,17 +581,18 @@ export function createHelpService(options: HelpServiceOptions) {
      */
     async offers(actor: Actor): Promise<HelpOffer[]> {
       const moment = await momentIn(actor.campusId)
-      const [days, active, blockers, blocked] = await Promise.all([
+      const [days, active, blockers, blocked, sees] = await Promise.all([
         help.daysIn(actor.campusId, moment.day),
         help.activeIn(actor.campusId, moment.day),
         help.blockersOf(actor.login),
         help.blockedBy(actor.login),
+        seesFor(options.audience ?? NO_POOL, actor),
       ])
       const hidden = new Set([actor.login, ...blockers, ...blocked])
       const offers: HelpOffer[] = []
 
       for (const day of days) {
-        if (hidden.has(day.login)) {
+        if (hidden.has(day.login) || !sees(day.login)) {
           continue
         }
 
@@ -633,10 +638,11 @@ export function createHelpService(options: HelpServiceOptions) {
         )
       }
 
-      const [day, blockers, blocked] = await Promise.all([
+      const [day, blockers, blocked, sees] = await Promise.all([
         help.day(request.helper, moment.day),
         help.blockersOf(actor.login),
         help.blockedBy(actor.login),
+        seesFor(options.audience ?? NO_POOL, actor),
       ])
       const window = day?.windows.find((span) => slot.start >= span.start && slot.end <= span.end)
 
@@ -644,7 +650,8 @@ export function createHelpService(options: HelpServiceOptions) {
         day?.campusId !== actor.campusId ||
         window === undefined ||
         blockers.includes(request.helper) ||
-        blocked.includes(request.helper)
+        blocked.includes(request.helper) ||
+        !sees(request.helper)
       ) {
         throw domainError('not_found', `${request.helper} no se ofrece en esa franja`)
       }

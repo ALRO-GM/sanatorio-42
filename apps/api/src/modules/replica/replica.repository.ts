@@ -74,6 +74,21 @@ const STUDENT_PROJECT = `(${IS_CORE} OR NOT EXISTS (
     WHERE other.user_id = u.id AND ${IS_CORE}
   ))`
 
+/**
+ * La gente del campus de cada mundo (`docs/piscineros.md`): un piscinero ve
+ * a los piscineros en curso (`pool_members`); un estudiante, a los del campus
+ * que no lo son. Va con `audienceWhere` y dos veces el campus en los
+ * argumentos: el del `JOIN` y el del `WHERE`.
+ */
+const audienceJoin = (pool: boolean): string =>
+  pool
+    ? 'pool_members cm ON cm.user_id = u.id AND cm.campus_id = ?'
+    : 'campus_members cm ON cm.user_id = u.id AND cm.campus_id = ?'
+const audienceWhere = (pool: boolean): string =>
+  pool
+    ? "cm.campus_id = ? AND cm.begin_at >= strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-60 days')"
+    : 'u.id NOT IN (SELECT user_id FROM pool_members WHERE campus_id = ?)'
+
 /** Un texto en minúsculas y sin tildes ni diéresis, como se compara al buscar. */
 function plain(text: string): string {
   return text.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase()
@@ -487,6 +502,8 @@ export function createReplicaRepository(db: Db) {
       excludeLogin?: string | undefined
       presenceSince: string
       limit?: number
+      /** `true` si pregunta un piscinero: solo piscineros (`docs/piscineros.md`). */
+      pool?: boolean
     }): Promise<PeerRow[]> {
       const result = await db.execute({
         sql: `SELECT u.login                    AS login,
@@ -498,12 +515,13 @@ export function createReplicaRepository(db: Db) {
                      COALESCE(pf.pre_review, 0) AS pre_review
               FROM project_users pu
               JOIN users u            ON u.id = pu.user_id
-              JOIN campus_members cm  ON cm.user_id = u.id AND cm.campus_id = ?
+              JOIN ${audienceJoin(params.pool === true)}
               LEFT JOIN presence pr   ON pr.user_id = u.id AND pr.seen_at >= ?
               LEFT JOIN availability a ON a.login = u.login
               LEFT JOIN profiles pf    ON pf.login = u.login
               WHERE pu.project_id = ?
                 AND u.login <> ?
+                AND ${audienceWhere(params.pool === true)}
                 AND (
                   (pu.status = 'in_progress' AND u.active = 1)
                   OR (pu.status = 'finished' AND pu.validated = 1
@@ -518,6 +536,7 @@ export function createReplicaRepository(db: Db) {
           params.presenceSince,
           params.projectId,
           params.excludeLogin ?? '',
+          params.campusId,
           params.limit ?? 300,
         ],
       })
@@ -569,13 +588,14 @@ export function createReplicaRepository(db: Db) {
       return result.rows.map((row) => toText(row.login))
     },
 
-    async countParticipants(projectId: number, campusId: number): Promise<number> {
+    async countParticipants(projectId: number, campusId: number, pool = false): Promise<number> {
       const result = await db.execute({
         sql: `SELECT COUNT(DISTINCT pu.user_id) AS total
               FROM project_users pu
-              JOIN campus_members cm ON cm.user_id = pu.user_id AND cm.campus_id = ?
-              WHERE pu.project_id = ?`,
-        args: [campusId, projectId],
+              JOIN users u ON u.id = pu.user_id
+              JOIN ${audienceJoin(pool)}
+              WHERE pu.project_id = ? AND ${audienceWhere(pool)}`,
+        args: [campusId, projectId, campusId],
       })
 
       return toNumber(result.rows[0]?.total)

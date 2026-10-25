@@ -1570,8 +1570,11 @@ PUT /admin/pool    → { open?, message?, allow? } → PoolSettings (solo admins
   `tests/integration/pool-gate.test.ts`).
 - `allow`: los permisos (`PoolKey` en `packages/contracts/src/pool.ts`); sin
   ajustes guardados, `POOL_DEFAULT`.
-- `open: true` da `409` mientras lo de piscina no esté separado de lo de
-  estudiantes (fase 3 de `docs/piscineros.md`).
+- Mundos separados (`core/audience.ts`): un estudiante no ve a ningún
+  piscinero (mapa, fichas, buscador, sala de espera, guardia, clasificaciones,
+  salas, grupos, pizarras, dudas, examen en vivo) y un piscinero solo ve a los
+  piscineros en curso de su campus (`pool_members`, copiados de
+  `GET /v2/cursus/9/cursus_users`). Un piscinero mira siempre su campus.
 
 ## Exámenes (`modules/exams`)
 

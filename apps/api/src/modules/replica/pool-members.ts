@@ -71,6 +71,20 @@ export function createPoolMembers(options: PoolMembersOptions) {
       await save(campusId, [{ user: profile, beginAt }])
     },
 
+    /** Los piscineros en curso de un campus, con su foto: para el buscador de un piscinero. */
+    async peopleIn(campusId: number): Promise<{ login: string; image: string | null }[]> {
+      const result = await db.execute({
+        sql: `SELECT login, image FROM pool_members
+              WHERE campus_id = ? AND begin_at >= ? ORDER BY login`,
+        args: [campusId, iso(now() - AFTER_MS)],
+      })
+
+      return result.rows.map((row) => ({
+        login: toText(row.login),
+        image: typeof row.image === 'string' ? row.image : null,
+      }))
+    },
+
     /** Los logins de los piscineros en curso de un campus. */
     async loginsIn(campusId: number): Promise<string[]> {
       const result = await db.execute({

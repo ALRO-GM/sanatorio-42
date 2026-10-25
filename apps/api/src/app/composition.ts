@@ -212,10 +212,12 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     focus.repository.untilOf(logins, new Date(now()).toISOString())
   // Los módulos avisan sin saber que hay un buzón: `notices` es quien escucha.
   const notify: Notify = (notice) => events.emit('notice', notice)
-  const common = { db, replica: replica.repository, ...clock }
+  // `audience`: quién ve a quién, para los módulos que enseñan gente (`docs/piscineros.md`).
+  const common = { db, replica: replica.repository, audience, ...clock }
   const profile = createProfileModule({
     ...common,
     curriculum: replica.curriculum,
+    poolPeople: (campusId) => replica.poolMembers.peopleIn(campusId),
     events,
     hacker: async (login) => {
       const caught = await late.get('clicker').service.caughtOf(login)
@@ -328,6 +330,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
 
   const exams = createExamsModule({
     db,
+    audience,
     client,
     replica: replica.repository,
     agenda: replica.agenda,
@@ -404,6 +407,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
   const tours = createToursModule({ db, ...clock })
   const stats = createStatsModule({
     db,
+    audience,
     circles: (track) => replica.curriculum.circles(track),
     ...clock,
   })
@@ -423,12 +427,14 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
 
   const quiz = createQuizModule({
     db,
+    audience,
     circlesOf: (logins) => replica.curriculum.circlesOf(logins),
     imagesOf: (logins) => replica.repository.imagesOf(logins),
     ...clock,
   })
   const gitCourse = createGitCourseModule({
     db,
+    audience,
     seatOf: (login) => peers.peers.locationOf(login),
     imagesOf: (logins) => replica.repository.imagesOf(logins),
     questions: quiz.questions,

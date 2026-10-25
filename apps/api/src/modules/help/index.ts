@@ -3,6 +3,7 @@
  * reservas que hay que aceptar, valoración mutua y bloqueos.
  */
 
+import type { Audience } from '../../core/audience.js'
 import type { Db } from '../../core/db/database.js'
 import type { Notify } from '../../core/events.js'
 import type { AppModule } from '../../core/module.js'
@@ -17,6 +18,8 @@ import { given } from '../../core/options.js'
 
 type HelpModuleDeps = {
   db: Db
+  /** Quién ve a quién (`docs/piscineros.md`). */
+  audience?: Audience
   replica: ReplicaRepository
   agenda: Agenda
   xp: XpService
@@ -39,6 +42,7 @@ export function createHelpModule(deps: HelpModuleDeps): HelpModule {
     xp: deps.xp,
     attendance: deps.attendance,
     ...given({
+      audience: deps.audience,
       notify: deps.notify,
       commitments: deps.commitments,
       presenceOf: deps.presenceOf,

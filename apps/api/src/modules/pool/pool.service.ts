@@ -9,7 +9,6 @@ import { z } from 'zod'
 import { assertAdmin } from '../../core/actor.js'
 import type { Actor } from '../../core/actor.js'
 import type { Db } from '../../core/db/database.js'
-import { domainError } from '../../core/errors.js'
 import { parse } from '../../core/validation.js'
 import type { ApiUser } from '../../integrations/forty-two/types.js'
 import { effective, POOL_DEFAULT, POOL_KEYS, poolAllows } from './pool.keys.js'
@@ -19,11 +18,6 @@ type PoolServiceOptions = {
   db: Db
   /** Si alguien administra la web (por configuración o desde el panel): entra siempre. */
   isAdmin: (login: string) => Promise<boolean>
-  /**
-   * Si ya se puede abrir la piscina: hace falta que lo de piscina esté copiado
-   * y separado (fase 3). Hasta entonces, `open` se guarda pero no abre nada.
-   */
-  canOpen?: boolean
   now?: () => number
 }
 
@@ -50,7 +44,6 @@ const settingsSchema = z
 export function createPoolService(options: PoolServiceOptions) {
   const { db } = options
   const now = options.now ?? Date.now
-  const canOpen = options.canOpen ?? false
   let cached: { at: number; settings: PoolSettings; allowed: Set<PoolKey> } | null = null
 
   async function read(): Promise<PoolSettings> {
@@ -64,7 +57,7 @@ export function createPoolService(options: PoolServiceOptions) {
       const known = new Set<string>(POOL_KEYS)
 
       return {
-        open: canOpen && parsed.open === true,
+        open: parsed.open === true,
         message: typeof parsed.message === 'string' ? parsed.message : '',
         // Una clave que ya no existe (se quitó una pestaña) se olvida sin más.
         allow: Array.isArray(parsed.allow)
@@ -139,13 +132,6 @@ export function createPoolService(options: PoolServiceOptions) {
       assertAdmin(actor)
 
       const changes = parse(settingsSchema, input)
-
-      if (changes.open === true && !canOpen) {
-        throw domainError(
-          'conflict',
-          'Aún no se puede abrir: falta separar lo de piscina de lo de estudiantes',
-        )
-      }
 
       const before = await read()
       const next: PoolSettings = {

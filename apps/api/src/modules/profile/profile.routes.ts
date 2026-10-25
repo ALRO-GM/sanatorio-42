@@ -47,10 +47,8 @@ export function registerProfileRoutes(
 
   /** `GET /users/:login/profile` → el expediente público de otra persona. */
   app.get<{ Params: { login: string } }>('/users/:login/profile', async (request, reply) => {
-    // Hace falta sesión para mirarlo, aunque no importe de quién sea.
-    session.user(request)
-
-    return reply.send(await xp.publicProfile(request.params.login))
+    // Quien mira importa: estudiantes y piscineros no se ven entre sí.
+    return reply.send(await xp.publicProfile(await session.actor(request), request.params.login))
   })
 
   /** `GET /me/health` → fechas para saber cómo vas de tiempo: inicio, círculos completados y black hole. */

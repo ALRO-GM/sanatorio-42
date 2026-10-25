@@ -37,6 +37,8 @@ import {
 import type { AchievementId, XpKind } from './xp.rules.js'
 import { day, id, parse } from '../../core/validation.js'
 import { canUseStyle, isStyle, NO_RECORD_STYLE, recordStyleOf } from './styles.rules.js'
+import { NO_POOL, seesFor } from '../../core/audience.js'
+import type { Audience } from '../../core/audience.js'
 import type { Actor } from '../../core/actor.js'
 import { dayOf } from '../../core/time.js'
 
@@ -46,6 +48,10 @@ export type XpServiceOptions = {
   replica: ReplicaRepository
   /** Plan de estudios: de ahí salen los rangos validados y sus fechas. */
   curriculum: Curriculum
+  /** Quién ve a quién: estudiantes y piscineros separados (`docs/piscineros.md`). */
+  audience?: Audience
+  /** Los piscineros en curso de un campus, para el buscador de un piscinero. */
+  poolPeople?: (campusId: number) => Promise<{ login: string; image: string | null }[]>
   /**
    * El título que se ha ganado alguien en Code Clicker por hacer trampas, y las
    * veces que le han pillado. Lo sabe `clicker`.
@@ -116,10 +122,16 @@ export function createXpService(options: XpServiceOptions) {
      *
      * @throws {DomainError} `not_found` si no conocemos a nadie con ese login.
      */
-    async publicProfile(login: string): Promise<PublicProfile> {
+    async publicProfile(actor: Actor, login: string): Promise<PublicProfile> {
       const wanted = login.trim().toLowerCase()
+      const sees = await seesFor(options.audience ?? NO_POOL, actor)
 
-      if (!/^[a-z0-9-]{1,30}$/.test(wanted) || !(await replica.userExists(wanted))) {
+      // Alguien del otro mundo (estudiante o piscinero) no existe para quien mira.
+      if (
+        !/^[a-z0-9-]{1,30}$/.test(wanted) ||
+        !sees(wanted) ||
+        (actor.pool !== true && !(await replica.userExists(wanted)))
+      ) {
         throw domainError('not_found', 'No conocemos a nadie con ese login')
       }
 
@@ -155,7 +167,22 @@ export function createXpService(options: XpServiceOptions) {
 
       if (text.length < 2 || text.length > 40) return []
 
-      return replica.searchUsers(text, actor.campusId, SEARCH_LIMIT)
+      // Un piscinero busca entre los piscineros de su campus, por login.
+      if (actor.pool === true) {
+        const wanted = text.toLowerCase()
+
+        return ((await options.poolPeople?.(actor.campusId)) ?? [])
+          .filter((person) => person.login.includes(wanted))
+          .slice(0, SEARCH_LIMIT)
+          .map((person) => ({ ...person, name: null }))
+      }
+
+      // A un estudiante no le salen piscineros (se pide de más por si los hay).
+      const sees = await seesFor(options.audience ?? NO_POOL, actor)
+
+      return (await replica.searchUsers(text, actor.campusId, SEARCH_LIMIT * 2))
+        .filter((person) => sees(person.login))
+        .slice(0, SEARCH_LIMIT)
     },
 
     /** Expediente completo de quien pregunta. */

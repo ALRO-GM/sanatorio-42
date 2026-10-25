@@ -131,6 +131,12 @@ export async function buildApp(options: BuildOptions = {}): Promise<BuiltApp> {
       const entered = await services.pool.enter(profile)
 
       if (entered.campusId !== null) await services.poolMembers.enter(entered.campusId, profile)
+      // Sus proyectos de piscina, para su sala de espera (sin pasar a ser del campus).
+      await services.repositories.replica.ingestProjectUsers(
+        profile.projects_users ?? [],
+        undefined,
+        profile,
+      )
 
       return entered
     },

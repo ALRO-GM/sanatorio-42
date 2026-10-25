@@ -16,6 +16,9 @@ import { projectUser } from '../helpers/fixtures.js'
 import { MADRID, actor, expectCode, useCommunity } from '../helpers/community.js'
 import type { Community } from '../helpers/community.js'
 
+/** Quien mira un expediente ajeno: un estudiante cualquiera. */
+const VIEWER = { login: 'quien', campusId: 22, admin: false }
+
 describe('reglas de los estilos', () => {
   it('son los mismos que los de la web', async () => {
     // La web es la que tiene los estilos: si cambian allí, que se note aquí.
@@ -62,9 +65,9 @@ describe('estilo del expediente', () => {
   it('quien visita el expediente de acamelo lo ve con su estilo, sin que ella haga nada', async () => {
     const { xp } = services
 
-    expect((await xp.publicProfile('acamelo')).recordStyle).toBe('bichota')
+    expect((await xp.publicProfile(VIEWER, 'acamelo')).recordStyle).toBe('bichota')
     expect((await xp.expediente(actor('acamelo'))).recordStyle).toBe('bichota')
-    expect((await xp.publicProfile('ana')).recordStyle).toBeNull()
+    expect((await xp.publicProfile(VIEWER, 'ana')).recordStyle).toBeNull()
     // El expediente público pide a 42 los hitos de cada cual: es lo esperado.
     community.api.calls.length = 0
   })
@@ -73,24 +76,24 @@ describe('estilo del expediente', () => {
     const { xp } = services
 
     await xp.updateSettings(actor('ana'), { recordStyle: 'espacio' })
-    expect((await xp.publicProfile('ana')).recordStyle).toBe('espacio')
+    expect((await xp.publicProfile(VIEWER, 'ana')).recordStyle).toBe('espacio')
     await expectCode(xp.updateSettings(actor('ana'), { recordStyle: 'bichota' }), 'forbidden')
-    expect((await xp.publicProfile('ana')).recordStyle).toBe('espacio')
+    expect((await xp.publicProfile(VIEWER, 'ana')).recordStyle).toBe('espacio')
 
     // Vuelta a «cada cual con el suyo», y a lo de fábrica.
     await xp.updateSettings(actor('ana'), { recordStyle: 'none' })
-    expect((await xp.publicProfile('ana')).recordStyle).toBeNull()
+    expect((await xp.publicProfile(VIEWER, 'ana')).recordStyle).toBeNull()
     await xp.updateSettings(actor('acamelo'), { recordStyle: 'none' })
-    expect((await xp.publicProfile('acamelo')).recordStyle).toBeNull()
+    expect((await xp.publicProfile(VIEWER, 'acamelo')).recordStyle).toBeNull()
     await xp.updateSettings(actor('acamelo'), { recordStyle: 'default' })
-    expect((await xp.publicProfile('acamelo')).recordStyle).toBe('bichota')
+    expect((await xp.publicProfile(VIEWER, 'acamelo')).recordStyle).toBe('bichota')
 
     // Lo que no es un estilo no entra; y cambiar el estilo no toca lo demás.
     for (const wrong of ['inventado', 'Bichota', '', '../x', 'a'.repeat(40), 7]) {
       await expectCode(xp.updateSettings(actor('ana'), { recordStyle: wrong }), 'invalid_input')
     }
     await xp.updateSettings(actor('ana'), { title: 'paciente' })
-    expect((await xp.publicProfile('ana')).recordStyle).toBeNull()
+    expect((await xp.publicProfile(VIEWER, 'ana')).recordStyle).toBeNull()
     community.api.calls.length = 0
   })
 })

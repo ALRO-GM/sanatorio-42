@@ -6,6 +6,7 @@
  * cada cosa) están en `xp.rules.ts`.
  */
 
+import { NO_POOL, visibleTo } from '../../core/audience.js'
 import type { Db } from '../../core/db/database.js'
 import type { EventBus } from '../../core/events.js'
 import type { AppModule } from '../../core/module.js'
@@ -23,6 +24,8 @@ type ProfileModuleDeps = {
   replica: ReplicaRepository
   curriculum: Curriculum
   events: EventBus
+  audience?: XpServiceOptions['audience']
+  poolPeople?: XpServiceOptions['poolPeople']
   hacker?: XpServiceOptions['hacker']
   master?: XpServiceOptions['master']
   now?: () => number
@@ -40,7 +43,13 @@ export function createProfileModule(deps: ProfileModuleDeps): ProfileModule {
     profiles,
     replica: deps.replica,
     curriculum: deps.curriculum,
-    ...given({ hacker: deps.hacker, master: deps.master, now: deps.now }),
+    ...given({
+      audience: deps.audience,
+      poolPeople: deps.poolPeople,
+      hacker: deps.hacker,
+      master: deps.master,
+      now: deps.now,
+    }),
   })
 
   deps.events.on('duty.started', ({ login }) => xp.markFirstDuty(login))
@@ -63,7 +72,23 @@ export function createProfileModule(deps: ProfileModuleDeps): ProfileModule {
     xp,
     profiles,
     routes: (app, context) => {
-      registerProfileRoutes(app, context, { xp, events: deps.events })
+      const audience = deps.audience ?? NO_POOL
+
+      // En la clasificación, solo gente del mundo de quien mira.
+      registerProfileRoutes(app, context, {
+        xp: {
+          ...xp,
+          leaderboard: async (actor, period) => {
+            const board = await xp.leaderboard(actor, period)
+
+            return {
+              ...board,
+              entries: await visibleTo(audience, actor, board.entries, (entry) => entry.login),
+            }
+          },
+        },
+        events: deps.events,
+      })
     },
   }
 }

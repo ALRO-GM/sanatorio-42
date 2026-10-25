@@ -3,6 +3,8 @@
  * concepto que proponen los propios estudiantes.
  */
 
+import { NO_POOL, visibleTo } from '../../core/audience.js'
+import type { Audience } from '../../core/audience.js'
 import type { Db } from '../../core/db/database.js'
 import type { EventBus, Notify } from '../../core/events.js'
 import type { AppModule } from '../../core/module.js'
@@ -17,6 +19,8 @@ import { given } from '../../core/options.js'
 
 type BoardsModuleDeps = {
   db: Db
+  /** Quién ve a quién: estudiantes y piscineros separados (`docs/piscineros.md`). */
+  audience?: Audience
   replica: ReplicaRepository
   xp: XpService
   attendance: AttendanceService
@@ -48,7 +52,14 @@ export function createBoardsModule(deps: BoardsModuleDeps): BoardsModule {
     ],
     service,
     routes: (app, context) => {
-      registerBoardsRoutes(app, context, service)
+      const audience = deps.audience ?? NO_POOL
+
+      // Cada cual, las pizarras de gente de su mundo.
+      registerBoardsRoutes(app, context, {
+        ...service,
+        list: async (actor, from, to) =>
+          visibleTo(audience, actor, await service.list(actor, from, to), (board) => board.host),
+      })
     },
   }
 }

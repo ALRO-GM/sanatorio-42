@@ -62,6 +62,7 @@ export function registerPeersRoutes(
       idParam(request.params.id, 'El proyecto'),
       actor.campusId,
       actor.login,
+      actor.pool === true,
     )
 
     reply.header('X-Total-Participants', String(result.totalParticipants))

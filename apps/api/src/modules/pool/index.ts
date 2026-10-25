@@ -12,7 +12,6 @@ import type { PoolService } from './pool.service.js'
 type PoolDeps = {
   db: Db
   isAdmin: (login: string) => Promise<boolean>
-  canOpen?: boolean
   now?: () => number
 }
 
@@ -22,7 +21,7 @@ export function createPoolModule(deps: PoolDeps): PoolModule {
   const service = createPoolService({
     db: deps.db,
     isAdmin: deps.isAdmin,
-    ...given({ canOpen: deps.canOpen, now: deps.now }),
+    ...given({ now: deps.now }),
   })
 
   return {

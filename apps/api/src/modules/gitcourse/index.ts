@@ -2,6 +2,8 @@
  * Módulo `gitcourse`: el curso de git de Not-games (#42 del buzón).
  */
 
+import { NO_POOL, visibleTo } from '../../core/audience.js'
+import type { Audience } from '../../core/audience.js'
 import type { Db } from '../../core/db/database.js'
 import { idParam, slugParam } from '../../core/http/params.js'
 import type { IdParams } from '../../core/http/params.js'
@@ -17,6 +19,8 @@ export type GitCourseModule = AppModule & { service: GitCourseService & { rooms:
 
 export function createGitCourseModule(deps: {
   db: Db
+  /** Quién ve a quién: estudiantes y piscineros separados (`docs/piscineros.md`). */
+  audience?: Audience
   seatOf: (login: string) => Promise<string | null>
   imagesOf: (logins: readonly string[]) => Promise<Map<string, string | null>>
   /** Las preguntas del banco de Not-games (para el test previo). */
@@ -103,7 +107,17 @@ export function createGitCourseModule(deps: {
       /** `GET /gitcourse/rooms?gate=group1` → `GitRoomLobby[]`: salas de esa prueba. */
       app.get<{ Querystring: { gate?: string } }>('/gitcourse/rooms', async (request, reply) => {
         return reply.send(
-          await rooms.list(await session.actor(request), gate(request.query.gate ?? '')),
+          await (async () => {
+            const actor = await session.actor(request)
+
+            // Cada cual, las salas de gente de su mundo.
+            return visibleTo(
+              deps.audience ?? NO_POOL,
+              actor,
+              await rooms.list(actor, gate(request.query.gate ?? '')),
+              (room) => room.host,
+            )
+          })(),
         )
       })
 
