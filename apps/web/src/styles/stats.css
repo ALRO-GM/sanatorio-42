@@ -108,6 +108,12 @@
   stroke-width: 1;
   stroke-dasharray: 4 4;
 }
+/* Los dos planes, siempre con el mismo color (en todos los estilos): azul C,
+   violeta Python; ni el acento (tu línea) ni el oro (con quien te comparas). */
+.progress-card {
+  --plan-c: #3d8bfd;
+  --plan-python: #b26ce6;
+}
 .progress-line {
   fill: none;
   stroke-width: 2;
@@ -120,6 +126,12 @@
 }
 .progress-line.average {
   stroke: var(--text-3);
+}
+.progress-line.average-c {
+  stroke: var(--plan-c);
+}
+.progress-line.average-python {
+  stroke: var(--plan-python);
 }
 .progress-line.other {
   stroke: var(--gold);
@@ -141,6 +153,16 @@
 .progress-swatch.average {
   fill: var(--text-3);
   background: var(--text-3);
+}
+.progress-dot.average-c,
+.progress-swatch.average-c {
+  fill: var(--plan-c);
+  background: var(--plan-c);
+}
+.progress-dot.average-python,
+.progress-swatch.average-python {
+  fill: var(--plan-python);
+  background: var(--plan-python);
 }
 .progress-dot.other,
 .progress-swatch.other {

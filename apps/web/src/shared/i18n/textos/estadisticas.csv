@@ -64,6 +64,8 @@ stats.progress.comparePlaceholder,Avance: hueco para escribir el login con quien
 stats.progress.compareClear,Avance: quitar la comparación,Quitar,Remove,Treure,Kendu
 stats.progress.me,Avance: tu línea,Tú,You,Tu,Zu
 stats.progress.average,"Avance: la línea de la media, con cuánta gente entra",Media ({n} personas),Average ({n} people),Mitjana ({n} persones),Batez bestekoa ({n} pertsona)
+stats.progress.averageC,"Avance: con los dos planes, la línea de la media del plan en C",Media C ({n} personas),C average ({n} people),Mitjana C ({n} persones),C batez bestekoa ({n} pertsona)
+stats.progress.averagePython,"Avance: con los dos planes, la línea de la media del plan con Python",Media Python ({n} personas),Python average ({n} people),Mitjana Python ({n} persones),Python batez bestekoa ({n} pertsona)
 stats.progress.months,"Avance: marca del eje de tiempo, en meses desde el inicio",{n} m,{n} mo,{n} m,{n} hil
 stats.progress.paceShort,Avance: rótulo al final de la línea de un pace,{n} m,{n} mo,{n} m,{n} hil
 stats.progress.paceLegend,Avance: leyenda de las líneas de los paces,Lo que pide cada pace (meses),What each pace asks for (months),El que demana cada pace (mesos),Pace bakoitzak eskatzen duena (hilabeteak)

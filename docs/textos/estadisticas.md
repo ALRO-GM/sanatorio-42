@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/estadisticas.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-73 textos. «—» es que falta la traducción: sale en español.
+75 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -72,6 +72,8 @@ Generado desde `apps/web/src/shared/i18n/textos/estadisticas.csv` con
 | `stats.progress.compareClear` | Avance: quitar la comparación | features/stats/HelpStatsPage, features/stats/ProgressPage | Quitar | Remove | Treure | Kendu |
 | `stats.progress.me` | Avance: tu línea | features/stats/HelpStatsPage, features/stats/ProgressPage | Tú | You | Tu | Zu |
 | `stats.progress.average` | Avance: la línea de la media, con cuánta gente entra | features/stats/HelpStatsPage, features/stats/ProgressPage | Media ({n} personas) | Average ({n} people) | Mitjana ({n} persones) | Batez bestekoa ({n} pertsona) |
+| `stats.progress.averageC` | Avance: con los dos planes, la línea de la media del plan en C | features/stats/HelpStatsPage, features/stats/ProgressPage | Media C ({n} personas) | C average ({n} people) | Mitjana C ({n} persones) | C batez bestekoa ({n} pertsona) |
+| `stats.progress.averagePython` | Avance: con los dos planes, la línea de la media del plan con Python | features/stats/HelpStatsPage, features/stats/ProgressPage | Media Python ({n} personas) | Python average ({n} people) | Mitjana Python ({n} persones) | Python batez bestekoa ({n} pertsona) |
 | `stats.progress.months` | Avance: marca del eje de tiempo, en meses desde el inicio | features/stats/HelpStatsPage, features/stats/ProgressPage | {n} m | {n} mo | {n} m | {n} hil |
 | `stats.progress.paceShort` | Avance: rótulo al final de la línea de un pace | features/stats/HelpStatsPage, features/stats/ProgressPage | {n} m | {n} mo | {n} m | {n} hil |
 | `stats.progress.paceLegend` | Avance: leyenda de las líneas de los paces | features/stats/HelpStatsPage, features/stats/ProgressPage | Lo que pide cada pace (meses) | What each pace asks for (months) | El que demana cada pace (mesos) | Pace bakoitzak eskatzen duena (hilabeteak) |

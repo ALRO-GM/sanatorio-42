@@ -60,11 +60,13 @@ export function ProgressPage() {
   const { t } = useI18n()
   const [measure, setMeasure] = useState<ProgressMeasure>('circles')
   const [scope, setScope] = useState<ProgressScope>('campus')
-  const [plan, setPlan] = useState<ProgressPlan>('all')
+  // Sin elegir, el plan de quien mira (C o Python); si no se sabe, los dos.
+  const [chosenPlan, setPlan] = useState<ProgressPlan | null>(null)
   const [paces, setPaces] = useState(true)
   const [typed, setTyped] = useState('')
   const [other, setOther] = useState<string | null>(null)
   const { data, error, reload } = useAsync(() => api.getStatsProgress(other), [other])
+  const plan = chosenPlan ?? data?.track ?? 'all'
 
   const pills = <T extends string>(
     label: string,
@@ -151,7 +153,8 @@ export function ProgressPage() {
           <ProgressChart
             data={data}
             measure={measure}
-            group={`${scope}-${plan}`}
+            scope={scope}
+            plan={plan}
             paces={paces}
             other={other}
           />
@@ -164,28 +167,39 @@ export function ProgressPage() {
 function ProgressChart({
   data,
   measure,
-  group,
+  scope,
+  plan,
   paces,
   other,
 }: {
   data: StatsProgress
   measure: ProgressMeasure
-  group: ProgressGroup
+  scope: ProgressScope
+  plan: ProgressPlan
   paces: boolean
   other: string | null
 }) {
   const { t } = useI18n()
   const [hover, setHover] = useState<number | null>(null)
-  const average = data.averages[measure][group]
   const mine = data.me?.[measure] ?? null
   const theirs = data.other?.line[measure] ?? null
+  // Con los dos planes, una media para cada uno: C y Python van a ritmos muy
+  // distintos y juntos no dirían nada de ninguno.
+  const averageOf = (one: ProgressPlan, key: string, label: string) => {
+    const group: ProgressGroup = `${scope}-${one}`
+
+    return { key, label: t(label, { n: data.people[group] }), line: data.averages[measure][group] }
+  }
+  const averages =
+    plan === 'all'
+      ? [
+          averageOf('classic', 'average-c', 'stats.progress.averageC'),
+          averageOf('next', 'average-python', 'stats.progress.averagePython'),
+        ]
+      : [averageOf(plan, 'average', 'stats.progress.average')]
   const series = [
     { key: 'me', label: t('stats.progress.me'), line: mine },
-    {
-      key: 'average',
-      label: t('stats.progress.average', { n: data.people[group] }),
-      line: average,
-    },
+    ...averages,
     { key: 'other', label: data.other?.login ?? '', line: theirs },
   ].filter((each): each is { key: string; label: string; line: ProgressLine } => each.line !== null)
 
