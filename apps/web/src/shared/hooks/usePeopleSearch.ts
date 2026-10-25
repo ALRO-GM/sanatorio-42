@@ -16,7 +16,11 @@ const MIN_LETTERS = 2
  * Lo comparten el buscador de la cabecera, el del buzón y `PersonInput`, para que encontrar a
  * alguien funcione igual en los dos sitios.
  */
-export function usePeopleSearch(text: string): FoundPerson[] | null {
+export function usePeopleSearch(
+  text: string,
+  /** Dónde buscar: el buscador de siempre, o el del panel (gente de cualquier grupo). */
+  search: (q: string) => Promise<FoundPerson[]> = api.searchPeople,
+): FoundPerson[] | null {
   const [found, setFound] = useState<FoundPerson[] | null>(null)
   const wanted = text.trim()
 
@@ -29,7 +33,7 @@ export function usePeopleSearch(text: string): FoundPerson[] | null {
 
     let current = true
     const timer = setTimeout(() => {
-      api.searchPeople(wanted).then(
+      search(wanted).then(
         (people) => {
           // Si entre tanto se ha escrito otra cosa, esta respuesta ya no vale.
           if (current) setFound(people)
@@ -44,7 +48,7 @@ export function usePeopleSearch(text: string): FoundPerson[] | null {
       current = false
       clearTimeout(timer)
     }
-  }, [wanted])
+  }, [wanted, search])
 
   return found
 }

@@ -201,19 +201,20 @@ export function createXpService(options: XpServiceOptions) {
 
       if (text.length < 2 || text.length > 40) return []
 
+      // A un estudiante no le salen piscineros; a nadie, quien está oculto a su grupo.
+      const sees = await seesFor(options.audience ?? NO_POOL, actor)
+
       // Un piscinero busca entre los piscineros de su campus, por login.
       if (actor.pool === true) {
         const wanted = text.toLowerCase()
 
         return ((await options.poolPeople?.(actor.campusId)) ?? [])
-          .filter((person) => person.login.includes(wanted))
+          .filter((person) => person.login.includes(wanted) && sees(person.login))
           .slice(0, SEARCH_LIMIT)
           .map((person) => ({ ...person, name: null }))
       }
 
-      // A un estudiante no le salen piscineros (se pide de más por si los hay).
-      const sees = await seesFor(options.audience ?? NO_POOL, actor)
-
+      // Se pide de más por si alguno no se puede ver.
       return (await replica.searchUsers(text, actor.campusId, SEARCH_LIMIT * 2))
         .filter((person) => sees(person.login))
         .slice(0, SEARCH_LIMIT)

@@ -3,7 +3,8 @@
  * que mantienen quienes ya lo aprobaron.
  */
 
-import { NO_POOL, visibleTo } from '../../core/audience.js'
+import { NO_POOL, seesFor, visibleTo } from '../../core/audience.js'
+import { domainError } from '../../core/errors.js'
 import type { Audience } from '../../core/audience.js'
 import type { Db } from '../../core/db/database.js'
 import type { Notify } from '../../core/events.js'
@@ -82,6 +83,17 @@ export function createDoubtsModule(deps: DoubtsModuleDeps): DoubtsModule {
             ...board,
             doubts: await visibleTo(audience, actor, board.doubts, (doubt) => doubt.author),
           }
+        },
+        // La de alguien a quien no se ve no existe; de las respuestas, solo las visibles.
+        detail: async (actor, doubtId) => {
+          const [doubt, sees] = await Promise.all([
+            service.detail(actor, doubtId),
+            seesFor(audience, actor),
+          ])
+
+          if (!sees(doubt.author)) throw domainError('not_found', 'Esa duda no existe')
+
+          return { ...doubt, replies: doubt.replies.filter((reply) => sees(reply.author)) }
         },
       })
     },

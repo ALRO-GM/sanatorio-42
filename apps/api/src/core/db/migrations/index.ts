@@ -77,6 +77,7 @@ import { poolMembersSchema } from './0068-pool-members.js'
 import { correctionsCursusSchema } from './0069-corrections-cursus.js'
 import { agendaCursusSchema } from './0070-agenda-cursus.js'
 import { seatLogSchema } from './0071-seat-log.js'
+import { hiddenPeopleSchema } from './0072-hidden-people.js'
 import type { Migration } from './types.js'
 
 export const MIGRATIONS: readonly Migration[] = [
@@ -151,6 +152,7 @@ export const MIGRATIONS: readonly Migration[] = [
   correctionsCursusSchema,
   agendaCursusSchema,
   seatLogSchema,
+  hiddenPeopleSchema,
 ]
 
 /** Versión más alta que existe en el código. */

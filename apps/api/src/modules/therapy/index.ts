@@ -3,7 +3,7 @@
  * sitio a unas horas, y ficha la asistencia.
  */
 
-import { NO_POOL, visibleTo } from '../../core/audience.js'
+import { NO_POOL, seesFor, visibleTo } from '../../core/audience.js'
 import type { Audience } from '../../core/audience.js'
 import type { Db } from '../../core/db/database.js'
 import type { Notify } from '../../core/events.js'
@@ -54,13 +54,21 @@ export function createTherapyModule(deps: TherapyModuleDeps): TherapyModule {
       // Cada cual, los grupos de gente de su mundo.
       registerTherapyRoutes(app, context, {
         ...service,
-        list: async (actor, projectId) =>
-          visibleTo(
+        // Y dentro de cada uno, sin quien está oculto a su grupo.
+        list: async (actor, projectId) => {
+          const sees = await seesFor(audience, actor)
+          const groups = await visibleTo(
             audience,
             actor,
             await service.list(actor, projectId),
             (group) => group.creator,
-          ),
+          )
+
+          return groups.map((group) => ({
+            ...group,
+            members: group.members.filter((member) => sees(member.login)),
+          }))
+        },
       })
     },
     jobs: [

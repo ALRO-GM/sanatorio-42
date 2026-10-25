@@ -30,6 +30,8 @@ import { z } from 'zod'
 
 import { assertAdmin } from '../../core/actor.js'
 import type { Actor } from '../../core/actor.js'
+import { NO_POOL, seesFor, shownFor } from '../../core/audience.js'
+import type { Audience } from '../../core/audience.js'
 import type { Notify } from '../../core/events.js'
 import type { Db } from '../../core/db/database.js'
 import { toNumber, toText } from '../../core/db/rows.js'
@@ -135,6 +137,8 @@ export function clickerLevel(total: number): number {
 export type ClickerServiceOptions = {
   db: Db
   replica: ReplicaRepository
+  /** Quién ve a quién: las noticias y la clasificación no nombran a quien está oculto. */
+  audience?: Audience
   /** Quién corrige más en un campus, para las noticias del juego. */
   topCorrectors?: (campusId: number, limit: number) => Promise<string[]>
   /** Con quién se ha corregido más alguien, en los dos sentidos. */
@@ -290,12 +294,17 @@ export function createClickerService(options: ClickerServiceOptions) {
    * más corrigen en su campus.
    */
   async function namesFor(actor: Actor): Promise<string[]> {
-    const partners =
+    // Solo gente que quien juega puede ver: ni del otro mundo ni oculta a su grupo.
+    const sees = await seesFor(options.audience ?? NO_POOL, actor)
+    const partners = (
       (await options.partnersOf?.(actor.campusId, actor.login, NAMES).catch(() => [])) ?? []
+    ).filter(sees)
 
     if (partners.length >= NAMES) return partners
 
-    const campus = (await options.topCorrectors?.(actor.campusId, NAMES * 2).catch(() => [])) ?? []
+    const campus = (
+      (await options.topCorrectors?.(actor.campusId, NAMES * 2).catch(() => [])) ?? []
+    ).filter(sees)
     const others = campus.filter((login) => login !== actor.login && !partners.includes(login))
 
     return [...partners, ...others].slice(0, NAMES)
@@ -1046,8 +1055,13 @@ export function createClickerService(options: ClickerServiceOptions) {
         `SELECT login, save, total, per_second, achievements, prestige FROM clicker
          WHERE pill = 'red' AND save IS NOT NULL`,
       )
+      // Es de todos los campus: no separa mundos, pero sí deja fuera a quien
+      // está oculto al grupo de quien mira (que a sí mismo sí se ve).
+      const shown = await shownFor(options.audience ?? NO_POOL, actor)
       const rows = result.rows
-        .filter((entry) => !HIDDEN_FROM_BOARD.has(toText(entry.login)))
+        .filter(
+          (entry) => !HIDDEN_FROM_BOARD.has(toText(entry.login)) && shown(toText(entry.login)),
+        )
         .map((entry) => ({ entry, wealth: wealthOf(readSave(toText(entry.save))) }))
         .sort(
           (a, b) =>

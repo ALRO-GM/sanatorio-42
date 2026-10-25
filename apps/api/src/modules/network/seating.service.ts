@@ -10,7 +10,7 @@ import type { SeatGraph, SeatPerson } from '@sanatorio/contracts'
 import { z } from 'zod'
 
 import type { Actor } from '../../core/actor.js'
-import { NO_POOL, seesFor } from '../../core/audience.js'
+import { audienceKey, NO_POOL, seesFor } from '../../core/audience.js'
 import type { Audience } from '../../core/audience.js'
 import type { Db } from '../../core/db/database.js'
 import { toText } from '../../core/db/rows.js'
@@ -116,7 +116,9 @@ export function createSeatingService(options: SeatingOptions): SeatingService {
   return {
     async graph(actor, query) {
       const { days } = parse(querySchema, query)
-      const key = `${String(actor.campusId)}|${actor.pool === true ? 'pool' : 'student'}|${String(days)}`
+      // Va ya filtrado por quién se ve: la clave lleva también los ocultos.
+      const seen = await audienceKey(audience, actor)
+      const key = `${String(actor.campusId)}|${actor.pool === true ? 'pool' : 'student'}|${seen}|${String(days)}`
 
       return cache.get(key, () => load(actor, days))
     },

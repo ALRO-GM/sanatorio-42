@@ -49,6 +49,10 @@ ni de un permiso concedido (`modules/pool/pool.keys.ts`). Una ruta que no está
 en esa tabla queda cerrada para piscineros, y un test exige que cada ruta nueva
 se apunte en ella (`tests/integration/pool-gate.test.ts`).
 
+Por encima de los dos mundos, quien administra puede ocultar a una persona
+concreta a los estudiantes, a los piscineros o a los dos (pestaña **Personas
+ocultas** del panel): ver [personas-ocultas.md](personas-ocultas.md).
+
 ## Ver como piscinero
 
 Pedido por Alberto el 2026-10-25. En la pestaña **Piscina** del panel, **Ver
@@ -73,8 +77,8 @@ abrirla.
   tiene (y añadirla rompe la firma): recibe un 403 y sigue siendo piscinero
   (`tests/integration/pool-preview.test.ts`).
 - Lo que no es igual: quien administra no está en `pool_members`, así que no
-  se ve a sí mismo en el mapa ni en el buscador, como un piscinero recién
-  llegado que aún no se ha copiado. Si deja de administrar estando dentro, no
+  se ve a sí mismo en el buscador, como un piscinero recién llegado que aún no
+  se ha copiado (en el mapa sí: cada cual se ve siempre a sí mismo). Si deja de administrar estando dentro, no
   puede volver: sale de la cuenta y entra otra vez (como estudiante).
 - API de mentira: `localStorage.mock_pool_preview = 'true'` es la vista previa.
 

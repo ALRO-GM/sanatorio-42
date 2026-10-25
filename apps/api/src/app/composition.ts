@@ -56,7 +56,7 @@ import { createAudience } from '../core/audience.js'
 import type { Audience } from '../core/audience.js'
 import type { PhotoStore, ReplicaModule, SyncerConfig } from '../modules/replica/index.js'
 import { createFacilityModule } from '../modules/facility/index.js'
-import { createPoolModule } from '../modules/pool/index.js'
+import { createPoolModule, hiddenLogins } from '../modules/pool/index.js'
 import type { PoolModule } from '../modules/pool/index.js'
 import { createFocusModule } from '../modules/focus/index.js'
 import type { FocusModule } from '../modules/focus/index.js'
@@ -207,7 +207,11 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     ...clock,
   })
   // Quién ve a quién (`docs/piscineros.md`): lo usan los módulos que enseñan gente.
-  const audience = createAudience((campusId) => replica.poolMembers.loginsIn(campusId), now)
+  const audience = createAudience(
+    (campusId) => replica.poolMembers.loginsIn(campusId),
+    now,
+    (pool) => hiddenLogins(db, pool),
+  )
   // El Pomodoro va pronto: la sala de espera y el plano preguntan quién está concentrado.
   const focus = createFocusModule({ db, ...clock })
   const focusOf = (logins: readonly string[]) =>
@@ -361,6 +365,9 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
   const pool = createPoolModule({
     db,
     isAdmin: async (login) => (await admin.service.accessOf(login)).admin,
+    hiddenChanged: () => {
+      audience.forget()
+    },
     ...clock,
   })
 
@@ -394,6 +401,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
   const clicker = createClickerModule({
     db,
     replica: replica.repository,
+    audience,
     topCorrectors: (campusId, limit) => network.topCorrectors(campusId, limit),
     partnersOf: (campusId, login, limit) => network.partnersOf(campusId, login, limit),
     timeOn: (key, from, to) => late.get('usage').service.timeOn(key, from, to),

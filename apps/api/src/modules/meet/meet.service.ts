@@ -172,7 +172,8 @@ export function createMeetService(options: MeetServiceOptions) {
     id: string,
   ): Promise<void> => {
     const world = actor.pool === true ? 'pool' : 'student'
-    const key = `${actor.login}|${actor.campusId}|${world}|${id}`
+    // Con la versión de los ocultos: ocultar a alguien se nota al momento.
+    const key = `${actor.login}|${actor.campusId}|${world}|${String(audience.version())}|${id}`
     const takesPart = await membership.get(key, async () => {
       const [kind, second, third] = id.split(':')
       // Una sala con alguien del otro mundo no es de quien pregunta.

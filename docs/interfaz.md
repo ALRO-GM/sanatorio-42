@@ -75,6 +75,7 @@ de datos.
 | Panel de gestión | Pestaña Pomodoro: uso por días y horas, paradas, motivos y tramo de gente | Admins | Solo de quien administra (#80) |
 | Panel de gestión | Pestaña Piscina: quién entra y el aviso para piscineros con la piscina cerrada (`docs/piscineros.md`) | Admins | Solo de quien administra |
 | Panel de gestión | Pestaña Piscina: «Ver como piscinero» y, mientras dura, la franja fija de arriba con «Volver» (`docs/piscineros.md`) | Admins | Bloque de la pestaña Piscina, no una sección: es para comprobar lo que se ha marcado |
+| Panel de gestión | Pestaña Personas ocultas: buscar a alguien de cualquier grupo, ocultarlo a estudiantes, piscineros o los dos, con motivo, y la lista con quién y cuándo (`docs/personas-ocultas.md`) | Admins | Pestaña propia y no bloque de Piscina: vale también para estudiantes |
 | Clústeres | Avisar de un problema (edificio u ordenador) | N | Al lado del plano, donde se ve el puesto |
 | Pestañas | Estadísticas (en Ayuda) | N | Clasificaciones: el simplificado no enseña rankings |
 | Estadísticas | Cifras del campus y clasificación de cada sección, con fotos | N | La sección en sí |

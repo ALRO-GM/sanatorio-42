@@ -120,6 +120,75 @@ describe('ventanas y paneles', () => {
     })
   }, 60_000)
 
+  it('personas ocultas: se busca en los dos grupos, se oculta, se lista y se quita', async () => {
+    await quietly(async () => {
+      const user = userEvent.setup()
+
+      await openApp('#/gestion')
+      await unlockPanel(user)
+      await user.click(await screen.findByRole('tab', { name: text('admin.tab.hidden') }, WAIT))
+      expect(await screen.findByText(text('admin.hidden.empty'), {}, WAIT)).toBeTruthy()
+
+      const add = screen.getByRole('button', { name: text('admin.hidden.add') })
+      const box = screen.getByRole('combobox', { name: text('admin.hidden.login') })
+
+      // Sin login no se puede.
+      expect(add).toHaveProperty('disabled', true)
+
+      // El buscador del panel trae también a piscineros, que el de arriba no ve.
+      await user.type(box, 'pisci')
+      const found = await screen.findByRole('listbox', { name: text('admin.hidden.login') }, WAIT)
+
+      await user.click(within(found).getByText('pisci-ana'))
+      expect(box).toHaveProperty('value', 'pisci-ana')
+      await user.selectOptions(
+        screen.getByRole('combobox', { name: text('admin.hidden.from') }),
+        text('admin.hidden.from.pool'),
+      )
+      await user.type(
+        screen.getByRole('textbox', { name: text('admin.hidden.reason') }),
+        'Lo pidió',
+      )
+      await user.click(add)
+
+      const list = await screen.findByRole('list', { name: text('admin.hidden.title') }, WAIT)
+
+      expect(within(list).getByText('pisci-ana')).toBeTruthy()
+      expect(within(list).getByText(new RegExp(text('admin.hidden.hiddenFrom.pool')))).toBeTruthy()
+      expect(within(list).getByText(/Lo pidió/)).toBeTruthy()
+      expect(box).toHaveProperty('value', '')
+
+      // A estudiantes: desaparece del buscador de quien mira, que es estudiante.
+      expect((await api.searchPeople('jdo')).map((person) => person.login)).toContain('jdoe')
+      await user.type(box, 'jdoe')
+      await user.selectOptions(
+        screen.getByRole('combobox', { name: text('admin.hidden.from') }),
+        text('admin.hidden.from.students'),
+      )
+      await user.click(add)
+      expect(await within(list).findByText('jdoe', {}, WAIT)).toBeTruthy()
+      expect((await api.searchPeople('jdo')).map((person) => person.login)).not.toContain('jdoe')
+      await expect(api.getPersonCard('jdoe')).rejects.toThrow()
+
+      // Al quitarlo, vuelve.
+      await user.click(
+        within(list).getByRole('button', {
+          name: text('admin.hidden.removeOne').replace('{login}', 'jdoe'),
+        }),
+      )
+      await waitFor(() => {
+        expect(within(list).queryByText('jdoe')).toBeNull()
+      })
+      expect((await api.searchPeople('jdo')).map((person) => person.login)).toContain('jdoe')
+      await user.click(
+        within(list).getByRole('button', {
+          name: text('admin.hidden.removeOne').replace('{login}', 'pisci-ana'),
+        }),
+      )
+      expect(await screen.findByText(text('admin.hidden.empty'), {}, WAIT)).toBeTruthy()
+    })
+  }, 30_000)
+
   it('buzón: se abre, cambia a conversaciones y vuelve a avisos', async () => {
     await quietly(async () => {
       const user = userEvent.setup()

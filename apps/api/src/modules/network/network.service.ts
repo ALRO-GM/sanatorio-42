@@ -21,7 +21,7 @@ import type {
 import { z } from 'zod'
 
 import type { Actor } from '../../core/actor.js'
-import { NO_POOL, seesFor } from '../../core/audience.js'
+import { audienceKey, NO_POOL, seesFor } from '../../core/audience.js'
 import type { Audience } from '../../core/audience.js'
 import { domainError } from '../../core/errors.js'
 import { createRateLimit } from '../../core/rate-limit.js'
@@ -204,7 +204,7 @@ export function createNetworkService(options: NetworkServiceOptions) {
 
     const checks = await Promise.all(
       [...new Set([actor.campusId, ...campuses])].map((campusId) =>
-        seesFor(audience, { campusId, pool: false }),
+        seesFor(audience, { campusId, pool: false, login: actor.login }),
       ),
     )
 
@@ -237,55 +237,59 @@ export function createNetworkService(options: NetworkServiceOptions) {
     projectId: number | null,
     passed: boolean | null,
   ): Promise<Cached> =>
-    analyses.get(
-      `${cursusOf(actor)}|${campusId.join(',')}|${from ?? ''}|${to ?? ''}|${projectId ?? ''}|${passed ?? ''}`,
-      async () => {
-        if (!fresh.hit(actor.login)) {
-          throw domainError(
-            'rate_limited',
-            'Demasiados análisis distintos seguidos: espera un minuto',
+    // Va ya filtrado por quién se ve: la clave lleva la versión de los ocultos
+    // (y a quien mira, si está oculto, que a sí mismo sí se ve).
+    audienceKey(audience, actor).then((seen) =>
+      analyses.get(
+        `${cursusOf(actor)}|${seen}|${campusId.join(',')}|${from ?? ''}|${to ?? ''}|${projectId ?? ''}|${passed ?? ''}`,
+        async () => {
+          if (!fresh.hit(actor.login)) {
+            throw domainError(
+              'rate_limited',
+              'Demasiados análisis distintos seguidos: espera un minuto',
+            )
+          }
+
+          const cursus = cursusOf(actor)
+          const [all, everyCampus, givenAll, receivedAll, timeline, sees] = await Promise.all([
+            corrections.pairs({ campusId, cursus, from, to, projectId, passed }),
+            membersIn(actor, campusId),
+            corrections.verdicts({ campusId, cursus, from, to, projectId }, 'corrector'),
+            corrections.verdicts({ campusId, cursus, from, to, projectId }, 'corrected'),
+            // La línea de tiempo no lleva fechas: enseña todo para poder elegirlas.
+            corrections.timeline({ campusId, cursus, projectId }),
+            seesIn(actor, campusId),
+          ])
+          // Una pareja con alguien que no se puede ver no sale, ni cuenta como de
+          // dentro: así un piscinero no entra en la red de un estudiante, ni al revés.
+          const rows = all.filter((row) => sees(row.corrector) && sees(row.corrected))
+          const perCampus = everyCampus.map((campus) => visible(campus, sees))
+          const given = visible(givenAll, sees)
+          const received = visible(receivedAll, sees)
+          const members = new Map(perCampus.flatMap((campus) => [...campus]))
+          const homes = new Map(
+            perCampus.flatMap((campus, index) =>
+              [...campus.keys()].map((login): [string, number] => [login, campusId[index] ?? 0]),
+            ),
           )
-        }
+          // Sin réplica del campus no se sabe quién es de fuera: se trata a todo el
+          // mundo como de dentro en vez de enseñar un grafo vacío.
+          const everyone = rows.flatMap((row) => [row.corrector, row.corrected])
+          const inside: ReadonlySet<string> =
+            members.size === 0
+              ? new Set(everyone)
+              : new Set([...members.keys(), ...everyone.filter(isAnonymised)])
 
-        const cursus = cursusOf(actor)
-        const [all, everyCampus, givenAll, receivedAll, timeline, sees] = await Promise.all([
-          corrections.pairs({ campusId, cursus, from, to, projectId, passed }),
-          membersIn(actor, campusId),
-          corrections.verdicts({ campusId, cursus, from, to, projectId }, 'corrector'),
-          corrections.verdicts({ campusId, cursus, from, to, projectId }, 'corrected'),
-          // La línea de tiempo no lleva fechas: enseña todo para poder elegirlas.
-          corrections.timeline({ campusId, cursus, projectId }),
-          seesIn(actor, campusId),
-        ])
-        // Una pareja con alguien que no se puede ver no sale, ni cuenta como de
-        // dentro: así un piscinero no entra en la red de un estudiante, ni al revés.
-        const rows = all.filter((row) => sees(row.corrector) && sees(row.corrected))
-        const perCampus = everyCampus.map((campus) => visible(campus, sees))
-        const given = visible(givenAll, sees)
-        const received = visible(receivedAll, sees)
-        const members = new Map(perCampus.flatMap((campus) => [...campus]))
-        const homes = new Map(
-          perCampus.flatMap((campus, index) =>
-            [...campus.keys()].map((login): [string, number] => [login, campusId[index] ?? 0]),
-          ),
-        )
-        // Sin réplica del campus no se sabe quién es de fuera: se trata a todo el
-        // mundo como de dentro en vez de enseñar un grafo vacío.
-        const everyone = rows.flatMap((row) => [row.corrector, row.corrected])
-        const inside: ReadonlySet<string> =
-          members.size === 0
-            ? new Set(everyone)
-            : new Set([...members.keys(), ...everyone.filter(isAnonymised)])
-
-        return {
-          analysis: analyse(mergePairs(rows, inside), inside),
-          members,
-          homes,
-          given,
-          received,
-          timeline,
-        }
-      },
+          return {
+            analysis: analyse(mergePairs(rows, inside), inside),
+            members,
+            homes,
+            given,
+            received,
+            timeline,
+          }
+        },
+      ),
     )
 
   /** Lo que no depende de los filtros: año de llegada de cada quien y proyectos con correcciones. */

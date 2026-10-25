@@ -75,19 +75,30 @@ const STUDENT_PROJECT = `(${IS_CORE} OR NOT EXISTS (
   ))`
 
 /**
+ * Condición SQL: `u` no está oculto al grupo de quien mira
+ * (`docs/personas-ocultas.md`). Es lo mismo que `hiddenFrom` de
+ * `core/audience.ts`, para lo que se filtra en la consulta.
+ */
+const notHidden = (pool: boolean): string =>
+  `lower(u.login) NOT IN (SELECT login FROM hidden_people WHERE ${pool ? 'from_pool' : 'from_students'} = 1)`
+
+/**
  * La gente del campus de cada mundo (`docs/piscineros.md`): un piscinero ve
  * a los piscineros en curso (`pool_members`); un estudiante, a los del campus
  * que no lo son. Va con `audienceWhere` y dos veces el campus en los
- * argumentos: el del `JOIN` y el del `WHERE`.
+ * argumentos: el del `JOIN` y el del `WHERE`. Deja fuera, además, a quien
+ * está oculto a ese grupo.
  */
 const audienceJoin = (pool: boolean): string =>
   pool
     ? 'pool_members cm ON cm.user_id = u.id AND cm.campus_id = ?'
     : 'campus_members cm ON cm.user_id = u.id AND cm.campus_id = ?'
 const audienceWhere = (pool: boolean): string =>
-  pool
-    ? "cm.campus_id = ? AND cm.begin_at >= strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-60 days')"
-    : 'u.id NOT IN (SELECT user_id FROM pool_members WHERE campus_id = ?)'
+  `${
+    pool
+      ? "cm.campus_id = ? AND cm.begin_at >= strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-60 days')"
+      : 'u.id NOT IN (SELECT user_id FROM pool_members WHERE campus_id = ?)'
+  } AND ${notHidden(pool)}`
 
 /** Un texto en minúsculas y sin tildes ni diéresis, como se compara al buscar. */
 function plain(text: string): string {

@@ -75,3 +75,41 @@ export type PoolAccess = {
   /** `true` si es quien administra, en la vista de piscinero (`POST /admin/pool/preview`). */
   preview?: boolean
 }
+
+/** El grupo de una persona: estudiante o piscinero (`docs/piscineros.md`). */
+export type PersonGroup = 'student' | 'pool'
+
+/**
+ * Una persona oculta (`GET /admin/hidden`, `docs/personas-ocultas.md`): para
+ * el grupo del que se oculta no existe en ningún sitio de la web.
+ */
+export type HiddenPerson = {
+  login: string
+  image: string | null
+  /** Su grupo, si se la conoce (`null`: no está en la réplica ni en la piscina). */
+  group: PersonGroup | null
+  /** Si no la ven los estudiantes. */
+  fromStudents: boolean
+  /** Si no la ven los piscineros. */
+  fromPool: boolean
+  /** Por qué, si se dijo. Solo lo lee quien administra. */
+  reason: string | null
+  /** Quién la ocultó y cuándo. */
+  by: string
+  at: string
+}
+
+/** Cuerpo de `PUT /admin/hidden/:login`: de qué grupos se oculta (al menos uno). */
+export type HiddenPersonInput = {
+  fromStudents: boolean
+  fromPool: boolean
+  reason?: string
+}
+
+/** `GET /admin/hidden/search?q=`: gente de cualquier grupo, para elegir a quién ocultar. */
+export type HiddenCandidate = {
+  login: string
+  name: string | null
+  image: string | null
+  group: PersonGroup
+}

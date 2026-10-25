@@ -21,6 +21,7 @@ import { FacilityList } from '../facility/FacilityList'
 import { GrowthPanel } from './GrowthPanel'
 import { FocusPanel } from './FocusPanel'
 import { PoolPanel } from './PoolPanel'
+import { HiddenPanel } from './HiddenPanel'
 import { StatsPanel } from './StatsPanel'
 import { UsageTab } from './UsageTab'
 import { Icon } from '../../shared/ui/Icon'
@@ -41,6 +42,7 @@ const TABS = [
   'facility',
   'focus',
   'pool',
+  'hidden',
   'data',
 ] as const
 
@@ -102,6 +104,7 @@ function AdminTabs({ campusId, me }: { campusId?: number | undefined; me: string
       {tab === 'data' && <DataPanel />}
       {tab === 'focus' && <FocusPanel />}
       {tab === 'pool' && <PoolPanel />}
+      {tab === 'hidden' && <HiddenPanel />}
       {tab === 'casts' && <BroadcastsTab campusId={campusId} />}
       {tab === 'facility' && (
         <FacilityList

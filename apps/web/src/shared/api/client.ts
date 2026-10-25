@@ -172,6 +172,11 @@ export const realApi: Api = {
   getPoolNotice: () => getJson('/pool/notice'),
   getPoolSettings: () => getJson('/admin/pool'),
   updatePoolSettings: (changes) => sendJson('PUT', '/admin/pool', changes),
+  getHiddenPeople: () => getJson('/admin/hidden'),
+  searchHiddenCandidates: (q) => getJson(`/admin/hidden/search?q=${encodeURIComponent(q)}`),
+  hidePerson: (login, input) =>
+    sendJson('PUT', `/admin/hidden/${encodeURIComponent(login)}`, input),
+  revealPerson: (login) => sendJson('DELETE', `/admin/hidden/${encodeURIComponent(login)}`),
   getPoolAccess: () => getJson('/pool/access'),
   startPoolPreview: () => send('POST', '/admin/pool/preview'),
   stopPoolPreview: () => send('POST', '/pool/preview/exit'),

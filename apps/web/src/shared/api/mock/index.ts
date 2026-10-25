@@ -22,6 +22,7 @@ import { statsMock } from './stats'
 import { turnsMock } from './turns'
 import { facilityMock } from './facility'
 import { focusMock } from './focus'
+import { hiddenMock, withHidden } from './hidden'
 import { poolMock } from './pool'
 import { gitCourseMock } from './gitcourse'
 import { gitRoomsMock } from './gitrooms'
@@ -29,8 +30,11 @@ import { replicaMock } from './replica'
 import { staffMock } from './staff'
 import { therapyMock } from './therapy'
 
-/** Cada trozo es una funcionalidad; juntos tienen que cumplir `Api` entero. */
-export const mockApi: Api = {
+/**
+ * Cada trozo es una funcionalidad; juntos tienen que cumplir `Api` entero. Las
+ * personas ocultas van por encima: quitan a quien no se ve de lo que enseña gente.
+ */
+export const mockApi: Api = withHidden({
   ...peersMock,
   ...meetMock,
   ...adminMock,
@@ -49,6 +53,7 @@ export const mockApi: Api = {
   ...facilityMock,
   ...focusMock,
   ...poolMock,
+  ...hiddenMock,
   ...gitCourseMock,
   ...gitRoomsMock,
-}
+})

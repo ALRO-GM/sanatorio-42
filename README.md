@@ -395,9 +395,14 @@ de espera, la guardia, la red, el calendario, las clasificaciones y lo que
 crea la gente (grupos, pizarras, dudas, salas). Detalle en
 [docs/piscineros.md](docs/piscineros.md).
 
+Además, desde la pestaña **Personas ocultas** del panel se puede ocultar a
+cualquier persona a uno de los grupos (o a los dos): para ese grupo deja de
+existir en toda la web, y ella sigue viéndose y usándola con normalidad
+([docs/personas-ocultas.md](docs/personas-ocultas.md)).
+
 ### Panel de gestión
 
-Solo para quien administra. Doce pestañas:
+Solo para quien administra. Trece pestañas:
 
 | Pestaña              | Qué enseña                                                                                             |
 | -------------------- | ------------------------------------------------------------------------------------------------------ |
@@ -412,6 +417,7 @@ Solo para quien administra. Doce pestañas:
 | Avisos del edificio  | Problemas de ordenadores o del edificio que manda la gente, para resolverlos
 | Pomodoro             | Uso por días y horas, paradas y sus motivos, por tramo de gente
 | Piscina              | Quién entra, el aviso de la piscina cerrada y lo que puede ver un piscinero
+| Personas ocultas     | Ocultar a alguien (de cualquier grupo) a los estudiantes, a los piscineros o a los dos, con un motivo que solo se ve ahí ([docs/personas-ocultas.md](docs/personas-ocultas.md))
 | Limpiar datos        | Borrado a mano de cualquier dato, global o de una persona, entero o desde una fecha                    |
 
 Nada se borra solo: lo único que elimina datos es «Limpiar datos», que antes

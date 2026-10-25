@@ -11,6 +11,9 @@ import type {
   PoolAccess,
   PoolNotice,
   PoolSettings,
+  HiddenCandidate,
+  HiddenPerson,
+  HiddenPersonInput,
   GitAttemptInput,
   GitAttemptResult,
   GitCourse,
@@ -339,6 +342,14 @@ export type Api = {
   /** Los ajustes de la piscina. Solo admins. */
   getPoolSettings: () => Promise<PoolSettings>
   updatePoolSettings: (changes: Partial<PoolSettings>) => Promise<PoolSettings>
+  /** Las personas ocultas a un grupo (`docs/personas-ocultas.md`). Solo admins. */
+  getHiddenPeople: () => Promise<HiddenPerson[]>
+  /** Gente de cualquier grupo y campus, para elegir a quién ocultar. Solo admins. */
+  searchHiddenCandidates: (q: string) => Promise<HiddenCandidate[]>
+  /** Oculta a alguien a los grupos marcados (o cambia cómo). Devuelve la lista. */
+  hidePerson: (login: string, input: HiddenPersonInput) => Promise<HiddenPerson[]>
+  /** La vuelve a enseñar a todo el mundo. Devuelve la lista. */
+  revealPerson: (login: string) => Promise<HiddenPerson[]>
   /** Si eres piscinero y qué puedes ver. */
   getPoolAccess: () => Promise<PoolAccess>
   /** Quien administra pasa a ver la web como un piscinero (cambia la cookie). */

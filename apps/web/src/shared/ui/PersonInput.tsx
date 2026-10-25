@@ -1,5 +1,7 @@
 import { useId, useState } from 'react'
 
+import type { FoundPerson } from '@sanatorio/contracts'
+
 import { usePeopleSearch } from '../hooks/usePeopleSearch'
 import { comboboxProps, PeopleResults, usePeopleKeys } from './PeopleResults'
 
@@ -13,6 +15,7 @@ import { comboboxProps, PeopleResults, usePeopleKeys } from './PeopleResults'
  * @param onChange Cada tecla.
  * @param onPick Al elegir a alguien de la lista: su login.
  * @param exclude Logins que no se sugieren (p. ej., quien mira).
+ * @param search Dónde buscar, si no es el buscador de personas de siempre.
  */
 export function PersonInput(props: {
   value: string
@@ -22,10 +25,11 @@ export function PersonInput(props: {
   placeholder?: string
   exclude?: readonly string[]
   required?: boolean
+  search?: (q: string) => Promise<FoundPerson[]>
 }) {
   const id = useId()
   const [open, setOpen] = useState(false)
-  const found = usePeopleSearch(props.value)
+  const found = usePeopleSearch(props.value, props.search)
   const people =
     found?.filter((person) => !(props.exclude ?? []).includes(person.login)).slice(0, 8) ?? null
   // Ya elegido (lo escrito es justo uno de la lista y nada más): no hace falta sugerir.

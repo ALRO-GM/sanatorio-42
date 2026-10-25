@@ -1611,6 +1611,10 @@ GET /admin/pool    → PoolSettings (solo admins)
 PUT /admin/pool    → { open?, message?, allow? } → PoolSettings (solo admins)
 POST /admin/pool/preview → 204: entra en la vista de piscinero (solo admins)
 POST /pool/preview/exit  → 204: vuelve de ella; 403 sin la marca de vista previa
+GET    /admin/hidden            → HiddenPerson[]: las personas ocultas (solo admins)
+GET    /admin/hidden/search?q=  → HiddenCandidate[]: gente de cualquier grupo y campus (solo admins)
+PUT    /admin/hidden/:login     → HiddenPersonInput → HiddenPerson[]: la oculta o cambia cómo (solo admins)
+DELETE /admin/hidden/:login     → HiddenPerson[]: la vuelve a enseñar (solo admins)
 ```
 
 - Quién entra se decide al volver de 42 (`docs/piscineros.md`): con el
@@ -1639,6 +1643,17 @@ POST /pool/preview/exit  → 204: vuelve de ella; 403 sin la marca de vista prev
   `POST /pool/preview/exit` es de la base de los piscineros, pero solo hace algo
   con la marca firmada y si quien la lleva sigue administrando; si no, `403`.
   Un piscinero de verdad no la tiene y no puede hacerse estudiante con ella.
+- Personas ocultas (`docs/personas-ocultas.md`, tabla `hidden_people`): quien
+  administra oculta a alguien a los estudiantes (`fromStudents`), a los
+  piscineros (`fromPool`) o a los dos; al menos uno, o `400`. Para ese grupo
+  no existe en ningún sitio que enseñe gente (los mismos que los mundos
+  separados, más la red de correcciones y la de asientos, las noticias y la
+  clasificación de Code Clicker, las respuestas del tablón y los miembros de
+  los sprints): su ficha, su perfil y su duda dan `404`. A sí misma se ve
+  siempre. Quien administra, fuera del panel, ve según su grupo. `reason`
+  (hasta 500 caracteres) solo sale aquí. `login` en la ruta: `[a-z0-9-]{1,30}`
+  (se pasa a minúsculas); `q`, de 2 a 40 caracteres. Como mucho 500 personas.
+  Todas piden el segundo factor del panel, como el resto de `/admin/…`.
 
 ## Exámenes (`modules/exams`)
 
