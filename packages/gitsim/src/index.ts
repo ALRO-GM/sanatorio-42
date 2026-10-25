@@ -8,6 +8,7 @@ export { goalOf, missing, shape } from './compare.js'
 export type { Goal, Miss } from './compare.js'
 export { ancestors, emptyRepo, GitError, headId, isAncestor, mergeBase } from './model.js'
 export type { Commit, Files, Head, Remote, Repo } from './model.js'
+export { LIMITS } from './limits.js'
 export { resolve, run, runAll, threeWay, tokenize } from './run.js'
 export type { RunResult, World } from './run.js'
 export {
@@ -32,8 +33,10 @@ export {
   missionOf,
   PREFIXES,
   solvedOf,
+  starGoals,
   starsOf,
   startOf,
+  tally,
 } from './levels/index.js'
 export type {
   Attempt,
@@ -42,5 +45,6 @@ export type {
   GroupPlayer,
   Level,
   MissionItem,
+  Tally,
   Theory,
 } from './levels/index.js'

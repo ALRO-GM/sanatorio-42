@@ -1382,7 +1382,7 @@ descanso lo lleva la web.
 
 ```
 GET  /gitcourse                   → GitCourse { seat, stars: { [punto]: 1–3 }, gates: { [prueba]: { passed, retryAt } } }
-POST /gitcourse/levels/:id        → GitAttemptInput { lines: string[] (≤ 300, ≤ 200 caracteres) } → GitAttemptResult
+POST /gitcourse/levels/:id        → GitAttemptInput { lines: string[] (≤ 300, ≤ 200 caracteres) } → GitAttemptResult { done, stars, commands, misses, course }
 POST /gitcourse/gates/:id/start   → GitGateQuiz { gate, questions: { prompt, code, options }[], deadline }
 POST /gitcourse/gates/:id/answer  → GitGateAnswerInput { answers: (number | null)[] } → GitGateResult
 GET  /gitcourse/rooms?gate=group1 → GitRoomLobby[] (las sin empezar del campus y las tuyas de las últimas 6 h)
@@ -1391,7 +1391,7 @@ GET  /gitcourse/rooms/:id         → GitRoom { status, players, missions, mine:
 POST /gitcourse/rooms/:id/join    → GitRoom
 POST /gitcourse/rooms/:id/leave   → 204
 POST /gitcourse/rooms/:id/start   → GitRoom (solo quien la creó)
-POST /gitcourse/rooms/:id/run     → GitRunInput { line (≤ 200) } → GitRunResult { ok, output, room }
+POST /gitcourse/rooms/:id/run     → GitRunInput { line (≤ 200) } → GitRunResult { ok, output, room } (60 por minuto y persona)
 ```
 
 - Los puntos del camino (teoría, partida, solución) están en
@@ -1399,9 +1399,14 @@ POST /gitcourse/rooms/:id/run     → GitRunInput { line (≤ 200) } → GitRunR
 - El reto se corrige **volviendo a ejecutar** `lines` desde el punto de
   partida con el mismo motor: las líneas que fallan no cuentan. Hecho si la
   forma de la historia (y HEAD, el remoto, los tags o los ficheros que pida el
-  punto) coincide con la de la solución. Estrellas: 3 con tantos comandos de
-  git como la solución (`status` y `log` no cuentan), 2 con la mitad más uno, 1
-  con más. Se guarda la mejor vez (`git_progress`).
+  punto) coincide con la de la solución. Las estrellas y el recuento
+  (`commands`) los calcula la API: lo que mande la web aparte de `lines` no se
+  usa. Cuenta cada comando que cambia ramas, commits, HEAD, tags, stash u
+  origin (`count.ts` de gitsim); mirar, preparar ficheros (`add`, `restore`),
+  `fetch` y lo que falla no cuentan, y crear una rama y cambiarse a ella
+  cuenta uno. Estrellas (`starGoals`): 3 con tantos como la solución, 2 hasta
+  la mitad más uno, 1 con más. Se guarda la mejor vez (`git_progress`). Tope de
+  30 intentos por persona cada diez minutos (429).
 - Solo desde un puesto del clúster (`seat`, la última sesión en un puesto):
   sin él, 403. En orden: sin el punto anterior, 409. Punto que no existe, 404.
 - **Test previo** a cada prueba de grupo (`group1`, `group2`, `group3`, `boss`
@@ -1418,8 +1423,11 @@ POST /gitcourse/rooms/:id/run     → GitRunInput { line (≤ 200) } → GitRunR
   todas sentadas. Al empezar se monta origin (`groupRemote`) y el repositorio
   de cada cual ya clonado, con su prefijo de ids (`a`, `b`, `d`…) y su papel
   por orden de llegada. `run` ejecuta la línea en el servidor con el mismo
-  motor (403 si te levantas; 429 pasados 400 comandos); un error no cambia
-  nada. Las misiones (`check` de la prueba) se miran sobre origin y casi todas
+  motor (403 si te levantas; 429 pasados 400 comandos o con más de 60 en un
+  minuto); un error no cambia nada. Los topes del motor (`LIMITS` de gitsim:
+  ficheros, tamaño, commits, ramas, tags, stash y bytes del repositorio)
+  valen igual aquí, y la sala entera no pasa de `(6 + 1) × LIMITS.worldBytes`
+  en la base (409). Las misiones (`check` de la prueba) se miran sobre origin y casi todas
   son de una persona (`login`): todas hacen todo. Con todas hechas, la sala
   acaba (`result: 'passed'`) y la prueba se guarda en `git_progress` con 3
   estrellas para cada cual. Cada prueba tiene su tiempo (`minutes`: 45 o 60, el

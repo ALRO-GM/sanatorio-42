@@ -14,6 +14,7 @@ import {
   farApart,
   gateOf,
   groupStart,
+  LIMITS,
   MAX_PLAYERS,
   missionDone,
   missionOf,
@@ -28,6 +29,7 @@ import type { Db } from '../../core/db/database.js'
 import { toNumber, toText } from '../../core/db/rows.js'
 import { domainError } from '../../core/errors.js'
 import { createLocks } from '../../core/lock.js'
+import { createRateLimit } from '../../core/rate-limit.js'
 import { parse } from '../../core/validation.js'
 import { isoAt } from '../../core/time.js'
 
@@ -36,8 +38,19 @@ const MAX_COMMANDS = 400
 const LOBBY_TTL_MS = 2 * 3_600_000
 const DONE_TTL_MS = 7 * 24 * 3_600_000
 
+/**
+ * Líneas por persona y minuto: escribiendo se hace una cada pocos segundos;
+ * más es un guion que llenaría la base (cada línea guarda la sala entera).
+ */
+const RUNS_PER_MINUTE = 60
+/**
+ * Lo que ocupa una sala en la base. Cada repositorio (con origin) ya tiene su
+ * tope en el motor (`LIMITS.worldBytes`); esto es la red por si se suman.
+ */
+const MAX_STATE_BYTES = (MAX_PLAYERS + 1) * LIMITS.worldBytes
+
 const createSchema = z.object({ gate: z.string().max(20) })
-const runSchema = z.object({ line: z.string().max(200) })
+const runSchema = z.object({ line: z.string().max(LIMITS.line) })
 
 type Status = GitRoom['status']
 
@@ -199,6 +212,7 @@ export function createRoomService(deps: {
 }) {
   const { rooms } = deps
   const locked = createLocks()
+  const runs = createRateLimit({ max: RUNS_PER_MINUTE, windowMs: 60_000, now: deps.now })
 
   function missionFor(gate: string): GroupMission {
     const mission = missionOf(gate)
@@ -487,6 +501,9 @@ export function createRoomService(deps: {
     async run(actor: Actor, id: number, input: unknown): Promise<GitRunResult> {
       const { line } = parse(runSchema, input)
 
+      if (!runs.hit(actor.login))
+        throw domainError('rate_limited', 'Vas muy deprisa: espera unos segundos entre comandos')
+
       return locked(id, async () => {
         const room = await expire(await mustRoom(id))
         const state = room.state
@@ -512,6 +529,9 @@ export function createRoomService(deps: {
           commands: { ...state.commands, [actor.login]: used + 1 },
           last: { ...state.last, [actor.login]: line },
         }
+        if (JSON.stringify(next).length > MAX_STATE_BYTES)
+          throw domainError('conflict', 'La sala ha crecido demasiado: ese comando no cabe')
+
         const logins = await rooms.players(id)
         const present = next.players.filter((p) => logins.includes(p.login))
         const finished = missionDone(missionFor(room.gate).check(next.remote, present))

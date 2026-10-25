@@ -5,6 +5,7 @@
  */
 
 import { goalOf, missing } from '../compare.js'
+import { createCounter } from '../count.js'
 import type { Goal, Miss } from '../compare.js'
 import { emptyRepo } from '../model.js'
 import type { Remote } from '../model.js'
@@ -62,22 +63,64 @@ export function goalOfLevel(level: Level): Goal {
   return goalOf(solved.repo, solved.remote, level.check)
 }
 
-/** Mirar es gratis: status y log no cuentan para las estrellas. */
-const FREE = new Set(['status', 'log'])
+/** Cada línea de un intento: si salió bien y si cuenta para las estrellas. */
+export type Tally = { world: World; lines: { ok: boolean; counted: boolean }[]; commands: number }
 
-/** Los comandos de git que cuentan para las estrellas. */
-function gitCount(lines: readonly string[]): number {
-  return lines.filter(
-    (line) => /^\s*git\s/.test(line) && !FREE.has(line.trim().split(/\s+/)[1] ?? ''),
-  ).length
+/**
+ * Vuelve a ejecutar las líneas desde el principio del reto, como la terminal:
+ * las que fallan no cambian nada ni cuentan. Qué cuenta lo decide
+ * `createCounter` (lo que cambia, no cómo se escribe).
+ */
+export function tally(level: Level, lines: readonly string[]): Tally {
+  let world = startOf(level)
+  const counter = createCounter()
+  const marks: Tally['lines'] = []
+  let commands = 0
+
+  for (const line of lines) {
+    const result = run(world, line)
+    const next = { repo: result.repo, remote: result.remote }
+    const counted = result.ok && counter(world, next)
+
+    if (result.ok) world = next
+    if (counted) commands++
+    marks.push({ ok: result.ok, counted })
+  }
+
+  return { world, lines: marks, commands }
 }
 
-/** Tres estrellas con tantos comandos de git como la solución; dos con la mitad más; una, con lo que sea. */
-export function starsOf(level: Level, used: number): 1 | 2 | 3 {
-  const best = gitCount(level.solution)
+const pars = new Map<string, number>()
 
-  if (used <= best) return 3
-  if (used <= Math.ceil(best * 1.5) + 1) return 2
+/** Los comandos que cuentan en la solución: con eso o menos, tres estrellas. */
+function parOf(level: Level): number {
+  const known = pars.get(level.id)
+
+  if (known !== undefined) return known
+
+  const par = tally(level, level.solution).commands
+
+  pars.set(level.id, par)
+
+  return par
+}
+
+/**
+ * Cuántos comandos (de los que cuentan) caben en cada estrella: tres con
+ * tantos como la solución; dos con la mitad más uno; una, con lo que sea. Lo
+ * enseña la web antes de empezar y lo usa la API al corregir: es lo mismo.
+ */
+export function starGoals(level: Level): { three: number; two: number } {
+  const three = parOf(level)
+
+  return { three, two: Math.ceil(three * 1.5) + 1 }
+}
+
+export function starsOf(level: Level, used: number): 1 | 2 | 3 {
+  const goals = starGoals(level)
+
+  if (used <= goals.three) return 3
+  if (used <= goals.two) return 2
 
   return 1
 }
@@ -85,26 +128,15 @@ export function starsOf(level: Level, used: number): 1 | 2 | 3 {
 export type Attempt = { done: boolean; misses: Miss[]; stars: 0 | 1 | 2 | 3; commands: number }
 
 /**
- * Corrige un intento: vuelve a ejecutar las líneas desde el principio. Las que
- * fallan no cambian nada (como en la terminal), pero tampoco cuentan.
+ * Corrige un intento: vuelve a ejecutar las líneas desde el principio y mira
+ * si el repositorio ha llegado al objetivo (por su forma, no por los comandos).
  */
 export function checkAttempt(
   level: Level,
   lines: readonly string[],
   goal = goalOfLevel(level),
 ): Attempt {
-  let world = startOf(level)
-  let commands = 0
-
-  for (const line of lines) {
-    const result = run(world, line)
-
-    if (result.ok) {
-      world = { repo: result.repo, remote: result.remote }
-      if (result.command !== null && !FREE.has(result.command)) commands++
-    }
-  }
-
+  const { world, commands } = tally(level, lines)
   const misses = missing(world.repo, world.remote, goal)
   const done = misses.length === 0
 

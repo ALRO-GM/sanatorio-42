@@ -52,6 +52,8 @@ export type GitAttemptInput = { lines: string[] }
 export type GitAttemptResult = {
   done: boolean
   stars: 0 | 1 | 2 | 3
+  /** Los comandos que han contado (los que cambian ramas, commits, HEAD, tags, stash u origin). */
+  commands: number
   /** Qué no está como se pide: `main`, `origin/feature`, `main:hola.c`… */
   misses: string[]
   course: GitCourse

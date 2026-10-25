@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import type { KeyboardEvent } from 'react'
 
+import { LIMITS } from '@sanatorio/gitsim'
+
 import { useI18n } from '../../shared/i18n'
 
-export type TerminalEntry = { line: string; output: string[]; ok: boolean }
+/** Una línea escrita y lo que contestó. `counted`: su número si cuenta para las estrellas. */
+export type TerminalEntry = { line: string; output: string[]; ok: boolean; counted?: number | null }
 
 type TerminalProps = {
   entries: TerminalEntry[]
@@ -19,7 +22,7 @@ type TerminalProps = {
  * los comandos de antes, y `clear` limpia la pantalla (no el repositorio).
  */
 export function Terminal({ entries, prompt, disabled = false, onRun, onClear }: TerminalProps) {
-  const { t } = useI18n()
+  const { t, tn } = useI18n()
   const [draft, setDraft] = useState('')
   const [back, setBack] = useState(0)
   const screen = useRef<HTMLDivElement>(null)
@@ -58,6 +61,12 @@ export function Terminal({ entries, prompt, disabled = false, onRun, onClear }: 
         <div key={index} className="git-term-entry">
           <div className="git-term-line">
             <span className="git-prompt">$</span> {entry.line}
+            {typeof entry.counted === 'number' && (
+              <span className="git-term-count" title={tn('git.term.counted', entry.counted)}>
+                <span aria-hidden="true">{entry.counted}</span>
+                <span className="sr-only">{tn('git.term.counted', entry.counted)}</span>
+              </span>
+            )}
           </div>
           {entry.output.map((text, row) => (
             <div key={row} className={`git-term-out ${entry.ok ? '' : 'error'}`}>
@@ -72,6 +81,7 @@ export function Terminal({ entries, prompt, disabled = false, onRun, onClear }: 
           ref={input}
           value={draft}
           disabled={disabled}
+          maxLength={LIMITS.line}
           spellCheck={false}
           autoCapitalize="off"
           autoComplete="off"

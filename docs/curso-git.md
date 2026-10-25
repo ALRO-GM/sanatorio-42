@@ -56,6 +56,70 @@ cierto número de conceptos hay una **prueba de grupo**.
    animación (ramas, commits, HEAD y, si toca, el contenido de ficheros) con la
    terminal. Una, dos o tres estrellas según los comandos usados.
 
+## Estrellas: cuántos comandos
+
+En la cabecera de cada punto (en sus tres pasos) se ve el **objetivo** y
+cuántos comandos da cada estrella, por ejemplo en «Ramas: dos a la vez»:
+«★★★ en 8 comandos o menos · ★★☆ hasta 13 · ★☆☆ con más, al conseguirlo», con
+un desplegable «¿Qué comandos cuentan?». Durante el reto, encima de la
+terminal: «Llevas 3 comandos que cuentan» y las estrellas que tendrías si lo
+consiguieras ya; cada línea que cuenta lleva su número a la derecha. Al
+acabar se explica el porqué: «Lo has hecho en 10 comandos. Con 8 o menos
+tendrías tres estrellas: empieza de nuevo para mejorar».
+
+- **Qué cuenta** (`packages/gitsim/src/count.ts`): no el texto del comando
+  sino lo que cambia. Cuenta lo que mueve commits, ramas, HEAD, tags, stash u
+  origin. No cuentan mirar (`status`, `log`, `diff`, `show`), preparar ficheros
+  (`echo`, `rm`, `git add`, `git restore`, `git reset HEAD f`), `git fetch`
+  (no toca tus ramas: `fetch` + `merge` = `pull`), lo que falla ni lo que
+  repite algo hecho. Crear una rama y cambiarse a ella cuenta uno
+  (`switch -c` = `checkout -b` = `branch x` + `switch x`).
+- **Umbrales** (`starGoals` en `levels/build.ts`): tres estrellas con tantos
+  comandos como la solución del punto (contados igual), dos hasta la mitad más
+  uno (`⌈1,5 × n⌉ + 1`), una con más. La web los enseña y la API puntúa con la
+  misma función, sobre las líneas que vuelve a ejecutar.
+- **Formas equivalentes**: el motor acepta `git add .` / `-A` / `--all` / `*`
+  / patrones (`*.c`) / carpetas / fichero a fichero / `-u`; `commit -m`,
+  `--message`, `--message=…`, `-m"…"`, `-am`, `-a -m`, `--all`, `commit f`;
+  `switch -c` / `--create` / `checkout -b` / `switch -c x origin/x` /
+  `--track`; `switch` / `checkout` de rama, `switch -` / `checkout -`;
+  `switch --detach` / `checkout ref`; `restore f` / `checkout -- f` /
+  `checkout f`; `restore --staged f` / `reset HEAD f` / `reset f` /
+  `reset -- f`; `rebase main feature` = `switch feature` + `rebase main`;
+  `pull -r` / `--rebase`; `push -u` / `--set-upstream` / `push origin HEAD` /
+  `local:remota`; `branch -d` / `--delete`, `-D` / `-d --force`, `branch -m`;
+  `tag -a … -m`, `tag -d`; `stash push` / `save`, `pop` / `apply`, `drop`;
+  `merge --ff-only`, `--continue`; `revert --no-edit`, `cherry-pick -x`;
+  `HEAD~2` / `HEAD^^` / `@~2` / `main~2` / el id. El test
+  `apps/api/tests/unit/gitsim-equivalent.test.ts` resuelve cada punto con
+  varias de estas variantes y exige tres estrellas en todas.
+
+## Protección de la terminal
+
+- **No ejecuta nada de verdad.** Todo pasa en `packages/gitsim`, que no
+  importa `fs`, procesos ni nada del sistema (un test lo comprueba). En los
+  retos en solitario los comandos corren en el navegador y la API los vuelve
+  a ejecutar al corregir; en las pruebas de grupo corren en la API. Las
+  órdenes que no son del curso (`sudo`, `curl`, `bash`…) solo dan un mensaje;
+  `;`, `&&`, `|`, `<`, `` ` `` y `$(` sin comillas se rechazan («aquí no hay
+  shell»).
+- **Rutas**: solo dentro de `~/repo`. Nada de `/…`, `~`, `..`, `.git` ni
+  enlaces (`safePath` en `limits.ts`). Nombres de rama y tag con las reglas de
+  git; los nombres de JavaScript (`constructor`, `__proto__`…) no valen.
+- **Topes** (`LIMITS` en `packages/gitsim/src/limits.ts`, se miran tras cada
+  orden; si se pasa, falla con un mensaje y no cambia nada): línea de 200
+  caracteres y 40 palabras, 40 ficheros, 1000 caracteres por fichero y 8000
+  entre todos, nombres de 60, 200 commits, 30 ramas, 30 tags, 10 entradas de
+  stash y 200 kB de repositorio con origin. Un intento a la API, 300 líneas.
+  Referencias como `HEAD~99999999` o patrones como `*a*a*a…b` no cuelgan
+  (se paran en el primer commit; el patrón se compara sin expresiones
+  regulares). Un error inesperado del motor se enseña como error y no tumba
+  la pestaña ni la API.
+- **API**: los intentos se validan con zod (300 líneas de 200) y van a 30 por
+  persona cada diez minutos; las estrellas las calcula siempre la API. En las
+  salas, 60 comandos por minuto y persona, 400 por partida y la sala entera
+  con tope de bytes antes de guardarse.
+
 ## Reglas
 
 - **Solo desde un ordenador del clúster**: hace falta estar sentado en un
@@ -136,3 +200,6 @@ cierto número de conceptos hay una **prueba de grupo**.
   las personas usen todos los conceptos (misiones por persona).
 - [x] Fase 6: demostración animada (`GitCourseTour`, junto a la frase del
   curso) y repaso de la documentación.
+- [x] Fase 7 (2026-10-25): objetivo y comandos por estrella a la vista,
+  recuento en vivo y el porqué al acabar; recuento por lo que cambia y formas
+  equivalentes de git; topes y protección de la terminal (ver arriba).

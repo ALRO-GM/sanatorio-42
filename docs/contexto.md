@@ -71,7 +71,10 @@ que hacer, en orden. Este documento es el porqué; aquel, el qué.
   misiones de grupo se comprueban **por persona** (pedido por Alberto: todas
   usan todos los conceptos). En el jefe, puestos a 4 filas y 4 columnas (u
   otro clúster) y sin ver lo que escriben las demás. Migración 62
-  (`git_rooms`, `git_room_players`). Demostración `gitCourse`.
+  (`git_rooms`, `git_room_players`). Demostración `gitCourse`. 2026-10-25:
+  objetivo y comandos por estrella a la vista, recuento por lo que cambia
+  (formas equivalentes valen igual) y topes contra abusos en la terminal
+  (`LIMITS` de gitsim, límites de peticiones en la API).
 - **Tanda de la valoración de uso** hecha (ver `docs/interfaz.md`), con la
   demostración de Exámenes, «Personalizar» desde cada página y el modo de la
   interfaz también en Personalizar.
