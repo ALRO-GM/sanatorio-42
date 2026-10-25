@@ -46,6 +46,7 @@ import {
   milestonesOf,
   ownUnits,
   paceLines,
+  settled,
   standingOf,
   totalHours,
   unitsOf,
@@ -217,6 +218,13 @@ export function createProgressService(options: {
   /**
    * Los proyectos de cada plan, con las otras versiones de cada uno (la vieja y
    * la de `42next-`): quien hizo cualquiera tiene el hueco hecho.
+   *
+   * En el de Python, la versión vieja (de C) cuenta en el círculo que tiene en C
+   * (`adopted`): quien empezó en C y pasó a Python hizo Born2beroot en el
+   * círculo 1 y la push_swap vieja en el 2 (al revés que el plan de Python). En
+   * producción, las 16 personas de Python con el rango 1 y Born2beroot de C lo
+   * validaron con él y sin push_swap. En C no se hace al revés: nadie de C ha
+   * hecho una versión `42next-` de esas.
    */
   async function plans(): Promise<
     Record<CoreTrack, PlanProject[]> & { names: Map<number, string> }
@@ -225,22 +233,29 @@ export function createProgressService(options: {
     const planIds = [...new Set([...classic.keys(), ...next.keys()])]
     const extra = await options.progress.idsOf(Object.values(VERSIONS).flat())
     const info = await options.progress.projects([...new Set([...planIds, ...extra.values()])])
-    const listOf = (circles: Map<number, number>): PlanProject[] =>
+    const listOf = (circles: Map<number, number>, adopt: Map<number, number>): PlanProject[] =>
       [...circles].flatMap(([id, circle]) => {
         const slug = info.get(id)?.slug ?? ''
         const versions = Object.values(VERSIONS).find((group) => group.includes(slug)) ?? [slug]
 
-        return versions.flatMap((version) => {
+        return versions.flatMap((version): PlanProject[] => {
           const versionId = version === slug ? id : extra.get(version)
 
-          return versionId === undefined
-            ? []
-            : [{ id: versionId, circle, slug: version, hours: info.get(versionId)?.hours ?? null }]
+          if (versionId === undefined) return []
+          const project = {
+            id: versionId,
+            circle,
+            slug: version,
+            hours: info.get(versionId)?.hours ?? null,
+          }
+          const there = version === slug ? undefined : adopt.get(versionId)
+
+          return [there === undefined ? project : { ...project, circle: there, adopted: true }]
         })
       })
     const names = new Map([...info].map(([id, each]) => [id, each.name]))
 
-    return { classic: listOf(classic), next: listOf(next), names }
+    return { classic: listOf(classic, new Map()), next: listOf(next, classic), names }
   }
 
   /**
@@ -296,6 +311,8 @@ export function createProgressService(options: {
       string,
       Person & {
         first: number
+        /** Cuándo se apuntó a cada proyecto (id → ms), para fechar Libft (`settled`). */
+        opened: Map<number, number>
         begin: number | null
         votes: Record<CoreTrack, Set<number>>
         known: boolean
@@ -316,6 +333,7 @@ export function createProgressService(options: {
           known: row.track !== null,
           start: 0,
           first: Infinity,
+          opened: new Map(),
           begin: cursus?.beginAt ?? row.beginAt,
           done: new Map(),
           here: row.here,
@@ -339,6 +357,7 @@ export function createProgressService(options: {
         people.set(row.login, person)
       }
       if (row.createdAt !== null) person.first = Math.min(person.first, row.createdAt)
+      if (row.openedAt !== null) person.opened.set(row.projectId, row.openedAt)
       if (row.doneAt !== null) person.done.set(row.projectId, row.doneAt)
       const slug = slugOf.get(row.projectId) ?? ''
 
@@ -383,6 +402,8 @@ export function createProgressService(options: {
       }
       if (!Number.isFinite(person.start) || person.start > t) continue
       kept.set(person.login, person)
+      // Libft, como tarde cuando se apuntó a lo siguiente: 42 reescribió en lote muchas de sus fechas.
+      person.done = settled(units[person.track], person.done, person.opened)
 
       census.all[person.track][person.status] += 1
       if (person.here) census.campus[person.track][person.status] += 1
@@ -538,7 +559,7 @@ export function createProgressService(options: {
         people: data.counts,
         census: data.census,
         axis: {
-          circles: circleMarks(units),
+          circles: circleMarks(),
           // Las horas del eje son las de quien mira, con su versión de cada proyecto
           // (si terminó, las de lo que hizo: su 100 %).
           hours: mine?.trace.hours ?? Math.round(totalHours(units)),

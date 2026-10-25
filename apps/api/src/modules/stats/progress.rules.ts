@@ -4,10 +4,14 @@
  * lo que pide cada pace. No se mide por experiencia, sino por proyectos, de
  * dos maneras:
  *
- * - **Círculos** (`circles`): de cada círculo, la parte de sus proyectos que
- *   está aprobada; todos los círculos pesan lo mismo. Completar los círculos
- *   0, 1 y 2 y la mitad del 3 es (3 + 0,5) / 7 = 50 %. Terminar el círculo `n`
- *   es, por tanto, (n + 1) / 7: así se marcan los círculos en el eje.
+ * - **Círculos** (`circles`): cada uno de los `CIRCLES` (7) círculos pesa
+ *   exactamente 1/7, y sus casillas se lo reparten a partes iguales. Completar
+ *   los círculos 0, 1 y 2 y la mitad del 3 es (3 + 0,5) / 7 = 50 %. Terminar
+ *   el círculo `k` es, por tanto, (k + 1) / 7: las marcas fijas del eje
+ *   (`circleMarks`). Vale para cualquier juego de casillas (el plan, o lo que
+ *   hizo quien terminó): el 7 no cambia, solo cuántas casillas tiene cada
+ *   círculo. Un círculo sin casillas en ese juego se da por hecho con el
+ *   siguiente que tenga (al final, con el anterior): su peso pasa a ese.
  * - **Horas** (`hours`): las horas estimadas por 42 de los proyectos aprobados,
  *   frente a las de todo el plan **de esa persona**: de cada hueco cuentan las
  *   horas de la versión que hizo (la vieja o la de `42next-`, o el proyecto que
@@ -15,7 +19,14 @@
  *
  * Un proyecto entre los que se elige uno (`CHOICES`: so_long, FdF o fract-ol) o
  * con dos versiones (`VERSIONS`) es una sola casilla: con aprobar cualquiera,
- * está hecha.
+ * está hecha. Cuenta en el círculo de la versión que hizo (`moved`): quien
+ * empezó en C y pasó a Python hizo Born2beroot en el círculo 1 y la push_swap
+ * vieja en el 2, al revés que el plan de Python (`docs/blackhole.md`).
+ *
+ * Libft (el círculo 0) se aprueba antes de apuntarse a nada más, pero 42
+ * reescribió en lote la fecha de muchas filas (el 2023-08-08, la de Libft de
+ * un tercio de C): lo del círculo 0 cuenta, como tarde, cuando se apuntó al
+ * primer proyecto de otro círculo (`settled`).
  *
  * **Quien terminó** el common core se mide contra lo que hizo hasta terminar,
  * no contra el plan de hoy (`ownUnits`): el plan cambia (proyectos que entran,
@@ -28,18 +39,29 @@ import type { ProgressMeasure } from '@sanatorio/contracts'
 
 import { DAYS, PACES } from './pace.rules.js'
 
-/** Un proyecto del plan, con su círculo y sus horas (si 42 las da). */
-export type PlanProject = { id: number; slug: string; circle: number; hours: number | null }
+/**
+ * Un proyecto del plan, con su círculo y sus horas (si 42 las da). `adopted`:
+ * una versión que el plan toma de otro plan, con el círculo que tenía allí.
+ */
+export type PlanProject = {
+  id: number
+  slug: string
+  circle: number
+  hours: number | null
+  adopted?: boolean
+}
 
 /**
  * Una casilla del plan: un proyecto, o un grupo entre los que vale uno. `hours`
- * son las del más corto; `hoursById`, las de cada uno.
+ * son las del más corto; `hoursById`, las de cada uno. `circle` es el suyo en el
+ * plan; `moved`, las versiones adoptadas que cuentan en otro círculo.
  */
 export type Unit = {
   circle: number
   hours: number | null
   ids: readonly number[]
   hoursById: ReadonlyMap<number, number | null>
+  moved: ReadonlyMap<number, number>
 }
 
 /** Cuándo aprobó cada proyecto (id → ms) una persona. */
@@ -51,11 +73,17 @@ type Standing = { circle: number; circles: number; hours: number }
 const DAY_MS = 86_400_000
 /** El círculo de quien completó todos: uno más que el último (el 6). */
 export const FINISHED_CIRCLE = 7
+/** Cuántos círculos tiene el common core (del 0 al 6): por círculos, cada uno pesa 1/7. */
+const CIRCLES = FINISHED_CIRCLE
 
 const shorter = (a: number | null, b: number | null): number | null =>
   a === null || b === null ? (a ?? b) : Math.min(a, b)
 
-/** Las casillas del plan: cada proyecto, salvo los de un mismo grupo, que van juntos. */
+/**
+ * Las casillas del plan: cada proyecto, salvo los de un mismo grupo, que van
+ * juntos. El círculo de un grupo es el más bajo de los suyos sin contar las
+ * versiones adoptadas; una adoptada de otro círculo va en `moved`.
+ */
 export function unitsOf(
   projects: readonly PlanProject[],
   ...groups: readonly Readonly<Record<string, readonly string[]>>[]
@@ -68,34 +96,34 @@ export function unitsOf(
     }
   }
 
-  const units = new Map<
-    string,
-    { circle: number; hours: number | null; ids: number[]; hoursById: Map<number, number | null> }
-  >()
+  const members = new Map<string, PlanProject[]>()
 
   for (const project of projects) {
     const key = groupOf.get(project.slug) ?? `#${String(project.id)}`
-    const unit = units.get(key)
+    const list = members.get(key) ?? []
 
-    if (unit === undefined) {
-      units.set(key, {
-        circle: project.circle,
-        hours: project.hours,
-        ids: [project.id],
-        hoursById: new Map([[project.id, project.hours]]),
-      })
-      continue
-    }
-    if (unit.hoursById.has(project.id)) continue
-
-    // Del grupo se hace uno: cuenta el círculo más bajo y, sin saber cuál, las horas del más corto.
-    unit.circle = Math.min(unit.circle, project.circle)
-    unit.hours = shorter(unit.hours, project.hours)
-    unit.ids.push(project.id)
-    unit.hoursById.set(project.id, project.hours)
+    if (list.some((each) => each.id === project.id)) continue
+    list.push(project)
+    members.set(key, list)
   }
 
-  return [...units.values()]
+  return [...members.values()].map((list) => {
+    const own = list.filter((project) => project.adopted !== true)
+    // Del grupo se hace uno: cuenta el círculo más bajo y, sin saber cuál, las horas del más corto.
+    const circle = Math.min(...(own.length > 0 ? own : list).map((project) => project.circle))
+
+    return {
+      circle,
+      hours: list.map((project) => project.hours).reduce(shorter),
+      ids: list.map((project) => project.id),
+      hoursById: new Map(list.map((project) => [project.id, project.hours])),
+      moved: new Map(
+        list
+          .filter((project) => project.adopted === true && project.circle !== circle)
+          .map((project) => [project.id, project.circle]),
+      ),
+    }
+  })
 }
 
 /** Cuándo hizo cada casilla y con qué proyecto. `at: Infinity` si no la ha hecho. */
@@ -129,18 +157,58 @@ export function totalHours(units: readonly Unit[], done: Done = new Map()): numb
 }
 
 /**
+ * El círculo en que cuenta cada casilla para alguien: el de la versión que hizo.
+ * De lo que no ha hecho, el del plan; salvo que ya haya hecho alguna versión
+ * adoptada que cambia de círculo (empezó en C y pasó a Python): entonces sigue
+ * esas, y lo que le falta va donde iba en su plan de antes.
+ */
+function placedCircles(units: readonly Unit[], done: Done): number[] {
+  const at = finishedAt(units, done)
+  const follows = at.some(({ id }, index) => id !== null && units[index]?.moved.has(id) === true)
+
+  return units.map((unit, index) => {
+    const id = at[index]?.id ?? null
+
+    if (id !== null) return unit.moved.get(id) ?? unit.circle
+    if (follows) return [...unit.moved.values()][0] ?? unit.circle
+
+    return unit.circle
+  })
+}
+
+/**
+ * Lo que pesa cada círculo con casillas: 1/7 cada uno. El de un círculo sin
+ * casillas pasa al siguiente que tenga (o, si no hay, al anterior): se da por
+ * hecho con él, y la línea sigue cayendo en las marcas.
+ */
+function circleShares(present: ReadonlySet<number>): Map<number, number> {
+  const sorted = [...present].sort((a, b) => a - b)
+  const shares = new Map<number, number>()
+
+  for (let circle = 0; circle < CIRCLES; circle++) {
+    const target = sorted.find((each) => each >= circle) ?? sorted.at(-1)
+
+    if (target !== undefined) shares.set(target, (shares.get(target) ?? 0) + 1 / CIRCLES)
+  }
+
+  return shares
+}
+
+/**
  * Lo que mide cada casilla en cada manera de medir, en tanto por uno del total:
- * en círculos, 1 / (casillas de su círculo) / (círculos con casillas); en horas,
- * sus horas entre las de todo el plan de esa persona.
+ * en círculos, lo que pesa su círculo entre las casillas que tiene ese círculo
+ * en el juego de esa persona; en horas, sus horas entre las de todo su plan.
  */
 function weightsOf(units: readonly Unit[], done: Done): Record<ProgressMeasure, number[]> {
+  const placed = placedCircles(units, done)
   const perCircle = new Map<number, number>()
 
-  for (const unit of units) perCircle.set(unit.circle, (perCircle.get(unit.circle) ?? 0) + 1)
+  for (const circle of placed) perCircle.set(circle, (perCircle.get(circle) ?? 0) + 1)
 
+  const shares = circleShares(new Set(perCircle.keys()))
   const hours = ownHours(units, done)
   const total = hours.reduce((sum, each) => sum + each, 0)
-  const circles = units.map((unit) => 1 / (perCircle.get(unit.circle) ?? 1) / perCircle.size)
+  const circles = placed.map((circle) => (shares.get(circle) ?? 0) / (perCircle.get(circle) ?? 1))
 
   // Sin ninguna hora conocida (solo exámenes), por horas cuenta como por círculos.
   return { circles, hours: total === 0 ? circles : hours.map((each) => each / total) }
@@ -202,15 +270,14 @@ export function curveOf(
  */
 export function standingOf(units: readonly Unit[], done: Done): Standing {
   const weights = weightsOf(units, done)
+  const placed = placedCircles(units, done)
   const at = finishedAt(units, done)
   let circle = FINISHED_CIRCLE
   const sums = { circles: 0, hours: 0 }
 
   at.forEach(({ at: when }, index) => {
-    const unit = units[index]
-
     if (when === Infinity) {
-      circle = Math.min(circle, unit?.circle ?? FINISHED_CIRCLE)
+      circle = Math.min(circle, placed[index] ?? FINISHED_CIRCLE)
       return
     }
     sums.circles += weights.circles[index] ?? 0
@@ -220,21 +287,25 @@ export function standingOf(units: readonly Unit[], done: Done): Standing {
   return { circle, circles: percent(sums.circles), hours: percent(sums.hours) }
 }
 
-/** El avance (en %) de tener completos los círculos 0…`circle`, con lo más corto de cada grupo. */
-function upTo(units: readonly Unit[], measure: ProgressMeasure, circle: number): number {
-  const weights = weightsOf(units, new Map())
+/**
+ * Dónde se acaba cada círculo (0…6) en la medida por círculos: las marcas del
+ * eje, (k + 1) / 7. Son fijas: toda línea pesa cada círculo igual, sea cual sea
+ * su juego de casillas, y cae justo en la marca `k` al completar los círculos 0…k.
+ */
+export function circleMarks(): number[] {
+  return Array.from({ length: CIRCLES }, (_, circle) => percent((circle + 1) / CIRCLES))
+}
+
+/** El avance por horas de tener completos los círculos 0…`circle`, con lo más corto de cada grupo. */
+function hoursUpTo(units: readonly Unit[], circle: number): number {
+  const weights = weightsOf(units, new Map()).hours
 
   return percent(
     units.reduce(
-      (sum, unit, index) => sum + (unit.circle <= circle ? (weights[measure][index] ?? 0) : 0),
+      (sum, unit, index) => sum + (unit.circle <= circle ? (weights[index] ?? 0) : 0),
       0,
     ),
   )
-}
-
-/** Dónde se acaba cada círculo (0…6) en la medida por círculos: las marcas del eje. */
-export function circleMarks(units: readonly Unit[]): number[] {
-  return DAYS[24].map((_, circle) => upTo(units, 'circles', circle))
 }
 
 /**
@@ -244,16 +315,20 @@ export function circleMarks(units: readonly Unit[]): number[] {
 export function paceLines(
   units: readonly Unit[],
 ): Record<ProgressMeasure, { pace: number; points: [number, number][] }[]> {
-  const line = (measure: ProgressMeasure) =>
+  const marks = circleMarks()
+  const line = (upTo: (circle: number) => number) =>
     PACES.map((pace) => ({
       pace,
       points: [
         [0, 0] as [number, number],
-        ...DAYS[pace].map((day, circle): [number, number] => [day, upTo(units, measure, circle)]),
+        ...DAYS[pace].map((day, circle): [number, number] => [day, upTo(circle)]),
       ],
     }))
 
-  return { circles: line('circles'), hours: line('hours') }
+  return {
+    circles: line((circle) => marks[circle] ?? 100),
+    hours: line((circle) => hoursUpTo(units, circle)),
+  }
 }
 
 /**
@@ -287,6 +362,47 @@ export function ownUnits(units: readonly Unit[], done: Done): readonly Unit[] {
   const end = finishedOn(units, done) ?? Math.max(...passed)
 
   return units.filter((_, index) => (at[index]?.at ?? Infinity) <= end)
+}
+
+/**
+ * Lo aprobado, con lo del círculo 0 (Libft) como tarde cuando se apuntó al
+ * primer proyecto de otro círculo, o un día antes de aprobarlo si no se sabe
+ * cuándo se apuntó: nadie se apunta a ft_printf sin tener Libft, y nadie se
+ * apunta y lo aprueba el mismo día. 42 reescribió en lote la fecha de muchas
+ * filas de Libft (el 2023-08-08: 638 en Madrid, un tercio de C) y su línea
+ * empezaba por ft_printf, lejos del círculo 0. Esas filas no dicen cuándo se
+ * apuntó; una que sí lo dice y es posterior (lo repitió, o el plan lo añadió
+ * después) se queda como está. `opened`: cuándo se apuntó a cada proyecto (id →
+ * ms), si se sabe.
+ */
+export function settled(
+  units: readonly Unit[],
+  done: Done,
+  opened: ReadonlyMap<number, number>,
+): Map<number, number> {
+  let first = Infinity
+
+  for (const unit of units) {
+    if (unit.circle === 0) continue
+    for (const id of unit.ids) {
+      first = Math.min(first, opened.get(id) ?? Infinity, (done.get(id) ?? Infinity) - DAY_MS)
+    }
+  }
+
+  const fixed = new Map(done)
+
+  for (const unit of units) {
+    if (unit.circle !== 0) continue
+    for (const id of unit.ids) {
+      const at = done.get(id)
+
+      if (at !== undefined && at > first && (opened.get(id) ?? -Infinity) <= first) {
+        fixed.set(id, first)
+      }
+    }
+  }
+
+  return fixed
 }
 
 /** Lo aprobado de un mismo día: los proyectos (por id) y dónde deja la línea. */

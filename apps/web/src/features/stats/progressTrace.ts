@@ -45,6 +45,25 @@ export function tracePoints(
 }
 
 /**
+ * Los puntos de una línea en escalones: entre dos puntos se queda en el valor
+ * del primero y sube de golpe el día del segundo, que es cuando aprobó (los
+ * hitos van dentro). Así el escalón de completar un círculo cae justo en su raya
+ * del eje ese día, en vez de una rampa desde el punto de 15 días anterior.
+ */
+export function stepped(points: readonly Point[]): Point[] {
+  const steps: Point[] = []
+
+  points.forEach(([day, value], index) => {
+    const before = points[index - 1]
+
+    if (before !== undefined && before[1] !== value) steps.push([day, before[1]])
+    steps.push([day, value])
+  })
+
+  return steps
+}
+
+/**
  * El tramo de después de terminar, a lo largo del 100 %: del día en que
  * terminó al último punto. `null` si no terminó o cae fuera del periodo.
  */

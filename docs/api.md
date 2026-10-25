@@ -1907,8 +1907,10 @@ GET /stats/ranking?by=circle|circles|hours&plan=all|classic|next&kickoff=AAAA-MM
   hizo de cada proyecto (la vieja o la de `42next-`, o el que eligió de un
   grupo); de lo que no ha hecho, las del más corto. Las dos versiones de un
   proyecto son una sola casilla (`VERSIONS` de `replica/common-core.ts`).
-- `axis.circles[n]`: el % (por círculos) de tener completos los círculos 0…n
-  con el plan de quien mira, para marcar los círculos en el eje. `axis.hours`:
+- `axis.circles[n]`: el % (por círculos) de tener completos los círculos 0…n,
+  fijo: (n + 1) / 7 (14,3, 28,6… 100). Cada línea pesa cada círculo 1/7 con
+  su juego de casillas, así que cae justo en esas marcas (`docs/blackhole.md`,
+  «La medida por círculos»). `axis.hours`:
   las horas del common core de quien mira; `axis.planHours`, las de cada plan
   con lo más corto (en octubre de 2026, C 1 786 h y Python 1 436 h, sin
   contar lo que el plan nuevo aún no ha aprendido del círculo 6).

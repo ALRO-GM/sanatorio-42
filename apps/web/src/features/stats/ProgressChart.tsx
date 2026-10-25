@@ -13,7 +13,7 @@ import { useFormat } from '../../shared/i18n/useFormat'
 import { Icon } from '../../shared/ui/Icon'
 import { MAX_LINES, ME_STYLE, TRACKS, groupSeries, personStyle } from './progressSeries'
 import type { GroupKey, LineStyle, Picked, Series } from './progressSeries'
-import { finishedStretch, nextStop, stopsOf, tracePoints } from './progressTrace'
+import { finishedStretch, nextStop, stepped, stopsOf, tracePoints } from './progressTrace'
 import type { Stop } from './progressTrace'
 
 const WIDTH = 640
@@ -170,7 +170,8 @@ function axisTicks(
   number: (value: number) => string,
 ): { at: number; label: string }[] {
   if (measure === 'circles') {
-    // Al terminar cada círculo: con siete que pesan igual, cada uno es 1/7.
+    // Al terminar cada círculo: siete que pesan 1/7 cada uno, en cualquier línea
+    // (la API da las marcas fijas y cada línea cae en ellas al completar un círculo).
     return [
       { at: 0, label: t('stats.progress.axisStart') },
       ...data.axis.circles.map((at, circle) => ({
@@ -467,7 +468,9 @@ export function ProgressChart({
                 >
                   <path
                     className="progress-line"
-                    d={points === null ? pathOf(x, days, each.line) : pathThrough(x, points)}
+                    d={
+                      points === null ? pathOf(x, days, each.line) : pathThrough(x, stepped(points))
+                    }
                     {...strokeOf(each.style)}
                   />
                   {stretch !== null && (

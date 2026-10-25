@@ -224,6 +224,11 @@ type ProgressRow = {
   doneAt: number | null
   /** Cuándo se apuntó (ms), para saber cuándo empezó quien no tiene fecha de inicio. */
   createdAt: number | null
+  /**
+   * Cuándo se apuntó, solo si 42 lo dice (`null` si no): las filas de Libft que 42
+   * reescribió en lote no lo traen, y así se distinguen de quien lo repitió.
+   */
+  openedAt: number | null
   beginAt: number | null
   track: 'classic' | 'next' | null
   /** Si es del campus de quien pregunta. */
@@ -342,6 +347,7 @@ export function createProgressRepository(db: Db) {
         // Las filas antiguas no traen cuándo se apuntó: la última vez que cambió
         // es lo más temprano que se sabe.
         createdAt: msOf(row.created_at_42) ?? msOf(row.updated_at_42),
+        openedAt: msOf(row.created_at_42),
         beginAt: msOf(row.begin_at),
         track: row.track === 'classic' || row.track === 'next' ? row.track : null,
         here: toNumber(row.here ?? 0) === 1,
