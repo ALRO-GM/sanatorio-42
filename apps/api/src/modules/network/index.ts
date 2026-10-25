@@ -93,6 +93,7 @@ export function createNetworkModule(deps: NetworkModuleDeps): NetworkModule {
   })
   const seating = createSeatingService({
     db: deps.db,
+    knownSeats: (campusId) => deps.replica.knownSeats(campusId),
     ...given({ audience: deps.audience }),
     ...clock,
   })

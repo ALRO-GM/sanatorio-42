@@ -14,11 +14,14 @@ import type {
   NetworkPerson,
   NetworkStrictest,
   SeatGraph,
+  SeatHeat,
+  SeatHeatCell,
   SeatLink,
   SeatPerson,
 } from '@sanatorio/contracts'
 
 import type { NetworkParams } from '../types'
+import { CLUSTER_SIZES } from './data'
 import { portrait } from './portrait'
 
 const GROUPS = 6
@@ -400,4 +403,40 @@ export function mockSeats(me: string, days: number): SeatGraph {
       hours: Math.round(seated.reduce((sum, person) => sum + person.hours, 0)),
     },
   }
+}
+
+/**
+ * El mapa de calor de mentira, sobre el plano de `CLUSTER_SIZES`: las filas de
+ * delante y los puestos de los extremos, más usados; uno de cada siete, sin
+ * estrenar, para que se vean los ceros.
+ */
+export function mockSeatHeat(days: number): SeatHeat {
+  const random = seeded(11)
+  let max = 0
+  const clusters = Object.entries(CLUSTER_SIZES).map(([id, [rows, seatsPerRow]], index) => {
+    const cells: SeatHeatCell[] = []
+
+    for (let row = 1; row <= rows; row += 1) {
+      for (let seat = 1; seat <= seatsPerRow; seat += 1) {
+        const unused = random() < 1 / 7
+        const edge = seat === 1 || seat === seatsPerRow ? 1.6 : 1
+        const front = 1 + (rows - row) / rows
+        const busy = unused ? 0 : (days / 7) * edge * front * (2 + random() * 9) * (1 - index / 8)
+        const hours = Math.round(busy * 10) / 10
+
+        max = Math.max(max, hours)
+        cells.push({
+          host: `${id}r${String(row)}s${String(seat)}`,
+          row,
+          seat,
+          hours,
+          people: hours === 0 ? 0 : Math.max(1, Math.round(hours / (3 + random() * 4))),
+        })
+      }
+    }
+
+    return { id, rows, seatsPerRow, cells }
+  })
+
+  return { days, clusters, max }
 }

@@ -64,6 +64,19 @@ export function registerNetworkRoutes(
     },
   )
 
+  /**
+   * `GET /network/seats/heat?days=` → el mapa de calor de los puestos: horas y
+   * gente distinta en cada ordenador de los clústeres, sin nombres.
+   */
+  app.get<{ Querystring: Record<string, string | undefined> }>(
+    '/network/seats/heat',
+    async (request, reply) => {
+      reply.header('Cache-Control', 'private, max-age=60')
+
+      return reply.send(await seating.heat(await session.actor(request), request.query))
+    },
+  )
+
   /** `GET /network/mine` → con quién te has corregido tú, en todo el histórico. */
   app.get('/network/mine', async (request, reply) => {
     reply.header('Cache-Control', 'private, max-age=60')

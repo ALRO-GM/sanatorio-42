@@ -1449,6 +1449,26 @@ es la parte de sus horas sin nadie en un puesto cercano. Un piscinero solo ve a
 piscineros de su campus y un estudiante, a estudiantes. Permiso de piscina
 `red.seats`.
 
+GET /network/seats/heat?days=30 → el mapa de calor de los puestos
+(`docs/asientos.md`): cuántas horas se ha usado cada ordenador en los últimos
+`days` días (1-365, por defecto 30) y por cuántas personas distintas.
+
+```json
+{
+  "days": 30,
+  "clusters": [{ "id": "c2", "rows": 7, "seatsPerRow": 8,
+                 "cells": [{ "host": "c2r1s1", "row": 1, "seat": 1, "hours": 37.5, "people": 9 }] }],
+  "max": 112.4
+}
+```
+
+Las horas se miden igual que en `GET /network/seats` (desde `first_seen_at`,
+12 h como mucho por sesión, recortadas al periodo) y solo cuentan las de la
+gente que ves en esa red: tu mundo, sin las personas ocultas. Cada clúster va
+entero, como en `GET /map`: los puestos conocidos sin uso salen con `0`. Sin
+logins. `max` son las horas del puesto más usado. Caché de 5 minutos por campus
+y mundo. Permiso de piscina `red.seats`.
+
 ## Ranking
 
 GET /leaderboard?period=month|all → quién ayuda más en el campus que miro.

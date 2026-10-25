@@ -308,6 +308,7 @@ export const realApi: Api = {
     return getJson(`/network/strictest?${query.toString()}`)
   },
   getSeatGraph: (days) => getJson(`/network/seats?days=${String(days)}`),
+  getSeatHeat: (days) => getJson(`/network/seats/heat?days=${String(days)}`),
   getNetworkMine: () => getJson('/network/mine'),
   searchNetworkPeople: (q, campuses) => getJson(`/network/people?${search({ q, campuses })}`),
 

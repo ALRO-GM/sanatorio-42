@@ -599,3 +599,118 @@ button.seat.open {
 .map-placement .map-tools {
   margin: 0.5rem 0 0.25rem;
 }
+
+/* ── Mapa de calor de los puestos (`features/map/SeatHeatMap.tsx`) ───────────
+   El plano del mapa en pequeño y sin caras. Escala secuencial de una sola tinta
+   (azul, se lee igual con daltonismo): en claro, de clara (poco) a oscura
+   (mucho); en oscuro, al revés, para que lo más usado sea lo que más destaca
+   sobre el fondo. Es un código de color como los del mapa: igual en todos los
+   estilos, con su versión para el tema oscuro. El puesto sin uso, vacío como
+   un puesto libre. */
+.seat-heat {
+  --seat: 30px;
+  --heat-lo: #86b6ef;
+  --heat-mid: #2a78d6;
+  --heat-hi: #0d366b;
+}
+:root[data-theme='dark'] .seat-heat {
+  --heat-lo: #184f95;
+  --heat-mid: #5598e7;
+  --heat-hi: #e3effd;
+}
+.seat-heat .seat-grid {
+  gap: 5px;
+}
+.seat-heat .seat-grid.staggered {
+  row-gap: 13px;
+}
+.seat.heat-cell {
+  border-width: 1.5px;
+  border-radius: 6px;
+  box-shadow: none;
+  cursor: default;
+}
+.seat.heat-cell.used {
+  border-color: transparent;
+  /* Tres tonos de la misma tinta: mezclar solo los extremos daba medios grises. */
+  background: color-mix(
+    in oklab,
+    var(--heat-hi) calc(clamp(0, var(--heat) * 2 - 1, 1) * 100%),
+    color-mix(in oklab, var(--heat-mid) calc(clamp(0, var(--heat) * 2, 1) * 100%), var(--heat-lo))
+  );
+}
+.seat.heat-cell.screen-up {
+  border-top-width: 3px;
+}
+.seat.heat-cell.screen-down {
+  border-bottom-width: 3px;
+}
+/* El canto de la pantalla, un poco más oscuro que el color del puesto. */
+.seat.heat-cell.used.screen-up {
+  border-top-color: color-mix(in srgb, var(--text) 35%, transparent);
+}
+.seat.heat-cell.used.screen-down {
+  border-bottom-color: color-mix(in srgb, var(--text) 35%, transparent);
+}
+.seat-heat .seat-grid.staggered .seat.screen-up {
+  top: 3px;
+}
+.seat-heat .seat-grid.staggered .seat.screen-down {
+  top: -3px;
+}
+.seat.heat-cell:focus-visible {
+  outline: 3px solid var(--accent-text);
+  outline-offset: 2px;
+}
+.heat-tip {
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.heat-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem 1.2rem;
+  font-size: 0.8rem;
+  color: var(--text-2);
+}
+.heat-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+.heat-legend .seat.sample {
+  --seat: 16px;
+  border-radius: 4px;
+}
+.heat-ramp {
+  width: 140px;
+  height: 12px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--heat-lo), var(--heat-mid), var(--heat-hi));
+}
+.heat-table summary {
+  cursor: pointer;
+  width: fit-content;
+  color: var(--accent-text);
+  font-size: 0.85rem;
+}
+.seat-heat-card {
+  margin-top: 0.9rem;
+}
+.seat-heat-card h3 {
+  margin: 0 0 0.75rem;
+}
+@media (max-width: 520px) {
+  .seat-heat {
+    --seat: 22px;
+  }
+  .seat-heat .seat-grid {
+    gap: 4px;
+  }
+  .heat-ramp {
+    width: 96px;
+  }
+}

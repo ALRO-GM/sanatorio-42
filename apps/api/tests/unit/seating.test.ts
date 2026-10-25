@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { parseHost } from '../../src/modules/map/seat-layout.js'
+import { seatHeatOf } from '../../src/modules/network/seating.heat.js'
 import { seatingOf, seatWeight } from '../../src/modules/network/seating.rules.js'
 
 const at = (host: string) => {
@@ -60,5 +61,38 @@ describe('cercanía entre personas', () => {
     expect(ana?.aloneHours).toBe(2)
     expect(ana?.partners).toBe(2)
     expect(seating.people.get('sol')).toMatchObject({ hours: 1, aloneHours: 1, partners: 0 })
+  })
+})
+
+describe('mapa de calor de los puestos', () => {
+  it('suma horas y gente por puesto y completa el plano con la letra de cada clúster', () => {
+    const heat = seatHeatOf(
+      [
+        { login: 'ana', host: 'C3R1P2', begin: 0, end: 2 * HOUR },
+        { login: 'ana', host: 'c3r1p2', begin: 3 * HOUR, end: 4 * HOUR },
+        { login: 'bea', host: 'c3r1p2', begin: 0, end: HOUR / 2 },
+        { login: 'bea', host: 'mac-del-fondo', begin: 0, end: HOUR },
+      ],
+      ['c3r2p1', 'nada'],
+    )
+
+    expect(heat.max).toBe(3.5)
+    expect(heat.clusters).toEqual([
+      {
+        id: 'c3',
+        rows: 2,
+        seatsPerRow: 2,
+        cells: [
+          { host: 'c3r1p1', row: 1, seat: 1, hours: 0, people: 0 },
+          { host: 'c3r1p2', row: 1, seat: 2, hours: 3.5, people: 2 },
+          { host: 'c3r2p1', row: 2, seat: 1, hours: 0, people: 0 },
+          { host: 'c3r2p2', row: 2, seat: 2, hours: 0, people: 0 },
+        ],
+      },
+    ])
+  })
+
+  it('sin puestos ni sesiones no hay clústeres', () => {
+    expect(seatHeatOf([], [])).toEqual({ clusters: [], max: 0 })
   })
 })

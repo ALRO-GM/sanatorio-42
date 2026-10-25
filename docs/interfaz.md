@@ -97,6 +97,7 @@ de datos.
 | Calendario | Formas del día (lista, entera, ajustada, desde ahora) | N | Comodidad |
 | Red | Grafo, filtros, totales, cómo se lee | N | La sección en sí |
 | Red | Endogamia, parejas, los más estrictos, proyectos más corregidos | D | Rankings |
+| Red | Asientos: mapa de calor de los puestos bajo el grafo (horas por ordenador, con el plano de cada cual y «Ver como tabla»; `docs/asientos.md`) | N | Bloque de la red de asientos, pedido por Alberto (2026-10-25): el mismo periodo y las mismas horas que el grafo |
 | Avance | Tu avance en el common core frente a las medias y los paces, por círculos o por horas estimadas, y con hasta 5 personas (#87; en Datos desde el 2026-10-25). Plan, población (terminado, en curso + terminado, black hole: `docs/blackhole.md`) y alcance se encienden a la vez, una línea por combinación | N | La sección en sí |
 | Avance | «Los más rápidos» (dentro de comparar): quien terminó antes, de tu campus y el primero de cada campus, para añadirlo con un clic | N | Es la misma comparación, para quien no tiene a nadie en mente |
 | Avance | Quién va más rápido (bloque bajo la gráfica, antes en Ayuda → Estadísticas): por círculo o %, con plan, kickoff y rangos; tu fila fija | N | Ranking, pero del curso: es lo que se viene a mirar al Avance |
