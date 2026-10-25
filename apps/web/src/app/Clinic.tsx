@@ -29,6 +29,7 @@ import { RecordStylePicker } from '../features/profile/RecordStylePicker'
 import { startUsage, viewing } from '../shared/layout/store'
 import { Footer } from './Footer'
 import { Header } from './Header'
+import { PoolPreviewBar } from './PoolPreviewBar'
 import { SectionView } from './SectionView'
 import { loadPoolAccess, resetPoolAccess, usePoolAccess } from '../shared/pool'
 import { PoolOnly } from '../shared/ui/PoolOnly'
@@ -156,6 +157,8 @@ export function Clinic({ me, onLogout }: ClinicProps) {
 
   return (
     <>
+      {/* Quien administra, viendo la web como un piscinero: avisado y con la vuelta a mano. */}
+      {pool.preview === true && <PoolPreviewBar />}
       <Header
         me={me}
         section={section}

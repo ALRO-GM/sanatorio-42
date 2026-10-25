@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/gestion.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-516 textos. «—» es que falta la traducción: sale en español.
+521 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -519,6 +519,11 @@ Generado desde `apps/web/src/shared/i18n/textos/gestion.csv` con
 | `pool.group.extra` | Panel, Piscina: grupo del árbol de permisos | features/admin/PoolPanel | Fuera de las pestañas | Outside the tabs | Fora de les pestanyes | Fitxetatik kanpo |
 | `admin.pool.save` | Panel, Piscina: botón de guardar | features/admin/PoolPanel | Guardar | Save | Desar | Gorde |
 | `admin.pool.saved` | Panel, Piscina: guardado | features/admin/PoolPanel | Guardado. | Saved. | Desat. | Gordeta. |
+| `admin.pool.preview` | Panel, Piscina: botón para ver la web como la vería un piscinero | features/admin/PoolPanel | Ver como piscinero | View as a piscine student | Veure com a piscinista | Igerilari gisa ikusi |
+| `admin.pool.previewHint` | Panel, Piscina: qué hace el botón «Ver como piscinero» | features/admin/PoolPanel | Ves la web como un piscinero de tu campus, con los permisos guardados (lo que no hayas guardado no cuenta). Mientras tanto no tienes el panel: se vuelve desde la franja de arriba. | You see the site as a piscine student of your campus would, with the saved permissions (unsaved changes do not count). Meanwhile you have no panel: go back from the strip at the top. | Veus la web com un piscinista del teu campus, amb els permisos desats (el que no hagis desat no compta). Mentrestant no tens el panell: es torna des de la franja de dalt. | Webgunea zure campuseko igerilari batek bezala ikusten duzu, gordetako baimenekin (gorde ez duzuna ez da kontuan hartzen). Bitartean ez duzu panelik: goiko bandatik itzultzen da. |
+| `pool.preview.banner` | Franja fija arriba del todo mientras quien administra ve la web como un piscinero | app/PoolPreviewBar | Estás viendo Sanatorio como un piscinero | You are viewing Sanatorio as a piscine student | Estàs veient Sanatorio com un piscinista | Sanatorio igerilari baten moduan ikusten ari zara |
+| `pool.preview.back` | Franja de la vista de piscinero: botón para volver a la vista de siempre | app/PoolPreviewBar | Volver | Go back | Tornar | Itzuli |
+| `pool.preview.failed` | Franja de la vista de piscinero: no se ha podido volver (por ejemplo, ya no administras) | app/PoolPreviewBar | No se ha podido volver. Sal de la cuenta y entra otra vez. | Could not go back. Log out and sign in again. | No s'ha pogut tornar. Surt del compte i torna a entrar. | Ezin izan da itzuli. Irten kontutik eta sartu berriro. |
 | `admin.focus.title` | Panel de gestión: estadísticas del Pomodoro | features/admin/FocusPanel | Pomodoro: cómo se usa | Pomodoro: how it is used | Pomodoro: com s'utilitza | Pomodoro: nola erabiltzen den |
 | `admin.data.kind.focus_sessions` | Panel de gestión, «Limpiar datos»: un tipo de dato que se puede borrar. Nombre de un tipo de dato en la lista. | features/admin/DataPanel | Sesiones de Pomodoro | Pomodoro sessions | Sessions de Pomodoro | Pomodoro saioak |
 | `admin.data.kind.focus_sessions.summary` | Panel de gestión, «Limpiar datos»: un tipo de dato que se puede borrar. Resumen de un tipo de dato (qué contiene). | features/admin/DataPanel | Cada sesión de Pomodoro empezada, con cómo acabó. | Every Pomodoro session started, and how it ended. | Cada sessió de Pomodoro començada, amb com va acabar. | Hasitako Pomodoro saio bakoitza, nola amaitu zen. |

@@ -18,6 +18,8 @@ export const POOL_BASE: readonly string[] = [
   '/health/db',
   '/pool/notice',
   '/pool/access',
+  // La vuelta de la vista de piscinero de quien administra: sin la marca firmada, 403.
+  '/pool/preview/exit',
   '/pulse',
   '/campuses',
   '/me/settings',

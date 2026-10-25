@@ -341,6 +341,10 @@ export type Api = {
   updatePoolSettings: (changes: Partial<PoolSettings>) => Promise<PoolSettings>
   /** Si eres piscinero y qué puedes ver. */
   getPoolAccess: () => Promise<PoolAccess>
+  /** Quien administra pasa a ver la web como un piscinero (cambia la cookie). */
+  startPoolPreview: () => Promise<void>
+  /** Vuelve de la vista de piscinero a la de siempre. */
+  stopPoolPreview: () => Promise<void>
   /** Manda los clics de una sección para el mapa de calor. */
   sendClicks: (batch: ClickBatch) => Promise<void>
   /** El mapa de calor de clics de una sección. Solo admins. */

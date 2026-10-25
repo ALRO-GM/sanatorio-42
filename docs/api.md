@@ -1596,6 +1596,8 @@ GET /pool/notice   → PoolNotice, sin sesión: el aviso de la piscina cerrada
 GET /pool/access   → PoolAccess: si eres piscinero y qué puedes ver
 GET /admin/pool    → PoolSettings (solo admins)
 PUT /admin/pool    → { open?, message?, allow? } → PoolSettings (solo admins)
+POST /admin/pool/preview → 204: entra en la vista de piscinero (solo admins)
+POST /pool/preview/exit  → 204: vuelve de ella; 403 sin la marca de vista previa
 ```
 
 - Quién entra se decide al volver de 42 (`docs/piscineros.md`): con el
@@ -1615,6 +1617,15 @@ PUT /admin/pool    → { open?, message?, allow? } → PoolSettings (solo admins
   salas, grupos, pizarras, dudas, examen en vivo) y un piscinero solo ve a los
   piscineros en curso de su campus (`pool_members`, copiados de
   `GET /v2/cursus/9/cursus_users`). Un piscinero mira siempre su campus.
+- Vista de piscinero: `POST /admin/pool/preview` (desde una sesión de
+  estudiante que administra, con el segundo factor del panel) vuelve a firmar la
+  cookie con `aud: 'pool'` y `preview: true`, sin cambiar su caducidad. Desde
+  ahí es un piscinero a todos los efectos: el corte de arriba (también todo
+  `/admin/…`), mundos separados, su campus de casa y `admin: false`. Vale con
+  la piscina cerrada. `GET /pool/access` devuelve además `preview: true`.
+  `POST /pool/preview/exit` es de la base de los piscineros, pero solo hace algo
+  con la marca firmada y si quien la lleva sigue administrando; si no, `403`.
+  Un piscinero de verdad no la tiene y no puede hacerse estudiante con ella.
 
 ## Exámenes (`modules/exams`)
 

@@ -69,4 +69,9 @@ export type PoolNotice = { message: string }
  * `GET /pool/access`: si quien pregunta es piscinero y, si lo es, qué puede
  * ver. Un estudiante lo ve todo (`allow: null`).
  */
-export type PoolAccess = { pool: boolean; allow: PoolKey[] | null }
+export type PoolAccess = {
+  pool: boolean
+  allow: PoolKey[] | null
+  /** `true` si es quien administra, en la vista de piscinero (`POST /admin/pool/preview`). */
+  preview?: boolean
+}

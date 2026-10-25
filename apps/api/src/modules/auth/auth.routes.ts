@@ -7,7 +7,9 @@
 
 import type { FastifyInstance, FastifyRequest } from 'fastify'
 
+import { assertAdmin } from '../../core/actor.js'
 import { DomainError } from '../../core/errors.js'
+import type { SessionReader } from '../../core/session.js'
 import { createRateLimit } from '../../core/rate-limit.js'
 import type { RateLimit } from '../../core/rate-limit.js'
 import type { AuthService } from './auth.service.js'
@@ -37,6 +39,11 @@ type AuthRoutesOptions = {
   staff?: (key: unknown) => Promise<{ id: number; name: string } | null>
   /** Tope de claves de staff falladas por IP. */
   staffAttempts?: RateLimit
+  /**
+   * La sesión y si un login administra hoy, para la vista de piscinero de
+   * quien administra. Sin esto no hay vista previa.
+   */
+  preview?: { session: SessionReader; isAdmin: (login: string) => Promise<boolean> }
 }
 
 /**
@@ -255,6 +262,56 @@ export function registerAuthRoutes(app: FastifyInstance, options: AuthRoutesOpti
       campusId: user.campusId,
     })
   })
+
+  if (options.preview !== undefined) registerPreviewRoutes(options.preview)
+
+  /**
+   * La vista de piscinero (`docs/piscineros.md`): quien administra ve la web
+   * como un piscinero de su campus, con los permisos guardados en el panel, y
+   * vuelve. Viven aquí porque lo que hacen es volver a firmar la cookie.
+   */
+  function registerPreviewRoutes({ session, isAdmin }: NonNullable<AuthRoutesOptions['preview']>) {
+    /**
+     * `POST /admin/pool/preview` → 204: la cookie pasa a ser de piscinero, con
+     * la marca firmada de vista previa. Desde una sesión de estudiante que
+     * administra (la barrera de `/admin/` pide además el segundo factor). Vale
+     * con la piscina cerrada: el corte de piscineros no mira si está abierta.
+     */
+    app.post('/admin/pool/preview', async (request, reply) => {
+      if (session.user(request).role !== 'student') {
+        throw new DomainError('forbidden', 'Solo desde una sesión de estudiante')
+      }
+
+      assertAdmin(await session.actor(request))
+      reply.header(
+        'Set-Cookie',
+        sessionCookieHeader(auth.switchAudience(cookieOf(request, SESSION_COOKIE_NAME), 'pool')),
+      )
+
+      return reply.code(204).send()
+    })
+
+    /**
+     * `POST /pool/preview/exit` → 204: vuelta a estudiante. Es de la base de los
+     * piscineros, pero solo hace algo con la marca de vista previa y si quien
+     * la lleva sigue administrando: un piscinero de verdad no tiene la marca
+     * (va firmada) y recibe un 403.
+     */
+    app.post('/pool/preview/exit', async (request, reply) => {
+      const user = session.user(request)
+
+      if (user.preview !== true || !(await isAdmin(user.login.toLowerCase()))) {
+        throw new DomainError('forbidden', 'No estás en la vista de piscinero')
+      }
+
+      reply.header(
+        'Set-Cookie',
+        sessionCookieHeader(auth.switchAudience(cookieOf(request, SESSION_COOKIE_NAME), 'student')),
+      )
+
+      return reply.code(204).send()
+    })
+  }
 
   /**
    * `POST /auth/logout` → borra la sesión. Idempotente.

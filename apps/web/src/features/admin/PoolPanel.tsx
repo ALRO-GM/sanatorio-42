@@ -5,6 +5,7 @@ import type { PoolKey, PoolSettings } from '@sanatorio/contracts'
 import { api } from '../../shared/api'
 import { useAction, useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
+import { switchPoolPreview } from '../../shared/pool'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { GROUPS, sectionsOf } from './pool-tree'
 
@@ -13,6 +14,7 @@ import { GROUPS, sectionsOf } from './pool-tree'
  * estudiantes; aquí se abre o se cierra la entrada a piscineros de una piscina
  * en curso, el aviso que ven con ella cerrada y, pestaña a pestaña y elemento a
  * elemento, lo que pueden ver. Un elemento solo vale con su pestaña marcada.
+ * Y desde aquí se entra en la vista de piscinero.
  */
 export function PoolPanel() {
   const { t } = useI18n()
@@ -20,6 +22,7 @@ export function PoolPanel() {
   const [draft, setDraft] = useState<PoolSettings | null>(null)
   const [saved, setSaved] = useState(false)
   const save = useAction()
+  const preview = useAction()
 
   useEffect(() => {
     if (data !== undefined) setDraft(data)
@@ -123,6 +126,21 @@ export function PoolPanel() {
           <ErrorNote error={save.error} />
         </form>
       )}
+      {/* La web como la vería un piscinero de tu campus, con lo guardado; funciona
+          aunque la piscina esté cerrada. Se vuelve desde la franja de arriba. */}
+      <div className="pool-preview">
+        <button
+          type="button"
+          disabled={preview.busy}
+          onClick={() => {
+            void preview.run(() => switchPoolPreview(true))
+          }}
+        >
+          {t('admin.pool.preview')}
+        </button>
+        <p className="hint">{t('admin.pool.previewHint')}</p>
+        <ErrorNote error={preview.error} />
+      </div>
     </article>
   )
 }

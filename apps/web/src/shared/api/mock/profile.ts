@@ -6,6 +6,7 @@ import { mockHacker } from './clicker'
 import type { PaceRef } from '@sanatorio/contracts'
 
 import { LEVEL_FLOORS, ME, RANKING, TITLES } from './data'
+import { poolPreviewing } from './pool'
 import { portrait } from './portrait'
 import type { Api } from '../types'
 import { AVAILABLE_KEY, state, delay, levelFor, achievement } from './state'
@@ -102,8 +103,9 @@ export const profileMock: Pick<
       campusId: state.campusId,
       homeCampusId: ME.campusId,
       lang: null,
-      // En la web de mentira se es admin, para poder ver el panel de gestión.
-      admin: true,
+      // En la web de mentira se es admin, para poder ver el panel de gestión;
+      // en la vista de piscinero, no, como en la API.
+      admin: !poolPreviewing(),
       preReview: state.preReview,
       recordStyle: recordStyle.current,
       xp,

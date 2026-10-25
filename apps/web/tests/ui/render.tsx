@@ -17,11 +17,17 @@ export async function settle(ms = 600): Promise<void> {
  */
 export async function openApp(
   hash: string,
-  { pool = false, detail }: { pool?: boolean; detail?: 'simple' | 'normal' | 'datos' } = {},
+  {
+    pool = false,
+    preview = false,
+    detail,
+  }: { pool?: boolean; preview?: boolean; detail?: 'simple' | 'normal' | 'datos' } = {},
 ): Promise<void> {
   localStorage.clear()
   // Como piscinero (`docs/piscineros.md`): la API de mentira contesta con lo permitido.
   if (pool) localStorage.setItem('mock_pool', 'true')
+  // Quien administra, en la vista de piscinero del panel.
+  if (preview) localStorage.setItem('mock_pool_preview', 'true')
   if (detail !== undefined) localStorage.setItem('sanatorio_detail', detail)
   localStorage.setItem('sanatorio_welcome_seen', '1')
   localStorage.setItem('sanatorio_lang', 'es')

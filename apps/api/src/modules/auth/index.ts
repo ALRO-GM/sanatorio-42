@@ -83,6 +83,12 @@ export function createAuthModule(deps: AuthModuleDeps): AuthModule {
         auth: service,
         frontendUrl: env.FRONTEND_URL,
         ...given({ staff: deps.staff }),
+        // Si alguien administra hoy, con la misma regla que `actor()`.
+        preview: {
+          session,
+          isAdmin: async (login) =>
+            (await deps.access?.(login))?.admin ?? env.adminLogins.includes(login),
+        },
       })
     },
   }

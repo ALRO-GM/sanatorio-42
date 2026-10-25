@@ -262,6 +262,13 @@ export function createAuthService(options: AuthServiceOptions) {
    * No toca la base de datos: todo lo que hace falta está en la cookie firmada.
    */
   function readSession(sessionCookie: string | undefined): SessionUser | undefined {
+    return readSigned(sessionCookie)?.user
+  }
+
+  /** La persona de la cookie y su caducidad firmada, o `undefined`. */
+  function readSigned(
+    sessionCookie: string | undefined,
+  ): { user: SessionUser; expiresAt: number } | undefined {
     if (sessionCookie === undefined) {
       return undefined
     }
@@ -296,7 +303,37 @@ export function createAuthService(options: AuthServiceOptions) {
       return undefined
     }
 
-    return user
+    return { user, expiresAt }
+  }
+
+  /**
+   * La misma sesión con otro grupo: `pool` es la vista de piscinero de quien
+   * administra (lleva `preview`, firmado) y `student`, la vuelta. Quién puede
+   * hacerlo lo deciden las rutas; aquí solo se firma.
+   *
+   * La caducidad no cambia: entrar y salir de la vista no alarga la sesión.
+   *
+   * @throws {DomainError} 401 si no hay sesión válida.
+   */
+  function switchAudience(sessionCookie: string | undefined, audience: 'student' | 'pool'): string {
+    const current = readSigned(sessionCookie)
+
+    if (current === undefined || current.user.role === 'staff') {
+      throw domainError('unauthenticated', 'No hay sesión iniciada')
+    }
+
+    const { preview: _old, ...user } = current.user
+    const payload = Buffer.from(
+      JSON.stringify({
+        ...user,
+        role: audience,
+        aud: audience,
+        ...(audience === 'pool' ? { preview: true } : {}),
+        exp: current.expiresAt,
+      }),
+    ).toString('base64url')
+
+    return sign(options.secret, payload)
   }
 
   /**
@@ -371,6 +408,7 @@ export function createAuthService(options: AuthServiceOptions) {
     openStaffSession,
     readSession,
     currentUser,
+    switchAudience,
     logout,
     /** Vida de la sesión, para que la ruta ponga el mismo `Max-Age`. */
     sessionTtlMs,
@@ -397,6 +435,7 @@ function readSessionUser(parsed: unknown): SessionUser | undefined {
     campusId?: unknown
     role?: unknown
     aud?: unknown
+    preview?: unknown
   }
 
   if (typeof candidate.login !== 'string' || candidate.login === '') {
@@ -418,6 +457,10 @@ function readSessionUser(parsed: unknown): SessionUser | undefined {
     // Solo `staff` escrito tal cual es staff, y el grupo firmado manda: un
     // piscinero no puede hacerse pasar por estudiante tocando `role`.
     role: candidate.role === 'staff' ? 'staff' : candidate.aud === 'pool' ? 'pool' : 'student',
+    // La vista de piscinero de quien administra: solo cuenta en una sesión `pool`.
+    ...(candidate.aud === 'pool' && candidate.role !== 'staff' && candidate.preview === true
+      ? { preview: true as const }
+      : {}),
   }
 }
 

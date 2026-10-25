@@ -18,6 +18,8 @@ const listeners = new Set<() => void>()
 function set(next: PoolAccess): void {
   current = next
   document.documentElement.dataset.pool = next.pool ? 'on' : 'off'
+  // La franja de la vista de piscinero deja su hueco arriba (`styles/admin.css`).
+  document.documentElement.dataset.poolPreview = next.preview === true ? 'on' : 'off'
   for (const listener of listeners) listener()
 }
 
@@ -54,4 +56,16 @@ export function poolAllows(key: PoolKey, access: PoolAccess = current): boolean 
 /** Si se puede ver esto, para pintar o no un elemento. */
 export function usePoolAllows(key: PoolKey): boolean {
   return poolAllows(key, usePoolAccess())
+}
+
+/**
+ * Entra en la vista de piscinero (quien administra) o sale de ella. La API
+ * cambia la cookie; la web se carga de nuevo para que nada de lo pedido con la
+ * otra vista (expediente, pulso, permisos) se quede pintado. Al entrar se
+ * empieza por la portada; al salir, se vuelve al panel.
+ */
+export async function switchPoolPreview(on: boolean): Promise<void> {
+  await (on ? api.startPoolPreview() : api.stopPoolPreview())
+  window.location.hash = on ? '#/expediente' : '#/gestion'
+  window.location.reload()
 }
