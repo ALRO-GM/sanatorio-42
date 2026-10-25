@@ -46,6 +46,11 @@ roadmap y decisiones en `docs/curso-shell-investigacion.md`,
 `docs/curso-shell.md` y `docs/plantilla-cursos.md`. No pide puesto del
 clúster (a diferencia del de git).
 
+Tiempo de los cursos: estimación por punto, nivel/mundo y total
+(`packages/course/src/estimate.ts`; shell ~5 h 12 min, git ~4 h 46 min) y
+tiempo activo real de quien supera cada punto en `course_times` (migración
+75), para calibrarla y comparar a cada cual más adelante.
+
 ## Peer4U (2026-10-25)
 
 Alberto cambió el nombre a **Peer4U** y la temática de hospital por una de

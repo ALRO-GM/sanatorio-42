@@ -1497,7 +1497,7 @@ descanso lo lleva la web.
 
 ```
 GET  /gitcourse                   → GitCourse { seat, stars: { [punto]: 1–3 }, gates: { [prueba]: { passed, retryAt } } }
-POST /gitcourse/levels/:id        → GitAttemptInput { lines: string[] (≤ 300, ≤ 200 caracteres) } → GitAttemptResult { done, stars, commands, misses, course }
+POST /gitcourse/levels/:id        → GitAttemptInput { lines: string[] (≤ 300, ≤ 200 caracteres), activeSeconds?: entero 0–21600 } → GitAttemptResult { done, stars, commands, misses, course }
 POST /gitcourse/gates/:id/start   → GitGateQuiz { gate, questions: { prompt, code, options }[], deadline }
 POST /gitcourse/gates/:id/answer  → GitGateAnswerInput { answers: (number | null)[] } → GitGateResult
 GET  /gitcourse/rooms?gate=group1 → GitRoomLobby[] (las sin empezar del campus y las tuyas de las últimas 6 h)
@@ -1557,9 +1557,14 @@ POST /gitcourse/rooms/:id/run     → GitRunInput { line (≤ 200) } → GitRunR
 
 ```
 GET  /shellcourse                   → ShellCourse { stars: { [punto]: 1–3 }, best: { [punto]: { commands, seconds } }, runs: { [jefe]: { startedAt, deadline } }, certificates: { tier, stars, seconds, at }[] }
-POST /shellcourse/units/:id         → ShellAttemptInput { entries: string[] (≤ 300, ≤ 2000 caracteres) } → ShellAttemptResult { done, stars, commands, seconds, misses, course }
+POST /shellcourse/units/:id         → ShellAttemptInput { entries: string[] (≤ 300, ≤ 2000 caracteres), activeSeconds?: entero 0–21600 } → ShellAttemptResult { done, stars, commands, seconds, misses, course }
 POST /shellcourse/bosses/:id/start  → ShellBossStart { unit, run: { startedAt, deadline }, course }
 ```
+
+- `activeSeconds` (en los dos cursos): el tiempo activo que la web ha medido en
+  ese punto (`docs/plantilla-cursos.md`). Si el intento sale, se apunta en
+  `course_times` con la estimación del punto y si es la primera vez; si no sale
+  o no llega, no se apunta nada. No cambia las estrellas ni se enseña a nadie.
 
 - Las unidades, los jefes y los jefes finales (teoría, ejemplo, preparación,
   solución y lo que se comprueba) están en `@sanatorio/shellsim` (`UNITS`),

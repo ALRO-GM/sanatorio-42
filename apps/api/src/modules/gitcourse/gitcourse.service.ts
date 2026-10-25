@@ -6,7 +6,7 @@
  */
 
 import type { GitAttemptResult, GitCourse, GitGateQuiz, GitGateResult } from '@sanatorio/contracts'
-import { checkAttempt, LEVELS, LIMITS } from '@sanatorio/gitsim'
+import { checkAttempt, estimateOfLevel, LEVELS, LIMITS } from '@sanatorio/gitsim'
 import { z } from 'zod'
 
 import type { Actor } from '../../core/actor.js'
@@ -15,11 +15,14 @@ import { toNumber, toText } from '../../core/db/rows.js'
 import { domainError } from '../../core/errors.js'
 import { createRateLimit } from '../../core/rate-limit.js'
 import { parse } from '../../core/validation.js'
+import { activeSecondsSchema } from '../shellcourse/index.js'
+import type { CourseTimes } from '../shellcourse/index.js'
 import type { GateService } from './gates.js'
 
 // Los mismos topes que la terminal: la API vuelve a ejecutar cada línea.
 const attemptSchema = z.object({
   lines: z.array(z.string().max(LIMITS.line)).max(LIMITS.attemptLines),
+  activeSeconds: activeSecondsSchema,
 })
 
 /**
@@ -70,6 +73,8 @@ export function createGitCourseService(deps: {
   gates: GateService
   /** El puesto en el que está sentada esa persona ahora, o `null`. */
   seatOf: (login: string) => Promise<string | null>
+  /** Dónde se apunta el tiempo activo de cada punto superado. */
+  times?: CourseTimes
   now?: () => number
 }) {
   const now = deps.now ?? Date.now
@@ -105,7 +110,7 @@ export function createGitCourseService(deps: {
 
       if (level === undefined) throw domainError('not_found', 'Ese punto del camino no existe')
 
-      const { lines } = parse(attemptSchema, input)
+      const { lines, activeSeconds } = parse(attemptSchema, input)
 
       if (!attempts.hit(actor.login))
         throw domainError('rate_limited', 'Demasiados intentos seguidos: espera unos minutos')
@@ -128,6 +133,18 @@ export function createGitCourseService(deps: {
           result.commands,
           new Date(now()).toISOString(),
         )
+        if (activeSeconds !== undefined) {
+          await deps.times?.record({
+            login: actor.login,
+            course: 'git',
+            unit: level.id,
+            activeSeconds,
+            estimateSeconds: estimateOfLevel(level),
+            stars: result.stars,
+            first: before.stars[level.id] === undefined,
+            at: new Date(now()).toISOString(),
+          })
+        }
       }
 
       return {

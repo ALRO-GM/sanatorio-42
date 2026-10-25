@@ -8,6 +8,7 @@ import type { Db } from '../../core/db/database.js'
 import { idParam, slugParam } from '../../core/http/params.js'
 import type { IdParams } from '../../core/http/params.js'
 import type { AppModule } from '../../core/module.js'
+import { createCourseTimes } from '../shellcourse/index.js'
 import { createGateRepository, createGateService } from './gates.js'
 import type { GateQuestions } from './gates.js'
 import { createGitCourseRepository, createGitCourseService } from './gitcourse.service.js'
@@ -46,7 +47,13 @@ export function createGitCourseModule(deps: {
     now,
   })
   const service = {
-    ...createGitCourseService({ progress, gates, seatOf: deps.seatOf, now }),
+    ...createGitCourseService({
+      progress,
+      gates,
+      seatOf: deps.seatOf,
+      times: createCourseTimes(deps.db),
+      now,
+    }),
     rooms,
   }
 

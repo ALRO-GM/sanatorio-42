@@ -26,6 +26,7 @@ export const FINALS: Record<Tier, string> = {
 export const TIERS: readonly Tier[] = ['beginner', 'intermediate', 'advanced']
 
 export { BLOCKS, blockOf } from './blocks.js'
+export { estimateOf, estimateOfBlock, estimateOfCourse, estimateOfTier } from './estimate.js'
 export {
   checkAttempt,
   exampleOf,

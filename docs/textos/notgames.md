@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/notgames.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-216 textos. «—» es que falta la traducción: sale en español.
+224 textos. «—» es que falta la traducción: sale en español.
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -222,4 +222,12 @@ Generado desde `apps/web/src/shared/i18n/textos/notgames.csv` con
 | `course.time.two` | Cursos (git y shell): dos estrellas en un contrarreloj (va tras ★★☆) | shared/course/Stars | hasta {time} | up to {time} | fins a {time} | {time} arte |
 | `course.time.limit` | Cursos (git y shell): una estrella en un contrarreloj, el límite (va tras ★☆☆) | shared/course/Stars | antes de {time}, el límite | before {time}, the limit | abans de {time}, el límit | {time} baino lehen, muga |
 | `course.time.what` | Cursos (git y shell): desplegable que explica cómo se cuenta el tiempo | shared/course/Stars | ¿Cómo se cuenta el tiempo? | How is time counted? | Com es compta el temps? | Nola zenbatzen da denbora? |
+| `course.estimate.minutes` | Cursos (git y shell): tiempo estimado en minutos, junto a un punto o un nivel | shared/course/Estimate | ~{n} min | ~{n} min | ~{n} min | ~{n} min |
+| `course.estimate.hours` | Cursos (git y shell): tiempo estimado en horas justas | shared/course/Estimate | ~{h} h | ~{h} h | ~{h} h | ~{h} h |
+| `course.estimate.hoursMinutes` | Cursos (git y shell): tiempo estimado en horas y minutos | shared/course/Estimate | ~{h} h {m} min | ~{h} h {m} min | ~{h} h {m} min | ~{h} h {m} min |
+| `course.estimate.title` | Cursos (git y shell): al pasar por el tiempo de un punto, bloque o nivel | shared/course/Estimate | Tiempo estimado: {time} | Estimated time: {time} | Temps estimat: {time} | Kalkulatutako denbora: {time} |
+| `course.estimate.total` | Cursos (git y shell): tiempo estimado del curso entero | shared/course/Estimate | Tiempo estimado: {time} | Estimated time: {time} | Temps estimat: {time} | Kalkulatutako denbora: {time} |
+| `course.estimate.parts` | Cursos (git y shell): para lectores de pantalla; el reparto del tiempo estimado por nivel o mundo | shared/course/Estimate | Tiempo estimado de cada parte | Estimated time per part | Temps estimat de cada part | Zati bakoitzaren denbora |
+| `course.estimate.hint` | Cursos (git y shell): al pasar por el tiempo estimado del curso, de dónde sale | shared/course/Estimate | Un cálculo de partida: se irá ajustando con lo que tarda de verdad quien lo supera. | A first guess: it will be tuned with how long it really takes people who pass it. | Un càlcul inicial: s'anirà ajustant amb el que tarda de debò qui el supera. | Hasierako kalkulua: gainditzen dutenek benetan behar dutenarekin doituko da. |
+| `git.worldN` | Curso de git: nombre de un mundo en el reparto del tiempo estimado | features/gitcourse/GateView, features/gitcourse/GitCourseTab | Mundo {n} | World {n} | Món {n} | {n}. mundua |
 | `notgames.tab.shell` | Not-games: pestaña del curso de shell | features/notgames/NotGamesPage, features/shellcourse/ShellCourseTab, features/shellcourse/ShellCourseTour | Curso de shell | Shell course | Curs de shell | Shell ikastaroa |

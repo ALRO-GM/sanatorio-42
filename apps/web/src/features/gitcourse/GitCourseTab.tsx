@@ -2,10 +2,20 @@ import { useState } from 'react'
 import type { KeyboardEvent } from 'react'
 
 import type { GitCourse } from '@sanatorio/contracts'
-import { GATES, levelIn, LEVELS } from '@sanatorio/gitsim'
+import {
+  estimateOfGate,
+  estimateOfGitCourse,
+  estimateOfLevel,
+  estimateOfWorld,
+  GATES,
+  levelIn,
+  LEVELS,
+  WORLDS,
+} from '@sanatorio/gitsim'
 import type { Gate, Level } from '@sanatorio/gitsim'
 
 import { api } from '../../shared/api'
+import { CourseEstimate, useDuration } from '../../shared/course/Estimate'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
@@ -128,6 +138,14 @@ export function GitCourseTab({ me, onReview }: { me: string; onReview: () => voi
       <p className="git-total">
         <span className="course-stars">★</span> {total} / {LEVELS.length * 3}
       </p>
+      <CourseEstimate
+        total={estimateOfGitCourse()}
+        parts={WORLDS.map((world) => ({
+          id: String(world),
+          label: t('git.worldN', { n: world }),
+          seconds: estimateOfWorld(world),
+        }))}
+      />
       <svg
         className="git-path"
         viewBox={`0 0 380 ${height}`}
@@ -228,6 +246,7 @@ function GateStop({
   onOpen: () => void
 }) {
   const { t } = useI18n()
+  const duration = useDuration()
   const name = t(`git.${stop.gate.kind}`, { n: stop.gate.min })
 
   return (
@@ -253,7 +272,7 @@ function GateStop({
             ? `★ ${t('git.room.done')}`
             : passed
               ? `✓ ${t('git.gate.testPassed')}`
-              : t('git.gate.test')}
+              : `${t('git.gate.test')} · ${duration(estimateOfGate())}`}
         </text>
       </g>
     </g>
@@ -274,6 +293,7 @@ function LevelStop({
   onOpen: () => void
 }) {
   const { lang } = useI18n()
+  const duration = useDuration()
   const title = levelIn(stop.level, lang).title
   const big = stop.level.kind === 'world'
   const r = big ? 17 : 11
@@ -303,13 +323,17 @@ function LevelStop({
             {stop.level.world}
           </text>
         )}
-        <text x={r + 10} y={stars > 0 ? -2 : 4} className={`git-stop-title ${big ? 'big' : ''}`}>
+        <text x={r + 10} y={-2} className={`git-stop-title ${big ? 'big' : ''}`}>
           {title}
         </text>
-        {stars > 0 && (
+        {stars > 0 ? (
           <text x={r + 10} y={13} className="git-stop-stars">
             {'★'.repeat(stars)}
             {'☆'.repeat(3 - stars)}
+          </text>
+        ) : (
+          <text x={r + 10} y={13} className="git-stop-sub">
+            {duration(estimateOfLevel(stop.level))}
           </text>
         )}
       </g>

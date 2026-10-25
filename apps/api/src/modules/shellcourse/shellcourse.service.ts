@@ -19,7 +19,7 @@ import type {
   ShellBossStart,
   ShellCourse,
 } from '@sanatorio/contracts'
-import { checkAttempt, FINALS, LIMITS, TIERS, UNITS } from '@sanatorio/shellsim'
+import { checkAttempt, estimateOf, FINALS, LIMITS, TIERS, UNITS } from '@sanatorio/shellsim'
 import { z } from 'zod'
 
 import type { Actor } from '../../core/actor.js'
@@ -28,10 +28,13 @@ import { toNumber, toText } from '../../core/db/rows.js'
 import { domainError } from '../../core/errors.js'
 import { createRateLimit } from '../../core/rate-limit.js'
 import { parse } from '../../core/validation.js'
+import { activeSecondsSchema } from './course-times.js'
+import type { CourseTimes } from './course-times.js'
 
 // Los mismos topes que la terminal: la API vuelve a ejecutar cada orden.
 const attemptSchema = z.object({
   entries: z.array(z.string().max(LIMITS.entry)).max(LIMITS.attemptEntries),
+  activeSeconds: activeSecondsSchema,
 })
 
 /**
@@ -130,6 +133,8 @@ const iso = (ms: number): string => new Date(ms).toISOString()
 
 export function createShellCourseService(deps: {
   progress: ShellCourseRepository
+  /** Dónde se apunta el tiempo activo de cada punto superado. */
+  times?: CourseTimes
   now?: () => number
 }) {
   const now = deps.now ?? Date.now
@@ -209,7 +214,7 @@ export function createShellCourseService(deps: {
 
     async attempt(actor: Actor, id: string, input: unknown): Promise<ShellAttemptResult> {
       const { unit, previous } = unitAt(id)
-      const { entries } = parse(attemptSchema, input)
+      const { entries, activeSeconds } = parse(attemptSchema, input)
 
       if (!attempts.hit(actor.login))
         throw domainError('rate_limited', 'Demasiados intentos seguidos: espera unos minutos')
@@ -229,6 +234,8 @@ export function createShellCourseService(deps: {
       const result = checkAttempt(unit, entries, seconds ?? undefined)
 
       if (result.done && result.stars > 0) {
+        const first = (await deps.progress.progress(actor.login)).stars[unit.id] === undefined
+
         await deps.progress.save(
           actor.login,
           unit.id,
@@ -238,6 +245,18 @@ export function createShellCourseService(deps: {
           iso(now()),
         )
         if (unit.limit !== undefined) await deps.progress.endRun(actor.login, unit.id)
+        if (activeSeconds !== undefined) {
+          await deps.times?.record({
+            login: actor.login,
+            course: 'shell',
+            unit: unit.id,
+            activeSeconds,
+            estimateSeconds: estimateOf(unit),
+            stars: result.stars,
+            first,
+            at: iso(now()),
+          })
+        }
       }
 
       return {

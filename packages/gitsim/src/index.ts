@@ -13,6 +13,10 @@ export { resolve, run, runAll, threeWay, tokenize } from './run.js'
 export type { RunResult, World } from './run.js'
 export {
   checkAttempt,
+  estimateOfGate,
+  estimateOfGitCourse,
+  estimateOfLevel,
+  estimateOfWorld,
   gateOf,
   farApart,
   filled,
@@ -37,6 +41,7 @@ export {
   starsOf,
   startOf,
   tally,
+  WORLDS,
 } from './levels/index.js'
 export type {
   Attempt,

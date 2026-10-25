@@ -52,6 +52,29 @@ Los dos cursos que la siguen son [el de git](curso-git.md) y
 9. **Tono**: equipo de programación (on-call, producción, despliegues), en
    segunda persona y sin formas con género cuando se pueda.
 
+## Tiempo estimado y tiempo real
+
+- **Estimación** (`estimateSeconds` en `packages/course/src/estimate.ts`): cada
+  punto suma lo que se lee (teoría, ejemplo, historia y tareas, a 180 palabras
+  por minuto), un rato fijo para situarse y probar (2,5 min) y cada orden de la
+  solución (40 s, por 1,5 de margen); un punto con remoto, 1,5 min más. Un
+  contrarreloj cuenta tres cuartos de su límite por 1,6 (algún intento de más)
+  en vez de las órdenes. Las pruebas de grupo del curso de git, 20 min cada
+  una. Se redondea al minuto. Los números están en `ESTIMATE`, en un solo sitio,
+  y son una suposición de partida.
+- Se enseña el total del curso con su reparto (niveles en shell, mundos en
+  git), el de cada nivel y bloque, y «~N min» en cada punto sin hacer y dentro
+  de cada punto (`shared/course/Estimate.tsx`).
+- **Tiempo real** (`shared/course/activeTime.ts`): mientras la vista de un punto
+  está abierta, con la pestaña a la vista y con algo de actividad (teclas, ratón,
+  desplazarse) en el último minuto, cuenta cada 5 s. Se suma en el navegador
+  entre visitas y se manda con el intento como `activeSeconds`; si sale, vuelve
+  a cero. La API lo apunta en `course_times` (migración 75) solo cuando el punto
+  sale: quién, curso, punto, segundos activos, la estimación de ese momento,
+  estrellas y si es la primera vez. Nadie más lo ve.
+- **Para qué**: calibrar `ESTIMATE` con la mediana real de cada punto y, más
+  adelante, enseñar a cada cual cómo va frente a lo que suele tardar la gente.
+
 ## Las piezas
 
 | Pieza | Dónde | Qué hace |
@@ -61,6 +84,8 @@ Los dos cursos que la siguen son [el de git](curso-git.md) y
 | Terminal | `apps/web/src/shared/course/Terminal.tsx` | Escribir, historial con flechas, `clear`, órdenes de varias líneas (`>`), número de cada orden que cuenta |
 | Estrellas | `apps/web/src/shared/course/Stars.tsx` | `StarRules` (comandos o tiempo), `StarsWhy`, `starText`, `clock` |
 | Certificados | `apps/web/src/shared/course/Certificates.tsx` | Los niveles superados, en el curso y en el perfil |
+| Estimación | `packages/course/src/estimate.ts`, `apps/web/src/shared/course/Estimate.tsx` | `estimateSeconds`, `ESTIMATE`, `wordsIn`; `CourseEstimate`, `EstimateBadge`, `useDuration` |
+| Tiempo activo | `apps/web/src/shared/course/activeTime.ts`, `apps/api/src/modules/shellcourse/course-times.ts` | `useActiveTime`, `activeSecondsOf`, `clearActiveTime`; `course_times` |
 | Estilos | `course-*` en `styles/notgames.css` | Terminal, estrellas, recuento |
 | Textos comunes | `course.*` en `textos/notgames.csv` | Estrellas, recuento, terminal, tiempo |
 

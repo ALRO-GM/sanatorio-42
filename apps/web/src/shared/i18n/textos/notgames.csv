@@ -214,4 +214,12 @@ course.time.three,Cursos (git y shell): tres estrellas en un contrarreloj (va tr
 course.time.two,Cursos (git y shell): dos estrellas en un contrarreloj (va tras ★★☆),hasta {time},up to {time},fins a {time},{time} arte
 course.time.limit,"Cursos (git y shell): una estrella en un contrarreloj, el límite (va tras ★☆☆)","antes de {time}, el límite","before {time}, the limit","abans de {time}, el límit","{time} baino lehen, muga"
 course.time.what,Cursos (git y shell): desplegable que explica cómo se cuenta el tiempo,¿Cómo se cuenta el tiempo?,How is time counted?,Com es compta el temps?,Nola zenbatzen da denbora?
+course.estimate.minutes,"Cursos (git y shell): tiempo estimado en minutos, junto a un punto o un nivel",~{n} min,~{n} min,~{n} min,~{n} min
+course.estimate.hours,Cursos (git y shell): tiempo estimado en horas justas,~{h} h,~{h} h,~{h} h,~{h} h
+course.estimate.hoursMinutes,Cursos (git y shell): tiempo estimado en horas y minutos,~{h} h {m} min,~{h} h {m} min,~{h} h {m} min,~{h} h {m} min
+course.estimate.title,"Cursos (git y shell): al pasar por el tiempo de un punto, bloque o nivel",Tiempo estimado: {time},Estimated time: {time},Temps estimat: {time},Kalkulatutako denbora: {time}
+course.estimate.total,Cursos (git y shell): tiempo estimado del curso entero,Tiempo estimado: {time},Estimated time: {time},Temps estimat: {time},Kalkulatutako denbora: {time}
+course.estimate.parts,Cursos (git y shell): para lectores de pantalla; el reparto del tiempo estimado por nivel o mundo,Tiempo estimado de cada parte,Estimated time per part,Temps estimat de cada part,Zati bakoitzaren denbora
+course.estimate.hint,"Cursos (git y shell): al pasar por el tiempo estimado del curso, de dónde sale",Un cálculo de partida: se irá ajustando con lo que tarda de verdad quien lo supera.,A first guess: it will be tuned with how long it really takes people who pass it.,Un càlcul inicial: s'anirà ajustant amb el que tarda de debò qui el supera.,Hasierako kalkulua: gainditzen dutenek benetan behar dutenarekin doituko da.
+git.worldN,Curso de git: nombre de un mundo en el reparto del tiempo estimado,Mundo {n},World {n},Món {n},{n}. mundua
 notgames.tab.shell,Not-games: pestaña del curso de shell,Curso de shell,Shell course,Curs de shell,Shell ikastaroa

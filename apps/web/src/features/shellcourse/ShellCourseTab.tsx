@@ -2,11 +2,22 @@ import { useState } from 'react'
 
 import type { ShellCourse } from '@sanatorio/contracts'
 import { firstOpen, unlocked } from '@sanatorio/course'
-import { BLOCKS, FINALS, TIERS, unitIn, UNITS } from '@sanatorio/shellsim'
+import {
+  BLOCKS,
+  estimateOf,
+  estimateOfBlock,
+  estimateOfCourse,
+  estimateOfTier,
+  FINALS,
+  TIERS,
+  unitIn,
+  UNITS,
+} from '@sanatorio/shellsim'
 import type { Tier, Unit } from '@sanatorio/shellsim'
 
 import { api } from '../../shared/api'
 import { Certificates } from '../../shared/course/Certificates'
+import { CourseEstimate, EstimateBadge } from '../../shared/course/Estimate'
 import { starText } from '../../shared/course/Stars'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
@@ -63,6 +74,14 @@ export function ShellCourseTab() {
       <p className="git-total">
         <span className="course-stars">★</span> {total} / {IDS.length * 3}
       </p>
+      <CourseEstimate
+        total={estimateOfCourse()}
+        parts={TIERS.map((tier) => ({
+          id: tier,
+          label: t(`shell.tier.${tier}`),
+          seconds: estimateOfTier(tier),
+        }))}
+      />
       <Certificates certificates={current.certificates} />
       {TIERS.map((tier) => (
         <TierPath
@@ -95,7 +114,9 @@ function TierPath({
 
   return (
     <section className={`shell-tier tier-${tier}`} aria-labelledby={`shell-tier-${tier}`}>
-      <h3 id={`shell-tier-${tier}`}>{t(`shell.tier.${tier}`)}</h3>
+      <h3 id={`shell-tier-${tier}`}>
+        {t(`shell.tier.${tier}`)} <EstimateBadge seconds={estimateOfTier(tier)} />
+      </h3>
       {BLOCKS.filter((block) => block.tier === tier).map((block) => (
         <BlockPath key={block.n} n={block.n} course={course} next={next} onOpen={onOpen} />
       ))}
@@ -126,7 +147,8 @@ function BlockPath({
   return (
     <div className="shell-block">
       <h4>
-        <span className="shell-block-n">{t('shell.block', { n })}</span> {text.title}
+        <span className="shell-block-n">{t('shell.block', { n })}</span> {text.title}{' '}
+        <EstimateBadge seconds={estimateOfBlock(n)} />
       </h4>
       <p className="muted">{text.pitch}</p>
       <p className="shell-jobs">
@@ -192,7 +214,11 @@ function Stop({
       <span className="shell-stop-text">
         {unit.kind !== 'unit' && <small>{t(`shell.kind.${unit.kind}`)}</small>}
         <span>{title}</span>
-        <span className="course-stars">{stars > 0 ? starText(stars) : ' '}</span>
+        {stars > 0 ? (
+          <span className="course-stars">{starText(stars)}</span>
+        ) : (
+          <EstimateBadge seconds={estimateOf(unit)} />
+        )}
       </span>
     </button>
   )

@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
 
 import type { CourseRun, ShellAttemptResult, ShellCourse } from '@sanatorio/contracts'
-import { exampleOf, starGoals, timeGoalsOf, unitIn } from '@sanatorio/shellsim'
+import { estimateOf, exampleOf, starGoals, timeGoalsOf, unitIn } from '@sanatorio/shellsim'
 import type { Unit } from '@sanatorio/shellsim'
 
 import { api } from '../../shared/api'
+import { useActiveTime } from '../../shared/course/activeTime'
+import { EstimateBadge } from '../../shared/course/Estimate'
 import { clock, StarRules, starText } from '../../shared/course/Stars'
 import { useAction } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
@@ -34,6 +36,8 @@ export function UnitView({ unit, course, onCourse, onBack }: UnitViewProps) {
   const time = timeGoalsOf(unit)
   const [step, setStep] = useState<Step>('theory')
 
+  useActiveTime('shell', unit.id)
+
   return (
     <article className={`git-level shell-unit ${unit.kind}`}>
       <header className="git-level-head">
@@ -42,7 +46,8 @@ export function UnitView({ unit, course, onCourse, onBack }: UnitViewProps) {
         </button>
         <h3>
           {text.title}
-          {best > 0 && <span className="course-stars"> {starText(best)}</span>}
+          {best > 0 && <span className="course-stars"> {starText(best)}</span>}{' '}
+          <EstimateBadge seconds={estimateOf(unit)} />
         </h3>
         <p className="git-goal">
           <strong>{t('shell.goal')}:</strong> {text.goal}

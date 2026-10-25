@@ -2,7 +2,9 @@ import { useEffect, useMemo, useState } from 'react'
 
 import type { GitAttemptResult } from '@sanatorio/contracts'
 import {
+  estimateOfLevel,
   goalOfLevel,
+  levelOf,
   LIMITS,
   missing,
   run,
@@ -17,6 +19,8 @@ import type { Level, World } from '@sanatorio/gitsim'
 import { api } from '../../shared/api'
 import { useAction } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
+import { activeSecondsOf, clearActiveTime, useActiveTime } from '../../shared/course/activeTime'
+import { EstimateBadge } from '../../shared/course/Estimate'
 import { StarRules, StarsWhy, starText } from '../../shared/course/Stars'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { PillGroup } from '../../shared/ui/PillGroup'
@@ -43,6 +47,8 @@ export function LevelView({ level, best, seat, onDone, onBack }: LevelViewProps)
   const { t } = useI18n()
   const [step, setStep] = useState<Step>('animation')
 
+  useActiveTime('git', level.id)
+
   return (
     <article className="git-level">
       <header className="git-level-head">
@@ -51,7 +57,9 @@ export function LevelView({ level, best, seat, onDone, onBack }: LevelViewProps)
         </button>
         <h3>
           {level.title}
-          {best > 0 && <span className="course-stars"> {'★'.repeat(best)}</span>}
+          {best > 0 && <span className="course-stars"> {'★'.repeat(best)}</span>}{' '}
+          {/* La estimación se calcula con el texto en castellano, venga en el idioma que venga. */}
+          <EstimateBadge seconds={estimateOfLevel(levelOf(level.id) ?? level)} />
         </h3>
         <p className="git-goal">
           <strong>{t('git.goal')}:</strong> {level.goal}
@@ -256,8 +264,13 @@ function Challenge({
 
   function submit(all: string[]) {
     void act(async () => {
-      const answer = await api.submitGitAttempt(level.id, { lines: all })
+      const answer = await api.submitGitAttempt(level.id, {
+        lines: all,
+        activeSeconds: activeSecondsOf('git', level.id),
+      })
 
+      // Superado: lo que tardó ya lo tiene la API; la próxima vez empieza de cero.
+      if (answer.done && answer.stars > 0) clearActiveTime('git', level.id)
       setResult(answer)
       if (answer.done) onDone(answer)
     })

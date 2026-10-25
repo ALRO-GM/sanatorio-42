@@ -14,6 +14,7 @@ import type { Tally, Unit, World } from '@sanatorio/shellsim'
 import { starsFor } from '@sanatorio/course'
 
 import { api } from '../../shared/api'
+import { activeSecondsOf, clearActiveTime } from '../../shared/course/activeTime'
 import { clock, StarsWhy, starText } from '../../shared/course/Stars'
 import { Terminal } from '../../shared/course/Terminal'
 import type { TerminalEntry } from '../../shared/course/Terminal'
@@ -97,8 +98,13 @@ export function Challenge({ unit, run, onResult, onRestart }: ChallengeProps) {
 
   function submit(all: string[]) {
     void act(async () => {
-      const answer = await api.submitShellAttempt(unit.id, { entries: all })
+      const answer = await api.submitShellAttempt(unit.id, {
+        entries: all,
+        activeSeconds: activeSecondsOf('shell', unit.id),
+      })
 
+      // Superado: lo que tardó ya lo tiene la API; la próxima vez empieza de cero.
+      if (answer.done && answer.stars > 0) clearActiveTime('shell', unit.id)
       setResult(answer)
       onResult(answer)
     })

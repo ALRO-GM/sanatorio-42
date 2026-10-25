@@ -47,7 +47,11 @@ export type GitGateResult = {
 }
 
 /** `POST /gitcourse/levels/:id`: los comandos que escribiste, en orden. */
-export type GitAttemptInput = { lines: string[] }
+export type GitAttemptInput = {
+  lines: string[]
+  /** Segundos de tiempo activo en el punto (`docs/plantilla-cursos.md`); se guardan si sale. */
+  activeSeconds?: number
+}
 
 export type GitAttemptResult = {
   done: boolean

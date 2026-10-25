@@ -105,6 +105,21 @@ investigación):
   sondas sobre una copia de tu mundo (con el fichero y sin él, con argumentos
   y sin ellos) y su salida tiene que ser la de la solución.
 
+## Tiempo estimado
+
+Con el modelo común (`docs/plantilla-cursos.md`, `estimateOf` en
+`packages/shellsim/src/course/estimate.ts`), a 2026-10-25:
+
+| Nivel | Bloques | Tiempo |
+| --- | --- | --- |
+| Principiante | 22 + 35 + 28 min, y el jefe final | ~1 h 40 min |
+| Intermedio | 33 + 28 + 30 min, y el jefe final | ~1 h 46 min |
+| Avanzado | 31 + 28 + 26 min, y el jefe final | ~1 h 46 min |
+| **Todo el curso** | | **~5 h 12 min** |
+
+Es un cálculo de partida: el tiempo activo real de quien supera cada punto se
+guarda (`course_times`) para ajustarlo.
+
 ## Cómo está hecho
 
 - `packages/shellsim`: la shell simulada, en TypeScript puro.

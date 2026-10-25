@@ -56,6 +56,16 @@ cierto número de conceptos hay una **prueba de grupo**.
    animación (ramas, commits, HEAD y, si toca, el contenido de ficheros) con la
    terminal. Una, dos o tres estrellas según los comandos usados.
 
+## Tiempo estimado
+
+Con el modelo común (`docs/plantilla-cursos.md`, `estimateOfLevel` en
+`packages/gitsim/src/levels/estimate.ts`), cada mundo con las pruebas de grupo
+que lo cierran (20 min cada una), a 2026-10-25: mundo 0 ~27 min, mundo 1
+~57 min, mundo 2 ~37 min, mundo 3 ~24 min, mundo 4 ~51 min y mundo 5 ~1 h
+30 min (con la tercera prueba de grupo y el jefe). **Todo el curso: ~4 h
+46 min.** Es un cálculo de partida: el tiempo activo real de quien supera cada
+punto se guarda (`course_times`) para ajustarlo.
+
 ## Estrellas: cuántos comandos
 
 En la cabecera de cada punto (en sus tres pasos) se ve el **objetivo** y

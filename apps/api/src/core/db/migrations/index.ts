@@ -80,6 +80,7 @@ import { seatLogSchema } from './0071-seat-log.js'
 import { hiddenPeopleSchema } from './0072-hidden-people.js'
 import { countdownsSchema } from './0073-countdowns.js'
 import { shellCourseSchema } from './0074-shell-course.js'
+import { courseTimesSchema } from './0075-course-times.js'
 import type { Migration } from './types.js'
 
 export const MIGRATIONS: readonly Migration[] = [
@@ -157,6 +158,7 @@ export const MIGRATIONS: readonly Migration[] = [
   hiddenPeopleSchema,
   countdownsSchema,
   shellCourseSchema,
+  courseTimesSchema,
 ]
 
 /** Versión más alta que existe en el código. */

@@ -65,6 +65,7 @@ describe('migraciones', () => {
       'countdown_dismissals',
       'countdown_notices',
       'countdown_pins',
+      'course_times',
       'curriculum_votes',
       'doubt_answers',
       'doubts',

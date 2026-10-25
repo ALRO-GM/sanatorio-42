@@ -1116,3 +1116,28 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* El tiempo estimado: discreto junto a un nombre, y el total con su reparto. */
+.course-estimate {
+  color: var(--text-3);
+  font-size: 0.8rem;
+  font-weight: 400;
+  white-space: nowrap;
+}
+.course-estimate-total {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 1rem;
+  margin: 0.25rem 0 0.75rem;
+  font-size: 0.9rem;
+}
+.course-estimate-total ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.9rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--text-2);
+}

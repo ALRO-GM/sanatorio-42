@@ -19,6 +19,13 @@ export function levelOf(id: string): Level | undefined {
 
 export { checkAttempt, goalOfLevel, solvedOf, starGoals, starsOf, startOf, tally } from './build.js'
 export type { Attempt, Tally } from './build.js'
+export {
+  estimateOfGate,
+  estimateOfGitCourse,
+  estimateOfLevel,
+  estimateOfWorld,
+  WORLDS,
+} from './estimate.js'
 export type { Level, Theory } from './types.js'
 export { levelIn, LEVELS_EN, missionIn, missionItemIn } from './en/index.js'
 export { GROUPS_EN, MISSION_ITEMS_EN } from './en/groups.js'

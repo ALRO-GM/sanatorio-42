@@ -18,7 +18,11 @@ export type ShellCourse = {
 }
 
 /** `POST /shellcourse/units/:id`: las órdenes que escribiste, en orden. */
-export type ShellAttemptInput = { entries: string[] }
+export type ShellAttemptInput = {
+  entries: string[]
+  /** Segundos de tiempo activo en el punto (`docs/plantilla-cursos.md`); se guardan si sale. */
+  activeSeconds?: number
+}
 
 export type ShellAttemptResult = {
   done: boolean
