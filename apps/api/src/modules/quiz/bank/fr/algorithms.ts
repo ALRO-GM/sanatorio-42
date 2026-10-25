@@ -7,16 +7,16 @@ export const ALGORITHMS_FR: Readonly<Record<string, ConceptText>> = {
     forms: [
       {
         ask: [
-          "Dans le pire cas, combien de comparaisons fait au minimum n'importe quel tri par comparaison ?",
-          'Quel est le plus petit coût dans le pire cas que peut atteindre un tri par comparaison ?',
+          "Dans le pire des cas, combien de comparaisons fait au minimum n'importe quel tri par comparaison ?",
+          'En dessous de quel coût un tri par comparaison ne peut-il pas descendre, dans le pire des cas ?',
         ],
         right: ['O(n log n)'],
         wrong: ['O(n)', 'O(1)', 'O(log n)', 'O(n²)'],
       },
       {
         ask: [
-          'Combien coûte le tri à bulles dans le pire cas ?',
-          'Le tri à bulles, dans le pire cas, coûte…',
+          'Combien coûte le tri à bulles dans le pire des cas ?',
+          'Le tri à bulles, dans le pire des cas, coûte…',
         ],
         right: ['O(n²)'],
         wrong: ['O(n log n)', 'O(n)', 'O(log n)', 'O(n³)'],
@@ -44,7 +44,7 @@ export const ALGORITHMS_FR: Readonly<Record<string, ConceptText>> = {
         wrong: ['Le dernier entré', 'Le plus petit', 'Celui du milieu'],
       },
       {
-        ask: ['Quel ordre suit une pile ?', "Quelle politique d'accès a une pile ?"],
+        ask: ['Quel ordre suit une pile ?', "Quelle politique d'accès suit une pile ?"],
         right: ['LIFO : dernier entré, premier sorti'],
         wrong: [
           'FIFO : premier entré, premier sorti',
@@ -60,7 +60,7 @@ export const ALGORITHMS_FR: Readonly<Record<string, ConceptText>> = {
     forms: [
       {
         ask: [
-          'La pile a vaut 1 2 3 4 5, avec le 1 en haut. À quoi ressemble-t-elle après `ra` ?',
+          'La pile a contient 1 2 3 4 5, avec le 1 en haut. À quoi ressemble-t-elle après `ra` ?',
           'Avec a = 1 2 3 4 5 (le sommet à gauche), que donne une rotation vers le haut ?',
         ],
         right: ['2 3 4 5 1'],
@@ -68,7 +68,7 @@ export const ALGORITHMS_FR: Readonly<Record<string, ConceptText>> = {
       },
       {
         ask: [
-          'La pile a vaut 1 2 3 4 5, avec le 1 en haut. À quoi ressemble-t-elle après `rra` ?',
+          'La pile a contient 1 2 3 4 5, avec le 1 en haut. À quoi ressemble-t-elle après `rra` ?',
           'Avec a = 1 2 3 4 5 (le sommet à gauche), que donne une rotation vers le bas ?',
         ],
         right: ['5 1 2 3 4'],
@@ -83,7 +83,7 @@ export const ALGORITHMS_FR: Readonly<Record<string, ConceptText>> = {
       {
         ask: [
           "Combien d'opérations faut-il, au maximum, pour trier 3 nombres dans push_swap ?",
-          "Dans le pire cas, combien d'opérations coûte le tri d'une pile de 3 éléments ?",
+          "Dans le pire des cas, combien d'opérations coûte le tri d'une pile de 3 éléments ?",
         ],
         right: ['2'],
       },
@@ -94,7 +94,7 @@ export const ALGORITHMS_FR: Readonly<Record<string, ConceptText>> = {
   'algo-radix': {
     forms: [
       {
-        ask: ['Comment trie le tri radix ?', 'Que fait le radix sort pour trier ?'],
+        ask: ['Comment le tri radix trie-t-il ?', 'Que fait le radix sort pour trier ?'],
         right: [
           'Chiffre par chiffre (ou bit par bit), sans comparer les éléments entre eux',
           'Il regroupe selon chaque bit ou chiffre, en commençant par le moins significatif',
@@ -211,7 +211,7 @@ export const ALGORITHMS_FR: Readonly<Record<string, ConceptText>> = {
       'Un cycle qui passe par tous les nœuds',
       "L'ordre topologique",
     ],
-    why: 'Dijkstra considère le nœud le plus proche comme définitivement réglé ; un poids négatif pourrait ensuite raccourcir un chemin déjà fermé.',
+    why: 'Dijkstra considère le nœud le plus proche comme définitivement réglé ; un poids négatif pourrait ensuite raccourcir le chemin vers un nœud déjà réglé.',
   },
   'algo-maze-perfect': {
     forms: [
@@ -354,13 +354,13 @@ export const ALGORITHMS_FR: Readonly<Record<string, ConceptText>> = {
         ask: ['À quoi sert un mutex ?', 'Que garantit un mutex ?'],
         right: [
           "Qu'un seul thread à la fois entre dans une section",
-          "Qu'un seul thread à la fois détient le verrou",
+          "Qu'un seul thread à la fois détienne le verrou",
         ],
         wrong: [
-          'Que les threads vont plus vite',
+          'Que les threads aillent plus vite',
           "Que les threads démarrent dans l'ordre",
-          'Que la mémoire peut être partagée entre processus',
-          'Que le temps est bien mesuré',
+          'Que la mémoire puisse être partagée entre processus',
+          'Que le temps soit bien mesuré',
         ],
       },
       {
@@ -377,9 +377,9 @@ export const ALGORITHMS_FR: Readonly<Record<string, ConceptText>> = {
       },
     ],
     wrong: [
-      'Que les threads vont plus vite',
+      'Que les threads aillent plus vite',
       "Que les threads démarrent dans l'ordre",
-      'Que le temps est bien mesuré',
+      'Que le temps soit bien mesuré',
     ],
     why: "lock attend que le verrou soit libre ; si c'est toi qui l'as déjà, tu t'attends toi-même.",
   },
@@ -426,7 +426,7 @@ export const ALGORITHMS_FR: Readonly<Record<string, ConceptText>> = {
           'Pourquoi un thread de surveillance qui dort une demi-seconde entre deux vérifications ne convient-il pas ?',
         ],
         right: [
-          'Il annonce la mort en retard : il faut vérifier toutes les 2 ou 3 millisecondes',
+          "Il annonce la mort en retard : il faut vérifier à quelques millisecondes d'intervalle",
           "Il peut prévenir jusqu'à 500 ms en retard, alors que la mort doit être annoncée en moins de 10 ms",
         ],
       },

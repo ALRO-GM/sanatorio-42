@@ -61,7 +61,7 @@ export const C_BASICS_FR: Readonly<Record<string, ConceptText>> = {
       {
         ask: [
           "Que faut-il faire de la mémoire renvoyée par `malloc` quand on ne s'en sert plus ?",
-          "La mémoire allouée avec malloc, quand on n'en a plus besoin, il faut…",
+          "Quand on n'a plus besoin de la mémoire allouée avec malloc, il faut…",
         ],
         right: ['La libérer avec free', 'La passer à free, une seule fois'],
         wrong: [
@@ -107,7 +107,7 @@ export const C_BASICS_FR: Readonly<Record<string, ConceptText>> = {
           'Que fait `free(NULL)` ?',
           'Que se passe-t-il si tu appelles free avec un pointeur nul ?',
         ],
-        right: ['Rien : sans danger'],
+        right: ["Rien : c'est sans danger"],
         wrong: [
           'Une erreur de segmentation',
           'Ça compte comme un double free',
@@ -130,7 +130,7 @@ export const C_BASICS_FR: Readonly<Record<string, ConceptText>> = {
           'Il manque un cast en int*',
           'n devrait être unsigned',
           "Il n'y a aucun problème",
-          'Il faut faire free(&n) avant de revenir',
+          'Il faut faire free(&n) avant le return',
         ],
       },
       {
@@ -159,7 +159,7 @@ export const C_BASICS_FR: Readonly<Record<string, ConceptText>> = {
         wrong: [
           'memmove est toujours plus rapide',
           'memmove efface la source après la copie',
-          'Elles sont exactement pareilles',
+          'Elles font exactement la même chose',
           'memmove ne copie que des chaînes',
         ],
       },
@@ -174,7 +174,7 @@ export const C_BASICS_FR: Readonly<Record<string, ConceptText>> = {
     ],
     wrong: [
       'memmove est toujours plus rapide',
-      'Elles sont exactement pareilles',
+      'Elles font exactement la même chose',
       'memmove ne copie que des chaînes',
     ],
     why: "En cas de chevauchement, memcpy peut écraser ce qu'elle n'a pas encore copié ; memmove choisit le sens de la copie.",
@@ -209,7 +209,7 @@ export const C_BASICS_FR: Readonly<Record<string, ConceptText>> = {
         ],
         right: [
           'Comportement indéfini : il écrit dans un littéral (souvent une segmentation fault)',
-          'En général, segfault : on ne peut pas modifier un littéral',
+          'En général, un segfault : un littéral ne se modifie pas',
         ],
         wrong: ['Il affiche Hola', 'Il affiche hola', 'Il affiche H', 'Il a une fuite de mémoire'],
       },
@@ -230,7 +230,7 @@ export const C_BASICS_FR: Readonly<Record<string, ConceptText>> = {
       {
         ask: ['Cette fonction copie une chaîne. Où est le problème ?', 'Quel bug a ce strdup ?'],
         right: [
-          "Elle alloue un octet de trop peu : il manque celui du '\\0'",
+          "Elle alloue un octet de moins que nécessaire : celui du '\\0'",
           'Il faudrait allouer strlen(s) + 1',
         ],
       },
@@ -249,15 +249,15 @@ export const C_BASICS_FR: Readonly<Record<string, ConceptText>> = {
       {
         ask: [
           "Qu'a de particulier une variable locale déclarée `static` ?",
-          "Qu'est-ce qui change quand tu mets static à une variable dans une fonction ?",
+          "Qu'est-ce qui change quand tu déclares static une variable dans une fonction ?",
         ],
         right: [
           'Elle garde sa valeur entre deux appels',
-          "Elle dure tout le programme, même si on ne la voit qu'à l'intérieur de la fonction",
+          "Elle existe pendant tout le programme, même si elle n'est visible que dans la fonction",
         ],
         wrong: [
           'Elle est remise à zéro à chaque appel',
-          "On la voit depuis d'autres fichiers",
+          "Elle est visible depuis d'autres fichiers",
           'Elle devient constante',
           "Elle est stockée dans la pile de l'appelant",
         ],
@@ -277,10 +277,10 @@ export const C_BASICS_FR: Readonly<Record<string, ConceptText>> = {
     ],
     wrong: [
       'Elle est remise à zéro à chaque appel',
-      "On la voit depuis d'autres fichiers",
+      "Elle est visible depuis d'autres fichiers",
       'Elle devient constante',
     ],
-    why: "static donne à la variable la durée de vie de tout le programme (initialisée une seule fois) sans changer l'endroit où on la voit.",
+    why: "static donne à la variable la durée de vie du programme entier (elle n'est initialisée qu'une fois) sans changer sa portée.",
   },
   'c-read-return': {
     forms: [
@@ -437,7 +437,7 @@ export const C_BASICS_FR: Readonly<Record<string, ConceptText>> = {
         right: ['Elle ne finit jamais : un size_t est toujours >= 0', "Elle tourne à l'infini"],
       },
     ],
-    wrong: ['11 fois', '10 fois', 'Jamais', 'Ça ne compile pas', "Elle s'arrête à -1"],
+    wrong: ['11 fois', '10 fois', 'Aucune fois', 'Ça ne compile pas', "Elle s'arrête à -1"],
     why: "size_t n'a pas de signe : en passant sous 0, il revient à la plus grande valeur et la condition est toujours vraie.",
   },
   'c-signed-overflow': {

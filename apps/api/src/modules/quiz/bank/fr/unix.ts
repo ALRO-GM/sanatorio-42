@@ -28,7 +28,7 @@ export const UNIX_FR: Readonly<Record<string, ConceptText>> = {
       },
     ],
     wrong: ['Elle change de shell', 'Elle éteint la machine', 'Elle liste les processus'],
-    why: "sudo exécute en tant qu'autre utilisateur selon les règles de /etc/sudoers, qu'on modifie avec visudo pour ne pas le casser.",
+    why: "sudo exécute une commande en tant qu'un autre utilisateur, selon les règles de /etc/sudoers, qu'on modifie avec visudo pour ne pas le casser.",
   },
   'unix-ssh-port': {
     forms: [
@@ -310,7 +310,7 @@ export const UNIX_FR: Readonly<Record<string, ConceptText>> = {
       },
     ],
     wrong: ['SIGINT et SIGQUIT', 'SIGKILL et SIGSTOP', 'SIGSEGV et SIGBUS'],
-    why: "SIGUSR1 et SIGUSR2 n'ont pas de sens fixé ; kill ne sert pas qu'à tuer : il envoie n'importe quel signal.",
+    why: "SIGUSR1 et SIGUSR2 n'ont pas de signification fixe ; kill ne sert pas qu'à tuer : il envoie n'importe quel signal.",
   },
   'sig-sigaction': {
     forms: [

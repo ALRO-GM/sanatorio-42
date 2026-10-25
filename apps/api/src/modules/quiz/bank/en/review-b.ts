@@ -269,14 +269,14 @@ export const REVIEW_B_EN: Readonly<Record<string, ReviewEntry>> = {
     title: 'poll',
     definition:
       'poll waits on many descriptors at once and tells you which ones can be read or written without blocking. That way a single thread serves many clients; reading without poll saying so can block the whole server.',
-    example: 'poll(fds, n, -1); for (…) if (fds[i].revents & POLLIN) leer(fds[i].fd);',
+    example: 'poll(fds, n, -1); for (…) if (fds[i].revents & POLLIN) read_from(fds[i].fd);',
   },
   'srv-partial': {
     title: 'Messages in pieces',
     definition:
       'TCP is a stream of bytes, not of messages: one recv can bring half a message or several. Accumulate in a buffer per client and process each complete message (up to \\r\\n).',
     example:
-      'buffer += recibido; while ((pos = buffer.find("\\r\\n")) != npos) { procesar(buffer.substr(0, pos)); … }',
+      'buffer += received; while ((pos = buffer.find("\\r\\n")) != npos) { process(buffer.substr(0, pos)); … }',
   },
   'http-status': {
     title: 'HTTP codes',
@@ -344,14 +344,14 @@ export const REVIEW_B_EN: Readonly<Record<string, ReviewEntry>> = {
     title: 'Storing passwords',
     definition:
       'They are never stored as they are, nor encrypted with a key: you store a slow, salted hash (bcrypt, argon2). To check, compute it again and compare.',
-    example: 'hash = await bcrypt.hash(password, 12); ok = await bcrypt.compare(intento, hash);',
+    example: 'hash = await bcrypt.hash(password, 12); ok = await bcrypt.compare(attempt, hash);',
   },
   'web-websocket': {
     title: 'WebSockets',
     definition:
       'A WebSocket keeps a two-way connection open: the server sends data whenever it wants, without the client asking. Great for real-time games and chats.',
     example:
-      'const ws = new WebSocket("wss://…/pong"); ws.onmessage = (e) => dibujar(JSON.parse(e.data));',
+      'const ws = new WebSocket("wss://…/pong"); ws.onmessage = (e) => draw(JSON.parse(e.data));',
   },
   'cpp-class-struct': {
     title: 'class and struct',
@@ -363,7 +363,7 @@ export const REVIEW_B_EN: Readonly<Record<string, ReviewEntry>> = {
     title: 'References',
     definition:
       'A reference is another name for something that already exists: it is initialized when created, cannot be null and cannot be reassigned to something else. They are used to pass without copying.',
-    example: 'void subir(int &n) { n++; } int x = 1; subir(x); // x is 2',
+    example: 'void increment(int &n) { n++; } int x = 1; increment(x); // x is 2',
   },
   'cpp-const-method': {
     title: 'const methods',
@@ -495,13 +495,13 @@ export const REVIEW_B_EN: Readonly<Record<string, ReviewEntry>> = {
     title: 'Dictionaries',
     definition:
       'd[key] raises KeyError if it is missing; d.get(key, default) returns the default (or None). `in` tells you whether the key exists.',
-    example: 'edades.get("ana", 0) + 1; if "ana" in edades: …',
+    example: 'ages.get("ana", 0) + 1; if "ana" in ages: …',
   },
   'py-comprehension': {
     title: 'Comprehensions',
     definition:
       'A short way to build lists, sets or dictionaries: [expression for x in iterable if condition].',
-    example: '[x * x for x in range(5) if x % 2 == 0] → [0, 4, 16]. {k: len(k) for k in nombres}',
+    example: '[x * x for x in range(5) if x % 2 == 0] → [0, 4, 16]. {k: len(k) for k in names}',
   },
   'py-generator': {
     title: 'Generators',
@@ -514,7 +514,7 @@ export const REVIEW_B_EN: Readonly<Record<string, ReviewEntry>> = {
     title: 'try, except, else and finally',
     definition:
       'try tries a block; except catches errors of the type you name; else runs if there was no error; finally always runs, error or not.',
-    example: 'try:\\n    n = int(texto)\\nexcept ValueError:\\n    print("not a number")',
+    example: 'try:\\n    n = int(text)\\nexcept ValueError:\\n    print("not a number")',
   },
   'py-classes': {
     title: 'Classes and self',
@@ -526,13 +526,13 @@ export const REVIEW_B_EN: Readonly<Record<string, ReviewEntry>> = {
     title: 'Abstract classes (ABC)',
     definition:
       'By inheriting from ABC and marking methods with @abstractmethod, Python does not let you create objects of the class while any of them is left unimplemented (TypeError).',
-    example: 'class Forma(ABC):\\n    @abstractmethod\\n    def area(self) -> float: ...',
+    example: 'class Shape(ABC):\\n    @abstractmethod\\n    def area(self) -> float: ...',
   },
   'py-typing': {
     title: 'Type annotations',
     definition:
       'Annotations (x: int, -> str) document the types, but Python does not check them at run time. Tools like mypy check them, before running.',
-    example: 'def saluda(nombre: str) -> str: … ; mypy programa.py warns you if you pass an int.',
+    example: 'def greet(name: str) -> str: … ; mypy program.py warns you if you pass an int.',
   },
   'py-scope': {
     title: 'Variable scope',

@@ -116,7 +116,7 @@ export const REVIEW_A_FR: Readonly<Record<string, ReviewEntry>> = {
     example: 'make 2> erreurs.log; echo salut >> journal.txt',
   },
   'gen-shell-exit-status': {
-    title: 'Code de retour ($?)',
+    title: 'Code de sortie ($?)',
     definition:
       "Toute commande se termine avec un nombre : 0 veut dire succès, toute autre valeur une erreur. `$?` contient celui de la dernière commande ; `&&` et `||` s'en servent pour décider quoi faire.",
     example:
@@ -214,7 +214,7 @@ export const REVIEW_A_FR: Readonly<Record<string, ReviewEntry>> = {
   'c-fd-standard': {
     title: 'Descripteurs de fichier',
     definition:
-      "Un descripteur de fichier est un nombre qui désigne quelque chose d'ouvert (un fichier, un pipe, un socket). 0 est l'entrée standard, 1 la sortie standard et 2 la sortie d'erreur ; open renvoie le plus petit numéro libre.",
+      "Un descripteur de fichier est un nombre qui désigne quelque chose d'ouvert (un fichier, un pipe, une socket). 0 est l'entrée standard, 1 la sortie standard et 2 la sortie d'erreur ; open renvoie le plus petit numéro libre.",
     example: 'write(2, "Error\\n", 6); écrit sur la sortie d\'erreur.',
   },
   'c-variadic': {
@@ -288,7 +288,7 @@ export const REVIEW_A_FR: Readonly<Record<string, ReviewEntry>> = {
   'unix-password-policy': {
     title: 'Utilisateurs et mots de passe',
     definition:
-      "/etc/passwd liste les utilisateurs (nom, uid, dossier personnel, shell) et tout le monde peut le lire. Les hachages des mots de passe sont à part, dans /etc/shadow, que seul root peut lire. Les règles d'expiration sont dans /etc/login.defs.",
+      "/etc/passwd liste les utilisateurs (nom, uid, dossier personnel, shell) et tout le monde peut le lire. Les hashs des mots de passe sont à part, dans /etc/shadow, que seul root peut lire. Les règles d'expiration sont dans /etc/login.defs.",
     example: 'chage -l user indique quand son mot de passe expire.',
   },
   'proc-fork': {
@@ -338,7 +338,7 @@ export const REVIEW_A_FR: Readonly<Record<string, ReviewEntry>> = {
   'sig-sigusr': {
     title: 'Signaux et kill',
     definition:
-      "Un signal est une notification qu'un processus envoie à un autre. SIGUSR1 et SIGUSR2 n'ont pas de sens fixé : ils servent à ce que tu veux. On les envoie avec kill(pid, signal).",
+      "Un signal est une notification qu'un processus envoie à un autre. SIGUSR1 et SIGUSR2 n'ont pas de signification fixe : ils servent à ce que tu veux. On les envoie avec kill(pid, signal).",
     example: 'Dans minitalk : SIGUSR1 vaut un bit 0 et SIGUSR2 un bit 1.',
   },
   'sig-sigaction': {
@@ -354,9 +354,9 @@ export const REVIEW_A_FR: Readonly<Record<string, ReviewEntry>> = {
     example: 'c = (c << 1) | bit; if (++count == 8) { write(1, &c, 1); count = 0; c = 0; }',
   },
   'sh-quotes': {
-    title: 'Les quotes dans le shell',
+    title: 'Les guillemets dans le shell',
     definition:
-      "Entre quotes simples, tout est littéral ; entre quotes doubles, les variables ($VAR) sont développées mais les mots ne sont pas découpés. Sans quotes, c'est développé puis découpé sur les espaces.",
+      "Entre guillemets simples, tout est littéral ; entre guillemets doubles, les variables ($VAR) sont développées mais les mots ne sont pas découpés. Sans guillemets, c'est développé puis découpé sur les espaces.",
     example: 'echo \'$USER\' → $USER. echo "$USER" → ton login.',
   },
   'sh-heredoc': {
@@ -366,7 +366,7 @@ export const REVIEW_A_FR: Readonly<Record<string, ReviewEntry>> = {
     example: 'cat << FIN\\nligne 1\\nligne 2\\nFIN → affiche les deux lignes.',
   },
   'sh-exit-codes': {
-    title: 'Les codes de retour de bash',
+    title: 'Les codes de sortie de bash',
     definition:
       "0, c'est le succès ; 1, une erreur générique ; 126, pas la permission d'exécuter ; 127, commande introuvable ; et 128 + N si un signal N a terminé le processus.",
     example: 'Ctrl-C (SIGINT, 2) → $? = 130. Ctrl-\\ (SIGQUIT, 3) → 131.',

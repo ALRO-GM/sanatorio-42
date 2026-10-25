@@ -12,7 +12,7 @@ export const CPP_FR: Readonly<Record<string, ConceptText>> = {
         ],
         right: [
           'Ce qui est privé ou public par défaut',
-          'Dans une class tout est privé par défaut, et dans une struct, public',
+          'Dans une class, tout est privé par défaut, et dans une struct, public',
         ],
       },
     ],
@@ -222,7 +222,7 @@ export const CPP_FR: Readonly<Record<string, ConceptText>> = {
         ],
       },
       {
-        ask: ['Que produit `virtual void makeSound() const = 0;` dans une classe ?'],
+        ask: ["Qu'implique `virtual void makeSound() const = 0;` dans une classe ?"],
         right: ["Qu'on ne peut pas créer d'objets de cette classe"],
         wrong: [
           'Que makeSound renvoie 0',

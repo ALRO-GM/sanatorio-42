@@ -310,11 +310,11 @@ export const GENERAL_FR: Readonly<Record<string, ConceptText>> = {
         ask: ['Que fait `git push` ?', 'À quoi sert `git push` ?'],
         right: [
           'Il envoie tes commits au dépôt distant',
-          'Il pousse tes commits locaux vers le remote',
+          'Il pousse tes commits locaux vers le dépôt distant',
         ],
         wrong: [
           'Il enregistre les changements dans un commit local',
-          'Il télécharge les changements du remote',
+          'Il télécharge les changements du dépôt distant',
           "Il ajoute des fichiers à l'index",
           'Il crée une nouvelle branche',
         ],
@@ -330,10 +330,10 @@ export const GENERAL_FR: Readonly<Record<string, ConceptText>> = {
     ],
     wrong: [
       'Il enregistre les changements dans un commit local',
-      'Il télécharge les changements du remote',
+      'Il télécharge les changements du dépôt distant',
       'Il crée une nouvelle branche',
     ],
-    why: "`commit` enregistre dans ta copie du dépôt ; `push` l'envoie au remote.",
+    why: "`commit` enregistre dans ta copie du dépôt ; `push` l'envoie au dépôt distant.",
   },
   'gen-git-add': {
     forms: [
@@ -346,7 +346,7 @@ export const GENERAL_FR: Readonly<Record<string, ConceptText>> = {
         wrong: [
           "Il l'envoie sur le serveur",
           'Il le supprime du dépôt',
-          "Il fait que git l'ignore pour toujours",
+          "Il demande à git de l'ignorer pour toujours",
           'Il le copie dans une autre branche',
         ],
       },
@@ -472,7 +472,7 @@ export const GENERAL_FR: Readonly<Record<string, ConceptText>> = {
   'gen-shell-exit-status': {
     forms: [
       {
-        ask: ['Que contient `$?` dans bash ?', 'Que garde la variable spéciale `$?` ?'],
+        ask: ['Que contient `$?` dans bash ?', 'Que stocke la variable spéciale `$?` ?'],
         right: [
           'Le code de sortie de la dernière commande',
           "Comment s'est terminée la dernière commande (0 si tout s'est bien passé)",

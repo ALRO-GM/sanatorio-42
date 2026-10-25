@@ -105,7 +105,7 @@ export const REVIEW_GIT_FR: Readonly<Record<string, ReviewEntry>> = {
     definition:
       "Déplace la branche vers un autre commit. --soft laisse ce qui a été défait indexé, l'option par défaut (--mixed) le laisse non indexé et --hard l'efface. Seulement sur des commits que personne n'a vus.",
     example:
-      'git reset --soft HEAD~3 && git commit -m "Tout ensemble" regroupe 3 commits en un seul.',
+      'git reset --soft HEAD~3 && git commit -m "Tout ensemble" regroupe trois commits en un seul.',
   },
   'git-revert': {
     title: 'Revert',

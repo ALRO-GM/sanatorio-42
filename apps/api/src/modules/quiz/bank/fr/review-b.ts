@@ -6,7 +6,7 @@ export const REVIEW_B_FR: Readonly<Record<string, ReviewEntry>> = {
   'algo-sort-complexity': {
     title: 'La limite du tri par comparaisons',
     definition:
-      "Tout tri qui ne fait que comparer des éléments a besoin, dans le pire cas, de l'ordre de n·log n comparaisons. On ne descend en dessous qu'en ne comparant pas (radix, counting sort).",
+      "Tout tri qui ne fait que comparer des éléments a besoin, dans le pire des cas, de l'ordre de n·log n comparaisons. On ne descend en dessous qu'en ne comparant pas (radix, counting sort).",
     example:
       "100 nombres : au moins 525 comparaisons environ (log₂ 100!) ; le tri à bulles en fait jusqu'à 4950.",
   },
@@ -110,7 +110,7 @@ export const REVIEW_B_FR: Readonly<Record<string, ReviewEntry>> = {
   'thr-usleep': {
     title: 'Mesurer le temps avec des threads',
     definition:
-      "usleep peut dormir plus longtemps que demandé, et un moniteur qui dort trop annonce une mort en retard. Dors par petites tranches en vérifiant l'horloge (gettimeofday), et surveille toutes les quelques millisecondes.",
+      "usleep peut dormir plus longtemps que demandé, et un thread de surveillance qui dort trop annonce une mort en retard. Dors par petites tranches en vérifiant l'horloge (gettimeofday), et surveille à quelques millisecondes d'intervalle.",
     example: 'while (now() - start < ms) usleep(500);',
   },
   'thr-print': {
@@ -167,7 +167,7 @@ export const REVIEW_B_FR: Readonly<Record<string, ReviewEntry>> = {
     title: 'Ensembles de Julia',
     definition:
       "La même formule z = z² + c, mais c est fixe pour toute l'image et z part du point du pixel. Chaque c donne un ensemble de Julia différent.",
-    example: 'c = -0.8 + 0.156i donne un ensemble de Julia en spirales.',
+    example: 'c = -0,8 + 0,156i donne un ensemble de Julia en spirales.',
   },
   'gfx-complex-square': {
     title: 'Nombres complexes',
@@ -204,7 +204,7 @@ export const REVIEW_B_FR: Readonly<Record<string, ReviewEntry>> = {
     title: 'Normaliser un vecteur',
     definition:
       "Diviser un vecteur par sa longueur (√(x² + y² + z²)) pour qu'il mesure 1 et ne garde que sa direction. Les normales et les directions des rayons s'utilisent normalisées.",
-    example: '(3, 4, 0) a pour longueur 5 → normalisé : (0,6, 0,8, 0).',
+    example: '(3, 4, 0) a pour longueur 5 → normalisé : (0,6 ; 0,8 ; 0).',
   },
   'gfx-ray-sphere': {
     title: 'Rayon contre sphère',
@@ -252,7 +252,7 @@ export const REVIEW_B_FR: Readonly<Record<string, ReviewEntry>> = {
   'net-tcp-udp': {
     title: 'TCP et UDP',
     definition:
-      "TCP est une connexion fiable : il livre tout, dans l'ordre et sans doublon, en renvoyant si besoin. UDP envoie des paquets isolés, sans garantie, mais avec moins d'attente.",
+      "TCP est une connexion fiable : il achemine tout, dans l'ordre et sans doublon, en renvoyant si besoin. UDP envoie des paquets isolés, sans garantie, mais avec moins d'attente.",
     example: 'HTTP, SSH et IRC passent par TCP ; le DNS et beaucoup de jeux en ligne, par UDP.',
   },
   'net-dns': {
@@ -272,19 +272,19 @@ export const REVIEW_B_FR: Readonly<Record<string, ReviewEntry>> = {
     title: 'poll',
     definition:
       "poll surveille plusieurs descripteurs de fichier à la fois et te dit lesquels peuvent être lus ou écrits sans bloquer. Comme ça, un seul thread sert beaucoup de clients ; lire sans que poll l'ait signalé peut bloquer tout le serveur.",
-    example: 'poll(fds, n, -1); for (…) if (fds[i].revents & POLLIN) leer(fds[i].fd);',
+    example: 'poll(fds, n, -1); for (…) if (fds[i].revents & POLLIN) lire(fds[i].fd);',
   },
   'srv-partial': {
     title: 'Messages en morceaux',
     definition:
       "TCP est un flux d'octets, pas de messages : un recv peut apporter un demi-message ou plusieurs. Accumule dans un buffer par client et traite chaque message complet (jusqu'au \\r\\n).",
     example:
-      'buffer += recibido; while ((pos = buffer.find("\\r\\n")) != npos) { procesar(buffer.substr(0, pos)); … }',
+      'buffer += recu; while ((pos = buffer.find("\\r\\n")) != npos) { traiter(buffer.substr(0, pos)); … }',
   },
   'http-status': {
     title: 'Codes HTTP',
     definition:
-      '2xx : succès, 3xx : redirection, 4xx : erreur de celui qui fait la requête, 5xx : erreur du serveur.',
+      '2xx : succès, 3xx : redirection, 4xx : erreur côté client, 5xx : erreur côté serveur.',
     example:
       '200 OK, 301 Moved, 403 Forbidden, 404 Not Found, 405 Method Not Allowed, 500 Internal Server Error.',
   },
@@ -347,14 +347,14 @@ export const REVIEW_B_FR: Readonly<Record<string, ReviewEntry>> = {
     title: 'Stocker les mots de passe',
     definition:
       'On ne les stocke jamais tels quels, ni chiffrés avec une clé : on stocke un hash lent et salé (bcrypt, argon2). Pour vérifier, on le recalcule et on compare.',
-    example: 'hash = await bcrypt.hash(password, 12); ok = await bcrypt.compare(intento, hash);',
+    example: 'hash = await bcrypt.hash(password, 12); ok = await bcrypt.compare(essai, hash);',
   },
   'web-websocket': {
     title: 'WebSockets',
     definition:
-      'Un WebSocket garde ouverte une connexion dans les deux sens : le serveur envoie des données quand il veut, sans que le client les demande. Idéal pour les jeux et les chats en temps réel.',
+      'Une WebSocket garde ouverte une connexion dans les deux sens : le serveur envoie des données quand il veut, sans que le client les demande. Idéal pour les jeux et les chats en temps réel.',
     example:
-      'const ws = new WebSocket("wss://…/pong"); ws.onmessage = (e) => dibujar(JSON.parse(e.data));',
+      'const ws = new WebSocket("wss://…/pong"); ws.onmessage = (e) => dessiner(JSON.parse(e.data));',
   },
   'cpp-class-struct': {
     title: 'class et struct',
@@ -366,7 +366,7 @@ export const REVIEW_B_FR: Readonly<Record<string, ReviewEntry>> = {
     title: 'Références',
     definition:
       "Une référence est un autre nom pour quelque chose qui existe déjà : elle s'initialise à sa création, ne peut pas être nulle et ne peut pas être réassignée à autre chose. On s'en sert pour passer sans copier.",
-    example: 'void subir(int &n) { n++; } int x = 1; subir(x); // x vaut 2',
+    example: 'void augmenter(int &n) { n++; } int x = 1; augmenter(x); // x vaut 2',
   },
   'cpp-const-method': {
     title: 'Méthodes const',
@@ -398,7 +398,7 @@ export const REVIEW_B_FR: Readonly<Record<string, ReviewEntry>> = {
     definition:
       "Sans virtual, la méthode exécutée dépend du type du pointeur ; avec virtual, de l'objet réel. C'est ce qui permet le polymorphisme : un Animal* qui est un Dog aboie.",
     example:
-      'virtual void makeSound() const; dans Animal → a->makeSound() dit « Woof » si a est un Dog.',
+      'virtual void makeSound() const; dans Animal → a->makeSound() dit « Ouaf » si a est un Dog.',
   },
   'cpp-virtual-destructor': {
     title: 'Destructeur virtuel',
@@ -498,13 +498,13 @@ export const REVIEW_B_FR: Readonly<Record<string, ReviewEntry>> = {
     title: 'Dictionnaires',
     definition:
       "d[clé] lève KeyError si la clé n'existe pas ; d.get(clé, défaut) renvoie la valeur par défaut (ou None). `in` te dit si la clé existe.",
-    example: 'edades.get("ana", 0) + 1 ; if "ana" in edades: …',
+    example: 'ages.get("ana", 0) + 1; if "ana" in ages: …',
   },
   'py-comprehension': {
     title: 'Compréhensions',
     definition:
       'Une façon courte de construire des listes, des ensembles ou des dictionnaires : [expression for x in iterable if condition].',
-    example: '[x * x for x in range(5) if x % 2 == 0] → [0, 4, 16]. {k: len(k) for k in nombres}',
+    example: '[x * x for x in range(5) if x % 2 == 0] → [0, 4, 16]. {k: len(k) for k in noms}',
   },
   'py-generator': {
     title: 'Générateurs',
@@ -517,26 +517,25 @@ export const REVIEW_B_FR: Readonly<Record<string, ReviewEntry>> = {
     title: 'try, except, else et finally',
     definition:
       "try essaie un bloc ; except attrape les erreurs du type que tu indiques ; else s'exécute s'il n'y a pas eu d'erreur ; finally s'exécute toujours, erreur ou pas.",
-    example: 'try:\\n    n = int(texto)\\nexcept ValueError:\\n    print("pas un nombre")',
+    example: 'try:\\n    n = int(texte)\\nexcept ValueError:\\n    print("pas un nombre")',
   },
   'py-classes': {
     title: 'Classes et self',
     definition:
-      "__init__ prépare chaque nouvel objet. self est l'objet sur lequel on appelle la méthode : obj.method() revient à Class.method(obj).",
+      "__init__ prépare chaque nouvel objet. self est l'objet sur lequel on appelle la méthode : obj.methode() revient à Classe.methode(obj).",
     example: 'class Planta:\\n    def __init__(self, nombre):\\n        self.nombre = nombre',
   },
   'py-abc': {
     title: 'Classes abstraites (ABC)',
     definition:
       "En héritant de ABC et en marquant des méthodes avec @abstractmethod, Python t'empêche de créer des objets de la classe tant qu'il en reste une non implémentée (TypeError).",
-    example: 'class Forma(ABC):\\n    @abstractmethod\\n    def area(self) -> float: ...',
+    example: 'class Forme(ABC):\\n    @abstractmethod\\n    def area(self) -> float: ...',
   },
   'py-typing': {
     title: 'Annotations de type',
     definition:
       "Les annotations (x: int, -> str) documentent les types, mais Python ne les vérifie pas à l'exécution. Ce sont des outils comme mypy qui les vérifient, avant l'exécution.",
-    example:
-      'def saluda(nombre: str) -> str: … ; mypy programa.py te prévient si tu passes un int.',
+    example: 'def saluer(nom: str) -> str: … ; mypy programme.py te prévient si tu passes un int.',
   },
   'py-scope': {
     title: 'Portée des variables',
