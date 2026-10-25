@@ -6,7 +6,7 @@ exams.noStats,Sin datos de exámenes,Aún no hay intentos de examen copiados en 
 exams.circles,Cuánto se tarda en cada círculo,Cuánto se tarda en cada círculo,How long each circle takes,Quant es triga en cada cercle,Zirkulu bakoitzak zenbat denbora eskatzen duen,Temps passé dans chaque cercle
 exams.circlesHint,Cómo se calcula,"Mediana de días desde que se empieza el cursus (o se valida el círculo anterior) hasta validar este, sin los casos extremos. Solo cuenta la gente cuyas fechas se conocen.","Median days from starting the cursus (or validating the previous circle) to validating this one, leaving out outliers. Only people whose dates are known count.","Mediana de dies des que es comença el cursus (o es valida el cercle anterior) fins a validar aquest, sense els casos extrems. Només compta la gent de qui se saben les dates.","Cursusa hasi zenetik (edo aurreko zirkulua balidatu zenetik) hau balidatu arteko egunen mediana, muturreko kasurik gabe. Datak ezagutzen diren pertsonak bakarrik zenbatzen dira.","Nombre médian de jours entre le début du cursus (ou la validation du cercle précédent) et la validation de celui-ci, sans les cas extrêmes. Seules comptent les personnes dont on connaît les dates."
 exams.days,Número de días,{n} días,{n} days,{n} dies,{n} egun,{n} jours
-exams.range,La mitad central de la gente tarda entre esos días,la mitad tarda entre {p25} y {p75} días · {n} personas,half take {p25} to {p75} days · {n} people,la meitat triga entre {p25} i {p75} dies · {n} persones,erdiak {p25} eta {p75} egun artean · {n} pertsona,la moitié met entre {p25} et {p75} jours · {n} personnes
+exams.range,La mitad central de la gente tarda entre esos días,la mitad tarda entre {p25} y {p75} días · {n} personas,half take {p25} to {p75} days · {n} people,la meitat triga entre {p25} i {p75} dies · {n} persones,erdiak {p25} eta {p75} egun artean · {n} pertsona,la moitié met entre {p25} et {p75} jours · personnes : {n}
 exams.none,No hay exámenes en las próximas 24 horas,No hay ningún examen en tu campus en las próximas 24 horas.,There is no exam on your campus in the next 24 hours.,No hi ha cap examen al teu campus en les properes 24 hores.,Ez dago azterketarik zure campusean hurrengo 24 orduetan.,Aucun examen sur ton campus dans les prochaines 24 heures.
 exams.live,Examen en curso,En marcha,Live,En marxa,Martxan,En cours
 exams.next,Examen que empieza hoy (hora del campus) y aún no ha empezado,Hoy,Today,Avui,Gaur,Aujourd'hui
@@ -19,22 +19,22 @@ exams.nextRefreshLabel,Nombre del reloj de lo que falta para el siguiente refres
 exams.refreshIn,Cuánto falta para poder volver a pulsar Actualizar,Podrás actualizar otra vez en {time},You can refresh again in {time},Podràs tornar a actualitzar en {time},{time} barru berriro eguneratu ahal izango duzu,Tu pourras actualiser à nouveau dans {time}
 exams.status.pending,Estado: apuntado al examen pero aún sin entrar,Sin empezar,Not started,Sense començar,Hasi gabe,Pas commencé
 exams.status.inProgress,Estado: haciendo el examen ahora,Haciéndolo,Taking it,Fent-lo,Egiten,En train de composer
-exams.status.passed,Estado: examen cerrado con 100 o más,Aprobado,Passed,Aprovat,Gaindituta,Réussi
-exams.status.failed,Estado: examen cerrado sin llegar a 100,Suspenso,Failed,Suspès,Ez gaindituta,Échoué
+exams.status.passed,Estado: examen cerrado con 100 o más,Aprobado,Passed,Aprovat,Gaindituta,Validé
+exams.status.failed,Estado: examen cerrado sin llegar a 100,Suspenso,Failed,Suspès,Ez gaindituta,Échec
 exams.track.all,Plan: todos,Todos,All,Tots,Denak,Tous
-exams.track.classic,Plan clásico,Plan clásico,Classic plan,Pla clàssic,Plan klasikoa,Cursus classique
-exams.track.next,Plan nuevo,Plan nuevo,New plan,Pla nou,Plan berria,Nouveau cursus
+exams.track.classic,Plan clásico,Plan clásico,Classic plan,Pla clàssic,Plan klasikoa,Programme classique
+exams.track.next,Plan nuevo,Plan nuevo,New plan,Pla nou,Plan berria,Nouveau programme
 exams.circleFilter,Filtro de círculo,Círculo,Circle,Cercle,Zirkulua,Cercle
 exams.allCircles,Todos los círculos,Todos los círculos,All circles,Tots els cercles,Zirkulu guztiak,Tous les cercles
 exams.nobody,No se sabe quién se ha apuntado,Aún no se sabe quién está apuntado.,Who is signed up is not known yet.,Encara no se sap qui s'hi ha apuntat.,Oraindik ez da jakiten nor dagoen izena emanda.,On ne sait pas encore qui est inscrit.
 exams.unknownExam,Grupo de quien no se sabe qué examen le toca,Examen por saber,Exam not known yet,Examen per saber,Azterketa jakiteke,Examen pas encore connu
-exams.avg,Intentos de media,{n} intentos de media para aprobar,{n} attempts on average to pass,{n} intents de mitjana per aprovar,batez beste {n} saiakera gainditzeko,{n} tentatives en moyenne pour réussir
-exams.people,"Cuánta gente aprobó, y qué parte es",Aprobaron {passed} de {people} · {pct},{passed} passed out of {people} · {pct},Han aprovat {passed} de {people} · {pct},"{passed} gainditu, {people}tik · {pct}",{passed} sur {people} ont réussi · {pct}
-exams.toPass,En qué intento se aprueba,En qué intento se aprueba,Which attempt they passed on,En quin intent s'aprova,Zenbatgarren saiakeran gainditzen den,À quelle tentative on réussit
-exams.byAttempt,Desplegable con los datos de cada intento,"Cada intento: nota mediana, aprobados y personas","Each attempt: median mark, passes and people","Cada intent: nota mediana, aprovats i persones","Saiakera bakoitza: nota mediana, gaindituak eta pertsonak","Par tentative : note médiane, réussites et personnes"
+exams.avg,Intentos de media,{n} intentos de media para aprobar,{n} attempts on average to pass,{n} intents de mitjana per aprovar,batez beste {n} saiakera gainditzeko,{n} tentatives en moyenne pour valider
+exams.people,"Cuánta gente aprobó, y qué parte es",Aprobaron {passed} de {people} · {pct},{passed} passed out of {people} · {pct},Han aprovat {passed} de {people} · {pct},"{passed} gainditu, {people}tik · {pct}",Validé : {passed} sur {people} · {pct}
+exams.toPass,En qué intento se aprueba,En qué intento se aprueba,Which attempt they passed on,En quin intent s'aprova,Zenbatgarren saiakeran gainditzen den,À quelle tentative on valide
+exams.byAttempt,Desplegable con los datos de cada intento,"Cada intento: nota mediana, aprobados y personas","Each attempt: median mark, passes and people","Cada intent: nota mediana, aprovats i persones","Saiakera bakoitza: nota mediana, gaindituak eta pertsonak","Par tentative : note médiane, validations et personnes"
 exams.attempt,Número de intento,{n}.º intento,Attempt {n},{n}r intent,{n}. saiakera,Tentative {n}
-exams.attemptLine,"Nota mediana, porcentaje de aprobados y personas de un intento",nota mediana {mark} · aprueba el {pct} % · {n} personas,median mark {mark} · {pct}% pass · {n} people,nota mediana {mark} · aprova el {pct} % · {n} persones,nota mediana {mark} · %{pct} gainditzen du · {n} pertsona,note médiane {mark} · {pct} % de réussite · {n} personnes
-exams.trackFilter,Estadísticas: desplegable del plan que sigue la gente,Plan de la gente,People's plan,Pla de la gent,Jendearen plana,Cursus suivi
+exams.attemptLine,"Nota mediana, porcentaje de aprobados y personas de un intento",nota mediana {mark} · aprueba el {pct} % · {n} personas,median mark {mark} · {pct}% pass · {n} people,nota mediana {mark} · aprova el {pct} % · {n} persones,nota mediana {mark} · %{pct} gainditzen du · {n} pertsona,note médiane {mark} · {pct} % de validation · personnes : {n}
+exams.trackFilter,Estadísticas: desplegable del plan que sigue la gente,Plan de la gente,People's plan,Pla de la gent,Jendearen plana,Programme suivi
 exams.plan.all,Estadísticas: gente de los dos planes,Toda la gente,Everyone,Tothom,Jende guztia,Tout le monde
 exams.plan.classic,"Estadísticas: gente del common core antiguo, en C",Core en C,C core,Core en C,C core-a,Tronc commun en C
 exams.plan.next,"Estadísticas: gente del common core nuevo, en Python",Core en Python,Python core,Core en Python,Python core-a,Tronc commun en Python
@@ -46,14 +46,14 @@ exams.kickoffs,Estadísticas: desplegable con casillas de las kickoffs (meses en
 exams.kickoffPill,"Botón de una kickoff: mes y año, y cuánta gente empezó",{month} · {n},{month} · {n},{month} · {n},{month} · {n},{month} · {n}
 exams.kickoff.all,Casilla y texto del desplegable cuando se ven todas las kickoffs juntas,Todas,All,Totes,Denak,Tous
 exams.kickoff.small,"Rótulo de las kickoffs de muy poca gente, al final del desplegable",{n} más con poca gente,{n} more with few people,{n} més amb poca gent,"{n} gehiago, jende gutxirekin",{n} de plus avec peu de monde
-exams.selection,Cuánta gente entra en lo elegido,{n} personas en lo elegido,{n} people in this selection,{n} persones en el que has triat,{n} pertsona aukeratutakoan,{n} personnes dans la sélection
+exams.selection,Cuánta gente entra en lo elegido,{n} personas en lo elegido,{n} people in this selection,{n} persones en el que has triat,{n} pertsona aukeratutakoan,Personnes dans la sélection : {n}
 exams.rank,Fila de un rango: su examen de C y el de Nexus,Rango {n},Rank {n},Rang {n},{n}. maila,Rang {n}
 exams.otherRank,Fila de exámenes sin número de rango,Otros,Others,Altres,Besteak,Autres
 exams.noAttempts,Un examen de esa fila que nadie de lo elegido ha hecho,Nadie lo ha intentado aún.,Nobody has tried it yet.,Encara no ho ha intentat ningú.,Oraindik inork ez du saiatu.,Personne ne l'a encore tenté.
 exams.pct,Un porcentaje,{n} %,{n}%,{n} %,% {n},{n} %
 exams.bar,Una cifra y qué parte es del total,{n} · {pct},{n} · {pct},{n} · {pct},{n} · {pct},{n} · {pct}
 exams.kickoff.chosen,Texto del desplegable de kickoffs cuando hay varias marcadas,{n} kickoffs,{n} kickoffs,{n} kickoffs,{n} kickoff,{n} kick-offs
-exams.moreAttempts,Desplegable con los intentos a partir del cuarto,Ver {n} intentos más,Show {n} more attempts,Veure {n} intents més,Ikusi {n} saiakera gehiago,Voir {n} tentatives de plus
+exams.moreAttempts,Desplegable con los intentos a partir del cuarto,Ver {n} intentos más,Show {n} more attempts,Veure {n} intents més,Ikusi {n} saiakera gehiago,Voir les tentatives suivantes ({n})
 exams.markLater,Examen en vivo: en lugar de la nota de quien sigue dentro,Nota al cerrar,Mark when it closes,Nota en tancar,Nota ixtean,Note à la fermeture
 exams.markLaterHint,Examen en vivo: explicación al pasar el ratón por «Nota al cerrar»,"42 no da la nota de un examen hasta que se cierra. Mientras la persona sigue dentro, ves la de su último intento (la que figura en 42).","42 does not give an exam's mark until it closes. While the person is still in, you see the one from their last attempt (the one shown on 42).","42 no dona la nota d'un examen fins que es tanca. Mentre la persona hi és, veus la del seu últim intent (la que figura a 42).","42k ez du azterketaren nota ematen itxi arte. Barruan dagoen bitartean, azken saiakerarena ikusten da (42n agertzen dena).","42 ne donne la note d'un examen qu'à sa fermeture. Tant que la personne est dedans, tu vois celle de sa dernière tentative (celle affichée sur 42)."
 exams.previousMark,"Examen en vivo: quien sigue dentro, con la nota de su último intento cerrado",Último: {n},Last: {n},Últim: {n},Azkena: {n},Dernière : {n}

@@ -11,6 +11,8 @@
  * - hay una clave en las tablas que el código no usa;
  * - una traducción no conserva los huecos del español (`{login}`, `{n}`…);
  * - falta el inglés (o el francés, con `FR_REQUIRED`) fuera del panel de gestión;
+ * - el francés no sigue su tipografía (espacios sin corte, « », `…`; ver
+ *   `textos-fr.ts`);
  * - una clave no tiene contexto;
  * - `docs/textos/` no está al día con las tablas.
  */
@@ -20,6 +22,7 @@ import { join, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { LANG_CODES, readGroup, tableGroups } from './textos.ts'
+import { frenchTypography } from './textos-fr.ts'
 import type { TextRow } from './textos.ts'
 
 const WEB = fileURLToPath(new URL('..', import.meta.url))
@@ -36,13 +39,13 @@ const LANG_NAMES: Record<string, string> = {
 }
 
 /**
- * ¿Es obligatorio el francés? Mientras se traduce, `false`: una celda `fr`
- * vacía se acepta y la web enseña el inglés en su lugar. Cuando estén todas
- * las traducciones se pone a `true` y una celda `fr` vacía es un error, igual
- * que el inglés (salvo en el panel de gestión, `SPANISH_ONLY`). El `as boolean`
- * es para que el linter no dé por muerta la otra rama mientras vale `false`.
+ * ¿Es obligatorio el francés? Sí desde que está entero y revisado (octubre de
+ * 2026): una celda `fr` vacía es un error, igual que el inglés (salvo en el
+ * panel de gestión, `SPANISH_ONLY`). Un idioma nuevo empieza con su interruptor
+ * a `false` mientras se traduce. El `as boolean` es para que el linter no dé
+ * por muerta la otra rama.
  */
-const FR_REQUIRED = false as boolean
+const FR_REQUIRED = true as boolean
 
 /** Los idiomas que no pueden quedarse vacíos fuera del panel de gestión. */
 const REQUIRED: readonly string[] = FR_REQUIRED ? ['en', 'fr'] : ['en']
@@ -232,6 +235,11 @@ function main(): void {
         problems.push(
           `${where}: «${row.key}» en ${lang} tiene los huecos ${holes(text) || 'ninguno'} y el español ${holes(row.text.es) || 'ninguno'}`,
         )
+      }
+      if (lang === 'fr') {
+        for (const problem of frenchTypography(text)) {
+          problems.push(`${where}: «${row.key}» en francés: ${problem}`)
+        }
       }
       if (REQUIRED.includes(lang) && text === '' && !SPANISH_ONLY.test(row.key)) {
         problems.push(

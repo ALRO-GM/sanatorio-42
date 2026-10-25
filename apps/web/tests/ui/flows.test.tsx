@@ -97,14 +97,9 @@ describe('lo que hace la gente en la web, de principio a fin', () => {
     expect(screen.getAllByText(en['nav.cat.ayuda'] ?? '?').length).toBeGreaterThan(0)
   }, 20_000)
 
-  it('idioma: elegir «Français» pone la web en francés y, lo que no tiene, en inglés', async () => {
+  it('idioma: elegir «Français» pone la web en francés', async () => {
     const user = userEvent.setup()
 
-    await openApp('#/expediente')
-    // Mientras se revisa la traducción no se ofrece en el selector.
-    expect(screen.queryByRole('option', { name: 'Français' })).toBeNull()
-    cleanup()
-    LANGS.fr.unlisted = false
     await openApp('#/expediente')
     await user.selectOptions(
       screen.getByRole('combobox', { name: text('settings.lang') }),
@@ -112,12 +107,16 @@ describe('lo que hace la gente en la web, de principio a fin', () => {
     )
     await settle(100)
     expect(document.documentElement.lang).toBe('fr')
-    // Sin su celda en francés, la pestaña sale en inglés y no en español.
-    expect(
-      screen.getAllByText(fr['nav.cat.ayuda'] ?? en['nav.cat.ayuda'] ?? '?').length,
-    ).toBeGreaterThan(0)
+    expect(screen.getAllByText(fr['nav.cat.ayuda'] ?? '?').length).toBeGreaterThan(0)
     expect(screen.queryByText(text('nav.cat.ayuda'))).toBeNull()
-    LANGS.fr.unlisted = true
+  }, 20_000)
+
+  it('idioma: uno que aún se traduce (`unlisted`) no sale en el selector', async () => {
+    LANGS.eu.unlisted = true
+    await openApp('#/expediente')
+    expect(screen.queryByRole('option', { name: 'Euskara' })).toBeNull()
+    expect(screen.getByRole('option', { name: 'Français' })).toBeTruthy()
+    delete LANGS.eu.unlisted
   }, 20_000)
 
   it('una dirección que no existe lleva a la portada, no a una pantalla en blanco', async () => {

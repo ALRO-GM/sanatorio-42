@@ -16,12 +16,14 @@ vocabulario: `AGENTS.md` («Reglas de producto»).
    un prefijo de clave coherente con las de esa tabla.
 2. Escribe la fila con **las cinco lenguas** (un test obliga a ca y eu en todo
    lo visible) y un `contexto` que diga dónde sale y qué es cada `{variable}`.
-   El francés se puede dejar vacío mientras `FR_REQUIRED` sea `false`
-   (`apps/web/tools/textos-cli.ts`): sale el inglés. Francés natural y tuteando.
+   El francés es obligatorio (`FR_REQUIRED` en `apps/web/tools/textos-cli.ts`):
+   natural, tuteando, con los términos y la tipografía de
+   `docs/glosario-frances.md` (espacios sin corte antes de `: ; ? ! %` y dentro
+   de « »; `npm run textos` lo comprueba).
    Si el contexto lleva comas, va entre comillas dobles.
 3. Español: segunda persona, lenguaje inclusivo (evita formas con género),
    comillas «», puntos suspensivos «…», tono de clínica cálida. Inglés natural
-   (no literal). Mismos `{placeholders}` en las cuatro columnas.
+   (no literal). Mismos `{placeholders}` en todas las columnas.
 4. `npm run textos -- --write` (regenera `docs/textos/*.md`) y `npm run check`.
 5. La clave que deja de usarse se borra de la tabla.
 

@@ -48,10 +48,10 @@ map.reportBroken,Botón: avisar de que un ordenador no funciona,Avisar de que no
 map.seatBroken,Etiqueta: ordenador averiado,No funciona,Not working,No funciona,Ez dabil,En panne
 map.finishedMine,Cuánta gente cerca aprobó tu proyecto,Aprobaron tu proyecto: {n},Passed your project: {n},Han aprovat el teu projecte: {n},Zure proiektua gainditu dute: {n},Ont validé ton projet : {n}
 clusters.title,Título de la página del mapa,Clústeres del campus,Campus clusters,Clústers del campus,Campuseko klusterrak,Clusters du campus
-clusters.count,Cuánta gente sentada tiene la web abierta,Con Peer4U abierto: {online} de {occupied} personas sentadas,With Peer4U open: {online} of {occupied} people seated,Amb Peer4U obert: {online} de {occupied} persones assegudes,Peer4U irekita dutenak: eserita dauden {occupied} pertsonetatik {online},Avec Peer4U ouvert : {online} sur {occupied} personnes installées
-clusters.online,Etiqueta: tiene la web abierta,Con Peer4U abierto,Has Peer4U open,Amb Peer4U obert,Peer4U irekita du,A Peer4U ouvert
+clusters.count,Cuánta gente sentada tiene la web abierta,Con Peer4U abierto: {online} de {occupied} personas sentadas,With Peer4U open: {online} of {occupied} people seated,Amb Peer4U obert: {online} de {occupied} persones assegudes,Peer4U irekita dutenak: eserita dauden {occupied} pertsonetatik {online},Avec Peer4U ouvert : {online} sur {occupied} postes occupés
+clusters.online,Etiqueta: tiene la web abierta,Con Peer4U abierto,Has Peer4U open,Amb Peer4U obert,Peer4U irekita du,Peer4U ouvert
 clusters.write,Botón para escribir a alguien,Escribir,Message,Escriu-li,Idatzi,Écrire
-map.legend.online,Leyenda: tiene Peer4U abierto,Con Peer4U abierto,Has Peer4U open,Amb Peer4U obert,Peer4U irekita du,A Peer4U ouvert
+map.legend.online,Leyenda: tiene Peer4U abierto,Con Peer4U abierto,Has Peer4U open,Amb Peer4U obert,Peer4U irekita du,Peer4U ouvert
 clusters.chat,Chat directo con alguien,Chat directo,Direct chat,Xat directe,Txat zuzena,Discussion privée
 clusters.chatEmpty,Chat directo vacío,Nadie ha escrito todavía. Lo que pongas solo lo ve quien participa en este chat.,Nobody has written yet. Only the people in this chat can see what you write.,Ningú ha escrit encara. El que posis només ho veu qui participa en aquest xat.,Inork ez du oraindik idatzi. Jartzen duzuna txat honetan parte hartzen dutenek soilik ikusten dute.,Personne n'a encore écrit. Ce que tu écris n'est visible que par les personnes de cette discussion.
 facility.open,Clústeres: botón para avisar al staff de un problema del edificio o de un ordenador,Avisar de un problema,Report a problem,Avisar d'un problema,Arazo baten berri eman,Signaler un problème

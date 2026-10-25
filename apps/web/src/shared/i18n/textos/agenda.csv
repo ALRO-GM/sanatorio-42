@@ -34,7 +34,7 @@ scrum.check.sheet,Checkpoint: la hoja de corrección está repasada,Hoja de corr
 scrum.check.norminette,Checkpoint: pasa la norminette,Norminette en verde,Norminette passes,Norminette en verd,Norminette berdean,Norminette au vert
 scrum.check.leaks,Checkpoint: sin leaks ni segfaults,Sin leaks ni segfaults,No leaks or segfaults,Sense leaks ni segfaults,Leak eta segfault gabe,Ni leaks ni segfaults
 scrum.check.breakers,Checkpoint: varios peers han intentado romperlo,Varios peers han intentado romperlo,Several peers tried to break it,Diversos peers han intentat trencar-lo,Hainbat peerrek apurtzen saiatu dira,Plusieurs peers ont essayé de le casser
-scrum.check.git,Checkpoint: el repo está limpio y subido,Repo limpio y pusheado,Repo clean and pushed,Repo net i pujat,Repoa garbi eta pusheatuta,Repo propre et pushé
+scrum.check.git,Checkpoint: el repo está limpio y subido,Repo limpio y pusheado,Repo clean and pushed,Repo net i pujat,Repoa garbi eta pusheatuta,Dépôt propre et poussé
 scrum.check.slots,Checkpoint: las franjas de corrección están reservadas,Slots de corrección reservados,Evaluation slots booked,Slots de correcció reservats,Zuzenketa-slotak erreserbatuta,Créneaux de correction réservés
 scrum.check.flags,Checkpoint: compila con -Wall -Wextra -Werror (y -std=c++98),Compila con -Wall -Wextra -Werror,Compiles with -Wall -Wextra -Werror,Compila amb -Wall -Wextra -Werror,-Wall -Wextra -Werror-ekin konpilatzen da,Compile avec -Wall -Wextra -Werror
 scrum.check.canonical,Checkpoint de C++: forma canónica ortodoxa en cada clase,Forma canónica en cada clase,Orthodox canonical form in every class,Forma canònica a cada classe,Forma kanonikoa klase guztietan,Forme canonique dans chaque classe
@@ -107,7 +107,7 @@ scrum.entry.kind,Nombre accesible de las pastillas daily o weekly,Tipo,Type,Tipu
 scrum.entry.day,Daily: el día,Día,Day,Dia,Eguna,Jour
 scrum.entry.week,Weekly: un día de la semana (se guarda su lunes),Semana de,Week of,Setmana de,Astea,Semaine du
 scrum.entry.outcome,Daily: si lo hiciste,¿Lo hiciste?,Did you do it?,Ho vas fer?,Egin zenuen?,Tu l'as fait ?
-scrum.entry.problem,Daily: qué te atascó,¿Qué te atascó?,What blocked you?,Què et va encallar?,Zerk blokeatu zintuen?,Qu'est-ce qui t'a bloqué ?
+scrum.entry.problem,Daily: qué te atascó,¿Qué te atascó?,What blocked you?,Què et va encallar?,Zerk blokeatu zintuen?,Qu'est-ce qui a bloqué ?
 scrum.entry.problemOther,Daily: escribir el atasco «Otro»,¿Cuál?,Which one?,Quin?,Zein?,Lequel ?
 scrum.entry.solution,Daily: cómo podrías desatascarte,¿Cómo podrías salir?,How could you get unstuck?,Com en podries sortir?,Nola atera zintezke?,Comment pourrais-tu t'en sortir ?
 scrum.entry.solutionOther,Daily: escribir la salida «Otra»,¿Qué harías?,What would you do?,Què faries?,Zer egingo zenuke?,Que ferais-tu ?
@@ -117,7 +117,7 @@ scrum.entry.note,Daily: nota corta opcional,Nota,Note,Nota,Oharra,Note
 scrum.entry.noteHint,Ejemplo de nota del daily,Ej.: valgrind me chiva 3 bloques,E.g. valgrind flags 3 blocks,P. ex.: valgrind em xiva 3 blocs,Adib.: valgrind-ek 3 bloke salatzen ditu,Ex. : valgrind me signale 3 blocs
 scrum.entry.planDay,Daily: los checkpoints que te propones hoy,Hoy me propongo,Today I will,Avui em proposo,Gaur hau egingo dut,"Aujourd'hui, je compte faire"
 scrum.entry.planWeek,Weekly: los checkpoints que te propones esta semana,Esta semana me propongo,This week I will,Aquesta setmana em proposo,Aste honetan hau egingo dut,"Cette semaine, je compte faire"
-scrum.entry.save,Botón: guardar el daily,Commitear,Commit,Commitejar,Commit egin,Commit
+scrum.entry.save,Botón: guardar el daily,Commitear,Commit,Commitejar,Commit egin,Commiter
 scrum.pin,Botón: fijar la fecha de entrega como cuenta atrás,Fijar cuenta atrás,Pin countdown,Fixar compte enrere,Finkatu atzerako kontaketa,Épingler le compte à rebours
 scrum.unpin,Botón: quitar la cuenta atrás de la meta,Quitar cuenta atrás,Unpin countdown,Treure compte enrere,Kendu atzerako kontaketa,Retirer le compte à rebours
 scrum.pin.title,Título de la cuenta atrás de una meta,Entrega de {project},{project} hand-in,Lliurament de {project},{project}-ren entrega,Rendu de {project}
