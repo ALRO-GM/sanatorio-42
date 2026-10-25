@@ -52,6 +52,24 @@ export const INTERMEDIATE: Unit[] = [
       },
       example: 'You count what is in /var/log and look at the first two accounts in /etc/passwd.',
     },
+    fr: {
+      title: 'Tubes : | et wc',
+      goal: 'Combien y a-t-il de requêtes dans /var/log/nginx/access.log ? Affiche seulement le nombre.',
+      theory: {
+        what: 'Le tube (pipe) | envoie la sortie d’une commande dans l’entrée de la suivante. < donne un fichier en entrée. C’est comme ça qu’on enchaîne de petits outils.',
+        how: [
+          'ls /var/log | wc -l',
+          'cat fichier | head -n 2',
+          'wc -l < fichier        # seulement le nombre, sans le nom',
+          'commande | tee copie.txt # le voir et le garder',
+        ],
+        when: 'Chaque fois que la réponse vient de deux ou trois étapes mises bout à bout : compter, filtrer, trier.',
+        problems:
+          'Avec wc -l fichier, le nom s’affiche aussi ; avec wc -l < fichier ou cat fichier | wc -l, seulement le nombre.',
+      },
+      example:
+        'Tu comptes ce qu’il y a dans /var/log et tu regardes les deux premiers comptes de /etc/passwd.',
+    },
     example: ['ls /var/log | wc -l', 'cat /etc/passwd | head -n 2'],
     solution: [`wc -l < ${ACCESS}`],
     check: { output: true },
@@ -98,6 +116,26 @@ export const INTERMEDIATE: Unit[] = [
           'Special characters (. * [ ]) belong to the regex: use single quotes and, for literal text, -F.',
       },
       example: 'You search errors ignoring case, count warnings and find where nginx listens.',
+    },
+    fr: {
+      title: 'Chercher du texte : grep',
+      goal: 'Affiche les lignes de /var/log/peer4u/app.log qui contiennent ERROR.',
+      theory: {
+        what: 'grep affiche les lignes qui correspondent à un motif (une expression régulière). -i sans tenir compte de la casse, -v celles qui ne correspondent pas, -c combien, -n avec les numéros, -r dans des dossiers, -E regex étendue.',
+        how: [
+          'grep ERROR app.log',
+          'grep -i error app.log',
+          'grep -v INFO app.log',
+          'grep -c WARN app.log',
+          "grep -rn 'listen' /etc/nginx",
+          "grep -E '50[0-9]' access.log",
+        ],
+        when: 'Pour trouver l’aiguille dans le log : des erreurs, une IP, un utilisateur, une option dans la configuration.',
+        problems:
+          'Les caractères spéciaux (. * [ ]) appartiennent à la regex : mets-la entre apostrophes et, pour chercher le texte tel quel, utilise -F.',
+      },
+      example:
+        'Tu cherches des erreurs sans tenir compte de la casse, tu comptes les avertissements et tu trouves où nginx écoute.',
     },
     example: [
       `grep -i error ${APP} | head -n 3`,
@@ -149,6 +187,26 @@ export const INTERMEDIATE: Unit[] = [
       },
       example: 'You extract IPs from the access log, uppercase a text and look at the shells.',
     },
+    fr: {
+      title: 'Colonnes et caractères : cut et tr',
+      goal: 'Affiche seulement les noms d’utilisateur de /etc/passwd (le premier champ), en majuscules.',
+      theory: {
+        what: 'cut extrait des colonnes (-d le séparateur, -f les champs ; -c des caractères). tr remplace ou supprime des caractères.',
+        how: [
+          'cut -d: -f1 /etc/passwd',
+          "cut -d' ' -f1 access.log",
+          'cut -d: -f1,7 /etc/passwd',
+          'tr a-z A-Z',
+          "tr -d '\\r'          # enlever les retours chariot de Windows",
+          "tr ' ' '\\n'         # un mot par ligne",
+        ],
+        when: 'Avec des fichiers en colonnes fixes : /etc/passwd, CSV, logs séparés par des espaces.',
+        problems:
+          'cut ne traite pas plusieurs espaces à la suite comme un seul : pour ça, il y a awk.',
+      },
+      example:
+        'Tu extrais les IP du log d’accès, tu passes un texte en majuscules et tu regardes les shells.',
+    },
     example: [
       `cut -d' ' -f1 ${ACCESS} | head -n 3`,
       "echo 'hola peers' | tr a-z A-Z",
@@ -197,6 +255,24 @@ export const INTERMEDIATE: Unit[] = [
       },
       example: 'You count which shell each account uses and the HTTP codes in the log.',
     },
+    fr: {
+      title: 'Compter et trier : sort et uniq',
+      goal: 'Affiche les 3 IP qui font le plus de requêtes dans access.log, avec le nombre de requêtes de chacune (de la plus active à la moins active).',
+      theory: {
+        what: 'sort trie (-n comme des nombres, -r à l’envers, -h des tailles comme 2K et 1G, -k par colonne, -u sans doublons). uniq regroupe les lignes identiques qui se suivent (-c les compte) : c’est pour ça qu’il vient après sort.',
+        how: [
+          'sort fichier',
+          'sort -rn',
+          'sort -k2 -t, donnees.csv',
+          '... | sort | uniq -c | sort -rn | head',
+          'sort -u',
+        ],
+        when: 'Le « top N » de n’importe quoi : IP, chemins, erreurs, utilisateurs. C’est le tube le plus utilisé de ce cours.',
+        problems:
+          'uniq sans sort avant compte mal : il ne regroupe que les lignes répétées qui se suivent.',
+      },
+      example: 'Tu comptes quel shell utilise chaque compte et les codes HTTP du log.',
+    },
     example: [
       'cut -d: -f7 /etc/passwd | sort | uniq -c',
       `cut -d' ' -f9 ${ACCESS} | sort | uniq -c | sort -rn`,
@@ -243,6 +319,24 @@ export const INTERMEDIATE: Unit[] = [
         problems: 'sed f > f leaves f empty (the redirection empties it before reading): use -i.',
       },
       example: 'You replace words in the output, print a range of lines and drop the INFO ones.',
+    },
+    fr: {
+      title: 'Modifier du texte : sed',
+      goal: 'Dans ~/app.env, remplace LOG_LEVEL=info par LOG_LEVEL=debug (dans le fichier lui-même).',
+      theory: {
+        what: "sed modifie du texte à la volée : 's/ancien/nouveau/' remplace la première occurrence de chaque ligne, avec g toutes. -i modifie le fichier. Il sait aussi supprimer (/motif/d) ou afficher des plages (-n '2,4p').",
+        how: [
+          "sed 's/ERROR/ECHEC/' app.log",
+          "sed -i 's/info/debug/' app.env",
+          "sed -i.bak 's/80/8080/' nginx.conf   # avec une copie .bak",
+          "sed -n '10,20p' fichier",
+          "sed '/^#/d' config   # sans les commentaires",
+        ],
+        when: 'Pour modifier une configuration depuis un script ou en ssh, sans ouvrir d’éditeur.',
+        problems: 'sed f > f laisse f vide (la redirection le vide avant la lecture) : utilise -i.',
+      },
+      example:
+        'Tu remplaces des mots dans la sortie, tu affiches une plage de lignes et tu enlèves celles en INFO.',
     },
     example: [
       `sed 's/ERROR/FALLO/' ${APP} | grep FALLO | head -n 2`,
@@ -291,6 +385,25 @@ export const INTERMEDIATE: Unit[] = [
       },
       example: 'You print IP and code, filter human accounts by uid and count 5xx errors.',
     },
+    fr: {
+      title: 'Des colonnes et des calculs : awk',
+      goal: 'Additionne les octets envoyés (colonne 10) des réponses au code 200 (colonne 9) de access.log. Affiche seulement le total.',
+      theory: {
+        what: 'awk lit ligne par ligne et découpe chacune en champs ($1, $2… $NF pour le dernier). Un motif choisit les lignes, et ce qui est entre accolades dit quoi faire. END s’exécute à la fin.',
+        how: [
+          "awk '{print $1}' access.log",
+          "awk -F: '{print $1, $7}' /etc/passwd",
+          "awk '$9 >= 500' access.log",
+          "awk '{s += $10} END {print s}' access.log",
+          "awk '{n[$1]++} END {for (ip in n) print n[ip], ip}'",
+        ],
+        when: 'Quand il faut filtrer selon la valeur d’une colonne ou faire des sommes et des moyennes : plus que ce que permettent grep et cut.',
+        problems:
+          'Entre apostrophes : avec des guillemets doubles, le shell remplace les $1 avant awk.',
+      },
+      example:
+        'Tu affiches l’IP et le code, tu filtres les comptes humains par leur uid et tu comptes les erreurs 5xx.',
+    },
     example: [
       `awk '{print $1, $9}' ${ACCESS} | head -n 3`,
       "awk -F: '$3 >= 1000 {print $1}' /etc/passwd",
@@ -327,6 +440,18 @@ export const INTERMEDIATE: Unit[] = [
         'In ~/informe/atacante.txt, only the IP with the most «Failed password» lines.',
         'In ~/informe/fallos.txt, how many «Failed password» lines there are (just the number).',
         'In ~/informe/usuarios.txt, the users they tried (the one after «invalid user»), unique and sorted.',
+      ],
+    },
+    fr: {
+      title: 'Boss : quelqu’un frappe à la porte de ssh',
+      goal: 'Trouve dans le log d’authentification qui attaque et avec quels utilisateurs, et range tout ça dans ~/informe.',
+      story:
+        'L’équipe sécurité a vu des centaines de tentatives de connexion ssh sur web1. Elle veut un rapport tout de suite : /var/log/auth.log.',
+      tasks: [
+        'Crée ~/informe.',
+        'Dans ~/informe/atacante.txt, seulement l’IP qui a le plus de lignes « Failed password ».',
+        'Dans ~/informe/fallos.txt, le nombre de lignes « Failed password » (seulement le nombre).',
+        'Dans ~/informe/usuarios.txt, les utilisateurs essayés (celui qui suit « invalid user »), sans doublons et triés.',
       ],
     },
     solution: [
@@ -382,6 +507,25 @@ export const INTERMEDIATE: Unit[] = [
       },
       example: 'You find your .txt files, the nginx directory and what changed in the last hour.',
     },
+    fr: {
+      title: 'Chercher des fichiers : find',
+      goal: 'Affiche les fichiers .log de /var/log (sous-dossiers compris) qui font plus de 2 Ko.',
+      theory: {
+        what: 'find parcourt des dossiers et affiche ce qui remplit les conditions : -name (jokers entre apostrophes), -type f/d, -size +10M, -mtime +7 (plus de 7 jours), -user, -empty.',
+        how: [
+          "find . -name '*.txt'",
+          'find /etc -type d -name nginx',
+          "find /var/log -name '*.log' -size +100M",
+          'find /tmp -mtime +7',
+          'find ~ -empty',
+        ],
+        when: 'Quand tu ne sais pas où se trouve quelque chose ou que tu veux tout ce qui remplit un critère (vieux, gros, à quelqu’un).',
+        problems:
+          'Sans apostrophes, *.log est développé par le shell avant d’arriver à find, et la recherche se passe mal.',
+      },
+      example:
+        'Tu cherches tes .txt, le dossier de nginx et ce qui a été modifié dans la dernière heure.',
+    },
     example: ["find ~ -name '*.txt'", 'find /etc -type d -name nginx', 'find /var/log -mmin -60'],
     solution: ["find /var/log -name '*.log' -size +2k"],
     check: { output: true },
@@ -432,6 +576,24 @@ export const INTERMEDIATE: Unit[] = [
         problems: 'Run it first without -delete (just find) to see what would go.',
       },
       example: 'You see what is older than 7 days, list it with -exec and count bytes with xargs.',
+    },
+    fr: {
+      title: 'Agir sur ce qu’on trouve : -exec, -delete et xargs',
+      goal: 'Supprime les .tmp de ~/cache qui ont plus de 7 jours. Les récents et les .dat restent.',
+      theory: {
+        what: 'find peut agir sur ce qu’il trouve : -delete le supprime, -exec commande {} \\; lance une commande pour chaque résultat. xargs transforme les lignes de l’entrée en arguments d’une autre commande.',
+        how: [
+          'find ~/cache -mtime +7 -delete',
+          "find . -name '*.tmp' -exec rm {} \\;",
+          "find . -name '*.log' -exec gzip {} +",
+          "find . -name '*.tmp' | xargs rm",
+          'ls *.log | xargs wc -l',
+        ],
+        when: 'Les nettoyages réguliers : vieux fichiers temporaires, anciens logs, sauvegardes périmées.',
+        problems: 'Lance-le d’abord sans -delete (find tout seul) pour voir ce qui partirait.',
+      },
+      example:
+        'Tu vois ce qui a plus de 7 jours, tu le listes avec -exec et tu comptes les octets avec xargs.',
     },
     example: [
       'find ~/cache -mtime +7',
@@ -491,6 +653,25 @@ export const INTERMEDIATE: Unit[] = [
       example:
         'You archive your notes, list what is inside, extract it elsewhere and compress a single file.',
     },
+    fr: {
+      title: 'Archiver : tar et gzip',
+      goal: 'Sauvegarde la configuration de nginx (tout /etc/nginx) dans ~/backups/nginx-conf.tar.gz.',
+      theory: {
+        what: 'tar regroupe beaucoup de fichiers en un seul (-c créer, -x extraire, -t lister, -z compressé avec gzip, -f le nom, -C où). gzip compresse un fichier seul (.gz).',
+        how: [
+          'tar -czf copie.tar.gz dossier/',
+          'tar -tzf copie.tar.gz',
+          'tar -xzf copie.tar.gz -C /tmp/restauration',
+          'gzip -k app.log      # -k : garde l’original',
+          'zcat app.log.gz | tail',
+        ],
+        when: 'Les sauvegardes, le transfert d’un dossier vers une autre machine, l’archivage des logs après rotation.',
+        problems:
+          'L’ordre compte : -f va juste avant le nom du fichier (tar -czf nom, pas tar -cfz).',
+      },
+      example:
+        'Tu archives tes notes, tu regardes ce que contient l’archive, tu l’extrais ailleurs et tu compresses un fichier seul.',
+    },
     example: [
       'tar -czf notas.tar.gz notas.txt proyectos',
       'tar -tzf notas.tar.gz',
@@ -546,6 +727,23 @@ export const INTERMEDIATE: Unit[] = [
           'du on directories without permission prints errors: 2>/dev/null hides them (or sudo).',
       },
       example: 'You check the disk, how much the logs take and the /var/log directories sorted.',
+    },
+    fr: {
+      title: 'Espace disque : df et du',
+      goal: 'Quel sous-dossier de /srv/datos prend le plus de place ? Écris seulement son nom dans ~/mayor.txt.',
+      theory: {
+        what: 'df -h dit combien il reste sur chaque disque ; du -sh combien prend un dossier. Avec sort -h, on trie des tailles comme 5M et 3G.',
+        how: [
+          'df -h',
+          'du -sh /var/log',
+          'du -sh /srv/datos/* | sort -h',
+          'du -h -d 1 / 2>/dev/null | sort -h | tail',
+        ],
+        when: 'Quand l’alerte disque se déclenche : d’abord df (quel disque), puis du (quel dossier) jusqu’à trouver le coupable.',
+        problems:
+          'du sur des dossiers sans permission affiche des erreurs : 2>/dev/null les cache (ou sudo).',
+      },
+      example: 'Tu regardes le disque, ce que prennent les logs et les dossiers de /var/log triés.',
     },
     example: ['df -h', 'du -sh /var/log', 'du -h -d 1 /var/log | sort -h'],
     solution: ['du -sh /srv/datos/* | sort -h', 'echo videos > ~/mayor.txt'],
@@ -607,6 +805,18 @@ export const INTERMEDIATE: Unit[] = [
         'Empty /var/log/peer4u/debug.log without deleting it: the API has it open.',
         'Compress the rotated nginx logs (access.log.1 and access.log.2) with gzip.',
         'Check with df that the disk is below 80%.',
+      ],
+    },
+    fr: {
+      title: 'Boss : disque plein à 97 %',
+      goal: 'Fais passer le disque de web1 sous les 80 % sans supprimer le log que l’API a ouvert.',
+      story:
+        'Il est 4 h 12 et l’alerte sonne : le disque de web1 est presque plein et l’API commence à échouer en écriture.',
+      tasks: [
+        'Trouve ce qui remplit le disque (df, du, find).',
+        'Vide /var/log/peer4u/debug.log sans le supprimer : l’API l’a ouvert.',
+        'Compresse avec gzip les logs de nginx déjà passés en rotation (access.log.1 et access.log.2).',
+        'Vérifie avec df que le disque est passé sous les 80 %.',
       ],
     },
     solution: [
@@ -673,6 +883,25 @@ export const INTERMEDIATE: Unit[] = [
       },
       example: 'You look at your processes, the first five of all and the top CPU users.',
     },
+    fr: {
+      title: 'Voir les processus : ps, top et pgrep',
+      goal: 'Quelque chose dévore le CPU de web1. Écris dans ~/pid.txt le PID (seulement le nombre) du processus qui consomme le plus de CPU.',
+      theory: {
+        what: 'Chaque programme lancé est un processus avec son PID. ps aux les liste tous (utilisateur, PID, %CPU, %MEM, commande) ; top les trie par CPU ; pgrep donne le PID à partir du nom.',
+        how: [
+          'ps aux',
+          'ps aux --sort=-%cpu | head',
+          'ps -eo pid,user,%cpu,cmd --sort=-%cpu',
+          'pgrep -a nginx',
+          'pgrep -f miner.py    # -f : dans toute la ligne de commande',
+          'top',
+        ],
+        when: 'Quand la machine rame : qui consomme du CPU ou de la mémoire, et à qui ça appartient.',
+        problems: 'ps aux | grep truc trouve aussi le grep lui-même : pgrep n’a pas ce problème.',
+      },
+      example:
+        'Tu regardes tes processus, les cinq premiers de tous et ceux qui consomment le plus de CPU.',
+    },
     example: ['ps', 'ps aux | head -n 5', 'ps -eo pid,user,%cpu,cmd --sort=-%cpu | head -n 4'],
     solution: ['ps aux --sort=-%cpu | head -n 3', 'pgrep -f miner.py > ~/pid.txt'],
     check: { files: [`${H}/pid.txt`] },
@@ -727,6 +956,27 @@ export const INTERMEDIATE: Unit[] = [
         problems: 'You can only signal your own processes; other people’s, with sudo.',
       },
       example: 'You start a sleep in the background, find it and stop it.',
+    },
+    fr: {
+      title: 'Arrêter des processus : kill et signaux',
+      goal: 'Arrête les deux yes et miner.py. Attention : miner.py ignore le signal normal.',
+      theory: {
+        what: 'kill envoie un signal à un PID : TERM (15, celui par défaut) lui demande de se terminer ; KILL (9) le tue sans discuter ; HUP (1) recharge en général la configuration. pkill et killall font la même chose par nom.',
+        how: [
+          'kill 1234',
+          'kill -9 1234',
+          'kill -HUP 1234',
+          'pkill yes',
+          'pkill -f miner.py',
+          'kill -l',
+        ],
+        when: 'Avec un processus bloqué ou qui s’emballe. D’abord TERM (il a le temps d’enregistrer et de fermer) ; KILL seulement s’il ne répond pas.',
+        whenNot:
+          'Tuer le processus d’un service ne le répare pas : systemd peut le relancer (on verra ça au niveau avancé).',
+        problems:
+          'Tu ne peux envoyer de signal qu’à tes propres processus ; pour ceux des autres, il faut sudo.',
+      },
+      example: 'Tu lances un sleep en arrière-plan, tu le retrouves et tu l’arrêtes.',
     },
     example: ['sleep 600 &', 'pgrep -a sleep', 'pkill sleep', 'pgrep -a sleep'],
     solution: ['pkill yes', 'pkill -9 -f miner.py'],
@@ -783,6 +1033,25 @@ export const INTERMEDIATE: Unit[] = [
       },
       example: 'You look at your variables, one not exported and one exported in a child shell.',
     },
+    fr: {
+      title: 'Variables, export et PATH',
+      goal: 'Exporte ENTORNO=staging, ajoute ~/bin au PATH et lance hola par son nom (sans chemin).',
+      theory: {
+        what: 'Une variable contient un texte ($NOM l’utilise). Avec export, elle est transmise aux programmes que tu lances. PATH est la liste des dossiers où le shell cherche les commandes.',
+        how: [
+          'NOM=peer            # pas d’espace autour du =',
+          'echo "salut, $NOM"',
+          'export ENV=prod',
+          'export PATH="$PATH:$HOME/bin"',
+          'which ls',
+          'env | sort',
+        ],
+        when: 'Pour configurer des programmes (DATABASE_URL, NODE_ENV) et avoir tes scripts sous la main sans taper leur chemin.',
+        problems:
+          'NOM = peer (avec des espaces) lance une commande appelée NOM. Et export ne dure que pour cette session : pour le garder, mets-le dans ~/.bashrc.',
+      },
+      example: 'Tu regardes tes variables, une non exportée et une exportée, dans un shell enfant.',
+    },
     example: [
       'echo $HOME $USER',
       'echo $PATH',
@@ -836,6 +1105,24 @@ export const INTERMEDIATE: Unit[] = [
       example:
         'You see the code of a command that works and of one that fails, and chain with && and ||.',
     },
+    fr: {
+      title: 'Codes de sortie : $?, && et ||',
+      goal: 'Avec && et || : crée ~/listo.txt (vide) seulement si /etc/peer4u/app.env existe, et ~/fallo.txt (vide) seulement si /etc/peer4u/old.env n’existe PAS.',
+      theory: {
+        what: 'Chaque commande se termine avec un code : 0 veut dire que tout s’est bien passé ; un autre nombre, qu’elle a échoué. $? garde le dernier. a && b lance b seulement si a a réussi ; a || b, seulement s’il a échoué. test (ou [ ]) vérifie des choses : -f fichier, -d dossier.',
+        how: [
+          'ls /rien; echo $?',
+          'mkdir -p /tmp/x && echo cree',
+          'cat /rien || echo "absent"',
+          'test -f /etc/hosts && echo oui',
+          '[ -d /srv ] && echo dossier',
+        ],
+        when: 'Pour enchaîner des étapes qui dépendent des précédentes (compiler && déployer), et dans tous les scripts.',
+        problems: 'a && b || c n’est pas un if : si b échoue, c s’exécute aussi.',
+      },
+      example:
+        'Tu vois le code d’une commande qui réussit et d’une qui échoue, et tu enchaînes avec && et ||.',
+    },
     example: [
       'ls /etc/hostname; echo "código: $?"',
       'ls /nada; echo "código: $?"',
@@ -881,6 +1168,18 @@ export const INTERMEDIATE: Unit[] = [
         'Stop miner.py (it ignores TERM).',
         'Write into ~/culpable.txt the user who launched miner.py.',
         'Write into ~/deploy-procs.txt how many processes deploy has left (just the number).',
+      ],
+    },
+    fr: {
+      title: 'Boss : l’API rame',
+      goal: 'Libère le CPU de web1 et garde une trace de qui a lancé quoi.',
+      story:
+        'Les requêtes prennent 8 secondes. Quelqu’un a laissé tourner en production des tests de charge, et quelque chose de pire.',
+      tasks: [
+        'Arrête tous les stress-ng (ils ne sont pas à toi : sudo).',
+        'Arrête miner.py (il ignore TERM).',
+        'Écris dans ~/culpable.txt l’utilisateur qui a lancé miner.py.',
+        'Écris dans ~/deploy-procs.txt combien de processus il reste à deploy (seulement le nombre).',
       ],
     },
     solution: [
@@ -935,6 +1234,21 @@ export const INTERMEDIATE: Unit[] = [
         'Delete the .tmp files in ~/cache older than 3 days.',
         'Stop the yes process.',
         'In ~/app.env, change LOG_LEVEL=debug to LOG_LEVEL=warn.',
+      ],
+    },
+    fr: {
+      title: 'Boss final : intermédiaire',
+      goal: 'Le rapport du matin et le ménage, contre la montre. Si tu réussis, tu obtiens le certificat intermédiaire.',
+      story:
+        'Réunion d’équipe dans dix minutes : on te demande des chiffres et de l’ordre sur web1.',
+      tasks: [
+        'Crée ~/final.',
+        'Dans ~/final/top-rutas.txt, les 3 chemins (colonne 7) les plus demandés dans access.log avec leur nombre, du plus au moins demandé (sort | uniq -c | sort -rn).',
+        'Dans ~/final/errores.txt, le nombre de réponses 5xx (seulement le nombre).',
+        'Archive ~/proyectos dans ~/final/proyectos.tar.gz.',
+        'Supprime les .tmp de ~/cache qui ont plus de 3 jours.',
+        'Arrête le processus yes.',
+        'Dans ~/app.env, remplace LOG_LEVEL=debug par LOG_LEVEL=warn.',
       ],
     },
     solution: [

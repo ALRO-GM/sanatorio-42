@@ -10,7 +10,7 @@ export const SHARED_EN: Readonly<Record<string, LevelText>> = {
       what: "A remote (origin) is another copy of the repository, usually on GitHub or on 42's GitLab. clone copies the whole thing; push uploads your commits.",
       how: ['git clone', 'git commit -m "my part"', 'git push'],
       when: 'clone once, when you start; push when your work is ready for others to see.',
-      whenNot: 'Pushing something that does not compile to a branch that more people use.',
+      whenNot: 'Pushing something that does not compile to a branch other people use.',
       looks: 'origin/main appears: where main was on origin the last time you talked to it.',
       problems:
         'Forgetting to push: the work only exists on your computer (and at 42 the computers get wiped).',
@@ -109,7 +109,7 @@ export const SHARED_EN: Readonly<Record<string, LevelText>> = {
       how: ['git switch feature', 'git rebase main'],
       when: 'To bring your branch up to date before merging it, if only you use it.',
       whenNot:
-        "On branches that more people share: their commits stop existing and the others' history breaks.",
+        "On branches other people share: their commits stop existing and everyone else's history breaks.",
       looks: 'The circles of feature go away and copies (with a prime mark) appear on top of main.',
       problems: 'Conflicts on every copied commit, one by one.',
     },

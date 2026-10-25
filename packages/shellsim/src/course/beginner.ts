@@ -49,6 +49,24 @@ export const BEGINNER: Unit[] = [
       },
       example: 'You check where you are, what is in your directory and the details of /var/log.',
     },
+    fr: {
+      title: 'Où suis-je ? pwd et ls',
+      goal: 'Affiche ce qu’il y a dans /srv/peer4u (le dossier de l’API).',
+      theory: {
+        what: 'pwd te dit dans quel dossier tu es ; ls liste ce qu’il y a dans un dossier (le tien si tu n’en précises pas).',
+        how: [
+          'pwd',
+          'ls',
+          'ls /var/log',
+          'ls -l /var/log      # format long : permissions, propriétaire, taille, date',
+          'man ls              # l’aide de n’importe quelle commande',
+        ],
+        when: 'La première chose à faire en arrivant sur un serveur : savoir où tu es et ce qu’il y a autour avant de toucher à quoi que ce soit.',
+        problems:
+          'Linux distingue les majuscules : Notes.txt et notes.txt sont deux fichiers différents.',
+      },
+      example: 'Tu regardes où tu es, ce qu’il y a dans ton dossier et le détail de /var/log.',
+    },
     example: ['pwd', 'ls', 'ls -l /var/log'],
     solution: ['ls /srv/peer4u'],
     check: { output: true },
@@ -92,6 +110,25 @@ export const BEGINNER: Unit[] = [
       },
       example: 'You go to /var/log, enter nginx, go up with .. and back home with ~.',
     },
+    fr: {
+      title: 'Se déplacer : cd et les chemins',
+      goal: 'Termine dans /var/log/nginx.',
+      theory: {
+        what: 'cd change de dossier. Un chemin absolu commence par / (depuis la racine) ; un chemin relatif part de là où tu es.',
+        how: [
+          'cd /var/log         # absolu',
+          'cd nginx            # relatif : /var/log/nginx',
+          'cd ..               # le dossier du dessus',
+          'cd ~   (ou cd seul) # ton dossier personnel',
+          'cd -                # le dossier précédent',
+        ],
+        when: 'Pour travailler dans un dossier sans retaper le chemin complet à chaque fois.',
+        whenNot:
+          'Dans les scripts, les chemins absolus sont plus sûrs : ils ne dépendent pas de l’endroit où on les lance.',
+      },
+      example:
+        'Tu vas dans /var/log, tu entres dans nginx, tu remontes avec .. et tu rentres chez toi avec ~.',
+    },
     example: ['cd /var/log', 'pwd', 'cd nginx', 'pwd', 'cd ..', 'cd ~', 'pwd'],
     solution: ['cd /var/log/nginx'],
     check: { cwd: true },
@@ -132,6 +169,18 @@ export const BEGINNER: Unit[] = [
           'cat on a huge file floods the screen: that is what head, tail and less are for (next unit).',
       },
       example: 'You look at your home with and without -a and read your .bashrc.',
+    },
+    fr: {
+      title: 'Fichiers cachés et cat',
+      goal: 'Il y a un fichier caché dans /srv/peer4u. Affiche son contenu.',
+      theory: {
+        what: 'Les fichiers qui commencent par un point (.bashrc, .env) n’apparaissent pas avec ls tout court : ls -a les affiche. cat affiche un fichier en entier.',
+        how: ['ls -a ~', 'ls -la ~            # cachés et en format long', 'cat ~/.bashrc'],
+        when: 'La configuration se trouve souvent dans des fichiers cachés : .bashrc, .ssh/, .env, .gitignore.',
+        problems:
+          'cat sur un énorme fichier remplit l’écran : c’est à ça que servent head, tail et less (unité suivante).',
+      },
+      example: 'Tu regardes ton dossier avec et sans -a, et tu lis ton .bashrc.',
     },
     example: ['ls ~', 'ls -a ~', 'cat ~/.bashrc'],
     solution: ['cat /srv/peer4u/.env.example'],
@@ -179,6 +228,25 @@ export const BEGINNER: Unit[] = [
       },
       example: 'You look at the start of the API log, how many lines it has and the end of syslog.',
     },
+    fr: {
+      title: 'Lire des logs : head, tail, wc, less',
+      goal: 'Affiche les 5 dernières lignes de /var/log/peer4u/app.log.',
+      theory: {
+        what: 'head affiche le début d’un fichier, tail la fin, wc -l compte les lignes et less le fait défiler page par page.',
+        how: [
+          'head -n 3 fichier',
+          'tail -n 20 /var/log/syslog',
+          'tail -f app.log      # suit ce qui s’écrit au fur et à mesure',
+          'wc -l fichier',
+          'less fichier         # q pour quitter',
+        ],
+        when: 'Dans un log, le plus récent est à la fin : tail est ce que tu utiliseras le plus en astreinte.',
+        problems:
+          'tail -f ne s’arrête jamais (Ctrl+C pour sortir) ; dans ce simulateur, il affiche la fin et rend la main.',
+      },
+      example:
+        'Tu regardes le début du log de l’API, combien de lignes il contient et la fin de syslog.',
+    },
     example: [
       'head -n 3 /var/log/peer4u/app.log',
       'wc -l /var/log/peer4u/app.log',
@@ -217,11 +285,22 @@ export const BEGINNER: Unit[] = [
       title: 'Boss: first day on call',
       goal: 'Follow the clues and end in the nginx log directory showing the latest entries.',
       story:
-        'You are holding the pager for the first time. Someone left a note in your home and a hidden clue.',
+        'You are holding the pager for the first time. Someone left a note in your home directory and a hidden clue.',
       tasks: [
         'Read ~/ONCALL.txt.',
         'Find and read the hidden clue in /srv/peer4u.',
         'Do what the clue says (and stay in that directory).',
+      ],
+    },
+    fr: {
+      title: 'Boss : premier jour d’astreinte',
+      goal: 'Suis les indices et termine dans le dossier des logs de nginx en affichant les dernières entrées.',
+      story:
+        'C’est ta première astreinte. Quelqu’un t’a laissé une note dans ton dossier personnel et un indice caché.',
+      tasks: [
+        'Lis ~/ONCALL.txt.',
+        'Trouve et lis l’indice caché dans /srv/peer4u.',
+        'Fais ce que dit l’indice (et reste dans ce dossier).',
       ],
     },
     solution: [
@@ -270,6 +349,22 @@ export const BEGINNER: Unit[] = [
         problems: 'Without -p, mkdir a/b fails if a does not exist.',
       },
       example: 'You create nested directories in one go and an empty file inside.',
+    },
+    fr: {
+      title: 'Créer : mkdir et touch',
+      goal: 'Crée ~/deploy avec les dossiers logs, config et releases, et un fichier vide ~/deploy/config/app.env.',
+      theory: {
+        what: 'mkdir crée des dossiers (-p crée aussi ceux du milieu et ne se plaint pas s’ils existent déjà) ; touch crée un fichier vide ou le met à l’heure actuelle.',
+        how: [
+          'mkdir essais',
+          'mkdir -p a/b/c',
+          'mkdir -p deploy/{logs,config}   # accolades : plusieurs d’un coup',
+          'touch vide.txt',
+        ],
+        when: 'Pour préparer l’arborescence d’un déploiement, de sauvegardes ou d’un projet.',
+        problems: 'Sans -p, mkdir a/b échoue si a n’existe pas.',
+      },
+      example: 'Tu crées des dossiers imbriqués d’un seul coup et un fichier vide dedans.',
     },
     example: ['mkdir -p pruebas/a/b', 'touch pruebas/a/vacio.txt', 'ls -R pruebas'],
     solution: [
@@ -320,6 +415,23 @@ export const BEGINNER: Unit[] = [
         problems: 'cp and mv overwrite the destination without asking.',
       },
       example: 'You copy your notes, move the copy into proyectos and check it.',
+    },
+    fr: {
+      title: 'Copier et déplacer : cp et mv',
+      goal: 'Garde une copie de /etc/nginx/nginx.conf sous ~/backup/nginx.conf.bak et renomme ~/inbox/report.txt en ~/inbox/informe-octubre.txt.',
+      theory: {
+        what: 'cp copie (cp -r pour des dossiers entiers) ; mv déplace ou renomme : c’est la même chose, changer le chemin.',
+        how: [
+          'cp source destination',
+          'cp nginx.conf nginx.conf.bak      # sauvegarde avant de modifier',
+          'cp -r dossier/ copie/',
+          'mv ancien.txt nouveau.txt',
+          'mv fichier dossier/',
+        ],
+        when: 'Avant de toucher à une configuration, copie-la : si ça tourne mal, tu reviens en arrière avec un seul mv.',
+        problems: 'cp et mv écrasent la destination sans demander.',
+      },
+      example: 'Tu copies tes notes, tu déplaces la copie dans proyectos et tu vérifies.',
     },
     example: ['cp notas.txt notas-copia.txt', 'mv notas-copia.txt proyectos/', 'ls proyectos'],
     solution: [
@@ -381,6 +493,25 @@ export const BEGINNER: Unit[] = [
       example:
         'You delete a file, an empty directory, and see why plain rm does not delete directories.',
     },
+    fr: {
+      title: 'Supprimer : rm et rmdir',
+      goal: 'Supprime tout le dossier ~/build/tmp et ~/old.log. ~/build/out/app et ~/importante.txt doivent rester.',
+      theory: {
+        what: 'rm supprime des fichiers ; rm -r, des dossiers avec tout leur contenu ; rmdir, seulement des dossiers vides.',
+        how: [
+          'rm fichier',
+          'rm -r dossier',
+          'rm -i fichier      # demande avant',
+          'rmdir dossier-vide',
+        ],
+        when: 'Pour faire le ménage dans ce qui ne sert plus : fichiers compilés, temporaires, vieux logs.',
+        whenNot:
+          'Jamais de rm -rf avec une variable qui peut être vide (rm -rf $DIR/ peut devenir rm -rf /).',
+        problems: 'Il n’y a pas de corbeille : ce que tu supprimes est perdu.',
+      },
+      example:
+        'Tu supprimes un fichier, un dossier vide, et tu vois pourquoi rm tout court ne supprime pas les dossiers.',
+    },
     example: ['touch borrame.txt', 'rm borrame.txt', 'mkdir vacia', 'rmdir vacia', 'rm proyectos'],
     solution: ['rm -r ~/build/tmp', 'rm ~/old.log'],
     check: {
@@ -427,6 +558,24 @@ export const BEGINNER: Unit[] = [
           'One > too many wipes what was there: with important files, ask yourself if you meant >>.',
       },
       example: 'You write a file, append a line and keep an error apart.',
+    },
+    fr: {
+      title: 'Écrire : echo, > et >>',
+      goal: 'Crée ~/motd.txt avec deux lignes : « Bienvenida a web1 » et « Mantenimiento: domingo 03:00 ».',
+      theory: {
+        what: 'echo écrit un texte. > envoie la sortie dans un fichier (en le vidant d’abord) ; >> l’ajoute à la fin ; 2> envoie les erreurs. C’est ce qu’on appelle une redirection.',
+        how: [
+          "echo 'salut' > salut.txt",
+          "echo 'une autre ligne' >> salut.txt",
+          'ls absent 2> erreurs.txt',
+          'commande > tout.txt 2>&1   # sortie et erreurs ensemble',
+          "cat > fichier <<'EOF'      # plusieurs lignes, jusqu’à EOF",
+        ],
+        when: 'Pour laisser des notes, créer de petites configurations et garder ce qu’affiche une commande.',
+        problems:
+          'Un > de trop efface ce qu’il y avait : sur un fichier important, demande-toi si tu voulais >>.',
+      },
+      example: 'Tu écris un fichier, tu y ajoutes une ligne et tu mets une erreur de côté.',
     },
     example: [
       'echo hola > saludo.txt',
@@ -492,6 +641,24 @@ export const BEGINNER: Unit[] = [
       },
       example: 'You see what some patterns match and what braces generate.',
     },
+    fr: {
+      title: 'Jokers : *, ? et {}',
+      goal: 'Déplace tous les .log de ~/descargas dans ~/descargas/logs/ (crée-le) et supprime les .png.',
+      theory: {
+        what: 'Avant d’exécuter, le shell remplace les jokers par les noms qui correspondent : * veut dire n’importe quoi, ? un caractère, [abc] l’un de ceux-là. Les accolades {a,b} et {1..5} génèrent des mots.',
+        how: [
+          'ls *.log',
+          'rm img?.png',
+          'mv *.log logs/',
+          'echo rapport-{janvier,fevrier}.txt',
+          'echo sprint-{1..5}',
+        ],
+        when: 'Pour faire la même chose sur beaucoup de fichiers d’un coup.',
+        problems:
+          'Vérifie avec ls (ou echo) ce qui correspond avant un rm avec des jokers. * ne correspond pas aux fichiers cachés.',
+      },
+      example: 'Tu vois ce qui correspond à quelques motifs et ce que génèrent les accolades.',
+    },
     example: ['ls /var/log/*.log', 'ls /etc/host*', 'echo fichero-{1..3}.txt'],
     solution: [
       'mkdir ~/descargas/logs',
@@ -553,6 +720,18 @@ export const BEGINNER: Unit[] = [
         'Make ~/app/CURRENT say v2.',
       ],
     },
+    fr: {
+      title: 'Boss : la release v2',
+      goal: 'Installe la v2 dans ~/app/releases/v2, nettoie les fichiers temporaires et marque la v2 comme version actuelle.',
+      story:
+        'Le build de la v2 est arrivé dans ~/release-v2, avec des déchets dedans. La démo est dans quatre minutes.',
+      tasks: [
+        'Crée ~/app/releases/v2.',
+        'Copie-y les .js et le .css de ~/release-v2.',
+        'Supprime les .tmp de ~/release-v2.',
+        'Fais en sorte que ~/app/CURRENT contienne v2.',
+      ],
+    },
     solution: [
       'mkdir ~/app/releases/v2',
       'cp ~/release-v2/*.js ~/release-v2/*.css ~/app/releases/v2/',
@@ -601,6 +780,18 @@ export const BEGINNER: Unit[] = [
           'On a directory, x means entering: without x you cannot reach what is inside even if you can read it.',
       },
       example: 'You compare /etc/passwd with /etc/shadow and see who you are.',
+    },
+    fr: {
+      title: 'Lire les permissions : ls -l et id',
+      goal: 'Trouve à qui appartient /etc/peer4u/app.env et affiche avec id les groupes de cet utilisateur.',
+      theory: {
+        what: 'ls -l affiche -rwxr-x--- : le type, puis trois triplets (propriétaire, groupe, autres) de lecture (r), écriture (w) et exécution ou accès (x). Ensuite, le propriétaire et le groupe. id te dit qui tu es et dans quels groupes tu es.',
+        how: ['ls -l fichier', 'ls -ld dossier', 'id', 'id deploy', 'groups'],
+        when: 'Face à un « Permission denied » : regarde les permissions et tes groupes avant de dégainer sudo.',
+        problems:
+          'Sur un dossier, x veut dire pouvoir y entrer : sans x, tu n’atteins pas son contenu même si tu peux le lire.',
+      },
+      example: 'Tu compares /etc/passwd et /etc/shadow, et tu vois qui tu es.',
     },
     example: ['ls -l /etc/passwd /etc/shadow', 'id', 'cat /etc/shadow'],
     solution: ['ls -l /etc/peer4u/app.env', 'id deploy'],
@@ -653,6 +844,24 @@ export const BEGINNER: Unit[] = [
       },
       example: 'You change the permissions of your notes in octal and with letters.',
     },
+    fr: {
+      title: 'Changer les permissions : chmod',
+      goal: 'Mets ~/scripts/backup.sh en rwxr-xr-x (exécutable) et ~/secrets.env en rw------- (toi seulement).',
+      theory: {
+        what: 'chmod change les permissions. En octal, chaque triplet est un chiffre : r=4, w=2, x=1 (7=rwx, 5=r-x, 6=rw-, 0=---). En lettres : u (propriétaire), g, o, a (tous) avec +, - ou =.',
+        how: [
+          'chmod 755 script.sh    # rwxr-xr-x',
+          'chmod 600 secret        # rw-------',
+          'chmod u+x script.sh',
+          'chmod go-w fichier',
+          'chmod -R g+r dossier',
+        ],
+        when: 'Pour rendre un script exécutable ou pour qu’une clé ne soit lisible par personne d’autre (ssh refuse les clés aux permissions trop ouvertes).',
+        whenNot:
+          'chmod 777 « pour que ça marche » ouvre la porte à tout le monde : cherche la permission juste.',
+      },
+      example: 'Tu changes les permissions de tes notes en octal et en lettres.',
+    },
     example: [
       'ls -l notas.txt',
       'chmod 640 notas.txt',
@@ -701,6 +910,23 @@ export const BEGINNER: Unit[] = [
       },
       example: 'You see that without sudo you cannot write in /srv and with sudo you can.',
     },
+    fr: {
+      title: 'Propriétaires et sudo : chown',
+      goal: 'Fais en sorte que /srv/site et tout son contenu appartiennent à deploy, groupe www-data.',
+      theory: {
+        what: 'chown change le propriétaire et le groupe (utilisateur:groupe). Seul root peut donner des fichiers à quelqu’un d’autre, donc il faut sudo : il lance une commande en tant que root si tu es dans le groupe sudo.',
+        how: [
+          'sudo chown deploy fichier',
+          'sudo chown deploy:www-data fichier',
+          'sudo chown -R deploy:www-data /srv/site',
+          'sudo -i     # un shell root (exit pour revenir)',
+        ],
+        when: 'Quand un service (nginx tourne en tant que www-data) doit lire ou écrire ce que tu as déposé.',
+        whenNot:
+          'Ne travaille pas tout le temps en root : sudo seulement pour la commande qui en a besoin.',
+      },
+      example: 'Tu vois que sans sudo tu ne peux pas écrire dans /srv, et qu’avec sudo tu peux.',
+    },
     example: ['touch /srv/prueba', 'sudo touch /srv/prueba', 'ls -l /srv/prueba'],
     solution: ['sudo chown -R deploy:www-data /srv/site'],
     check: {
@@ -744,6 +970,23 @@ export const BEGINNER: Unit[] = [
       },
       example: 'You look at mgarcia’s groups and the last accounts in /etc/passwd.',
     },
+    fr: {
+      title: 'Utilisateurs et groupes',
+      goal: 'Crée le compte lucia, avec un dossier personnel et dans le groupe developers. Puis ajoute mgarcia à www-data sans lui faire perdre developers.',
+      theory: {
+        what: 'useradd crée des utilisateurs (-m avec dossier personnel, -G groupes supplémentaires, -s shell) ; usermod les modifie ; groupadd crée des groupes. Tout est enregistré dans /etc/passwd et /etc/group.',
+        how: [
+          'sudo useradd -m -s /bin/bash -G developers ana',
+          'sudo usermod -aG www-data ana   # -a : ajouter',
+          'sudo groupadd ops',
+          'id ana',
+        ],
+        when: 'Quand quelqu’un rejoint l’équipe ou qu’un service a besoin de son propre utilisateur.',
+        problems:
+          'usermod -G sans -a remplace tous les groupes : c’est comme ça qu’on prive quelqu’un de sudo.',
+      },
+      example: 'Tu regardes les groupes de mgarcia et les derniers comptes de /etc/passwd.',
+    },
     example: ['id mgarcia', 'tail -n 3 /etc/passwd'],
     solution: ['sudo useradd -m -G developers lucia', 'sudo usermod -aG www-data mgarcia'],
     check: { users: ['lucia', 'mgarcia'], dirs: ['/home/lucia'] },
@@ -781,6 +1024,19 @@ export const BEGINNER: Unit[] = [
         'Add peer (you) to ops without removing your groups.',
         'Create /srv/ops, owned by root and group ops, mode 770.',
         'Copy ~/runbook.md inside, as root:ops with mode 640.',
+      ],
+    },
+    fr: {
+      title: 'Boss : l’équipe ops arrive',
+      goal: 'Prépare l’espace de la nouvelle équipe : groupe, compte, dossier partagé et permissions.',
+      story:
+        'Nora rejoint ops aujourd’hui. Il lui faut un compte et un dossier que seule son équipe peut voir.',
+      tasks: [
+        'Crée le groupe ops.',
+        'Crée nora, avec un dossier personnel et dans ops.',
+        'Ajoute peer (toi) à ops sans perdre tes groupes.',
+        'Crée /srv/ops, appartenant à root et au groupe ops, avec les permissions 770.',
+        'Copie ~/runbook.md dedans, en root:ops et avec les permissions 640.',
       ],
     },
     solution: [
@@ -843,6 +1099,21 @@ export const BEGINNER: Unit[] = [
         'Delete the .bak files in ~/viejo and the directory ~/viejo/tmp (leeme.txt stays).',
         'Create rocio with a home and in the www-data group.',
         'To finish, show the last 2 lines of /var/log/syslog.',
+      ],
+    },
+    fr: {
+      title: 'Boss final : débutant',
+      goal: 'Ta première mission en solo : tout le niveau, contre la montre. Si tu réussis, tu obtiens le certificat débutant.',
+      story:
+        'Aujourd’hui, personne d’autre n’est d’astreinte. On t’a laissé une mission dans ~/ENCARGO.txt.',
+      tasks: [
+        'Crée ~/sitio avec les dossiers css et img.',
+        'Écris ~/sitio/index.html avec la ligne « <h1>Hola, peers</h1> ».',
+        'Copie /var/www/html/index.html vers ~/sitio/index.original.html.',
+        'Déplace ~/publicar.sh dans ~/sitio/ et mets-lui les permissions 750.',
+        'Supprime les .bak de ~/viejo et le dossier ~/viejo/tmp (leeme.txt reste).',
+        'Crée rocio avec un dossier personnel et dans le groupe www-data.',
+        'Pour finir, affiche les 2 dernières lignes de /var/log/syslog.',
       ],
     },
     solution: [

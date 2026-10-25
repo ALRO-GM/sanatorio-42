@@ -33,10 +33,16 @@ vocabulario: `AGENTS.md` («Reglas de producto»).
   `tests/unit/quiz-bank-lang.test.ts` lo comprueba. Repaso: `bank/review-*.ts`
   y `bank/{en,fr}/review-*.ts`, mismas claves. Lo que falta en francés sale
   en inglés.
-- Curso de git: `packages/gitsim/src/levels/*.ts` y `levels/en/*.ts`
-  (`LevelText` por id; misiones por plantilla en `en/groups.ts`). Test:
-  `apps/api/tests/unit/gitcourse-en.test.ts`. Comandos, ficheros y ramas no
-  se traducen.
+- Curso de git: `packages/gitsim/src/levels/*.ts`, `levels/en/*.ts` y
+  `levels/fr/*.ts` (`LevelText` por id; misiones por plantilla en
+  `en/groups.ts` y `fr/groups.ts`). Tests:
+  `apps/api/tests/unit/gitcourse-en.test.ts` y `gitcourse-fr.test.ts`.
+  Comandos, ficheros y ramas no se traducen.
+- Curso de shell: cada unidad (`packages/shellsim/src/course/*.ts`) y cada
+  bloque (`blocks.ts`) llevan `es`, `en` y `fr`. Test:
+  `apps/api/tests/unit/shellcourse-fr.test.ts` (misma forma que el inglés).
+  Los comandos, las rutas y lo que la prueba comprueba (nombres de fichero,
+  textos que hay que escribir) se dejan como en español.
 - Reglas del banco: cada forma pregunta una sola cosa; los números, en cifras;
   las malas, de la misma pinta que la buena (`shapeOf`); ninguna respuesta se
   cuela en la pregunta.

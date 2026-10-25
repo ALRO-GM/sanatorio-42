@@ -96,6 +96,8 @@ export type Unit = {
   kind: UnitKind
   es: UnitText
   en: UnitText
+  /** El francés; si falta, se lee el inglés (`courseText`). */
+  fr?: UnitText
   setup?: Setup
   /** Las órdenes del ejemplo: se ejecutan de verdad sobre el mundo de partida. */
   example?: string[]
@@ -118,6 +120,8 @@ export type Block = {
   tier: Tier
   es: BlockText
   en: BlockText
+  /** El francés; si falta, se lee el inglés (`courseText`). */
+  fr?: BlockText
   /** Los perfiles de trabajo que más lo usan (`docs/curso-shell.md`). */
   jobs: string[]
 }
