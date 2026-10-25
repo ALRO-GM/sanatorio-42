@@ -101,7 +101,7 @@ export const GRAPHICS_FR: Readonly<Record<string, ConceptText>> = {
           "Qu'utilise-t-on en général pour savoir si la carte a une solution ?",
         ],
         right: [
-          'Un flood fill depuis le joueur, puis voir ce qui reste intact',
+          "Un flood fill depuis le joueur, puis regarder ce qui n'a pas été atteint",
           'Un parcours depuis le joueur, comme un BFS ou un flood fill',
         ],
       },
@@ -250,7 +250,7 @@ export const GRAPHICS_FR: Readonly<Record<string, ConceptText>> = {
     forms: [
       {
         ask: [
-          'Tes murs sont courbés, comme en fisheye. Pourquoi ?',
+          'Tes murs sont courbés, comme avec un fish-eye. Pourquoi ?',
           "Un mur droit paraît bombé dans ton raycaster. Qu'est-ce que tu fais de travers ?",
         ],
         right: [
@@ -265,7 +265,7 @@ export const GRAPHICS_FR: Readonly<Record<string, ConceptText>> = {
       'Il manque des rayons',
       "La carte n'est pas fermée",
     ],
-    why: 'Les rayons sur les côtés sont plus longs même si le mur est aussi loin : il faut utiliser la distance perpendiculaire.',
+    why: 'Les rayons sur les côtés sont plus longs même si le mur est à la même distance : il faut utiliser la distance perpendiculaire.',
   },
   'gfx-map-closed': {
     forms: [
@@ -351,7 +351,7 @@ export const GRAPHICS_FR: Readonly<Record<string, ConceptText>> = {
       {
         ask: [
           "L'intersection d'un rayon et d'une sphère donne une équation du second degré. Que signifie un discriminant négatif ?",
-          'Si b² - 4ac < 0 quand tu croises le rayon avec la sphère, que se passe-t-il ?',
+          "Si b² - 4ac < 0 quand tu calcules l'intersection du rayon et de la sphère, que se passe-t-il ?",
         ],
         right: [
           'Le rayon ne touche pas la sphère',

@@ -100,7 +100,7 @@ export const NETWORK_FR: Readonly<Record<string, ConceptText>> = {
         wrong: ['8.8.8.8', '1.1.1.1', '80.58.61.250', '142.250.1.1'],
       },
       {
-        ask: ["Qu'est-ce que 127.0.0.1 ?", "Vers qui pointe l'adresse 127.0.0.1 ?"],
+        ask: ["Qu'est-ce que 127.0.0.1 ?", "Vers quoi pointe l'adresse 127.0.0.1 ?"],
         right: ['La machine elle-même (localhost)'],
         wrong: ['La passerelle', 'Le DNS de Google', "L'adresse de broadcast"],
       },
@@ -151,7 +151,7 @@ export const NETWORK_FR: Readonly<Record<string, ConceptText>> = {
         ],
         right: [
           "Que tout arrive, dans l'ordre et sans doublons",
-          'Une livraison fiable et ordonnée',
+          "Un acheminement fiable et dans l'ordre",
         ],
         wrong: [
           "Qu'il est plus rapide",
@@ -370,8 +370,8 @@ export const NETWORK_FR: Readonly<Record<string, ConceptText>> = {
     forms: [
       {
         ask: [
-          "Quelle commande IRC te fait devenir membre d'un canal ?",
-          'Quelle commande envoies-tu pour aller dans #42 ?',
+          'Quelle commande IRC permet de rejoindre un canal ?',
+          'Quelle commande envoies-tu pour rejoindre #42 ?',
         ],
         right: ['JOIN'],
         wrong: ['ENTER', 'PRIVMSG', 'NICK', 'CONNECT'],

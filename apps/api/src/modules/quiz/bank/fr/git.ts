@@ -333,7 +333,7 @@ export const GIT_FR: Readonly<Record<string, ConceptText>> = {
       {
         ask: ["Qu'est-ce que `HEAD~2` ?", 'HEAD~2 désigne…'],
         right: [
-          'Le commit situé 2 crans avant HEAD',
+          'Le commit situé deux crans avant HEAD',
           'Le grand-parent de HEAD (en suivant le premier parent)',
         ],
       },
@@ -349,8 +349,8 @@ export const GIT_FR: Readonly<Record<string, ConceptText>> = {
     ],
     wrong: [
       'La deuxième branche du dépôt',
-      'Les 2 derniers commits ensemble',
-      'Le commit situé 2 crans après HEAD',
+      'Les deux derniers commits ensemble',
+      'Le commit situé deux crans après HEAD',
       'HEAD sur le dépôt distant',
     ],
     why: "~n remonte de n commits par le premier parent ; ^ désigne le parent. Ça t'évite de copier des identifiants.",
@@ -359,12 +359,12 @@ export const GIT_FR: Readonly<Record<string, ConceptText>> = {
     forms: [
       {
         ask: ['Que fait `git reset --hard HEAD~1` ?', 'reset --hard HEAD~1…'],
-        right: ['Ramène la branche 1 commit en arrière et efface les changements du dossier'],
+        right: ['Ramène la branche un commit en arrière et efface les changements du dossier'],
         wrong: ['Ramène la branche en arrière et laisse les changements indexés'],
       },
       {
         ask: ['Que fait `git reset --soft HEAD~1` ?', 'reset --soft HEAD~1…'],
-        right: ['Ramène la branche 1 commit en arrière et laisse ses changements indexés'],
+        right: ['Ramène la branche un commit en arrière et laisse ses changements indexés'],
         wrong: ['Ramène la branche en arrière et efface les changements du dossier'],
       },
     ],
@@ -432,7 +432,7 @@ export const GIT_FR: Readonly<Record<string, ConceptText>> = {
     ],
     wrong: [
       'Tout le monde fait ses commits directement sur main',
-      'Il y a 2 branches longues, main et develop, plus des branches de release',
+      'Il y a deux branches longues, main et develop, plus des branches de release',
       'Chaque personne a son propre dépôt, sans dépôt distant',
       "On ne fusionne dans main qu'une fois par an",
     ],
