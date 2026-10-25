@@ -15,6 +15,7 @@ import type {
   NetworkGraph,
   Peer,
   SeatGraph,
+  SeatHeat,
 } from '@sanatorio/contracts'
 import { userId } from '../helpers/fixtures.js'
 import { cookieAs, json, makeApp } from '../helpers/test-app.js'
@@ -64,17 +65,20 @@ type Seen = {
   profile: number
   network: string[]
   seats: string[]
+  /** Los puestos con horas en el mapa de calor: no lleva nombres, pero sí dónde. */
+  heat: string[]
 }
 
 /** Lo que `cookie` ve de `who`: mapa, buscador, ficha, perfil y las dos redes. */
 async function seenBy(built: TestApp, cookie: string, who: string): Promise<Seen> {
-  const [map, search, card, profile, network, seats] = await Promise.all([
+  const [map, search, card, profile, network, seats, heat] = await Promise.all([
     get(built, '/map', cookie),
     get(built, `/users/search?q=${who.slice(0, 3)}`, cookie),
     get(built, `/people/${who}/card`, cookie),
     get(built, `/users/${who}/profile`, cookie),
     get(built, '/network', cookie),
     get(built, '/network/seats?days=7', cookie),
+    get(built, '/network/seats/heat?days=7', cookie),
   ])
 
   return {
@@ -84,6 +88,9 @@ async function seenBy(built: TestApp, cookie: string, who: string): Promise<Seen
     profile: profile.statusCode,
     network: (json(network) as NetworkGraph).nodes.map((node) => node.login),
     seats: (json(seats) as SeatGraph).people.map((person) => person.login),
+    heat: (json(heat) as SeatHeat).clusters.flatMap((cluster) =>
+      cluster.cells.filter((cell) => cell.hours > 0).map((cell) => cell.host),
+    ),
   }
 }
 
@@ -166,6 +173,8 @@ describe('personas ocultas', () => {
     expect(before.profile).toBe(200)
     expect(before.network).toContain('mgomez')
     expect(before.seats).toContain('mgomez')
+    // El mapa de calor, solo con los de su mundo: los puestos de los piscineros, a 0.
+    expect(before.heat).toEqual(['c2r2s3', 'c2r2s4', 'c2r2s5'])
     expect(await peersOf(built, student)).toContain('mgomez')
 
     const saved = await hide(built, admin, 'MGomez', {
@@ -198,6 +207,8 @@ describe('personas ocultas', () => {
     expect(after.network).toContain('amiga')
     expect(after.seats).not.toContain('mgomez')
     expect(after.seats).toContain('amiga')
+    // Su puesto sigue en el plano, pero sin sus horas.
+    expect(after.heat).toEqual(['c2r2s3', 'c2r2s5'])
     expect(await peersOf(built, student)).not.toContain('mgomez')
 
     // Ella se sigue viendo, y ve a los demás.
@@ -218,6 +229,7 @@ describe('personas ocultas', () => {
     expect(pisci.card).toBe(200)
     expect(pisci.network).toContain('pisci2')
     expect(pisci.seats).toContain('pisci2')
+    expect(pisci.heat).toEqual(['c1r1s1', 'c1r1s2'])
 
     // Al quitarla, vuelve al momento.
     const removed = await built.app.inject({
@@ -248,6 +260,7 @@ describe('personas ocultas', () => {
     expect(pisci.card).toBe(404)
     expect(pisci.network).not.toContain('pisci2')
     expect(pisci.seats).not.toContain('pisci2')
+    expect(pisci.heat).toEqual(['c1r1s1'])
 
     // Ocultar a una estudiante a los piscineros no cambia nada para los estudiantes.
     const seen = await seenBy(built, student, 'amiga')

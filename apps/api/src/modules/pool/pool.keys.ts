@@ -150,7 +150,7 @@ export const POOL_ROUTES: Record<PoolKey, readonly string[]> = {
   'clusters.report': ['/facility/reports'],
   red: ['/network', '/network/people', '/network/pair'],
   'red.rankings': ['/network/strictest'],
-  'red.seats': ['/network/seats'],
+  'red.seats': ['/network/seats', '/network/seats/heat'],
   avance: ['/stats/progress', '/stats/ranking'],
   'avance.compare': ['/stats/progress/fastest'],
   examenes: [],

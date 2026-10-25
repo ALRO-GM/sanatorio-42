@@ -62,6 +62,36 @@ amigos) salen con el mismo Louvain que la red de correcciones.
 dentro de la pestaña Red (`RedPage.tsx`). Para piscineros, permiso
 `red.seats` en el panel (dentro de la Red).
 
+## Mapa de calor
+
+Pedido por Alberto el 2026-10-25: debajo del grafo, en Datos → Red →
+Asientos, cuánto se ha usado cada ordenador del clúster en el mismo periodo
+(`GET /network/seats/heat?days=`, `features/map/SeatHeatMap.tsx`).
+
+- **Las mismas horas que el grafo.** Las sesiones salen de
+  `network/seating.sessions.ts` (`seatSessionsIn`), que usan los dos: desde
+  `first_seen_at` menos 15 minutos de margen, 12 h como mucho por sesión y
+  recortadas al periodo. Las horas de un puesto son la suma de sus sesiones;
+  además, cuántas personas distintas se han sentado en él.
+- **Solo la gente que ves.** Cuenta las horas de quien sale en la red de
+  asientos de quien mira: un estudiante, las de estudiantes; un piscinero, las
+  de su piscina; y nadie oculto a su grupo (`docs/personas-ocultas.md`). Se
+  eligió así, y no contar a todo el mundo, para que el mapa y el grafo sumen lo
+  mismo y para que una persona oculta no deje rastro de dónde se sienta. No
+  lleva nombres: solo horas y número de personas por puesto.
+- **El plano de cada cual.** Cada clúster se completa como en el mapa (los
+  puestos conocidos de `replica.knownSeats` y los del historial; lo que falta
+  dentro del rectángulo sale a 0) y se dibuja con las opciones que la persona
+  tiene puestas en la pestaña Clústeres (`features/map/look.ts`: filas, puestos,
+  hacia dónde miran y el desplazamiento). Un clúster cada vez, con las mismas
+  pastillas que el mapa; de entrada, el más usado.
+- **Color.** Una sola tinta azul, de clara a oscura en el tema claro y de
+  oscura a clara en el oscuro (secuencial, se lee con daltonismo); el puesto sin
+  uso, vacío como un puesto libre. Leyenda de 0 al máximo, ficha al pasar o al
+  enfocar («c2r3s4 · 37 h · 9 personas») y «Ver como tabla» con los puestos más
+  y menos usados.
+- Caché de 5 minutos por campus, mundo, ocultos y días, como el grafo.
+
 ## El plano de los clústeres
 
 La pestaña Clústeres pinta el plano igual de fábrica (`features/map/look.ts`):

@@ -46,3 +46,34 @@ export type SeatGraph = {
     hours: number
   }
 }
+
+/** Un puesto del mapa de calor. */
+export type SeatHeatCell = {
+  host: string
+  row: number
+  seat: number
+  /** Horas de uso en el periodo, con un decimal. `0` si nadie se ha sentado. */
+  hours: number
+  /** Personas distintas que se han sentado en él. */
+  people: number
+}
+
+/** Un clúster del mapa de calor: la cuadrícula entera, `rows` × `seatsPerRow`. */
+export type SeatHeatCluster = {
+  id: string
+  rows: number
+  seatsPerRow: number
+  /** Ordenados por fila y puesto. */
+  cells: SeatHeatCell[]
+}
+
+/**
+ * `GET /network/seats/heat?days=`: cuánto se ha usado cada ordenador, medido
+ * igual que la red de asientos y solo con la gente que quien mira puede ver.
+ */
+export type SeatHeat = {
+  days: number
+  clusters: SeatHeatCluster[]
+  /** Las horas del puesto más usado, para la escala de colores. */
+  max: number
+}

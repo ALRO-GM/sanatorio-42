@@ -10,10 +10,10 @@ Generado desde `apps/web/src/shared/i18n/textos/clusters.csv` con
 | `map.title` | Título del mapa de puestos del campus | features/map/ClusterMapView, features/map/ProjectMap | Mapa de los clústeres | Cluster map | Mapa de clústers | Klusterren mapa | Plan des clusters |
 | `map.loading` | Mientras se dibuja el mapa | features/map/ClusterMapView, features/map/ClustersPage, features/map/ProjectMap, features/map/SeatPicker | Dibujando el mapa… | Drawing the map… | Dibuixant el mapa… | Mapa marrazten… | Dessin du plan… |
 | `map.empty` | Aún no hay plano del campus | features/map/ClusterMapView | Todavía no hay plano de este campus: se dibuja a medida que la gente se sienta. | No map for this campus yet: it gets drawn as people sit down. | Encara no hi ha plànol d'aquest campus: es va dibuixant a mesura que la gent s'asseu. | Oraindik ez dago campus honen planorik: jendea esertzen den heinean marrazten da. | Pas encore de plan pour ce campus : il se dessine à mesure que les gens s'installent. |
-| `map.clusters` | Selector de sala | features/map/ClusterMapView | Clústeres | Clusters | Clústers | Klusterrak | Clusters |
+| `map.clusters` | Selector de sala | features/map/ClusterMapView, features/map/SeatHeatMap | Clústeres | Clusters | Clústers | Klusterrak | Clusters |
 | `map.cluster` | Nombre de una sala del campus (en 42 se llaman así) | features/map/ClusterMapView, features/map/ClustersTour, shared/seats | Clúster {n} | Cluster {n} | Clúster {n} | {n}. klusterra | Cluster {n} |
 | `map.seatName` | Nombre completo de un puesto: clúster, fila y puesto | features/map/ClusterMapView, shared/seats | {cluster} · Fila {row} · Puesto {seat} | {cluster} · Row {row} · Seat {seat} | {cluster} · Fila {row} · Lloc {seat} | {cluster} · {row}. ilara · {seat}. postua | {cluster} · Rangée {row} · Poste {seat} |
-| `map.row` | Fila, abreviado | features/map/ClusterMapView | F{n} | R{n} | F{n} | E{n} | R{n} |
+| `map.row` | Fila, abreviado | features/map/ClusterMapView, features/map/SeatHeatMap | F{n} | R{n} | F{n} | E{n} | R{n} |
 | `map.rowLong.one` | Una fila | features/map/ClusterMapView, features/therapy/GroupForm | fila {rows} | row {rows} | fila {rows} | {rows} ilara | rangée {rows} |
 | `map.rowLong.many` | Varias filas | features/map/ClusterMapView, features/therapy/GroupForm | filas {rows} | rows {rows} | files {rows} | {rows} ilarak | rangées {rows} |
 | `map.seatTaken` | Puesto ocupado por alguien a quien no puedes ver (otro grupo, u oculto) | features/map/ClusterMapView | Ocupado | Taken | Ocupat | Hartuta | Occupé |

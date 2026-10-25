@@ -135,6 +135,7 @@ import type {
   NetworkPerson,
   NetworkStrictest,
   SeatGraph,
+  SeatHeat,
   Notices,
   OnlineUsers,
   PaceRefInput,
@@ -527,6 +528,8 @@ export type Api = {
   ) => Promise<NetworkStrictest>
   /** La red de asientos: quién se sienta cerca de quién, en los últimos `days` días. */
   getSeatGraph: (days: number) => Promise<SeatGraph>
+  /** El mapa de calor de los puestos: horas y gente por ordenador, en los últimos `days` días. */
+  getSeatHeat: (days: number) => Promise<SeatHeat>
   /** Con quién te has corregido tú, en todo el histórico. */
   getNetworkMine: () => Promise<NetworkMine>
   /** Logins que empiezan por lo escrito, para el buscador de la red. */

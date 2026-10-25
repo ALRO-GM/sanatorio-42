@@ -1,7 +1,13 @@
 import { useCallback, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 
-import type { NetworkLink, NetworkNode, SeatGraph, SeatPerson } from '@sanatorio/contracts'
+import type {
+  NetworkLink,
+  NetworkNode,
+  SeatGraph,
+  SeatHeat,
+  SeatPerson,
+} from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
@@ -13,6 +19,7 @@ import { Avatar } from '../../shared/ui/Avatar'
 import { PersonLink } from '../../shared/ui/PersonLink'
 import { colorOf, scaleColor } from './colors'
 import { ForceGraph } from './ForceGraph'
+import { SeatHeatMap } from '../map/SeatHeatMap'
 
 /** Días hacia atrás que se pueden mirar. */
 const DAYS = [7, 14, 30, 90] as const
@@ -65,6 +72,7 @@ export function SeatsPage({ switcher }: { switcher: ReactNode }) {
   const [mode, setMode] = useState<Mode>('community')
   const [selected, setSelected] = useState<string | null>(null)
   const { data, error, reload } = useAsync<SeatGraph>(() => api.getSeatGraph(days), [days])
+  const heat = useAsync<SeatHeat>(() => api.getSeatHeat(days), [days])
 
   const nodes = useMemo(() => data?.people.map(toNode) ?? [], [data])
   const links = useMemo(
@@ -316,6 +324,13 @@ export function SeatsPage({ switcher }: { switcher: ReactNode }) {
           </div>
         )}
       </div>
+
+      {/* Debajo del grafo, con el mismo periodo: cuánto se usa cada ordenador. */}
+      <article className="card seat-heat-card">
+        <h3>{t('seats.heat.title')}</h3>
+        <ErrorNote error={heat.error} onRetry={() => void heat.reload()} />
+        {heat.data !== undefined && <SeatHeatMap heat={heat.data} />}
+      </article>
     </section>
   )
 }
