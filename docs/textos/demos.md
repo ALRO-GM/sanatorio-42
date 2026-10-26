@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/demos.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-108 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
+114 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera | Francés |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -115,3 +115,9 @@ Generado desde `apps/web/src/shared/i18n/textos/demos.csv` con
 | `tour.scrum.2` | Demostración animada de la agenda: frase del paso 2 | shared/tour/Tour | Marca cada checkpoint según lo cierras. | Tick each checkpoint as you close it. | Marca cada checkpoint a mesura que el tanques. | Markatu checkpoint bakoitza ixten duzun heinean. | Coche chaque checkpoint au fur et à mesure. |
 | `tour.scrum.3` | Demostración animada de la agenda: frase del paso 3 | shared/tour/Tour | En el daily, elige de la lista qué te atascó. | In your daily, pick what blocked you from the list. | Al daily, tria de la llista què et va encallar. | Daily-an, aukeratu zerrendatik zerk blokeatu zintuen. | Dans ton daily, choisis dans la liste ce qui t'a bloqué. |
 | `tour.scrum.4` | Demostración animada de la agenda: frase del paso 4 | shared/tour/Tour | Tu sprint lo ve en su tablero y puede echarte una mano. | Your sprint sees it on its board and can lend a hand. | El teu sprint ho veu al seu tauler i et pot donar un cop de mà. | Zure sprintak bere taulan ikusten du eta lagun zaitzake. | Ton sprint le voit sur son tableau et peut te donner un coup de main. |
+| `tour.progress.1` | Demostración animada de Avance: frase del paso 1 | shared/tour/Tour | Tu línea, frente a la media de tu campus. | Your line, against your campus average. | La teva línia, davant la mitjana del teu campus. | Zure lerroa, zure campuseko batez bestekoaren aurrean. | Ta courbe, face à la moyenne de ton campus. |
+| `tour.progress.2` | Demostración animada de Avance: frase del paso 2 | shared/tour/Tour | Más arriba, más common core hecho en ese mes. | Higher means more common core done by that month. | Més amunt, més common core fet en aquell mes. | Gorago, hilabete horretan common core gehiago eginda. | Plus haut, plus de common core fait à ce mois-là. |
+| `tour.progress.3` | Demostración animada de Avance: frase del paso 3 | shared/tour/Tour | Añade campus: cada uno sale con su línea. | Add campuses: each one gets its own line. | Afegeix campus: cadascun surt amb la seva línia. | Gehitu campusak: bakoitzak bere lerroa du. | Ajoute des campus : chacun a sa courbe. |
+| `tour.progress.4` | Demostración animada de Avance: frase del paso 4 | shared/tour/Tour | Elige el periodo: los primeros meses o todo. | Pick the period: the first months or everything. | Tria el període: els primers mesos o tot. | Aukeratu aldia: lehen hilabeteak edo dena. | Choisis la période : les premiers mois ou tout. |
+| `tour.progress.5` | Demostración animada de Avance: frase del paso 5 | shared/tour/Tour | Mide por círculos o por horas estimadas. | Measure by circles or by estimated hours. | Mesura per cercles o per hores estimades. | Neurtu zirkuluka edo kalkulatutako orduka. | Mesure par cercles ou par heures estimées. |
+| `tour.progress.6` | Demostración animada de Avance: frase del paso 6 | shared/tour/Tour | Pasa por un punto: lo que aprobaste ese día. | Hover a dot: what you passed that day. | Passa per un punt: el que vas aprovar aquell dia. | Pasatu puntu baten gainetik: egun hartan gainditutakoa. | Survole un point : ce que tu as validé ce jour-là. |

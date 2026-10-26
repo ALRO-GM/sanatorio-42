@@ -95,6 +95,7 @@ Clases de `styles/tour.css`, que ya se ven bien en todos los estilos y temas:
 | `tour-seats` / `tour-seat` (`.on`, `.busy`, `.glow`, `.broken`) | Puestos del mapa |
 | `tour-pop`, `tour-side`, `tour-box` | Ventanita flotante, lateral o de buzón |
 | `tour-notice`, `tour-chip`, `tour-code`, `tour-switch`, `tour-input`, `tour-select`, `tour-menu`, `tour-check` | Avisos, etiquetas, códigos y controles |
+| `tour-chart`, `tour-chart-line` (`.me`, `.avg`, `.other`), `tour-chart-dot` | Gráfica de líneas en miniatura (Avance) |
 | `tour-in` | Aparece con un fundido corto |
 
 Si hace falta una pieza nueva, va en `styles/tour.css` con las variables del
@@ -144,4 +145,4 @@ tema (nunca un color suelto) y se apunta en esta tabla.
 | `exams` | Exámenes | Aviso en vivo en la pestaña, quién está y su nota, intentos hasta aprobar |
 | `scrum` | Agenda | Marcar un checkpoint, daily con un atasco de la lista, tablero del sprint |
 | `gitCourse` | Curso de git (Not-games) | Elegir punto, animación y teoría, terminal y estrellas, misiones de grupo |
-
+| `progress` | Datos › Avance | Tu línea y la media, añadir un campus con su línea, el periodo, medir por horas, la ficha de un hito |

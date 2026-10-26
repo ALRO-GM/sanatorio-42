@@ -793,3 +793,34 @@ dialog.info-dialog {
     color-mix(in srgb, var(--danger) 35%, transparent) 4px 6px
   );
 }
+
+/* Avance: una gráfica de líneas en miniatura (`ProgressTour`). */
+.tour-chart {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.tour-chart-line {
+  fill: none;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: d calc(0.6s * var(--pace)) ease-in-out;
+}
+.tour-chart-line.me {
+  stroke: var(--accent);
+  stroke-width: 3.5;
+}
+.tour-chart-line.avg {
+  stroke: var(--text-3);
+}
+.tour-chart-line.other {
+  stroke: var(--warn);
+  stroke-dasharray: 6 4;
+}
+.tour-chart-dot {
+  fill: var(--surface);
+  stroke: var(--accent);
+  stroke-width: 2.5;
+}

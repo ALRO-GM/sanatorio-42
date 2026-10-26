@@ -26,6 +26,7 @@ import { MONTH, ProgressChart } from './ProgressChart'
 import type { Span } from './ProgressChart'
 import { ProgressCompare } from './ProgressCompare'
 import { ProgressRanking } from './ProgressRanking'
+import { ProgressTour } from './ProgressTour'
 import { POPULATIONS, TRACKS } from './progressSeries'
 
 const RANGE_KEY = 'sanatorio_progress_range'
@@ -211,6 +212,7 @@ export function ProgressPage({ me }: { me: string }) {
           {t('stats.progress.title')}
           <InfoTip title={t('stats.progress.title')}>
             <p>{t('stats.progress.info')}</p>
+            <ProgressTour />
           </InfoTip>
         </h2>
       </div>

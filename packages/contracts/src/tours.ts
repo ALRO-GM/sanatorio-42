@@ -21,6 +21,7 @@ export type TourName =
   | 'mailbox'
   | 'network'
   | 'notGames'
+  | 'progress'
   | 'record'
   | 'scrum'
   | 'therapy'

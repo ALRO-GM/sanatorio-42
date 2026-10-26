@@ -51,6 +51,7 @@ const TOURS: Record<TourName, true> = {
   mailbox: true,
   network: true,
   notGames: true,
+  progress: true,
   record: true,
   scrum: true,
   therapy: true,
