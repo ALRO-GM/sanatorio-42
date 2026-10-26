@@ -40,7 +40,7 @@ export function BoardsTour() {
   const { t } = useI18n()
 
   return (
-    <Tour tour={TOUR} tab={() => t('nav.pizarras')}>
+    <Tour tour={TOUR} tab={() => t('nav.cat.ayuda')} sub={() => t('nav.pizarras')}>
       {(shot) =>
         shot.scene === 0 ? (
           <>

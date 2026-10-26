@@ -38,7 +38,7 @@ export function TherapyTour() {
   const days = t('tour.days').split(',')
 
   return (
-    <Tour tour={TOUR} tab={() => t('nav.terapia')}>
+    <Tour tour={TOUR} tab={() => t('nav.cat.ayuda')} sub={() => t('nav.terapia')}>
       {(shot) =>
         shot.scene === 0 ? (
           <>

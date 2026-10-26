@@ -824,3 +824,187 @@ dialog.info-dialog {
   stroke: var(--accent);
   stroke-width: 2.5;
 }
+
+/* Sin pestaña de la segunda fila en esa escena (el on-call se abre desde la
+   cabecera, no va en ninguna categoría): no se deja la flecha sola. */
+.tour-subtab:empty {
+  display: none;
+}
+
+/* Dos columnas, la de la izquierda más ancha: la gráfica y sus opciones. */
+.tour-split.lean {
+  grid-template-columns: 2fr 1fr;
+}
+
+/* Lo que se ordena arrastrando (Personalizar). Cada pieza va en su hueco
+   (`--i`) de una fila (`tour-sort-row`, `--n` huecos) o de una columna
+   (`tour-sort-col`); al cambiar de hueco se desliza con la misma duración y
+   curva que el ratón arrastrando, así que lo cogido va pegado al ratón. */
+.tour-sort-row,
+.tour-sort-col {
+  position: relative;
+}
+.tour-sort-row {
+  height: 1.9em;
+}
+.tour-sort-col {
+  height: calc(var(--n) * 2.1em);
+}
+.tour-sort {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transition: transform calc(0.94s * var(--pace)) cubic-bezier(0.4, 0.1, 0.3, 1);
+}
+.tour-sort-row > .tour-sort {
+  width: calc(100% / var(--n));
+  padding: 0 0.12em;
+  transform: translateX(calc(var(--i) * 100%));
+}
+.tour-sort-col > .tour-sort {
+  right: 0;
+  transform: translateY(calc(var(--i) * 2.1em));
+}
+.tour-sort > span {
+  display: flex;
+  align-items: center;
+  gap: 0.3em;
+  height: 1.8em;
+  padding: 0 0.4em;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 0.5em;
+  background: var(--mini-surface, var(--surface));
+  color: var(--mini-text, var(--text));
+  white-space: nowrap;
+  transition:
+    background 0.4s,
+    color 0.4s,
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+.tour-sort.on > span {
+  border-color: var(--mini-accent, var(--accent));
+  font-weight: 700;
+}
+/* Lo cogido flota por encima del resto. */
+.tour-sort.lifted {
+  z-index: 1;
+}
+.tour-sort.lifted > span {
+  border-color: var(--mini-accent, var(--accent));
+  box-shadow: 0 6px 16px var(--shadow);
+}
+/* El nombre se corta con puntos suspensivos si no cabe, como en la miniatura de verdad. */
+.tour-sort > span > b {
+  min-width: 0;
+  overflow: hidden;
+  font-weight: inherit;
+  text-overflow: ellipsis;
+}
+.tour-grip {
+  display: inline-grid;
+  flex: none;
+  color: var(--text-3);
+}
+
+/* La web en pequeño de Personalizar: toma los colores del estilo que se elige
+   en la demostración (`--mini-*`, los de la muestra del selector) y, mientras
+   no se elige ninguno, los del que está puesto. */
+.tour-mini {
+  display: grid;
+  gap: 0.5em;
+  padding: 0.6em;
+  border: 1px solid var(--border);
+  border-radius: var(--mini-radius, 0.8em);
+  background: var(--mini-bg, var(--bg));
+  color: var(--mini-text, var(--text));
+  font-size: 0.9em;
+  transition:
+    background 0.4s,
+    color 0.4s;
+}
+/* Un estilo del selector: su muestra (fondo y acento) y su nombre. */
+.tour-style {
+  display: grid;
+  grid-template-columns: 2.2em 1fr;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.3em 0.5em;
+  border: 1px solid var(--border);
+  border-radius: 0.7em;
+  transition:
+    border-color 0.2s,
+    background 0.2s;
+}
+.tour-style.on {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.tour-style i {
+  display: grid;
+  align-content: end;
+  height: 1.5em;
+  padding: 0.2em;
+  border-radius: 0.3em;
+  background: var(--sample-bg);
+}
+.tour-style i::after {
+  content: '';
+  height: 0.4em;
+  border-radius: 0.2em;
+  background: var(--sample-accent);
+}
+
+/* El mapa de calor de los puestos en miniatura: las mismas casillas y colores
+   que el de verdad (`heat-*` de `network.css`), a la medida del decorado. */
+.tour-heat {
+  --cell: 1.5em;
+  gap: 0.6em;
+}
+.tour-heat .heat-clusters {
+  gap: 0.6em 1.6em;
+}
+.tour-heat .heat-cluster {
+  position: relative;
+  gap: 0.3em;
+}
+.tour-heat .heat-cluster figcaption {
+  font-size: 1em;
+}
+.tour-heat .heat-axis,
+.tour-heat .heat-stats,
+.tour-heat .heat-legend {
+  font-size: 0.8em;
+}
+.tour-heat .heat-ramp {
+  width: 6em;
+  height: 0.7em;
+}
+.tour-heat .heat-stats {
+  padding: 0.2em 0.3em;
+  border-radius: 0.4em;
+}
+/* La ficha de un puesto al pasar el ratón, encima de su clúster. */
+.tour-tip {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  z-index: 2;
+  padding: 0.25em 0.6em;
+  border: 1px solid var(--border);
+  border-radius: 0.5em;
+  background: var(--surface);
+  box-shadow: 0 4px 12px var(--shadow-soft);
+  color: var(--text);
+  font-weight: 600;
+  white-space: nowrap;
+  /* Centrada con `translate`: lo que aparece suave va en el `tour-in` de dentro. */
+  translate: -50% -30%;
+}
+/* El grafo de la red, sobre su fondo de siempre (`--stage-bg`). */
+.tour-card.tour-net {
+  padding: 0;
+  overflow: hidden;
+  background: var(--stage-bg);
+}

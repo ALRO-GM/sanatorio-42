@@ -71,7 +71,7 @@ export const TOUR = defineTour<Guard>('guard', START, [
 ])
 
 /** Las medias horas de la rejilla de mentira. */
-const SLOTS = ['16:00', '16:30', '17:00', '17:30', '18:00', '18:30', '19:00', '19:30']
+const SLOTS = ['16:00', '16:30', '17:00', '17:30', '18:00', '18:30', '19:00']
 
 const label = (minutes: number): string => (minutes < 60 ? `${minutes} min` : `${minutes / 60} h`)
 
@@ -86,7 +86,10 @@ export function GuardTour() {
   return (
     <Tour
       tour={TOUR}
-      tab={(shot) => t(shot.scene === 0 ? 'nav.guardia' : 'nav.tablon')}
+      // El on-call se abre desde la cabecera, sin categoría; luego se sigue en
+      // Ayuda › Proyectos.
+      tab={(shot) => t(shot.scene === 0 ? 'nav.guardia' : 'nav.cat.ayuda')}
+      sub={(shot) => (shot.scene === 0 ? '' : t('nav.tablon'))}
       bell={(shot) => (shot.box === 'badge' ? 1 : 0)}
     >
       {(shot) =>
@@ -125,9 +128,8 @@ export function GuardTour() {
               </span>
             </div>
             <div className="tour-row">
-              <span className={`tour-check ${shot.pre ? 'on' : ''}`} data-tour="pre">
-                {shot.pre && <Icon name="hecho" size={11} />}
-              </span>
+              {/* Como en la página: un interruptor, en su propio bloque arriba. */}
+              <span className={`tour-switch ${shot.pre ? 'on' : ''}`} data-tour="pre" />
               <span>{t('help.preReview')}</span>
             </div>
             <div className="tour-row">

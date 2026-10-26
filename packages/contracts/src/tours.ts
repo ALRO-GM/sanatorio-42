@@ -24,6 +24,8 @@ export type TourName =
   | 'progress'
   | 'record'
   | 'scrum'
+  | 'seats'
+  | 'studio'
   | 'therapy'
   | 'waiting'
 

@@ -14,7 +14,7 @@ Cómo se trabaja con ellas: [docs/textos.md](../textos.md).
 | [code-clicker](code-clicker.md) | 27 | 0 | 0 | 0 | 0 |
 | [comun](comun.md) | 335 | 0 | 0 | 0 | 0 |
 | [curso-shell](curso-shell.md) | 67 | 0 | 0 | 0 | 0 |
-| [demos](demos.md) | 114 | 0 | 0 | 0 | 0 |
+| [demos](demos.md) | 126 | 0 | 0 | 0 | 0 |
 | [estadisticas](estadisticas.md) | 127 | 0 | 0 | 0 | 0 |
 | [examenes](examenes.md) | 65 | 0 | 0 | 0 | 0 |
 | [expediente](expediente.md) | 143 | 0 | 0 | 0 | 0 |

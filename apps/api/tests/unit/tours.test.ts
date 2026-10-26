@@ -102,6 +102,9 @@ describe('velocidad de las demostraciones', () => {
     await expectCode(tours.rate(actor('ana'), { name: 'inventada', rate: 1 }), 'invalid_input')
     // Y las de nombre con mayúscula, que antes no pasaban.
     expect(await tours.rate(actor('ana'), { name: 'helpStats', rate: 1 })).toEqual({ speed: 1 })
+    // Las dos nuevas: la red de asientos y Personalizar.
+    expect(await tours.rate(actor('ana'), { name: 'seats', rate: 1 })).toEqual({ speed: 1 })
+    expect(await tours.rate(actor('ana'), { name: 'studio', rate: 1 })).toEqual({ speed: 1 })
     await expectCode(tours.stats(actor('ana')), 'forbidden')
   })
 })

@@ -67,7 +67,7 @@ Generado desde `apps/web/src/shared/i18n/textos/buzon.csv` con
 | `inbox.kind.idea` | Tipo de envío: mejora | features/admin/Inbox, features/admin/InboxTab | Mejora | Improvement | Millora | Hobekuntza | Amélioration |
 | `inbox.kind.report` | Tipo de envío: denuncia | features/admin/Inbox, features/admin/InboxTab | Denuncia | Report | Denúncia | Salaketa | Signalement |
 | `inbox.bodyLabel` | Formulario: detalle | features/admin/Inbox | Detalle | Details | Detall | Xehetasuna | Détails |
-| `inbox.mine` | Lista de lo que has enviado | features/admin/Inbox | Lo que has enviado | What you have sent | El que has enviat | Bidali duzuna | Ce que tu as envoyé |
+| `inbox.mine` | Lista de lo que has enviado | features/admin/Inbox, features/admin/InboxTour | Lo que has enviado | What you have sent | El que has enviat | Bidali duzuna | Ce que tu as envoyé |
 | `inbox.none` | No has enviado nada | features/admin/Inbox | Todavía no has enviado nada. | You have not sent anything yet. | Encara no has enviat res. | Oraindik ez duzu ezer bidali. | Tu n'as encore rien envoyé. |
 | `inbox.pending` | Sin respuesta todavía | features/admin/Inbox | Pendiente de respuesta | Waiting for an answer | Pendent de resposta | Erantzunaren zain | En attente de réponse |
 | `inbox.answer` | Prefijo de la respuesta de admin | features/admin/Inbox | Respuesta: | Answer: | Resposta: | Erantzuna: | Réponse : |
@@ -87,8 +87,8 @@ Generado desde `apps/web/src/shared/i18n/textos/buzon.csv` con
 | `notices.toAdmin` | Destinatario: administración | features/notices/Mailbox | A quien administra | To the admins | A qui administra | Kudeatzaileari | Aux personnes qui administrent |
 | `notices.toPeer` | Destinatario: otra persona | features/notices/Mailbox | A alguien del campus | To someone on campus | A algú del campus | Campuseko norbaiti | À quelqu'un du campus |
 | `notices.peerLabel` | Buscador de destinatario | features/notices/PeerPicker | Busca por login o por nombre | Search by login or name | Cerca per login o per nom | Bilatu loginaren edo izenaren arabera | Cherche par login ou par nom |
-| `notices.tab.notices` | Pestaña del buzón: avisos | features/notices/Mailbox | Avisos | Notices | Avisos | Oharrak | Notifications |
-| `notices.tab.chats` | Pestaña del buzón: conversaciones | features/notices/Mailbox | Conversaciones | Conversations | Converses | Elkarrizketak | Discussions |
+| `notices.tab.notices` | Pestaña del buzón: avisos | features/notices/Mailbox, features/notices/MailboxTour | Avisos | Notices | Avisos | Oharrak | Notifications |
+| `notices.tab.chats` | Pestaña del buzón: conversaciones | features/notices/Mailbox, features/notices/MailboxTour | Conversaciones | Conversations | Converses | Elkarrizketak | Discussions |
 | `notices.go.conversations` | Enlace del aviso: abrir la conversación | features/notices/Mailbox | abrir la conversación | open the conversation | obre la conversa | ireki elkarrizketa | ouvrir la discussion |
 | `notices.kind.chat_reminder` | Recordatorio que te pusiste | features/notices/Mailbox | Recordatorio: tienes pendiente responder a {from} | Reminder: you still have to answer {from} | Et recordo que tens pendent respondre a {from} | Gogoratu: {from} erabiltzaileari erantzuteko duzu | Rappel : tu dois encore répondre à {from} |
 | `chats.back` | Botón para volver a la lista de conversaciones | features/notices/Conversations | Conversaciones | Conversations | Converses | Elkarrizketak | Discussions |

@@ -20,10 +20,12 @@ import { PeriodPicker } from '../../shared/ui/PeriodPicker'
 import { daysOf } from '../../shared/period'
 import type { Period } from '../../shared/period'
 import { Avatar } from '../../shared/ui/Avatar'
+import { InfoTip } from '../../shared/ui/InfoTip'
 import { PersonLink } from '../../shared/ui/PersonLink'
 import { colorOf, scaleColor } from './colors'
 import { ForceGraph } from './ForceGraph'
 import { SeatHeatMap } from './SeatHeatMap'
+import { SeatsTour } from './SeatsTour'
 
 /** «Todo»: los días más que acepta la API (diez años). */
 const ALL_DAYS = 3650
@@ -163,7 +165,12 @@ export function SeatsPage({ switcher }: { switcher: ReactNode }) {
       <div className="net-layout">
         <div className="net-rail">
           <div className="net-head">
-            <h2>{t('seats.title')}</h2>
+            <h2>
+              {t('seats.title')}
+              <InfoTip title={t('seats.title')}>
+                <SeatsTour />
+              </InfoTip>
+            </h2>
             {switcher}
             <p className="hint">{t('seats.intro')}</p>
           </div>

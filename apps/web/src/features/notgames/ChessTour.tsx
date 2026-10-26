@@ -36,7 +36,7 @@ export function ChessTour() {
   const { t } = useI18n()
 
   return (
-    <Tour tour={TOUR} tab={() => t('nav.notgames')}>
+    <Tour tour={TOUR} tab={() => t('nav.cat.ayuda')} sub={() => t('nav.notgames')}>
       {(shot) => {
         if (shot.scene === 0) {
           return (

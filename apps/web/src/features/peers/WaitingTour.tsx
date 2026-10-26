@@ -36,12 +36,12 @@ export function WaitingTour() {
   const { t } = useI18n()
 
   return (
-    <Tour tour={TOUR} tab={() => t('nav.consulta')}>
+    <Tour tour={TOUR} tab={() => t('nav.cat.ayuda')} sub={() => t('nav.consulta')}>
       {(shot) =>
         shot.scene === 0 ? (
           <>
+            <strong>{t('projects.title')}</strong>
             <div className="tour-row">
-              <strong>{t('projects.title')}</strong>
               {PROJECTS.map((project, index) => (
                 <span
                   key={project}
@@ -55,6 +55,7 @@ export function WaitingTour() {
             {shot.project && (
               <div className="tour-split tour-in">
                 <div className="tour-card">
+                  <strong>{t('peers.title', { project: 'push_swap' })}</strong>
                   <span className={`tour-item ${shot.open ? 'on' : ''}`} data-tour="p1">
                     <span className="tour-avatar">M</span>
                     <span>
@@ -86,29 +87,47 @@ export function WaitingTour() {
                       </span>
                       <span className="tour-pill">17:30</span>
                     </div>
-                    <div className="tour-row">
-                      <span className="tour-button" data-tour="send">
-                        {t('help.bookSend')}
+                    {shot.sent ? (
+                      <span className="tour-notice tour-in">
+                        <Icon name="hecho" size={13} /> {t('help.bookSent', { login: 'mgarcia' })}
                       </span>
-                      {shot.sent && (
-                        <span className="tour-saved">
-                          <Icon name="hecho" size={13} />
+                    ) : (
+                      <div className="tour-row">
+                        <span className="tour-button" data-tour="send">
+                          {t('help.bookSend')}
                         </span>
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
             )}
           </>
         ) : (
-          <div className="tour-card">
+          <>
+            {/* El interruptor va en la cabecera, junto al botón de tu on-call. */}
             <div className="tour-row">
-              <strong>{t('duty.label')}</strong>
+              <span className="tour-pill tour-end">{t('duty.label')}</span>
               <span className={`tour-switch ${shot.duty ? 'on' : ''}`} data-tour="duty" />
-              {shot.duty && <span className="tour-chip">{t('peers.badgeOn')}</span>}
             </div>
-          </div>
+            <div className="tour-card">
+              <strong>{t('peers.title', { project: 'push_swap' })}</strong>
+              <span className="tour-item">
+                <span className="tour-avatar">M</span>
+                <strong>mgarcia</strong>
+                <span className="tour-chip tour-end">{t('peers.badgeOn')}</span>
+              </span>
+              {shot.duty && (
+                <span className="tour-item on tour-in">
+                  <span className="tour-avatar" style={{ ['--hue' as string]: 120 }}>
+                    T
+                  </span>
+                  <strong>tlopez</strong>
+                  <span className="tour-chip tour-end">{t('peers.badgeOn')}</span>
+                </span>
+              )}
+            </div>
+          </>
         )
       }
     </Tour>
