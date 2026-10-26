@@ -307,6 +307,10 @@ common.close,Botón genérico: cerrar una ventana o panel,Cerrar,Close,Tanca,Itx
 common.from,Campo genérico: inicio de un periodo o franja,Desde,From,Des de,Noiztik,De
 common.to,Campo genérico: fin de un periodo o franja,Hasta,To,Fins a,Noiz arte,À
 common.period,Etiqueta genérica: el periodo que se mira,Periodo,Period,Període,Aldia,Période
+period.last.one,Selector de periodo de toda la web: el último mes,Último mes,Last month,Últim mes,Azken hilabetea,Dernier mois
+period.last.many,"Selector de periodo de toda la web: los últimos {n} meses","Últimos {n} meses","Last {n} months","Últims {n} mesos","Azken {n} hilabeteak","{n} derniers mois"
+period.all,Selector de periodo de toda la web: sin límite,Todo,All,Tot,Dena,Tout
+period.custom,"Selector de periodo de toda la web: elegir las fechas a mano",Fechas…,Dates…,Dates…,Datak…,Dates…
 common.people,Etiqueta o columna genérica: número de personas,Personas,People,Persones,Pertsonak,Personnes
 common.person,Columna genérica: la persona de la fila,Persona,Person,Persona,Pertsona,Personne
 common.accept,Botón genérico: aceptar una petición,Aceptar,Accept,Accepta,Onartu,Accepter

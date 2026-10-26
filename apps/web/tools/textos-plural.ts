@@ -77,7 +77,6 @@ export const ALWAYS_MANY: Record<string, string> = {
   'net.projects.span': 'un rango («entre {min} y {max}»)',
   'net.strict.min': 'MIN_STEPS empieza en 3',
   'net.strict.empty': 'MIN_STEPS empieza en 3',
-  'seats.days': 'opciones 7, 14, 30 y 90',
   'peers.specialistsN': 'con 1 se usa peers.specialists1',
   'peers.totalN': 'con 1 se usa peers.total1',
   'peers.totalOf': 'solo sale si hay más de las que se ven (2 o más)',

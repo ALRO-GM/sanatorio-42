@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/red.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-192 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
+187 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera | Francés |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -13,11 +13,7 @@ Generado desde `apps/web/src/shared/i18n/textos/red.csv` con
 | `net.sync.copying.one` | Progreso de la copia del historial (una) | features/network/NetworkPage | Copiando el historial de 42: {rows} de {total} corrección. El grafo irá creciendo solo. | Copying history from 42: {rows} of {total} evaluation. The graph will keep growing. | Copiant l'historial de 42: {rows} de {total} correcció. El graf anirà creixent sol. | 42ko historia kopiatzen: {total} zuzenketatik {rows}. Grafoa berez haziko da. | Import de l'historique depuis 42 : {rows} sur {total} correction. Le graphe va s'étoffer tout seul. |
 | `net.sync.copying.many` | Progreso de la copia del historial (varias) | features/network/NetworkPage | Copiando el historial de 42: {rows} de {total} correcciones. El grafo irá creciendo solo. | Copying history from 42: {rows} of {total} evaluations. The graph will keep growing. | Copiant l'historial de 42: {rows} de {total} correccions. El graf anirà creixent sol. | 42ko historia kopiatzen: {total} zuzenketatik {rows}. Grafoa berez haziko da. | Import de l'historique depuis 42 : {rows} sur {total} corrections. Le graphe va s'étoffer tout seul. |
 | `net.sync.range` | Fechas copiadas hasta ahora | features/network/NetworkPage | Por ahora, del {from} al {to} | So far, from {from} to {to} | De moment, del {from} al {to} | Oraingoz, {from} – {to} | Pour l'instant, du {from} au {to} |
-| `net.period.all` | Periodo: todo | features/network/NetworkPage, features/stats/ProgressPage | Todo | All | Tot | Dena | Tout |
-| `net.period.month` | Periodo: último mes | features/network/NetworkPage | Último mes | Last month | Últim mes | Azken hilabetea | Dernier mois |
-| `net.period.quarter` | Periodo: tres meses | features/network/NetworkPage | 3 meses | 3 months | 3 mesos | 3 hilabete | 3 mois |
-| `net.period.year` | Periodo: último año | features/network/NetworkPage | Último año | Last year | Últim any | Azken urtea | Dernière année |
-| `net.period.custom` | Periodo: elegir fechas | features/network/NetworkPage | Fechas… | Dates… | Dates… | Datak… | Dates… |
+| `net.period.all` | Periodo: todo | features/stats/ProgressPage | Todo | All | Tot | Dena | Tout |
 | `net.person.placeholder` | Ejemplo dentro del buscador de persona | features/network/PersonSearch | Buscar un login… | Search a login… | Cerca un login… | Bilatu login bat… | Chercher un login… |
 | `net.person.me` | Botón: ver tu red | features/network/PersonSearch | Mi red | My network | La meva xarxa | Nire sarea | Mon réseau |
 | `net.person.clear` | Botón: volver a todo el campus | features/network/PersonSearch | Volver a todo el campus | Back to the whole campus | Torna a tot el campus | Itzuli campus osora | Revenir à tout le campus |
@@ -160,7 +156,6 @@ Generado desde `apps/web/src/shared/i18n/textos/red.csv` con
 | `seats.view.seats` | Red: pestaña de la red de asientos (quién se sienta con quién en los clústeres) | features/network/RedPage | Asientos | Seats | Seients | Eserlekuak | Postes |
 | `seats.title` | Red de asientos: título | features/network/SeatsPage | Red de asientos | Seating network | Xarxa de seients | Eserlekuen sarea | Réseau des postes |
 | `seats.intro` | Red de asientos: qué enseña, en una línea | features/network/SeatsPage | Con quién se sienta cada cual en los clústeres: cuanto más cerca y más horas a la vez, más fuerte la unión. | Who sits with whom in the clusters: the closer and the longer at the same time, the stronger the link. | Amb qui seu cadascú als clústers: com més a prop i més hores alhora, més forta la unió. | Nor norekin esertzen den klusterretan: zenbat eta gertuago eta ordu gehiago batera, orduan eta lotura sendoagoa. | Qui s'installe à côté de qui dans les clusters : plus les personnes sont proches et restent longtemps ensemble, plus le lien est fort. |
-| `seats.days` | Red de asientos: periodo, últimos {n} días | features/network/SeatsPage | {n} días | {n} days | {n} dies | {n} egun | {n} jours |
 | `seats.colour` | Red de asientos: rótulo del modo de color | features/network/SeatsPage | Color | Colour | Color | Kolorea | Couleur |
 | `seats.mode.community` | Red de asientos: color por grupo de gente que se sienta junta | features/network/SeatsPage | Por grupo | By group | Per grup | Taldeka | Par groupe |
 | `seats.mode.alone` | Red de asientos: color por lo solo que se sienta (verde acompañado, rojo solo) | features/network/SeatsPage | Por aislamiento | By isolation | Per aïllament | Isolamenduaren arabera | Par isolement |

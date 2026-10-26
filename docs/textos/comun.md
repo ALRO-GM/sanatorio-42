@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/comun.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-328 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
+332 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera | Francés |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -312,9 +312,13 @@ Generado desde `apps/web/src/shared/i18n/textos/comun.csv` con
 | `common.next` | Botón genérico: ir al siguiente | features/calendar/CalendarPage, features/gitcourse/LevelView, features/notgames/TurnRoomView | Siguiente | Next | Següent | Hurrengoa | Suivant |
 | `common.refresh` | Botón genérico: volver a cargar los datos | features/calendar/CalendarPage, features/exams/ExamsPage, features/notgames/NotGamesPage | Actualizar | Refresh | Actualitza | Eguneratu | Actualiser |
 | `common.close` | Botón genérico: cerrar una ventana o panel | features/facility/FacilityForm, features/focus/FocusTimer, features/suggest/SuggestPanel | Cerrar | Close | Tanca | Itxi | Fermer |
-| `common.from` | Campo genérico: inicio de un periodo o franja | features/boards/BoardForm, features/network/NetworkPage, features/profile/HoursReport, features/therapy/GroupForm | Desde | From | Des de | Noiztik | De |
-| `common.to` | Campo genérico: fin de un periodo o franja | features/boards/BoardForm, features/network/NetworkPage, features/profile/HoursReport, features/therapy/GroupForm | Hasta | To | Fins a | Noiz arte | À |
-| `common.period` | Etiqueta genérica: el periodo que se mira | features/admin/RangePills, features/network/NetworkPage, features/network/SeatsPage, features/staff/StaffPage | Periodo | Period | Període | Aldia | Période |
+| `common.from` | Campo genérico: inicio de un periodo o franja | features/boards/BoardForm, features/profile/HoursReport, features/therapy/GroupForm, shared/ui/PeriodPicker | Desde | From | Des de | Noiztik | De |
+| `common.to` | Campo genérico: fin de un periodo o franja | features/boards/BoardForm, features/profile/HoursReport, features/therapy/GroupForm, shared/ui/PeriodPicker | Hasta | To | Fins a | Noiz arte | À |
+| `common.period` | Etiqueta genérica: el periodo que se mira | features/admin/RangePills, features/staff/StaffPage, shared/ui/PeriodPicker | Periodo | Period | Període | Aldia | Période |
+| `period.last.one` | Selector de periodo de toda la web: el último mes | shared/ui/PeriodPicker | Último mes | Last month | Últim mes | Azken hilabetea | Dernier mois |
+| `period.last.many` | Selector de periodo de toda la web: los últimos {n} meses | shared/ui/PeriodPicker | Últimos {n} meses | Last {n} months | Últims {n} mesos | Azken {n} hilabeteak | {n} derniers mois |
+| `period.all` | Selector de periodo de toda la web: sin límite | shared/ui/PeriodPicker | Todo | All | Tot | Dena | Tout |
+| `period.custom` | Selector de periodo de toda la web: elegir las fechas a mano | shared/ui/PeriodPicker | Fechas… | Dates… | Dates… | Datak… | Dates… |
 | `common.people` | Etiqueta o columna genérica: número de personas | features/admin/FlowsPanel, features/admin/StatsPanel, features/network/NetworkPage, features/network/SeatsPage | Personas | People | Persones | Pertsonak | Personnes |
 | `common.person` | Columna genérica: la persona de la fila | features/admin/AdminPage, features/admin/CheatsPanel, features/admin/ClickerPanel, features/admin/StatsPanel, features/network/NetworkPage, features/network/PersonSearch | Persona | Person | Persona | Pertsona | Personne |
 | `common.accept` | Botón genérico: aceptar una petición | features/help/BookingCard, features/help/GuardTour, features/help/HelpGate | Aceptar | Accept | Accepta | Onartu | Accepter |

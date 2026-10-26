@@ -5,7 +5,7 @@
 import type { AvailabilityResponse, Peer } from '@sanatorio/contracts'
 
 import { apiUrl, fetchApi, getJson, intHeader, send, sendJson } from './http'
-import type { Api } from './types'
+import type { Api, SeatDates } from './types'
 
 /** Los parámetros de una dirección, sin los que no vengan. */
 const search = (query: Record<string, string | number | undefined>): string =>
@@ -14,6 +14,12 @@ const search = (query: Record<string, string | number | undefined>): string =>
       value === undefined ? [] : [[key, String(value)]],
     ),
   ).toString()
+
+/** El periodo de la red de asientos en la dirección: días o, a mano, dos fechas. */
+const seatQuery = (days: number, dates?: SeatDates): string =>
+  dates === undefined
+    ? search({ days })
+    : search({ from: dates.from, to: dates.to === '' ? undefined : dates.to })
 
 export const realApi: Api = {
   getMe: () => getJson('/auth/me'),
@@ -307,8 +313,8 @@ export const realApi: Api = {
 
     return getJson(`/network/strictest?${query.toString()}`)
   },
-  getSeatGraph: (days) => getJson(`/network/seats?days=${String(days)}`),
-  getSeatHeat: (days) => getJson(`/network/seats/heat?days=${String(days)}`),
+  getSeatGraph: (days, dates) => getJson(`/network/seats?${seatQuery(days, dates)}`),
+  getSeatHeat: (days, dates) => getJson(`/network/seats/heat?${seatQuery(days, dates)}`),
   getNetworkMine: () => getJson('/network/mine'),
   searchNetworkPeople: (q, campuses) => getJson(`/network/people?${search({ q, campuses })}`),
 

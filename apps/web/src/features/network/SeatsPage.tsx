@@ -10,22 +10,23 @@ import type {
 } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
+import type { SeatDates } from '../../shared/api/types'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { useFormat } from '../../shared/i18n/useFormat'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { PillGroup } from '../../shared/ui/PillGroup'
-import { StepPicker } from '../../shared/ui/StepPicker'
+import { PeriodPicker } from '../../shared/ui/PeriodPicker'
+import { daysOf } from '../../shared/period'
+import type { Period } from '../../shared/period'
 import { Avatar } from '../../shared/ui/Avatar'
 import { PersonLink } from '../../shared/ui/PersonLink'
 import { colorOf, scaleColor } from './colors'
 import { ForceGraph } from './ForceGraph'
 import { SeatHeatMap } from './SeatHeatMap'
 
-/** Días hacia atrás que se pueden mirar. */
-const DAYS = [7, 14, 30, 90] as const
-
-type Days = (typeof DAYS)[number]
+/** «Todo»: los días más que acepta la API (diez años). */
+const ALL_DAYS = 3650
 
 /** Cómo se colorea: por grupo de gente que se sienta junta, o por lo solo que se sienta. */
 const MODES = ['community', 'alone'] as const
@@ -69,11 +70,16 @@ function toNode(person: SeatPerson): NetworkNode {
 export function SeatsPage({ switcher }: { switcher: ReactNode }) {
   const { t } = useI18n()
   const { number } = useFormat()
-  const [days, setDays] = useState<Days>(30)
+  const [period, setPeriod] = useState<Period>('1')
+  const [dates, setDates] = useState<SeatDates>({ from: '', to: '' })
+  // A mano, hasta que haya fecha de inicio se sigue con el último mes.
+  const custom = period === 'custom' && dates.from !== '' ? dates : undefined
+  const days = period === 'custom' ? 30 : (daysOf(period) ?? ALL_DAYS)
+  const key = custom === undefined ? String(days) : `${custom.from}..${custom.to}`
   const [mode, setMode] = useState<Mode>('community')
   const [selected, setSelected] = useState<string | null>(null)
-  const { data, error, reload } = useAsync<SeatGraph>(() => api.getSeatGraph(days), [days])
-  const heat = useAsync<SeatHeat>(() => api.getSeatHeat(days), [days])
+  const { data, error, reload } = useAsync<SeatGraph>(() => api.getSeatGraph(days, custom), [key])
+  const heat = useAsync<SeatHeat>(() => api.getSeatHeat(days, custom), [key])
 
   const nodes = useMemo(() => data?.people.map(toNode) ?? [], [data])
   const links = useMemo(
@@ -146,10 +152,10 @@ export function SeatsPage({ switcher }: { switcher: ReactNode }) {
   const loneliest = useMemo(
     () =>
       (data?.people ?? [])
-        .filter((person) => person.hours >= days / 2)
+        .filter((person) => person.hours >= (data?.days ?? 30) / 2)
         .sort((x, y) => y.alone - x.alone)
         .slice(0, 5),
-    [data, days],
+    [data],
   )
 
   return (
@@ -164,14 +170,14 @@ export function SeatsPage({ switcher }: { switcher: ReactNode }) {
           <div className="net-filters">
             <div className="net-filter">
               {/* El selector de periodo de toda la web (`shared/ui/StepPicker`). */}
-              <StepPicker
-                options={DAYS}
-                value={days}
-                onChange={(next) => {
-                  setDays(next)
+              <PeriodPicker
+                value={period}
+                onChange={setPeriod}
+                from={dates.from}
+                to={dates.to}
+                onDates={(from, to) => {
+                  setDates({ from, to })
                 }}
-                label={t('common.period')}
-                text={(option) => t('seats.days', { n: option })}
               />
             </div>
             <div className="net-filter">

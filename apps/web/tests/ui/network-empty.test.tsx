@@ -78,7 +78,7 @@ describe('Red sin resultados', () => {
     const getSeatGraph = api.getSeatGraph.bind(api)
 
     vi.spyOn(api, 'getSeatGraph').mockImplementation(async (days) =>
-      days === 7
+      days > 40
         ? {
             days,
             people: [],
@@ -98,12 +98,12 @@ describe('Red sin resultados', () => {
       name: text('common.period'),
     })
 
-    await user.selectOptions(period, '7')
+    await user.selectOptions(period, '3')
     expect(await screen.findByText(text('seats.empty'), {}, { timeout: 3000 })).toBeTruthy()
 
     await user.selectOptions(
       screen.getByRole<HTMLSelectElement>('combobox', { name: text('common.period') }),
-      '30',
+      '1',
     )
     await settle(600)
     expect(screen.queryByText(text('seats.empty'))).toBeNull()

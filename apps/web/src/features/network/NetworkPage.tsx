@@ -11,7 +11,9 @@ import { useFormat } from '../../shared/i18n/useFormat'
 import { Blocks } from '../../shared/layout/Blocks'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { CampusPicker } from './CampusPicker'
-import { StepPicker } from '../../shared/ui/StepPicker'
+import { PeriodPicker } from '../../shared/ui/PeriodPicker'
+import { startOf } from '../../shared/period'
+import type { Period } from '../../shared/period'
 import {
   COLOR_MODES,
   colorOf,
@@ -27,8 +29,6 @@ import type { Scale, ScaleMode } from './colors'
 import type { ColorMode } from './colors'
 import { ForceGraph } from './ForceGraph'
 import { Meter } from './Meter'
-import { STEPS, startOf } from './period'
-import type { Period } from './period'
 import { PersonPanel } from './PersonPanel'
 import { PersonSearch } from './PersonSearch'
 import { RangeSlider, Slider } from '../../shared/ui/RangeSlider'
@@ -111,7 +111,7 @@ export function NetworkPage({ me, switcher }: { me: CurrentUser; switcher?: Reac
   const { number } = useFormat()
   const [filters, setFilters] = useState<Filters>({
     // Un enlace a una persona enseña su historia entera; el campus, el último año.
-    period: loginInUrl() === null ? 'year' : 'all',
+    period: loginInUrl() === null ? '12' : 'all',
     from: '',
     to: '',
     login: loginInUrl(),
@@ -366,41 +366,17 @@ export function NetworkPage({ me, switcher }: { me: CurrentUser; switcher?: Reac
             )}
             <div className="net-filter">
               {/* El selector de periodo de toda la web: de menos a más, y al final «a mano». */}
-              <StepPicker
-                options={STEPS}
+              <PeriodPicker
                 value={filters.period}
                 onChange={(period) => {
                   change({ period })
                 }}
-                label={t('common.period')}
-                text={(period) => t(`net.period.${period}`)}
+                from={filters.from}
+                to={filters.to}
+                onDates={(from, to) => {
+                  change({ from, to })
+                }}
               />
-              {filters.period === 'custom' && (
-                <div className="net-dates">
-                  <label>
-                    {t('common.from')}
-                    <input
-                      type="date"
-                      value={filters.from}
-                      max={filters.to === '' ? undefined : filters.to}
-                      onChange={(event) => {
-                        change({ from: event.target.value })
-                      }}
-                    />
-                  </label>
-                  <label>
-                    {t('common.to')}
-                    <input
-                      type="date"
-                      value={filters.to}
-                      min={filters.from === '' ? undefined : filters.from}
-                      onChange={(event) => {
-                        change({ to: event.target.value })
-                      }}
-                    />
-                  </label>
-                </div>
-              )}
             </div>
 
             {graph !== null && (

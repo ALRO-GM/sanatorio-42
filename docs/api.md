@@ -1446,7 +1446,8 @@ primero: `[{ "login": "jdoe", "image": "https://…", "corrections": 79 }]`.
 
 GET /network/seats?days=30 → la red de asientos (`docs/asientos.md`): quién se
 sienta cerca de quién en los clústeres del campus, en los últimos `days` días
-(1-365, por defecto 30).
+(1-3650, por defecto 30) o entre `from` y `to` (`YYYY-MM-DD`; `to` incluido y
+opcional). La web los elige con el selector de periodo común (`PeriodPicker`).
 
 ```json
 {
@@ -1468,7 +1469,8 @@ a todo el mundo, así que la diferencia es lo que queda fuera.
 
 GET /network/seats/heat?days=30 → el mapa de calor de los puestos
 (`docs/asientos.md`): cuántas horas se ha usado cada ordenador en los últimos
-`days` días (1-365, por defecto 30) y por cuántas personas distintas.
+`days` días (1-3650, por defecto 30; 3650 es «todo») o entre `from` y `to`
+(`YYYY-MM-DD`, `to` incluido y opcional), y por cuántas personas distintas.
 
 ```json
 {

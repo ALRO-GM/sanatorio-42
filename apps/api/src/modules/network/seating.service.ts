@@ -14,6 +14,7 @@ import { audienceKey, NO_POOL, seesFor } from '../../core/audience.js'
 import type { Audience } from '../../core/audience.js'
 import type { Db } from '../../core/db/database.js'
 import { createTtlCache } from '../../core/ttl-cache.js'
+import { domainError } from '../../core/errors.js'
 import { parse } from '../../core/validation.js'
 import { communitiesOf, GRAPH_BUDGET } from './network.analysis.js'
 import { seatHeatOf } from './seating.heat.js'
@@ -42,9 +43,37 @@ const CACHE_TTL_MS = 5 * 60_000
 /** Por debajo de esto (una hora al lado, más o menos) dos personas no se unen. */
 const MIN_CLOSENESS = 2
 
+/** Un día `YYYY-MM-DD`. */
+const day = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Se espera una fecha YYYY-MM-DD')
+
+/**
+ * El periodo: los últimos `days` días (hasta diez años, que es «todo») o, con
+ * `from`, de ese día a `to` (incluido; sin él, hasta ahora).
+ */
 const querySchema = z.object({
-  days: z.coerce.number().int().min(1).max(365).default(30),
+  days: z.coerce.number().int().min(1).max(3650).default(30),
+  from: day.optional(),
+  to: day.optional(),
 })
+
+/** El tramo que se mira, en ms, y cuántos días son. */
+type Span = { since: number; until: number; days: number }
+
+function spanOf(query: z.infer<typeof querySchema>, now: number): Span {
+  if (query.from === undefined) {
+    return { since: now - query.days * DAY_MS, until: now, days: query.days }
+  }
+
+  const since = Date.parse(`${query.from}T00:00:00.000Z`)
+  const until = Math.min(
+    now,
+    query.to === undefined ? now : Date.parse(`${query.to}T00:00:00.000Z`) + DAY_MS,
+  )
+
+  if (!(since < until)) throw domainError('invalid_input', 'El periodo acaba antes de empezar')
+
+  return { since, until, days: Math.max(1, Math.round((until - since) / DAY_MS)) }
+}
 
 const round1 = (value: number): number => Math.round(value * 10) / 10
 
@@ -58,10 +87,12 @@ export function createSeatingService(options: SeatingOptions): SeatingService {
    * La clave de la caché: campus, mundo, quién se ve y días. Lo que se guarda
    * va ya filtrado por quién se ve, así que lleva también los ocultos.
    */
-  async function keyOf(actor: Actor, days: number): Promise<string> {
+  async function keyOf(actor: Actor, query: z.infer<typeof querySchema>): Promise<string> {
     const seen = await audienceKey(audience, actor)
+    const period =
+      query.from === undefined ? String(query.days) : `${query.from}..${query.to ?? ''}`
 
-    return `${String(actor.campusId)}|${actor.pool === true ? 'pool' : 'student'}|${seen}|${String(days)}`
+    return `${String(actor.campusId)}|${actor.pool === true ? 'pool' : 'student'}|${seen}|${period}`
   }
 
   /**
@@ -69,25 +100,16 @@ export function createSeatingService(options: SeatingOptions): SeatingService {
    * ver, como el grafo: así los dos suman lo mismo y nadie oculto (ni del
    * otro mundo) deja huella en un puesto.
    */
-  async function loadHeat(actor: Actor, days: number): Promise<SeatHeat> {
-    const until = now()
+  async function loadHeat(actor: Actor, { since, until, days }: Span): Promise<SeatHeat> {
     const [{ sessions }, known] = await Promise.all([
-      seatSessionsIn(
-        db,
-        actor.campusId,
-        until - days * DAY_MS,
-        until,
-        await seesFor(audience, actor),
-      ),
+      seatSessionsIn(db, actor.campusId, since, until, await seesFor(audience, actor)),
       knownSeats(actor.campusId),
     ])
 
     return { days, ...seatHeatOf(sessions, known) }
   }
 
-  async function load(actor: Actor, days: number): Promise<SeatGraph> {
-    const until = now()
-    const since = until - days * DAY_MS
+  async function load(actor: Actor, { since, until, days }: Span): Promise<SeatGraph> {
     const { sessions, images } = await seatSessionsIn(
       db,
       actor.campusId,
@@ -142,15 +164,15 @@ export function createSeatingService(options: SeatingOptions): SeatingService {
 
   return {
     async graph(actor, query) {
-      const { days } = parse(querySchema, query)
+      const parsed = parse(querySchema, query)
 
-      return cache.get(await keyOf(actor, days), () => load(actor, days))
+      return cache.get(await keyOf(actor, parsed), () => load(actor, spanOf(parsed, now())))
     },
 
     async heat(actor, query) {
-      const { days } = parse(querySchema, query)
+      const parsed = parse(querySchema, query)
 
-      return heatCache.get(await keyOf(actor, days), () => loadHeat(actor, days))
+      return heatCache.get(await keyOf(actor, parsed), () => loadHeat(actor, spanOf(parsed, now())))
     },
   }
 }

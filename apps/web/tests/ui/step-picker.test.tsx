@@ -121,10 +121,13 @@ describe('StepPicker', () => {
       within(select)
         .getAllByRole('option')
         .map((option) => option.textContent),
-    ).toEqual(
-      ['month', 'quarter', 'year', 'all', 'custom'].map((period) => text(`net.period.${period}`)),
-    )
-    await user.selectOptions(select, text('net.period.custom'))
+    ).toEqual([
+      text('period.last.one'),
+      ...[3, 6, 12, 24].map((n) => text('period.last.many').replace('{n}', String(n))),
+      text('period.all'),
+      text('period.custom'),
+    ])
+    await user.selectOptions(select, text('period.custom'))
     expect(screen.getByLabelText(text('common.from'))).toBeTruthy()
   })
 })

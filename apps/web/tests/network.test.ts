@@ -14,7 +14,7 @@ import {
   luminanceOf,
   passColor,
 } from '../src/features/network/colors'
-import { dayOf, startOf } from '../src/features/network/period'
+import { dayOf, daysOf, periodOf, startOf } from '../src/shared/period'
 
 const node = (extra: Partial<NetworkNode> = {}): NetworkNode => ({
   login: 'ana',
@@ -114,10 +114,18 @@ describe('periodos de la red', () => {
 
   it('cada periodo empieza donde toca', () => {
     expect(startOf('all', now)).toBeNull()
-    expect(startOf('month', now)).toBe('2026-09-11')
-    expect(startOf('quarter', now)).toBe('2026-07-12')
-    expect(startOf('year', now)).toBe('2025-10-11')
+    expect(startOf('1', now)).toBe('2026-09-11')
+    expect(startOf('3', now)).toBe('2026-07-11')
+    expect(startOf('6', now)).toBe('2026-04-11')
+    expect(startOf('12', now)).toBe('2025-10-11')
+    expect(startOf('24', now)).toBe('2024-10-11')
+    expect(daysOf('1', now)).toBe(30)
+    expect(daysOf('12', now)).toBe(365)
+    expect(daysOf('all', now)).toBeNull()
     expect(dayOf(now)).toBe('2026-10-11')
+    // Los enlaces viejos siguen valiendo.
+    expect(periodOf('year')).toBe('12')
+    expect(periodOf('nada')).toBeNull()
   })
 })
 

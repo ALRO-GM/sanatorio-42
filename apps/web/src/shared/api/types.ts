@@ -170,6 +170,9 @@ import type {
 } from '@sanatorio/contracts'
 
 /** `GET /projects/:id/peers`, con lo que viaja en cabeceras ya leído. */
+/** Un periodo a mano de la red de asientos; `to` vacío es hasta hoy. */
+export type SeatDates = { from: string; to: string }
+
 export type PeersResult = {
   peers: Peer[]
   /** Personas del campus con ese proyecto, o `null` si no se sabe. */
@@ -526,10 +529,13 @@ export type Api = {
     order: 'asc' | 'desc',
     params: NetworkParams,
   ) => Promise<NetworkStrictest>
-  /** La red de asientos: quién se sienta cerca de quién, en los últimos `days` días. */
-  getSeatGraph: (days: number) => Promise<SeatGraph>
-  /** El mapa de calor de los puestos: horas y gente por ordenador, en los últimos `days` días. */
-  getSeatHeat: (days: number) => Promise<SeatHeat>
+  /**
+   * La red de asientos: quién se sienta cerca de quién, en los últimos `days`
+   * días o, con `dates`, entre esos dos días (`YYYY-MM-DD`, `to` incluido).
+   */
+  getSeatGraph: (days: number, dates?: SeatDates) => Promise<SeatGraph>
+  /** El mapa de calor de los puestos: horas y gente por ordenador, en el mismo periodo. */
+  getSeatHeat: (days: number, dates?: SeatDates) => Promise<SeatHeat>
   /** Con quién te has corregido tú, en todo el histórico. */
   getNetworkMine: () => Promise<NetworkMine>
   /** Logins que empiezan por lo escrito, para el buscador de la red. */

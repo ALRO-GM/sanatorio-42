@@ -85,7 +85,7 @@ describe('red de asientos (docs/asientos.md)', () => {
       (
         await built.app.inject({
           method: 'GET',
-          url: '/network/seats?days=999',
+          url: '/network/seats?days=3651',
           headers: { cookie },
         })
       ).statusCode,
@@ -233,6 +233,18 @@ describe('red de asientos (docs/asientos.md)', () => {
         })
       ).statusCode,
     ).toBe(400)
+    // A mano: dos fechas; al revés, 400.
+    for (const [url, status] of [
+      ['/network/seats?from=2020-01-01&to=2030-01-01', 200],
+      ['/network/seats/heat?from=2020-01-01', 200],
+      ['/network/seats?from=2026-10-10&to=2026-10-01', 400],
+      ['/network/seats?from=ayer', 400],
+    ] as const) {
+      expect(
+        (await built.app.inject({ method: 'GET', url, headers: { cookie } })).statusCode,
+        url,
+      ).toBe(status)
+    }
   })
 
   it('sin historial, el plano conocido sale entero a 0', async () => {
