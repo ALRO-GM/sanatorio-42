@@ -140,6 +140,7 @@ describe('migraciones', () => {
       'user_blocks',
       'user_levels',
       'user_limits',
+      'user_logtime',
       'user_roles',
       'user_tracks',
       'users',

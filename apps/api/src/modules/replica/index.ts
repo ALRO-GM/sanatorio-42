@@ -12,6 +12,8 @@ import type { FortyTwoClient } from '../../integrations/forty-two/client.js'
 import { createAgenda } from './agenda.js'
 import type { Agenda } from './agenda.js'
 import { createCurriculum } from './curriculum.js'
+import { createLogtime } from './logtime.js'
+import type { Logtime } from './logtime.js'
 import type { Curriculum } from './curriculum.js'
 import { createCampusesService } from './campuses.service.js'
 import { DRAIN_EVERY_MS, createQuota } from './quota.js'
@@ -61,6 +63,8 @@ export type ReplicaModule = AppModule & {
   points: Points
   /** Los piscineros en curso de cada campus (`docs/piscineros.md`). */
   poolMembers: PoolMembers
+  /** Las horas de clúster de cada cual, bajo demanda. */
+  logtime: Logtime
 }
 
 export function createReplicaModule(deps: ReplicaModuleDeps): ReplicaModule {
@@ -114,6 +118,13 @@ export function createReplicaModule(deps: ReplicaModuleDeps): ReplicaModule {
 
   const points = createPoints({ client: deps.client, quota, replica: repository })
 
+  const logtime = createLogtime({
+    db: deps.db,
+    client: deps.client,
+    quota,
+    ...given({ now: deps.now, log: deps.log }),
+  })
+
   const poolMembers = createPoolMembers({
     db: deps.db,
     client: deps.client,
@@ -150,6 +161,9 @@ export function createReplicaModule(deps: ReplicaModuleDeps): ReplicaModule {
   quota.register('track', async (login) =>
     curriculum.trackOf(login, await repository.userIdOf(login)),
   )
+  quota.register('logtime', async (login) =>
+    logtime.hoursOf(login, await repository.userIdOf(login)),
+  )
 
   return {
     name: 'replica',
@@ -175,6 +189,7 @@ export function createReplicaModule(deps: ReplicaModuleDeps): ReplicaModule {
       { table: 'seat_sessions', logins: ['login'], userIds: ['user_id'], source: '42' },
       { table: 'user_tracks', logins: ['login'], source: '42' },
       { table: 'user_levels', logins: ['login'], source: '42' },
+      { table: 'user_logtime', logins: ['login'], source: '42' },
       { table: 'quota_queue', logins: ['login'] },
       { table: 'curriculum_votes', logins: ['login'] },
     ],
@@ -186,6 +201,7 @@ export function createReplicaModule(deps: ReplicaModuleDeps): ReplicaModule {
     quota,
     points,
     poolMembers,
+    logtime,
     routes: (app, context) => {
       registerReplicaRoutes(app, context, { campuses, sync, quota, photos })
     },

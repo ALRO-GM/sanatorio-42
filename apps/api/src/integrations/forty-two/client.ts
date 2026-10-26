@@ -367,6 +367,25 @@ export class FortyTwoClient {
   }
 
   /**
+   * `GET /v2/users/:id/locations_stats`: cuánto ha estado conectada a un
+   * ordenador del clúster cada día, `{ "2026-10-26": "05:12:33.123456" }`.
+   * Desde 2013: toda su historia en una sola petición.
+   */
+  async getLocationsStats(userId: number): Promise<Record<string, unknown>> {
+    const url = `${this.apiV2Base}/users/${userId}/locations_stats?begin_at=2013-01-01`
+    const { body } = await this.requestWithRetries(url)
+
+    if (body === null || typeof body !== 'object' || Array.isArray(body)) {
+      throw new ApiError(`${endpointFromUrl(url)} no ha devuelto un objeto`, 200, {
+        endpoint: endpointFromUrl(url),
+        code: 'bad_request',
+      })
+    }
+
+    return body as Record<string, unknown>
+  }
+
+  /**
    * Una foto de perfil de la CDN de 42 (`cdn.intra.42.fr`).
    *
    * Desde octubre de 2026 la CDN contesta 403 a quien no lleva sesión de la

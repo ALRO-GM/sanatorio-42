@@ -28,6 +28,7 @@ type ProfileModuleDeps = {
   poolPeople?: XpServiceOptions['poolPeople']
   hacker?: XpServiceOptions['hacker']
   master?: XpServiceOptions['master']
+  logtime?: XpServiceOptions['logtime']
   now?: () => number
 }
 
@@ -48,6 +49,7 @@ export function createProfileModule(deps: ProfileModuleDeps): ProfileModule {
       poolPeople: deps.poolPeople,
       hacker: deps.hacker,
       master: deps.master,
+      logtime: deps.logtime,
       now: deps.now,
     }),
   })

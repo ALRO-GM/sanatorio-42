@@ -238,6 +238,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     ...common,
     curriculum: replica.curriculum,
     poolPeople: (campusId) => replica.poolMembers.peopleIn(campusId),
+    logtime: (login, userId) => replica.logtime.hoursOf(login, userId),
     events,
     hacker: async (login) => {
       const caught = await late.get('clicker').service.caughtOf(login)

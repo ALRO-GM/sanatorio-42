@@ -36,6 +36,15 @@
   font-size: 1.4rem;
   color: var(--text-2);
 }
+/* Las horas en el clúster: un dato aparte, ni pace ni plazo. */
+.health-pace.hours {
+  background: var(--surface-2);
+  box-shadow: none;
+}
+.health-pace.hours strong {
+  font-size: 1.4rem;
+  white-space: nowrap;
+}
 .health-pace.gone {
   background: color-mix(in srgb, var(--danger) 18%, var(--surface));
 }
@@ -296,7 +305,7 @@ a.back-btn {
 .health-detail > .health-update {
   justify-self: start;
 }
-/* En el móvil, los dos números del pace arriba y el resumen debajo, a lo ancho. */
+/* En el móvil, los cuadros (pace, intra, horas) arriba y el resumen debajo, a lo ancho. */
 @media (max-width: 560px) {
   .health-head {
     flex-wrap: wrap;

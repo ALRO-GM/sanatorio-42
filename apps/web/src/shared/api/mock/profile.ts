@@ -217,6 +217,7 @@ export const profileMock: Pick<
       currentCircle: 3,
       milestones: [at(1), at(31), at(94)],
       declared,
+      clusterHours: 1186,
     }
   },
 

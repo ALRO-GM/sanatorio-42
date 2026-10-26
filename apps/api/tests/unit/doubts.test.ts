@@ -791,6 +791,7 @@ describe('comunidad', () => {
         currentCircle: 2,
         milestones: ['2026-05-19T11:37:00.000Z', '2026-06-18T14:40:00.000Z'],
         declared: null,
+        clusterHours: null,
       })
 
       // Quien entró antes de que se guardasen las fechas no las tiene: se piden
@@ -822,6 +823,7 @@ describe('comunidad', () => {
         currentCircle: 0,
         milestones: [],
         declared: null,
+        clusterHours: null,
       })
       expect(api.calls).toHaveLength(0)
     })

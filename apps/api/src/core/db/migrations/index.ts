@@ -85,6 +85,7 @@ import { agendaScrumSchema } from './0076-agenda-scrum.js'
 import { coreCursusSchema } from './0077-core-cursus.js'
 import { ticketPlaceSchema } from './0078-ticket-place.js'
 import { seatFirstSeenSchema } from './0079-seat-first-seen.js'
+import { userLogtimeSchema } from './0080-user-logtime.js'
 import type { Migration } from './types.js'
 
 export const MIGRATIONS: readonly Migration[] = [
@@ -167,6 +168,7 @@ export const MIGRATIONS: readonly Migration[] = [
   coreCursusSchema,
   ticketPlaceSchema,
   seatFirstSeenSchema,
+  userLogtimeSchema,
 ]
 
 /** Versión más alta que existe en el código. */

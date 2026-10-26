@@ -1308,9 +1308,17 @@ GET /me/health → las fechas para saber cómo vas de tiempo en el common core.
     "circle": 3,
     "deadline": "2026-11-11",
     "updatedAt": "2026-10-12T09:00:00.000Z"
-  }
+  },
+  "clusterHours": 1186
 }
 ```
+
+`clusterHours`: horas en total conectado a ordenadores del clúster (el tercer
+cuadro del estado de salud, pedido por Alberto el 2026-10-26), redondeadas, o
+`null` si aún no se saben. Salen de `GET /v2/users/:id/locations_stats` de 42
+(`replica/logtime.ts`, tabla `user_logtime`): una petición por persona y día
+como mucho, cuando alguien abre su estado de salud o su expediente; si la cuota
+va justa, lo guardado y turno en la cola (tarea `logtime`).
 
 `track` es tu plan (`classic` o `next`): con él, «Compararte en Avance» abre
 el Avance con tu plan encendido (`#/avance?plan=c|python&pop=current,blackholed&scope=campus&paces=1&me=1`,

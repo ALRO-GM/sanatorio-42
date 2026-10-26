@@ -56,7 +56,7 @@ import { formatWindow } from '../../core/night-window.js'
 type QuotaTier = 'background' | 'deferrable' | 'critical'
 
 /** Lo aplazable que es de una persona y por tanto puede esperar turno. */
-export type QuotaTask = 'agenda' | 'cursus' | 'track'
+export type QuotaTask = 'agenda' | 'cursus' | 'track' | 'logtime'
 
 type QuotaOptions = {
   db: Db

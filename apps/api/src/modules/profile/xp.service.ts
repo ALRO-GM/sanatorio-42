@@ -62,6 +62,8 @@ export type XpServiceOptions = {
    * el título de maestro del código. Lo sabe `network`.
    */
   master?: (login: string) => Promise<number>
+  /** Las horas que alguien lleva en ordenadores del clúster, si se saben. Lo sabe `replica`. */
+  logtime?: (login: string, userId: number | null) => Promise<number | null>
   now?: () => number
 }
 
@@ -330,7 +332,8 @@ export function createXpService(options: XpServiceOptions) {
 
     /**
      * Los datos del "estado de salud": cuándo empezó el 42cursus, cuándo
-     * completó cada círculo y la fecha de black hole que dé 42.
+     * completó cada círculo, la fecha de black hole que dé 42 y las horas que
+     * lleva en ordenadores del clúster.
      *
      * Son solo los hechos; los plazos de cada pace los calcula la web. Cuesta,
      * como mucho, una petición a 42 por persona y día (sus hitos).
@@ -338,10 +341,11 @@ export function createXpService(options: XpServiceOptions) {
      * @param userId Su id en 42, para preguntar por sus rangos.
      */
     async health(actor: Actor, userId: number | null): Promise<Health> {
-      const [{ track, rank, ranks }, cursus, declared] = await Promise.all([
+      const [{ track, rank, ranks }, cursus, declared, clusterHours] = await Promise.all([
         curriculum.trackOf(actor.login, userId),
         curriculum.cursusOf(actor.login, userId),
         profiles.paceRef(actor.login),
+        options.logtime?.(actor.login, userId) ?? null,
       ])
 
       return {
@@ -351,6 +355,7 @@ export function createXpService(options: XpServiceOptions) {
         currentCircle: Math.min(LAST_CIRCLE, (rank ?? -1) + 1),
         milestones: ranks,
         declared: declared ?? null,
+        clusterHours: clusterHours === null ? null : Math.round(clusterHours),
       }
     },
 

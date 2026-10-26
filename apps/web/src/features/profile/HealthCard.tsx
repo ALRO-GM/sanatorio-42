@@ -125,6 +125,20 @@ function HealthBody({ health, startedAt, mine, onSaved }: HealthBodyProps) {
     </small>
   )
 
+  // El tercer cuadro: las horas que lleva en ordenadores del clúster, según la intra.
+  const hours = (
+    <div className="health-pace hours" title={t('health.hoursHint')}>
+      <span className="eyebrow">{t('health.hours')}</span>
+      <strong>
+        {health.clusterHours === null
+          ? '—'
+          : t('health.hoursValue', {
+              n: health.clusterHours.toLocaleString(localeOf(lang)),
+            })}
+      </strong>
+    </div>
+  )
+
   if (finished) {
     return (
       <div className="health-head">
@@ -132,6 +146,7 @@ function HealthBody({ health, startedAt, mine, onSaved }: HealthBodyProps) {
           <span className="eyebrow">{t('health.pace')}</span>
           <strong>✓</strong>
         </div>
+        {hours}
         <p className="health-summary">
           {t(mine ? 'health.finished' : 'health.finishedOther')}
           {started}
@@ -179,6 +194,7 @@ function HealthBody({ health, startedAt, mine, onSaved }: HealthBodyProps) {
           <span className="eyebrow">{t(mine ? 'health.paceIntra' : 'health.paceIntraOther')}</span>
           <strong>{declared.pace}</strong>
         </div>
+        {hours}
         <p className="health-summary">
           {current === null
             ? t(mine ? 'health.summaryGone' : 'health.summaryGoneOther', { circle })

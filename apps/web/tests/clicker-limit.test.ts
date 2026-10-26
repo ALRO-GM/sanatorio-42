@@ -30,6 +30,7 @@ describe('el tope de juego con el pace en riesgo', () => {
     track: 'classic',
     currentCircle: circle,
     milestones: [],
+    clusterHours: null,
   })
   const origin = originOf(declared) ?? 0
   /** El día en que, en el círculo 2, ya solo quedaría ese pace. */

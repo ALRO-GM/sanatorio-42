@@ -171,6 +171,11 @@ export type Health = {
    * validaste el rango 2. Solo los que llevas.
    */
   milestones: string[]
+  /**
+   * Horas en total conectado a ordenadores del clúster de 42 (redondeadas),
+   * según la intra; `null` si aún no se saben.
+   */
+  clusterHours: number | null
 }
 
 /** Lo que se puede seguir viendo en modo Pomodoro (lo demás se silencia). */
