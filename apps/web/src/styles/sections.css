@@ -1014,6 +1014,11 @@ dialog.welcome {
   background: var(--accent-soft);
   color: var(--accent-text);
 }
+.welcome-lang {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.4rem;
+}
 dialog.welcome h3 {
   margin: 0.3rem 0 0.6rem;
 }

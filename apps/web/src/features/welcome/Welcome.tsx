@@ -4,6 +4,7 @@ import type { Section } from '../../app/sections'
 import { DetailCards } from '../../shared/ui/DetailSelect'
 import { useI18n } from '../../shared/i18n'
 import { Icon } from '../../shared/ui/Icon'
+import { LangSelect } from '../../shared/ui/LangSelect'
 import type { IconName } from '../../shared/ui/Icon'
 
 /** Ya se ha visto la bienvenida en este navegador. */
@@ -110,6 +111,10 @@ export function Welcome({ open, onGo, onClose }: WelcomeProps) {
         close()
       }}
     >
+      {/* El idioma, a mano desde el principio: quien no lee español no tiene que esperar a Ajustes. */}
+      <div className="welcome-lang">
+        <LangSelect />
+      </div>
       <div className="welcome-art" aria-hidden="true">
         <Icon name={slide.icon} size={44} />
       </div>
