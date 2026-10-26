@@ -28,6 +28,6 @@ export function createMapModule(deps: MapModuleDeps): MapModule {
 }
 
 export { createBrokenSeats } from './broken-seats.js'
-export { hostAt, parseHost } from './seat-layout.js'
+export { clusterBounds, hostAt, isInside, parseHost } from './seat-layout.js'
 export type { SeatPosition } from './seat-layout.js'
 export type { MapService } from './map.service.js'

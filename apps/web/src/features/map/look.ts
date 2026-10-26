@@ -28,6 +28,11 @@ export type MapLook = {
   circles: boolean
   /** A quién resaltar; con alguno marcado, el resto se apaga. */
   mates: Mate[]
+  /**
+   * Encoger los puestos para que el clúster quepa a lo ancho (de fábrica). Con
+   * `false`, «100 %»: tamaño real y el plano se desliza de lado (`fit.ts`).
+   */
+  fit: boolean
 }
 
 /** Nota con la que un proyecto sale perfecto: brillo dorado. */
@@ -42,6 +47,7 @@ export const DEFAULT_LOOK: MapLook = {
   flat: false,
   circles: false,
   mates: [],
+  fit: true,
 }
 
 type Store = Pick<Storage, 'getItem' | 'setItem'>
@@ -68,6 +74,7 @@ export function loadLook(store: Store | null = storage()): MapLook {
       mates: Array.isArray(read?.mates)
         ? MATES.filter((mate) => read.mates?.includes(mate) === true)
         : [],
+      fit: read?.fit !== false,
     }
   } catch {
     return DEFAULT_LOOK

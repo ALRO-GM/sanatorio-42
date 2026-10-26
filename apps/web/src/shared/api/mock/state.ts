@@ -35,6 +35,7 @@ import {
   PEERS,
   PROJECTS,
 } from './data'
+import { parisMap, PARIS_ID } from './paris'
 import { portrait } from './portrait'
 import type { StoredBoard, StoredDoubt, StoredGroup } from './data'
 
@@ -168,6 +169,9 @@ const TAKEN = new Set(['c1r3s2', 'c1r3s3', 'c2r1s4'])
 
 /** El plano de mentira: todos los puestos de `CLUSTER_SIZES`, con quien toque sentado. */
 export function buildMap(projectId?: number): ClusterMap {
+  // Con París elegido en el pie, el campus grande (`paris.ts`).
+  if (state.campusId === PARIS_ID) return parisMap(projectId)
+
   const peers = projectId === undefined ? [] : (PEERS[projectId] ?? [])
   const seated = new Map<string, NonNullable<MapSeat['occupant']>>()
 
@@ -240,7 +244,8 @@ export function buildMap(projectId?: number): ClusterMap {
         rows,
         seatsPerRow,
         seats,
-        occupied: seats.filter((seat) => seat.occupant !== null).length,
+        // Como la API: ocupado es quien está sentado, se le vea o no.
+        occupied: seats.filter((seat) => seat.occupant !== null || seat.taken).length,
         onDuty: seats.filter((seat) => seat.occupant !== null && seat.occupant.duty !== null)
           .length,
       }

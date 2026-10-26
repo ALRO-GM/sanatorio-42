@@ -2,7 +2,10 @@
    Un cluster cada vez, como cuadrícula de puestos. Colores:
      dorado  especialista de guardia      verde  paciente de guardia
      azul    reservado para terapia       gris   ocupado, sin más
-   En el móvil la cuadrícula se desliza de lado dentro de su caja.
+   Los clústeres grandes se encogen para caber a lo ancho (`features/map/fit.ts`):
+   el tamaño llega en `--seat` y `--seat-gap`, y lo demás va en proporción.
+   Con poco sitio, sin caras (`density-initials`) o solo color (`density-dots`),
+   y sin sombras ni relieve: con cientos de puestos es lo que más cuesta pintar.
    ──────────────────────────────────────────────────────────────────────────── */
 .map-card {
   margin: 1rem 0;
@@ -28,6 +31,8 @@
   gap: 0.25rem;
   margin-left: 0.4rem;
   font-size: 0.8em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
   opacity: 0.8;
 }
 .duty-dot {
@@ -53,7 +58,7 @@
 }
 .seat-grid {
   display: grid;
-  gap: 9px;
+  gap: var(--seat-gap, 9px);
   width: max-content;
   margin: 0 auto;
 }
@@ -63,9 +68,14 @@
 .row-label {
   display: flex;
   align-items: center;
-  padding-right: 0.5rem;
+  justify-content: flex-end;
+  padding-right: 4px;
   font-size: 0.7rem;
+  white-space: nowrap;
   color: var(--text-3);
+}
+.density-dots .row-label {
+  font-size: 0.6rem;
 }
 
 /* Cada puesto es una tecla: cara clara arriba, canto debajo y una sombra corta.
@@ -81,18 +91,18 @@
   padding: 0;
   overflow: hidden;
   border: 2px solid var(--border);
-  border-radius: 12px;
+  border-radius: calc(var(--seat, 48px) / 4);
   background: linear-gradient(180deg, var(--surface), var(--surface-2));
   box-shadow:
     0 2px 0 var(--border),
     0 5px 9px var(--shadow-soft);
   color: var(--text);
-  font-size: 1rem;
+  font-size: max(0.6rem, calc(var(--seat, 48px) / 3));
   font-weight: 700;
   line-height: 1;
-  transition:
-    transform 0.15s ease,
-    box-shadow 0.15s ease;
+  /* Solo se anima el movimiento: animar la sombra obligaba a repintar el puesto
+     en cada fotograma, y al pasar el ratón por un plano grande eran decenas. */
+  transition: transform 0.15s ease;
 }
 .seat.ghost {
   background: none;
@@ -330,13 +340,52 @@ button.seat:focus-visible {
 .picked-seats button.link {
   margin: 0;
 }
+/* En el móvil la bandeja deja más sitio a los puestos. */
 @media (max-width: 520px) {
-  .cluster-map {
-    --seat: 40px;
+  .map-scroll {
+    padding: 0.75rem 0.5rem 0.9rem;
   }
-  .seat-grid {
-    gap: 7px;
-  }
+}
+
+/* Puestos pequeños: planos, sin sombras, degradados ni relieve al pasar. El
+   color de cada estado pasa al fondo, que es lo que se ve a este tamaño. */
+.density-initials .seat,
+.density-dots .seat {
+  border-width: 1px;
+  background: var(--surface);
+  box-shadow: none;
+  transition: none;
+}
+.density-initials .seat.occupied,
+.density-dots .seat.occupied {
+  background: var(--fill-muted);
+}
+.density-dots .seat.patient {
+  background: var(--seat-green);
+}
+.density-dots .seat.specialist {
+  background: var(--seat-gold);
+}
+.density-dots .seat.reserved {
+  background: color-mix(in srgb, var(--seat-blue) 45%, var(--surface));
+}
+.density-initials .seat.patient,
+.density-initials .seat.specialist,
+.density-dots .seat.patient,
+.density-dots .seat.specialist {
+  border-width: 2px;
+  box-shadow: none;
+}
+.density-initials button.seat:hover,
+.density-initials button.seat.open,
+.density-dots button.seat:hover,
+.density-dots button.seat.open {
+  transform: none;
+  box-shadow: 0 0 0 2px var(--accent);
+}
+.density-dots .seat.perfect,
+.density-initials .seat.perfect {
+  animation: none;
 }
 @media (prefers-reduced-motion: reduce) {
   .seat {
@@ -357,11 +406,19 @@ button.seat:focus-visible {
   position: absolute;
   right: -3px;
   bottom: -3px;
-  width: 11px;
-  height: 11px;
+  width: clamp(6px, calc(var(--seat, 48px) / 4.4), 11px);
+  height: clamp(6px, calc(var(--seat, 48px) / 4.4), 11px);
   border: 2px solid var(--surface);
   border-radius: 50%;
   background: var(--ok);
+}
+/* Con puntos, el de «con Peer4U abierto» es una mota: si no, tapa el plano. */
+.density-dots .seat-online {
+  right: 1px;
+  bottom: 1px;
+  width: 4px;
+  height: 4px;
+  border: 0;
 }
 .seat-online.sample {
   position: static;
@@ -472,10 +529,11 @@ button.seat.open {
   pointer-events: none;
 }
 
-/* Resaltados: un halo del color de lo que comparte; lo demás se apaga. */
+/* Resaltados: un halo del color de lo que comparte; lo demás se apaga. Solo con
+   opacidad: un filtro (`grayscale`) en cientos de puestos hacía cada cambio de
+   resaltado mucho más caro de pintar. */
 .seat.dim {
-  opacity: 0.35;
-  filter: grayscale(0.7);
+  opacity: 0.3;
 }
 .seat.mate-circle {
   box-shadow:
@@ -565,19 +623,32 @@ button.seat.open {
    lado de la pantalla, y el puesto se corre un poco hacia el otro lado, donde
    se sienta la persona. Con «alinear», sin desplazamiento. */
 .seat-grid.staggered {
-  row-gap: 22px;
+  row-gap: calc(var(--seat, 48px) * 0.46);
 }
 .seat.screen-up {
-  border-top-width: 5px;
+  border-top-width: max(2px, calc(var(--seat, 48px) / 10));
 }
 .seat.screen-down {
-  border-bottom-width: 5px;
+  border-bottom-width: max(2px, calc(var(--seat, 48px) / 10));
 }
 .seat-grid.staggered .seat.screen-up {
-  top: 6px;
+  top: calc(var(--seat, 48px) / 8);
 }
 .seat-grid.staggered .seat.screen-down {
-  top: -6px;
+  top: calc(var(--seat, 48px) / -8);
+}
+
+/* Resaltados a la izquierda y, si el clúster no cabe, ajustar o tamaño real a
+   la derecha, en la misma fila. */
+.map-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0 0.75rem;
+}
+.map-zoom {
+  margin-left: auto;
 }
 
 /* Entre los resaltados y la marca de círculos, una raya fina. */
@@ -598,4 +669,22 @@ button.seat.open {
 }
 .map-placement .map-tools {
   margin: 0.5rem 0 0.25rem;
+}
+
+/* Puestos pequeños: lo elegido sigue en el color del acento, y el círculo, en
+   pequeño (con puntos no cabe y no se pinta). */
+.density-initials .seat.picked,
+.density-dots .seat.picked {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.density-initials .seat-circle {
+  top: 1px;
+  left: 1px;
+  min-width: 12px;
+  height: 12px;
+  padding: 0 2px;
+  border-width: 1px;
+  font-size: 0.55rem;
+  line-height: 10px;
 }
