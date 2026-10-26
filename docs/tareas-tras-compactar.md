@@ -1,12 +1,13 @@
 # Tareas tras compactar (2026-10-26)
 
-Nada pendiente. Desplegado cf8b681: Avance (100 % de quien terminó, trofeo,
-hitos, círculos exactos, opciones a la derecha), «Tu estado de salud» con
-enlace a Avance, deslizadores precisos, selector de periodo común, mapa de
-calor con el orden del plano, plan de Python sembrado hasta el círculo 6,
-presupuesto nocturno de la API de 42, la app con 2 GB, clústeres de París
-(caben, nombres F1B, sin hosts basura, menos CPU) y el grafo de la red con
-tope de 1 500 personas y sin reiniciarse al refrescar.
+En producción: 916cded (grafo con 2 000 y «Todas», RAG en el círculo 4 de
+Python, el modo noche ya no lo bloquea una pestaña olvidada con `x-idle`, el
+relleno viejo por trimestres) y 9d11c9a (selector de periodo común
+`PeriodPicker`: 1, 3, 6, 12, 24 meses, todo y fechas, en Red y Asientos).
 
-Pendiente de mirar con datos reales: la escala del mapa de calor (si sale
-casi todo azul, pasar a raíz o cuantiles) y el avance de la copia de París.
+En marcha: un agente en un worktree con Avance (por defecto tu campus, varios o
+todos con una línea cada uno, por qué salía París, y el periodo común con un
+tramo de meses a mano). Al acabar: unir, check, push y desplegar.
+
+Mirar: la copia de París (backfill:1 en `sync_state`) y que esta noche entre el
+modo noche (log «modo noche» entre las 01:00 y las 05:00 UTC).
