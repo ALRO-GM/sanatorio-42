@@ -22,6 +22,7 @@ import type {
 
 import type { NetworkParams } from '../types'
 import { CLUSTER_SIZES } from './data'
+import { bigWorld } from './network-big'
 import { portrait } from './portrait'
 
 const GROUPS = 6
@@ -92,25 +93,43 @@ function build(me: string): { people: Person[]; links: NetworkLink[] } {
   return { people, links }
 }
 
-/** Las cuentas de cada persona sobre unas uniones. */
-function statsOf(person: Person, links: readonly NetworkLink[]): NetworkNode {
-  let given = 0
-  let received = 0
-  let partners = 0
-  let mutual = 0
+/** Lo que suma cada persona recorriendo las uniones. */
+type Tally = { given: number; received: number; partners: number; mutual: number }
 
-  for (const link of links) {
-    const mine = link.source === person.login
-    const theirs = link.target === person.login
+/**
+ * Las cuentas de toda la gente sobre unas uniones, en una sola pasada: con el
+ * campus grande, recorrer las uniones una vez por persona tardaba segundos.
+ */
+function tallies(links: readonly NetworkLink[]): Map<string, Tally> {
+  const all = new Map<string, Tally>()
+  const add = (login: string, given: number, received: number, mutual: number): void => {
+    const tally = all.get(login) ?? { given: 0, received: 0, partners: 0, mutual: 0 }
 
-    if (!mine && !theirs) continue
-
-    given += mine ? link.forth : link.back
-    received += mine ? link.back : link.forth
-    partners += 1
-    mutual += 2 * Math.min(link.forth, link.back)
+    tally.given += given
+    tally.received += received
+    tally.partners += 1
+    tally.mutual += mutual
+    all.set(login, tally)
   }
 
+  for (const link of links) {
+    const mutual = 2 * Math.min(link.forth, link.back)
+
+    add(link.source, link.forth, link.back, mutual)
+    add(link.target, link.back, link.forth, mutual)
+  }
+
+  return all
+}
+
+/** Las cuentas de una persona, ya sumadas. */
+function nodeOf(person: Person, tally: Tally | undefined): NetworkNode {
+  const { given, received, partners, mutual } = tally ?? {
+    given: 0,
+    received: 0,
+    partners: 0,
+    mutual: 0,
+  }
   const total = given + received
   const repetition = total === 0 ? 0 : (total - partners) / total
   const reciprocity = total === 0 ? 0 : mutual / total
@@ -134,14 +153,25 @@ function statsOf(person: Person, links: readonly NetworkLink[]): NetworkNode {
   }
 }
 
+/** Las cuentas de una persona sobre unas uniones. */
+function statsOf(person: Person, links: readonly NetworkLink[]): NetworkNode {
+  return nodeOf(person, tallies(links).get(person.login))
+}
+
 /** Los campus con correcciones en la web de mentira. */
 const MOCK_CAMPUSES = [
   { id: 22, name: 'Madrid' },
   { id: 46, name: 'Barcelona' },
   { id: 37, name: 'Málaga' },
+  // Un campus del tamaño de París: para probar el grafo con decenas de miles de uniones.
+  { id: 1, name: 'Paris' },
 ] as const
 
+/** El campus grande de mentira (`network-big.ts`). */
+const BIG_CAMPUS = 1
+
 let cached: { me: string; people: Person[]; links: NetworkLink[] } | null = null
+let big: { people: Person[]; links: NetworkLink[] } | null = null
 
 function world(me: string) {
   cached ??= { me, ...build(me) }
@@ -149,10 +179,33 @@ function world(me: string) {
   return cached
 }
 
+/** El campus grande, si está entre los que se miran. Se genera la primera vez. */
+function worldFor(me: string, campuses: readonly number[]) {
+  if (!campuses.includes(BIG_CAMPUS)) return world(me)
+
+  big ??= bigWorld()
+
+  return big
+}
+
+/** Como en la API (`GRAPH_BUDGET` y `select` de `network.analysis.ts`). */
+const LINKS_PER_PERSON = 6
+const BUDGET = { nodes: 1500, links: 10_000 }
+
 export function mockNetwork(me: string, params: NetworkParams): NetworkGraph {
-  const { people, links: every } = world(me)
+  const wanted =
+    params.campuses === undefined
+      ? [MOCK_CAMPUSES[0].id]
+      : params.campuses === 'all'
+        ? MOCK_CAMPUSES.map((campus) => campus.id)
+        : params.campuses.split(',').map(Number)
+  const chosen: number[] = MOCK_CAMPUSES.map((campus) => campus.id).filter((id) =>
+    wanted.includes(id),
+  )
+  const { people, links: every } = worldFor(me, chosen)
   const min = params.min ?? 1
-  const limit = params.limit ?? 300
+  // Un tope mayor (un enlace viejo con «sin límite») se recorta, como en la API.
+  const limit = Math.min(params.limit ?? 300, BUDGET.nodes)
   const focus = params.login ?? null
   // Un periodo o un proyecto dejan una parte de las correcciones, siempre la misma.
   const share =
@@ -177,7 +230,8 @@ export function mockNetwork(me: string, params: NetworkParams): NetworkGraph {
     }
   }
 
-  const stats = people.map((person) => statsOf(person, all))
+  const counted = tallies(all)
+  const stats = people.map((person) => nodeOf(person, counted.get(person.login)))
   const active = stats.filter((node) => node.given + node.received > 0)
   const candidates = active
     .filter((node) => around.has(node.login))
@@ -188,21 +242,17 @@ export function mockNetwork(me: string, params: NetworkParams): NetworkGraph {
     )
   const nodes = candidates.slice(0, limit)
   const shown = new Set(nodes.map((node) => node.login))
-  const links = strong.filter((link) => shown.has(link.source) && shown.has(link.target))
+  const inside = strong.filter((link) => shown.has(link.source) && shown.has(link.target))
+  const maxLinks = Math.min(BUDGET.links, Math.max(200, limit * LINKS_PER_PERSON))
+  const links =
+    inside.length > maxLinks
+      ? [...inside].sort((x, y) => y.forth + y.back - (x.forth + x.back)).slice(0, maxLinks)
+      : inside
+  const groupOf = new Map(people.map((person) => [person.login, person.group]))
   const insiders = active.filter((node) => !node.external)
   const weight = insiders.reduce((sum, node) => sum + node.given + node.received, 0) || 1
   const weighted = (value: (node: NetworkNode) => number): number =>
     insiders.reduce((sum, node) => sum + value(node) * (node.given + node.received), 0) / weight
-
-  const wanted =
-    params.campuses === undefined
-      ? [MOCK_CAMPUSES[0].id]
-      : params.campuses === 'all'
-        ? MOCK_CAMPUSES.map((campus) => campus.id)
-        : params.campuses.split(',').map(Number)
-  const chosen: number[] = MOCK_CAMPUSES.map((campus) => campus.id).filter((id) =>
-    wanted.includes(id),
-  )
 
   return {
     query: {
@@ -222,9 +272,7 @@ export function mockNetwork(me: string, params: NetworkParams): NetworkGraph {
       ...node,
       campusId: node.external
         ? null
-        : (chosen[
-            (people.find((person) => person.login === node.login)?.group ?? index) % chosen.length
-          ] ?? null),
+        : (chosen[(groupOf.get(node.login) ?? index) % chosen.length] ?? null),
     })),
     links,
     totals: {
@@ -238,8 +286,8 @@ export function mockNetwork(me: string, params: NetworkParams): NetworkGraph {
       communities: GROUPS,
     },
     hidden:
-      candidates.length > nodes.length
-        ? { nodes: candidates.length - nodes.length, links: 0 }
+      candidates.length > nodes.length || inside.length > links.length
+        ? { nodes: candidates.length - nodes.length, links: inside.length - links.length }
         : null,
     topPairs: [...all]
       .sort((a, b) => Math.min(b.forth, b.back) - Math.min(a.forth, a.back))

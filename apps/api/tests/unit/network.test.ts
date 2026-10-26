@@ -13,6 +13,7 @@ import type { Db } from '../../src/core/db/database.js'
 import type { ApiScaleTeam } from '../../src/integrations/forty-two/types.js'
 import {
   analyse,
+  GRAPH_BUDGET,
   mergePairs,
   passMarkOf,
   select,
@@ -178,6 +179,31 @@ describe('red de correcciones', () => {
       expect(select(analysis, { focus: null, min: 1, limit: 2 }).hidden).toMatchObject({ nodes: 2 })
       expect(select(analysis, { focus: 'nadie', min: 1, limit: 10 }).logins).toEqual([])
     })
+
+    it('con un campus enorme no pasa del tope que el navegador mueve con soltura', () => {
+      // 2 000 personas en fila y una piña de 150 que se corrigen todas entre sí:
+      // más de 12 000 uniones entre las 1 500 más activas.
+      const crowd = Array.from({ length: 2000 }, (_, index) => `p${String(index)}`)
+      const knot = crowd.slice(0, 150)
+      const everyone = new Set(crowd)
+      const analysis = analyse(
+        mergePairs(
+          [
+            ...crowd.slice(1).map((login, index) => pair(crowd[index] ?? '', login, 3)),
+            ...knot.flatMap((a, index) => knot.slice(index + 1).map((b) => pair(a, b, 2))),
+          ],
+          everyone,
+        ),
+        everyone,
+      )
+      const shown = select(analysis, { focus: null, min: 1, limit: 20_000 })
+
+      expect(shown.logins).toHaveLength(GRAPH_BUDGET.nodes)
+      expect(shown.links.length).toBeLessThanOrEqual(GRAPH_BUDGET.links)
+      // Se quedan las más activas (toda la piña) y se dice cuántas quedan fuera.
+      expect(knot.every((login) => shown.logins.includes(login))).toBe(true)
+      expect(shown.hidden).toMatchObject({ nodes: 500 })
+    })
   })
 
   describe('copia desde 42', () => {
@@ -223,6 +249,14 @@ describe('red de correcciones', () => {
 
     afterEach(() => {
       closeDatabase(db)
+    })
+
+    it('un tope de personas mayor que el del navegador se recorta, sin error', async () => {
+      // Los enlaces viejos con la opción «sin límite» (20 000) siguen valiendo.
+      const graph = await services.network.graph(actor('ana'), { limit: '20000' })
+
+      expect(graph.query.limit).toBe(GRAPH_BUDGET.nodes)
+      await expect(services.network.graph(actor('ana'), { limit: '20001' })).rejects.toThrow()
     })
 
     it('cada persona puede pedir veinte análisis nuevos por minuto; los ya hechos no cuentan', async () => {

@@ -1,10 +1,12 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 
 import type { NetworkLink, NetworkNode } from '@sanatorio/contracts'
 import { forceCollide, forceLink, forceManyBody, forceSimulation, forceX, forceY } from 'd3-force'
 import type { Simulation, SimulationLinkDatum, SimulationNodeDatum } from 'd3-force'
 import { photoUrl } from '../../shared/api'
+import { byWeight, graphSignature, spotAt, spotIndex } from './graph-data'
+import type { SpotIndex } from './graph-data'
 import {
   MOVING_LINKS,
   inside,
@@ -72,8 +74,18 @@ type Scene = {
   /** Si la persona ha movido la vista, no se le vuelve a encajar sola. */
   touched: boolean
   frame: number
-  /** Las uniones más fuertes: las únicas que se pintan mientras todo se mueve. */
-  strong: SimLink[]
+  /** `true` si alguien ha pedido repintar: un fotograma sin paso ni petición no pinta. */
+  dirty: boolean
+  /** Pasos de la simulación desde que llegaron los datos. */
+  ticks: number
+  /** Las uniones por peso (`byWeight`): cada grupo se pinta de un solo trazo. */
+  groups: SimLink[][]
+  /** Las más fuertes, también por peso: las únicas que se pintan mientras todo se mueve. */
+  strong: SimLink[][]
+  /** Índice de burbujas por sitio para el ratón, y de qué `version` es. */
+  spots: { index: SpotIndex<SimNode>; version: number } | null
+  /** Huella de los datos con los que se montó la simulación (`graphSignature`). */
+  signature: string
   /** `true` mientras la simulación recoloca las burbujas. */
   moving: boolean
   /** Sube con cada cosa que cambia lo que se ve en las uniones (ver `graph-layers.ts`). */
@@ -94,6 +106,29 @@ const GO_TO_ZOOM = 1.6
 const GO_TO_MS = 450
 /** Personas que se ofrecen al buscar. */
 const FOUND_MAX = 6
+
+/**
+ * Por debajo de este calor la simulación se da por quieta y el bucle de
+ * fotogramas se para del todo (d3 trae 0,001: los últimos cien pasos casi no
+ * movían nada y costaban como los primeros).
+ */
+const ALPHA_MIN = 0.005
+/**
+ * Calor al arrastrar una burbuja: lo justo para que sus vecinas la sigan. Con
+ * 0,25, como antes, el grafo entero se recolocaba a cada movimiento.
+ */
+const DRAG_HEAT = 0.08
+/** Nombres que se pintan como mucho en un fotograma: más no se leen. */
+const MAX_LABELS = 120
+/** Con más burbujas que esto, las fotos esperan a que el grafo se quede quieto. */
+const PHOTOS_WHILE_MOVING = 400
+
+/** `true` mientras la simulación tenga calor o alguien la esté calentando (arrastrar). */
+function isHot(simulation: Simulation<SimNode, SimLink>): boolean {
+  return (
+    simulation.alpha() >= simulation.alphaMin() || simulation.alphaTarget() >= simulation.alphaMin()
+  )
+}
 
 /**
  * Radio de una burbuja. El área es proporcional a su actividad, y la escala es
@@ -154,6 +189,25 @@ const PHOTO_PX = 128
  */
 const pictures = new Map<string, HTMLCanvasElement | null | 'loading'>()
 
+/**
+ * Fotos pidiéndose ahora. Se piden pocas a la vez (cada una se decodifica en el
+ * hilo de la página) y, al desmontar el grafo, las que falten se cortan: si
+ * no, seguían llegando y decodificándose un buen rato en otra sección.
+ */
+const loading = new Map<string, HTMLImageElement>()
+const PHOTO_LOADS = 6
+
+/** Corta las fotos a medio pedir; se volverán a pedir si se vuelven a ver. */
+function dropLoading(): void {
+  for (const [url, image] of loading) {
+    image.onload = null
+    image.onerror = null
+    image.src = ''
+    pictures.delete(url)
+  }
+  loading.clear()
+}
+
 /** La foto cuadrada del centro, recortada en un círculo. */
 function roundPicture(image: HTMLImageElement): HTMLCanvasElement | null {
   const canvas = document.createElement('canvas')
@@ -188,18 +242,25 @@ function pictureOf(url: string, onLoad: () => void): HTMLCanvasElement | null {
   if (known !== undefined) {
     return known === 'loading' ? null : known
   }
+  // Ya hay bastantes en camino: esta se pide en un dibujo próximo.
+  if (loading.size >= PHOTO_LOADS) return null
 
   const image = new Image()
 
+  // Al llegar una (o fallar) se repinta, y ese dibujo pide las siguientes.
   image.onload = () => {
+    loading.delete(url)
     pictures.set(url, roundPicture(image))
     onLoad()
   }
   image.onerror = () => {
+    loading.delete(url)
     pictures.set(url, null)
+    onLoad()
   }
   image.src = url
   pictures.set(url, 'loading')
+  loading.set(url, image)
 
   return null
 }
@@ -246,7 +307,12 @@ export function ForceGraph({
     needsFit: true,
     touched: false,
     frame: 0,
+    dirty: false,
+    ticks: 0,
+    groups: [],
     strong: [],
+    spots: null,
+    signature: '',
     moving: false,
     version: 0,
   })
@@ -338,8 +404,6 @@ export function ForceGraph({
     }
 
     const draw = (): void => {
-      state.frame = 0
-
       const { view, hover } = state
       const { colorOf: color, selected: chosen } = live.current
       const ratio = window.devicePixelRatio || 1
@@ -382,17 +446,6 @@ export function ForceGraph({
             ? Math.min(0.7, (0.1 + link.weight * 0.05) * density)
             : 0.9
           : 0.04
-      }
-      const line = (target: CanvasRenderingContext2D, link: SimLink): void => {
-        if (!crosses(link)) return
-
-        const from = link.source as SimNode
-        const to = link.target as SimNode
-
-        target.beginPath()
-        target.moveTo(from.x ?? 0, from.y ?? 0)
-        target.lineTo(to.x ?? 0, to.y ?? 0)
-        target.stroke()
       }
       const touches = (link: SimLink): boolean =>
         (link.source as SimNode).login === focus || (link.target as SimNode).login === focus
@@ -501,15 +554,41 @@ export function ForceGraph({
         }
       }
 
-      if (state.moving) {
-        for (const link of state.links.length > MOVING_LINKS ? state.strong : state.links) {
-          const on = around === null || touches(link)
+      /**
+       * Un grupo de uniones del mismo peso, de un solo trazo. Las de quien está
+       * elegido se saltan: van después, una a una, con su sentido.
+       */
+      const strokeGroup = (
+        target: CanvasRenderingContext2D,
+        group: readonly SimLink[],
+        on: boolean,
+        skipFocus: boolean,
+      ): void => {
+        const first = group[0]
 
-          if (around !== null && on) {
-            directed(link)
-          } else {
-            style(context, link, on)
-            line(context, link)
+        if (first === undefined) return
+
+        style(target, first, on)
+        target.beginPath()
+        for (const link of group) {
+          if ((skipFocus && touches(link)) || !crosses(link)) continue
+
+          const from = link.source as SimNode
+          const to = link.target as SimNode
+
+          target.moveTo(from.x ?? 0, from.y ?? 0)
+          target.lineTo(to.x ?? 0, to.y ?? 0)
+        }
+        target.stroke()
+      }
+
+      if (state.moving) {
+        const groups = state.links.length > MOVING_LINKS ? state.strong : state.groups
+
+        for (const group of groups) strokeGroup(context, group, around === null, around !== null)
+        if (around !== null) {
+          for (const group of groups) {
+            for (const link of group) if (touches(link)) directed(link)
           }
         }
       } else {
@@ -527,10 +606,7 @@ export function ForceGraph({
 
           // En la capa «apagada» van todas tenues: las de quien está elegido se
           // pintan después encima, y la tenue de debajo no se nota.
-          for (const link of state.links) {
-            style(target, link, around === null)
-            line(target, link)
-          }
+          for (const group of state.groups) strokeGroup(target, group, around === null, false)
           layer.key = key
         }
 
@@ -567,7 +643,11 @@ export function ForceGraph({
 
         const photo = photoUrl(node.data.login, node.data.image)
 
-        if (on && shownRadius > 11 && photo !== null) {
+        // Con muchas burbujas, mientras se recolocan, sin fotos: es lo que más
+        // cuesta de cada fotograma y no da tiempo a verlas.
+        const photos = !state.moving || state.nodes.length <= PHOTOS_WHILE_MOVING
+
+        if (on && photos && shownRadius > 11 && photo !== null) {
           const picture = pictureOf(photo, schedule.current)
 
           if (picture !== null) {
@@ -599,7 +679,11 @@ export function ForceGraph({
       context.strokeStyle = palette.surface
       context.fillStyle = palette.text
 
+      let labels = 0
+
       for (const node of state.nodes) {
+        if (labels >= MAX_LABELS) break
+
         const named =
           around === null
             ? node.r * view.k > 13
@@ -611,6 +695,7 @@ export function ForceGraph({
 
         const y = (node.y ?? 0) + node.r + 3 / view.k
 
+        labels += 1
         context.globalAlpha = 1
         context.strokeText(node.login, node.x ?? 0, y)
         context.fillText(node.login, node.x ?? 0, y)
@@ -619,9 +704,74 @@ export function ForceGraph({
       context.globalAlpha = 1
     }
 
+    /** Un paso de la simulación: mueve las burbujas y, al enfriarse, la da por quieta. */
+    const tick = (simulation: Simulation<SimNode, SimLink>): void => {
+      simulation.tick()
+      state.ticks += 1
+      state.moving = true
+      state.version += 1
+
+      // Durante la primera colocación la vista acompaña al grafo.
+      if (state.needsFit && !state.touched && state.ticks % 6 === 0) fit()
+
+      if (!isHot(simulation)) {
+        // Quieto: desde ahora se pintan todas las uniones, y en la capa guardada.
+        state.moving = false
+        state.version += 1
+        if (state.needsFit && !state.touched) fit()
+        state.needsFit = false
+      }
+    }
+
+    /** Lo que costó el último paso y cuándo acabó: el siguiente espera el doble. */
+    let last = { cost: 0, end: 0 }
+
+    /**
+     * Un fotograma. Si la simulación tiene calor da un paso, pero como mucho un
+     * tercio del tiempo: si un paso costó 10 ms, el siguiente espera 20 ms. Con
+     * grafos grandes se recoloca algo más despacio y la página sigue fluida.
+     * Pinta solo si algo ha cambiado y pide otro fotograma solo mientras haya
+     * calor: quieto el grafo, no queda ningún bucle corriendo.
+     */
+    const frame = (now: number): void => {
+      state.frame = 0
+
+      const simulation = state.simulation
+      let changed = state.dirty
+
+      if (simulation !== null && isHot(simulation) && now - last.end >= 2 * last.cost) {
+        const start = performance.now()
+
+        tick(simulation)
+        last = { cost: performance.now() - start, end: performance.now() }
+        changed = true
+      }
+
+      state.dirty = false
+      if (changed) draw()
+      if (simulation !== null && isHot(simulation)) request()
+    }
+
+    /** Pide el siguiente fotograma; con la pestaña oculta, nada (se retoma al volver). */
+    const request = (): void => {
+      if (state.frame === 0 && document.visibilityState !== 'hidden') {
+        state.frame = requestAnimationFrame(frame)
+      }
+    }
+
     schedule.current = () => {
-      if (state.frame === 0) {
-        state.frame = requestAnimationFrame(draw)
+      state.dirty = true
+      request()
+    }
+
+    // Pestaña oculta: fuera el fotograma pendiente. Al volver, se repinta y,
+    // si la simulación aún tenía calor, sigue donde estaba.
+    const onVisibility = (): void => {
+      if (document.visibilityState === 'hidden') {
+        cancelAnimationFrame(state.frame)
+        state.frame = 0
+      } else {
+        schedule.current()
       }
     }
 
@@ -649,22 +799,18 @@ export function ForceGraph({
       }
     }
 
+    /**
+     * La burbuja bajo un punto, con un índice por sitio (`graph-data.ts`) en vez
+     * de mirarlas todas a cada movimiento del ratón. El índice se rehace solo
+     * cuando las burbujas se han movido desde la última vez.
+     */
     const nodeAt = (point: { x: number; y: number }): SimNode | null => {
-      let found: SimNode | null = null
-      let best = Infinity
-
-      for (const node of state.nodes) {
-        const distance = Math.hypot((node.x ?? 0) - point.x, (node.y ?? 0) - point.y)
-        // Un margen en píxeles de pantalla: las burbujas pequeñas también se aciertan.
-        const reach = node.r + 4 / state.view.k
-
-        if (distance <= reach && distance < best) {
-          found = node
-          best = distance
-        }
+      if (state.spots?.version !== state.version) {
+        state.spots = { index: spotIndex(state.nodes), version: state.version }
       }
 
-      return found
+      // Un margen en píxeles de pantalla: las burbujas pequeñas también se aciertan.
+      return spotAt(state.spots.index, point.x, point.y, 4 / state.view.k)
     }
 
     let drag: { node: SimNode | null; x: number; y: number; moved: boolean } | null = null
@@ -696,6 +842,7 @@ export function ForceGraph({
         held.fx = null
         held.fy = null
         state.simulation?.alphaTarget(0)
+        schedule.current()
       }
 
       drag = null
@@ -781,10 +928,17 @@ export function ForceGraph({
         drag.y = event.clientY
         schedule.current()
       } else {
-        // Una burbuja arrastrada se queda clavada donde va el ratón y el resto se recoloca.
+        // Una burbuja arrastrada se queda clavada donde va el ratón y sus vecinas
+        // la siguen con poco calor; al soltarla, se enfría y el bucle se para.
         drag.node.fx = point.x
         drag.node.fy = point.y
-        state.simulation?.alphaTarget(0.25).restart()
+        drag.node.x = point.x
+        drag.node.y = point.y
+        state.version += 1
+        state.simulation?.alphaTarget(DRAG_HEAT)
+        // Sin pedir un dibujo por cada movimiento del ratón: el siguiente paso
+        // de la simulación ya pinta la burbuja en su sitio nuevo.
+        request()
       }
     }
 
@@ -800,6 +954,7 @@ export function ForceGraph({
         drag.node.fx = null
         drag.node.fy = null
         state.simulation?.alphaTarget(0)
+        schedule.current()
       }
 
       if (!drag.moved) {
@@ -908,15 +1063,7 @@ export function ForceGraph({
     canvas.addEventListener('pointerleave', onLeave)
     canvas.addEventListener('wheel', onWheel, { passive: false })
     canvas.addEventListener('dblclick', onDoubleClick)
-
-    // El encaje inicial lo pide la simulación cuando ya ha repartido las burbujas.
-    const fitter = (): void => {
-      if (!state.touched) {
-        fit()
-      }
-    }
-
-    canvas.addEventListener('graph:fit', fitter)
+    document.addEventListener('visibilitychange', onVisibility)
 
     return () => {
       observer.disconnect()
@@ -930,26 +1077,38 @@ export function ForceGraph({
       canvas.removeEventListener('pointerleave', onLeave)
       canvas.removeEventListener('wheel', onWheel)
       canvas.removeEventListener('dblclick', onDoubleClick)
-      canvas.removeEventListener('graph:fit', fitter)
+      document.removeEventListener('visibilitychange', onVisibility)
       cancelAnimationFrame(state.frame)
       cancelAnimationFrame(travel)
       state.frame = 0
+      // Lo que llegue tarde (una foto, un clic) ya no pide fotogramas.
+      schedule.current = () => undefined
+      dropLoading()
     }
   }, [])
 
-  // --- Datos: cada vez que cambian, la simulación se recalienta -------------
+  // --- Datos: cada vez que cambian de verdad, la simulación se recalienta ----
+  // Lo que llegue con la misma huella (el sondeo mientras se copia, un render
+  // que crea arrays nuevos) no recoloca nada: solo se cambian los datos de cada
+  // burbuja y se repinta.
+  const latest = useRef({ nodes, links })
+
+  latest.current = { nodes, links }
+
+  const signature = useMemo(() => graphSignature(nodes, links), [nodes, links])
+
   useEffect(() => {
     const state = scene.current
-    const canvas = canvasRef.current
+    const { nodes: people, links: pairs } = latest.current
     const before = new Map(state.nodes.map((node) => [node.login, node]))
     // Quien ya estaba conserva su sitio: el grafo se recoloca, no salta.
-    const spread = 30 * Math.sqrt(nodes.length)
-    const busiest = Math.max(1, ...nodes.map((node) => node.given + node.received))
-    const simNodes: SimNode[] = nodes.map((data, index) => {
+    const spread = 30 * Math.sqrt(people.length)
+    const busiest = people.reduce((most, node) => Math.max(most, node.given + node.received), 1)
+    const simNodes: SimNode[] = people.map((data, index) => {
       const old = before.get(data.login)
       // Espiral de girasol para los nuevos: repartidos, sin azar.
       const angle = index * 2.399963
-      const distance = spread * Math.sqrt((index + 0.5) / nodes.length)
+      const distance = spread * Math.sqrt((index + 0.5) / people.length)
 
       return {
         login: data.login,
@@ -964,7 +1123,7 @@ export function ForceGraph({
     const neighbours = new Map<string, Set<string>>()
     const simLinks: SimLink[] = []
 
-    for (const link of links) {
+    for (const link of pairs) {
       const source = byLogin.get(link.source)
       const target = byLogin.get(link.target)
 
@@ -1005,8 +1164,12 @@ export function ForceGraph({
     state.simulation?.stop()
     state.nodes = simNodes
     state.links = simLinks
-    state.strong = strongest(simLinks, MOVING_LINKS)
+    state.groups = byWeight(simLinks)
+    state.strong = byWeight(strongest(simLinks, MOVING_LINKS))
+    state.spots = null
+    state.signature = signature
     state.moving = true
+    state.ticks = 0
     state.version += 1
     state.neighbours = neighbours
     state.hover = null
@@ -1018,8 +1181,6 @@ export function ForceGraph({
       state.needsFit = true
       state.touched = false
     }
-
-    let ticks = 0
 
     state.simulation = forceSimulation<SimNode, SimLink>(simNodes)
       .force(
@@ -1064,35 +1225,29 @@ export function ForceGraph({
       // Con muchas uniones cada paso cuesta más: se enfría antes.
       .alphaDecay(simNodes.length > 800 || simLinks.length > 5000 ? 0.035 : 0.022)
       .velocityDecay(0.35)
-      .on('tick', () => {
-        ticks += 1
-        state.moving = true
-        state.version += 1
-
-        // Durante la primera colocación la vista acompaña al grafo.
-        if (state.needsFit && !state.touched && ticks % 6 === 0) {
-          canvas?.dispatchEvent(new Event('graph:fit'))
-        }
-
-        schedule.current()
-      })
-      .on('end', () => {
-        // Quieto: la próxima vez se pintan todas las uniones, y en la capa guardada.
-        state.moving = false
-        state.version += 1
-        schedule.current()
-
-        if (state.needsFit) {
-          canvas?.dispatchEvent(new Event('graph:fit'))
-          state.needsFit = false
-          schedule.current()
-        }
-      })
+      .alphaMin(ALPHA_MIN)
+      // Sin el reloj propio de d3: los pasos los da el bucle de fotogramas del
+      // lienzo, que sabe cuándo parar, cuándo esperar y cuándo la pestaña no se ve.
+      .stop()
+    schedule.current()
 
     return () => {
       state.simulation?.stop()
     }
-  }, [nodes, links])
+  }, [signature])
+
+  // Mismos datos en objetos nuevos: cada burbuja se queda con el suyo (para el
+  // color, la etiqueta y la ficha) sin moverse.
+  useEffect(() => {
+    const state = scene.current
+
+    if (state.signature !== signature) return
+
+    const fresh = new Map(nodes.map((node) => [node.login, node]))
+
+    for (const node of state.nodes) node.data = fresh.get(node.login) ?? node.data
+    schedule.current()
+  }, [nodes, signature])
 
   // Cambiar el color o la persona elegida solo repinta.
   useEffect(() => {
