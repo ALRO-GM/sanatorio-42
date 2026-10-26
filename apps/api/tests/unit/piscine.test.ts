@@ -9,7 +9,7 @@ import { closeDatabase, openDatabase } from '../../src/core/db/database.js'
 import type { Db } from '../../src/core/db/database.js'
 import { actor } from '../helpers/community.js'
 import { PISCINE, PISCINE_PROGRESS } from '../../src/modules/replica/index.js'
-import { meanLine, poolOf, swimOf, POOL_DAYS } from '../../src/modules/stats/piscine.rules.js'
+import { meanLine, samePool, swimOf, POOL_DAYS } from '../../src/modules/stats/piscine.rules.js'
 import { createPiscineProgressService } from '../../src/modules/stats/piscine.service.js'
 import { createPiscineRepository } from '../../src/modules/stats/stats.repository.js'
 
@@ -91,12 +91,11 @@ describe('la línea de un piscinero', () => {
     expect(meanLine([], 3, 1)).toEqual([null, null, null])
   })
 
-  it('tu piscina es quien empezó a menos de una semana; las anteriores, antes y desde el límite', () => {
-    expect(poolOf(START + 2 * DAY, START, 0)).toBe('cohort')
-    expect(poolOf(START - 40 * DAY, START, 0)).toBe('past')
-    expect(poolOf(START - 40 * DAY, START, START - 30 * DAY)).toBeNull()
-    expect(poolOf(START + 40 * DAY, START, 0)).toBeNull()
-    expect(poolOf(START - 40 * DAY, null, 0)).toBe('past')
+  it('tu piscina es quien empezó a menos de una semana de ti', () => {
+    expect(samePool(START + 2 * DAY, START)).toBe(true)
+    expect(samePool(START - 2 * DAY, START)).toBe(true)
+    expect(samePool(START - 40 * DAY, START)).toBe(false)
+    expect(samePool(START + 40 * DAY, START)).toBe(false)
   })
 })
 
@@ -170,7 +169,7 @@ async function person(
 }
 
 describe('el avance de la piscina', () => {
-  it('tu línea, la media de tu piscina y la de las anteriores, sin rushes ni exámenes', async () => {
+  it('tu línea y la media de tu piscina, sin rushes, exámenes ni otras piscinas', async () => {
     const ids = await seedProjects()
     const now = START + 3.5 * DAY
     const past = START - 120 * DAY
@@ -187,7 +186,7 @@ describe('el avance de la piscina', () => {
     for (let n = 0; n < 11; n++) {
       await person(10 + n, `mate${n}`, START, { 'c-piscine-shell-00': 0 }, ids, true)
     }
-    // Una piscina anterior: tres que llegaron a C 00 el día 2.
+    // Una piscina anterior, aún en `pool_members` y otra de la copia del campus: no salen.
     for (let n = 0; n < 3; n++) {
       await person(
         50 + n,
@@ -195,7 +194,7 @@ describe('el avance de la piscina', () => {
         past,
         { 'c-piscine-shell-00': 0, 'c-piscine-shell-01': 1, 'c-piscine-c-00': 2 },
         ids,
-        false,
+        n < 2,
       )
     }
 
@@ -219,14 +218,9 @@ describe('el avance de la piscina', () => {
     expect(data.cohort.people).toBe(11)
     expect(data.cohort.line.slice(0, 4)).toEqual([1, 1, 1, 1])
     expect(data.cohort.individuals).toEqual([])
-    // Las anteriores: tres, sin nombre y día a día hasta el último del eje.
-    expect(data.past.people).toBe(3)
-    expect(data.past.line.slice(0, 3)).toEqual([null, null, null])
-    expect(data.past.individuals.map((each) => each.login)).toEqual([null, null, null])
-    expect(data.past.individuals[0]?.line.slice(0, 4)).toEqual([1, 2, 3, 3])
-    // Sin fecha de piscina, su inicio es cuando se apuntó al primer proyecto.
-    expect(data.past.since).toBe(new Date(past + 3_600_000).toISOString())
-    // Comparar solo con piscineros en curso: quien hizo una anterior, no.
+    expect(data.cohort.since).toBe(new Date(START).toISOString())
+    // Nada de otras piscinas: ni en la respuesta ni para compararse.
+    expect(data).not.toHaveProperty('past')
     expect(data.others.map((each) => each.login)).toEqual(['mate1'])
   })
 
@@ -254,8 +248,6 @@ describe('el avance de la piscina', () => {
     // Con dos no hay media: van sus líneas, sin quien no se ve.
     expect(data.cohort.line[0]).toBeNull()
     expect(data.cohort.individuals.map((each) => each.login)).toEqual(['mate0'])
-    expect(data.past.people).toBe(0)
-    expect(data.past.since).toBeNull()
   })
 
   it('un campus sin nadie: todo vacío, sin fallar', async () => {

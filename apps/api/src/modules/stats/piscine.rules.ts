@@ -89,19 +89,7 @@ export function meanLine(
 /** Una semana: quien empezó a menos de esto de ti es de tu piscina. */
 const SAME_POOL_MS = 7 * DAY_MS
 
-/**
- * De qué piscina es cada cual, respecto a la tuya (la que empezó en
- * `anchor`): la misma, si empezó a menos de una semana; una anterior, si
- * empezó antes y desde `since`; ninguna de las dos (una que empieza después,
- * o una demasiado vieja), `null`. Sin piscina tuya, todas son anteriores.
- */
-export function poolOf(
-  start: number,
-  anchor: number | null,
-  since: number,
-): 'cohort' | 'past' | null {
-  if (anchor !== null && Math.abs(start - anchor) < SAME_POOL_MS) return 'cohort'
-  if (start < since) return null
-
-  return anchor === null || start < anchor ? 'past' : null
+/** Si quien empezó en `start` es de tu piscina (la que empezó en `anchor`): a menos de una semana. */
+export function samePool(start: number, anchor: number): boolean {
+  return Math.abs(start - anchor) < SAME_POOL_MS
 }

@@ -1959,11 +1959,9 @@ GET /stats/ranking?by=circle|circles|hours&plan=all|classic|next&kickoff=AAAA-MM
   `PiscineTrace` (`line`: cuántos lleva aprobados al acabar cada día, `null`
   los que aún no ha vivido; `done`; `milestones`). `cohort` es tu piscina:
   piscineros en curso de tu campus que empezaron a menos de una semana de ti,
-  sin ti. `past`, las piscinas anteriores de tu campus en los tres últimos
-  años, de la réplica (`project_users` de la gente del campus), sin nombre.
-  Cada una con `line` (media, `null` con menos de `minPeople`), `people`,
+  sin ti; no hay nada de otras piscinas. Con `line` (media, `null` con menos de `minPeople`), `people`,
   `individuals` (si son menos de `minPeople`) y `since`. `with`: solo
-  piscineros en curso de tu campus que ves. Los rushes, BSQ y exámenes no
+  gente de tu piscina que ves. Los rushes, BSQ y exámenes no
   suman. Se calcula por campus y se guarda 10 minutos. Es del permiso
   `avance`.
 - **Plan** de quien 42 no lo ha dicho (`user_tracks`): el de la mayoría de sus

@@ -85,23 +85,14 @@ su valor en claro y en oscuro y su color de texto encima, `--on-piscine-*`).
   aprobados al acabar cada día de piscina (eje de 0 a 30 días; el día 1 es el
   primero). Los rushes, BSQ y exámenes no suman nunca. Sin plan, pace, black
   hole, horas, campus a elegir ni «quién va más rápido»: en la piscina no
-  significan nada. Se compara con dos medias, las dos de **su campus**:
-  - **Tu piscina**: los piscineros en curso (`pool_members`) que empezaron a
-    menos de una semana de ti, sin ti. Es la comparación justa (mismo día,
-    mismos plazos) y la gente con la que se cruza en el clúster.
-  - **Piscinas anteriores**: quien hizo la piscina en tu campus en los tres
-    últimos años, de las filas de la réplica (`project_users` de la gente del
-    campus: `campus_members` o `pool_members`). Dice «a estas alturas, lo
-    normal es ir por aquí». Su inicio es su `begin_at` si aún está en
-    `pool_members` o, si no, el día en que se apuntó a su primer proyecto de
-    la piscina (Shell 00 se abre el primer día). Mezcla a quien entró y a quien
-    no: es la media de la piscina, no la de quien la aprobó. Tres años porque
-    antes la piscina tenía otros proyectos y un campus nuevo no tendría a
-    nadie con menos.
-  Con menos de 10 personas no hay media: van las líneas de cada cual (las de
-  piscinas anteriores, sin nombre, porque hoy son estudiantes u otro mundo).
-  Comparar con alguien (`?with=`, permiso `avance.compare`): solo piscineros en
-  curso de tu campus que ves. Quien administra viéndolo como piscinero no
+  significan nada. Se compara solo con la media de **tu piscina**: los
+  piscineros en curso de tu campus (`pool_members`) que empezaron a menos de
+  una semana de ti, sin ti. Nada de otras piscinas (pedido por Alberto el
+  2026-10-26: a quien está en la piscina no se le enseña información de las
+  anteriores). Con menos de 10 personas no hay media: van las líneas de cada
+  cual.
+  Comparar con alguien (`?with=`, permiso `avance.compare`): solo gente de
+  tu piscina que ves. Quien administra viéndolo como piscinero no
   tiene línea propia y su «piscina» es la última que ha empezado en su campus.
 - **Tablón** (`GET /doubts/graph` con `kind: 'piscine'`, `PiscineGraph.tsx`):
   el camino de los 16 que cuentan, en orden y con sus colores, y aparte, bajo

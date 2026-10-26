@@ -11,7 +11,7 @@ const PAD = { left: 62, right: 16, top: 12, bottom: 34 }
 const WEEK = 7
 
 /** Qué medias se ven. */
-export type PiscineShown = { cohort: boolean; past: boolean }
+export type PiscineShown = { cohort: boolean }
 
 type Line = {
   key: string
@@ -61,29 +61,16 @@ export function PiscineProgressChart(props: {
     return path
   }
   const shells = data.steps.filter((step) => step.group === 'shell').length
-  const named = (traces: readonly (PiscineTrace & { login: string | null })[], stroke: string) =>
+  const named = (traces: readonly (PiscineTrace & { login: string })[], stroke: string) =>
     traces.map((each, index): Line => ({
       key: `${stroke}-${index}`,
       line: each.line,
       stroke,
       width: 1,
       opacity: 0.45,
-      label: each.login ?? t('piscine.chart.someone'),
+      label: each.login,
     }))
   const lines: Line[] = [
-    ...(props.shown.past
-      ? [
-          {
-            key: 'past',
-            line: data.past.line,
-            stroke: 'var(--text-3)',
-            width: 2.25,
-            dash: '6 4',
-            label: t('piscine.chart.past'),
-          },
-          ...named(data.past.individuals, 'var(--text-3)'),
-        ]
-      : []),
     ...(props.shown.cohort
       ? [
           {

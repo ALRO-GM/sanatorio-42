@@ -222,14 +222,12 @@ export type PiscineTrace = {
 /**
  * Una media de piscineros: la línea (proyectos aprobados de media; `null` en
  * los días con menos de `minPeople` personas), cuánta gente entra y, si en
- * total son menos de `minPeople`, la línea de cada cual. `login` es `null` en
- * quien ya no es de tu mundo (las piscinas anteriores: hoy son estudiantes o
- * ya no están).
+ * total son menos de `minPeople`, la línea de cada cual.
  */
 export type PiscineAverage = {
   line: ProgressLine
   people: number
-  individuals: (PiscineTrace & { login: string | null })[]
+  individuals: (PiscineTrace & { login: string })[]
   /** El inicio de la piscina más antigua que entra (ISO-8601); `null` sin nadie. */
   since: string | null
 }
@@ -249,8 +247,6 @@ export type PiscineProgress = {
   me: PiscineTrace | null
   /** Tu piscina: quien la empezó en tu campus a la vez que tú (una semana arriba o abajo). */
   cohort: PiscineAverage
-  /** Las piscinas anteriores de tu campus, de los tres últimos años. */
-  past: PiscineAverage
   /** Las personas con quien te comparas (`?with=`): piscineros de tu campus. */
   others: (PiscineTrace & { login: string })[]
   minPeople: number

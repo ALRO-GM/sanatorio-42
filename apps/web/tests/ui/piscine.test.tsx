@@ -68,9 +68,6 @@ describe('un piscinero ve la piscina (docs/piscineros.md)', () => {
     expect(
       screen.getByRole('checkbox', { name: new RegExp(text('piscine.chart.cohort')) }),
     ).toBeTruthy()
-    expect(
-      screen.getByRole('checkbox', { name: new RegExp(text('piscine.chart.past')) }),
-    ).toBeTruthy()
     expect(screen.queryByText(text('stats.progress.plan'))).toBeNull()
     expect(screen.queryByText(text('stats.progress.paces'))).toBeNull()
   }, 20_000)

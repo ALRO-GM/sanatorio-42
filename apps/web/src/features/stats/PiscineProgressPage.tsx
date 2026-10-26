@@ -17,8 +17,8 @@ import { MAX_OTHERS, PERSON_COLORS } from './progressSeries'
 /**
  * El Avance de un piscinero (`docs/piscineros.md`), en vez del del common
  * core: cuántos de los dieciséis proyectos que cuentan (Shell 00 … C 13) lleva
- * aprobados cada día de piscina, con la media de su piscina y la de las
- * anteriores de su campus, y hasta cinco piscineros con quien compararse. Los
+ * aprobados cada día de piscina, con la media de su piscina (nada de otras
+ * piscinas) y hasta cinco piscineros con quien compararse. Los
  * rushes, BSQ y exámenes no suman. Sin pace, plan, black hole ni horas: en la
  * piscina no hay nada de eso.
  *
@@ -28,7 +28,7 @@ import { MAX_OTHERS, PERSON_COLORS } from './progressSeries'
 export function PiscineProgressPage({ me }: { me: string }) {
   const { t, tn } = useI18n()
   const [others, setOthers] = useState<string[]>([])
-  const [shown, setShown] = useState<PiscineShown>({ cohort: true, past: true })
+  const [shown, setShown] = useState<PiscineShown>({ cohort: true })
   const [typed, setTyped] = useState('')
   const fetched = useAsync(() => api.getPiscineProgress(others), [others.join(',')])
   // Mientras llega lo nuevo (otra persona), se queda lo de antes: la gráfica no se vacía.
@@ -88,10 +88,6 @@ export function PiscineProgressPage({ me }: { me: string }) {
           <div className="progress-option">
             <span className="eyebrow">{t('piscine.chart.compareWith')}</span>
             {toggle('cohort')}
-            {toggle('past')}
-            {typeof data?.past.since === 'string' && (
-              <p className="hint">{t('piscine.chart.pastHint')}</p>
-            )}
           </div>
           <PoolOnly k="avance.compare">
             <div className="progress-option">

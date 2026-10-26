@@ -396,18 +396,13 @@ type PiscineRow = {
   projectId: number
   /** Aprobado, y cuándo (ms); `null` si no. */
   doneAt: number | null
-  /** Cuándo se apuntó (ms): sin fecha de piscina, la primera es su inicio. */
-  createdAt: number | null
 }
 
 /** Lo que el Avance de un piscinero lee de la réplica (`piscine.service.ts`). */
 export function createPiscineRepository(db: Db) {
   return {
-    /**
-     * Las filas de esos proyectos de la gente de un campus (de la copia del
-     * campus o piscineros en curso de él), apuntada desde `since`.
-     */
-    async rows(campusId: number, ids: readonly number[], since: string): Promise<PiscineRow[]> {
+    /** Las filas de esos proyectos de los piscineros en curso de un campus. */
+    async rows(campusId: number, ids: readonly number[]): Promise<PiscineRow[]> {
       if (ids.length === 0) return []
 
       const result = await db.execute({
@@ -416,17 +411,14 @@ export function createPiscineRepository(db: Db) {
               FROM project_users pu
               JOIN users u ON u.id = pu.user_id
               WHERE ${inList('pu.project_id')}
-                AND (u.id IN (SELECT user_id FROM campus_members WHERE campus_id = ?)
-                     OR u.id IN (SELECT user_id FROM pool_members WHERE campus_id = ?))
-                AND COALESCE(pu.created_at_42, pu.updated_at_42) >= ?`,
-        args: [listArg(ids), campusId, campusId, since],
+                AND u.id IN (SELECT user_id FROM pool_members WHERE campus_id = ?)`,
+        args: [listArg(ids), campusId],
       })
 
       return result.rows.map((row) => ({
         login: toText(row.login).toLowerCase(),
         projectId: toNumber(row.project_id),
         doneAt: doneAtOf(row),
-        createdAt: msOf(row.created_at_42) ?? msOf(row.updated_at_42),
       }))
     },
 

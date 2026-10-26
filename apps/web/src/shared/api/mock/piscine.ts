@@ -118,7 +118,7 @@ const MATES: Record<string, [every: number, from: number]> = {
   'achen-pi': [2.5, 0],
 }
 
-/** El Avance de un piscinero: su línea, la de su piscina, las anteriores y con quien se compara. */
+/** El Avance de un piscinero: su línea, la de su piscina y con quien se compara. */
 export function piscineProgress(others: readonly string[]): PiscineProgress {
   return {
     days: DAYS,
@@ -129,7 +129,6 @@ export function piscineProgress(others: readonly string[]): PiscineProgress {
     startedAt: new Date(Date.now() - ELAPSED * DAY).toISOString(),
     me: swim(2.6, 0, ELAPSED),
     cohort: average(73, 3, ELAPSED, ELAPSED),
-    past: average(612, 3.4, 30, 3 * 365),
     others: others.flatMap((login) => {
       const mate = MATES[login]
 
