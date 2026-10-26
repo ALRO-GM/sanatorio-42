@@ -73,19 +73,7 @@ describe('burbuja de sugerencias', () => {
   }, 20_000)
 
   it('arrastrándola sobre un bloque, lo detecta y Escape lo cierra', async () => {
-    // jsdom no trae `PointerEvent`: sin él, los eventos llegan sin botón ni coordenadas.
-    if (!('PointerEvent' in window)) {
-      class PointerEventLike extends MouseEvent {
-        pointerId: number
-
-        constructor(type: string, init: PointerEventInit = {}) {
-          super(type, init)
-          this.pointerId = init.pointerId ?? 0
-        }
-      }
-
-      vi.stubGlobal('PointerEvent', PointerEventLike)
-    }
+    stubPointerEvent()
     await openApp('#/expediente')
 
     const button = await bubble()
@@ -134,4 +122,82 @@ describe('burbuja de sugerencias', () => {
     }, WAIT)
     Reflect.deleteProperty(document, 'elementFromPoint')
   }, 20_000)
+
+  it('con el ratón: un clic la engancha, otro la deja y pulsar fuera cierra el panel', async () => {
+    stubPointerEvent()
+    await openApp('#/expediente')
+
+    const button = await bubble()
+    const block = await waitFor(() =>
+      must(document.querySelector('[data-feedback="expediente.health"]'), 'el bloque de salud'),
+    )
+    const inside = block.querySelector('.block-head') ?? block
+    const clicked = vi.fn()
+
+    inside.addEventListener('click', clicked)
+    Object.defineProperty(document, 'elementFromPoint', {
+      configurable: true,
+      value: () => inside,
+    })
+
+    await act(async () => {
+      fireEvent.pointerDown(button, { button: 0, pointerId: 1, pointerType: 'mouse' })
+      fireEvent.pointerUp(button, { pointerId: 1, pointerType: 'mouse' })
+      fireEvent.click(button, { detail: 1, clientX: 10, clientY: 10 })
+      await Promise.resolve()
+    })
+    // Enganchada: sigue al ratón y marca lo de debajo, sin abrir el panel.
+    expect(document.querySelector('.suggest-ghost')).not.toBeNull()
+    await act(async () => {
+      fireEvent.pointerMove(window, { clientX: 200, clientY: 300 })
+      await Promise.resolve()
+    })
+    expect(document.querySelector('.suggest-outline')?.textContent).toBe(
+      text('layout.expediente.health'),
+    )
+    expect(screen.queryByRole('dialog', { name: text('suggest.open') })).toBeNull()
+
+    // El clic que la deja abre el panel y no llega a lo de debajo.
+    await act(async () => {
+      fireEvent.pointerDown(inside, { button: 0, clientX: 200, clientY: 300 })
+      fireEvent.click(inside)
+      await Promise.resolve()
+    })
+
+    const panel = await screen.findByRole('dialog', { name: text('suggest.open') }, WAIT)
+
+    expect(within(panel).getByText(text('layout.expediente.health'))).toBeTruthy()
+    expect(clicked).not.toHaveBeenCalled()
+
+    // Pulsar fuera del panel lo cierra y la burbuja vuelve.
+    await act(async () => {
+      fireEvent.pointerDown(document.body, { button: 0 })
+      await Promise.resolve()
+    })
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog', { name: text('suggest.open') })).toBeNull()
+    }, WAIT)
+    await waitFor(() => {
+      expect(button.classList.contains('away')).toBe(false)
+    }, WAIT)
+    Reflect.deleteProperty(document, 'elementFromPoint')
+  }, 20_000)
 })
+
+/** jsdom no trae `PointerEvent`: sin él, los eventos llegan sin botón ni coordenadas. */
+function stubPointerEvent(): void {
+  if ('PointerEvent' in window) return
+
+  class PointerEventLike extends MouseEvent {
+    pointerId: number
+    pointerType: string
+
+    constructor(type: string, init: PointerEventInit = {}) {
+      super(type, init)
+      this.pointerId = init.pointerId ?? 0
+      this.pointerType = init.pointerType ?? ''
+    }
+  }
+
+  vi.stubGlobal('PointerEvent', PointerEventLike)
+}

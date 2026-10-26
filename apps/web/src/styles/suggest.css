@@ -43,6 +43,11 @@
   transform: translate(-50%, -50%);
   pointer-events: none;
 }
+/* Con la burbuja enganchada al ratón, se apunta con una cruz. */
+body.suggest-carrying,
+body.suggest-carrying * {
+  cursor: crosshair !important;
+}
 .suggest-ghost.returning {
   transition:
     left 0.36s cubic-bezier(0.3, 0.7, 0.2, 1),

@@ -27,6 +27,14 @@ burbuja vuelve a su sitio.
 4. **Enviar**: el panel se cierra, la burbuja vuelve volando a la cabecera
    (de golpe con `prefers-reduced-motion`) y sale «¡Gracias!» un momento.
 
+Con el ratón, arrastrar resulta raro (2026-10-26): un clic en la bombilla la
+engancha al puntero (cursor en cruz, el sitio de debajo marcado) y el
+siguiente clic la deja ahí y abre el panel; ese clic no llega a lo de debajo.
+Un clic sobre la bombilla de la cabecera, el botón derecho o Escape la
+devuelven sin abrir nada. Arrastrarla con el ratón sigue funcionando.
+
+Con el panel abierto, pulsar fuera de él lo cierra (con cualquier puntero).
+
 Con el teclado: Intro o Espacio sobre la burbuja abren el panel sin arrastrar,
 con el foco en la lista de secciones (la abierta, elegida). Escape cierra el
 panel o cancela un arrastre; el foco vuelve a la burbuja.

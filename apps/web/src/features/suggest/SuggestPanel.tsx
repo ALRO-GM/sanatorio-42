@@ -1,7 +1,8 @@
 /**
  * El panel de una sugerencia (`docs/sugerencias.md`): dónde (detectado, y
  * cambiable), el problema y tu propuesta. Pequeño y junto a donde se soltó la
- * burbuja; en el móvil, abajo a todo lo ancho. Se cierra con Escape.
+ * burbuja; en el móvil, abajo a todo lo ancho. Se cierra con Escape o
+ * pulsando fuera.
  */
 
 import { useEffect, useId, useRef, useState } from 'react'
@@ -111,6 +112,23 @@ export function SuggestPanel({
 
     first?.focus()
   }, [detected])
+
+  // Pulsar fuera lo cierra. La burbuja no cuenta: su propio clic ya lo cierra.
+  useEffect(() => {
+    const onDown = (event: PointerEvent): void => {
+      const target = event.target instanceof Node ? event.target : null
+
+      if (target === null || panel.current?.contains(target) === true) return
+      if (anchor?.contains(target) === true) return
+      onClose(false)
+    }
+
+    window.addEventListener('pointerdown', onDown, true)
+
+    return () => {
+      window.removeEventListener('pointerdown', onDown, true)
+    }
+  }, [anchor, onClose])
 
   const submit = async (event: SyntheticEvent): Promise<void> => {
     event.preventDefault()

@@ -1,11 +1,13 @@
 /**
  * La burbuja de sugerencias de la cabecera (`docs/sugerencias.md`): se coge,
- * se arrastra hasta lo que mejorarías y, al soltarla (o al pulsarla sin
- * arrastrar), se abre un panel pequeño con el sitio detectado, el problema y
- * tu propuesta. Al mandarla, vuelve volando a su sitio.
+ * se lleva hasta lo que mejorarías y, al dejarla, se abre un panel pequeño con
+ * el sitio detectado, el problema y tu propuesta. Al mandarla, vuelve volando
+ * a su sitio.
  *
- * Funciona con ratón, dedo y lápiz (eventos de puntero) y con teclado: Intro o
- * Espacio abren el panel sin arrastrar, y el sitio se elige de una lista.
+ * Con el dedo o el lápiz se arrastra y se suelta (un toque sin arrastrar abre
+ * el panel). Con el ratón, arrastrar es raro: un clic la engancha al puntero y
+ * el siguiente la deja donde esté. Con el teclado, Intro o Espacio abren el
+ * panel sin llevarla a ningún sitio, y el sitio se elige de una lista.
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -68,6 +70,10 @@ export function SuggestBubble({
   const press = useRef<Point | null>(null)
   /** Si la pulsación en curso (o la que acaba de terminar) fue un arrastre. */
   const dragged = useRef(false)
+  /** Con qué se pulsó la burbuja la última vez (`mouse`, `touch`, `pen`). */
+  const pointer = useRef('')
+  /** La burbuja va enganchada al ratón, esperando el clic que la deja. */
+  const [carrying, setCarrying] = useState(false)
   /** La burbuja suelta: dónde está, o `null` si está en la cabecera. */
   const [ghost, setGhost] = useState<Point | null>(null)
   const [returning, setReturning] = useState(false)
@@ -81,6 +87,7 @@ export function SuggestBubble({
   /** Devuelve la burbuja a la cabecera: volando, o de golpe si se prefiere quieto. */
   const goHome = useCallback(() => {
     setHover(null)
+    setCarrying(false)
 
     const home = centerOf(button.current)
 
@@ -130,7 +137,55 @@ export function SuggestBubble({
     }
   }, [ghost, opened, returning, goHome])
 
+  // Enganchada al ratón: sigue al puntero y el siguiente clic la deja ahí. Ese
+  // clic es solo para dejarla: no llega a lo que haya debajo. Un clic sobre la
+  // burbuja de la cabecera la devuelve sin abrir nada.
+  useEffect(() => {
+    if (!carrying) return undefined
+
+    const swallow = (event: Event): void => {
+      event.preventDefault()
+      event.stopPropagation()
+    }
+    const onMove = (event: PointerEvent): void => {
+      const point = { x: event.clientX, y: event.clientY }
+
+      setGhost(point)
+      setHover(detect(under(point)))
+    }
+    const onDown = (event: PointerEvent): void => {
+      swallow(event)
+      window.addEventListener('click', swallow, { capture: true, once: true })
+
+      const target = event.target instanceof Node ? event.target : null
+
+      if (event.button !== 0 || (target !== null && button.current?.contains(target) === true)) {
+        goHome()
+
+        return
+      }
+
+      const point = { x: event.clientX, y: event.clientY }
+
+      setCarrying(false)
+      setHover(null)
+      setGhost(point)
+      setOpened({ spot: detect(under(point)), at: point })
+    }
+
+    document.body.classList.add('suggest-carrying')
+    window.addEventListener('pointermove', onMove)
+    window.addEventListener('pointerdown', onDown, true)
+
+    return () => {
+      document.body.classList.remove('suggest-carrying')
+      window.removeEventListener('pointermove', onMove)
+      window.removeEventListener('pointerdown', onDown, true)
+    }
+  }, [carrying, goHome])
+
   const onPointerDown = (event: ReactPointerEvent<HTMLButtonElement>): void => {
+    pointer.current = event.pointerType
     if (event.button !== 0 || opened !== null || returning) return
     press.current = { x: event.clientX, y: event.clientY }
     dragged.current = false
@@ -188,7 +243,7 @@ export function SuggestBubble({
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
           onPointerCancel={onPointerCancel}
-          onClick={() => {
+          onClick={(event) => {
             // El clic que llega al soltar un arrastre ya abrió el panel.
             if (dragged.current) {
               dragged.current = false
@@ -201,6 +256,13 @@ export function SuggestBubble({
               return
             }
             setThanks(false)
+            // Un clic de ratón (no Intro ni Espacio, que no traen `detail`) la engancha.
+            if (pointer.current === 'mouse' && event.detail > 0 && !returning) {
+              setGhost({ x: event.clientX, y: event.clientY })
+              setCarrying(true)
+
+              return
+            }
             setOpened({ spot: null, at: null })
           }}
         >
