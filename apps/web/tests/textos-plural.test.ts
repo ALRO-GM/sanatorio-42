@@ -31,7 +31,7 @@ describe('plurales que faltan', () => {
     // Code Clicker no pasa por `tn`.
     expect(needsPlural(row('game.ui.x', '{n} líneas'))).toBe(false)
     // Lo que nunca vale 1, con su porqué.
-    expect(needsPlural(row('seats.days', '{n} días'))).toBe(false)
+    expect(needsPlural(row('countdown.coming', '{n} días'))).toBe(false)
   })
 
   it('las tablas de la web están en orden y las excepciones existen todas', () => {
