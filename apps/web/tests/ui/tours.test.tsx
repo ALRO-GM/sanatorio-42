@@ -64,3 +64,40 @@ describe('demostraciones pintadas', () => {
     expect([...wanted].filter((target) => !seen.has(target))).toEqual([])
   })
 })
+
+describe('mando de las demostraciones', () => {
+  it('se pausa, se salta a un paso y se sigue desde ahí', async () => {
+    const [, tour, Component] = TOURS[0] ?? []
+
+    if (tour === undefined || Component === undefined) throw new Error('sin demostraciones')
+    vi.useFakeTimers()
+    const view = render(
+      <I18nProvider>
+        <Component />
+      </I18nProvider>,
+    )
+    const caption = (): string => view.container.querySelector('.tour-caption')?.textContent ?? ''
+    const chapters = view.container.querySelectorAll<HTMLButtonElement>('.tour-chapter')
+
+    expect(chapters.length).toBe(tour.steps.length)
+
+    // Al último paso: sale su frase sin esperar al guion.
+    const last = chapters[chapters.length - 1]
+
+    await act(async () => {
+      last?.click()
+      await vi.advanceTimersByTimeAsync(800 * 1.5 * 3)
+    })
+    expect(caption()).toBe(last?.title)
+
+    // En pausa no pasa nada por mucho que corra el reloj.
+    const pause = [...view.container.querySelectorAll('button')].find((button) =>
+      button.classList.contains('pill'),
+    )
+
+    act(() => {
+      pause?.click()
+    })
+    expect(vi.getTimerCount()).toBe(0)
+  })
+})

@@ -3,12 +3,16 @@
 Generado desde `apps/web/src/shared/i18n/textos/demos.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-104 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
+108 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera | Francés |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | `tour.replay` | Botón para repetir la demostración animada | shared/tour/Tour | Ver otra vez | Watch again | Torna-ho a veure | Ikusi berriro | Revoir |
 | `tour.speed` | Botón de velocidad de la demostración | shared/tour/Tour | Velocidad ×{n} | Speed ×{n} | Velocitat ×{n} | Abiadura ×{n} | Vitesse ×{n} |
+| `tour.pause` | Botón para pausar la demostración animada | shared/tour/Tour | Pausa | Pause | Pausa | Gelditu | Pause |
+| `tour.play` | Botón para seguir con la demostración pausada | shared/tour/Tour | Seguir | Continue | Continua | Jarraitu | Reprendre |
+| `tour.restart` | Botón para empezar la demostración desde el principio | shared/tour/Tour | Desde el principio | From the start | Des del principi | Hasieratik | Depuis le début |
+| `tour.jump` | Marca de la barra de progreso de la demostración: ir a ese paso | shared/tour/Tour | Ir al paso {n}: {text} | Go to step {n}: {text} | Ves al pas {n}: {text} | Joan {n}. urratsera: {text} | Aller à l’étape {n} : {text} |
 | `tour.guard.1` | Demostración animada del on-call: frase del paso 1 | shared/tour/Tour | Arrastra por las medias horas en las que te ofreces hoy. | Drag over the half hours you offer today. | Arrossega per les mitges hores en què t'ofereixes avui. | Arrastatu gaur eskaintzen zaren ordu erdietatik. | Fais glisser sur les demi-heures où tu es dispo aujourd'hui. |
 | `tour.guard.2` | Demostración animada del on-call: frase del paso 2 | shared/tour/Tour | Elige cuánto tiempo quieres ayudar como mucho. | Choose how long you want to help at most. | Tria quant de temps vols ajudar com a molt. | Aukeratu gehienez zenbat denbora lagundu nahi duzun. | Choisis combien de temps tu veux aider au maximum. |
 | `tour.guard.3` | Demostración animada del on-call: frase del paso 3 | shared/tour/Tour | Si quieres, ofrécete también a preevaluar proyectos. | If you like, offer to pre-review projects too. | Si vols, ofereix-te també a preavaluar projectes. | Nahi baduzu, eskaini proiektuak aurre-ebaluatzeko ere. | Si tu veux, propose aussi de pré-corriger des projets. |

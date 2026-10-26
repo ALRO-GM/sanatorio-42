@@ -85,6 +85,19 @@ dialog.info-dialog {
   color: var(--accent-text);
   font-weight: 700;
 }
+/* La pestaña de la segunda fila, tras la de arriba: «Datos › Avance». */
+.tour-subtab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  color: var(--text-2);
+  font-weight: 600;
+  animation: tour-drop 0.25s ease-out;
+}
+.tour-subtab::before {
+  content: '›';
+  color: var(--text-3);
+}
 .tour-bell {
   position: relative;
   display: grid;
@@ -571,6 +584,93 @@ dialog.info-dialog {
 .tour-cursor.drag,
 .tour-cursor.drag span {
   transition: transform calc(0.94s * var(--pace)) cubic-bezier(0.4, 0.1, 0.3, 1);
+}
+/* Lo que señala el ratón se ilumina cuando llega (`data-hot`, de `Tour.tsx`). */
+.tour-stage [data-hot]:not(.tour-anchor) {
+  box-shadow: 0 0 0 0.22em color-mix(in srgb, var(--accent) 35%, transparent);
+  transition: box-shadow calc(0.25s * var(--pace)) ease-out calc(0.45s * var(--pace));
+}
+/* La onda de cada pulsación. */
+.tour-ripple {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 4;
+  width: 2.4em;
+  height: 2.4em;
+  margin: -1.2em 0 0 -1.2em;
+  border: 2px solid var(--accent);
+  border-radius: 50%;
+  transform: translate(var(--x), var(--y)) scale(0.2);
+  opacity: 0;
+  animation: tour-ripple calc(0.5s * var(--pace)) ease-out;
+  pointer-events: none;
+}
+@keyframes tour-ripple {
+  from {
+    transform: translate(var(--x), var(--y)) scale(0.2);
+    opacity: 0.9;
+  }
+  to {
+    transform: translate(var(--x), var(--y)) scale(1);
+    opacity: 0;
+  }
+}
+/* La barra de progreso, con una marca por frase para saltar a ese paso. */
+.tour-progress {
+  position: relative;
+  height: 0.9rem;
+  margin: 0 0.4rem;
+}
+.tour-progress::before,
+.tour-progress-bar {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 4px;
+  margin-top: -2px;
+  border-radius: 2px;
+  content: '';
+}
+.tour-progress::before {
+  background: var(--surface-3);
+}
+.tour-progress-bar {
+  background: var(--accent);
+  transform: scaleX(var(--from));
+  transform-origin: left;
+}
+.tour-progress-bar.running {
+  animation: tour-progress var(--left) linear forwards;
+}
+@keyframes tour-progress {
+  from {
+    transform: scaleX(var(--from));
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+.tour-chapter {
+  position: absolute;
+  top: 50%;
+  width: 0.8rem;
+  height: 0.8rem;
+  margin: -0.4rem 0 0 -0.4rem;
+  padding: 0;
+  border: 2px solid var(--accent);
+  border-radius: 50%;
+  background: var(--surface);
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+.tour-chapter:hover,
+.tour-chapter:focus-visible {
+  transform: scale(1.3);
+}
+.tour-chapter.on {
+  background: var(--accent);
 }
 .tour-caption {
   min-height: 2.6em;

@@ -119,11 +119,44 @@ export function defineTour<S extends object>(
   return { name, start, script, steps: [...new Set([1, ...captions])].sort((a, b) => a - b) }
 }
 
+/** Lo que dura el guion entero, con el último respiro antes de darlo por visto. */
+function lengthOf<S>(script: readonly Cue<S>[]): number {
+  return script.reduce((last, [at]) => Math.max(last, at), 0) + 1800
+}
+
+/** Cómo está todo a los `at` ms del guion: lo de antes, ya aplicado. */
+function shotAt<S extends object>(start: S, script: readonly Cue<S>[], at: number): Shot<S> {
+  const shot: Shot<S> = { ...start, ...BASE }
+
+  for (const [when, change] of [...script].sort((a, b) => a[0] - b[0])) {
+    if (when <= at) Object.assign(shot, change)
+  }
+  // Saltando, no se queda nada a medias: ni a oscuras ni con el botón apretado.
+  return { ...shot, dark: false, press: false }
+}
+
+/**
+ * Dónde empieza cada frase del guion, para saltar a ella desde la barra de
+ * progreso: la primera vez que sale, un poco antes, para ver llegar al ratón.
+ */
+function chaptersOf<S>(tour: TourDef<S>): { step: number; at: number }[] {
+  return tour.steps.map((step) => {
+    const first = tour.script.find(([, change]) => change.caption === step)?.[0] ?? 0
+
+    return { step, at: step === 1 ? 0 : Math.max(0, first - 700) }
+  })
+}
+
+/** Cómo va la reproducción: desde qué punto del guion (ms) y si está en marcha. */
+type Run = { take: number; from: number; playing: boolean }
+
 type TourProps<S> = {
   /** La demostración, de `defineTour`. */
   tour: TourDef<S>
-  /** Pestaña que se ve abierta en la cabecera de mentira. */
+  /** Pestaña de arriba que se ve abierta en la cabecera de mentira. */
   tab: (shot: Shot<S>) => string
+  /** Pestaña de la segunda fila, si la sección va dentro de una de arriba. */
+  sub?: (shot: Shot<S>) => string
   /** Avisos sin leer en la campana; `0` si no pinta nada. */
   bell?: (shot: Shot<S>) => number
   /** La escena, pintada a partir de cómo está todo en ese instante. */
@@ -138,15 +171,21 @@ type TourProps<S> = {
  * Es un decorado: nada de lo que se ve es un control de verdad ni llama a la
  * API. Quien prefiere menos movimiento ve los mismos pasos como lista.
  */
-export function Tour<S extends object>({ tour, tab, bell, children }: TourProps<S>) {
+export function Tour<S extends object>({ tour, tab, sub, bell, children }: TourProps<S>) {
   const { name, start, script, steps } = tour
   const { t } = useI18n()
   const { number } = useFormat()
   const [still] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches)
-  const [take, setTake] = useState(0)
+  const [run, setRun] = useState<Run>({ take: 0, from: 0, playing: true })
   const [shot, setShot] = useState<Shot<S>>({ ...start, ...BASE })
   const stage = useRef<HTMLDivElement>(null)
   const [point, setPoint] = useState({ x: 0, y: 0 })
+  // Cada pulsación deja una onda donde está el ratón: la clave la vuelve a lanzar.
+  const [ripples, setRipples] = useState(0)
+  // Cuándo empezó a contar el guion (ms del reloj), para saber por dónde va al pausar.
+  const startedAt = useRef(0)
+  const length = lengthOf(script)
+  const chapters = chaptersOf(tour)
   const { base, rate, choose } = useTourSpeed(name)
   // Cuánto se estira el guion ahora: el ritmo de lectura, entre la velocidad de
   // fábrica de esta demostración y lo que la haya movido quien mira.
@@ -168,28 +207,65 @@ export function Tour<S extends object>({ tour, tab, bell, children }: TourProps<
   useEffect(() => {
     if (still) return
 
-    setShot({ ...start, ...BASE })
+    setShot(run.from === 0 ? { ...start, ...BASE } : shotAt(start, script, run.from))
+    if (!run.playing) return
 
-    const end = script.reduce((last, [at]) => Math.max(last, at), 0) + 1800
+    startedAt.current = performance.now() - run.from * pace
+
     const done: Partial<Base> = { done: true }
-    const cues: Cue<S>[] = [...script, [end, done as Partial<Shot<S>>]]
-    const timers = cues.map(([at, change]) =>
-      setTimeout(() => {
-        setShot((current) => ({ ...current, ...change }))
-      }, at * pace),
-    )
+    const cues: Cue<S>[] = [...script, [length, done as Partial<Shot<S>>]]
+    const timers = cues
+      .filter(([at]) => at > run.from)
+      .map(([at, change]) =>
+        setTimeout(
+          () => {
+            setShot((current) => ({ ...current, ...change }))
+          },
+          (at - run.from) * pace,
+        ),
+      )
 
     return () => {
       timers.forEach(clearTimeout)
     }
     // El guion y el inicio son constantes de cada demostración.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [still, take, pace])
+  }, [still, run, pace])
+
+  // Una onda por pulsación, en el sitio del ratón.
+  useEffect(() => {
+    if (shot.press) setRipples((current) => current + 1)
+  }, [shot.press])
+
+  /** Por dónde va el guion ahora mismo, en ms. */
+  const now = (): number =>
+    run.playing ? Math.min(length, (performance.now() - startedAt.current) / pace) : run.from
+  const replay = (): void => {
+    setRun((current) => ({ take: current.take + 1, from: 0, playing: true }))
+  }
+  const toggle = (): void => {
+    if (shot.done) {
+      replay()
+      return
+    }
+    const at = now()
+
+    setRun((current) => ({ take: current.take + 1, from: at, playing: !current.playing }))
+  }
+  const seek = (at: number): void => {
+    setRun((current) => ({ take: current.take + 1, from: at, playing: true }))
+  }
 
   // El ratón va al centro de lo que toque. Se mide en cada cambio, después de
   // pintar, porque muchos destinos (un desplegable, un botón) acaban de aparecer.
   useLayoutEffect(() => {
     const target = stage.current?.querySelector(`[data-tour="${shot.cursor}"]`)
+
+    // Lo que señala el ratón se ilumina un poco (`[data-hot]` en `tour.css`).
+    stage.current?.querySelectorAll('[data-hot]').forEach((element) => {
+      if (element !== target) element.removeAttribute('data-hot')
+    })
+    if (shot.cursor !== 'rest') target?.setAttribute('data-hot', '')
 
     if (stage.current === null || target === null || target === undefined) return
 
@@ -227,6 +303,7 @@ export function Tour<S extends object>({ tour, tab, bell, children }: TourProps<
         <div className="tour-bar">
           <span className="tour-dots" />
           <span className="tour-tab">{tab(shot)}</span>
+          {sub !== undefined && <span className="tour-subtab">{sub(shot)}</span>}
           <span className={`tour-bell ${unread > 0 ? 'ringing' : ''}`} data-tour="bell">
             <Icon name="campana" size={15} />
             {unread > 0 && <i>{unread}</i>}
@@ -235,6 +312,13 @@ export function Tour<S extends object>({ tour, tab, bell, children }: TourProps<
         <div className="tour-scene">{children(shot)}</div>
         <span className="tour-anchor" data-tour="rest" style={{ left: '80%', top: '82%' }} />
         <div className={`tour-fade ${shot.dark ? 'on' : ''}`} />
+        {ripples > 0 && (
+          <span
+            key={ripples}
+            className="tour-ripple"
+            style={{ ['--x' as string]: `${point.x}px`, ['--y' as string]: `${point.y}px` }}
+          />
+        )}
         <div
           className={`tour-cursor ${shot.drag ? 'drag' : ''} ${shot.press ? 'press' : ''}`}
           style={{ ['--x' as string]: `${point.x}px`, ['--y' as string]: `${point.y}px` }}
@@ -253,6 +337,29 @@ export function Tour<S extends object>({ tour, tab, bell, children }: TourProps<
         </div>
       </div>
 
+      <div className="tour-progress">
+        <span
+          key={`${String(run.take)}-${String(run.playing)}`}
+          className={`tour-progress-bar ${run.playing && !shot.done ? 'running' : ''}`}
+          style={{
+            ['--from' as string]: shot.done ? 1 : run.from / length,
+            ['--left' as string]: `${String(((length - run.from) * pace) / 1000)}s`,
+          }}
+        />
+        {chapters.map(({ step, at }) => (
+          <button
+            key={step}
+            type="button"
+            className={`tour-chapter ${shot.caption === step ? 'on' : ''}`}
+            style={{ left: `${String((at / length) * 100)}%` }}
+            aria-label={t('tour.jump', { n: step, text: t(`tour.${name}.${step}`) })}
+            title={t(`tour.${name}.${step}`)}
+            onClick={() => {
+              seek(at)
+            }}
+          />
+        ))}
+      </div>
       <p className="tour-caption" role="status">
         <span key={shot.caption}>{t(`tour.${name}.${shot.caption}`)}</span>
       </p>
@@ -267,22 +374,22 @@ export function Tour<S extends object>({ tour, tab, bell, children }: TourProps<
             value={RATES.findIndex((option) => option === rate)}
             aria-valuetext={`×${rate}`}
             onChange={(event) => {
-              // Cambiarla vuelve a empezar: los pasos ya programados iban a la de antes.
+              // Cambiarla sigue desde donde iba: los pasos ya programados iban a la de antes.
+              const at = shot.done ? 0 : now()
+
               choose(RATES[Number(event.target.value)] ?? 1)
-              setTake((current) => current + 1)
+              setRun((current) => ({ take: current.take + 1, from: at, playing: true }))
             }}
           />
         </label>
-        <button
-          type="button"
-          className="pill"
-          disabled={!shot.done}
-          onClick={() => {
-            setTake((current) => current + 1)
-          }}
-        >
-          {t('tour.replay')}
+        <button type="button" className="pill" onClick={toggle}>
+          {shot.done ? t('tour.replay') : run.playing ? t('tour.pause') : t('tour.play')}
         </button>
+        {!shot.done && run.from + (run.playing ? 1 : 0) > 0 && (
+          <button type="button" className="pill" onClick={replay}>
+            {t('tour.restart')}
+          </button>
+        )}
       </div>
     </div>
   )

@@ -64,8 +64,19 @@ Ayudas del guion (`shared/tour/Tour.tsx`):
 | `[at, { caption: n }]` | Cambia la frase |
 | `cursor: 'rest'` | Deja el ratón en reposo, abajo a la derecha |
 
-Props de `<Tour>`: `tour` (de `defineTour`), `tab` (la pestaña que se ve en la
-barra de mentira) y `bell` (avisos sin leer en la campana, si hace falta).
+Props de `<Tour>`: `tour` (de `defineTour`), `tab` (la pestaña de arriba que se
+ve en la barra de mentira), `sub` (la de la segunda fila, si la sección va
+dentro de una de arriba: se ve «Datos › Avance») y `bell` (avisos sin leer en la
+campana, si hace falta).
+
+Lo que pone el motor solo, en todas:
+
+- **Resaltado**: lo que señala el ratón se ilumina cuando llega (`data-hot`).
+- **Onda**: cada pulsación deja una onda en el sitio del ratón.
+- **Barra de progreso con una marca por frase**: se puede saltar a cualquier
+  paso (el decorado se pone como estaría en ese momento, `shotAt`).
+- **Pausa / Seguir / Desde el principio**, y cambiar la velocidad sigue desde
+  donde iba.
 
 ## Piezas del decorado
 
