@@ -2,7 +2,7 @@
  * Code Clicker: las reglas del juego, con la hora y el azar fijados.
  */
 
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import gameEn from 'virtual:textos/juego/en'
 import gameFr from 'virtual:textos/juego/fr'
 
@@ -51,7 +51,13 @@ import {
   upgradeGain,
   waitFor,
 } from '../src/features/clicker/insight'
-import { canResume, newSession } from '../src/features/clicker/sync'
+import {
+  canResume,
+  newSession,
+  readLocal,
+  startFrom,
+  writeLocal,
+} from '../src/features/clicker/sync'
 import {
   achievementText,
   newsFor,
@@ -491,6 +497,32 @@ describe('code clicker: dónde vive la partida', () => {
     // Navegador nuevo, sin copia: la partida recién empezada no pisa la buena.
     expect(canResume({ save: '{}', rev: 3 }, { save: null, rev: null })).toBe(false)
     expect(canResume({ save: '{}', rev: 0 }, { save: null, rev: 0 })).toBe(false)
+  })
+
+  it('al entrar sigue con la copia del navegador si continúa la de la API (la noche con la sesión caducada)', () => {
+    // Los guardados en la API fallaron unas horas: la copia, de la misma rev, va por delante.
+    expect(startFrom({ save: 'api', rev: 7 }, { save: 'aquí', rev: 7 })).toBe('aquí')
+    // Se siguió en otro dispositivo: manda la de la API.
+    expect(startFrom({ save: 'api', rev: 8 }, { save: 'aquí', rev: 7 })).toBe('api')
+    // Sin copia, o sin partida en la API, la de la API.
+    expect(startFrom({ save: 'api', rev: 7 }, { save: null, rev: null })).toBe('api')
+    expect(startFrom({ save: null, rev: 0 }, { save: 'aquí', rev: 0 })).toBeNull()
+  })
+
+  it('la copia del navegador es de quien la guardó', () => {
+    // Aquí no hay navegador: un almacenamiento de mentira.
+    const stored = new Map<string, string>()
+
+    vi.stubGlobal('localStorage', {
+      getItem: (key: string) => stored.get(key) ?? null,
+      setItem: (key: string, value: string) => stored.set(key, value),
+    })
+    writeLocal('ana', 'partida de ana', 4)
+
+    expect(readLocal('ana')).toEqual({ save: 'partida de ana', rev: 4 })
+    // En un ordenador compartido no se retoma la de otra persona.
+    expect(readLocal('luis')).toEqual({ save: null, rev: null })
+    vi.unstubAllGlobals()
   })
 
   it('cada pestaña tiene su identificador', () => {

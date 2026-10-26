@@ -10,14 +10,20 @@ import type { ClickerState } from '@sanatorio/contracts'
 
 const LOCAL_KEY = 'sanatorio_clicker'
 const REV_KEY = 'sanatorio_clicker_rev'
+/** De quién es la copia: en un ordenador compartido no se retoma la de otra persona. */
+const OWNER_KEY = 'sanatorio_clicker_owner'
 const CAUGHT_KEY = 'sanatorio_clicker_caught'
 
 /** La copia de este navegador y la `rev` de la API de la que salió. */
 type LocalCopy = { save: string | null; rev: number | null }
 
-export function readLocal(): LocalCopy {
+/** La copia de este navegador, si es de `login` (o de antes de apuntar de quién era). */
+export function readLocal(login: string): LocalCopy {
   try {
     const rev = localStorage.getItem(REV_KEY)
+    const owner = localStorage.getItem(OWNER_KEY)
+
+    if (owner !== null && owner !== login) return { save: null, rev: null }
 
     return { save: localStorage.getItem(LOCAL_KEY), rev: rev === null ? null : Number(rev) }
   } catch {
@@ -25,8 +31,9 @@ export function readLocal(): LocalCopy {
   }
 }
 
-export function writeLocal(save: string, rev: number | null): void {
+export function writeLocal(login: string, save: string, rev: number | null): void {
   try {
+    localStorage.setItem(OWNER_KEY, login)
     localStorage.setItem(LOCAL_KEY, save)
     if (rev !== null) localStorage.setItem(REV_KEY, String(rev))
   } catch {
@@ -43,6 +50,23 @@ export function writeLocal(save: string, rev: number | null): void {
  */
 export function canResume(server: Pick<ClickerState, 'save' | 'rev'>, local: LocalCopy): boolean {
   return server.save === null || (local.save !== null && local.rev === server.rev)
+}
+
+/**
+ * Al entrar, con qué partida se sigue: la de la API o la copia de este
+ * navegador. La copia, si salió de la misma `rev` que tiene la API: es la
+ * misma partida, guardada aquí después (cada 10 s), y puede ir muy por
+ * delante. Pasa si los guardados en la API fallaron un rato con la pestaña
+ * abierta: la sesión caducó de madrugada, se fue la red… Antes se entraba con
+ * la de la API y se perdía lo de esas horas.
+ */
+export function startFrom(
+  server: Pick<ClickerState, 'save' | 'rev'>,
+  local: LocalCopy,
+): string | null {
+  return server.save !== null && local.save !== null && local.rev === server.rev
+    ? local.save
+    : server.save
 }
 
 /** Un identificador para esta pestaña: la API lo usa para saber quién guardó el último. */

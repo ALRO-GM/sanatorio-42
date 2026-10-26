@@ -72,6 +72,7 @@ import {
   readLocal,
   sample,
   seenCaught,
+  startFrom,
   writeLocal,
 } from './sync'
 import { achievementText, fill, newsFor, short, textsOf, upgradeText } from './texts'
@@ -247,7 +248,7 @@ export function CodeClicker({
       // manda la de la API.
       if (lost.current) return
 
-      writeLocal(saved, rev)
+      writeLocal(me, saved, rev)
 
       if (!toServer || rev === null) return
 
@@ -334,7 +335,7 @@ export function CodeClicker({
           }
         })
     },
-    [spectate, toast, ui, lang],
+    [spectate, toast, ui, lang, me],
   )
 
   /**
@@ -361,7 +362,7 @@ export function CodeClicker({
         return
       }
 
-      const local = readLocal()
+      const local = readLocal(me)
 
       try {
         const state = await api.getClicker()
@@ -373,6 +374,7 @@ export function CodeClicker({
           samples.current = []
           clickSamples.current = []
           game.current =
+            restore(replace ? state.save : startFrom(state, local), Date.now()) ??
             restore(state.save, Date.now()) ??
             (replace ? null : restore(local.save, Date.now())) ??
             newGame(Date.now())
@@ -410,7 +412,7 @@ export function CodeClicker({
         setLoaded(true)
       }
     },
-    [save, spectate],
+    [save, spectate, me],
   )
 
   reload.current = () => {

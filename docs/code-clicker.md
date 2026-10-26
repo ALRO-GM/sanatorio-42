@@ -99,6 +99,21 @@ el segundo compra.
 - Wiki de Cookie Clicker (leche, edificios, producción):
   <https://cookieclicker.wiki.gg/wiki/Milk>, <https://cookieclicker.wiki.gg/wiki/Building>
 
+## Guardado
+
+La partida se guarda en el navegador cada 10 s y en la API cada minuto, al
+ocultar la pestaña y al salir del juego. El tiempo con la web cerrada no
+produce; con la pestaña abierta, sí (también de noche).
+
+Al entrar se sigue con la copia del navegador si salió de la misma `rev` que
+tiene la API (es la misma partida, guardada aquí después) y es de la misma
+persona (`sanatorio_clicker_owner`); si no, con la de la API. Arreglado el
+2026-10-26: con la pestaña abierta toda la noche, la sesión (12 h) caducaba de
+madrugada, los guardados en la API fallaban sin avisar y por la mañana se
+entraba con el último guardado bueno: se perdían esas horas. Una partida
+rechazada por trampa no se recupera así: al volver a guardarla, la API la
+rechaza otra vez.
+
 ## Trampas
 
 La partida la lleva el navegador, así que quien quiera puede tocarla. La API no
