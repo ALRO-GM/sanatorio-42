@@ -41,7 +41,12 @@ export function CorrectionGraph({ graph, selected, onSelect }: CorrectionGraphPr
       <ol className="cgraph-rings">
         {rings.map(({ circle, projects }) => (
           <li key={circle}>
-            <span className="cgraph-circle">{t('graph.circle', { n: circle })}</span>
+            <span className="cgraph-circle">
+              {/* En la piscina no hay círculos: lo que cuenta y lo de aparte. */}
+              {graph.kind === 'piscine'
+                ? t(circle === 0 ? 'piscine.progress' : 'piscine.apart')
+                : t('graph.circle', { n: circle })}
+            </span>
             <div className="cgraph-row">
               {projects.map((project) => (
                 <button

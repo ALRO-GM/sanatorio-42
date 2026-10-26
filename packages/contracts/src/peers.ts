@@ -1,3 +1,5 @@
+import type { PiscineGroup } from './graph.js'
+
 /**
  * Estado de una persona respecto a un proyecto.
  *
@@ -6,12 +8,18 @@
  */
 export type ProjectStatus = 'in_progress' | 'finished'
 
-/** Cada elemento de `GET /me/projects`. */
+/**
+ * Cada elemento de `GET /me/projects`. A un piscinero le llegan todos los
+ * proyectos de la piscina, en su orden, con su grupo (`docs/piscineros.md`):
+ * `status` solo en los que tiene empezados o aprobados.
+ */
 export type ProjectSummary = {
   id: number
   name: string
-  /** Solo con `?scope=all`: distingue lo que haces de lo que ya aprobaste. */
+  /** Solo con `?scope=all` (y siempre a un piscinero): distingue lo que haces de lo que ya aprobaste. */
   status?: ProjectStatus
+  /** Solo a un piscinero: el grupo del proyecto en la piscina. */
+  group?: PiscineGroup
 }
 
 /**

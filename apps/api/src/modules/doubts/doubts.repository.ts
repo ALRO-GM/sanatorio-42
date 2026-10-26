@@ -49,7 +49,7 @@ type ProposalRow = {
 }
 
 /** Lo que hay pendiente en el tablón de un proyecto. */
-type ProjectActivity = {
+export type ProjectActivity = {
   /** Dudas sin resolver y sin ninguna respuesta. */
   unanswered: number
   /** Propuestas de cambio a la guía pendientes de revisar. */

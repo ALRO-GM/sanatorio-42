@@ -241,6 +241,17 @@ const msOf = (value: unknown): number | null => {
   return Number.isNaN(ms) ? null : ms
 }
 
+/**
+ * Cuándo aprobó (ms), o `null`: validado, aunque lo esté repitiendo (para
+ * subir nota): 42 deja en la fila la nota y el `validated?` del último intento
+ * cerrado. Así salía sin hacer agent-smith de smarin-s (`searching_a_group`, 98).
+ */
+const doneAtOf = (row: Record<string, unknown>): number | null =>
+  toNumber(row.validated ?? 0) === 1 &&
+  (row.status === 'finished' || (row.final_mark !== null && row.final_mark !== undefined))
+    ? msOf(row.updated_at_42)
+    : null
+
 const flagOf = (value: unknown): boolean | null =>
   value === null || value === undefined ? null : toNumber(value) === 1
 
@@ -353,14 +364,7 @@ export function createProgressRepository(db: Db) {
         login: toText(row.login),
         image: toTextOrNull(row.image),
         projectId: toNumber(row.project_id),
-        // Aprobado: validado, aunque lo esté repitiendo (para subir nota): 42 deja
-        // en la fila la nota y el `validated?` del último intento cerrado. Así
-        // salía sin hacer agent-smith de smarin-s (`searching_a_group`, 98).
-        doneAt:
-          toNumber(row.validated ?? 0) === 1 &&
-          (row.status === 'finished' || (row.final_mark !== null && row.final_mark !== undefined))
-            ? msOf(row.updated_at_42)
-            : null,
+        doneAt: doneAtOf(row),
         // Las filas antiguas no traen cuándo se apuntó: la última vez que cambió
         // es lo más temprano que se sabe.
         createdAt: msOf(row.created_at_42) ?? msOf(row.updated_at_42),
@@ -385,3 +389,76 @@ export function createProgressRepository(db: Db) {
 }
 
 export type ProgressRepository = ReturnType<typeof createProgressRepository>
+
+/** Una fila de un proyecto de la piscina de alguien del campus, para su avance. */
+type PiscineRow = {
+  login: string
+  projectId: number
+  /** Aprobado, y cuándo (ms); `null` si no. */
+  doneAt: number | null
+  /** Cuándo se apuntó (ms): sin fecha de piscina, la primera es su inicio. */
+  createdAt: number | null
+}
+
+/** Lo que el Avance de un piscinero lee de la réplica (`piscine.service.ts`). */
+export function createPiscineRepository(db: Db) {
+  return {
+    /**
+     * Las filas de esos proyectos de la gente de un campus (de la copia del
+     * campus o piscineros en curso de él), apuntada desde `since`.
+     */
+    async rows(campusId: number, ids: readonly number[], since: string): Promise<PiscineRow[]> {
+      if (ids.length === 0) return []
+
+      const result = await db.execute({
+        sql: `SELECT u.login, pu.project_id, pu.status, pu.validated, pu.final_mark,
+                     pu.created_at_42, pu.updated_at_42
+              FROM project_users pu
+              JOIN users u ON u.id = pu.user_id
+              WHERE ${inList('pu.project_id')}
+                AND (u.id IN (SELECT user_id FROM campus_members WHERE campus_id = ?)
+                     OR u.id IN (SELECT user_id FROM pool_members WHERE campus_id = ?))
+                AND COALESCE(pu.created_at_42, pu.updated_at_42) >= ?`,
+        args: [listArg(ids), campusId, campusId, since],
+      })
+
+      return result.rows.map((row) => ({
+        login: toText(row.login).toLowerCase(),
+        projectId: toNumber(row.project_id),
+        doneAt: doneAtOf(row),
+        createdAt: msOf(row.created_at_42) ?? msOf(row.updated_at_42),
+      }))
+    },
+
+    /** Los piscineros en curso de un campus, con el día en que empezó su piscina (ms). */
+    async members(campusId: number): Promise<{ login: string; begin: number }[]> {
+      const result = await db.execute({
+        sql: 'SELECT login, begin_at FROM pool_members WHERE campus_id = ?',
+        args: [campusId],
+      })
+
+      return result.rows.flatMap((row) => {
+        const begin = msOf(row.begin_at)
+
+        return begin === null ? [] : [{ login: toText(row.login).toLowerCase(), begin }]
+      })
+    },
+
+    /** El id de cada uno de esos slugs que esté en la réplica. */
+    async idsOf(slugs: readonly string[]): Promise<Map<string, number>> {
+      return createProgressRepository(db).idsOf(slugs)
+    },
+
+    /** El nombre de un campus, si se sabe. */
+    async campusName(campusId: number): Promise<string | null> {
+      const result = await db.execute({
+        sql: 'SELECT name FROM campuses WHERE id = ?',
+        args: [campusId],
+      })
+
+      return toTextOrNull(result.rows[0]?.name)
+    },
+  }
+}
+
+export type PiscineRepository = ReturnType<typeof createPiscineRepository>

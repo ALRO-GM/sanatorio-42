@@ -26,6 +26,7 @@ import type {
 } from '@sanatorio/contracts'
 
 import { ME } from './data'
+import { piscineProgress } from './piscine'
 import { portrait } from './portrait'
 import { delay } from './state'
 import type { Api, RankingQuery } from '../types'
@@ -565,8 +566,14 @@ function rankingMock(query: RankingQuery): StatsRanking {
 
 export const statsMock: Pick<
   Api,
-  'getHelpStats' | 'getStatsProgress' | 'getStatsFastest' | 'getStatsRanking'
+  'getHelpStats' | 'getStatsProgress' | 'getPiscineProgress' | 'getStatsFastest' | 'getStatsRanking'
 > = {
+  async getPiscineProgress(others) {
+    await delay(150)
+
+    return piscineProgress(others)
+  },
+
   async getStatsProgress(others, campuses = null): Promise<StatsProgress> {
     await delay(200)
 

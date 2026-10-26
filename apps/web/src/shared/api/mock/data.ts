@@ -14,6 +14,7 @@ import type {
   HelpOffer,
   LeaderboardEntry,
   Peer,
+  PiscineGroup,
   ProjectSummary,
   ReactionKind,
   TimeRange,
@@ -122,6 +123,52 @@ export const CORE: {
     hours: hours ?? null,
   })),
 }))
+
+const two = (n: number): string => String(n).padStart(2, '0')
+
+/**
+ * La piscina de mentira (`docs/piscineros.md`), como la de `replica/piscine.ts`
+ * de la API: Shell y C, que cuentan para el avance, y aparte rushes, BSQ y
+ * exámenes. `status`: cómo va el piscinero de mentira, en su primera semana y
+ * media (`undefined`, sin empezar).
+ */
+export const PISCINE_PROJECTS: (ProjectSummary & { short: string; group: PiscineGroup })[] = [
+  ...[0, 1].map((n) => ({
+    id: 1500 + n,
+    name: `C Piscine Shell ${two(n)}`,
+    short: `Shell ${two(n)}`,
+    group: 'shell' as const,
+  })),
+  ...Array.from({ length: 14 }, (_, n) => ({
+    id: 1510 + n,
+    name: `C Piscine C ${two(n)}`,
+    short: `C ${two(n)}`,
+    group: 'c' as const,
+  })),
+  ...[0, 1, 2].map((n) => ({
+    id: 1530 + n,
+    name: `C Piscine Rush ${two(n)}`,
+    short: `Rush ${two(n)}`,
+    group: 'rush' as const,
+  })),
+  { id: 1533, name: 'C Piscine BSQ', short: 'BSQ', group: 'rush' as const },
+  ...[0, 1, 2].map((n) => ({
+    id: 1540 + n,
+    name: `C Piscine Exam ${two(n)}`,
+    short: `Exam ${two(n)}`,
+    group: 'exam' as const,
+  })),
+  { id: 1543, name: 'C Piscine Final Exam', short: 'Final', group: 'exam' as const },
+].map((project): ProjectSummary & { short: string; group: PiscineGroup } => {
+  // Shell 00, 01, C 00 y C 01 aprobados; C 02, C 03 y el rush 00 en curso.
+  const status = [1500, 1501, 1510, 1511, 1540].includes(project.id)
+    ? ('finished' as const)
+    : [1512, 1513, 1530].includes(project.id)
+      ? ('in_progress' as const)
+      : undefined
+
+  return status === undefined ? project : { ...project, status }
+})
 
 export const CAMPUSES: CampusSummary[] = [
   { id: 22, name: 'Madrid', city: 'Madrid', country: 'Spain', tracked: true },

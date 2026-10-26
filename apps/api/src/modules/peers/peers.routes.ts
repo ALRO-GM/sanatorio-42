@@ -33,11 +33,16 @@ export function registerPeersRoutes(
    * proyectos en los que la persona puede responder como especialista.
    *
    * Lista vacía si no tiene ninguno: no es un error, es que no le toca.
+   *
+   * A un piscinero, todos los proyectos de la piscina con su grupo, sea cual
+   * sea `scope` (`docs/piscineros.md`).
    */
   app.get<{ Querystring: { scope?: string } }>('/me/projects', async (request, reply) => {
     const user = session.user(request)
 
-    return reply.send(await peers.findByUser(user, request.query.scope === 'all'))
+    return reply.send(
+      await peers.findByUser(user, request.query.scope === 'all', user.role === 'pool'),
+    )
   })
 
   /**

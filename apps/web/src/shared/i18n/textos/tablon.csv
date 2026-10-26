@@ -93,3 +93,13 @@ graph.seriesLabel,Nombre accesible de un grupo de módulos,Módulos de {series}:
 graph.hours,Horas que estima 42,unas {n} h,about {n} h,unes {n} h,{n} h inguru,environ {n} h
 graph.perfect,Aprobado con la nota máxima,Aprobado con 125,Passed with 125,Aprovat amb 125,125ekin gaindituta,Validé avec 125
 graph.sizeHint,Qué significa el tamaño de cada burbuja,El tamaño de cada burbuja indica las horas que 42 calcula para el proyecto.,Each bubble is sized by the hours 42 estimates.,La mida de cada bombolla indica les hores que 42 calcula per al projecte.,Burbuila bakoitzaren tamainak 42k proiekturako kalkulatzen dituen orduak adierazten ditu.,La taille de chaque bulle indique les heures estimées par 42 pour le projet.
+piscine.title,Grafo de un piscinero: su etiqueta de arriba,Tu piscina,Your piscine,La teva piscina,Zure piscina,Ta piscine
+piscine.day,Grafo de un piscinero: qué día de piscina es hoy (el primero es el 1),Día {n} de piscina,Piscine day {n},Dia {n} de piscina,Piscinako {n}. eguna,Jour {n} de piscine
+piscine.done,Piscina: proyectos de shell y C aprobados de todos los que cuentan,Aprobados: {done} de {total},Passed: {done} of {total},Aprovats: {done} de {total},Gaindituta: {done}/{total},Validés : {done} sur {total}
+piscine.progress,Piscina: los proyectos que cuentan para el avance (shell y C),Lo que cuenta para tu avance,What counts towards your progress,El que compta per al teu avenç,Zure aurrerapenerako kontatzen dena,Ce qui compte pour ta progression
+piscine.apart,"Piscina: los proyectos de aparte, que no cuentan para el avance","Rushes, BSQ y exámenes","Rushes, BSQ and exams","Rushes, BSQ i exàmens","Rushak, BSQ eta azterketak","Rushs, BSQ et examens"
+piscine.apartHint,"Piscina: por qué los rushes, BSQ y exámenes van aparte","No suman a tu avance, pero puedes pedir y dar ayuda con ellos.","They don't add to your progress, but you can ask for and give help with them.","No sumen al teu avenç, però pots demanar i donar ajuda amb ells.","Ez dute zure aurrerapenean gehitzen, baina haiekin laguntza eskatu eta eman dezakezu.","Ils ne comptent pas dans ta progression, mais tu peux demander et donner de l'aide dessus."
+piscine.group.shell,Piscina: grupo de los proyectos de shell (azul claro),Shell,Shell,Shell,Shell,Shell
+piscine.group.c,Piscina: grupo de los proyectos de C (azul oscuro),C,C,C,C,C
+piscine.group.rush,Piscina: grupo de los proyectos en grupo del fin de semana,Rushes y BSQ,Rushes and BSQ,Rushes i BSQ,Rushak eta BSQ,Rushs et BSQ
+piscine.group.exam,Piscina: grupo de los exámenes,Exámenes,Exams,Exàmens,Azterketak,Examens

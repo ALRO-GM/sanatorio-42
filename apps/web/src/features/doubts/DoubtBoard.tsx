@@ -11,6 +11,7 @@ import { DoubtForm } from './DoubtForm'
 import { firstInProgress } from './graph'
 import { GuidePanel } from './GuidePanel'
 import { HolyGraph } from './HolyGraph'
+import { PiscineGraph } from './PiscineGraph'
 import { CorrectionGraph } from './CorrectionGraph'
 import { InfoTip } from '../../shared/ui/InfoTip'
 import { Icon } from '../../shared/ui/Icon'
@@ -23,8 +24,8 @@ type DoubtBoardProps = {
 }
 
 /**
- * Tablón de dudas: el proyecto se elige en el grafo del common core y debajo se
- * ve su guía y su corcho.
+ * Tablón de dudas: el proyecto se elige en el grafo del common core (o, a un
+ * piscinero, en el de la piscina) y debajo se ve su guía y su corcho.
  */
 export function DoubtBoard({ initialProject }: DoubtBoardProps) {
   const { t } = useI18n()
@@ -83,7 +84,12 @@ export function DoubtBoard({ initialProject }: DoubtBoardProps) {
           {/* En el modo simplificado solo está el grafo de tu avance. */}
           {view === 'progress' || !shows(detail, 'normal') ? (
             <PoolOnly k="tablon.graph">
-              <HolyGraph graph={graph.data} selected={projectId} onSelect={select} />
+              {/* Un piscinero ve la piscina, no el common core (`docs/piscineros.md`). */}
+              {graph.data.kind === 'piscine' ? (
+                <PiscineGraph graph={graph.data} selected={projectId} onSelect={select} />
+              ) : (
+                <HolyGraph graph={graph.data} selected={projectId} onSelect={select} />
+              )}
             </PoolOnly>
           ) : (
             <PoolOnly k="tablon.corrections">

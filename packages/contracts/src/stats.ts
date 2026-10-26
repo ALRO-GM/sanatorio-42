@@ -203,3 +203,57 @@ export type StatsRanking = {
   /** Quien mira, si entra con los filtros, aunque no salga en la página. */
   me: RankingEntry | null
 }
+
+/** Un día en que un piscinero aprobó proyectos que cuentan: cuáles y con cuántos se queda. */
+export type PiscineMilestone = { day: number; projects: string[]; value: number }
+
+/**
+ * La línea de un piscinero: cuántos proyectos de los que cuentan (Shell 00 …
+ * C 13) lleva aprobados al acabar cada día de `PiscineProgress.days`; `null`
+ * los días que aún no ha vivido.
+ */
+export type PiscineTrace = {
+  line: ProgressLine
+  /** Cuántos lleva aprobados hoy. */
+  done: number
+  milestones: PiscineMilestone[]
+}
+
+/**
+ * Una media de piscineros: la línea (proyectos aprobados de media; `null` en
+ * los días con menos de `minPeople` personas), cuánta gente entra y, si en
+ * total son menos de `minPeople`, la línea de cada cual. `login` es `null` en
+ * quien ya no es de tu mundo (las piscinas anteriores: hoy son estudiantes o
+ * ya no están).
+ */
+export type PiscineAverage = {
+  line: ProgressLine
+  people: number
+  individuals: (PiscineTrace & { login: string | null })[]
+  /** El inicio de la piscina más antigua que entra (ISO-8601); `null` sin nadie. */
+  since: string | null
+}
+
+/**
+ * `GET /stats/progress/piscine?with=a,b`: el Avance de un piscinero
+ * (`docs/piscineros.md`). El eje es el día de piscina; lo que cuenta son los
+ * proyectos Shell 00 … C 13 aprobados. Los rushes, BSQ y los exámenes no suman.
+ */
+export type PiscineProgress = {
+  /** Días desde el inicio de la piscina: 0, 1, 2… */
+  days: number[]
+  /** Los proyectos que cuentan, en su orden: el eje vertical. */
+  steps: { short: string; group: 'shell' | 'c' }[]
+  /** Tu inicio de piscina (ISO-8601), o `null` si no se sabe. */
+  startedAt: string | null
+  me: PiscineTrace | null
+  /** Tu piscina: quien la empezó en tu campus a la vez que tú (una semana arriba o abajo). */
+  cohort: PiscineAverage
+  /** Las piscinas anteriores de tu campus, de los tres últimos años. */
+  past: PiscineAverage
+  /** Las personas con quien te comparas (`?with=`): piscineros de tu campus. */
+  others: (PiscineTrace & { login: string })[]
+  minPeople: number
+  /** El nombre de tu campus, si se sabe. */
+  campus: string | null
+}

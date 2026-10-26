@@ -374,7 +374,9 @@ conviene agotar la sesión en otras tareas si él avisa de que va justa.
 
 ## Decisiones tomadas con Alberto
 
-- **Solo 42cursus**: la piscina (`cursus_id` 9 y 66) no sale en ningún sitio.
+- **Solo 42cursus** para los estudiantes: la piscina (`cursus_id` 9 y 66) no
+  les sale en ningún sitio. Un piscinero ve la piscina en su Avance, en el
+  tablón y al elegir proyecto (2026-10-26, `docs/piscineros.md`).
 - **Guardia**: no se puede abrir una media hora ya empezada; la XP exige
   presencia comprobada y valoración de las dos partes.
 - **Mapa**: los puestos de una terapia solo se pintan en azul mientras el grupo

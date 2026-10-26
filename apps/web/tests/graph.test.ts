@@ -24,6 +24,7 @@ const project = (overrides: Partial<GraphProject> = {}): GraphProject => ({
   corrected: 0,
   retired: false,
   signals: { unanswered: 0, proposals: 0, missingGuide: false },
+  group: null,
   ...overrides,
 })
 
@@ -83,6 +84,7 @@ describe('el grafo de correcciones', () => {
 
   it('deja fuera los retirados que no corregiste, y marca lo que aún no has aprobado', () => {
     const graph = {
+      kind: 'core' as const,
       track: 'classic' as const,
       level: null,
       startedAt: null,

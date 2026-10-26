@@ -14,6 +14,20 @@ export type GraphStatus =
 export type GraphTrack = 'classic' | 'next'
 
 /**
+ * Qué grafo es: el del common core (por círculos) o el de la piscina
+ * (`docs/piscineros.md`), que es lo que ve un piscinero.
+ */
+export type GraphKind = 'core' | 'piscine'
+
+/**
+ * Los grupos de proyectos de la piscina (C Piscine), como en su grafo de la
+ * intra: Shell 00 y 01 (azul claro), C 00 a C 13 (azul oscuro), que son los que
+ * cuentan para el avance, y aparte los rushes y BSQ (en grupo, el fin de
+ * semana) y los exámenes, que no cuentan pero se pueden elegir para pedir ayuda.
+ */
+export type PiscineGroup = 'shell' | 'c' | 'rush' | 'exam'
+
+/**
  * Dónde hace falta una mano en el tablón de un proyecto.
  *
  * Solo llega lo que le sirve a quien pregunta: quien aprobó el proyecto ve las
@@ -62,13 +76,22 @@ export type GraphProject = {
    */
   retired: boolean
   signals: GraphSignals
+  /** En el grafo de la piscina, su grupo; en el del common core, `null`. */
+  group: PiscineGroup | null
 }
 
 /**
  * `GET /doubts/graph`: los proyectos del common core que quien pregunta tiene o
  * tendrá disponibles, según su plan, por círculos.
+ *
+ * A un piscinero, el de la piscina (`kind: 'piscine'`): dos «círculos», el 0
+ * con los proyectos que cuentan para el avance, en orden (Shell 00 … C 13), y
+ * el 1 con los de aparte (rushes, BSQ y exámenes). `track` no dice nada,
+ * `level` es `null`, `startedAt` es el inicio de su piscina y
+ * `currentCircle` y `knownUpTo` son `1`.
  */
 export type HolyGraph = {
+  kind: GraphKind
   track: GraphTrack
   /** Nivel en el 42cursus (`3.66`), o `null` si no se sabe. */
   level: number | null

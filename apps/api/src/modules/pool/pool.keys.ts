@@ -151,7 +151,8 @@ export const POOL_ROUTES: Record<PoolKey, readonly string[]> = {
   red: ['/network', '/network/people', '/network/pair'],
   'red.rankings': ['/network/strictest'],
   'red.seats': ['/network/seats', '/network/seats/heat'],
-  avance: ['/stats/progress', '/stats/ranking'],
+  // Un piscinero tiene su propio avance, el de la piscina (`docs/piscineros.md`).
+  avance: ['/stats/progress', '/stats/progress/piscine', '/stats/ranking'],
   'avance.compare': ['/stats/progress/fastest'],
   examenes: [],
   'examenes.live': ['/exams/live', '/exams/live/refresh'],

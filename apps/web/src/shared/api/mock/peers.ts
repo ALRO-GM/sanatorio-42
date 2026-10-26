@@ -18,6 +18,8 @@ import {
   brokenSeats,
 } from './state'
 import { closeStaffSession } from './staff'
+import { piscineProjects } from './piscine'
+import { poolMocking } from './pool'
 
 export const peersMock: Pick<
   Api,
@@ -66,6 +68,9 @@ export const peersMock: Pick<
 
   async getMyProjects(all = false) {
     await delay()
+
+    // A un piscinero, todos los de la piscina, como en la API.
+    if (poolMocking()) return piscineProjects()
 
     return all
       ? PROJECTS

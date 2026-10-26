@@ -19,6 +19,7 @@ import { toNumber, toText } from '../../core/db/rows.js'
 import { inList, listArg } from '../../core/db/sql.js'
 import { createTtlCache } from '../../core/ttl-cache.js'
 import { avatarUrlOf } from '../../integrations/forty-two/avatar.js'
+import { PISCINE } from './piscine.js'
 import { PROJECT_STATUS } from './replica.domain.js'
 import type {
   ApiCampus,
@@ -664,6 +665,69 @@ export function createReplicaRepository(db: Db) {
             }
           : {}),
       }))
+    },
+
+    /**
+     * Los proyectos de la piscina (`piscine.ts`) que hay en la réplica, con
+     * cómo va esa persona en cada uno, en el orden de la piscina. Un proyecto
+     * que nadie de ningún campus copiado ha tocado aún no está en `projects`
+     * y no sale.
+     *
+     * Aprobado: terminado y validado. Empezado: cualquier fila sin terminar
+     * (también buscando grupo para un rush o esperando corrección). Terminado
+     * sin aprobar (un examen suspendido, un C que no pasó), como sin empezar:
+     * en la piscina no se repite, pero un examen sí se vuelve a hacer.
+     */
+    async piscineOf(login: string): Promise<
+      {
+        id: number
+        name: string
+        slug: string
+        status: 'todo' | 'in_progress' | 'finished'
+        perfect: boolean
+      }[]
+    > {
+      const slugs = PISCINE.map((project) => project.slug)
+      const result = await db.execute({
+        sql: `SELECT p.id, p.name, p.slug,
+                     MAX(CASE WHEN pu.status = 'finished' AND pu.validated = 1 THEN 1 ELSE 0 END) AS done,
+                     MAX(CASE WHEN pu.status = 'finished' AND pu.validated = 1 AND pu.final_mark >= ?
+                         THEN 1 ELSE 0 END) AS perfect,
+                     MAX(CASE WHEN pu.id IS NOT NULL AND pu.status != 'finished' THEN 1 ELSE 0 END) AS doing
+              FROM projects p
+              LEFT JOIN project_users pu
+                ON pu.project_id = p.id AND pu.user_id IN (SELECT id FROM users WHERE login = ?)
+              WHERE ${inList('p.slug')}
+              GROUP BY p.id, p.name, p.slug`,
+        args: [PERFECT_MARK, login, listArg(slugs)],
+      })
+      const order = new Map(slugs.map((slug, index) => [slug, index]))
+
+      return result.rows
+        .map((row) => ({
+          id: toNumber(row.id),
+          name: toText(row.name),
+          slug: toText(row.slug),
+          status:
+            toNumber(row.done) === 1
+              ? ('finished' as const)
+              : toNumber(row.doing) === 1
+                ? ('in_progress' as const)
+                : ('todo' as const),
+          perfect: toNumber(row.perfect) === 1,
+        }))
+        .sort((a, b) => (order.get(a.slug) ?? 0) - (order.get(b.slug) ?? 0))
+    },
+
+    /** Cuándo empezó su piscina en curso (ISO-8601), según `pool_members`; `null` si no está. */
+    async poolBeginOf(login: string): Promise<string | null> {
+      const result = await db.execute({
+        sql: 'SELECT MAX(begin_at) AS begin_at FROM pool_members WHERE login = ?',
+        args: [login.toLowerCase()],
+      })
+      const begin = result.rows[0]?.begin_at
+
+      return typeof begin === 'string' ? begin : null
     },
 
     /** `true` si ya hay alguna fila de proyectos de esta persona. */

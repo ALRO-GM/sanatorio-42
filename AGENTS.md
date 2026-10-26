@@ -172,7 +172,9 @@ regla de aquí, cambia también la skill que la repite.
 - Grafo del tablón: es el plan de cada persona, no un catálogo. Turquesa =
   aprobado, blanco = en curso, gris = disponible, gris con candado = aún no.
   Cada proyecto enseña como mucho una marca y solo a quien puede hacer algo con
-  ella (`graph` en `doubts.service.ts`). La piscina no sale en ningún sitio.
+  ella (`graph` en `doubts.service.ts`). A un estudiante la piscina no le sale
+  en ningún sitio; un piscinero ve solo la piscina (`PiscineGraph.tsx`: azul
+  claro shell, azul oscuro C, aparte rushes, BSQ y exámenes; `docs/piscineros.md`).
 - Red de correcciones: el grafo se pinta en `<canvas>` (`features/network/ForceGraph.tsx`),
   no en SVG, y todo lo que cambia a cada fotograma vive en un `ref`, no en estado
   de React. Las cuentas (endogamia, comunidades) son de la API: la web no las repite.

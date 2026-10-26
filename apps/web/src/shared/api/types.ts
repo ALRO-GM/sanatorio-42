@@ -120,6 +120,7 @@ import type {
   HelpStats,
   StatsFastest,
   StatsProgress,
+  PiscineProgress,
   StatsRanking,
   RankingBy,
   Leaderboard,
@@ -521,6 +522,8 @@ export type Api = {
     others: readonly string[],
     campuses?: readonly number[] | null,
   ) => Promise<StatsProgress>
+  /** El Avance de un piscinero: lo aprobado de la piscina día a día y con quién se compara (hasta 5). */
+  getPiscineProgress: (others: readonly string[]) => Promise<PiscineProgress>
   /** Quien terminó el common core más deprisa, por plan: en tu campus y el primero de cada campus. */
   getStatsFastest: () => Promise<StatsFastest>
   /** Quién va más rápido en el campus, con esos filtros, por páginas. */

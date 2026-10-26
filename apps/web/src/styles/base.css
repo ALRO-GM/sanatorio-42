@@ -161,6 +161,30 @@ button.link {
   font-size: 2rem;
 }
 
+/* Los proyectos de la piscina, con el color de su grupo (`docs/piscineros.md`). */
+.project.piscine .project-icon {
+  background: color-mix(in srgb, var(--piscine) 22%, var(--surface));
+  color: var(--text);
+}
+.project.shell {
+  --piscine: var(--piscine-shell);
+}
+.project.c {
+  --piscine: var(--piscine-c);
+}
+.project.rush,
+.project.exam {
+  --piscine: var(--text-3);
+}
+.project-status {
+  font-size: 0.78rem;
+  color: var(--text-3);
+}
+.project-list + .eyebrow {
+  display: block;
+  margin-top: 1.2rem;
+}
+
 .howto {
   margin-top: 2.5rem;
   text-align: center;

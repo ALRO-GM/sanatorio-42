@@ -17,15 +17,22 @@ import type {
   GuideChange,
   GuideSanctions,
   GraphProject,
+  GraphSignals,
   GraphStatus,
   HolyGraph,
 } from '@sanatorio/contracts'
 import { z } from 'zod'
 
-import type { AnswerRow, DoubtRow, DoubtsRepository, GuideRow } from './doubts.repository.js'
+import type {
+  AnswerRow,
+  DoubtRow,
+  DoubtsRepository,
+  GuideRow,
+  ProjectActivity,
+} from './doubts.repository.js'
 import { XP_KIND } from '../profile/index.js'
 import type { XpService } from '../profile/index.js'
-import { LAST_CIRCLE, SEEDED_UP_TO } from '../replica/index.js'
+import { LAST_CIRCLE, PISCINE, SEEDED_UP_TO, countsForProgress } from '../replica/index.js'
 import type { Curriculum, ReplicaRepository } from '../replica/index.js'
 import { domainError } from '../../core/errors.js'
 import { parse, text } from '../../core/validation.js'
@@ -119,6 +126,19 @@ const SHORT_NAMES: Record<string, string> = {
  */
 function seriesOf(name: string): string | null {
   return /^(.+) Module \d+$/.exec(name)?.[1] ?? null
+}
+
+/**
+ * Los avisos de un proyecto, solo para quien puede hacer algo con ellos: quien
+ * lo aprobó ve las dudas sin responder, las propuestas y si falta la guía;
+ * quien lo está haciendo, solo las dudas; quien no ha llegado, nada.
+ */
+function signalsOf(status: GraphStatus, pending: ProjectActivity | undefined): GraphSignals {
+  return {
+    unanswered: status === 'todo' ? 0 : (pending?.unanswered ?? 0),
+    proposals: status === 'finished' ? (pending?.proposals ?? 0) : 0,
+    missingGuide: status === 'finished' && pending?.hasGuide !== true,
+  }
 }
 
 /** Nombre corto de un proyecto, para que quepa dentro de su nodo. */
@@ -225,6 +245,60 @@ export function createDoubtsService(options: DoubtsServiceOptions) {
     }
   }
 
+  /**
+   * El grafo de un piscinero (`docs/piscineros.md`): los proyectos de la
+   * piscina (`replica/piscine.ts`) en vez del common core. En el «círculo» 0,
+   * los que cuentan para su avance, en orden (Shell 00 … C 13); en el 1, los
+   * de aparte (rushes, BSQ y exámenes), que se ven y sirven igual para el
+   * tablón aunque no sumen. Nada está cerrado: en la piscina todo se puede
+   * mirar, y quien prepara un examen pregunta antes de hacerlo.
+   */
+  async function piscineGraph(actor: Actor): Promise<HolyGraph> {
+    const [projects, activity, startedAt, corrected] = await Promise.all([
+      replica.piscineOf(actor.login),
+      doubts.activity(actor.campusId, actor.login),
+      replica.poolBeginOf(actor.login),
+      options.corrections?.byProject(actor.login) ?? new Map<number, number>(),
+    ])
+    const plan = new Map(PISCINE.map((project) => [project.slug, project]))
+    const nodes = projects.flatMap((project): GraphProject[] => {
+      const known = plan.get(project.slug)
+
+      if (known === undefined) return []
+
+      return [
+        {
+          projectId: project.id,
+          name: project.name,
+          short: known.short,
+          status: project.status,
+          perfect: project.perfect,
+          hours: null,
+          series: null,
+          choice: null,
+          locked: false,
+          corrected: corrected.get(project.id) ?? 0,
+          retired: false,
+          signals: signalsOf(project.status, activity.get(project.id)),
+          group: known.group,
+        },
+      ]
+    })
+
+    return {
+      kind: 'piscine',
+      track: 'classic',
+      level: null,
+      startedAt,
+      currentCircle: 1,
+      knownUpTo: 1,
+      circles: [
+        { circle: 0, projects: nodes.filter((node) => countsForProgress(node.group ?? 'rush')) },
+        { circle: 1, projects: nodes.filter((node) => !countsForProgress(node.group ?? 'rush')) },
+      ],
+    }
+  }
+
   return {
     /**
      * El grafo del tablón: los proyectos del common core que quien pregunta
@@ -233,7 +307,8 @@ export function createDoubtsService(options: DoubtsServiceOptions) {
      *
      * Es **su** plan, no un catálogo: quien sigue el plan nuevo ve sus módulos
      * de Python y no los proyectos de C que ya no le tocan, y al revés. La
-     * piscina no sale nunca (no es del 42cursus).
+     * piscina no sale a un estudiante (no es del 42cursus); un piscinero ve
+     * solo la piscina (`piscineGraph`).
      *
      * En los círculos que ya completó salen los proyectos que hizo, no los que
      * podría haber hecho: de un «elige uno», el que eligió, y lo que hizo con
@@ -249,6 +324,8 @@ export function createDoubtsService(options: DoubtsServiceOptions) {
      * @param userId Su id en 42, para preguntar por su plan y su rango.
      */
     async graph(actor: Actor, userId: number | null): Promise<HolyGraph> {
+      if (actor.pool === true) return piscineGraph(actor)
+
       const { track, rank } = await curriculum.trackOf(actor.login, userId)
 
       await curriculum.ensureHours(actor.campusId)
@@ -347,11 +424,8 @@ export function createDoubtsService(options: DoubtsServiceOptions) {
             corrected: corrected.get(projectId) ?? 0,
             // Sin correcciones copiadas no se puede decir: ninguno está retirado.
             retired: alive !== null && alive.size > 0 && !alive.has(projectId),
-            signals: {
-              unanswered: status === 'todo' ? 0 : (pending?.unanswered ?? 0),
-              proposals: status === 'finished' ? (pending?.proposals ?? 0) : 0,
-              missingGuide: status === 'finished' && pending?.hasGuide !== true,
-            },
+            signals: signalsOf(status, pending),
+            group: null,
           },
         ])
       }
@@ -359,6 +433,7 @@ export function createDoubtsService(options: DoubtsServiceOptions) {
       const knownUpTo = Math.max(0, ...byCircle.keys())
 
       return {
+        kind: 'core',
         track,
         level: cursus.level,
         startedAt: cursus.startedAt,

@@ -13,7 +13,7 @@
 
 import type { ReplicaRepository } from '../replica/index.js'
 import { domainError } from '../../core/errors.js'
-import { LOCATION_MAX_AGE_MS } from '../replica/index.js'
+import { LOCATION_MAX_AGE_MS, PISCINE } from '../replica/index.js'
 import type { Peer, ProjectSummary } from '@sanatorio/contracts'
 import type { Syncer } from '../replica/index.js'
 
@@ -48,6 +48,34 @@ export function createPeersService(options: PeersServiceOptions) {
     }
   }
 
+  /**
+   * Los proyectos de un piscinero: **todos** los de la piscina, en su orden y
+   * con su grupo, no solo los que tiene empezados (`docs/piscineros.md`). Así
+   * puede pedir ayuda (o abrir un sprint) con un rush antes de tener grupo o
+   * con un examen que aún no ha hecho. Primero lo que tiene en curso; `status`
+   * solo donde lo tiene empezado o aprobado.
+   */
+  async function piscineOf(login: string): Promise<ProjectSummary[]> {
+    const group = new Map(PISCINE.map((project) => [project.slug, project.group]))
+    const projects = (await replica.piscineOf(login)).map(
+      ({ id, name, slug, status }): ProjectSummary => {
+        const of = group.get(slug)
+
+        return {
+          id,
+          name,
+          ...(status === 'todo' ? {} : { status }),
+          ...(of === undefined ? {} : { group: of }),
+        }
+      },
+    )
+
+    return [
+      ...projects.filter((project) => project.status === 'in_progress'),
+      ...projects.filter((project) => project.status !== 'in_progress'),
+    ]
+  }
+
   /** Desde cuándo se cree un puesto. Ver `LOCATION_MAX_AGE_MS`. */
   const presenceSince = (): string => new Date(now() - LOCATION_MAX_AGE_MS).toISOString()
 
@@ -63,7 +91,12 @@ export function createPeersService(options: PeersServiceOptions) {
      *
      * @param includeFinished También los aprobados, con `status` en cada uno.
      */
-    async findByUser(viewer: Viewer, includeFinished = false): Promise<ProjectSummary[]> {
+    async findByUser(
+      viewer: Viewer,
+      includeFinished = false,
+      /** `true` si pregunta un piscinero: todos los de la piscina (`piscineOf`). */
+      pool = false,
+    ): Promise<ProjectSummary[]> {
       try {
         await sync.ensureUserProjects(
           viewer.login,
@@ -74,7 +107,7 @@ export function createPeersService(options: PeersServiceOptions) {
         // sala de espera vacía con su mensaje que un error.
       }
 
-      return replica.projectsOf(viewer.login, includeFinished)
+      return pool ? piscineOf(viewer.login) : replica.projectsOf(viewer.login, includeFinished)
     },
 
     /**

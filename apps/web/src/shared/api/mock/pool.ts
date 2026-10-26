@@ -45,6 +45,10 @@ const PREVIEW = 'mock_pool_preview'
 /** Si quien administra está en la vista de piscinero: entonces no administra. */
 export const poolPreviewing = (): boolean => localStorage.getItem(PREVIEW) === 'true'
 
+/** Si se está viendo la web como piscinero (`mock_pool` o la vista previa): entonces, la piscina. */
+export const poolMocking = (): boolean =>
+  poolPreviewing() || localStorage.getItem('mock_pool') === 'true'
+
 export const poolMock: Pick<
   Api,
   | 'getPoolNotice'
@@ -79,7 +83,7 @@ export const poolMock: Pick<
 
     if (poolPreviewing()) return { pool: true, allow: effective(settings.allow), preview: true }
 
-    return localStorage.getItem('mock_pool') === 'true'
+    return poolMocking()
       ? { pool: true, allow: effective(settings.allow) }
       : { pool: false, allow: null }
   },

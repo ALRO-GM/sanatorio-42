@@ -82,6 +82,17 @@ GET /me/projects?scope=all → también los aprobados (en ellos soy especialista
 [{ "id": 1314, "name": "ft_printf", "status": "in_progress" },
  { "id": 1312, "name": "Libft", "status": "finished" }]
 
+A un piscinero, con `scope` o sin él, **todos** los proyectos de la piscina
+(`replica/piscine.ts`, `docs/piscineros.md`), con su `group` (`shell`, `c`,
+`rush` o `exam`): primero los que tiene en curso (también un rush buscando
+grupo o esperando corrección) y luego el resto en el orden de la piscina.
+`status` solo en los empezados o aprobados. Así puede pedir ayuda, o abrir un
+sprint, con un rush o un examen que aún no ha empezado.
+
+[{ "id": 1308, "name": "C Piscine C 01", "status": "in_progress", "group": "c" },
+ { "id": 1305, "name": "C Piscine Shell 00", "status": "finished", "group": "shell" },
+ { "id": 1320, "name": "C Piscine Exam 00", "group": "exam" }]
+
 ## Gente del proyecto (en el campus que estoy mirando)
 GET /projects/:id/peers
 
@@ -544,10 +555,11 @@ ese proyecto.
 GET /doubts/graph → **tu plan** del common core, por círculos: los proyectos
 que tienes o tendrás disponibles. No es un catálogo: quien sigue el plan nuevo
 ve sus módulos de Python y no los proyectos de C que ya no le tocan, y al
-revés. La piscina no sale nunca.
+revés. A un estudiante la piscina no le sale nunca.
 
 ```json
 {
+  "kind": "core",
   "track": "next",
   "level": 3.66,
   "currentCircle": 3,
@@ -569,6 +581,8 @@ revés. La piscina no sale nunca.
 
 - `track`: `"classic"` (todo en C) o `"next"` (C y luego Python). Lo marca 42
   con el hito `42next`.
+- `kind`: `"core"`, o `"piscine"` para un piscinero (abajo).
+- `group` de cada proyecto: `null` en el common core.
 - `currentCircle`: el círculo en el que estás (el siguiente al último rango
   `common-core-rank-0N` que validaste).
 - `knownUpTo`: hasta qué círculo se conoce tu plan. Menor que 6 significa que lo
@@ -1856,6 +1870,17 @@ GET /stats?period=month|all  → HelpStats: { period, sections: StatsSection[] }
 - Quién va más rápido (antes la sección `ritmo`) está desde el 2026-10-25 en
   el Avance: `GET /stats/ranking`.
 
+A un piscinero (`docs/piscineros.md`), el grafo de la piscina (`kind:
+"piscine"`): `circles[0]` son los proyectos que cuentan para su avance, en
+orden (Shell 00 y 01 con `group: "shell"`, C 00 a C 13 con `"c"`), y
+`circles[1]` los de aparte (los rushes y BSQ, `"rush"`, y los exámenes,
+`"exam"`), que no cuentan pero se pueden abrir como cualquier otro. Nada va
+cerrado (`locked: false`), `short` es el nombre corto (`Shell 00`, `C 07`,
+`BSQ`, `Final`), `level` es `null`, `startedAt` el inicio de su piscina
+(`pool_members`) y `currentCircle` y `knownUpTo` valen `1`. Un examen
+suspendido sale como por hacer (`todo`); un rush buscando grupo, en curso. Los
+avisos siguen las mismas reglas.
+
 ## Avance (`modules/stats`, Datos → Avance)
 
 ```
@@ -1863,6 +1888,9 @@ GET /stats/progress?with=login,login&campuses=22,1|all → StatsProgress. Tu ava
                   de cada campus pedido y de todos juntos, los paces y hasta 5 personas
                   con quien compararte.
 GET /stats/progress/fastest → StatsFastest. Quien terminó el common core más deprisa, por plan.
+GET /stats/progress/piscine?with=login,login → PiscineProgress. El Avance de un piscinero (403 a
+                  un estudiante): lo aprobado de la piscina día a día, con la media de su
+                  piscina y de las anteriores de su campus.
 GET /stats/ranking?by=circle|circles|hours&plan=all|classic|next&kickoff=AAAA-MM&cohort=only|since
                   &circleMin=0&circleMax=7&pctMin=0&pctMax=100&offset=0&limit=50 → StatsRanking.
 ```
@@ -1925,6 +1953,19 @@ GET /stats/ranking?by=circle|circles|hours&plan=all|classic|next&kickoff=AAAA-MM
   plan, y hace falta tener al menos la mitad del plan aprobado en la réplica
   (quien vino trasladado parecería terminar en días). Sin quien no ves. Es del
   permiso `avance.compare` de los piscineros.
+- `GET /stats/progress/piscine` (`piscine.service.ts`, reglas en
+  `piscine.rules.ts`): `days` 0…30; `steps`, los 16 proyectos que cuentan
+  (`{ short, group }`); `me`, `others[]` y cada `individuals` son
+  `PiscineTrace` (`line`: cuántos lleva aprobados al acabar cada día, `null`
+  los que aún no ha vivido; `done`; `milestones`). `cohort` es tu piscina:
+  piscineros en curso de tu campus que empezaron a menos de una semana de ti,
+  sin ti. `past`, las piscinas anteriores de tu campus en los tres últimos
+  años, de la réplica (`project_users` de la gente del campus), sin nombre.
+  Cada una con `line` (media, `null` con menos de `minPeople`), `people`,
+  `individuals` (si son menos de `minPeople`) y `since`. `with`: solo
+  piscineros en curso de tu campus que ves. Los rushes, BSQ y exámenes no
+  suman. Se calcula por campus y se guarda 10 minutos. Es del permiso
+  `avance`.
 - **Plan** de quien 42 no lo ha dicho (`user_tracks`): el de la mayoría de sus
   pistas. Del nuevo, un `python-module…`, un proyecto que solo tiene el plan
   nuevo o una versión `42next-` que no sea examen; del clásico, un proyecto que

@@ -842,3 +842,156 @@ svg .graph-node.selected .orb {
   border-width: 3px;
   cursor: default;
 }
+
+/* ── El grafo de la piscina (un piscinero, `PiscineGraph.tsx`) ──────────────
+   Azul claro shell, azul oscuro C (`--piscine-shell`, `--piscine-c`), en un
+   camino; aparte, en gris, los rushes, BSQ y exámenes. El estado va en la
+   forma: relleno si está aprobado, con aro si está en curso, desvaído si no. */
+.piscine-graph {
+  --node-size: 4.2rem;
+}
+.graph-track.piscine {
+  background: color-mix(in srgb, var(--piscine-shell) 22%, var(--surface));
+  color: var(--text);
+}
+.piscine-node.shell {
+  --node: var(--piscine-shell);
+  --on-node: var(--on-piscine-shell);
+}
+.piscine-node.c {
+  --node: var(--piscine-c);
+  --on-node: var(--on-piscine-c);
+}
+.piscine-node.rush,
+.piscine-node.exam {
+  --node: var(--text-3);
+  --on-node: var(--surface);
+}
+.piscine-path,
+.piscine-extras {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem 0.55rem;
+  margin: 0.45rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.piscine-path > li,
+.piscine-extras > li {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+/* El camino: una raya entre un proyecto y el siguiente. */
+.piscine-path > li + li::before {
+  content: '';
+  width: 0.55rem;
+  height: 3px;
+  margin-left: -0.55rem;
+  border-radius: 2px;
+  background: var(--border-strong);
+}
+.piscine-node {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.1rem;
+  width: var(--node-size);
+  height: var(--node-size);
+  padding: 0.2rem;
+  border: 2px solid var(--node);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--node) 16%, var(--surface));
+  color: var(--text-2);
+  font: inherit;
+  font-size: 0.74rem;
+  font-weight: 800;
+  line-height: 1.1;
+  text-align: center;
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+.piscine-node:hover,
+.piscine-node:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px var(--shadow-soft);
+}
+.piscine-node.finished {
+  background: var(--node);
+  color: var(--on-node);
+}
+.piscine-node.in_progress {
+  border-width: 4px;
+  background: var(--surface);
+  color: var(--text);
+}
+.piscine-node.todo {
+  border-style: dashed;
+  opacity: 0.75;
+}
+.piscine-node.perfect {
+  box-shadow: 0 0 0 3px var(--gold);
+}
+.piscine-node.selected {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+.piscine-node .graph-mark {
+  position: absolute;
+  top: -0.3rem;
+  right: -0.3rem;
+}
+.piscine-node-name {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* Lo de aparte, separado del camino con su raya, como en el grafo de la intra. */
+.piscine-apart {
+  padding-top: 0.7rem;
+  border-top: 1px dashed var(--border-strong);
+}
+.piscine-apart .hint {
+  margin: 0.2rem 0 0;
+}
+.piscine-extras .piscine-node {
+  --node-size: 3.6rem;
+  border-radius: 1rem;
+}
+.piscine-swatch {
+  width: 15px;
+  height: 15px;
+  border: 2px solid var(--node);
+  border-radius: 50%;
+  background: var(--node);
+}
+.piscine-swatch.shell {
+  --node: var(--piscine-shell);
+}
+.piscine-swatch.c {
+  --node: var(--piscine-c);
+}
+.piscine-swatch.rush {
+  --node: var(--text-3);
+  border-radius: 5px;
+}
+.piscine-swatch.in_progress {
+  border-width: 4px;
+  background: var(--surface);
+}
+.piscine-swatch.todo {
+  border-style: dashed;
+  background: color-mix(in srgb, var(--node) 16%, var(--surface));
+}
+@media (max-width: 700px) {
+  .piscine-graph {
+    --node-size: 3.4rem;
+  }
+  .piscine-node {
+    font-size: 0.66rem;
+  }
+}

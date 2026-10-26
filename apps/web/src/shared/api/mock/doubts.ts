@@ -6,6 +6,8 @@ import type { Guide } from '@sanatorio/contracts'
 import { CORE, CURRENT_CIRCLE, ME, PROJECTS } from './data'
 import type { StoredDoubt } from './data'
 import type { Api } from '../types'
+import { piscineGraph } from './piscine'
+import { poolMocking } from './pool'
 import {
   EMPTY_GUIDE,
   state,
@@ -38,7 +40,11 @@ export const doubtsMock: Pick<
   async getDoubtGraph() {
     await delay()
 
+    // Quien entra como piscinero ve la piscina, como en la API.
+    if (poolMocking()) return piscineGraph()
+
     return {
+      kind: 'core',
       track: 'next',
       level: 1.42,
       // Empezó hace algo más de mes y medio.
@@ -75,6 +81,7 @@ export const doubtsMock: Pick<
             // Lo aprobado, corregido más veces cuanto más antiguo (Libft, maestro).
             corrected: status === 'finished' ? Math.max(0, 12 - circle * 4 - (id % 3)) : 0,
             retired: false,
+            group: null,
             signals: {
               unanswered: status === 'todo' ? 0 : unanswered,
               proposals:

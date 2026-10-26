@@ -33,6 +33,7 @@ import {
   LEVEL_FLOORS,
   ME,
   PEERS,
+  PISCINE_PROJECTS,
   PROJECTS,
 } from './data'
 import { parisMap, PARIS_ID } from './paris'
@@ -69,6 +70,7 @@ export const emptyToNull = (value: string | null | undefined): string | null =>
 export const projectName = (id: number): string =>
   CORE.flatMap((circle) => circle.projects).find((project) => project.id === id)?.name ??
   PROJECTS.find((project) => project.id === id)?.name ??
+  PISCINE_PROJECTS.find((project) => project.id === id)?.name ??
   `Proyecto ${id}`
 
 export const isSpecialist = (projectId: number): boolean =>

@@ -481,3 +481,33 @@
   color: var(--text-2);
   margin-right: 0.25rem;
 }
+
+/* --- El Avance de un piscinero (`PiscineProgressChart.tsx`): las bandas de
+   shell y C con los azules de la piscina, muy suaves para que las líneas manden. */
+.piscine-band.shell {
+  fill: var(--piscine-shell);
+  opacity: 0.16;
+}
+.piscine-band.c {
+  fill: var(--piscine-c);
+  opacity: 0.08;
+}
+.piscine-summary {
+  margin: 0;
+  font-weight: 700;
+}
+.piscine-chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 1rem;
+  margin: 0.4rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.82rem;
+  color: var(--text-2);
+}
+.piscine-chart-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}

@@ -61,6 +61,68 @@ Por encima de los dos mundos, quien administra puede ocultar a una persona
 concreta a los estudiantes, a los piscineros o a los dos (pestaña **Personas
 ocultas** del panel): ver [personas-ocultas.md](personas-ocultas.md).
 
+## La piscina en el Avance, el tablón y la ayuda
+
+Pedido por Alberto el 2026-10-26: «para los piscineros su avance es como se
+muestra en la foto» (el grafo de la piscina de la intra). Un piscinero no ve
+nada del common core; ve la piscina, definida una sola vez en
+`apps/api/src/modules/replica/piscine.ts` (por `slug`):
+
+| Grupo | Proyectos | Color | Cuenta para el avance |
+| --- | --- | --- | --- |
+| `shell` | `c-piscine-shell-00`, `-01` | azul claro (`--piscine-shell`) | Sí |
+| `c` | `c-piscine-c-00` … `c-piscine-c-13` | azul oscuro (`--piscine-c`) | Sí |
+| `rush` | `c-piscine-rush-00`, `-01`, `-02` y `c-piscine-bsq` (en grupo, el fin de semana) | gris, aparte | No |
+| `exam` | `c-piscine-exam-00`, `-01`, `-02` y `c-piscine-final-exam` | gris, aparte | No |
+
+Fuera quedan los `c-piscine-exam-checkpoint-*` y `c-piscine-reloaded` (que es
+del 42cursus). Los dos azules son variables de tema (`styles/theme.css`, con
+su valor en claro y en oscuro y su color de texto encima, `--on-piscine-*`).
+
+- **Avance** (`GET /stats/progress/piscine`, `stats/piscine.service.ts` y
+  `piscine.rules.ts`; en la web `PiscineProgressPage.tsx`, que sale en vez de
+  la del common core): cuántos de los 16 proyectos de shell y C lleva
+  aprobados al acabar cada día de piscina (eje de 0 a 30 días; el día 1 es el
+  primero). Los rushes, BSQ y exámenes no suman nunca. Sin plan, pace, black
+  hole, horas, campus a elegir ni «quién va más rápido»: en la piscina no
+  significan nada. Se compara con dos medias, las dos de **su campus**:
+  - **Tu piscina**: los piscineros en curso (`pool_members`) que empezaron a
+    menos de una semana de ti, sin ti. Es la comparación justa (mismo día,
+    mismos plazos) y la gente con la que se cruza en el clúster.
+  - **Piscinas anteriores**: quien hizo la piscina en tu campus en los tres
+    últimos años, de las filas de la réplica (`project_users` de la gente del
+    campus: `campus_members` o `pool_members`). Dice «a estas alturas, lo
+    normal es ir por aquí». Su inicio es su `begin_at` si aún está en
+    `pool_members` o, si no, el día en que se apuntó a su primer proyecto de
+    la piscina (Shell 00 se abre el primer día). Mezcla a quien entró y a quien
+    no: es la media de la piscina, no la de quien la aprobó. Tres años porque
+    antes la piscina tenía otros proyectos y un campus nuevo no tendría a
+    nadie con menos.
+  Con menos de 10 personas no hay media: van las líneas de cada cual (las de
+  piscinas anteriores, sin nombre, porque hoy son estudiantes u otro mundo).
+  Comparar con alguien (`?with=`, permiso `avance.compare`): solo piscineros en
+  curso de tu campus que ves. Quien administra viéndolo como piscinero no
+  tiene línea propia y su «piscina» es la última que ha empezado en su campus.
+- **Tablón** (`GET /doubts/graph` con `kind: 'piscine'`, `PiscineGraph.tsx`):
+  el camino de los 16 que cuentan, en orden y con sus colores, y aparte, bajo
+  una raya, los rushes, BSQ y exámenes. Relleno = aprobado, con aro = en curso,
+  a trazos = sin empezar (un examen suspendido también: se vuelve a hacer).
+  Nada va cerrado: quien prepara un examen pregunta antes de hacerlo. Cada
+  nodo abre su guía y sus dudas, con las mismas marcas que el common core. El
+  grafo de correcciones también usa la piscina.
+- **Ayuda** (`GET /me/projects`): a un piscinero, todos los proyectos de la
+  piscina con su `group`, lo que tiene en curso primero (también un rush
+  buscando grupo o esperando corrección, que antes no salía). Así la sala de
+  espera, los sprints y el buzón le dejan elegir un rush, BSQ o un examen que
+  aún no ha empezado. La sala de espera los enseña en dos listas: lo que
+  cuenta y lo de aparte. Quién ayuda en cada uno ya iba solo con piscineros de
+  su campus (`findPeers` con `pool`).
+- Un proyecto que nadie de los campus copiados ha tocado aún no está en
+  `projects` y no sale (no se inventan ids). La agenda sigue con los proyectos
+  que tiene empezados.
+- API de mentira: con `mock_pool` (o la vista previa), el tablón, la sala de
+  espera y el Avance enseñan la piscina de `mock/piscine.ts`.
+
 ## Ver como piscinero
 
 Pedido por Alberto el 2026-10-25. En la pestaña **Piscina** del panel, **Ver
@@ -101,8 +163,8 @@ de un piscinero abre por la red de asientos (`docs/asientos.md`, permiso
 `red.seats`).
 
 Lo que no separa nada porque no enseña a nadie: las cifras sueltas de las
-estadísticas (totales de cada sección) y las medias del avance, que son de
-estudiantes; para un piscinero no dicen nada de nadie.
+estadísticas (totales de cada sección). El avance de un piscinero es el de la
+piscina, con medias de piscineros (arriba).
 
 ## Fases
 

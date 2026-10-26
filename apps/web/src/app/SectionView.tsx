@@ -5,7 +5,7 @@ import type { CurrentUser, Profile, ProjectSummary } from '@sanatorio/contracts'
 import { PeerList } from '../features/peers/PeerList'
 import { ProjectSelect } from '../features/peers/ProjectSelect'
 import type { AsyncState } from '../shared/hooks/useAsync'
-import { poolAllows } from '../shared/pool'
+import { poolAllows, usePoolAccess } from '../shared/pool'
 import { useI18n } from '../shared/i18n'
 import type { Section } from './sections'
 import { useEgg } from '../features/clicker/egg'
@@ -51,6 +51,12 @@ const ExamsPage = lazy(() =>
 const ProgressPage = lazy(() =>
   import('../features/stats/ProgressPage').then((m) => ({ default: m.ProgressPage })),
 )
+// El Avance de un piscinero: la piscina, no el common core (`docs/piscineros.md`).
+const PiscineProgressPage = lazy(() =>
+  import('../features/stats/PiscineProgressPage').then((m) => ({
+    default: m.PiscineProgressPage,
+  })),
+)
 const HelpStatsPage = lazy(() =>
   import('../features/stats/HelpStatsPage').then((m) => ({ default: m.HelpStatsPage })),
 )
@@ -92,6 +98,7 @@ export function SectionView({
 }: SectionViewProps) {
   const { t } = useI18n()
   const egg = useEgg()
+  const { pool } = usePoolAccess()
   // El proyecto elegido en la sala de espera.
   const [project, setProject] = useState<ProjectSummary | null>(null)
 
@@ -136,7 +143,8 @@ export function SectionView({
       {section === 'notgames' && <NotGamesPage me={me.login} room={param} />}
       {section === 'estadisticas' && <HelpStatsPage me={me.login} />}
       {section === 'red' && <RedPage me={me} />}
-      {section === 'avance' && <ProgressPage me={me.login} />}
+      {section === 'avance' &&
+        (pool ? <PiscineProgressPage me={me.login} /> : <ProgressPage me={me.login} />)}
       {section === 'agenda' && (
         <AgendaPage
           me={me.login}

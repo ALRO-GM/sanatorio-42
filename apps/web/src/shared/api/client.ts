@@ -276,6 +276,10 @@ export const realApi: Api = {
     return getJson(`/stats/progress${query === '' ? '' : `?${query}`}`)
   },
   getStatsFastest: () => getJson('/stats/progress/fastest'),
+  getPiscineProgress: (others) =>
+    getJson(
+      `/stats/progress/piscine${others.length === 0 ? '' : `?with=${encodeURIComponent(others.join(','))}`}`,
+    ),
   getStatsRanking: (query) => {
     const params = new URLSearchParams()
 

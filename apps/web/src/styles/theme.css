@@ -53,6 +53,13 @@
   --silver: color-mix(in srgb, var(--text-4) 45%, var(--surface));
   --bronze: color-mix(in srgb, #b8733a 45%, var(--surface));
 
+  /* La piscina (`docs/piscineros.md`), como su grafo de la intra: azul claro
+     los proyectos de shell, azul oscuro los de C. Con su color de texto. */
+  --piscine-shell: #63bdf0;
+  --on-piscine-shell: #07263a;
+  --piscine-c: #1c5ca6;
+  --on-piscine-c: #ffffff;
+
   /* La sombra es solo para lo que flota (menús, ventanas, avisos). */
   --shadow-soft: rgba(23, 33, 29, 0.05);
   --shadow: rgba(23, 33, 29, 0.14);
@@ -93,6 +100,12 @@
   --danger: #f0605f;
   --danger-soft: #331817;
   --gold: #e0b44a;
+
+  /* En oscuro, los dos azules suben de luz para no hundirse en el fondo. */
+  --piscine-shell: #86d0f7;
+  --on-piscine-shell: #06202e;
+  --piscine-c: #3f82d4;
+  --on-piscine-c: #ffffff;
 
   --shadow-soft: rgba(0, 0, 0, 0.3);
   --shadow: rgba(0, 0, 0, 0.55);

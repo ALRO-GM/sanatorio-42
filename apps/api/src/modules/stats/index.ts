@@ -12,9 +12,15 @@ import type { Audience } from '../../core/audience.js'
 import type { Db } from '../../core/db/database.js'
 import type { AppModule } from '../../core/module.js'
 import { MAX_OTHERS, createProgressService } from './progress.service.js'
-import { createProgressRepository, createStatsRepository } from './stats.repository.js'
+import { createPiscineProgressService } from './piscine.service.js'
+import {
+  createPiscineRepository,
+  createProgressRepository,
+  createStatsRepository,
+} from './stats.repository.js'
 import { createStatsService } from './stats.service.js'
 import type { StatsService } from './stats.service.js'
+import { domainError } from '../../core/errors.js'
 import { given } from '../../core/options.js'
 import { parse } from '../../core/validation.js'
 
@@ -100,6 +106,11 @@ export function createStatsModule(deps: {
     ...given({ campusIds: deps.campusIds, now: deps.now }),
   })
 
+  const piscine = createPiscineProgressService({
+    piscine: createPiscineRepository(deps.db),
+    ...given({ now: deps.now }),
+  })
+
   return {
     name: 'stats',
     service,
@@ -180,6 +191,26 @@ export function createStatsModule(deps: {
             ...given({ campuses: query.campuses }),
           }),
         )
+      })
+
+      /**
+       * `GET /stats/progress/piscine?with=login,login` → el Avance de un
+       * piscinero: lo aprobado de la piscina día a día, con la media de su
+       * piscina y de las anteriores de su campus (`docs/piscineros.md`). Solo
+       * para piscineros: un estudiante tiene el suyo en `/stats/progress`.
+       */
+      app.get('/stats/progress/piscine', async (request, reply) => {
+        reply.header('Cache-Control', 'private, max-age=300')
+
+        const query = parse(progressQuery, request.query)
+        const actor = await session.actor(request)
+
+        if (actor.pool !== true) {
+          throw domainError('forbidden', 'El avance de la piscina es de los piscineros')
+        }
+        const sees = await seesFor(deps.audience ?? NO_POOL, actor)
+
+        return reply.send(await piscine.progress(actor, homeOf(request), query.with, sees))
       })
 
       /**
