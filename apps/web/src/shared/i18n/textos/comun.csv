@@ -311,6 +311,9 @@ period.last.one,Selector de periodo de toda la web: el último mes,Último mes,L
 period.last.many,"Selector de periodo de toda la web: los últimos {n} meses","Últimos {n} meses","Last {n} months","Últims {n} mesos","Azken {n} hilabeteak","{n} derniers mois"
 period.all,Selector de periodo de toda la web: sin límite,Todo,All,Tot,Dena,Tout
 period.custom,"Selector de periodo de toda la web: elegir las fechas a mano",Fechas…,Dates…,Dates…,Datak…,Dates…
+period.customMonths,"Selector de periodo, cuando cuenta meses desde un inicio (el Avance): elegir los meses a mano",Meses…,Months…,Mesos…,Hilabeteak…,Mois…
+period.fromMonth,"Selector de periodo, a mano en meses: el primer mes del tramo",Desde el mes,From month,Des del mes,Hilabete honetatik,Du mois
+period.toMonth,"Selector de periodo, a mano en meses: el último mes del tramo",Hasta el mes,To month,Fins al mes,Hilabete honetara arte,Au mois
 common.people,Etiqueta o columna genérica: número de personas,Personas,People,Persones,Pertsonak,Personnes
 common.person,Columna genérica: la persona de la fila,Persona,Person,Persona,Pertsona,Personne
 common.accept,Botón genérico: aceptar una petición,Aceptar,Accept,Accepta,Onartu,Accepter

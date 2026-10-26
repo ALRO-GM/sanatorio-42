@@ -12,7 +12,7 @@ const group = (key: string, index = 0): HTMLElement =>
   must(screen.getAllByRole('group', { name: text(key) })[index], `el grupo ${key}`)
 /** El periodo del eje del tiempo, en el panel de opciones. */
 const picker = (): HTMLSelectElement =>
-  screen.getByRole<HTMLSelectElement>('combobox', { name: text('rank.period') })
+  screen.getByRole<HTMLSelectElement>('combobox', { name: text('common.period') })
 const chartCard = (): HTMLElement =>
   must(document.querySelector<HTMLElement>('.progress-card'), 'la gráfica')
 const axis = (): string[] =>
@@ -34,6 +34,9 @@ const legendItems = (): string[] =>
 const toggle = async (user: ReturnType<typeof userEvent.setup>, groupKey: string, name: string) => {
   await user.click(within(group(groupKey)).getByRole('button', { name }))
 }
+/** La casilla de la media de todos los campus juntos. */
+const together = (): HTMLElement =>
+  screen.getByRole('checkbox', { name: text('stats.progress.together') })
 
 describe('Avance: cada opción encendida suma sus líneas', () => {
   it('por defecto tu plan, en curso + terminado y tu campus: una media, con su gente', async () => {
@@ -57,7 +60,8 @@ describe('Avance: cada opción encendida suma sus líneas', () => {
         name: text('stats.progress.plan.all'),
       }),
     ).toBeNull()
-    expect(series()).toEqual(['next-current-campus', 'me'])
+    expect(series()).toEqual(['next-current-22', 'me'])
+    expect((together() as HTMLInputElement).checked).toBe(false)
     // Quien no se sabe si sigue no entra: se dice cuántos son.
     expect(screen.getByText(/9 personas no entran en ninguna media/)).toBeTruthy()
   })
@@ -69,11 +73,11 @@ describe('Avance: cada opción encendida suma sus líneas', () => {
     await screen.findAllByText(/^Python · En curso \+ terminado · Madrid/, {}, { timeout: 5000 })
 
     await toggle(user, 'stats.progress.plan', 'C')
-    await toggle(user, 'stats.progress.scope', text('stats.progress.scope.all'))
+    await user.click(together())
     expect(series()).toEqual([
-      'classic-current-campus',
+      'classic-current-22',
       'classic-current-all',
-      'next-current-campus',
+      'next-current-22',
       'next-current-all',
       'me',
     ])
@@ -81,7 +85,7 @@ describe('Avance: cada opción encendida suma sus líneas', () => {
 
     // Con muy poca gente que terminó Python no hay media: va cada persona, una vez.
     await toggle(user, 'stats.progress.population', text('stats.progress.population.finished'))
-    expect(series()).toContain('next-finished-campus-nvelasco')
+    expect(series()).toContain('next-finished-22-nvelasco')
     expect(series()).toContain('next-finished-all-ktorres')
     expect(series().filter((key) => key.endsWith('nvelasco'))).toHaveLength(1)
     expect(legendItems()).toContain('Python · Terminado: nvelasco')
@@ -92,15 +96,74 @@ describe('Avance: cada opción encendida suma sus líneas', () => {
     expect(screen.getByText(/^Son 16 líneas a la vez y caben 10/)).toBeTruthy()
     expect(series()).toEqual(['me'])
 
-    // Se quita Python y el alcance de todos: vuelven a caber.
+    // Se quita Python y todos juntos: vuelven a caber.
     await toggle(user, 'stats.progress.plan', 'Python')
-    await toggle(user, 'stats.progress.scope', text('stats.progress.scope.all'))
+    await user.click(together())
     expect(series()).toEqual([
-      'classic-current-campus',
-      'classic-finished-campus',
-      'classic-blackholed-campus',
+      'classic-current-22',
+      'classic-finished-22',
+      'classic-blackholed-22',
       'me',
     ])
+  })
+
+  it('varios campus, cada uno en su línea, con su color y su nombre', async () => {
+    const user = userEvent.setup()
+
+    await openApp('#/avance')
+    await ready()
+
+    // Por defecto, el tuyo; los que sigue la web, para elegir.
+    const campuses = within(group('stats.progress.scope'))
+      .getAllByRole('button')
+      .map((button) => button.textContent)
+
+    expect(campuses).toEqual(['Madrid', 'Málaga', 'Urduliz', 'Barcelona', 'Paris', 'Todas'])
+    expect(chartCard().querySelector('.progress-encoding')?.textContent).toBe(
+      text('stats.progress.encoding'),
+    )
+
+    // «Todas»: cada campus en su línea, al momento.
+    await toggle(user, 'stats.progress.scope', 'Todas')
+    await screen.findByText(
+      (_, node) => node === chartCard() && series().includes('next-current-1'),
+      {},
+      { timeout: 5000 },
+    )
+    expect(series()).toEqual([
+      'next-current-22',
+      'next-current-37',
+      'next-current-40',
+      'next-current-46',
+      'next-current-1',
+      'me',
+    ])
+    const strokes = series()
+      .filter((key) => key !== 'me')
+      .map((key) =>
+        chartCard().querySelector(`[data-series="${key}"] path`)?.getAttribute('stroke'),
+      )
+
+    expect(new Set(strokes).size).toBe(5)
+    expect(
+      legendItems().some((item) => item.startsWith('Python · En curso + terminado · Paris (')),
+    ).toBe(true)
+    expect(chartCard().querySelector('.progress-encoding')?.textContent).toBe(
+      text('stats.progress.encodingCampuses'),
+    )
+
+    // Todos juntos va aparte, en gris; y el doble clic deja solo un campus.
+    await user.click(together())
+    expect(series()).toContain('next-current-all')
+    await user.dblClick(
+      within(group('stats.progress.scope')).getByRole('button', { name: 'Barcelona' }),
+    )
+    await screen.findByText(
+      (_, node) => node === chartCard() && !series().includes('next-current-22'),
+      {},
+      { timeout: 5000 },
+    )
+    expect(series()).toEqual(['next-current-46', 'next-current-all', 'me'])
   })
 
   it('la ficha al pasar y la tabla nombran cada línea', async () => {
@@ -168,28 +231,98 @@ describe('Avance: el periodo del eje del tiempo', () => {
 
   afterEach(() => {
     localStorage.removeItem('sanatorio_progress_range')
+    localStorage.removeItem('sanatorio_progress_months')
   })
 
-  it('por defecto dos años; con 8 meses, marca cada mes y el pace de 8 sigue', async () => {
+  it('por defecto dos años; con el primer año, marca cada dos meses y los paces de 8 y 12', async () => {
     const user = userEvent.setup()
 
     await openApp('#/avance')
     await ready()
 
-    // El periodo es un desplegable (`StepPicker`): en escritorio, un `<select>` nativo.
+    // El periodo es un desplegable (`PeriodPicker`): en escritorio, un `<select>` nativo.
     const period = picker()
 
     expect(period.value).toBe('24')
+    expect([...period.options].map((option) => option.textContent)).toEqual([
+      'Primer mes',
+      'Primeros 3 meses',
+      'Primeros 6 meses',
+      'Primeros 12 meses',
+      'Primeros 24 meses',
+      text('period.all'),
+      text('period.customMonths'),
+    ])
     expect(months()).toEqual(['0 m', '3 m', '6 m', '9 m', '12 m', '15 m', '18 m', '21 m', '24 m'])
     const wide = myEnd()
 
-    await user.selectOptions(period, '8 m')
-    expect(months()).toEqual(['0 m', '1 m', '2 m', '3 m', '4 m', '5 m', '6 m', '7 m', '8 m'])
-    // El pace de 8 meses acaba justo en el borde: se ve con su rótulo; los demás, cortados.
-    expect(paceLabels()).toEqual(['8 m'])
+    await user.selectOptions(period, 'Primeros 12 meses')
+    expect(months()).toEqual(['0 m', '2 m', '4 m', '6 m', '8 m', '10 m', '12 m'])
+    // Los paces de 8 y 12 meses acaban dentro: se ven con su rótulo; los demás, cortados.
+    expect(paceLabels()).toEqual(['8 m', '12 m'])
     // La misma línea, estirada: llega más a la derecha.
     expect(myEnd()).toBeGreaterThan(wide)
-    expect(localStorage.getItem('sanatorio_progress_range')).toBe('8')
+    expect(localStorage.getItem('sanatorio_progress_range')).toBe('12')
+  })
+
+  it('a mano, un tramo de meses desde el inicio: del 6 al 12', async () => {
+    const user = userEvent.setup()
+
+    await openApp('#/avance')
+    await ready()
+    await user.selectOptions(picker(), text('period.customMonths'))
+
+    const from = screen.getByRole('spinbutton', { name: text('period.fromMonth') })
+    const to = screen.getByRole('spinbutton', { name: text('period.toMonth') })
+
+    fireEvent.change(from, { target: { value: '6' } })
+    fireEvent.change(to, { target: { value: '12' } })
+    // El eje empieza en el mes 6, no en 0.
+    expect(months()).toEqual(['6 m', '7 m', '8 m', '9 m', '10 m', '11 m', '12 m'])
+    expect(localStorage.getItem('sanatorio_progress_months')).toBe('6,12')
+    // Las líneas entran por el borde izquierdo, recortadas.
+    const me = must(chartCard().querySelector<SVGGElement>('[data-series="me"]'), 'tu línea')
+
+    expect(me.getAttribute('clip-path')).toMatch(/^url\(#progress-clip-/)
+    // La tabla, solo con lo del tramo (cada tres meses: el 9 y el 12).
+    const rows = [...chartCard().querySelectorAll('.progress-table tbody tr')]
+
+    expect(rows.map((row) => row.firstElementChild?.textContent)).toEqual(['9', '12'])
+    // El teclado va del primer día del tramo al último.
+    const svg = must(chartCard().querySelector<SVGSVGElement>('.progress-chart svg'), 'el dibujo')
+
+    svg.focus()
+    await user.keyboard('{Home}')
+    // El primer sitio del tramo: un día (o un hito) del mes 6.
+    expect(screen.getByRole('status').textContent).toMatch(/^Día 1\d\d \(mes 6,/)
+    await user.keyboard('{End}')
+    expect(screen.getByRole('status').textContent).toContain('Día 360')
+  })
+
+  it('lo guardado de antes (8, 15 meses…) cae en el siguiente que hay', async () => {
+    const original = localStorage.getItem.bind(localStorage)
+    let saved = '8'
+    // `openApp` vacía el almacenamiento: lo de antes se finge al leerlo.
+    const spy = vi.spyOn(Storage.prototype, 'getItem').mockImplementation(function (
+      this: Storage,
+      key: string,
+    ) {
+      return key === 'sanatorio_progress_range' ? saved : original(key)
+    })
+
+    try {
+      await openApp('#/avance')
+      await ready()
+      expect(picker().value).toBe('12')
+      cleanup()
+
+      saved = '15'
+      await openApp('#/avance')
+      await ready()
+      expect(picker().value).toBe('24')
+    } finally {
+      spy.mockRestore()
+    }
   })
 
   it('«Todo» llega hasta el último dato, y se recuerda al volver', async () => {
@@ -197,7 +330,7 @@ describe('Avance: el periodo del eje del tiempo', () => {
 
     await openApp('#/avance')
     await ready()
-    await user.selectOptions(picker(), text('net.period.all'))
+    await user.selectOptions(picker(), text('period.all'))
 
     // Cuatro años de datos en la API de mentira: una marca al año.
     expect(months()).toEqual(['0 m', '12 m', '24 m', '36 m', '48 m'])
@@ -260,7 +393,7 @@ describe('Avance: compararte con varias personas', () => {
       {},
       { timeout: 5000 },
     )
-    expect(series()).toEqual(['next-current-campus', 'other-jdoe', 'other-mgarcia', 'me'])
+    expect(series()).toEqual(['next-current-22', 'other-jdoe', 'other-mgarcia', 'me'])
     // Cada persona, con su color.
     const strokes = ['other-jdoe', 'other-mgarcia'].map((key) =>
       chartCard().querySelector(`[data-series="${key}"] path`)?.getAttribute('stroke'),
@@ -277,7 +410,7 @@ describe('Avance: compararte con varias personas', () => {
       {},
       { timeout: 5000 },
     )
-    expect(series()).toEqual(['next-current-campus', 'other-mgarcia', 'me'])
+    expect(series()).toEqual(['next-current-22', 'other-mgarcia', 'me'])
   })
 
   it('«Los más rápidos» sugiere quién terminó antes y con un clic se añaden, hasta cinco', async () => {
@@ -286,7 +419,7 @@ describe('Avance: compararte con varias personas', () => {
     await openApp('#/avance')
     await screen.findAllByText(/^Python · En curso \+ terminado · Madrid/, {}, { timeout: 5000 })
     await toggle(user, 'stats.progress.plan', 'C')
-    await toggle(user, 'stats.progress.scope', text('stats.progress.scope.all'))
+    await user.click(together())
     await user.click(screen.getByRole('button', { name: text('stats.progress.fastest') }))
 
     const campus = await screen.findByRole('region', { name: 'C · Madrid' }, { timeout: 5000 })

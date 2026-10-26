@@ -231,8 +231,6 @@ type ProgressRow = {
   openedAt: number | null
   beginAt: number | null
   track: 'classic' | 'next' | null
-  /** Si es del campus de quien pregunta. */
-  here: boolean
   /** Su 42cursus, si está copiado. */
   cursus: CursusRow | null
 }
@@ -312,24 +310,43 @@ export function createProgressRepository(db: Db) {
       )
     },
 
+    /**
+     * De qué campus copiados es cada persona (login → ids), aunque no tenga su
+     * 42cursus copiado: con el de su 42cursus, son sus campus en el Avance.
+     */
+    async memberships(): Promise<Map<string, number[]>> {
+      const result = await db.execute(
+        `SELECT u.login, m.campus_id FROM campus_members m JOIN users u ON u.id = m.user_id`,
+      )
+      const campuses = new Map<string, number[]>()
+
+      for (const row of result.rows) {
+        const login = toText(row.login)
+        const list = campuses.get(login) ?? []
+
+        list.push(toNumber(row.campus_id))
+        campuses.set(login, list)
+      }
+
+      return campuses
+    },
+
     /** Los proyectos del plan de todo el mundo (de todos los campus), uno por fila. */
-    async rows(campus: number, ids: readonly number[]): Promise<ProgressRow[]> {
+    async rows(ids: readonly number[]): Promise<ProgressRow[]> {
       if (ids.length === 0) return []
 
       const result = await db.execute({
         sql: `SELECT u.login, u.image, pu.project_id, pu.status, pu.validated, pu.final_mark, pu.created_at_42,
                      pu.updated_at_42, ul.begin_at, ut.track,
-                     (m.user_id IS NOT NULL OR cc.campus_id = ?) AS here,
                      cc.user_id AS cc_user, cc.campus_id AS cc_campus, cc.begin_at AS cc_begin, cc.end_at, cc.blackholed_at,
                      cc.grade, cc.active, cc.alumni
               FROM project_users pu
               JOIN users u ON u.id = pu.user_id
               LEFT JOIN user_levels ul ON ul.login = u.login
               LEFT JOIN user_tracks ut ON ut.login = u.login
-              LEFT JOIN campus_members m ON m.user_id = u.id AND m.campus_id = ?
               LEFT JOIN core_cursus cc ON cc.user_id = u.id
               WHERE ${inList('pu.project_id')}`,
-        args: [campus, campus, listArg(ids)],
+        args: [listArg(ids)],
       })
 
       return result.rows.map((row) => ({
@@ -350,7 +367,6 @@ export function createProgressRepository(db: Db) {
         openedAt: msOf(row.created_at_42),
         beginAt: msOf(row.begin_at),
         track: row.track === 'classic' || row.track === 'next' ? row.track : null,
-        here: toNumber(row.here ?? 0) === 1,
         cursus:
           row.cc_user === null || row.cc_user === undefined
             ? null

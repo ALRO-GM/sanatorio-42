@@ -8,7 +8,8 @@ import type {
   CoreTrack,
   FastestEntry,
   HelpStats,
-  ProgressGroup,
+  ProgressArea,
+  ProgressCampus,
   ProgressIndividual,
   ProgressLine,
   ProgressMeasure,
@@ -146,15 +147,33 @@ const POPULATION_SHAPE: Record<ProgressPopulation, { scale: number; until: numbe
 }
 
 /**
- * Cuánta gente hay en cada media. Python en el campus tiene muy poca gente que
- * terminó o se fue: ahí van las líneas de cada persona, como en la API.
+ * Cuánta gente hay en cada media de tu campus y de todos. Python en tu campus
+ * tiene muy poca gente que terminó o se fue: ahí van las líneas de cada
+ * persona, como en la API.
  */
-const PEOPLE: Record<ProgressPopulation, Record<ProgressGroup, number>> = {
-  finished: { 'campus-classic': 93, 'campus-next': 1, 'all-classic': 1410, 'all-next': 3 },
-  current: { 'campus-classic': 310, 'campus-next': 110, 'all-classic': 4700, 'all-next': 600 },
-  blackholed: { 'campus-classic': 651, 'campus-next': 4, 'all-classic': 9870, 'all-next': 140 },
+const PEOPLE: Record<'home' | 'all', ProgressArea['people']> = {
+  home: {
+    finished: { classic: 93, next: 1 },
+    current: { classic: 310, next: 110 },
+    blackholed: { classic: 651, next: 4 },
+  },
+  all: {
+    finished: { classic: 1410, next: 3 },
+    current: { classic: 4700, next: 600 },
+    blackholed: { classic: 9870, next: 140 },
+  },
 }
 const MIN_PEOPLE = 10
+/** Tu campus en la API de mentira. */
+const HOME = 22
+/** Los campus que se pueden pedir: el tuyo primero y los que sigue la web. */
+const PROGRESS_CAMPUSES: ProgressCampus[] = [
+  { id: HOME, name: 'Madrid' },
+  { id: 37, name: 'Málaga' },
+  { id: 40, name: 'Urduliz' },
+  { id: 46, name: 'Barcelona' },
+  { id: 1, name: 'Paris' },
+]
 /** Quien terminó Python: de este campus, la primera; las otras, de otros. */
 const PYTHON_FINISHERS: { login: string; campus: string; days: number }[] = [
   { login: 'nvelasco', campus: 'Madrid', days: 212 },
@@ -291,13 +310,49 @@ function personLine(login: string, until = LAST_DAY): ProgressTrace {
   return traceOf(login, Math.min(0.95, 0.55 + noise(seed) * 0.45), until - 30, until)
 }
 
-function individualsMock(): StatsProgress['individuals'] {
-  const none = (): Record<ProgressGroup, ProgressIndividual[]> => ({
-    'campus-classic': [],
-    'campus-next': [],
-    'all-classic': [],
-    'all-next': [],
+/**
+ * Las medias de mentira de un campus (o de todos, `id` `null`): tu campus y
+ * todos, como siempre; los demás, parecidos a tu campus, cada uno con su
+ * gente, su ritmo y sin nadie de Python que haya terminado o se haya ido.
+ */
+function areaMock(id: number | null): ProgressArea {
+  const all = id === null
+  // De 0,5 a 1,3 veces tu campus, siempre igual para el mismo campus.
+  const size = all || id === HOME ? 1 : 0.5 + noise(id) * 0.8
+  const people: ProgressArea['people'] = all
+    ? PEOPLE.all
+    : {
+        finished: { classic: Math.round(93 * size), next: id === HOME ? 1 : 0 },
+        current: { classic: Math.round(310 * size), next: Math.round(110 * size) },
+        blackholed: { classic: Math.round(651 * size), next: id === HOME ? 4 : 0 },
+      }
+  const pace = all || id === HOME ? 1 : 0.85 + noise(id + 7) * 0.3
+  const lines = (
+    scale: number,
+    population: ProgressPopulation,
+  ): Record<CoreTrack, ProgressLine> => {
+    const { scale: shape, until } = POPULATION_SHAPE[population]
+    const top = (value: number): number => Math.min(100, value * scale * shape * pace)
+    const average = (track: CoreTrack, line: ProgressLine): ProgressLine =>
+      people[population][track] < MIN_PEOPLE ? line.map(() => null) : line
+
+    return all
+      ? {
+          classic: average('classic', curve(top(52), 300, until)),
+          next: average('next', curve(top(60), 250, Math.min(until, 450))),
+        }
+      : {
+          classic: average('classic', curve(top(58), 280 / pace, until)),
+          next: average('next', curve(top(66), 230 / pace, Math.min(until, 450))),
+        }
+  }
+  const byPopulation = (scale: number) => ({
+    finished: lines(scale, 'finished'),
+    current: lines(scale, 'current'),
+    blackholed: lines(scale, 'blackholed'),
   })
+  const factor = all ? 12 : size
+  const none = (): Record<CoreTrack, ProgressIndividual[]> => ({ classic: [], next: [] })
   const finished = PYTHON_FINISHERS.map((each) => ({
     login: each.login,
     ...traceOf(each.login, 1, each.days),
@@ -309,50 +364,42 @@ function individualsMock(): StatsProgress['individuals'] {
   }))
 
   return {
-    finished: { ...none(), 'campus-next': finished.slice(0, 1), 'all-next': finished },
-    current: none(),
-    blackholed: { ...none(), 'campus-next': gone },
+    id,
+    name: PROGRESS_CAMPUSES.find((campus) => campus.id === id)?.name ?? null,
+    averages: { circles: byPopulation(1), hours: byPopulation(0.8) },
+    individuals:
+      id === HOME
+        ? {
+            finished: { ...none(), next: finished.slice(0, 1) },
+            current: none(),
+            blackholed: { ...none(), next: gone },
+          }
+        : {
+            finished: { ...none(), next: all ? finished : [] },
+            current: none(),
+            blackholed: none(),
+          },
+    people,
+    census: {
+      classic: {
+        finished: Math.round(93 * factor),
+        active: Math.round(217 * factor),
+        blackholed: Math.round(651 * factor),
+        unknown: Math.round(38 * factor),
+      },
+      next: {
+        finished: people.finished.next,
+        active: Math.round(109 * factor),
+        blackholed: all ? 140 : people.blackholed.next,
+        unknown: Math.round(9 * factor),
+      },
+    },
   }
 }
 
-function progressMock(others: readonly string[]): StatsProgress {
-  const groups = (
-    scale: number,
-    population: ProgressPopulation,
-  ): Record<ProgressGroup, ProgressLine> => {
-    const { scale: shape, until } = POPULATION_SHAPE[population]
-    const top = (value: number): number => Math.min(100, value * scale * shape)
-    const average = (group: ProgressGroup, line: ProgressLine): ProgressLine =>
-      PEOPLE[population][group] < MIN_PEOPLE ? line.map(() => null) : line
-
-    return {
-      'campus-classic': average('campus-classic', curve(top(58), 280, until)),
-      'campus-next': average('campus-next', curve(top(66), 230, Math.min(until, 450))),
-      'all-classic': average('all-classic', curve(top(52), 300, until)),
-      'all-next': average('all-next', curve(top(60), 250, Math.min(until, 450))),
-    }
-  }
-  const byPopulation = (scale: number) => ({
-    finished: groups(scale, 'finished'),
-    current: groups(scale, 'current'),
-    blackholed: groups(scale, 'blackholed'),
-  })
-  const census = (
-    factor: number,
-  ): Record<CoreTrack, StatsProgress['census']['campus']['classic']> => ({
-    classic: {
-      finished: Math.round(93 * factor),
-      active: Math.round(217 * factor),
-      blackholed: Math.round(651 * factor),
-      unknown: Math.round(38 * factor),
-    },
-    next: {
-      finished: factor === 1 ? 1 : 3,
-      active: Math.round(109 * factor),
-      blackholed: factor === 1 ? 4 : 140,
-      unknown: Math.round(9 * factor),
-    },
-  })
+function progressMock(others: readonly string[], asked: readonly number[] | null): StatsProgress {
+  const wanted = new Set(asked ?? [HOME])
+  const picked = PROGRESS_CAMPUSES.filter((campus) => wanted.has(campus.id))
   const paces = (share: (circle: number) => number) =>
     Object.entries(PACE_DAYS).map(([pace, days]) => ({
       pace: Number(pace),
@@ -370,7 +417,11 @@ function progressMock(others: readonly string[]): StatsProgress {
     days: DAYS,
     track: 'next',
     me: { ...traceOf(ME.login, 0.62, 290, 300), hours: 1456 },
-    campus: 'Madrid',
+    home: HOME,
+    available: PROGRESS_CAMPUSES,
+    // Como la API: lo que no se puede pedir se ignora; sin nada que valga, el tuyo.
+    campuses: (picked.length === 0 ? [HOME] : picked.map((campus) => campus.id)).map(areaMock),
+    all: areaMock(null),
     // Como la API: sin una misma y como mucho cinco.
     others: [...new Set(others)]
       .filter((login) => login !== ME.login)
@@ -383,11 +434,7 @@ function progressMock(others: readonly string[]): StatsProgress {
           ...(days === undefined ? personLine(login, 1100) : traceOf(login, 1, days)),
         }
       }),
-    averages: { circles: byPopulation(1), hours: byPopulation(0.8) },
-    individuals: individualsMock(),
     minPeople: MIN_PEOPLE,
-    people: PEOPLE,
-    census: { campus: census(1), all: census(12) },
     axis: {
       circles: [0, 1, 2, 3, 4, 5, 6].map(circles),
       hours: 1456,
@@ -520,10 +567,10 @@ export const statsMock: Pick<
   Api,
   'getHelpStats' | 'getStatsProgress' | 'getStatsFastest' | 'getStatsRanking'
 > = {
-  async getStatsProgress(others): Promise<StatsProgress> {
+  async getStatsProgress(others, campuses = null): Promise<StatsProgress> {
     await delay(200)
 
-    return progressMock(others)
+    return progressMock(others, campuses)
   },
 
   async getStatsFastest(): Promise<StatsFastest> {

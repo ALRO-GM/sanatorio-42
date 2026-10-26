@@ -6,6 +6,8 @@
  */
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
+import type { ProgressArea, StatsProgress } from '@sanatorio/contracts'
+
 import { closeDatabase, openDatabase } from '../../src/core/db/database.js'
 import type { Db } from '../../src/core/db/database.js'
 import { actor } from '../helpers/community.js'
@@ -132,6 +134,14 @@ describe('avance en el common core', () => {
 
 const NOW = Date.parse('2026-10-25T12:00:00Z')
 const MADRID = 22
+
+/** Las medias de tu campus: el primero (y, sin pedir otros, el único) de `campuses`. */
+function here(progress: StatsProgress): ProgressArea {
+  const [mine] = progress.campuses
+
+  if (mine === undefined) throw new Error('sin las medias de tu campus')
+  return mine
+}
 const iso = (ms: number): string => new Date(ms).toISOString()
 
 let db: Db
@@ -296,10 +306,10 @@ describe('medias por población', () => {
 
     const progress = await service().progress(actor('sigue0'), [], () => true)
 
-    expect(progress.people.current['campus-classic']).toBe(24)
-    expect(progress.people.finished['campus-classic']).toBe(12)
-    expect(progress.people.blackholed['campus-classic']).toBe(12)
-    expect(progress.census.campus.classic).toEqual({
+    expect(here(progress).people.current.classic).toBe(24)
+    expect(here(progress).people.finished.classic).toBe(12)
+    expect(here(progress).people.blackholed.classic).toBe(12)
+    expect(here(progress).census.classic).toEqual({
       finished: 12,
       active: 12,
       blackholed: 12,
@@ -309,16 +319,14 @@ describe('medias por población', () => {
     // los que este plan no tiene); los que siguen, el 0 (1/7).
     const at60 = progress.days.indexOf(60)
 
-    expect(progress.averages.circles.finished['campus-classic'][at60]).toBe(100)
-    expect(progress.averages.circles.current['campus-classic'][at60]).toBe(57.1)
-    expect(progress.averages.circles.blackholed['campus-classic'][at60]).toBe(14.3)
+    expect(here(progress).averages.circles.finished.classic[at60]).toBe(100)
+    expect(here(progress).averages.circles.current.classic[at60]).toBe(57.1)
+    expect(here(progress).averages.circles.blackholed.classic[at60]).toBe(14.3)
     // Los absorbidos no siguen después de salir (día 100).
     expect(
-      progress.averages.circles.blackholed['campus-classic'][progress.days.indexOf(120)],
+      here(progress).averages.circles.blackholed.classic[progress.days.indexOf(120)],
     ).toBeNull()
-    expect(progress.averages.circles.current['campus-next'].every((value) => value === null)).toBe(
-      true,
-    )
+    expect(here(progress).averages.circles.current.next.every((value) => value === null)).toBe(true)
 
     // Ejes: las marcas fijas, (k + 1) / 7, y las horas son las de su plan (70 + 55).
     expect(progress.axis.circles.slice(0, 2)).toEqual([14.3, 28.6])
@@ -554,30 +562,125 @@ describe('todas las líneas en una respuesta', () => {
 
     const progress = await service().progress(actor('c0'), [], everyone)
 
-    for (const measure of ['circles', 'hours'] as const) {
-      for (const population of ['finished', 'current', 'blackholed'] as const) {
-        expect(Object.keys(progress.averages[measure][population]).sort()).toEqual([
-          'all-classic',
-          'all-next',
-          'campus-classic',
-          'campus-next',
-        ])
+    for (const area of [here(progress), progress.all]) {
+      for (const measure of ['circles', 'hours'] as const) {
+        for (const population of ['finished', 'current', 'blackholed'] as const) {
+          expect(Object.keys(area.averages[measure][population]).sort()).toEqual([
+            'classic',
+            'next',
+          ])
+        }
       }
     }
-    expect(progress.people.current).toEqual({
-      'campus-classic': 10,
-      'campus-next': 0,
-      'all-classic': 10,
-      'all-next': 10,
-    })
-    expect(progress.averages.circles.current['all-next'][progress.days.indexOf(30)]).toBe(14.3)
-    expect(progress.campus).toBe('Madrid')
+    // Sin pedir campus, solo el tuyo; y todos juntos.
+    expect(progress.campuses.map((each) => each.id)).toEqual([MADRID])
+    expect(here(progress).people.current).toEqual({ classic: 10, next: 0 })
+    expect(progress.all.id).toBeNull()
+    expect(progress.all.people.current).toEqual({ classic: 10, next: 10 })
+    expect(progress.all.averages.circles.current.next[progress.days.indexOf(30)]).toBe(14.3)
+    expect(here(progress).name).toBe('Madrid')
     expect(progress.minPeople).toBe(10)
     // Diez por media: hay media, no personas sueltas.
-    expect(progress.individuals.current['campus-classic']).toEqual([])
-    expect(progress.individuals.current['campus-next']).toEqual([])
-    // Lo que pesa: cuatro grupos, tres poblaciones, dos medidas; unos pocos KB.
+    expect(here(progress).individuals.current.classic).toEqual([])
+    expect(here(progress).individuals.current.next).toEqual([])
+    // Lo que pesa: dos sitios, dos planes, tres poblaciones, dos medidas; unos pocos KB.
     expect(JSON.stringify(progress).length).toBeLessThan(30_000)
+  })
+
+  it('cada campus pedido con sus medias, en el orden de los que se pueden pedir', async () => {
+    await projects()
+    await campuses()
+    const begin = NOW - 300 * DAY
+    let id = 100
+
+    for (let n = 0; n < 10; n++) {
+      await person(id++, `c${String(n)}`, {
+        begin,
+        printf: null,
+        cursus: { grade: 'Cadet', active: 1 },
+      })
+      await person(id++, `b${String(n)}`, {
+        campus: 46,
+        begin,
+        printf: begin + 20 * DAY,
+        cursus: { grade: 'Cadet', active: 1 },
+      })
+    }
+    const followed = createProgressService({
+      progress: createProgressRepository(db),
+      circles: () =>
+        Promise.resolve(
+          new Map([
+            [1314, 0],
+            [1316, 1],
+          ]),
+        ),
+      campusIds: [MADRID, 46, 37, 1],
+      now: () => NOW,
+    })
+    // Mira París en sus preferencias (`campusId`), pero su campus es Madrid.
+    const viewer = { ...actor('c0'), campusId: 1 }
+    const mine = await followed.progress(viewer, [], everyone, { home: MADRID })
+
+    // Por defecto, su campus: no el que mira.
+    expect(mine.home).toBe(MADRID)
+    expect(mine.campuses.map((each) => each.name)).toEqual(['Madrid'])
+    // Se pueden pedir los que sigue la web, el suyo primero.
+    expect(mine.available.map((each) => each.id)).toEqual([MADRID, 46, 37, 1])
+
+    // Dos campus, cada uno con lo suyo; lo que no se sigue se ignora.
+    const two = await followed.progress(viewer, [], everyone, {
+      home: MADRID,
+      campuses: [46, 999, MADRID],
+    })
+    const at30 = two.days.indexOf(30)
+
+    expect(two.campuses.map((each) => each.id)).toEqual([MADRID, 46])
+    expect(two.campuses.map((each) => each.people.current.classic)).toEqual([10, 10])
+    expect(two.campuses.map((each) => each.averages.circles.current.classic[at30])).toEqual([
+      14.3, 100,
+    ])
+    expect(two.all.people.current.classic).toBe(20)
+    // Un campus sin nadie: vacío, sin romperse.
+    const all = await followed.progress(viewer, [], everyone, { home: MADRID, campuses: 'all' })
+
+    expect(all.campuses.map((each) => each.id)).toEqual([MADRID, 46, 37, 1])
+    expect(all.campuses[2]?.people.current.classic).toBe(0)
+    expect(all.campuses[2]?.averages.circles.current.classic.every((v) => v === null)).toBe(true)
+    // Nada que valga: el suyo.
+    const none = await followed.progress(viewer, [], everyone, { home: MADRID, campuses: [999] })
+
+    expect(none.campuses.map((each) => each.id)).toEqual([MADRID])
+
+    // Un piscinero solo puede pedir el suyo.
+    const pool = await followed.progress({ ...viewer, pool: true }, [], everyone, {
+      home: MADRID,
+      campuses: 'all',
+    })
+
+    expect(pool.available.map((each) => each.id)).toEqual([MADRID])
+    expect(pool.campuses.map((each) => each.id)).toEqual([MADRID])
+
+    // La clasificación y las sugerencias, también de su campus.
+    const ranking = await followed.ranking(
+      viewer,
+      {
+        by: 'circle',
+        plan: 'all',
+        kickoff: null,
+        cohort: 'only',
+        circleMin: 0,
+        circleMax: 7,
+        pctMin: 0,
+        pctMax: 100,
+      },
+      { offset: 0, limit: 50 },
+      everyone,
+      MADRID,
+    )
+
+    expect(ranking.total).toBe(10)
+    expect(ranking.entries.every((entry) => entry.login.startsWith('c'))).toBe(true)
   })
 
   it('sin nadie: todo vacío, sin romperse', async () => {
@@ -586,10 +689,10 @@ describe('todas las líneas en una respuesta', () => {
     const progress = await service().progress(actor('nadie'), ['tampoco'], everyone)
 
     expect(progress.me).toBeNull()
-    expect(progress.campus).toBeNull()
+    expect(here(progress).name).toBeNull()
     expect(progress.others).toEqual([])
-    expect(progress.individuals.finished['all-next']).toEqual([])
-    expect(progress.people.current['all-classic']).toBe(0)
+    expect(progress.all.individuals.finished.next).toEqual([])
+    expect(progress.all.people.current.classic).toBe(0)
   })
 })
 
@@ -622,20 +725,20 @@ describe('con poca gente, la línea de cada persona', () => {
     const sees = (login: string) => login !== 'oculta'
     const progress = await service().progress(actor('yo'), [], sees)
 
-    expect(progress.people.finished['campus-next']).toBe(1)
-    expect(progress.averages.circles.finished['campus-next'].every((value) => value === null)).toBe(
+    expect(here(progress).people.finished.next).toBe(1)
+    expect(here(progress).averages.circles.finished.next.every((value) => value === null)).toBe(
       true,
     )
-    const [only] = progress.individuals.finished['campus-next']
+    const [only] = here(progress).individuals.finished.next
 
-    expect(progress.individuals.finished['campus-next']).toHaveLength(1)
+    expect(here(progress).individuals.finished.next).toHaveLength(1)
     expect(only?.login).toBe('rapida')
     expect(only?.line.circles[progress.days.indexOf(45)]).toBe(100)
     // En todos los campus son dos, pero quien no se ve no sale (aunque cuente).
-    expect(progress.people.finished['all-next']).toBe(2)
-    expect(progress.individuals.finished['all-next'].map((each) => each.login)).toEqual(['rapida'])
+    expect(progress.all.people.finished.next).toBe(2)
+    expect(progress.all.individuals.finished.next.map((each) => each.login)).toEqual(['rapida'])
     // Quien se tragó el black hole sale sin nombre, y solo hasta que se fue.
-    const [gone] = progress.individuals.blackholed['campus-next']
+    const [gone] = here(progress).individuals.blackholed.next
 
     expect(gone?.login).toBeNull()
     expect(gone?.line.circles[progress.days.indexOf(120)]).toBeNull()
@@ -651,9 +754,9 @@ describe('con poca gente, la línea de cada persona', () => {
     }
     const more = await service().progress(actor('yo'), [], sees)
 
-    expect(more.people.finished['campus-next']).toBe(10)
-    expect(more.individuals.finished['campus-next']).toEqual([])
-    expect(more.averages.circles.finished['campus-next'][more.days.indexOf(45)]).toBe(100)
+    expect(here(more).people.finished.next).toBe(10)
+    expect(here(more).individuals.finished.next).toEqual([])
+    expect(here(more).averages.circles.finished.next[more.days.indexOf(45)]).toBe(100)
   })
 })
 
@@ -879,10 +982,8 @@ describe('quien terminó acaba en el 100 %, con sus hitos', () => {
     expect(other?.milestones.map((each) => each.day)).toEqual([10, 40])
 
     // Las medias de quien terminó lo heredan; quien no se ve no sale en las sueltas.
-    expect(progress.individuals.finished['campus-classic'].map((each) => each.login)).toEqual([
-      'fin',
-    ])
-    expect(progress.individuals.finished['campus-classic'][0]?.milestones).toHaveLength(2)
+    expect(here(progress).individuals.finished.classic.map((each) => each.login)).toEqual(['fin'])
+    expect(here(progress).individuals.finished.classic[0]?.milestones).toHaveLength(2)
     // En la clasificación, quien terminó va con el 100 %.
     const ranking = await grown().ranking(
       actor('fin'),
@@ -921,7 +1022,7 @@ describe('quien terminó acaba en el 100 %, con sus hitos', () => {
 
     const progress = await service().progress(actor('grado'), [], () => true)
 
-    expect(progress.census.campus.classic).toMatchObject({ finished: 1, unknown: 1 })
+    expect(here(progress).census.classic).toMatchObject({ finished: 1, unknown: 1 })
     expect(progress.me?.finished).toBeNull()
   })
 
@@ -939,8 +1040,8 @@ describe('quien terminó acaba en el 100 %, con sus hitos', () => {
     }
 
     const progress = await grown().progress(actor('fin0'), [], () => true)
-    const average = progress.averages.circles.finished['campus-classic']
-    const hours = progress.averages.hours.finished['campus-classic']
+    const average = here(progress).averages.circles.finished.classic
+    const hours = here(progress).averages.hours.finished.classic
 
     // Arriba del todo (el final del círculo 6), y ahí se queda hasta el último punto.
     expect(average.at(-1)).toBe(100)
@@ -979,7 +1080,7 @@ describe('quien terminó acaba en el 100 %, con sus hitos', () => {
       ['42cursus-libft'],
       ['42cursus-ft_printf'],
     ])
-    const [gone] = progress.individuals.blackholed['campus-classic']
+    const [gone] = here(progress).individuals.blackholed.classic
 
     expect(gone?.login).toBeNull()
     expect(gone?.milestones.at(-1)).toEqual({

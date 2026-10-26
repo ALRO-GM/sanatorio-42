@@ -1,9 +1,9 @@
 /**
  * El avance en el common core a lo largo del tiempo (#87 del buzón): la línea
- * de quien mira, la de hasta cinco personas con quien se compara, todas las
- * medias (alcance × plan × población: quien terminó, quien sigue más quien
- * terminó, o quien se tragó el black hole: `docs/blackhole.md`) y las líneas de
- * cada pace. Una media con menos de `MIN_PEOPLE` personas no dice nada: en su
+ * de quien mira, la de hasta cinco personas con quien se compara, las medias
+ * de cada campus que se pida (por defecto, el tuyo) y de todos juntos (plan ×
+ * población: quien terminó, quien sigue más quien terminó, o quien se tragó el
+ * black hole: `docs/blackhole.md`) y las líneas de cada pace. Una media con menos de `MIN_PEOPLE` personas no dice nada: en su
  * lugar va la línea de cada una. También quién va más rápido
  * (`ranking.rules.ts`) y quién terminó antes, para sugerir con quién
  * compararse. Las reglas del avance están en `progress.rules.ts`.
@@ -12,15 +12,22 @@
  * cursus o, si no, la de quien ha entrado en la web) o, si no se sabe, cuándo
  * se apuntó a su primer proyecto del plan: Libft se empieza el primer día.
  *
+ * «Tu campus» es el de tu 42cursus (`home`), no el que estés mirando en la web
+ * (`Actor.campusId`, el de tus preferencias): con ese, quien había elegido París
+ * para mirar veía París en su Avance.
+ *
  * Mirar a todo el mundo es caro (cientos de miles de proyectos), así que el
- * cálculo se guarda un rato por campus.
+ * cálculo se hace una vez para todos los campus a la vez (cada persona suma en
+ * los suyos y en el de todos) y se guarda un rato: pedir más campus no cuesta
+ * más.
  */
 
 import type {
   CoreStatus,
   CoreTrack,
   FastestEntry,
-  ProgressGroup,
+  ProgressArea,
+  ProgressCampus,
   ProgressIndividual,
   ProgressLine,
   ProgressMeasure,
@@ -112,12 +119,8 @@ const POPULATIONS: readonly ProgressPopulation[] = ['finished', 'current', 'blac
 const SCOPES: readonly ProgressScope[] = ['campus', 'all']
 const TRACKS: readonly CoreTrack[] = ['classic', 'next']
 const STATUSES: readonly CoreStatus[] = ['finished', 'active', 'blackholed', 'unknown']
-const GROUPS: readonly ProgressGroup[] = [
-  'campus-classic',
-  'campus-next',
-  'all-classic',
-  'all-next',
-]
+/** La clave de las medias de todos los campus juntos (las de cada campus van por su id). */
+const ALL = 'all'
 /** En qué medias entra cada estado. `unknown`, en ninguna. */
 const POPULATIONS_OF: Record<CoreStatus, readonly ProgressPopulation[]> = {
   finished: ['finished', 'current'],
@@ -133,36 +136,51 @@ type Person = {
   track: CoreTrack
   start: number
   done: Map<number, number>
-  here: boolean
   status: CoreStatus
   /** Cuándo salió del cursus, si salió. */
   endAt: number | null
   /** El campus de su 42cursus, si está copiado. */
   campus: number | null
+  /** Sus campus: el de su 42cursus y los copiados en los que está. */
+  campuses: number[]
 }
 
 type Cells = { sum: number; n: number }[]
 
 /** Quien terminó, con cuánto tardó: para sugerir con quién compararse. */
-type Finisher = Omit<FastestEntry, 'campus'> & { track: CoreTrack; here: boolean; campus: number }
+type Finisher = Omit<FastestEntry, 'campus'> & {
+  track: CoreTrack
+  campus: number
+  campuses: number[]
+}
 
 /** Una línea de una media con poca gente, aún con su login para saber si se ve. */
 type Member = ProgressTrace & { login: string }
+
+/** Lo que se va sumando de un sitio (un campus o todos) mientras se mira a cada persona. */
+type Tally = {
+  sums: Record<ProgressMeasure, Record<ProgressPopulation, Record<CoreTrack, Cells>>>
+  /** Las primeras `MIN_PEOPLE` personas de cada media: si no hay más, van ellas. */
+  members: Record<ProgressPopulation, Record<CoreTrack, Member[]>>
+  counts: ProgressArea['people']
+  census: ProgressArea['census']
+}
+
+/** Las medias ya hechas de un sitio, con sus personas por si son pocas. */
+type Area = Omit<Tally, 'sums'> & { averages: ProgressArea['averages'] }
 
 type Snapshot = {
   units: Record<CoreTrack, Unit[]>
   /** Los días de cada punto, hasta lo que lleva quien más tiempo lleva. */
   days: number[]
   people: Map<string, Person>
-  averages: StatsProgress['averages']
-  /** Las primeras `MIN_PEOPLE` personas de cada media: si no hay más, van ellas. */
-  members: Record<ProgressPopulation, Record<ProgressGroup, Member[]>>
-  counts: StatsProgress['people']
-  census: StatsProgress['census']
+  /** Las medias de cada campus (por su id) y de todos (`ALL`). */
+  areas: Map<string, Area>
   planHours: Record<CoreTrack, number>
   /** El nombre de cada proyecto del plan (id → nombre), para los hitos. */
   names: Map<number, string>
-  runners: Runner[]
+  /** Quien puede salir en la clasificación, con sus campus. */
+  runners: { runner: Runner; campuses: number[] }[]
   finishers: Finisher[]
   campusNames: Map<number, string>
 }
@@ -202,18 +220,47 @@ function traceOf(
   }
 }
 
+/** Un sitio sin nadie todavía, con `days` puntos. */
+const emptyTally = (days: number): Tally => ({
+  sums: filled(MEASURES, () =>
+    filled(POPULATIONS, () =>
+      filled(TRACKS, (): Cells => Array.from({ length: days }, () => ({ sum: 0, n: 0 }))),
+    ),
+  ),
+  members: filled(POPULATIONS, () => filled(TRACKS, (): Member[] => [])),
+  counts: filled(POPULATIONS, () => filled(TRACKS, () => 0)),
+  census: filled(TRACKS, () => filled(STATUSES, () => 0)),
+})
+
+/** La media de cada punto; con menos de `MIN_PEOPLE` personas, `null`. */
+const mean = (cells: Cells): ProgressLine =>
+  cells.map((cell) => (cell.n < MIN_PEOPLE ? null : Math.round((cell.sum / cell.n) * 10) / 10))
+
+const areaOf = ({ sums, ...rest }: Tally): Area => ({
+  ...rest,
+  averages: filled(MEASURES, (measure) =>
+    filled(POPULATIONS, (population) =>
+      filled(TRACKS, (track) => mean(sums[measure][population][track])),
+    ),
+  ),
+})
+
+/** Dónde se mira: tu campus y los campus que se piden (`'all'`: todos los que se pueden). */
+type ProgressWhere = { home?: number; campuses?: readonly number[] | 'all' }
+
 export function createProgressService(options: {
   progress: ProgressRepository
   /** El círculo de cada proyecto (por id) de cada plan: lo da el plan de estudios. */
   circles: (track: CoreTrack) => Promise<Map<number, number>>
+  /** Los campus que sigue la web: los que se pueden pedir, además del tuyo. */
+  campusIds?: readonly number[]
   now?: () => number
 }) {
   const now = options.now ?? Date.now
-  // Un agregado por campus que cambia despacio: dos visitas a la vez comparten
-  // la misma carga en vez de lanzar dos.
-  const snapshots = createTtlCache<Snapshot>({ ttlMs: CACHE_MS, maxEntries: 50, now })
-  const snapshot = (campus: number): Promise<Snapshot> =>
-    snapshots.get(String(campus), () => build(campus))
+  // Un agregado de todos los campus que cambia despacio: dos visitas a la vez
+  // comparten la misma carga en vez de lanzar dos.
+  const snapshots = createTtlCache<Snapshot>({ ttlMs: CACHE_MS, maxEntries: 1, now })
+  const snapshot = (): Promise<Snapshot> => snapshots.get(ALL, build)
 
   /**
    * Los proyectos de cada plan, con las otras versiones de cada uno (la vieja y
@@ -281,7 +328,7 @@ export function createProgressService(options: {
     }
   }
 
-  async function build(campus: number): Promise<Snapshot> {
+  async function build(): Promise<Snapshot> {
     const t = now()
 
     const plan = await plans()
@@ -302,10 +349,11 @@ export function createProgressService(options: {
       })
     const transcendence = idsOf(CLOSERS.transcendence)
     const lastExam = idsOf(CLOSERS.exam)
-    const [rows, activity, campusNames] = await Promise.all([
-      options.progress.rows(campus, [...new Set([...slugOf.keys(), ...closers.values()])]),
+    const [rows, activity, campusNames, memberships] = await Promise.all([
+      options.progress.rows([...new Set([...slugOf.keys(), ...closers.values()])]),
       options.progress.activity(),
       options.progress.campusNames(),
+      options.progress.memberships(),
     ])
     const people = new Map<
       string,
@@ -325,6 +373,7 @@ export function createProgressService(options: {
 
       if (person === undefined) {
         const cursus = row.cursus
+        const campus = cursus?.campusId ?? null
 
         person = {
           login: row.login,
@@ -336,7 +385,6 @@ export function createProgressService(options: {
           opened: new Map(),
           begin: cursus?.beginAt ?? row.beginAt,
           done: new Map(),
-          here: row.here,
           votes: { classic: new Set(), next: new Set() },
           // Se decide con todas sus filas: terminar pide ft_transcendence y el examen 6.
           status: 'unknown',
@@ -352,7 +400,13 @@ export function createProgressService(options: {
                   lastActivity: activity.get(row.login) ?? null,
                 },
           endAt: cursus?.endAt ?? null,
-          campus: cursus?.campusId ?? null,
+          campus,
+          campuses: [
+            ...new Set([
+              ...(campus === null ? [] : [campus]),
+              ...(memberships.get(row.login) ?? []),
+            ]),
+          ],
         }
         people.set(row.login, person)
       }
@@ -385,15 +439,20 @@ export function createProgressService(options: {
     }
 
     const days = daysUpTo(longest)
-    const sums = filled(MEASURES, () =>
-      filled(POPULATIONS, () => filled(GROUPS, (): Cells => days.map(() => ({ sum: 0, n: 0 })))),
-    )
-    const counts = filled(POPULATIONS, () => filled(GROUPS, () => 0))
-    const members = filled(POPULATIONS, () => filled(GROUPS, (): Member[] => []))
+    // Lo de todos y lo de cada campus en el que haya alguien.
+    const tallies = new Map<string, Tally>([[ALL, emptyTally(days.length)]])
+    const tallyOf = (key: string): Tally => {
+      const known = tallies.get(key)
+
+      if (known !== undefined) return known
+      const fresh = emptyTally(days.length)
+
+      tallies.set(key, fresh)
+      return fresh
+    }
     const finishers: Finisher[] = []
-    const census = filled(SCOPES, () => filled(TRACKS, () => filled(STATUSES, () => 0)))
     const kept = new Map<string, Person>()
-    const runners: Runner[] = []
+    const runners: Snapshot['runners'] = []
 
     for (const person of people.values()) {
       // Sin plan dicho por 42, el de la mayoría de sus pistas; sin pistas, el clásico.
@@ -405,25 +464,23 @@ export function createProgressService(options: {
       // Libft, como tarde cuando se apuntó a lo siguiente: 42 reescribió en lote muchas de sus fechas.
       person.done = settled(units[person.track], person.done, person.opened)
 
-      census.all[person.track][person.status] += 1
-      if (person.here) census.campus[person.track][person.status] += 1
+      // Cada cual cuenta en todos y en cada uno de sus campus.
+      const where = [ALL, ...person.campuses.map(String)].map(tallyOf)
+
+      for (const tally of where) tally.census[person.track][person.status] += 1
 
       // Quien ya no está, solo hasta el día en que salió: después no avanza. Quien
       // terminó, contra lo que hizo: su línea (y la media) llega al 100 %.
       const trace = traceOf(units[person.track], person, days, t, plan.names)
       const curve = trace.line
-      const groups = GROUPS.filter((group) => {
-        const [scope, plan] = group.split('-') as [ProgressScope, CoreTrack]
-
-        return (scope === 'all' || person.here) && plan === person.track
-      })
+      const track = person.track
 
       for (const population of POPULATIONS_OF[person.status]) {
-        for (const group of groups) {
-          counts[population][group] += 1
+        for (const tally of where) {
+          tally.counts[population][track] += 1
           // Por si la media se queda corta: entonces van estas líneas.
-          if (members[population][group].length < MIN_PEOPLE) {
-            members[population][group].push({ login: person.login, ...trace })
+          if (tally.members[population][track].length < MIN_PEOPLE) {
+            tally.members[population][track].push({ login: person.login, ...trace })
           }
           // En la media de quien terminó, quien ya terminó sigue en el 100 % los días que
           // aún no ha vivido: sin eso, el final de la curva solo tenía a quien empezó hace
@@ -432,7 +489,7 @@ export function createProgressService(options: {
 
           for (const measure of MEASURES) {
             curve[measure].forEach((each, index) => {
-              const cell = sums[measure][population][group][index]
+              const cell = tally.sums[measure][population][track][index]
               const value = each ?? (carry ? 100 : null)
 
               if (value !== null && cell !== undefined) {
@@ -453,46 +510,38 @@ export function createProgressService(options: {
             login: person.login,
             image: person.image,
             track: person.track,
-            here: person.here,
             campus: person.campus,
+            campuses: person.campuses,
             days: Math.round((finished - person.start) / DAY_MS),
           })
         }
       }
 
-      // En la clasificación, solo gente del campus que sigue o terminó.
-      if (person.here && (person.status === 'active' || person.status === 'finished')) {
+      // En la clasificación, gente que sigue o terminó (de un campus, al pedirla).
+      if (person.status === 'active' || person.status === 'finished') {
         const standing =
           person.status === 'finished'
             ? { circle: FINISHED_CIRCLE, circles: 100, hours: 100 }
             : standingOf(units[person.track], person.done)
 
         runners.push({
-          login: person.login,
-          image: person.image,
-          track: person.track,
-          kickoff: monthOf(person.start),
-          ...standing,
+          runner: {
+            login: person.login,
+            image: person.image,
+            track: person.track,
+            kickoff: monthOf(person.start),
+            ...standing,
+          },
+          campuses: person.campuses,
         })
       }
     }
-
-    const mean = (cells: Cells): ProgressLine =>
-      cells.map((cell) => (cell.n < MIN_PEOPLE ? null : Math.round((cell.sum / cell.n) * 10) / 10))
-    const averages = filled(MEASURES, (measure) =>
-      filled(POPULATIONS, (population) =>
-        filled(GROUPS, (group) => mean(sums[measure][population][group])),
-      ),
-    )
 
     return {
       units,
       days,
       people: kept,
-      averages,
-      members,
-      counts,
-      census,
+      areas: new Map([...tallies].map(([key, tally]) => [key, areaOf(tally)])),
       planHours: filled(TRACKS, (track) => totalHours(units[track])),
       names: plan.names,
       runners,
@@ -501,20 +550,52 @@ export function createProgressService(options: {
     }
   }
 
+  /**
+   * Los campus que se pueden pedir: los que sigue la web y el tuyo, el tuyo
+   * primero. Un piscinero, solo el suyo: solo ve la piscina de su campus.
+   */
+  const availableOf = (
+    actor: Actor,
+    home: number,
+    names: ReadonlyMap<number, string>,
+  ): ProgressCampus[] =>
+    [home, ...(actor.pool === true ? [] : (options.campusIds ?? []))]
+      .filter((id, index, list) => list.indexOf(id) === index)
+      .map((id) => ({ id, name: names.get(id) ?? String(id) }))
+
+  /**
+   * Los campus pedidos, en el orden de `available` y sin repetir. Lo que no se
+   * puede pedir se ignora; sin nada que valga, el tuyo.
+   */
+  const pickedOf = (
+    available: readonly ProgressCampus[],
+    asked: ProgressWhere['campuses'],
+    home: number,
+  ): number[] => {
+    if (asked === undefined) return [home]
+    const wanted = new Set(asked === 'all' ? available.map((campus) => campus.id) : asked)
+    const picked = available.filter((campus) => wanted.has(campus.id)).map((campus) => campus.id)
+
+    return picked.length === 0 ? [home] : picked
+  }
+
   return {
     /**
-     * El avance de quien mira, con todas las medias y los paces. Con `others`,
-     * además la línea de cada una de esas personas (como mucho `MAX_OTHERS`),
-     * para compararse. `sees` quita a quien no puede ver (mundos separados,
-     * personas ocultas) de las líneas con nombre.
+     * El avance de quien mira, con las medias de cada campus pedido y de todos
+     * juntos, y los paces. Con `others`, además la línea de cada una de esas
+     * personas (como mucho `MAX_OTHERS`), para compararse. `sees` quita a quien
+     * no puede ver (mundos separados, personas ocultas) de las líneas con nombre.
      */
     async progress(
       actor: Actor,
       others: readonly string[],
       sees: (login: string) => boolean,
+      where: ProgressWhere = {},
     ): Promise<StatsProgress> {
-      const data = await snapshot(actor.campusId)
+      const data = await snapshot()
       const t = now()
+      const home = where.home ?? actor.campusId
+      const available = availableOf(actor, home, data.campusNames)
       const lineOf = (login: string) => {
         const person = data.people.get(login)
 
@@ -533,31 +614,42 @@ export function createProgressService(options: {
         })
       const track = mine?.person.track ?? data.people.get(theirs[0]?.login ?? '')?.track ?? null
       const units = data.units[track ?? 'classic']
+      const empty = areaOf(emptyTally(data.days.length))
       // Una media corta enseña a cada cual; quien se tragó el black hole, sin nombre.
-      const individuals = filled(POPULATIONS, (population) =>
-        filled(GROUPS, (group): ProgressIndividual[] =>
-          data.counts[population][group] >= MIN_PEOPLE
-            ? []
-            : data.members[population][group]
-                .filter((member) => member.login === actor.login || sees(member.login))
-                .map((member) => ({
-                  ...member,
-                  login: population === 'blackholed' ? null : member.login,
-                })),
-        ),
-      )
+      const areaFor = (id: number | null): ProgressArea => {
+        const area = data.areas.get(id === null ? ALL : String(id)) ?? empty
+
+        return {
+          id,
+          name: id === null ? null : (data.campusNames.get(id) ?? null),
+          averages: area.averages,
+          individuals: filled(POPULATIONS, (population) =>
+            filled(TRACKS, (each): ProgressIndividual[] =>
+              area.counts[population][each] >= MIN_PEOPLE
+                ? []
+                : area.members[population][each]
+                    .filter((member) => member.login === actor.login || sees(member.login))
+                    .map((member) => ({
+                      ...member,
+                      login: population === 'blackholed' ? null : member.login,
+                    })),
+            ),
+          ),
+          people: area.counts,
+          census: area.census,
+        }
+      }
 
       return {
         days: data.days,
         track,
         me: mine?.trace ?? null,
-        campus: data.campusNames.get(actor.campusId) ?? null,
+        home,
+        available,
+        campuses: pickedOf(available, where.campuses, home).map(areaFor),
+        all: areaFor(null),
         others: theirs,
-        averages: data.averages,
-        individuals,
         minPeople: MIN_PEOPLE,
-        people: data.counts,
-        census: data.census,
         axis: {
           circles: circleMarks(),
           // Las horas del eje son las de quien mira, con su versión de cada proyecto
@@ -570,11 +662,15 @@ export function createProgressService(options: {
     },
 
     /**
-     * Quien terminó el common core más deprisa, por plan: los primeros del
-     * campus de quien mira y el primero de cada campus. Sin quien no se ve.
+     * Quien terminó el common core más deprisa, por plan: los primeros de tu
+     * campus (`home`) y el primero de cada campus. Sin quien no se ve.
      */
-    async fastest(actor: Actor, sees: (login: string) => boolean): Promise<StatsFastest> {
-      const data = await snapshot(actor.campusId)
+    async fastest(
+      actor: Actor,
+      sees: (login: string) => boolean,
+      home = actor.campusId,
+    ): Promise<StatsFastest> {
+      const data = await snapshot()
       const visible = data.finishers.filter(
         (each) => each.login === actor.login || sees(each.login),
       )
@@ -601,7 +697,7 @@ export function createProgressService(options: {
 
           return (
             scope === 'campus'
-              ? ofTrack.filter((each) => each.here).slice(0, FASTEST_HERE)
+              ? ofTrack.filter((each) => each.campuses.includes(home)).slice(0, FASTEST_HERE)
               : firstOfEach(ofTrack)
           ).map(entry)
         }),
@@ -609,20 +705,25 @@ export function createProgressService(options: {
     },
 
     /**
-     * Quién va más rápido en el campus de quien mira, con esos filtros: la
-     * página que empieza en `offset` y, aparte, quien mira. `sees` quita a quien
-     * no puede ver (mundos separados, personas ocultas).
+     * Quién va más rápido en tu campus (`home`), con esos filtros: la página que
+     * empieza en `offset` y, aparte, quien mira. `sees` quita a quien no puede
+     * ver (mundos separados, personas ocultas).
      */
     async ranking(
       actor: Actor,
       filters: RankingFilters,
       page: { offset: number; limit: number },
       sees: (login: string) => boolean,
+      home = actor.campusId,
     ): Promise<StatsRanking> {
-      const data = await snapshot(actor.campusId)
-      const visible = data.runners.filter(
-        (runner) => runner.login === actor.login || sees(runner.login),
-      )
+      const data = await snapshot()
+      const visible = data.runners
+        .filter(
+          (each) =>
+            each.campuses.includes(home) &&
+            (each.runner.login === actor.login || sees(each.runner.login)),
+        )
+        .map((each) => each.runner)
       const entries = rankRunners(visible, filters)
 
       return {

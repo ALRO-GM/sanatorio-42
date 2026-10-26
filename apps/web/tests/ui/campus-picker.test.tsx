@@ -1,7 +1,7 @@
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { CAMPUS_WAIT_MS, CampusPicker } from '../../src/features/network/CampusPicker'
+import { CAMPUS_WAIT_MS, CampusPicker } from '../../src/shared/ui/CampusPicker'
 import { I18nProvider } from '../../src/shared/i18n'
 
 const CAMPUSES = [

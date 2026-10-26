@@ -73,16 +73,35 @@ describe('Avance desde un enlace', () => {
       text('stats.progress.population.blackholed'),
     ])
     expect(pressed('stats.progress.scope')).toEqual(['Madrid'])
-    expect(series()).toEqual(['classic-current-campus', 'classic-blackholed-campus', 'me'])
+    expect(series()).toEqual(['classic-current-22', 'classic-blackholed-22', 'me'])
     expect(
       screen.getByRole('checkbox', { name: text('stats.progress.paces') }).matches(':checked'),
     ).toBe(true)
+    // Pedía 8 meses, que ya no se ofrecen: cae en el siguiente que hay, 12.
     expect(
-      screen.getByRole<HTMLSelectElement>('combobox', { name: text('rank.period') }).value,
-    ).toBe('8')
+      screen.getByRole<HTMLSelectElement>('combobox', { name: text('common.period') }).value,
+    ).toBe('12')
     // El periodo del enlace no se guarda (abrir la web empieza sin nada guardado),
     // y recargar ya no repite el enlace.
     expect(localStorage.getItem('sanatorio_progress_range')).toBeNull()
     expect(window.location.hash).toBe('#/avance')
+  })
+
+  it('con «todos», la media de todos los campus juntos y ninguna de un campus', async () => {
+    await openApp(progressHref({ plan: ['next'], scope: ['all'], range: 'all' }))
+    await screen.findAllByText(
+      /^Python · En curso \+ terminado · Todos los campus/,
+      {},
+      { timeout: 5000 },
+    )
+
+    expect(pressed('stats.progress.scope')).toEqual([])
+    expect(
+      screen.getByRole('checkbox', { name: text('stats.progress.together') }).matches(':checked'),
+    ).toBe(true)
+    expect(series()).toEqual(['next-current-all', 'me'])
+    expect(
+      screen.getByRole<HTMLSelectElement>('combobox', { name: text('common.period') }).value,
+    ).toBe('all')
   })
 })

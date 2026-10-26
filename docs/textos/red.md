@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/red.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-187 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
+186 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera | Francés |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -13,7 +13,6 @@ Generado desde `apps/web/src/shared/i18n/textos/red.csv` con
 | `net.sync.copying.one` | Progreso de la copia del historial (una) | features/network/NetworkPage | Copiando el historial de 42: {rows} de {total} corrección. El grafo irá creciendo solo. | Copying history from 42: {rows} of {total} evaluation. The graph will keep growing. | Copiant l'historial de 42: {rows} de {total} correcció. El graf anirà creixent sol. | 42ko historia kopiatzen: {total} zuzenketatik {rows}. Grafoa berez haziko da. | Import de l'historique depuis 42 : {rows} sur {total} correction. Le graphe va s'étoffer tout seul. |
 | `net.sync.copying.many` | Progreso de la copia del historial (varias) | features/network/NetworkPage | Copiando el historial de 42: {rows} de {total} correcciones. El grafo irá creciendo solo. | Copying history from 42: {rows} of {total} evaluations. The graph will keep growing. | Copiant l'historial de 42: {rows} de {total} correccions. El graf anirà creixent sol. | 42ko historia kopiatzen: {total} zuzenketatik {rows}. Grafoa berez haziko da. | Import de l'historique depuis 42 : {rows} sur {total} corrections. Le graphe va s'étoffer tout seul. |
 | `net.sync.range` | Fechas copiadas hasta ahora | features/network/NetworkPage | Por ahora, del {from} al {to} | So far, from {from} to {to} | De moment, del {from} al {to} | Oraingoz, {from} – {to} | Pour l'instant, du {from} au {to} |
-| `net.period.all` | Periodo: todo | features/stats/ProgressPage | Todo | All | Tot | Dena | Tout |
 | `net.person.placeholder` | Ejemplo dentro del buscador de persona | features/network/PersonSearch | Buscar un login… | Search a login… | Cerca un login… | Bilatu login bat… | Chercher un login… |
 | `net.person.me` | Botón: ver tu red | features/network/PersonSearch | Mi red | My network | La meva xarxa | Nire sarea | Mon réseau |
 | `net.person.clear` | Botón: volver a todo el campus | features/network/PersonSearch | Volver a todo el campus | Back to the whole campus | Torna a tot el campus | Itzuli campus osora | Revenir à tout le campus |
@@ -30,8 +29,8 @@ Generado desde `apps/web/src/shared/i18n/textos/red.csv` con
 | `net.color.cohort` | Color: año en que llegó a 42 | features/network/NetworkPage | Año de llegada | Arrival year | Any d'arribada | Iritsi zen urtea | Année d'arrivée |
 | `net.color.balance` | Color: si corrige más o le corrigen más | features/network/NetworkPage | Corrige o le corrigen | Evaluates or is evaluated | Corregeix o el corregeixen | Zuzentzen du edo zuzentzen diote | Corrections faites ou reçues |
 | `net.color.origin` | Color: del campus o de otro | features/network/NetworkPage | Del campus o de fuera | Campus or outside | Del campus o de fora | Campusekoa edo kanpokoa | Du campus ou d'ailleurs |
-| `net.campuses` | Filtro de escuelas | features/network/CampusPicker, features/network/NetworkPage | Escuelas | Schools | Escoles | Eskolak | Écoles |
-| `net.campuses.all` | Escuelas: todas | features/network/CampusPicker | Todas | All | Totes | Denak | Toutes |
+| `net.campuses` | Filtro de escuelas | features/network/NetworkPage, shared/ui/CampusPicker | Escuelas | Schools | Escoles | Eskolak | Écoles |
+| `net.campuses.all` | Escuelas: todas | shared/ui/CampusPicker | Todas | All | Totes | Denak | Toutes |
 | `net.color.campus` | Color: escuela de origen | features/network/NetworkPage | Escuela | School | Escola | Eskola | École |
 | `net.legend.community` | Leyenda: grupo y su tamaño | features/network/colors | Grupo {n} ({size}) | Group {n} ({size}) | Grup {n} ({size}) | {n}. taldea ({size}) | Groupe {n} ({size}) |
 | `net.legend.others` | Leyenda: el resto | features/network/colors | Otros ({size}) | Others ({size}) | Altres ({size}) | Besteak ({size}) | Autres ({size}) |
@@ -99,9 +98,9 @@ Generado desde `apps/web/src/shared/i18n/textos/red.csv` con
 | `net.verdict.all` | Resultado: todas | features/network/NetworkPage | Todas | All | Totes | Denak | Toutes |
 | `net.verdict.pass` | Resultado: aprobadas | features/network/NetworkPage | Solo aprobadas | Passed only | Només aprovades | Gaindituak bakarrik | Validées seulement |
 | `net.verdict.fail` | Resultado: suspendidas | features/network/NetworkPage | Solo suspendidas | Failed only | Només suspeses | Suspendituak bakarrik | Échecs seulement |
-| `net.campuses.hint` | Pista al pasar por una escuela del filtro | features/network/CampusPicker | Clic: marcar o quitar (tienes 2 s para marcar más). Doble clic: solo esta. | Click: select or unselect (you have 2 s to pick more). Double-click: only this one. | Clic: marcar o treure (tens 2 s per marcar-ne més). Doble clic: només aquesta. | Klik: hautatu edo kendu (2 s dituzu gehiago hautatzeko). Klik bikoitza: hau bakarrik. | Clic : cocher ou décocher (tu as 2 s pour en cocher d'autres). Double-clic : celle-ci seulement. |
-| `net.campuses.waiting` | Filtro de escuelas: aviso mientras se espera a que termines de elegir | features/network/CampusPicker | Se cargará en un momento… puedes marcar otra escuela. | Loading in a moment… you can still pick another school. | Es carregarà en un moment… pots marcar una altra escola. | Laster kargatuko da… beste eskola bat hauta dezakezu. | Chargement dans un instant… tu peux encore cocher une autre école. |
-| `net.campuses.none` | Filtro de escuelas: aviso si se han quitado todas | features/network/CampusPicker | Marca al menos una escuela. | Select at least one school. | Marca almenys una escola. | Hautatu eskola bat gutxienez. | Coche au moins une école. |
+| `net.campuses.hint` | Pista al pasar por una escuela del filtro | shared/ui/CampusPicker | Clic: marcar o quitar (tienes 2 s para marcar más). Doble clic: solo esta. | Click: select or unselect (you have 2 s to pick more). Double-click: only this one. | Clic: marcar o treure (tens 2 s per marcar-ne més). Doble clic: només aquesta. | Klik: hautatu edo kendu (2 s dituzu gehiago hautatzeko). Klik bikoitza: hau bakarrik. | Clic : cocher ou décocher (tu as 2 s pour en cocher d'autres). Double-clic : celle-ci seulement. |
+| `net.campuses.waiting` | Filtro de escuelas: aviso mientras se espera a que termines de elegir | shared/ui/CampusPicker | Se cargará en un momento… puedes marcar otra escuela. | Loading in a moment… you can still pick another school. | Es carregarà en un moment… pots marcar una altra escola. | Laster kargatuko da… beste eskola bat hauta dezakezu. | Chargement dans un instant… tu peux encore cocher une autre école. |
+| `net.campuses.none` | Filtro de escuelas: aviso si se han quitado todas | shared/ui/CampusPicker | Marca al menos una escuela. | Select at least one school. | Marca almenys una escola. | Hautatu eskola bat gutxienez. | Coche au moins une école. |
 | `net.onlyInside` | Filtro de la red: quitar del grafo a quien no es de ninguna de las escuelas elegidas | features/network/NetworkPage | Solo gente de las escuelas elegidas | Only people from the selected schools | Només gent de les escoles triades | Hautatutako eskoletako jendea bakarrik | Seulement les personnes des écoles choisies |
 | `net.mutualOnly` | Filtro: solo parejas que se corrigen en los dos sentidos | features/network/NetworkPage | Solo quienes se corrigen mutuamente | Only people who evaluate each other | Només els qui es corregeixen mútuament | Elkar zuzentzen dutenak bakarrik | Seulement les personnes qui se corrigent mutuellement |
 | `net.tip.counts` | Ventanita: corregido y recibido | features/network/NetworkPage | Ha corregido {given} · le han corregido {received} | Evaluated {given} · was evaluated {received} | Ha corregit {given} · l'han corregit {received} | {given} zuzendu ditu · {received} zuzendu dizkiote | Corrections faites : {given} · reçues : {received} |

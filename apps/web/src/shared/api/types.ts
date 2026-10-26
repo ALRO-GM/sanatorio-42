@@ -512,8 +512,15 @@ export type Api = {
   getLeaderboard: (period: LeaderboardPeriod) => Promise<Leaderboard>
   /** Estadísticas de Ayuda: cifras y clasificación de cada sección. */
   getHelpStats: (period: LeaderboardPeriod) => Promise<HelpStats>
-  /** El avance en el common core a lo largo del tiempo; con `others`, también el de esas personas (hasta 5). */
-  getStatsProgress: (others: readonly string[]) => Promise<StatsProgress>
+  /**
+   * El avance en el common core a lo largo del tiempo; con `others`, también el
+   * de esas personas (hasta 5). `campuses`: los campus de los que se quieren las
+   * medias, cada uno en su línea (`null`: el tuyo).
+   */
+  getStatsProgress: (
+    others: readonly string[],
+    campuses?: readonly number[] | null,
+  ) => Promise<StatsProgress>
   /** Quien terminó el common core más deprisa, por plan: en tu campus y el primero de cada campus. */
   getStatsFastest: () => Promise<StatsFastest>
   /** Quién va más rápido en el campus, con esos filtros, por páginas. */

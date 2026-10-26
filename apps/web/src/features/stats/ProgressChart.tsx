@@ -1,17 +1,12 @@
 import { useId, useState } from 'react'
 import type { KeyboardEvent, PointerEvent } from 'react'
 
-import type {
-  ProgressLine,
-  ProgressMeasure,
-  ProgressScope,
-  StatsProgress,
-} from '@sanatorio/contracts'
+import type { ProgressLine, ProgressMeasure, StatsProgress } from '@sanatorio/contracts'
 
 import { useI18n } from '../../shared/i18n'
 import { useFormat } from '../../shared/i18n/useFormat'
 import { Icon } from '../../shared/ui/Icon'
-import { MAX_LINES, ME_STYLE, TRACKS, groupSeries, personStyle } from './progressSeries'
+import { MAX_LINES, ME_STYLE, TRACKS, areasOf, groupSeries, personStyle } from './progressSeries'
 import type { GroupKey, LineStyle, Picked, Series } from './progressSeries'
 import { finishedStretch, nextStop, stepped, stopsOf, tracePoints } from './progressTrace'
 import type { Stop } from './progressTrace'
@@ -20,24 +15,30 @@ const WIDTH = 640
 const HEIGHT = 280
 // A la izquierda caben los rótulos del eje: «Círculo 6» o «1 786 h».
 const PAD = { left: 76, right: 40, top: 12, bottom: 28 }
-const MONTH = 730 / 24
+/** Los días de un mes: dos años son 730 días. */
+export const MONTH = 730 / 24
 /**
- * Lo que abarca el eje del tiempo: lo que pide cada pace (en meses) o «Todo»,
- * hasta el último dato. Por defecto, los dos años del pace más lento.
+ * Lo que abarca el eje del tiempo, en días desde el inicio de cada cual: del
+ * día `first` al `last`. `last` `null`: hasta el último dato («Todo»).
  */
-export const RANGES = ['8', '12', '15', '18', '22', '24', 'all'] as const
-export type Range = (typeof RANGES)[number]
+export type Span = { first: number; last: number | null }
 /** Cada cuántos meses va una marca del eje: la más fina con la que no pasan de nueve. */
 const MONTH_STEPS = [1, 2, 3, 6, 12, 24]
 /** A cuánto (en unidades del dibujo) del puntero se engancha un hito. */
 const MILESTONE_REACH = 9
 
-/** Las marcas de meses del eje para un periodo de `months` meses. */
-function monthTicks(months: number): number[] {
-  const step = MONTH_STEPS.find((each) => months / each <= 8) ?? 24
+/** Las marcas de meses del eje para el tramo del mes `from` al `to`: de `from` en adelante. */
+function monthTicks(from: number, to: number): number[] {
+  const step = MONTH_STEPS.find((each) => (to - from) / each <= 8) ?? 24
   const ticks: number[] = []
 
-  for (let month = 0; month <= months + 0.01; month += step) ticks.push(month)
+  for (
+    let month = Math.max(0, Math.ceil(from / step - 0.01)) * step;
+    month <= to + 0.01;
+    month += step
+  ) {
+    ticks.push(month)
+  }
 
   return ticks
 }
@@ -46,11 +47,11 @@ type Scale = (day: number) => number
 /** Cada cuántas horas va una marca del eje de horas. */
 const HOURS_STEP = 250
 
-/** La posición en el eje del tiempo de cada día, con el periodo que acaba en `last`. */
+/** La posición en el eje del tiempo de cada día, con el periodo del día `first` al `last`. */
 const scaleX =
-  (last: number): Scale =>
+  (first: number, last: number): Scale =>
   (day) =>
-    PAD.left + (day / last) * (WIDTH - PAD.left - PAD.right)
+    PAD.left + ((day - first) / Math.max(1, last - first)) * (WIDTH - PAD.left - PAD.right)
 const y = (value: number): number =>
   HEIGHT - PAD.bottom - (value / 100) * (HEIGHT - PAD.top - PAD.bottom)
 
@@ -107,9 +108,14 @@ type Tag = {
 /**
  * Los logins de quien te comparas, escritos en su línea: donde llega a su
  * último valor (quien terminó se queda en el 100 % hasta el final, y ahí se
- * amontonarían). Si dos se pisan, el segundo sube una fila.
+ * amontonarían), si cae en el periodo. Si dos se pisan, el segundo sube una fila.
  */
-function tagsOf(x: Scale, days: readonly number[], series: readonly Series[]): Tag[] {
+function tagsOf(
+  x: Scale,
+  days: readonly number[],
+  series: readonly Series[],
+  shown: (day: number) => boolean,
+): Tag[] {
   const placed: Tag[] = []
   const width = (text: string): number => text.length * 6.5
 
@@ -117,8 +123,10 @@ function tagsOf(x: Scale, days: readonly number[], series: readonly Series[]): T
     const end = lastPoint(days, each.line)
 
     if (each.tag === undefined || end === null) continue
-    const first = each.line.findIndex((value) => value === end[1])
-    const day = days[first] ?? end[0]
+    const reached = each.line.findIndex((value) => value === end[1])
+    const day = Math.max(days[reached] ?? end[0], days.find(shown) ?? 0)
+
+    if (!shown(end[0])) continue
     const anchor = x(day) + 4 + width(each.tag) > WIDTH ? 'end' : 'start'
     const tag: Tag = {
       key: each.key,
@@ -211,30 +219,33 @@ export function ProgressChart({
   measure,
   picked,
   paces,
-  range,
+  span,
   mine = true,
 }: {
   data: StatsProgress
   measure: ProgressMeasure
   picked: Picked
   paces: boolean
-  range: Range
+  span: Span
   /** Si va tu línea (un enlace puede pedir que no). */
   mine?: boolean
 }) {
   const { t, tn } = useI18n()
   const { number } = useFormat()
   const [hover, setHover] = useState<Stop | null>(null)
-  // El eje del tiempo acaba donde acaba el periodo; con «Todo», en el último dato.
-  const lastDay = range === 'all' ? (data.days.at(-1) ?? 730) : Number(range) * MONTH
-  const x = scaleX(lastDay)
+  // El eje del tiempo va del principio al final del periodo; con «Todo», hasta el último dato.
+  const firstDay = span.first
+  const lastDay = Math.max(firstDay + 1, span.last ?? data.days.at(-1) ?? 730)
+  const x = scaleX(firstDay, lastDay)
   // Un día de margen: el pace de 8 meses acaba en el 244 y 8 meses son 243,3 días.
-  const shown = (day: number): boolean => day <= lastDay + 1
+  const shown = (day: number): boolean => day >= firstDay - 1 && day <= lastDay + 1
   const groups = groupSeries(data, measure, picked, {
     plan: (track) => t(`stats.progress.plan.${track}`),
     population: (population) => t(`stats.progress.population.${population}`),
-    scope: (scope) =>
-      scope === 'campus' && data.campus !== null ? data.campus : t(`stats.progress.scope.${scope}`),
+    scope: (area) =>
+      area.id === null
+        ? t('stats.progress.scope.all')
+        : (area.name ?? t('stats.progress.scope.campus')),
     average: (parts) => t('stats.progress.line', parts),
     one: (parts) => t('stats.progress.lineOne', parts),
     anonymous: (parts) => t('stats.progress.lineAnon', parts),
@@ -266,20 +277,24 @@ export function ProgressChart({
           },
         ]),
   ]
-  // Solo lo que cae en el periodo: la línea se corta en su borde derecho.
-  const count = data.days.filter(shown).length
-  const days = data.days.slice(0, count)
-  const series = every.map((each) => ({ ...each, line: each.line.slice(0, count) }))
+  // Solo lo que cae en el periodo, más el punto de antes de su borde izquierdo
+  // para que la línea entre por él (el `clipPath` corta lo que sobra). Por la
+  // derecha, la línea se corta en el borde.
+  const end = data.days.filter((day) => day <= lastDay + 1).length
+  const start = Math.max(0, data.days.findIndex((day) => day >= firstDay - 1) - 1)
+  const days = data.days.slice(start, end)
+  const series = every.map((each) => ({ ...each, line: each.line.slice(start, end) }))
   const traced = series.flatMap((each) =>
     each.trace === undefined ? [] : [{ key: each.key, trace: each.trace, series: each }],
   )
-  const stops = stopsOf(days, traced, lastDay)
+  const stops = stopsOf(days, traced, firstDay - 1, lastDay + 1)
   const id = useId().replace(/:/g, '')
   const clip = `progress-clip-${id}`
-  // Quien no se sabe si sigue: del alcance más amplio encendido, en los planes encendidos.
-  const widest: ProgressScope = picked.scopes.has('all') ? 'all' : 'campus'
+  // Quien no se sabe si sigue: de todos juntos si van; si no, de cada campus
+  // encendido; en los planes encendidos.
+  const counted = picked.together ? [data.all] : areasOf(data, picked)
   const unknown = TRACKS.filter((track) => picked.tracks.has(track)).reduce(
-    (sum, track) => sum + data.census[widest][track].unknown,
+    (sum, track) => sum + counted.reduce((each, area) => each + area.census[track].unknown, 0),
     0,
   )
   const ticks = axisTicks(data, measure, t, number)
@@ -313,13 +328,18 @@ export function ProgressChart({
       setHover(near.stop)
       return
     }
-    const day = ((at - PAD.left) / (WIDTH - PAD.left - PAD.right)) * lastDay
-    let index = 0
+    const day = firstDay + ((at - PAD.left) / (WIDTH - PAD.left - PAD.right)) * (lastDay - firstDay)
+    // El día del periodo más cercano (el de antes del borde izquierdo no cuenta).
+    const closest = stops.reduce<Stop | null>(
+      (best, stop) =>
+        stop.kind === 'day' &&
+        (best === null || Math.abs(stop.day - day) < Math.abs(best.day - day))
+          ? stop
+          : best,
+      null,
+    )
 
-    days.forEach((each, at) => {
-      if (Math.abs(each - day) < Math.abs((days[index] ?? 0) - day)) index = at
-    })
-    setHover({ kind: 'day', index, day: days[index] ?? 0 })
+    if (closest !== null) setHover(closest)
   }
   const onKeyDown = (event: KeyboardEvent<SVGSVGElement>): void => {
     if (event.key === 'Escape') {
@@ -417,7 +437,7 @@ export function ProgressChart({
                 height={HEIGHT - PAD.bottom}
               />
             </clipPath>
-            {monthTicks(lastDay / MONTH).map((months) => (
+            {monthTicks(firstDay / MONTH, lastDay / MONTH).map((months) => (
               <text
                 key={months}
                 className="progress-axis"
@@ -464,6 +484,7 @@ export function ProgressChart({
                   key={each.key}
                   className="progress-series"
                   data-series={each.key}
+                  clipPath={`url(#${clip})`}
                   style={{ color: each.style.stroke }}
                 >
                   <path
@@ -499,7 +520,7 @@ export function ProgressChart({
                       />
                     ) : null,
                   )}
-                  {each.style.marker && end !== null && stretch === null && (
+                  {each.style.marker && end !== null && stretch === null && shown(end[0]) && (
                     <circle
                       cx={x(end[0])}
                       cy={y(end[1])}
@@ -511,7 +532,7 @@ export function ProgressChart({
                 </g>
               )
             })}
-            {tagsOf(x, days, series).map((tag) => (
+            {tagsOf(x, days, series, shown).map((tag) => (
               <text
                 key={tag.key}
                 className="progress-tag"
@@ -642,7 +663,13 @@ export function ProgressChart({
           </li>
         )}
       </ul>
-      <p className="hint progress-encoding">{t('stats.progress.encoding')}</p>
+      <p className="hint progress-encoding">
+        {t(
+          areasOf(data, picked).filter((area) => area.id !== null).length > 1
+            ? 'stats.progress.encodingCampuses'
+            : 'stats.progress.encoding',
+        )}
+      </p>
       {groups.individuals && !tooMany && (
         <p className="hint">{t('stats.progress.fewPeople', { n: data.minPeople })}</p>
       )}
@@ -660,7 +687,7 @@ export function ProgressChart({
             </thead>
             <tbody>
               {days.map((day, index) =>
-                day % 90 !== 0 ? null : (
+                day % 90 !== 0 || !shown(day) ? null : (
                   <tr key={day}>
                     <td>{Math.round(day / MONTH)}</td>
                     {series.map((each) => (

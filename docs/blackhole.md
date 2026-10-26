@@ -99,29 +99,42 @@ de quien entra en la web, 247 personas, que además no es de fiar). Se añadió:
 
 ## Cómo se usa
 
-- Medias: `StatsProgress.averages[medida][población][grupo]` y su gente en
-  `people[población][grupo]`; `census[alcance][plan][estado]` cuenta a todos.
+- Medias: por sitio (`ProgressArea`: cada campus pedido en `campuses[]` y
+  todos juntos en `all`), `averages[medida][población][plan]` y su gente en
+  `people[población][plan]`; `census[plan][estado]` cuenta a todos.
   La línea de quien se tragó el black hole acaba el día de su `end_at`: después
   no avanza y bajaría la media sin decir nada.
 - Con menos de 10 personas (`minPeople`) no hay media: `individuals` trae la
   línea de cada una (sin nombre en `blackholed`) y la web las pinta sueltas.
-- La gráfica (pedido de Alberto del 2026-10-25): plan, quién cuenta y alcance
+- La gráfica (pedido de Alberto del 2026-10-25): plan, quién cuenta y campus
   son botones que se encienden a la vez; cada combinación es una línea (ver
-  abajo). Te comparas con hasta 5 personas, y «Los más rápidos» sugiere a
+  abajo). Por defecto, tu campus: el de tu 42cursus, no el que miras en la web
+  (antes salía el de tus preferencias, y quien tenía París elegido veía París).
+  Desde el 2026-10-26 se elige uno, varios o todos los campus que sigue la web,
+  cada uno en su línea para compararlos (`CampusPicker`, el de la Red: espera
+  2 s tras el último clic antes de pedirlos), y aparte «Todos los campus
+  juntos», una sola línea. Te comparas con hasta 5 personas, y «Los más rápidos» sugiere a
   quien terminó antes (`GET /stats/progress/fastest`).
 
 ## La gráfica: varias líneas a la vez
 
 `apps/web/src/features/stats/progressSeries.ts`. Cada combinación encendida de
-plan × quién cuenta × alcance es una línea, y se distinguen sin fiarlo todo al
-color:
+plan × quién cuenta × campus (y todos juntos) es una línea, y se distinguen sin
+fiarlo todo al color. Con un solo campus:
 
 | | Qué dice | Cómo |
 |---|---|---|
 | Color | El plan | C azul, Python violeta (con daltonismo, los de Okabe e Ito) |
 | Trazo | Quién cuenta | En curso + terminado continuo; terminado a rayas; black hole a puntos |
-| Grosor | El alcance | Tu campus grueso y opaco; todos los campus fino y medio transparente |
+| Grosor | El campus o todos | El campus grueso y opaco; todos juntos fino y medio transparente |
 | Punto al final | Una persona, no una media | La misma línea, más fina |
+
+Con varios campus, para compararlos, el color pasa a ser el campus (siempre el
+mismo para cada uno, por su sitio en la lista: azul, naranja, verde, violeta,
+rosa, lima; todos juntos en gris) y, si van los dos planes, el grosor dice el
+plan (C grueso, Python fino). El trazo sigue diciendo quién cuenta, y el
+nombre del campus va en la leyenda, la ficha y la tabla. La nota bajo la
+leyenda cambia con la manera de leerla.
 
 Tú vas en el acento y cada persona con quien te comparas en su color (oro,
 naranja, verde, rosa, lima), con su login escrito en la línea. La leyenda
@@ -129,12 +142,19 @@ nombra cada línea («C · Terminado · Madrid (93)», «Python · Terminado:
 login»), como la ficha al pasar y la tabla. Más de 10 líneas de medias a la vez
 no se pintan: se avisa para que quites alguna opción.
 
-El eje del tiempo se elige con «Periodo»: lo que pide cada pace (8, 12, 15,
-18, 22 o 24 meses; por defecto 24) o «Todo», hasta el último dato (la API
-alarga las líneas hasta quien más tiempo lleva, cada 30 días pasados los dos
-años). Las marcas de meses van cada 1, 2, 3, 6 o 12 según lo que abarque; un
-pace más largo que el periodo se corta en el borde. La elección se guarda en el
-navegador (`sanatorio_progress_range`).
+El eje del tiempo se elige con «Periodo», el selector de toda la web
+(`PeriodPicker`, 2026-10-26): el primer mes, los primeros 3, 6, 12 o 24 meses
+(por defecto 24), «Todo», hasta el último dato (la API alarga las líneas hasta
+quien más tiempo lleva, cada 30 días pasados los dos años), o «Meses…», a
+mano: del mes X al Y desde el inicio de cada cual (el eje es el tiempo desde
+que empezó cada persona, no fechas de calendario). Con un tramo que no empieza
+en 0, el eje empieza en su primer mes, las líneas entran recortadas por el
+borde izquierdo y el ratón y el teclado solo van por lo de dentro. Las marcas
+de meses van cada 1, 2, 3, 6 o 12 según lo que abarque; un pace más largo que
+el periodo se corta en el borde. La elección se guarda en el navegador
+(`sanatorio_progress_range` y, los meses a mano, `sanatorio_progress_months`);
+lo guardado de antes (8, 15, 18, 22 meses) cae en el siguiente que hay (12 o
+24), y lo mismo el `range` de un enlace (`progressHref`).
 
 ## Quién terminó Python (2026-10-25)
 
@@ -408,7 +428,7 @@ hasta 100 KB / 2,5 KB.
 
 - La copia es de los campus copiados (`trackedCampusIds`). Quien vino de otro
   campus y no está en su 42cursus copiado queda `unknown`.
-- El estado se recalcula con el avance (cada 30 minutos por campus) y la copia
+- El estado se recalcula con el avance (cada 30 minutos, todos los campus a la vez) y la copia
   es diaria: quien sale hoy tarda hasta 30 días (el margen) en contar como
   absorbido.
 - Quien se fue por su cuenta antes de su fecha cuenta como «blackhole»: los

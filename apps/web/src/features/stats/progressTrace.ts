@@ -85,18 +85,23 @@ export type MilestoneStop = { kind: 'milestone'; key: string; at: number; day: n
 
 /**
  * Por dónde pasa el teclado, de izquierda a derecha: cada día de las líneas y,
- * entre ellos, cada hito. Con dos en el mismo día, primero el día.
+ * entre ellos, cada hito, solo los del periodo (del día `first` al `last`). Con
+ * dos en el mismo día, primero el día. `index` es el sitio del día en `days`.
  */
 export function stopsOf(
   days: readonly number[],
   milestones: readonly { key: string; trace: ProgressTrace }[],
+  first: number,
   last: number,
 ): Stop[] {
-  const stops: Stop[] = days.map((day, index) => ({ kind: 'day', index, day }))
+  const inside = (day: number): boolean => day >= first && day <= last
+  const stops: Stop[] = days.flatMap((day, index): Stop[] =>
+    inside(day) ? [{ kind: 'day', index, day }] : [],
+  )
 
   for (const { key, trace } of milestones) {
     trace.milestones.forEach((milestone, at) => {
-      if (milestone.day <= last) stops.push({ kind: 'milestone', key, at, day: milestone.day })
+      if (inside(milestone.day)) stops.push({ kind: 'milestone', key, at, day: milestone.day })
     })
   }
 

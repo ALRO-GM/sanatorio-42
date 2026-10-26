@@ -42,7 +42,10 @@ describe('Avance: quien terminó y sus hitos', () => {
     ]) {
       expect(within(rail).getByRole('group', { name: text(key) })).toBeTruthy()
     }
-    expect(within(rail).getByRole('combobox', { name: text('rank.period') })).toBeTruthy()
+    expect(within(rail).getByRole('combobox', { name: text('common.period') })).toBeTruthy()
+    expect(
+      within(rail).getByRole('checkbox', { name: text('stats.progress.together') }),
+    ).toBeTruthy()
     expect(within(rail).getByRole('checkbox', { name: text('stats.progress.paces') })).toBeTruthy()
     // La gráfica no lleva opciones dentro.
     expect(within(chartCard()).queryAllByRole('button')).toHaveLength(0)
@@ -61,7 +64,7 @@ describe('Avance: quien terminó y sus hitos', () => {
     )
 
     const series = must(
-      chartCard().querySelector('[data-series="next-finished-campus-nvelasco"]'),
+      chartCard().querySelector('[data-series="next-finished-22-nvelasco"]'),
       'la línea de nvelasco',
     )
     const stretch = must(series.querySelector('.progress-finished'), 'su tramo terminado')

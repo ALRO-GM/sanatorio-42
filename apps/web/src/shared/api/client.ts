@@ -266,10 +266,15 @@ export const realApi: Api = {
 
   getLeaderboard: (period) => getJson(`/leaderboard?period=${period}`),
   getHelpStats: (period) => getJson(`/stats?period=${period}`),
-  getStatsProgress: (others) =>
-    getJson(
-      `/stats/progress${others.length === 0 ? '' : `?with=${encodeURIComponent(others.join(','))}`}`,
-    ),
+  getStatsProgress: (others, campuses = null) => {
+    const params = new URLSearchParams()
+
+    if (others.length > 0) params.set('with', others.join(','))
+    if (campuses !== null) params.set('campuses', campuses.join(','))
+    const query = params.toString()
+
+    return getJson(`/stats/progress${query === '' ? '' : `?${query}`}`)
+  },
   getStatsFastest: () => getJson('/stats/progress/fastest'),
   getStatsRanking: (query) => {
     const params = new URLSearchParams()
