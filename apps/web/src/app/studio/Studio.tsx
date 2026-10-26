@@ -2,11 +2,13 @@ import { useState } from 'react'
 import type { ReactNode } from 'react'
 
 import { ComfortSettings } from '../../features/settings/ComfortSettings'
+import { StudioTour } from '../../features/settings/StudioTour'
 import { useI18n } from '../../shared/i18n'
 import type { StudioTab } from '../../shared/layout/customize'
 import type { OrderMode } from '../../shared/layout/order'
 import { resetPrefs, updatePrefs, usePrefs } from '../../shared/layout/store'
 import { DetailCards } from '../../shared/ui/DetailSelect'
+import { InfoTip } from '../../shared/ui/InfoTip'
 import { LangSelect } from '../../shared/ui/LangSelect'
 import { Modal } from '../../shared/ui/Modal'
 import { PillGroup } from '../../shared/ui/PillGroup'
@@ -49,7 +51,19 @@ export function Studio({ me, section, tab: initialTab, onClose, recordStyle }: S
   const [said, setSaid] = useState('')
 
   return (
-    <Modal label={t('layout.title')} title={t('layout.title')} onClose={onClose} className="studio">
+    <Modal
+      label={t('layout.title')}
+      title={
+        <>
+          {t('layout.title')}
+          <InfoTip title={t('layout.title')}>
+            <StudioTour />
+          </InfoTip>
+        </>
+      }
+      onClose={onClose}
+      className="studio"
+    >
       {/* Lo que se oye al arrastrar: coger, mover, soltar o cancelar. */}
       <p className="sr-only" aria-live="assertive" aria-atomic="true">
         {said}

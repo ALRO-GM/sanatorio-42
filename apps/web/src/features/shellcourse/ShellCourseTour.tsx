@@ -40,7 +40,12 @@ export function ShellCourseTour() {
   const { t, lang } = useI18n()
 
   return (
-    <Tour tour={TOUR} tab={() => t('notgames.tab.shell')}>
+    <Tour
+      tour={TOUR}
+      tab={() => t('nav.cat.ayuda')}
+      // El curso va en su pestaña dentro de Not-games: «Ayuda › Not-games › Curso de shell».
+      sub={() => `${t('nav.notgames')} › ${t('notgames.tab.shell')}`}
+    >
       {(shot) => {
         if (shot.scene === 0)
           return (

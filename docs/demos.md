@@ -66,7 +66,8 @@ Ayudas del guion (`shared/tour/Tour.tsx`):
 
 Props de `<Tour>`: `tour` (de `defineTour`), `tab` (la pestaña de arriba que se
 ve en la barra de mentira), `sub` (la de la segunda fila, si la sección va
-dentro de una de arriba: se ve «Datos › Avance») y `bell` (avisos sin leer en la
+dentro de una de arriba: se ve «Datos › Avance»; vacía no se pinta, como en el
+on-call, que no va en ninguna categoría) y `bell` (avisos sin leer en la
 campana, si hace falta).
 
 Lo que pone el motor solo, en todas:
@@ -96,6 +97,12 @@ Clases de `styles/tour.css`, que ya se ven bien en todos los estilos y temas:
 | `tour-pop`, `tour-side`, `tour-box` | Ventanita flotante, lateral o de buzón |
 | `tour-notice`, `tour-chip`, `tour-code`, `tour-switch`, `tour-input`, `tour-select`, `tour-menu`, `tour-check` | Avisos, etiquetas, códigos y controles |
 | `tour-in` | Aparece con un fundido corto |
+| `tour-split lean` | Dos columnas, la izquierda más ancha: una gráfica y sus opciones |
+| `tour-sort-row` / `tour-sort-col` (`--n`), `tour-sort` (`--i`, `.on`, `.lifted`), `tour-grip` | Piezas que se ordenan arrastrando: cada una en su hueco `--i`, y se desliza a la vez que el ratón |
+| `tour-mini` (`--mini-*`) | La web en pequeño de Personalizar, con los colores del estilo elegido |
+| `tour-style` (`.on`, `--sample-*`) | Un estilo del selector, con su muestra |
+| `seat-heat tour-heat`, `tour-tip` | El mapa de calor de los puestos (las casillas `heat-*` de verdad) y la ficha al pasar por un puesto |
+| `tour-card tour-net` | Tarjeta con el fondo del grafo de la red (`--stage-bg`) |
 
 Si hace falta una pieza nueva, va en `styles/tour.css` con las variables del
 tema (nunca un color suelto) y se apunta en esta tabla.
@@ -127,21 +134,24 @@ tema (nunca un color suelto) y se apunta en esta tabla.
 
 | Demostración | Sección | Pasos |
 | --- | --- | --- |
-| `waiting` | Sala de espera | Elegir proyecto, ver quién está de guardia, reservar, ponerse de guardia |
-| `guard` | Guardia | Marcar medias horas, tope, preevaluar, aceptar una reserva, aviso |
-| `board` | Tablón | Elegir proyecto en el grafo, preguntar, marcar la respuesta |
-| `therapy` | Terapia | Unirse, abrir un grupo con puestos y días |
-| `boards` | Pizarras | Apuntarse, proponer, códigos de asistencia |
+| `waiting` | Ayuda › Peer to peer | Elegir proyecto, ver quién está disponible y dónde, reservar, ponerse disponible desde la cabecera |
+| `guard` | On-call (cabecera) | Marcar medias horas, tope, preevaluar, aceptar una reserva en Ayuda › Proyectos, aviso |
+| `board` | Ayuda › Proyectos | Elegir proyecto en el grafo, preguntar, marcar la respuesta |
+| `therapy` | Ayuda › Sprints | Unirse, abrir un grupo con puestos y días |
+| `boards` | Ayuda › Pizarras | Apuntarse, proponer, códigos de asistencia |
 | `agenda` | Calendario | Tipos, detalle de un evento, responder al aviso |
 | `network` | Red | Burbujas, ficha, buscar, escala de color |
 | `clusters` | Clústeres | Sala, resaltar tu proyecto, ficha de un puesto, avisar de una avería |
 | `record` | Expediente | Nivel, XP, estado de salud |
-| `mailbox` | Buzón | Avisos sin leer y a dónde llevan |
-| `inbox` | Incidencias | Escribir y recibir respuesta |
+| `mailbox` | Buzón (cabecera) | Avisos sin leer, pestañas de avisos y conversaciones, a dónde llevan |
+| `inbox` | Incidencias y sugerencias (menú de la cuenta) | Elegir tipo, escribir, la respuesta en lo que has enviado |
 | `helpStats` | Estadísticas | Periodo, cifras de una sección, clasificación con fotos, tu fila, ir a un expediente |
-| `chess` | Ajedrez de Not-games | Mover, pregunta a los dos, quien acierta mueve, castigo por fallar |
-| `notGames` | Not-games | Elegir modo, contestar, ver la buena y por qué, marcador con vidas |
+| `chess` | Ayuda › Not-games (ajedrez) | Mover, pregunta a los dos, quien acierta mueve, castigo por fallar |
+| `notGames` | Ayuda › Not-games | Elegir modo, contestar, ver la buena y por qué, marcador con vidas |
 | `exams` | Exámenes | Aviso en vivo en la pestaña, quién está y su nota, intentos hasta aprobar |
 | `scrum` | Agenda | Marcar un checkpoint, daily con un atasco de la lista, tablero del sprint |
-| `gitCourse` | Curso de git (Not-games) | Elegir punto, animación y teoría, terminal y estrellas, misiones de grupo |
+| `gitCourse` | Ayuda › Not-games › Curso de git | Elegir punto, animación y teoría, terminal y estrellas, misiones de grupo |
+| `shellCourse` | Ayuda › Not-games › Curso de shell | Elegir unidad, teoría y ejemplo, terminal con objetivos, jefe contrarreloj |
+| `seats` | Datos › Red › Asientos | Grafo de quién se sienta cerca, color por aislamiento, ficha de una persona, periodo, mapa de calor de los puestos y sus cifras |
+| `studio` | Personalizar (menú de la cuenta) | Arrastrar una pestaña y un bloque, pestaña Estilo, elegir un estilo que se aplica al momento, Listo |
 

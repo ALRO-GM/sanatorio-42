@@ -58,7 +58,12 @@ export function GitCourseTour() {
   const { t, lang } = useI18n()
 
   return (
-    <Tour tour={TOUR} tab={() => t('notgames.tab.git')}>
+    <Tour
+      tour={TOUR}
+      tab={() => t('nav.cat.ayuda')}
+      // El curso va en su pestaña dentro de Not-games: «Ayuda › Not-games › Curso de git».
+      sub={() => `${t('nav.notgames')} › ${t('notgames.tab.git')}`}
+    >
       {(shot) => {
         if (shot.scene === 0) {
           return (

@@ -23,6 +23,8 @@ export type TourName =
   | 'notGames'
   | 'record'
   | 'scrum'
+  | 'seats'
+  | 'studio'
   | 'therapy'
   | 'waiting'
 

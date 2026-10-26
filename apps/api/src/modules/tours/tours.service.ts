@@ -53,6 +53,8 @@ const TOURS: Record<TourName, true> = {
   notGames: true,
   record: true,
   scrum: true,
+  seats: true,
+  studio: true,
   therapy: true,
   waiting: true,
 }

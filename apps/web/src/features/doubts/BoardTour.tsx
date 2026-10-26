@@ -40,7 +40,8 @@ export function BoardTour() {
   return (
     <Tour
       tour={TOUR}
-      tab={() => t('nav.tablon')}
+      tab={() => t('nav.cat.ayuda')}
+      sub={() => t('nav.tablon')}
       bell={(shot) => (shot.scene === 1 && !shot.solved ? 1 : 0)}
     >
       {(shot) => (

@@ -24,7 +24,8 @@ export function MailboxTour() {
   return (
     <Tour
       tour={TOUR}
-      tab={(shot) => t(shot.scene === 0 ? 'nav.consulta' : 'nav.tablon')}
+      tab={() => t('nav.cat.ayuda')}
+      sub={(shot) => t(shot.scene === 0 ? 'nav.consulta' : 'nav.tablon')}
       bell={(shot) => (shot.read ? 1 : 2)}
     >
       {(shot) => (
@@ -33,6 +34,10 @@ export function MailboxTour() {
           {shot.open && (
             <div className="tour-pop tour-box">
               <strong>{t('notices.title')}</strong>
+              <span className="tour-row">
+                <span className="tour-pill on">{t('notices.tab.notices')}</span>
+                <span className="tour-pill">{t('notices.tab.chats')}</span>
+              </span>
               <span className="tour-notice" data-tour="n1">
                 <Icon name="pregunta" size={14} />
                 {t('notices.kind.doubt_answered', { from: 'lsoto' })}

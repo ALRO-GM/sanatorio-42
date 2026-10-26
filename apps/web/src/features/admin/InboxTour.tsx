@@ -66,6 +66,7 @@ export function InboxTour() {
             </>
           ) : (
             <>
+              <strong>{t('inbox.mine')}</strong>
               <span className="tour-item">
                 <Icon name="idea" size={14} />
                 <span>{text}</span>
