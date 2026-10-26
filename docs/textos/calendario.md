@@ -10,8 +10,8 @@ Generado desde `apps/web/src/shared/i18n/textos/calendario.csv` con
 | `agenda.title` | Título de la página del calendario | features/calendar/CalendarPage | Tu calendario | Your calendar | El teu calendari | Zure egutegia | Ton calendrier |
 | `agenda.today` | Botón: volver a hoy | features/calendar/CalendarPage | Hoy | Today | Avui | Gaur | Aujourd'hui |
 | `agenda.tabs` | Calendario: las dos vistas de la pestaña | features/calendar/CalendarPage | Qué ver | What to see | Què veure | Zer ikusi | Affichage |
-| `agenda.tab.calendar` | Calendario: la vista del calendario | features/calendar/CalendarPage | Calendario | Calendar | Calendari | Egutegia | Calendrier |
-| `agenda.tab.countdowns` | Calendario: la vista de cuentas atrás | features/calendar/CalendarPage | Cuentas atrás | Countdowns | Comptes enrere | Atzerako kontaketak | Comptes à rebours |
+| `agenda.tab.calendar` | Calendario: la vista del calendario | features/calendar/AgendaTour, features/calendar/CalendarPage | Calendario | Calendar | Calendari | Egutegia | Calendrier |
+| `agenda.tab.countdowns` | Calendario: la vista de cuentas atrás | features/calendar/AgendaTour, features/calendar/CalendarPage | Cuentas atrás | Countdowns | Comptes enrere | Atzerako kontaketak | Comptes à rebours |
 | `agenda.view` | Selector de vista: día, semana o mes | features/calendar/CalendarPage | Vista | View | Vista | Ikuspegia | Vue |
 | `agenda.layout` | Selector de cómo se dibuja el día | features/calendar/CalendarPage | Cómo ver el día | How to see the day | Com veure el dia | Eguna nola ikusi | Affichage de la journée |
 | `agenda.layout.list` | Forma del día: lista | features/calendar/CalendarPage | Lista | List | Llista | Zerrenda | Liste |
@@ -30,7 +30,7 @@ Generado desde `apps/web/src/shared/i18n/textos/calendario.csv` con
 | `agenda.view.week` | Vista: semana | features/calendar/CalendarPage | Semana | Week | Setmana | Astea | Semaine |
 | `agenda.view.month` | Vista: mes | features/calendar/CalendarPage | Mes | Month | Mes | Hilabetea | Mois |
 | `agenda.kinds` | Filtro de tipos de evento | features/calendar/CalendarPage | Tipos de evento | Event types | Tipus d'esdeveniment | Ekitaldi motak | Types d'événement |
-| `agenda.kindsShow` | Calendario: delante de los tipos de evento, para que se vea que filtran | features/calendar/CalendarPage | Ver: | Show: | Mostra: | Erakutsi: | Afficher : |
+| `agenda.kindsShow` | Calendario: delante de los tipos de evento, para que se vea que filtran | features/calendar/AgendaTour, features/calendar/CalendarPage | Ver: | Show: | Mostra: | Erakutsi: | Afficher : |
 | `agenda.kind.help` | Tipo de evento: tu on-call y reservas de ayuda | features/agenda/AgendaPage, features/calendar/AgendaTour, features/calendar/CalendarPage, features/calendar/CountdownsView, features/calendar/EventChip, features/calendar/EventDialog | On-call | On-call | On-call | On-call | On-call |
 | `agenda.kind.therapy` | Tipo de evento: sprints | features/agenda/AgendaPage, features/calendar/AgendaTour, features/calendar/CalendarPage, features/calendar/CountdownsView, features/calendar/EventChip, features/calendar/EventDialog | Sprints | Sprints | Sprints | Sprintak | Sprints |
 | `agenda.kind.board` | Tipo de evento: pizarras | features/agenda/AgendaPage, features/calendar/AgendaTour, features/calendar/CalendarPage, features/calendar/CountdownsView, features/calendar/EventChip, features/calendar/EventDialog | Pizarras | Whiteboards | Pissarres | Arbelak | Tableaux blancs |

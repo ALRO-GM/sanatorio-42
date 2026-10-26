@@ -9,9 +9,9 @@ Generado desde `apps/web/src/shared/i18n/textos/agenda.csv` con
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | `scrum.title` | Título de la agenda (Scrum individual por proyecto) | features/agenda/AgendaPage | Tu agenda | Your agenda | La teva agenda | Zure agenda | Ton agenda |
 | `scrum.loading` | Mientras carga la agenda | features/agenda/AgendaPage | Haciendo git pull de tu agenda… | Pulling your agenda… | Fent git pull de la teva agenda… | Zure agenda git pull egiten… | git pull de ton agenda en cours… |
-| `scrum.new` | Botón y título del formulario: poner una meta nueva | features/agenda/AgendaPage, features/agenda/GoalForm | Nueva meta | New goal | Nova fita | Helburu berria | Nouvel objectif |
-| `scrum.countdown` | Agenda: botón que abre la ventanita de cuentas atrás (tu próximo compromiso o una propia) | features/agenda/AgendaPage | Cuenta atrás | Countdown | Compte enrere | Atzerako kontaketa | Compte à rebours |
-| `scrum.calendar` | Agenda: botón que lleva al calendario | features/agenda/AgendaPage | Ver el calendario | Open the calendar | Veure el calendari | Ikusi egutegia | Voir le calendrier |
+| `scrum.new` | Botón y título del formulario: poner una meta nueva | features/agenda/AgendaPage, features/agenda/GoalForm, features/agenda/ScrumTour | Nueva meta | New goal | Nova fita | Helburu berria | Nouvel objectif |
+| `scrum.countdown` | Agenda: botón que abre la ventanita de cuentas atrás (tu próximo compromiso o una propia) | features/agenda/AgendaPage, features/agenda/ScrumTour | Cuenta atrás | Countdown | Compte enrere | Atzerako kontaketa | Compte à rebours |
+| `scrum.calendar` | Agenda: botón que lleva al calendario | features/agenda/AgendaPage, features/agenda/ScrumTour | Ver el calendario | Open the calendar | Veure el calendari | Ikusi egutegia | Voir le calendrier |
 | `scrum.empty` | Agenda sin metas en marcha | features/agenda/AgendaPage | Sin metas en marcha. Elige un proyecto y ponle fecha de deploy. | No goals in progress. Pick a project and give it a deploy date. | Sense fites en marxa. Tria un projecte i posa-li data de deploy. | Ez dago helbururik martxan. Aukeratu proiektu bat eta jarri deploy data. | Aucun objectif en cours. Choisis un projet et donne-lui une date de deploy. |
 | `scrum.noProjects` | Agenda: no hay proyectos que elegir | features/agenda/AgendaPage, features/countdowns/GoalPins | No vemos proyectos tuyos todavía. Apúntate a uno en la intra y vuelve. | We cannot see any projects of yours yet. Register for one on the intra and come back. | Encara no veiem projectes teus. Apunta't a un a la intra i torna. | Oraindik ez dugu zure proiekturik ikusten. Eman izena batean intran eta itzuli. | On ne voit encore aucun projet à toi. Inscris-toi à un projet sur l'intra et reviens. |
 | `scrum.closed.show` | Agenda: desplegar las metas cerradas | features/agenda/AgendaPage | Ver las cerradas ({n}) | Show closed ones ({n}) | Veure les tancades ({n}) | Ikusi itxitakoak ({n}) | Voir les objectifs clos ({n}) |
@@ -21,14 +21,14 @@ Generado desde `apps/web/src/shared/i18n/textos/agenda.csv` con
 | `scrum.project` | Formulario de meta: campo del proyecto | features/agenda/GoalForm | Proyecto | Project | Projecte | Proiektua | Projet |
 | `scrum.project.doing` | Formulario de meta: grupo de proyectos que tienes en curso | features/agenda/GoalForm | En curso | In progress | En curs | Martxan | En cours |
 | `scrum.project.next` | Formulario de meta: grupo de lo siguiente de tu plan | features/agenda/GoalForm | Lo siguiente de tu plan | Next in your plan | El següent del teu pla | Zure planeko hurrengoa | La suite de ton plan |
-| `scrum.targetDay` | Meta: el día para el que te la pones | features/agenda/GoalCard, features/agenda/GoalForm | Fecha de entrega | Hand-in date | Data de lliurament | Entrega-data | Date de rendu |
-| `scrum.progress` | Meta: cuánto llevas | features/agenda/GoalCard, features/agenda/GoalForm | Cuánto llevas | How far along | Quant portes | Zenbat daramazun | Avancement |
+| `scrum.targetDay` | Meta: el día para el que te la pones | features/agenda/GoalCard, features/agenda/GoalForm, features/agenda/ScrumTour | Fecha de entrega | Hand-in date | Data de lliurament | Entrega-data | Date de rendu |
+| `scrum.progress` | Meta: cuánto llevas | features/agenda/GoalCard, features/agenda/GoalForm, features/agenda/ScrumTour | Cuánto llevas | How far along | Quant portes | Zenbat daramazun | Avancement |
 | `scrum.progress.zero` | Avance: 0 % | features/agenda/steps | 0 % · ni un commit | 0 % · not a single commit | 0 % · ni un commit | % 0 · commit bat ere ez | 0 % · pas un seul commit |
 | `scrum.progress.full` | Avance: 100 % | features/agenda/steps | 100 % · listo para entregar | 100 % · ready to hand in | 100 % · llest per lliurar | % 100 · entregatzeko prest | 100 % · prêt à rendre |
 | `scrum.progress.change` | Nombre accesible del desplegable para cambiar el avance de una meta | features/agenda/GoalCard | Cambiar cuánto llevas | Change how far along you are | Canviar quant portes | Aldatu zenbat daramazun | Modifier l'avancement |
 | `scrum.note` | Meta: lo que te queda, en pocas palabras | features/agenda/GoalCard, features/agenda/GoalForm | Lo que queda | What is left | El que queda | Geratzen dena | Ce qu'il reste |
 | `scrum.note.hint` | Ejemplo del campo de lo que queda | features/agenda/GoalForm | Ej.: el %p y los flags | E.g. %p and the flags | P. ex.: el %p i els flags | Adib.: %p eta flagak | Ex. : le %p et les flags |
-| `scrum.checkpoints` | Meta: título de la lista de checkpoints | features/agenda/GoalCard, features/agenda/GoalForm | Checkpoints | Checkpoints | Checkpoints | Checkpointak | Checkpoints |
+| `scrum.checkpoints` | Meta: título de la lista de checkpoints | features/agenda/GoalCard, features/agenda/GoalForm, features/agenda/ScrumTour | Checkpoints | Checkpoints | Checkpoints | Checkpointak | Checkpoints |
 | `scrum.check.remove` | Nombre accesible del botón que quita un checkpoint | features/agenda/GoalCard, features/agenda/GoalForm, features/agenda/ScrumTour, shared/agenda/labels | Quitar «{name}» | Remove “{name}” | Treure «{name}» | Kendu «{name}» | Retirer « {name} » |
 | `scrum.check.add` | Botón: añadir el checkpoint elegido | features/agenda/GoalCard, features/agenda/GoalForm, features/agenda/ScrumTour, shared/agenda/labels | Añadir | Add | Afegir | Gehitu | Ajouter |
 | `scrum.check.pick` | Primera opción del desplegable de checkpoints | features/agenda/GoalCard, features/agenda/GoalForm, features/agenda/ScrumTour, shared/agenda/labels | Añade un checkpoint… | Add a checkpoint… | Afegeix un checkpoint… | Gehitu checkpoint bat… | Ajoute un checkpoint… |
@@ -83,8 +83,8 @@ Generado desde `apps/web/src/shared/i18n/textos/agenda.csv` con
 | `scrum.outcome.not_done` | Cómo fue: no lo hiciste | features/agenda/EntryForm, shared/agenda/labels | No lo hice | Not done | No ho vaig fer | Ez nuen egin | Pas fait |
 | `scrum.outcome.open` | Cómo fue: aún sin cerrar (lo que te propones hoy) | features/agenda/EntryForm, shared/agenda/labels | Aún en marcha | Still open | Encara en marxa | Oraindik martxan | Toujours en cours |
 | `scrum.kind.daily` | Tipo de entrada: el de un día | features/agenda/EntryForm, features/agenda/GoalCard, features/agenda/ScrumTour, shared/agenda/SprintBoardView | Daily | Daily | Daily | Daily | Daily |
-| `scrum.kind.weekly` | Tipo de entrada: el de una semana | features/agenda/EntryForm, features/agenda/GoalCard, shared/agenda/SprintBoardView | Weekly | Weekly | Weekly | Weekly | Weekly |
-| `scrum.kindOf.c` | Tipo de proyecto: C | features/agenda/GoalCard | C | C | C | C | C |
+| `scrum.kind.weekly` | Tipo de entrada: el de una semana | features/agenda/EntryForm, features/agenda/GoalCard, features/agenda/ScrumTour, shared/agenda/SprintBoardView | Weekly | Weekly | Weekly | Weekly | Weekly |
+| `scrum.kindOf.c` | Tipo de proyecto: C | features/agenda/GoalCard, features/agenda/ScrumTour | C | C | C | C | C |
 | `scrum.kindOf.graphics` | Tipo de proyecto: gráfico (MiniLibX) | features/agenda/GoalCard | Gráficos | Graphics | Gràfics | Grafikoak | Graphique |
 | `scrum.kindOf.cpp` | Tipo de proyecto: C++ | features/agenda/GoalCard | C++ | C++ | C++ | C++ | C++ |
 | `scrum.kindOf.python` | Tipo de proyecto: Python | features/agenda/GoalCard | Python | Python | Python | Python | Python |
@@ -94,22 +94,22 @@ Generado desde `apps/web/src/shared/i18n/textos/agenda.csv` con
 | `scrum.status.done` | Meta cerrada: la entregaste | features/agenda/GoalCard | Entregada | Handed in | Lliurada | Entregatuta | Rendu |
 | `scrum.status.dropped` | Meta cerrada: la dejaste | features/agenda/GoalCard | Dejada | Dropped | Deixada | Utzita | Abandonné |
 | `scrum.due.today` | Meta: el día es hoy | shared/agenda/labels | Es hoy | It is today | És avui | Gaur da | C'est aujourd'hui |
-| `scrum.due.left.one` | Meta: falta un día | shared/agenda/labels | Queda {n} día | {n} day left | Queda {n} dia | Egun {n} geratzen da | Il reste {n} jour |
+| `scrum.due.left.one` | Meta: falta un día | features/agenda/ScrumTour, shared/agenda/labels | Queda {n} día | {n} day left | Queda {n} dia | Egun {n} geratzen da | Il reste {n} jour |
 | `scrum.due.left.many` | Meta: faltan varios días | features/agenda/ScrumTour, shared/agenda/labels | Quedan {n} días | {n} days left | Queden {n} dies | {n} egun geratzen dira | Il reste {n} jours |
 | `scrum.due.late.one` | Meta: se pasó hace un día | shared/agenda/labels | Se pasó hace {n} día | {n} day late | Es va passar fa {n} dia | Duela egun {n} pasatu zen | En retard de {n} jour |
 | `scrum.due.late.many` | Meta: se pasó hace varios días | shared/agenda/labels | Se pasó hace {n} días | {n} days late | Es va passar fa {n} dies | Duela {n} egun pasatu zen | En retard de {n} jours |
 | `scrum.goal.label` | Nombre accesible de la tarjeta de una meta | features/agenda/GoalCard | Meta: {project} | Goal: {project} | Fita: {project} | Helburua: {project} | Objectif : {project} |
-| `scrum.sprint.frame.one` | Marco de la meta: va con tu sprint (tú solo, por ahora) | features/agenda/GoalCard | En tu sprint · {place} · {n} persona | In your sprint · {place} · {n} person | Al teu sprint · {place} · {n} persona | Zure sprintean · {place} · pertsona {n} | Dans ton sprint · {place} · {n} personne |
-| `scrum.sprint.frame.many` | Marco de la meta: va con tu sprint, con más gente | features/agenda/GoalCard | En tu sprint · {place} · {n} personas | In your sprint · {place} · {n} people | Al teu sprint · {place} · {n} persones | Zure sprintean · {place} · {n} pertsona | Dans ton sprint · {place} · {n} personnes |
-| `scrum.sprint.show` | Botón: ver el tablero del sprint | features/agenda/GoalCard, features/therapy/GroupCard | Ver el tablero | Show the board | Veure el tauler | Ikusi taula | Voir le tableau |
-| `scrum.sprint.hide` | Botón: ocultar el tablero del sprint | features/agenda/GoalCard, features/therapy/GroupCard | Ocultar el tablero | Hide the board | Amagar el tauler | Ezkutatu taula | Masquer le tableau |
+| `scrum.sprint.frame.one` | Marco de la meta: va con tu sprint (tú solo, por ahora) | features/agenda/GoalCard, features/agenda/ScrumTour | En tu sprint · {place} · {n} persona | In your sprint · {place} · {n} person | Al teu sprint · {place} · {n} persona | Zure sprintean · {place} · pertsona {n} | Dans ton sprint · {place} · {n} personne |
+| `scrum.sprint.frame.many` | Marco de la meta: va con tu sprint, con más gente | features/agenda/GoalCard, features/agenda/ScrumTour | En tu sprint · {place} · {n} personas | In your sprint · {place} · {n} people | Al teu sprint · {place} · {n} persones | Zure sprintean · {place} · {n} pertsona | Dans ton sprint · {place} · {n} personnes |
+| `scrum.sprint.show` | Botón: ver el tablero del sprint | features/agenda/GoalCard, features/agenda/ScrumTour, features/therapy/GroupCard | Ver el tablero | Show the board | Veure el tauler | Ikusi taula | Voir le tableau |
+| `scrum.sprint.hide` | Botón: ocultar el tablero del sprint | features/agenda/GoalCard, features/agenda/ScrumTour, features/therapy/GroupCard | Ocultar el tablero | Hide the board | Amagar el tauler | Ezkutatu taula | Masquer le tableau |
 | `scrum.sprint.find` | Botón: buscar un sprint de ese proyecto | features/agenda/GoalCard | Buscar sprint | Find a sprint | Buscar sprint | Bilatu sprinta | Trouver un sprint |
 | `scrum.entries` | Meta: título de la lista de dailies y weeklies | features/agenda/GoalCard | Dailies y weeklies | Dailies and weeklies | Dailies i weeklies | Daily eta weekly-ak | Dailies et weeklies |
 | `scrum.entries.more.one` | Botón: ver uno más | features/agenda/GoalCard | Ver {n} más | Show {n} more | Veure'n {n} més | Ikusi {n} gehiago | Voir {n} de plus |
 | `scrum.entries.more.many` | Botón: ver los demás | features/agenda/GoalCard | Ver {n} más | Show {n} more | Veure'n {n} més | Ikusi {n} gehiago | Voir {n} de plus |
 | `scrum.entry.planned.one` | Daily: cuántos checkpoints te propusiste (uno) | features/agenda/GoalCard | {n} checkpoint en el plan | {n} checkpoint planned | {n} checkpoint al pla | Checkpoint {n} planean | {n} checkpoint prévu |
 | `scrum.entry.planned.many` | Daily: cuántos checkpoints te propusiste (varios) | features/agenda/GoalCard | {n} checkpoints en el plan | {n} checkpoints planned | {n} checkpoints al pla | {n} checkpoint planean | {n} checkpoints prévus |
-| `scrum.entry.write` | Botón: apuntar un daily o weekly | features/agenda/GoalCard | Apuntar daily | Log a daily | Apuntar daily | Daily-a idatzi | Noter un daily |
+| `scrum.entry.write` | Botón: apuntar un daily o weekly | features/agenda/GoalCard, features/agenda/ScrumTour | Apuntar daily | Log a daily | Apuntar daily | Daily-a idatzi | Noter un daily |
 | `scrum.entry.title` | Nombre accesible del formulario del daily | features/agenda/EntryForm | Daily de {project} | {project} daily | Daily de {project} | {project}-ren daily-a | Daily de {project} |
 | `scrum.entry.kind` | Nombre accesible de las pastillas daily o weekly | features/agenda/EntryForm | Tipo | Type | Tipus | Mota | Type |
 | `scrum.entry.day` | Daily: el día | features/agenda/EntryForm | Día | Day | Dia | Eguna | Jour |
@@ -126,9 +126,9 @@ Generado desde `apps/web/src/shared/i18n/textos/agenda.csv` con
 | `scrum.entry.planDay` | Daily: los checkpoints que te propones hoy | features/agenda/EntryForm | Hoy me propongo | Today I will | Avui em proposo | Gaur hau egingo dut | Aujourd'hui, je compte faire |
 | `scrum.entry.planWeek` | Weekly: los checkpoints que te propones esta semana | features/agenda/EntryForm | Esta semana me propongo | This week I will | Aquesta setmana em proposo | Aste honetan hau egingo dut | Cette semaine, je compte faire |
 | `scrum.entry.save` | Botón: guardar el daily | features/agenda/EntryForm, features/agenda/ScrumTour | Commitear | Commit | Commitejar | Commit egin | Commiter |
-| `scrum.pin` | Botón: fijar la fecha de entrega como cuenta atrás | features/agenda/GoalCard | Fijar cuenta atrás | Pin countdown | Fixar compte enrere | Finkatu atzerako kontaketa | Épingler le compte à rebours |
-| `scrum.unpin` | Botón: quitar la cuenta atrás de la meta | features/agenda/GoalCard | Quitar cuenta atrás | Unpin countdown | Treure compte enrere | Kendu atzerako kontaketa | Retirer le compte à rebours |
-| `scrum.pin.title` | Título de la cuenta atrás de una meta | features/agenda/GoalCard, features/countdowns/GoalPins | Entrega de {project} | {project} hand-in | Lliurament de {project} | {project}-ren entrega | Rendu de {project} |
+| `scrum.pin` | Botón: fijar la fecha de entrega como cuenta atrás | features/agenda/GoalCard, features/agenda/ScrumTour | Fijar cuenta atrás | Pin countdown | Fixar compte enrere | Finkatu atzerako kontaketa | Épingler le compte à rebours |
+| `scrum.unpin` | Botón: quitar la cuenta atrás de la meta | features/agenda/GoalCard, features/agenda/ScrumTour | Quitar cuenta atrás | Unpin countdown | Treure compte enrere | Kendu atzerako kontaketa | Retirer le compte à rebours |
+| `scrum.pin.title` | Título de la cuenta atrás de una meta | features/agenda/GoalCard, features/agenda/ScrumTour, features/calendar/AgendaTour, features/countdowns/GoalPins | Entrega de {project} | {project} hand-in | Lliurament de {project} | {project}-ren entrega | Rendu de {project} |
 | `scrum.close.done` | Botón: marcar la meta como entregada | features/agenda/GoalCard | Entregado | Handed in | Lliurat | Entregatuta | C'est rendu |
 | `scrum.close.dropped` | Botón: dejar la meta | features/agenda/GoalCard | Dejarla | Drop it | Deixar-la | Utzi | Abandonner |
 | `scrum.reopen` | Botón: volver a abrir una meta cerrada | features/agenda/GoalCard | Reabrir | Reopen | Reobrir | Berriro ireki | Rouvrir |
@@ -142,11 +142,11 @@ Generado desde `apps/web/src/shared/i18n/textos/agenda.csv` con
 | `scrum.board.checkpoints` | Columna: checkpoints hechos | shared/agenda/SprintBoardView | Checkpoints | Checkpoints | Checkpoints | Checkpointak | Checkpoints |
 | `scrum.board.latest` | Columna: último daily o weekly | shared/agenda/SprintBoardView | Último daily | Latest daily | Últim daily | Azken daily-a | Dernier daily |
 | `scrum.board.blocker` | Columna: si está atascado | shared/agenda/SprintBoardView | Bloqueo | Blocker | Bloqueig | Blokeoa | Blocage |
-| `scrum.board.you` | Tablero: marca de tu fila | shared/agenda/SprintBoardView | tú | you | tu | zu | toi |
+| `scrum.board.you` | Tablero: marca de tu fila | features/agenda/ScrumTour, shared/agenda/SprintBoardView | tú | you | tu | zu | toi |
 | `scrum.board.noGoal` | Tablero: esa persona no tiene meta del proyecto | shared/agenda/SprintBoardView | Aún sin meta de este proyecto en su agenda. | No goal for this project in their agenda yet. | Encara sense fita d'aquest projecte a la seva agenda. | Oraindik ez du proiektu honen helbururik bere agendan. | Pas encore d'objectif pour ce projet dans son agenda. |
-| `scrum.board.doneOf` | Checkpoints hechos de los que hay | features/agenda/GoalCard, shared/agenda/SprintBoardView | {done}/{total} | {done}/{total} | {done}/{total} | {done}/{total} | {done}/{total} |
+| `scrum.board.doneOf` | Checkpoints hechos de los que hay | features/agenda/GoalCard, features/agenda/ScrumTour, shared/agenda/SprintBoardView | {done}/{total} | {done}/{total} | {done}/{total} | {done}/{total} | {done}/{total} |
 | `scrum.board.noDaily` | Tablero: aún no ha apuntado nada | shared/agenda/SprintBoardView | Sin dailies | No dailies | Sense dailies | Daily-rik ez | Aucun daily |
-| `scrum.board.flowing` | Tablero: sin atascos | shared/agenda/SprintBoardView | Fluyendo | Flowing | Fluint | Jarioan | Ça avance |
+| `scrum.board.flowing` | Tablero: sin atascos | features/agenda/ScrumTour, shared/agenda/SprintBoardView | Fluyendo | Flowing | Fluint | Jarioan | Ça avance |
 | `scrum.board.more` | Botón: ver el detalle de una persona del tablero | shared/agenda/SprintBoardView | Ver el detalle de {login} | Show {login}'s details | Veure el detall de {login} | Ikusi {login}-ren xehetasunak | Voir le détail de {login} |
 | `scrum.board.less` | Botón: ocultar el detalle de una persona del tablero | shared/agenda/SprintBoardView | Ocultar el detalle de {login} | Hide {login}'s details | Amagar el detall de {login} | Ezkutatu {login}-ren xehetasunak | Masquer le détail de {login} |
 | `scrum.board.stuckOn` | Tablero: el primer checkpoint sin hacer | shared/agenda/SprintBoardView | Va por | Working on | Va per | Honetan dabil | En est à |

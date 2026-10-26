@@ -20,18 +20,18 @@ Generado desde `apps/web/src/shared/i18n/textos/red.csv` con
 | `net.project.all` | Proyecto: todos | features/network/NetworkPage | Todos | All | Tots | Denak | Tous |
 | `net.min` | Mínimo de correcciones entre dos personas para dibujar la unión | features/network/NetworkPage | Mínimo por pareja: {n} | Minimum per pair: {n} | Mínim per parella: {n} | Bikoteko gutxienekoa: {n} | Minimum par paire : {n} |
 | `net.minLabel` | Nombre del deslizador del mínimo de correcciones por pareja (para lectores de pantalla) | features/network/NetworkPage | Mínimo por pareja | Minimum per pair | Mínim per parella | Bikoteko gutxienekoa | Minimum par paire |
-| `net.limit` | Tope de personas en el grafo | features/network/NetworkPage | Personas, como mucho | People, at most | Persones, com a molt | Pertsonak, gehienez | Personnes, au maximum |
-| `net.limit.all` | Opción del tope de personas: todas (el grafo va lento) | features/network/NetworkPage | Todas (lento) | All (slow) | Totes (lent) | Guztiak (motela) | Toutes (lent) |
-| `net.limit.slow` | Opción del tope de personas por encima de 1 500 (el grafo va lento) | features/network/NetworkPage | {n} (lento) | {n} (slow) | {n} (lent) | {n} (motela) | {n} (lent) |
-| `net.color` | Selector de qué colorea las burbujas | features/network/NetworkPage | Color según | Colour by | Color segons | Kolorea honen arabera | Couleur selon |
-| `net.color.community` | Color: grupo de gente que se corrige entre sí | features/network/NetworkPage | Comunidad | Community | Comunitat | Komunitatea | Communauté |
+| `net.limit` | Tope de personas en el grafo | features/network/NetworkPage, features/network/NetworkTour | Personas, como mucho | People, at most | Persones, com a molt | Pertsonak, gehienez | Personnes, au maximum |
+| `net.limit.all` | Opción del tope de personas: todas (el grafo va lento) | features/network/NetworkPage, features/network/NetworkTour | Todas (lento) | All (slow) | Totes (lent) | Guztiak (motela) | Toutes (lent) |
+| `net.limit.slow` | Opción del tope de personas por encima de 1 500 (el grafo va lento) | features/network/NetworkPage, features/network/NetworkTour | {n} (lento) | {n} (slow) | {n} (lent) | {n} (motela) | {n} (lent) |
+| `net.color` | Selector de qué colorea las burbujas | features/network/NetworkPage, features/network/NetworkTour | Color según | Colour by | Color segons | Kolorea honen arabera | Couleur selon |
+| `net.color.community` | Color: grupo de gente que se corrige entre sí | features/network/NetworkPage, features/network/NetworkTour | Comunidad | Community | Comunitat | Komunitatea | Communauté |
 | `net.color.endogamy` | Color: cuánto repite con la misma gente | features/network/NetworkPage | Endogamia | Endogamy | Endogàmia | Endogamia | Endogamie |
 | `net.color.cohort` | Color: año en que llegó a 42 | features/network/NetworkPage | Año de llegada | Arrival year | Any d'arribada | Iritsi zen urtea | Année d'arrivée |
 | `net.color.balance` | Color: si corrige más o le corrigen más | features/network/NetworkPage | Corrige o le corrigen | Evaluates or is evaluated | Corregeix o el corregeixen | Zuzentzen du edo zuzentzen diote | Corrections faites ou reçues |
 | `net.color.origin` | Color: del campus o de otro | features/network/NetworkPage | Del campus o de fuera | Campus or outside | Del campus o de fora | Campusekoa edo kanpokoa | Du campus ou d'ailleurs |
-| `net.campuses` | Filtro de escuelas | features/network/NetworkPage, shared/ui/CampusPicker | Escuelas | Schools | Escoles | Eskolak | Écoles |
-| `net.campuses.all` | Escuelas: todas | shared/ui/CampusPicker | Todas | All | Totes | Denak | Toutes |
-| `net.color.campus` | Color: escuela de origen | features/network/NetworkPage | Escuela | School | Escola | Eskola | École |
+| `net.campuses` | Filtro de escuelas | features/network/NetworkPage, features/network/NetworkTour, shared/ui/CampusPicker | Escuelas | Schools | Escoles | Eskolak | Écoles |
+| `net.campuses.all` | Escuelas: todas | features/network/NetworkTour, shared/ui/CampusPicker | Todas | All | Totes | Denak | Toutes |
+| `net.color.campus` | Color: escuela de origen | features/network/NetworkPage, features/network/NetworkTour | Escuela | School | Escola | Eskola | École |
 | `net.legend.community` | Leyenda: grupo y su tamaño | features/network/colors | Grupo {n} ({size}) | Group {n} ({size}) | Grup {n} ({size}) | {n}. taldea ({size}) | Groupe {n} ({size}) |
 | `net.legend.others` | Leyenda: el resto | features/network/colors | Otros ({size}) | Others ({size}) | Altres ({size}) | Besteak ({size}) | Autres ({size}) |
 | `net.legend.gives` | Leyenda: corrige más de lo que le corrigen | features/network/colors | Corrige más | Evaluates more | Corregeix més | Gehiago zuzentzen du | Corrige plus |

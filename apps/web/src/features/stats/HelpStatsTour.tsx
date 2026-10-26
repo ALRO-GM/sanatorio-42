@@ -1,4 +1,5 @@
 import { useI18n } from '../../shared/i18n'
+import { useFormat } from '../../shared/i18n/useFormat'
 import { click, cut, defineTour, Tour } from '../../shared/tour/Tour'
 
 type HelpStats = {
@@ -14,10 +15,28 @@ export const TOUR = defineTour<HelpStats>('helpStats', START, [
   ...click<HelpStats>(900, 'all', { all: true }),
   [2600, { caption: 2 }],
   ...cut<HelpStats>(4600, { scene: 1, caption: 3, cursor: 'rest' }),
-  [7000, { caption: 4 }],
+  [7000, { caption: 4, cursor: 'me' }],
+  [9000, { caption: 5 }],
   ...click<HelpStats>(9000, 'login', { open: true }),
-  [10400, { caption: 5 }],
 ])
+
+/** Las cifras de dos secciones, del mes; desde siempre, cuatro veces más. */
+const SECTIONS = [
+  {
+    id: 'consulta',
+    totals: [
+      ['sessions', 38],
+      ['helped', 29],
+    ],
+  },
+  {
+    id: 'tablon',
+    totals: [
+      ['doubts', 64],
+      ['solved', 39],
+    ],
+  },
+] as const
 
 const ROWS = [
   { login: 'mgarcia', value: 11, extra: 25, hue: 200 },
@@ -32,16 +51,16 @@ const ROWS = [
  */
 export function HelpStatsTour() {
   const { t } = useI18n()
+  const { number } = useFormat()
 
   return (
-    <Tour tour={TOUR} tab={() => t('nav.estadisticas')}>
+    <Tour tour={TOUR} tab={() => t('nav.cat.ayuda')} sub={() => t('nav.estadisticas')}>
       {(shot) => {
         const scale = shot.all ? 4 : 1
 
         return shot.scene === 0 ? (
-          <div className="tour-card">
+          <>
             <div className="tour-row">
-              <strong>{t('nav.tablon')}</strong>
               <span className={`tour-pill tour-end ${shot.all ? '' : 'on'}`}>
                 {t('rank.month')}
               </span>
@@ -49,21 +68,22 @@ export function HelpStatsTour() {
                 {t('rank.all')}
               </span>
             </div>
-            <div className="tour-row">
-              {(
-                [
-                  ['doubts', 64],
-                  ['answers', 141],
-                  ['solved', 39],
-                ] as const
-              ).map(([key, value]) => (
-                <span key={key} className="tour-item">
-                  <span className="tour-muted">{t(`stats.tablon.${key}`)}</span>
-                  <strong>{value * scale}</strong>
-                </span>
+            <div className="tour-split">
+              {SECTIONS.map(({ id, totals }) => (
+                <div key={id} className="tour-card">
+                  <strong>{t(`nav.${id}`)}</strong>
+                  {totals.map(([key, value]) => (
+                    <span key={key} className="tour-row">
+                      <span className="tour-muted">{t(`stats.${id}.${key}`)}</span>
+                      <strong key={scale} className="tour-end tour-in">
+                        {number(value * scale)}
+                      </strong>
+                    </span>
+                  ))}
+                </div>
               ))}
             </div>
-          </div>
+          </>
         ) : (
           <div className="tour-split">
             <div className="tour-card">
@@ -80,7 +100,7 @@ export function HelpStatsTour() {
                   </span>
                 </span>
               ))}
-              <span className={`tour-item ${shot.caption >= 4 ? 'on' : ''}`}>
+              <span className={`tour-item ${shot.caption >= 4 ? 'on' : ''}`} data-tour="me">
                 <strong>9</strong>
                 <span className="tour-avatar">P</span>
                 <span>plopez-l</span>

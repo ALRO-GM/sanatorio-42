@@ -97,6 +97,12 @@ Clases de `styles/tour.css`, que ya se ven bien en todos los estilos y temas:
 | `tour-pop`, `tour-side`, `tour-box` | Ventanita flotante, lateral o de buzón |
 | `tour-notice`, `tour-chip`, `tour-code`, `tour-switch`, `tour-input`, `tour-select`, `tour-menu`, `tour-check` | Avisos, etiquetas, códigos y controles |
 | `tour-chart`, `tour-chart-line` (`.me`, `.avg`, `.other`), `tour-chart-dot` | Gráfica de líneas en miniatura (Avance) |
+| `tour-count` | Número pequeño dentro de una pastilla (sentados, eventos de un tipo) |
+| `tour-tabs` (`> span.on`) | Pestañas subrayadas dentro de una sección |
+| `tour-live` | Punto rojo que late delante de «en vivo» |
+| `tour-timer` | Reloj o cuenta atrás con cifras de ancho fijo |
+| `tour-stack` / `tour-slide` | Lista que se ordena arrastrando: cada fila se desliza a su `top` |
+| `tour-pan` (`.tour-seats.flip`) | Plano recortado que se gira y se ve al 100 % |
 | `tour-in` | Aparece con un fundido corto |
 | `tour-split lean` | Dos columnas, la izquierda más ancha: una gráfica y sus opciones |
 | `tour-sort-row` / `tour-sort-col` (`--n`), `tour-sort` (`--i`, `.on`, `.lifted`), `tour-grip` | Piezas que se ordenan arrastrando: cada una en su hueco `--i`, y se desliza a la vez que el ratón |
@@ -140,17 +146,17 @@ tema (nunca un color suelto) y se apunta en esta tabla.
 | `board` | Ayuda › Proyectos | Elegir proyecto en el grafo, preguntar, marcar la respuesta |
 | `therapy` | Ayuda › Sprints | Unirse, abrir un grupo con puestos y días |
 | `boards` | Ayuda › Pizarras | Apuntarse, proponer, códigos de asistencia |
-| `agenda` | Calendario | Tipos, detalle de un evento, responder al aviso |
-| `network` | Red | Burbujas, ficha, buscar, escala de color |
-| `clusters` | Clústeres | Sala, resaltar tu proyecto, ficha de un puesto, avisar de una avería |
-| `record` | Expediente | Nivel, XP, estado de salud |
+| `agenda` | Calendario | Filtros de tipo con su número, detalle de un evento, responder, fijar su cuenta atrás, pestaña Cuentas atrás con el reloj, fijar la entrega de una meta |
+| `network` | Datos › Red | Burbujas, ficha, buscar, periodo común, sumar una escuela (color por escuela), tope de personas |
+| `clusters` | Clústeres | Pestañas con sus sentados, resaltar tu proyecto, ficha de un puesto, avería de un puesto libre, colocación plegada (invertir), ajustar / 100 % |
+| `record` | Perfil › Perfil | Nivel y XP, ordenar los bloques en Personalizar (ventana), pace de hoy y de tu intra, plazos y black hole, compararte en Avance |
 | `mailbox` | Buzón (cabecera) | Avisos sin leer, pestañas de avisos y conversaciones, a dónde llevan |
 | `inbox` | Incidencias y sugerencias (menú de la cuenta) | Elegir tipo, escribir, la respuesta en lo que has enviado |
-| `helpStats` | Estadísticas | Periodo, cifras de una sección, clasificación con fotos, tu fila, ir a un expediente |
+| `helpStats` | Ayuda › Estadísticas | Periodo, cifras de cada sección, clasificación con fotos, tu fila, ir a un perfil |
 | `chess` | Ayuda › Not-games (ajedrez) | Mover, pregunta a los dos, quien acierta mueve, castigo por fallar |
 | `notGames` | Ayuda › Not-games | Elegir modo, contestar, ver la buena y por qué, marcador con vidas |
-| `exams` | Exámenes | Aviso en vivo en la pestaña, quién está y su nota, intentos hasta aprobar |
-| `scrum` | Agenda | Marcar un checkpoint, daily con un atasco de la lista, tablero del sprint |
+| `exams` | Datos › Exámenes | Aviso en vivo en la pestaña, quién está y su estado, se pone al día solo, filtrar por plan, intentos hasta aprobar |
+| `scrum` | Perfil › Agenda | Nueva meta (fecha, % y checkpoints), marcar un checkpoint, fijar la entrega como cuenta atrás, daily con un atasco de la lista, tablero del sprint |
 | `gitCourse` | Curso de git (Not-games) | Elegir punto, animación y teoría, terminal y estrellas, misiones de grupo |
 | `progress` | Datos › Avance | Tu línea y la media, añadir un campus con su línea, el periodo, medir por horas, la ficha de un hito |
 | `gitCourse` | Ayuda › Not-games › Curso de git | Elegir punto, animación y teoría, terminal y estrellas, misiones de grupo |
