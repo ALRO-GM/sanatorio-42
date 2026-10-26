@@ -133,3 +133,94 @@ la fila 1 abajo, el puesto 1 a la izquierda, y cada puesto un poco desplazado
 hacia donde se sienta la persona, con el canto grueso del lado de su pantalla.
 Opciones (se recuerdan en el navegador): invertir en vertical, en horizontal,
 hacia dónde miran los asientos, y alinear sin desplazamiento.
+
+### Clústeres grandes
+
+Pedido por Alberto el 2026-10-26 al mirar París (campus 1) con el selector de
+campus: los clústeres de allí (`f0`, `f1`, `f1b`, `f2`, `f4`, `f6`, de unos
+13 × 23 puestos) no cabían y había que deslizar el plano de lado, y moverse
+por él gastaba mucha CPU.
+
+- **Nombres.** `parseHost` (API, `modules/map/seat-layout.ts`) y `parseSeat`
+  (web, `shared/seats.ts`) leen igual `f1r11s15` (clúster `f1`) y `f1br2s8`
+  (`f1b`, la entreplanta de la planta 1). Los nombres cortos de letra y número
+  que no son `c1`, `c2`… se enseñan en mayúsculas, como se rotulan allí: «F1B»
+  en la pastilla y «F1B · Fila 2 · Puesto 8» en la ficha. «Clúster F1B» no
+  cabría en las pastillas y no es como lo llama nadie; `c1` sigue siendo
+  «Clúster 1». Lo demás (`bess-f1`, `made-f0a`) va tal cual.
+- **«Puestos» de broma.** Las cuentas del staff y los bots (norminet en
+  `POISSON POISSON POISSON 🐟🐟🐟`, `Hogwarts`, `Frozen 🥶`, `bocal`, `oven`…)
+  no son puestos: `parseHost` da `null` si no acaban en `r<fila>s<puesto>` o
+  si el clúster no es letras, números y guiones (16 como mucho), así que no
+  forman clúster. En el mapa salen en «Sin sitio en el plano», como antes; en
+  el mapa de calor y la red de asientos, no cuentan. Comprobado con la copia
+  de producción del 2026-10-26: de 2403 nombres de puesto que se colocan,
+  ninguno cambia; los que no se colocaban siguen sin colocarse.
+- **Erratas.** El plano se completa dentro del rectángulo de los puestos
+  vistos de cada clúster, así que un número mal escrito (`f1r13s93` en un
+  clúster de 23 por fila) lo convertía en una cuadrícula gigante. Ahora el
+  tamaño sale de `clusterBounds`: de cada clúster, filas y puestos se miden
+  por separado, del número más bajo visto hacia arriba, y cada número entra
+  solo si no pasa del doble de lo que ya mide más 10 (`MIN_JUMP`); nunca pasa
+  de 50 (`MAX_LINE`). Lo que queda fuera no se dibuja: si hay alguien
+  sentado, sale en «Sin sitio en el plano»; en el mapa de calor, sus horas
+  siguen en las cuentas del clúster pero sin casilla. Un clúster del que solo
+  hay erratas no sale. La regla es holgada a propósito: en producción hay
+  campus vistos a medias (filas 1, 8, 15 y 16 de un clúster), y ninguno de
+  los 89 clústeres de la copia cambia de tamaño con ella.
+- **Caber a lo ancho** (`features/map/fit.ts`). El plano mide su caja
+  (`ResizeObserver`) y encoge los puestos hasta que la fila cabe: el tamaño
+  llega en `--seat` y `--seat-gap`, y lo demás (relieve, desplazamiento,
+  cantos) va en proporción. Según lo que quede, tres formas: con cara
+  (28 px o más), con la inicial (18–27 px) y solo el color, como un punto
+  (8–17 px). Con iniciales o puntos los puestos van planos, sin sombras ni
+  degradados, y el color de cada estado pasa al fondo (dorado, verde, azul,
+  elegido). Por debajo de 8 px no se encoge más y el plano vuelve a
+  deslizarse. Si el clúster no cabe a tamaño real (48 px; 40 px en una caja
+  de 520 px o menos), sale «Ajustar» / «100 %» a la derecha de los
+  resaltados; «100 %» lo deja a tamaño real, con caras, y se recuerda con el
+  resto de la vista (`fit` en `look.ts`). Los de Madrid caben y no cambian.
+  En un móvil de 390 px, un clúster de 30 puestos por fila cabe con puntos.
+- **CPU.** Lo que más costaba era que cada movimiento del ratón sobre el
+  plano (la ficha que flota) volvía a pintar todos los puestos: unos 600
+  botones con ocho manejadores nuevos cada uno, su `aria-label` y su cara.
+  Ahora la cuadrícula (`SeatGrid`) y cada puesto (`SeatButton`) van
+  memorizados y reciben solo valores sueltos; los clics y el ratón los recoge
+  la cuadrícula con un manejador por evento (delegación, con `data-host`); los
+  valores de fábrica (`picked`, `showReservation`) son constantes del módulo.
+  Pasar el ratón, abrir una ficha o el refresco del mapa del Peer to peer
+  (cada minuto, con lo mismo) ya no repintan los puestos. Además: la ficha
+  fijada sigue a su puesto como mucho una vez por fotograma; las caras se
+  piden al acercarse (`loading="lazy"`), se decodifican aparte
+  (`decoding="async"`) y van con `key={login}`, para que el «no ha cargado»
+  de alguien no pase a quien se siente luego en el mismo sitio; el apagado de
+  los resaltados es solo opacidad (el `filter: grayscale` en cientos de
+  puestos era caro de pintar); y con iniciales o puntos no hay sombras,
+  degradados ni el brillo animado del «perfecto». Un puesto son 1,65 nodos
+  de media (el botón y, si hay alguien, su cara o inicial y el punto de «con
+  Peer4U abierto»). El mapa de calor (`SeatHeatMap`) tenía lo mismo: al pasar
+  el ratón repintaba todas las casillas de todos los clústeres y la tabla
+  plegada con todos los puestos; ahora clústeres y tabla van memorizados.
+  Medidas del 2026-10-26 (traza de Chrome sin pantalla, compilado de
+  producción del simulado, París de mentira con `f1` de 20 × 30 y 267
+  personas; mediana de tres pasadas, ms de hilo principal ocupado):
+
+  | Acción (escritorio, 1280 px)            | Antes     | Ajustar    | 100 %     |
+  | --------------------------------------- | --------- | ---------- | --------- |
+  | Ratón por 60 puestos (solo script)      | 630 (207) | 365 (65)   | 552 (79)  |
+  | Cambiar de clúster tres veces           | 162       | 154        | 183       |
+  | Invertir en horizontal y volver         | 120       | 36         | 81        |
+  | Resaltar «Mi círculo» y quitarlo        | 56        | 56         | 64        |
+
+  En el móvil (390 px), cambiar de clúster tres veces pasa de 173 a 108 ms e
+  invertir, de 83 a 49. Con el servidor de desarrollo (React sin compilar),
+  el script de pasar el ratón por 60 puestos bajó de 464 a 185 ms. Lo que
+  queda al pasar el ratón es sobre todo pintar y componer la ficha flotante.
+- **El simulado** (`shared/api/mock/paris.ts`): al elegir París en el pie,
+  un campus con `f0`, `f1` (20 × 30), `f1b` (vacío), `f2`, `f4` y `f6`, unos
+  500 sentados con logins inventados, algunos ocupados sin cara, algún puesto
+  roto y dos «puestos» de broma sin sitio. Como la API, cuenta como ocupado
+  también a quien no se ve.
+- **Las cuentas de las pastillas.** Cada pastilla lleva la gente sentada en
+  el clúster (`occupied` de la API: con cara o sin ella), también cuando es 0.
+

@@ -6,8 +6,7 @@
 
 import type { SeatHeatCell, SeatHeatCluster } from '@sanatorio/contracts'
 
-import { hostAt, parseHost } from '../map/index.js'
-import type { SeatPosition } from '../map/index.js'
+import { clusterBounds, hostAt, parseHost } from '../map/index.js'
 import type { SeatSession } from './seating.rules.js'
 
 const HOUR_MS = 3_600_000
@@ -54,26 +53,19 @@ export function seatHeatOf(
     }
   }
 
-  // El tamaño de cada clúster y la letra de sus puestos (`s` o `p`).
-  const bounds = new Map<string, SeatPosition>()
-
-  for (const host of [...known, ...usage.keys()]) {
-    const position = parseHost(host)
-
-    if (position === null) continue
-
-    const seen = bounds.get(position.cluster)
-
-    bounds.set(position.cluster, {
-      cluster: position.cluster,
-      separator: seen?.separator ?? position.separator,
-      row: Math.max(seen?.row ?? 0, position.row),
-      seat: Math.max(seen?.seat ?? 0, position.seat),
-    })
-  }
+  // El tamaño de cada clúster y la letra de sus puestos (`s` o `p`), como en
+  // el mapa: un puesto con una errata en el número no agranda la cuadrícula
+  // (`clusterBounds`). Sus horas siguen en las cuentas del clúster.
+  const bounds = clusterBounds(
+    [...known, ...usage.keys()]
+      .map((host) => parseHost(host))
+      .filter((position) => position !== null),
+  )
 
   let max = 0
   const clusters = [...bounds.values()]
+    // Un clúster del que solo se han visto erratas no se dibuja.
+    .filter((limit) => limit.row > 0 && limit.seat > 0)
     // `numeric` para que `c10` vaya después de `c2`, como en el mapa.
     .sort((a, b) => a.cluster.localeCompare(b.cluster, 'en', { numeric: true }))
     .map((limit): SeatHeatCluster => {

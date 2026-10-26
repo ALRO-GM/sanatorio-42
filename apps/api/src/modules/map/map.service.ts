@@ -34,7 +34,7 @@ import { domainError } from '../../core/errors.js'
 import { parse } from '../../core/validation.js'
 import { BROKEN_FOR_MS, MAX_BROKEN_PER_PERSON } from './broken-seats.js'
 import type { BrokenSeats } from './broken-seats.js'
-import { hostAt, parseHost } from './seat-layout.js'
+import { clusterBounds, hostAt, isInside, parseHost } from './seat-layout.js'
 import type { SeatPosition } from './seat-layout.js'
 
 export type MapServiceOptions = {
@@ -305,17 +305,19 @@ export function createMapService(options: MapServiceOptions) {
       // conocidos de cada cluster, las casillas que faltan se dan por puestos
       // libres. Así se pueden elegir para una terapia aunque nadie se haya
       // sentado nunca en ellos. El nombre sigue la forma que usa ese cluster.
-      const bounds = new Map<string, SeatPosition>()
+      // Un puesto que queda muy lejos del resto (una errata en el número) no
+      // agranda el rectángulo: no se dibuja y, si hay alguien, sale en la lista
+      // de los que no se pueden colocar (`clusterBounds`, `docs/asientos.md`).
+      const bounds = clusterBounds(seats.values())
 
-      for (const seat of seats.values()) {
-        const known = bounds.get(seat.cluster)
+      for (const [host, seat] of seats) {
+        if (isInside(seat, bounds)) continue
 
-        bounds.set(seat.cluster, {
-          cluster: seat.cluster,
-          separator: seat.separator,
-          row: Math.max(known?.row ?? 0, seat.row),
-          seat: Math.max(known?.seat ?? 0, seat.seat),
-        })
+        if (seat.occupant !== null) {
+          unplaced.push({ host, login: seat.occupant.login, duty: seat.occupant.duty })
+        }
+
+        seats.delete(host)
       }
 
       for (const limit of bounds.values()) {

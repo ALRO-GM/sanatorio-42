@@ -1,4 +1,4 @@
-import { Fragment, useMemo, useState } from 'react'
+import { Fragment, memo, useCallback, useMemo, useState } from 'react'
 import type { CSSProperties, KeyboardEvent } from 'react'
 
 import type { SeatHeat, SeatHeatCell, SeatHeatCluster } from '@sanatorio/contracts'
@@ -80,40 +80,26 @@ export function SeatHeatMap({ heat }: { heat: SeatHeat }) {
     [heat.clusters],
   )
 
+  // Siempre los mismos: con ellos, pasar el ratón (que cambia `hovered`) no
+  // vuelve a pintar los clústeres (en París, más de mil casillas) ni la tabla.
+  const label = useCallback(
+    (cell: SeatHeatCell): string => cellText(cell, { t, tn }, number),
+    [t, tn, number],
+  )
+  const hover = useMemo<Hover>(
+    () => ({
+      show: (cell) => (event) => {
+        setHovered({ cell, anchor: event.currentTarget })
+      },
+      hide: () => {
+        setHovered(null)
+      },
+    }),
+    [],
+  )
+
   if (heat.clusters.length === 0) {
     return <p className="estado">{t('seats.heat.empty')}</p>
-  }
-
-  const label = (cell: SeatHeatCell): string => cellText(cell, { t, tn }, number)
-  const table: Column<Row>[] = [
-    {
-      id: 'cluster',
-      label: t('seats.heat.col.cluster'),
-      cell: (row) => clusterName(row.cluster, t),
-      sort: (row) => row.cluster,
-      first: 'asc',
-    },
-    { id: 'seat', label: t('seats.heat.col.seat'), cell: (row) => row.host },
-    {
-      id: 'hours',
-      label: t('seats.heat.col.hours'),
-      cell: (row) => number(row.hours),
-      sort: (row) => row.hours,
-    },
-    {
-      id: 'people',
-      label: t('seats.heat.col.people'),
-      cell: (row) => number(row.people),
-      sort: (row) => row.people,
-    },
-  ]
-  const hover = {
-    show: (cell: SeatHeatCell) => (event: { currentTarget: Element }) => {
-      setHovered({ cell, anchor: event.currentTarget })
-    },
-    hide: (): void => {
-      setHovered(null)
-    },
   }
 
   return (
@@ -146,14 +132,46 @@ export function SeatHeatMap({ heat }: { heat: SeatHeat }) {
         )}
       </div>
 
-      <details className="heat-table">
-        <summary>{t('seats.heat.table')}</summary>
-        <p className="hint">{tn('seats.heat.summary', heat.days)}</p>
-        <DataTable id="seat-heat" rows={ranked} columns={table} rowKey={(row) => row.host} />
-      </details>
+      <HeatTable rows={ranked} days={heat.days} />
     </div>
   )
 }
+
+/** «Ver como tabla»: todos los puestos, memorizada para que el ratón no la repinte. */
+const HeatTable = memo(function HeatTable({ rows, days }: { rows: Row[]; days: number }) {
+  const { t, tn } = useI18n()
+  const { number } = useFormat()
+  const table: Column<Row>[] = [
+    {
+      id: 'cluster',
+      label: t('seats.heat.col.cluster'),
+      cell: (row) => clusterName(row.cluster, t),
+      sort: (row) => row.cluster,
+      first: 'asc',
+    },
+    { id: 'seat', label: t('seats.heat.col.seat'), cell: (row) => row.host },
+    {
+      id: 'hours',
+      label: t('seats.heat.col.hours'),
+      cell: (row) => number(row.hours),
+      sort: (row) => row.hours,
+    },
+    {
+      id: 'people',
+      label: t('seats.heat.col.people'),
+      cell: (row) => number(row.people),
+      sort: (row) => row.people,
+    },
+  ]
+
+  return (
+    <details className="heat-table">
+      <summary>{t('seats.heat.table')}</summary>
+      <p className="hint">{tn('seats.heat.summary', days)}</p>
+      <DataTable id="seat-heat" rows={rows} columns={table} rowKey={(row) => row.host} />
+    </details>
+  )
+})
 
 type Hover = {
   show: (cell: SeatHeatCell) => (event: { currentTarget: Element }) => void
@@ -168,8 +186,11 @@ const STEPS: Record<string, [row: number, seat: number]> = {
   ArrowRight: [0, 1],
 }
 
-/** Un clúster en miniatura: números de puesto arriba, de fila a la izquierda y sus cuentas debajo. */
-function HeatCluster({
+/**
+ * Un clúster en miniatura: números de puesto arriba, de fila a la izquierda y
+ * sus cuentas debajo. Memorizado: solo se repinta si cambia lo suyo.
+ */
+const HeatCluster = memo(function HeatCluster({
   cluster,
   scale,
   label,
@@ -282,7 +303,7 @@ function HeatCluster({
       </ul>
     </figure>
   )
-}
+})
 
 /** La ficha de un puesto al pasar o enfocar: fija en la ventana, para que nada la recorte. */
 function HeatTip({ text, anchor }: { text: string; anchor: Element }) {

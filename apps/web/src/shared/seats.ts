@@ -23,11 +23,18 @@ export function parseSeat(host: string): SeatPosition | null {
   return { cluster, row: Number(row), seat: Number(seat) }
 }
 
-/** "Cluster 1" para `c1`; el nombre tal cual si el campus los llama de otra forma. */
+/**
+ * Cómo se llama un clúster: "Clúster 1" para `c1`. Los nombres cortos de letra
+ * y número de otros campus van en mayúsculas, como los rotulan allí: en París,
+ * `f1b` (la entreplanta de la planta 1) es «F1B», no «Clúster F1B», que no
+ * cabría en las pastillas y no es como lo llama nadie. Lo demás, tal cual.
+ */
 export function clusterName(id: string, t: Translate): string {
   const match = /^c(\d+)$/.exec(id)
 
-  return match === null ? id : t('map.cluster', { n: match[1] ?? '' })
+  if (match !== null) return t('map.cluster', { n: match[1] ?? '' })
+
+  return /^[a-z]{1,2}\d+[a-z]?$/.test(id) ? id.toUpperCase() : id
 }
 
 /**
