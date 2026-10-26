@@ -29,11 +29,16 @@ services:
       # Donde la guardia de la máquina deja escrito si hay corte por los límites
       # del plan (infra/scripts/limits-guard.sh). Está en el volumen de datos.
       GUARD_LEVEL_FILE: /data/guard-level
+      # El montón de Node, por debajo del tope del contenedor. Con París (unas
+      # 400 000 correcciones y 1,2 millones de filas de proyectos) el de
+      # fábrica (~250 MB con 512 MB de tope) se llenó el 2026-10-26.
+      NODE_OPTIONS: --max-old-space-size=1536
     volumes:
       - data:/data
     # No publica puertos: solo Caddy habla con ella, por la red interna.
-    # La app es pequeña; el tope evita que un fallo se coma la máquina.
-    mem_limit: 512m
+    # El tope evita que un fallo se coma la máquina (24 GB): 2 GB dejan sitio
+    # al montón de Node y a SQLite con los campus grandes.
+    mem_limit: 2g
     # La app no necesita ningún privilegio del sistema: escucha en un puerto
     # alto y escribe en su volumen. Sin capacidades y sin poder ganarlas, un
     # fallo en la app se queda dentro de la app.
