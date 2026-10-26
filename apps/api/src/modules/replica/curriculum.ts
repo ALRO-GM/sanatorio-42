@@ -98,11 +98,14 @@ const pythonModules = Array.from(
 /**
  * Círculo de partida de cada proyecto, por slug.
  *
- * El plan nuevo solo está hasta el círculo 3 (más los exámenes, que llevan el
- * círculo en el nombre): es lo que se ha podido comprobar. El resto se aprende,
- * salvo ft_transcendence, que cierra el último círculo en los dos planes:
- * hasta que alguien del plan nuevo la termine no se aprendería, y sin ella
- * quien aprueba el examen 6 salía con el 100 % (pasó en Avance).
+ * El plan nuevo, entero desde el 2026-10-26: los círculos 0 a 3 comprobados al
+ * principio y los 4 a 6 sacados de los datos (en qué rango validaba la gente
+ * cada proyecto). RAG against the machine es del 5 aunque los votos lo daban
+ * en el 4: 4 de 5 validaron el rango 4 sin él y los 3 del rango 5 lo tenían.
+ * ft_transcendence cierra el último círculo, como en el clásico: sin ella,
+ * quien aprobaba el examen 6 salía con el 100 % en Avance. Lo sembrado manda
+ * sobre lo aprendido; más allá del 3 se siguen aprendiendo los proyectos que
+ * no estén aquí, por si 42 añade alguno.
  */
 const SEED: Record<Track, readonly (readonly string[])[]> = {
   classic: COMMON_CORE.map((circle) =>
@@ -121,8 +124,14 @@ const SEED: Record<Track, readonly (readonly string[])[]> = {
       '42next-exam-rank-02',
     ],
     ['codexion', 'fly-in', 'call-me-maybe', '42next-exam-rank-03'],
-    ['42next-exam-rank-04'],
-    ['42next-exam-rank-05'],
+    ['42next-exam-rank-04', 'netpractice', 'pac-man'],
+    [
+      '42next-exam-rank-05',
+      'inception',
+      'the-answer-protocol',
+      'agent-smith',
+      'rag-against-the-machine',
+    ],
     ['42next-exam-rank-06', 'ft_transcendence'],
   ],
 }
