@@ -12,6 +12,10 @@
  * 3. **Crítico** (`critical`): entrar y ver quién puede ayudarte y dónde está.
  *    Solo para cuando la cuota de la hora está casi a cero.
  *
+ * Cuánto puede bajar el trabajo de fondo depende de la hora (`budget.ts`): de
+ * día respeta la reserva; de noche y en los últimos minutos de cada hora gasta
+ * lo que de otro modo se perdería, por orden de prioridad (`allowsBulk`).
+ *
  * Además de la cuota horaria, que dice 42 en cada respuesta, se puede poner un
  * tope diario o mensual desde el panel; el de cada día es lo que queda del mes
  * entre los días que faltan para que se renueve.
@@ -23,8 +27,10 @@
  */
 
 import type {
+  BudgetMode,
   FortyTwoQuota,
   FortyTwoQuotaSettings,
+  QuotaBudget,
   QuotaLevel,
   QuotaStatus,
 } from '@sanatorio/contracts'
@@ -36,6 +42,16 @@ import { periodOf } from '../../core/period.js'
 import { parse } from '../../core/validation.js'
 import type { FortyTwoClient } from '../../integrations/forty-two/client.js'
 import { dayOf, isoAt } from '../../core/time.js'
+import {
+  BULK_LEASE_MS,
+  BULK_ORDER,
+  CRITICAL_FLOOR,
+  budgetAt,
+  dayOnly,
+  windowStart,
+} from './budget.js'
+import type { Budget, BudgetConfig, BulkJob } from './budget.js'
+import { formatWindow } from '../../core/night-window.js'
 
 type QuotaTier = 'background' | 'deferrable' | 'critical'
 
@@ -56,17 +72,33 @@ type QuotaOptions = {
   priority?: (login: string) => boolean
   log?: (message: string) => void
   now?: () => number
+  /** Cómo se reparte la cuota según la hora. Sin él, siempre de día (lo de antes). */
+  budget?: BudgetConfig
+  /** `true` si alguien ha usado la web hace poco: entonces no hay modo noche. */
+  isActive?: () => boolean
+}
+
+/** Lo que se guarda en `sync_state` para `npm run sync:status`, que es otro proceso. */
+export type BudgetState = Omit<QuotaBudget, 'resetsAt'>
+
+/** Clave de `sync_state` con el modo de la cuota. */
+export const BUDGET_STATE_KEY = 'budget'
+
+/**
+ * Lo que tiene que subir de golpe lo que queda en la hora para dar por hecho
+ * que la cuota se ha renovado. Entre dos lecturas seguidas nunca sube sola.
+ */
+const RESET_JUMP = 100
+
+const MODE_NAMES: Record<BudgetMode, string> = {
+  day: 'día',
+  night: 'noche',
+  spend: 'gastar lo que sobra',
 }
 
 const MINUTE = 60_000
 const HOUR = 60 * MINUTE
 const DAY = 24 * HOUR
-
-/**
- * Por debajo de esto no se hace desde una visita ninguna llamada a 42: lo poco
- * que queda es para que la gente pueda seguir entrando (el login son dos).
- */
-const CRITICAL_FLOOR = 40
 
 /** Parte del tope del día a partir de la que se frena cada escalón. */
 const DAY_SHARE: Record<Exclude<QuotaTier, 'critical'>, number> = {
@@ -110,6 +142,8 @@ export function createQuota(options: QuotaOptions) {
   const now = options.now ?? Date.now
   const log = options.log ?? (() => undefined)
   const priority = options.priority ?? (() => false)
+  const budgetConfig = options.budget ?? dayOnly(hourlyReserve)
+  const isActive = options.isActive ?? (() => false)
   const runners = new Map<QuotaTask, (login: string) => Promise<unknown>>()
 
   let settings: FortyTwoQuotaSettings = DEFAULT_QUOTA
@@ -127,8 +161,23 @@ export function createQuota(options: QuotaOptions) {
   let queued = 0
   let serving: string | null = null
   const today = (): string => dayOf(now())
+  /** El modo de la última vez que se miró, y desde cuándo. */
+  let mode: BudgetMode | null = null
+  let modeSince = now()
+  /** La hora de cuota en la que hubo noche o gasto final: lo aplazable puede bajar más. */
+  let lowWindow = -Infinity
+  /** Lo último que dijo 42 que quedaba, para ver cuándo se renueva. */
+  let lastReading: number | undefined
+  let lastReset: QuotaBudget['lastReset'] = null
+  /** Si hay que guardar el modo en `sync_state`. */
+  let budgetDirty = false
+  /** Cuándo quiso gastar por última vez cada tarea de volumen. */
+  const wanting = new Map<BulkJob, number>()
 
-  /** Apunta lo pedido a 42 desde la última vez que se miró. */
+  /**
+   * Apunta lo pedido a 42 desde la última vez que se miró, y si lo que queda en
+   * la hora ha subido de golpe: la cuota se ha renovado.
+   */
   const sample = (): void => {
     const made = client.requestCount()
 
@@ -139,17 +188,67 @@ export function createQuota(options: QuotaOptions) {
     }
 
     seen = made
+
+    const reading = client.hourlyRemaining()
+
+    if (reading !== undefined && lastReading !== undefined && reading >= lastReading + RESET_JUMP) {
+      lastReset = { at: isoAt(now()), from: lastReading, to: reading }
+      budgetDirty = true
+      log(`cuota de 42 renovada: quedaban ${lastReading}, ahora ${reading}`)
+    }
+
+    lastReading = reading ?? lastReading
   }
 
   /**
    * Lo que queda en la hora según la última respuesta de 42.
    *
-   * Si hace más de una hora que no se pide nada, ese dato ya no vale: la cuota
-   * se ha renovado. Sin esto, con todo parado por falta de cuota nadie haría la
-   * petición que permite enterarse de que ha vuelto.
+   * Si la última petición es de antes de la hora en punto, ese dato ya no vale:
+   * la cuota se ha renovado. Sin esto, con todo parado por falta de cuota nadie
+   * haría la petición que permite enterarse de que ha vuelto, y se perderían
+   * los primeros minutos de cada hora (antes se esperaba una hora entera desde
+   * la última petición).
    */
   const hourlyRemaining = (): number | undefined =>
-    now() - askedAt >= HOUR ? undefined : client.hourlyRemaining()
+    askedAt < windowStart(now()) ? undefined : client.hourlyRemaining()
+
+  /** El reparto de ahora. Avisa en el registro cuando cambia de modo. */
+  function budget(): Budget {
+    const current = budgetAt(budgetConfig, now(), isActive())
+
+    if (current.mode !== mode) {
+      log(
+        `cuota de 42: modo ${MODE_NAMES[current.mode]}` +
+          (current.paced ? '' : `, la copia baja hasta ${current.bulkReserve}`),
+      )
+      mode = current.mode
+      modeSince = now()
+      budgetDirty = true
+    }
+    if (current.mode !== 'day') {
+      lowWindow = windowStart(now())
+    }
+
+    return current
+  }
+
+  /**
+   * La reserva de lo aplazable de las personas. Si en esta hora la copia ha
+   * bajado de la reserva de día (noche o gasto final) y alguien llega, no se le
+   * hace esperar a la hora siguiente: le vale el suelo con margen, que la copia
+   * nunca toca porque su rampa va por encima.
+   */
+  const deferrableReserve = (): number =>
+    budget().mode !== 'day' || lowWindow === windowStart(now())
+      ? Math.min(hourlyReserve, CRITICAL_FLOOR + budgetConfig.spendMargin)
+      : hourlyReserve
+
+  const defaultReserve = (tier: QuotaTier): number =>
+    tier === 'critical'
+      ? CRITICAL_FLOOR
+      : tier === 'deferrable'
+        ? deferrableReserve()
+        : hourlyReserve
 
   /** Lo que se puede gastar hoy, o `null` si no hay tope diario ni mensual. */
   const allowance = (): number | null => {
@@ -179,9 +278,7 @@ export function createQuota(options: QuotaOptions) {
     const remaining = hourlyRemaining()
     // Antes de la primera respuesta no se sabe cuánto queda; se asume que sí,
     // porque la propia respuesta lo dirá.
-    const hourly =
-      remaining === undefined ||
-      remaining > (reserve ?? (tier === 'critical' ? CRITICAL_FLOOR : hourlyReserve))
+    const hourly = remaining === undefined || remaining > (reserve ?? defaultReserve(tier))
 
     if (tier === 'critical' || !hourly) {
       return hourly
@@ -193,6 +290,61 @@ export function createQuota(options: QuotaOptions) {
     const cap = allowance()
 
     return cap === null || spentToday < cap * DAY_SHARE[tier]
+  }
+
+  /**
+   * `true` si una tarea de volumen puede gastar ahora.
+   *
+   * De día, lo de siempre: su reserva (`dayReserve`). Fuera del día, la reserva
+   * del modo, y por turno: si una tarea de más prioridad ha querido gastar hace
+   * menos de `BULK_LEASE_MS`, esta espera. La que termina o falla deja de
+   * pedir, y su turno caduca solo.
+   */
+  function allowsBulk(job: BulkJob, dayReserve: number): boolean {
+    const current = budget()
+
+    if (current.paced) {
+      return allows('background', dayReserve)
+    }
+    if (!allows('background', current.bulkReserve)) {
+      return false
+    }
+
+    const at = now()
+
+    wanting.set(job, at)
+
+    return BULK_ORDER.slice(0, BULK_ORDER.indexOf(job)).every(
+      (other) => at - (wanting.get(other) ?? -Infinity) >= BULK_LEASE_MS,
+    )
+  }
+
+  /**
+   * La reserva del mantenimiento (puestos, cambios, novedades). De día, la suya
+   * de siempre; fuera del día, como mucho el suelo del modo: la rampa de la
+   * copia le deja sitio y no se queda sin turno.
+   */
+  const upkeep = (dayReserve: number): number => {
+    const current = budget()
+
+    return current.paced ? dayReserve : Math.min(dayReserve, current.floor)
+  }
+
+  /** `true` si la copia inicial va con su pausa entre peticiones (de día). */
+  const paced = (): boolean => budget().paced
+
+  /** Lo que se enseña y se guarda del modo. */
+  const budgetState = (): BudgetState => {
+    const current = budget()
+
+    return {
+      mode: current.mode,
+      since: isoAt(modeSince),
+      bulkReserve: current.bulkReserve,
+      nightWindow: formatWindow(budgetConfig.nightWindow),
+      timeZone: budgetConfig.timeZone,
+      lastReset,
+    }
   }
 
   const level = (): QuotaLevel =>
@@ -207,6 +359,17 @@ export function createQuota(options: QuotaOptions) {
     }
 
     syncedAt = now()
+
+    // El modo vive en memoria; se guarda al cambiar para que lo vea `sync:status`.
+    if (budgetDirty) {
+      budgetDirty = false
+      await db.execute({
+        sql: `INSERT INTO sync_state (key, value, updated_at) VALUES (?, ?, ?)
+              ON CONFLICT (key) DO UPDATE SET
+                value = excluded.value, updated_at = excluded.updated_at`,
+        args: [BUDGET_STATE_KEY, JSON.stringify(budgetState()), isoAt(now())],
+      })
+    }
 
     if (unsaved > 0) {
       const spent = unsaved
@@ -253,6 +416,10 @@ export function createQuota(options: QuotaOptions) {
 
   return {
     allows,
+    allowsBulk,
+    upkeep,
+    paced,
+    budget: budgetState,
     level,
     refresh,
 
@@ -382,9 +549,9 @@ export function createQuota(options: QuotaOptions) {
         if (settings.saving) {
           // El modo ahorro se quita a mano: no hay forma de saber cuándo.
           wait = null
-        } else if (remaining !== undefined && remaining <= hourlyReserve) {
+        } else if (remaining !== undefined && remaining <= deferrableReserve()) {
           // La cuota horaria vuelve al empezar la hora siguiente.
-          wait = Math.ceil((HOUR - (now() % HOUR)) / MINUTE)
+          wait = Math.ceil((windowStart(now()) + HOUR - now()) / MINUTE)
         } else {
           // Manda el tope del día: hasta mañana.
           wait = Math.ceil((DAY - (now() % DAY)) / MINUTE)
@@ -413,6 +580,7 @@ export function createQuota(options: QuotaOptions) {
         settings,
         level: level(),
         hourlyRemaining: hourlyRemaining() ?? null,
+        budget: { ...budgetState(), resetsAt: isoAt(windowStart(now()) + HOUR) },
         day: { spent: spentToday, allowance: allowance() },
         month: {
           spent: spentBefore + spentToday,
@@ -444,7 +612,7 @@ export function createQuota(options: QuotaOptions) {
 export type Quota = ReturnType<typeof createQuota>
 
 /** Lo que necesita de la cuota quien solo quiere saber si puede gastar. */
-export type QuotaGate = Pick<Quota, 'allows' | 'defer'>
+export type QuotaGate = Pick<Quota, 'allows' | 'allowsBulk' | 'defer' | 'paced' | 'upkeep'>
 
 /**
  * Una cuota que solo mira lo que queda en la hora, sin topes ni cola. Es lo que
@@ -463,7 +631,14 @@ export function hourlyQuota(
     )
   }
 
-  return { allows, defer: () => Promise.resolve(allows('deferrable')) }
+  // Sin reloj ni base: siempre de día, cada cual con su reserva.
+  return {
+    allows,
+    allowsBulk: (_job: BulkJob, dayReserve: number) => allows('background', dayReserve),
+    upkeep: (dayReserve: number) => dayReserve,
+    paced: () => true,
+    defer: () => Promise.resolve(allows('deferrable')),
+  }
 }
 
 /** Los ajustes con lo que traiga `patch` encima; lo que no venga se queda como estaba. */

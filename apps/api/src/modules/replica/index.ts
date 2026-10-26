@@ -69,7 +69,19 @@ export function createReplicaModule(deps: ReplicaModuleDeps): ReplicaModule {
     db: deps.db,
     client: deps.client,
     hourlyReserve: deps.config.hourlyReserve,
-    ...given({ priority: deps.priority, halted: deps.halted, now: deps.now, log: deps.log }),
+    // De noche y al final de cada hora la copia gasta lo que sobra, salvo que
+    // alguien esté usando la web (`budget.ts`). `sync` se crea justo después.
+    isActive: () => sync.isActive(),
+    ...given({
+      budget:
+        deps.config.budget === undefined
+          ? undefined
+          : { dayReserve: deps.config.hourlyReserve, ...deps.config.budget },
+      priority: deps.priority,
+      halted: deps.halted,
+      now: deps.now,
+      log: deps.log,
+    }),
   })
   const sync = createSyncer({
     client: deps.client,
@@ -220,8 +232,10 @@ export type { PhotoStore } from './photos.js'
 export { LAST_CIRCLE, SEEDED_UP_TO, parseHours } from './curriculum.js'
 export { CHOICES, VERSIONS } from './common-core.js'
 export type { Curriculum } from './curriculum.js'
-export { hourlyQuota } from './quota.js'
-export type { Quota, QuotaGate } from './quota.js'
+export { BUDGET_STATE_KEY, hourlyQuota } from './quota.js'
+export type { BudgetState, Quota, QuotaGate } from './quota.js'
+export { cursusStateKey } from './core-cursus.js'
+export type { CursusState } from './core-cursus.js'
 export { syncConfigFrom } from './sync-config.js'
 export { LOCATION_MAX_AGE_MS } from './replica.domain.js'
 export type { ReplicaRepository } from './replica.repository.js'

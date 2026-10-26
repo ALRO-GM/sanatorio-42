@@ -12,6 +12,7 @@ import { describe, expect, it } from 'vitest'
 
 import { loadEnv, REQUIRED_ENV_VARS } from '../../src/config/env.js'
 import type { Env } from '../../src/config/env.js'
+import { syncConfigFrom } from '../../src/modules/replica/sync-config.js'
 
 /** Lo mínimo imprescindible, tal y como se define en `REQUIRED_ENV_VARS`. */
 const MINIMO: NodeJS.ProcessEnv = {
@@ -194,6 +195,28 @@ describe('configuración', () => {
       expect(loadEnv({ ...MINIMO, MIN_REQUEST_INTERVAL_MS: '0' }).MIN_REQUEST_INTERVAL_MS).toBe(0)
       // Un intervalo negativo no tiene sentido.
       expect(() => loadEnv({ ...MINIMO, MIN_REQUEST_INTERVAL_MS: '-1' })).toThrow()
+    })
+
+    it('el ritmo de la copia viene de fábrica: noche de 02:00 a 06:00 en Madrid', () => {
+      const env = loadEnv(MINIMO)
+
+      // Sin tocar el `.env` del servidor, ya hay modo noche y gasto final.
+      expect(env.SYNC_NIGHT_WINDOW).toBe('02:00-06:00')
+      expect(env.SYNC_TIMEZONE).toBe('Europe/Madrid')
+      expect(env.SYNC_NIGHT_RESERVE).toBe(50)
+      expect(env.SYNC_SPEND_REMAINING_MINUTES).toBe(10)
+      expect(env.SYNC_SPEND_MARGIN).toBe(30)
+      expect(syncConfigFrom(env).budget?.nightWindow).toEqual({ from: 120, to: 360 })
+      expect(
+        syncConfigFrom(loadEnv({ ...MINIMO, SYNC_NIGHT_WINDOW: 'off' })).budget?.nightWindow,
+      ).toBeNull()
+    })
+
+    it('rechaza una franja, una zona horaria o unos minutos que no valen', () => {
+      expect(() => loadEnv({ ...MINIMO, SYNC_NIGHT_WINDOW: '2 a 6' })).toThrow(/SYNC_NIGHT_WINDOW/)
+      expect(() => loadEnv({ ...MINIMO, SYNC_TIMEZONE: 'Marte/Olympus' })).toThrow(/SYNC_TIMEZONE/)
+      expect(() => loadEnv({ ...MINIMO, SYNC_SPEND_REMAINING_MINUTES: '60' })).toThrow()
+      expect(() => loadEnv({ ...MINIMO, SYNC_NIGHT_RESERVE: '-1' })).toThrow()
     })
   })
 

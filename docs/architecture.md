@@ -100,17 +100,73 @@ propia comprobación: ver `docs/api.md`, "Cómo se gana XP".
 Vive en el módulo `replica`. El sincronizador (`syncer.ts`) reparte la cuota
 por prioridad:
 
-| Tarea                         | Cadencia                                   |
-| ----------------------------- | ------------------------------------------ |
-| Puestos ocupados del campus   | 2 min con gente en la web, 5 min sin ella  |
-| Cambios en proyectos          | 5 min / 30 min                             |
-| Catálogo de campus            | Semanal                                    |
-| Copia inicial del campus      | Una petición cada 5 s hasta terminar       |
+| Tarea                         | Cadencia                                   | Tipo |
+| ----------------------------- | ------------------------------------------ | ---- |
+| Puestos ocupados del campus   | 2 min con gente en la web, 5 min sin ella  | Mantenimiento |
+| Cambios en proyectos          | 5 min / 30 min                             | Mantenimiento |
+| Novedades de correcciones     | 10 min                                     | Mantenimiento |
+| Catálogo de campus            | Semanal                                    | Mantenimiento |
+| Copia inicial del campus      | Una petición cada 5 s de día; de corrido de noche y al final de la hora | Volumen, turno 1 |
+| 42cursus (`core_cursus`)      | Diaria; sigue en su página si se corta     | Volumen, turno 2 |
+| Histórico de correcciones     | Ráfagas de 16 s cada 20 s hasta terminar   | Volumen, turno 3 |
+| Repaso diario de correcciones | Diario, sin nadie en la web                | Volumen, turno 4 |
 
 - La copia inicial de Madrid son unas 1 600 peticiones, una sola vez. Después,
   entre 10 y 130 por hora según haya gente o no.
 - `SYNC_HOURLY_RESERVE` peticiones de cada hora no las toca el trabajo de
-  fondo: son para los logins y para quien está mirando.
+  fondo de día: son para los logins y para quien está mirando.
+- **La cuota horaria se renueva a la hora en punto** (UTC; con Madrid, a cada
+  hora en punto también), y lo que no se gasta se pierde: ventana fija, no
+  deslizante. Comprobado el 2026-10-26 leyendo `x-hourly-ratelimit-remaining`
+  a ambos lados de las 00:00 UTC: 206 a las 23:59:55 y 1 199 a las 00:00:02
+  (quedaban 206 sin gastar: se perdieron). 42 no manda ninguna cabecera con la hora de
+  renovación (solo `x-hourly-ratelimit-limit/remaining` y
+  `x-secondly-ratelimit-limit/remaining`), así que se da por hecha a la hora
+  en punto: lo que dijo 42 antes de esa hora ya no vale y se vuelve a
+  preguntar. Si alguna vez cambia, la cuota lo verá: cada salto hacia arriba
+  de lo que queda se apunta (`cuota de 42 renovada: …` en el registro y
+  `lastReset` en el panel).
+
+### Ritmo de la copia según la hora
+
+`modules/replica/budget.ts`, aplicado por `replica.quota`. El mantenimiento va
+siempre primero; el **volumen** (copias y repasos) gasta lo que sobra. Valores
+de fábrica (todos regulables en el entorno, ver `infra/.env.example`):
+
+| Hora (Madrid)                    | Modo | La copia baja hasta | El mantenimiento, hasta | Copia inicial | Turnos |
+| -------------------------------- | ---- | ------------------- | ----------------------- | ------------- | ------ |
+| 06:00–02:00, minutos :00–:50     | Día | 300 (correcciones 360, repaso 450) | 100 con gente, 300 sin ella | 1 cada 5 s | No: comparten |
+| 06:00–02:00, minutos :50–:60     | Gastar lo que sobra | 70 + 3 por minuto que falta (100 → 70) | 70 | De corrido | Sí |
+| 02:00–06:00 sin nadie en la web  | Noche | 50 + 3 por minuto que falta (230 → 50) | 50 | De corrido | Sí |
+| 02:00–06:00 con alguien en la web | Día (o gastar lo que sobra en :50–:60) | Como de día | Como de día | Como de día | Como de día |
+
+- **Variables**: `SYNC_NIGHT_WINDOW` (`02:00-06:00`, vacía u `off` sin
+  noche), `SYNC_TIMEZONE` (`Europe/Madrid`), `SYNC_NIGHT_RESERVE` (50, nunca
+  menos de 40), `SYNC_SPEND_REMAINING_MINUTES` (10; `0`, nunca) y
+  `SYNC_SPEND_MARGIN` (30 sobre el suelo de lo crítico, 40).
+- **La rampa** (3 peticiones por minuto que falta) es lo que gasta el
+  mantenimiento de cinco campus (unas 150 por hora): sin ella la copia se
+  comería la hora en diez minutos y el historial de asientos tendría huecos.
+- **Turnos**: fuera del día, la tarea de volumen de más prioridad que quiera
+  gastar se lleva todo; las de detrás esperan hasta que lleve 30 s sin pedir
+  (porque terminó, falló o no le queda cuota). Orden: copia inicial (que es
+  también la copia de los proyectos de todo el campus), 42cursus, histórico de
+  correcciones, repasos.
+- **Quien usa la web gana**: «alguien en la web» es una petición con sesión en
+  los últimos diez minutos (lo mismo que ya paraba el repaso). Con alguien
+  dentro no hay noche: la copia vuelve a la reserva de día al instante. Lo
+  crítico (entrar, puestos) no cambia (para con 40), y lo aplazable de las
+  personas, en una hora en la que la copia bajó de la reserva, aguanta hasta
+  70 en vez de 300, para no hacerles esperar a la hora siguiente.
+- **Ritmo por segundo**: además del suelo de 250 ms, el cliente nunca deja
+  salir más de 2 peticiones en 1,1 s (`perSecond` en `throttle.ts`): con
+  varias tareas a la vez las cabeceras llegan tarde y salían hasta 4 por
+  segundo (los `429` al arrancar). Un `429` se reintenta con `Retry-After` o
+  espera exponencial, y la tarea que sigue fallando se aparta hasta 15 min.
+- **Lo que se ve**: el registro avisa de cada cambio de modo (`cuota de 42:
+  modo noche, la copia baja hasta 230`); el panel (Consumo → Cuota de la API de
+  42) enseña el modo, hasta dónde baja la copia y cuándo vuelve la cuota; y
+  `npm run sync:status` el modo guardado y lo que queda de cada tarea de volumen.
 - Mientras la copia no ha terminado, lo que falte para una pantalla concreta se
   pide en el momento (`ensureFresh`), con tope.
 - Los campus de `SYNC_CAMPUS_IDS` se copian enteros; el resto funcionan bajo
@@ -146,9 +202,10 @@ son unas 82 000, 820 peticiones una sola vez) y calcula sobre ellas el grafo.
     nadie ha usado la web en los últimos diez minutos y sobra cuota, de modo que
     gasta la que de otro modo se perdería; si alguien entra, se para y sigue luego.
 
-  Nunca toca la reserva horaria de la API. Se guarda quién, a quién, qué
-  proyecto, cuándo, la nota y la marca; los comentarios y el feedback no llegan
-  a la base.
+  De día nunca toca la reserva horaria de la API; de noche y al final de la
+  hora gasta lo que sobra, por turno (ver «Ritmo de la copia según la hora»).
+  Se guarda quién, a quién, qué proyecto, cuándo, la nota y la marca; los
+  comentarios y el feedback no llegan a la base.
 - **Veredicto**: la marca que pone quien corrige no vale sola, porque 42 guarda
   "Ok" también en correcciones con un 0. Una corrección aprueba si la marca es
   buena y la nota llega a la mínima del proyecto. Esa mínima no está en la API:

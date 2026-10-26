@@ -132,6 +132,35 @@ describe('throttle', () => {
 
     expect(waits).toEqual([100])
   })
+
+  it('con tope propio, nunca salen más de dos por segundo aunque las cabeceras digan que sí', async () => {
+    const clock = createFakeClock()
+    const waits: number[] = []
+    // Este `sleep` sí mueve el reloj: el tope cuenta cuándo salió cada una.
+    const sleep = (ms: number): Promise<void> => {
+      waits.push(ms)
+      clock.advance(ms)
+      return Promise.resolve()
+    }
+    const throttle = createThrottle({ minIntervalMs: 250, perSecond: 2, sleep, now: clock.now })
+    const starts: number[] = []
+
+    for (let request = 0; request < 6; request += 1) {
+      await throttle.before()
+      starts.push(clock.now())
+      // La respuesta llega enseguida y dice que aún queda cuota por segundo.
+      throttle.observe(new Headers(quota({ 'x-secondly-ratelimit-remaining': '1' })))
+    }
+
+    // En cualquier ventana de un segundo, como mucho dos.
+    for (const [index, start] of starts.entries()) {
+      expect(
+        starts.filter((other) => other >= start && other < start + 1_000).length,
+      ).toBeLessThanOrEqual(2)
+      expect(index < 2 || start - (starts[index - 2] ?? 0) >= 1_100).toBe(true)
+    }
+    expect(waits.slice(0, 2)).toEqual([250, 850])
+  })
 })
 
 describe('token de la aplicación', () => {

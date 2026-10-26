@@ -372,8 +372,8 @@ en tres escalones, que se frenan en este orden:
 
 | Escalón      | Qué es                                                   | Cuándo para |
 | ------------ | -------------------------------------------------------- | ----------- |
-| `background` | La copia y el repaso                                     | Cuota horaria por debajo de la reserva, o 70 % del tope del día |
-| `deferrable` | Agenda de 42, hitos y cursus de cada persona, horas de los proyectos | Reserva horaria, o 90 % del tope del día |
+| `background` | La copia y el repaso                                     | Cuota horaria por debajo de la reserva del modo (de día, la de siempre), o 70 % del tope del día |
+| `deferrable` | Agenda de 42, hitos y cursus de cada persona, horas de los proyectos | Reserva horaria (70 si en esa hora hubo noche o gasto final), o 90 % del tope del día |
 | `critical`   | Entrar, y ver quién puede ayudarte y dónde está          | Solo con menos de 40 peticiones en la hora |
 
 Lo aplazable se sirve con lo último guardado. Si es de una persona, coge turno
@@ -382,11 +382,19 @@ turnos cada veinte segundos) cuando vuelve a haber cuota, y mientras haya
 alguien esperando nadie se cuela. Quien administra por configuración no hace
 cola. El modo ahorro deja pasar solo lo crítico.
 
+De noche y en los últimos minutos de cada hora el trabajo de fondo gasta la
+cuota que de otro modo se perdería, por turnos de prioridad: ver
+`docs/architecture.md`, «Réplica de 42» (`modules/replica/budget.ts`).
+
 - GET /quota → `{ "level": "ok" | "tight" | "critical", "ticket": { "number":
   "A-042", "serving": "A-037", "ahead": 4, "etaMinutes": 5, "since" } | null }`.
   Es lo que pinta el rótulo de aviso y el tique de turno.
 - GET /admin/quota → `{ "settings", "level", "hourlyRemaining", "day": { "spent",
-  "allowance" }, "month": { "spent", "daysLeft", "renewsOn" }, "queued" }`. Solo admins.
+  "allowance" }, "month": { "spent", "daysLeft", "renewsOn" }, "queued", "budget": {
+  "mode": "day" | "night" | "spend", "since", "bulkReserve", "resetsAt",
+  "nightWindow": "02:00-06:00" | null, "timeZone", "lastReset": { "at", "from", "to" }
+  | null } }`. `budget` es el ritmo de la copia: el modo, hasta dónde puede bajar
+  ahora lo que queda en la hora y cuándo vuelve la cuota. Solo admins.
 - PUT /admin/quota → los ajustes que cambien de `{ "dailyRequests" (o `null`),
   "monthlyRequests" (o `null`), "renewDay" (1-28), "saving" }`. Solo admins.
 

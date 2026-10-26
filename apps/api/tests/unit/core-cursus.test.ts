@@ -50,7 +50,7 @@ function fake(pages: ApiCursusMember[][], fail = false) {
 }
 
 const quota = (allows: () => boolean): QuotaGate =>
-  ({ allows, defer: () => Promise.resolve() }) as unknown as QuotaGate
+  ({ allows, allowsBulk: allows, defer: () => Promise.resolve() }) as unknown as QuotaGate
 
 describe('copia del 42cursus', () => {
   it('copia todas las páginas con grado, fin y cuenta, y no repite antes de un día', async () => {
@@ -139,5 +139,61 @@ describe('copia del 42cursus', () => {
       log: (line) => logs.push(line),
     }).step()
     expect(logs).toEqual(['42cursus: 42 no contesta'])
+  })
+
+  it('una vuelta cortada sigue en su página, también tras un reinicio, y no repite el día', async () => {
+    let now = NOW
+    let left = 2
+    const pages = [
+      [member(1, 'ana'), member(2, 'leo')],
+      [member(3, 'sol'), member(4, 'eva')],
+      [member(5, 'max')],
+    ]
+    const first = fake(pages)
+
+    await createCoreCursus({
+      db,
+      client: first.client,
+      campusIds: [22],
+      quota: quota(() => left-- > 0),
+      hourlyReserve: 0,
+      now: () => now,
+    }).step()
+    // La cuota se acaba tras la segunda página.
+    expect(first.asked).toEqual(['22:1', '22:2'])
+
+    const stored = await db.execute("SELECT value FROM sync_state WHERE key = 'cursus:22'")
+
+    expect(JSON.parse(stored.rows[0]?.value as string)).toMatchObject({ page: 3, rows: 4 })
+
+    // Otro proceso (un despliegue): sigue en la tercera, no en la primera.
+    const second = fake(pages)
+    const sync = createCoreCursus({
+      db,
+      client: second.client,
+      campusIds: [22, 37],
+      quota: quota(() => true),
+      hourlyReserve: 0,
+      now: () => now,
+    })
+
+    await sync.step()
+    expect(second.asked).toEqual(['22:3'])
+
+    // Después toca el otro campus entero; Madrid ya no, hasta mañana.
+    await sync.step()
+    await sync.step()
+    expect(second.asked).toEqual(['22:3', '37:1', '37:2', '37:3'])
+
+    now += 24 * 60 * 60_000
+    await sync.step()
+    expect(second.asked.slice(4)).toEqual(['22:1', '22:2', '22:3'])
+
+    // Un estado ilegible no rompe nada: se empieza de cero.
+    await db.execute("UPDATE sync_state SET value = 'no es json' WHERE key = 'cursus:37'")
+    now += 24 * 60 * 60_000
+    await sync.step()
+    await sync.step()
+    expect(second.asked.filter((call) => call === '37:1')).toHaveLength(2)
   })
 })

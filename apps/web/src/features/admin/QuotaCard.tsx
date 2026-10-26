@@ -19,7 +19,7 @@ const capOf = (text: string): number | null => (text.trim() === '' ? null : Numb
  */
 export function QuotaCard() {
   const { t, tn } = useI18n()
-  const { number } = useFormat()
+  const { number, time } = useFormat()
   const { data, error, loading, reload } = useAsync(() => api.getAdminQuota(), [])
   const action = useAction()
   const [draft, setDraft] = useState<{ daily: string; monthly: string; renewDay: string } | null>(
@@ -85,6 +85,14 @@ export function QuotaCard() {
           label={t('admin.quota.month')}
           value={number(month.spent)}
           hint={tn('admin.budget.renews', month.daysLeft, { day: month.renewsOn })}
+        />
+        <Tile
+          label={t('admin.quota.mode')}
+          value={t(`admin.quota.mode.${data.budget.mode}`)}
+          hint={t('admin.quota.modeHint', {
+            reserve: number(data.budget.bulkReserve),
+            time: time(data.budget.resetsAt),
+          })}
         />
         <Tile
           label={t('admin.quota.queued')}
