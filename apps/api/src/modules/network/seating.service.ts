@@ -15,9 +15,9 @@ import type { Audience } from '../../core/audience.js'
 import type { Db } from '../../core/db/database.js'
 import { createTtlCache } from '../../core/ttl-cache.js'
 import { parse } from '../../core/validation.js'
-import { communitiesOf } from './network.analysis.js'
+import { communitiesOf, GRAPH_BUDGET } from './network.analysis.js'
 import { seatHeatOf } from './seating.heat.js'
-import { seatingOf } from './seating.rules.js'
+import { seatingOf, trimSeating } from './seating.rules.js'
 import { seatSessionsIn } from './seating.sessions.js'
 
 type SeatingOptions = {
@@ -116,10 +116,16 @@ export function createSeatingService(options: SeatingOptions): SeatingService {
         .map(([host]) => host),
     }))
 
+    // El tope del grafo, como en la red de correcciones. Los totales siguen
+    // contando a todo el mundo: la web dice cuántas personas quedan fuera.
+    const shown = trimSeating(people, pairs, GRAPH_BUDGET)
+
     return {
       days,
-      people: people.sort((x, y) => y.closeness - x.closeness || x.login.localeCompare(y.login)),
-      links: pairs.map((pair) => ({
+      people: shown.people.sort(
+        (x, y) => y.closeness - x.closeness || x.login.localeCompare(y.login),
+      ),
+      links: shown.pairs.map((pair) => ({
         source: pair.a,
         target: pair.b,
         closeness: Math.round(pair.closeness),

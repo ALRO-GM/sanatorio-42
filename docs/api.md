@@ -1363,7 +1363,10 @@ GET /network?from=&to=&login=&projectId=&min=&limit= → el grafo. Todo opcional
   corregido mutuamente.
 - `min` (1-100, por defecto 1): correcciones mínimas entre dos personas para que
   salga su unión. `limit` (10-20000, por defecto 300): tope de personas, las más
-  activas primero.
+  activas primero. Más de 1 500 se recorta a 1 500 sin error (`GRAPH_BUDGET` en
+  `network.analysis.ts`: lo que el navegador mueve con soltura), y las uniones
+  van como mucho a seis por persona pedida y nunca más de 10 000, las más
+  fuertes. `hidden` dice cuántas personas y uniones han quedado fuera.
 
 ```json
 {
@@ -1461,7 +1464,9 @@ sienta cerca de quién en los clústeres del campus, en los últimos `days` día
 lado, 2 enfrente, 1,5 en la fila de atrás); una pareja sale con 2 o más. `alone`
 es la parte de sus horas sin nadie en un puesto cercano. Un piscinero solo ve a
 piscineros de su campus y un estudiante, a estudiantes. Permiso de piscina
-`red.seats`.
+`red.seats`. Con el mismo tope que la red de correcciones: como mucho 1 500
+personas (las de más horas) y 10 000 uniones (las más fuertes); `totals` cuenta
+a todo el mundo, así que la diferencia es lo que queda fuera.
 
 GET /network/seats/heat?days=30 → el mapa de calor de los puestos
 (`docs/asientos.md`): cuántas horas se ha usado cada ordenador en los últimos

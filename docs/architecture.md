@@ -222,6 +222,44 @@ son unas 82 000, 820 peticiones una sola vez) y calcula sobre ellas el grafo.
   en memoria (`core/ttl-cache.ts`), así que cambiar el tope de personas o elegir a
   alguien no vuelve a leer la base. La web lo pinta en un `<canvas>` con
   `d3-force` y solo descarga esa parte al abrir la sección.
+- **Tope del grafo** (`GRAPH_BUDGET` en `network.analysis.ts`): como mucho 1 500
+  personas y 10 000 uniones, también en la red de asientos. Se quedan las más
+  activas (y las uniones más fuertes) y la web lo dice bajo el grafo («se ven las
+  más activas · fuera por el tope…»). El selector «Personas, como mucho» llega a
+  1 500; un `limit` mayor (enlaces viejos con «sin límite») se recorta sin error.
+  Medido el 2026-10-26 con la base local (Madrid, 86 000 correcciones; un París
+  de 47 000 copiado de parte de Madrid): por defecto (300 personas) la respuesta
+  pesa 150-220 KB y tarda 150-480 ms en frío y 6-15 ms de caché; con el tope
+  antiguo (20 000) eran 3 300 personas, 20 000 uniones y 2,1 MB, y ahora son
+  1 500, 9 000 y 1 MB. No hace falta agregar más.
+- **El grafo en la web** (`ForceGraph.tsx`, cuentas en `graph-data.ts`), para que
+  la CPU descanse:
+  - La simulación no lleva el reloj de d3: cada fotograma del lienzo da un paso
+    mientras tenga calor y se para del todo al enfriarse (`ALPHA_MIN`). Un paso
+    gasta como mucho un tercio del tiempo (si costó 10 ms, el siguiente espera
+    20 ms). Arrastrar calienta poco (`DRAG_HEAT`) y al soltar se enfría.
+  - Los datos se comparan por su huella (`graphSignature`): el sondeo mientras se
+    copia el histórico (cada 45 s) o un render con arrays nuevos no la recalienta.
+    Cambiar el color, la etiqueta o la persona elegida solo repinta.
+  - Las uniones se pintan por grupos de peso (un trazo por grupo); con el grafo
+    quieto salen de una capa guardada (`graph-layers.ts`) y, moviéndose, solo las
+    2 500 más fuertes. Fotos solo con zoom (radio en pantalla de más de 11 px),
+    ya recortadas y guardadas, seis pidiéndose a la vez como mucho y ninguna con
+    más de 400 burbujas en movimiento. Nombres: los grandes, los del entorno
+    elegido, y no más de 120.
+  - La burbuja bajo el ratón se busca en un quadtree (`spotIndex`/`spotAt`).
+  - Al desmontar o con la pestaña oculta (`visibilitychange`) no queda ningún
+    fotograma pedido, y las fotos a medio pedir se cortan.
+
+  Medido en Chrome sin cabeza (`--disable-gpu`) con la API de mentira, que tiene
+  un campus «Paris» de 3 600 personas (`mock/network-big.ts`): con «sin límite»
+  (3 568 personas, 11 156 uniones), arrastrar una burbuja tenía el hilo de la
+  página al 98 % (Chrome entero, 122 %), los 10 s tras cargar gastaban 2,9 s de
+  JavaScript y el sondeo de cada 45 s volvía a mover el grafo (330 fotogramas).
+  Con el tope y lo de arriba (1 500 personas, 4 300 uniones): arrastrar, 43-54 %
+  del hilo (Chrome, 58-75 %); 0,8-1,2 s de JavaScript tras cargar; el bucle,
+  parado a los 2-3 s de soltar; un solo fotograma en 50 s de reposo con el
+  sondeo, y ninguno al salir de la sección.
 
 ## Base de datos
 

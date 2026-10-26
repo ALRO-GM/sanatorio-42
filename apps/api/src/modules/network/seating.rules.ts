@@ -163,3 +163,38 @@ export function seatingOf(sessions: readonly SeatSession[]): Seating {
 
   return { people, pairs: [...pairs.values()] }
 }
+
+/**
+ * Lo que cabe en el grafo de asientos con un tope (`GRAPH_BUDGET` en
+ * `network.analysis.ts`): las personas con más horas y, entre ellas, las uniones
+ * más fuertes. Sin tope, en un campus grande y con 90 días salían miles de
+ * burbujas y el navegador no daba abasto.
+ */
+export function trimSeating<
+  P extends { login: string; hours: number },
+  L extends { a: string; b: string; closeness: number },
+>(
+  people: readonly P[],
+  pairs: readonly L[],
+  budget: { nodes: number; links: number },
+): { people: P[]; pairs: L[] } {
+  const kept =
+    people.length > budget.nodes
+      ? new Set(
+          [...people]
+            .sort((x, y) => y.hours - x.hours || x.login.localeCompare(y.login))
+            .slice(0, Math.max(0, budget.nodes))
+            .map((person) => person.login),
+        )
+      : null
+  const between =
+    kept === null ? [...pairs] : pairs.filter((pair) => kept.has(pair.a) && kept.has(pair.b))
+
+  return {
+    people: kept === null ? [...people] : people.filter((person) => kept.has(person.login)),
+    pairs:
+      between.length > budget.links
+        ? between.sort((x, y) => y.closeness - x.closeness).slice(0, Math.max(0, budget.links))
+        : between,
+  }
+}

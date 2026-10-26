@@ -322,6 +322,17 @@ export function SeatsPage({ switcher }: { switcher: ReactNode }) {
               />
             )}
             <p className="net-help">{t('seats.help')}</p>
+            {/* Con un campus grande la API manda solo a quien más horas pasa
+                (`GRAPH_BUDGET`): se dice cuánta gente queda fuera. */}
+            {nodes.length > 0 && data.totals.people > nodes.length && (
+              <p className="net-shown" role="status">
+                {t('net.shown', { people: nodes.length, links: links.length })}
+                {` · ${t('net.hidden', {
+                  people: data.totals.people - nodes.length,
+                  links: Math.max(0, data.totals.pairs - links.length),
+                })}`}
+              </p>
+            )}
           </div>
         )}
       </div>

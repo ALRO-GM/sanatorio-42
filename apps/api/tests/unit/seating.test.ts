@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { parseHost } from '../../src/modules/map/seat-layout.js'
 import { seatHeatOf } from '../../src/modules/network/seating.heat.js'
-import { seatingOf, seatWeight } from '../../src/modules/network/seating.rules.js'
+import { seatingOf, seatWeight, trimSeating } from '../../src/modules/network/seating.rules.js'
 
 const at = (host: string) => {
   const position = parseHost(host)
@@ -125,5 +125,28 @@ describe('mapa de calor de los puestos', () => {
 
   it('sin puestos ni sesiones no hay clústeres', () => {
     expect(seatHeatOf([], [])).toEqual({ clusters: [], max: 0 })
+  })
+})
+
+describe('tope del grafo de asientos', () => {
+  const people = ['ana', 'eva', 'leo', 'sol'].map((login, index) => ({ login, hours: 10 - index }))
+  const pairs = [
+    { a: 'ana', b: 'eva', closeness: 9 },
+    { a: 'ana', b: 'sol', closeness: 8 },
+    { a: 'eva', b: 'leo', closeness: 2 },
+    { a: 'ana', b: 'leo', closeness: 5 },
+  ]
+
+  it('se queda con quien más horas pasa y, entre ellas, con las uniones más fuertes', () => {
+    const shown = trimSeating(people, pairs, { nodes: 3, links: 2 })
+
+    expect(shown.people.map((person) => person.login)).toEqual(['ana', 'eva', 'leo'])
+    expect(shown.pairs.map((pair) => pair.closeness)).toEqual([9, 5])
+  })
+
+  it('si cabe todo, todo y en su orden; sin sitio, nada', () => {
+    expect(trimSeating(people, pairs, { nodes: 10, links: 10 })).toEqual({ people, pairs })
+    expect(trimSeating(people, pairs, { nodes: 0, links: 0 })).toEqual({ people: [], pairs: [] })
+    expect(trimSeating([], [], { nodes: 3, links: 3 })).toEqual({ people: [], pairs: [] })
   })
 })
