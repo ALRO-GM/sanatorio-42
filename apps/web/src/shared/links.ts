@@ -34,7 +34,10 @@ type ProgressPreset = {
   paces?: boolean | undefined
   /** Si se ve tu línea. */
   me?: boolean | undefined
-  /** El periodo (`8`…`24` meses o `all`), solo para esa visita. */
+  /**
+   * El periodo (los primeros `1`…`24` meses o `all`), solo para esa visita. Los
+   * de antes (`8`, `15`…) caen en el siguiente que hay (`rangeOf`).
+   */
   range?: string | undefined
 }
 

@@ -1859,8 +1859,9 @@ GET /stats?period=month|all  → HelpStats: { period, sections: StatsSection[] }
 ## Avance (`modules/stats`, Datos → Avance)
 
 ```
-GET /stats/progress?with=login,login → StatsProgress. Tu avance, todas las medias, los paces
-                  y hasta 5 personas con quien compararte.
+GET /stats/progress?with=login,login&campuses=22,1|all → StatsProgress. Tu avance, las medias
+                  de cada campus pedido y de todos juntos, los paces y hasta 5 personas
+                  con quien compararte.
 GET /stats/progress/fastest → StatsFastest. Quien terminó el common core más deprisa, por plan.
 GET /stats/ranking?by=circle|circles|hours&plan=all|classic|next&kickoff=AAAA-MM&cohort=only|since
                   &circleMin=0&circleMax=7&pctMin=0&pctMax=100&offset=0&limit=50 → StatsRanking.
@@ -1874,15 +1875,29 @@ GET /stats/ranking?by=circle|circles|hours&plan=all|classic|next&kickoff=AAAA-MM
   futura o algo hecho en los últimos 120 días) y `unknown` (lo demás, o sin
   copia del 42cursus). Sale de `core_cursus`, que copia
   `GET /v2/cursus/21/cursus_users` por campus una vez al día.
-- `StatsProgress.averages[medida][población][grupo]`: todas las combinaciones
-  en una respuesta. `grupo` es `alcance-plan` (`campus-classic`, `campus-next`,
-  `all-classic`, `all-next`: cada plan va en su línea, ya no hay media de los
-  dos juntos); `population` es `finished`, `current` (en curso + terminado) o
-  `blackholed`; `unknown` no entra en ninguna. `people` tiene la misma forma, y
-  `census[alcance][plan][estado]` cuenta a todo el mundo, `unknown` incluido. La
-  línea de quien se tragó el black hole acaba el día de su `end_at`. Un punto
-  con menos de `minPeople` (10) personas es `null`. Unos 7 KB sin comprimir; con personas
-  sueltas (abajo), hasta unos 15 KB.
+- **Tu campus** (`home`) es el de tu 42cursus (`SessionReader.homeCampus`), no
+  el que miras en la web (`Actor.campusId`, el de tus preferencias): con ese,
+  quien había elegido París en el pie de página veía «París» o «Todos los
+  campus» en su Avance (2026-10-26). También es el de `fastest` y de
+  `/stats/ranking`.
+- `campuses`: ids separados por comas, o `all`. Solo valen los que sigue la web
+  (`SYNC_CAMPUS_IDS`) y el tuyo; lo demás se ignora y, sin nada que valga (o
+  sin decirlo), va el tuyo. Un piscinero, siempre el suyo. `available` dice los
+  que se pueden pedir (`{ id, name }`, el tuyo primero).
+- Las medias van por sitio (`ProgressArea`): `campuses[]` (cada campus pedido,
+  en el orden de `available`) y `all` (todos los campus juntos, `id` `null`).
+  Cada una trae `averages[medida][población][plan]`, `individuals`, `people`
+  (misma forma) y `census[plan][estado]`, que cuenta a todo el mundo,
+  `unknown` incluido. `population` es `finished`, `current` (en curso +
+  terminado) o `blackholed`; `unknown` no entra en ninguna; cada plan va en su
+  línea. Quien está en un campus: el de su 42cursus y los copiados en los que
+  está (`campus_members`). La línea de quien se tragó el black hole acaba el
+  día de su `end_at`. Un punto con menos de `minPeople` (10) personas es
+  `null`. Unos 7 KB sin comprimir por campus; con personas sueltas (abajo),
+  hasta unos 15 KB.
+- Coste: el cálculo se hace una vez para todos los campus a la vez (cada
+  persona suma en los suyos y en el de todos) y se guarda 30 minutos; pedir
+  más campus no lanza más consultas, solo alarga la respuesta.
 - Cada línea de una persona (`me`, `others[]`, `individuals`) es un
   `ProgressTrace`: `line` (las dos medidas), `hours` (las de su common core: su
   plan o, si terminó, lo que hizo), `finished` (el día en que terminó, o
@@ -1891,12 +1906,11 @@ GET /stats/ranking?by=circle|circles|hours&plan=all|classic|next&kickoff=AAAA-MM
   contra lo que hizo hasta terminar: acaba en el 100 % de las dos maneras
   (`docs/blackhole.md`). Con hitos, unos 28 KB sin comprimir con tu línea y
   cinco personas; hasta 100 KB si todas las medias son de personas sueltas.
-- `individuals[población][grupo]`: si una media tiene menos de `minPeople`
+- `individuals[población][plan]` (de cada sitio): si una media tiene menos de `minPeople`
   personas, la línea de cada una (`{ login, …ProgressTrace }`) en su lugar; con bastante
   gente, vacío. Sin quien no ves (mundos separados, personas ocultas), aunque
   cuente en `people`. En `blackholed`, `login` es `null`: se ve el camino, no
   quién. Nada más sensible que compararse con alguien (`with`).
-- `campus`: el nombre del campus de quien mira, para rotular sus medias.
 - `days`: cada 15 días hasta los dos años (730) y, después, cada 30 hasta lo que
   lleva quien más tiempo lleva en los datos (hasta diez años como mucho): con
   eso la web dibuja «Todo». Con diez años, ~150 puntos por línea: unos 20 KB
@@ -1906,7 +1920,7 @@ GET /stats/ranking?by=circle|circles|hours&plan=all|classic|next&kickoff=AAAA-MM
   ves; ni tú ni quien no ves.
 - `GET /stats/progress/fastest`: `StatsFastest[alcance][plan]` es una lista de
   `{ login, image, campus, days }`. `campus`: los 5 que antes terminaron de tu
-  campus; `all`: el primero de cada campus copiado. Solo `finished`; `days` va
+  campus (`home`); `all`: el primero de cada campus copiado. Solo `finished`; `days` va
   de su `begin_at` del 42cursus al último aprobado del último círculo de su
   plan, y hace falta tener al menos la mitad del plan aprobado en la réplica
   (quien vino trasladado parecería terminar en días). Sin quien no ves. Es del

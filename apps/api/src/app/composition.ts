@@ -486,6 +486,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     db,
     audience,
     circles: (track) => replica.curriculum.circles(track),
+    campusIds: config.sync.trackedCampusIds,
     ...clock,
   })
   const legal = createLegalModule({

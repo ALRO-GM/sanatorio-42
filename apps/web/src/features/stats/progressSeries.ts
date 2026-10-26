@@ -1,16 +1,23 @@
 /**
  * Las líneas de la gráfica del Avance a partir de lo que trae la API y de los
- * botones encendidos: una por cada combinación de plan × población × alcance
- * (o, si esa media tiene muy poca gente, una por persona), más la tuya y la de
- * cada persona con quien te comparas.
+ * botones encendidos: una por cada combinación de plan × población × campus
+ * (cada campus elegido en su línea, y todos juntos en otra) o, si esa media
+ * tiene muy poca gente, una por persona; más la tuya y la de cada persona con
+ * quien te comparas.
  *
  * Cómo se distinguen, sin fiarlo todo al color (`docs/blackhole.md`):
  *
- * - **Color = plan**: C azul, Python violeta (los de siempre).
+ * - Con un solo campus:
+ *   - **Color = plan**: C azul, Python violeta (los de siempre).
+ *   - **Grosor = alcance**: el campus, grueso y opaco; todos los campus, fino y
+ *     medio transparente.
+ * - Con varios campus, para compararlos:
+ *   - **Color = campus**: cada uno el suyo, siempre el mismo (por su sitio en
+ *     la lista de los que se pueden pedir); todos juntos, en gris.
+ *   - **Grosor = plan** (si van los dos): C grueso, Python fino.
  * - **Trazo = población**: en curso + terminado, continuo; terminado, a rayas;
  *   black hole, a puntos.
- * - **Grosor = alcance**: tu campus, grueso y opaco; todos los campus, fino y
- *   medio transparente.
+ * - El nombre del campus va siempre en el rótulo, en la leyenda y en la ficha.
  * - Una persona suelta (de una media con poca gente) va con su plan y su trazo,
  *   más fina y con un punto al final. Tú, en el acento; con quien te comparas,
  *   cada cual con su color y su login al final de la línea.
@@ -22,6 +29,7 @@ import type {
   CoreTrack,
   ProgressLine,
   ProgressMeasure,
+  ProgressArea,
   ProgressPopulation,
   ProgressScope,
   ProgressTrace,
@@ -73,6 +81,20 @@ const WEIGHT: Record<ProgressScope, { width: number; opacity: number }> = {
   campus: { width: 2.5, opacity: 1 },
   all: { width: 1.5, opacity: 0.6 },
 }
+/**
+ * El color de cada campus cuando se comparan varios, por su sitio en la lista
+ * de los que se pueden pedir: los mismos tonos de la gráfica (con su versión
+ * para daltonismo, `comfort.css`). Todos juntos, en gris.
+ */
+const CAMPUS_COLORS: readonly string[] = [
+  'var(--plan-c)',
+  'var(--person-2)',
+  'var(--person-3)',
+  'var(--plan-python)',
+  'var(--person-4)',
+  'var(--person-5)',
+]
+const TOGETHER_COLOR = 'var(--text-3)'
 /** El color de cada persona con quien te comparas, por orden de llegada. */
 export const PERSON_COLORS: readonly string[] = [
   'var(--gold)',
@@ -98,23 +120,46 @@ export const personStyle = (index: number): LineStyle => ({
   marker: false,
 })
 
-/** El estilo de las medias de ese plan, población y alcance. */
+/** Cómo se pintan las medias encendidas: con un campus o comparando varios. */
+type Encoding = { campuses: boolean; tracks: number }
+
+/**
+ * El estilo de las medias de ese plan, población y sitio (`color`: el sitio del
+ * campus en la lista; `null`, todos juntos).
+ */
 const groupStyle = (
   track: CoreTrack,
   population: ProgressPopulation,
-  scope: ProgressScope,
-): LineStyle => ({
-  stroke: PLAN_COLOR[track],
-  dash: DASH[population],
-  ...WEIGHT[scope],
-  marker: false,
-})
+  color: number | null,
+  encoding: Encoding,
+): LineStyle => {
+  if (!encoding.campuses) {
+    return {
+      stroke: PLAN_COLOR[track],
+      dash: DASH[population],
+      ...WEIGHT[color === null ? 'all' : 'campus'],
+      marker: false,
+    }
+  }
+
+  return {
+    stroke:
+      color === null
+        ? TOGETHER_COLOR
+        : (CAMPUS_COLORS[color % CAMPUS_COLORS.length] ?? TOGETHER_COLOR),
+    dash: DASH[population],
+    width: encoding.tracks > 1 && track === 'next' ? 1.5 : 2.5,
+    opacity: color === null ? 0.8 : 1,
+    marker: false,
+  }
+}
 
 /** Lo que dicen los rótulos: cada uno, ya traducido. */
 type Labels = {
   plan: (track: CoreTrack) => string
   population: (population: ProgressPopulation) => string
-  scope: (scope: ProgressScope) => string
+  /** El nombre de un sitio: su campus, o todos juntos. */
+  scope: (area: ProgressArea) => string
   average: (parts: { plan: string; population: string; scope: string; n: number }) => string
   one: (parts: { plan: string; population: string; login: string }) => string
   anonymous: (parts: { plan: string; population: string; scope: string; n: number }) => string
@@ -123,16 +168,27 @@ type Labels = {
 export type Picked = {
   tracks: ReadonlySet<CoreTrack>
   populations: ReadonlySet<ProgressPopulation>
-  scopes: ReadonlySet<ProgressScope>
+  /** Los campus elegidos, cada uno en su línea. */
+  campuses: readonly number[]
+  /** Si va la media de todos los campus juntos. */
+  together: boolean
+}
+
+/** Los sitios que se pintan: los campus elegidos que trae la API y, si se pide, todos juntos. */
+export function areasOf(data: StatsProgress, picked: Picked): ProgressArea[] {
+  return [
+    ...data.campuses.filter((area) => area.id !== null && picked.campuses.includes(area.id)),
+    ...(picked.together ? [data.all] : []),
+  ]
 }
 
 /** Una entrada de la leyenda de las medias, aunque no tenga línea (nadie en ella). */
 export type GroupKey = { key: string; label: string; style: LineStyle; empty: boolean }
 
 /**
- * Las líneas de las medias encendidas, en orden (plan, población, alcance), y
- * su leyenda. Una media con menos de `minPeople` personas son sus personas, una
- * línea cada una; quien sale en las dos (su campus y todos), una sola vez.
+ * Las líneas de las medias encendidas, en orden (plan, población, sitio), y su
+ * leyenda. Una media con menos de `minPeople` personas son sus personas, una
+ * línea cada una; quien sale en varias (su campus y todos), una sola vez.
  */
 export function groupSeries(
   data: StatsProgress,
@@ -143,6 +199,11 @@ export function groupSeries(
   const series: Series[] = []
   const keys: GroupKey[] = []
   let individuals = false
+  const areas = areasOf(data, picked)
+  const encoding: Encoding = {
+    campuses: areas.filter((area) => area.id !== null).length > 1,
+    tracks: TRACKS.filter((track) => picked.tracks.has(track)).length,
+  }
 
   for (const track of TRACKS) {
     if (!picked.tracks.has(track)) continue
@@ -150,17 +211,17 @@ export function groupSeries(
       if (!picked.populations.has(population)) continue
       const drawn = new Set<string>()
 
-      for (const scope of SCOPES) {
-        if (!picked.scopes.has(scope)) continue
-        const group = `${scope}-${track}` as const
-        const n = data.people[population][group]
-        const style = groupStyle(track, population, scope)
+      for (const area of areas) {
+        const n = area.people[population][track]
+        const color =
+          area.id === null ? null : data.available.findIndex((campus) => campus.id === area.id)
+        const style = groupStyle(track, population, color, encoding)
         const parts = {
           plan: labels.plan(track),
           population: labels.population(population),
-          scope: labels.scope(scope),
+          scope: labels.scope(area),
         }
-        const key = `${track}-${population}-${scope}`
+        const key = `${track}-${population}-${area.id === null ? 'all' : String(area.id)}`
 
         if (n >= data.minPeople) {
           const label = labels.average({ ...parts, n })
@@ -168,7 +229,7 @@ export function groupSeries(
           series.push({
             key,
             label,
-            line: data.averages[measure][population][group],
+            line: area.averages[measure][population][track],
             hours: data.axis.planHours[track],
             style,
           })
@@ -176,7 +237,7 @@ export function groupSeries(
           continue
         }
 
-        const people = data.individuals[population][group]
+        const people = area.individuals[population][track]
 
         if (people.length === 0) {
           keys.push({ key, label: labels.average({ ...parts, n }), style, empty: true })

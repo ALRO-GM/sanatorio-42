@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 
-import { useI18n } from '../../shared/i18n'
+import { useI18n } from '../i18n'
 
-/** Lo que se espera tras el último clic antes de pedir el grafo: da tiempo a marcar otra. */
+/** Lo que se espera tras el último clic antes de pedir los datos: da tiempo a marcar otra. */
 export const CAMPUS_WAIT_MS = 2000
 
 type Campus = { id: number; name: string }
@@ -12,15 +12,26 @@ type CampusPickerProps = {
   /** Las que se están viendo ahora. */
   current: readonly number[]
   onApply: (campuses: readonly number[] | 'all') => void
+  /** El nombre del grupo, si no es «Escuelas». */
+  label?: string
+  /** Si se puede quedar sin ninguna (en el Avance queda la media de todos juntos). */
+  allowEmpty?: boolean
 }
 
 /**
- * Elegir escuelas para la red sin pedir el grafo a cada clic (pedir varias es
- * caro): un clic marca o desmarca y pone el reloj a dos segundos; si en ese rato
- * se marca otra, vuelve a empezar. Al acabar se pide con lo marcado. Un doble
- * clic deja solo esa escuela, al momento. «Todas», también al momento.
+ * Elegir escuelas (en la Red y en el Avance) sin pedir los datos a cada clic
+ * (pedir varias es caro): un clic marca o desmarca y pone el reloj a dos
+ * segundos; si en ese rato se marca otra, vuelve a empezar. Al acabar se pide
+ * con lo marcado. Un doble clic deja solo esa escuela, al momento. «Todas»,
+ * también al momento.
  */
-export function CampusPicker({ available, current, onApply }: CampusPickerProps) {
+export function CampusPicker({
+  available,
+  current,
+  onApply,
+  label,
+  allowEmpty = false,
+}: CampusPickerProps) {
   const { t } = useI18n()
   // Lo marcado y aún sin pedir; `null` si no hay nada pendiente.
   const [pending, setPending] = useState<number[] | null>(null)
@@ -48,11 +59,11 @@ export function CampusPicker({ available, current, onApply }: CampusPickerProps)
     stop()
     setPending(next)
     setRound((count) => count + 1)
-    // Sin ninguna marcada no hay grafo: se queda como estaba.
+    // Sin ninguna marcada (si no se puede) no hay datos: se queda como estaba.
     timer.current = setTimeout(() => {
       timer.current = null
       setPending(null)
-      if (next.length > 0) onApply(next)
+      if (next.length > 0 || allowEmpty) onApply(next)
     }, CAMPUS_WAIT_MS)
   }
 
@@ -60,7 +71,7 @@ export function CampusPicker({ available, current, onApply }: CampusPickerProps)
 
   return (
     <div className="campus-picker">
-      <div className="filter-pills" role="group" aria-label={t('net.campuses')}>
+      <div className="filter-pills" role="group" aria-label={label ?? t('net.campuses')}>
         {available.map((campus) => {
           const on = shown.includes(campus.id)
 
@@ -96,7 +107,11 @@ export function CampusPicker({ available, current, onApply }: CampusPickerProps)
       {pending !== null && (
         <div className="campus-wait" role="status">
           <span key={round} className="campus-wait-bar" aria-hidden="true" />
-          <small>{pending.length === 0 ? t('net.campuses.none') : t('net.campuses.waiting')}</small>
+          <small>
+            {pending.length === 0 && !allowEmpty
+              ? t('net.campuses.none')
+              : t('net.campuses.waiting')}
+          </small>
         </div>
       )}
     </div>

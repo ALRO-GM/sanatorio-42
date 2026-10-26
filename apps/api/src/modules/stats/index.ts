@@ -4,6 +4,7 @@
  * Datos (la gráfica y quién va más rápido). Solo lee.
  */
 
+import type { FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
 import { NO_POOL, seesFor, visibleTo } from '../../core/audience.js'
@@ -39,11 +40,27 @@ const rankingQuery = z
   })
 
 /**
- * `GET /stats/progress?with=a,b`: los logins con quien compararse, separados por
- * comas. Lo que no parece un login se ignora (como antes con uno solo) y se
- * queda en los `MAX_OTHERS` primeros.
+ * `GET /stats/progress?with=a,b&campuses=22,1`: los logins con quien compararse,
+ * separados por comas. Lo que no parece un login se ignora (como antes con uno
+ * solo) y se queda en los `MAX_OTHERS` primeros. `campuses`: los ids de los
+ * campus de los que se quieren las medias, o `all`; sin decirlo, el tuyo. Lo
+ * que no es un número se ignora (y el servicio, lo que no se puede pedir).
  */
 const progressQuery = z.object({
+  campuses: z
+    .string()
+    .max(200)
+    .optional()
+    .transform((value): number[] | 'all' | undefined =>
+      value === undefined
+        ? undefined
+        : value === 'all'
+          ? 'all'
+          : value
+              .split(',')
+              .filter((id) => /^\d{1,9}$/.test(id.trim()))
+              .map(Number),
+    ),
   with: z
     .string()
     .max(1000)
@@ -68,6 +85,8 @@ export function createStatsModule(deps: {
   audience?: Audience
   /** El círculo de cada proyecto de un plan (el plan de estudios), para el avance. */
   circles?: (track: 'classic' | 'next') => Promise<Map<number, number>>
+  /** Los campus que sigue la web: los que se pueden pedir en el Avance, además del tuyo. */
+  campusIds?: readonly number[]
   now?: () => number
 }): StatsModule {
   const service = createStatsService({
@@ -78,13 +97,18 @@ export function createStatsModule(deps: {
   const progress = createProgressService({
     progress: createProgressRepository(deps.db),
     circles: deps.circles ?? (() => Promise.resolve(new Map<number, number>())),
-    ...given({ now: deps.now }),
+    ...given({ campusIds: deps.campusIds, now: deps.now }),
   })
 
   return {
     name: 'stats',
     service,
     routes: (app, { session }) => {
+      // En el Avance, «tu campus» es el de tu 42cursus, no el que miras en la web
+      // (`Actor.campusId`, el de tus preferencias): si no, quien eligió París para
+      // mirar veía París en su Avance.
+      const homeOf = (request: FastifyRequest): number => session.homeCampus(session.user(request))
+
       /** `GET /stats?period=month|all` → cifras y clasificaciones de Ayuda del campus. */
       app.get<{ Querystring: { period?: string } }>('/stats', async (request, reply) => {
         reply.header('Cache-Control', 'private, max-age=60')
@@ -107,7 +131,7 @@ export function createStatsModule(deps: {
 
       /**
        * `GET /stats/ranking?by=&plan=&kickoff=&cohort=&circleMin=&circleMax=&pctMin=&pctMax=&offset=&limit=`
-       * → quién va más rápido en el campus, por páginas, con el puesto de quien mira.
+       * → quién va más rápido en tu campus, por páginas, con el puesto de quien mira.
        */
       app.get('/stats/ranking', async (request, reply) => {
         reply.header('Cache-Control', 'private, max-age=60')
@@ -132,13 +156,15 @@ export function createStatsModule(deps: {
             },
             { offset: query.offset, limit: query.limit },
             sees,
+            homeOf(request),
           ),
         )
       })
 
       /**
-       * `GET /stats/progress?with=login,login` → el avance a lo largo del tiempo,
-       * con todas las medias, los paces y hasta cinco personas con quien compararse.
+       * `GET /stats/progress?with=login,login&campuses=22,1` → el avance a lo largo
+       * del tiempo, con las medias de cada campus pedido y de todos juntos, los
+       * paces y hasta cinco personas con quien compararse.
        */
       app.get('/stats/progress', async (request, reply) => {
         reply.header('Cache-Control', 'private, max-age=300')
@@ -148,12 +174,17 @@ export function createStatsModule(deps: {
         // Con alguien del otro mundo o oculto no se compara: como si no existiera.
         const sees = await seesFor(deps.audience ?? NO_POOL, actor)
 
-        return reply.send(await progress.progress(actor, query.with, sees))
+        return reply.send(
+          await progress.progress(actor, query.with, sees, {
+            home: homeOf(request),
+            ...given({ campuses: query.campuses }),
+          }),
+        )
       })
 
       /**
        * `GET /stats/progress/fastest` → quien terminó el common core más deprisa,
-       * por plan: en el campus de quien mira y el primero de cada campus.
+       * por plan: en tu campus y el primero de cada campus.
        */
       app.get('/stats/progress/fastest', async (request, reply) => {
         reply.header('Cache-Control', 'private, max-age=300')
@@ -161,7 +192,7 @@ export function createStatsModule(deps: {
         const actor = await session.actor(request)
         const sees = await seesFor(deps.audience ?? NO_POOL, actor)
 
-        return reply.send(await progress.fastest(actor, sees))
+        return reply.send(await progress.fastest(actor, sees, homeOf(request)))
       })
     },
   }

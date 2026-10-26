@@ -6,44 +6,88 @@ import type {
   ProgressMeasure,
   ProgressPopulation,
   ProgressScope,
+  StatsProgress,
 } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
+import { CampusPicker } from '../../shared/ui/CampusPicker'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { PillGroup } from '../../shared/ui/PillGroup'
 import { InfoTip } from '../../shared/ui/InfoTip'
+import { PeriodPicker } from '../../shared/ui/PeriodPicker'
 import { PoolOnly } from '../../shared/ui/PoolOnly'
-import { StepPicker } from '../../shared/ui/StepPicker'
 import { useFormat } from '../../shared/i18n/useFormat'
 import { readProgressPreset } from '../../shared/links'
-import { ProgressChart, RANGES } from './ProgressChart'
-import type { Range } from './ProgressChart'
+import { PERIODS, periodOf } from '../../shared/period'
+import type { Period } from '../../shared/period'
+import { MONTH, ProgressChart } from './ProgressChart'
+import type { Span } from './ProgressChart'
 import { ProgressCompare } from './ProgressCompare'
 import { ProgressRanking } from './ProgressRanking'
-import { POPULATIONS, SCOPES, TRACKS } from './progressSeries'
+import { POPULATIONS, TRACKS } from './progressSeries'
 
 const RANGE_KEY = 'sanatorio_progress_range'
+/** Los meses de «a mano» (`desde,hasta`), aparte del periodo. */
+const MONTHS_KEY = 'sanatorio_progress_months'
 const MEASURES: readonly ProgressMeasure[] = ['circles', 'hours']
+/** Lo de «a mano» antes de tocarlo: los dos años del pace más lento. */
+const DEFAULT_MONTHS = { from: '0', to: '24' }
 
-/** El periodo guardado; si el navegador no deja leerlo, el de siempre. */
-function storedRange(): Range {
+type Months = { from: string; to: string }
+
+/**
+ * Un periodo guardado o de un enlace. Los de antes, en meses que ya no se
+ * ofrecen (8, 15, 18, 22), caen en el siguiente que hay: 8 en 12; 15, 18 y 22
+ * en 24. Lo que no se entiende, `null`.
+ */
+function rangeOf(value: unknown): Period | null {
+  const known = periodOf(value)
+
+  if (known !== null) return known
+  const months = Number(value)
+
+  if (typeof value !== 'string' || !Number.isFinite(months) || months <= 0) return null
+
+  return PERIODS.find((period) => Number(period) >= months) ?? 'all'
+}
+
+/** Lo guardado; si el navegador no deja leerlo (o no hay nada), `null`. */
+function stored(key: string): string | null {
   try {
-    const value = localStorage.getItem(RANGE_KEY)
-
-    return RANGES.find((range) => range === value) ?? '24'
+    return localStorage.getItem(key)
   } catch {
-    return '24'
+    return null
   }
 }
 
-function storeRange(range: Range): void {
+function store(key: string, value: string): void {
   try {
-    localStorage.setItem(RANGE_KEY, range)
+    localStorage.setItem(key, value)
   } catch {
     // Sin almacenamiento (modo privado, bloqueado): solo dura esta visita.
   }
+}
+
+/** Los meses de «a mano» guardados, o los de siempre. */
+function storedMonths(): Months {
+  const [from, to] = (stored(MONTHS_KEY) ?? '').split(',')
+
+  return from === undefined || to === undefined ? DEFAULT_MONTHS : { from, to }
+}
+
+/**
+ * Lo que abarca el eje: los primeros meses del periodo, todo o, a mano, del mes
+ * `from` al `to` (al menos un mes; sin decir el final, uno después del principio).
+ */
+function spanOf(range: Period, months: Months): Span {
+  if (range === 'all') return { first: 0, last: null }
+  if (range !== 'custom') return { first: 0, last: Number(range) * MONTH }
+  const from = Math.max(0, Math.floor(Number(months.from) || 0))
+  const to = Math.floor(Number(months.to) || 0)
+
+  return { first: from * MONTH, last: (to > from ? to : from + 1) * MONTH }
 }
 
 /** Un botón por opción que se enciende y apaga solo; varias a la vez. */
@@ -85,8 +129,12 @@ function Option({ label, children }: { label: string; children: ReactNode }) {
 /**
  * La pestaña Avance, en Datos: el avance en el common core a lo largo del
  * tiempo (#87). Tu línea, las medias que enciendas (plan × quién cuenta ×
- * alcance, cada combinación en su línea), hasta cinco personas con quien
- * compararte y lo que pide cada pace. Se mide por círculos o por horas.
+ * campus, cada combinación en su línea: uno, varios o todos los campus, cada
+ * uno en la suya, y todos juntos), hasta cinco personas con quien compararte y
+ * lo que pide cada pace. Se mide por círculos o por horas.
+ *
+ * Por defecto, tu campus: el de tu 42cursus, no el que estés mirando en la web
+ * (`StatsProgress.home`).
  *
  * Como toda gráfica con opciones (`docs/interfaz.md`): la gráfica a la
  * izquierda, quieta a la vista, y las opciones en un panel a la derecha; al
@@ -94,15 +142,17 @@ function Option({ label, children }: { label: string; children: ReactNode }) {
  * las opciones debajo.
  */
 export function ProgressPage({ me }: { me: string }) {
-  const { t } = useI18n()
+  const { t, tn } = useI18n()
   const { number } = useFormat()
   // Lo que pide el enlace con el que se abrió (`progressHref`, desde el health
   // check): manda en esta visita, sin tocar lo guardado.
   const [preset] = useState(() => readProgressPreset(window.location.hash))
   const [measure, setMeasure] = useState<ProgressMeasure>('circles')
-  const [scopes, setScopes] = useState<ReadonlySet<ProgressScope>>(
-    new Set(preset?.scope ?? ['campus']),
+  // Los campus elegidos, cada uno en su línea; `null`, el tuyo (aún sin saber cuál es).
+  const [chosen, setChosen] = useState<readonly number[] | null>(
+    preset?.scope === undefined || preset.scope.includes('campus') ? null : [],
   )
+  const [together, setTogether] = useState(preset?.scope?.includes('all') ?? false)
   // Por defecto, quien sigue más quien terminó: la media de la gente que está.
   const [populations, setPopulations] = useState<ReadonlySet<ProgressPopulation>>(
     new Set(preset?.pop ?? ['current']),
@@ -113,9 +163,10 @@ export function ProgressPage({ me }: { me: string }) {
   )
   const [paces, setPaces] = useState(preset?.paces ?? true)
   const [mine] = useState(preset?.me ?? true)
-  const [range, setRange] = useState<Range>(
-    () => RANGES.find((each) => each === preset?.range) ?? storedRange(),
+  const [range, setRange] = useState<Period>(
+    () => rangeOf(preset?.range) ?? rangeOf(stored(RANGE_KEY)) ?? '24',
   )
+  const [months, setMonths] = useState<Months>(storedMonths)
 
   useEffect(() => {
     // La dirección vuelve a ser la del Avance: recargar no repite el enlace.
@@ -123,14 +174,35 @@ export function ProgressPage({ me }: { me: string }) {
     if (preset !== null) window.history.replaceState(null, '', '#/avance')
   }, [preset])
   const [others, setOthers] = useState<string[]>([])
-  const { data, error, reload } = useAsync(() => api.getStatsProgress(others), [others.join(',')])
+  // Sin campus elegido (o ninguno), lo de siempre: tu campus, que no se pinta si no se quiere.
+  const asked = chosen === null || chosen.length === 0 ? null : chosen
+  const fetched = useAsync(
+    () => api.getStatsProgress(others, asked),
+    [others.join(','), asked?.join(',') ?? ''],
+  )
+  // Mientras llega lo nuevo (otro campus, otra persona), se queda lo de antes:
+  // la gráfica no se vacía a cada clic.
+  const [kept, setKept] = useState<StatsProgress | undefined>(undefined)
+
+  if (fetched.data !== undefined && fetched.data !== kept) setKept(fetched.data)
+  const data = fetched.data ?? kept
   const tracks: ReadonlySet<CoreTrack> =
     chosenTracks ??
     new Set(data?.track === undefined || data.track === null ? TRACKS : [data.track])
+  const home = data?.home ?? null
+  const campuses = chosen ?? (home === null ? [] : [home])
+  const picked = { tracks, populations, campuses, together }
+  // Las sugerencias de «Los más rápidos»: de tu campus si va, y de cada campus
+  // si van otros o todos juntos.
+  const scopes = new Set<ProgressScope>([
+    ...(home !== null && campuses.includes(home) ? (['campus'] as const) : []),
+    ...(together || campuses.some((id) => id !== home) ? (['all'] as const) : []),
+  ])
   const missing =
     data === undefined
       ? []
       : others.filter((login) => !data.others.some((each) => each.login === login))
+  const maxMonths = Math.ceil((data?.days.at(-1) ?? 730) / MONTH)
 
   return (
     <section className="progress-page" aria-labelledby="stats-progress">
@@ -145,14 +217,14 @@ export function ProgressPage({ me }: { me: string }) {
       <div className="progress-layout">
         <article className="card progress-card">
           {data === undefined ? (
-            <ErrorNote error={error} onRetry={() => void reload()} />
+            <ErrorNote error={fetched.error} onRetry={() => void fetched.reload()} />
           ) : (
             <ProgressChart
               data={data}
               measure={measure}
-              picked={{ tracks, populations, scopes }}
+              picked={picked}
               paces={paces}
-              range={range}
+              span={spanOf(range, months)}
               mine={mine}
             />
           )}
@@ -189,29 +261,53 @@ export function ProgressPage({ me }: { me: string }) {
             />
           </Option>
           <Option label={t('stats.progress.scope')}>
-            <Toggles
-              label={t('stats.progress.scope')}
-              options={SCOPES}
-              on={scopes}
-              set={setScopes}
-              text={(value) =>
-                value === 'campus' && data !== undefined && data.campus !== null
-                  ? data.campus
-                  : t(`stats.progress.scope.${value}`)
-              }
-            />
+            {data !== undefined && (
+              // Cada campus en su línea: uno, varios o todos («Todas»). Pedir
+              // campus cuesta una petición: se espera a que acabes de marcar.
+              <CampusPicker
+                available={data.available}
+                current={campuses}
+                label={t('stats.progress.scope')}
+                allowEmpty
+                onApply={(next) => {
+                  setChosen(next === 'all' ? data.available.map((campus) => campus.id) : next)
+                }}
+              />
+            )}
+            <label className="progress-toggle">
+              <input
+                type="checkbox"
+                checked={together}
+                onChange={(event) => {
+                  setTogether(event.target.checked)
+                }}
+              />{' '}
+              {t('stats.progress.together')}
+            </label>
           </Option>
           <div className="progress-option progress-option-row">
-            <StepPicker
-              options={RANGES}
+            {/* El eje es el tiempo desde el inicio de cada cual: los primeros N
+                meses o, a mano, del mes X al Y. */}
+            <PeriodPicker
               value={range}
               onChange={(next) => {
                 setRange(next)
-                storeRange(next)
+                store(RANGE_KEY, next)
               }}
-              label={t('rank.period')}
-              text={(value) =>
-                value === 'all' ? t('net.period.all') : t('stats.progress.months', { n: value })
+              unit="months"
+              maxMonths={maxMonths}
+              from={months.from}
+              to={months.to}
+              onDates={(from, to) => {
+                setMonths({ from, to })
+                store(MONTHS_KEY, `${from},${to}`)
+              }}
+              text={(period) =>
+                period === 'all'
+                  ? t('period.all')
+                  : period === 'custom'
+                    ? t('period.customMonths')
+                    : tn('stats.progress.first', Number(period))
               }
             />
             <label className="progress-toggle">
@@ -234,7 +330,7 @@ export function ProgressPage({ me }: { me: string }) {
                 tracks={tracks}
                 scopes={scopes}
                 me={me}
-                campus={data?.campus ?? null}
+                campus={data?.available.find((campus) => campus.id === home)?.name ?? null}
               />
             </div>
           </PoolOnly>

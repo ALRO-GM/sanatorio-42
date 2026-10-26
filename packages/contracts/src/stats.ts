@@ -39,12 +39,13 @@ export type HelpStats = {
 
 /** Cómo se mide el avance: parte de cada círculo hecha, u horas estimadas hechas. */
 export type ProgressMeasure = 'circles' | 'hours'
-/** Con quién se compara: el campus de quien mira, o todos los campus. */
+/**
+ * Con quién se compara: un campus (por defecto, el tuyo) o todos los campus
+ * juntos. En las sugerencias (`StatsFastest`), tu campus o uno por campus.
+ */
 export type ProgressScope = 'campus' | 'all'
 /** De qué plan, en la clasificación: los dos juntos, el clásico (C) o el nuevo (Python). */
 export type ProgressPlan = 'all' | 'classic' | 'next'
-/** Una media de la gráfica: un alcance y un plan (cada plan va siempre en su línea). */
-export type ProgressGroup = `${ProgressScope}-${CoreTrack}`
 /**
  * Dónde está cada cual en el common core (`docs/blackhole.md`): lo terminó, sigue
  * en él, se lo tragó el black hole (se fue sin terminar) o no se sabe seguro.
@@ -90,33 +91,59 @@ export type ProgressPersonLine = ProgressTrace & { login: string }
  */
 export type ProgressIndividual = ProgressTrace & { login: string | null }
 
-/** `GET /stats/progress`: el avance en el common core a lo largo del tiempo (#87). */
+/**
+ * Las medias de un sitio: un campus o todos los campus juntos. Cada plan va
+ * siempre en su línea.
+ */
+export type ProgressArea = {
+  /** El campus; `null` en todos los campus juntos. */
+  id: number | null
+  /** Su nombre; `null` en todos juntos o si no se sabe. */
+  name: string | null
+  /** Medida × población × plan. Sin bastante gente, `null` en cada punto. */
+  averages: Record<ProgressMeasure, Record<ProgressPopulation, Record<CoreTrack, ProgressLine>>>
+  /**
+   * Donde una media tiene menos de `minPeople` personas, la línea de cada una en
+   * su lugar (sin quien no se ve). Con bastante gente, vacío: va la media.
+   */
+  individuals: Record<ProgressPopulation, Record<CoreTrack, ProgressIndividual[]>>
+  /** Cuánta gente hay en cada media. */
+  people: Record<ProgressPopulation, Record<CoreTrack, number>>
+  /** Cuánta gente hay en cada estado, por plan; `unknown` no entra en ninguna media. */
+  census: Record<CoreTrack, Record<CoreStatus, number>>
+}
+
+/** Un campus que se puede pedir en el Avance. */
+export type ProgressCampus = { id: number; name: string }
+
+/**
+ * `GET /stats/progress?with=a,b&campuses=22,1`: el avance en el common core a lo
+ * largo del tiempo (#87).
+ */
 export type StatsProgress = {
   /** Días desde el inicio de cada punto de las líneas. */
   days: number[]
   /** El plan de quien mira (o de con quién se compara), si se sabe. */
   track: CoreTrack | null
   me: ProgressTrace | null
-  /** El nombre del campus de quien mira, para rotular sus medias; `null` si no se sabe. */
-  campus: string | null
+  /**
+   * Tu campus: el de tu 42cursus, no el que estés mirando en la web. Es el que
+   * va por defecto y el de las sugerencias y la clasificación.
+   */
+  home: number
+  /** Los campus que se pueden pedir: los que sigue la web, y el tuyo. */
+  available: ProgressCampus[]
+  /** Las medias de cada campus pedido (`?campuses=`; sin pedir, el tuyo), en ese orden. */
+  campuses: ProgressArea[]
+  /** Las medias de todos los campus juntos. */
+  all: ProgressArea
   /**
    * Las personas con las que se compara (`?with=a,b`), en el orden pedido. Quien
    * no tiene datos o no se ve (otro mundo, oculta) no sale.
    */
   others: ProgressPersonLine[]
-  /** Todas las medias: medida × población × alcance × plan. Sin bastante gente, `null` en cada punto. */
-  averages: Record<ProgressMeasure, Record<ProgressPopulation, Record<ProgressGroup, ProgressLine>>>
-  /**
-   * Donde una media tiene menos de `minPeople` personas, la línea de cada una en
-   * su lugar (sin quien no se ve). Con bastante gente, vacío: va la media.
-   */
-  individuals: Record<ProgressPopulation, Record<ProgressGroup, ProgressIndividual[]>>
   /** Con cuánta gente se hace media. */
   minPeople: number
-  /** Cuánta gente hay en cada media. */
-  people: Record<ProgressPopulation, Record<ProgressGroup, number>>
-  /** Cuánta gente hay en cada estado, por alcance y plan; `unknown` no entra en ninguna media. */
-  census: Record<ProgressScope, Record<CoreTrack, Record<CoreStatus, number>>>
   /**
    * Para los ejes. `circles[n]`: el % de tener completos los círculos 0…n, con el
    * plan de quien mira. `hours`: las horas de todo el common core de quien mira
@@ -140,7 +167,7 @@ export type FastestEntry = {
 
 /**
  * `GET /stats/progress/fastest`: quien terminó el common core más deprisa, por
- * plan. `campus`: los primeros del campus de quien mira; `all`: el primero de
+ * plan. `campus`: los primeros de tu campus (`StatsProgress.home`); `all`: el primero de
  * cada campus. Sin quien no se ve.
  */
 export type StatsFastest = Record<ProgressScope, Record<CoreTrack, FastestEntry[]>>
