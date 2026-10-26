@@ -402,6 +402,15 @@ export function quotaStatus(): FortyTwoQuota {
     day: { spent: 3120, allowance: quotaSettings.dailyRequests },
     month: { spent: 41_800, daysLeft: 21, renewsOn: '2026-11-01' },
     queued: quotaSettings.saving ? quotaQueue.ahead + 1 : 0,
+    budget: {
+      mode: 'day',
+      since: '2026-10-26T05:00:00.000Z',
+      bulkReserve: 300,
+      resetsAt: '2026-10-26T10:00:00.000Z',
+      nightWindow: '02:00-06:00',
+      timeZone: 'Europe/Madrid',
+      lastReset: { at: '2026-10-26T09:00:01.000Z', from: 287, to: 1199 },
+    },
   }
 }
 

@@ -44,9 +44,25 @@ const HOURLY_CAUTION = 30
 /** Cuánto se espera de más cuando la cuota por hora anda baja. */
 const HOURLY_CAUTION_DELAY_MS = 1_000
 
+/**
+ * Ventana del tope propio por segundo. Un poco más de un segundo: los relojes
+ * de aquí y de 42 no van a la par, y una petición tarda en llegar.
+ */
+const SECOND_WINDOW_MS = 1_100
+
 type ThrottleOptions = {
   /** Separación mínima entre peticiones, en ms. Evita ráfagas en el mismo tick. */
   minIntervalMs: number
+  /**
+   * Peticiones que salen como mucho en cada `SECOND_WINDOW_MS`, pase lo que pase
+   * con las cabeceras. Sin él, solo mandan las cabeceras y el suelo.
+   *
+   * Hace falta porque las cabeceras llegan tarde: con varias tareas a la vez
+   * (copia, 42cursus, correcciones), la segunda petición sale antes de que
+   * vuelva la respuesta de la primera, y con el suelo de 250 ms salían hasta
+   * cuatro por segundo. Es lo que daba los `429` al arrancar.
+   */
+  perSecond?: number
   /** `sleep` inyectable, para que los tests no esperen de verdad. */
   sleep?: (ms: number) => Promise<void>
   /** Reloj inyectable, para tests. */
@@ -69,6 +85,8 @@ export function createThrottle(options: ThrottleOptions): Throttle {
   const now = options.now ?? Date.now
 
   let lastAt = 0
+  /** Cuándo salieron las últimas peticiones, para el tope por segundo. */
+  const starts: number[] = []
   let forcedDelayMs = 0
   let hourly: number | undefined
 
@@ -115,7 +133,13 @@ export function createThrottle(options: ThrottleOptions): Throttle {
     before: () => {
       const run = async (): Promise<void> => {
         const elapsed = now() - lastAt
-        const wait = Math.max(forcedDelayMs, options.minIntervalMs - elapsed)
+        // La más antigua de las `perSecond` últimas tiene que haber salido de la ventana.
+        const oldest = options.perSecond === undefined ? undefined : starts.at(-options.perSecond)
+        const wait = Math.max(
+          forcedDelayMs,
+          options.minIntervalMs - elapsed,
+          oldest === undefined ? 0 : oldest + SECOND_WINDOW_MS - now(),
+        )
 
         if (wait > 0) {
           await sleep(wait)
@@ -123,6 +147,11 @@ export function createThrottle(options: ThrottleOptions): Throttle {
 
         lastAt = now()
         forcedDelayMs = 0
+
+        if (options.perSecond !== undefined) {
+          starts.push(lastAt)
+          starts.splice(0, Math.max(0, starts.length - options.perSecond))
+        }
       }
 
       // Encadenar en vez de dejar que cada llamada calcule su `wait` por su

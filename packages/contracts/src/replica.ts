@@ -86,4 +86,31 @@ export type FortyTwoQuota = {
   month: { spent: number; daysLeft: number; renewsOn: string }
   /** Personas esperando turno. */
   queued: number
+  /** El ritmo de la copia según la hora (`docs/architecture.md`, «Réplica de 42»). */
+  budget: QuotaBudget
+}
+
+/**
+ * Cómo se reparte la cuota horaria ahora mismo:
+ *
+ * - `day`: de día, el trabajo de fondo no baja de la reserva.
+ * - `night`: de madrugada y sin nadie en la web, la copia gasta casi todo.
+ * - `spend`: en los últimos minutos de la hora, la copia gasta lo que sobra.
+ */
+export type BudgetMode = 'day' | 'night' | 'spend'
+
+export type QuotaBudget = {
+  mode: BudgetMode
+  /** Desde cuándo está en este modo (ISO-8601). */
+  since: string
+  /** Hasta dónde puede bajar ahora la copia lo que queda en la hora. */
+  bulkReserve: number
+  /** Cuándo vuelve la cuota horaria (ISO-8601). */
+  resetsAt: string
+  /** La franja de la noche (`02:00-06:00`), o `null` si no hay. */
+  nightWindow: string | null
+  /** Zona horaria de la franja. */
+  timeZone: string
+  /** La última vez que se vio volver la cuota: cuándo y de cuánto a cuánto. */
+  lastReset: { at: string; from: number; to: number } | null
 }

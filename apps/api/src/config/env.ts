@@ -11,6 +11,8 @@
 
 import { z } from 'zod'
 
+import { isTimeZone, parseNightWindow } from '../core/night-window.js'
+
 const envSchema = z.object({
   // --- API de 42 ---------------------------------------------------------
   /** Client ID (UID) de la aplicación OAuth. */
@@ -152,6 +154,48 @@ const envSchema = z.object({
   SYNC_HOURLY_RESERVE: z.coerce.number().int().min(0).max(1200).default(300),
 
   /**
+   * Franja de la noche (`HH:MM-HH:MM`, en `SYNC_TIMEZONE`), cuando nadie usa la
+   * web: la copia gasta casi toda la cuota horaria en vez de dejar la reserva,
+   * y sin la pausa entre peticiones. Puede cruzar la medianoche. Vacía u `off`,
+   * sin modo noche. Ver `modules/replica/budget.ts`.
+   */
+  SYNC_NIGHT_WINDOW: z
+    .string()
+    .default('02:00-06:00')
+    .refine((value) => {
+      try {
+        parseNightWindow(value)
+        return true
+      } catch {
+        return false
+      }
+    }, 'SYNC_NIGHT_WINDOW: se espera HH:MM-HH:MM, vacía u off'),
+
+  /** Zona horaria de la franja de la noche (IANA). */
+  SYNC_TIMEZONE: z
+    .string()
+    .default('Europe/Madrid')
+    .refine(isTimeZone, 'SYNC_TIMEZONE: zona horaria desconocida'),
+
+  /**
+   * Lo que la copia deja sin tocar de noche. No baja de 40, el suelo de lo
+   * crítico: los logins tienen que poder entrar siempre.
+   */
+  SYNC_NIGHT_RESERVE: z.coerce.number().int().min(0).max(1200).default(50),
+
+  /**
+   * Minutos finales de cada hora en los que la copia gasta lo que sobra de la
+   * cuota antes de que se renueve (y se pierda). `0`: nunca.
+   */
+  SYNC_SPEND_REMAINING_MINUTES: z.coerce.number().int().min(0).max(59).default(10),
+
+  /**
+   * De día, al gastar lo que sobra, lo que se deja por encima del suelo de lo
+   * crítico (40) para logins y para quien esté mirando.
+   */
+  SYNC_SPEND_MARGIN: z.coerce.number().int().min(0).max(1200).default(30),
+
+  /**
    * Pausa entre dos pasos del relleno histórico, en ms.
    *
    * Cada paso es una petición. Con 5 s son 720 por hora: Madrid entero se copia
@@ -236,8 +280,10 @@ const envSchema = z.object({
    * cuota por segundo espera más, y cuando sobra no espera. Este valor es solo
    * el suelo, para no machacar dos peticiones seguidas en el mismo tick.
    *
-   * `0` quita el suelo y deja solo las cabeceras de la API, que es lo que
-   * necesitan los tests y lo que puede servir en local.
+   * Con un suelo, además, nunca salen más de 2 por segundo (`perSecond` en
+   * `throttle.ts`). `0` quita las dos cosas y deja solo las cabeceras de la
+   * API, que es lo que necesitan los tests contra una API de mentira. En
+   * producción, nunca `0`.
    */
   MIN_REQUEST_INTERVAL_MS: z.coerce.number().int().min(0).default(250),
 

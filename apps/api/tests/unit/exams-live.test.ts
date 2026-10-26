@@ -230,6 +230,9 @@ describe('el examen en vivo', () => {
       exams: createExamsRepository(db),
       quota: {
         allows: () => quotaOk,
+        allowsBulk: () => quotaOk,
+        upkeep: (reserve) => reserve,
+        paced: () => true,
         defer: () => Promise.resolve(quotaOk),
       },
       now: () => clock,

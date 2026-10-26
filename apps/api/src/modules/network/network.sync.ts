@@ -6,7 +6,9 @@
  * lo que ha cambiado (`range[updated_at]`): las correcciones nuevas y las que
  * por fin tienen nota.
  *
- * Nunca gasta la reserva horaria de la API: las lecturas de la web van antes.
+ * De día nunca gasta la reserva horaria de la API: las lecturas de la web van
+ * antes. De noche y al final de la hora gasta lo que sobra, por turno
+ * (`replica/budget.ts`).
  *
  * Hay dos copias: la del 42cursus (`21`), con todo el histórico, y la de la
  * C Piscine (`9`, `docs/piscineros.md`), que solo trae lo reciente
@@ -171,7 +173,14 @@ export function createCorrectionSync(options: CorrectionSyncOptions) {
 
   const quota = options.quota ?? hourlyQuota(client, hourlyReserve)
 
-  const canSpend = (): boolean => quota.allows('background', hourlyReserve + BUDGET_MARGIN)
+  /**
+   * Las novedades son mantenimiento: de noche y al final de la hora bajan hasta
+   * el suelo del modo (`quota.upkeep`). El histórico es volumen y va por turno
+   * detrás de la copia inicial y del 42cursus (`quota.allowsBulk`).
+   */
+  const canSpend = (): boolean =>
+    quota.allows('background', quota.upkeep(hourlyReserve + BUDGET_MARGIN))
+  const canCopy = (): boolean => quota.allowsBulk('corrections', hourlyReserve + BUDGET_MARGIN)
 
   const load = async (campusId: number): Promise<State> =>
     (await replica.getState<State>(stateKey(campusId))) ??
@@ -246,7 +255,8 @@ export function createCorrectionSync(options: CorrectionSyncOptions) {
 
     let cursor = state.sweepCursor
     const deadline = Date.now() + STEP_BUDGET_MS
-    const roomy = (): boolean => quota.allows('background', hourlyReserve + SWEEP_MARGIN)
+    // El último de la cola de volumen: de día deja además `SWEEP_MARGIN`.
+    const roomy = (): boolean => quota.allowsBulk('sweep', hourlyReserve + SWEEP_MARGIN)
 
     for (let page = 0; (page === 0 || Date.now() < deadline) && roomy() && !isActive(); page += 1) {
       const from = cursor
@@ -295,7 +305,7 @@ export function createCorrectionSync(options: CorrectionSyncOptions) {
     const deadline = Date.now() + STEP_BUDGET_MS
 
     // El reloj de verdad, no el inyectado: mide lo que tarda la red.
-    for (let page = 0; (page === 0 || Date.now() < deadline) && canSpend(); page += 1) {
+    for (let page = 0; (page === 0 || Date.now() < deadline) && canCopy(); page += 1) {
       const startedAt = new Date(now()).toISOString()
       const result = await client.getCampusScaleTeamsPage({
         campusId,

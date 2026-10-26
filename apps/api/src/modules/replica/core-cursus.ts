@@ -25,6 +25,22 @@ const EVERY_MS = 24 * 60 * 60_000
  */
 const MAX_PAGES = 250
 
+/** Lo que se guarda de cada campus en `sync_state` (`cursus:<campus>`). */
+export type CursusState = {
+  /** Página que toca pedir; `1` si no hay ninguna vuelta a medias. */
+  page: number
+  /** Filas copiadas en la vuelta en curso (o en la última). */
+  rows: number
+  /** Las que dice 42 que hay. */
+  total: number | null
+  /** Cuándo terminó la última vuelta (ms). */
+  doneAt: number | null
+}
+
+const FRESH: CursusState = { page: 1, rows: 0, total: null, doneAt: null }
+
+export const cursusStateKey = (campusId: number): string => `cursus:${campusId}`
+
 type CoreCursusOptions = {
   db: Db
   client: FortyTwoClient
@@ -43,8 +59,6 @@ export function createCoreCursus(options: CoreCursusOptions) {
   const { db, client } = options
   const now = options.now ?? Date.now
   const log = options.log ?? (() => undefined)
-  /** Cuándo se repasó cada campus. En memoria: perderlo solo cuesta repasarlo antes. */
-  const doneAt = new Map<number, number>()
   let running = false
 
   const save = async (campusId: number, items: readonly ApiCursusMember[]): Promise<void> => {
@@ -87,31 +101,75 @@ export function createCoreCursus(options: CoreCursusOptions) {
     )
   }
 
+  const load = async (campusId: number): Promise<CursusState> => {
+    const stored = (
+      await db.execute({
+        sql: 'SELECT value FROM sync_state WHERE key = ?',
+        args: [cursusStateKey(campusId)],
+      })
+    ).rows[0]?.value
+
+    try {
+      if (typeof stored === 'string') return { ...FRESH, ...(JSON.parse(stored) as CursusState) }
+    } catch {
+      // Estado ilegible: se empieza de nuevo, que solo cuesta repasar el campus.
+    }
+
+    return { ...FRESH }
+  }
+
+  const store = async (campusId: number, state: CursusState): Promise<void> => {
+    await db.execute({
+      sql: `INSERT INTO sync_state (key, value, updated_at) VALUES (?, ?, ?)
+            ON CONFLICT (key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at`,
+      args: [cursusStateKey(campusId), JSON.stringify(state), new Date(now()).toISOString()],
+    })
+  }
+
+  const may = (): boolean => options.quota.allowsBulk('cursus', options.hourlyReserve)
+
   return {
-    /** Una vuelta: repasa el campus que más tiempo lleva sin repasar, si toca y hay cuota. */
+    /**
+     * Una vuelta: sigue el campus que se quedó a medias o, si no hay ninguno,
+     * repasa el que toque, si hay cuota.
+     */
     async step(): Promise<void> {
       if (running) return
       running = true
 
       try {
-        const due = options.campusIds.find(
-          (campusId) => now() - (doneAt.get(campusId) ?? -Infinity) >= EVERY_MS,
+        const states = await Promise.all(
+          options.campusIds.map(async (campusId) => ({ campusId, state: await load(campusId) })),
         )
+        const due =
+          states.find(({ state }) => state.page > 1) ??
+          states.find(({ state }) => now() - (state.doneAt ?? -Infinity) >= EVERY_MS)
 
-        if (due === undefined || !options.quota.allows('background', options.hourlyReserve)) {
+        if (due === undefined || !may()) {
           return
         }
 
-        for (let page = 1; page <= MAX_PAGES; page++) {
-          // Página a página: si la cuota se acaba a medias, sigue en la próxima vuelta.
-          if (page > 1 && !options.quota.allows('background', options.hourlyReserve)) return
+        const { campusId, state } = due
 
-          const result = await client.getCoreCursusPage({ campusId: due, page })
+        if (state.page === 1) state.rows = 0
 
-          await save(due, result.items)
+        for (let fetched = 0; state.page <= MAX_PAGES; fetched++, state.page++) {
+          // Página a página, y por dónde va se guarda: si la cuota se acaba a
+          // medias o el servidor se reinicia, sigue en esa página, no en la 1.
+          // Antes empezaba de cero cada vez, y París (más de 80 páginas) no
+          // terminaba nunca cuando la cuota iba justa.
+          if (fetched > 0 && !may()) return
+
+          const result = await client.getCoreCursusPage({ campusId, page: state.page })
+
+          await save(campusId, result.items)
+          state.rows += result.items.length
+          state.total = result.total
+
           if (result.items.length < result.perPage) break
+          await store(campusId, { ...state, page: state.page + 1 })
         }
-        doneAt.set(due, now())
+        await store(campusId, { ...state, page: 1, doneAt: now() })
       } catch (error) {
         log(`42cursus: ${error instanceof Error ? error.message : String(error)}`)
       } finally {

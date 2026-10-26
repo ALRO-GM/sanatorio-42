@@ -7,6 +7,7 @@
  */
 
 import type { Env } from '../../config/env.js'
+import { parseNightWindow } from '../../core/night-window.js'
 import type { SyncerConfig } from './syncer.js'
 
 export function syncConfigFrom(env: Env): SyncerConfig {
@@ -20,5 +21,12 @@ export function syncConfigFrom(env: Env): SyncerConfig {
     deltaTtlMs: env.DELTA_TTL_SECONDS * 1000,
     deltaIdleMs: env.DELTA_IDLE_SECONDS * 1000,
     requestPageBudget: env.PEERS_PAGE_BUDGET,
+    budget: {
+      nightReserve: env.SYNC_NIGHT_RESERVE,
+      nightWindow: parseNightWindow(env.SYNC_NIGHT_WINDOW),
+      timeZone: env.SYNC_TIMEZONE,
+      spendMinutes: env.SYNC_SPEND_REMAINING_MINUTES,
+      spendMargin: env.SYNC_SPEND_MARGIN,
+    },
   }
 }

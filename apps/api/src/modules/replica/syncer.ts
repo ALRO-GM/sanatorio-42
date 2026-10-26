@@ -11,7 +11,7 @@
  * | Proyecto     | `projects_users` de **un** proyecto y campus          | 1-3 peticiones     | una vez, al abrirlo, si el campus aún no está copiado |
  * | Cambios      | `projects_users?range[updated_at]=<cursor>,<ahora>`   | casi siempre 1     | 5 min con gente, 30 min sin nadie |
  * | Catálogo     | `/campus`                                             | 1 petición         | semanal |
- * | Relleno      | `projects_users` del campus, por ventanas de tiempo   | 1 por paso         | cada 5 s hasta acabar, una sola vez |
+ * | Relleno      | `projects_users` del campus, por ventanas de tiempo   | 1 por paso         | cada 5 s de día, de corrido de noche y al final de la hora (`budget.ts`), una sola vez |
  *
  * Con el campus ya copiado, una hora con gente son unas 50-130 peticiones; en
  * reposo, unas 10. El relleno inicial de Madrid (156 671 filas) son ~1 600
@@ -35,6 +35,7 @@ import type { BackfillPhase, SyncStatus } from '@sanatorio/contracts'
 import type { FortyTwoClient } from '../../integrations/forty-two/client.js'
 import { hourlyQuota } from './quota.js'
 import type { QuotaGate } from './quota.js'
+import type { BudgetConfig } from './budget.js'
 import type { ReplicaRepository } from './replica.repository.js'
 import type { ApiLocation, ApiUser } from '../../integrations/forty-two/types.js'
 import { isoAt } from '../../core/time.js'
@@ -54,6 +55,8 @@ export type SyncerConfig = {
   deltaIdleMs: number
   /** Páginas que se bajan como mucho dentro de una petición web. */
   requestPageBudget: number
+  /** Cómo se reparte la cuota según la hora (`budget.ts`). Sin él, siempre de día. */
+  budget?: Omit<BudgetConfig, 'dayReserve'>
 }
 
 type SyncerOptions = {
@@ -511,10 +514,12 @@ export function createSyncer(options: SyncerOptions) {
     const active = isActive()
 
     // 1. Puestos. Con gente mirando se permite apurar más la cuota: es el dato
-    //    que más rápido envejece y el que decide a quién vas a buscar.
+    //    que más rápido envejece y el que decide a quién vas a buscar. De noche
+    //    o al final de la hora, el mantenimiento baja hasta el suelo del modo
+    //    (`quota.upkeep`): la copia, que va detrás, le deja sitio.
     for (const campusId of config.trackedCampusIds) {
       const ttl = active ? config.locationsTtlMs : config.locationsIdleMs
-      const reserve = active ? config.hourlyReserve / 3 : config.hourlyReserve
+      const reserve = quota.upkeep(active ? config.hourlyReserve / 3 : config.hourlyReserve)
 
       if (
         (await locationsAge(campusId)) >= ttl &&
@@ -528,7 +533,7 @@ export function createSyncer(options: SyncerOptions) {
     // 2. Proyectos que alguien abrió y no cupieron en su petición.
     const pending = pendingProjects.entries().next().value
 
-    if (pending !== undefined && canSpend(config.hourlyReserve / 3)) {
+    if (pending !== undefined && canSpend(quota.upkeep(config.hourlyReserve / 3))) {
       const [key, { campusId, projectId }] = pending
       // Se quita antes de intentarlo: si quedan páginas, `syncProject` lo vuelve
       // a apuntar; si falla, no se queda aquí bloqueando la cola.
@@ -539,7 +544,7 @@ export function createSyncer(options: SyncerOptions) {
       }
     }
 
-    if (!canSpend()) {
+    if (!canSpend(quota.upkeep(config.hourlyReserve))) {
       return false
     }
 
@@ -563,9 +568,20 @@ export function createSyncer(options: SyncerOptions) {
       return true
     }
 
-    // 5. Relleno histórico, con su propio ritmo.
-    if (now() - lastBackfillAt >= config.backfillIntervalMs) {
+    // 5. Relleno histórico (la copia inicial), con su propio ritmo: de día una
+    //    petición cada `backfillIntervalMs`; de noche y al final de la hora, de
+    //    corrido, hasta la reserva del modo y antes que el resto de la copia.
+    const interval = quota.paced() ? config.backfillIntervalMs : 0
+
+    if (now() - lastBackfillAt >= interval) {
       for (const campusId of config.trackedCampusIds) {
+        if (
+          (await backfillState(campusId)).phase === 'done' ||
+          !quota.allowsBulk('initial', config.hourlyReserve)
+        ) {
+          continue
+        }
+
         const step = { done: false }
         const tried = await guarded(`relleno del campus ${campusId}`, async () => {
           step.done = await backfillStep(campusId)

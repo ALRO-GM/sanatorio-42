@@ -11,8 +11,16 @@ import { createAppTokenProvider } from './app-token.js'
 import { createThrottle } from './throttle.js'
 import type { Env } from '../../config/env.js'
 
+/** El límite por segundo de la API de 42 (`x-secondly-ratelimit-limit`). */
+const SECONDLY_LIMIT = 2
+
 export function createApiClient(env: Env, fetchImpl: typeof fetch = fetch): FortyTwoClient {
-  const throttle = createThrottle({ minIntervalMs: env.MIN_REQUEST_INTERVAL_MS })
+  // Con `MIN_REQUEST_INTERVAL_MS=0` (los tests, contra una API de mentira) no
+  // hay topes propios; en producción, además del suelo, nunca más de 2 por segundo.
+  const throttle = createThrottle({
+    minIntervalMs: env.MIN_REQUEST_INTERVAL_MS,
+    ...(env.MIN_REQUEST_INTERVAL_MS > 0 ? { perSecond: SECONDLY_LIMIT } : {}),
+  })
 
   const tokens = createAppTokenProvider({
     tokenUrl: env.FORTY_TWO_TOKEN_URL,

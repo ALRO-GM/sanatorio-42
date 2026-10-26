@@ -164,6 +164,49 @@ describe('sincronizador', () => {
       // La única petición es la de puestos, que salió antes de saber la cuota.
       expect(api.calls.filter((call) => call.startsWith('/projects_users'))).toHaveLength(0)
     })
+
+    it('de noche va de corrido, sin su pausa, y solo con turno de la cuota', async () => {
+      api.rows.set(
+        MADRID,
+        Array.from({ length: 6 }, (_, index) => row(`u${index}`, index * 40 + 1)),
+      )
+      let turn = false
+      const asked: string[] = []
+      const night = createSyncer({
+        client: api.client,
+        replica,
+        // De día, una petición por minuto: de noche no se espera.
+        config: { ...CONFIG, backfillIntervalMs: 60_000 },
+        quota: {
+          allows: () => true,
+          allowsBulk: (job) => {
+            asked.push(job)
+            return turn
+          },
+          // El mantenimiento recibe la reserva del modo.
+          upkeep: () => 0,
+          paced: () => false,
+          defer: () => Promise.resolve(true),
+        },
+        now: clock.now,
+        sleep: async () => undefined,
+      })
+
+      // Sin turno (otra tarea de más prioridad, o la reserva del modo) no copia.
+      await drain(night)
+      expect(asked).toContain('initial')
+      expect((await night.status()).campuses[0]?.backfill.rows).toBe(0)
+
+      // Con turno, del tirón: el reloj no se mueve y aun así termina.
+      turn = true
+      await drain(night)
+      expect((await night.status()).campuses[0]?.backfill.phase).toBe('done')
+
+      // Copiado el campus, ya no pide turno.
+      asked.length = 0
+      await night.tick()
+      expect(asked).toEqual([])
+    })
   })
 
   describe('cambios', () => {

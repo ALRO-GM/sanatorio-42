@@ -69,7 +69,10 @@ describe('quién habla con 42', () => {
     for (const path of callers.filter((each) => !NO_QUOTA.has(each))) {
       const source = readFileSync(join(SRC, path), 'utf8')
 
-      expect(/quota\.(allows|defer)\(|quota\.allows\b|allows\(/.test(source), path).toBe(true)
+      // `allowsBulk`: las tareas de volumen piden turno (`budget.ts`).
+      expect(/quota\.(allows|allowsBulk|defer)\(|quota\.allows\b|allows\(/.test(source), path).toBe(
+        true,
+      )
     }
   })
 })
