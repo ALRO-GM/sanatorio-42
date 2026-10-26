@@ -28,14 +28,7 @@ import { createRateLimit } from '../../core/rate-limit.js'
 import { createTtlCache } from '../../core/ttl-cache.js'
 import { parse } from '../../core/validation.js'
 import type { ReplicaRepository } from '../replica/index.js'
-import {
-  analyse,
-  GRAPH_BUDGET,
-  isAnonymised,
-  mergePairs,
-  select,
-  toLink,
-} from './network.analysis.js'
+import { analyse, isAnonymised, mergePairs, select, toLink } from './network.analysis.js'
 import type { Analysis } from './network.analysis.js'
 import type { NetworkRepository } from './network.repository.js'
 import { CORE_CURSUS, PISCINE_CURSUS } from './network.sync.js'
@@ -77,11 +70,7 @@ const CACHE_SIZE = 12
 const TOP_PAIRS = 100
 
 const DEFAULT_LIMIT = 300
-/**
- * Lo más que se acepta en la URL. Lo que pase de `GRAPH_BUDGET.nodes` se recorta
- * a ese tope en vez de dar error: los enlaces guardados con la antigua opción
- * «sin límite» (20 000) siguen funcionando.
- */
+/** Lo más que se acepta en la URL: es la opción «todas» de la web (`ALL_PEOPLE`). */
 const MAX_LIMIT = 20_000
 
 /** Una fecha (`2026-10-11`) o un instante ISO-8601. */
@@ -174,13 +163,7 @@ const querySchema = z.object({
     .optional()
     .transform((value) => value === '1' || value === 'true'),
   min: z.coerce.number().int().min(1).max(100).default(1),
-  limit: z.coerce
-    .number()
-    .int()
-    .min(10)
-    .max(MAX_LIMIT)
-    .default(DEFAULT_LIMIT)
-    .transform((limit) => Math.min(limit, GRAPH_BUDGET.nodes)),
+  limit: z.coerce.number().int().min(10).max(MAX_LIMIT).default(DEFAULT_LIMIT),
 })
 
 type Cached = {

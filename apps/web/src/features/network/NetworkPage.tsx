@@ -40,12 +40,15 @@ import { InfoTip } from '../../shared/ui/InfoTip'
 import { NetworkTour } from './NetworkTour'
 import { decodePart, networkHref } from '../../shared/links'
 
+/** «Todas»: lo más que acepta la API (`MAX_LIMIT` en `network.service.ts`). */
+const ALL_PEOPLE = 20_000
+
 /**
- * Topes de personas que se pueden pedir. El más alto es el de la API
- * (`GRAPH_BUDGET` en `network.analysis.ts`): con París o todos los campus, más
- * burbujas que esto ahogaban el navegador. Siempre se ven las más activas.
+ * Topes de personas que se pueden pedir. Siempre se ven las más activas. Con
+ * París o todos los campus, pasar de 1 500 hace ir lento el grafo: lo dice la
+ * propia opción.
  */
-const LIMITS = [150, 300, 600, 1000, 1500] as const
+const LIMITS = [150, 300, 600, 1000, 1500, 2000, ALL_PEOPLE] as const
 
 /** Espera antes de pedir de nuevo al mover un control (el deslizador sobre todo). */
 const DEBOUNCE_MS = 250
@@ -464,7 +467,11 @@ export function NetworkPage({ me, switcher }: { me: CurrentUser; switcher?: Reac
                 >
                   {LIMITS.map((limit) => (
                     <option key={limit} value={limit}>
-                      {limit}
+                      {limit === ALL_PEOPLE
+                        ? t('net.limit.all')
+                        : limit > 1500
+                          ? t('net.limit.slow', { n: number(limit) })
+                          : number(limit)}
                     </option>
                   ))}
                 </select>

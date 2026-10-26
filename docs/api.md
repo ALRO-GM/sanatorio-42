@@ -1363,10 +1363,8 @@ GET /network?from=&to=&login=&projectId=&min=&limit= → el grafo. Todo opcional
   corregido mutuamente.
 - `min` (1-100, por defecto 1): correcciones mínimas entre dos personas para que
   salga su unión. `limit` (10-20000, por defecto 300): tope de personas, las más
-  activas primero. Más de 1 500 se recorta a 1 500 sin error (`GRAPH_BUDGET` en
-  `network.analysis.ts`: lo que el navegador mueve con soltura), y las uniones
-  van como mucho a seis por persona pedida y nunca más de 10 000, las más
-  fuertes. `hidden` dice cuántas personas y uniones han quedado fuera.
+  activas primero; 20000 es «todas». Las uniones van como mucho a seis por
+  persona pintada, las más fuertes. `hidden` dice cuántas personas y uniones han quedado fuera.
 
 ```json
 {

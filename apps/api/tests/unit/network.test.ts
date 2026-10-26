@@ -13,7 +13,6 @@ import type { Db } from '../../src/core/db/database.js'
 import type { ApiScaleTeam } from '../../src/integrations/forty-two/types.js'
 import {
   analyse,
-  GRAPH_BUDGET,
   mergePairs,
   passMarkOf,
   select,
@@ -180,9 +179,9 @@ describe('red de correcciones', () => {
       expect(select(analysis, { focus: 'nadie', min: 1, limit: 10 }).logins).toEqual([])
     })
 
-    it('con un campus enorme no pasa del tope que el navegador mueve con soltura', () => {
+    it('con un campus enorme se pintan las personas pedidas y seis uniones por cabeza', () => {
       // 2 000 personas en fila y una piña de 150 que se corrigen todas entre sí:
-      // más de 12 000 uniones entre las 1 500 más activas.
+      // más de 12 000 uniones.
       const crowd = Array.from({ length: 2000 }, (_, index) => `p${String(index)}`)
       const knot = crowd.slice(0, 150)
       const everyone = new Set(crowd)
@@ -196,13 +195,16 @@ describe('red de correcciones', () => {
         ),
         everyone,
       )
-      const shown = select(analysis, { focus: null, min: 1, limit: 20_000 })
+      const some = select(analysis, { focus: null, min: 1, limit: 1500 })
 
-      expect(shown.logins).toHaveLength(GRAPH_BUDGET.nodes)
-      expect(shown.links.length).toBeLessThanOrEqual(GRAPH_BUDGET.links)
+      expect(some.logins).toHaveLength(1500)
+      expect(some.links.length).toBeLessThanOrEqual(1500 * 6)
       // Se quedan las más activas (toda la piña) y se dice cuántas quedan fuera.
-      expect(knot.every((login) => shown.logins.includes(login))).toBe(true)
-      expect(shown.hidden).toMatchObject({ nodes: 500 })
+      expect(knot.every((login) => some.logins.includes(login))).toBe(true)
+      expect(some.hidden).toMatchObject({ nodes: 500 })
+
+      // «Todas»: nadie fuera.
+      expect(select(analysis, { focus: null, min: 1, limit: 20_000 }).logins).toHaveLength(2000)
     })
   })
 
@@ -251,11 +253,10 @@ describe('red de correcciones', () => {
       closeDatabase(db)
     })
 
-    it('un tope de personas mayor que el del navegador se recorta, sin error', async () => {
-      // Los enlaces viejos con la opción «sin límite» (20 000) siguen valiendo.
+    it('se pueden pedir todas las personas (20 000), no más', async () => {
       const graph = await services.network.graph(actor('ana'), { limit: '20000' })
 
-      expect(graph.query.limit).toBe(GRAPH_BUDGET.nodes)
+      expect(graph.query.limit).toBe(20_000)
       await expect(services.network.graph(actor('ana'), { limit: '20001' })).rejects.toThrow()
     })
 

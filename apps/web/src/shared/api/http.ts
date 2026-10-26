@@ -4,6 +4,8 @@
 
 import type { ErrorBody } from '@sanatorio/contracts'
 
+import { isIdle } from '../still'
+
 const BASE = import.meta.env.VITE_API_URL ?? '/api'
 
 /**
@@ -13,6 +15,9 @@ const BASE = import.meta.env.VITE_API_URL ?? '/api'
  * error visible, que es lo único que la web sabe mostrar.
  */
 const TIMEOUT_MS = 15_000
+
+/** Sin tocar la web este rato, sus peticiones van con `x-idle`: las de la API (`ACTIVITY_WINDOW_MS`). */
+const IDLE_MS = 10 * 60_000
 
 /**
  * Error de una llamada a la API.
@@ -72,6 +77,10 @@ export async function fetchApi(path: string, init: RequestInit = {}): Promise<Re
     'x-lang',
     typeof document === 'undefined' ? 'es' : document.documentElement.lang || 'es',
   )
+
+  // Una pestaña olvidada que se refresca sola no es nadie usando la web: así la
+  // copia de 42 puede entrar en su modo noche (`modules/replica/budget.ts`).
+  if (typeof document !== 'undefined' && isIdle(IDLE_MS)) headers.set('x-idle', '1')
 
   try {
     response = await fetch(BASE + path, {

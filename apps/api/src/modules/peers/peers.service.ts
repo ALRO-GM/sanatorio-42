@@ -64,8 +64,6 @@ export function createPeersService(options: PeersServiceOptions) {
      * @param includeFinished También los aprobados, con `status` en cada uno.
      */
     async findByUser(viewer: Viewer, includeFinished = false): Promise<ProjectSummary[]> {
-      sync.touch()
-
       try {
         await sync.ensureUserProjects(
           viewer.login,

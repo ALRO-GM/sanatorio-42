@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/red.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-190 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
+192 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera | Francés |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -26,6 +26,8 @@ Generado desde `apps/web/src/shared/i18n/textos/red.csv` con
 | `net.min` | Mínimo de correcciones entre dos personas para dibujar la unión | features/network/NetworkPage | Mínimo por pareja: {n} | Minimum per pair: {n} | Mínim per parella: {n} | Bikoteko gutxienekoa: {n} | Minimum par paire : {n} |
 | `net.minLabel` | Nombre del deslizador del mínimo de correcciones por pareja (para lectores de pantalla) | features/network/NetworkPage | Mínimo por pareja | Minimum per pair | Mínim per parella | Bikoteko gutxienekoa | Minimum par paire |
 | `net.limit` | Tope de personas en el grafo | features/network/NetworkPage | Personas, como mucho | People, at most | Persones, com a molt | Pertsonak, gehienez | Personnes, au maximum |
+| `net.limit.all` | Opción del tope de personas: todas (el grafo va lento) | features/network/NetworkPage | Todas (lento) | All (slow) | Totes (lent) | Guztiak (motela) | Toutes (lent) |
+| `net.limit.slow` | Opción del tope de personas por encima de 1 500 (el grafo va lento) | features/network/NetworkPage | {n} (lento) | {n} (slow) | {n} (lent) | {n} (motela) | {n} (lent) |
 | `net.color` | Selector de qué colorea las burbujas | features/network/NetworkPage | Color según | Colour by | Color segons | Kolorea honen arabera | Couleur selon |
 | `net.color.community` | Color: grupo de gente que se corrige entre sí | features/network/NetworkPage | Comunidad | Community | Comunitat | Komunitatea | Communauté |
 | `net.color.endogamy` | Color: cuánto repite con la misma gente | features/network/NetworkPage | Endogamia | Endogamy | Endogàmia | Endogamia | Endogamie |

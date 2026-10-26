@@ -144,14 +144,29 @@ const EPOCH = '1970-01-01T00:00:00.000Z'
 const BACKFILL_WINDOW_MS = 30 * 24 * 60 * MINUTE
 
 /**
- * Cuántas ventanas recientes se recorren de una en una antes de pedir "todo lo
- * anterior" de golpe.
+ * Cuántas ventanas recientes se recorren de una en una antes de pasar a las
+ * ventanas viejas, más grandes.
  *
  * Dos años de ventanas mensuales hacen que lo reciente (quien está cursando
- * ahora) llegue primero. Más atrás ya no merece la pena afinar: cada ventana
- * vacía cuesta una petición.
+ * ahora) llegue primero.
  */
 const BACKFILL_RECENT_WINDOWS = 24
+
+/**
+ * Tamaño de las ventanas viejas: un trimestre.
+ *
+ * Antes, tras las recientes se pedía "todo lo anterior" de golpe. Con París
+ * (un millón de filas antes de 2024-12) la API de 42 no llegaba a contestar ni
+ * la primera página y el relleno se quedó reintentando la misma petición toda
+ * la noche del 2026-10-26.
+ */
+const BACKFILL_OLD_WINDOW_MS = 91 * 24 * 60 * MINUTE
+
+/**
+ * Antes de esto no hay 42 (París abrió en 2013): de aquí hacia atrás, una sola
+ * ventana hasta `EPOCH`, que vendrá vacía o casi.
+ */
+const BACKFILL_FLOOR = Date.parse('2013-01-01T00:00:00.000Z')
 
 /** Páginas por sondeo de puestos. 1 000 personas sentadas a la vez no las hay. */
 const LOCATIONS_MAX_PAGES = 10
@@ -355,11 +370,27 @@ export function createSyncer(options: SyncerOptions) {
       return undefined
     }
 
-    const to = isoAt(Date.parse(state.from) + 1)
-    const from = Date.parse(state.from) - BACKFILL_WINDOW_MS
+    const start = Date.parse(state.from)
     const recentLimit = Date.parse(state.anchor) - BACKFILL_RECENT_WINDOWS * BACKFILL_WINDOW_MS
+    const from = start - (start > recentLimit ? BACKFILL_WINDOW_MS : BACKFILL_OLD_WINDOW_MS)
 
-    return { from: from <= recentLimit ? EPOCH : isoAt(from), to }
+    return { from: from <= BACKFILL_FLOOR ? EPOCH : isoAt(from), to: isoAt(start + 1) }
+  }
+
+  /**
+   * Un relleno guardado con la regla vieja (de una ventana reciente a "todo lo
+   * anterior" de golpe) que aún no ha bajado ninguna página de esa ventana: se
+   * parte en trimestres. Los que ya la empezaron la terminan igual.
+   */
+  function splitOldWindow(state: BackfillState): BackfillState {
+    const to = Date.parse(state.to)
+
+    return state.phase === 'all' &&
+      state.from === EPOCH &&
+      state.page === 1 &&
+      to - BACKFILL_OLD_WINDOW_MS > BACKFILL_FLOOR
+      ? { ...state, from: isoAt(to - BACKFILL_OLD_WINDOW_MS) }
+      : state
   }
 
   /**
@@ -367,13 +398,13 @@ export function createSyncer(options: SyncerOptions) {
    *
    * Primero se copia a quien tiene algo **en curso**, que es lo que la web
    * enseña sí o sí ("pacientes como tú") y son pocas páginas (38 en Madrid).
-   * Después todo lo demás, por ventanas de un mes hacia atrás.
+   * Después todo lo demás, por ventanas de un mes hacia atrás y, pasados dos años, de un trimestre.
    *
    * @returns `true` si ha hecho una petición; `false` si el campus ya está copiado.
    */
   async function backfillStep(campusId: number): Promise<boolean> {
     return single(`backfill:${campusId}`, async () => {
-      const state = await backfillState(campusId)
+      const state = splitOldWindow(await backfillState(campusId))
 
       if (state.phase === 'done') {
         return false
@@ -658,7 +689,6 @@ export function createSyncer(options: SyncerOptions) {
      * @returns `partial: true` si faltan participantes por bajar.
      */
     async ensureFresh(campusId: number, projectId?: number): Promise<{ partial: boolean }> {
-      lastActivityAt = now()
       let partial = false
 
       // Con la cuota de la hora casi agotada ya no se pide nada desde una

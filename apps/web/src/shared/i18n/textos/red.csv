@@ -18,6 +18,8 @@ net.project.all,Proyecto: todos,Todos,All,Tots,Denak,Tous
 net.min,Mínimo de correcciones entre dos personas para dibujar la unión,Mínimo por pareja: {n},Minimum per pair: {n},Mínim per parella: {n},Bikoteko gutxienekoa: {n},Minimum par paire : {n}
 net.minLabel,"Nombre del deslizador del mínimo de correcciones por pareja (para lectores de pantalla)",Mínimo por pareja,Minimum per pair,Mínim per parella,Bikoteko gutxienekoa,Minimum par paire
 net.limit,Tope de personas en el grafo,"Personas, como mucho","People, at most","Persones, com a molt","Pertsonak, gehienez","Personnes, au maximum"
+net.limit.all,Opción del tope de personas: todas (el grafo va lento),Todas (lento),All (slow),Totes (lent),Guztiak (motela),Toutes (lent)
+net.limit.slow,Opción del tope de personas por encima de 1 500 (el grafo va lento),{n} (lento),{n} (slow),{n} (lent),{n} (motela),{n} (lent)
 net.color,Selector de qué colorea las burbujas,Color según,Colour by,Color segons,Kolorea honen arabera,Couleur selon
 net.color.community,Color: grupo de gente que se corrige entre sí,Comunidad,Community,Comunitat,Komunitatea,Communauté
 net.color.endogamy,Color: cuánto repite con la misma gente,Endogamia,Endogamy,Endogàmia,Endogamia,Endogamie

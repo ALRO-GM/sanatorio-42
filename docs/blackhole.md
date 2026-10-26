@@ -259,15 +259,12 @@ el día 75, después de Born2beroot y ft_printf; ahora, el 41.
 
 **Lo que queda, y por qué**:
 
-- **El plan de Python aprendido pone RAG against the machine en el círculo
-  4**, y es del 5: de las 5 personas con el rango 4, 4 lo validaron sin RAG;
-  las 3 con el rango 5 lo tenían. Por eso cdonaire, cmelero- y smarin-s se
-  quedan 3,5 puntos por debajo de «Círculo 4» al validarlo. Se aprende de los
-  votos (cuántos rangos tenía quien se apuntó, y se apuntan estando en el 4).
-  Conviene fijar en la tabla de partida de `curriculum.ts` los círculos 4 a 6
-  de Python (`SEEDED_UP_TO.next = 6`): 4 = examen 4, NetPractice, Pac-Man; 5 =
-  examen 5, Inception, The Answer Protocol, Agent Smith y RAG; 6 = examen 6 y
-  ft_transcendence. No va en este cambio (es de la réplica).
+- **RAG against the machine es del círculo 4** (con el examen 4, NetPractice
+  y Pac-Man): ahí se hace. Los datos lo enseñaban más tarde (de las 5 personas
+  con el rango 4, 4 lo validaron sin RAG) porque mucha gente lo entrega después
+  del examen 4. La tabla de partida de `curriculum.ts` fija los círculos 4 a 6
+  de Python: 4 = examen 4, NetPractice, Pac-Man y RAG; 5 = examen 5, Inception,
+  The Answer Protocol y Agent Smith; 6 = examen 6 y ft_transcendence.
 - En Python, 2 de 18 validaron el rango 3 sin Fly-in o sin Call Me Maybe (los
   aprobaron después), 3 de 41 el 2 sin el módulo 10 y 1 de 3 el 5 sin Agent
   Smith. Puede que 42 pida solo parte del círculo; con tan pocos casos, se deja.

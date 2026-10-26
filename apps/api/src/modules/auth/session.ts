@@ -55,7 +55,10 @@ export function createSessionReader(options: SessionReaderOptions): SessionReade
       throw new DomainError('forbidden', 'Esta cuenta solo sirve para validar documentos')
     }
 
-    options.onActivity?.()
+    // Las peticiones de una pestaña oculta o que nadie toca (las marca la web con
+    // `x-idle`) no cuentan: si no, una pestaña olvidada no dejaba entrar nunca
+    // en el modo noche de la copia de 42.
+    if (request.headers['x-idle'] === undefined) options.onActivity?.()
 
     return session
   }

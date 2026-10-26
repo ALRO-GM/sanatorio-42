@@ -1,19 +1,12 @@
-# Tareas tras compactar (2026-10-25, 23:30)
+# Tareas tras compactar (2026-10-26)
 
-Desplegado: 5313876 (francés obligatorio y en el selector, burbuja de
-sugerencias, estudio de personalización, pila de ventanitas, Avance con
-varias líneas, mapa de calor de asientos, horas de asientos desde que se ve
-la sesión y tope de 12 h, ft_transcendence en el último círculo de Python).
+Nada pendiente. Desplegado cf8b681: Avance (100 % de quien terminó, trofeo,
+hitos, círculos exactos, opciones a la derecha), «Tu estado de salud» con
+enlace a Avance, deslizadores precisos, selector de periodo común, mapa de
+calor con el orden del plano, plan de Python sembrado hasta el círculo 6,
+presupuesto nocturno de la API de 42, la app con 2 GB, clústeres de París
+(caben, nombres F1B, sin hosts basura, menos CPU) y el grafo de la red con
+tope de 1 500 personas y sin reiniciarse al refrescar.
 
-En marcha (worktree, sin push): agente de Avance.
-
-- Quien terminó llega al 100 % (medido con lo que hizo), tramo final
-  resaltado con trofeo, hitos de entrega en la ficha.
-- Opciones del gráfico en un panel a la derecha (como Red).
-- Selector de periodo común (desplegable en ordenador, rueda en el móvil)
-  aplicado en la web, salvo Asientos y el mapa de calor (pendiente).
-- Regla en `docs/interfaz.md` y AGENTS.md: gráfico a la izquierda, opciones
-  a la derecha.
-
-Al unir: regenerar `docs/textos/*.md`, check, cobertura, push y despliegue.
-Después, aplicar el selector de periodo también en Asientos.
+Pendiente de mirar con datos reales: la escala del mapa de calor (si sale
+casi todo azul, pasar a raíz o cuantiles) y el avance de la copia de París.

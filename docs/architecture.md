@@ -222,11 +222,12 @@ son unas 82 000, 820 peticiones una sola vez) y calcula sobre ellas el grafo.
   en memoria (`core/ttl-cache.ts`), así que cambiar el tope de personas o elegir a
   alguien no vuelve a leer la base. La web lo pinta en un `<canvas>` con
   `d3-force` y solo descarga esa parte al abrir la sección.
-- **Tope del grafo** (`GRAPH_BUDGET` en `network.analysis.ts`): como mucho 1 500
-  personas y 10 000 uniones, también en la red de asientos. Se quedan las más
-  activas (y las uniones más fuertes) y la web lo dice bajo el grafo («se ven las
-  más activas · fuera por el tope…»). El selector «Personas, como mucho» llega a
-  1 500; un `limit` mayor (enlaces viejos con «sin límite») se recorta sin error.
+- **Tope del grafo**: la red de correcciones pinta las personas pedidas («Personas,
+  como mucho»: 150 a 2 000 o «Todas», que es `limit=20000`) y seis uniones por
+  persona, las más fuertes. Desde 2 000 la opción avisa de que irá lento: lo
+  decide quien lo pide. La red de asientos se queda en 1 500 personas y 10 000
+  uniones (`GRAPH_BUDGET` en `network.analysis.ts`). Se quedan las más activas y
+  la web lo dice bajo el grafo («se ven las más activas · fuera por el tope…»).
   Medido el 2026-10-26 con la base local (Madrid, 86 000 correcciones; un París
   de 47 000 copiado de parte de Madrid): por defecto (300 personas) la respuesta
   pesa 150-220 KB y tarda 150-480 ms en frío y 6-15 ms de caché; con el tope

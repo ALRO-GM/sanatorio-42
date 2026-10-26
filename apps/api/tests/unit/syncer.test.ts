@@ -139,6 +139,47 @@ describe('sincronizador', () => {
       expect(api.calls[before]).toContain('page=3')
     })
 
+    it('lo de hace más de dos años va por trimestres: nunca pide "todo lo anterior" de golpe', async () => {
+      // Con París, "todo lo anterior a hace dos años" era un millón de filas y
+      // 42 no llegaba a contestar.
+      api.rows.set(MADRID, [row('a', 1), row('b', 1000), row('c', 3000), row('d', 4500)])
+      const syncer = makeSyncer()
+
+      await drain(syncer, 400)
+
+      // Las que piden desde 1970 sin ser la fase «en curso» ni la del total (hasta ahora).
+      const sinceEver = api.calls
+        .map(decodeURIComponent)
+        .filter((call) => !call.includes('status') && call.includes('=1970'))
+        .map((call) => /range\[updated_at\]=[^,]+,([^&]+)/.exec(call)?.[1] ?? '')
+        .filter((to) => Date.parse(to) < clock.now())
+
+      expect((await replica.counts()).projectUsers).toBe(4)
+      // Solo la última, la de antes de 2013 (con un trimestre de margen).
+      expect(sinceEver).toHaveLength(1)
+      expect(Date.parse(sinceEver[0] ?? '')).toBeLessThan(Date.parse('2013-04-02T00:00:00.000Z'))
+    })
+
+    it('un relleno a punto de pedir "todo lo anterior" lo parte en trimestres', async () => {
+      api.rows.set(MADRID, [row('a', 3000)])
+      await replica.setState('backfill:22', {
+        phase: 'all',
+        anchor: '2026-10-01T00:00:00.000Z',
+        from: '1970-01-01T00:00:00.000Z',
+        to: '2024-12-01T00:00:00.000Z',
+        page: 1,
+        rows: 0,
+        total: 1,
+      })
+      const syncer = makeSyncer()
+
+      await syncer.backfillStep(MADRID)
+
+      expect(decodeURIComponent(api.calls[0] ?? '')).toContain(
+        'range[updated_at]=2024-09-01T00:00:00.000Z,2024-12-01T00:00:00.000Z',
+      )
+    })
+
     it('una vez copiado no vuelve a gastar ni una petición', async () => {
       api.rows.set(MADRID, [row('a', 1)])
       const syncer = makeSyncer()

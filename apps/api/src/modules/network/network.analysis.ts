@@ -401,15 +401,17 @@ export function toLink(pair: Pair): NetworkLink {
 const weightOf = (pair: Pair): number => pair.ab + pair.ba
 
 /**
- * Lo que se manda al navegador como mucho, por muchas personas que se pidan:
- * burbujas y uniones. Con más, el grafo es una mancha y la simulación de la web
- * (que mueve cada burbuja a cada paso) se come la CPU: con 3 600 personas y
- * 11 000 uniones, arrastrar una burbuja tenía el hilo de la página al 98 %.
- * Con este tope se queda por debajo de la mitad (medido en `docs/architecture.md`,
- * «Red de correcciones»). Se quedan las personas más activas y las uniones más
- * fuertes, y la web dice cuántas quedan fuera.
+ * Tope del grafo de asientos (`seating.service.ts`): burbujas y uniones. Con más,
+ * el grafo es una mancha y la simulación de la web (que mueve cada burbuja a cada
+ * paso) se come la CPU: con 3 600 personas y 11 000 uniones, arrastrar una
+ * burbuja tenía el hilo de la página al 98 % (medido en `docs/architecture.md`,
+ * «Red de correcciones»). El de correcciones deja elegir más, hasta «todas»
+ * (`select`): quien lo pide sabe que irá más lento.
  */
 export const GRAPH_BUDGET = { nodes: 1500, links: 10_000 } as const
+
+/** Uniones por burbuja que se pintan como mucho: se quedan las más fuertes. */
+const LINKS_PER_NODE = 6
 
 /**
  * Qué se pinta de un análisis.
@@ -454,11 +456,11 @@ export function select(
       Number(y === focus) - Number(x === focus) || activity(y) - activity(x) || (x < y ? -1 : 1),
   )
 
-  const logins = candidates.slice(0, Math.min(limit, GRAPH_BUDGET.nodes))
+  const logins = candidates.slice(0, limit)
   const shown = new Set(logins)
   const inside = strong.filter((pair) => shown.has(pair.a) && shown.has(pair.b))
   // Tope de uniones: con demasiadas el grafo es una mancha y el navegador sufre.
-  const maxLinks = Math.min(GRAPH_BUDGET.links, Math.max(200, limit * 6))
+  const maxLinks = Math.max(200, logins.length * LINKS_PER_NODE)
   const kept =
     inside.length > maxLinks
       ? [...inside].sort((x, y) => weightOf(y) - weightOf(x)).slice(0, maxLinks)

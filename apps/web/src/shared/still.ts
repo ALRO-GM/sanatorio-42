@@ -64,6 +64,17 @@ function active(): void {
   if (still) check()
 }
 
+/**
+ * `true` si nadie mira la web: la pestaña está oculta o hace más de `idleMs` que
+ * nadie la toca. Sin vigilar (`watchStill` no ha arrancado, como en las pruebas),
+ * `false`.
+ */
+export function isIdle(idleMs: number): boolean {
+  if (last === 0) return false
+
+  return document.hidden || Date.now() - last > idleMs
+}
+
 /** Empieza a vigilar. Una vez, al arrancar la web. */
 export function watchStill(): void {
   last = Date.now()
