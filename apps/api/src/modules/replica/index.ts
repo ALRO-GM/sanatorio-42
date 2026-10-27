@@ -17,6 +17,8 @@ import type { Logtime } from './logtime.js'
 import type { Curriculum } from './curriculum.js'
 import { createCampusesService } from './campuses.service.js'
 import { DRAIN_EVERY_MS, createQuota } from './quota.js'
+import { createApiUsage } from './api-usage.js'
+import type { ApiUsageService } from './api-usage.js'
 import type { Quota } from './quota.js'
 import type { CampusesService } from './campuses.service.js'
 import { createPhotos, memoryPhotoStore } from './photos.js'
@@ -59,6 +61,8 @@ export type ReplicaModule = AppModule & {
   curriculum: Curriculum
   /** La cuota de 42: quién puede gastarla y la cola de quien espera. */
   quota: Quota
+  /** Lo que gasta de la cuota cada función y cada persona, y sus topes por hora. */
+  apiUsage: ApiUsageService
   /** El historial de puntos de evaluación de cada cual, bajo demanda. */
   points: Points
   /** Los piscineros en curso de cada campus (`docs/piscineros.md`). */
@@ -69,6 +73,12 @@ export type ReplicaModule = AppModule & {
 
 export function createReplicaModule(deps: ReplicaModuleDeps): ReplicaModule {
   const repository = createReplicaRepository(deps.db)
+  const apiUsage = createApiUsage({
+    db: deps.db,
+    ...given({ priority: deps.priority, now: deps.now }),
+  })
+
+  deps.client.setMeter(apiUsage.meter)
   const quota = createQuota({
     db: deps.db,
     client: deps.client,
@@ -191,6 +201,7 @@ export function createReplicaModule(deps: ReplicaModuleDeps): ReplicaModule {
       { table: 'user_levels', logins: ['login'], source: '42' },
       { table: 'user_logtime', logins: ['login'], source: '42' },
       { table: 'quota_queue', logins: ['login'] },
+      { table: 'api_usage', logins: ['login'] },
       { table: 'curriculum_votes', logins: ['login'] },
     ],
     repository,
@@ -199,11 +210,12 @@ export function createReplicaModule(deps: ReplicaModuleDeps): ReplicaModule {
     sync,
     campuses,
     quota,
+    apiUsage,
     points,
     poolMembers,
     logtime,
     routes: (app, context) => {
-      registerReplicaRoutes(app, context, { campuses, sync, quota, photos })
+      registerReplicaRoutes(app, context, { campuses, sync, quota, apiUsage, photos })
     },
     jobs: [
       {
@@ -214,13 +226,20 @@ export function createReplicaModule(deps: ReplicaModuleDeps): ReplicaModule {
         },
       },
       {
+        name: 'cuenta del consumo de 42',
+        everyMs: 60_000,
+        run: () => apiUsage.flush(),
+      },
+      {
         name: 'copia de piscineros',
+        usage: 'pool-members',
         everyMs: 60_000,
         run: () => poolMembers.step(),
       },
       {
         // Grado, fin y black hole de todo el 42cursus de cada campus (`docs/blackhole.md`).
         name: 'copia del 42cursus',
+        usage: 'core-cursus',
         everyMs: 60_000,
         run: () => coreCursus.step(),
       },

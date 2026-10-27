@@ -392,12 +392,7 @@ export const admins: string[] = []
 export const blocks: AdminPeople['blocks'] = []
 export const limits = new Map<string, number>()
 
-export const quotaSettings: FortyTwoQuotaSettings = {
-  dailyRequests: null,
-  monthlyRequests: null,
-  renewDay: 1,
-  saving: false,
-}
+export const quotaSettings: FortyTwoQuotaSettings = { saving: false }
 /** Turnos que quedan delante en la cola de mentira. En un objeto para poder cambiarlo desde fuera. */
 export const quotaQueue = { ahead: 5 }
 
@@ -406,8 +401,9 @@ export function quotaStatus(): FortyTwoQuota {
     settings: { ...quotaSettings },
     level: quotaSettings.saving ? 'tight' : 'ok',
     hourlyRemaining: 874,
-    day: { spent: 3120, allowance: quotaSettings.dailyRequests },
-    month: { spent: 41_800, daysLeft: 21, renewsOn: '2026-11-01' },
+    hourlyLimit: 1200,
+    secondlyLimit: 2,
+    day: { spent: 3120 },
     queued: quotaSettings.saving ? quotaQueue.ahead + 1 : 0,
     budget: {
       mode: 'day',

@@ -27,6 +27,12 @@
 
 import { defaultSleep, readInt } from './headers.js'
 
+/** La cuota de la aplicación en 42: vuelve entera a cada hora en punto (UTC). */
+export const HOURLY_LIMIT = 1200
+
+/** Lo que deja 42 por segundo (`x-secondly-ratelimit-limit`). */
+export const SECONDLY_LIMIT = 2
+
 /** Cabeceras que manda la API de 42 con su cuota. */
 const SECONDLY_REMAINING = 'x-secondly-ratelimit-remaining'
 const HOURLY_REMAINING = 'x-hourly-ratelimit-remaining'

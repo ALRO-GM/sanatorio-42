@@ -1,67 +1,30 @@
-import { useState } from 'react'
-import type { SyntheticEvent } from 'react'
-
-import type { FortyTwoQuotaSettings } from '@sanatorio/contracts'
-
 import { api } from '../../shared/api'
 import { useAction, useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { useFormat } from '../../shared/i18n/useFormat'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
-import { LimitActions, NumberField, Tile } from './LimitParts'
-
-/** Un tope escrito en el formulario: vacío es "sin tope". */
-const capOf = (text: string): number | null => (text.trim() === '' ? null : Number(text))
+import { Tile } from './LimitParts'
 
 /**
- * La cuota de la API de 42: lo que queda esta hora, lo gastado hoy y este mes,
- * cuánta gente espera turno y los topes para regularla a mano.
+ * La cuota de la API de 42: 1 200 peticiones por hora que vuelven enteras a la
+ * hora en punto y 2 por segundo. Sin topes diarios ni mensuales (42 no los
+ * tiene): lo que se gasta en la hora, el ritmo de la copia, quién espera turno
+ * y el modo ahorro. Los topes por función y por persona, en `ApiUsagePanel`.
  */
 export function QuotaCard() {
-  const { t, tn } = useI18n()
+  const { t } = useI18n()
   const { number, time } = useFormat()
   const { data, error, loading, reload } = useAsync(() => api.getAdminQuota(), [])
   const action = useAction()
-  const [draft, setDraft] = useState<{ daily: string; monthly: string; renewDay: string } | null>(
-    null,
-  )
 
   if (loading) return <p className="estado">{t('app.loading')}</p>
   if (data === undefined) return <ErrorNote error={error} onRetry={() => void reload()} />
 
-  const { settings, day, month } = data
-  const form = draft ?? {
-    daily: settings.dailyRequests === null ? '' : String(settings.dailyRequests),
-    monthly: settings.monthlyRequests === null ? '' : String(settings.monthlyRequests),
-    renewDay: String(settings.renewDay),
-  }
+  const { settings } = data
 
-  const save = async (changes: Partial<FortyTwoQuotaSettings>): Promise<void> => {
-    if (await action.run(() => api.setAdminQuota(changes))) {
-      setDraft(null)
-      await reload()
-    }
+  const toggleSaving = async (): Promise<void> => {
+    if (await action.run(() => api.setAdminQuota({ saving: !settings.saving }))) await reload()
   }
-
-  const submit = (event: SyntheticEvent): void => {
-    event.preventDefault()
-    void save({
-      dailyRequests: capOf(form.daily),
-      monthlyRequests: capOf(form.monthly),
-      renewDay: Number(form.renewDay),
-    })
-  }
-
-  const field = (name: keyof typeof form, extra: { min?: number; max?: number } = {}) => (
-    <NumberField
-      label={t(`admin.quota.${name}`)}
-      value={form[name]}
-      {...extra}
-      onChange={(value) => {
-        setDraft({ ...form, [name]: value })
-      }}
-    />
-  )
 
   return (
     <article className={`card budget ${settings.saving ? 'saving' : ''}`}>
@@ -69,22 +32,21 @@ export function QuotaCard() {
       <div className="tiles">
         <Tile
           label={t('admin.quota.hour')}
-          value={data.hourlyRemaining ?? '—'}
-          hint={t(`admin.quota.level.${data.level}`)}
-        />
-        <Tile
-          label={t('admin.quota.today')}
           value={
-            day.allowance === null
-              ? number(day.spent)
-              : `${number(day.spent)} / ${number(day.allowance)}`
+            data.hourlyRemaining === null
+              ? '—'
+              : `${number(data.hourlyLimit - data.hourlyRemaining)} / ${number(data.hourlyLimit)}`
           }
-          hint={t(day.allowance === null ? 'admin.quota.noCap' : 'admin.quota.cap')}
+          hint={t('admin.quota.hourHint', {
+            left: data.hourlyRemaining ?? data.hourlyLimit,
+            time: time(data.budget.resetsAt),
+            perSecond: data.secondlyLimit,
+          })}
         />
         <Tile
-          label={t('admin.quota.month')}
-          value={number(month.spent)}
-          hint={tn('admin.budget.renews', month.daysLeft, { day: month.renewsOn })}
+          label={t('admin.quota.state')}
+          value={t(`admin.quota.level.${data.level}`)}
+          hint={t('admin.quota.today', { n: data.day.spent })}
         />
         <Tile
           label={t('admin.quota.mode')}
@@ -100,17 +62,17 @@ export function QuotaCard() {
           hint={t('admin.quota.queuedHint')}
         />
       </div>
-
-      <form className="budget-form" onSubmit={submit}>
-        {field('daily', { min: 100 })}
-        {field('monthly', { min: 1000 })}
-        {field('renewDay', { min: 1, max: 28 })}
-        <LimitActions
-          busy={action.busy}
-          saving={settings.saving}
-          onToggleSaving={() => void save({ saving: !settings.saving })}
-        />
-      </form>
+      <div className="actions">
+        <button
+          type="button"
+          className={`small ${settings.saving ? 'primary' : ''}`}
+          aria-pressed={settings.saving}
+          disabled={action.busy}
+          onClick={() => void toggleSaving()}
+        >
+          {t(settings.saving ? 'admin.budget.savingOff' : 'admin.budget.savingOn')}
+        </button>
+      </div>
       <p className="hint">{t('admin.quota.hint')}</p>
       <ErrorNote error={action.error} />
     </article>

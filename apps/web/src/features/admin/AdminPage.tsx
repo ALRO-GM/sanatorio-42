@@ -14,6 +14,7 @@ import { PersonLink } from '../../shared/ui/PersonLink'
 import { HoursReport } from '../profile/HoursReport'
 import { BudgetCard } from './BudgetCard'
 import { QuotaCard } from './QuotaCard'
+import { ApiUsagePanel } from './ApiUsagePanel'
 import { BroadcastsTab } from './BroadcastsTab'
 import { ClickerPanel } from './ClickerPanel'
 import { DataPanel } from './DataPanel'
@@ -145,6 +146,7 @@ function ConsumptionTab() {
     <>
       <BudgetCard status={data.budget} onChange={() => void reload()} />
       <QuotaCard />
+      <ApiUsagePanel />
       <div className="tiles">
         <div className="tile">
           <span className="eyebrow">{t('admin.cons.perPerson')}</span>

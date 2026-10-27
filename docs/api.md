@@ -400,14 +400,25 @@ cuota que de otro modo se perdería, por turnos de prioridad: ver
 - GET /quota → `{ "level": "ok" | "tight" | "critical", "ticket": { "number":
   "A-042", "serving": "A-037", "ahead": 4, "etaMinutes": 5, "since" } | null }`.
   Es lo que pinta el rótulo de aviso y el tique de turno.
-- GET /admin/quota → `{ "settings", "level", "hourlyRemaining", "day": { "spent",
-  "allowance" }, "month": { "spent", "daysLeft", "renewsOn" }, "queued", "budget": {
+- GET /admin/quota → `{ "settings": { "saving" }, "level", "hourlyRemaining",
+  "hourlyLimit" (1 200), "secondlyLimit" (2), "day": { "spent" }, "queued", "budget": {
   "mode": "day" | "night" | "spend", "since", "bulkReserve", "resetsAt",
   "nightWindow": "02:00-06:00" | null, "timeZone", "lastReset": { "at", "from", "to" }
-  | null } }`. `budget` es el ritmo de la copia: el modo, hasta dónde puede bajar
-  ahora lo que queda en la hora y cuándo vuelve la cuota. Solo admins.
-- PUT /admin/quota → los ajustes que cambien de `{ "dailyRequests" (o `null`),
-  "monthlyRequests" (o `null`), "renewDay" (1-28), "saving" }`. Solo admins.
+  | null } }`. 42 solo tiene cuota horaria (vuelve entera a la hora en punto) y 2
+  por segundo: no hay topes diarios ni mensuales. `budget` es el ritmo de la copia:
+  el modo, hasta dónde puede bajar ahora lo que queda en la hora y cuándo vuelve la
+  cuota. Solo admins.
+- PUT /admin/quota → `{ "saving" }`. Solo admins.
+- GET /admin/api-usage?hours=1-168&feature=&login= → a qué se va la cuota de 42
+  (`docs/consumo-api.md`): `{ "hours", "hour": { "start", "spent", "resetsAt" },
+  "series": [{ "hour": "2026-10-27T09", "key", "requests" }], "features": [{ "key",
+  "requests", "people", "thisHour" }], "people": [{ "login", "requests", "thisHour",
+  "top", "cap" }], "background", "limits" }`. Las series son por función, o por
+  persona si se filtra por una función; más de ocho se juntan en `*`. Solo admins.
+- PUT /admin/api-usage/limits → un cambio de `{ "perPerson" (o `null`), "person": {
+  "login", "cap" (o `null`) }, "feature": { "key", "cap" (o `null`) } }`; devuelve
+  `limits`: `{ "perPerson", "people": { login: tope }, "features": { función: tope } }`.
+  Solo admins.
 
 - PUT /admin/budget → los ajustes que cambien de `{ "dailyRequests",
   "monthlyBytes" (o `null`), "renewDay" (1-28), "share" (0,5-1), "minPerPerson",

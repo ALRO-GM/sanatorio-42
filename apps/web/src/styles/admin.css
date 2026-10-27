@@ -924,3 +924,41 @@ dialog.data-review h3 {
 :root[data-pool-preview='on'] .appbar {
   top: var(--pool-preview-height);
 }
+
+/* Consumo de la API de 42 (`ApiUsagePanel`): ocho colores fijos por serie, del
+   orden categórico validado (azul, naranja, aguamarina, amarillo, magenta,
+   verde, violeta, rojo), con sus pasos de oscuro; lo que sobra, en gris. */
+.api-usage {
+  --api-series-1: #2a78d6;
+  --api-series-2: #eb6834;
+  --api-series-3: #1baf7a;
+  --api-series-4: #eda100;
+  --api-series-5: #e87ba4;
+  --api-series-6: #008300;
+  --api-series-7: #6250d6;
+  --api-series-8: #e34948;
+  --api-series-rest: #9b9a93;
+}
+:root[data-theme='dark'] .api-usage {
+  --api-series-1: #3987e5;
+  --api-series-2: #d95926;
+  --api-series-3: #199e70;
+  --api-series-4: #c98500;
+  --api-series-5: #d55181;
+  --api-series-6: #008300;
+  --api-series-7: #9085e9;
+  --api-series-8: #e66767;
+  --api-series-rest: #6f6e68;
+}
+.api-usage .progress-layout {
+  margin: 0.6rem 0 1rem;
+}
+.api-tip {
+  min-height: 1.4em;
+  margin: 0.3rem 0;
+  font-size: 0.85rem;
+  color: var(--text-2);
+}
+.api-usage h3 {
+  margin: 1rem 0 0.4rem;
+}

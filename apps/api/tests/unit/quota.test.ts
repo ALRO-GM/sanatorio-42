@@ -1,6 +1,6 @@
 /**
- * Tests de la cuota de la API de 42: los tres escalones, el reparto del tope
- * del mes entre los días que quedan y la cola por orden de llegada.
+ * Tests de la cuota de la API de 42: los tres escalones, que solo hay cuota
+ * horaria y la cola por orden de llegada.
  *
  * Sobre SQLite en memoria, con un cliente de mentira al que se le dice cuánto
  * queda en la hora y cuánto lleva pedido.
@@ -92,59 +92,28 @@ describe('cuota de 42', () => {
     expect(quota.level()).toBe('ok')
   })
 
-  it('con un tope diario, el fondo para al 70 % y lo aplazable al 90 %', async () => {
+  it('solo hay cuota horaria: lo del día se cuenta pero no frena, y los topes de antes se ignoran', async () => {
     const quota = build()
 
-    await quota.configure({ dailyRequests: 1000 }, 'eva')
-
-    client.made = 699
-    expect(quota.allows('background')).toBe(true)
-    client.made = 700
-    expect(quota.allows('background')).toBe(false)
-    expect(quota.allows('deferrable')).toBe(true)
-    client.made = 900
-    expect(quota.allows('deferrable')).toBe(false)
-    // Lo crítico no mira el tope del día: mientras 42 responda, se entra.
+    await db.execute({
+      sql: "INSERT INTO settings (key, value, updated_by, updated_at) VALUES ('quota42', ?, 'eva', '')",
+      args: [JSON.stringify({ dailyRequests: 100, monthlyRequests: 1000, renewDay: 1 })],
+    })
     client.made = 5000
-    expect(quota.allows('critical')).toBe(true)
-
+    await quota.refresh(true)
+    expect(quota.allows('background')).toBe(true)
     expect(await quota.status()).toMatchObject({
-      level: 'tight',
+      settings: { saving: false },
       hourlyRemaining: 1200,
-      day: { spent: 5000, allowance: 1000 },
+      hourlyLimit: 1200,
+      secondlyLimit: 2,
+      day: { spent: 5000 },
     })
 
     // Al día siguiente el contador empieza de cero.
     clock.advance(DAY)
     await quota.refresh()
-    expect(quota.allows('background')).toBe(true)
     expect((await quota.status()).day.spent).toBe(0)
-  })
-
-  it('el tope mensual se reparte entre los días que quedan, y se renueva al cambiar de mes', async () => {
-    const quota = build()
-
-    // Día 6: quedan 26 días. 26 000 al mes son 1 000 al día.
-    expect((await quota.configure({ monthlyRequests: 26_000 }, 'eva')).day.allowance).toBe(1000)
-
-    // Hoy se gastan 6 000: mañana quedan 20 000 entre 25 días.
-    client.made = 6000
-    clock.advance(DAY)
-    expect(await quota.status()).toMatchObject({
-      day: { spent: 0, allowance: 800 },
-      month: { spent: 6000, daysLeft: 25, renewsOn: '2026-11-01' },
-    })
-
-    // El 1 de noviembre el mes empieza de cero: 26 000 entre 30 días.
-    clock.advance(25 * DAY)
-    expect(await quota.status()).toMatchObject({
-      day: { spent: 0, allowance: 866 },
-      month: { spent: 0, daysLeft: 30, renewsOn: '2026-12-01' },
-    })
-
-    // Si el tope diario es más bajo que lo que da el mes, manda él.
-    expect((await quota.configure({ dailyRequests: 500 }, 'eva')).day.allowance).toBe(500)
-    await expect(quota.configure({ renewDay: 31 }, 'eva')).rejects.toThrow()
   })
 
   it('el modo ahorro solo deja pasar lo crítico', async () => {
@@ -261,7 +230,7 @@ describe('cuota de 42', () => {
   it('un reinicio no pierde lo gastado ni desordena la cola', async () => {
     const first = build()
 
-    await first.configure({ dailyRequests: 1000 }, 'eva')
+    await first.configure({ saving: true }, 'eva')
     client.remaining = 250
     await first.defer('ana', 'agenda')
     await first.defer('leo', 'agenda')
@@ -275,11 +244,12 @@ describe('cuota de 42', () => {
     const second = build()
 
     expect(await second.status()).toMatchObject({
-      settings: { dailyRequests: 1000 },
+      settings: { saving: true },
       day: { spent: 400 },
       queued: 2,
     })
     expect((await second.statusFor('leo')).ticket).toMatchObject({ number: 'A-002', ahead: 1 })
+    await second.configure({ saving: false }, 'eva')
     expect(await second.drain()).toBe(2)
     expect(served).toEqual(['ana:agenda', 'leo:agenda'])
     // Los turnos atendidos se borran al día siguiente.

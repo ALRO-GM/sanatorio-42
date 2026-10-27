@@ -116,6 +116,8 @@ export type Services = {
   sync: ReplicaModule['sync']
   campuses: ReplicaModule['campuses']
   quota: ReplicaModule['quota']
+  /** Lo que gasta de la cuota de 42 cada función y cada persona. */
+  apiUsage: ReplicaModule['apiUsage']
   peers: PeersModule['peers']
   availability: PeersModule['availability']
   xp: ProfileModule['xp']
@@ -572,6 +574,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
       sync: replica.sync,
       campuses: replica.campuses,
       quota: replica.quota,
+      apiUsage: replica.apiUsage,
       peers: peers.peers,
       availability: peers.availability,
       xp: profile.xp,

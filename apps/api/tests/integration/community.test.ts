@@ -82,6 +82,18 @@ describe('réplica vista desde fuera', () => {
     expect(built.provider.requests.length).toBe(before)
   })
 
+  it('lo que se pide a 42 en una visita va a nombre de la sección y de quien la mira', async () => {
+    const built = await app()
+    const http = client(built, await built.login())
+
+    await http.get('/projects/10/peers')
+
+    const usage = await built.services.apiUsage.report({ hours: 1 })
+
+    expect(usage.people[0]).toMatchObject({ login: 'albrodri', top: 'projects' })
+    expect(usage.features.find((row) => row.key === 'projects')?.people).toBe(1)
+  })
+
   it('la lista de compañeros trae el puesto y solo gasta la primera vez', async () => {
     const built = await app()
     const http = client(built, await built.login())

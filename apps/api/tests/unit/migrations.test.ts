@@ -46,6 +46,7 @@ describe('migraciones', () => {
       'admin_second_factor',
       'agenda_events',
       'agenda_users',
+      'api_usage',
       'availability',
       'board_attendees',
       'boards',

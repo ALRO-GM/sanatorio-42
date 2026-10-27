@@ -168,6 +168,9 @@ import type {
   UsageStats,
   SecondFactorStatus,
   LegalStatus,
+  ApiUsage,
+  ApiUsageLimits,
+  ApiUsageLimitsChange,
 } from '@sanatorio/contracts'
 
 /** `GET /projects/:id/peers`, con lo que viaja en cabeceras ya leído. */
@@ -509,6 +512,14 @@ export type Api = {
   getAdminQuota: () => Promise<FortyTwoQuota>
   /** Cambia los ajustes de la cuota de 42; solo hace falta mandar lo que cambia. */
   setAdminQuota: (changes: Partial<FortyTwoQuotaSettings>) => Promise<FortyTwoQuota>
+  /** A qué se va la cuota de 42, por función y por persona, en las últimas `hours` horas. */
+  getAdminApiUsage: (query: {
+    hours: number
+    feature?: string | undefined
+    login?: string | undefined
+  }) => Promise<ApiUsage>
+  /** Cambia un tope por hora de la cuota de 42; devuelve cómo quedan. */
+  setAdminApiLimits: (change: ApiUsageLimitsChange) => Promise<ApiUsageLimits>
 
   getLeaderboard: (period: LeaderboardPeriod) => Promise<Leaderboard>
   /** Estadísticas de Ayuda: cifras y clasificación de cada sección. */

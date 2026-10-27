@@ -26,6 +26,11 @@ export type Job = {
   readonly name: string
   /** Cada cuánto se lanza. */
   readonly everyMs: number
+  /**
+   * Su nombre en la cuenta de la cuota de 42 (`job:<usage>`), si gasta de
+   * ella. Sin él, el del módulo.
+   */
+  readonly usage?: string
   /** Si falla, se registra y se vuelve a intentar en la siguiente vuelta. */
   readonly run: () => Promise<void>
 }

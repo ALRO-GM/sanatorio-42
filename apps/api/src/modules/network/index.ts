@@ -114,11 +114,13 @@ export function createNetworkModule(deps: NetworkModuleDeps): NetworkModule {
     jobs: [
       {
         name: 'copia de correcciones',
+        usage: 'corrections',
         everyMs: SYNC_EVERY_MS,
         run: () => sync.step(),
       },
       {
         name: 'copia de correcciones de la piscina',
+        usage: 'pool-corrections',
         everyMs: SYNC_EVERY_MS,
         run: () => poolSync.step(),
       },

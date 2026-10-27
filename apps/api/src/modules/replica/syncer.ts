@@ -30,6 +30,11 @@
  * para quien está mirando.
  */
 
+import {
+  currentApiUse,
+  inBackground,
+  withApiUse,
+} from '../../integrations/forty-two/usage-context.js'
 import type { BackfillPhase, SyncStatus } from '@sanatorio/contracts'
 
 import type { FortyTwoClient } from '../../integrations/forty-two/client.js'
@@ -71,6 +76,8 @@ type SyncerOptions = {
   log?: (message: string) => void
 }
 
+/** La función del bucle de la copia en la cuenta de la cuota; cada tarea, `sync:<tipo>`. */
+const SYNC_FEATURE = 'sync'
 /**
  * Por dónde va el relleno.
  *
@@ -204,7 +211,16 @@ export function createSyncer(options: SyncerOptions) {
       return existing as Promise<T>
     }
 
-    const promise = task().finally(() => {
+    // En la cuenta de la cuota (`api-usage.ts`), la tarea va a nombre de su
+    // tipo (`sync:locations`, `sync:backfill`…) si la lanza el bucle; si la
+    // lanza una visita, a nombre de quien la ha provocado.
+    const use = currentApiUse()
+    const kind = `${SYNC_FEATURE}:${key.split(':')[0] ?? key}`
+    const run =
+      use === undefined || use.feature === SYNC_FEATURE
+        ? withApiUse({ feature: kind, login: null }, task)
+        : task()
+    const promise = run.finally(() => {
       inFlight.delete(key)
     })
     inFlight.set(key, promise)
@@ -779,7 +795,7 @@ export function createSyncer(options: SyncerOptions) {
       loop = (async () => {
         while (keepGoing()) {
           try {
-            const worked = await tick()
+            const worked = await inBackground(SYNC_FEATURE, tick)
             // Sin trabajo se duerme lo que tarde en tocar el siguiente paso del
             // relleno, que es la tarea con la cadencia más corta.
             await sleep(

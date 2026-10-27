@@ -31,6 +31,7 @@ import { registerCors } from './cors.js'
 import { registerErrorHandler } from './error-handler.js'
 import { registerHealth } from './health.js'
 import { given } from '../core/options.js'
+import { withApiUse } from '../integrations/forty-two/usage-context.js'
 
 type BuildOptions = {
   env?: Env
@@ -196,9 +197,21 @@ export async function buildApp(options: BuildOptions = {}): Promise<BuiltApp> {
 
   // El identificador va en cada respuesta, también en las que fallan: con él
   // se encuentra la línea del registro (`reqId`) de lo que alguien cuenta.
+  //
+  // Y lo que se pida a 42 mientras se atiende va a nombre de la sección y de
+  // quien la mira (`usage-context.ts`): es la cuenta del consumo del panel.
   app.addHook('onRequest', (request, reply, done) => {
     reply.header('x-request-id', request.id)
-    done()
+
+    let login: string | null = null
+
+    try {
+      login = auth.session.user(request).login
+    } catch {
+      // Sin sesión (entrar, la portada): no es de nadie todavía.
+    }
+
+    withApiUse({ feature: featureOf(request.routeOptions.url), login }, done)
   })
 
   registerCors(app, env.allowedOrigins)
@@ -265,8 +278,9 @@ export async function buildApp(options: BuildOptions = {}): Promise<BuiltApp> {
               if (busy || (module.name !== 'admin' && services.admin.halted())) return
 
               busy = true
-              job
-                .run()
+              withApiUse({ feature: `job:${job.usage ?? module.name}`, login: null }, () =>
+                job.run(),
+              )
                 .catch((error: unknown) => {
                   const message = error instanceof Error ? error.message : String(error)
                   process.stderr.write(`[${job.name}] ${message}\n`)
@@ -295,6 +309,19 @@ export async function buildApp(options: BuildOptions = {}): Promise<BuiltApp> {
       }
     },
   }
+}
+
+/**
+ * La función de una ruta en la cuenta de la cuota de 42: su primer tramo
+ * (`/network/graph` → `network`), salvo el Avance, que cuelga de `/stats`.
+ */
+export function featureOf(route: string | undefined): string {
+  if (route === undefined || route === '') return 'other'
+  if (route.startsWith('/stats/progress')) return 'progress'
+
+  const [first = ''] = route.split('/').filter((part) => part !== '' && !part.startsWith(':'))
+
+  return first === '' ? 'other' : first
 }
 
 /**

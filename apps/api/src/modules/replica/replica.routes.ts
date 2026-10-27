@@ -12,12 +12,15 @@ import { parse } from '../../core/validation.js'
 import type { CampusesService } from './campuses.service.js'
 import type { Photos } from './photos.js'
 import type { Quota } from './quota.js'
+import { MAX_HOURS } from './api-usage.js'
+import type { ApiUsageService } from './api-usage.js'
 import type { Syncer } from './syncer.js'
 
 type ReplicaRoutesOptions = {
   campuses: CampusesService
   sync: Syncer
   quota: Quota
+  apiUsage: ApiUsageService
   photos: Photos
 }
 
@@ -27,7 +30,7 @@ const photoParams = z.object({ login: z.string().regex(/^[a-z0-9-]{1,40}$/, 'log
 export function registerReplicaRoutes(
   app: FastifyInstance,
   { session }: RouteContext,
-  { campuses, sync, quota, photos }: ReplicaRoutesOptions,
+  { campuses, sync, quota, apiUsage, photos }: ReplicaRoutesOptions,
 ): void {
   /**
    * `GET /avatars/:login` → la foto de perfil de alguien, servida desde aquí
@@ -95,4 +98,33 @@ export function registerReplicaRoutes(
 
     return reply.send(await quota.configure(request.body, actor.login))
   })
+
+  /**
+   * `GET /admin/api-usage?hours=&feature=&login=` → a qué se va la cuota de 42,
+   * por función y por persona. Solo admins.
+   */
+  app.get('/admin/api-usage', async (request, reply) => {
+    assertAdmin(await session.actor(request))
+
+    const query = parse(usageQuery, request.query)
+
+    return reply.send(
+      await apiUsage.report({ hours: query.hours, feature: query.feature, login: query.login }),
+    )
+  })
+
+  /** `PUT /admin/api-usage/limits` → cambia un tope por hora; devuelve cómo quedan. */
+  app.put('/admin/api-usage/limits', async (request, reply) => {
+    const actor = await session.actor(request)
+
+    assertAdmin(actor)
+
+    return reply.send(await apiUsage.configure(request.body, actor.login))
+  })
 }
+
+const usageQuery = z.object({
+  hours: z.coerce.number().int().min(1).max(MAX_HOURS).default(24),
+  feature: z.string().min(1).max(64).optional(),
+  login: z.string().min(1).max(64).optional(),
+})

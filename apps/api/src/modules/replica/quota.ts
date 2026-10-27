@@ -16,9 +16,10 @@
  * día respeta la reserva; de noche y en los últimos minutos de cada hora gasta
  * lo que de otro modo se perdería, por orden de prioridad (`allowsBulk`).
  *
- * Además de la cuota horaria, que dice 42 en cada respuesta, se puede poner un
- * tope diario o mensual desde el panel; el de cada día es lo que queda del mes
- * entre los días que faltan para que se renueve.
+ * 42 no tiene topes diarios ni mensuales: solo la cuota horaria, que dice en
+ * cada respuesta y vuelve entera a cada hora en punto, y las 2 por segundo. Lo
+ * que gasta cada función y cada persona, y los topes por hora para que nadie se
+ * la coma, van aparte (`api-usage.ts`).
  *
  * **La cola** es por orden de llegada y vive en la base, así que un reinicio no
  * la desordena. Avanza sola cuando vuelve a haber cuota para lo aplazable, y
@@ -38,7 +39,6 @@ import { z } from 'zod'
 
 import type { Db } from '../../core/db/database.js'
 import { toNumber, toText } from '../../core/db/rows.js'
-import { periodOf } from '../../core/period.js'
 import { parse } from '../../core/validation.js'
 import type { FortyTwoClient } from '../../integrations/forty-two/client.js'
 import { dayOf, isoAt } from '../../core/time.js'
@@ -52,6 +52,8 @@ import {
 } from './budget.js'
 import type { Budget, BudgetConfig, BulkJob } from './budget.js'
 import { formatWindow } from '../../core/night-window.js'
+import { withApiUse } from '../../integrations/forty-two/usage-context.js'
+import { HOURLY_LIMIT, SECONDLY_LIMIT } from '../../integrations/forty-two/throttle.js'
 
 type QuotaTier = 'background' | 'deferrable' | 'critical'
 
@@ -100,18 +102,7 @@ const MINUTE = 60_000
 const HOUR = 60 * MINUTE
 const DAY = 24 * HOUR
 
-/** Parte del tope del día a partir de la que se frena cada escalón. */
-const DAY_SHARE: Record<Exclude<QuotaTier, 'critical'>, number> = {
-  background: 0.7,
-  deferrable: 0.9,
-}
-
-const DEFAULT_QUOTA: FortyTwoQuotaSettings = {
-  dailyRequests: null,
-  monthlyRequests: null,
-  renewDay: 1,
-  saving: false,
-}
+const DEFAULT_QUOTA: FortyTwoQuotaSettings = { saving: false }
 
 /** Cada cuánto se releen los ajustes y se guarda lo gastado. */
 const SYNC_EVERY_MS = MINUTE
@@ -123,14 +114,8 @@ export const DRAIN_EVERY_MS = 20_000
 /** Los turnos atendidos se guardan un día, para poder decir por cuál va la cola. */
 const KEEP_SERVED_MS = DAY
 
-const settingsSchema = z
-  .object({
-    dailyRequests: z.number().int().min(100).max(10_000_000).nullable(),
-    monthlyRequests: z.number().int().min(1000).max(1_000_000_000).nullable(),
-    renewDay: z.number().int().min(1).max(28),
-    saving: z.boolean(),
-  })
-  .partial()
+// Los topes diario y mensual de antes se ignoran al leer: 42 no los tiene.
+const settingsSchema = z.object({ saving: z.boolean() }).partial()
 
 /** El número de un turno, como en un tique: `A-042`. Da la vuelta cada mil. */
 export function ticketNumber(id: number): string {
@@ -148,10 +133,9 @@ export function createQuota(options: QuotaOptions) {
 
   let settings: FortyTwoQuotaSettings = DEFAULT_QUOTA
   let syncedAt = -Infinity
-  /** El día (UTC) al que corresponde lo contado, y lo gastado en él y en el periodo antes de él. */
+  /** El día (UTC) al que corresponde lo contado, y lo gastado en él. */
   let day = ''
   let spentToday = 0
-  let spentBefore = 0
   /** Lo que el cliente decía haber pedido la última vez que se miró, y lo que falta por guardar. */
   let seen = client.requestCount()
   let unsaved = 0
@@ -250,18 +234,6 @@ export function createQuota(options: QuotaOptions) {
         ? deferrableReserve()
         : hourlyReserve
 
-  /** Lo que se puede gastar hoy, o `null` si no hay tope diario ni mensual. */
-  const allowance = (): number | null => {
-    const byMonth =
-      settings.monthlyRequests === null
-        ? Infinity
-        : Math.max(0, settings.monthlyRequests - spentBefore) /
-          periodOf(now(), settings.renewDay).daysLeft
-    const allowed = Math.min(settings.dailyRequests ?? Infinity, byMonth)
-
-    return Number.isFinite(allowed) ? Math.floor(allowed) : null
-  }
-
   /**
    * `true` si ese escalón puede gastar una petición ahora.
    *
@@ -283,13 +255,8 @@ export function createQuota(options: QuotaOptions) {
     if (tier === 'critical' || !hourly) {
       return hourly
     }
-    if (settings.saving) {
-      return false
-    }
 
-    const cap = allowance()
-
-    return cap === null || spentToday < cap * DAY_SHARE[tier]
+    return !settings.saving
   }
 
   /**
@@ -399,18 +366,12 @@ export function createQuota(options: QuotaOptions) {
 
     day = today()
 
-    const since = isoAt(periodOf(now(), settings.renewDay).start).slice(0, 10)
-    const [mine, before, waiting] = await Promise.all([
+    const [mine, waiting] = await Promise.all([
       db.execute({ sql: 'SELECT requests FROM forty_two_stats WHERE day = ?', args: [day] }),
-      db.execute({
-        sql: 'SELECT SUM(requests) AS requests FROM forty_two_stats WHERE day >= ? AND day < ?',
-        args: [since, day],
-      }),
       db.execute('SELECT COUNT(*) AS total FROM quota_queue WHERE served_at IS NULL'),
     ])
 
     spentToday = toNumber(mine.rows[0]?.requests ?? 0)
-    spentBefore = toNumber(before.rows[0]?.requests ?? 0)
     queued = toNumber(waiting.rows[0]?.total)
   }
 
@@ -487,7 +448,10 @@ export function createQuota(options: QuotaOptions) {
         serving = `${login}|${task}`
 
         try {
-          await runners.get(task)?.(login)
+          // En la cuenta de la cuota va a nombre de quien esperaba (`api-usage.ts`).
+          await withApiUse({ feature: `queue:${task}`, login }, async () =>
+            runners.get(task)?.(login),
+          )
         } catch (error) {
           // Un turno que falla no bloquea a los de detrás: se da por atendido.
           log(
@@ -544,17 +508,12 @@ export function createQuota(options: QuotaOptions) {
       let wait: number | null = 0
 
       if (!allows('deferrable')) {
-        const remaining = hourlyRemaining()
-
         if (settings.saving) {
           // El modo ahorro se quita a mano: no hay forma de saber cuándo.
           wait = null
-        } else if (remaining !== undefined && remaining <= deferrableReserve()) {
-          // La cuota horaria vuelve al empezar la hora siguiente.
-          wait = Math.ceil((windowStart(now()) + HOUR - now()) / MINUTE)
         } else {
-          // Manda el tope del día: hasta mañana.
-          wait = Math.ceil((DAY - (now() % DAY)) / MINUTE)
+          // La cuota horaria vuelve entera al empezar la hora siguiente.
+          wait = Math.ceil((windowStart(now()) + HOUR - now()) / MINUTE)
         }
       }
 
@@ -574,19 +533,14 @@ export function createQuota(options: QuotaOptions) {
     async status(): Promise<FortyTwoQuota> {
       await refresh()
 
-      const period = periodOf(now(), settings.renewDay)
-
       return {
         settings,
         level: level(),
         hourlyRemaining: hourlyRemaining() ?? null,
+        hourlyLimit: HOURLY_LIMIT,
+        secondlyLimit: SECONDLY_LIMIT,
         budget: { ...budgetState(), resetsAt: isoAt(windowStart(now()) + HOUR) },
-        day: { spent: spentToday, allowance: allowance() },
-        month: {
-          spent: spentBefore + spentToday,
-          daysLeft: period.daysLeft,
-          renewsOn: isoAt(period.end).slice(0, 10),
-        },
+        day: { spent: spentToday },
         queued,
       }
     },

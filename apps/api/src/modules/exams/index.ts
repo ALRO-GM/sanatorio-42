@@ -125,6 +125,7 @@ export function createExamsModule(deps: ExamsModuleDeps): ExamsModule {
     jobs: [
       {
         name: 'intentos de examen antiguos',
+        usage: 'exam-history',
         everyMs: BACKFILL_EVERY_MS,
         run: async () => {
           await sync.step()
@@ -132,6 +133,7 @@ export function createExamsModule(deps: ExamsModuleDeps): ExamsModule {
       },
       {
         name: 'examen en vivo',
+        usage: 'exam-live',
         everyMs: LIVE_TICK_MS,
         run: async () => {
           await live.tick(deps.campusIds)

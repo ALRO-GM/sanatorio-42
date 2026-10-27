@@ -40,6 +40,8 @@ que hacer, en orden. Este documento es el porqué; aquel, el qué.
 - **Agenda** (`docs/agenda.md`, migración 76 `scrum_*`): Scrum individual por proyecto en Perfil · Agenda, con checkpoints de fábrica por tipo de proyecto, dailies y weeklies de listas cerradas, cuenta atrás de la entrega y el tablero de cada sprint para su grupo; el gancho con la ayuda (`onBlocker`) queda sin conectar.
 - **Ritmo de la copia de 42** (2026-10-26, sin desplegar): de noche (02:00–06:00 en Madrid, sin nadie en la web) y en los últimos 10 min de cada hora la copia gasta la cuota que se perdería, por turnos (copia inicial, 42cursus, correcciones, repasos); la cuota de 42 se renueva a la hora en punto; tope propio de 2 peticiones/s; el 42cursus sigue en su página tras un corte (`docs/architecture.md`, «Ritmo de la copia según la hora»).
 
+- **Consumo de la API de 42** (2026-10-27, `docs/consumo-api.md`, migración 81 `api_usage`): cuenta por función y por persona, topes por hora (general, por persona y por función), panel con gráfico y tablas; quitados los topes diarios y mensuales (42 solo tiene 1 200/h y 2/s). Arreglada la copia de correcciones de París, parada en mayo por consultas de ids abiertas que tardaban más que la espera.
+
 ## Curso de shell (2026-10-25)
 
 Pedido por Alberto: un curso de shell de Linux por niveles, con teoría,

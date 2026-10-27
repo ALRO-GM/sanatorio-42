@@ -263,6 +263,8 @@ export const realApi: Api = {
   saveNotice: (id, saved) => sendJson('POST', '/notices/save', { id, saved }),
   getAdminQuota: () => getJson('/admin/quota'),
   setAdminQuota: (changes) => sendJson('PUT', '/admin/quota', changes),
+  getAdminApiUsage: (query) => getJson(`/admin/api-usage?${search(query)}`),
+  setAdminApiLimits: (change) => sendJson('PUT', '/admin/api-usage/limits', change),
 
   getLeaderboard: (period) => getJson(`/leaderboard?period=${period}`),
   getHelpStats: (period) => getJson(`/stats?period=${period}`),

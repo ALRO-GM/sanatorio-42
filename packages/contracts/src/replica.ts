@@ -62,32 +62,79 @@ export type QuotaStatus = {
 
 /** Los ajustes de la cuota de 42, que se cambian desde el panel. */
 export type FortyTwoQuotaSettings = {
-  /** Peticiones a 42 que se permiten al día, o `null` si solo cuenta la cuota horaria. */
-  dailyRequests: number | null
-  /** Tope mensual de la aplicación en 42, o `null` si no tiene o no se sabe. */
-  monthlyRequests: number | null
-  /** Día del mes (1-28) en que se renueva el tope mensual. */
-  renewDay: number
   /** Modo ahorro: mientras esté puesto, solo pasa lo crítico. */
   saving: boolean
 }
 
-/** La cuota de 42, para el panel. Días en UTC. */
+/**
+ * La cuota de 42, para el panel. 42 no tiene topes diarios ni mensuales: da
+ * `hourlyLimit` peticiones que vuelven enteras a cada hora en punto (UTC) y
+ * `secondlyLimit` por segundo.
+ */
 export type FortyTwoQuota = {
   settings: FortyTwoQuotaSettings
   level: QuotaLevel
   /** Peticiones que quedan esta hora según 42, o `null` si aún no se ha hecho ninguna. */
   hourlyRemaining: number | null
-  day: {
-    spent: number
-    /** Lo que se puede gastar hoy, o `null` si no hay tope diario ni mensual. */
-    allowance: number | null
-  }
-  month: { spent: number; daysLeft: number; renewsOn: string }
+  /** Las que da 42 cada hora (1 200). */
+  hourlyLimit: number
+  /** Las que deja 42 por segundo (2). */
+  secondlyLimit: number
+  /** Lo gastado hoy (UTC), solo para mirar: no hay tope del día. */
+  day: { spent: number }
   /** Personas esperando turno. */
   queued: number
   /** El ritmo de la copia según la hora (`docs/architecture.md`, «Réplica de 42»). */
   budget: QuotaBudget
+}
+
+/**
+ * Los topes por hora de la cuota de 42 (`docs/consumo-api.md`). Un tope es
+ * cuántas peticiones a 42 puede provocar en una hora (en punto, UTC); al
+ * llegar, lo que pediría a 42 se sirve con lo guardado o falla con 503.
+ */
+export type ApiUsageLimits = {
+  /** Lo que puede provocar cada persona en una hora, o `null` sin tope. */
+  perPerson: number | null
+  /** Topes de una persona concreta, que mandan sobre `perPerson`. */
+  people: Record<string, number>
+  /** Topes de una función (todas las personas juntas). */
+  features: Record<string, number>
+}
+
+/** `PUT /admin/api-usage/limits`: solo lo que cambia; `null` quita el tope. */
+export type ApiUsageLimitsChange = {
+  perPerson?: number | null
+  person?: { login: string; cap: number | null }
+  feature?: { key: string; cap: number | null }
+}
+
+/**
+ * `GET /admin/api-usage?hours=&feature=&login=`: a qué se van las peticiones a
+ * 42. Una función es la sección de la web que las provoca (`network`,
+ * `boards`…) o un trabajo de fondo (`sync:*`, `job:*`, `queue:*`).
+ */
+export type ApiUsage = {
+  hours: number
+  /** La hora en curso: lo gastado según lo contado aquí y cuándo vuelve la cuota. */
+  hour: { start: string; spent: number; resetsAt: string }
+  /** Peticiones por hora y función (o por persona, si se filtra por una función). */
+  series: { hour: string; key: string; requests: number }[]
+  /** Por función, de más a menos, con lo filtrado por persona si lo hay. */
+  features: { key: string; requests: number; people: number; thisHour: number }[]
+  /** Por persona, de más a menos, con lo filtrado por función si lo hay. */
+  people: {
+    login: string
+    requests: number
+    thisHour: number
+    /** La función que más gasta. */
+    top: string
+    /** Su tope por hora, propio o el general, o `null` sin tope. */
+    cap: number | null
+  }[]
+  /** Lo que no es de nadie (trabajo de fondo) dentro de lo filtrado. */
+  background: number
+  limits: ApiUsageLimits
 }
 
 /**

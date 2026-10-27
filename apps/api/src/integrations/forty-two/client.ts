@@ -23,6 +23,7 @@
  */
 
 import type { AppTokenProvider } from './app-token.js'
+import type { ApiMeter } from './usage-context.js'
 import type { Throttle } from './throttle.js'
 import { ApiError, apiErrorFromNetwork, apiErrorFromResponse, endpointFromUrl } from './errors.js'
 import type {
@@ -157,6 +158,7 @@ export class FortyTwoClient {
   private readonly backoffMaxMs: number
   private readonly sleep: (ms: number) => Promise<void>
   private requests = 0
+  private meter: ApiMeter | null = null
 
   constructor(options: FortyTwoClientOptions) {
     this.apiV2Base = options.apiV2Base
@@ -472,6 +474,11 @@ export class FortyTwoClient {
     return this.throttle.hourlyRemaining()
   }
 
+  /** Engancha la cuenta por función y por persona, con sus topes. */
+  setMeter(meter: ApiMeter): void {
+    this.meter = meter
+  }
+
   /** Peticiones hechas por esta instancia desde que arrancó, reintentos incluidos. */
   requestCount(): number {
     return this.requests
@@ -534,11 +541,15 @@ export class FortyTwoClient {
     const endpoint = endpointFromUrl(url)
     let lastError: ApiError | null = null
 
+    // Quien ha llegado a su tope por hora no gasta: falla antes de esperar turno.
+    this.meter?.check(endpoint)
+
     for (let attempt = 0; ; attempt += 1) {
       // Cada intento pasa por el ritmo: los reintentos también cuentan, y saltarse
       // el control aquí convertiría un 503 en un 429.
       await this.throttle.before()
       this.requests += 1
+      this.meter?.count()
 
       try {
         const response = await this.fetchOnce(url)
