@@ -1670,7 +1670,7 @@ POST /games/rooms/:id/resign   → abandona: gana el otro bando
 
 ```
 GET    /me/focus  → Focus { until, startedAt, settings }
-PUT    /me/focus  → FocusSettings { focusMinutes 5–180, breakMinutes 0–60, sections, show } → Focus
+PUT    /me/focus  → FocusSettings { focusMinutes 5–240, breakMinutes 0–60, sections, show } → Focus
 DELETE /me/focus  → FocusExit { reasons } (opcional) → Focus (acaba antes de tiempo; los ajustes se guardan)
 POST   /me/focus/stay → FocusExit { reasons } → Focus (pulsaste «Acabar» y sigues)
 GET    /me/focus/stats?from=&to=&offset=&low=&high=    → MyFocusStats

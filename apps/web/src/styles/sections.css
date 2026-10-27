@@ -1671,3 +1671,14 @@ dialog.layout-dialog.focus-dialog.wide {
     transition: none;
   }
 }
+
+/* Pomodoro: el tiempo de concentración en una rueda, con su nombre encima como
+   el descanso de al lado. */
+.form-grid .focus-minutes {
+  display: grid;
+  justify-items: start;
+  align-content: start;
+  gap: 0.35rem;
+  font-size: inherit;
+  color: inherit;
+}

@@ -51,6 +51,7 @@ describe('modo Pomodoro', () => {
     expect((await focus.stop(actor('ana'))).until).toBeNull()
     await expect(focus.stop(actor('leo'))).resolves.toMatchObject({ until: null })
     await expectCode(focus.start(actor('ana'), { ...settings, focusMinutes: 2 }), 'invalid_input')
+    await expectCode(focus.start(actor('ana'), { ...settings, focusMinutes: 245 }), 'invalid_input')
     await expectCode(focus.start(actor('ana'), { ...settings, show: ['games'] }), 'invalid_input')
   })
 

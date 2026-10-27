@@ -9,13 +9,19 @@ import { useAction } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { PillGroup } from '../../shared/ui/PillGroup'
+import { StepPicker } from '../../shared/ui/StepPicker'
 import { Icon } from '../../shared/ui/Icon'
 import { Modal } from '../../shared/ui/Modal'
 import { FocusMyStats } from './FocusMyStats'
 import { usePoolAllows } from '../../shared/pool'
 
-const FOCUS_MINUTES = [25, 50, 90] as const
-const BREAK_MINUTES = [5, 10, 15, 0] as const
+/**
+ * Lo que se puede estar concentrado: de 5 en 5 minutos hasta 4 horas, en una
+ * rueda que se desliza opción a opción (pedido por Alberto, 2026-10-27).
+ */
+const FOCUS_MINUTES: readonly number[] = Array.from({ length: 48 }, (_, index) => (index + 1) * 5)
+/** El descanso, en la misma rueda: sin descanso, 5, 10 o 15 minutos. */
+const BREAK_MINUTES: readonly number[] = [0, 5, 10, 15]
 const SHOWS: readonly FocusShow[] = ['corrections', 'events', 'messages', 'guard', 'notices']
 /** Las secciones que se pueden dejar a la vista (las de las pestañas; el expediente, siempre). */
 const CHOOSABLE = SECTIONS.filter((section) => section.inNav).map((section) => section.id)
@@ -79,36 +85,30 @@ export function FocusDialog({ onClose }: { onClose: () => void }) {
           <p className="hint">{t('focus.pitch')}</p>
 
           <div className="form-grid">
-            <label>
-              {t('focus.minutes')}
-              <select
-                value={settings.focusMinutes}
-                onChange={(event) => {
-                  setSettings({ ...settings, focusMinutes: Number(event.target.value) })
-                }}
-              >
-                {FOCUS_MINUTES.map((minutes) => (
-                  <option key={minutes} value={minutes}>
-                    {t('focus.minutesN', { n: minutes })}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              {t('focus.break')}
-              <select
-                value={settings.breakMinutes}
-                onChange={(event) => {
-                  setSettings({ ...settings, breakMinutes: Number(event.target.value) })
-                }}
-              >
-                {BREAK_MINUTES.map((minutes) => (
-                  <option key={minutes} value={minutes}>
-                    {minutes === 0 ? t('focus.noBreak') : t('focus.minutesN', { n: minutes })}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <StepPicker
+              className="focus-minutes"
+              variant="wheel"
+              options={FOCUS_MINUTES}
+              value={settings.focusMinutes}
+              onChange={(focusMinutes) => {
+                setSettings({ ...settings, focusMinutes })
+              }}
+              label={t('focus.minutes')}
+              text={(minutes) => t('focus.minutesN', { n: minutes })}
+            />
+            <StepPicker
+              className="focus-minutes"
+              variant="wheel"
+              options={BREAK_MINUTES}
+              value={settings.breakMinutes}
+              onChange={(breakMinutes) => {
+                setSettings({ ...settings, breakMinutes })
+              }}
+              label={t('focus.break')}
+              text={(minutes) =>
+                minutes === 0 ? t('focus.noBreak') : t('focus.minutesN', { n: minutes })
+              }
+            />
           </div>
 
           <fieldset className="focus-choices">

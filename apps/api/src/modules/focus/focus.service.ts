@@ -28,7 +28,8 @@ const DEFAULT_FOCUS: FocusSettings = {
 }
 
 const settingsSchema = z.object({
-  focusMinutes: z.number().int().min(5).max(180),
+  // De 5 minutos a 4 horas (la web los ofrece de 5 en 5).
+  focusMinutes: z.number().int().min(5).max(240),
   breakMinutes: z.number().int().min(0).max(60),
   sections: z.array(z.string().regex(/^[a-z]{2,20}$/)).max(20),
   show: z.array(z.enum(['corrections', 'events', 'messages', 'guard', 'notices'])).max(5),
