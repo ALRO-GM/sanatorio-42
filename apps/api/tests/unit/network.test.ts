@@ -298,16 +298,20 @@ describe('red de correcciones', () => {
 
       expect(await services.corrections.status(MADRID)).toMatchObject({ phase: 'pending', rows: 0 })
 
-      // Con una API que responde al instante, una vuelta se lo lleva todo:
-      // siete peticiones, cada una a partir del último id de la anterior.
+      // Con una API que responde al instante, una vuelta se lo lleva todo: el
+      // total, siete páginas en tramos acotados de ids, cada una a partir del
+      // último id de la anterior, y la última corrección de 42 para saber que
+      // no queda nada más allá.
       await services.corrections.step()
       expect(await services.corrections.status(MADRID)).toMatchObject({
         phase: 'done',
         rows: 13,
         total: 13,
       })
-      expect(api.calls).toHaveLength(7)
-      expect(api.calls[1]).toContain('range[id]=3,')
+      expect(api.calls).toHaveLength(9)
+      expect(api.calls[0]).not.toContain('range[id]')
+      expect(api.calls[2]).toContain('range[id]=3,100002')
+      expect(api.calls[8]).toContain('sort=-id')
 
       // Con el histórico hecho y sin que pase el tiempo, no se pide nada.
       api.calls.length = 0

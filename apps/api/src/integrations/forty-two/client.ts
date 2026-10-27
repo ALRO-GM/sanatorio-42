@@ -94,6 +94,12 @@ type ScaleTeamsQuery = {
   cursusId?: number | undefined
   /** Solo las de id mayor que este, ordenadas por id. */
   afterId?: number | undefined
+  /**
+   * Con `afterId`, solo hasta este id (incluido). Sin él, el tramo va hasta el
+   * final, y 42 tarda entre 30 y 50 s en contestar a un tramo abierto (medido el
+   * 2026-10-27): uno de 100 000 ids tarda 2 o 3 s.
+   */
+  untilId?: number | undefined
   /** Límites de `updated_at`, en ISO-8601. Van los dos o ninguno. */
   updatedFrom?: string | undefined
   updatedTo?: string | undefined
@@ -235,7 +241,7 @@ export class FortyTwoClient {
     ]
 
     if (query.afterId !== undefined) {
-      params.push('sort=id', `range[id]=${query.afterId + 1},${MAX_ID}`)
+      params.push('sort=id', `range[id]=${query.afterId + 1},${query.untilId ?? MAX_ID}`)
     }
     if (query.updatedFrom !== undefined && query.updatedTo !== undefined) {
       params.push(`range[updated_at]=${query.updatedFrom},${query.updatedTo}`)
@@ -243,6 +249,19 @@ export class FortyTwoClient {
     params.push(`page=${query.page ?? 1}`, `per_page=${this.pageSize}`)
 
     return this.requestPage<ApiScaleTeam>(`/scale_teams?${params.join('&')}`)
+  }
+
+  /**
+   * El id de la última corrección creada en 42, de cualquier campus, o `null`
+   * si no hay ninguna desde `since`. Con el tramo de fechas contesta en menos
+   * de un segundo; ordenar todo por id sin él tarda más de diez.
+   */
+  async getNewestScaleTeamId(since: string, until: string): Promise<number | null> {
+    const result = await this.requestPage<ApiScaleTeam>(
+      `/scale_teams?range[created_at]=${since},${until}&sort=-id&page=1&per_page=1`,
+    )
+
+    return result.items[0]?.id ?? null
   }
 
   /**

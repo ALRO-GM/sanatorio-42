@@ -202,7 +202,8 @@ export function createNetworkRepository(db: Db) {
       last: string | null
     }> {
       const result = await db.execute({
-        sql: `SELECT COUNT(*) AS total, MIN(begin_at) AS first, MAX(begin_at) AS last
+        // Una fila por persona corregida: se cuentan correcciones, como el total de 42.
+        sql: `SELECT COUNT(DISTINCT id) AS total, MIN(begin_at) AS first, MAX(begin_at) AS last
               FROM corrections WHERE campus_id = ? AND cursus = ?`,
         args: [campusId, cursus],
       })
@@ -213,6 +214,17 @@ export function createNetworkRepository(db: Db) {
         first: typeof row?.first === 'string' ? row.first : null,
         last: typeof row?.last === 'string' ? row.last : null,
       }
+    },
+
+    /** El id de la primera corrección guardada del campus, o `null` si no hay ninguna. */
+    async firstId(campusId: number, cursus = STUDENTS): Promise<number | null> {
+      const result = await db.execute({
+        sql: 'SELECT MIN(id) AS id FROM corrections WHERE campus_id = ? AND cursus = ?',
+        args: [campusId, cursus],
+      })
+      const id = result.rows[0]?.id
+
+      return id === null || id === undefined ? null : toNumber(id)
     },
 
     /**

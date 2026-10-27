@@ -121,18 +121,24 @@ export function createFake42(pageSize = 2): Fake42 {
     } else if (path === '/scale_teams') {
       const ids = url.searchParams.get('range[id]')?.split(',').map(Number)
       const updated = url.searchParams.get('range[updated_at]')?.split(',')
-      const cursus = Number(url.searchParams.get('filter[cursus_id]') ?? '21')
+      const campus = url.searchParams.get('filter[campus_id]')
+      const cursus = url.searchParams.get('filter[cursus_id]')
 
-      items = (state.scaleTeams.get(Number(url.searchParams.get('filter[campus_id]'))) ?? [])
+      // Sin campus, las de todos (la última corrección creada en 42).
+      items = (
+        campus === null
+          ? [...state.scaleTeams.values()].flat()
+          : (state.scaleTeams.get(Number(campus)) ?? [])
+      )
         .filter(
           (row) =>
-            (row.cursus_id ?? 21) === cursus &&
+            (cursus === null || (row.cursus_id ?? 21) === Number(cursus)) &&
             (ids === undefined || (row.id >= (ids[0] ?? 0) && row.id <= (ids[1] ?? Infinity))) &&
             (updated === undefined ||
               ((row.updated_at ?? '') >= (updated[0] ?? '') &&
                 (row.updated_at ?? '') <= (updated[1] ?? ''))),
         )
-        .sort((a, b) => a.id - b.id)
+        .sort((a, b) => (url.searchParams.get('sort') === '-id' ? b.id - a.id : a.id - b.id))
     } else if (path === '/campus') {
       items = [{ id: 22, name: 'Madrid', time_zone: 'Europe/Madrid' }]
     }

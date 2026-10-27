@@ -100,6 +100,21 @@ const SWEEP_EVERY_MS = 24 * 60 * 60_000
  */
 const SWEEP_MARGIN = 150
 
+/**
+ * Ancho de cada tramo de ids del histórico y del repaso. A un tramo abierto
+ * (`range[id]=X,2000000000`) 42 tarda entre 30 y 50 s en contestar, más que
+ * nuestra espera (15 s): la copia de París se quedó parada en mayo de 2026 y
+ * los repasos de los demás campus a medias (2026-10-27). Uno de 100 000 ids
+ * contesta en 2 o 3 s; uno de 500 000, en 30.
+ */
+const ID_WINDOW = 100_000
+
+/** Cuánto atrás se busca la última corrección creada en 42. */
+const NEWEST_LOOKBACK_MS = 7 * 24 * 60 * 60_000
+
+/** Cada cuánto se vuelve a preguntar cuál es la última corrección de 42. */
+const NEWEST_EVERY_MS = 10 * 60_000
+
 /** Tope de páginas de novedades por vuelta. Un cinturón, no un límite real. */
 const DELTA_MAX_PAGES = 20
 
@@ -172,6 +187,49 @@ export function createCorrectionSync(options: CorrectionSyncOptions) {
   let running = false
 
   const quota = options.quota ?? hourlyQuota(client, hourlyReserve)
+  /** El id de la última corrección creada en 42 y cuándo se preguntó. */
+  let newest: { id: number; at: number } | null = null
+
+  /** Hasta qué id hay correcciones en 42: pasado él, el histórico está entero. */
+  const frontier = async (): Promise<number> => {
+    if (newest === null || now() - newest.at >= NEWEST_EVERY_MS) {
+      const id = await client.getNewestScaleTeamId(
+        new Date(now() - NEWEST_LOOKBACK_MS).toISOString(),
+        new Date(now()).toISOString(),
+      )
+
+      newest = { id: id ?? newest?.id ?? 0, at: now() }
+    }
+
+    return newest.id
+  }
+
+  /**
+   * Una página del tramo de ids que empieza justo después de `from`.
+   *
+   * Si la página viene llena, lo siguiente empieza tras su último id; si no, el
+   * tramo está visto entero y se sigue tras él. Se acaba cuando un tramo sin
+   * página llena pasa de la última corrección de 42.
+   */
+  const windowPage = async (
+    campusId: number,
+    from: number,
+  ): Promise<{ items: ApiScaleTeam[]; upTo: number; finished: boolean }> => {
+    const until = from + ID_WINDOW
+    const result = await client.getCampusScaleTeamsPage({
+      campusId,
+      cursusId: cursus,
+      afterId: from,
+      untilId: until,
+    })
+    const full = result.items.length >= result.perPage
+
+    return {
+      items: result.items,
+      upTo: full ? result.items.reduce((max, item) => Math.max(max, item.id), from) : until,
+      finished: !full && until >= (await frontier()),
+    }
+  }
 
   /**
    * Las novedades son mantenimiento: de noche y al final de la hora bajan hasta
@@ -250,7 +308,9 @@ export function createCorrectionSync(options: CorrectionSyncOptions) {
         return
       }
 
-      state.sweepCursor = 0
+      // Antes de la primera corrección guardada del campus no hay nada que
+      // repasar: se ahorran los tramos vacíos de los años en que no existía.
+      state.sweepCursor = Math.max(0, ((await corrections.firstId(campusId, cursus)) ?? 1) - 1)
     }
 
     let cursor = state.sweepCursor
@@ -260,20 +320,13 @@ export function createCorrectionSync(options: CorrectionSyncOptions) {
 
     for (let page = 0; (page === 0 || Date.now() < deadline) && roomy() && !isActive(); page += 1) {
       const from = cursor
-      const result = await client.getCampusScaleTeamsPage({
-        campusId,
-        cursusId: cursus,
-        afterId: from,
-      })
-      const ids = result.items.map((item) => item.id)
-      const finished = result.items.length < result.perPage
-      const upTo = ids.reduce((max, id) => Math.max(max, id), from)
+      const { items, upTo, finished } = await windowPage(campusId, from)
 
-      await store(result.items, campusId)
+      await store(items, campusId)
 
       // Lo que la base tiene en este tramo y 42 no: ya no existe. Se borra
       // también lo guardado de citas que han vuelto a quedar sin nota.
-      const kept = result.items.filter((item) => rowsOf(item, campusId, cursus).length > 0)
+      const kept = items.filter((item) => rowsOf(item, campusId, cursus).length > 0)
 
       await corrections.prune(
         campusId,
@@ -307,20 +360,23 @@ export function createCorrectionSync(options: CorrectionSyncOptions) {
     // El reloj de verdad, no el inyectado: mide lo que tarda la red.
     for (let page = 0; (page === 0 || Date.now() < deadline) && canCopy(); page += 1) {
       const startedAt = new Date(now()).toISOString()
-      const result = await client.getCampusScaleTeamsPage({
-        campusId,
-        cursusId: cursus,
-        afterId: state.cursor,
-      })
 
-      await store(result.items, campusId)
+      // Cuántas tiene el campus en total, para enseñar por dónde va. Cuesta
+      // una petición, solo la primera vez; después se vuelve a mirar la cuota.
+      if (state.total === null) {
+        state.total = (
+          await client.getCampusScaleTeamsPage({ campusId, cursusId: cursus, page: 1 })
+        ).total
+        await replica.setState(stateKey(campusId), state)
+        continue
+      }
 
-      // El total de la primera petición es el de todo; el de las siguientes,
-      // lo que queda por delante del cursor.
-      state.total ??= result.total
-      state.cursor = result.items.reduce((max, item) => Math.max(max, item.id), state.cursor)
+      const { items, upTo, finished } = await windowPage(campusId, state.cursor)
 
-      if (result.items.length < result.perPage) {
+      await store(items, campusId)
+      state.cursor = upTo
+
+      if (finished) {
         state.done = true
         // Copiar el histórico ya es un repaso completo: el siguiente, mañana.
         state.sweptAt = startedAt
