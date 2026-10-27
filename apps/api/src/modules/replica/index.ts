@@ -25,6 +25,8 @@ import { createPhotos, memoryPhotoStore } from './photos.js'
 import { createPoints } from './points.js'
 import { createPoolMembers } from './pool-members.js'
 import { createCoreCursus } from './core-cursus.js'
+import { createSeatHistory } from './seat-history.js'
+import type { SeatHistory } from './seat-history.js'
 import type { PoolMembers } from './pool-members.js'
 import type { Points } from './points.js'
 import type { PhotoStore } from './photos.js'
@@ -69,6 +71,8 @@ export type ReplicaModule = AppModule & {
   poolMembers: PoolMembers
   /** Las horas de clúster de cada cual, bajo demanda. */
   logtime: Logtime
+  /** El historial de asientos de 42, hacia atrás (`docs/asientos.md`). */
+  seatHistory: SeatHistory
 }
 
 export function createReplicaModule(deps: ReplicaModuleDeps): ReplicaModule {
@@ -153,6 +157,15 @@ export function createReplicaModule(deps: ReplicaModuleDeps): ReplicaModule {
     ...given({ now: deps.now, log: deps.log }),
   })
 
+  const seatHistory = createSeatHistory({
+    db: deps.db,
+    client: deps.client,
+    campusIds: deps.config.trackedCampusIds,
+    hourlyReserve: deps.config.hourlyReserve,
+    quota,
+    ...given({ now: deps.now, log: deps.log }),
+  })
+
   const photos = createPhotos({
     db: deps.db,
     client: deps.client,
@@ -214,6 +227,7 @@ export function createReplicaModule(deps: ReplicaModuleDeps): ReplicaModule {
     points,
     poolMembers,
     logtime,
+    seatHistory,
     routes: (app, context) => {
       registerReplicaRoutes(app, context, { campuses, sync, quota, apiUsage, photos })
     },
@@ -242,6 +256,13 @@ export function createReplicaModule(deps: ReplicaModuleDeps): ReplicaModule {
         usage: 'core-cursus',
         everyMs: 60_000,
         run: () => coreCursus.step(),
+      },
+      {
+        // Quién se sentó dónde, hacia atrás, solo alumnos (`docs/asientos.md`).
+        name: 'historial de asientos',
+        usage: 'seat-history',
+        everyMs: 60_000,
+        run: () => seatHistory.step(),
       },
       {
         // Es de toda la base, no solo de la réplica: va aquí porque este módulo

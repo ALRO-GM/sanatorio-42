@@ -27,6 +27,28 @@ examen que no se reinicia bien no echa a nadie por inactividad y la sesión
 puede seguir abierta días (pasó con una sesión abierta desde el 21 de octubre,
 que salía con 103 h). Además, **una sesión cuenta como mucho 12 h seguidas**.
 
+## Historial hacia atrás (2026-10-27)
+
+Pedido por Alberto: que la red tenga todo el historial de 42, no solo desde el
+día en que se empezó a mirar. 42 guarda cada sesión de cada puesto
+(`GET /campus/:id/locations?range[begin_at]=…`): Madrid son 7 000-13 000 al mes,
+unas 850 000 desde 2019 y unas 8 500 peticiones.
+
+- `replica/seat-history.ts`, trabajo de volumen `seats` (detrás de las
+  correcciones, `BULK_ORDER`): un mes cada vez, de hoy hacia atrás, página a
+  página, con el sitio guardado en `sync_state` (`seats-history:<campus>`). Un
+  campus detrás de otro, por el orden de `SYNC_CAMPUS_IDS`: **Madrid primero**.
+  Acaba al llegar al primer alumno del 42cursus del campus.
+- **Solo alumnos, como siempre**: una sesión entra si quien se sentó está en el
+  42cursus del campus (`core_cursus`) y la sesión empezó cuando ya lo estaba.
+  La piscina (quien no pasó, y el mes de piscina de quien sí) no entra. Las
+  sesiones abiertas las apunta la copia de puestos.
+- Las sesiones históricas se guardan como las vistas en directo, con
+  `first_seen_at` = su entrada y `seen_at` = su salida, y cuentan igual (12 h
+  como mucho por sesión). Una que ya apuntó la copia de puestos no se toca,
+  solo se alarga hasta su salida de verdad.
+- `npm run sync:status` dice por dónde va cada campus.
+
 ## Cómo se mide
 
 Viendo el plano en vertical, la fila 1 es la de abajo y suben hacia arriba.

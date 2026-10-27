@@ -128,13 +128,31 @@ try {
   }
 
   for (const campus of status.campuses) {
+    const history = await replica.getState<{
+      until: string
+      done: boolean
+      seen: number
+      kept: number
+    }>(`seats-history:${campus.id}`)
+
+    out(
+      `  4. Historial de asientos del campus ${campus.id}: ` +
+        (history === undefined
+          ? 'sin empezar'
+          : `${history.done ? 'completo' : `hasta ${history.until.slice(0, 10)}`}, ` +
+            `${number(history.kept)} sesiones de alumnos de ${number(history.seen)}`) +
+        '.',
+    )
+  }
+
+  for (const campus of status.campuses) {
     const state = await replica.getState<{ sweepCursor?: number | null; sweptAt?: string | null }>(
       `corrections:${campus.id}`,
     )
     const cursor = state?.sweepCursor
 
     out(
-      `  4. Repaso diario de correcciones del campus ${campus.id}: ` +
+      `  5. Repaso diario de correcciones del campus ${campus.id}: ` +
         (cursor !== null && cursor !== undefined
           ? `a medias (id ${number(cursor)})`
           : `último ${ago(state?.sweptAt ?? null)}`) +

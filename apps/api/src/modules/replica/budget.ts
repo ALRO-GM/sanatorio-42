@@ -65,9 +65,10 @@ export const BULK_LEASE_MS = 30_000
  *    copia de los proyectos de todo París.
  * 2. `cursus`: las páginas del 42cursus (grado, fin, black hole).
  * 3. `corrections`: el histórico de correcciones.
- * 4. `sweep`: los repasos diarios de las correcciones.
+ * 4. `seats`: el historial de asientos de 42 (`seat-history.ts`).
+ * 5. `sweep`: los repasos diarios de las correcciones.
  */
-export const BULK_ORDER = ['initial', 'cursus', 'corrections', 'sweep'] as const
+export const BULK_ORDER = ['initial', 'cursus', 'corrections', 'seats', 'sweep'] as const
 export type BulkJob = (typeof BULK_ORDER)[number]
 
 export type BudgetConfig = {

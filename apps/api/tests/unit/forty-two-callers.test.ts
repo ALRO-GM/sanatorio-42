@@ -25,6 +25,8 @@ const ALLOWED: Record<string, string> = {
   'modules/replica/syncer.ts': 'el bucle que copia el campus',
   'modules/replica/logtime.ts': 'las horas de clúster de cada persona (estado de salud)',
   'modules/replica/pool-members.ts': 'los piscineros en curso de cada campus (docs/piscineros.md)',
+  'modules/replica/seat-history.ts':
+    'el historial de asientos de cada campus, solo alumnos (docs/asientos.md)',
   'modules/replica/core-cursus.ts':
     'grado, fin y black hole del 42cursus de cada campus (docs/blackhole.md)',
   'modules/network/index.ts': 'cableado del módulo',

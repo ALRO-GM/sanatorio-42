@@ -189,6 +189,23 @@ export class FortyTwoClient {
   }
 
   /**
+   * `GET /v2/campus/:id/locations` entre dos fechas de entrada, **una página**:
+   * el historial de quién se sentó dónde (`docs/asientos.md`). Por meses: Madrid
+   * son 7 000-13 000 sesiones al mes y cada página tarda 3-5 s (2026-10-27).
+   */
+  async getLocationsHistoryPage(query: {
+    campusId: number
+    from: string
+    to: string
+    page: number
+  }): Promise<Page<ApiLocation>> {
+    return this.requestPage<ApiLocation>(
+      `/campus/${query.campusId}/locations?range[begin_at]=${query.from},${query.to}` +
+        `&sort=begin_at&page=${query.page}&per_page=${this.pageSize}`,
+    )
+  }
+
+  /**
    * `GET /v2/projects_users?filter[campus]=:id…`, **una página**.
    *
    * Es la llamada que alimenta la réplica. Cada fila trae `status`,
