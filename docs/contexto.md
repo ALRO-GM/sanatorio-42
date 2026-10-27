@@ -44,6 +44,8 @@ que hacer, en orden. Este documento es el porqué; aquel, el qué.
 
 - **Pomodoro con sonido** (2026-10-27, `docs/pomodoro-sonidos.md`): ruido generado en el navegador, naturaleza y diez lo-fi CC0 en `public/sounds/focus/` (AAC 128 kbps, -18 LUFS), bucle con fundido cruzado. **Caché en el PC** (`docs/rendimiento.md` §8): `public/sw.js`, ETag/304 y `Range` en `core/http/static.ts`.
 
+- **2026-10-27, más**: Red con modo ligero para grafos enormes, colores bien separados, mínimo por persona, escuelas que no «se desmarcan» y las uniones de la persona elegida sin recortar; historial de asientos de 42 hacia atrás, solo alumnos, Madrid primero (`docs/asientos.md`, `replica/seat-history.ts`); Pomodoro con rueda de 5 en 5 min hasta 4 h y **startup del Pomodoro** (`docs/pomodoro-startup.md`, paquete `@sanatorio/startup`, migración 82).
+
 ## Curso de shell (2026-10-25)
 
 Pedido por Alberto: un curso de shell de Linux por niveles, con teoría,
