@@ -9,6 +9,9 @@ import { byWeight, graphSignature, spotAt, spotIndex } from './graph-data'
 import type { SpotIndex } from './graph-data'
 import {
   MOVING_LINKS,
+  isHeavy,
+  layerBase,
+  reuseTransform,
   inside,
   layerKey,
   segmentMeets,
@@ -82,6 +85,8 @@ type Scene = {
   groups: SimLink[][]
   /** Las más fuertes, también por peso: las únicas que se pintan mientras todo se mueve. */
   strong: SimLink[][]
+  /** Las que se pintan mientras se mueve un grafo pesado (modo ligero). */
+  strongHeavy: SimLink[][]
   /** Índice de burbujas por sitio para el ratón, y de qué `version` es. */
   spots: { index: SpotIndex<SimNode>; version: number } | null
   /** Huella de los datos con los que se montó la simulación (`graphSignature`). */
@@ -120,6 +125,15 @@ const ALPHA_MIN = 0.005
 const DRAG_HEAT = 0.08
 /** Nombres que se pintan como mucho en un fotograma: más no se leen. */
 const MAX_LABELS = 120
+/** En modo ligero (grafo pesado), menos nombres. */
+const MAX_LABELS_HEAVY = 40
+/** Uniones que se pintan mientras se mueve un grafo pesado. */
+const MOVING_LINKS_HEAVY = 1200
+/**
+ * Lo que tiene que pasar sin tocar la vista para volver a pintar nítida la capa
+ * de uniones. Mientras dura el zoom o el arrastre se reaprovecha la de antes.
+ */
+const VIEW_SETTLE_MS = 180
 /** Con más burbujas que esto, las fotos esperan a que el grafo se quede quieto. */
 const PHOTOS_WHILE_MOVING = 400
 
@@ -311,6 +325,7 @@ export function ForceGraph({
     ticks: 0,
     groups: [],
     strong: [],
+    strongHeavy: [],
     spots: null,
     signature: '',
     moving: false,
@@ -340,7 +355,18 @@ export function ForceGraph({
 
     if (layerContext === null) return undefined
 
-    const layer = { canvas: layerCanvas, context: layerContext, key: '' }
+    const layer = {
+      canvas: layerCanvas,
+      context: layerContext,
+      key: '',
+      /** Lo mismo sin la vista, y la vista con la que se pintó. */
+      base: '',
+      view: { x: 0, y: 0, k: 1 },
+    }
+    /** La última vista pintada y cuándo cambió por última vez (zoom, arrastre). */
+    let lastView = { x: 0, y: 0, k: 1 }
+    let viewAt = -Infinity
+    let settle: ReturnType<typeof setTimeout> | null = null
     /** Dónde está el lienzo en la página. Se guarda: pedirlo en cada movimiento del ratón obliga a recalcular la página. */
     let box = canvas.getBoundingClientRect()
     const measure = (): void => {
@@ -405,6 +431,14 @@ export function ForceGraph({
 
     const draw = (): void => {
       const { view, hover } = state
+      // Grafo pesado: modo ligero, sin fotos, sin flechas ni cifras y con menos nombres.
+      const heavy = isHeavy(state.nodes.length, state.links.length)
+      const now = performance.now()
+
+      if (view.x !== lastView.x || view.y !== lastView.y || view.k !== lastView.k) {
+        lastView = { ...view }
+        viewAt = now
+      }
       const { colorOf: color, selected: chosen } = live.current
       const ratio = window.devicePixelRatio || 1
       // Lo que manda: la burbuja bajo el ratón, o si no la elegida.
@@ -457,6 +491,22 @@ export function ForceGraph({
        */
       const directed = (link: SimLink): void => {
         if (!crosses(link)) return
+
+        // Modo ligero: sin flechas ni cifras, una recta encendida.
+        if (heavy) {
+          const from = link.source as SimNode
+          const to = link.target as SimNode
+
+          context.globalAlpha = 0.9
+          context.strokeStyle = link.mutual ? palette.accent : palette.gave
+          context.lineWidth = (0.8 + Math.sqrt(link.weight) * 0.6) / Math.sqrt(view.k)
+          context.beginPath()
+          context.moveTo(from.x ?? 0, from.y ?? 0)
+          context.lineTo(to.x ?? 0, to.y ?? 0)
+          context.stroke()
+
+          return
+        }
 
         const source = link.source as SimNode
         const target = link.target as SimNode
@@ -583,7 +633,11 @@ export function ForceGraph({
       }
 
       if (state.moving) {
-        const groups = state.links.length > MOVING_LINKS ? state.strong : state.groups
+        const groups = heavy
+          ? state.strongHeavy
+          : state.links.length > MOVING_LINKS
+            ? state.strong
+            : state.groups
 
         for (const group of groups) strokeGroup(context, group, around === null, around !== null)
         if (around !== null) {
@@ -594,8 +648,26 @@ export function ForceGraph({
       } else {
         const kind = around === null ? 'rest' : 'dim'
         const key = layerKey({ kind, view, width, height, ratio, version: state.version })
+        const base = layerBase({ kind, width, height, ratio, version: state.version })
+        // En pleno zoom o arrastre, la capa de antes, ampliada o movida: volver a
+        // pintar miles de uniones en cada paso de la rueda es lo que atascaba.
+        const gesture = layer.key !== key && layer.base === base && now - viewAt < VIEW_SETTLE_MS
 
-        if (layer.key !== key) {
+        if (gesture) {
+          const [scale, x, y] = reuseTransform(layer.view, view, ratio)
+
+          context.save()
+          context.setTransform(scale, 0, 0, scale, x, y)
+          context.globalAlpha = 1
+          context.drawImage(layer.canvas, 0, 0)
+          context.restore()
+          // Al acabar el gesto, una vez más, ya nítida.
+          if (settle !== null) clearTimeout(settle)
+          settle = setTimeout(() => {
+            settle = null
+            schedule.current()
+          }, VIEW_SETTLE_MS)
+        } else if (layer.key !== key) {
           const target = layer.context
 
           layer.canvas.width = Math.round(width * ratio)
@@ -608,13 +680,17 @@ export function ForceGraph({
           // pintan después encima, y la tenue de debajo no se nota.
           for (const group of state.groups) strokeGroup(target, group, around === null, false)
           layer.key = key
+          layer.base = base
+          layer.view = { ...view }
         }
 
-        context.save()
-        context.setTransform(1, 0, 0, 1, 0, 0)
-        context.globalAlpha = 1
-        context.drawImage(layer.canvas, 0, 0)
-        context.restore()
+        if (!gesture) {
+          context.save()
+          context.setTransform(1, 0, 0, 1, 0, 0)
+          context.globalAlpha = 1
+          context.drawImage(layer.canvas, 0, 0)
+          context.restore()
+        }
 
         if (around !== null) {
           for (const link of state.links) {
@@ -625,30 +701,50 @@ export function ForceGraph({
         }
       }
 
+      // Burbujas, de golpe: un trazo por color y por si está encendida o apagada,
+      // en vez de un relleno por burbuja (con miles, era buena parte del fotograma).
+      const batches = new Map<string, SimNode[]>()
+      const visible: SimNode[] = []
+
       for (const node of state.nodes) {
         if (!shown(node)) continue
 
-        const on = lit(node.login)
+        visible.push(node)
+
+        const id = `${lit(node.login) ? '1' : '0'}${color(node.data)}`
+        const batch = batches.get(id)
+
+        if (batch === undefined) batches.set(id, [node])
+        else batch.push(node)
+      }
+
+      for (const [id, batch] of batches) {
+        context.globalAlpha = id.startsWith('1') ? 1 : 0.14
+        context.fillStyle = id.slice(1)
+        context.beginPath()
+        for (const node of batch) {
+          const x = node.x ?? 0
+          const y = node.y ?? 0
+
+          context.moveTo(x + node.r, y)
+          context.arc(x, y, node.r, 0, 2 * Math.PI)
+        }
+        context.fill()
+      }
+
+      // Las fotos, solo cuando la burbuja se ve lo bastante grande para
+      // distinguirla. Con muchas burbujas, mientras se recolocan, sin fotos; en
+      // modo ligero, nunca: es lo que más cuesta de cada fotograma.
+      const photos = !heavy && (!state.moving || state.nodes.length <= PHOTOS_WHILE_MOVING)
+
+      context.globalAlpha = 1
+      for (const node of visible) {
         const x = node.x ?? 0
         const y = node.y ?? 0
 
-        context.globalAlpha = on ? 1 : 0.14
-        context.beginPath()
-        context.arc(x, y, node.r, 0, 2 * Math.PI)
-        context.fillStyle = color(node.data)
-        context.fill()
-
-        // La foto, solo cuando la burbuja se ve lo bastante grande para distinguirla.
-        const shownRadius = node.r * view.k
-
-        const photo = photoUrl(node.data.login, node.data.image)
-
-        // Con muchas burbujas, mientras se recolocan, sin fotos: es lo que más
-        // cuesta de cada fotograma y no da tiempo a verlas.
-        const photos = !state.moving || state.nodes.length <= PHOTOS_WHILE_MOVING
-
-        if (on && photos && shownRadius > 11 && photo !== null) {
-          const picture = pictureOf(photo, schedule.current)
+        if (photos && node.r * view.k > 11 && lit(node.login)) {
+          const photo = photoUrl(node.data.login, node.data.image)
+          const picture = photo === null ? null : pictureOf(photo, schedule.current)
 
           if (picture !== null) {
             const inner = node.r - Math.max(1.5, node.r * 0.14)
@@ -659,6 +755,7 @@ export function ForceGraph({
 
         // Quien viene de fuera lleva un aro discontinuo; la elegida, uno grueso.
         if (node.data.external || node.login === chosen || node === hover) {
+          context.globalAlpha = lit(node.login) ? 1 : 0.14
           context.beginPath()
           context.arc(x, y, node.r + 2 / view.k, 0, 2 * Math.PI)
           context.lineWidth = (node.login === chosen || node === hover ? 2.5 : 1.2) / view.k
@@ -668,6 +765,7 @@ export function ForceGraph({
           context.strokeStyle = node.login === chosen ? palette.accent : palette.text
           context.stroke()
           context.setLineDash([])
+          context.globalAlpha = 1
         }
       }
 
@@ -682,7 +780,7 @@ export function ForceGraph({
       let labels = 0
 
       for (const node of state.nodes) {
-        if (labels >= MAX_LABELS) break
+        if (labels >= (heavy ? MAX_LABELS_HEAVY : MAX_LABELS)) break
 
         const named =
           around === null
@@ -1166,6 +1264,7 @@ export function ForceGraph({
     state.links = simLinks
     state.groups = byWeight(simLinks)
     state.strong = byWeight(strongest(simLinks, MOVING_LINKS))
+    state.strongHeavy = byWeight(strongest(simLinks, MOVING_LINKS_HEAVY))
     state.spots = null
     state.signature = signature
     state.moving = true
@@ -1222,8 +1321,14 @@ export function ForceGraph({
       .force('x', forceX<SimNode>(0).strength(0.035))
       .force('y', forceY<SimNode>(0).strength(0.035))
       .alpha(kept === simNodes.length && kept > 0 ? 0.35 : 1)
-      // Con muchas uniones cada paso cuesta más: se enfría antes.
-      .alphaDecay(simNodes.length > 800 || simLinks.length > 5000 ? 0.035 : 0.022)
+      // Con muchas uniones cada paso cuesta más: se enfría antes, y en modo ligero, más.
+      .alphaDecay(
+        isHeavy(simNodes.length, simLinks.length)
+          ? 0.05
+          : simNodes.length > 800 || simLinks.length > 5000
+            ? 0.035
+            : 0.022,
+      )
       .velocityDecay(0.35)
       .alphaMin(ALPHA_MIN)
       // Sin el reloj propio de d3: los pasos los da el bucle de fotogramas del

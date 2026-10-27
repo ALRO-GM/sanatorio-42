@@ -90,3 +90,32 @@ describe('lo que se ve', () => {
     expect(segmentMeets(bounds, 0, 0, 10, 10)).toBe(true)
   })
 })
+
+describe('grafo pesado y gestos', () => {
+  it('la capa pintada con una vista encaja con otra: el mismo punto cae en el mismo píxel', async () => {
+    const { reuseTransform } = await import('../src/features/network/graph-layers')
+    const from = { x: 40, y: -20, k: 0.8 }
+    const to = { x: 10, y: 35, k: 1.6 }
+    const ratio = 2
+    const [scale, x, y] = reuseTransform(from, to, ratio)
+    // Un punto del grafo: dónde estaba en la capa y dónde tiene que estar ahora (en píxeles).
+    const point = { x: 123, y: -45 }
+    const before = {
+      x: ratio * (from.x + from.k * point.x),
+      y: ratio * (from.y + from.k * point.y),
+    }
+    const now = { x: ratio * (to.x + to.k * point.x), y: ratio * (to.y + to.k * point.y) }
+
+    expect(scale * before.x + x).toBeCloseTo(now.x)
+    expect(scale * before.y + y).toBeCloseTo(now.y)
+  })
+
+  it('el modo ligero empieza con muchas personas o muchas uniones, y se va al bajar', async () => {
+    const { isHeavy } = await import('../src/features/network/graph-layers')
+
+    expect(isHeavy(300, 1500)).toBe(false)
+    expect(isHeavy(1201, 100)).toBe(true)
+    expect(isHeavy(500, 6001)).toBe(true)
+    expect(isHeavy(0, 0)).toBe(false)
+  })
+})

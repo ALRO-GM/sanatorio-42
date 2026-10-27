@@ -32,6 +32,43 @@ export type LayerState = {
   version: number
 }
 
+/**
+ * Lo mismo sin la vista: si solo ha cambiado la vista (zoom o arrastre), la
+ * capa pintada se puede reaprovechar ampliándola o moviéndola mientras dura el
+ * gesto, y volver a pintarla nítida al acabar (`reuseTransform`).
+ */
+export function layerBase(state: Omit<LayerState, 'view'>): string {
+  const { kind, width, height, ratio, version } = state
+
+  return `${kind}|${width}|${height}|${ratio}|${version}`
+}
+
+/**
+ * Cómo pintar una capa hecha con la vista `from` para que encaje con la vista
+ * `to`, en píxeles del lienzo: `[escala, x, y]` para `setTransform(s, 0, 0, s, x, y)`.
+ */
+export function reuseTransform(
+  from: { x: number; y: number; k: number },
+  to: { x: number; y: number; k: number },
+  ratio: number,
+): [number, number, number] {
+  const scale = to.k / from.k
+
+  return [scale, ratio * (to.x - scale * from.x), ratio * (to.y - scale * from.y)]
+}
+
+/**
+ * Lo que hace pesado a un grafo: con más personas o uniones que esto se pinta
+ * en modo ligero (sin fotos, sin flechas ni cifras, menos nombres) para que siga
+ * fluido. Por debajo vuelven solas.
+ */
+const HEAVY_NODES = 1200
+const HEAVY_LINKS = 6000
+
+export function isHeavy(nodes: number, links: number): boolean {
+  return nodes > HEAVY_NODES || links > HEAVY_LINKS
+}
+
 /** Una clave que cambia si cambia cualquier cosa que se vea en la capa. */
 export function layerKey(state: LayerState): string {
   const { kind, view, width, height, ratio, version } = state

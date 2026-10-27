@@ -249,6 +249,16 @@ son unas 82 000, 820 peticiones una sola vez) y calcula sobre ellas el grafo.
     más de 400 burbujas en movimiento. Nombres: los grandes, los del entorno
     elegido, y no más de 120.
   - La burbuja bajo el ratón se busca en un quadtree (`spotIndex`/`spotAt`).
+  - Las burbujas se pintan de golpe, un trazo por color (y por encendida o
+    apagada), no una a una.
+  - Zoom y arrastre: mientras dura el gesto se reaprovecha la capa de uniones
+    ya pintada, ampliada o movida (`reuseTransform`), y se vuelve a pintar
+    nítida 180 ms después de parar. Con la CPU a ¼ y unas 3 500 personas, el
+    zoom pasó de 30 fps (2,2 s de bloqueos en 2 s) a 60 fps sin bloqueos.
+  - **Modo ligero** (más de 1 200 personas o 6 000 uniones, `isHeavy`): sin
+    fotos, sin flechas ni cifras (las uniones de la persona elegida son rectas
+    encendidas), 40 nombres como mucho, 1 200 uniones mientras se mueve y se
+    asienta antes. Por debajo, todo vuelve solo (pedido por Alberto, 2026-10-27).
   - Al desmontar o con la pestaña oculta (`visibilitychange`) no queda ningún
     fotograma pedido, y las fotos a medio pedir se cortan.
 
