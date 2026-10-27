@@ -26,6 +26,14 @@ watchErrors()
 // Sin nadie mirando, las animaciones se paran (y no calientan el equipo).
 watchStill()
 
+// Lo que se va usando de la web se queda en el PC (`public/sw.js`): la próxima
+// vez se abre sin bajarlo. Solo en la web compilada, no con `npm run dev`.
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  void navigator.serviceWorker
+    .register(`${import.meta.env.BASE_URL}sw.js`, { scope: import.meta.env.BASE_URL })
+    .catch(() => undefined)
+}
+
 createRoot(root).render(
   <StrictMode>
     <I18nProvider>

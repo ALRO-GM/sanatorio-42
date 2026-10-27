@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/gestion.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-651 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
+652 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera | Francés |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -116,6 +116,7 @@ Generado desde `apps/web/src/shared/i18n/textos/gestion.csv` con
 | `admin.api.f.pool` | Panel de gestión, «Consumo»: nombre de una función que gasta cuota de 42 (sección de la web o trabajo de fondo). | features/admin/ApiUsagePanel | Piscina | Pool | — | — | — |
 | `admin.api.f.admin` | Panel de gestión, «Consumo»: nombre de una función que gasta cuota de 42 (sección de la web o trabajo de fondo). | features/admin/ApiUsagePanel | Panel de gestión | Admin panel | — | — | — |
 | `admin.api.f.other` | Panel de gestión, «Consumo»: nombre de una función que gasta cuota de 42 (sección de la web o trabajo de fondo). | features/admin/ApiUsagePanel | Sin función | No feature | — | — | — |
+| `admin.api.f.pulse` | Panel de gestión, «Consumo»: nombre de una función que gasta cuota de 42 (sección de la web o trabajo de fondo). | features/admin/ApiUsagePanel | Pulso (avisos y estado) | Pulse (alerts and status) | — | — | — |
 | `admin.api.f.sync` | Panel de gestión, «Consumo»: nombre de una función que gasta cuota de 42 (sección de la web o trabajo de fondo). | features/admin/ApiUsagePanel | Copia (bucle) | Copy (loop) | — | — | — |
 | `admin.api.f.sync-locations` | Panel de gestión, «Consumo»: nombre de una función que gasta cuota de 42 (sección de la web o trabajo de fondo). | features/admin/ApiUsagePanel | Copia: puestos | Copy: seats | — | — | — |
 | `admin.api.f.sync-delta` | Panel de gestión, «Consumo»: nombre de una función que gasta cuota de 42 (sección de la web o trabajo de fondo). | features/admin/ApiUsagePanel | Copia: cambios | Copy: changes | — | — | — |

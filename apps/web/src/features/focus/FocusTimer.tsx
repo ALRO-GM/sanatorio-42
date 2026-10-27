@@ -8,10 +8,12 @@ import { clock } from '../../shared/time'
 import { Icon } from '../../shared/ui/Icon'
 import { FocusExit } from './FocusExit'
 import { FocusScreen } from './FocusScreen'
+import { FocusSound } from './FocusSound'
+import { setAmbience } from './ambience'
 
 const RING = 2 * Math.PI * 26
 /** Lo que mide la píldora, desplegada y plegada, hasta que la pila la mide de verdad. */
-const PILL = { width: 380, height: 80 }
+const PILL = { width: 380, height: 128 }
 const PILL_FOLDED = { width: 190, height: 64 }
 
 /** `m:ss` de lo que queda, redondeando hacia arriba: que el 0:00 sea el final de verdad. */
@@ -75,6 +77,11 @@ export function FocusTimer() {
       window.clearTimeout(done)
     }
   }, [until, focus])
+
+  // El sonido de fondo es de la concentración: al acabar (o parar), se apaga.
+  useEffect(() => {
+    if (!active) setAmbience(null)
+  }, [active])
 
   const resting = !active && breakUntil !== null && breakUntil > now
 
@@ -173,6 +180,7 @@ export function FocusTimer() {
                     >
                       {t('focus.stop')}
                     </button>
+                    <FocusSound />
                   </>
                 )}
                 {controls}

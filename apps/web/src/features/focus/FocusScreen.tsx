@@ -6,6 +6,7 @@ import { useI18n } from '../../shared/i18n'
 import { useFormat } from '../../shared/i18n/useFormat'
 import { cover } from '../../shared/still'
 import { Icon } from '../../shared/ui/Icon'
+import { FocusSound } from './FocusSound'
 
 /**
  * El Pomodoro a pantalla completa (#80 del buzón): el tiempo que queda en
@@ -121,6 +122,7 @@ export function FocusScreen({
         <strong>{left}</strong>
         <small>{t('focus.screen.until', { time })}</small>
       </div>
+      <FocusSound />
       {children}
       <div className="actions">
         <button

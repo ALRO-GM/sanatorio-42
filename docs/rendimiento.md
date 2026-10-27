@@ -148,6 +148,28 @@ por índice). Por eso la pestaña en reposo queda en 42 a la hora y no en 24: la
 - **Descarga al entrar**: unos 135 kB comprimidos, igual que antes. Cada sección
   va en su trozo y los datos simulados no entran en producción.
 
+## 8. Caché en el PC (2026-10-27)
+
+Pedido por Alberto: que la web no se baje entera cada vez, sino que cada parte
+se baje cuando se usa y se quede en el PC.
+
+- **Troceo**: Vite parte la web en ~140 trozos (cada sección, cada idioma, cada
+  estilo, los juegos…). Solo se baja lo que se abre.
+- **Trozos con hash** (`assets/`): `Cache-Control: immutable` de un año. Además
+  el service worker (`public/sw.js`) los guarda en la caché del navegador la
+  primera vez que hacen falta y desde entonces los sirve sin tocar la red (ni
+  para preguntar). Se quedan los 400 más recientes.
+- **La portada** (`index.html`, `sw.js`, el manifiesto): se revalida siempre,
+  con `ETag`. Si no ha cambiado, `304` sin cuerpo. El service worker la pide a
+  la red (así cada despliegue se estrena al momento) y, sin red, sirve la
+  última guardada.
+- **Sonidos del Pomodoro** (`sounds/`): un año, con `Range` (el navegador los
+  pide por trozos y vuelve al principio sin bajarlos otra vez). El service worker
+  no los toca. Un sonido que cambie tiene que cambiar de nombre.
+- La API nunca se guarda.
+
+No se baja nada por adelantado: lo que no se usa no ocupa sitio en el PC.
+
 ## Cómo se ha medido
 
 - **Base**: sobre una copia de la base real de desarrollo, con el mismo cliente

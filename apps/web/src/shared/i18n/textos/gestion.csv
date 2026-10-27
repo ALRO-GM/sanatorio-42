@@ -108,6 +108,7 @@ admin.api.f.exams,"Panel de gestión, «Consumo»: nombre de una función que ga
 admin.api.f.pool,"Panel de gestión, «Consumo»: nombre de una función que gasta cuota de 42 (sección de la web o trabajo de fondo).",Piscina,Pool,,,
 admin.api.f.admin,"Panel de gestión, «Consumo»: nombre de una función que gasta cuota de 42 (sección de la web o trabajo de fondo).",Panel de gestión,Admin panel,,,
 admin.api.f.other,"Panel de gestión, «Consumo»: nombre de una función que gasta cuota de 42 (sección de la web o trabajo de fondo).",Sin función,No feature,,,
+admin.api.f.pulse,"Panel de gestión, «Consumo»: nombre de una función que gasta cuota de 42 (sección de la web o trabajo de fondo).",Pulso (avisos y estado),Pulse (alerts and status),,,
 admin.api.f.sync,"Panel de gestión, «Consumo»: nombre de una función que gasta cuota de 42 (sección de la web o trabajo de fondo).",Copia (bucle),Copy (loop),,,
 admin.api.f.sync-locations,"Panel de gestión, «Consumo»: nombre de una función que gasta cuota de 42 (sección de la web o trabajo de fondo).",Copia: puestos,Copy: seats,,,
 admin.api.f.sync-delta,"Panel de gestión, «Consumo»: nombre de una función que gasta cuota de 42 (sección de la web o trabajo de fondo).",Copia: cambios,Copy: changes,,,

@@ -542,6 +542,41 @@ describe('un solo proceso para la web y la API', () => {
     )
   })
 
+  it('la portada se revalida con ETag y los sonidos se guardan y se sirven por trozos', async () => {
+    const folder = mkdtempSync(join(tmpdir(), 'sanatorio-web-'))
+    folders.push(folder)
+    mkdirSync(join(folder, 'sounds', 'focus'), { recursive: true })
+    writeFileSync(join(folder, 'index.html'), '<!doctype html><title>Sanatorio 42</title>')
+    writeFileSync(join(folder, 'sounds', 'focus', 'rain.m4a'), '0123456789')
+
+    const built = await app({ STATIC_DIR: folder })
+    const get = (url: string, headers: Record<string, string> = {}) =>
+      built.app.inject({ method: 'GET', url, headers })
+
+    // Sin cambios, la portada es un 304 sin cuerpo.
+    const home = await get('/')
+    const etag = String(home.headers.etag)
+
+    expect(etag).toMatch(/^".+"$/)
+    expect((await get('/', { 'if-none-match': etag })).statusCode).toBe(304)
+    expect((await get('/lo-que-sea', { 'if-none-match': etag })).statusCode).toBe(304)
+    expect((await get('/', { 'if-none-match': '"otro"' })).statusCode).toBe(200)
+
+    const sound = await get('/sounds/focus/rain.m4a')
+
+    expect(sound.headers['content-type']).toBe('audio/mp4')
+    expect(sound.headers['cache-control']).toContain('immutable')
+    expect(sound.headers['accept-ranges']).toBe('bytes')
+
+    const part = await get('/sounds/focus/rain.m4a', { range: 'bytes=2-5' })
+
+    expect(part.statusCode).toBe(206)
+    expect(part.body).toBe('2345')
+    expect(part.headers['content-range']).toBe('bytes 2-5/10')
+    expect((await get('/sounds/focus/rain.m4a', { range: 'bytes=-3' })).body).toBe('789')
+    expect((await get('/sounds/focus/rain.m4a', { range: 'bytes=20-' })).statusCode).toBe(416)
+  })
+
   it('la demostración se sirve desde /demo, con su propia portada', async () => {
     const folder = mkdtempSync(join(tmpdir(), 'sanatorio-web-'))
     folders.push(folder)

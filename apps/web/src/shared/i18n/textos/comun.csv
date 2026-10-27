@@ -247,6 +247,19 @@ focus.screen.sign,Pomodoro a pantalla completa: letrero para quien pase por al l
 focus.screen.until,Pomodoro a pantalla completa: a qué hora acaba,Hasta las {time},Until {time},Fins a les {time},{time}ak arte,Jusqu'à {time}
 focus.screen.shrink,Pomodoro a pantalla completa: volver al temporizador pequeño sin parar,Quitar pantalla completa,Exit full screen,Treure la pantalla completa,Irten pantaila osotik,Quitter le plein écran
 focus.screen.exit,Pomodoro a pantalla completa: querer parar la sesión (pregunta antes),Parar la sesión,Stop the session,Parar la sessió,Saioa gelditu,Arrêter la session
+focus.sound.label,Pomodoro: sonido de fondo. Nombre accesible del grupo de botones del sonido.,Sonido de fondo,Background sound,So de fons,Atzeko soinua,Son d'ambiance
+focus.sound.noise,"Pomodoro: sonido de fondo. Botón del tipo «ruido» (blanco, rosa, marrón).",Ruido,Noise,Soroll,Zarata,Bruit
+focus.sound.nature,"Pomodoro: sonido de fondo. Botón del tipo «naturaleza» (lluvia, océano, tormenta).",Naturaleza,Nature,Natura,Natura,Nature
+focus.sound.lofi,Pomodoro: sonido de fondo. Botón del tipo «música lo-fi».,Lo-Fi,Lo-Fi,Lo-Fi,Lo-Fi,Lo-Fi
+focus.sound.next,Pomodoro: sonido de fondo. Ayuda del botón elegido: volver a pulsarlo pasa a la siguiente opción.,Pulsa otra vez para cambiar,Press again to switch,Torna a prémer per canviar,Sakatu berriro aldatzeko,Appuie de nouveau pour changer
+focus.sound.off,Pomodoro: sonido de fondo. Botón que apaga el sonido.,Quitar el sonido,Turn the sound off,Treure el so,Soinua kendu,Couper le son
+focus.sound.option.white,Pomodoro: sonido de fondo. Opción de ruido blanco.,Blanco,White,Blanc,Zuria,Blanc
+focus.sound.option.pink,Pomodoro: sonido de fondo. Opción de ruido rosa.,Rosa,Pink,Rosa,Arrosa,Rose
+focus.sound.option.brown,Pomodoro: sonido de fondo. Opción de ruido marrón.,Marrón,Brown,Marró,Marroia,Brun
+focus.sound.option.rain,Pomodoro: sonido de fondo. Opción de naturaleza: lluvia.,Lluvia,Rain,Pluja,Euria,Pluie
+focus.sound.option.ocean,Pomodoro: sonido de fondo. Opción de naturaleza: olas del mar.,Océano,Ocean,Oceà,Ozeanoa,Océan
+focus.sound.option.storm,Pomodoro: sonido de fondo. Opción de naturaleza: tormenta con truenos.,Tormenta,Storm,Tempesta,Ekaitza,Orage
+focus.sound.track,"Pomodoro: sonido de fondo. La pista lo-fi que suena. {n} es su número (de más suave a más intensa), {total} cuántas hay y {title} su título.",{n}/{total} · {title},{n}/{total} · {title},{n}/{total} · {title},{n}/{total} · {title},{n}/{total} · {title}
 focus.exit.title,Pomodoro: pregunta al pulsar Parar,¿De verdad quieres parar?,Do you really want to stop?,De debò vols parar?,Benetan gelditu nahi duzu?,Tu veux vraiment arrêter ?
 focus.exit.left,"Pomodoro: lo que queda, al querer parar",Tiempo de concentración restante: {time}. ¿De verdad hace falta acabar ahora?,Focus time left: {time}. Do you really need to stop now?,Temps de concentració restant: {time}. De debò cal acabar ara?,Geratzen den kontzentrazio-denbora: {time}. Benetan orain amaitu behar duzu?,Temps de concentration restant : {time}. Faut-il vraiment arrêter maintenant ?
 focus.exit.why,Pomodoro: título de la lista de motivos para parar,¿Por qué quieres parar?,Why do you want to stop?,Per què vols parar?,Zergatik gelditu nahi duzu?,Pourquoi veux-tu arrêter ?

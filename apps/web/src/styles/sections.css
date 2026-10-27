@@ -1593,3 +1593,81 @@ dialog.layout-dialog.focus-dialog.wide {
   gap: 0.5rem;
   justify-items: start;
 }
+
+/* El sonido de fondo del Pomodoro (`FocusSound`): tres botones; el elegido se
+   resalta con la opción que suena y los otros se encogen. En la píldora va en
+   una segunda fila. */
+.focus-timer:not(.folded) {
+  flex-wrap: wrap;
+  border-radius: 28px;
+}
+.focus-sound {
+  display: flex;
+  /* Siempre la última fila, detrás de los botones del dock. */
+  order: 1;
+  flex-basis: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+.focus-sound-kind {
+  display: grid;
+  justify-items: center;
+  gap: 0.05rem;
+  min-width: 0;
+  padding: 0.3rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text-2);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition:
+    padding 0.2s,
+    font-size 0.2s,
+    opacity 0.2s;
+}
+.focus-sound-kind.on {
+  flex: 1 1 auto;
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 18%, var(--surface));
+  color: var(--text);
+}
+.focus-sound-kind.on small {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 0.72rem;
+  color: var(--text-2);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.focus-sound-kind.small {
+  padding: 0.15rem 0.5rem;
+  font-size: 0.7rem;
+  opacity: 0.6;
+}
+.focus-sound-kind.small:hover,
+.focus-sound-kind.small:focus-visible {
+  opacity: 1;
+}
+.focus-sound-off {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--text-2);
+  cursor: pointer;
+}
+.focus-screen .focus-sound {
+  flex-basis: auto;
+  margin: 1rem 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .focus-sound-kind {
+    transition: none;
+  }
+}

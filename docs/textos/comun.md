@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/comun.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-335 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
+348 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera | Francés |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -255,6 +255,19 @@ Generado desde `apps/web/src/shared/i18n/textos/comun.csv` con
 | `focus.screen.until` | Pomodoro a pantalla completa: a qué hora acaba | features/focus/FocusScreen | Hasta las {time} | Until {time} | Fins a les {time} | {time}ak arte | Jusqu'à {time} |
 | `focus.screen.shrink` | Pomodoro a pantalla completa: volver al temporizador pequeño sin parar | features/focus/FocusScreen | Quitar pantalla completa | Exit full screen | Treure la pantalla completa | Irten pantaila osotik | Quitter le plein écran |
 | `focus.screen.exit` | Pomodoro a pantalla completa: querer parar la sesión (pregunta antes) | features/focus/FocusScreen | Parar la sesión | Stop the session | Parar la sessió | Saioa gelditu | Arrêter la session |
+| `focus.sound.label` | Pomodoro: sonido de fondo. Nombre accesible del grupo de botones del sonido. | features/focus/FocusSound | Sonido de fondo | Background sound | So de fons | Atzeko soinua | Son d'ambiance |
+| `focus.sound.noise` | Pomodoro: sonido de fondo. Botón del tipo «ruido» (blanco, rosa, marrón). | features/focus/FocusSound | Ruido | Noise | Soroll | Zarata | Bruit |
+| `focus.sound.nature` | Pomodoro: sonido de fondo. Botón del tipo «naturaleza» (lluvia, océano, tormenta). | features/focus/FocusSound | Naturaleza | Nature | Natura | Natura | Nature |
+| `focus.sound.lofi` | Pomodoro: sonido de fondo. Botón del tipo «música lo-fi». | features/focus/FocusSound | Lo-Fi | Lo-Fi | Lo-Fi | Lo-Fi | Lo-Fi |
+| `focus.sound.next` | Pomodoro: sonido de fondo. Ayuda del botón elegido: volver a pulsarlo pasa a la siguiente opción. | features/focus/FocusSound | Pulsa otra vez para cambiar | Press again to switch | Torna a prémer per canviar | Sakatu berriro aldatzeko | Appuie de nouveau pour changer |
+| `focus.sound.off` | Pomodoro: sonido de fondo. Botón que apaga el sonido. | features/focus/FocusSound | Quitar el sonido | Turn the sound off | Treure el so | Soinua kendu | Couper le son |
+| `focus.sound.option.white` | Pomodoro: sonido de fondo. Opción de ruido blanco. | features/focus/FocusSound | Blanco | White | Blanc | Zuria | Blanc |
+| `focus.sound.option.pink` | Pomodoro: sonido de fondo. Opción de ruido rosa. | features/focus/FocusSound | Rosa | Pink | Rosa | Arrosa | Rose |
+| `focus.sound.option.brown` | Pomodoro: sonido de fondo. Opción de ruido marrón. | features/focus/FocusSound | Marrón | Brown | Marró | Marroia | Brun |
+| `focus.sound.option.rain` | Pomodoro: sonido de fondo. Opción de naturaleza: lluvia. | features/focus/FocusSound | Lluvia | Rain | Pluja | Euria | Pluie |
+| `focus.sound.option.ocean` | Pomodoro: sonido de fondo. Opción de naturaleza: olas del mar. | features/focus/FocusSound | Océano | Ocean | Oceà | Ozeanoa | Océan |
+| `focus.sound.option.storm` | Pomodoro: sonido de fondo. Opción de naturaleza: tormenta con truenos. | features/focus/FocusSound | Tormenta | Storm | Tempesta | Ekaitza | Orage |
+| `focus.sound.track` | Pomodoro: sonido de fondo. La pista lo-fi que suena. {n} es su número (de más suave a más intensa), {total} cuántas hay y {title} su título. | features/focus/FocusSound | {n}/{total} · {title} | {n}/{total} · {title} | {n}/{total} · {title} | {n}/{total} · {title} | {n}/{total} · {title} |
 | `focus.exit.title` | Pomodoro: pregunta al pulsar Parar | features/focus/FocusExit | ¿De verdad quieres parar? | Do you really want to stop? | De debò vols parar? | Benetan gelditu nahi duzu? | Tu veux vraiment arrêter ? |
 | `focus.exit.left` | Pomodoro: lo que queda, al querer parar | features/focus/FocusExit | Tiempo de concentración restante: {time}. ¿De verdad hace falta acabar ahora? | Focus time left: {time}. Do you really need to stop now? | Temps de concentració restant: {time}. De debò cal acabar ara? | Geratzen den kontzentrazio-denbora: {time}. Benetan orain amaitu behar duzu? | Temps de concentration restant : {time}. Faut-il vraiment arrêter maintenant ? |
 | `focus.exit.why` | Pomodoro: título de la lista de motivos para parar | features/focus/FocusExit | ¿Por qué quieres parar? | Why do you want to stop? | Per què vols parar? | Zergatik gelditu nahi duzu? | Pourquoi veux-tu arrêter ? |
