@@ -179,6 +179,30 @@ describe('red de correcciones', () => {
       expect(select(analysis, { focus: 'nadie', min: 1, limit: 10 }).logins).toEqual([])
     })
 
+    it('centrado en alguien, sus uniones salen todas aunque el tope recorte las demás', () => {
+      // `foco` se ha cruzado una vez con 80 personas, que se corrigen mucho entre sí:
+      // más uniones de las que caben. Pasaba con masenjo y smarin-s (2026-10-27).
+      const crowd = Array.from({ length: 80 }, (_, index) => `q${String(index)}`)
+      const everyone = new Set(['foco', ...crowd])
+      const analysis = analyse(
+        mergePairs(
+          [
+            ...crowd.map((login) => pair(login, 'foco', 1)),
+            ...crowd.flatMap((a, index) => crowd.slice(index + 1).map((b) => pair(a, b, 4))),
+          ],
+          everyone,
+        ),
+        everyone,
+      )
+      const around = select(analysis, { focus: 'foco', min: 1, limit: 300 })
+      const own = around.links.filter((link) => link.source === 'foco' || link.target === 'foco')
+
+      expect(around.logins).toHaveLength(81)
+      expect(own).toHaveLength(80)
+      expect(around.links.length).toBeLessThanOrEqual(81 * 6)
+      expect(around.hidden?.links).toBeGreaterThan(0)
+    })
+
     it('con un campus enorme se pintan las personas pedidas y seis uniones por cabeza', () => {
       // 2 000 personas en fila y una piña de 150 que se corrigen todas entre sí:
       // más de 12 000 uniones.

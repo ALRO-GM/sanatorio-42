@@ -460,10 +460,20 @@ export function select(
   const shown = new Set(logins)
   const inside = strong.filter((pair) => shown.has(pair.a) && shown.has(pair.b))
   // Tope de uniones: con demasiadas el grafo es una mancha y el navegador sufre.
+  // Las de la persona elegida no entran en el tope: son las que dicen por qué
+  // sale cada cual. Antes se recortaban por flojas (una sola corrección) y esa
+  // gente salía apagada y sin línea, como si no tuviera nada que ver (2026-10-27).
   const maxLinks = Math.max(200, logins.length * LINKS_PER_NODE)
+  const own = (pair: Pair): boolean => focus !== null && (pair.a === focus || pair.b === focus)
+  const others = inside.filter((pair) => !own(pair))
   const kept =
     inside.length > maxLinks
-      ? [...inside].sort((x, y) => weightOf(y) - weightOf(x)).slice(0, maxLinks)
+      ? [
+          ...inside.filter(own),
+          ...[...others]
+            .sort((x, y) => weightOf(y) - weightOf(x))
+            .slice(0, Math.max(0, maxLinks - inside.filter(own).length)),
+        ]
       : inside
   const hiddenNodes = candidates.length - logins.length
   const hiddenLinks = inside.length - kept.length
