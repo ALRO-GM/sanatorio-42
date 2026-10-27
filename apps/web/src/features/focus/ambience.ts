@@ -11,6 +11,20 @@
  *
  * Cambiar de sonido también funde: el de antes se apaga en `SWITCH_S` mientras
  * sube el nuevo. Nada de esto falla hacia fuera: sin audio, no suena y ya.
+ *
+ * Con el móvil bloqueado o la página en segundo plano (había microcortes,
+ * 2026-10-27):
+ *
+ * - El contexto va con `latencyHint: 'playback'`: búferes grandes, como un
+ *   reproductor de música. Con los de fábrica (`interactive`, para juegos), al
+ *   bajar el sistema la prioridad de la página el audio no llegaba a tiempo.
+ * - El fundido entre vueltas lo lanza el `timeupdate` del propio audio, no un
+ *   temporizador: en segundo plano los navegadores retrasan los temporizadores
+ *   (hasta uno por minuto) y la siguiente vuelta llegaba tarde. Si aun así se
+ *   acaba antes (`ended`), la siguiente empieza al momento.
+ * - Media Session: el móvil lo trata como música (título en la pantalla de
+ *   bloqueo, pausa y seguir), y al volver a la página se reanuda si el sistema
+ *   lo había parado.
  */
 
 import { TRACKS } from './ambience-tracks'
@@ -63,7 +77,7 @@ const notify = (): void => {
 /** El contexto de audio, creado la primera vez (siempre tras un clic: el navegador lo exige). */
 function audio(): { ctx: AudioContext; out: GainNode } {
   if (context === null || master === null) {
-    context = new AudioContext()
+    context = new AudioContext({ latencyHint: 'playback' })
     master = context.createGain()
     master.connect(context.destination)
   }
@@ -192,22 +206,34 @@ function playFile(id: string, level: number): Voice {
     void player.element.play().catch(() => undefined)
   }
 
-  // Un poco antes del final, empieza el otro y se cruzan los volúmenes.
-  const watch = window.setInterval(() => {
+  /** Pasa a la otra vuelta: empieza desde el principio y se cruzan los volúmenes. */
+  const cross = (fadeS: number): void => {
     const playing = players[turn]
     const next = players[1 - turn]
 
     if (stopped || playing === undefined || next === undefined) return
 
-    const { duration, currentTime } = playing.element
-
-    if (!Number.isFinite(duration) || duration - currentTime > CROSSFADE_S) return
-
     turn = 1 - turn
     start(turn)
-    ramp(next.gain, 0, level, CROSSFADE_S)
-    ramp(playing.gain, playing.gain.gain.value, 0, CROSSFADE_S)
-  }, 250)
+    ramp(next.gain, 0, level, fadeS)
+    ramp(playing.gain, playing.gain.gain.value, 0, fadeS)
+  }
+
+  // Un poco antes del final, empieza el otro. Lo avisa el propio audio, que en
+  // segundo plano no se retrasa como un temporizador.
+  players.forEach((player, index) => {
+    player.element.addEventListener('timeupdate', () => {
+      const { duration, currentTime } = player.element
+
+      if (index === turn && Number.isFinite(duration) && duration - currentTime <= CROSSFADE_S) {
+        cross(CROSSFADE_S)
+      }
+    })
+    // Se acabó sin haber cruzado (llegó tarde el aviso): la otra vuelta, ya.
+    player.element.addEventListener('ended', () => {
+      if (index === turn) cross(0.05)
+    })
+  })
 
   start(0)
   if (players[0] !== undefined) ramp(players[0].gain, 0, level, SWITCH_S)
@@ -215,7 +241,6 @@ function playFile(id: string, level: number): Voice {
   return {
     stop: (fadeS) => {
       stopped = true
-      window.clearInterval(watch)
 
       for (const player of players) ramp(player.gain, player.gain.gain.value, 0, fadeS)
 
@@ -233,8 +258,61 @@ function playFile(id: string, level: number): Voice {
   }
 }
 
-/** Pone ese sonido (o ninguno, con `null`), fundiendo con el que hubiera. */
-export function setAmbience(next: Ambience | null): void {
+/**
+ * Lo que enseña el móvil en la pantalla de bloqueo, y sus botones: pausa y
+ * seguir paran y reanudan el contexto, sin perder lo elegido.
+ */
+function showSession(title: string | null): void {
+  if (!('mediaSession' in navigator)) return
+
+  try {
+    const session = navigator.mediaSession
+
+    session.metadata = title === null ? null : new MediaMetadata({ title, artist: 'Peer4U' })
+    session.playbackState = title === null ? 'none' : 'playing'
+    session.setActionHandler(
+      'pause',
+      title === null
+        ? null
+        : () => {
+            void context?.suspend()
+            session.playbackState = 'paused'
+          },
+    )
+    session.setActionHandler(
+      'play',
+      title === null
+        ? null
+        : () => {
+            void context?.resume()
+            session.playbackState = 'playing'
+          },
+    )
+  } catch {
+    // Sin Media Session (o sin alguna acción): suena igual.
+  }
+}
+
+// Al volver a la página, si el sistema paró el audio (iOS lo hace al bloquear),
+// se reanuda lo que sonaba.
+if (typeof document !== 'undefined') {
+  document.addEventListener('visibilitychange', () => {
+    if (
+      document.visibilityState === 'visible' &&
+      current !== null &&
+      context?.state !== 'running'
+    ) {
+      void context?.resume()
+    }
+  })
+}
+
+/**
+ * Pone ese sonido (o ninguno, con `null`), fundiendo con el que hubiera.
+ *
+ * @param title Lo que se enseña en la pantalla de bloqueo del móvil.
+ */
+export function setAmbience(next: Ambience | null, title: string | null = null): void {
   try {
     voice?.stop(SWITCH_S)
     voice = null
@@ -252,6 +330,7 @@ export function setAmbience(next: Ambience | null): void {
   }
 
   current = next
+  showSession(next === null ? null : (title ?? ''))
   notify()
 }
 

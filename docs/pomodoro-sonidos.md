@@ -18,6 +18,20 @@ solo al acabar la concentración.
   indistinguible del original y ocupa ~1 MB por minuto. Volumen igualado a
   -18 LUFS (`loudnorm`). El océano se recorta a 5 min.
 
+## Con el móvil bloqueado
+
+Había microcortes con la pantalla bloqueada o la página en segundo plano
+(2026-10-27). Por qué y cómo se arregló:
+
+- Búferes pequeños: el contexto de audio iba con la latencia de fábrica
+  (`interactive`, para juegos). Al bajar el sistema la prioridad de la página,
+  el audio no llegaba a tiempo. Ahora `latencyHint: 'playback'`.
+- Temporizadores frenados: el fundido entre vueltas lo lanzaba un `setInterval`,
+  que en segundo plano se retrasa (hasta una vez por minuto). Ahora lo lanza el
+  `timeupdate` del propio audio, y `ended` por si llega tarde.
+- Media Session: título en la pantalla de bloqueo, pausa y seguir; al volver a
+  la página se reanuda si el sistema lo había parado (iOS lo hace al bloquear).
+
 ## Licencias
 
 Todo es CC0 o dominio público: no hace falta atribución (se cita igualmente).

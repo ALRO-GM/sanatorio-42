@@ -51,7 +51,7 @@ export function FocusSound() {
     const next = { kind, index }
 
     remember(next)
-    setAmbience(next)
+    setAmbience(next, `${t(`focus.sound.${kind}`)} · ${optionName(next)}`)
   }
 
   const optionName = (choice: Ambience): string => {
