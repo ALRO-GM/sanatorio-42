@@ -42,6 +42,8 @@ que hacer, en orden. Este documento es el porqué; aquel, el qué.
 
 - **Consumo de la API de 42** (2026-10-27, `docs/consumo-api.md`, migración 81 `api_usage`): cuenta por función y por persona, topes por hora (general, por persona y por función), panel con gráfico y tablas; quitados los topes diarios y mensuales (42 solo tiene 1 200/h y 2/s). Arreglada la copia de correcciones de París, parada en mayo por consultas de ids abiertas que tardaban más que la espera.
 
+- **Pomodoro con sonido** (2026-10-27, `docs/pomodoro-sonidos.md`): ruido generado en el navegador, naturaleza y diez lo-fi CC0 en `public/sounds/focus/` (AAC 128 kbps, -18 LUFS), bucle con fundido cruzado. **Caché en el PC** (`docs/rendimiento.md` §8): `public/sw.js`, ETag/304 y `Range` en `core/http/static.ts`.
+
 ## Curso de shell (2026-10-25)
 
 Pedido por Alberto: un curso de shell de Linux por niveles, con teoría,
