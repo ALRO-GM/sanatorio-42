@@ -37,6 +37,7 @@ import type { Order } from './RankCard'
 import { StrictestCard } from './StrictestCard'
 import { Timeline } from './Timeline'
 import { InfoTip } from '../../shared/ui/InfoTip'
+import { PillGroup } from '../../shared/ui/PillGroup'
 import { NetworkTour } from './NetworkTour'
 import { decodePart, networkHref } from '../../shared/links'
 
@@ -58,6 +59,19 @@ const REFRESH_WHILE_COPYING_MS = 45_000
 
 /** Actividad mínima para salir en el ranking: con dos correcciones cualquier índice engaña. */
 const RANKING_MIN_ACTIVITY = 12
+
+/** Qué se cuenta para el mínimo por persona: las dos cosas, las hechas o las recibidas. */
+const PERSON_MEASURES = ['total', 'given', 'received'] as const
+type PersonMeasure = (typeof PERSON_MEASURES)[number]
+
+/** Las correcciones de alguien según lo que se cuente. */
+function countOf(node: NetworkNode, measure: PersonMeasure): number {
+  return measure === 'given'
+    ? node.given
+    : measure === 'received'
+      ? node.received
+      : node.given + node.received
+}
 
 type Filters = {
   period: Period
@@ -181,10 +195,20 @@ export function NetworkPage({ me, switcher }: { me: CurrentUser; switcher?: Reac
   // Sin quien no es de ninguna de las escuelas elegidas: solo llenan de líneas.
   // Marcado de entrada (pedido por Alberto, 2026-10-27); se desmarca para verla.
   const [onlyInside, setOnlyInside] = useState(true)
+  // Mínimo de correcciones por persona (hechas, recibidas o las dos): se filtra
+  // aquí, al momento, sin volver a pedir el grafo. Quien está elegida, siempre.
+  const [personMin, setPersonMin] = useState<{ measure: PersonMeasure; n: number }>({
+    measure: 'total',
+    n: 0,
+  })
   const shownGraph = useMemo(() => {
-    if (graph === null || !onlyInside) return graph
+    if (graph === null || (!onlyInside && personMin.n === 0)) return graph
 
-    const nodes = graph.nodes.filter((node) => !node.external)
+    const nodes = graph.nodes.filter(
+      (node) =>
+        (!onlyInside || !node.external) &&
+        (node.login === selected || countOf(node, personMin.measure) >= personMin.n),
+    )
     const inside = new Set(nodes.map((node) => node.login))
 
     return {
@@ -192,7 +216,7 @@ export function NetworkPage({ me, switcher }: { me: CurrentUser; switcher?: Reac
       nodes,
       links: graph.links.filter((link) => inside.has(link.source) && inside.has(link.target)),
     }
-  }, [graph, onlyInside])
+  }, [graph, onlyInside, personMin, selected])
 
   // Mientras se copia el histórico, el grafo crece solo.
   const copying = graph !== null && graph.sync.phase !== 'done'
@@ -219,7 +243,11 @@ export function NetworkPage({ me, switcher }: { me: CurrentUser; switcher?: Reac
   // Entre qué porcentajes se reparte el degradado de cada modo que lo usa.
   const [scales, setScales] = useState<Record<ScaleMode, Scale>>(DEFAULT_SCALES)
   const scale = isScaleMode(mode) ? scales[mode] : undefined
-  const paint = useCallback((node: NetworkNode) => colorOf(node, mode, scale), [mode, scale])
+  const shownCampuses = graph?.campuses
+  const paint = useCallback(
+    (node: NetworkNode) => colorOf(node, mode, scale, shownCampuses),
+    [mode, scale, shownCampuses],
+  )
   const tooltip = useCallback(
     (node: NetworkNode) => (
       <>
@@ -253,8 +281,8 @@ export function NetworkPage({ me, switcher }: { me: CurrentUser; switcher?: Reac
   const nodes = graph?.nodes
   const available = options?.available
   const legend = useMemo(
-    () => legendOf(nodes ?? [], mode, t, scale, available),
-    [nodes, mode, t, scale, available],
+    () => legendOf(nodes ?? [], mode, t, scale, available, shownCampuses),
+    [nodes, mode, t, scale, available, shownCampuses],
   )
   const chosen = nodes?.find((node) => node.login === selected) ?? null
   // Sentido de cada lista del panel: de mayor a menor mientras no se cambie.
@@ -356,7 +384,16 @@ export function NetworkPage({ me, switcher }: { me: CurrentUser; switcher?: Reac
                 <span className="eyebrow">{t('net.campuses')}</span>
                 <CampusPicker
                   available={options.available}
-                  current={graph.campuses}
+                  // Lo pedido, no lo del grafo que se ve: mientras llega el nuevo
+                  // (con París tarda), las recién añadidas siguen marcadas.
+                  current={
+                    filters.campuses === null
+                      ? graph.campuses
+                      : filters.campuses === 'all'
+                        ? options.available.map((campus) => campus.id)
+                        : filters.campuses
+                  }
+                  loading={loading}
                   onApply={(next) => {
                     change({ campuses: next })
                     // Con más de una, lo que interesa ver es de cuál es cada quien.
@@ -431,6 +468,36 @@ export function NetworkPage({ me, switcher }: { me: CurrentUser; switcher?: Reac
                   commit="release"
                   onChange={(min) => {
                     change({ min })
+                  }}
+                />
+              </div>
+              <div className="net-min net-person-min">
+                <span>
+                  {t('net.personMin', {
+                    n: personMin.n,
+                    what: t(`net.personMin.${personMin.measure}`),
+                  })}
+                </span>
+                <PillGroup
+                  options={PERSON_MEASURES}
+                  value={personMin.measure}
+                  onChange={(measure) => {
+                    setPersonMin((current) => ({ ...current, measure }))
+                  }}
+                  label={t('net.personMinWhat')}
+                  text={(measure) => t(`net.personMin.${measure}`)}
+                />
+                <Slider
+                  min={0}
+                  max={Math.max(
+                    1,
+                    ...(graph?.nodes ?? []).map((node) => countOf(node, personMin.measure)),
+                  )}
+                  curve="log"
+                  value={personMin.n}
+                  label={t('net.personMinLabel')}
+                  onChange={(n) => {
+                    setPersonMin((current) => ({ ...current, n }))
                   }}
                 />
               </div>

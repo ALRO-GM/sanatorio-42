@@ -55,7 +55,7 @@ const visible = <T>(map: Map<string, T>, sees: (login: string) => boolean): Map<
   new Map([...map].filter(([login]) => sees(login)))
 
 /** Cuánto vale un análisis guardado. La copia avanza por detrás: no hace falta más fresco. */
-const CACHE_TTL_MS = 60_000
+const CACHE_TTL_MS = 10 * 60_000
 
 /** Cuánto vale el catálogo (años de llegada, proyectos): cambia con cuentagotas. */
 const CATALOGUE_TTL_MS = 5 * 60_000

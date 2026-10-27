@@ -50,6 +50,33 @@ describe('colores de la red', () => {
     }
   })
 
+  it('escuelas y comunidades se reparten la rueda: las primeras, bien lejos', () => {
+    const hueOf = (color: string): number => Number(/^hsl\((\d+)/.exec(color)?.[1])
+    const gap = (a: number, b: number): number => Math.min(Math.abs(a - b), 360 - Math.abs(a - b))
+    const paris = node({ campusId: 1 })
+    const madrid = node({ campusId: 22 })
+
+    // Antes salían de su id y París y Madrid eran dos verdes casi iguales.
+    expect(
+      gap(
+        hueOf(colorOf(paris, 'campus', undefined, [1, 22])),
+        hueOf(colorOf(madrid, 'campus', undefined, [1, 22])),
+      ),
+    ).toBeGreaterThanOrEqual(150)
+
+    // Con tres, cuatro o cinco escuelas o comunidades, ninguna pareja a menos de 45°.
+    for (const count of [3, 4, 5]) {
+      const hues = Array.from({ length: count }, (_, index) =>
+        hueOf(colorOf(node({ community: index }), 'community')),
+      )
+
+      for (const [index, hue] of hues.entries()) {
+        for (const other of hues.slice(index + 1))
+          expect(gap(hue, other)).toBeGreaterThanOrEqual(45)
+      }
+    }
+  })
+
   it('distingue lo que tiene que distinguir', () => {
     expect(colorOf(node({ community: 0 }), 'community')).not.toBe(
       colorOf(node({ community: 1 }), 'community'),
@@ -139,14 +166,26 @@ describe('red: varias escuelas', () => {
       node({ login: 'fuera', campusId: null, external: true }),
     ]
 
-    expect(colorOf(nodes[0] ?? node(), 'campus')).toBe(campusColor(22))
-    expect(campusColor(22)).not.toBe(campusColor(46))
+    const shown = [22, 46]
 
-    const legend = legendOf(nodes, 'campus', (key) => key, undefined, [
-      { id: 22, name: 'Madrid' },
-      { id: 46, name: 'Barcelona' },
-      { id: 37, name: 'Málaga' },
-    ])
+    expect(colorOf(nodes[0] ?? node(), 'campus', undefined, shown)).toBe(campusColor(22, shown))
+    expect(campusColor(22, shown)).not.toBe(campusColor(46, shown))
+
+    const legend = legendOf(
+      nodes,
+      'campus',
+      (key) => key,
+      undefined,
+      [
+        { id: 22, name: 'Madrid' },
+        { id: 46, name: 'Barcelona' },
+        { id: 37, name: 'Málaga' },
+      ],
+      shown,
+    )
+
+    // El color de la leyenda es el mismo que el de las burbujas.
+    expect(legend[0]?.color).toBe(campusColor(22, shown))
 
     // Solo las escuelas que tienen a alguien pintado, y al final quien viene de fuera.
     expect(legend.map((entry) => entry.label)).toEqual([

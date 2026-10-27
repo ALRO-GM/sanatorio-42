@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useI18n } from '../i18n'
 
 /** Lo que se espera tras el último clic antes de pedir los datos: da tiempo a marcar otra. */
-export const CAMPUS_WAIT_MS = 2000
+export const CAMPUS_WAIT_MS = 1000
 
 type Campus = { id: number; name: string }
 
@@ -16,12 +16,14 @@ type CampusPickerProps = {
   label?: string
   /** Si se puede quedar sin ninguna (en el Avance queda la media de todos juntos). */
   allowEmpty?: boolean
+  /** `true` mientras se piden los datos de lo elegido: se dice, para que no parezca que no ha hecho nada. */
+  loading?: boolean
 }
 
 /**
  * Elegir escuelas (en la Red y en el Avance) sin pedir los datos a cada clic
  * (pedir varias es caro): un clic marca o desmarca y pone el reloj a dos
- * segundos; si en ese rato se marca otra, vuelve a empezar. Al acabar se pide
+ * segundo; si en ese rato se marca otra, vuelve a empezar. Al acabar se pide
  * con lo marcado. Un doble clic deja solo esa escuela, al momento. «Todas»,
  * también al momento.
  */
@@ -31,6 +33,7 @@ export function CampusPicker({
   onApply,
   label,
   allowEmpty = false,
+  loading = false,
 }: CampusPickerProps) {
   const { t } = useI18n()
   // Lo marcado y aún sin pedir; `null` si no hay nada pendiente.
@@ -104,6 +107,11 @@ export function CampusPicker({
           {t('net.campuses.all')}
         </button>
       </div>
+      {pending === null && loading && (
+        <div className="campus-wait" role="status">
+          <small>{t('net.campuses.loading')}</small>
+        </div>
+      )}
       {pending !== null && (
         <div className="campus-wait" role="status">
           <span key={round} className="campus-wait-bar" aria-hidden="true" />

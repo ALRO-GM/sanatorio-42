@@ -1119,3 +1119,10 @@ ol.net-rows .net-row-name {
     width: 110px;
   }
 }
+/* El mínimo por persona ocupa la fila entera: el texto, qué se cuenta y la barra. */
+.net-filter-grid .net-person-min {
+  grid-column: 1 / -1;
+}
+.net-person-min .filter-pills {
+  flex-wrap: wrap;
+}

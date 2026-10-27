@@ -218,7 +218,7 @@ son unas 82 000, 820 peticiones una sola vez) y calcula sobre ellas el grafo.
 - **Quién es de fuera**: quien no está en la réplica del campus. Solo sale como
   vecino de alguien de dentro; una pareja de dos personas de fuera se descarta.
   Las cuentas borradas (`3b3-…`) fueron estudiantes del campus y cuentan como tales.
-- **Rendimiento**: el análisis de cada combinación de filtros se guarda un minuto
+- **Rendimiento**: el análisis de cada combinación de filtros se guarda diez minutos
   en memoria (`core/ttl-cache.ts`), así que cambiar el tope de personas o elegir a
   alguien no vuelve a leer la base. La web lo pinta en un `<canvas>` con
   `d3-force` y solo descarga esa parte al abrir la sección.

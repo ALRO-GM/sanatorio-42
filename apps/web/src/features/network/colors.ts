@@ -18,11 +18,28 @@ export const COLOR_MODES = [
 export type ColorMode = (typeof COLOR_MODES)[number]
 
 /** Tonos de las comunidades mayores. De la décima en adelante, gris. */
-const COMMUNITY_HUES = [186, 28, 262, 138, 340, 48, 212, 96, 300, 12]
-
 // El grafo se pinta siempre sobre fondo oscuro (`--stage-bg`): los colores van
 // vivos y claros, que es lo que se distingue ahí.
 const OTHER = 'hsl(200 12% 68%)'
+
+/**
+ * Tonos para lo que no tiene orden (comunidades, escuelas), elegidos para que
+ * los primeros queden siempre lo más lejos posible en la rueda: con dos, azul y
+ * naranja (opuestos, 180°); con tres y cuatro, verde y magenta (a 90°); hasta
+ * ocho, los puntos medios (amarillo, turquesa, violeta, rojo; a 45°); y dos más
+ * en los huecos. Pedido por Alberto (2026-10-27): antes París y Madrid salían en
+ * dos verdes casi iguales.
+ */
+const DISTINCT_HUES = [210, 30, 120, 300, 75, 165, 255, 345, 52, 188]
+
+/** Color del puesto `index` de la lista; pasada la lista, en gris. */
+const distinctColor = (index: number): string => {
+  const hue = DISTINCT_HUES[index]
+
+  return hue === undefined ? OTHER : `hsl(${hue} 86% 62%)`
+}
+
+const COMMUNITY_HUES = DISTINCT_HUES
 
 /**
  * Parte de suspensos a partir de la cual alguien ya sale en rojo del todo. En
@@ -106,7 +123,12 @@ export function passColor(passRate: number): string {
  * @param scale Entre qué porcentajes se reparte el degradado, en los modos que
  *   lo usan. Sin ella, la de fábrica.
  */
-export function colorOf(node: NetworkNode, mode: ColorMode, scale?: Scale): string {
+export function colorOf(
+  node: NetworkNode,
+  mode: ColorMode,
+  scale?: Scale,
+  campuses: readonly number[] = [],
+): string {
   if (isScaleMode(mode)) {
     const value = valueOf(node, mode)
 
@@ -115,11 +137,8 @@ export function colorOf(node: NetworkNode, mode: ColorMode, scale?: Scale): stri
   }
 
   switch (mode) {
-    case 'community': {
-      const hue = COMMUNITY_HUES[node.community]
-
-      return hue === undefined ? OTHER : `hsl(${hue} 86% 62%)`
-    }
+    case 'community':
+      return distinctColor(node.community)
     case 'cohort':
       return node.cohort === null ? OTHER : yearColor(node.cohort)
     case 'balance': {
@@ -132,13 +151,19 @@ export function colorOf(node: NetworkNode, mode: ColorMode, scale?: Scale): stri
     case 'origin':
       return node.external ? 'hsl(28 92% 62%)' : 'hsl(186 80% 55%)'
     case 'campus':
-      return node.campusId === null ? OTHER : campusColor(node.campusId)
+      return node.campusId === null ? OTHER : campusColor(node.campusId, campuses)
   }
 }
 
-/** Color estable para un campus: los ids seguidos quedan lejos en el círculo. */
-export function campusColor(campusId: number): string {
-  return `hsl(${(campusId * 137) % 360} 86% 62%)`
+/**
+ * Color de una escuela según su puesto entre las que se ven (`campuses`): así
+ * las elegidas se reparten la rueda y nunca salen dos parecidas. Una que no
+ * esté en la lista (no debería pasar), en gris.
+ */
+export function campusColor(campusId: number, campuses: readonly number[]): string {
+  const index = campuses.indexOf(campusId)
+
+  return index === -1 ? OTHER : distinctColor(index)
 }
 
 type LegendEntry = { color: string; label: string }
@@ -154,6 +179,8 @@ export function legendOf(
   t: (key: string, vars?: Record<string, string | number>) => string,
   scale?: Scale,
   campuses: readonly { id: number; name: string }[] = [],
+  /** Las escuelas que se ven, en orden: de ahí sale el color de cada una. */
+  shown: readonly number[] = [],
 ): LegendEntry[] {
   if (isScaleMode(mode)) {
     const range = scale ?? DEFAULT_SCALES[mode]
@@ -203,7 +230,7 @@ export function legendOf(
           const year = mainYear(community)
 
           return {
-            color: `hsl(${COMMUNITY_HUES[community] ?? 0} 86% 62%)`,
+            color: distinctColor(community),
             label:
               year === null
                 ? t('net.legend.community', { n: community + 1, size })
@@ -244,7 +271,7 @@ export function legendOf(
         ...campuses
           .filter((campus) => count(campus.id) > 0)
           .map((campus) => ({
-            color: campusColor(campus.id),
+            color: campusColor(campus.id, shown),
             label: `${campus.name} (${count(campus.id)})`,
           })),
         ...(count(null) > 0 ? [{ color: OTHER, label: t('net.legend.external') }] : []),
