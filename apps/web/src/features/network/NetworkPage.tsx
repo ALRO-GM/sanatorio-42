@@ -179,7 +179,8 @@ export function NetworkPage({ me, switcher }: { me: CurrentUser; switcher?: Reac
   const options = graph !== null && graph.nodes.length === 0 ? (lastFull ?? graph) : graph
 
   // Sin quien no es de ninguna de las escuelas elegidas: solo llenan de líneas.
-  const [onlyInside, setOnlyInside] = useState(false)
+  // Marcado de entrada (pedido por Alberto, 2026-10-27); se desmarca para verla.
+  const [onlyInside, setOnlyInside] = useState(true)
   const shownGraph = useMemo(() => {
     if (graph === null || !onlyInside) return graph
 
