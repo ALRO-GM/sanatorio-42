@@ -124,6 +124,7 @@ describe('migraciones', () => {
       'shell_runs',
       'staff_accounts',
       'staff_checks',
+      'startup',
       'sync_state',
       'therapy_checks',
       'therapy_groups',

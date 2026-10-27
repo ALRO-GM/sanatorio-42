@@ -240,6 +240,25 @@ export function createFocusService(
       }
     },
 
+    /**
+     * Los minutos de concentración de cada persona, desde siempre: lo que gana
+     * para su startup (`docs/pomodoro-startup.md`). Cuentan como en sus
+     * estadísticas: la sesión acabada hasta su final, la que sigue hasta ahora.
+     */
+    async focusedMinutes(login?: string): Promise<Map<string, number>> {
+      const sessions =
+        login === undefined
+          ? await log.between(null, new Date(now() + 1).toISOString())
+          : await log.of(login)
+
+      return new Map(
+        [...focusedByLogin(sessions, now())].map(([who, seconds]) => [
+          who,
+          Math.floor(seconds / 60),
+        ]),
+      )
+    },
+
     /** Las de todo el mundo (o del tramo elegido), para el panel. Solo admins. */
     async adminStats(actor: Actor, input: unknown): Promise<FocusStats> {
       assertAdmin(actor)

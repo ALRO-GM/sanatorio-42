@@ -31,6 +31,7 @@ import { shellCourseMock } from './shellcourse'
 import { gitRoomsMock } from './gitrooms'
 import { replicaMock } from './replica'
 import { apiUsageMock } from './api-usage'
+import { startupMock } from './startup'
 import { staffMock } from './staff'
 import { therapyMock } from './therapy'
 
@@ -45,6 +46,7 @@ export const mockApi: Api = withHidden({
   ...profileMock,
   ...replicaMock,
   ...apiUsageMock,
+  ...startupMock,
   ...helpMock,
   ...therapyMock,
   ...doubtsMock,

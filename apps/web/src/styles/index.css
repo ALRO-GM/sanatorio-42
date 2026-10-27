@@ -63,3 +63,4 @@
 /* La agenda: metas, checkpoints, dailies y el tablero del sprint. */
 @import './agenda.css';
 @import './comfort.css';
+@import './startup.css';

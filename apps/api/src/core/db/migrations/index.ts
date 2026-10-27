@@ -87,6 +87,7 @@ import { ticketPlaceSchema } from './0078-ticket-place.js'
 import { seatFirstSeenSchema } from './0079-seat-first-seen.js'
 import { userLogtimeSchema } from './0080-user-logtime.js'
 import { apiUsageSchema } from './0081-api-usage.js'
+import { startupSchema } from './0082-startup.js'
 import type { Migration } from './types.js'
 
 export const MIGRATIONS: readonly Migration[] = [
@@ -171,6 +172,7 @@ export const MIGRATIONS: readonly Migration[] = [
   seatFirstSeenSchema,
   userLogtimeSchema,
   apiUsageSchema,
+  startupSchema,
 ]
 
 /** Versión más alta que existe en el código. */

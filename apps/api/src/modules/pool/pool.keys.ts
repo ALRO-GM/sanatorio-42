@@ -168,7 +168,8 @@ export const POOL_ROUTES: Record<PoolKey, readonly string[]> = {
     '/clicker/save',
     '/clicker/seizure/ack',
   ],
-  focus: ['/me/focus', '/me/focus/stay'],
+  // Con el Pomodoro va su startup (`docs/pomodoro-startup.md`).
+  focus: ['/me/focus', '/me/focus/stay', '/me/startup', '/me/startup/action', '/startup/ranking'],
   'focus.stats': ['/me/focus/stats'],
   mailbox: [
     '/notices',

@@ -13,6 +13,7 @@ import { StepPicker } from '../../shared/ui/StepPicker'
 import { Icon } from '../../shared/ui/Icon'
 import { Modal } from '../../shared/ui/Modal'
 import { FocusMyStats } from './FocusMyStats'
+import { StartupPanel } from './startup/StartupPanel'
 import { usePoolAllows } from '../../shared/pool'
 
 /**
@@ -26,7 +27,7 @@ const SHOWS: readonly FocusShow[] = ['corrections', 'events', 'messages', 'guard
 /** Las secciones que se pueden dejar a la vista (las de las pestañas; el expediente, siempre). */
 const CHOOSABLE = SECTIONS.filter((section) => section.inNav).map((section) => section.id)
 
-const TABS = ['settings', 'stats'] as const
+const TABS = ['settings', 'startup', 'stats'] as const
 
 /**
  * El Pomodoro: cuánto concentrarse y descansar, qué secciones dejar en las
@@ -60,7 +61,7 @@ export function FocusDialog({ onClose }: { onClose: () => void }) {
     <Modal
       ref={dialog}
       label={t('focus.title')}
-      className={`focus-dialog ${tab === 'stats' ? 'wide' : ''}`}
+      className={`focus-dialog ${tab === 'settings' ? '' : 'wide'}`}
       onClose={onClose}
       title={
         <>
@@ -80,6 +81,7 @@ export function FocusDialog({ onClose }: { onClose: () => void }) {
         />
       </Show>
       {tab === 'stats' && stats && <FocusMyStats />}
+      {tab === 'startup' && <StartupPanel />}
       {tab === 'settings' && (
         <>
           <p className="hint">{t('focus.pitch')}</p>

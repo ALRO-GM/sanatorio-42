@@ -22,6 +22,7 @@ COPY packages/gitsim/package.json packages/gitsim/
 COPY packages/course/package.json packages/course/
 COPY packages/shellsim/package.json packages/shellsim/
 COPY packages/clicker/package.json packages/clicker/
+COPY packages/startup/package.json packages/startup/
 RUN npm ci
 
 COPY tsconfig.base.json ./
@@ -41,6 +42,7 @@ COPY packages/gitsim/package.json packages/gitsim/
 COPY packages/course/package.json packages/course/
 COPY packages/shellsim/package.json packages/shellsim/
 COPY packages/clicker/package.json packages/clicker/
+COPY packages/startup/package.json packages/startup/
 RUN npm ci --omit=dev --workspace @sanatorio/api
 
 # --- Ejecución ---------------------------------------------------------------
@@ -68,6 +70,9 @@ COPY --from=build /repo/packages/shellsim/dist packages/shellsim/dist
 # Y el motor del Code Clicker, que la API usa para rehacer las cuentas.
 COPY --from=build /repo/packages/clicker/package.json packages/clicker/
 COPY --from=build /repo/packages/clicker/dist packages/clicker/dist
+# Y el de la startup del Pomodoro, que la API usa para hacer cumplir las reglas.
+COPY --from=build /repo/packages/startup/package.json packages/startup/
+COPY --from=build /repo/packages/startup/dist packages/startup/dist
 
 # El commit que se está construyendo: `GET /health/db` lo devuelve y quien
 # despliega comprueba que responde lo que subió. Va en la última etapa y al

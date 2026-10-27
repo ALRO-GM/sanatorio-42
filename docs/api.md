@@ -1671,6 +1671,9 @@ POST /games/rooms/:id/resign   → abandona: gana el otro bando
 ```
 GET    /me/focus  → Focus { until, startedAt, settings }
 PUT    /me/focus  → FocusSettings { focusMinutes 5–240, breakMinutes 0–60, sections, show } → Focus
+GET    /me/startup → StartupSnapshot { login, state, earnedMinutes } (docs/pomodoro-startup.md)
+POST   /me/startup/action → { type: buy, item } | { type: milestone, milestone, name? } | { type: hire, index } | { type: reroll } | { type: round } → StartupSnapshot; 409 si no se puede
+GET    /startup/ranking → StartupRankRow[] { login, name, hours, valuation, stage, focus, team }
 DELETE /me/focus  → FocusExit { reasons } (opcional) → Focus (acaba antes de tiempo; los ajustes se guardan)
 POST   /me/focus/stay → FocusExit { reasons } → Focus (pulsaste «Acabar» y sigues)
 GET    /me/focus/stats?from=&to=&offset=&low=&high=    → MyFocusStats

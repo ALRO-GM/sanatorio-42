@@ -278,6 +278,31 @@ focus.reason.done,Pomodoro: motivo para parar,Ya he terminado lo que quería,I h
 focus.reason.other,Pomodoro: motivo para parar,Otro motivo,Another reason,Un altre motiu,Beste arrazoi bat,Autre raison
 focus.tab.settings,Pomodoro: pestaña de los ajustes en la ventana,Ajustes,Settings,Ajustos,Ezarpenak,Réglages
 focus.tab.stats,Pomodoro: pestaña de tus estadísticas en la ventana,Tus estadísticas,Your statistics,Les teves estadístiques,Zure estatistikak,Tes statistiques
+focus.tab.startup,Pomodoro: pestaña del juego de la startup en la ventana,Startup,Startup,Startup,Startup,Start-up
+startup.title,"Pomodoro, pestaña Startup (juego de construir una empresa con las horas de concentración). Nombre accesible de la pestaña.",Tu startup,Your startup,La teva startup,Zure startupa,Ta start-up
+startup.balance,"Pomodoro, pestaña Startup (juego de construir una empresa con las horas de concentración). Nombre accesible de la cifra: minutos de concentración que puedes gastar.",Tiempo para gastar,Time to spend,Temps per gastar,Gastatzeko denbora,Temps à dépenser
+startup.hours,"Pomodoro, pestaña Startup (juego de construir una empresa con las horas de concentración). Nombre accesible de la cifra: horas de concentración en total.",Horas de concentración,Focus hours,Hores de concentració,Kontzentrazio orduak,Heures de concentration
+startup.valuation,"Pomodoro, pestaña Startup (juego de construir una empresa con las horas de concentración). Nombre accesible de la cifra: lo que vale la empresa.",Valoración,Valuation,Valoració,Balorazioa,Valorisation
+startup.team,"Pomodoro, pestaña Startup (juego de construir una empresa con las horas de concentración). Nombre accesible de la cifra: personas en la empresa sobre las que caben.",Equipo,Team,Equip,Taldea,Équipe
+startup.shop,"Pomodoro, pestaña Startup (juego de construir una empresa con las horas de concentración). Nombre accesible del grupo de cosas que se pueden comprar.",Mejoras,Upgrades,Millores,Hobekuntzak,Améliorations
+startup.item.learn,"Pomodoro, pestaña Startup (juego de construir una empresa con las horas de concentración). Tarjeta: aprender. {axis} es el área.",Aprender {axis},Learn {axis},Aprendre {axis},{axis} ikasi,Apprendre {axis}
+startup.item.gear,"Pomodoro, pestaña Startup (juego de construir una empresa con las horas de concentración). Tarjeta: mejorar el ordenador.",Mejor ordenador,Better computer,Millor ordinador,Ordenagailu hobea,Meilleur ordinateur
+startup.item.space,"Pomodoro, pestaña Startup (juego de construir una empresa con las horas de concentración). Tarjeta: un espacio más grande.",Más espacio,More space,Més espai,Leku gehiago,Plus d’espace
+startup.item.servers,"Pomodoro, pestaña Startup (juego de construir una empresa con las horas de concentración). Tarjeta: más servidores.",Servidores,Servers,Servidors,Zerbitzariak,Serveurs
+startup.axis.front,"Pomodoro, pestaña Startup (juego de construir una empresa con las horas de concentración). Modelo de negocio: apps y producto.",apps y producto,apps and product,apps i producte,aplikazioak eta produktua,applis et produit
+startup.axis.back,"Pomodoro, pestaña Startup (juego de construir una empresa con las horas de concentración). Modelo de negocio: plataforma y APIs.",plataforma y APIs,platform and APIs,plataforma i APIs,plataforma eta APIak,plateforme et API
+startup.axis.data,"Pomodoro, pestaña Startup (juego de construir una empresa con las horas de concentración). Modelo de negocio: datos y analítica.",datos,data,dades,datuak,données
+startup.axis.ai,"Pomodoro, pestaña Startup (juego de construir una empresa con las horas de concentración). Modelo de negocio: inteligencia artificial.",IA,AI,IA,AA,IA
+startup.axis.infra,"Pomodoro, pestaña Startup (juego de construir una empresa con las horas de concentración). Modelo de negocio: nube e infraestructura.",nube e infraestructura,cloud and infrastructure,núvol i infraestructura,hodeia eta azpiegitura,cloud et infrastructure
+startup.milestone.side,"Pomodoro, pestaña Startup (juego de construir una empresa con las horas de concentración). Botón del hito: empezar un proyecto propio.",Empezar un proyecto,Start a project,Començar un projecte,Proiektu bat hasi,Lancer un projet
+startup.milestone.mvp,"Pomodoro, pestaña Startup (juego de construir una empresa con las horas de concentración). Botón del hito: lanzar el producto mínimo.",Lanzar el MVP,Launch the MVP,Llançar el MVP,MVPa abiarazi,Lancer le MVP
+startup.milestone.founded,"Pomodoro, pestaña Startup (juego de construir una empresa con las horas de concentración). Botón del hito: fundar la empresa con su nombre.",Fundar la startup,Found the startup,Fundar la startup,Startupa sortu,Fonder la start-up
+startup.milestone.global,"Pomodoro, pestaña Startup (juego de construir una empresa con las horas de concentración). Botón del hito final: control global.",Control global,Global control,Control global,Kontrol globala,Contrôle mondial
+startup.name,"Pomodoro, pestaña Startup (juego de construir una empresa con las horas de concentración). Campo: el nombre de la startup al fundarla.",Nombre de tu startup,Your startup’s name,Nom de la teva startup,Zure startuparen izena,Nom de ta start-up
+startup.hire,"Pomodoro, pestaña Startup (juego de construir una empresa con las horas de concentración). Grupo y tarjetas de candidatos a contratar.",Contratar,Hire,Contractar,Kontratatu,Recruter
+startup.reroll,"Pomodoro, pestaña Startup (juego de construir una empresa con las horas de concentración). Botón: ver otros candidatos.",Otros candidatos,Other candidates,Altres candidats,Beste hautagai batzuk,Autres candidats
+startup.round,"Pomodoro, pestaña Startup (juego de construir una empresa con las horas de concentración). Botón: hacer la siguiente ronda de inversión.",Ronda de inversión,Funding round,Ronda d’inversió,Inbertsio-txanda,Levée de fonds
+startup.ranking,"Pomodoro, pestaña Startup (juego de construir una empresa con las horas de concentración). Nombre accesible del ranking.",Ranking,Ranking,Rànquing,Sailkapena,Classement
 focus.stats.period,Estadísticas del Pomodoro: grupo de botones del periodo,Periodo,Period,Període,Aldia,Période
 focus.period.day,Estadísticas del Pomodoro: periodo,Hoy,Today,Avui,Gaur,Aujourd'hui
 focus.period.week,Estadísticas del Pomodoro: periodo (últimos 7 días),Semana,Week,Setmana,Astea,Semaine

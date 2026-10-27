@@ -1,0 +1,287 @@
+/* La startup del Pomodoro (`features/focus/startup`, `docs/pomodoro-startup.md`):
+   la escena plana con sus microanimaciones, las cifras, las tarjetas y el ranking. */
+
+.su-panel {
+  display: grid;
+  gap: 0.8rem;
+}
+.su-scene {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-sm);
+  /* Un cielo suave: la escena es igual en claro y en oscuro. */
+  background: linear-gradient(#cfe7f5, #eef6fb 70%);
+}
+.su-scene.compact {
+  max-width: 560px;
+  margin: 0 auto;
+}
+.su-ground {
+  fill: #b9c7d3;
+}
+.su-name {
+  font:
+    700 8px system-ui,
+    sans-serif;
+  fill: #2f3a45;
+}
+.su-more {
+  font:
+    700 10px system-ui,
+    sans-serif;
+  fill: #2f3a45;
+}
+
+/* Microanimaciones: teclear, luces, monedas, ventanas, la bolsa, el planeta. */
+.su-typing {
+  animation: su-type 0.5s ease-in-out infinite alternate;
+  transform-box: fill-box;
+  transform-origin: center top;
+}
+@keyframes su-type {
+  to {
+    transform: translateY(-1.2px);
+  }
+}
+.su-code {
+  animation: su-code 2.4s steps(4) infinite;
+}
+@keyframes su-code {
+  50% {
+    opacity: 0.45;
+  }
+}
+.su-led {
+  animation: su-blink 1.3s steps(2) infinite;
+}
+@keyframes su-blink {
+  50% {
+    opacity: 0.15;
+  }
+}
+.su-coin {
+  animation: su-float 2.6s ease-in-out infinite alternate;
+}
+@keyframes su-float {
+  to {
+    transform: translateY(-3px);
+  }
+}
+.su-window {
+  animation: su-window 11s steps(1) infinite;
+}
+@keyframes su-window {
+  70% {
+    opacity: 0.35;
+  }
+}
+.su-globe {
+  animation: su-spin 9s linear infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+@keyframes su-spin {
+  to {
+    transform: translateX(6px);
+  }
+}
+.su-stock {
+  stroke-dasharray: 60;
+  animation: su-stock 3s ease-out infinite;
+}
+@keyframes su-stock {
+  from {
+    stroke-dashoffset: 60;
+  }
+}
+.su-flame {
+  animation: su-blink 0.4s steps(2) infinite;
+}
+.su-flag {
+  animation: su-float 1.4s ease-in-out infinite alternate;
+}
+@media (prefers-reduced-motion: reduce) {
+  .su-scene *,
+  .su-item-art * {
+    animation: none !important;
+  }
+}
+:root[data-still='on'] .su-scene *,
+:root[data-still='on'] .su-item-art * {
+  animation-play-state: paused !important;
+}
+
+/* Las cifras: icono y número. */
+.su-figures {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+}
+.su-figure {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: var(--text-2);
+}
+.su-figure b {
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.su-figure.strong b {
+  font-size: 1.15rem;
+  color: var(--accent);
+}
+
+/* El hito y la ronda que tocan. */
+.su-milestone {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem 0.9rem;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+}
+.su-needs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+.su-need {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-3);
+  background: var(--surface);
+}
+.su-need.met {
+  color: var(--text);
+}
+.su-name-input {
+  flex: 1 1 10rem;
+  min-width: 0;
+}
+.su-go {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-left: auto;
+}
+
+/* La tienda y los candidatos. */
+.su-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  gap: 0.5rem;
+}
+.su-card {
+  display: grid;
+  justify-items: center;
+  gap: 0.2rem;
+  padding: 0.45rem 0.3rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  transition:
+    transform 0.15s,
+    border-color 0.15s;
+}
+.su-card:not(:disabled):hover {
+  transform: translateY(-2px);
+  border-color: var(--accent);
+}
+.su-card:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+.su-card.max {
+  opacity: 0.8;
+}
+.su-cost {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+.su-dots {
+  display: flex;
+  gap: 2px;
+}
+.su-dots i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--border);
+}
+.su-dots i.on {
+  background: var(--accent);
+}
+.su-stars {
+  display: flex;
+  color: #e6b326;
+}
+.su-reroll {
+  align-content: center;
+}
+
+/* El ranking. */
+.su-ranking {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.su-ranking li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0.5rem;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+}
+.su-ranking li.mine {
+  outline: 2px solid var(--accent);
+}
+.su-rank {
+  width: 1.6rem;
+  font-weight: 700;
+  color: var(--text-3);
+  text-align: right;
+}
+.su-who {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+}
+.su-who b,
+.su-who small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.su-who small {
+  color: var(--text-3);
+}
+@media (prefers-reduced-motion: reduce) {
+  .su-card {
+    transition: none;
+  }
+}
+
+/* En el Pomodoro a pantalla completa: abajo, sin robar sitio al reloj. */
+.su-strip {
+  width: min(560px, 100%);
+  margin: 0 auto 0.8rem;
+  opacity: 0.92;
+}

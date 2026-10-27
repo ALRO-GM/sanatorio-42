@@ -80,6 +80,7 @@ de datos.
 | Menú de la cuenta | Modo concentración (Pomodoro) | S | Para todos: concentrarse no es «de datos» |
 | Pomodoro | Pantalla completa con «en concentración · no molestar» y la pregunta al acabar (motivos, diez segundos, seguir con felicitación) | S | Es el propio Pomodoro: ayuda a no rendirse a la primera (#80) |
 | Pomodoro | «Tus estadísticas» (pestaña de su ventana): periodo, días, horas, paradas y motivos, y la media del tramo elegido de quienes lo usan | N | Son cifras: el simplificado no las enseña (#80) |
+| Pomodoro | «Startup» (pestaña de su ventana): con los minutos de concentración se construye una empresa, del garaje al control global, con ranking; y la escena en pequeño en la pantalla completa (`docs/pomodoro-startup.md`) | N | Es un juego de motivación con cifras: desde el normal, como las estadísticas (pedido por Alberto, 2026-10-27) |
 | Panel de gestión | Pestaña Pomodoro: uso por días y horas, paradas, motivos y tramo de gente | Admins | Solo de quien administra (#80) |
 | Panel de gestión | Pestaña Piscina: quién entra y el aviso para piscineros con la piscina cerrada (`docs/piscineros.md`) | Admins | Solo de quien administra |
 | Panel de gestión | Pestaña Piscina: «Ver como piscinero» y, mientras dura, la franja fija de arriba con «Volver» (`docs/piscineros.md`) | Admins | Bloque de la pestaña Piscina, no una sección: es para comprobar lo que se ha marcado |

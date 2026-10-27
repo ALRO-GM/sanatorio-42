@@ -6,6 +6,7 @@
  * trabajar en la web sin levantar nada más.
  */
 
+import type { StartupAction } from '@sanatorio/startup'
 import type {
   AgendaCheckpointInput,
   AgendaEntryInput,
@@ -170,6 +171,8 @@ import type {
   LegalStatus,
   ApiUsage,
   ApiUsageLimits,
+  StartupRankRow,
+  StartupSnapshot,
   ApiUsageLimitsChange,
 } from '@sanatorio/contracts'
 
@@ -512,6 +515,11 @@ export type Api = {
   getAdminQuota: () => Promise<FortyTwoQuota>
   /** Cambia los ajustes de la cuota de 42; solo hace falta mandar lo que cambia. */
   setAdminQuota: (changes: Partial<FortyTwoQuotaSettings>) => Promise<FortyTwoQuota>
+  /** Tu startup del Pomodoro y los minutos ganados (`docs/pomodoro-startup.md`). */
+  getStartup: () => Promise<StartupSnapshot>
+  /** Una acción de la startup (comprar, hito, contratar, volver a sacar, ronda); `409` si no se puede. */
+  startupAction: (action: StartupAction) => Promise<StartupSnapshot>
+  getStartupRanking: () => Promise<StartupRankRow[]>
   /** A qué se va la cuota de 42, por función y por persona, en las últimas `hours` horas. */
   getAdminApiUsage: (query: {
     hours: number

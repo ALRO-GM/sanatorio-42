@@ -85,6 +85,16 @@ export function createSessionLog(db: Db) {
       })
     },
 
+    /** Todas las sesiones de una persona (lo que ha ganado para su startup). */
+    async of(login: string): Promise<FocusSession[]> {
+      const result = await db.execute({
+        sql: `SELECT ${COLUMNS} FROM focus_sessions WHERE login = ?`,
+        args: [login],
+      })
+
+      return result.rows.map(sessionOf)
+    },
+
     /** Las sesiones empezadas entre esos dos instantes ISO (`from` incluido); sin `from`, desde siempre. */
     async between(from: string | null, to: string): Promise<FocusSession[]> {
       const result = await db.execute({

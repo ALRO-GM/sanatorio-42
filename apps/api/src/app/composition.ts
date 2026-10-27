@@ -63,6 +63,7 @@ import { createFacilityModule } from '../modules/facility/index.js'
 import { createPoolModule, hiddenLogins } from '../modules/pool/index.js'
 import type { PoolModule } from '../modules/pool/index.js'
 import { createFocusModule } from '../modules/focus/index.js'
+import { createStartupModule } from '../modules/startup/index.js'
 import type { FocusModule } from '../modules/focus/index.js'
 import { createGitCourseModule } from '../modules/gitcourse/index.js'
 import type { GitCourseModule } from '../modules/gitcourse/index.js'
@@ -554,6 +555,13 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     stats,
     facility,
     focus,
+    // La startup del Pomodoro: lo ganado sale de sus sesiones (`docs/pomodoro-startup.md`).
+    createStartupModule({
+      db,
+      focusedMinutes: (login) => focus.service.focusedMinutes(login),
+      audience,
+      ...clock,
+    }),
     gitCourse,
     shellCourse,
     pool,
