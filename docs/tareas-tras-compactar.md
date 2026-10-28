@@ -12,4 +12,3 @@ Mirar:
   (`packages/startup/src/data.ts`).
 - Que Alberto escuche las lo-fi (orden por medición, no escuchado) y pruebe el
   sonido con el móvil bloqueado.
-- Funciones sin nombre en el panel de consumo: añadirlas a `admin.api.f.*`.

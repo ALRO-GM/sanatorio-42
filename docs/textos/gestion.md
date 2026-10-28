@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/gestion.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-652 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
+655 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera | Francés |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -113,6 +113,7 @@ Generado desde `apps/web/src/shared/i18n/textos/gestion.csv` con
 | `admin.api.f.auth` | Panel de gestión, «Consumo»: nombre de una función que gasta cuota de 42 (sección de la web o trabajo de fondo). | features/admin/ApiUsagePanel | Entrar | Login | — | — | — |
 | `admin.api.f.help` | Panel de gestión, «Consumo»: nombre de una función que gasta cuota de 42 (sección de la web o trabajo de fondo). | features/admin/ApiUsagePanel | Ayuda | Help | — | — | — |
 | `admin.api.f.exams` | Panel de gestión, «Consumo»: nombre de una función que gasta cuota de 42 (sección de la web o trabajo de fondo). | features/admin/ApiUsagePanel | Exámenes | Exams | — | — | — |
+| `admin.api.f.doubts` | Panel de gestión, «Consumo»: nombre de una función que gasta cuota de 42 (sección de la web o trabajo de fondo). | features/admin/ApiUsagePanel | Dudas (horas de los proyectos) | Questions (project hours) | — | — | — |
 | `admin.api.f.pool` | Panel de gestión, «Consumo»: nombre de una función que gasta cuota de 42 (sección de la web o trabajo de fondo). | features/admin/ApiUsagePanel | Piscina | Pool | — | — | — |
 | `admin.api.f.admin` | Panel de gestión, «Consumo»: nombre de una función que gasta cuota de 42 (sección de la web o trabajo de fondo). | features/admin/ApiUsagePanel | Panel de gestión | Admin panel | — | — | — |
 | `admin.api.f.other` | Panel de gestión, «Consumo»: nombre de una función que gasta cuota de 42 (sección de la web o trabajo de fondo). | features/admin/ApiUsagePanel | Sin función | No feature | — | — | — |
@@ -129,6 +130,8 @@ Generado desde `apps/web/src/shared/i18n/textos/gestion.csv` con
 | `admin.api.f.job-core-cursus` | Panel de gestión, «Consumo»: nombre de una función que gasta cuota de 42 (sección de la web o trabajo de fondo). | features/admin/ApiUsagePanel | Copia del 42cursus | 42cursus copy | — | — | — |
 | `admin.api.f.job-exam-live` | Panel de gestión, «Consumo»: nombre de una función que gasta cuota de 42 (sección de la web o trabajo de fondo). | features/admin/ApiUsagePanel | Examen en vivo | Live exam | — | — | — |
 | `admin.api.f.job-exam-history` | Panel de gestión, «Consumo»: nombre de una función que gasta cuota de 42 (sección de la web o trabajo de fondo). | features/admin/ApiUsagePanel | Intentos de examen | Exam attempts | — | — | — |
+| `admin.api.f.job-seat-history` | Panel de gestión, «Consumo»: nombre de una función que gasta cuota de 42 (sección de la web o trabajo de fondo). | features/admin/ApiUsagePanel | Historial de asientos | Seat history | — | — | — |
+| `admin.api.f.job-therapy` | Panel de gestión, «Consumo»: nombre de una función que gasta cuota de 42 (sección de la web o trabajo de fondo). | features/admin/ApiUsagePanel | Sprints en grupo: asistencia | Group sprints: attendance | — | — | — |
 | `admin.api.f.queue-agenda` | Panel de gestión, «Consumo»: nombre de una función que gasta cuota de 42 (sección de la web o trabajo de fondo). | features/admin/ApiUsagePanel | Cola: agenda de 42 | Queue: 42 agenda | — | — | — |
 | `admin.api.f.queue-cursus` | Panel de gestión, «Consumo»: nombre de una función que gasta cuota de 42 (sección de la web o trabajo de fondo). | features/admin/ApiUsagePanel | Cola: plan de estudios | Queue: curriculum | — | — | — |
 | `admin.api.f.queue-track` | Panel de gestión, «Consumo»: nombre de una función que gasta cuota de 42 (sección de la web o trabajo de fondo). | features/admin/ApiUsagePanel | Cola: hitos | Queue: milestones | — | — | — |
