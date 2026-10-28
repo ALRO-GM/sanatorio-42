@@ -3,7 +3,7 @@ import { parseStartup } from '@sanatorio/startup'
 import { api } from '../../../shared/api'
 import { useAsync } from '../../../shared/hooks/useAsync'
 import { lookOf } from './StartupPanel'
-import { StartupScene } from './StartupScene'
+import { PixelScene } from './pixel/PixelScene'
 
 /**
  * La startup en pequeño, abajo del Pomodoro a pantalla completa: se ve crecer
@@ -16,7 +16,7 @@ export function StartupStrip() {
 
   return (
     <div className="su-strip">
-      <StartupScene state={parseStartup(data.state)} me={lookOf(data.login)} compact />
+      <PixelScene state={parseStartup(data.state)} me={lookOf(data.login)} compact />
     </div>
   )
 }

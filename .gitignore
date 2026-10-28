@@ -29,3 +29,4 @@ backups/
 # y los subagentes de .claude/ sí se suben.
 .claude/worktrees/
 infra/deploy.log
+apps/web/.pixel/

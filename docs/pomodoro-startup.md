@@ -62,14 +62,64 @@ su startup.
 
 - Reglas y cuentas: `packages/startup` (`@sanatorio/startup`), compartido por
   la API (`modules/startup`, migración 82) y la web.
-- Dibujos planos en `apps/web/src/features/focus/startup/art/`: `Person`
-  (aspecto según `look`, teclea), `Workstation` (crece con el ordenador),
-  `ServerRack` (luces), `Building` (según la etapa), `Props` (planta, moneda,
-  planeta, libro), `AxisGlyph` (los cinco modelos), `ItemArt` (el dibujo de
-  cada tarjeta) y `palette.ts` (colores).
-- `StartupScene` compone la escena; `StartupPanel` es la pestaña;
-  `StartupStrip`, la escena en el Pomodoro a pantalla completa. Las
-  animaciones (`styles/startup.css`) se paran con movimiento reducido y con la
-  web quieta.
-- Añadir una pieza: una entrada en `ITEMS`, su dibujo en `ItemArt` y su nombre
-  accesible en `comun.csv`.
+- `StartupPanel` es la pestaña; `StartupStrip`, la oficina en pequeño en el
+  Pomodoro a pantalla completa. `art/AxisGlyph` dibuja los cinco modelos de
+  negocio en las cifras y el ranking.
+- Añadir una pieza al juego: una entrada en `ITEMS`, su dibujo (abajo) y su
+  nombre accesible en `comun.csv`.
+
+## La oficina en píxeles
+
+Pedido por Alberto el 2026-10-28: pixel art isométrico, sin paredes (solo el
+suelo, como una isla) y fácil de ampliar poco a poco. Todo se dibuja con
+código, sin imágenes: así casa siempre, no hay licencias de terceros y cada
+pieza crece con la partida. Vive en `apps/web/src/features/focus/startup/pixel/`.
+
+| Pieza | Qué hace |
+|---|---|
+| `sprite.ts` | El motor: cajas y caras en coordenadas del mundo (baldosa de 16 × 16, `z` hacia arriba), proyección 2:1 (cada baldosa, 32 × 16 píxeles), píxeles a mano (`grid`) y contorno. Sin navegador. |
+| `palette.ts` | La paleta. Cada caja lleva tres tonos: arriba el claro, a la izquierda el medio y a la derecha el oscuro (la luz viene de arriba a la izquierda). |
+| `person.ts` | Las personas, 10 × 13 píxeles: piel, pelo y peinado salen de `look`; la ropa, de su modelo de negocio. |
+| `models/` | Un modelo por pieza (`Model`: `frames` y `draw`), reunidos en `models/index.ts`. |
+| `floor.ts` | Los suelos, uno por sitio: cemento, parquet, baldosa, moqueta y suelo técnico. |
+| `layout.ts` | Qué sale y dónde, solo a partir de la partida: el lado de la oficina (`ROOM`), las mesas en filas con pasillo, los servidores al fondo y la decoración que se gana (`DECOR`). |
+| `paint.ts` | Pasa los dibujos al lienzo: cada fotograma de cada modelo se dibuja una vez y se guarda. |
+| `PixelScene` / `PixelArt` / `ItemArt` | La oficina, un modelo suelto y el dibujo de cada tarjeta. |
+| `useFrame.ts` | Un solo reloj a 6 fotogramas por segundo para todos; se para con movimiento reducido y con la web quieta. |
+
+Se agranda siempre a múltiplos enteros (× 2, × 3; en las tarjetas, de medio en
+medio) con `image-rendering: pixelated`, para que ningún píxel salga borroso.
+
+### Añadir un modelo
+
+1. Su `Model` en `models/` (en el archivo de su familia o en uno nuevo): cajas
+   con `sprite.box`, detalles con `faceX` / `faceY` / `faceZ` y `dot`, y
+   píxeles a mano con `grid`. Lo que mira a la izquierda (`faceY`) es lo que
+   más se ve: pantallas, frentes, luces.
+2. Una línea en `MODELS` (`models/index.ts`).
+3. Para que salga en la oficina, su regla en `DECOR` (`layout.ts`): cuándo
+   (etapa, espacio, hitos…) y dónde (fondo, izquierda, derecha o delante,
+   por orden de preferencia).
+4. Para que sea el dibujo de una tarjeta, su caso en `modelOf` (`ItemArt.tsx`).
+5. `npm run pixel -w @sanatorio/web -- <modelo>` lo pinta en PNG
+   (`apps/web/.pixel/`) en cada nivel y fotograma, sin abrir la web. Sin
+   nombre, pinta todos los modelos y seis oficinas de ejemplo.
+
+Los tests (`tests/unit/startup-pixel.test.ts`) comprueban solos que el modelo
+nuevo cabe en su lienzo en cualquier nivel y fotograma, que sale siempre igual
+y que en ninguna oficina hay dos cosas en la misma baldosa.
+
+### Añadir una animación
+
+Un modelo anima con `frames` (cuántos fotogramas tiene) y el `frame` que
+recibe `draw`: lo que cambie entre uno y otro se mueve. Van a 6 por segundo,
+como en los juegos de píxeles: un parpadeo es un fotograma de 16, un vaivén
+son dos posiciones. Para que no se muevan todos a la vez, se desfasa con algo
+propio (`look`, el nivel). Lo que parece al azar (luces, motas) sale de
+`scatter`, nunca de `Math.random`: el mismo fotograma tiene que salir igual.
+
+### Lo siguiente
+
+- Colocar las piezas a mano en la cuadrícula: hace falta guardar su sitio en
+  la partida (`StartupState`) y una acción nueva en la API.
+- Más modelos por modelo de negocio (por ejemplo, una granja de GPU para `ai`).

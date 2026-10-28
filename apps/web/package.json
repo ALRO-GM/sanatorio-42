@@ -15,7 +15,8 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "textos": "tsx tools/textos-cli.ts",
-    "demo:new": "tsx tools/demo-new.ts"
+    "demo:new": "tsx tools/demo-new.ts",
+    "pixel": "tsx tools/pixel-preview.ts"
   },
   "dependencies": {
     "@fontsource-variable/caveat": "^5.3.0",

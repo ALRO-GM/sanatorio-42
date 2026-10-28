@@ -32,9 +32,9 @@ import { ErrorNote } from '../../../shared/ui/ErrorNote'
 import { Icon } from '../../../shared/ui/Icon'
 import type { IconName } from '../../../shared/ui/Icon'
 import { AxisGlyph } from './art/AxisGlyph'
-import { ItemArt } from './art/ItemArt'
-import type { ArtOf } from './art/ItemArt'
-import { StartupScene } from './StartupScene'
+import { ItemArt } from './pixel/ItemArt'
+import type { ArtOf } from './pixel/ItemArt'
+import { PixelScene } from './pixel/PixelScene'
 
 /** El aspecto de quien funda la startup: un número fijo sacado de su login. */
 export const lookOf = (login: string): number => Math.floor(seeded(`${login}|look`)() * 1000)
@@ -110,7 +110,7 @@ function Game({
 
   return (
     <section className="su-panel" aria-label={t('startup.title')}>
-      <StartupScene state={state} me={lookOf(snapshot.login)} />
+      <PixelScene state={state} me={lookOf(snapshot.login)} />
 
       <div className="su-figures">
         <Figure icon="reloj" label={t('startup.balance')} value={hm(balance)} strong />
