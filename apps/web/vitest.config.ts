@@ -23,6 +23,9 @@ export default defineConfig({
     // tiempo de vez en cuando (y entonces no se despliega). Allí se repite
     // hasta dos veces; en local, no, para que un fallo de verdad se vea.
     retry: process.env.CI === undefined ? 0 : 2,
+    // En GitHub, cada fallo sale también como anotación de la ejecución: se lee
+    // sin iniciar sesión (los registros enteros piden una cuenta).
+    reporters: process.env.GITHUB_ACTIONS === 'true' ? ['default', 'github-actions'] : ['default'],
     coverage: {
       provider: 'v8',
       include: ['src/**/*.{ts,tsx}'],

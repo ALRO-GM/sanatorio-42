@@ -13,6 +13,9 @@ export default defineConfig({
     globals: false,
     pool: 'forks',
     testTimeout: 20_000,
+    // En GitHub, cada fallo sale también como anotación de la ejecución: se lee
+    // sin iniciar sesión (los registros enteros piden una cuenta).
+    reporters: process.env.GITHUB_ACTIONS === 'true' ? ['default', 'github-actions'] : ['default'],
     hookTimeout: 30_000,
     coverage: {
       provider: 'v8',
