@@ -84,6 +84,34 @@ amigos) salen con el mismo Louvain que la red de correcciones.
 dentro de la pestaña Red (`RedPage.tsx`). Para piscineros, permiso
 `red.seats` en el panel (dentro de la Red).
 
+## Recortar el grafo
+
+Pedido por Alberto el 2026-10-28: el grafo salía demasiado entrelazado. Tiene
+tres opciones, como la red de correcciones pero menos, que recortan en la web
+y al momento, sin volver a pedir nada (`features/network/seat-trim.ts`):
+
+- **Las más cercanas de cada cual** (1 a 10, o todas; de fábrica, 5): de cada
+  persona solo se guardan las que más cercanía tienen con ella.
+- **Hasta reunir este tiempo acompañado** (50 % a 100 %; de fábrica, 80 %): de
+  cada persona se cogen sus parejas de la más a la menos cercana hasta reunir
+  esa parte de su cercanía total (siempre la primera). Quien pasa la mitad del
+  tiempo con dos personas y el resto repartido entre muchas, con el 50 %, se
+  queda solo con esas dos. Las dos opciones van juntas: manda la que corte
+  antes.
+- Sin nadie elegido, **una unión se queda si es de las cercanas de cualquiera
+  de las dos personas**: a quien solo se sienta con alguien muy sociable no se
+  le queda sin nadie. La gente sale toda.
+- **Al elegir a alguien, solo sus conexiones** (casilla, marcada de fábrica):
+  esa persona y sus más cercanas, con las mismas dos opciones, y solo sus
+  uniones con ella, sin las de las demás entre sí, para que se vea despejado.
+  Se elige pinchando en el grafo, en las listas de la ficha o con el buscador
+  de personas (las de más horas, primero). Pinchar en otra persona del grafo
+  pasa a sus conexiones; vaciar el buscador o cerrar la ficha vuelve a todas.
+- Bajo el grafo, «Se ven N de M uniones» cuando algo queda fuera.
+
+La ficha de cada persona sigue enseñando sus 8 parejas más cercanas, se vean o
+no en el grafo.
+
 ## Mapa de calor
 
 Pedido por Alberto el 2026-10-25: debajo del grafo, en Datos → Red →

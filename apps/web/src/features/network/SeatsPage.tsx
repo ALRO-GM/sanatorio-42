@@ -17,6 +17,7 @@ import { useFormat } from '../../shared/i18n/useFormat'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { PillGroup } from '../../shared/ui/PillGroup'
 import { PeriodPicker } from '../../shared/ui/PeriodPicker'
+import { StepPicker } from '../../shared/ui/StepPicker'
 import { daysOf } from '../../shared/period'
 import type { Period } from '../../shared/period'
 import { Avatar } from '../../shared/ui/Avatar'
@@ -26,6 +27,8 @@ import { colorOf, scaleColor } from './colors'
 import { ForceGraph } from './ForceGraph'
 import { SeatHeatMap } from './SeatHeatMap'
 import { SeatsTour } from './SeatsTour'
+import { DEFAULT_TRIM, MOST_OPTIONS, SHARE_OPTIONS, trimSeats } from './seat-trim'
+import type { SeatTrim } from './seat-trim'
 
 /** «Todo»: los días más que acepta la API (diez años). */
 const ALL_DAYS = 3650
@@ -70,7 +73,7 @@ function toNode(person: SeatPerson): NetworkNode {
  * la vez por el peso de lo cerca que estaban los puestos.
  */
 export function SeatsPage({ switcher }: { switcher: ReactNode }) {
-  const { t } = useI18n()
+  const { t, tn } = useI18n()
   const { number } = useFormat()
   const [period, setPeriod] = useState<Period>('1')
   const [dates, setDates] = useState<SeatDates>({ from: '', to: '' })
@@ -83,16 +86,27 @@ export function SeatsPage({ switcher }: { switcher: ReactNode }) {
   const { data, error, reload } = useAsync<SeatGraph>(() => api.getSeatGraph(days, custom), [key])
   const heat = useAsync<SeatHeat>(() => api.getSeatHeat(days, custom), [key])
 
-  const nodes = useMemo(() => data?.people.map(toNode) ?? [], [data])
+  // Recortado en la web, al momento (`seat-trim.ts`): de cada cual, solo la
+  // gente con la que más se sienta; y, con alguien elegido, solo sus uniones.
+  const [trim, setTrim] = useState<SeatTrim>(DEFAULT_TRIM)
+  const [onlyChosen, setOnlyChosen] = useState(true)
+  const shown = useMemo(
+    () =>
+      data === undefined
+        ? undefined
+        : trimSeats(data.people, data.links, trim, onlyChosen ? selected : null),
+    [data, trim, onlyChosen, selected],
+  )
+  const nodes = useMemo(() => shown?.people.map(toNode) ?? [], [shown])
   const links = useMemo(
     (): NetworkLink[] =>
-      data?.links.map((link) => ({
+      shown?.links.map((link) => ({
         source: link.source,
         target: link.target,
         forth: link.closeness,
         back: 0,
       })) ?? [],
-    [data],
+    [shown],
   )
   const paint = useCallback(
     (node: NetworkNode) =>
@@ -100,6 +114,14 @@ export function SeatsPage({ switcher }: { switcher: ReactNode }) {
     [mode],
   )
   const byLogin = useMemo(() => new Map(data?.people.map((p) => [p.login, p]) ?? []), [data])
+  // Para buscar a alguien: primero quien más horas pasa.
+  const byHours = useMemo(() => [...(data?.people ?? [])].sort((x, y) => y.hours - x.hours), [data])
+  const [query, setQuery] = useState('')
+  // Elegir a alguien (en el grafo, en una lista o al buscar) también lo escribe en el buscador.
+  const choose = useCallback((login: string | null) => {
+    setSelected(login)
+    setQuery(login ?? '')
+  }, [])
   const tooltip = useCallback(
     (node: NetworkNode) => {
       const person = byLogin.get(node.login)
@@ -197,6 +219,65 @@ export function SeatsPage({ switcher }: { switcher: ReactNode }) {
                 text={(option) => t(`seats.mode.${option}`)}
               />
             </div>
+            {data !== undefined && (
+              <div className="net-filter">
+                <label className="seats-person">
+                  <span className="eyebrow">{t('common.person')}</span>
+                  <input
+                    type="search"
+                    list="seats-people"
+                    value={query}
+                    onChange={(event) => {
+                      const typed = event.target.value
+
+                      setQuery(typed)
+                      // Al vaciarlo, nadie elegido.
+                      if (byLogin.has(typed) || typed === '')
+                        setSelected(typed === '' ? null : typed)
+                    }}
+                  />
+                </label>
+                <datalist id="seats-people">
+                  {byHours.map((person) => (
+                    <option key={person.login} value={person.login} />
+                  ))}
+                </datalist>
+              </div>
+            )}
+            <div className="net-filter seats-trim">
+              <StepPicker
+                options={MOST_OPTIONS}
+                value={trim.most}
+                onChange={(most) => {
+                  setTrim((current) => ({ ...current, most }))
+                }}
+                label={t('seats.trim.most')}
+                text={(most) => (most === 'all' ? t('seats.trim.most.all') : String(most))}
+              />
+              <StepPicker
+                options={SHARE_OPTIONS}
+                value={trim.share}
+                onChange={(share) => {
+                  setTrim((current) => ({ ...current, share }))
+                }}
+                label={t('seats.trim.share')}
+                text={(share) =>
+                  share >= 1
+                    ? t('seats.trim.share.all')
+                    : t('seats.trim.share.value', { pct: Math.round(share * 100) })
+                }
+              />
+              <label className="net-check">
+                <input
+                  type="checkbox"
+                  checked={onlyChosen}
+                  onChange={(event) => {
+                    setOnlyChosen(event.target.checked)
+                  }}
+                />
+                {t('seats.trim.focus')}
+              </label>
+            </div>
           </div>
           <ErrorNote error={error} onRetry={() => void reload()} />
           {data !== undefined && (
@@ -213,7 +294,7 @@ export function SeatsPage({ switcher }: { switcher: ReactNode }) {
                       className="link"
                       aria-label={t('net.close')}
                       onClick={() => {
-                        setSelected(null)
+                        choose(null)
                       }}
                     >
                       ✕
@@ -246,7 +327,7 @@ export function SeatsPage({ switcher }: { switcher: ReactNode }) {
                             type="button"
                             className="link"
                             onClick={() => {
-                              setSelected(partner.login)
+                              choose(partner.login)
                             }}
                           >
                             {partner.login}
@@ -291,7 +372,7 @@ export function SeatsPage({ switcher }: { switcher: ReactNode }) {
                           type="button"
                           className="link"
                           onClick={() => {
-                            setSelected(person.login)
+                            choose(person.login)
                           }}
                         >
                           {person.login}
@@ -327,7 +408,7 @@ export function SeatsPage({ switcher }: { switcher: ReactNode }) {
                 links={links}
                 colorOf={paint}
                 selected={selected}
-                onSelect={setSelected}
+                onSelect={choose}
                 label={t('seats.graphLabel', { people: nodes.length, links: links.length })}
                 tooltip={tooltip}
                 controls={controls}
@@ -335,6 +416,11 @@ export function SeatsPage({ switcher }: { switcher: ReactNode }) {
               />
             )}
             <p className="net-help">{t('seats.help')}</p>
+            {data.links.length > links.length && (
+              <p className="net-shown" role="status">
+                {tn('seats.trim.shown', data.links.length, { links: number(links.length) })}
+              </p>
+            )}
             {/* Con un campus grande la API manda solo a quien más horas pasa
                 (`GRAPH_BUDGET`): se dice cuánta gente queda fuera. */}
             {nodes.length > 0 && data.totals.people > nodes.length && (

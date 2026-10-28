@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/red.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-193 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
+201 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera | Francés |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -165,6 +165,14 @@ Generado desde `apps/web/src/shared/i18n/textos/red.csv` con
 | `seats.colour` | Red de asientos: rótulo del modo de color | features/network/SeatsPage, features/network/SeatsTour | Color | Colour | Color | Kolorea | Couleur |
 | `seats.mode.community` | Red de asientos: color por grupo de gente que se sienta junta | features/network/SeatsPage, features/network/SeatsTour | Por grupo | By group | Per grup | Taldeka | Par groupe |
 | `seats.mode.alone` | Red de asientos: color por lo solo que se sienta (verde acompañado, rojo solo) | features/network/SeatsPage, features/network/SeatsTour | Por aislamiento | By isolation | Per aïllament | Isolamenduaren arabera | Par isolement |
+| `seats.trim.most` | Red de asientos, opciones: cuántas de las personas más cercanas de cada cual se ven (de 1 a 10, o todas) | features/network/SeatsPage | Las más cercanas de cada cual | Closest people per person | Les més properes de cadascú | Bakoitzaren hurbilenak | Les plus proches de chaque personne |
+| `seats.trim.most.all` | Red de asientos, opciones: opción para ver todas las personas cercanas de cada cual | features/network/SeatsPage | Todas | All | Totes | Guztiak | Toutes |
+| `seats.trim.share` | Red de asientos, opciones: hasta qué parte de su tiempo acompañado se ven las personas de cada cual (de la más a la menos cercana) | features/network/SeatsPage | Hasta reunir este tiempo acompañado | Up to this share of time with others | Fins a reunir aquest temps acompanyat | Lagunduta emandako denboraren zati hau arte | Jusqu’à cette part du temps accompagné |
+| `seats.trim.share.value` | Red de asientos, opciones: un porcentaje de su tiempo acompañado | features/network/SeatsPage | {pct} % | {pct}% | {pct} % | % {pct} | {pct} % |
+| `seats.trim.share.all` | Red de asientos, opciones: opción para no recortar por tiempo acompañado | features/network/SeatsPage | Todo | All of it | Tot | Dena | Tout |
+| `seats.trim.focus` | Red de asientos, opciones: casilla: al elegir a alguien, el grafo enseña solo a esa persona y sus uniones | features/network/SeatsPage | Al elegir a alguien, solo sus conexiones | When you pick someone, only their connections | En triar algú, només les seves connexions | Norbait aukeratzean, haren loturak bakarrik | En choisissant une personne, seulement ses liens |
+| `seats.trim.shown.one` | Red de asientos: aviso bajo el grafo cuando las opciones esconden uniones ({n}: las uniones en total, una) | features/network/SeatsPage | Se ven {links} de {n} unión | Showing {links} of {n} connection | Es veuen {links} de {n} unió | {n} lotura: {links} ikusten dira | {links} lien affiché sur {n} |
+| `seats.trim.shown.many` | Red de asientos: aviso bajo el grafo cuando las opciones esconden uniones ({n}: las uniones en total, varias) | features/network/SeatsPage | Se ven {links} de {n} uniones | Showing {links} of {n} connections | Es veuen {links} de {n} unions | {n} loturetatik {links} ikusten dira | {links} liens affichés sur {n} |
 | `seats.tip.hours` | Red de asientos: etiqueta flotante, horas sentado | features/network/SeatsPage | {n} h en un puesto | {n} h at a seat | {n} h en un seient | {n} h eserleku batean | {n} h à un poste |
 | `seats.tip.alone` | Red de asientos: etiqueta flotante, % de horas sin nadie cerca y personas cercanas | features/network/SeatsPage | {pct} % sin nadie cerca · {partners} cerca alguna vez | {pct} % with nobody near · {partners} near at some point | {pct} % sense ningú a prop · {partners} a prop algun cop | % {pct} inor gertu gabe · {partners} gertu noizbait | {pct} % sans personne à côté · {partners} à côté au moins une fois |
 | `seats.person.hours` | Red de asientos, ficha: horas sentado en el periodo | features/network/SeatsPage, features/network/SeatsTour | Horas | Hours | Hores | Orduak | Heures |

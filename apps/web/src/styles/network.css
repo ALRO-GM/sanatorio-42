@@ -914,6 +914,18 @@ ol.net-rows .net-row-name {
 }
 
 /* La red de asientos: listas de con quién se sienta alguien y de quién se sienta solo. */
+/* Red de asientos: buscar a alguien y recortar el grafo (`seat-trim.ts`). */
+.seats-person {
+  display: grid;
+  gap: 0.25rem;
+}
+.seats-person input {
+  width: 100%;
+  min-width: 0;
+}
+.seats-trim {
+  gap: 0.6rem;
+}
 .seats-partners {
   margin: 0.5rem 0 0;
   padding-left: 1.4rem;
