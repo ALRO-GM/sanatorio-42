@@ -15,6 +15,8 @@ export function ExamPeople<T extends ExamPerson>({
   people,
   badges,
   end,
+  corner,
+  footer,
   rowClass,
   label,
 }: {
@@ -23,6 +25,10 @@ export function ExamPeople<T extends ExamPerson>({
   badges?: (person: T) => ReactNode
   /** Lo que va al final de la fila (la nota, cuánto falta). */
   end: (person: T) => ReactNode
+  /** Un dato pequeño en la esquina de arriba (la mejor nota). */
+  corner?: (person: T) => ReactNode
+  /** Lo que va debajo, a lo ancho de la fila (la barra de progreso). */
+  footer?: (person: T) => ReactNode
   rowClass?: (person: T) => string
   label?: string
 }) {
@@ -41,6 +47,8 @@ export function ExamPeople<T extends ExamPerson>({
             {badges?.(person)}
           </span>
           {end(person)}
+          {corner?.(person)}
+          {footer?.(person)}
         </li>
       ))}
     </ul>

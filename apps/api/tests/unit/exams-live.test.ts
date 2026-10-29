@@ -6,6 +6,8 @@
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
+import type { LiveExaminee } from '@sanatorio/contracts'
+
 import { closeDatabase, openDatabase } from '../../src/core/db/database.js'
 import type { Db } from '../../src/core/db/database.js'
 import type { ApiExamUser, ApiProjectUser } from '../../src/integrations/forty-two/types.js'
@@ -14,6 +16,7 @@ import { createExamsRepository } from '../../src/modules/exams/exams.repository.
 import {
   LIVE_AUTO_MS,
   LIVE_MANUAL_MS,
+  byProgress,
   examDay,
   examineeStatus,
   expectedExamSlug,
@@ -154,6 +157,27 @@ describe('cómo va cada cual', () => {
     expect(examineeStatus(old, undefined, since)).toBe('pending')
     expect(examineeStatus({ ...old, updatedAt: null }, undefined, since)).toBe('pending')
     expect(examineeStatus(undefined, undefined, since)).toBe('pending')
+  })
+})
+
+describe('orden del examen en vivo', () => {
+  const examinee = (login: string, mark: number | null, status: LiveExaminee['status']) =>
+    ({ login, image: null, track: 'classic', circle: 2, mark, bestMark: null, status }) as const
+
+  it('por la nota de hoy, de más a menos; sin nota cuenta como 0', () => {
+    const people = [
+      examinee('dan', null, 'inProgress'),
+      examinee('ana', 75, 'failed'),
+      examinee('bea', 100, 'passed'),
+      examinee('cai', 0, 'failed'),
+    ]
+
+    expect(people.sort(byProgress).map((person) => person.login)).toEqual([
+      'bea',
+      'ana',
+      'dan',
+      'cai',
+    ])
   })
 })
 
@@ -355,7 +379,7 @@ describe('el examen en vivo', () => {
       group.people.map((person) => `${person.login}:${person.status}`),
     ])
 
-  it('sale toda la gente apuntada, con el examen que le toca por su círculo', async () => {
+  it('con el examen en marcha sale solo quien ha entrado, por la nota de hoy', async () => {
     const live = await build().live(actor('eva'))
 
     expect(live).toMatchObject({
@@ -365,16 +389,18 @@ describe('el examen en vivo', () => {
       nextRefreshAt: new Date(NOW + 5 * MINUTE).toISOString(),
       refreshableAt: new Date(NOW + MINUTE).toISOString(),
     })
-    expect(summary(live)).toEqual([
-      ['Exam Rank 02', ['ana:failed', 'mia:inProgress']],
-      ['Exam Rank 03', ['leo:pending']],
-      ['Exam Rank 03 · 42next', ['eva:pending']],
-    ])
-    // La nota es la del intento de hoy (75), no la mejor del proyecto (90).
-    expect(live.groups[0]?.people[0]).toMatchObject({ mark: 75, track: 'classic', circle: 2 })
-    // Quien sigue dentro no tiene nota todavía (la del proyecto no vale): se da
-    // la de su último intento cerrado, la de su expediente.
-    expect(live.groups[0]?.people[1]).toMatchObject({ login: 'mia', mark: null, previousMark: 50 })
+    // `leo` y `eva` están apuntados pero no han entrado: no salen.
+    expect(summary(live)).toEqual([['Exam Rank 02', ['ana:failed', 'mia:inProgress']]])
+    // La nota es la del intento de hoy (75); la mejor, la de la semana pasada (90).
+    expect(live.groups[0]?.people[0]).toMatchObject({
+      mark: 75,
+      bestMark: 90,
+      track: 'classic',
+      circle: 2,
+    })
+    // Quien sigue dentro no tiene nota todavía (la del proyecto no vale); la
+    // mejor es la de sus intentos cerrados (90 y 50).
+    expect(live.groups[0]?.people[1]).toMatchObject({ login: 'mia', mark: null, bestMark: 90 })
     // Solo se piden las notas de los exámenes que tocan a alguien, uno por petición.
     expect(calls.pages.sort()).toEqual([1320, 1321, 1400])
   })
@@ -384,10 +410,7 @@ describe('el examen en vivo', () => {
 
     const live = await build().live(actor('eva'))
 
-    expect(summary(live)).toEqual([
-      ['Exam Rank 02', ['ana:failed', 'mia:inProgress']],
-      ['Exam Rank 03 · 42next', ['eva:pending']],
-    ])
+    expect(summary(live)).toEqual([['Exam Rank 02', ['ana:failed', 'mia:inProgress']]])
     // Y el fallo también cuenta para el reloj: no se insiste en cada visita.
     await build().live(actor('ana'))
     expect(calls.users).toBe(1)
@@ -464,6 +487,8 @@ describe('el examen en vivo', () => {
       nextRefreshAt: null,
       refreshableAt: null,
     })
+    // Antes de empezar se ve a quien está apuntado (aquí, por la agenda), sin entrar.
+    expect(summary(live)).toEqual([['Exam Rank 03 · 42next', ['eva:pending']]])
     expect(calls.users).toBe(0)
     await build().refreshNow(actor('ana'))
     expect(calls.users).toBe(0)

@@ -25,7 +25,13 @@ import { toNumber, toText } from '../../core/db/rows.js'
 import type { FortyTwoClient } from '../../integrations/forty-two/client.js'
 import type { Agenda, Curriculum, QuotaGate, ReplicaRepository } from '../replica/index.js'
 import type { ExamsRepository } from './exams.repository.js'
-import { examDay, examineeStatus, expectedExamSlug, liveRefreshPlan } from './exams.rules.js'
+import {
+  byProgress,
+  examDay,
+  examineeStatus,
+  expectedExamSlug,
+  liveRefreshPlan,
+} from './exams.rules.js'
 
 /** Hasta cuánto antes se enseña el siguiente examen. */
 const AHEAD_MS = 24 * 3_600_000
@@ -43,7 +49,7 @@ type ExamsLiveOptions = {
   curriculum: Pick<Curriculum, 'placesOf'>
   exams: Pick<
     ExamsRepository,
-    'exams' | 'agendaRegistered' | 'sessionRows' | 'fromElsewhere' | 'lastClosedMarks'
+    'exams' | 'agendaRegistered' | 'sessionRows' | 'fromElsewhere' | 'bestClosedMarks'
   >
   quota: QuotaGate
 } & Clock &
@@ -237,14 +243,14 @@ export function createExamsLive(options: ExamsLiveOptions) {
     const state = await stateOf(liveKey(campusId, exam.id))
     const logins = await registered(campusId, exam, state)
     const fromFortyTwo = new Map(state?.logins ?? [])
-    const [places, images, attempts, rows, projects, timeZone, previous] = await Promise.all([
+    const [places, images, attempts, rows, projects, timeZone, best] = await Promise.all([
       curriculum.placesOf(logins),
       replica.imagesOf(logins),
       latestAttempts(logins, exam.beginAt),
       running ? exams.sessionRows(campusId, exam.beginAt, logins) : Promise.resolve([]),
       exams.exams(),
       replica.timeZoneOf(campusId),
-      exams.lastClosedMarks(logins, exam.beginAt),
+      exams.bestClosedMarks(logins, exam.beginAt),
     ])
     const bySlug = new Map(projects.map((project) => [project.slug, project]))
     const byId = new Map(projects.map((project) => [project.id, project]))
@@ -261,6 +267,13 @@ export function createExamsLive(options: ExamsLiveOptions) {
       const attempt = attempts.get(login)
       // El examen que ya ha empezado manda sobre el que le tocaría por el círculo.
       const projectId = row?.projectId ?? attempt?.projectId ?? expected?.id ?? null
+      const status = examineeStatus(row, attempt, exam.beginAt)
+
+      // Con el examen en marcha, solo quien ha entrado: apuntarse no es estar.
+      if (running && status === 'pending') continue
+
+      const mark = attempt?.mark ?? null
+      const before = projectId === null ? undefined : best.get(`${login}:${String(projectId)}`)
       const person: LiveExaminee = {
         login,
         image: images.get(login) ?? fromFortyTwo.get(login) ?? null,
@@ -268,11 +281,10 @@ export function createExamsLive(options: ExamsLiveOptions) {
         circle,
         // Solo la del intento de esta sesión: hasta que se cierra, 42 no da nota
         // (ni del equipo ni de sus ejercicios), y la del proyecto es la mejor de todas.
-        mark: attempt?.mark ?? null,
-        // Lo que se ve en su expediente: su último intento cerrado de antes.
-        previousMark:
-          projectId === null ? null : (previous.get(`${login}:${String(projectId)}`) ?? null),
-        status: examineeStatus(row, attempt, exam.beginAt),
+        mark,
+        // La mejor de todas en ese examen, contando la de hoy si ya la hay.
+        bestMark: before === undefined ? mark : Math.max(before, mark ?? 0),
+        status,
       }
       const group = groups.get(projectId) ?? {
         projectId,
@@ -298,12 +310,7 @@ export function createExamsLive(options: ExamsLiveOptions) {
       running,
       // Por examen, por nombre; al final, quien no se sabe qué examen hace.
       groups: [...groups.values()]
-        .map((group) => ({
-          ...group,
-          people: group.people.sort(
-            (a, b) => (b.mark ?? -1) - (a.mark ?? -1) || a.login.localeCompare(b.login),
-          ),
-        }))
+        .map((group) => ({ ...group, people: group.people.sort(byProgress) }))
         .sort((a, b) =>
           a.name === null ? 1 : b.name === null ? -1 : a.name.localeCompare(b.name),
         ),

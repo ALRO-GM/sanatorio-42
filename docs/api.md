@@ -2160,11 +2160,16 @@ POST /exams/live/refresh  → LiveExam. Lo mismo, pidiendo antes lo nuevo a 42 s
   `GET /v2/teams`: equipos en curso sin `final_mark`, `teams_uploads` ni
   `scale_teams`). Nunca la del proyecto: mientras está en curso, 42 deja ahí la
   mejor de los intentos anteriores, no la de ahora.
-- `previousMark`: la de su último intento cerrado de antes de la sesión (lo que
-  se ve en su expediente); es lo que la web enseña de quien sigue dentro.
+- `bestMark`: la mejor de sus intentos cerrados de ese examen, contando el de
+  esta sesión si ya está cerrado; `null` si nunca lo ha cerrado. La web la pone
+  pequeña en una esquina; la grande es `mark`, con su barra sobre 100.
 - `status`: `pending` (aún no ha entrado), `inProgress`, `passed` (cerrado con 100
   o más) o `failed` (cerrado sin llegar a 100, o sin validar). Solo cuenta la fila
   tocada en esta sesión.
+- Con el examen en marcha solo sale quien ha entrado (`pending` no sale:
+  apuntarse no es estar); antes de empezar, toda la gente apuntada. Cada grupo va
+  ordenado por la nota de hoy (sin nota, 0), luego por estado y por login
+  (`byProgress`).
 - Refrescos: con el examen en marcha se pide lo nuevo cada 5 minutos (un trabajo
   de fondo, aunque nadie mire, o la visita si toca) y a mano como mucho una vez
   por minuto. El reloj es uno por examen y campus para todo el mundo y se guarda

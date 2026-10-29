@@ -66,13 +66,13 @@ export type LiveExaminee = {
   /** La nota de su intento de esta sesión, cuando se cierra; `null` mientras tanto. */
   mark: number | null
   /**
-   * La nota de su último intento cerrado de antes de esta sesión (lo que se ve
-   * en su expediente), o `null` si es el primero. Mientras sigue dentro es lo
-   * único que se sabe: 42 no da la nota del intento abierto hasta cerrarlo.
+   * La mejor nota que ha sacado en ese examen, contando la de esta sesión si ya
+   * está cerrada; `null` si nunca lo ha cerrado.
    */
-  previousMark: number | null
+  bestMark: number | null
   /**
-   * Cómo va en esta sesión: `pending` si aún no ha empezado, `inProgress` si
+   * Cómo va en esta sesión: `pending` si aún no ha empezado (con el examen en
+   * marcha no sale: solo se ve a quien ha entrado), `inProgress` si
    * está dentro, `passed` si lo tiene cerrado con 100 o más y `failed` si lo
    * tiene cerrado sin llegar a 100.
    */

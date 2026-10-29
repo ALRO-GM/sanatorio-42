@@ -805,7 +805,7 @@ describe('exámenes en vivo', () => {
   const at = (minutes: number): string => new Date(Date.now() + minutes * 60_000).toISOString()
   const exam = { id: 1320, name: 'Exam Rank 02', slug: 'exam-rank-02' }
 
-  it('enseña quién está en el examen de ahora, qué examen hace y su última nota', async () => {
+  it('enseña quién ha entrado en el examen de ahora, qué examen hace y su nota', async () => {
     const built = await app(
       {},
       {
@@ -851,9 +851,9 @@ describe('exámenes en vivo', () => {
     const live = json(await http.get('/exams/live')) as LiveExam
 
     expect(live).toMatchObject({ running: true, exam: { id: 710, name: 'Exam Session' } })
+    // `mgomez` está apuntado pero no ha entrado: con el examen en marcha no sale.
     expect(live.groups.map((group) => [group.name, group.people.map((one) => one.login)])).toEqual([
       ['Exam Rank 02', ['jdoe']],
-      [null, ['mgomez']],
     ])
     expect(live.groups[0]?.people[0]).toMatchObject({ mark: 100, status: 'passed' })
     expect(live.exam).toMatchObject({ when: 'today' })

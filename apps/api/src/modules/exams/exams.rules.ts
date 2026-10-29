@@ -443,3 +443,18 @@ export function examineeStatus(
 
   return recent || attempt !== undefined ? 'inProgress' : 'pending'
 }
+
+/** Entre quienes tienen la misma nota, el orden: aprobado, dentro, suspenso, sin entrar. */
+const STATUS_ORDER: LiveExaminee['status'][] = ['passed', 'inProgress', 'failed', 'pending']
+
+/**
+ * El orden del examen en vivo: por la barra de progreso (la nota de hoy, sobre
+ * 100; sin nota aún, 0), de más a menos; luego por estado y por login.
+ */
+export function byProgress(a: LiveExaminee, b: LiveExaminee): number {
+  return (
+    (b.mark ?? 0) - (a.mark ?? 0) ||
+    STATUS_ORDER.indexOf(a.status) - STATUS_ORDER.indexOf(b.status) ||
+    a.login.localeCompare(b.login)
+  )
+}

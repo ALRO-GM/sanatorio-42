@@ -1079,12 +1079,81 @@ dialog.welcome .actions {
   list-style: none;
 }
 .exam-people li {
+  position: relative;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem;
   padding: 0.35rem 0.6rem;
   border-radius: 10px;
   background: var(--surface-2);
+}
+/* La mejor nota, pequeña en la esquina; la de hoy es la grande. */
+.exam-best {
+  position: absolute;
+  top: 0.15rem;
+  right: 0.6rem;
+  color: var(--text-3);
+  font-size: 0.7rem;
+  font-variant-numeric: tabular-nums;
+}
+.exam-people li:has(.exam-best) {
+  padding-top: 1rem;
+}
+/* La nota de hoy sobre 100: azul mientras sigue dentro; al cerrar, verde o roja. */
+.exam-progress {
+  --exam-bar: #3b82f6;
+  flex-basis: 100%;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--exam-bar) 18%, transparent);
+}
+.exam-progress > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--exam-bar);
+  transition: width 0.6s ease;
+}
+.status-passed .exam-progress {
+  --exam-bar: var(--ok);
+}
+.status-failed .exam-progress {
+  --exam-bar: var(--danger);
+}
+/* Sin nota aún (42 la da al cerrar): un brillo que recorre la barra vacía. */
+.exam-progress.waiting {
+  background:
+    linear-gradient(
+        90deg,
+        transparent 0%,
+        color-mix(in srgb, var(--exam-bar) 45%, transparent) 50%,
+        transparent 100%
+      )
+      0 0 / 40% 100% no-repeat,
+    color-mix(in srgb, var(--exam-bar) 18%, transparent);
+  animation: exam-waiting 1.8s linear infinite;
+}
+@keyframes exam-waiting {
+  from {
+    background-position:
+      -40% 0,
+      0 0;
+  }
+  to {
+    background-position:
+      140% 0,
+      0 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .exam-progress.waiting {
+    animation: none;
+  }
+  .exam-progress > span {
+    transition: none;
+  }
 }
 .exam-people li.status-passed {
   box-shadow: inset 3px 0 0 var(--ok);

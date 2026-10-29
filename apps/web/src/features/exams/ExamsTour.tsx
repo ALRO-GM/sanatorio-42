@@ -30,7 +30,7 @@ export const TOUR = defineTour<Exams>('exams', START, [
 
 /**
  * Inventadas: quién está en el examen, de qué plan y círculo, y cómo está antes
- * y después de ponerse al día (estado y nota, o la de su último intento).
+ * y después de ponerse al día (estado y nota; de quien sigue dentro, su mejor nota).
  */
 const PEOPLE = [
   {
@@ -57,8 +57,8 @@ const PEOPLE = [
     circle: 4,
     track: 'next',
     exam: 'Exam Rank 04',
-    before: { status: 'pending', mark: null },
-    after: { status: 'inProgress', mark: null },
+    before: { status: 'inProgress', mark: null },
+    after: { status: 'failed', mark: 50 },
   },
 ] as const
 
@@ -144,10 +144,10 @@ export function ExamsTour() {
                     </span>
                     <strong key={String(shot.marked)} className="tour-in">
                       {now.status !== 'inProgress'
-                        ? (now.mark ?? '—')
+                        ? now.mark
                         : now.mark === null
                           ? t('exams.markLater')
-                          : t('exams.previousMark', { n: now.mark })}
+                          : t('exams.bestMark', { n: now.mark })}
                     </strong>
                   </span>
                 )

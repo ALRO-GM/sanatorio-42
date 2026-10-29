@@ -135,6 +135,29 @@ function remaining(iso: string, now: number): string {
     : `${String(minutes)}:${pad(seconds % 60)}`
 }
 
+/**
+ * La nota de hoy sobre 100, como barra: azul mientras sigue dentro, y del color
+ * del aprobado o del suspenso al cerrar. Sin nota aún, vacía y con un brillo
+ * que dice que está en marcha.
+ */
+function ExamProgress({ person }: { person: LiveExaminee }) {
+  const { t } = useI18n()
+  const value = Math.max(0, Math.min(100, person.mark ?? 0))
+
+  return (
+    <span
+      className={`exam-progress ${person.mark === null ? 'waiting' : ''}`}
+      role="progressbar"
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={value}
+      aria-label={t('exams.progressLabel', { login: person.login })}
+    >
+      <span style={{ width: `${String(value)}%` }} />
+    </span>
+  )
+}
+
 /** El examen de ahora: quién está, por examen, y cómo va cada cual. */
 function LiveCard({
   live,
@@ -266,17 +289,25 @@ function LiveCard({
               )}
               end={(person) =>
                 person.mark === null && person.status === 'inProgress' ? (
-                  // 42 no da nota hasta que se cierra el examen: mientras, la de su
-                  // último intento cerrado (la de su expediente), si tiene.
-                  <small className="exam-mark pending" title={t('exams.markLaterHint')}>
-                    {person.previousMark === null
-                      ? t('exams.markLater')
-                      : t('exams.previousMark', { n: person.previousMark })}
-                  </small>
+                  // 42 no da nota hasta que se cierra el examen: un guion, que la
+                  // barra vacía con su brillo ya dice que sigue dentro.
+                  <strong
+                    className="exam-mark pending"
+                    title={t('exams.markLaterHint')}
+                    aria-label={t('exams.markLater')}
+                  >
+                    —
+                  </strong>
                 ) : (
                   <strong className="exam-mark">{person.mark ?? '—'}</strong>
                 )
               }
+              corner={(person) =>
+                person.bestMark !== null && (
+                  <small className="exam-best">{t('exams.bestMark', { n: person.bestMark })}</small>
+                )
+              }
+              footer={(person) => live.running && <ExamProgress person={person} />}
             />
           </section>
         )

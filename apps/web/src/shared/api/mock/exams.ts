@@ -41,8 +41,8 @@ const person = (
   circle: number,
   mark: number | null,
   status: LiveExaminee['status'],
-  previousMark: number | null = null,
-): LiveExaminee => ({ login, image: portrait(login), track, circle, mark, previousMark, status })
+  bestMark: number | null = mark,
+): LiveExaminee => ({ login, image: portrait(login), track, circle, mark, bestMark, status })
 
 /** Las kickoffs del campus inventado: las grandes y alguna suelta. */
 const KICKOFFS: ExamKickoff[] = [
@@ -101,26 +101,22 @@ function liveNow(manual: boolean): LiveExam {
         name: 'Exam Rank 02',
         people: [
           person('jdoe', 'classic', 2, 100, 'passed'),
-          person('llorente', 'classic', 2, 50, 'failed'),
+          person('llorente', 'classic', 2, 50, 'failed', 75),
           person('pvidal', 'classic', 2, null, 'inProgress', 50),
-          person('tmolina', 'classic', 2, null, 'pending'),
         ],
       },
       {
         projectId: 1420,
         name: 'Exam Rank 02 · 42next',
-        people: [
-          person('anavarro', 'next', 2, null, 'inProgress'),
-          person('bcastro', 'next', 2, null, 'pending'),
-        ],
+        people: [person('anavarro', 'next', 2, null, 'inProgress')],
       },
       {
         projectId: 1321,
         name: 'Exam Rank 03',
         people: [
           person('mgarcia', 'classic', 3, 100, 'passed'),
-          person('rsoto', 'classic', 3, 0, 'failed'),
-          person('cfernandez', 'classic', 3, null, 'pending'),
+          person('cfernandez', 'classic', 3, null, 'inProgress', 25),
+          person('rsoto', 'classic', 3, 0, 'failed', 25),
         ],
       },
     ],
