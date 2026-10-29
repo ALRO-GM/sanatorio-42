@@ -1,6 +1,8 @@
 # Estilos
 
-Cada estilo de la web es una carpeta de aquí. La persona elige el suyo en
+Cada estilo de la web es una carpeta de aquí. El de fábrica es **Peer4U**
+(`peer4u/`, desde el 2026-10-29): sobrio, con Inter, grises neutros y un solo
+acento turquesa; quien ya había elegido otro lo conserva. La persona elige el suyo en
 **Personalizar**; se escribe en `data-style` de `<html>` y se guarda en el
 navegador (`shared/theme`).
 

@@ -5,7 +5,14 @@
  */
 
 /** Los estilos que puede elegir cualquiera, en el orden del selector. */
-export const PUBLIC_STYLES = ['clinica', 'terminal', 'historial', 'espacio', 'libre'] as const
+export const PUBLIC_STYLES = [
+  'peer4u',
+  'clinica',
+  'terminal',
+  'historial',
+  'espacio',
+  'libre',
+] as const
 
 /**
  * Estilos hechos para una persona: solo los ven en el selector sus dueñas, y

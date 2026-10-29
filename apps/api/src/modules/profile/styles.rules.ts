@@ -7,7 +7,14 @@
  */
 
 /** Los estilos de todo el mundo. */
-export const PUBLIC_STYLES = ['clinica', 'terminal', 'historial', 'espacio', 'libre'] as const
+export const PUBLIC_STYLES = [
+  'peer4u',
+  'clinica',
+  'terminal',
+  'historial',
+  'espacio',
+  'libre',
+] as const
 
 /** Estilos hechos para alguien: solo sus dueñas los pueden usar. */
 export const EXCLUSIVE_STYLES: Readonly<Record<string, readonly string[]>> = {

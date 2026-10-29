@@ -10,13 +10,22 @@ import { clinica } from './clinica/theme'
 import { espacio } from './espacio/theme'
 import { historial } from './historial/theme'
 import { libre } from './libre/theme'
+import { peer4u } from './peer4u/theme'
 import { terminal } from './terminal/theme'
 import { canUseStyle } from './ids'
 import type { ThemeManifest } from './types'
 
-const THEMES: readonly ThemeManifest[] = [clinica, terminal, historial, espacio, libre, bichota]
+const THEMES: readonly ThemeManifest[] = [
+  peer4u,
+  clinica,
+  terminal,
+  historial,
+  espacio,
+  libre,
+  bichota,
+]
 
-export const DEFAULT_THEME: ThemeManifest = clinica
+export const DEFAULT_THEME: ThemeManifest = peer4u
 
 export const themeOf = (id: string | null | undefined): ThemeManifest =>
   THEMES.find((theme) => theme.id === id) ?? DEFAULT_THEME

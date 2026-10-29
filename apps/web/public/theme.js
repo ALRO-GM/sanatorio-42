@@ -54,7 +54,7 @@
     (choice !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches)
 
   root.dataset.theme = dark ? 'dark' : 'light'
-  root.dataset.style = style !== null && /^[a-z0-9-]{1,30}$/.test(style) ? style : 'clinica'
+  root.dataset.style = style !== null && /^[a-z0-9-]{1,30}$/.test(style) ? style : 'peer4u'
 
   // Comodidad (`src/shared/comfort.ts`): tamaño del texto, daltonismo y zen.
   try {
