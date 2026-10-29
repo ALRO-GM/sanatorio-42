@@ -511,3 +511,44 @@
   align-items: center;
   gap: 0.35rem;
 }
+
+/* ── Avance en tres capas (reorganización del 2026-10-29) ─────────────────────
+ * Primera, la respuesta en una frase; segunda, la gráfica con lo básico a la
+ * derecha; tercera, «Ver a fondo», plegado salvo en el modo de datos. */
+.progress-answer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  margin: 0 0 1rem;
+}
+.progress-answer strong {
+  font-family: var(--font-display);
+  font-size: clamp(1.15rem, 1rem + 1vw, 1.6rem);
+  font-weight: var(--display-weight, 700);
+  letter-spacing: var(--display-spacing, -0.01em);
+  line-height: 1.25;
+}
+.progress-answer.good strong {
+  color: var(--ok);
+}
+.progress-answer.warn strong {
+  color: var(--warn);
+}
+.progress-deep {
+  border-top: 1px solid var(--border);
+  padding-top: 0.75rem;
+}
+.progress-deep > summary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  cursor: pointer;
+  font-weight: 600;
+}
+.progress-deep > summary small {
+  color: var(--text-3);
+  font-weight: 400;
+}
+.progress-deep[open] > summary {
+  margin-bottom: 0.75rem;
+}

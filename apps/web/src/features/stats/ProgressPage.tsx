@@ -10,6 +10,7 @@ import type {
 } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
+import { useDetail } from '../../shared/detail'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { CampusPicker } from '../../shared/ui/CampusPicker'
@@ -27,6 +28,8 @@ import type { Span } from './ProgressChart'
 import { ProgressCompare } from './ProgressCompare'
 import { ProgressRanking } from './ProgressRanking'
 import { ProgressTour } from './ProgressTour'
+import { progressAnswer } from './progressAnswer'
+import type { ProgressAnswer } from './progressAnswer'
 import { POPULATIONS, TRACKS } from './progressSeries'
 
 const RANGE_KEY = 'sanatorio_progress_range'
@@ -204,6 +207,13 @@ export function ProgressPage({ me }: { me: string }) {
       ? []
       : others.filter((login) => !data.others.some((each) => each.login === login))
   const maxMonths = Math.ceil((data?.days.at(-1) ?? 730) / MONTH)
+  // Primera capa: la respuesta, con tu plan (el elegido si solo hay uno).
+  const answer =
+    data === undefined
+      ? null
+      : progressAnswer(data, tracks.size === 1 ? ([...tracks][0] ?? null) : null)
+  // Tercera capa, plegada salvo para quien disfruta de los datos.
+  const deep = useDetail() === 'datos'
 
   return (
     <section className="progress-page" aria-labelledby="stats-progress">
@@ -216,6 +226,7 @@ export function ProgressPage({ me }: { me: string }) {
           </InfoTip>
         </h2>
       </div>
+      {answer !== null && <Answer answer={answer} />}
       <div className="progress-layout">
         <article className="card progress-card">
           {data === undefined ? (
@@ -253,40 +264,6 @@ export function ProgressPage({ me }: { me: string }) {
               text={(value) => t(`stats.progress.plan.${value}`)}
             />
           </Option>
-          <Option label={t('stats.progress.population')}>
-            <Toggles
-              label={t('stats.progress.population')}
-              options={POPULATIONS}
-              on={populations}
-              set={setPopulations}
-              text={(value) => t(`stats.progress.population.${value}`)}
-            />
-          </Option>
-          <Option label={t('stats.progress.scope')}>
-            {data !== undefined && (
-              // Cada campus en su línea: uno, varios o todos («Todas»). Pedir
-              // campus cuesta una petición: se espera a que acabes de marcar.
-              <CampusPicker
-                available={data.available}
-                current={campuses}
-                label={t('stats.progress.scope')}
-                allowEmpty
-                onApply={(next) => {
-                  setChosen(next === 'all' ? data.available.map((campus) => campus.id) : next)
-                }}
-              />
-            )}
-            <label className="progress-toggle">
-              <input
-                type="checkbox"
-                checked={together}
-                onChange={(event) => {
-                  setTogether(event.target.checked)
-                }}
-              />{' '}
-              {t('stats.progress.together')}
-            </label>
-          </Option>
           <div className="progress-option progress-option-row">
             {/* El eje es el tiempo desde el inicio de cada cual: los primeros N
                 meses o, a mano, del mes X al Y. */}
@@ -323,22 +300,86 @@ export function ProgressPage({ me }: { me: string }) {
               {t('stats.progress.paces')}
             </label>
           </div>
-          <PoolOnly k="avance.compare">
-            <div className="progress-option">
-              <ProgressCompare
-                others={others}
-                onChange={setOthers}
-                missing={missing}
-                tracks={tracks}
-                scopes={scopes}
-                me={me}
-                campus={data?.available.find((campus) => campus.id === home)?.name ?? null}
+          <details className="progress-deep" open={deep}>
+            <summary>
+              {t('stats.progress.deep')}
+              <small>{t('stats.progress.deep.hint')}</small>
+            </summary>
+            <Option label={t('stats.progress.population')}>
+              <Toggles
+                label={t('stats.progress.population')}
+                options={POPULATIONS}
+                on={populations}
+                set={setPopulations}
+                text={(value) => t(`stats.progress.population.${value}`)}
               />
-            </div>
-          </PoolOnly>
+            </Option>
+            <Option label={t('stats.progress.scope')}>
+              {data !== undefined && (
+                // Cada campus en su línea: uno, varios o todos («Todas»). Pedir
+                // campus cuesta una petición: se espera a que acabes de marcar.
+                <CampusPicker
+                  available={data.available}
+                  current={campuses}
+                  label={t('stats.progress.scope')}
+                  allowEmpty
+                  onApply={(next) => {
+                    setChosen(next === 'all' ? data.available.map((campus) => campus.id) : next)
+                  }}
+                />
+              )}
+              <label className="progress-toggle">
+                <input
+                  type="checkbox"
+                  checked={together}
+                  onChange={(event) => {
+                    setTogether(event.target.checked)
+                  }}
+                />{' '}
+                {t('stats.progress.together')}
+              </label>
+            </Option>
+            <PoolOnly k="avance.compare">
+              <div className="progress-option">
+                <ProgressCompare
+                  others={others}
+                  onChange={setOthers}
+                  missing={missing}
+                  tracks={tracks}
+                  scopes={scopes}
+                  me={me}
+                  campus={data?.available.find((campus) => campus.id === home)?.name ?? null}
+                />
+              </div>
+            </PoolOnly>
+          </details>
         </aside>
       </div>
       <ProgressRanking />
     </section>
+  )
+}
+
+/**
+ * La respuesta en una frase (primera capa): cómo vas frente a la media de tu
+ * campus, con su color de estado. Lo demás, en la gráfica y en «Ver a fondo».
+ */
+function Answer({ answer }: { answer: ProgressAnswer }) {
+  const { t, tn } = useI18n()
+  const text =
+    answer.kind === 'finished'
+      ? answer.average === null
+        ? tn('stats.progress.answer.finished', answer.months)
+        : `${tn('stats.progress.answer.finished', answer.months)} · ${tn('stats.progress.answer.average', answer.average)}`
+      : answer.kind === 'ahead' || answer.kind === 'behind'
+        ? tn(`stats.progress.answer.${answer.kind}`, answer.weeks)
+        : t(`stats.progress.answer.${answer.kind}`)
+  const tone = answer.kind === 'behind' ? 'warn' : answer.kind === 'even' ? 'neutral' : 'good'
+
+  return (
+    <p className={`progress-answer ${tone}`}>
+      <span className="eyebrow">{t('stats.progress.answer.label')}</span>
+      <strong>{text}</strong>
+    </p>
   )
 }
