@@ -6,6 +6,7 @@ import type { CurrentUser } from '@sanatorio/contracts'
 import { AvailabilityToggle } from '../features/peers/AvailabilityToggle'
 import { PersonFinder } from '../features/profile/PersonFinder'
 import { reportableSections } from '../features/admin/inbox'
+import { HelpBubble } from '../features/suggest/HelpBubble'
 import { SuggestBubble } from '../features/suggest/SuggestBubble'
 import { useI18n } from '../shared/i18n'
 import { track } from '../shared/layout/store'
@@ -174,6 +175,7 @@ export function Header({
               />
             )}
             {/* Sugerir una mejora: se arrastra hasta el sitio (`docs/sugerencias.md`). */}
+            <HelpBubble section={section} />
             {may('tickets') && <SuggestBubble section={section} sections={suggestable(section)} />}
             {may('mailbox') && (
               <button

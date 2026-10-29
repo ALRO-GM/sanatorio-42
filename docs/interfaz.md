@@ -26,7 +26,7 @@ Fuera de las pestañas, a propósito:
 | --- | --- | --- |
 | Guardia | «De guardia», en la cabecera | Es un interruptor que se toca a diario, no una página que se visita |
 | Buscador de personas, buzón, menú de la cuenta | Cabecera | Se usan desde cualquier sitio |
-| Burbuja de sugerencias (`docs/sugerencias.md`) | Cabecera, junto al buzón | La pidió Alberto ahí: se arrastra hasta lo que se mejoraría, desde cualquier sitio |
+| Bicho e interrogante (`docs/sugerencias.md`) | Cabecera, junto al buzón | Pedidos por Alberto: se arrastran hasta cualquier sitio; el bicho, para contar qué falla o qué mejorar; el interrogante, para ver la demostración de ese panel |
 | Panel de gestión, incidencias, personalizar, bienvenida | Menú de la cuenta | Son de vez en cuando o solo de quien administra |
 | Modo, idioma, tema, texto, daltonismo, zen, campus | Pie | Se eligen una vez |
 | Privacidad, Code Clicker | Enlace del pie / secreto | No son del uso diario |

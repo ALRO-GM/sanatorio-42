@@ -184,6 +184,68 @@ describe('burbuja de sugerencias', () => {
   }, 20_000)
 })
 
+describe('interrogante', () => {
+  const question = (): Promise<HTMLElement> =>
+    screen.findByRole('button', { name: text('howto.open') }, WAIT)
+
+  it('arrastrado sobre un bloque, abre la demostración de su panel', async () => {
+    stubPointerEvent()
+    await openApp('#/expediente')
+
+    const button = await question()
+    const block = await waitFor(() =>
+      must(document.querySelector('[data-feedback="expediente.health"]'), 'el bloque de salud'),
+    )
+    const inside = block.querySelector('.block-head') ?? block
+
+    Object.defineProperty(document, 'elementFromPoint', {
+      configurable: true,
+      value: () => inside,
+    })
+    expect(document.querySelector('.info-dialog')).toBeNull()
+
+    await act(async () => {
+      fireEvent.pointerDown(button, { button: 0, pointerId: 1, clientX: 10, clientY: 10 })
+      fireEvent.pointerMove(button, { pointerId: 1, clientX: 200, clientY: 300 })
+      await Promise.resolve()
+    })
+    // Mientras se lleva, una etiqueta dice qué hacer con él.
+    expect(document.querySelector('.suggest-ghost-hint')?.textContent).toBe(text('howto.carry'))
+
+    await act(async () => {
+      fireEvent.pointerUp(button, { pointerId: 1, clientX: 200, clientY: 300 })
+      fireEvent.click(button)
+      await Promise.resolve()
+    })
+
+    await waitFor(() => {
+      expect(document.querySelector('.info-dialog')).not.toBeNull()
+    }, WAIT)
+    Reflect.deleteProperty(document, 'elementFromPoint')
+  }, 20_000)
+
+  it('con el teclado, explica para qué sirve y enseña la demostración de la página', async () => {
+    const user = userEvent.setup()
+
+    await openApp('#/expediente')
+
+    const button = await question()
+
+    // La página, con su icono de información, ya pintada.
+    await waitFor(() => must(document.querySelector('main .info-tip'), 'un icono de información'))
+    button.focus()
+    await user.keyboard('{Enter}')
+
+    const intro = await screen.findByRole('dialog', { name: text('howto.title') }, WAIT)
+
+    expect(within(intro).getByText(text('howto.intro'))).toBeTruthy()
+    await user.click(within(intro).getByRole('button', { name: text('howto.showPage') }))
+    await waitFor(() => {
+      expect(document.querySelector('.info-dialog')).not.toBeNull()
+    }, WAIT)
+  }, 20_000)
+})
+
 /** jsdom no trae `PointerEvent`: sin él, los eventos llegan sin botón ni coordenadas. */
 function stubPointerEvent(): void {
   if ('PointerEvent' in window) return

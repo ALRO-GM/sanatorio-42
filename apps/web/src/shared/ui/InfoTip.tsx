@@ -1,10 +1,17 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 
 import { useI18n } from '../i18n'
 import { usePrefs } from '../layout/store'
 import { Icon } from './Icon'
 import { Modal } from './Modal'
+
+/**
+ * El evento con el que el interrogante de la cabecera abre la demostración de
+ * un panel (`features/suggest/demo.ts`). No es un clic: el clic que suelta la
+ * burbuja se descarta para que no llegue a lo de debajo.
+ */
+export const OPEN_DEMO = 'sanatorio:open-demo'
 
 type InfoTipProps = {
   /** De qué habla la explicación: título de la ventana y nombre del botón. */
@@ -24,15 +31,33 @@ type InfoTipProps = {
 export function InfoTip({ title, children }: InfoTipProps) {
   const { t } = useI18n()
   const [open, setOpen] = useState(false)
-  // Quien ya se sabe la web puede esconderlos en Personalizar.
+  const button = useRef<HTMLButtonElement>(null)
+  // Quien ya se sabe la web puede esconderlos en Personalizar; escondidos,
+  // siguen ahí para el interrogante.
   const hidden = usePrefs().tips === false
 
-  if (hidden) return null
+  useEffect(() => {
+    const element = button.current
+
+    if (element === null) return undefined
+
+    const onOpen = (): void => {
+      setOpen(true)
+    }
+
+    element.addEventListener(OPEN_DEMO, onOpen)
+
+    return () => {
+      element.removeEventListener(OPEN_DEMO, onOpen)
+    }
+  }, [])
 
   return (
     <>
       <button
+        ref={button}
         type="button"
+        hidden={hidden}
         className="info-tip"
         aria-label={t('info.open', { title })}
         title={t('info.open', { title })}

@@ -43,6 +43,24 @@
   transform: translate(-50%, -50%);
   pointer-events: none;
 }
+/* Junto a la burbuja suelta, qué hacer con ella: un clic sin más ya lo explica. */
+.suggest-ghost-hint {
+  position: absolute;
+  top: 50%;
+  left: calc(100% + 8px);
+  padding: 0.3rem 0.6rem;
+  border-radius: var(--radius-sm, 6px);
+  background: var(--text);
+  color: var(--bg);
+  font-size: 0.78rem;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px var(--shadow);
+  transform: translateY(-50%);
+}
+.help-intro .actions {
+  display: flex;
+  justify-content: flex-end;
+}
 /* Con la burbuja enganchada al ratón, se apunta con una cruz. */
 body.suggest-carrying,
 body.suggest-carrying * {

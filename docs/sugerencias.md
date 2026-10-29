@@ -105,3 +105,32 @@ y `apps/web/tests/ui/suggest-detect.test.tsx`.
 - Lo dibujado en `<canvas>` (la Red) se ve como un solo sitio.
 - Mientras el panel está abierto no se puede volver a arrastrar la burbuja:
   se cierra y se suelta de nuevo, o se usa «Cambiar».
+
+
+## El bicho y el interrogante (2026-10-29)
+
+Pedido por Alberto: en la cabecera hay dos burbujas con el mismo gesto
+(`features/suggest/useCarry.ts`): se cogen, se llevan hasta un sitio y, al
+soltarlas, hacen algo con ese sitio. Mientras se llevan, una etiqueta al lado
+dice qué hacer con ellas, así que un clic sin más ya explica para qué sirven.
+
+| Burbuja | Al soltarla sobre un sitio | Con un toque, Intro o Espacio |
+| --- | --- | --- |
+| Bicho (antes, la bombilla) | El panel de siempre, con el sitio detectado: qué falla, qué falta o qué mejorarías | El panel, con la lista de secciones |
+| Interrogante | La demostración animada de ese panel | Una ventana que explica el interrogante (y el bicho) con «Ver cómo se usa esta página» |
+
+Cómo encuentra el interrogante la demostración (`features/suggest/demo.ts`):
+cada panel lleva la suya en el icono de información (`InfoTip`) de su título,
+y se busca el más cercano al sitio, de dentro hacia fuera. Por eso no depende
+de en qué pestaña o categoría esté el panel: si la web se reorganiza, sigue
+funcionando. Si no hay ninguno alrededor, se abre el de la página y se avisa;
+si la página tampoco tiene, solo el aviso.
+
+- El interrogante abre el icono con un evento propio (`OPEN_DEMO`), no con un
+  clic: el clic que suelta la burbuja se descarta para que no llegue a lo de
+  debajo, y se llevaría también ese.
+- Los iconos de información escondidos desde Personalizar siguen en la página
+  (`hidden`) para que el interrogante funcione igual.
+- Hoy hay 22 demostraciones, una por pantalla. Para afinar por elemento, se
+  pone un `InfoTip` en el bloque que lo merezca y el interrogante lo encuentra
+  solo.
