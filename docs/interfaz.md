@@ -111,6 +111,7 @@ de datos.
 | Clústeres | «N de M personas tienen Sanatorio abierto» | D | Cifra |
 | Exámenes | Examen en vivo y estadísticas de cada examen | N | La sección en sí |
 | Exámenes | En vivo, solo quien ha entrado (apuntarse no es estar; antes de empezar, toda la gente apuntada), ordenados por una barra con la nota de hoy sobre 100: azul mientras siguen dentro (vacía con un brillo hasta que 42 da la nota, al cerrar), verde o roja al aprobar o suspender; la nota de hoy grande y la mejor que han sacado, pequeña en la esquina | N | Pedido por Alberto (2026-10-29): ver de un vistazo cómo va cada cual |
+| Exámenes | Último examen acabado (de las dos últimas semanas), bajo el siguiente, con los resultados de quien entró, sus barras y la mejor nota; se quita mientras hay otro en marcha | N | Pedido por Alberto (2026-10-29): que no desaparezca al acabar, para que los amigos lo revisen |
 | Exámenes | Cuánto se tarda en cada círculo | D | Estadística |
 | Exámenes | Filtros de plan (C o Python), exámenes (C, Nexus o los dos) y kickoffs; un rango por fila con C y Nexus juntos (#81) | N | Es lo que se viene a mirar |
 | Exámenes | Cada intento (nota mediana, aprobados, personas), plegado; en qué intento se aprueba, los 3 primeros y el resto al desplegar | D | Detalle (2026-10-25: sin tabla de kickoffs ni black hole, que no eran de fiar) |

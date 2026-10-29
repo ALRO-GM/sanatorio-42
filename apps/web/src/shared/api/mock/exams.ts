@@ -123,6 +123,8 @@ function liveNow(manual: boolean): LiveExam {
     updatedAt: iso(refreshedAt),
     nextRefreshAt: iso(refreshedAt + AUTO_MS),
     refreshableAt: iso(refreshedAt + MANUAL_MS),
+    // Con un examen en marcha, el último acabado no se enseña.
+    last: null,
   }
 }
 

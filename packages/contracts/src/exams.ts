@@ -90,6 +90,17 @@ export type LiveExamGroup = {
   people: LiveExaminee[]
 }
 
+/**
+ * El último examen acabado (de las dos últimas semanas) con los resultados de
+ * quien entró, para revisarlos después: no desaparece al acabar.
+ */
+export type LiveExamResults = {
+  exam: { id: number; name: string; location: string | null; beginAt: string; endAt: string }
+  groups: LiveExamGroup[]
+  /** Cuándo se miraron las notas por última vez. */
+  updatedAt: string | null
+}
+
 /** `GET /exams/live`: el examen que hay ahora en tu campus (o el siguiente, en las próximas 24 h). */
 export type LiveExam = {
   exam: {
@@ -113,4 +124,6 @@ export type LiveExam = {
    * Es uno por minuto para todo el campus, no por persona.
    */
   refreshableAt: string | null
+  /** Sin examen en marcha, el último que acabó; `null` con uno en marcha o si no hay. */
+  last: LiveExamResults | null
 }

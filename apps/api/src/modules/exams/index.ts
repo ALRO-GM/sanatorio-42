@@ -9,7 +9,7 @@
 
 import { NO_POOL, visibleTo } from '../../core/audience.js'
 import type { Actor } from '../../core/actor.js'
-import type { LiveExam } from '@sanatorio/contracts'
+import type { LiveExam, LiveExamGroup } from '@sanatorio/contracts'
 import type { Audience } from '../../core/audience.js'
 import type { Db } from '../../core/db/database.js'
 import type { AppModule } from '../../core/module.js'
@@ -48,14 +48,21 @@ const LIVE_TICK_MS = 60_000
 
 export function createExamsModule(deps: ExamsModuleDeps): ExamsModule {
   /** En el examen en vivo, solo la gente del mundo de quien mira. */
-  const seenLive = async (actor: Actor, exam: LiveExam): Promise<LiveExam> => ({
-    ...exam,
-    groups: await Promise.all(
-      exam.groups.map(async (group) => ({
+  const seenGroups = (actor: Actor, groups: LiveExamGroup[]): Promise<LiveExamGroup[]> =>
+    Promise.all(
+      groups.map(async (group) => ({
         ...group,
         people: await visibleTo(deps.audience ?? NO_POOL, actor, group.people, (one) => one.login),
       })),
-    ),
+    )
+  const seenLive = async (actor: Actor, exam: LiveExam): Promise<LiveExam> => ({
+    ...exam,
+    groups: await seenGroups(actor, exam.groups),
+    // El último examen acabado, con el mismo filtro.
+    last:
+      exam.last === null
+        ? null
+        : { ...exam.last, groups: await seenGroups(actor, exam.last.groups) },
   })
   const exams = createExamsRepository(deps.db)
   const sync = createExamsSync({

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 
-import type { LiveExam, LiveExaminee } from '@sanatorio/contracts'
+import type { LiveExam, LiveExamGroup, LiveExamResults, LiveExaminee } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
@@ -95,6 +95,7 @@ function LiveSection() {
       {live.data !== undefined && (
         <LiveCard live={live.data} refreshing={refreshing} onRefresh={() => void refresh()} />
       )}
+      {live.data?.last && <LastExamCard last={live.data.last} />}
       <ErrorNote error={live.error} onRetry={() => void live.reload()} />
     </>
   )
@@ -268,7 +269,29 @@ function LiveCard({
         </div>
       )}
       {live.running && live.groups.length === 0 && <p className="estado">{t('exams.nobody')}</p>}
-      {live.groups.map((group) => {
+      <ExamGroups groups={live.groups} shown={shown} bars={live.running} />
+    </article>
+  )
+}
+
+/**
+ * La gente de un examen, por grupos: estado, nota de hoy, la mejor en la
+ * esquina y, con `bars`, la barra de progreso.
+ */
+function ExamGroups({
+  groups,
+  shown = () => true,
+  bars,
+}: {
+  groups: readonly LiveExamGroup[]
+  shown?: (person: LiveExaminee) => boolean
+  bars: boolean
+}) {
+  const { t } = useI18n()
+
+  return (
+    <>
+      {groups.map((group) => {
         const people = group.people.filter(shown)
 
         if (people.length === 0) return null
@@ -307,11 +330,42 @@ function LiveCard({
                   <small className="exam-best">{t('exams.bestMark', { n: person.bestMark })}</small>
                 )
               }
-              footer={(person) => live.running && <ExamProgress person={person} />}
+              footer={(person) => bars && <ExamProgress person={person} />}
             />
           </section>
         )
       })}
+    </>
+  )
+}
+
+/**
+ * El último examen acabado, con los resultados de quien entró: no desaparece
+ * al acabar, para que se pueda revisar después (cómo le fue a cada cual).
+ */
+function LastExamCard({ last }: { last: LiveExamResults }) {
+  const { t, lang } = useI18n()
+  const when = new Date(last.exam.beginAt).toLocaleString(localeOf(lang), {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+
+  return (
+    <article className="card exam-live exam-last">
+      <span className="eyebrow">{t('exams.lastTitle')}</span>
+      <h3>
+        {last.exam.name}
+        {last.exam.location !== null && <small> · {last.exam.location}</small>}
+      </h3>
+      <p className="hint">{when}</p>
+      {last.groups.length === 0 ? (
+        <p className="estado">{t('exams.lastNobody')}</p>
+      ) : (
+        <ExamGroups groups={last.groups} bars />
+      )}
     </article>
   )
 }

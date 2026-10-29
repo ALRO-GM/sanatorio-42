@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/examenes.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-66 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
+68 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera | Francés |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -73,3 +73,5 @@ Generado desde `apps/web/src/shared/i18n/textos/examenes.csv` con
 | `exams.markLaterHint` | Examen en vivo: explicación al pasar el ratón por «Nota al cerrar» | features/exams/ExamsPage | 42 no da la nota de un examen hasta que se cierra: mientras la persona sigue dentro, la barra espera vacía. | 42 does not give an exam's mark until it closes: while the person is still in, the bar waits empty. | 42 no dona la nota d'un examen fins que es tanca: mentre la persona hi és, la barra espera buida. | 42k ez du azterketaren nota ematen itxi arte: pertsona barruan dagoen bitartean, barra hutsik dago. | 42 ne donne la note d'un examen qu'à sa fermeture : tant que la personne est dedans, la barre attend, vide. |
 | `exams.bestMark` | Examen en vivo: en la esquina de cada persona, la mejor nota que ha sacado en ese examen | features/exams/ExamsPage, features/exams/ExamsTour | Mejor: {n} | Best: {n} | Millor: {n} | Onena: {n} | Meilleure : {n} |
 | `exams.progressLabel` | Examen en vivo: nombre accesible de la barra de progreso (la nota de hoy sobre 100) | features/exams/ExamsPage | Nota de hoy de {login} sobre 100 | Today's mark for {login} out of 100 | Nota d'avui de {login} sobre 100 | {login}(r)en gaurko nota 100etik | Note du jour de {login} sur 100 |
+| `exams.lastTitle` | Examen en vivo: etiqueta de la tarjeta del último examen acabado (sus resultados) | features/exams/ExamsPage | Último examen | Last exam | Últim examen | Azken azterketa | Dernier examen |
+| `exams.lastNobody` | Último examen acabado: nadie del campus entró | features/exams/ExamsPage | Nadie de tu campus entró en este examen. | Nobody from your campus took this exam. | Ningú del teu campus va entrar a aquest examen. | Zure campuseko inor ez zen azterketa honetan sartu. | Personne de ton campus n'a passé cet examen. |

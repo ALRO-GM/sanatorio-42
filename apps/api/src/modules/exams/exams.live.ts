@@ -15,7 +15,7 @@
  * reinicio hacen que se pida más.
  */
 
-import type { LiveExam, LiveExamGroup, LiveExaminee } from '@sanatorio/contracts'
+import type { LiveExam, LiveExamGroup, LiveExamResults, LiveExaminee } from '@sanatorio/contracts'
 
 import type { Actor } from '../../core/actor.js'
 import { clockOf, loggerOf } from '../../core/options.js'
@@ -37,6 +37,10 @@ import {
 const AHEAD_MS = 24 * 3_600_000
 /** Lo más que dura un examen: para buscar el que sigue en marcha. */
 const BEHIND_MS = 12 * 3_600_000
+/** Hasta cuánto atrás se busca el último examen acabado, con sus resultados. */
+const LAST_MS = 14 * 24 * 3_600_000
+/** Tras acabar, se pide una vez más a 42 durante este rato: las notas de quien cierra al final. */
+const AFTER_END_MS = 30 * 60_000
 
 type ExamsLiveOptions = {
   db: Db
@@ -101,16 +105,19 @@ export function createExamsLive(options: ExamsLiveOptions) {
     return stored
   }
 
-  /** El examen en marcha en el campus o, si no hay, el siguiente de las próximas 24 h. */
+  /**
+   * El examen en marcha en el campus o, si no hay, el siguiente de las
+   * próximas 24 h; y el último que acabó (de las dos últimas semanas).
+   */
   async function examOf(
     campusId: number,
     at: number,
     pool = false,
-  ): Promise<{ exam: ExamEvent; running: boolean } | null> {
+  ): Promise<{ found: { exam: ExamEvent; running: boolean } | null; last: ExamEvent | null }> {
     // Un piscinero, los exámenes de la piscina; un estudiante, los suyos.
     const events = await agenda.campusEvents(
       campusId,
-      new Date(at - BEHIND_MS).toISOString(),
+      new Date(at - LAST_MS).toISOString(),
       new Date(at + AHEAD_MS).toISOString(),
       pool ? 'pool' : 'student',
     )
@@ -119,8 +126,14 @@ export function createExamsLive(options: ExamsLiveOptions) {
       (event) => Date.parse(event.beginAt) <= at && Date.parse(event.endAt) > at,
     )
     const exam = running ?? examEvents.find((event) => Date.parse(event.beginAt) > at)
+    const last = examEvents
+      .filter((event) => Date.parse(event.endAt) <= at)
+      .sort((a, b) => Date.parse(b.endAt) - Date.parse(a.endAt))[0]
 
-    return exam === undefined ? null : { exam, running: running !== undefined }
+    return {
+      found: exam === undefined ? null : { exam, running: running !== undefined },
+      last: last ?? null,
+    }
   }
 
   /**
@@ -229,27 +242,24 @@ export function createExamsLive(options: ExamsLiveOptions) {
     return all.filter((login) => !elsewhere.has(login))
   }
 
-  /** Lo que ve quien pregunta, con lo que haya guardado. */
-  async function view(
+  /**
+   * La gente de un examen, por grupos. `entered`: solo quien ha entrado (con
+   * el examen en marcha o ya acabado); antes de empezar, toda la apuntada.
+   */
+  async function groupsOf(
     campusId: number,
-    found: { exam: ExamEvent; running: boolean } | null,
-    at: number,
-  ): Promise<LiveExam> {
-    if (found === null) {
-      return { exam: null, running: false, groups: [], updatedAt: null, ...noRefresh }
-    }
-
-    const { exam, running } = found
-    const state = await stateOf(liveKey(campusId, exam.id))
+    exam: ExamEvent,
+    state: LiveState | null,
+    entered: boolean,
+  ): Promise<LiveExamGroup[]> {
     const logins = await registered(campusId, exam, state)
     const fromFortyTwo = new Map(state?.logins ?? [])
-    const [places, images, attempts, rows, projects, timeZone, best] = await Promise.all([
+    const [places, images, attempts, rows, projects, best] = await Promise.all([
       curriculum.placesOf(logins),
       replica.imagesOf(logins),
-      latestAttempts(logins, exam.beginAt),
-      running ? exams.sessionRows(campusId, exam.beginAt, logins) : Promise.resolve([]),
+      latestAttempts(logins, exam.beginAt, exam.endAt),
+      entered ? exams.sessionRows(campusId, exam.beginAt, logins) : Promise.resolve([]),
       exams.exams(),
-      replica.timeZoneOf(campusId),
       exams.bestClosedMarks(logins, exam.beginAt),
     ])
     const bySlug = new Map(projects.map((project) => [project.slug, project]))
@@ -269,8 +279,8 @@ export function createExamsLive(options: ExamsLiveOptions) {
       const projectId = row?.projectId ?? attempt?.projectId ?? expected?.id ?? null
       const status = examineeStatus(row, attempt, exam.beginAt)
 
-      // Con el examen en marcha, solo quien ha entrado: apuntarse no es estar.
-      if (running && status === 'pending') continue
+      // Con el examen en marcha o acabado, solo quien ha entrado: apuntarse no es estar.
+      if (entered && status === 'pending') continue
 
       const mark = attempt?.mark ?? null
       const before = projectId === null ? undefined : best.get(`${login}:${String(projectId)}`)
@@ -296,6 +306,56 @@ export function createExamsLive(options: ExamsLiveOptions) {
       groups.set(projectId, group)
     }
 
+    // Por examen, por nombre; al final, quien no se sabe qué examen hace.
+    return [...groups.values()]
+      .map((group) => ({ ...group, people: group.people.sort(byProgress) }))
+      .sort((a, b) => (a.name === null ? 1 : b.name === null ? -1 : a.name.localeCompare(b.name)))
+  }
+
+  /** El último examen acabado, con los resultados de quien entró. */
+  async function lastView(campusId: number, exam: ExamEvent): Promise<LiveExamResults> {
+    const state = await stateOf(liveKey(campusId, exam.id))
+
+    return {
+      exam: {
+        id: exam.id,
+        name: exam.name,
+        location: exam.location,
+        beginAt: exam.beginAt,
+        endAt: exam.endAt,
+      },
+      groups: await groupsOf(campusId, exam, state, true),
+      updatedAt: state === null ? null : new Date(state.at).toISOString(),
+    }
+  }
+
+  /** Lo que ve quien pregunta, con lo que haya guardado. */
+  async function view(
+    campusId: number,
+    { found, last }: Awaited<ReturnType<typeof examOf>>,
+    at: number,
+  ): Promise<LiveExam> {
+    // Sin examen en marcha, el último acabado sigue a la vista para revisarlo.
+    const lastResults =
+      found?.running !== true && last !== null ? await lastView(campusId, last) : null
+
+    if (found === null) {
+      return {
+        exam: null,
+        running: false,
+        groups: [],
+        updatedAt: null,
+        ...noRefresh,
+        last: lastResults,
+      }
+    }
+
+    const { exam, running } = found
+    const state = await stateOf(liveKey(campusId, exam.id))
+    const [groups, timeZone] = await Promise.all([
+      groupsOf(campusId, exam, state, running),
+      replica.timeZoneOf(campusId),
+    ])
     const plan = liveRefreshPlan(state?.at ?? null, at)
 
     return {
@@ -308,12 +368,8 @@ export function createExamsLive(options: ExamsLiveOptions) {
         when: examDay(exam.beginAt, at, timeZone),
       },
       running,
-      // Por examen, por nombre; al final, quien no se sabe qué examen hace.
-      groups: [...groups.values()]
-        .map((group) => ({ ...group, people: group.people.sort(byProgress) }))
-        .sort((a, b) =>
-          a.name === null ? 1 : b.name === null ? -1 : a.name.localeCompare(b.name),
-        ),
+      groups,
+      last: lastResults,
       updatedAt: state === null ? null : new Date(state.at).toISOString(),
       ...(running
         ? {
@@ -345,13 +401,13 @@ export function createExamsLive(options: ExamsLiveOptions) {
 
     /** El examen de ahora en el campus de quien pregunta, o el siguiente. Refresca si toca. */
     async live(actor: Actor): Promise<LiveExam> {
-      const found = await examOf(actor.campusId, now(), actor.pool === true)
+      const exams = await examOf(actor.campusId, now(), actor.pool === true)
 
-      if (found?.running === true) {
-        await refresh(actor.campusId, found.exam, 'auto', 'deferrable')
+      if (exams.found?.running === true) {
+        await refresh(actor.campusId, exams.found.exam, 'auto', 'deferrable')
       }
 
-      return view(actor.campusId, found, now())
+      return view(actor.campusId, exams, now())
     },
 
     /**
@@ -359,13 +415,13 @@ export function createExamsLive(options: ExamsLiveOptions) {
      * último refresco de quien sea. Si no, devuelve lo que hay.
      */
     async refreshNow(actor: Actor): Promise<LiveExam> {
-      const found = await examOf(actor.campusId, now(), actor.pool === true)
+      const exams = await examOf(actor.campusId, now(), actor.pool === true)
 
-      if (found?.running === true) {
-        await refresh(actor.campusId, found.exam, 'manual', 'deferrable')
+      if (exams.found?.running === true) {
+        await refresh(actor.campusId, exams.found.exam, 'manual', 'deferrable')
       }
 
-      return view(actor.campusId, found, now())
+      return view(actor.campusId, exams, now())
     },
 
     /** El reloj de cinco minutos: refresca los exámenes en marcha aunque nadie mire. */
@@ -373,17 +429,23 @@ export function createExamsLive(options: ExamsLiveOptions) {
       for (const campusId of campusIds) {
         if (!quota.allows('background')) return
 
-        const found = await examOf(campusId, now())
+        const { found, last } = await examOf(campusId, now())
 
-        if (found?.running === true) await refresh(campusId, found.exam, 'auto', 'background')
+        if (found?.running === true) {
+          await refresh(campusId, found.exam, 'auto', 'background')
+        } else if (last !== null && now() - Date.parse(last.endAt) < AFTER_END_MS) {
+          // Recién acabado: quien cierra en el último momento aún no tiene su nota.
+          await refresh(campusId, last, 'auto', 'background')
+        }
       }
     },
   }
 
-  /** El último intento de cada una de esas personas desde que empezó el examen. */
+  /** El último intento de cada una de esas personas durante el examen (de `since` a `until`). */
   async function latestAttempts(
     logins: readonly string[],
     since: string,
+    until: string,
   ): Promise<Map<string, Attempt>> {
     const found = new Map<string, Attempt>()
 
@@ -393,9 +455,9 @@ export function createExamsLive(options: ExamsLiveOptions) {
       sql: `SELECT u.login, a.project_id, a.mark, a.validated, a.at
             FROM exam_attempts a
             JOIN users u ON u.id = a.user_id
-            WHERE u.login IN (SELECT value FROM json_each(?)) AND a.at >= ?
+            WHERE u.login IN (SELECT value FROM json_each(?)) AND a.at >= ? AND a.at <= ?
             ORDER BY a.at`,
-      args: [JSON.stringify(logins), since],
+      args: [JSON.stringify(logins), since, until],
     })
 
     // Por orden de fecha: el último pisa a los anteriores.

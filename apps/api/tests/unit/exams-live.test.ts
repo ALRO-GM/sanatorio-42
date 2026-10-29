@@ -494,6 +494,39 @@ describe('el examen en vivo', () => {
     expect(calls.users).toBe(0)
   })
 
+  it('al acabar, el examen sigue a la vista con los resultados de quien entró', async () => {
+    // Las 14:00 de Madrid: el examen acabó a las 12:00 y no hay otro.
+    clock = Date.parse(END) + 2 * 60 * MINUTE
+
+    const live = await build().live(actor('eva'))
+
+    expect(live).toMatchObject({ exam: null, running: false, groups: [] })
+    expect(live.last?.exam).toMatchObject({ id: 710, name: 'Exam Session', endAt: END })
+    // `eva` estaba apuntada y no entró: no sale. Las notas son las de ese examen.
+    expect(
+      live.last?.groups.map((group) => [
+        group.name,
+        group.people.map((person) => `${person.login}:${person.status}:${String(person.mark)}`),
+      ]),
+    ).toEqual([['Exam Rank 02', ['ana:failed:75', 'mia:inProgress:null']]])
+    // Sin examen en marcha no se pide nada a 42 por mirar.
+    expect(calls.users).toBe(0)
+  })
+
+  it('recién acabado, el reloj de fondo pide las notas una vez más; pasada media hora, no', async () => {
+    clock = Date.parse(END) + 10 * MINUTE
+    await build().tick([MADRID])
+    expect(calls.users).toBe(1)
+
+    clock = Date.parse(END) + 40 * MINUTE
+    await build().tick([MADRID])
+    expect(calls.users).toBe(1)
+  })
+
+  it('con un examen en marcha, el último acabado no se enseña', async () => {
+    expect((await build().live(actor('ana'))).last).toBeNull()
+  })
+
   it('sin examen no hay nada que enseñar', async () => {
     expect(await build([]).live(actor('ana'))).toEqual({
       exam: null,
@@ -502,6 +535,7 @@ describe('el examen en vivo', () => {
       updatedAt: null,
       nextRefreshAt: null,
       refreshableAt: null,
+      last: null,
     })
   })
 })

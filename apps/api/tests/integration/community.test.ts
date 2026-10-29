@@ -881,6 +881,7 @@ describe('exámenes en vivo', () => {
       updatedAt: null,
       nextRefreshAt: null,
       refreshableAt: null,
+      last: null,
     })
   })
 })

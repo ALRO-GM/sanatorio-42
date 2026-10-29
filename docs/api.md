@@ -2170,6 +2170,11 @@ POST /exams/live/refresh  → LiveExam. Lo mismo, pidiendo antes lo nuevo a 42 s
   apuntarse no es estar); antes de empezar, toda la gente apuntada. Cada grupo va
   ordenado por la nota de hoy (sin nota, 0), luego por estado y por login
   (`byProgress`).
+- `last`: sin examen en marcha, el último que acabó en las dos últimas semanas,
+  con los resultados de quien entró (mismos grupos, orden y filtro de mundos),
+  para revisarlo después; `null` con uno en marcha o si no hay. Durante la
+  media hora tras acabar, el reloj de fondo sigue pidiendo a 42 cada 5 minutos:
+  las notas de quien cierra en el último momento.
 - Refrescos: con el examen en marcha se pide lo nuevo cada 5 minutos (un trabajo
   de fondo, aunque nadie mire, o la visita si toca) y a mano como mucho una vez
   por minuto. El reloj es uno por examen y campus para todo el mundo y se guarda
