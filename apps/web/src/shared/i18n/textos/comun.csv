@@ -212,7 +212,11 @@ welcome.mode.body,"Bienvenida, paso 2: explicación del modo",Elige cuánto ense
 table.sortedBy,"Tablas: por qué columnas está ordenada, de la que más manda a la que menos",Ordenado por {columns},Sorted by {columns},Ordenat per {columns},Honen arabera ordenatuta: {columns},Trié par {columns}
 table.unsort,Tablas: botón para quitar el orden,Quitar el orden,Clear sorting,Treu l'ordre,Kendu ordena,Annuler le tri
 table.sortHint,Tablas: explicación al pasar por una cabecera,Ordenar por esta columna. Lo que ordenaste antes decide los empates.,Sort by this column. What you sorted before breaks ties.,Ordena per aquesta columna. El que vas ordenar abans decideix els empats.,Ordenatu zutabe honen arabera. Lehen ordenatutakoak erabakitzen ditu berdinketak.,Trier par cette colonne. Les tris précédents départagent les égalités.
-nav.notgames,Pestaña de Ayuda: preguntas de programación para aprender jugando (no se llama juego a propósito),Not-games,Not-games,Not-games,Not-games,Not-games
+nav.notgames,Pestaña de Aprender: preguntas de programación para aprender jugando (no se llama juego a propósito),Not-games,Not-games,Not-games,Not-games,Not-games
+nav.cursogit,Pestaña de Aprender: el curso de git,Curso de git,Git course,Curs de git,Git ikastaroa,Cours de git
+nav.cursoshell,Pestaña de Aprender: el curso de shell,Curso de shell,Shell course,Curs de shell,Shell ikastaroa,Cours de shell
+nav.pomodoro,Pestaña de Aprender: el Pomodoro (concentrarse por tandas),Pomodoro,Pomodoro,Pomodoro,Pomodoroa,Pomodoro
+nav.asientos,Pestaña de Campus: la red de asientos (con quién se sienta cada cual),Asientos,Seating,Seients,Eserlekuak,Postes
 nav.estadisticas,Pestaña de Campus: clasificación de cada sección de Ayuda,Clasificaciones,Rankings,Classificacions,Sailkapenak,Classements
 focus.open,Menú de la cuenta: abrir el Pomodoro,Modo concentración (Pomodoro),Focus mode (Pomodoro),Mode concentració (Pomodoro),Kontzentrazio modua (Pomodoro),Mode concentration (Pomodoro)
 focus.title,Pomodoro: título de la ventana,Modo concentración,Focus mode,Mode concentració,Kontzentrazio modua,Mode concentration

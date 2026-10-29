@@ -18,11 +18,13 @@ abajo).
 | --- | --- | --- | --- |
 | **Yo** | Lo tuyo | Expediente (la portada) · Agenda · Calendario | `app/sections.ts` |
 | **Ayuda** | Pedir y dar ayuda, quedar con gente | Sala de espera · Tablón · Terapia · Pizarras · Guardia | |
-| **Aprender** | Practicar y concentrarse | Not-games (con los cursos de git y de shell dentro, de momento) | |
-| **Campus** | Cómo va el campus y cómo vas tú | Clústeres · Avance · Red · Exámenes · Clasificaciones | |
+| **Aprender** | Practicar y concentrarse | Curso de git · Curso de shell · Not-games · Pomodoro | |
+| **Campus** | Cómo va el campus y cómo vas tú | Clústeres · Asientos · Avance · Red · Exámenes · Clasificaciones | |
 
-Siguiente fase (`docs/tareas-tras-compactar.md`): los cursos y el Pomodoro,
-pestañas propias de Aprender; los Asientos, de Campus.
+Los cursos eran pestañas de Not-games (sus direcciones viejas,
+`#/notgames/git` y `#/notgames/shell`, llevan a las nuevas: `useRoute.ts`), el
+Pomodoro solo estaba en el menú de la cuenta (sigue ahí, y su ventanita en la
+esquina) y los Asientos eran una vista de la Red.
 
 Fuera de las pestañas, a propósito:
 
@@ -238,7 +240,7 @@ Antes de escribir una a mano, se usa la que ya existe en `apps/web/src/shared/`:
   `ui/StepPicker`. En escritorio, un `<select>` nativo y compacto; en el móvil
   (640 px o menos), una rueda que se desliza arriba y abajo (`role="spinbutton"`,
   con flechas, `Home` y `End`, y sin animación con movimiento reducido). Es el
-  mismo en toda la web: Avance, Red, Red → Asientos (los días), las cifras del
+  mismo en toda la web: Avance, Red, Asientos (los días), las cifras del
   Pomodoro y las pestañas del panel con periodo. Lo que solo tiene dos opciones («este mes» / «siempre»)
   sigue en pastillas; el capital de Code Clicker también, porque sus tramos
   conviven con fechas a mano y a veces no hay ninguno elegido.

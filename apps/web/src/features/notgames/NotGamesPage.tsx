@@ -19,8 +19,6 @@ import { useI18n } from '../../shared/i18n'
 import { notGamesHref, turnGameHref } from '../../shared/links'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { PillGroup } from '../../shared/ui/PillGroup'
-import { GitCourseTab } from '../gitcourse/GitCourseTab'
-import { ShellCourseTab } from '../shellcourse/ShellCourseTab'
 import { Icon } from '../../shared/ui/Icon'
 import { InfoTip } from '../../shared/ui/InfoTip'
 import { NotGamesTour } from './NotGamesTour'
@@ -68,27 +66,26 @@ export function NotGamesPage({ me, room }: NotGamesPageProps) {
       </h2>
       {valid && turn && <TurnRoomView id={id} me={me} />}
       {valid && !turn && <RoomView id={id} me={me} />}
-      {!valid && <Lobby me={me} initial={room === 'git' || room === 'shell' ? room : 'rooms'} />}
+      {!valid && <Lobby initial={room === 'review' ? 'review' : 'rooms'} />}
     </section>
   )
 }
 
-const TABS = ['rooms', 'review', 'git', 'shell'] as const
+const TABS = ['rooms', 'review'] as const
 
 type Tab = (typeof TABS)[number]
 
-/** La portada de Not-games: las salas, tu Repaso o los cursos de git (`#/notgames/git`) y de shell (`#/notgames/shell`). */
-function Lobby({ me, initial }: { me: string; initial: Tab }) {
+/**
+ * La portada de Not-games: las salas o tu Repaso (`#/notgames/review`). Los
+ * cursos de git y de shell tienen su propia pestaña en Aprender desde el
+ * 2026-10-29; sus direcciones viejas llevan allí (`useRoute`).
+ */
+function Lobby({ initial }: { initial: Tab }) {
   const { t } = useI18n()
   const [tab, setTab] = useState<Tab>(initial)
   // Un piscinero, solo las pestañas que permite el panel (`docs/piscineros.md`).
   const review = usePoolAllows('notgames.review')
-  const git = usePoolAllows('gitcourse')
-  const shell = usePoolAllows('shellcourse')
-  const tabs = TABS.filter(
-    (each) =>
-      (each !== 'review' || review) && (each !== 'git' || git) && (each !== 'shell' || shell),
-  )
+  const tabs = TABS.filter((each) => each !== 'review' || review)
 
   return (
     <>
@@ -102,15 +99,6 @@ function Lobby({ me, initial }: { me: string; initial: Tab }) {
       />
       {tab === 'rooms' && <Rooms />}
       {tab === 'review' && review && <ReviewTab />}
-      {tab === 'git' && git && (
-        <GitCourseTab
-          me={me}
-          onReview={() => {
-            setTab('review')
-          }}
-        />
-      )}
-      {tab === 'shell' && shell && <ShellCourseTab />}
     </>
   )
 }

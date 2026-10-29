@@ -41,8 +41,20 @@ const PublicRecord = lazy(() =>
 const AdminPage = lazy(() =>
   import('../features/admin/AdminPage').then((m) => ({ default: m.AdminPage })),
 )
-const RedPage = lazy(() =>
-  import('../features/network/RedPage').then((m) => ({ default: m.RedPage })),
+const NetworkPage = lazy(() =>
+  import('../features/network/NetworkPage').then((m) => ({ default: m.NetworkPage })),
+)
+const SeatsPage = lazy(() =>
+  import('../features/network/SeatsPage').then((m) => ({ default: m.SeatsPage })),
+)
+const GitCoursePage = lazy(() =>
+  import('../features/gitcourse/GitCoursePage').then((m) => ({ default: m.GitCoursePage })),
+)
+const ShellCoursePage = lazy(() =>
+  import('../features/shellcourse/ShellCoursePage').then((m) => ({ default: m.ShellCoursePage })),
+)
+const FocusPage = lazy(() =>
+  import('../features/focus/FocusDialog').then((m) => ({ default: m.FocusPage })),
 )
 // Los exámenes también perezosos: son ~800 líneas que no toca cargar al entrar.
 const ExamsPage = lazy(() =>
@@ -142,7 +154,11 @@ export function SectionView({
       {section === 'pizarras' && <BoardsCalendar />}
       {section === 'notgames' && <NotGamesPage me={me.login} room={param} />}
       {section === 'estadisticas' && <HelpStatsPage me={me.login} />}
-      {section === 'red' && <RedPage me={me} />}
+      {section === 'red' && <NetworkPage me={me} />}
+      {section === 'asientos' && <SeatsPage />}
+      {section === 'cursogit' && <GitCoursePage me={me.login} />}
+      {section === 'cursoshell' && <ShellCoursePage />}
+      {section === 'pomodoro' && <FocusPage />}
       {section === 'avance' &&
         (pool ? <PiscineProgressPage me={me.login} /> : <ProgressPage me={me.login} />)}
       {section === 'agenda' && (

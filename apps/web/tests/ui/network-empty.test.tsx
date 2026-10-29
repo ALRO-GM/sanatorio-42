@@ -87,10 +87,8 @@ describe('Red sin resultados', () => {
           }
         : getSeatGraph(days),
     )
-    await openApp('#/red', { detail: 'datos' })
-    await user.click(
-      await screen.findByRole('tab', { name: text('seats.view.seats') }, { timeout: 5000 }),
-    )
+    await openApp('#/asientos', { detail: 'datos' })
+    await screen.findByText(text('seats.title'), {}, { timeout: 5000 })
     await settle(600)
     expect(document.querySelector('canvas.force-graph')).not.toBeNull()
 

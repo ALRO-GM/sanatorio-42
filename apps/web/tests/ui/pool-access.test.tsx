@@ -60,8 +60,8 @@ describe('lo que ve un piscinero (docs/piscineros.md)', () => {
     await waitFor(() => {
       expect(tabs()).not.toContain(text('nav.cat.ayuda'))
     }, WAIT)
-    // Yo (expediente y calendario) y Campus (por los clústeres); sin Aprender.
-    expect(tabs()).toEqual([text('nav.cat.yo'), text('nav.cat.campus')])
+    // Yo (expediente y calendario), Aprender (por el Pomodoro) y Campus (por los clústeres).
+    expect(tabs()).toEqual([text('nav.cat.yo'), text('nav.cat.aprender'), text('nav.cat.campus')])
     // `red.rankings` sin `red`: en Campus no sale la Red.
     await userEvent.setup().click(within(nav).getByRole('button', { name: text('nav.cat.campus') }))
     expect(window.location.hash).toBe('#/clusters')

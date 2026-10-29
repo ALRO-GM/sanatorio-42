@@ -108,7 +108,7 @@ export function SeatsTour() {
       tour={TOUR}
       tab={() => t('nav.cat.campus')}
       // Los asientos son una vista de Red: «Datos › Red › Asientos».
-      sub={() => `${t('nav.red')} › ${t('seats.view.seats')}`}
+      sub={() => t('nav.asientos')}
     >
       {(shot) => {
         if (shot.scene === 1) {

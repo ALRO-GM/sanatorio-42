@@ -18,7 +18,7 @@ que hacer, en orden. Este documento es el porqué; aquel, el qué.
   desde el panel (`docs/piscineros.md`).
 - **Red de asientos** (`docs/asientos.md`, migración 71 `seat_sessions`):
   historial de dónde se sienta cada cual, cercanía 3/2/1,5, aislamiento;
-  puestos cada 2 min con gente y 5 sin ella. Pestaña Red → Asientos.
+  puestos cada 2 min con gente y 5 sin ella. Pestaña Campus › Asientos (antes, Red → Asientos).
 - Plano de clústeres: fila 1 abajo, desplazamiento por hacia dónde miran.
   Resaltados arriba; invertir y alinear, plegados bajo el plano. Arreglado el
   botón de «no funciona».

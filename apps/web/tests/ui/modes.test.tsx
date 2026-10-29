@@ -1,4 +1,4 @@
-import { cleanup, screen, within } from '@testing-library/react'
+import { cleanup, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import es from 'virtual:textos/es'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
@@ -65,8 +65,19 @@ describe('categorías', () => {
     expect(window.location.hash).toBe('#/pizarras')
   }, 20_000)
 
+  it('las direcciones de antes de la reorganización llevan a su pestaña nueva', async () => {
+    await openIn('normal', '#/notgames/git')
+    await waitFor(() => {
+      expect(window.location.hash).toBe('#/cursogit')
+    }, WAIT)
+    expect(tabsOf(text('nav.cat.aprender'))).toEqual(
+      expect.arrayContaining([text('nav.cursogit'), text('nav.cursoshell'), text('nav.notgames')]),
+    )
+  }, 20_000)
+
   it('una categoría de una sola sección no saca segunda fila', async () => {
-    await openIn('normal', '#/notgames')
+    // En el simplificado, de Aprender solo queda el Pomodoro.
+    await openIn('simple', '#/pomodoro')
     expect(screen.queryByRole('navigation', { name: text('nav.cat.aprender') })).toBeNull()
   }, 20_000)
 })

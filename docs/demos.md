@@ -147,20 +147,20 @@ tema (nunca un color suelto) y se apunta en esta tabla.
 | `therapy` | Ayuda › Sprints | Unirse, abrir un grupo con puestos y días |
 | `boards` | Ayuda › Pizarras | Apuntarse, proponer, códigos de asistencia |
 | `agenda` | Calendario | Filtros de tipo con su número, detalle de un evento, responder, fijar su cuenta atrás, pestaña Cuentas atrás con el reloj, fijar la entrega de una meta |
-| `network` | Datos › Red | Burbujas, ficha, buscar, periodo común, sumar una escuela (color por escuela), tope de personas |
-| `clusters` | Clústeres | Pestañas con sus sentados, resaltar tu proyecto, ficha de un puesto, avería de un puesto libre, colocación plegada (invertir), ajustar / 100 % |
-| `record` | Perfil › Perfil | Nivel y XP, ordenar los bloques en Personalizar (ventana), pace de hoy y de tu intra, plazos y black hole, compararte en Avance |
+| `network` | Campus › Red | Burbujas, ficha, buscar, periodo común, sumar una escuela (color por escuela), tope de personas |
+| `clusters` | Campus › Clústeres | Pestañas con sus sentados, resaltar tu proyecto, ficha de un puesto, avería de un puesto libre, colocación plegada (invertir), ajustar / 100 % |
+| `record` | Yo › Expediente | Nivel y XP, ordenar los bloques en Personalizar (ventana), pace de hoy y de tu intra, plazos y black hole, compararte en Avance |
 | `mailbox` | Buzón (cabecera) | Avisos sin leer, pestañas de avisos y conversaciones, a dónde llevan |
 | `inbox` | Incidencias y sugerencias (menú de la cuenta) | Elegir tipo, escribir, la respuesta en lo que has enviado |
-| `helpStats` | Ayuda › Estadísticas | Periodo, cifras de cada sección, clasificación con fotos, tu fila, ir a un perfil |
-| `chess` | Ayuda › Not-games (ajedrez) | Mover, pregunta a los dos, quien acierta mueve, castigo por fallar |
-| `notGames` | Ayuda › Not-games | Elegir modo, contestar, ver la buena y por qué, marcador con vidas |
-| `exams` | Datos › Exámenes | Aviso en vivo en la pestaña, quién está y su estado, se pone al día solo, filtrar por plan, intentos hasta aprobar |
-| `scrum` | Perfil › Agenda | Nueva meta (fecha, % y checkpoints), marcar un checkpoint, fijar la entrega como cuenta atrás, daily con un atasco de la lista, tablero del sprint |
-| `gitCourse` | Curso de git (Not-games) | Elegir punto, animación y teoría, terminal y estrellas, misiones de grupo |
-| `progress` | Datos › Avance | Tu línea y la media, añadir un campus con su línea, el periodo, medir por horas, la ficha de un hito |
-| `gitCourse` | Ayuda › Not-games › Curso de git | Elegir punto, animación y teoría, terminal y estrellas, misiones de grupo |
-| `shellCourse` | Ayuda › Not-games › Curso de shell | Elegir unidad, teoría y ejemplo, terminal con objetivos, jefe contrarreloj |
-| `seats` | Datos › Red › Asientos | Grafo de quién se sienta cerca, color por aislamiento, ficha de una persona, periodo, mapa de calor de los puestos y sus cifras |
+| `helpStats` | Campus › Clasificaciones | Periodo, cifras de cada sección, clasificación con fotos, tu fila, ir a un perfil |
+| `chess` | Aprender › Not-games (ajedrez) | Mover, pregunta a los dos, quien acierta mueve, castigo por fallar |
+| `notGames` | Aprender › Not-games | Elegir modo, contestar, ver la buena y por qué, marcador con vidas |
+| `exams` | Campus › Exámenes | Aviso en vivo en la pestaña, quién está y su estado, se pone al día solo, filtrar por plan, intentos hasta aprobar |
+| `scrum` | Yo › Agenda | Nueva meta (fecha, % y checkpoints), marcar un checkpoint, fijar la entrega como cuenta atrás, daily con un atasco de la lista, tablero del sprint |
+| `gitCourse` | Aprender › Curso de git | Elegir punto, animación y teoría, terminal y estrellas, misiones de grupo |
+| `progress` | Campus › Avance | Tu línea y la media, añadir un campus con su línea, el periodo, medir por horas, la ficha de un hito |
+| `gitCourse` | Aprender › Curso de git | Elegir punto, animación y teoría, terminal y estrellas, misiones de grupo |
+| `shellCourse` | Aprender › Curso de shell | Elegir unidad, teoría y ejemplo, terminal con objetivos, jefe contrarreloj |
+| `seats` | Campus › Asientos | Grafo de quién se sienta cerca, color por aislamiento, ficha de una persona, periodo, mapa de calor de los puestos y sus cifras |
 | `studio` | Personalizar (menú de la cuenta) | Arrastrar una pestaña y un bloque, pestaña Estilo, elegir un estilo que se aplica al momento, Listo |
 

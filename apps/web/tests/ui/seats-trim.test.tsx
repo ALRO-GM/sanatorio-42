@@ -33,7 +33,7 @@ describe('red de asientos: recortar el grafo', () => {
   it('de cada cual, sus más cercanas; y al elegir a alguien, solo sus conexiones', async () => {
     render(
       <I18nProvider>
-        <SeatsPage switcher={null} />
+        <SeatsPage />
       </I18nProvider>,
     )
 

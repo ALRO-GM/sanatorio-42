@@ -30,11 +30,17 @@ export const SECTIONS = [
   // La guardia: ofrecer ayuda. El interruptor sigue en la cabecera, que es lo
   // que se toca a diario; la página, con las demás de Ayuda.
   { id: 'guardia', icon: 'guardia', inNav: true, category: 'ayuda', from: 'simple' },
-  // Aprender: practicar y concentrarse. Not-games (preguntas con más gente,
-  // con los cursos de git y de shell dentro, de momento).
+  // Aprender: practicar y concentrarse. Los cursos (antes, pestañas de
+  // Not-games), Not-games (preguntas con más gente) y el Pomodoro (antes, en el
+  // menú de la cuenta), que es para todos: concentrarse no es «de datos».
+  { id: 'cursogit', icon: 'chispa', inNav: true, category: 'aprender', from: 'normal' },
+  { id: 'cursoshell', icon: 'terminal', inNav: true, category: 'aprender', from: 'normal' },
   { id: 'notgames', icon: 'pregunta', inNav: true, category: 'aprender', from: 'normal' },
+  { id: 'pomodoro', icon: 'reloj', inNav: true, category: 'aprender', from: 'simple' },
   // Campus: cómo va el campus y cómo vas tú frente a él.
   { id: 'clusters', icon: 'capas', inNav: true, category: 'campus', from: 'normal' },
+  // Asientos: con quién se sienta cada cual (antes, una vista de la Red).
+  { id: 'asientos', icon: 'persona', inNav: true, category: 'campus', from: 'normal' },
   // Avance en el common core frente a la media y los paces (#87).
   { id: 'avance', icon: 'despegue', inNav: true, category: 'campus', from: 'normal' },
   { id: 'red', icon: 'red', inNav: true, category: 'campus', from: 'normal' },
@@ -117,12 +123,16 @@ const POOL_KEY: Record<Section, PoolKey | null> = {
   tablon: 'tablon',
   terapia: 'terapia',
   pizarras: 'pizarras',
+  cursogit: 'gitcourse',
+  cursoshell: 'shellcourse',
   notgames: 'notgames',
+  pomodoro: 'focus',
   estadisticas: 'estadisticas',
   calendario: 'calendario',
   red: 'red',
   avance: 'avance',
   clusters: 'clusters',
+  asientos: 'red.seats',
   examenes: 'examenes',
   guardia: 'guardia',
   expediente: 'expediente',

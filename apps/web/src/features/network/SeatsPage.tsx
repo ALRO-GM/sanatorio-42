@@ -1,5 +1,4 @@
 import { useCallback, useMemo, useState } from 'react'
-import type { ReactNode } from 'react'
 
 import type {
   NetworkLink,
@@ -73,7 +72,7 @@ function toNode(person: SeatPerson, strength: number): NetworkNode {
  * los clústeres. Cada unión es la cercanía de dos personas: horas sentadas a
  * la vez por el peso de lo cerca que estaban los puestos.
  */
-export function SeatsPage({ switcher }: { switcher: ReactNode }) {
+export function SeatsPage() {
   const { t, tn } = useI18n()
   const { number } = useFormat()
   const [period, setPeriod] = useState<Period>('1')
@@ -208,7 +207,6 @@ export function SeatsPage({ switcher }: { switcher: ReactNode }) {
                 <SeatsTour />
               </InfoTip>
             </h2>
-            {switcher}
             <p className="hint">{t('seats.intro')}</p>
           </div>
           <div className="net-filters">

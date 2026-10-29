@@ -19,12 +19,12 @@ Mapa acordado (Calendario en Yo, confirmado por Alberto):
 
 Fases, cada una con check, commit, push y despliegue:
 
-1. **Categorías** (`app/sections.ts`, `shared/layout/registry.ts`, textos
+1. **(Hecha, 46ed511) Categorías** (`app/sections.ts`, `shared/layout/registry.ts`, textos
    `nav.cat.*`, Nav, Miniature, tours que nombran categorías, mock de piscina,
    `docs/interfaz.md`): Yo, Ayuda, Aprender, Campus; Guardia como pestaña de
    Ayuda; Estadísticas → Clasificaciones en Campus. Los órdenes guardados con
    las categorías viejas no deben romper nada.
-2. **Sacar lo escondido**: cursos de git y de shell como secciones propias de
+2. **(Hecha) Sacar lo escondido**: cursos de git y de shell como secciones propias de
    Aprender (hoy pestañas de Not-games; `#/notgames/git` y `#/notgames/shell`
    redirigen); Pomodoro como página de Aprender (ajustes, Startup, cifras; la
    ventanita de la esquina se queda); Asientos como sección de Campus (hoy
