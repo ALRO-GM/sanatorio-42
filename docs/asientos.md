@@ -274,3 +274,12 @@ por él gastaba mucha CPU.
 - **Las cuentas de las pastillas.** Cada pastilla lleva la gente sentada en
   el clúster (`occupied` de la API: con cara o sin ella), también cuando es 0.
 
+
+## Tamaño de las burbujas (2026-10-29)
+
+Pedido por Alberto: el tamaño de cada burbuja ya no son sus horas en el
+clúster, sino la fuerza de sus uniones: la cercanía de todas las uniones a la
+vista (con los recortes de «con quién más» y «solo las de la persona elegida»)
+sumada por persona. El área es proporcional a esa parte del total, con la
+misma escala que la red de correcciones (la más grande, a tamaño máximo). Se
+calcula en la web (`SeatsPage.tsx`), así que cambia al momento al recortar.

@@ -46,14 +46,15 @@ const PARTNERS_SHOWN = 8
 
 /**
  * Una persona de la red de asientos como burbuja del grafo de la red: el
- * tamaño son sus horas y la endogamia guarda lo solo que se sienta (0-100).
+ * tamaño es la fuerza de sus uniones a la vista (`strength`) y la endogamia
+ * guarda lo solo que se sienta (0-100).
  */
-function toNode(person: SeatPerson): NetworkNode {
+function toNode(person: SeatPerson, strength: number): NetworkNode {
   return {
     login: person.login,
     image: person.image,
     external: false,
-    given: Math.round(person.hours),
+    given: strength,
     received: 0,
     partners: person.partners,
     endogamy: Math.round(person.alone * 100),
@@ -97,7 +98,21 @@ export function SeatsPage({ switcher }: { switcher: ReactNode }) {
         : trimSeats(data.people, data.links, trim, onlyChosen ? selected : null),
     [data, trim, onlyChosen, selected],
   )
-  const nodes = useMemo(() => shown?.people.map(toNode) ?? [], [shown])
+  // El tamaño de cada burbuja no son sus horas en el clúster, sino su parte de
+  // la cercanía de las uniones a la vista: sumadas todas, cuanto más le toca a
+  // alguien, más grande (pedido por Alberto, 2026-10-29).
+  const nodes = useMemo(() => {
+    if (shown === undefined) return []
+
+    const strength = new Map<string, number>()
+
+    for (const link of shown.links) {
+      strength.set(link.source, (strength.get(link.source) ?? 0) + link.closeness)
+      strength.set(link.target, (strength.get(link.target) ?? 0) + link.closeness)
+    }
+
+    return shown.people.map((person) => toNode(person, strength.get(person.login) ?? 0))
+  }, [shown])
   const links = useMemo(
     (): NetworkLink[] =>
       shown?.links.map((link) => ({
