@@ -6,7 +6,8 @@
  * tamaño y de visibilidad y URLs de ficheros. En Node no hay `window` y no se
  * toca nada.
  */
-import { vi } from 'vitest'
+import { cleanup } from '@testing-library/react'
+import { afterAll, vi } from 'vitest'
 
 /** Pone `value` en `target[name]` solo si no lo trae ya. */
 function fill(target: object, name: string, value: unknown): void {
@@ -16,6 +17,13 @@ function fill(target: object, name: string, value: unknown): void {
 }
 
 const noop = (): void => undefined
+
+/**
+ * Lo que se espera al acabar cada fichero antes de cerrar jsdom: más que la
+ * respuesta más lenta de la API de mentira (`delay(350)`), con margen para una
+ * cadena de dos.
+ */
+const SETTLE_MS = 1000
 
 if (typeof window !== 'undefined') {
   vi.stubEnv('VITE_USE_MOCK', 'true')
@@ -93,6 +101,18 @@ if (typeof window !== 'undefined') {
   fill(Element.prototype, 'scrollIntoView', noop)
   fill(URL, 'createObjectURL', () => 'blob:prueba')
   fill(URL, 'revokeObjectURL', noop)
+
+  // Una respuesta de la API de mentira que llega después del último test hace
+  // un `setState` en una pantalla ya desmontada. Si jsdom ya se ha cerrado, sin
+  // `window`, React falla y vitest da el fichero por roto («window is not
+  // defined», solo en la CI, que es más lenta). Se desmonta todo y se deja que
+  // terminen antes de cerrar.
+  afterAll(async () => {
+    cleanup()
+    await new Promise((resolve) => {
+      setTimeout(resolve, SETTLE_MS)
+    })
+  })
 
   // Como `main.tsx`: los textos del idioma del navegador, antes de pintar. Sin
   // ellos, `I18nProvider` no pinta nada hasta que llegan.
