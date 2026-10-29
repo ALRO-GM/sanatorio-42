@@ -155,7 +155,7 @@ export function SectionView({
       {section === 'notgames' && <NotGamesPage me={me.login} room={param} />}
       {section === 'estadisticas' && <HelpStatsPage me={me.login} />}
       {section === 'red' && <NetworkPage me={me} />}
-      {section === 'asientos' && <SeatsPage />}
+      {section === 'asientos' && <SeatsPage me={me.login} />}
       {section === 'cursogit' && <GitCoursePage me={me.login} />}
       {section === 'cursoshell' && <ShellCoursePage />}
       {section === 'pomodoro' && <FocusPage />}

@@ -340,6 +340,8 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
     [allProjects, orders.projects, spanLow, spanHigh],
   )
 
+  const mine = graph?.nodes.find((node) => node.login === me.login)
+
   return (
     <section className="network">
       <div className="net-layout">
@@ -353,6 +355,18 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
                 <NetworkTour />
               </InfoTip>
             </h2>
+            {/* Primera capa (2026-10-29): tu red en una frase, con los filtros puestos. */}
+            {mine !== undefined && mine.given + mine.received > 0 && (
+              <p className="progress-answer neutral net-answer">
+                <span className="eyebrow">{t('stats.progress.answer.label')}</span>
+                <strong>
+                  {tn('net.answer', mine.given, {
+                    received: number(mine.received),
+                    partners: number(mine.partners),
+                  })}
+                </strong>
+              </p>
+            )}
 
             {graph !== null && graph.sync.phase !== 'done' && (
               <div className="net-sync" role="status">

@@ -105,6 +105,7 @@ de datos.
 | Calendario | Vistas día/semana/mes, tipos de evento (también leyenda) | S | Básico |
 | Calendario | Formas del día (lista, entera, ajustada, desde ahora) | N | Comodidad |
 | Red | Grafo, filtros, totales, cómo se lee | N | La sección en sí |
+| Red, Asientos y Clasificaciones | Primera capa (2026-10-29), una frase arriba: en la Red, cuántas correcciones has hecho y recibido y con cuánta gente; en Asientos, con quién te sueles sentar y cuánto pasas sin nadie cerca; en Clasificaciones, tu mejor puesto | N | Datos rápidos: lo que se viene a mirar, sin leer el grafo ni las listas |
 | Red | Endogamia, parejas, los más estrictos, proyectos más corregidos | D | Rankings |
 | Red | Asientos: mapa de calor de los puestos bajo el grafo (horas por ordenador, con el plano de cada cual y «Ver como tabla»; `docs/asientos.md`) | N | Bloque de la red de asientos, pedido por Alberto (2026-10-25): el mismo periodo y las mismas horas que el grafo |
 | Avance | Tu avance en el common core frente a las medias y los paces, por círculos o por horas estimadas, y con hasta 5 personas (#87; en Datos desde el 2026-10-25). Plan, población (terminado, en curso + terminado, black hole: `docs/blackhole.md`) y campus (por defecto el tuyo; uno, varios o todos, cada uno en su línea, y todos juntos) se encienden a la vez, una línea por combinación. Periodo: los primeros 1–24 meses, todo o del mes X al Y | N | La sección en sí |

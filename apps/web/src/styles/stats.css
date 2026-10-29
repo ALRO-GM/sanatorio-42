@@ -552,3 +552,8 @@
 .progress-deep[open] > summary {
   margin-bottom: 0.75rem;
 }
+/* En la columna estrecha de la Red y los Asientos, la frase más pequeña. */
+.net-answer strong {
+  font-size: 1.05rem;
+  line-height: 1.35;
+}

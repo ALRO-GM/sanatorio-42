@@ -24,6 +24,15 @@ export function HelpStatsPage({ me }: { me: string }) {
   const { t } = useI18n()
   const [period, setPeriod] = useState<LeaderboardPeriod>('month')
   const { data, error, loading, reload } = useAsync(() => api.getHelpStats(period), [period])
+  // Primera capa (2026-10-29): tu mejor puesto entre todas las clasificaciones.
+  const best =
+    data?.sections.reduce<{ rank: number; section: string } | null>(
+      (top, section) =>
+        section.me !== null && (top === null || section.me.rank < top.rank)
+          ? { rank: section.me.rank, section: section.id }
+          : top,
+      null,
+    ) ?? null
 
   return (
     <section className="help-stats">
@@ -43,6 +52,14 @@ export function HelpStatsPage({ me }: { me: string }) {
         />
       </div>
 
+      {best !== null && (
+        <p className="progress-answer good">
+          <span className="eyebrow">{t('stats.progress.answer.label')}</span>
+          <strong>
+            {t('stats.answer', { rank: best.rank, section: t(`nav.${best.section}`) })}
+          </strong>
+        </p>
+      )}
       {loading && data === undefined && <p className="estado">{t('app.loading')}</p>}
       {data === undefined && <ErrorNote error={error} onRetry={() => void reload()} />}
 

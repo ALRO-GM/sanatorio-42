@@ -11,7 +11,7 @@ import type {
 import { api } from '../../shared/api'
 import type { SeatDates } from '../../shared/api/types'
 import { useAsync } from '../../shared/hooks/useAsync'
-import { useI18n } from '../../shared/i18n'
+import { localeOf, useI18n } from '../../shared/i18n'
 import { useFormat } from '../../shared/i18n/useFormat'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { PillGroup } from '../../shared/ui/PillGroup'
@@ -72,8 +72,8 @@ function toNode(person: SeatPerson, strength: number): NetworkNode {
  * los clústeres. Cada unión es la cercanía de dos personas: horas sentadas a
  * la vez por el peso de lo cerca que estaban los puestos.
  */
-export function SeatsPage() {
-  const { t, tn } = useI18n()
+export function SeatsPage({ me }: { me?: string }) {
+  const { t, tn, lang } = useI18n()
   const { number } = useFormat()
   const [period, setPeriod] = useState<Period>('1')
   const [dates, setDates] = useState<SeatDates>({ from: '', to: '' })
@@ -186,6 +186,20 @@ export function SeatsPage() {
         hours: link.hours,
       }))
   }, [chosen, data])
+  // Primera capa (2026-10-29): con quién te sueles sentar y cuánto, sin nadie cerca.
+  const answer = useMemo(() => {
+    const person = me === undefined ? undefined : byLogin.get(me)
+
+    if (person === undefined || data === undefined) return null
+
+    const names = data.links
+      .filter((link) => link.source === person.login || link.target === person.login)
+      .sort((x, y) => y.closeness - x.closeness)
+      .slice(0, 3)
+      .map((link) => (link.source === person.login ? link.target : link.source))
+
+    return names.length === 0 ? null : { names, alone: Math.round(person.alone * 100) }
+  }, [me, byLogin, data])
   // Quien más horas pasa sin nadie cerca, entre quien viene a menudo.
   const loneliest = useMemo(
     () =>
@@ -207,6 +221,19 @@ export function SeatsPage() {
                 <SeatsTour />
               </InfoTip>
             </h2>
+            {answer !== null && (
+              <p className="progress-answer neutral net-answer">
+                <span className="eyebrow">{t('stats.progress.answer.label')}</span>
+                <strong>
+                  {t('seats.answer', {
+                    names: new Intl.ListFormat(localeOf(lang), { type: 'conjunction' }).format(
+                      answer.names,
+                    ),
+                    alone: answer.alone,
+                  })}
+                </strong>
+              </p>
+            )}
             <p className="hint">{t('seats.intro')}</p>
           </div>
           <div className="net-filters">

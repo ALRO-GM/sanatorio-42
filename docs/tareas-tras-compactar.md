@@ -35,7 +35,7 @@ Fases, cada una con check, commit, push y despliegue:
 4. **(Hecha) Estilo base profesional**: un estilo nuevo por defecto como el ejemplo
    (Inter, grises neutros, turquesa #0F766E / #2DD4BF en oscuro, bordes de 1 px,
    radio 12, cifras tabulares). Los estilos actuales siguen en Personalizar.
-5. **(Hecha en Avance, ce05d63; faltan Red, Asientos, Exámenes, Clasificaciones y Clústeres) Tres capas de datos** en Campus: la respuesta en una frase, el gráfico
+5. **(Hecha: Avance con tres capas; Red, Asientos y Clasificaciones con la frase; Exámenes ya la tenía con el examen en vivo; Clústeres es el propio plano) Tres capas de datos** en Campus: la respuesta en una frase, el gráfico
    con opciones a la derecha, «Ver a fondo» plegado.
 
 ## Dominio Peer4U.app (cuando Alberto lo compre)
