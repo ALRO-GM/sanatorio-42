@@ -6,11 +6,9 @@ import { useAsync } from '../../shared/hooks/useAsync'
 import { usePolling } from '../../shared/hooks/usePolling'
 import { useI18n } from '../../shared/i18n'
 import { Show } from '../../shared/detail'
+import { openCustomize } from '../../shared/layout/customize'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
-import { ComfortSettings } from './ComfortSettings'
-import { DetailSelect } from '../../shared/ui/DetailSelect'
 import { LangSelect } from '../../shared/ui/LangSelect'
-import { ThemeSelect } from '../../shared/ui/ThemeSelect'
 
 type SettingsProps = {
   /** Campus que se está mirando. `undefined` mientras carga el perfil. */
@@ -41,10 +39,18 @@ export function Settings({ campusId, onCampusChange }: SettingsProps) {
 
   return (
     <div className="settings" aria-label={t('settings.label')}>
-      <DetailSelect />
       <LangSelect />
-      <ThemeSelect />
-      <ComfortSettings />
+      {/* El modo, el tema y la comodidad están en Personalizar (2026-10-29): aquí,
+          solo el idioma (donde se busca) y el campus, y el paso hasta allí. */}
+      <button
+        type="button"
+        className="link settings-more"
+        onClick={() => {
+          openCustomize('settings')
+        }}
+      >
+        {t('settings.more')}
+      </button>
       {/* Sin la lista no se puede cambiar de campus: se dice y se deja reintentar. */}
       <ErrorNote error={campuses.error} onRetry={() => void campuses.reload()} />
       {campuses.data !== undefined && campuses.data.length > 0 && campusId !== undefined && (

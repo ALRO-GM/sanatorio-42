@@ -25,7 +25,7 @@ export type Detail = (typeof DETAILS)[number]
 const KEY = 'sanatorio_detail'
 const listeners = new Set<() => void>()
 
-export function isDetail(value: unknown): value is Detail {
+function isDetail(value: unknown): value is Detail {
   return typeof value === 'string' && (DETAILS as readonly string[]).includes(value)
 }
 

@@ -105,13 +105,13 @@ describe('modos de la interfaz', () => {
     expect(await screen.findByText(text('net.strict.title'), {}, WAIT)).toBeTruthy()
   }, 30_000)
 
-  it('cambiar el modo en el pie cambia la web al momento y se recuerda', async () => {
+  it('cambiar el modo (desde el pie, en Personalizar) cambia la web al momento y se recuerda', async () => {
     const user = userEvent.setup()
 
     await openIn('normal', '#/expediente')
-    await user.selectOptions(
-      screen.getByRole('combobox', { name: text('settings.detail') }),
-      'simple',
+    await user.click(screen.getByRole('button', { name: text('settings.more') }))
+    await user.click(
+      await screen.findByRole('radio', { name: new RegExp(text('settings.detail.simple')) }, WAIT),
     )
     expect(tabsOf(text('nav.label'))).not.toContain(text('nav.cat.campus'))
     expect(localStorage.getItem('sanatorio_detail')).toBe('simple')

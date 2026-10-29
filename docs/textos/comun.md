@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/comun.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-372 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
+373 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera | Francés |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -379,3 +379,4 @@ Generado desde `apps/web/src/shared/i18n/textos/comun.csv` con
 | `dock.dropped` | Ventanitas de la esquina: lector de pantalla, al soltarla con Espacio | shared/dock/DockItem | {title} se queda en la posición {pos} de {total}. | {title} stays in position {pos} of {total}. | {title} es queda a la posició {pos} de {total}. | {title} {pos}. posizioan geratzen da ({total}etatik). | {title} reste en position {pos} sur {total}. |
 | `dock.cancelled` | Ventanitas de la esquina: lector de pantalla, al cancelar con Escape | shared/dock/DockItem | {title} vuelve a su sitio. | {title} is back where it was. | {title} torna al seu lloc. | {title} bere lekura itzuli da. | {title} revient à sa place. |
 | `dock.floated` | Ventanitas de la esquina: lector de pantalla, al soltarla lejos de la pila | shared/dock/DockItem | {title} flota fuera de la esquina. | {title} is floating outside the corner. | {title} flota fora de la cantonada. | {title} izkinatik kanpo dago. | {title} flotte hors du coin. |
+| `settings.more` | Pie: botón que abre Personalizar en sus ajustes (modo, tema, texto, daltonismo, zen) | features/settings/Settings | Más ajustes: modo, tema y comodidad | More settings: mode, theme and comfort | Més ajustos: mode, tema i comoditat | Ezarpen gehiago: modua, gaia eta erosotasuna | Plus de réglages : mode, thème et confort |

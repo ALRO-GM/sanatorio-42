@@ -29,13 +29,13 @@ Fases, cada una con check, commit, push y despliegue:
    redirigen); Pomodoro como página de Aprender (ajustes, Startup, cifras; la
    ventanita de la esquina se queda); Asientos como sección de Campus (hoy
    pestaña de Red). Permisos de piscina (`POOL_KEY`) de cada sección nueva.
-3. **(Hecha en parte: menú y barra del móvil; falta llevar los ajustes del pie a Personalizar) Cabecera y menú**: menú del avatar solo de la cuenta (Personalizar,
+3. **(Hecha) Cabecera y menú**: menú del avatar solo de la cuenta (Personalizar,
    Bienvenida, Gestión, Salir); los ajustes del pie, en Personalizar; en el
    móvil, barra inferior con las cuatro categorías.
 4. **(Hecha) Estilo base profesional**: un estilo nuevo por defecto como el ejemplo
    (Inter, grises neutros, turquesa #0F766E / #2DD4BF en oscuro, bordes de 1 px,
    radio 12, cifras tabulares). Los estilos actuales siguen en Personalizar.
-5. **Tres capas de datos** en Campus: la respuesta en una frase, el gráfico
+5. **(Hecha en Avance, ce05d63; faltan Red, Asientos, Exámenes, Clasificaciones y Clústeres) Tres capas de datos** en Campus: la respuesta en una frase, el gráfico
    con opciones a la derecha, «Ver a fondo» plegado.
 
 ## Dominio Peer4U.app (cuando Alberto lo compre)

@@ -6,7 +6,10 @@ type FooterProps = {
   onCampusChange: (campusId: number) => Promise<void>
 }
 
-/** El pie: idioma, tema y campus. Lo de escribir a quien administra está en el menú de la cuenta. */
+/**
+ * El pie: el idioma, el campus y el paso a Personalizar, donde están el modo,
+ * el tema y la comodidad. Lo de escribir a quien administra está en el menú de la cuenta.
+ */
 export function Footer({ campusId, onCampusChange }: FooterProps) {
   const { t } = useI18n()
 

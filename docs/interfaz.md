@@ -35,7 +35,8 @@ Fuera de las pestañas, a propósito:
 | Bicho e interrogante (`docs/sugerencias.md`) | Cabecera, junto al buzón | Pedidos por Alberto: se arrastran hasta cualquier sitio; el bicho, para contar qué falla o qué mejorar; el interrogante, para ver la demostración de ese panel |
 | Panel de gestión, incidencias, personalizar, bienvenida, salir | Menú de la cuenta | Solo lo de la cuenta (2026-10-29): el expediente, la guardia y el Pomodoro tienen su pestaña |
 | Las cuatro categorías en el móvil | Barra fija abajo (640 px o menos), con icono y nombre | Destinos de primer nivel al alcance del pulgar; la pila de la esquina sube lo que mide la barra. Con 400 px o menos, el interruptor de la guardia va sin su palabra |
-| Modo, idioma, tema, texto, daltonismo, zen, campus | Pie | Se eligen una vez |
+| Idioma y campus | Pie | Se eligen una vez; el idioma, donde se suele buscar |
+| Modo, tema, texto, daltonismo, zen | Personalizar (pestaña Ajustes y Estilo), con «Más ajustes» en el pie | Un solo sitio para los ajustes (2026-10-29); antes estaban repetidos en el pie |
 | Privacidad, Code Clicker | Enlace del pie / secreto | No son del uso diario |
 
 ## Modos de la interfaz
@@ -123,7 +124,7 @@ de datos.
 | Exámenes | Cuánto se tarda en cada círculo | D | Estadística |
 | Exámenes | Filtros de plan (C o Python), exámenes (C, Nexus o los dos) y kickoffs; un rango por fila con C y Nexus juntos (#81) | N | Es lo que se viene a mirar |
 | Exámenes | Cada intento (nota mediana, aprobados, personas), plegado; en qué intento se aprueba, los 3 primeros y el resto al desplegar | D | Detalle (2026-10-25: sin tabla de kickoffs ni black hole, que no eran de fiar) |
-| Pie | Modo, idioma, tema, texto, daltonismo, zen | S | Accesibilidad |
+| Pie | Idioma y «Más ajustes» (abre Personalizar: modo, tema, texto, daltonismo, zen) | S | Accesibilidad |
 | Pie | Campus | N | Casi nadie cambia de campus |
 | Pie | «Puestos actualizados hace N min» | D | Dato técnico |
 
