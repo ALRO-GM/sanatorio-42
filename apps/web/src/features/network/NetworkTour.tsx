@@ -104,7 +104,7 @@ export function NetworkTour() {
     value === 'all' ? t('period.all') : tn('period.last', Number(value))
 
   return (
-    <Tour tour={TOUR} tab={() => t('nav.cat.datos')} sub={() => t('nav.red')}>
+    <Tour tour={TOUR} tab={() => t('nav.cat.campus')} sub={() => t('nav.red')}>
       {(shot) => {
         const shown = (when: string): boolean =>
           when === '' ||

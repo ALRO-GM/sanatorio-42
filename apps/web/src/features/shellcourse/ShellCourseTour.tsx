@@ -42,7 +42,7 @@ export function ShellCourseTour() {
   return (
     <Tour
       tour={TOUR}
-      tab={() => t('nav.cat.ayuda')}
+      tab={() => t('nav.cat.aprender')}
       // El curso va en su pestaña dentro de Not-games: «Ayuda › Not-games › Curso de shell».
       sub={() => `${t('nav.notgames')} › ${t('notgames.tab.shell')}`}
     >

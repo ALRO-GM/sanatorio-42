@@ -109,7 +109,7 @@ export function Miniature({ start, announce }: MiniatureProps) {
 
   const fixed = category === null ? [] : sectionsOf(category).filter((id) => !navOrder.includes(id))
   const iconOf = (id: Section): IconName =>
-    sectionsOfCategory(categoryOf(id) ?? 'expediente').find((entry) => entry.id === id)?.icon ??
+    sectionsOfCategory(categoryOf(id) ?? 'yo').find((entry) => entry.id === id)?.icon ??
     'expediente'
 
   /** El asa de algo que se arrastra: un botón con los puntos. */

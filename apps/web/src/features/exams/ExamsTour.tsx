@@ -78,7 +78,7 @@ export function ExamsTour() {
   return (
     <Tour
       tour={TOUR}
-      tab={() => t('nav.cat.datos')}
+      tab={() => t('nav.cat.campus')}
       sub={(shot) => t(shot.opened ? 'nav.examenes' : 'nav.red')}
     >
       {(shot) => {

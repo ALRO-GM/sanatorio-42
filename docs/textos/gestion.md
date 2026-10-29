@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/gestion.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-657 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
+656 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera | Francés |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -589,11 +589,10 @@ Generado desde `apps/web/src/shared/i18n/textos/gestion.csv` con
 | `pool.key.people` | Panel, Piscina: permiso «people» | features/admin/PoolPanel | Buscador de personas y sus fichas | People search and their cards | Cercador de persones i les seves fitxes | Pertsona bilatzailea eta haien fitxak | Recherche de personnes et leurs fiches |
 | `pool.key.broadcasts` | Panel, Piscina: permiso «broadcasts» | features/admin/PoolPanel | Comunicados | Announcements | Comunicats | Oharrak | Annonces |
 | `pool.key.tickets` | Panel, Piscina: permiso «tickets» | features/admin/PoolPanel | Escribir a quien administra | Write to the admins | Escriure a qui administra | Administratzaileari idatzi | Écrire aux personnes qui administrent |
-| `pool.group.expediente` | Panel, Piscina: grupo del árbol de permisos | features/admin/PoolPanel | Perfil | Profile | Perfil | Profila | Profil |
+| `pool.group.yo` | Panel, Piscina: grupo del árbol de permisos | features/admin/PoolPanel | Yo | Me | Jo | Ni | Moi |
 | `pool.group.ayuda` | Panel, Piscina: grupo del árbol de permisos | features/admin/PoolPanel | Ayuda | Help | Ajuda | Laguntza | Entraide |
-| `pool.group.calendario` | Panel, Piscina: grupo del árbol de permisos | features/admin/PoolPanel | Calendario | Calendar | Calendari | Egutegia | Calendrier |
-| `pool.group.clusters` | Panel, Piscina: grupo del árbol de permisos | features/admin/PoolPanel | Clústeres | Clusters | Clústers | Klusterrak | Clusters |
-| `pool.group.datos` | Panel, Piscina: grupo del árbol de permisos | features/admin/PoolPanel | Datos | Data | Dades | Datuak | Données |
+| `pool.group.aprender` | Panel, Piscina: grupo del árbol de permisos | features/admin/PoolPanel | Aprender | Learn | Aprendre | Ikasi | Apprendre |
+| `pool.group.campus` | Panel, Piscina: grupo del árbol de permisos | features/admin/PoolPanel | Campus | Campus | Campus | Campusa | Campus |
 | `pool.group.extra` | Panel, Piscina: grupo del árbol de permisos | features/admin/PoolPanel | Fuera de las pestañas | Outside the tabs | Fora de les pestanyes | Fitxetatik kanpo | En dehors des onglets |
 | `admin.pool.save` | Panel, Piscina: botón de guardar | features/admin/PoolPanel | Guardar | Save | Desar | Gorde | Enregistrer |
 | `admin.pool.saved` | Panel, Piscina: guardado | features/admin/PoolPanel | Guardado. | Saved. | Desat. | Gordeta. | Enregistré. |

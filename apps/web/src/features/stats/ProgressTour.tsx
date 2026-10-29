@@ -59,7 +59,7 @@ export function ProgressTour() {
   const { t, tn } = useI18n()
 
   return (
-    <Tour tour={TOUR} tab={() => t('nav.cat.datos')} sub={() => t('nav.avance')}>
+    <Tour tour={TOUR} tab={() => t('nav.cat.campus')} sub={() => t('nav.avance')}>
       {(shot) => {
         const months = shot.short ? 12 : 24
         // Por horas la curva es algo más lenta al principio: se ve que cambia.

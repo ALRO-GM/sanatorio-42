@@ -70,7 +70,7 @@ export function ScrumTour() {
   const { t, tn } = useI18n()
 
   return (
-    <Tour tour={TOUR} tab={() => t('nav.cat.expediente')} sub={() => t('nav.agenda')}>
+    <Tour tour={TOUR} tab={() => t('nav.cat.yo')} sub={() => t('nav.agenda')}>
       {(shot) => {
         const done = 2 + (shot.checked ? 1 : 0)
 

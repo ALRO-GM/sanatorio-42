@@ -581,11 +581,10 @@ pool.key.mailbox,"Panel, Piscina: permiso «mailbox»",Buzón y chats,Mailbox an
 pool.key.people,"Panel, Piscina: permiso «people»",Buscador de personas y sus fichas,People search and their cards,Cercador de persones i les seves fitxes,Pertsona bilatzailea eta haien fitxak,Recherche de personnes et leurs fiches
 pool.key.broadcasts,"Panel, Piscina: permiso «broadcasts»",Comunicados,Announcements,Comunicats,Oharrak,Annonces
 pool.key.tickets,"Panel, Piscina: permiso «tickets»",Escribir a quien administra,Write to the admins,Escriure a qui administra,Administratzaileari idatzi,Écrire aux personnes qui administrent
-pool.group.expediente,"Panel, Piscina: grupo del árbol de permisos",Perfil,Profile,Perfil,Profila,Profil
+pool.group.yo,"Panel, Piscina: grupo del árbol de permisos",Yo,Me,Jo,Ni,Moi
 pool.group.ayuda,"Panel, Piscina: grupo del árbol de permisos",Ayuda,Help,Ajuda,Laguntza,Entraide
-pool.group.calendario,"Panel, Piscina: grupo del árbol de permisos",Calendario,Calendar,Calendari,Egutegia,Calendrier
-pool.group.clusters,"Panel, Piscina: grupo del árbol de permisos",Clústeres,Clusters,Clústers,Klusterrak,Clusters
-pool.group.datos,"Panel, Piscina: grupo del árbol de permisos",Datos,Data,Dades,Datuak,Données
+pool.group.aprender,"Panel, Piscina: grupo del árbol de permisos",Aprender,Learn,Aprendre,Ikasi,Apprendre
+pool.group.campus,"Panel, Piscina: grupo del árbol de permisos",Campus,Campus,Campus,Campusa,Campus
 pool.group.extra,"Panel, Piscina: grupo del árbol de permisos",Fuera de las pestañas,Outside the tabs,Fora de les pestanyes,Fitxetatik kanpo,En dehors des onglets
 admin.pool.save,"Panel, Piscina: botón de guardar",Guardar,Save,Desar,Gorde,Enregistrer
 admin.pool.saved,"Panel, Piscina: guardado",Guardado.,Saved.,Desat.,Gordeta.,Enregistré.

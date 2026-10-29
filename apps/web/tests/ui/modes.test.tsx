@@ -35,15 +35,14 @@ afterEach(() => {
 })
 
 describe('categorías', () => {
-  it('arriba hay cinco categorías y la abierta enseña sus secciones debajo', async () => {
+  it('arriba hay cuatro categorías y la abierta enseña sus secciones debajo', async () => {
     await openIn('normal', '#/tablon')
 
     expect(tabsOf(text('nav.label'))).toEqual([
-      text('nav.cat.expediente'),
+      text('nav.cat.yo'),
       text('nav.cat.ayuda'),
-      text('nav.cat.calendario'),
-      text('nav.cat.clusters'),
-      text('nav.cat.datos'),
+      text('nav.cat.aprender'),
+      text('nav.cat.campus'),
     ])
     expect(tabsOf(text('nav.cat.ayuda'))).toEqual(
       expect.arrayContaining([
@@ -51,6 +50,7 @@ describe('categorías', () => {
         text('nav.tablon'),
         text('nav.terapia'),
         text('nav.pizarras'),
+        text('nav.guardia'),
       ]),
     )
   }, 20_000)
@@ -59,23 +59,23 @@ describe('categorías', () => {
     const user = userEvent.setup()
 
     await openIn('normal', '#/pizarras')
-    await user.click(screen.getByRole('button', { name: new RegExp(text('nav.cat.datos')) }))
-    expect(window.location.hash).toBe('#/red')
+    await user.click(screen.getByRole('button', { name: new RegExp(text('nav.cat.campus')) }))
+    expect(window.location.hash).toBe('#/clusters')
     await user.click(screen.getByRole('button', { name: text('nav.cat.ayuda') }))
     expect(window.location.hash).toBe('#/pizarras')
   }, 20_000)
 
   it('una categoría de una sola sección no saca segunda fila', async () => {
-    await openIn('normal', '#/calendario')
-    expect(screen.queryByRole('navigation', { name: text('nav.cat.calendario') })).toBeNull()
+    await openIn('normal', '#/notgames')
+    expect(screen.queryByRole('navigation', { name: text('nav.cat.aprender') })).toBeNull()
   }, 20_000)
 })
 
 describe('modos de la interfaz', () => {
-  it('el simplificado quita la categoría de datos y lo que es de cifras', async () => {
+  it('el simplificado quita Campus y lo que es de cifras', async () => {
     await openIn('simple', '#/expediente')
 
-    expect(tabsOf(text('nav.label'))).not.toContain(text('nav.cat.datos'))
+    expect(tabsOf(text('nav.label'))).not.toContain(text('nav.cat.campus'))
     expect(screen.queryByText(text('layout.expediente.ranking'))).toBeNull()
     expect(screen.queryByText(text('layout.expediente.network'))).toBeNull()
     expect(await screen.findAllByText(text('layout.expediente.health'), {}, WAIT)).not.toHaveLength(
@@ -102,7 +102,7 @@ describe('modos de la interfaz', () => {
       screen.getByRole('combobox', { name: text('settings.detail') }),
       'simple',
     )
-    expect(tabsOf(text('nav.label'))).not.toContain(text('nav.cat.datos'))
+    expect(tabsOf(text('nav.label'))).not.toContain(text('nav.cat.campus'))
     expect(localStorage.getItem('sanatorio_detail')).toBe('simple')
   }, 20_000)
 

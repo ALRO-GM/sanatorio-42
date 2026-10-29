@@ -60,11 +60,13 @@ describe('lo que ve un piscinero (docs/piscineros.md)', () => {
     await waitFor(() => {
       expect(tabs()).not.toContain(text('nav.cat.ayuda'))
     }, WAIT)
-    expect(tabs()).toEqual(
-      expect.arrayContaining([text('nav.cat.calendario'), text('nav.cat.clusters')]),
-    )
-    // `red.rankings` sin `red`: Datos no sale.
-    expect(tabs()).not.toContain(text('nav.cat.datos'))
+    // Yo (expediente y calendario) y Campus (por los clústeres); sin Aprender.
+    expect(tabs()).toEqual([text('nav.cat.yo'), text('nav.cat.campus')])
+    // `red.rankings` sin `red`: en Campus no sale la Red.
+    await userEvent.setup().click(within(nav).getByRole('button', { name: text('nav.cat.campus') }))
+    expect(window.location.hash).toBe('#/clusters')
+    expect(screen.queryByRole('navigation', { name: text('nav.cat.campus') })).toBeNull()
+    await userEvent.setup().click(within(nav).getByRole('button', { name: text('nav.cat.yo') }))
     // Llegó por un enlace al tablón, que no tiene: vuelve al expediente.
     expect(window.location.hash).toMatch(/^#\/expediente/)
     expect(screen.queryByRole('button', { name: text('notices.open') })).toBeNull()
@@ -82,7 +84,7 @@ describe('lo que ve un piscinero (docs/piscineros.md)', () => {
         within(nav)
           .getAllByRole('button')
           .map((button) => button.textContent),
-      ).toEqual(expect.arrayContaining([text('nav.cat.ayuda'), text('nav.cat.datos')]))
+      ).toEqual(expect.arrayContaining([text('nav.cat.ayuda'), text('nav.cat.campus')]))
     }, WAIT)
     expect(window.location.hash).toMatch(/^#\/tablon/)
   }, 20_000)

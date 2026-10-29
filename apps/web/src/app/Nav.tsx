@@ -27,7 +27,7 @@ const lastOf = new Map<Category, Section>()
 
 /**
  * Las pestañas, en su propia fila debajo de la marca: arriba las categorías
- * (Perfil, Ayuda, Calendario, Clústeres, Datos), en el orden elegido, y, si la
+ * (Yo, Ayuda, Aprender, Campus), en el orden elegido, y, si la
  * abierta tiene varias secciones, una segunda fila con ellas, en el orden que
  * la persona ha elegido (o el automático). Solo sale lo que toca en el modo de la interfaz.
  */
@@ -105,7 +105,7 @@ export function Nav({ section, onGo, examLive = false }: NavProps) {
           >
             <Icon name={icon} />
             <span>{t(`nav.cat.${id}`)}</span>
-            {examLive && id === 'datos' && <b className="tab-live">{t('nav.examenesLive')}</b>}
+            {examLive && id === 'campus' && <b className="tab-live">{t('nav.examenesLive')}</b>}
           </button>
         ))}
       </nav>

@@ -7,7 +7,7 @@ Generado desde `apps/web/src/shared/i18n/textos/estadisticas.csv` con
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera | Francés |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `stats.title` | Estadísticas de Ayuda: título de la sección | features/stats/HelpStatsPage, features/stats/HelpStatsTour | Estadísticas de Ayuda | Help statistics | Estadístiques d'Ajuda | Laguntzaren estatistikak | Statistiques de l'entraide |
+| `stats.title` | Clasificaciones (en Campus): título de la sección | features/stats/HelpStatsPage, features/stats/HelpStatsTour | Clasificaciones de Ayuda | Help rankings | Classificacions d'Ajuda | Laguntzaren sailkapenak | Classements de l'entraide |
 | `stats.period` | Estadísticas de Ayuda: grupo de botones para elegir el periodo | features/stats/HelpStatsPage, features/stats/HelpStatsTour | Periodo | Period | Període | Aldia | Période |
 | `stats.ranking` | Estadísticas de Ayuda: encabezado de la clasificación de una sección | features/stats/HelpStatsPage, features/stats/HelpStatsTour | Clasificación | Leaderboard | Classificació | Sailkapena | Classement |
 | `stats.empty` | Estadísticas de Ayuda: clasificación sin nadie todavía | features/stats/HelpStatsPage, features/stats/HelpStatsTour | Aún no hay nadie: estrénala tú. | Nobody yet: be the first. | Encara no hi ha ningú: estrena-la tu. | Oraindik ez dago inor: estreinatu zuk. | Personne pour l'instant : lance-toi ! |

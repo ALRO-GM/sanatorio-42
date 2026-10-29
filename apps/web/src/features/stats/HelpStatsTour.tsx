@@ -54,7 +54,7 @@ export function HelpStatsTour() {
   const { number } = useFormat()
 
   return (
-    <Tour tour={TOUR} tab={() => t('nav.cat.ayuda')} sub={() => t('nav.estadisticas')}>
+    <Tour tour={TOUR} tab={() => t('nav.cat.campus')} sub={() => t('nav.estadisticas')}>
       {(shot) => {
         const scale = shot.all ? 4 : 1
 

@@ -66,7 +66,7 @@ export function RecordTour() {
   return (
     <Tour
       tour={TOUR}
-      tab={(shot) => t(shot.compare ? 'nav.cat.datos' : 'nav.cat.expediente')}
+      tab={(shot) => t(shot.compare ? 'nav.cat.campus' : 'nav.cat.yo')}
       sub={(shot) => t(shot.compare ? 'nav.avance' : 'nav.expediente')}
     >
       {(shot) => {

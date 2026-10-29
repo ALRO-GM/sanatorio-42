@@ -70,7 +70,7 @@ export function ClustersTour() {
   const { t } = useI18n()
 
   return (
-    <Tour tour={TOUR} tab={() => t('nav.cat.clusters')}>
+    <Tour tour={TOUR} tab={() => t('nav.cat.campus')}>
       {(shot) => (
         <div className="tour-card">
           <div className="tour-row">

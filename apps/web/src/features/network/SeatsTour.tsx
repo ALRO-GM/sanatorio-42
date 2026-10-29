@@ -106,7 +106,7 @@ export function SeatsTour() {
   return (
     <Tour
       tour={TOUR}
-      tab={() => t('nav.cat.datos')}
+      tab={() => t('nav.cat.campus')}
       // Los asientos son una vista de Red: «Datos › Red › Asientos».
       sub={() => `${t('nav.red')} › ${t('seats.view.seats')}`}
     >

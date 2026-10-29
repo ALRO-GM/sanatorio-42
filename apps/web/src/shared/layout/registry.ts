@@ -6,33 +6,33 @@
  */
 
 /**
- * Orden de fábrica de las pestañas. Sigue el camino habitual de quien se
- * atasca: ver quién le puede ayudar, preguntar en el tablón, buscar un grupo o
- * una pizarra, y lo que se consulta de tarde en tarde (calendario, red) al
- * final. La guardia no está: se abre desde "De guardia", en la cabecera. La
- * agenda va la primera, pero sale junto al perfil, en su propia categoría.
+ * Orden de fábrica de las pestañas de cada categoría. En Ayuda, el camino de
+ * quien se atasca: ver quién le puede ayudar, preguntar en el tablón, buscar
+ * un grupo o una pizarra; la guardia, al final (el interruptor ya está en la
+ * cabecera). En Campus, de lo que más se mira a lo que menos.
  */
 export const NAV_DEFAULT = [
   'agenda',
+  'calendario',
   'consulta',
   'tablon',
   'terapia',
   'pizarras',
+  'guardia',
   'notgames',
-  'estadisticas',
-  'calendario',
-  'red',
-  'avance',
   'clusters',
+  'avance',
+  'red',
   'examenes',
+  'estadisticas',
 ] as const
 
 /**
  * Orden de fábrica de las categorías de arriba (`CATEGORIES` en
- * `app/sections.ts`, que tiene sus iconos). El perfil, la portada, va el
- * primero; la persona puede moverlas a mano en Personalizar.
+ * `app/sections.ts`, que tiene sus iconos). Yo, la portada, va el primero; la
+ * persona puede moverlas a mano en Personalizar.
  */
-export const CATEGORY_DEFAULT = ['expediente', 'ayuda', 'calendario', 'clusters', 'datos'] as const
+export const CATEGORY_DEFAULT = ['yo', 'ayuda', 'aprender', 'campus'] as const
 
 /**
  * Bloques de cada página, en su orden de fábrica. `foldable`: se puede plegar.

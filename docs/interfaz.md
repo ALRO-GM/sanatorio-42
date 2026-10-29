@@ -6,7 +6,9 @@ final y en `AGENTS.md`).
 
 ## Categorías
 
-Arriba hay cinco pestañas, agrupadas por para qué sirve cada cosa. Si la
+Arriba hay cuatro pestañas, agrupadas por para qué viene cada cual
+(reorganización del 2026-10-29, con la teoría en el informe
+https://claude.ai/artifact/GdfmhP8oaqqfc8AiwRebwM). Si la
 categoría abierta tiene varias secciones, salen debajo en una segunda fila. Al
 volver a una categoría se abre la última sección que se miró en ella. El orden
 de fábrica es el de la tabla; cada cual puede cambiarlo en Personalizar (ver
@@ -14,17 +16,19 @@ abajo).
 
 | Categoría | Para qué | Secciones | Dónde está |
 | --- | --- | --- | --- |
-| **Expediente** | Lo tuyo | Expediente (la portada) · Agenda | `app/sections.ts` |
-| **Ayuda** | Quedar con gente: pedir y dar ayuda, aprender y enseñar | Sala de espera · Tablón · Terapia · Pizarras · Not-games · Estadísticas | |
-| **Calendario** | Todo lo que tienes, en el tiempo | Calendario | |
-| **Clústeres** | El plano del campus: quién está, dónde y de guardia | Clústeres | |
-| **Datos** | El campus en cifras | Red · Avance · Exámenes | |
+| **Yo** | Lo tuyo | Expediente (la portada) · Agenda · Calendario | `app/sections.ts` |
+| **Ayuda** | Pedir y dar ayuda, quedar con gente | Sala de espera · Tablón · Terapia · Pizarras · Guardia | |
+| **Aprender** | Practicar y concentrarse | Not-games (con los cursos de git y de shell dentro, de momento) | |
+| **Campus** | Cómo va el campus y cómo vas tú | Clústeres · Avance · Red · Exámenes · Clasificaciones | |
+
+Siguiente fase (`docs/tareas-tras-compactar.md`): los cursos y el Pomodoro,
+pestañas propias de Aprender; los Asientos, de Campus.
 
 Fuera de las pestañas, a propósito:
 
 | Qué | Dónde | Por qué |
 | --- | --- | --- |
-| Guardia | «De guardia», en la cabecera | Es un interruptor que se toca a diario, no una página que se visita |
+| Interruptor «De guardia» | Cabecera | Se toca a diario; la página de la guardia está en Ayuda |
 | Buscador de personas, buzón, menú de la cuenta | Cabecera | Se usan desde cualquier sitio |
 | Bicho e interrogante (`docs/sugerencias.md`) | Cabecera, junto al buzón | Pedidos por Alberto: se arrastran hasta cualquier sitio; el bicho, para contar qué falla o qué mejorar; el interrogante, para ver la demostración de ese panel |
 | Panel de gestión, incidencias, personalizar, bienvenida | Menú de la cuenta | Son de vez en cuando o solo de quien administra |
@@ -38,7 +42,7 @@ Se eligen en el pie y en el segundo paso de la bienvenida
 
 | Modo | Para quién | Qué enseña |
 | --- | --- | --- |
-| **Simplificado** | Quien solo quiere ayuda o darla, o se pierde con tanto | Lo esencial: buscar ayuda, ofrecerse, quedar y su calendario. Sin la categoría Datos, sin rankings ni cifras |
+| **Simplificado** | Quien solo quiere ayuda o darla, o se pierde con tanto | Lo esencial: buscar ayuda, ofrecerse, quedar y su calendario. Sin Campus ni Aprender, sin rankings ni cifras |
 | **Normal** | La mayoría | Toda la web con las cifras principales |
 | **Loco por los datos** | Quien disfruta mirando cifras | Todo, con rankings, estadísticas y desgloses abiertos |
 
@@ -50,7 +54,7 @@ de datos.
 | Página | Elemento | Modo | Por qué |
 | --- | --- | --- | --- |
 | Pestañas | Expediente, Ayuda (las cuatro) y Calendario | S | Son para lo que existe la web |
-| Pestañas | Datos (red, avance, exámenes) y Clústeres | N | Informan, no resuelven un atasco |
+| Pestañas | Campus (clústeres, avance, red, exámenes, clasificaciones) | N | Informan, no resuelven un atasco |
 | Pestañas | Agenda (en Perfil, junto a la portada): metas por proyecto con checkpoints, dailies y weeklies elegidos de listas, y lo de 42 a lo que vas (`docs/agenda.md`) | N | Es tu progreso («lo tuyo»), pero quien solo quiere pedir o dar ayuda no la necesita: como el Avance |
 | Agenda | Fijar la entrega de una meta o un evento de 42 como cuenta atrás; «Cuenta atrás» y «Ver el calendario» arriba | N | Bloque de la agenda: reutiliza la ventanita de cuentas atrás, no inventa otra |
 | Sprints y Agenda | Tablero del sprint: una fila por persona del grupo con entrega, %, checkpoints, último daily y atasco; en la tarjeta del grupo y enmarcado en cada meta | N | Bloque, no sección: solo lo ve quien está en el grupo, y es para ir a echar una mano |
@@ -203,11 +207,11 @@ Antes de escribir código, se decide y se apunta aquí (y se dice en la
 respuesta a quien la pidió):
 
 1. **Categoría**: a cuál se acerca más por para qué sirve.
-   - Lo tuyo (perfil, progreso, ajustes de tu cuenta) → **Expediente**.
-   - Quedar, pedir o dar ayuda, aprender o enseñar con otras personas →
-     **Ayuda**.
-   - Algo con fecha y hora → **Calendario** (además de su sección, si la tiene).
-   - Cifras, estadísticas, mapas del campus → **Datos**.
+   - Lo tuyo (perfil, progreso, agenda, calendario) → **Yo**.
+   - Pedir o dar ayuda, quedar con otras personas → **Ayuda**.
+   - Practicar, cursos, juegos de preguntas, concentrarse → **Aprender**.
+   - Cifras, estadísticas, mapas del campus → **Campus**.
+   - Algo con fecha y hora sale además en el calendario.
    - Si no encaja: cabecera solo si se usa desde cualquier sitio y a diario;
      menú de la cuenta si es de vez en cuando; pie si se elige una vez.
    - Una categoría nueva solo si no encaja en ninguna y tendrá varias

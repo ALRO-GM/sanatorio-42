@@ -11,37 +11,39 @@ import type { IconName } from '../shared/ui/Icon'
  * los idiomas) y decir qué se pinta en `Clinic.tsx`.
  *
  * `inNav: false` la deja fuera de las pestañas que se pueden reordenar: el
- * expediente va siempre el primero, y a la guardia y al panel se llega desde
- * la cabecera. `category` dice bajo qué pestaña de arriba va y `from`, desde
+ * expediente va siempre el primero de Yo, y al panel se llega desde el menú. `category` dice bajo qué pestaña de arriba va y `from`, desde
  * qué modo de la interfaz sale.
  *
  * El orden en que salen las pestañas no es el de esta lista: lo decide la
  * personalización (`shared/layout`).
  */
 export const SECTIONS = [
-  // Agenda: tu Scrum individual por proyecto (`docs/agenda.md`). Es «lo tuyo»,
-  // así que va con el perfil; desde el modo normal, como el avance.
-  { id: 'agenda', icon: 'agenda', inNav: true, category: 'expediente', from: 'normal' },
+  // Yo: lo tuyo. La portada es el expediente; con él, tu agenda (Scrum por
+  // proyecto, `docs/agenda.md`) y tu calendario.
+  { id: 'agenda', icon: 'agenda', inNav: true, category: 'yo', from: 'normal' },
+  { id: 'calendario', icon: 'calendario', inNav: true, category: 'yo', from: 'simple' },
+  // Ayuda: pedir y dar ayuda, quedar con gente.
   { id: 'consulta', icon: 'consulta', inNav: true, category: 'ayuda', from: 'simple' },
   { id: 'tablon', icon: 'tablon', inNav: true, category: 'ayuda', from: 'simple' },
   { id: 'terapia', icon: 'terapia', inNav: true, category: 'ayuda', from: 'simple' },
   { id: 'pizarras', icon: 'pizarras', inNav: true, category: 'ayuda', from: 'simple' },
-  // Not-games: aprender jugando a preguntas de programación con más gente.
-  { id: 'notgames', icon: 'pregunta', inNav: true, category: 'ayuda', from: 'normal' },
-  // Estadísticas de Ayuda: cifras y clasificación de cada sección. Con rankings:
-  // desde el modo normal (el simplificado no enseña rankings).
-  { id: 'estadisticas', icon: 'cifras', inNav: true, category: 'ayuda', from: 'normal' },
-  { id: 'calendario', icon: 'calendario', inNav: true, category: 'calendario', from: 'simple' },
-  { id: 'red', icon: 'red', inNav: true, category: 'datos', from: 'normal' },
+  // La guardia: ofrecer ayuda. El interruptor sigue en la cabecera, que es lo
+  // que se toca a diario; la página, con las demás de Ayuda.
+  { id: 'guardia', icon: 'guardia', inNav: true, category: 'ayuda', from: 'simple' },
+  // Aprender: practicar y concentrarse. Not-games (preguntas con más gente,
+  // con los cursos de git y de shell dentro, de momento).
+  { id: 'notgames', icon: 'pregunta', inNav: true, category: 'aprender', from: 'normal' },
+  // Campus: cómo va el campus y cómo vas tú frente a él.
+  { id: 'clusters', icon: 'capas', inNav: true, category: 'campus', from: 'normal' },
   // Avance en el common core frente a la media y los paces (#87).
-  { id: 'avance', icon: 'despegue', inNav: true, category: 'datos', from: 'normal' },
-  // Clústeres: el plano del campus, en su propia pestaña de arriba.
-  { id: 'clusters', icon: 'capas', inNav: true, category: 'clusters', from: 'normal' },
-  // Exámenes: el de ahora (en vivo) y sus estadísticas.
-  { id: 'examenes', icon: 'medalla', inNav: true, category: 'datos', from: 'normal' },
-  // La guardia se abre desde "De guardia", en la cabecera.
-  { id: 'guardia', icon: 'guardia', inNav: false },
-  { id: 'expediente', icon: 'expediente', inNav: false, category: 'expediente', from: 'simple' },
+  { id: 'avance', icon: 'despegue', inNav: true, category: 'campus', from: 'normal' },
+  { id: 'red', icon: 'red', inNav: true, category: 'campus', from: 'normal' },
+  // Exámenes: el de ahora (en vivo), el último y sus estadísticas.
+  { id: 'examenes', icon: 'medalla', inNav: true, category: 'campus', from: 'normal' },
+  // Clasificaciones de cada sección de Ayuda. Son rankings: desde el modo
+  // normal (el simplificado no los enseña).
+  { id: 'estadisticas', icon: 'cifras', inNav: true, category: 'campus', from: 'normal' },
+  { id: 'expediente', icon: 'expediente', inNav: false, category: 'yo', from: 'simple' },
   // La sección secreta: solo existe para quien eligió la pastilla roja.
   { id: 'clicker', icon: 'terminal', inNav: false },
   // Panel de gestión: solo para quien administra la web.
@@ -61,24 +63,23 @@ export const SECTIONS = [
 export type Section = (typeof SECTIONS)[number]['id']
 
 /**
- * Las pestañas de arriba: las secciones van agrupadas por para qué sirven.
+ * Las pestañas de arriba: las secciones van agrupadas por para qué viene cada
+ * cual (reorganización del 2026-10-29, `docs/interfaz.md`).
  *
- * - Expediente: lo tuyo. Es la portada; con ella, tu agenda.
- * - Ayuda: quedar con gente para pedir y dar ayuda, aprender y enseñar.
- * - Calendario: todo lo que tienes, en el tiempo.
- * - Clústeres: el plano del campus, quién está y dónde.
- * - Datos: el campus en cifras (correcciones, exámenes).
+ * - Yo: lo tuyo. Es la portada; con ella, tu agenda y tu calendario.
+ * - Ayuda: pedir y dar ayuda, quedar con gente, la guardia.
+ * - Aprender: practicar, cursos y juegos de preguntas.
+ * - Campus: el campus en cifras y mapas (clústeres, avance, red, exámenes).
  *
  * Una categoría con una sola sección es esa sección; con varias, al abrirla
  * sale una segunda fila con ellas. Dónde va una funcionalidad nueva: la regla
  * de `AGENTS.md` y el mapa de `docs/interfaz.md`.
  */
 export const CATEGORIES = [
-  { id: 'expediente', icon: 'expediente' },
+  { id: 'yo', icon: 'expediente' },
   { id: 'ayuda', icon: 'corazon' },
-  { id: 'calendario', icon: 'calendario' },
-  { id: 'clusters', icon: 'capas' },
-  { id: 'datos', icon: 'cifras' },
+  { id: 'aprender', icon: 'pregunta' },
+  { id: 'campus', icon: 'capas' },
 ] as const satisfies readonly { id: string; icon: IconName }[]
 
 export type Category = (typeof CATEGORIES)[number]['id']

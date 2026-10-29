@@ -135,8 +135,8 @@ regla de aquí, cambia también la skill que la repite.
   cuando se pueda).
 - Lo primero que se ve al entrar es el perfil (el expediente del código): es la
   portada y, de fábrica, la primera pestaña. Cada cual puede mover la categoría
-  Perfil a otro sitio en Personalizar (decidido con Alberto el 2026-10-25). La navegación va en su propia fila, debajo de
-  la marca: cinco categorías (Perfil, Ayuda, Calendario, Clústeres, Datos) y, debajo, las secciones de
+  Yo a otro sitio en Personalizar (decidido con Alberto el 2026-10-25). La navegación va en su propia fila, debajo de
+  la marca: cuatro categorías (Yo, Ayuda, Aprender, Campus; reorganización del 2026-10-29) y, debajo, las secciones de
   la abierta (`CATEGORIES` en `app/sections.ts`).
 - **Funcionalidad nueva**: antes de escribir código se decide su categoría, si
   es sección o bloque, desde qué modo de la interfaz sale (simplificado,

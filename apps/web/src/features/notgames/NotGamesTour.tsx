@@ -44,7 +44,7 @@ export function NotGamesTour() {
   ]
 
   return (
-    <Tour tour={TOUR} tab={() => t('nav.cat.ayuda')} sub={() => t('nav.notgames')}>
+    <Tour tour={TOUR} tab={() => t('nav.cat.aprender')} sub={() => t('nav.notgames')}>
       {(shot) => {
         if (shot.scene === 0) {
           return (

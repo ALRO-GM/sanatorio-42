@@ -92,7 +92,7 @@ export function AgendaTour() {
   const days = t('tour.days').split(',')
 
   return (
-    <Tour tour={TOUR} tab={() => t('nav.cat.calendario')}>
+    <Tour tour={TOUR} tab={() => t('nav.cat.yo')}>
       {(shot) => {
         const now = shot.tick * 1000
 

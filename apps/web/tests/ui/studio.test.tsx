@@ -38,7 +38,7 @@ const realCategories = (): string[] =>
   )
 
 const CATEGORY_NAMES = (): string[] =>
-  ['expediente', 'ayuda', 'calendario', 'clusters', 'datos'].map((id) => text(`nav.cat.${id}`))
+  ['yo', 'ayuda', 'aprender', 'campus'].map((id) => text(`nav.cat.${id}`))
 
 async function openStudio(user: ReturnType<typeof userEvent.setup>): Promise<HTMLElement> {
   await openApp('#/expediente')
@@ -127,16 +127,17 @@ describe('Personalizar: el estudio', () => {
     // El perfil, con la agenda y sus bloques con su título de verdad.
     expect(within(mini).getByRole('button', { name: text('nav.agenda') })).toBeTruthy()
     expect(within(mini).getByText(text('layout.expediente.health'))).toBeTruthy()
-    // Datos: sus tres pestañas; la red, con sus bloques.
-    await user.click(within(mini).getByRole('button', { name: text('nav.cat.datos') }))
-    for (const id of ['red', 'avance', 'examenes']) {
+    // Campus: sus cinco pestañas; la red, con sus bloques.
+    await user.click(within(mini).getByRole('button', { name: text('nav.cat.campus') }))
+    for (const id of ['clusters', 'avance', 'red', 'examenes', 'estadisticas']) {
       expect(within(mini).getByRole('button', { name: text(`nav.${id}`) })).toBeTruthy()
     }
+    await user.click(within(mini).getByRole('button', { name: text('nav.red') }))
     expect(within(mini).getByText(text('layout.red.endogamy'))).toBeTruthy()
     // Una página sin bloques lo dice.
     await user.click(within(mini).getByRole('button', { name: text('nav.avance') }))
     expect(within(mini).getByText(text('studio.noBlocks'))).toBeTruthy()
-    // El on-call no es una pestaña: se abre desde su botón.
+    // La guardia también se abre desde su botón, como en la cabecera.
     await user.click(within(mini).getByRole('button', { name: text('nav.guardia') }))
     expect(within(mini).getByText(text('layout.guardia.prereview'))).toBeTruthy()
     // «Listo» cierra.
@@ -147,26 +148,26 @@ describe('Personalizar: el estudio', () => {
   it('teclado: Espacio coge, las flechas mueven, Espacio suelta y Escape cancela', async () => {
     const user = userEvent.setup()
     const mini = await openStudio(user)
-    const clusters = text('nav.cat.clusters')
+    const clusters = text('nav.cat.campus')
     const live = must(document.querySelector('[aria-live]:not([data-dock-said])'), 'la región viva')
 
     within(mini)
       .getByRole('button', { name: fill('studio.grab', { name: clusters }) })
       .focus()
     await user.keyboard(' ')
-    expect(live.textContent).toBe(fill('studio.lift', { name: clusters, pos: 4, total: 5 }))
+    expect(live.textContent).toBe(fill('studio.lift', { name: clusters, pos: 4, total: 4 }))
     await user.keyboard('{ArrowLeft}{ArrowLeft}')
-    expect(live.textContent).toBe(fill('studio.move', { name: clusters, pos: 2, total: 5 }))
+    expect(live.textContent).toBe(fill('studio.move', { name: clusters, pos: 2, total: 4 }))
     // Mientras está cogido, nada se ha guardado todavía.
     expect(saved().categories).toBeUndefined()
     await user.keyboard(' ')
-    expect(live.textContent).toBe(fill('studio.drop', { name: clusters, pos: 2, total: 5 }))
+    expect(live.textContent).toBe(fill('studio.drop', { name: clusters, pos: 2, total: 4 }))
 
-    const [first, ayuda, calendario, , datos] = CATEGORY_NAMES()
-    const expected = [first, clusters, ayuda, calendario, datos]
+    const [first, ayuda, aprender] = CATEGORY_NAMES()
+    const expected = [first, clusters, ayuda, aprender]
 
     expect(miniCategories()).toEqual(expected)
-    expect(saved().categories).toEqual(['expediente', 'clusters', 'ayuda', 'calendario', 'datos'])
+    expect(saved().categories).toEqual(['yo', 'campus', 'ayuda', 'aprender'])
     // La web de detrás ya va en ese orden.
     expect(realCategories()).toEqual(expected)
     // El asa sigue con el foco para seguir moviendo.
@@ -176,9 +177,9 @@ describe('Personalizar: el estudio', () => {
 
     // Escape devuelve a su sitio sin guardar ni cerrar la ventana.
     await user.keyboard(' {ArrowRight}{ArrowRight}{Escape}')
-    expect(live.textContent).toBe(fill('studio.cancel', { name: clusters, pos: 2, total: 5 }))
+    expect(live.textContent).toBe(fill('studio.cancel', { name: clusters, pos: 2, total: 4 }))
     expect(miniCategories()).toEqual(expected)
-    expect(saved().categories).toEqual(['expediente', 'clusters', 'ayuda', 'calendario', 'datos'])
+    expect(saved().categories).toEqual(['yo', 'campus', 'ayuda', 'aprender'])
     expect(screen.getByRole('group', { name: text('studio.preview') })).toBeTruthy()
   }, 30_000)
 
@@ -188,7 +189,7 @@ describe('Personalizar: el estudio', () => {
 
     stubLayout()
     const grip = within(mini).getByRole('button', {
-      name: fill('studio.grab', { name: text('nav.cat.clusters') }),
+      name: fill('studio.grab', { name: text('nav.cat.campus') }),
     })
 
     // De la cuarta (x 300-390) a encima de la mitad izquierda de la segunda.
@@ -201,8 +202,8 @@ describe('Personalizar: el estudio', () => {
         [120, 15],
       ],
     )
-    expect(saved().categories).toEqual(['expediente', 'clusters', 'ayuda', 'calendario', 'datos'])
-    expect(realCategories()[1]).toBe(text('nav.cat.clusters'))
+    expect(saved().categories).toEqual(['yo', 'campus', 'ayuda', 'aprender'])
+    expect(realCategories()[1]).toBe(text('nav.cat.campus'))
     // Un clic sin moverse no arrastra: abre la categoría.
     await user.click(within(mini).getByRole('button', { name: text('nav.cat.ayuda') }))
     expect(within(mini).getByRole('button', { name: text('nav.tablon') })).toBeTruthy()
@@ -287,7 +288,7 @@ describe('Personalizar: el estudio', () => {
     expect(screen.getByText(text('studio.autoNote'))).toBeTruthy()
 
     within(mini)
-      .getByRole('button', { name: fill('studio.grab', { name: text('nav.cat.datos') }) })
+      .getByRole('button', { name: fill('studio.grab', { name: text('nav.cat.campus') }) })
       .focus()
     await user.keyboard(' {ArrowLeft} ')
     expect(saved().mode).toBe('manual')

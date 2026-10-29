@@ -21,7 +21,7 @@ type Studio = {
   done: boolean
 }
 
-const CATEGORIES = ['expediente', 'ayuda', 'calendario', 'clusters', 'datos']
+const CATEGORIES = ['yo', 'ayuda', 'aprender', 'campus']
 const BLOCKS = ['record', 'health', 'network']
 
 const START: Studio = {
@@ -45,8 +45,8 @@ const carry = (at: number, id: string, to: string, change: Partial<Studio>): Cue
 ]
 
 export const TOUR = defineTour<Studio>('studio', START, [
-  ...carry(700, 'calendario', 'cat1', {
-    categories: ['expediente', 'calendario', 'ayuda', 'clusters', 'datos'],
+  ...carry(700, 'aprender', 'cat1', {
+    categories: ['yo', 'aprender', 'ayuda', 'campus'],
   }),
   [3300, { caption: 2 }],
   ...carry(3300, 'network', 'block0', {
@@ -96,7 +96,7 @@ export function StudioTour() {
               {CATEGORIES.map((id) => (
                 <span
                   key={id}
-                  className={`tour-sort ${id === 'expediente' ? 'on' : ''} ${shot.lifted === id ? 'lifted' : ''}`}
+                  className={`tour-sort ${id === 'yo' ? 'on' : ''} ${shot.lifted === id ? 'lifted' : ''}`}
                   style={{ ['--i' as string]: shot.categories.indexOf(id) }}
                 >
                   <span>
