@@ -29,7 +29,7 @@ Fases, cada una con check, commit, push y despliegue:
    redirigen); Pomodoro como página de Aprender (ajustes, Startup, cifras; la
    ventanita de la esquina se queda); Asientos como sección de Campus (hoy
    pestaña de Red). Permisos de piscina (`POOL_KEY`) de cada sección nueva.
-3. **Cabecera y menú**: menú del avatar solo de la cuenta (Personalizar,
+3. **(Hecha en parte: menú y barra del móvil; falta llevar los ajustes del pie a Personalizar) Cabecera y menú**: menú del avatar solo de la cuenta (Personalizar,
    Bienvenida, Gestión, Salir); los ajustes del pie, en Personalizar; en el
    móvil, barra inferior con las cuatro categorías.
 4. **Estilo base profesional**: un estilo nuevo por defecto como el ejemplo

@@ -10,23 +10,32 @@ import { openApp } from './render'
 
 const text = (key: string): string => must(es[key], `el texto ${key}`)
 
+/** La pestaña del Pomodoro (Aprender), ya pintada. */
+const page = async (): Promise<HTMLElement> =>
+  must(
+    (
+      await screen.findByRole(
+        'heading',
+        { name: new RegExp(text('focus.title')) },
+        { timeout: 5000 },
+      )
+    ).parentElement,
+    'la página del Pomodoro',
+  )
+
 afterEach(async () => {
   await api.stopFocus()
   cleanup()
 })
 
 describe('modo concentración (Pomodoro)', () => {
-  it('se empieza desde el menú: la web se queda con lo elegido y sale el temporizador; al acabar, vuelve todo', async () => {
+  it('se empieza desde su pestaña: la web se queda con lo elegido y sale el temporizador; al acabar, vuelve todo', async () => {
     const user = userEvent.setup()
 
-    await openApp('#/expediente')
+    await openApp('#/pomodoro')
     const nav = await screen.findByRole('navigation', { name: text('nav.label') })
     const before = within(nav).getAllByRole('button').length
-
-    await user.click(screen.getByRole('button', { name: /tu cuenta/i }))
-    await user.click(await screen.findByRole('menuitem', { name: text('focus.open') }))
-
-    const dialog = await screen.findByRole('dialog', { name: text('focus.title') })
+    const dialog = await page()
 
     // Por defecto: el calendario (el expediente siempre se ve); los juegos, fuera.
     expect(within(dialog).getByRole('checkbox', { name: text('nav.calendario') })).toHaveProperty(
@@ -55,32 +64,22 @@ describe('modo concentración (Pomodoro)', () => {
     expect(within(nav).getAllByRole('button')).toHaveLength(before)
   }, 20_000)
 
-  it('al empezarlo, una pestaña que no se ha elegido se cierra y se vuelve al expediente', async () => {
+  it('al empezarlo, una pestaña que no se ha elegido no se puede abrir: se vuelve al expediente', async () => {
     const user = userEvent.setup()
-    const start = async (): Promise<void> => {
-      await user.click(screen.getByRole('button', { name: /tu cuenta/i }))
-      await user.click(await screen.findByRole('menuitem', { name: text('focus.open') }))
-      const dialog = await screen.findByRole('dialog', { name: text('focus.title') })
+    await openApp('#/pomodoro')
+    await user.click(
+      within(await page()).getByRole('button', { name: new RegExp(text('focus.start')) }),
+    )
+    await screen.findByRole('timer', { name: text('focus.timerLabel') })
+    // Su propia pestaña sigue abierta: es donde se lleva.
+    expect(window.location.hash).toBe('#/pomodoro')
 
-      await user.click(
-        within(dialog).getByRole('button', { name: new RegExp(text('focus.start')) }),
-      )
-      await screen.findByRole('timer', { name: text('focus.timerLabel') })
-    }
-
-    // El calendario está elegido por defecto: se queda donde está.
-    await openApp('#/calendario')
-    await start()
-    expect(window.location.hash).toBe('#/calendario')
-    await act(() => stopFocus(['done']))
-    cleanup()
-
-    // El tablón no: se vuelve al expediente, y por un enlace tampoco se entra.
-    await openApp('#/tablon')
-    await start()
+    // El calendario está elegido por defecto: se puede ir.
+    window.location.hash = '#/calendario'
     await waitFor(() => {
-      expect(window.location.hash).toMatch(/^#\/expediente/)
+      expect(window.location.hash).toBe('#/calendario')
     })
+    // El tablón no: por un enlace no se entra, se vuelve al expediente.
     window.location.hash = '#/tablon'
     await waitFor(() => {
       expect(window.location.hash).toMatch(/^#\/expediente/)
@@ -90,11 +89,9 @@ describe('modo concentración (Pomodoro)', () => {
   it('tus estadísticas: cifras con la media del tramo, por días, por horas y motivos', async () => {
     const user = userEvent.setup()
 
-    await openApp('#/expediente')
-    await user.click(screen.getByRole('button', { name: /tu cuenta/i }))
-    await user.click(await screen.findByRole('menuitem', { name: text('focus.open') }))
+    await openApp('#/pomodoro')
 
-    const dialog = await screen.findByRole('dialog', { name: text('focus.title') })
+    const dialog = await page()
 
     await user.click(within(dialog).getByRole('tab', { name: text('focus.tab.stats') }))
     // El periodo, con el selector de toda la web (`StepPicker`): un desplegable.

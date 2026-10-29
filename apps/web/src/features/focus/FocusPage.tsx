@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 
 import type { FocusSettings, FocusShow } from '@sanatorio/contracts'
 
@@ -11,7 +11,6 @@ import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { PillGroup } from '../../shared/ui/PillGroup'
 import { StepPicker } from '../../shared/ui/StepPicker'
 import { Icon } from '../../shared/ui/Icon'
-import { Modal } from '../../shared/ui/Modal'
 import { FocusMyStats } from './FocusMyStats'
 import { StartupPanel } from './startup/StartupPanel'
 import { usePoolAllows } from '../../shared/pool'
@@ -25,40 +24,11 @@ const FOCUS_MINUTES: readonly number[] = Array.from({ length: 48 }, (_, index) =
 const BREAK_MINUTES: readonly number[] = [0, 5, 10, 15]
 const SHOWS: readonly FocusShow[] = ['corrections', 'events', 'messages', 'guard', 'notices']
 /** Las secciones que se pueden dejar a la vista (las de las pestañas; el expediente, siempre). */
-const CHOOSABLE = SECTIONS.filter((section) => section.inNav).map((section) => section.id)
+const CHOOSABLE = SECTIONS.filter((section) => section.inNav && section.id !== 'pomodoro').map(
+  (section) => section.id,
+)
 
 const TABS = ['settings', 'startup', 'stats'] as const
-
-/**
- * El Pomodoro en una ventana (desde el menú de la cuenta): el panel de abajo,
- * que se cierra al empezar.
- */
-export function FocusDialog({ onClose }: { onClose: () => void }) {
-  const { t } = useI18n()
-  const dialog = useRef<HTMLDialogElement>(null)
-  const [wide, setWide] = useState(false)
-
-  return (
-    <Modal
-      ref={dialog}
-      label={t('focus.title')}
-      className={`focus-dialog ${wide ? 'wide' : ''}`}
-      onClose={onClose}
-      title={
-        <>
-          <Icon name="reloj" /> {t('focus.title')}
-        </>
-      }
-    >
-      <FocusPanel
-        onStarted={() => {
-          dialog.current?.close()
-        }}
-        onWide={setWide}
-      />
-    </Modal>
-  )
-}
 
 /**
  * El Pomodoro como pestaña de Aprender (reorganización del 2026-10-29): el
@@ -84,17 +54,8 @@ export function FocusPage() {
  *
  * En las otras pestañas, la Startup y tus estadísticas (#80 del buzón); son
  * cifras, así que salen desde el modo normal.
- *
- * @param onStarted Al empezar (la ventana se cierra).
- * @param onWide Si la pestaña abierta necesita más ancho (la ventana se ensancha).
  */
-function FocusPanel({
-  onStarted,
-  onWide,
-}: {
-  onStarted?: () => void
-  onWide?: (wide: boolean) => void
-}) {
+function FocusPanel() {
   const { t } = useI18n()
   const focus = useFocus()
   const [settings, setSettings] = useState<FocusSettings>(
@@ -109,10 +70,6 @@ function FocusPanel({
   const { busy, error, run } = useAction()
   const stats = usePoolAllows('focus.stats')
   const [tab, setTab] = useState<(typeof TABS)[number]>('settings')
-
-  useEffect(() => {
-    onWide?.(tab !== 'settings')
-  }, [tab, onWide])
 
   const toggle = <T extends string>(list: readonly T[], item: T): T[] =>
     list.includes(item) ? list.filter((one) => one !== item) : [...list, item]
@@ -205,7 +162,6 @@ function FocusPanel({
               onClick={() => {
                 void run(async () => {
                   await startFocus(settings)
-                  onStarted?.()
                 })
               }}
             >

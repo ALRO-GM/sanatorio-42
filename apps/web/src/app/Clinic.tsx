@@ -9,7 +9,6 @@ import { calendarHref } from '../shared/links'
 import { HelpGate } from '../features/help/HelpGate'
 import { Welcome } from '../features/welcome/Welcome'
 import { OtherCampusNotice } from '../features/campus/OtherCampusNotice'
-import { FocusDialog } from '../features/focus/FocusDialog'
 import { FocusTimer } from '../features/focus/FocusTimer'
 import { focusing, loadFocus, useFocus } from '../shared/focus'
 import { AlertCenter } from '../features/alerts/AlertCenter'
@@ -129,7 +128,6 @@ export function Clinic({ me, onLogout }: ClinicProps) {
   useEffect(() => {
     if (blockedForPool(section, pool)) go(HOME)
   }, [pool, section, go])
-  const [focusOpen, setFocusOpen] = useState(false)
 
   // El tiempo de uso se apunta a la sección que se está mirando.
   useEffect(() => {
@@ -195,9 +193,6 @@ export function Clinic({ me, onLogout }: ClinicProps) {
         onWelcome={() => {
           setWelcoming(true)
         }}
-        onFocus={() => {
-          setFocusOpen(true)
-        }}
         onLogout={onLogout}
       />
       {/* Las ventanitas flotantes van en una pila en la esquina (`shared/dock`):
@@ -208,13 +203,6 @@ export function Clinic({ me, onLogout }: ClinicProps) {
         <FocusTimer />
       </PoolOnly>
       <CountdownDock stamp={pulse?.countdowns ?? null} />
-      {focusOpen && (
-        <FocusDialog
-          onClose={() => {
-            setFocusOpen(false)
-          }}
-        />
-      )}
 
       {/* La red de correcciones necesita sitio: es la única sección a todo lo ancho. */}
       <main className={`container ${section === 'red' || section === 'clicker' ? 'wide' : ''}`}>

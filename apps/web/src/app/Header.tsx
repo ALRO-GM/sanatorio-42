@@ -33,8 +33,6 @@ type HeaderProps = {
   onInbox: () => void
   /** Volver a ver la bienvenida. */
   onWelcome: () => void
-  /** Abre el Pomodoro (modo concentración). */
-  onFocus: () => void
   /** Hay un examen en marcha en el campus. */
   examLive?: boolean
   onLogout: () => void
@@ -68,7 +66,6 @@ export function Header({
   onCustomize,
   onInbox,
   onWelcome,
-  onFocus,
   examLive = false,
   onLogout,
 }: HeaderProps) {
@@ -198,26 +195,8 @@ export function Header({
             <UserMenu
               me={me}
               items={[
-                {
-                  id: 'expediente',
-                  icon: 'expediente',
-                  label: t('menu.record'),
-                  run: () => {
-                    onGo('expediente')
-                  },
-                },
-                ...(may('guardia')
-                  ? [
-                      {
-                        id: 'guardia',
-                        icon: 'guardia' as const,
-                        label: t('menu.duty'),
-                        run: () => {
-                          onGo('guardia')
-                        },
-                      },
-                    ]
-                  : []),
+                // Solo lo de la cuenta (reorganización del 2026-10-29): el
+                // expediente, la guardia y el Pomodoro tienen su pestaña.
                 ...(admin
                   ? [
                       {
@@ -244,16 +223,6 @@ export function Header({
                     ]
                   : []),
                 null,
-                ...(may('focus')
-                  ? [
-                      {
-                        id: 'pomodoro',
-                        icon: 'reloj' as const,
-                        label: t('focus.open'),
-                        run: onFocus,
-                      },
-                    ]
-                  : []),
                 { id: 'personalizar', icon: 'ajustes', label: t('layout.open'), run: onCustomize },
                 ...(may('tickets')
                   ? [

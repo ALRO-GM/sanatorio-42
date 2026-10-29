@@ -1055,3 +1055,87 @@ dialog::backdrop {
 .person-options small {
   color: var(--text-3);
 }
+
+/* ── Móvil: las categorías, en una barra fija abajo ────────────────────────────
+ * Reorganización del 2026-10-29: Yo, Ayuda, Aprender y Campus son los cuatro
+ * destinos de primer nivel, al alcance del pulgar (como las apps del móvil).
+ * Arriba quedan la marca, el buscador y la cuenta; debajo de la cabecera, las
+ * pestañas de la categoría abierta. Lo que vive pegado abajo (la pila de la
+ * esquina, los avisos) sube lo que mide la barra. */
+@media (max-width: 640px) {
+  :root {
+    --bottom-bar: calc(3.6rem + env(safe-area-inset-bottom, 0px));
+  }
+  body {
+    padding-bottom: var(--bottom-bar);
+  }
+  /* La cabecera cabe en 360 px: iconos más juntos y sin la flecha del menú. */
+  .appbar-actions {
+    gap: 0.1rem;
+  }
+  .user-menu-btn > .icon {
+    display: none;
+  }
+  /* Con desenfoque, lo fijo de dentro se colocaría respecto a la cabecera y no
+     a la pantalla: en el móvil, fondo opaco. */
+  .appbar {
+    backdrop-filter: none;
+    background: var(--bg);
+  }
+  nav.tabs {
+    position: fixed;
+    inset: auto 0 0 0;
+    z-index: 50;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    gap: 0;
+    margin: 0;
+    padding: 0.2rem 0.25rem env(safe-area-inset-bottom, 0px);
+    overflow: visible;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    box-shadow: 0 -4px 16px color-mix(in srgb, var(--shadow) 40%, transparent);
+  }
+  nav.tabs .tab {
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.15rem;
+    min-height: 3.2rem;
+    padding: 0.3rem 0.2rem;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    line-height: 1.1;
+  }
+  nav.tabs .tab .icon {
+    width: 22px;
+    height: 22px;
+  }
+  nav.tabs .tab.active {
+    color: var(--accent-text);
+  }
+  nav.tabs .tab.active::after {
+    display: none;
+  }
+  /* «En vivo» de Campus: un punto sobre el icono, que el nombre no cabe. */
+  nav.tabs .tab .tab-live {
+    position: absolute;
+    top: 0.25rem;
+    left: calc(50% + 0.5rem);
+    font-size: 0.55rem;
+    padding: 0 0.3rem;
+  }
+  .dock-slot:not(.floating, .dragging) {
+    translate: 0 calc(-1 * var(--bottom-bar));
+  }
+  .meet-toast {
+    bottom: calc(1.25rem + var(--bottom-bar));
+  }
+}
+/* En los móviles estrechos, el interruptor de la guardia sin su palabra: la
+   página de la guardia ya está en Ayuda, y el interruptor tiene su nombre. */
+@media (max-width: 400px) {
+  .appbar .duty-open {
+    display: none;
+  }
+}

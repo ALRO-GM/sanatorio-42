@@ -154,10 +154,11 @@ export function blockedForPool(section: Section, access: PoolAccess): boolean {
 /**
  * Si, en Pomodoro, esta sección queda fuera: una de las pestañas que no se ha
  * elegido, o el juego. El expediente (la portada) siempre se puede ver: es
- * adonde se vuelve. Gestión, guardia y privacidad no se eligen y no se cierran.
+ * adonde se vuelve; y el Pomodoro, que es donde se lleva. Gestión y privacidad
+ * no se eligen y no se cierran.
  */
 export function hiddenInFocus(section: Section, chosen: readonly string[]): boolean {
-  if (section === HOME) return false
+  if (section === HOME || section === 'pomodoro') return false
   if (section === 'clicker') return true
 
   return (

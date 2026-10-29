@@ -54,7 +54,7 @@ const ShellCoursePage = lazy(() =>
   import('../features/shellcourse/ShellCoursePage').then((m) => ({ default: m.ShellCoursePage })),
 )
 const FocusPage = lazy(() =>
-  import('../features/focus/FocusDialog').then((m) => ({ default: m.FocusPage })),
+  import('../features/focus/FocusPage').then((m) => ({ default: m.FocusPage })),
 )
 // Los exámenes también perezosos: son ~800 líneas que no toca cargar al entrar.
 const ExamsPage = lazy(() =>

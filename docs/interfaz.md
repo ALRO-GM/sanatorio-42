@@ -33,7 +33,8 @@ Fuera de las pestañas, a propósito:
 | Interruptor «De guardia» | Cabecera | Se toca a diario; la página de la guardia está en Ayuda |
 | Buscador de personas, buzón, menú de la cuenta | Cabecera | Se usan desde cualquier sitio |
 | Bicho e interrogante (`docs/sugerencias.md`) | Cabecera, junto al buzón | Pedidos por Alberto: se arrastran hasta cualquier sitio; el bicho, para contar qué falla o qué mejorar; el interrogante, para ver la demostración de ese panel |
-| Panel de gestión, incidencias, personalizar, bienvenida | Menú de la cuenta | Son de vez en cuando o solo de quien administra |
+| Panel de gestión, incidencias, personalizar, bienvenida, salir | Menú de la cuenta | Solo lo de la cuenta (2026-10-29): el expediente, la guardia y el Pomodoro tienen su pestaña |
+| Las cuatro categorías en el móvil | Barra fija abajo (640 px o menos), con icono y nombre | Destinos de primer nivel al alcance del pulgar; la pila de la esquina sube lo que mide la barra. Con 400 px o menos, el interruptor de la guardia va sin su palabra |
 | Modo, idioma, tema, texto, daltonismo, zen, campus | Pie | Se eligen una vez |
 | Privacidad, Code Clicker | Enlace del pie / secreto | No son del uso diario |
 
