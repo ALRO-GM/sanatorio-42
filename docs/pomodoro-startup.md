@@ -85,7 +85,7 @@ pieza crece con la partida. Vive en `apps/web/src/features/focus/startup/pixel/`
 | `layout.ts` | Qué sale y dónde, solo a partir de la partida: el lado de la oficina (`ROOM`), las mesas en filas con pasillo, los servidores al fondo y la decoración que se gana (`DECOR`). |
 | `paint.ts` | Pasa los dibujos al lienzo: cada fotograma de cada modelo se dibuja una vez y se guarda. |
 | `PixelScene` / `PixelArt` / `ItemArt` | La oficina, un modelo suelto y el dibujo de cada tarjeta. |
-| `useFrame.ts` | Un solo reloj a 6 fotogramas por segundo para todos; se para con movimiento reducido y con la web quieta. |
+| `useFrame.ts` | Un solo reloj a 6 fotogramas por segundo para todos; se para con movimiento reducido y con la web quieta. Dentro de `AwakeFrames` (la oficina pequeña del Pomodoro a pantalla completa) solo para con la pestaña escondida: esa pantalla marca quieta la web que tapa y quien se concentra no toca nada, pero es lo que se mira (arreglado el 2026-10-29: los muñequitos no se movían). |
 
 Se agranda siempre a múltiplos enteros (× 2, × 3; en las tarjetas, de medio en
 medio) con `image-rendering: pixelated`, para que ningún píxel salga borroso.
@@ -123,3 +123,15 @@ propio (`look`, el nivel). Lo que parece al azar (luces, motas) sale de
 - Colocar las piezas a mano en la cuadrícula: hace falta guardar su sitio en
   la partida (`StartupState`) y una acción nueva en la API.
 - Más modelos por modelo de negocio (por ejemplo, una granja de GPU para `ai`).
+
+## La pantalla del Pomodoro en el móvil (2026-10-29)
+
+Pedido por Alberto: a pantalla completa, la pantalla del móvil no se apaga ni
+se bloquea, para que el tiempo y el «no molestar» sigan a la vista. Lo hace el
+bloqueo de pantalla del navegador (`features/focus/useWakeLock.ts`, la API
+*Screen Wake Lock*): se pide al abrir, se vuelve a pedir al volver a la
+pestaña (el navegador lo suelta al esconderla) y se suelta al cerrar. Donde no
+existe (Firefox, Safari anterior a la 16.4) no pasa nada. La pantalla completa
+de verdad se pide también con el prefijo de Safari; en el iPhone no existe, y
+la ventana del Pomodoro ya tapa toda la web. Las animaciones de la propia
+pantalla del Pomodoro tampoco se paran con la web quieta (`styles/comfort.css`).

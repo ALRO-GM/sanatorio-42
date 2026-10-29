@@ -8,6 +8,7 @@ import { cover } from '../../shared/still'
 import { Icon } from '../../shared/ui/Icon'
 import { FocusSound } from './FocusSound'
 import { StartupStrip } from './startup/StartupStrip'
+import { useWakeLock } from './useWakeLock'
 
 /**
  * El Pomodoro a pantalla completa (#80 del buzón): el tiempo que queda en
@@ -80,26 +81,29 @@ export function FocusScreen({
       attributeFilter: ['open'],
     })
 
-    // La de verdad es un extra: sin ella (o sin permiso, o en un móvil que no
-    // la tiene) la ventana ya lo tapa todo.
-    const root: { requestFullscreen?: () => Promise<void> } = document.documentElement
-
-    if (root.requestFullscreen !== undefined) void root.requestFullscreen().catch(() => undefined)
+    // La de verdad es un extra: sin ella (o sin permiso, o en un iPhone, que
+    // no la tiene) la ventana ya lo tapa todo. Safari la tiene con prefijo.
+    const asked = enterFullscreen()
 
     const changed = (): void => {
-      if (document.fullscreenElement === null && !leaving.current) exit.current()
+      if (asked && fullscreenElement() === null && !leaving.current) exit.current()
     }
 
     document.addEventListener('fullscreenchange', changed)
+    document.addEventListener('webkitfullscreenchange', changed)
 
     return () => {
       leaving.current = true
       watcher.disconnect()
       cover(false)
       document.removeEventListener('fullscreenchange', changed)
-      if (document.fullscreenElement) void document.exitFullscreen().catch(() => undefined)
+      document.removeEventListener('webkitfullscreenchange', changed)
+      leaveFullscreen()
     }
   }, [])
+
+  // En el móvil, que la pantalla no se apague: el tiempo y el aviso, siempre a la vista.
+  useWakeLock()
 
   const time = useFormat().time(until)
 
@@ -143,4 +147,45 @@ export function FocusScreen({
     </dialog>,
     document.body,
   )
+}
+
+/** La pantalla completa con y sin el prefijo de Safari. */
+type Fullscreen = {
+  requestFullscreen?: () => Promise<void>
+  webkitRequestFullscreen?: () => void
+}
+type FullscreenDocument = Document & {
+  webkitFullscreenElement?: Element | null
+  webkitExitFullscreen?: () => void
+}
+
+/** Pide la pantalla completa; `true` si el navegador la tiene. */
+function enterFullscreen(): boolean {
+  const root: Fullscreen = document.documentElement
+
+  if (root.requestFullscreen !== undefined) {
+    void root.requestFullscreen().catch(() => undefined)
+
+    return true
+  }
+  if (root.webkitRequestFullscreen !== undefined) {
+    root.webkitRequestFullscreen()
+
+    return true
+  }
+
+  return false
+}
+
+function fullscreenElement(): Element | null {
+  const page = document as FullscreenDocument
+
+  return page.fullscreenElement ?? page.webkitFullscreenElement ?? null
+}
+
+function leaveFullscreen(): void {
+  const page = document as FullscreenDocument
+
+  if (page.fullscreenElement) void page.exitFullscreen().catch(() => undefined)
+  else if (page.webkitFullscreenElement) page.webkitExitFullscreen?.()
 }

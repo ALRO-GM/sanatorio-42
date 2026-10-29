@@ -73,17 +73,18 @@
    acaba la que lleva y se para. Una que no para obliga a sacar fotogramas sin
    descanso aunque nadie mire, y calienta el ordenador y el móvil. No se
    pausan: una de entrada (algo que aparece desde transparente) se quedaría a
-   medias, invisible. Las demostraciones, tal cual: quien las mira no suele
-   mover el ratón. */
+   medias, invisible. Las demostraciones y la pantalla del Pomodoro, tal cual:
+   quien las mira no suele mover el ratón (y el Pomodoro marca quieta la web
+   que tapa). */
 /* Con el Pomodoro a pantalla completa (`cover` en `src/shared/still.ts`), la
    web de debajo ni se pinta: no gasta en animaciones que nadie ve. */
 :root[data-covered='on'] #root {
   content-visibility: hidden;
 }
 
-:root[data-still='on'] :not(.tour, .tour *),
-:root[data-still='on'] :not(.tour, .tour *)::before,
-:root[data-still='on'] :not(.tour, .tour *)::after {
+:root[data-still='on'] :not(.tour, .tour *, .focus-screen, .focus-screen *),
+:root[data-still='on'] :not(.tour, .tour *, .focus-screen, .focus-screen *)::before,
+:root[data-still='on'] :not(.tour, .tour *, .focus-screen, .focus-screen *)::after {
   animation-iteration-count: 1 !important;
 }
 /* Avance: las medias (C y Python) y la gente con quien te comparas, con la
