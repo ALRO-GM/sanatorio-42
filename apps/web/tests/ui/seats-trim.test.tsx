@@ -69,6 +69,8 @@ describe('red de asientos: recortar el grafo', () => {
     const someone = document.querySelector<HTMLOptionElement>('#seats-people option')?.value ?? ''
 
     fireEvent.change(search, { target: { value: someone } })
+    // Con alguien elegido sale su red en anillos; el grafo, a un clic.
+    fireEvent.click(await screen.findByRole('tab', { name: text('net.view.graph') }))
 
     await waitFor(() => {
       expect(graphCounts().people).toBeLessThanOrEqual(4)
