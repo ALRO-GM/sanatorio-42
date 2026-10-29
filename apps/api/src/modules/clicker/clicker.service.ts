@@ -945,6 +945,31 @@ export function createClickerService(options: ClickerServiceOptions) {
     },
 
     /**
+     * Le quita la pastilla a alguien para que vuelva a elegir. Su partida, sus
+     * pulsaciones y su historial se quedan: si vuelve a la roja, sigue donde
+     * estaba. Solo quien administra.
+     *
+     * @throws {DomainError} `not_found` si esa persona no ha elegido ninguna.
+     */
+    async resetPill(actor: Actor, input: unknown): Promise<void> {
+      assertAdmin(actor)
+
+      const { login } = parse(loginSchema, input)
+
+      return locked(login, async () => {
+        if (pillOf(await row(login)) === null) {
+          throw domainError('not_found', 'Esa persona no ha elegido pastilla')
+        }
+
+        // Sin `holder`: la pestaña que tuviera el juego abierto ya no guarda.
+        await db.execute({
+          sql: 'UPDATE clicker SET pill = NULL, holder = NULL, updated_at = ? WHERE login = ?',
+          args: [iso(), login],
+        })
+      })
+    },
+
+    /**
      * Una sanción a mano: le deja `code` líneas y, con `wipe`, sin edificios ni
      * mejoras (ni lo que llevaba en marcha). Conserva logros, prestigio y la
      * cuenta de la clasificación. Lo verá en el juego con el mensaje (`note`).

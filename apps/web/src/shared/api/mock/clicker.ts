@@ -94,6 +94,9 @@ let alerts: ClickerAlert[] = [
   },
 ]
 
+/** A quién le ha quitado la pastilla quien administra: vuelve a elegir. */
+const reset = new Set<string>()
+
 /** El título que deja en el banner haber sido pillado, y las veces: lo pinta el expediente. */
 export function mockHacker(): { title: TitleId | null; caught: number } {
   const { caught } = state
@@ -134,6 +137,7 @@ export const clickerMock: Pick<
   | 'ackClickerSeizure'
   | 'getClickerGameOf'
   | 'sanctionClicker'
+  | 'resetClickerPill'
 > = {
   async getClicker() {
     await delay(100)
@@ -263,6 +267,7 @@ export const clickerMock: Pick<
     ] as const
     const players = rows.map((row, index) => ({
       ...row,
+      pill: reset.has(row.login) ? null : row.pill,
       level: level(row.total),
       achievements: row.total > 0 ? 41 - index * 16 : 0,
       prestige: 0,
@@ -508,6 +513,12 @@ export const clickerMock: Pick<
       caught: login === 'rsoto' ? 2 : 0,
       perSecond: 340,
     }
+  },
+
+  async resetClickerPill(login) {
+    await delay(120)
+    reset.add(login)
+    if (login === ME.login) state.pill = null
   },
 
   async sanctionClicker({ code, wipe, note }) {

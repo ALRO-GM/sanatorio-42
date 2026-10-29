@@ -125,6 +125,30 @@ describe('code clicker', () => {
     await expectCode(clicker.board(actor('leo')), 'forbidden')
   })
 
+  it('quien administra puede quitar la pastilla: se vuelve a elegir y la partida se queda', async () => {
+    const { clicker } = services
+    const boss = actor('eva', { admin: true })
+
+    await press('leo', 100)
+    await clicker.choose(actor('leo'), { pill: 'red' })
+    await clicker.save(actor('leo'), SAVE)
+
+    // Solo quien administra, y solo a quien ya eligió.
+    await expectCode(clicker.resetPill(actor('leo'), { login: 'leo' }), 'forbidden')
+    await expectCode(clicker.resetPill(boss, { login: 'nadie' }), 'not_found')
+    await expectCode(clicker.resetPill(boss, { login: '../x' }), 'invalid_input')
+
+    await clicker.resetPill(boss, { login: 'leo' })
+    expect(await clicker.state(actor('leo'))).toMatchObject({ pill: null, plus: 100 })
+    await expectCode(clicker.resetPill(boss, { login: 'leo' }), 'not_found')
+
+    // Vuelve a elegir; con la roja, sigue su partida.
+    expect(await clicker.choose(actor('leo'), { pill: 'blue' })).toMatchObject({ pill: 'blue' })
+    await clicker.resetPill(boss, { login: 'leo' })
+    expect(await clicker.choose(actor('leo'), { pill: 'red' })).toMatchObject({ pill: 'red' })
+    expect((await clicker.state(actor('leo'))).save).not.toBeNull()
+  })
+
   it('dos elecciones a la vez: entra una sola pastilla', async () => {
     const { clicker } = services
 

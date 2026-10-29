@@ -18,7 +18,7 @@ Cómo se trabaja con ellas: [docs/textos.md](../textos.md).
 | [estadisticas](estadisticas.md) | 137 | 0 | 0 | 0 | 0 |
 | [examenes](examenes.md) | 68 | 0 | 0 | 0 | 0 |
 | [expediente](expediente.md) | 146 | 0 | 0 | 0 | 0 |
-| [gestion](gestion.md) | 655 | 0 | 71 | 71 | 71 |
+| [gestion](gestion.md) | 657 | 0 | 71 | 71 | 71 |
 | [guardia](guardia.md) | 75 | 0 | 0 | 0 | 0 |
 | [legal](legal.md) | 56 | 0 | 0 | 0 | 0 |
 | [notgames](notgames.md) | 225 | 0 | 0 | 0 | 0 |

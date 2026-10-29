@@ -876,6 +876,12 @@ la copia se borra. `404` si ya no está. Quien tuviera la partida abierta recibe
 
 DELETE /admin/clicker/alerts/:id → 204. Solo admins. Descarta un aviso de salto.
 
+POST /admin/clicker/pill/reset → `{ login }` → 204. Solo admins. Le quita la
+pastilla para que vuelva a elegir (pedido por Alberto, 2026-10-29): sus
+pulsaciones, su partida y su historial se quedan, así que con la roja sigue
+donde estaba. `404` si no ha elegido ninguna. Se hace desde Gestión › Clicker,
+en la ficha de la persona.
+
 POST /admin/clicker/sanction → `{ login, code, wipe, note }` → 204. Solo admins.
 Le deja ese código de sanción y, con `wipe`, sin edificios ni mejoras; lo verá
 en el juego.

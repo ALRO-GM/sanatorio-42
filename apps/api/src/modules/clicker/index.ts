@@ -153,6 +153,16 @@ export function createClickerModule(deps: ClickerServiceOptions): ClickerModule 
       )
 
       /**
+       * `POST /admin/clicker/pill/reset` → `{ login }`: le quita la pastilla para
+       * que vuelva a elegir; la partida se queda. 204. Solo admins.
+       */
+      app.post('/admin/clicker/pill/reset', async (request, reply) => {
+        await service.resetPill(await session.actor(request), request.body)
+
+        return reply.code(204).send()
+      })
+
+      /**
        * `POST /admin/clicker/sanction` → `{ login, code, wipe, note }`: le deja ese
        * código y, con `wipe`, sin edificios ni mejoras; lo verá en el juego. 204.
        */

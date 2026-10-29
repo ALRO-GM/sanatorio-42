@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/gestion.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-655 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
+657 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera | Francés |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -662,3 +662,5 @@ Generado desde `apps/web/src/shared/i18n/textos/gestion.csv` con
 | `pool.key.shellcourse` | Panel, Piscina: permiso «shellcourse» | features/admin/PoolPanel | Curso de shell | Shell course | Curs de shell | Shell ikastaroa | Cours de shell |
 | `pool.key.agenda` | Panel, Piscina: permiso «agenda» | features/admin/PoolPanel | Agenda: metas, checkpoints y dailies | Agenda: goals, checkpoints and dailies | Agenda: fites, checkpoints i dailies | Agenda: helburuak, checkpointak eta daily-ak | Agenda : objectifs, checkpoints et dailies |
 | `pool.key.agenda.sprint` | Panel, Piscina: permiso «agenda.sprint» | features/admin/PoolPanel | Tablero del sprint | Sprint board | Tauler de l'sprint | Sprintaren taula | Tableau du sprint |
+| `admin.clicker.resetPill` | Gestión › Clicker: botón para quitarle la pastilla a alguien | features/admin/ClickerPanel | Resetear la pastilla | Reset the pill | Restablir la pastilla | Pilula berrezarri | Réinitialiser la pilule |
+| `admin.clicker.resetPillAsk` | Gestión › Clicker: confirmación antes de resetear la pastilla, con el login | features/admin/ClickerPanel | ¿Quitarle la pastilla a {login}? Volverá a elegir entre la roja y la azul; su partida se queda como está. | Take {login}'s pill away? They'll choose between red and blue again; their game stays as it is. | Treure-li la pastilla a {login}? Tornarà a triar entre la vermella i la blava; la seva partida es queda com està. | {login}(r)i pilula kendu? Gorria eta urdinaren artean berriro aukeratuko du; bere partida dagoen bezala geratuko da. | Retirer la pilule de {login} ? Il ou elle choisira à nouveau entre la rouge et la bleue ; sa partie reste telle quelle. |

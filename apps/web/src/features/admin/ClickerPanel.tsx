@@ -55,6 +55,18 @@ export function ClickerPanel({ me }: { me: string }) {
       return
     if (await action.run(() => api.pardonClickerCheat(id))) await reload()
   }
+  /** Le quita la pastilla: vuelve a elegir, con su partida intacta. */
+  const resetPill = async (who: string): Promise<void> => {
+    if (
+      !(await confirm.ask({
+        body: t('admin.clicker.resetPillAsk', { login: who }),
+        okText: t('admin.clicker.resetPill'),
+        danger: true,
+      }))
+    )
+      return
+    if (await action.run(() => api.resetClickerPill(who))) await reload()
+  }
   /** Lo que se decide sobre un salto. La trampa requisa todo: se pregunta antes. */
   const review = async (id: number, verdict: ClickerVerdict): Promise<void> => {
     if (
@@ -155,6 +167,20 @@ export function ClickerPanel({ me }: { me: string }) {
                   />
                 )}
               </div>
+
+              {one.pill !== null && (
+                <div className="actions">
+                  <button
+                    type="button"
+                    className="pill"
+                    disabled={action.busy}
+                    onClick={() => void resetPill(one.login)}
+                  >
+                    {t('admin.clicker.resetPill')}
+                  </button>
+                  <ErrorNote error={action.error} />
+                </div>
+              )}
 
               <article className="card">
                 <CapitalHistory login={one.login} lang={lang} label={t('admin.clicker.capital')} />

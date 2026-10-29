@@ -480,6 +480,8 @@ export type Api = {
   defendClickerReview: (id: number, answer: string) => Promise<void>
   /** La partida de alguien, para verla. Solo admins. */
   getClickerGameOf: (login: string) => Promise<ClickerGameView>
+  /** Le quita la pastilla a alguien para que vuelva a elegir; la partida se queda. */
+  resetClickerPill: (login: string) => Promise<void>
   /** Sanción a mano: le deja ese código y, si se pide, sin edificios ni mejoras. */
   sanctionClicker: (sanction: ClickerSanction) => Promise<void>
   /** Ya has visto el aviso de la policía del código. */
