@@ -5,7 +5,7 @@
 import type { AvailabilityResponse, Peer } from '@sanatorio/contracts'
 
 import { apiUrl, fetchApi, getJson, intHeader, send, sendJson } from './http'
-import type { Api, SeatDates } from './types'
+import type { Api, ExamWorld, SeatDates } from './types'
 
 /** Los parámetros de una dirección, sin los que no vengan. */
 const search = (query: Record<string, string | number | undefined>): string =>
@@ -20,6 +20,10 @@ const seatQuery = (days: number, dates?: SeatDates): string =>
   dates === undefined
     ? search({ days })
     : search({ from: dates.from, to: dates.to === '' ? undefined : dates.to })
+
+/** De qué mundo es el examen en vivo (solo la vista sin límites del dueño lo elige). */
+const worldQuery = (world?: ExamWorld): string =>
+  world === undefined ? '' : `?${search({ world })}`
 
 export const realApi: Api = {
   getMe: () => getJson('/auth/me'),
@@ -80,8 +84,8 @@ export const realApi: Api = {
     getJson(
       `/exams/stats?track=${track}${kickoffs.length === 0 ? '' : `&kickoffs=${kickoffs.join(',')}`}`,
     ),
-  getLiveExam: () => getJson('/exams/live'),
-  refreshLiveExam: () => sendJson('POST', '/exams/live/refresh'),
+  getLiveExam: (world) => getJson(`/exams/live${worldQuery(world)}`),
+  refreshLiveExam: (world) => sendJson('POST', `/exams/live/refresh${worldQuery(world)}`),
   reportBrokenSeat: (host) => send('POST', `/map/seats/${encodeURIComponent(host)}/broken`),
   clearBrokenSeat: (host) => send('DELETE', `/map/seats/${encodeURIComponent(host)}/broken`),
   getConversations: () => getJson('/conversations'),

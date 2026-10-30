@@ -11,6 +11,7 @@ import { NO_POOL, visibleTo } from '../../core/audience.js'
 import type { Actor } from '../../core/actor.js'
 import type { LiveExam, LiveExamGroup } from '@sanatorio/contracts'
 import type { Audience } from '../../core/audience.js'
+import type { SessionUser } from '../../core/session.js'
 import type { Db } from '../../core/db/database.js'
 import type { AppModule } from '../../core/module.js'
 import type { FortyTwoClient } from '../../integrations/forty-two/client.js'
@@ -45,6 +46,20 @@ export type ExamsModule = AppModule & { service: ExamsService; sync: ExamsSync; 
 const BACKFILL_EVERY_MS = 60_000
 /** Cada cuánto se mira si toca refrescar un examen en marcha (toca cada cinco minutos). */
 const LIVE_TICK_MS = 60_000
+
+/**
+ * De qué mundo es el examen en vivo que se mira: el de quien pregunta, salvo en
+ * la vista sin límites del dueño (`docs/piscineros.md`), que elige con
+ * `?world=student|pool`. A cualquier otro el parámetro no le cambia nada.
+ */
+export function liveWorld(user: SessionUser, query: unknown, actor: Actor): Actor {
+  const world = (query as { world?: unknown } | null | undefined)?.world
+
+  if (user.unrestricted !== true) return actor
+  if (world !== 'student' && world !== 'pool') return actor
+
+  return { ...actor, pool: world === 'pool' }
+}
 
 export function createExamsModule(deps: ExamsModuleDeps): ExamsModule {
   /** En el examen en vivo, solo la gente del mundo de quien mira. */
@@ -114,7 +129,7 @@ export function createExamsModule(deps: ExamsModuleDeps): ExamsModule {
        * de hoy): quién está apuntado, qué examen hace y su última nota.
        */
       app.get('/exams/live', async (request, reply) => {
-        const actor = await session.actor(request)
+        const actor = liveWorld(session.user(request), request.query, await session.actor(request))
 
         return reply.send(await seenLive(actor, await live.live(actor)))
       })
@@ -124,7 +139,7 @@ export function createExamsModule(deps: ExamsModuleDeps): ExamsModule {
        * hace al menos un minuto del último refresco (de quien sea).
        */
       app.post('/exams/live/refresh', async (request, reply) => {
-        const actor = await session.actor(request)
+        const actor = liveWorld(session.user(request), request.query, await session.actor(request))
 
         return reply.send(await seenLive(actor, await live.refreshNow(actor)))
       })

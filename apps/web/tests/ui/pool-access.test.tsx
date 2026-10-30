@@ -182,6 +182,26 @@ describe('la vista de piscinero de quien administra', () => {
     quiet.mockRestore()
   }, 30_000)
 
+  it('sin límites, en Exámenes se elige ver los de los piscineros', async () => {
+    const user = userEvent.setup()
+
+    await openApp('#/examenes', { preview: 'full', detail: 'datos' })
+
+    const pool = await screen.findByRole('button', { name: text('exams.world.pool') }, WAIT)
+
+    expect(await screen.findByText('Exam Rank 03', {}, WAIT)).toBeTruthy()
+    await user.click(pool)
+    expect(pool.getAttribute('aria-pressed')).toBe('true')
+    expect((await screen.findAllByText('C Piscine Exam 00', {}, WAIT)).length).toBeGreaterThan(0)
+    expect(screen.queryByText('Exam Rank 03')).toBeNull()
+  }, 30_000)
+
+  it('en la vista normal no hay botón de piscineros en Exámenes', async () => {
+    await openApp('#/examenes', { preview: true })
+    await screen.findByRole('complementary', { name: text('pool.preview.banner') }, WAIT)
+    expect(screen.queryByRole('button', { name: text('exams.world.pool') })).toBeNull()
+  }, 20_000)
+
   it('si no se puede volver, la franja lo dice', async () => {
     const user = userEvent.setup()
 

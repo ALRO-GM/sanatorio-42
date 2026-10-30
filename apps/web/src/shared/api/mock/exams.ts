@@ -128,17 +128,42 @@ function liveNow(manual: boolean): LiveExam {
   }
 }
 
+/**
+ * El de la piscina, para la vista sin límites del dueño con «Piscineros»: un
+ * examen de piscina con logins inventados.
+ */
+function piscineNow(manual: boolean): LiveExam {
+  const live = liveNow(manual)
+
+  return {
+    ...live,
+    exam: live.exam === null ? null : { ...live.exam, id: 910, name: 'C Piscine Exam 00' },
+    groups: [
+      {
+        projectId: 1301,
+        name: 'C Piscine Exam 00',
+        people: [
+          person('pmartin', 'classic', 0, 50, 'failed'),
+          person('lruiz', 'classic', 0, null, 'inProgress'),
+          person('acano', 'classic', 0, 100, 'passed'),
+        ],
+      },
+    ],
+    last: null,
+  }
+}
+
 export const examsMock: Pick<Api, 'getExamStats' | 'getLiveExam' | 'refreshLiveExam'> = {
-  async getLiveExam() {
+  async getLiveExam(world) {
     await delay(120)
 
-    return liveNow(false)
+    return world === 'pool' ? piscineNow(false) : liveNow(false)
   },
 
-  async refreshLiveExam() {
+  async refreshLiveExam(world) {
     await delay(120)
 
-    return liveNow(true)
+    return world === 'pool' ? piscineNow(true) : liveNow(true)
   },
 
   async getExamStats(query: ExamQuery): Promise<ExamStats> {

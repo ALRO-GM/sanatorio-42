@@ -160,6 +160,11 @@ restricción, con exámenes y todo lo de un estudiante, y que solo él pueda.
   todo; sigue siendo piscinero en lo demás (mundos separados, la piscina en
   Avance y tablón, su campus de casa, `admin: false`, sin panel).
 - La franja dice «… como un piscinero sin límites»; «Volver» es la misma.
+- **Exámenes** (pedido el 2026-10-30): arriba, «Estudiantes · Piscineros».
+  De entrada, el examen en vivo y el último de los estudiantes, con sus
+  estadísticas; «Piscineros», los de la piscina de su campus, con su gente (sin
+  estadísticas, que son de los Exam Rank). Va con `?world=` a
+  `/exams/live`, que solo atiende esta vista.
 - Tests: `tests/integration/pool-preview.test.ts` (otro que administra recibe
   `403` y la marca firmada a mano no le vale).
 - API de mentira: `localStorage.mock_pool_preview = 'full'`.

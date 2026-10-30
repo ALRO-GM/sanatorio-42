@@ -11,6 +11,8 @@ import { ExamPeople } from './ExamPeople'
 import { ExamStatsPanel } from './ExamStatsPanel'
 import { ExamsTour } from './ExamsTour'
 import { PoolOnly } from '../../shared/ui/PoolOnly'
+import { usePoolAccess } from '../../shared/pool'
+import type { ExamWorld } from '../../shared/api/types'
 
 /** Sin examen en marcha, cada cuánto se mira si ha aparecido uno. */
 const IDLE_REFRESH_MS = 5 * 60_000
@@ -26,6 +28,10 @@ type TrackFilter = 'all' | LiveExaminee['track']
  */
 export function ExamsPage() {
   const { t } = useI18n()
+  // La vista sin límites del dueño elige el mundo: de entrada, el de los
+  // estudiantes; «Piscineros», los exámenes de la piscina (`docs/piscineros.md`).
+  const unrestricted = usePoolAccess().unrestricted === true
+  const [world, setWorld] = useState<ExamWorld>('student')
 
   return (
     <section>
@@ -35,20 +41,40 @@ export function ExamsPage() {
           <ExamsTour />
         </InfoTip>
       </h2>
+      {unrestricted && (
+        <div className="filter-pills" role="group" aria-label={t('exams.world.label')}>
+          {(['student', 'pool'] as const).map((option) => (
+            <button
+              key={option}
+              type="button"
+              className={`pill ${world === option ? 'active' : ''}`}
+              aria-pressed={world === option}
+              onClick={() => {
+                setWorld(option)
+              }}
+            >
+              {t(`exams.world.${option}`)}
+            </button>
+          ))}
+        </div>
+      )}
       {/* Un piscinero, solo lo que permite el panel (`docs/piscineros.md`). */}
       <PoolOnly k="examenes.live">
-        <LiveSection />
+        <LiveSection key={world} world={unrestricted ? world : undefined} />
       </PoolOnly>
-      <PoolOnly k="examenes.stats">
-        <ExamStatsPanel />
-      </PoolOnly>
+      {/* Las estadísticas son de los Exam Rank: con «Piscineros» no van. */}
+      {(!unrestricted || world === 'student') && (
+        <PoolOnly k="examenes.stats">
+          <ExamStatsPanel />
+        </PoolOnly>
+      )}
     </section>
   )
 }
 
-/** El examen en marcha (o el siguiente), que se pone al día solo. */
-function LiveSection() {
-  const live = useAsync(() => api.getLiveExam(), [])
+/** El examen en marcha (o el siguiente), que se pone al día solo. `world`: de quién. */
+function LiveSection({ world }: { world?: ExamWorld | undefined }) {
+  const live = useAsync(() => api.getLiveExam(world), [world])
   const [refreshing, setRefreshing] = useState(false)
   const { reload, setData } = live
 
@@ -82,13 +108,13 @@ function LiveSection() {
     setRefreshing(true)
 
     try {
-      setData(await api.refreshLiveExam())
+      setData(await api.refreshLiveExam(world))
     } catch {
       // Si falla, se queda lo que había; el siguiente refresco solo lo arreglará.
     } finally {
       setRefreshing(false)
     }
-  }, [setData])
+  }, [setData, world])
 
   return (
     <>

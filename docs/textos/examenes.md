@@ -3,11 +3,14 @@
 Generado desde `apps/web/src/shared/i18n/textos/examenes.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-68 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
+71 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera | Francés |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | `exams.title` | Título de la página de exámenes | features/exams/ExamsPage | Exámenes | Exams | Exàmens | Azterketak | Examens |
+| `exams.world.label` | Exámenes, vista sin límites del dueño: el grupo de botones para elegir de quién son los exámenes | features/exams/ExamsPage | De quién son los exámenes | Whose exams | De qui són els exàmens | Noren azterketak | Examens de qui |
+| `exams.world.student` | Exámenes, vista sin límites del dueño: botón para ver los exámenes de los estudiantes | features/exams/ExamsPage | Estudiantes | Students | Estudiants | Ikasleak | Étudiants |
+| `exams.world.pool` | Exámenes, vista sin límites del dueño: botón para ver los exámenes de los piscineros | features/exams/ExamsPage | Piscineros | Piscine students | Piscinistes | Igerilariak | Piscine |
 | `exams.stats` | Apartado de estadísticas | features/exams/ExamStatsPanel | Estadísticas del campus | Campus statistics | Estadístiques del campus | Campuseko estatistikak | Statistiques du campus |
 | `exams.backfill.one` | Progreso de la copia de intentos antiguos (una) | features/exams/ExamStatsPanel | Copiando los intentos antiguos de 42: {done} de {total} examen. Las cifras se irán completando. | Copying old attempts from 42: {done} of {total} exam. Figures will fill in. | Copiant els intents antics de 42: {done} de {total} examen. Les xifres s'aniran completant. | 42ko saiakera zaharrak kopiatzen: {done} / {total} azterketa. Zifrak osatzen joango dira. | Import des anciennes tentatives depuis 42 : {done} sur {total} examen. Les chiffres vont se compléter au fur et à mesure. |
 | `exams.backfill.many` | Progreso de la copia de intentos antiguos (varias) | features/exams/ExamStatsPanel | Copiando los intentos antiguos de 42: {done} de {total} exámenes. Las cifras se irán completando. | Copying old attempts from 42: {done} of {total} exams. Figures will fill in. | Copiant els intents antics de 42: {done} de {total} exàmens. Les xifres s'aniran completant. | 42ko saiakera zaharrak kopiatzen: {done} / {total} azterketa. Zifrak osatzen joango dira. | Import des anciennes tentatives depuis 42 : {done} sur {total} examens. Les chiffres vont se compléter au fur et à mesure. |

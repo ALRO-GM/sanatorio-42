@@ -181,6 +181,9 @@ import type {
 /** Un periodo a mano de la red de asientos; `to` vacío es hasta hoy. */
 export type SeatDates = { from: string; to: string }
 
+/** El examen en vivo de estudiantes o de piscineros (`getLiveExam`). */
+export type ExamWorld = 'student' | 'pool'
+
 export type PeersResult = {
   peers: Peer[]
   /** Personas del campus con ese proyecto, o `null` si no se sabe. */
@@ -257,10 +260,14 @@ export type Api = {
   getCampusMap: () => Promise<ClusterMap>
   /** Estadísticas de los exámenes, los círculos y el black hole del campus, por plan y kickoff. */
   getExamStats: (query: ExamQuery) => Promise<ExamStats>
-  /** El examen que hay ahora en el campus (o el siguiente, en las próximas 24 h). */
-  getLiveExam: () => Promise<LiveExam>
+  /**
+   * El examen que hay ahora en el campus (o el siguiente, en las próximas 24 h).
+   * `world`: el de estudiantes o el de piscineros; solo lo atiende la API en la
+   * vista sin límites del dueño (`docs/piscineros.md`).
+   */
+  getLiveExam: (world?: ExamWorld) => Promise<LiveExam>
   /** Lo mismo, pidiendo antes lo nuevo a 42 (uno por minuto para todo el campus). */
-  refreshLiveExam: () => Promise<LiveExam>
+  refreshLiveExam: (world?: ExamWorld) => Promise<LiveExam>
   /** Ese puesto no funciona (vale una semana), o ya funciona. */
   reportBrokenSeat: (host: string) => Promise<void>
   clearBrokenSeat: (host: string) => Promise<void>

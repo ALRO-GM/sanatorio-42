@@ -2118,6 +2118,10 @@ DELETE /admin/hidden/:login     → HiddenPerson[]: la vuelve a enseñar (solo a
   incluidos), pero `/admin/…` sigue cerrado porque no administra.
   `GET /pool/access` devuelve `allow: null`, `preview` y `unrestricted`, y al
   dueño en su sesión de estudiante, `owner: true`.
+- En esa vista, `GET /exams/live` y `POST /exams/live/refresh` aceptan
+  `?world=student|pool`: el examen (y quién sale) de los estudiantes o de la
+  piscina (`liveWorld` en `modules/exams/index.ts`). A cualquier otro el
+  parámetro no le cambia nada.
 - Personas ocultas (`docs/personas-ocultas.md`, tabla `hidden_people`): quien
   administra oculta a alguien a los estudiantes (`fromStudents`), a los
   piscineros (`fromPool`) o a los dos; al menos uno, o `400`. Para ese grupo
