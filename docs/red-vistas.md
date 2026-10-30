@@ -1,5 +1,10 @@
 # Vistas de la red: según cuánta gente se mira
 
+> **Retiradas el 2026-10-30** (pedido por Alberto): la Red y Amigos vuelven a
+> enseñar solo el grafo de fuerzas (`ForceGraph`). Se probaron la red en
+> anillos, la matriz y las cuerdas entre grupos y ninguna convenció; lo de
+> abajo queda como registro de lo probado.
+
 Pedido por Alberto (2026-10-29): además del grafo de fuerzas, otras formas de
 ver la red de correcciones y la de asientos, según si se mira a un grupo
 mediano o a mucha gente. El grafo de siempre se ofrece siempre. Código: `apps/web/src/features/network/GraphViews.tsx`; lo usan

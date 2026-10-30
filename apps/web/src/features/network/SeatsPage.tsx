@@ -24,7 +24,6 @@ import { InfoTip } from '../../shared/ui/InfoTip'
 import { PersonLink } from '../../shared/ui/PersonLink'
 import { colorOf, scaleColor } from './colors'
 import { ForceGraph } from './ForceGraph'
-import { GraphViews } from './GraphViews'
 import { SeatHeatMap } from './SeatHeatMap'
 import { SeatsTour } from './SeatsTour'
 import { DEFAULT_TRIM, MOST_OPTIONS, SHARE_OPTIONS, trimSeats } from './seat-trim'
@@ -465,26 +464,16 @@ export function SeatsPage({ me }: { me?: string }) {
             {nodes.length === 0 ? (
               <p className="estado">{t('seats.empty')}</p>
             ) : (
-              <GraphViews
+              <ForceGraph
                 nodes={nodes}
                 links={links}
                 colorOf={paint}
+                selected={selected}
                 onSelect={choose}
+                label={t('seats.graphLabel', { people: nodes.length, links: links.length })}
+                tooltip={tooltip}
+                controls={controls}
                 undirected
-                describe={(link) => t('net.view.describeSeats', { n: link.forth })}
-                graph={
-                  <ForceGraph
-                    nodes={nodes}
-                    links={links}
-                    colorOf={paint}
-                    selected={selected}
-                    onSelect={choose}
-                    label={t('seats.graphLabel', { people: nodes.length, links: links.length })}
-                    tooltip={tooltip}
-                    controls={controls}
-                    undirected
-                  />
-                }
               />
             )}
             <p className="net-help">{t('seats.help')}</p>

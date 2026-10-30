@@ -33,7 +33,7 @@ const OTHER = 'hsl(200 12% 68%)'
 const DISTINCT_HUES = [210, 30, 120, 300, 75, 165, 255, 345, 52, 188]
 
 /** Color del puesto `index` de la lista; pasada la lista, en gris. */
-export const distinctColor = (index: number): string => {
+const distinctColor = (index: number): string => {
   const hue = DISTINCT_HUES[index]
 
   return hue === undefined ? OTHER : `hsl(${hue} 86% 62%)`

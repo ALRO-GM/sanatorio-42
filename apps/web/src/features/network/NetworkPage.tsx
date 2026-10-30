@@ -27,7 +27,6 @@ import {
 import type { Scale, ScaleMode } from './colors'
 import type { ColorMode } from './colors'
 import { ForceGraph } from './ForceGraph'
-import { GraphViews } from './GraphViews'
 import { Meter } from './Meter'
 import { PersonPanel } from './PersonPanel'
 import { PersonSearch } from './PersonSearch'
@@ -869,32 +868,18 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
                   {graph.query.login === null ? t('net.empty') : t('net.emptyPerson')}
                 </p>
               ) : (
-                <GraphViews
+                <ForceGraph
                   nodes={(shownGraph ?? graph).nodes}
                   links={(shownGraph ?? graph).links}
                   colorOf={paint}
+                  selected={selected}
                   onSelect={setSelected}
-                  describe={(link, from) =>
-                    t('net.view.describe', {
-                      gave: link.source === from ? link.forth : link.back,
-                      got: link.source === from ? link.back : link.forth,
-                    })
-                  }
-                  graph={
-                    <ForceGraph
-                      nodes={(shownGraph ?? graph).nodes}
-                      links={(shownGraph ?? graph).links}
-                      colorOf={paint}
-                      selected={selected}
-                      onSelect={setSelected}
-                      label={t('net.graphLabel', {
-                        people: (shownGraph ?? graph).nodes.length,
-                        links: (shownGraph ?? graph).links.length,
-                      })}
-                      tooltip={tooltip}
-                      controls={controls}
-                    />
-                  }
+                  label={t('net.graphLabel', {
+                    people: (shownGraph ?? graph).nodes.length,
+                    links: (shownGraph ?? graph).links.length,
+                  })}
+                  tooltip={tooltip}
+                  controls={controls}
                 />
               )}
               <div className="net-key">

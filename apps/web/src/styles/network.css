@@ -1148,39 +1148,3 @@ ol.net-rows .net-row-name {
 .net-person-min .filter-pills {
   flex-wrap: wrap;
 }
-
-/* ── Otras vistas de la red (`GraphViews.tsx`, 2026-10-29) ─────────────────────
- * Anillos para una persona, matriz para un grupo mediano, cuerdas entre grupos
- * para mucha gente. SVG con las variables del tema: valen en claro y oscuro. */
-.net-views {
-  margin-bottom: 0.6rem;
-}
-.net-view {
-  margin: 0;
-  padding: 0.75rem;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--surface);
-}
-.net-view svg {
-  display: block;
-  width: 100%;
-  height: auto;
-  max-height: 78vh;
-  font-family: var(--font);
-}
-.net-view figcaption {
-  margin-top: 0.5rem;
-}
-.net-matrix-block {
-  fill: none;
-  stroke-width: 1.5;
-  opacity: 0.8;
-}
-.net-matrix-cell {
-  fill: var(--accent);
-  cursor: pointer;
-}
-.net-matrix-label text {
-  font-size: 9px;
-}
