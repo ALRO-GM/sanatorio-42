@@ -27,6 +27,8 @@ import type { Agenda, Curriculum, QuotaGate, ReplicaRepository } from '../replic
 import type { ExamsRepository } from './exams.repository.js'
 import {
   byProgress,
+  CLOSE_CHECK_MS,
+  examCheckpoints,
   examDay,
   examineeStatus,
   expectedExamSlug,
@@ -75,7 +77,7 @@ type RefreshMode = 'auto' | 'manual'
 
 const liveKey = (campusId: number, examId: number): string => `exams:live:${campusId}:${examId}`
 
-type Attempt = { projectId: number; mark: number | null; passed: boolean }
+type Attempt = { projectId: number; mark: number | null; passed: boolean; closed: boolean }
 
 export function createExamsLive(options: ExamsLiveOptions) {
   const { db, client, replica, agenda, curriculum, exams, quota } = options
@@ -153,7 +155,7 @@ export function createExamsLive(options: ExamsLiveOptions) {
 
     const task = (async () => {
       const state = await stateOf(key)
-      const plan = liveRefreshPlan(state?.at ?? null, now())
+      const plan = liveRefreshPlan(state?.at ?? null, now(), examCheckpoints(exam))
 
       if (!(mode === 'manual' ? plan.manual : plan.auto) || !quota.allows(tier)) return
 
@@ -257,7 +259,12 @@ export function createExamsLive(options: ExamsLiveOptions) {
     const [places, images, attempts, rows, projects, best] = await Promise.all([
       curriculum.placesOf(logins),
       replica.imagesOf(logins),
-      latestAttempts(logins, exam.beginAt, exam.endAt),
+      // 42 apunta el cierre de un intento algo después de la hora de fin.
+      latestAttempts(
+        logins,
+        exam.beginAt,
+        new Date(Date.parse(exam.endAt) + AFTER_END_MS).toISOString(),
+      ),
       entered ? exams.sessionRows(campusId, exam.beginAt, logins) : Promise.resolve([]),
       exams.exams(),
       exams.bestClosedMarks(logins, exam.beginAt),
@@ -277,7 +284,10 @@ export function createExamsLive(options: ExamsLiveOptions) {
       const attempt = attempts.get(login)
       // El examen que ya ha empezado manda sobre el que le tocaría por el círculo.
       const projectId = row?.projectId ?? attempt?.projectId ?? expected?.id ?? null
-      const status = examineeStatus(row, attempt, exam.beginAt)
+      // Pasado el margen tras la hora de fin, el examen está cerrado: quien
+      // siguiera dentro ha suspendido, con la nota que tuviera.
+      const ended = now() >= Date.parse(exam.endAt) + CLOSE_CHECK_MS
+      const status = examineeStatus(row, attempt, exam.beginAt, ended)
 
       // Con el examen en marcha o acabado, solo quien ha entrado: apuntarse no es estar.
       if (entered && status === 'pending') continue
@@ -356,7 +366,7 @@ export function createExamsLive(options: ExamsLiveOptions) {
       groupsOf(campusId, exam, state, running),
       replica.timeZoneOf(campusId),
     ])
-    const plan = liveRefreshPlan(state?.at ?? null, at)
+    const plan = liveRefreshPlan(state?.at ?? null, at, examCheckpoints(exam))
 
     return {
       exam: {
@@ -433,9 +443,15 @@ export function createExamsLive(options: ExamsLiveOptions) {
 
         if (found?.running === true) {
           await refresh(campusId, found.exam, 'auto', 'background')
-        } else if (last !== null && now() - Date.parse(last.endAt) < AFTER_END_MS) {
-          // Recién acabado: quien cierra en el último momento aún no tiene su nota.
-          await refresh(campusId, last, 'auto', 'background')
+        } else if (last !== null) {
+          // Recién acabado (quien cierra en el último momento aún no tiene su
+          // nota), o sin mirar desde que cerró: se piden las notas que quedaron.
+          const state = await stateOf(liveKey(campusId, last.id))
+          const end = Date.parse(last.endAt)
+
+          if (now() - end < AFTER_END_MS || (state?.at ?? 0) < end + CLOSE_CHECK_MS) {
+            await refresh(campusId, last, 'auto', 'background')
+          }
         }
       }
     },
@@ -466,6 +482,8 @@ export function createExamsLive(options: ExamsLiveOptions) {
         projectId: toNumber(row.project_id),
         mark: row.mark === null ? null : toNumber(row.mark),
         passed: row.validated !== null && toNumber(row.validated) === 1,
+        // Cerrado: 42 ya dijo si valía o no (un intento abierto aún no lo dice).
+        closed: row.validated !== null,
       })
     }
 

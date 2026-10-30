@@ -17,6 +17,7 @@ import {
   LIVE_AUTO_MS,
   LIVE_MANUAL_MS,
   byProgress,
+  examCheckpoints,
   examDay,
   examineeStatus,
   expectedExamSlug,
@@ -75,6 +76,23 @@ describe('el reloj de refrescos', () => {
       manual: true,
       nextAt: start,
       manualAt: start,
+    })
+  })
+
+  it('a los 11 minutos del inicio y a los 5 del final se mira sí o sí', () => {
+    const exam = { beginAt: '2026-10-22T07:00:00Z', endAt: '2026-10-22T10:00:00Z' }
+    const [entry, close] = examCheckpoints(exam)
+    const begin = Date.parse(exam.beginAt)
+
+    expect(entry).toBe(begin + 11 * MINUTE)
+    expect(close).toBe(Date.parse(exam.endAt) + 5 * MINUTE)
+    // Refrescado a los 8 minutos: a los 11 toca, aunque no hayan pasado cinco.
+    expect(liveRefreshPlan(begin + 8 * MINUTE, begin + 11 * MINUTE, [entry ?? 0])).toMatchObject({
+      auto: true,
+    })
+    expect(liveRefreshPlan(begin + 8 * MINUTE, begin + 10 * MINUTE, [entry ?? 0])).toMatchObject({
+      auto: false,
+      nextAt: begin + 11 * MINUTE,
     })
   })
 
@@ -148,7 +166,34 @@ describe('cómo va cada cual', () => {
     expect(examineeStatus(row('finished', 100, true), undefined, since)).toBe('passed')
     expect(examineeStatus(row('finished', 125, null), undefined, since)).toBe('passed')
     expect(examineeStatus(row('in_progress', 75, null), undefined, since)).toBe('inProgress')
-    expect(examineeStatus(undefined, { mark: null, passed: false }, since)).toBe('inProgress')
+    expect(examineeStatus(undefined, { mark: null, passed: false, closed: false }, since)).toBe(
+      'inProgress',
+    )
+  })
+
+  it('un intento cerrado sin aprobar es un suspenso, aunque 42 deje el proyecto en curso', () => {
+    expect(
+      examineeStatus(
+        row('in_progress', 90, null),
+        { mark: 75, passed: false, closed: true },
+        since,
+      ),
+    ).toBe('failed')
+    expect(
+      examineeStatus(
+        row('in_progress', 90, null),
+        { mark: 100, passed: true, closed: true },
+        since,
+      ),
+    ).toBe('passed')
+  })
+
+  it('con el examen cerrado, quien seguía dentro ha suspendido; quien no entró, no cuenta', () => {
+    expect(examineeStatus(row('in_progress', null, null), undefined, since, true)).toBe('failed')
+    expect(
+      examineeStatus(undefined, { mark: null, passed: false, closed: false }, since, true),
+    ).toBe('failed')
+    expect(examineeStatus(undefined, undefined, since, true)).toBe('pending')
   })
 
   it('una fila cerrada de otro día no cuenta: aún no ha empezado', () => {
@@ -508,17 +553,27 @@ describe('el examen en vivo', () => {
         group.name,
         group.people.map((person) => `${person.login}:${person.status}:${String(person.mark)}`),
       ]),
-    ).toEqual([['Exam Rank 02', ['ana:failed:75', 'mia:inProgress:null']]])
+      // `mia` seguía «dentro» para 42, pero el examen ya cerró: ha suspendido.
+    ).toEqual([['Exam Rank 02', ['ana:failed:75', 'mia:failed:null']]])
     // Sin examen en marcha no se pide nada a 42 por mirar.
     expect(calls.users).toBe(0)
   })
 
-  it('recién acabado, el reloj de fondo pide las notas una vez más; pasada media hora, no', async () => {
+  it('recién acabado, el reloj de fondo pide las notas; pasada media hora y ya mirado tras el cierre, no', async () => {
     clock = Date.parse(END) + 10 * MINUTE
     await build().tick([MADRID])
     expect(calls.users).toBe(1)
 
     clock = Date.parse(END) + 40 * MINUTE
+    await build().tick([MADRID])
+    expect(calls.users).toBe(1)
+  })
+
+  it('un examen que acabó sin mirarlo tras el cierre se mira una vez, aunque sea de hace días', async () => {
+    clock = Date.parse(END) + 3 * 24 * 60 * MINUTE
+    await build().tick([MADRID])
+    expect(calls.users).toBe(1)
+    clock += 10 * MINUTE
     await build().tick([MADRID])
     expect(calls.users).toBe(1)
   })

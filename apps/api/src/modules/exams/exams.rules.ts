@@ -360,13 +360,18 @@ export const LIVE_MANUAL_MS = 60_000
 export function liveRefreshPlan(
   lastAt: number | null,
   now: number,
+  checkpoints: readonly number[] = [],
 ): { auto: boolean; manual: boolean; nextAt: number; manualAt: number } {
   if (lastAt === null) return { auto: true, manual: true, nextAt: now, manualAt: now }
 
+  // Un momento fijo (`examCheckpoints`) ya pasado y sin mirar desde entonces: toca ya.
+  const due = checkpoints.some((at) => now >= at && lastAt < at)
+  const upcoming = checkpoints.filter((at) => at > lastAt)
+
   return {
-    auto: now - lastAt >= LIVE_AUTO_MS,
+    auto: due || now - lastAt >= LIVE_AUTO_MS,
     manual: now - lastAt >= LIVE_MANUAL_MS,
-    nextAt: lastAt + LIVE_AUTO_MS,
+    nextAt: Math.min(lastAt + LIVE_AUTO_MS, ...upcoming),
     manualAt: lastAt + LIVE_MANUAL_MS,
   }
 }
@@ -428,11 +433,17 @@ export type ExamRow = {
  * dice `finished` aunque hoy aún no haya entrado. Cerrada (`finished`) con
  * 100 o más y validada, aprueba; cerrada sin llegar a 100 (o sin validar),
  * suspende, aunque la sesión no haya acabado: en 42 ya no puede subir.
+ *
+ * El intento (el equipo de 42) manda también: cerrado y sin aprobar es un
+ * suspenso aunque el proyecto siga «en curso» en 42, que con los exámenes pasa
+ * a menudo. Y con el examen ya cerrado (`ended`), quien siguiera dentro ha
+ * suspendido: el examen dura lo que dura y a la hora de fin se cierra.
  */
 export function examineeStatus(
   row: ExamRow | undefined,
-  attempt: { mark: number | null; passed: boolean } | undefined,
+  attempt: { mark: number | null; passed: boolean; closed: boolean } | undefined,
   since: string,
+  ended = false,
 ): LiveExaminee['status'] {
   const recent = row !== undefined && row.updatedAt !== null && row.updatedAt >= since
 
@@ -440,8 +451,27 @@ export function examineeStatus(
     return (row.finalMark ?? 0) >= 100 && row.validated !== false ? 'passed' : 'failed'
   }
   if (attempt?.passed === true) return 'passed'
+  if (attempt?.closed === true) return 'failed'
 
-  return recent || attempt !== undefined ? 'inProgress' : 'pending'
+  const entered = recent || attempt !== undefined
+
+  return entered ? (ended ? 'failed' : 'inProgress') : 'pending'
+}
+
+/**
+ * Lo que se tiene para entrar en un examen: pasado, quien no ha entrado ya no
+ * entra. Con un minuto de margen, se mira entonces quién está.
+ */
+const ENTRY_CHECK_MS = 11 * 60_000
+/**
+ * Tras la hora de fin, el margen para que 42 cierre todo: entonces se mira por
+ * última vez y quien siga abierto cuenta como suspendido.
+ */
+export const CLOSE_CHECK_MS = 5 * 60_000
+
+/** Los momentos de un examen en que se mira sí o sí: tras la entrada y tras el cierre. */
+export function examCheckpoints(exam: { beginAt: string; endAt: string }): number[] {
+  return [Date.parse(exam.beginAt) + ENTRY_CHECK_MS, Date.parse(exam.endAt) + CLOSE_CHECK_MS]
 }
 
 /** Entre quienes tienen la misma nota, el orden: aprobado, dentro, suspenso, sin entrar. */

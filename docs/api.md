@@ -2172,6 +2172,16 @@ POST /exams/live/refresh  → LiveExam. Lo mismo, pidiendo antes lo nuevo a 42 s
 - `status`: `pending` (aún no ha entrado), `inProgress`, `passed` (cerrado con 100
   o más) o `failed` (cerrado sin llegar a 100, o sin validar). Solo cuenta la fila
   tocada en esta sesión.
+  Desde el 2026-10-30, también: un intento (equipo de 42) cerrado y sin aprobar
+  es `failed` aunque 42 deje el proyecto «en curso», y pasados 5 minutos de la
+  hora de fin (`CLOSE_CHECK_MS`) quien siguiera dentro es `failed`, con la nota
+  que tuviera (el examen dura lo que dura y se cierra). Los intentos cuentan
+  hasta 30 minutos después del fin: 42 apunta el cierre algo más tarde.
+- Momentos fijos (`examCheckpoints`): además de cada 5 minutos, se pide a 42 a
+  los 11 minutos del inicio (los 10 que hay para entrar y uno de margen: quien
+  no ha entrado ya no entra) y a los 5 minutos del fin (el cierre). El reloj de
+  fondo mira cada minuto si toca. Un último examen que no se miró tras su cierre
+  se mira una vez, aunque sea de hace días.
 - Con el examen en marcha solo sale quien ha entrado (`pending` no sale:
   apuntarse no es estar); antes de empezar, toda la gente apuntada. Cada grupo va
   ordenado por la nota de hoy (sin nota, 0), luego por estado y por login
