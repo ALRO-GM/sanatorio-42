@@ -202,6 +202,12 @@ export type StatsRanking = {
   entries: RankingEntry[]
   /** Quien mira, si entra con los filtros, aunque no salga en la página. */
   me: RankingEntry | null
+  /**
+   * El plan y el kickoff de quien mira, entre o no con los filtros: la web
+   * empieza con ellos (su plan, su kickoff y los siguientes). `null` si no
+   * está en la clasificación.
+   */
+  self: { track: CoreTrack; kickoff: string } | null
 }
 
 /** Un día en que un piscinero aprobó proyectos que cuentan: cuáles y con cuántos se queda. */

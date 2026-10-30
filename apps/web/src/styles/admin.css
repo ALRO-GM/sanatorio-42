@@ -63,6 +63,10 @@
   gap: 0.4rem;
   margin-top: 0.8rem;
 }
+details.hours-report > summary {
+  cursor: pointer;
+  width: fit-content;
+}
 .hours-form {
   display: flex;
   flex-wrap: wrap;

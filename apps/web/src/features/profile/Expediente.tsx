@@ -117,7 +117,7 @@ export function Expediente({ me, profile }: ExpedienteProps) {
                 </PoolOnly>
                 <Show from="normal">
                   <PoolOnly k="expediente.hours">
-                    <HoursReport />
+                    <HoursReport folded />
                   </PoolOnly>
                 </Show>
               </article>

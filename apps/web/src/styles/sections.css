@@ -1072,38 +1072,55 @@ dialog.welcome .actions {
 }
 .exam-people {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 0.4rem;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 0.45rem;
   margin: 0;
   padding: 0;
   list-style: none;
 }
+/* Una ficha compacta: foto grande, nombre y etiquetas en dos líneas, la nota
+   grande a la derecha (la mejor, pequeña debajo) y la barra a lo ancho. */
 .exam-people li {
-  position: relative;
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.35rem 0.6rem;
-  border-radius: 10px;
+  gap: 0.35rem 0.65rem;
+  padding: 0.5rem 0.65rem;
+  border-radius: 12px;
   background: var(--surface-2);
 }
-/* La mejor nota, pequeña en la esquina; la de hoy es la grande. */
+.exam-face {
+  display: flex;
+}
+.exam-face > * {
+  flex-shrink: 0;
+}
+.exam-who {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+}
+.exam-who a {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.exam-score {
+  display: grid;
+  justify-items: end;
+  gap: 0.1rem;
+}
+/* La mejor nota, pequeña bajo la de hoy, que es la grande. */
 .exam-best {
-  position: absolute;
-  top: 0.15rem;
-  right: 0.6rem;
   color: var(--text-3);
   font-size: 0.7rem;
   font-variant-numeric: tabular-nums;
-}
-.exam-people li:has(.exam-best) {
-  padding-top: 1rem;
+  white-space: nowrap;
 }
 /* La nota de hoy sobre 100: azul mientras sigue dentro; al cerrar, verde o roja. */
 .exam-progress {
   --exam-bar: #3b82f6;
-  flex-basis: 100%;
+  grid-column: 1 / -1;
   height: 6px;
   overflow: hidden;
   border-radius: 999px;
@@ -1190,14 +1207,26 @@ dialog.welcome .actions {
 }
 .exam-badges {
   display: flex;
-  flex: 1;
   flex-wrap: wrap;
-  gap: 0.25rem;
+  gap: 0.2rem;
+}
+.exam-badges .badge {
+  padding: 0.05rem 0.45rem;
+  font-size: 0.7rem;
 }
 .exam-mark {
   min-width: 2.5rem;
+  font-size: 1.6rem;
+  font-weight: 800;
+  line-height: 1;
   text-align: right;
   font-variant-numeric: tabular-nums;
+}
+.status-passed .exam-mark {
+  color: var(--ok);
+}
+.status-failed .exam-mark {
+  color: var(--danger);
 }
 .exam-stats {
   display: grid;

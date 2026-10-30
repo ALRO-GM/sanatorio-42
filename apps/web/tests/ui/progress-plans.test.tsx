@@ -455,6 +455,38 @@ describe('Quién va más rápido', () => {
   const list = (): HTMLElement =>
     must(document.querySelector<HTMLElement>('.progress-ranking-scroll'), 'la lista')
   const rows = (): Element[] => [...list().querySelectorAll('li')]
+  /** De entrada sale lo tuyo (C, kickoff 2026-02 y los siguientes); esto mira a todo el campus. */
+  const everyone = async (user: ReturnType<typeof userEvent.setup>): Promise<void> => {
+    await screen.findByText(/^40 personas/, {}, { timeout: 5000 })
+    await user.click(
+      within(group('stats.progress.plan', 1)).getByRole('button', {
+        name: text('stats.progress.plan.all'),
+      }),
+    )
+    await user.selectOptions(
+      screen.getByRole('combobox', { name: text('stats.ranking.kickoff') }),
+      '',
+    )
+    await screen.findByText('240 personas', {}, { timeout: 5000 })
+  }
+
+  it('de entrada, por % por círculos, con tu plan y tu kickoff y los siguientes', async () => {
+    await openApp('#/avance')
+    await screen.findByText(/^40 personas/, {}, { timeout: 5000 })
+
+    const pressed = (key: string, index = 0): string | undefined =>
+      within(group(key, index))
+        .getAllByRole('button')
+        .find((button) => button.getAttribute('aria-pressed') === 'true')?.textContent ?? undefined
+
+    expect(pressed('stats.ranking.by')).toBe(text('stats.ranking.by.circles'))
+    expect(pressed('stats.progress.plan', 1)).toBe(text('stats.progress.plan.classic'))
+    expect(pressed('stats.ranking.cohort')).toBe(text('stats.ranking.cohort.since'))
+    expect(
+      screen.getByRole<HTMLSelectElement>('combobox', { name: text('stats.ranking.kickoff') })
+        .value,
+    ).toBe('2026-02')
+  }, 20_000)
 
   it('una página al principio, tu fila fija y más al pedirlo', async () => {
     const user = userEvent.setup()
@@ -463,7 +495,7 @@ describe('Quién va más rápido', () => {
     expect(
       await screen.findByRole('heading', { name: text('stats.ranking.title') }, { timeout: 5000 }),
     ).toBeTruthy()
-    await screen.findByText('240 personas', {}, { timeout: 5000 })
+    await everyone(user)
 
     // 50 filas de la página más la tuya, que va al final y fija con `sticky`.
     expect(rows()).toHaveLength(51)
@@ -488,7 +520,7 @@ describe('Quién va más rápido', () => {
     const user = userEvent.setup()
 
     await openApp('#/avance')
-    await screen.findByText('240 personas', {}, { timeout: 5000 })
+    await everyone(user)
 
     await user.click(
       within(group('stats.progress.plan', 1)).getByRole('button', { name: 'Python' }),

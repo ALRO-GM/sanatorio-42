@@ -872,7 +872,6 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
                   nodes={(shownGraph ?? graph).nodes}
                   links={(shownGraph ?? graph).links}
                   colorOf={paint}
-                  selected={selected}
                   onSelect={setSelected}
                   describe={(link, from) =>
                     t('net.view.describe', {

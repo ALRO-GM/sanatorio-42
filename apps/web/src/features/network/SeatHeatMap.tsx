@@ -17,18 +17,20 @@ const STOPS = 5
 /** De las horas más bajas a las más altas que se han usado: la escala de colores. */
 type Scale = { min: number; max: number }
 
-/** Lo menos y lo más usado de todos los clústeres, sin contar los puestos a 0. */
-function scaleOf(clusters: readonly SeatHeatCluster[]): Scale {
-  const used = clusters.flatMap((cluster) =>
-    cluster.cells.filter((cell) => cell.hours > 0).map((cell) => cell.hours),
-  )
+/**
+ * Lo menos y lo más usado de un clúster, sin contar los puestos a 0. Cada
+ * clúster tiene su escala (pedido por Alberto, 2026-10-30): con una sola, los
+ * más usados dejaban a los demás en el tono más bajo.
+ */
+function scaleOf(cells: readonly SeatHeatCell[]): Scale {
+  const used = cells.filter((cell) => cell.hours > 0).map((cell) => cell.hours)
 
   return used.length === 0 ? { min: 0, max: 0 } : { min: Math.min(...used), max: Math.max(...used) }
 }
 
 /**
  * El color de un puesto usado: entre qué dos paradas de la escala cae y cuánto
- * de la segunda lleva. Si todos tienen las mismas horas, van al rojo.
+ * de la segunda lleva. Si todos tienen las mismas horas, van al más intenso.
  */
 function heatStyle(hours: number, { min, max }: Scale): CSSProperties {
   const share = max === min ? 1 : (hours - min) / (max - min)
@@ -70,7 +72,6 @@ export function SeatHeatMap({ heat }: { heat: SeatHeat }) {
   const { t, tn } = useI18n()
   const { number } = useFormat()
   const [hovered, setHovered] = useState<Hovered | null>(null)
-  const scale = useMemo(() => scaleOf(heat.clusters), [heat.clusters])
   // La tabla: el más usado primero; al ordenar por horas al revés, los menos usados.
   const ranked = useMemo(
     () =>
@@ -109,7 +110,7 @@ export function SeatHeatMap({ heat }: { heat: SeatHeat }) {
           <HeatCluster
             key={cluster.id}
             cluster={cluster}
-            scale={scale}
+            days={heat.days}
             label={label}
             hover={hover}
           />
@@ -123,11 +124,11 @@ export function SeatHeatMap({ heat }: { heat: SeatHeat }) {
           <span className="heat-cell free" aria-hidden="true" />
           {t('seats.heat.unused')}
         </span>
-        {scale.max > 0 && (
+        {heat.max > 0 && (
           <span className="heat-legend-item">
-            {t('seats.heat.hours', { n: number(scale.min) })}
+            {t('seats.heat.less')}
             <span className="heat-ramp" aria-hidden="true" />
-            {t('seats.heat.hours', { n: number(scale.max) })}
+            {t('seats.heat.more')}
           </span>
         )}
       </div>
@@ -192,12 +193,12 @@ const STEPS: Record<string, [row: number, seat: number]> = {
  */
 const HeatCluster = memo(function HeatCluster({
   cluster,
-  scale,
+  days,
   label,
   hover,
 }: {
   cluster: SeatHeatCluster
-  scale: Scale
+  days: number
   label: (cell: SeatHeatCell) => string
   hover: Hover
 }) {
@@ -212,6 +213,11 @@ const HeatCluster = memo(function HeatCluster({
   const seats = order(cluster.seatsPerRow, look.flipSeats)
   const byPosition = new Map(cluster.cells.map((cell) => [`${cell.row}:${cell.seat}`, cell]))
   const used = cluster.cells.filter((cell) => cell.hours > 0).length
+  const scale = useMemo(() => scaleOf(cluster.cells), [cluster.cells])
+  // Las horas que podía haberse usado: cada ordenador, todas las horas del periodo.
+  const capacity = cluster.cells.length * days * 24
+  const unused = Math.max(0, capacity - cluster.hours)
+  const share = (hours: number): string => number(capacity === 0 ? 0 : (hours / capacity) * 100, 1)
   const name = clusterName(cluster.id, t)
   // El que recibe el tabulador: el último enfocado o, de entrada, el primero.
   const current = focus ?? cluster.cells[0]?.host
@@ -291,8 +297,18 @@ const HeatCluster = memo(function HeatCluster({
           ))}
         </div>
       </div>
+      {scale.max > 0 && (
+        <p className="heat-scale">
+          {t('seats.heat.hours', { n: number(scale.min) })}
+          <span className="heat-ramp" aria-hidden="true" />
+          {t('seats.heat.hours', { n: number(scale.max) })}
+        </p>
+      )}
       <ul className="heat-stats">
-        <li>{t('seats.heat.cluster.hours', { n: number(cluster.hours) })}</li>
+        <li>
+          {t('seats.heat.cluster.hours', { n: number(cluster.hours), pct: share(cluster.hours) })}
+        </li>
+        <li>{t('seats.heat.cluster.unused', { n: number(unused), pct: share(unused) })}</li>
         <li>
           {t('seats.heat.cluster.used', {
             used: number(used),

@@ -150,26 +150,37 @@ Asientos, cuánto se ha usado cada ordenador del clúster en el mismo periodo
   una marca azul arriba»: el relieve del mapa (el canto grueso de la pantalla,
   el fondo de tecla, el desplazamiento) seguía debajo del color, y en el tema
   oscuro el puesto más usado era casi blanco (`#e3effd`), así que solo se veía
-  el canto. Ahora la escala va de **azul oscuro (lo menos usado) a rojo intenso
-  (lo más)**, pasando por un gris lila claro, en cinco paradas:
+  el canto. Del 2026-10-25 al 2026-10-30 la escala fue divergente, de azul
+  oscuro a rojo pasando por un gris lila casi blanco, y con una sola escala
+  para todo el campus. Alberto vio dos problemas (2026-10-30): el centro casi
+  blanco parecía menos uso que el azul oscuro, y los clústeres más usados
+  dejaban a los demás en el tono más bajo.
+- **Escala secuencial, una por clúster** (desde el 2026-10-30). Las horas son
+  una magnitud sin punto medio con sentido, así que lo habitual en mapas de
+  calor es una escala **secuencial**: un solo tono (o tonos vecinos) cuya luz
+  baja paso a paso, de modo que más oscuro es siempre más uso. Las divergentes
+  (dos colores con un centro neutro) son para datos con un cero o una media
+  que importa (por encima / por debajo). Pasar de azul claro a rojo intenso
+  mezcla dos tonos opuestos y el medio sale grisáceo o morado, el mismo
+  problema de antes; por eso se usa un solo tono cálido, del melocotón al rojo
+  oscuro:
 
-  | Tema   | 0 (mínimo) | 1         | 2 (medio) | 3         | 4 (máximo) |
+  | Tema   | 0 (mínimo) | 1         | 2         | 3         | 4 (máximo) |
   | ------ | ---------- | --------- | --------- | --------- | ---------- |
-  | Claro  | `#004296`  | `#4c82c6` | `#bab4c9` | `#e37f65` | `#be2323`  |
-  | Oscuro | `#4f97ef`  | `#3a69ad` | `#453e53` | `#a64736` | `#f75e54`  |
+  | Claro  | `#f6c3a6`  | `#f09670` | `#e2653f` | `#c23a26` | `#8a1c16`  |
+  | Oscuro | `#7a2a1e`  | `#a83a26` | `#d6563a` | `#f08a5e` | `#fbc0a0`  |
 
-  Los extremos son saturados y se separan del fondo y el centro casi no tiene
-  color, así que no depende solo del tono: con daltonismo rojo-verde el rojo
-  pasa a pardo pero sigue lejos del azul y del centro por la luz. Comprobado
-  con `validate_palette.js` de la skill dataviz (todas las parejas): ΔE ≥ 13
-  en claro y ≥ 11 en oscuro con protanopía y deuteranopía, y ≥ 15 con visión
-  normal. El centro queda por debajo de 3:1 con el fondo a propósito (es lo
-  «normal»); lo compensan la ficha y la tabla. En el tema oscuro las paradas
-  se eligieron otra vez, no se invirtieron: extremos claros y vivos, centro
-  oscuro. Es un código de color como los del mapa: igual en todos los estilos.
-  La escala va del puesto **menos usado** al más usado de todo el campus (no
-  desde 0), en línea recta; el puesto **sin uso no lleva color**, solo el
-  contorno. Leyenda: «Sin uso» y la rampa con las horas mínima y máxima.
+  Comprobado con `validate_palette.js` de la skill dataviz: luz monótona, saltos
+  visibles entre paradas y tono único (23° y 19°). En el tema oscuro, al revés:
+  más uso, más luz. El extremo claro queda por debajo de 2:1 con el fondo a
+  propósito (es lo poco usado); el puesto **sin uso no lleva color**, solo el
+  contorno, y la ficha y la tabla dan las cifras. **Cada clúster va de su
+  puesto menos usado a su más usado** (no desde 0), con su rampa y sus horas
+  mínima y máxima debajo de la cuadrícula. La leyenda común dice «Sin uso» y
+  «Menos uso → Más uso».
+- **Horas sin uso.** Bajo el uso total, «Sin uso: N h»: las horas que podían
+  usarse (ordenadores × días × 24) menos las usadas, y al lado de cada una qué
+  parte son de esas horas posibles (pedido por Alberto, 2026-10-30).
 - Ficha al pasar o al enfocar («c2r3s4 · 37 h · 9 personas»), con su
   `aria-label` en cada casilla. Cada clúster es una sola parada del tabulador y
   las flechas se mueven por la cuadrícula. «Ver como tabla» lista los puestos

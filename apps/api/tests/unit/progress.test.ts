@@ -4,7 +4,7 @@
  * que se elige (o con dos versiones) como una sola casilla, las líneas de cada
  * pace y las medias por población (`docs/blackhole.md`).
  */
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { ProgressArea, StatsProgress } from '@sanatorio/contracts'
 
@@ -517,7 +517,60 @@ describe('quién va más rápido', () => {
 
     const python = await service().ranking(actor('leo'), { ...filters, plan: 'next' }, page, all)
 
-    expect(python).toEqual({ kickoffs: [], total: 0, offset: 0, entries: [], me: null })
+    // Aunque no entre con los filtros, se sabe su plan y su kickoff: la web empieza con ellos.
+    expect(python).toEqual({
+      kickoffs: [],
+      total: 0,
+      offset: 0,
+      entries: [],
+      me: null,
+      self: { track: 'classic', kickoff: '2026-02' },
+    })
+  })
+
+  it('caducado, sirve el cálculo anterior mientras lo rehace; el trabajo de fondo lo rehace', async () => {
+    await projects()
+    await person(1, 'leo', {
+      begin: Date.parse('2026-02-02T08:00:00Z'),
+      cursus: { grade: 'Cadet', active: 1 },
+    })
+
+    const repository = createProgressRepository(db)
+    let reads = 0
+    let at = NOW
+    const counted = createProgressService({
+      progress: {
+        ...repository,
+        rows: (ids) => {
+          reads++
+
+          return repository.rows(ids)
+        },
+      },
+      circles: () => Promise.resolve(new Map([[1314, 0]])),
+      now: () => at,
+    })
+    const look = () => counted.ranking(actor('leo'), filters, page, all)
+
+    expect((await look()).total).toBe(1)
+    await look()
+    expect(reads).toBe(1)
+
+    // Llega alguien nuevo y pasa media hora: se sirve lo de antes al momento…
+    await person(2, 'ana', {
+      begin: Date.parse('2026-02-02T08:00:00Z'),
+      cursus: { grade: 'Cadet', active: 1 },
+    })
+    at += 31 * 60_000
+    expect((await look()).total).toBe(1)
+    // …y lo nuevo, en cuanto se ha rehecho detrás.
+    await vi.waitFor(async () => {
+      expect((await look()).total).toBe(2)
+    })
+    expect(reads).toBe(2)
+
+    await counted.refresh()
+    expect(reads).toBe(3)
   })
 })
 

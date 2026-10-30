@@ -19,7 +19,10 @@
  * Mirar a todo el mundo es caro (cientos de miles de proyectos), así que el
  * cálculo se hace una vez para todos los campus a la vez (cada persona suma en
  * los suyos y en el de todos) y se guarda un rato: pedir más campus no cuesta
- * más.
+ * más. Pasado ese rato, se sirve el cálculo anterior mientras se rehace detrás,
+ * y un trabajo de fondo lo rehace antes de que caduque (`refresh`): así nadie
+ * espera al cálculo entero, salvo la primera visita tras arrancar si llega
+ * antes que el trabajo (pedido por Alberto, 2026-10-30: el Avance tardaba).
  */
 
 import type {
@@ -62,7 +65,6 @@ import type { PlanProject, Unit } from './progress.rules.js'
 import { kickoffsOf, rankRunners } from './ranking.rules.js'
 import type { RankingFilters, Runner } from './ranking.rules.js'
 import type { ProgressRepository } from './stats.repository.js'
-import { createTtlCache } from '../../core/ttl-cache.js'
 
 /**
  * Lo que hay que tener aprobado para haber terminado el common core, además del
@@ -258,9 +260,32 @@ export function createProgressService(options: {
 }) {
   const now = options.now ?? Date.now
   // Un agregado de todos los campus que cambia despacio: dos visitas a la vez
-  // comparten la misma carga en vez de lanzar dos.
-  const snapshots = createTtlCache<Snapshot>({ ttlMs: CACHE_MS, maxEntries: 1, now })
-  const snapshot = (): Promise<Snapshot> => snapshots.get(ALL, build)
+  // comparten la misma carga en vez de lanzar dos, y caducado se sirve el
+  // anterior mientras se rehace (lo nuevo es solo lo que se ha añadido).
+  let current: { at: number; value: Snapshot } | null = null
+  let building: Promise<Snapshot> | null = null
+  const rebuild = (): Promise<Snapshot> => {
+    building ??= build()
+      .then((value) => {
+        current = { at: now(), value }
+
+        return value
+      })
+      .finally(() => {
+        building = null
+      })
+
+    return building
+  }
+  const snapshot = (): Promise<Snapshot> => {
+    if (current === null) return rebuild()
+    if (now() - current.at >= CACHE_MS) {
+      // Un fallo al rehacer no tira lo que había: se vuelve a probar en la siguiente.
+      rebuild().catch(() => undefined)
+    }
+
+    return Promise.resolve(current.value)
+  }
 
   /**
    * Los proyectos de cada plan, con las otras versiones de cada uno (la vieja y
@@ -580,6 +605,11 @@ export function createProgressService(options: {
   }
 
   return {
+    /** Rehace el cálculo de fondo (el trabajo del módulo), sin esperar a que alguien lo pida. */
+    async refresh(): Promise<void> {
+      await rebuild()
+    },
+
     /**
      * El avance de quien mira, con las medias de cada campus pedido y de todos
      * juntos, y los paces. Con `others`, además la línea de cada una de esas
@@ -725,6 +755,7 @@ export function createProgressService(options: {
         )
         .map((each) => each.runner)
       const entries = rankRunners(visible, filters)
+      const self = visible.find((runner) => runner.login === actor.login)
 
       return {
         kickoffs: kickoffsOf(
@@ -734,6 +765,7 @@ export function createProgressService(options: {
         offset: page.offset,
         entries: entries.slice(page.offset, page.offset + page.limit),
         me: entries.find((entry) => entry.login === actor.login) ?? null,
+        self: self === undefined ? null : { track: self.track, kickoff: self.kickoff },
       }
     },
   }

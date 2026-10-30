@@ -522,6 +522,7 @@ function rankingMock(query: RankingQuery): StatsRanking {
       : query.by === 'circles'
         ? [runner.circles, runner.hours]
         : [runner.hours, runner.circles]
+  const mine = RUNNERS.find((runner) => runner.login === ME.login)
   const planned = RUNNERS.filter((runner) => query.plan === 'all' || runner.track === query.plan)
   const kept = planned
     .filter(
@@ -561,6 +562,7 @@ function rankingMock(query: RankingQuery): StatsRanking {
     offset: query.offset,
     entries: entries.slice(query.offset, query.offset + query.limit),
     me: entries.find((entry) => entry.login === ME.login) ?? null,
+    self: mine === undefined ? null : { track: mine.track, kickoff: mine.kickoff },
   }
 }
 

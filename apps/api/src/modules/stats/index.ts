@@ -83,6 +83,9 @@ const progressQuery = z.object({
     ),
 })
 
+/** Cada cuánto se rehace el Avance de fondo: antes de los 30 min en que caduca. */
+const PROGRESS_REFRESH_MS = 25 * 60_000
+
 export type StatsModule = AppModule & { service: StatsService }
 
 export function createStatsModule(deps: {
@@ -114,6 +117,23 @@ export function createStatsModule(deps: {
   return {
     name: 'stats',
     service,
+    // El Avance se rehace de fondo antes de que caduque (30 min): nadie espera
+    // al cálculo entero (`progress.service.ts`). Solo lee la base, sin 42.
+    jobs: [
+      {
+        name: 'avance precalculado',
+        everyMs: PROGRESS_REFRESH_MS,
+        run: () => progress.refresh(),
+      },
+    ],
+    // Y una vez al minuto de arrancar (tras un despliegue), sin estorbar al arranque.
+    start: () => {
+      setTimeout(() => {
+        progress.refresh().catch((error: unknown) => {
+          process.stderr.write(`[avance precalculado] ${String(error)}\n`)
+        })
+      }, 60_000).unref()
+    },
     routes: (app, { session }) => {
       // En el Avance, «tu campus» es el de tu 42cursus, no el que miras en la web
       // (`Actor.campusId`, el de tus preferencias): si no, quien eligió París para

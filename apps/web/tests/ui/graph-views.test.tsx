@@ -1,7 +1,7 @@
 /**
  * Las otras vistas de la red (`features/network/GraphViews.tsx`): qué se ofrece
  * según cuánta gente se mira, y que cada vista se pinta. El grafo de siempre
- * sigue en las tres.
+ * sigue en todas.
  */
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import es from 'virtual:textos/es'
@@ -40,7 +40,7 @@ function network(n: number): { nodes: NetworkNode[]; links: NetworkLink[] } {
   return { nodes, links }
 }
 
-function show(n: number, selected: string | null = null): void {
+function show(n: number): void {
   const { nodes, links } = network(n)
 
   render(
@@ -48,7 +48,6 @@ function show(n: number, selected: string | null = null): void {
       <GraphViews
         nodes={nodes}
         links={links}
-        selected={selected}
         onSelect={() => undefined}
         colorOf={() => '#888'}
         describe={() => ''}
@@ -59,10 +58,9 @@ function show(n: number, selected: string | null = null): void {
 }
 
 describe('vistas de la red según cuánta gente se mira', () => {
-  it('una persona: su red en anillos; un grupo mediano: matriz; mucha gente: el grafo', () => {
-    expect(viewsFor(40, 'p1')).toEqual(['ego', 'graph'])
-    expect(viewsFor(150, null)).toEqual(['graph', 'matrix'])
-    expect(viewsFor(151, null)).toEqual(['graph'])
+  it('un grupo mediano: grafo o matriz; mucha gente: solo el grafo', () => {
+    expect(viewsFor(150)).toEqual(['graph', 'matrix'])
+    expect(viewsFor(151)).toEqual(['graph'])
   })
 
   it('con mucha gente, solo el grafo y sin selector de vista', async () => {
@@ -76,13 +74,5 @@ describe('vistas de la red según cuánta gente se mira', () => {
     fireEvent.click(await screen.findByRole('tab', { name: text('net.view.matrix') }))
     expect(document.querySelectorAll('.net-matrix-block')).toHaveLength(3)
     expect(document.querySelectorAll('.net-matrix-cell').length).toBeGreaterThan(0)
-  })
-
-  it('con alguien elegido, su red en anillos de fábrica; el grafo, a un clic', async () => {
-    show(60, 'p5')
-    expect(await screen.findByRole('img', { name: /p5/ })).toBeTruthy()
-    expect(document.querySelectorAll('.net-ego-person')).toHaveLength(2)
-    fireEvent.click(screen.getByRole('tab', { name: text('net.view.graph') }))
-    expect(screen.getByText('el grafo de siempre')).toBeTruthy()
   })
 })

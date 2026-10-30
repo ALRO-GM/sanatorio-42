@@ -467,7 +467,6 @@ export function SeatsPage({ me }: { me?: string }) {
                 nodes={nodes}
                 links={links}
                 colorOf={paint}
-                selected={selected}
                 onSelect={choose}
                 undirected
                 describe={(link) => t('net.view.describeSeats', { n: link.forth })}

@@ -108,7 +108,9 @@ describe('mapa de calor de los puestos', () => {
 
     const [first, second] = [...document.querySelectorAll<HTMLElement>('.heat-cluster')]
 
-    expect(within(must(first, 'el clúster 1')).getByText('Uso total: 41 h')).toBeTruthy()
+    expect(within(must(first, 'el clúster 1')).getByText('Uso total: 41 h (0,9 %)')).toBeTruthy()
+    // 6 ordenadores × 30 días × 24 h = 4320 h posibles.
+    expect(within(must(first, 'el clúster 1')).getByText('Sin uso: 4279 h (99,1 %)')).toBeTruthy()
     expect(within(must(first, 'el clúster 1')).getByText('Ordenadores usados: 2 de 6')).toBeTruthy()
     // La gente del clúster es la que da la API, no la suma de los puestos (10).
     expect(within(must(first, 'el clúster 1')).getByText('Personas distintas: 9')).toBeTruthy()
@@ -117,7 +119,7 @@ describe('mapa de calor de los puestos', () => {
     ).toBeTruthy()
   })
 
-  it('el puesto sin uso no lleva color; los usados van del azul (poco) al rojo (mucho)', () => {
+  it('el puesto sin uso no lleva color; los usados, de lo menos a lo más usado de su clúster', () => {
     const cells = show()
     const at = (host: string) =>
       must(
@@ -127,17 +129,24 @@ describe('mapa de calor de los puestos', () => {
 
     expect(at('c1r1s2').classList).toContain('free')
     expect(at('c1r1s2').getAttribute('style')).toBeNull()
-    // Lo más usado, en la última parada (rojo); lo menos, en la primera (azul).
+    // Cada clúster con su escala: lo más usado del 1, en la última parada; lo
+    // menos (4 h), en la primera. El único puesto usado del 2 (1 h) es su
+    // máximo, aunque en el 1 sería poquísimo.
     expect(at('c1r1s1').style.getPropertyValue('--to')).toBe('var(--heat-4)')
     expect(at('c1r1s1').style.getPropertyValue('--mix')).toBe('100%')
-    expect(at('c2r1s1').style.getPropertyValue('--from')).toBe('var(--heat-0)')
-    expect(at('c2r1s1').style.getPropertyValue('--mix')).toBe('0%')
-    // La leyenda: sin uso, y del mínimo al máximo usado.
+    expect(at('c1r2s3').style.getPropertyValue('--from')).toBe('var(--heat-0)')
+    expect(at('c1r2s3').style.getPropertyValue('--mix')).toBe('0%')
+    expect(at('c2r1s1').style.getPropertyValue('--to')).toBe('var(--heat-4)')
+    expect(at('c2r1s1').style.getPropertyValue('--mix')).toBe('100%')
+    // La leyenda común: sin uso, y de menos a más; las horas, en cada clúster.
     const legend = must(document.querySelector('.heat-legend'), 'la leyenda')
 
     expect(within(legend as HTMLElement).getByText(text('seats.heat.unused'))).toBeTruthy()
-    expect(legend.textContent).toContain('1 h')
-    expect(legend.textContent).toContain('37 h')
+    expect(legend.textContent).toContain(text('seats.heat.more'))
+    const [first] = [...document.querySelectorAll('.heat-scale')]
+
+    expect(first?.textContent).toContain('4 h')
+    expect(first?.textContent).toContain('37 h')
   })
 
   it('cada puesto dice sus horas y su gente, al pasar o al enfocar y a quien no ve', () => {

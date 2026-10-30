@@ -18,8 +18,16 @@ const dayOf = (at: number): string => new Date(at).toISOString().slice(0, 10)
  * porque cada descarga emite un documento verificable.
  *
  * @param everyone Para el panel de gestión: las de todo el mundo, no solo las tuyas.
+ * @param folded Plegado en un desplegable: en el perfil, que por ahora casi no
+ *   se usa (pedido por Alberto, 2026-10-30).
  */
-export function HoursReport({ everyone = false }: { everyone?: boolean }) {
+export function HoursReport({
+  everyone = false,
+  folded = false,
+}: {
+  everyone?: boolean
+  folded?: boolean
+}) {
   const { t } = useI18n()
   const [from, setFrom] = useState(() => dayOf(Date.now() - 30 * DAY))
   const [to, setTo] = useState(() => dayOf(Date.now()))
@@ -45,14 +53,13 @@ export function HoursReport({ everyone = false }: { everyone?: boolean }) {
     }
   }
 
-  return (
-    <div className="hours-report">
-      <span className="eyebrow">
-        {t('hours.title')}
-        <InfoTip title={t('hours.title')}>
-          <p>{t(everyone ? 'hours.hintAll' : 'hours.hint')}</p>
-        </InfoTip>
-      </span>
+  const hint = (
+    <InfoTip title={t('hours.title')}>
+      <p>{t(everyone ? 'hours.hintAll' : 'hours.hint')}</p>
+    </InfoTip>
+  )
+  const form = (
+    <>
       <div className="hours-form">
         <label>
           {t('common.from')}
@@ -79,8 +86,29 @@ export function HoursReport({ everyone = false }: { everyone?: boolean }) {
         <button className="link" disabled={busy} onClick={() => void download()}>
           {t('hours.download')}
         </button>
+        {folded && hint}
       </div>
       <ErrorNote error={error} />
+    </>
+  )
+
+  // La explicación, dentro al plegarlo: en el título abriría y cerraría el desplegable.
+  if (folded) {
+    return (
+      <details className="hours-report">
+        <summary className="eyebrow">{t('hours.title')}</summary>
+        {form}
+      </details>
+    )
+  }
+
+  return (
+    <div className="hours-report">
+      <span className="eyebrow">
+        {t('hours.title')}
+        {hint}
+      </span>
+      {form}
     </div>
   )
 }

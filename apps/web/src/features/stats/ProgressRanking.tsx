@@ -30,12 +30,16 @@ type Filters = Omit<RankingQuery, 'offset' | 'limit'>
  * horas de su plan), con filtros de plan, kickoff y rangos. Sin quien se tragó
  * el black hole (`docs/blackhole.md`). La lista va por páginas al desplazar y
  * tu fila se queda fija abajo hasta llegar a tu puesto, y arriba después.
+ *
+ * De entrada, por % por círculos, con tu plan (C o Python) y tu kickoff y los
+ * siguientes (pedido por Alberto, 2026-10-30): se ajusta con la primera
+ * respuesta, que dice tu plan y tu kickoff (`self`), y luego se cambia a mano.
  */
 export function ProgressRanking() {
   const { t, tn } = useI18n()
   const { number, date } = useFormat()
   const [filters, setFilters] = useState<Filters>({
-    by: 'circle',
+    by: 'circles',
     plan: 'all',
     kickoff: null,
     cohort: 'only',
@@ -50,6 +54,8 @@ export function ProgressRanking() {
   const [busy, setBusy] = useState(false)
   // La petición en curso: si cambian los filtros, la vieja no pisa a la nueva.
   const asked = useRef(0)
+  // Si ya se ajustó a tu plan y tu kickoff: solo una vez, para no deshacer lo que elijas.
+  const adjusted = useRef(false)
 
   const set = (changes: Partial<Filters>): void => {
     setFilters((current) => ({ ...current, ...changes }))
@@ -63,6 +69,14 @@ export function ProgressRanking() {
       const page = await api.getStatsRanking({ ...filters, offset, limit: PAGE })
 
       if (ticket !== asked.current) return
+      if (!adjusted.current) {
+        adjusted.current = true
+        if (page.self !== null) {
+          set({ plan: page.self.track, kickoff: page.self.kickoff, cohort: 'since' })
+
+          return
+        }
+      }
       setData(page)
       setRows((current) => (offset === 0 ? page.entries : [...current, ...page.entries]))
       setError(null)
