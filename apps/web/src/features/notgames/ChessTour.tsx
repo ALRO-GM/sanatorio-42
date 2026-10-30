@@ -14,16 +14,29 @@ type Chess = {
 
 const START: Chess = { picked: false, moved: false, answer: null, penalty: false }
 
-export const TOUR = defineTour<Chess>('chess', START, [
-  ...click<Chess>(800, 'pawn', { picked: true }),
-  ...click<Chess>(1800, 'target', { moved: true }),
-  ...cut<Chess>(3200, { scene: 1, caption: 2, cursor: 'rest' }),
-  ...click<Chess>(5000, 'right', { answer: 'right' }),
-  [6000, { caption: 3 }],
-  ...cut<Chess>(8600, { scene: 2, caption: 4, answer: null, cursor: 'rest' }),
-  [10200, { penalty: true }],
-  [12600, { caption: 5 }],
-])
+export const TOUR = defineTour<Chess>(
+  'chess',
+  START,
+  [
+    ...click<Chess>(800, 'pawn', { picked: true }),
+    ...click<Chess>(1800, 'target', { moved: true }),
+    ...cut<Chess>(3200, { scene: 1, caption: 2, cursor: 'rest' }),
+    ...click<Chess>(5000, 'right', { answer: 'right' }),
+    [6000, { caption: 3 }],
+    ...cut<Chess>(8600, { scene: 2, caption: 4, answer: null, cursor: 'rest' }),
+    [10200, { penalty: true }],
+    [12600, { caption: 5 }],
+  ],
+  // De qué sitio de la página habla cada paso: soltando ahí el interrogante,
+  // la demostración empieza en él.
+  {
+    1: '.turn-room .chess-board, .turn-clocks',
+    2: '.turn-question',
+    3: '.turn-status, .turn-last.right',
+    4: '.turn-last.wrong',
+    5: '.turn-room .quiz-final',
+  },
+)
 
 const FILES = ['d', 'e', 'f']
 

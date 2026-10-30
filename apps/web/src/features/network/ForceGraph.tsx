@@ -174,11 +174,16 @@ function widthOf(weight: number, max: number, base: number): number {
   return base + (MAX_LINK_WIDTH - base) * Math.sqrt(Math.min(1, weight / Math.max(1, max)))
 }
 
+/** El radio más pequeño con el que una burbuja aún lleva foto (más de 11 px en pantalla). */
+const PHOTO_MIN = 13
+
 /**
  * Con alguien elegido, el tamaño de cada burbuja es la fuerza de su unión con
  * esa persona, en relación a la más fuerte (lineal: quien se desvía, se ve):
  * si alguien te ha corregido 7 veces y los demás 1, sale mucho más grande. La
- * elegida, la más grande; quien no está unido a ella, pequeño.
+ * elegida, la más grande; quien no está unido a ella, pequeño. Quien está
+ * unido a ella nunca baja de `PHOTO_MIN`, para que se vea su foto como antes
+ * de ajustar los tamaños (pedido por Alberto, 2026-10-30).
  */
 function radiiAround(
   nodes: readonly SimNode[],
@@ -205,7 +210,11 @@ function radiiAround(
 
       return [
         node.login,
-        node.login === chosen ? 30 : value === undefined ? 4 : 5 + 23 * (value / strongest),
+        node.login === chosen
+          ? 32
+          : value === undefined
+            ? 4
+            : PHOTO_MIN + (30 - PHOTO_MIN) * (value / strongest),
       ]
     }),
   )

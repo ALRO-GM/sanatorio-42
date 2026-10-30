@@ -22,19 +22,30 @@ const START: GitCourse = { picked: false, grown: false, typed: 0, ran: false, mi
 
 const COMMAND = 'git commit -m dos'
 
-export const TOUR = defineTour<GitCourse>('gitCourse', START, [
-  ...click<GitCourse>(900, 'level', { picked: true }),
-  ...cut<GitCourse>(2600, { scene: 1, caption: 2, cursor: 'rest' }),
-  [4000, { grown: true }],
-  ...cut<GitCourse>(6200, { scene: 2, caption: 3 }),
-  ...typing<GitCourse>(7000, 'typed', COMMAND.length),
-  [8300, { ran: true }],
-  [9600, { caption: 4 }],
-  ...cut<GitCourse>(12000, { scene: 3, caption: 5 }),
-  [13600, { missions: 1 }],
-  [15000, { missions: 2 }],
-  [16200, { missions: 3 }],
-])
+export const TOUR = defineTour<GitCourse>(
+  'gitCourse',
+  START,
+  [
+    ...click<GitCourse>(900, 'level', { picked: true }),
+    ...cut<GitCourse>(2600, { scene: 1, caption: 2, cursor: 'rest' }),
+    [4000, { grown: true }],
+    ...cut<GitCourse>(6200, { scene: 2, caption: 3 }),
+    ...typing<GitCourse>(7000, 'typed', COMMAND.length),
+    [8300, { ran: true }],
+    [9600, { caption: 4 }],
+    ...cut<GitCourse>(12000, { scene: 3, caption: 5 }),
+    [13600, { missions: 1 }],
+    [15000, { missions: 2 }],
+    [16200, { missions: 3 }],
+  ],
+  // De qué sitio de la página habla cada paso: soltando ahí el interrogante,
+  // la demostración empieza en él.
+  {
+    1: '.git-stop:not(.gate)',
+    4: '.git-total, .git-stop-stars',
+    5: '.git-stop.gate',
+  },
+)
 
 /** Los dos momentos del repositorio de mentira: antes y después del comando. */
 const step = (lines: string[]): World => {

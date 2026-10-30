@@ -18,18 +18,28 @@ const START: ShellTour = { picked: false, typed: 0, ran: false, left: 180 }
 
 const COMMAND = 'grep -c ERROR app.log'
 
-export const TOUR = defineTour<ShellTour>('shellCourse', START, [
-  ...click<ShellTour>(900, 'unit', { picked: true }),
-  ...cut<ShellTour>(2800, { scene: 1, caption: 2, cursor: 'rest' }),
-  ...cut<ShellTour>(6000, { scene: 2, caption: 3 }),
-  ...typing<ShellTour>(6800, 'typed', COMMAND.length),
-  [8400, { ran: true }],
-  ...cut<ShellTour>(11000, { scene: 3, caption: 4 }),
-  [12000, { left: 179 }],
-  [13000, { left: 178 }],
-  [14000, { left: 177 }],
-  [15000, { left: 176 }],
-])
+export const TOUR = defineTour<ShellTour>(
+  'shellCourse',
+  START,
+  [
+    ...click<ShellTour>(900, 'unit', { picked: true }),
+    ...cut<ShellTour>(2800, { scene: 1, caption: 2, cursor: 'rest' }),
+    ...cut<ShellTour>(6000, { scene: 2, caption: 3 }),
+    ...typing<ShellTour>(6800, 'typed', COMMAND.length),
+    [8400, { ran: true }],
+    ...cut<ShellTour>(11000, { scene: 3, caption: 4 }),
+    [12000, { left: 179 }],
+    [13000, { left: 178 }],
+    [14000, { left: 177 }],
+    [15000, { left: 176 }],
+  ],
+  // De qué sitio de la página habla cada paso: soltando ahí el interrogante,
+  // la demostración empieza en él.
+  {
+    1: '.shell-stop.unit',
+    4: '.shell-stop.boss, .shell-stop.final',
+  },
+)
 
 /**
  * Cómo se juega el curso de shell: eliges la siguiente unidad, lees la

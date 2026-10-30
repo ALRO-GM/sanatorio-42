@@ -54,6 +54,23 @@ export function ClustersTour() {
 }
 ```
 
+Cada paso lleva además su **título** (`tour.<nombre>.title.<n>` en la tabla
+`demos`, de 1 a 4 palabras), que sale encima de la frase («Paso 4 de 6 ·
+Estado de salud») y en las marcas de la barra. Y, con el cuarto argumento de
+`defineTour`, **de qué sitio de la web de verdad habla** (paso → selector CSS):
+
+```tsx
+export const TOUR = defineTour('record', START, [...], {
+  4: '.health-card', // soltar el interrogante en el estado de salud empieza aquí
+})
+```
+
+Al soltar el interrogante de la cabecera sobre algo, se abre la demostración
+más cercana (`features/suggest/demo.ts`) y empieza en el paso cuyo selector
+casa con el sitio o con lo que lo contiene, de dentro hacia fuera (`stepAt`);
+si ninguno casa, desde el principio (pedido por Alberto, 2026-10-30). Con el
+icono (i) empieza siempre desde el principio.
+
 Ayudas del guion (`shared/tour/Tour.tsx`):
 
 | Ayuda | Qué hace |

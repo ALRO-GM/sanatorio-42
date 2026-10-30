@@ -17,17 +17,30 @@ const START: Board = { picked: false, form: false, typed: 0, posted: false, solv
 /** Letras que se teclean como mucho: la duda se corta ahí si es más larga. */
 const LETTERS = 24
 
-export const TOUR = defineTour<Board>('board', START, [
-  ...click<Board>(600, 'node', { picked: true }),
-  [1800, { caption: 2 }],
-  [3300, { caption: 3 }],
-  ...click<Board>(3300, 'new', { form: true }),
-  ...typing<Board>(4300, 'typed', LETTERS),
-  ...click<Board>(6000, 'post', { posted: true, form: false }),
-  ...cut<Board>(7800, { scene: 1, caption: 4, cursor: 'rest' }),
-  [9800, { caption: 5 }],
-  ...click<Board>(9800, 'solve', { solved: true }),
-])
+export const TOUR = defineTour<Board>(
+  'board',
+  START,
+  [
+    ...click<Board>(600, 'node', { picked: true }),
+    [1800, { caption: 2 }],
+    [3300, { caption: 3 }],
+    ...click<Board>(3300, 'new', { form: true }),
+    ...typing<Board>(4300, 'typed', LETTERS),
+    ...click<Board>(6000, 'post', { posted: true, form: false }),
+    ...cut<Board>(7800, { scene: 1, caption: 4, cursor: 'rest' }),
+    [9800, { caption: 5 }],
+    ...click<Board>(9800, 'solve', { solved: true }),
+  ],
+  // De qué sitio de la página habla cada paso: soltando ahí el interrogante,
+  // la demostración empieza en él.
+  {
+    1: '.holy-graph, .correction-graph, .graph-views',
+    2: '.board-layout > .guide, .postits',
+    3: '.cork-head .primary, .postit.empty, .postit.writing',
+    4: '.appbar .mailbox-btn',
+    5: '.doubt-detail .replies',
+  },
+)
 
 /**
  * Cómo funciona el tablón: eliges un proyecto en el grafo, ves su guía y sus

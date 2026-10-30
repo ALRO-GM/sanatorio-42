@@ -18,20 +18,33 @@ type Rec = {
 
 const START: Rec = { xp: 310, studio: false, healthFirst: false, open: false, compare: false }
 
-export const TOUR = defineTour<Rec>('record', START, [
-  [1500, { caption: 2, xp: 350 }],
-  [3300, { caption: 3 }],
-  ...click<Rec>(3300, 'customize', { studio: true }),
-  [4700, { cursor: 'b-health' }],
-  [5300, { press: true, drag: true }],
-  [5360, { cursor: 'slot0', healthFirst: true }],
-  [6400, { press: false, drag: false }],
-  ...cut<Rec>(7100, { scene: 1, caption: 4, cursor: 'rest', studio: false }),
-  [9300, { caption: 5 }],
-  ...click<Rec>(9300, 'toggle', { open: true }),
-  [11800, { caption: 6 }],
-  ...click<Rec>(11800, 'compare', { compare: true }),
-])
+export const TOUR = defineTour<Rec>(
+  'record',
+  START,
+  [
+    [1500, { caption: 2, xp: 350 }],
+    [3300, { caption: 3 }],
+    ...click<Rec>(3300, 'customize', { studio: true }),
+    [4700, { cursor: 'b-health' }],
+    [5300, { press: true, drag: true }],
+    [5360, { cursor: 'slot0', healthFirst: true }],
+    [6400, { press: false, drag: false }],
+    ...cut<Rec>(7100, { scene: 1, caption: 4, cursor: 'rest', studio: false }),
+    [9300, { caption: 5 }],
+    ...click<Rec>(9300, 'toggle', { open: true }),
+    [11800, { caption: 6 }],
+    ...click<Rec>(11800, 'compare', { compare: true }),
+  ],
+  // De qué sitio de la página habla cada paso: soltando ahí el interrogante,
+  // la demostración empieza en él.
+  {
+    2: '.record .xp-line, .record .xp-bar, .record .level',
+    3: '.blocks-customize, [data-feedback^="expediente."] > .block-head',
+    4: '.health',
+    5: '.health .xp-toggle, .health-detail',
+    6: '.health .card-head .link',
+  },
+)
 
 /** Los bloques del perfil, en su orden de fábrica (`layout.expediente.*`). */
 const BLOCKS = ['record', 'health', 'network', 'achievements', 'ranking'] as const

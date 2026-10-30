@@ -11,20 +11,32 @@ type Therapy = {
 
 const START: Therapy = { joined: false, seats: [], days: [], created: false }
 
-export const TOUR = defineTour<Therapy>('therapy', START, [
-  [1500, { caption: 2 }],
-  ...click<Therapy>(1500, 'join', { joined: true }),
-  ...click<Therapy>(3700, 'new'),
-  ...cut<Therapy>(4700, { scene: 1, caption: 3, cursor: 'rest' }),
-  ...click<Therapy>(5900, 'seat7', { seats: [7] }),
-  ...click<Therapy>(6750, 'seat8', { seats: [7, 8] }),
-  ...click<Therapy>(7600, 'seat9', { seats: [7, 8, 9] }),
-  [8600, { caption: 4 }],
-  ...click<Therapy>(8600, 'day1', { days: [1] }),
-  ...click<Therapy>(9500, 'day3', { days: [1, 3] }),
-  [10500, { caption: 5 }],
-  ...click<Therapy>(10500, 'create', { created: true }),
-])
+export const TOUR = defineTour<Therapy>(
+  'therapy',
+  START,
+  [
+    [1500, { caption: 2 }],
+    ...click<Therapy>(1500, 'join', { joined: true }),
+    ...click<Therapy>(3700, 'new'),
+    ...cut<Therapy>(4700, { scene: 1, caption: 3, cursor: 'rest' }),
+    ...click<Therapy>(5900, 'seat7', { seats: [7] }),
+    ...click<Therapy>(6750, 'seat8', { seats: [7, 8] }),
+    ...click<Therapy>(7600, 'seat9', { seats: [7, 8, 9] }),
+    [8600, { caption: 4 }],
+    ...click<Therapy>(8600, 'day1', { days: [1] }),
+    ...click<Therapy>(9500, 'day3', { days: [1, 3] }),
+    [10500, { caption: 5 }],
+    ...click<Therapy>(10500, 'create', { created: true }),
+  ],
+  // De qué sitio de la página habla cada paso: soltando ahí el interrogante,
+  // la demostración empieza en él.
+  {
+    1: '.group-card',
+    2: '.group-card .join-box, .group-card .tiles',
+    3: '.filters > .primary, .seat-field',
+    4: '.days-field',
+  },
+)
 
 /** Puestos del cluster de mentira que ya tiene otra persona. */
 const BUSY = [1, 4, 11]

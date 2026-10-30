@@ -169,3 +169,23 @@ export function hiddenInFocus(section: Section, chosen: readonly string[]): bool
 export function isSection(name: string): name is Section {
   return SECTIONS.some((section) => section.id === name)
 }
+
+/**
+ * Las secciones de datos (gráficos, mapas, listas de gente) van a lo ancho de
+ * la pantalla, hasta `--page-wide`; el resto, a `--page-standard`. Es la
+ * pauta habitual de las webs de datos: el contenido de lectura en una columna
+ * cómoda y los paneles de datos aprovechando el monitor (pedido por Alberto,
+ * 2026-10-30: en el ordenador se perdía mucho espacio a los lados).
+ */
+const WIDE: ReadonlySet<string> = new Set([
+  'clusters',
+  'asientos',
+  'avance',
+  'red',
+  'examenes',
+  'estadisticas',
+  'clicker',
+  'gestion',
+])
+
+export const isWide = (section: string): boolean => WIDE.has(section)

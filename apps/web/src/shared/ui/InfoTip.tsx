@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { createContext, useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 
 import { useI18n } from '../i18n'
@@ -12,6 +12,16 @@ import { Modal } from './Modal'
  * burbuja se descarta para que no llegue a lo de debajo.
  */
 export const OPEN_DEMO = 'sanatorio:open-demo'
+
+/** Lo que lleva el evento: dónde se soltó el interrogante. */
+export type OpenDemoDetail = { spot: Element | null }
+
+/**
+ * Dónde se soltó el interrogante que abrió la explicación (`null` si se abrió
+ * con el icono): la demostración empieza en el paso que habla de ese sitio
+ * (`spots` en `defineTour`).
+ */
+export const DemoSpot = createContext<Element | null>(null)
 
 type InfoTipProps = {
   /** De qué habla la explicación: título de la ventana y nombre del botón. */
@@ -31,6 +41,7 @@ type InfoTipProps = {
 export function InfoTip({ title, children }: InfoTipProps) {
   const { t } = useI18n()
   const [open, setOpen] = useState(false)
+  const [spot, setSpot] = useState<Element | null>(null)
   const button = useRef<HTMLButtonElement>(null)
   // Quien ya se sabe la web puede esconderlos en Personalizar; escondidos,
   // siguen ahí para el interrogante.
@@ -41,7 +52,8 @@ export function InfoTip({ title, children }: InfoTipProps) {
 
     if (element === null) return undefined
 
-    const onOpen = (): void => {
+    const onOpen = (event: Event): void => {
+      setSpot(event instanceof CustomEvent ? ((event.detail as OpenDemoDetail).spot ?? null) : null)
       setOpen(true)
     }
 
@@ -62,6 +74,7 @@ export function InfoTip({ title, children }: InfoTipProps) {
         aria-label={t('info.open', { title })}
         title={t('info.open', { title })}
         onClick={() => {
+          setSpot(null)
           setOpen(true)
         }}
       >
@@ -78,7 +91,9 @@ export function InfoTip({ title, children }: InfoTipProps) {
             setOpen(false)
           }}
         >
-          <div className="info-body">{children}</div>
+          <div className="info-body">
+            <DemoSpot.Provider value={spot}>{children}</DemoSpot.Provider>
+          </div>
         </Modal>
       )}
     </>

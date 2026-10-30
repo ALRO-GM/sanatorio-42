@@ -18,19 +18,30 @@ const START: Boards = { day: false, joined: false, typed: 0, created: false, cod
 const LETTERS = 20
 const CODE = 'K7QM'
 
-export const TOUR = defineTour<Boards>('boards', START, [
-  ...click<Boards>(600, 'day9', { day: true }),
-  [1800, { caption: 2 }],
-  ...click<Boards>(2700, 'join', { joined: true }),
-  ...click<Boards>(4300, 'propose'),
-  ...cut<Boards>(5300, { scene: 1, caption: 3, cursor: 'rest' }),
-  ...typing<Boards>(6500, 'typed', LETTERS),
-  ...click<Boards>(7900, 'create', { created: true }),
-  ...cut<Boards>(9600, { scene: 2, caption: 4, cursor: 'rest' }),
-  ...typing<Boards>(11000, 'code', CODE.length, 220),
-  [12100, { caption: 5 }],
-  ...click<Boards>(12100, 'validate', { valid: true }),
-])
+export const TOUR = defineTour<Boards>(
+  'boards',
+  START,
+  [
+    ...click<Boards>(600, 'day9', { day: true }),
+    [1800, { caption: 2 }],
+    ...click<Boards>(2700, 'join', { joined: true }),
+    ...click<Boards>(4300, 'propose'),
+    ...cut<Boards>(5300, { scene: 1, caption: 3, cursor: 'rest' }),
+    ...typing<Boards>(6500, 'typed', LETTERS),
+    ...click<Boards>(7900, 'create', { created: true }),
+    ...cut<Boards>(9600, { scene: 2, caption: 4, cursor: 'rest' }),
+    ...typing<Boards>(11000, 'code', CODE.length, 220),
+    [12100, { caption: 5 }],
+    ...click<Boards>(12100, 'validate', { valid: true }),
+  ],
+  // De qué sitio de la página habla cada paso: soltando ahí el interrogante,
+  // la demostración empieza en él.
+  {
+    1: '.board-card',
+    2: '.board-card .board-side',
+    3: '.pitch, .ghost-slot, .cal-layout form.form',
+  },
+)
 
 /**
  * Cómo funcionan las pizarras: te apuntas a una del calendario, propones la

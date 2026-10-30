@@ -244,7 +244,9 @@ export function ProgressPage({ me }: { me: string }) {
         </article>
         <aside className="card progress-rail" aria-label={t('stats.progress.options')}>
           <Option label={t('stats.progress.measure')}>
+            {/* `progress-measure`: para la demostración (`spots` de `ProgressTour`). */}
             <PillGroup
+              className="progress-measure"
               options={MEASURES}
               value={measure}
               onChange={setMeasure}

@@ -1,9 +1,13 @@
 import { act, cleanup, render } from '@testing-library/react'
 import type { ComponentType } from 'react'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+
+import es from 'virtual:textos/es'
 
 import { I18nProvider } from '../../src/shared/i18n'
+import { Tour, defineTour, stepAt } from '../../src/shared/tour/Tour'
 import type { TourDef } from '../../src/shared/tour/Tour'
+import { DemoSpot } from '../../src/shared/ui/InfoTip'
 
 /**
  * Las demostraciones, pintadas de verdad: todo lo que el guion manda señalar
@@ -23,6 +27,10 @@ const TOURS = Object.values(MODULES).flatMap((module) => {
   return tour === undefined || component === undefined
     ? []
     : [[tour.name, tour, component] as const]
+})
+
+beforeEach(() => {
+  localStorage.setItem('sanatorio_lang', 'es')
 })
 
 afterEach(() => {
@@ -81,14 +89,16 @@ describe('mando de las demostraciones', () => {
 
     expect(chapters.length).toBe(tour.steps.length)
 
-    // Al último paso: sale su frase sin esperar al guion.
+    // Al último paso: sale su título y su frase sin esperar al guion.
     const last = chapters[chapters.length - 1]
+    const step = tour.steps.at(-1) ?? 1
 
     await act(async () => {
       last?.click()
       await vi.advanceTimersByTimeAsync(800 * 1.5 * 3)
     })
-    expect(caption()).toBe(last?.title)
+    expect(caption()).toContain(es[`tour.${tour.name}.title.${String(step)}`])
+    expect(caption()).toContain(es[`tour.${tour.name}.${String(step)}`])
 
     // En pausa no pasa nada por mucho que corra el reloj.
     const pause = [...view.container.querySelectorAll('button')].find((button) =>
@@ -99,5 +109,44 @@ describe('mando de las demostraciones', () => {
       pause?.click()
     })
     expect(vi.getTimerCount()).toBe(0)
+  })
+})
+
+describe('el interrogante sobre un sitio: desde qué paso empieza', () => {
+  const tour = defineTour('record', {}, [[1000, { caption: 2 }]], {
+    2: '.health-card',
+    1: '.xp-bar',
+  })
+
+  it('el paso del sitio más cercano, de dentro hacia fuera; ninguno, null', () => {
+    document.body.innerHTML = `
+      <section class="profile">
+        <article class="health-card"><p><b id="in-health">ok</b></p></article>
+        <div class="xp-bar"><span id="in-xp"></span></div>
+        <p id="elsewhere"></p>
+      </section>`
+
+    expect(stepAt(tour.spots, document.getElementById('in-health'))).toBe(2)
+    expect(stepAt(tour.spots, document.getElementById('in-xp'))).toBe(1)
+    expect(stepAt(tour.spots, document.getElementById('elsewhere'))).toBeNull()
+    expect(stepAt(tour.spots, null)).toBeNull()
+  })
+
+  it('abierta desde el interrogante, la demostración empieza en ese paso', () => {
+    document.body.innerHTML = '<article class="health-card"><b id="in-health">ok</b></article>'
+    const dropped = document.getElementById('in-health')
+    const view = render(
+      <I18nProvider>
+        <DemoSpot.Provider value={dropped}>
+          <Tour tour={tour} tab={() => ''}>
+            {() => null}
+          </Tour>
+        </DemoSpot.Provider>
+      </I18nProvider>,
+    )
+
+    expect(view.container.querySelector('.tour-caption')?.textContent).toContain(
+      es['tour.record.2'],
+    )
   })
 })

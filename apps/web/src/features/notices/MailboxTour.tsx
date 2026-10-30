@@ -7,12 +7,23 @@ type Mailbox = { open: boolean; read: boolean }
 
 const START: Mailbox = { open: false, read: false }
 
-export const TOUR = defineTour<Mailbox>('mailbox', START, [
-  ...click<Mailbox>(1500, 'bell', { open: true }),
-  [2600, { caption: 2 }],
-  ...click<Mailbox>(4300, 'n1', { read: true }),
-  ...cut<Mailbox>(5300, { scene: 1, caption: 3, open: false, cursor: 'rest' }),
-])
+export const TOUR = defineTour<Mailbox>(
+  'mailbox',
+  START,
+  [
+    ...click<Mailbox>(1500, 'bell', { open: true }),
+    [2600, { caption: 2 }],
+    ...click<Mailbox>(4300, 'n1', { read: true }),
+    ...cut<Mailbox>(5300, { scene: 1, caption: 3, open: false, cursor: 'rest' }),
+  ],
+  // De qué sitio de la página habla cada paso: soltando ahí el interrogante,
+  // la demostración empieza en él.
+  {
+    1: '.mailbox .layout-head .count-badge',
+    2: '.mailbox-tabs, .notice-list',
+    3: '.notice',
+  },
+)
 
 /**
  * Cómo funciona el buzón: el número rojo son avisos sin leer, dentro está lo

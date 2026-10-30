@@ -13,18 +13,29 @@ type Waiting = {
 
 const START: Waiting = { project: false, open: false, slot: false, sent: false, duty: false }
 
-export const TOUR = defineTour<Waiting>('waiting', START, [
-  ...click<Waiting>(500, 'proj', { project: true }),
-  [1700, { caption: 2 }],
-  [3400, { caption: 3 }],
-  ...click<Waiting>(3400, 'p1', { open: true }),
-  ...click<Waiting>(4700, 'slot', { slot: true }),
-  ...click<Waiting>(5700, 'send', { sent: true }),
-  [6700, { caption: 4 }],
-  ...cut<Waiting>(8600, { scene: 1, caption: 5, cursor: 'rest' }),
-  ...click<Waiting>(9900, 'duty', { duty: true }),
-  [10900, { caption: 6 }],
-])
+export const TOUR = defineTour<Waiting>(
+  'waiting',
+  START,
+  [
+    ...click<Waiting>(500, 'proj', { project: true }),
+    [1700, { caption: 2 }],
+    [3400, { caption: 3 }],
+    ...click<Waiting>(3400, 'p1', { open: true }),
+    ...click<Waiting>(4700, 'slot', { slot: true }),
+    ...click<Waiting>(5700, 'send', { sent: true }),
+    [6700, { caption: 4 }],
+    ...cut<Waiting>(8600, { scene: 1, caption: 5, cursor: 'rest' }),
+    ...click<Waiting>(9900, 'duty', { duty: true }),
+    [10900, { caption: 6 }],
+  ],
+  // De qué sitio de la página habla cada paso: soltando ahí el interrogante,
+  // la demostración empieza en él.
+  {
+    1: '.project-list',
+    4: '.appbar .mailbox-btn',
+    5: '.appbar .switch-wrap',
+  },
+)
 
 const PROJECTS = ['libft', 'ft_printf', 'push_swap']
 

@@ -687,8 +687,19 @@ dialog.info-dialog {
   display: inline-block;
   animation: tour-drop 0.25s ease-out;
 }
+.tour-step-title {
+  display: block;
+  margin-bottom: 0.15rem;
+  color: var(--text-3);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
 .tour .actions {
   justify-content: center;
+}
+.tour-steps li.on {
+  color: var(--text);
 }
 .tour-steps {
   margin: 0;

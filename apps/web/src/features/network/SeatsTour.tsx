@@ -21,19 +21,34 @@ type Seats = {
 
 const START: Seats = { alone: false, picked: -1, menu: false, months: 1, tip: false }
 
-export const TOUR = defineTour<Seats>('seats', START, [
-  [2200, { caption: 2 }],
-  ...click<Seats>(2200, 'alone', { alone: true }),
-  [4600, { caption: 3 }],
-  ...click<Seats>(4600, 'p3', { picked: 3 }),
-  [7300, { caption: 4 }],
-  ...click<Seats>(7300, 'period', { menu: true }),
-  ...click<Seats>(8200, 'm3', { menu: false, months: 3 }),
-  ...cut<Seats>(10200, { scene: 1, caption: 5, cursor: 'rest', picked: -1 }),
-  [12200, { caption: 6, cursor: 'hot' }],
-  [12900, { tip: true }],
-  [15000, { caption: 7, cursor: 'stats', tip: false }],
-])
+export const TOUR = defineTour<Seats>(
+  'seats',
+  START,
+  [
+    [2200, { caption: 2 }],
+    ...click<Seats>(2200, 'alone', { alone: true }),
+    [4600, { caption: 3 }],
+    ...click<Seats>(4600, 'p3', { picked: 3 }),
+    [7300, { caption: 4 }],
+    ...click<Seats>(7300, 'period', { menu: true }),
+    ...click<Seats>(8200, 'm3', { menu: false, months: 3 }),
+    ...cut<Seats>(10200, { scene: 1, caption: 5, cursor: 'rest', picked: -1 }),
+    [12200, { caption: 6, cursor: 'hot' }],
+    [12900, { tip: true }],
+    [15000, { caption: 7, cursor: 'stats', tip: false }],
+  ],
+  // De qué sitio de la página habla cada paso: soltando ahí el interrogante,
+  // la demostración empieza en él.
+  {
+    1: '.seats .force-graph',
+    2: '.seats-modes',
+    3: '.seats .net-panel, .seats-person',
+    4: '.seats-period',
+    5: '.seat-heat-card',
+    6: '.heat-cell',
+    7: '.heat-stats',
+  },
+)
 
 /**
  * La gente de la red de mentira: dónde sale, con qué grupo se sienta, horas en

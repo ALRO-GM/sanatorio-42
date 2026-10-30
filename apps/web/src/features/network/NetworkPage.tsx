@@ -516,7 +516,8 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
                   }}
                 />
               </div>
-              <label>
+              {/* `net-limit`: para la demostración (`spots` de `NetworkTour`). */}
+              <label className="net-limit">
                 {t('net.limit')}
                 <select
                   value={filters.limit}

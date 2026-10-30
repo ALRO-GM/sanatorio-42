@@ -44,21 +44,35 @@ const PICKED = 10
 const BROKEN = 15
 const PER_ROW = 6
 
-export const TOUR = defineTour<Clusters>('clusters', START, [
-  ...click<Clusters>(900, 'room1', { room: 1 }),
-  [2400, { caption: 2 }],
-  ...click<Clusters>(2400, 'mine', { mine: true }),
-  [4200, { caption: 3 }],
-  ...click<Clusters>(4200, `seat${PICKED}`, { open: true }),
-  [6400, { caption: 4 }],
-  ...click<Clusters>(6400, `seat${BROKEN}`, { open: false, chosen: true }),
-  ...click<Clusters>(7500, 'report', { broken: true }),
-  [9300, { caption: 5 }],
-  ...click<Clusters>(9300, 'placement', { placement: true }),
-  ...click<Clusters>(10400, 'flipRows', { flipped: true }),
-  [12300, { caption: 6 }],
-  ...click<Clusters>(12300, 'full', { full: true }),
-])
+export const TOUR = defineTour<Clusters>(
+  'clusters',
+  START,
+  [
+    ...click<Clusters>(900, 'room1', { room: 1 }),
+    [2400, { caption: 2 }],
+    ...click<Clusters>(2400, 'mine', { mine: true }),
+    [4200, { caption: 3 }],
+    ...click<Clusters>(4200, `seat${PICKED}`, { open: true }),
+    [6400, { caption: 4 }],
+    ...click<Clusters>(6400, `seat${BROKEN}`, { open: false, chosen: true }),
+    ...click<Clusters>(7500, 'report', { broken: true }),
+    [9300, { caption: 5 }],
+    ...click<Clusters>(9300, 'placement', { placement: true }),
+    ...click<Clusters>(10400, 'flipRows', { flipped: true }),
+    [12300, { caption: 6 }],
+    ...click<Clusters>(12300, 'full', { full: true }),
+  ],
+  // De qué sitio de la página habla cada paso: soltando ahí el interrogante,
+  // la demostración empieza en él.
+  {
+    1: '.cluster-map > .filter-pills',
+    2: '.map-bar .map-tools',
+    3: '.seat-grid .seat.occupied, .seat-hover',
+    4: '.seat-grid .seat.free, .seat-detail, .facility-open',
+    5: '.map-placement',
+    6: '.map-zoom',
+  },
+)
 
 /**
  * Cómo funciona el mapa de los clústeres, como está ahora: pestañas de clúster

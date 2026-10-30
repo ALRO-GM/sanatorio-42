@@ -11,16 +11,29 @@ type NotGames = {
 
 const START: NotGames = { survival: false, answer: null, reveal: false }
 
-export const TOUR = defineTour<NotGames>('notGames', START, [
-  ...click<NotGames>(900, 'survival', { survival: true }),
-  [2400, { caption: 2 }],
-  ...click<NotGames>(3600, 'create', {}),
-  ...cut<NotGames>(4700, { scene: 1, caption: 3, cursor: 'rest' }),
-  ...click<NotGames>(6800, 'a0', { answer: 0 }),
-  [8000, { reveal: true, caption: 4 }],
-  ...cut<NotGames>(11000, { scene: 2, caption: 5, cursor: 'rest' }),
-  [13500, { caption: 6 }],
-])
+export const TOUR = defineTour<NotGames>(
+  'notGames',
+  START,
+  [
+    ...click<NotGames>(900, 'survival', { survival: true }),
+    [2400, { caption: 2 }],
+    ...click<NotGames>(3600, 'create', {}),
+    ...cut<NotGames>(4700, { scene: 1, caption: 3, cursor: 'rest' }),
+    ...click<NotGames>(6800, 'a0', { answer: 0 }),
+    [8000, { reveal: true, caption: 4 }],
+    ...cut<NotGames>(11000, { scene: 2, caption: 5, cursor: 'rest' }),
+    [13500, { caption: 6 }],
+  ],
+  // De qué sitio de la página habla cada paso: soltando ahí el interrogante,
+  // la demostración empieza en él.
+  {
+    1: '.quiz-modes + .quiz-modes',
+    3: '.quiz-timer, .quiz-options',
+    4: '.quiz-reveal',
+    5: '.quiz-lives',
+    6: '.quiz-final',
+  },
+)
 
 const MODES = ['duel', 'ffa', 'survival'] as const
 const PLAYERS = [

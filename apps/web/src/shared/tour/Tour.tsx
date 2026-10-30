@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useContext, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 
 import type { TourName } from '@sanatorio/contracts'
@@ -7,6 +7,7 @@ import { api } from '../api'
 import { useI18n } from '../i18n'
 import { useFormat } from '../i18n/useFormat'
 import { Icon } from '../ui/Icon'
+import { DemoSpot } from '../ui/InfoTip'
 import { RATES, useTourSpeed } from './speed'
 
 /**
@@ -98,11 +99,18 @@ export type TourDef<S> = {
   script: readonly Cue<S>[]
   /** Las frases que cuentan los pasos, en orden, para quien no quiere animación. */
   steps: readonly number[]
+  /**
+   * De qué parte de la web de verdad habla cada paso (paso → selector CSS): si
+   * se suelta el interrogante encima, la demostración empieza en ese paso.
+   */
+  spots: Readonly<Partial<Record<number, string>>>
 }
 
 /**
  * Define una demostración. Las frases (`caption`) son los pasos que se leen
- * sin animación: salen solas del guion, en orden.
+ * sin animación: salen solas del guion, en orden. Cada paso tiene además su
+ * título (`tour.<name>.title.<n>`), y con `spots`, el sitio de la web del que
+ * habla (pedido por Alberto, 2026-10-30).
  *
  * Cada fichero de demostración exporta lo que devuelve como `TOUR`: así los
  * tests la encuentran sin apuntarla en ningún sitio (`tests/tours.test.ts`).
@@ -111,12 +119,19 @@ export function defineTour<S extends object>(
   name: TourName,
   start: S,
   script: readonly Cue<S>[],
+  spots: Readonly<Partial<Record<number, string>>> = {},
 ): TourDef<S> {
   const captions = script.flatMap(([, change]) =>
     change.caption === undefined ? [] : [change.caption],
   )
 
-  return { name, start, script, steps: [...new Set([1, ...captions])].sort((a, b) => a - b) }
+  return {
+    name,
+    start,
+    script,
+    steps: [...new Set([1, ...captions])].sort((a, b) => a - b),
+    spots,
+  }
 }
 
 /** Lo que dura el guion entero, con el último respiro antes de darlo por visto. */
@@ -147,6 +162,24 @@ function chaptersOf<S>(tour: TourDef<S>): { step: number; at: number }[] {
   })
 }
 
+/**
+ * El paso que habla del sitio donde se soltó el interrogante: el del sitio más
+ * cercano, de dentro hacia fuera. `null` si ninguno habla de él.
+ */
+export function stepAt(spots: TourDef<object>['spots'], spot: Element | null): number | null {
+  const entries = Object.entries(spots).flatMap(([step, selector]) =>
+    selector === undefined ? [] : [[Number(step), selector] as const],
+  )
+
+  for (let node = spot; node !== null; node = node.parentElement) {
+    const found = entries.find(([, selector]) => node.matches(selector))
+
+    if (found !== undefined) return found[0]
+  }
+
+  return null
+}
+
 /** Cómo va la reproducción: desde qué punto del guion (ms) y si está en marcha. */
 type Run = { take: number; from: number; playing: boolean }
 
@@ -175,8 +208,18 @@ export function Tour<S extends object>({ tour, tab, sub, bell, children }: TourP
   const { name, start, script, steps } = tour
   const { t } = useI18n()
   const { number } = useFormat()
+  const spot = useContext(DemoSpot)
   const [still] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches)
-  const [run, setRun] = useState<Run>({ take: 0, from: 0, playing: true })
+  const length = lengthOf(script)
+  const chapters = chaptersOf(tour)
+  // Abierta desde el interrogante encima de algo: desde el paso que habla de eso.
+  const [first] = useState(() => stepAt(tour.spots, spot))
+  // Justo cuando sale su frase: con el margen de la barra se vería aún la anterior.
+  const [run, setRun] = useState<Run>(() => ({
+    take: 0,
+    from: first === null ? 0 : (script.find(([, change]) => change.caption === first)?.[0] ?? 0),
+    playing: true,
+  }))
   const [shot, setShot] = useState<Shot<S>>({ ...start, ...BASE })
   const stage = useRef<HTMLDivElement>(null)
   const [point, setPoint] = useState({ x: 0, y: 0 })
@@ -184,8 +227,6 @@ export function Tour<S extends object>({ tour, tab, sub, bell, children }: TourP
   const [ripples, setRipples] = useState(0)
   // Cuándo empezó a contar el guion (ms del reloj), para saber por dónde va al pausar.
   const startedAt = useRef(0)
-  const length = lengthOf(script)
-  const chapters = chaptersOf(tour)
   const { base, rate, choose } = useTourSpeed(name)
   // Cuánto se estira el guion ahora: el ritmo de lectura, entre la velocidad de
   // fábrica de esta demostración y lo que la haya movido quien mira.
@@ -283,7 +324,9 @@ export function Tour<S extends object>({ tour, tab, sub, bell, children }: TourP
     return (
       <ol className="tour-steps">
         {steps.map((step) => (
-          <li key={step}>{t(`tour.${name}.${step}`)}</li>
+          <li key={step} className={step === first ? 'on' : undefined}>
+            <strong>{t(`tour.${name}.title.${step}`)}</strong> {t(`tour.${name}.${step}`)}
+          </li>
         ))}
       </ol>
     )
@@ -352,8 +395,8 @@ export function Tour<S extends object>({ tour, tab, sub, bell, children }: TourP
             type="button"
             className={`tour-chapter ${shot.caption === step ? 'on' : ''}`}
             style={{ left: `${String((at / length) * 100)}%` }}
-            aria-label={t('tour.jump', { n: step, text: t(`tour.${name}.${step}`) })}
-            title={t(`tour.${name}.${step}`)}
+            aria-label={t('tour.jump', { n: step, text: t(`tour.${name}.title.${step}`) })}
+            title={`${String(step)}. ${t(`tour.${name}.title.${step}`)}`}
             onClick={() => {
               seek(at)
             }}
@@ -361,7 +404,16 @@ export function Tour<S extends object>({ tour, tab, sub, bell, children }: TourP
         ))}
       </div>
       <p className="tour-caption" role="status">
-        <span key={shot.caption}>{t(`tour.${name}.${shot.caption}`)}</span>
+        <span key={shot.caption}>
+          <small className="tour-step-title">
+            {t('tour.stepTitle', {
+              n: shot.caption,
+              total: steps.length,
+              title: t(`tour.${name}.title.${shot.caption}`),
+            })}
+          </small>
+          {t(`tour.${name}.${shot.caption}`)}
+        </span>
       </p>
       <div className="actions">
         <label className="tour-speed">

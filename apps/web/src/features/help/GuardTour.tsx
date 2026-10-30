@@ -39,36 +39,50 @@ const drag = (at: number, to: string, pan: Guard['pan']): Cue<Guard>[] => [
   [at + 1000, { press: false, drag: false }],
 ]
 
-export const TOUR = defineTour<Guard>('guard', START, [
-  // Escena 1: arrastrar por cuatro medias horas, el tope, preevaluar y guardar.
-  [300, { cursor: 'slot2' }],
-  [1000, { press: true, slots: [2] }],
-  [1500, { cursor: 'slot3', slots: [2, 3] }],
-  [2000, { cursor: 'slot4', slots: [2, 3, 4] }],
-  [2500, { cursor: 'slot5', slots: [2, 3, 4, 5] }],
-  [3100, { press: false }],
-  [3700, { caption: 2 }],
-  ...click<Guard>(3700, 'max', { menu: true }),
-  ...click<Guard>(4600, 'opt30', { menu: false, max: 30 }),
-  [5450, { caption: 3 }],
-  ...click<Guard>(5450, 'pre', { pre: true }),
-  [6300, { caption: 4 }],
-  ...click<Guard>(6300, 'save', { saved: true }),
-  // Escena 2: en el tablón, llega una reserva al buzón y se acepta.
-  ...cut<Guard>(7500, { scene: 1, cursor: 'g1', caption: 5 }),
-  ...drag(8500, 'g2', 1),
-  [9700, { box: 'badge', caption: 6 }],
-  ...click<Guard>(9900, 'bell', { box: 'open' }),
-  ...click<Guard>(10800, 'notice', { box: 'booking' }),
-  [11700, { caption: 7 }],
-  ...click<Guard>(11700, 'accept', { box: 'accepted' }),
-  // Escena 3: de vuelta al tablón, salta el aviso de cinco minutos antes.
-  ...cut<Guard>(12900, { scene: 2, box: 'none', cursor: 'g2', caption: 5 }),
-  ...drag(13800, 'g3', 2),
-  [15000, { alert: true, caption: 8 }],
-  ...click<Guard>(15800, 'going', { alert: false }),
-  [17000, { caption: 9 }],
-])
+export const TOUR = defineTour<Guard>(
+  'guard',
+  START,
+  [
+    // Escena 1: arrastrar por cuatro medias horas, el tope, preevaluar y guardar.
+    [300, { cursor: 'slot2' }],
+    [1000, { press: true, slots: [2] }],
+    [1500, { cursor: 'slot3', slots: [2, 3] }],
+    [2000, { cursor: 'slot4', slots: [2, 3, 4] }],
+    [2500, { cursor: 'slot5', slots: [2, 3, 4, 5] }],
+    [3100, { press: false }],
+    [3700, { caption: 2 }],
+    ...click<Guard>(3700, 'max', { menu: true }),
+    ...click<Guard>(4600, 'opt30', { menu: false, max: 30 }),
+    [5450, { caption: 3 }],
+    ...click<Guard>(5450, 'pre', { pre: true }),
+    [6300, { caption: 4 }],
+    ...click<Guard>(6300, 'save', { saved: true }),
+    // Escena 2: en el tablón, llega una reserva al buzón y se acepta.
+    ...cut<Guard>(7500, { scene: 1, cursor: 'g1', caption: 5 }),
+    ...drag(8500, 'g2', 1),
+    [9700, { box: 'badge', caption: 6 }],
+    ...click<Guard>(9900, 'bell', { box: 'open' }),
+    ...click<Guard>(10800, 'notice', { box: 'booking' }),
+    [11700, { caption: 7 }],
+    ...click<Guard>(11700, 'accept', { box: 'accepted' }),
+    // Escena 3: de vuelta al tablón, salta el aviso de cinco minutos antes.
+    ...cut<Guard>(12900, { scene: 2, box: 'none', cursor: 'g2', caption: 5 }),
+    ...drag(13800, 'g3', 2),
+    [15000, { alert: true, caption: 8 }],
+    ...click<Guard>(15800, 'going', { alert: false }),
+    [17000, { caption: 9 }],
+  ],
+  // De qué sitio de la página habla cada paso: soltando ahí el interrogante,
+  // la demostración empieza en él.
+  {
+    1: '.slot-day',
+    2: '[data-feedback="guardia.today"] .form-grid',
+    3: '.pre-review',
+    4: '[data-feedback="guardia.today"] .form > .actions',
+    6: '.appbar .mailbox-btn',
+    7: '.booking',
+  },
+)
 
 /** Las medias horas de la rejilla de mentira. */
 const SLOTS = ['16:00', '16:30', '17:00', '17:30', '18:00', '18:30', '19:00']

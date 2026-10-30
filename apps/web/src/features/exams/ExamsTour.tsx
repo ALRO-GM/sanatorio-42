@@ -15,18 +15,31 @@ type Exams = {
 
 const START: Exams = { opened: false, refresh: 4, marked: false, next: false }
 
-export const TOUR = defineTour<Exams>('exams', START, [
-  ...click<Exams>(900, 'tab', { opened: true }),
-  ...cut<Exams>(2500, { scene: 1, caption: 2, cursor: 'rest' }),
-  [4800, { caption: 3, refresh: 3 }],
-  [5800, { refresh: 2 }],
-  [6800, { refresh: 1 }],
-  [7800, { refresh: 0, marked: true }],
-  [8300, { refresh: 300 }],
-  [9400, { caption: 4 }],
-  ...click<Exams>(9400, 'trackNext', { next: true }),
-  ...cut<Exams>(11400, { scene: 2, caption: 5, cursor: 'rest' }),
-])
+export const TOUR = defineTour<Exams>(
+  'exams',
+  START,
+  [
+    ...click<Exams>(900, 'tab', { opened: true }),
+    ...cut<Exams>(2500, { scene: 1, caption: 2, cursor: 'rest' }),
+    [4800, { caption: 3, refresh: 3 }],
+    [5800, { refresh: 2 }],
+    [6800, { refresh: 1 }],
+    [7800, { refresh: 0, marked: true }],
+    [8300, { refresh: 300 }],
+    [9400, { caption: 4 }],
+    ...click<Exams>(9400, 'trackNext', { next: true }),
+    ...cut<Exams>(11400, { scene: 2, caption: 5, cursor: 'rest' }),
+  ],
+  // De qué sitio de la página habla cada paso: soltando ahí el interrogante,
+  // la demostración empieza en él.
+  {
+    1: '.exam-live > .eyebrow',
+    2: '.exam-group',
+    3: '.exam-clocks',
+    4: '.exam-live > .filter-pills',
+    5: '.exam-pairs',
+  },
+)
 
 /**
  * Inventadas: quién está en el examen, de qué plan y círculo, y cómo está antes

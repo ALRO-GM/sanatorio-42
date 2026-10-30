@@ -1276,9 +1276,12 @@ dialog.welcome .actions {
 }
 
 /* Estadísticas de exámenes por plan y kickoff (#81). */
+/* Un rango por columna: en una pantalla ancha, varios rangos a la vez. */
 .exam-pairs {
   display: grid;
-  gap: 0.8rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 520px), 1fr));
+  align-items: start;
+  gap: 1.2rem 1.4rem;
   margin: 0.6rem 0 0.8rem;
 }
 /* Una fila por rango: el de C y el de Nexus, uno al lado del otro. */

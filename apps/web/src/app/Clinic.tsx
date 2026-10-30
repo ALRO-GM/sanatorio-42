@@ -36,7 +36,7 @@ import { PoolPreviewBar } from './PoolPreviewBar'
 import { SectionView } from './SectionView'
 import { loadPoolAccess, resetPoolAccess, usePoolAccess } from '../shared/pool'
 import { PoolOnly } from '../shared/ui/PoolOnly'
-import { blockedForPool, HOME, SECTIONS, hiddenInFocus } from './sections'
+import { blockedForPool, HOME, SECTIONS, hiddenInFocus, isWide } from './sections'
 import type { Section } from './sections'
 import { useRoute } from './useRoute'
 
@@ -155,6 +155,11 @@ export function Clinic({ me, onLogout }: ClinicProps) {
     if (section === 'expediente') void reloadProfile()
   }, [section, reloadProfile])
 
+  // La cabecera va al ancho de la sección abierta (`--page-max` en `system.css`).
+  useEffect(() => {
+    document.documentElement.dataset.page = isWide(section) ? 'wide' : 'standard'
+  }, [section])
+
   const openSection = useCallback(
     (next: Section, projectId: number | null = null) => {
       setFocusProject(projectId)
@@ -204,8 +209,8 @@ export function Clinic({ me, onLogout }: ClinicProps) {
       </PoolOnly>
       <CountdownDock stamp={pulse?.countdowns ?? null} />
 
-      {/* La red de correcciones necesita sitio: es la única sección a todo lo ancho. */}
-      <main className={`container ${section === 'red' || section === 'clicker' ? 'wide' : ''}`}>
+      {/* Las secciones de datos, a lo ancho de la pantalla (`isWide`). */}
+      <main className={`container ${isWide(section) ? 'wide' : ''}`}>
         <MaintenanceBanner
           onPanel={() => {
             openSection('gestion')

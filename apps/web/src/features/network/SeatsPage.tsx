@@ -245,7 +245,8 @@ export function SeatsPage({ me }: { me?: string }) {
             <p className="hint">{t('seats.intro')}</p>
           </div>
           <div className="net-filters">
-            <div className="net-filter">
+            {/* `seats-period` y `seats-modes`: para la demostración (`spots` de `SeatsTour`). */}
+            <div className="net-filter seats-period">
               {/* El selector de periodo de toda la web (`shared/ui/StepPicker`). */}
               <PeriodPicker
                 value={period}
@@ -260,6 +261,7 @@ export function SeatsPage({ me }: { me?: string }) {
             <div className="net-filter">
               <span className="eyebrow">{t('seats.colour')}</span>
               <PillGroup
+                className="seats-modes"
                 options={MODES}
                 value={mode}
                 onChange={setMode}

@@ -38,22 +38,36 @@ const TICKS: Cue<Agenda>[] = Array.from({ length: 7 }, (_, index) => [
   { tick: index + 1 },
 ])
 
-export const TOUR = defineTour<Agenda>('agenda', START, [
-  [1600, { caption: 2 }],
-  ...click<Agenda>(1600, 'kind', { hidden: true }),
-  ...click<Agenda>(3100, 'kind', { hidden: false }),
-  [4600, { caption: 3 }],
-  ...click<Agenda>(4600, 'ev', { sheet: true }),
-  [6600, { caption: 4 }],
-  ...click<Agenda>(6600, 'going', { going: true }),
-  [8400, { caption: 5 }],
-  ...click<Agenda>(8400, 'pin', { pinned: true }),
-  [10400, { caption: 6 }],
-  ...click<Agenda>(10400, 'tabCountdowns', { countdowns: true, sheet: false }),
-  ...TICKS,
-  [13200, { caption: 7 }],
-  ...click<Agenda>(13200, 'goal', { goal: true }),
-])
+export const TOUR = defineTour<Agenda>(
+  'agenda',
+  START,
+  [
+    [1600, { caption: 2 }],
+    ...click<Agenda>(1600, 'kind', { hidden: true }),
+    ...click<Agenda>(3100, 'kind', { hidden: false }),
+    [4600, { caption: 3 }],
+    ...click<Agenda>(4600, 'ev', { sheet: true }),
+    [6600, { caption: 4 }],
+    ...click<Agenda>(6600, 'going', { going: true }),
+    [8400, { caption: 5 }],
+    ...click<Agenda>(8400, 'pin', { pinned: true }),
+    [10400, { caption: 6 }],
+    ...click<Agenda>(10400, 'tabCountdowns', { countdowns: true, sheet: false }),
+    ...TICKS,
+    [13200, { caption: 7 }],
+    ...click<Agenda>(13200, 'goal', { goal: true }),
+  ],
+  // De qué sitio de la página habla cada paso: soltando ahí el interrogante,
+  // la demostración empieza en él.
+  {
+    2: '.agenda-kinds',
+    3: '.event-chip, .event-sheet',
+    4: '.event-sheet .meet-room',
+    5: '.event-sheet .actions [aria-pressed]',
+    6: '.countdowns-mine',
+    7: '.countdowns-add',
+  },
+)
 
 /** Los filtros que salen: los de aquí y dos de 42 (los demás, en la web, igual). */
 const KINDS = ['help', 'therapy', 'board', 'evaluation', 'exam'] as const satisfies CalendarKind[]

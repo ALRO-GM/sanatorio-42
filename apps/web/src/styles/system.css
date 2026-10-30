@@ -24,9 +24,26 @@ body::after {
   display: none;
 }
 
+/* Anchos de página (pauta de las webs de datos): la cabecera y el pie llegan al
+   más ancho; las secciones normales, a `--page-standard`, y las de datos
+   (`isWide` en `sections.ts`), a `--page-wide`. Los márgenes crecen con la
+   pantalla. */
+:root {
+  --page-standard: 1240px;
+  --page-wide: 1680px;
+  --page-max: var(--page-standard);
+  --gutter: clamp(1rem, 2.5vw, 2.5rem);
+}
+/* La cabecera, alineada con el contenido de la sección abierta. */
+:root[data-page='wide'] {
+  --page-max: var(--page-wide);
+}
 .container {
-  max-width: 1000px;
-  padding: 1.75rem 1.25rem 2.5rem;
+  max-width: calc(var(--page-standard) + 2 * var(--gutter));
+  padding: 1.75rem var(--gutter) 2.5rem;
+}
+.container.wide {
+  max-width: calc(var(--page-wide) + 2 * var(--gutter));
 }
 h2 {
   font-size: 1.5rem;
@@ -60,9 +77,9 @@ h2 {
   border-bottom-color: var(--border);
 }
 .appbar-inner {
-  max-width: 1000px;
+  max-width: calc(var(--page-max) + 2 * var(--gutter));
   margin: 0 auto;
-  padding: 0 1.25rem;
+  padding: 0 var(--gutter);
 }
 .appbar-row {
   display: flex;
@@ -552,7 +569,7 @@ dialog::backdrop {
 
 /* --- Pie -------------------------------------------------------------------- */
 .footer {
-  max-width: 1000px;
+  max-width: var(--page-wide);
   margin: 3rem auto 0;
   padding-top: 1.25rem;
   border-top: 1px solid var(--border);

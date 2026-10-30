@@ -15,6 +15,7 @@ import { createPortal } from 'react-dom'
 import { useI18n } from '../../shared/i18n'
 import { Icon } from '../../shared/ui/Icon'
 import { OPEN_DEMO } from '../../shared/ui/InfoTip'
+import type { OpenDemoDetail } from '../../shared/ui/InfoTip'
 import { Modal } from '../../shared/ui/Modal'
 import { BubbleGhost } from './BubbleGhost'
 import { pageTip, tipNear } from './demo'
@@ -37,10 +38,13 @@ export function HelpBubble({ section }: { section: string }) {
     }, NOTE_MS)
   }
 
-  /** Abre la demostración de `tip`, o avisa de que no hay ninguna. */
-  const show = (tip: HTMLElement | null): void => {
+  /**
+   * Abre la demostración de `tip`, o avisa de que no hay ninguna. Con `spot`
+   * (donde se soltó), empieza en el paso que habla de ese sitio.
+   */
+  const show = (tip: HTMLElement | null, spot: Element | null = null): void => {
     if (tip === null) flash(t('howto.none'))
-    else tip.dispatchEvent(new Event(OPEN_DEMO))
+    else tip.dispatchEvent(new CustomEvent<OpenDemoDetail>(OPEN_DEMO, { detail: { spot } }))
   }
 
   const { button, ghost, returning, hover, goHome, handlers } = useCarry({
@@ -50,7 +54,7 @@ export function HelpBubble({ section }: { section: string }) {
       const near = tipNear(spot?.element ?? null)
 
       if (near === null && pageTip() !== null) flash(t('howto.page'))
-      show(near ?? pageTip())
+      show(near ?? pageTip(), spot?.element ?? null)
     },
     onTap: () => {
       setIntro(true)

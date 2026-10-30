@@ -14,14 +14,25 @@ const START: Inbox = { menu: false, idea: false, typed: 0, sent: false }
 
 const LETTERS = 30
 
-export const TOUR = defineTour<Inbox>('inbox', START, [
-  ...click<Inbox>(900, 'kind', { menu: true }),
-  ...click<Inbox>(1900, 'idea', { menu: false, idea: true }),
-  [3000, { caption: 2 }],
-  ...typing<Inbox>(3200, 'typed', LETTERS, 50),
-  ...click<Inbox>(5000, 'send', { sent: true }),
-  ...cut<Inbox>(6800, { scene: 1, caption: 3, cursor: 'rest' }),
-])
+export const TOUR = defineTour<Inbox>(
+  'inbox',
+  START,
+  [
+    ...click<Inbox>(900, 'kind', { menu: true }),
+    ...click<Inbox>(1900, 'idea', { menu: false, idea: true }),
+    [3000, { caption: 2 }],
+    ...typing<Inbox>(3200, 'typed', LETTERS, 50),
+    ...click<Inbox>(5000, 'send', { sent: true }),
+    ...cut<Inbox>(6800, { scene: 1, caption: 3, cursor: 'rest' }),
+  ],
+  // De qué sitio de la página habla cada paso: soltando ahí el interrogante,
+  // la demostración empieza en él.
+  {
+    1: '.inbox-form .form-grid',
+    2: '.inbox-form textarea, .inbox-form [type="submit"]',
+    3: '.inbox-form ~ .ticket-list',
+  },
+)
 
 /**
  * Cómo funciona el buzón de incidencias: eliges de qué se trata, lo escribes y

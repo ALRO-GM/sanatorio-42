@@ -11,14 +11,27 @@ type HelpStats = {
 
 const START: HelpStats = { all: false, open: false }
 
-export const TOUR = defineTour<HelpStats>('helpStats', START, [
-  ...click<HelpStats>(900, 'all', { all: true }),
-  [2600, { caption: 2 }],
-  ...cut<HelpStats>(4600, { scene: 1, caption: 3, cursor: 'rest' }),
-  [7000, { caption: 4, cursor: 'me' }],
-  [9000, { caption: 5 }],
-  ...click<HelpStats>(9000, 'login', { open: true }),
-])
+export const TOUR = defineTour<HelpStats>(
+  'helpStats',
+  START,
+  [
+    ...click<HelpStats>(900, 'all', { all: true }),
+    [2600, { caption: 2 }],
+    ...cut<HelpStats>(4600, { scene: 1, caption: 3, cursor: 'rest' }),
+    [7000, { caption: 4, cursor: 'me' }],
+    [9000, { caption: 5 }],
+    ...click<HelpStats>(9000, 'login', { open: true }),
+  ],
+  // De qué sitio de la página habla cada paso: soltando ahí el interrogante,
+  // la demostración empieza en él.
+  {
+    1: '.help-stats .section-head .filter-pills',
+    2: '.help-stats-totals',
+    3: '.help-stats-card .ranking',
+    4: '.help-stats-card .ranking .row.me',
+    5: '.help-stats-card .ranking .record-link',
+  },
+)
 
 /** Las cifras de dos secciones, del mes; desde siempre, cuatro veces más. */
 const SECTIONS = [

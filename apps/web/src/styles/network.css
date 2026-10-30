@@ -1,7 +1,4 @@
 /* --- Red de correcciones -------------------------------------------------- */
-.container.wide {
-  max-width: 1320px;
-}
 .net-head {
   grid-area: head;
   display: grid;

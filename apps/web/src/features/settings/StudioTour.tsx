@@ -44,21 +44,34 @@ const carry = (at: number, id: string, to: string, change: Partial<Studio>): Cue
   [at + 1700, { press: false, drag: false, lifted: null }],
 ]
 
-export const TOUR = defineTour<Studio>('studio', START, [
-  ...carry(700, 'aprender', 'cat1', {
-    categories: ['yo', 'aprender', 'ayuda', 'campus'],
-  }),
-  [3300, { caption: 2 }],
-  ...carry(3300, 'network', 'block0', {
-    blocks: ['network', 'record', 'health'],
-  }),
-  [6000, { caption: 3 }],
-  ...click<Studio>(6000, 'tab-style', { tab: 'style' }),
-  [7700, { caption: 4 }],
-  ...click<Studio>(7700, 'style1', { look: 1 }),
-  [10200, { caption: 5 }],
-  ...click<Studio>(10200, 'done', { done: true }),
-])
+export const TOUR = defineTour<Studio>(
+  'studio',
+  START,
+  [
+    ...carry(700, 'aprender', 'cat1', {
+      categories: ['yo', 'aprender', 'ayuda', 'campus'],
+    }),
+    [3300, { caption: 2 }],
+    ...carry(3300, 'network', 'block0', {
+      blocks: ['network', 'record', 'health'],
+    }),
+    [6000, { caption: 3 }],
+    ...click<Studio>(6000, 'tab-style', { tab: 'style' }),
+    [7700, { caption: 4 }],
+    ...click<Studio>(7700, 'style1', { look: 1 }),
+    [10200, { caption: 5 }],
+    ...click<Studio>(10200, 'done', { done: true }),
+  ],
+  // De qué sitio de la página habla cada paso: soltando ahí el interrogante,
+  // la demostración empieza en él.
+  {
+    1: '.mini-tabs, .mini-subtabs',
+    2: '.mini-blocks',
+    3: '#studio-tab-style',
+    4: '.studio-styles, .studio-palettes',
+    5: '.studio > .actions',
+  },
+)
 
 /** Los colores de la muestra de un estilo, para la web en pequeño. */
 const colors = (theme: ThemeManifest | undefined): CSSProperties =>

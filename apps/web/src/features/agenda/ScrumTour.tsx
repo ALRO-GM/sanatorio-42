@@ -30,21 +30,34 @@ const START: Scrum = {
   board: false,
 }
 
-export const TOUR = defineTour<Scrum>('scrum', START, [
-  ...click<Scrum>(900, 'new', { goal: true }),
-  [2600, { caption: 2 }],
-  ...click<Scrum>(2600, 'leaks', { checked: true }),
-  [4400, { caption: 3 }],
-  ...click<Scrum>(4400, 'pin', { pinned: true }),
-  [6400, { caption: 4 }],
-  ...click<Scrum>(6400, 'write', { entry: true }),
-  ...click<Scrum>(7500, 'problem', { menu: true }),
-  ...click<Scrum>(8500, 'memory', { menu: false, picked: true }),
-  ...click<Scrum>(9500, 'save', { saved: true }),
-  [10200, { entry: false }],
-  [11000, { caption: 5 }],
-  ...click<Scrum>(11000, 'board', { board: true }),
-])
+export const TOUR = defineTour<Scrum>(
+  'scrum',
+  START,
+  [
+    ...click<Scrum>(900, 'new', { goal: true }),
+    [2600, { caption: 2 }],
+    ...click<Scrum>(2600, 'leaks', { checked: true }),
+    [4400, { caption: 3 }],
+    ...click<Scrum>(4400, 'pin', { pinned: true }),
+    [6400, { caption: 4 }],
+    ...click<Scrum>(6400, 'write', { entry: true }),
+    ...click<Scrum>(7500, 'problem', { menu: true }),
+    ...click<Scrum>(8500, 'memory', { menu: false, picked: true }),
+    ...click<Scrum>(9500, 'save', { saved: true }),
+    [10200, { entry: false }],
+    [11000, { caption: 5 }],
+    ...click<Scrum>(11000, 'board', { board: true }),
+  ],
+  // De qué sitio de la página habla cada paso: soltando ahí el interrogante,
+  // la demostración empieza en él.
+  {
+    1: '.scrum > .filters > .primary, .scrum-form',
+    2: '.scrum-goal > .scrum-checks',
+    3: '.scrum-goal > .actions [aria-pressed]',
+    4: '.scrum-entry, .scrum-entries',
+    5: '.scrum-frame',
+  },
+)
 
 const CHECKS = ['works', 'subject', 'leaks', 'slots'] as const
 

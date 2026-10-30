@@ -19,6 +19,9 @@ import type { TourDef } from '../src/shared/tour/Tour'
 const MODULES = import.meta.glob<{ TOUR?: TourDef<object> }>('../src/features/**/*Tour.tsx', {
   eager: true,
 })
+const DEFS = Object.values(MODULES).flatMap((module) =>
+  module.TOUR === undefined ? [] : [[module.TOUR.name, module.TOUR] as const],
+)
 const TOURS = Object.fromEntries(
   Object.values(MODULES).flatMap((module) =>
     module.TOUR === undefined ? [] : [[module.TOUR.name, module.TOUR.script]],
@@ -80,6 +83,20 @@ describe('demostraciones', () => {
       for (const dict of [es, en, ca, eu]) {
         expect(dict[`tour.${name}.${caption}`], `tour.${name}.${caption}`).toBeTruthy()
       }
+    }
+  })
+
+  it.each(DEFS)('%s: cada paso tiene su título en los cuatro idiomas', (name, tour) => {
+    for (const step of tour.steps) {
+      for (const dict of [es, en, ca, eu]) {
+        expect(dict[`tour.${name}.title.${step}`], `tour.${name}.title.${step}`).toBeTruthy()
+      }
+    }
+  })
+
+  it.each(DEFS)('%s: los sitios de la web van a pasos que existen', (_, tour) => {
+    for (const step of Object.keys(tour.spots)) {
+      expect(tour.steps).toContain(Number(step))
     }
   })
 

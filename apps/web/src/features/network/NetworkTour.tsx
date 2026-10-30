@@ -28,22 +28,36 @@ const START: Network = {
 
 const SEARCH = 'lso'
 
-export const TOUR = defineTour<Network>('network', START, [
-  [1600, { caption: 2 }],
-  ...click<Network>(1600, 'n2', { picked: 2 }),
-  [3800, { caption: 3 }],
-  ...click<Network>(3800, 'search', { picked: -1 }),
-  ...typing<Network>(4700, 'typed', SEARCH.length, 200),
-  [5400, { picked: 5 }],
-  [7000, { caption: 4, picked: -1, typed: 0 }],
-  ...click<Network>(7000, 'period', { menu: 'period' }),
-  ...click<Network>(8000, 'p24', { menu: '', longer: true }),
-  [9900, { caption: 5 }],
-  ...click<Network>(9900, 'school2', { schools: true }),
-  [12400, { caption: 6 }],
-  ...click<Network>(12400, 'limit', { menu: 'limit' }),
-  ...click<Network>(13400, 'l2000', { menu: '', more: true }),
-])
+export const TOUR = defineTour<Network>(
+  'network',
+  START,
+  [
+    [1600, { caption: 2 }],
+    ...click<Network>(1600, 'n2', { picked: 2 }),
+    [3800, { caption: 3 }],
+    ...click<Network>(3800, 'search', { picked: -1 }),
+    ...typing<Network>(4700, 'typed', SEARCH.length, 200),
+    [5400, { picked: 5 }],
+    [7000, { caption: 4, picked: -1, typed: 0 }],
+    ...click<Network>(7000, 'period', { menu: 'period' }),
+    ...click<Network>(8000, 'p24', { menu: '', longer: true }),
+    [9900, { caption: 5 }],
+    ...click<Network>(9900, 'school2', { schools: true }),
+    [12400, { caption: 6 }],
+    ...click<Network>(12400, 'limit', { menu: 'limit' }),
+    ...click<Network>(13400, 'l2000', { menu: '', more: true }),
+  ],
+  // De qué sitio de la página habla cada paso: soltando ahí el interrogante,
+  // la demostración empieza en él.
+  {
+    1: '.net-stage .force-graph, .net-legend',
+    2: '.net-panel',
+    3: '.net-search, .net-person-chosen, .force-find',
+    4: '.net-filters .step-picker, .net-filters .net-dates, .net-timeline',
+    5: '.net-filters .campus-picker',
+    6: '.net-limit',
+  },
+)
 
 /**
  * Las personas de la red de mentira: dónde están, cuánto corrigen, de qué

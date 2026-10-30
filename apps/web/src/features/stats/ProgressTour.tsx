@@ -14,14 +14,28 @@ type Progress = {
 
 const START: Progress = { paris: false, short: false, hours: false, milestone: false }
 
-export const TOUR = defineTour<Progress>('progress', START, [
-  [1800, { caption: 2 }],
-  ...click<Progress>(3400, 'paris', { paris: true, caption: 3 }),
-  ...click<Progress>(6200, 'period', { short: true, caption: 4 }),
-  ...cut<Progress>(8800, { scene: 1, caption: 5, cursor: 'rest' }),
-  ...click<Progress>(10200, 'hours', { hours: true }),
-  ...click<Progress>(12600, 'milestone', { milestone: true, caption: 6 }),
-])
+export const TOUR = defineTour<Progress>(
+  'progress',
+  START,
+  [
+    [1800, { caption: 2 }],
+    ...click<Progress>(3400, 'paris', { paris: true, caption: 3 }),
+    ...click<Progress>(6200, 'period', { short: true, caption: 4 }),
+    ...cut<Progress>(8800, { scene: 1, caption: 5, cursor: 'rest' }),
+    ...click<Progress>(10200, 'hours', { hours: true }),
+    ...click<Progress>(12600, 'milestone', { milestone: true, caption: 6 }),
+  ],
+  // De qué sitio de la página habla cada paso: soltando ahí el interrogante,
+  // la demostración empieza en él.
+  {
+    1: '.progress-chart, .progress-legend',
+    2: '.progress-grid',
+    3: '.progress-rail .campus-picker',
+    4: '.progress-option-row, .progress-axis',
+    5: '.progress-measure, .progress-measure-hint',
+    6: '.progress-hover, .progress-tip',
+  },
+)
 
 /** Puntos `[mes, %]` de cada línea, con 24 meses de eje. */
 const LINES = {
