@@ -41,9 +41,15 @@ const effective = (allow: readonly PoolKey[]): PoolKey[] =>
   allow.filter((key) => allow.includes(key.split('.')[0] as PoolKey))
 
 const PREVIEW = 'mock_pool_preview'
+/** La vista sin límites del dueño: `'full'` en la misma clave. */
+const FULL = 'full'
 
 /** Si quien administra está en la vista de piscinero: entonces no administra. */
-export const poolPreviewing = (): boolean => localStorage.getItem(PREVIEW) === 'true'
+export const poolPreviewing = (): boolean => {
+  const value = localStorage.getItem(PREVIEW)
+
+  return value === 'true' || value === FULL
+}
 
 /** Si se está viendo la web como piscinero (`mock_pool` o la vista previa): entonces, la piscina. */
 export const poolMocking = (): boolean =>
@@ -81,15 +87,19 @@ export const poolMock: Pick<
   async getPoolAccess() {
     await delay(40)
 
+    if (localStorage.getItem(PREVIEW) === FULL) {
+      return { pool: true, allow: null, preview: true, unrestricted: true }
+    }
     if (poolPreviewing()) return { pool: true, allow: effective(settings.allow), preview: true }
 
+    // En la de mentira entra `albrodri`, el dueño.
     return poolMocking()
       ? { pool: true, allow: effective(settings.allow) }
-      : { pool: false, allow: null }
+      : { pool: false, allow: null, owner: true }
   },
-  async startPoolPreview() {
+  async startPoolPreview(full = false) {
     await delay(40)
-    localStorage.setItem(PREVIEW, 'true')
+    localStorage.setItem(PREVIEW, full ? FULL : 'true')
   },
   async stopPoolPreview() {
     await delay(40)

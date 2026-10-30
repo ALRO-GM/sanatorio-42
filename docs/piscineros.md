@@ -143,6 +143,27 @@ abrirla.
   puede volver: sale de la cuenta y entra otra vez (como estudiante).
 - API de mentira: `localStorage.mock_pool_preview = 'true'` es la vista previa.
 
+### Sin límites (solo el dueño)
+
+Pedido por Alberto el 2026-10-30: ver la web como piscinero sin ninguna
+restricción, con exámenes y todo lo de un estudiante, y que solo él pueda.
+
+- Botón **Ver como piscinero sin límites** bajo el de siempre, que solo sale
+  con `owner: true` de `GET /pool/access`. Entra con
+  `POST /admin/pool/preview/full`.
+- Solo el dueño: el login va fijo en `apps/api/src/core/owner.ts`, no en
+  `ADMIN_LOGINS` ni en el panel, así que dar a alguien el permiso de
+  administrar no le da esto. Pide además lo de la vista normal (administrar,
+  segundo factor, sesión de estudiante).
+- La cookie lleva `unrestricted: true` firmado, y al leerla solo cuenta con
+  `preview` y el login del dueño. Con ella el corte de piscineros deja pasar
+  todo; sigue siendo piscinero en lo demás (mundos separados, la piscina en
+  Avance y tablón, su campus de casa, `admin: false`, sin panel).
+- La franja dice «… como un piscinero sin límites»; «Volver» es la misma.
+- Tests: `tests/integration/pool-preview.test.ts` (otro que administra recibe
+  `403` y la marca firmada a mano no le vale).
+- API de mentira: `localStorage.mock_pool_preview = 'full'`.
+
 ## Estado (2026-10-25)
 
 Hecho: entrada (fase 1), permisos (fase 2) y separación de datos (fase 3). Los

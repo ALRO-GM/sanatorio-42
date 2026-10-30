@@ -62,7 +62,7 @@ export function createPoolModule(deps: PoolDeps): PoolModule {
       app.get('/pool/access', async (request, reply) => {
         const user = session.user(request)
 
-        return reply.send(await service.access(user.role === 'pool', user.preview === true))
+        return reply.send(await service.access(user))
       })
 
       /** `GET /admin/pool` → `PoolSettings`. */

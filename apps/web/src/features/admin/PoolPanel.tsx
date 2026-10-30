@@ -5,7 +5,7 @@ import type { PoolKey, PoolSettings } from '@sanatorio/contracts'
 import { api } from '../../shared/api'
 import { useAction, useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
-import { switchPoolPreview } from '../../shared/pool'
+import { switchPoolPreview, usePoolAccess } from '../../shared/pool'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { GROUPS, sectionsOf } from './pool-tree'
 
@@ -23,6 +23,7 @@ export function PoolPanel() {
   const [saved, setSaved] = useState(false)
   const save = useAction()
   const preview = useAction()
+  const { owner } = usePoolAccess()
 
   useEffect(() => {
     if (data !== undefined) setDraft(data)
@@ -139,6 +140,22 @@ export function PoolPanel() {
           {t('admin.pool.preview')}
         </button>
         <p className="hint">{t('admin.pool.previewHint')}</p>
+        {/* Sin límites: un piscinero con todo lo de un estudiante. Solo el
+            dueño (`core/owner.ts` en la API, que es quien corta). */}
+        {owner === true && (
+          <>
+            <button
+              type="button"
+              disabled={preview.busy}
+              onClick={() => {
+                void preview.run(() => switchPoolPreview(true, true))
+              }}
+            >
+              {t('admin.pool.previewFull')}
+            </button>
+            <p className="hint">{t('admin.pool.previewFullHint')}</p>
+          </>
+        )}
         <ErrorNote error={preview.error} />
       </div>
     </article>

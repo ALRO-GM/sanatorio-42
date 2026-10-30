@@ -21,6 +21,14 @@ afterEach(async () => {
 const SECRET = 'secreto-de-sesion-para-pruebas-de-treinta-y-dos'
 const SESSION = '__Host-sanatorio_session'
 const DAY = 86_400_000
+/** Otra que administra, estudiante como `albrodri`. */
+const OTHER = {
+  id: 8,
+  login: 'otra',
+  campus_users: [{ campus_id: 22, is_primary: true }],
+  cursus_users: [{ cursus_id: 21, begin_at: '2024-10-07T08:00:00.000Z' }],
+  projects_users: [],
+}
 const PISCI = {
   id: 7,
   login: 'pisci',
@@ -106,11 +114,70 @@ describe('la vista de piscinero de quien administra', () => {
     expect((await send(built, 'POST', '/pool/preview/exit', back)).statusCode).toBe(403)
   })
 
+  it('sin límites: solo el dueño, con todo abierto menos el panel, y vuelve', async () => {
+    const built = await app({ ADMIN_LOGINS: 'albrodri' })
+    const owner = await built.adminLogin()
+
+    expect((json(await send(built, 'GET', '/pool/access', owner)) as PoolAccess).owner).toBe(true)
+
+    const entered = await send(built, 'POST', '/admin/pool/preview/full', owner)
+
+    expect(entered.statusCode).toBe(204)
+
+    const full = withSession(owner, entered)
+
+    expect(payloadOf(full)).toMatchObject({ aud: 'pool', preview: true, unrestricted: true })
+    expect(json(await send(built, 'GET', '/pool/access', full))).toEqual({
+      pool: true,
+      allow: null,
+      preview: true,
+      unrestricted: true,
+    })
+
+    // Lo que los permisos no abren (exámenes, la clasificación) pasa; el panel, no.
+    expect((await send(built, 'GET', '/exams/stats', full)).statusCode).not.toBe(403)
+    expect((await send(built, 'GET', '/leaderboard', full)).statusCode).toBe(200)
+    expect((await send(built, 'GET', '/admin/pool', full)).statusCode).toBe(403)
+    expect((json(await send(built, 'GET', '/me/profile', full)) as { admin: boolean }).admin).toBe(
+      false,
+    )
+
+    const back = withSession(full, await send(built, 'POST', '/pool/preview/exit', full))
+
+    expect(payloadOf(back)).not.toHaveProperty('unrestricted')
+    expect((json(await send(built, 'GET', '/pool/access', back)) as PoolAccess).pool).toBe(false)
+  })
+
+  it('sin límites: otro que administra no entra, ni firmándose la marca', async () => {
+    const built = await app({ ADMIN_LOGINS: 'albrodri,otra' }, { profile: OTHER })
+    const admin = await built.adminLogin()
+
+    expect((json(await send(built, 'GET', '/pool/access', admin)) as PoolAccess).owner).toBe(
+      undefined,
+    )
+    expect((await send(built, 'POST', '/admin/pool/preview/full', admin)).statusCode).toBe(403)
+
+    // Su vista normal con la marca firmada a mano: sin ser el dueño no cuenta.
+    const preview = withSession(admin, await send(built, 'POST', '/admin/pool/preview', admin))
+    const forged = `${SESSION}=${sign(
+      SECRET,
+      Buffer.from(JSON.stringify({ ...payloadOf(preview), unrestricted: true })).toString(
+        'base64url',
+      ),
+    )}`
+
+    expect(
+      (json(await send(built, 'GET', '/pool/access', forged)) as PoolAccess).unrestricted,
+    ).toBe(undefined)
+    expect((await send(built, 'GET', '/leaderboard', forged)).statusCode).toBe(403)
+  })
+
   it('quien no administra no entra, y sin sesión es 401', async () => {
     const built = await app()
     const student = await built.login()
 
     expect((await send(built, 'POST', '/admin/pool/preview', student)).statusCode).toBe(403)
+    expect((await send(built, 'POST', '/admin/pool/preview/full', student)).statusCode).toBe(403)
     expect((await send(built, 'POST', '/pool/preview/exit', student)).statusCode).toBe(403)
     expect(
       (await built.app.inject({ method: 'POST', url: '/admin/pool/preview' })).statusCode,

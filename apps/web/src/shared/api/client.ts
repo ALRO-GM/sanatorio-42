@@ -191,7 +191,8 @@ export const realApi: Api = {
     sendJson('PUT', `/admin/hidden/${encodeURIComponent(login)}`, input),
   revealPerson: (login) => sendJson('DELETE', `/admin/hidden/${encodeURIComponent(login)}`),
   getPoolAccess: () => getJson('/pool/access'),
-  startPoolPreview: () => send('POST', '/admin/pool/preview'),
+  startPoolPreview: (full = false) =>
+    send('POST', full ? '/admin/pool/preview/full' : '/admin/pool/preview'),
   stopPoolPreview: () => send('POST', '/pool/preview/exit'),
   sendClicks: (batch) => send('POST', '/usage/clicks', batch),
   getClickHeatmap: (section, layout, days) =>

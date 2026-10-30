@@ -23,13 +23,19 @@ export async function openApp(
     pool = false,
     preview = false,
     detail,
-  }: { pool?: boolean; preview?: boolean; detail?: 'simple' | 'normal' | 'datos' } = {},
+  }: {
+    pool?: boolean
+    /** `'full'`: la vista sin límites del dueño. */
+    preview?: boolean | 'full'
+    detail?: 'simple' | 'normal' | 'datos'
+  } = {},
 ): Promise<void> {
   localStorage.clear()
   // Como piscinero (`docs/piscineros.md`): la API de mentira contesta con lo permitido.
   if (pool) localStorage.setItem('mock_pool', 'true')
   // Quien administra, en la vista de piscinero del panel.
-  if (preview) localStorage.setItem('mock_pool_preview', 'true')
+  if (preview !== false)
+    localStorage.setItem('mock_pool_preview', preview === 'full' ? 'full' : 'true')
   if (detail !== undefined) localStorage.setItem('sanatorio_detail', detail)
   localStorage.setItem('sanatorio_welcome_seen', '1')
   localStorage.setItem('sanatorio_lang', 'es')

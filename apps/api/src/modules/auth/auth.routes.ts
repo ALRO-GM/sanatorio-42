@@ -5,10 +5,11 @@
  * negocio, esa lógica va al servicio. Aquí solo hay cookies y redirecciones.
  */
 
-import type { FastifyInstance, FastifyRequest } from 'fastify'
+import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 
 import { assertAdmin } from '../../core/actor.js'
 import { DomainError } from '../../core/errors.js'
+import { isOwner } from '../../core/owner.js'
 import type { SessionReader } from '../../core/session.js'
 import { createRateLimit } from '../../core/rate-limit.js'
 import type { RateLimit } from '../../core/rate-limit.js'
@@ -278,6 +279,24 @@ export function registerAuthRoutes(app: FastifyInstance, options: AuthRoutesOpti
      * con la piscina cerrada: el corte de piscineros no mira si está abierta.
      */
     app.post('/admin/pool/preview', async (request, reply) => {
+      return enter(request, reply, false)
+    })
+
+    /**
+     * `POST /admin/pool/preview/full` → 204: lo mismo, pero sin límites: un
+     * piscinero de su campus con todo lo de un estudiante permitido
+     * (exámenes incluidos). Solo el dueño (`core/owner.ts`); otro que
+     * administre recibe un 403.
+     */
+    app.post('/admin/pool/preview/full', async (request, reply) => {
+      if (!isOwner(session.user(request).login)) {
+        throw new DomainError('forbidden', 'Solo para el dueño de la web')
+      }
+
+      return enter(request, reply, true)
+    })
+
+    async function enter(request: FastifyRequest, reply: FastifyReply, unrestricted: boolean) {
       if (session.user(request).role !== 'student') {
         throw new DomainError('forbidden', 'Solo desde una sesión de estudiante')
       }
@@ -285,11 +304,13 @@ export function registerAuthRoutes(app: FastifyInstance, options: AuthRoutesOpti
       assertAdmin(await session.actor(request))
       reply.header(
         'Set-Cookie',
-        sessionCookieHeader(auth.switchAudience(cookieOf(request, SESSION_COOKIE_NAME), 'pool')),
+        sessionCookieHeader(
+          auth.switchAudience(cookieOf(request, SESSION_COOKIE_NAME), 'pool', unrestricted),
+        ),
       )
 
       return reply.code(204).send()
-    })
+    }
 
     /**
      * `POST /pool/preview/exit` → 204: vuelta a estudiante. Es de la base de los

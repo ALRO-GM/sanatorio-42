@@ -78,6 +78,13 @@ export type PoolAccess = {
   allow: PoolKey[] | null
   /** `true` si es quien administra, en la vista de piscinero (`POST /admin/pool/preview`). */
   preview?: boolean
+  /**
+   * `true` en la vista de piscinero sin límites del dueño
+   * (`POST /admin/pool/preview/full`): un piscinero con todo permitido.
+   */
+  unrestricted?: boolean
+  /** `true` si es el dueño de la web, que puede entrar en esa vista. */
+  owner?: boolean
 }
 
 /** El grupo de una persona: estudiante o piscinero (`docs/piscineros.md`). */

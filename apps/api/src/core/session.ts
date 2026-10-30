@@ -33,6 +33,12 @@ export type SessionUser = {
    * se puede volver a estudiante (`POST /pool/preview/exit`).
    */
   preview?: true
+  /**
+   * La vista de piscinero sin límites del dueño (`core/owner.ts`): con todo lo
+   * de un estudiante permitido. Va firmado y solo cuenta con `preview` y el
+   * login del dueño.
+   */
+  unrestricted?: true
 }
 
 export type SessionReader = {

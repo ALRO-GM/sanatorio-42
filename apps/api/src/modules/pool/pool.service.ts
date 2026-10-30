@@ -8,6 +8,8 @@ import { z } from 'zod'
 
 import { assertAdmin } from '../../core/actor.js'
 import type { Actor } from '../../core/actor.js'
+import { isOwner } from '../../core/owner.js'
+import type { SessionUser } from '../../core/session.js'
 import type { Db } from '../../core/db/database.js'
 import { parse } from '../../core/validation.js'
 import type { ApiUser } from '../../integrations/forty-two/types.js'
@@ -112,14 +114,23 @@ export function createPoolService(options: PoolServiceOptions) {
 
     /**
      * Qué puede ver quien pregunta: todo un estudiante, lo permitido un
-     * piscinero. `preview`: quien administra, en la vista de piscinero.
+     * piscinero. `preview`: quien administra, en la vista de piscinero; sin
+     * límites (solo el dueño), todo. `owner`: el dueño, para que la web le
+     * enseñe el botón de esa vista.
      */
-    async access(pool: boolean, preview = false): Promise<PoolAccess> {
-      if (!pool) return { pool: false, allow: null }
+    async access(
+      user: Pick<SessionUser, 'login' | 'role' | 'preview' | 'unrestricted'>,
+    ): Promise<PoolAccess> {
+      if (user.role !== 'pool')
+        return isOwner(user.login)
+          ? { pool: false, allow: null, owner: true }
+          : { pool: false, allow: null }
+      if (user.unrestricted === true)
+        return { pool: true, allow: null, preview: true, unrestricted: true }
 
       const allow = [...(await current()).allowed]
 
-      return preview ? { pool: true, allow, preview: true } : { pool: true, allow }
+      return user.preview === true ? { pool: true, allow, preview: true } : { pool: true, allow }
     },
 
     /** El aviso para la portada, sin sesión. */

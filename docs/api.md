@@ -2077,6 +2077,7 @@ GET /pool/access   → PoolAccess: si eres piscinero y qué puedes ver
 GET /admin/pool    → PoolSettings (solo admins)
 PUT /admin/pool    → { open?, message?, allow? } → PoolSettings (solo admins)
 POST /admin/pool/preview → 204: entra en la vista de piscinero (solo admins)
+POST /admin/pool/preview/full → 204: la misma, sin límites (solo el dueño)
 POST /pool/preview/exit  → 204: vuelve de ella; 403 sin la marca de vista previa
 GET    /admin/hidden            → HiddenPerson[]: las personas ocultas (solo admins)
 GET    /admin/hidden/search?q=  → HiddenCandidate[]: gente de cualquier grupo y campus (solo admins)
@@ -2110,6 +2111,13 @@ DELETE /admin/hidden/:login     → HiddenPerson[]: la vuelve a enseñar (solo a
   `POST /pool/preview/exit` es de la base de los piscineros, pero solo hace algo
   con la marca firmada y si quien la lleva sigue administrando; si no, `403`.
   Un piscinero de verdad no la tiene y no puede hacerse estudiante con ella.
+- Sin límites: `POST /admin/pool/preview/full`, lo mismo pero solo para el
+  dueño (`core/owner.ts`, login fijo en el código; otro que administre, `403`).
+  Firma además `unrestricted: true`, que solo cuenta con `preview` y ese login:
+  el corte de piscineros no se aplica (todo lo de un estudiante, exámenes
+  incluidos), pero `/admin/…` sigue cerrado porque no administra.
+  `GET /pool/access` devuelve `allow: null`, `preview` y `unrestricted`, y al
+  dueño en su sesión de estudiante, `owner: true`.
 - Personas ocultas (`docs/personas-ocultas.md`, tabla `hidden_people`): quien
   administra oculta a alguien a los estudiantes (`fromStudents`), a los
   piscineros (`fromPool`) o a los dos; al menos uno, o `400`. Para ese grupo

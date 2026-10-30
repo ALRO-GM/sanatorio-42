@@ -408,8 +408,11 @@ export type Api = {
   revealPerson: (login: string) => Promise<HiddenPerson[]>
   /** Si eres piscinero y qué puedes ver. */
   getPoolAccess: () => Promise<PoolAccess>
-  /** Quien administra pasa a ver la web como un piscinero (cambia la cookie). */
-  startPoolPreview: () => Promise<void>
+  /**
+   * Quien administra pasa a ver la web como un piscinero (cambia la cookie).
+   * `full`: sin límites, todo permitido; solo el dueño.
+   */
+  startPoolPreview: (full?: boolean) => Promise<void>
   /** Vuelve de la vista de piscinero a la de siempre. */
   stopPoolPreview: () => Promise<void>
   /** Manda los clics de una sección para el mapa de calor. */

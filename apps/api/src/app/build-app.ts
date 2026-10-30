@@ -19,6 +19,7 @@ import { loadEnv } from '../config/env.js'
 import type { Env } from '../config/env.js'
 import { assertSchemaIsCurrent, closeDatabase, openDatabase } from '../core/db/database.js'
 import type { Db } from '../core/db/database.js'
+import type { SessionUser } from '../core/session.js'
 import { registerStatic } from '../core/http/static.js'
 import type { AppModule } from '../core/module.js'
 import { createApiClient } from '../integrations/forty-two/create-client.js'
@@ -231,15 +232,18 @@ export async function buildApp(options: BuildOptions = {}): Promise<BuiltApp> {
 
     if (typeof route !== 'string' || route === '') return
 
-    let role: string | null = null
+    let user: SessionUser
 
     try {
-      role = auth.session.user(request).role
+      user = auth.session.user(request)
     } catch {
       return
     }
 
-    if (role !== 'pool' || (await services.pool.allows(route))) return
+    // La vista sin límites del dueño (`core/owner.ts`) pasa: el panel sigue
+    // cerrado por su barrera, porque en ella no administra.
+    if (user.role !== 'pool' || user.unrestricted === true) return
+    if (await services.pool.allows(route)) return
 
     await reply
       .code(403)

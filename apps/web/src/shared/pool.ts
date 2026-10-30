@@ -62,10 +62,11 @@ export function usePoolAllows(key: PoolKey): boolean {
  * Entra en la vista de piscinero (quien administra) o sale de ella. La API
  * cambia la cookie; la web se carga de nuevo para que nada de lo pedido con la
  * otra vista (expediente, pulso, permisos) se quede pintado. Al entrar se
- * empieza por la portada; al salir, se vuelve al panel.
+ * empieza por la portada; al salir, se vuelve al panel. `full`: sin límites
+ * (solo el dueño, `POST /admin/pool/preview/full`).
  */
-export async function switchPoolPreview(on: boolean): Promise<void> {
-  await (on ? api.startPoolPreview() : api.stopPoolPreview())
+export async function switchPoolPreview(on: boolean, full = false): Promise<void> {
+  await (on ? api.startPoolPreview(full) : api.stopPoolPreview())
   window.location.hash = on ? '#/expediente' : '#/gestion'
   window.location.reload()
 }

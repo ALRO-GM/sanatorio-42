@@ -155,6 +155,33 @@ describe('la vista de piscinero de quien administra', () => {
     quiet.mockRestore()
   }, 30_000)
 
+  it('el dueño entra sin límites: todo lo de un estudiante, exámenes incluidos', async () => {
+    const user = userEvent.setup()
+    const quiet = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+
+    await api.updatePoolSettings({ open: false, allow: ['expediente'] })
+    await openPoolTab(user)
+    await user.click(screen.getByRole('button', { name: text('admin.pool.previewFull') }))
+    await waitFor(async () => {
+      expect(await api.getPoolAccess()).toMatchObject({ allow: null, unrestricted: true })
+    }, WAIT)
+    cleanup()
+
+    await openApp('#/expediente', { preview: 'full', detail: 'datos' })
+    await screen.findByRole('complementary', { name: text('pool.preview.bannerFull') }, WAIT)
+
+    const nav = await screen.findByRole('navigation', { name: text('nav.label') }, WAIT)
+
+    await waitFor(() => {
+      expect(
+        within(nav)
+          .getAllByRole('button')
+          .map((button) => button.textContent),
+      ).toContain(text('nav.cat.ayuda'))
+    }, WAIT)
+    quiet.mockRestore()
+  }, 30_000)
+
   it('si no se puede volver, la franja lo dice', async () => {
     const user = userEvent.setup()
 

@@ -28,6 +28,7 @@
 import type { ApiUser } from '../../integrations/forty-two/types.js'
 import { avatarUrlOf } from '../../integrations/forty-two/avatar.js'
 import { domainError } from '../../core/errors.js'
+import { isOwner } from '../../core/owner.js'
 import type { SessionUser } from '../../core/session.js'
 import { createPkcePair } from './oauth-client.js'
 import type { OAuthClient } from './oauth-client.js'
@@ -312,23 +313,29 @@ export function createAuthService(options: AuthServiceOptions) {
    * hacerlo lo deciden las rutas; aquí solo se firma.
    *
    * La caducidad no cambia: entrar y salir de la vista no alarga la sesión.
+   * `unrestricted`: la vista sin límites del dueño (`core/owner.ts`).
    *
    * @throws {DomainError} 401 si no hay sesión válida.
    */
-  function switchAudience(sessionCookie: string | undefined, audience: 'student' | 'pool'): string {
+  function switchAudience(
+    sessionCookie: string | undefined,
+    audience: 'student' | 'pool',
+    unrestricted = false,
+  ): string {
     const current = readSigned(sessionCookie)
 
     if (current === undefined || current.user.role === 'staff') {
       throw domainError('unauthenticated', 'No hay sesión iniciada')
     }
 
-    const { preview: _old, ...user } = current.user
+    const { preview: _old, unrestricted: _was, ...user } = current.user
     const payload = Buffer.from(
       JSON.stringify({
         ...user,
         role: audience,
         aud: audience,
         ...(audience === 'pool' ? { preview: true } : {}),
+        ...(audience === 'pool' && unrestricted ? { unrestricted: true } : {}),
         exp: current.expiresAt,
       }),
     ).toString('base64url')
@@ -436,6 +443,7 @@ function readSessionUser(parsed: unknown): SessionUser | undefined {
     role?: unknown
     aud?: unknown
     preview?: unknown
+    unrestricted?: unknown
   }
 
   if (typeof candidate.login !== 'string' || candidate.login === '') {
@@ -460,6 +468,14 @@ function readSessionUser(parsed: unknown): SessionUser | undefined {
     // La vista de piscinero de quien administra: solo cuenta en una sesión `pool`.
     ...(candidate.aud === 'pool' && candidate.role !== 'staff' && candidate.preview === true
       ? { preview: true as const }
+      : {}),
+    // Y sin límites, solo la del dueño: otro login con la marca no la tiene.
+    ...(candidate.aud === 'pool' &&
+    candidate.role !== 'staff' &&
+    candidate.preview === true &&
+    candidate.unrestricted === true &&
+    isOwner(candidate.login)
+      ? { unrestricted: true as const }
       : {}),
   }
 }
