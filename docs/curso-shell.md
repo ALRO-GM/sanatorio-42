@@ -181,3 +181,12 @@ guarda (`course_times`) para ajustarlo.
 - El contenido de las unidades está en castellano e inglés; en catalán y
   euskera se ve en castellano (la interfaz sí está en los cuatro idiomas).
 - Los certificados se ven en el perfil propio (no en el de otras personas).
+
+## El camino como `tree` (2026-10-30)
+
+Pedido por Alberto: el camino se ve como la salida de `tree` en una terminal
+oscura. Los niveles son carpetas y cada bloque, un capítulo plegado
+(`CourseChapter`, el mismo que los mundos del de git) con su número, de qué
+trata y quién lo usa en el trabajo como comentarios (`# …`), lo hecho y el
+tiempo. Desplegado, sus unidades y su jefe como ficheros. De entrada, solo el
+bloque que toca; uno sin alcanzar no se despliega.

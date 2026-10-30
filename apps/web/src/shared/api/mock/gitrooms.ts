@@ -305,8 +305,12 @@ function viewOf(room: Room): GitRoom {
   }
 }
 
+/** Quien espera las pruebas de grupo en la API de mentira. */
+const WAITING = ['mgarcia', 'jdoe', 'lsoto', 'cfernandez', 'anavarro', 'rsoto']
+
 export const gitRoomsMock: Pick<
   Api,
+  | 'getGitGatePeople'
   | 'getGitRooms'
   | 'createGitRoom'
   | 'getGitRoom'
@@ -315,6 +319,22 @@ export const gitRoomsMock: Pick<
   | 'startGitRoom'
   | 'runGitRoom'
 > = {
+  // Gente de mentira esperando cada prueba: la primera, más concurrida.
+  async getGitGatePeople(gate) {
+    await delay(80)
+
+    const logins = gate === 'group1' ? WAITING : WAITING.slice(0, gate === 'boss' ? 1 : 3)
+
+    return {
+      gate,
+      people: logins.map((login, index) => ({
+        login,
+        image: portrait(login),
+        since: new Date(Date.now() - (index + 1) * 5 * 3_600_000).toISOString(),
+      })),
+    }
+  },
+
   async getGitRooms(gate) {
     await delay(80)
     missionFor(gate)

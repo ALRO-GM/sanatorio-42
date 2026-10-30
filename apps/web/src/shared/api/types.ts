@@ -37,6 +37,7 @@ import type {
   GitAttemptResult,
   GitCourse,
   GitGateAnswerInput,
+  GitGatePeople,
   GitGateQuiz,
   GitGateResult,
   GitRoom,
@@ -370,6 +371,8 @@ export type Api = {
   submitGitAttempt: (level: string, input: GitAttemptInput) => Promise<GitAttemptResult>
   startGitGate: (gate: string) => Promise<GitGateQuiz>
   answerGitGate: (gate: string, input: GitGateAnswerInput) => Promise<GitGateResult>
+  /** Quién de tu campus espera esa prueba de grupo, para hacerla juntos. */
+  getGitGatePeople: (gate: string) => Promise<GitGatePeople>
   /** Las pruebas de grupo del curso de git: salas, empezar y la terminal común. */
   getGitRooms: (gate: string) => Promise<GitRoomLobby[]>
   createGitRoom: (gate: string) => Promise<GitRoom>

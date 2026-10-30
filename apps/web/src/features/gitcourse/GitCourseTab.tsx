@@ -15,11 +15,15 @@ import {
 import type { Gate, Level } from '@sanatorio/gitsim'
 
 import { api } from '../../shared/api'
+import { CourseChapter, useChapters } from '../../shared/course/Chapter'
 import { CourseEstimate, useDuration } from '../../shared/course/Estimate'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
+import { Avatar } from '../../shared/ui/Avatar'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { Icon } from '../../shared/ui/Icon'
 import { InfoTip } from '../../shared/ui/InfoTip'
+import { PersonLink } from '../../shared/ui/PersonLink'
 import { GateView } from './GateView'
 import { GitCourseTour } from './GitCourseTour'
 import { LevelView } from './LevelView'
@@ -34,16 +38,29 @@ type Stop =
   | { kind: 'level'; level: Level; index: number; x: number; y: number; color: string }
   | { kind: 'gate'; gate: Gate; x: number; y: number }
 
-/** El camino de arriba abajo: los pasos de cada mundo en su rama, y el mundo en el tronco. */
-function stopsOf(): Stop[] {
+const colorOf = (world: number): string => WORLD_COLORS[world % WORLD_COLORS.length] ?? '#888'
+
+/**
+ * El camino de un mundo, de arriba abajo: sus pasos en su rama y el punto gordo
+ * en el tronco, con las pruebas de grupo que van detrás.
+ */
+function stopsOf(world: number): Stop[] {
   const stops: Stop[] = []
   let y = 30
 
   LEVELS.forEach((level, index) => {
-    const color = WORLD_COLORS[level.world % WORLD_COLORS.length] ?? '#888'
+    if (level.world !== world) return
+
     const onTrunk = level.kind === 'world'
 
-    stops.push({ kind: 'level', level, index, x: onTrunk ? TRUNK_X : LANE_X, y, color })
+    stops.push({
+      kind: 'level',
+      level,
+      index,
+      x: onTrunk ? TRUNK_X : LANE_X,
+      y,
+      color: colorOf(world),
+    })
     y += ROW
     if (onTrunk) {
       for (const gate of GATES.filter((each) => each.after === level.id)) {
@@ -56,14 +73,20 @@ function stopsOf(): Stop[] {
   return stops
 }
 
-const STOPS = stopsOf()
-/** El tronco (main): de un punto gordo al siguiente, en línea recta. */
-const TRUNK = STOPS.filter((stop) => stop.x === TRUNK_X)
+/** Las pruebas de grupo (y el jefe) que cierran cada mundo. */
+const gatesOf = (world: number): Gate[] =>
+  GATES.filter((gate) => gate.after === `w${String(world)}-world`)
 
 /**
  * El curso de git: un camino con forma de ramas de git. Cada mundo sale del
  * tronco, tiene sus pasos y vuelve a unirse en un punto gordo. Los puntos se
  * desbloquean en orden y se marcan con estrellas.
+ *
+ * Cada mundo va plegado en su capítulo (`CourseChapter`): de qué trata, para
+ * qué sirve en la industria, lo hecho y cuánta gente hace falta en su prueba
+ * de grupo; de entrada se despliega el que toca, y uno al que aún no se ha
+ * llegado no se despliega. En cada prueba de grupo, quién de tu campus la
+ * espera, para quedar y hacerla juntos (pedido por Alberto, 2026-10-30).
  */
 export function GitCourseTab({ me, onReview }: { me: string; onReview: () => void }) {
   const { t, lang } = useI18n()
@@ -71,17 +94,18 @@ export function GitCourseTab({ me, onReview }: { me: string; onReview: () => voi
   const [course, setCourse] = useState<GitCourse | null>(null)
   const [open, setOpen] = useState<string | null>(null)
   const current = course ?? loaded.data ?? null
-
-  if (loaded.error !== null) return <ErrorNote error={loaded.error} />
-  if (current === null) return <p className="muted">{t('app.loading')}</p>
-
-  const done = (id: string) => current.stars[id] !== undefined
+  const done = (id: string) => current?.stars[id] !== undefined
   const unlocked = (index: number) => {
     const previous = LEVELS[index - 1]
 
     return previous === undefined || done(previous.id)
   }
   const next = LEVELS.findIndex((level, index) => unlocked(index) && !done(level.id))
+  const chapters = useChapters<number>(LEVELS[next]?.world ?? null)
+
+  if (loaded.error !== null) return <ErrorNote error={loaded.error} />
+  if (current === null) return <p className="muted">{t('app.loading')}</p>
+
   const found = LEVELS.find((each) => each.id === open)
   const level = found === undefined ? undefined : levelIn(found, lang)
   const gate = GATES.find((each) => each.id === open)
@@ -118,7 +142,6 @@ export function GitCourseTab({ me, onReview }: { me: string; onReview: () => voi
     )
   }
 
-  const height = (STOPS.at(-1)?.y ?? 0) + 50
   // Las pruebas de grupo también se guardan como estrellas; aquí cuentan solo los puntos.
   const total = LEVELS.reduce((sum, each) => sum + (current.stars[each.id] ?? 0), 0)
 
@@ -146,79 +169,181 @@ export function GitCourseTab({ me, onReview }: { me: string; onReview: () => voi
           seconds: estimateOfWorld(world),
         }))}
       />
-      <svg
-        className="git-path"
-        viewBox={`0 0 380 ${height}`}
-        role="list"
-        aria-label={t('git.path')}
-      >
-        {TRUNK.slice(1).map((stop, i) => {
-          const from = TRUNK[i]
-
-          return from === undefined ? null : (
-            <line
-              key={`trunk-${i}`}
-              className="git-trunk"
-              x1={from.x}
-              y1={from.y}
-              x2={stop.x}
-              y2={stop.y}
-            />
+      <div className="git-worlds" role="list" aria-label={t('git.path')}>
+        {WORLDS.map((world) => {
+          const levels = LEVELS.map((level, index) => ({ level, index })).filter(
+            ({ level }) => level.world === world,
           )
-        })}
-        {STOPS.slice(1).map((stop, i) => {
-          const from = STOPS[i]
-
-          if (from === undefined) return null
-
-          const mid = (from.y + stop.y) / 2
-          const color =
-            stop.kind === 'level' && stop.x === LANE_X
-              ? stop.color
-              : from.kind === 'level' && from.x === LANE_X
-                ? from.color
-                : 'var(--border)'
-          const reached =
-            stop.kind === 'level'
-              ? unlocked(stop.index)
-              : from.kind === 'level' && done(from.level.id)
+          const first = levels[0]?.index ?? 0
+          const finished = levels.filter(({ level }) => done(level.id)).length
+          const stars = levels.reduce((sum, { level }) => sum + (current.stars[level.id] ?? 0), 0)
+          const gates = gatesOf(world)
 
           return (
-            <path
-              key={i}
-              className={`git-path-line ${reached ? 'reached' : ''}`}
-              d={`M${from.x},${from.y} C${from.x},${mid} ${stop.x},${mid} ${stop.x},${stop.y}`}
-              stroke={color}
-            />
+            <div key={world} role="listitem" style={{ ['--world' as string]: colorOf(world) }}>
+              <CourseChapter
+                className="git-world"
+                mark={world}
+                title={t(`git.world.${String(world)}.name`)}
+                pitch={t(`git.world.${String(world)}.pitch`)}
+                industry={t('course.chapter.industry', {
+                  text: t(`git.world.${String(world)}.industry`),
+                })}
+                meta={
+                  <>
+                    <span>
+                      {t('course.chapter.progress', { done: finished, total: levels.length })}
+                    </span>
+                    {stars > 0 && <span className="course-stars">★ {stars}</span>}
+                    {gates.map((gate) => (
+                      <span key={gate.id} className="git-world-people">
+                        <Icon name="persona" size={13} />
+                        {t(`git.${gate.kind}`, { n: gate.min })}
+                      </span>
+                    ))}
+                  </>
+                }
+                locked={!unlocked(first)}
+                open={chapters.isOpen(world)}
+                onToggle={() => {
+                  chapters.toggle(world)
+                }}
+              >
+                <WorldPath
+                  world={world}
+                  course={current}
+                  next={next}
+                  done={done}
+                  unlocked={unlocked}
+                  onOpen={setOpen}
+                />
+                {gates.map(
+                  (gate) =>
+                    done(gate.after) && !done(gate.id) && <GatePeople key={gate.id} gate={gate} />,
+                )}
+              </CourseChapter>
+            </div>
           )
         })}
-        {STOPS.map((stop) =>
-          stop.kind === 'level' ? (
-            <LevelStop
-              key={stop.level.id}
-              stop={stop}
-              stars={current.stars[stop.level.id] ?? 0}
-              open={unlocked(stop.index)}
-              current={stop.index === next}
-              onOpen={() => {
-                setOpen(stop.level.id)
-              }}
-            />
-          ) : (
-            <GateStop
-              key={stop.gate.id}
-              stop={stop}
-              open={done(stop.gate.after)}
-              passed={current.gates[stop.gate.id]?.passed === true}
-              won={done(stop.gate.id)}
-              onOpen={() => {
-                setOpen(stop.gate.id)
-              }}
-            />
-          ),
-        )}
-      </svg>
+      </div>
     </section>
+  )
+}
+
+/** El camino de un mundo: el tronco, su rama de color y sus puntos. */
+function WorldPath({
+  world,
+  course,
+  next,
+  done,
+  unlocked,
+  onOpen,
+}: {
+  world: number
+  course: GitCourse
+  next: number
+  done: (id: string) => boolean
+  unlocked: (index: number) => boolean
+  onOpen: (id: string) => void
+}) {
+  const { t } = useI18n()
+  const stops = stopsOf(world)
+  const height = (stops.at(-1)?.y ?? 0) + 30
+
+  return (
+    <svg
+      className="git-path"
+      viewBox={`0 0 380 ${String(height)}`}
+      role="list"
+      aria-label={t('git.worldN', { n: world })}
+    >
+      {/* El tronco (main) viene de arriba y sigue hacia abajo: los mundos van seguidos. */}
+      <line className="git-trunk" x1={TRUNK_X} y1={0} x2={TRUNK_X} y2={height} />
+      {/* La rama sale del tronco arriba y vuelve en el punto gordo. */}
+      {stops.map((stop, i) => {
+        const from: Stop | { x: number; y: number } = stops[i - 1] ?? { x: TRUNK_X, y: 0 }
+
+        if (stop.x !== LANE_X && from.x !== LANE_X) return null
+
+        const mid = (from.y + stop.y) / 2
+        const reached =
+          stop.kind === 'level'
+            ? unlocked(stop.index)
+            : 'kind' in from && from.kind === 'level' && done(from.level.id)
+
+        return (
+          <path
+            key={i}
+            className={`git-path-line ${reached ? 'reached' : ''}`}
+            d={`M${String(from.x)},${String(from.y)} C${String(from.x)},${String(mid)} ${String(stop.x)},${String(mid)} ${String(stop.x)},${String(stop.y)}`}
+            stroke={colorOf(world)}
+          />
+        )
+      })}
+      {stops.map((stop) =>
+        stop.kind === 'level' ? (
+          <LevelStop
+            key={stop.level.id}
+            stop={stop}
+            stars={course.stars[stop.level.id] ?? 0}
+            open={unlocked(stop.index)}
+            current={stop.index === next}
+            onOpen={() => {
+              onOpen(stop.level.id)
+            }}
+          />
+        ) : (
+          <GateStop
+            key={stop.gate.id}
+            stop={stop}
+            open={done(stop.gate.after)}
+            passed={course.gates[stop.gate.id]?.passed === true}
+            won={done(stop.gate.id)}
+            onOpen={() => {
+              onOpen(stop.gate.id)
+            }}
+          />
+        ),
+      )}
+    </svg>
+  )
+}
+
+/**
+ * Quién de tu campus ha llegado a esta prueba de grupo y aún no la ha hecho:
+ * con sus perfiles, para escribirles y quedar para hacerla juntos.
+ */
+function GatePeople({ gate }: { gate: Gate }) {
+  const { t, tn } = useI18n()
+  const people = useAsync(() => api.getGitGatePeople(gate.id), [gate.id])
+  const list = people.data?.people ?? []
+
+  return (
+    <aside className="git-gate-people" aria-label={t('git.gate.people.title')}>
+      <h4>
+        <Icon name="persona" size={15} /> {t(`git.${gate.kind}`, { n: gate.min })}
+      </h4>
+      <p className="hint">{t('git.gate.people.hint')}</p>
+      {people.error !== null ? (
+        <ErrorNote error={people.error} />
+      ) : people.data === undefined ? (
+        <p className="muted">{t('app.loading')}</p>
+      ) : list.length === 0 ? (
+        <p className="muted">{t('git.gate.people.none')}</p>
+      ) : (
+        <>
+          <p className="muted">{tn('git.gate.people.count', list.length)}</p>
+          <ul className="git-gate-list">
+            {list.map((person) => (
+              <li key={person.login}>
+                <Avatar login={person.login} image={person.image} size={32} />
+                <PersonLink login={person.login} />
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+    </aside>
   )
 }
 

@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/curso-shell.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-67 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
+66 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera | Francés |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -11,7 +11,6 @@ Generado desde `apps/web/src/shared/i18n/textos/curso-shell.csv` con
 | `shell.tier.beginner` | Curso de shell: nombre del nivel principiante | features/shellcourse/ShellCourseTab, shared/course/Certificates | Principiante | Beginner | Principiant | Hasiberria | Débutant |
 | `shell.tier.intermediate` | Curso de shell: nombre del nivel intermedio | features/shellcourse/ShellCourseTab, shared/course/Certificates | Intermedio | Intermediate | Intermedi | Ertaina | Intermédiaire |
 | `shell.tier.advanced` | Curso de shell: nombre del nivel avanzado | features/shellcourse/ShellCourseTab, shared/course/Certificates | Avanzado | Advanced | Avançat | Aurreratua | Avancé |
-| `shell.block` | Curso de shell: número de bloque en el camino | features/shellcourse/ShellCourseTab | Bloque {n} | Block {n} | Bloc {n} | {n}. blokea | Bloc {n} |
 | `shell.jobs` | Curso de shell: delante de los perfiles de trabajo que usan lo del bloque | features/shellcourse/ShellCourseTab | Lo usan: | Used by: | Ho fan servir: | Erabiltzen dutenak: | Utilisé par : |
 | `shell.job.sysadmin` | Curso de shell: perfil de trabajo | features/shellcourse/ShellCourseTab | sysadmin | sysadmin | sysadmin | sysadmin | sysadmin |
 | `shell.job.devops` | Curso de shell: perfil de trabajo | features/shellcourse/ShellCourseTab | DevOps | DevOps | DevOps | DevOps | DevOps |

@@ -86,7 +86,8 @@ Los dos cursos que la siguen son [el de git](curso-git.md) y
 | Certificados | `apps/web/src/shared/course/Certificates.tsx` | Los niveles superados, en el curso y en el perfil |
 | Estimación | `packages/course/src/estimate.ts`, `apps/web/src/shared/course/Estimate.tsx` | `estimateSeconds`, `ESTIMATE`, `wordsIn`; `CourseEstimate`, `EstimateBadge`, `useDuration` |
 | Tiempo activo | `apps/web/src/shared/course/activeTime.ts`, `apps/api/src/modules/shellcourse/course-times.ts` | `useActiveTime`, `activeSecondsOf`, `clearActiveTime`; `course_times` |
-| Estilos | `course-*` en `styles/notgames.css` | Terminal, estrellas, recuento |
+| Capítulos | `apps/web/src/shared/course/Chapter.tsx` | `CourseChapter` y `useChapters`: cada mundo o bloque, plegado con su número, de qué trata, para qué sirve en la industria, lo hecho y la gente que pide; de entrada solo el que toca, y uno sin alcanzar no se despliega (pedido por Alberto, 2026-10-30). En git, cada mundo con su color y, en sus pruebas de grupo, quién de tu campus las espera (`GET /gitcourse/gates/:id/people`); en shell, la salida de `tree` en una terminal |
+| Estilos | `course-*` en `styles/notgames.css` | Terminal, estrellas, recuento, capítulos |
 | Textos comunes | `course.*` en `textos/notgames.csv` | Estrellas, recuento, terminal, tiempo |
 
 ## Para hacer un curso nuevo

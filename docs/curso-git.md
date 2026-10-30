@@ -218,3 +218,15 @@ tendrías tres estrellas: empieza de nuevo para mejorar».
 - [x] Fase 7 (2026-10-25): objetivo y comandos por estrella a la vista,
   recuento en vivo y el porqué al acabar; recuento por lo que cambia y formas
   equivalentes de git; topes y protección de la terminal (ver arriba).
+
+## El camino por mundos (2026-10-30)
+
+Pedido por Alberto: el camino entero de golpe era largo. Cada mundo va plegado
+en su capítulo (`CourseChapter`): número con su color, nombre, de qué trata y
+para qué sirve en la industria (`git.world.<n>.*`), puntos hechos, estrellas y
+la gente que pide su prueba de grupo. De entrada se despliega el mundo que
+toca; uno al que aún no se ha llegado no se despliega. Al llegar a una prueba
+de grupo sin haberla hecho, debajo sale quién de tu campus la espera
+(`GET /gitcourse/gates/:id/people`: ha superado el punto de antes y no la
+prueba; sin ti, solo quien puedes ver, 60 como mucho), con su perfil, para
+escribirles y quedar para hacerla juntos en un sprint.

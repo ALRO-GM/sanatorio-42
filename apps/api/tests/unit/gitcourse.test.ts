@@ -32,6 +32,33 @@ describe('curso de git', () => {
     )
   })
 
+  it('en una prueba de grupo, quién del campus la espera: sin ti y sin quien ya la hizo', async () => {
+    const { gitCourse } = services
+    const upTo = LEVELS.slice(0, LEVELS.findIndex((level) => level.id === 'w1-world') + 1)
+
+    await seat({ ana: 'c1r1s1', leo: 'c1r1s2', eva: 'c1r1s3' })
+    for (const login of ['ana', 'leo', 'eva']) {
+      for (const level of upTo) {
+        await gitCourse.attempt(actor(login), level.id, { lines: level.solution })
+      }
+    }
+    // `eva` ya superó la prueba: se guarda como una estrella más.
+    await community.db.execute({
+      sql: `INSERT INTO git_progress (login, level, stars, commands, done_at) VALUES ('eva', 'group1', 3, 0, ?)`,
+      args: [new Date().toISOString()],
+    })
+
+    const waiting = await gitCourse.gatePeople(actor('ana'), 'group1')
+
+    expect(waiting.gate).toBe('group1')
+    expect(waiting.people.map((person) => person.login)).toEqual(['leo'])
+    // De otro campus, nadie.
+    expect((await gitCourse.gatePeople(actor('ana', { campusId: 58 }), 'group1')).people).toEqual(
+      [],
+    )
+    await expectCode(gitCourse.gatePeople(actor('ana'), 'nada'), 'not_found')
+  })
+
   it('re-ejecuta los comandos, va en orden y guarda la mejor vez', async () => {
     const { gitCourse } = services
 

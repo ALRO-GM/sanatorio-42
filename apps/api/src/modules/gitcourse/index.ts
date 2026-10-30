@@ -79,6 +79,26 @@ export function createGitCourseModule(deps: {
         return reply.send(await service.course(await session.actor(request)))
       })
 
+      /**
+       * `GET /gitcourse/gates/:id/people` → `GitGatePeople`: quién de tu campus
+       * espera esa prueba de grupo, para buscar con quién hacerla. Solo quien
+       * puedes ver (mundos separados, personas ocultas).
+       */
+      app.get<{ Params: { id: string } }>('/gitcourse/gates/:id/people', async (request, reply) => {
+        const actor = await session.actor(request)
+        const found = await service.gatePeople(actor, gate(request.params.id))
+
+        return reply.send({
+          ...found,
+          people: await visibleTo(
+            deps.audience ?? NO_POOL,
+            actor,
+            found.people,
+            (person) => person.login,
+          ),
+        })
+      })
+
       /** `POST /gitcourse/gates/:id/start` → `GitGateQuiz`: empieza (o retoma) el test previo. */
       app.post<{ Params: { id: string } }>('/gitcourse/gates/:id/start', async (request, reply) => {
         return reply.send(

@@ -3,7 +3,6 @@ shell.pitch,Curso de shell: frase bajo las pestañas,"Tres niveles para manejart
 shell.tier.beginner,Curso de shell: nombre del nivel principiante,Principiante,Beginner,Principiant,Hasiberria,Débutant
 shell.tier.intermediate,Curso de shell: nombre del nivel intermedio,Intermedio,Intermediate,Intermedi,Ertaina,Intermédiaire
 shell.tier.advanced,Curso de shell: nombre del nivel avanzado,Avanzado,Advanced,Avançat,Aurreratua,Avancé
-shell.block,Curso de shell: número de bloque en el camino,Bloque {n},Block {n},Bloc {n},{n}. blokea,Bloc {n}
 shell.jobs,Curso de shell: delante de los perfiles de trabajo que usan lo del bloque,Lo usan:,Used by:,Ho fan servir:,Erabiltzen dutenak:,Utilisé par :
 shell.job.sysadmin,Curso de shell: perfil de trabajo,sysadmin,sysadmin,sysadmin,sysadmin,sysadmin
 shell.job.devops,Curso de shell: perfil de trabajo,DevOps,DevOps,DevOps,DevOps,DevOps

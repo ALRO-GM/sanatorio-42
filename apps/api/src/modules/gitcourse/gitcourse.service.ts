@@ -5,13 +5,19 @@
  * «hecho» sin hacerlo. Solo se juega sentado en un puesto del clúster.
  */
 
-import type { GitAttemptResult, GitCourse, GitGateQuiz, GitGateResult } from '@sanatorio/contracts'
-import { checkAttempt, estimateOfLevel, LEVELS, LIMITS } from '@sanatorio/gitsim'
+import type {
+  GitAttemptResult,
+  GitCourse,
+  GitGatePeople,
+  GitGateQuiz,
+  GitGateResult,
+} from '@sanatorio/contracts'
+import { checkAttempt, estimateOfLevel, gateOf, LEVELS, LIMITS } from '@sanatorio/gitsim'
 import { z } from 'zod'
 
 import type { Actor } from '../../core/actor.js'
 import type { Db } from '../../core/db/database.js'
-import { toNumber, toText } from '../../core/db/rows.js'
+import { toNumber, toText, toTextOrNull } from '../../core/db/rows.js'
 import { domainError } from '../../core/errors.js'
 import { createRateLimit } from '../../core/rate-limit.js'
 import { parse } from '../../core/validation.js'
@@ -35,6 +41,9 @@ const ATTEMPT_WINDOW_MS = 10 * 60_000
 
 type Stars = 1 | 2 | 3
 
+/** Cuánta gente se lista en una prueba de grupo, como mucho. */
+const WAITING_MAX = 60
+
 export function createGitCourseRepository(db: Db) {
   return {
     async stars(login: string): Promise<Record<string, Stars>> {
@@ -46,6 +55,36 @@ export function createGitCourseRepository(db: Db) {
       return Object.fromEntries(
         result.rows.map((row) => [toText(row.level), toNumber(row.stars) as Stars]),
       )
+    },
+
+    /**
+     * Quién de `campus` ha superado `after` y no tiene aún `gate` (sin `login`):
+     * la gente que espera esa prueba de grupo, de quien llegó hace menos a quien
+     * llegó hace más.
+     */
+    async waiting(
+      gate: string,
+      after: string,
+      login: string,
+      campus: number,
+    ): Promise<GitGatePeople['people']> {
+      const result = await db.execute({
+        sql: `SELECT p.login, u.image, p.done_at
+              FROM git_progress p
+              JOIN users u ON u.login = p.login
+              WHERE p.level = ? AND p.login != ?
+                AND NOT EXISTS (SELECT 1 FROM git_progress g WHERE g.login = p.login AND g.level = ?)
+                AND u.id IN (SELECT user_id FROM campus_members WHERE campus_id = ?)
+              ORDER BY p.done_at DESC
+              LIMIT ?`,
+        args: [after, login, gate, campus, WAITING_MAX],
+      })
+
+      return result.rows.map((row) => ({
+        login: toText(row.login),
+        image: toTextOrNull(row.image),
+        since: toText(row.done_at),
+      }))
     },
 
     /** Guarda el punto; si ya estaba, se queda la mejor vez. */
@@ -102,6 +141,18 @@ export function createGitCourseService(deps: {
 
   return {
     course: (actor: Actor) => course(actor.login),
+
+    /** Quién de tu campus espera esa prueba de grupo (`GitGatePeople`). */
+    async gatePeople(actor: Actor, id: string): Promise<GitGatePeople> {
+      const gate = gateOf(id)
+
+      if (gate === undefined) throw domainError('not_found', 'Esa prueba no existe')
+
+      return {
+        gate: gate.id,
+        people: await deps.progress.waiting(gate.id, gate.after, actor.login, actor.campusId),
+      }
+    },
     ...gateActions({ gates: deps.gates, seated, course }),
 
     async attempt(actor: Actor, id: string, input: unknown): Promise<GitAttemptResult> {

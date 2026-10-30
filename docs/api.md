@@ -1718,6 +1718,7 @@ GET  /gitcourse                   → GitCourse { seat, stars: { [punto]: 1–3 
 POST /gitcourse/levels/:id        → GitAttemptInput { lines: string[] (≤ 300, ≤ 200 caracteres), activeSeconds?: entero 0–21600 } → GitAttemptResult { done, stars, commands, misses, course }
 POST /gitcourse/gates/:id/start   → GitGateQuiz { gate, questions: { prompt, code, options }[], deadline }
 POST /gitcourse/gates/:id/answer  → GitGateAnswerInput { answers: (number | null)[] } → GitGateResult
+GET  /gitcourse/gates/:id/people  → GitGatePeople { gate, people: { login, image, since }[] } (quién de tu campus espera esa prueba; sin ti, ≤ 60)
 GET  /gitcourse/rooms?gate=group1 → GitRoomLobby[] (las sin empezar del campus y las tuyas de las últimas 6 h)
 POST /gitcourse/rooms             → { gate } → GitRoom (201; entras tú)
 GET  /gitcourse/rooms/:id         → GitRoom { status, players, missions, mine: { role, repo }, remote, deadline, result }

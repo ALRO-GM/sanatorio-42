@@ -94,6 +94,16 @@ export type GitRemoteView = {
 export type GitRoomStatus = 'lobby' | 'playing' | 'done'
 
 /** `GET /gitcourse/rooms?gate=`: las salas sin empezar del campus y las tuyas. */
+/**
+ * `GET /gitcourse/gates/:id/people`: quién de tu campus ha llegado a esa
+ * prueba de grupo y aún no la ha superado, para buscar con quién hacerla. Sin
+ * ti; de quien llegó hace menos a quien llegó hace más.
+ */
+export type GitGatePeople = {
+  gate: string
+  people: { login: string; image: string | null; since: string }[]
+}
+
 export type GitRoomLobby = {
   id: number
   gate: string

@@ -682,12 +682,159 @@
   letter-spacing: 0.05em;
 }
 
+/* ── Capítulos plegables de los cursos (`shared/course/Chapter.tsx`) ─────────
+   Plegado: número, de qué trata, para qué sirve en la industria y lo hecho;
+   desplegado, sus puntos. Uno sin alcanzar, apagado y sin desplegar. */
+.course-chapter {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+}
+.course-chapter + .course-chapter {
+  margin-top: 0.6rem;
+}
+.course-chapter-head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.9rem;
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border: 0;
+  border-radius: inherit;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.course-chapter-head:disabled {
+  cursor: not-allowed;
+}
+.course-chapter.locked {
+  opacity: 0.55;
+}
+.course-chapter-mark {
+  display: grid;
+  place-items: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 50%;
+  background: var(--surface-2);
+  font-weight: 800;
+  font-size: 1.1rem;
+}
+.course-chapter-text {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+}
+.course-chapter-title {
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+.course-chapter-pitch {
+  color: var(--text-2);
+}
+.course-chapter-industry {
+  color: var(--text-3);
+  font-size: 0.85rem;
+}
+.course-chapter-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 0.8rem;
+  margin-top: 0.15rem;
+  color: var(--text-2);
+  font-size: 0.82rem;
+  font-variant-numeric: tabular-nums;
+}
+.course-chapter-locked {
+  color: var(--text-3);
+  font-size: 0.8rem;
+  font-style: italic;
+}
+.course-chapter-chevron {
+  display: grid;
+  color: var(--text-3);
+  transition: transform 0.2s;
+}
+.course-chapter.open .course-chapter-chevron {
+  transform: rotate(180deg);
+}
+.course-chapter-body {
+  padding: 0 1rem 1rem;
+}
+
+/* Git: cada mundo con su color (la rama), en el número y en el borde. */
+.git-worlds {
+  display: grid;
+  gap: 0.6rem;
+  margin-top: 1rem;
+}
+.git-world {
+  border-left: 4px solid var(--world);
+}
+.git-world .course-chapter-mark {
+  background: var(--world);
+  color: #fff;
+}
+.git-world.locked .course-chapter-mark {
+  background: var(--surface-2);
+  color: var(--text-2);
+}
+.git-world-people {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--text);
+  font-weight: 600;
+}
+.git-world .course-chapter-body {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 1rem 2rem;
+}
+.git-gate-people {
+  flex: 1 1 18rem;
+  display: grid;
+  gap: 0.4rem;
+  padding: 0.8rem 1rem;
+  border-radius: 12px;
+  background: var(--surface-2);
+}
+.git-gate-people h4 {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0;
+}
+.git-gate-people p {
+  margin: 0;
+}
+.git-gate-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+  gap: 0.4rem;
+  margin: 0.2rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.git-gate-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
 /* El camino: un tronco y una rama de color por mundo. */
 .git-path {
   display: block;
+  flex: 0 1 30rem;
   width: 100%;
   max-width: 30rem;
-  margin: 0.5rem 0 1rem;
+  margin: 0;
   overflow: visible;
 }
 .git-path-line {

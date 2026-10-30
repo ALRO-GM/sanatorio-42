@@ -1,127 +1,226 @@
 /* ── Curso de shell: niveles, bloques como tuberías, jefes y certificados ───── */
 /* La terminal, las estrellas y la teoría son las de los cursos (notgames.css). */
 
+/* Todo el camino es la salida de `tree` en una terminal (pedido por Alberto,
+   2026-10-30): oscura en los dos temas, como la terminal de los cursos. Los
+   niveles son carpetas; los bloques, capítulos plegables (`.course-chapter`)
+   con sus comentarios (`# …`); las unidades, ficheros colgando del árbol. */
+.shell-tree {
+  --tree-line: #3d4450;
+  --tree-dir: #79c0ff;
+  --tree-comment: #8b949e;
+  margin-top: 1rem;
+  padding: 0 1rem 1rem;
+  border-radius: 12px;
+  background: #0d1117;
+  color: #c9d1d9;
+  font-family: 'JetBrains Mono Variable', ui-monospace, monospace;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  box-shadow: 0 10px 30px rgb(0 0 0 / 25%);
+}
+.shell-tree-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 -1rem 0.6rem;
+  padding: 0.55rem 1rem;
+  border-bottom: 1px solid #21262d;
+  color: var(--tree-comment);
+  font-size: 0.78rem;
+}
+.shell-tree-bar i {
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
+  background: #ff5f56;
+}
+.shell-tree-bar i:nth-child(2) {
+  background: #ffbd2e;
+}
+.shell-tree-bar i:nth-child(3) {
+  background: #27c93f;
+}
+.shell-tree-bar span {
+  margin-left: 0.5rem;
+}
+.shell-tree-cmd {
+  margin: 0 0 0.4rem;
+  color: #fff;
+}
 .shell-tier {
-  margin: 1.25rem 0 0.5rem;
-}
-.shell-tier > h3 {
-  margin: 0 0 0.25rem;
-}
-.shell-block {
-  margin: 0.75rem 0 1rem;
-  padding-left: 0.75rem;
-  border-left: 3px solid var(--border);
-}
-.shell-block h4 {
   margin: 0;
 }
-.shell-block > p {
-  margin: 0.15rem 0;
-}
-.shell-block-n {
-  color: var(--text-2);
-  font-weight: 600;
-}
-.shell-jobs {
+.shell-tree-dir {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem 0.4rem;
   align-items: center;
-  font-size: 0.85rem;
-  color: var(--text-2);
+  gap: 0.6rem;
+  margin: 0.3rem 0 0;
+  color: var(--tree-dir);
+  font: inherit;
+  font-weight: 700;
 }
-.shell-job {
-  padding: 0 0.45rem;
-  border: 1px solid var(--border);
-  border-radius: 999px;
+.shell-tree-dir::before {
+  content: '├── ';
+  color: var(--tree-line);
+  white-space: pre;
 }
-/* Las unidades de un bloque van unidas como una tubería: a | b | c | jefe. */
+/* Lo que cuelga de una carpeta: la raya vertical del árbol a la izquierda. */
+.shell-tree-children {
+  display: grid;
+  gap: 0.15rem;
+  margin-left: 0.55ch;
+  padding: 0.15rem 0 0.4rem 2.5ch;
+  border-left: 1px solid var(--tree-line);
+}
+.shell-tree .course-estimate {
+  color: var(--tree-comment);
+}
+
+/* Un bloque: una carpeta plegada con sus comentarios. */
+.shell-block.course-chapter {
+  position: relative;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+}
+.shell-block.course-chapter + .course-chapter {
+  margin-top: 0;
+}
+.shell-block::before {
+  content: '── ';
+  position: absolute;
+  top: 0.55rem;
+  left: -2.5ch;
+  color: var(--tree-line);
+  white-space: pre;
+}
+.shell-block .course-chapter-head {
+  gap: 0.8ch;
+  padding: 0.45rem 0.5rem;
+  border-radius: 6px;
+}
+.shell-block .course-chapter-head:not(:disabled):hover {
+  background: #161b22;
+}
+.shell-block .course-chapter-mark {
+  width: auto;
+  height: auto;
+  align-self: start;
+  border-radius: 0;
+  background: none;
+  color: #d2a8ff;
+  font-size: inherit;
+}
+.shell-block .course-chapter-title {
+  color: var(--tree-dir);
+  font-size: inherit;
+}
+.shell-block .course-chapter-pitch,
+.shell-block .course-chapter-industry,
+.shell-block .course-chapter-locked {
+  color: var(--tree-comment);
+  font-size: inherit;
+  font-style: normal;
+}
+.shell-block .course-chapter-pitch::before,
+.shell-block .course-chapter-industry::before,
+.shell-block .course-chapter-locked::before {
+  content: '# ';
+}
+.shell-block .course-chapter-meta {
+  color: #7ee787;
+  font-size: 0.8rem;
+}
+.shell-block .course-chapter-chevron {
+  align-self: start;
+  color: var(--tree-comment);
+}
+.shell-block .course-chapter-body {
+  padding: 0 0 0.3rem 4ch;
+}
+
+/* Las unidades de un bloque: ficheros del árbol. */
 .shell-pipe {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem 0;
-  margin: 0.5rem 0 0;
-  padding: 0;
+  display: grid;
+  margin: 0;
+  padding: 0 0 0 2.5ch;
+  border-left: 1px solid var(--tree-line);
   list-style: none;
 }
-.shell-pipe li {
-  display: flex;
-  align-items: center;
-}
-.shell-pipe li + li::before {
-  content: '';
-  width: 1rem;
-  border-top: 3px solid var(--border);
-}
 .shell-stop {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  max-width: 15rem;
-  padding: 0.3rem 0.65rem 0.3rem 0.3rem;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  background: var(--surface);
-  color: var(--text);
-  text-align: left;
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 1ch;
+  width: 100%;
+  padding: 0.2rem 0.4rem;
+  border: 0;
+  border-radius: 4px;
+  background: none;
+  color: #c9d1d9;
   font: inherit;
+  text-align: left;
   cursor: pointer;
 }
+.shell-stop::before {
+  content: '── ';
+  position: absolute;
+  left: -2.5ch;
+  color: var(--tree-line);
+  white-space: pre;
+}
 .shell-stop:disabled {
-  opacity: 0.5;
+  color: #6e7681;
   cursor: not-allowed;
 }
 .shell-stop:not(:disabled):hover {
-  border-color: var(--accent);
+  background: #161b22;
 }
 .shell-stop-mark {
-  display: inline-grid;
-  place-items: center;
-  flex: none;
-  width: 1.9rem;
-  height: 1.9rem;
-  border-radius: 50%;
-  background: var(--border);
-  font-weight: 700;
+  display: inline-flex;
+  min-width: 2ch;
+  color: var(--tree-comment);
   font-variant-numeric: tabular-nums;
 }
 .shell-stop.done .shell-stop-mark {
-  background: var(--ok);
-  color: #fff;
+  color: #7ee787;
 }
 .shell-stop.current {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 2px var(--accent-soft);
+  background: #1f2a1f;
+  box-shadow: inset 2px 0 0 #7ee787;
 }
 .shell-stop.current .shell-stop-mark {
-  background: var(--accent);
-  color: var(--accent-text);
+  color: #7ee787;
 }
 .shell-stop.boss .shell-stop-mark {
-  border-radius: 0.35rem;
+  color: #ffa657;
 }
+/* El jefe final de cada nivel: el fichero gordo, en dorado. */
 .shell-stop.final {
-  margin: 0.25rem 0 0.5rem;
-  max-width: 22rem;
-  border-width: 2px;
-  border-color: #f0b400;
+  font-weight: 700;
+  color: #f0b400;
 }
 .shell-stop.final .shell-stop-mark {
-  width: 2.4rem;
-  height: 2.4rem;
-  background: #f0b400;
-  color: #3a2a00;
+  color: #f0b400;
 }
 .shell-stop-text {
-  display: grid;
-  line-height: 1.2;
-  font-size: 0.88rem;
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 1ch;
 }
 .shell-stop-text small {
-  color: var(--text-2);
-  font-size: 0.72rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  color: #ffa657;
+  font-size: inherit;
+  text-transform: lowercase;
+}
+.shell-stop-text small::before {
+  content: '[';
+}
+.shell-stop-text small::after {
+  content: ']';
 }
 .shell-example-screen {
   height: auto;
