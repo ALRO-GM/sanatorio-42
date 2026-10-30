@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest'
 
-import type { PoolAccess } from '@sanatorio/contracts'
+import type { LiveExam, PoolAccess } from '@sanatorio/contracts'
 import { sign } from '../../src/modules/auth/signed-cookie.js'
 import { json, makeApp } from '../helpers/test-app.js'
 import type { TestApp } from '../helpers/test-app.js'
@@ -170,6 +170,68 @@ describe('la vista de piscinero de quien administra', () => {
       (json(await send(built, 'GET', '/pool/access', forged)) as PoolAccess).unrestricted,
     ).toBe(undefined)
     expect((await send(built, 'GET', '/leaderboard', forged)).statusCode).toBe(403)
+  })
+
+  it('sin límites, Exámenes enseña el de la piscina con los C Piscine Exam de cada cual', async () => {
+    const at = (minutes: number): string => new Date(Date.now() + minutes * 60_000).toISOString()
+    const piscineExam = { id: 1301, name: 'C Piscine Exam 00', slug: 'c-piscine-exam-00' }
+    const built = await app(
+      { ADMIN_LOGINS: 'albrodri' },
+      {
+        routes: {
+          '/v2/campus/22/events': [],
+          // Un examen solo de la piscina (cursus 9): los estudiantes no lo tienen.
+          '/v2/campus/22/exams': [
+            {
+              id: 910,
+              name: 'C Piscine Exam',
+              location: 'c1',
+              begin_at: at(-30),
+              end_at: at(150),
+              cursus_ids: [9],
+            },
+          ],
+          '/v2/exams/910/exams_users': [{ id: 1, user: { id: 40, login: 'ppool' } }],
+          '/v2/projects_users': [
+            {
+              id: 6001,
+              status: 'in_progress',
+              'validated?': null,
+              final_mark: null,
+              project: piscineExam,
+              user: { id: 40, login: 'ppool' },
+              teams: [{ id: 9001, final_mark: null, 'validated?': null, created_at: at(-20) }],
+            },
+          ],
+        },
+      },
+    )
+
+    await built.db.execute({
+      sql: `INSERT INTO pool_members (campus_id, user_id, login, image, begin_at, updated_at)
+            VALUES (22, 40, 'ppool', NULL, ?, ?)`,
+      args: [at(-10 * 24 * 60), at(0)],
+    })
+    // El examen de la piscina ya se conoce: alguien lo tenía de antes.
+    await built.services.repositories.replica.ingestProjectUsers(
+      [{ id: 5999, status: 'finished', project: piscineExam, user: { id: 41, login: 'otro' } }],
+      22,
+    )
+
+    const owner = await built.adminLogin()
+    const full = withSession(owner, await send(built, 'POST', '/admin/pool/preview/full', owner))
+    const pool = json(await send(built, 'GET', '/exams/live?world=pool', full)) as LiveExam
+
+    expect(pool).toMatchObject({ running: true, exam: { id: 910 } })
+    expect(pool.groups.map((group) => [group.name, group.people.map((one) => one.login)])).toEqual([
+      ['C Piscine Exam 00', ['ppool']],
+    ])
+    expect(pool.groups[0]?.people[0]).toMatchObject({ status: 'inProgress' })
+
+    // El de los estudiantes no tiene ese examen.
+    expect(
+      (json(await send(built, 'GET', '/exams/live?world=student', full)) as LiveExam).exam,
+    ).toBeNull()
   })
 
   it('quien no administra no entra, y sin sesión es 401', async () => {

@@ -14,6 +14,16 @@ import type { AttemptRow, ExamRow, MemberRow, OccurrenceRow, PlanRow } from './e
  */
 const EXAM_PROJECT = `(p.slug LIKE 'exam-rank-%' OR p.slug LIKE '42next-exam-rank-%')`
 
+/**
+ * Los de la piscina, para el examen en vivo de los piscineros
+ * (`docs/piscineros.md`): «C Piscine Exam 00» a «03» y el final. Las
+ * prácticas (`c-piscine-exam-checkpoint-*`) no.
+ */
+const PISCINE_EXAM_PROJECT = `(p.slug LIKE 'c-piscine-exam-0%' OR p.slug = 'c-piscine-final-exam')`
+
+/** Los exámenes de un mundo: los del common core o, con `pool`, los de la piscina. */
+const examProject = (pool: boolean): string => (pool ? PISCINE_EXAM_PROJECT : EXAM_PROJECT)
+
 /** Lista de fechas guardada como JSON. Vacía si no se puede leer. */
 function parseDates(value: unknown): string[] {
   try {
@@ -30,10 +40,10 @@ const triState = (value: unknown): boolean | null =>
 
 export function createExamsRepository(db: Db) {
   return {
-    /** Los exámenes que se conocen, por nombre. */
-    async exams(): Promise<{ id: number; name: string; slug: string }[]> {
+    /** Los exámenes que se conocen, por nombre. `pool`: los de la piscina. */
+    async exams(pool = false): Promise<{ id: number; name: string; slug: string }[]> {
       const result = await db.execute(
-        `SELECT p.id, p.name, p.slug FROM projects p WHERE ${EXAM_PROJECT} ORDER BY p.name, p.slug`,
+        `SELECT p.id, p.name, p.slug FROM projects p WHERE ${examProject(pool)} ORDER BY p.name, p.slug`,
       )
 
       // Los dos planes los llaman igual: el del nuevo lleva su marca.
@@ -108,11 +118,13 @@ export function createExamsRepository(db: Db) {
      * Las filas de examen tocadas desde `since` de la gente del campus o de esos
      * logins: quien ha entrado en el examen aparece aunque la lista de
      * apuntados no haya llegado. La más reciente de cada cual va la última.
+     * `pool`: las de los exámenes de la piscina.
      */
     async sessionRows(
       campusId: number,
       since: string,
       logins: readonly string[],
+      pool = false,
     ): Promise<(ExamRow & { login: string; projectId: number })[]> {
       const result = await db.execute({
         sql: `SELECT u.login, pu.project_id, pu.status, pu.final_mark, pu.validated, pu.updated_at_42
@@ -120,7 +132,7 @@ export function createExamsRepository(db: Db) {
               JOIN projects p ON p.id = pu.project_id
               JOIN users u ON u.id = pu.user_id
               LEFT JOIN campus_members cm ON cm.user_id = pu.user_id AND cm.campus_id = ?
-              WHERE ${EXAM_PROJECT} AND pu.updated_at_42 >= ?
+              WHERE ${examProject(pool)} AND pu.updated_at_42 >= ?
                 AND (cm.user_id IS NOT NULL OR u.login IN (SELECT value FROM json_each(?)))
               ORDER BY pu.updated_at_42`,
         args: [campusId, since, JSON.stringify(logins)],
@@ -136,11 +148,13 @@ export function createExamsRepository(db: Db) {
       }))
     },
 
-    /** Los intentos guardados de la gente de un campus. */
+    /** Los intentos guardados de la gente de un campus, en los exámenes del common core. */
     async attempts(campusId: number): Promise<AttemptRow[]> {
       const result = await db.execute({
         sql: `SELECT a.user_id, a.project_id, a.mark, a.validated, a.at FROM exam_attempts a
-              JOIN campus_members cm ON cm.user_id = a.user_id AND cm.campus_id = ?`,
+              JOIN projects p ON p.id = a.project_id
+              JOIN campus_members cm ON cm.user_id = a.user_id AND cm.campus_id = ?
+              WHERE ${EXAM_PROJECT}`,
         args: [campusId],
       })
 

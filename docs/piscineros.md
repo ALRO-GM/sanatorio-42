@@ -165,6 +165,13 @@ restricción, con exámenes y todo lo de un estudiante, y que solo él pueda.
   estadísticas; «Piscineros», los de la piscina de su campus, con su gente (sin
   estadísticas, que son de los Exam Rank). Va con `?world=` a
   `/exams/live`, que solo atiende esta vista.
+- El examen de la piscina mira sus propios proyectos (pedido el 2026-10-30):
+  «C Piscine Exam 00» a «03» y el final (`c-piscine-exam-0*`,
+  `c-piscine-final-exam`; las prácticas `c-piscine-exam-checkpoint-*` no).
+  Quién ha entrado, en qué examen y su nota salen de la fila de cada
+  piscinero en esos proyectos, como con los Exam Rank; el refresco de cinco
+  minutos pide a 42 esos proyectos y los intentos se guardan en
+  `exam_attempts`. Las estadísticas siguen siendo solo de los Exam Rank.
 - Tests: `tests/integration/pool-preview.test.ts` (otro que administra recibe
   `403` y la marca firmada a mano no le vale).
 - API de mentira: `localStorage.mock_pool_preview = 'full'`.
