@@ -59,18 +59,16 @@ function show(n: number, selected: string | null = null): void {
 }
 
 describe('vistas de la red según cuánta gente se mira', () => {
-  it('una persona: su red en anillos; un grupo mediano: matriz; mucha gente: grupos', () => {
+  it('una persona: su red en anillos; un grupo mediano: matriz; mucha gente: el grafo', () => {
     expect(viewsFor(40, 'p1')).toEqual(['ego', 'graph'])
     expect(viewsFor(150, null)).toEqual(['graph', 'matrix'])
-    expect(viewsFor(151, null)).toEqual(['graph', 'chord'])
+    expect(viewsFor(151, null)).toEqual(['graph'])
   })
 
-  it('con mucha gente, el grafo de fábrica y las cuerdas entre grupos', async () => {
+  it('con mucha gente, solo el grafo y sin selector de vista', async () => {
     show(200)
     expect(await screen.findByText('el grafo de siempre')).toBeTruthy()
-    fireEvent.click(screen.getByRole('tab', { name: text('net.view.chord') }))
-    expect(document.querySelectorAll('.net-chord-group').length).toBeGreaterThan(5)
-    expect(document.querySelectorAll('.net-chord-ribbon').length).toBeGreaterThan(0)
+    expect(screen.queryByRole('tablist', { name: text('net.view.label') })).toBeNull()
   })
 
   it('con un grupo mediano, la matriz con un bloque por grupo', async () => {

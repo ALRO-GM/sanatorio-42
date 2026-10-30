@@ -128,17 +128,19 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
     period: loginInUrl() === null ? '12' : 'all',
     from: '',
     to: '',
-    login: loginInUrl(),
+    // De fábrica, tu propia red (pedido por Alberto, 2026-10-30); la de todo el
+    // campus, quitando a la persona elegida.
+    login: loginInUrl() ?? me.login,
     projectId: null,
     verdict: '',
     mutual: false,
     // Con una persona elegida interesa toda su red, no solo sus uniones fuertes.
-    min: loginInUrl() === null ? 2 : 1,
+    min: 1,
     limit: 300,
     campuses: null,
   })
   const [mode, setMode] = useState<ColorMode>('community')
-  const [selected, setSelected] = useState<string | null>(loginInUrl)
+  const [selected, setSelected] = useState<string | null>(() => loginInUrl() ?? me.login)
   // El grafo anterior se sigue viendo mientras llega el nuevo: así se recoloca
   // en vez de desaparecer y volver a aparecer.
   const [graph, setGraph] = useState<NetworkGraph | null>(null)

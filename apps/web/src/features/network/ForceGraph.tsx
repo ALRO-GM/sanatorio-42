@@ -87,6 +87,8 @@ type Scene = {
   strong: SimLink[][]
   /** Las que se pintan mientras se mueve un grafo pesado (modo ligero). */
   strongHeavy: SimLink[][]
+  /** La unión más fuerte de lo que se ve: el grosor de cada una va en relación a ella. */
+  maxWeight: number
   /** Índice de burbujas por sitio para el ratón, y de qué `version` es. */
   spots: { index: SpotIndex<SimNode>; version: number } | null
   /** Huella de los datos con los que se montó la simulación (`graphSignature`). */
@@ -160,6 +162,54 @@ function radiusOf(node: NetworkNode, busiest: number): number {
 }
 
 const weightOf = (link: NetworkLink): number => link.forth + link.back
+
+/** Lo más gruesa que sale una unión, en píxeles: antes, unas pocas tapaban el grafo. */
+const MAX_LINK_WIDTH = 4
+
+/**
+ * El grosor de una unión, en relación a la más fuerte de lo que se ve (`max`):
+ * de `base` a `MAX_LINK_WIDTH`. Así ninguna se hace desproporcionada.
+ */
+function widthOf(weight: number, max: number, base: number): number {
+  return base + (MAX_LINK_WIDTH - base) * Math.sqrt(Math.min(1, weight / Math.max(1, max)))
+}
+
+/**
+ * Con alguien elegido, el tamaño de cada burbuja es la fuerza de su unión con
+ * esa persona, en relación a la más fuerte (lineal: quien se desvía, se ve):
+ * si alguien te ha corregido 7 veces y los demás 1, sale mucho más grande. La
+ * elegida, la más grande; quien no está unido a ella, pequeño.
+ */
+function radiiAround(
+  nodes: readonly SimNode[],
+  links: readonly SimLink[],
+  chosen: string,
+): Map<string, number> | null {
+  const strength = new Map<string, number>()
+
+  for (const link of links) {
+    const from = (link.source as SimNode).login
+    const to = (link.target as SimNode).login
+
+    if (from === chosen) strength.set(to, (strength.get(to) ?? 0) + link.weight)
+    if (to === chosen) strength.set(from, (strength.get(from) ?? 0) + link.weight)
+  }
+
+  if (!nodes.some((node) => node.login === chosen) || strength.size === 0) return null
+
+  const strongest = Math.max(...strength.values())
+
+  return new Map(
+    nodes.map((node) => {
+      const value = strength.get(node.login)
+
+      return [
+        node.login,
+        node.login === chosen ? 30 : value === undefined ? 4 : 5 + 23 * (value / strongest),
+      ]
+    }),
+  )
+}
 
 /**
  * Fuerza que junta a cada persona con su comunidad: tira de cada burbuja hacia
@@ -326,6 +376,7 @@ export function ForceGraph({
     groups: [],
     strong: [],
     strongHeavy: [],
+    maxWeight: 1,
     spots: null,
     signature: '',
     moving: false,
@@ -471,7 +522,7 @@ export function ForceGraph({
       // capa ya pintada (`graph-layers.ts`) y solo se pintan encima las de quien
       // está elegido. Mientras se mueve, con muchas, solo las más fuertes.
       const style = (target: CanvasRenderingContext2D, link: SimLink, on: boolean): void => {
-        target.lineWidth = (0.5 + Math.sqrt(link.weight) * 0.75) / Math.sqrt(view.k)
+        target.lineWidth = widthOf(link.weight, state.maxWeight, 0.5) / Math.sqrt(view.k)
         // En reposo, todas del mismo gris: el color es para las burbujas. Al
         // elegir a alguien, las suyas se encienden, en turquesa las mutuas.
         target.strokeStyle = around !== null && on && link.mutual ? palette.accent : palette.link
@@ -499,7 +550,7 @@ export function ForceGraph({
 
           context.globalAlpha = 0.9
           context.strokeStyle = link.mutual ? palette.accent : palette.gave
-          context.lineWidth = (0.8 + Math.sqrt(link.weight) * 0.6) / Math.sqrt(view.k)
+          context.lineWidth = widthOf(link.weight, state.maxWeight, 0.8) / Math.sqrt(view.k)
           context.beginPath()
           context.moveTo(from.x ?? 0, from.y ?? 0)
           context.lineTo(to.x ?? 0, to.y ?? 0)
@@ -550,7 +601,7 @@ export function ForceGraph({
 
           const vx = dx / span
           const vy = dy / span
-          const width = (0.8 + Math.sqrt(count) * 0.75) / Math.sqrt(view.k)
+          const width = widthOf(count, state.maxWeight, 0.8) / Math.sqrt(view.k)
           const head = Math.min(span * 0.6, Math.max(6 / view.k, width * 3))
 
           context.globalAlpha = 0.95
@@ -1265,6 +1316,7 @@ export function ForceGraph({
     state.groups = byWeight(simLinks)
     state.strong = byWeight(strongest(simLinks, MOVING_LINKS))
     state.strongHeavy = byWeight(strongest(simLinks, MOVING_LINKS_HEAVY))
+    state.maxWeight = simLinks.reduce((most, link) => Math.max(most, link.weight), 1)
     state.spots = null
     state.signature = signature
     state.moving = true
@@ -1354,10 +1406,28 @@ export function ForceGraph({
     schedule.current()
   }, [nodes, signature])
 
-  // Cambiar el color o la persona elegida solo repinta.
+  // Cambiar el color solo repinta. Elegir a alguien, además, cambia el tamaño de
+  // las burbujas (su unión con esa persona) y se recolocan un poco.
   useEffect(() => {
     schedule.current()
-  }, [colorOf, selected])
+  }, [colorOf])
+
+  useEffect(() => {
+    const state = scene.current
+    const around = selected === null ? null : radiiAround(state.nodes, state.links, selected)
+    const busiest = state.nodes.reduce(
+      (most, node) => Math.max(most, node.data.given + node.data.received),
+      1,
+    )
+
+    for (const node of state.nodes) node.r = around?.get(node.login) ?? radiusOf(node.data, busiest)
+    state.simulation?.force(
+      'collide',
+      forceCollide<SimNode>((node) => node.r + 2.5).iterations(state.nodes.length > 800 ? 1 : 2),
+    )
+    state.simulation?.alpha(0.3).restart()
+    schedule.current()
+  }, [selected, signature])
 
   // Quienes están pintados y llevan lo escrito en el login: primero los que
   // empiezan así, y a igualdad, los más activos.

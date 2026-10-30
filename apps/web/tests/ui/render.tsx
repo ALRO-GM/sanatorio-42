@@ -1,4 +1,5 @@
-import { act, render } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import es from 'virtual:textos/es'
 
 import { App } from '../../src/app/App'
 import { api } from '../../src/shared/api'
@@ -72,4 +73,26 @@ export async function answerGates(): Promise<void> {
       await new Promise((resolve) => setTimeout(resolve, 300))
     })
   }
+}
+
+/**
+ * La Red y Amigos se abren con tu propia red (2026-10-30). Para mirar a todo el
+ * campus, como quien la usa: se quita a la persona elegida.
+ */
+export async function wholeCampus(): Promise<void> {
+  // En la Red, la × de la persona elegida; en Amigos, vaciar el buscador.
+  const found = await waitFor(
+    () => {
+      const clear = screen.queryByRole('button', { name: es['net.person.clear'] ?? '' })
+      const search = screen.queryByRole('combobox', { name: es['common.person'] ?? '' })
+
+      if (clear === null && search === null) throw new Error('sin persona elegida que quitar')
+
+      return clear ?? search
+    },
+    { timeout: 5000 },
+  )
+
+  if (found?.tagName === 'BUTTON') fireEvent.click(found)
+  else if (found !== null) fireEvent.change(found, { target: { value: '' } })
 }

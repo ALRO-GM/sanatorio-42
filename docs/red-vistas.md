@@ -10,7 +10,7 @@ casos. Código: `apps/web/src/features/network/GraphViews.tsx`; lo usan
 | --- | --- | --- |
 | Una persona elegida | **Su red** (anillos) · Grafo | Con quién se cruza o se sienta, de un vistazo y en el móvil. Más cerca y más gruesa, unión más fuerte; en correcciones, continua si es mutua y a trazos si va en un solo sentido. Pulsar a alguien pasa a su red |
 | Hasta 150 personas a la vista | Grafo · **Matriz** | Persona × persona ordenadas por grupo: los grupos cerrados salen como bloques en la diagonal (endogamia) y lo mutuo, como simetría. Sin maraña. Con 60 o menos, con los nombres |
-| Más de 150 | Grafo · **Grupos** (cuerdas) | Cuánto se une cada grupo (comunidad) con los demás y cuánto dentro de sí (la cuerda que vuelve a su arco). Los 10 grupos más grandes con arco propio; el resto, en «Otros» |
+| Más de 150 | Grafo | Las cuerdas entre grupos se probaron y se quitaron el 2026-10-30: no convencían |
 
 Al elegir a alguien se pasa a su red; al soltarlo, a la vista de fábrica de lo
 que se ve. Las vistas usan los mismos nodos, uniones y colores que el grafo,
@@ -20,3 +20,18 @@ Ideas que quedan (del análisis del 2026-10-29): la red sobre el plano del
 clúster para los asientos, el calendario de coincidencias (horas × días) al
 elegir a alguien, y el diagrama de cuerdas por kickoff o campus además de por
 comunidad.
+
+## Cambios del 2026-10-30 (pedidos por Alberto)
+
+- La Red y Amigos (antes «Asientos») se abren con **tu propia red** elegida; la
+  de todo el campus, quitando a la persona (la × en la Red, vaciar el buscador
+  en Amigos). En Amigos, «Mi red» vuelve a la tuya.
+- **Con alguien elegido, el tamaño de cada burbuja es su unión con esa persona**
+  (correcciones en los dos sentidos, o la cercanía), en proporción lineal a la
+  más fuerte: si alguien te ha corregido 7 veces y los demás 1, sale mucho más
+  grande (`radiiAround` en `ForceGraph.tsx`). Sin nadie elegido, como antes.
+- **El grosor de las uniones** va en relación a la más fuerte de lo que se ve,
+  de 0,5 a 4 píxeles (`widthOf`): antes, unas pocas tapaban el grafo.
+- En **su red** (anillos), las fotos, y el tamaño y el grosor según la unión.
+- La línea de «se ven N de M» va debajo del dibujo: encima tapaba el selector
+  de vista en el móvil.

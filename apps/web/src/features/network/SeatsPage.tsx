@@ -83,7 +83,8 @@ export function SeatsPage({ me }: { me?: string }) {
   const days = period === 'custom' ? 30 : (daysOf(period) ?? ALL_DAYS)
   const key = custom === undefined ? String(days) : `${custom.from}..${custom.to}`
   const [mode, setMode] = useState<Mode>('community')
-  const [selected, setSelected] = useState<string | null>(null)
+  // De fábrica, tu propia red: con quién te sientas tú (pedido por Alberto, 2026-10-30).
+  const [selected, setSelected] = useState<string | null>(me ?? null)
   const { data, error, reload } = useAsync<SeatGraph>(() => api.getSeatGraph(days, custom), [key])
   const heat = useAsync<SeatHeat>(() => api.getSeatHeat(days, custom), [key])
 
@@ -95,7 +96,13 @@ export function SeatsPage({ me }: { me?: string }) {
     () =>
       data === undefined
         ? undefined
-        : trimSeats(data.people, data.links, trim, onlyChosen ? selected : null),
+        : trimSeats(
+            data.people,
+            data.links,
+            trim,
+            // Quien no tiene puestos en el periodo no recorta nada: se ve a todos.
+            onlyChosen && data.people.some((person) => person.login === selected) ? selected : null,
+          ),
     [data, trim, onlyChosen, selected],
   )
   // El tamaño de cada burbuja no son sus horas en el clúster, sino su parte de
@@ -131,7 +138,7 @@ export function SeatsPage({ me }: { me?: string }) {
   const byLogin = useMemo(() => new Map(data?.people.map((p) => [p.login, p]) ?? []), [data])
   // Para buscar a alguien: primero quien más horas pasa.
   const byHours = useMemo(() => [...(data?.people ?? [])].sort((x, y) => y.hours - x.hours), [data])
-  const [query, setQuery] = useState('')
+  const [query, setQuery] = useState(me ?? '')
   // Elegir a alguien (en el grafo, en una lista o al buscar) también lo escribe en el buscador.
   const choose = useCallback((login: string | null) => {
     setSelected(login)
@@ -278,6 +285,18 @@ export function SeatsPage({ me }: { me?: string }) {
                     }}
                   />
                 </label>
+                {me !== undefined && selected !== me && (
+                  <button
+                    type="button"
+                    className="pill"
+                    onClick={() => {
+                      setQuery(me)
+                      setSelected(me)
+                    }}
+                  >
+                    {t('seats.me')}
+                  </button>
+                )}
                 <datalist id="seats-people">
                   {byHours.map((person) => (
                     <option key={person.login} value={person.login} />

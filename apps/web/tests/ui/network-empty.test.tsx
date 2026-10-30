@@ -11,7 +11,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { api } from '../../src/shared/api'
 import { must } from './must'
-import { openApp, settle } from './render'
+import { openApp, settle, wholeCampus } from './render'
 
 const text = (key: string): string => must(es[key], `el texto ${key}`)
 
@@ -42,6 +42,7 @@ describe('Red sin resultados', () => {
         : graph
     })
     await openApp('#/red', { detail: 'datos' })
+    await wholeCampus()
     // Hasta que llega el primer grafo.
     await waitFor(
       () => {
@@ -71,7 +72,7 @@ describe('Red sin resultados', () => {
     await settle(900)
     expect(screen.queryByText(text('net.empty'))).toBeNull()
     expect(document.querySelector('canvas.force-graph')).not.toBeNull()
-  })
+  }, 20_000)
 
   it('asientos: un periodo sin nadie deja el selector para elegir otro', async () => {
     const user = userEvent.setup()
@@ -88,6 +89,7 @@ describe('Red sin resultados', () => {
         : getSeatGraph(days),
     )
     await openApp('#/asientos', { detail: 'datos' })
+    await wholeCampus()
     await screen.findByText(text('seats.title'), {}, { timeout: 5000 })
     await settle(600)
     expect(document.querySelector('canvas.force-graph')).not.toBeNull()
@@ -106,5 +108,5 @@ describe('Red sin resultados', () => {
     await settle(600)
     expect(screen.queryByText(text('seats.empty'))).toBeNull()
     expect(document.querySelector('canvas.force-graph')).not.toBeNull()
-  })
+  }, 20_000)
 })

@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import { reloadDetail } from '../../src/shared/detail'
 import { must } from './must'
-import { openApp, settle } from './render'
+import { openApp, settle, wholeCampus } from './render'
 
 const WAIT = { timeout: 5000 }
 const text = (key: string): string => must(es[key], `el texto ${key}`)
@@ -96,12 +96,14 @@ describe('modos de la interfaz', () => {
 
   it('el de datos enseña los rankings de la red que el normal no', async () => {
     await openIn('normal', '#/red')
+    await wholeCampus()
     // Ya pintada (sale su explicación), y sin el ranking de los más estrictos.
     expect(await screen.findAllByText(text('net.about'), {}, WAIT)).not.toHaveLength(0)
     expect(screen.queryByText(text('net.strict.title'))).toBeNull()
     cleanup()
 
     await openIn('datos', '#/red')
+    await wholeCampus()
     expect(await screen.findByText(text('net.strict.title'), {}, WAIT)).toBeTruthy()
   }, 30_000)
 

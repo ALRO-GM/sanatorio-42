@@ -195,8 +195,21 @@ export function Header({
             <UserMenu
               me={me}
               items={[
-                // Solo lo de la cuenta (reorganización del 2026-10-29): el
-                // expediente, la guardia y el Pomodoro tienen su pestaña.
+                // Lo de la cuenta (reorganización del 2026-10-29) y el Pomodoro,
+                // que se quiere a mano desde cualquier sitio (pedido por Alberto,
+                // 2026-10-30): lleva a su pestaña de Aprender.
+                ...(may('focus')
+                  ? [
+                      {
+                        id: 'pomodoro',
+                        icon: 'reloj' as const,
+                        label: t('focus.open'),
+                        run: () => {
+                          onGo('pomodoro')
+                        },
+                      },
+                    ]
+                  : []),
                 ...(admin
                   ? [
                       {

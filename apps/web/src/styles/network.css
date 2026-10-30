@@ -267,24 +267,20 @@
   height: 0.7rem;
   border-radius: 50%;
 }
+/* Debajo del dibujo, no encima: encima tapaban el selector de vista en el
+   móvil (2026-10-30). */
 .net-help,
 .net-shown {
-  position: absolute;
-  top: 0.6rem;
-  margin: 0;
+  margin: 0.4rem 0 0;
+  width: fit-content;
+  max-width: 100%;
   padding: 0.2rem 0.55rem;
   border-radius: 999px;
   background: color-mix(in srgb, var(--surface) 86%, transparent);
   font-size: 0.72rem;
   color: var(--text-3);
-  pointer-events: none;
 }
-.net-help {
-  right: 0.7rem;
-}
-.net-shown {
-  left: 0.7rem;
-}
+
 .net-side {
   grid-area: side;
   display: grid;
@@ -1172,22 +1168,9 @@ ol.net-rows .net-row-name {
   stroke-linecap: round;
   opacity: 0.75;
 }
-.net-ego-person circle {
-  cursor: pointer;
-  stroke: var(--surface);
-  stroke-width: 2;
-}
-.net-ego-person:hover circle {
-  stroke: var(--accent);
-  stroke-width: 3;
-}
 .net-ego-person text {
   fill: var(--text-2);
   font-size: 11px;
-}
-.net-ego-center {
-  stroke: var(--accent);
-  stroke-width: 4;
 }
 .net-ego-name {
   fill: var(--text);
@@ -1206,18 +1189,21 @@ ol.net-rows .net-row-name {
 .net-matrix-label text {
   font-size: 9px;
 }
-.net-chord-ribbon {
-  fill-opacity: 0.35;
-  stroke: var(--surface);
-  stroke-width: 0.5;
+.net-ego-person {
+  cursor: pointer;
 }
-.net-chord-ribbon:hover {
-  fill-opacity: 0.75;
+.net-face-bg {
+  fill: var(--surface-2);
 }
-.net-chord-ribbon.self {
-  fill-opacity: 0.55;
-}
-.net-chord-group text {
+.net-face-initial {
   fill: var(--text-2);
-  font-size: 12px;
+  font-weight: 700;
+}
+.net-face-ring {
+  fill: none;
+  stroke-width: 3;
+}
+.net-ego-person:hover .net-face-ring {
+  stroke: var(--accent);
+  stroke-width: 4;
 }
