@@ -5,6 +5,7 @@ import type { ClusterMap, MapCluster, MapSeat, SeatReservation } from '@sanatori
 
 import { localeOf, useI18n } from '../../shared/i18n'
 import type { Translate } from '../../shared/i18n'
+import { Icon } from '../../shared/ui/Icon'
 import { PillGroup } from '../../shared/ui/PillGroup'
 import { recordHref } from '../../shared/links'
 import { fitSeats, ROW_LABEL } from './fit'
@@ -13,6 +14,7 @@ import {
   DEFAULT_LOOK,
   loadLook,
   lookClasses,
+  matesOf,
   MATES,
   order,
   rowsTopDown,
@@ -185,6 +187,8 @@ type SeatButtonProps = {
   online: boolean
   /** El círculo a la vista, o `null` si no se enseña. */
   circle: number | null
+  /** Ha terminado el common core: con los círculos a la vista, un trofeo en vez del número. */
+  outer: boolean
   density: Density
 }
 
@@ -205,6 +209,7 @@ const SeatButton = memo(function SeatButton({
   image,
   online,
   circle,
+  outer,
   density,
 }: SeatButtonProps) {
   return (
@@ -224,11 +229,17 @@ const SeatButton = memo(function SeatButton({
         ) : null)}
       {/* Tiene Sanatorio abierto: un punto verde en la esquina. */}
       {online && <i className="seat-online" />}
-      {circle !== null && density !== 'dots' && (
-        <b className="seat-circle" aria-hidden="true">
-          {circle}
-        </b>
-      )}
+      {circle !== null &&
+        density !== 'dots' &&
+        (outer ? (
+          <b className="seat-circle seat-outer" aria-hidden="true">
+            <Icon name="trofeo" size={11} />
+          </b>
+        ) : (
+          <b className="seat-circle" aria-hidden="true">
+            {circle}
+          </b>
+        ))}
     </button>
   )
 })
@@ -383,6 +394,7 @@ const SeatGrid = memo(function SeatGrid({
                 circle={
                   look.circles && typeof occupant?.circle === 'number' ? occupant.circle : null
                 }
+                outer={occupant?.outer === true}
                 density={density}
               />
             )
@@ -536,6 +548,15 @@ export function ClusterMapView({
   const open = cluster.seats.find((seat) => seat.host === openHost) ?? null
   const reservation = open?.reservation ?? null
   const openReservation = reservation !== null && showReservation(reservation) ? reservation : null
+  // Cuánta gente del clúster cumple cada resaltado: va junto a su botón.
+  const mateCounts = new Map(
+    MATES.map((mate) => [
+      mate,
+      cluster.seats.filter(
+        (seat) => seat.occupant !== null && matesOf(seat.occupant, map.me).includes(mate),
+      ).length,
+    ]),
+  )
   // El puesto abierto, si hay alguien sentado: es el que lleva ficha fijada.
   const openTaken = open?.occupant === undefined || open.occupant === null ? null : open
 
@@ -591,6 +612,7 @@ export function ClusterMapView({
                   >
                     <i className={`mate-dot mate-${mate}`} aria-hidden="true" />
                     {t(`map.mate.${mate}`)}
+                    <span className="pill-count">{mateCounts.get(mate) ?? 0}</span>
                   </button>
                 )
               })}

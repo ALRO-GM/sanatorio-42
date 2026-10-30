@@ -611,6 +611,24 @@ export function createProgressService(options: {
     },
 
     /**
+     * Quién de esa gente ha terminado el common core (outer core), según el
+     * último cálculo. Sin esperar: si aún no hay cálculo (recién arrancada),
+     * nadie, y se pone a hacerlo. Es para el trofeo del mapa de clústeres, que
+     * no puede esperar al cálculo entero.
+     */
+    finishedNow(logins: readonly string[]): Set<string> {
+      if (current === null) {
+        rebuild().catch(() => undefined)
+
+        return new Set()
+      }
+
+      const { people } = current.value
+
+      return new Set(logins.filter((login) => people.get(login)?.status === 'finished'))
+    },
+
+    /**
      * El avance de quien mira, con las medias de cada campus pedido y de todos
      * juntos, y los paces. Con `others`, además la línea de cada una de esas
      * personas (como mucho `MAX_OTHERS`), para compararse. `sees` quita a quien

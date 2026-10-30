@@ -38,6 +38,8 @@ export type MapSeat = {
     online: boolean
     /** El círculo del common core en que va (0 a 6), si se sabe. */
     circle: number | null
+    /** Ha terminado el common core (outer core): lleva trofeo en vez de número. */
+    outer: boolean
     /** En modo Pomodoro hasta esa hora (ISO), o `null`. */
     focusUntil: string | null
     /**

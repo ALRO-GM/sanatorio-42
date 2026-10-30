@@ -55,6 +55,7 @@ function cluster(id: string, rows: number, seats: number, seated: string[]): Map
               me: false,
               online: false,
               circle: null,
+              outer: false,
               finishedMine: null,
               focusUntil: null,
             }

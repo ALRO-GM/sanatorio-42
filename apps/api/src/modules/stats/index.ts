@@ -86,7 +86,11 @@ const progressQuery = z.object({
 /** Cada cuánto se rehace el Avance de fondo: antes de los 30 min en que caduca. */
 const PROGRESS_REFRESH_MS = 25 * 60_000
 
-export type StatsModule = AppModule & { service: StatsService }
+export type StatsModule = AppModule & {
+  service: StatsService
+  /** Quién ha terminado el common core, del último cálculo del Avance (sin esperar). */
+  finishedOf: (logins: readonly string[]) => Set<string>
+}
 
 export function createStatsModule(deps: {
   db: Db
@@ -117,6 +121,7 @@ export function createStatsModule(deps: {
   return {
     name: 'stats',
     service,
+    finishedOf: (logins) => progress.finishedNow(logins),
     // El Avance se rehace de fondo antes de que caduque (30 min): nadie espera
     // al cálculo entero (`progress.service.ts`). Solo lee la base, sin 42.
     jobs: [

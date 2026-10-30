@@ -307,6 +307,8 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     therapy: therapy.service,
     online,
     circlesOf: (logins) => replica.curriculum.circlesOf(logins),
+    // El módulo de estadísticas se monta más abajo; se le pregunta al servir.
+    finishedOf: (logins) => stats.finishedOf(logins),
     availableOf: (login) => peers.availabilityRepository.get(login),
     focusOf,
     titleOf: (login) => profile.xp.titleOf(login),

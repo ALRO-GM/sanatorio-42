@@ -50,6 +50,8 @@ export type MapServiceOptions = {
   broken?: BrokenSeats
   /** El círculo en que va cada persona, sin preguntar a 42. */
   circlesOf?: (logins: readonly string[]) => Promise<Map<string, number>>
+  /** Quién de esos ha terminado el common core (del cálculo del Avance, sin esperar). */
+  finishedOf?: (logins: readonly string[]) => Set<string>
   /** Si alguien tiene encendido «de guardia». */
   availableOf?: (login: string) => Promise<boolean>
   /** Quién de esos está en modo Pomodoro, y hasta cuándo. */
@@ -264,6 +266,7 @@ export function createMapService(options: MapServiceOptions) {
 
       const logins = present.map((person) => person.login)
       const mine = await replica.projectsOf(actor.login)
+      const outers = options.finishedOf?.(logins) ?? new Set<string>()
       const [activeProjects, circles, marks, focusing] = await Promise.all([
         replica.activeProjectsOf([...logins, actor.login]),
         options.circlesOf?.([...logins, actor.login]) ?? new Map<string, number>(),
@@ -291,6 +294,7 @@ export function createMapService(options: MapServiceOptions) {
           me: person.login === actor.login,
           online: online.has(person.login),
           circle: circles.get(person.login) ?? null,
+          outer: outers.has(person.login),
           finishedMine: marks.get(person.login) ?? null,
           focusUntil: focusing.get(person.login) ?? null,
         }

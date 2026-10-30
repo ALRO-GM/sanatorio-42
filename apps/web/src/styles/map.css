@@ -528,6 +528,15 @@ button.seat.open {
   text-align: center;
   pointer-events: none;
 }
+/* Quien terminó el common core (outer core): un trofeo dorado en vez del
+   número (pedido por Alberto, 2026-10-30). */
+.seat-circle.seat-outer {
+  display: grid;
+  place-items: center;
+  padding: 0;
+  background: linear-gradient(180deg, #ffe27a, #f0b400 60%, #c98f00);
+  color: #3a2a00;
+}
 
 /* Resaltados: un halo del color de lo que comparte; lo demás se apaga. Solo con
    opacidad: un filtro (`grayscale`) en cientos de puestos hacía cada cambio de

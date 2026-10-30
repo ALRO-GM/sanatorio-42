@@ -451,7 +451,15 @@ describe('quién va más rápido', () => {
       cursus: { grade: 'Cadet', active: 1 },
     })
 
-    const ranking = await service().ranking(actor('leo'), filters, page, all)
+    const counted = service()
+
+    // Sin cálculo aún, nadie ha terminado (no se espera): se pone a hacerlo.
+    expect(counted.finishedNow(['ana', 'eva', 'leo'])).toEqual(new Set())
+
+    const ranking = await counted.ranking(actor('leo'), filters, page, all)
+
+    // Ya calculado: quien terminó el common core lleva trofeo en el mapa.
+    expect(counted.finishedNow(['ana', 'eva', 'leo'])).toEqual(new Set(['eva']))
 
     expect(
       ranking.entries.map((entry) => [entry.rank, entry.login, entry.circle, entry.circles]),
