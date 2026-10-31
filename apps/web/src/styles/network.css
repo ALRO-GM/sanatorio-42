@@ -87,7 +87,7 @@
   display: flex;
   gap: 0.4rem;
 }
-.net-search-row input {
+.net-search-row .person-input {
   flex: 1;
   min-width: 0;
 }
@@ -912,8 +912,7 @@ ol.net-rows .net-row-name {
   display: grid;
   gap: 0.25rem;
 }
-.seats-person input {
-  width: 100%;
+.seats-person .person-input {
   min-width: 0;
 }
 .seats-trim {
@@ -1131,7 +1130,16 @@ ol.net-rows .net-row-name {
   margin-top: 0.9rem;
 }
 .seat-heat-card h3 {
-  margin: 0 0 0.75rem;
+  margin: 0;
+}
+/* En Clústeres: el título y, a su derecha, su propio periodo. */
+.seat-heat-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  margin-bottom: 0.75rem;
 }
 @media (max-width: 520px) {
   .seat-heat {

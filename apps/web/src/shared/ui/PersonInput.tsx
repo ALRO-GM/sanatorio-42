@@ -13,14 +13,14 @@ import { comboboxProps, PeopleResults, usePeopleKeys } from './PeopleResults'
  *
  * @param value Lo escrito.
  * @param onChange Cada tecla.
- * @param onPick Al elegir a alguien de la lista: su login.
+ * @param onPick Al elegir a alguien de la lista: su login (y la persona, con su foto).
  * @param exclude Logins que no se sugieren (p. ej., quien mira).
  * @param search Dónde buscar, si no es el buscador de personas de siempre.
  */
 export function PersonInput(props: {
   value: string
   onChange: (text: string) => void
-  onPick: (login: string) => void
+  onPick: (login: string, person: FoundPerson) => void
   label: string
   placeholder?: string
   exclude?: readonly string[]
@@ -35,14 +35,14 @@ export function PersonInput(props: {
   // Ya elegido (lo escrito es justo uno de la lista y nada más): no hace falta sugerir.
   const settled = people?.length === 1 && people[0]?.login === props.value.trim().toLowerCase()
   const shown = open && people !== null && !settled
-  const pick = (login: string): void => {
-    props.onPick(login)
+  const pick = (person: FoundPerson): void => {
+    props.onPick(person.login, person)
     setOpen(false)
   }
   const keys = usePeopleKeys(
     shown ? people : null,
     (person) => {
-      pick(person.login)
+      pick(person)
     },
     () => {
       setOpen(false)
@@ -84,7 +84,7 @@ export function PersonInput(props: {
           label={props.label}
           size={28}
           onPick={(person) => {
-            pick(person.login)
+            pick(person)
           }}
         />
       )}

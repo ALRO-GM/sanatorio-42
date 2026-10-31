@@ -1,11 +1,13 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 
-import type { NetworkPerson } from '@sanatorio/contracts'
+import type { FoundPerson } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
+import { mergePeople } from '../../shared/hooks/usePeopleSearch'
 import { useI18n } from '../../shared/i18n'
 import { Avatar } from '../../shared/ui/Avatar'
 import { Icon } from '../../shared/ui/Icon'
+import { PersonInput } from '../../shared/ui/PersonInput'
 import { forget, recentOf, remember } from '../../shared/recent'
 import type { RecentPerson } from '../../shared/recent'
 
@@ -22,49 +24,37 @@ type PersonSearchProps = {
   campuses?: string | undefined
 }
 
-/** Espera tras la última tecla antes de preguntar a la API. */
-const DEBOUNCE_MS = 180
-
-/** Buscador de personas de la red: escribe el principio de un login y elige. */
+/**
+ * Buscador de personas de la red: el de toda la web (`PersonInput`, con foto,
+ * login y nombre). Busca por nombre o login en el buscador de personas y, por
+ * el principio del login, en la red de los campus elegidos (2026-10-31: antes
+ * solo esto último, sin nombres).
+ */
 export function PersonSearch({ value, me, onChange, campuses }: PersonSearchProps) {
   const { t } = useI18n()
   const [text, setText] = useState('')
-  const [found, setFound] = useState<NetworkPerson[]>([])
   // Con el campo vacío y a la vista, las últimas personas buscadas aquí.
   const [focused, setFocused] = useState(false)
   const [recent, setRecent] = useState<RecentPerson[]>(() => recentOf(RECENT_LIST))
+  const search = useCallback(
+    async (q: string): Promise<FoundPerson[]> => {
+      const [network, named] = await Promise.all([
+        api.searchNetworkPeople(q.toLowerCase(), campuses).catch(() => []),
+        // Un piscinero sin el buscador de personas se queda con lo de la red.
+        api.searchPeople(q).catch((): FoundPerson[] => []),
+      ])
 
-  useEffect(() => {
-    const prefix = text.trim().toLowerCase()
-
-    if (prefix === '') {
-      setFound([])
-
-      return undefined
-    }
-
-    let current = true
-    const timer = setTimeout(() => {
-      api
-        .searchNetworkPeople(prefix, campuses)
-        .then((people) => {
-          if (current) setFound(people)
-        })
-        .catch(() => {
-          if (current) setFound([])
-        })
-    }, DEBOUNCE_MS)
-
-    return () => {
-      current = false
-      clearTimeout(timer)
-    }
-  }, [text, campuses])
+      return mergePeople(
+        network.map((person) => ({ login: person.login, name: null, image: person.image })),
+        named,
+      )
+    },
+    [campuses],
+  )
 
   const choose = (login: string | null, image: string | null = null): void => {
     if (login !== null && login !== me) setRecent(remember(RECENT_LIST, { login, image }))
     setText('')
-    setFound([])
     setFocused(false)
     onChange(login)
   }
@@ -89,25 +79,21 @@ export function PersonSearch({ value, me, onChange, campuses }: PersonSearchProp
   }
 
   return (
-    <div className="net-search">
+    <div
+      className="net-search"
+      onFocus={() => {
+        setFocused(true)
+      }}
+    >
       <div className="net-search-row">
-        <input
-          type="search"
+        <PersonInput
           value={text}
+          label={t('common.person')}
           placeholder={t('net.person.placeholder')}
-          aria-label={t('common.person')}
-          onChange={(event) => {
-            setText(event.target.value)
-          }}
-          onFocus={() => {
-            setFocused(true)
-          }}
-          onKeyDown={(event) => {
-            const first = found[0]
-
-            if (event.key === 'Enter' && first !== undefined) {
-              choose(first.login, first.image)
-            }
+          search={search}
+          onChange={setText}
+          onPick={(login, person) => {
+            choose(login, person.image)
           }}
         />
         <button
@@ -145,24 +131,6 @@ export function PersonSearch({ value, me, onChange, campuses }: PersonSearchProp
               >
                 <Avatar login={person.login} image={person.image} size={22} />
                 <span>{person.login}</span>
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-      {found.length > 0 && (
-        <ul className="net-search-list">
-          {found.map((person) => (
-            <li key={person.login}>
-              <button
-                type="button"
-                onClick={() => {
-                  choose(person.login, person.image)
-                }}
-              >
-                <Avatar login={person.login} image={person.image} size={22} />
-                <span>{person.login}</span>
-                <small>{person.corrections}</small>
               </button>
             </li>
           ))}

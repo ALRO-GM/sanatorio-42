@@ -1,5 +1,9 @@
+import { Fragment } from 'react'
+import type { CSSProperties } from 'react'
+
 import { useI18n } from '../../shared/i18n'
-import { click, defineTour, Tour } from '../../shared/tour/Tour'
+import { clusterName } from '../../shared/seats'
+import { click, cut, defineTour, Tour } from '../../shared/tour/Tour'
 import { Icon } from '../../shared/ui/Icon'
 
 /**
@@ -18,6 +22,8 @@ type Clusters = {
   flipped: boolean
   /** Al 100 % en vez de ajustado al ancho. */
   full: boolean
+  /** La ficha del puesto por el que pasa el ratón, en el mapa de calor. */
+  tip: boolean
 }
 
 const START: Clusters = {
@@ -29,6 +35,7 @@ const START: Clusters = {
   placement: false,
   flipped: false,
   full: false,
+  tip: false,
 }
 
 /** Puestos ocupados de cada clúster del decorado; el número de la pestaña sale de aquí. */
@@ -61,6 +68,11 @@ export const TOUR = defineTour<Clusters>(
     ...click<Clusters>(10400, 'flipRows', { flipped: true }),
     [12300, { caption: 6 }],
     ...click<Clusters>(12300, 'full', { full: true }),
+    // Debajo del plano, el mapa de calor de los puestos (antes en Amigos).
+    ...cut<Clusters>(14300, { scene: 1, caption: 7, cursor: 'rest' }),
+    [16300, { caption: 8, cursor: 'hot' }],
+    [17000, { tip: true }],
+    [19100, { caption: 9, cursor: 'stats', tip: false }],
   ],
   // De qué sitio de la página habla cada paso: soltando ahí el interrogante,
   // la demostración empieza en él.
@@ -71,117 +83,229 @@ export const TOUR = defineTour<Clusters>(
     4: '.seat-grid .seat.free, .seat-detail, .facility-open',
     5: '.map-placement',
     6: '.map-zoom',
+    7: '.seat-heat-card',
+    8: '.heat-cell',
+    9: '.heat-stats',
   },
 )
+
+/** Puestos de dos clústeres por fila: de 0 (poco uso) a 4 (mucho); `-1`, sin uso. */
+const HEAT = [
+  {
+    id: 'c1',
+    rows: [
+      [2, 3, 4, 3, -1, 1],
+      [1, 4, 4, 3, 2, 0],
+      [-1, 0, 2, 1, -1, -1],
+    ],
+    hours: 286,
+    used: 14,
+    people: 34,
+  },
+  {
+    id: 'c2',
+    rows: [
+      [0, 1, -1, 0, 1, 2],
+      [-1, 0, 1, 1, 0, -1],
+      [1, 2, 0, -1, -1, 0],
+    ],
+    hours: 97,
+    used: 13,
+    people: 21,
+  },
+] as const
+
+/** El puesto por el que pasa el ratón: clúster 1, fila 2, puesto 3. */
+const HOT = { cluster: 0, row: 1, seat: 2 }
 
 /**
  * Cómo funciona el mapa de los clústeres, como está ahora: pestañas de clúster
  * con cuánta gente hay sentada, los resaltados arriba, la ficha de un puesto
- * para escribir, el aviso de avería de un puesto libre y, debajo del plano, la
- * colocación plegada y el tamaño (ajustar o al 100 %).
+ * para escribir, el aviso de avería de un puesto libre, debajo del plano la
+ * colocación plegada y el tamaño (ajustar o al 100 %) y, al final, el mapa de
+ * calor de los puestos con sus cifras.
  */
 export function ClustersTour() {
   const { t } = useI18n()
 
   return (
     <Tour tour={TOUR} tab={() => t('nav.cat.campus')}>
-      {(shot) => (
-        <div className="tour-card">
-          <div className="tour-row">
-            {BUSY.map((busy, index) => (
-              <span
-                key={index}
-                data-tour={`room${index}`}
-                className={`tour-pill ${shot.room === index ? 'on' : ''}`}
-              >
-                {t('map.cluster', { n: index + 1 })}
-                <span className="tour-count">{busy.length}</span>
-              </span>
-            ))}
-          </div>
-          <div className="tour-row">
-            <span className="tour-muted">{t('map.highlight')}</span>
-            <span className="tour-pill">{t('map.mate.circle')}</span>
-            <span className={`tour-pill ${shot.mine ? 'on' : ''}`} data-tour="mine">
-              {t('map.mate.project')}
-            </span>
-            <span className="tour-pill">{t('map.mate.done')}</span>
-            <span className={`tour-pill tour-end ${shot.full ? '' : 'on'}`}>
-              {t('map.zoomFit')}
-            </span>
-            <span className={`tour-pill ${shot.full ? 'on' : ''}`} data-tour="full">
-              {t('map.zoomFull')}
-            </span>
-          </div>
-          <div className="tour-pan">
-            <div
-              className={`tour-seats ${shot.flipped ? 'flip' : ''}`}
-              style={{ width: shot.full ? '150%' : '100%' }}
-            >
-              {Array.from({ length: PER_ROW * 3 }, (_, seat) => (
+      {(shot) =>
+        shot.scene === 1 ? (
+          <HeatScene tip={shot.tip} />
+        ) : (
+          <div className="tour-card">
+            <div className="tour-row">
+              {BUSY.map((busy, index) => (
                 <span
-                  key={seat}
-                  data-tour={`seat${seat}`}
-                  className={[
-                    'tour-seat',
-                    (BUSY[shot.room] ?? []).includes(seat) ? 'busy' : '',
-                    shot.room === 1 && shot.mine && MINE.includes(seat) ? 'glow' : '',
-                    seat === BROKEN && shot.broken ? 'broken' : '',
-                    seat === BROKEN && shot.chosen ? 'on' : '',
-                  ].join(' ')}
-                />
+                  key={index}
+                  data-tour={`room${index}`}
+                  className={`tour-pill ${shot.room === index ? 'on' : ''}`}
+                >
+                  {t('map.cluster', { n: index + 1 })}
+                  <span className="tour-count">{busy.length}</span>
+                </span>
               ))}
             </div>
+            <div className="tour-row">
+              <span className="tour-muted">{t('map.highlight')}</span>
+              <span className="tour-pill">{t('map.mate.circle')}</span>
+              <span className={`tour-pill ${shot.mine ? 'on' : ''}`} data-tour="mine">
+                {t('map.mate.project')}
+              </span>
+              <span className="tour-pill">{t('map.mate.done')}</span>
+              <span className={`tour-pill tour-end ${shot.full ? '' : 'on'}`}>
+                {t('map.zoomFit')}
+              </span>
+              <span className={`tour-pill ${shot.full ? 'on' : ''}`} data-tour="full">
+                {t('map.zoomFull')}
+              </span>
+            </div>
+            <div className="tour-pan">
+              <div
+                className={`tour-seats ${shot.flipped ? 'flip' : ''}`}
+                style={{ width: shot.full ? '150%' : '100%' }}
+              >
+                {Array.from({ length: PER_ROW * 3 }, (_, seat) => (
+                  <span
+                    key={seat}
+                    data-tour={`seat${seat}`}
+                    className={[
+                      'tour-seat',
+                      (BUSY[shot.room] ?? []).includes(seat) ? 'busy' : '',
+                      shot.room === 1 && shot.mine && MINE.includes(seat) ? 'glow' : '',
+                      seat === BROKEN && shot.broken ? 'broken' : '',
+                      seat === BROKEN && shot.chosen ? 'on' : '',
+                    ].join(' ')}
+                  />
+                ))}
+              </div>
+            </div>
+            {shot.open && (
+              <div className="tour-pop" style={{ top: '34%', left: '6%', width: '46%' }}>
+                <span className="tour-row">
+                  <span className="tour-avatar" style={{ ['--hue' as string]: 200 }}>
+                    L
+                  </span>
+                  <strong>lsoto</strong>
+                  <span className="tour-chip">{t('map.circle', { n: 3 })}</span>
+                </span>
+                <span className="tour-muted">push_swap</span>
+                <span className="tour-row">
+                  <span className="tour-button">
+                    <Icon name="chat" size={13} /> {t('clusters.write')}
+                  </span>
+                </span>
+              </div>
+            )}
+            {shot.chosen && (
+              <div className="tour-row tour-in">
+                <strong>
+                  {t('map.seatName', {
+                    cluster: t('map.cluster', { n: 2 }),
+                    row: Math.floor(BROKEN / PER_ROW) + 1,
+                    seat: (BROKEN % PER_ROW) + 1,
+                  })}
+                </strong>
+                <span className="tour-muted">
+                  {t(shot.broken ? 'map.seatBroken' : 'map.seatFree')}
+                </span>
+                <span className="tour-pill" data-tour="report">
+                  {t(shot.broken ? 'map.fixed' : 'map.reportBroken')}
+                </span>
+              </div>
+            )}
+            <span className="tour-row" data-tour="placement">
+              <span className="tour-muted">{shot.placement ? '▾' : '▸'}</span>
+              {t('map.placement')}
+            </span>
+            {shot.placement && (
+              <div className="tour-row tour-in">
+                <span className={`tour-pill ${shot.flipped ? 'on' : ''}`} data-tour="flipRows">
+                  {t('map.flipRows')}
+                </span>
+                <span className="tour-pill">{t('map.flipSeats')}</span>
+                <span className="tour-pill">{t('map.flat')}</span>
+              </div>
+            )}
           </div>
-          {shot.open && (
-            <div className="tour-pop" style={{ top: '34%', left: '6%', width: '46%' }}>
-              <span className="tour-row">
-                <span className="tour-avatar" style={{ ['--hue' as string]: 200 }}>
-                  L
-                </span>
-                <strong>lsoto</strong>
-                <span className="tour-chip">{t('map.circle', { n: 3 })}</span>
-              </span>
-              <span className="tour-muted">push_swap</span>
-              <span className="tour-row">
-                <span className="tour-button">
-                  <Icon name="chat" size={13} /> {t('clusters.write')}
-                </span>
-              </span>
-            </div>
-          )}
-          {shot.chosen && (
-            <div className="tour-row tour-in">
-              <strong>
-                {t('map.seatName', {
-                  cluster: t('map.cluster', { n: 2 }),
-                  row: Math.floor(BROKEN / PER_ROW) + 1,
-                  seat: (BROKEN % PER_ROW) + 1,
-                })}
-              </strong>
-              <span className="tour-muted">
-                {t(shot.broken ? 'map.seatBroken' : 'map.seatFree')}
-              </span>
-              <span className="tour-pill" data-tour="report">
-                {t(shot.broken ? 'map.fixed' : 'map.reportBroken')}
-              </span>
-            </div>
-          )}
-          <span className="tour-row" data-tour="placement">
-            <span className="tour-muted">{shot.placement ? '▾' : '▸'}</span>
-            {t('map.placement')}
-          </span>
-          {shot.placement && (
-            <div className="tour-row tour-in">
-              <span className={`tour-pill ${shot.flipped ? 'on' : ''}`} data-tour="flipRows">
-                {t('map.flipRows')}
-              </span>
-              <span className="tour-pill">{t('map.flipSeats')}</span>
-              <span className="tour-pill">{t('map.flat')}</span>
-            </div>
-          )}
-        </div>
-      )}
+        )
+      }
     </Tour>
+  )
+}
+
+/** El mapa de calor de los puestos del decorado: dos clústeres, la ficha de un puesto y sus cifras. */
+function HeatScene({ tip }: { tip: boolean }) {
+  const { t, tn } = useI18n()
+
+  return (
+    <div className="seat-heat tour-heat">
+      <strong>{t('seats.heat.title')}</strong>
+      <div className="heat-clusters">
+        {HEAT.map((cluster, index) => (
+          <figure key={cluster.id} className="heat-cluster">
+            <figcaption>{clusterName(cluster.id, t)}</figcaption>
+            {tip && index === HOT.cluster && (
+              <span className="tour-tip tour-in">
+                {`c1r2s3 · ${t('seats.heat.hours', { n: 41 })} · ${tn('seats.heat.people', 9)}`}
+              </span>
+            )}
+            <div
+              className="heat-grid"
+              style={{ gridTemplateColumns: 'auto repeat(6, var(--cell))' }}
+            >
+              <span />
+              {cluster.rows[0].map((_, seat) => (
+                <span key={seat} className="heat-axis">
+                  {seat + 1}
+                </span>
+              ))}
+              {cluster.rows.map((row, rowIndex) => (
+                <Fragment key={rowIndex}>
+                  <span className="heat-axis heat-row">{rowIndex + 1}</span>
+                  {row.map((level, seat) => (
+                    <span
+                      key={seat}
+                      data-tour={
+                        index === HOT.cluster && rowIndex === HOT.row && seat === HOT.seat
+                          ? 'hot'
+                          : undefined
+                      }
+                      className={`heat-cell ${level < 0 ? 'free' : 'used'}`}
+                      style={
+                        level < 0
+                          ? undefined
+                          : ({
+                              '--from': `var(--heat-${String(level)})`,
+                              '--to': `var(--heat-${String(level)})`,
+                              '--mix': '0%',
+                            } as CSSProperties)
+                      }
+                    />
+                  ))}
+                </Fragment>
+              ))}
+            </div>
+            <ul className="heat-stats" data-tour={index === 0 ? 'stats' : undefined}>
+              <li>{t('seats.heat.cluster.hours', { n: cluster.hours })}</li>
+              <li>{t('seats.heat.cluster.used', { used: cluster.used, total: 18 })}</li>
+              <li>{t('seats.heat.cluster.people', { n: cluster.people })}</li>
+            </ul>
+          </figure>
+        ))}
+      </div>
+      <div className="heat-legend">
+        <span className="heat-legend-item">
+          <span className="heat-cell free" />
+          {t('seats.heat.unused')}
+        </span>
+        <span className="heat-legend-item">
+          {t('seats.heat.hours', { n: 2 })}
+          <span className="heat-ramp" />
+          {t('seats.heat.hours', { n: 41 })}
+        </span>
+      </div>
+    </div>
   )
 }

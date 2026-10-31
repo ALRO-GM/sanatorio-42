@@ -11,6 +11,7 @@ import { Show } from '../../shared/detail'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { directChatId, openChat } from '../notices/conversations'
 import { ClusterMapView } from './ClusterMapView'
+import { SeatHeatCard } from './SeatHeatCard'
 import { PoolOnly } from '../../shared/ui/PoolOnly'
 import { usePoolAllows } from '../../shared/pool'
 
@@ -96,6 +97,8 @@ export function ClustersPage({ me }: { me: string }) {
           </div>
         </>
       )}
+      {/* Debajo del plano, cuánto se usa cada ordenador (antes en Amigos). */}
+      <SeatHeatCard />
     </section>
   )
 }

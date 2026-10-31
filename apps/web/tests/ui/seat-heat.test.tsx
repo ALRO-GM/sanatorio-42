@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import type { SeatHeat, SeatHeatCell, SeatHeatCluster } from '@sanatorio/contracts'
 
-import { SeatHeatMap } from '../../src/features/network/SeatHeatMap'
+import { SeatHeatMap } from '../../src/features/map/SeatHeatMap'
 import { I18nProvider } from '../../src/shared/i18n'
 import { must } from './must'
 

@@ -1,16 +1,17 @@
 import { useCallback, useMemo, useState } from 'react'
 
 import type {
+  FoundPerson,
   NetworkLink,
   NetworkNode,
   SeatGraph,
-  SeatHeat,
   SeatPerson,
 } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
 import type { SeatDates } from '../../shared/api/types'
 import { useAsync } from '../../shared/hooks/useAsync'
+import { mergePeople } from '../../shared/hooks/usePeopleSearch'
 import { localeOf, useI18n } from '../../shared/i18n'
 import { useFormat } from '../../shared/i18n/useFormat'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
@@ -22,9 +23,9 @@ import type { Period } from '../../shared/period'
 import { Avatar } from '../../shared/ui/Avatar'
 import { InfoTip } from '../../shared/ui/InfoTip'
 import { PersonLink } from '../../shared/ui/PersonLink'
+import { PersonInput } from '../../shared/ui/PersonInput'
 import { colorOf, scaleColor } from './colors'
 import { ForceGraph } from './ForceGraph'
-import { SeatHeatMap } from './SeatHeatMap'
 import { SeatsTour } from './SeatsTour'
 import { DEFAULT_TRIM, MOST_OPTIONS, SHARE_OPTIONS, trimSeats } from './seat-trim'
 import type { SeatTrim } from './seat-trim'
@@ -85,7 +86,6 @@ export function SeatsPage({ me }: { me?: string }) {
   // De fábrica, tu propia red: con quién te sientas tú (pedido por Alberto, 2026-10-30).
   const [selected, setSelected] = useState<string | null>(me ?? null)
   const { data, error, reload } = useAsync<SeatGraph>(() => api.getSeatGraph(days, custom), [key])
-  const heat = useAsync<SeatHeat>(() => api.getSeatHeat(days, custom), [key])
 
   // Recortado en la web, al momento (`seat-trim.ts`): de cada cual, solo la
   // gente con la que más se sienta; y, con alguien elegido, solo sus uniones.
@@ -138,6 +138,22 @@ export function SeatsPage({ me }: { me?: string }) {
   // Para buscar a alguien: primero quien más horas pasa.
   const byHours = useMemo(() => [...(data?.people ?? [])].sort((x, y) => y.hours - x.hours), [data])
   const [query, setQuery] = useState(me ?? '')
+  // Quien sale en el grafo: por su login aquí mismo y por su nombre en el
+  // buscador de personas (solo los que están en el grafo).
+  const searchSeated = useCallback(
+    async (q: string): Promise<FoundPerson[]> => {
+      const wanted = q.trim().toLowerCase()
+      const named = await api.searchPeople(q).catch((): FoundPerson[] => [])
+
+      return mergePeople(
+        named.filter((person) => byLogin.has(person.login)),
+        byHours
+          .filter((person) => person.login.includes(wanted))
+          .map((person) => ({ login: person.login, name: null, image: person.image })),
+      )
+    },
+    [byLogin, byHours],
+  )
   // Elegir a alguien (en el grafo, en una lista o al buscar) también lo escribe en el buscador.
   const choose = useCallback((login: string | null) => {
     setSelected(login)
@@ -270,22 +286,28 @@ export function SeatsPage({ me }: { me?: string }) {
             </div>
             {data !== undefined && (
               <div className="net-filter">
-                <label className="seats-person">
-                  <span className="eyebrow">{t('common.person')}</span>
-                  <input
-                    type="search"
-                    list="seats-people"
+                <span className="eyebrow">{t('common.person')}</span>
+                {/* El buscador de toda la web (`PersonInput`): por nombre o login, con foto. */}
+                <div className="seats-person">
+                  <PersonInput
                     value={query}
-                    onChange={(event) => {
-                      const typed = event.target.value
-
+                    label={t('common.person')}
+                    placeholder={t('net.person.placeholder')}
+                    search={searchSeated}
+                    onChange={(typed) => {
                       setQuery(typed)
-                      // Al vaciarlo, nadie elegido.
-                      if (byLogin.has(typed) || typed === '')
-                        setSelected(typed === '' ? null : typed)
+                      // Escribir el login entero también vale; al vaciarlo, nadie elegido.
+                      const login = typed.trim().toLowerCase()
+
+                      if (byLogin.has(login) || login === '')
+                        setSelected(login === '' ? null : login)
+                    }}
+                    onPick={(login) => {
+                      setQuery(login)
+                      setSelected(login)
                     }}
                   />
-                </label>
+                </div>
                 {me !== undefined && selected !== me && (
                   <button
                     type="button"
@@ -298,11 +320,6 @@ export function SeatsPage({ me }: { me?: string }) {
                     {t('seats.me')}
                   </button>
                 )}
-                <datalist id="seats-people">
-                  {byHours.map((person) => (
-                    <option key={person.login} value={person.login} />
-                  ))}
-                </datalist>
               </div>
             )}
             <div className="net-filter seats-trim">
@@ -496,13 +513,6 @@ export function SeatsPage({ me }: { me?: string }) {
           </div>
         )}
       </div>
-
-      {/* Debajo del grafo, con el mismo periodo: cuánto se usa cada ordenador. */}
-      <article className="card seat-heat-card">
-        <h3>{t('seats.heat.title')}</h3>
-        <ErrorNote error={heat.error} onRetry={() => void heat.reload()} />
-        {heat.data !== undefined && <SeatHeatMap heat={heat.data} />}
-      </article>
     </section>
   )
 }

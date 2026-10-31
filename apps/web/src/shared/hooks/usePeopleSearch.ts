@@ -52,3 +52,24 @@ export function usePeopleSearch(
 
   return found
 }
+
+/**
+ * Junta las personas de varias búsquedas sin repetir a nadie: va el orden de
+ * la primera y, de quien sale en varias, el nombre y la foto que se sepan.
+ */
+export function mergePeople(...lists: readonly (readonly FoundPerson[])[]): FoundPerson[] {
+  const merged = new Map<string, FoundPerson>()
+
+  for (const person of lists.flat()) {
+    const known = merged.get(person.login)
+
+    merged.set(
+      person.login,
+      known === undefined
+        ? person
+        : { ...known, name: known.name ?? person.name, image: known.image ?? person.image },
+    )
+  }
+
+  return [...merged.values()]
+}

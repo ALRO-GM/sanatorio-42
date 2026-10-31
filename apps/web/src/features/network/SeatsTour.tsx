@@ -1,9 +1,5 @@
-import { Fragment } from 'react'
-import type { CSSProperties } from 'react'
-
 import { useI18n } from '../../shared/i18n'
-import { clusterName } from '../../shared/seats'
-import { click, cut, defineTour, Tour } from '../../shared/tour/Tour'
+import { click, defineTour, Tour } from '../../shared/tour/Tour'
 import { scaleColor } from './colors'
 
 type Seats = {
@@ -15,11 +11,9 @@ type Seats = {
   menu: boolean
   /** Meses del periodo: el último o los tres últimos. */
   months: 1 | 3
-  /** La ficha del puesto por el que pasa el ratón, en el mapa de calor. */
-  tip: boolean
 }
 
-const START: Seats = { alone: false, picked: -1, menu: false, months: 1, tip: false }
+const START: Seats = { alone: false, picked: -1, menu: false, months: 1 }
 
 export const TOUR = defineTour<Seats>(
   'seats',
@@ -32,10 +26,6 @@ export const TOUR = defineTour<Seats>(
     [7300, { caption: 4 }],
     ...click<Seats>(7300, 'period', { menu: true }),
     ...click<Seats>(8200, 'm3', { menu: false, months: 3 }),
-    ...cut<Seats>(10200, { scene: 1, caption: 5, cursor: 'rest', picked: -1 }),
-    [12200, { caption: 6, cursor: 'hot' }],
-    [12900, { tip: true }],
-    [15000, { caption: 7, cursor: 'stats', tip: false }],
   ],
   // De qué sitio de la página habla cada paso: soltando ahí el interrogante,
   // la demostración empieza en él.
@@ -44,9 +34,6 @@ export const TOUR = defineTour<Seats>(
     2: '.seats-modes',
     3: '.seats .net-panel, .seats-person',
     4: '.seats-period',
-    5: '.seat-heat-card',
-    6: '.heat-cell',
-    7: '.heat-stats',
   },
 )
 
@@ -80,39 +67,10 @@ const LINKS = [
 /** Tonos de los grupos: los tres primeros de la red de verdad (`colors.ts`). */
 const GROUP_HUES = [186, 28, 262]
 
-/** Puestos de dos clústeres por fila: de 0 (poco uso) a 4 (mucho); `-1`, sin uso. */
-const HEAT = [
-  {
-    id: 'c1',
-    rows: [
-      [2, 3, 4, 3, -1, 1],
-      [1, 4, 4, 3, 2, 0],
-      [-1, 0, 2, 1, -1, -1],
-    ],
-    hours: 286,
-    used: 14,
-    people: 34,
-  },
-  {
-    id: 'c2',
-    rows: [
-      [0, 1, -1, 0, 1, 2],
-      [-1, 0, 1, 1, 0, -1],
-      [1, 2, 0, -1, -1, 0],
-    ],
-    hours: 97,
-    used: 13,
-    people: 21,
-  },
-] as const
-
-/** El puesto por el que pasa el ratón: clúster 1, fila 2, puesto 3. */
-const HOT = { cluster: 0, row: 1, seat: 2 }
-
 /**
  * Cómo funciona la red de asientos: quién se sienta cerca de quién, colorear
- * por grupo o por soledad, la ficha de una persona, el periodo y, debajo, el
- * mapa de calor de los puestos con sus cifras.
+ * por grupo o por soledad, la ficha de una persona y el periodo. El mapa de
+ * calor de los puestos se enseña en la de Clústeres, donde está ahora.
  */
 export function SeatsTour() {
   const { t, tn } = useI18n()
@@ -126,78 +84,6 @@ export function SeatsTour() {
       sub={() => t('nav.asientos')}
     >
       {(shot) => {
-        if (shot.scene === 1) {
-          return (
-            <div className="seat-heat tour-heat">
-              <strong>{t('seats.heat.title')}</strong>
-              <div className="heat-clusters">
-                {HEAT.map((cluster, index) => (
-                  <figure key={cluster.id} className="heat-cluster">
-                    <figcaption>{clusterName(cluster.id, t)}</figcaption>
-                    {shot.tip && index === HOT.cluster && (
-                      <span className="tour-tip tour-in">
-                        {`c1r2s3 · ${t('seats.heat.hours', { n: 41 })} · ${tn('seats.heat.people', 9)}`}
-                      </span>
-                    )}
-                    <div
-                      className="heat-grid"
-                      style={{ gridTemplateColumns: 'auto repeat(6, var(--cell))' }}
-                    >
-                      <span />
-                      {cluster.rows[0].map((_, seat) => (
-                        <span key={seat} className="heat-axis">
-                          {seat + 1}
-                        </span>
-                      ))}
-                      {cluster.rows.map((row, rowIndex) => (
-                        <Fragment key={rowIndex}>
-                          <span className="heat-axis heat-row">{rowIndex + 1}</span>
-                          {row.map((level, seat) => (
-                            <span
-                              key={seat}
-                              data-tour={
-                                index === HOT.cluster && rowIndex === HOT.row && seat === HOT.seat
-                                  ? 'hot'
-                                  : undefined
-                              }
-                              className={`heat-cell ${level < 0 ? 'free' : 'used'}`}
-                              style={
-                                level < 0
-                                  ? undefined
-                                  : ({
-                                      '--from': `var(--heat-${String(level)})`,
-                                      '--to': `var(--heat-${String(level)})`,
-                                      '--mix': '0%',
-                                    } as CSSProperties)
-                              }
-                            />
-                          ))}
-                        </Fragment>
-                      ))}
-                    </div>
-                    <ul className="heat-stats" data-tour={index === 0 ? 'stats' : undefined}>
-                      <li>{t('seats.heat.cluster.hours', { n: cluster.hours })}</li>
-                      <li>{t('seats.heat.cluster.used', { used: cluster.used, total: 18 })}</li>
-                      <li>{t('seats.heat.cluster.people', { n: cluster.people })}</li>
-                    </ul>
-                  </figure>
-                ))}
-              </div>
-              <div className="heat-legend">
-                <span className="heat-legend-item">
-                  <span className="heat-cell free" />
-                  {t('seats.heat.unused')}
-                </span>
-                <span className="heat-legend-item">
-                  {t('seats.heat.hours', { n: 2 })}
-                  <span className="heat-ramp" />
-                  {t('seats.heat.hours', { n: 41 })}
-                </span>
-              </div>
-            </div>
-          )
-        }
-
         const picked = PEOPLE[shot.picked]
         // Con tres meses salen más horas, y las burbujas crecen.
         const hoursOf = (hours: number): number => hours * shot.months

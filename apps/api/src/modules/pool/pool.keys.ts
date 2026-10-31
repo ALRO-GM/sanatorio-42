@@ -145,13 +145,14 @@ export const POOL_ROUTES: Record<PoolKey, readonly string[]> = {
     '/events/messages',
     '/events/thread',
   ],
-  clusters: ['/map'],
+  // El mapa de calor de los puestos va en Clústeres (antes en Amigos, 2026-10-31).
+  clusters: ['/map', '/network/seats/heat'],
   'clusters.online': [],
   'clusters.broken': ['/map/seats/:host/broken'],
   'clusters.report': ['/facility/reports'],
   red: ['/network', '/network/people', '/network/pair'],
   'red.rankings': ['/network/strictest'],
-  'red.seats': ['/network/seats', '/network/seats/heat'],
+  'red.seats': ['/network/seats'],
   // Un piscinero tiene su propio avance, el de la piscina (`docs/piscineros.md`).
   avance: ['/stats/progress', '/stats/progress/piscine', '/stats/ranking'],
   'avance.compare': ['/stats/progress/fastest'],

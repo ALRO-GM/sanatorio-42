@@ -9,7 +9,7 @@ import { useFormat } from '../../shared/i18n/useFormat'
 import { DataTable } from '../../shared/ui/DataTable'
 import type { Column } from '../../shared/ui/DataTable'
 import { clusterName } from '../../shared/seats'
-import { loadLook, order, rowsTopDown } from '../map/look'
+import { loadLook, order, rowsTopDown } from './look'
 
 /** Paradas de la escala (`--heat-0` … `--heat-4` en `network.css`). */
 const STOPS = 5

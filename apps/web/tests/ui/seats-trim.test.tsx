@@ -8,6 +8,7 @@ import es from 'virtual:textos/es'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import { SeatsPage } from '../../src/features/network/SeatsPage'
+import { mockSeats } from '../../src/shared/api/mock/network'
 import { I18nProvider } from '../../src/shared/i18n'
 import { must } from './must'
 
@@ -65,10 +66,15 @@ describe('red de asientos: recortar el grafo', () => {
     // Elegida una persona en el buscador: ella y sus tres más cercanas.
     fireEvent.change(most, { target: { value: '3' } })
 
+    // Con el buscador de toda la web: se escribe un trozo y se elige en la lista, con su foto.
     const search = screen.getByRole('combobox', { name: text('common.person') })
-    const someone = document.querySelector<HTMLOptionElement>('#seats-people option')?.value ?? ''
+    const someone = must(mockSeats('nadie', 30).people[0], 'alguien en el grafo').login
 
-    fireEvent.change(search, { target: { value: someone } })
+    fireEvent.change(search, { target: { value: someone.slice(0, 4) } })
+    const option = await screen.findByRole('option', { name: new RegExp(`^${someone}`) })
+
+    expect(option.querySelector('.avatar, img')).not.toBeNull()
+    fireEvent.mouseDown(option)
 
     await waitFor(() => {
       expect(graphCounts().people).toBeLessThanOrEqual(4)

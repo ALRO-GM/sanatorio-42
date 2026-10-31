@@ -105,7 +105,8 @@ y al momento, sin volver a pedir nada (`features/network/seat-trim.ts`):
   esa persona y sus más cercanas, con las mismas dos opciones, y solo sus
   uniones con ella, sin las de las demás entre sí, para que se vea despejado.
   Se elige pinchando en el grafo, en las listas de la ficha o con el buscador
-  de personas (las de más horas, primero). Pinchar en otra persona del grafo
+  de personas, el de toda la web (`PersonInput`, desde el 2026-10-31): por
+  nombre o login, con foto, solo entre quien sale en el grafo. Pinchar en otra persona del grafo
   pasa a sus conexiones; vaciar el buscador o cerrar la ficha vuelve a todas.
 - Bajo el grafo, «Se ven N de M uniones» cuando algo queda fuera.
 
@@ -114,9 +115,13 @@ no en el grafo.
 
 ## Mapa de calor
 
-Pedido por Alberto el 2026-10-25: debajo del grafo, en Datos → Red →
-Asientos, cuánto se ha usado cada ordenador del clúster en el mismo periodo
-(`GET /network/seats/heat?days=`, `features/network/SeatHeatMap.tsx`).
+Pedido por Alberto el 2026-10-25: cuánto se ha usado cada ordenador del
+clúster en un periodo (`GET /network/seats/heat?days=`,
+`features/map/SeatHeatMap.tsx`). Desde el 2026-10-31 va en Campus → Clústeres,
+bajo el plano y con su propio selector de periodo (`SeatHeatCard.tsx`); antes
+iba bajo el grafo de Amigos, con el periodo del grafo. Para un piscinero, la
+ruta va con el permiso de la pestaña Clústeres (`clusters`), no con
+`red.seats`.
 
 - **Las mismas horas que el grafo.** Las sesiones salen de
   `network/seating.sessions.ts` (`seatSessionsIn`), que usan los dos: desde
