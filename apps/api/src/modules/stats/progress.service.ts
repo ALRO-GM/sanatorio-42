@@ -147,7 +147,12 @@ type Person = {
   campuses: number[]
 }
 
-type Cells = { sum: number; n: number }[]
+/**
+ * Lo que se suma en cada punto de una media: la suma, cuántos y, para los
+ * percentiles 25 y 75, cuántos hay en cada % entero (0 … 100). El histograma
+ * solo vive mientras se hace la foto: lo que queda son las líneas.
+ */
+type Cells = { sum: number; n: number; hist: Uint32Array | null }[]
 
 /** Quien terminó, con cuánto tardó: para sugerir con quién compararse. */
 type Finisher = Omit<FastestEntry, 'campus'> & {
@@ -169,7 +174,10 @@ type Tally = {
 }
 
 /** Las medias ya hechas de un sitio, con sus personas por si son pocas. */
-type Area = Omit<Tally, 'sums'> & { averages: ProgressArea['averages'] }
+type Area = Omit<Tally, 'sums'> & {
+  averages: ProgressArea['averages']
+  quartiles: ProgressArea['quartiles']
+}
 
 type Snapshot = {
   units: Record<CoreTrack, Unit[]>
@@ -226,7 +234,9 @@ function traceOf(
 const emptyTally = (days: number): Tally => ({
   sums: filled(MEASURES, () =>
     filled(POPULATIONS, () =>
-      filled(TRACKS, (): Cells => Array.from({ length: days }, () => ({ sum: 0, n: 0 }))),
+      filled(TRACKS, (): Cells =>
+        Array.from({ length: days }, () => ({ sum: 0, n: 0, hist: null })),
+      ),
     ),
   ),
   members: filled(POPULATIONS, () => filled(TRACKS, (): Member[] => [])),
@@ -238,11 +248,38 @@ const emptyTally = (days: number): Tally => ({
 const mean = (cells: Cells): ProgressLine =>
   cells.map((cell) => (cell.n < MIN_PEOPLE ? null : Math.round((cell.sum / cell.n) * 10) / 10))
 
+/**
+ * El percentil `q` (0 … 1) de cada punto, al % entero; con menos de
+ * `MIN_PEOPLE` personas, `null`, como la media.
+ */
+const quantile = (cells: Cells, q: number): ProgressLine =>
+  cells.map((cell) => {
+    if (cell.n < MIN_PEOPLE || cell.hist === null) return null
+
+    const wanted = Math.max(1, Math.ceil(q * cell.n))
+    let seen = 0
+
+    for (let value = 0; value < cell.hist.length; value += 1) {
+      seen += cell.hist[value] ?? 0
+      if (seen >= wanted) return value
+    }
+
+    return 100
+  })
+
 const areaOf = ({ sums, ...rest }: Tally): Area => ({
   ...rest,
   averages: filled(MEASURES, (measure) =>
     filled(POPULATIONS, (population) =>
       filled(TRACKS, (track) => mean(sums[measure][population][track])),
+    ),
+  ),
+  quartiles: filled(MEASURES, (measure) =>
+    filled(POPULATIONS, (population) =>
+      filled(TRACKS, (track) => ({
+        p25: quantile(sums[measure][population][track], 0.25),
+        p75: quantile(sums[measure][population][track], 0.75),
+      })),
     ),
   ),
 })
@@ -520,6 +557,11 @@ export function createProgressService(options: {
               if (value !== null && cell !== undefined) {
                 cell.sum += value
                 cell.n += 1
+                // Se crea con el primer dato: los puntos sin nadie no gastan nada.
+                cell.hist ??= new Uint32Array(101)
+                const bin = Math.max(0, Math.min(100, Math.round(value)))
+
+                cell.hist[bin] = (cell.hist[bin] ?? 0) + 1
               }
             })
           }
@@ -671,6 +713,7 @@ export function createProgressService(options: {
           id,
           name: id === null ? null : (data.campusNames.get(id) ?? null),
           averages: area.averages,
+          quartiles: area.quartiles,
           individuals: filled(POPULATIONS, (population) =>
             filled(TRACKS, (each): ProgressIndividual[] =>
               area.counts[population][each] >= MIN_PEOPLE

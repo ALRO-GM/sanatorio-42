@@ -149,6 +149,20 @@
 .progress-swatch.pace {
   background: repeating-linear-gradient(90deg, var(--border-strong) 0 4px, transparent 4px 8px);
 }
+/* Los percentiles 25 y 75 de una media: un tramo tenue de su color, debajo de las líneas. */
+.progress-band {
+  fill-opacity: 0.14;
+  stroke: none;
+  pointer-events: none;
+}
+.progress-swatch.band {
+  height: 0.6rem;
+  background: var(--text-3);
+  opacity: 0.35;
+}
+.progress-tip-band {
+  color: var(--text-2);
+}
 .progress-tip {
   position: absolute;
   top: 0.5rem;
@@ -556,4 +570,28 @@
 .net-answer strong {
   font-size: 1.05rem;
   line-height: 1.35;
+}
+
+/* ── Los piscineros más avanzados (vista sin límites del dueño, `PiscineTop.tsx`) ── */
+.piscine-top {
+  display: grid;
+  gap: 0.75rem;
+  justify-items: start;
+  margin-top: 1rem;
+}
+.piscine-top .ranking {
+  width: 100%;
+  columns: 2 22rem;
+  column-gap: 1.5rem;
+}
+.piscine-top .ranking > li {
+  break-inside: avoid;
+}
+.piscine-top-value {
+  display: grid;
+  justify-items: end;
+  line-height: 1.15;
+}
+.piscine-top-value small {
+  color: var(--text-2);
 }

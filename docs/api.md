@@ -1914,12 +1914,13 @@ avisos siguen las mismas reglas.
 
 ```
 GET /stats/progress?with=login,login&campuses=22,1|all → StatsProgress. Tu avance, las medias
-                  de cada campus pedido y de todos juntos, los paces y hasta 5 personas
-                  con quien compararte.
+                  (con sus percentiles 25 y 75, `quartiles`) de cada campus pedido y de
+                  todos juntos, los paces y hasta 5 personas con quien compararte.
 GET /stats/progress/fastest → StatsFastest. Quien terminó el common core más deprisa, por plan.
 GET /stats/progress/piscine?with=login,login → PiscineProgress. El Avance de un piscinero (403 a
                   un estudiante): lo aprobado de la piscina día a día, con la media de su
-                  piscina y de las anteriores de su campus.
+                  piscina y de las anteriores de su campus. En la vista sin límites
+                  del dueño trae además `everyone`: la línea de cada uno de la piscina.
 GET /stats/ranking?by=circle|circles|hours&plan=all|classic|next&kickoff=AAAA-MM&cohort=only|since
                   &circleMin=0&circleMax=7&pctMin=0&pctMax=100&offset=0&limit=50 → StatsRanking.
 ```

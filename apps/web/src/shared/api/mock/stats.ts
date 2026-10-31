@@ -152,6 +152,13 @@ const POPULATION_SHAPE: Record<ProgressPopulation, { scale: number; until: numbe
  * tiene muy poca gente que terminó o se fue: ahí van las líneas de cada
  * persona, como en la API.
  */
+/** Lo mismo para cada población. */
+const filledPopulations = <V>(value: (population: ProgressPopulation) => V) => ({
+  finished: value('finished'),
+  current: value('current'),
+  blackholed: value('blackholed'),
+})
+
 const PEOPLE: Record<'home' | 'all', ProgressArea['people']> = {
   home: {
     finished: { classic: 93, next: 1 },
@@ -352,6 +359,23 @@ function areaMock(id: number | null): ProgressArea {
     current: lines(scale, 'current'),
     blackholed: lines(scale, 'blackholed'),
   })
+  const averages = { circles: byPopulation(1), hours: byPopulation(0.8) }
+  const around = (line: ProgressLine, by: number): ProgressLine =>
+    line.map((value) =>
+      value === null
+        ? null
+        : Math.max(0, Math.min(100, Math.round(value + by * (4 + value * 0.25)))),
+    )
+  const spreadOf = (
+    lines: Record<ProgressPopulation, Record<CoreTrack, ProgressLine>>,
+  ): ProgressArea['quartiles']['circles'] =>
+    filledPopulations((population) => ({
+      classic: {
+        p25: around(lines[population].classic, -1),
+        p75: around(lines[population].classic, 1),
+      },
+      next: { p25: around(lines[population].next, -1), p75: around(lines[population].next, 1) },
+    }))
   const factor = all ? 12 : size
   const none = (): Record<CoreTrack, ProgressIndividual[]> => ({ classic: [], next: [] })
   const finished = PYTHON_FINISHERS.map((each) => ({
@@ -367,7 +391,12 @@ function areaMock(id: number | null): ProgressArea {
   return {
     id,
     name: PROGRESS_CAMPUSES.find((campus) => campus.id === id)?.name ?? null,
-    averages: { circles: byPopulation(1), hours: byPopulation(0.8) },
+    averages,
+    // Los percentiles 25 y 75: un tramo alrededor de la media, más ancho cuanto más se avanza.
+    quartiles: {
+      circles: spreadOf(averages.circles),
+      hours: spreadOf(averages.hours),
+    },
     individuals:
       id === HOME
         ? {

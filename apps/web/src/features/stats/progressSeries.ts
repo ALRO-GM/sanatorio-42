@@ -66,6 +66,8 @@ export type Series = {
   tag?: string
   /** Lo de una persona: sus hitos y si terminó. Las medias no lo llevan. */
   trace?: ProgressTrace
+  /** Una media, con los percentiles 25 y 75 encendidos: el tramo de la mitad central. */
+  band?: { p25: ProgressLine; p75: ProgressLine }
 }
 
 const PLAN_COLOR: Record<CoreTrack, string> = {
@@ -172,6 +174,8 @@ export type Picked = {
   campuses: readonly number[]
   /** Si va la media de todos los campus juntos. */
   together: boolean
+  /** Si cada media lleva el tramo entre sus percentiles 25 y 75. */
+  quartiles?: boolean
 }
 
 /** Los sitios que se pintan: los campus elegidos que trae la API y, si se pide, todos juntos. */
@@ -232,6 +236,9 @@ export function groupSeries(
             line: area.averages[measure][population][track],
             hours: data.axis.planHours[track],
             style,
+            ...(picked.quartiles === true
+              ? { band: area.quartiles[measure][population][track] }
+              : {}),
           })
           keys.push({ key, label, style, empty: false })
           continue

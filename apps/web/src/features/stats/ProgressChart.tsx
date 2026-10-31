@@ -83,6 +83,40 @@ function pathOf(x: Scale, days: readonly number[], line: ProgressLine): string {
   return path
 }
 
+/**
+ * El tramo entre dos líneas (los percentiles 25 y 75): arriba de ida y abajo de
+ * vuelta, un trozo por cada racha de días con los dos valores.
+ */
+function bandOf(x: Scale, days: readonly number[], low: ProgressLine, high: ProgressLine): string {
+  let path = ''
+  let run: [number, number, number][] = []
+  const close = (): void => {
+    if (run.length > 1) {
+      const top = run.map(([day, , up]) => `${x(day).toFixed(1)},${y(up).toFixed(1)}`)
+      const bottom = [...run]
+        .reverse()
+        .map(([day, down]) => `${x(day).toFixed(1)},${y(down).toFixed(1)}`)
+
+      path += `M${top.join('L')}L${bottom.join('L')}Z`
+    }
+    run = []
+  }
+
+  days.forEach((day, index) => {
+    const down = low[index]
+    const up = high[index]
+
+    if (down === null || down === undefined || up === null || up === undefined) {
+      close()
+      return
+    }
+    run.push([day, down, up])
+  })
+  close()
+
+  return path
+}
+
 /** El último punto con valor de una línea: donde va su punto final o su login. */
 function lastPoint(days: readonly number[], line: ProgressLine): [number, number] | null {
   for (let index = line.length - 1; index >= 0; index--) {
@@ -283,7 +317,13 @@ export function ProgressChart({
   const end = data.days.filter((day) => day <= lastDay + 1).length
   const start = Math.max(0, data.days.findIndex((day) => day >= firstDay - 1) - 1)
   const days = data.days.slice(start, end)
-  const series = every.map((each) => ({ ...each, line: each.line.slice(start, end) }))
+  const series = every.map((each) => ({
+    ...each,
+    line: each.line.slice(start, end),
+    ...(each.band === undefined
+      ? {}
+      : { band: { p25: each.band.p25.slice(start, end), p75: each.band.p75.slice(start, end) } }),
+  }))
   const traced = series.flatMap((each) =>
     each.trace === undefined ? [] : [{ key: each.key, trace: each.trace, series: each }],
   )
@@ -468,6 +508,18 @@ export function ProgressChart({
                   </g>
                 )
               })}
+            {/* Los percentiles 25 y 75 de cada media: debajo de todas las líneas. */}
+            {series.map((each) =>
+              each.band === undefined ? null : (
+                <path
+                  key={`band-${each.key}`}
+                  className="progress-band"
+                  clipPath={`url(#${clip})`}
+                  d={bandOf(x, days, each.band.p25, each.band.p75)}
+                  fill={each.style.stroke}
+                />
+              ),
+            )}
             {series.map((each) => {
               const end = lastPoint(days, each.line)
               const points =
@@ -632,6 +684,15 @@ export function ProgressChart({
                 <span key={each.key}>
                   <LineKey style={each.style} /> {each.label}:{' '}
                   {valueOf(hoverIndex === null ? null : each.line[hoverIndex], each.hours)}
+                  {each.band !== undefined && hoverIndex !== null && (
+                    <small className="progress-tip-band">
+                      {' '}
+                      {t('stats.progress.quartilesTip', {
+                        p25: valueOf(each.band.p25[hoverIndex], each.hours),
+                        p75: valueOf(each.band.p75[hoverIndex], each.hours),
+                      })}
+                    </small>
+                  )}
                 </span>
               ))
             )}
@@ -647,6 +708,11 @@ export function ProgressChart({
         {paces && (
           <li>
             <i className="progress-swatch pace" /> {t('stats.progress.paceLegend')}
+          </li>
+        )}
+        {series.some((each) => each.band !== undefined) && (
+          <li>
+            <i className="progress-swatch band" /> {t('stats.progress.quartilesLegend')}
           </li>
         )}
         {anyMilestone && (

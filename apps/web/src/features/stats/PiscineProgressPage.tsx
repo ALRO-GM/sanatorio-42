@@ -11,7 +11,8 @@ import { InfoTip } from '../../shared/ui/InfoTip'
 import { PersonInput } from '../../shared/ui/PersonInput'
 import { PoolOnly } from '../../shared/ui/PoolOnly'
 import { PiscineProgressChart } from './PiscineProgressChart'
-import type { PiscineShown } from './PiscineProgressChart'
+import type { Line, PiscineShown } from './PiscineProgressChart'
+import { PiscineTop, useTopLines } from './PiscineTop'
 import { MAX_OTHERS, PERSON_COLORS } from './progressSeries'
 
 /**
@@ -47,6 +48,10 @@ export function PiscineProgressPage({ me }: { me: string }) {
   }
   const missing =
     data === undefined ? [] : others.filter((login) => !data.others.some((o) => o.login === login))
+  // La vista sin límites del dueño: los más avanzados, la media de los mejores
+  // y quien cae entre dos percentiles (`docs/piscineros.md`).
+  const top = useTopLines(data)
+  const extra: Line[] = top?.lines ?? []
   const toggle = (key: keyof PiscineShown) => (
     <label className="progress-toggle">
       <input
@@ -80,7 +85,7 @@ export function PiscineProgressPage({ me }: { me: string }) {
               <p className="piscine-summary">
                 {t('piscine.done', { done: data.me?.done ?? 0, total: data.steps.length })}
               </p>
-              <PiscineProgressChart data={data} shown={shown} others={others} />
+              <PiscineProgressChart data={data} shown={shown} others={others} extra={extra} />
             </>
           )}
         </article>
@@ -89,6 +94,7 @@ export function PiscineProgressPage({ me }: { me: string }) {
             <span className="eyebrow">{t('piscine.chart.compareWith')}</span>
             {toggle('cohort')}
           </div>
+          {top?.options}
           <PoolOnly k="avance.compare">
             <div className="progress-option">
               <form
@@ -139,6 +145,9 @@ export function PiscineProgressPage({ me }: { me: string }) {
           </PoolOnly>
         </aside>
       </div>
+      {top !== null && data !== undefined && (
+        <PiscineTop ranked={top.ranked} total={data.steps.length} />
+      )}
     </section>
   )
 }

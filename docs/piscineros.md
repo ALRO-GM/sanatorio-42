@@ -174,7 +174,20 @@ restricción, con exámenes y todo lo de un estudiante, y que solo él pueda.
   `exam_attempts`. Las estadísticas siguen siendo solo de los Exam Rank.
 - Tests: `tests/integration/pool-preview.test.ts` (otro que administra recibe
   `403` y la marca firmada a mano no le vale).
-- API de mentira: `localStorage.mock_pool_preview = 'full'`.
+- **Avance** (pedido el 2026-10-31): `GET /stats/progress/piscine` trae
+  `everyone`, la línea de cada piscinero de la piscina (sin los ocultos), y no
+  se guarda en el navegador (`no-store`: la misma dirección cambia con la
+  cookie). Con eso la web (`PiscineTop.tsx`, reglas en `piscineTop.ts`):
+  - **Los piscineros más avanzados**: lista con foto, aprobados de 16,
+    percentil y día del último aprobado; más aprobados primero y, a igualdad,
+    quien llegó antes (si empatan en las dos, comparten puesto). Quince a la
+    vista y el resto al pedirlo. Percentil 100: el primero.
+  - **Media de los mejores X %** (de 1 a 100, 10 de entrada, encendida): una
+    línea dorada a trazos con la media de esa gente.
+  - **Piscineros entre dos percentiles** (deslizador doble, P75–P90 de
+    entrada, apagada): la línea fina de cada uno.
+- API de mentira: `localStorage.mock_pool_preview = 'full'` (con cuarenta
+  piscineros inventados en el Avance).
 
 ## Estado (2026-10-25)
 

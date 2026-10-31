@@ -70,5 +70,36 @@ describe('un piscinero ve la piscina (docs/piscineros.md)', () => {
     ).toBeTruthy()
     expect(screen.queryByText(text('stats.progress.plan'))).toBeNull()
     expect(screen.queryByText(text('stats.progress.paces'))).toBeNull()
+    // Sin la vista sin límites, ni la lista de los más avanzados ni los percentiles.
+    expect(screen.queryByRole('heading', { name: text('piscine.top.listTitle') })).toBeNull()
+  }, 20_000)
+
+  it('sin límites: los más avanzados, la media de los mejores y quien cae entre dos percentiles', async () => {
+    const user = userEvent.setup()
+
+    await openApp('#/avance', { preview: 'full' })
+
+    const list = await screen.findByRole('list', { name: text('piscine.top.listTitle') }, WAIT)
+
+    // De entrada, los quince primeros; el resto, al pedirlo.
+    expect(within(list).getAllByRole('listitem')).toHaveLength(15)
+    await user.click(screen.getByRole('button', { name: /^Ver los 40/ }))
+    expect(within(list).getAllByRole('listitem')).toHaveLength(40)
+
+    // La media de los mejores 10 %: cuatro de cuarenta, encendida de entrada.
+    const legend = must(document.querySelector('.piscine-chart-legend'), 'la leyenda')
+
+    expect(legend.textContent).toContain('Mejores 10 % (4)')
+
+    // Entre P75 y P90, cada cual con su línea fina.
+    const band = screen.getByRole('checkbox', { name: /^Piscineros entre P75 y P90/ })
+
+    expect(document.querySelectorAll('.piscine-chart path title')).not.toHaveLength(0)
+    const before = document.querySelectorAll('.piscine-chart path.progress-line').length
+
+    await user.click(band)
+    expect(document.querySelectorAll('.piscine-chart path.progress-line').length).toBeGreaterThan(
+      before,
+    )
   }, 20_000)
 })

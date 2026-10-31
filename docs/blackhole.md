@@ -142,6 +142,15 @@ nombra cada línea («C · Terminado · Madrid (93)», «Python · Terminado:
 login»), como la ficha al pasar y la tabla. Más de 10 líneas de medias a la vez
 no se pintan: se avisa para que quites alguna opción.
 
+**Percentiles 25 y 75** (pedido por Alberto el 2026-10-31): la casilla «Ver
+percentiles 25 y 75» (apagada de entrada) pone bajo cada media un tramo tenue
+de su color entre los dos, la mitad central de la gente; la ficha al pasar
+dice «(P25 … · P75 …)» y la leyenda explica el tramo. Salen de la API
+(`ProgressArea.quartiles`), con la misma regla que la media: `null` donde hay
+menos de 10 personas. Para no guardar la línea de cada cual, al hacer la foto
+cada punto de cada media lleva un histograma de 101 casillas (0 … 100 %) que
+se crea con el primer dato y se tira al acabar; el percentil va al % entero.
+
 El eje del tiempo se elige con «Periodo», el selector de toda la web
 (`PeriodPicker`, 2026-10-26): el primer mes, los primeros 3, 6, 12 o 24 meses
 (por defecto 24), «Todo», hasta el último dato (la API alarga las líneas hasta

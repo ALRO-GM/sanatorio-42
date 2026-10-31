@@ -103,6 +103,14 @@ export type ProgressArea = {
   /** Medida × población × plan. Sin bastante gente, `null` en cada punto. */
   averages: Record<ProgressMeasure, Record<ProgressPopulation, Record<CoreTrack, ProgressLine>>>
   /**
+   * Los percentiles 25 y 75 de cada media, al % entero: entre los dos está la
+   * mitad de la gente. `null` donde la media también lo es.
+   */
+  quartiles: Record<
+    ProgressMeasure,
+    Record<ProgressPopulation, Record<CoreTrack, { p25: ProgressLine; p75: ProgressLine }>>
+  >
+  /**
    * Donde una media tiene menos de `minPeople` personas, la línea de cada una en
    * su lugar (sin quien no se ve). Con bastante gente, vacío: va la media.
    */
@@ -258,4 +266,10 @@ export type PiscineProgress = {
   minPeople: number
   /** El nombre de tu campus, si se sabe. */
   campus: string | null
+  /**
+   * Solo en la vista sin límites del dueño (`docs/piscineros.md`): la línea
+   * de cada piscinero de la piscina, con su foto, para la lista de los más
+   * avanzados, la media de los mejores y quién cae entre dos percentiles.
+   */
+  everyone?: (PiscineTrace & { login: string; image: string | null })[]
 }

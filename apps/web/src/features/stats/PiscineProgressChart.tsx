@@ -13,7 +13,8 @@ const WEEK = 7
 /** Qué medias se ven. */
 export type PiscineShown = { cohort: boolean }
 
-type Line = {
+/** Una línea de más (la media de los mejores, quien cae entre dos percentiles). */
+export type Line = {
   key: string
   line: ProgressLine
   stroke: string
@@ -35,6 +36,8 @@ export function PiscineProgressChart(props: {
   data: PiscineProgress
   shown: PiscineShown
   others: readonly string[]
+  /** Líneas de más, debajo de las tuyas (la vista sin límites del dueño). */
+  extra?: readonly Line[]
 }) {
   const { t } = useI18n()
   const { data } = props
@@ -71,6 +74,7 @@ export function PiscineProgressChart(props: {
       label: each.login,
     }))
   const lines: Line[] = [
+    ...(props.extra ?? []),
     ...(props.shown.cohort
       ? [
           {

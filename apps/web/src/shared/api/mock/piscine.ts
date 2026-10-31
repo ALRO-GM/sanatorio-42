@@ -14,6 +14,8 @@ import type {
 } from '@sanatorio/contracts'
 
 import { ME, PISCINE_PROJECTS } from './data'
+import { poolUnrestricted } from './pool'
+import { portrait } from './portrait'
 import { state } from './state'
 
 const DAY = 86_400_000
@@ -118,6 +120,21 @@ const MATES: Record<string, [every: number, from: number]> = {
   'achen-pi': [2.5, 0],
 }
 
+/**
+ * Toda la piscina inventada, para la vista sin límites del dueño: cuarenta
+ * piscineros, de quien aprueba algo cada día y medio a quien va muy despacio.
+ */
+const everyone = (): NonNullable<PiscineProgress['everyone']> =>
+  Array.from({ length: 40 }, (_, index) => {
+    const login = `pisci${String(index + 1).padStart(2, '0')}`
+
+    return {
+      login,
+      image: portrait(login),
+      ...swim(1.5 + ((index * 7) % 40) / 6, index % 3, ELAPSED),
+    }
+  })
+
 /** El Avance de un piscinero: su línea, la de su piscina y con quien se compara. */
 export function piscineProgress(others: readonly string[]): PiscineProgress {
   return {
@@ -136,5 +153,6 @@ export function piscineProgress(others: readonly string[]): PiscineProgress {
     }),
     minPeople: 10,
     campus: 'Madrid',
+    ...(poolUnrestricted() ? { everyone: everyone() } : {}),
   }
 }

@@ -30,7 +30,7 @@ const CACHE_MS = 10 * 60_000
 
 /** Lo que se sabe de los piscineros en curso de un campus para el avance. */
 type Pool = {
-  people: Map<string, Swimmer>
+  people: Map<string, Swimmer & { image: string | null }>
   names: Map<number, string>
   campus: string | null
 }
@@ -57,14 +57,19 @@ export function createPiscineProgressService(options: {
       options.piscine.members(campusId),
       options.piscine.campusName(campusId),
     ])
-    const people = new Map<string, Swimmer & { done: Map<number, number> }>()
+    const people = new Map<string, Swimmer & { done: Map<number, number>; image: string | null }>()
 
     // Quien está en la piscina, aunque aún no tenga ninguna fila: cuenta con 0.
     for (const member of members) {
       const known = people.get(member.login)
 
       if (known === undefined) {
-        people.set(member.login, { login: member.login, start: member.begin, done: new Map() })
+        people.set(member.login, {
+          login: member.login,
+          start: member.begin,
+          done: new Map(),
+          image: member.image,
+        })
       } else known.start = Math.min(known.start, member.begin)
     }
     for (const row of rows) {
@@ -79,13 +84,15 @@ export function createPiscineProgressService(options: {
      * El avance de la piscina de quien mira, en su campus (`home`), con la
      * media de su piscina y hasta cinco piscineros de su
      * campus con quien compararse (`others`). `sees` quita a quien no se ve
-     * (personas ocultas) de las líneas con nombre.
+     * (personas ocultas) de las líneas con nombre. `everyone`: la vista sin
+     * límites del dueño, que trae además la línea de cada uno de la piscina.
      */
     async progress(
       actor: Actor,
       home: number,
       others: readonly string[],
       sees: (login: string) => boolean,
+      everyone = false,
     ): Promise<PiscineProgress> {
       const pool = await pools.get(String(home), () => load(home))
       const t = now()
@@ -147,6 +154,13 @@ export function createPiscineProgressService(options: {
           .slice(0, MAX_OTHERS),
         minPeople: MIN_PEOPLE,
         campus: pool.campus,
+        ...(everyone
+          ? {
+              everyone: cohort
+                .filter((person) => sees(person.login))
+                .map((person) => ({ login: person.login, image: person.image, ...trace(person) })),
+            }
+          : {}),
       }
     },
   }

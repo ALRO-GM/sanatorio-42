@@ -166,6 +166,8 @@ export function ProgressPage({ me }: { me: string }) {
     preset?.plan === undefined ? null : new Set(preset.plan),
   )
   const [paces, setPaces] = useState(preset?.paces ?? true)
+  // Los percentiles 25 y 75 de cada media, como un tramo: de entrada, no.
+  const [quartiles, setQuartiles] = useState(false)
   const [mine] = useState(preset?.me ?? true)
   const [range, setRange] = useState<Period>(
     () => rangeOf(preset?.range) ?? rangeOf(stored(RANGE_KEY)) ?? '24',
@@ -195,7 +197,7 @@ export function ProgressPage({ me }: { me: string }) {
     new Set(data?.track === undefined || data.track === null ? TRACKS : [data.track])
   const home = data?.home ?? null
   const campuses = chosen ?? (home === null ? [] : [home])
-  const picked = { tracks, populations, campuses, together }
+  const picked = { tracks, populations, campuses, together, quartiles }
   // Las sugerencias de «Los más rápidos»: de tu campus si va, y de cada campus
   // si van otros o todos juntos.
   const scopes = new Set<ProgressScope>([
@@ -300,6 +302,16 @@ export function ProgressPage({ me }: { me: string }) {
                 }}
               />{' '}
               {t('stats.progress.paces')}
+            </label>
+            <label className="progress-toggle">
+              <input
+                type="checkbox"
+                checked={quartiles}
+                onChange={(event) => {
+                  setQuartiles(event.target.checked)
+                }}
+              />{' '}
+              {t('stats.progress.quartiles')}
             </label>
           </div>
           <details className="progress-deep" open={deep}>

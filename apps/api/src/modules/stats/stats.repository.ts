@@ -422,17 +422,27 @@ export function createPiscineRepository(db: Db) {
       }))
     },
 
-    /** Los piscineros en curso de un campus, con el día en que empezó su piscina (ms). */
-    async members(campusId: number): Promise<{ login: string; begin: number }[]> {
+    /** Los piscineros en curso de un campus, con el día en que empezó su piscina (ms) y su foto. */
+    async members(
+      campusId: number,
+    ): Promise<{ login: string; begin: number; image: string | null }[]> {
       const result = await db.execute({
-        sql: 'SELECT login, begin_at FROM pool_members WHERE campus_id = ?',
+        sql: 'SELECT login, begin_at, image FROM pool_members WHERE campus_id = ?',
         args: [campusId],
       })
 
       return result.rows.flatMap((row) => {
         const begin = msOf(row.begin_at)
 
-        return begin === null ? [] : [{ login: toText(row.login).toLowerCase(), begin }]
+        return begin === null
+          ? []
+          : [
+              {
+                login: toText(row.login).toLowerCase(),
+                begin,
+                image: row.image === null ? null : toText(row.image),
+              },
+            ]
       })
     },
 

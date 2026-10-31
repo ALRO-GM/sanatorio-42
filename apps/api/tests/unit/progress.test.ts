@@ -322,6 +322,12 @@ describe('medias por población', () => {
     expect(here(progress).averages.circles.finished.classic[at60]).toBe(100)
     expect(here(progress).averages.circles.current.classic[at60]).toBe(57.1)
     expect(here(progress).averages.circles.blackholed.classic[at60]).toBe(14.3)
+    // Percentiles 25 y 75, al % entero: en curso + terminados son doce en el 14 y doce en el 100.
+    expect(here(progress).quartiles.circles.current.classic.p25[at60]).toBe(14)
+    expect(here(progress).quartiles.circles.current.classic.p75[at60]).toBe(100)
+    expect(here(progress).quartiles.circles.current.next.p75.every((value) => value === null)).toBe(
+      true,
+    )
     // Los absorbidos no siguen después de salir (día 100).
     expect(
       here(progress).averages.circles.blackholed.classic[progress.days.indexOf(120)],

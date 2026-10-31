@@ -248,6 +248,40 @@ describe('el avance de la piscina', () => {
     // Con dos no hay media: van sus líneas, sin quien no se ve.
     expect(data.cohort.line[0]).toBeNull()
     expect(data.cohort.individuals.map((each) => each.login)).toEqual(['mate0'])
+    // Sin la vista sin límites, la piscina entera no viene.
+    expect(data).not.toHaveProperty('everyone')
+  })
+
+  it('la vista sin límites del dueño trae la línea de cada uno de la piscina, sin quien no se ve', async () => {
+    const ids = await seedProjects()
+
+    await person(
+      10,
+      'rapido',
+      START,
+      { 'c-piscine-shell-00': 0, 'c-piscine-shell-01': 1 },
+      ids,
+      true,
+    )
+    await person(11, 'lento', START, { 'c-piscine-shell-00': 1 }, ids, true)
+    await person(12, 'oculto', START, { 'c-piscine-shell-00': 0 }, ids, true)
+
+    const service = createPiscineProgressService({
+      piscine: createPiscineRepository(db),
+      now: () => START + 3 * DAY,
+    })
+    const data = await service.progress(
+      actor('albrodri', { pool: true }),
+      22,
+      [],
+      (login) => login !== 'oculto',
+      true,
+    )
+
+    expect(data.everyone?.map((each) => [each.login, each.done]).sort()).toEqual([
+      ['lento', 1],
+      ['rapido', 2],
+    ])
   })
 
   it('un campus sin nadie: todo vacío, sin fallar', async () => {

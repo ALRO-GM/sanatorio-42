@@ -51,6 +51,9 @@ export const poolPreviewing = (): boolean => {
   return value === 'true' || value === FULL
 }
 
+/** Si es la vista sin límites del dueño. */
+export const poolUnrestricted = (): boolean => localStorage.getItem(PREVIEW) === FULL
+
 /** Si se está viendo la web como piscinero (`mock_pool` o la vista previa): entonces, la piscina. */
 export const poolMocking = (): boolean =>
   poolPreviewing() || localStorage.getItem('mock_pool') === 'true'
@@ -87,7 +90,7 @@ export const poolMock: Pick<
   async getPoolAccess() {
     await delay(40)
 
-    if (localStorage.getItem(PREVIEW) === FULL) {
+    if (poolUnrestricted()) {
       return { pool: true, allow: null, preview: true, unrestricted: true }
     }
     if (poolPreviewing()) return { pool: true, allow: effective(settings.allow), preview: true }

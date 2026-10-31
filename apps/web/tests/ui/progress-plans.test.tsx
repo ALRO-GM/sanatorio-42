@@ -38,6 +38,20 @@ const toggle = async (user: ReturnType<typeof userEvent.setup>, groupKey: string
 const together = (): HTMLElement =>
   screen.getByRole('checkbox', { name: text('stats.progress.together') })
 
+describe('Avance: los percentiles 25 y 75', () => {
+  it('apagados de entrada; al encenderlos, cada media lleva su tramo y su leyenda', async () => {
+    const user = userEvent.setup()
+
+    await openApp('#/avance')
+    await ready()
+    expect(chartCard().querySelectorAll('.progress-band')).toHaveLength(0)
+
+    await user.click(screen.getByRole('checkbox', { name: text('stats.progress.quartiles') }))
+    expect(chartCard().querySelectorAll('.progress-band')).toHaveLength(1)
+    expect(legendItems()).toContain(text('stats.progress.quartilesLegend'))
+  }, 20_000)
+})
+
 describe('Avance: cada opción encendida suma sus líneas', () => {
   it('por defecto tu plan, en curso + terminado y tu campus: una media, con su gente', async () => {
     await openApp('#/avance')
