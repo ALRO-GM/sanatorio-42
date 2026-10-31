@@ -78,6 +78,12 @@
 .progress-chart {
   position: relative;
 }
+/* La lupa, encima de la gráfica a la derecha: sin tapar las líneas. */
+.progress-tools {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.2rem;
+}
 .progress-chart > svg {
   display: block;
   width: 100%;

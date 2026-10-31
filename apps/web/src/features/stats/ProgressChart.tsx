@@ -10,6 +10,7 @@ import { MAX_LINES, ME_STYLE, TRACKS, areasOf, groupSeries, personStyle } from '
 import type { GroupKey, LineStyle, Picked, Series } from './progressSeries'
 import { finishedStretch, nextStop, stepped, stopsOf, tracePoints } from './progressTrace'
 import type { Stop } from './progressTrace'
+import { zoomLast, zoomTop } from './progressZoom'
 
 const WIDTH = 640
 const HEIGHT = 280
@@ -52,11 +53,14 @@ const scaleX =
   (first: number, last: number): Scale =>
   (day) =>
     PAD.left + ((day - first) / Math.max(1, last - first)) * (WIDTH - PAD.left - PAD.right)
-const y = (value: number): number =>
-  HEIGHT - PAD.bottom - (value / 100) * (HEIGHT - PAD.top - PAD.bottom)
+/** La altura de cada valor, con el eje vertical del 0 al `top` % (la lupa lo baja). */
+const scaleY =
+  (top: number): Scale =>
+  (value) =>
+    HEIGHT - PAD.bottom - (value / top) * (HEIGHT - PAD.top - PAD.bottom)
 
 /** Un trazo de SVG por esos puntos `[día, %]`. */
-const pathThrough = (x: Scale, points: readonly [number, number][]): string =>
+const pathThrough = (x: Scale, y: Scale, points: readonly [number, number][]): string =>
   points
     .map(
       ([day, value], index) =>
@@ -65,7 +69,7 @@ const pathThrough = (x: Scale, points: readonly [number, number][]): string =>
     .join('')
 
 /** Los puntos de una línea en SVG, saltándose los huecos (`null`). */
-function pathOf(x: Scale, days: readonly number[], line: ProgressLine): string {
+function pathOf(x: Scale, y: Scale, days: readonly number[], line: ProgressLine): string {
   let path = ''
   let open = false
 
@@ -87,7 +91,13 @@ function pathOf(x: Scale, days: readonly number[], line: ProgressLine): string {
  * El tramo entre dos líneas (los percentiles 25 y 75): arriba de ida y abajo de
  * vuelta, un trozo por cada racha de días con los dos valores.
  */
-function bandOf(x: Scale, days: readonly number[], low: ProgressLine, high: ProgressLine): string {
+function bandOf(
+  x: Scale,
+  y: Scale,
+  days: readonly number[],
+  low: ProgressLine,
+  high: ProgressLine,
+): string {
   let path = ''
   let run: [number, number, number][] = []
   const close = (): void => {
@@ -146,6 +156,7 @@ type Tag = {
  */
 function tagsOf(
   x: Scale,
+  y: Scale,
   days: readonly number[],
   series: readonly Series[],
   shown: (day: number) => boolean,
@@ -267,12 +278,10 @@ export function ProgressChart({
   const { t, tn } = useI18n()
   const { number } = useFormat()
   const [hover, setHover] = useState<Stop | null>(null)
+  const [zoom, setZoom] = useState(false)
   // El eje del tiempo va del principio al final del periodo; con «Todo», hasta el último dato.
   const firstDay = span.first
-  const lastDay = Math.max(firstDay + 1, span.last ?? data.days.at(-1) ?? 730)
-  const x = scaleX(firstDay, lastDay)
-  // Un día de margen: el pace de 8 meses acaba en el 244 y 8 meses son 243,3 días.
-  const shown = (day: number): boolean => day >= firstDay - 1 && day <= lastDay + 1
+  const periodLast = Math.max(firstDay + 1, span.last ?? data.days.at(-1) ?? 730)
   const groups = groupSeries(data, measure, picked, {
     plan: (track) => t(`stats.progress.plan.${track}`),
     population: (population) => t(`stats.progress.population.${population}`),
@@ -311,6 +320,23 @@ export function ProgressChart({
           },
         ]),
   ]
+  // Con la lupa, el tiempo acaba con la persona que más lejos llega (`progressZoom.ts`).
+  const lastDay = zoom
+    ? zoomLast(
+        data.days,
+        every.flatMap((each) =>
+          // Tú y con quien te comparas: las sueltas de una media con poca gente, no.
+          each.trace === undefined || (each.key !== 'me' && !people.includes(each))
+            ? []
+            : [{ line: each.line, trace: each.trace }],
+        ),
+        firstDay,
+        periodLast,
+      )
+    : periodLast
+  const x = scaleX(firstDay, lastDay)
+  // Un día de margen: el pace de 8 meses acaba en el 244 y 8 meses son 243,3 días.
+  const shown = (day: number): boolean => day >= firstDay - 1 && day <= lastDay + 1
   // Solo lo que cae en el periodo, más el punto de antes de su borde izquierdo
   // para que la línea entre por él (el `clipPath` corta lo que sobra). Por la
   // derecha, la línea se corta en el borde.
@@ -327,6 +353,24 @@ export function ProgressChart({
   const traced = series.flatMap((each) =>
     each.trace === undefined ? [] : [{ key: each.key, trace: each.trace, series: each }],
   )
+  // Con la lupa, el eje vertical llega a lo más alto que se ve en ese tiempo, paces incluidos.
+  const top = zoom
+    ? zoomTop(
+        series.flatMap((each) =>
+          each.band === undefined ? [each.line] : [each.line, each.band.p75],
+        ),
+        traced.flatMap(({ trace }) =>
+          trace.milestones.map((milestone) => ({
+            day: milestone.day,
+            value: milestone.value[measure],
+          })),
+        ),
+        paces ? data.paces[measure].map((line) => line.points) : [],
+        firstDay,
+        lastDay,
+      )
+    : 100
+  const y = scaleY(top)
   const stops = stopsOf(days, traced, firstDay - 1, lastDay + 1)
   const id = useId().replace(/:/g, '')
   const clip = `progress-clip-${id}`
@@ -337,7 +381,7 @@ export function ProgressChart({
     (sum, track) => sum + counted.reduce((each, area) => each + area.census[track].unknown, 0),
     0,
   )
-  const ticks = axisTicks(data, measure, t, number)
+  const ticks = axisTicks(data, measure, t, number).filter((tick) => tick.at <= top + 0.01)
   /** «48 %» y, por horas, «48 % · 690 h» con las horas del plan de esa línea. */
   const valueOf = (value: number | null | undefined, hours: number | null): string =>
     value === null || value === undefined
@@ -443,6 +487,21 @@ export function ProgressChart({
           {t('stats.progress.tooMany', { n: groups.series.length, max: MAX_LINES })}
         </p>
       )}
+      {/* La lupa: ajusta los ejes a lo que se ve (`progressZoom.ts`). */}
+      <div className="progress-tools">
+        <button
+          type="button"
+          className={`pill icon-btn${zoom ? ' active' : ''}`}
+          aria-pressed={zoom}
+          aria-label={t('stats.progress.zoom')}
+          title={t(zoom ? 'stats.progress.zoomOff' : 'stats.progress.zoomOn')}
+          onClick={() => {
+            setZoom(!zoom)
+          }}
+        >
+          <Icon name="lupa" size={16} />
+        </button>
+      </div>
       <div className="progress-chart">
         <svg
           viewBox={`0 0 ${String(WIDTH)} ${String(HEIGHT)}`}
@@ -494,7 +553,7 @@ export function ProgressChart({
 
                 return (
                   <g key={line.pace} className="progress-pace">
-                    <path clipPath={`url(#${clip})`} d={pathThrough(x, line.points)} />
+                    <path clipPath={`url(#${clip})`} d={pathThrough(x, y, line.points)} />
                     {end !== undefined && paceTags.has(line.pace) && (
                       // Arriba del todo, debajo de la raya: ahí va el tramo de quien terminó.
                       <text
@@ -515,7 +574,7 @@ export function ProgressChart({
                   key={`band-${each.key}`}
                   className="progress-band"
                   clipPath={`url(#${clip})`}
-                  d={bandOf(x, days, each.band.p25, each.band.p75)}
+                  d={bandOf(x, y, days, each.band.p25, each.band.p75)}
                   fill={each.style.stroke}
                 />
               ),
@@ -542,14 +601,16 @@ export function ProgressChart({
                   <path
                     className="progress-line"
                     d={
-                      points === null ? pathOf(x, days, each.line) : pathThrough(x, stepped(points))
+                      points === null
+                        ? pathOf(x, y, days, each.line)
+                        : pathThrough(x, y, stepped(points))
                     }
                     {...strokeOf(each.style)}
                   />
                   {stretch !== null && (
                     <path
                       className="progress-finished"
-                      d={pathThrough(x, stretch)}
+                      d={pathThrough(x, y, stretch)}
                       stroke={each.style.stroke}
                       strokeWidth={each.style.width + 1.5}
                     />
@@ -584,7 +645,7 @@ export function ProgressChart({
                 </g>
               )
             })}
-            {tagsOf(x, days, series, shown).map((tag) => (
+            {tagsOf(x, y, days, series, shown).map((tag) => (
               <text
                 key={tag.key}
                 className="progress-tag"

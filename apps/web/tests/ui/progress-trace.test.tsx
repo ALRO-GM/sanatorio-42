@@ -47,8 +47,12 @@ describe('Avance: quien terminó y sus hitos', () => {
       within(rail).getByRole('checkbox', { name: text('stats.progress.together') }),
     ).toBeTruthy()
     expect(within(rail).getByRole('checkbox', { name: text('stats.progress.paces') })).toBeTruthy()
-    // La gráfica no lleva opciones dentro.
-    expect(within(chartCard()).queryAllByRole('button')).toHaveLength(0)
+    // La gráfica no lleva opciones dentro: solo la lupa, que la ajusta a lo que se ve.
+    expect(
+      within(chartCard())
+        .queryAllByRole('button')
+        .map((button) => button.getAttribute('aria-label')),
+    ).toEqual([text('stats.progress.zoom')])
   })
 
   it('el tramo terminado se resalta y el trofeo cae el día en que terminó', async () => {

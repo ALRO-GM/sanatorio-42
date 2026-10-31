@@ -52,6 +52,34 @@ describe('Avance: los percentiles 25 y 75', () => {
   }, 20_000)
 })
 
+describe('Avance: la lupa', () => {
+  it('ajusta el tiempo a tu línea y la altura a lo más alto que se ve; otra vez, como antes', async () => {
+    const user = userEvent.setup()
+    const months = (): string[] =>
+      [...chartCard().querySelectorAll('.progress-axis')].map((node) => node.textContent)
+
+    await openApp('#/avance')
+    await ready()
+    const before = { months: months(), axis: axis() }
+    const lupa = screen.getByRole('button', { name: text('stats.progress.zoom') })
+
+    expect(lupa.getAttribute('aria-pressed')).toBe('false')
+    await user.click(lupa)
+    expect(lupa.getAttribute('aria-pressed')).toBe('true')
+    // El tiempo, hasta tu último dato (8 meses en la API de mentira), no hasta los dos años.
+    expect(months().at(-1)).toBe('8 m')
+    // Con los paces, el de 8 meses llega al 100 % en ese tramo: la altura no baja.
+    expect(axis()).toEqual(before.axis)
+    // Sin ellos, solo hasta lo más alto de tu línea y de la media.
+    await user.click(screen.getByRole('checkbox', { name: text('stats.progress.paces') }))
+    expect(axis()).toEqual(['Inicio', 'Círculo 0', 'Círculo 1', 'Círculo 2'])
+
+    await user.click(lupa)
+    expect(months()).toEqual(before.months)
+    expect(axis()).toEqual(before.axis)
+  }, 20_000)
+})
+
 describe('Avance: cada opción encendida suma sus líneas', () => {
   it('por defecto tu plan, en curso + terminado y tu campus: una media, con su gente', async () => {
     await openApp('#/avance')

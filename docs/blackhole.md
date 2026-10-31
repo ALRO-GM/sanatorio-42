@@ -151,6 +151,15 @@ menos de 10 personas. Para no guardar la línea de cada cual, al hacer la foto
 cada punto de cada media lleva un histograma de 101 casillas (0 … 100 %) que
 se crea con el primer dato y se tira al acabar; el percentil va al % entero.
 
+**La lupa** (pedida por Alberto el 2026-10-31): el botón de la lupa, encima
+de la gráfica a la derecha, la ajusta a lo que se ve (`progressZoom.ts`). El
+tiempo acaba el último día de la persona que más lejos llega, tú o con quien te
+comparas (quien terminó, el día que terminó), sin pasar del periodo; ni las
+medias ni los paces lo alargan. La altura llega a lo más alto que se ve en ese
+tiempo: medias, su P75 si van los percentiles, personas, hitos y paces (con su
+valor en el borde), con un 5 % de aire y entre el 5 % y el 100 %; las marcas del
+eje que quedan por encima no se pintan. Otro clic la quita.
+
 El eje del tiempo se elige con «Periodo», el selector de toda la web
 (`PeriodPicker`, 2026-10-26): el primer mes, los primeros 3, 6, 12 o 24 meses
 (por defecto 24), «Todo», hasta el último dato (la API alarga las líneas hasta
