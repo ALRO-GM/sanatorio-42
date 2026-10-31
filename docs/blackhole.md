@@ -160,6 +160,14 @@ tiempo: medias, su P75 si van los percentiles, personas, hitos y paces (con su
 valor en el borde), con un 5 % de aire y entre el 5 % y el 100 %; las marcas del
 eje que quedan por encima no se pintan. Otro clic la quita.
 
+**Forma de las líneas** (pedida por Alberto el 2026-10-31): en el panel,
+«A saltos por proyecto» (de entrada) o «Continua y suave», y se recuerda
+(`sanatorio_progress_shape`). A saltos, la línea de cada persona sube de golpe
+el día en que aprobó cada proyecto y las medias van de punto a punto.
+Continua, todas pasan por los mismos puntos e hitos con una curva monótona
+(`monotonePath` en `progressTrace.ts`, Fritsch–Carlson), que no baja donde la
+línea no baja ni se pasa del 100 %.
+
 El eje del tiempo se elige con «Periodo», el selector de toda la web
 (`PeriodPicker`, 2026-10-26): el primer mes, los primeros 3, 6, 12 o 24 meses
 (por defecto 24), «Todo», hasta el último dato (la API alarga las líneas hasta

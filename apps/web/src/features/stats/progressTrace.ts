@@ -132,3 +132,64 @@ export function nextStop(stops: readonly Stop[], current: Stop | null, key: stri
 
   return to === null ? null : (stops[to] ?? null)
 }
+
+/**
+ * Un trazo de SVG suave por esos puntos (ya en el dibujo, `[x, y]`): una curva
+ * monótona (Fritsch–Carlson) que pasa por todos y no se pasa de ninguno, así
+ * que no baja donde la línea no baja ni sube del 100 %. Es la forma «continua»
+ * del Avance, en vez de los saltos de cada proyecto.
+ */
+export function monotonePath(points: readonly Point[]): string {
+  const at = ([px, py]: Point): string => `${px.toFixed(1)},${py.toFixed(1)}`
+  const first = points[0]
+
+  if (first === undefined) return ''
+  if (points.length < 3)
+    return points.map((point, index) => `${index === 0 ? 'M' : 'L'}${at(point)}`).join('')
+  // La pendiente de cada tramo y la tangente en cada punto.
+  const slopes = points.slice(1).map(([px, py], index) => {
+    const [fromX, fromY] = points[index] ?? first
+
+    return px === fromX ? 0 : (py - fromY) / (px - fromX)
+  })
+  const tangents = points.map((_, index) => {
+    const before = slopes[index - 1]
+    const after = slopes[index]
+
+    if (before === undefined) return after ?? 0
+    if (after === undefined) return before
+
+    return before * after <= 0 ? 0 : (before + after) / 2
+  })
+
+  slopes.forEach((slope, index) => {
+    if (slope === 0) {
+      tangents[index] = 0
+      tangents[index + 1] = 0
+      return
+    }
+    const a = (tangents[index] ?? 0) / slope
+    const b = (tangents[index + 1] ?? 0) / slope
+    const size = a * a + b * b
+
+    if (size > 9) {
+      const tau = 3 / Math.sqrt(size)
+
+      tangents[index] = tau * a * slope
+      tangents[index + 1] = tau * b * slope
+    }
+  })
+
+  let path = `M${at(first)}`
+
+  points.slice(1).forEach(([px, py], index) => {
+    const [fromX, fromY] = points[index] ?? first
+    const third = (px - fromX) / 3
+
+    path +=
+      `C${at([fromX + third, fromY + (tangents[index] ?? 0) * third])}` +
+      ` ${at([px - third, py - (tangents[index + 1] ?? 0) * third])} ${at([px, py])}`
+  })
+
+  return path
+}

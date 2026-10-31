@@ -8,7 +8,14 @@ import { useFormat } from '../../shared/i18n/useFormat'
 import { Icon } from '../../shared/ui/Icon'
 import { MAX_LINES, ME_STYLE, TRACKS, areasOf, groupSeries, personStyle } from './progressSeries'
 import type { GroupKey, LineStyle, Picked, Series } from './progressSeries'
-import { finishedStretch, nextStop, stepped, stopsOf, tracePoints } from './progressTrace'
+import {
+  finishedStretch,
+  monotonePath,
+  nextStop,
+  stepped,
+  stopsOf,
+  tracePoints,
+} from './progressTrace'
 import type { Stop } from './progressTrace'
 import { zoomLast, zoomTop } from './progressZoom'
 
@@ -68,24 +75,41 @@ const pathThrough = (x: Scale, y: Scale, points: readonly [number, number][]): s
     )
     .join('')
 
-/** Los puntos de una línea en SVG, saltándose los huecos (`null`). */
-function pathOf(x: Scale, y: Scale, days: readonly number[], line: ProgressLine): string {
-  let path = ''
-  let open = false
+/** Un trazo suave por esos puntos `[día, %]` (`monotonePath`). */
+const curveThrough = (x: Scale, y: Scale, points: readonly [number, number][]): string =>
+  monotonePath(points.map(([day, value]) => [x(day), y(value)]))
+
+/**
+ * Los puntos de una línea en SVG, saltándose los huecos (`null`): cada racha
+ * de días con valor, recta de punto a punto o, `smooth`, en curva suave.
+ */
+function pathOf(
+  x: Scale,
+  y: Scale,
+  days: readonly number[],
+  line: ProgressLine,
+  smooth = false,
+): string {
+  const runs: [number, number][][] = [[]]
 
   line.forEach((value, index) => {
     const day = days[index]
 
-    if (value === null || day === undefined) {
-      open = false
-      return
-    }
-    path += `${open ? 'L' : 'M'}${x(day).toFixed(1)},${y(value).toFixed(1)}`
-    open = true
+    if (value === null || day === undefined) runs.push([])
+    else runs.at(-1)?.push([day, value])
   })
 
-  return path
+  return runs
+    .filter((run) => run.length > 0)
+    .map((run) => (smooth ? curveThrough(x, y, run) : pathThrough(x, y, run)))
+    .join('')
 }
+
+/**
+ * Cómo se dibuja cada línea: a saltos, subiendo de golpe el día en que se
+ * aprueba cada proyecto, o continua y suave (pedido por Alberto, 2026-10-31).
+ */
+export type LineShape = 'steps' | 'smooth'
 
 /**
  * El tramo entre dos líneas (los percentiles 25 y 75): arriba de ida y abajo de
@@ -266,6 +290,7 @@ export function ProgressChart({
   paces,
   span,
   mine = true,
+  shape = 'steps',
 }: {
   data: StatsProgress
   measure: ProgressMeasure
@@ -274,6 +299,8 @@ export function ProgressChart({
   span: Span
   /** Si va tu línea (un enlace puede pedir que no). */
   mine?: boolean
+  /** A saltos por proyecto o continua y suave. */
+  shape?: LineShape
 }) {
   const { t, tn } = useI18n()
   const { number } = useFormat()
@@ -602,8 +629,10 @@ export function ProgressChart({
                     className="progress-line"
                     d={
                       points === null
-                        ? pathOf(x, y, days, each.line)
-                        : pathThrough(x, y, stepped(points))
+                        ? pathOf(x, y, days, each.line, shape === 'smooth')
+                        : shape === 'smooth'
+                          ? curveThrough(x, y, points)
+                          : pathThrough(x, y, stepped(points))
                     }
                     {...strokeOf(each.style)}
                   />

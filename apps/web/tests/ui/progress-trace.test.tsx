@@ -171,3 +171,30 @@ describe('Avance: quien terminó y sus hitos', () => {
     expect(screen.queryByRole('status')).toBeNull()
   })
 })
+
+describe('Avance: la forma de las líneas', () => {
+  it('a saltos por proyecto de entrada; continua y suave al elegirla, y se recuerda', async () => {
+    const user = userEvent.setup()
+    const mine = (): string =>
+      chartCard().querySelector('[data-series="me"] .progress-line')?.getAttribute('d') ?? ''
+
+    await openApp('#/avance')
+    await ready()
+    const group = screen.getByRole('group', { name: text('stats.progress.shape') })
+
+    // A saltos: solo rectas.
+    expect(mine()).toMatch(/^M/)
+    expect(mine()).not.toContain('C')
+
+    await user.click(
+      within(group).getByRole('button', { name: text('stats.progress.shape.smooth') }),
+    )
+    expect(mine()).toContain('C')
+    expect(localStorage.getItem('sanatorio_progress_shape')).toBe('smooth')
+
+    await user.click(
+      within(group).getByRole('button', { name: text('stats.progress.shape.steps') }),
+    )
+    expect(mine()).not.toContain('C')
+  })
+})

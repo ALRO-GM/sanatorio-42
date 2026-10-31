@@ -24,7 +24,7 @@ import { readProgressPreset } from '../../shared/links'
 import { PERIODS, periodOf } from '../../shared/period'
 import type { Period } from '../../shared/period'
 import { MONTH, ProgressChart } from './ProgressChart'
-import type { Span } from './ProgressChart'
+import type { LineShape, Span } from './ProgressChart'
 import { ProgressCompare } from './ProgressCompare'
 import { ProgressRanking } from './ProgressRanking'
 import { ProgressTour } from './ProgressTour'
@@ -36,6 +36,9 @@ const RANGE_KEY = 'sanatorio_progress_range'
 /** Los meses de «a mano» (`desde,hasta`), aparte del periodo. */
 const MONTHS_KEY = 'sanatorio_progress_months'
 const MEASURES: readonly ProgressMeasure[] = ['circles', 'hours']
+/** La forma de las líneas, guardada: a saltos o continua. */
+const SHAPE_KEY = 'sanatorio_progress_shape'
+const SHAPES: readonly LineShape[] = ['steps', 'smooth']
 /** Lo de «a mano» antes de tocarlo: los dos años del pace más lento. */
 const DEFAULT_MONTHS = { from: '0', to: '24' }
 
@@ -168,6 +171,9 @@ export function ProgressPage({ me }: { me: string }) {
   const [paces, setPaces] = useState(preset?.paces ?? true)
   // Los percentiles 25 y 75 de cada media, como un tramo: de entrada, no.
   const [quartiles, setQuartiles] = useState(false)
+  const [shape, setShape] = useState<LineShape>(() =>
+    stored(SHAPE_KEY) === 'smooth' ? 'smooth' : 'steps',
+  )
   const [mine] = useState(preset?.me ?? true)
   const [range, setRange] = useState<Period>(
     () => rangeOf(preset?.range) ?? rangeOf(stored(RANGE_KEY)) ?? '24',
@@ -241,6 +247,7 @@ export function ProgressPage({ me }: { me: string }) {
               paces={paces}
               span={spanOf(range, months)}
               mine={mine}
+              shape={shape}
             />
           )}
         </article>
@@ -258,6 +265,18 @@ export function ProgressPage({ me }: { me: string }) {
             <p className="hint progress-measure-hint">
               {t(`stats.progress.measure.${measure}.hint`, { n: number(data?.axis.hours ?? 0) })}
             </p>
+          </Option>
+          <Option label={t('stats.progress.shape')}>
+            <PillGroup
+              options={SHAPES}
+              value={shape}
+              onChange={(next) => {
+                setShape(next)
+                store(SHAPE_KEY, next)
+              }}
+              label={t('stats.progress.shape')}
+              text={(value) => t(`stats.progress.shape.${value}`)}
+            />
           </Option>
           <Option label={t('stats.progress.plan')}>
             <Toggles
