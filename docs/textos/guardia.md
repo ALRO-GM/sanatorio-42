@@ -3,13 +3,15 @@
 Generado desde `apps/web/src/shared/i18n/textos/guardia.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-78 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
+80 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera | Francés |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | `help.title` | Título de la página de tu on-call | features/help/Guardia | Tu on-call de hoy | Your on-call today | El teu on-call d'avui | Zure gaurko on-call-a | Ton on-call du jour |
 | `help.today` | Tarjeta de tus medias horas de hoy | features/help/DayEditor, features/help/GuardTour | Franjas de hoy | Today's slots | Franges d'avui | Gaurko tarteak | Créneaux du jour |
 | `help.dragHint` | On-call: cómo se marcan las medias horas en la rejilla | features/help/DayEditor | Arrastra por las horas en las que te ofreces; arrastra sobre las marcadas para quitarlas. | Drag over the hours you offer; drag over marked ones to remove them. | Arrossega per les hores en què t'ofereixes; arrossega sobre les marcades per treure-les. | Arrastatu eskaintzen zaren orduetatik; arrastatu markatuen gainetik kentzeko. | Fais glisser sur les heures où tu es dispo ; refais-le sur celles déjà marquées pour les retirer. |
+| `help.wholeDay` | On-call: botón bajo las medias horas que enseña también las que quedan hasta medianoche (de fábrica solo salen las horas con algo) | features/help/DayEditor | Ver el resto del día | Show the rest of the day | Mira la resta del dia | Ikusi egunaren gainerakoa | Voir le reste de la journée |
+| `help.shortDay` | On-call: botón que vuelve a recoger las medias horas a las que tienen algo | features/help/DayEditor | Ver menos horas | Show fewer hours | Mira menys hores | Ikusi ordu gutxiago | Voir moins d'heures |
 | `help.max` | Tope de tiempo que quieres ayudar hoy | features/help/DayEditor, features/help/GuardTour | Como mucho quiero ayudar | At most I want to help | Com a molt vull ajudar | Gehienez hau lagundu nahi dut | Temps d'aide maximum |
 | `help.noWindows` | No has marcado ninguna media hora | features/help/DayEditor | Ahora mismo no te ofreces en ninguna franja. | You are not offering any slot right now. | Ara mateix no t'ofereixes en cap franja. | Une honetan ez zara inongo tartetan eskaintzen. | Pour l'instant, tu ne proposes aucun créneau. |
 | `help.summary` | Cuánto te ofreces y cuánto te pueden reservar | features/help/DayEditor | Te ofreces {offered}; te podrán reservar {max} como mucho. | You offer {offered}; up to {max} can be booked. | T'ofereixes {offered}; et podran reservar {max} com a molt. | {offered} eskaintzen duzu; gehienez {max} erreserbatu ahal izango dizute. | Tu proposes {offered} ; on pourra te réserver {max} au maximum. |

@@ -113,6 +113,11 @@ export function readProgressPreset(hash: string): ProgressPreset | null {
   return Object.values(preset).some((value) => value !== undefined) ? preset : null
 }
 
+/** Peer to peer: la lista de proyectos, o quién ayuda con uno (`#/consulta/1314`). */
+export function waitingHref(project: number | null = null): string {
+  return project === null ? '#/consulta' : `#/consulta/${project}`
+}
+
 /** Not-games: la lista de salas, o una sala si se dice cuál. */
 export function notGamesHref(room: number | null = null): string {
   return room === null ? '#/notgames' : `#/notgames/${room}`

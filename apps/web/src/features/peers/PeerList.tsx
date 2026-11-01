@@ -4,6 +4,7 @@ import type { Peer, ProjectStatus, ProjectSummary } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
+import { useMediaQuery } from '../../shared/hooks/useMediaQuery'
 import { usePolling } from '../../shared/hooks/usePolling'
 import { useI18n } from '../../shared/i18n'
 import { Show, shows, useDetail } from '../../shared/detail'
@@ -38,6 +39,9 @@ function rank(peer: Peer): number {
 const REFRESH_MS = 60_000
 // Si el proyecto aún se está copiando, se insiste antes para ver llegar al resto.
 const REFRESH_PARTIAL_MS = 8_000
+// En el móvil el mapa llena la pantalla: ahí la gente va primero y el mapa
+// después (revisión de la UX del 2026-11). Mismo corte que el resto de la web.
+const NARROW_QUERY = '(max-width: 640px)'
 
 type TypeFilter = 'all' | ProjectStatus
 
@@ -63,6 +67,7 @@ export function PeerList({ project, onOpenTherapy }: PeerListProps) {
   const [booking, setBooking] = useState<string | null>(null)
   // Con quién te has corregido ya: sirve para animar a buscar caras nuevas.
   const network = useAsync(() => api.getNetworkMine(), [])
+  const narrow = useMediaQuery(NARROW_QUERY)
 
   const partial = data?.partial === true
 
@@ -107,6 +112,11 @@ export function PeerList({ project, onOpenTherapy }: PeerListProps) {
 
   const inProgressOnDuty = peers.filter((p) => onDuty(p) && p.status === 'in_progress')
   const openGroups = groups.data?.length ?? 0
+  const map = (
+    <PoolOnly k="consulta.map">
+      <ProjectMap projectId={project.id} spotlight={spotlight} />
+    </PoolOnly>
+  )
 
   return (
     <section>
@@ -144,9 +154,7 @@ export function PeerList({ project, onOpenTherapy }: PeerListProps) {
         </p>
       )}
       {peers.length === 0 && <p>{t('peers.nobody')}</p>}
-      <PoolOnly k="consulta.map">
-        <ProjectMap projectId={project.id} spotlight={spotlight} />
-      </PoolOnly>
+      {!narrow && map}
       <div className="filters">
         <Show from="normal">
           <PillGroup<TypeFilter>
@@ -311,6 +319,7 @@ export function PeerList({ project, onOpenTherapy }: PeerListProps) {
           )
         })}
       </ul>
+      {narrow && map}
     </section>
   )
 }

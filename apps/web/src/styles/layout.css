@@ -92,6 +92,24 @@
 .block-arrow {
   transition: transform 0.2s;
 }
+/* Abierto, el nombre es el título del bloque: a la izquierda, como los demás
+   títulos, y separado de la tarjeta de arriba. Pequeño y a la derecha parecía
+   el pie de esa tarjeta (revisión de la UX del 2026-11). */
+.block:not(.folded) > .block-head {
+  margin: 0 0 0.35rem;
+  padding: 0.1rem 0;
+  color: var(--text-3);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.block:not(.folded) > .block-head:hover {
+  color: var(--accent-text);
+}
+.block + .block:not(.folded) > .block-head {
+  margin-top: 1.1rem;
+}
 /* Plegado: una barra con el nombre del bloque, que es lo único que queda de él. */
 .block.folded .block-head {
   width: 100%;

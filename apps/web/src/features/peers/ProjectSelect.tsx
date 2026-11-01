@@ -14,24 +14,30 @@ type ProjectSelectProps = {
   onSelect: (project: ProjectSummary) => void
   /** Si solo hay un proyecto para elegir, elegirlo sin esperar al clic. */
   autoPick?: boolean
+  /** El proyecto que hay que abrir sin esperar al clic si está en la lista (con `autoPick`). */
+  wanted?: number | null
 }
 
 /**
  * La sala de espera: tus proyectos en curso, para elegir con cuál necesitas
  * ayuda. Un piscinero, todos los de la piscina.
  */
-export function ProjectSelect({ onSelect, autoPick = false }: ProjectSelectProps) {
+export function ProjectSelect({ onSelect, autoPick = false, wanted = null }: ProjectSelectProps) {
   const { t } = useI18n()
   const { data, error, loading, reload } = useAsync(() => api.getMyProjects(), [])
   // Lo que llega con grupo es de la piscina: la lista de un piscinero.
   const piscine = data?.some((project) => project.group !== undefined) === true
   // Un estudiante con un solo proyecto en curso va directo a quién le ayuda: un
   // clic menos en el camino de quien se atasca. Un piscinero ve siempre la lista.
-  const only = autoPick && !piscine && data?.length === 1 ? data[0] : undefined
+  // Y el que pide la dirección o se dejó abierto antes de irse a otra sección.
+  const asked = wanted === null ? undefined : data?.find((project) => project.id === wanted)
+  const auto = !autoPick
+    ? undefined
+    : (asked ?? (!piscine && data?.length === 1 ? data[0] : undefined))
 
   useEffect(() => {
-    if (only !== undefined) onSelect(only)
-  }, [only, onSelect])
+    if (auto !== undefined) onSelect(auto)
+  }, [auto, onSelect])
 
   if (loading) {
     return <p>{t('projects.loading')}</p>

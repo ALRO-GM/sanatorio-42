@@ -12,14 +12,14 @@ Cómo se trabaja con ellas: [docs/textos.md](../textos.md).
 | [calendario](calendario.md) | 111 | 0 | 0 | 0 | 0 |
 | [clusters](clusters.md) | 80 | 0 | 0 | 0 | 0 |
 | [code-clicker](code-clicker.md) | 27 | 0 | 0 | 0 | 0 |
-| [comun](comun.md) | 446 | 0 | 0 | 0 | 0 |
+| [comun](comun.md) | 441 | 0 | 0 | 0 | 0 |
 | [curso-shell](curso-shell.md) | 66 | 0 | 0 | 0 | 0 |
 | [demos](demos.md) | 252 | 0 | 0 | 0 | 0 |
 | [estadisticas](estadisticas.md) | 175 | 0 | 0 | 0 | 0 |
 | [examenes](examenes.md) | 71 | 0 | 0 | 0 | 0 |
 | [expediente](expediente.md) | 146 | 0 | 0 | 0 | 0 |
 | [gestion](gestion.md) | 659 | 0 | 71 | 71 | 71 |
-| [guardia](guardia.md) | 78 | 0 | 0 | 0 | 0 |
+| [guardia](guardia.md) | 80 | 0 | 0 | 0 | 0 |
 | [legal](legal.md) | 56 | 0 | 0 | 0 | 0 |
 | [notgames](notgames.md) | 251 | 0 | 0 | 0 | 0 |
 | [pizarras](pizarras.md) | 37 | 0 | 0 | 0 | 0 |
