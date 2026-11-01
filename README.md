@@ -17,11 +17,11 @@
 
 **La web que le dice a un estudiante de 42 quién puede ayudarle ahora mismo con
 su proyecto, y dónde está sentado.** En producción en
-[sanatorio42.duckdns.org](https://sanatorio42.duckdns.org) (se entra con la
+[peer4u.app](https://peer4u.app) (se entra con la
 cuenta de 42).
 
 **¿No tienes cuenta de 42?** Hay una
-[demostración con datos inventados](https://sanatorio42.duckdns.org/demo/): la
+[demostración con datos inventados](https://peer4u.app/demo/): la
 web entera, sin registrarte y sin que salga nadie real.
 
 ![Sala de espera, red de correcciones, tablón y el estilo Espacial](docs/img/portada.webp)
@@ -113,6 +113,7 @@ con el commit donde volver a verlo, está en
 
 | Fecha      | Dónde                  | Qué cambió                                                                                                   |
 | ---------- | ---------------------- | ------------------------------------------------------------------------------------------------------------ |
+| 2026-11-01 | Dominio                | La web pasa a [peer4u.app](https://peer4u.app); `www.` y el dominio de antes redirigen |
 | 2026-11-01 | Red                    | Si tu red sale vacía (aún sin correcciones, o viendo la web como piscinero), la vista de partida es la del campus |
 | 2026-11-01 | Not-games · Piscina    | Los piscineros tienen salas de preguntas: cada grupo y cada campus, las suyas; entre campus, desde el panel    |
 | 2026-11-01 | Piscina                | El círculo de un piscinero es su último módulo de C aprobado («C02»; solo shell, 0)                           |
@@ -418,7 +419,11 @@ sesión y presupuesto de peticiones por persona para lo que sí; respuestas con
 
 Una máquina de Oracle Cloud (ARM A1, 4 OCPU, 24 GB de memoria y 200 GB de
 disco: el máximo gratuito) con Docker: la app en un contenedor y Caddy en otro,
-con HTTPS automático.
+con HTTPS automático. El dominio, `peer4u.app`, está en Cloudflare solo como
+DNS (sin su proxy, para que cada petición llegue con su IP de verdad), con
+DNSSEC, CAA para Let's Encrypt y el correo falsificado rechazado;
+`www.peer4u.app` y el dominio de antes, `sanatorio42.duckdns.org`, redirigen
+a él.
 
 ```mermaid
 flowchart LR

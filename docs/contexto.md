@@ -294,9 +294,16 @@ Alberto pidió una revisión de todo; hecha y desplegada por bloques:
 
 ## Despliegue: en producción desde el 2026-10-11
 
-- **https://sanatorio42.duckdns.org** → `51.170.34.214` (Oracle, ARM, 1 OCPU,
-  6 GB, 46,6 GB de disco; cuenta en Pay As You Go). DuckDNS solo con IPv4: la
-  máquina no tiene IPv6 pública.
+- **https://peer4u.app** → `51.170.34.214` (Oracle, ARM; cuenta en Pay As You
+  Go) desde el 2026-11-01. Dominio comprado por Alberto en Cloudflare, que es
+  el registrador y el DNS: `A @` y `CNAME www` en «DNS only» (nube gris: con el
+  proxy, todas las IP serían de Cloudflare y los topes por IP no valdrían),
+  CAA solo `letsencrypt.org`, SPF `-all` y DMARC `reject` (el dominio no envía
+  correo) y DNSSEC. Se gestiona con un token de la API de Cloudflare limitado
+  a la zona, en `~/.config/cloudflare/peer4u.token` (fuera de git; nunca se
+  imprime). `www.peer4u.app` y el dominio de antes, `sanatorio42.duckdns.org`,
+  redirigen en Caddy a `peer4u.app` con la misma ruta. Sin IPv6: la máquina no
+  tiene IPv6 pública.
 - Código en `/opt/sanatorio`, `infra/.env` copiado desde el equipo de Alberto.
   Para actualizar: `ssh ubuntu@51.170.34.214`, y en `/opt/sanatorio`
   `infra/scripts/deploy.sh` (o `git pull` y `docker compose up -d --build` en `infra/`).
@@ -315,7 +322,7 @@ Alberto pidió una revisión de todo; hecha y desplegada por bloques:
 
 ## Cómo se llegó hasta aquí (histórico)
 
-- Dominio: `sanatorio42.duckdns.org`. La URL de retorno ya está en la app de 42.
+- Dominio (hasta el 2026-11-01): `sanatorio42.duckdns.org`. La URL de retorno ya está en la app de 42.
   En DuckDNS falta poner la IP de la máquina (ahora apunta a la casa de Alberto).
 - `infra/.env` de producción está preparado en local (fuera de git, permisos 600).
 - Oracle responde "Out of host capacity" en `eu-madrid-1` para las dos máquinas
@@ -329,7 +336,7 @@ Alberto pidió una revisión de todo; hecha y desplegada por bloques:
 - El cliente `oci` está configurado en `~/.oci/` (clave de API propia).
 - **Cuando haya IP**: ponerla en DuckDNS (lo hace Alberto) → `ssh ubuntu@<IP>` →
   clonar en `/opt/sanatorio` → copiar `infra/.env` → `docker compose up -d --build`
-  → comprobar `https://sanatorio42.duckdns.org/api/health/db`. La copia inicial
+  → comprobar `https://<dominio>/api/health/db`. La copia inicial
   de 42 tarda unas horas; la web funciona desde el primer minuto.
 - Alberto va a pasar la cuenta a "Pay As You Go" (2026-10-11) para tener
   capacidad. Condición suya, **estricta**: no pagar nunca. Al 90 % de cualquier

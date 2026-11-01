@@ -41,3 +41,12 @@
 		header_down -Via
 	}
 }
+
+# Una sola dirección buena (2026-11-01): `www.` y el dominio de antes llevan a
+# la misma ruta en el de ahora, para que no se rompan los enlaces ni los QR
+# que ya circulan. La sesión va atada al dominio: quien llega del viejo entra
+# otra vez con 42 una vez. Solo vale con `DOMAIN` ya en peer4u.app: si fuera
+# el de antes, este bloque chocaría con el de arriba.
+www.{$DOMAIN}, sanatorio42.duckdns.org {
+	redir https://{$DOMAIN}{uri} permanent
+}

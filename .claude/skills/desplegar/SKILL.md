@@ -52,7 +52,7 @@ for i in $(seq 1 40); do line=$(ssh -o ConnectTimeout=10 ubuntu@51.170.34.214 't
 
 ```sh
 ssh ubuntu@51.170.34.214 'docker inspect sanatorio-app-1 --format "{{.State.StartedAt}} {{.State.Health.Status}}"; cd /opt/sanatorio && git log --oneline -1' < /dev/null
-curl -s https://sanatorio42.duckdns.org/api/health/db
+curl -s https://peer4u.app/api/health/db
 ```
 
 `healthy`, hora de arranque reciente y `version` igual al commit esperado,
