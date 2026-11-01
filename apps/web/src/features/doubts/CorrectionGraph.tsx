@@ -144,7 +144,7 @@ export function CorrectionGraph({ graph, selected, onSelect }: CorrectionGraphPr
 
       <Show from="normal">
         {collection.data === undefined && !collection.loading ? (
-          <ErrorNote error={collection.error} onRetry={() => void collection.reload()} />
+          <ErrorNote error={collection.error} retry />
         ) : (
           <div className="album-extras">
             <Goals
