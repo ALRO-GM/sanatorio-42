@@ -119,6 +119,16 @@ regla de aquí, cambia también la skill que la repite.
   `QUIET_UNITS` de la guardia. Nada de `infra/` puede pedir a Oracle recursos
   que no sean de la capa gratuita o que pasen del 90 % de ella.
 - Comentarios en español, explicando el porqué.
+- **Documentación al día en el mismo commit** (pedido por Alberto, 2026-11-01).
+  Cada mejora, cambio o arreglo que se note por fuera actualiza, en el mismo
+  commit: `README.md` (qué hace, cifras, módulos, flujo, estado y límites),
+  `docs/funcionalidades.md` (la fila de la funcionalidad: qué hace, modo,
+  quién y dónde) y el doc de su funcionalidad si lo tiene. Lo que deja de
+  existir se borra de esos sitios y se apunta en `docs/historico-retiradas.md`
+  con qué hacía, por qué se quitó, qué la sustituye y el último commit donde
+  estaba (`git rev-parse <commit que la quita>^`), para poder volver a verla.
+  Las cifras del README (módulos, rutas, migraciones, tests, textos) se miden,
+  no se calculan a ojo.
 
 ## Reglas de producto
 
@@ -200,10 +210,11 @@ regla de aquí, cambia también la skill que la repite.
 ## XP y anti-trampas
 
 - La XP por ayudar en persona solo sale de una sesión reservada, aceptada,
-  con los dos códigos validados (inicio y fin) y valorada por las dos partes. No
-  añadas atajos que den XP con un clic.
-- Pizarras y sesiones de ayuda: sin los dos códigos no hay XP ni tiempo
-  contado. Las reglas (cuándo vale cada código, cuánto tiempo cuenta) están en
+  con el código validado al llegar y valorada por las dos partes. No añadas
+  atajos que den XP con un clic.
+- Pizarras y sesiones de ayuda: un solo código, el de llegada, que vale toda
+  la actividad; sin él no hay XP ni tiempo contado, y el tiempo va de la
+  llegada al final. A una pizarra empezada no se apunta nadie (2026-11-01). Las reglas (cuándo vale cada código, cuánto tiempo cuenta) están en
   `modules/attendance/attendance.rules.ts`; ese tiempo se enseña al staff, así
   que ante la duda se cuenta menos.
 - Las valoraciones no son notas: describen cómo fue la sesión. No añadas

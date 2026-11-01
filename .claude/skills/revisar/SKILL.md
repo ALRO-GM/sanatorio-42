@@ -45,6 +45,9 @@ Luego, por cada punto, mira el código, no el resumen del commit.
 - Respuesta nueva o cambiada → `packages/contracts` + `docs/api.md`.
 - Pantalla o bloque nuevo → `docs/interfaz.md` (categoría, modo, importancia).
 - Decisión de producto → `docs/contexto.md`.
+- Cualquier cambio que se note por fuera → `README.md` y su fila en
+  `docs/funcionalidades.md`, en el mismo commit. Algo retirado → fuera de esos
+  sitios y dentro de `docs/historico-retiradas.md` con su último commit.
 
 ## Cómo informar
 

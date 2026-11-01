@@ -48,5 +48,10 @@ los tests de demos.
 
 ## 5. Cerrar
 
+Docs en el mismo commit (`AGENTS.md`, «Documentación al día»): `README.md`,
+la fila en `docs/funcionalidades.md` y el doc de la funcionalidad. Si algo se
+quita o se sustituye, se borra de ahí y entra en `docs/historico-retiradas.md`
+con el último commit donde estaba (`git rev-parse <commit que la quita>^`).
+
 `npm run check` (skill `comprobar`) → commit en español con el porqué →
 skill `desplegar`. Antes de compactar el contexto: `docs/tareas-tras-compactar.md`.

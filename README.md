@@ -41,8 +41,8 @@ Es un proyecto personal de [Alberto](https://github.com/ALRO-GM) (`albrodri` en
 | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Qué es**      | Aplicación web completa: API, web, base de datos y despliegue                                                                                        |
 | **Tecnología**  | TypeScript de punta a punta · Node 22 y Fastify 5 · React 19 y Vite · SQLite (libSQL) · Docker y Caddy                                               |
-| **Tamaño**      | 33 módulos de API con 248 rutas, 82 migraciones, 6 paquetes compartidos; 4 categorías con 17 secciones, 3 modos de interfaz, 7 estilos y 5 idiomas    |
-| **Calidad**     | 3 329 tests en 231 ficheros (2 549 de la API y 780 de la web, con 62 ficheros de pantallas), cobertura mínima que solo sube, sin código muerto ni duplicado, y un despliegue que no sale sin la CI en verde |
+| **Tamaño**      | 35 módulos de API con 256 rutas, 83 migraciones, 6 paquetes compartidos; 4 categorías con 17 secciones, 3 modos de interfaz, 7 estilos y 5 idiomas    |
+| **Calidad**     | 7 083 tests en 252 ficheros (6 178 de la API y 905 de la web, con 69 ficheros de pantallas; medido el 2026-11-01), cobertura mínima que solo sube, sin código muerto ni duplicado, y un despliegue que no sale sin la CI en verde |
 | **Seguridad**   | Revisión completa documentada: permisos con doble cerradura, segundo factor en el panel, topes de intentos y un test que recorre todas las rutas con entradas imposibles |
 | **Datos**       | Réplica propia de 5 campus de 42 (Madrid, Málaga, Urduliz, Barcelona y París) copiada con 1 200 peticiones por hora                                   |
 | **Coste**       | 0 € al mes. La web y la máquina se cortan solas antes de pasar de la capa gratuita                                                                   |
@@ -68,6 +68,8 @@ Lo que este proyecto enseña de quien lo ha hecho:
 - [Probar](#probar)
 - [Estructura del repositorio](#estructura-del-repositorio)
 - [Cómo está hecho](#cómo-está-hecho)
+- [Módulos de la API](#módulos-de-la-api)
+- [Flujo de trabajo](#flujo-de-trabajo)
 - [Cómo se protege el código](#cómo-se-protege-el-código)
 - [Seguridad](#seguridad)
 - [Despliegue](#despliegue)
@@ -92,9 +94,9 @@ modo está en [docs/interfaz.md](docs/interfaz.md).
 | Categoría    | Secciones                                                                | Para qué                                                                                                   |
 | ------------ | ------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
 | **Yo**       | Perfil (la portada) · Agenda · Calendario                                | Nivel, XP y títulos; health check (pace y black hole); metas por proyecto; todo lo tuyo y lo de 42 en un calendario |
-| **Ayuda**    | Peer to peer · Proyectos · Sprints · Pizarras · On-call                  | Quién te puede ayudar y dónde se sienta; dudas y guía por proyecto; quedar en grupo; explicar algo; ofrecerse |
-| **Aprender** | Curso de git · Curso de shell · Not-games · Pomodoro                     | Cursos con terminal simulada; preguntas y ajedrez con más gente; concentrarse (y construir una startup)      |
-| **Campus**   | Clústeres · Asientos · Avance · Red · Exámenes · Clasificaciones          | Plano del campus; con quién te sientas; tu avance frente a la media; red de correcciones; examen en vivo     |
+| **Ayuda**    | Peer to peer · Proyectos · Sprints · Pizarras · On-call                  | Quién te puede ayudar y dónde se sienta; dudas, guía y álbum de correcciones por proyecto; quedar en grupo; explicar algo; ofrecerse |
+| **Aprender** | Curso de git · Curso de shell · Not-games · Pomodoro                     | Cursos con terminal simulada; preguntas y ajedrez con más gente; concentrarse (y llevar una startup en una oficina viva) |
+| **Campus**   | Clústeres · Amigos · Avance · Red · Exámenes · Clasificaciones            | Plano del campus; con quién te sientas; tu avance frente a la media; red de correcciones; examen en vivo     |
 
 Alrededor: el buscador de personas, el interruptor de disponibilidad, un buzón
 con avisos y conversaciones, avisos de eventos que no se cierran sin contestar,
@@ -102,6 +104,29 @@ cuentas atrás, sugerencias arrastrando un bicho hasta el sitio, Personalizar
 (orden, estilos y ajustes), un panel de gestión para quien administra, una
 página para que el staff valide documentos, una versión para piscineros y un
 juego secreto.
+
+### Últimos cambios
+
+Lo más reciente, de lo último a lo primero. Lo que se retiró por el camino,
+con el commit donde volver a verlo, está en
+**[docs/historico-retiradas.md](docs/historico-retiradas.md)**.
+
+| Fecha      | Dónde                  | Qué cambió                                                                                                   |
+| ---------- | ---------------------- | ------------------------------------------------------------------------------------------------------------ |
+| 2026-11-01 | Red                    | Si tu red sale vacía (aún sin correcciones, o viendo la web como piscinero), la vista de partida es la del campus |
+| 2026-11-01 | Not-games · Piscina    | Los piscineros tienen salas de preguntas: cada grupo y cada campus, las suyas; entre campus, desde el panel    |
+| 2026-11-01 | Piscina                | El círculo de un piscinero es su último módulo de C aprobado («C02»; solo shell, 0)                           |
+| 2026-11-01 | Red y Amigos           | Unos filtros que no dejan a nadie vuelven solos a la vista de partida, con un aviso                           |
+| 2026-11-01 | Pizarras y ayuda       | Un solo código de asistencia, al llegar, que vale toda la actividad; a una pizarra empezada no se apunta nadie |
+| 2026-11-01 | Red                    | Con más de 150 burbujas solo se pintan las uniones más fuertes                                                |
+| 2026-11-01 | Amigos                 | Los grupos empiezan separados, el periodo arranca en «todo» y los pesos de los puestos se ajustan en el panel |
+| 2026-11-01 | Proyectos              | «Mis correcciones» pasa a ser un álbum de cromos con rarezas y clasificaciones                               |
+| 2026-11-01 | Avance y Exámenes      | Kickoffs reales por campus; en el móvil, el punto se marca con el dedo; desgloses de exámenes plegados        |
+| 2026-11-01 | Pomodoro               | La startup es un mundo vivo: oficina en píxeles, personal, decoración, cajas sorpresa, mudanza y edificio     |
+| 2026-11-01 | Not-games              | Banco de preguntas revisado y ampliado, con la piscina de Shell 00 a C 13 ([docs/preguntas.md](docs/preguntas.md)) |
+| 2026-11-01 | Agenda                 | Las metas pueden llevar hora de entrega                                                                       |
+| 2026-11-01 | Toda la web            | Revisión de la UX: modos coherentes, un paso menos para pedir y dar ayuda y bienvenida de seis pasos; «Reintentar» recarga la página |
+| 2026-11-01 | Seguridad              | Mundos separados también entre campus: un estudiante no ve a piscineros de ningún campus                     |
 
 <details>
 <summary>Capturas (de la demostración, con datos inventados)</summary>
@@ -189,7 +214,7 @@ apps/
       core/            base de datos y migraciones, sesión, actor, errores,
                        eventos, mundos (audience), validación, topes
       integrations/    cliente de la API de 42 (token, ritmo, reintentos) y Slack
-      modules/         una carpeta por funcionalidad (33)
+      modules/         una carpeta por funcionalidad (35)
       cli/             migrar, estado y avance de la réplica, informe de uso
     tests/             unit/, integration/ y helpers/ (42 de mentira)
   web/                 web (React 19, Vite, TypeScript)
@@ -223,7 +248,7 @@ seguridad. La base es un fichero de SQLite. Un bucle de fondo copia el campus de
 ```mermaid
 flowchart LR
   P["Navegador<br/>React 19"] -->|HTTPS| C["Caddy<br/>TLS, CSP, HSTS"]
-  C --> A["Fastify<br/>33 módulos"]
+  C --> A["Fastify<br/>35 módulos"]
   A --> D[("SQLite en WAL<br/>datos propios y réplica")]
   S["Réplica y 17 trabajos<br/>en el mismo proceso"] --> D
   S -->|"cuota 1 200/h<br/>con tres escalones"| Q["API de 42"]
@@ -256,7 +281,7 @@ Decisiones que lo definen:
   con un guion y nada más que mantener. Las fronteras entre módulos las vigila el
   linter.
 - **XP que no se puede puentear.** Cada punto sale de un hecho comprobable (una
-  sesión con sus dos códigos y valorada por los dos, una respuesta que resuelve),
+  sesión con su código de llegada y valorada por los dos, una respuesta que resuelve),
   una sola vez por referencia y con topes.
 - **El servidor manda en lo que importa.** Reloj de las partidas, estrellas de
   los cursos (la API vuelve a ejecutar el intento con el mismo simulador) y
@@ -268,6 +293,74 @@ Decisiones que lo definen:
 - **Privacidad.** No se guardan correos, teléfonos, tokens de 42 ni los
   comentarios de las correcciones. Cada cual descarga o anonimiza sus datos.
   Estudiantes y piscineros no se ven entre sí.
+
+## Módulos de la API
+
+Uno por carpeta en `apps/api/src/modules/`, todos con la misma forma: rutas
+que validan con zod, un servicio con las reglas, un repositorio con el SQL y
+reglas puras en `*.rules.ts`. Se hablan por su `index.ts` o por eventos.
+Cada uno por dentro, con diagramas: [docs/componentes.md](docs/componentes.md).
+
+| Módulo | Qué hace |
+| --- | --- |
+| `admin` | Permisos, bloqueos, incidencias, consumo y presupuesto de peticiones; sus ganchos cortan a las cuentas bloqueadas y apuntan lo servido |
+| `agenda` | Scrum individual: metas por proyecto (con día y hora), checkpoints, dailies, weeklies y tablero del sprint |
+| `attendance` | Asistencia con un código de llegada y el tiempo validado que sale de ella (sin rutas propias: las pone `meet`) |
+| `auth` | OAuth de 42, cookie de sesión firmada, staff con clave y quién hace cada petición |
+| `boards` | Pizarras: sesiones para explicar un concepto, con plazas y apuntarse antes de empezar |
+| `broadcasts` | Comunicados de quien administra, con opciones que contestar |
+| `calendar` | Calendario personal: compone ayuda, sprints, pizarras y la agenda de 42 (sin tablas) |
+| `clicker` | Code Clicker, el juego secreto, con antitrampas |
+| `client-errors` | Fallos de la web en el navegador de cada cual, para enterarse |
+| `collection` | Álbum de correcciones: rareza de cada proyecto y clasificaciones de completitud |
+| `countdowns` | Cuentas atrás: las del panel (taquillas) y lo que cada cual fija |
+| `doubts` | Tablón de dudas por proyecto, guía que mantienen los seniors y el grafo del plan |
+| `exams` | Exámenes: intentos y notas, examen en vivo, días por círculo y black hole, por plan y kickoff |
+| `facility` | Avisos al staff de problemas del edificio o de los ordenadores |
+| `focus` | Pomodoro: sesiones, paradas y estadísticas |
+| `gitcourse` | Curso de git con git simulado y pruebas de grupo |
+| `help` | Ayuda reservada: franjas, reservas, valoración mutua, bloqueos y XP |
+| `legal` | Privacidad y condiciones, y descarga de los datos de cada cual |
+| `map` | Plano de los clústeres y puestos rotos |
+| `meet` | Avisos, chat y asistencia de cada evento |
+| `network` | Red de correcciones: copia quién corrigió a quién y calcula grafo, comunidades y endogamia |
+| `notices` | Buzón de avisos y el pulso de fondo (`GET /pulse`) |
+| `peers` | Peer to peer: tus proyectos, quién puede ayudarte y tu disponibilidad |
+| `pool` | Quién entra (estudiantes y piscineros), permisos de la piscina y personas ocultas |
+| `presence` | Quién tiene la web abierta y desde qué puesto |
+| `profile` | Perfil: XP, niveles, títulos, logros, reacciones y preferencias |
+| `quiz` | Not-games: salas de preguntas y ajedrez, banco de preguntas, repaso y quién ve qué salas |
+| `replica` | Copia local de 42 y su cuota: el único que pide a 42 en segundo plano |
+| `shellcourse` | Curso de shell con shell simulada, jefes y certificados |
+| `staff` | Documentos con código de verificación y las cuentas de staff que los comprueban |
+| `startup` | La startup del Pomodoro: partida, oficina, decoración, cajas y clasificación |
+| `stats` | Clasificaciones de Ayuda y el Avance (solo lee) |
+| `therapy` | Sprints: grupos del mismo proyecto que quedan a unas horas, con chat y asistencia |
+| `tours` | Velocidad de las demostraciones, que se ajusta sola |
+| `usage` | Cuánto se usa cada elemento, para ordenar la web por uso |
+
+En la web, cada funcionalidad tiene su carpeta en `apps/web/src/features/` (30)
+y solo `shared/api` habla con la API.
+
+## Flujo de trabajo
+
+De una idea a producción (detalle en
+[docs/flujo-de-trabajo.md](docs/flujo-de-trabajo.md) y la skill
+`nueva-funcionalidad`):
+
+1. **Decidir dónde va**: categoría, sección o bloque, desde qué modo sale y su
+   importancia, apuntado en [docs/interfaz.md](docs/interfaz.md).
+2. **Contrato** en `packages/contracts` y [docs/api.md](docs/api.md).
+3. **API**: migración si hace falta, reglas puras, servicio, rutas con zod.
+4. **Web**: la pantalla, el cliente real y el de mentira (que es también la
+   demostración pública), textos en las cinco lenguas y su demo animada.
+5. **Tests** de las cinco familias y el recorrido de la pantalla.
+6. **Documentación en el mismo commit**: este README, su fila en
+   [docs/funcionalidades.md](docs/funcionalidades.md) y el doc propio. Lo que
+   se retira entra en [docs/historico-retiradas.md](docs/historico-retiradas.md)
+   con el commit donde volver a verlo.
+7. **`npm run check`**, commit en español con el porqué, push y `deploy.sh`,
+   que espera a la CI, hace copia, migra aparte y vuelve atrás solo si falla.
 
 ## Cómo se protege el código
 
@@ -460,7 +553,7 @@ ejecuta las tareas tras compactar» basta para seguir.
 - La sesión dura 12 horas y no se puede revocar antes (bloquear sí corta).
 - Las franjas que cada quien abre en 42 para corregir no se ven: haría falta un
   permiso que la aplicación no pide.
-- Textos: 3 731 en las tablas, todos en español e inglés y 3 660 en catalán,
+- Textos: 3 388 en las tablas, todos en español e inglés y 3 317 en catalán,
   euskera y francés (lo que falta es sobre todo del panel). Los mensajes de error
   de la API solo están en español; fuera de él se enseña uno genérico.
 - No hay prueba de carga ni pruebas de extremo a extremo contra la API real.
@@ -476,11 +569,13 @@ moderar desde la propia denuncia y aplicación instalable (PWA).
 - [docs/funcionalidades.md](docs/funcionalidades.md): todo lo que hace la web, por sección, con su modo y quién la ve.
 - [docs/componentes.md](docs/componentes.md): cada componente por dentro, con diagramas, pros, contras y alternativas.
 - [docs/architecture.md](docs/architecture.md): capas, módulos, réplica de 42, red de correcciones y cómo ampliar.
+- [docs/historico-retiradas.md](docs/historico-retiradas.md): lo que se probó y se quitó, por qué y el commit donde volver a verlo.
 - [docs/interfaz.md](docs/interfaz.md): categorías, modos, importancia de cada elemento, valoración de uso y dónde va algo nuevo.
 - [docs/api.md](docs/api.md): contrato HTTP.
 
 **Por funcionalidad**
 
+- [docs/correcciones-coleccion.md](docs/correcciones-coleccion.md) (álbum de correcciones), [docs/preguntas.md](docs/preguntas.md) (banco de preguntas).
 - [docs/agenda.md](docs/agenda.md), [docs/asientos.md](docs/asientos.md), [docs/blackhole.md](docs/blackhole.md) (Avance), [docs/red-vistas.md](docs/red-vistas.md).
 - [docs/curso-git.md](docs/curso-git.md), [docs/curso-shell.md](docs/curso-shell.md), [docs/curso-shell-investigacion.md](docs/curso-shell-investigacion.md), [docs/plantilla-cursos.md](docs/plantilla-cursos.md).
 - [docs/pomodoro-startup.md](docs/pomodoro-startup.md), [docs/pomodoro-sonidos.md](docs/pomodoro-sonidos.md), [docs/code-clicker.md](docs/code-clicker.md).
@@ -495,7 +590,7 @@ moderar desde la propia denuncia y aplicación instalable (PWA).
 - [docs/consumo-api.md](docs/consumo-api.md): consumo de la API de 42.
 - [docs/rendimiento.md](docs/rendimiento.md): cada mejora con su antes, su después y cómo se midió.
 - [docs/tests.md](docs/tests.md): qué cubre cada test y cómo se protege producción.
-- [docs/revision-seguridad.md](docs/revision-seguridad.md) y [docs/revision-2026-10/](docs/revision-2026-10/README.md): revisiones de seguridad y calidad.
+- [docs/revision-seguridad.md](docs/revision-seguridad.md), [docs/revision-2026-10/](docs/revision-2026-10/README.md) y [docs/revision-2026-11/](docs/revision-2026-11/ux.md) (UX y [código](docs/revision-2026-11/codigo.md)): revisiones de seguridad, calidad y UX.
 - [docs/uso-informe.md](docs/uso-informe.md): informe de uso agregado, sin datos personales.
 - [docs/bug-trozos-sin-pintar.md](docs/bug-trozos-sin-pintar.md): el bug abierto y su tabla de pruebas.
 
