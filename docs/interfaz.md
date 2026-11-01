@@ -119,6 +119,7 @@ de datos.
 | Calendario | Vistas día/semana/mes, tipos de evento (también leyenda) | S | Básico |
 | Calendario | Formas del día (lista, entera, ajustada, desde ahora) | N | Comodidad |
 | Red | Grafo, filtros, totales, cómo se lee | N | La sección en sí |
+| Red y Amigos | Unos filtros que no dejan a nadie vuelven solos a la vista de partida (tu red; en Amigos, todo el periodo) con un aviso (2026-11-01) | N | Pedido por Alberto: con el grafo vacío no quedaba nada a mano |
 | Red y Amigos | Solo el grafo de fuerzas: la red en anillos, la matriz y las cuerdas se probaron y se quitaron (2026-10-30, `docs/red-vistas.md`) | N | Pedido por Alberto: ninguna otra vista convenció |
 | Red, Asientos y Clasificaciones | Primera capa (2026-10-29), una frase arriba: en la Red, cuántas correcciones has hecho y recibido y con cuánta gente; en Asientos, con quién te sueles sentar y cuánto pasas sin nadie cerca; en Clasificaciones, tu mejor puesto | N | Datos rápidos: lo que se viene a mirar, sin leer el grafo ni las listas |
 | Red | Endogamia, parejas, los más estrictos, proyectos más corregidos | D | Rankings |

@@ -1,10 +1,9 @@
 /**
- * Red: unos filtros que no dejan a nadie no bloquean la página. Las opciones
- * (escuelas, proyectos, periodo) siguen ahí, sacadas del último grafo con
- * gente, para poder cambiarlas y volver a ver el grafo. En las dos redes: la de
+ * Red: unos filtros que no dejan a nadie no dejan la página vacía. Se vuelve
+ * sola a la vista de partida (tu red) y lo dice. En las dos redes: la de
  * correcciones y la de asientos.
  */
-import { cleanup, fireEvent, screen, waitFor, within } from '@testing-library/react'
+import { cleanup, fireEvent, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import es from 'virtual:textos/es'
 import { afterEach, describe, expect, it, vi } from 'vitest'
@@ -21,7 +20,7 @@ afterEach(() => {
 })
 
 describe('Red sin resultados', () => {
-  it('correcciones: sin nadie, siguen las escuelas y los proyectos, y se puede volver', async () => {
+  it('correcciones: sin nadie, vuelve a tu red y quita el filtro', async () => {
     const getNetwork = api.getNetwork.bind(api)
 
     // Con «solo mutuas» no queda nadie, y esa respuesta no trae opciones (como
@@ -51,30 +50,22 @@ describe('Red sin resultados', () => {
       { timeout: 5000 },
     )
 
-    const project = screen.getByRole('combobox', { name: text('net.project') })
-    const projects = within(project).getAllByRole('option').length
-
-    expect(projects).toBeGreaterThan(1)
-
-    const mutual = screen.getByRole('checkbox', { name: text('net.mutualOnly') })
+    const mutual = screen.getByRole<HTMLInputElement>('checkbox', {
+      name: text('net.mutualOnly'),
+    })
 
     fireEvent.click(mutual)
-    expect(await screen.findByText(text('net.empty'), {}, { timeout: 3000 })).toBeTruthy()
-    expect(document.querySelector('canvas.force-graph')).toBeNull()
-    // Las opciones del último grafo con gente siguen ahí.
-    expect(
-      within(screen.getByRole('combobox', { name: text('net.project') })).getAllByRole('option'),
-    ).toHaveLength(projects)
-    expect(screen.getByRole('group', { name: text('net.campuses') })).toBeTruthy()
-
-    // Y se puede deshacer: vuelve el grafo.
-    fireEvent.click(screen.getByRole('checkbox', { name: text('net.mutualOnly') }))
+    // Sin nadie, vuelve a tu red: se dice, el grafo sigue y el filtro se quita.
+    expect(await screen.findByText(text('net.resetEmpty'), {}, { timeout: 3000 })).toBeTruthy()
     await settle(900)
     expect(screen.queryByText(text('net.empty'))).toBeNull()
     expect(document.querySelector('canvas.force-graph')).not.toBeNull()
+    expect(
+      screen.getByRole<HTMLInputElement>('checkbox', { name: text('net.mutualOnly') }).checked,
+    ).toBe(false)
   }, 20_000)
 
-  it('asientos: un periodo sin nadie deja el selector para elegir otro', async () => {
+  it('asientos: un periodo sin nadie vuelve a todo el periodo', async () => {
     const user = userEvent.setup()
     const getSeatGraph = api.getSeatGraph.bind(api)
 
@@ -100,14 +91,12 @@ describe('Red sin resultados', () => {
     })
 
     await user.selectOptions(period, '3')
-    expect(await screen.findByText(text('seats.empty'), {}, { timeout: 3000 })).toBeTruthy()
-
-    await user.selectOptions(
-      screen.getByRole<HTMLSelectElement>('combobox', { name: text('common.period') }),
-      '1',
-    )
+    expect(await screen.findByText(text('net.resetEmpty'), {}, { timeout: 3000 })).toBeTruthy()
     await settle(600)
     expect(screen.queryByText(text('seats.empty'))).toBeNull()
     expect(document.querySelector('canvas.force-graph')).not.toBeNull()
+    expect(
+      screen.getByRole<HTMLSelectElement>('combobox', { name: text('common.period') }).value,
+    ).toBe('all')
   }, 20_000)
 })

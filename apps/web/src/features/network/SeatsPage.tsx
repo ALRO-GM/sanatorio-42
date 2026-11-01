@@ -87,6 +87,17 @@ export function SeatsPage({ me }: { me?: string }) {
   // Para buscar a alguien: primero quien más horas pasa.
   const byHours = useMemo(() => [...(data?.people ?? [])].sort((x, y) => y.hours - x.hours), [data])
   const [query, setQuery] = useState(me ?? '')
+  // Si un periodo no deja a nadie, se vuelve a la vista de partida: todo el
+  // periodo y tu red (pedido por Alberto, 2026-11-01). Si esa también sale
+  // vacía, se queda así.
+  const [wasEmpty, setWasEmpty] = useState(false)
+
+  if (data?.people.length === 0 && period !== 'all') {
+    setPeriod('all')
+    setSelected(me ?? null)
+    setQuery(me ?? '')
+    setWasEmpty(true)
+  }
   // Quien sale en el grafo: por su login aquí mismo y por su nombre en el
   // buscador de personas (solo los que están en el grafo).
   const searchSeated = useCallback(
@@ -212,7 +223,10 @@ export function SeatsPage({ me }: { me?: string }) {
               {/* El selector de periodo de toda la web (`shared/ui/StepPicker`). */}
               <PeriodPicker
                 value={period}
-                onChange={setPeriod}
+                onChange={(next) => {
+                  setPeriod(next)
+                  setWasEmpty(false)
+                }}
                 from={dates.from}
                 to={dates.to}
                 onDates={(from, to) => {
@@ -422,6 +436,12 @@ export function SeatsPage({ me }: { me?: string }) {
             </aside>
           )}
         </div>
+
+        {wasEmpty && (
+          <p className="hint" role="status">
+            {t('net.resetEmpty')}
+          </p>
+        )}
 
         {data !== undefined && (
           <div className="net-stage">

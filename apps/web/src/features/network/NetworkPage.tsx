@@ -97,6 +97,25 @@ function loginInUrl(): string | null {
   return /^[a-z0-9-]{1,30}$/.test(login) ? login : null
 }
 
+/** Los filtros de partida: la red de `login` en ese periodo, sin más filtros. */
+function startFilters(login: string, period: Filters['period']): Filters {
+  return {
+    period,
+    from: '',
+    to: '',
+    // De fábrica, tu propia red (pedido por Alberto, 2026-10-30); la de todo el
+    // campus, quitando a la persona elegida.
+    login,
+    projectId: null,
+    verdict: '',
+    mutual: false,
+    // Con una persona elegida interesa toda su red, no solo sus uniones fuertes.
+    min: 1,
+    limit: 300,
+    campuses: null,
+  }
+}
+
 function paramsOf(filters: Filters): NetworkParams {
   const from = filters.period === 'custom' ? filters.from : startOf(filters.period)
 
@@ -122,22 +141,12 @@ function paramsOf(filters: Filters): NetworkParams {
 export function NetworkPage({ me }: { me: CurrentUser }) {
   const { t, tn } = useI18n()
   const { number } = useFormat()
-  const [filters, setFilters] = useState<Filters>({
+  const [filters, setFilters] = useState<Filters>(() =>
     // Un enlace a una persona enseña su historia entera; el campus, el último año.
-    period: loginInUrl() === null ? '12' : 'all',
-    from: '',
-    to: '',
-    // De fábrica, tu propia red (pedido por Alberto, 2026-10-30); la de todo el
-    // campus, quitando a la persona elegida.
-    login: loginInUrl() ?? me.login,
-    projectId: null,
-    verdict: '',
-    mutual: false,
-    // Con una persona elegida interesa toda su red, no solo sus uniones fuertes.
-    min: 1,
-    limit: 300,
-    campuses: null,
-  })
+    startFilters(loginInUrl() ?? me.login, loginInUrl() === null ? '12' : 'all'),
+  )
+  // `true` cuando unos filtros no dejaban a nadie y se ha vuelto a la vista de partida.
+  const [wasEmpty, setWasEmpty] = useState(false)
   const [mode, setMode] = useState<ColorMode>('community')
   const [selected, setSelected] = useState<string | null>(() => loginInUrl() ?? me.login)
   // El grafo anterior se sigue viendo mientras llega el nuevo: así se recoloca
@@ -148,6 +157,21 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
   const [reloads, setReloads] = useState(0)
 
   const params = useMemo(() => paramsOf(filters), [filters])
+
+  // Si unos filtros no dejan a nadie, se vuelve a la vista de partida, tu red
+  // (pedido por Alberto, 2026-11-01): con el grafo vacío no quedaba nada a
+  // mano. Si la de partida también sale vacía, se queda así: no hay a dónde
+  // volver.
+  const backToStart = useCallback(() => {
+    setFilters(startFilters(me.login, '12'))
+    setSelected(me.login)
+    setPersonMin((current) => ({ ...current, n: 0 }))
+    setWasEmpty(true)
+  }, [me.login])
+  const atStart = useMemo(
+    () => JSON.stringify(params) === JSON.stringify(paramsOf(startFilters(me.login, '12'))),
+    [params, me.login],
+  )
 
   // La persona elegida va en la URL (`#/red/<login>`): el enlace se puede compartir.
   useEffect(() => {
@@ -167,6 +191,11 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
         .getNetwork(params)
         .then((result) => {
           if (!current) return
+          // Se sigue viendo el grafo de antes mientras llega el de partida.
+          if (result.nodes.length === 0 && !atStart) {
+            backToStart()
+            return
+          }
           setGraph(result)
           setError(null)
         })
@@ -182,7 +211,8 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
       current = false
       clearTimeout(timer)
     }
-  }, [params, reloads])
+    // `atStart` cambia con `params`, y `backToStart`, solo con quien mira: no piden de más.
+  }, [params, reloads, atStart, backToStart])
 
   // Las opciones de los filtros (campus, meses, proyectos) salen del último
   // grafo con gente: si unos filtros no dejan a nadie, siguen ahí para
@@ -219,6 +249,18 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
     }
   }, [graph, onlyInside, personMin, selected])
 
+  // El mínimo por persona se aplica aquí: si deja el grafo vacío, se quita.
+  if (
+    graph !== null &&
+    graph.nodes.length > 0 &&
+    shownGraph !== null &&
+    shownGraph.nodes.length === 0 &&
+    personMin.n > 0
+  ) {
+    setPersonMin((current) => ({ ...current, n: 0 }))
+    setWasEmpty(true)
+  }
+
   // Mientras se copia el histórico, el grafo crece solo.
   const copying = graph !== null && graph.sync.phase !== 'done'
 
@@ -231,6 +273,7 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
 
   const change = useCallback((patch: Partial<Filters>) => {
     setFilters((current) => ({ ...current, ...patch }))
+    setWasEmpty(false)
   }, [])
 
   const focusOn = useCallback(
@@ -851,6 +894,12 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
               <ErrorNote error={error} retry />
             )}
           </div>
+        )}
+
+        {wasEmpty && (
+          <p className="hint" role="status">
+            {t('net.resetEmpty')}
+          </p>
         )}
 
         {graph !== null && (
