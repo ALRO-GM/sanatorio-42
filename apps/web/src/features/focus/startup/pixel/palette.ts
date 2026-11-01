@@ -1,4 +1,4 @@
-import type { Axis } from '@sanatorio/startup'
+import type { Axis, Role } from '@sanatorio/startup'
 
 import type { Color, Shades } from './sprite'
 
@@ -57,6 +57,37 @@ export const AXIS_SHADES: Record<Axis, Shades> = {
   ai: ['#cc8cee', '#b25be0', '#8b3fb6'],
   infra: ['#f2cd5c', '#e6b326', '#b88a12'],
 }
+
+/**
+ * La ropa de cada oficio que no programa (`ROLES`): recepción de chaqueta,
+ * limpieza en verde agua, reparto en marrón, cocina de blanco, seguridad de
+ * azul oscuro y mantenimiento con su mono naranja.
+ */
+export const UNIFORM: Record<Role, Shades> = {
+  reception: ['#7aa5c9', '#4f7fa8', '#3a6286'],
+  cleaning: ['#6fd1c4', '#2fa59a', '#22807a'],
+  delivery: ['#c9965f', '#9a6b3c', '#7a522c'],
+  kitchen: ['#ffffff', '#eceaf2', '#c9c5d6'],
+  security: ['#4a5476', '#2d3450', '#20263c'],
+  maintenance: ['#f6a65a', '#e8822e', '#bb6420'],
+}
+
+/** La decoración: tapicería, piedra, corcho, teclas, neón y el agua del acuario. */
+export const TEAL: Shades = ['#5fc2b6', '#3a9e93', '#2a776f']
+export const PLUM: Shades = ['#b07ab8', '#8a5594', '#683e70']
+export const STONE: Shades = ['#e4e1da', '#c2beb4', '#9b968b']
+export const CORK = '#c8955a'
+export const CHERRY: Shades = ['#e86a5f', '#c94a40', '#9c362e']
+export const BRASS: Shades = [GOLD.light, GOLD.mid, GOLD.dark]
+export const NEON = ['#ff6fd8', '#6ff7ff', '#fff27a'] as const
+export const SEA = ['#4fb3e8', '#2f86c4'] as const
+export const LIGHT = '#fff3b0'
+
+/** Pantalones y zapatos de quien camina. */
+export const PANTS = ['#3a3f5c', '#2a2e45'] as const
+export const SHOE = '#1f1b2b'
+/** Cartón de las cajas de la mudanza y de los paquetes. */
+export const CARDBOARD: Shades = ['#e2b878', '#c4955a', '#9f7442']
 
 /** La ropa de quien aún no tiene modelo de negocio. */
 export const PLAIN: Shades = ['#a7b0bd', '#7d8a99', '#5e6a78']
