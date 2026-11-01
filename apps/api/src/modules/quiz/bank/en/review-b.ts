@@ -3,19 +3,6 @@
 import type { ReviewEntry } from '../types.js'
 
 export const REVIEW_B_EN: Readonly<Record<string, ReviewEntry>> = {
-  'algo-sort-complexity': {
-    title: 'The limit of comparison sorting',
-    definition:
-      'Any sort that only compares elements needs, in the worst case, about n·log n comparisons. You can only beat that by not comparing (radix, counting sort).',
-    example:
-      '100 numbers: at least about 525 comparisons (log₂ 100!); bubble sort does up to 4950.',
-  },
-  'algo-stack': {
-    title: 'Stacks and queues in push_swap',
-    definition:
-      'A stack gives back the last thing that went in (LIFO); a queue gives back the first (FIFO). In push_swap the two stacks only let you touch the top, and rotations make them work almost like circular queues.',
-    example: 'pb moves the top of a onto the top of b; pa does the opposite.',
-  },
   'algo-rotate': {
     title: 'Rotating a stack',
     definition:

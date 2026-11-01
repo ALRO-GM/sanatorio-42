@@ -17,9 +17,9 @@ export const PYTHON_EN: Readonly<Record<string, ConceptText>> = {
         ],
         right: ['None, and create the list inside if items is None'],
         wrong: [
-          'list (the class itself, without calling it)',
-          'list() instead of []',
-          'A global variable with the list',
+          'list, the class, so that it builds one per call',
+          'list() instead of [], which creates a new list',
+          'A global list that is emptied on every call',
         ],
       },
     ],
@@ -32,7 +32,7 @@ export const PYTHON_EN: Readonly<Record<string, ConceptText>> = {
         ask: ['What is the difference between `==` and `is`?'],
         right: ['== compares values; is, whether they are the same object'],
         wrong: [
-          'None: they are the same',
+          'None: they are exactly the same operator',
           'is is faster, and otherwise the same',
           'is compares types; ==, values',
           '== compares the address in memory; is, the value',
@@ -42,9 +42,9 @@ export const PYTHON_EN: Readonly<Record<string, ConceptText>> = {
         ask: ['What does `a is b` check?'],
         right: ['That a and b are the same object in memory'],
         wrong: [
-          'That a and b have the same value',
-          'That a and b are of the same type',
-          'That b is inside a',
+          'That a and b have the same value, even as copies',
+          'That a and b are of the same type or class',
+          'That b is inside a, as with in',
         ],
       },
     ],
@@ -68,7 +68,7 @@ export const PYTHON_EN: Readonly<Record<string, ConceptText>> = {
           'What do you have to write so that changing b does not change a?',
         ],
         right: ['b = a.copy()', 'b = list(a)', 'b = a[:]'],
-        wrong: ['b = a', 'b == a', 'b = a.self'],
+        wrong: ['b = a', 'b == a', 'b = a.clone()', 'b = a.self'],
       },
     ],
     wrong: ['[1, 2, 3]', '[4]', '[1, 2, 3, [4]]'],
@@ -139,16 +139,16 @@ export const PYTHON_EN: Readonly<Record<string, ConceptText>> = {
       {
         ask: ['What does `yield` do in a function?', 'What changes in a function that uses yield?'],
         right: [
-          'It turns it into a generator: it gives values one at a time, when they are asked for',
-          'It returns a generator that computes on the fly',
+          'It makes it a generator that gives values one by one',
+          'It makes it return a lazy generator',
         ],
       },
     ],
     wrong: [
-      'It ends it, like return',
-      'It pauses the whole program',
-      'It starts a thread',
-      'It makes it return a list with everything',
+      'It ends it at that point, just like return',
+      'It pauses the whole program until the next call',
+      'It runs the function in a separate thread',
+      'It makes it return a list with all the values',
     ],
     why: 'A generator stops at each yield and carries on from there on the next round: it does not keep everything in memory.',
   },
@@ -169,8 +169,13 @@ export const PYTHON_EN: Readonly<Record<string, ConceptText>> = {
           'What is `self` in a method?',
           'What does a normal method receive as its first parameter?',
         ],
-        right: ['The object the method is called on', 'The instance'],
-        wrong: ['The class', 'The module', 'The parent class', 'A reserved word with no meaning'],
+        right: ['The object the method is called on', 'The instance that gets the call'],
+        wrong: [
+          'The class the method belongs to',
+          'The module where the class is defined',
+          'The parent class, to call super',
+          'A reserved word with no meaning',
+        ],
       },
       {
         ask: [
@@ -195,10 +200,10 @@ export const PYTHON_EN: Readonly<Record<string, ConceptText>> = {
       },
     ],
     wrong: [
-      'It is created without trouble',
-      'The method returns None',
-      "The parent's method is called",
-      'It warns, but carries on',
+      'It is created without trouble, with an empty method',
+      'The abstract method returns None when called',
+      "The parent's method is called instead",
+      'It shows a warning, but carries on',
     ],
     why: 'With ABC, Python stops you from creating objects while any abstract method is left unimplemented.',
   },
@@ -210,16 +215,16 @@ export const PYTHON_EN: Readonly<Record<string, ConceptText>> = {
           'What happens if you pass a str to `def f(x: int)`?',
         ],
         right: [
-          'Nothing: it does not check them; tools like mypy use them',
-          'It works the same: types are not checked at run time',
+          'Nothing: it does not check them at run time',
+          'It works the same: they are not checked',
         ],
       },
     ],
     wrong: [
-      'It raises TypeError',
-      'It converts x to int',
-      'It does not compile',
-      'It always prints a warning',
+      'It raises TypeError when f is called',
+      'It converts x to int before going in',
+      'It does not compile: the type does not fit',
+      'It shows a warning and carries on',
     ],
     why: 'Annotations are information; what checks them is mypy (or similar), not the interpreter.',
   },
@@ -227,17 +232,14 @@ export const PYTHON_EN: Readonly<Record<string, ConceptText>> = {
     forms: [
       {
         ask: ['What happens when inc() is called?', 'Does this code work?'],
-        right: [
-          'It fails with UnboundLocalError: count is treated as local',
-          'It fails: inside inc, count is a local variable with no value',
-        ],
+        right: ['It fails with UnboundLocalError', 'It fails: count is local and has no value'],
       },
     ],
     wrong: [
-      'count becomes 1',
-      'Nothing happens',
-      'count stays at 0',
-      'Another variable count is created that is 1',
+      'count becomes 1 without trouble',
+      'Nothing happens: count stays at 0',
+      'Another local count is created that is 1',
+      'It fails with SyntaxError when inc is defined',
     ],
     why: 'Assigning to a name inside a function makes it local; reading it before assigning it fails. You need `global count`.',
   },
@@ -245,15 +247,12 @@ export const PYTHON_EN: Readonly<Record<string, ConceptText>> = {
     forms: [
       {
         ask: ['What is a virtual environment (venv) for?', 'What does a venv allow?'],
-        right: [
-          "Keeping each project's packages apart, without mixing them",
-          'Isolating the dependencies of a project',
-        ],
+        right: ["Keeping each project's packages apart", 'Isolating the dependencies of a project'],
         wrong: [
-          'Making Python faster',
+          'Making Python run faster',
           'Running Python on another machine',
-          'Compiling to C',
-          'Hiding the code',
+          'Compiling the project to C code',
+          'Hiding the source code of the project',
         ],
       },
       {
@@ -262,7 +261,7 @@ export const PYTHON_EN: Readonly<Record<string, ConceptText>> = {
           'Which file do you pass to `pip install -r`?',
         ],
         right: ['requirements.txt'],
-        wrong: ['package.json', 'Makefile', 'main.py'],
+        wrong: ['package.json', 'packages.txt', 'Makefile'],
       },
     ],
     wrong: ['Making Python faster', 'Running Python on another machine', 'Compiling to C'],
@@ -282,12 +281,100 @@ export const PYTHON_EN: Readonly<Record<string, ConceptText>> = {
       },
     ],
     wrong: [
-      'Always: it is compulsory',
-      'Only when it is imported',
-      'Only on Windows',
-      'Only when declaring the main function',
+      'Always: it is compulsory in every file',
+      'Only when it is imported from another module',
+      'Only if the file is called main.py',
+      'Only when a main function is declared',
     ],
     why: 'When imported, __name__ is the module name; when the file is run, "__main__".',
+  },
+  'py-floor-div': {
+    forms: [
+      {
+        ask: ['What does `7 // 2` give in Python 3?', 'What is the result of `7 // 2`?'],
+        right: ['3'],
+        wrong: ['3.5', '4', '2'],
+      },
+      {
+        ask: ['What does `-7 // 2` give in Python 3?', 'What is the result of `-7 // 2`?'],
+        right: ['-4'],
+        wrong: ['-3', '-3.5', '3'],
+      },
+      {
+        ask: ['What does `7 / 2` give in Python 3?', 'What is the result of `7 / 2`?'],
+        right: ['3.5'],
+        wrong: ['3', '4', '3.0'],
+      },
+    ],
+    wrong: ['1', '0', '7'],
+    why: 'In Python 3, / always gives a float and // rounds down (towards minus infinity, not towards zero): -7 // 2 is -4, not -3 as in C.',
+  },
+  'py-args-kwargs': {
+    forms: [
+      {
+        ask: [
+          'In `def f(*args, **kwargs)`, what does kwargs receive?',
+          'When you call `f(1, x=2)`, kwargs inside f is…',
+        ],
+        right: ['A dictionary with the named arguments', 'A dict from name to value'],
+        wrong: [
+          'A tuple with the positional arguments',
+          'A list with all the arguments together',
+          'A pointer to the list of arguments',
+        ],
+      },
+      {
+        ask: [
+          'In `def f(*args, **kwargs)`, what does args receive?',
+          'When you call `f(1, 2, x=3)`, args inside f is…',
+        ],
+        right: ['A tuple with the positional arguments', 'A tuple with the ones that have no name'],
+        wrong: [
+          'A dictionary with the named arguments',
+          'A list that can be changed inside',
+          'A pointer to the first argument, as in C',
+        ],
+      },
+    ],
+    wrong: ['A string with the arguments', 'The number of arguments', 'An iterator that runs out'],
+    why: '*args gathers the extra loose arguments in a tuple, and **kwargs gathers the named ones in a dictionary.',
+  },
+  'py-with': {
+    forms: [
+      {
+        ask: [
+          'What does `with open("data.txt") as f:` guarantee?',
+          'Opening a file with with is useful for…',
+        ],
+        right: [
+          'That the file is closed when the block ends',
+          'Closing the file by itself, whatever happens',
+        ],
+        wrong: [
+          'That the whole file is read into memory',
+          'That nobody else can open the file',
+          'That the file is created if it does not exist',
+        ],
+      },
+      {
+        ask: [
+          'If an exception is raised inside a `with open(...)`, what happens to the file?',
+          'With an exception halfway through the with block, the file…',
+        ],
+        right: ['It is closed anyway on the way out', 'It is closed before the error goes up'],
+        wrong: [
+          'It stays open until the end',
+          'It is deleted so as not to leave it half-done',
+          'A backup copy of it is saved',
+        ],
+      },
+    ],
+    wrong: [
+      'That the file opens faster',
+      'That it is written in binary',
+      'That it is locked for other processes',
+    ],
+    why: 'with calls __exit__ when the block ends, also if there is an exception: the file is always closed without writing close().',
   },
   'py-json': {
     forms: [
@@ -320,17 +407,17 @@ export const PYTHON_EN: Readonly<Record<string, ConceptText>> = {
           'What does a language model generate at each step?',
           'In what units does an LLM write its answer?',
         ],
-        right: ['The next token, chosen according to probabilities', 'One token at a time'],
+        right: ['The next token, according to probabilities', 'A single token at a time'],
         wrong: [
-          'The whole answer at once',
-          'One sentence at a time',
-          'One character, always',
-          'One dictionary word, always',
+          'The whole answer at once, already thought out',
+          'One whole sentence at a time',
+          'One character at a time, always one',
+          'One whole word from the dictionary',
         ],
       },
       {
         ask: [
-          'How do you force a model to always write valid JSON for a function?',
+          'What does forcing a model to always write valid JSON consist of?',
           'What does constrained decoding consist of?',
         ],
         right: [
@@ -338,9 +425,9 @@ export const PYTHON_EN: Readonly<Record<string, ConceptText>> = {
           'Only letting it choose tokens that keep the JSON valid',
         ],
         wrong: [
-          'Asking it politely in the prompt',
-          'Retrying until it comes out right',
-          'Using a bigger model',
+          'Asking it politely in the system prompt',
+          'Retrying until a JSON that works comes out',
+          'Using a bigger model with more context',
         ],
       },
     ],
@@ -355,16 +442,16 @@ export const PYTHON_EN: Readonly<Record<string, ConceptText>> = {
           'What does a model do when it does function calling?',
         ],
         right: [
-          'It chooses a function and its arguments; your program runs it',
-          'It returns which function to call and with which parameters',
+          'It picks function and arguments; your program runs it',
+          'It returns which function to call and with what arguments',
         ],
       },
     ],
     wrong: [
-      'It runs code on your machine',
-      'It is trained with your functions',
-      'It compiles your functions',
-      'It calls another model',
+      'It runs the code of the function on your machine',
+      'It is trained on your functions to learn them',
+      'It compiles your functions and returns the binary',
+      'It calls another model to do the task',
     ],
     why: 'The model only proposes the call (name and arguments, usually in JSON); running it is up to you.',
   },

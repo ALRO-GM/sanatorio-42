@@ -3,6 +3,10 @@
  * del español con la misma forma (lo comprueba `tests/unit/quiz-bank-lang.test.ts`).
  */
 
+import { PISCINE_SHELL_EN } from './piscine-shell.js'
+import { PISCINE_C00_C03_EN } from './piscine-c00-c03.js'
+import { PISCINE_C04_C07_EN } from './piscine-c04-c07.js'
+import { PISCINE_C08_C13_EN } from './piscine-c08-c13.js'
 import type { ConceptText } from '../types.js'
 import { ALGORITHMS_EN } from './algorithms.js'
 import { C_BASICS_EN } from './c-basics.js'
@@ -24,4 +28,8 @@ export const BANK_EN: Readonly<Record<string, ConceptText>> = {
   ...CPP_EN,
   ...PYTHON_EN,
   ...GIT_EN,
+  ...PISCINE_SHELL_EN,
+  ...PISCINE_C00_C03_EN,
+  ...PISCINE_C04_C07_EN,
+  ...PISCINE_C08_C13_EN,
 }

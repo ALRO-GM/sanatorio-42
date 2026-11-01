@@ -36,7 +36,8 @@ export function languagesOf(slugs: ReadonlySet<string>): Set<'c' | 'python' | 'c
   for (const slug of slugs) {
     if (slug.startsWith('python-module-')) langs.add('python')
     else if (slug.startsWith('cpp-module-')) langs.add('cpp')
-    else langs.add('c')
+    // La shell de la piscina no es C: quien solo va por Shell 00 aún no ha escrito una línea.
+    else if (!slug.startsWith('c-piscine-shell-')) langs.add('c')
   }
 
   return langs

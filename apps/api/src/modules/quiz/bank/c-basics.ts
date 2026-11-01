@@ -100,7 +100,7 @@ export const C_BASICS: readonly Concept[] = [
           'Si reservas con `malloc` y nunca llamas a `free`, tienes…',
           '¿Cómo se llama la memoria reservada que ya no se puede liberar porque se perdió su puntero?',
         ],
-        right: ['Una fuga (memory leak)'],
+        right: ['Una fuga de memoria'],
         wrong: ['Un puntero colgante', 'Un doble free', 'Un desbordamiento de pila'],
       },
     ],
@@ -123,21 +123,17 @@ export const C_BASICS: readonly Concept[] = [
           '¿Qué devuelve `malloc` si no puede reservar la memoria?',
           'Si falla una reserva, malloc devuelve…',
         ],
-        right: ['NULL', 'Un puntero nulo'],
-        wrong: [
-          '-1',
-          'Un puntero a la pila',
-          'Un puntero a memoria sin inicializar',
-          'Lo que había antes',
-        ],
+        // Todas como código, para que «NULL» no destaque entre frases largas.
+        right: ['`NULL`'],
+        wrong: ['`(void *)-1`', '`-1`', '`EOF`', '`ENOMEM`'],
       },
       {
         ask: ['¿Qué hace `free(NULL)`?', '¿Qué pasa si llamas a free con un puntero nulo?'],
-        right: ['Nada: es seguro'],
+        right: ['No hace nada, es seguro'],
         wrong: ['Da un fallo de segmentación', 'Cuenta como un doble free', 'Aborta el programa'],
       },
     ],
-    wrong: ['-1', 'Un puntero a la pila', 'Aborta el programa'],
+    wrong: ['Da un fallo de segmentación', 'Aborta el programa', 'Libera la memoria dos veces'],
     why: 'malloc devuelve NULL al fallar (hay que comprobarlo) y free(NULL) no hace nada, por definición.',
   },
   {
@@ -151,14 +147,14 @@ export const C_BASICS: readonly Concept[] = [
       {
         ask: ['¿Qué falla en este código?', '¿Por qué está mal esto?'],
         right: [
-          'Devuelve la dirección de una variable local, que deja de existir al salir',
-          'El puntero devuelto apunta a la pila de una llamada que ya terminó',
+          'Devuelve la dirección de una variable local',
+          'Apunta a la pila de una llamada ya terminada',
         ],
         wrong: [
-          'Falta un cast a int*',
-          'n debería ser unsigned',
-          'No falla nada',
+          'Falta un cast de &n a int* en el return',
           'Hay que hacer free(&n) antes de volver',
+          'No falla nada: el que llama lee un 42',
+          'f debería recibir n como parámetro',
         ],
       },
       {
@@ -166,11 +162,15 @@ export const C_BASICS: readonly Concept[] = [
           '¿Cómo se llama el puntero que devuelve f?',
           'Un puntero a memoria que ya no es válida se llama…',
         ],
-        right: ['Colgante (dangling pointer)'],
-        wrong: ['Nulo', 'Salvaje, porque nunca se inicializó', 'Puntero a función'],
+        right: ['Un puntero colgante'],
+        wrong: ['Un puntero nulo', 'Un puntero a función', 'Un puntero constante'],
       },
     ],
-    wrong: ['Falta un cast a int*', 'n debería ser unsigned', 'No falla nada'],
+    wrong: [
+      'Falta un cast de &n a int* en el return',
+      'Hay que hacer free(&n) antes de volver',
+      'No falla nada: el que llama lee un 42',
+    ],
     why: 'n vive en la pila de f; al volver, esa memoria se reutiliza y el puntero ya no vale.',
   },
   {
@@ -186,14 +186,14 @@ export const C_BASICS: readonly Concept[] = [
           '¿Por qué existe memmove si ya está memcpy?',
         ],
         right: [
-          'memmove copia bien aunque origen y destino se solapen',
-          'Con zonas solapadas, solo memmove garantiza el resultado',
+          'memmove admite que las zonas se solapen',
+          'Solo memmove copia bien con solapamiento',
         ],
         wrong: [
-          'memmove es siempre más rápida',
+          'memmove es siempre más rápida que memcpy',
           'memmove borra el origen después de copiar',
-          'Son exactamente iguales',
-          'memmove solo copia cadenas',
+          'memmove solo sirve para copiar cadenas',
+          'Son iguales: memmove es otro nombre de memcpy',
         ],
       },
       {
@@ -206,9 +206,9 @@ export const C_BASICS: readonly Concept[] = [
       },
     ],
     wrong: [
-      'memmove es siempre más rápida',
-      'Son exactamente iguales',
-      'memmove solo copia cadenas',
+      'memmove es siempre más rápida que memcpy',
+      'memmove borra el origen después de copiar',
+      'memmove solo sirve para copiar cadenas',
     ],
     why: 'Con solapamiento, memcpy puede pisar lo que aún no ha copiado; memmove elige el sentido de la copia.',
   },
@@ -245,10 +245,15 @@ export const C_BASICS: readonly Concept[] = [
       {
         ask: ['¿Qué pasa al ejecutar esto?', 'Este código compila. ¿Qué ocurre al ejecutarlo?'],
         right: [
-          'Comportamiento indefinido: escribe en un literal (suele dar segmentation fault)',
-          'Suele dar segfault: los literales no se pueden modificar',
+          'Comportamiento indefinido: suele dar segfault',
+          'Suele dar segfault: un literal no se modifica',
         ],
-        wrong: ['Imprime Hola', 'Imprime hola', 'Imprime H', 'Tiene una fuga de memoria'],
+        wrong: [
+          'Imprime Hola, con la H mayúscula',
+          'Imprime hola, porque s[0] es una copia',
+          'Imprime H y se para en la primera letra',
+          'Tiene una fuga: el literal no se libera',
+        ],
       },
       {
         ask: [
@@ -259,7 +264,11 @@ export const C_BASICS: readonly Concept[] = [
         wrong: ['const char *s = "hola";', "char *s = 'hola';", 'static char *s = "hola";'],
       },
     ],
-    wrong: ['Imprime Hola', 'Imprime hola', 'Imprime H'],
+    wrong: [
+      'Imprime Hola, con la H mayúscula',
+      'Imprime hola, porque s[0] es una copia',
+      'Imprime H y se para en la primera letra',
+    ],
     why: 'Un literal vive en memoria de solo lectura; char s[] = "hola" hace una copia propia que sí se puede cambiar.',
   },
   {
@@ -272,15 +281,15 @@ export const C_BASICS: readonly Concept[] = [
     forms: [
       {
         ask: ['Esta función copia una cadena. ¿Qué falla?', '¿Qué error tiene este strdup?'],
-        right: ["Reserva un byte de menos: falta el del '\\0'", 'Debería reservar strlen(s) + 1'],
+        right: ["Reserva un byte de menos, el del '\\0'", 'Debería reservar strlen(s) + 1'],
       },
     ],
     wrong: [
       'strcpy no copia el último carácter',
       'Hay que hacer free(d) antes del return',
-      'malloc necesita un cast a char*',
-      's debería ser char**',
-      'No falla nada',
+      'malloc necesita un cast a char *',
+      "No falla: strlen ya cuenta el '\\0'",
+      'd debería ser static para devolverla',
     ],
     why: "strlen no cuenta el '\\0', pero strcpy sí lo copia: escribe un byte fuera de lo reservado.",
   },
@@ -296,14 +305,11 @@ export const C_BASICS: readonly Concept[] = [
           '¿Qué tiene de especial una variable local declarada `static`?',
           '¿Qué cambia al poner static a una variable dentro de una función?',
         ],
-        right: [
-          'Conserva su valor entre llamadas',
-          'Dura todo el programa, aunque solo se vea dentro de la función',
-        ],
+        right: ['Conserva su valor entre llamadas', 'Dura todo el programa, no solo una llamada'],
         wrong: [
-          'Se reinicia en cada llamada',
-          'Se ve desde otros ficheros',
-          'Pasa a ser constante',
+          'Se reinicia a 0 en cada llamada',
+          'Se ve también desde otros ficheros',
+          'Pasa a ser constante tras asignarla',
           'Se guarda en la pila de quien llama',
         ],
       },
@@ -312,11 +318,20 @@ export const C_BASICS: readonly Concept[] = [
           '¿Qué permite a get_next_line recordar lo que sobró de la lectura anterior?',
           'Para guardar lo leído de más entre dos llamadas a get_next_line se usa…',
         ],
-        right: ['Una variable static'],
-        wrong: ['Una variable local normal', 'Un parámetro más', 'Una variable global con extern'],
+        // Todas son locales con otro calificativo: lo que cuenta es saber cuál dura entre llamadas.
+        right: ['Una variable local static'],
+        wrong: [
+          'Una variable local normal',
+          'Una variable local register',
+          'Una variable local const',
+        ],
       },
     ],
-    wrong: ['Se reinicia en cada llamada', 'Se ve desde otros ficheros', 'Pasa a ser constante'],
+    wrong: [
+      'Se reinicia a 0 en cada llamada',
+      'Se ve también desde otros ficheros',
+      'Pasa a ser constante tras asignarla',
+    ],
     why: 'static da a la variable la duración de todo el programa (se inicializa una vez) sin cambiar dónde se ve.',
   },
   {
@@ -344,14 +359,11 @@ export const C_BASICS: readonly Concept[] = [
           'Si `read(fd, buf, 42)` devuelve 10, ¿qué ha pasado?',
           'read pidió 42 bytes y devolvió 10. ¿Qué significa?',
         ],
-        right: [
-          'Que solo había 10 bytes disponibles (no es un error)',
-          'Que ha leído 10 bytes, menos de lo pedido',
-        ],
+        right: ['Que solo había 10 bytes para leer', 'Que ha leído 10 bytes, menos de lo pedido'],
         wrong: [
-          'Que ha habido un error',
+          'Que ha habido un error a mitad de lectura',
           'Que faltan 32 bytes por un fallo de disco',
-          'Que el fichero tiene 52 bytes',
+          'Que el fichero tiene 52 bytes en total',
         ],
       },
     ],
@@ -406,18 +418,27 @@ export const C_BASICS: readonly Concept[] = [
           'Para leer los argumentos de `printf(const char *fmt, ...)` se usa…',
         ],
         right: ['va_start, va_arg y va_end', 'Una va_list con va_arg'],
-        wrong: ['argc y argv', 'Un array de void*', 'malloc y free', 'getopt'],
+        wrong: [
+          'argc y argv, como en main',
+          'Un array de void * con NULL al final',
+          'getopt y optarg',
+          'malloc, memcpy y free',
+        ],
       },
       {
         ask: [
           '¿Cómo sabe printf cuántos argumentos le han pasado?',
           '¿De dónde saca una función variádica cuántos argumentos tiene?',
         ],
-        right: ['No lo sabe: lo deduce del formato', 'De la cadena de formato'],
-        wrong: ['De argc', 'De sizeof(...)', 'Porque va_arg devuelve NULL al acabar'],
+        right: ['No lo sabe: lo deduce del formato', 'De lo que pide la cadena de formato'],
+        wrong: [
+          'De un argc oculto que pasa el compilador',
+          'De sizeof(...) sobre los argumentos',
+          'De va_arg, que da NULL al acabar',
+        ],
       },
     ],
-    wrong: ['argc y argv', 'Un array de void*', 'getopt'],
+    wrong: ['argc y argv, como en main', 'Un array de void * con NULL al final', 'getopt y optarg'],
     why: 'va_start empieza, va_arg da el siguiente con el tipo que digas y va_end termina; cuántos hay lo dice el formato.',
   },
   {
@@ -480,18 +501,14 @@ export const C_BASICS: readonly Concept[] = [
           '¿Qué falla en este lstadd_front?',
           'Debería poner `new` al principio de la lista. ¿Qué pasa?',
         ],
-        right: [
-          'Cambia una copia del puntero: fuera, la cabeza no cambia',
-          'Tendría que recibir t_list **lst para cambiar la cabeza',
-        ],
+        right: ['Cambia solo su copia local de lst', 'Debería recibir t_list **lst'],
       },
     ],
     wrong: [
       'Falta reservar memoria para new',
       'Debería ser lst->next = new',
-      'Hay que liberar lst',
-      'Funciona bien',
-      'Le falta un return',
+      'Hay que liberar lst antes de cambiarla',
+      'Funciona bien: new queda el primero',
     ],
     why: 'En C los argumentos se pasan por valor: para cambiar la cabeza hay que pasar su dirección.',
   },
@@ -504,11 +521,18 @@ export const C_BASICS: readonly Concept[] = [
     code: 'for (size_t i = 10; i >= 0; i--)\n    printf("%zu\\n", i);',
     forms: [
       {
-        ask: ['¿Cuántas veces se ejecuta este bucle?', 'Quiere contar de 10 a 0. ¿Qué pasa?'],
-        right: ['Nunca termina: un size_t siempre es >= 0', 'Se repite sin fin'],
+        ask: ['¿Qué pasa con este bucle?', 'Quiere contar de 10 a 0. ¿Qué pasa?'],
+        right: ['Nunca termina: i nunca baja de 0', 'Da vueltas sin fin'],
       },
     ],
-    wrong: ['11 veces', '10 veces', 'Ninguna', 'Da error de compilación', 'Se para en -1'],
+    // Con texto y no con números: si no, «11 veces» no saldría nunca junto a la buena.
+    wrong: [
+      'Termina tras 11 vueltas',
+      'Termina tras 10 vueltas',
+      'No entra ni una vez',
+      'No compila por el i >= 0',
+      'Se para al llegar a -1',
+    ],
     why: 'size_t no tiene signo: al bajar de 0 da la vuelta al valor más grande y la condición siempre se cumple.',
   },
   {
@@ -523,21 +547,26 @@ export const C_BASICS: readonly Concept[] = [
           '¿Qué pasa en C si un int con signo pasa de INT_MAX?',
           '¿Qué pasa al sumar 1 a INT_MAX en un int?',
         ],
-        right: ['Comportamiento indefinido', 'Indefinido: el estándar no dice qué pasa'],
+        right: ['Comportamiento indefinido', 'El estándar no dice qué pasa'],
         wrong: [
-          'Da error de compilación',
-          'Se queda en el máximo',
-          'Lanza una excepción',
-          'Pasa a ser un long',
+          'Da un error al compilar',
+          'Se queda fijo en INT_MAX',
+          'Lanza una excepción en tiempo de ejecución',
+          'Se convierte solo en un long',
         ],
       },
       {
-        ask: ['¿Y si un unsigned int pasa de su máximo?', '¿Qué da sumar 1 a UINT_MAX?'],
+        ask: ['¿Qué pasa si un unsigned int pasa de su máximo?', '¿Qué da sumar 1 a UINT_MAX?'],
         right: ['Vuelve a 0, de forma definida'],
-        wrong: ['Comportamiento indefinido', 'Se queda en el máximo', 'Da error de compilación'],
+        wrong: [
+          'Comportamiento indefinido',
+          'Se queda fijo en UINT_MAX',
+          'Da un error al compilar',
+          'Pasa a valer -1, con signo',
+        ],
       },
     ],
-    wrong: ['Da error de compilación', 'Se queda en el máximo', 'Lanza una excepción'],
+    wrong: ['Da un error al compilar', 'Se queda fijo en INT_MAX', 'Se convierte solo en un long'],
     why: 'Los unsigned dan la vuelta (aritmética módulo 2ⁿ); con signo, desbordar es indefinido.',
   },
   {
@@ -553,34 +582,442 @@ export const C_BASICS: readonly Concept[] = [
           '¿En qué se fija make para decidir si rehace un objetivo?',
         ],
         right: [
-          'En las fechas de modificación del objetivo y de sus dependencias',
-          'En si el objetivo es más nuevo que todo lo que necesita',
+          'En las fechas de modificación de los ficheros',
+          'En si el objetivo es más nuevo que sus dependencias',
         ],
         wrong: [
-          'En un hash de cada fichero',
+          'En un hash del contenido de cada fichero',
           'En lo que recuerda en memoria entre ejecuciones',
-          'En nada: siempre recompila todo',
-          'En si existe la carpeta obj',
+          'En nada: siempre lo recompila todo',
+          'En si existe ya la carpeta de los objetos',
         ],
       },
       {
         ask: ['¿Para qué sirve `.PHONY` en un Makefile?', '¿Para qué se declara `.PHONY: clean`?'],
         right: [
-          'Para que make ejecute la regla aunque exista un fichero con ese nombre',
-          'Para decir que esa regla no crea ningún fichero',
+          'Para ejecutarla aunque haya un fichero con su nombre',
+          'Para marcar que la regla no crea ningún fichero',
         ],
         wrong: [
-          'Para compilar en paralelo',
-          'Para ocultar la regla de la ayuda',
-          'Para que la regla se ejecute la primera',
+          'Para compilar sus dependencias en paralelo',
+          'Para ocultar la regla en la ayuda de make',
+          'Para que la regla se ejecute antes que all',
+          'Para que make no muestre las órdenes que ejecuta',
         ],
       },
     ],
     wrong: [
-      'En un hash de cada fichero',
-      'En nada: siempre recompila todo',
-      'En si existe la carpeta obj',
+      'En un hash del contenido de cada fichero',
+      'En nada: siempre lo recompila todo',
+      'En si existe ya la carpeta de los objetos',
     ],
     why: 'make rehace un objetivo si alguna dependencia es más reciente; .PHONY marca reglas que no son ficheros.',
+  },
+  {
+    id: 'libft-split',
+    topic: 'cadenas',
+    needs: { projects: LIBFT },
+    kind: 'long',
+    level: 3,
+    forms: [
+      {
+        ask: [
+          '¿Qué devuelve `ft_split("  hola  42 ", \' \')`?',
+          'Partiendo `"  hola  42 "` por espacios, `ft_split` devuelve…',
+        ],
+        right: ['`{"hola", "42", NULL}`'],
+        wrong: [
+          '`{"hola", "42"}`',
+          '`{"", "hola", "", "42", NULL}`',
+          '`{"  hola", "  42 ", NULL}`',
+          '`{"hola  42", NULL}`',
+        ],
+      },
+      {
+        ask: [
+          '¿Cómo sabe quien usa el array de `ft_split` dónde acaba?',
+          'El array que devuelve ft_split no lleva su tamaño. ¿Cómo se sabe dónde termina?',
+        ],
+        right: ['Porque el último puntero es NULL', 'Por un puntero NULL detrás de la última'],
+        wrong: [
+          'Porque acaba en una cadena vacía',
+          'Porque el primero guarda cuántas hay',
+          "Porque detrás de la última hay un '\\0'",
+        ],
+      },
+    ],
+    wrong: [
+      'Porque acaba en una cadena vacía',
+      'Porque el primero guarda cuántas hay',
+      'Porque ft_split avisa con un printf',
+    ],
+    why: 'ft_split salta los separadores seguidos (no da cadenas vacías) y cierra el array con un puntero NULL, como argv.',
+  },
+  {
+    id: 'libft-itoa',
+    topic: 'cadenas',
+    needs: { projects: LIBFT },
+    kind: 'long',
+    level: 3,
+    forms: [
+      {
+        ask: [
+          '¿Con qué n falla un ft_itoa que empieza por `if (n < 0) n = -n;` con int de 32 bits?',
+          'Un ft_itoa cambia el signo con `n = -n` sin más. ¿Con qué valor de n se rompe?',
+        ],
+        right: ['-2147483648'],
+        wrong: ['-1', '0', '2147483647', '-2147483647'],
+      },
+      {
+        ask: [
+          "¿Cuántos bytes tiene que reservar `ft_itoa(-42)`, contando el '\\0'?",
+          "Contando signo y '\\0', ¿cuántos bytes ocupa el resultado de `ft_itoa(-42)`?",
+        ],
+        right: ['4'],
+        wrong: ['3', '5', '2'],
+      },
+    ],
+    wrong: ['1', '6', '11'],
+    why: '-(-2147483648) no cabe en un int (el máximo es 2147483647), así que INT_MIN se trata aparte o con un long; "-42" son signo, dos cifras y el \'\\0\'.',
+  },
+  {
+    id: 'libft-ar',
+    topic: 'makefile',
+    needs: { projects: LIBFT },
+    kind: 'quick',
+    level: 2,
+    forms: [
+      {
+        ask: [
+          '¿Qué orden junta los `.o` en la biblioteca `libft.a`?',
+          'Para crear `libft.a` con los objetos ya compilados, el Makefile llama a…',
+        ],
+        right: ['`ar rcs libft.a *.o`'],
+        wrong: [
+          '`gcc -shared -o libft.a *.o`',
+          '`ld -o libft.a *.o`',
+          '`tar -cf libft.a *.o`',
+          '`cc -c -o libft.a *.c`',
+        ],
+      },
+      {
+        ask: ['¿Qué es `libft.a`?', '¿Qué fichero es el `libft.a` que entregas?'],
+        right: ['Una biblioteca estática: los .o juntos', 'Un archivo con los .o de tus funciones'],
+        wrong: [
+          'Un ejecutable con todas las funciones',
+          'Una biblioteca dinámica que se carga al arrancar',
+          'Una cabecera .h ya compilada',
+          'Un .c con todas las funciones juntas',
+        ],
+      },
+    ],
+    wrong: [
+      'Un ejecutable con todas las funciones',
+      'Una cabecera .h ya compilada',
+      'Un .c con todas las funciones juntas',
+    ],
+    why: 'Una biblioteca estática .a es un archivo de objetos hecho con ar; al enlazar, se copian en el programa los que hacen falta.',
+  },
+  {
+    id: 'libft-lstclear',
+    topic: 'listas',
+    needs: { projects: LIBFT },
+    kind: 'quick',
+    level: 3,
+    forms: [
+      {
+        ask: [
+          '¿Qué tiene que hacer `ft_lstclear(&lst, del)`?',
+          'Según el enunciado de la Libft, ft_lstclear tiene que…',
+        ],
+        right: [
+          'Liberar cada nodo y su contenido, y dejar lst a NULL',
+          'Borrar la lista entera y dejar el puntero a NULL',
+        ],
+        wrong: [
+          'Liberar solo el primer nodo y su contenido',
+          'Vaciar el contenido y dejar los nodos',
+          'Liberar los nodos, pero no su contenido',
+          'Poner lst a NULL sin liberar nada',
+        ],
+      },
+      {
+        ask: [
+          'En `ft_lstclear`, ¿para qué sirve el parámetro `del`?',
+          '¿Qué hace la función `del` que recibe ft_lstclear?',
+        ],
+        right: ['Libera el contenido de cada nodo'],
+        wrong: [
+          'Libera el nodo, pero no su contenido',
+          'Decide qué nodos se borran y cuáles no',
+          'Compara contenidos y quita repetidos',
+        ],
+      },
+    ],
+    wrong: [
+      'Liberar solo el primer nodo y su contenido',
+      'Vaciar el contenido y dejar los nodos',
+      'Poner lst a NULL sin liberar nada',
+    ],
+    why: 'La lista no sabe qué guarda content: del lo libera, free libera cada nodo y al final el puntero a la lista queda a NULL.',
+  },
+  {
+    id: 'printf-return',
+    topic: 'funciones',
+    needs: { projects: PRINTF },
+    kind: 'quick',
+    level: 2,
+    forms: [
+      {
+        ask: [
+          '¿Qué devuelve `ft_printf("hola %d\\n", 42)`?',
+          'Tras escribir `hola 42` y un salto de línea, ft_printf devuelve…',
+        ],
+        right: ['8'],
+        wrong: ['7', '9', '0', '2'],
+      },
+      {
+        ask: [
+          '¿Qué tiene que devolver `ft_printf`?',
+          '¿Qué valor de retorno pide el enunciado de ft_printf?',
+        ],
+        right: ['El número de caracteres que ha escrito'],
+        wrong: [
+          'El número de conversiones del formato',
+          'El número de argumentos que ha leído',
+          'La longitud de la cadena de formato',
+          'Un 0 si todo ha ido bien',
+        ],
+      },
+    ],
+    wrong: ['1', '10', '42'],
+    why: 'Como printf, ft_printf devuelve cuántos caracteres ha escrito: "hola 42\\n" son 8.',
+  },
+  {
+    id: 'printf-pointer',
+    topic: 'funciones',
+    needs: { projects: PRINTF },
+    kind: 'quick',
+    level: 3,
+    forms: [
+      {
+        ask: [
+          '¿Qué imprime `ft_printf("%p", (void *)42)`?',
+          'Un puntero que vale 42, escrito con `%p`, sale como…',
+        ],
+        right: ['0x2a'],
+        wrong: ['42', '2a', '0x2A', '0x0000002a'],
+      },
+      {
+        ask: [
+          '¿En qué formato escribe `%p` la dirección?',
+          'Con %p, la dirección de un puntero sale en…',
+        ],
+        right: ['Hexadecimal, en minúsculas y con 0x'],
+        wrong: [
+          'Decimal, como un unsigned long',
+          'Hexadecimal en mayúsculas, sin 0x',
+          'Binario, con el prefijo 0b',
+          'Octal, con un 0 delante',
+        ],
+      },
+    ],
+    wrong: ['0x42', '0X2A', '0b101010'],
+    why: '%p escribe la dirección en hexadecimal en minúsculas con el prefijo 0x, como printf: 42 es 0x2a.',
+  },
+  {
+    id: 'printf-percent',
+    topic: 'funciones',
+    needs: { projects: PRINTF },
+    kind: 'quick',
+    level: 2,
+    forms: [
+      {
+        ask: ['¿Qué imprime `ft_printf("%d%%", 50)`?', 'Con el formato `"%d%%"` y 50, sale…'],
+        right: ['50%'],
+        wrong: ['50', '50%%', '5%', '0%'],
+      },
+      {
+        ask: ['¿Qué imprime `ft_printf("%%d", 42)`?', 'Con el formato `"%%d"` y 42, sale…'],
+        right: ['%d'],
+        wrong: ['%42', '%%d', '%d42'],
+      },
+    ],
+    wrong: ['%%', '%50', 'd'],
+    why: '%% escribe un solo % y no consume ningún argumento; lo que va detrás se imprime tal cual.',
+  },
+  {
+    id: 'gnl-buffer-size',
+    topic: 'ficheros',
+    needs: { projects: GNL },
+    kind: 'quick',
+    level: 3,
+    forms: [
+      {
+        ask: [
+          '¿Qué opción de cc fija BUFFER_SIZE al compilar get_next_line?',
+          'Para compilar get_next_line con un búfer de 42 bytes, le pasas a cc…',
+        ],
+        right: ['`-D BUFFER_SIZE=42`'],
+        wrong: ['`-O BUFFER_SIZE=42`', '`-I BUFFER_SIZE=42`', '`-l BUFFER_SIZE=42`'],
+      },
+      {
+        ask: [
+          'Con BUFFER_SIZE=1, ¿cuántas llamadas a read hacen falta para leer la línea `hola\\n`?',
+          'Si cada read trae 1 byte, ¿cuántas lecturas cuesta la línea `hola\\n`?',
+        ],
+        right: ['5'],
+        wrong: ['1', '4', '6', '2'],
+      },
+      {
+        ask: [
+          'Con `-D BUFFER_SIZE=10000000`, ¿qué falla si el búfer es un `char buf[BUFFER_SIZE]` local?',
+          'Un búfer local de 10 MB en get_next_line rompe el programa. ¿Por qué?',
+        ],
+        right: ['No cabe en la pila: hay que pedirlo con malloc'],
+        wrong: [
+          'read no admite leer tanto de una vez',
+          'No compila: un array no puede ser tan grande',
+          'Nada: la pila crece todo lo que haga falta',
+        ],
+      },
+    ],
+    wrong: [
+      'read no admite leer tanto de una vez',
+      'No compila: un array no puede ser tan grande',
+      'Tarda mucho: read lee byte a byte',
+    ],
+    why: '-D define la macro al compilar; con 1 byte hay un read por carácter, y un búfer de 10 MB no cabe en la pila, que suele tener 8 MB.',
+  },
+  {
+    id: 'gnl-last-line',
+    topic: 'ficheros',
+    needs: { projects: GNL },
+    kind: 'quick',
+    level: 3,
+    forms: [
+      {
+        ask: [
+          'Un fichero acaba con una línea sin `\\n`. ¿Cómo la devuelve get_next_line?',
+          'Si la última línea no lleva salto de línea, get_next_line la devuelve…',
+        ],
+        right: ['Tal cual, sin añadirle el salto'],
+        wrong: [
+          'Con un salto de línea añadido al final',
+          'No la devuelve: devuelve NULL directamente',
+          'Vacía: solo cuentan las líneas con \\n',
+        ],
+      },
+      {
+        ask: [
+          'Tras devolver la última línea, ¿qué devuelve la siguiente llamada a get_next_line?',
+          'Cuando ya no queda nada que leer, get_next_line devuelve…',
+        ],
+        right: ['`NULL`'],
+        wrong: ['`""`', '`"\\n"`', '`-1`'],
+      },
+      {
+        ask: [
+          '¿Cómo devuelve get_next_line una línea que sí acaba en salto de línea?',
+          'Al leer una línea normal, con su salto, get_next_line devuelve…',
+        ],
+        right: ['La línea, con su \\n al final'],
+        wrong: [
+          'La línea, sin el \\n del final',
+          'La línea y lo que sobró del búfer',
+          'Solo el \\n, sin el texto',
+        ],
+      },
+    ],
+    wrong: [
+      'Con un salto de línea añadido al final',
+      'No la devuelve: devuelve NULL directamente',
+      'La línea, sin el \\n del final',
+    ],
+    why: 'La línea se devuelve con su \\n si lo tiene (la última puede no tenerlo) y, cuando no queda nada, get_next_line devuelve NULL.',
+  },
+  {
+    id: 'gnl-errors',
+    topic: 'ficheros',
+    needs: { projects: GNL },
+    kind: 'quick',
+    level: 3,
+    forms: [
+      {
+        ask: [
+          '¿Qué tiene que devolver `get_next_line(-1)`?',
+          'Con un descriptor que no vale, get_next_line devuelve…',
+        ],
+        right: ['`NULL`'],
+        wrong: ['`""`', '`-1`', '`"(null)"`'],
+      },
+      {
+        ask: [
+          'Si read falla a mitad de una línea, ¿qué se hace con lo guardado en la static?',
+          'read devuelve -1 y la static tiene texto a medias. ¿Qué toca hacer?',
+        ],
+        right: ['Liberarlo y devolver NULL'],
+        wrong: [
+          'Devolver lo leído hasta ahí',
+          'Guardarlo para la siguiente llamada',
+          'Llamar a exit con un error',
+        ],
+      },
+    ],
+    wrong: [
+      'Devolver lo leído hasta ahí',
+      'Guardarlo para la siguiente llamada',
+      'Imprimir un error y seguir',
+    ],
+    why: 'Ante un error (fd malo o read que falla) get_next_line devuelve NULL, y liberar lo guardado evita la fuga.',
+  },
+  {
+    id: 'gnl-bonus-fd',
+    topic: 'ficheros',
+    needs: { projects: GNL },
+    kind: 'quick',
+    level: 4,
+    forms: [
+      {
+        ask: [
+          'En el bonus, ¿qué hace falta para leer de varios fd a la vez?',
+          'Para que get_next_line alterne entre varios ficheros sin mezclarlos, hay que…',
+        ],
+        right: ['Guardar lo sobrante de cada fd por separado'],
+        wrong: [
+          'Abrir los ficheros en el mismo orden siempre',
+          'Leer cada fichero entero de una vez',
+          'Usar lseek para volver atrás en cada fd',
+          'Cerrar cada fd antes de pasar al siguiente',
+        ],
+      },
+      {
+        ask: [
+          '¿Cuántas variables static permite el bonus de get_next_line?',
+          'El bonus pide hacerlo con, como mucho, ¿cuántas static?',
+        ],
+        right: ['1'],
+        wrong: ['2', '0', '3', '1024'],
+      },
+      {
+        ask: [
+          'Alternas llamadas con el fd 3 y el fd 4. ¿Qué devuelve cada una?',
+          'En el bonus, si llamas con el fd 3, luego con el 4 y otra vez con el 3, cada llamada da…',
+        ],
+        right: ['La siguiente línea de ese fd, sin mezclas'],
+        wrong: [
+          'La siguiente línea del último fd que se abrió',
+          'Siempre la primera línea de cada fichero',
+          'Una línea que mezcla lo de los dos fd',
+          'NULL: no se pueden mezclar descriptores',
+        ],
+      },
+    ],
+    wrong: [
+      'Leer cada fichero entero de una vez',
+      'Cerrar cada fd antes de pasar al siguiente',
+      'Abrir los ficheros en el mismo orden siempre',
+    ],
+    why: 'Cada fd tiene su propio resto pendiente (por ejemplo, un array de restos indexado por fd), y el bonus lo pide con una sola static.',
   },
 ]

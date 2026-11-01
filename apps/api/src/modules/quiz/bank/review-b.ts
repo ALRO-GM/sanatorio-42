@@ -6,19 +6,6 @@
 import type { ReviewEntry } from './types.js'
 
 export const REVIEW_B: Record<string, ReviewEntry> = {
-  'algo-sort-complexity': {
-    title: 'El límite de ordenar comparando',
-    definition:
-      'Cualquier ordenación que solo compare elementos necesita, en el peor caso, del orden de n·log n comparaciones. Solo se puede bajar de ahí sin comparar (radix, counting sort).',
-    example:
-      '100 números: unas 525 comparaciones como mínimo (log₂ 100!); la burbuja hace hasta 4950.',
-  },
-  'algo-stack': {
-    title: 'Pilas y colas en push_swap',
-    definition:
-      'Una pila saca lo último que entró (LIFO); una cola, lo primero (FIFO). En push_swap las dos pilas solo dejan tocar la cima, y las rotaciones las usan casi como colas circulares.',
-    example: 'pb mueve la cima de a a la cima de b; pa, al revés.',
-  },
   'algo-rotate': {
     title: 'Rotar una pila',
     definition:

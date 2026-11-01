@@ -7,6 +7,7 @@ import { describe, expect, it } from 'vitest'
 import { BANK, REVIEW } from '../../src/modules/quiz/bank/index.js'
 import { buildRound, OPTIONS, seeded, shapeOf } from '../../src/modules/quiz/quiz.rules.js'
 import { SEEDED_SLUGS } from '../../src/modules/replica/curriculum.js'
+import { PISCINE_PROGRESS } from '../../src/modules/replica/piscine.js'
 
 // Sin espacios de más. Las mayúsculas cuentan: «ff» y «FF» son respuestas distintas.
 const norm = (text: string): string => text.trim()
@@ -109,8 +110,10 @@ describe('banco de preguntas', () => {
   })
 
   it('los proyectos que pide cada concepto existen (si no, no saldría nunca)', () => {
+    // Los del common core y los de la piscina que cuentan (shell y C).
+    const known = new Set([...SEEDED_SLUGS, ...PISCINE_PROGRESS.map((project) => project.slug)])
     const unknown = BANK.flatMap((concept) =>
-      (concept.needs.projects ?? []).filter((slug) => !SEEDED_SLUGS.has(slug)),
+      (concept.needs.projects ?? []).filter((slug) => !known.has(slug)),
     )
 
     expect(unknown).toEqual([])

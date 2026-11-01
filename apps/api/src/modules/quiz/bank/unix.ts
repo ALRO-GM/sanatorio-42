@@ -21,14 +21,11 @@ export const UNIX: readonly Concept[] = [
     forms: [
       {
         ask: ['¿Para qué sirve `sudo`?', '¿Qué hace `sudo orden`?'],
-        right: [
-          'Ejecuta la orden con los permisos de otro usuario (normalmente root)',
-          'Ejecuta la orden como root, si tienes permiso',
-        ],
+        right: ['Ejecuta la orden como root', 'Ejecuta la orden con permisos de root'],
         wrong: [
-          'Cambia de shell',
-          'Apaga la máquina',
-          'Lista los procesos',
+          'Cambia de shell para esa orden',
+          'Apaga la máquina de forma segura',
+          'Lista los procesos de root',
           'Instala paquetes, y nada más',
         ],
       },
@@ -41,8 +38,12 @@ export const UNIX: readonly Concept[] = [
         wrong: ['/etc/passwd', '/etc/shadow', '~/.bashrc'],
       },
     ],
-    wrong: ['Cambia de shell', 'Apaga la máquina', 'Lista los procesos'],
-    why: 'sudo ejecuta como otro usuario según las reglas de /etc/sudoers, que se editan con visudo para no romperlo.',
+    wrong: [
+      'Cambia de shell para esa orden',
+      'Apaga la máquina de forma segura',
+      'Lista los procesos de root',
+    ],
+    why: 'sudo ejecuta como otro usuario (root, si no se dice otro) según las reglas de /etc/sudoers, que se editan con visudo para no romperlo.',
   },
   {
     id: 'unix-ssh-port',
@@ -77,11 +78,13 @@ export const UNIX: readonly Concept[] = [
     forms: [
       {
         ask: ['¿Qué hace un cortafuegos como UFW?', '¿Para qué sirve UFW?'],
-        right: [
-          'Decide qué conexiones de red se permiten y cuáles no',
-          'Filtra el tráfico de red por puertos y reglas',
+        right: ['Decide qué conexiones se permiten', 'Filtra el tráfico de red con reglas'],
+        wrong: [
+          'Cifra el disco y las particiones',
+          'Gestiona usuarios y sus contraseñas',
+          'Cifra el tráfico que sale de la red',
+          'Acelera la red guardando caché',
         ],
-        wrong: ['Cifra el disco', 'Gestiona usuarios', 'Comprime ficheros', 'Acelera la red'],
       },
       {
         ask: [
@@ -92,7 +95,11 @@ export const UNIX: readonly Concept[] = [
         wrong: ['ufw open 4242', 'ufw enable 4242', 'ufw deny 4242'],
       },
     ],
-    wrong: ['Cifra el disco', 'Gestiona usuarios', 'Comprime ficheros'],
+    wrong: [
+      'Cifra el disco y las particiones',
+      'Gestiona usuarios y sus contraseñas',
+      'Acelera la red guardando caché',
+    ],
     why: 'Un cortafuegos filtra el tráfico según reglas; con UFW se abren puertos con `allow`.',
   },
   {
@@ -108,14 +115,15 @@ export const UNIX: readonly Concept[] = [
           '¿Qué permite hacer LVM?',
         ],
         right: [
-          'Crear volúmenes lógicos y cambiarlos de tamaño con flexibilidad',
-          'Juntar discos y redimensionar volúmenes sin reparticionar',
+          'Redimensionar volúmenes sin reparticionar',
+          'Juntar varios discos en un mismo grupo',
         ],
       },
     ],
+    // LVM no cifra: en Born2beroot el cifrado lo pone LUKS, por debajo.
     wrong: [
-      'Hacer el disco más rápido',
-      'Cifrar los datos',
+      'Hacer el disco más rápido al leer',
+      'Cifrar los datos del disco entero',
       'Prescindir del sistema de ficheros',
       'Hacer copias de seguridad automáticas',
     ],
@@ -204,14 +212,11 @@ export const UNIX: readonly Concept[] = [
           '¿Qué pasa con el código que va después de un `execve` que funciona?',
           'Si execve tiene éxito, ¿qué pasa con las líneas que lo siguen?',
         ],
-        right: [
-          'No se ejecutan nunca: el proceso pasa a ser el nuevo programa',
-          'Nada: el proceso se sustituye y execve no vuelve',
-        ],
+        right: ['No se ejecutan: execve no vuelve', 'Nunca llegan a ejecutarse'],
         wrong: [
           'Se ejecutan al terminar el nuevo programa',
-          'Se ejecutan en un hilo aparte',
-          'Se ejecutan en el padre',
+          'Se ejecutan en un hilo aparte, a la vez',
+          'Se ejecutan en el padre, no en el hijo',
         ],
       },
       {
@@ -225,8 +230,8 @@ export const UNIX: readonly Concept[] = [
     ],
     wrong: [
       'Se ejecutan al terminar el nuevo programa',
-      'Se ejecutan en un hilo aparte',
-      'Se ejecutan en el padre',
+      'Se ejecutan en un hilo aparte, a la vez',
+      'Se ejecutan en el padre, no en el hijo',
     ],
     why: 'execve reemplaza la imagen del proceso; solo vuelve (con -1) si no lo ha conseguido.',
   },
@@ -267,16 +272,16 @@ export const UNIX: readonly Concept[] = [
       {
         ask: ['¿Qué hace `dup2(fd, 1)`?', '¿Para qué sirve `dup2(fd, STDOUT_FILENO)`?'],
         right: [
-          'Hace que el descriptor 1 apunte a lo mismo que fd',
-          'Redirige la salida estándar a donde apunta fd',
+          'Hace que el fd 1 apunte a lo mismo que fd',
+          'Redirige la salida estándar hacia fd',
         ],
       },
     ],
     wrong: [
       'Copia el contenido del fichero en la salida',
       'Cierra fd y abre uno nuevo',
-      'Duplica el proceso',
-      'Escribe fd en pantalla',
+      'Duplica el proceso, como hace fork',
+      'Escribe el número fd en la salida',
     ],
     why: 'dup2 hace que el segundo descriptor sea una copia del primero: así se redirige la salida a un fichero o a un pipe.',
   },
@@ -292,16 +297,16 @@ export const UNIX: readonly Concept[] = [
       {
         ask: ['Este «ls | wc» se queda colgado. ¿Por qué?', '¿Qué hace que wc no termine nunca?'],
         right: [
-          'El padre no cierra fd[1]: wc nunca recibe el fin de fichero',
-          'El padre deja abierto un extremo de escritura, así que wc espera para siempre',
+          'El padre no cierra fd[1]: wc no ve el EOF',
+          'El padre deja abierto fd[1], y wc espera',
         ],
       },
     ],
     wrong: [
-      'Falta un tercer fork',
-      'ls escribe en stderr',
-      'wait solo espera a un hijo',
-      'dup2 se usa al revés',
+      'Falta un tercer fork para el padre',
+      'ls escribe en stderr, no en el pipe',
+      'wait solo espera a un hijo, no a dos',
+      'dup2 tiene los argumentos al revés',
       'execve necesita la ruta relativa',
     ],
     why: 'Un lector solo ve el fin de fichero cuando todos los extremos de escritura están cerrados, también el que heredó el padre.',
@@ -316,14 +321,15 @@ export const UNIX: readonly Concept[] = [
       {
         ask: ['¿Qué es un proceso zombi?', '¿Cuándo se dice que un proceso es zombi?'],
         right: [
-          'Ha terminado, pero su padre aún no ha recogido su estado',
-          'Está muerto y espera a que su padre haga wait',
+          'Ha terminado y su padre no ha hecho wait',
+          'Ha muerto, pero nadie ha recogido su estado',
         ],
+        // Nada de «no responde a señales»: un zombi tampoco muere con kill, sería medio verdad.
         wrong: [
-          'No responde a señales',
-          'Se ha quedado sin padre',
-          'Usa demasiada memoria',
-          'Está parado con SIGSTOP',
+          'Se ha quedado sin padre y lo adopta init',
+          'Usa demasiada memoria y lo frena todo',
+          'Está parado con SIGSTOP hasta un SIGCONT',
+          'Sigue en marcha tras cerrar su terminal',
         ],
       },
       {
@@ -340,7 +346,11 @@ export const UNIX: readonly Concept[] = [
         wrong: ['Matarlo con kill', 'Hacer otro fork', 'Esperar con sleep a que desaparezca'],
       },
     ],
-    wrong: ['No responde a señales', 'Se ha quedado sin padre', 'Usa demasiada memoria'],
+    wrong: [
+      'Se ha quedado sin padre y lo adopta init',
+      'Usa demasiada memoria y lo frena todo',
+      'Está parado con SIGSTOP hasta un SIGCONT',
+    ],
     why: 'Al terminar, un hijo queda en la tabla de procesos hasta que el padre recoge su estado con wait.',
   },
   {
@@ -383,10 +393,15 @@ export const UNIX: readonly Concept[] = [
           '¿Por qué se prefiere sigaction a signal?',
         ],
         right: [
-          'Comportamiento definido y más control (máscara, flags, quién la mandó)',
-          'Que con SA_SIGINFO se sabe el PID de quien manda la señal, entre otras cosas',
+          'Saber qué PID la mandó, con SA_SIGINFO',
+          'Un comportamiento igual en todos los sistemas',
         ],
-        wrong: ['Que es más rápida', 'Que funciona en Windows', 'Que manda la señal dos veces'],
+        wrong: [
+          'Atender la señal más rápido que signal',
+          'Funcionar también en Windows',
+          'Poder capturar también SIGKILL',
+          'No perder señales aunque lleguen juntas',
+        ],
       },
       {
         ask: [
@@ -397,7 +412,11 @@ export const UNIX: readonly Concept[] = [
         wrong: ['SIGUSR1 y SIGUSR2', 'SIGINT y SIGQUIT', 'SIGTERM y SIGHUP'],
       },
     ],
-    wrong: ['Que es más rápida', 'Que funciona en Windows', 'Que manda la señal dos veces'],
+    wrong: [
+      'Atender la señal más rápido que signal',
+      'Funcionar también en Windows',
+      'Poder capturar también SIGKILL',
+    ],
     why: 'signal varía entre sistemas; sigaction fija el comportamiento y da información; SIGKILL y SIGSTOP no se capturan nunca.',
   },
   {
@@ -435,17 +454,34 @@ export const UNIX: readonly Concept[] = [
     level: 2,
     forms: [
       {
-        ask: ["¿Qué imprime `echo '$HOME'`?", '¿Qué pasa con `$HOME` entre comillas simples?'],
+        ask: ["¿Qué imprime `echo '$HOME'`?", '¿Qué sale de `$HOME` entre comillas simples?'],
         right: ['$HOME, tal cual, sin expandir'],
-        wrong: ['La ruta de tu carpeta personal', 'Un error de sintaxis', 'Nada', 'HOME'],
+        wrong: [
+          'La ruta de tu carpeta personal',
+          'La palabra HOME, sin el dólar',
+          'Una línea vacía, sin nada',
+          'Un error de sintaxis por el $',
+        ],
       },
       {
-        ask: ['¿Qué imprime `echo "$HOME"`?', '¿Qué pasa con `$HOME` entre comillas dobles?'],
-        right: ['Se expande: sale la ruta de tu carpeta personal'],
-        wrong: ['$HOME, tal cual, sin expandir', 'Un error de sintaxis', 'Nada', 'HOME'],
+        ask: [
+          '¿Qué imprime `echo "$HOME"`?',
+          'Entre comillas dobles, ¿en qué se convierte `$HOME`?',
+        ],
+        right: ['La ruta de tu carpeta personal'],
+        wrong: [
+          '$HOME, tal cual, sin expandir',
+          'La palabra HOME, sin el dólar',
+          '"$HOME", con las comillas',
+          'Un error de sintaxis por el $',
+        ],
       },
     ],
-    wrong: ['Un error de sintaxis', 'Nada', 'HOME'],
+    wrong: [
+      'La palabra HOME, sin el dólar',
+      'Un error de sintaxis por el $',
+      'Una línea vacía, sin nada',
+    ],
     why: 'Las comillas simples lo dejan todo literal; las dobles dejan expandir variables.',
   },
   {
@@ -458,16 +494,16 @@ export const UNIX: readonly Concept[] = [
       {
         ask: ['¿Qué hace `cat << FIN`?', '¿Para qué sirve un heredoc (`<< FIN`)?'],
         right: [
-          'Lee líneas hasta una que diga FIN y se las da a cat como entrada',
-          'Pasa a la orden, como entrada, el texto escrito hasta el delimitador',
+          'Da a cat las líneas que escribas hasta FIN',
+          'Pasa como entrada el texto hasta el delimitador',
         ],
       },
     ],
     wrong: [
       'Añade FIN al final de un fichero',
-      'Redirige la salida a un fichero llamado FIN',
-      'Lee el fichero FIN',
-      'Compara la salida de cat con FIN',
+      'Redirige la salida de cat a un fichero FIN',
+      'Lee el contenido de un fichero llamado FIN',
+      'Compara la salida de cat con la palabra FIN',
     ],
     why: 'El heredoc recoge líneas hasta el delimitador y las da como entrada estándar de la orden.',
   },
@@ -511,16 +547,16 @@ export const UNIX: readonly Concept[] = [
           '¿Por qué cd no puede ser un programa aparte?',
         ],
         right: [
-          'Un proceso hijo no puede cambiar el directorio del padre',
-          'Cambiaría el directorio de un hijo que muere enseguida, no el de la shell',
+          'Un hijo no puede cambiar el directorio del padre',
+          'Cambiaría el directorio de un hijo, no el de la shell',
         ],
       },
     ],
     wrong: [
-      'Por rapidez',
-      'Porque no existe /bin/cd',
-      'Porque necesita permisos de root',
-      'Por compatibilidad con Windows',
+      'Porque necesita permisos de root para entrar',
+      'Por compatibilidad con la shell de Windows',
+      'Porque el núcleo no deja ejecutar /bin/cd',
+      'Porque así lo exige la norma de 42',
     ],
     why: 'El directorio actual es de cada proceso: solo la propia shell puede cambiar el suyo.',
   },
@@ -533,21 +569,554 @@ export const UNIX: readonly Concept[] = [
     forms: [
       {
         ask: [
-          '¿Para qué usa la shell la variable PATH?',
+          '¿Cómo usa la shell PATH al escribir una orden sin ruta?',
           'Al escribir `ls`, ¿cómo encuentra la shell el programa?',
         ],
         right: [
-          'Lo busca en las carpetas de esa lista, en orden',
-          'Prueba cada carpeta de la lista hasta dar con un ejecutable',
+          'Lo busca en cada carpeta de PATH, en orden',
+          'Prueba las carpetas de PATH hasta dar con él',
         ],
       },
     ],
     wrong: [
-      'Lo busca en todo el disco',
-      'Solo mira en la carpeta actual',
-      'Lo descarga de internet',
-      'Lo busca en /etc/programs',
+      'Lo busca en todo el disco, carpeta a carpeta',
+      'Solo lo busca en la carpeta actual',
+      'Lo busca en /bin y en ningún otro sitio',
+      'Lo busca en la lista de /etc/programs',
     ],
     why: 'PATH es una lista de carpetas separadas por «:»; se prueba cada una hasta encontrar un ejecutable con ese nombre.',
+  },
+  {
+    id: 'b2br-groups-host',
+    topic: 'sistema',
+    needs: { projects: B2BR },
+    kind: 'quick',
+    level: 1,
+    forms: [
+      {
+        ask: [
+          'En Born2beroot, ¿a qué grupos tiene que pertenecer tu usuario?',
+          '¿En qué dos grupos pide el enunciado de Born2beroot que esté tu usuario?',
+        ],
+        right: ['user42 y sudo'],
+        wrong: ['root y sudo', 'user42 y root', 'users y adm', 'admin y user42'],
+      },
+      {
+        ask: [
+          '¿Qué nombre de máquina (hostname) pide Born2beroot?',
+          'El hostname de tu máquina de Born2beroot tiene que ser…',
+        ],
+        right: ['Tu login seguido de 42'],
+        wrong: [
+          'born2beroot, sin más',
+          'Tu login en mayúsculas',
+          'debian seguido de 42',
+          'Tu login seguido de 4242',
+        ],
+      },
+      {
+        ask: [
+          '¿Qué orden mete a la usuaria ana en el grupo user42 sin quitarle los demás?',
+          'Para añadir a ana al grupo user42 conservando sus otros grupos se usa…',
+        ],
+        right: ['usermod -aG user42 ana'],
+        wrong: ['groupadd user42 ana', 'chgrp user42 ana', 'useradd -g user42 ana'],
+      },
+    ],
+    wrong: ['root y sudo', 'user42 y root', 'users y adm'],
+    why: 'El enunciado pide un usuario con tu login en los grupos user42 y sudo y una máquina que se llame como tu login acabado en 42; usermod -aG añade un grupo sin quitar los que ya hay.',
+  },
+  {
+    id: 'b2br-hardening',
+    topic: 'sistema',
+    needs: { projects: B2BR },
+    kind: 'quick',
+    level: 2,
+    forms: [
+      {
+        ask: [
+          '¿Qué línea de sshd_config impide entrar por SSH como root?',
+          'Para que nadie pueda conectarse por SSH como root, en sshd_config pones…',
+        ],
+        right: ['`PermitRootLogin no`'],
+        wrong: [
+          '`AllowRoot no`',
+          '`RootLogin disabled`',
+          '`PasswordAuthentication no`',
+          '`DenyGroups sudo`',
+        ],
+      },
+      {
+        ask: [
+          '¿Qué hace AppArmor, que Born2beroot pide activo desde el arranque?',
+          '¿Para qué sirve AppArmor en Debian?',
+        ],
+        right: ['Limita lo que puede hacer cada programa'],
+        wrong: [
+          'Cifra las particiones del disco',
+          'Filtra el tráfico de red por puertos',
+          'Obliga a usar contraseñas seguras',
+          'Lanza tareas a horas fijas',
+        ],
+      },
+    ],
+    wrong: [
+      'Cifra las particiones del disco',
+      'Filtra el tráfico de red por puertos',
+      'Obliga a usar contraseñas seguras',
+    ],
+    why: 'PermitRootLogin no cierra SSH a root (sin contraseña ni clave); AppArmor encierra cada programa en un perfil con lo que puede tocar.',
+  },
+  {
+    id: 'b2br-password',
+    topic: 'sistema',
+    needs: { projects: B2BR },
+    kind: 'quick',
+    level: 3,
+    forms: [
+      {
+        ask: [
+          '¿En qué fichero se fija PASS_MAX_DAYS para los usuarios que se creen?',
+          'La caducidad por defecto de las contraseñas de los usuarios nuevos se fija en…',
+        ],
+        right: ['/etc/login.defs'],
+        wrong: ['/etc/passwd', '/etc/sudoers', '/etc/pam.d/sshd', '/etc/security/limits.conf'],
+      },
+      {
+        ask: [
+          '¿Qué módulo de PAM impone longitud, mayúsculas y cifras en las contraseñas?',
+          'La política de contraseñas fuertes de Born2beroot se configura con…',
+        ],
+        right: ['pam_pwquality'],
+        wrong: ['pam_limits', 'pam_env', 'pam_motd', 'pam_faildelay'],
+      },
+      {
+        ask: [
+          '¿Qué longitud mínima de contraseña pide Born2beroot?',
+          '¿Cuántos caracteres tiene que tener, como mínimo, una contraseña en Born2beroot?',
+        ],
+        right: ['10'],
+        wrong: ['8', '12', '6', '16'],
+      },
+    ],
+    wrong: ['/etc/passwd', '/etc/sudoers', '/etc/hosts'],
+    why: 'login.defs da la caducidad a los usuarios nuevos (a los que ya existen se les cambia con chage) y pam_pwquality exige al menos 10 caracteres con mayúscula, minúscula y cifra.',
+  },
+  {
+    id: 'b2br-monitoring',
+    topic: 'sistema',
+    needs: { projects: B2BR },
+    kind: 'quick',
+    level: 2,
+    forms: [
+      {
+        ask: [
+          '¿Cada cuánto tiene que mostrar monitoring.sh su información?',
+          'Desde el arranque, monitoring.sh vuelve a enseñar sus datos cada…',
+        ],
+        right: ['10 min'],
+        wrong: ['5 min', '15 min', '30 min', '60 min'],
+      },
+      {
+        ask: [
+          '¿Qué servicio lanza monitoring.sh cada pocos minutos?',
+          'Para ejecutar monitoring.sh de forma periódica se usa…',
+        ],
+        right: ['cron'],
+        wrong: ['at', 'sudo', 'ufw', 'apt'],
+      },
+      {
+        ask: [
+          '¿Con qué orden escribe monitoring.sh en todas las terminales?',
+          'Para que el mensaje salga en la terminal de todos los usuarios se usa…',
+        ],
+        right: ['wall'],
+        wrong: ['echo', 'write', 'printf', 'cat'],
+      },
+    ],
+    wrong: ['sudo', 'ufw', 'echo'],
+    why: 'cron lanza el script cada 10 minutos y wall manda lo que escribe a todas las terminales abiertas.',
+  },
+  {
+    id: 'pipex-equivalent',
+    topic: 'procesos',
+    needs: { projects: PIPEX },
+    kind: 'long',
+    level: 2,
+    forms: [
+      {
+        ask: [
+          '¿A qué orden de shell equivale `./pipex infile "grep a" "wc -l" outfile`?',
+          'Según el enunciado, `./pipex infile "grep a" "wc -l" outfile` hace lo mismo que…',
+        ],
+        right: ['`grep a < infile | wc -l > outfile`'],
+        wrong: [
+          '`grep a > infile | wc -l < outfile`',
+          '`grep a < infile > outfile | wc -l`',
+          '`wc -l < infile | grep a > outfile`',
+          '`grep a < outfile | wc -l > infile`',
+        ],
+      },
+      {
+        ask: [
+          'En el bonus, ¿a qué equivale `./pipex here_doc FIN cat "wc -l" outfile`?',
+          'Con here_doc, `./pipex here_doc FIN cat "wc -l" outfile` hace lo mismo que…',
+        ],
+        right: ['`cat << FIN | wc -l >> outfile`'],
+        wrong: [
+          '`cat << FIN | wc -l > outfile`',
+          '`cat < FIN | wc -l >> outfile`',
+          '`cat <<< FIN | wc -l >> outfile`',
+        ],
+      },
+    ],
+    wrong: [
+      '`grep a > infile | wc -l < outfile`',
+      '`grep a < infile > outfile | wc -l`',
+      '`wc -l < infile | grep a > outfile`',
+    ],
+    why: 'pipex hace de `< infile cmd1 | cmd2 > outfile`; con here_doc lee hasta el delimitador y añade al final con >>, como `cmd << LIMITER | cmd1 >> file`.',
+  },
+  {
+    id: 'pipex-path',
+    topic: 'procesos',
+    needs: { projects: PIPEX },
+    kind: 'quick',
+    level: 3,
+    forms: [
+      {
+        ask: [
+          '¿Qué comprueba `access(ruta, X_OK)` en pipex?',
+          'Antes de llamar a execve, ¿qué mira `access` con X_OK?',
+        ],
+        right: ['Si esa ruta existe y se puede ejecutar'],
+        wrong: [
+          'Si el fichero ya está abierto por otro',
+          'Si el comando está en la variable PATH',
+          'Si tienes permiso de root para lanzarlo',
+          'Si el programa ha terminado bien',
+        ],
+      },
+      {
+        ask: [
+          'Con el comando `ls` a secas, ¿de dónde saca pipex las carpetas donde buscarlo?',
+          'Para encontrar `wc` sin ruta, ¿de dónde saca pipex la lista de carpetas?',
+        ],
+        right: ['De la línea PATH= de envp'],
+        wrong: [
+          'Del fichero /etc/programs',
+          'De la carpeta actual, y nada más',
+          'De argv[0], la ruta de pipex',
+          'De una lista fija dentro de execve',
+        ],
+      },
+    ],
+    wrong: [
+      'Si el fichero ya está abierto por otro',
+      'Si tienes permiso de root para lanzarlo',
+      'Si el programa ha terminado bien',
+    ],
+    why: 'execve no busca en PATH: pipex parte la línea PATH= de envp por «:», pega el nombre a cada carpeta y usa access con X_OK para dar con la que se puede ejecutar.',
+  },
+  {
+    id: 'pipex-wait',
+    topic: 'procesos',
+    needs: { projects: PIPEX },
+    kind: 'quick',
+    level: 3,
+    forms: [
+      {
+        ask: [
+          'En la shell, ¿qué código de salida da `< in cmd1 | cmd2 > out`?',
+          '¿De qué comando es el código de salida de una tubería `cmd1 | cmd2`?',
+        ],
+        right: ['El de cmd2, el último comando'],
+        wrong: [
+          'El de cmd1, el primer comando',
+          'El mayor de los dos códigos',
+          'La suma de los dos códigos',
+          'El de cmd1 si ha fallado',
+        ],
+      },
+      {
+        ask: [
+          '¿Qué macro saca el código de salida del status que llena `waitpid`?',
+          'Tras `waitpid(pid, &status, 0)`, el código con que salió el hijo se lee con…',
+        ],
+        right: ['`WEXITSTATUS(status)`'],
+        wrong: ['`WIFEXITED(status)`', '`WTERMSIG(status)`', '`WSTOPSIG(status)`', '`status >> 4`'],
+      },
+    ],
+    wrong: [
+      'El de cmd1, el primer comando',
+      'El mayor de los dos códigos',
+      'La suma de los dos códigos',
+    ],
+    why: 'La shell devuelve el código del último comando de la tubería; waitpid lo deja codificado en status y WEXITSTATUS lo saca (WIFEXITED solo dice si salió normalmente).',
+  },
+  {
+    id: 'talk-pid',
+    topic: 'señales',
+    needs: { projects: MINITALK },
+    kind: 'quick',
+    level: 2,
+    forms: [
+      {
+        ask: [
+          '¿Cómo sabe el cliente de minitalk a qué proceso mandar las señales?',
+          '¿Cómo encuentra el cliente de minitalk al servidor?',
+        ],
+        right: ['Se le pasa el PID que imprime el servidor'],
+        wrong: [
+          'Lo busca por su nombre con la orden ps',
+          'Lo lee de un fichero que crea el servidor',
+          'Manda las señales a todos los procesos',
+          'Usa getpid(), que da el del servidor',
+        ],
+      },
+      {
+        ask: [
+          '¿Qué función usa el servidor de minitalk para saber su propio PID?',
+          'Para imprimir su PID al arrancar, el servidor llama a…',
+        ],
+        right: ['getpid'],
+        wrong: ['getppid', 'kill', 'pause', 'sigaction'],
+      },
+      {
+        ask: [
+          'En el bonus, ¿de dónde saca el servidor el PID del cliente al que confirma?',
+          'Para mandarle la confirmación, ¿de dónde saca el servidor el PID del cliente?',
+        ],
+        right: ['Del si_pid que da sigaction con SA_SIGINFO'],
+        wrong: [
+          'De getppid(): el cliente es su padre',
+          'De getpid(), que da el del cliente',
+          'Del número de la señal que recibe',
+        ],
+      },
+    ],
+    wrong: [
+      'Lo busca por su nombre con la orden ps',
+      'Lo lee de un fichero que crea el servidor',
+      'Manda las señales a todos los procesos',
+    ],
+    why: 'El servidor imprime su PID con getpid y se lo pasas al cliente; en el bonus, sigaction con SA_SIGINFO le da en si_pid quién mandó la señal.',
+  },
+  {
+    id: 'talk-ack',
+    topic: 'señales',
+    needs: { projects: MINITALK },
+    kind: 'quick',
+    level: 3,
+    forms: [
+      {
+        ask: [
+          '¿Por qué el cliente de minitalk no puede mandar las señales todas seguidas, sin esperar?',
+          '¿Qué falla si el cliente manda señales más rápido de lo que el servidor las atiende?',
+        ],
+        right: ['Las pendientes iguales se juntan y se pierden'],
+        wrong: [
+          'El núcleo solo deja mandar una por segundo',
+          'kill falla si el servidor está ocupado',
+          'SIGUSR1 y SIGUSR2 se anulan entre sí',
+          'El servidor se cierra si recibe muchas',
+        ],
+      },
+      {
+        ask: [
+          'En el bonus de minitalk, ¿qué hace el servidor al recibir un mensaje?',
+          '¿Cómo confirma el servidor del bonus que ha recibido un mensaje?',
+        ],
+        right: ['Manda una señal de vuelta al cliente'],
+        wrong: [
+          'Escribe el PID del cliente en un fichero',
+          'Se cierra hasta que lo vuelvan a lanzar',
+          'Le responde por una tubería con un OK',
+          'Imprime el mensaje dos veces seguidas',
+        ],
+      },
+    ],
+    wrong: [
+      'El núcleo solo deja mandar una por segundo',
+      'kill falla si el servidor está ocupado',
+      'SIGUSR1 y SIGUSR2 se anulan entre sí',
+    ],
+    why: 'Una señal estándar no se encola: si llega otra igual antes de atender la primera, se pierde; por eso el cliente espera, y en el bonus el servidor confirma con una señal.',
+  },
+  {
+    id: 'talk-unicode',
+    topic: 'señales',
+    needs: { projects: MINITALK },
+    kind: 'quick',
+    level: 3,
+    forms: [
+      {
+        ask: [
+          '¿Por qué minitalk, que manda bytes bit a bit, sirve ya para texto en UTF-8?',
+          'Con un bit por señal, ¿por qué llegan bien letras como «ñ» o «€»?',
+        ],
+        right: ['Porque UTF-8 son bytes y se mandan igual'],
+        wrong: [
+          'Porque cada señal lleva un carácter entero',
+          'Porque SIGUSR2 se usa para las letras raras',
+          'Porque write convierte los bytes a ASCII',
+          'Porque la terminal adivina la letra que falta',
+        ],
+      },
+      {
+        ask: ['A bit por señal, ¿cuántas señales cuesta mandar «ñ» en UTF-8?'],
+        right: ['16'],
+        wrong: ['8', '1', '32', '2'],
+      },
+      {
+        ask: ['Mandando un bit por señal, ¿cuántas señales hacen falta para «€» en UTF-8?'],
+        right: ['24'],
+        wrong: ['8', '16', '32', '3'],
+      },
+    ],
+    wrong: ['4', '12', '64'],
+    why: 'UTF-8 escribe cada carácter con 1 a 4 bytes: el servidor junta los bytes y write los imprime; la «ñ» son 2 bytes (16 señales) y el «€», 3 (24).',
+  },
+  {
+    id: 'msh-signals',
+    topic: 'señales',
+    needs: { projects: MINISHELL },
+    kind: 'quick',
+    level: 3,
+    forms: [
+      {
+        ask: [
+          '¿Qué puede guardar la única variable global que permite minishell?',
+          '¿Qué deja guardar el enunciado de minishell en su variable global?',
+        ],
+        right: ['El número de la señal recibida, nada más'],
+        wrong: [
+          'Todo el estado de la shell, en una struct',
+          'La lista de variables de entorno',
+          'El último código de salida, el de $?',
+          'El historial de órdenes escritas',
+        ],
+      },
+      {
+        ask: [
+          '¿Qué hace minishell con Ctrl-C en el prompt, sin nada en marcha?',
+          'Pulsas Ctrl-C en el prompt vacío de minishell. ¿Qué pasa?',
+        ],
+        right: ['Muestra un prompt nuevo en otra línea'],
+        wrong: [
+          'Cierra la minishell, igual que exit',
+          'Borra la pantalla y deja el prompt arriba',
+          'Repite la última orden del historial',
+          'No hace nada: lo ignora como Ctrl-\\',
+        ],
+      },
+      {
+        ask: [
+          'En bash, ¿cuánto vale `$?` después de pulsar Ctrl-C en el prompt?',
+          'Tras un Ctrl-C en el prompt de bash, `echo $?` imprime…',
+        ],
+        right: ['130'],
+        wrong: ['0', '1', '2', '127'],
+      },
+    ],
+    wrong: [
+      'Cierra la minishell, igual que exit',
+      'Borra la pantalla y deja el prompt arriba',
+      'Repite la última orden del historial',
+    ],
+    why: 'La global solo guarda el número de la señal (lo demás va en tus structs); Ctrl-C saca un prompt nuevo en otra línea y bash pone $? a 130 (128 + SIGINT).',
+  },
+  {
+    id: 'msh-readline',
+    topic: 'shell',
+    needs: { projects: MINISHELL },
+    kind: 'quick',
+    level: 2,
+    forms: [
+      {
+        ask: [
+          '¿Qué hace Ctrl-D en el prompt vacío de minishell?',
+          'Pulsas Ctrl-D sin haber escrito nada en minishell. ¿Qué pasa?',
+        ],
+        right: ['Sale de la minishell, como exit'],
+        wrong: [
+          'Muestra un prompt nuevo en otra línea',
+          'Borra la última letra que escribiste',
+          'Manda SIGQUIT y deja un volcado',
+          'Nada: solo cuentan Ctrl-C y Ctrl-\\',
+        ],
+      },
+      {
+        ask: [
+          '¿Qué devuelve `readline` si se pulsa Ctrl-D en una línea vacía?',
+          'Al llegar al fin de la entrada, readline devuelve…',
+        ],
+        right: ['`NULL`'],
+        wrong: ['`""`', '`"\\n"`', '`EOF`'],
+      },
+      {
+        ask: [
+          '¿Qué función guarda una línea en el historial de readline?',
+          'Para que la flecha arriba recupere lo que escribiste, llamas a…',
+        ],
+        right: ['add_history'],
+        wrong: ['rl_on_new_line', 'rl_redisplay', 'rl_replace_line'],
+      },
+    ],
+    wrong: [
+      'Muestra un prompt nuevo en otra línea',
+      'Borra la última letra que escribiste',
+      'Manda SIGQUIT y deja un volcado',
+    ],
+    why: 'Con la línea vacía, Ctrl-D es fin de entrada: readline devuelve NULL y minishell sale; add_history guarda cada línea para las flechas.',
+  },
+  {
+    id: 'msh-env-expand',
+    topic: 'shell',
+    needs: { projects: MINISHELL },
+    kind: 'long',
+    level: 4,
+    forms: [
+      {
+        ask: [
+          'En bash, ¿qué hace `export VAR` sin `=` si VAR no existía?',
+          'Con VAR sin definir, ¿qué consigue `export VAR` en bash?',
+        ],
+        right: ['La marca para exportar, sin darle valor'],
+        wrong: [
+          'La crea vacía, y env la muestra como VAR=',
+          'Da un error porque le falta el =',
+          'La borra del entorno, como unset',
+          'Imprime el valor que tiene VAR',
+        ],
+      },
+      {
+        ask: [
+          'En bash, ¿qué pasa con `echo hola > $NADA` si NADA no está definida?',
+          'Si `$NADA` está vacía, ¿qué hace bash con `echo hola > $NADA`?',
+        ],
+        right: ['Da error: redirección ambigua'],
+        wrong: [
+          'Escribe hola en un fichero llamado $NADA',
+          'Escribe hola en la pantalla, sin más',
+          'Crea un fichero vacío sin nombre',
+          'Escribe hola en un fichero llamado NADA',
+        ],
+      },
+      {
+        ask: [
+          'Si USER vale ana, ¿qué imprime `echo "$USER"\'$USER\'`?',
+          'Con USER=ana, la orden `echo "$USER"\'$USER\'` imprime…',
+        ],
+        right: ['ana$USER'],
+        wrong: ['anaana', '$USER$USER', "ana'$USER'", '$USERana'],
+      },
+    ],
+    wrong: [
+      'Da un error porque le falta el =',
+      'La borra del entorno, como unset',
+      'Imprime el valor que tiene VAR',
+    ],
+    why: 'export VAR sin valor solo la marca (sale en export, no en env); redirigir a una variable vacía sin comillas es ambiguo; y entre comillas simples $USER no se expande.',
   },
 ]

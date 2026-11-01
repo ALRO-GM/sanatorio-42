@@ -71,24 +71,24 @@ export const GENERAL_EN: Readonly<Record<string, ConceptText>> = {
           'Shifting an integer one bit to the left is the same as…',
         ],
         right: ['Multiplying it by 2', 'Doubling it'],
-        wrong: ['Dividing it by 2', 'Adding 1 to it', 'Squaring it', 'Changing its sign'],
+        wrong: ['Dividing it by 2', 'Adding 1 to it', 'Squaring it', 'Flipping its sign'],
       },
       {
         ask: [
           'What does `x >> 1` do to a positive integer?',
           'Shifting a positive integer one bit to the right is the same as…',
         ],
-        right: ['Dividing it by 2 (rounding down)', 'Halving it, without decimals'],
+        right: ['Dividing it by 2', 'Halving it'],
         wrong: [
           'Multiplying it by 2',
-          'Subtracting 1 from it',
-          'Flipping all its bits',
-          'Changing its sign',
+          'Taking 1 away',
+          'Inverting all its bits',
+          'Flipping its sign',
         ],
       },
     ],
-    wrong: ['Adding 1 to it', 'Squaring it', 'Changing its sign', 'Subtracting 1 from it'],
-    why: 'Each bit moves up (or down) one position, and each position is worth twice the previous one.',
+    wrong: ['Adding 1 to it', 'Squaring it', 'Flipping its sign', 'Taking 1 away'],
+    why: 'Each bit moves up (or down) one position, and each position is worth twice the one before.',
   },
   'gen-and-mask': {
     forms: [
@@ -195,12 +195,15 @@ export const GENERAL_EN: Readonly<Record<string, ConceptText>> = {
   'gen-queue-fifo': {
     forms: [
       {
-        ask: ['In what order do elements leave a queue?', 'What access policy does a queue have?'],
+        ask: [
+          'In what order do the elements of a queue come out?',
+          'What access policy does a queue follow?',
+        ],
         right: ['FIFO: first in, first out'],
         wrong: [
           'LIFO: last in, first out',
-          'By priority: the largest leaves first',
-          'At random: any one leaves',
+          'By priority: the largest comes out',
+          'At random: any one comes out',
         ],
       },
       {
@@ -208,17 +211,17 @@ export const GENERAL_EN: Readonly<Record<string, ConceptText>> = {
           'In a queue, which element is served first?',
           'Which one do you take out of a queue first?',
         ],
-        right: ['The one that has been waiting longest'],
-        wrong: ['The last one added', 'The smallest one', 'The one in the middle'],
+        right: ['The first one put in'],
+        wrong: ['The last one put in', 'The smallest of them all', 'The one in the middle'],
       },
       {
-        ask: ['You add 1, 2 and 3 to a queue, in that order. Which comes out first?'],
+        ask: ['You push 1, 2 and 3 into a queue, in that order. Which one comes out first?'],
         right: ['The 1'],
         wrong: ['The 3', 'The 2', 'Any of the three'],
       },
     ],
-    wrong: ['The smallest one', 'The largest one', 'One at random'],
-    why: 'Like a supermarket queue: people are served in order of arrival.',
+    wrong: ['The smallest', 'The largest', 'A random one'],
+    why: 'Like the queue at the supermarket: people are served in order of arrival.',
   },
   'gen-list-vs-array': {
     forms: [
@@ -246,20 +249,20 @@ export const GENERAL_EN: Readonly<Record<string, ConceptText>> = {
     forms: [
       {
         ask: [
-          'What is missing in a recursive function that never ends?',
+          'What is missing from a recursive function that never ends?',
           'For a recursive function to finish, it needs…',
         ],
-        right: ['A base case', 'A stop condition that does not call it again'],
-        wrong: ['A while loop', 'A global variable', 'A return value', 'More memory'],
+        right: ['A base case', 'A stop condition'],
+        wrong: ['A while loop', 'A global variable', 'A return value', 'More stack memory'],
       },
       {
         ask: [
           'What usually happens in C with a recursion that never ends?',
-          'A function that calls itself forever ends up…',
+          'A function that keeps calling itself forever ends up…',
         ],
-        right: ['Overflowing the stack (stack overflow)'],
+        right: ['Overflowing the stack'],
         wrong: [
-          'With a compilation error',
+          'With a compile error',
           'With a heap memory leak',
           'Returning 0',
           'In a loop that uses no memory',
@@ -320,13 +323,10 @@ export const GENERAL_EN: Readonly<Record<string, ConceptText>> = {
   'gen-git-add': {
     forms: [
       {
-        ask: ['What does `git add file` do?', 'What is `git add` for, with a changed file?'],
-        right: [
-          'It prepares it for the next commit',
-          'It puts it in the index (staging) for the next commit',
-        ],
+        ask: ['What does `git add file` do?', 'What is `git add` for, on a changed file?'],
+        right: ['It prepares it for the next commit', 'It adds it to the index (staging)'],
         wrong: [
-          'It uploads it to the server',
+          'It uploads it to the remote server',
           'It deletes it from the repository',
           'It makes git ignore it forever',
           'It copies it to another branch',
@@ -335,14 +335,14 @@ export const GENERAL_EN: Readonly<Record<string, ConceptText>> = {
       {
         ask: [
           'Before committing a changed file, which command prepares it?',
-          'Which command puts a change in the index?',
+          'Which command puts a change into the index?',
         ],
         right: ['git add'],
         wrong: ['git push', 'git commit', 'git stash', 'git log'],
       },
     ],
     wrong: [
-      'It uploads it to the server',
+      'It uploads it to the remote server',
       'It deletes it from the repository',
       'It copies it to another branch',
     ],
@@ -351,33 +351,37 @@ export const GENERAL_EN: Readonly<Record<string, ConceptText>> = {
   'gen-git-conflict': {
     forms: [
       {
-        ask: ['When is there a conflict when merging?', 'What causes a conflict in git?'],
+        ask: ['When is there a conflict during a merge?', 'What causes a conflict in git?'],
         right: [
-          'Both branches changed the same lines in different ways',
-          'Two changes touch the same part of a file and git cannot tell which to keep',
+          'Both branches changed the same lines',
+          'Two branches touch the same part of a file',
         ],
         wrong: [
-          'A file is too big',
+          'A file is too big to be merged',
           'The remote branch has been deleted',
           'Two commits have the same message',
-          'Any merge, always',
+          'The two branches touch different files',
         ],
       },
       {
         ask: [
-          'With what markers does git separate the two versions in a conflict?',
+          'Which markers does git use to separate the two versions in a conflict?',
           'In a conflicted file, the two versions appear between…',
         ],
         right: ['<<<<<<<, ======= and >>>>>>>'],
-        wrong: ['/* conflict */ and /* end */', '### MERGE ###', '[[[ and ]]]'],
+        wrong: [
+          '/* conflict */ and /* end */',
+          '### HEAD ### and ### END ###',
+          '[[[ ours ]]] and [[[ theirs ]]]',
+        ],
       },
     ],
     wrong: [
-      'A file is too big',
+      'A file is too big to be merged',
       'The remote branch has been deleted',
       'Two commits have the same message',
     ],
-    why: 'Git only merges what does not overlap; if two branches change the same thing, it leaves both versions marked for you to choose.',
+    why: 'Git merges on its own only what does not overlap; if two branches change the same thing, it leaves both versions marked for you to choose.',
   },
   'gen-shell-pipe': {
     forms: [
@@ -388,7 +392,7 @@ export const GENERAL_EN: Readonly<Record<string, ConceptText>> = {
           'It passes the output of ls to wc, which counts its lines',
         ],
         wrong: [
-          'It runs ls and wc at the same time, without connecting them',
+          'It runs ls and wc at the same time, unconnected',
           'It saves the output of ls in a file called wc',
           'It only runs wc if ls fails',
           'It counts the hidden files',
@@ -396,25 +400,22 @@ export const GENERAL_EN: Readonly<Record<string, ConceptText>> = {
       },
       {
         ask: [
-          'In `cmd1 | cmd2`, what happens to the output of cmd1?',
-          'What does the `|` symbol do between two commands?',
+          'In `cmd1 | cmd2`, where does the output of cmd1 go?',
+          'With `cmd1 | cmd2`, what happens to what cmd1 writes?',
         ],
-        right: [
-          'It becomes the input of the second command',
-          'It connects the output of the first with the input of the second',
-        ],
+        right: ['It goes into cmd2 through its standard input', 'It becomes the input of cmd2'],
         wrong: [
-          'It is thrown away',
-          'It is a logical OR between the two commands',
-          'It only runs the second if the first fails',
-          'It is written to a temporary file called pipe',
+          'It is lost: only the output of cmd2 is shown',
+          'It goes to the screen and to cmd2 at once',
+          'It is saved in a file called cmd2',
+          'It is passed to cmd2 as arguments',
         ],
       },
     ],
     wrong: [
-      'It is thrown away',
-      'It only runs the second if the first fails',
-      'It is a logical OR',
+      'It runs ls and wc at the same time, unconnected',
+      'It only runs wc if ls fails',
+      'It counts the hidden files',
     ],
     why: 'A pipe connects the standard output of one command to the standard input of the next.',
   },
@@ -427,12 +428,12 @@ export const GENERAL_EN: Readonly<Record<string, ConceptText>> = {
         ],
         right: [
           '`>` overwrites and `>>` appends at the end',
-          '`>>` appends without deleting what was there; `>` empties it',
+          '`>>` appends and `>` empties the file',
         ],
         wrong: [
-          '`>` appends and `>>` overwrites',
-          '`>>` redirects the input',
-          '`>>` redirects the errors',
+          '`>` appends at the end and `>>` overwrites',
+          '`>>` redirects the input, not the output',
+          '`>>` redirects the errors to a file',
           '`>` only works with new files',
         ],
       },
@@ -446,9 +447,9 @@ export const GENERAL_EN: Readonly<Record<string, ConceptText>> = {
       },
     ],
     wrong: [
-      '`>` appends and `>>` overwrites',
-      '`>>` redirects the input',
-      '`>>` redirects the errors',
+      '`>` appends at the end and `>>` overwrites',
+      '`>>` redirects the input, not the output',
+      '`>>` redirects the errors to a file',
     ],
     why: '`>` empties the file before writing; `>>` writes after what is there.',
   },
@@ -456,15 +457,12 @@ export const GENERAL_EN: Readonly<Record<string, ConceptText>> = {
     forms: [
       {
         ask: ['What does `$?` hold in bash?', 'What does the special variable `$?` contain?'],
-        right: [
-          'The exit code of the last command',
-          'How the last command ended (0 if it went well)',
-        ],
+        right: ['The exit code of the last command', 'The status the last command ended with'],
         wrong: [
-          'The PID of the shell',
-          'The number of arguments',
-          'The last argument',
-          'The name of the script',
+          'The PID of the last command launched',
+          'The number of arguments of the script',
+          'The last argument of the previous command',
+          'The PID of the shell itself',
         ],
       },
       {
@@ -476,8 +474,12 @@ export const GENERAL_EN: Readonly<Record<string, ConceptText>> = {
         wrong: ['1', '-1', '255', '42'],
       },
     ],
-    wrong: ['The PID of the shell', 'The number of arguments', 'The last argument'],
-    why: '`$?` is the exit status: 0 means success, and any other number, error.',
+    wrong: [
+      'The PID of the last command launched',
+      'The number of arguments of the script',
+      'The PID of the shell itself',
+    ],
+    why: '`$?` is the exit status: 0 means success, and any other number, an error.',
   },
   'gen-chmod': {
     forms: [

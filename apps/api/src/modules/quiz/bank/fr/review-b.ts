@@ -3,19 +3,6 @@
 import type { ReviewEntry } from '../types.js'
 
 export const REVIEW_B_FR: Readonly<Record<string, ReviewEntry>> = {
-  'algo-sort-complexity': {
-    title: 'La limite du tri par comparaisons',
-    definition:
-      "Tout tri qui ne fait que comparer des éléments a besoin, dans le pire des cas, de l'ordre de n·log n comparaisons. On ne descend en dessous qu'en ne comparant pas (radix, counting sort).",
-    example:
-      "100 nombres : au moins 525 comparaisons environ (log₂ 100!) ; le tri à bulles en fait jusqu'à 4950.",
-  },
-  'algo-stack': {
-    title: 'Piles et files dans push_swap',
-    definition:
-      "Une pile rend le dernier élément entré (LIFO) ; une file, le premier (FIFO). Dans push_swap, les deux piles ne laissent toucher que le sommet, et les rotations permettent de s'en servir presque comme de files circulaires.",
-    example: "pb déplace le sommet de a sur le sommet de b ; pa fait l'inverse.",
-  },
   'algo-rotate': {
     title: 'Faire tourner une pile',
     definition:
