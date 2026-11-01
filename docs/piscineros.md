@@ -29,8 +29,9 @@ piscineros de su campus (sala de espera, mapa, buscador, fichas, red). El
 calendario de un piscinero solo trae eventos y exámenes de piscina.
 
 **Excepción, el plano de los clústeres** (pedido por Alberto el 2026-10-25): es
-la sala tal como está. Un estudiante ve con nombre y foto a todo el que esté
-sentado (piscineros, discovery…). Un piscinero ve con nombre solo a los de su
+la sala tal como está. Un estudiante ve con nombre a todo el que esté sentado
+(piscineros, discovery…), pero a los piscineros sin foto (Alberto,
+2026-11-01). Un piscinero ve con nombre solo a los de su
 piscina; los demás puestos con alguien salen **ocupados**, sin nombre ni foto
 (`MapSeat.taken`), para que sepa que no están libres. Lo mismo vale para los
 ocultos a un grupo: ocupados, sin nombre. La ficha y el buscador siguen

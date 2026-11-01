@@ -184,7 +184,7 @@ export function createMapService(options: MapServiceOptions) {
       }
 
       const since = isoAt(now() - LOCATION_MAX_AGE_MS)
-      const [known, everyone, reservations, online, broken, sees, shown] = await Promise.all([
+      const [known, everyone, reservations, online, broken, sees, shown, pool] = await Promise.all([
         replica.knownSeats(actor.campusId),
         replica.presenceIn(actor.campusId, since),
         therapy.reservations(actor.campusId),
@@ -193,10 +193,12 @@ export function createMapService(options: MapServiceOptions) {
           new Map<string, { by: string; at: string }>(),
         seesFor(audience, actor),
         shownFor(audience, actor),
+        actor.pool === true ? new Set<string>() : audience.poolAnywhere(),
       ])
       // Quién sale con nombre en el plano. Un estudiante ve a todo el que esté
-      // sentado (piscineros, discovery…: es lo que hay en la sala); un
-      // piscinero, solo a los de su piscina. Los ocultos a su grupo, a nadie.
+      // sentado (piscineros, discovery…: es lo que hay en la sala), pero a los
+      // piscineros sin foto (Alberto, 2026-11-01); un piscinero, solo a los de
+      // su piscina. Los ocultos a su grupo, a nadie.
       // Lo que no sale con nombre sale ocupado, sin más: el puesto no está libre.
       const named = (login: string): boolean => (actor.pool === true ? sees(login) : shown(login))
       const present = everyone.filter((person) => named(person.login))
@@ -295,7 +297,7 @@ export function createMapService(options: MapServiceOptions) {
 
         seat.occupant = {
           login: person.login,
-          image: person.image,
+          image: pool.has(person.login.toLowerCase()) ? null : person.image,
           projects: (activeProjects.get(person.login) ?? []).slice(0, MAX_PROJECTS),
           duty: personDuty,
           me: person.login === actor.login,

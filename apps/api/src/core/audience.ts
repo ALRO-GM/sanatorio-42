@@ -134,6 +134,33 @@ export async function seesFor(
 }
 
 /**
+ * Lo mismo que `seesFor`, en listas para filtrar en la base de datos (las
+ * clasificaciones ponen el puesto después de filtrar, sin huecos que delaten
+ * a quien no se ve): `only`, si quien mira solo ve a esos (un piscinero), y
+ * `except`, a quienes no ve. Logins en minúsculas; a sí mismo se ve siempre.
+ */
+export async function worldOf(
+  audience: Audience,
+  actor: Viewer,
+): Promise<{ only: readonly string[] | null; except: readonly string[] }> {
+  const [pool, anywhere, hidden] = await Promise.all([
+    audience.poolIn(actor.campusId),
+    actor.pool === true ? Promise.resolve(new Set<string>()) : audience.poolAnywhere(),
+    audience.hiddenFrom(actor.pool === true),
+  ])
+  const self = actor.login?.toLowerCase()
+  const others = (logins: Iterable<string>): string[] =>
+    [...logins].filter((login) => login !== self)
+
+  return actor.pool === true
+    ? {
+        only: [...others([...pool].filter((login) => !hidden.has(login))), ...(self ? [self] : [])],
+        except: [],
+      }
+    : { only: null, except: others(new Set([...pool, ...anywhere, ...hidden])) }
+}
+
+/**
  * Solo los ocultos, sin separar mundos: para lo que es de todos los campus y
  * ya mezcla grupos (la clasificación de Code Clicker).
  */

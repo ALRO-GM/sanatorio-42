@@ -132,6 +132,11 @@ const QUERIES: Record<StatsSectionId, SectionQueries> = {
 
 export const STATS_SECTIONS = Object.keys(QUERIES) as StatsSectionId[]
 
+/** A quién cuenta una clasificación (`worldOf` en `core/audience.ts`). */
+type World = { only: readonly string[] | null; except: readonly string[] }
+
+const EVERYONE: World = { only: null, except: [] }
+
 export function createStatsRepository(db: Db) {
   return {
     /** Las cifras de una sección, en el orden de sus columnas. */
@@ -151,7 +156,8 @@ export function createStatsRepository(db: Db) {
      * Los `limit` primeros de una sección, de mejor a peor, sin quien no ha
      * hecho nada; y aparte la fila de `login` con su puesto, salga o no en
      * esos primeros. Así la respuesta no crece con el campus: la clasificación
-     * entera no se lee nunca.
+     * entera no se lee nunca. Solo cuenta a la gente de `world`
+     * (`worldOf`), antes de poner los puestos.
      */
     async ranking(
       section: StatsSectionId,
@@ -160,8 +166,21 @@ export function createStatsRepository(db: Db) {
       now: string,
       limit: number,
       login: string,
+      world: World = EVERYONE,
     ): Promise<{ top: RankRow[]; me: (RankRow & { rank: number }) | null }> {
-      const inner = QUERIES[section].ranking(campus, since, now)
+      const base = QUERIES[section].ranking(campus, since, now)
+      // Quien no se ve no está en la clasificación, ni cuenta para los puestos.
+      const inner = {
+        sql: `SELECT * FROM (${base.sql}) w
+              WHERE (? IS NULL OR lower(w.login) IN (SELECT value FROM json_each(?)))
+                AND lower(w.login) NOT IN (SELECT value FROM json_each(?))`,
+        args: [
+          ...base.args,
+          world.only === null ? null : 1,
+          JSON.stringify(world.only ?? []),
+          JSON.stringify(world.except),
+        ],
+      }
       const rowOf = (row: Record<string, unknown>): RankRow => ({
         login: toText(row.login),
         image: toTextOrNull(row.image),

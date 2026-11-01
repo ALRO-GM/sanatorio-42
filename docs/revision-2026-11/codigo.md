@@ -24,9 +24,9 @@ Los mínimos de cobertura estaban en 96/96/96/89 (API) y 64/64/51/79 (web).
 | S5 | Baja | Esquemas sin tope (`from`/`to` del informe, `title`) | Arreglado |
 | S6 | Baja | La web no arrancaba con el almacenamiento bloqueado | Arreglado |
 | S7 | Baja | Parámetros que llegan al servicio sin pasar por zod en la ruta | Pendiente |
-| S8 | Baja | Huecos en los puestos de las clasificaciones | Pendiente |
+| S8 | Baja | Huecos en los puestos de las clasificaciones | Arreglado (2026-11-01) |
 | S9 | Baja | Perfil por login: puede gastar cuota de 42 | Pendiente |
-| S10 | Duda | El mapa enseña piscineros a los estudiantes | Por decidir |
+| S10 | Duda | El mapa enseña piscineros a los estudiantes | Decidido: salen, sin foto |
 
 ### S1. Mundos separados solo dentro del campus (media, arreglado)
 
@@ -107,7 +107,9 @@ tablón. Además `isLang` usaba `in`, que da por idioma `constructor` o
   una ruta y su test, sin ganancia de seguridad.
 - **S8 (baja).** En `/leaderboard` y `/stats` el puesto se calcula antes de
   `visibleTo`: los huecos dicen cuánta gente oculta o del otro mundo va por
-  delante. Arreglarlo cambia los puestos que se enseñan: decisión de producto.
+  delante. **Arreglado el 2026-11-01** (decidido por Alberto): `worldOf`
+  (`core/audience.ts`) filtra en la consulta antes de contar los puestos, y la
+  clasificación de ayuda (`xp.leaderboard`) filtra antes de ponerlos.
 - **S9 (baja, sospecha).** `GET /users/:login/profile` puede pedir a 42 los
   hitos de cada login nuevo (uno por persona y día). Un guion que recorra el
   campus gastaría cuota. No se comprobó si el escalón de cuota ya lo frena;
@@ -116,7 +118,9 @@ tablón. Además `isLang` usaba `in`, que da por idioma `constructor` o
   estudiantes a todo el que está sentado, piscineros incluidos, con login y
   proyectos; el comentario dice que es a propósito («es lo que hay en la
   sala»), pero choca con «un estudiante no ve a ningún piscinero» de
-  `audience.ts` y con el 404 de su ficha. Hay que decidir cuál vale.
+  `audience.ts` y con el 404 de su ficha. **Decidido por Alberto el
+  2026-11-01**: salen en el plano (es lo que hay en la sala), pero un
+  estudiante no ve su foto (`image: null`).
 
 ### Comprobado y bien
 

@@ -34,7 +34,11 @@ export function createStatsService(options: { stats: StatsRepository; now?: () =
   const now = options.now ?? Date.now
 
   return {
-    async help(actor: Actor, period: LeaderboardPeriod): Promise<HelpStats> {
+    async help(
+      actor: Actor,
+      period: LeaderboardPeriod,
+      world?: Parameters<StatsRepository['ranking']>[6],
+    ): Promise<HelpStats> {
       const date = new Date(now())
       const since =
         period === 'month' ? isoAt(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1)) : null
@@ -44,7 +48,7 @@ export function createStatsService(options: { stats: StatsRepository; now?: () =
         STATS_SECTIONS.map(async (id): Promise<StatsSection> => {
           const [totals, { top, me }] = await Promise.all([
             stats.totals(id, actor.campusId, since, at),
-            stats.ranking(id, actor.campusId, since, at, TOP, actor.login),
+            stats.ranking(id, actor.campusId, since, at, TOP, actor.login, world),
           ])
           const entries = ranked(top)
 

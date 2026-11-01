@@ -18,6 +18,7 @@ Cinco agentes en worktrees (`.claude/worktrees/`), cada uno con commit local:
 Al acabar: `git merge --no-ff` de cada rama en main (textos: `npm run textos -- --write`),
 `npm run check`, un push y un despliegue (skill desplegar). Resumen a Alberto.
 
-**Hecho y desplegado (e871d05, 2026-11-01).** Pendientes de Alberto: piscineros en el
-mapa de clústeres (S10), huecos de los rankings (S8), unificar componentes de pantalla,
-propuestas de `docs/revision-2026-11/ux.md` y datos dudosos de `docs/preguntas.md`.
+**Hecho y desplegado (e871d05, 2026-11-01).** Después (Alberto): piscineros en el plano
+sin foto para estudiantes (S10) y puestos de clasificaciones sin huecos (S8), hechos; un
+agente unifica los componentes de pantalla tras la UX. Las preguntas dudosas las revisa
+Alberto (no es pendiente nuestro). Pendiente: propuestas de `docs/revision-2026-11/ux.md`.

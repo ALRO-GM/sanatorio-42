@@ -219,6 +219,19 @@ describe('comunidad', () => {
       expect((await xp.leaderboard(actor('ana', { campusId: 58 }), 'all')).entries).toEqual([])
     })
 
+    it('quien no se ve no cuenta para los puestos: sin huecos', async () => {
+      const { xp } = services
+
+      await xp.award('eva', 'doubt_solved', 'doubt:1')
+      await xp.award('eva', 'doubt_solved', 'doubt:2')
+      await xp.award('ana', 'doubt_solved', 'doubt:3')
+
+      const board = await xp.leaderboard(actor('ana'), 'all', (login) => login !== 'eva')
+
+      expect(board.entries.map((entry) => [entry.rank, entry.login])).toEqual([[1, 'ana']])
+      expect(board.me).toMatchObject({ rank: 1 })
+    })
+
     it('el expediente desglosa la XP: cuánta y cuántas veces por cada cosa', async () => {
       const { xp } = services
 

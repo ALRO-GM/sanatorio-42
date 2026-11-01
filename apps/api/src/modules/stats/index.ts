@@ -7,7 +7,7 @@
 import type { FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
-import { NO_POOL, seesFor, visibleTo } from '../../core/audience.js'
+import { NO_POOL, seesFor, worldOf } from '../../core/audience.js'
 import type { Audience } from '../../core/audience.js'
 import type { Db } from '../../core/db/database.js'
 import type { AppModule } from '../../core/module.js'
@@ -150,19 +150,15 @@ export function createStatsModule(deps: {
         reply.header('Cache-Control', 'private, max-age=60')
 
         const actor = await session.actor(request)
-        const stats = await service.help(actor, request.query.period === 'all' ? 'all' : 'month')
-        const audience = deps.audience ?? NO_POOL
-
-        // En las clasificaciones, solo gente del mundo de quien mira.
-        return reply.send({
-          ...stats,
-          sections: await Promise.all(
-            stats.sections.map(async (section) => ({
-              ...section,
-              ranking: await visibleTo(audience, actor, section.ranking, (entry) => entry.login),
-            })),
+        // En las clasificaciones, solo gente del mundo de quien mira, y los
+        // puestos contados entre ella.
+        return reply.send(
+          await service.help(
+            actor,
+            request.query.period === 'all' ? 'all' : 'month',
+            await worldOf(deps.audience ?? NO_POOL, actor),
           ),
-        })
+        )
       })
 
       /**

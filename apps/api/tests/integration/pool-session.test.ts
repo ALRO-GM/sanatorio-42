@@ -25,7 +25,7 @@ const seated = (id: number, login: string, host: string) => ({
   begin_at: ago(0.01),
   end_at: null,
   campus_id: 22,
-  user: { id, login, image: null },
+  user: { id, login, image: { link: `https://cdn.intra.42.fr/users/${login}.jpg` } },
 })
 /** Un estudiante y un piscinero sentados en el mismo campus. */
 const LOCATIONS = {
@@ -108,7 +108,7 @@ describe('un piscinero, con la piscina abierta', () => {
 })
 
 describe('un estudiante', () => {
-  it('ve a los piscineros sentados en el mapa, pero no en el buscador ni su ficha', async () => {
+  it('ve a los piscineros sentados en el mapa, sin foto, pero no en el buscador ni su ficha', async () => {
     const built = await app()
 
     await built.db.execute({
@@ -123,6 +123,14 @@ describe('un estudiante', () => {
     // En la sala está quien esté sentado, sea del grupo que sea.
     expect(occupants(map)).toEqual(expect.arrayContaining(['albrodri', 'pisci']))
     expect(map.clusters.every((cluster) => cluster.seats.every((seat) => !seat.taken))).toBe(true)
+    // A los piscineros, sin foto; a los demás, con la suya.
+    const imageOf = (login: string) =>
+      map.clusters
+        .flatMap((cluster) => cluster.seats)
+        .find((seat) => seat.occupant?.login === login)?.occupant?.image
+
+    expect(imageOf('pisci')).toBeNull()
+    expect(imageOf('albrodri')).toContain('albrodri')
     expect(json(await get(built, '/users/search?q=pis', cookie))).toEqual([])
     expect((await get(built, '/people/pisci/card', cookie)).statusCode).toBe(404)
     expect((await get(built, '/users/pisci/profile', cookie)).statusCode).toBe(404)

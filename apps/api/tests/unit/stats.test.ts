@@ -110,6 +110,41 @@ describe('estadísticas de Ayuda', () => {
     expect(section(crowded, 'consulta').me).toMatchObject({ rank: 13, login: 'leo', value: 1 })
   })
 
+  it('quien no se ve no está ni cuenta para los puestos: sin huecos', async () => {
+    const booking = (helper: string, day: string) =>
+      run(
+        `INSERT INTO help_bookings (campus_id, helper, requester, day, start_min, minutes, status, verified, created_at)
+         VALUES (?, ?, 'uma', ?, 600, 30, 'confirmed', 1, ?)`,
+        [MADRID, helper, day, THIS_MONTH],
+      )
+
+    // pisci (otro mundo) y oculta van por delante de ana y de leo.
+    for (const day of ['2026-10-02', '2026-10-03', '2026-10-04']) await booking('pisci', day)
+    for (const day of ['2026-10-02', '2026-10-03']) await booking('oculta', day)
+    await booking('ana', '2026-10-02')
+    await booking('leo', '2026-10-02')
+    await booking('leo', '2026-10-03')
+    await booking('leo', '2026-10-04')
+    await booking('leo', '2026-10-05')
+
+    const world = { only: null, except: ['pisci', 'oculta'] }
+    const stats = await services.stats.help(actor('ana'), 'month', world)
+
+    expect(board(stats, 'consulta')).toEqual([
+      [1, 'leo', 4, 120],
+      [2, 'ana', 1, 30],
+    ])
+    expect(section(stats, 'consulta').me).toMatchObject({ rank: 2, login: 'ana' })
+
+    // Un piscinero solo ve (y se cuenta) entre los suyos.
+    const pool = await services.stats.help(actor('pisci'), 'month', {
+      only: ['pisci'],
+      except: [],
+    })
+
+    expect(board(pool, 'consulta')).toEqual([[1, 'pisci', 3, 90]])
+  })
+
   it('tablón: clasifica las respuestas que resuelven, sin contar las de la propia duda', async () => {
     await run(
       `INSERT INTO doubts (id, campus_id, project_id, author, body, created_at, solved_answer_id, solved_at)

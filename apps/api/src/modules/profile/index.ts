@@ -6,7 +6,7 @@
  * cada cosa) están en `xp.rules.ts`.
  */
 
-import { NO_POOL, visibleTo } from '../../core/audience.js'
+import { NO_POOL, seesFor } from '../../core/audience.js'
 import type { Db } from '../../core/db/database.js'
 import type { EventBus } from '../../core/events.js'
 import type { AppModule } from '../../core/module.js'
@@ -80,14 +80,8 @@ export function createProfileModule(deps: ProfileModuleDeps): ProfileModule {
       registerProfileRoutes(app, context, {
         xp: {
           ...xp,
-          leaderboard: async (actor, period) => {
-            const board = await xp.leaderboard(actor, period)
-
-            return {
-              ...board,
-              entries: await visibleTo(audience, actor, board.entries, (entry) => entry.login),
-            }
-          },
+          leaderboard: async (actor, period) =>
+            xp.leaderboard(actor, period, await seesFor(audience, actor)),
         },
         events: deps.events,
       })

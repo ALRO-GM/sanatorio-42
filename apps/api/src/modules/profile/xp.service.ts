@@ -404,13 +404,22 @@ export function createXpService(options: XpServiceOptions) {
      * Quién ayuda más en el campus que mira `actor`.
      *
      * Cuenta solo la XP de ayudar (`HELP_KINDS`). Devuelve los `limit` primeros
-     * y, aparte, el puesto de quien pregunta.
+     * y, aparte, el puesto de quien pregunta. Solo cuenta a quien `sees` deja
+     * ver, antes de poner los puestos: así no quedan huecos que delaten a la
+     * gente oculta o del otro mundo que va por delante.
      */
-    async leaderboard(actor: Actor, period: LeaderboardPeriod, limit = 20): Promise<Leaderboard> {
+    async leaderboard(
+      actor: Actor,
+      period: LeaderboardPeriod,
+      sees: (login: string) => boolean = () => true,
+      limit = 20,
+    ): Promise<Leaderboard> {
       const date = new Date(now())
       const since =
         period === 'month' ? isoAt(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1)) : null
-      const rows = await xp.ranking(actor.campusId, HELP_KINDS, since)
+      const rows = (await xp.ranking(actor.campusId, HELP_KINDS, since)).filter((row) =>
+        sees(row.login),
+      )
       const entries: LeaderboardEntry[] = []
 
       for (const [index, row] of rows.entries()) {
