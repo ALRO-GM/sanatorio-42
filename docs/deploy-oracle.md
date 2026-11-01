@@ -232,6 +232,7 @@ pizarras). La réplica de 42 se puede volver a bajar.
 | ----------------------------- | ----------------------------------------------------- |
 | Ver logs                      | `docker compose logs -f app`                          |
 | Estado de la réplica          | `docker compose exec app node dist/cli/sync-status.js` |
+| Kickoffs reales por campus    | `docker compose exec app node dist/cli/kickoffs.js` |
 | Reiniciar                     | `docker compose restart app`                          |
 | Cambiar una variable          | editar `.env` y `docker compose up -d`                |
 

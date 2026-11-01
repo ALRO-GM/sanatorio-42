@@ -9,6 +9,34 @@ export const SLOT = 30
 export const DAY_START = 8 * 60
 export const DAY_END = 24 * 60
 
+/** Lo que enseña el editor recogido como poco: de ahora a cuatro horas más. */
+export const SHORT_SPAN = 4 * 60
+
+/**
+ * Las medias horas que enseña el editor recogido, desde `first` (la hora de
+ * ahora): las cuatro horas siguientes y la hora entera de cada cosa que tengas
+ * más tarde (una franja, una reserva, una corrección). Lo vacío de en medio no
+ * se pinta: las 24 horas eran lo que más ocupaba la página. El día entero
+ * sigue a un clic.
+ */
+export function shortStarts(first: number, marked: Iterable<number>): number[] {
+  const keep = new Set<number>()
+  const add = (from: number, to: number): void => {
+    for (let start = Math.max(from, first); start < Math.min(to, DAY_END); start += SLOT) {
+      keep.add(start)
+    }
+  }
+
+  add(first, first + SHORT_SPAN)
+  for (const start of marked) {
+    const hour = Math.floor(start / 60) * 60
+
+    add(hour, hour + 60)
+  }
+
+  return [...keep].sort((a, b) => a - b)
+}
+
 export function toMinutes(time: string): number {
   const [hours = '0', minutes = '0'] = time.split(':')
 

@@ -64,6 +64,8 @@ export function Clinic({ me, onLogout }: ClinicProps) {
       : null
   // Proyecto con el que se abre terapia o tablón al llegar desde la sala de espera.
   const [focusProject, setFocusProject] = useState<number | null>(null)
+  // El proyecto abierto en Peer to peer, para seguir en él al volver de otra sección.
+  const [waitingProject, setWaitingProject] = useState<number | null>(null)
   // Cambia al elegir otro campus: todo lo que depende del campus se vuelve a montar.
   const [campusVersion, setCampusVersion] = useState(0)
   // Personalizar abierto, y con qué pestaña de opciones; `null`, cerrado.
@@ -274,7 +276,7 @@ export function Clinic({ me, onLogout }: ClinicProps) {
           />
         )}
 
-        {/* Con otro campus, la sección se monta de nuevo: también se olvida el proyecto elegido. */}
+        {/* Con otro campus, la sección se monta de nuevo (y pide de nuevo lo de ese campus). */}
         <div key={campusVersion}>
           <ErrorBoundary key={section} where={section}>
             <SectionView
@@ -285,6 +287,8 @@ export function Clinic({ me, onLogout }: ClinicProps) {
               focusProject={focusProject}
               otherRecord={otherRecord}
               param={param}
+              openProject={waitingProject}
+              onOpenProject={setWaitingProject}
               onGo={openSection}
             />
           </ErrorBoundary>

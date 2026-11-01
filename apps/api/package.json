@@ -18,7 +18,8 @@
     "db:migrate": "tsx --conditions=source --env-file=.env src/cli/migrate.ts",
     "sync:status": "tsx --conditions=source --env-file=.env src/cli/sync-status.ts",
     "sync:run": "tsx --conditions=source --env-file=.env src/cli/sync-run.ts",
-    "uso:report": "tsx --conditions=source --env-file=.env src/cli/usage-report.ts"
+    "uso:report": "tsx --conditions=source --env-file=.env src/cli/usage-report.ts",
+    "kickoffs": "tsx --conditions=source --env-file=.env src/cli/kickoffs.ts"
   },
   "dependencies": {
     "@libsql/client": "^0.18.0",

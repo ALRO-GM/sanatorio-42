@@ -3,8 +3,9 @@ import { useState } from 'react'
 import { api } from '../../shared/api'
 import { useAction, useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
+import { Async } from '../../shared/ui/Async'
 import { Icon } from '../../shared/ui/Icon'
-import { InfoTip } from '../../shared/ui/InfoTip'
+import { SectionTitle } from '../../shared/ui/SectionTitle'
 import { FacilityForm } from '../facility/FacilityForm'
 import { ClustersTour } from './ClustersTour'
 import { Show } from '../../shared/detail'
@@ -35,12 +36,9 @@ export function ClustersPage({ me }: { me: string }) {
 
   return (
     <section>
-      <h2>
-        {t('clusters.title')}
-        <InfoTip title={t('clusters.title')}>
-          <ClustersTour />
-        </InfoTip>
-      </h2>
+      <SectionTitle title={t('clusters.title')}>
+        <ClustersTour />
+      </SectionTitle>
       {!report ? null : reporting ? (
         <FacilityForm
           onDone={() => {
@@ -58,45 +56,42 @@ export function ClustersPage({ me }: { me: string }) {
           <Icon name="aviso" size={14} /> {t('facility.open')}
         </button>
       )}
-      {map.loading && <p className="estado">{t('map.loading')}</p>}
-      {!map.loading && map.data === undefined && (
-        <ErrorNote error={map.error} onRetry={() => void map.reload()} />
-      )}
-
-      {map.data !== undefined && (
-        <>
-          <Show from="datos">
-            <PoolOnly k="clusters.online">
-              <p className="clusters-count" role="status">
-                <span className="seat-online sample" />{' '}
-                {tn('clusters.count', occupied, { online, occupied })}
-              </p>
-            </PoolOnly>
-          </Show>
-          <div className="card" data-feedback="clusters.map">
-            <ClusterMapView
-              map={map.data}
-              legend={['online', 'occupied', 'reserved', 'free', 'broken']}
-              onBroken={
-                !broken
-                  ? undefined
-                  : (host, isBroken) => {
-                      // Si falla, se dice (antes se callaba y parecía que no hacía nada).
-                      void marking
-                        .run(() =>
-                          isBroken ? api.reportBrokenSeat(host) : api.clearBrokenSeat(host),
-                        )
-                        .then((done) => (done ? map.reload() : undefined))
-                    }
-              }
-              onChat={(login) => {
-                openChat(directChatId(me, login))
-              }}
-            />
-            <ErrorNote error={marking.error} />
-          </div>
-        </>
-      )}
+      <Async state={map} loadingText={t('map.loading')}>
+        {(campus) => (
+          <>
+            <Show from="datos">
+              <PoolOnly k="clusters.online">
+                <p className="clusters-count" role="status">
+                  <span className="seat-online sample" />{' '}
+                  {tn('clusters.count', occupied, { online, occupied })}
+                </p>
+              </PoolOnly>
+            </Show>
+            <div className="card" data-feedback="clusters.map">
+              <ClusterMapView
+                map={campus}
+                legend={['online', 'occupied', 'reserved', 'free', 'broken']}
+                onBroken={
+                  !broken
+                    ? undefined
+                    : (host, isBroken) => {
+                        // Si falla, se dice (antes se callaba y parecía que no hacía nada).
+                        void marking
+                          .run(() =>
+                            isBroken ? api.reportBrokenSeat(host) : api.clearBrokenSeat(host),
+                          )
+                          .then((done) => (done ? map.reload() : undefined))
+                      }
+                }
+                onChat={(login) => {
+                  openChat(directChatId(me, login))
+                }}
+              />
+              <ErrorNote error={marking.error} />
+            </div>
+          </>
+        )}
+      </Async>
       {/* Debajo del plano, cuánto se usa cada ordenador (antes en Amigos). */}
       <SeatHeatCard />
     </section>

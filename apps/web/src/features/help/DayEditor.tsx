@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { Fragment, useEffect, useRef, useState } from 'react'
 import type { PointerEvent as ReactPointerEvent } from 'react'
 
 import type { HelpDay } from '@sanatorio/contracts'
@@ -13,6 +13,7 @@ import {
   DAY_END,
   DAY_START,
   duration,
+  shortStarts,
   SLOT,
   slotsOf,
   toMinutes,
@@ -51,6 +52,8 @@ export function DayEditor({ day, onSaved }: DayEditorProps) {
   const [slots, setSlots] = useState(() => slotsOf(day.windows))
   const [maxMinutes, setMaxMinutes] = useState(day.maxMinutes)
   const [saved, setSaved] = useState(false)
+  // De fábrica, recogido a las horas con algo; se abre para ver el día entero.
+  const [wholeDay, setWholeDay] = useState(false)
 
   // La hora del campus, que sigue corriendo con la página abierta: la de la API
   // más lo que ha pasado desde que llegó.
@@ -76,10 +79,9 @@ export function DayEditor({ day, onSaved }: DayEditorProps) {
   const offered = slots.size * SLOT
   // Primera hora que se enseña: la de ahora, para no gastar pantalla en el pasado.
   const first = Math.max(DAY_START, Math.floor(now / 60) * 60)
-  const starts = Array.from(
-    { length: (DAY_END - first) / SLOT },
-    (_, index) => first + index * SLOT,
-  )
+  const all = Array.from({ length: (DAY_END - first) / SLOT }, (_, index) => first + index * SLOT)
+  const short = shortStarts(first, [...slots, ...evaluationSlots, ...bookedSlots])
+  const starts = wholeDay ? all : short
 
   /** Si una media hora se puede poner (`add`) o quitar (`remove`) ahora. */
   const allowed = (start: number, mode: 'add' | 'remove'): boolean => {
@@ -170,7 +172,7 @@ export function DayEditor({ day, onSaved }: DayEditorProps) {
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerUp}
       >
-        {starts.map((start) => {
+        {starts.map((start, index) => {
           const past = start <= now
           const active = slots.has(start)
           const taken = evaluationSlots.has(start)
@@ -179,52 +181,70 @@ export function DayEditor({ day, onSaved }: DayEditorProps) {
           const joinedAbove = active && slots.has(start - SLOT)
           const joinedBelow = active && slots.has(start + SLOT)
 
+          // Entre dos tramos recogidos, una raya que dice que ahí hay horas sin pintar.
+          const gap = index > 0 && starts[index - 1] !== start - SLOT
+
           return (
-            <div key={start} className={`slot-row ${start % 60 === 0 ? 'hour' : ''}`}>
-              <span className="slot-hour" aria-hidden="true">
-                {start % 60 === 0 ? toTime(start) : ''}
-              </span>
-              <button
-                type="button"
-                data-slot={start}
-                className={[
-                  'slot',
-                  active ? 'active' : '',
-                  taken ? 'busy' : '',
-                  past ? 'past' : '',
-                  booked ? 'booked' : '',
-                  joinedAbove ? 'joined-above' : '',
-                  joinedBelow ? 'joined-below' : '',
-                ].join(' ')}
-                aria-pressed={active}
-                aria-label={`${toTime(start)}–${toTime(start + SLOT)}`}
-                title={
-                  booked
-                    ? t('help.bookedSlot')
-                    : past && !active
-                      ? t('help.pastSlot')
-                      : taken
-                        ? t('help.busySlot')
-                        : undefined
-                }
-                disabled={!canToggle({ past, active, booked, taken }) || day.mustRate}
-                onClick={(event) => {
-                  // Con el ratón o el dedo ya lo ha hecho el arrastre; esto es el teclado.
-                  if (event.detail === 0) apply(start, active ? 'remove' : 'add')
-                }}
-              >
-                {taken && <Icon name="lupa" size={13} />}
-                {active && !joinedAbove && (
-                  <span className="slot-label">
-                    {toTime(start)}–{toTime(endOf(slots, start))}
-                  </span>
-                )}
-                {booked && <span className="slot-label">{t('help.bookedShort')}</span>}
-              </button>
-            </div>
+            <Fragment key={start}>
+              {gap && <div className="slot-gap" aria-hidden="true" />}
+              <div className={`slot-row ${start % 60 === 0 || gap ? 'hour' : ''}`}>
+                <span className="slot-hour" aria-hidden="true">
+                  {start % 60 === 0 || gap ? toTime(start) : ''}
+                </span>
+                <button
+                  type="button"
+                  data-slot={start}
+                  className={[
+                    'slot',
+                    active ? 'active' : '',
+                    taken ? 'busy' : '',
+                    past ? 'past' : '',
+                    booked ? 'booked' : '',
+                    joinedAbove ? 'joined-above' : '',
+                    joinedBelow ? 'joined-below' : '',
+                  ].join(' ')}
+                  aria-pressed={active}
+                  aria-label={`${toTime(start)}–${toTime(start + SLOT)}`}
+                  title={
+                    booked
+                      ? t('help.bookedSlot')
+                      : past && !active
+                        ? t('help.pastSlot')
+                        : taken
+                          ? t('help.busySlot')
+                          : undefined
+                  }
+                  disabled={!canToggle({ past, active, booked, taken }) || day.mustRate}
+                  onClick={(event) => {
+                    // Con el ratón o el dedo ya lo ha hecho el arrastre; esto es el teclado.
+                    if (event.detail === 0) apply(start, active ? 'remove' : 'add')
+                  }}
+                >
+                  {taken && <Icon name="lupa" size={13} />}
+                  {active && !joinedAbove && (
+                    <span className="slot-label">
+                      {toTime(start)}–{toTime(endOf(slots, start))}
+                    </span>
+                  )}
+                  {booked && <span className="slot-label">{t('help.bookedShort')}</span>}
+                </button>
+              </div>
+            </Fragment>
           )
         })}
       </div>
+      {short.length < all.length && (
+        <button
+          type="button"
+          className="link slot-more"
+          aria-expanded={wholeDay}
+          onClick={() => {
+            setWholeDay(!wholeDay)
+          }}
+        >
+          {wholeDay ? t('help.shortDay') : t('help.wholeDay')}
+        </button>
+      )}
 
       <div className="form-grid">
         <label>

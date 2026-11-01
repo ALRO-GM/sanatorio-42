@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState } from 'react'
+import { lazy, Suspense, useCallback, useState } from 'react'
 
 import type { CurrentUser, Profile, ProjectSummary } from '@sanatorio/contracts'
 
@@ -6,6 +6,7 @@ import { PeerList } from '../features/peers/PeerList'
 import { ProjectSelect } from '../features/peers/ProjectSelect'
 import type { AsyncState } from '../shared/hooks/useAsync'
 import { poolAllows, usePoolAccess } from '../shared/pool'
+import { waitingHref } from '../shared/links'
 import { useI18n } from '../shared/i18n'
 import type { Section } from './sections'
 import { useEgg } from '../features/clicker/egg'
@@ -82,6 +83,11 @@ const TherapyGroups = lazy(() =>
   import('../features/therapy/TherapyGroups').then((m) => ({ default: m.TherapyGroups })),
 )
 
+/** El proyecto que pide la dirección (`#/consulta/1314` → `1314`), o `null`. */
+function projectOf(param: string | null): number | null {
+  return param !== null && /^\d{1,9}$/.test(param) ? Number(param) : null
+}
+
 type SectionViewProps = {
   section: Section
   me: CurrentUser
@@ -94,6 +100,13 @@ type SectionViewProps = {
   otherRecord: string | null
   /** Lo que va detrás de la sección en la dirección (`#/notgames/12` → `12`). */
   param: string | null
+  /**
+   * El proyecto que se dejó abierto en Peer to peer: quien se va a otra sección
+   * (a apuntarse a un sprint, a mirar el calendario) y vuelve sigue en quién le
+   * ayuda, no en la lista. Lo guarda `Clinic`, que no se desmonta al cambiar.
+   */
+  openProject: number | null
+  onOpenProject: (project: number | null) => void
   onGo: (section: Section, projectId?: number | null) => void
 }
 
@@ -106,6 +119,8 @@ export function SectionView({
   focusProject,
   otherRecord,
   param,
+  openProject,
+  onOpenProject,
   onGo,
 }: SectionViewProps) {
   const { t } = useI18n()
@@ -116,19 +131,32 @@ export function SectionView({
   // Con un solo proyecto en curso no hay nada que elegir: se abre directamente.
   // Al volver a la lista, ya no (si no, «Volver» llevaría otra vez al mismo).
   const [autoPick, setAutoPick] = useState(true)
+  // Al llegar, el de la dirección o el que se dejó abierto. Va en la dirección
+  // (sin otra entrada en el historial) para que un enlace o una recarga lo abran.
+  const wanted = autoPick ? (projectOf(param) ?? openProject) : null
+  const pick = useCallback(
+    (chosen: ProjectSummary) => {
+      onOpenProject(chosen.id)
+      setProject(chosen)
+      window.location.replace(waitingHref(chosen.id))
+    },
+    [onOpenProject],
+  )
 
   return (
     <Suspense fallback={<p className="estado">{t('app.loadingSection')}</p>}>
       {section === 'consulta' &&
         (project === null ? (
-          <ProjectSelect onSelect={setProject} autoPick={autoPick} />
+          <ProjectSelect onSelect={pick} autoPick={autoPick} wanted={wanted} />
         ) : (
           <>
             <button
               className="back-btn"
               onClick={() => {
+                onOpenProject(null)
                 setAutoPick(false)
                 setProject(null)
+                window.location.replace(waitingHref())
               }}
             >
               {t('app.back')}

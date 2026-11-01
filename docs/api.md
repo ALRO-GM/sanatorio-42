@@ -2062,7 +2062,9 @@ GET /stats/ranking?by=circle|circles|hours&plan=all|classic|next&kickoff=AAAA-MM
   100 %. Ordena por `circle` (desempata el % de círculos y luego el de horas),
   `circles` o `hours`; mismas cifras, mismo puesto. `pctMin`/`pctMax` filtran
   por el % de lo que ordena (el de círculos con `circle`). `kickoff` es el mes
-  de entrada al 42cursus; `cohort=since` incluye los kickoffs siguientes.
+  de la kickoff real del campus (`core/kickoffs.ts`: los días en que entra
+  mucha gente; quien entra a destiempo, con la anterior más cercana a su
+  entrada en 42); `cohort=since` incluye los kickoffs siguientes.
   `limit` hasta 50; `me` es tu fila aunque no salga en la página (`null` si no
   entras con esos filtros). `kickoffs` cuenta la gente de cada mes con el plan
   elegido. Quien no ves (mundos separados, personas ocultas) no sale ni ocupa
@@ -2191,7 +2193,8 @@ POST /exams/live/refresh  → LiveExam. Lo mismo, pidiendo antes lo nuevo a 42 s
 ```
 
 - `track`: el plan de la gente (`classic`, el core en C; `next`, el core en
-  Python). `kickoffs`: meses en que se empezó, separados por comas; sin él,
+  Python). `kickoffs`: meses de las kickoffs reales del campus (como en
+  `/stats/ranking`), separados por comas; sin él,
   todos. Un plan desconocido o un mes mal escrito es 400. Tipos en
   `packages/contracts/src/exams.ts`; las cuentas, en `exams.rules.ts`.
 - Kickoff de cada cual (#81 del buzón): el mes de `user_levels.begin_at` o, si

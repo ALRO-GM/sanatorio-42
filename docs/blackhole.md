@@ -97,6 +97,23 @@ de quien entra en la web, 247 personas, que además no es de fiar). Se añadió:
 - De paso da el inicio (`begin_at`) de todo el mundo, no solo de quien entra en
   la web: el kickoff y el día 0 del avance son los de verdad.
 
+## Kickoffs reales (2026-11-01)
+
+Pedido por Alberto: la gente que entra a destiempo (sobre todo quien viene de
+otro campus) sacaba meses sueltos que ensuciaban las elecciones por kickoff.
+`core/kickoffs.ts`, para el Avance y los Exámenes:
+
+1. Las kickoffs de cada campus son los días con muchas entradas: las que caen
+   a menos de 7 días se juntan, y vale el grupo con al menos 8 personas y el
+   10 % del más grande. Su fecha, el día con más entradas.
+2. Quien entró con uno de esos grupos (± 7 días) es de esa kickoff.
+3. Quien no, va con la kickoff del campus anterior más cercana a su entrada
+   en 42 (lo primero que se sabe: inicio del cursus o primer proyecto, que en
+   un traslado es del otro campus); sin ninguna anterior, la más cercana.
+4. Un campus sin grupos grandes se queda con el mes en que empezó cada cual.
+
+El día 0 de cada línea del avance sigue siendo el inicio de cada cual.
+
 ## Cómo se usa
 
 - Medias: por sitio (`ProgressArea`: cada campus pedido en `campuses[]` y

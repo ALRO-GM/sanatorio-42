@@ -8,6 +8,7 @@ import {
   progressHref,
   readProgressPreset,
   recordHref,
+  waitingHref,
 } from '../src/shared/links'
 
 describe('direcciones de la web', () => {
@@ -99,5 +100,12 @@ describe('el Avance con opciones', () => {
     expect(readProgressPreset('#/avance')).toBeNull()
     expect(readProgressPreset('#/red?plan=c')).toBeNull()
     expect(readProgressPreset('#/avance?x=1')).toBeNull()
+  })
+})
+
+describe('Peer to peer con un proyecto', () => {
+  it('la lista, o el proyecto por su número', () => {
+    expect(waitingHref()).toBe('#/consulta')
+    expect(waitingHref(1314)).toBe('#/consulta/1314')
   })
 })

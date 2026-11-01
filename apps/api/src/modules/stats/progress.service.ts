@@ -63,6 +63,7 @@ import {
   unitsOf,
 } from './progress.rules.js'
 import type { PlanProject, Unit } from './progress.rules.js'
+import { kickoffMonths } from '../../core/kickoffs.js'
 import { kickoffsOf, rankRunners } from './ranking.rules.js'
 import type { RankingFilters, Runner } from './ranking.rules.js'
 import type { ProgressRepository } from './stats.repository.js'
@@ -502,6 +503,17 @@ export function createProgressService(options: {
 
     const days = daysUpTo(longest)
     // Lo de todos y lo de cada campus en el que haya alguien.
+    // La kickoff de cada cual, entre las reales de su campus (`core/kickoffs.ts`).
+    const kickoffs = kickoffMonths(
+      [...people.values()]
+        .filter((person) => Number.isFinite(person.start) && person.start <= t)
+        .map((person) => ({
+          key: person.login,
+          campus: person.campus,
+          start: person.start,
+          general: Math.min(person.start, person.first),
+        })),
+    )
     const tallies = new Map<string, Tally>([[ALL, emptyTally(days.length)]])
     const tallyOf = (key: string): Tally => {
       const known = tallies.get(key)
@@ -596,7 +608,7 @@ export function createProgressService(options: {
             login: person.login,
             image: person.image,
             track: person.track,
-            kickoff: monthOf(person.start),
+            kickoff: kickoffs.get(person.login) ?? monthOf(person.start),
             ...standing,
           },
           campuses: person.campuses,
