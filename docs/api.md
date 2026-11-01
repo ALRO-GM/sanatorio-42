@@ -2139,6 +2139,8 @@ GET /pool/access   → PoolAccess: si eres piscinero y qué puedes ver
 GET /admin/pool    → PoolSettings (solo admins)
 PUT /admin/pool    → { open?, message?, allow? } → PoolSettings (solo admins)
 POST /admin/pool/preview → 204: entra en la vista de piscinero (solo admins)
+GET /admin/quiz-scope → QuizScope: si las salas de Not-games se abren a todos los campus (solo admins)
+PUT /admin/quiz-scope → { crossCampus } → QuizScope (solo admins)
 POST /admin/pool/preview/full → 204: la misma, sin límites (solo el dueño)
 POST /pool/preview/exit  → 204: vuelve de ella; 403 sin la marca de vista previa
 GET    /admin/hidden            → HiddenPerson[]: las personas ocultas (solo admins)

@@ -30,6 +30,8 @@ import type { PlayerRow, QuizRepository, RoomRow, RoundRow } from './quiz.reposi
 import { localizeRound, localizeText, reviewIn } from './bank/localize.js'
 import { buildRound, levelOf, LIVES, orderFor, pickConcepts, pointsFor } from './quiz.rules.js'
 import { isoAt } from '../../core/time.js'
+import { roomAccess } from './room-access.js'
+import type { RoomAccess } from './room-access.js'
 
 type QuizServiceOptions = {
   quiz: QuizRepository
@@ -38,6 +40,8 @@ type QuizServiceOptions = {
   review?: Readonly<Record<string, ReviewEntry>>
   /** El círculo en que va cada persona (para el mínimo de una sala). */
   circlesOf: (logins: readonly string[]) => Promise<Map<string, number>>
+  /** Qué salas ve cada cual: su grupo y su campus, o todos los campus (`room-access.ts`). */
+  access?: RoomAccess
   /** Si alguien está ya en una partida por turnos (ajedrez…): no se juegan dos a la vez. */
   busyElsewhere?: (login: string) => Promise<boolean>
   /** Las fotos de 42, para el marcador. */
@@ -85,6 +89,7 @@ const answerSchema = z.object({
 export function createQuizService(options: QuizServiceOptions) {
   const { quiz, bank } = options
   const now = options.now ?? Date.now
+  const access = options.access ?? roomAccess()
   const random = options.random ?? Math.random
 
   /** Una cosa cada vez por sala: que dos peticiones no cierren la misma pregunta. */
@@ -242,7 +247,10 @@ export function createQuizService(options: QuizServiceOptions) {
   ): Promise<string | null> {
     if (players.some((p) => p.login === actor.login)) return null
     if (room.status !== 'lobby') return 'La partida ya ha empezado'
-    if (room.campusId !== actor.campusId) return 'Esa sala es de otro campus'
+
+    const blocked = await access.whyNot(actor, room)
+
+    if (blocked !== null) return blocked
 
     const limit = room.settings.mode === 'duel' ? 2 : MAX_PLAYERS
 
@@ -260,12 +268,16 @@ export function createQuizService(options: QuizServiceOptions) {
   }
 
   /**
-   * Una sala se mira si es del campus de quien pregunta o si juega en ella:
-   * los ids van seguidos y, sin esto, cualquiera vería las partidas de otro
-   * campus (quién juega, quién ha contestado). Si no, como si no existiera.
+   * Una sala se mira si es de tu grupo y de tu campus (o de cualquiera, si
+   * quien administra lo ha abierto) o si juegas en ella: los ids van seguidos
+   * y, sin esto, cualquiera vería las partidas de otros (quién juega, quién ha
+   * contestado). Si no, como si no existiera.
    */
-  async function assertCanSee(actor: Actor, room: { id: number; campusId: number }): Promise<void> {
-    if (room.campusId === actor.campusId) return
+  async function assertCanSee(
+    actor: Actor,
+    room: { id: number; campusId: number; host: string },
+  ): Promise<void> {
+    if ((await access.whyNot(actor, room)) === null) return
     if ((await quiz.players(room.id)).map((p) => p.login).some((login) => login === actor.login))
       return
 
@@ -366,7 +378,11 @@ export function createQuizService(options: QuizServiceOptions) {
   return {
     /** Las salas abiertas del campus y las tuyas de las últimas horas. */
     async list(actor: Actor): Promise<QuizLobby[]> {
-      const rows = await quiz.rooms(actor.campusId, actor.login, isoAt(now() - 6 * 3_600_000))
+      const rows = await quiz.rooms(
+        await access.campusFor(actor),
+        actor.login,
+        isoAt(now() - 6 * 3_600_000),
+      )
 
       return rows.map((room) => ({
         id: room.id,

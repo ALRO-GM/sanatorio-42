@@ -58,18 +58,19 @@ export function createTurnsRepository<State>(db: Db) {
 
     /** Las salas sin empezar del campus y las de `login` desde `since`, con cuántos hay. */
     async rooms(
-      campusId: number,
+      /** `null`: las de todos los campus. */
+      campusId: number | null,
       login: string,
       since: string,
     ): Promise<(TurnRoomRow<State> & { players: number; joined: boolean })[]> {
       const result = await db.execute({
         sql: `SELECT r.*, (SELECT COUNT(*) FROM turn_players p WHERE p.room_id = r.id) AS players,
-                     EXISTS (SELECT 1 FROM turn_players p WHERE p.room_id = r.id AND p.login = ?) AS joined
+                     EXISTS (SELECT 1 FROM turn_players p WHERE p.room_id = r.id AND p.login = ?1) AS joined
               FROM turn_rooms r
-              WHERE (r.campus_id = ? AND r.status = 'lobby')
-                 OR (r.created_at >= ? AND EXISTS (SELECT 1 FROM turn_players p WHERE p.room_id = r.id AND p.login = ?))
+              WHERE ((?2 IS NULL OR r.campus_id = ?2) AND r.status = 'lobby')
+                 OR (r.created_at >= ?3 AND EXISTS (SELECT 1 FROM turn_players p WHERE p.room_id = r.id AND p.login = ?1))
               ORDER BY r.id DESC LIMIT 50`,
-        args: [login, campusId, since, login],
+        args: [login, campusId, since],
       })
 
       return result.rows.map((row) => ({

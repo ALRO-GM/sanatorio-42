@@ -212,6 +212,8 @@ export const POOL_DEFAULT: readonly PoolKey[] = [
   'tablon',
   'terapia',
   'pizarras',
+  // Las salas de preguntas, cada grupo con las suyas (`quiz/room-access.ts`).
+  'notgames',
   'calendario',
   'clusters',
   'clusters.report',

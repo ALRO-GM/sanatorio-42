@@ -26,6 +26,7 @@ import type {
   PoolAccess,
   PoolNotice,
   PoolSettings,
+  QuizScope,
   HiddenCandidate,
   HiddenPerson,
   HiddenPersonInput,
@@ -410,6 +411,9 @@ export type Api = {
   /** Los ajustes de la piscina. Solo admins. */
   getPoolSettings: () => Promise<PoolSettings>
   updatePoolSettings: (changes: Partial<PoolSettings>) => Promise<PoolSettings>
+  /** Si las salas de Not-games se abren a todos los campus. Solo admins. */
+  getQuizScope: () => Promise<QuizScope>
+  saveQuizScope: (scope: { crossCampus: boolean }) => Promise<QuizScope>
   /** Las personas ocultas a un grupo (`docs/personas-ocultas.md`). Solo admins. */
   getHiddenPeople: () => Promise<HiddenPerson[]>
   /** Gente de cualquier grupo y campus, para elegir a quién ocultar. Solo admins. */

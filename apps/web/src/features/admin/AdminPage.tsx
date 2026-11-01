@@ -22,6 +22,7 @@ import { DataPanel } from './DataPanel'
 import { FacilityList } from '../facility/FacilityList'
 import { GrowthPanel } from './GrowthPanel'
 import { FocusPanel } from './FocusPanel'
+import { QuizScopePanel } from './QuizScopePanel'
 import { PoolPanel } from './PoolPanel'
 import { SeatWeightsPanel } from '../network/SeatWeightsPanel'
 import { HiddenPanel } from './HiddenPanel'
@@ -106,6 +107,7 @@ function AdminTabs({ campusId, me }: { campusId?: number | undefined; me: string
       {tab === 'data' && <DataPanel />}
       {tab === 'focus' && <FocusPanel />}
       {tab === 'pool' && <PoolPanel />}
+      {tab === 'pool' && <QuizScopePanel />}
       {tab === 'hidden' && <HiddenPanel />}
       {tab === 'casts' && <BroadcastsTab campusId={campusId} />}
       {tab === 'countdowns' && <CountdownsPanel campusId={campusId} />}

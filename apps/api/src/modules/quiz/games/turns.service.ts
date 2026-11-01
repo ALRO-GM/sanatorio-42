@@ -44,6 +44,8 @@ import {
 import type { Side, TurnState } from '../turns.rules.js'
 import type { TurnPlayerRow, TurnRoomRow, TurnsRepository } from './turns.repository.js'
 import { isoAt } from '../../../core/time.js'
+import { roomAccess } from '../room-access.js'
+import type { RoomAccess } from '../room-access.js'
 
 /** Lo que tiene que dar cada juego. `Board` es su tablero; `View`, cómo lo ve la web. */
 export type TurnGame<Board, View> = {
@@ -103,6 +105,8 @@ type TurnsServiceOptions<Board, View> = {
   game: TurnGame<Board, View>
   bank: readonly Concept[]
   circlesOf: (logins: readonly string[]) => Promise<Map<string, number>>
+  /** Qué salas ve cada cual: su grupo y su campus, o todos los campus (`room-access.ts`). */
+  access?: RoomAccess
   imagesOf?: (logins: readonly string[]) => Promise<Map<string, string | null>>
   now?: () => number
   random?: () => number
@@ -111,6 +115,7 @@ type TurnsServiceOptions<Board, View> = {
 export function createTurnsService<Board, View>(options: TurnsServiceOptions<Board, View>) {
   const { turns, quiz, game, bank } = options
   const now = options.now ?? Date.now
+  const access = options.access ?? roomAccess()
   const random = options.random ?? Math.random
   const concepts = new Map(bank.map((concept) => [concept.id, concept]))
 
@@ -267,7 +272,10 @@ export function createTurnsService<Board, View>(options: TurnsServiceOptions<Boa
   ): Promise<string | null> {
     if (players.some((p) => p.login === actor.login)) return null
     if (room.status !== 'lobby') return 'La partida ya ha empezado'
-    if (room.campusId !== actor.campusId) return 'Esa sala es de otro campus'
+
+    const blocked = await access.whyNot(actor, room)
+
+    if (blocked !== null) return blocked
     if (players.length >= 2) return 'La sala está llena'
 
     const minCircle = room.settings.minCircle
@@ -288,12 +296,16 @@ export function createTurnsService<Board, View>(options: TurnsServiceOptions<Boa
   }
 
   /**
-   * Una sala se mira si es del campus de quien pregunta o si juega en ella:
-   * los ids van seguidos y, sin esto, cualquiera vería las partidas de otro
-   * campus (quién juega, quién ha contestado). Si no, como si no existiera.
+   * Una sala se mira si es de tu grupo y de tu campus (o de cualquiera, si
+   * quien administra lo ha abierto) o si juegas en ella: los ids van seguidos
+   * y, sin esto, cualquiera vería las partidas de otros (quién juega, quién ha
+   * contestado). Si no, como si no existiera.
    */
-  async function assertCanSee(actor: Actor, room: { id: number; campusId: number }): Promise<void> {
-    if (room.campusId === actor.campusId) return
+  async function assertCanSee(
+    actor: Actor,
+    room: { id: number; campusId: number; host: string },
+  ): Promise<void> {
+    if ((await access.whyNot(actor, room)) === null) return
     if ((await turns.players(room.id)).map((p) => p.login).some((login) => login === actor.login))
       return
 
@@ -401,7 +413,11 @@ export function createTurnsService<Board, View>(options: TurnsServiceOptions<Boa
 
   return {
     async list(actor: Actor): Promise<TurnLobby[]> {
-      const rows = await turns.rooms(actor.campusId, actor.login, isoAt(now() - 6 * 3_600_000))
+      const rows = await turns.rooms(
+        await access.campusFor(actor),
+        actor.login,
+        isoAt(now() - 6 * 3_600_000),
+      )
 
       return rows.map((room) => ({
         id: room.id,

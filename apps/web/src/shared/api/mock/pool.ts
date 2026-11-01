@@ -5,7 +5,7 @@
  * piscinero del panel lo hace con `mock_pool_preview`, como la cookie de verdad.
  */
 
-import type { PoolKey, PoolSettings } from '@sanatorio/contracts'
+import type { PoolKey, PoolSettings, QuizScope } from '@sanatorio/contracts'
 
 import type { Api } from '../types'
 import { delay, fail } from './state'
@@ -22,6 +22,7 @@ const DEFAULT: PoolKey[] = [
   'tablon',
   'terapia',
   'pizarras',
+  'notgames',
   'calendario',
   'clusters',
   'clusters.report',
@@ -34,6 +35,8 @@ const DEFAULT: PoolKey[] = [
   'tickets',
 ]
 
+/** Las salas de Not-games: de entrada, cada campus las suyas. */
+let quizScope: QuizScope = { crossCampus: false, updatedBy: null, updatedAt: null }
 let settings: PoolSettings = { open: false, message: '', allow: [...DEFAULT] }
 
 /** Un elemento solo vale con su pestaña, como en la API. */
@@ -63,6 +66,8 @@ export const poolMock: Pick<
   | 'getPoolNotice'
   | 'getPoolSettings'
   | 'updatePoolSettings'
+  | 'getQuizScope'
+  | 'saveQuizScope'
   | 'getPoolAccess'
   | 'startPoolPreview'
   | 'stopPoolPreview'
@@ -86,6 +91,17 @@ export const poolMock: Pick<
     }
 
     return { ...settings, allow: [...settings.allow] }
+  },
+  async getQuizScope() {
+    await delay(40)
+
+    return { ...quizScope }
+  },
+  async saveQuizScope({ crossCampus }) {
+    await delay(60)
+    quizScope = { crossCampus, updatedBy: 'albrodri', updatedAt: new Date().toISOString() }
+
+    return { ...quizScope }
   },
   async getPoolAccess() {
     await delay(40)

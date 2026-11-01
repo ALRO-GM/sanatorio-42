@@ -58,6 +58,16 @@ ni de un permiso concedido (`modules/pool/pool.keys.ts`). Una ruta que no está
 en esa tabla queda cerrada para piscineros, y un test exige que cada ruta nueva
 se apunte en ella (`tests/integration/pool-gate.test.ts`).
 
+### Not-games
+
+Las salas de preguntas y de ajedrez están entre lo que tiene un piscinero
+de entrada (permiso `notgames`, 2026-11-01); se quitan desmarcándolo en el
+panel. Cada grupo ve y entra solo en las salas de su grupo, y cada campus en
+las suyas (`modules/quiz/room-access.ts`). Debajo de los permisos, en la misma
+pestaña, quien administra puede **abrir las salas a todos los campus** para
+los concursos entre campus (`GET/PUT /admin/quiz-scope`); abierto, un
+piscinero sigue viendo solo a los piscineros de su campus.
+
 Por encima de los dos mundos, quien administra puede ocultar a una persona
 concreta a los estudiantes, a los piscineros o a los dos (pestaña **Personas
 ocultas** del panel): ver [personas-ocultas.md](personas-ocultas.md).

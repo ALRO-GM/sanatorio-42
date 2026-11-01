@@ -17,6 +17,7 @@ import { localizeRound } from './bank/localize.js'
 import { buildRound } from './quiz.rules.js'
 import type { Round } from './quiz.rules.js'
 import { registerQuizRoutes } from './quiz.routes.js'
+import { createQuizScope, roomAccess } from './room-access.js'
 import { createQuizService } from './quiz.service.js'
 import type { QuizService } from './quiz.service.js'
 import { given } from '../../core/options.js'
@@ -50,11 +51,15 @@ export function createQuizModule(deps: QuizModuleDeps): QuizModule {
   const clock = {
     ...given({ now: deps.now, random: deps.random }),
   }
+  // Cada grupo y cada campus, sus salas; el panel puede abrirlas a todos los campus.
+  const scope = createQuizScope({ db: deps.db, ...clock })
+  const access = roomAccess(deps.audience ?? NO_POOL, scope.crossCampus)
   const service = createQuizService({
     quiz,
     bank: BANK,
     review: REVIEW,
     circlesOf: deps.circlesOf,
+    access,
     imagesOf: deps.imagesOf,
     busyElsewhere: async (login) => (await openTurnRoomsOf(deps.db)(login)).length > 0,
     ...clock,
@@ -64,6 +69,7 @@ export function createQuizModule(deps: QuizModuleDeps): QuizModule {
     quiz,
     bank: BANK,
     circlesOf: deps.circlesOf,
+    access,
     imagesOf: deps.imagesOf,
     ...clock,
   })
@@ -103,6 +109,17 @@ export function createQuizModule(deps: QuizModuleDeps): QuizModule {
         ...chess,
         list: async (actor) =>
           visibleTo(audience, actor, await chess.list(actor), (room) => room.host),
+      })
+
+      /**
+       * `GET /admin/quiz-scope` → si las salas se abren a todos los campus.
+       * `PUT` con `{ crossCampus }` lo cambia. Solo admins.
+       */
+      app.get('/admin/quiz-scope', async (request, reply) => {
+        return reply.send(await scope.get(await context.session.actor(request)))
+      })
+      app.put('/admin/quiz-scope', async (request, reply) => {
+        return reply.send(await scope.set(await context.session.actor(request), request.body))
       })
     },
     jobs: [

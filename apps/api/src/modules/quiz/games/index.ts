@@ -7,6 +7,7 @@
 import type { Db } from '../../../core/db/database.js'
 import type { Concept } from '../bank/index.js'
 import type { QuizRepository } from '../quiz.repository.js'
+import type { RoomAccess } from '../room-access.js'
 import { CHESS } from './chess.game.js'
 import type { ChessBoard } from './chess.game.js'
 import { createTurnsRepository } from './turns.repository.js'
@@ -19,6 +20,7 @@ type ChessDeps = {
   quiz: QuizRepository
   bank: readonly Concept[]
   circlesOf: (logins: readonly string[]) => Promise<Map<string, number>>
+  access?: RoomAccess
   imagesOf: (logins: readonly string[]) => Promise<Map<string, string | null>>
   now?: () => number
   random?: () => number
@@ -31,6 +33,7 @@ export function createChessService(deps: ChessDeps) {
     game: CHESS,
     bank: deps.bank,
     circlesOf: deps.circlesOf,
+    ...(deps.access === undefined ? {} : { access: deps.access }),
     imagesOf: deps.imagesOf,
     ...given({ now: deps.now, random: deps.random }),
   })

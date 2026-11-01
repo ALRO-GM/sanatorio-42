@@ -245,3 +245,13 @@ export type QuizReviewItem = {
   /** Lo acertaste después del último fallo. */
   mastered: boolean
 }
+
+/**
+ * `GET/PUT /admin/quiz-scope`: si las salas de Not-games se abren a todos los
+ * campus (para los concursos entre campus). Cerrado, cada campus ve las suyas.
+ */
+export type QuizScope = {
+  crossCampus: boolean
+  updatedBy: string | null
+  updatedAt: string | null
+}
