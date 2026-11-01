@@ -119,6 +119,8 @@ import type {
   HelpOffer,
   HelpReputation,
   HolyGraph,
+  CollectionGroup,
+  CorrectionCollection,
   HelpStats,
   StatsFastest,
   StatsProgress,
@@ -641,6 +643,8 @@ export type Api = {
   // --- Tablón de dudas
   /** El common core por círculos, con tu estado y dónde hace falta una mano. */
   getDoubtGraph: () => Promise<HolyGraph>
+  /** El álbum de correcciones: rareza, tus puestos y la clasificación de un grupo. */
+  getCorrectionCollection: (group: CollectionGroup) => Promise<CorrectionCollection>
   getDoubtBoard: (projectId: number) => Promise<DoubtBoard>
   createDoubt: (projectId: number, body: string) => Promise<DoubtView>
   /** Solo quien la puso, y mientras no esté resuelta. */

@@ -340,15 +340,16 @@ export function createNetworkRepository(db: Db) {
 
     /**
      * Cuántas correcciones ha hecho alguien de cada proyecto, en cualquier
-     * campus y solo del 42cursus. Una corrección a un grupo cuenta una vez.
+     * campus y solo del 42cursus (o, a un piscinero, de la piscina). Una
+     * corrección a un grupo cuenta una vez.
      */
-    async correctedByProject(login: string): Promise<Map<number, number>> {
+    async correctedByProject(login: string, cursus = STUDENTS): Promise<Map<number, number>> {
       const result = await db.execute({
         sql: `SELECT project_id, COUNT(DISTINCT id) AS times FROM corrections
               WHERE corrector = ? AND corrected <> corrector AND project_id IS NOT NULL
-                AND cursus = ${STUDENTS}
+                AND cursus = ?
               GROUP BY project_id`,
-        args: [login],
+        args: [login, cursus],
       })
 
       return new Map(result.rows.map((row) => [toNumber(row.project_id), toNumber(row.times)]))
