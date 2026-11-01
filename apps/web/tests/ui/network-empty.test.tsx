@@ -78,8 +78,9 @@ describe('Red sin resultados', () => {
     const user = userEvent.setup()
     const getSeatGraph = api.getSeatGraph.bind(api)
 
+    // Solo «3 meses» sale vacío: «todo» (lo de entrada) y «1 mes» tienen gente.
     vi.spyOn(api, 'getSeatGraph').mockImplementation(async (days) =>
-      days > 40
+      days > 40 && days < 120
         ? {
             days,
             people: [],

@@ -84,6 +84,9 @@ amigos) salen con el mismo Louvain que la red de correcciones.
 dentro de la pestaña Red (`RedPage.tsx`). Para piscineros, permiso
 `red.seats` en el panel (dentro de la Red).
 
+El periodo arranca en «todo» (pedido por Alberto, 2026-11-01): de entrada se
+ve con quién se ha sentado cada cual desde siempre, y el selector lo acota.
+
 ## Recortar el grafo
 
 Pedido por Alberto el 2026-10-28: el grafo salía demasiado entrelazado. Tiene

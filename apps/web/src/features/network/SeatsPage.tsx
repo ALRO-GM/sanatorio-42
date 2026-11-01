@@ -76,7 +76,7 @@ function toNode(person: SeatPerson, strength: number): NetworkNode {
 export function SeatsPage({ me }: { me?: string }) {
   const { t, tn, lang } = useI18n()
   const { number } = useFormat()
-  const [period, setPeriod] = useState<Period>('1')
+  const [period, setPeriod] = useState<Period>('all')
   const [dates, setDates] = useState<SeatDates>({ from: '', to: '' })
   // A mano, hasta que haya fecha de inicio se sigue con el último mes.
   const custom = period === 'custom' && dates.from !== '' ? dates : undefined
