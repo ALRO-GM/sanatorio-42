@@ -75,12 +75,13 @@ toca a otra persona, y lo recoge `notices`.
 
 Un módulo puede declarar `jobs` (nombre, cada cuánto y qué hacer). La app los
 lanza al arrancar y los para al cerrar; un fallo se registra y se reintenta en la
-siguiente vuelta. Hoy hay cuatro. La asistencia a terapias (`therapy`), cada
-minuto, que usa la foto de puestos de 42 y la refresca con
-`sync.ensureLocations` si se ha quedado vieja. La copia de correcciones
-(`network`) y la cola de la cuota de 42 (`replica`), cada veinte segundos, que
-casi siempre no tienen nada que hacer. Y el volcado del consumo (`admin`), cada
-minuto.
+siguiente vuelta. Hoy hay diecisiete en diez módulos (la tabla, en
+[componentes.md](componentes.md#trabajos-periódicos)). Por ejemplo: la
+asistencia a terapias (`therapy`), cada minuto, que usa la foto de puestos de 42
+y la refresca con `sync.ensureLocations` si se ha quedado vieja; la copia de
+correcciones (`network`) y la cola de la cuota de 42 (`replica`), cada veinte
+segundos, que casi siempre no tienen nada que hacer; y el volcado del consumo
+(`admin`), cada minuto. Con el corte del 90 % solo corren los de `admin`.
 
 Nadie decide por su cuenta si puede gastar cuota de 42: lo pregunta a
 `replica.quota` diciendo su escalón (fondo, aplazable o crítico). Ver
@@ -295,8 +296,12 @@ shared/     api/ (cliente real y simulado), i18n/, hooks/, ui/
 - Solo `shared/api` habla con la API. Tiene dos implementaciones del mismo tipo
   `Api`: la real y una en memoria para trabajar sin servidor (`npm run dev:mock`).
 - La navegación va en el hash de la URL (`#/tablon`); no hay router. Solo la
-  portada viaja con la web: cada una de las demás secciones se descarga al
-  abrirla (`lazy` en `SectionView.tsx`), y la API simulada, solo en `dev:mock`.
+  sala de espera (`ProjectSelect` y `PeerList`) viaja con la web: cada una de las
+  demás secciones se descarga al abrirla (`lazy` en `SectionView.tsx`), y la API
+  simulada, solo en `dev:mock`, en la demostración (`/demo/`) y en los tests.
+- Cada sección, bloque o elemento dice desde qué modo de la interfaz sale
+  (simplificado, normal o datos): `from` en `app/sections.ts` y en
+  `shared/layout/registry.ts`, y `<Show from>` (`shared/detail.tsx`).
 - El orden de las pestañas y de los bloques de cada página, y cuáles salen
   plegados, es personalizable (`shared/layout`): manual, o automático según lo
   que más usa la persona o la comunidad. Para que un bloque entre en ese juego
@@ -333,5 +338,10 @@ falso; `tests/integration` levanta la app entera con la API de 42 simulada
 (`tests/helpers/fake-42.ts`). Ningún test sale a la red.
 
 `apps/web/tests` prueba las funciones puras de la web (plazos por pace, nombres
-de puestos, franjas, colores y periodos de la red): lo que se puede romper sin
-que se note en pantalla. Los componentes no tienen tests.
+de puestos, franjas, colores y periodos de la red, textos, demostraciones) en
+Node, y en `tests/ui/` las pantallas: se abren en jsdom contra la API de
+mentira y se usan buscando por rol y nombre, como lo haría una persona. Qué
+cubre cada test: [tests.md](tests.md).
+
+Cada componente por dentro, con diagramas y sus pros y contras:
+[componentes.md](componentes.md).

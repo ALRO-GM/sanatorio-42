@@ -1,0 +1,480 @@
+# Funcionalidades
+
+Todo lo que la web incluye y usa hoy (2026-11-01), agrupado por dónde está,
+con el modo de la interfaz desde el que sale y quién lo ve. Está sacado del
+código: las secciones de `apps/web/src/app/sections.ts`, los bloques de
+`shared/layout/registry.ts`, los `<Show from="…">` de cada pantalla y los
+permisos de piscinero de `apps/api/src/modules/pool/pool.keys.ts`. Cómo está
+hecha cada pieza: [componentes.md](componentes.md). Por qué cada elemento va en
+su modo: [interfaz.md](interfaz.md).
+
+## Cómo leer las tablas
+
+**Modo** es desde cuál sale (`from`): **S** = simplificado (sale en los tres),
+**N** = normal (normal y datos), **D** = solo en «loco por los datos». De
+fábrica, el modo es normal. Lo que no lleva `<Show>` propio sale con el modo de
+su sección. Una sección que no toca en el modo elegido deja de salir en las
+pestañas, pero se abre por su dirección.
+
+**Quién**: «todos» es cualquier persona con sesión (estudiante o piscinero con
+el permiso). Un piscinero solo ve lo que tiene permitido; la clave va entre
+corchetes, p. ej. `[tablon.graph]`, y una clave hija solo vale si su padre está
+permitido. Las claves que un piscinero tiene de fábrica son `expediente`,
+`expediente.achievements`, `agenda`, `agenda.sprint`, `consulta`,
+`consulta.map`, `guardia`, `tablon`, `terapia`, `pizarras`, `calendario`,
+`clusters`, `clusters.report`, `red`, `red.seats`, `focus`, `mailbox`,
+`people`, `broadcasts` y `tickets`; el resto lo abre quien administra en
+Gestión › Piscina. Además, estudiantes y piscineros no se ven entre sí, y un
+piscinero solo ve a los de su campus ([piscineros.md](piscineros.md)).
+
+Los nombres de la izquierda son los que se ven en español; entre paréntesis, la
+dirección (que conserva los nombres de antes de Peer4U).
+
+## Índice
+
+- [Yo](#yo): Perfil · Agenda · Calendario
+- [Ayuda](#ayuda): Peer to peer · Proyectos · Sprints · Pizarras · On-call
+- [Aprender](#aprender): Curso de git · Curso de shell · Not-games · Pomodoro
+- [Campus](#campus): Clústeres · Asientos · Avance · Red · Exámenes · Clasificaciones
+- [Cabecera](#cabecera), [menú de la cuenta](#menú-de-la-cuenta) y [pie](#pie)
+- [En toda la web](#en-toda-la-web): ventanitas, avisos obligatorios, buzón, Personalizar
+- [Fuera de la web con sesión](#fuera-de-la-web-con-sesión): entrada, mantenimiento, privacidad
+- [Panel de gestión](#panel-de-gestión) (solo admins)
+- [Staff](#staff), [piscineros](#piscineros), [demostración](#demostración) y [Code Clicker](#code-clicker)
+- [Direcciones](#direcciones)
+
+## Yo
+
+### Perfil (`#/expediente`) · portada · S · `[expediente]`
+
+Sin el permiso, a un piscinero la portada solo le da la bienvenida.
+
+| Funcionalidad | Modo | Quién | Dónde |
+| --- | --- | --- | --- |
+| Tarjeta: foto, login, título, nivel, barra de XP, siguiente título, enlace a la intra | S | Todos | `features/profile/Expediente.tsx` (bloque `record`) |
+| Cómo se gana XP y cuánta llevas de cada cosa (al pulsar el nivel) | S | Todos | `LevelButton.tsx` |
+| Elegir título; cada título trae su banner, que ven los demás | S | Todos | `TitlePicker.tsx` |
+| Certificados del curso de shell | S | Con certificados `[shellcourse]` | `shared/course/Certificates.tsx` |
+| Descargar las horas validadas (CSV con código de verificación) | N | Todos `[expediente.hours]` | `HoursReport.tsx` |
+| Health check: pace, cuándo caerías a cada pace, black hole, calculadora «si termino tal día»; la primera vez pregunta pace y fecha | S | Todos `[expediente.health]` | `HealthCard.tsx` (bloque `health`) |
+| Compararte en Avance desde el health check | N | Todos `[avance]` | `progressHref` |
+| Tu red de correcciones en pequeño | N | Todos `[expediente.network]` | `NetworkCard.tsx` (bloque `network`) |
+| Logros y reacciones recibidas | N | Todos `[expediente.achievements]` | `Achievements.tsx` (bloque `achievements`) |
+| Quién ayuda más (del mes o siempre) y «cómo te han descrito» | N | Todos `[expediente.ranking]` | `LeaderboardCard.tsx`, `AskedCard.tsx` (bloque `ranking`) |
+| Plegar y ordenar los bloques; «Ordenar o plegar estos bloques» | S | Todos | `shared/layout/Blocks.tsx` |
+| Perfil de otra persona (`#/expediente/<login>`): su estilo, nivel, salud, red, logros y botón para escribirle | S | Todos | `PublicRecord.tsx` |
+| Demostración | S | Todos | `RecordTour.tsx` |
+
+### Agenda (`#/agenda`) · N · `[agenda]`
+
+| Funcionalidad | Modo | Quién | Dónde |
+| --- | --- | --- | --- |
+| Metas por proyecto: día objetivo, progreso, nota, checkpoints de fábrica por tipo o propios; cerrar como hecha o abandonada, reabrir | N | Todos | `features/agenda/GoalForm.tsx`, `GoalCard.tsx` |
+| Dailies y weeklies: plan, resultado, problema y solución, elegidos de listas | N | Todos | `EntryForm.tsx` |
+| Tablero del sprint dentro de la meta | N | Quien está en un grupo de ese proyecto | `shared/agenda/SprintBoardView.tsx` |
+| Eventos de 42 de las dos próximas semanas, con chincheta para fijar la cuenta atrás | N | Todos | `AgendaPage.tsx` |
+| Atajos a Cuentas atrás, Calendario y Sprints del proyecto | N | Todos | `AgendaPage.tsx` |
+| Demostración | N | Todos | `ScrumTour.tsx` |
+
+Detalle: [agenda.md](agenda.md).
+
+### Calendario (`#/calendario`) · S · `[calendario]`
+
+| Funcionalidad | Modo | Quién | Dónde |
+| --- | --- | --- | --- |
+| Pestañas Calendario y Cuentas atrás (se recuerda la última) | S | Todos | `features/calendar/CalendarPage.tsx` |
+| Vistas día, semana y mes; línea de horas con la raya de ahora | S | Todos | `DayTimeline.tsx` |
+| Formas del día: lista, entera, ajustada, desde ahora | N | Todos | `CalendarPage.tsx` |
+| Filtro por tipo: ayuda, sprint, pizarra, corrección, evento de 42 apuntado o abierto, examen | S | Todos | `kinds.ts` |
+| Ficha del evento: cuándo, dónde, quién, plazas, si vas; enlace a la intra; apuntarse a una pizarra o un sprint | S | Todos | `EventDialog.tsx` |
+| Sala del evento: respuestas rápidas (lo he visto, me retraso, no puedo ir) y chat | S | Quien está apuntado | `EventRoom.tsx` |
+| Asistencia con dos códigos y QR (pizarras y sesiones de ayuda) | S | Quien organiza ve los códigos; quien asiste los escribe | `Attendance.tsx` |
+| Fijar la cuenta atrás de un evento | S | Todos | `PinCountdown.tsx` |
+| Cuentas atrás: las tuyas, el próximo compromiso, algo propio, metas de la agenda, lo de los próximos 30 días | S | Todos (metas `[agenda]`) | `CountdownsView.tsx`, `CountdownPicker.tsx`, `countdowns/GoalPins.tsx` |
+| Demostración | S | Todos | `AgendaTour.tsx` |
+
+## Ayuda
+
+### Peer to peer (`#/consulta`) · S · `[consulta]`
+
+| Funcionalidad | Modo | Quién | Dónde |
+| --- | --- | --- | --- |
+| Elegir proyecto (tus proyectos en curso; a un piscinero, los de la piscina) | S | Todos | `features/peers/ProjectSelect.tsx` |
+| Quién puede ayudar, primero quien está disponible: peer como tú, senior o guru, dónde se sienta, si preevalúa, si está en un Pomodoro | S | Todos | `PeerList.tsx` |
+| Ficha al pasar por un login | S | Todos `[people]` | `shared/ui/PersonLink.tsx` |
+| Mapa del proyecto: puestos, disponibles resaltados, sprint reunido en azul | S | Todos `[consulta.map]` | `features/map/ProjectMap.tsx` |
+| Filtros «solo disponibles» y «solo reservables» | S | Todos | `PeerList.tsx` |
+| Filtros seniors / peers y «solo preevaluación» | N | Todos | `PeerList.tsx` |
+| «Os habéis corregido N veces» con cada persona | D | Todos | `PeerList.tsx` |
+| Reservar un rato (30, 60, 90 o 120 min) a quien se ofrece hoy | S | Todos | `features/help/BookHelp.tsx` |
+| Sugerencia de ir a Sprints si hay grupos o varias personas disponibles | S | Todos | `PeerList.tsx` |
+| Demostración | S | Todos | `WaitingTour.tsx` |
+
+### Proyectos (`#/tablon`) · S · `[tablon]`
+
+| Funcionalidad | Modo | Quién | Dónde |
+| --- | --- | --- | --- |
+| Grafo de tu plan en perspectiva para elegir proyecto (al piscinero, el de la piscina) | S | Todos `[tablon.graph]` | `features/doubts/HolyGraph.tsx`, `PiscineGraph.tsx` |
+| Cambiar entre el grafo de avance y el de correcciones | N | Todos | `DoubtBoard.tsx` |
+| Grafo de tus correcciones, con medallas por proyecto | N | Todos `[tablon.corrections]` | `CorrectionGraph.tsx` |
+| Guía del proyecto: leerla, proponer cambios, aceptar o rechazar propuestas, marcar un cambio; editarla directamente | S | Todos; editar, seniors | `GuidePanel.tsx` |
+| Corcho de dudas: crear, responder, marcar resuelta, editar, borrar, denunciar | S | Todos | `DoubtForm.tsx`, `DoubtDetailCard.tsx` |
+| Demostración | S | Todos | `BoardTour.tsx` |
+
+### Sprints (`#/terapia`) · S · `[terapia]`
+
+| Funcionalidad | Modo | Quién | Dónde |
+| --- | --- | --- | --- |
+| Grupos abiertos del campus, por proyecto | S | Todos | `features/therapy/TherapyGroups.tsx` |
+| Abrir o cambiar un grupo: para avanzar o de repaso, hasta 14 fechas, horario, de 1 a 6 puestos que se tocan (o sitio automático) | S | Todos | `GroupForm.tsx`, `map/SeatPicker.tsx` |
+| Unirse con el % que llevas, salirse, copiar los logins | S | Todos | `GroupCard.tsx` |
+| Chat del grupo | S | Miembros | `GroupCard.tsx` |
+| Tablero del sprint | S | Miembros `[agenda.sprint]` | `shared/agenda/SprintBoardView.tsx` |
+| Editar, cerrar y avisar una vez a quien hace el proyecto | S | Quien lo abrió | `GroupCard.tsx` |
+| Retirar el grupo de otra persona | S | Quien modera | `GroupCard.tsx` |
+| Demostración | S | Todos | `TherapyTour.tsx` |
+
+### Pizarras (`#/pizarras`) · S · `[pizarras]`
+
+| Funcionalidad | Modo | Quién | Dónde |
+| --- | --- | --- | --- |
+| Mes con las del día elegido, o las próximas con plaza, y las pasadas | S | Todos | `features/boards/BoardsCalendar.tsx` |
+| Proponer o editar una: título, tema, lugar, fecha (62 días vista como mucho), plazas, horario, descripción | S | Todos | `BoardForm.tsx` |
+| Apuntarse o salirse; aviso si está llena; denunciar | S | Todos | `BoardCard.tsx` |
+| Editar o cancelar | S | Quien la organiza | `BoardCard.tsx` |
+| Retirar la de otra persona | S | Quien modera | `BoardCard.tsx` |
+| Demostración | S | Todos | `BoardsTour.tsx` |
+
+La asistencia con códigos va en el Calendario.
+
+### On-call (`#/guardia`) · S · `[guardia]`
+
+| Funcionalidad | Modo | Quién | Dónde |
+| --- | --- | --- | --- |
+| Frase de ánimo | S | Todos | `features/help/cheers.ts` |
+| Ofrecerse a preevaluar lo que aprobaste | S | Todos | `PreReviewToggle.tsx` (bloque `prereview`) |
+| Cómo te ven ahora y las medias horas de hoy, con un tope de 30 min a 8 h | S | Todos | `GuardStatus.tsx`, `DayEditor.tsx` (bloque `today`) |
+| Reservas que te piden y que pides: aceptar, rechazar, anular, valorar (con etiquetas, no notas), bloquear | S | Todos | `BookingCard.tsx` (bloque `bookings`) |
+| Personas bloqueadas, con desbloquear | N | Si hay alguna | bloque `blocked` |
+| Demostración | S | Todos | `GuardTour.tsx` |
+
+La XP de una sesión solo sale con los dos códigos validados y las dos
+valoraciones.
+
+## Aprender
+
+### Curso de git (`#/cursogit`) · N · `[gitcourse]`
+
+| Funcionalidad | Modo | Quién | Dónde |
+| --- | --- | --- | --- |
+| Camino con forma de ramas: mundos en capítulos plegables, puntos que se abren en orden, estrellas | N | Todos | `features/gitcourse/GitCourseTab.tsx` |
+| Cada punto: animación de la estructura, teoría y reto en una terminal con git simulado | N | Todos; solo cuenta sentado en un puesto del clúster | `LevelView.tsx`, `GitGraph.tsx` |
+| Test previo a cada prueba de grupo: entero o una hora de espera | N | Sentado en un puesto | `GateView.tsx` |
+| Quién de tu campus espera esa prueba | N | Todos | `GatePeople` |
+| Salas de la prueba de grupo: crear, entrar, empezar, órdenes en un origin común | N | Tras el test `[gitcourse.groups]` | `GroupRoom.tsx` |
+| Reglas de las estrellas y tiempo estimado | N | Todos | `shared/course/Stars.tsx`, `Estimate.tsx` |
+| Demostración | N | Todos | `GitCourseTour.tsx` |
+
+Detalle: [curso-git.md](curso-git.md).
+
+### Curso de shell (`#/cursoshell`) · N · `[shellcourse]`
+
+| Funcionalidad | Modo | Quién | Dónde |
+| --- | --- | --- | --- |
+| Árbol de 3 niveles y 9 bloques en capítulos plegables | N | Todos | `features/shellcourse/ShellCourseTab.tsx` |
+| Cada unidad: teoría, ejemplo que se escribe solo y prueba en una shell simulada | N | Todos | `UnitView.tsx`, `Challenge` |
+| Jefes contrarreloj por bloque y jefe final por nivel, con certificado | N | Todos | `shared/course/Certificates.tsx` |
+| Demostración | N | Todos | `ShellCourseTour.tsx` |
+
+No pide puesto en el clúster. Detalle: [curso-shell.md](curso-shell.md).
+
+### Not-games (`#/notgames`) · N · `[notgames]`
+
+| Funcionalidad | Modo | Quién | Dónde |
+| --- | --- | --- | --- |
+| Salas abiertas de preguntas y de ajedrez | N | Todos | `features/notgames/NotGamesPage.tsx` |
+| Crear sala de preguntas: duelo, equipos, todos contra todos (a solas, práctica) o supervivencia con 3 vidas; preguntas de lo que sabe todo el grupo o generales; rápidas, largas o mezcla; dificultad; cuántas; círculo mínimo; competitivo (fallar resta) | N | Todos | `NotGamesPage.tsx` |
+| Partida: espera y equipos, cuenta atrás con la hora del servidor, marcador, la buena y por qué | N | Quien está en la sala | `RoomView.tsx` |
+| Ajedrez con pregunta: reloj de 3, 5, 10 o 15 min, pregunta tras cada jugada (quien acierta primero mueve), rendirse, repasar la partida, estilo del tablero | N | Todos `[notgames.chess]` | `TurnRoomView.tsx`, `ChessBoard.tsx` |
+| Repaso: lo fallado con concepto, ejemplo y la pregunta; lo superado aparte | N | Todos `[notgames.review]` | `ReviewTab.tsx` |
+| Sonidos, que se pueden apagar | N | Todos | `SoundToggle.tsx` |
+| Demostraciones (salas y ajedrez) | N | Todos | `NotGamesTour.tsx`, `ChessTour.tsx` |
+
+### Pomodoro (`#/pomodoro`) · S · `[focus]`
+
+| Funcionalidad | Modo | Quién | Dónde |
+| --- | --- | --- | --- |
+| Concentración de 5 a 240 min (rueda de 5 en 5) y descanso de 0, 5, 10 o 15 | S | Todos | `features/focus/FocusPage.tsx` |
+| Qué pestañas siguen a la vista y qué avisos pasan (correcciones, eventos, mensajes, guardia, buzón) | S | Todos | `FocusPage.tsx` |
+| Pestañas Startup y Estadísticas | N | Todos | `FocusPage.tsx` |
+| Tus estadísticas: días, horas, paradas y motivos, «quise parar y seguí», y la media del tramo de gente elegido | N | Todos `[focus.stats]` | `FocusMyStats.tsx`, `FocusStatsView.tsx` |
+| Startup: con los minutos de concentración se construye una empresa, con clasificación | N | Todos | `focus/startup/StartupPanel.tsx` |
+
+Lo que va fuera de la página (temporizador, pantalla completa, sonido) está en
+[En toda la web](#en-toda-la-web). Startup: [pomodoro-startup.md](pomodoro-startup.md).
+
+## Campus
+
+### Clústeres (`#/clusters`) · N · `[clusters]`
+
+| Funcionalidad | Modo | Quién | Dónde |
+| --- | --- | --- | --- |
+| Plano de cada clúster con leyenda (en la web, ocupado, reservado, libre, roto) y colores (senior disponible dorado, peer disponible verde) | N | Todos | `features/map/ClusterMapView.tsx` |
+| Resaltar a tu círculo o a quien hace tu proyecto, con cuánta gente cumple cada uno | N | Todos | `ClustersPage.tsx` |
+| Girar y alinear el plano; «Ajustar» o «100 %» en los clústeres grandes | N | Todos | `fit.ts` |
+| Ficha de un puesto al pasar; al pulsar se queda, con escribir y ver el perfil | N | Todos | `SeatHoverCard.tsx` |
+| «N de M personas tienen Peer4U abierto» | D | Todos `[clusters.online]` | `ClustersPage.tsx` |
+| Marcar o desmarcar un puesto roto | N | Todos `[clusters.broken]` | `ClustersPage.tsx` |
+| Avisar al staff de un problema del edificio: qué, dónde (tu puesto si no se dice) y nota | N | Todos `[clusters.report]` | `features/facility/FacilityForm.tsx` |
+| Mapa de calor: horas de uso de cada ordenador por periodo | N | Todos | `SeatHeatCard.tsx` |
+| Demostración | N | Todos | `ClustersTour.tsx` |
+
+### Asientos (`#/asientos`) · N · `[red.seats]`
+
+| Funcionalidad | Modo | Quién | Dónde |
+| --- | --- | --- | --- |
+| Con quién te sueles sentar, en una frase | N | Todos | `features/network/SeatsPage.tsx` |
+| Red de con quién se sienta cada cual, por periodo o fechas | N | Todos | `SeatsPage.tsx` |
+| Color por grupos o por lo a solas que se sienta cada cual; recortes (los que más, %, centrar en ti) | N | Todos | `SeatsPage.tsx` |
+| Ficha: horas, % a solas, puesto habitual, con quién más | N | Todos | `SeatsPage.tsx` |
+| Totales, quién se sienta más a solas y cómo se calcula | N | Todos | `SeatsPage.tsx` |
+| Demostración | N | Todos | `SeatsTour.tsx` |
+
+Detalle: [asientos.md](asientos.md).
+
+### Avance (`#/avance`) · N · `[avance]`
+
+| Funcionalidad | Modo | Quién | Dónde |
+| --- | --- | --- | --- |
+| La respuesta en una frase: cuántas semanas vas por delante o por detrás de la media | N | Estudiantes | `features/stats/progressAnswer.ts` |
+| Gráfica por círculos o por horas: tu línea, medias por plan, población (terminado, en curso, black hole) y campus, paces y cuartiles, zoom | N | Estudiantes | `ProgressPage.tsx`, `ProgressChart.tsx` |
+| «Ver a fondo»: quién cuenta, campus, todos juntos (abierto de fábrica en datos) | N | Estudiantes | `ProgressPage.tsx` |
+| Comparar con hasta 5 personas y «los más rápidos» | N | Todos `[avance.compare]` | `ProgressCompare.tsx` |
+| Quién va más rápido: por círculo o %, plan, kickoff, rangos; tu fila fija | N | Estudiantes | `ProgressRanking.tsx` |
+| Avance de la piscina: aprobado por día frente a la media de su piscina y los más avanzados | N | Piscineros | `PiscineProgressPage.tsx`, `PiscineTop.tsx` |
+| Demostración | N | Todos | `ProgressTour.tsx` |
+
+Detalle: [blackhole.md](blackhole.md).
+
+### Red (`#/red`) · N · `[red]`
+
+| Funcionalidad | Modo | Quién | Dónde |
+| --- | --- | --- | --- |
+| Grafo de burbujas de quién ha corregido a quién | N | Todos | `features/network/ForceGraph.tsx` |
+| Filtros: campus (uno, varios, todos), meses en una línea que se arrastra, proyecto, mínimos por pareja y persona, cuántas personas, veredicto, solo mutuas, solo de dentro | N | Todos | `NetworkPage.tsx`, `Timeline.tsx` |
+| Color por comunidad, endogamia, suspensos dados o recibidos, promoción, balance, origen o campus | N | Todos | `NetworkPage.tsx` |
+| Buscar a alguien en el grafo; atajo a tu red | N | Todos | `PersonSearch.tsx` |
+| Ficha de persona y detalle de una pareja | N | Todos | `PersonPanel.tsx`, `PairDetail.tsx` |
+| Totales y una frase con tus correcciones hechas y recibidas | N | Todos | bloque `totals` |
+| Endogamia, parejas, los más estrictos, proyectos más corregidos | D | Todos `[red.rankings]` | bloques `endogamy`, `pairs`, `strictest`, `projects` |
+| Cómo se lee | N | Todos | bloque `about` |
+| Aviso mientras sigue la copia desde 42 | N | Todos | `NetworkPage.tsx` |
+| Demostración | N | Todos | `NetworkTour.tsx` |
+
+### Exámenes (`#/examenes`) · N · `[examenes]`
+
+| Funcionalidad | Modo | Quién | Dónde |
+| --- | --- | --- | --- |
+| Examen en vivo del campus: quién ha entrado, qué examen, barra con la nota de hoy y mejor nota; refrescar | N | Todos `[examenes.live]` | `features/exams/ExamPeople.tsx` |
+| Último examen acabado con sus resultados | N | Todos `[examenes.live]` | `ExamsPage.tsx` |
+| «En vivo» en la pestaña Campus y en Exámenes mientras hay examen | S | Todos | `app/Nav.tsx` |
+| Estadísticas de cada Exam Rank, con filtros de plan, exámenes y kickoffs | N | Todos `[examenes.stats]` | `ExamStatsPanel.tsx` |
+| Detalle de cada intento y días por círculo | D | Todos `[examenes.stats]` | `ExamStatsPanel.tsx` |
+| Elegir exámenes de estudiantes o de piscineros | N | Solo la vista sin límites del dueño | `ExamsPage.tsx` |
+| Demostración | N | Todos | `ExamsTour.tsx` |
+
+### Clasificaciones (`#/estadisticas`) · N · `[estadisticas]`
+
+| Funcionalidad | Modo | Quién | Dónde |
+| --- | --- | --- | --- |
+| Clasificación de cada sección de Ayuda (sesiones validadas, dudas resueltas, sprints, pizarras, partidas), del mes o siempre, con fotos y tu fila | N | Todos | `features/stats/HelpStatsPage.tsx` |
+| Tu mejor puesto en una frase | N | Todos | `HelpStatsPage.tsx` |
+| Demostración | N | Todos | `HelpStatsTour.tsx` |
+
+## Cabecera
+
+| Funcionalidad | Modo | Quién | Dónde |
+| --- | --- | --- | --- |
+| Marca Peer4U: lleva a la portada (y guarda un secreto) | S | Todos | `app/Header.tsx` |
+| Buscador de personas por login o nombre, sin distinguir acentos | S | Todos `[people]` | `features/profile/PersonFinder.tsx` |
+| Interruptor «Disponible» | S | Todos `[guardia]` | `features/peers/AvailabilityToggle.tsx` |
+| Interrogante: se arrastra sobre un sitio y abre su demostración | S | Todos | `features/suggest/HelpBubble.tsx` |
+| Bicho de sugerencias: se suelta sobre algo y abre un panel con el sitio, el problema y tu propuesta | S | Todos `[tickets]` | `SuggestBubble.tsx`, `SuggestPanel.tsx` |
+| Buzón con el número de sin leer | S | Todos `[mailbox]` | `features/notices/Mailbox.tsx` |
+| Categorías y, debajo, secciones de la abierta (en el móvil, barra fija abajo) | S | Todos | `app/Nav.tsx` |
+
+## Menú de la cuenta
+
+En este orden (`app/Header.tsx`, `app/UserMenu.tsx`):
+
+| Entrada | Modo | Quién |
+| --- | --- | --- |
+| Pomodoro | S | Todos `[focus]` |
+| Panel de gestión | S | Solo admins |
+| Code Clicker | S | Quien eligió la pastilla roja `[clicker]` |
+| Personalizar | S | Todos |
+| Incidencias y sugerencias | S | Todos `[tickets]` |
+| Bienvenida | S | Todos |
+| Salir | S | Todos |
+
+## Pie
+
+| Funcionalidad | Modo | Quién |
+| --- | --- | --- |
+| Idioma: español, inglés, catalán, euskera y francés (lo que le falta al francés sale en inglés) | S | Todos |
+| «Más ajustes» (abre Personalizar) | S | Todos |
+| Campus que se mira (los que no se copian, marcados) | N | Todos |
+| De cuándo son los datos de 42 | D | Todos |
+| Privacidad | S | Todos |
+
+## En toda la web
+
+### Ventanitas de la esquina
+
+| Funcionalidad | Modo | Quién | Dónde |
+| --- | --- | --- | --- |
+| Temporizador del Pomodoro, plegable y arrastrable | S | Todos `[focus]` | `features/focus/FocusTimer.tsx` |
+| Pomodoro a pantalla completa: «no molestar», pantalla encendida, la startup en pequeño | S | Todos `[focus]` | `FocusScreen.tsx`, `useWakeLock.ts` |
+| Al parar antes de tiempo: motivos, diez segundos y seguir con felicitación | S | Todos `[focus]` | `FocusExit.tsx` |
+| Sonido de fondo: ruido, naturaleza o diez lo-fi | S | Todos `[focus]` | `FocusSound.tsx` |
+| Mientras dura: solo las pestañas elegidas, juegos callados, solo los avisos elegidos; «concentrado» en tu ficha | S | Todos | `app/sections.ts` (`hiddenInFocus`) |
+| Cuentas atrás: avisos de quien administra y lo que fijas | S | Todos | `features/countdowns/CountdownDock.tsx` |
+| Ventanita de Code Clicker | S | Quien juega `[clicker]` | `features/clicker/Mini.tsx` |
+| Ordenar, sacar a flotar y plegar cada ventanita | S | Todos | `shared/dock` |
+
+### Franjas y avisos
+
+| Funcionalidad | Modo | Quién | Dónde |
+| --- | --- | --- | --- |
+| Tu turno en la cola de la cuota de 42 | S | Quien espera | `features/alerts/QuotaNotice.tsx` |
+| Aviso de que tu campus aún no se copia | S | Quien entra desde otro campus | `features/campus/OtherCampusNotice.tsx` |
+| Franja de mantenimiento con enlace al panel | S | Admins durante el mantenimiento | `features/maintenance/MaintenanceBanner.tsx` |
+| Franja «ver como piscinero» con «Volver» | S | Admins en esa vista | `app/PoolPreviewBar.tsx` |
+
+### Ventanas que hay que contestar
+
+| Funcionalidad | Modo | Quién | Dónde |
+| --- | --- | --- | --- |
+| Aceptar privacidad y condiciones (otra vez si cambia la versión) | S | Todos | `features/legal/LegalGate.tsx` |
+| Comunicados de quien administra, con opciones | S | Destinatarios `[broadcasts]` | `features/admin/BroadcastGate.tsx` |
+| Avisos de eventos con la antelación elegida; con más gente, no se cierran sin «voy», «me retraso» o «no voy»; notificación del sistema si la pestaña está oculta | S | Todos `[calendario]` | `features/alerts/AlertCenter.tsx` |
+| Confirmar la asistencia al abrir el enlace de un QR | S | Asistentes | `AlertCenter.tsx` |
+| Peticiones de ayuda y reservas rechazadas o anuladas (se aplazan en el Pomodoro) | S | Todos `[consulta]` | `features/help/HelpGate.tsx` |
+| Revisión de trampas de Code Clicker | S | Quien juega `[clicker]` | `features/clicker/ReviewGate.tsx` |
+
+### Otras ventanas
+
+| Funcionalidad | Modo | Quién | Dónde |
+| --- | --- | --- | --- |
+| Bienvenida: presentación, modo, perfil, sala de espera, on-call, proyectos, sprints, agenda, red y comodidad; la primera vez y desde el menú | S | Todos | `features/welcome/Welcome.tsx` |
+| Buzón · Avisos: cada uno lleva a su sitio; guardar, borrar, borrar los leídos | S | Todos `[mailbox]` | `features/notices/Mailbox.tsx` |
+| Buzón · Conversaciones: directas, de grupo, pizarra, ayuda y evento; filtros (sin leer, pendientes, tipo, proyecto); marcar pendiente o sin leer; recordar en una hora, mañana o el lunes; escribir a alguien nuevo; denunciar un mensaje | S | Todos `[mailbox]` | `Conversations.tsx`, `PeerPicker.tsx` |
+| Incidencias y sugerencias: categoría (fallo, mejora, idea, traducción, otra), sección y texto, y las tuyas con respuesta | S | Todos `[tickets]` | `features/admin/Inbox.tsx` |
+| Personalizar · Estilo: siete estilos (uno exclusivo), paletas, claro u oscuro, y con qué estilo ven tu perfil | S | Todos | `app/studio/StylePanel.tsx` |
+| Personalizar · Orden: la web en pequeño para arrastrar categorías, pestañas y bloques; a mano, por tu uso o por la comunidad; volver al de fábrica | S | Todos | `Miniature.tsx` |
+| Personalizar · Ajustes: modo de la interfaz, antelación de avisos (0 a 60 min), iconos de información, idioma, tamaño del texto, daltonismo, zen | S | Todos | `features/settings/ComfortSettings.tsx` |
+| Demostración animada en el icono de información de cada sección, con velocidad elegible | S | Todos | `shared/tour` |
+| Ficha de una persona al pasar por su login | S | Todos `[people]` | `shared/ui/PersonLink.tsx` |
+
+## Fuera de la web con sesión
+
+| Funcionalidad | Quién | Dónde |
+| --- | --- | --- |
+| Entrar con la cuenta de 42 y el motivo de un rechazo (cancelado, no eres estudiante, piscina cerrada con el aviso de quien administra) | Sin sesión | `features/auth/Login.tsx` |
+| Servidor caído, con reintentar | Todos | `app/App.tsx` |
+| Pantalla de mantenimiento con cuenta atrás y entrada discreta para admins | Quien no administra | `features/maintenance/MaintenanceScreen.tsx` |
+| Privacidad y condiciones (`#/privacidad`), también sin sesión | Todos | `features/legal/LegalPage.tsx` |
+| Con sesión: cuándo aceptaste, descargar todos tus datos, anonimizar la cuenta escribiendo tu login | Todos | `LegalPage.tsx`, `AnonymizeAccount.tsx` |
+
+## Panel de gestión
+
+`#/gestion`, desde el menú de la cuenta. Solo admins, tras el segundo factor
+(código de una app de autenticación; la primera vez, con un QR:
+`features/admin/PanelLock.tsx`). No depende del modo. Pestañas, en este orden
+(`AdminPage.tsx`):
+
+| Pestaña | Qué se hace |
+| --- | --- |
+| Consumo | Presupuesto de peticiones y sus ajustes; cuota de la API de 42 (modo, hasta dónde baja la copia, cola); uso de 42 por función y persona con topes; consumo por persona, últimas 48 h, quién más gasta y tope por hora a mano |
+| Permisos y bloqueos | Dar o quitar admin; bloquear 1, 7 o 30 días o siempre, con motivo; límites a mano; cuentas de staff (la clave se ve una vez); horas validadas de todo el mundo |
+| Incidencias | Pendientes y respondidas, denuncias por motivo, responder y borrar |
+| Mensajes | Registro de lo escrito en los chats de eventos, con filtro |
+| Qué se usa | Mapa de calor de cada elemento, recorridos entre secciones y mapa de clics |
+| Estadísticas | Tiempo en la web y tráfico (de todos o de una persona), velocidad de las demos, quién está conectado y crecimiento por campus |
+| Code Clicker | Uso y partidas; trampas (ver la partida, escribir, indultar, comunicado a quienes las hicieron); sanción a mano; resetear la pastilla |
+| Comunicados | A una persona, varias, un campus o todo el mundo, con opciones y respuestas |
+| Cuentas atrás | Limpieza de taquillas (día y hora) u otro aviso, para estudiantes, piscineros o todos |
+| Mantenimiento | Mensaje y hora de vuelta (atajos de 30 a 240 min) |
+| Avisos del edificio | Lista y «resuelto» |
+| Pomodoro | Uso por periodo, paradas y motivos, por tramo de gente |
+| Piscina | Abrir o cerrar la entrada; aviso con la piscina cerrada; árbol de permisos por pestaña y elemento; ver como piscinero; vista sin límites (solo el dueño) |
+| Personas ocultas | Ocultar a alguien a estudiantes, piscineros o los dos, con motivo |
+| Limpiar datos | Qué, de quién y desde cuándo, con vista previa antes de borrar (lo único que borra datos) |
+
+Detalle: [mantenimiento.md](mantenimiento.md),
+[avisos-cuenta-atras.md](avisos-cuenta-atras.md),
+[personas-ocultas.md](personas-ocultas.md), [consumo-api.md](consumo-api.md).
+
+## Staff
+
+`#/validar`, fuera de la web de estudiantes (`features/staff/StaffPage.tsx`).
+Se entra con la clave que crea un admin; la sesión dura 2 h y no llega a nada
+más.
+
+| Funcionalidad | Dónde |
+| --- | --- |
+| Escribir el código de un documento (p. ej. el CSV de horas) y verlo tal como se emitió | `StaffPage.tsx` |
+| Subir el fichero recibido y saber si es idéntico | `StaffPage.tsx` |
+| Avisos del edificio, con «resuelto» | `features/facility/FacilityList.tsx` |
+
+## Piscineros
+
+Quien está en una piscina en curso entra a una versión solo para piscineros si
+quien administra la abre ([piscineros.md](piscineros.md)). Además de los
+permisos por clave de arriba:
+
+- Peer to peer enseña todos los proyectos de la piscina.
+- Proyectos enseña el grafo de la piscina (shell en azul claro, C en azul
+  oscuro, y aparte rushes, BSQ y exámenes).
+- Avance enseña la piscina por días frente a la media de su piscina.
+- Sin el permiso `expediente`, la portada es un saludo.
+- Solo ven a piscineros de su campus, y ningún estudiante los ve.
+
+## Demostración
+
+`/demo/`: la web entera con la API de mentira (`shared/api/mock`), datos y
+logins inventados y nada guardado. Una etiqueta plegable en la pila dice que es
+una demostración y enlaza a la web de verdad (`app/DemoBadge.tsx`).
+
+## Code Clicker
+
+Secreto (`#/clicker`, `features/clicker`). Pulsando la marca de la cabecera
+salen avisos y, al final, una pregunta con dos pastillas: la azul lo olvida
+todo; la roja abre el juego. Para quien no eligió la roja, la sección no existe.
+
+| Funcionalidad | Quién |
+| --- | --- |
+| Juego incremental: escribir código, comprar lo que lo escribe solo, mejoras y noticias | Pastilla roja `[clicker]` |
+| Sigue en toda la web con su ventanita (no en el Pomodoro) | Pastilla roja |
+| Estadísticas con historial de capital (hoy, semana, mes, todo, fechas, zoom), logros y clasificación | Pastilla roja |
+| Tope de 30 min al día si tu pace está en riesgo | Pastilla roja |
+| Revisión de trampas: hay que defenderse (20 caracteres o más) antes de seguir | Quien tiene una revisión |
+
+Detalle: [code-clicker.md](code-clicker.md).
+
+## Direcciones
+
+`#/<sección>` para cualquier sección de la tabla; una dirección no válida lleva
+a la portada. Se construyen con `shared/links.ts`.
+
+| Dirección | Qué abre |
+| --- | --- |
+| `#/expediente/<login>` | El perfil de otra persona |
+| `#/calendario/<evento>` | La ficha de ese evento |
+| `#/notgames/<n>`, `#/notgames/t<n>`, `#/notgames/review` | Una sala de preguntas, una partida de ajedrez, el Repaso |
+| `#/red/<login>` | La red centrada en esa persona |
+| `#/avance?plan=…&pop=…&scope=…&paces=1&me=1` | El Avance con esas opciones |
+| `#/asistencia/<evento>/<código>` | El enlace del QR: pide confirmar y vuelve a `#/calendario` |
+| `#/validar` | La página del staff |
+| `#/privacidad` | Privacidad y condiciones (también sin sesión) |
+| `#/notgames/git`, `#/notgames/shell` | Direcciones viejas: llevan a `#/cursogit` y `#/cursoshell` |
