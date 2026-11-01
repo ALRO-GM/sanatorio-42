@@ -49,6 +49,8 @@ const picked: { caught: number | null } = { caught: null }
 
 /** Con qué estilo ven los demás el expediente de la persona de mentira. */
 const recordStyle: { current: string | null } = { current: null }
+/** Si ya se vio la bienvenida: en la de mentira, solo mientras dura la página. */
+const welcomed = { current: false }
 
 export const profileMock: Pick<
   Api,
@@ -133,6 +135,7 @@ export const profileMock: Pick<
       admin: !poolPreviewing(),
       preReview: state.preReview,
       recordStyle: recordStyle.current,
+      welcomed: welcomed.current,
       xp,
       // Como en la API: al pillar una trampa, el título se pone solo.
       title: hacker.title !== null && picked.caught !== hacker.caught ? hacker.title : state.title,
@@ -184,6 +187,7 @@ export const profileMock: Pick<
 
     if (settings.campusId !== undefined) state.campusId = settings.campusId
     if (settings.preReview !== undefined) state.preReview = settings.preReview
+    if (settings.welcomed === true) welcomed.current = true
     if (settings.recordStyle !== undefined) {
       recordStyle.current =
         settings.recordStyle === 'none' || settings.recordStyle === 'default'

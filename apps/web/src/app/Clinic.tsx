@@ -233,6 +233,7 @@ export function Clinic({ me, onLogout }: ClinicProps) {
         </PoolOnly>
         <Welcome
           open={welcoming}
+          welcomed={profile.data?.welcomed}
           onGo={(next) => {
             openSection(next)
           }}

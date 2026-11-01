@@ -235,6 +235,31 @@ describe('migraciones', () => {
     db.close()
   })
 
+  it('la 84 da la bienvenida por vista a quien ya había entrado', async () => {
+    const db = createClient({ url: 'file::memory:' })
+
+    await db.batch([
+      ...MIGRATIONS.filter((m) => m.version < 84).flatMap((m) => m.statements),
+      'CREATE TABLE schema_version (id INTEGER PRIMARY KEY CHECK (id = 1), version INTEGER NOT NULL)',
+      'INSERT INTO schema_version (id, version) VALUES (1, 83)',
+      `INSERT INTO profiles (login, created_at, seen_at) VALUES ('ana', '2026-10-01', '2026-11-01')`,
+    ])
+    await migrate(db)
+    await db.execute(
+      `INSERT INTO profiles (login, created_at, seen_at) VALUES ('leo', '2026-11-02', '2026-11-02')`,
+    )
+
+    const rows = await db.execute('SELECT login, welcomed_at FROM profiles ORDER BY login')
+
+    // Quien llega después empieza sin verla.
+    expect(rows.rows.map((row) => [row.login, row.welcomed_at])).toEqual([
+      ['ana', '2026-10-01'],
+      ['leo', null],
+    ])
+
+    db.close()
+  })
+
   it('la 36 da por leído el «mensaje nuevo» de lo ya respondido, de todo quien administra', async () => {
     const db = createClient({ url: 'file::memory:' })
 

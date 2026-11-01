@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 
 import type { Section } from '../../app/sections'
+import { api } from '../../shared/api'
 import { shows, useDetail } from '../../shared/detail'
 import type { Detail } from '../../shared/detail'
 import { DetailCards } from '../../shared/ui/DetailSelect'
@@ -9,7 +10,10 @@ import { Icon } from '../../shared/ui/Icon'
 import { LangSelect } from '../../shared/ui/LangSelect'
 import type { IconName } from '../../shared/ui/Icon'
 
-/** Ya se ha visto la bienvenida en este navegador. */
+/**
+ * Ya se ha visto la bienvenida en este navegador. Lo que manda es lo de la API
+ * (`welcomed`, por persona); esto solo evita abrirla mientras llega.
+ */
 const SEEN_KEY = 'sanatorio_welcome_seen'
 /** Cada cuánto se mira si ya no hay otra ventana delante (la legal, un comunicado…). */
 const WAIT_MS = 1500
@@ -40,35 +44,53 @@ function welcomeSeen(): boolean {
   }
 }
 
+/** Se apunta aquí y en la API, para que no vuelva en otro navegador ni al volver a entrar. */
 function markSeen(): void {
   try {
     localStorage.setItem(SEEN_KEY, new Date().toISOString())
   } catch {
-    // Sin almacenamiento se volvería a ver; mejor eso que no verla nunca.
+    // Sin almacenamiento, queda lo de la API.
   }
+  // Si falla, a lo sumo vuelve a salir una vez: no merece un aviso.
+  api.updateSettings({ welcomed: true }).catch(() => undefined)
 }
 
 type WelcomeProps = {
   /** `true` para abrirla a mano (desde el menú de la cuenta). */
   open: boolean
+  /**
+   * Si la persona ya la vio, según la API; `undefined` mientras no se sabe. Sola
+   * solo se abre con `false`: la primera vez que se entra.
+   */
+  welcomed: boolean | undefined
   onGo: (section: Section) => void
   onClose: () => void
 }
 
 /**
- * La bienvenida: un paseo corto por la web la primera vez que se entra, y
- * cuando se pide desde el menú de la cuenta. Espera a que no haya otra
+ * La bienvenida: un paseo corto por la web la primera vez que se entra (en
+ * cualquier navegador: lo apunta la API), y cuando se pide desde el menú de la
+ * cuenta. Espera a que no haya otra
  * ventana delante, y se puede saltar.
  */
-export function Welcome({ open, onGo, onClose }: WelcomeProps) {
+export function Welcome({ open, welcomed, onGo, onClose }: WelcomeProps) {
   const { t } = useI18n()
   const dialog = useRef<HTMLDialogElement>(null)
   const [step, setStep] = useState(0)
-  const [first, setFirst] = useState(() => !welcomeSeen())
+  const [closed, setClosed] = useState(false)
+  const seenHere = welcomeSeen()
+  const first = welcomed === false && !closed && !seenHere
   const showing = open || first
   const detail = useDetail()
   // El modo se elige en el primer paso: las que salen después ya lo siguen.
   const slides = SLIDES.filter((one) => shows(detail, one.from ?? 'simple'))
+
+  // Vista en este navegador antes de que la API lo apuntara: se le dice ahora.
+  useEffect(() => {
+    if (welcomed === false && seenHere) {
+      api.updateSettings({ welcomed: true }).catch(() => undefined)
+    }
+  }, [welcomed, seenHere])
 
   useEffect(() => {
     if (!showing) return undefined
@@ -100,8 +122,8 @@ export function Welcome({ open, onGo, onClose }: WelcomeProps) {
   const slide = slides[step] ?? slides[0]
   const last = step === slides.length - 1
   const close = (): void => {
-    markSeen()
-    setFirst(false)
+    if (!seenHere || welcomed === false) markSeen()
+    setClosed(true)
     setStep(0)
     dialog.current?.close()
     onClose()

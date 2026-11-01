@@ -41,8 +41,8 @@ Es un proyecto personal de [Alberto](https://github.com/ALRO-GM) (`albrodri` en
 | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Qué es**      | Aplicación web completa: API, web, base de datos y despliegue                                                                                        |
 | **Tecnología**  | TypeScript de punta a punta · Node 22 y Fastify 5 · React 19 y Vite · SQLite (libSQL) · Docker y Caddy                                               |
-| **Tamaño**      | 35 módulos de API con 256 rutas, 83 migraciones, 6 paquetes compartidos; 4 categorías con 17 secciones, 3 modos de interfaz, 7 estilos y 5 idiomas    |
-| **Calidad**     | 7 083 tests en 252 ficheros (6 178 de la API y 905 de la web, con 69 ficheros de pantallas; medido el 2026-11-01), cobertura mínima que solo sube, sin código muerto ni duplicado, y un despliegue que no sale sin la CI en verde |
+| **Tamaño**      | 35 módulos de API con 256 rutas, 84 migraciones, 6 paquetes compartidos; 4 categorías con 17 secciones, 3 modos de interfaz, 7 estilos y 5 idiomas    |
+| **Calidad**     | 7 089 tests en 253 ficheros (6 180 de la API y 909 de la web, con 70 ficheros de pantallas; medido el 2026-11-02), cobertura mínima que solo sube, sin código muerto ni duplicado, y un despliegue que no sale sin la CI en verde |
 | **Seguridad**   | Revisión completa documentada: permisos con doble cerradura, segundo factor en el panel, topes de intentos y un test que recorre todas las rutas con entradas imposibles |
 | **Datos**       | Réplica propia de 5 campus de 42 (Madrid, Málaga, Urduliz, Barcelona y París) copiada con 1 200 peticiones por hora                                   |
 | **Coste**       | 0 € al mes. La web y la máquina se cortan solas antes de pasar de la capa gratuita                                                                   |
@@ -113,6 +113,7 @@ con el commit donde volver a verlo, está en
 
 | Fecha      | Dónde                  | Qué cambió                                                                                                   |
 | ---------- | ---------------------- | ------------------------------------------------------------------------------------------------------------ |
+| 2026-11-02 | Bienvenida             | Sale sola solo la primera vez que entras: la API lo apunta por persona (`welcomed`), y ya no vuelve en otro navegador, en una ventana privada ni al volver a entrar con 42 |
 | 2026-11-01 | Privacidad             | Texto nuevo (versión 2026-11-01, se vuelve a aceptar): correo de contacto, interés legítimo para los datos de quien no entra y cómo no salir, proveedores (Oracle, Slack del staff), plazos, seguridad y normas de no sacar datos de la red de 42; el pie dice «Hecho para albrodri» |
 | 2026-11-01 | Dominio                | La web pasa a [peer4u.app](https://peer4u.app); `www.` y el dominio de antes redirigen |
 | 2026-11-01 | Red                    | Si tu red sale vacía (aún sin correcciones, o viendo la web como piscinero), la vista de partida es la del campus |

@@ -46,6 +46,8 @@ export type Expediente = {
    * `apps/web/src/themes`), o `null` si cada cual lo ve con el suyo.
    */
   recordStyle: string | null
+  /** Ya vio la bienvenida (en cualquier navegador): no se le vuelve a abrir sola. */
+  welcomed: boolean
   xp: {
     total: number
     level: number
@@ -96,6 +98,8 @@ export type SettingsInput = {
   title?: string
   /** Ofrecerte (o dejar de hacerlo) a preevaluar proyectos terminados. */
   preReview?: boolean
+  /** Has visto la bienvenida. Se apunta una vez y no se deshace. */
+  welcomed?: true
   /**
    * Con qué estilo ven tu expediente los demás: el id de un estilo que puedas
    * usar, `none` (cada cual con el suyo) o `default` (lo de fábrica: tu estilo

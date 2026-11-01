@@ -556,8 +556,9 @@ Cambios en los grupos (`POST /groups`, `PUT /groups/:id`, `POST /groups/:id/join
 - El chat del grupo es el de los eventos, con id `group:<id>`
   (`GET /events/thread?id=group:3`): solo para quien está dentro.
 
-`PUT /me/settings` acepta además `preReview` (te ofreces a preevaluar proyectos
-terminados); `GET /projects/:id/peers` lo devuelve en cada persona que ya aprobó
+`PUT /me/settings` acepta además `welcomed: true` (ya viste la bienvenida; se
+apunta una vez y no se deshace, y `GET /me/profile` lo devuelve en `welcomed`) y
+`preReview` (te ofreces a preevaluar proyectos terminados); `GET /projects/:id/peers` lo devuelve en cada persona que ya aprobó
 ese proyecto.
 
 ## Tablón de dudas

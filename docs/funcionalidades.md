@@ -371,7 +371,7 @@ En este orden (`app/Header.tsx`, `app/UserMenu.tsx`):
 
 | Funcionalidad | Modo | Quién | Dónde |
 | --- | --- | --- | --- |
-| Bienvenida en seis pasos (siete con la Red), que siguen el modo elegido: el modo en el saludo, perfil, Peer to peer y On-call, Proyectos con Sprints y Pizarras, el calendario con los ajustes; la primera vez y desde el menú | S | Todos | `features/welcome/Welcome.tsx` |
+| Bienvenida en seis pasos (siete con la Red), que siguen el modo elegido: el modo en el saludo, perfil, Peer to peer y On-call, Proyectos con Sprints y Pizarras, el calendario con los ajustes; sola solo la primera vez que entras (lo apunta la API por persona: no vuelve en otro navegador ni al volver a entrar) y, cuando quieras, desde el menú | S | Todos | `features/welcome/Welcome.tsx` |
 | Buzón · Avisos: cada uno lleva a su sitio; guardar, borrar, borrar los leídos | S | Todos `[mailbox]` | `features/notices/Mailbox.tsx` |
 | Buzón · Conversaciones: directas, de grupo, pizarra, ayuda y evento; filtros (sin leer, pendientes, tipo, proyecto); marcar pendiente o sin leer; recordar en una hora, mañana o el lunes; escribir a alguien nuevo; denunciar un mensaje | S | Todos `[mailbox]` | `Conversations.tsx`, `PeerPicker.tsx` |
 | Incidencias y sugerencias: categoría (fallo, mejora, idea, traducción, otra), sección y texto, y las tuyas con respuesta | S | Todos `[tickets]` | `features/admin/Inbox.tsx` |

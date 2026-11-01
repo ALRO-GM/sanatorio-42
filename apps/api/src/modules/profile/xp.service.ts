@@ -89,6 +89,7 @@ const settingsSchema = z.object({
   // Luego se compara con los títulos desbloqueados; el tope es para no cargar texto enorme.
   title: z.string().max(60).optional(),
   preReview: z.boolean().optional(),
+  welcomed: z.literal(true).optional(),
   /** El id de un estilo, `none` (el de quien mira) o `default` (lo de fábrica). */
   recordStyle: z
     .string()
@@ -256,6 +257,7 @@ export function createXpService(options: XpServiceOptions) {
         admin: actor.admin,
         preReview: profile?.preReview ?? false,
         recordStyle: recordStyleOf(actor.login, profile?.recordStyle ?? null),
+        welcomed: profile?.welcomed ?? false,
         xp: { total, ...level },
         title,
         hacks: hacker.caught,

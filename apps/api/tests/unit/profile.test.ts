@@ -264,6 +264,22 @@ describe('comunidad', () => {
       expect(xp.total).toBe(0)
     })
 
+    it('la bienvenida se apunta una vez por persona, venga del navegador que venga', async () => {
+      const { xp } = services
+      const leo = actor('leo')
+
+      expect((await xp.expediente(leo)).welcomed).toBe(false)
+      // Otra preferencia no la da por vista.
+      await xp.updateSettings(leo, { preReview: true })
+      expect((await xp.expediente(leo)).welcomed).toBe(false)
+
+      await xp.updateSettings(leo, { welcomed: true })
+      await xp.updateSettings(leo, { preReview: false })
+      expect((await xp.expediente(leo)).welcomed).toBe(true)
+      // Solo se apunta: no hay forma de deshacerlo.
+      await expectCode(xp.updateSettings(leo, { welcomed: false }), 'invalid_input')
+    })
+
     it('luce el título más alto que tenga y no deja ponerse uno bloqueado', async () => {
       const { xp } = services
 

@@ -27,6 +27,8 @@ type ProfileRow = {
   preReview: boolean
   /** Con qué estilo ven su expediente los demás, tal como se guardó (`styles.rules.ts`). */
   recordStyle: string | null
+  /** Ya vio la bienvenida. */
+  welcomed: boolean
 }
 
 /** Sin señales de vida durante esto, lo siguiente ya es otra sesión. */
@@ -37,7 +39,7 @@ export function createProfilesRepository(db: Db) {
     /** Preferencias de una persona, o `undefined` si nunca ha entrado. */
     async get(login: string): Promise<ProfileRow | undefined> {
       const result = await db.execute({
-        sql: `SELECT login, campus_id, lang, title, pre_review, record_style
+        sql: `SELECT login, campus_id, lang, title, pre_review, record_style, welcomed_at
               FROM profiles WHERE login = ?`,
         args: [login],
       })
@@ -54,6 +56,7 @@ export function createProfilesRepository(db: Db) {
         title: typeof row.title === 'string' ? row.title : null,
         preReview: toNumber(row.pre_review) === 1,
         recordStyle: typeof row.record_style === 'string' ? row.record_style : null,
+        welcomed: row.welcomed_at !== null,
       }
     },
 
@@ -124,20 +127,25 @@ export function createProfilesRepository(db: Db) {
         lang?: string | undefined
         title?: string | undefined
         preReview?: boolean | undefined
+        welcomed?: true | undefined
       },
     ): Promise<void> {
       const now = nowIso()
       // `null` deja la columna como estaba.
       const flag = changes.preReview === undefined ? null : Number(changes.preReview)
+      // La bienvenida se apunta una vez: la primera fecha se queda.
+      const welcomed = changes.welcomed === true ? now : null
 
       await db.execute({
-        sql: `INSERT INTO profiles (login, campus_id, lang, title, pre_review, created_at, seen_at)
-              VALUES (?, ?, ?, ?, COALESCE(?, 0), ?, ?)
+        sql: `INSERT INTO profiles
+                (login, campus_id, lang, title, pre_review, welcomed_at, created_at, seen_at)
+              VALUES (?, ?, ?, ?, COALESCE(?, 0), ?, ?, ?)
               ON CONFLICT (login) DO UPDATE SET
                 campus_id = COALESCE(excluded.campus_id, campus_id),
                 lang      = COALESCE(excluded.lang, lang),
                 title     = COALESCE(excluded.title, title),
                 pre_review = COALESCE(?, pre_review),
+                welcomed_at = COALESCE(welcomed_at, excluded.welcomed_at),
                 seen_at   = excluded.seen_at`,
         args: [
           login,
@@ -145,6 +153,7 @@ export function createProfilesRepository(db: Db) {
           changes.lang ?? null,
           changes.title ?? null,
           flag,
+          welcomed,
           now,
           now,
           flag,
