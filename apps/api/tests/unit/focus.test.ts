@@ -118,6 +118,25 @@ describe('registro y estadísticas del Pomodoro (#80)', () => {
     expect(stats.band.sessions).toBe(3)
   })
 
+  it('las sesiones largas (las cajas de la startup): acabadas y de 30 minutos o más', async () => {
+    const { focus } = services
+
+    // Una de 50 que llega a su hora, otra de 50 parada a los 30 y una de 25.
+    await focus.start(actor('ana'), { ...settings, focusMinutes: 50 })
+    clock.advance(50 * MINUTE + 1)
+    await focus.start(actor('ana'), { ...settings, focusMinutes: 50 })
+    clock.advance(30 * MINUTE)
+    await focus.stop(actor('ana'))
+    await focus.start(actor('ana'), settings)
+    clock.advance(25 * MINUTE + 1)
+    expect(await focus.longSessions('ana', 30)).toBe(2)
+    // La que sigue en marcha aún no cuenta, aunque ya lleve una hora.
+    await focus.start(actor('ana'), { ...settings, focusMinutes: 90 })
+    clock.advance(60 * MINUTE)
+    expect(await focus.longSessions('ana', 30)).toBe(2)
+    expect(await focus.longSessions('leo', 30)).toBe(0)
+  })
+
   it('acabar sin motivos (o sin sesión) vale; seguir sin sesión no apunta nada', async () => {
     const { focus } = services
 

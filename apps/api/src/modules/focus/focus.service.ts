@@ -259,6 +259,23 @@ export function createFocusService(
       )
     },
 
+    /**
+     * Las sesiones ya acabadas de una persona en las que se concentró al menos
+     * `minutes` minutos: cada una le da una caja sorpresa en su startup
+     * (`docs/pomodoro-startup.md`). La que sigue en marcha aún no cuenta.
+     */
+    async longSessions(login: string, minutes: number): Promise<number> {
+      const sessions = await log.of(login)
+
+      return sessions.filter((session) => {
+        const settled = settle(session, now())
+
+        return (
+          settled.outcome !== 'running' && settled.endsAt - session.startedAt >= minutes * 60_000
+        )
+      }).length
+    },
+
     /** Las de todo el mundo (o del tramo elegido), para el panel. Solo admins. */
     async adminStats(actor: Actor, input: unknown): Promise<FocusStats> {
       assertAdmin(actor)

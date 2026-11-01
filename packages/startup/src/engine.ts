@@ -3,54 +3,33 @@
  * hacerlo y lo que vale la empresa. Funciones puras: la API las usa para hacer
  * cumplir las reglas y la web para pintar lo mismo.
  *
- * El azar (candidatos, suerte de cada ronda) sale de una semilla con el login y
- * lo hecho hasta ahora: el mismo para quien lo pide desde la web y para la API,
- * y no se puede volver a tirar recargando la página.
+ * El azar (candidatos, suerte de cada ronda, cajas sorpresa) sale de una
+ * semilla con el login y lo hecho hasta ahora: el mismo para quien lo pide
+ * desde la web y para la API, y no se puede volver a tirar recargando la página.
  */
 
 import {
   AXES,
   CANDIDATES,
+  DECOR,
+  DECOR_MAX,
   HIRE_BASE,
   ITEMS,
   MILESTONES,
   MILESTONE_RULES,
   NAME_MAX,
   REROLL_COST,
+  ROLES,
+  ROLE_RULES,
   ROUNDS,
   ROUND_RULES,
-  SEATS,
+  SPACES,
 } from './data.js'
-import type { Axis, Item, Milestone, Round } from './data.js'
-
-/** Alguien de la plantilla: su especialidad, sus estrellas (1-5) y su aspecto. */
-export type Hire = { axis: Axis; stars: number; look: number }
-
-/** Una ronda hecha y la suerte que tuvo (de 0,7 a 1,5). */
-export type RoundResult = { id: Round; luck: number }
-
-export type StartupState = {
-  name: string | null
-  /** Nivel de cada pieza del catálogo (`ITEMS`), por id. */
-  levels: Record<string, number>
-  milestones: Milestone[]
-  team: Hire[]
-  rounds: RoundResult[]
-  /** Minutos gastados. */
-  spent: number
-  /** Veces que se han vuelto a sacar candidatos (cambia la semilla). */
-  rolls: number
-}
-
-export const EMPTY_STARTUP: StartupState = {
-  name: null,
-  levels: {},
-  milestones: [],
-  team: [],
-  rounds: [],
-  spent: 0,
-  rolls: 0,
-}
+import type { Axis, Item, Milestone, Role, Round } from './data.js'
+import { seatsOf, settle } from './economy.js'
+import { EMPTY_STARTUP, cycleOf, has, levelOf, seeded } from './state.js'
+import type { Hire, Placed, RoundResult, StartupState } from './state.js'
+import { canPlace, decorItem, freeSpot, spaceOf, tidyDecor } from './world.js'
 
 export type StartupAction =
   | { type: 'buy'; item: string }
@@ -58,56 +37,50 @@ export type StartupAction =
   | { type: 'hire'; index: number }
   | { type: 'reroll' }
   | { type: 'round' }
+  /** Contratar a alguien del resto de la oficina (recepción, limpieza…), con dinero. */
+  | { type: 'staff'; role: Role }
+  /** Comprar una pieza de decoración: se deja sola en la primera baldosa libre. */
+  | { type: 'decor'; id: string }
+  /** Mover (y girar) la pieza `index` de la decoración a (gx, gy). */
+  | { type: 'place'; index: number; gx: number; gy: number; turn: boolean }
+  /** Guardar la pieza `index` en el almacén. */
+  | { type: 'store'; index: number }
+  /** Abrir una caja sorpresa (una por sesión del Pomodoro de 30 minutos o más). */
+  | { type: 'open' }
+  /** Con el edificio terminado y el control global: volver a empezar en tu cuarto. */
+  | { type: 'legacy' }
 
-/** Por qué no se puede: sin minutos, aún no, ya está al máximo, sin sitio, o no existe. */
-export type Refusal = 'poor' | 'locked' | 'max' | 'full' | 'invalid'
+/**
+ * Por qué no se puede: sin minutos (o sin dinero), aún no, ya está al máximo,
+ * sin sitio, la baldosa está ocupada o no existe.
+ */
+export type Refusal = 'poor' | 'locked' | 'max' | 'full' | 'taken' | 'invalid'
 
-// --- Azar con semilla ---------------------------------------------------------
-
-/** Un número de 32 bits a partir de un texto (FNV-1a). */
-function hash(text: string): number {
-  let value = 2166136261
-
-  for (let index = 0; index < text.length; index += 1) {
-    value ^= text.charCodeAt(index)
-    value = Math.imul(value, 16777619)
-  }
-
-  return value >>> 0
-}
-
-/** Una serie de números de 0 a 1 que siempre sale igual con la misma semilla (mulberry32). */
-export function seeded(seed: string): () => number {
-  let state = hash(seed)
-
-  return () => {
-    state = (state + 0x6d2b79f5) >>> 0
-
-    let t = state
-
-    t = Math.imul(t ^ (t >>> 15), t | 1)
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61)
-
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
-  }
-}
+/** Lo que sale de una caja sorpresa: una pieza de decoración (o mascota) o dinero. */
+export type Prize = { kind: 'decor'; id: string } | { kind: 'cash'; amount: number }
 
 // --- Lo que se deduce del estado ------------------------------------------------
-
-export const levelOf = (state: StartupState, id: string): number => state.levels[id] ?? 0
 
 /** Lo aprendido: la suma de los niveles de las cinco ramas. */
 export function skillOf(state: StartupState): number {
   return AXES.reduce((sum, axis) => sum + levelOf(state, `learn-${axis}`), 0)
 }
 
-/** Cuánto pesa cada modelo de negocio: lo aprendido, la plantilla y los servidores. */
+/**
+ * Cuánto pesa cada modelo de negocio: lo aprendido, quien programa, los
+ * productos de cada rama y los servidores (también los del sótano).
+ */
 export function profileOf(state: StartupState): Record<Axis, number> {
   const profile = Object.fromEntries(AXES.map((axis) => [axis, 0])) as Record<Axis, number>
 
   for (const axis of AXES) profile[axis] += 2 * levelOf(state, `learn-${axis}`)
-  for (const hire of state.team) profile[hire.axis] += 3 * hire.stars
-  profile.infra += 2 * levelOf(state, 'servers')
+  for (const hire of state.team) if (hire.role === undefined) profile[hire.axis] += 3 * hire.stars
+  for (const item of ITEMS) {
+    if (item.kind === 'product' && item.axis !== null) {
+      profile[item.axis] += 2 * levelOf(state, item.id)
+    }
+  }
+  profile.infra += 2 * levelOf(state, 'servers') + 3 * levelOf(state, 'basement')
 
   return profile
 }
@@ -123,13 +96,6 @@ export function focusOf(state: StartupState): Axis | null {
 
   return best
 }
-
-/** Sitio para la plantilla. */
-export const seatsOf = (state: StartupState): number =>
-  SEATS[Math.min(levelOf(state, 'space'), SEATS.length - 1)] ?? 2
-
-export const has = (state: StartupState, milestone: Milestone): boolean =>
-  state.milestones.includes(milestone)
 
 /** La siguiente ronda que toca, o `null` si ya se salió a bolsa. */
 export function nextRound(state: StartupState): Round | null {
@@ -168,7 +134,7 @@ export function hireCost(state: StartupState, stars: number): number {
  * estrellas altas son raras.
  */
 export function candidatesOf(login: string, state: StartupState): (Hire & { cost: number })[] {
-  const random = seeded(`${login}|hire|${state.team.length}|${state.rolls}`)
+  const random = seeded(`${cycleOf(login, state)}|hire|${state.team.length}|${state.rolls}`)
   const focus = focusOf(state)
 
   return Array.from({ length: CANDIDATES }, () => {
@@ -184,21 +150,75 @@ export function candidatesOf(login: string, state: StartupState): (Hire & { cost
   })
 }
 
+/** Cuántas personas de ese oficio hay en la plantilla. */
+export const staffOf = (state: StartupState, role: Role): number =>
+  state.team.filter((hire) => hire.role === role).length
+
+/** Lo que cuesta, en dinero, contratar a la siguiente persona de ese oficio. */
+export const staffCost = (state: StartupState, role: Role): number =>
+  ROLE_RULES[role].cost * (staffOf(state, role) + 1)
+
 /** La suerte de una ronda: de 0,7 a 1,5, con semilla. */
 export function luckOf(login: string, round: Round): number {
   return Math.round((0.7 + seeded(`${login}|round|${round}`)() * 0.8) * 100) / 100
 }
 
+/** Cajas sorpresa por abrir: las sesiones de 30 minutos o más menos las abiertas. */
+export const boxesOf = (state: StartupState, sessions: number): number =>
+  Math.max(0, Math.floor(sessions) - state.opened)
+
 /**
- * Lo que vale la empresa: lo construido (aprendido, equipos, plantilla,
- * espacio, hitos) por lo que multiplican las rondas, con su suerte.
+ * Lo que sale de la siguiente caja: casi siempre una pieza de decoración (a
+ * veces de un espacio que aún no tienes), a veces una de las que solo salen
+ * en cajas o una mascota que aún no tienes, y si no, dinero. Con semilla:
+ * la web lo sabe antes de abrirla y la API saca lo mismo.
+ */
+export function prizeOf(login: string, state: StartupState): Prize {
+  const random = seeded(`${login}|box|${String(state.opened)}`)
+  const roll = random()
+  const pick = random()
+  const owned = new Set(state.decor.map((piece) => piece.id))
+  const pets = DECOR.filter((item) => item.kind === 'pet' && !owned.has(item.id))
+  const rare = DECOR.filter((item) => item.cost === 0 && item.kind !== 'pet')
+  const shop = DECOR.filter((item) => item.cost > 0)
+  const choose = (from: readonly { id: string }[]): Prize => ({
+    kind: 'decor',
+    id: from[Math.floor(pick * from.length)]?.id ?? 'plant',
+  })
+
+  if (state.decor.length < DECOR_MAX) {
+    if (roll < 0.15 && pets.length > 0) return choose(pets)
+    if (roll < 0.35) return choose(rare)
+    if (roll < 0.85) return choose(shop)
+  }
+
+  return { kind: 'cash', amount: 100 * 2 ** spaceOf(state) }
+}
+
+/**
+ * Lo que vale la empresa: lo construido (aprendido, equipos, productos,
+ * plantilla, espacio, edificio, hitos) por lo que multiplican las rondas, con
+ * su suerte.
  */
 export function valuationOf(state: StartupState): number {
+  const products = ITEMS.filter((item) => item.kind === 'product').reduce(
+    (sum, item) => sum + levelOf(state, item.id) * 10_000,
+    0,
+  )
+  const building = ITEMS.filter((item) => item.kind === 'building').reduce(
+    (sum, item) => sum + levelOf(state, item.id) * 50_000,
+    0,
+  )
   const built =
     skillOf(state) * 1_000 +
     levelOf(state, 'computer') * 2_000 +
     levelOf(state, 'servers') * 5_000 +
-    state.team.reduce((sum, hire) => sum + hire.stars * 8_000, 0) +
+    products +
+    building +
+    state.team.reduce(
+      (sum, hire) => sum + (hire.role === undefined ? hire.stars * 8_000 : 5_000),
+      0,
+    ) +
     levelOf(state, 'space') * 20_000 +
     (has(state, 'side') ? 5_000 : 0) +
     (has(state, 'mvp') ? 25_000 : 0) +
@@ -218,36 +238,71 @@ export function priceOf(state: StartupState, item: Item): number | null {
   return item.costs[levelOf(state, item.id)] ?? null
 }
 
+/** Si una pieza del catálogo aún no se puede comprar: le falta un hito, el espacio o lo aprendido. */
+export function lockedOf(state: StartupState, item: Item): boolean {
+  if (item.needs !== null && !has(state, item.needs)) return true
+  if (item.space !== undefined && spaceOf(state) < item.space) return true
+
+  // Cada versión de un producto pide ese nivel aprendido en su rama.
+  return (
+    item.kind === 'product' &&
+    item.axis !== null &&
+    levelOf(state, `learn-${item.axis}`) < levelOf(state, item.id) + 1
+  )
+}
+
+/** Si ya se puede terminar la partida y volver a empezar: el control global y el edificio entero. */
+export const canLegacy = (state: StartupState): boolean =>
+  has(state, 'global') && spaceOf(state) === SPACES.length - 1
+
 /**
  * Hace una acción: el estado nuevo, o por qué no se puede.
  *
  * @param earned Minutos de concentración ganados en total.
+ * @param sessions Sesiones del Pomodoro de 30 minutos o más, en total (las cajas).
  */
 export function act(
   login: string,
-  state: StartupState,
+  previous: StartupState,
   earned: number,
   action: StartupAction,
+  sessions = 0,
 ): { state: StartupState } | { refused: Refusal } {
+  // El dinero se apunta antes de nada: lo que cambie ahora rinde desde aquí.
+  const state = settle(previous, earned)
   const balance = earned - state.spent
   const hours = earned / 60
+  const seed = cycleOf(login, state)
   const pay = (cost: number, next: Partial<StartupState>) =>
     cost > balance
       ? { refused: 'poor' as const }
       : { state: { ...state, ...next, spent: state.spent + cost } }
+  const payCash = (cost: number, next: Partial<StartupState>) =>
+    cost > state.cash
+      ? { refused: 'poor' as const }
+      : { state: { ...state, ...next, cash: state.cash - cost } }
 
   switch (action.type) {
     case 'buy': {
       const item = ITEMS.find((one) => one.id === action.item)
 
       if (item === undefined) return { refused: 'invalid' }
-      if (item.needs !== null && !has(state, item.needs)) return { refused: 'locked' }
+      if (lockedOf(state, item)) return { refused: 'locked' }
 
       const cost = priceOf(state, item)
 
       if (cost === null) return { refused: 'max' }
 
-      return pay(cost, { levels: { ...state.levels, [item.id]: levelOf(state, item.id) + 1 } })
+      const next = { levels: { ...state.levels, [item.id]: levelOf(state, item.id) + 1 } }
+
+      if (item.currency !== 'cash') return pay(cost, next)
+
+      const result = payCash(cost, next)
+
+      // Con un espacio más grande, lo guardado que ya cabe se queda donde estaba.
+      return 'state' in result
+        ? { state: { ...result.state, decor: tidyDecor(result.state) } }
+        : result
     }
     case 'milestone': {
       if (nextMilestone(state) !== action.milestone) return { refused: 'locked' }
@@ -305,15 +360,109 @@ export function act(
       }
 
       return pay(rule.cost, {
-        rounds: [...state.rounds, { id: round, luck: luckOf(login, round) }],
+        rounds: [...state.rounds, { id: round, luck: luckOf(seed, round) }],
       })
+    }
+    case 'staff': {
+      const rule = (ROLE_RULES as Partial<Record<string, (typeof ROLE_RULES)[Role]>>)[action.role]
+
+      if (rule === undefined) return { refused: 'invalid' }
+      if (!has(state, 'founded') || spaceOf(state) < rule.space) return { refused: 'locked' }
+
+      const count = staffOf(state, action.role)
+
+      if (count >= rule.max) return { refused: 'max' }
+      if (state.team.length >= seatsOf(state)) return { refused: 'full' }
+
+      const look = Math.floor(seeded(`${seed}|staff|${action.role}|${String(count)}`)() * 1000)
+
+      return payCash(staffCost(state, action.role), {
+        team: [
+          ...state.team,
+          { axis: focusOf(state) ?? 'front', stars: 1, look, role: action.role },
+        ],
+      })
+    }
+    case 'decor': {
+      const item = decorItem(action.id)
+
+      if (item === undefined) return { refused: 'invalid' }
+      // Lo de coste 0 solo sale en las cajas.
+      if (item.cost === 0 || spaceOf(state) < item.space) return { refused: 'locked' }
+      if (state.decor.length >= DECOR_MAX) return { refused: 'full' }
+
+      return payCash(item.cost, { decor: withPiece(state, item.id) })
+    }
+    case 'place': {
+      const piece = state.decor[action.index]
+
+      if (piece === undefined) return { refused: 'invalid' }
+      if (!canPlace(state, action.index, action.gx, action.gy)) return { refused: 'taken' }
+
+      const decor = state.decor.map((one, index): Placed =>
+        index === action.index ? { ...one, at: [action.gx, action.gy], turn: action.turn } : one,
+      )
+
+      return { state: { ...state, decor } }
+    }
+    case 'store': {
+      // Lo que no existe o ya está guardado no se guarda.
+      if ((state.decor[action.index]?.at ?? null) === null) return { refused: 'invalid' }
+
+      return {
+        state: {
+          ...state,
+          decor: state.decor.map((one, index) =>
+            index === action.index ? { ...one, at: null } : one,
+          ),
+        },
+      }
+    }
+    case 'open': {
+      if (boxesOf(state, sessions) === 0) return { refused: 'locked' }
+
+      const prize = prizeOf(login, state)
+      const opened = state.opened + 1
+
+      return {
+        state:
+          prize.kind === 'cash'
+            ? { ...state, opened, cash: state.cash + prize.amount }
+            : { ...state, opened, decor: withPiece(state, prize.id) },
+      }
+    }
+    case 'legacy': {
+      if (!canLegacy(state)) return { refused: 'locked' }
+
+      // Lo que se conserva: la decoración y las mascotas, las cajas abiertas,
+      // lo gastado (para que el tiempo no vuelva), una décima del dinero y,
+      // por cada vuelta, un 25 % más de lo que se gana.
+      const fresh: StartupState = {
+        ...EMPTY_STARTUP,
+        spent: state.spent,
+        cash: Math.floor(state.cash / 10),
+        at: earned,
+        decor: state.decor,
+        opened: state.opened,
+        legacy: state.legacy + 1,
+      }
+
+      return { state: { ...fresh, decor: tidyDecor(fresh) } }
     }
   }
 }
 
+/** La decoración con una pieza más: en la primera baldosa libre (las mascotas, sueltas). */
+function withPiece(state: StartupState, id: string): Placed[] {
+  const at = decorItem(id)?.kind === 'pet' ? null : freeSpot(state)
+
+  return [...state.decor, { id, at, turn: false }]
+}
+
 /**
  * Un estado leído de la base, saneado: lo que no cuadre con el catálogo se
- * descarta en vez de romper la partida.
+ * descarta en vez de romper la partida. Las partidas de antes (sin dinero ni
+ * decoración) salen con lo nuevo vacío.
  */
 export function parseStartup(value: unknown): StartupState {
   if (typeof value !== 'object' || value === null) return { ...EMPTY_STARTUP }
@@ -321,8 +470,9 @@ export function parseStartup(value: unknown): StartupState {
   const raw = value as Partial<Record<keyof StartupState, unknown>>
   const number = (input: unknown): number =>
     typeof input === 'number' && Number.isFinite(input) && input >= 0 ? input : 0
+  const whole = (input: unknown): number => Math.floor(number(input))
 
-  return {
+  const state: StartupState = {
     name: typeof raw.name === 'string' ? raw.name.slice(0, NAME_MAX) : null,
     levels: Object.fromEntries(
       Object.entries(
@@ -331,7 +481,7 @@ export function parseStartup(value: unknown): StartupState {
           : {},
       )
         .filter(([id]) => ITEMS.some((item) => item.id === id))
-        .map(([id, level]): [string, number] => [id, Math.floor(number(level))])
+        .map(([id, level]): [string, number] => [id, whole(level)])
         .filter(([, level]) => level > 0),
     ),
     milestones: Array.isArray(raw.milestones)
@@ -339,15 +489,7 @@ export function parseStartup(value: unknown): StartupState {
           (MILESTONES as readonly unknown[]).includes(one),
         )
       : [],
-    team: Array.isArray(raw.team)
-      ? raw.team.filter(
-          (one): one is Hire =>
-            typeof one === 'object' &&
-            one !== null &&
-            (AXES as readonly unknown[]).includes((one as Hire).axis) &&
-            number((one as Hire).stars) >= 1,
-        )
-      : [],
+    team: Array.isArray(raw.team) ? raw.team.flatMap(parseHire) : [],
     rounds: Array.isArray(raw.rounds)
       ? raw.rounds.filter(
           (one): one is RoundResult =>
@@ -358,5 +500,48 @@ export function parseStartup(value: unknown): StartupState {
       : [],
     spent: number(raw.spent),
     rolls: number(raw.rolls),
+    cash: whole(raw.cash),
+    at: typeof raw.at === 'number' && Number.isFinite(raw.at) && raw.at >= 0 ? raw.at : null,
+    decor: Array.isArray(raw.decor) ? raw.decor.flatMap(parsePlaced).slice(0, DECOR_MAX) : [],
+    opened: whole(raw.opened),
+    legacy: whole(raw.legacy),
   }
+
+  return { ...state, decor: tidyDecor(state) }
+}
+
+function parseHire(one: unknown): Hire[] {
+  if (typeof one !== 'object' || one === null) return []
+
+  const hire = one as Partial<Record<keyof Hire, unknown>>
+
+  if (!(AXES as readonly unknown[]).includes(hire.axis)) return []
+  if (typeof hire.stars !== 'number' || !(hire.stars >= 1)) return []
+
+  const base = {
+    axis: hire.axis as Axis,
+    stars: hire.stars,
+    look: typeof hire.look === 'number' && Number.isFinite(hire.look) ? hire.look : 0,
+  }
+
+  return [
+    (ROLES as readonly unknown[]).includes(hire.role) ? { ...base, role: hire.role as Role } : base,
+  ]
+}
+
+function parsePlaced(one: unknown): Placed[] {
+  if (typeof one !== 'object' || one === null) return []
+
+  const piece = one as Partial<Record<keyof Placed, unknown>>
+
+  if (typeof piece.id !== 'string' || decorItem(piece.id) === undefined) return []
+
+  const at =
+    Array.isArray(piece.at) &&
+    piece.at.length === 2 &&
+    piece.at.every((value) => Number.isInteger(value))
+      ? ([piece.at[0] as number, piece.at[1] as number] as const)
+      : null
+
+  return [{ id: piece.id, at, turn: piece.turn === true }]
 }

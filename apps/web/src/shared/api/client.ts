@@ -273,6 +273,7 @@ export const realApi: Api = {
   getStartup: () => getJson('/me/startup'),
   startupAction: (action) => sendJson('POST', '/me/startup/action', action),
   getStartupRanking: () => getJson('/startup/ranking'),
+  getStartupOffice: (login) => getJson(`/startup/office/${encodeURIComponent(login)}`),
   getAdminApiUsage: (query) => getJson(`/admin/api-usage?${search(query)}`),
   setAdminApiLimits: (change) => sendJson('PUT', '/admin/api-usage/limits', change),
 

@@ -8,10 +8,14 @@
  * lo que diga el navegador.
  */
 
-import type { StartupRankRow, StartupSnapshot } from '@sanatorio/contracts'
+import type { StartupRankRow, StartupSnapshot, StartupVisit } from '@sanatorio/contracts'
 import {
+  BOX_MINUTES,
+  DECOR_MAX,
   MILESTONES,
   NAME_MAX,
+  ROLES,
+  ROOM,
   act,
   focusOf,
   parseStartup,
@@ -48,7 +52,42 @@ const actionSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('hire'), index: z.number().int().min(0).max(9) }),
   z.object({ type: z.literal('reroll') }),
   z.object({ type: z.literal('round') }),
+  z.object({ type: z.literal('staff'), role: z.enum(ROLES) }),
+  z.object({ type: z.literal('decor'), id: z.string().min(1).max(40) }),
+  // Dónde dejar una pieza: dentro de la planta más grande; lo demás lo mira el motor.
+  z.object({
+    type: z.literal('place'),
+    index: z
+      .number()
+      .int()
+      .min(0)
+      .max(DECOR_MAX - 1),
+    gx: z
+      .number()
+      .int()
+      .min(0)
+      .max(Math.max(...ROOM) - 1),
+    gy: z
+      .number()
+      .int()
+      .min(0)
+      .max(Math.max(...ROOM) - 1),
+    turn: z.boolean(),
+  }),
+  z.object({
+    type: z.literal('store'),
+    index: z
+      .number()
+      .int()
+      .min(0)
+      .max(DECOR_MAX - 1),
+  }),
+  z.object({ type: z.literal('open') }),
+  z.object({ type: z.literal('legacy') }),
 ])
+
+/** Un login de 42 en la ruta: letras, cifras y guiones. */
+const visitSchema = z.object({ login: z.string().regex(/^[a-z0-9-]{1,32}$/) })
 
 /** Lo que dice la web cuando no se puede (`Refusal` de `@sanatorio/startup`). */
 const REFUSED: Record<string, string> = {
@@ -56,6 +95,7 @@ const REFUSED: Record<string, string> = {
   locked: 'Aún no: falta algo antes',
   max: 'Ya está al máximo',
   full: 'No queda sitio para más gente',
+  taken: 'Ahí no cabe: está ocupado o fuera de la oficina',
   invalid: 'Eso no se puede',
 }
 
@@ -63,6 +103,8 @@ type StartupDeps = {
   db: Db
   /** Minutos de concentración de cada persona (o de una), del módulo `focus`. */
   focusedMinutes: (login?: string) => Promise<Map<string, number>>
+  /** Sesiones acabadas de al menos esos minutos (las cajas sorpresa), del módulo `focus`. */
+  longSessions: (login: string, minutes: number) => Promise<number>
   audience?: Audience
   now?: () => number
 }
@@ -86,18 +128,31 @@ export function createStartupModule(deps: StartupDeps) {
   const earnedOf = async (login: string): Promise<number> =>
     (await deps.focusedMinutes(login)).get(login) ?? 0
 
+  /** La partida, lo ganado y las sesiones largas: todo lo que cuenta la API, nada del navegador. */
+  const current = async (login: string) => {
+    const [state, earnedMinutes, longSessions] = await Promise.all([
+      load(login),
+      earnedOf(login),
+      deps.longSessions(login, BOX_MINUTES),
+    ])
+
+    return { login, state, earnedMinutes, longSessions }
+  }
+
   const service = {
     async snapshot(actor: Actor): Promise<StartupSnapshot> {
-      const [state, earnedMinutes] = await Promise.all([load(actor.login), earnedOf(actor.login)])
-
-      return { login: actor.login, state, earnedMinutes }
+      return current(actor.login)
     },
 
-    /** Hace una acción (comprar, hito, contratar, volver a sacar, ronda) y devuelve cómo queda. */
+    /**
+     * Hace una acción (comprar, hito, contratar, ronda, decorar, colocar, abrir
+     * una caja, volver a empezar) y devuelve cómo queda. El dinero lo vuelve a
+     * contar el motor con los minutos de aquí.
+     */
     async act(actor: Actor, input: unknown): Promise<StartupSnapshot> {
       const action = parse(actionSchema, input)
-      const [state, earnedMinutes] = await Promise.all([load(actor.login), earnedOf(actor.login)])
-      const result = act(actor.login, state, earnedMinutes, action)
+      const { state, earnedMinutes, longSessions } = await current(actor.login)
+      const result = act(actor.login, state, earnedMinutes, action, longSessions)
 
       if ('refused' in result) {
         throw domainError('conflict', REFUSED[result.refused] ?? 'Eso no se puede')
@@ -109,7 +164,24 @@ export function createStartupModule(deps: StartupDeps) {
         args: [actor.login, JSON.stringify(result.state), new Date(now()).toISOString()],
       })
 
-      return { login: actor.login, state: result.state, earnedMinutes }
+      return { login: actor.login, state: result.state, earnedMinutes, longSessions }
+    },
+
+    /**
+     * La oficina de otra persona, para ir a verla desde el ranking: solo la
+     * partida (sin sus minutos), y solo de quien sale en tu ranking (cada
+     * mundo, el suyo; nadie oculto). Si no la puedes ver o no tiene, `404`.
+     */
+    async visit(actor: Actor, params: unknown): Promise<StartupVisit> {
+      const { login } = parse(visitSchema, params)
+      const sees = await seesFor(deps.audience ?? NO_POOL, actor)
+      const found = (
+        await db.execute({ sql: 'SELECT 1 FROM startup WHERE login = ?', args: [login] })
+      ).rows[0]
+
+      if (found === undefined || !sees(login)) throw domainError('not_found', 'No hay startup')
+
+      return { login, state: await load(login) }
     },
 
     /**
@@ -166,6 +238,11 @@ export function createStartupModule(deps: StartupDeps) {
       /** `POST /me/startup/action` → una acción; `409` si no se puede. Devuelve `StartupSnapshot`. */
       app.post('/me/startup/action', async (request, reply) => {
         return reply.send(await service.act(await session.actor(request), request.body))
+      })
+
+      /** `GET /startup/office/:login` → `StartupVisit`: la oficina de alguien del ranking. */
+      app.get('/startup/office/:login', async (request, reply) => {
+        return reply.send(await service.visit(await session.actor(request), request.params))
       })
 
       /** `GET /startup/ranking` → `StartupRankRow[]`. */
