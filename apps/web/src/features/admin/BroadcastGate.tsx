@@ -3,7 +3,8 @@ import type { Broadcast } from '@sanatorio/contracts'
 import { api } from '../../shared/api'
 import { useAction } from '../../shared/hooks/useAsync'
 import { useGateQueue } from '../../shared/hooks/useGateQueue'
-import { localeOf, useI18n } from '../../shared/i18n'
+import { useI18n } from '../../shared/i18n'
+import { useFormat } from '../../shared/i18n/useFormat'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { Icon } from '../../shared/ui/Icon'
 
@@ -23,7 +24,8 @@ type BroadcastGateProps = {
  * aunque se recargue la página o se abra en otro sitio.
  */
 export function BroadcastGate({ pending, onChange }: BroadcastGateProps) {
-  const { t, lang } = useI18n()
+  const { t } = useI18n()
+  const { dateTime } = useFormat()
   const { queue, setQueue, current, dialog } = useGateQueue<Broadcast>(pending, () =>
     api.getBroadcasts(),
   )
@@ -70,12 +72,7 @@ export function BroadcastGate({ pending, onChange }: BroadcastGateProps) {
       </div>
       <h3>{current.title}</h3>
       <p className="broadcast-body">{current.body}</p>
-      <small className="hint">
-        {new Date(current.at).toLocaleString(localeOf(lang), {
-          dateStyle: 'medium',
-          timeStyle: 'short',
-        })}
-      </small>
+      <small className="hint">{dateTime(current.at, 'medium')}</small>
 
       {locked && <p className="event-alert must">{t('broadcast.must')}</p>}
       <ErrorNote error={error} />

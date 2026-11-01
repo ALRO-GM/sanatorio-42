@@ -5,7 +5,8 @@ import type { BoardView } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
 import { useAction } from '../../shared/hooks/useAsync'
-import { localeOf, useI18n } from '../../shared/i18n'
+import { useI18n } from '../../shared/i18n'
+import { useFormat } from '../../shared/i18n/useFormat'
 import { lastDay, untilText } from '../../shared/until'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { useConfirm } from '../../shared/ui/useConfirm'
@@ -22,7 +23,8 @@ type BoardFormProps = {
 
 /** Proponer una pizarra, o cambiar una que ya existe (`board`). */
 export function BoardForm({ defaultDay, board, onCancel, onSaved }: BoardFormProps) {
-  const { t, lang } = useI18n()
+  const { t } = useI18n()
+  const { dateTime } = useFormat()
   const { busy, error, run } = useAction()
   const confirm = useConfirm()
   const [form, setForm] = useState(() =>
@@ -57,14 +59,7 @@ export function BoardForm({ defaultDay, board, onCancel, onSaved }: BoardFormPro
   /** "Va a ser el martes 14 de octubre a las 17:00: dentro de 2 días y 3 horas." */
   const confirmText = (startsAt: string): string =>
     t('event.confirm', {
-      when: new Date(startsAt).toLocaleString(localeOf(lang), {
-        weekday: 'long',
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      }),
+      when: dateTime(startsAt, 'weekdayYear'),
       in: untilText(Date.parse(startsAt) - Date.now(), t),
     })
 

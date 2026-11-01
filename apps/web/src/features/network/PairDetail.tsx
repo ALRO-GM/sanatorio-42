@@ -1,7 +1,8 @@
 import { api } from '../../shared/api'
 import type { NetworkParams } from '../../shared/api/types'
 import { useAsync } from '../../shared/hooks/useAsync'
-import { localeOf, useI18n } from '../../shared/i18n'
+import { useI18n } from '../../shared/i18n'
+import { useFormat } from '../../shared/i18n/useFormat'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 
 type PairDetailProps = {
@@ -13,7 +14,8 @@ type PairDetailProps = {
 
 /** Las correcciones que se han hecho dos personas: cuándo, de qué y con qué nota. */
 export function PairDetail({ a, b, params }: PairDetailProps) {
-  const { t, tn, lang } = useI18n()
+  const { t, tn } = useI18n()
+  const { date } = useFormat()
   const { data, error, loading, reload } = useAsync(
     () => api.getNetworkPair(a, b, params),
     [a, b, params],
@@ -30,13 +32,7 @@ export function PairDetail({ a, b, params }: PairDetailProps) {
       <ol>
         {data.corrections.map((row) => (
           <li key={`${row.id}-${row.corrected}`}>
-            <time dateTime={row.at}>
-              {new Date(row.at).toLocaleDateString(localeOf(lang), {
-                day: 'numeric',
-                month: 'short',
-                year: '2-digit',
-              })}
-            </time>
+            <time dateTime={row.at}>{date(row.at, 'dayMonthYY')}</time>
             <span className="net-pair-what">
               <strong>{row.project ?? t('net.pair.unknownProject')}</strong>
               <small>

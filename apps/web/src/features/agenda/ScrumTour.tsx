@@ -1,4 +1,5 @@
 import { useI18n } from '../../shared/i18n'
+import { initialOf } from '../../shared/initial'
 import { click, defineTour, Tour } from '../../shared/tour/Tour'
 import { CountdownClock } from '../../shared/ui/CountdownClock'
 import { Icon } from '../../shared/ui/Icon'
@@ -199,7 +200,7 @@ export function ScrumTour() {
                 <strong>{t('scrum.board.title')}</strong>
                 {BOARD.map((row) => (
                   <span key={row.login} className={`tour-item tour-in ${row.me ? 'on' : ''}`}>
-                    <span className="tour-avatar">{row.login.slice(0, 1).toUpperCase()}</span>
+                    <span className="tour-avatar">{initialOf(row.login)}</span>
                     <span>
                       <span>
                         {row.login}

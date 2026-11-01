@@ -5,7 +5,9 @@ import type { BroadcastAudience, BroadcastReport } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
 import { useAction, useAsync } from '../../shared/hooks/useAsync'
-import { localeOf, useI18n } from '../../shared/i18n'
+import { useI18n } from '../../shared/i18n'
+import { useFormat } from '../../shared/i18n/useFormat'
+import { Async } from '../../shared/ui/Async'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { PersonInput } from '../../shared/ui/PersonInput'
 
@@ -166,28 +168,28 @@ export function BroadcastsTab({ campusId }: { campusId: number | undefined }) {
         </div>
       </form>
 
-      {sent.loading && <p className="estado">{t('app.loading')}</p>}
-      {sent.data === undefined ? (
-        <ErrorNote error={sent.error} onRetry={() => void sent.reload()} />
-      ) : (
-        <>
-          {sent.data.length === 0 && <p className="estado">{t('admin.cast.none')}</p>}
-          <ul className="stack">
-            {sent.data.map((report) => (
-              <li key={report.id}>
-                <Sent report={report} onRemoved={() => void sent.reload()} />
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
+      <Async state={sent}>
+        {(list) => (
+          <>
+            {list.length === 0 && <p className="estado">{t('admin.cast.none')}</p>}
+            <ul className="stack">
+              {list.map((report) => (
+                <li key={report.id}>
+                  <Sent report={report} onRemoved={() => void sent.reload()} />
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+      </Async>
     </>
   )
 }
 
 /** Un comunicado ya mandado: a quién fue y qué se ha contestado. */
 function Sent({ report, onRemoved }: { report: BroadcastReport; onRemoved: () => void }) {
-  const { t, lang } = useI18n()
+  const { t } = useI18n()
+  const { dateTime } = useFormat()
   const removing = useAction()
   const { audience } = report
   const reached = report.answers.length
@@ -204,7 +206,7 @@ function Sent({ report, onRemoved }: { report: BroadcastReport; onRemoved: () =>
       </div>
       <p className="broadcast-body">{report.body}</p>
       <small className="hint">
-        {report.from} · {new Date(report.at).toLocaleString(localeOf(lang))} ·{' '}
+        {report.from} · {dateTime(report.at, 'numeric')} ·{' '}
         {t(report.required ? 'admin.cast.wasRequired' : 'admin.cast.wasOptional')}
       </small>
 

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 
 import { photoUrl } from '../api'
+import { initialOf } from '../initial'
 
 type AvatarProps = {
   login: string
@@ -30,7 +31,7 @@ export function Avatar({ login, image, size = 64 }: AvatarProps) {
         className="avatar-fallback"
         style={{ width: size, height: size, background: colorFor(login), fontSize: size * 0.45 }}
       >
-        {login.charAt(0).toUpperCase()}
+        {initialOf(login)}
       </span>
     )
   }

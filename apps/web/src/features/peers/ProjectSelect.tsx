@@ -7,7 +7,7 @@ import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { Icon } from '../../shared/ui/Icon'
-import { InfoTip } from '../../shared/ui/InfoTip'
+import { SectionTitle } from '../../shared/ui/SectionTitle'
 import { WaitingTour } from './WaitingTour'
 
 type ProjectSelectProps = {
@@ -48,12 +48,9 @@ export function ProjectSelect({ onSelect, autoPick = false }: ProjectSelectProps
 
   return (
     <section>
-      <h2>
-        {t('projects.title')}
-        <InfoTip title={t('nav.consulta')}>
-          <WaitingTour />
-        </InfoTip>
-      </h2>
+      <SectionTitle title={t('projects.title')} tipTitle={t('nav.consulta')}>
+        <WaitingTour />
+      </SectionTitle>
       {data.length === 0 && <p className="estado">{t('projects.empty')}</p>}
       {/* «¿Qué te duele hoy?» es un juego de palabras: esto dice qué hacer. */}
       {data.length > 0 && <span className="eyebrow">{t('projects.pick')}</span>}

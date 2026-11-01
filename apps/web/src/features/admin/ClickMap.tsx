@@ -7,7 +7,7 @@ import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { useFormat } from '../../shared/i18n/useFormat'
 import { DataTable } from '../../shared/ui/DataTable'
-import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { Async } from '../../shared/ui/Async'
 import { PillGroup } from '../../shared/ui/PillGroup'
 import { RangePills } from './RangePills'
 
@@ -25,10 +25,8 @@ export function ClickMap() {
   const [section, setSection] = useState<string | null>(null)
   const [layout, setLayout] = useState<ClickLayout>('desktop')
   const [days, setDays] = useState(30)
-  const { data, error, loading, reload } = useAsync(
-    () => api.getClickHeatmap(section, layout, days),
-    [section, layout, days],
-  )
+  const clicks = useAsync(() => api.getClickHeatmap(section, layout, days), [section, layout, days])
+  const { data } = clicks
   const max = Math.max(1, ...(data?.cells ?? []).map((cell) => cell.n))
   const rows = Math.max(10, ...(data?.cells ?? []).map((cell) => cell.y + 1))
   const byCell = new Map((data?.cells ?? []).map((cell) => [`${cell.x},${cell.y}`, cell.n]))
@@ -61,59 +59,59 @@ export function ClickMap() {
         />
       </div>
       <RangePills value={days} onChange={setDays} />
-      {loading && data === undefined && <p className="estado">{t('app.loading')}</p>}
-      <ErrorNote error={error} onRetry={() => void reload()} />
-      {data !== undefined && (
-        <div className="click-layout">
-          <div
-            className={`click-grid ${layout}`}
-            role="img"
-            aria-label={t('admin.clicks.gridLabel')}
-            style={{ gridTemplateColumns: `repeat(${data.columns}, 1fr)` }}
-          >
-            {Array.from({ length: rows * data.columns }, (_, index) => {
-              const x = index % data.columns
-              const y = Math.floor(index / data.columns)
-              const n = byCell.get(`${x},${y}`) ?? 0
+      <Async state={clicks}>
+        {(data) => (
+          <div className="click-layout">
+            <div
+              className={`click-grid ${layout}`}
+              role="img"
+              aria-label={t('admin.clicks.gridLabel')}
+              style={{ gridTemplateColumns: `repeat(${data.columns}, 1fr)` }}
+            >
+              {Array.from({ length: rows * data.columns }, (_, index) => {
+                const x = index % data.columns
+                const y = Math.floor(index / data.columns)
+                const n = byCell.get(`${x},${y}`) ?? 0
 
-              return (
-                <span
-                  key={index}
-                  title={n === 0 ? undefined : String(n)}
-                  style={{ opacity: n === 0 ? 0.06 : 0.15 + (0.85 * n) / max }}
-                />
-              )
-            })}
+                return (
+                  <span
+                    key={index}
+                    title={n === 0 ? undefined : String(n)}
+                    style={{ opacity: n === 0 ? 0.06 : 0.15 + (0.85 * n) / max }}
+                  />
+                )
+              })}
+            </div>
+            <DataTable
+              id="click-elements"
+              rows={data.elements}
+              rowKey={(row) => `${row.interactive ? 1 : 0}|${row.element}`}
+              rowClass={(row) => (row.interactive ? '' : 'dead-click')}
+              columns={[
+                {
+                  id: 'element',
+                  label: t('admin.clicks.element'),
+                  sort: (row) => row.element,
+                  first: 'asc',
+                  cell: (row) => <code>{row.element}</code>,
+                },
+                {
+                  id: 'interactive',
+                  label: t('admin.clicks.interactive'),
+                  sort: (row) => (row.interactive ? 1 : 0),
+                  cell: (row) => (row.interactive ? t('admin.clicks.yes') : t('admin.clicks.dead')),
+                },
+                {
+                  id: 'n',
+                  label: t('admin.clicks.count'),
+                  sort: (row) => row.n,
+                  cell: (row) => number(row.n),
+                },
+              ]}
+            />
           </div>
-          <DataTable
-            id="click-elements"
-            rows={data.elements}
-            rowKey={(row) => `${row.interactive ? 1 : 0}|${row.element}`}
-            rowClass={(row) => (row.interactive ? '' : 'dead-click')}
-            columns={[
-              {
-                id: 'element',
-                label: t('admin.clicks.element'),
-                sort: (row) => row.element,
-                first: 'asc',
-                cell: (row) => <code>{row.element}</code>,
-              },
-              {
-                id: 'interactive',
-                label: t('admin.clicks.interactive'),
-                sort: (row) => (row.interactive ? 1 : 0),
-                cell: (row) => (row.interactive ? t('admin.clicks.yes') : t('admin.clicks.dead')),
-              },
-              {
-                id: 'n',
-                label: t('admin.clicks.count'),
-                sort: (row) => row.n,
-                cell: (row) => number(row.n),
-              },
-            ]}
-          />
-        </div>
-      )}
+        )}
+      </Async>
       <p className="hint">{t('admin.clicks.hint')}</p>
     </section>
   )

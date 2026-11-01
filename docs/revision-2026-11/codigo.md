@@ -149,8 +149,9 @@ Arreglado:
   lo que le queda a una pregunta estaba igual en las dos salas de Not games, y
   el `clamp` en el deslizador, los colores de la red y el Clicker.
 
-Pendiente (encontrado, no hecho para no reestructurar pantallas que otro
-agente está cambiando):
+Pendiente entonces (encontrado, no hecho para no reestructurar pantallas que
+otro agente estaba cambiando; lo que se hizo después, en «Duplicados de
+pantalla, después de la revisión de UX»):
 
 - **Carga y error a mano tras `useAsync`** (≈17 sitios, casi todo `admin/`):
   `if (loading) … ErrorNote …` en vez de `<Async>`. Mecánico.
@@ -174,19 +175,98 @@ agente está cambiando):
   deja, porque el de `shared/hooks` no se reajusta y la cuenta atrás saldría
   un segundo por encima al refrescar.
 
+### Duplicados de pantalla, después de la revisión de UX
+
+Lo que quedó pendiente arriba se volvió a mirar el 2026-11-01 sobre el código
+con la revisión de UX ya unida (`ux.md`): ninguno de los cambios de UX lo
+había resuelto, así que todos seguían. Hecho en la rama del agente sin cambiar
+el aspecto ni lo que se ve (los recorridos de `tests/ui/` pasan sin tocarlos).
+Fuera quedan, a propósito, `features/stats` (clasificaciones, Avance), el mapa
+(`ClusterMapView`, lo de piscineros en el mapa) y la API: otra persona los
+cambia a la vez.
+
+- **Carga y error a mano tras `useAsync`: hecho en 22 sitios.** Pasan a
+  `<Async>` los que hacían exactamente lo mismo (un «Cargando…» con `.estado` y
+  el error con «Reintentar» solo sin datos): `QuotaCard`, `DataPanel`,
+  `InboxTab`, `CheatsPanel`, `HiddenPanel`, `MaintenancePanel`, `PanelLock`,
+  las tres pestañas de `AdminPage` (consumo, personas, mensajes),
+  `UsageHeatmap` y `FlowsPanel` (con su vacío), `StatsPanel`, `StaffAccounts`,
+  `CountdownsPanel`, `BroadcastsTab`, `ClickMap`, `GrowthPanel`, `FocusPanel`,
+  `FocusMyStats`, `StartupPanel` y `HealthCard`. Se dejan, porque `<Async>`
+  cambiaría lo que se ve:
+  - su «Cargando…» va sin `.estado` (sin el fondo) o en `.hint`: `Guardia`,
+    `Expediente`, `PublicRecord`, `ProjectSelect`, `PeerList`, `DoubtBoard`,
+    `DoubtDetailCard`, `TherapyGroups`, `CalendarPage`, `BoardsCalendar`,
+    `PairDetail`, `StrictestCard`, `Attendance`, `Mailbox`, `Conversations`,
+    `StaffPage`, `GitCourseTab`, `ShellCourseTab`;
+  - enseñan el error también con datos (se recargan solos o tras una acción):
+    `ExamStatsPanel` (guarda los datos de antes), `ApiUsagePanel` (junta el
+    error de cambiar topes), la lista de salas de `NotGamesPage`, `ReviewTab`
+    (su lista se pinta siempre);
+  - `NetworkCard`: lo que pinta depende de `mine`, no de los datos;
+  - de otros: `HelpStatsPage` y `ProgressRanking` (`stats`), `ClustersPage`,
+    `ProjectMap` y `SeatPicker` (mapa).
+- **Título de sección: hecho.** `shared/ui/SectionTitle` (`title`, la demo
+  dentro y `tipTitle` si se llama distinto, como en Peer to peer). Lo usan 13
+  pantallas: Exámenes, Uso (`UsageHeatmap`), Pizarras, Scrum, Proyectos,
+  Not-games, On-call, Sprints, Perfil, Asientos, Red, Calendario y Peer to
+  peer. Sin `level`: todas son `h2`. Quedan el Avance, el Avance de la piscina
+  y las estadísticas de ayuda (`stats`) y Clústeres (mapa). No aplica a los
+  títulos con otra forma: el `InfoTip` en una `eyebrow` (`AskedCard`,
+  `LeaderboardCard`), en el título de una ventana (`Mailbox`, `Inbox`), tras
+  la frase de los cursos, el del ajedrez y el de «bloqueado» de On-call.
+- **Gráfica con panel de opciones: hecho, a medias.** `shared/ui/ChartWithRail`
+  (`chart`, `railLabel`, las opciones dentro y `framed={false}` cuando ya va en
+  una tarjeta); la usa el uso de la API. El Avance y el Avance de la piscina son
+  de `stats` y se quedan con su `div.progress-layout` hasta que acabe quien los
+  cambia: pasarlos es cambiar seis líneas en cada uno. La Red y los Asientos
+  tienen otra rejilla (`net-layout`, con el escenario a pantalla) y no aplican.
+- **Sondeo y salas: hecho.** La lista de salas de `GroupRoom.tsx` deja su
+  `setInterval` con `document.hidden` por `usePolling` (que además se para con
+  el Pomodoro a pantalla completa, como todo sondeo). Y `shared/hooks/useLiveRoom`
+  junta la carga de las tres salas que lleva el servidor: la de Not-games, la
+  de ajedrez y la de prueba de grupo del curso de git (la sala, su error, la
+  diferencia de reloj, `take` para lo que devuelve una acción y el sondeo
+  deprisa jugando y despacio esperando). Va en `shared` y no en `notgames`
+  porque la usa también `gitcourse`.
+- **Pastillas a mano: hecho en Exámenes**, sus dos grupos (mundo y examen).
+  No aplica en `Mailbox` ni en `EventRoom`: mezclan un botón que hace algo
+  (escribir a admins, «Voy») con otro que se enciende, y `PillGroup` les
+  pondría `aria-pressed` a los dos. Tampoco en `HolyGraph`: sus pastillas
+  despliegan series (`aria-expanded`), no eligen. `ClusterMapView`, de otros.
+- **Estilos de fecha: hecho.** `useFormat` gana `dayMonthYear`, `dayMonthYY`,
+  `weekdayDayMonth` y `longDate` en `date`, y `dateTime` acepta estilo
+  (`medium`, `long`, `numeric`, `dayMonth`, `weekday`, `weekdayYear`). Pasan a
+  ellos 14 llamadas: Exámenes, `BroadcastGate`, `BroadcastsTab`, `InboxTab`,
+  mensajes de `AdminPage`, `BoardForm`, `GroupForm`, `therapy/days.ts`,
+  `HolyGraph`, `PairDetail`, `LegalPage`, `StaffPage`, `FacilityList` y
+  `HealthCard` (también su número de horas). Un test comprueba, en los cinco
+  idiomas, que dicen lo mismo que las llamadas de antes. Se deja la de
+  `CapitalChart` (Code Clicker): sus opciones dependen del tramo que se mira.
+- **Inicial de un login: hecho.** `initialOf` (`shared/initial.ts`) en
+  `Avatar`, `SeatFace` y las demos de Scrum, Exámenes, Not-games y Asientos.
+  Quedan `ClusterMapView` y la demo de las estadísticas de ayuda (de otros).
+- **`useNow` propio** en `ExamsPage`: se deja, por lo de arriba.
+
+Tests nuevos: `tests/ui/screen-pieces.test.tsx` (`SectionTitle`,
+`ChartWithRail`, `initialOf`), `tests/ui/use-live-room.test.tsx` (carga,
+reloj del servidor, ritmo del sondeo por estado, fallo y reintento, pestaña
+oculta, otra sala) y los estilos nuevos en `tests/format.test.ts`. Permisos: no
+aplica, son piezas sin datos de nadie.
+
 ## Piezas comunes de la web (inventario)
 
 `shared/hooks`: `useAsync`/`useAction`, `usePolling`, `useNow`, `usePulse`,
-`useMediaQuery`, `usePeopleSearch`, `useGateQueue`. `shared/ui`: `Async`,
+`useMediaQuery`, `usePeopleSearch`, `useGateQueue`, `useLiveRoom`. `shared/ui`: `Async`,
 `ErrorNote`, `InfoTip`, `PillGroup`, `StepPicker`, `PeriodPicker`,
 `CampusPicker`, `DetailCards`, `ProjectPills`, `DataTable`, `RankingList`,
 `Modal`/`useConfirm`, `DayTimeFields`, `RangeSlider`, `SegmentSlider`,
 `CountdownClock`, `Avatar`, `PersonLink`, `PersonInput`, `PeopleResults`,
-`Qr`, `TitleBanner`, `ReportButton`, `PoolOnly`, `FocusBadge`, `Icon`.
+`Qr`, `TitleBanner`, `ReportButton`, `PoolOnly`, `FocusBadge`, `Icon`,
+`SectionTitle`, `ChartWithRail`.
 Tiempo: `shared/time.ts` (`clock`, `durationText`), `shared/day.ts`
 (`dayKey`, `hhmm`, `clockOf`), `shared/period.ts` (`dayOf`, `periodOf`),
-`useFormat`. Nuevo: `shared/math.ts`. No hay aún pieza común para la gráfica
-con panel de opciones ni para el título de sección.
+`useFormat`. Nuevos: `shared/math.ts` y `shared/initial.ts` (`initialOf`).
 
 ## Tests y casos límite
 

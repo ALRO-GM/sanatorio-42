@@ -9,7 +9,7 @@ import { BoardCard } from './BoardCard'
 import { orderBoards } from './order'
 import { BoardForm } from './BoardForm'
 import { dayKey } from '../../shared/day'
-import { InfoTip } from '../../shared/ui/InfoTip'
+import { SectionTitle } from '../../shared/ui/SectionTitle'
 import { BoardsTour } from './BoardsTour'
 
 /** Hasta dónde se miran las próximas pizarras, sin día elegido. */
@@ -80,12 +80,9 @@ export function BoardsCalendar() {
 
   return (
     <section>
-      <h2>
-        {t('cal.title')}
-        <InfoTip title={t('cal.title')}>
-          <BoardsTour />
-        </InfoTip>
-      </h2>
+      <SectionTitle title={t('cal.title')}>
+        <BoardsTour />
+      </SectionTitle>
 
       <div className="cal-layout">
         <div>

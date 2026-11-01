@@ -6,6 +6,7 @@ import { api } from '../../shared/api'
 import { useAction, useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { useFormat } from '../../shared/i18n/useFormat'
+import { ChartWithRail } from '../../shared/ui/ChartWithRail'
 import { DataTable } from '../../shared/ui/DataTable'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { StepPicker } from '../../shared/ui/StepPicker'
@@ -69,76 +70,75 @@ export function ApiUsagePanel() {
       <ErrorNote error={error ?? action.error} onRetry={() => void reload()} />
       {data !== undefined && (
         <>
-          <div className="progress-layout">
-            <div className="progress-card">
-              <UsageChart data={data} byPerson={feature !== null && login === null} />
-            </div>
-            <aside className="card progress-rail" aria-label={t('admin.api.options')}>
-              <StepPicker
-                options={HOURS}
-                value={hours}
-                onChange={setHours}
-                label={t('common.period')}
-                text={(option) => t('admin.api.hours', { n: option })}
-              />
-              <label className="progress-option">
-                {t('admin.api.feature')}
-                <select
-                  value={feature ?? ''}
-                  onChange={(event) => {
-                    setFeature(event.target.value === '' ? null : event.target.value)
-                  }}
-                >
-                  <option value="">{t('admin.api.all')}</option>
-                  {withPicked(
-                    data.features.map((row) => row.key),
-                    feature,
-                  ).map((key) => (
-                    <option key={key} value={key}>
-                      {label(key)}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="progress-option">
-                {t('admin.api.person')}
-                <select
-                  value={login ?? ''}
-                  onChange={(event) => {
-                    setLogin(event.target.value === '' ? null : event.target.value)
-                  }}
-                >
-                  <option value="">{t('admin.api.everyone')}</option>
-                  {withPicked(
-                    data.people.map((row) => row.login),
-                    login,
-                  ).map((key) => (
-                    <option key={key} value={key}>
-                      {key}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <div className="progress-option">
-                <span>{t('admin.api.perPerson')}</span>
-                <button
-                  type="button"
-                  className="pill"
-                  disabled={action.busy}
-                  onClick={() => {
-                    const cap = askCap(t('admin.api.askPerPerson'), data.limits.perPerson)
+          <ChartWithRail
+            framed={false}
+            railLabel={t('admin.api.options')}
+            chart={<UsageChart data={data} byPerson={feature !== null && login === null} />}
+          >
+            <StepPicker
+              options={HOURS}
+              value={hours}
+              onChange={setHours}
+              label={t('common.period')}
+              text={(option) => t('admin.api.hours', { n: option })}
+            />
+            <label className="progress-option">
+              {t('admin.api.feature')}
+              <select
+                value={feature ?? ''}
+                onChange={(event) => {
+                  setFeature(event.target.value === '' ? null : event.target.value)
+                }}
+              >
+                <option value="">{t('admin.api.all')}</option>
+                {withPicked(
+                  data.features.map((row) => row.key),
+                  feature,
+                ).map((key) => (
+                  <option key={key} value={key}>
+                    {label(key)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="progress-option">
+              {t('admin.api.person')}
+              <select
+                value={login ?? ''}
+                onChange={(event) => {
+                  setLogin(event.target.value === '' ? null : event.target.value)
+                }}
+              >
+                <option value="">{t('admin.api.everyone')}</option>
+                {withPicked(
+                  data.people.map((row) => row.login),
+                  login,
+                ).map((key) => (
+                  <option key={key} value={key}>
+                    {key}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <div className="progress-option">
+              <span>{t('admin.api.perPerson')}</span>
+              <button
+                type="button"
+                className="pill"
+                disabled={action.busy}
+                onClick={() => {
+                  const cap = askCap(t('admin.api.askPerPerson'), data.limits.perPerson)
 
-                    if (cap !== undefined) void change({ perPerson: cap })
-                  }}
-                >
-                  {data.limits.perPerson === null
-                    ? t('admin.api.noCap')
-                    : t('admin.api.capValue', { n: data.limits.perPerson })}
-                </button>
-                <small className="hint">{t('admin.api.perPersonHint')}</small>
-              </div>
-            </aside>
-          </div>
+                  if (cap !== undefined) void change({ perPerson: cap })
+                }}
+              >
+                {data.limits.perPerson === null
+                  ? t('admin.api.noCap')
+                  : t('admin.api.capValue', { n: data.limits.perPerson })}
+              </button>
+              <small className="hint">{t('admin.api.perPersonHint')}</small>
+            </div>
+          </ChartWithRail>
 
           <h3>{t('admin.api.byFeature')}</h3>
           <DataTable

@@ -13,7 +13,7 @@ import { GuidePanel } from './GuidePanel'
 import { HolyGraph } from './HolyGraph'
 import { PiscineGraph } from './PiscineGraph'
 import { CorrectionGraph } from './CorrectionGraph'
-import { InfoTip } from '../../shared/ui/InfoTip'
+import { SectionTitle } from '../../shared/ui/SectionTitle'
 import { Icon } from '../../shared/ui/Icon'
 import { BoardTour } from './BoardTour'
 import { PoolOnly } from '../../shared/ui/PoolOnly'
@@ -59,12 +59,9 @@ export function DoubtBoard({ initialProject }: DoubtBoardProps) {
 
   return (
     <section>
-      <h2>
-        {t('board.title')}
-        <InfoTip title={t('board.title')}>
-          <BoardTour />
-        </InfoTip>
-      </h2>
+      <SectionTitle title={t('board.title')}>
+        <BoardTour />
+      </SectionTitle>
 
       {graph.loading && <p>{t('graph.loading')}</p>}
       {graph.data === undefined ? (

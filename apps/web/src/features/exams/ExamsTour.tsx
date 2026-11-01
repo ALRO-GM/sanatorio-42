@@ -1,4 +1,5 @@
 import { useI18n } from '../../shared/i18n'
+import { initialOf } from '../../shared/initial'
 import { clock } from '../../shared/time'
 import { click, cut, defineTour, Tour } from '../../shared/tour/Tour'
 
@@ -144,7 +145,7 @@ export function ExamsTour() {
                 return (
                   <span key={person.login} className="tour-item">
                     <span className="tour-avatar" style={{ ['--hue' as string]: person.hue }}>
-                      {person.login.charAt(0).toUpperCase()}
+                      {initialOf(person.login)}
                     </span>
                     <span>
                       <strong>{person.login}</strong>

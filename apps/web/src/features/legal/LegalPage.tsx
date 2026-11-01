@@ -1,6 +1,7 @@
 import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
-import { localeOf, useI18n } from '../../shared/i18n'
+import { useI18n } from '../../shared/i18n'
+import { useFormat } from '../../shared/i18n/useFormat'
 import { Icon } from '../../shared/ui/Icon'
 import { AnonymizeAccount } from './AnonymizeAccount'
 import { LegalDocument } from './LegalDocument'
@@ -11,7 +12,8 @@ import { legalText } from './text'
  * lo tuyo. Sin sesión (desde la pantalla de entrada) se ve solo el texto.
  */
 export function LegalPage({ signedIn }: { signedIn: boolean }) {
-  const { t, lang, tree } = useI18n()
+  const { t, tree } = useI18n()
+  const { date } = useFormat()
   const status = useAsync(() => (signedIn ? api.getLegal() : Promise.resolve(null)), [signedIn])
   const accepted = status.data?.acceptedAt ?? null
   const me = useAsync(() => (signedIn ? api.getMe() : Promise.resolve(null)), [signedIn])
@@ -25,9 +27,7 @@ export function LegalPage({ signedIn }: { signedIn: boolean }) {
             {accepted === null
               ? t('legal.notAccepted')
               : t('legal.acceptedOn', {
-                  date: new Date(accepted).toLocaleDateString(localeOf(lang), {
-                    dateStyle: 'long',
-                  }),
+                  date: date(accepted, 'longDate'),
                 })}
           </p>
           <a className="button primary small" href={api.exportUrl()} download>

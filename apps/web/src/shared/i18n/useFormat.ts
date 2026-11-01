@@ -21,6 +21,31 @@ type DateStyle =
   | 'long'
   /** `octubre de 2025`. */
   | 'monthLong'
+  /** `13 oct 2025`, con las partes dichas una a una (`medium` puede ordenarlas distinto). */
+  | 'dayMonthYear'
+  /** `13 oct 25`: una fecha corta en una lista apretada. */
+  | 'dayMonthYY'
+  /** `lun, 13 oct`: un día de un grupo, que se lee junto a otros. */
+  | 'weekdayDayMonth'
+  /** `13 de octubre de 2025`: una fecha que se lee entera (cuándo aceptaste algo). */
+  | 'longDate'
+
+/** Los estilos de fecha y hora. */
+type DateTimeStyle =
+  /** `13/10/25, 16:05`. */
+  | 'short'
+  /** `13 oct 2025, 16:05`. */
+  | 'medium'
+  /** `13 de octubre de 2025, 16:05`. */
+  | 'long'
+  /** `13/10/2025, 16:05:00`: lo que da `toLocaleString()` sin opciones, para el panel. */
+  | 'numeric'
+  /** `13 oct, 16:05`. */
+  | 'dayMonth'
+  /** `lunes, 13 de octubre, 16:05`. */
+  | 'weekday'
+  /** `lunes, 13 de octubre de 2025, 16:05`: lo que se confirma antes de mover algo. */
+  | 'weekdayYear'
 
 type Formats = {
   /** `1.234` con, como mucho, `digits` decimales. */
@@ -35,8 +60,7 @@ type Formats = {
   /** `16:05`. */
   time: (value: Moment) => string
   date: (value: Moment, style?: DateStyle) => string
-  /** `13/10/25, 16:05`. */
-  dateTime: (value: Moment) => string
+  dateTime: (value: Moment, style?: DateTimeStyle) => string
 }
 
 const DATE_OPTIONS: Record<DateStyle, Intl.DateTimeFormatOptions> = {
@@ -47,6 +71,29 @@ const DATE_OPTIONS: Record<DateStyle, Intl.DateTimeFormatOptions> = {
   weekday: { weekday: 'short' },
   long: { weekday: 'long', day: 'numeric', month: 'long' },
   monthLong: { month: 'long', year: 'numeric' },
+  dayMonthYear: { day: 'numeric', month: 'short', year: 'numeric' },
+  dayMonthYY: { day: 'numeric', month: 'short', year: '2-digit' },
+  weekdayDayMonth: { weekday: 'short', day: 'numeric', month: 'short' },
+  longDate: { dateStyle: 'long' },
+}
+
+const HOUR = { hour: '2-digit', minute: '2-digit' } as const
+
+const DATE_TIME_OPTIONS: Record<DateTimeStyle, Intl.DateTimeFormatOptions> = {
+  short: { dateStyle: 'short', timeStyle: 'short' },
+  medium: { dateStyle: 'medium', timeStyle: 'short' },
+  long: { dateStyle: 'long', timeStyle: 'short' },
+  numeric: {
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+    second: 'numeric',
+  },
+  dayMonth: { day: 'numeric', month: 'short', ...HOUR },
+  weekday: { weekday: 'long', day: 'numeric', month: 'long', ...HOUR },
+  weekdayYear: { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', ...HOUR },
 }
 
 const toDate = (value: Moment): Date => (value instanceof Date ? value : new Date(value))
@@ -73,10 +120,8 @@ export function formatsFor(lang: string): Formats {
   if (known !== undefined) return known
 
   const numbers = new Map<number | undefined, Intl.NumberFormat>()
-  const dates = new Map<DateStyle, Intl.DateTimeFormat>()
   const compact = new Intl.NumberFormat(locale, { notation: 'compact', maximumFractionDigits: 1 })
-  const time = new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit' })
-  const dateTime = new Intl.DateTimeFormat(locale, { dateStyle: 'short', timeStyle: 'short' })
+  const time = new Intl.DateTimeFormat(locale, HOUR)
   const numberOf = (digits: number | undefined): Intl.NumberFormat => {
     let format = numbers.get(digits)
 
@@ -90,12 +135,14 @@ export function formatsFor(lang: string): Formats {
 
     return format
   }
-  const dateOf = (style: DateStyle): Intl.DateTimeFormat => {
-    let format = dates.get(style)
+  // Un formateador de fecha por estilo, montado la primera vez que se pide.
+  const moments = new Map<string, Intl.DateTimeFormat>()
+  const momentOf = (key: string, options: Intl.DateTimeFormatOptions): Intl.DateTimeFormat => {
+    let format = moments.get(key)
 
     if (format === undefined) {
-      format = new Intl.DateTimeFormat(locale, DATE_OPTIONS[style])
-      dates.set(style, format)
+      format = new Intl.DateTimeFormat(locale, options)
+      moments.set(key, format)
     }
 
     return format
@@ -129,8 +176,10 @@ export function formatsFor(lang: string): Formats {
     compact: (value) => compact.format(value),
     bytes,
     time: (value) => time.format(toDate(value)),
-    date: (value, style = 'short') => dateOf(style).format(toDate(value)),
-    dateTime: (value) => dateTime.format(toDate(value)),
+    date: (value, style = 'short') =>
+      momentOf(`date:${style}`, DATE_OPTIONS[style]).format(toDate(value)),
+    dateTime: (value, style = 'short') =>
+      momentOf(`dateTime:${style}`, DATE_TIME_OPTIONS[style]).format(toDate(value)),
   }
 
   cache.set(locale, formats)

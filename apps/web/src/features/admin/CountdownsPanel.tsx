@@ -9,6 +9,7 @@ import { useAction, useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { useFormat } from '../../shared/i18n/useFormat'
 import { DayTimeFields, instantOf } from '../../shared/ui/DayTimeFields'
+import { Async } from '../../shared/ui/Async'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { PillGroup } from '../../shared/ui/PillGroup'
 
@@ -139,30 +140,29 @@ export function CountdownsPanel({ campusId }: { campusId: number | undefined }) 
         </div>
       </form>
 
-      {sent.loading && <p className="estado">{t('app.loading')}</p>}
-      {sent.data === undefined ? (
-        <ErrorNote error={sent.error} onRetry={() => void sent.reload()} />
-      ) : (
-        <article className="card">
-          <span className="eyebrow">{t('admin.countdown.sent')}</span>
-          {sent.data.length === 0 ? (
-            <p className="hint">{t('admin.countdown.none')}</p>
-          ) : (
-            <ul className="rows">
-              {sent.data.map((report) => (
-                <SentCountdown
-                  key={report.id}
-                  report={report}
-                  onRemoved={() => {
-                    void sent.reload()
-                    void loadCountdowns()
-                  }}
-                />
-              ))}
-            </ul>
-          )}
-        </article>
-      )}
+      <Async state={sent}>
+        {(list) => (
+          <article className="card">
+            <span className="eyebrow">{t('admin.countdown.sent')}</span>
+            {list.length === 0 ? (
+              <p className="hint">{t('admin.countdown.none')}</p>
+            ) : (
+              <ul className="rows">
+                {list.map((report) => (
+                  <SentCountdown
+                    key={report.id}
+                    report={report}
+                    onRemoved={() => {
+                      void sent.reload()
+                      void loadCountdowns()
+                    }}
+                  />
+                ))}
+              </ul>
+            )}
+          </article>
+        )}
+      </Async>
     </>
   )
 }

@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import type { TurnPlayer, TurnRoom, TurnSide } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
 import { useAction } from '../../shared/hooks/useAsync'
-import { usePolling } from '../../shared/hooks/usePolling'
+import { useLiveRoom } from '../../shared/hooks/useLiveRoom'
 import { useNow } from '../../shared/hooks/useNow'
 import { useI18n } from '../../shared/i18n'
 import { notGamesHref } from '../../shared/links'
@@ -42,43 +42,18 @@ function clockText(ms: number): string {
  */
 export function TurnRoomView({ id, me }: { id: number; me: string }) {
   const { t } = useI18n()
-  const [room, setRoom] = useState<TurnRoom | null>(null)
-  const [error, setError] = useState<unknown>(null)
   const [style, setStyle] = useState<BoardStyle>(loadBoardStyle)
-  const offset = useRef(0)
   const action = useAction()
   const sounds = useGameSounds()
   // Repasando la partida acabada: qué posición se ve (`null`, la de ahora).
   const [step, setStep] = useState<number | null>(null)
-
-  const take = useCallback(
-    (next: TurnRoom) => {
-      offset.current = Date.parse(next.now) - Date.now()
-      setRoom((previous) => {
-        sounds.turnChanged(previous, next, me)
-
-        return next
-      })
-      setError(null)
+  const { room, error, load, take, offset } = useLiveRoom(() => api.getTurnRoom(id), [id], {
+    playingMs: PLAYING_MS,
+    waitingMs: WAITING_MS,
+    onChange: (previous, next) => {
+      sounds.turnChanged(previous, next, me)
     },
-    [me, sounds],
-  )
-
-  const load = useCallback(async () => {
-    try {
-      take(await api.getTurnRoom(id))
-    } catch (caught) {
-      setError(caught)
-    }
-  }, [id, take])
-
-  useEffect(() => {
-    void load()
-  }, [load])
-
-  const status = room?.status
-
-  usePolling(load, status === 'done' ? null : status === 'playing' ? PLAYING_MS : WAITING_MS)
+  })
 
   if (room === null) {
     return error === null ? (

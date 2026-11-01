@@ -6,9 +6,9 @@ import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { useFormat } from '../../shared/i18n/useFormat'
-import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { Async } from '../../shared/ui/Async'
 import { PillGroup } from '../../shared/ui/PillGroup'
-import { InfoTip } from '../../shared/ui/InfoTip'
+import { SectionTitle } from '../../shared/ui/SectionTitle'
 import { SegmentSlider } from '../../shared/ui/SegmentSlider'
 import type { SegmentRange } from '../../shared/ui/SegmentSlider'
 
@@ -36,10 +36,7 @@ export function UsageHeatmap({
 }) {
   const { t } = useI18n()
   const [by, setBy] = useState<Heatmap['by']>('total')
-  const { data, error, loading, reload } = useAsync(
-    () => api.getUsageHeatmap(by, segment),
-    [by, segment.low, segment.high],
-  )
+  const heatmap = useAsync(() => api.getUsageHeatmap(by, segment), [by, segment.low, segment.high])
 
   /** Nombre legible de un elemento: la pestaña o el bloque, con su página delante. */
   const nameOf = (key: string): string => {
@@ -55,12 +52,9 @@ export function UsageHeatmap({
 
   return (
     <section>
-      <h2>
-        {t('admin.usage.title')}
-        <InfoTip title={t('admin.usage.title')}>
-          <p>{t('admin.usage.subtitle')}</p>
-        </InfoTip>
-      </h2>
+      <SectionTitle title={t('admin.usage.title')}>
+        <p>{t('admin.usage.subtitle')}</p>
+      </SectionTitle>
 
       <PillGroup
         options={GROUPINGS}
@@ -70,16 +64,15 @@ export function UsageHeatmap({
         text={(option) => t(`admin.usage.by.${option}`)}
       />
 
-      <SegmentSlider value={segment} onChange={onSegment} told={data?.segment} />
+      <SegmentSlider value={segment} onChange={onSegment} told={heatmap.data?.segment} />
 
-      {loading && <p className="estado">{t('app.loading')}</p>}
-      {!loading && data === undefined && <ErrorNote error={error} onRetry={() => void reload()} />}
-      {data !== undefined &&
-        (data.rows.length === 0 ? (
-          <p className="estado">{t('admin.usage.empty')}</p>
-        ) : (
-          <HeatTable data={data} nameOf={nameOf} groupName={groupName} />
-        ))}
+      <Async
+        state={heatmap}
+        empty={(data) => data.rows.length === 0}
+        emptyText={t('admin.usage.empty')}
+      >
+        {(data) => <HeatTable data={data} nameOf={nameOf} groupName={groupName} />}
+      </Async>
     </section>
   )
 }

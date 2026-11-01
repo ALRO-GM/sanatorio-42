@@ -9,7 +9,7 @@ import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { ProjectPills } from '../../shared/ui/ProjectPills'
 import { GroupCard } from './GroupCard'
 import { GroupForm } from './GroupForm'
-import { InfoTip } from '../../shared/ui/InfoTip'
+import { SectionTitle } from '../../shared/ui/SectionTitle'
 import { TherapyTour } from './TherapyTour'
 
 type TherapyGroupsProps = {
@@ -31,12 +31,9 @@ export function TherapyGroups({ projects, initialProject, me }: TherapyGroupsPro
 
   return (
     <section>
-      <h2>
-        {t('therapy.title')}
-        <InfoTip title={t('therapy.title')}>
-          <TherapyTour />
-        </InfoTip>
-      </h2>
+      <SectionTitle title={t('therapy.title')}>
+        <TherapyTour />
+      </SectionTitle>
 
       <div className="filters">
         <ProjectPills

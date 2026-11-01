@@ -5,6 +5,7 @@ import { api } from '../../shared/api'
 import { useAction, useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { useFormat } from '../../shared/i18n/useFormat'
+import { Async } from '../../shared/ui/Async'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { Icon } from '../../shared/ui/Icon'
 import { Qr } from '../../shared/ui/Qr'
@@ -48,100 +49,105 @@ export function PanelLock({ children }: { children: ReactNode }) {
     }
   }, [until, status])
 
-  if (status.loading) return <p className="estado">{t('app.loading')}</p>
-  if (status.data === undefined) {
-    return <ErrorNote error={status.error} onRetry={() => void status.reload()} />
-  }
-
-  if (until !== null) {
-    return (
-      <>
-        <p className="hint panel-open">
-          <Icon name="escudo" size={14} />{' '}
-          {t('admin.lock.openUntil', {
-            time: time(until),
-          })}{' '}
-          <button
-            type="button"
-            className="link"
-            onClick={() =>
-              void run(async () => {
-                await api.lockPanel()
-                await status.reload()
-              })
-            }
-          >
-            {t('admin.lock.close')}
-          </button>
-        </p>
-        {children}
-      </>
-    )
-  }
-
-  const enrolled = status.data.enrolled
-
-  const submit = async (event: SyntheticEvent): Promise<void> => {
-    event.preventDefault()
-
-    const ok = await run(() =>
-      enrolled ? api.verifySecondFactor(code) : api.confirmSecondFactor(code),
-    )
-
-    setCode('')
-    if (ok) await status.reload()
-  }
-
   return (
-    <article className="card form panel-lock">
-      <h3>
-        <Icon name="escudo" /> {t(enrolled ? 'admin.lock.title' : 'admin.lock.enrollTitle')}
-      </h3>
-      <p className="hint">{t(enrolled ? 'admin.lock.ask' : 'admin.lock.enrollAsk')}</p>
+    <Async state={status}>
+      {(data) => {
+        if (until !== null) {
+          return (
+            <>
+              <p className="hint panel-open">
+                <Icon name="escudo" size={14} />{' '}
+                {t('admin.lock.openUntil', {
+                  time: time(until),
+                })}{' '}
+                <button
+                  type="button"
+                  className="link"
+                  onClick={() =>
+                    void run(async () => {
+                      await api.lockPanel()
+                      await status.reload()
+                    })
+                  }
+                >
+                  {t('admin.lock.close')}
+                </button>
+              </p>
+              {children}
+            </>
+          )
+        }
 
-      {!enrolled && uri === null && (
-        <button
-          type="button"
-          className="primary small"
-          disabled={busy}
-          onClick={() =>
-            void run(async () => {
-              setUri((await api.setupSecondFactor()).uri)
-            })
-          }
-        >
-          {t('admin.lock.generate')}
-        </button>
-      )}
-      {!enrolled && uri !== null && (
-        <div className="panel-lock-qr">
-          <Qr text={uri} label={t('admin.lock.qr')} />
-          <small className="hint">
-            {t('admin.lock.manual')} <code>{secretOf(uri)}</code>
-          </small>
-        </div>
-      )}
+        const enrolled = data.enrolled
 
-      {(enrolled || uri !== null) && (
-        <form className="actions" onSubmit={(event) => void submit(event)}>
-          <input
-            value={code}
-            inputMode="numeric"
-            autoComplete="one-time-code"
-            pattern="[0-9]{6}"
-            maxLength={6}
-            placeholder="123456"
-            aria-label={t('admin.lock.code')}
-            onChange={(event) => {
-              setCode(event.target.value.replace(/\D/g, ''))
-            }}
-          />
-          <button type="submit" className="primary small" disabled={busy || code.length !== 6}>
-            {t(enrolled ? 'admin.lock.open' : 'admin.lock.confirm')}
-          </button>
-        </form>
-      )}
-      <ErrorNote error={error} />
-    </article>
+        const submit = async (event: SyntheticEvent): Promise<void> => {
+          event.preventDefault()
+
+          const ok = await run(() =>
+            enrolled ? api.verifySecondFactor(code) : api.confirmSecondFactor(code),
+          )
+
+          setCode('')
+          if (ok) await status.reload()
+        }
+
+        return (
+          <article className="card form panel-lock">
+            <h3>
+              <Icon name="escudo" /> {t(enrolled ? 'admin.lock.title' : 'admin.lock.enrollTitle')}
+            </h3>
+            <p className="hint">{t(enrolled ? 'admin.lock.ask' : 'admin.lock.enrollAsk')}</p>
+
+            {!enrolled && uri === null && (
+              <button
+                type="button"
+                className="primary small"
+                disabled={busy}
+                onClick={() =>
+                  void run(async () => {
+                    setUri((await api.setupSecondFactor()).uri)
+                  })
+                }
+              >
+                {t('admin.lock.generate')}
+              </button>
+            )}
+            {!enrolled && uri !== null && (
+              <div className="panel-lock-qr">
+                <Qr text={uri} label={t('admin.lock.qr')} />
+                <small className="hint">
+                  {t('admin.lock.manual')} <code>{secretOf(uri)}</code>
+                </small>
+              </div>
+            )}
+
+            {(enrolled || uri !== null) && (
+              <form className="actions" onSubmit={(event) => void submit(event)}>
+                <input
+                  value={code}
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  pattern="[0-9]{6}"
+                  maxLength={6}
+                  placeholder="123456"
+                  aria-label={t('admin.lock.code')}
+                  onChange={(event) => {
+                    setCode(event.target.value.replace(/\D/g, ''))
+                  }}
+                />
+                <button
+                  type="submit"
+                  className="primary small"
+                  disabled={busy || code.length !== 6}
+                >
+                  {t(enrolled ? 'admin.lock.open' : 'admin.lock.confirm')}
+                </button>
+              </form>
+            )}
+            <ErrorNote error={error} />
+          </article>
+        )
+      }}
+    </Async>
   )
 }

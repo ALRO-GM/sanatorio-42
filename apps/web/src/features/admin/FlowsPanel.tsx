@@ -9,7 +9,7 @@ import { useFormat } from '../../shared/i18n/useFormat'
 import { dayOf } from '../../shared/period'
 import { DataTable } from '../../shared/ui/DataTable'
 import { durationText } from '../../shared/time'
-import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { Async } from '../../shared/ui/Async'
 import { SegmentSlider } from '../../shared/ui/SegmentSlider'
 import type { SegmentRange } from '../../shared/ui/SegmentSlider'
 import { RangePills } from './RangePills'
@@ -51,7 +51,7 @@ export function FlowsPanel({
   const { t } = useI18n()
   const [days, setDays] = useState<number>(7)
   const [picked, setPicked] = useState<string | null>(null)
-  const { data, error, loading, reload } = useAsync(
+  const flows = useAsync(
     () =>
       api.getFlows({
         from: dayOf(Date.now() - (days - 1) * DAY_MS),
@@ -67,16 +67,15 @@ export function FlowsPanel({
     <>
       <RangePills value={days} onChange={setDays} />
 
-      <SegmentSlider value={segment} onChange={onSegment} told={data?.segment} />
+      <SegmentSlider value={segment} onChange={onSegment} told={flows.data?.segment} />
 
-      {loading && <p className="estado">{t('app.loading')}</p>}
-      {data === undefined ? (
-        <ErrorNote error={error} onRetry={() => void reload()} />
-      ) : data.flows.length === 0 ? (
-        <p className="estado">{t('admin.flows.empty')}</p>
-      ) : (
-        <Flows data={data} name={name} picked={picked} onPick={setPicked} />
-      )}
+      <Async
+        state={flows}
+        empty={(data) => data.flows.length === 0}
+        emptyText={t('admin.flows.empty')}
+      >
+        {(data) => <Flows data={data} name={name} picked={picked} onPick={setPicked} />}
+      </Async>
     </>
   )
 }

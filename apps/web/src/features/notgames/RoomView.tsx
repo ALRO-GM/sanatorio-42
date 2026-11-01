@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect } from 'react'
 
 import type { QuizPlayer, QuizQuestion, QuizRoom, QuizTeam } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
 import { useAction } from '../../shared/hooks/useAsync'
-import { usePolling } from '../../shared/hooks/usePolling'
+import { useLiveRoom } from '../../shared/hooks/useLiveRoom'
 import { useNow } from '../../shared/hooks/useNow'
 import { useI18n } from '../../shared/i18n'
 import { notGamesHref } from '../../shared/links'
@@ -30,41 +30,15 @@ type RoomViewProps = { id: number; me: string }
  */
 export function RoomView({ id, me }: RoomViewProps) {
   const { t } = useI18n()
-  const [room, setRoom] = useState<QuizRoom | null>(null)
-  const [error, setError] = useState<unknown>(null)
-  // Diferencia entre el reloj del servidor y el de aquí.
-  const offset = useRef(0)
   const action = useAction()
-
   const sounds = useGameSounds()
-  const take = useCallback(
-    (next: QuizRoom) => {
-      offset.current = Date.parse(next.now) - Date.now()
-      setRoom((previous) => {
-        sounds.quizChanged(previous, next, me)
-
-        return next
-      })
-      setError(null)
+  const { room, error, load, take, offset } = useLiveRoom(() => api.getQuizRoom(id), [id], {
+    playingMs: PLAYING_MS,
+    waitingMs: WAITING_MS,
+    onChange: (previous, next) => {
+      sounds.quizChanged(previous, next, me)
     },
-    [me, sounds],
-  )
-
-  const load = useCallback(async () => {
-    try {
-      take(await api.getQuizRoom(id))
-    } catch (caught) {
-      setError(caught)
-    }
-  }, [id, take])
-
-  useEffect(() => {
-    void load()
-  }, [load])
-
-  const status = room?.status
-
-  usePolling(load, status === 'done' ? null : status === 'playing' ? PLAYING_MS : WAITING_MS)
+  })
 
   if (room === null) {
     return error === null ? (

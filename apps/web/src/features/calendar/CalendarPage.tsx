@@ -16,7 +16,7 @@ import { EventDialog } from './EventDialog'
 import { KINDS, loadHidden, loadView, saveHidden, saveView, VIEWS } from './kinds'
 import type { View } from './kinds'
 import { Icon } from '../../shared/ui/Icon'
-import { InfoTip } from '../../shared/ui/InfoTip'
+import { SectionTitle } from '../../shared/ui/SectionTitle'
 import { AgendaTour } from './AgendaTour'
 import { CountdownsView } from './CountdownsView'
 import { DayTimeline } from './DayTimeline'
@@ -164,12 +164,9 @@ export function CalendarPage({ focus = null, onGo, me }: CalendarPageProps) {
 
   return (
     <section>
-      <h2>
-        {t('agenda.title')}
-        <InfoTip title={t('agenda.title')}>
-          <AgendaTour />
-        </InfoTip>
-      </h2>
+      <SectionTitle title={t('agenda.title')}>
+        <AgendaTour />
+      </SectionTitle>
 
       <PillGroup
         className="calendar-tabs"

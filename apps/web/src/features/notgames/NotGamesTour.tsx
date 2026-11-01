@@ -1,4 +1,5 @@
 import { useI18n } from '../../shared/i18n'
+import { initialOf } from '../../shared/initial'
 import { click, cut, defineTour, Tour } from '../../shared/tour/Tour'
 import { Icon } from '../../shared/ui/Icon'
 
@@ -122,7 +123,7 @@ export function NotGamesTour() {
             {PLAYERS.map((player) => (
               <span key={player.login} className={`tour-item ${player.lives === 0 ? '' : 'on'}`}>
                 <span className="tour-avatar" style={{ ['--hue' as string]: player.hue }}>
-                  {player.login.charAt(0).toUpperCase()}
+                  {initialOf(player.login)}
                 </span>
                 <strong>{player.login}</strong>
                 <span className="tour-chip tour-end">

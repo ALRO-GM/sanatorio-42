@@ -6,10 +6,12 @@ import type { Health, PaceRef } from '@sanatorio/contracts'
 import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { shows, useDetail } from '../../shared/detail'
-import { localeOf, useI18n } from '../../shared/i18n'
+import { useI18n } from '../../shared/i18n'
+import { useFormat } from '../../shared/i18n/useFormat'
 import { INTRA_HOME, progressHref } from '../../shared/links'
 import { daysBetween, originOf, paceOn, PACES, SLOWEST, stepsFor } from '../../shared/pace'
 import type { PaceStep } from '../../shared/pace'
+import { Async } from '../../shared/ui/Async'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { Icon } from '../../shared/ui/Icon'
 
@@ -49,7 +51,6 @@ export function HealthCard({ health }: HealthCardProps) {
     () => (health === undefined ? api.getHealth() : Promise.resolve(health)),
     [health],
   )
-  const { data, error, loading, reload, setData } = own
 
   return (
     <article className="card health">
@@ -59,11 +60,11 @@ export function HealthCard({ health }: HealthCardProps) {
             tragó el black hole de tu campus, los paces y tu línea. El Avance sale
             desde el modo normal: en el simplificado, el enlace llevaría a una
             pestaña que no se ve. */}
-        {health === undefined && data !== undefined && shows(detail, 'normal') && (
+        {health === undefined && own.data !== undefined && shows(detail, 'normal') && (
           <a
             className="link"
             href={progressHref({
-              plan: [data.track],
+              plan: [own.data.track],
               pop: ['current', 'blackholed'],
               scope: ['campus'],
               paces: true,
@@ -74,19 +75,20 @@ export function HealthCard({ health }: HealthCardProps) {
           </a>
         )}
       </div>
-      {loading && <p className="estado">{t('health.loading')}</p>}
-      {!loading && data === undefined && <ErrorNote error={error} onRetry={() => void reload()} />}
-      {data !== undefined &&
-        (data.startedAt === null ? (
-          <p className="estado">{t('health.unknown')}</p>
-        ) : (
-          <HealthBody
-            health={data}
-            startedAt={data.startedAt}
-            mine={health === undefined}
-            onSaved={setData}
-          />
-        ))}
+      <Async state={own} loadingText={t('health.loading')}>
+        {(data) =>
+          data.startedAt === null ? (
+            <p className="estado">{t('health.unknown')}</p>
+          ) : (
+            <HealthBody
+              health={data}
+              startedAt={data.startedAt}
+              mine={health === undefined}
+              onSaved={own.setData}
+            />
+          )
+        }
+      </Async>
     </article>
   )
 }
@@ -100,7 +102,8 @@ type HealthBodyProps = {
 }
 
 function HealthBody({ health, startedAt, mine, onSaved }: HealthBodyProps) {
-  const { t, tn, lang } = useI18n()
+  const { t, tn } = useI18n()
+  const fmt = useFormat()
   // En el expediente de otra persona, las frases van en tercera persona (`…Other`).
   // Se fija al montar: las cuentas no deben bailar entre un render y el siguiente.
   const [now] = useState(() => Date.now())
@@ -113,12 +116,7 @@ function HealthBody({ health, startedAt, mine, onSaved }: HealthBodyProps) {
   // El día cero: de él cuelgan todas las fechas. Sin pace anotado, no lo hay.
   const origin = declared === null ? null : originOf(declared)
 
-  const day = (date: Date | string): string =>
-    new Date(date).toLocaleDateString(localeOf(lang), {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-    })
+  const day = (value: Date | string): string => fmt.date(value, 'dayMonthYear')
 
   const started = (
     <small>
@@ -137,7 +135,7 @@ function HealthBody({ health, startedAt, mine, onSaved }: HealthBodyProps) {
         {health.clusterHours === null
           ? '—'
           : t('health.hoursValue', {
-              n: health.clusterHours.toLocaleString(localeOf(lang)),
+              n: fmt.number(health.clusterHours),
             })}
       </strong>
     </div>

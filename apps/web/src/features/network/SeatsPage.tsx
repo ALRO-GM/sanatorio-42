@@ -21,7 +21,7 @@ import { StepPicker } from '../../shared/ui/StepPicker'
 import { daysOf } from '../../shared/period'
 import type { Period } from '../../shared/period'
 import { Avatar } from '../../shared/ui/Avatar'
-import { InfoTip } from '../../shared/ui/InfoTip'
+import { SectionTitle } from '../../shared/ui/SectionTitle'
 import { PersonLink } from '../../shared/ui/PersonLink'
 import { PersonInput } from '../../shared/ui/PersonInput'
 import { colorOf, scaleColor } from './colors'
@@ -238,12 +238,9 @@ export function SeatsPage({ me }: { me?: string }) {
       <div className="net-layout">
         <div className="net-rail">
           <div className="net-head">
-            <h2>
-              {t('seats.title')}
-              <InfoTip title={t('seats.title')}>
-                <SeatsTour />
-              </InfoTip>
-            </h2>
+            <SectionTitle title={t('seats.title')}>
+              <SeatsTour />
+            </SectionTitle>
             {answer !== null && (
               <p className="progress-answer neutral net-answer">
                 <span className="eyebrow">{t('stats.progress.answer.label')}</span>

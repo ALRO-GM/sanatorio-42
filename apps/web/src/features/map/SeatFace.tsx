@@ -1,6 +1,7 @@
 import { useState } from 'react'
 
 import { photoUrl } from '../../shared/api'
+import { initialOf } from '../../shared/initial'
 
 type SeatFaceProps = {
   login: string
@@ -24,7 +25,7 @@ export function SeatFace({ login, image }: SeatFaceProps) {
   const src = photoUrl(login, image)
 
   if (src === null || failed) {
-    return <span className="seat-initial">{login.charAt(0).toUpperCase()}</span>
+    return <span className="seat-initial">{initialOf(login)}</span>
   }
 
   return (

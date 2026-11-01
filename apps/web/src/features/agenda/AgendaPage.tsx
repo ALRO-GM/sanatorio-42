@@ -16,7 +16,7 @@ import { useFormat } from '../../shared/i18n/useFormat'
 import { Async } from '../../shared/ui/Async'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { Icon } from '../../shared/ui/Icon'
-import { InfoTip } from '../../shared/ui/InfoTip'
+import { SectionTitle } from '../../shared/ui/SectionTitle'
 import { GoalCard } from './GoalCard'
 import { GoalForm } from './GoalForm'
 import { ScrumTour } from './ScrumTour'
@@ -48,12 +48,9 @@ export function AgendaPage({ onGo, me }: AgendaPageProps) {
 
   return (
     <section className="scrum">
-      <h2>
-        {t('scrum.title')}
-        <InfoTip title={t('scrum.title')}>
-          <ScrumTour />
-        </InfoTip>
-      </h2>
+      <SectionTitle title={t('scrum.title')}>
+        <ScrumTour />
+      </SectionTitle>
 
       <div className="filters">
         {!creating && (
