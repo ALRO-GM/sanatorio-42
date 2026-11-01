@@ -3,58 +3,188 @@
 import type { ConceptText } from '../types.js'
 
 export const ALGORITHMS_EN: Readonly<Record<string, ConceptText>> = {
-  'algo-sort-complexity': {
+  'ps-ops': {
     forms: [
       {
-        ask: [
-          'In the worst case, at least how many comparisons does any comparison sort make?',
-          'What is the lowest worst-case cost a comparison sort can reach?',
-        ],
-        right: ['O(n log n)'],
-        wrong: ['O(n)', 'O(1)', 'O(log n)', 'O(n²)'],
-      },
-      {
-        ask: [
-          'What does bubble sort cost in the worst case?',
-          'Bubble sort, in the worst case, costs…',
-        ],
-        right: ['O(n²)'],
-        wrong: ['O(n log n)', 'O(n)', 'O(log n)', 'O(n³)'],
-      },
-    ],
-    wrong: ['O(n)', 'O(1)', 'O(log n)', 'O(n³)', 'O(2ⁿ)'],
-    why: 'Comparing, there are n! possible orders and each comparison splits them in two: about log₂(n!) ≈ n log n are needed.',
-  },
-  'algo-stack': {
-    forms: [
-      {
-        ask: [
-          'In a stack, which element comes out first?',
-          'Which one do you take out of a stack first?',
-        ],
-        right: ['The last one that went in'],
-        wrong: ['The first one that went in', 'The smallest one', 'The one in the middle'],
-      },
-      {
-        ask: [
-          'In a queue, which element comes out first?',
-          'Which one do you take out of a queue first?',
-        ],
-        right: ['The first one that went in'],
-        wrong: ['The last one that went in', 'The smallest one', 'The one in the middle'],
-      },
-      {
-        ask: ['What order does a stack follow?', 'What access policy does a stack have?'],
-        right: ['LIFO: last in, first out'],
+        ask: ['What does `sa` do in push_swap?', 'In push_swap, what does the `sa` operation do?'],
+        right: ['Swaps the first two elements of a'],
         wrong: [
-          'FIFO: first in, first out',
-          'By priority: the largest leaves first',
-          'At random: any one leaves',
+          'Moves the top of a onto the top of b',
+          'Shifts a up and the first one goes last',
+          'Swaps the first of a with the first of b',
+          'Swaps the first and the last of stack a',
+        ],
+      },
+      {
+        ask: ['What does `pb` do in push_swap?', 'In push_swap, what does the `pb` operation do?'],
+        right: ['Moves the top of a onto the top of b'],
+        wrong: [
+          'Moves the top of b onto the top of a',
+          'Swaps the first two elements of b',
+          'Shifts b down and the last one goes up',
+        ],
+      },
+      {
+        ask: ['What does `rr` do in push_swap?', 'In push_swap, what does the `rr` operation do?'],
+        right: ['Does ra and rb at once'],
+        wrong: ['Does rra and rrb at once', 'Does ra twice in a row', 'Rotates a downwards'],
+      },
+      {
+        ask: [
+          'What does `rrr` do in push_swap?',
+          'In push_swap, what does the `rrr` operation do?',
+        ],
+        right: ['Does rra and rrb at once'],
+        wrong: ['Does ra and rb at once', 'Does rra three times in a row', 'Does rr and then rra'],
+      },
+      {
+        ask: ['What does `pa` do if stack b is empty?', 'With b empty, what happens on `pa`?'],
+        right: ['Nothing at all'],
+        wrong: ['Prints «Error» and exits', 'Pushes a 0 onto the top of a', 'Does pb instead'],
+      },
+    ],
+    wrong: [
+      'Empties the whole stack b',
+      'Sorts the first three of a',
+      'Reverses the whole stack a',
+    ],
+    why: 'sa swaps the top two of a, pb moves the top of a to b, ra rotates up and rra down; ss, rr and rrr do the same on both stacks.',
+  },
+  'ps-sequence': {
+    forms: [
+      {
+        ask: [
+          'a = 3 1 2 (top on the left) and b is empty. What are they after `sa` and `pb`?',
+          'With a = 3 1 2 (the 3 on top) and b empty, you do `sa` and then `pb`. What do the stacks look like?',
+        ],
+        right: ['a = 3 2, b = 1'],
+        wrong: ['a = 1 2, b = 3', 'a = 1 3, b = 2', 'a = 2 3, b = 1', 'a = 3 1, b = 2'],
+      },
+      {
+        ask: [
+          'a = 1 2 3 and b = 4 5 (tops on the left). What is a after `pa` and `rra`?',
+          'With a = 1 2 3 and b = 4 5 (the 1 and the 4 on top), you do `pa` and then `rra`. What is a?',
+        ],
+        right: ['3 4 1 2'],
+        wrong: ['4 1 2 3', '1 2 3 4', '4 3 1 2', '3 5 1 2'],
+      },
+    ],
+    wrong: ['Same as before', 'Both empty'],
+    why: 'They apply in order: sa swaps the top two, pb and pa move the top from one stack to the other and rra brings the bottom one up.',
+  },
+  'ps-limits': {
+    forms: [
+      {
+        ask: [
+          'For the top push_swap grade, in fewer than how many operations must you sort 100 random numbers?',
+          'With 100 random numbers, below how many operations does push_swap ask you to stay for the top grade?',
+        ],
+        right: ['700'],
+        wrong: ['1100', '500', '1500', '300'],
+      },
+      {
+        ask: [
+          'For the top push_swap grade, at most how many operations are accepted with 500 random numbers?',
+          'With 500 random numbers, what is the push_swap operation limit for the top grade?',
+        ],
+        right: ['5500'],
+        wrong: ['7000', '3500', '11500', '8500'],
+      },
+    ],
+    wrong: ['1000', '2000', '10000'],
+    why: 'The evaluation counts operations: the top grade needs fewer than 700 with 100 numbers and no more than 5500 with 500.',
+  },
+  'ps-errors': {
+    forms: [
+      {
+        ask: [
+          'You give push_swap a duplicate number. What does it do?',
+          'What does push_swap do if an argument is not an integer, like «12a»?',
+          'What does push_swap do with a number that does not fit in an int?',
+        ],
+        right: ['Prints «Error» and a newline on stderr'],
+        wrong: [
+          'Skips it and sorts the other numbers',
+          'Prints «Error» on standard output',
+          'Prints «KO» followed by a newline',
+          'Goes on and leaves that number in place',
+        ],
+      },
+      {
+        ask: [
+          'What does push_swap do if you run it with no arguments?',
+          'You run `./push_swap` with nothing else. What must happen?',
+        ],
+        right: ['Prints nothing and exits'],
+        wrong: [
+          'Prints «Error» on stderr',
+          'Waits for numbers on stdin',
+          'Prints how to use the program',
         ],
       },
     ],
-    wrong: ['The smallest one', 'The one in the middle', 'The largest one'],
-    why: 'A stack takes out where it puts in (LIFO); a queue puts in at one end and takes out at the other (FIFO).',
+    wrong: ['Hangs forever', 'Sorts an empty stack and prints OK'],
+    why: 'The subject asks for «Error» and a newline on standard error for any bad argument, and nothing when there are no arguments.',
+  },
+  'ps-output': {
+    forms: [
+      {
+        ask: [
+          'How does push_swap print the list of instructions?',
+          'Where and in what format does push_swap output the operations?',
+        ],
+        right: ['One per line, on standard output'],
+        wrong: [
+          'All on one line, separated by commas',
+          'One per line, on standard error',
+          'In a file that checker reads later',
+        ],
+      },
+      {
+        ask: [
+          'What does push_swap print if the numbers are already sorted?',
+          'With `./push_swap 1 2 3`, what comes out?',
+        ],
+        right: ['Nothing: no instructions'],
+        wrong: ['OK and a newline', '«Error» on standard error', 'An sa to check'],
+      },
+    ],
+    wrong: ['The stacks after each step'],
+    why: 'push_swap prints the shortest list it finds, one instruction per line on stdout; if already sorted, the shortest is doing nothing.',
+  },
+  'ps-checker': {
+    forms: [
+      {
+        ask: [
+          'What does `checker` print if, after the instructions, a is sorted and b is empty?',
+          'The instructions leave a sorted and b empty. What does checker answer?',
+        ],
+        right: ['OK'],
+        wrong: ['KO', 'Error', 'Nothing'],
+      },
+      {
+        ask: [
+          'What does `checker` print if a ends up sorted but b is not empty?',
+          'The instructions leave a sorted, but there are numbers left in b. What does checker answer?',
+        ],
+        right: ['KO'],
+        wrong: ['OK', 'Error', 'Nothing'],
+      },
+      {
+        ask: [
+          'Where does `checker` read the instructions from?',
+          'In the push_swap bonus, how do the operations reach checker?',
+        ],
+        right: ['From standard input, one per line'],
+        wrong: [
+          'From the arguments, after the numbers',
+          'From a file called instructions.txt',
+          'From the standard error of push_swap',
+        ],
+      },
+    ],
+    wrong: ['Sorted', 'Done'],
+    why: 'checker reads the instructions on stdin, applies them and prints OK only if a is sorted and b is empty; otherwise, KO.',
   },
   'algo-rotate': {
     forms: [
@@ -96,18 +226,18 @@ export const ALGORITHMS_EN: Readonly<Record<string, ConceptText>> = {
       {
         ask: ['How does radix sort sort?', 'What does radix sort do to sort?'],
         right: [
-          'Digit by digit (or bit by bit), without comparing elements with each other',
-          'It groups by each bit or digit, starting with the least significant',
+          'By bits or digits, one at a time, without comparing',
+          'It groups by each bit, from the least significant up',
         ],
       },
     ],
     wrong: [
-      'It compares every pair of elements',
-      'It picks a pivot and splits in two',
-      'It inserts each element in its place',
-      'It shuffles at random until it is sorted',
+      'It compares each pair of neighbours and swaps them',
+      'It picks a pivot and splits the list in two halves',
+      'It inserts each element in its place, one by one',
+      'It splits in halves, sorts each and merges them',
     ],
-    why: 'Radix distributes by each digit or bit; with normalised indexes and bits, it fits well with two stacks.',
+    why: 'Radix distributes by each digit or bit; with normalised indices and bits, it fits two stacks well.',
   },
   'algo-quicksort': {
     forms: [
@@ -116,12 +246,15 @@ export const ALGORITHMS_EN: Readonly<Record<string, ConceptText>> = {
           'When does quicksort hit its worst case, O(n²)?',
           'What makes quicksort become quadratic?',
         ],
-        right: ['A pivot that is always the minimum or the maximum', 'Very unbalanced partitions'],
+        right: [
+          'The pivot always being the minimum or the maximum',
+          'Partitions that come out very unbalanced',
+        ],
         wrong: [
-          'Repeated numbers',
-          'A very short list',
-          'Negative numbers',
-          'Nothing: it is always n log n',
+          'The numbers being very large integers',
+          'The list having fewer than ten elements',
+          'Mixing negative and positive numbers',
+          'Nothing: quicksort always costs n log n',
         ],
       },
       {
@@ -133,30 +266,22 @@ export const ALGORITHMS_EN: Readonly<Record<string, ConceptText>> = {
         wrong: ['Quicksort', 'Bubble sort', 'Insertion sort', 'Radix sort'],
       },
     ],
-    wrong: ['Repeated numbers', 'A very short list', 'Negative numbers'],
-    why: 'Quicksort depends on the pivot; merge sort always splits in half and always costs n log n.',
+    wrong: ['The numbers being very large integers', 'Mixing negative and positive numbers'],
+    why: 'Quicksort depends on the pivot; merge sort always splits in the middle and always costs n log n.',
   },
   'algo-binary-search': {
     forms: [
       {
         ask: [
-          'What does a binary search need to work?',
-          'How must the data be to search by halving?',
-        ],
-        right: ['Sorted'],
-        wrong: ['Without duplicates', 'In a linked list', 'An even number of them', 'On the stack'],
-      },
-      {
-        ask: [
           'At most, how many steps does a binary search need in 1000 elements?',
-          'Searching by halving among 1000 elements, in how many steps do you get there at most?',
+          'Searching by halves among 1000 elements, in at most how many steps do you get there?',
         ],
         right: ['10'],
         wrong: ['500', '1000', '100', '32'],
       },
     ],
-    wrong: ['Without duplicates', 'In a linked list', 'An even number of them'],
-    why: 'Halving only works if you know which side to look at: it needs order. 2¹⁰ = 1024.',
+    wrong: ['20', '50'],
+    why: 'Each step discards half of what is left, and 2¹⁰ = 1024 is already over 1000: 10 are enough.',
   },
   'algo-bfs-dfs': {
     forms: [
@@ -186,41 +311,48 @@ export const ALGORITHMS_EN: Readonly<Record<string, ConceptText>> = {
         ask: ["What is Dijkstra's algorithm for?", 'What does Dijkstra find?'],
         right: [
           'The shortest path with non-negative weights',
-          'The minimum distance from one origin to the other nodes, with weights',
+          'The minimum distance from a source to each node',
         ],
         wrong: [
-          'The minimum spanning tree',
-          'A cycle that goes through every node',
-          'The topological order',
+          'The minimum spanning tree of the graph',
+          'A cycle that goes once through every node',
+          'The topological order of a directed graph',
         ],
       },
       {
-        ask: ['When does Dijkstra not work?', 'With what kind of graph can Dijkstra fail?'],
-        right: ['With negative-weight edges'],
-        wrong: ['With cycles', 'With more than 100 nodes', 'With decimal weights'],
+        ask: [
+          'In which case does Dijkstra not work?',
+          'With what kind of graph can Dijkstra fail?',
+        ],
+        right: ['With negative weights'],
+        wrong: ['With decimal weights', 'With directed cycles', 'With over a thousand nodes'],
       },
     ],
-    wrong: [
-      'The minimum spanning tree',
-      'A cycle that goes through every node',
-      'The topological order',
-    ],
+    wrong: ['The minimum spanning tree of the graph', 'The topological order of a directed graph'],
     why: 'Dijkstra closes the nearest node for good; a negative weight could later shorten something already closed.',
   },
   'algo-maze-perfect': {
     forms: [
       {
         ask: [
-          'What is special about a "perfect" maze?',
-          'In a perfect maze, how many paths are there between two cells?',
+          'What is special about a «perfect» maze?',
+          'What must a maze meet to be called perfect?',
         ],
-        right: ['Exactly one path between each pair of cells'],
+        right: ['There is a single path between two cells'],
         wrong: [
-          'It has no exit',
-          'It is symmetrical',
+          'It has no exit at all on the border',
+          'It is symmetric around its centre',
           'There are several paths to the exit',
-          'It has no dead ends',
+          'It has no dead ends anywhere',
         ],
+      },
+      {
+        ask: [
+          'In a perfect maze, how many paths are there between two cells?',
+          'How many different paths join the entry and the exit of a perfect maze?',
+        ],
+        right: ['1'],
+        wrong: ['0', '2', '4', '8'],
       },
       {
         ask: [
@@ -228,27 +360,27 @@ export const ALGORITHMS_EN: Readonly<Record<string, ConceptText>> = {
           'What structure do the cells and passages of a perfect maze form?',
         ],
         right: ['A tree'],
-        wrong: ['A complete graph', 'A cycle', 'A list'],
+        wrong: ['A complete graph', 'A cycle', 'A graph with cycles'],
       },
     ],
-    wrong: ['A complete graph', 'A cycle', 'A list'],
+    wrong: ['A complete graph', 'A cycle'],
     why: 'No cycles and everything connected: that is a tree, and that is why there is a single path between two points.',
   },
   'algo-maze-gen': {
     forms: [
       {
         ask: [
-          'You generate a maze with DFS: from a cell you go to a random unvisited neighbour, knock down the wall and, if none is left, you go back. What comes out?',
-          'What does the "recursive backtracker" (DFS knocking down walls) generate?',
+          'You generate a maze with DFS: from a cell you go to a random unvisited neighbour, knock down the wall and, if none is left, you backtrack. What comes out?',
+          'What does the «recursive backtracker» (DFS knocking down walls) generate?',
         ],
         right: ['A perfect maze, with long corridors', 'A tree that covers every cell'],
       },
     ],
     wrong: [
-      'A maze with many cycles',
-      'A maze with no solution',
-      'Just a straight line',
-      'A maze with isolated cells',
+      'A maze with many cycles and shortcuts',
+      'A maze that has no solution',
+      'A straight corridor from side to side',
+      'A maze with isolated areas',
     ],
     why: 'It never enters an already visited cell (no cycles) and does not stop until all are visited (everything connected).',
   },
@@ -256,28 +388,25 @@ export const ALGORITHMS_EN: Readonly<Record<string, ConceptText>> = {
     forms: [
       {
         ask: ['What is a data race?', 'When is there a data race?'],
-        right: [
-          'When two threads access a piece of data at once, at least one writes and nothing synchronises them',
-        ],
+        right: ['When two threads touch data at once, one writes, and no mutex'],
         wrong: [
-          'When one thread finishes before another',
-          'When a thread uses a lot of CPU',
+          'When one thread ends before another one starts',
+          'When one thread uses almost all the process CPU',
           'When two threads wait for each other forever',
-          'When the program runs faster with threads',
+          'When the program runs faster with threads than without',
         ],
       },
       {
         ask: [
-          'Two threads touch the same variable at once, at least one writes and there is no mutex. What is that called?',
+          'Two threads touch the same variable at the same time, at least one writes and there is no mutex. What is that called?',
         ],
         right: ['Data race'],
         wrong: ['Deadlock', 'Starvation', 'Context switch'],
       },
     ],
     wrong: [
-      'When one thread finishes before another',
-      'When a thread uses a lot of CPU',
-      'When the program runs faster with threads',
+      'When one thread ends before another one starts',
+      'When one thread uses almost all the process CPU',
     ],
     why: 'Without a mutex (or other synchronisation), the result depends on how the threads interleave.',
   },
@@ -288,47 +417,52 @@ export const ALGORITHMS_EN: Readonly<Record<string, ConceptText>> = {
         ask: ['What is `count` at the end?', 'When both threads finish, what is count?'],
         right: [
           'It can be less than 200000: count++ is not atomic',
-          'Unknown; usually less than 200000',
+          'Unknown, but it usually comes out below 200000',
         ],
       },
     ],
-    wrong: ['Always 200000', 'Always 100000', 'It does not compile', 'Always 0'],
-    why: 'count++ is read, add and write: two threads can read the same value and one sum is lost.',
+    wrong: [
+      'Always 200000: each thread adds 100000',
+      'Always 100000: only the last thread counts',
+      'Always 200000, because main waits for both',
+      'Always 0: each thread adds to its own copy',
+    ],
+    why: 'count++ is read, add and write: two threads can read the same value and one addition is lost.',
   },
   'thr-deadlock': {
     forms: [
       {
         ask: ['What is a deadlock?', 'When is there a deadlock?'],
-        right: ['When several threads wait for each other and none can move on'],
+        right: ['When several threads wait for each other and none moves on'],
         wrong: [
-          'When a thread is very slow',
-          'When two threads write at once',
-          'When a thread ends too early',
+          'When one thread is much slower than the others',
+          'When two threads write the same data at once',
+          'When one thread ends before main is done',
         ],
       },
       {
         ask: [
-          'Each thread waits for something another one has, and nobody lets go. What is that called?',
+          'Each thread waits for something another one holds, and nobody lets go. What is that called?',
         ],
         right: ['Deadlock'],
         wrong: ['Data race', 'Starvation', 'Memory leak'],
       },
       {
         ask: [
-          'Every philosopher takes the fork on their left first. What can happen?',
+          'All the philosophers pick up their left fork first. What can happen?',
           'If each philosopher takes their left fork and waits for the right one, what can happen?',
         ],
-        right: [
-          'They all end up waiting forever',
-          'Nobody gets the second fork or lets go of the first',
+        right: ['They all end up waiting forever', 'Nobody gets the second one or drops the first'],
+        wrong: [
+          'Each one eats twice in a row without stopping',
+          'They all eat at once with a single fork',
+          'Nothing: it is the right way to avoid locks',
         ],
-        wrong: ['They eat twice in a row', 'They all eat at once', 'Nothing: it is correct'],
       },
     ],
     wrong: [
-      'When a thread is very slow',
-      'When two threads write at once',
-      'When a thread ends too early',
+      'When one thread is much slower than the others',
+      'When two threads write the same data at once',
     ],
     why: 'With circular waiting nobody moves on. Breaking the cycle (for example, even ones take the other fork first) avoids it.',
   },
@@ -341,99 +475,220 @@ export const ALGORITHMS_EN: Readonly<Record<string, ConceptText>> = {
           'That only one thread at a time holds the lock',
         ],
         wrong: [
-          'That threads run faster',
-          'That threads start in order',
+          'That threads run faster when sharing',
+          'That threads start in the order of the code',
           'That memory can be shared between processes',
-          'That time is measured correctly',
+          'That time is measured well in each thread',
         ],
       },
       {
         ask: [
           'What happens if a thread calls `pthread_mutex_lock` twice in a row on the same normal mutex?',
-          'What happens if a thread locks the same (non-recursive) mutex twice?',
+          'A thread locks the same normal-type mutex twice in a row. What happens?',
         ],
         right: ['It blocks forever, waiting for itself'],
         wrong: [
-          'Nothing: the second one is ignored',
-          'It gets unlocked',
-          'It gives an error and continues',
+          'Nothing: the second lock is just ignored',
+          'It unlocks, because lock toggles the state',
+          'The second lock passes and the mutex counts two',
         ],
       },
     ],
-    wrong: [
-      'That threads run faster',
-      'That threads start in order',
-      'That time is measured correctly',
-    ],
+    wrong: ['That threads run faster when sharing', 'That threads start in the order of the code'],
     why: 'lock waits for the lock to be free; if you already hold it, you wait for yourself.',
   },
   'thr-join-detach': {
     forms: [
       {
         ask: ['What does `pthread_join` do?', 'What is `pthread_join(th, NULL)` for?'],
-        right: [
-          'It waits for that thread to finish',
-          'It waits for the thread and collects what it returns',
-        ],
+        right: ['Waits for that thread to finish', 'Waits for the thread and collects its result'],
         wrong: [
-          'It starts a new thread',
-          'It merges two threads into one',
-          'It locks a mutex',
-          'It puts the thread to sleep',
+          'Starts a new thread with that function',
+          'Merges two threads into one',
+          "Locks that thread's mutex",
+          'Puts the current thread to sleep a while',
         ],
       },
       {
         ask: ['What does `pthread_detach` do?', 'What changes when you detach a thread?'],
         right: [
-          'Its resources are freed when it ends, without anyone waiting for it',
+          'It frees itself when it ends, with nobody waiting for it',
           'It can no longer be waited for with join',
         ],
-        wrong: ['It is waited for until it ends', 'The thread is killed', 'The thread is paused'],
+        wrong: [
+          'The current thread waits for it to finish',
+          'The thread is killed right at that moment',
+          'The thread pauses until it is signalled',
+        ],
       },
     ],
-    wrong: ['It starts a new thread', 'It merges two threads into one', 'It locks a mutex'],
-    why: 'Every thread is collected with join or released with detach; otherwise its resources stay.',
+    wrong: ['Starts a new thread with that function', 'Merges two threads into one'],
+    why: 'Every thread is collected with join or released with detach; otherwise, its resources stay.',
   },
   'thr-usleep': {
     forms: [
       {
         ask: [
-          'A philosopher dies if 410 ms pass without eating, and your monitor thread calls `usleep(500000)` between checks. What is wrong?',
-          'Why is a monitor that sleeps half a second between checks no good?',
+          'A philosopher dies if 410 ms pass without eating, and your monitor thread does `usleep(500000)` between checks. What goes wrong?',
+          'Why does a monitor that sleeps half a second between checks not work?',
         ],
         right: [
-          'It announces the death late: it has to check every few milliseconds',
-          'It can warn up to 500 ms late, and the death must be announced within 10 ms',
+          'It reports the death late: check every few ms',
+          'It can be 500 ms late, and the limit is 10 ms',
         ],
       },
     ],
     wrong: [
-      'Nothing: usleep is exact',
-      'The philosopher dies too early',
-      'usleep does not work in threads',
-      'It blocks every philosopher',
+      'Nothing: usleep sleeps exactly what you ask',
+      'The philosopher dies early because of usleep',
+      'usleep cannot be used inside a thread',
+      'It blocks all the philosophers at once',
     ],
-    why: 'The death has to be announced almost at once; also, usleep can sleep longer than requested.',
+    why: 'The death must be reported at most 10 ms after it happens; also, usleep can sleep longer than asked.',
   },
   'thr-print': {
     forms: [
       {
         ask: [
-          'What is avoided by protecting the printf of the messages with a mutex?',
-          'Without a mutex for writing, what can happen to the messages of several threads?',
+          'What does protecting the printf of the messages with a mutex prevent?',
+          'Without a mutex for writing, what can happen to messages from several threads?',
         ],
         right: [
-          'They get mixed or come out after a death is announced',
-          'They interrupt each other or come out after the "died"',
+          'That they mix or come out after a death',
+          'That they cut each other or follow the «died»',
         ],
       },
     ],
     wrong: [
-      'printf stops working',
-      'The program gets slower',
-      'The compiler gives a warning',
-      'More memory is used',
+      'That printf stops working in the other threads',
+      'That the program gets slower when writing',
+      'That the compiler warns about a race',
+      'That more memory goes into the buffer',
     ],
-    why: 'A message after "died" is a failure; the same mutex also prevents mixed lines.',
+    why: 'A message after «died» is a bug; the same mutex also prevents mixed-up lines.',
+  },
+  'philo-args': {
+    forms: [
+      {
+        ask: [
+          'How many mandatory arguments does `philo` take?',
+          'Not counting the optional one, how many arguments does `./philo` take?',
+        ],
+        right: ['4'],
+        wrong: ['5', '3', '6', '2'],
+      },
+      {
+        ask: [
+          'In what unit are time_to_die, time_to_eat and time_to_sleep?',
+          'In `./philo 5 800 200 200`, in what unit are the 800 and the 200s?',
+        ],
+        right: ['In milliseconds'],
+        wrong: ['In microseconds', 'In seconds', 'In tenths of a second'],
+      },
+      {
+        ask: [
+          'In what order do the arguments of `philo` go?',
+          'What order do the mandatory arguments of philosophers follow?',
+        ],
+        right: ['Philosophers, die, eat, sleep'],
+        wrong: [
+          'Philosophers, eat, sleep, die',
+          'Philosophers, sleep, eat, die',
+          'Die, eat, sleep, philosophers',
+        ],
+      },
+    ],
+    wrong: ['Eat, sleep, die, philosophers'],
+    why: 'They are number_of_philosophers, time_to_die, time_to_eat and time_to_sleep, in milliseconds, plus an optional fifth.',
+  },
+  'philo-must-eat': {
+    forms: [
+      {
+        ask: [
+          'What does the fifth argument, number_of_times_each_philosopher_must_eat, do?',
+          'If you give number_of_times_each_philosopher_must_eat, when does the simulation stop?',
+        ],
+        right: ['It stops when all have eaten at least that many times'],
+        wrong: [
+          'Each philosopher dies after eating that many times',
+          'It stops when the first one has eaten that many times',
+          'It is the number of forks on the table',
+        ],
+      },
+      {
+        ask: [
+          'If number_of_times_each_philosopher_must_eat is not given, when does the simulation end?',
+          'Without the optional argument, what makes philo stop?',
+        ],
+        right: ['A philosopher dies'],
+        wrong: ['Each one has eaten once', 'A full minute goes by', 'All have slept once'],
+      },
+    ],
+    wrong: ['It never stops: you must kill it with Ctrl+C'],
+    why: 'The simulation stops at the first death or, if the fifth argument is given, when all have eaten at least that many times.',
+  },
+  'philo-one': {
+    forms: [
+      {
+        ask: [
+          'With a single philosopher (`./philo 1 800 200 200`), what must happen?',
+          'You run philo with 1 philosopher and time_to_die = 800. What is correct?',
+        ],
+        right: ['Takes a fork, cannot eat and dies at 800 ms'],
+        wrong: [
+          'Eats with a single fork and lives forever',
+          'The program errors out: at least 2 are needed',
+          'Keeps thinking and never dies: nobody takes anything',
+        ],
+      },
+      {
+        ask: [
+          'In the mandatory part, how many forks are there at a table of N philosophers?',
+          'How many forks are on the table with N philosophers?',
+        ],
+        right: ['As many as philosophers'],
+        wrong: [
+          'One fewer than philosophers',
+          'Twice as many as philosophers',
+          'Half as many as philosophers',
+        ],
+      },
+    ],
+    wrong: ['It hangs without printing anything'],
+    why: 'There is one fork per philosopher; alone, he has one and needs two, so he does not eat and dies at time_to_die.',
+  },
+  'philo-bonus': {
+    forms: [
+      {
+        ask: [
+          'In the philosophers bonus, what is each philosopher?',
+          'In philo_bonus, how is each philosopher started?',
+        ],
+        right: ['A process'],
+        wrong: ['A thread', 'A semaphore', 'A signal'],
+      },
+      {
+        ask: [
+          'In the philosophers bonus, what keeps count of the free forks?',
+          'In philo_bonus, what represents the number of forks left?',
+        ],
+        right: ['A counting semaphore'],
+        wrong: ['A mutex for each fork', 'A pipe between neighbours', 'A file in /tmp'],
+      },
+      {
+        ask: [
+          'In the philosophers bonus, where are the forks?',
+          'In philo_bonus, how are the forks placed on the table?',
+        ],
+        right: ['All in the middle of the table'],
+        wrong: [
+          'One between every two philosophers',
+          'Two in front of each philosopher',
+          'In the hands of the parent process',
+        ],
+      },
+    ],
+    wrong: ['A shared global variable'],
+    why: 'In the bonus each philosopher is a process and the forks are in the middle: a semaphore holds how many there are.',
   },
 }
