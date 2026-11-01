@@ -38,3 +38,11 @@ comunidad.
   de 0,5 a 4 píxeles (`widthOf`): antes, unas pocas tapaban el grafo.
 - La línea de «se ven N de M» va debajo del dibujo: encima tapaba el selector
   de vista en el móvil.
+
+## Solo las uniones más fuertes (2026-11-01, pedido por Alberto)
+
+Con muchas burbujas, las uniones flojas ensuciaban el grafo. Por encima de 150
+burbujas se pintan, como mucho, 1,5 uniones por burbuja (nunca menos de 225),
+las más fuertes (`drawnLinks` en `features/network/graph-layers.ts`). Las demás
+siguen existiendo: cuentan para colocar las burbujas y, al elegir a alguien, se
+pintan todas las suyas. Vale para la red de correcciones y para la de Amigos.

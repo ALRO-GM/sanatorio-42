@@ -10,6 +10,7 @@ import {
   segmentMeets,
   strongest,
   visibleBounds,
+  drawnLinks,
 } from '../src/features/network/graph-layers'
 import type { LayerState } from '../src/features/network/graph-layers'
 
@@ -117,5 +118,14 @@ describe('grafo pesado y gestos', () => {
     expect(isHeavy(1201, 100)).toBe(true)
     expect(isHeavy(500, 6001)).toBe(true)
     expect(isHeavy(0, 0)).toBe(false)
+  })
+})
+
+describe('uniones que se pintan con el grafo quieto', () => {
+  it('con pocas burbujas, todas; con muchas, solo las más fuertes, en proporción', () => {
+    expect(drawnLinks(40)).toBeNull()
+    expect(drawnLinks(150)).toBeNull()
+    expect(drawnLinks(151)).toBe(227)
+    expect(drawnLinks(1000)).toBe(1500)
   })
 })

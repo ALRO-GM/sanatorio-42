@@ -10,6 +10,7 @@ import type { SpotIndex } from './graph-data'
 import { seedLayout, separateCommunities } from './graph-seed'
 import {
   MOVING_LINKS,
+  drawnLinks,
   isHeavy,
   layerBase,
   reuseTransform,
@@ -90,6 +91,8 @@ type Scene = {
   strong: SimLink[][]
   /** Las que se pintan mientras se mueve un grafo pesado (modo ligero). */
   strongHeavy: SimLink[][]
+  /** Las que se pintan con el grafo quieto: con muchas burbujas, solo las más fuertes. */
+  drawn: SimLink[][]
   /** La unión más fuerte de lo que se ve: el grosor de cada una va en relación a ella. */
   maxWeight: number
   /** Índice de burbujas por sitio para el ratón, y de qué `version` es. */
@@ -389,6 +392,7 @@ export function ForceGraph({
     groups: [],
     strong: [],
     strongHeavy: [],
+    drawn: [],
     maxWeight: 1,
     spots: null,
     signature: '',
@@ -701,7 +705,7 @@ export function ForceGraph({
           ? state.strongHeavy
           : state.links.length > MOVING_LINKS
             ? state.strong
-            : state.groups
+            : state.drawn
 
         for (const group of groups) strokeGroup(context, group, around === null, around !== null)
         if (around !== null) {
@@ -742,7 +746,7 @@ export function ForceGraph({
 
           // En la capa «apagada» van todas tenues: las de quien está elegido se
           // pintan después encima, y la tenue de debajo no se nota.
-          for (const group of state.groups) strokeGroup(target, group, around === null, false)
+          for (const group of state.drawn) strokeGroup(target, group, around === null, false)
           layer.key = key
           layer.base = base
           layer.view = { ...view }
@@ -1349,6 +1353,12 @@ export function ForceGraph({
     state.groups = byWeight(simLinks)
     state.strong = byWeight(strongest(simLinks, MOVING_LINKS))
     state.strongHeavy = byWeight(strongest(simLinks, MOVING_LINKS_HEAVY))
+    // Con muchas burbujas, solo las uniones más fuertes (`drawnLinks`), también moviéndose.
+    const cap = drawnLinks(simNodes.length)
+
+    state.drawn = cap === null ? state.groups : byWeight(strongest(simLinks, cap))
+    if (cap !== null && cap < MOVING_LINKS) state.strong = state.drawn
+    if (cap !== null && cap < MOVING_LINKS_HEAVY) state.strongHeavy = state.drawn
     state.maxWeight = simLinks.reduce((most, link) => Math.max(most, link.weight), 1)
     state.spots = null
     state.signature = signature

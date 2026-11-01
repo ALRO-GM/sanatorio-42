@@ -13,6 +13,24 @@
 /** Uniones que se pintan, como mucho, mientras el grafo se mueve. */
 export const MOVING_LINKS = 2500
 
+/** Hasta aquí de burbujas se pintan todas las uniones. */
+const ALL_LINKS_UP_TO = 150
+/** Con más burbujas, uniones que se pintan por burbuja (y nunca menos de `LEAST_DRAWN`). */
+const DRAWN_PER_NODE = 1.5
+const LEAST_DRAWN = 225
+
+/**
+ * Cuántas uniones se pintan, como mucho, con el grafo quieto. Con muchas
+ * burbujas, las uniones flojas ensuciaban el dibujo (pedido por Alberto,
+ * 2026-11-01): se pintan solo las más fuertes. Siguen contando para colocar
+ * las burbujas, y las de quien esté elegido se pintan todas. `null`: todas.
+ */
+export function drawnLinks(nodes: number): number | null {
+  if (nodes <= ALL_LINKS_UP_TO) return null
+
+  return Math.max(LEAST_DRAWN, Math.round(nodes * DRAWN_PER_NODE))
+}
+
 /** Las `max` uniones con más peso (las demás no se ven mientras todo se mueve). */
 export function strongest<T extends { weight: number }>(links: readonly T[], max: number): T[] {
   if (links.length <= max) return [...links]
