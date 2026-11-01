@@ -24,7 +24,7 @@ type ProjectSelectProps = {
  */
 export function ProjectSelect({ onSelect, autoPick = false, wanted = null }: ProjectSelectProps) {
   const { t } = useI18n()
-  const { data, error, loading, reload } = useAsync(() => api.getMyProjects(), [])
+  const { data, error, loading } = useAsync(() => api.getMyProjects(), [])
   // Lo que llega con grupo es de la piscina: la lista de un piscinero.
   const piscine = data?.some((project) => project.group !== undefined) === true
   // Un estudiante con un solo proyecto en curso va directo a quién le ayuda: un
@@ -47,7 +47,7 @@ export function ProjectSelect({ onSelect, autoPick = false, wanted = null }: Pro
     return (
       <section>
         <h2>{t('projects.title')}</h2>
-        <ErrorNote error={error} onRetry={() => void reload()} />
+        <ErrorNote error={error} retry />
       </section>
     )
   }

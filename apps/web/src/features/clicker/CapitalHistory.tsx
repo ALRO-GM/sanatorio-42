@@ -58,7 +58,7 @@ export function CapitalHistory({
     from: null,
     to: null,
   })
-  const { data, error, reload } = useAsync(
+  const { data, error } = useAsync(
     () =>
       api.getClickerCapital({
         ...(login === undefined ? {} : { login }),
@@ -134,7 +134,7 @@ export function CapitalHistory({
           />
         </label>
       </div>
-      <ErrorNote error={error} onRetry={() => void reload()} />
+      <ErrorNote error={error} retry />
       {points.length < 2 ? (
         <p className="cc-chart-empty">{t('clicker.chart.empty')}</p>
       ) : (

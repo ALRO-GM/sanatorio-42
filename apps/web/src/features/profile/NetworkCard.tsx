@@ -19,7 +19,7 @@ const SHOWN = 5
 export function NetworkCard({ me }: { me: string }) {
   const { t } = useI18n()
   // Centrado en ti y sin fechas: tu historia entera en el campus.
-  const { data, error, loading, reload } = useAsync(
+  const { data, error, loading } = useAsync(
     () => api.getNetwork({ login: me, min: 1, limit: 150 }),
     [me],
   )
@@ -41,7 +41,7 @@ export function NetworkCard({ me }: { me: string }) {
         </a>
       </div>
       {loading && <p className="estado">{t('net.loading')}</p>}
-      {!loading && data === undefined && <ErrorNote error={error} onRetry={() => void reload()} />}
+      {!loading && data === undefined && <ErrorNote error={error} retry />}
       {data !== undefined && mine === undefined && (
         <p className="estado">
           {data.sync.phase === 'done' ? t('net.card.empty') : t('net.card.copying')}

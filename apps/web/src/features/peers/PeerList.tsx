@@ -87,7 +87,7 @@ export function PeerList({ project, onOpenTherapy }: PeerListProps) {
     return (
       <section>
         {title}
-        <ErrorNote error={error} onRetry={() => void reload()} />
+        <ErrorNote error={error} retry />
       </section>
     )
   }

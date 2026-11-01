@@ -85,7 +85,7 @@ export function SeatsPage({ me }: { me?: string }) {
   const [mode, setMode] = useState<Mode>('community')
   // De fábrica, tu propia red: con quién te sientas tú (pedido por Alberto, 2026-10-30).
   const [selected, setSelected] = useState<string | null>(me ?? null)
-  const { data, error, reload } = useAsync<SeatGraph>(() => api.getSeatGraph(days, custom), [key])
+  const { data, error } = useAsync<SeatGraph>(() => api.getSeatGraph(days, custom), [key])
 
   // Recortado en la web, al momento (`seat-trim.ts`): de cada cual, solo la
   // gente con la que más se sienta; y, con alguien elegido, solo sus uniones.
@@ -354,7 +354,7 @@ export function SeatsPage({ me }: { me?: string }) {
               </label>
             </div>
           </div>
-          <ErrorNote error={error} onRetry={() => void reload()} />
+          <ErrorNote error={error} retry />
           {data !== undefined && (
             <aside className="net-side">
               {chosen !== undefined && (

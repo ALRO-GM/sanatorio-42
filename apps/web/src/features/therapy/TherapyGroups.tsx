@@ -72,7 +72,7 @@ export function TherapyGroups({ projects, initialProject, me }: TherapyGroupsPro
       )}
 
       {groups.loading && <p>{t('therapy.loading')}</p>}
-      <ErrorNote error={groups.error} onRetry={() => void groups.reload()} />
+      <ErrorNote error={groups.error} retry />
       {groups.data?.length === 0 && <p className="estado">{t('therapy.empty')}</p>}
 
       <ul className="stack">

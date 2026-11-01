@@ -135,9 +135,9 @@ function Fastest(props: {
 }) {
   const { t } = useI18n()
   const { number } = useFormat()
-  const { data, error, reload } = useAsync(() => api.getStatsFastest(), [])
+  const { data, error } = useAsync(() => api.getStatsFastest(), [])
 
-  if (data === undefined) return <ErrorNote error={error} onRetry={() => void reload()} />
+  if (data === undefined) return <ErrorNote error={error} retry />
 
   // Sin plan o alcance encendido, se sugiere de todos: mejor algo que nada.
   const tracks = TRACKS.filter((track) => props.tracks.size === 0 || props.tracks.has(track))

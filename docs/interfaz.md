@@ -311,7 +311,9 @@ Antes de escribir una a mano, se usa la que ya existe en `apps/web/src/shared/`:
   obligatorias con `cancelable={false}`). Para preguntar antes de algo que no se
   deshace, `ui/useConfirm`, nunca `window.confirm`.
 - **Cargar datos**: `ui/Async` (cargando, error con reintento y vacío) o, si no
-  encaja, `ErrorNote`: un fallo nunca deja la sección en blanco sin decir nada.
+  encaja, `ErrorNote`: un fallo nunca deja la sección en blanco sin decir nada. «Reintentar» (en `ErrorNote` con `retry`, en `ErrorBoundary` y en «el
+  servidor no responde») recarga la página entera (`shared/reload.ts`), no solo
+  la pieza (Alberto, 2026-11-01).
 - **Clasificaciones**: `ui/RankingList` y `withMe` (tu fila siempre, con «tú»
   en texto). **Personas buscadas**: `ui/PeopleResults` y `usePeopleKeys`.
 - **Tiempo**: `hooks/useNow` (un reloj compartido por cadencia) y `time.ts`

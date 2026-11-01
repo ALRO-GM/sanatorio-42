@@ -34,7 +34,7 @@ export function CountdownsView({ onOpen }: { onOpen: (event: CalendarEvent) => v
   const now = useNow(1000, { active: shown.length > 0 })
   const start = startOfDay(new Date()).toISOString()
   const end = addDays(new Date(start), AHEAD_DAYS).toISOString()
-  const { data, error, reload } = useAsync(() => api.getCalendar(start, end), [start, end])
+  const { data, error } = useAsync(() => api.getCalendar(start, end), [start, end])
   const coming = (data?.events ?? [])
     .filter((event) => Date.parse(event.start) > Date.now())
     .sort((a, b) => Date.parse(a.start) - Date.parse(b.start))
@@ -72,7 +72,7 @@ export function CountdownsView({ onOpen }: { onOpen: (event: CalendarEvent) => v
 
       <section className="countdowns-coming" aria-labelledby="countdowns-coming">
         <h3 id="countdowns-coming">{t('countdown.coming', { n: AHEAD_DAYS })}</h3>
-        {data === undefined && <ErrorNote error={error} onRetry={() => void reload()} />}
+        {data === undefined && <ErrorNote error={error} retry />}
         {data !== undefined && coming.length === 0 && (
           <p className="hint">{t('countdown.comingNone')}</p>
         )}

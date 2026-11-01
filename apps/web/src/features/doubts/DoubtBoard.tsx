@@ -63,7 +63,7 @@ export function DoubtBoard({ initialProject }: DoubtBoardProps) {
 
       {graph.loading && <p>{t('graph.loading')}</p>}
       {graph.data === undefined ? (
-        <ErrorNote error={graph.error} onRetry={() => void graph.reload()} />
+        <ErrorNote error={graph.error} retry />
       ) : (
         <>
           {/* El álbum sale en los tres modos (`docs/correcciones-coleccion.md`):
@@ -118,7 +118,7 @@ function ProjectBoard({ projectId, onChange }: { projectId: number; onChange: ()
 
   if (board.loading) return <p>{t('board.loading')}</p>
   if (board.data === undefined) {
-    return <ErrorNote error={board.error} onRetry={() => void board.reload()} />
+    return <ErrorNote error={board.error} retry />
   }
 
   const reload = (): void => {

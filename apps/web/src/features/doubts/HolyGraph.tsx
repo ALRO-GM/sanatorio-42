@@ -372,7 +372,7 @@ export function HolyGraph({ graph, selected, onSelect }: HolyGraphProps) {
       {health.data === undefined && !health.loading && health.error !== null && (
         <>
           <p className="hint">{t('graph.healthFailed')}</p>
-          <ErrorNote error={health.error} onRetry={() => void health.reload()} />
+          <ErrorNote error={health.error} retry />
         </>
       )}
       {(active.length > 0 || allSeries.length > 0) && (

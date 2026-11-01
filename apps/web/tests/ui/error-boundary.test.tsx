@@ -5,8 +5,12 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { api } from '../../src/shared/api'
 import { I18nProvider } from '../../src/shared/i18n'
+import { reloadPage } from '../../src/shared/reload'
 import { ErrorBoundary } from '../../src/shared/ui/ErrorBoundary'
 import { must } from './must'
+
+// jsdom no recarga: se mira que se pida.
+vi.mock('../../src/shared/reload', () => ({ reloadPage: vi.fn() }))
 
 const text = (key: string): string => must(es[key], `el texto ${key}`)
 
@@ -16,18 +20,15 @@ afterEach(() => {
 })
 
 describe('Una sección que falla al pintarse', () => {
-  it('enseña el aviso, manda el fallo y al volver a probar se pinta otra vez', async () => {
+  it('enseña el aviso, manda el fallo y «Reintentar» recarga la página', async () => {
     const user = userEvent.setup()
     const reported = vi.spyOn(api, 'reportClientError').mockResolvedValue()
-    let broken = true
 
     // React avisa en la consola de cada error recogido: aquí es lo esperado.
     vi.spyOn(console, 'error').mockImplementation(() => undefined)
 
-    function Section() {
-      if (broken) throw new Error('se rompió')
-
-      return <p>todo bien</p>
+    function Section(): never {
+      throw new Error('se rompió')
     }
 
     localStorage.setItem('sanatorio_lang', 'es')
@@ -44,8 +45,7 @@ describe('Una sección que falla al pintarse', () => {
       expect.objectContaining({ message: 'Error: se rompió', where: 'tablon' }),
     )
 
-    broken = false
     await user.click(screen.getByRole('button', { name: text('app.retry') }))
-    expect(screen.getByText('todo bien')).toBeTruthy()
+    expect(reloadPage).toHaveBeenCalledOnce()
   })
 })

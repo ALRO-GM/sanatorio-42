@@ -25,7 +25,7 @@ export function ReviewTab() {
   return (
     <div className="quiz-review">
       {review.loading && review.data === undefined && <p className="estado">{t('app.loading')}</p>}
-      <ErrorNote error={review.error} onRetry={() => void review.reload()} />
+      <ErrorNote error={review.error} retry />
       {review.data !== undefined && items.length === 0 && (
         <p className="estado">{t('notgames.review.empty')}</p>
       )}

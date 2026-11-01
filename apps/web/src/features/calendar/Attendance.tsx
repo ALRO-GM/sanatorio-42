@@ -39,7 +39,7 @@ export function Attendance({ eventId }: { eventId: string }) {
   const [shown, setShown] = useState<'start' | 'end'>('start')
 
   if (loading) return <p className="hint">{t('app.loading')}</p>
-  if (data === undefined) return <ErrorNote error={error} onRetry={() => void reload()} />
+  if (data === undefined) return <ErrorNote error={error} retry />
 
   const row = (presence: MeetPresence) => (
     <li key={presence.login}>

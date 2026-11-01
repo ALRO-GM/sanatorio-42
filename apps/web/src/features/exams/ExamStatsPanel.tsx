@@ -89,7 +89,7 @@ export function ExamStatsPanel() {
     <>
       <h3 className="exams-subtitle">{t('exams.stats')}</h3>
       {data === undefined && stats.loading && <p className="estado">{t('app.loading')}</p>}
-      <ErrorNote error={stats.error} onRetry={() => void stats.reload()} />
+      <ErrorNote error={stats.error} retry />
       {data !== undefined && (
         <>
           {data.backfill.done < data.backfill.total && (

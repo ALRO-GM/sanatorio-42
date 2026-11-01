@@ -41,7 +41,7 @@ export function Guardia() {
   }
 
   if (data === undefined) {
-    return <ErrorNote error={error} onRetry={() => void reload()} />
+    return <ErrorNote error={error} retry />
   }
 
   // Primero lo que espera una respuesta tuya: valorar o aceptar.

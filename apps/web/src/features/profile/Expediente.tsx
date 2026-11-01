@@ -39,7 +39,7 @@ export function Expediente({ me, profile }: ExpedienteProps) {
 
   if (profile.loading) return <p>{t('xp.loading')}</p>
   if (profile.data === undefined) {
-    return <ErrorNote error={profile.error} onRetry={() => void profile.reload()} />
+    return <ErrorNote error={profile.error} retry />
   }
 
   const { xp, title, hacks, master, titles, achievements, reactions, rules, earned } = profile.data

@@ -52,7 +52,7 @@ export function StrictestCard({ params, onSelect }: StrictestCardProps) {
   }, [wanted])
 
   const { from, to, projectId, campuses } = params
-  const { data, error, loading, reload } = useAsync(
+  const { data, error, loading } = useAsync(
     () =>
       api.getNetworkStrictest(min, order, {
         ...(from === undefined ? {} : { from }),
@@ -87,9 +87,7 @@ export function StrictestCard({ params, onSelect }: StrictestCardProps) {
       footer={
         <>
           {loading && <p className="hint">{t('net.loading')}</p>}
-          {!loading && data === undefined && (
-            <ErrorNote error={error} onRetry={() => void reload()} />
-          )}
+          {!loading && data === undefined && <ErrorNote error={error} retry />}
           {data !== undefined && (
             <p className="hint">
               {data.people.length === 0

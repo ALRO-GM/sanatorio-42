@@ -32,7 +32,7 @@ export function RoomView({ id, me }: RoomViewProps) {
   const { t } = useI18n()
   const action = useAction()
   const sounds = useGameSounds()
-  const { room, error, load, take, offset } = useLiveRoom(() => api.getQuizRoom(id), [id], {
+  const { room, error, take, offset } = useLiveRoom(() => api.getQuizRoom(id), [id], {
     playingMs: PLAYING_MS,
     waitingMs: WAITING_MS,
     onChange: (previous, next) => {
@@ -44,7 +44,7 @@ export function RoomView({ id, me }: RoomViewProps) {
     return error === null ? (
       <p className="estado">{t('app.loading')}</p>
     ) : (
-      <ErrorNote error={error} onRetry={() => void load()} />
+      <ErrorNote error={error} retry />
     )
   }
 

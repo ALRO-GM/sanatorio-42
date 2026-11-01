@@ -127,7 +127,7 @@ export function ClickerPanel({ me }: { me: string }) {
 
           {loading && <p className="estado">{t('app.loading')}</p>}
           {data === undefined ? (
-            <ErrorNote error={error} onRetry={() => void reload()} />
+            <ErrorNote error={error} retry />
           ) : one !== undefined ? (
             <>
               <div className="stat-cards">

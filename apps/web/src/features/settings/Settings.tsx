@@ -52,7 +52,7 @@ export function Settings({ campusId, onCampusChange }: SettingsProps) {
         {t('settings.more')}
       </button>
       {/* Sin la lista no se puede cambiar de campus: se dice y se deja reintentar. */}
-      <ErrorNote error={campuses.error} onRetry={() => void campuses.reload()} />
+      <ErrorNote error={campuses.error} retry />
       {campuses.data !== undefined && campuses.data.length > 0 && campusId !== undefined && (
         <Show from="normal">
           <label className="setting">

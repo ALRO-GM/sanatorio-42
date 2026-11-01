@@ -16,13 +16,10 @@ type PairDetailProps = {
 export function PairDetail({ a, b, params }: PairDetailProps) {
   const { t, tn } = useI18n()
   const { date } = useFormat()
-  const { data, error, loading, reload } = useAsync(
-    () => api.getNetworkPair(a, b, params),
-    [a, b, params],
-  )
+  const { data, error, loading } = useAsync(() => api.getNetworkPair(a, b, params), [a, b, params])
 
   if (loading) return <p className="hint">{t('net.pair.loading')}</p>
-  if (data === undefined) return <ErrorNote error={error} onRetry={() => void reload()} />
+  if (data === undefined) return <ErrorNote error={error} retry />
 
   return (
     <div className="net-pair">

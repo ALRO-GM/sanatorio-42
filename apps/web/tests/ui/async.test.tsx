@@ -5,8 +5,12 @@ import type { ReactNode } from 'react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { I18nProvider, useI18n } from '../../src/shared/i18n'
+import { reloadPage } from '../../src/shared/reload'
 import { Async } from '../../src/shared/ui/Async'
 import { must } from './must'
+
+// jsdom no recarga: se mira que se pida.
+vi.mock('../../src/shared/reload', () => ({ reloadPage: vi.fn() }))
 
 const text = (key: string): string => must(es[key], `el texto ${key}`)
 
@@ -43,14 +47,15 @@ describe('Async: cargando, error y vacío siempre iguales', () => {
     expect(screen.getByText('Nadie todavía')).toBeTruthy()
   })
 
-  it('si falla, se dice y se puede reintentar', async () => {
+  it('si falla, se dice y «Reintentar» recarga la página entera, no solo la pieza', async () => {
     const user = userEvent.setup()
     const reload = vi.fn(() => Promise.resolve())
 
     show({ data: undefined, error: new Error('se cayó'), loading: false, reload })
     expect(screen.getByRole('alert')).toBeTruthy()
     await user.click(screen.getByRole('button', { name: text('app.retry') }))
-    expect(reload).toHaveBeenCalledOnce()
+    expect(reloadPage).toHaveBeenCalledOnce()
+    expect(reload).not.toHaveBeenCalled()
   })
 })
 
