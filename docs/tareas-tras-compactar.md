@@ -1,49 +1,19 @@
-# Tareas tras compactar (2026-10-29)
+# Tareas tras compactar (2026-11-01)
 
-En producción hasta 22cb544. Si la CI falla: `gh run view --job <id> --log-failed`
-(gh instalado en `~/.local/bin` con la sesión de ALRO-GM).
+En producción hasta 7a69796. Si la CI falla: `gh run view --job <id> --log-failed`
+(gh en `~/.local/bin`).
 
-## Reorganización de la web (pedida por Alberto el 2026-10-29)
+## Gran tanda pedida por Alberto el 2026-11-01 (push y despliegue autorizados)
 
-Informe con la teoría y el mapa: https://claude.ai/artifact/GdfmhP8oaqqfc8AiwRebwM
-Ejemplo del estilo base (claro, oscuro, móvil): https://claude.ai/artifact/WuVSadwa7zy7e2AiuijDkP
+Cinco agentes en worktrees (`.claude/worktrees/`), cada uno con commit local:
 
-Mapa acordado (Calendario en Yo, confirmado por Alberto):
+| Rama (si la crearon a mano) | Encargo | Entrega |
+| --- | --- | --- |
+| revision-codigo | Revisión: seguridad, duplicados, cobertura y casos límite, componentes reutilizables | `docs/revision-2026-11/codigo.md` |
+| docs-readme | README al día, `docs/componentes.md` (Mermaid + pros/contras), `docs/funcionalidades.md` | docs |
+| ux-modos | UX a fondo y qué se ve en simplificado/normal/datos | `docs/revision-2026-11/ux.md`, `docs/interfaz.md` |
+| preguntas | Coherencia del banco, Common Core, ≥100 (ideal 200) de piscina Shell00-01 y C00-C12 | `docs/preguntas.md` |
+| startup-mundo | Pomodoro: cuarto→coworking→oficinas→edificio, mudanzas, economía, oficios, mundo vivo, decoración recolocable, premio tras ≥30 min. Migración 0083 | `docs/pomodoro-startup.md` |
 
-| Categoría | Pestañas |
-| --- | --- |
-| Yo (portada) | Expediente · Agenda · Calendario |
-| Ayuda | Sala de espera · Tablón · Terapia · Pizarras · Guardia |
-| Aprender | Curso de git · Curso de shell · Not-games · Pomodoro |
-| Campus | Clústeres · Asientos · Avance · Red · Exámenes · Clasificaciones |
-
-Fases, cada una con check, commit, push y despliegue:
-
-1. **(Hecha, 46ed511) Categorías** (`app/sections.ts`, `shared/layout/registry.ts`, textos
-   `nav.cat.*`, Nav, Miniature, tours que nombran categorías, mock de piscina,
-   `docs/interfaz.md`): Yo, Ayuda, Aprender, Campus; Guardia como pestaña de
-   Ayuda; Estadísticas → Clasificaciones en Campus. Los órdenes guardados con
-   las categorías viejas no deben romper nada.
-2. **(Hecha) Sacar lo escondido**: cursos de git y de shell como secciones propias de
-   Aprender (hoy pestañas de Not-games; `#/notgames/git` y `#/notgames/shell`
-   redirigen); Pomodoro como página de Aprender (ajustes, Startup, cifras; la
-   ventanita de la esquina se queda); Asientos como sección de Campus (hoy
-   pestaña de Red). Permisos de piscina (`POOL_KEY`) de cada sección nueva.
-3. **(Hecha) Cabecera y menú**: menú del avatar solo de la cuenta (Personalizar,
-   Bienvenida, Gestión, Salir); los ajustes del pie, en Personalizar; en el
-   móvil, barra inferior con las cuatro categorías.
-4. **(Hecha) Estilo base profesional**: un estilo nuevo por defecto como el ejemplo
-   (Inter, grises neutros, turquesa #0F766E / #2DD4BF en oscuro, bordes de 1 px,
-   radio 12, cifras tabulares). Los estilos actuales siguen en Personalizar.
-5. **(Hecha: Avance con tres capas; Red, Asientos y Clasificaciones con la frase; Exámenes ya la tenía con el examen en vivo; Clústeres es el propio plano) Tres capas de datos** en Campus: la respuesta en una frase, el gráfico
-   con opciones a la derecha, «Ver a fondo» plegado.
-
-## Dominio Peer4U.app (cuando Alberto lo compre)
-
-Caddyfile con el dominio nuevo, redirección desde el viejo, URI de vuelta de
-la aplicación OAuth de 42, CORS y `PUBLIC_URL`/cookies en `infra/.env`.
-
-## Pendiente de antes
-
-- Historial de asientos: `npm run sync:status`.
-- Startup del Pomodoro: ajustar precios cuando haya uso.
+Al acabar: `git merge --no-ff` de cada rama en main (textos: `npm run textos -- --write`),
+`npm run check`, un push y un despliegue (skill desplegar). Resumen a Alberto.
