@@ -188,6 +188,16 @@
   display: grid;
   flex: 1;
   min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.su-who:hover b {
+  color: var(--accent);
 }
 .su-who b,
 .su-who small {
@@ -202,6 +212,125 @@
   .su-card {
     transition: none;
   }
+  .su-prize {
+    animation: none;
+  }
+}
+
+/* El mundo: la planta y, al lado, el edificio por fuera (en el móvil, debajo). */
+.su-world {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 0.5rem;
+}
+.su-world > .su-office {
+  flex: 1 1 260px;
+}
+.su-tower {
+  display: block;
+  max-width: 40%;
+  height: auto;
+  image-rendering: pixelated;
+}
+.su-office.editing canvas {
+  cursor: grab;
+  touch-action: none;
+}
+
+/* El dinero: una moneda dorada, igual en claro y en oscuro. */
+.su-coin {
+  display: inline-block;
+  flex: none;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fff6c4 0 20%, #ffd04d 21% 70%, #b9761c 71%);
+}
+.su-count {
+  font-size: 0.75rem;
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+.su-edit.on {
+  outline: 2px solid var(--accent);
+}
+
+/* Colocar a mano: las piezas para elegir y las flechas para moverlas. */
+.su-editor {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-sm);
+}
+.su-pieces {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.su-piece {
+  display: grid;
+  place-items: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  padding: 0.15rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  cursor: pointer;
+}
+.su-piece.on {
+  border-color: var(--accent);
+  outline: 2px solid var(--accent);
+}
+.su-piece.stored {
+  opacity: 0.55;
+}
+.su-moves {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+.su-step.up svg {
+  transform: rotate(180deg);
+}
+
+/* Lo que sale de una caja sorpresa: aparece de un salto (sin él, con movimiento reducido). */
+.su-prize {
+  display: grid;
+  place-items: center;
+  animation: su-pop 0.5s ease-out;
+}
+.su-prize-cash {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 1.2rem;
+}
+@keyframes su-pop {
+  from {
+    transform: scale(0.3) translateY(10px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+/* De visita en la oficina de otra persona. */
+.su-visit {
+  display: grid;
+  gap: 0.4rem;
+}
+.su-visit-close {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
 }
 
 /* En el Pomodoro a pantalla completa: abajo, sin robar sitio al reloj. */

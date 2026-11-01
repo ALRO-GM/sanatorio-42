@@ -24,7 +24,7 @@ const isNight = (): boolean => {
 }
 
 /** Colocar a mano: qué pieza está elegida y qué hacer al elegir o soltar. */
-export type Editing = {
+type Editing = {
   selected: number | null
   onSelect: (index: number | null) => void
   onDrop: (index: number, gx: number, gy: number) => void
@@ -260,7 +260,7 @@ function TowerView({ tower, frame }: { tower: Tower; frame: number }) {
       className="su-tower"
       width={size.width}
       height={size.height}
-      style={{ width: `${String(size.width * 2)}px`, height: `${String(size.height * 2)}px` }}
+      style={{ width: `${String(size.width * 2)}px` }}
       aria-hidden="true"
     />
   )

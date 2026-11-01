@@ -73,7 +73,7 @@ const key = (gx: number, gy: number): string => `${String(gx)},${String(gy)}`
  * Lo que se lleva cada par de personas, de 0 a 1: sale de sus dos aspectos
  * y es lo mismo en los dos sentidos.
  */
-export function affinity(a: number, b: number): number {
+function affinity(a: number, b: number): number {
   return seeded(`friends|${String(Math.min(a, b))}|${String(Math.max(a, b))}`)()
 }
 

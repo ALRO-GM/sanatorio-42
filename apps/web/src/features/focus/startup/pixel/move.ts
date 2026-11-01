@@ -28,8 +28,8 @@ export type Move = {
 }
 
 /** Lo que dura cada una, en fotogramas (6 y 9 segundos). */
-export const MOVE_FRAMES = 36
-export const EPILOGUE_FRAMES = 54
+const MOVE_FRAMES = 36
+const EPILOGUE_FRAMES = 54
 
 export const lengthOf = (move: Move): number =>
   move.kind === 'move' ? MOVE_FRAMES : EPILOGUE_FRAMES

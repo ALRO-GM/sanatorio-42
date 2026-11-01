@@ -24,7 +24,7 @@ const OX = WIDTH / 2
 const OY = HEIGHT - 18
 
 /** Lo que sobresale lo más alto por encima de la fila de atrás, en píxeles. */
-export const HEADROOM = 46
+const HEADROOM = 46
 
 /** Copia los píxeles de un dibujo a un lienzo nuevo de su tamaño. */
 export function toCanvas(sprite: Sprite): HTMLCanvasElement {
@@ -64,7 +64,7 @@ type Drawn = { canvas: HTMLCanvasElement; sprite: Sprite }
 const frames = new Map<string, Drawn>()
 
 /** Un modelo dibujado en un lienzo de modelo, girado si toca y con su contorno. */
-export function modelSprite(model: ModelId, props: Props, frame: number): Sprite {
+function modelSprite(model: ModelId, props: Props, frame: number): Sprite {
   const sprite = new Sprite(WIDTH, HEIGHT, OX, OY)
 
   sprite.turned = props.turn === true

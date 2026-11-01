@@ -93,7 +93,7 @@ const pick = <T>(list: readonly T[], look: number, step = 1): T =>
   list[Math.floor(look / step) % list.length] as T
 
 /** Quién es: su aspecto (0-999), su especialidad o su oficio. */
-export type Who = { look: number; axis: Axis | null; role?: Role | undefined }
+type Who = { look: number; axis: Axis | null; role?: Role | undefined }
 
 /** La ropa: la del oficio, o la del modelo de negocio de quien programa. */
 const clothesOf = ({ axis, role }: Who) =>
