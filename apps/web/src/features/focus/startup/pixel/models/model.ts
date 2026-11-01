@@ -1,5 +1,6 @@
-import type { Axis } from '@sanatorio/startup'
+import type { Axis, Role } from '@sanatorio/startup'
 
+import type { Carry } from '../person'
 import type { Shades, Sprite } from '../sprite'
 
 /** Lo que cambia un mismo modelo de un sitio a otro. Cada modelo mira lo que le toca. */
@@ -12,6 +13,14 @@ export type Props = {
   axis?: Axis | null
   /** Si trabaja: teclea y parpadea. Si no, se queda quieto. */
   busy?: boolean
+  /** El oficio de quien se dibuja, si no programa: su uniforme. */
+  role?: Role | undefined
+  /** Girado: mira a la derecha (lo hace el motor, `Sprite.turned`). */
+  turn?: boolean | undefined
+  /** Quien camina: el paso (0 quieto, 1 y 2 andando), si va de espaldas y lo que lleva. */
+  step?: number | undefined
+  back?: boolean | undefined
+  carry?: Carry | undefined
 }
 
 /**

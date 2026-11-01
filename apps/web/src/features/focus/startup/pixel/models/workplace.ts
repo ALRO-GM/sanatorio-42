@@ -1,5 +1,5 @@
 import { DARK, METAL, NAVY, PLYWOOD, PORCELAIN, SILVER, WOOD, GLOW, LED } from '../palette'
-import { PERSON_WIDTH, PERSON_HEIGHT, drawPerson } from '../person'
+import { PERSON_WIDTH, PERSON_HEIGHT, WALKER_HEIGHT, drawPerson, drawWalker } from '../person'
 import type { Sprite } from '../sprite'
 import { posts } from './model'
 import type { Model, Props } from './model'
@@ -15,7 +15,7 @@ function chair(sprite: Sprite): void {
 function seated(
   sprite: Sprite,
   frame: number,
-  { look = 0, axis = null, busy = false }: Props,
+  { look = 0, axis = null, busy = false, role }: Props,
 ): void {
   const [x, y] = sprite.project(8, 4.5, 9)
   // Que no tecleen ni parpadeen todos a la vez.
@@ -25,7 +25,7 @@ function seated(
     sprite,
     Math.round(x) - PERSON_WIDTH / 2,
     Math.round(y) - PERSON_HEIGHT + (busy && own % 2 === 1 ? 1 : 0),
-    { look, axis, blink: busy && own === 11 },
+    { look, axis, role, blink: busy && own === 11 },
   )
 }
 
@@ -111,5 +111,46 @@ export const person: Model = {
       axis,
       blink: (frame + look) % 24 === 5,
     })
+  },
+}
+
+/**
+ * Alguien de pie o andando por la oficina (`pixel/life.ts`): entero, con su
+ * uniforme si tiene oficio, de frente o de espaldas, con lo que lleve en las
+ * manos. El paso lo decide quien lo mueve; aquí solo parpadea.
+ */
+export const walker: Model = {
+  frames: 1,
+  draw(sprite, _frame, { look = 0, axis = null, role, step = 0, back = false, carry = null }) {
+    const [x, y] = sprite.project(8, 8, 0)
+
+    drawWalker(sprite, Math.round(x) - PERSON_WIDTH / 2, Math.round(y) - WALKER_HEIGHT, {
+      look,
+      axis,
+      role,
+      step,
+      back,
+      carry,
+    })
+  },
+}
+
+/**
+ * El mostrador de recepción, con quien atiende detrás (`look`) y un timbre.
+ * Sale en cuanto hay alguien de recepción en la plantilla.
+ */
+export const reception: Model = {
+  frames: 16,
+  draw(sprite, frame, props) {
+    if (props.look !== undefined) {
+      chair(sprite)
+      seated(sprite, frame, { ...props, busy: false, role: 'reception' })
+    }
+
+    sprite.box(1, 8, 0, 14, 6, 11, PLYWOOD)
+    sprite.faceY(14.01, 2, 14, 2, 9, WOOD[1])
+    sprite.box(1, 7, 11, 14, 7, 1.5, WOOD)
+    sprite.box(11, 10, 12.5, 2, 2, 1, SILVER)
+    sprite.dot(12, 11, 14, frame % 16 < 2 ? LED.amber : METAL[0])
   },
 }

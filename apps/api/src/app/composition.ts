@@ -562,6 +562,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     createStartupModule({
       db,
       focusedMinutes: (login) => focus.service.focusedMinutes(login),
+      longSessions: (login, minutes) => focus.service.longSessions(login, minutes),
       audience,
       ...clock,
     }),

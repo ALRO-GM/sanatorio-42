@@ -52,11 +52,23 @@ function subscribeHidden(listener: () => void): () => void {
  * dentro de `AwakeFrames`, donde solo para con la pestaña escondida.
  */
 export function useFrame(): number {
+  const stopped = useStopped()
+
+  return useSyncExternalStore(stopped ? idle : subscribe, () => frame)
+}
+
+/** Si los dibujos están quietos ahora (movimiento reducido, web quieta o pestaña escondida). */
+function useStopped(): boolean {
   const awake = useContext(AwakeFrames)
   const still = useStill()
   const hidden = useSyncExternalStore(subscribeHidden, () => document.hidden)
   const [calm] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches)
-  const stopped = calm || (awake ? hidden : still)
 
-  return useSyncExternalStore(stopped ? idle : subscribe, () => frame)
+  return calm || (awake ? hidden : still)
 }
+
+/**
+ * Si se mueve: con movimiento reducido (o todo quieto) las transiciones no
+ * se hacen, se pasa directamente a lo nuevo.
+ */
+export const useAnimated = (): boolean => !useStopped()

@@ -12,6 +12,8 @@ export type ArtOf =
   | { kind: 'side' | 'mvp' | 'founded' | 'global' }
   | { kind: 'round'; index: number }
   | { kind: 'hire'; axis: Axis; look: number }
+  /** Cualquier modelo tal cual: la decoración, los productos, el resto de la plantilla. */
+  | { kind: 'model'; model: ModelId; props?: Props }
 
 /** Qué modelo dibuja cada tarjeta, y con qué. */
 function modelOf(art: ArtOf): { model: ModelId; props: Props } {
@@ -36,6 +38,8 @@ function modelOf(art: ArtOf): { model: ModelId; props: Props } {
       return { model: 'coins', props: { level: art.index + 1 } }
     case 'hire':
       return { model: 'person', props: { look: art.look, axis: art.axis } }
+    case 'model':
+      return { model: art.model, props: art.props ?? {} }
   }
 }
 

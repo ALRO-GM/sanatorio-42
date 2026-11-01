@@ -29,6 +29,13 @@ export class Sprite {
   readonly pixels: (Color | null)[]
 
   /**
+   * Girado: el modelo mira a la derecha. Se dibuja como siempre y el motor lo
+   * refleja (cambia `x` por `y`) y cambia los tonos de las caras, para que la
+   * luz siga viniendo de arriba a la izquierda.
+   */
+  turned = false
+
+  /**
    * @param ox, oy Dónde cae en el lienzo la esquina de arriba de la baldosa (0, 0).
    */
   constructor(
@@ -42,7 +49,9 @@ export class Sprite {
 
   /** Dónde cae en el lienzo un punto del mundo. */
   project(x: number, y: number, z: number): [number, number] {
-    return [this.ox + x - y, this.oy + (x + y) / 2 - z]
+    const [a, b] = this.turned ? [y, x] : [x, y]
+
+    return [this.ox + a - b, this.oy + (a + b) / 2 - z]
   }
 
   set(x: number, y: number, color: Color): void {
@@ -75,7 +84,7 @@ export class Sprite {
 
   /** Una caja de `w × d × h` con su esquina de atrás abajo en (x, y, z). */
   box(x: number, y: number, z: number, w: number, d: number, h: number, shades: Shades): void {
-    const [top, left, right] = shades
+    const [top, left, right] = this.turned ? [shades[0], shades[2], shades[1]] : shades
     const X = x + w
     const Y = y + d
     const Z = z + h
@@ -165,11 +174,15 @@ export class Sprite {
     x: number,
     y: number,
   ): void {
+    // Girado, lo escrito a mano se da la vuelta en su sitio: el sitio ya sale
+    // reflejado de `project`.
+    const width = Math.max(0, ...rows.map((row) => row.length))
+
     rows.forEach((row, j) => {
       for (let i = 0; i < row.length; i += 1) {
         const color = palette[row.charAt(i)]
 
-        if (color !== undefined) this.set(x + i, y + j, color)
+        if (color !== undefined) this.set(x + (this.turned ? width - 1 - i : i), y + j, color)
       }
     })
   }

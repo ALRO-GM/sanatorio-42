@@ -7,3 +7,6 @@
 
 export * from './data.js'
 export * from './engine.js'
+export * from './economy.js'
+export * from './state.js'
+export * from './world.js'

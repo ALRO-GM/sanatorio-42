@@ -174,6 +174,7 @@ import type {
   ApiUsageLimits,
   StartupRankRow,
   StartupSnapshot,
+  StartupVisit,
   ApiUsageLimitsChange,
 } from '@sanatorio/contracts'
 
@@ -535,6 +536,8 @@ export type Api = {
   /** Una acción de la startup (comprar, hito, contratar, volver a sacar, ronda); `409` si no se puede. */
   startupAction: (action: StartupAction) => Promise<StartupSnapshot>
   getStartupRanking: () => Promise<StartupRankRow[]>
+  /** La oficina de alguien del ranking, para ir a verla; `404` si no se puede ver. */
+  getStartupOffice: (login: string) => Promise<StartupVisit>
   /** A qué se va la cuota de 42, por función y por persona, en las últimas `hours` horas. */
   getAdminApiUsage: (query: {
     hours: number

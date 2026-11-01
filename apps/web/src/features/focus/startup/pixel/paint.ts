@@ -1,8 +1,12 @@
+import { BUBBLE_HEIGHT, BUBBLE_WIDTH, drawBubble } from './bubbles'
 import { drawFloor } from './floor'
 import type { Floor } from './floor'
-import type { Office } from './layout'
+import type { Office, Piece } from './layout'
+import { poseAt } from './life'
+import type { Bubble, Plan, Pose } from './life'
 import { MODELS } from './models'
 import type { ModelId, Props } from './models'
+import { WALKER_HEIGHT } from './person'
 import { Sprite, TILE } from './sprite'
 
 /**
@@ -23,7 +27,7 @@ const OY = HEIGHT - 18
 const HEADROOM = 46
 
 /** Copia los píxeles de un dibujo a un lienzo nuevo de su tamaño. */
-function toCanvas(sprite: Sprite): HTMLCanvasElement {
+export function toCanvas(sprite: Sprite): HTMLCanvasElement {
   const canvas = document.createElement('canvas')
 
   canvas.width = sprite.width
@@ -59,20 +63,28 @@ type Drawn = { canvas: HTMLCanvasElement; sprite: Sprite }
 
 const frames = new Map<string, Drawn>()
 
+/** Un modelo dibujado en un lienzo de modelo, girado si toca y con su contorno. */
+function modelSprite(model: ModelId, props: Props, frame: number): Sprite {
+  const sprite = new Sprite(WIDTH, HEIGHT, OX, OY)
+
+  sprite.turned = props.turn === true
+  MODELS[model].draw(sprite, frame % MODELS[model].frames, props)
+
+  return sprite.outline()
+}
+
 /** Un fotograma de un modelo, dibujado la primera vez y guardado. */
 function drawn(model: ModelId, props: Props, frame: number): Drawn {
-  const { frames: count, draw } = MODELS[model]
+  const { frames: count } = MODELS[model]
   const key = `${model}|${JSON.stringify(props)}|${String(frame % count)}`
   let found = frames.get(key)
 
   if (found === undefined) {
     // No crece sin fin: si se llena, se vuelve a dibujar lo que se vea.
-    if (frames.size > 800) frames.clear()
+    if (frames.size > 1500) frames.clear()
 
-    const sprite = new Sprite(WIDTH, HEIGHT, OX, OY)
+    const sprite = modelSprite(model, props, frame)
 
-    draw(sprite, frame % count, props)
-    sprite.outline()
     found = { canvas: toCanvas(sprite), sprite }
     frames.set(key, found)
   }
@@ -83,6 +95,24 @@ function drawn(model: ModelId, props: Props, frame: number): Drawn {
 /** Lo que mide la escena de una oficina de `size` baldosas, en píxeles. */
 export function sceneSize(size: number): { width: number; height: number } {
   return { width: size * 2 * TILE + 8, height: size * TILE + HEADROOM + 6 }
+}
+
+/** Dónde cae en la escena la esquina de arriba de la baldosa (gx, gy). */
+export function tileOrigin(size: number, gx: number, gy: number): [number, number] {
+  return [size * TILE + 4 + (gx - gy) * TILE, HEADROOM + ((gx + gy) * TILE) / 2]
+}
+
+/**
+ * La baldosa bajo un punto de la escena (en píxeles del dibujo), o `null` si
+ * cae fuera del suelo: lo contrario de `tileOrigin`, para tocar y arrastrar.
+ */
+export function tileAt(size: number, x: number, y: number): [number, number] | null {
+  const u = (x - size * TILE - 4) / TILE
+  const v = ((y - HEADROOM) * 2) / TILE
+  const gx = Math.floor((u + v) / 2)
+  const gy = Math.floor((v - u) / 2)
+
+  return gx >= 0 && gy >= 0 && gx < size && gy < size ? [gx, gy] : null
 }
 
 const floors = new Map<string, HTMLCanvasElement>()
@@ -103,27 +133,236 @@ function floorOf(size: number, floor: Floor): HTMLCanvasElement {
   return canvas
 }
 
-/** Pinta la oficina en el fotograma `frame`: el suelo y lo colocado, de atrás adelante. */
+const marks = new Map<string, HTMLCanvasElement>()
+
+/** El rombo de una baldosa marcada (elegida, se puede o no se puede dejar ahí). */
+function markOf(color: string): HTMLCanvasElement {
+  let canvas = marks.get(color)
+
+  if (canvas === undefined) {
+    const sprite = new Sprite(2 * TILE + 2, TILE + 2, TILE + 1, 1)
+
+    sprite.faceZ(0, 0, TILE, 0, TILE, color)
+    canvas = toCanvas(sprite)
+    marks.set(color, canvas)
+  }
+
+  return canvas
+}
+
+const bubbles = new Map<Bubble, HTMLCanvasElement>()
+
+function bubbleOf(bubble: Bubble): HTMLCanvasElement {
+  let canvas = bubbles.get(bubble)
+
+  if (canvas === undefined) {
+    const sprite = new Sprite(BUBBLE_WIDTH + 2, BUBBLE_HEIGHT + 2, 0, 0)
+
+    drawBubble(sprite, 1, 1, bubble)
+    canvas = toCanvas(sprite.outline())
+    bubbles.set(bubble, canvas)
+  }
+
+  return canvas
+}
+
+/** Lo que se pinta encima de la oficina: la vida, la noche y lo de colocar a mano. */
+export type Extras = {
+  /** Los planes de cada persona (`lifeOf`); sin ellos, todo el mundo en su sitio. */
+  plans?: readonly Plan[] | undefined
+  night?: boolean | undefined
+  /** La pieza de decoración elegida (su número) y dónde se dejaría al soltarla. */
+  selected?: number | null | undefined
+  ghost?: { gx: number; gy: number; ok: boolean } | null | undefined
+  /** Para la mudanza: cada pieza, una caja; y cuánto ha caído cada pieza (0 arriba, 1 en su sitio). */
+  packed?: number | undefined
+  dropped?: number | undefined
+}
+
+type Drawable = { depth: number; tie: number; paint: () => void }
+
+/**
+ * Pinta la oficina en el fotograma `frame`: el suelo, lo colocado y quien
+ * anda por ella, de atrás adelante; luego los bocadillos y, de noche, la luz
+ * baja. Los bocadillos van por encima de la noche, para que se lean.
+ */
 export function paintOffice(
   context: CanvasRenderingContext2D,
   office: Office,
   frame: number,
+  extras: Extras = {},
 ): void {
   const { width, height } = sceneSize(office.size)
-  const sx = office.size * TILE + 4
+  const at = (gx: number, gy: number) => tileOrigin(office.size, gx, gy)
+  const poses: (Pose | null)[] = office.people.map((_, index) => {
+    const plan = extras.plans?.[index]
+
+    return plan === undefined ? null : poseAt(plan, frame)
+  })
+  const items: Drawable[] = []
+  const said: { x: number; y: number; bubble: Bubble }[] = []
+  const pieces = office.pieces
+  const packed = extras.packed ?? 0
+  const dropped = extras.dropped ?? 1
 
   context.imageSmoothingEnabled = false
   context.clearRect(0, 0, width, height)
   context.drawImage(floorOf(office.size, office.floor), 0, 0)
 
-  const ordered = [...office.pieces].sort((a, b) => a.gx + a.gy - (b.gx + b.gy) || a.gx - b.gx)
+  if (extras.selected !== undefined && extras.selected !== null) {
+    const chosen = pieces.find((piece) => piece.decor === extras.selected)
 
-  for (const piece of ordered) {
-    const { canvas } = drawn(piece.model, piece.props, frame)
-    const x = sx + (piece.gx - piece.gy) * TILE
-    const y = HEADROOM + ((piece.gx + piece.gy) * TILE) / 2
+    if (chosen !== undefined) {
+      const [x, y] = at(chosen.gx, chosen.gy)
 
-    context.drawImage(canvas, x - OX, y - OY)
+      context.globalAlpha = 0.6
+      context.drawImage(markOf('#5cc8ff'), x - TILE - 1, y - 1)
+      context.globalAlpha = 1
+    }
+  }
+
+  pieces.forEach((piece, index) => {
+    const seated = piece.seat === undefined ? null : poses[piece.seat]
+    // Quien se ha levantado deja la silla vacía.
+    const props: Props =
+      seated !== null && seated !== undefined && !seated.seated
+        ? Object.fromEntries(Object.entries(piece.props).filter(([name]) => name !== 'look'))
+        : piece.props
+    const share = index / Math.max(1, pieces.length)
+
+    if (packed > share) {
+      items.push(
+        paintPiece(
+          context,
+          at,
+          { ...piece, model: 'crate', props: { level: 1 + (index % 3) } },
+          frame,
+          0,
+        ),
+      )
+      return
+    }
+
+    // Al montar la oficina nueva, cada pieza cae a su sitio por turnos.
+    const fall = Math.min(1, Math.max(0, (dropped - share * 0.6) / 0.4))
+
+    if (fall <= 0) return
+
+    items.push(
+      paintPiece(
+        context,
+        at,
+        { ...piece, props: cleanProps(props) },
+        frame,
+        Math.round((1 - fall) ** 2 * 40),
+      ),
+    )
+
+    if (seated?.seated === true && seated.bubble !== null) {
+      const [x, y] = at(piece.gx, piece.gy)
+
+      said.push({ x, y: y - 16, bubble: seated.bubble })
+    }
+  })
+
+  if (packed === 0 && dropped >= 1) {
+    office.people.forEach((person, index) => {
+      const pose = poses[index]
+
+      if (pose === null || pose === undefined || pose.seated || pose.away) return
+
+      const [x, y] = at(pose.gx, pose.gy)
+      const model: ModelId = person.pet ?? 'walker'
+      const props: Props =
+        person.pet !== undefined
+          ? { step: pose.step, turn: pose.turn }
+          : cleanProps({
+              look: person.look,
+              axis: person.axis,
+              role: person.role,
+              step: pose.step,
+              back: pose.back,
+              turn: pose.turn,
+              carry: pose.carry,
+            })
+
+      items.push({
+        depth: pose.gx + pose.gy + 0.5,
+        tie: pose.gx,
+        paint: () => {
+          context.drawImage(
+            drawn(model, props, frame).canvas,
+            Math.round(x - OX),
+            Math.round(y - OY),
+          )
+        },
+      })
+
+      if (pose.bubble !== null) {
+        said.push({
+          x,
+          y: y + 8 - (person.pet === undefined ? WALKER_HEIGHT : 8),
+          bubble: pose.bubble,
+        })
+      }
+
+      // Quien charla con alguien sentado: le contesta.
+      const partner = pose.with === null ? undefined : office.people[pose.with]
+      const answer = pose.with === null ? null : poses[pose.with]
+
+      if (pose.bubble !== null && partner?.desk !== undefined && answer?.seated === true) {
+        const [px, py] = at(partner.desk[0], partner.desk[1])
+
+        said.push({ x: px, y: py - 16, bubble: pose.bubble === 'heart' ? 'heart' : 'chat' })
+      }
+    })
+  }
+
+  items.sort((a, b) => a.depth - b.depth || a.tie - b.tie)
+  for (const item of items) item.paint()
+
+  if (extras.ghost !== undefined && extras.ghost !== null) {
+    const [x, y] = at(extras.ghost.gx, extras.ghost.gy)
+
+    context.globalAlpha = 0.55
+    context.drawImage(markOf(extras.ghost.ok ? '#53ff8f' : '#ff5d5d'), x - TILE - 1, y - 1)
+    context.globalAlpha = 1
+  }
+
+  if (extras.night === true) {
+    context.fillStyle = 'rgba(20, 24, 66, 0.32)'
+    context.fillRect(0, 0, width, height)
+  }
+
+  for (const { x, y, bubble } of said) {
+    context.drawImage(
+      bubbleOf(bubble),
+      Math.round(x - BUBBLE_WIDTH / 2),
+      Math.round(y - BUBBLE_HEIGHT),
+    )
+  }
+}
+
+/** Sin lo que vale `undefined`: así la clave de lo guardado es la misma. */
+function cleanProps(props: Props): Props {
+  return Object.fromEntries(Object.entries(props).filter(([, value]) => value !== undefined))
+}
+
+function paintPiece(
+  context: CanvasRenderingContext2D,
+  at: (gx: number, gy: number) => [number, number],
+  piece: Piece,
+  frame: number,
+  lift: number,
+): Drawable {
+  const [x, y] = at(piece.gx, piece.gy)
+
+  return {
+    depth: piece.gx + piece.gy,
+    tie: piece.gx,
+    paint: () => {
+      context.drawImage(drawn(piece.model, piece.props, frame).canvas, x - OX, y - OY - lift)
+    },
   }
 }
 
@@ -167,4 +406,16 @@ export function paintModel(
   context.imageSmoothingEnabled = false
   context.clearRect(0, 0, width, height)
   context.drawImage(drawn(model, props, frame).canvas, x, y, width, height, 0, 0, width, height)
+}
+
+/** Pinta un modelo suelto en (x, y) de un lienzo, con la esquina de su baldosa ahí: la mudanza. */
+export function paintAt(
+  context: CanvasRenderingContext2D,
+  model: ModelId,
+  props: Props,
+  frame: number,
+  x: number,
+  y: number,
+): void {
+  context.drawImage(drawn(model, props, frame).canvas, Math.round(x - OX), Math.round(y - OY))
 }

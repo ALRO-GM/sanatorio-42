@@ -83,4 +83,112 @@ describe('startup del Pomodoro', () => {
       expect(within(ranking).getByText('Neuralia').textContent).toBe('Neuralia')
     })
   })
+
+  it('cajas sorpresa, colocar la decoración a mano y visitar otra oficina', async () => {
+    render(
+      <I18nProvider>
+        <StartupPanel />
+      </I18nProvider>,
+    )
+
+    // Tres sesiones largas en la API de mentira: tres cajas. La primera trae un gato.
+    const open = await screen.findByRole('button', { name: text('startup.box') })
+
+    await waitFor(() => {
+      expect((open as HTMLButtonElement).disabled).toBe(false)
+    })
+    fireEvent.click(open)
+    expect((await screen.findByRole('status')).textContent).toContain(
+      text('startup.prize', { name: text('startup.decor.cat') }),
+    )
+
+    // La segunda, una máquina de refrescos que se coloca sola.
+    const again = screen.getByRole('button', { name: text('startup.box') })
+
+    await waitFor(() => {
+      expect((again as HTMLButtonElement).disabled).toBe(false)
+    })
+    fireEvent.click(again)
+    await waitFor(() => {
+      expect(screen.getByRole('status').textContent).toContain(text('startup.decor.vending'))
+    })
+
+    // Mover la decoración: se elige la pieza y se mueve con las flechas.
+    fireEvent.click(await screen.findByRole('button', { name: text('startup.edit') }))
+
+    const editor = await screen.findByRole('group', { name: text('startup.edit') })
+    const piece = within(editor).getByRole('button', {
+      name: new RegExp(`^${text('startup.decor.vending')} `),
+    })
+    const before = piece.getAttribute('aria-label')
+
+    // El gato va solo: no sale para colocar.
+    expect(
+      within(editor).queryByRole('button', { name: new RegExp(text('startup.decor.cat')) }),
+    ).toBeNull()
+    fireEvent.click(piece)
+
+    const moves = ['up', 'left', 'right', 'down'].map((way) =>
+      within(editor).getByRole('button', { name: text(`startup.move.${way}`) }),
+    )
+    const free = must(
+      moves.find((move) => !(move as HTMLButtonElement).disabled),
+      'una flecha que se pueda usar',
+    )
+
+    fireEvent.click(free)
+    await waitFor(() => {
+      expect(
+        within(editor)
+          .getByRole('button', { name: new RegExp(`^${text('startup.decor.vending')} `) })
+          .getAttribute('aria-label'),
+      ).not.toBe(before)
+    })
+
+    // Guardarla en el almacén.
+    fireEvent.click(within(editor).getByRole('button', { name: text('startup.store') }))
+    await waitFor(() => {
+      expect(
+        within(editor).getByRole('button', {
+          name: text('startup.piece.stored', { name: text('startup.decor.vending') }),
+        }),
+      ).toBeTruthy()
+    })
+
+    // Ir a ver la oficina de alguien del ranking y volver.
+    fireEvent.click(
+      await screen.findByRole('button', { name: text('startup.visit', { login: 'lmarin-g' }) }),
+    )
+    fireEvent.click(await screen.findByRole('button', { name: text('startup.visit.close') }))
+    expect(screen.queryByRole('button', { name: text('startup.visit.close') })).toBeNull()
+  })
+
+  it('implementar un producto hace que cada minuto de concentración dé dinero', async () => {
+    render(
+      <I18nProvider>
+        <StartupPanel />
+      </I18nProvider>,
+    )
+
+    const rate = await screen.findByTitle(text('startup.rate'))
+
+    expect(rate.textContent).toContain('+0')
+
+    const product = await screen.findByRole('button', {
+      name: text('startup.item.product-insights'),
+    })
+
+    await waitFor(() => {
+      expect((product as HTMLButtonElement).disabled).toBe(false)
+    })
+    fireEvent.click(product)
+    await waitFor(() => {
+      expect(screen.getByTitle(text('startup.rate')).textContent).not.toContain('+0')
+    })
+    // El dinero se paga con dinero: sin él, el coworking no se puede alquilar.
+    expect(
+      screen.getByRole<HTMLButtonElement>('button', { name: text('startup.space.coworking') })
+        .disabled,
+    ).toBe(true)
+  })
 })

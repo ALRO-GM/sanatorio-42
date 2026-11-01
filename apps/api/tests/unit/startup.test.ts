@@ -58,7 +58,7 @@ describe('motor de la startup', () => {
     ).toEqual({
       refused: 'poor',
     })
-    // El espacio pide haber fundado la startup.
+    // El espacio pide tener un proyecto propio.
     expect(act('ana', EMPTY_STARTUP, 10_000, { type: 'buy', item: 'space' })).toEqual({
       refused: 'locked',
     })
@@ -145,7 +145,10 @@ describe('motor de la startup', () => {
     // La presemilla pide un espacio.
     expect(act('ana', state, rich, { type: 'round' })).toEqual({ refused: 'locked' })
 
-    state = play('ana', rich, [{ type: 'buy', item: 'space' }], state)
+    // El espacio se alquila con dinero, no con minutos.
+    expect(act('ana', state, rich, { type: 'buy', item: 'space' })).toEqual({ refused: 'poor' })
+    state = play('ana', rich, [{ type: 'buy', item: 'space' }], { ...state, cash: 200 })
+    expect(state.cash).toBe(0)
 
     const before = valuationOf(state)
 
@@ -196,6 +199,7 @@ describe('módulo startup', () => {
         Promise.resolve(
           login === undefined ? minutes : new Map([[login, minutes.get(login) ?? 0]]),
         ),
+      longSessions: (login) => Promise.resolve(login === 'ana' ? 2 : 0),
     }).service
 
   beforeEach(async () => {
