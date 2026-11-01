@@ -39,7 +39,7 @@ import { domainError } from '../../core/errors.js'
 import { clockOf } from '../../core/options.js'
 import type { Clock } from '../../core/options.js'
 import { isoAt, localMoment } from '../../core/time.js'
-import { day, id, optionalText, parse, text } from '../../core/validation.js'
+import { clockTime, day, id, optionalText, parse, text } from '../../core/validation.js'
 import type { SprintRoster } from '../therapy/index.js'
 import type { AgendaRepository, EntryWrite, GoalRow } from './agenda.repository.js'
 import {
@@ -82,6 +82,8 @@ const progress = z.number().int().min(0).max(100).multipleOf(5, 'va de 5 en 5')
 const goalSchema = z.object({
   projectId: id,
   targetDay: day,
+  // Sin hora, la meta vence al acabar el día.
+  targetTime: clockTime.nullable().default(null),
   progress: progress.default(0),
   note: optionalText(200),
   checkpoints: z
@@ -93,6 +95,8 @@ const goalSchema = z.object({
 
 const updateSchema = z.object({
   targetDay: day.optional(),
+  // `undefined`: no cambia; `null`: sin hora.
+  targetTime: clockTime.nullable().optional(),
   progress: progress.optional(),
   // `undefined`: no cambia; vacío o `null`: se borra.
   note: z.string().trim().max(200, 'máximo 200 caracteres').nullable().optional(),
@@ -363,6 +367,7 @@ export function createAgendaService(options: AgendaServiceOptions) {
           projectName: name,
           projectKind: kind,
           targetDay: wanted.targetDay,
+          targetTime: wanted.targetTime,
           progress: wanted.progress,
           note: wanted.note,
         },
@@ -397,6 +402,7 @@ export function createAgendaService(options: AgendaServiceOptions) {
         goalId,
         {
           targetDay: change.targetDay ?? goal.targetDay,
+          targetTime: change.targetTime === undefined ? goal.targetTime : change.targetTime,
           progress: change.progress ?? goal.progress,
           note: change.note === undefined ? goal.note : change.note === '' ? null : change.note,
           status,
@@ -573,6 +579,7 @@ export function createAgendaService(options: AgendaServiceOptions) {
             goal: {
               id: goal.id,
               targetDay: goal.targetDay,
+              targetTime: goal.targetTime,
               progress: goal.progress,
               status: goal.status,
               note: goal.note,

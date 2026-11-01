@@ -49,6 +49,10 @@ describe('agenda', () => {
     await user.selectOptions(within(form).getByLabelText(text('scrum.project')), 'minitalk')
     await user.selectOptions(within(form).getByLabelText(text('scrum.progress')), '20')
     await user.type(within(form).getByLabelText(text('scrum.note')), 'Falta el bonus')
+    // La hora es opcional: sin ella, vence al acabar el día.
+    fireEvent.change(within(form).getByLabelText(text('scrum.targetTime')), {
+      target: { value: '18:30' },
+    })
     await user.click(
       within(form).getByRole('button', {
         name: fill('scrum.check.remove', { name: text('scrum.check.slots') }),
@@ -60,6 +64,7 @@ describe('agenda', () => {
       expect(create).toHaveBeenCalled()
     }, WAIT)
     expect(create.mock.calls[0]?.[0]).toMatchObject({
+      targetTime: '18:30',
       progress: 20,
       note: 'Falta el bonus',
       checkpoints: ['works', 'subject', 'sheet', 'norminette', 'leaks', 'breakers', 'git'],
@@ -155,6 +160,11 @@ describe('agenda', () => {
         }),
       )
     }, WAIT)
+    // Con hora de entrega, la cuenta atrás acaba a esa hora y no al final del día.
+    const pinned = pin.mock.calls[0]?.[0]
+
+    expect(pinned?.kind === 'custom' && new Date(pinned.at).getHours()).toBe(14)
+    expect(within(printf).getByText(/· 14:00/)).toBeTruthy()
     expect(
       await within(printf).findByRole('button', { name: text('scrum.unpin') }, WAIT),
     ).toHaveProperty('ariaPressed', 'true')

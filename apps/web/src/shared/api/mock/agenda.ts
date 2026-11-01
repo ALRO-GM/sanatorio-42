@@ -157,6 +157,7 @@ function initialGoals(): AgendaGoal[] {
       projectName: 'ft_printf',
       projectKind: 'c',
       targetDay: dayFrom(4),
+      targetTime: '14:00',
       progress: 60,
       note: 'Me queda el %p y los flags',
       status: 'active',
@@ -182,6 +183,7 @@ function initialGoals(): AgendaGoal[] {
       projectName: 'get_next_line',
       projectKind: 'c',
       targetDay: dayFrom(9),
+      targetTime: null,
       progress: 30,
       note: null,
       status: 'active',
@@ -210,7 +212,7 @@ let goals = initialGoals()
 function sprintGoalOf(
   goal: Pick<
     AgendaGoal,
-    'id' | 'targetDay' | 'progress' | 'status' | 'note' | 'checkpoints' | 'entries'
+    'id' | 'targetDay' | 'targetTime' | 'progress' | 'status' | 'note' | 'checkpoints' | 'entries'
   >,
 ): SprintGoal {
   const latest = goal.entries[0]
@@ -240,6 +242,7 @@ function others(): Record<string, SprintGoal> {
     sprintGoalOf({
       id: newId(),
       targetDay: dayFrom(login === 'lruiz' ? 2 : 11),
+      targetTime: null,
       progress,
       status: 'active',
       note: null,
@@ -371,6 +374,7 @@ export const agendaMock: Pick<
       projectName: project.name,
       projectKind: kind,
       targetDay: input.targetDay,
+      targetTime: input.targetTime ?? null,
       progress: input.progress ?? 0,
       note: emptyToNull(input.note),
       status: 'active',
@@ -392,6 +396,7 @@ export const agendaMock: Pick<
     const goal = mine(id)
 
     if (change.targetDay !== undefined) goal.targetDay = change.targetDay
+    if (change.targetTime !== undefined) goal.targetTime = change.targetTime
     if (change.progress !== undefined) goal.progress = change.progress
     if (change.note !== undefined) goal.note = emptyToNull(change.note)
     if (change.status !== undefined && change.status !== goal.status) {

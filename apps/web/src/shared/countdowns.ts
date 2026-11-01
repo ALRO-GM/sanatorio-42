@@ -68,21 +68,27 @@ export function onOpenCountdownsPage(listener: () => void): () => void {
   }
 }
 
-/** El final del día de entrega de una meta de la agenda: hasta ahí cuenta su cuenta atrás. */
-export const goalDeadline = (day: string): string => new Date(`${day}T23:59:00`).toISOString()
+/**
+ * La entrega de una meta de la agenda: su hora o, sin ella, el final del día.
+ * Hasta ahí cuenta su cuenta atrás.
+ */
+export const goalDeadline = (day: string, time: string | null = null): string =>
+  new Date(`${day}T${time ?? '23:59'}:00`).toISOString()
 
 /**
  * La cuenta atrás de una meta de la agenda, si está fijada. Es una propia con
- * el título de la meta (`scrum.pin.title`) y el final de su día: así se
+ * el título de la meta (`scrum.pin.title`) y su entrega: así se
  * reconoce desde la agenda y desde el formulario de fijar.
  */
 export const goalPinOf = (
   list: Countdown[] | null,
   title: string,
   day: string,
+  time: string | null = null,
 ): Countdown | undefined =>
   (list ?? []).find(
-    (entry) => entry.kind === 'custom' && entry.title === title && entry.at === goalDeadline(day),
+    (entry) =>
+      entry.kind === 'custom' && entry.title === title && entry.at === goalDeadline(day, time),
   )
 
 /** Lo fijado de ese evento del calendario, si lo está. */

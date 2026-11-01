@@ -19,7 +19,7 @@ type GoalFormProps = {
 }
 
 /**
- * Poner una meta: el proyecto, el día, cuánto llevas, lo que te queda y los
+ * Poner una meta: el proyecto, el día (y, si quieres, la hora), cuánto llevas, lo que te queda y los
  * checkpoints. Al elegir proyecto salen los de fábrica de su tipo; se quitan
  * con un clic y se añaden de la lista. Los propios, después, en la meta.
  */
@@ -29,6 +29,8 @@ export function GoalForm({ projects, options, today, onCancel, onSaved }: GoalFo
   const [projectId, setProjectId] = useState(projects[0]?.id ?? 0)
   const kindOf = (id: number) => projects.find((project) => project.id === id)?.kind ?? 'c'
   const [targetDay, setTargetDay] = useState(plusDays(today, 7))
+  // Vacía: vence al acabar el día.
+  const [targetTime, setTargetTime] = useState('')
   const [progress, setProgress] = useState(0)
   const [note, setNote] = useState('')
   const [checks, setChecks] = useState<AgendaCheckpointKey[]>(options.defaults[kindOf(projectId)])
@@ -41,7 +43,14 @@ export function GoalForm({ projects, options, today, onCancel, onSaved }: GoalFo
     event.preventDefault()
     if (
       await run(() =>
-        api.createAgendaGoal({ projectId, targetDay, progress, note, checkpoints: checks }),
+        api.createAgendaGoal({
+          projectId,
+          targetDay,
+          targetTime: targetTime === '' ? null : targetTime,
+          progress,
+          note,
+          checkpoints: checks,
+        }),
       )
     ) {
       onSaved()
@@ -98,6 +107,16 @@ export function GoalForm({ projects, options, today, onCancel, onSaved }: GoalFo
             required
             onChange={(event) => {
               setTargetDay(event.target.value)
+            }}
+          />
+        </label>
+        <label>
+          {t('scrum.targetTime')}
+          <input
+            type="time"
+            value={targetTime}
+            onChange={(event) => {
+              setTargetTime(event.target.value)
             }}
           />
         </label>

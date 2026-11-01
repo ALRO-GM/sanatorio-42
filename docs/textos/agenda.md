@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/agenda.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-144 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
+145 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera | Francés |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -22,6 +22,7 @@ Generado desde `apps/web/src/shared/i18n/textos/agenda.csv` con
 | `scrum.project.doing` | Formulario de meta: grupo de proyectos que tienes en curso | features/agenda/GoalForm | En curso | In progress | En curs | Martxan | En cours |
 | `scrum.project.next` | Formulario de meta: grupo de lo siguiente de tu plan | features/agenda/GoalForm | Lo siguiente de tu plan | Next in your plan | El següent del teu pla | Zure planeko hurrengoa | La suite de ton plan |
 | `scrum.targetDay` | Meta: el día para el que te la pones | features/agenda/GoalCard, features/agenda/GoalForm, features/agenda/ScrumTour | Fecha de entrega | Hand-in date | Data de lliurament | Entrega-data | Date de rendu |
+| `scrum.targetTime` | Meta: la hora de entrega (si no se pone, al acabar el día) | features/agenda/GoalForm | Hora (opcional) | Time (optional) | Hora (opcional) | Ordua (aukerakoa) | Heure (facultatif) |
 | `scrum.progress` | Meta: cuánto llevas | features/agenda/GoalCard, features/agenda/GoalForm, features/agenda/ScrumTour | Cuánto llevas | How far along | Quant portes | Zenbat daramazun | Avancement |
 | `scrum.progress.zero` | Avance: 0 % | features/agenda/steps | 0 % · ni un commit | 0 % · not a single commit | 0 % · ni un commit | % 0 · commit bat ere ez | 0 % · pas un seul commit |
 | `scrum.progress.full` | Avance: 100 % | features/agenda/steps | 100 % · listo para entregar | 100 % · ready to hand in | 100 % · llest per lliurar | % 100 · entregatzeko prest | 100 % · prêt à rendre |

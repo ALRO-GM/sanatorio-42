@@ -29,6 +29,8 @@ export type GoalRow = {
   projectName: string
   projectKind: AgendaProjectKind
   targetDay: string
+  /** La hora de entrega (`HH:MM`, hora del campus), o `null`: al acabar el día. */
+  targetTime: string | null
   progress: number
   note: string | null
   status: AgendaGoalStatus
@@ -62,6 +64,7 @@ const goalOf = (row: Row): GoalRow => ({
   projectName: toText(row.project_name),
   projectKind: toText(row.project_kind) as AgendaProjectKind,
   targetDay: toText(row.target_day),
+  targetTime: toTextOrNull(row.target_time),
   progress: toNumber(row.progress),
   note: toTextOrNull(row.note),
   status: toText(row.status) as AgendaGoalStatus,
@@ -166,8 +169,8 @@ export function createAgendaRepository(db: Db) {
     ): Promise<number> {
       const created = await db.execute({
         sql: `INSERT INTO scrum_goals (login, campus_id, project_id, project_name, project_kind,
-                target_day, progress, note, status, created_at, updated_at)
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'active', ?, ?) RETURNING id`,
+                target_day, target_time, progress, note, status, created_at, updated_at)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', ?, ?) RETURNING id`,
         args: [
           goal.login,
           goal.campusId,
@@ -175,6 +178,7 @@ export function createAgendaRepository(db: Db) {
           goal.projectName,
           goal.projectKind,
           goal.targetDay,
+          goal.targetTime,
           goal.progress,
           goal.note,
           at,
@@ -198,14 +202,18 @@ export function createAgendaRepository(db: Db) {
 
     async update(
       goalId: number,
-      change: Pick<GoalRow, 'targetDay' | 'progress' | 'note' | 'status' | 'closedAt'>,
+      change: Pick<
+        GoalRow,
+        'targetDay' | 'targetTime' | 'progress' | 'note' | 'status' | 'closedAt'
+      >,
       at: string,
     ): Promise<void> {
       await db.execute({
-        sql: `UPDATE scrum_goals SET target_day = ?, progress = ?, note = ?, status = ?,
+        sql: `UPDATE scrum_goals SET target_day = ?, target_time = ?, progress = ?, note = ?, status = ?,
                 closed_at = ?, updated_at = ? WHERE id = ?`,
         args: [
           change.targetDay,
+          change.targetTime,
           change.progress,
           change.note,
           change.status,

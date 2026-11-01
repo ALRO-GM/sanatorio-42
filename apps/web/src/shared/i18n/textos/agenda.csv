@@ -14,6 +14,7 @@ scrum.project,Formulario de meta: campo del proyecto,Proyecto,Project,Projecte,P
 scrum.project.doing,Formulario de meta: grupo de proyectos que tienes en curso,En curso,In progress,En curs,Martxan,En cours
 scrum.project.next,Formulario de meta: grupo de lo siguiente de tu plan,Lo siguiente de tu plan,Next in your plan,El següent del teu pla,Zure planeko hurrengoa,La suite de ton plan
 scrum.targetDay,Meta: el día para el que te la pones,Fecha de entrega,Hand-in date,Data de lliurament,Entrega-data,Date de rendu
+scrum.targetTime,"Meta: la hora de entrega (si no se pone, al acabar el día)",Hora (opcional),Time (optional),Hora (opcional),Ordua (aukerakoa),Heure (facultatif)
 scrum.progress,Meta: cuánto llevas,Cuánto llevas,How far along,Quant portes,Zenbat daramazun,Avancement
 scrum.progress.zero,Avance: 0 %,0 % · ni un commit,0 % · not a single commit,0 % · ni un commit,% 0 · commit bat ere ez,0 % · pas un seul commit
 scrum.progress.full,Avance: 100 %,100 % · listo para entregar,100 % · ready to hand in,100 % · llest per lliurar,% 100 · entregatzeko prest,100 % · prêt à rendre

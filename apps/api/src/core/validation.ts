@@ -66,3 +66,8 @@ export const day = z
 
     return !Number.isNaN(at) && new Date(at).toISOString().slice(0, 10) === value
   }, 'esa fecha no existe')
+
+/** Una hora del día, `HH:MM` (de `00:00` a `23:59`). */
+export const clockTime = z
+  .string()
+  .regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'la hora va como HH:MM (de 00:00 a 23:59)')

@@ -1109,7 +1109,7 @@ proyectos que puedes elegir y lo de 42 a lo que vas en los próximos 14 días.
   "today": "2026-10-25",
   "goals": [{
     "id": 4, "projectId": 1314, "projectName": "ft_printf", "projectKind": "c",
-    "targetDay": "2026-10-30", "progress": 60, "note": "Falta %p y los flags",
+    "targetDay": "2026-10-30", "targetTime": "14:00", "progress": 60, "note": "Falta %p y los flags",
     "status": "active", "createdAt": "…", "closedAt": null,
     "checkpoints": [{ "id": 31, "key": "works", "text": null, "done": true },
                     { "id": 39, "key": null, "text": "Comparar con printf", "done": false }],
@@ -1133,13 +1133,14 @@ proyectos que puedes elegir y lo de 42 a lo que vas en los próximos 14 días.
 - `entries`: los 14 últimos, lo más reciente primero. `sprints`: tus grupos de
   terapia abiertos del mismo proyecto; ahí lo ve tu grupo.
 
-POST /agenda/goals → `201` con la meta. `{ projectId, targetDay, progress?, note?, checkpoints? }`.
+POST /agenda/goals → `201` con la meta. `{ projectId, targetDay, targetTime?, progress?, note?, checkpoints? }`.
 
-- `targetDay` de hoy a 180 días (`400`); `progress` de 0 a 100, de 5 en 5;
+- `targetDay` de hoy a 180 días (`400`); `targetTime` `HH:MM` (hora del
+  campus) o `null`: sin hora, vence al acabar el día (2026-11-01); `progress` de 0 a 100, de 5 en 5;
   `note` hasta 200 caracteres. Sin `checkpoints`, los de fábrica del tipo de
   proyecto. Proyecto que no está en la réplica: `404`. Como mucho 8 en marcha (`409`).
 
-PUT /agenda/goals/:id → la meta. Solo lo que cambia: `targetDay`, `progress`,
+PUT /agenda/goals/:id → la meta. Solo lo que cambia: `targetDay`, `targetTime` (`null` la quita), `progress`,
 `note` (vacío la borra) y `status` (`active`, `done`, `dropped`; cerrarla
 apunta `closedAt`).
 

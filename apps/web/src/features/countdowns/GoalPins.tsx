@@ -41,11 +41,15 @@ export function GoalPins({ inPage }: { inPage: boolean }) {
   const open = data.goals.filter((goal) => goal.status === 'active' && goal.targetDay >= data.today)
 
   const toggle = (goal: AgendaGoal): void => {
-    const pin = goalPinOf(countdowns, titleOf(goal), goal.targetDay)
+    const pin = goalPinOf(countdowns, titleOf(goal), goal.targetDay, goal.targetTime)
 
     void action.run(() =>
       pin === undefined
-        ? pinCountdown({ kind: 'custom', title: titleOf(goal), at: goalDeadline(goal.targetDay) })
+        ? pinCountdown({
+            kind: 'custom',
+            title: titleOf(goal),
+            at: goalDeadline(goal.targetDay, goal.targetTime),
+          })
         : unpinCountdown(pin.id),
     )
   }
@@ -65,7 +69,7 @@ export function GoalPins({ inPage }: { inPage: boolean }) {
         await pinCountdown({
           kind: 'custom',
           title: t('scrum.pin.title', { project: newest.projectName }),
-          at: goalDeadline(newest.targetDay),
+          at: goalDeadline(newest.targetDay, newest.targetTime),
         })
       }
     })
@@ -78,7 +82,8 @@ export function GoalPins({ inPage }: { inPage: boolean }) {
       {open.length > 0 && (
         <ul className="countdown-goal-list">
           {open.map((goal) => {
-            const pinned = goalPinOf(countdowns, titleOf(goal), goal.targetDay) !== undefined
+            const pinned =
+              goalPinOf(countdowns, titleOf(goal), goal.targetDay, goal.targetTime) !== undefined
 
             return (
               <li key={goal.id}>
@@ -92,7 +97,10 @@ export function GoalPins({ inPage }: { inPage: boolean }) {
                   }}
                 >
                   <Icon name="chincheta" size={14} /> {goal.projectName}
-                  <small>{date(new Date(`${goal.targetDay}T12:00:00`), 'dayMonth')}</small>
+                  <small>
+                    {date(new Date(`${goal.targetDay}T12:00:00`), 'dayMonth')}
+                    {goal.targetTime !== null && ` ${goal.targetTime}`}
+                  </small>
                 </button>
               </li>
             )

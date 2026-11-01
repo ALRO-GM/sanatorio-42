@@ -76,7 +76,7 @@ export function GoalCard({
   )
   // La cuenta atrás de la meta es una propia con su título y su hora: así se reconoce.
   const pinTitle = t('scrum.pin.title', { project: goal.projectName })
-  const pin = goalPinOf(countdowns, pinTitle, goal.targetDay)
+  const pin = goalPinOf(countdowns, pinTitle, goal.targetDay, goal.targetTime)
   const late = goal.targetDay < today
 
   const change = async (fn: () => Promise<AgendaGoal>): Promise<void> => {
@@ -141,7 +141,10 @@ export function GoalCard({
       <div className="scrum-facts">
         <div>
           <span className="eyebrow">{t('scrum.targetDay')}</span>
-          <strong>{format.date(`${goal.targetDay}T12:00:00`, 'long')}</strong>
+          <strong>
+            {format.date(`${goal.targetDay}T12:00:00`, 'long')}
+            {goal.targetTime !== null && ` · ${goal.targetTime}`}
+          </strong>
           <span className={late && active ? 'scrum-late' : 'hint'}>
             {dueText(t, tn, today, goal.targetDay)}
           </span>
@@ -336,7 +339,7 @@ export function GoalCard({
                   ? pinCountdown({
                       kind: 'custom',
                       title: pinTitle,
-                      at: goalDeadline(goal.targetDay),
+                      at: goalDeadline(goal.targetDay, goal.targetTime),
                     })
                   : unpinCountdown(pin.id),
               )

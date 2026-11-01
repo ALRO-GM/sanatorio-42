@@ -136,6 +136,8 @@ export type AgendaGoal = {
   projectKind: AgendaProjectKind
   /** El día para el que te lo pones (`YYYY-MM-DD`, hora del campus). */
   targetDay: string
+  /** La hora de entrega (`HH:MM`, hora del campus), o `null`: al acabar el día. */
+  targetTime: string | null
   /** Cuánto llevas, de 0 a 100 (de 5 en 5). */
   progress: number
   /** Lo que te queda, en pocas palabras. */
@@ -189,6 +191,8 @@ export type AgendaView = {
 export type AgendaGoalInput = {
   projectId: number
   targetDay: string
+  /** `HH:MM`; sin ella, al acabar el día. */
+  targetTime?: string | null
   progress?: number
   note?: string | null
   /** Sin ellos, los de fábrica del tipo de proyecto. */
@@ -198,6 +202,8 @@ export type AgendaGoalInput = {
 /** Cuerpo de `PUT /agenda/goals/:id`: solo lo que cambia. */
 export type AgendaGoalUpdate = {
   targetDay?: string
+  /** `null` quita la hora. */
+  targetTime?: string | null
   progress?: number
   note?: string | null
   status?: AgendaGoalStatus
@@ -233,6 +239,7 @@ export type SprintBlocker = {
 export type SprintGoal = {
   id: number
   targetDay: string
+  targetTime: string | null
   progress: number
   status: AgendaGoalStatus
   note: string | null

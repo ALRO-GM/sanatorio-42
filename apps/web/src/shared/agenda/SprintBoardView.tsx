@@ -123,6 +123,7 @@ function Row({ member, me, open, onToggle, due }: RowProps) {
         <>
           <td data-label={t('scrum.board.target')} className="sprint-due">
             {due(goal.targetDay)}
+            {goal.targetTime !== null && ` · ${goal.targetTime}`}
           </td>
           <td data-label={t('scrum.board.progress')}>
             <span className="scrum-meter" title={`${goal.progress} %`}>

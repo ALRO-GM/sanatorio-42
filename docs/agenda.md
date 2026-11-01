@@ -26,7 +26,8 @@ Rutas en [api.md](api.md#agenda-scrum-individual-modulesagenda).
 ## Cómo se usa
 
 1. **Nueva meta**: eliges el proyecto (los que tienes en curso y los 10
-   siguientes de tu plan), la fecha de entrega, cuánto llevas (de 10 en 10,
+   siguientes de tu plan), la fecha de entrega y, si quieres, la hora (sin
+   ella, vence al acabar el día; la cuenta atrás fijada acaba ahí), cuánto llevas (de 10 en 10,
    «0 % · ni un commit» … «100 % · listo para entregar») y, si quieres, lo que
    te queda en una frase. Salen los **checkpoints de fábrica** de su tipo de
    proyecto; los quitas con un clic y añades otros de la lista.

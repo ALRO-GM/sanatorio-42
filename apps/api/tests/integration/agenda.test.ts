@@ -78,6 +78,7 @@ describe('agenda', () => {
     const created = await me.call('POST', '/agenda/goals', {
       projectId: 10,
       targetDay: plus(start.today, 5),
+      targetTime: '14:30',
       progress: 40,
       note: '  Me falta el %p y los flags  ',
     })
@@ -89,6 +90,7 @@ describe('agenda', () => {
     expect(goal).toMatchObject({
       projectName: 'ft_printf',
       projectKind: 'c',
+      targetTime: '14:30',
       progress: 40,
       note: 'Me falta el %p y los flags',
       status: 'active',
@@ -151,9 +153,22 @@ describe('agenda', () => {
       [{ projectId: 10, targetDay: '2026-02-31' }, 400],
       [{ projectId: 999_999, targetDay: plus(start.today, 3) }, 404],
       [{ projectId: 10, targetDay: plus(start.today, 3), checkpoints: ['magia'] }, 400],
+      [{ projectId: 10, targetDay: plus(start.today, 3), targetTime: '24:00' }, 400],
+      [{ projectId: 10, targetDay: plus(start.today, 3), targetTime: '9:5' }, 400],
     ] as const) {
       expect((await me.call('POST', '/agenda/goals', body)).statusCode).toBe(status)
     }
+
+    // La hora se cambia y se quita; sin ella, vence al acabar el día.
+    const later = json(
+      await me.call('PUT', `/agenda/goals/${goal.id}`, { targetTime: '09:00' }),
+    ) as AgendaGoal
+
+    expect(later.targetTime).toBe('09:00')
+    expect(
+      (json(await me.call('PUT', `/agenda/goals/${goal.id}`, { targetTime: null })) as AgendaGoal)
+        .targetTime,
+    ).toBeNull()
 
     // Se entrega: sale como cerrada y ya no admite dailies.
     const done = json(
