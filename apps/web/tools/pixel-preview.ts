@@ -16,14 +16,18 @@ import { mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { deflateSync } from 'node:zlib'
 
-import { EMPTY_STARTUP } from '@sanatorio/startup'
+import { EMPTY_STARTUP, moodOf } from '@sanatorio/startup'
 import type { StartupState } from '@sanatorio/startup'
 
+import { drawBubble } from '../src/features/focus/startup/pixel/bubbles'
 import { drawFloor } from '../src/features/focus/startup/pixel/floor'
 import { officeOf } from '../src/features/focus/startup/pixel/layout'
+import { lifeOf, poseAt } from '../src/features/focus/startup/pixel/life'
 import { MODELS } from '../src/features/focus/startup/pixel/models'
 import type { ModelId, Props } from '../src/features/focus/startup/pixel/models'
+import { WALKER_HEIGHT } from '../src/features/focus/startup/pixel/person'
 import { Sprite, TILE } from '../src/features/focus/startup/pixel/sprite'
+import { drawTower, towerOf } from '../src/features/focus/startup/pixel/tower'
 
 /** Cada píxel, de 3 × 3 en el PNG. */
 const SCALE = 3
@@ -41,6 +45,7 @@ function model(id: ModelId, props: Props, frame: number): Sprite {
   const sprite = new Sprite(CELL.width, CELL.height, CELL.ox, CELL.oy)
   const { frames, draw } = MODELS[id]
 
+  sprite.turned = props.turn === true
   draw(sprite, frame % frames, props)
 
   return sprite.outline()
@@ -57,21 +62,71 @@ function paste(to: Sprite, from: Sprite, x: number, y: number): void {
   }
 }
 
-function office(state: StartupState): Sprite {
-  const { size, floor, pieces } = officeOf(state, 500)
+/** La oficina de una partida en el fotograma `frame`, con la gente donde esté entonces. */
+function office(state: StartupState, frame: number): Sprite {
+  const room = officeOf(state, 500)
+  const { size, floor, pieces, people } = room
+  const poses = lifeOf(room, moodOf(state)).map((plan) => poseAt(plan, frame))
   const sx = size * TILE + 4
   const scene = new Sprite(size * 2 * TILE + 8, size * TILE + HEADROOM + 6, sx, HEADROOM)
+  const at = (gx: number, gy: number): [number, number] => [
+    sx + (gx - gy) * TILE,
+    HEADROOM + ((gx + gy) * TILE) / 2,
+  ]
+  const drawables: { depth: number; sprite: Sprite; gx: number; gy: number }[] = []
 
   drawFloor(scene, size, floor)
 
-  for (const piece of [...pieces].sort((a, b) => a.gx + a.gy - (b.gx + b.gy) || a.gx - b.gx)) {
-    paste(
-      scene,
-      model(piece.model, piece.props, 1),
-      sx + (piece.gx - piece.gy) * TILE - CELL.ox,
-      HEADROOM + ((piece.gx + piece.gy) * TILE) / 2 - CELL.oy,
-    )
+  for (const piece of pieces) {
+    const pose = piece.seat === undefined ? undefined : poses[piece.seat]
+    const props =
+      pose !== undefined && !pose.seated ? { ...piece.props, look: undefined } : piece.props
+
+    drawables.push({
+      depth: piece.gx + piece.gy,
+      sprite: model(piece.model, props as Props, frame),
+      gx: piece.gx,
+      gy: piece.gy,
+    })
   }
+
+  people.forEach((person, index) => {
+    const pose = poses[index]
+
+    if (pose === undefined || pose.seated || pose.away) return
+
+    const props = {
+      ...person,
+      step: pose.step,
+      back: pose.back,
+      turn: pose.turn,
+      carry: pose.carry,
+    }
+
+    drawables.push({
+      depth: pose.gx + pose.gy + 0.5,
+      sprite: model(person.pet ?? 'walker', props, frame),
+      gx: pose.gx,
+      gy: pose.gy,
+    })
+  })
+
+  for (const { sprite, gx, gy } of drawables.sort((a, b) => a.depth - b.depth)) {
+    const [x, y] = at(gx, gy)
+
+    paste(scene, sprite, Math.round(x - CELL.ox), Math.round(y - CELL.oy))
+  }
+
+  people.forEach((person, index) => {
+    const pose = poses[index]
+
+    if (pose?.bubble === null || pose === undefined) return
+
+    const [x, y] = at(pose.gx, pose.gy)
+    const head = pose.seated ? y - 16 : y + 8 - (person.pet === undefined ? WALKER_HEIGHT : 8)
+
+    drawBubble(scene, Math.round(x - 5), Math.round(head - 11), pose.bubble)
+  })
 
   return scene
 }
@@ -173,10 +228,48 @@ const GAMES: Record<string, StartupState> = {
       { id: 'seed', luck: 1.2 },
     ],
   },
+  // La oficina grande con el resto de la plantilla, decoración y mascotas.
+  vida: {
+    ...EMPTY_STARTUP,
+    name: 'Pixelwork',
+    levels: { 'learn-ai': 5, computer: 4, space: 3, servers: 3, 'product-bot': 1 },
+    milestones: ['side', 'mvp', 'founded'],
+    team: [
+      ...[77, 412, 905, 260, 640].map((look) => ({ axis: 'ai' as const, stars: 2, look })),
+      ...(['reception', 'cleaning', 'delivery', 'kitchen', 'security'] as const).map(
+        (role, index) => ({
+          axis: 'ai' as const,
+          stars: 1,
+          look: 100 + index * 151,
+          role,
+        }),
+      ),
+    ],
+    decor: [
+      { id: 'sofa', at: [7, 4], turn: true },
+      { id: 'rug', at: [6, 6], turn: false },
+      { id: 'arcade', at: [0, 6], turn: false },
+      { id: 'aquarium', at: [3, 7], turn: false },
+      { id: 'neon', at: [4, 0], turn: false },
+      { id: 'cat', at: null, turn: false },
+      { id: 'robot', at: null, turn: false },
+    ],
+  },
   global: {
     ...EMPTY_STARTUP,
     name: 'Pixelwork',
-    levels: { 'learn-ai': 5, 'learn-infra': 5, 'learn-data': 5, computer: 5, space: 5, servers: 6 },
+    levels: {
+      'learn-ai': 5,
+      'learn-infra': 5,
+      'learn-data': 5,
+      computer: 5,
+      space: 5,
+      servers: 6,
+      floors: 2,
+      basement: 2,
+      solar: 2,
+      rooftop: 2,
+    },
     milestones: ['side', 'mvp', 'founded', 'global'],
     team: Array.from({ length: 30 }, (_, index) => ({
       axis: index % 3 === 0 ? 'infra' : 'ai',
@@ -206,5 +299,12 @@ if (only !== undefined) {
 
   save('modelos', grid(ids.map((id) => LEVELS.map((level) => model(id, { ...SAMPLE, level }, 1)))))
 
-  for (const [name, state] of Object.entries(GAMES)) save(`oficina-${name}`, office(state))
+  for (const [name, state] of Object.entries(GAMES)) {
+    // Tres momentos de cada oficina: la gente se mueve.
+    for (const frame of [0, 40, 120]) save(`oficina-${name}-${String(frame)}`, office(state, frame))
+
+    const tower = towerOf(state)
+
+    if (tower !== null) save(`edificio-${name}`, drawTower(tower, 0, true))
+  }
 }

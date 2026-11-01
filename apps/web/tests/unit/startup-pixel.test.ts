@@ -3,14 +3,17 @@
  * motor, la oficina que sale de cada partida y que ningún modelo se salga de
  * su lienzo, sea cual sea su nivel o su fotograma.
  */
-import { EMPTY_STARTUP } from '@sanatorio/startup'
+import { DECOR, EMPTY_STARTUP, canPlace } from '@sanatorio/startup'
 import type { StartupState } from '@sanatorio/startup'
 import { describe, expect, it } from 'vitest'
 
 import { officeOf, ROOM } from '../../src/features/focus/startup/pixel/layout'
+import { friendsOf, lifeOf, poseAt } from '../../src/features/focus/startup/pixel/life'
 import { MODELS } from '../../src/features/focus/startup/pixel/models'
 import type { ModelId } from '../../src/features/focus/startup/pixel/models'
+import { tileAt, tileOrigin } from '../../src/features/focus/startup/pixel/paint'
 import { INK, Sprite } from '../../src/features/focus/startup/pixel/sprite'
+import { drawTower, towerOf, towerSize } from '../../src/features/focus/startup/pixel/tower'
 
 const hires = (count: number): StartupState['team'] =>
   Array.from({ length: count }, (_, index) => ({ axis: 'ai', stars: 1, look: index % 1000 }))
@@ -143,6 +146,34 @@ describe('la oficina de cada partida', () => {
       team: hires(60),
       rounds: (['preseed', 'seed', 'a', 'b', 'c', 'ipo'] as const).map((id) => ({ id, luck: 1 })),
     },
+    vida: {
+      ...EMPTY_STARTUP,
+      levels: { 'learn-ai': 5, computer: 4, space: 3, servers: 3 },
+      milestones: ['side', 'mvp', 'founded'],
+      team: [
+        ...hires(5),
+        ...(
+          ['reception', 'cleaning', 'delivery', 'kitchen', 'security', 'maintenance'] as const
+        ).map((role, look) => ({ axis: 'ai' as const, stars: 1, look, role })),
+      ],
+      decor: [
+        { id: 'sofa', at: [7, 4], turn: true },
+        { id: 'rug', at: [6, 6], turn: false },
+        { id: 'arcade', at: [0, 6], turn: false },
+        { id: 'cat', at: null, turn: false },
+        { id: 'dog', at: null, turn: false },
+      ],
+    },
+    // Decoración por todas partes: la gente se queda sin camino y no pasa nada.
+    llena: {
+      ...EMPTY_STARTUP,
+      team: [...hires(1), { axis: 'ai', stars: 1, look: 3, role: 'cleaning' }],
+      decor: Array.from({ length: 16 }, (_, at) => ({
+        id: 'cactus',
+        at: [at % 4, Math.floor(at / 4)] as const,
+        turn: false,
+      })),
+    },
     // Lo que no debería pasar: niveles de más, de menos y una plantilla enorme.
     rara: {
       ...EMPTY_STARTUP,
@@ -167,20 +198,67 @@ describe('la oficina de cada partida', () => {
     }
 
     const desks = office.pieces.filter(({ model }) => model === 'workstation').length
+    const walking = office.people.filter((person) => person.desk === undefined).length
+    const counters = office.pieces.filter(({ model }) => model === 'reception').length
+    const pets = state.decor.filter((piece) => ['cat', 'dog', 'robot'].includes(piece.id)).length
 
-    expect(desks + office.hidden).toBe(state.team.length + 1)
+    expect(desks + counters + walking + office.hidden).toBe(state.team.length + 1 + pets)
   })
 
-  it('al empezar: el garaje de cemento, quien fundó en su mesa y un cactus', () => {
+  it.each(Object.entries(games))(
+    '%s: la gente anda por baldosas libres y vuelve a su sitio',
+    (_name, state) => {
+      const office = officeOf(state, 321)
+      const plans = lifeOf(office, 1.2)
+      const blocked = new Set(
+        office.pieces
+          .filter(({ model }) => model !== 'rug')
+          .map(({ gx, gy }) => `${String(gx)},${String(gy)}`),
+      )
+
+      expect(plans).toHaveLength(office.people.length)
+
+      for (const [index, plan] of plans.entries()) {
+        expect(plan.total).toBeGreaterThan(0)
+
+        for (let frame = 0; frame < plan.total; frame += 1) {
+          const pose = poseAt(plan, frame)
+
+          // Mismo fotograma, misma postura; el plan se repite.
+          expect(poseAt(plan, frame + plan.total)).toEqual(pose)
+
+          if (pose.away) continue
+          if (pose.seated) {
+            expect(office.people[index]?.desk).toEqual([pose.gx, pose.gy])
+            continue
+          }
+
+          // Andando: en una baldosa de la oficina y nunca dentro de algo (sí al levantarse de su mesa).
+          const tile = `${String(Math.round(pose.gx))},${String(Math.round(pose.gy))}`
+          const desk = office.people[index]?.desk
+
+          expect(pose.gx).toBeGreaterThanOrEqual(0)
+          expect(pose.gx).toBeLessThan(office.size)
+          if (desk === undefined || tile !== `${String(desk[0])},${String(desk[1])}`) {
+            if (Number.isInteger(pose.gx) && Number.isInteger(pose.gy))
+              expect(blocked.has(tile), tile).toBe(false)
+          }
+        }
+      }
+    },
+  )
+
+  it('al empezar: tu cuarto de madera, quien fundó en su mesa y un cactus', () => {
     const office = officeOf(EMPTY_STARTUP, 321)
 
     expect(office.size).toBe(ROOM[0])
-    expect(office.floor).toBe('concrete')
+    expect(office.floor).toBe('planks')
     expect(office.pieces).toContainEqual({
       model: 'workstation',
       gx: 1,
       gy: 1,
       props: { level: 0, look: 321, axis: null, busy: true },
+      seat: 0,
     })
     expect(office.pieces.map(({ model }) => model)).toContain('cactus')
     expect(office.hidden).toBe(0)
@@ -201,6 +279,103 @@ describe('la oficina de cada partida', () => {
 
     for (const piece of office.pieces.filter(({ model }) => model === 'workstation')) {
       expect(piece.props.busy).toBe(false)
+    }
+  })
+})
+
+describe('el mundo vivo', () => {
+  it('cada pieza de decoración tiene su dibujo', () => {
+    for (const item of DECOR) expect(item.id in MODELS, item.id).toBe(true)
+  })
+
+  it('la decoración colocada sale donde dice la partida, girada si lo está', () => {
+    const state: StartupState = {
+      ...EMPTY_STARTUP,
+      decor: [
+        { id: 'lamp', at: [0, 2], turn: true },
+        { id: 'guitar', at: null, turn: false },
+      ],
+    }
+    const office = officeOf(state, 1)
+
+    expect(office.pieces).toContainEqual({
+      model: 'lamp',
+      gx: 0,
+      gy: 2,
+      props: { turn: true },
+      decor: 0,
+    })
+    expect(office.pieces.some(({ model }) => model === 'guitar')).toBe(false)
+    // Lo ganado no se pone encima de lo colocado a mano.
+    expect(office.pieces.filter(({ gx, gy }) => gx === 0 && gy === 2)).toHaveLength(1)
+    // Lo que el motor deja colocar es lo que la oficina tiene libre.
+    expect(canPlace(state, 0, 1, 1)).toBe(false)
+  })
+
+  it('girar un modelo lo refleja y le cambia la luz', () => {
+    const plain = new Sprite(40, 76, 20, 58)
+    const turned = new Sprite(40, 76, 20, 58)
+
+    turned.turned = true
+    MODELS.sofa.draw(plain, 0, {})
+    MODELS.sofa.draw(turned, 0, {})
+
+    expect(turned.pixels).not.toEqual(plain.pixels)
+    expect(new Set(turned.pixels)).toEqual(new Set(plain.pixels))
+  })
+
+  it('tocar una baldosa da esa baldosa; fuera del suelo, nada', () => {
+    for (const [gx, gy] of [
+      [0, 0],
+      [3, 1],
+      [5, 5],
+    ] as const) {
+      const [x, y] = tileOrigin(6, gx, gy)
+
+      // El centro del rombo de la baldosa.
+      expect(tileAt(6, x, y + 8)).toEqual([gx, gy])
+    }
+    expect(tileAt(6, 0, 0)).toBeNull()
+    expect(tileAt(6, 9999, 9999)).toBeNull()
+  })
+
+  it('las relaciones salen siempre igual y nadie es su propia amistad', () => {
+    const office = officeOf({ ...EMPTY_STARTUP, team: hires(4) }, 9)
+    const friends = friendsOf(office.people)
+
+    expect(friendsOf(office.people)).toEqual(friends)
+    friends.forEach((one, index) => {
+      expect(one?.friend).not.toBe(index)
+      expect(one?.affinity).toBeGreaterThanOrEqual(0)
+    })
+    expect(friendsOf(officeOf(EMPTY_STARTUP, 9).people)).toEqual([null])
+  })
+
+  it('el edificio crece con lo comprado y cabe en su dibujo', () => {
+    expect(towerOf({ ...EMPTY_STARTUP, levels: { space: 3 } })).toBeNull()
+
+    const tower = towerOf({
+      ...EMPTY_STARTUP,
+      levels: { space: 5, floors: 4, basement: 3, solar: 2, rooftop: 2 },
+    })
+
+    expect(tower).toEqual({ storeys: 8, basements: 3, solar: 2, rooftop: 2 })
+
+    for (const night of [false, true]) {
+      const sprite = drawTower(
+        tower ?? { storeys: 2, basements: 0, solar: 0, rooftop: 0 },
+        5,
+        night,
+      )
+      const [x0, y0, x1, y1] = sprite.bounds() ?? [0, 0, 0, 0]
+      const { width, height } = towerSize(
+        tower ?? { storeys: 2, basements: 0, solar: 0, rooftop: 0 },
+      )
+
+      expect(x0).toBeGreaterThan(0)
+      expect(y0).toBeGreaterThan(0)
+      expect(x1).toBeLessThan(width - 1)
+      expect(y1).toBeLessThan(height - 1)
     }
   })
 })
