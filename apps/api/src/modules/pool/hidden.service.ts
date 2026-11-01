@@ -14,6 +14,7 @@ import type { Db } from '../../core/db/database.js'
 import { toNumber, toText } from '../../core/db/rows.js'
 import { domainError } from '../../core/errors.js'
 import { parse } from '../../core/validation.js'
+import { isoAt } from '../../core/time.js'
 
 type HiddenServiceOptions = {
   db: Db
@@ -205,7 +206,7 @@ export function createHiddenService(options: HiddenServiceOptions) {
           body.fromPool ? 1 : 0,
           reason === '' ? null : reason,
           actor.login,
-          new Date(now()).toISOString(),
+          isoAt(now()),
         ],
       })
       changed()

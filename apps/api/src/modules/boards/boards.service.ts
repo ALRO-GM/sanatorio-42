@@ -18,7 +18,7 @@ import type { BoardRow, BoardsRepository } from './boards.repository.js'
 import { EVENT_ID, closed } from '../attendance/index.js'
 import type { AttendanceService } from '../attendance/index.js'
 import type { ReplicaRepository } from '../replica/index.js'
-import { beyondHorizon, EVENT_HORIZON_DAYS } from '../../core/time.js'
+import { beyondHorizon, EVENT_HORIZON_DAYS, isoAt } from '../../core/time.js'
 import { domainError } from '../../core/errors.js'
 import { XP_KIND } from '../profile/index.js'
 import type { XpService } from '../profile/index.js'
@@ -98,7 +98,7 @@ export function createBoardsService(options: BoardsServiceOptions) {
    * para no volver a mirarla.
    */
   async function settle(): Promise<void> {
-    for (const board of await boards.unsettledEndedBefore(new Date(now()).toISOString())) {
+    for (const board of await boards.unsettledEndedBefore(isoAt(now()))) {
       const schedule = { startsAt: Date.parse(board.startsAt), endsAt: Date.parse(board.endsAt) }
 
       if (!closed(schedule, now())) {
@@ -129,14 +129,7 @@ export function createBoardsService(options: BoardsServiceOptions) {
       const start = parseInstant(from) ?? now() - 24 * HOUR
       const end = parseInstant(to) ?? start + 60 * 24 * HOUR
 
-      return view(
-        await boards.listBetween(
-          actor.campusId,
-          new Date(start).toISOString(),
-          new Date(end).toISOString(),
-        ),
-        actor,
-      )
+      return view(await boards.listBetween(actor.campusId, isoAt(start), isoAt(end)), actor)
     },
 
     /** Propone una pizarra. */
@@ -155,7 +148,7 @@ export function createBoardsService(options: BoardsServiceOptions) {
         throw domainError('invalid_input', 'Una pizarra dura entre unos minutos y cuatro horas')
       }
 
-      const nowIso = new Date(now()).toISOString()
+      const nowIso = isoAt(now())
 
       if ((await boards.countUpcomingBy(actor.login, nowIso)) >= MAX_UPCOMING_BOARDS) {
         throw domainError('conflict', 'Ya tienes varias pizarras propuestas')
@@ -164,8 +157,8 @@ export function createBoardsService(options: BoardsServiceOptions) {
       const boardId = await boards.create({
         ...board,
         // Siempre en UTC, para que el orden como texto sea el orden real.
-        startsAt: new Date(startsAt).toISOString(),
-        endsAt: new Date(endsAt).toISOString(),
+        startsAt: isoAt(startsAt),
+        endsAt: isoAt(endsAt),
         campusId: actor.campusId,
         host: actor.login,
       })
@@ -219,8 +212,8 @@ export function createBoardsService(options: BoardsServiceOptions) {
 
       await boards.update(boardId, {
         ...board,
-        startsAt: new Date(startsAt).toISOString(),
-        endsAt: new Date(endsAt).toISOString(),
+        startsAt: isoAt(startsAt),
+        endsAt: isoAt(endsAt),
       })
 
       const [updated] = await view([await mustGet(boardId, actor)], actor)

@@ -7,6 +7,7 @@
 
 import type { Db } from '../../core/db/database.js'
 import { toText } from '../../core/db/rows.js'
+import { isoAt as iso } from '../../core/time.js'
 import type { FortyTwoClient } from '../../integrations/forty-two/client.js'
 import { avatarUrlOf } from '../../integrations/forty-two/avatar.js'
 import type { ApiUser } from '../../integrations/forty-two/types.js'
@@ -30,8 +31,6 @@ type PoolMembersOptions = {
   log?: (message: string) => void
   now?: () => number
 }
-
-const iso = (ms: number): string => new Date(ms).toISOString()
 
 export function createPoolMembers(options: PoolMembersOptions) {
   const { db, client } = options
@@ -90,6 +89,16 @@ export function createPoolMembers(options: PoolMembersOptions) {
       const result = await db.execute({
         sql: 'SELECT login FROM pool_members WHERE campus_id = ? AND begin_at >= ?',
         args: [campusId, iso(now() - AFTER_MS)],
+      })
+
+      return result.rows.map((row) => toText(row.login))
+    },
+
+    /** Los logins de los piscineros en curso de todos los campus (quién ve a quién). */
+    async loginsAnywhere(): Promise<string[]> {
+      const result = await db.execute({
+        sql: 'SELECT DISTINCT login FROM pool_members WHERE begin_at >= ?',
+        args: [iso(now() - AFTER_MS)],
       })
 
       return result.rows.map((row) => toText(row.login))

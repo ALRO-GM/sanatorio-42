@@ -10,6 +10,7 @@ import type { HelpStats, LeaderboardPeriod, StatsEntry, StatsSection } from '@sa
 import type { Actor } from '../../core/actor.js'
 import type { RankRow, StatsRepository } from './stats.repository.js'
 import { STATS_SECTIONS } from './stats.repository.js'
+import { isoAt } from '../../core/time.js'
 
 /** Puestos que se enseñan de cada clasificación. */
 const TOP = 10
@@ -36,9 +37,7 @@ export function createStatsService(options: { stats: StatsRepository; now?: () =
     async help(actor: Actor, period: LeaderboardPeriod): Promise<HelpStats> {
       const date = new Date(now())
       const since =
-        period === 'month'
-          ? new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1)).toISOString()
-          : null
+        period === 'month' ? isoAt(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1)) : null
       const at = date.toISOString()
 
       const sections = await Promise.all(

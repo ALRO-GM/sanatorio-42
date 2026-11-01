@@ -15,8 +15,9 @@ import type { GroupRow, TherapyRepository } from './therapy.repository.js'
 import type { ReplicaRepository, Syncer } from '../replica/index.js'
 import { domainError } from '../../core/errors.js'
 import {
-  EVENT_HORIZON_DAYS,
   beyondHorizon,
+  EVENT_HORIZON_DAYS,
+  isoAt,
   localMoment,
   minutesOf,
   startOfDayIso,
@@ -449,9 +450,19 @@ export function createTherapyService(options: TherapyServiceOptions) {
         throw domainError('conflict', 'Ya se avisó de este grupo')
       }
 
-      const people = (await replica.doingProject(group.projectId, group.campusId)).filter(
-        (login) => !group.members.includes(login),
+      // Solo a quien puede ver a quien avisa: un piscinero no escribe a los
+      // estudiantes (ni al revés) y nadie recibe avisos de alguien oculto a
+      // su grupo, ni se avisa a quien está oculto (`core/audience.ts`).
+      const audience = options.audience ?? NO_POOL
+      const sees = await seesFor(audience, actor)
+      const hiddenSelf = (await audience.hiddenFrom(actor.pool === true)).has(
+        actor.login.toLowerCase(),
       )
+      const people = hiddenSelf
+        ? []
+        : (await replica.doingProject(group.projectId, group.campusId)).filter(
+            (login) => !group.members.includes(login) && sees(login),
+          )
 
       if (!(await therapy.markInvited(groupId, people.length))) {
         throw domainError('conflict', 'Ya se avisó de este grupo')
@@ -525,7 +536,7 @@ export function createTherapyService(options: TherapyServiceOptions) {
      */
     async checkAttendance(): Promise<number> {
       const fresh = new Set<number>()
-      const since = new Date(now() - LOCATION_MAX_AGE_MS).toISOString()
+      const since = isoAt(now() - LOCATION_MAX_AGE_MS)
       let awarded = 0
 
       for (const group of await therapy.listAllOpen()) {
@@ -565,7 +576,7 @@ export function createTherapyService(options: TherapyServiceOptions) {
           day: moment.day,
           slot,
           present,
-          at: new Date(now()).toISOString(),
+          at: isoAt(now()),
         })
 
         if (!first || present.length < MIN_PRESENT) {

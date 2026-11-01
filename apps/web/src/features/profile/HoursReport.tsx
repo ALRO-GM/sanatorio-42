@@ -3,12 +3,11 @@ import { useState } from 'react'
 import { api } from '../../shared/api'
 import { saveFile } from '../../shared/download'
 import { useI18n } from '../../shared/i18n'
+import { dayOf } from '../../shared/period'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { InfoTip } from '../../shared/ui/InfoTip'
 
 const DAY = 24 * 60 * 60_000
-
-const dayOf = (at: number): string => new Date(at).toISOString().slice(0, 10)
 
 /**
  * Descarga de las horas validadas con códigos (pizarras y sesiones de ayuda) en

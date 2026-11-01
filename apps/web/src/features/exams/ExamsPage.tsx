@@ -5,6 +5,8 @@ import type { LiveExam, LiveExamGroup, LiveExamResults, LiveExaminee } from '@sa
 import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { localeOf, useI18n } from '../../shared/i18n'
+import { useFormat } from '../../shared/i18n/useFormat'
+import { clock } from '../../shared/time'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { InfoTip } from '../../shared/ui/InfoTip'
 import { ExamPeople } from './ExamPeople'
@@ -152,14 +154,7 @@ function useNow(since: unknown): number {
 
 /** Lo que falta hasta `iso`, como un reloj: `1:05:09` o `4:59`. Nunca negativo. */
 function remaining(iso: string, now: number): string {
-  const seconds = Math.max(0, Math.ceil((Date.parse(iso) - now) / 1000))
-  const hours = Math.floor(seconds / 3600)
-  const minutes = Math.floor((seconds % 3600) / 60)
-  const pad = (value: number): string => String(value).padStart(2, '0')
-
-  return hours > 0
-    ? `${String(hours)}:${pad(minutes)}:${pad(seconds % 60)}`
-    : `${String(minutes)}:${pad(seconds % 60)}`
+  return clock(Math.ceil((Date.parse(iso) - now) / 1000))
 }
 
 /**
@@ -195,25 +190,21 @@ function LiveCard({
   refreshing: boolean
   onRefresh: () => void
 }) {
-  const { t, lang } = useI18n()
+  const { t } = useI18n()
+  const fmt = useFormat()
   const [track, setTrack] = useState<TrackFilter>('all')
   const [circle, setCircle] = useState<string>('all')
   const now = useNow(live)
 
   if (live.exam === null) return <p className="estado">{t('exams.none')}</p>
 
-  const time = (iso: string): string =>
-    new Date(iso).toLocaleTimeString(localeOf(lang), { hour: '2-digit', minute: '2-digit' })
+  const time = fmt.time
   const day =
     live.exam.when === 'today'
       ? t('exams.next')
       : live.exam.when === 'tomorrow'
         ? t('exams.tomorrow')
-        : new Date(live.exam.beginAt).toLocaleDateString(localeOf(lang), {
-            weekday: 'long',
-            day: 'numeric',
-            month: 'long',
-          })
+        : fmt.date(live.exam.beginAt, 'long')
   const circles = [
     ...new Set(live.groups.flatMap((group) => group.people.map((person) => person.circle))),
   ]

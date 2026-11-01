@@ -11,6 +11,7 @@ import type { Actor } from '../../core/actor.js'
 import { assertAdmin } from '../../core/actor.js'
 import type { Db } from '../../core/db/database.js'
 import { toNumber, toText } from '../../core/db/rows.js'
+import { dayOf } from '../../core/time.js'
 import { parse } from '../../core/validation.js'
 
 /** Columnas de la rejilla y alto de cada fila, en px. Igual que en la web. */
@@ -62,8 +63,6 @@ const querySchema = z.object({
 })
 
 export function createClicksService(db: Db, now: () => number = Date.now) {
-  const dayOf = (ms: number): string => new Date(ms).toISOString().slice(0, 10)
-
   return {
     async record(_actor: Actor, input: unknown): Promise<void> {
       const batch = parse(batchSchema, input)

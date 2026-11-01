@@ -18,6 +18,7 @@ import type {
   AgendaSolution,
   SprintBlocker,
 } from '@sanatorio/contracts'
+import { dayOf } from '../../core/time.js'
 
 const keysOf = <K extends string>(record: Record<K, true>): [K, ...K[]] =>
   Object.keys(record) as [K, ...K[]]
@@ -120,7 +121,7 @@ export function mondayOf(day: string): string {
   const at = new Date(`${day}T00:00:00.000Z`)
   const back = (at.getUTCDay() + 6) % 7
 
-  return new Date(at.getTime() - back * 86_400_000).toISOString().slice(0, 10)
+  return dayOf(at.getTime() - back * 86_400_000)
 }
 
 /** Días entre dos fechas `YYYY-MM-DD` (positivo si `to` va después). */

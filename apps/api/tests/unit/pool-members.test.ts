@@ -130,4 +130,40 @@ describe('copia de piscineros', () => {
     expect([...(await pool.loginsIn(22))].sort()).toEqual(['nueva', 'pisci'])
     expect(await pool.loginsIn(58)).toEqual([])
   })
+
+  it('loginsAnywhere junta a los de todos los campus, sin repetir y sin piscinas pasadas', async () => {
+    const pool = createPoolMembers({
+      db,
+      client: fake([]).client,
+      campusIds: [22, 58],
+      quota: quota(true),
+      hourlyReserve: 0,
+      now: () => NOW,
+    })
+
+    expect(await pool.loginsAnywhere()).toEqual([])
+    await pool.enter(22, {
+      id: 7,
+      login: 'pisci',
+      cursus_users: [{ cursus_id: 9, begin_at: at(-3) }],
+    })
+    await pool.enter(58, {
+      id: 9,
+      login: 'lejos',
+      cursus_users: [{ cursus_id: 9, begin_at: at(-3) }],
+    })
+    // La misma persona en dos campus sale una vez.
+    await pool.enter(58, {
+      id: 7,
+      login: 'pisci',
+      cursus_users: [{ cursus_id: 9, begin_at: at(-3) }],
+    })
+    await pool.enter(58, {
+      id: 10,
+      login: 'vieja',
+      cursus_users: [{ cursus_id: 9, begin_at: at(-90) }],
+    })
+
+    expect((await pool.loginsAnywhere()).sort()).toEqual(['lejos', 'pisci'])
+  })
 })

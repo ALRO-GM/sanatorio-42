@@ -408,6 +408,23 @@ describe('comunidad', () => {
       await expectCode(therapy.invite(actor('ana'), group.id), 'conflict')
     })
 
+    it('un piscinero no avisa a los estudiantes que hacen el proyecto', async () => {
+      const { therapy, notices } = services
+      const at = new Date(community.clock.now()).toISOString()
+
+      await community.db.execute({
+        sql: `INSERT INTO pool_members (campus_id, user_id, login, image, begin_at, updated_at)
+              VALUES (?, 900, 'pisci', NULL, ?, ?)`,
+        args: [MADRID, at, at],
+      })
+      const pisci = actor('pisci', { pool: true })
+      const group = await therapy.create(pisci, martesYJueves)
+
+      // `leo` hace ft_printf, pero es de otro mundo: no se le avisa.
+      expect(await therapy.invite(pisci, group.id)).toEqual({ invited: 0 })
+      expect((await notices.list(actor('leo'))).items).toEqual([])
+    })
+
     it('un puesto roto sale en el mapa una semana, hasta que alguien dice que ya funciona', async () => {
       const { map } = services
       const brokenOf = async (host: string) =>
@@ -445,6 +462,39 @@ describe('comunidad', () => {
       ).toBe(0)
 
       await expectCode(map.reportBroken(actor('ana'), '../x'), 'invalid_input')
+    })
+
+    it('un piscinero ve el puesto roto, pero no quién avisó si es estudiante', async () => {
+      const { map } = services
+      const at = new Date(clock.now()).toISOString()
+
+      await community.db.execute({
+        sql: `INSERT INTO pool_members (campus_id, user_id, login, image, begin_at, updated_at)
+              VALUES (?, 900, 'pisci', NULL, ?, ?)`,
+        args: [MADRID, at, at],
+      })
+      // Con alguien a cada lado, los puestos de en medio salen en el plano.
+      await seat({ eva: 'c1r1s1', leo: 'c1r1s4' })
+      await services.repositories.replica.setState(`delta:${MADRID}`, {
+        cursor: at,
+        at: clock.now(),
+      })
+      await map.reportBroken(actor('ana'), 'c1r1s2')
+      await map.reportBroken(actor('pisci', { pool: true }), 'c1r1s3')
+
+      const brokenFor = async (who: ReturnType<typeof actor>) =>
+        Object.fromEntries(
+          (await map.forCampus(who)).clusters
+            .flatMap((cluster) => cluster.seats)
+            .filter((one) => one.broken !== null)
+            .map((one) => [one.host, one.broken?.by]),
+        )
+
+      expect(await brokenFor(actor('pisci', { pool: true }))).toEqual({
+        c1r1s2: null,
+        c1r1s3: 'pisci',
+      })
+      expect(await brokenFor(actor('leo'))).toEqual({ c1r1s2: 'ana', c1r1s3: 'pisci' })
     })
 
     it('nadie puede tener más de diez puestos rotos avisados a la vez', async () => {

@@ -247,6 +247,49 @@ describe('red de asientos (docs/asientos.md)', () => {
     }
   })
 
+  it('una fecha que no existe es un 400 y los periodos nuevos tienen tope por minuto', async () => {
+    const built = await makeApp({}, { routes: { '/v2/campus/22/locations': [] } })
+
+    apps.push(built)
+
+    const cookie = await built.login()
+    const get = async (url: string): Promise<number> =>
+      (await built.app.inject({ method: 'GET', url, headers: { cookie } })).statusCode
+
+    expect(await get('/network/seats?from=2026-02-31')).toBe(400)
+    expect(await get('/network/seats?from=2026-13-01')).toBe(400)
+
+    // Veinte periodos distintos se calculan; el siguiente espera. Lo ya
+    // calculado sigue saliendo de la caché.
+    for (let days = 1; days <= 20; days += 1) {
+      expect(await get(`/network/seats?days=${String(days)}`)).toBe(200)
+    }
+    expect(await get('/network/seats/heat?days=21')).toBe(429)
+    expect(await get('/network/seats?days=20')).toBe(200)
+  })
+
+  it('un periodo antiguo no cuenta las sesiones que empezaron después', async () => {
+    const built = await makeApp({}, { routes: LOCATIONS })
+
+    apps.push(built)
+
+    const cookie = await built.login()
+
+    await built.app.inject({ method: 'GET', url: '/map', headers: { cookie } })
+    await built.db.execute('UPDATE seat_sessions SET first_seen_at = begin_at')
+
+    const graph = json(
+      await built.app.inject({
+        method: 'GET',
+        url: '/network/seats?from=2020-01-01&to=2020-01-02',
+        headers: { cookie },
+      }),
+    ) as SeatGraph
+
+    expect(graph.people).toEqual([])
+    expect(graph.totals.hours).toBe(0)
+  })
+
   it('sin historial, el plano conocido sale entero a 0', async () => {
     const built = await makeApp({}, { routes: { '/v2/campus/22/locations': [] } })
 

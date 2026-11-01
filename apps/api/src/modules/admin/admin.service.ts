@@ -62,7 +62,7 @@ import {
   subjectFrom,
   withdrawUntil,
 } from './tickets.rules.js'
-import { isoAt } from '../../core/time.js'
+import { dayOf, isoAt } from '../../core/time.js'
 import { SUGGESTIONS_PER_DAY, placeFrom, suggestionSchema } from './suggestions.js'
 
 export type AdminServiceOptions = {
@@ -275,7 +275,7 @@ export function createAdminService(options: AdminServiceOptions) {
     }
 
     if (rolled) {
-      const since = new Date(periodOf(now(), settings.renewDay).start).toISOString().slice(0, 10)
+      const since = dayOf(periodOf(now(), settings.renewDay).start)
       const [people, today, period] = await Promise.all([
         // Lo de esta hora solo está en la base si el servidor se ha reiniciado a media hora.
         db.execute({
@@ -338,7 +338,7 @@ export function createAdminService(options: AdminServiceOptions) {
         hardStopAt: settings.monthlyBytes === null ? null : hardStopAt(settings.monthlyBytes),
         bytesLeft: limit === null ? null : Math.max(0, limit - bytesUsed),
         daysLeft: period.daysLeft,
-        renewsOn: new Date(period.end).toISOString().slice(0, 10),
+        renewsOn: dayOf(period.end),
       },
     }
   }
@@ -451,9 +451,7 @@ export function createAdminService(options: AdminServiceOptions) {
         args: [
           change.login,
           change.reason,
-          change.days === undefined
-            ? null
-            : new Date(now() + change.days * 24 * HOUR).toISOString(),
+          change.days === undefined ? null : isoAt(now() + change.days * 24 * HOUR),
           actor.login,
           iso(),
         ],
@@ -563,7 +561,7 @@ export function createAdminService(options: AdminServiceOptions) {
 
     /** Cuándo se renueva el límite mensual (ISO-8601): hasta entonces dura una parada. */
     renewsAt(): string {
-      return new Date(periodOf(now(), settings.renewDay).end).toISOString()
+      return isoAt(periodOf(now(), settings.renewDay).end)
     },
 
     /**
@@ -634,7 +632,7 @@ export function createAdminService(options: AdminServiceOptions) {
       await this.flush()
       await refresh()
 
-      const since = (ms: number): string => new Date(now() - ms).toISOString().slice(0, 10)
+      const since = (ms: number): string => dayOf(now() - ms)
       const [recent, pattern, top, limits] = await Promise.all([
         db.execute({
           sql: `SELECT day, hour, SUM(requests) AS requests, SUM(bytes) AS bytes,
@@ -801,7 +799,7 @@ export function createAdminService(options: AdminServiceOptions) {
 
       const recent = await db.execute({
         sql: 'SELECT COUNT(*) AS total FROM tickets WHERE login = ? AND created_at > ?',
-        args: [actor.login, new Date(now() - TICKET_WINDOW_MS).toISOString()],
+        args: [actor.login, isoAt(now() - TICKET_WINDOW_MS)],
       })
 
       if (toNumber(recent.rows[0]?.total) >= MAX_TICKETS_PER_WINDOW) {
@@ -892,7 +890,7 @@ export function createAdminService(options: AdminServiceOptions) {
       const result = await db.execute({
         sql: `DELETE FROM tickets WHERE id = ? AND login = ? AND status = 'open'
               AND answer IS NULL AND created_at > ?`,
-        args: [id, actor.login, new Date(now() - WITHDRAW_MS).toISOString()],
+        args: [id, actor.login, isoAt(now() - WITHDRAW_MS)],
       })
 
       if (result.rowsAffected === 0) {

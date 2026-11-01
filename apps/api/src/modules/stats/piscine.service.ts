@@ -21,6 +21,7 @@ import { PISCINE_PROGRESS } from '../replica/index.js'
 import { POOL_AXIS, meanLine, samePool, swimOf } from './piscine.rules.js'
 import type { Swimmer } from './piscine.rules.js'
 import type { PiscineRepository } from './stats.repository.js'
+import { isoAt } from '../../core/time.js'
 
 /** Con menos gente que esto, una media no dice nada: van las líneas de cada cual. */
 const MIN_PEOPLE = 10
@@ -132,13 +133,13 @@ export function createPiscineProgressService(options: {
             list.length >= MIN_PEOPLE
               ? []
               : traces.filter((each) => each.login === actor.login || sees(each.login)),
-          since: Number.isFinite(first) ? new Date(first).toISOString() : null,
+          since: Number.isFinite(first) ? isoAt(first) : null,
         }
       }
       return {
         days: [...POOL_AXIS],
         steps: PISCINE_PROGRESS.map((project) => ({ short: project.short, group: project.group })),
-        startedAt: mine === undefined ? null : new Date(mine.start).toISOString(),
+        startedAt: mine === undefined ? null : isoAt(mine.start),
         me: mine === undefined ? null : trace(mine),
         cohort: averageOf(cohort),
         // Solo piscineros de tu piscina.

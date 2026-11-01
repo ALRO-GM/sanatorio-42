@@ -2,7 +2,8 @@ import { useMemo, useState } from 'react'
 
 import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
-import { localeOf, useI18n } from '../../shared/i18n'
+import { useI18n } from '../../shared/i18n'
+import { useFormat } from '../../shared/i18n/useFormat'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { BoardCard } from './BoardCard'
 import { orderBoards } from './order'
@@ -21,7 +22,8 @@ const UPCOMING_MAX = 8
  * las del día elegido o, sin día, las próximas a las que aún te puedes apuntar.
  */
 export function BoardsCalendar() {
-  const { t, lang } = useI18n()
+  const { t } = useI18n()
+  const fmt = useFormat()
   const today = useMemo(() => new Date(), [])
   const [month, setMonth] = useState(() => new Date(today.getFullYear(), today.getMonth(), 1))
   const [selectedDay, setSelectedDay] = useState<string | null>(null)
@@ -179,13 +181,7 @@ export function BoardsCalendar() {
             />
           )}
           <h3 className="boards-list-title">
-            {selectedDay === null
-              ? t('cal.upcoming')
-              : new Date(`${selectedDay}T12:00:00`).toLocaleDateString(localeOf(lang), {
-                  weekday: 'long',
-                  day: 'numeric',
-                  month: 'long',
-                })}
+            {selectedDay === null ? t('cal.upcoming') : fmt.date(`${selectedDay}T12:00:00`, 'long')}
           </h3>
           {(selectedDay === null ? soon.loading : boards.loading) && <p>{t('cal.loading')}</p>}
           <ErrorNote

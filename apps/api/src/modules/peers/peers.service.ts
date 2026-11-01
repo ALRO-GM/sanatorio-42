@@ -16,6 +16,7 @@ import { domainError } from '../../core/errors.js'
 import { LOCATION_MAX_AGE_MS, PISCINE } from '../replica/index.js'
 import type { Peer, ProjectSummary } from '@sanatorio/contracts'
 import type { Syncer } from '../replica/index.js'
+import { isoAt } from '../../core/time.js'
 
 type PeersResult = {
   /** Los accionables, ya ordenados: de guardia primero. */
@@ -77,7 +78,7 @@ export function createPeersService(options: PeersServiceOptions) {
   }
 
   /** Desde cuándo se cree un puesto. Ver `LOCATION_MAX_AGE_MS`. */
-  const presenceSince = (): string => new Date(now() - LOCATION_MAX_AGE_MS).toISOString()
+  const presenceSince = (): string => isoAt(now() - LOCATION_MAX_AGE_MS)
 
   return {
     /**

@@ -26,6 +26,7 @@ import { day, parse } from '../../core/validation.js'
 import type { ReplicaRepository } from '../replica/index.js'
 import { sectionsOf, START } from './flows.rules.js'
 import { given } from '../../core/options.js'
+import { dayOf, isoAt } from '../../core/time.js'
 
 /** Claves como `nav.tablon` o `expediente.health`: dos palabras en minúsculas. */
 const KEY = /^[a-z]{2,20}\.[a-z_]{2,30}$/
@@ -173,7 +174,6 @@ export function createUsageService(options: {
 }) {
   const { db, replica } = options
   const now = options.now ?? Date.now
-  const dayOf = (at: number): string => new Date(at).toISOString().slice(0, 10)
   const totals = createTtlCache<UsageCounts>({
     ttlMs: 5 * 60_000,
     maxEntries: 1,
@@ -524,7 +524,7 @@ export function createUsageService(options: {
       const images = await replica.imagesOf(people.map((person) => person.login))
 
       return {
-        now: new Date(now()).toISOString(),
+        now: isoAt(now()),
         people: people.map((person) => ({ ...person, image: images.get(person.login) ?? null })),
       }
     },

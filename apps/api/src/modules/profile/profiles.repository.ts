@@ -7,6 +7,7 @@
 import type { Db } from '../../core/db/database.js'
 import { nowIso } from '../../core/db/database.js'
 import { toNumber, toText } from '../../core/db/rows.js'
+import { isoAt } from '../../core/time.js'
 
 /** Pace y plazo del milestone que alguien ha copiado de su perfil de la intra. */
 type PaceRefRow = {
@@ -74,7 +75,7 @@ export function createProfilesRepository(db: Db) {
      */
     async touch(login: string, at?: string): Promise<void> {
       const now = at ?? nowIso()
-      const gone = new Date(Date.parse(now) - SESSION_GAP_MS).toISOString()
+      const gone = isoAt(Date.parse(now) - SESSION_GAP_MS)
 
       await db.execute({
         // En el `SET`, `seen_at` a secas es todavía el valor de antes.

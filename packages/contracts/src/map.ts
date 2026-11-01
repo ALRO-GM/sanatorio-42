@@ -57,9 +57,10 @@ export type MapSeat = {
   reservation: SeatReservation | null
   /**
    * Si alguien ha avisado de que no funciona (vale una semana): quién y
-   * cuándo. Un puesto roto no se propone para una terapia.
+   * cuándo. Un puesto roto no se propone para una terapia. `by` es `null`
+   * si quien avisó no sale con nombre para quien mira (otro mundo, oculto).
    */
-  broken: { by: string; at: string } | null
+  broken: { by: string | null; at: string } | null
 }
 
 export type MapCluster = {

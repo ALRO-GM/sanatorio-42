@@ -7,6 +7,7 @@ import { useAsync } from '../../shared/hooks/useAsync'
 import { usePolling } from '../../shared/hooks/usePolling'
 import { useI18n } from '../../shared/i18n'
 import { useFormat } from '../../shared/i18n/useFormat'
+import { dayOf } from '../../shared/period'
 import { DataTable } from '../../shared/ui/DataTable'
 import { Avatar } from '../../shared/ui/Avatar'
 import { durationText } from '../../shared/time'
@@ -18,7 +19,6 @@ import { Figure } from './Figure'
 const DAY_MS = 24 * 60 * 60_000
 
 /** `YYYY-MM-DD` en UTC: los días de las estadísticas van en UTC. */
-const dayOf = (at: number): string => new Date(at).toISOString().slice(0, 10)
 
 /** "2h", "45m", "30s": lo justo para caber encima de una barra. */
 function briefTime(seconds: number): string {

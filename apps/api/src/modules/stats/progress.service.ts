@@ -43,6 +43,7 @@ import type {
 } from '@sanatorio/contracts'
 
 import type { Actor } from '../../core/actor.js'
+import { monthOf } from '../../core/time.js'
 import { CHOICES, VERSIONS } from '../replica/index.js'
 import { coreStatusOf } from './blackhole.rules.js'
 import type { CoreFacts } from './blackhole.rules.js'
@@ -198,7 +199,6 @@ type Snapshot = {
 const filled = <K extends string, V>(keys: readonly K[], value: (key: K) => V): Record<K, V> =>
   Object.fromEntries(keys.map((key) => [key, value(key)])) as Record<K, V>
 
-const monthOf = (ms: number): string => new Date(ms).toISOString().slice(0, 7)
 const DAY_MS = 86_400_000
 
 /**

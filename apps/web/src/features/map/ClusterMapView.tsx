@@ -4,7 +4,8 @@ import type { CSSProperties, FocusEvent, MouseEvent, RefObject } from 'react'
 import type { ClusterMap, MapCluster, MapSeat, SeatReservation } from '@sanatorio/contracts'
 
 import { shows, useDetail } from '../../shared/detail'
-import { localeOf, useI18n } from '../../shared/i18n'
+import { useI18n } from '../../shared/i18n'
+import { useFormat } from '../../shared/i18n/useFormat'
 import type { Translate } from '../../shared/i18n'
 import { Icon } from '../../shared/ui/Icon'
 import { PillGroup } from '../../shared/ui/PillGroup'
@@ -758,20 +759,14 @@ export function ClusterMapView({
 
 /** Para qué proyecto y cuándo está reservado un puesto. */
 function ReservationNote({ reservation }: { reservation: SeatReservation }) {
-  const { t, lang } = useI18n()
+  const { t } = useI18n()
+  const fmt = useFormat()
 
   return (
     <span className="seat-reservation">
       {t('map.reservedFor', {
         project: reservation.projectName ?? '?',
-        days: reservation.dates
-          .map((day) =>
-            new Date(`${day}T12:00:00`).toLocaleDateString(localeOf(lang), {
-              day: 'numeric',
-              month: 'short',
-            }),
-          )
-          .join(', '),
+        days: reservation.dates.map((day) => fmt.date(`${day}T12:00:00`, 'dayMonth')).join(', '),
         start: reservation.start,
         end: reservation.end,
       })}

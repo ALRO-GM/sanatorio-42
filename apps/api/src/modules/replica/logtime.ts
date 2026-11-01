@@ -12,6 +12,7 @@ import type { Db } from '../../core/db/database.js'
 import { toNumber, toText } from '../../core/db/rows.js'
 import type { FortyTwoClient } from '../../integrations/forty-two/client.js'
 import type { QuotaGate } from './quota.js'
+import { isoAt } from '../../core/time.js'
 
 /** Cada cuánto se vuelve a preguntar a 42 por las horas de alguien. */
 const LOGTIME_TTL_MS = 24 * 60 * 60_000
@@ -76,7 +77,7 @@ export function createLogtime(options: LogtimeOptions) {
           sql: `INSERT INTO user_logtime (login, seconds, updated_at) VALUES (?, ?, ?)
                 ON CONFLICT (login) DO UPDATE SET
                   seconds = excluded.seconds, updated_at = excluded.updated_at`,
-          args: [login, seconds, new Date(now()).toISOString()],
+          args: [login, seconds, isoAt(now())],
         })
 
         return seconds / 3600

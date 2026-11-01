@@ -9,6 +9,8 @@
  * valores enormes se comerían casi toda la barra.
  */
 
+import { clamp } from '../math'
+
 export type Curve = 'linear' | 'log'
 
 /** La rejilla de valores que admite un deslizador, independiente de los datos. */
@@ -41,9 +43,6 @@ const MAGNET_STEPS = 0.6
  * no, un pulso que tiembla justo en la frontera saltaría entre dos números.
  */
 const HOLD = 0.65
-
-const clamp = (value: number, low: number, high: number): number =>
-  Math.min(high, Math.max(low, value))
 
 /** Los decimales del paso, para que `0.1 + 0.2` no se quede en `0.30000000000000004`. */
 function decimalsOf(step: number): number {

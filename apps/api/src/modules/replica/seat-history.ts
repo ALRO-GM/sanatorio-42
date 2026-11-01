@@ -21,6 +21,7 @@ import { toText } from '../../core/db/rows.js'
 import type { FortyTwoClient } from '../../integrations/forty-two/client.js'
 import type { ApiLocation } from '../../integrations/forty-two/types.js'
 import type { QuotaGate } from './quota.js'
+import { isoAt } from '../../core/time.js'
 
 const DAY = 24 * 60 * 60_000
 /** El tramo de cada vuelta hacia atrás. */
@@ -73,14 +74,14 @@ export function createSeatHistory(options: SeatHistoryOptions) {
       // Estado ilegible: se empieza otra vez desde hoy; lo copiado no se pierde.
     }
 
-    return { until: new Date(now()).toISOString(), page: 1, done: false, seen: 0, kept: 0 }
+    return { until: isoAt(now()), page: 1, done: false, seen: 0, kept: 0 }
   }
 
   const store = async (campusId: number, state: HistoryState): Promise<void> => {
     await db.execute({
       sql: `INSERT INTO sync_state (key, value, updated_at) VALUES (?, ?, ?)
             ON CONFLICT (key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at`,
-      args: [seatHistoryKey(campusId), JSON.stringify(state), new Date(now()).toISOString()],
+      args: [seatHistoryKey(campusId), JSON.stringify(state), isoAt(now())],
     })
   }
 
@@ -199,7 +200,7 @@ export function createSeatHistory(options: SeatHistoryOptions) {
               break
             }
 
-            const from = new Date(Math.max(first, to - WINDOW_MS)).toISOString()
+            const from = isoAt(Math.max(first, to - WINDOW_MS))
             const result = await client.getLocationsHistoryPage({
               campusId,
               from,

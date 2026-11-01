@@ -36,6 +36,7 @@ import { BROKEN_FOR_MS, MAX_BROKEN_PER_PERSON } from './broken-seats.js'
 import type { BrokenSeats } from './broken-seats.js'
 import { clusterBounds, hostAt, isInside, parseHost } from './seat-layout.js'
 import type { SeatPosition } from './seat-layout.js'
+import { isoAt } from '../../core/time.js'
 
 export type MapServiceOptions = {
   replica: ReplicaRepository
@@ -80,7 +81,7 @@ export function createMapService(options: MapServiceOptions) {
   const audience = options.audience ?? NO_POOL
 
   /** Desde cuándo vale un aviso de puesto roto. */
-  const brokenSince = (): string => new Date(now() - BROKEN_FOR_MS).toISOString()
+  const brokenSince = (): string => isoAt(now() - BROKEN_FOR_MS)
 
   /** El nombre del puesto, en minúsculas, si es uno que se sabe colocar. */
   const seatHost = (host: unknown): string => {
@@ -111,7 +112,7 @@ export function createMapService(options: MapServiceOptions) {
         )
       }
 
-      await options.broken?.report(actor.campusId, name, actor.login, new Date(now()).toISOString())
+      await options.broken?.report(actor.campusId, name, actor.login, isoAt(now()))
     },
 
     /** Ya funciona: cualquiera que esté delante puede decirlo. */
@@ -140,7 +141,7 @@ export function createMapService(options: MapServiceOptions) {
         throw domainError('not_found', 'No hay nadie con ese login')
       }
 
-      const since = new Date(now() - LOCATION_MAX_AGE_MS).toISOString()
+      const since = isoAt(now() - LOCATION_MAX_AGE_MS)
       const [present, images, active, circles, online, available, focusing, title] =
         await Promise.all([
           replica.presenceIn(actor.campusId, since),
@@ -182,7 +183,7 @@ export function createMapService(options: MapServiceOptions) {
         ).peers
       }
 
-      const since = new Date(now() - LOCATION_MAX_AGE_MS).toISOString()
+      const since = isoAt(now() - LOCATION_MAX_AGE_MS)
       const [known, everyone, reservations, online, broken, sees, shown] = await Promise.all([
         replica.knownSeats(actor.campusId),
         replica.presenceIn(actor.campusId, since),
@@ -199,6 +200,12 @@ export function createMapService(options: MapServiceOptions) {
       // Lo que no sale con nombre sale ocupado, sin más: el puesto no está libre.
       const named = (login: string): boolean => (actor.pool === true ? sees(login) : shown(login))
       const present = everyone.filter((person) => named(person.login))
+      // Quién avisó de un puesto roto sale con la misma regla: si no, el aviso
+      // enseñaría a alguien del otro mundo o a alguien oculto.
+      const reportOf = (
+        report: { by: string; at: string } | undefined,
+      ): { by: string | null; at: string } | null =>
+        report === undefined ? null : { by: named(report.by) ? report.by : null, at: report.at }
       const taken = everyone.filter((person) => !named(person.login))
 
       // De guardia = disponible y sentado. Misma regla que en la lista.
@@ -233,7 +240,7 @@ export function createMapService(options: MapServiceOptions) {
           occupant: null,
           taken: false,
           reservation: null,
-          broken: broken.get(host) ?? null,
+          broken: reportOf(broken.get(host)),
         }
 
         seats.set(host, seat)

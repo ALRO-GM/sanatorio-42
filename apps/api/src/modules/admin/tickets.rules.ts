@@ -4,6 +4,7 @@
  */
 
 import type { ReportReason, TicketCategory } from '@sanatorio/contracts'
+import { isoAt } from '../../core/time.js'
 
 export const TICKET_CATEGORIES = [
   'bug',
@@ -64,6 +65,6 @@ export function withdrawUntil(
   const until = Date.parse(ticket.createdAt) + WITHDRAW_MS
 
   return ticket.status === 'open' && ticket.answer === null && Number.isFinite(until) && until > now
-    ? new Date(until).toISOString()
+    ? isoAt(until)
     : null
 }

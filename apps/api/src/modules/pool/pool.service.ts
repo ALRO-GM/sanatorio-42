@@ -15,6 +15,7 @@ import { parse } from '../../core/validation.js'
 import type { ApiUser } from '../../integrations/forty-two/types.js'
 import { effective, POOL_DEFAULT, POOL_KEYS, poolAllows } from './pool.keys.js'
 import { audienceOf } from './pool.rules.js'
+import { isoAt } from '../../core/time.js'
 
 type PoolServiceOptions = {
   db: Db
@@ -159,7 +160,7 @@ export function createPoolService(options: PoolServiceOptions) {
       await db.execute({
         sql: `INSERT OR REPLACE INTO settings (key, value, updated_by, updated_at)
               VALUES ('pool', ?, ?, ?)`,
-        args: [JSON.stringify(next), actor.login, new Date(now()).toISOString()],
+        args: [JSON.stringify(next), actor.login, isoAt(now())],
       })
       cached = null
 

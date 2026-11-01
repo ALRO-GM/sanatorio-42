@@ -24,6 +24,7 @@ import { hourlyQuota } from '../replica/index.js'
 import type { QuotaGate, ReplicaRepository } from '../replica/index.js'
 import { DEFAULT_PASS_MARK, passMarkOf } from './network.analysis.js'
 import type { CorrectionRow, NetworkRepository } from './network.repository.js'
+import { isoAt } from '../../core/time.js'
 
 type CorrectionSyncOptions = {
   client: FortyTwoClient
@@ -193,10 +194,7 @@ export function createCorrectionSync(options: CorrectionSyncOptions) {
   /** Hasta qué id hay correcciones en 42: pasado él, el histórico está entero. */
   const frontier = async (): Promise<number> => {
     if (newest === null || now() - newest.at >= NEWEST_EVERY_MS) {
-      const id = await client.getNewestScaleTeamId(
-        new Date(now() - NEWEST_LOOKBACK_MS).toISOString(),
-        new Date(now()).toISOString(),
-      )
+      const id = await client.getNewestScaleTeamId(isoAt(now() - NEWEST_LOOKBACK_MS), isoAt(now()))
 
       newest = { id: id ?? newest?.id ?? 0, at: now() }
     }
@@ -245,7 +243,7 @@ export function createCorrectionSync(options: CorrectionSyncOptions) {
     (recentMs === undefined
       ? { cursor: 0, done: false, total: null, deltaAt: null }
       : // Sin histórico: se da por hecho y las novedades empiezan `recentMs` atrás.
-        { cursor: 0, done: true, total: null, deltaAt: new Date(now() - recentMs).toISOString() })
+        { cursor: 0, done: true, total: null, deltaAt: isoAt(now() - recentMs) })
 
   /** Guarda una página y le pone veredicto a lo guardado. */
   const store = async (items: readonly ApiScaleTeam[], campusId: number): Promise<void> => {
@@ -338,7 +336,7 @@ export function createCorrectionSync(options: CorrectionSyncOptions) {
 
       if (finished) {
         state.sweepCursor = null
-        state.sweptAt = new Date(now()).toISOString()
+        state.sweptAt = isoAt(now())
         log(`correcciones del campus ${campusId}: repaso completo`)
       } else {
         cursor = upTo
@@ -359,7 +357,7 @@ export function createCorrectionSync(options: CorrectionSyncOptions) {
 
     // El reloj de verdad, no el inyectado: mide lo que tarda la red.
     for (let page = 0; (page === 0 || Date.now() < deadline) && canCopy(); page += 1) {
-      const startedAt = new Date(now()).toISOString()
+      const startedAt = isoAt(now())
 
       // Cuántas tiene el campus en total, para enseñar por dónde va. Cuesta
       // una petición, solo la primera vez; después se vuelve a mirar la cuota.
@@ -414,8 +412,8 @@ export function createCorrectionSync(options: CorrectionSyncOptions) {
 
     for (let slice = 0; slice === 0 || (Date.now() < deadline && canSpend()); slice += 1) {
       const end = Math.min(now(), start + span)
-      const to = new Date(end).toISOString()
-      const from = new Date(start - DELTA_OVERLAP_MS).toISOString()
+      const to = isoAt(end)
+      const from = isoAt(start - DELTA_OVERLAP_MS)
       let finished = false
 
       for (let page = 1; page <= DELTA_MAX_PAGES && canSpend(); page += 1) {
@@ -485,7 +483,7 @@ export function createCorrectionSync(options: CorrectionSyncOptions) {
             (Number.isNaN(judged) || now() - judged >= JUDGE_EVERY_MS)
           ) {
             await judgeAll()
-            state.judgedAt = new Date(now()).toISOString()
+            state.judgedAt = isoAt(now())
             await replica.setState(stateKey(campusId), state)
           }
 

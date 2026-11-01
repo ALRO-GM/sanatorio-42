@@ -13,7 +13,7 @@ import type {
   LiveExaminee,
 } from '@sanatorio/contracts'
 
-import { localMoment } from '../../core/time.js'
+import { localMoment, monthOf } from '../../core/time.js'
 
 /** Un intento guardado: quién, de qué examen, con qué nota y cuándo. */
 export type AttemptRow = {
@@ -243,9 +243,6 @@ const msOf = (value: string | null): number | null => {
 
   return Number.isNaN(ms) ? null : ms
 }
-
-/** El mes (`AAAA-MM`, en UTC) de un instante. */
-const monthOf = (ms: number): string => new Date(ms).toISOString().slice(0, 7)
 
 /** De quien no se sabe el plan: el nuevo si tiene algo de Python o de `42next`. */
 const nextSlug = (slug: string): boolean =>

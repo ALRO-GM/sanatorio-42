@@ -7,6 +7,7 @@
 import type { Db } from '../../core/db/database.js'
 import { toText } from '../../core/db/rows.js'
 import type { SeatSession } from './seating.rules.js'
+import { isoAt } from '../../core/time.js'
 
 /**
  * Lo más que cuenta una sesión seguida. En los puestos de examen que no se
@@ -57,8 +58,9 @@ export async function seatSessionsIn(
   const result = await db.execute({
     sql: `SELECT s.login, s.host, s.begin_at, s.first_seen_at, s.seen_at, u.image
           FROM seat_sessions s LEFT JOIN users u ON u.id = s.user_id
-          WHERE s.campus_id = ? AND s.seen_at >= ?`,
-    args: [campusId, new Date(since).toISOString()],
+          WHERE s.campus_id = ? AND s.seen_at >= ? AND s.begin_at < ?`,
+    // Con las dos puntas: un periodo antiguo no lee toda la historia del campus.
+    args: [campusId, isoAt(since), isoAt(until)],
   })
   const images = new Map<string, string | null>()
   const sessions: SeatSession[] = []

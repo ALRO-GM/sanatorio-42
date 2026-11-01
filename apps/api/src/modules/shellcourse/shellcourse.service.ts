@@ -27,6 +27,7 @@ import type { Db } from '../../core/db/database.js'
 import { toNumber, toText } from '../../core/db/rows.js'
 import { domainError } from '../../core/errors.js'
 import { createRateLimit } from '../../core/rate-limit.js'
+import { isoAt as iso } from '../../core/time.js'
 import { parse } from '../../core/validation.js'
 import { activeSecondsSchema } from './course-times.js'
 import type { CourseTimes } from './course-times.js'
@@ -128,8 +129,6 @@ export function createShellCourseRepository(db: Db) {
 }
 
 type ShellCourseRepository = ReturnType<typeof createShellCourseRepository>
-
-const iso = (ms: number): string => new Date(ms).toISOString()
 
 export function createShellCourseService(deps: {
   progress: ShellCourseRepository

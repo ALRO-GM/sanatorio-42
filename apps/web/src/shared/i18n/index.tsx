@@ -167,12 +167,22 @@ type I18n = {
 const STORAGE_KEY = 'sanatorio_lang'
 
 export function isLang(value: string | null | undefined): value is Lang {
-  return value !== null && value !== undefined && value in LANGS
+  // `hasOwn` y no `in`: `constructor` o `toString` no son idiomas.
+  return value !== null && value !== undefined && Object.hasOwn(LANGS, value)
+}
+
+/** Lo guardado en el navegador; con el almacenamiento bloqueado, nada (no rompe el arranque). */
+function storedLang(): string | null {
+  try {
+    return localStorage.getItem(STORAGE_KEY)
+  } catch {
+    return null
+  }
 }
 
 /** Idioma inicial: el que eligió la última vez, o el del navegador si lo tenemos. */
 export function initialLang(): Lang {
-  const stored = localStorage.getItem(STORAGE_KEY)
+  const stored = storedLang()
 
   if (isLang(stored)) {
     return stored
@@ -228,7 +238,11 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 
   const setLang = useCallback(
     (next: Lang) => {
-      localStorage.setItem(STORAGE_KEY, next)
+      try {
+        localStorage.setItem(STORAGE_KEY, next)
+      } catch {
+        // Sin almacenamiento, el idioma dura lo que la pestaña.
+      }
       // Lo que se pinta ahora sigue mientras llega el nuevo.
       setShown(lang)
       setWanted(next)

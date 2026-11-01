@@ -5,6 +5,7 @@
  */
 
 import type { FocusFigures, FocusReason, FocusStats } from '@sanatorio/contracts'
+import { dayOf } from '../../core/time.js'
 
 /** Los motivos que se pueden marcar al querer acabar, en el orden de la web. */
 export const REASONS = [
@@ -90,8 +91,7 @@ export function figuresOf(sessions: readonly FocusSession[], now: number): Focus
   return { ...figures, focusedSeconds: Math.round(ms / 1000) }
 }
 
-/** `AAAA-MM-DD` y hora de un instante ya pasado a la hora de quien mira. */
-const dayOf = (local: number): string => new Date(local).toISOString().slice(0, 10)
+/** La hora de un instante ya pasado a la hora de quien mira (su día sale de `dayOf`). */
 const hourOf = (local: number): number => new Date(local).getUTCHours()
 
 /**
