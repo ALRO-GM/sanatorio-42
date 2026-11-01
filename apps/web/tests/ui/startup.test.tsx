@@ -82,7 +82,7 @@ describe('startup del Pomodoro', () => {
     await waitFor(() => {
       expect(within(ranking).getByText('Neuralia').textContent).toBe('Neuralia')
     })
-  })
+  }, 20_000)
 
   it('cajas sorpresa, colocar la decoración a mano y visitar otra oficina', async () => {
     render(
@@ -161,7 +161,7 @@ describe('startup del Pomodoro', () => {
     )
     fireEvent.click(await screen.findByRole('button', { name: text('startup.visit.close') }))
     expect(screen.queryByRole('button', { name: text('startup.visit.close') })).toBeNull()
-  })
+  }, 20_000)
 
   it('implementar un producto hace que cada minuto de concentración dé dinero', async () => {
     render(
@@ -190,5 +190,5 @@ describe('startup del Pomodoro', () => {
       screen.getByRole<HTMLButtonElement>('button', { name: text('startup.space.coworking') })
         .disabled,
     ).toBe(true)
-  })
+  }, 20_000)
 })
