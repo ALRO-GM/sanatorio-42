@@ -231,6 +231,19 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     (pool) => hiddenLogins(db, pool),
     () => replica.poolMembers.loginsAnywhere(),
   )
+
+  // El círculo de cada cual. Un piscinero no tiene círculos del common core:
+  // lleva el número del último módulo de C que tiene aprobado (0 con el Shell).
+  const circlesOf = async (logins: readonly string[]): Promise<Map<string, number>> => {
+    const pool = await audience.poolAnywhere()
+    const swimmers = logins.filter((login) => pool.has(login.toLowerCase()))
+    const [circles, levels] = await Promise.all([
+      replica.curriculum.circlesOf(logins.filter((login) => !pool.has(login.toLowerCase()))),
+      replica.curriculum.piscineLevelsOf(swimmers),
+    ])
+
+    return new Map([...circles, ...levels])
+  }
   // El Pomodoro va pronto: la sala de espera y el plano preguntan quién está concentrado.
   const focus = createFocusModule({ db, ...clock })
   const focusOf = (logins: readonly string[]) =>
@@ -309,7 +322,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     peers: peers.peers,
     therapy: therapy.service,
     online,
-    circlesOf: (logins) => replica.curriculum.circlesOf(logins),
+    circlesOf,
     // El módulo de estadísticas se monta más abajo; se le pregunta al servir.
     finishedOf: (logins) => stats.finishedOf(logins),
     availableOf: (login) => peers.availabilityRepository.get(login),
@@ -515,7 +528,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
   const quiz = createQuizModule({
     db,
     audience,
-    circlesOf: (logins) => replica.curriculum.circlesOf(logins),
+    circlesOf,
     imagesOf: (logins) => replica.repository.imagesOf(logins),
     ...clock,
   })
@@ -576,7 +589,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
       db,
       audience,
       circles: (track) => replica.curriculum.circles(track),
-      circlesOf: (logins) => replica.curriculum.circlesOf(logins),
+      circlesOf,
       ...clock,
     }),
     createClientErrorsModule(),

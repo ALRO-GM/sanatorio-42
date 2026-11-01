@@ -9,7 +9,8 @@ import { recordHref } from '../links'
 import { Avatar } from './Avatar'
 import { FocusBadge } from './FocusBadge'
 import { TitleBanner } from './TitleBanner'
-import { usePoolAllows } from '../pool'
+import { circleLabel } from '../circle'
+import { usePoolAccess, usePoolAllows } from '../pool'
 
 /** Lo que se tarda en sacar la ficha al pasar el ratón: así no salta al cruzar la lista. */
 const HOVER_DELAY_MS = 350
@@ -52,6 +53,8 @@ export function PersonLink({ login, className = 'record-link', children }: Perso
   const [card, setCard] = useState<PersonCard | null>(null)
   const [open, setOpen] = useState(false)
   const cards = usePoolAllows('people')
+  // Un piscinero solo ve piscineros: su «círculo» es su nivel de C.
+  const { pool } = usePoolAccess()
 
   useEffect(
     () => () => {
@@ -115,7 +118,7 @@ export function PersonLink({ login, className = 'record-link', children }: Perso
           <span className="seat-projects">
             {card.me && <span className="badge subtle">{t('map.you')}</span>}
             {card.circle !== null && (
-              <span className="badge subtle">{t('map.circle', { n: card.circle })}</span>
+              <span className="badge subtle">{circleLabel(t, card.circle, pool)}</span>
             )}
             {card.onDuty && <span className="badge on">{t('peers.badgeOn')}</span>}
             {card.online && !card.me && <span className="badge on">{t('clusters.online')}</span>}

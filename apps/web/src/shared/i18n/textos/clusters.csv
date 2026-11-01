@@ -31,7 +31,7 @@ map.flipSeats,Opción del plano: el primer puesto a la derecha en vez de a la iz
 map.flipFacing,Opción del plano: los impares miran al sur y los pares al norte,Invertir hacia dónde miran,Flip which way seats face,Inverteix cap a on miren,Begiratzeko norabidea irauli,Inverser l'orientation des postes
 map.placement,Desplegable bajo el plano: invertir y alinear las filas,Colocación de los puestos,Seat layout,Col·locació dels llocs,Postuen kokapena,Disposition des postes
 map.zoomLabel,Grupo de botones: tamaño del plano de un clúster grande,Tamaño del plano,Map size,Mida del plànol,Planoaren tamaina,Taille du plan
-map.zoomFit,"Botón: encoger los puestos para que el clúster quepa a lo ancho",Ajustar,Fit,Ajusta,Doitu,Ajuster
+map.zoomFit,Botón: encoger los puestos para que el clúster quepa a lo ancho,Ajustar,Fit,Ajusta,Doitu,Ajuster
 map.zoomFull,"Botón: ver los puestos a tamaño real, deslizando el plano",100 %,100%,100 %,% 100,100 %
 map.flat,"Opción del plano: puestos alineados, sin el desplazamiento de hacia dónde miran",Alinear,Align,Alinea,Lerrokatu,Aligner
 map.circles,Casilla: marcar el círculo de cada persona,Círculos,Circles,Cercles,Zirkuluak,Cercles
@@ -41,6 +41,8 @@ map.mate.project,Resaltar: gente de tu proyecto,Mi proyecto,My project,El meu pr
 map.mate.done,Resaltar: gente que aprobó tu proyecto,Lo aprobaron,Passed it,L'han aprovat,Gainditu dutenak,L'ont validé
 map.middleClick,Truco para abrir un perfil en otra pestaña,Clic central (o Ctrl + clic) en un puesto: abre su perfil en otra pestaña.,Middle click (or Ctrl + click) on a seat opens their profile in a new tab.,Clic central (o Ctrl + clic) en un lloc: obre el seu perfil en una altra pestanya.,Erdiko klik (edo Ctrl + klik) postu batean: haren profila beste fitxa batean irekitzen du.,Clic molette (ou Ctrl + clic) sur un poste : ouvre son profil dans un nouvel onglet.
 map.circle,Círculo de una persona,Círculo {n},Circle {n},Cercle {n},{n}. zirkulua,Cercle {n}
+map.circle.c,Nivel de un piscinero: el último módulo de C aprobado (C 06),C {n},C {n},C {n},C {n},C {n}
+map.circle.shell,Nivel de un piscinero que aún no ha aprobado ningún módulo de C,Shell,Shell,Shell,Shell,Shell
 map.proposeNone,No hay tantos puestos juntos libres,No hay tantos puestos juntos libres: prueba con menos.,There are not that many free seats together: try fewer.,No hi ha tants llocs junts lliures: prova amb menys.,Ez dago hainbeste postu libre elkarren ondoan: saiatu gutxiagorekin.,Pas assez de postes libres côte à côte : essaie avec moins.
 map.proposeHint,Qué hace proponer puestos,"Busca puestos juntos, libres y que funcionen, lo más cerca de ti.","Finds free, working seats together, as close to you as possible.","Busca llocs junts, lliures i que funcionin, com més a prop teu millor.","Elkarren ondoko postu libre eta erabilgarriak bilatzen ditu, zugandik ahalik eta hurbilen.","Cherche des postes voisins, libres et en état de marche, le plus près possible de toi."
 map.propose,Botón para que la web proponga puestos,Proponer puestos,Suggest seats,Proposa llocs,Postuak proposatu,Proposer des postes

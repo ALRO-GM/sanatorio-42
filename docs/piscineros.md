@@ -115,6 +115,16 @@ su valor en claro y en oscuro y su color de texto encima, `--on-piscine-*`).
 - API de mentira: con `mock_pool` (o la vista previa), el tablón, la sala de
   espera y el Avance enseñan la piscina de `mock/piscine.ts`.
 
+### El círculo de un piscinero
+
+Donde a un estudiante se le ve su círculo (el número en el puesto del plano,
+la ficha al pasar por encima, la ayuda), a un piscinero se le ve su nivel de C
+(pedido por Alberto, 2026-11-01): el número del módulo de C más alto que tiene
+**aprobado** (`c-piscine-c-06` aprobado, un 6) y 0 si solo tiene el Shell. En
+la ficha se lee «C 06» o «Shell». Lo calcula `curriculum.piscineLevelsOf` con
+la réplica, sin preguntar a 42; `composition.ts` lo usa para quien está en la
+piscina.
+
 ## Ver como piscinero
 
 Pedido por Alberto el 2026-10-25. En la pestaña **Piscina** del panel, **Ver

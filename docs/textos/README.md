@@ -10,7 +10,7 @@ Cómo se trabaja con ellas: [docs/textos.md](../textos.md).
 | [avisos](avisos.md) | 44 | 0 | 0 | 0 | 0 |
 | [buzon](buzon.md) | 142 | 0 | 0 | 0 | 0 |
 | [calendario](calendario.md) | 105 | 0 | 0 | 0 | 0 |
-| [clusters](clusters.md) | 80 | 0 | 0 | 0 | 0 |
+| [clusters](clusters.md) | 82 | 0 | 0 | 0 | 0 |
 | [code-clicker](code-clicker.md) | 27 | 0 | 0 | 0 | 0 |
 | [comun](comun.md) | 441 | 0 | 0 | 0 | 0 |
 | [curso-shell](curso-shell.md) | 66 | 0 | 0 | 0 | 0 |

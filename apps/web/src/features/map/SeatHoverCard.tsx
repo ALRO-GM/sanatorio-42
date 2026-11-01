@@ -2,7 +2,9 @@ import type { ReactNode } from 'react'
 
 import type { MapSeat } from '@sanatorio/contracts'
 
+import { circleLabel } from '../../shared/circle'
 import { useI18n } from '../../shared/i18n'
+import { usePoolAccess } from '../../shared/pool'
 import { Avatar } from '../../shared/ui/Avatar'
 import { FocusBadge } from '../../shared/ui/FocusBadge'
 import { Icon } from '../../shared/ui/Icon'
@@ -46,6 +48,8 @@ type SeatHoverCardProps = {
  */
 export function SeatHoverCard({ hovered, pinned }: SeatHoverCardProps) {
   const { t } = useI18n()
+  // Un piscinero solo ve piscineros: su «círculo» es su nivel de C.
+  const { pool } = usePoolAccess()
   const { seat, anchor } = hovered
   const occupant = seat.occupant
 
@@ -89,7 +93,7 @@ export function SeatHoverCard({ hovered, pinned }: SeatHoverCardProps) {
           <span className="badge on">{t('clusters.online')}</span>
         )}
         {occupant.circle !== null && (
-          <span className="badge subtle">{t('map.circle', { n: occupant.circle })}</span>
+          <span className="badge subtle">{circleLabel(t, occupant.circle, pool)}</span>
         )}
         {occupant.finishedMine !== null && (
           <span className={`badge ${occupant.finishedMine >= 125 ? 'specialist' : 'on'}`}>

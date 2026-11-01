@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/clusters.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-80 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
+82 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera | Francés |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -48,7 +48,9 @@ Generado desde `apps/web/src/shared/i18n/textos/clusters.csv` con
 | `map.mate.project` | Resaltar: gente de tu proyecto | features/map/ClusterMapView, features/map/ClustersTour | Mi proyecto | My project | El meu projecte | Nire proiektua | Mon projet |
 | `map.mate.done` | Resaltar: gente que aprobó tu proyecto | features/map/ClusterMapView, features/map/ClustersTour | Lo aprobaron | Passed it | L'han aprovat | Gainditu dutenak | L'ont validé |
 | `map.middleClick` | Truco para abrir un perfil en otra pestaña | features/map/ClusterMapView | Clic central (o Ctrl + clic) en un puesto: abre su perfil en otra pestaña. | Middle click (or Ctrl + click) on a seat opens their profile in a new tab. | Clic central (o Ctrl + clic) en un lloc: obre el seu perfil en una altra pestanya. | Erdiko klik (edo Ctrl + klik) postu batean: haren profila beste fitxa batean irekitzen du. | Clic molette (ou Ctrl + clic) sur un poste : ouvre son profil dans un nouvel onglet. |
-| `map.circle` | Círculo de una persona | features/map/ClusterMapView, features/map/ClustersTour, features/map/SeatHoverCard, shared/ui/PersonLink | Círculo {n} | Circle {n} | Cercle {n} | {n}. zirkulua | Cercle {n} |
+| `map.circle` | Círculo de una persona | features/map/ClusterMapView, features/map/ClustersTour, shared/circle | Círculo {n} | Circle {n} | Cercle {n} | {n}. zirkulua | Cercle {n} |
+| `map.circle.c` | Nivel de un piscinero: el último módulo de C aprobado (C 06) | features/map/ClusterMapView, shared/circle | C {n} | C {n} | C {n} | C {n} | C {n} |
+| `map.circle.shell` | Nivel de un piscinero que aún no ha aprobado ningún módulo de C | features/map/ClusterMapView, shared/circle | Shell | Shell | Shell | Shell | Shell |
 | `map.proposeNone` | No hay tantos puestos juntos libres | features/map/ClusterMapView, features/map/SeatPicker | No hay tantos puestos juntos libres: prueba con menos. | There are not that many free seats together: try fewer. | No hi ha tants llocs junts lliures: prova amb menys. | Ez dago hainbeste postu libre elkarren ondoan: saiatu gutxiagorekin. | Pas assez de postes libres côte à côte : essaie avec moins. |
 | `map.proposeHint` | Qué hace proponer puestos | features/map/ClusterMapView, features/map/SeatPicker | Busca puestos juntos, libres y que funcionen, lo más cerca de ti. | Finds free, working seats together, as close to you as possible. | Busca llocs junts, lliures i que funcionin, com més a prop teu millor. | Elkarren ondoko postu libre eta erabilgarriak bilatzen ditu, zugandik ahalik eta hurbilen. | Cherche des postes voisins, libres et en état de marche, le plus près possible de toi. |
 | `map.propose` | Botón para que la web proponga puestos | features/map/ClusterMapView, features/map/SeatPicker | Proponer puestos | Suggest seats | Proposa llocs | Postuak proposatu | Proposer des postes |

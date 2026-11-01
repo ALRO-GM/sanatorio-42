@@ -65,6 +65,9 @@ export const LAST_CIRCLE = 6
 /** Cada cuánto se vuelven a pedir las horas estimadas de los proyectos de un campus. */
 const HOURS_TTL_MS = 7 * 24 * 60 * 60_000
 
+/** Un módulo de C de la piscina: `c-piscine-c-06` es el 6. Los exámenes no cuentan. */
+const PISCINE_MODULE = /^c-piscine-c-(\d{2})$/
+
 /** A cuántas horas equivale cada unidad en la que 42 da sus estimaciones. */
 const HOURS_PER: Record<string, number> = { hour: 1, day: 8, week: 40, month: 160 }
 
@@ -452,6 +455,37 @@ export function createCurriculum(options: CurriculumOptions) {
 
       for (const [login, place] of await curriculum.placesOf(logins)) {
         if (place.circle !== null) found.set(login, place.circle)
+      }
+
+      return found
+    },
+
+    /**
+     * El «círculo» de un piscinero (pedido por Alberto, 2026-11-01): el número
+     * del módulo de C más alto que tiene **aprobado** (C 06 aprobado, un 6). Con
+     * solo el Shell, o sin nada aprobado, un 0. Quien no tiene nada de la
+     * piscina en la réplica también sale con 0.
+     */
+    async piscineLevelsOf(logins: readonly string[]): Promise<Map<string, number>> {
+      const found = new Map<string, number>(logins.map((login) => [login, 0]))
+
+      if (logins.length === 0) return found
+
+      const result = await db.execute({
+        sql: `SELECT u.login, p.slug FROM project_users pu
+              JOIN users u ON u.id = pu.user_id
+              JOIN projects p ON p.id = pu.project_id
+              WHERE ${inList('u.login')} AND p.slug LIKE 'c-piscine-c-%' AND pu.validated = 1`,
+        args: [listArg(logins)],
+      })
+
+      for (const row of result.rows) {
+        const login = toText(row.login)
+        const level = PISCINE_MODULE.exec(toText(row.slug))
+
+        if (level?.[1] !== undefined) {
+          found.set(login, Math.max(found.get(login) ?? 0, Number(level[1])))
+        }
       }
 
       return found
