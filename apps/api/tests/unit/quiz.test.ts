@@ -51,6 +51,15 @@ describe('reglas de Not-games', () => {
     expect(fits(concept('c', { lang: 'c' }), { slugs: new Set() })).toBe(false)
   })
 
+  it('en la piscina, C es de quien ya está en los módulos de C, no en los de shell', () => {
+    expect([...languagesOf(new Set(['c-piscine-shell-00', 'c-piscine-shell-01']))]).toEqual([])
+    expect([...languagesOf(new Set(['c-piscine-shell-01', 'c-piscine-c-00']))]).toEqual(['c'])
+    expect(fits(concept('c', { lang: 'c' }), { slugs: new Set(['c-piscine-shell-00']) })).toBe(
+      false,
+    )
+    expect(fits(concept('c', { lang: 'c' }), { slugs: new Set(['c-piscine-c-03']) })).toBe(true)
+  })
+
   it('en grupo solo sale lo que les vale a todos, o solo lo general', () => {
     const bank = [concept('g', {}), concept('c', { lang: 'c' }), concept('py', { lang: 'python' })]
     const people = [
