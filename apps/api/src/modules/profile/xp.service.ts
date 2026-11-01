@@ -40,7 +40,7 @@ import { canUseStyle, isStyle, NO_RECORD_STYLE, recordStyleOf } from './styles.r
 import { NO_POOL, seesFor } from '../../core/audience.js'
 import type { Audience } from '../../core/audience.js'
 import type { Actor } from '../../core/actor.js'
-import { dayOf } from '../../core/time.js'
+import { dayOf, isoAt } from '../../core/time.js'
 
 export type XpServiceOptions = {
   xp: XpRepository
@@ -408,9 +408,7 @@ export function createXpService(options: XpServiceOptions) {
     async leaderboard(actor: Actor, period: LeaderboardPeriod, limit = 20): Promise<Leaderboard> {
       const date = new Date(now())
       const since =
-        period === 'month'
-          ? new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1)).toISOString()
-          : null
+        period === 'month' ? isoAt(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1)) : null
       const rows = await xp.ranking(actor.campusId, HELP_KINDS, since)
       const entries: LeaderboardEntry[] = []
 

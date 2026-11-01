@@ -32,6 +32,7 @@ import { domainError } from '../../core/errors.js'
 import { createRateLimit } from '../../core/rate-limit.js'
 import { parse } from '../../core/validation.js'
 import { matchStep, newSecret, otpauthUri } from './totp.js'
+import { isoAt } from '../../core/time.js'
 
 /** Lo que dura el panel abierto tras escribir el código. */
 export const ELEVATION_MS = 12 * 60 * 60_000
@@ -173,7 +174,7 @@ export function createSecondFactor(options: SecondFactorOptions) {
     await db.execute({
       sql: `UPDATE admin_second_factor SET used_step = ?,
               confirmed_at = COALESCE(confirmed_at, ?) WHERE login = ?`,
-      args: [step, new Date(now()).toISOString(), login],
+      args: [step, isoAt(now()), login],
     })
 
     return cookieFor(login, now() + ELEVATION_MS)
@@ -189,7 +190,7 @@ export function createSecondFactor(options: SecondFactorOptions) {
 
       return {
         enrolled: (await row(login))?.confirmed ?? false,
-        elevatedUntil: until === null ? null : new Date(until).toISOString(),
+        elevatedUntil: until === null ? null : isoAt(until),
       }
     },
 
@@ -209,7 +210,7 @@ export function createSecondFactor(options: SecondFactorOptions) {
       await db.execute({
         sql: `INSERT OR REPLACE INTO admin_second_factor (login, secret, confirmed_at, used_step, created_at)
               VALUES (?, ?, NULL, NULL, ?)`,
-        args: [login, seal(secret), new Date(now()).toISOString()],
+        args: [login, seal(secret), isoAt(now())],
       })
 
       return { uri: otpauthUri(ISSUER, login, secret) }

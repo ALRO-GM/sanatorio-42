@@ -14,6 +14,7 @@ import type { Db } from '../../core/db/database.js'
 import type { FortyTwoClient } from '../../integrations/forty-two/client.js'
 import type { ApiCursusMember } from '../../integrations/forty-two/types.js'
 import type { QuotaGate } from './quota.js'
+import { isoAt } from '../../core/time.js'
 
 /** Cada cuánto se repasa un campus: el grado y el fin cambian despacio. */
 const EVERY_MS = 24 * 60 * 60_000
@@ -62,7 +63,7 @@ export function createCoreCursus(options: CoreCursusOptions) {
   let running = false
 
   const save = async (campusId: number, items: readonly ApiCursusMember[]): Promise<void> => {
-    const at = new Date(now()).toISOString()
+    const at = isoAt(now())
     const rows = items.flatMap((item) => {
       const user = item.user
 
@@ -122,7 +123,7 @@ export function createCoreCursus(options: CoreCursusOptions) {
     await db.execute({
       sql: `INSERT INTO sync_state (key, value, updated_at) VALUES (?, ?, ?)
             ON CONFLICT (key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at`,
-      args: [cursusStateKey(campusId), JSON.stringify(state), new Date(now()).toISOString()],
+      args: [cursusStateKey(campusId), JSON.stringify(state), isoAt(now())],
     })
   }
 

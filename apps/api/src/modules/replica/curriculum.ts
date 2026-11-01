@@ -36,6 +36,7 @@ import { hourlyQuota } from './quota.js'
 import type { QuotaGate } from './quota.js'
 import { CHOICES, COMMON_CORE } from './common-core.js'
 import { learnedCircle } from './curriculum.rules.js'
+import { isoAt } from '../../core/time.js'
 
 type Track = 'classic' | 'next'
 
@@ -251,7 +252,7 @@ export function createCurriculum(options: CurriculumOptions) {
       {
         sql: `INSERT OR REPLACE INTO user_tracks (login, track, rank, ranks, fetched_at)
               VALUES (?, ?, ?, ?, ?)`,
-        args: [login, track, rank, JSON.stringify(dates), new Date(now()).toISOString()],
+        args: [login, track, rank, JSON.stringify(dates), isoAt(now())],
       },
       // Lo que votaba antes esta persona (si cambió de plan, en el otro) se rehace.
       { sql: 'DELETE FROM curriculum_votes WHERE login = ?', args: [login] },
@@ -319,7 +320,7 @@ export function createCurriculum(options: CurriculumOptions) {
 
       try {
         const sessions = await client.getProjectSessions(campusId)
-        const stamp = new Date(now()).toISOString()
+        const stamp = isoAt(now())
 
         await db.batch([
           ...sessions.flatMap((session) => {
@@ -399,13 +400,7 @@ export function createCurriculum(options: CurriculumOptions) {
           sql: `INSERT OR REPLACE INTO user_levels
                   (login, level, begin_at, blackholed_at, updated_at)
                 VALUES (?, ?, ?, ?, ?)`,
-          args: [
-            login,
-            learned.level ?? 0,
-            learned.startedAt,
-            learned.blackholedAt,
-            new Date(now()).toISOString(),
-          ],
+          args: [login, learned.level ?? 0, learned.startedAt, learned.blackholedAt, isoAt(now())],
         })
 
         return learned

@@ -648,7 +648,7 @@ export function createClickerService(options: ClickerServiceOptions) {
                           VALUES (?, ?, ?, ?, ?, ?, ?)`,
                       args: [
                         actor.login,
-                        new Date(leap.at * 1000).toISOString(),
+                        isoAt(leap.at * 1000),
                         leap.seconds,
                         leap.from,
                         leap.to,

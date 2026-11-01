@@ -109,5 +109,8 @@ export const isoAt = (ms: number): string => new Date(ms).toISOString()
 /** El día UTC de un instante, `AAAA-MM-DD`. */
 export const dayOf = (ms: number): string => isoAt(ms).slice(0, 10)
 
+/** El mes UTC de un instante, `AAAA-MM`. */
+export const monthOf = (ms: number): string => isoAt(ms).slice(0, 7)
+
 /** Principio del día UTC de un instante, en ISO. Para los topes diarios. */
 export const startOfDayIso = (at: number): string => `${dayOf(at)}T00:00:00.000Z`

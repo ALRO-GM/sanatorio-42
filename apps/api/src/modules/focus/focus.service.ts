@@ -247,9 +247,7 @@ export function createFocusService(
      */
     async focusedMinutes(login?: string): Promise<Map<string, number>> {
       const sessions =
-        login === undefined
-          ? await log.between(null, new Date(now() + 1).toISOString())
-          : await log.of(login)
+        login === undefined ? await log.between(null, isoAt(now() + 1)) : await log.of(login)
 
       return new Map(
         [...focusedByLogin(sessions, now())].map(([who, seconds]) => [

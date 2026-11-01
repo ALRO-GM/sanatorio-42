@@ -17,6 +17,7 @@ import type { AttemptRow, ExamPerson, OccurrenceRow } from './exams.rules.js'
 import { circleDurations, examPeople, examStat, kickoffsOf, selectPeople } from './exams.rules.js'
 import type { ExamsSync } from './exams.sync.js'
 import { createTtlCache } from '../../core/ttl-cache.js'
+import { isoAt } from '../../core/time.js'
 
 type ExamsServiceOptions = {
   exams: ExamsRepository
@@ -108,7 +109,7 @@ export function createExamsService({
               ? []
               : [
                   {
-                    begin: person.start === null ? null : new Date(person.start).toISOString(),
+                    begin: person.start === null ? null : isoAt(person.start),
                     ranks: person.ranks,
                   },
                 ],

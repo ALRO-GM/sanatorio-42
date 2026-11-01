@@ -24,6 +24,7 @@ import { parse } from '../../core/validation.js'
 import { activeSecondsSchema } from '../shellcourse/index.js'
 import type { CourseTimes } from '../shellcourse/index.js'
 import type { GateService } from './gates.js'
+import { isoAt } from '../../core/time.js'
 
 // Los mismos topes que la terminal: la API vuelve a ejecutar cada línea.
 const attemptSchema = z.object({
@@ -182,7 +183,7 @@ export function createGitCourseService(deps: {
           level.id,
           result.stars as Stars,
           result.commands,
-          new Date(now()).toISOString(),
+          isoAt(now()),
         )
         if (activeSeconds !== undefined) {
           await deps.times?.record({
@@ -193,7 +194,7 @@ export function createGitCourseService(deps: {
             estimateSeconds: estimateOfLevel(level),
             stars: result.stars,
             first: before.stars[level.id] === undefined,
-            at: new Date(now()).toISOString(),
+            at: isoAt(now()),
           })
         }
       }

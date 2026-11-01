@@ -16,6 +16,7 @@ import type { PersonalTable } from '../../core/db/personal-data.js'
 import { toText } from '../../core/db/rows.js'
 import { domainError } from '../../core/errors.js'
 import { parse } from '../../core/validation.js'
+import { isoAt } from '../../core/time.js'
 
 /**
  * La versión del texto que hay que aceptar. Se cambia (con la fecha) cuando
@@ -77,7 +78,7 @@ export function createLegalService(options: LegalServiceOptions) {
       await db.execute({
         sql: `INSERT OR IGNORE INTO legal_acceptances (login, version, accepted_at)
               VALUES (?, ?, ?)`,
-        args: [actor.login, version, new Date(now()).toISOString()],
+        args: [actor.login, version, isoAt(now())],
       })
 
       return this.status(actor)
@@ -123,7 +124,7 @@ export function createLegalService(options: LegalServiceOptions) {
     async export(actor: Actor, userId: number | null): Promise<PersonalExport> {
       return {
         login: actor.login,
-        exportedAt: new Date(now()).toISOString(),
+        exportedAt: isoAt(now()),
         legalVersion: LEGAL_VERSION,
         tables: await personalData(db, options.personal(), { login: actor.login, userId }),
       }

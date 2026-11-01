@@ -384,10 +384,7 @@ export function createDoubtsService(options: DoubtsServiceOptions) {
       const [info, corrected, alive] = await Promise.all([
         replica.projectInfo([...circles.keys()]),
         options.corrections?.byProject(actor.login) ?? new Map<number, number>(),
-        options.corrections?.since(
-          actor.campusId,
-          new Date(now() - RETIRED_AFTER_DAYS * DAY).toISOString(),
-        ) ?? null,
+        options.corrections?.since(actor.campusId, isoAt(now() - RETIRED_AFTER_DAYS * DAY)) ?? null,
       ])
       const byCircle = new Map<number, GraphProject[]>()
 

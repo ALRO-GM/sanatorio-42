@@ -63,6 +63,7 @@ const numberOf = (part: string | undefined): number =>
   /^\d{1,12}$/.test(part ?? '') ? Number(part) : -1
 import type { TherapyService } from '../therapy/index.js'
 import { given } from '../../core/options.js'
+import { isoAt } from '../../core/time.js'
 
 export type MeetServiceOptions = {
   db: Db
@@ -228,8 +229,8 @@ export function createMeetService(options: MeetServiceOptions) {
       const { events } = await calendar.between(
         actor,
         userId,
-        new Date(now() - LOOK_BACK_MS).toISOString(),
-        new Date(now() + LOOK_AHEAD_MS).toISOString(),
+        isoAt(now() - LOOK_BACK_MS),
+        isoAt(now() + LOOK_AHEAD_MS),
       )
 
       // `joined: false` es un evento que se ve pero al que no se ha apuntado.
@@ -416,7 +417,7 @@ export function createMeetService(options: MeetServiceOptions) {
         await db.execute({
           sql: `SELECT COUNT(*) AS total, SUM(event_id = ?) AS here FROM event_messages
                 WHERE login = ? AND created_at > ?`,
-          args: [message.id, actor.login, new Date(now() - 60_000).toISOString()],
+          args: [message.id, actor.login, isoAt(now() - 60_000)],
         })
       ).rows[0]
 
@@ -437,7 +438,7 @@ export function createMeetService(options: MeetServiceOptions) {
           message.kind === 'late' ? (message.minutes ?? null) : null,
           message.kind === 'late' || message.kind === 'absent' ? (message.reason ?? null) : null,
           message.body === undefined || message.body === '' ? null : message.body,
-          new Date(now()).toISOString(),
+          isoAt(now()),
         ],
       })
 
@@ -505,8 +506,8 @@ export function createMeetService(options: MeetServiceOptions) {
       const { events } = await calendar.between(
         actor,
         userId,
-        new Date(at - ALERTS_BACK_MS).toISOString(),
-        new Date(at + ALERTS_AHEAD_MS).toISOString(),
+        isoAt(at - ALERTS_BACK_MS),
+        isoAt(at + ALERTS_AHEAD_MS),
       )
       const mine = events.filter((event) => event.joined !== false && event.kind !== 'event_open')
       const replied = new Set<string>()
@@ -540,18 +541,12 @@ export function createMeetService(options: MeetServiceOptions) {
                 {
                   sql: `INSERT INTO event_messages (event_id, login, kind, reason, created_at)
                         VALUES (?, ?, 'absent', 'missed', ?)`,
-                  args: [event.id, actor.login, new Date(at).toISOString()],
+                  args: [event.id, actor.login, isoAt(at)],
                 },
                 {
                   sql: `INSERT OR IGNORE INTO event_alerts (event_id, login, event, starts_at, missed_at)
                         VALUES (?, ?, ?, ?, ?)`,
-                  args: [
-                    event.id,
-                    actor.login,
-                    JSON.stringify(event),
-                    event.start,
-                    new Date(at).toISOString(),
-                  ],
+                  args: [event.id, actor.login, JSON.stringify(event), event.start, isoAt(at)],
                 },
               ],
               'write',
@@ -591,7 +586,7 @@ export function createMeetService(options: MeetServiceOptions) {
       await db.execute({
         sql: `UPDATE event_alerts SET acked_at = ? WHERE event_id = ? AND login = ?
               AND acked_at IS NULL`,
-        args: [new Date(now()).toISOString(), parse(eventId, id), actor.login],
+        args: [isoAt(now()), parse(eventId, id), actor.login],
       })
     },
 

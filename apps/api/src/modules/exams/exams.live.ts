@@ -34,6 +34,7 @@ import {
   expectedExamSlug,
   liveRefreshPlan,
 } from './exams.rules.js'
+import { isoAt } from '../../core/time.js'
 
 /** Hasta cuánto antes se enseña el siguiente examen. */
 const AHEAD_MS = 24 * 3_600_000
@@ -119,8 +120,8 @@ export function createExamsLive(options: ExamsLiveOptions) {
     // Un piscinero, los exámenes de la piscina; un estudiante, los suyos.
     const events = await agenda.campusEvents(
       campusId,
-      new Date(at - LAST_MS).toISOString(),
-      new Date(at + AHEAD_MS).toISOString(),
+      isoAt(at - LAST_MS),
+      isoAt(at + AHEAD_MS),
       pool ? 'pool' : 'student',
     )
     const examEvents = events.filter((event) => event.source === 'exam')
@@ -264,11 +265,7 @@ export function createExamsLive(options: ExamsLiveOptions) {
       curriculum.placesOf(logins),
       replica.imagesOf(logins),
       // 42 apunta el cierre de un intento algo después de la hora de fin.
-      latestAttempts(
-        logins,
-        exam.beginAt,
-        new Date(Date.parse(exam.endAt) + AFTER_END_MS).toISOString(),
-      ),
+      latestAttempts(logins, exam.beginAt, isoAt(Date.parse(exam.endAt) + AFTER_END_MS)),
       entered ? exams.sessionRows(campusId, exam.beginAt, logins, pool) : Promise.resolve([]),
       exams.exams(pool),
       exams.bestClosedMarks(logins, exam.beginAt),
@@ -343,7 +340,7 @@ export function createExamsLive(options: ExamsLiveOptions) {
         endAt: exam.endAt,
       },
       groups: await groupsOf(campusId, exam, state, true, pool),
-      updatedAt: state === null ? null : new Date(state.at).toISOString(),
+      updatedAt: state === null ? null : isoAt(state.at),
     }
   }
 
@@ -389,11 +386,11 @@ export function createExamsLive(options: ExamsLiveOptions) {
       running,
       groups,
       last: lastResults,
-      updatedAt: state === null ? null : new Date(state.at).toISOString(),
+      updatedAt: state === null ? null : isoAt(state.at),
       ...(running
         ? {
-            nextRefreshAt: new Date(plan.nextAt).toISOString(),
-            refreshableAt: new Date(plan.manualAt).toISOString(),
+            nextRefreshAt: isoAt(plan.nextAt),
+            refreshableAt: isoAt(plan.manualAt),
           }
         : noRefresh),
     }
@@ -405,8 +402,8 @@ export function createExamsLive(options: ExamsLiveOptions) {
       const at = now()
       const events = await agenda.campusEvents(
         actor.campusId,
-        new Date(at - BEHIND_MS).toISOString(),
-        new Date(at + 60_000).toISOString(),
+        isoAt(at - BEHIND_MS),
+        isoAt(at + 60_000),
         actor.pool === true ? 'pool' : 'student',
       )
 
