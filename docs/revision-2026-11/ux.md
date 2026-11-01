@@ -79,24 +79,24 @@ flujos) y `exams.test.tsx` (el desglose, abierto en datos y plegable).
 
 ## Propuesto, sin hacer
 
-Por riesgo, por tocar zonas de otros o por necesitar una decisión de producto:
+Por riesgo, por tocar zonas de otros o por necesitar una decisión de producto
+(las propuestas 1-4 y 7, aprobadas por Alberto, están en «Hecho después»):
 
-1. **Peer to peer en el móvil: la lista antes que el mapa.** En 390 px el mapa
-   llena la pantalla y la gente sale después. Bastaría con un `order` en CSS
-   para ≤ 640 px, pero cambia la lectura de la página: mejor decidirlo con
-   Alberto.
-2. **On-call: franjas del día recortadas** a las horas con algo (o desde ahora
-   hasta la noche). El editor pinta las 24 horas y es lo que más ocupa.
-3. **Bienvenida más corta**: diez pasos son muchos; se podrían juntar
-   Proyectos y Sprints, y Calendario con los ajustes (seis o siete pasos).
-   Cambia textos en cinco lenguas y el test de la bienvenida.
-4. **Recordar el proyecto elegido en Peer to peer** al ir y volver de otra
-   sección (ahora se vuelve a la lista), quizá con `#/consulta/<id>`.
 5. **Perfil en el simplificado**: un acceso directo «¿Atascado? Busca quién te
    ayuda» bajo el nivel. Hoy hay un clic (Ayuda) y funciona; solo si las
    pruebas con gente dicen que no se encuentra.
 6. **Modo de datos en el Avance y los Asientos**: abrir de fábrica «Ver como
    tabla». Son vistas alternativas más que desgloses; no se tocó.
-7. **Cabecera de bloque** («▾ Nivel y títulos», pequeña y a la derecha): se
-   confunde con un pie de la tarjeta anterior. Es de `shared/layout`
-   (de otro agente en esta tanda).
+
+## Hecho después (aprobado por Alberto)
+
+| Propuesta | Cambio |
+| --- | --- |
+| 1. Peer to peer en el móvil | En ≤ 640 px la lista de gente va antes que el mapa; en escritorio, igual que antes (`PeerList.tsx`, `useMediaQuery`) |
+| 2. On-call recogido | El editor enseña las cuatro horas desde ahora y la hora entera de cada cosa más tarde (franja, reserva, corrección); entre tramos, una raya. «Ver el resto del día» / «Ver menos horas» (`shortStarts` en `features/help/time.ts`, `DayEditor.tsx`, `help.wholeDay`, `help.shortDay`) |
+| 3. Bienvenida corta | De diez pasos a seis (simplificado) o siete: el modo se elige en el saludo, Proyectos va con Sprints y Pizarras, y el calendario con los ajustes al final (`Welcome.tsx`, textos `welcome.*` en cinco lenguas) |
+| 4. Recordar el proyecto | `#/consulta/<id>` (`waitingHref`): al elegir se escribe sin otra entrada en el historial, al volver de otra sección se abre el mismo, y un enlace lo abre si es de tu lista; «Volver» lo olvida (`SectionView.tsx`, `ProjectSelect.tsx`, `Clinic.tsx`) |
+| 7. Cabecera de bloque | Abierta: a la izquierda, en versalitas, con aire sobre ella; plegada, la barra de siempre (`styles/layout.css`) |
+
+Tests: `apps/web/tests/ui/ux-propuestas.test.tsx`, `guard-slots.test.tsx`,
+`tests/help-slots.test.ts` y `tests/links.test.ts`.

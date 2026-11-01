@@ -6,7 +6,13 @@ import { describe, expect, it } from 'vitest'
 
 import type { Booking } from '@sanatorio/contracts'
 
-import { bookedSlotsOf, canToggle } from '../src/features/help/time'
+import {
+  bookedSlotsOf,
+  canToggle,
+  DAY_END,
+  SHORT_SPAN,
+  shortStarts,
+} from '../src/features/help/time'
 
 const booking = (overrides: Partial<Booking>): Booking => ({
   id: 1,
@@ -66,5 +72,32 @@ describe('guardia: medias horas', () => {
       }),
     ).toEqual(new Set([19 * 60]))
     expect(bookedSlotsOf({ day, bookings: [] }).size).toBe(0)
+  })
+})
+
+describe('guardia: el editor recogido', () => {
+  const h = (hours: number, minutes = 0): number => hours * 60 + minutes
+  const range = (from: number, to: number): number[] =>
+    Array.from({ length: (to - from) / 30 }, (_, index) => from + index * 30)
+
+  it('sin nada marcado, de ahora a cuatro horas más', () => {
+    expect(shortStarts(h(11), [])).toEqual(range(h(11), h(11) + SHORT_SPAN))
+  })
+
+  it('lo que tengas más tarde sale con su hora entera; lo vacío de en medio, no', () => {
+    expect(shortStarts(h(11), [h(18, 30)])).toEqual([...range(h(11), h(15)), h(18), h(18, 30)])
+    // Lo de antes de ahora o dentro de las cuatro horas no añade nada.
+    expect(shortStarts(h(11), [h(9), h(12, 30)])).toEqual(range(h(11), h(15)))
+  })
+
+  it('nunca pasa de medianoche', () => {
+    expect(shortStarts(h(22), [])).toEqual(range(h(22), DAY_END))
+    expect(shortStarts(h(11), [h(23, 30)]).at(-1)).toBe(h(23, 30))
+  })
+
+  it('con muchas medias horas repetidas, cada una sale una vez y en orden', () => {
+    const many = Array.from({ length: 10_000 }, (_, index) => h(8) + (index % 32) * 30)
+
+    expect(shortStarts(h(8), many)).toEqual(range(h(8), DAY_END))
   })
 })

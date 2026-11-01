@@ -42,7 +42,7 @@ Fuera de las pestañas, a propósito:
 ## Modos de la interfaz
 
 Se eligen en Personalizar (pestaña Ajustes, también desde «Más ajustes» en el
-pie) y en el segundo paso de la bienvenida (`shared/detail.tsx`). Cada elemento
+pie) y en el primer paso de la bienvenida (`shared/detail.tsx`). Cada elemento
 dice desde qué modo sale (`from`). Revisión de la coherencia entre modos y de
 los flujos: `docs/revision-2026-11/ux.md`.
 
@@ -73,6 +73,9 @@ de datos.
 | Expediente | Tu red de correcciones, logros y reacciones, clasificación | N | Es reconocimiento, no utilidad |
 | Expediente | En tu red de correcciones: la endogamia y con quién te cruzas más | D | En la Red son del modo de datos; aquí igual (2026-11) |
 | Guardia | Preevaluaciones, franjas de hoy, reservas | S | Es la guardia |
+| Guardia | Franjas de hoy recogidas: las cuatro horas desde ahora y la hora de cada cosa que tengas más tarde (franja, reserva, corrección), con una raya donde se saltan horas vacías; «Ver el resto del día» las abre todas (`shortStarts` en `features/help/time.ts`) | S | Las 24 horas eran lo que más ocupaba la página (2026-11) |
+| Peer to peer | En el móvil (≤ 640 px), la lista de gente antes que el mapa (`PeerList.tsx`) | S | En 390 px el mapa llenaba la pantalla y la gente quedaba debajo (2026-11) |
+| Peer to peer | El proyecto elegido va en la dirección (`#/consulta/<id>`, `waitingHref`) y se recuerda al ir y volver de otra sección; «Volver» lo olvida | S | Quien se va a apuntarse a un sprint vuelve a quién le ayuda, no a la lista (2026-11) |
 | Guardia | Personas bloqueadas | N | Uso raro |
 | Guardia | Aviso arriba, «Tienes N reservas esperando tu respuesta», con «Verlas», que baja a las reservas | S | Lo que espera respuesta (valorar, aceptar) quedaba debajo de las franjas del día (2026-11) |
 | Sala de espera | Proyectos, quién ayuda, mapa de dónde se sienta, «solo de guardia», «a quien puedes pedir» | S | Es la sala de espera |
@@ -135,7 +138,7 @@ de datos.
 | Exámenes | Filtros de plan (C o Python), exámenes (C, Nexus o los dos) y kickoffs; un rango por fila con C y Nexus juntos (#81) | N | Es lo que se viene a mirar |
 | Exámenes | Cada intento (nota mediana, aprobados, personas); en qué intento se aprueba, los 3 primeros y el resto al desplegar | D | Detalle (2026-10-25: sin tabla de kickoffs ni black hole, que no eran de fiar). Desde el 2026-11, en el modo de datos los dos desgloses salen abiertos |
 | Pie | Idioma y «Más ajustes» (abre Personalizar: modo, tema, texto, daltonismo, zen) | S | Accesibilidad |
-| Bienvenida | Diez pasos; el de la Red y los clústeres, solo si el modo elegido en el segundo paso los enseña | S | No presentar lo que no va a salir (2026-11); los textos dicen que el modo y el tema están en «Más ajustes», no sueltos en el pie |
+| Bienvenida | Seis pasos (siete con la Red y los clústeres, que salen solo si el modo elegido en el primero los enseña): saludo con el modo, perfil, Peer to peer, disponible, Proyectos con Sprints y Pizarras, y el calendario con los ajustes | S | No presentar lo que no va a salir; de diez pasos a seis o siete (2026-11); los textos dicen que el modo y el tema están en «Más ajustes», no sueltos en el pie |
 | Pie | Campus | N | Casi nadie cambia de campus |
 | Pie | «Puestos actualizados hace N min» | D | Dato técnico |
 
@@ -198,7 +201,9 @@ detrás cambia a la vez; «Listo» solo cierra.
 - **Con el teclado**: en el asa, Espacio o Intro lo cogen, las flechas lo
   mueven, Espacio o Intro lo sueltan y Escape lo devuelve a su sitio sin cerrar
   la ventana. Cada paso se anuncia en una región viva.
-- **Plegar**: la flecha de cada tarjeta de bloque.
+- **Plegar**: la flecha de cada tarjeta de bloque. Abierto, su nombre es el
+  título del bloque (a la izquierda, en versalitas y separado de la tarjeta de
+  arriba, para que no parezca su pie); plegado, una barra (`styles/layout.css`).
 - **A la derecha, las opciones**, en tres pestañas:
   - *Estilo*: una tarjeta por estilo con su muestra (cabecera, tarjeta y botón
     con sus colores, letra y esquinas); las paletas del elegido, como muestras

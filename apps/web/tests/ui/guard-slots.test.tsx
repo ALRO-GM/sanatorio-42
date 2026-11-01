@@ -35,6 +35,9 @@ describe('guardia: las medias horas como un día del calendario', () => {
 
     if (pending !== null) await user.click(pending)
 
+    // De fábrica sale recogido a unas horas desde ahora: se abre el día entero.
+    await user.click(screen.getByRole('button', { name: text('help.wholeDay') }))
+
     const slot = (time: string): HTMLButtonElement =>
       within(grid).getByRole('button', { name: new RegExp(`^${time}–`) })
 

@@ -17,20 +17,19 @@ const WAIT_MS = 1500
 /**
  * Las diapositivas: de qué va cada parte y a dónde lleva. `from`: desde qué
  * modo de la interfaz sale (como las pestañas): quien elige el simplificado en
- * el segundo paso no ve después las de lo que no le va a salir.
+ * el primer paso no ve después las de lo que no le va a salir. Eran diez; se
+ * juntaron el saludo con el modo, Proyectos con Sprints y el calendario con los
+ * ajustes (revisión de la UX del 2026-11): seis en el simplificado, siete si no.
  */
 const SLIDES: readonly { id: string; icon: IconName; go?: Section; from?: Detail }[] = [
+  // Con el saludo, lo primero que se elige: cuánto enseña la web.
   { id: 'hello', icon: 'pregunta' },
-  // Lo primero que se elige: cuánto enseña la web. Se cambia luego en el pie.
-  { id: 'mode', icon: 'cifras' },
   { id: 'record', icon: 'expediente', go: 'expediente' },
   { id: 'waiting', icon: 'consulta', go: 'consulta' },
   { id: 'duty', icon: 'guardia', go: 'guardia' },
   { id: 'board', icon: 'tablon', go: 'tablon' },
-  { id: 'groups', icon: 'terapia', go: 'terapia' },
-  { id: 'agenda', icon: 'calendario', go: 'calendario' },
   { id: 'net', icon: 'red', go: 'red', from: 'normal' },
-  { id: 'comfort', icon: 'ajustes' },
+  { id: 'agenda', icon: 'calendario', go: 'calendario' },
 ]
 
 function welcomeSeen(): boolean {
@@ -68,7 +67,7 @@ export function Welcome({ open, onGo, onClose }: WelcomeProps) {
   const [first, setFirst] = useState(() => !welcomeSeen())
   const showing = open || first
   const detail = useDetail()
-  // El modo se elige en el segundo paso: las que salen después ya lo siguen.
+  // El modo se elige en el primer paso: las que salen después ya lo siguen.
   const slides = SLIDES.filter((one) => shows(detail, one.from ?? 'simple'))
 
   useEffect(() => {
@@ -130,7 +129,12 @@ export function Welcome({ open, onGo, onClose }: WelcomeProps) {
       <span className="eyebrow">{t('welcome.step', { n: step + 1, total: slides.length })}</span>
       <h3>{t(`welcome.${slide.id}.title`)}</h3>
       <p>{t(`welcome.${slide.id}.body`)}</p>
-      {slide.id === 'mode' && <DetailCards />}
+      {slide.id === 'hello' && (
+        <>
+          <p>{t('welcome.mode.body')}</p>
+          <DetailCards />
+        </>
+      )}
       {slide.go !== undefined && (
         <button
           type="button"
