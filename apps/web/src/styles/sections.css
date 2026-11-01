@@ -252,6 +252,7 @@ input[type='checkbox'] {
   font-weight: 600;
   font-size: 0.9rem;
 }
+.guard-pending,
 .group-therapy {
   display: flex;
   align-items: center;
@@ -259,6 +260,7 @@ input[type='checkbox'] {
   gap: 1rem;
   flex-wrap: wrap;
 }
+.guard-pending p,
 .group-therapy p {
   margin: 0;
 }

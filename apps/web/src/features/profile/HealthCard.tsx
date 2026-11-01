@@ -5,6 +5,7 @@ import type { Health, PaceRef } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
+import { shows, useDetail } from '../../shared/detail'
 import { localeOf, useI18n } from '../../shared/i18n'
 import { INTRA_HOME, progressHref } from '../../shared/links'
 import { daysBetween, originOf, paceOn, PACES, SLOWEST, stepsFor } from '../../shared/pace'
@@ -43,6 +44,7 @@ type HealthCardProps = {
 
 export function HealthCard({ health }: HealthCardProps) {
   const { t } = useI18n()
+  const detail = useDetail()
   const own = useAsync(
     () => (health === undefined ? api.getHealth() : Promise.resolve(health)),
     [health],
@@ -54,8 +56,10 @@ export function HealthCard({ health }: HealthCardProps) {
       <div className="card-head">
         <span className="eyebrow">{t('health.title')}</span>
         {/* Tu estado, comparado: en el Avance, con tu plan, quien sigue y quien se
-            tragó el black hole de tu campus, los paces y tu línea. */}
-        {health === undefined && data !== undefined && (
+            tragó el black hole de tu campus, los paces y tu línea. El Avance sale
+            desde el modo normal: en el simplificado, el enlace llevaría a una
+            pestaña que no se ve. */}
+        {health === undefined && data !== undefined && shows(detail, 'normal') && (
           <a
             className="link"
             href={progressHref({

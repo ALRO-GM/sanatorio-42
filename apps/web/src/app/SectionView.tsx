@@ -113,17 +113,21 @@ export function SectionView({
   const { pool } = usePoolAccess()
   // El proyecto elegido en la sala de espera.
   const [project, setProject] = useState<ProjectSummary | null>(null)
+  // Con un solo proyecto en curso no hay nada que elegir: se abre directamente.
+  // Al volver a la lista, ya no (si no, «Volver» llevaría otra vez al mismo).
+  const [autoPick, setAutoPick] = useState(true)
 
   return (
     <Suspense fallback={<p className="estado">{t('app.loadingSection')}</p>}>
       {section === 'consulta' &&
         (project === null ? (
-          <ProjectSelect onSelect={setProject} />
+          <ProjectSelect onSelect={setProject} autoPick={autoPick} />
         ) : (
           <>
             <button
               className="back-btn"
               onClick={() => {
+                setAutoPick(false)
                 setProject(null)
               }}
             >

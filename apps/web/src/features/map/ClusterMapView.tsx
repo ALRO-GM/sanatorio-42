@@ -3,6 +3,7 @@ import type { CSSProperties, FocusEvent, MouseEvent, RefObject } from 'react'
 
 import type { ClusterMap, MapCluster, MapSeat, SeatReservation } from '@sanatorio/contracts'
 
+import { shows, useDetail } from '../../shared/detail'
 import { localeOf, useI18n } from '../../shared/i18n'
 import type { Translate } from '../../shared/i18n'
 import { Icon } from '../../shared/ui/Icon'
@@ -444,9 +445,13 @@ export function ClusterMapView({
   // Al elegir puestos el plano se ve de fábrica: sin giros ni resaltados. El
   // tamaño sí es el que cada cual haya elegido.
   const tools = onPick === undefined
+  // Resaltar y girar el plano es afinar: en el simplificado, el plano tal cual
+  // (en Peer to peer, lo que importa es la lista de quién ayuda).
+  const detail = useDetail()
+  const looks = tools && shows(detail, 'normal')
   const shown = useMemo<MapLook>(
-    () => (tools ? look : { ...DEFAULT_LOOK, fit: look.fit }),
-    [tools, look],
+    () => (looks ? look : { ...DEFAULT_LOOK, fit: look.fit }),
+    [looks, look],
   )
 
   // Lo último que se ha pintado, para que los manejadores de la cuadrícula
@@ -586,9 +591,9 @@ export function ClusterMapView({
         }}
       />
 
-      {(tools || fit.overflows) && (
+      {(looks || fit.overflows) && (
         <div className="map-bar">
-          {tools && (
+          {looks && (
             <div className="map-tools" role="group" aria-label={t('map.look')}>
               <span className="map-tools-label">{t('map.highlight')}</span>
               {MATES.map((mate) => {

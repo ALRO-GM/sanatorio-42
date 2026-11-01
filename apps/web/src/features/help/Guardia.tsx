@@ -19,7 +19,7 @@ import { PreReviewToggle } from './PreReviewToggle'
  * te piden y las que has pedido) y a quién no quieres ayudar.
  */
 export function Guardia() {
-  const { t, tree } = useI18n()
+  const { t, tn, tree } = useI18n()
   // La frase de ánimo se elige al entrar: no cambia mientras se marcan franjas.
   const [pick] = useState(() => Math.random())
   const { data, error, loading, reload, setData } = useAsync(() => api.getHelpDay(), [])
@@ -55,6 +55,9 @@ export function Guardia() {
   const bookings = [...data.bookings].sort(
     (a, b) => urgency(a) - urgency(b) || a.start.localeCompare(b.start),
   )
+  // Lo que espera tu respuesta (valorar o aceptar) va debajo de las franjas del
+  // día, que son largas: se avisa arriba, con un salto hasta las reservas.
+  const waiting = bookings.filter((booking) => urgency(booking) < 2).length
 
   return (
     <section>
@@ -65,6 +68,22 @@ export function Guardia() {
         </InfoTip>
       </h2>
       <p className="cheer">{cheerFor(tree, data.windows.length > 0, pick)}</p>
+      {waiting > 0 && (
+        <div className="guard-pending" role="status">
+          <p>{tn('help.waiting', waiting)}</p>
+          <button
+            type="button"
+            className="pill active"
+            onClick={() => {
+              document
+                .querySelector('[data-feedback="guardia.bookings"]')
+                ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            }}
+          >
+            {t('help.waitingGo')}
+          </button>
+        </div>
+      )}
 
       <Blocks
         page="guardia"

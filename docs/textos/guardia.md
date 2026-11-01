@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/guardia.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-75 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
+78 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera | Francés |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -18,6 +18,9 @@ Generado desde `apps/web/src/shared/i18n/textos/guardia.csv` con
 | `help.save` | Botón para guardar tus medias horas | features/help/DayEditor, features/help/GuardTour | Guardar mi on-call | Save my on-call | Desa el meu on-call | Gorde nire on-call-a | Enregistrer mon on-call |
 | `help.saved` | Confirmación de guardado | features/help/DayEditor, features/help/GuardTour | Guardado. | Saved. | Desat. | Gordeta. | Enregistré. |
 | `help.noBookings` | No hay reservas hoy | features/help/Guardia | Todavía no hay reservas hoy. | No bookings yet today. | Encara no hi ha reserves avui. | Oraindik ez dago erreserbarik gaur. | Aucune réservation aujourd'hui pour l'instant. |
+| `help.waiting.one` | Aviso arriba del on-call: una reserva espera que la valores o la aceptes | features/help/Guardia | Tienes 1 reserva esperando tu respuesta. | You have 1 booking waiting for your answer. | Tens 1 reserva esperant la teva resposta. | Erreserba 1 zure erantzunaren zain dago. | 1 réservation attend ta réponse. |
+| `help.waiting.many` | Aviso arriba del on-call: varias reservas esperan que las valores o las aceptes | features/help/Guardia | Tienes {n} reservas esperando tu respuesta. | You have {n} bookings waiting for your answer. | Tens {n} reserves esperant la teva resposta. | {n} erreserba zure erantzunaren zain daude. | Réservations qui attendent ta réponse : {n}. |
+| `help.waitingGo` | Botón del aviso de reservas pendientes: baja hasta las reservas | features/help/Guardia | Verlas | See them | Veure-les | Ikusi | Les voir |
 | `help.blocked` | Lista de personas a las que no quieres ayudar | features/help/Guardia | Personas a las que no ayudas | People you do not help | Persones a qui no ajudes | Laguntzen ez diezun pertsonak | Personnes que tu n'aides pas |
 | `help.blockedHint` | Qué pasa con las personas bloqueadas | features/help/Guardia | No ven tus franjas ni pueden reservarte. No se les avisa. | They cannot see your slots or book you. They are not told. | No veuen les teves franges ni et poden reservar. No se'ls avisa. | Ez dituzte zure tarteak ikusten, eta ezin zaituzte erreserbatu. Ez zaie abisatzen. | Elles ne voient pas tes créneaux et ne peuvent pas te réserver. Elles n'en sont pas averties. |
 | `help.unblock` | Botón para desbloquear a alguien | features/help/Guardia | Volver a ayudar | Help again | Torna a ajudar | Lagundu berriro | Aider à nouveau |

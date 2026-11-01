@@ -306,6 +306,7 @@ button.link {
   background: var(--surface-2);
   color: var(--ok);
 }
+.guard-pending,
 .group-therapy {
   background: var(--accent-soft);
   border-radius: 12px;
