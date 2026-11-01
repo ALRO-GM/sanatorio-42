@@ -12,6 +12,8 @@ type SectionTitleProps = {
    * «Tus proyectos», pero su demostración es la de la sección entera.
    */
   tipTitle?: string
+  /** `id` del encabezado, para que la sección lo nombre con `aria-labelledby`. */
+  id?: string
 }
 
 /**
@@ -20,9 +22,9 @@ type SectionTitleProps = {
  * título que abre la demostración. Antes cada pantalla escribía
  * `<h2>{t(k)}<InfoTip title={t(k)}>…</InfoTip></h2>` a mano.
  */
-export function SectionTitle({ title, children, tipTitle }: SectionTitleProps) {
+export function SectionTitle({ title, children, tipTitle, id }: SectionTitleProps) {
   return (
-    <h2>
+    <h2 id={id}>
       {title}
       <InfoTip title={tipTitle ?? title}>{children}</InfoTip>
     </h2>

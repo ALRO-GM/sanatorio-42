@@ -1,4 +1,5 @@
 import { useI18n } from '../../shared/i18n'
+import { initialOf } from '../../shared/initial'
 import { useFormat } from '../../shared/i18n/useFormat'
 import { click, cut, defineTour, Tour } from '../../shared/tour/Tour'
 
@@ -105,7 +106,7 @@ export function HelpStatsTour() {
                 <span key={row.login} className="tour-item">
                   <strong>{index + 1}</strong>
                   <span className="tour-avatar" style={{ ['--hue' as string]: row.hue }}>
-                    {row.login.charAt(0).toUpperCase()}
+                    {initialOf(row.login)}
                   </span>
                   <span data-tour={index === 0 ? 'login' : undefined}>{row.login}</span>
                   <span className="tour-chip tour-end">

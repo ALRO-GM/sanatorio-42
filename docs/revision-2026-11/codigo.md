@@ -185,9 +185,9 @@ Lo que quedó pendiente arriba se volvió a mirar el 2026-11-01 sobre el código
 con la revisión de UX ya unida (`ux.md`): ninguno de los cambios de UX lo
 había resuelto, así que todos seguían. Hecho en la rama del agente sin cambiar
 el aspecto ni lo que se ve (los recorridos de `tests/ui/` pasan sin tocarlos).
-Fuera quedan, a propósito, `features/stats` (clasificaciones, Avance), el mapa
-(`ClusterMapView`, lo de piscineros en el mapa) y la API: otra persona los
-cambia a la vez.
+Primero quedaron fuera `features/stats` (clasificaciones, Avance) y el mapa
+(`ClusterMapView`), que otra persona cambiaba a la vez; en una segunda tanda,
+ya libres, se hizo también lo suyo (abajo, «Segunda tanda»). La API no se tocó.
 
 - **Carga y error a mano tras `useAsync`: hecho en 22 sitios.** Pasan a
   `<Async>` los que hacían exactamente lo mismo (un «Cargando…» con `.estado` y
@@ -208,22 +208,21 @@ cambia a la vez.
     error de cambiar topes), la lista de salas de `NotGamesPage`, `ReviewTab`
     (su lista se pinta siempre);
   - `NetworkCard`: lo que pinta depende de `mine`, no de los datos;
-  - de otros: `HelpStatsPage` y `ProgressRanking` (`stats`), `ClustersPage`,
-    `ProjectMap` y `SeatPicker` (mapa).
+  - de otros: `ProjectMap` y `SeatPicker` (mapa, con otro agente);
+    `HelpStatsPage`, `ProgressRanking` y `ClustersPage`, en la segunda tanda.
 - **Título de sección: hecho.** `shared/ui/SectionTitle` (`title`, la demo
   dentro y `tipTitle` si se llama distinto, como en Peer to peer). Lo usan 13
   pantallas: Exámenes, Uso (`UsageHeatmap`), Pizarras, Scrum, Proyectos,
   Not-games, On-call, Sprints, Perfil, Asientos, Red, Calendario y Peer to
-  peer. Sin `level`: todas son `h2`. Quedan el Avance, el Avance de la piscina
-  y las estadísticas de ayuda (`stats`) y Clústeres (mapa). No aplica a los
+  peer. Sin `level`: todas son `h2`. El Avance, el Avance de la piscina, las
+  estadísticas de ayuda y Clústeres, en la segunda tanda. No aplica a los
   títulos con otra forma: el `InfoTip` en una `eyebrow` (`AskedCard`,
   `LeaderboardCard`), en el título de una ventana (`Mailbox`, `Inbox`), tras
   la frase de los cursos, el del ajedrez y el de «bloqueado» de On-call.
-- **Gráfica con panel de opciones: hecho, a medias.** `shared/ui/ChartWithRail`
+- **Gráfica con panel de opciones: hecho.** `shared/ui/ChartWithRail`
   (`chart`, `railLabel`, las opciones dentro y `framed={false}` cuando ya va en
-  una tarjeta); la usa el uso de la API. El Avance y el Avance de la piscina son
-  de `stats` y se quedan con su `div.progress-layout` hasta que acabe quien los
-  cambia: pasarlos es cambiar seis líneas en cada uno. La Red y los Asientos
+  una tarjeta); la usa el uso de la API y, desde la segunda tanda, el Avance y
+  el Avance de la piscina. La Red y los Asientos
   tienen otra rejilla (`net-layout`, con el escenario a pantalla) y no aplican.
 - **Sondeo y salas: hecho.** La lista de salas de `GroupRoom.tsx` deja su
   `setInterval` con `document.hidden` por `usePolling` (que además se para con
@@ -237,7 +236,8 @@ cambia a la vez.
   No aplica en `Mailbox` ni en `EventRoom`: mezclan un botón que hace algo
   (escribir a admins, «Voy») con otro que se enciende, y `PillGroup` les
   pondría `aria-pressed` a los dos. Tampoco en `HolyGraph`: sus pastillas
-  despliegan series (`aria-expanded`), no eligen. `ClusterMapView`, de otros.
+  despliegan series (`aria-expanded`), no eligen. `ClusterMapView`, en la
+  segunda tanda.
 - **Estilos de fecha: hecho.** `useFormat` gana `dayMonthYear`, `dayMonthYY`,
   `weekdayDayMonth` y `longDate` en `date`, y `dateTime` acepta estilo
   (`medium`, `long`, `numeric`, `dayMonth`, `weekday`, `weekdayYear`). Pasan a
@@ -249,7 +249,7 @@ cambia a la vez.
   `CapitalChart` (Code Clicker): sus opciones dependen del tramo que se mira.
 - **Inicial de un login: hecho.** `initialOf` (`shared/initial.ts`) en
   `Avatar`, `SeatFace` y las demos de Scrum, Exámenes, Not-games y Asientos.
-  Quedan `ClusterMapView` y la demo de las estadísticas de ayuda (de otros).
+  `ClusterMapView` y la demo de las estadísticas de ayuda, en la segunda tanda.
 - **`useNow` propio** en `ExamsPage`: se deja, por lo de arriba.
 
 Tests nuevos: `tests/ui/screen-pieces.test.tsx` (`SectionTitle`,
@@ -257,6 +257,34 @@ Tests nuevos: `tests/ui/screen-pieces.test.tsx` (`SectionTitle`,
 reloj del servidor, ritmo del sondeo por estado, fallo y reintento, pestaña
 oculta, otra sala) y los estilos nuevos en `tests/format.test.ts`. Permisos: no
 aplica, son piezas sin datos de nadie.
+
+#### Segunda tanda: estadísticas y mapa de clústeres
+
+Ya sin nadie cambiando `features/stats` ni el mapa de clústeres:
+
+- **Cargas con `<Async>`:** `ClustersPage` (lo mismo que antes, con
+  `map.loading` y el error solo sin plano) y `ProgressRanking`, que va por
+  páginas con su propio estado: se le da la forma de `<Async>` (sin primera
+  página ni error, se carga; con error, «Reintentar» pide la primera). Los
+  fallos de las páginas siguientes seguían sin enseñarse, y así siguen.
+  **No hecho en `HelpStatsPage`:** su rejilla de tarjetas se pinta vacía
+  mientras carga y lleva `margin-top`; dentro de `<Async>` desaparecería y el
+  hueco bajo «Cargando…» cambiaría.
+- **`SectionTitle`** en el Avance y el Avance de la piscina (con `id`, que se
+  añade a la pieza para su `aria-labelledby`), las estadísticas de ayuda y
+  Clústeres.
+- **`ChartWithRail`** en el Avance y el Avance de la piscina: el mismo
+  marcado, la gráfica en su tarjeta y las opciones en el panel con su nombre.
+- **`initialOf`** en `ClusterMapView` y la demo de las estadísticas de ayuda.
+- **Pastillas de `ClusterMapView`:** los dos grupos hechos a mano, «Resaltar»
+  (con su rótulo delante y, detrás, la raya y «Círculos», que sigue siendo su
+  propio botón) y la colocación, pasan a `PillGroup` con `pressed` (varias a la
+  vez) y `className="map-tools"`. La clase `filter-pills` que añade la pieza
+  solo pone `display`, `gap` y `flex-wrap`, y `.map-tools` (`map.css`, después
+  de `base.css`) manda en los tres: el aspecto no cambia. Ganan el teclado de
+  la pieza (flechas, `Home`, `End`).
+- No se tocaron `ProjectMap`, `SeatPicker`, `features/peers`, On-call,
+  la bienvenida ni `shared/layout` (con otro agente).
 
 ## Piezas comunes de la web (inventario)
 
