@@ -379,4 +379,37 @@ describe('personas ocultas', () => {
     }
     expect(json(await get(built, '/admin/hidden', admin))).toEqual([])
   })
+
+  it('un piscinero de otro campus tampoco existe para un estudiante', async () => {
+    const built = await makeApp({}, { routes: LOCATIONS })
+
+    apps.push(built)
+    // `pisci` es de la piscina de Madrid; `pisci2`, de la de Barcelona, pero está
+    // sentado en Madrid: la réplica de Madrid lo guarda igual.
+    await built.db.batch(
+      [
+        ['pisci', 22],
+        ['pisci2', 58],
+      ].map(([login, campus]) => ({
+        sql: `INSERT INTO pool_members (campus_id, user_id, login, image, begin_at, updated_at)
+              VALUES (?, ?, ?, NULL, ?, ?)`,
+        args: [campus ?? 22, userId(String(login)), login ?? '', ago(24 * 5), ago(0)],
+      })),
+      'write',
+    )
+
+    const student = await built.login()
+    const pool = cookieAs(student, 'pisci', 'pool')
+
+    await get(built, '/map', student)
+
+    const seen = await seenBy(built, student, 'pisci2')
+
+    expect(seen.profile).toBe(404)
+    expect(seen.card).toBe(404)
+    expect(seen.search).not.toContain('pisci2')
+    // Un piscinero de Madrid tampoco lo ve: solo a los de su campus.
+    expect((await get(built, '/users/pisci2/profile', pool)).statusCode).toBe(404)
+    expect((await get(built, '/users/mgomez/profile', student)).statusCode).toBe(200)
+  })
 })
