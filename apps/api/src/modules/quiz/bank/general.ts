@@ -102,10 +102,8 @@ export const GENERAL: readonly Concept[] = [
           '¿Qué le hace `x >> 1` a un entero positivo?',
           'Desplazar un entero positivo un bit a la derecha equivale a…',
         ],
-        right: [
-          'Dividirlo entre 2 (redondeando hacia abajo)',
-          'Partirlo por la mitad, sin decimales',
-        ],
+        // En C, dividir enteros ya descarta los decimales: no hace falta matizarlo solo en la buena.
+        right: ['Dividirlo entre 2', 'Partirlo por la mitad'],
         wrong: [
           'Multiplicarlo por 2',
           'Restarle 1',
@@ -266,8 +264,8 @@ export const GENERAL: readonly Concept[] = [
       },
       {
         ask: ['En una cola, ¿qué elemento se atiende primero?', '¿Cuál se saca antes de una cola?'],
-        right: ['El que lleva más tiempo esperando'],
-        wrong: ['El último que se metió', 'El más pequeño', 'El que está en medio'],
+        right: ['El primero que se metió'],
+        wrong: ['El último que se metió', 'El más pequeño de todos', 'El que está en medio'],
       },
       {
         ask: ['Metes 1, 2 y 3 en una cola, en ese orden. ¿Cuál sale primero?'],
@@ -314,15 +312,20 @@ export const GENERAL: readonly Concept[] = [
           '¿Qué le falta a una función recursiva que nunca termina?',
           'Para que una función recursiva acabe, necesita…',
         ],
-        right: ['Un caso base', 'Una condición de parada que no vuelva a llamarla'],
-        wrong: ['Un bucle while', 'Una variable global', 'Un valor de retorno', 'Más memoria'],
+        right: ['Un caso base', 'Una condición de parada'],
+        wrong: [
+          'Un bucle while',
+          'Una variable global',
+          'Un valor de retorno',
+          'Más memoria en la pila',
+        ],
       },
       {
         ask: [
           '¿Qué suele pasar en C con una recursión que no termina?',
           'Una función que se llama a sí misma sin parar acaba…',
         ],
-        right: ['Desbordando la pila (stack overflow)'],
+        right: ['Desbordando la pila'],
         wrong: [
           'Con un error de compilación',
           'Con una fuga de memoria del heap',
@@ -395,12 +398,9 @@ export const GENERAL: readonly Concept[] = [
     forms: [
       {
         ask: ['¿Qué hace `git add fichero`?', '¿Para qué sirve `git add` con un fichero cambiado?'],
-        right: [
-          'Lo prepara para el siguiente commit',
-          'Lo pone en el índice (staging) para el próximo commit',
-        ],
+        right: ['Lo prepara para el siguiente commit', 'Lo añade al índice (staging)'],
         wrong: [
-          'Lo sube al servidor',
+          'Lo sube al servidor remoto',
           'Lo borra del repositorio',
           'Hace que git lo ignore para siempre',
           'Lo copia en otra rama',
@@ -415,7 +415,7 @@ export const GENERAL: readonly Concept[] = [
         wrong: ['git push', 'git commit', 'git stash', 'git log'],
       },
     ],
-    wrong: ['Lo sube al servidor', 'Lo borra del repositorio', 'Lo copia en otra rama'],
+    wrong: ['Lo sube al servidor remoto', 'Lo borra del repositorio', 'Lo copia en otra rama'],
     why: 'El índice es la lista de lo que entrará en el próximo commit.',
   },
   {
@@ -428,14 +428,14 @@ export const GENERAL: readonly Concept[] = [
       {
         ask: ['¿Cuándo hay un conflicto al hacer merge?', '¿Qué provoca un conflicto en git?'],
         right: [
-          'Que las dos ramas cambiaron las mismas líneas de forma distinta',
-          'Que dos cambios tocan la misma zona de un fichero y git no sabe con cuál quedarse',
+          'Que las dos ramas cambiaron las mismas líneas',
+          'Que dos ramas tocan la misma zona de un fichero',
         ],
         wrong: [
-          'Que un fichero es demasiado grande',
+          'Que un fichero es demasiado grande para unirlo',
           'Que se ha borrado la rama remota',
           'Que hay dos commits con el mismo mensaje',
-          'Que se hace merge, siempre',
+          'Que las dos ramas tocan ficheros distintos',
         ],
       },
       {
@@ -444,11 +444,15 @@ export const GENERAL: readonly Concept[] = [
           'En un fichero con conflicto, las dos versiones aparecen entre…',
         ],
         right: ['<<<<<<<, ======= y >>>>>>>'],
-        wrong: ['/* conflict */ y /* end */', '### MERGE ###', '[[[ y ]]]'],
+        wrong: [
+          '/* conflict */ y /* end */',
+          '### HEAD ### y ### END ###',
+          '[[[ ours ]]] y [[[ theirs ]]]',
+        ],
       },
     ],
     wrong: [
-      'Que un fichero es demasiado grande',
+      'Que un fichero es demasiado grande para unirlo',
       'Que se ha borrado la rama remota',
       'Que hay dos commits con el mismo mensaje',
     ],
@@ -476,22 +480,23 @@ export const GENERAL: readonly Concept[] = [
       },
       {
         ask: [
-          'En `cmd1 | cmd2`, ¿qué pasa con la salida de cmd1?',
-          '¿Qué hace el símbolo `|` entre dos órdenes?',
+          'En `cmd1 | cmd2`, ¿adónde va la salida de cmd1?',
+          'Con `cmd1 | cmd2`, ¿qué pasa con lo que escribe cmd1?',
         ],
-        right: [
-          'Se convierte en la entrada de la segunda orden',
-          'Conecta la salida de la primera con la entrada de la segunda',
-        ],
+        right: ['Entra a cmd2 por su entrada estándar', 'Se convierte en la entrada de cmd2'],
         wrong: [
-          'Se descarta',
-          'Es un OR lógico entre las dos órdenes',
-          'Solo ejecuta la segunda si la primera falla',
-          'Se escribe en un fichero temporal llamado pipe',
+          'Se pierde: solo se ve la de cmd2',
+          'Va a la pantalla y a cmd2 a la vez',
+          'Se guarda en un fichero llamado cmd2',
+          'Se pasa a cmd2 como argumentos',
         ],
       },
     ],
-    wrong: ['Se descarta', 'Solo ejecuta la segunda si la primera falla', 'Es un OR lógico'],
+    wrong: [
+      'Ejecuta ls y wc a la vez, sin conectarlas',
+      'Solo ejecuta wc si ls falla',
+      'Cuenta los ficheros ocultos',
+    ],
     why: 'Una tubería conecta la salida estándar de una orden con la entrada estándar de la siguiente.',
   },
   {
@@ -506,14 +511,11 @@ export const GENERAL: readonly Concept[] = [
           '¿Qué diferencia hay entre `>` y `>>`?',
           '¿En qué se diferencian `echo hola > f` y `echo hola >> f`?',
         ],
-        right: [
-          '`>` sobrescribe y `>>` añade al final',
-          '`>>` añade sin borrar lo que había; `>` lo vacía',
-        ],
+        right: ['`>` sobrescribe y `>>` añade al final', '`>>` añade al final y `>` lo vacía'],
         wrong: [
-          '`>` añade y `>>` sobrescribe',
-          '`>>` redirige la entrada',
-          '`>>` redirige los errores',
+          '`>` añade al final y `>>` sobrescribe',
+          '`>>` redirige la entrada, no la salida',
+          '`>>` redirige los errores a un fichero',
           '`>` solo funciona con ficheros nuevos',
         ],
       },
@@ -527,9 +529,9 @@ export const GENERAL: readonly Concept[] = [
       },
     ],
     wrong: [
-      '`>` añade y `>>` sobrescribe',
-      '`>>` redirige la entrada',
-      '`>>` redirige los errores',
+      '`>` añade al final y `>>` sobrescribe',
+      '`>>` redirige la entrada, no la salida',
+      '`>>` redirige los errores a un fichero',
     ],
     why: '`>` vacía el fichero antes de escribir; `>>` escribe a continuación.',
   },
@@ -544,13 +546,14 @@ export const GENERAL: readonly Concept[] = [
         ask: ['¿Qué guarda `$?` en bash?', '¿Qué contiene la variable especial `$?`?'],
         right: [
           'El código de salida de la última orden',
-          'Cómo terminó la última orden (0 si fue bien)',
+          'El estado con que acabó la última orden',
         ],
+        // Son otras variables especiales de bash: $!, $#, $_ y $$.
         wrong: [
-          'El PID de la shell',
-          'El número de argumentos',
-          'El último argumento',
-          'El nombre del script',
+          'El PID de la última orden lanzada',
+          'El número de argumentos del script',
+          'El último argumento de la orden anterior',
+          'El PID de la propia shell',
         ],
       },
       {
@@ -562,7 +565,11 @@ export const GENERAL: readonly Concept[] = [
         wrong: ['1', '-1', '255', '42'],
       },
     ],
-    wrong: ['El PID de la shell', 'El número de argumentos', 'El último argumento'],
+    wrong: [
+      'El PID de la última orden lanzada',
+      'El número de argumentos del script',
+      'El PID de la propia shell',
+    ],
     why: '`$?` es el estado de salida: 0 significa éxito, y cualquier otro número, error.',
   },
   {

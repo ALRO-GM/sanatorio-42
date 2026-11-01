@@ -7,7 +7,7 @@ export const GENERAL_FR: Readonly<Record<string, ConceptText>> = {
     forms: [
       {
         ask: [
-          'Combien vaut le binaire 1000 en décimal ?',
+          'Combien vaut le binaire 1000 en décimal ?',
           'Le nombre binaire 1000, converti en décimal, donne…',
           'Convertis 0b1000 en base 10.',
         ],
@@ -15,46 +15,46 @@ export const GENERAL_FR: Readonly<Record<string, ConceptText>> = {
         wrong: ['16', '4', '10', '2', '7'],
       },
       {
-        ask: ["Comment s'écrit 8 en binaire ?", 'Le 8 décimal, en base 2, donne…'],
+        ask: ["Comment s'écrit 8 en binaire ?", 'Le 8 décimal, en base 2, donne…'],
         right: ['1000', '0b1000'],
         wrong: ['111', '0b111', '1001', '100', '0b10000'],
       },
     ],
     wrong: ['16', '4', '10', '2', '7'],
-    why: "Chaque position vaut le double de la précédente : 1000, c'est 1 × 2³ = 8.",
+    why: "Chaque position vaut le double de la précédente : 1000, c'est 1 × 2³ = 8.",
   },
   'gen-hex-ff': {
     forms: [
       {
         ask: [
-          'Quelle est la valeur décimale de 0xFF ?',
+          'Quelle est la valeur décimale de 0xFF ?',
           "L'hexadécimal FF, en décimal, donne…",
-          'Si un octet vaut 0xFF, combien vaut-il non signé, en base 10 ?',
+          'Si un octet vaut 0xFF, combien vaut-il non signé, en base 10 ?',
         ],
         right: ['255'],
       },
       {
         ask: [
-          'Quelle est la plus grande valeur qui tient dans un octet non signé ?',
+          'Quelle est la plus grande valeur qui tient dans un octet non signé ?',
           "Un unsigned char monte, au maximum, jusqu'à…",
         ],
         right: ['255'],
       },
     ],
     wrong: ['256', '15', '128', '510', '100', '127', '1515'],
-    why: "F vaut 15 : 15 × 16 + 15 = 255, la plus grande valeur d'un octet non signé (8 bits à 1).",
+    why: "F vaut 15 : 15 × 16 + 15 = 255, la plus grande valeur d'un octet non signé (8 bits à 1).",
   },
   'gen-byte-bits': {
     forms: [
       {
-        ask: ['Combien de bits contient un octet ?', "Un octet, c'est combien de bits ?"],
+        ask: ['Combien de bits contient un octet ?', "Un octet, c'est combien de bits ?"],
         right: ['8'],
         wrong: ['4', '16', '10', '32', '64'],
       },
       {
         ask: [
-          'Combien de valeurs différentes tiennent dans un octet ?',
-          'Combien de combinaisons différentes donnent 8 bits ?',
+          'Combien de valeurs différentes tiennent dans un octet ?',
+          'Combien de combinaisons différentes donnent 8 bits ?',
         ],
         right: ['256'],
         wrong: ['255', '128', '512', '64'],
@@ -67,7 +67,7 @@ export const GENERAL_FR: Readonly<Record<string, ConceptText>> = {
     forms: [
       {
         ask: [
-          'Que fait `x << 1` à un petit entier positif ?',
+          'Que fait `x << 1` à un petit entier positif ?',
           "Décaler un entier d'un bit vers la gauche revient à…",
         ],
         right: ['Le multiplier par 2', 'Le doubler'],
@@ -75,13 +75,10 @@ export const GENERAL_FR: Readonly<Record<string, ConceptText>> = {
       },
       {
         ask: [
-          'Que fait `x >> 1` à un entier positif ?',
+          'Que fait `x >> 1` à un entier positif ?',
           "Décaler un entier positif d'un bit vers la droite revient à…",
         ],
-        right: [
-          'Le diviser par 2 (en arrondissant vers le bas)',
-          'Le couper en deux, sans décimales',
-        ],
+        right: ['Le diviser par 2', 'Le couper en deux'],
         wrong: [
           'Le multiplier par 2',
           'Lui retirer 1',
@@ -96,24 +93,24 @@ export const GENERAL_FR: Readonly<Record<string, ConceptText>> = {
   'gen-and-mask': {
     forms: [
       {
-        ask: ['Combien vaut `13 & 6` ?', 'Le ET bit à bit de 13 et 6 donne…'],
+        ask: ['Combien vaut `13 & 6` ?', 'Le ET bit à bit de 13 et 6 donne…'],
         right: ['4'],
         wrong: ['19', '15', '2', '7', '1'],
       },
       {
-        ask: ['Combien vaut `13 | 6` ?', 'Le OU bit à bit de 13 et 6 donne…'],
+        ask: ['Combien vaut `13 | 6` ?', 'Le OU bit à bit de 13 et 6 donne…'],
         right: ['15'],
         wrong: ['4', '19', '11', '7', '78'],
       },
     ],
     wrong: ['19', '11', '2', '78', '7', '1'],
-    why: "13 s'écrit 1101 et 6, 0110 : le ET ne garde que le bit présent dans les deux (0100 = 4) ; le OU les garde tous (1111 = 15).",
+    why: "13 s'écrit 1101 et 6, 0110 : le ET ne garde que le bit présent dans les deux (0100 = 4) ; le OU les garde tous (1111 = 15).",
   },
   'gen-complexity-binary-search': {
     forms: [
       {
         ask: [
-          'Quelle est la complexité de la recherche dichotomique dans un tableau trié ?',
+          'Quelle est la complexité de la recherche dichotomique dans un tableau trié ?',
           'Chercher dans un tableau trié en le coupant en deux à chaque fois coûte…',
         ],
         right: ['O(log n)'],
@@ -121,7 +118,7 @@ export const GENERAL_FR: Readonly<Record<string, ConceptText>> = {
       },
       {
         ask: [
-          'Quelle condition doit remplir un tableau pour utiliser la recherche dichotomique ?',
+          'Quelle condition doit remplir un tableau pour utiliser la recherche dichotomique ?',
           'Avant de chercher en coupant en deux, le tableau doit…',
         ],
         right: ['Être trié'],
@@ -133,27 +130,27 @@ export const GENERAL_FR: Readonly<Record<string, ConceptText>> = {
       },
     ],
     wrong: ['O(n)', 'O(n²)', 'O(1)', 'O(n log n)'],
-    why: "Chaque étape élimine la moitié (d'où le besoin d'ordre) : avec n éléments, environ log₂ n étapes suffisent.",
+    why: "Chaque étape élimine la moitié (d'où le besoin d'ordre) : avec n éléments, environ log₂ n étapes suffisent.",
   },
   'gen-complexity-nested': {
     forms: [
       {
         ask: [
-          'Quelle est la complexité de ce fragment ?',
+          'Quelle est la complexité de ce fragment ?',
           'En notation grand O, cette double boucle coûte…',
-          'Comment le travail de ce code augmente-t-il avec n ?',
+          'Comment le travail de ce code augmente-t-il avec n ?',
         ],
         right: ['O(n²)'],
       },
     ],
     wrong: ['O(n)', 'O(n log n)', 'O(log n)', 'O(n³)', 'O(1)', 'O(2ⁿ)'],
-    why: "Le corps s'exécute n + (n-1) + … + 1 = n(n+1)/2 fois : il croît comme n².",
+    why: "Le corps s'exécute n + (n-1) + … + 1 = n(n+1)/2 fois : il croît comme n².",
   },
   'gen-sort-complexity': {
     forms: [
       {
         ask: [
-          'Au minimum, combien coûte un tri par comparaisons dans le cas général ?',
+          'Au minimum, que coûte un tri par comparaisons dans le cas général ?',
           'Dans le pire des cas, un algorithme qui trie par comparaisons ne peut pas descendre sous…',
         ],
         right: ['O(n log n)'],
@@ -161,7 +158,7 @@ export const GENERAL_FR: Readonly<Record<string, ConceptText>> = {
       },
       {
         ask: [
-          'Quelle est la complexité du tri à bulles dans le pire des cas ?',
+          'Quelle est la complexité du tri à bulles dans le pire des cas ?',
           'Le bubble sort, dans le pire des cas, coûte…',
         ],
         right: ['O(n²)'],
@@ -169,75 +166,75 @@ export const GENERAL_FR: Readonly<Record<string, ConceptText>> = {
       },
     ],
     wrong: ['O(n)', 'O(log n)', 'O(1)', 'O(n³)', 'O(2ⁿ)'],
-    why: 'Avec des comparaisons, il y a n! ordres possibles et chaque comparaison donne un bit : il en faut environ n log n. Le tri à bulles compare tout avec tout.',
+    why: 'Avec des comparaisons, il y a n! ordres possibles et chaque comparaison donne un bit : il en faut environ n log n. Le tri à bulles compare tout avec tout.',
   },
   'gen-stack-lifo': {
     forms: [
       {
         ask: [
-          "Dans quel ordre les éléments sortent-ils d'une pile ?",
-          "Quelle politique d'accès suit une pile ?",
+          "Dans quel ordre les éléments sortent-ils d'une pile ?",
+          "Quelle politique d'accès suit une pile ?",
         ],
-        right: ['LIFO : dernier entré, premier sorti'],
+        right: ['LIFO : dernier entré, premier sorti'],
         wrong: [
-          'FIFO : premier entré, premier sorti',
-          'Par priorité : le plus grand sort',
-          "Au hasard : n'importe lequel sort",
+          'FIFO : premier entré, premier sorti',
+          'Par priorité : le plus grand sort',
+          "Au hasard : n'importe lequel sort",
         ],
       },
       {
         ask: [
-          'Dans une pile, quel élément sort en premier ?',
-          "Lequel retire-t-on d'abord d'une pile ?",
+          'Dans une pile, quel élément sort en premier ?',
+          "Lequel retire-t-on d'abord d'une pile ?",
         ],
         right: ['Le dernier ajouté'],
         wrong: ['Le premier ajouté', 'Le plus petit', 'Celui du milieu'],
       },
       {
-        ask: ['Tu empiles 1, 2 et 3, dans cet ordre. Lequel dépiles-tu en premier ?'],
+        ask: ['Tu empiles 1, 2 et 3, dans cet ordre. Lequel dépiles-tu en premier ?'],
         right: ['Le 3'],
         wrong: ['Le 1', 'Le 2', "N'importe lequel des trois"],
       },
     ],
     wrong: ['Le plus petit', 'Le plus grand', 'Un au hasard'],
-    why: "Une pile, c'est comme une pile d'assiettes : on prend celle du dessus, la dernière posée.",
+    why: "Une pile, c'est comme une pile d'assiettes : on prend celle du dessus, la dernière posée.",
   },
   'gen-queue-fifo': {
     forms: [
       {
         ask: [
-          "Dans quel ordre les éléments sortent-ils d'une file ?",
-          "Quelle politique d'accès suit une file ?",
+          "Dans quel ordre les éléments sortent-ils d'une file ?",
+          "Quelle politique d'accès suit une file ?",
         ],
-        right: ['FIFO : premier entré, premier sorti'],
+        right: ['FIFO : premier entré, premier sorti'],
         wrong: [
-          'LIFO : dernier entré, premier sorti',
-          'Par priorité : le plus grand sort',
-          "Au hasard : n'importe lequel sort",
+          'LIFO : dernier entré, premier sorti',
+          'Par priorité : le plus grand sort',
+          "Au hasard : n'importe lequel sort",
         ],
       },
       {
         ask: [
-          'Dans une file, quel élément est servi en premier ?',
-          "Lequel retire-t-on d'abord d'une file ?",
+          'Dans une file, quel élément est servi en premier ?',
+          "Lequel retire-t-on d'abord d'une file ?",
         ],
-        right: ['Celui qui attend depuis le plus longtemps'],
-        wrong: ['Le dernier ajouté', 'Le plus petit', 'Celui du milieu'],
+        right: ['Le premier ajouté'],
+        wrong: ['Le dernier ajouté', 'Le plus petit de tous', 'Celui du milieu'],
       },
       {
-        ask: ['Tu ajoutes 1, 2 et 3 à une file, dans cet ordre. Lequel sort en premier ?'],
+        ask: ['Tu ajoutes 1, 2 et 3 à une file, dans cet ordre. Lequel sort en premier ?'],
         right: ['Le 1'],
         wrong: ['Le 3', 'Le 2', "N'importe lequel des trois"],
       },
     ],
     wrong: ['Le plus petit', 'Le plus grand', 'Un au hasard'],
-    why: "Comme la file d'attente au supermarché : on sert dans l'ordre d'arrivée.",
+    why: "Comme la file d'attente au supermarché : on sert dans l'ordre d'arrivée.",
   },
   'gen-list-vs-array': {
     forms: [
       {
         ask: [
-          "Combien coûte l'accès à l'élément i d'une liste chaînée ?",
+          "Que coûte l'accès à l'élément i d'une liste chaînée ?",
           "Atteindre la position i d'une liste chaînée coûte…",
         ],
         right: ['O(i)'],
@@ -245,7 +242,7 @@ export const GENERAL_FR: Readonly<Record<string, ConceptText>> = {
       },
       {
         ask: [
-          "Combien coûte l'accès à l'élément i d'un tableau ?",
+          "Que coûte l'accès à l'élément i d'un tableau ?",
           'Lire `a[i]` dans un tableau coûte…',
         ],
         right: ['O(1)'],
@@ -253,29 +250,29 @@ export const GENERAL_FR: Readonly<Record<string, ConceptText>> = {
       },
     ],
     wrong: ['O(log i)', 'O(i²)', 'O(n)'],
-    why: 'Un tableau est contigu en mémoire (adresse = début + i × taille) ; une liste se parcourt nœud par nœud depuis le début.',
+    why: 'Un tableau est contigu en mémoire (adresse = début + i × taille) ; une liste se parcourt nœud par nœud depuis le début.',
   },
   'gen-recursion-base': {
     forms: [
       {
         ask: [
-          'Que manque-t-il à une fonction récursive qui ne se termine jamais ?',
+          'Que manque-t-il à une fonction récursive qui ne se termine jamais ?',
           'Pour se terminer, une fonction récursive doit avoir…',
         ],
-        right: ['Un cas de base', "Une condition d'arrêt qui ne la rappelle pas"],
+        right: ['Un cas de base', "Une condition d'arrêt"],
         wrong: [
           'Une boucle while',
           'Une variable globale',
           'Une valeur de retour',
-          'Plus de mémoire',
+          'Plus de mémoire sur la pile',
         ],
       },
       {
         ask: [
-          "Que se passe-t-il en général en C avec une récursion qui ne s'arrête pas ?",
-          "Qu'arrive-t-il à une fonction qui s'appelle elle-même sans fin ?",
+          "Que se passe-t-il en général en C avec une récursion qui ne s'arrête pas ?",
+          "Qu'arrive-t-il à une fonction qui s'appelle elle-même sans fin ?",
         ],
-        right: ['La pile déborde (stack overflow)'],
+        right: ['La pile finit par déborder'],
         wrong: [
           'Une erreur de compilation',
           'Une fuite de mémoire sur le tas',
@@ -285,29 +282,29 @@ export const GENERAL_FR: Readonly<Record<string, ConceptText>> = {
       },
     ],
     wrong: ['Une boucle while', 'Une variable globale', 'Une valeur de retour'],
-    why: "Chaque appel prend de la place sur la pile ; sans cas qui arrête les appels, la pile s'épuise.",
+    why: "Chaque appel prend de la place sur la pile ; sans cas qui arrête les appels, la pile s'épuise.",
   },
   'gen-recursion-trace': {
     forms: [
-      { ask: ['Que renvoie f(4) ?', 'Quelle valeur donne f(4) ?'], right: ['24'] },
+      { ask: ['Que renvoie f(4) ?', 'Quelle valeur donne f(4) ?'], right: ['24'] },
       {
-        ask: ['Que renvoie f(5) ?', 'Quelle valeur donne f(5) ?'],
+        ask: ['Que renvoie f(5) ?', 'Quelle valeur donne f(5) ?'],
         right: ['120'],
         wrong: ['24'],
       },
       {
-        ask: ['Que calcule cette fonction ?', 'Que fait f avec un n positif ?'],
+        ask: ['Que calcule cette fonction ?', 'Que fait f avec un n positif ?'],
         right: ['La factorielle de n'],
         wrong: ['La somme de 1 à n', 'n au carré', 'Le n-ième nombre de Fibonacci'],
       },
     ],
     wrong: ['10', '4', '16', '1', '60'],
-    why: "f(n) = n × f(n-1) et f(1) = 1 : c'est la factorielle (4! = 24, 5! = 120).",
+    why: "f(n) = n × f(n-1) et f(1) = 1 : c'est la factorielle (4! = 24, 5! = 120).",
   },
   'gen-git-push': {
     forms: [
       {
-        ask: ['Que fait `git push` ?', 'À quoi sert `git push` ?'],
+        ask: ['Que fait `git push` ?', 'À quoi sert `git push` ?'],
         right: [
           'Il envoie tes commits au dépôt distant',
           'Il pousse tes commits locaux vers le dépôt distant',
@@ -321,7 +318,7 @@ export const GENERAL_FR: Readonly<Record<string, ConceptText>> = {
       },
       {
         ask: [
-          'Après `git commit`, quelle commande envoie tes changements au serveur ?',
+          'Après `git commit`, quelle commande envoie tes changements au serveur ?',
           'Pour que ton commit arrive sur le dépôt distant, tu utilises…',
         ],
         right: ['git push'],
@@ -333,18 +330,15 @@ export const GENERAL_FR: Readonly<Record<string, ConceptText>> = {
       'Il télécharge les changements du dépôt distant',
       'Il crée une nouvelle branche',
     ],
-    why: "`commit` enregistre dans ta copie du dépôt ; `push` l'envoie au dépôt distant.",
+    why: "`commit` enregistre dans ta copie du dépôt ; `push` l'envoie au dépôt distant.",
   },
   'gen-git-add': {
     forms: [
       {
-        ask: ['Que fait `git add fichier` ?', 'À quoi sert `git add` sur un fichier modifié ?'],
-        right: [
-          'Il le prépare pour le prochain commit',
-          "Il le met dans l'index (staging) pour le prochain commit",
-        ],
+        ask: ['Que fait `git add fichier` ?', 'À quoi sert `git add` sur un fichier modifié ?'],
+        right: ['Il le prépare pour le prochain commit', "Il l'ajoute à l'index (staging)"],
         wrong: [
-          "Il l'envoie sur le serveur",
+          "Il l'envoie sur le serveur distant",
           'Il le supprime du dépôt',
           "Il demande à git de l'ignorer pour toujours",
           'Il le copie dans une autre branche',
@@ -352,15 +346,15 @@ export const GENERAL_FR: Readonly<Record<string, ConceptText>> = {
       },
       {
         ask: [
-          'Avant de commiter un fichier modifié, quelle commande le prépare ?',
-          "Quelle commande met un changement dans l'index ?",
+          'Avant de commiter un fichier modifié, quelle commande le prépare ?',
+          "Quelle commande met un changement dans l'index ?",
         ],
         right: ['git add'],
         wrong: ['git push', 'git commit', 'git stash', 'git log'],
       },
     ],
     wrong: [
-      "Il l'envoie sur le serveur",
+      "Il l'envoie sur le serveur distant",
       'Il le supprime du dépôt',
       'Il le copie dans une autre branche',
     ],
@@ -370,40 +364,44 @@ export const GENERAL_FR: Readonly<Record<string, ConceptText>> = {
     forms: [
       {
         ask: [
-          "Quand y a-t-il un conflit lors d'un merge ?",
-          "Qu'est-ce qui provoque un conflit dans git ?",
+          "Quand y a-t-il un conflit lors d'un merge ?",
+          "Qu'est-ce qui provoque un conflit dans git ?",
         ],
         right: [
-          'Les deux branches ont modifié les mêmes lignes de façon différente',
-          "Deux changements touchent la même zone d'un fichier et git ne sait pas lequel garder",
+          'Les deux branches ont modifié les mêmes lignes',
+          "Deux branches touchent la même zone d'un fichier",
         ],
         wrong: [
-          'Un fichier est trop gros',
+          'Un fichier est trop gros pour être fusionné',
           'La branche distante a été supprimée',
           'Deux commits ont le même message',
-          "N'importe quel merge, toujours",
+          'Les deux branches touchent des fichiers différents',
         ],
       },
       {
         ask: [
-          'Avec quels marqueurs git sépare-t-il les deux versions dans un conflit ?',
+          'Avec quels marqueurs git sépare-t-il les deux versions dans un conflit ?',
           'Dans un fichier en conflit, les deux versions apparaissent entre…',
         ],
         right: ['<<<<<<<, ======= et >>>>>>>'],
-        wrong: ['/* conflict */ et /* end */', '### MERGE ###', '[[[ et ]]]'],
+        wrong: [
+          '/* conflict */ et /* end */',
+          '### HEAD ### et ### END ###',
+          '[[[ ours ]]] et [[[ theirs ]]]',
+        ],
       },
     ],
     wrong: [
-      'Un fichier est trop gros',
+      'Un fichier est trop gros pour être fusionné',
       'La branche distante a été supprimée',
       'Deux commits ont le même message',
     ],
-    why: 'Git ne fusionne que ce qui ne se chevauche pas ; si deux branches modifient la même chose, il laisse les deux versions marquées pour que tu choisisses.',
+    why: 'Git ne fusionne que ce qui ne se chevauche pas ; si deux branches modifient la même chose, il laisse les deux versions marquées pour que tu choisisses.',
   },
   'gen-shell-pipe': {
     forms: [
       {
-        ask: ['Dans le shell, que fait `ls | wc -l` ?', 'Quel résultat donne `ls | wc -l` ?'],
+        ask: ['Dans le shell, que fait `ls | wc -l` ?', 'Quel résultat donne `ls | wc -l` ?'],
         right: [
           'Il compte combien de lignes affiche ls',
           'Il passe la sortie de ls à wc, qui en compte les lignes',
@@ -417,25 +415,22 @@ export const GENERAL_FR: Readonly<Record<string, ConceptText>> = {
       },
       {
         ask: [
-          'Dans `cmd1 | cmd2`, que devient la sortie de cmd1 ?',
-          'Que fait le symbole `|` entre deux commandes ?',
+          'Dans `cmd1 | cmd2`, où va la sortie de cmd1 ?',
+          "Avec `cmd1 | cmd2`, que devient ce qu'écrit cmd1 ?",
         ],
-        right: [
-          "Elle devient l'entrée de la deuxième commande",
-          "Il relie la sortie de la première à l'entrée de la deuxième",
-        ],
+        right: ['Elle entre dans cmd2 par son entrée standard', "Elle devient l'entrée de cmd2"],
         wrong: [
-          'Elle est jetée',
-          "C'est un OU logique entre les deux commandes",
-          'Il ne lance la deuxième que si la première échoue',
-          'Elle est écrite dans un fichier temporaire appelé pipe',
+          'Elle se perd : on ne voit que celle de cmd2',
+          "Elle va à l'écran et à cmd2 en même temps",
+          'Elle est écrite dans un fichier appelé cmd2',
+          'Elle est passée à cmd2 comme arguments',
         ],
       },
     ],
     wrong: [
-      'Elle est jetée',
-      'Il ne lance la deuxième que si la première échoue',
-      "C'est un OU logique",
+      'Il lance ls et wc en même temps, sans les relier',
+      'Il ne lance wc que si ls échoue',
+      'Il compte les fichiers cachés',
     ],
     why: "Un pipe relie la sortie standard d'une commande à l'entrée standard de la suivante.",
   },
@@ -443,111 +438,119 @@ export const GENERAL_FR: Readonly<Record<string, ConceptText>> = {
     forms: [
       {
         ask: [
-          'Quelle est la différence entre `>` et `>>` ?',
-          'En quoi `echo salut > f` et `echo salut >> f` diffèrent-ils ?',
+          'Quelle est la différence entre `>` et `>>` ?',
+          'En quoi `echo salut > f` et `echo salut >> f` diffèrent-ils ?',
         ],
         right: [
           '`>` écrase et `>>` ajoute à la fin',
-          '`>>` ajoute sans effacer ce qui y était ; `>` vide le fichier',
+          '`>>` ajoute à la fin et `>` vide le fichier',
         ],
         wrong: [
-          '`>` ajoute et `>>` écrase',
-          "`>>` redirige l'entrée",
-          '`>>` redirige les erreurs',
+          '`>` ajoute à la fin et `>>` écrase',
+          "`>>` redirige l'entrée, pas la sortie",
+          '`>>` redirige les erreurs vers un fichier',
           "`>` ne marche qu'avec des fichiers nouveaux",
         ],
       },
       {
         ask: [
-          "Quelle redirection ajoute à la fin d'un fichier sans l'effacer ?",
+          "Quelle redirection ajoute à la fin d'un fichier sans l'effacer ?",
           'Pour écrire à la suite de ce qui est déjà dans un fichier, on utilise…',
         ],
         right: ['>>'],
         wrong: ['>', '<<', '<', '|'],
       },
     ],
-    wrong: ['`>` ajoute et `>>` écrase', "`>>` redirige l'entrée", '`>>` redirige les erreurs'],
-    why: "`>` vide le fichier avant d'écrire ; `>>` écrit à la suite de ce qui y est.",
+    wrong: [
+      '`>` ajoute à la fin et `>>` écrase',
+      "`>>` redirige l'entrée, pas la sortie",
+      '`>>` redirige les erreurs vers un fichier',
+    ],
+    why: "`>` vide le fichier avant d'écrire ; `>>` écrit à la suite de ce qui y est.",
   },
   'gen-shell-exit-status': {
     forms: [
       {
-        ask: ['Que contient `$?` dans bash ?', 'Que stocke la variable spéciale `$?` ?'],
+        ask: ['Que contient `$?` dans bash ?', 'Que stocke la variable spéciale `$?` ?'],
         right: [
           'Le code de sortie de la dernière commande',
-          "Comment s'est terminée la dernière commande (0 si tout s'est bien passé)",
+          "L'état avec lequel a fini la dernière commande",
         ],
         wrong: [
-          'Le PID du shell',
-          "Le nombre d'arguments",
-          'Le dernier argument',
-          'Le nom du script',
+          'Le PID de la dernière commande lancée',
+          "Le nombre d'arguments du script",
+          'Le dernier argument de la commande précédente',
+          'Le PID du shell lui-même',
         ],
       },
       {
         ask: [
-          "Quel code de sortie donne une commande qui s'est bien passée ?",
+          "Quel code de sortie donne une commande qui s'est bien passée ?",
           'Par convention, une commande qui se termine sans erreur sort avec…',
         ],
         right: ['0'],
         wrong: ['1', '-1', '255', '42'],
       },
     ],
-    wrong: ['Le PID du shell', "Le nombre d'arguments", 'Le dernier argument'],
-    why: '`$?` est le code de sortie : 0 veut dire succès, et tout autre nombre, erreur.',
+    wrong: [
+      'Le PID de la dernière commande lancée',
+      "Le nombre d'arguments du script",
+      'Le PID du shell lui-même',
+    ],
+    why: '`$?` est le code de sortie : 0 veut dire succès, et tout autre nombre, erreur.',
   },
   'gen-chmod': {
     forms: [
       {
         ask: [
-          'Quels droits donne `chmod 755 fichier` ?',
-          'À quoi ressemblent les droits 755 dans `ls -l` ?',
+          'Quels droits donne `chmod 755 fichier` ?',
+          'À quoi ressemblent les droits 755 dans `ls -l` ?',
         ],
         right: ['rwxr-xr-x'],
         wrong: ['rwxrwxrwx', 'r--r--r--', 'rw-rw-rw-', 'rwxr--r--'],
       },
       {
         ask: [
-          'Quel nombre de chmod donne `rw-r--r--` ?',
-          "Comment s'écrivent en octal les droits rw-r--r-- ?",
+          'Quel nombre de chmod donne `rw-r--r--` ?',
+          "Comment s'écrivent en octal les droits rw-r--r-- ?",
         ],
         right: ['644'],
         wrong: ['755', '666', '444', '777'],
       },
     ],
     wrong: ['rwxrwxrwx', 'r--r--r--', 'rw-rw-rw-'],
-    why: 'Chaque chiffre correspond au propriétaire, au groupe et aux autres : lecture vaut 4, écriture 2 et exécution 1 (7 = 4 + 2 + 1, 5 = 4 + 1).',
+    why: 'Chaque chiffre correspond au propriétaire, au groupe et aux autres : lecture vaut 4, écriture 2 et exécution 1 (7 = 4 + 2 + 1, 5 = 4 + 1).',
   },
   'gen-ascii-a': {
     forms: [
       {
-        ask: ['Quel est le code ASCII de la lettre `A` ?', "En ASCII, 'A' vaut…"],
+        ask: ['Quel est le code ASCII de la lettre `A` ?', "En ASCII, 'A' vaut…"],
         right: ['65'],
         wrong: ['97', '64', '48', '90'],
       },
       {
-        ask: ['Quel est le code ASCII de la minuscule `a` ?', "En ASCII, 'a' vaut…"],
+        ask: ['Quel est le code ASCII de la minuscule `a` ?', "En ASCII, 'a' vaut…"],
         right: ['97'],
         wrong: ['65', '122', '96', '48'],
       },
       {
         ask: [
-          'Quel écart y a-t-il en ASCII entre une minuscule et sa majuscule ?',
-          "Quelle est la distance entre 'a' et 'A' dans la table ASCII ?",
+          'Quel écart y a-t-il en ASCII entre une minuscule et sa majuscule ?',
+          "Quelle est la distance entre 'a' et 'A' dans la table ASCII ?",
         ],
         right: ['32'],
         wrong: ['26', '1', '64', '16'],
       },
     ],
     wrong: ['64', '48', '41', '90', '122'],
-    why: 'Les majuscules commencent à 65 (A) et les minuscules à 97 (a) : elles diffèrent de 32, un seul bit.',
+    why: 'Les majuscules commencent à 65 (A) et les minuscules à 97 (a) : elles diffèrent de 32, un seul bit.',
   },
   'gen-hash-collision': {
     forms: [
       {
         ask: [
-          "Dans une table de hachage, qu'est-ce qu'une collision ?",
-          'Quand y a-t-il une collision dans une table de hachage ?',
+          "Dans une table de hachage, qu'est-ce qu'une collision ?",
+          'Quand y a-t-il une collision dans une table de hachage ?',
         ],
         right: [
           'Quand deux clés différentes donnent le même hash',
@@ -562,7 +565,7 @@ export const GENERAL_FR: Readonly<Record<string, ConceptText>> = {
       },
       {
         ask: [
-          "Comment appelle-t-on deux clés différentes qui tombent dans la même case d'une table de hachage ?",
+          "Comment appelle-t-on deux clés différentes qui tombent dans la même case d'une table de hachage ?",
           'Si deux clés différentes donnent le même hash, il y a…',
         ],
         right: ['Une collision'],
@@ -570,7 +573,7 @@ export const GENERAL_FR: Readonly<Record<string, ConceptText>> = {
       },
       {
         ask: [
-          'En moyenne, combien coûte une recherche dans une table de hachage bien dimensionnée ?',
+          'En moyenne, que coûte une recherche dans une table de hachage bien dimensionnée ?',
           'Une recherche dans une table de hachage coûte, en moyenne…',
         ],
         right: ['O(1)'],
@@ -578,6 +581,6 @@ export const GENERAL_FR: Readonly<Record<string, ConceptText>> = {
       },
     ],
     wrong: ['Un rehash', 'Un débordement', 'Un doublon'],
-    why: 'Le hash donne directement la case ; les collisions (inévitables) se règlent par chaînage ou en cherchant une autre case libre.',
+    why: 'Le hash donne directement la case ; les collisions (inévitables) se règlent par chaînage ou en cherchant une autre case libre.',
   },
 }
