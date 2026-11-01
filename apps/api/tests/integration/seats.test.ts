@@ -1,6 +1,11 @@
 import { afterEach, describe, expect, it } from 'vitest'
 
-import type { SeatGraph, SeatHeat } from '@sanatorio/contracts'
+import type {
+  SeatGraph,
+  SeatHeat,
+  SeatWeightsPreview,
+  SeatWeightsState,
+} from '@sanatorio/contracts'
 import { json, makeApp } from '../helpers/test-app.js'
 import type { TestApp } from '../helpers/test-app.js'
 
@@ -309,5 +314,113 @@ describe('red de asientos (docs/asientos.md)', () => {
       expect.objectContaining({ id: 'c1', rows: 2, seatsPerRow: 3, hours: 0, people: 0 }),
     ])
     expect(heat.clusters[0]?.cells.every((one) => one.hours === 0 && one.people === 0)).toBe(true)
+  })
+})
+
+describe('pesos de los puestos desde el panel (docs/asientos.md)', () => {
+  /** Los de siempre, pero «al lado» no cuenta y la fila de delante, sí. */
+  const TRIED = [
+    [0, 0, 1, 0, 1, 0, 0],
+    [0, 0, 2, 9, 2, 0, 0],
+    [0, 0, 1.5, 0, 1.5, 0, 0],
+  ]
+
+  it('se prueban sin guardar, se guardan y la red se recalcula; solo admins', async () => {
+    const built = await makeApp({ ADMIN_LOGINS: 'albrodri' }, { routes: LOCATIONS })
+
+    apps.push(built)
+
+    const admin = await built.adminLogin()
+
+    await built.app.inject({ method: 'GET', url: '/map', headers: { cookie: admin } })
+    await built.db.execute('UPDATE seat_sessions SET first_seen_at = begin_at')
+
+    const state = json(
+      await built.app.inject({
+        method: 'GET',
+        url: '/admin/seat-weights',
+        headers: { cookie: admin },
+      }),
+    ) as SeatWeightsState
+
+    expect(state).toMatchObject({ updatedBy: null, grid: state.defaults })
+    expect(state.grid[1]).toEqual([0, 3, 2, 0, 2, 3, 0])
+
+    const preview = await built.app.inject({
+      method: 'POST',
+      url: '/admin/seat-weights/preview',
+      headers: { cookie: admin },
+      payload: { grid: TRIED, days: 7 },
+    })
+    const tried = json(preview) as SeatWeightsPreview
+    const pairs = (graph: SeatGraph) => graph.links.map((link) => `${link.source}-${link.target}`)
+
+    expect(preview.statusCode).toBe(200)
+    // Sin «al lado», la amiga ya no se une; el centro (la propia persona) no cuenta aunque pese 9.
+    expect(pairs(tried.graph)).not.toContain('albrodri-amiga')
+    expect(tried.current.pairs).toBeGreaterThan(tried.proposed.pairs)
+    expect(tried.current.modularity).toBeGreaterThanOrEqual(-0.5)
+
+    // Probar no cambia nada.
+    const before = json(
+      await built.app.inject({
+        method: 'GET',
+        url: '/network/seats?days=7',
+        headers: { cookie: admin },
+      }),
+    ) as SeatGraph
+
+    expect(pairs(before)).toContain('albrodri-amiga')
+
+    const saved = await built.app.inject({
+      method: 'PUT',
+      url: '/admin/seat-weights',
+      headers: { cookie: admin },
+      payload: { grid: TRIED },
+    })
+
+    expect(saved.statusCode).toBe(200)
+    expect(json(saved)).toMatchObject({ updatedBy: 'albrodri' })
+    expect((json(saved) as SeatWeightsState).grid[1]?.[3]).toBe(0)
+
+    const after = json(
+      await built.app.inject({
+        method: 'GET',
+        url: '/network/seats?days=7',
+        headers: { cookie: admin },
+      }),
+    ) as SeatGraph
+
+    expect(pairs(after)).not.toContain('albrodri-amiga')
+
+    // Mal formados: ni de otro tamaño ni fuera de 0 a 10.
+    for (const grid of [[[1, 2, 3]], TRIED.map((row) => row.map(() => 11)), 'pesos']) {
+      const wrong = await built.app.inject({
+        method: 'PUT',
+        url: '/admin/seat-weights',
+        headers: { cookie: admin },
+        payload: { grid },
+      })
+
+      expect(wrong.statusCode).toBe(400)
+    }
+
+    // Sin el panel abierto no se ven ni se prueban.
+    const cookie = await built.login()
+
+    for (const [method, url] of [
+      ['GET', '/admin/seat-weights'],
+      ['POST', '/admin/seat-weights/preview'],
+      ['PUT', '/admin/seat-weights'],
+    ] as const) {
+      const denied = await built.app.inject({
+        method,
+        url,
+        headers: { cookie },
+        payload: { grid: TRIED, days: 7 },
+      })
+
+      expect([401, 403]).toContain(denied.statusCode)
+    }
   })
 })

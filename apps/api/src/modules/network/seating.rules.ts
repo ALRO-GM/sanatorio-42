@@ -11,34 +11,67 @@
  *
  * Quien se sienta con amigos suele ocupar, desde 2·3N: 2·1N y 2·5N (al lado,
  * mirando igual), luego 2·2S y 2·4S (enfrente, en diagonal), luego 1·2S y
- * 1·4S (la fila de atrás). Los pesos de abajo siguen ese orden. Para un puesto
- * sur es lo mismo hacia la fila de arriba, así que el peso vale igual en los
- * dos sentidos.
+ * 1·4S (la fila de atrás). Los pesos de siempre siguen ese orden; desde el
+ * 2026-11-01 se pueden cambiar en el panel. Para un puesto sur es lo mismo
+ * hacia la fila de arriba, así que el peso vale igual en los dos sentidos.
  */
 
 import { parseHost } from '../map/index.js'
 import type { SeatPosition } from '../map/index.js'
 
-/** Lo que pesa cada vecino. Cambiarlos aquí recalcula todo desde el historial. */
-const SEAT_WEIGHTS = { beside: 3, across: 2, behind: 1.5 } as const
+/**
+ * Lo que pesa cada vecino, visto desde un puesto norte: tres filas (la de
+ * delante, la suya y la de atrás) y de tres puestos a la izquierda a tres a la
+ * derecha. El centro (`[1][SEAT_REACH]`) es la propia persona y no cuenta. Desde
+ * un puesto sur se mira girado media vuelta (delante es la fila de abajo y la
+ * izquierda, su derecha en el plano). Se cambian desde el panel
+ * (`seat-weights.ts`); estos son los de siempre.
+ */
+export type SeatWeights = number[][]
 
-/** Lo cerca que se sientan dos puestos: 0 si no cuentan como cerca. */
-export function seatWeight(a: SeatPosition, b: SeatPosition): number {
+/** Puestos que se miran a cada lado. */
+export const SEAT_REACH = 3
+
+/** Filas de la cuadrícula: delante, la suya y atrás. */
+const FRONT = 0
+const OWN = 1
+const BEHIND = 2
+
+/** Los de siempre: al lado 3, enfrente en diagonal 2, la fila de atrás 1,5. */
+export const DEFAULT_SEAT_WEIGHTS: SeatWeights = [
+  [0, 0, 0, 0, 0, 0, 0],
+  [0, 3, 2, 0, 2, 3, 0],
+  [0, 0, 1.5, 0, 1.5, 0, 0],
+]
+
+/** Lo que pesa `b` visto desde `a`, en la cuadrícula de `a`. */
+function oneWay(a: SeatPosition, b: SeatPosition, weights: SeatWeights): number {
+  // Un sur mira al revés: se gira media vuelta para verlo como un norte.
+  const turn = a.seat % 2 === 1 ? 1 : -1
+  const across = (b.seat - a.seat) * turn
+  const rows = (b.row - a.row) * turn
+  // En el plano la fila de delante de un norte es la de arriba.
+  const row = rows === 1 ? FRONT : rows === 0 ? OWN : rows === -1 ? BEHIND : null
+
+  if (row === null || Math.abs(across) > SEAT_REACH) return 0
+
+  return weights[row]?.[across + SEAT_REACH] ?? 0
+}
+
+/**
+ * Lo cerca que se sientan dos puestos: 0 si no cuentan como cerca. Si la
+ * cuadrícula no es simétrica, vale la media de mirarlo desde cada uno: así
+ * pesa lo mismo en los dos sentidos.
+ */
+export function seatWeight(
+  a: SeatPosition,
+  b: SeatPosition,
+  weights: SeatWeights = DEFAULT_SEAT_WEIGHTS,
+): number {
   if (a.cluster !== b.cluster || a.separator !== b.separator) return 0
+  if (a.row === b.row && a.seat === b.seat) return 0
 
-  const gap = Math.abs(a.seat - b.seat)
-
-  if (a.row === b.row) {
-    if (gap === 2) return SEAT_WEIGHTS.beside
-    if (gap === 1) return SEAT_WEIGHTS.across
-
-    return 0
-  }
-
-  // El de atrás: un norte mira a la fila de abajo; un sur, a la de arriba.
-  const back = a.seat % 2 === 1 ? a.row - 1 : a.row + 1
-
-  return b.row === back && gap === 1 ? SEAT_WEIGHTS.behind : 0
+  return (oneWay(a, b, weights) + oneWay(b, a, weights)) / 2
 }
 
 /** Una sesión en un puesto, en milisegundos. */
@@ -86,7 +119,10 @@ function covered(spans: [number, number][]): number {
  * sesiones en un puesto que no sigue el patrón de nombre cuentan como horas,
  * pero sin vecinos.
  */
-export function seatingOf(sessions: readonly SeatSession[]): Seating {
+export function seatingOf(
+  sessions: readonly SeatSession[],
+  weights: SeatWeights = DEFAULT_SEAT_WEIGHTS,
+): Seating {
   type Placed = SeatSession & { position: SeatPosition | null; near: [number, number][] }
   const placed: Placed[] = sessions
     .filter((session) => session.end > session.begin)
@@ -107,7 +143,7 @@ export function seatingOf(sessions: readonly SeatSession[]): Seating {
     for (const other of still) {
       if (other.login === session.login || other.position === null) continue
 
-      const weight = seatWeight(position, other.position)
+      const weight = seatWeight(position, other.position, weights)
 
       if (weight === 0) continue
 

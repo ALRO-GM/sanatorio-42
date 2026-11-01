@@ -26,7 +26,7 @@ export type SeatPerson = {
 export type SeatLink = {
   source: string
   target: string
-  /** Horas a la vez por el peso de cada puesto (3, 2 o 1,5), redondeado. */
+  /** Horas a la vez por el peso de cada puesto (los del panel; de siempre, 3, 2 o 1,5), redondeado. */
   closeness: number
   /** Horas sentados cerca a la vez, sin pesos. */
   hours: number
@@ -80,4 +80,43 @@ export type SeatHeat = {
   clusters: SeatHeatCluster[]
   /** Las horas del puesto más usado, para la escala de colores. */
   max: number
+}
+
+/**
+ * Los pesos de los puestos (`GET /admin/seat-weights`): tres filas (delante,
+ * la suya, atrás) de siete puestos, del tercero a la izquierda al tercero a la
+ * derecha, vistos desde un puesto norte. El centro es la propia persona.
+ */
+export type SeatWeightsState = {
+  grid: number[][]
+  /** Los de siempre, para volver a ellos. */
+  defaults: number[][]
+  /** Quién los cambió por última vez y cuándo; `null` si son los de siempre. */
+  updatedBy: string | null
+  updatedAt: string | null
+}
+
+/** Lo bien que separan unos pesos a la gente en grupos. */
+export type SeatGroupQuality = {
+  /** Modularidad de los grupos (de −0,5 a 1): más alta, grupos más nítidos. */
+  modularity: number
+  /** Grupos de dos o más personas. */
+  communities: number
+  /** Parte de la gente (0-1) que está en un grupo de dos o más. */
+  grouped: number
+  /** Parte de la cercanía (0-1) que queda dentro de los grupos. */
+  inside: number
+  /** Parte de la gente (0-1) en el grupo más grande: muy alta es una sola bola. */
+  largest: number
+  /** Parejas que se unen en el grafo. */
+  pairs: number
+}
+
+/** `POST /admin/seat-weights/preview`: cómo saldría la red con otros pesos. */
+export type SeatWeightsPreview = {
+  graph: SeatGraph
+  /** Con los pesos que se prueban. */
+  proposed: SeatGroupQuality
+  /** Con los que están en uso, en el mismo periodo. */
+  current: SeatGroupQuality
 }

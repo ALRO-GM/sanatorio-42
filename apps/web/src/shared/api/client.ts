@@ -337,6 +337,10 @@ export const realApi: Api = {
   },
   getSeatGraph: (days, dates) => getJson(`/network/seats?${seatQuery(days, dates)}`),
   getSeatHeat: (days, dates) => getJson(`/network/seats/heat?${seatQuery(days, dates)}`),
+  getSeatWeights: () => getJson('/admin/seat-weights'),
+  saveSeatWeights: (grid) => sendJson('PUT', '/admin/seat-weights', { grid }),
+  previewSeatWeights: (grid, days) =>
+    sendJson('POST', '/admin/seat-weights/preview', { grid, days }),
   getNetworkMine: () => getJson('/network/mine'),
   searchNetworkPeople: (q, campuses) => getJson(`/network/people?${search({ q, campuses })}`),
 

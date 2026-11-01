@@ -272,6 +272,7 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
       zoomIn: t('net.zoomIn'),
       zoomOut: t('net.zoomOut'),
       fit: t('net.fit'),
+      shake: t('net.shake'),
       find: t('net.find'),
       none: t('net.findNone'),
       gave: t('net.arrows.gave'),

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { parseHost } from '../../src/modules/map/seat-layout.js'
 import { seatHeatOf } from '../../src/modules/network/seating.heat.js'
+import { groupQuality } from '../../src/modules/network/seating.quality.js'
 import { seatingOf, seatWeight, trimSeating } from '../../src/modules/network/seating.rules.js'
 
 const at = (host: string) => {
@@ -148,5 +149,81 @@ describe('tope del grafo de asientos', () => {
     expect(trimSeating(people, pairs, { nodes: 10, links: 10 })).toEqual({ people, pairs })
     expect(trimSeating(people, pairs, { nodes: 0, links: 0 })).toEqual({ people: [], pairs: [] })
     expect(trimSeating([], [], { nodes: 3, links: 3 })).toEqual({ people: [], pairs: [] })
+  })
+})
+
+describe('pesos a medida (panel, docs/asientos.md)', () => {
+  const custom = (a: string, b: string, grid: number[][]): number => seatWeight(at(a), at(b), grid)
+  const FRONT_ONLY = [
+    [0, 0, 0, 4, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0],
+  ]
+
+  it('desde un norte, la fila de delante es la de arriba; desde un sur, la de abajo', () => {
+    // Quien está delante te ve en su fila de atrás: solo con delante, la mitad.
+    expect(custom('c1r2s3', 'c1r3s3', FRONT_ONLY)).toBe(2)
+    expect(custom('c1r2s4', 'c1r1s4', FRONT_ONLY)).toBe(2)
+    expect(custom('c1r2s3', 'c1r1s3', FRONT_ONLY)).toBe(2)
+    expect(custom('c1r2s3', 'c1r4s3', FRONT_ONLY)).toBe(0)
+
+    const both = FRONT_ONLY.map((row, at) => (at === 2 ? [0, 0, 0, 4, 0, 0, 0] : row))
+
+    expect(custom('c1r2s3', 'c1r3s3', both)).toBe(4)
+    expect(custom('c1r2s4', 'c1r1s4', both)).toBe(4)
+  })
+
+  it('si la cuadrícula no es simétrica, vale la media de los dos sentidos', () => {
+    // Solo el de la derecha: desde 2·3N, 2·5N pesa 2; desde 2·5N, 2·3N está a la izquierda.
+    const right = [
+      [0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 2, 0],
+      [0, 0, 0, 0, 0, 0, 0],
+    ]
+
+    expect(custom('c1r2s3', 'c1r2s5', right)).toBe(1)
+    expect(custom('c1r2s5', 'c1r2s3', right)).toBe(1)
+  })
+
+  it('el mismo puesto y lo que queda fuera de la cuadrícula no cuentan', () => {
+    const full = [0, 1, 2].map(() => [5, 5, 5, 5, 5, 5, 5])
+
+    expect(custom('c1r2s3', 'c1r2s3', full)).toBe(0)
+    expect(custom('c1r2s3', 'c1r2s7', full)).toBe(0)
+    expect(custom('c1r2s3', 'c1r2s6', full)).toBe(5)
+    expect(custom('c1r2s3', 'c1r4s3', full)).toBe(0)
+  })
+})
+
+describe('calidad de los grupos', () => {
+  it('dos grupos sin nada entre ellos: modularidad 0,5, todo dentro', () => {
+    const community = new Map([
+      ['a', 0],
+      ['b', 0],
+      ['c', 1],
+      ['d', 1],
+      ['e', 2],
+    ])
+    const quality = groupQuality(
+      ['a', 'b', 'c', 'd', 'e'],
+      [
+        { a: 'a', b: 'b', closeness: 5 },
+        { a: 'c', b: 'd', closeness: 5 },
+      ],
+      community,
+    )
+
+    expect(quality).toEqual({
+      modularity: 0.5,
+      communities: 2,
+      grouped: 0.8,
+      inside: 1,
+      largest: 0.4,
+      pairs: 2,
+    })
+  })
+
+  it('sin uniones, todo a cero', () => {
+    expect(groupQuality([], [], new Map())).toMatchObject({ modularity: 0, inside: 0, largest: 0 })
   })
 })

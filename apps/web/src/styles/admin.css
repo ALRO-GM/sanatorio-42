@@ -982,3 +982,113 @@ dialog.data-review h3 {
 .api-usage h3 {
   margin: 1rem 0 0.4rem;
 }
+
+/* Pesos de los puestos de la red de Amigos (`SeatWeightsPanel.tsx`). */
+.seat-weights-grid {
+  display: grid;
+  gap: 4px;
+  margin: 12px 0 4px;
+  overflow-x: auto;
+}
+
+.seat-weights-row {
+  display: grid;
+  grid-template-columns: minmax(96px, 1.4fr) repeat(7, minmax(38px, 1fr));
+  gap: 4px;
+}
+
+.seat-weights-rowname {
+  font-size: 0.8rem;
+  text-align: left;
+}
+
+.seat-weights-rowname[aria-pressed='true'] {
+  outline: 2px solid var(--accent);
+}
+
+.seat-weights-cell {
+  display: grid;
+  place-items: center;
+  min-height: 44px;
+  padding: 2px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--accent) calc(var(--weight, 0) * 100%), var(--surface));
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.seat-weights-cell small {
+  font-size: 0.65rem;
+  opacity: 0.7;
+}
+
+.seat-weights-cell.linked {
+  outline: 2px dashed var(--accent);
+  outline-offset: -2px;
+}
+
+.seat-weights-cell.chosen {
+  outline: 3px solid var(--accent);
+  outline-offset: -3px;
+}
+
+.seat-weights-cell.me {
+  border-style: dashed;
+  background: var(--surface-2, var(--surface));
+  font-weight: 600;
+}
+
+.seat-weights-tools,
+.seat-weights-apply,
+.seat-weights-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  align-items: end;
+  margin: 8px 0;
+}
+
+.seat-weights-apply input {
+  width: 6em;
+}
+
+.seat-weights-compare {
+  width: 100%;
+  margin: 12px 0;
+  border-collapse: collapse;
+}
+
+.seat-weights-compare th,
+.seat-weights-compare td {
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.seat-weights-compare th small {
+  display: block;
+  font-weight: 400;
+}
+
+.seat-weights-compare td {
+  font-variant-numeric: tabular-nums;
+}
+
+.seat-weights-compare td.better {
+  color: var(--ok, inherit);
+  font-weight: 600;
+}
+
+.seat-weights-compare td.better::before {
+  content: '▲ ';
+}
+
+.seat-weights-compare td.worse {
+  color: var(--danger, inherit);
+}
+
+.seat-weights-compare td.worse::before {
+  content: '▼ ';
+}

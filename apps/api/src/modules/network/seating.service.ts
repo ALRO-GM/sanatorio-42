@@ -6,10 +6,17 @@
  * piscineros de su campus; un estudiante, solo a estudiantes.
  */
 
-import type { SeatGraph, SeatHeat, SeatPerson } from '@sanatorio/contracts'
+import type {
+  SeatGraph,
+  SeatGroupQuality,
+  SeatHeat,
+  SeatPerson,
+  SeatWeightsPreview,
+} from '@sanatorio/contracts'
 import { z } from 'zod'
 
 import type { Actor } from '../../core/actor.js'
+import { assertAdmin } from '../../core/actor.js'
 import { audienceKey, NO_POOL, seesFor } from '../../core/audience.js'
 import type { Audience } from '../../core/audience.js'
 import type { Db } from '../../core/db/database.js'
@@ -19,7 +26,11 @@ import { createRateLimit } from '../../core/rate-limit.js'
 import { day, parse } from '../../core/validation.js'
 import { communitiesOf, GRAPH_BUDGET } from './network.analysis.js'
 import { seatHeatOf } from './seating.heat.js'
-import { seatingOf, trimSeating } from './seating.rules.js'
+import { seatWeightsSchema, weightsKey } from './seat-weights.js'
+import type { SeatWeightsStore } from './seat-weights.js'
+import { groupQuality } from './seating.quality.js'
+import { DEFAULT_SEAT_WEIGHTS, seatingOf, trimSeating } from './seating.rules.js'
+import type { SeatSession, SeatWeights } from './seating.rules.js'
 import { seatSessionsIn } from './seating.sessions.js'
 
 type SeatingOptions = {
@@ -27,6 +38,8 @@ type SeatingOptions = {
   audience?: Audience
   /** Los puestos que se han visto ocupados alguna vez en un campus (`replica.knownSeats`). */
   knownSeats?: (campusId: number) => Promise<string[]>
+  /** Los pesos de los puestos, que se cambian en el panel. Sin ella, los de siempre. */
+  weights?: Pick<SeatWeightsStore, 'grid'>
   now?: () => number
 }
 
@@ -34,6 +47,11 @@ export type SeatingService = {
   graph: (actor: Actor, query: unknown) => Promise<SeatGraph>
   /** El mapa de calor de los puestos: horas y gente por ordenador, sin nombres. */
   heat: (actor: Actor, query: unknown) => Promise<SeatHeat>
+  /**
+   * Solo admins: cómo saldría la red de su campus con otros pesos, y lo bien
+   * que separan en grupos comparado con los que están en uso.
+   */
+  preview: (actor: Actor, input: unknown) => Promise<SeatWeightsPreview>
 }
 
 const DAY_MS = 86_400_000
@@ -63,6 +81,8 @@ const querySchema = z.object({
   to: day.optional(),
 })
 
+const previewSchema = querySchema.extend({ grid: seatWeightsSchema })
+
 /** El tramo que se mira, en ms, y cuántos días son. */
 type Span = { since: number; until: number; days: number }
 
@@ -87,6 +107,8 @@ const round1 = (value: number): number => Math.round(value * 10) / 10
 export function createSeatingService(options: SeatingOptions): SeatingService {
   const { db, audience = NO_POOL, now = Date.now } = options
   const knownSeats = options.knownSeats ?? (() => Promise.resolve([]))
+  const gridOf = (): Promise<SeatWeights> =>
+    options.weights?.grid() ?? Promise.resolve(DEFAULT_SEAT_WEIGHTS)
   const cache = createTtlCache<SeatGraph>({ ttlMs: CACHE_TTL_MS, maxEntries: 12, now })
   const heatCache = createTtlCache<SeatHeat>({ ttlMs: CACHE_TTL_MS, maxEntries: 12, now })
   const fresh = createRateLimit({ max: FRESH_PER_MINUTE, windowMs: 60_000, now })
@@ -113,29 +135,29 @@ export function createSeatingService(options: SeatingOptions): SeatingService {
    * ver, como el grafo: así los dos suman lo mismo y nadie oculto (ni del
    * otro mundo) deja huella en un puesto.
    */
-  async function loadHeat(actor: Actor, { since, until, days }: Span): Promise<SeatHeat> {
+  async function loadHeat(actor: Actor, span: Span): Promise<SeatHeat> {
+    const { days } = span
     const [{ sessions }, known] = await Promise.all([
-      seatSessionsIn(db, actor.campusId, since, until, await seesFor(audience, actor)),
+      sessionsOf(actor, span),
       knownSeats(actor.campusId),
     ])
 
     return { days, ...seatHeatOf(sessions, known) }
   }
 
-  async function load(actor: Actor, { since, until, days }: Span): Promise<SeatGraph> {
-    const { sessions, images } = await seatSessionsIn(
-      db,
-      actor.campusId,
-      since,
-      until,
-      await seesFor(audience, actor),
-    )
-
-    const seating = seatingOf(sessions)
+  /** La red de unas sesiones con unos pesos, y lo bien que separa en grupos. */
+  function build(
+    sessions: readonly SeatSession[],
+    images: ReadonlyMap<string, string | null>,
+    days: number,
+    grid: SeatWeights,
+  ): { graph: SeatGraph; quality: SeatGroupQuality } {
+    const seating = seatingOf(sessions, grid)
     const pairs = seating.pairs.filter((pair) => pair.closeness >= MIN_CLOSENESS)
+    const logins = [...seating.people.keys()]
     const community = communitiesOf(
       pairs.map((pair) => ({ a: pair.a, b: pair.b, ab: pair.closeness, ba: 0 })),
-      [...seating.people.keys()],
+      logins,
     )
     const people: SeatPerson[] = [...seating.people].map(([login, entry]) => ({
       login,
@@ -156,34 +178,67 @@ export function createSeatingService(options: SeatingOptions): SeatingService {
     const shown = trimSeating(people, pairs, GRAPH_BUDGET)
 
     return {
-      days,
-      people: shown.people.sort(
-        (x, y) => y.closeness - x.closeness || x.login.localeCompare(y.login),
-      ),
-      links: shown.pairs.map((pair) => ({
-        source: pair.a,
-        target: pair.b,
-        closeness: Math.round(pair.closeness),
-        hours: round1(pair.hours),
-      })),
-      totals: {
-        people: people.length,
-        pairs: pairs.length,
-        communities: new Set(community.values()).size,
-        hours: Math.round(people.reduce((sum, person) => sum + person.hours, 0)),
+      graph: {
+        days,
+        people: shown.people.sort(
+          (x, y) => y.closeness - x.closeness || x.login.localeCompare(y.login),
+        ),
+        links: shown.pairs.map((pair) => ({
+          source: pair.a,
+          target: pair.b,
+          closeness: Math.round(pair.closeness),
+          hours: round1(pair.hours),
+        })),
+        totals: {
+          people: people.length,
+          pairs: pairs.length,
+          communities: new Set(community.values()).size,
+          hours: Math.round(people.reduce((sum, person) => sum + person.hours, 0)),
+        },
       },
+      quality: groupQuality(logins, pairs, community),
     }
+  }
+
+  async function sessionsOf(actor: Actor, { since, until }: Span) {
+    return seatSessionsIn(db, actor.campusId, since, until, await seesFor(audience, actor))
+  }
+
+  async function load(actor: Actor, span: Span, grid: SeatWeights): Promise<SeatGraph> {
+    const { sessions, images } = await sessionsOf(actor, span)
+
+    return build(sessions, images, span.days, grid).graph
   }
 
   return {
     async graph(actor, query) {
       const parsed = parse(querySchema, query)
+      const grid = await gridOf()
 
-      return cache.get(await keyOf(actor, parsed), () => {
+      // Los pesos van en la clave: al cambiarlos en el panel se recalcula.
+      return cache.get(`${await keyOf(actor, parsed)}|${weightsKey(grid)}`, () => {
         limited(actor)
 
-        return load(actor, spanOf(parsed, now()))
+        return load(actor, spanOf(parsed, now()), grid)
       })
+    },
+
+    async preview(actor, input) {
+      assertAdmin(actor)
+
+      const parsed = parse(previewSchema, input)
+      const span = spanOf(parsed, now())
+
+      limited(actor)
+
+      const [{ sessions, images }, grid] = await Promise.all([sessionsOf(actor, span), gridOf()])
+      const proposed = build(sessions, images, span.days, parsed.grid)
+
+      return {
+        graph: proposed.graph,
+        proposed: proposed.quality,
+        current: build(sessions, images, span.days, grid).quality,
+      }
     },
 
     async heat(actor, query) {

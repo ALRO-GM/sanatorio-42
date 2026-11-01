@@ -108,6 +108,7 @@ net.tip.endogamy.many,Ventanita: endogamia (varias),Endogamia {n} · {partners} 
 net.zoomIn,Botón: acercar,Acercar,Zoom in,Apropa,Hurbildu,Zoomer
 net.zoomOut,Botón: alejar,Alejar,Zoom out,Allunya,Urrundu,Dézoomer
 net.fit,Botón: ver todo el grafo,Ver todo,Show all,Mostra-ho tot,Ikusi dena,Tout voir
+net.shake,"Botón del grafo: volver a colocarlo desde cero, cada grupo en su sitio",Reorganizar los grupos,Rearrange the groups,Reorganitza els grups,Taldeak berrantolatu,Réorganiser les groupes
 net.find,Buscar a alguien en el grafo,Buscar en el grafo,Find in the graph,Cerca al graf,Bilatu grafoan,Chercher dans le graphe
 net.findNone,No está en el grafo,No hay nadie con ese login en el grafo,Nobody in the graph has that login,No hi ha ningú amb aquest login al graf,Grafoan ez dago login hori duen inor,Personne avec ce login dans le graphe
 net.arrows.gave,Leyenda: flecha de lo que corrigió,Corrigió →,Evaluated →,Va corregir →,Zuzendu zuen →,Corrections faites →

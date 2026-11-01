@@ -7,6 +7,7 @@ import type { Simulation, SimulationLinkDatum, SimulationNodeDatum } from 'd3-fo
 import { photoUrl } from '../../shared/api'
 import { byWeight, graphSignature, spotAt, spotIndex } from './graph-data'
 import type { SpotIndex } from './graph-data'
+import { seedLayout, separateCommunities } from './graph-seed'
 import {
   MOVING_LINKS,
   isHeavy,
@@ -38,6 +39,8 @@ type ForceGraphProps = {
     fit: string
     find: string
     none: string
+    /** Botón de volver a colocar el grafo desde cero, separando los grupos. */
+    shake: string
     /** La leyenda de las flechas de quien está elegido. */
     gave: string
     got: string
@@ -366,6 +369,7 @@ export function ForceGraph({
     zoomBy: (_factor: number): void => undefined,
     fit: (): void => undefined,
     goTo: (_login: string): void => undefined,
+    shake: (): void => undefined,
   })
   // Lo escrito en el buscador de dentro del grafo.
   const [query, setQuery] = useState('')
@@ -1164,6 +1168,27 @@ export function ForceGraph({
         zoomAt(factor, width / 2, height / 2)
       },
       fit: onDoubleClick,
+      // Vuelve a empezar desde cero: cada grupo en su sitio y con todo el calor,
+      // para desenredar lo que se haya quedado mezclado.
+      shake: () => {
+        const seeds = seedLayout(state.nodes.map((node) => node.data))
+
+        for (const node of state.nodes) {
+          const seed = seeds.get(node.login)
+
+          node.x = seed?.x ?? 0
+          node.y = seed?.y ?? 0
+          node.vx = 0
+          node.vy = 0
+        }
+        state.needsFit = true
+        state.touched = false
+        state.moving = true
+        state.ticks = 0
+        state.spots = null
+        state.simulation?.alpha(1)
+        schedule.current()
+      },
       // Lleva la vista hasta una burbuja, acercándose si hace falta, en un
       // movimiento corto para que se vea de dónde a dónde se va.
       goTo: (login) => {
@@ -1260,20 +1285,19 @@ export function ForceGraph({
     const { nodes: people, links: pairs } = latest.current
     const before = new Map(state.nodes.map((node) => [node.login, node]))
     // Quien ya estaba conserva su sitio: el grafo se recoloca, no salta.
-    const spread = 30 * Math.sqrt(people.length)
     const busiest = people.reduce((most, node) => Math.max(most, node.given + node.received), 1)
-    const simNodes: SimNode[] = people.map((data, index) => {
+    // Los nuevos, cada uno junto a su comunidad y los grupos ya separados (`graph-seed.ts`).
+    const seeds = seedLayout(people)
+    const simNodes: SimNode[] = people.map((data) => {
       const old = before.get(data.login)
-      // Espiral de girasol para los nuevos: repartidos, sin azar.
-      const angle = index * 2.399963
-      const distance = spread * Math.sqrt((index + 0.5) / people.length)
+      const seed = seeds.get(data.login)
 
       return {
         login: data.login,
         data,
         r: radiusOf(data, busiest),
-        x: old?.x ?? Math.cos(angle) * distance,
-        y: old?.y ?? Math.sin(angle) * distance,
+        x: old?.x ?? seed?.x ?? 0,
+        y: old?.y ?? seed?.y ?? 0,
         ...(old === undefined ? {} : { vx: old.vx ?? 0, vy: old.vy ?? 0 }),
       }
     })
@@ -1378,6 +1402,11 @@ export function ForceGraph({
         forceCollide<SimNode>((node) => node.r + 2.5).iterations(simNodes.length > 800 ? 1 : 2),
       )
       .force('community', communityForce(simNodes))
+      // Los grupos que se pisan se apartan: sin esto quedaban mezclados en una maraña.
+      .force(
+        'separate',
+        separateCommunities(simNodes, (node) => node.data.community),
+      )
       // Una gravedad suave hacia el centro: los grupos sueltos no se escapan.
       .force('x', forceX<SimNode>(0).strength(0.035))
       .force('y', forceY<SimNode>(0).strength(0.035))
@@ -1548,6 +1577,16 @@ export function ForceGraph({
           }}
         >
           ⤢
+        </button>
+        <button
+          type="button"
+          aria-label={controls.shake}
+          title={controls.shake}
+          onClick={() => {
+            actions.current.shake()
+          }}
+        >
+          ⟲
         </button>
       </div>
     </div>

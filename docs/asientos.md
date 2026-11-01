@@ -71,6 +71,38 @@ Desde 2·3N, los puestos donde suele sentarse un amigo, con su peso
 Para un puesto sur es lo mismo hacia la fila de arriba, así que el peso es el
 mismo en los dos sentidos. Lo demás no cuenta.
 
+### Pesos desde el panel (2026-11-01)
+
+Esos son los de siempre (`DEFAULT_SEAT_WEIGHTS`). Quien administra los cambia
+en el panel, pestaña **Amigos** (`features/network/SeatWeightsPanel.tsx`): una
+cuadrícula de tres filas (la de delante, su mesa y la de atrás) de siete
+puestos, del tercero a la izquierda al tercero a la derecha, vistos desde un
+puesto norte, con la persona en el centro. Desde un puesto sur se mira girada
+media vuelta. Se guardan en `settings` (clave `seatWeights`, sin migración) y
+la red se recalcula sola: la firma de los pesos va en la clave de su caché.
+
+- **Los dos sentidos.** Cada pareja pesa la media de mirarla desde cada uno de
+  los dos puestos. A distancia impar (enfrente) los dos se ven en la misma
+  casilla; a distancia par (mirando igual), en la casilla girada media vuelta:
+  quien tienes delante te ve detrás, y quien está a tu derecha te ve a su
+  izquierda. Por eso el panel, de entrada, cambia también la casilla pareja
+  («Lo mismo en los dos sentidos»): si no, esa pareja contaría la mitad.
+  También, de entrada, el lado contrario («Igual a izquierda y derecha»).
+- **Probar sin guardar.** «Ver cómo queda» rehace la red del campus de quien
+  administra con esos pesos y el periodo elegido
+  (`POST /admin/seat-weights/preview`): el grafo, y al lado de los pesos en
+  uso, lo bien que separan en grupos (`seating.quality.ts`):
+  - **Nitidez (modularidad)**, de −0,5 a 1: la cercanía dentro de los grupos
+    menos la que habría por azar. Es la cifra principal: más alta, mejor.
+  - **Cercanía dentro de los grupos**: más alta, menos uniones entre grupos.
+  - **Gente con grupo**: más alta, menos gente suelta.
+  - **En el grupo más grande**: más baja, mejor (muy alta es una sola bola).
+  - **Grupos** y **parejas unidas**: para comparar, ni mejor ni peor.
+
+  Ojo: subir todos los pesos a la vez no cambia los grupos, solo las parejas
+  que pasan del mínimo de cercanía (2). Lo que cuenta es la proporción entre
+  casillas.
+
 La **cercanía** de dos personas es la suma, sesión a sesión, de las horas que
 han estado sentadas a la vez por el peso de sus puestos. Una pareja sale en el
 grafo con 2 o más. Por persona: horas en un puesto, cercanía total, con
@@ -86,6 +118,16 @@ dentro de la pestaña Red (`RedPage.tsx`). Para piscineros, permiso
 
 El periodo arranca en «todo» (pedido por Alberto, 2026-11-01): de entrada se
 ve con quién se ha sentado cada cual desde siempre, y el selector lo acota.
+
+**Cómo se coloca el grafo** (`features/network/graph-seed.ts`, también en la
+red de correcciones). Antes cada burbuja nueva salía en una sola espiral por
+orden de la lista: los grupos empezaban mezclados en el centro y con mucha
+gente quedaba una maraña que había que desenredar a mano. Ahora cada grupo
+empieza en su sitio (del más grande al más pequeño, en el primer hueco libre
+de una espiral) con su gente alrededor, y quien va solo, en un anillo por
+fuera. Mientras el grafo se mueve, los grupos que se pisan se empujan
+(`separateCommunities`). El botón ⟲ («Reorganizar los grupos») vuelve a
+empezar desde ahí, por si después de arrastrar algo queda enredado.
 
 ## Recortar el grafo
 

@@ -23,6 +23,7 @@ import { FacilityList } from '../facility/FacilityList'
 import { GrowthPanel } from './GrowthPanel'
 import { FocusPanel } from './FocusPanel'
 import { PoolPanel } from './PoolPanel'
+import { SeatWeightsPanel } from '../network/SeatWeightsPanel'
 import { HiddenPanel } from './HiddenPanel'
 import { MaintenancePanel } from './MaintenancePanel'
 import { CountdownsPanel } from './CountdownsPanel'
@@ -41,6 +42,7 @@ const TABS = [
   'messages',
   'usage',
   'stats',
+  'seats',
   'clicker',
   'casts',
   'countdowns',
@@ -99,6 +101,7 @@ function AdminTabs({ campusId, me }: { campusId?: number | undefined; me: string
       {tab === 'usage' && <UsageTab />}
       {tab === 'stats' && <StatsPanel />}
       {tab === 'stats' && <GrowthPanel />}
+      {tab === 'seats' && <SeatWeightsPanel />}
       {tab === 'clicker' && <ClickerPanel me={me} />}
       {tab === 'data' && <DataPanel />}
       {tab === 'focus' && <FocusPanel />}

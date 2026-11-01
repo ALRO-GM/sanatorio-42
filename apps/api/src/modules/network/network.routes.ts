@@ -4,8 +4,10 @@
 
 import type { FastifyInstance } from 'fastify'
 
+import { assertAdmin } from '../../core/actor.js'
 import type { RouteContext } from '../../core/module.js'
 import type { NetworkService } from './network.service.js'
+import type { SeatWeightsStore } from './seat-weights.js'
 import type { SeatingService } from './seating.service.js'
 
 export function registerNetworkRoutes(
@@ -13,6 +15,7 @@ export function registerNetworkRoutes(
   { session }: RouteContext,
   network: NetworkService,
   seating: SeatingService,
+  weights: SeatWeightsStore,
 ): void {
   /**
    * `GET /network?from=&to=&login=&projectId=&min=&limit=` → quién ha corregido
@@ -76,6 +79,32 @@ export function registerNetworkRoutes(
       return reply.send(await seating.heat(await session.actor(request), request.query))
     },
   )
+
+  /**
+   * `GET /admin/seat-weights` → los pesos de los puestos en uso, los de
+   * siempre y quién los cambió. `PUT` con `{ grid }` los guarda: la red de
+   * asientos se recalcula con ellos (`docs/asientos.md`).
+   */
+  app.get('/admin/seat-weights', async (request, reply) => {
+    const actor = await session.actor(request)
+
+    assertAdmin(actor)
+
+    return reply.send(await weights.current())
+  })
+
+  app.put('/admin/seat-weights', async (request, reply) => {
+    return reply.send(await weights.set(await session.actor(request), request.body))
+  })
+
+  /**
+   * `POST /admin/seat-weights/preview` con `{ grid, days | from, to }` → cómo
+   * saldría la red de asientos con esos pesos, sin guardarlos, y lo bien que
+   * separa en grupos al lado de los pesos en uso.
+   */
+  app.post('/admin/seat-weights/preview', async (request, reply) => {
+    return reply.send(await seating.preview(await session.actor(request), request.body))
+  })
 
   /** `GET /network/mine` → con quién te has corregido tú, en todo el histórico. */
   app.get('/network/mine', async (request, reply) => {

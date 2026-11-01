@@ -141,6 +141,8 @@ import type {
   NetworkStrictest,
   SeatGraph,
   SeatHeat,
+  SeatWeightsPreview,
+  SeatWeightsState,
   Notices,
   OnlineUsers,
   PaceRefInput,
@@ -585,6 +587,11 @@ export type Api = {
   getSeatGraph: (days: number, dates?: SeatDates) => Promise<SeatGraph>
   /** El mapa de calor de los puestos: horas y gente por ordenador, en el mismo periodo. */
   getSeatHeat: (days: number, dates?: SeatDates) => Promise<SeatHeat>
+  /** Los pesos de los puestos de la red de asientos. Solo admins. */
+  getSeatWeights: () => Promise<SeatWeightsState>
+  saveSeatWeights: (grid: number[][]) => Promise<SeatWeightsState>
+  /** Cómo saldría la red de asientos con otros pesos, sin guardarlos. Solo admins. */
+  previewSeatWeights: (grid: number[][], days: number) => Promise<SeatWeightsPreview>
   /** Con quién te has corregido tú, en todo el histórico. */
   getNetworkMine: () => Promise<NetworkMine>
   /** Logins que empiezan por lo escrito, para el buscador de la red. */

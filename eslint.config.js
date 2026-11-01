@@ -145,6 +145,8 @@ export default defineConfig(
      * - `help/BookHelp|tags`: la consulta reserva ayuda y el expediente enseña
      *   cómo te describieron quienes te ayudaron.
      * - `network/Meter|VerdictStats`: el expediente resume tu red de correcciones.
+     * - `network/SeatWeightsPanel`: el panel prueba los pesos de los puestos con
+     *   el mismo grafo de Amigos que ve todo el mundo.
      * - `countdowns/CountdownDock|CountdownPicker`: el calendario tiene una vista de
      *   cuentas atrás con las mismas fichas y el mismo formulario que la ventanita.
      * - `agenda/GoalForm`: desde la vista de cuentas atrás se pone una meta nueva
@@ -160,7 +162,7 @@ export default defineConfig(
           patterns: [
             {
               regex:
-                '^\\.\\./(?!\\.\\./)(?!(notices/conversations|calendar/EventDialog|facility/(FacilityList|FacilityForm)|profile/HoursReport|clicker/(CapitalChart|CapitalHistory)|focus/FocusStatsView|gitcourse/GitCourseTab|shellcourse/ShellCourseTab|map/(ProjectMap|ClusterMapView|SeatPicker)|help/(BookHelp|tags)|network/(Meter|VerdictStats)|countdowns/(CountdownDock|CountdownPicker)|agenda/GoalForm|map/look)$)[a-z-]+/',
+                '^\\.\\./(?!\\.\\./)(?!(notices/conversations|calendar/EventDialog|facility/(FacilityList|FacilityForm)|profile/HoursReport|clicker/(CapitalChart|CapitalHistory)|focus/FocusStatsView|gitcourse/GitCourseTab|shellcourse/ShellCourseTab|map/(ProjectMap|ClusterMapView|SeatPicker)|help/(BookHelp|tags)|network/(Meter|VerdictStats|SeatWeightsPanel)|countdowns/(CountdownDock|CountdownPicker)|agenda/GoalForm|map/look)$)[a-z-]+/',
               message:
                 'Una funcionalidad no importa de otra: lo compartido va a `shared/`. Las excepciones, con su porqué, están en eslint.config.js.',
             },

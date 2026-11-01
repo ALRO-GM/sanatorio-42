@@ -1553,6 +1553,19 @@ piscineros de su campus y un estudiante, a estudiantes. Permiso de piscina
 personas (las de más horas) y 10 000 uniones (las más fuertes); `totals` cuenta
 a todo el mundo, así que la diferencia es lo que queda fuera.
 
+GET /admin/seat-weights → los pesos de los puestos de la red de asientos
+  (`docs/asientos.md`): { grid (3 filas × 7: delante, su mesa, atrás; del
+  tercer puesto a la izquierda al tercero a la derecha, vistos desde un norte),
+  defaults (los de siempre), updatedBy, updatedAt }. Solo admins.
+PUT /admin/seat-weights { grid } → los guarda (cada peso de 0 a 10, el centro
+  se queda a 0; 400 si no es 3 × 7). La red de asientos se recalcula con ellos.
+POST /admin/seat-weights/preview { grid, days | from, to } → cómo saldría la
+  red de asientos del campus de quien administra con esos pesos, sin
+  guardarlos: { graph (como GET /network/seats), proposed, current }, con la
+  calidad de los grupos (modularity, communities, grouped, inside, largest,
+  pairs) de los pesos probados y de los que están en uso. Cuenta en el mismo
+  tope de cálculos por minuto que el grafo.
+
 GET /network/seats/heat?days=30 → el mapa de calor de los puestos
 (`docs/asientos.md`): cuántas horas se ha usado cada ordenador en los últimos
 `days` días (1-3650, por defecto 30; 3650 es «todo») o entre `from` y `to`

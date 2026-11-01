@@ -7,7 +7,7 @@
  * Los fotogramas son de mentira (`requestAnimationFrame` con temporizadores
  * falsos): cada paso de 16 ms es uno.
  */
-import { act, cleanup, render } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import type { NetworkLink, NetworkNode } from '@sanatorio/contracts'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -41,6 +41,7 @@ const CONTROLS = {
   zoomIn: 'Acercar',
   zoomOut: 'Alejar',
   fit: 'Ver todo',
+  shake: 'Reorganizar',
   find: 'Buscar',
   none: 'Nadie',
   gave: 'Corrigió',
@@ -123,6 +124,22 @@ describe('ForceGraph', () => {
     expect(spent).toBeLessThan(1000)
     expect(pending()).toBe(0)
     frames(600)
+    expect(pending()).toBe(0)
+  })
+
+  it('«Reorganizar» la recalienta desde cero y vuelve a pararse sola', () => {
+    render(<Graph />)
+    untilQuiet()
+    expect(pending()).toBe(0)
+
+    act(() => {
+      fireEvent.click(screen.getByRole('button', { name: CONTROLS.shake }))
+    })
+    expect(pending()).toBe(1)
+
+    const spent = untilQuiet()
+
+    expect(spent).toBeGreaterThan(50)
     expect(pending()).toBe(0)
   })
 
