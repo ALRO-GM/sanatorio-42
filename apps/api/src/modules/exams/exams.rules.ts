@@ -14,6 +14,7 @@ import type {
 } from '@sanatorio/contracts'
 
 import { localMoment, monthOf } from '../../core/time.js'
+import { kickoffMonths } from '../../core/kickoffs.js'
 
 /** Un intento guardado: quién, de qué examen, con qué nota y cuándo. */
 export type AttemptRow = {
@@ -251,10 +252,12 @@ const nextSlug = (slug: string): boolean =>
 /**
  * La gente del campus con su kickoff, plan y círculo.
  *
- * La kickoff es el mes de su fecha de entrada al cursus (solo de quien ha
- * entrado en la web) o, si no, el de su primer proyecto del common core, como
- * en el avance de Estadísticas (`stats/progress.service.ts`): las filas
- * antiguas no traen cuándo se apuntó y vale la última vez que cambiaron.
+ * Se empieza en la fecha de entrada al cursus (solo de quien ha entrado en la
+ * web) o, si no, en la de su primer proyecto del common core, como en el avance
+ * de Estadísticas (`stats/progress.service.ts`): las filas antiguas no traen
+ * cuándo se apuntó y vale la última vez que cambiaron. La kickoff es la real
+ * del campus que le toca (`core/kickoffs.ts`): quien entró a destiempo
+ * (de otro campus, solo) va con la anterior más cercana a su entrada en 42.
  *
  * Sale quien tiene kickoff o algún examen (`examUsers`).
  */
@@ -288,7 +291,7 @@ export function examPeople(input: {
     byUser.set(row.userId, entry)
   }
 
-  return input.members.flatMap((member) => {
+  const people = input.members.flatMap((member) => {
     const entry = byUser.get(member.userId)
     const track: Track = member.track ?? (entry?.python === true ? 'next' : 'classic')
     const first = entry !== undefined && Number.isFinite(entry.first) ? entry.first : null
@@ -305,12 +308,24 @@ export function examPeople(input: {
         image: member.image,
         track,
         kickoff: start === null ? null : monthOf(start),
+        general: first === null || start === null ? start : Math.min(start, first),
         start,
         ranks: member.ranks,
         projectCircle: reached < 0 ? null : Math.min(LAST_CIRCLE, reached),
       },
     ]
   })
+  // Todos son del mismo campus: el que se mira.
+  const kickoffs = kickoffMonths(
+    people.flatMap(({ userId, start, general }) =>
+      start === null ? [] : [{ key: userId, campus: 0, start, general: general ?? start }],
+    ),
+  )
+
+  return people.map(({ general: _general, ...person }) => ({
+    ...person,
+    kickoff: kickoffs.get(person.userId) ?? person.kickoff,
+  }))
 }
 
 /** Todas las kickoffs, de la más reciente a la más antigua, con su gente de cada plan. */
