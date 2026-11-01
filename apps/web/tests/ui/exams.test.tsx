@@ -97,8 +97,8 @@ describe('Estadísticas de exámenes', () => {
     expect(within(rankRow(3)).getByText('Exam Rank 03')).toBeTruthy()
   }, 30_000)
 
-  // Solo sale en el modo de datos, que lleva los desgloses abiertos: se puede plegar.
-  it('cada intento sale abierto y se pliega, con la nota mediana; sin black hole ni tabla de kickoffs', async () => {
+  // Solo sale en el modo de datos; como la cola de intentos, va plegado.
+  it('cada intento y la cola salen plegados y se abren, con la nota mediana; sin black hole ni tabla de kickoffs', async () => {
     const user = userEvent.setup()
 
     await openExams()
@@ -110,8 +110,12 @@ describe('Estadísticas de exámenes', () => {
     )
     const details = must(folded.closest('details'), 'su details')
 
-    expect(details.open).toBe(true)
-    await user.click(folded)
+    const tail = must(
+      within(rankRow(3)).getAllByText(pattern('exams.moreAttempts'), { selector: 'summary' })[0],
+      'la cola de intentos',
+    ).closest('details')
+
+    expect(tail?.open).toBe(false)
     expect(details.open).toBe(false)
     await user.click(folded)
     expect(details.open).toBe(true)

@@ -3,7 +3,7 @@ import { useRef, useState } from 'react'
 import type { ExamFamily, ExamKickoff, ExamStat, ExamStats, ExamTrack } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
-import { Show, useDetail } from '../../shared/detail'
+import { Show } from '../../shared/detail'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { useFormat } from '../../shared/i18n/useFormat'
@@ -234,8 +234,6 @@ function ExamPairs({ exams, family }: { exams: readonly ExamStat[]; family: Fami
 /** Las estadísticas de un examen: intentos hasta aprobar y cómo va cada intento, sin tope. */
 function ExamCard({ exam }: { exam: ExamStat }) {
   const { t, tn } = useI18n()
-  // En el modo de datos, los desgloses van abiertos (`docs/interfaz.md`).
-  const deep = useDetail() === 'datos'
   const most = Math.max(1, ...exam.attemptsToPass)
   const known = exam.attemptsToPass.reduce((sum, count) => sum + count, 0)
   const bar = (count: number, index: number) => (
@@ -281,7 +279,7 @@ function ExamCard({ exam }: { exam: ExamStat }) {
             {exam.attemptsToPass.slice(0, SHOWN_ATTEMPTS).map(bar)}
           </ul>
           {exam.attemptsToPass.length > SHOWN_ATTEMPTS && (
-            <details className="exam-more" open={deep}>
+            <details className="exam-more">
               <summary>
                 {tn('exams.moreAttempts', exam.attemptsToPass.length - SHOWN_ATTEMPTS)}
               </summary>
@@ -294,11 +292,11 @@ function ExamCard({ exam }: { exam: ExamStat }) {
           )}
         </>
       )}
-      {/* El detalle por intento es denso: solo para quien quiere los datos, que lo
-          ve abierto (se puede plegar). */}
+      {/* El detalle por intento es denso: solo para quien quiere los datos. Como la
+          cola de intentos, sale plegado (pedido por Alberto, 2026-11-01). */}
       {exam.byAttempt.length > 0 && (
         <Show from="datos">
-          <details className="exam-more" open>
+          <details className="exam-more">
             <summary>{t('exams.byAttempt')}</summary>
             <ul className="rows exam-attempts">{exam.byAttempt.map(line)}</ul>
           </details>

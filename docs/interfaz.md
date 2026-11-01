@@ -50,7 +50,7 @@ los flujos: `docs/revision-2026-11/ux.md`.
 | --- | --- | --- |
 | **Simplificado** | Quien solo quiere ayuda o darla, o se pierde con tanto | Lo esencial: buscar ayuda, ofrecerse, quedar y su calendario. Sin Campus ni Agenda; de Aprender, solo el Pomodoro; sin rankings ni cifras de más, y ningún enlace a una pestaña que no sale |
 | **Normal** | La mayoría | Toda la web con las cifras principales y los filtros para afinar |
-| **Loco por los datos** | Quien disfruta mirando cifras | Todo, con rankings, estadísticas y desgloses abiertos (se pueden plegar) |
+| **Loco por los datos** | Quien disfruta mirando cifras | Todo, con rankings, estadísticas y desgloses abiertos (se pueden plegar; los de Exámenes, plegados) |
 
 ### Importancia de cada elemento
 
@@ -138,7 +138,7 @@ de datos.
 | Exámenes | Último examen acabado (de las dos últimas semanas), bajo el siguiente, con los resultados de quien entró, sus barras y la mejor nota; se quita mientras hay otro en marcha | N | Pedido por Alberto (2026-10-29): que no desaparezca al acabar, para que los amigos lo revisen |
 | Exámenes | Cuánto se tarda en cada círculo | D | Estadística |
 | Exámenes | Filtros de plan (C o Python), exámenes (C, Nexus o los dos) y kickoffs; un rango por fila con C y Nexus juntos (#81) | N | Es lo que se viene a mirar |
-| Exámenes | Cada intento (nota mediana, aprobados, personas); en qué intento se aprueba, los 3 primeros y el resto al desplegar | D | Detalle (2026-10-25: sin tabla de kickoffs ni black hole, que no eran de fiar). Desde el 2026-11, en el modo de datos los dos desgloses salen abiertos |
+| Exámenes | Cada intento (nota mediana, aprobados, personas); en qué intento se aprueba, los 3 primeros y el resto al desplegar | D | Detalle (2026-10-25: sin tabla de kickoffs ni black hole, que no eran de fiar). Desde el 2026-11-01, los dos desgloses (cada intento y la cola de «en qué intento») salen plegados en todos los modos, pedido por Alberto |
 | Pie | Idioma y «Más ajustes» (abre Personalizar: modo, tema, texto, daltonismo, zen) | S | Accesibilidad |
 | Bienvenida | Seis pasos (siete con la Red y los clústeres, que salen solo si el modo elegido en el primero los enseña): saludo con el modo, perfil, Peer to peer, disponible, Proyectos con Sprints y Pizarras, y el calendario con los ajustes | S | No presentar lo que no va a salir; de diez pasos a seis o siete (2026-11); los textos dicen que el modo y el tema están en «Más ajustes», no sueltos en el pie |
 | Pie | Campus | N | Casi nadie cambia de campus |
