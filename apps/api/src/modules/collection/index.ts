@@ -21,7 +21,8 @@ import { NO_POOL, seesFor } from '../../core/audience.js'
 import type { Audience } from '../../core/audience.js'
 import type { Db } from '../../core/db/database.js'
 import type { AppModule } from '../../core/module.js'
-import { isoAt } from '../../core/time.js'
+import { kickoffMonths } from '../../core/kickoffs.js'
+import { isoAt, monthOf } from '../../core/time.js'
 import { createTtlCache } from '../../core/ttl-cache.js'
 import { parse } from '../../core/validation.js'
 import { PISCINE } from '../replica/index.js'
@@ -68,10 +69,41 @@ type World = {
   corrected: Map<string, Set<number>>
   alive: Set<number> | null
   circleOf: Map<string, number>
+  kickoffOf: Map<string, string>
 }
 
-const kickoffOf = (beginAt: string | null): string | null =>
-  beginAt !== null && /^\d{4}-\d{2}/.test(beginAt) ? beginAt.slice(0, 7) : null
+/**
+ * La kickoff (`AAAA-MM`) de cada cual, la misma que el Avance y Exámenes: entre
+ * las kickoffs reales del campus (`core/kickoffs.ts`), con cuándo empezó el
+ * cursus (o su primer proyecto) y lo primero que se sabe de él en 42. Un
+ * piscinero va con su piscina: el mes en que empezó.
+ */
+function kickoffsOf(
+  people: Iterable<FinishedRow>,
+  campusId: number,
+  pool: boolean,
+): Map<string, string> {
+  const known = [...people].flatMap((row) => {
+    const begin = row.beginAt === null ? NaN : Date.parse(row.beginAt)
+    const first = row.firstAt === null ? NaN : Date.parse(row.firstAt)
+    const start = Number.isFinite(begin) ? begin : first
+
+    return Number.isFinite(start)
+      ? [
+          {
+            key: row.login,
+            campus: campusId,
+            start,
+            general: Number.isFinite(first) ? Math.min(start, first) : start,
+          },
+        ]
+      : []
+  })
+
+  if (pool) return new Map(known.map((one) => [one.key, monthOf(one.start)]))
+
+  return kickoffMonths(known)
+}
 
 export function createCollectionModule(deps: CollectionDeps) {
   const repository = createCollectionRepository(deps.db)
@@ -105,7 +137,14 @@ export function createCollectionModule(deps: CollectionDeps) {
     ])
     const circleOf = pool ? new Map<string, number>() : await deps.circlesOf([...people.keys()])
 
-    return { universe, people, corrected, alive, circleOf }
+    return {
+      universe,
+      people,
+      corrected,
+      alive,
+      circleOf,
+      kickoffOf: kickoffsOf(people.values(), campusId, pool),
+    }
   }
 
   async function collection(actor: Actor, input: unknown): Promise<CorrectionCollection> {
@@ -128,7 +167,7 @@ export function createCollectionModule(deps: CollectionDeps) {
       .map((row) => ({
         login: row.login,
         image: row.image,
-        kickoff: kickoffOf(row.beginAt),
+        kickoff: world.kickoffOf.get(row.login) ?? null,
         finished: row.finished,
         // Lo tuyo, de cualquier campus, como en el grafo del tablón.
         corrected: row.login === self ? mine : (world.corrected.get(row.login) ?? new Set()),
@@ -225,5 +264,3 @@ export function createCollectionModule(deps: CollectionDeps) {
     },
   } satisfies AppModule & { service: typeof service }
 }
-
-export type CollectionModule = ReturnType<typeof createCollectionModule>

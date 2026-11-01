@@ -656,7 +656,8 @@ da 400. Un piscinero necesita el permiso `tablon.corrections`.
   corregido alguna vez.
 - **Grupos**: `friends`, las 10 personas con las que más te has corregido (en
   los dos sentidos, la cercanía de la red de correcciones) y tú; `kickoff`, quien
-  empezó el 42cursus el mismo mes (un piscinero: su piscina); `circle`, quien va
+  tiene tu kickoff, la misma que el Avance (las reales del campus,
+  `core/kickoffs.ts`; un piscinero: el mes de su piscina); `circle`, quien va
   por tu círculo (no hay en la piscina); `world`, todo tu campus. `standings`
   trae solo los grupos que tienes (sin kickoff conocido, no sale) y `rank` es
   `null` si aún no tienes nada que corregir. `rows`, las 50 primeras del grupo

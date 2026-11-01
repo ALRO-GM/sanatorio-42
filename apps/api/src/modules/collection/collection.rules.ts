@@ -29,7 +29,7 @@ export const isExamSlug = (slug: string | null): boolean =>
   slug !== null && /(^|-)exam(-|$)/.test(slug)
 
 /** Una fracción con tres decimales, como la dan los contratos. */
-export const round3 = (value: number): number => Math.round(value * 1000) / 1000
+const round3 = (value: number): number => Math.round(value * 1000) / 1000
 
 /**
  * Las cuentas de una persona: de lo que aprobó, lo que sigue vivo en el campus

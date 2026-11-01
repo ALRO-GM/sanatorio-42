@@ -356,6 +356,46 @@ describe('servicio del álbum', () => {
     expect(circle.rows.map((row) => row.login)).toEqual(['yo', 'leo'])
   })
 
+  it('el kickoff es el real del campus, como en el Avance: quien entra a destiempo va con el anterior', async () => {
+    // Nueve personas entran el 1 de septiembre (una kickoff real) y leo llega
+    // en noviembre de otro campus: va con la de septiembre, no con «2025-11».
+    await db.batch(
+      [
+        ...Array.from({ length: 9 }, (_, index) => [
+          {
+            sql: `INSERT INTO users (id, login, image, synced_at) VALUES (?, ?, NULL, ?)`,
+            args: [200 + index, `nuevo${String(index)}`, ago(0)],
+          },
+          {
+            sql: 'INSERT INTO campus_members (campus_id, user_id) VALUES (?, ?)',
+            args: [MADRID, 200 + index],
+          },
+          {
+            sql: `INSERT INTO project_users (id, user_id, project_id, status, validated, synced_at)
+                  VALUES (?, ?, 1, 'finished', 1, ?)`,
+            args: [300 + index, 200 + index, ago(0)],
+          },
+          {
+            sql: `INSERT INTO core_cursus (user_id, login, campus_id, begin_at, updated_at)
+                  VALUES (?, ?, ?, '2025-09-01T08:00:00.000Z', ?)`,
+            args: [200 + index, `nuevo${String(index)}`, MADRID, ago(0)],
+          },
+        ]).flat(),
+        {
+          sql: "UPDATE core_cursus SET begin_at = '2025-11-20T08:00:00.000Z' WHERE login = 'leo'",
+          args: [],
+        },
+      ],
+      'write',
+    )
+
+    const result = await ask('yo', { group: 'kickoff' })
+
+    expect(result.standings.find((one) => one.group === 'kickoff')?.label).toBe('2025-09')
+    expect(result.rows.map((row) => row.login)).toContain('leo')
+    expect(result.rows).toHaveLength(12)
+  })
+
   it('a quien no tiene nada que corregir le da la rareza y ningún puesto', async () => {
     const result = await ask('nadie', { group: 'world' })
 

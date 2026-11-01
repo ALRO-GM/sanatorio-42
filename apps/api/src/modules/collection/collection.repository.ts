@@ -17,6 +17,11 @@ export type FinishedRow = {
   image: string | null
   /** Cuándo empezó (ISO-8601), o `null` si no se sabe. */
   beginAt: string | null
+  /**
+   * Lo primero que se sabe de esa persona en 42: cuándo se apuntó a su primer
+   * proyecto (de cualquier campus). Con `beginAt`, da su kickoff real.
+   */
+  firstAt: string | null
   finished: Set<number>
 }
 
@@ -64,7 +69,8 @@ export function createCollectionRepository(db: Db) {
       const result = await db.execute(
         pool !== null
           ? {
-              sql: `SELECT pm.login AS login, pm.image AS image, pm.begin_at AS begin_at, pu.project_id
+              sql: `SELECT pm.login AS login, pm.image AS image, pm.begin_at AS begin_at,
+                           NULL AS first_at, pu.project_id
                     FROM pool_members pm
                     JOIN project_users pu ON pu.user_id = pm.user_id
                     WHERE pm.campus_id = ?
@@ -75,7 +81,10 @@ export function createCollectionRepository(db: Db) {
             }
           : {
               sql: `SELECT u.login AS login, u.image AS image,
-                           COALESCE(cc.begin_at, ul.begin_at) AS begin_at, pu.project_id
+                           COALESCE(cc.begin_at, ul.begin_at) AS begin_at,
+                           (SELECT MIN(COALESCE(p2.created_at_42, p2.updated_at_42))
+                              FROM project_users p2 WHERE p2.user_id = u.id) AS first_at,
+                           pu.project_id
                     FROM campus_members cm
                     JOIN users u ON u.id = cm.user_id
                     JOIN project_users pu ON pu.user_id = u.id
@@ -94,6 +103,7 @@ export function createCollectionRepository(db: Db) {
           login,
           image: toTextOrNull(row.image),
           beginAt: toTextOrNull(row.begin_at),
+          firstAt: toTextOrNull(row.first_at),
           finished: new Set<number>(),
         }
 
@@ -174,5 +184,3 @@ export function createCollectionRepository(db: Db) {
     },
   }
 }
-
-export type CollectionRepository = ReturnType<typeof createCollectionRepository>

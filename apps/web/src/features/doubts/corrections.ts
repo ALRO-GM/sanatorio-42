@@ -74,7 +74,7 @@ export function albumOf(graph: HolyGraph): AlbumSet[] {
     .filter((set) => set.cards.length > 0)
 }
 
-export type AlbumProgress = {
+type AlbumProgress = {
   owned: number
   total: number
   /** De 0 a 1; 0 si aún no hay nada que conseguir. */
@@ -106,9 +106,9 @@ export function progressOf(sets: readonly AlbumSet[]): AlbumProgress {
  * pueden corregir lo ha corregido). Con menos de 5 personas no se dice nada:
  * con 2, «el 50 %» no significa nada.
  */
-export type RarityTier = 'common' | 'uncommon' | 'rare' | 'legendary'
+type RarityTier = 'common' | 'uncommon' | 'rare' | 'legendary'
 
-export const RARITY_MIN_PEOPLE = 5
+const RARITY_MIN_PEOPLE = 5
 
 export function rarityTierOf(rarity: CollectionRarity | undefined): RarityTier | null {
   if (rarity === undefined || rarity.eligible < RARITY_MIN_PEOPLE) return null
@@ -119,7 +119,7 @@ export function rarityTierOf(rarity: CollectionRarity | undefined): RarityTier |
   return 'legendary'
 }
 
-export type AlbumGoals = {
+type AlbumGoals = {
   /** El set al que menos le falta (y lo que le falta), si hay alguno a medias. */
   closestSet: { circle: number; missing: AlbumCard[] } | null
   /** El cromo que te falta y menos gente tiene (solo si la API dice su rareza). */
