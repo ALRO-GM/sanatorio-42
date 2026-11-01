@@ -3,28 +3,6 @@
 import type { ConceptText } from '../types.js'
 
 export const PISCINE_C04_C07_EN: Readonly<Record<string, ConceptText>> = {
-  'pis-c04-strlen': {
-    forms: [
-      {
-        ask: [
-          'What does it return for "42 Madrid"?',
-          'Given the string "42 Madrid", what does it return?',
-        ],
-        right: ['9'],
-        wrong: ['10', '8', '2', '7'],
-      },
-      {
-        ask: [
-          'What does it return for the empty string ""?',
-          'Given "", what does this function return?',
-        ],
-        right: ['0'],
-        wrong: ['1', '-1', '2'],
-      },
-    ],
-    wrong: ['10', '8', '2'],
-    why: "It counts the characters up to the '\\0' without counting it: the space counts, and the empty string gives 0.",
-  },
   'pis-c04-putstr': {
     forms: [
       {

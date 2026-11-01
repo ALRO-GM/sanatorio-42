@@ -3,28 +3,6 @@
 import type { ConceptText } from '../types.js'
 
 export const PISCINE_C04_C07_FR: Readonly<Record<string, ConceptText>> = {
-  'pis-c04-strlen': {
-    forms: [
-      {
-        ask: [
-          'Que renvoie-t-elle avec "42 Madrid" ?',
-          'Avec la chaîne "42 Madrid", que renvoie-t-elle ?',
-        ],
-        right: ['9'],
-        wrong: ['10', '8', '2', '7'],
-      },
-      {
-        ask: [
-          'Que renvoie-t-elle avec la chaîne vide "" ?',
-          'Avec "", que renvoie cette fonction ?',
-        ],
-        right: ['0'],
-        wrong: ['1', '-1', '2'],
-      },
-    ],
-    wrong: ['10', '8', '2'],
-    why: "Elle compte les caractères jusqu'au '\\0' sans le compter : l'espace compte, et la chaîne vide donne 0.",
-  },
   'pis-c04-putstr': {
     forms: [
       {

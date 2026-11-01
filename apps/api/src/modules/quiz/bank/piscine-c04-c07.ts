@@ -20,28 +20,6 @@ const C07 = fromPiscine('c-piscine-c-07')
 /** C 04: cadenas, números y bases. */
 const C04_CONCEPTS: readonly Concept[] = [
   {
-    id: 'pis-c04-strlen',
-    topic: 'cadenas',
-    needs: { projects: C04 },
-    kind: 'long',
-    level: 1,
-    code: "int ft_strlen(char *str)\n{\n    int i;\n\n    i = 0;\n    while (str[i] != '\\0')\n        i++;\n    return (i);\n}",
-    forms: [
-      {
-        ask: ['¿Qué devuelve con "42 Madrid"?', 'Con la cadena "42 Madrid", ¿qué devuelve?'],
-        right: ['9'],
-        wrong: ['10', '8', '2', '7'],
-      },
-      {
-        ask: ['¿Qué devuelve con la cadena vacía ""?', 'Con "", ¿qué devuelve esta función?'],
-        right: ['0'],
-        wrong: ['1', '-1', '2'],
-      },
-    ],
-    wrong: ['10', '8', '2'],
-    why: "Cuenta los caracteres hasta el '\\0' sin contarlo: el espacio cuenta, y la cadena vacía da 0.",
-  },
-  {
     id: 'pis-c04-putstr',
     topic: 'cadenas',
     needs: { projects: C04 },

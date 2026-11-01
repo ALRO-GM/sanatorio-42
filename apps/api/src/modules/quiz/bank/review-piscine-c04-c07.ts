@@ -3,12 +3,6 @@
 import type { ReviewEntry } from './types.js'
 
 export const REVIEW_PISCINE_C04_C07: Record<string, ReviewEntry> = {
-  'pis-c04-strlen': {
-    title: 'ft_strlen',
-    definition:
-      "Recorre la cadena con un índice hasta encontrar el '\\0' y devuelve cuántos caracteres ha pasado, sin contar el '\\0'. Los espacios cuentan como cualquier otro carácter.",
-    example: 'ft_strlen("42 Madrid") = 9; ft_strlen("") = 0.',
-  },
   'pis-c04-putstr': {
     title: "ft_putstr y el '\\0'",
     definition:
