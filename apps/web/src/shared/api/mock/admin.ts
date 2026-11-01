@@ -22,7 +22,7 @@ import {
 
 /** La versión de mentira de la privacidad y las condiciones, y si se ha aceptado. */
 const legal: { version: string; acceptedAt: string | null } = {
-  version: '2026-10-25',
+  version: '2026-11-01',
   acceptedAt: null,
 }
 

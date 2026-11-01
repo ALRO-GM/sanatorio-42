@@ -113,6 +113,7 @@ con el commit donde volver a verlo, está en
 
 | Fecha      | Dónde                  | Qué cambió                                                                                                   |
 | ---------- | ---------------------- | ------------------------------------------------------------------------------------------------------------ |
+| 2026-11-01 | Privacidad             | Texto nuevo (versión 2026-11-01, se vuelve a aceptar): correo de contacto, interés legítimo para los datos de quien no entra y cómo no salir, proveedores (Oracle, Slack del staff), plazos, seguridad y normas de no sacar datos de la red de 42; el pie dice «Hecho para albrodri» |
 | 2026-11-01 | Dominio                | La web pasa a [peer4u.app](https://peer4u.app); `www.` y el dominio de antes redirigen |
 | 2026-11-01 | Red                    | Si tu red sale vacía (aún sin correcciones, o viendo la web como piscinero), la vista de partida es la del campus |
 | 2026-11-01 | Not-games · Piscina    | Los piscineros tienen salas de preguntas: cada grupo y cada campus, las suyas; entre campus, desde el panel    |
@@ -292,8 +293,10 @@ Decisiones que lo definen:
 - **Textos y estilos como datos.** Los textos viven en tablas CSV con una
   columna por idioma; los estilos, en carpetas que solo dan valor a variables.
 - **Privacidad.** No se guardan correos, teléfonos, tokens de 42 ni los
-  comentarios de las correcciones. Cada cual descarga o anonimiza sus datos.
-  Estudiantes y piscineros no se ven entre sí.
+  comentarios de las correcciones. Cada cual descarga o anonimiza sus datos, y
+  quien lo pide (aunque nunca haya entrado) deja de salir. Estudiantes y
+  piscineros no se ven entre sí. El texto legal se apoya en el consentimiento de
+  quien entra y en el interés legítimo para lo que la intra ya enseña a la red.
 
 ## Módulos de la API
 

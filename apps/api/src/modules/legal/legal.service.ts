@@ -23,7 +23,7 @@ import { isoAt } from '../../core/time.js'
  * cambia algo de lo que dice `features/legal` en la web: entonces se vuelve a
  * pedir a todo el mundo.
  */
-export const LEGAL_VERSION = '2026-10-25'
+export const LEGAL_VERSION = '2026-11-01'
 
 export type LegalServiceOptions = {
   db: Db

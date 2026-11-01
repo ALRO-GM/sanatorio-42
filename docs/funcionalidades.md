@@ -330,6 +330,7 @@ En este orden (`app/Header.tsx`, `app/UserMenu.tsx`):
 | Campus que se mira (los que no se copian, marcados) | N | Todos |
 | De cuándo son los datos de 42 | D | Todos |
 | Privacidad | S | Todos |
+| Quién la hace: «Hecho para albrodri», con enlace a su perfil de la intra | S | Todos |
 
 ## En toda la web
 
@@ -388,7 +389,7 @@ En este orden (`app/Header.tsx`, `app/UserMenu.tsx`):
 | Entrar con la cuenta de 42 y el motivo de un rechazo (cancelado, no eres estudiante, piscina cerrada con el aviso de quien administra) | Sin sesión | `features/auth/Login.tsx` |
 | Servidor caído, con reintentar | Todos | `app/App.tsx` |
 | Pantalla de mantenimiento con cuenta atrás y entrada discreta para admins | Quien no administra | `features/maintenance/MaintenanceScreen.tsx` |
-| Privacidad y condiciones (`#/privacidad`), también sin sesión | Todos | `features/legal/LegalPage.tsx` |
+| Privacidad y condiciones (`#/privacidad`), también sin sesión: responsable y correo de contacto, quién puede entrar, datos de 42 y de aquí, base legal (consentimiento e interés legítimo), quién lo ve y proveedores, plazos, seguridad, derechos, cómo no salir en la web y normas | Todos | `features/legal/LegalPage.tsx` |
 | Con sesión: cuándo aceptaste, descargar todos tus datos, anonimizar la cuenta escribiendo tu login | Todos | `LegalPage.tsx`, `AnonymizeAccount.tsx` |
 
 ## Panel de gestión
