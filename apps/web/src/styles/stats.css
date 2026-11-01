@@ -90,6 +90,25 @@
   height: auto;
   touch-action: pan-y;
 }
+/* Con un punto marcado, el dedo ya no desplaza la página sobre la gráfica:
+   arrastrarlo (también hacia abajo, para afinar) recorre la línea. */
+.progress-chart.marked > svg {
+  touch-action: none;
+}
+/* «Ajuste fino ×N» mientras se afina con el dedo. */
+.progress-fine {
+  position: absolute;
+  top: 0.3rem;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: var(--surface-2, var(--surface));
+  border: 1px solid var(--border);
+  color: var(--text-2);
+  font-size: 0.75rem;
+  pointer-events: none;
+}
 .progress-grid line {
   stroke: var(--border);
   stroke-width: 1;

@@ -1,4 +1,4 @@
-import { useId, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import type { KeyboardEvent, PointerEvent } from 'react'
 
 import type { ProgressLine, ProgressMeasure, StatsProgress } from '@sanatorio/contracts'
@@ -6,6 +6,7 @@ import type { ProgressLine, ProgressMeasure, StatsProgress } from '@sanatorio/co
 import { useI18n } from '../../shared/i18n'
 import { useFormat } from '../../shared/i18n/useFormat'
 import { Icon } from '../../shared/ui/Icon'
+import { fineFactor } from '../../shared/ui/range'
 import { MAX_LINES, ME_STYLE, TRACKS, areasOf, groupSeries, personStyle } from './progressSeries'
 import type { GroupKey, LineStyle, Picked, Series } from './progressSeries'
 import {
@@ -13,6 +14,7 @@ import {
   monotonePath,
   nextStop,
   stepped,
+  stopNear,
   stopsOf,
   tracePoints,
 } from './progressTrace'
@@ -230,6 +232,10 @@ const strokeOf = (style: LineStyle) => ({
 })
 
 /** La muestra de una línea en la leyenda: el mismo color, trazo y grosor. */
+/** Con el dedo (o un lápiz): el punto se queda marcado. Sin `pointerType` (jsdom), ratón. */
+const byFinger = (event: PointerEvent): boolean =>
+  event.pointerType === 'touch' || event.pointerType === 'pen'
+
 function LineKey({ style }: { style: LineStyle }) {
   return (
     <svg className="progress-key" viewBox="0 0 28 8" aria-hidden="true">
@@ -305,6 +311,18 @@ export function ProgressChart({
   const { t, tn } = useI18n()
   const { number } = useFormat()
   const [hover, setHover] = useState<Stop | null>(null)
+  // Con el dedo: el punto se queda marcado y se recorre la línea arrastrando
+  // (lejos de la gráfica, más fino, como los deslizadores). Ver `onPointerDown`.
+  const touch = useRef<{
+    id: number
+    box: DOMRect
+    startY: number
+    lastX: number
+    raw: number
+    fine: boolean
+  } | null>(null)
+  const [fine, setFine] = useState(1)
+  const chart = useRef<HTMLDivElement>(null)
   const [zoom, setZoom] = useState(false)
   // El eje del tiempo va del principio al final del periodo; con «Todo», hasta el último dato.
   const firstDay = span.first
@@ -417,10 +435,16 @@ export function ProgressChart({
         ? `${number(value)} % · ${t('stats.progress.hours', { n: number(Math.round((value / 100) * hours)) })}`
         : `${number(value)} %`
 
-  const onMove = (event: PointerEvent<SVGSVGElement>): void => {
-    const box = event.currentTarget.getBoundingClientRect()
-    const at = ((event.clientX - box.left) / box.width) * WIDTH
-    const height = ((event.clientY - box.top) / box.height) * HEIGHT
+  /** El día de una posición horizontal de la gráfica (en píxeles de pantalla). */
+  const dayAt = (box: DOMRect, px: number): number => {
+    const at = (px / box.width) * WIDTH
+
+    return firstDay + ((at - PAD.left) / (WIDTH - PAD.left - PAD.right)) * (lastDay - firstDay)
+  }
+  /** Lo que hay bajo el puntero: cerca de un hito, el hito; si no, el día más cercano. */
+  const stopAt = (box: DOMRect, clientX: number, clientY: number): Stop | null => {
+    const at = ((clientX - box.left) / box.width) * WIDTH
+    const height = ((clientY - box.top) / box.height) * HEIGHT
     // Cerca de un hito, el hito; si no, el día más cercano.
     const near: { stop: Stop | null; distance: number } = { stop: null, distance: MILESTONE_REACH }
 
@@ -435,13 +459,11 @@ export function ProgressChart({
         }
       })
     }
-    if (near.stop !== null) {
-      setHover(near.stop)
-      return
-    }
-    const day = firstDay + ((at - PAD.left) / (WIDTH - PAD.left - PAD.right)) * (lastDay - firstDay)
+    if (near.stop !== null) return near.stop
+    const day = dayAt(box, clientX - box.left)
+
     // El día del periodo más cercano (el de antes del borde izquierdo no cuenta).
-    const closest = stops.reduce<Stop | null>(
+    return stops.reduce<Stop | null>(
       (best, stop) =>
         stop.kind === 'day' &&
         (best === null || Math.abs(stop.day - day) < Math.abs(best.day - day))
@@ -449,9 +471,76 @@ export function ProgressChart({
           : best,
       null,
     )
-
-    if (closest !== null) setHover(closest)
   }
+  const onMove = (event: PointerEvent<SVGSVGElement>): void => {
+    const drag = touch.current
+
+    if (drag === null) {
+      // Ratón: lo que haya debajo, mientras esté encima.
+      if (byFinger(event)) return
+      const stop = stopAt(event.currentTarget.getBoundingClientRect(), event.clientX, event.clientY)
+
+      if (stop !== null) setHover(stop)
+      return
+    }
+    if (event.pointerId !== drag.id) return
+    // Arrastrando el dedo: lejos de donde se tocó (arriba o abajo), cada píxel
+    // mueve menos; el punto sigue marcado aunque el dedo salga de la gráfica.
+    const factor = fineFactor(event.clientY - drag.startY)
+    const x = event.clientX - drag.box.left
+
+    if (factor < 1) drag.fine = true
+    drag.raw = Math.min(
+      drag.box.width,
+      Math.max(0, drag.fine ? drag.raw + (x - drag.lastX) * factor : x),
+    )
+    drag.lastX = x
+    setFine(drag.fine ? Math.max(1, Math.round(1 / factor)) : 1)
+    const stop = drag.fine
+      ? stopNear(stops, dayAt(drag.box, drag.raw))
+      : stopAt(drag.box, event.clientX, event.clientY)
+
+    if (stop !== null) setHover(stop)
+  }
+  const onPointerDown = (event: PointerEvent<SVGSVGElement>): void => {
+    if (!byFinger(event)) return
+    const box = event.currentTarget.getBoundingClientRect()
+    const x = event.clientX - box.left
+    // Se sigue al dedo aunque salga de la gráfica (jsdom no tiene captura).
+    const capture: Partial<Pick<SVGSVGElement, 'setPointerCapture'>> = event.currentTarget
+
+    capture.setPointerCapture?.call(event.currentTarget, event.pointerId)
+    touch.current = {
+      id: event.pointerId,
+      box,
+      startY: event.clientY,
+      lastX: x,
+      raw: x,
+      fine: false,
+    }
+    const stop = stopAt(box, event.clientX, event.clientY)
+
+    if (stop !== null) setHover(stop)
+  }
+  /** Al soltar, el punto se queda: se quita tocando fuera de la gráfica. */
+  const onPointerEnd = (): void => {
+    touch.current = null
+    setFine(1)
+  }
+
+  // Marcado con el dedo, un toque en cualquier otro sitio lo quita.
+  const marked = hover !== null
+  useEffect(() => {
+    if (!marked) return
+    const away = (event: Event): void => {
+      if (touch.current === null && !chart.current?.contains(event.target as Node)) setHover(null)
+    }
+
+    document.addEventListener('pointerdown', away)
+    return () => {
+      document.removeEventListener('pointerdown', away)
+    }
+  }, [marked])
   const onKeyDown = (event: KeyboardEvent<SVGSVGElement>): void => {
     if (event.key === 'Escape') {
       setHover(null)
@@ -529,20 +618,24 @@ export function ProgressChart({
           <Icon name="lupa" size={16} />
         </button>
       </div>
-      <div className="progress-chart">
+      <div className={`progress-chart ${marked ? 'marked' : ''}`} ref={chart}>
         <svg
           viewBox={`0 0 ${String(WIDTH)} ${String(HEIGHT)}`}
           role="group"
           aria-label={t('stats.progress.title')}
           aria-describedby={`${id}-keys`}
           tabIndex={0}
+          onPointerDown={onPointerDown}
           onPointerMove={onMove}
-          onPointerLeave={() => {
-            setHover(null)
+          onPointerUp={onPointerEnd}
+          onPointerCancel={onPointerEnd}
+          onPointerLeave={(event) => {
+            // Con el dedo, el punto se queda al salir.
+            if (!byFinger(event)) setHover(null)
           }}
           onKeyDown={onKeyDown}
           onBlur={() => {
-            setHover(null)
+            if (touch.current === null) setHover(null)
           }}
         >
           <desc id={`${id}-keys`}>{t('stats.progress.chartKeys')}</desc>
@@ -740,6 +833,11 @@ export function ProgressChart({
             </g>
           )}
         </svg>
+        {fine > 1 && (
+          <span className="progress-fine" aria-hidden="true">
+            {t('range.fine', { n: fine })}
+          </span>
+        )}
         {hoverDay !== null && (
           <div
             className={`progress-tip ${x(hoverDay) > WIDTH / 2 ? 'left' : 'right'}`}

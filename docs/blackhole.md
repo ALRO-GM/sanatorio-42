@@ -467,6 +467,18 @@ medias de 10 o más, tu línea y cinco personas, 28 KB / 1,9 KB (13 KB / 1,2 KB
 sin hitos); si todas las medias son de personas sueltas (un campus casi vacío),
 hasta 100 KB / 2,5 KB.
 
+## Con el dedo (2026-11-01)
+
+Pedido por Alberto: en el móvil costaba acertar con los puntos. Con el dedo
+(`pointerType` táctil o lápiz; el ratón sigue igual), tocar la gráfica marca el
+punto y se queda al soltar. Arrastrando a los lados se recorre la línea; si el
+dedo se aleja arriba o abajo de donde tocó, cada píxel mueve menos (el ajuste
+fino de los deslizadores, `fineFactor`, con «Ajuste fino ×N»), y el punto sigue
+marcado aunque el dedo salga de la gráfica. Un toque fuera lo quita. Sin punto
+marcado, deslizar en vertical sobre la gráfica desplaza la página como siempre
+(`touch-action: pan-y`); con uno marcado, la gráfica se queda el dedo
+(`touch-action: none`) para poder afinar hacia abajo.
+
 ## Límites
 
 - La copia es de los campus copiados (`trackedCampusIds`). Quien vino de otro

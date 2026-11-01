@@ -108,6 +108,18 @@ export function stopsOf(
   return stops.sort((a, b) => a.day - b.day || (a.kind === 'day' ? -1 : 1))
 }
 
+/**
+ * El sitio más cercano a un día (con dos igual de cerca, el primero: el día
+ * antes que su hito). Para recorrer la línea con el dedo (`ProgressChart`).
+ */
+export function stopNear(stops: readonly Stop[], day: number): Stop | null {
+  return stops.reduce<Stop | null>(
+    (best, stop) =>
+      best === null || Math.abs(stop.day - day) < Math.abs(best.day - day) ? stop : best,
+    null,
+  )
+}
+
 /** El sitio al que se va con una tecla desde `current` (o `null` si la tecla no mueve). */
 export function nextStop(stops: readonly Stop[], current: Stop | null, key: string): Stop | null {
   const index =
