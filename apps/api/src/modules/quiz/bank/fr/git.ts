@@ -6,103 +6,107 @@ export const GIT_FR: Readonly<Record<string, ConceptText>> = {
   'git-commit': {
     forms: [
       {
-        ask: ["Qu'est-ce qu'un commit ?", 'Un commit enregistre…'],
+        ask: ["Qu'est-ce qu'un commit ?", 'Un commit enregistre…'],
         right: [
-          'Un instantané des fichiers indexés, avec un message et son commit précédent',
-          'Une version enregistrée du projet qui pointe vers la précédente',
+          'Un instantané de ce qui est indexé, avec message et parent',
+          'Une version enregistrée qui pointe vers la précédente',
         ],
       },
       {
         ask: [
-          "Qu'est-ce qui entre dans un commit ?",
+          "Qu'est-ce qui entre dans un commit ?",
           'Quand tu lances git commit, git enregistre…',
         ],
-        right: ["Ce qui est dans l'index (ce que tu as ajouté avec git add)"],
+        right: ["Ce qui est dans l'index, ajouté avec git add"],
         wrong: [
           'Tout ce qui est dans le dossier, toujours',
-          'Seulement les nouveaux fichiers',
-          "Ce qui n'est pas dans l'index",
+          'Seulement les nouveaux fichiers, jamais les modifiés',
+          "Ce qui n'est pas encore dans l'index",
         ],
       },
     ],
     wrong: [
-      'Une copie du dépôt sur le serveur',
-      'Une nouvelle branche',
-      'Un fichier de configuration de git',
-      'La liste des fichiers que git ignore',
+      'Une copie du dépôt gardée sur le serveur',
+      'Une nouvelle branche qui part de la branche main',
+      'Un fichier de configuration propre à git',
+      'La liste des fichiers que git doit ignorer',
     ],
-    why: "Chaque commit est un instantané de ce qui a été indexé avec add, avec son message et un lien vers son parent : c'est comme ça que se construit l'historique.",
+    why: "Chaque commit est un instantané de ce qui a été indexé avec add, avec son message et un lien vers son parent : c'est comme ça que se construit l'historique.",
   },
   'git-status': {
     forms: [
       {
-        ask: ['Que te dit `git status` ?', '`git status` sert à voir…'],
+        ask: ['Que te dit `git status` ?', '`git status` sert à voir…'],
         right: [
-          'Sur quelle branche tu es, ce qui est indexé et ce qui a changé sans être indexé',
+          "Ta branche, ce qui est indexé et ce qui ne l'est pas",
           "L'état de tes fichiers et de ta branche",
         ],
       },
     ],
     wrong: [
-      "L'historique des commits",
-      'Qui a modifié chaque ligne',
-      'Si le serveur est allumé',
-      'Les différences ligne par ligne',
+      "L'historique des commits de la branche",
+      "Qui a modifié chaque ligne d'un fichier",
+      'Si le serveur distant est allumé et répond',
+      'Les différences ligne par ligne de chaque fichier',
     ],
-    why: "status, c'est la photo du moment : la branche, ce qui est indexé et ce qui ne l'est pas. L'historique, c'est git log.",
+    why: "status, c'est la photo du moment : la branche, ce qui est indexé et ce qui ne l'est pas. L'historique, c'est git log.",
   },
   'git-branch-what': {
     forms: [
       {
-        ask: ["Qu'est-ce qu'une branche dans git ?", 'Pour git, une branche est…'],
-        right: ['Un nom qui pointe vers un commit et avance à chaque nouveau commit'],
+        ask: ["Qu'est-ce qu'une branche dans git ?", 'Pour git, une branche est…'],
+        right: ['Un pointeur vers un commit qui avance à chaque commit'],
       },
       {
-        ask: ['Que copie git quand tu crées une branche ?', 'Créer une branche copie…'],
-        right: ['Rien : ça crée juste un pointeur vers le commit actuel'],
-        wrong: ['Tous les fichiers du projet', "L'historique entier", "L'index"],
+        ask: ['Que copie git quand tu crées une branche ?', 'Créer une branche copie…'],
+        right: ['Rien : juste un pointeur vers le commit actuel'],
+        wrong: [
+          'Tous les fichiers du projet',
+          "L'historique entier de la branche actuelle",
+          "L'index et les changements non indexés",
+        ],
       },
     ],
     wrong: [
       'Une copie du dossier du projet',
-      'Un dépôt à part',
-      'Un commit spécial sans parent',
-      'Un serveur distant',
+      'Un dépôt à part, avec son propre historique',
+      "Un commit spécial qui n'a pas de parent",
+      'Un serveur distant où on envoie le code',
     ],
-    why: "Une branche n'est qu'une étiquette qui pointe vers un commit : en créer une ne coûte rien.",
+    why: "Une branche n'est qu'une étiquette qui pointe vers un commit : en créer une ne coûte rien.",
   },
   'git-head': {
     forms: [
       {
-        ask: ["Qu'est-ce que HEAD ?", 'Dans git, HEAD indique…'],
+        ask: ["Qu'est-ce que HEAD ?", 'Dans git, HEAD indique…'],
         right: [
-          'Où tu te trouves : en général, la branche actuelle',
-          'La branche (ou le commit) sur laquelle tu travailles',
+          'Où tu te trouves : en général, la branche actuelle',
+          'La branche ou le commit sur lequel tu travailles',
         ],
       },
       {
-        ask: ["Qu'est-ce qu'une HEAD détachée (detached) ?", 'Une HEAD détachée veut dire que…'],
-        right: ['HEAD pointe directement vers un commit, pas vers une branche'],
+        ask: ["Qu'est-ce qu'une HEAD détachée (detached) ?", 'Une HEAD détachée veut dire…'],
+        right: ['Que HEAD pointe vers un commit, pas vers une branche'],
         wrong: [
-          'La branche main a été supprimée',
-          "Il n'y a plus de connexion avec le dépôt distant",
-          'Le dépôt est vide',
+          'Que la branche où tu étais a été supprimée',
+          "Qu'il n'y a plus de connexion avec origin",
+          'Que le dépôt est vide, sans aucun commit',
         ],
       },
     ],
     wrong: [
       'Le premier commit du dépôt',
-      'La branche main du dépôt distant',
+      'La branche main telle qu’elle est sur le dépôt distant',
       "Le dernier commit de n'importe quelle branche",
-      'Le fichier de configuration',
+      'Le fichier de configuration du dépôt',
     ],
-    why: "HEAD, c'est là où tu es ; quand tu fais un commit, la branche vers laquelle elle pointe avance. Si elle pointe vers un commit, elle est détachée.",
+    why: "HEAD, c'est là où tu es ; quand tu fais un commit, la branche vers laquelle elle pointe avance. Si elle pointe vers un commit, elle est détachée.",
   },
   'git-switch-c': {
     forms: [
       {
         ask: [
-          'Quelle commande crée une branche et bascule dessus en même temps ?',
+          'Quelle commande crée une branche et bascule dessus en même temps ?',
           'Pour créer la branche login et passer dessus, tu tapes…',
         ],
         right: ['git switch -c login', 'git checkout -b login'],
@@ -110,23 +114,23 @@ export const GIT_FR: Readonly<Record<string, ConceptText>> = {
       },
     ],
     wrong: ['git push login', 'git add login', 'git init login'],
-    why: 'git branch se contente de la créer ; switch -c (ou checkout -b) la crée et te place dessus.',
+    why: 'git branch se contente de la créer ; switch -c (ou checkout -b) la crée et te place dessus.',
   },
   'git-fast-forward': {
     forms: [
       {
-        ask: ["Qu'est-ce qu'un merge fast-forward ?", 'Un fast-forward se produit quand…'],
+        ask: ['Que fait git lors d’un merge fast-forward ?', 'Lors d’un fast-forward, git…'],
         right: [
-          "La branche cible n'a pas bougé : elle avance simplement, sans nouveau commit",
-          "Fusionner ne fait que déplacer le pointeur de la branche, car il n'y a rien à combiner",
+          'Avance juste la branche, sans nouveau commit',
+          "Déplace juste le pointeur, car il n'y a rien à combiner",
         ],
       },
     ],
     wrong: [
-      'Un merge qui crée un commit à deux parents',
-      'Un merge qui ignore les conflits',
-      'Un push forcé',
-      "Un merge qui supprime l'autre branche",
+      'Crée un commit de merge à deux parents',
+      'Ignore les conflits et garde ta version',
+      'Fait un push forcé de la branche',
+      "Supprime l'autre branche après la fusion",
     ],
     why: "Si main n'a pas bougé depuis que tu as créé ta branche, fusionner déplace simplement main jusqu'au bout de ta branche.",
   },
@@ -134,20 +138,17 @@ export const GIT_FR: Readonly<Record<string, ConceptText>> = {
     forms: [
       {
         ask: [
-          "Qu'a de particulier un commit de merge ?",
+          "Qu'a de particulier un commit de merge ?",
           'Si les deux branches ont avancé, git merge crée…',
         ],
-        right: [
-          'Un commit à deux parents',
-          'Un commit qui réunit les deux historiques (deux parents)',
-        ],
+        right: ['Un seul commit, à deux parents', 'Un commit qui réunit les deux historiques'],
       },
     ],
     wrong: [
-      'Un commit sans parent',
+      'Un commit sans parent, comme le premier',
       "Une copie de chaque commit de l'autre branche",
-      'Une nouvelle branche',
-      'Rien : on ne peut pas fusionner deux branches qui ont toutes les deux avancé',
+      'Une nouvelle branche avec les deux changements',
+      'Rien : si les deux ont avancé, on ne peut pas fusionner',
     ],
     why: "Le merge à trois voies combine les changements faits depuis l'ancêtre commun dans un commit à deux parents.",
   },
@@ -155,108 +156,107 @@ export const GIT_FR: Readonly<Record<string, ConceptText>> = {
     forms: [
       {
         ask: [
-          'Que se passe-t-il quand tu supprimes avec git branch -d une branche déjà fusionnée ?',
+          'Que se passe-t-il quand tu supprimes avec git branch -d une branche déjà fusionnée ?',
           'Après avoir fusionné feature dans main, git branch -d feature…',
         ],
-        right: ['Le nom disparaît ; les commits restent dans main'],
+        right: ['Supprime le nom ; les commits restent dans main'],
       },
       {
         ask: [
-          'Que fait git branch -d avec une branche qui a des commits non fusionnés ?',
+          'Que fait git branch -d avec une branche qui a des commits non fusionnés ?',
           'Si une branche contient du travail non fusionné, git branch -d…',
         ],
-        right: ['Refuse de la supprimer (avec -D, il la supprime)'],
+        right: ['Refuse de la supprimer ; avec -D, il le fait'],
         wrong: [
           'La supprime et ses commits passent dans main',
-          'La fusionne avant de la supprimer',
+          'La fusionne dans main avant de la supprimer',
+          'La supprime avec tous ses commits',
         ],
       },
     ],
     wrong: [
-      'Tous ses commits sont supprimés',
-      'Elle est aussi supprimée sur le dépôt distant',
-      'Le merge est annulé',
-      'Ses fichiers sont supprimés du dossier',
+      "Supprime tous ses commits de l'historique",
+      'La supprime aussi sur le dépôt distant',
+      "Annule le merge qui l'a réunie à main",
+      'Supprime ses fichiers du dossier',
     ],
-    why: "Une branche est un nom : la supprimer n'efface pas les commits qui sont sur une autre branche. -d protège ce qui n'est pas fusionné.",
+    why: "Une branche est un nom : la supprimer n'efface pas les commits qui sont sur une autre branche. -d protège ce qui n'est pas fusionné.",
   },
   'git-fetch': {
     forms: [
       {
-        ask: ['Que fait `git fetch` ?', 'À quoi sert git fetch ?'],
+        ask: ['Que fait `git fetch` ?', 'À quoi sert git fetch ?'],
         right: [
-          'Il télécharge les nouveautés du dépôt distant et déplace origin/main, sans toucher à tes branches',
-          'Il récupère les commits du dépôt distant mais ne les fusionne pas avec les tiens',
+          'Il télécharge les nouveautés et déplace origin/main, sans toucher à tes branches',
+          'Il récupère les commits du dépôt distant sans les fusionner',
         ],
       },
       {
-        ask: ['Quelle est la différence entre fetch et pull ?', "git pull, c'est…"],
-        right: ['fetch puis merge (ou rebase avec --rebase)'],
+        ask: ['Que fait git pull, par rapport à fetch ?', "git pull, c'est…"],
+        right: ['Un fetch suivi d’un merge dans ta branche'],
         wrong: [
-          'La même chose que fetch',
-          "L'inverse de push : il envoie des changements",
-          'fetch plus push',
+          'La même chose que fetch, sous un autre nom',
+          'Un fetch suivi d’un push de ton travail',
+          'Un nouveau clone, par-dessus ce que tu as',
         ],
       },
     ],
     wrong: [
-      'Il envoie tes commits sur le dépôt distant',
-      'Il fusionne origin/main dans ta branche',
-      'Il supprime les branches qui ne sont pas sur le dépôt distant',
-      'Il clone à nouveau le dépôt',
+      'Il envoie tes nouveaux commits sur la branche distante',
+      'Il télécharge les nouveautés et les fusionne dans ta branche',
+      'Il supprime les branches qui ne sont plus sur le dépôt distant',
+      'Il clone à nouveau le dépôt, depuis zéro',
     ],
-    why: 'fetch ne fait que télécharger et mettre à jour les branches de suivi ; pull fusionne en plus dans ta branche.',
+    why: 'fetch ne fait que télécharger et mettre à jour les branches de suivi ; pull fusionne en plus dans ta branche (avec merge, ou avec rebase si tu le demandes).',
   },
   'git-tracking': {
     forms: [
       {
-        ask: ["Qu'est-ce que origin/main ?", "La branche origin/main de ton dépôt, c'est…"],
+        ask: ["Qu'est-ce que origin/main ?", "La branche origin/main de ton dépôt, c'est…"],
         right: [
-          'Là où était main sur origin la dernière fois que tu lui as parlé',
-          "Une branche de suivi : ta copie de l'état de main sur le dépôt distant",
+          'Là où était main sur origin la dernière fois que tu as regardé',
+          "Ta copie de l'état de main sur le dépôt distant",
         ],
       },
     ],
     wrong: [
-      'La branche main du dépôt distant en temps réel',
-      'Une branche sur laquelle tu peux faire des commits comme sur main',
-      'Le premier commit de main',
+      'La branche main du dépôt distant, en temps réel',
+      'Une branche où tu fais des commits, comme sur main',
+      'Le premier commit qui a été poussé sur main',
       'Une sauvegarde automatique de ta branche main',
     ],
-    why: "origin/main ne change qu'avec fetch, pull ou push : c'est la dernière chose que tu sais du dépôt distant.",
+    why: "origin/main ne change qu'avec fetch, pull ou push : c'est la dernière chose que tu sais du dépôt distant.",
   },
   'git-push-rejected': {
     forms: [
       {
         ask: [
-          "git push te répond « rejected » parce que le dépôt distant a des commits que tu n'as pas. Que fais-tu ?",
+          "git push te répond « rejected » parce que le dépôt distant a des commits que tu n'as pas. Que fais-tu ?",
           "Ton push est refusé (non-fast-forward). Le réflexe normal, c'est…",
         ],
-        right: ['git pull (ou pull --rebase), puis git push à nouveau'],
+        right: ['Récupérer leur travail avec git pull et repousser'],
         wrong: [
-          'git push --force sans regarder',
+          'git push --force, sans regarder',
           'Supprimer le dépôt et le cloner à nouveau',
           'git commit --amend puis git push à nouveau',
         ],
       },
     ],
     wrong: ['git commit --amend', 'git reset --hard', 'git branch -D main', 'git init'],
-    why: "Le dépôt distant ne te laisse pas écraser le travail des autres : d'abord tu récupères le leur, tu fusionnes, puis tu pousses.",
+    why: "Le dépôt distant ne te laisse pas écraser le travail des autres : d'abord tu récupères le leur (pull, ou pull --rebase), tu fusionnes, puis tu pousses.",
   },
   'git-clone': {
     forms: [
       {
-        ask: ['Que fait `git clone url` ?', 'À quoi sert git clone ?'],
-        right: [
-          "Il copie tout le dépôt, avec son historique, et configure origin pour qu'il pointe vers l'url",
-        ],
+        ask: ['Que fait `git clone url` ?', 'À quoi sert git clone ?'],
+        right: ['Il copie le dépôt avec son historique et configure origin'],
       },
     ],
     wrong: [
       "Il télécharge seulement la dernière version des fichiers, sans l'historique",
-      'Il crée une nouvelle branche sur le dépôt distant',
-      'Il envoie ton dossier sur le serveur',
-      'Il fusionne deux dépôts',
+      'Il crée sur le dépôt distant une branche à ton nom',
+      'Il envoie ton dossier sur le serveur comme dépôt',
+      'Il fusionne deux dépôts en un seul avec leur historique',
     ],
     why: "clone récupère tout l'historique et configure le dépôt distant origin.",
   },
@@ -264,21 +264,19 @@ export const GIT_FR: Readonly<Record<string, ConceptText>> = {
     forms: [
       {
         ask: [
-          'Que fait `git rebase main` quand tu es sur feature ?',
+          'Que fait `git rebase main` quand tu es sur feature ?',
           'git rebase main depuis ta branche…',
         ],
         right: [
-          "Copie les commits de feature par-dessus main : l'historique devient linéaire",
-          'Rejoue tes commits sur le bout de main, avec de nouveaux identifiants',
+          'Copie tes commits par-dessus main, en ligne droite',
+          'Rejoue tes commits sur main, avec de nouveaux identifiants',
         ],
       },
       {
-        ask: ['Quand ne faut-il pas faire de rebase ?', 'Le rebase est dangereux sur…'],
-        right: [
-          "Les branches que d'autres personnes partagent déjà (leurs commits changent d'identifiant)",
-        ],
+        ask: ['Quand ne faut-il pas faire de rebase ?', 'Le rebase est dangereux sur…'],
+        right: ["Les branches que d'autres partagent déjà"],
         wrong: [
-          "Les branches qui n'existent que dans ton dépôt local",
+          "Les branches qui n'existent qu'en local",
           "Les branches qui n'ont qu'un commit",
           "Les branches que tu n'as pas encore poussées",
         ],
@@ -286,18 +284,18 @@ export const GIT_FR: Readonly<Record<string, ConceptText>> = {
     ],
     wrong: [
       'Il fusionne main dans feature avec un commit de merge',
-      'Il supprime les commits de main',
-      'Il pousse feature sur le dépôt distant',
-      'Il renomme la branche',
+      "Il supprime de main les commits que feature n'a pas",
+      'Il pousse feature sur le dépôt distant et la fusionne',
+      'Il renomme la branche en main',
     ],
-    why: "rebase copie tes commits par-dessus une autre branche : historique linéaire, mais nouveaux commits. Sur une branche partagée, il casse l'historique des autres.",
+    why: "rebase copie tes commits par-dessus une autre branche : historique linéaire, mais nouveaux commits. Sur une branche partagée, il casse l'historique des autres.",
   },
   'git-cherry-pick': {
     forms: [
       {
-        ask: ['Que fait `git cherry-pick a1b2c3` ?', 'À quoi sert cherry-pick ?'],
+        ask: ['Que fait `git cherry-pick a1b2c3` ?', 'À quoi sert cherry-pick ?'],
         right: [
-          'Il copie les changements de ce commit là où tu te trouves',
+          'Il copie ce commit là où tu te trouves',
           "Il récupère un commit précis d'une autre branche",
         ],
       },
@@ -306,44 +304,44 @@ export const GIT_FR: Readonly<Record<string, ConceptText>> = {
       'Il récupère toute la branche de ce commit',
       "Il supprime ce commit de l'historique",
       'Il te place sur ce commit avec une HEAD détachée',
-      'Il annule ce commit',
+      'Il annule ce commit avec un nouveau',
     ],
-    why: "cherry-pick copie un seul commit ; la branche d'où il vient ne change pas.",
+    why: "cherry-pick copie un seul commit ; la branche d'où il vient ne change pas.",
   },
   'git-amend': {
     forms: [
       {
-        ask: ['Que fait `git commit --amend` ?', 'À quoi sert --amend dans git commit ?'],
+        ask: ['Que fait `git commit --amend` ?', 'À quoi sert --amend dans git commit ?'],
         right: [
-          'Il refait le dernier commit (message ou fichiers) sous forme de nouveau commit',
+          'Il refait le dernier commit, avec un autre message ou d’autres fichiers',
           'Il remplace le dernier commit par une version corrigée',
         ],
       },
     ],
     wrong: [
-      'Il ajoute un commit vide',
+      'Il ajoute un commit vide après le dernier',
       'Il annule le dernier commit et efface ses changements',
       "Il change le message de n'importe quel ancien commit",
-      'Il pousse le dernier commit sur le dépôt distant',
+      'Il pousse le dernier commit, corrigé, sur le dépôt distant',
     ],
-    why: "amend remplace le dernier commit ; si tu l'avais déjà poussé, les autres ont toujours l'ancien.",
+    why: "amend remplace le dernier commit par un nouveau ; si tu l'avais déjà poussé, les autres ont toujours l'ancien.",
   },
   'git-relative': {
     forms: [
       {
-        ask: ["Qu'est-ce que `HEAD~2` ?", 'HEAD~2 désigne…'],
+        ask: ["Qu'est-ce que `HEAD~2` ?", 'HEAD~2 désigne…'],
         right: [
           'Le commit situé deux crans avant HEAD',
-          'Le grand-parent de HEAD (en suivant le premier parent)',
+          'Le grand-parent de HEAD, par le premier parent',
         ],
       },
       {
-        ask: ["Qu'est-ce que `main^` ?", 'main^ désigne…'],
+        ask: ["Qu'est-ce que `main^` ?", 'main^ désigne…'],
         right: ['Le parent du commit vers lequel pointe main'],
         wrong: [
-          'La branche main du dépôt distant',
-          'Le premier commit de main',
-          'Le commit enfant de main',
+          'La branche main telle qu’elle est sur origin',
+          "Le premier commit de l'historique de main",
+          "L'enfant du commit vers lequel pointe main",
         ],
       },
     ],
@@ -351,147 +349,154 @@ export const GIT_FR: Readonly<Record<string, ConceptText>> = {
       'La deuxième branche du dépôt',
       'Les deux derniers commits ensemble',
       'Le commit situé deux crans après HEAD',
-      'HEAD sur le dépôt distant',
+      'HEAD tel qu’il est sur le dépôt distant',
     ],
-    why: "~n remonte de n commits par le premier parent ; ^ désigne le parent. Ça t'évite de copier des identifiants.",
+    why: "~n remonte de n commits par le premier parent ; ^ désigne le parent. Ça t'évite de copier des identifiants.",
   },
   'git-reset': {
     forms: [
       {
-        ask: ['Que fait `git reset --hard HEAD~1` ?', 'reset --hard HEAD~1…'],
-        right: ['Ramène la branche un commit en arrière et efface les changements du dossier'],
-        wrong: ['Ramène la branche en arrière et laisse les changements indexés'],
+        ask: ['Que fait `git reset --hard HEAD~1` ?', 'reset --hard HEAD~1…'],
+        right: ['Recule d’un commit et efface ses changements du dossier'],
+        wrong: [
+          'Recule d’un commit et laisse ses changements indexés',
+          'Recule d’un commit et laisse les changements non indexés',
+          'Crée un nouveau commit qui annule le précédent',
+        ],
       },
       {
-        ask: ['Que fait `git reset --soft HEAD~1` ?', 'reset --soft HEAD~1…'],
-        right: ['Ramène la branche un commit en arrière et laisse ses changements indexés'],
-        wrong: ['Ramène la branche en arrière et efface les changements du dossier'],
+        ask: ['Que fait `git reset --soft HEAD~1` ?', 'reset --soft HEAD~1…'],
+        right: ['Recule d’un commit et laisse ses changements indexés'],
+        wrong: [
+          'Recule d’un commit et efface ses changements du dossier',
+          'Recule d’un commit et laisse les changements non indexés',
+          'Crée un nouveau commit qui annule le précédent',
+        ],
       },
     ],
     wrong: [
-      'Crée un commit qui annule le précédent',
       'Supprime la branche',
       'Télécharge la version du dépôt distant',
       'Annule le dernier push',
     ],
-    why: "reset déplace la branche : --soft laisse ce qui a été défait indexé ; sans option (--mixed), non indexé ; et --hard l'efface.",
+    why: "reset déplace la branche : --soft laisse ce qui a été défait indexé ; sans option (--mixed), non indexé ; et --hard l'efface.",
   },
   'git-revert': {
     forms: [
       {
         ask: [
-          "Un mauvais commit est déjà sur origin et d'autres personnes l'ont récupéré. Comment l'annules-tu ?",
+          "Un mauvais commit est déjà sur origin et d'autres personnes l'ont récupéré. Comment l'annules-tu ?",
           "Pour annuler un commit déjà public, la solution sûre, c'est…",
         ],
-        right: ['git revert : un nouveau commit qui fait le contraire'],
+        right: ['git revert : un nouveau commit qui fait le contraire'],
         wrong: [
-          'git reset --hard puis git push --force',
-          'git commit --amend',
-          'Supprimer la branche et la recréer',
+          'git reset --hard HEAD~1 puis git push --force',
+          'git commit --amend puis git push --force',
+          'Supprimer la branche sur origin et la recréer',
         ],
       },
       {
-        ask: ['Que fait `git revert` ?', "git revert d'un commit…"],
-        right: ["Crée un nouveau commit qui annule ses changements, sans réécrire l'historique"],
+        ask: ['Que fait `git revert` ?', "git revert d'un commit…"],
+        right: ['Crée un commit qui annule ses changements'],
       },
     ],
     wrong: [
-      "Supprime le commit de l'historique",
-      'Revient à la version du dépôt distant',
-      'Change le message du commit',
-      'Déplace la branche sur ce commit',
+      "Supprime le commit de l'historique de la branche",
+      'Revient à la version qui est sur le dépôt distant',
+      'Change le message de ce commit',
+      'Déplace la branche jusqu’à ce commit',
     ],
-    why: "revert ajoute, il ne réécrit rien : personne n'a besoin de réparer son historique.",
+    why: "revert ajoute, il ne réécrit rien : personne n'a besoin de réparer son historique.",
   },
   'git-stash': {
     forms: [
       {
-        ask: ['À quoi sert `git stash` ?', 'Que fait git stash ?'],
+        ask: ['À quoi sert `git stash` ?', 'Que fait git stash ?'],
         right: [
-          'Il met de côté les changements non commités et laisse le dossier propre (stash pop les ramène)',
-          'Il garde tes changements en cours pour que tu puisses changer de branche un moment',
+          'Il met de côté les changements non commités et nettoie le dossier',
+          'Il garde tes changements en cours pour que tu changes de branche',
         ],
       },
     ],
     wrong: [
-      'Il fait un commit temporaire sur main',
-      'Il efface les changements non enregistrés',
+      'Il fait un commit temporaire sur la branche main',
+      "Il efface les changements qui n'ont pas de commit",
       'Il envoie les changements sur une branche cachée du dépôt distant',
-      'Il ignore les nouveaux fichiers',
+      'Il ajoute les nouveaux fichiers à .gitignore',
     ],
-    why: "stash range sur une pile ce qui n'a pas encore de commit ; avec pop, ça revient là où tu es.",
+    why: "stash range sur une pile ce qui n'a pas encore de commit ; avec stash pop, ça revient là où tu es.",
   },
   'git-github-flow': {
     forms: [
       {
-        ask: ['En quoi consiste le GitHub flow ?', 'Avec le GitHub flow…'],
-        right: [
-          'main fonctionne toujours ; chaque changement passe par une branche courte, relue dans une pull request puis fusionnée',
-        ],
+        ask: ['En quoi consiste le GitHub flow ?', 'Avec le GitHub flow…'],
+        right: ['Des branches courtes depuis main, fusionnées par pull request'],
       },
     ],
     wrong: [
       'Tout le monde fait ses commits directement sur main',
       'Il y a deux branches longues, main et develop, plus des branches de release',
       'Chaque personne a son propre dépôt, sans dépôt distant',
-      "On ne fusionne dans main qu'une fois par an",
+      "On ne fusionne dans main qu'une fois par an, en bloc",
     ],
-    why: "Des branches courtes à partir de main, une pull request et retour dans main : c'est le flux le plus courant dans les petites équipes.",
+    why: "main fonctionne toujours : chaque changement passe par une branche courte depuis main, relue dans une pull request, puis revient dans main. C'est le flux le plus courant dans les petites équipes.",
   },
   'git-gitflow': {
     forms: [
       {
-        ask: ["Dans Gitflow, d'où part une branche hotfix ?", 'Un hotfix Gitflow part de…'],
+        ask: ["Dans Gitflow, d'où part une branche hotfix ?", 'Un hotfix Gitflow part de…'],
         right: ['De main, et il est fusionné dans main et dans develop'],
-        wrong: ['De develop, et il est fusionné seulement dans develop', 'De la dernière release'],
+        wrong: [
+          'De develop, et il est fusionné seulement dans develop',
+          'De la dernière release, et il est fusionné dedans',
+          "De n'importe quelle branche feature",
+        ],
       },
       {
-        ask: ['Dans Gitflow, à quoi sert develop ?', 'La branche develop de Gitflow…'],
+        ask: ['Dans Gitflow, à quoi sert develop ?', 'La branche develop de Gitflow…'],
         right: ["Rassemble le travail terminé jusqu'à la prochaine version"],
         wrong: [
-          'Est ce qui est publié',
-          "Est une branche de test qu'on supprime",
-          'Ne contient que les hotfix',
+          'Est ce qui est publié en ce moment en production',
+          "Est une branche de test qu'on supprime à la fin",
+          'Ne contient que les hotfix faits sur main',
         ],
       },
     ],
     wrong: [
-      "De n'importe quelle branche feature",
-      "Ça n'existe pas : Gitflow n'a pas de hotfix",
+      "Ça n'existe pas : Gitflow n'a pas de hotfix",
       "D'origin/develop, sans jamais être fusionné",
+      'Est une copie de sauvegarde de main',
     ],
-    why: "main, c'est ce qui est publié, et develop, ce qui arrive : le hotfix corrige ce qui est publié et revient dans les deux.",
+    why: "main, c'est ce qui est publié, et develop, ce qui arrive : le hotfix corrige ce qui est publié et revient dans les deux.",
   },
   'git-tag': {
     forms: [
       {
         ask: [
-          'Quelle est la différence entre un tag et une branche ?',
+          'Quelle est la différence entre un tag et une branche ?',
           'Un tag (git tag v1.0), contrairement à une branche…',
         ],
-        right: ['Ne bouge pas : il marque toujours le même commit'],
+        right: ['Ne bouge pas : il marque toujours le même commit'],
       },
       {
-        ask: ['Comment pousses-tu les tags sur le dépôt distant ?', 'Les tags se poussent avec…'],
+        ask: ['Comment pousses-tu les tags sur le dépôt distant ?', 'Les tags se poussent avec…'],
         right: ['git push --tags', 'git push origin v1.0'],
         wrong: ['git push, qui pousse toujours les tags', 'git tag --push', 'git commit --tags'],
       },
     ],
     wrong: [
-      'Avance à chaque commit',
-      "N'existe que sur le dépôt distant",
-      'Garde les fichiers à part',
-      'Est une branche protégée',
+      'Avance à chaque commit que tu fais',
+      "N'existe que sur le dépôt distant, pas en local",
+      'Garde une copie à part des fichiers',
+      'Est une branche protégée que personne ne touche',
     ],
-    why: 'Un tag est un nom fixe pour un commit : une version.',
+    why: 'Un tag est un nom fixe pour un commit : une version.',
   },
   'git-trunk': {
     forms: [
       {
-        ask: ["Qu'est-ce que le trunk-based development ?", 'En trunk-based development…'],
-        right: [
-          'Tout le monde fusionne dans main plusieurs fois par jour, avec des branches qui durent quelques heures et des tests automatiques',
-        ],
+        ask: ["Qu'est-ce que le trunk-based development ?", 'En trunk-based development…'],
+        right: ['Tous fusionnent dans main plusieurs fois par jour, avec des branches courtes'],
       },
     ],
     wrong: [
@@ -500,6 +505,6 @@ export const GIT_FR: Readonly<Record<string, ConceptText>> = {
       'Une seule personne peut faire des commits sur main',
       'Les branches durent des mois et sont fusionnées à la fin',
     ],
-    why: 'Des branches très courtes et main toujours à jour : il faut une CI qui protège main.',
+    why: 'Des branches très courtes et main toujours à jour : il faut des tests automatiques et une CI qui protège main.',
   },
 }
