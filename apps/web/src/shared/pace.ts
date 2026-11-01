@@ -33,17 +33,31 @@ const DAYS: Record<Pace, readonly number[]> = {
 const DAY_MS = 24 * 60 * 60_000
 const STORAGE_KEY = 'sanatorio_pace'
 
+/**
+ * El pace guardado en el navegador. Con el almacenamiento bloqueado (modo
+ * privado, cookies de terceros) leerlo lanza: entonces no hay pace guardado,
+ * en vez de romper el grafo que lo pide al montarse.
+ */
 export function loadPace(): Pace | null {
-  const stored = Number(localStorage.getItem(STORAGE_KEY))
+  try {
+    const stored = Number(localStorage.getItem(STORAGE_KEY))
 
-  return PACES.find((pace) => pace === stored) ?? null
+    return PACES.find((pace) => pace === stored) ?? null
+  } catch {
+    return null
+  }
 }
 
+/** Guarda el pace; si el navegador no deja, dura lo que dure la pestaña. */
 export function savePace(pace: Pace | null): void {
-  if (pace === null) {
-    localStorage.removeItem(STORAGE_KEY)
-  } else {
-    localStorage.setItem(STORAGE_KEY, String(pace))
+  try {
+    if (pace === null) {
+      localStorage.removeItem(STORAGE_KEY)
+    } else {
+      localStorage.setItem(STORAGE_KEY, String(pace))
+    }
+  } catch {
+    // Sin almacenamiento, el pace elegido vive en el estado del grafo.
   }
 }
 

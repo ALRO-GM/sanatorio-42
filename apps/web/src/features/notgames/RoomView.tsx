@@ -8,6 +8,7 @@ import { usePolling } from '../../shared/hooks/usePolling'
 import { useNow } from '../../shared/hooks/useNow'
 import { useI18n } from '../../shared/i18n'
 import { notGamesHref } from '../../shared/links'
+import { timeLeft } from '../../shared/math'
 import { Avatar } from '../../shared/ui/Avatar'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { Icon } from '../../shared/ui/Icon'
@@ -246,8 +247,7 @@ function Question({ room, question, me, playing, offset, onAnswer }: QuestionPro
   const endsAt = Date.parse(question.endsAt)
   const reveal = room.phase === 'reveal'
   const waiting = now < startsAt && question.options.length === 0
-  const left = Math.max(0, Math.ceil((endsAt - now) / 1000))
-  const share = Math.max(0, Math.min(1, (endsAt - now) / Math.max(1, endsAt - startsAt)))
+  const { seconds: left, share } = timeLeft(startsAt, endsAt, now)
   const answered = question.mine !== null
   const ticking = playing && !answered && !reveal && left > 0 && left <= 3 ? left : null
 

@@ -8,6 +8,7 @@ import { usePolling } from '../../shared/hooks/usePolling'
 import { useNow } from '../../shared/hooks/useNow'
 import { useI18n } from '../../shared/i18n'
 import { notGamesHref } from '../../shared/links'
+import { timeLeft } from '../../shared/math'
 import { Avatar } from '../../shared/ui/Avatar'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { PillGroup } from '../../shared/ui/PillGroup'
@@ -404,8 +405,7 @@ function TurnQuestionCard({
 
   const startsAt = Date.parse(question.startsAt)
   const endsAt = Date.parse(question.endsAt)
-  const share = Math.max(0, Math.min(1, (endsAt - now) / Math.max(1, endsAt - startsAt)))
-  const left = Math.max(0, Math.ceil((endsAt - now) / 1000))
+  const { seconds: left, share } = timeLeft(startsAt, endsAt, now)
   const answered = question.mine !== null
 
   return (

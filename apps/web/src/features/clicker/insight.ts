@@ -10,6 +10,8 @@ import type { BuildingId } from '@sanatorio/clicker'
 import { baseCps, clickPower, cpsOf, globalMult, unitCps } from '@sanatorio/clicker'
 import type { Game } from '@sanatorio/clicker'
 
+import { clamp } from '../../shared/math'
+
 /** Lo que sube la producción por segundo y cada pulsación al comprar una mejora. */
 export function upgradeGain(game: Game, id: string, now: number): { cps: number; click: number } {
   const after: Game = { ...game, bought: [...game.bought, id] }
@@ -57,7 +59,7 @@ export const payback = (price: number, gain: number): number | null =>
 
 /** Cuánto de lleno está el camino a poder pagar algo, de 0 a 1. */
 export const reach = (game: Game, price: number): number =>
-  price <= 0 ? 1 : Math.max(0, Math.min(1, game.code / price))
+  price <= 0 ? 1 : clamp(game.code / price)
 
 /**
  * Parte recorrida hacia el siguiente nivel, de 0 a 1. El nivel es

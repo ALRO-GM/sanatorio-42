@@ -4,6 +4,8 @@
 
 import type { NetworkNode } from '@sanatorio/contracts'
 
+import { clamp } from '../../shared/math'
+
 export const COLOR_MODES = [
   'community',
   'endogamy',
@@ -50,7 +52,7 @@ const STRICTEST = 0.25
 
 /** Verde → ámbar → rojo, para un valor de 0 a 1. */
 function heat(value: number): string {
-  const clamped = Math.max(0, Math.min(1, value))
+  const clamped = clamp(value)
 
   return `hsl(${Math.round(150 - 150 * clamped)} 88% ${Math.round(58 + 4 * clamped)}%)`
 }
