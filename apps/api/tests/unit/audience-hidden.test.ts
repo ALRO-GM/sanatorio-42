@@ -101,3 +101,82 @@ describe('personas ocultas en quién ve a quién', () => {
     expect((await seesFor(audience, students))('x')).toBe(false)
   })
 })
+
+describe('piscineros de otro campus', () => {
+  // Campus 22 con `pisci`; en el 1, `lejos`. La réplica guarda a los dos.
+  const setupWorlds = () => {
+    let reads = 0
+    let time = 0
+    const byCampus: Record<number, string[]> = { 22: ['pisci'], 1: ['Lejos'] }
+    const audience = createAudience(
+      (campusId) => Promise.resolve(byCampus[campusId] ?? []),
+      () => time,
+      () => Promise.resolve([]),
+      () => {
+        reads += 1
+
+        return Promise.resolve(['pisci', 'Lejos'])
+      },
+    )
+
+    return {
+      audience,
+      reads: () => reads,
+      later: (ms: number) => {
+        time += ms
+      },
+    }
+  }
+
+  it('un estudiante no ve a los piscineros de ningún campus', async () => {
+    const sees = await seesFor(setupWorlds().audience, students)
+
+    expect(sees('pisci')).toBe(false)
+    expect(sees('lejos')).toBe(false)
+    expect(sees('LEJOS')).toBe(false)
+    expect(sees('ana')).toBe(true)
+  })
+
+  it('un piscinero ve solo a los de su campus, ni a los de otro ni a estudiantes', async () => {
+    const worlds = setupWorlds()
+    const sees = await seesFor(worlds.audience, pool)
+
+    expect(sees('pisci')).toBe(true)
+    expect(sees('lejos')).toBe(false)
+    expect(sees('ana')).toBe(false)
+    // Para un piscinero no hace falta la lista de todos los campus.
+    expect(worlds.reads()).toBe(0)
+  })
+
+  it('a sí mismo se ve, aunque esté en la lista de todos los campus', async () => {
+    const sees = await seesFor(setupWorlds().audience, { ...students, login: 'lejos' })
+
+    expect(sees('lejos')).toBe(true)
+  })
+
+  it('la lista de todos los campus se lee una vez por minuto', async () => {
+    const worlds = setupWorlds()
+
+    await seesFor(worlds.audience, students)
+    await seesFor(worlds.audience, students)
+    expect(worlds.reads()).toBe(1)
+    worlds.later(60_000)
+    await seesFor(worlds.audience, students)
+    expect(worlds.reads()).toBe(2)
+  })
+
+  it('si falla la lectura de todos los campus, se vuelve a pedir', async () => {
+    let fail = true
+    const audience = createAudience(
+      () => Promise.resolve([]),
+      () => 0,
+      () => Promise.resolve([]),
+      () => (fail ? Promise.reject(new Error('sin base')) : Promise.resolve(['lejos'])),
+    )
+
+    await expect(seesFor(audience, students)).rejects.toThrow('sin base')
+    fail = false
+    await Promise.resolve()
+    expect((await seesFor(audience, students))('lejos')).toBe(false)
+  })
+})

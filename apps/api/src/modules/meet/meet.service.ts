@@ -41,7 +41,7 @@ import type { Db } from '../../core/db/database.js'
 import { toNumber, toText } from '../../core/db/rows.js'
 import { domainError } from '../../core/errors.js'
 import { createTtlCache } from '../../core/ttl-cache.js'
-import { parse } from '../../core/validation.js'
+import { day, parse } from '../../core/validation.js'
 import { inList, listArg } from '../../core/db/sql.js'
 import { createConversations } from './conversations.js'
 import { needsReply } from './meet.rules.js'
@@ -144,8 +144,9 @@ const checkinSchema = z.object({
 
 const reportSchema = z.object({
   login: z.string().trim().toLowerCase().max(40).optional(),
-  from: z.string().optional(),
-  to: z.string().optional(),
+  // El mismo esquema que el informe de `attendance`: se corta ya en el borde.
+  from: day.optional(),
+  to: day.optional(),
 })
 
 export function createMeetService(options: MeetServiceOptions) {

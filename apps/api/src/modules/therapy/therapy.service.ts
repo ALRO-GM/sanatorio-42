@@ -450,9 +450,19 @@ export function createTherapyService(options: TherapyServiceOptions) {
         throw domainError('conflict', 'Ya se avisó de este grupo')
       }
 
-      const people = (await replica.doingProject(group.projectId, group.campusId)).filter(
-        (login) => !group.members.includes(login),
+      // Solo a quien puede ver a quien avisa: un piscinero no escribe a los
+      // estudiantes (ni al revés) y nadie recibe avisos de alguien oculto a
+      // su grupo, ni se avisa a quien está oculto (`core/audience.ts`).
+      const audience = options.audience ?? NO_POOL
+      const sees = await seesFor(audience, actor)
+      const hiddenSelf = (await audience.hiddenFrom(actor.pool === true)).has(
+        actor.login.toLowerCase(),
       )
+      const people = hiddenSelf
+        ? []
+        : (await replica.doingProject(group.projectId, group.campusId)).filter(
+            (login) => !group.members.includes(login) && sees(login),
+          )
 
       if (!(await therapy.markInvited(groupId, people.length))) {
         throw domainError('conflict', 'Ya se avisó de este grupo')

@@ -228,6 +228,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     (campusId) => replica.poolMembers.loginsIn(campusId),
     now,
     (pool) => hiddenLogins(db, pool),
+    () => replica.poolMembers.loginsAnywhere(),
   )
   // El Pomodoro va pronto: la sala de espera y el plano preguntan quién está concentrado.
   const focus = createFocusModule({ db, ...clock })

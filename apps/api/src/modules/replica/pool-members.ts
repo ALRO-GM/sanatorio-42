@@ -94,6 +94,16 @@ export function createPoolMembers(options: PoolMembersOptions) {
       return result.rows.map((row) => toText(row.login))
     },
 
+    /** Los logins de los piscineros en curso de todos los campus (quién ve a quién). */
+    async loginsAnywhere(): Promise<string[]> {
+      const result = await db.execute({
+        sql: 'SELECT DISTINCT login FROM pool_members WHERE begin_at >= ?',
+        args: [iso(now() - AFTER_MS)],
+      })
+
+      return result.rows.map((row) => toText(row.login))
+    },
+
     /** Los piscineros en curso de un campus, con su avatar (la red de la piscina). */
     async membersIn(campusId: number): Promise<Map<string, string | null>> {
       const result = await db.execute({

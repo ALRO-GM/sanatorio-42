@@ -58,8 +58,9 @@ export async function seatSessionsIn(
   const result = await db.execute({
     sql: `SELECT s.login, s.host, s.begin_at, s.first_seen_at, s.seen_at, u.image
           FROM seat_sessions s LEFT JOIN users u ON u.id = s.user_id
-          WHERE s.campus_id = ? AND s.seen_at >= ?`,
-    args: [campusId, isoAt(since)],
+          WHERE s.campus_id = ? AND s.seen_at >= ? AND s.begin_at < ?`,
+    // Con las dos puntas: un periodo antiguo no lee toda la historia del campus.
+    args: [campusId, isoAt(since), isoAt(until)],
   })
   const images = new Map<string, string | null>()
   const sessions: SeatSession[] = []

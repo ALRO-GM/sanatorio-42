@@ -11,6 +11,12 @@ import type { Actor } from './actor.js'
 export type Audience = {
   /** Los logins (en minúsculas) de los piscineros en curso de un campus. */
   poolIn: (campusId: number) => Promise<ReadonlySet<string>>
+  /**
+   * Los piscineros en curso de todos los campus. Un estudiante no ve a ninguno,
+   * tampoco a los de otro campus: la réplica también los guarda (los exámenes
+   * de la piscina los traen) y su perfil se puede pedir por login.
+   */
+  poolAnywhere: () => Promise<ReadonlySet<string>>
   /** Los logins (en minúsculas) ocultos a los piscineros (`true`) o a los estudiantes. */
   hiddenFrom: (pool: boolean) => Promise<ReadonlySet<string>>
   /** Olvida lo leído de los ocultos: se llama al cambiar la lista en el panel. */
@@ -37,8 +43,10 @@ export function createAudience(
   read: (campusId: number) => Promise<readonly string[]>,
   now: () => number = Date.now,
   readHidden: (pool: boolean) => Promise<readonly string[]> = () => Promise.resolve([]),
+  readAll: () => Promise<readonly string[]> = () => Promise.resolve([]),
 ): Audience {
   const cache = new Map<number, { at: number; logins: Promise<ReadonlySet<string>> }>()
+  let everywhere: { at: number; logins: Promise<ReadonlySet<string>> } | null = null
   const hidden = new Map<boolean, { at: number; logins: Promise<ReadonlySet<string>> }>()
   let changes = 0
 
@@ -52,6 +60,18 @@ export function createAudience(
 
       cache.set(campusId, { at: now(), logins })
       logins.catch(() => cache.delete(campusId))
+
+      return logins
+    },
+    poolAnywhere() {
+      if (everywhere !== null && now() - everywhere.at < TTL_MS) return everywhere.logins
+
+      const logins = readAll().then(lowered)
+
+      everywhere = { at: now(), logins }
+      logins.catch(() => {
+        everywhere = null
+      })
 
       return logins
     },
@@ -78,6 +98,7 @@ export function createAudience(
 /** Nadie es piscinero ni está oculto: para los tests y lo que aún no separa. */
 export const NO_POOL: Audience = {
   poolIn: () => Promise.resolve(new Set()),
+  poolAnywhere: () => Promise.resolve(new Set()),
   hiddenFrom: () => Promise.resolve(new Set()),
   forget: () => undefined,
   version: () => 0,
@@ -92,8 +113,10 @@ export async function seesFor(
   audience: Audience,
   actor: Viewer,
 ): Promise<(login: string) => boolean> {
-  const [pool, hidden] = await Promise.all([
+  const [pool, anywhere, hidden] = await Promise.all([
     audience.poolIn(actor.campusId),
+    // Un piscinero solo ve a los de su campus; no hace falta leer los demás.
+    actor.pool === true ? Promise.resolve(new Set<string>()) : audience.poolAnywhere(),
     audience.hiddenFrom(actor.pool === true),
   ])
   const self = actor.login?.toLowerCase()
@@ -103,8 +126,10 @@ export async function seesFor(
 
     if (wanted === self) return true
     if (hidden.has(wanted)) return false
+    if (actor.pool === true) return pool.has(wanted)
 
-    return actor.pool === true ? pool.has(wanted) : !pool.has(wanted)
+    // Un estudiante no ve a piscineros de ningún campus, no solo del suyo.
+    return !pool.has(wanted) && !anywhere.has(wanted)
   }
 }
 

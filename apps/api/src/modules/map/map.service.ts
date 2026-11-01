@@ -200,6 +200,12 @@ export function createMapService(options: MapServiceOptions) {
       // Lo que no sale con nombre sale ocupado, sin más: el puesto no está libre.
       const named = (login: string): boolean => (actor.pool === true ? sees(login) : shown(login))
       const present = everyone.filter((person) => named(person.login))
+      // Quién avisó de un puesto roto sale con la misma regla: si no, el aviso
+      // enseñaría a alguien del otro mundo o a alguien oculto.
+      const reportOf = (
+        report: { by: string; at: string } | undefined,
+      ): { by: string | null; at: string } | null =>
+        report === undefined ? null : { by: named(report.by) ? report.by : null, at: report.at }
       const taken = everyone.filter((person) => !named(person.login))
 
       // De guardia = disponible y sentado. Misma regla que en la lista.
@@ -234,7 +240,7 @@ export function createMapService(options: MapServiceOptions) {
           occupant: null,
           taken: false,
           reservation: null,
-          broken: broken.get(host) ?? null,
+          broken: reportOf(broken.get(host)),
         }
 
         seats.set(host, seat)

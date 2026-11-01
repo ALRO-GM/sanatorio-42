@@ -15,7 +15,8 @@ import type { Audience } from '../../core/audience.js'
 import type { Db } from '../../core/db/database.js'
 import { createTtlCache } from '../../core/ttl-cache.js'
 import { domainError } from '../../core/errors.js'
-import { parse } from '../../core/validation.js'
+import { createRateLimit } from '../../core/rate-limit.js'
+import { day, parse } from '../../core/validation.js'
 import { communitiesOf, GRAPH_BUDGET } from './network.analysis.js'
 import { seatHeatOf } from './seating.heat.js'
 import { seatingOf, trimSeating } from './seating.rules.js'
@@ -43,9 +44,15 @@ const CACHE_TTL_MS = 5 * 60_000
 /** Por debajo de esto (una hora al lado, más o menos) dos personas no se unen. */
 const MIN_CLOSENESS = 2
 
-/** Un día `YYYY-MM-DD`. */
-const day = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Se espera una fecha YYYY-MM-DD')
+/**
+ * Cálculos nuevos (lo que no está ya en la caché) por persona y minuto, entre
+ * el grafo y el mapa de calor. Las fechas las elige quien pregunta y la caché
+ * guarda pocas: sin tope, variándolas se haría recalcular todo sin parar,
+ * como en la red de correcciones.
+ */
+const FRESH_PER_MINUTE = 20
 
+/** Un día `YYYY-MM-DD`. */
 /**
  * El periodo: los últimos `days` días (hasta diez años, que es «todo») o, con
  * `from`, de ese día a `to` (incluido; sin él, hasta ahora).
@@ -82,6 +89,12 @@ export function createSeatingService(options: SeatingOptions): SeatingService {
   const knownSeats = options.knownSeats ?? (() => Promise.resolve([]))
   const cache = createTtlCache<SeatGraph>({ ttlMs: CACHE_TTL_MS, maxEntries: 12, now })
   const heatCache = createTtlCache<SeatHeat>({ ttlMs: CACHE_TTL_MS, maxEntries: 12, now })
+  const fresh = createRateLimit({ max: FRESH_PER_MINUTE, windowMs: 60_000, now })
+  const limited = (actor: Actor): void => {
+    if (!fresh.hit(actor.login)) {
+      throw domainError('rate_limited', 'Demasiados periodos distintos seguidos: espera un minuto')
+    }
+  }
 
   /**
    * La clave de la caché: campus, mundo, quién se ve y días. Lo que se guarda
@@ -166,13 +179,21 @@ export function createSeatingService(options: SeatingOptions): SeatingService {
     async graph(actor, query) {
       const parsed = parse(querySchema, query)
 
-      return cache.get(await keyOf(actor, parsed), () => load(actor, spanOf(parsed, now())))
+      return cache.get(await keyOf(actor, parsed), () => {
+        limited(actor)
+
+        return load(actor, spanOf(parsed, now()))
+      })
     },
 
     async heat(actor, query) {
       const parsed = parse(querySchema, query)
 
-      return heatCache.get(await keyOf(actor, parsed), () => loadHeat(actor, spanOf(parsed, now())))
+      return heatCache.get(await keyOf(actor, parsed), () => {
+        limited(actor)
+
+        return loadHeat(actor, spanOf(parsed, now()))
+      })
     },
   }
 }

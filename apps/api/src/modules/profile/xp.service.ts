@@ -86,7 +86,8 @@ const paceRefSchema = z.object({
 const settingsSchema = z.object({
   campusId: id.optional(),
   lang: z.enum(['es', 'en', 'ca', 'eu', 'fr']).optional(),
-  title: z.string().optional(),
+  // Luego se compara con los títulos desbloqueados; el tope es para no cargar texto enorme.
+  title: z.string().max(60).optional(),
   preReview: z.boolean().optional(),
   /** El id de un estilo, `none` (el de quien mira) o `default` (lo de fábrica). */
   recordStyle: z
