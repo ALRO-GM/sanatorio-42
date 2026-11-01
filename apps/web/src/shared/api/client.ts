@@ -379,6 +379,7 @@ export const realApi: Api = {
   inviteGroup: (id) => sendJson('POST', `/groups/${id}/invite`),
 
   getDoubtGraph: () => getJson('/doubts/graph'),
+  getCorrectionCollection: (group) => getJson(`/corrections/collection?group=${group}`),
   getDoubtBoard: (projectId) => getJson(`/projects/${projectId}/doubts`),
   createDoubt: (projectId, body) => sendJson('POST', `/projects/${projectId}/doubts`, { body }),
   updateDoubt: (id, body) => sendJson('PUT', `/doubts/${id}`, { body }),

@@ -12,6 +12,7 @@ import { adminMock } from './admin'
 import { agendaMock } from './agenda'
 import { boardsMock } from './boards'
 import { clickerMock } from './clicker'
+import { collectionMock } from './collection'
 import { countdownsMock } from './countdowns'
 import { doubtsMock } from './doubts'
 import { examsMock } from './exams'
@@ -50,6 +51,7 @@ export const mockApi: Api = withHidden({
   ...helpMock,
   ...therapyMock,
   ...doubtsMock,
+  ...collectionMock,
   ...examsMock,
   ...boardsMock,
   ...clickerMock,

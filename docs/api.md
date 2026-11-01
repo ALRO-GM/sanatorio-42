@@ -624,6 +624,52 @@ persona y día.
 **Piscina.** En todas las listas de proyectos de una persona (sala de espera,
 mapa, grafo) solo cuentan los del 42cursus (`cursus_ids` con `21`). De quien
 todavía está en la piscina se enseñan los suyos, que es lo único que tiene.
+En el grafo de un piscinero, `corrected` cuenta sus correcciones de la piscina
+(cursus `9`).
+
+GET /corrections/collection?group=friends|kickoff|circle|world → el álbum de
+correcciones (`docs/correcciones-coleccion.md`; contrato `CorrectionCollection`
+en `packages/contracts/src/collection.ts`). Sin `group`, `friends`; otro valor
+da 400. Un piscinero necesita el permiso `tablon.corrections`.
+
+```json
+{
+  "rarity": [{ "projectId": 1314, "eligible": 412, "holders": 377, "share": 0.915 }],
+  "standings": [
+    { "group": "friends", "label": null, "size": 11, "rank": 3 },
+    { "group": "kickoff", "label": "2025-09", "size": 140, "rank": 12 },
+    { "group": "circle", "label": "3", "size": 96, "rank": 8 },
+    { "group": "world", "label": null, "size": 1210, "rank": 87 }
+  ],
+  "group": "friends",
+  "rows": [{ "rank": 1, "login": "jdoe", "image": null, "collected": 9, "eligible": 9, "share": 1 }],
+  "me": { "rank": 3, "login": "albrodri", "image": null, "collected": 7, "eligible": 9, "share": 0.778 }
+}
+```
+
+- **Cromo**: un proyecto del álbum (los de los dos planes del common core; en
+  la piscina, todo menos los exámenes) que la persona aprobó (terminado y
+  validado). Cuenta si sigue vivo en el campus (alguien lo ha corregido en el
+  último año) o si ya lo corrigió: un cromo conseguido no se pierde.
+  `collected` son los que ha corregido al menos una vez; `share`, la fracción.
+- **Rareza**: de quienes aprobaron el proyecto en tu mundo, qué parte lo ha
+  corregido alguna vez.
+- **Grupos**: `friends`, las 10 personas con las que más te has corregido (en
+  los dos sentidos, la cercanía de la red de correcciones) y tú; `kickoff`, quien
+  tiene tu kickoff, la misma que el Avance (las reales del campus,
+  `core/kickoffs.ts`; un piscinero: el mes de su piscina); `circle`, quien va
+  por tu círculo (no hay en la piscina); `world`, todo tu campus. `standings`
+  trae solo los grupos que tienes (sin kickoff conocido, no sale) y `rank` es
+  `null` si aún no tienes nada que corregir. `rows`, las 50 primeras del grupo
+  elegido; `me`, tu fila aunque quede fuera.
+- **Quién sale**: solo la gente que puedes ver (`seesFor`): un estudiante no ve
+  piscineros, un piscinero solo a los de su campus, y quien está oculto a tu
+  grupo no sale ni cuenta, tampoco en la rareza. Los puestos se ponen después
+  de filtrar: sin huecos. Empate (mismo % y mismos cromos), mismo puesto.
+- **Coste**: nada a 42. Sale de la réplica (`project_users`, `campus_members`,
+  `pool_members`, `core_cursus`) y de la copia de correcciones; lo del campus se
+  guarda 10 minutos. Lo tuyo cuenta también lo corregido en otro campus, como el
+  grafo; lo de los demás, lo de este.
 
 GET /projects/:id/doubts
 {

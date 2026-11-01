@@ -3,7 +3,6 @@ import { useEffect, useRef, useState } from 'react'
 import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
-import { Show, shows, useDetail } from '../../shared/detail'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { PillGroup } from '../../shared/ui/PillGroup'
 import { DoubtDetailCard } from './DoubtDetailCard'
@@ -29,7 +28,6 @@ type DoubtBoardProps = {
  */
 export function DoubtBoard({ initialProject }: DoubtBoardProps) {
   const { t } = useI18n()
-  const detail = useDetail()
   const graph = useAsync(() => api.getDoubtGraph(), [])
   const [projectId, setProjectId] = useState<number | null>(initialProject)
   // Qué grafo se ve: el de tu avance o el de lo que has corregido.
@@ -68,18 +66,17 @@ export function DoubtBoard({ initialProject }: DoubtBoardProps) {
         <ErrorNote error={graph.error} retry />
       ) : (
         <>
-          <Show from="normal">
-            <PillGroup
-              className="graph-views"
-              options={['progress', 'corrections'] as const}
-              value={view}
-              onChange={setView}
-              label={t('cgraph.views')}
-              text={(option) => t(`cgraph.view.${option}`)}
-            />
-          </Show>
-          {/* En el modo simplificado solo está el grafo de tu avance. */}
-          {view === 'progress' || !shows(detail, 'normal') ? (
+          {/* El álbum sale en los tres modos (`docs/correcciones-coleccion.md`):
+              en el simplificado, sin rankings ni cifras de más. */}
+          <PillGroup
+            className="graph-views"
+            options={['progress', 'corrections'] as const}
+            value={view}
+            onChange={setView}
+            label={t('cgraph.views')}
+            text={(option) => t(`cgraph.view.${option}`)}
+          />
+          {view === 'progress' ? (
             <PoolOnly k="tablon.graph">
               {/* Un piscinero ve la piscina, no el common core (`docs/piscineros.md`). */}
               {graph.data.kind === 'piscine' ? (

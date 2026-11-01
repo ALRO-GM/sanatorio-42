@@ -55,6 +55,8 @@ export type DoubtsServiceOptions = {
    */
   corrections?: {
     byProject: (login: string) => Promise<Map<number, number>>
+    /** Lo mismo en la piscina: lo que ha corregido un piscinero de cada proyecto suyo. */
+    poolByProject?: (login: string) => Promise<Map<number, number>>
     since: (campusId: number, since: string) => Promise<Set<number>>
   }
   now?: () => number
@@ -258,7 +260,8 @@ export function createDoubtsService(options: DoubtsServiceOptions) {
       replica.piscineOf(actor.login),
       doubts.activity(actor.campusId, actor.login),
       replica.poolBeginOf(actor.login),
-      options.corrections?.byProject(actor.login) ?? new Map<number, number>(),
+      // Las correcciones de la piscina son de su cursus (9), no del 42cursus.
+      options.corrections?.poolByProject?.(actor.login) ?? new Map<number, number>(),
     ])
     const plan = new Map(PISCINE.map((project) => [project.slug, project]))
     const nodes = projects.flatMap((project): GraphProject[] => {

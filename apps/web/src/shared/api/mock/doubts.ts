@@ -79,7 +79,9 @@ export const doubtsMock: Pick<
               : null,
             locked: status === 'todo' && circle > CURRENT_CIRCLE,
             // Lo aprobado, corregido más veces cuanto más antiguo (Libft, maestro).
-            corrected: status === 'finished' ? Math.max(0, 12 - circle * 4 - (id % 3)) : 0,
+            // Born2beroot, sin corregir: el hueco que enseña el álbum.
+            corrected:
+              status === 'finished' && id !== 3102 ? Math.max(0, 12 - circle * 4 - (id % 3)) : 0,
             retired: false,
             group: null,
             signals: {

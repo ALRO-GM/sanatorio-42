@@ -94,7 +94,7 @@ export const POOL_ROUTES: Record<PoolKey, readonly string[]> = {
     '/guide-proposals/:id/reject',
   ],
   'tablon.graph': ['/doubts/graph'],
-  'tablon.corrections': [],
+  'tablon.corrections': ['/corrections/collection'],
   terapia: ['/groups', '/groups/:id', '/groups/:id/invite', '/groups/:id/join'],
   pizarras: ['/boards', '/boards/:id', '/boards/:id/join'],
   notgames: [

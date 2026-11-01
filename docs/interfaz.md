@@ -85,7 +85,9 @@ de datos.
 | Sala de espera y Clústeres | En el mapa, «Resaltar» (tu círculo, tu proyecto, quien lo aprobó) y «Círculos» | N | Afinar; en el simplificado, el plano tal cual (2026-11) |
 | Sala de espera | «Os habéis corregido N veces» | D | Curiosidad |
 | Tablón | Grafo de tu avance, guía y dudas | S | Es el tablón |
-| Tablón | Grafo de tus correcciones (maestro del código) | N | Reconocimiento |
+| Tablón | «Mis correcciones»: el álbum de correcciones, con colecciones por círculo, cromos en silueta para lo que falta, niveles (1, 3, 5, 10), tu progreso y la celebración al completar una colección (`docs/correcciones-coleccion.md`) | S | Pedido por Alberto (2026-11-01): que apetezca corregir al menos una vez cada proyecto; es tuyo y sin cifras de otros, así que sale en los tres modos |
+| Tablón | En el álbum: el siguiente objetivo (colección más cercana, cromo más raro a tu alcance, nivel más cercano) y tu puesto en cada grupo, resumido | N | Motiva sin abrumar: una línea por cosa |
+| Tablón | En el álbum: la rareza de cada cromo y la clasificación de completitud por grupo (tu gente cercana, kickoff, círculo, campus) | D | Son rankings y cifras |
 | Terapia y Pizarras | Todo | S | Son quedar |
 | Pestañas | Not-games, Curso de git y Curso de shell (en Aprender) | N | Aprender jugando: no hace falta para pedir ni dar ayuda. En el simplificado, Aprender es solo el Pomodoro |
 | Not-games | Salas, crear sala, partida y marcador | N | La sección en sí |

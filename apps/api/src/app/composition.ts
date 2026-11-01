@@ -45,7 +45,7 @@ import type { ExamsModule } from '../modules/exams/index.js'
 import type { MapModule } from '../modules/map/index.js'
 import { createMeetModule } from '../modules/meet/index.js'
 import type { MeetModule } from '../modules/meet/index.js'
-import { createNetworkModule } from '../modules/network/index.js'
+import { createNetworkModule, PISCINE_CURSUS } from '../modules/network/index.js'
 import { createQuizModule } from '../modules/quiz/index.js'
 import type { QuizModule } from '../modules/quiz/index.js'
 import { createNoticesModule } from '../modules/notices/index.js'
@@ -71,6 +71,7 @@ import { createShellCourseModule } from '../modules/shellcourse/index.js'
 import type { ShellCourseModule } from '../modules/shellcourse/index.js'
 import type { FacilityModule } from '../modules/facility/index.js'
 import { createStatsModule } from '../modules/stats/index.js'
+import { createCollectionModule } from '../modules/collection/index.js'
 import type { StatsModule } from '../modules/stats/index.js'
 import type { SlackPoster } from '../integrations/slack.js'
 import { createToursModule } from '../modules/tours/index.js'
@@ -285,6 +286,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     notify,
     corrections: {
       byProject: (login) => late.get('network').correctedByProject(login),
+      poolByProject: (login) => late.get('network').correctedByProject(login, PISCINE_CURSUS),
       since: (campusId, since) => late.get('network').correctedSince(campusId, since),
     },
   })
@@ -569,6 +571,14 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     gitCourse,
     shellCourse,
     pool,
+    // El álbum de correcciones del tablón (`docs/correcciones-coleccion.md`).
+    createCollectionModule({
+      db,
+      audience,
+      circles: (track) => replica.curriculum.circles(track),
+      circlesOf: (logins) => replica.curriculum.circlesOf(logins),
+      ...clock,
+    }),
     createClientErrorsModule(),
   ]
 

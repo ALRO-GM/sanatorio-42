@@ -47,8 +47,8 @@ export type NetworkModule = AppModule & {
    * le corrigieron), los que más primero. Lo usan las noticias del juego secreto.
    */
   partnersOf: (campusId: number, login: string, limit: number) => Promise<string[]>
-  /** Correcciones hechas por alguien, por proyecto. */
-  correctedByProject: (login: string) => Promise<Map<number, number>>
+  /** Correcciones hechas por alguien, por proyecto (del 42cursus, o del cursus que se diga). */
+  correctedByProject: (login: string, cursus?: number) => Promise<Map<number, number>>
   /** Proyectos corregidos en un campus desde una fecha (ISO). */
   correctedSince: (campusId: number, since: string) => Promise<Set<number>>
 }
@@ -106,7 +106,7 @@ export function createNetworkModule(deps: NetworkModuleDeps): NetworkModule {
     topCorrectors: (campusId, limit) => corrections.topCorrectors(campusId, limit),
     partnersOf: async (campusId, login, limit) =>
       (await corrections.partnersOf(campusId, login)).slice(0, limit).map((entry) => entry.login),
-    correctedByProject: (login) => corrections.correctedByProject(login),
+    correctedByProject: (login, cursus) => corrections.correctedByProject(login, cursus),
     correctedSince: (campusId, since) => corrections.correctedSince(campusId, since),
     routes: (app, context) => {
       registerNetworkRoutes(app, context, service, seating)
@@ -130,3 +130,4 @@ export function createNetworkModule(deps: NetworkModuleDeps): NetworkModule {
 
 export type { NetworkService } from './network.service.js'
 export type { CorrectionSync } from './network.sync.js'
+export { PISCINE_CURSUS } from './network.sync.js'
