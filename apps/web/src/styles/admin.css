@@ -67,6 +67,22 @@ details.hours-report > summary {
   cursor: pointer;
   width: fit-content;
 }
+/* Plegado en el perfil, el título no parecía pulsable (salía como una etiqueta
+   sin nada debajo): una flecha que gira dice que se abre. */
+details.hours-report > summary::before {
+  content: '▸';
+  display: inline-block;
+  margin-right: 0.4em;
+  transition: transform 0.15s;
+}
+details.hours-report[open] > summary::before {
+  transform: rotate(90deg);
+}
+@media (prefers-reduced-motion: reduce) {
+  details.hours-report > summary::before {
+    transition: none;
+  }
+}
 .hours-form {
   display: flex;
   flex-wrap: wrap;

@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 
 import type { Section } from '../../app/sections'
+import { shows, useDetail } from '../../shared/detail'
+import type { Detail } from '../../shared/detail'
 import { DetailCards } from '../../shared/ui/DetailSelect'
 import { useI18n } from '../../shared/i18n'
 import { Icon } from '../../shared/ui/Icon'
@@ -12,8 +14,12 @@ const SEEN_KEY = 'sanatorio_welcome_seen'
 /** Cada cuánto se mira si ya no hay otra ventana delante (la legal, un comunicado…). */
 const WAIT_MS = 1500
 
-/** Las diapositivas: de qué va cada parte y a dónde lleva. */
-const SLIDES: readonly { id: string; icon: IconName; go?: Section }[] = [
+/**
+ * Las diapositivas: de qué va cada parte y a dónde lleva. `from`: desde qué
+ * modo de la interfaz sale (como las pestañas): quien elige el simplificado en
+ * el segundo paso no ve después las de lo que no le va a salir.
+ */
+const SLIDES: readonly { id: string; icon: IconName; go?: Section; from?: Detail }[] = [
   { id: 'hello', icon: 'pregunta' },
   // Lo primero que se elige: cuánto enseña la web. Se cambia luego en el pie.
   { id: 'mode', icon: 'cifras' },
@@ -23,7 +29,7 @@ const SLIDES: readonly { id: string; icon: IconName; go?: Section }[] = [
   { id: 'board', icon: 'tablon', go: 'tablon' },
   { id: 'groups', icon: 'terapia', go: 'terapia' },
   { id: 'agenda', icon: 'calendario', go: 'calendario' },
-  { id: 'net', icon: 'red', go: 'red' },
+  { id: 'net', icon: 'red', go: 'red', from: 'normal' },
   { id: 'comfort', icon: 'ajustes' },
 ]
 
@@ -61,6 +67,9 @@ export function Welcome({ open, onGo, onClose }: WelcomeProps) {
   const [step, setStep] = useState(0)
   const [first, setFirst] = useState(() => !welcomeSeen())
   const showing = open || first
+  const detail = useDetail()
+  // El modo se elige en el segundo paso: las que salen después ya lo siguen.
+  const slides = SLIDES.filter((one) => shows(detail, one.from ?? 'simple'))
 
   useEffect(() => {
     if (!showing) return undefined
@@ -89,8 +98,8 @@ export function Welcome({ open, onGo, onClose }: WelcomeProps) {
 
   if (!showing) return null
 
-  const slide = SLIDES[step] ?? SLIDES[0]
-  const last = step === SLIDES.length - 1
+  const slide = slides[step] ?? slides[0]
+  const last = step === slides.length - 1
   const close = (): void => {
     markSeen()
     setFirst(false)
@@ -118,7 +127,7 @@ export function Welcome({ open, onGo, onClose }: WelcomeProps) {
       <div className="welcome-art" aria-hidden="true">
         <Icon name={slide.icon} size={44} />
       </div>
-      <span className="eyebrow">{t('welcome.step', { n: step + 1, total: SLIDES.length })}</span>
+      <span className="eyebrow">{t('welcome.step', { n: step + 1, total: slides.length })}</span>
       <h3>{t(`welcome.${slide.id}.title`)}</h3>
       <p>{t(`welcome.${slide.id}.body`)}</p>
       {slide.id === 'mode' && <DetailCards />}
@@ -135,7 +144,7 @@ export function Welcome({ open, onGo, onClose }: WelcomeProps) {
         </button>
       )}
       <div className="welcome-dots" aria-hidden="true">
-        {SLIDES.map((one, index) => (
+        {slides.map((one, index) => (
           <i key={one.id} className={index === step ? 'on' : ''} />
         ))}
       </div>

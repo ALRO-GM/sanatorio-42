@@ -1,4 +1,5 @@
 import { api } from '../../shared/api'
+import { Show } from '../../shared/detail'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
@@ -12,7 +13,7 @@ const SHOWN = 5
 
 /**
  * Tu red de correcciones, en pequeño: cuánto has corregido, con cuánta gente
- * distinta, tu endogamia y con quién te cruzas más. El grafo entero está en la
+ * distinta y, en el modo de datos, tu endogamia y con quién te cruzas más. El grafo entero está en la
  * sección Red.
  */
 export function NetworkCard({ me }: { me: string }) {
@@ -63,28 +64,32 @@ export function NetworkCard({ me }: { me: string }) {
             </div>
           </dl>
           <VerdictStats node={mine} />
-          <Meter label={t('net.endogamy')} value={mine.endogamy} />
-          <p className="hint">
-            {t('net.personBreakdown', {
-              repetition: Math.round(mine.repetition * 100),
-              reciprocity: Math.round(mine.reciprocity * 100),
-            })}
-          </p>
-          {partners.length > 0 && (
-            <>
-              <span className="eyebrow">{t('net.mostWith')}</span>
-              <ul className="net-rows static">
-                {partners.slice(0, SHOWN).map((partner) => (
-                  <li key={partner.login}>
-                    <span className="net-row-name">{partner.login}</span>
-                    <span className="net-row-count" title={t('net.gaveGot')}>
-                      {partner.gave} → · ← {partner.got}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </>
-          )}
+          {/* La endogamia y con quién te cruzas más son rankings y desgloses: en la
+              Red salen desde el modo de datos, y aquí igual (`docs/interfaz.md`). */}
+          <Show from="datos">
+            <Meter label={t('net.endogamy')} value={mine.endogamy} />
+            <p className="hint">
+              {t('net.personBreakdown', {
+                repetition: Math.round(mine.repetition * 100),
+                reciprocity: Math.round(mine.reciprocity * 100),
+              })}
+            </p>
+            {partners.length > 0 && (
+              <>
+                <span className="eyebrow">{t('net.mostWith')}</span>
+                <ul className="net-rows static">
+                  {partners.slice(0, SHOWN).map((partner) => (
+                    <li key={partner.login}>
+                      <span className="net-row-name">{partner.login}</span>
+                      <span className="net-row-count" title={t('net.gaveGot')}>
+                        {partner.gave} → · ← {partner.got}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
+          </Show>
         </>
       )}
     </article>

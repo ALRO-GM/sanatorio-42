@@ -41,14 +41,16 @@ Fuera de las pestañas, a propósito:
 
 ## Modos de la interfaz
 
-Se eligen en el pie y en el segundo paso de la bienvenida
-(`shared/detail.tsx`). Cada elemento dice desde qué modo sale (`from`).
+Se eligen en Personalizar (pestaña Ajustes, también desde «Más ajustes» en el
+pie) y en el segundo paso de la bienvenida (`shared/detail.tsx`). Cada elemento
+dice desde qué modo sale (`from`). Revisión de la coherencia entre modos y de
+los flujos: `docs/revision-2026-11/ux.md`.
 
 | Modo | Para quién | Qué enseña |
 | --- | --- | --- |
-| **Simplificado** | Quien solo quiere ayuda o darla, o se pierde con tanto | Lo esencial: buscar ayuda, ofrecerse, quedar y su calendario. Sin Campus ni Aprender, sin rankings ni cifras |
-| **Normal** | La mayoría | Toda la web con las cifras principales |
-| **Loco por los datos** | Quien disfruta mirando cifras | Todo, con rankings, estadísticas y desgloses abiertos |
+| **Simplificado** | Quien solo quiere ayuda o darla, o se pierde con tanto | Lo esencial: buscar ayuda, ofrecerse, quedar y su calendario. Sin Campus ni Agenda; de Aprender, solo el Pomodoro; sin rankings ni cifras de más, y ningún enlace a una pestaña que no sale |
+| **Normal** | La mayoría | Toda la web con las cifras principales y los filtros para afinar |
+| **Loco por los datos** | Quien disfruta mirando cifras | Todo, con rankings, estadísticas y desgloses abiertos (se pueden plegar) |
 
 ### Importancia de cada elemento
 
@@ -64,28 +66,34 @@ de datos.
 | Sprints y Agenda | Tablero del sprint: una fila por persona del grupo con entrega, %, checkpoints, último daily y atasco; en la tarjeta del grupo y enmarcado en cada meta | N | Bloque, no sección: solo lo ve quien está en el grupo, y es para ir a echar una mano |
 | Expediente | Nivel, títulos y XP | S | Lo primero que se ve al entrar |
 | Expediente | Estado de salud (pace y black hole) | S | Afecta a la vida académica |
+| Expediente | «Compararte en Avance», en el estado de salud | N | El Avance sale desde el normal: en el simplificado llevaría a una pestaña que no se ve (2026-11) |
 | Expediente | Horas validadas (descarga para el staff) | N | Se usa de tarde en tarde |
 | Expediente | Cómo se gana XP (y cuánta llevas): se abre al pulsar el número del nivel | S (cerrado) | Detalle, a un clic de donde se mira |
 | Expediente | Título y banner: desplegable con el activo a la vista; cada título trae su banner, que se ve también en tu perfil público y en tu ficha | S (cerrado) | Lo tuyo, sin ocupar sitio fijo |
 | Expediente | Tu red de correcciones, logros y reacciones, clasificación | N | Es reconocimiento, no utilidad |
+| Expediente | En tu red de correcciones: la endogamia y con quién te cruzas más | D | En la Red son del modo de datos; aquí igual (2026-11) |
 | Guardia | Preevaluaciones, franjas de hoy, reservas | S | Es la guardia |
 | Guardia | Personas bloqueadas | N | Uso raro |
+| Guardia | Aviso arriba, «Tienes N reservas esperando tu respuesta», con «Verlas», que baja a las reservas | S | Lo que espera respuesta (valorar, aceptar) quedaba debajo de las franjas del día (2026-11) |
 | Sala de espera | Proyectos, quién ayuda, mapa de dónde se sienta, «solo de guardia», «a quien puedes pedir» | S | Es la sala de espera |
+| Sala de espera | Con un solo proyecto en curso, se abre directamente quién ayuda (un estudiante; un piscinero ve siempre la lista); «Volver» deja la lista | S | Un clic menos en el camino de quien se atasca (2026-11) |
 | Sala de espera | Filtro especialistas / pacientes, filtro de preevaluación | N | Afinar |
+| Sala de espera | «En la lista, N personas: quien lo está haciendo y los seniors disponibles» | N | Cifra; antes decía «pueden ayudarte ahora mismo» y chocaba con «N disponibles» (2026-11) |
+| Sala de espera y Clústeres | En el mapa, «Resaltar» (tu círculo, tu proyecto, quien lo aprobó) y «Círculos» | N | Afinar; en el simplificado, el plano tal cual (2026-11) |
 | Sala de espera | «Os habéis corregido N veces» | D | Curiosidad |
 | Tablón | Grafo de tu avance, guía y dudas | S | Es el tablón |
 | Tablón | Grafo de tus correcciones (maestro del código) | N | Reconocimiento |
 | Terapia y Pizarras | Todo | S | Son quedar |
-| Pestañas | Not-games | N | Aprender jugando: no hace falta para pedir ni dar ayuda |
+| Pestañas | Not-games, Curso de git y Curso de shell (en Aprender) | N | Aprender jugando: no hace falta para pedir ni dar ayuda. En el simplificado, Aprender es solo el Pomodoro |
 | Not-games | Salas, crear sala, partida y marcador | N | La sección en sí |
-| Not-games | Curso de git: camino, animación, teoría y terminal | N | Aprender jugando, como el resto de Not-games |
-| Not-games | Curso de git: pruebas de grupo (sala, misiones, origin común) | N | Va con el curso: después del test previo de cada prueba |
-| Not-games | Curso de shell: camino por niveles, unidad (teoría, ejemplo, prueba), jefes contrarreloj | N | Aprender jugando, como el curso de git: una pestaña más de Not-games, no una sección |
+| Curso de git | Camino, animación, teoría y terminal | N | Aprender jugando; desde el 2026-10-29, su propia pestaña de Aprender (antes, de Not-games) |
+| Curso de git | Pruebas de grupo (sala, misiones, origin común) | N | Va con el curso: después del test previo de cada prueba |
+| Curso de shell | Camino por niveles, unidad (teoría, ejemplo, prueba), jefes contrarreloj | N | Como el curso de git: su propia pestaña de Aprender |
 | Perfil | Certificados del curso de shell (jefes finales superados), en la tarjeta del perfil | S | Lo ganado se enseña donde está el resto de lo tuyo; si no hay ninguno, no ocupa nada |
 | Toda la web | Aviso para quien entra desde un campus que aún no se copia (#92) | S | Se ve una vez, arriba, y se cierra: explica por qué ve datos de otro campus |
 | Not-games | Repaso: lo fallado con definición y ejemplo | N | Para estudiar después de jugar |
 | Not-games | Ajedrez: tablero, relojes, pregunta encima del tablero, estilos de tablero, sonido | N | Un juego más de la sección |
-| Menú de la cuenta | Modo concentración (Pomodoro) | S | Para todos: concentrarse no es «de datos» |
+| Aprender y menú de la cuenta | Modo concentración (Pomodoro) | S | Para todos: concentrarse no es «de datos» |
 | Pomodoro | Pantalla completa con «en concentración · no molestar» y la pregunta al acabar (motivos, diez segundos, seguir con felicitación) | S | Es el propio Pomodoro: ayuda a no rendirse a la primera (#80) |
 | Pomodoro | «Tus estadísticas» (pestaña de su ventana): periodo, días, horas, paradas y motivos, y la media del tramo elegido de quienes lo usan | N | Son cifras: el simplificado no las enseña (#80) |
 | Pomodoro | «Startup» (pestaña de su ventana): con los minutos de concentración se construye una empresa, del garaje al control global, con ranking; y la escena en pequeño en la pantalla completa (`docs/pomodoro-startup.md`) | N | Es un juego de motivación con cifras: desde el normal, como las estadísticas (pedido por Alberto, 2026-10-27) |
@@ -100,7 +108,7 @@ de datos.
 | Panel de gestión | Pestaña Mantenimiento: ponerlo y quitarlo, mensaje y hora prevista; mientras dura, franja arriba para quien administra y pantalla «No disponible» con cuenta atrás para el resto (`docs/mantenimiento.md`) | Admins | La pantalla del resto no es una sección: sustituye a toda la web |
 | Clústeres | Avisar de un problema (edificio u ordenador) | N | Al lado del plano, donde se ve el puesto |
 | Cabecera | Burbuja de sugerencias: se arrastra hasta un sitio (o se pulsa), panel con dónde, el problema y tu propuesta; va al buzón de incidencias como mejora con el sitio (`docs/sugerencias.md`) | S | Contar que algo no se entiende es justo para quien se pierde; pequeña y sin abrir nada hasta que se usa |
-| Pestañas | Estadísticas (en Ayuda) | N | Clasificaciones: el simplificado no enseña rankings |
+| Pestañas | Clasificaciones (en Campus; en el código, `estadisticas`) | N | Clasificaciones: el simplificado no enseña rankings |
 | Estadísticas | Cifras del campus y clasificación de cada sección, con fotos | N | La sección en sí |
 | Calendario | Vistas día/semana/mes, tipos de evento (también leyenda) | S | Básico |
 | Calendario | Formas del día (lista, entera, ajustada, desde ahora) | N | Comodidad |
@@ -125,8 +133,9 @@ de datos.
 | Exámenes | Último examen acabado (de las dos últimas semanas), bajo el siguiente, con los resultados de quien entró, sus barras y la mejor nota; se quita mientras hay otro en marcha | N | Pedido por Alberto (2026-10-29): que no desaparezca al acabar, para que los amigos lo revisen |
 | Exámenes | Cuánto se tarda en cada círculo | D | Estadística |
 | Exámenes | Filtros de plan (C o Python), exámenes (C, Nexus o los dos) y kickoffs; un rango por fila con C y Nexus juntos (#81) | N | Es lo que se viene a mirar |
-| Exámenes | Cada intento (nota mediana, aprobados, personas), plegado; en qué intento se aprueba, los 3 primeros y el resto al desplegar | D | Detalle (2026-10-25: sin tabla de kickoffs ni black hole, que no eran de fiar) |
+| Exámenes | Cada intento (nota mediana, aprobados, personas); en qué intento se aprueba, los 3 primeros y el resto al desplegar | D | Detalle (2026-10-25: sin tabla de kickoffs ni black hole, que no eran de fiar). Desde el 2026-11, en el modo de datos los dos desgloses salen abiertos |
 | Pie | Idioma y «Más ajustes» (abre Personalizar: modo, tema, texto, daltonismo, zen) | S | Accesibilidad |
+| Bienvenida | Diez pasos; el de la Red y los clústeres, solo si el modo elegido en el segundo paso los enseña | S | No presentar lo que no va a salir (2026-11); los textos dicen que el modo y el tema están en «Más ajustes», no sueltos en el pie |
 | Pie | Campus | N | Casi nadie cambia de campus |
 | Pie | «Puestos actualizados hace N min» | D | Dato técnico |
 

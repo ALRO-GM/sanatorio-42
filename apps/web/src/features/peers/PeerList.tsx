@@ -6,7 +6,7 @@ import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { usePolling } from '../../shared/hooks/usePolling'
 import { useI18n } from '../../shared/i18n'
-import { Show } from '../../shared/detail'
+import { Show, shows, useDetail } from '../../shared/detail'
 import { Icon } from '../../shared/ui/Icon'
 import { Avatar } from '../../shared/ui/Avatar'
 import { FocusBadge } from '../../shared/ui/FocusBadge'
@@ -49,6 +49,7 @@ type PeerListProps = {
 /** Quién puede ayudarte con un proyecto: de guardia primero. */
 export function PeerList({ project, onOpenTherapy }: PeerListProps) {
   const { t, tn } = useI18n()
+  const detail = useDetail()
   const { data, error, loading, reload } = useAsync(() => api.getPeers(project.id), [project.id])
   const groups = useAsync(() => api.getGroups(project.id), [project.id])
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('all')
@@ -127,7 +128,8 @@ export function PeerList({ project, onOpenTherapy }: PeerListProps) {
       ) : (
         <p className="count">{t('peers.nobodyOnDuty')}</p>
       )}
-      {peers.length > 0 && (
+      {/* Cuánta gente hay en la lista: una cifra más, desde el modo normal. */}
+      {peers.length > 0 && shows(detail, 'normal') && (
         <p className="total">
           {total !== null && total > peers.length
             ? t('peers.totalOf', { shown: peers.length, total })
