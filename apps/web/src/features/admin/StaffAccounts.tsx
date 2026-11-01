@@ -5,6 +5,7 @@ import { api } from '../../shared/api'
 import { useAction, useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { useFormat } from '../../shared/i18n/useFormat'
+import { Async } from '../../shared/ui/Async'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 
 /**
@@ -15,7 +16,7 @@ import { ErrorNote } from '../../shared/ui/ErrorNote'
 export function StaffAccounts() {
   const { t } = useI18n()
   const { date } = useFormat()
-  const { data, loading, error, reload } = useAsync(() => api.getStaffAccounts(), [])
+  const accounts = useAsync(() => api.getStaffAccounts(), [])
   const [name, setName] = useState('')
   const [fresh, setFresh] = useState<{ name: string; key: string } | null>(null)
   const [copied, setCopied] = useState(false)
@@ -30,7 +31,7 @@ export function StaffAccounts() {
 
       setFresh({ name: created.account.name, key: created.key })
       setName('')
-      await reload()
+      await accounts.reload()
     })
   }
 
@@ -53,51 +54,50 @@ export function StaffAccounts() {
         {t('admin.staff.hint', { url: `${window.location.origin}/#/validar` })}
       </p>
       <ErrorNote error={action.error} />
-      {loading && <p className="estado">{t('app.loading')}</p>}
-      {data === undefined ? (
-        !loading && <ErrorNote error={error} onRetry={() => void reload()} />
-      ) : (
-        <>
-          {data.accounts.length === 0 && <p className="hint">{t('admin.staff.none')}</p>}
-          <ul className="rows">
-            {data.accounts.map((account) => (
-              <li key={account.id} className="row plain">
-                <span>
-                  <strong>{account.name}</strong>
-                  <small>
-                    {t('admin.staff.created', {
-                      date: day(account.createdAt),
-                      by: account.createdBy,
-                    })}
-                    {' · '}
-                    {account.lastUsedAt === null
-                      ? t('admin.staff.unused')
-                      : t('admin.staff.used', { date: day(account.lastUsedAt) })}
-                  </small>
-                </span>
-                {account.revokedAt === null ? (
-                  <button
-                    type="button"
-                    className="pill row-count"
-                    disabled={action.busy}
-                    onClick={() =>
-                      void action
-                        .run(() => api.revokeStaffAccount(account.id))
-                        .then((ok) => (ok ? reload() : undefined))
-                    }
-                  >
-                    {t('admin.staff.revoke')}
-                  </button>
-                ) : (
-                  <small className="row-count">
-                    {t('admin.staff.revoked', { date: day(account.revokedAt) })}
-                  </small>
-                )}
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
+      <Async state={accounts}>
+        {(data) => (
+          <>
+            {data.accounts.length === 0 && <p className="hint">{t('admin.staff.none')}</p>}
+            <ul className="rows">
+              {data.accounts.map((account) => (
+                <li key={account.id} className="row plain">
+                  <span>
+                    <strong>{account.name}</strong>
+                    <small>
+                      {t('admin.staff.created', {
+                        date: day(account.createdAt),
+                        by: account.createdBy,
+                      })}
+                      {' · '}
+                      {account.lastUsedAt === null
+                        ? t('admin.staff.unused')
+                        : t('admin.staff.used', { date: day(account.lastUsedAt) })}
+                    </small>
+                  </span>
+                  {account.revokedAt === null ? (
+                    <button
+                      type="button"
+                      className="pill row-count"
+                      disabled={action.busy}
+                      onClick={() =>
+                        void action
+                          .run(() => api.revokeStaffAccount(account.id))
+                          .then((ok) => (ok ? accounts.reload() : undefined))
+                      }
+                    >
+                      {t('admin.staff.revoke')}
+                    </button>
+                  ) : (
+                    <small className="row-count">
+                      {t('admin.staff.revoked', { date: day(account.revokedAt) })}
+                    </small>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+      </Async>
 
       {fresh !== null && (
         <div className="staff-key" role="status">

@@ -4,14 +4,15 @@ import type { LiveExam, LiveExamGroup, LiveExamResults, LiveExaminee } from '@sa
 
 import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
-import { localeOf, useI18n } from '../../shared/i18n'
+import { useI18n } from '../../shared/i18n'
 import { useFormat } from '../../shared/i18n/useFormat'
 import { clock } from '../../shared/time'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
-import { InfoTip } from '../../shared/ui/InfoTip'
+import { SectionTitle } from '../../shared/ui/SectionTitle'
 import { ExamPeople } from './ExamPeople'
 import { ExamStatsPanel } from './ExamStatsPanel'
 import { ExamsTour } from './ExamsTour'
+import { PillGroup } from '../../shared/ui/PillGroup'
 import { PoolOnly } from '../../shared/ui/PoolOnly'
 import { usePoolAccess } from '../../shared/pool'
 import type { ExamWorld } from '../../shared/api/types'
@@ -22,6 +23,10 @@ const IDLE_REFRESH_MS = 5 * 60_000
 const MIN_WAIT_MS = 5_000
 
 type TrackFilter = 'all' | LiveExaminee['track']
+
+/** Los dos mundos que elige la vista sin límites: estudiantes y piscineros. */
+const WORLDS: readonly ExamWorld[] = ['student', 'pool']
+const TRACKS: readonly TrackFilter[] = ['all', 'classic', 'next']
 
 /**
  * Exámenes: arriba, el examen que hay ahora en tu campus (quién está, qué
@@ -37,28 +42,17 @@ export function ExamsPage() {
 
   return (
     <section>
-      <h2>
-        {t('exams.title')}
-        <InfoTip title={t('exams.title')}>
-          <ExamsTour />
-        </InfoTip>
-      </h2>
+      <SectionTitle title={t('exams.title')}>
+        <ExamsTour />
+      </SectionTitle>
       {unrestricted && (
-        <div className="filter-pills" role="group" aria-label={t('exams.world.label')}>
-          {(['student', 'pool'] as const).map((option) => (
-            <button
-              key={option}
-              type="button"
-              className={`pill ${world === option ? 'active' : ''}`}
-              aria-pressed={world === option}
-              onClick={() => {
-                setWorld(option)
-              }}
-            >
-              {t(`exams.world.${option}`)}
-            </button>
-          ))}
-        </div>
+        <PillGroup
+          options={WORLDS}
+          value={world}
+          onChange={setWorld}
+          label={t('exams.world.label')}
+          text={(option) => t(`exams.world.${option}`)}
+        />
       )}
       {/* Un piscinero, solo lo que permite el panel (`docs/piscineros.md`). */}
       <PoolOnly k="examenes.live">
@@ -253,20 +247,12 @@ function LiveCard({
         </div>
       )}
       {live.running && (
-        <div className="filter-pills">
-          {(['all', 'classic', 'next'] as const).map((option) => (
-            <button
-              key={option}
-              type="button"
-              className={`pill ${track === option ? 'active' : ''}`}
-              aria-pressed={track === option}
-              onClick={() => {
-                setTrack(option)
-              }}
-            >
-              {t(`exams.track.${option}`)}
-            </button>
-          ))}
+        <PillGroup
+          options={TRACKS}
+          value={track}
+          onChange={setTrack}
+          text={(option) => t(`exams.track.${option}`)}
+        >
           {circles.length > 0 && (
             <select
               value={circle}
@@ -283,7 +269,7 @@ function LiveCard({
               ))}
             </select>
           )}
-        </div>
+        </PillGroup>
       )}
       {live.running && live.groups.length === 0 && <p className="estado">{t('exams.nobody')}</p>}
       <ExamGroups groups={live.groups} shown={shown} bars={live.running} />
@@ -361,14 +347,8 @@ function ExamGroups({
  * al acabar, para que se pueda revisar después (cómo le fue a cada cual).
  */
 function LastExamCard({ last }: { last: LiveExamResults }) {
-  const { t, lang } = useI18n()
-  const when = new Date(last.exam.beginAt).toLocaleString(localeOf(lang), {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
+  const { t } = useI18n()
+  const when = useFormat().dateTime(last.exam.beginAt, 'weekday')
 
   return (
     <article className="card exam-live exam-last">

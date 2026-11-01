@@ -15,7 +15,7 @@ import { HealthCard } from './HealthCard'
 import { HoursReport } from './HoursReport'
 import { LeaderboardCard } from './LeaderboardCard'
 import { NetworkCard } from './NetworkCard'
-import { InfoTip } from '../../shared/ui/InfoTip'
+import { SectionTitle } from '../../shared/ui/SectionTitle'
 import { Icon } from '../../shared/ui/Icon'
 import { RecordTour } from './RecordTour'
 import { LevelButton } from './LevelButton'
@@ -50,12 +50,9 @@ export function Expediente({ me, profile }: ExpedienteProps) {
 
   return (
     <section>
-      <h2>
-        {t('xp.title')}
-        <InfoTip title={t('xp.title')}>
-          <RecordTour />
-        </InfoTip>
-      </h2>
+      <SectionTitle title={t('xp.title')}>
+        <RecordTour />
+      </SectionTitle>
 
       <Blocks
         page="expediente"

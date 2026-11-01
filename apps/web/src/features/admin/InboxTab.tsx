@@ -9,7 +9,9 @@ import type { Ticket } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
 import { useAction, useAsync } from '../../shared/hooks/useAsync'
-import { localeOf, useI18n } from '../../shared/i18n'
+import { useI18n } from '../../shared/i18n'
+import { useFormat } from '../../shared/i18n/useFormat'
+import { Async } from '../../shared/ui/Async'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { useConfirm } from '../../shared/ui/useConfirm'
 import { PillGroup } from '../../shared/ui/PillGroup'
@@ -21,64 +23,70 @@ import type { InboxFilter, InboxView } from './inbox'
 
 export function InboxTab() {
   const { t } = useI18n()
-  const { data, error, loading, reload } = useAsync(() => api.getAdminTickets(), [])
+  const tickets = useAsync(() => api.getAdminTickets(), [])
   // A quién se acaba de responder: se dice dónde va a ver la respuesta.
   const [answered, setAnswered] = useState<string | null>(null)
   const [view, setView] = useState<InboxView>('pending')
   const [filter, setFilter] = useState<InboxFilter>('all')
 
-  if (loading) return <p className="estado">{t('app.loading')}</p>
-  if (data === undefined) return <ErrorNote error={error} onRetry={() => void reload()} />
-
-  const shown = ticketsIn(data, view, filter)
-  const reports = ticketsIn(data, view).filter((ticket) => ticket.kind === 'report').length
-
   return (
-    <>
-      <PillGroup
-        kind="tabs"
-        className="sub-tabs"
-        options={INBOX_VIEWS}
-        value={view}
-        onChange={setView}
-        label={t('admin.tab.inbox')}
-        text={(option) => `${t(`admin.inbox.view.${option}`)} (${ticketsIn(data, option).length})`}
-      />
-      {(reports > 0 || filter !== 'all') && (
-        <PillGroup
-          options={['all', ...REPORT_REASONS] as const}
-          value={filter}
-          onChange={setFilter}
-          label={t('admin.inbox.byReason')}
-          text={(option) =>
-            `${option === 'all' ? t('admin.inbox.allKinds') : t(`report.reason.${option}`)} (${ticketsIn(data, view, option).length})`
-          }
-        />
-      )}
-      {shown.length === 0 && <p className="estado">{t('admin.inbox.empty')}</p>}
-      {answered !== null && (
-        <p className="reaction-done" role="status">
-          {t('admin.inbox.sent', { login: answered })}
-        </p>
-      )}
-      <ul className="ticket-list">
-        {shown.map((ticket) => (
-          <TicketRow
-            key={ticket.id}
-            ticket={ticket}
-            onDone={() => {
-              setAnswered(ticket.login)
-              void reload()
-            }}
-          />
-        ))}
-      </ul>
-    </>
+    <Async state={tickets}>
+      {(data) => {
+        const shown = ticketsIn(data, view, filter)
+        const reports = ticketsIn(data, view).filter((ticket) => ticket.kind === 'report').length
+
+        return (
+          <>
+            <PillGroup
+              kind="tabs"
+              className="sub-tabs"
+              options={INBOX_VIEWS}
+              value={view}
+              onChange={setView}
+              label={t('admin.tab.inbox')}
+              text={(option) =>
+                `${t(`admin.inbox.view.${option}`)} (${ticketsIn(data, option).length})`
+              }
+            />
+            {(reports > 0 || filter !== 'all') && (
+              <PillGroup
+                options={['all', ...REPORT_REASONS] as const}
+                value={filter}
+                onChange={setFilter}
+                label={t('admin.inbox.byReason')}
+                text={(option) =>
+                  `${option === 'all' ? t('admin.inbox.allKinds') : t(`report.reason.${option}`)} (${ticketsIn(data, view, option).length})`
+                }
+              />
+            )}
+            {shown.length === 0 && <p className="estado">{t('admin.inbox.empty')}</p>}
+            {answered !== null && (
+              <p className="reaction-done" role="status">
+                {t('admin.inbox.sent', { login: answered })}
+              </p>
+            )}
+            <ul className="ticket-list">
+              {shown.map((ticket) => (
+                <TicketRow
+                  key={ticket.id}
+                  ticket={ticket}
+                  onDone={() => {
+                    setAnswered(ticket.login)
+                    void tickets.reload()
+                  }}
+                />
+              ))}
+            </ul>
+          </>
+        )
+      }}
+    </Async>
   )
 }
 
 function TicketRow({ ticket, onDone }: { ticket: Ticket; onDone: () => void }) {
-  const { t, lang } = useI18n()
+  const { t } = useI18n()
+  const { dateTime } = useFormat()
   const { busy, error, run } = useAction()
   const confirm = useConfirm()
   const [answer, setAnswer] = useState(ticket.answer ?? '')
@@ -102,7 +110,7 @@ function TicketRow({ ticket, onDone }: { ticket: Ticket; onDone: () => void }) {
         )}
         <strong>{ticket.subject}</strong>
         <small>
-          {ticket.login} · {new Date(ticket.createdAt).toLocaleString(localeOf(lang))}
+          {ticket.login} · {dateTime(ticket.createdAt, 'numeric')}
           {ticket.target !== null && ` · ${ticket.target}`}
         </small>
       </div>

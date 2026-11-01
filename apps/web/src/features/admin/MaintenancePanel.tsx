@@ -9,6 +9,7 @@ import { useI18n } from '../../shared/i18n'
 import { useFormat } from '../../shared/i18n/useFormat'
 import { maintenanceSaved } from '../../shared/maintenance'
 import { DayTimeFields, instantOf } from '../../shared/ui/DayTimeFields'
+import { Async } from '../../shared/ui/Async'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { Icon } from '../../shared/ui/Icon'
 
@@ -21,13 +22,9 @@ const QUICK = [30, 60, 120, 240] as const
  * quien no administra ve la pantalla de mantenimiento con la cuenta atrás.
  */
 export function MaintenancePanel() {
-  const { data, error, loading, reload } = useAsync(() => api.getMaintenance(), [])
-  const { t } = useI18n()
+  const maintenance = useAsync(() => api.getMaintenance(), [])
 
-  if (loading && data === undefined) return <p className="estado">{t('app.loading')}</p>
-  if (data === undefined) return <ErrorNote error={error} onRetry={() => void reload()} />
-
-  return <MaintenanceForm initial={data} />
+  return <Async state={maintenance}>{(data) => <MaintenanceForm initial={data} />}</Async>
 }
 
 function MaintenanceForm({ initial }: { initial: Maintenance }) {

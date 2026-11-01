@@ -36,6 +36,7 @@ import { api } from '../../../shared/api'
 import { useAction, useAsync } from '../../../shared/hooks/useAsync'
 import { useI18n } from '../../../shared/i18n'
 import { useFormat } from '../../../shared/i18n/useFormat'
+import { Async } from '../../../shared/ui/Async'
 import { ErrorNote } from '../../../shared/ui/ErrorNote'
 import { Icon } from '../../../shared/ui/Icon'
 import { AxisGlyph } from './art/AxisGlyph'
@@ -88,33 +89,35 @@ const SHOPS: readonly { label: string; kinds: readonly ItemKind[] }[] = [
  * compara con la de los demás. Casi sin texto: dibujos, iconos y cifras.
  */
 export function StartupPanel() {
-  const { t } = useI18n()
-  const { data, error, loading, reload, setData } = useAsync(() => api.getStartup(), [])
+  const startup = useAsync(() => api.getStartup(), [])
   const ranking = useAsync(() => api.getStartupRanking(), [])
   const action = useAction()
 
-  if (loading && data === undefined) return <p className="estado">{t('app.loading')}</p>
-  if (data === undefined) return <ErrorNote error={error} onRetry={() => void reload()} />
-
-  const run = async (next: StartupAction): Promise<boolean> => {
-    // La partida que devuelve la API es la que manda: se pinta tal cual.
-    const done = await action.run(async () => {
-      setData(await api.startupAction(next))
-    })
-
-    if (done) void ranking.reload()
-
-    return done
-  }
-
   return (
-    <Game
-      snapshot={data}
-      busy={action.busy}
-      onAct={run}
-      error={<ErrorNote error={action.error} />}
-      ranking={ranking.data ?? []}
-    />
+    <Async state={startup}>
+      {(data) => {
+        const run = async (next: StartupAction): Promise<boolean> => {
+          // La partida que devuelve la API es la que manda: se pinta tal cual.
+          const done = await action.run(async () => {
+            startup.setData(await api.startupAction(next))
+          })
+
+          if (done) void ranking.reload()
+
+          return done
+        }
+
+        return (
+          <Game
+            snapshot={data}
+            busy={action.busy}
+            onAct={run}
+            error={<ErrorNote error={action.error} />}
+            ranking={ranking.data ?? []}
+          />
+        )
+      }}
+    </Async>
   )
 }
 

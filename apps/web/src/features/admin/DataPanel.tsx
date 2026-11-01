@@ -8,6 +8,7 @@ import { useI18n } from '../../shared/i18n'
 import { useFormat } from '../../shared/i18n/useFormat'
 import { cellValue } from '../../shared/table-sort'
 import { DataTable } from '../../shared/ui/DataTable'
+import { Async } from '../../shared/ui/Async'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { Modal } from '../../shared/ui/Modal'
 import { PersonInput } from '../../shared/ui/PersonInput'
@@ -28,7 +29,7 @@ type Range = (typeof RANGES)[number]
 export function DataPanel() {
   const { t, tn } = useI18n()
   const { number } = useFormat()
-  const { data, error, loading, reload } = useAsync(() => api.getAdminData(), [])
+  const stored = useAsync(() => api.getAdminData(), [])
   const action = useAction()
   const [kind, setKind] = useState('')
   const [login, setLogin] = useState('')
@@ -38,156 +39,159 @@ export function DataPanel() {
   const [review, setReview] = useState<{ scope: DataWipe; preview: DataPreview } | null>(null)
   const [deleted, setDeleted] = useState<number | null>(null)
 
-  if (loading) return <p className="estado">{t('app.loading')}</p>
-  if (data === undefined) return <ErrorNote error={error} onRetry={() => void reload()} />
-
-  const who = login.trim().toLowerCase()
-  const ready = kind !== '' && (range === 'all' || day !== '')
-  const scope: DataWipe = {
-    kind,
-    ...(who === '' ? {} : { login: who }),
-    ...(range === 'before' ? { before: day } : {}),
-    ...(range === 'from' ? { from: day } : {}),
-  }
-
-  const see = async (): Promise<void> => {
-    setDeleted(null)
-    await action.run(async () => {
-      setReview({ scope, preview: await api.previewAdminData(scope) })
-    })
-  }
-  const erase = async (): Promise<void> => {
-    if (review === null) return
-
-    await action.run(async () => {
-      const { rows } = await api.deleteAdminData(review.scope)
-
-      setReview(null)
-      setDeleted(rows)
-      await reload()
-    })
-  }
-
   return (
-    <section>
-      <h2>{t('admin.data.title')}</h2>
-      <p className="hint">{t('admin.data.about')}</p>
+    <Async state={stored}>
+      {(data) => {
+        const who = login.trim().toLowerCase()
+        const ready = kind !== '' && (range === 'all' || day !== '')
+        const scope: DataWipe = {
+          kind,
+          ...(who === '' ? {} : { login: who }),
+          ...(range === 'before' ? { before: day } : {}),
+          ...(range === 'from' ? { from: day } : {}),
+        }
 
-      <article className="card">
-        <div className="data-form">
-          <label>
-            {t('admin.data.kind')}
-            <select
-              value={kind}
-              onChange={(event) => {
-                setKind(event.target.value)
-              }}
-            >
-              <option value="">{t('admin.data.choose')}</option>
-              {data.kinds.map((entry) => (
-                <option key={entry.id} value={entry.id}>
-                  {t(`admin.data.kind.${entry.id}`)} ({number(entry.rows)})
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            {t('admin.data.who')}
-            <PersonInput
-              value={login}
-              label={t('admin.data.who')}
-              placeholder={t('admin.data.everyone')}
-              onChange={setLogin}
-              onPick={setLogin}
-            />
-          </label>
-          <label>
-            {t('admin.data.range')}
-            <select
-              value={range}
-              onChange={(event) => {
-                setRange(event.target.value as Range)
-              }}
-            >
-              {RANGES.map((option) => (
-                <option key={option} value={option}>
-                  {t(`admin.data.range.${option}`)}
-                </option>
-              ))}
-            </select>
-          </label>
-          {range !== 'all' && (
-            <label>
-              {t('admin.data.day')}
-              <input
-                type="date"
-                value={day}
-                onChange={(event) => {
-                  setDay(event.target.value)
+        const see = async (): Promise<void> => {
+          setDeleted(null)
+          await action.run(async () => {
+            setReview({ scope, preview: await api.previewAdminData(scope) })
+          })
+        }
+        const erase = async (): Promise<void> => {
+          if (review === null) return
+
+          await action.run(async () => {
+            const { rows } = await api.deleteAdminData(review.scope)
+
+            setReview(null)
+            setDeleted(rows)
+            await stored.reload()
+          })
+        }
+
+        return (
+          <section>
+            <h2>{t('admin.data.title')}</h2>
+            <p className="hint">{t('admin.data.about')}</p>
+
+            <article className="card">
+              <div className="data-form">
+                <label>
+                  {t('admin.data.kind')}
+                  <select
+                    value={kind}
+                    onChange={(event) => {
+                      setKind(event.target.value)
+                    }}
+                  >
+                    <option value="">{t('admin.data.choose')}</option>
+                    {data.kinds.map((entry) => (
+                      <option key={entry.id} value={entry.id}>
+                        {t(`admin.data.kind.${entry.id}`)} ({number(entry.rows)})
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  {t('admin.data.who')}
+                  <PersonInput
+                    value={login}
+                    label={t('admin.data.who')}
+                    placeholder={t('admin.data.everyone')}
+                    onChange={setLogin}
+                    onPick={setLogin}
+                  />
+                </label>
+                <label>
+                  {t('admin.data.range')}
+                  <select
+                    value={range}
+                    onChange={(event) => {
+                      setRange(event.target.value as Range)
+                    }}
+                  >
+                    {RANGES.map((option) => (
+                      <option key={option} value={option}>
+                        {t(`admin.data.range.${option}`)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                {range !== 'all' && (
+                  <label>
+                    {t('admin.data.day')}
+                    <input
+                      type="date"
+                      value={day}
+                      onChange={(event) => {
+                        setDay(event.target.value)
+                      }}
+                    />
+                  </label>
+                )}
+              </div>
+
+              {kind !== '' && (
+                <div className="data-about">
+                  <strong>{t(`admin.data.kind.${kind}.summary`)}</strong>
+                  <span className="eyebrow">{t('admin.data.includes')}</span>
+                  <p>{t(`admin.data.kind.${kind}.detail`)}</p>
+                </div>
+              )}
+
+              <div className="data-actions">
+                <button
+                  type="button"
+                  className="primary"
+                  disabled={!ready || action.busy}
+                  onClick={() => void see()}
+                >
+                  {t('admin.data.see')}
+                </button>
+                {deleted !== null && <span role="status">{tn('admin.data.deleted', deleted)}</span>}
+              </div>
+              <ErrorNote error={action.error} />
+            </article>
+
+            <article className="card">
+              <span className="eyebrow">{t('admin.data.kind')}</span>
+              <dl className="data-kinds">
+                {data.kinds.map((entry) => (
+                  <div key={entry.id}>
+                    <dt>
+                      {t(`admin.data.kind.${entry.id}`)}
+                      <small>{tn('admin.data.total', entry.rows)}</small>
+                    </dt>
+                    <dd>{t(`admin.data.kind.${entry.id}.summary`)}</dd>
+                  </div>
+                ))}
+              </dl>
+            </article>
+
+            {review !== null && (
+              <Review
+                title={t('admin.data.reviewScope', {
+                  kind: t(`admin.data.kind.${review.scope.kind}`),
+                  who: review.scope.login ?? t('admin.data.scope.everyone'),
+                  when:
+                    review.scope.before !== undefined
+                      ? t('admin.data.scope.before', { day: review.scope.before })
+                      : review.scope.from !== undefined
+                        ? t('admin.data.scope.from', { day: review.scope.from })
+                        : t('admin.data.scope.all'),
+                })}
+                preview={review.preview}
+                busy={action.busy}
+                onDelete={() => void erase()}
+                onClose={() => {
+                  setReview(null)
                 }}
               />
-            </label>
-          )}
-        </div>
-
-        {kind !== '' && (
-          <div className="data-about">
-            <strong>{t(`admin.data.kind.${kind}.summary`)}</strong>
-            <span className="eyebrow">{t('admin.data.includes')}</span>
-            <p>{t(`admin.data.kind.${kind}.detail`)}</p>
-          </div>
-        )}
-
-        <div className="data-actions">
-          <button
-            type="button"
-            className="primary"
-            disabled={!ready || action.busy}
-            onClick={() => void see()}
-          >
-            {t('admin.data.see')}
-          </button>
-          {deleted !== null && <span role="status">{tn('admin.data.deleted', deleted)}</span>}
-        </div>
-        <ErrorNote error={action.error} />
-      </article>
-
-      <article className="card">
-        <span className="eyebrow">{t('admin.data.kind')}</span>
-        <dl className="data-kinds">
-          {data.kinds.map((entry) => (
-            <div key={entry.id}>
-              <dt>
-                {t(`admin.data.kind.${entry.id}`)}
-                <small>{tn('admin.data.total', entry.rows)}</small>
-              </dt>
-              <dd>{t(`admin.data.kind.${entry.id}.summary`)}</dd>
-            </div>
-          ))}
-        </dl>
-      </article>
-
-      {review !== null && (
-        <Review
-          title={t('admin.data.reviewScope', {
-            kind: t(`admin.data.kind.${review.scope.kind}`),
-            who: review.scope.login ?? t('admin.data.scope.everyone'),
-            when:
-              review.scope.before !== undefined
-                ? t('admin.data.scope.before', { day: review.scope.before })
-                : review.scope.from !== undefined
-                  ? t('admin.data.scope.from', { day: review.scope.from })
-                  : t('admin.data.scope.all'),
-          })}
-          preview={review.preview}
-          busy={action.busy}
-          onDelete={() => void erase()}
-          onClose={() => {
-            setReview(null)
-          }}
-        />
-      )}
-    </section>
+            )}
+          </section>
+        )
+      }}
+    </Async>
   )
 }
 

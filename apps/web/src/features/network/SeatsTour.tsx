@@ -1,4 +1,5 @@
 import { useI18n } from '../../shared/i18n'
+import { initialOf } from '../../shared/initial'
 import { click, defineTour, Tour } from '../../shared/tour/Tour'
 import { scaleColor } from './colors'
 
@@ -153,7 +154,7 @@ export function SeatsTour() {
                 <div className="tour-in" style={{ display: 'grid', gap: '0.3em' }}>
                   <span className="tour-row">
                     <span className="tour-avatar" style={{ ['--hue' as string]: 30 }}>
-                      {picked.login.charAt(0).toUpperCase()}
+                      {initialOf(picked.login)}
                     </span>
                     <strong>{picked.login}</strong>
                   </span>

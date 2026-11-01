@@ -6,6 +6,7 @@ import { useI18n } from '../../shared/i18n'
 import { Blocks } from '../../shared/layout/Blocks'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { InfoTip } from '../../shared/ui/InfoTip'
+import { SectionTitle } from '../../shared/ui/SectionTitle'
 import { BookingCard } from './BookingCard'
 import { cheerFor } from './cheers'
 import { DayEditor } from './DayEditor'
@@ -61,12 +62,9 @@ export function Guardia() {
 
   return (
     <section>
-      <h2>
-        {t('help.title')}
-        <InfoTip title={t('help.title')}>
-          <GuardTour />
-        </InfoTip>
-      </h2>
+      <SectionTitle title={t('help.title')}>
+        <GuardTour />
+      </SectionTitle>
       <p className="cheer">{cheerFor(tree, data.windows.length > 0, pick)}</p>
       {waiting > 0 && (
         <div className="guard-pending" role="status">

@@ -4,7 +4,8 @@ import type { KeyboardEvent, ReactNode } from 'react'
 import type { GraphProject, HolyGraph as HolyGraphData } from '@sanatorio/contracts'
 
 import { useMediaQuery } from '../../shared/hooks/useMediaQuery'
-import { localeOf, useI18n } from '../../shared/i18n'
+import { useI18n } from '../../shared/i18n'
+import { useFormat } from '../../shared/i18n/useFormat'
 import type { Translate, TranslateCount } from '../../shared/i18n'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { Icon } from '../../shared/ui/Icon'
@@ -179,7 +180,8 @@ function describeSeries(series: string, projects: readonly GraphProject[], t: Tr
  * dejarían de leerse.
  */
 export function HolyGraph({ graph, selected, onSelect }: HolyGraphProps) {
-  const { t, tn, lang } = useI18n()
+  const { t, tn } = useI18n()
+  const fmt = useFormat()
   const narrow = useMediaQuery('(max-width: 700px)')
   // Aviso con el que se filtra el grafo: los proyectos que no lo tienen se apagan.
   const [focus, setFocus] = useState<Signal | null>(null)
@@ -818,13 +820,7 @@ export function HolyGraph({ graph, selected, onSelect }: HolyGraphProps) {
                     style={{ ['--i' as string]: circle }}
                   >
                     <strong>{circle}</strong>
-                    <span>
-                      {date.toLocaleDateString(localeOf(lang), {
-                        day: 'numeric',
-                        month: 'short',
-                        year: '2-digit',
-                      })}
-                    </span>
+                    <span>{fmt.date(date, 'dayMonthYY')}</span>
                     <span className="pace-left">
                       {completed
                         ? t('pace.done')

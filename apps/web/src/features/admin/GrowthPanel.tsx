@@ -6,7 +6,7 @@ import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { dayOf } from '../../shared/period'
-import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { Async } from '../../shared/ui/Async'
 import { PillGroup } from '../../shared/ui/PillGroup'
 import { Figure } from './Figure'
 import { RangePills } from './RangePills'
@@ -102,10 +102,7 @@ export function GrowthPanel() {
   const [picked, setPicked] = useState<number[]>([])
   const to = dayOf(Date.now())
   const from = dayOf(Date.now() - (range - 1) * DAY_MS)
-  const { data, error, loading, reload } = useAsync(
-    () => api.getAdminGrowth(from, to, picked),
-    [from, to, picked.join(',')],
-  )
+  const growth = useAsync(() => api.getAdminGrowth(from, to, picked), [from, to, picked.join(',')])
 
   const toggle = (id: number): void => {
     setPicked((current) =>
@@ -113,7 +110,7 @@ export function GrowthPanel() {
     )
   }
 
-  const campuses = (data?.campuses ?? []).slice(0, SHOWN_CAMPUSES)
+  const campuses = (growth.data?.campuses ?? []).slice(0, SHOWN_CAMPUSES)
 
   return (
     <article className="card growth">
@@ -136,9 +133,7 @@ export function GrowthPanel() {
           return `${campus.name === '' ? t('admin.growth.noCampus') : campus.name} · ${campus.people}`
         }}
       />
-      {loading && data === undefined && <p className="estado">{t('app.loading')}</p>}
-      <ErrorNote error={error} onRetry={() => void reload()} />
-      {data !== undefined && <GrowthCharts data={data} />}
+      <Async state={growth}>{(data) => <GrowthCharts data={data} />}</Async>
     </article>
   )
 }

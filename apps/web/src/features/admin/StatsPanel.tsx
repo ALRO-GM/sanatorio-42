@@ -11,7 +11,7 @@ import { dayOf } from '../../shared/period'
 import { DataTable } from '../../shared/ui/DataTable'
 import { Avatar } from '../../shared/ui/Avatar'
 import { durationText } from '../../shared/time'
-import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { Async } from '../../shared/ui/Async'
 import { EVERYONE, SegmentSlider } from '../../shared/ui/SegmentSlider'
 import { RangePills } from './RangePills'
 import { Figure } from './Figure'
@@ -75,7 +75,7 @@ export function StatsPanel() {
   const [days, setDays] = useState<number>(7)
   const [login, setLogin] = useState<string | null>(null)
   const [segment, setSegment] = useState(EVERYONE)
-  const { data, error, loading, reload } = useAsync(
+  const stats = useAsync(
     () =>
       api.getStats({
         from: dayOf(Date.now() - (days - 1) * DAY_MS),
@@ -112,141 +112,74 @@ export function StatsPanel() {
       </RangePills>
 
       {login === null && (
-        <SegmentSlider value={segment} onChange={setSegment} told={data?.segment} />
+        <SegmentSlider value={segment} onChange={setSegment} told={stats.data?.segment} />
       )}
       {login === null && <OnlineCard onPick={setLogin} />}
 
-      {loading && <p className="estado">{t('app.loading')}</p>}
-      {data === undefined ? (
-        <ErrorNote error={error} onRetry={() => void reload()} />
-      ) : (
-        <>
-          <div className="stat-cards">
-            <Figure label={t('admin.stats.seen')} value={durationText(data.totals.seen)} strong />
-            <Figure label={t('admin.stats.back')} value={durationText(data.totals.back)} />
-            <Figure label={t('admin.stats.hidden')} value={durationText(data.totals.hidden)} />
-            <Figure label={t('admin.stats.clicks')} value={number(data.totals.clicks)} />
-            <Figure
-              label={t('admin.stats.traffic')}
-              value={`${number(data.totals.requests)} · ${size(data.totals.bytes)}`}
-            />
-            {login === null && (
-              <Figure label={t('common.people')} value={number(data.totals.people)} />
-            )}
-          </div>
+      <Async state={stats}>
+        {(data) => (
+          <>
+            <div className="stat-cards">
+              <Figure label={t('admin.stats.seen')} value={durationText(data.totals.seen)} strong />
+              <Figure label={t('admin.stats.back')} value={durationText(data.totals.back)} />
+              <Figure label={t('admin.stats.hidden')} value={durationText(data.totals.hidden)} />
+              <Figure label={t('admin.stats.clicks')} value={number(data.totals.clicks)} />
+              <Figure
+                label={t('admin.stats.traffic')}
+                value={`${number(data.totals.requests)} · ${size(data.totals.bytes)}`}
+              />
+              {login === null && (
+                <Figure label={t('common.people')} value={number(data.totals.people)} />
+              )}
+            </div>
 
-          <article className="card">
-            <span className="eyebrow">{t('admin.stats.byHour')}</span>
-            <HourChart hours={byLocalHour(data.hours)} />
-            <ul className="map-legend">
-              <li>
-                <span className="stat-key seen" /> {t('admin.stats.seen')}
-              </li>
-              <li>
-                <span className="stat-key back" /> {t('admin.stats.back')}
-              </li>
-              <li>
-                <span className="stat-key hidden" /> {t('admin.stats.hidden')}
-              </li>
-            </ul>
-          </article>
-
-          <article className="card">
-            <span className="eyebrow">{t('admin.stats.byKey')}</span>
-            <DataTable
-              id={login === null ? 'stats-keys' : 'stats-keys-one'}
-              rows={data.keys}
-              rowKey={(row) => row.key}
-              columns={[
-                {
-                  id: 'key',
-                  label: t('admin.stats.element'),
-                  sort: (row) => sectionName(row.key),
-                  first: 'asc',
-                  cell: (row) => sectionName(row.key),
-                },
-                {
-                  id: 'seen',
-                  label: t('admin.stats.seen'),
-                  sort: (row) => row.seen,
-                  cell: (row) => (row.seen > 0 ? durationText(row.seen) : '—'),
-                },
-                {
-                  id: 'back',
-                  label: t('admin.stats.back'),
-                  sort: (row) => row.back,
-                  cell: (row) => (row.back > 0 ? durationText(row.back) : '—'),
-                },
-                {
-                  id: 'hidden',
-                  label: t('admin.stats.hidden'),
-                  sort: (row) => row.hidden,
-                  cell: (row) => (row.hidden > 0 ? durationText(row.hidden) : '—'),
-                },
-                {
-                  id: 'clicks',
-                  label: t('admin.stats.clicks'),
-                  sort: (row) => row.clicks,
-                  cell: (row) => number(row.clicks),
-                },
-                ...(login === null
-                  ? [
-                      {
-                        id: 'people',
-                        label: t('common.people'),
-                        sort: (row: (typeof data.keys)[number]) => row.people,
-                        cell: (row: (typeof data.keys)[number]) => number(row.people),
-                      },
-                    ]
-                  : []),
-              ]}
-            />
-            {data.keys.length === 0 && <p className="estado">{t('admin.stats.empty')}</p>}
-          </article>
-
-          {login === null && <TourSpeeds />}
-          {login === null && (
             <article className="card">
-              <span className="eyebrow">{t('admin.stats.byUser')}</span>
+              <span className="eyebrow">{t('admin.stats.byHour')}</span>
+              <HourChart hours={byLocalHour(data.hours)} />
+              <ul className="map-legend">
+                <li>
+                  <span className="stat-key seen" /> {t('admin.stats.seen')}
+                </li>
+                <li>
+                  <span className="stat-key back" /> {t('admin.stats.back')}
+                </li>
+                <li>
+                  <span className="stat-key hidden" /> {t('admin.stats.hidden')}
+                </li>
+              </ul>
+            </article>
+
+            <article className="card">
+              <span className="eyebrow">{t('admin.stats.byKey')}</span>
               <DataTable
-                id="stats-users"
-                rows={data.users}
-                rowKey={(row) => row.login}
+                id={login === null ? 'stats-keys' : 'stats-keys-one'}
+                rows={data.keys}
+                rowKey={(row) => row.key}
                 columns={[
                   {
-                    id: 'login',
-                    label: t('common.person'),
-                    sort: (row) => row.login,
+                    id: 'key',
+                    label: t('admin.stats.element'),
+                    sort: (row) => sectionName(row.key),
                     first: 'asc',
-                    cell: (row) => (
-                      <button
-                        type="button"
-                        className="link"
-                        onClick={() => {
-                          setLogin(row.login)
-                        }}
-                      >
-                        {row.login}
-                      </button>
-                    ),
+                    cell: (row) => sectionName(row.key),
                   },
                   {
                     id: 'seen',
                     label: t('admin.stats.seen'),
                     sort: (row) => row.seen,
-                    cell: (row) => durationText(row.seen),
+                    cell: (row) => (row.seen > 0 ? durationText(row.seen) : '—'),
                   },
                   {
                     id: 'back',
                     label: t('admin.stats.back'),
                     sort: (row) => row.back,
-                    cell: (row) => durationText(row.back),
+                    cell: (row) => (row.back > 0 ? durationText(row.back) : '—'),
                   },
                   {
                     id: 'hidden',
                     label: t('admin.stats.hidden'),
                     sort: (row) => row.hidden,
-                    cell: (row) => durationText(row.hidden),
+                    cell: (row) => (row.hidden > 0 ? durationText(row.hidden) : '—'),
                   },
                   {
                     id: 'clicks',
@@ -254,24 +187,90 @@ export function StatsPanel() {
                     sort: (row) => row.clicks,
                     cell: (row) => number(row.clicks),
                   },
-                  {
-                    id: 'requests',
-                    label: t('admin.stats.requests'),
-                    sort: (row) => row.requests,
-                    cell: (row) => number(row.requests),
-                  },
-                  {
-                    id: 'bytes',
-                    label: t('admin.stats.size'),
-                    sort: (row) => row.bytes,
-                    cell: (row) => size(row.bytes),
-                  },
+                  ...(login === null
+                    ? [
+                        {
+                          id: 'people',
+                          label: t('common.people'),
+                          sort: (row: (typeof data.keys)[number]) => row.people,
+                          cell: (row: (typeof data.keys)[number]) => number(row.people),
+                        },
+                      ]
+                    : []),
                 ]}
               />
+              {data.keys.length === 0 && <p className="estado">{t('admin.stats.empty')}</p>}
             </article>
-          )}
-        </>
-      )}
+
+            {login === null && <TourSpeeds />}
+            {login === null && (
+              <article className="card">
+                <span className="eyebrow">{t('admin.stats.byUser')}</span>
+                <DataTable
+                  id="stats-users"
+                  rows={data.users}
+                  rowKey={(row) => row.login}
+                  columns={[
+                    {
+                      id: 'login',
+                      label: t('common.person'),
+                      sort: (row) => row.login,
+                      first: 'asc',
+                      cell: (row) => (
+                        <button
+                          type="button"
+                          className="link"
+                          onClick={() => {
+                            setLogin(row.login)
+                          }}
+                        >
+                          {row.login}
+                        </button>
+                      ),
+                    },
+                    {
+                      id: 'seen',
+                      label: t('admin.stats.seen'),
+                      sort: (row) => row.seen,
+                      cell: (row) => durationText(row.seen),
+                    },
+                    {
+                      id: 'back',
+                      label: t('admin.stats.back'),
+                      sort: (row) => row.back,
+                      cell: (row) => durationText(row.back),
+                    },
+                    {
+                      id: 'hidden',
+                      label: t('admin.stats.hidden'),
+                      sort: (row) => row.hidden,
+                      cell: (row) => durationText(row.hidden),
+                    },
+                    {
+                      id: 'clicks',
+                      label: t('admin.stats.clicks'),
+                      sort: (row) => row.clicks,
+                      cell: (row) => number(row.clicks),
+                    },
+                    {
+                      id: 'requests',
+                      label: t('admin.stats.requests'),
+                      sort: (row) => row.requests,
+                      cell: (row) => number(row.requests),
+                    },
+                    {
+                      id: 'bytes',
+                      label: t('admin.stats.size'),
+                      sort: (row) => row.bytes,
+                      cell: (row) => size(row.bytes),
+                    },
+                  ]}
+                />
+              </article>
+            )}
+          </>
+        )}
+      </Async>
     </section>
   )
 }

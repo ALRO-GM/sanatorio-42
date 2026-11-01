@@ -5,7 +5,8 @@ import type { StaffDocument } from '@sanatorio/contracts'
 
 import { api, ApiError } from '../../shared/api'
 import { useAction, useAsync } from '../../shared/hooks/useAsync'
-import { localeOf, useI18n } from '../../shared/i18n'
+import { useI18n } from '../../shared/i18n'
+import { useFormat } from '../../shared/i18n/useFormat'
 import { cellValue } from '../../shared/table-sort'
 import { DataTable } from '../../shared/ui/DataTable'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
@@ -169,11 +170,11 @@ function Checker({ name, onLeave }: { name: string; onLeave: () => void }) {
 }
 
 function Document({ found }: { found: StaffDocument }) {
-  const { t, tn, lang } = useI18n()
+  const { t, tn } = useI18n()
+  const { dateTime } = useFormat()
   const [verdict, setVerdict] = useState<boolean | null>(null)
   const action = useAction()
-  const date = (iso: string): string =>
-    new Date(iso).toLocaleString(localeOf(lang), { dateStyle: 'long', timeStyle: 'short' })
+  const date = (iso: string): string => dateTime(iso, 'long')
 
   const compare = (file: File | undefined): void => {
     setVerdict(null)

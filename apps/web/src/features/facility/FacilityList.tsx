@@ -1,7 +1,8 @@
 import type { FacilityReport } from '@sanatorio/contracts'
 
 import { useAsync } from '../../shared/hooks/useAsync'
-import { localeOf, useI18n } from '../../shared/i18n'
+import { useI18n } from '../../shared/i18n'
+import { useFormat } from '../../shared/i18n/useFormat'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 
 type FacilityListProps = {
@@ -17,15 +18,10 @@ type FacilityListProps = {
  * con un botón.
  */
 export function FacilityList({ load, resolve, showCampus = false }: FacilityListProps) {
-  const { t, lang } = useI18n()
+  const { t } = useI18n()
+  const { dateTime } = useFormat()
   const reports = useAsync(load, [])
-  const when = (at: string): string =>
-    new Date(at).toLocaleString(localeOf(lang), {
-      day: 'numeric',
-      month: 'short',
-      hour: '2-digit',
-      minute: '2-digit',
-    })
+  const when = (at: string): string => dateTime(at, 'dayMonth')
 
   return (
     <div className="facility-list">

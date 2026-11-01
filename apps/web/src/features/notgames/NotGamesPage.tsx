@@ -21,6 +21,7 @@ import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { PillGroup } from '../../shared/ui/PillGroup'
 import { Icon } from '../../shared/ui/Icon'
 import { InfoTip } from '../../shared/ui/InfoTip'
+import { SectionTitle } from '../../shared/ui/SectionTitle'
 import { NotGamesTour } from './NotGamesTour'
 import { RoomView } from './RoomView'
 import { ChessTour } from './ChessTour'
@@ -58,12 +59,9 @@ export function NotGamesPage({ me, room }: NotGamesPageProps) {
 
   return (
     <section className="notgames">
-      <h2>
-        {t('nav.notgames')}
-        <InfoTip title={t('nav.notgames')}>
-          <NotGamesTour />
-        </InfoTip>
-      </h2>
+      <SectionTitle title={t('nav.notgames')}>
+        <NotGamesTour />
+      </SectionTitle>
       {valid && turn && <TurnRoomView id={id} me={me} />}
       {valid && !turn && <RoomView id={id} me={me} />}
       {!valid && <Lobby initial={room === 'review' ? 'review' : 'rooms'} />}

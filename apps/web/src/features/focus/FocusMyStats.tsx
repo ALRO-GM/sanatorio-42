@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
-import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { Async } from '../../shared/ui/Async'
 import { EVERYONE, SegmentSlider } from '../../shared/ui/SegmentSlider'
 import { FocusCharts, FocusFigureCards, PeriodPicker, periodQuery } from './FocusStatsView'
 import type { FocusPeriod } from './FocusStatsView'
@@ -19,7 +19,7 @@ export function FocusMyStats() {
   const { t } = useI18n()
   const [period, setPeriod] = useState<FocusPeriod>('week')
   const [band, setBand] = useState(EVERYONE)
-  const { data, error, loading, reload } = useAsync(
+  const mine = useAsync(
     () => api.getMyFocusStats(periodQuery(period, band)),
     [period, band.low, band.high],
   )
@@ -28,19 +28,19 @@ export function FocusMyStats() {
     <section className="focus-stats" aria-label={t('focus.tab.stats')}>
       <PeriodPicker value={period} onChange={setPeriod} />
 
-      <SegmentSlider value={band} onChange={setBand} told={data?.segment} texts="focus.band" />
+      <SegmentSlider value={band} onChange={setBand} told={mine.data?.segment} texts="focus.band" />
 
-      {loading && data === undefined && <p className="estado">{t('app.loading')}</p>}
-      <ErrorNote error={error} onRetry={() => void reload()} />
-      {data !== undefined && (
-        <>
-          <FocusFigureCards figures={data.totals} band={data.band} who="me" />
-          {data.position !== null && (
-            <p className="hint">{t('focus.stats.position', { n: data.position })}</p>
-          )}
-          <FocusCharts stats={data} />
-        </>
-      )}
+      <Async state={mine}>
+        {(data) => (
+          <>
+            <FocusFigureCards figures={data.totals} band={data.band} who="me" />
+            {data.position !== null && (
+              <p className="hint">{t('focus.stats.position', { n: data.position })}</p>
+            )}
+            <FocusCharts stats={data} />
+          </>
+        )}
+      </Async>
     </section>
   )
 }

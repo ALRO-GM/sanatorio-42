@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import type { GitRoom, GitRoomLobby } from '@sanatorio/contracts'
 import { filled, LIMITS, MAX_PLAYERS, missionIn, missionItemIn, missionOf } from '@sanatorio/gitsim'
@@ -6,6 +6,7 @@ import type { Gate, GroupMission } from '@sanatorio/gitsim'
 
 import { api } from '../../shared/api'
 import { useAction } from '../../shared/hooks/useAsync'
+import { useLiveRoom } from '../../shared/hooks/useLiveRoom'
 import { usePolling } from '../../shared/hooks/usePolling'
 import { useNow } from '../../shared/hooks/useNow'
 import { useI18n } from '../../shared/i18n'
@@ -42,18 +43,12 @@ export function GroupRooms({ gate, me }: { gate: Gate; me: string }) {
     }
   }, [gate.id])
 
+  // La lista se pide al volver a ella y, mientras se mira, cada poco; dentro
+  // de una sala, no.
   useEffect(() => {
-    if (open !== null) return undefined
-    void load()
-
-    const timer = setInterval(() => {
-      if (!document.hidden) void load()
-    }, LIST_MS)
-
-    return () => {
-      clearInterval(timer)
-    }
+    if (open === null) void load()
   }, [open, load])
+  usePolling(load, open === null ? LIST_MS : null)
 
   if (mission === undefined) return null
   if (open !== null) {
@@ -139,37 +134,17 @@ function GroupRoom({
   onExit: () => void
 }) {
   const { t, lang } = useI18n()
-  const [room, setRoom] = useState<GitRoom | null>(null)
-  const [error, setError] = useState<unknown>(null)
   const [entries, setEntries] = useState<TerminalEntry[]>([])
-  const offset = useRef(0)
   const action = useAction()
+  const { room, error, load, take, offset } = useLiveRoom(() => api.getGitRoom(id), [id], {
+    playingMs: PLAYING_MS,
+    waitingMs: WAITING_MS,
+  })
 
-  const take = useCallback((next: GitRoom) => {
-    offset.current = Date.parse(next.now) - Date.now()
-    setRoom(next)
-    setError(null)
-  }, [])
-
-  const load = useCallback(async () => {
-    try {
-      take(await api.getGitRoom(id))
-    } catch (caught) {
-      setError(caught)
-    }
-  }, [id, take])
-
-  useEffect(() => {
-    void load()
-  }, [load])
-
-  const status = room?.status
   // Milisegundos que quedan hasta el plazo, con la hora del servidor.
   const deadline = room?.deadline ?? null
   const now = useNow(1000, { active: deadline !== null, offset: offset.current })
   const left = deadline === null ? null : Math.max(0, Date.parse(deadline) - now)
-
-  usePolling(load, status === 'done' ? null : status === 'playing' ? PLAYING_MS : WAITING_MS)
 
   if (room === null) {
     return error === null ? (

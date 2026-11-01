@@ -35,7 +35,7 @@ import { RankCard, ranked } from './RankCard'
 import type { Order } from './RankCard'
 import { StrictestCard } from './StrictestCard'
 import { Timeline } from './Timeline'
-import { InfoTip } from '../../shared/ui/InfoTip'
+import { SectionTitle } from '../../shared/ui/SectionTitle'
 import { PillGroup } from '../../shared/ui/PillGroup'
 import { NetworkTour } from './NetworkTour'
 import { decodePart, networkHref } from '../../shared/links'
@@ -351,12 +351,9 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
             tiene su propio desplazamiento, y el grafo se queda quieto a su lado. */}
         <div className="net-rail">
           <div className="net-head">
-            <h2>
-              {t('net.title')}
-              <InfoTip title={t('net.title')}>
-                <NetworkTour />
-              </InfoTip>
-            </h2>
+            <SectionTitle title={t('net.title')}>
+              <NetworkTour />
+            </SectionTitle>
             {/* Primera capa (2026-10-29): tu red en una frase, con los filtros puestos. */}
             {mine !== undefined && mine.given + mine.received > 0 && (
               <p className="progress-answer neutral net-answer">

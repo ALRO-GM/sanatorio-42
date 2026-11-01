@@ -295,7 +295,11 @@ Antes de escribir una a mano, se usa la que ya existe en `apps/web/src/shared/`:
   (`position: sticky`) y, si el panel no cabe, se desplaza él solo: al cambiar
   una opción se ve el efecto sin subir ni bajar. Nada de filas de botones encima
   de la gráfica. En el móvil, la gráfica primero y las opciones debajo,
-  compactas. Pedido por Alberto (2026-10-25).
+  compactas. Pedido por Alberto (2026-10-25). La pieza es `ui/ChartWithRail`
+  (`chart`, `railLabel` y las opciones dentro; `framed={false}` si ya va en
+  una tarjeta).
+- **Título de sección**: `ui/SectionTitle` (el `h2` con su `InfoTip`; `tipTitle`
+  si la demostración se llama distinto que el título).
 - **Ventanas**: `ui/Modal` (se cierra con su botón, Escape y el fondo; las
   obligatorias con `cancelable={false}`). Para preguntar antes de algo que no se
   deshace, `ui/useConfirm`, nunca `window.confirm`.
@@ -304,11 +308,15 @@ Antes de escribir una a mano, se usa la que ya existe en `apps/web/src/shared/`:
 - **Clasificaciones**: `ui/RankingList` y `withMe` (tu fila siempre, con «tú»
   en texto). **Personas buscadas**: `ui/PeopleResults` y `usePeopleKeys`.
 - **Tiempo**: `hooks/useNow` (un reloj compartido por cadencia) y `time.ts`
-  (`clock`, `durationText`). **Sondeo de lo que se mira**: `hooks/usePolling`.
+  (`clock`, `durationText`). **Sondeo de lo que se mira**: `hooks/usePolling`;
+  una sala que se juega con el servidor (Not-games, ajedrez, pruebas de grupo
+  del curso de git), `hooks/useLiveRoom`.
 - **Ventanitas flotantes**: `dock/DockItem` (ver «Ventanitas de la esquina»),
   nunca un `position: fixed` propio en una esquina.
 - **Fechas y números**: `i18n/useFormat` (o `formatsFor(lang)` fuera de un
-  componente), en el idioma elegido. **Plurales**: `tn(clave, n)` con las claves
+  componente), en el idioma elegido, con un estilo con nombre (`date(x,
+  'dayMonthYY')`, `dateTime(x, 'weekdayYear')`…), nunca `toLocaleString` a
+  mano. **Inicial de un login**: `initialOf` (`shared/initial.ts`). **Plurales**: `tn(clave, n)` con las claves
   `clave.one` y `clave.many`.
 
 ## Ventanitas de la esquina

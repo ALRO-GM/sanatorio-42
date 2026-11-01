@@ -5,7 +5,8 @@ import type { GroupKind, GroupView, ProjectSummary } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
 import { useAction } from '../../shared/hooks/useAsync'
-import { localeOf, useI18n } from '../../shared/i18n'
+import { useI18n } from '../../shared/i18n'
+import { useFormat } from '../../shared/i18n/useFormat'
 import { lastDay, untilText } from '../../shared/until'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { useConfirm } from '../../shared/ui/useConfirm'
@@ -83,6 +84,7 @@ const MAX_DATES = 14
  */
 export function GroupForm({ projects, defaultProject, group, onCancel, onSaved }: GroupFormProps) {
   const { t, tn, lang } = useI18n()
+  const { dateTime } = useFormat()
   const { busy, error, run } = useAction()
   const confirm = useConfirm()
   const [form, setForm] = useState<GroupFormState>(() =>
@@ -220,14 +222,7 @@ export function GroupForm({ projects, defaultProject, group, onCancel, onSaved }
     if (first !== undefined && moved) {
       const startsAt = new Date(`${first}T${form.start}:00`)
       const text = t('event.confirm', {
-        when: startsAt.toLocaleString(localeOf(lang), {
-          weekday: 'long',
-          day: 'numeric',
-          month: 'long',
-          year: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit',
-        }),
+        when: dateTime(startsAt, 'weekdayYear'),
         in: untilText(startsAt.getTime() - Date.now(), t),
       })
 
