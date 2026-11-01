@@ -5,6 +5,7 @@ import type { AdminGrowth } from '@sanatorio/contracts'
 import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
+import { dayOf } from '../../shared/period'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { PillGroup } from '../../shared/ui/PillGroup'
 import { Figure } from './Figure'
@@ -16,8 +17,6 @@ const SHOWN_CAMPUSES = 8
 const W = 640
 const H = 180
 const PAD = 28
-
-const dayOf = (at: number): string => new Date(at).toISOString().slice(0, 10)
 
 /** Todos los días del periodo, aunque no haya pasado nada en alguno. */
 function daysBetween(from: string, to: string): string[] {

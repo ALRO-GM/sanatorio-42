@@ -6,6 +6,7 @@ import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { useFormat } from '../../shared/i18n/useFormat'
+import { dayOf } from '../../shared/period'
 import { DataTable } from '../../shared/ui/DataTable'
 import { durationText } from '../../shared/time'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
@@ -15,7 +16,6 @@ import { RangePills } from './RangePills'
 import { Figure } from './Figure'
 
 const DAY_MS = 24 * 60 * 60_000
-const dayOf = (at: number): string => new Date(at).toISOString().slice(0, 10)
 
 /** De dónde se viene cuando la sección es lo primero que se abre. */
 const START = 'start'

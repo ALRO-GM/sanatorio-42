@@ -4,7 +4,8 @@ import { api } from '../../shared/api'
 import { useAction } from '../../shared/hooks/useAsync'
 import { todayKey } from '../../shared/day'
 import { useGateQueue } from '../../shared/hooks/useGateQueue'
-import { localeOf, useI18n } from '../../shared/i18n'
+import { useI18n } from '../../shared/i18n'
+import { useFormat } from '../../shared/i18n/useFormat'
 import { Avatar } from '../../shared/ui/Avatar'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { Icon } from '../../shared/ui/Icon'
@@ -22,7 +23,8 @@ type HelpGateProps = {
  * rechazado o anulado una reserva (enterado). Primero las peticiones.
  */
 export function HelpGate({ pending, onChange }: HelpGateProps) {
-  const { t, lang } = useI18n()
+  const { t } = useI18n()
+  const fmt = useFormat()
   const { queue, setQueue, current, dialog, left } = useGateQueue<Booking>(pending, async () => {
     const inbox = await api.getHelpInbox()
 
@@ -44,13 +46,7 @@ export function HelpGate({ pending, onChange }: HelpGateProps) {
   }
   const when = `${current.start}–${current.end}`
   const day =
-    current.day === todayKey()
-      ? t('helpGate.today')
-      : new Date(`${current.day}T12:00:00`).toLocaleDateString(localeOf(lang), {
-          weekday: 'long',
-          day: 'numeric',
-          month: 'long',
-        })
+    current.day === todayKey() ? t('helpGate.today') : fmt.date(`${current.day}T12:00:00`, 'long')
   const title = asking
     ? t('helpGate.asks', { login: current.peer.login })
     : t(current.status === 'declined' ? 'helpGate.declined' : 'helpGate.cancelled', {
