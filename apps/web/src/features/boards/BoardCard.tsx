@@ -26,6 +26,8 @@ export function BoardCard({ board, featured, onChange }: BoardCardProps) {
   const [editing, setEditing] = useState(false)
   const start = new Date(board.startsAt)
   const past = Date.parse(board.endsAt) <= Date.now()
+  // Hay que apuntarse antes de que empiece: la API tampoco deja.
+  const started = Date.parse(board.startsAt) <= Date.now()
   const full = board.attendees >= board.capacity
   const act = async (fn: () => Promise<unknown>): Promise<void> => {
     if (await run(fn)) onChange()
@@ -100,6 +102,8 @@ export function BoardCard({ board, featured, onChange }: BoardCardProps) {
           >
             {t('cal.leave')}
           </button>
+        ) : started ? (
+          <span className="badge off">{t('cal.started')}</span>
         ) : (
           <button
             className="primary small"

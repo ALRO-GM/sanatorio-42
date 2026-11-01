@@ -117,19 +117,15 @@ export function BoardsTour() {
           <div className="tour-card">
             <strong>{t('meet.att.title')}</strong>
             <div className="tour-row">
-              <span>{t('meet.att.startCode')}</span>
+              <span>{t('meet.att.codeLabel')}</span>
               <span className="tour-code">{CODE.slice(0, shot.code) || '····'}</span>
               <span className="tour-button" data-tour="validate">
                 {t('meet.att.validate')}
               </span>
             </div>
-            <div className="tour-row">
-              <span className="tour-muted">{t('meet.att.endCode')}</span>
-              <span className="tour-code">····</span>
-            </div>
             {shot.valid && (
               <span className="tour-saved">
-                <Icon name="hecho" size={13} /> {t('meet.att.start')}
+                <Icon name="hecho" size={13} /> {t('tour.boards.title.5')}
               </span>
             )}
           </div>

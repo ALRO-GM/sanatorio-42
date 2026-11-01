@@ -6,9 +6,9 @@
  * para que no se pueda cobrar sin haber ayudado:
  *
  * 1. Quien ayuda tiene que **aceptar** la reserva: nadie se apunta XP ajena.
- * 2. Quien recibe la ayuda **valida dos códigos** que le enseña quien ayuda:
- *    uno al empezar y otro al terminar (módulo `attendance`). Sin los dos, la
- *    sesión se cierra sin XP y sin tiempo contado.
+ * 2. Quien recibe la ayuda **valida el código** que le enseña quien ayuda, al
+ *    llegar (módulo `attendance`). Sin él, la sesión se cierra sin XP y sin
+ *    tiempo contado.
  * 3. Al terminar, **las dos se valoran**. La XP solo se reparte cuando están
  *    las dos valoraciones.
  * 4. Una pareja solo puntúa **una vez al día** (lo garantiza `xp.creditHelp`).
@@ -280,7 +280,7 @@ export function createHelpService(options: HelpServiceOptions) {
     return { startsAt, endsAt: startsAt + booking.minutes * 60_000 }
   }
 
-  /** `true` si quien pidió la ayuda validó los dos códigos de esa sesión. */
+  /** `true` si quien pidió la ayuda validó el código de esa sesión. */
   const attended = async (booking: BookingRow): Promise<boolean> =>
     booking.verified ||
     (await attendance.attended(EVENT_ID.help(booking.id))).includes(booking.requester)
@@ -288,8 +288,8 @@ export function createHelpService(options: HelpServiceOptions) {
   /**
    * Cierra una sesión valorada por las dos partes y reparte su XP.
    *
-   * Con los dos códigos validados, quien ayudó gana XP. Sin ellos se cierra a
-   * cero, pero solo cuando el código de fin ya ha caducado: hasta entonces
+   * Con el código validado, quien ayudó gana XP. Sin él se cierra a cero,
+   * pero solo cuando la sesión ya ha terminado: hasta entonces
    * todavía se puede validar, y la sesión se queda abierta.
    *
    * @returns La XP repartida, o `null` si la sesión sigue abierta.
@@ -820,10 +820,10 @@ export function createHelpService(options: HelpServiceOptions) {
      *
      * Quien recibió la ayuda elige cómo le ayudaron; quien ayudó, cómo llegó la
      * otra persona. Cuando están las dos valoraciones la sesión se cierra, y si
-     * quien recibió la ayuda validó los dos códigos, quien ayudó gana XP.
+     * quien recibió la ayuda validó el código, quien ayudó gana XP.
      *
      * @returns La XP repartida, o `null` si todavía falta la otra valoración o
-     *   aún se puede validar el código de fin.
+     *   aún se puede validar el código.
      */
     async rate(actor: Actor, bookingId: number, input: unknown): Promise<{ xp: number | null }> {
       const booking = await mustGet(bookingId, actor)

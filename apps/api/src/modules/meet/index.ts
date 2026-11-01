@@ -84,7 +84,7 @@ export function createMeetModule(deps: MeetServiceOptions): MeetModule {
         return reply.send(await service.attendance(await session.actor(request), request.query.id))
       })
 
-      /** `POST /events/checkin` → `{ id, code }`: valida el código de inicio o el de fin. */
+      /** `POST /events/checkin` → `{ id, code }`: valida el código de asistencia. */
       app.post('/events/checkin', async (request, reply) => {
         return reply.send(await service.checkin(await session.actor(request), request.body))
       })

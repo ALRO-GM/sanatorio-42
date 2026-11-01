@@ -9,7 +9,7 @@ Cómo se trabaja con ellas: [docs/textos.md](../textos.md).
 | [animos](animos.md) | 100 | 0 | 0 | 0 | 0 |
 | [avisos](avisos.md) | 44 | 0 | 0 | 0 | 0 |
 | [buzon](buzon.md) | 142 | 0 | 0 | 0 | 0 |
-| [calendario](calendario.md) | 111 | 0 | 0 | 0 | 0 |
+| [calendario](calendario.md) | 105 | 0 | 0 | 0 | 0 |
 | [clusters](clusters.md) | 80 | 0 | 0 | 0 | 0 |
 | [code-clicker](code-clicker.md) | 27 | 0 | 0 | 0 | 0 |
 | [comun](comun.md) | 441 | 0 | 0 | 0 | 0 |
@@ -22,7 +22,7 @@ Cómo se trabaja con ellas: [docs/textos.md](../textos.md).
 | [guardia](guardia.md) | 80 | 0 | 0 | 0 | 0 |
 | [legal](legal.md) | 56 | 0 | 0 | 0 | 0 |
 | [notgames](notgames.md) | 251 | 0 | 0 | 0 | 0 |
-| [pizarras](pizarras.md) | 37 | 0 | 0 | 0 | 0 |
+| [pizarras](pizarras.md) | 38 | 0 | 0 | 0 | 0 |
 | [red](red.md) | 206 | 0 | 0 | 0 | 0 |
 | [sala-de-espera](sala-de-espera.md) | 47 | 0 | 0 | 0 | 0 |
 | [tablon](tablon.md) | 146 | 0 | 0 | 0 | 0 |

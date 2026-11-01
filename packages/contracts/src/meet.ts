@@ -51,40 +51,37 @@ export type MeetMessageInput = {
   body?: string
 }
 
-/** Cuándo empezó y terminó alguien, según los códigos que validó. */
+/** Cuándo llegó alguien, según el código que validó, y el rato que le cuenta. */
 export type MeetPresence = {
   login: string
+  /** Cuándo escribió el código. */
   startedAt: string | null
+  /** Hasta cuándo cuenta: la hora de fin del evento. */
   endedAt: string | null
   /**
-   * Minutos validados: el rato entre un código y otro, recortado al horario del
-   * evento y nunca más que su duración. `null` si falta algún código: sin los
-   * dos no vale.
+   * Minutos validados: de la llegada a la hora de fin, recortado al horario
+   * del evento. `null` si no ha escrito el código.
    */
   minutes: number | null
 }
 
-/** Cuándo se puede validar cada código de un evento (ISO-8601). */
+/** Cuándo se puede validar el código de un evento (ISO-8601). */
 export type MeetWindow = {
-  /** Desde cuándo vale el código de inicio. */
-  startFrom: string
-  /** Hasta cuándo vale el código de inicio: después ya no se puede empezar. */
-  startUntil: string
-  /** Hasta cuándo vale el código de fin. */
-  endUntil: string
-  /** Minutos que tienen que pasar entre validar el de inicio y el de fin. */
-  minStay: number
+  /** Desde cuándo vale: un poco antes de la hora de inicio. */
+  from: string
+  /** Hasta cuándo vale: la hora de fin. */
+  until: string
 }
 
 /**
  * `GET /events/attendance?id=`: la asistencia de un evento que se valida con
- * códigos (pizarras y sesiones de ayuda).
+ * código (pizarras y sesiones de ayuda).
  */
 export type MeetAttendance = {
-  /** `host`: quien imparte o ayuda, enseña los códigos · `guest`: quien asiste, los escribe. */
+  /** `host`: quien imparte o ayuda, enseña el código · `guest`: quien asiste, lo escribe. */
   role: 'host' | 'guest'
-  /** Los dos códigos. Solo los recibe quien organiza. */
-  codes: { start: string; end: string } | null
+  /** El código. Solo lo recibe quien organiza. */
+  code: string | null
   /** Lo que ha validado quien pregunta. Solo para quien asiste. */
   mine: MeetPresence | null
   /** Lo que ha validado cada persona. Solo para quien organiza. */
@@ -94,9 +91,8 @@ export type MeetAttendance = {
   attemptsLeft: number
 }
 
-/** `POST /events/checkin` → qué código era y cómo queda tu asistencia. */
+/** `POST /events/checkin` → cómo queda tu asistencia. */
 export type MeetCheckin = {
-  phase: 'start' | 'end'
   presence: MeetPresence
 }
 

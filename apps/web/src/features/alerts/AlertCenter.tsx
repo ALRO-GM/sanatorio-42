@@ -218,11 +218,7 @@ export function AlertCenter({ me, onGo }: AlertCenterProps) {
       )}
       {checkin !== null && (
         <div className="meet-toast" role="status">
-          <span>
-            {checkin.presence.minutes === null
-              ? t('meet.qr.start')
-              : t('meet.qr.end', { n: checkin.presence.minutes })}
-          </span>
+          <span>{t('meet.qr.end', { n: checkin.presence.minutes ?? 0 })}</span>
           <button
             type="button"
             className="link"

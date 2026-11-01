@@ -119,9 +119,9 @@ describe('comunidad', () => {
       await boards.join(actor('ana'), board.id)
       await meet.send(actor('ana'), null, { id, kind: 'text', body: 'viejo' })
       clock.advance(24 * HOUR)
-      await validate(id, 'eva', 'ana', 'start')
+      await validate(id, 'eva', 'ana')
       clock.advance(60 * MINUTE)
-      await validate(id, 'eva', 'ana', 'end')
+      await validate(id, 'eva', 'ana')
 
       clock.advance(88 * 24 * HOUR)
       // La primera pizarra ya pasó: el mensaje reciente va en otra.
@@ -236,70 +236,73 @@ describe('comunidad', () => {
       expect((await meet.thread(actor('eva'), null, id)).messages).toHaveLength(10)
     })
 
-    it('la asistencia se valida con dos códigos: uno al empezar y otro al terminar', async () => {
+    it('la asistencia se valida con un código al llegar, y cuenta hasta el final', async () => {
       const { boards, meet } = services
       const board = await boards.create(actor('eva'), malloc())
       const id = `board:${board.id}`
 
       await boards.join(actor('ana'), board.id)
 
-      // Quien la imparte ve los dos códigos, de cuatro caracteres y distintos.
+      // Quien la imparte ve el código, de cuatro caracteres.
       const host = await meet.attendance(actor('eva'), id)
-      const codes = host.codes ?? { start: '', end: '' }
+      const code = host.code ?? ''
 
       expect(host).toMatchObject({ role: 'host', mine: null, people: [] })
-      expect(codes.start).toMatch(/^[A-Z2-9]{4}$/)
-      expect(codes.end).toMatch(/^[A-Z2-9]{4}$/)
-      expect(codes.start).not.toBe(codes.end)
-      // Y son siempre los mismos para ese evento.
-      expect((await meet.attendance(actor('eva'), id)).codes).toEqual(codes)
+      expect(code).toMatch(/^[A-Z2-9]{4}$/)
+      // Y es siempre el mismo para ese evento.
+      expect((await meet.attendance(actor('eva'), id)).code).toBe(code)
 
-      // Quien asiste no los ve, pero sí cuándo vale cada uno.
+      // Quien asiste no lo ve, pero sí cuándo vale: de un poco antes al final.
       expect(await meet.attendance(actor('ana'), id)).toEqual({
         role: 'guest',
-        codes: null,
+        code: null,
         mine: null,
         people: [],
         window: {
-          startFrom: new Date(Date.parse(board.startsAt) - 10 * MINUTE).toISOString(),
-          startUntil: new Date(Date.parse(board.startsAt) + 30 * MINUTE).toISOString(),
-          endUntil: new Date(Date.parse(board.endsAt) + 30 * MINUTE).toISOString(),
-          minStay: 10,
+          from: new Date(Date.parse(board.startsAt) - 10 * MINUTE).toISOString(),
+          until: board.endsAt,
         },
         attemptsLeft: 5,
       })
 
-      // Falta un día: el código de inicio todavía no vale.
-      await expectCode(meet.checkin(actor('ana'), { id, code: codes.start }), 'conflict')
+      // Falta un día: todavía no vale.
+      await expectCode(meet.checkin(actor('ana'), { id, code }), 'conflict')
 
       clock.advance(24 * HOUR - 5 * MINUTE)
 
-      // No se puede terminar sin haber empezado, ni con un código inventado.
-      await expectCode(meet.checkin(actor('ana'), { id, code: codes.end }), 'conflict')
+      // Ni un código inventado, ni validar quien la imparte, ni quien no está apuntado.
       await expectCode(meet.checkin(actor('ana'), { id, code: 'ZZZZ' }), 'invalid_input')
-      // Ni validar quien la imparte, ni quien no está apuntado.
-      await expectCode(meet.checkin(actor('eva'), { id, code: codes.start }), 'conflict')
-      await expectCode(meet.checkin(actor('leo'), { id, code: codes.start }), 'forbidden')
+      await expectCode(meet.checkin(actor('eva'), { id, code }), 'conflict')
+      await expectCode(meet.checkin(actor('leo'), { id, code }), 'forbidden')
 
-      const started = await meet.checkin(actor('ana'), { id, code: codes.start.toLowerCase() })
+      // Cinco minutos antes: cuenta desde la hora de inicio hasta la de fin.
+      const checked = await meet.checkin(actor('ana'), { id, code: code.toLowerCase() })
 
-      // Con solo el de inicio todavía no hay duración: no vale.
-      expect(started).toMatchObject({ phase: 'start', presence: { endedAt: null, minutes: null } })
-      // Y el de fin no vale nada más empezar.
-      await expectCode(meet.checkin(actor('ana'), { id, code: codes.end }), 'conflict')
-
-      clock.advance(50 * MINUTE)
-      // Volver a escribir el de inicio no mueve la hora a la que empezó.
-      await meet.checkin(actor('ana'), { id, code: codes.start })
-
-      const ended = await meet.checkin(actor('ana'), { id, code: codes.end })
-
-      expect(ended).toMatchObject({ phase: 'end', presence: { login: 'ana', minutes: 50 } })
+      expect(checked).toEqual({
+        presence: {
+          login: 'ana',
+          startedAt: expect.any(String),
+          endedAt: board.endsAt,
+          minutes: 90,
+        },
+      })
       expect((await meet.attendance(actor('eva'), id)).people).toMatchObject([
-        { login: 'ana', minutes: 50 },
+        { login: 'ana', minutes: 90 },
       ])
       // Los códigos son solo para pizarras y sesiones de ayuda.
       await expectCode(meet.attendance(actor('ana'), 'therapy:1:2026-10-06'), 'invalid_input')
+    })
+
+    it('no se puede apuntar a una pizarra que ya ha empezado', async () => {
+      const { boards } = services
+      const board = await boards.create(actor('eva'), malloc())
+
+      await boards.join(actor('ana'), board.id)
+      clock.advance(24 * HOUR)
+
+      // Al verla en marcha ya no hay plaza que coger; quien la tenía, la conserva.
+      await expectCode(boards.join(actor('leo'), board.id), 'conflict')
+      await boards.join(actor('ana'), board.id)
     })
 
     it('no hay más plazas de las que hay', async () => {
@@ -360,7 +363,7 @@ describe('comunidad', () => {
       )
     })
 
-    it('quien imparte gana XP cuando ya ha pasado y alguien validó los dos códigos, y solo una vez', async () => {
+    it('quien imparte gana XP cuando ya ha pasado y alguien validó el código, y solo una vez', async () => {
       const { boards, xp } = services
       const board = await boards.create(actor('eva'), malloc())
       const id = `board:${board.id}`
@@ -371,15 +374,13 @@ describe('comunidad', () => {
       expect((await xp.expediente(actor('eva'))).xp.total).toBe(0)
 
       clock.advance(24 * HOUR)
-      await validate(id, 'eva', 'ana', 'start')
-      clock.advance(90 * MINUTE)
-      await validate(id, 'eva', 'ana', 'end')
+      await validate(id, 'eva', 'ana')
 
-      // Acaba de terminar, pero el código de fin aún no ha caducado: se espera.
+      // Aún no ha terminado: alguien más puede llegar, se espera.
       await boards.settle()
       expect((await xp.expediente(actor('eva'))).xp.total).toBe(0)
 
-      clock.advance(31 * MINUTE)
+      clock.advance(91 * MINUTE)
       await boards.settle()
       await boards.settle()
 
@@ -388,18 +389,14 @@ describe('comunidad', () => {
       expect(eva.achievements.find((entry) => entry.id === 'board_teacher')?.unlocked).toBe(true)
     })
 
-    it('una pizarra a la que no va nadie no da XP, y apuntarse sin validar los códigos tampoco', async () => {
+    it('una pizarra a la que no va nadie no da XP, y apuntarse sin validar el código tampoco', async () => {
       const { boards, xp } = services
       await boards.create(actor('eva'), malloc())
       const second = await boards.create(actor('eva'), malloc(30))
-      const id = `board:${second.id}`
 
-      // `ana` se apunta a la segunda y valida el inicio, pero no el fin.
+      // `ana` se apunta a la segunda, pero no escribe el código.
       await boards.join(actor('ana'), second.id)
-      clock.advance(30 * HOUR)
-      await validate(id, 'eva', 'ana', 'start')
-
-      clock.advance(48 * HOUR)
+      clock.advance(78 * HOUR)
       await boards.settle()
 
       expect((await xp.expediente(actor('eva'))).xp.total).toBe(0)
@@ -423,24 +420,23 @@ describe('comunidad', () => {
         return { id: `board:${board.id}`, startsAt: Date.parse(board.startsAt) }
       }
 
-      it('las cuentas: se recorta al horario, con margen, y nunca pasa de lo previsto', () => {
+      it('las cuentas: de la llegada a la hora de fin, sin contar lo de antes de empezar', () => {
         const schedule = { startsAt: 100 * MINUTE, endsAt: 190 * MINUTE }
 
-        // Validar un cuarto de hora antes no regala un cuarto de hora: solo el margen.
-        expect(validSpan(85 * MINUTE, 150 * MINUTE, schedule)).toEqual({
-          from: 90 * MINUTE,
-          to: 150 * MINUTE,
-          minutes: 60,
+        // Validar un cuarto de hora antes no regala un cuarto de hora.
+        expect(validSpan(85 * MINUTE, schedule)).toEqual({
+          from: 100 * MINUTE,
+          to: 190 * MINUTE,
+          minutes: 90,
         })
-        // De punta a punta con los dos márgenes serían 110: cuenta la duración prevista.
-        expect(validSpan(80 * MINUTE, 220 * MINUTE, schedule).minutes).toBe(90)
-        // Los minutos a medias no cuentan.
-        expect(validSpan(100 * MINUTE, 130 * MINUTE + 59_000, schedule).minutes).toBe(30)
-        // Un evento corto admite menos retraso: la mitad de lo que dura.
+        // Llegar tarde cuenta lo que queda, y los minutos a medias no cuentan.
+        expect(validSpan(130 * MINUTE + 1_000, schedule).minutes).toBe(59)
+        // Pasada la hora de fin no queda nada.
+        expect(validSpan(200 * MINUTE, schedule).minutes).toBe(0)
+        // El código vale de diez minutos antes al final.
         expect(windowOf({ startsAt: 0, endsAt: 30 * MINUTE })).toEqual({
-          startFrom: -10 * MINUTE,
-          startUntil: 15 * MINUTE,
-          endUntil: 60 * MINUTE,
+          from: -10 * MINUTE,
+          until: 30 * MINUTE,
         })
         // Quien organiza: el rato con alguien delante, sin contar dos veces a quien coincide.
         expect(
@@ -452,76 +448,60 @@ describe('comunidad', () => {
         ).toBe(100)
       })
 
-      it('llegar tarde cuenta desde que llegas, y demasiado tarde ya no cuenta', async () => {
+      it('llegar tarde cuenta desde que llegas, y tras el final ya no se valida', async () => {
         const { id } = await boardAt(['ana', 'leo'], 20 * MINUTE)
 
-        await validate(id, 'eva', 'ana', 'start')
+        expect((await validate(id, 'eva', 'ana')).presence.minutes).toBe(70)
 
-        // A los 31 minutos el código de inicio ha caducado.
-        clock.advance(11 * MINUTE)
-        await expectCode(validate(id, 'eva', 'leo', 'start'), 'conflict')
-
-        clock.advance(59 * MINUTE) // justo al terminar
-        expect((await validate(id, 'eva', 'ana', 'end')).presence.minutes).toBe(70)
-        await expectCode(validate(id, 'eva', 'leo', 'end'), 'conflict')
+        // A la hora y cuarto todavía vale: cuenta el cuarto de hora que queda.
+        clock.advance(55 * MINUTE)
+        expect((await validate(id, 'eva', 'leo')).presence.minutes).toBe(15)
       })
 
-      it('irse antes cuenta hasta que te vas', async () => {
+      it('validar después de terminar no cuenta nada', async () => {
         const { id } = await boardAt(['ana'])
 
-        await validate(id, 'eva', 'ana', 'start')
-        clock.advance(25 * MINUTE)
+        clock.advance(90 * MINUTE + 1_000)
+        await expectCode(validate(id, 'eva', 'ana'), 'conflict')
 
-        expect((await validate(id, 'eva', 'ana', 'end')).presence.minutes).toBe(25)
-      })
-
-      it('validar el de fin fuera de plazo no cuenta nada', async () => {
-        const { id } = await boardAt(['ana'])
-
-        await validate(id, 'eva', 'ana', 'start')
-
-        // Hasta media hora después de terminar se admite, pero el tiempo no pasa del previsto…
-        clock.advance(90 * MINUTE + 31 * MINUTE)
-        await expectCode(validate(id, 'eva', 'ana', 'end'), 'conflict')
-
-        expect((await services.meet.attendance(actor('ana'), id)).mine).toMatchObject({
-          endedAt: null,
-          minutes: null,
-        })
+        expect((await services.meet.attendance(actor('ana'), id)).mine).toBeNull()
         expect(await services.attendance.attended(id)).toEqual([])
       })
 
-      it('validar tarde el de fin, pero en plazo, no suma más que lo previsto', async () => {
-        const { id } = await boardAt(['ana'], -10 * MINUTE)
-
-        await validate(id, 'eva', 'ana', 'start')
-        clock.advance(10 * MINUTE + 90 * MINUTE + 25 * MINUTE)
-
-        expect((await validate(id, 'eva', 'ana', 'end')).presence.minutes).toBe(90)
-      })
-
-      it('repetir un código no mueve nada', async () => {
+      it('repetir el código no mueve nada', async () => {
         const { id } = await boardAt(['ana'])
 
-        await validate(id, 'eva', 'ana', 'start')
-        clock.advance(40 * MINUTE)
-        const ended = await validate(id, 'eva', 'ana', 'end')
+        clock.advance(20 * MINUTE)
+        const first = await validate(id, 'eva', 'ana')
 
         clock.advance(30 * MINUTE)
-        expect(await validate(id, 'eva', 'ana', 'start')).toMatchObject({
-          presence: ended.presence,
+        expect(await validate(id, 'eva', 'ana')).toEqual(first)
+        expect(first.presence.minutes).toBe(70)
+      })
+
+      it('si cambia la hora de fin, se recalcula lo de quien ya validó', async () => {
+        const { boards } = services
+        const board = await boards.create(actor('eva'), { ...malloc(), capacity: 5 })
+        const id = `board:${board.id}`
+
+        await boards.join(actor('ana'), board.id)
+        clock.advance(24 * HOUR + 10 * MINUTE)
+        expect((await validate(id, 'eva', 'ana')).presence.minutes).toBe(80)
+
+        await boards.update(actor('eva'), board.id, {
+          ...malloc(),
+          capacity: 5,
+          endsAt: new Date(Date.parse(board.startsAt) + 60 * MINUTE).toISOString(),
         })
-        expect(await validate(id, 'eva', 'ana', 'end')).toEqual(ended)
-        expect(ended.presence.minutes).toBe(40)
+
+        expect((await services.meet.attendance(actor('ana'), id)).mine?.minutes).toBe(50)
       })
 
       it('los códigos no se adivinan probando: cinco fallos y se acabó', async () => {
         const { meet } = services
         const { id } = await boardAt(['ana', 'leo'])
-        const codes = (await meet.attendance(actor('eva'), id)).codes ?? { start: '', end: '' }
-        const wrong = ['2222', '3333', '4444', '5555', '6666'].filter(
-          (code) => code !== codes.start && code !== codes.end,
-        )
+        const right = (await meet.attendance(actor('eva'), id)).code ?? ''
+        const wrong = ['2222', '3333', '4444', '5555', '6666'].filter((code) => code !== right)
 
         for (const code of wrong) {
           await expectCode(meet.checkin(actor('ana'), { id, code }), 'invalid_input')
@@ -529,9 +509,9 @@ describe('comunidad', () => {
 
         expect((await meet.attendance(actor('ana'), id)).attemptsLeft).toBe(0)
         // Ni con el bueno.
-        await expectCode(meet.checkin(actor('ana'), { id, code: codes.start }), 'forbidden')
+        await expectCode(meet.checkin(actor('ana'), { id, code: right }), 'forbidden')
         // El tope es de cada persona: `leo` valida sin problema.
-        await meet.checkin(actor('leo'), { id, code: codes.start })
+        await meet.checkin(actor('leo'), { id, code: right })
 
         // Todo queda en el registro, y solo lo lee quien administra.
         await expectCode(meet.checkins(actor('eva'), id), 'forbidden')
@@ -552,14 +532,11 @@ describe('comunidad', () => {
         const { meet } = services
         const { id, startsAt } = await boardAt(['ana', 'leo'])
 
-        // `ana`: de 0 a 60. `leo`: de 20 a 90.
-        await validate(id, 'eva', 'ana', 'start')
+        // `ana`: de 0 a 90. `leo`: de 20 a 90.
+        await validate(id, 'eva', 'ana')
         clock.advance(20 * MINUTE)
-        await validate(id, 'eva', 'leo', 'start')
-        clock.advance(40 * MINUTE)
-        await validate(id, 'eva', 'ana', 'end')
-        clock.advance(30 * MINUTE)
-        await validate(id, 'eva', 'leo', 'end')
+        await validate(id, 'eva', 'leo')
+        clock.advance(70 * MINUTE)
 
         const at = (minutes: number): string => new Date(startsAt + minutes * MINUTE).toISOString()
         const common = {
@@ -574,15 +551,15 @@ describe('comunidad', () => {
         expect(await meet.report(admin, { login: 'all' })).toEqual({
           from: '2026-09-08',
           to: '2026-10-07',
-          totalMinutes: 220,
+          totalMinutes: 250,
           rows: [
             {
               ...common,
               login: 'ana',
               role: 'guest',
               from: at(0),
-              to: at(60),
-              minutes: 60,
+              to: at(90),
+              minutes: 90,
               with: ['eva'],
             },
             {
@@ -612,7 +589,7 @@ describe('comunidad', () => {
         ])
         expect((await meet.report(actor('eva'), {})).totalMinutes).toBe(90)
         await expectCode(meet.report(actor('leo'), { login: 'ana' }), 'forbidden')
-        expect((await meet.report(admin, { login: 'ana' })).totalMinutes).toBe(60)
+        expect((await meet.report(admin, { login: 'ana' })).totalMinutes).toBe(90)
         // Fuera del periodo no sale nada, y un periodo al revés no vale.
         expect((await meet.report(admin, { login: 'all', to: '2026-10-06' })).rows).toEqual([])
         await expectCode(
@@ -645,9 +622,7 @@ describe('comunidad', () => {
 
         await boards.join(actor('ana'), board.id)
         clock.advance(24 * HOUR)
-        await validate(id, 'eva', 'ana', 'start')
-        clock.advance(30 * MINUTE)
-        await validate(id, 'eva', 'ana', 'end')
+        await validate(id, 'eva', 'ana')
 
         expect((await meet.reportCsv(actor('ana'), {})).csv).toContain(`"'=HYPERLINK(""x"")"`)
       })
@@ -657,7 +632,7 @@ describe('comunidad', () => {
 
         await helpSession('ana')
 
-        // De 17:00 a 17:30, aunque el código de fin se validara a las 17:35.
+        // De 17:00, cuando llegó, a las 17:30, cuando acababa.
         expect((await meet.report(actor('eva'), {})).rows).toMatchObject([
           {
             login: 'eva',

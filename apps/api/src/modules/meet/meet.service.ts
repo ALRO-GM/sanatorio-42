@@ -4,8 +4,8 @@
  * - **Avisos y chat**: quien participa en un evento puede decir "lo he visto",
  *   "llego tarde" o "no voy", y escribir. Todos los del evento ven lo mismo.
  * - **Asistencia con códigos** (pizarras y sesiones de ayuda): quien organiza
- *   tiene dos códigos de cuatro caracteres, uno para el principio y otro para el
- *   final. Quien asiste los escribe (o escanea su QR). Aquí solo se decide quién
+ *   tiene un código de cuatro caracteres. Quien asiste lo escribe al llegar (o
+ *   escanea su QR). Aquí solo se decide quién
  *   es quién en cada evento; las reglas y el tiempo son del módulo `attendance`.
  *
  * Quién participa en qué lo dice el módulo de cada cosa (pizarras, ayuda,
@@ -591,7 +591,7 @@ export function createMeetService(options: MeetServiceOptions) {
       })
     },
 
-    /** La asistencia de un evento: los códigos para quien organiza, lo validado para quien asiste. */
+    /** La asistencia de un evento: el código para quien organiza, lo validado para quien asiste. */
     async attendance(actor: Actor, id: unknown): Promise<MeetAttendance> {
       const { role, event } = await resolve(actor, parse(eventId, id))
       const sees = await seerOf(actor)
@@ -603,22 +603,21 @@ export function createMeetService(options: MeetServiceOptions) {
       }
 
       return role === 'host'
-        ? { ...common, codes: await attendance.codes(event.id), mine: null, people }
+        ? { ...common, code: await attendance.code(event.id), mine: null, people }
         : {
             ...common,
-            codes: null,
+            code: null,
             mine: people.find((entry) => entry.login === actor.login) ?? null,
             people: [],
           }
     },
 
     /**
-     * Valida un código de asistencia. El de inicio marca cuándo empezaste; el
-     * de fin, cuándo terminaste, y solo vale si antes validaste el de inicio.
-     * Cuándo vale cada uno y cuánto tiempo cuenta lo decide `attendance`.
+     * Valida el código de asistencia: marca cuándo llegaste. Cuándo vale y
+     * cuánto tiempo cuenta lo decide `attendance`.
      *
      * @throws {DomainError} `invalid_input` si el código no es de ese evento;
-     *   `conflict` si no es el momento de ese código; `forbidden` si ya has
+     *   `conflict` si no es el momento del código; `forbidden` si ya has
      *   fallado demasiadas veces.
      */
     async checkin(actor: Actor, input: unknown): Promise<MeetCheckin> {
@@ -632,7 +631,7 @@ export function createMeetService(options: MeetServiceOptions) {
       const result = await attendance.checkin(event, actor.login, code)
 
       // Una sesión de ayuda ya valorada puede estar esperando solo a este código.
-      if (result.phase === 'end' && id.startsWith('help:')) {
+      if (id.startsWith('help:')) {
         await help.settle()
       }
 

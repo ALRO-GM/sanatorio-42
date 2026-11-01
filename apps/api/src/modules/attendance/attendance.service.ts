@@ -1,17 +1,17 @@
 /**
  * Asistencia validada con códigos, y el tiempo que sale de ella.
  *
- * Quien organiza una pizarra o una sesión de ayuda tiene dos códigos, uno para
- * el principio y otro para el final. Quien asiste los escribe. De ahí salen dos
- * cosas: si hubo sesión (y por tanto XP) y cuánto duró. Ese tiempo se quiere
- * poder enseñar al staff de 42, así que tiene que aguantar una discusión:
+ * Quien organiza una pizarra o una sesión de ayuda tiene un código. Quien
+ * asiste lo escribe al llegar. De ahí salen dos cosas: si hubo sesión (y por
+ * tanto XP) y cuánto duró. Ese tiempo se quiere poder enseñar al staff de 42,
+ * así que tiene que aguantar una discusión:
  *
- * - **Sin los dos códigos no hay nada**: ni XP ni minutos.
- * - **Los códigos caducan**: el de inicio solo vale alrededor de la hora de
- *   inicio; el de fin, cuando ha pasado un mínimo desde el de inicio y hasta un
- *   rato después de la hora de fin (`attendance.rules.ts`).
- * - **El tiempo se recorta** al horario previsto y se guarda ya calculado, con
- *   los datos del evento de ese momento.
+ * - **Sin el código no hay nada**: ni XP ni minutos.
+ * - **El código caduca**: vale desde un poco antes de la hora de inicio hasta
+ *   la de fin (`attendance.rules.ts`).
+ * - **El tiempo va de la llegada a la hora de fin**, recortado al horario
+ *   previsto, y se guarda ya calculado. Si quien organiza cambia el horario,
+ *   se recalcula (`reschedule`).
  * - **Tope de códigos equivocados** por persona y evento: no se adivinan a base
  *   de probar.
  * - **Queda registro** de cada intento, saliera bien o mal.
@@ -38,13 +38,7 @@ import { toNumber, toText } from '../../core/db/rows.js'
 import { domainError } from '../../core/errors.js'
 import { isoAt, localMoment } from '../../core/time.js'
 import { day, parse } from '../../core/validation.js'
-import {
-  MAX_FAILED_ATTEMPTS,
-  MIN_STAY_MS,
-  unionMinutes,
-  validSpan,
-  windowOf,
-} from './attendance.rules.js'
+import { MAX_FAILED_ATTEMPTS, unionMinutes, validSpan, windowOf } from './attendance.rules.js'
 
 export type AttendanceServiceOptions = {
   db: Db
@@ -108,7 +102,8 @@ function presenceOf(row: Record<string, unknown>): MeetPresence {
   return {
     login: toText(row.login),
     startedAt: typeof row.started_at === 'string' ? row.started_at : null,
-    endedAt: typeof row.ended_at === 'string' ? row.ended_at : null,
+    // Con un solo código no se valida la salida: el rato acaba con el evento.
+    endedAt: typeof row.valid_to === 'string' ? row.valid_to : null,
     minutes:
       row.valid_minutes === null || row.valid_minutes === undefined
         ? null
@@ -132,7 +127,13 @@ export function createAttendanceService(options: AttendanceServiceOptions) {
   const { db, timeZoneOf } = options
   const now = options.now ?? Date.now
 
-  /** Los códigos de un evento. Se crean la primera vez que alguien los pide. */
+  /**
+   * Los códigos de un evento. Se crean la primera vez que alguien los pide.
+   *
+   * El que se enseña es `start`. El de fin es de cuando había dos (hasta
+   * 2026-11-01): ya no se enseña, pero quien lo tenga de un evento que estaba
+   * en marcha al cambiar la regla aún puede escribirlo.
+   */
   async function codes(eventId: string): Promise<{ start: string; end: string }> {
     const start = newCode()
 
@@ -288,17 +289,49 @@ export function createAttendanceService(options: AttendanceServiceOptions) {
   }
 
   return {
-    codes,
+    /** El código que enseña quien organiza. */
+    async code(eventId: string): Promise<string> {
+      return (await codes(eventId)).start
+    },
 
-    /** Cuándo vale cada código de ese evento. */
+    /** Cuándo vale el código de ese evento. */
     window(event: AttendanceEvent): MeetWindow {
       const window = windowOf(event)
 
-      return {
-        startFrom: isoAt(window.startFrom),
-        startUntil: isoAt(window.startUntil),
-        endUntil: isoAt(window.endUntil),
-        minStay: MIN_STAY_MS / MINUTE,
+      return { from: isoAt(window.from), until: isoAt(window.until) }
+    },
+
+    /**
+     * Recalcula el rato de quienes ya validaron cuando cambia el horario: si
+     * la pizarra acaba antes, cuenta menos; si acaba después, más.
+     */
+    async reschedule(event: AttendanceEvent): Promise<void> {
+      const result = await db.execute({
+        sql: `SELECT login, started_at FROM event_attendance
+              WHERE event_id = ? AND started_at IS NOT NULL AND valid_minutes IS NOT NULL`,
+        args: [event.id],
+      })
+
+      for (const row of result.rows) {
+        const span = validSpan(Date.parse(toText(row.started_at)), event)
+
+        await db.execute({
+          sql: `UPDATE event_attendance SET
+                  valid_from = ?, valid_to = ?, valid_minutes = ?,
+                  host = ?, title = ?, starts_at = ?, ends_at = ?
+                WHERE event_id = ? AND login = ?`,
+          args: [
+            isoAt(span.from),
+            isoAt(span.to),
+            span.minutes,
+            event.host,
+            event.title,
+            isoAt(event.startsAt),
+            isoAt(event.endsAt),
+            event.id,
+            toText(row.login),
+          ],
+        })
       }
     },
 
@@ -318,7 +351,7 @@ export function createAttendanceService(options: AttendanceServiceOptions) {
     },
 
     /**
-     * Quiénes tienen asistencia válida en un evento: los dos códigos y tiempo
+     * Quiénes tienen asistencia válida en un evento: el código y tiempo
      * contado. Es lo que `boards` y `help` miran antes de dar XP.
      */
     async attended(eventId: string): Promise<string[]> {
@@ -332,19 +365,20 @@ export function createAttendanceService(options: AttendanceServiceOptions) {
     },
 
     /**
-     * Valida un código. El de inicio marca cuándo empezaste; el de fin, cuándo
-     * terminaste, y con él se calcula y se guarda el tiempo que cuenta.
+     * Valida el código. Marca cuándo llegaste y guarda ya el tiempo que cuenta:
+     * de entonces a la hora de fin.
      *
      * Cada intento queda en el registro, también los que fallan.
      *
      * @throws {DomainError} `invalid_input` si el código no es de ese evento;
      *   `forbidden` si ya has fallado demasiadas veces; `conflict` si es pronto
-     *   o tarde para ese código, o si falta el de inicio.
+     *   o tarde para el código.
      */
     async checkin(event: AttendanceEvent, login: string, code: string): Promise<MeetCheckin> {
       const at = now()
+      // `phase` va vacía cuando el código no era el del evento.
       const reject = async (
-        phase: 'start' | 'end' | null,
+        phase: 'start' | null,
         outcome: Outcome,
         error: ReturnType<typeof domainError>,
       ): Promise<never> => {
@@ -367,9 +401,8 @@ export function createAttendanceService(options: AttendanceServiceOptions) {
       }
 
       const valid = await codes(event.id)
-      const phase = code === valid.start ? 'start' : code === valid.end ? 'end' : null
 
-      if (phase === null) {
+      if (code !== valid.start && code !== valid.end) {
         const left = MAX_FAILED_ATTEMPTS - failed - 1
 
         return reject(
@@ -386,106 +419,55 @@ export function createAttendanceService(options: AttendanceServiceOptions) {
 
       const window = windowOf(event)
       const before = await rowOf(event.id, login)
-      const startedAt = typeof before?.started_at === 'string' ? before.started_at : null
 
-      if (phase === 'start') {
-        // El primer momento es el que cuenta: volver a escribirlo no lo mueve.
-        if (startedAt !== null) {
-          await record(event.id, login, code, phase, 'repeat')
+      // El primer momento es el que cuenta: volver a escribirlo no lo mueve.
+      if (typeof before?.valid_minutes === 'number') {
+        await record(event.id, login, code, 'start', 'repeat')
 
-          return { phase, presence: presenceOf(before ?? {}) }
-        }
-        if (at < window.startFrom) {
-          return reject(
-            phase,
-            'too_early',
-            domainError('conflict', 'Todavía es pronto para validar el código de inicio'),
-          )
-        }
-        if (at > window.startUntil) {
-          return reject(
-            phase,
-            'too_late',
-            domainError('conflict', 'El código de inicio ya ha caducado'),
-          )
-        }
-
-        await db.execute({
-          sql: `INSERT INTO event_attendance
-                  (event_id, login, started_at, campus_id, host, title, starts_at, ends_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                ON CONFLICT (event_id, login) DO UPDATE SET
-                  started_at = COALESCE(event_attendance.started_at, excluded.started_at)`,
-          args: [
-            event.id,
-            login,
-            isoAt(at),
-            event.campusId,
-            event.host,
-            event.title,
-            isoAt(event.startsAt),
-            isoAt(event.endsAt),
-          ],
-        })
-      } else {
-        if (startedAt === null) {
-          return reject(
-            phase,
-            'no_start',
-            domainError('conflict', 'Valida primero el código de inicio'),
-          )
-        }
-        if (typeof before?.ended_at === 'string') {
-          await record(event.id, login, code, phase, 'repeat')
-
-          return { phase, presence: presenceOf(before) }
-        }
-        if (at < Date.parse(startedAt) + MIN_STAY_MS) {
-          return reject(
-            phase,
-            'too_early',
-            domainError(
-              'conflict',
-              `El código de fin vale cuando han pasado ${MIN_STAY_MS / MINUTE} minutos desde el de inicio`,
-            ),
-          )
-        }
-        if (at > window.endUntil) {
-          return reject(
-            phase,
-            'too_late',
-            domainError('conflict', 'El código de fin ya ha caducado'),
-          )
-        }
-
-        const span = validSpan(Date.parse(startedAt), at, event)
-
-        // El horario y quién organiza se guardan como estén al terminar: si la
-        // pizarra se movió entre un código y otro, manda el horario definitivo.
-        await db.execute({
-          sql: `UPDATE event_attendance SET
-                  ended_at = ?, valid_from = ?, valid_to = ?, valid_minutes = ?,
-                  campus_id = ?, host = ?, title = ?, starts_at = ?, ends_at = ?
-                WHERE event_id = ? AND login = ? AND ended_at IS NULL`,
-          args: [
-            isoAt(at),
-            isoAt(span.from),
-            isoAt(span.to),
-            span.minutes,
-            event.campusId,
-            event.host,
-            event.title,
-            isoAt(event.startsAt),
-            isoAt(event.endsAt),
-            event.id,
-            login,
-          ],
-        })
+        return { presence: presenceOf(before) }
+      }
+      if (at < window.from) {
+        return reject(
+          'start',
+          'too_early',
+          domainError('conflict', 'Todavía es pronto para validar el código'),
+        )
+      }
+      if (at > window.until) {
+        return reject('start', 'too_late', domainError('conflict', 'El evento ya ha terminado'))
       }
 
-      await record(event.id, login, code, phase, 'ok')
+      // Quien llegó con la regla de los dos códigos guarda su hora de llegada.
+      const arrivedAt = typeof before?.started_at === 'string' ? Date.parse(before.started_at) : at
+      const span = validSpan(arrivedAt, event)
 
-      return { phase, presence: presenceOf((await rowOf(event.id, login)) ?? {}) }
+      await db.execute({
+        sql: `INSERT INTO event_attendance
+                (event_id, login, started_at, valid_from, valid_to, valid_minutes,
+                 campus_id, host, title, starts_at, ends_at)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+              ON CONFLICT (event_id, login) DO UPDATE SET
+                valid_from = excluded.valid_from, valid_to = excluded.valid_to,
+                valid_minutes = excluded.valid_minutes, campus_id = excluded.campus_id,
+                host = excluded.host, title = excluded.title,
+                starts_at = excluded.starts_at, ends_at = excluded.ends_at`,
+        args: [
+          event.id,
+          login,
+          isoAt(arrivedAt),
+          isoAt(span.from),
+          isoAt(span.to),
+          span.minutes,
+          event.campusId,
+          event.host,
+          event.title,
+          isoAt(event.startsAt),
+          isoAt(event.endsAt),
+        ],
+      })
+      await record(event.id, login, code, 'start', 'ok')
+
+      return { presence: presenceOf((await rowOf(event.id, login)) ?? {}) }
     },
 
     /**

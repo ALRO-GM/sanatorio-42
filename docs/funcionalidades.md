@@ -88,7 +88,7 @@ Detalle: [agenda.md](agenda.md).
 | Filtro por tipo: ayuda, sprint, pizarra, corrección, evento de 42 apuntado o abierto, examen | S | Todos | `kinds.ts` |
 | Ficha del evento: cuándo, dónde, quién, plazas, si vas; enlace a la intra; apuntarse a una pizarra o un sprint | S | Todos | `EventDialog.tsx` |
 | Sala del evento: respuestas rápidas (lo he visto, me retraso, no puedo ir) y chat | S | Quien está apuntado | `EventRoom.tsx` |
-| Asistencia con dos códigos y QR (pizarras y sesiones de ayuda) | S | Quien organiza ve los códigos; quien asiste los escribe | `Attendance.tsx` |
+| Asistencia con un código y QR (pizarras y sesiones de ayuda) | S | Quien organiza ve el código; quien asiste lo escribe al llegar | `Attendance.tsx` |
 | Fijar la cuenta atrás de un evento | S | Todos | `PinCountdown.tsx` |
 | Cuentas atrás: las tuyas, el próximo compromiso, algo propio, metas de la agenda, lo de los próximos 30 días | S | Todos (metas `[agenda]`) | `CountdownsView.tsx`, `CountdownPicker.tsx`, `countdowns/GoalPins.tsx` |
 | Demostración | S | Todos | `AgendaTour.tsx` |
@@ -158,7 +158,7 @@ La asistencia con códigos va en el Calendario.
 | Personas bloqueadas, con desbloquear | N | Si hay alguna | bloque `blocked` |
 | Demostración | S | Todos | `GuardTour.tsx` |
 
-La XP de una sesión solo sale con los dos códigos validados y las dos
+La XP de una sesión solo sale con el código validado y las dos
 valoraciones.
 
 ## Aprender

@@ -3,7 +3,7 @@
  * pizarra, propuestas por estudiantes.
  *
  * Quien imparte gana XP, pero solo cuando la pizarra ya ha pasado y alguien
- * validó su asistencia con los dos códigos (inicio y fin): proponer una sesión
+ * validó su asistencia con el código: proponer una sesión
  * a la que no va nadie, o apuntarse sin ir, no da puntos. Ese reparto se hace
  * al leer el calendario (`settle`), que es idempotente, en vez de con un
  * temporizador: así funciona igual con o sin proceso de fondo.
@@ -93,8 +93,8 @@ export function createBoardsService(options: BoardsServiceOptions) {
   /**
    * Reparte la XP de las pizarras que ya han terminado.
    *
-   * Se espera a que caduque el código de fin: hasta entonces alguien puede
-   * estar todavía validando. Se marca como repartida haya ido alguien o no,
+   * Se espera a que termine: hasta entonces alguien puede estar todavía
+   * llegando y validando. Se marca como repartida haya ido alguien o no,
    * para no volver a mirarla.
    */
   async function settle(): Promise<void> {
@@ -222,6 +222,18 @@ export function createBoardsService(options: BoardsServiceOptions) {
         throw domainError('not_found', 'Esa pizarra no existe')
       }
 
+      // Quien ya validó el código cuenta hasta la hora de fin nueva.
+      if (updated.startsAt !== current.startsAt || updated.endsAt !== current.endsAt) {
+        await attendance.reschedule({
+          id: EVENT_ID.board(boardId),
+          campusId: actor.campusId,
+          host: updated.host,
+          title: updated.title,
+          startsAt: Date.parse(updated.startsAt),
+          endsAt: Date.parse(updated.endsAt),
+        })
+      }
+
       // Solo se avisa de lo que cambia el plan de quien va: cuándo o dónde.
       if (
         updated.startsAt !== current.startsAt ||
@@ -240,7 +252,11 @@ export function createBoardsService(options: BoardsServiceOptions) {
       return updated
     },
 
-    /** Reserva plaza. `409` si está completa o ya ha pasado. */
+    /**
+     * Reserva plaza. `409` si está completa o ya ha empezado: apuntarse al ver
+     * una pizarra en marcha y escribir el código sería una trampa fácil, así
+     * que hay que reservar antes.
+     */
     async join(actor: Actor, boardId: number): Promise<void> {
       const board = await mustGet(boardId, actor)
 
@@ -254,6 +270,9 @@ export function createBoardsService(options: BoardsServiceOptions) {
       }
       if (Date.parse(board.endsAt) <= now()) {
         throw domainError('conflict', 'Esa pizarra ya ha terminado')
+      }
+      if (Date.parse(board.startsAt) <= now()) {
+        throw domainError('conflict', 'Esa pizarra ya ha empezado: hay que apuntarse antes')
       }
       if (!(await boards.join(boardId, actor.login))) {
         throw domainError('conflict', 'No quedan plazas')

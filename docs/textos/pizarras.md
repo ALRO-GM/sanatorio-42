@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/pizarras.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-37 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
+38 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera | Francés |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -28,6 +28,7 @@ Generado desde `apps/web/src/shared/i18n/textos/pizarras.csv` con
 | `cal.remove` | Botón de moderación para retirar una pizarra | features/boards/BoardCard, shared/ui/useConfirm | Retirar (moderación) | Remove (moderation) | Retira (moderació) | Kendu (moderazioa) | Retirer (modération) |
 | `cal.removeAsk` | Confirmación antes de retirar una pizarra | features/boards/BoardCard, shared/ui/useConfirm | ¿Retirar la pizarra de {host}? Se cancela y se avisa a quien se había apuntado. | Remove {host}'s whiteboard? It is cancelled and everyone signed up is told. | Vols retirar la pissarra de {host}? Es cancel·la i s'avisa qui s'hi havia apuntat. | {host}(r)en arbela kendu? Bertan behera geratzen da eta izena emandakoei abisatzen zaie. | Retirer le tableau blanc de {host} ? Il sera annulé et les personnes inscrites seront prévenues. |
 | `cal.past` | Pizarra ya pasada | features/boards/BoardCard | Ya pasó | Already held | Ja ha passat | Pasa da | Déjà passé |
+| `cal.started` | Pizarra ya empezada: no se admiten más inscripciones | features/boards/BoardCard | Ya empezó | Already started | Ja ha començat | Hasita dago | Déjà commencé |
 | `cal.empty` | No hay pizarras ese mes | features/boards/BoardsCalendar | Este mes no hay pizarras. | No whiteboards this month. | Aquest mes no hi ha pissarres. | Hilabete honetan ez dago arbelik. | Aucun tableau blanc ce mois-ci. |
 | `cal.yours` | Invitación a proponer una pizarra en un hueco | features/boards/BoardsCalendar | Tu pizarra puede estar aquí | Your whiteboard could be here | La teva pissarra pot ser aquí | Zure arbela hemen egon daiteke | Ton tableau blanc pourrait être ici |
 | `cal.pitchTitle` | Título de la invitación a dar una pizarra | features/boards/BoardsCalendar | ¿Dominas un concepto? | Know a concept inside out? | Domines un concepte? | Kontzeptu bat menderatzen duzu? | Tu maîtrises une notion ? |

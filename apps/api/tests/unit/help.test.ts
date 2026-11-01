@@ -35,7 +35,7 @@ describe('comunidad', () => {
   describe('ayuda reservada', () => {
     const tarde = { windows: [{ start: '17:00', end: '19:00' }], maxMinutes: 60 }
 
-    it('una sesión aceptada, con los dos códigos y valorada por las dos partes da XP a quien ayudó', async () => {
+    it('una sesión aceptada, con el código y valorada por las dos partes da XP a quien ayudó', async () => {
       const { help, xp } = services
 
       // `eva` aprobó ft_printf: ayuda de especialista.
@@ -53,7 +53,7 @@ describe('comunidad', () => {
       expect(await helpSession('ana', 'leo')).toBe(15)
     })
 
-    it('sin las dos valoraciones no hay XP, y sin los códigos tampoco', async () => {
+    it('sin las dos valoraciones no hay XP, y sin el código tampoco', async () => {
       const { help, xp } = services
 
       await help.setToday(actor('eva'), tarde)
@@ -63,23 +63,31 @@ describe('comunidad', () => {
       // Antes de que termine la franja no se puede valorar.
       await expectCode(help.rate(actor('ana'), booking.id, { tag: 'bug' }), 'conflict')
 
-      // Se valida el código de inicio, pero no el de fin: no hay asistencia.
-      clock.advance(30 * MINUTE)
-      await validate(`help:booking:${booking.id}`, 'eva', 'ana', 'start')
-
-      clock.advance(35 * MINUTE)
+      // `ana` no escribe el código, y ya fuera de la franja no vale.
+      clock.advance(65 * MINUTE)
+      await expectCode(validate(`help:booking:${booking.id}`, 'eva', 'ana'), 'conflict')
       expect(await help.rate(actor('ana'), booking.id, { tag: 'bug' })).toEqual({ xp: null })
       // Cada parte usa sus propias opciones, y solo una vez.
       await expectCode(help.rate(actor('eva'), booking.id, { tag: 'bug' }), 'invalid_input')
       await expectCode(help.rate(actor('ana'), booking.id, { tag: 'code' }), 'conflict')
-      // Con las dos valoraciones la sesión espera: el código de fin aún no ha caducado.
-      expect(await help.rate(actor('eva'), booking.id, { tag: 'curious' })).toEqual({ xp: null })
-
-      // A las 18:00 caduca. Sin él, la sesión se cierra a cero.
-      clock.advance(30 * MINUTE)
-      await expectCode(validate(`help:booking:${booking.id}`, 'eva', 'ana', 'end'), 'conflict')
+      // Con las dos valoraciones y sin código, la sesión se cierra a cero.
+      expect(await help.rate(actor('eva'), booking.id, { tag: 'curious' })).toEqual({ xp: 0 })
       expect((await help.today(actor('eva'))).bookings).toMatchObject([{ xp: 0, verified: false }])
       expect((await xp.expediente(actor('eva'))).xp.total).toBe(0)
+    })
+
+    it('llegar tarde a una sesión de ayuda cuenta lo que queda de ella', async () => {
+      const { help } = services
+
+      await help.setToday(actor('eva'), tarde)
+      const booking = await help.book(actor('ana'), { helper: 'eva', start: '17:00', minutes: 60 })
+      await help.respond(actor('eva'), booking.id, true)
+
+      // Llega a las 17:40: cuentan los 20 minutos que quedan.
+      clock.advance(70 * MINUTE)
+      const checkin = await validate(`help:booking:${booking.id}`, 'eva', 'ana')
+
+      expect(checkin.presence.minutes).toBe(20)
     })
 
     it('no deja abrir medias horas que ya han empezado', async () => {

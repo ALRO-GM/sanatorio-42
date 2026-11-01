@@ -8,7 +8,6 @@ import { useAction, useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { formatsFor } from '../../shared/i18n/useFormat'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
-import { PillGroup } from '../../shared/ui/PillGroup'
 import { Qr } from '../../shared/ui/Qr'
 
 /** La dirección que abre la web y valida el código sola: es lo que lleva el QR. */
@@ -21,12 +20,11 @@ function hour(iso: string | null, lang: string): string {
 }
 
 /**
- * La asistencia a una pizarra o a una sesión de ayuda, validada con dos códigos.
+ * La asistencia a una pizarra o a una sesión de ayuda, validada con un código.
  *
- * Quien organiza ve el código de inicio y el de fin (con su QR) y quién los ha
- * validado. Quien asiste escribe el que le enseñen: el de inicio al empezar y el
- * de fin al terminar. Solo con los dos hay asistencia válida. Cuándo vale cada
- * código y cuánto tiempo cuenta lo decide la API; aquí solo se enseña.
+ * Quien organiza ve el código (con su QR) y quién lo ha validado. Quien asiste
+ * lo escribe al llegar, y le cuenta desde entonces hasta la hora de fin. Cuándo
+ * vale y cuánto tiempo cuenta lo decide la API; aquí solo se enseña.
  */
 export function Attendance({ eventId }: { eventId: string }) {
   const { t, lang } = useI18n()
@@ -36,7 +34,6 @@ export function Attendance({ eventId }: { eventId: string }) {
   )
   const action = useAction()
   const [code, setCode] = useState('')
-  const [shown, setShown] = useState<'start' | 'end'>('start')
 
   if (loading) return <p className="hint">{t('app.loading')}</p>
   if (data === undefined) return <ErrorNote error={error} retry />
@@ -55,36 +52,22 @@ export function Attendance({ eventId }: { eventId: string }) {
     </li>
   )
 
-  const { window } = data
-  const startWindow = t('meet.att.windowStart', {
-    from: hour(window.startFrom, lang),
-    to: hour(window.startUntil, lang),
-  })
-  const endWindow = t('meet.att.windowEnd', {
-    n: window.minStay,
-    to: hour(window.endUntil, lang),
+  const when = t('meet.att.window', {
+    from: hour(data.window.from, lang),
+    to: hour(data.window.until, lang),
   })
 
-  if (data.role === 'host' && data.codes !== null) {
-    const current = data.codes[shown]
-
+  if (data.role === 'host' && data.code !== null) {
     return (
       <div className="meet-att">
         <span className="eyebrow">{t('meet.att.title')}</span>
         <p className="hint">{t('meet.att.hostHint')}</p>
-        <p className="hint">{shown === 'start' ? startWindow : endWindow}</p>
-        <PillGroup
-          options={['start', 'end'] as const}
-          value={shown}
-          onChange={setShown}
-          label={t('meet.att.title')}
-          text={(phase) => t(`meet.att.${phase}`)}
-        />
+        <p className="hint">{when}</p>
         <div className="meet-code">
-          <Qr text={checkinUrl(eventId, current)} label={t(`meet.att.${shown}`)} />
+          <Qr text={checkinUrl(eventId, data.code)} label={t('meet.att.codeLabel')} />
           <div>
-            <small>{t(`meet.att.${shown}Code`)}</small>
-            <strong>{current}</strong>
+            <small>{t('meet.att.codeLabel')}</small>
+            <strong>{data.code}</strong>
           </div>
         </div>
         {data.people.length > 0 && <ul className="meet-people">{data.people.map(row)}</ul>}
@@ -104,21 +87,17 @@ export function Attendance({ eventId }: { eventId: string }) {
     }
   }
 
-  const mine = data.mine
-  // Con los dos códigos validados ya no hay nada más que escribir.
-  const validated = typeof mine?.minutes === 'number'
+  // Con el código validado ya no hay nada más que escribir.
+  const minutes = data.mine?.minutes ?? null
+  const validated = minutes !== null
 
   return (
     <div className="meet-att">
       <span className="eyebrow">{t('meet.att.title')}</span>
       <p className="hint">
-        {mine === null
-          ? t('meet.att.guestStart')
-          : mine.minutes === null
-            ? t('meet.att.guestEnd', { time: hour(mine.startedAt, lang) })
-            : t('meet.att.guestDone', { n: mine.minutes })}
+        {validated ? t('meet.att.guestDone', { n: minutes }) : t('meet.att.guestStart')}
       </p>
-      {!validated && <p className="hint">{mine === null ? startWindow : endWindow}</p>}
+      {!validated && <p className="hint">{when}</p>}
       {!validated && data.attemptsLeft < 5 && (
         <p className="hint" role="status">
           {data.attemptsLeft === 0

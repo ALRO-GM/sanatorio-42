@@ -291,15 +291,13 @@ sale nadie del otro mundo.
 - Ni los mensajes ni el registro de intentos de códigos (`/admin/checkins`) se
   borran solos: los quita quien administra (ver «Borrado de datos»).
 - GET /events/attendance?id= → solo pizarras y sesiones de ayuda aceptadas. Quien
-  organiza recibe `codes: { start, end }` (cuatro caracteres cada uno) y lo
-  validado por cada persona; quien asiste, lo suyo en `mine`. Las dos partes
-  reciben `window: { startFrom, startUntil, endUntil, minStay }` (cuándo vale
-  cada código) y `attemptsLeft`.
-- POST /events/checkin → `{ "id", "code" }`. El de inicio marca cuándo empezaste;
-  el de fin, cuándo terminaste, y solo vale si antes validaste el de inicio.
-  `minutes` es `null` mientras falte uno: sin los dos no hay asistencia. `409`
-  si no es el momento de ese código, `400` si el código no es de ese evento,
-  `403` si ya has agotado los intentos.
+  organiza recibe `code` (cuatro caracteres) y lo validado por cada persona;
+  quien asiste, lo suyo en `mine`. Las dos partes reciben
+  `window: { from, until }` (cuándo vale el código) y `attemptsLeft`.
+- POST /events/checkin → `{ "id", "code" }` → `{ "presence" }`. Marca cuándo
+  llegaste y guarda ya el tiempo, de entonces a la hora de fin (`endedAt`).
+  `409` si no es el momento del código, `400` si el código no es de ese
+  evento, `403` si ya has agotado los intentos.
 - GET /events/report?from=&to=&login= → las horas validadas con códigos
   en un periodo (días `YYYY-MM-DD`, los dos incluidos; por defecto, los últimos
   treinta): `{ "from", "to", "totalMinutes", "rows": [{ "login", "role", "eventId",
@@ -334,19 +332,19 @@ sale nadie del otro mundo.
   si la hora o el proyecto no valen.
 - GET /admin/checkins?id= → cada intento de validar un código de ese evento, con
   su resultado (`ok`, `repeat`, `wrong_code`, `locked`, `too_early`, `too_late`,
-  `no_start`). Solo admins.
+  `no_start`; este último es de cuando había dos códigos). Solo admins.
 
 Reglas de los códigos (`modules/attendance/attendance.rules.ts`):
 
-- **Sin los dos códigos no hay nada**: ni XP ni tiempo contado.
-- El de **inicio** vale desde 10 minutos antes de la hora hasta 30 después (o
-  la mitad del evento, si dura menos de una hora). Quien llega dentro de ese
-  margen cuenta desde que llega; quien llega más tarde ya no puede empezar.
-- El de **fin** vale cuando han pasado 10 minutos desde el de inicio y hasta 30
-  minutos después de la hora de fin. Quien se va antes cuenta hasta que se va.
-- El **tiempo validado** es el rato entre los dos códigos, recortado al horario
-  previsto con 10 minutos de margen por cada lado, y nunca más que la duración
-  prevista. Se guarda ya calculado, con el horario del evento en ese momento.
+- **Un solo código, al llegar** (desde 2026-11-01; antes había otro al
+  terminar, y costaba que te lo dieran). Lo que se premia es el esfuerzo de ir.
+  **Sin el código no hay nada**: ni XP ni tiempo contado.
+- Vale desde 10 minutos antes de la hora de inicio **hasta la de fin**.
+- El **tiempo validado** va de la llegada a la hora de fin; quien llega antes
+  de la hora cuenta desde la hora. Se guarda ya calculado y, si quien imparte
+  una pizarra le cambia el horario, se recalcula.
+- **No se puede apuntar a una pizarra ya empezada**: así nadie se apunta al
+  verla en marcha y escribe el código; hay que reservar antes.
 - El tiempo de **quien organiza** es el rato en que tuvo a alguien validado
   delante, sin contar dos veces a quienes coinciden.
 - **Cinco códigos equivocados** por persona y evento, y ya no se puede validar.
@@ -713,12 +711,12 @@ POST /boards → 201 con la pizarra. `topic`, `description` y `capacity` (por de
   lejos se puede retocar o acercar, pero no se puede llevar ninguna allí. La
   web, antes de guardar, dice cuánto falta y pide confirmación.
 
-- POST /boards/:id/join → 204 (409 si no quedan plazas)
+- POST /boards/:id/join → 204 (409 si no quedan plazas o ya ha empezado)
 - DELETE /boards/:id/join → 204
 - DELETE /boards/:id → 204. Solo quien la imparte.
 
 Quien imparte gana 50 XP cuando la pizarra ya ha terminado y al menos otra persona
-validó los dos códigos de asistencia (ver "Reglas de los códigos").
+validó el código de asistencia (ver "Reglas de los códigos").
 
 ## Calendario personal
 
@@ -823,9 +821,9 @@ ayudar en persona.
 Reglas:
 
 - La reserva la tiene que **aceptar** quien ayuda.
-- Quien recibe la ayuda **valida los dos códigos** (inicio y fin) que le enseña
-  quien ayuda; `verified` dice si lo ha hecho. Sin ellos, la sesión se cierra
-  con 0 XP cuando caduca el código de fin.
+- Quien recibe la ayuda **valida el código** que le enseña quien ayuda, al
+  llegar; `verified` dice si lo ha hecho. Sin él, la sesión se cierra con 0 XP
+  cuando termina la franja.
 - La XP se reparte cuando **las dos partes han valorado**. Quien pidió ayuda
   elige cómo le ayudaron (`bug`, `code`, `concept`, `patient`); quien ayudó,
   cómo llegó la otra persona (`prepared`, `curious`, `autonomous`, `basics`).
@@ -1609,12 +1607,12 @@ La de asistir a terapias no cuenta. `me` es `null` si aún no has ayudado.
 
 | Motivo (`kind`)   | XP | Cuándo |
 | ----------------- | -- | ------ |
-| `specialist_help` | 40 | Sesión de ayuda con sus dos códigos y cerrada, en un proyecto que ya aprobaste |
-| `peer_help`       | 15 | Sesión de ayuda con sus dos códigos y cerrada, en cualquier otro proyecto |
+| `specialist_help` | 40 | Sesión de ayuda con su código y cerrada, en un proyecto que ya aprobaste |
+| `peer_help`       | 15 | Sesión de ayuda con su código y cerrada, en cualquier otro proyecto |
 | `doubt_solved`    | 25 | Tu respuesta es la que resuelve una duda ajena |
 | `guide_proposal`  | 15 | Te validan un cambio en una guía |
 | `guide_review`    | 5  | Validas el cambio de otra persona |
-| `board_host`      | 50 | Impartes una pizarra en la que alguien valida los dos códigos |
+| `board_host`      | 50 | Impartes una pizarra en la que alguien valida el código |
 | `therapy_session` | 10 | Cada media hora en tu puesto reservado de una terapia |
 
 - **Dudas**: `PUT /doubts/:id/resolved` exige `{ "resolved": true, "answerId" }`.
@@ -1951,7 +1949,7 @@ GET /stats?period=month|all  → HelpStats: { period, sections: StatsSection[] }
   entres en los 10; `null` si no sales).
 - Cada fila: `rank` (empates en las dos cifras comparten puesto), `login`,
   `image`, `value` (lo que ordena) y `extra` (lo que desempata).
-- Qué ordena cada una: sesiones de ayuda **validadas con los dos códigos**
+- Qué ordena cada una: sesiones de ayuda **validadas con el código**
   (extra: minutos), respuestas que resuelven una duda ajena (extra: respuestas),
   grupos de terapia a los que vas (extra: los que abres), gente apuntada a tus
   pizarras ya empezadas (extra: pizarras) y partidas ganadas de Not-games

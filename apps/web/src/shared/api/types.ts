@@ -295,7 +295,7 @@ export type Api = {
   /** Manda un aviso o un mensaje; devuelve el chat ya con él. */
   sendEventMessage: (message: MeetMessageInput) => Promise<MeetThread>
   getEventAttendance: (eventId: string) => Promise<MeetAttendance>
-  /** Valida el código de inicio o el de fin de un evento. */
+  /** Valida el código de asistencia de un evento. */
   checkinEvent: (eventId: string, code: string) => Promise<MeetCheckin>
   /**
    * El CSV con las horas validadas con códigos en un periodo (días

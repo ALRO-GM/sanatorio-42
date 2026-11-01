@@ -244,7 +244,7 @@ export function createHelpRepository(db: Db) {
       })
     },
 
-    /** Apunta que quien pidió la ayuda validó los dos códigos. */
+    /** Apunta que quien pidió la ayuda validó el código de asistencia. */
     async setVerified(id: number): Promise<void> {
       await db.execute({ sql: 'UPDATE help_bookings SET verified = 1 WHERE id = ?', args: [id] })
     },

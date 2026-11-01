@@ -4,7 +4,7 @@ tour.speed,Botón de velocidad de la demostración,Velocidad ×{n},Speed ×{n},V
 tour.pause,Botón para pausar la demostración animada,Pausa,Pause,Pausa,Gelditu,Pause
 tour.play,Botón para seguir con la demostración pausada,Seguir,Continue,Continua,Jarraitu,Reprendre
 tour.restart,Botón para empezar la demostración desde el principio,Desde el principio,From the start,Des del principi,Hasieratik,Depuis le début
-tour.jump,"Marca de la barra de progreso de la demostración: ir a ese paso","Ir al paso {n}: {text}","Go to step {n}: {text}","Ves al pas {n}: {text}","Joan {n}. urratsera: {text}","Aller à l’étape {n} : {text}"
+tour.jump,Marca de la barra de progreso de la demostración: ir a ese paso,Ir al paso {n}: {text},Go to step {n}: {text},Ves al pas {n}: {text},Joan {n}. urratsera: {text},Aller à l’étape {n} : {text}
 tour.stepTitle,"Demostración: encima de la frase, en qué paso va y de qué habla (título del paso)",Paso {n} de {total} · {title},Step {n} of {total} · {title},Pas {n} de {total} · {title},{total}/{n}. urratsa · {title},Étape {n} sur {total} · {title}
 tour.guard.1,Demostración animada del on-call: frase del paso 1,Arrastra por las medias horas en las que te ofreces hoy.,Drag over the half hours you offer today.,Arrossega per les mitges hores en què t'ofereixes avui.,Arrastatu gaur eskaintzen zaren ordu erdietatik.,Fais glisser sur les demi-heures où tu es dispo aujourd'hui.
 tour.guard.title.1,Demostración animada del on-call: título del paso 1,Tus medias horas,Your half hours,Les teves mitges hores,Zure ordu erdiak,Tes demi-heures
@@ -70,9 +70,9 @@ tour.boards.2,Demostración animada de las pizarras: frase del paso 2,Apúntate 
 tour.boards.title.2,Demostración animada de las pizarras: título del paso 2,Apúntate,Sign up,Apunta't,Eman izena,Inscris-toi
 tour.boards.3,Demostración animada de las pizarras: frase del paso 3,¿Dominas algo? Propón tú una.,Good at something? Propose your own.,Domines alguna cosa? Proposa'n tu una.,Zerbait menderatzen duzu? Proposatu zuk bat.,Tu maîtrises un sujet ? Propose la tienne.
 tour.boards.title.3,Demostración animada de las pizarras: título del paso 3,Propón una,Propose your own,Proposa'n una,Proposatu bat,Propose la tienne
-tour.boards.4,Demostración animada de las pizarras: frase del paso 4,"Al empezar y al acabar, quien la da enseña un código.","At the start and the end, the host shows a code.","En començar i en acabar, qui la fa ensenya un codi.","Hastean eta bukatzean, ematen duenak kode bat erakusten du.","Au début et à la fin, la personne qui anime montre un code."
-tour.boards.title.4,Demostración animada de las pizarras: título del paso 4,Códigos de la sesión,Session codes,Codis de la sessió,Saioaren kodeak,Codes de la session
-tour.boards.5,Demostración animada de las pizarras: frase del paso 5,"Con los dos códigos, tu tiempo queda validado.","With both codes, your time is validated.","Amb els dos codis, el teu temps queda validat.","Bi kodeekin, zure denbora balidatuta geratzen da.","Avec les deux codes, ton temps est validé."
+tour.boards.4,Demostración animada de las pizarras: frase del paso 4,"Al llegar, escribes el código que enseña quien la da.","When you arrive, you type the code the host shows.","En arribar, escrius el codi que ensenya qui la fa.","Iristean, ematen duenak erakusten duen kodea idazten duzu.","En arrivant, tu saisis le code que montre la personne qui anime."
+tour.boards.title.4,Demostración animada de las pizarras: título del paso 4,El código de la sesión,The session code,El codi de la sessió,Saioaren kodea,Le code de la session
+tour.boards.5,Demostración animada de las pizarras: frase del paso 5,"Con el código, tu tiempo cuenta hasta el final.","With the code, your time counts until the end.","Amb el codi, el teu temps compta fins al final.","Kodearekin, zure denbora amaierara arte zenbatzen da.","Avec le code, ton temps compte jusqu'à la fin."
 tour.boards.title.5,Demostración animada de las pizarras: título del paso 5,Tiempo validado,Time validated,Temps validat,Denbora balidatuta,Temps validé
 tour.boards.topic,Demostración de pizarras: tema de ejemplo,Punteros a función,Function pointers,Punters a funció,Funtzio-erakusleak,Pointeurs sur fonction
 tour.boards.mine,Demostración de pizarras: la que propones tú,Makefiles sin miedo,Makefiles without fear,Makefiles sense por,Makefileak beldurrik gabe,Les Makefiles sans peur

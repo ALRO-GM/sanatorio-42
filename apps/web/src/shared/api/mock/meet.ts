@@ -139,10 +139,8 @@ export const meetMock: Pick<
 
     const common = {
       window: {
-        startFrom: new Date(Date.now() - 10 * 60_000).toISOString(),
-        startUntil: new Date(Date.now() + 30 * 60_000).toISOString(),
-        endUntil: new Date(Date.now() + 120 * 60_000).toISOString(),
-        minStay: 10,
+        from: new Date(Date.now() - 10 * 60_000).toISOString(),
+        until: new Date(Date.now() + 90 * 60_000).toISOString(),
       },
       attemptsLeft: 5,
     }
@@ -152,24 +150,24 @@ export const meetMock: Pick<
       ? {
           ...common,
           role: 'host',
-          codes: { start: 'K7QM', end: 'R3XD' },
+          code: 'K7QM',
           mine: null,
           people: [
             {
               login: 'jdoe',
-              startedAt: new Date(Date.now() - 50 * 60_000).toISOString(),
-              endedAt: new Date().toISOString(),
-              minutes: 50,
+              startedAt: new Date(Date.now() - 20 * 60_000).toISOString(),
+              endedAt: new Date(Date.now() + 70 * 60_000).toISOString(),
+              minutes: 90,
             },
             {
               login: 'mgarcia',
-              startedAt: new Date(Date.now() - 48 * 60_000).toISOString(),
-              endedAt: null,
-              minutes: null,
+              startedAt: new Date(Date.now() - 5 * 60_000).toISOString(),
+              endedAt: new Date(Date.now() + 70 * 60_000).toISOString(),
+              minutes: 75,
             },
           ],
         }
-      : { ...common, role: 'guest', codes: null, mine: presences.get(id) ?? null, people: [] }
+      : { ...common, role: 'guest', code: null, mine: presences.get(id) ?? null, people: [] }
   },
 
   async attendanceReport({ from = '', to = '' }) {
@@ -195,30 +193,20 @@ export const meetMock: Pick<
   async checkinEvent(id, code) {
     await delay(200)
 
-    const before = presences.get(id)
-    const phase =
-      code.toUpperCase() === 'K7QM' ? 'start' : code.toUpperCase() === 'R3XD' ? 'end' : null
+    if (code.toUpperCase() !== 'K7QM') throw fail(400, 'Ese código no es de este evento')
 
-    if (phase === null) throw fail(400, 'Ese código no es de este evento')
-    if (phase === 'end' && before === undefined)
-      throw fail(409, 'Valida primero el código de inicio')
-
-    const now = new Date().toISOString()
-    const startedAt = before?.startedAt ?? now
-    const endedAt = phase === 'end' ? now : null
-    const presence = {
+    // En la web de mentira el evento acaba dentro de una hora.
+    const until = Date.now() + 60 * 60_000
+    const presence = presences.get(id) ?? {
       login: ME.login,
-      startedAt,
-      endedAt,
-      minutes:
-        endedAt === null
-          ? null
-          : Math.round((Date.parse(endedAt) - Date.parse(startedAt)) / 60_000),
+      startedAt: new Date().toISOString(),
+      endedAt: new Date(until).toISOString(),
+      minutes: 60,
     }
 
     presences.set(id, presence)
 
-    return { phase, presence }
+    return { presence }
   },
 }
 

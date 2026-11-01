@@ -547,7 +547,7 @@ Nº de rutas contadas en el código (con método; 248 en total contando `/health
 | `doubts`      | Proyectos: grafo, dudas, guía por propuestas                                                           |    13 | Topes y XP en el servicio                                     |
 | `boards`      | Pizarras                                                                                               |     6 | XP al leer (`settle`)                                         |
 | `help`        | On-call: franjas, reservas, valoraciones, bloqueos                                                     |    13 | Topes pareja/día/semana                                       |
-| `attendance`  | Códigos de inicio y fin y tiempo validado                                                              |     0 | Lo usan meet, help, boards                                    |
+| `attendance`  | Código de asistencia y tiempo validado                                                                 |     0 | Lo usan meet, help, boards                                    |
 | `calendar`    | Calendario personal: lo de Peer4U y lo de 42                                                           |     1 | Sin tablas propias                                            |
 | `map`         | Plano de clústeres, ficha de persona, puestos rotos                                                    |     5 | Usa `ensureFresh`                                             |
 | `network`     | Red de correcciones y de asientos (grafo, endogamia, comunidades)                                      |     7 | Cliente de 42; dos trabajos                                   |
@@ -582,7 +582,7 @@ A continuación, los que tienen más mecánica propia.
 aprobó y «guru» con 125. Alguien está disponible solo con `available: true` y
 un puesto. `help` lleva las franjas de media hora de cada día, las reservas
 (pedir, aceptar, rechazar, cancelar), la valoración descriptiva y los bloqueos;
-la XP solo sale con los dos códigos de `attendance` y las dos valoraciones.
+la XP solo sale con el código de `attendance` y las dos valoraciones.
 
 ```mermaid
 sequenceDiagram
@@ -595,8 +595,8 @@ sequenceDiagram
   H->>H: topes pareja/día/semana, bloqueos
   H-->>B: notify(booking)
   B->>H: respondBooking(accept)
-  A->>AT: código de inicio
-  B->>AT: código de fin
+  B-->>A: enseña el código
+  A->>AT: código, al llegar
   A->>H: rateBooking · B->>H: rateBooking
   H->>X: award(ref única de la sesión)
 ```

@@ -60,16 +60,11 @@ export type Community = {
   api: ReturnType<typeof createFake42>
   /** Sienta a esa gente y deja la foto de puestos recién hecha, para que no se pida a 42. */
   seat: (seats: Record<string, string>) => Promise<void>
-  /** Valida un código de un evento: el que enseña `host`, lo escribe `guest`. */
-  validate: (
-    id: string,
-    host: string,
-    guest: string,
-    phase: 'start' | 'end',
-  ) => Promise<MeetCheckin>
+  /** Valida el código de un evento: el que enseña `host`, lo escribe `guest`. */
+  validate: (id: string, host: string, guest: string) => Promise<MeetCheckin>
   /**
    * Una sesión de ayuda entera: `eva` se ofrece, `requester` reserva media hora
-   * a las 17:00, valida el código de inicio y el de fin, y se valoran.
+   * a las 17:00, valida el código al llegar, y se valoran.
    */
   helpSession: (requester: string, helper?: string) => Promise<number | null>
 }
@@ -135,22 +130,17 @@ export function useCommunity(): Community {
     await replica.setState(`locations:${MADRID}`, { at: community.clock.now(), count: 1 })
   }
 
-  /** Valida un código de un evento: el que enseña `host`, lo escribe `guest`. */
-  const validate = async (
-    id: string,
-    host: string,
-    guest: string,
-    phase: 'start' | 'end',
-  ): Promise<MeetCheckin> => {
+  /** Valida el código de un evento: el que enseña `host`, lo escribe `guest`. */
+  const validate = async (id: string, host: string, guest: string): Promise<MeetCheckin> => {
     const { meet } = community.services
-    const codes = (await meet.attendance(actor(host), id)).codes ?? { start: '', end: '' }
+    const code = (await meet.attendance(actor(host), id)).code ?? ''
 
-    return meet.checkin(actor(guest), { id, code: codes[phase] })
+    return meet.checkin(actor(guest), { id, code })
   }
 
   /**
    * Una sesión de ayuda entera: `eva` se ofrece, `requester` reserva media hora
-   * a las 17:00, valida el código de inicio y el de fin, y se valoran.
+   * a las 17:00, valida el código al llegar, y se valoran.
    */
   const helpSession = async (requester: string, helper = 'eva'): Promise<number | null> => {
     const { help } = community.services
@@ -170,10 +160,9 @@ export function useCommunity(): Community {
     const id = `help:booking:${booking.id}`
 
     community.clock.advance(30 * MINUTE) // 17:00
-    await validate(id, helper, requester, 'start')
+    await validate(id, helper, requester)
 
     community.clock.advance(35 * MINUTE) // 17:35
-    await validate(id, helper, requester, 'end')
     await help.rate(actor(requester), booking.id, { tag: 'concept' })
 
     return (await help.rate(actor(helper), booking.id, { tag: 'prepared' })).xp
