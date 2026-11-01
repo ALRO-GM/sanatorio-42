@@ -10,6 +10,7 @@ import type { Translate } from '../../shared/i18n'
 import { Icon } from '../../shared/ui/Icon'
 import { PillGroup } from '../../shared/ui/PillGroup'
 import { recordHref } from '../../shared/links'
+import { initialOf } from '../../shared/initial'
 import { fitSeats, ROW_LABEL } from './fit'
 import type { Density, SeatFit } from './fit'
 import {
@@ -227,7 +228,7 @@ const SeatButton = memo(function SeatButton({
         (density === 'faces' ? (
           <SeatFace key={login} login={login} image={image} />
         ) : density === 'initials' ? (
-          <span className="seat-initial">{login.charAt(0).toUpperCase()}</span>
+          <span className="seat-initial">{initialOf(login)}</span>
         ) : null)}
       {/* Tiene Sanatorio abierto: un punto verde en la esquina. */}
       {online && <i className="seat-online" />}
@@ -595,33 +596,33 @@ export function ClusterMapView({
       {(looks || fit.overflows) && (
         <div className="map-bar">
           {looks && (
-            <div className="map-tools" role="group" aria-label={t('map.look')}>
-              <span className="map-tools-label">{t('map.highlight')}</span>
-              {MATES.map((mate) => {
-                const on = look.mates.includes(mate)
-
-                return (
-                  <button
-                    key={mate}
-                    type="button"
-                    className={`pill mate-pill mate-${mate} ${on ? 'active' : ''}`}
-                    aria-pressed={on}
-                    disabled={mate === 'circle' && map.me.circle === null}
-                    onClick={() => {
-                      change({
-                        ...look,
-                        mates: on
-                          ? look.mates.filter((one) => one !== mate)
-                          : [...look.mates, mate],
-                      })
-                    }}
-                  >
-                    <i className={`mate-dot mate-${mate}`} aria-hidden="true" />
-                    {t(`map.mate.${mate}`)}
-                    <span className="pill-count">{mateCounts.get(mate) ?? 0}</span>
-                  </button>
-                )
-              })}
+            // Varias a la vez: `pressed` dice cuáles están encendidas. `.map-tools`
+            // va después de `.filter-pills` en la cascada y manda en el hueco.
+            <PillGroup
+              className="map-tools"
+              options={MATES}
+              value={null}
+              pressed={(mate) => look.mates.includes(mate)}
+              onChange={(mate) => {
+                change({
+                  ...look,
+                  mates: look.mates.includes(mate)
+                    ? look.mates.filter((one) => one !== mate)
+                    : [...look.mates, mate],
+                })
+              }}
+              label={t('map.look')}
+              before={<span className="map-tools-label">{t('map.highlight')}</span>}
+              pillClass={(mate) => `mate-pill mate-${mate}`}
+              disabled={(mate) => mate === 'circle' && map.me.circle === null}
+              text={(mate) => (
+                <>
+                  <i className={`mate-dot mate-${mate}`} aria-hidden="true" />
+                  {t(`map.mate.${mate}`)}
+                  <span className="pill-count">{mateCounts.get(mate) ?? 0}</span>
+                </>
+              )}
+            >
               <span className="map-tools-sep" aria-hidden="true" />
               <button
                 type="button"
@@ -633,7 +634,7 @@ export function ClusterMapView({
               >
                 {t('map.circles')}
               </button>
-            </div>
+            </PillGroup>
           )}
 
           {/* Solo si el clúster no cabe a tamaño real: ajustarlo o verlo al 100 %. Va
@@ -714,21 +715,17 @@ export function ClusterMapView({
       {tools && (
         <details className="map-placement">
           <summary>{t('map.placement')}</summary>
-          <div className="map-tools" role="group" aria-label={t('map.placement')}>
-            {ORIENTATION.map((option) => (
-              <button
-                key={option}
-                type="button"
-                className={`pill ${look[option] ? 'active' : ''}`}
-                aria-pressed={look[option]}
-                onClick={() => {
-                  change({ ...look, [option]: !look[option] })
-                }}
-              >
-                {t(`map.${option}`)}
-              </button>
-            ))}
-          </div>
+          <PillGroup
+            className="map-tools"
+            options={ORIENTATION}
+            value={null}
+            pressed={(option) => look[option]}
+            onChange={(option) => {
+              change({ ...look, [option]: !look[option] })
+            }}
+            label={t('map.placement')}
+            text={(option) => t(`map.${option}`)}
+          />
         </details>
       )}
 

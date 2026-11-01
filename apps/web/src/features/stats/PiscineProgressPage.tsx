@@ -5,9 +5,10 @@ import type { PiscineProgress } from '@sanatorio/contracts'
 import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
+import { SectionTitle } from '../../shared/ui/SectionTitle'
+import { ChartWithRail } from '../../shared/ui/ChartWithRail'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { Icon } from '../../shared/ui/Icon'
-import { InfoTip } from '../../shared/ui/InfoTip'
 import { PersonInput } from '../../shared/ui/PersonInput'
 import { PoolOnly } from '../../shared/ui/PoolOnly'
 import { PiscineProgressChart } from './PiscineProgressChart'
@@ -69,16 +70,14 @@ export function PiscineProgressPage({ me }: { me: string }) {
   return (
     <section className="progress-page" aria-labelledby="stats-progress">
       <div className="section-head">
-        <h2 id="stats-progress">
-          {t('stats.progress.title')}
-          <InfoTip title={t('stats.progress.title')}>
-            <p>{t('piscine.chart.info')}</p>
-          </InfoTip>
-        </h2>
+        <SectionTitle id="stats-progress" title={t('stats.progress.title')}>
+          <p>{t('piscine.chart.info')}</p>
+        </SectionTitle>
       </div>
-      <div className="progress-layout">
-        <article className="card progress-card">
-          {data === undefined ? (
+      <ChartWithRail
+        railLabel={t('stats.progress.options')}
+        chart={
+          data === undefined ? (
             <ErrorNote error={fetched.error} onRetry={() => void fetched.reload()} />
           ) : (
             <>
@@ -87,64 +86,63 @@ export function PiscineProgressPage({ me }: { me: string }) {
               </p>
               <PiscineProgressChart data={data} shown={shown} others={others} extra={extra} />
             </>
-          )}
-        </article>
-        <aside className="card progress-rail" aria-label={t('stats.progress.options')}>
+          )
+        }
+      >
+        <div className="progress-option">
+          <span className="eyebrow">{t('piscine.chart.compareWith')}</span>
+          {toggle('cohort')}
+        </div>
+        {top?.options}
+        <PoolOnly k="avance.compare">
           <div className="progress-option">
-            <span className="eyebrow">{t('piscine.chart.compareWith')}</span>
-            {toggle('cohort')}
-          </div>
-          {top?.options}
-          <PoolOnly k="avance.compare">
-            <div className="progress-option">
-              <form
-                className="progress-compare-row"
-                onSubmit={(event) => {
-                  event.preventDefault()
-                  add(typed)
-                }}
-              >
-                <PersonInput
-                  value={typed}
-                  label={t('stats.progress.compare')}
-                  placeholder={t('stats.progress.comparePlaceholder')}
-                  exclude={[...others, me]}
-                  onChange={setTyped}
-                  onPick={add}
-                />
-                <button type="submit" className="pill" disabled={full || typed.trim() === ''}>
-                  {t('stats.progress.compareAdd')}
-                </button>
-              </form>
-              <ul className="progress-chips">
-                {others.map((login, index) => (
-                  <li key={login} className="progress-chip">
-                    <i
-                      className="progress-chip-dot"
-                      style={{ background: PERSON_COLORS[index % PERSON_COLORS.length] }}
-                    />
-                    {login}
-                    <button
-                      type="button"
-                      aria-label={t('stats.progress.compareRemove', { login })}
-                      onClick={() => {
-                        setOthers(others.filter((each) => each !== login))
-                      }}
-                    >
-                      <Icon name="cerrar" size={12} />
-                    </button>
-                  </li>
-                ))}
-              </ul>
-              {missing.map((login) => (
-                <p key={login} className="hint">
-                  {t('piscine.chart.noOther', { login })}
-                </p>
+            <form
+              className="progress-compare-row"
+              onSubmit={(event) => {
+                event.preventDefault()
+                add(typed)
+              }}
+            >
+              <PersonInput
+                value={typed}
+                label={t('stats.progress.compare')}
+                placeholder={t('stats.progress.comparePlaceholder')}
+                exclude={[...others, me]}
+                onChange={setTyped}
+                onPick={add}
+              />
+              <button type="submit" className="pill" disabled={full || typed.trim() === ''}>
+                {t('stats.progress.compareAdd')}
+              </button>
+            </form>
+            <ul className="progress-chips">
+              {others.map((login, index) => (
+                <li key={login} className="progress-chip">
+                  <i
+                    className="progress-chip-dot"
+                    style={{ background: PERSON_COLORS[index % PERSON_COLORS.length] }}
+                  />
+                  {login}
+                  <button
+                    type="button"
+                    aria-label={t('stats.progress.compareRemove', { login })}
+                    onClick={() => {
+                      setOthers(others.filter((each) => each !== login))
+                    }}
+                  >
+                    <Icon name="cerrar" size={12} />
+                  </button>
+                </li>
               ))}
-            </div>
-          </PoolOnly>
-        </aside>
-      </div>
+            </ul>
+            {missing.map((login) => (
+              <p key={login} className="hint">
+                {t('piscine.chart.noOther', { login })}
+              </p>
+            ))}
+          </div>
+        </PoolOnly>
+      </ChartWithRail>
       {top !== null && data !== undefined && (
         <PiscineTop ranked={top.ranked} total={data.steps.length} />
       )}

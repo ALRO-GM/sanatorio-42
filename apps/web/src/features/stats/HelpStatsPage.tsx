@@ -8,7 +8,7 @@ import { useI18n } from '../../shared/i18n'
 import { useFormat } from '../../shared/i18n/useFormat'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { PillGroup } from '../../shared/ui/PillGroup'
-import { InfoTip } from '../../shared/ui/InfoTip'
+import { SectionTitle } from '../../shared/ui/SectionTitle'
 import { RankingList, withMe } from '../../shared/ui/RankingList'
 import { HelpStatsTour } from './HelpStatsTour'
 
@@ -37,12 +37,9 @@ export function HelpStatsPage({ me }: { me: string }) {
   return (
     <section className="help-stats">
       <div className="section-head">
-        <h2>
-          {t('stats.title')}
-          <InfoTip title={t('stats.title')}>
-            <HelpStatsTour />
-          </InfoTip>
-        </h2>
+        <SectionTitle title={t('stats.title')}>
+          <HelpStatsTour />
+        </SectionTitle>
         <PillGroup
           options={PERIODS}
           value={period}

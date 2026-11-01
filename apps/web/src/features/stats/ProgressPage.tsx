@@ -13,10 +13,11 @@ import { api } from '../../shared/api'
 import { useDetail } from '../../shared/detail'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
+import { SectionTitle } from '../../shared/ui/SectionTitle'
+import { ChartWithRail } from '../../shared/ui/ChartWithRail'
 import { CampusPicker } from '../../shared/ui/CampusPicker'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { PillGroup } from '../../shared/ui/PillGroup'
-import { InfoTip } from '../../shared/ui/InfoTip'
 import { PeriodPicker } from '../../shared/ui/PeriodPicker'
 import { PoolOnly } from '../../shared/ui/PoolOnly'
 import { useFormat } from '../../shared/i18n/useFormat'
@@ -226,18 +227,16 @@ export function ProgressPage({ me }: { me: string }) {
   return (
     <section className="progress-page" aria-labelledby="stats-progress">
       <div className="section-head">
-        <h2 id="stats-progress">
-          {t('stats.progress.title')}
-          <InfoTip title={t('stats.progress.title')}>
-            <p>{t('stats.progress.info')}</p>
-            <ProgressTour />
-          </InfoTip>
-        </h2>
+        <SectionTitle id="stats-progress" title={t('stats.progress.title')}>
+          <p>{t('stats.progress.info')}</p>
+          <ProgressTour />
+        </SectionTitle>
       </div>
       {answer !== null && <Answer answer={answer} />}
-      <div className="progress-layout">
-        <article className="card progress-card">
-          {data === undefined ? (
+      <ChartWithRail
+        railLabel={t('stats.progress.options')}
+        chart={
+          data === undefined ? (
             <ErrorNote error={fetched.error} onRetry={() => void fetched.reload()} />
           ) : (
             <ProgressChart
@@ -249,145 +248,144 @@ export function ProgressPage({ me }: { me: string }) {
               mine={mine}
               shape={shape}
             />
-          )}
-        </article>
-        <aside className="card progress-rail" aria-label={t('stats.progress.options')}>
-          <Option label={t('stats.progress.measure')}>
-            {/* `progress-measure`: para la demostración (`spots` de `ProgressTour`). */}
-            <PillGroup
-              className="progress-measure"
-              options={MEASURES}
-              value={measure}
-              onChange={setMeasure}
-              label={t('stats.progress.measure')}
-              text={(value) => t(`stats.progress.measure.${value}`)}
-            />
-            <p className="hint progress-measure-hint">
-              {t(`stats.progress.measure.${measure}.hint`, { n: number(data?.axis.hours ?? 0) })}
-            </p>
-          </Option>
-          <Option label={t('stats.progress.shape')}>
-            <PillGroup
-              options={SHAPES}
-              value={shape}
-              onChange={(next) => {
-                setShape(next)
-                store(SHAPE_KEY, next)
-              }}
-              label={t('stats.progress.shape')}
-              text={(value) => t(`stats.progress.shape.${value}`)}
-            />
-          </Option>
-          <Option label={t('stats.progress.plan')}>
-            <Toggles
-              label={t('stats.progress.plan')}
-              options={TRACKS}
-              on={tracks}
-              set={setTracks}
-              text={(value) => t(`stats.progress.plan.${value}`)}
-            />
-          </Option>
-          <div className="progress-option progress-option-row">
-            {/* El eje es el tiempo desde el inicio de cada cual: los primeros N
+          )
+        }
+      >
+        <Option label={t('stats.progress.measure')}>
+          {/* `progress-measure`: para la demostración (`spots` de `ProgressTour`). */}
+          <PillGroup
+            className="progress-measure"
+            options={MEASURES}
+            value={measure}
+            onChange={setMeasure}
+            label={t('stats.progress.measure')}
+            text={(value) => t(`stats.progress.measure.${value}`)}
+          />
+          <p className="hint progress-measure-hint">
+            {t(`stats.progress.measure.${measure}.hint`, { n: number(data?.axis.hours ?? 0) })}
+          </p>
+        </Option>
+        <Option label={t('stats.progress.shape')}>
+          <PillGroup
+            options={SHAPES}
+            value={shape}
+            onChange={(next) => {
+              setShape(next)
+              store(SHAPE_KEY, next)
+            }}
+            label={t('stats.progress.shape')}
+            text={(value) => t(`stats.progress.shape.${value}`)}
+          />
+        </Option>
+        <Option label={t('stats.progress.plan')}>
+          <Toggles
+            label={t('stats.progress.plan')}
+            options={TRACKS}
+            on={tracks}
+            set={setTracks}
+            text={(value) => t(`stats.progress.plan.${value}`)}
+          />
+        </Option>
+        <div className="progress-option progress-option-row">
+          {/* El eje es el tiempo desde el inicio de cada cual: los primeros N
                 meses o, a mano, del mes X al Y. */}
-            <PeriodPicker
-              value={range}
-              onChange={(next) => {
-                setRange(next)
-                store(RANGE_KEY, next)
+          <PeriodPicker
+            value={range}
+            onChange={(next) => {
+              setRange(next)
+              store(RANGE_KEY, next)
+            }}
+            unit="months"
+            maxMonths={maxMonths}
+            from={months.from}
+            to={months.to}
+            onDates={(from, to) => {
+              setMonths({ from, to })
+              store(MONTHS_KEY, `${from},${to}`)
+            }}
+            text={(period) =>
+              period === 'all'
+                ? t('period.all')
+                : period === 'custom'
+                  ? t('period.customMonths')
+                  : tn('stats.progress.first', Number(period))
+            }
+          />
+          <label className="progress-toggle">
+            <input
+              type="checkbox"
+              checked={paces}
+              onChange={(event) => {
+                setPaces(event.target.checked)
               }}
-              unit="months"
-              maxMonths={maxMonths}
-              from={months.from}
-              to={months.to}
-              onDates={(from, to) => {
-                setMonths({ from, to })
-                store(MONTHS_KEY, `${from},${to}`)
+            />{' '}
+            {t('stats.progress.paces')}
+          </label>
+          <label className="progress-toggle">
+            <input
+              type="checkbox"
+              checked={quartiles}
+              onChange={(event) => {
+                setQuartiles(event.target.checked)
               }}
-              text={(period) =>
-                period === 'all'
-                  ? t('period.all')
-                  : period === 'custom'
-                    ? t('period.customMonths')
-                    : tn('stats.progress.first', Number(period))
-              }
+            />{' '}
+            {t('stats.progress.quartiles')}
+          </label>
+        </div>
+        <details className="progress-deep" open={deep}>
+          <summary>
+            {t('stats.progress.deep')}
+            <small>{t('stats.progress.deep.hint')}</small>
+          </summary>
+          <Option label={t('stats.progress.population')}>
+            <Toggles
+              label={t('stats.progress.population')}
+              options={POPULATIONS}
+              on={populations}
+              set={setPopulations}
+              text={(value) => t(`stats.progress.population.${value}`)}
             />
-            <label className="progress-toggle">
-              <input
-                type="checkbox"
-                checked={paces}
-                onChange={(event) => {
-                  setPaces(event.target.checked)
+          </Option>
+          <Option label={t('stats.progress.scope')}>
+            {data !== undefined && (
+              // Cada campus en su línea: uno, varios o todos («Todas»). Pedir
+              // campus cuesta una petición: se espera a que acabes de marcar.
+              <CampusPicker
+                available={data.available}
+                current={campuses}
+                label={t('stats.progress.scope')}
+                allowEmpty
+                onApply={(next) => {
+                  setChosen(next === 'all' ? data.available.map((campus) => campus.id) : next)
                 }}
-              />{' '}
-              {t('stats.progress.paces')}
-            </label>
-            <label className="progress-toggle">
-              <input
-                type="checkbox"
-                checked={quartiles}
-                onChange={(event) => {
-                  setQuartiles(event.target.checked)
-                }}
-              />{' '}
-              {t('stats.progress.quartiles')}
-            </label>
-          </div>
-          <details className="progress-deep" open={deep}>
-            <summary>
-              {t('stats.progress.deep')}
-              <small>{t('stats.progress.deep.hint')}</small>
-            </summary>
-            <Option label={t('stats.progress.population')}>
-              <Toggles
-                label={t('stats.progress.population')}
-                options={POPULATIONS}
-                on={populations}
-                set={setPopulations}
-                text={(value) => t(`stats.progress.population.${value}`)}
               />
-            </Option>
-            <Option label={t('stats.progress.scope')}>
-              {data !== undefined && (
-                // Cada campus en su línea: uno, varios o todos («Todas»). Pedir
-                // campus cuesta una petición: se espera a que acabes de marcar.
-                <CampusPicker
-                  available={data.available}
-                  current={campuses}
-                  label={t('stats.progress.scope')}
-                  allowEmpty
-                  onApply={(next) => {
-                    setChosen(next === 'all' ? data.available.map((campus) => campus.id) : next)
-                  }}
-                />
-              )}
-              <label className="progress-toggle">
-                <input
-                  type="checkbox"
-                  checked={together}
-                  onChange={(event) => {
-                    setTogether(event.target.checked)
-                  }}
-                />{' '}
-                {t('stats.progress.together')}
-              </label>
-            </Option>
-            <PoolOnly k="avance.compare">
-              <div className="progress-option">
-                <ProgressCompare
-                  others={others}
-                  onChange={setOthers}
-                  missing={missing}
-                  tracks={tracks}
-                  scopes={scopes}
-                  me={me}
-                  campus={data?.available.find((campus) => campus.id === home)?.name ?? null}
-                />
-              </div>
-            </PoolOnly>
-          </details>
-        </aside>
-      </div>
+            )}
+            <label className="progress-toggle">
+              <input
+                type="checkbox"
+                checked={together}
+                onChange={(event) => {
+                  setTogether(event.target.checked)
+                }}
+              />{' '}
+              {t('stats.progress.together')}
+            </label>
+          </Option>
+          <PoolOnly k="avance.compare">
+            <div className="progress-option">
+              <ProgressCompare
+                others={others}
+                onChange={setOthers}
+                missing={missing}
+                tracks={tracks}
+                scopes={scopes}
+                me={me}
+                campus={data?.available.find((campus) => campus.id === home)?.name ?? null}
+              />
+            </div>
+          </PoolOnly>
+        </details>
+      </ChartWithRail>
       <ProgressRanking />
     </section>
   )

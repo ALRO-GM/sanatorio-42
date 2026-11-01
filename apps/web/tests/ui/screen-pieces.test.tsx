@@ -55,6 +55,21 @@ describe('SectionTitle: el título de una sección con su InfoTip', () => {
     expect(screen.getByRole('button', { name: 'Cómo funciona: Peer to peer' })).toBeTruthy()
   })
 
+  it('con `id`, la sección puede nombrarse con su título', () => {
+    render(
+      <I18nProvider>
+        <section aria-labelledby="stats-progress">
+          <SectionTitle id="stats-progress" title="Avance">
+            <p>demo</p>
+          </SectionTitle>
+        </section>
+      </I18nProvider>,
+    )
+
+    expect(screen.getByRole('heading', { level: 2 }).id).toBe('stats-progress')
+    expect(screen.getByRole('region', { name: /Avance/ })).toBeTruthy()
+  })
+
   it('un título vacío o muy largo no rompe el encabezado', () => {
     const long = 'Sección '.repeat(200).trim()
 

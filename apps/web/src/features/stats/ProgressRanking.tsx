@@ -6,8 +6,8 @@ import type { RankingBy, RankingEntry, StatsRanking } from '@sanatorio/contracts
 import { api } from '../../shared/api'
 import type { RankingQuery } from '../../shared/api/types'
 import { useI18n } from '../../shared/i18n'
+import { Async } from '../../shared/ui/Async'
 import { useFormat } from '../../shared/i18n/useFormat'
-import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { PillGroup } from '../../shared/ui/PillGroup'
 import { RangeSlider } from '../../shared/ui/RangeSlider'
 import { RankingList, withMe } from '../../shared/ui/RankingList'
@@ -203,57 +203,57 @@ export function ProgressRanking() {
         </div>
       </div>
 
-      {data === null ? (
-        error === null ? (
-          <p className="estado">{t('app.loading')}</p>
-        ) : (
-          <ErrorNote error={error} onRetry={() => void load(0)} />
-        )
-      ) : (
-        <>
-          <p className="hint" role="status">
-            {tn('stats.ranking.total', data.total)}
-            {mine === null && data.total > 0 && ` · ${t('stats.ranking.notIn')}`}
-          </p>
-          {rows.length === 0 ? (
-            <p className="estado">{t('stats.ranking.empty')}</p>
-          ) : (
-            <div className="progress-ranking-scroll" onScroll={onScroll} tabIndex={0}>
-              <RankingList
-                rows={withMe(rows, mine)}
-                me={mine?.login ?? ''}
-                label={t('stats.ranking.title')}
-                // Tu fila, fija abajo mientras no llegas a ella y arriba al pasarla.
-                rowClass={(row) => (row.login === mine?.login ? 'pinned' : '')}
-                value={(entry) => (
-                  <span className="row-count">
-                    <strong>
-                      {filters.by === 'circle'
-                        ? circleText(entry.circle)
-                        : t(pctLabel, { n: number(entry[filters.by]) })}
-                    </strong>
-                    <small>
-                      {filters.by === 'circle'
-                        ? t('stats.ranking.pctCircles', { n: number(entry.circles) })
-                        : circleText(entry.circle)}
-                    </small>
-                  </span>
-                )}
-              />
-            </div>
-          )}
-          {more && (
-            <button
-              type="button"
-              className="pill"
-              disabled={busy}
-              onClick={() => void load(rows.length)}
-            >
-              {t('stats.ranking.more')}
-            </button>
-          )}
-        </>
-      )}
+      {/* Va por páginas con su propio estado, no con `useAsync`: se le da su
+          forma. Sin la primera página y sin error, se está cargando. */}
+      <Async
+        state={{ data: data ?? undefined, error, loading: error === null, reload: () => load(0) }}
+      >
+        {(data) => (
+          <>
+            <p className="hint" role="status">
+              {tn('stats.ranking.total', data.total)}
+              {mine === null && data.total > 0 && ` · ${t('stats.ranking.notIn')}`}
+            </p>
+            {rows.length === 0 ? (
+              <p className="estado">{t('stats.ranking.empty')}</p>
+            ) : (
+              <div className="progress-ranking-scroll" onScroll={onScroll} tabIndex={0}>
+                <RankingList
+                  rows={withMe(rows, mine)}
+                  me={mine?.login ?? ''}
+                  label={t('stats.ranking.title')}
+                  // Tu fila, fija abajo mientras no llegas a ella y arriba al pasarla.
+                  rowClass={(row) => (row.login === mine?.login ? 'pinned' : '')}
+                  value={(entry) => (
+                    <span className="row-count">
+                      <strong>
+                        {filters.by === 'circle'
+                          ? circleText(entry.circle)
+                          : t(pctLabel, { n: number(entry[filters.by]) })}
+                      </strong>
+                      <small>
+                        {filters.by === 'circle'
+                          ? t('stats.ranking.pctCircles', { n: number(entry.circles) })
+                          : circleText(entry.circle)}
+                      </small>
+                    </span>
+                  )}
+                />
+              </div>
+            )}
+            {more && (
+              <button
+                type="button"
+                className="pill"
+                disabled={busy}
+                onClick={() => void load(rows.length)}
+              >
+                {t('stats.ranking.more')}
+              </button>
+            )}
+          </>
+        )}
+      </Async>
     </article>
   )
 }
