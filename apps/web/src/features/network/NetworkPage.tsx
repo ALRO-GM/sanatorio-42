@@ -98,7 +98,7 @@ function loginInUrl(): string | null {
 }
 
 /** Los filtros de partida: la red de `login` en ese periodo, sin más filtros. */
-function startFilters(login: string, period: Filters['period']): Filters {
+function startFilters(login: string | null, period: Filters['period']): Filters {
   return {
     period,
     from: '',
@@ -160,18 +160,38 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
 
   // Si unos filtros no dejan a nadie, se vuelve a la vista de partida, tu red
   // (pedido por Alberto, 2026-11-01): con el grafo vacío no quedaba nada a
-  // mano. Si la de partida también sale vacía, se queda así: no hay a dónde
-  // volver.
+  // mano. Si tu red también sale vacía (quien aún no ha corregido, o quien
+  // mira como piscinero desde el panel y no está en esa red), la de partida
+  // pasa a ser la del campus en el último año y, si tampoco, la de siempre.
+  const homes = useMemo(
+    () => [startFilters(me.login, '12'), startFilters(null, '12'), startFilters(null, 'all')],
+    [me.login],
+  )
+  const [homeStep, setHomeStep] = useState(0)
+  const home = homes[homeStep] ?? startFilters(me.login, '12')
+  // `true` cuando la de partida ya no es tu red, sino la del campus.
+  const generic = homeStep > 0
   const backToStart = useCallback(() => {
-    setFilters(startFilters(me.login, '12'))
-    setSelected(me.login)
+    setFilters(home)
+    setSelected(home.login)
     setPersonMin((current) => ({ ...current, n: 0 }))
     setWasEmpty(true)
-  }, [me.login])
+  }, [home])
   const atStart = useMemo(
-    () => JSON.stringify(params) === JSON.stringify(paramsOf(startFilters(me.login, '12'))),
-    [params, me.login],
+    () => JSON.stringify(params) === JSON.stringify(paramsOf(home)),
+    [params, home],
   )
+  const nextHome = useCallback(() => {
+    const next = homes[homeStep + 1]
+
+    if (next === undefined) return false
+    setHomeStep(homeStep + 1)
+    setFilters(next)
+    setSelected(next.login)
+    setPersonMin((current) => ({ ...current, n: 0 }))
+
+    return true
+  }, [homes, homeStep])
 
   // La persona elegida va en la URL (`#/red/<login>`): el enlace se puede compartir.
   useEffect(() => {
@@ -192,9 +212,12 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
         .then((result) => {
           if (!current) return
           // Se sigue viendo el grafo de antes mientras llega el de partida.
-          if (result.nodes.length === 0 && !atStart) {
-            backToStart()
-            return
+          if (result.nodes.length === 0) {
+            if (!atStart) {
+              backToStart()
+              return
+            }
+            if (nextHome()) return
           }
           setGraph(result)
           setError(null)
@@ -211,8 +234,9 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
       current = false
       clearTimeout(timer)
     }
-    // `atStart` cambia con `params`, y `backToStart`, solo con quien mira: no piden de más.
-  }, [params, reloads, atStart, backToStart])
+    // `atStart` cambia con `params`, y `backToStart` y `nextHome`, solo con la
+    // vista de partida: no piden de más.
+  }, [params, reloads, atStart, backToStart, nextHome])
 
   // Las opciones de los filtros (campus, meses, proyectos) salen del último
   // grafo con gente: si unos filtros no dejan a nadie, siguen ahí para
@@ -896,9 +920,9 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
           </div>
         )}
 
-        {wasEmpty && (
+        {(wasEmpty || generic) && (
           <p className="hint" role="status">
-            {t('net.resetEmpty')}
+            {t(generic ? 'net.resetGeneric' : 'net.resetEmpty')}
           </p>
         )}
 

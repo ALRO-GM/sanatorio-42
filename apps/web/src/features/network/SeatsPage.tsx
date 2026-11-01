@@ -98,6 +98,18 @@ export function SeatsPage({ me }: { me?: string }) {
     setQuery(me ?? '')
     setWasEmpty(true)
   }
+  // Quien no sale en el grafo (quien mira como piscinero desde el panel, o no
+  // se ha sentado en el periodo) no queda elegido: se ve el campus entero.
+  if (
+    data !== undefined &&
+    data.people.length > 0 &&
+    selected !== null &&
+    selected === me &&
+    !byLogin.has(selected)
+  ) {
+    setSelected(null)
+    setQuery('')
+  }
   // Quien sale en el grafo: por su login aquí mismo y por su nombre en el
   // buscador de personas (solo los que están en el grafo).
   const searchSeated = useCallback(

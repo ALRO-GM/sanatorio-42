@@ -1,7 +1,7 @@
 /**
  * Red: unos filtros que no dejan a nadie no dejan la página vacía. Se vuelve
  * sola a la vista de partida (tu red) y lo dice. En las dos redes: la de
- * correcciones y la de asientos.
+ * correcciones y la de asientos. Y si tu red sale vacía, se ve la del campus.
  */
 import { cleanup, fireEvent, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
@@ -63,6 +63,29 @@ describe('Red sin resultados', () => {
     expect(
       screen.getByRole<HTMLInputElement>('checkbox', { name: text('net.mutualOnly') }).checked,
     ).toBe(false)
+  }, 20_000)
+
+  it('correcciones: si tu red sale vacía, se ve la del campus', async () => {
+    const getNetwork = api.getNetwork.bind(api)
+    const asked: (string | undefined)[] = []
+
+    // Quien mira no sale en la red (como quien la ve como piscinero desde el
+    // panel): con su login elegido, nadie.
+    vi.spyOn(api, 'getNetwork').mockImplementation(async (params) => {
+      asked.push(params.login)
+      const graph = await getNetwork(params)
+
+      return params.login === undefined
+        ? graph
+        : { ...graph, nodes: [], links: [], topPairs: [], timeline: [] }
+    })
+    // Sin quitar a la persona elegida: de entrada, tu red.
+    await openApp('#/red', { detail: 'datos' })
+    expect(await screen.findByText(text('net.resetGeneric'), {}, { timeout: 5000 })).toBeTruthy()
+    await settle(900)
+    expect(asked.at(-1)).toBeUndefined()
+    expect(screen.queryByText(text('net.empty'))).toBeNull()
+    expect(document.querySelector('canvas.force-graph')).not.toBeNull()
   }, 20_000)
 
   it('asientos: un periodo sin nadie vuelve a todo el periodo', async () => {
