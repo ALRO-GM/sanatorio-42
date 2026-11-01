@@ -118,7 +118,7 @@ function LiveSection({ world }: { world?: ExamWorld | undefined }) {
         <LiveCard live={live.data} refreshing={refreshing} onRefresh={() => void refresh()} />
       )}
       {live.data?.last && <LastExamCard last={live.data.last} />}
-      <ErrorNote error={live.error} onRetry={() => void live.reload()} />
+      <ErrorNote error={live.error} retry />
     </>
   )
 }

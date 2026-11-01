@@ -31,7 +31,7 @@ export function ProjectMap({
       <h3>{t('map.title')}</h3>
       {loading && <p>{t('map.loading')}</p>}
       {data === undefined ? (
-        <ErrorNote error={error} onRetry={() => void reload()} />
+        <ErrorNote error={error} retry />
       ) : (
         <>
           <ClusterMapView

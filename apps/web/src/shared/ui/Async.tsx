@@ -27,13 +27,13 @@ type AsyncProps<T> = {
  */
 export function Async<T>({ state, children, empty, emptyText, loadingText }: AsyncProps<T>) {
   const { t } = useI18n()
-  const { data, error, loading, reload } = state
+  const { data, error, loading } = state
 
   if (data === undefined) {
     return loading ? (
       <p className="estado">{loadingText ?? t('app.loading')}</p>
     ) : (
-      <ErrorNote error={error} onRetry={() => void reload()} />
+      <ErrorNote error={error} retry />
     )
   }
 

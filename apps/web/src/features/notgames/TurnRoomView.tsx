@@ -47,7 +47,7 @@ export function TurnRoomView({ id, me }: { id: number; me: string }) {
   const sounds = useGameSounds()
   // Repasando la partida acabada: qué posición se ve (`null`, la de ahora).
   const [step, setStep] = useState<number | null>(null)
-  const { room, error, load, take, offset } = useLiveRoom(() => api.getTurnRoom(id), [id], {
+  const { room, error, take, offset } = useLiveRoom(() => api.getTurnRoom(id), [id], {
     playingMs: PLAYING_MS,
     waitingMs: WAITING_MS,
     onChange: (previous, next) => {
@@ -59,7 +59,7 @@ export function TurnRoomView({ id, me }: { id: number; me: string }) {
     return error === null ? (
       <p className="estado">{t('app.loading')}</p>
     ) : (
-      <ErrorNote error={error} onRetry={() => void load()} />
+      <ErrorNote error={error} retry />
     )
   }
 

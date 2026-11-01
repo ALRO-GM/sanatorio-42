@@ -139,9 +139,7 @@ export function Mailbox({ me, chat, onChat, onClose, onOpen, onChange }: Mailbox
       ) : (
         <>
           {loading && <p className="hint">{t('app.loading')}</p>}
-          {data === undefined && !loading && (
-            <ErrorNote error={error} onRetry={() => void reload()} />
-          )}
+          {data === undefined && !loading && <ErrorNote error={error} retry />}
           {all.some((notice) => notice.saved) && (
             <PillGroup
               options={['all', 'saved'] as const}

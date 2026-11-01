@@ -58,7 +58,7 @@ export function StaffPage() {
       ) : denied ? (
         <KeyForm onEnter={() => void me.reload()} />
       ) : (
-        <ErrorNote error={me.error} onRetry={() => void me.reload()} />
+        <ErrorNote error={me.error} retry />
       )}
 
       <footer className="footer">

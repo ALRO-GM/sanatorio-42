@@ -46,7 +46,7 @@ export function SeatHeatCard() {
           />
         </div>
       </div>
-      <ErrorNote error={heat.error} onRetry={() => void heat.reload()} />
+      <ErrorNote error={heat.error} retry />
       {heat.data !== undefined && <SeatHeatMap heat={heat.data} />}
     </article>
   )

@@ -23,7 +23,7 @@ const PERIODS = ['month', 'all'] as const satisfies readonly LeaderboardPeriod[]
 export function HelpStatsPage({ me }: { me: string }) {
   const { t } = useI18n()
   const [period, setPeriod] = useState<LeaderboardPeriod>('month')
-  const { data, error, loading, reload } = useAsync(() => api.getHelpStats(period), [period])
+  const { data, error, loading } = useAsync(() => api.getHelpStats(period), [period])
   // Primera capa (2026-10-29): tu mejor puesto entre todas las clasificaciones.
   const best =
     data?.sections.reduce<{ rank: number; section: string } | null>(
@@ -58,7 +58,7 @@ export function HelpStatsPage({ me }: { me: string }) {
         </p>
       )}
       {loading && data === undefined && <p className="estado">{t('app.loading')}</p>}
-      {data === undefined && <ErrorNote error={error} onRetry={() => void reload()} />}
+      {data === undefined && <ErrorNote error={error} retry />}
 
       <div className="help-stats-grid">
         {data?.sections.map((section) => (

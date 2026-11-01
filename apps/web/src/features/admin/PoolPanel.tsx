@@ -18,7 +18,7 @@ import { GROUPS, sectionsOf } from './pool-tree'
  */
 export function PoolPanel() {
   const { t } = useI18n()
-  const { data, error, reload } = useAsync(() => api.getPoolSettings(), [])
+  const { data, error } = useAsync(() => api.getPoolSettings(), [])
   const [draft, setDraft] = useState<PoolSettings | null>(null)
   const [saved, setSaved] = useState(false)
   const save = useAction()
@@ -58,7 +58,7 @@ export function PoolPanel() {
     <article className="card pool-panel">
       <span className="eyebrow">{t('admin.pool.title')}</span>
       <p className="hint">{t('admin.pool.who')}</p>
-      <ErrorNote error={error} onRetry={() => void reload()} />
+      <ErrorNote error={error} retry />
       {draft !== null && (
         <form
           className="form"

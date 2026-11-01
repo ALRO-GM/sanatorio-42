@@ -150,7 +150,7 @@ function Rooms() {
           {rooms.loading && rooms.data === undefined && (
             <p className="estado">{t('app.loading')}</p>
           )}
-          <ErrorNote error={rooms.error} onRetry={() => void rooms.reload()} />
+          <ErrorNote error={rooms.error} retry />
           {rooms.data?.length === 0 && <p className="estado">{t('notgames.noRooms')}</p>}
           <ul className="quiz-rooms">
             {rooms.data?.map((entry) =>

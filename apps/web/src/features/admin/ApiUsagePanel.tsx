@@ -67,7 +67,7 @@ export function ApiUsagePanel() {
       <span className="eyebrow">{t('admin.api.title')}</span>
       <p className="hint">{t('admin.api.hint')}</p>
       {loading && data === undefined && <p className="estado">{t('app.loading')}</p>}
-      <ErrorNote error={error ?? action.error} onRetry={() => void reload()} />
+      <ErrorNote error={error ?? action.error} retry />
       {data !== undefined && (
         <>
           <ChartWithRail

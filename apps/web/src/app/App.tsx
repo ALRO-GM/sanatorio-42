@@ -8,6 +8,7 @@ import { StaffPage } from '../features/staff/StaffPage'
 import { api } from '../shared/api'
 import { useI18n } from '../shared/i18n'
 import { loadMaintenance, shutOut, useMaintenance } from '../shared/maintenance'
+import { reloadPage } from '../shared/reload'
 import { Logo } from '../shared/ui/Logo'
 import { Clinic } from './Clinic'
 import { DemoBadge } from './DemoBadge'
@@ -82,7 +83,7 @@ function useStaffRoute(): boolean {
 
 function StudentApp() {
   const { t } = useI18n()
-  const { me, loading, error, retry, login, logout } = useAuth()
+  const { me, loading, error, login, logout } = useAuth()
   const [oauthError] = useState(readOAuthError)
   // Con la piscina cerrada, el aviso lo escribe quien administra (`docs/piscineros.md`).
   const [poolNotice, setPoolNotice] = useState('')
@@ -125,7 +126,7 @@ function StudentApp() {
         <p className="estado error" role="alert">
           {t('app.serverDown')}
         </p>
-        <button className="primary" onClick={() => void retry()}>
+        <button type="button" className="primary" onClick={reloadPage}>
           {t('app.retry')}
         </button>
       </main>

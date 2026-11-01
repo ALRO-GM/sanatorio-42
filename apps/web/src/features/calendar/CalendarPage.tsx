@@ -276,7 +276,7 @@ export function CalendarPage({ focus = null, onGo, me }: CalendarPageProps) {
           </div>
 
           {loading && <p>{t('agenda.loading')}</p>}
-          {data === undefined && <ErrorNote error={error} onRetry={() => void reload()} />}
+          {data === undefined && <ErrorNote error={error} retry />}
 
           {data !== undefined && view === 'month' && (
             <div className="month-grid">

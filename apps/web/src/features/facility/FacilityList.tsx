@@ -25,7 +25,7 @@ export function FacilityList({ load, resolve, showCampus = false }: FacilityList
 
   return (
     <div className="facility-list">
-      <ErrorNote error={reports.error} onRetry={() => void reports.reload()} />
+      <ErrorNote error={reports.error} retry />
       {reports.data?.length === 0 && <p className="estado">{t('facility.none')}</p>}
       <ul className="stack">
         {reports.data?.map((report) => (

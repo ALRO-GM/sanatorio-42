@@ -78,7 +78,7 @@ export function PiscineProgressPage({ me }: { me: string }) {
         railLabel={t('stats.progress.options')}
         chart={
           data === undefined ? (
-            <ErrorNote error={fetched.error} onRetry={() => void fetched.reload()} />
+            <ErrorNote error={fetched.error} retry />
           ) : (
             <>
               <p className="piscine-summary">

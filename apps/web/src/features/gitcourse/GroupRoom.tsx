@@ -136,7 +136,7 @@ function GroupRoom({
   const { t, lang } = useI18n()
   const [entries, setEntries] = useState<TerminalEntry[]>([])
   const action = useAction()
-  const { room, error, load, take, offset } = useLiveRoom(() => api.getGitRoom(id), [id], {
+  const { room, error, take, offset } = useLiveRoom(() => api.getGitRoom(id), [id], {
     playingMs: PLAYING_MS,
     waitingMs: WAITING_MS,
   })
@@ -150,7 +150,7 @@ function GroupRoom({
     return error === null ? (
       <p className="muted">{t('app.loading')}</p>
     ) : (
-      <ErrorNote error={error} onRetry={() => void load()} />
+      <ErrorNote error={error} retry />
     )
   }
 

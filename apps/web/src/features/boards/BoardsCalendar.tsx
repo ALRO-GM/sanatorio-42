@@ -181,12 +181,7 @@ export function BoardsCalendar() {
             {selectedDay === null ? t('cal.upcoming') : fmt.date(`${selectedDay}T12:00:00`, 'long')}
           </h3>
           {(selectedDay === null ? soon.loading : boards.loading) && <p>{t('cal.loading')}</p>}
-          <ErrorNote
-            error={selectedDay === null ? soon.error : boards.error}
-            onRetry={() => {
-              reload()
-            }}
-          />
+          <ErrorNote error={selectedDay === null ? soon.error : boards.error} retry />
           {(selectedDay === null ? soon.data : boards.data) !== undefined && shown.length === 0 && (
             <p className="estado">
               {selectedDay === null ? t('cal.upcomingEmpty') : t('cal.empty')}

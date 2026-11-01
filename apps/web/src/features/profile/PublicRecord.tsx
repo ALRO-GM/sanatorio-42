@@ -23,7 +23,7 @@ import { directChatId, openChat } from '../notices/conversations'
  */
 export function PublicRecord({ login, me }: { login: string; me: string }) {
   const { t, lang } = useI18n()
-  const { data, error, loading, reload } = useAsync(() => api.getPublicProfile(login), [login])
+  const { data, error, loading } = useAsync(() => api.getPublicProfile(login), [login])
   // Si su dueña eligió con qué estilo se ve su expediente, se ve con ese.
   const style = data?.recordStyle ?? null
 
@@ -36,7 +36,7 @@ export function PublicRecord({ login, me }: { login: string; me: string }) {
         <a className="back-btn" href="#/expediente">
           <Icon name="atras" size={14} /> {t('record.backToMine')}
         </a>
-        <ErrorNote error={error} onRetry={() => void reload()} />
+        <ErrorNote error={error} retry />
       </section>
     )
   }

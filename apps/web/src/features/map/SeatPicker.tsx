@@ -36,7 +36,7 @@ type SeatPickerProps = {
  */
 export function SeatPicker({ value, onToggle, when, onPropose, max }: SeatPickerProps) {
   const { t } = useI18n()
-  const { data, error, loading, reload } = useAsync(() => api.getCampusMap(), [])
+  const { data, error, loading } = useAsync(() => api.getCampusMap(), [])
   // Cuántos puestos se quieren proponer, y si la última vez no había hueco.
   const [wanted, setWanted] = useState(Math.min(4, max))
   const [noRoom, setNoRoom] = useState(false)
@@ -46,7 +46,7 @@ export function SeatPicker({ value, onToggle, when, onPropose, max }: SeatPicker
   }
 
   if (data === undefined) {
-    return <ErrorNote error={error} onRetry={() => void reload()} />
+    return <ErrorNote error={error} retry />
   }
 
   /** `true` si esa reserva coincide en algún día y se pisa en la hora con lo que se elige. */

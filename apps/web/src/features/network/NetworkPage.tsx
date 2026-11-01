@@ -847,12 +847,7 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
             {error === null ? (
               <p className="estado">{t('net.loading')}</p>
             ) : (
-              <ErrorNote
-                error={error}
-                onRetry={() => {
-                  setReloads((count) => count + 1)
-                }}
-              />
+              <ErrorNote error={error} retry />
             )}
           </div>
         )}

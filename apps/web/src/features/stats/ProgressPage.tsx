@@ -237,7 +237,7 @@ export function ProgressPage({ me }: { me: string }) {
         railLabel={t('stats.progress.options')}
         chart={
           data === undefined ? (
-            <ErrorNote error={fetched.error} onRetry={() => void fetched.reload()} />
+            <ErrorNote error={fetched.error} retry />
           ) : (
             <ProgressChart
               data={data}

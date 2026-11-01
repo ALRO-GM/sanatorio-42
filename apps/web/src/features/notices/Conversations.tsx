@@ -203,7 +203,7 @@ export function Conversations({ me, openId, onOpen, onChange }: ConversationsPro
       )}
 
       {loading && fresh === null && <p className="hint">{t('app.loading')}</p>}
-      {data === undefined && !loading && <ErrorNote error={error} onRetry={() => void reload()} />}
+      {data === undefined && !loading && <ErrorNote error={error} retry />}
       {data !== undefined && items.length === 0 && <p className="hint">{t('chats.empty')}</p>}
       {items.length > 0 && shown.length === 0 && <p className="hint">{t('chats.noneShown')}</p>}
       <ErrorNote error={action.error} />
