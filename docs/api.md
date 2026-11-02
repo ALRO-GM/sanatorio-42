@@ -851,8 +851,9 @@ custodia la partida. Las reglas están en `apps/web/src/features/clicker`.
 GET /clicker → por dónde vas y tu partida:
 `{ plus, pill, save, rev, caught, saleDue, names }`.
 
-- `names` son los logins que más corrigen en tu campus, para las noticias del
-  juego. Solo viene con la pastilla roja.
+- `names` son, para las noticias del juego, tus 10 amistades más cercanas (con
+  quien más te has corregido, en los dos sentidos); si no llegan, se completa
+  con quienes más corrigen en tu campus. Solo viene con la pastilla roja.
 - `caught` son las veces que te han pillado haciendo trampas, y `saleDue` dice
   que te toca vender todos los edificios antes de poder guardar.
 

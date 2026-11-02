@@ -14,7 +14,7 @@ import { createNetworkService } from './network.service.js'
 import type { NetworkService } from './network.service.js'
 import { createSeatWeights } from './seat-weights.js'
 import { createSeatingService } from './seating.service.js'
-import { createCorrectionSync, PISCINE_CURSUS } from './network.sync.js'
+import { CORE_CURSUS, createCorrectionSync, PISCINE_CURSUS } from './network.sync.js'
 import type { CorrectionSync } from './network.sync.js'
 import { given } from '../../core/options.js'
 
@@ -45,9 +45,10 @@ export type NetworkModule = AppModule & {
   topCorrectors: (campusId: number, limit: number) => Promise<string[]>
   /**
    * Con quién se ha corregido más alguien, en los dos sentidos (le corrigió o
-   * le corrigieron), los que más primero. Lo usan las noticias del juego secreto.
+   * le corrigieron), los que más primero; en la piscina, con las correcciones
+   * de la piscina. Lo usan las noticias del juego secreto.
    */
-  partnersOf: (campusId: number, login: string, limit: number) => Promise<string[]>
+  partnersOf: (campusId: number, login: string, pool: boolean) => Promise<string[]>
   /** Correcciones hechas por alguien, por proyecto (del 42cursus, o del cursus que se diga). */
   correctedByProject: (login: string, cursus?: number) => Promise<Map<number, number>>
   /** Proyectos corregidos en un campus desde una fecha (ISO). */
@@ -107,8 +108,10 @@ export function createNetworkModule(deps: NetworkModuleDeps): NetworkModule {
     sync,
     poolSync,
     topCorrectors: (campusId, limit) => corrections.topCorrectors(campusId, limit),
-    partnersOf: async (campusId, login, limit) =>
-      (await corrections.partnersOf(campusId, login)).slice(0, limit).map((entry) => entry.login),
+    partnersOf: async (campusId, login, pool) =>
+      (await corrections.partnersOf(campusId, login, pool ? PISCINE_CURSUS : CORE_CURSUS)).map(
+        (entry) => entry.login,
+      ),
     correctedByProject: (login, cursus) => corrections.correctedByProject(login, cursus),
     correctedSince: (campusId, since) => corrections.correctedSince(campusId, since),
     routes: (app, context) => {

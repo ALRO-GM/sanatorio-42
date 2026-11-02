@@ -63,8 +63,8 @@ type Texts = {
    */
   scaleOne: string[]
   /**
-   * Las noticias del rótulo, por época. `{name}` es alguien del campus;
-   * `{n}`, las líneas escritas.
+   * Las noticias del rótulo, por época. `{name}` y `{name2}` son dos de tus
+   * amistades más cercanas; `{n}`, las líneas escritas.
    */
   news: {
     early: string[]

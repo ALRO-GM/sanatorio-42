@@ -33,6 +33,19 @@ describe('code clicker', () => {
     }
   }
 
+  let correctionId = 1
+  /** `corrector` corrige `times` veces a `corrected` en Madrid. */
+  const correct = async (corrector: string, corrected: string, times: number): Promise<void> => {
+    for (let index = 0; index < times; index++) {
+      await db.execute({
+        sql: `INSERT INTO corrections
+                (id, campus_id, corrector, corrected, project_id, begin_at, final_mark, positive)
+              VALUES (?, 22, ?, ?, 1, '2026-09-01T10:00:00.000Z', 100, 1)`,
+        args: [correctionId++, corrector, corrected],
+      })
+    }
+  }
+
   /** Una partida como las que guarda la web, con lo justo para que cuadre. */
   // Una partida recién empezada: lo escrito, a mano (doscientas pulsaciones).
   // La API rehace las cuentas con el motor del juego, así que las partidas de
@@ -53,19 +66,6 @@ describe('code clicker', () => {
 
   it('las noticias hablan de quien más te ha corregido y has corregido, y luego del campus', async () => {
     const { clicker } = services
-    let id = 1
-    /** `corrector` corrige `times` veces a `corrected` en Madrid. */
-    const correct = async (corrector: string, corrected: string, times: number): Promise<void> => {
-      for (let index = 0; index < times; index++) {
-        await db.execute({
-          sql: `INSERT INTO corrections
-                  (id, campus_id, corrector, corrected, project_id, begin_at, final_mark, positive)
-                VALUES (?, 22, ?, ?, 1, '2026-09-01T10:00:00.000Z', 100, 1)`,
-          args: [id++, corrector, corrected],
-        })
-      }
-    }
-
     await correct('leo', 'ana', 3)
     await correct('ana', 'uma', 2)
     await correct('zoe', 'bob', 20)
@@ -84,7 +84,23 @@ describe('code clicker', () => {
     expect(names).toContain('zoe')
     expect(names).not.toContain('ana')
     expect(new Set(names).size).toBe(names.length)
-    expect(names.length).toBeLessThanOrEqual(12)
+    expect(names.length).toBeLessThanOrEqual(10)
+  })
+
+  it('con diez amistades o más, las noticias solo hablan de las diez más cercanas', async () => {
+    const { clicker } = services
+    // Doce amistades: «p01» es la más cercana (doce correcciones) y «p12» la que menos.
+    const friends = Array.from({ length: 12 }, (_, i) => `p${String(i + 1).padStart(2, '0')}`)
+
+    for (const [i, friend] of friends.entries()) await correct(friend, 'ana', 12 - i)
+    // Quien más corrige del campus no es amistad suya: no entra.
+    await correct('zoe', 'bob', 40)
+    await press('ana', 42)
+    await clicker.choose(actor('ana'), { pill: 'red' })
+
+    const { names } = await clicker.state(actor('ana'))
+
+    expect(names).toEqual(friends.slice(0, 10))
   })
 
   it('cuenta las pulsaciones de la cruz, y no deja elegir antes de las 42', async () => {

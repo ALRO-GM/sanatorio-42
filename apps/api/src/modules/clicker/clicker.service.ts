@@ -63,8 +63,8 @@ const MAX_PLUS_PER_SEND = 25
 /** Lo que puede pesar una partida guardada. */
 const MAX_SAVE_BYTES = 80_000
 const BOARD_SIZE = 25
-/** Nombres que se mandan para las noticias del juego. */
-const NAMES = 12
+/** Las amistades que salen en las noticias del juego: las 10 más cercanas, como en la colección. */
+const FRIENDS = 10
 
 const plusSchema = z.object({ count: z.number().int().min(1).max(MAX_PLUS_PER_SEND) })
 const pillSchema = z.object({ pill: z.enum(['red', 'blue']) })
@@ -141,8 +141,11 @@ export type ClickerServiceOptions = {
   audience?: Audience
   /** Quién corrige más en un campus, para las noticias del juego. */
   topCorrectors?: (campusId: number, limit: number) => Promise<string[]>
-  /** Con quién se ha corregido más alguien, en los dos sentidos. */
-  partnersOf?: (campusId: number, login: string, limit: number) => Promise<string[]>
+  /**
+   * Con quién se ha corregido alguien, en los dos sentidos, los que más
+   * primero: en la piscina, las correcciones de la piscina.
+   */
+  partnersOf?: (campusId: number, login: string, pool: boolean) => Promise<string[]>
   /** El tiempo que cada quien ha tenido abierta una sección: lo sabe `usage`. */
   timeOn?: (
     key: string,
@@ -288,26 +291,37 @@ export function createClickerService(options: ClickerServiceOptions) {
   }
 
   /**
-   * Los nombres de las noticias del juego: las personas con las que más se ha
-   * corregido quien juega (le corrigieron o las corrigió), para que las
-   * noticias hablen de gente que conoce. Si son pocas, se completa con quienes
-   * más corrigen en su campus.
+   * Los nombres de las noticias del juego: las 10 amistades más cercanas de
+   * quien juega, las personas con las que más se ha corregido (le corrigieron
+   * o las corrigió), para que las noticias hablen de gente que conoce. Si no
+   * llegan a 10, se completa con quienes más corrigen en su campus.
    */
   async function namesFor(actor: Actor): Promise<string[]> {
     // Solo gente que quien juega puede ver: ni del otro mundo ni oculta a su grupo.
+    // Se filtra antes de quedarse con 10, para que una persona oculta no deje hueco.
     const sees = await seesFor(options.audience ?? NO_POOL, actor)
-    const partners = (
-      (await options.partnersOf?.(actor.campusId, actor.login, NAMES).catch(() => [])) ?? []
-    ).filter(sees)
+    const self = actor.login.toLowerCase()
+    const chosen: string[] = []
+    const add = (logins: readonly string[]): void => {
+      for (const login of logins) {
+        if (chosen.length >= FRIENDS) return
+        if (login === self || chosen.includes(login) || !sees(login)) continue
+        chosen.push(login)
+      }
+    }
 
-    if (partners.length >= NAMES) return partners
+    add(
+      (
+        (await options
+          .partnersOf?.(actor.campusId, actor.login, actor.pool === true)
+          .catch(() => [])) ?? []
+      ).map((login) => login.toLowerCase()),
+    )
+    if (chosen.length < FRIENDS) {
+      add((await options.topCorrectors?.(actor.campusId, FRIENDS * 3).catch(() => [])) ?? [])
+    }
 
-    const campus = (
-      (await options.topCorrectors?.(actor.campusId, NAMES * 2).catch(() => [])) ?? []
-    ).filter(sees)
-    const others = campus.filter((login) => login !== actor.login && !partners.includes(login))
-
-    return [...partners, ...others].slice(0, NAMES)
+    return chosen
   }
 
   /** Cuántos edificios y mejoras hay en una partida guardada (sin comprobarla). */

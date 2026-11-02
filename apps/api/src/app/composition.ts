@@ -487,7 +487,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     replica: replica.repository,
     audience,
     topCorrectors: (campusId, limit) => network.topCorrectors(campusId, limit),
-    partnersOf: (campusId, login, limit) => network.partnersOf(campusId, login, limit),
+    partnersOf: (campusId, login, pool) => network.partnersOf(campusId, login, pool),
     timeOn: (key, from, to) => late.get('usage').service.timeOn(key, from, to),
     brand: async (login, title) => {
       const before = (await profile.profiles.get(login))?.title ?? null
