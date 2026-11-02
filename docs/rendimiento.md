@@ -190,7 +190,7 @@ red no enseñaba nada, ni siquiera «Cargando…»; el Avance, tampoco.
   sigue dando mientras se rehace de fondo, una sola vez.
 - La red de asientos lee por tandas y calcula por tandas (`core/breathe.ts`):
   las demás peticiones pasan entre medias. Se precalcula «todo» de cada campus
-  cada 5 minutos, y las amistades (Code Clicker, álbum) salen de ese mismo
+  cada 15 minutos, y las amistades (Code Clicker, álbum) salen de ese mismo
   cálculo en vez de repetirlo.
 - Lo que pase de un segundo se apunta (`[lento] …`) para medirlo en producción.
   Primera medida (2026-11-02): Madrid, 479 453 sesiones, **15,1 s** de fondo.
@@ -199,7 +199,13 @@ red no enseñaba nada, ni siquiera «Cargando…»; el Avance, tampoco.
   servidor se quedó parado un segundo o más seguido, con los trabajos de fondo
   que corrieron (`[parón] …`, `watchStalls` en `app/build-app.ts`). Tras el
   despliegue, la salud tardó 4,8 s en contestar una vez mientras se
-  precalculaba: esto dirá qué lo causó.
+  precalculaba.
+- Lo que dijo el registro: de fondo, Madrid 12,7 s, el 37 6,8 s, el 40 5,2 s y
+  el 46 7,2 s; y un parón de 2,7 s mientras se precalculaba. Lo que quedaba de
+  una vez era preparar las sesiones (leer el puesto de cada una, 480 000 veces,
+  para unos cientos de puestos) y el repaso final por persona: ahora cada
+  puesto se lee una vez, los dos van por tandas, la lectura va de 10 000 en
+  10 000 y el precalculado pasa a cada 15 minutos.
 
 **En la web:**
 

@@ -58,8 +58,12 @@ export type NetworkModule = AppModule & {
 /** Cada cuánto avanza la copia. Con el histórico hecho, casi todas las vueltas no piden nada. */
 const SYNC_EVERY_MS = 20_000
 
-/** Cada cuánto se rehace de fondo la red de asientos de entrada: lo que tarda en caducar. */
-const WARM_EVERY_MS = 5 * 60_000
+/**
+ * Cada cuánto se rehace de fondo la red de asientos de entrada. Los cuatro
+ * campus son unos 30 s de cálculo: cada 15 minutos es un 3 % de un núcleo, y
+ * entre medias se sigue dando lo último (`STALE_MS` de `seating.service.ts`).
+ */
+const WARM_EVERY_MS = 15 * 60_000
 
 /**
  * Hasta dónde mira atrás la copia de la piscina. Un piscinero lo es durante

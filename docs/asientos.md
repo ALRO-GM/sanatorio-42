@@ -121,10 +121,10 @@ unas 850 000 sesiones. Medido en local, leerlas son unos 3,2 s y medir la
 cercanía 1,6 s más; en la máquina de Oracle, más. Y mientras tanto la web
 entera esperaba, porque Node atiende todo en un solo hilo. Ahora:
 
-- La lectura va por tandas de 20 000 filas en el orden del índice, y el cálculo
+- La lectura va por tandas de 10 000 filas en el orden del índice, y el cálculo
   deja pasar a las demás peticiones cada 20 000 sesiones (`core/breathe.ts`).
 - El trabajo `red de asientos precalculada` rehace «todo» de cada campus cada
-  5 minutos, de fondo. Lo caducado se sigue dando hasta 6 horas mientras se
+  15 minutos, de fondo (los cuatro, unos 30 s). Lo caducado se sigue dando hasta 6 horas mientras se
   rehace (`staleMs` de `core/ttl-cache.ts`): nadie espera al cálculo entero.
 - Lo que pase de un segundo sale en el registro como `[lento] red de asientos…`,
   con las sesiones y lo que tardó, para medirlo en producción. Madrid, con

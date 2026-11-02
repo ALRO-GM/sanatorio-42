@@ -46,7 +46,7 @@ function countedSpan(
 }
 
 /** Filas que se leen de una vez: con «todo» son cientos de miles, y leerlas juntas para la web entera. */
-const PAGE = 20_000
+const PAGE = 10_000
 
 /**
  * Las sesiones de un campus vistas en `[since, until]`, ya recortadas, de la

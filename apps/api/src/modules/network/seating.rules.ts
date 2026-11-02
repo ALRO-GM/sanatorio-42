@@ -128,10 +128,28 @@ export async function seatingOf(
   weights: SeatWeights = DEFAULT_SEAT_WEIGHTS,
 ): Promise<Seating> {
   type Placed = SeatSession & { position: SeatPosition | null; near: [number, number][] }
-  const placed: Placed[] = sessions
-    .filter((session) => session.end > session.begin)
-    .map((session) => ({ ...session, position: parseHost(session.host), near: [] }))
-    .sort((x, y) => x.begin - y.begin)
+  // Hay cientos de puestos y cientos de miles de sesiones: cada puesto se lee una vez.
+  const hosts = new Map<string, SeatPosition | null>()
+  const positionOf = (host: string): SeatPosition | null => {
+    let position = hosts.get(host)
+
+    if (position === undefined) {
+      position = parseHost(host)
+      hosts.set(host, position)
+    }
+
+    return position
+  }
+  const placed: Placed[] = []
+
+  for (const [index, session] of sessions.entries()) {
+    if (index % BATCH === BATCH - 1) await breathe()
+    if (session.end > session.begin) {
+      placed.push({ ...session, position: positionOf(session.host), near: [] })
+    }
+  }
+  placed.sort((x, y) => x.begin - y.begin)
+  await breathe()
   const pairs = new Map<string, PairSeating>()
   // Las sesiones abiertas a la vez, por clúster: solo esas pueden ser vecinas.
   const open = new Map<string, Placed[]>()
@@ -185,7 +203,9 @@ export async function seatingOf(
     return entry
   }
 
-  for (const session of placed) {
+  for (const [index, session] of placed.entries()) {
+    if (index % BATCH === BATCH - 1) await breathe()
+
     const entry = person(session.login)
     const hours = (session.end - session.begin) / HOUR_MS
 
