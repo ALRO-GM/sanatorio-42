@@ -12,6 +12,8 @@ import type {
 import { api } from '../../shared/api'
 import { useDetail } from '../../shared/detail'
 import { useAsync } from '../../shared/hooks/useAsync'
+import { expectedTotals, timedLoad } from '../../shared/loadMemory'
+import { LoadingActivity } from '../../shared/ui/LoadingActivity'
 import { useI18n } from '../../shared/i18n'
 import { SectionTitle } from '../../shared/ui/SectionTitle'
 import { ChartWithRail } from '../../shared/ui/ChartWithRail'
@@ -134,6 +136,20 @@ function Option({ label, children }: { label: string; children: ReactNode }) {
   )
 }
 
+/** Las fases del aviso de carga del Avance. */
+const LOADING_STEPS = [
+  'stats.progress.loading.read',
+  'stats.progress.loading.average',
+  'stats.progress.loading.line',
+] as const
+
+/** Cuánta gente entra en la comparación: el censo de todos los campus juntos. */
+function peopleIn(data: StatsProgress): number {
+  return Object.values(data.all.census)
+    .flatMap((byStatus) => Object.values(byStatus))
+    .reduce((sum, count) => sum + count, 0)
+}
+
 /**
  * La pestaña Avance, en Datos: el avance en el common core a lo largo del
  * tiempo (#87). Tu línea, las medias que enciendas (plan × quién cuenta ×
@@ -149,7 +165,7 @@ function Option({ label, children }: { label: string; children: ReactNode }) {
  * cambiar una se ve el efecto sin moverse. En el móvil, la gráfica primero y
  * las opciones debajo.
  */
-export function ProgressPage({ me }: { me: string }) {
+export function ProgressPage({ me, image = null }: { me: string; image?: string | null }) {
   const { t, tn } = useI18n()
   const { number } = useFormat()
   // Lo que pide el enlace con el que se abrió (`progressHref`, desde el health
@@ -189,10 +205,18 @@ export function ProgressPage({ me }: { me: string }) {
   const [others, setOthers] = useState<string[]>([])
   // Sin campus elegido (o ninguno), lo de siempre: tu campus, que no se pinta si no se quiere.
   const asked = chosen === null || chosen.length === 0 ? null : chosen
+  const loadKey = `${others.join(',')}|${asked?.join(',') ?? ''}`
   const fetched = useAsync(
-    () => api.getStatsProgress(others, asked),
-    [others.join(','), asked?.join(',') ?? ''],
+    () =>
+      timedLoad(
+        'progress',
+        () => api.getStatsProgress(others, asked),
+        (result) => ({ people: peopleIn(result), days: result.days.at(-1) ?? 0 }),
+      ),
+    [loadKey],
+    { keep: `progress|${loadKey}` },
   )
+  const expected = expectedTotals('progress', { people: 4_000, days: 2_500 })
   // Mientras llega lo nuevo (otro campus, otra persona), se queda lo de antes:
   // la gráfica no se vacía a cada clic.
   const [kept, setKept] = useState<StatsProgress | undefined>(undefined)
@@ -237,7 +261,19 @@ export function ProgressPage({ me }: { me: string }) {
         railLabel={t('stats.progress.options')}
         chart={
           data === undefined ? (
-            <ErrorNote error={fetched.error} retry />
+            fetched.error === null ? (
+              <LoadingActivity
+                steps={LOADING_STEPS}
+                stats={[
+                  { key: 'stats.progress.loading.people', target: expected.totals.people ?? 0 },
+                  { key: 'stats.progress.loading.days', target: expected.totals.days ?? 0 },
+                ]}
+                who={{ login: me, image }}
+                {...(expected.ms === undefined ? {} : { expectedMs: expected.ms })}
+              />
+            ) : (
+              <ErrorNote error={fetched.error} retry />
+            )
           ) : (
             <ProgressChart
               data={data}

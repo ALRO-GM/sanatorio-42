@@ -691,3 +691,88 @@ button.link {
 :root[data-still='on'] .step-wheel-list {
   transition: none;
 }
+
+/* Aviso de una carga larga (`shared/ui/LoadingActivity.tsx`): tu burbuja
+   latiendo, la fase y unas cifras que suben. Dentro de un grafo va centrado. */
+.activity {
+  display: grid;
+  justify-items: center;
+  gap: 0.6rem;
+  padding: 1.5rem 1rem;
+  color: var(--text-2);
+  text-align: center;
+}
+.net-stage > .activity {
+  position: absolute;
+  inset: 0;
+  align-content: center;
+}
+.activity-me {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  margin-bottom: 0.4rem;
+}
+.activity-me img,
+.activity-me .avatar-fallback {
+  position: relative;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+}
+.activity-ring {
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  opacity: 0;
+  animation: activity-ring 1.6s ease-out infinite;
+}
+@keyframes activity-ring {
+  from {
+    transform: scale(0.85);
+    opacity: 0.7;
+  }
+  to {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+.activity-step {
+  margin: 0;
+  font-weight: 600;
+  color: var(--text);
+}
+.activity-stats {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.2rem;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.92rem;
+}
+.activity-bar {
+  width: min(16rem, 80%);
+  height: 4px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+.activity-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+  transition: width 0.2s linear;
+}
+@media (prefers-reduced-motion: reduce) {
+  .activity-ring {
+    animation: none;
+    opacity: 0.4;
+  }
+  .activity-bar > span {
+    transition: none;
+  }
+}

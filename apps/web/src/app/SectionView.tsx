@@ -187,12 +187,16 @@ export function SectionView({
       {section === 'notgames' && <NotGamesPage me={me.login} room={param} />}
       {section === 'estadisticas' && <HelpStatsPage me={me.login} />}
       {section === 'red' && <NetworkPage me={me} />}
-      {section === 'asientos' && <SeatsPage me={me.login} />}
+      {section === 'asientos' && <SeatsPage me={me.login} image={me.image} />}
       {section === 'cursogit' && <GitCoursePage me={me.login} />}
       {section === 'cursoshell' && <ShellCoursePage />}
       {section === 'pomodoro' && <FocusPage />}
       {section === 'avance' &&
-        (pool ? <PiscineProgressPage me={me.login} /> : <ProgressPage me={me.login} />)}
+        (pool ? (
+          <PiscineProgressPage me={me.login} />
+        ) : (
+          <ProgressPage me={me.login} image={me.image} />
+        ))}
       {section === 'agenda' && (
         <AgendaPage
           me={me.login}

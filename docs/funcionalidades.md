@@ -334,6 +334,17 @@ En este orden (`app/Header.tsx`, `app/UserMenu.tsx`):
 
 ## En toda la web
 
+### Cargas largas
+
+| Funcionalidad | Modo | Quién | Dónde |
+| --- | --- | --- | --- |
+| Mientras carga Amigos, Red o Avance: tu burbuja latiendo, la fase en la que va y cifras que suben hacia las de la última vez | S | Todos | `shared/ui/LoadingActivity.tsx`, `shared/loadMemory.ts` |
+| Los grafos de Amigos y Red aparecen desde ti hacia fuera, por tandas | S | Todos | `features/network/reveal.ts` |
+| Al volver a Amigos, Red o Avance se ve al momento lo de la última vez, y se pone al día detrás | S | Todos | `useAsync` con `keep` |
+| Si algo tarda, «Cargando…» dice que sigue en marcha | S | Todos | `shared/ui/Async.tsx` |
+
+Detalle: [rendimiento.md](rendimiento.md#9-cargas-largas-2026-11-02).
+
 ### Ventanitas de la esquina
 
 | Funcionalidad | Modo | Quién | Dónde |

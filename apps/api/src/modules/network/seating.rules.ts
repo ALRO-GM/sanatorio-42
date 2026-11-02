@@ -16,6 +16,7 @@
  * hacia la fila de arriba, así que el peso vale igual en los dos sentidos.
  */
 
+import { breathe } from '../../core/breathe.js'
 import { parseHost } from '../map/index.js'
 import type { SeatPosition } from '../map/index.js'
 
@@ -93,6 +94,9 @@ type Seating = { people: Map<string, PersonSeating>; pairs: PairSeating[] }
 
 const HOUR_MS = 3_600_000
 
+/** Sesiones que se miran seguidas antes de dejar pasar a las demás peticiones. */
+const BATCH = 20_000
+
 /** Lo que mide una lista de tramos, contando una vez lo que se pisa. */
 function covered(spans: [number, number][]): number {
   spans.sort((x, y) => x[0] - y[0])
@@ -119,10 +123,10 @@ function covered(spans: [number, number][]): number {
  * sesiones en un puesto que no sigue el patrón de nombre cuentan como horas,
  * pero sin vecinos.
  */
-export function seatingOf(
+export async function seatingOf(
   sessions: readonly SeatSession[],
   weights: SeatWeights = DEFAULT_SEAT_WEIGHTS,
-): Seating {
+): Promise<Seating> {
   type Placed = SeatSession & { position: SeatPosition | null; near: [number, number][] }
   const placed: Placed[] = sessions
     .filter((session) => session.end > session.begin)
@@ -132,9 +136,11 @@ export function seatingOf(
   // Las sesiones abiertas a la vez, por clúster: solo esas pueden ser vecinas.
   const open = new Map<string, Placed[]>()
 
-  for (const session of placed) {
+  for (const [index, session] of placed.entries()) {
     const { position } = session
 
+    // Con todo el historial son cientos de miles: se deja pasar al resto de la web.
+    if (index % BATCH === BATCH - 1) await breathe()
     if (position === null) continue
 
     const room = `${position.cluster}|${position.separator}`

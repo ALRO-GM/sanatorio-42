@@ -5,10 +5,12 @@ import type { FoundPerson, NetworkLink, NetworkNode, SeatGraph } from '@sanatori
 import { api } from '../../shared/api'
 import type { SeatDates } from '../../shared/api/types'
 import { useAsync } from '../../shared/hooks/useAsync'
+import { expectedTotals, timedLoad } from '../../shared/loadMemory'
 import { mergePeople } from '../../shared/hooks/usePeopleSearch'
 import { localeOf, useI18n } from '../../shared/i18n'
 import { useFormat } from '../../shared/i18n/useFormat'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { LoadingActivity } from '../../shared/ui/LoadingActivity'
 import { PillGroup } from '../../shared/ui/PillGroup'
 import { PeriodPicker } from '../../shared/ui/PeriodPicker'
 import { StepPicker } from '../../shared/ui/StepPicker'
@@ -20,6 +22,7 @@ import { PersonLink } from '../../shared/ui/PersonLink'
 import { PersonInput } from '../../shared/ui/PersonInput'
 import { colorOf, scaleColor } from './colors'
 import { ForceGraph } from './ForceGraph'
+import { useReveal } from './reveal'
 import { seatLinks, seatNodes } from './seat-view'
 import { SeatsTour } from './SeatsTour'
 import { DEFAULT_TRIM, MOST_OPTIONS, SHARE_OPTIONS, trimSeats } from './seat-trim'
@@ -33,6 +36,28 @@ const MODES = ['community', 'alone'] as const
 
 type Mode = (typeof MODES)[number]
 
+/** Las fases del aviso de carga: lo que de verdad hace la API (`seating.service.ts`). */
+const LOADING_STEPS = [
+  'seats.loading.read',
+  'seats.loading.near',
+  'seats.loading.groups',
+  'seats.loading.place',
+] as const
+
+/**
+ * Las cifras hacia las que cuenta el aviso la primera vez, antes de saber las
+ * de verdad: las de un campus grande con todo el historial, a escala del periodo.
+ */
+function seatGuess(days: number): Record<string, number> {
+  const share = Math.min(1, days / 1_000)
+
+  return {
+    hours: Math.round(900_000 * share),
+    pairs: Math.round(40_000 * share),
+    people: Math.round(300 + 1_700 * Math.sqrt(share)),
+  }
+}
+
 /** Lo solo que se sienta, de verde (casi siempre con alguien) a rojo (casi siempre solo). */
 const ALONE_SCALE = { min: 0, max: 100 }
 
@@ -44,7 +69,7 @@ const PARTNERS_SHOWN = 8
  * los clústeres. Cada unión es la cercanía de dos personas: horas sentadas a
  * la vez por el peso de lo cerca que estaban los puestos.
  */
-export function SeatsPage({ me }: { me?: string }) {
+export function SeatsPage({ me, image = null }: { me?: string; image?: string | null }) {
   const { t, tn, lang } = useI18n()
   const { number } = useFormat()
   const [period, setPeriod] = useState<Period>('all')
@@ -56,7 +81,18 @@ export function SeatsPage({ me }: { me?: string }) {
   const [mode, setMode] = useState<Mode>('community')
   // De fábrica, tu propia red: con quién te sientas tú (pedido por Alberto, 2026-10-30).
   const [selected, setSelected] = useState<string | null>(me ?? null)
-  const { data, error } = useAsync<SeatGraph>(() => api.getSeatGraph(days, custom), [key])
+  const loadId = `seats.${key}`
+  const { data, error } = useAsync<SeatGraph>(
+    () =>
+      timedLoad(
+        loadId,
+        () => api.getSeatGraph(days, custom),
+        ({ totals }) => ({ hours: totals.hours, pairs: totals.pairs, people: totals.people }),
+      ),
+    [key],
+    { keep: loadId },
+  )
+  const expected = useMemo(() => expectedTotals(loadId, seatGuess(days)), [loadId, days])
 
   // Recortado en la web, al momento (`seat-trim.ts`): de cada cual, solo la
   // gente con la que más se sienta; y, con alguien elegido, solo sus uniones.
@@ -78,6 +114,8 @@ export function SeatsPage({ me }: { me?: string }) {
   // El tamaño de cada burbuja es su parte de la cercanía a la vista (`seat-view.ts`).
   const nodes = useMemo(() => (shown === undefined ? [] : seatNodes(shown)), [shown])
   const links = useMemo((): NetworkLink[] => (shown === undefined ? [] : seatLinks(shown)), [shown])
+  // Al llegar, aparece desde ti hacia fuera, en vez de todo de golpe.
+  const revealed = useReveal(nodes, links, selected ?? me ?? null)
   const paint = useCallback(
     (node: NetworkNode) =>
       mode === 'alone' ? scaleColor(node.endogamy, ALONE_SCALE) : colorOf(node, 'community'),
@@ -455,14 +493,29 @@ export function SeatsPage({ me }: { me?: string }) {
           </p>
         )}
 
+        {data === undefined && error === null && (
+          <div className="net-stage">
+            <LoadingActivity
+              steps={LOADING_STEPS}
+              stats={[
+                { key: 'seats.loading.hours', target: expected.totals.hours ?? 0 },
+                { key: 'seats.loading.pairs', target: expected.totals.pairs ?? 0 },
+                { key: 'seats.loading.people', target: expected.totals.people ?? 0 },
+              ]}
+              {...(me === undefined ? {} : { who: { login: me, image } })}
+              {...(expected.ms === undefined ? {} : { expectedMs: expected.ms })}
+            />
+          </div>
+        )}
+
         {data !== undefined && (
           <div className="net-stage">
             {nodes.length === 0 ? (
               <p className="estado">{t('seats.empty')}</p>
             ) : (
               <ForceGraph
-                nodes={nodes}
-                links={links}
+                nodes={revealed.nodes}
+                links={revealed.links}
                 colorOf={paint}
                 selected={selected}
                 onSelect={choose}

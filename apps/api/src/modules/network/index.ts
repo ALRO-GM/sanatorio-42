@@ -58,6 +58,9 @@ export type NetworkModule = AppModule & {
 /** Cada cuánto avanza la copia. Con el histórico hecho, casi todas las vueltas no piden nada. */
 const SYNC_EVERY_MS = 20_000
 
+/** Cada cuánto se rehace de fondo la red de asientos de entrada: lo que tarda en caducar. */
+const WARM_EVERY_MS = 5 * 60_000
+
 /**
  * Hasta dónde mira atrás la copia de la piscina. Un piscinero lo es durante
  * 60 días desde que empieza (`docs/piscineros.md`); con 90 cabe su piscina
@@ -126,6 +129,13 @@ export function createNetworkModule(deps: NetworkModuleDeps): NetworkModule {
         usage: 'pool-corrections',
         everyMs: SYNC_EVERY_MS,
         run: () => poolSync.step(),
+      },
+      {
+        // La vista de entrada de Amigos («todo») lleva segundos: se deja hecha
+        // de fondo para que nadie la espere (`docs/asientos.md`). Solo lee la base.
+        name: 'red de asientos precalculada',
+        everyMs: WARM_EVERY_MS,
+        run: () => seating.warm(deps.campusIds),
       },
     ],
   }

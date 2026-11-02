@@ -40,8 +40,8 @@ describe('peso entre puestos (docs/asientos.md)', () => {
 })
 
 describe('cercanía entre personas', () => {
-  it('suma horas a la vez por el peso y cuenta las horas sin nadie cerca', () => {
-    const seating = seatingOf([
+  it('suma horas a la vez por el peso y cuenta las horas sin nadie cerca', async () => {
+    const seating = await seatingOf([
       { login: 'ana', host: 'c1r2s3', begin: 0, end: 4 * HOUR },
       { login: 'bea', host: 'c1r2s5', begin: 2 * HOUR, end: 6 * HOUR },
       { login: 'eva', host: 'c1r2s4', begin: 3 * HOUR, end: 5 * HOUR },
@@ -62,6 +62,24 @@ describe('cercanía entre personas', () => {
     expect(ana?.aloneHours).toBe(2)
     expect(ana?.partners).toBe(2)
     expect(seating.people.get('sol')).toMatchObject({ hours: 1, aloneHours: 1, partners: 0 })
+  })
+
+  it('con muchas sesiones va por tandas y cuenta lo mismo que de una vez', async () => {
+    // 50 000 sesiones de una hora, de dos en dos y al lado: 25 000 h juntas.
+    const sessions = Array.from({ length: 50_000 }, (_, index) => ({
+      login: index % 2 === 0 ? 'ana' : 'bea',
+      host: index % 2 === 0 ? 'c1r2s3' : 'c1r2s5',
+      begin: Math.floor(index / 2) * 2 * HOUR,
+      end: Math.floor(index / 2) * 2 * HOUR + HOUR,
+    }))
+    let others = 0
+    const other = setInterval(() => (others += 1), 0)
+    const seating = await seatingOf(sessions)
+
+    clearInterval(other)
+    expect(seating.pairs).toEqual([{ a: 'ana', b: 'bea', closeness: 75_000, hours: 25_000 }])
+    // Entre tanda y tanda, otras cosas han podido pasar.
+    expect(others).toBeGreaterThan(0)
   })
 })
 

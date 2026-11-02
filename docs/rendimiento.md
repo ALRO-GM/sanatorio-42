@@ -171,6 +171,56 @@ se baje cuando se usa y se quede en el PC.
 
 No se baja nada por adelantado: lo que no se usa no ocupa sitio en el PC.
 
+## 9. Cargas largas (2026-11-02)
+
+Pedido por Alberto: Amigos tardaba mucho, y Red y Avance a veces también, sin
+que se viera nada mientras.
+
+**La causa (medida en local, con 850 000 sesiones como las de Madrid).** La
+vista de entrada de Amigos es «todo» el historial: leer las sesiones son unos
+3,2 s y medir la cercanía 1,6 s más, sin contar los grupos. Se rehacía cada
+5 minutos a la primera visita, y mientras tanto **todo el servidor esperaba**:
+Node atiende en un solo hilo, así que el Avance o la Red, aunque estén
+precalculados o en caché, esperaban detrás. En la pantalla, mientras tanto, la
+red no enseñaba nada, ni siquiera «Cargando…»; el Avance, tampoco.
+
+**En la API:**
+
+- `core/ttl-cache.ts` admite `staleMs`: pasado el tiempo, lo calculado se
+  sigue dando mientras se rehace de fondo, una sola vez.
+- La red de asientos lee por tandas y calcula por tandas (`core/breathe.ts`):
+  las demás peticiones pasan entre medias. Se precalcula «todo» de cada campus
+  cada 5 minutos, y las amistades (Code Clicker, álbum) salen de ese mismo
+  cálculo en vez de repetirlo.
+- Lo que pase de un segundo se apunta (`[lento] …`) para medirlo en producción.
+
+**En la web:**
+
+- Aviso de carga con tu burbuja, la fase y cifras que suben hacia las de la
+  última vez, guardadas en el navegador con lo que tardó
+  (`LoadingActivity`, `loadMemory`).
+- Los grafos aparecen desde ti hacia fuera, en un segundo (`useReveal`).
+- `useAsync` con `keep` recuerda la última respuesta mientras la web está
+  abierta: Amigos, Red y Avance salen al momento al volver.
+- «Cargando…» añade una segunda línea si pasa de 2,5 s, y otra a los 8 s.
+
+**Pendiente, de la revisión de las demás secciones** (sin medir; por orden de
+lo que más se notaría):
+
+1. Calendario, Agenda y On-call piden a 42 dentro de la petición (hasta 3 + 2
+   seguidas), a la cola de la copia, y repiten trabajo (`help.today` dentro de
+   `calendar.between`).
+2. `/help/offers`: una vuelta por persona de guardia, una detrás de otra, cada
+   una con escrituras y quizá llamadas a 42.
+3. `/map` y `/projects/:id/peers` refrescan los puestos dentro de la petición si
+   la foto tiene más de 2 minutos: tras un rato sin nadie, siempre se espera.
+4. `/exams/stats` en frío recorre `project_users` entero (un `OR … LIKE` que no
+   usa el índice) y no se precalcula.
+5. `/doubts/graph`, `/stats` y `/leaderboard`: sin caché, con agregados de todo
+   el campus en cada visita; faltan índices (`projects(slug)`, `xp_events`).
+6. El perfil espera a `/me/profile` antes de pedir lo demás.
+7. Las demás secciones podrían usar `keep` como Amigos, Red y Avance.
+
 ## Cómo se ha medido
 
 - **Base**: sobre una copia de la base real de desarrollo, con el mismo cliente

@@ -4,8 +4,9 @@
  * que los dos cuenten las mismas horas: si cambia cómo se mide, cambia en los dos.
  */
 
+import { breathe } from '../../core/breathe.js'
 import type { Db } from '../../core/db/database.js'
-import { toText } from '../../core/db/rows.js'
+import { toNumber, toText } from '../../core/db/rows.js'
 import type { SeatSession } from './seating.rules.js'
 import { isoAt } from '../../core/time.js'
 
@@ -44,9 +45,16 @@ function countedSpan(
   return end > begin ? { begin, end } : null
 }
 
+/** Filas que se leen de una vez: con «todo» son cientos de miles, y leerlas juntas para la web entera. */
+const PAGE = 20_000
+
 /**
  * Las sesiones de un campus vistas en `[since, until]`, ya recortadas, de la
  * gente que `sees` deja ver. Con la foto de cada una, para el grafo.
+ *
+ * Se leen por tandas, en el orden del índice (`campus_id, seen_at`): con todo
+ * el historial (850 000 sesiones en Madrid) leerlas de golpe paraba la web
+ * entera unos segundos.
  */
 export async function seatSessionsIn(
   db: Db,
@@ -55,26 +63,39 @@ export async function seatSessionsIn(
   until: number,
   sees: (login: string) => boolean,
 ): Promise<{ sessions: SeatSession[]; images: Map<string, string | null> }> {
-  const result = await db.execute({
-    sql: `SELECT s.login, s.host, s.begin_at, s.first_seen_at, s.seen_at, u.image
-          FROM seat_sessions s LEFT JOIN users u ON u.id = s.user_id
-          WHERE s.campus_id = ? AND s.seen_at >= ? AND s.begin_at < ?`,
-    // Con las dos puntas: un periodo antiguo no lee toda la historia del campus.
-    args: [campusId, isoAt(since), isoAt(until)],
-  })
   const images = new Map<string, string | null>()
   const sessions: SeatSession[] = []
+  // Por dónde va la lectura: la última `seen_at` y su `rowid`.
+  let after = { seen: isoAt(since), id: -1 }
 
-  for (const row of result.rows) {
-    const login = toText(row.login)
+  for (;;) {
+    const result = await db.execute({
+      sql: `SELECT s.rowid AS id, s.login, s.host, s.begin_at, s.first_seen_at, s.seen_at, u.image
+            FROM seat_sessions s LEFT JOIN users u ON u.id = s.user_id
+            WHERE s.campus_id = ? AND (s.seen_at > ? OR (s.seen_at = ? AND s.rowid > ?))
+              AND s.begin_at < ?
+            ORDER BY s.seen_at, s.rowid LIMIT ?`,
+      // Con las dos puntas: un periodo antiguo no lee toda la historia del campus.
+      args: [campusId, after.seen, after.seen, after.id, isoAt(until), PAGE],
+    })
 
-    if (!sees(login)) continue
+    for (const row of result.rows) {
+      const login = toText(row.login)
 
-    images.set(login, typeof row.image === 'string' ? row.image : null)
+      if (!sees(login)) continue
 
-    const span = countedSpan(row, since, until)
+      images.set(login, typeof row.image === 'string' ? row.image : null)
 
-    if (span !== null) sessions.push({ login, host: toText(row.host), ...span })
+      const span = countedSpan(row, since, until)
+
+      if (span !== null) sessions.push({ login, host: toText(row.host), ...span })
+    }
+
+    const last = result.rows.at(-1)
+
+    if (last === undefined || result.rows.length < PAGE) break
+    after = { seen: toText(last.seen_at), id: toNumber(last.id) }
+    await breathe()
   }
 
   return { sessions, images }

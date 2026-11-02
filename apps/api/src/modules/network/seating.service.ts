@@ -58,6 +58,11 @@ export type SeatingService = {
    * de los puestos), de más a menos, como mucho `limit`. Solo gente que puede ver.
    */
   friendsOf: (actor: Actor, limit: number) => Promise<string[]>
+  /**
+   * Deja calculada de fondo la vista de entrada («todo», la que ve casi todo el
+   * mundo) de cada campus, para que la primera persona que la abre no espere.
+   */
+  warm: (campusIds: readonly number[]) => Promise<void>
 }
 
 const DAY_MS = 86_400_000
@@ -65,8 +70,15 @@ const DAY_MS = 86_400_000
 /** La foto de los puestos se repite cada pocos minutos: no hace falta más fresco. */
 const CACHE_TTL_MS = 5 * 60_000
 
-/** Las amistades de cada cual cambian despacio: se rehacen cada hora. */
-const FRIENDS_TTL_MS = 60 * 60_000
+/**
+ * Pasado eso, se sigue dando lo calculado mientras se rehace de fondo: con todo
+ * el historial el cálculo lleva segundos, y unas horas de retraso en «todo» no
+ * se notan.
+ */
+const STALE_MS = 6 * 60 * 60_000
+
+/** Un cálculo que pasa de esto se apunta en el registro, para saber qué pesa. */
+const SLOW_MS = 1_000
 
 /** «Todo» el historial, como el periodo de entrada de la red de asientos. */
 const ALL_DAYS = 3650
@@ -116,16 +128,48 @@ function spanOf(query: z.infer<typeof querySchema>, now: number): Span {
 
 const round1 = (value: number): number => Math.round(value * 10) / 10
 
+/** Lo que sale de calcular un periodo: el grafo y, de cada persona, sus amistades. */
+type Built = { graph: SeatGraph; friends: Map<string, string[]> }
+
+/** De cada persona, con quién tiene una unión, de más cercanía a menos. */
+function friendsIn(pairs: readonly { a: string; b: string; closeness: number }[]) {
+  const near = new Map<string, { login: string; closeness: number }[]>()
+  const add = (login: string, other: string, closeness: number): void => {
+    const list = near.get(login)
+
+    if (list === undefined) near.set(login, [{ login: other, closeness }])
+    else list.push({ login: other, closeness })
+  }
+
+  for (const pair of pairs) {
+    add(pair.a, pair.b, pair.closeness)
+    add(pair.b, pair.a, pair.closeness)
+  }
+
+  return new Map(
+    [...near].map(([login, list]): [string, string[]] => [
+      login,
+      list
+        .sort((x, y) => y.closeness - x.closeness || x.login.localeCompare(y.login))
+        .map((entry) => entry.login),
+    ]),
+  )
+}
+
 export function createSeatingService(options: SeatingOptions): SeatingService {
   const { db, audience = NO_POOL, now = Date.now } = options
   const knownSeats = options.knownSeats ?? (() => Promise.resolve([]))
   const gridOf = (): Promise<SeatWeights> =>
     options.weights?.grid() ?? Promise.resolve(DEFAULT_SEAT_WEIGHTS)
-  const cache = createTtlCache<SeatGraph>({ ttlMs: CACHE_TTL_MS, maxEntries: 12, now })
-  const heatCache = createTtlCache<SeatHeat>({ ttlMs: CACHE_TTL_MS, maxEntries: 12, now })
-  // Por campus, mundo y quién se ve: de cada persona, sus más cercanas.
-  const friendsCache = createTtlCache<Map<string, string[]>>({
-    ttlMs: FRIENDS_TTL_MS,
+  const cache = createTtlCache<Built>({
+    ttlMs: CACHE_TTL_MS,
+    staleMs: STALE_MS,
+    maxEntries: 12,
+    now,
+  })
+  const heatCache = createTtlCache<SeatHeat>({
+    ttlMs: CACHE_TTL_MS,
+    staleMs: STALE_MS,
     maxEntries: 12,
     now,
   })
@@ -163,14 +207,18 @@ export function createSeatingService(options: SeatingOptions): SeatingService {
     return { days, ...seatHeatOf(sessions, known) }
   }
 
-  /** La red de unas sesiones con unos pesos, y lo bien que separa en grupos. */
-  function build(
+  /**
+   * La red de unas sesiones con unos pesos, lo bien que separa en grupos y, de
+   * cada persona, sus amistades: quienes tienen con ella al menos la cercanía
+   * mínima, de más a menos.
+   */
+  async function build(
     sessions: readonly SeatSession[],
     images: ReadonlyMap<string, string | null>,
     days: number,
     grid: SeatWeights,
-  ): { graph: SeatGraph; quality: SeatGroupQuality } {
-    const seating = seatingOf(sessions, grid)
+  ): Promise<Built & { quality: SeatGroupQuality }> {
+    const seating = await seatingOf(sessions, grid)
     const pairs = seating.pairs.filter((pair) => pair.closeness >= MIN_CLOSENESS)
     const logins = [...seating.people.keys()]
     const community = communitiesOf(
@@ -215,6 +263,7 @@ export function createSeatingService(options: SeatingOptions): SeatingService {
         },
       },
       quality: groupQuality(logins, pairs, community),
+      friends: friendsIn(pairs),
     }
   }
 
@@ -222,52 +271,41 @@ export function createSeatingService(options: SeatingOptions): SeatingService {
     return seatSessionsIn(db, actor.campusId, since, until, await seesFor(audience, actor))
   }
 
-  /** De cada persona, quienes tienen con ella al menos la cercanía mínima, de más a menos. */
-  async function loadFriends(actor: Actor, grid: SeatWeights): Promise<Map<string, string[]>> {
-    const until = now()
-    const { sessions } = await sessionsOf(actor, {
-      since: until - ALL_DAYS * DAY_MS,
-      until,
-      days: ALL_DAYS,
-    })
-    const near = new Map<string, { login: string; closeness: number }[]>()
-    const add = (login: string, other: string, closeness: number): void => {
-      near.set(login, [...(near.get(login) ?? []), { login: other, closeness }])
+  /** Lo que se guarda de un periodo: el grafo y las amistades, que salen del mismo cálculo. */
+  async function load(actor: Actor, span: Span, grid: SeatWeights): Promise<Built> {
+    const started = now()
+    const { sessions, images } = await sessionsOf(actor, span)
+    const { graph, friends } = await build(sessions, images, span.days, grid)
+    const took = now() - started
+
+    if (took >= SLOW_MS) {
+      process.stderr.write(
+        `[lento] red de asientos de ${String(actor.campusId)} (${String(span.days)} días, ${String(sessions.length)} sesiones): ${String(took)} ms\n`,
+      )
     }
 
-    for (const pair of seatingOf(sessions, grid).pairs) {
-      if (pair.closeness < MIN_CLOSENESS) continue
-      add(pair.a, pair.b, pair.closeness)
-      add(pair.b, pair.a, pair.closeness)
-    }
-
-    return new Map(
-      [...near].map(([login, list]) => [
-        login,
-        list
-          .sort((x, y) => y.closeness - x.closeness || x.login.localeCompare(y.login))
-          .map((entry) => entry.login),
-      ]),
-    )
+    return { graph, friends }
   }
 
-  async function load(actor: Actor, span: Span, grid: SeatWeights): Promise<SeatGraph> {
-    const { sessions, images } = await sessionsOf(actor, span)
+  /** El grafo y las amistades de un periodo, de la caché si se puede. */
+  async function builtFor(
+    actor: Actor,
+    query: z.infer<typeof querySchema>,
+    check: boolean,
+  ): Promise<Built> {
+    const grid = await gridOf()
 
-    return build(sessions, images, span.days, grid).graph
+    // Los pesos van en la clave: al cambiarlos en el panel se recalcula.
+    return cache.get(`${await keyOf(actor, query)}|${weightsKey(grid)}`, () => {
+      if (check) limited(actor)
+
+      return load(actor, spanOf(query, now()), grid)
+    })
   }
 
   return {
     async graph(actor, query) {
-      const parsed = parse(querySchema, query)
-      const grid = await gridOf()
-
-      // Los pesos van en la clave: al cambiarlos en el panel se recalcula.
-      return cache.get(`${await keyOf(actor, parsed)}|${weightsKey(grid)}`, () => {
-        limited(actor)
-
-        return load(actor, spanOf(parsed, now()), grid)
-      })
+      return (await builtFor(actor, parse(querySchema, query), true)).graph
     },
 
     async preview(actor, input) {
@@ -279,21 +317,28 @@ export function createSeatingService(options: SeatingOptions): SeatingService {
       limited(actor)
 
       const [{ sessions, images }, grid] = await Promise.all([sessionsOf(actor, span), gridOf()])
-      const proposed = build(sessions, images, span.days, parsed.grid)
+      const proposed = await build(sessions, images, span.days, parsed.grid)
 
       return {
         graph: proposed.graph,
         proposed: proposed.quality,
-        current: build(sessions, images, span.days, grid).quality,
+        current: (await build(sessions, images, span.days, grid)).quality,
       }
     },
 
     async friendsOf(actor, limit) {
-      const grid = await gridOf()
-      const key = `${await keyOf(actor, { days: ALL_DAYS })}|${weightsKey(grid)}`
-      const friends = await friendsCache.get(key, () => loadFriends(actor, grid))
+      // El mismo cálculo que la vista «todo» de la red: si alguien la ha abierto, ya está.
+      const { friends } = await builtFor(actor, { days: ALL_DAYS }, false)
 
       return (friends.get(actor.login.toLowerCase()) ?? []).slice(0, limit)
+    },
+
+    async warm(campusIds) {
+      // Cada campus por turno, como lo vería un estudiante cualquiera: es la
+      // clave que comparte casi todo el mundo (`audienceKey`).
+      for (const campusId of campusIds) {
+        await builtFor({ login: '', campusId, admin: false }, { days: ALL_DAYS }, false)
+      }
     },
 
     async heat(actor, query) {

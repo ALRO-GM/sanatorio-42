@@ -113,8 +113,21 @@ amigos) salen con el mismo Louvain que la red de correcciones.
 **Amistades más cercanas** (2026-11-02, pedido por Alberto: «tus amigos son
 las 10 personas con las que más cerca y más tiempo te has sentado»). De cada
 persona, quienes tienen con ella al menos la cercanía mínima, de más a menos,
-con todo el historial (`friendsOf` en `seating.service.ts`). Se calcula para
-todo el campus de una vez y se guarda una hora por campus, mundo y quién se ve.
+con todo el historial (`friendsOf` en `seating.service.ts`). Sale del mismo
+cálculo que la vista «todo» del grafo: uno por campus, mundo y quién se ve.
+
+**Que no se espere (2026-11-02).** La vista de entrada es «todo»: en Madrid,
+unas 850 000 sesiones. Medido en local, leerlas son unos 3,2 s y medir la
+cercanía 1,6 s más; en la máquina de Oracle, más. Y mientras tanto la web
+entera esperaba, porque Node atiende todo en un solo hilo. Ahora:
+
+- La lectura va por tandas de 20 000 filas en el orden del índice, y el cálculo
+  deja pasar a las demás peticiones cada 20 000 sesiones (`core/breathe.ts`).
+- El trabajo `red de asientos precalculada` rehace «todo» de cada campus cada
+  5 minutos, de fondo. Lo caducado se sigue dando hasta 6 horas mientras se
+  rehace (`staleMs` de `core/ttl-cache.ts`): nadie espera al cálculo entero.
+- Lo que pase de un segundo sale en el registro como `[lento] red de asientos…`,
+  con las sesiones y lo que tardó, para medirlo en producción.
 Lo usan las noticias de Code Clicker (`docs/code-clicker.md`) y el grupo
 «Amigos» del álbum de correcciones (`docs/correcciones-coleccion.md`).
 

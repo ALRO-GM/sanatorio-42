@@ -1,10 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
-import type { CurrentUser, NetworkGraph, NetworkNode } from '@sanatorio/contracts'
+import type { CurrentUser, NetworkGraph, NetworkLink, NetworkNode } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
 import type { NetworkParams } from '../../shared/api/types'
+import { keepValue, keptValue } from '../../shared/hooks/useAsync'
 import { usePolling } from '../../shared/hooks/usePolling'
+import { expectedTotals, timedLoad } from '../../shared/loadMemory'
+import { LoadingActivity } from '../../shared/ui/LoadingActivity'
 import { useI18n } from '../../shared/i18n'
 import { useFormat } from '../../shared/i18n/useFormat'
 import { Blocks } from '../../shared/layout/Blocks'
@@ -27,6 +30,7 @@ import {
 import type { Scale, ScaleMode } from './colors'
 import type { ColorMode } from './colors'
 import { ForceGraph } from './ForceGraph'
+import { useReveal } from './reveal'
 import { Meter } from './Meter'
 import { PersonPanel } from './PersonPanel'
 import { PersonSearch } from './PersonSearch'
@@ -134,6 +138,18 @@ function paramsOf(filters: Filters): NetworkParams {
   }
 }
 
+/** Las fases del aviso de carga: lo que hace la API (`network.service.ts`). */
+const LOADING_STEPS = [
+  'net.loading.read',
+  'net.loading.pairs',
+  'net.loading.groups',
+  'net.loading',
+] as const
+
+/** Sin grafo todavía: listas fijas, para no rehacer la aparición en cada render. */
+const NO_NODES: NetworkNode[] = []
+const NO_LINKS: NetworkLink[] = []
+
 /**
  * Red de correcciones: quién ha corregido a quién en el campus, como un grafo
  * de burbujas que se recoloca solo, con filtros y el cálculo de endogamia.
@@ -157,6 +173,11 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
   const [reloads, setReloads] = useState(0)
 
   const params = useMemo(() => paramsOf(filters), [filters])
+  // Lo último que llegó con estos filtros se ve al momento al volver a la Red.
+  const keepKey = `network|${JSON.stringify(params)}`
+  const remembered = keptValue(keepKey) as NetworkGraph | undefined
+
+  if (graph === null && remembered !== undefined) setGraph(remembered)
 
   // Si unos filtros no dejan a nadie, se vuelve a la vista de partida, tu red
   // (pedido por Alberto, 2026-11-01): con el grafo vacío no quedaba nada a
@@ -207,9 +228,17 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
     let current = true
     const timer = setTimeout(() => {
       setLoading(true)
-      api
-        .getNetwork(params)
+      timedLoad(
+        'network',
+        () => api.getNetwork(params),
+        ({ totals }) => ({
+          corrections: totals.corrections,
+          pairs: totals.pairs,
+          people: totals.people,
+        }),
+      )
         .then((result) => {
+          keepValue(`network|${JSON.stringify(params)}`, result)
           if (!current) return
           // Se sigue viendo el grafo de antes mientras llega el de partida.
           if (result.nodes.length === 0) {
@@ -272,6 +301,12 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
       links: graph.links.filter((link) => inside.has(link.source) && inside.has(link.target)),
     }
   }, [graph, onlyInside, personMin, selected])
+  // Al llegar un grafo nuevo, aparece desde quien está elegida hacia fuera.
+  const revealed = useReveal(shownGraph?.nodes ?? NO_NODES, shownGraph?.links ?? NO_LINKS, selected)
+  const expected = useMemo(
+    () => expectedTotals('network', { corrections: 60_000, pairs: 25_000, people: 1_500 }),
+    [],
+  )
 
   // El mínimo por persona se aplica aquí: si deja el grafo vacío, se quita.
   if (
@@ -913,7 +948,16 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
         {graph === null && (
           <div className="net-stage">
             {error === null ? (
-              <p className="estado">{t('net.loading')}</p>
+              <LoadingActivity
+                steps={LOADING_STEPS}
+                stats={[
+                  { key: 'net.loading.corrections', target: expected.totals.corrections ?? 0 },
+                  { key: 'net.loading.pairCount', target: expected.totals.pairs ?? 0 },
+                  { key: 'net.loading.people', target: expected.totals.people ?? 0 },
+                ]}
+                who={{ login: me.login, image: me.image }}
+                {...(expected.ms === undefined ? {} : { expectedMs: expected.ms })}
+              />
             ) : (
               <ErrorNote error={error} retry />
             )}
@@ -935,8 +979,8 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
                 </p>
               ) : (
                 <ForceGraph
-                  nodes={(shownGraph ?? graph).nodes}
-                  links={(shownGraph ?? graph).links}
+                  nodes={revealed.nodes}
+                  links={revealed.links}
                   colorOf={paint}
                   selected={selected}
                   onSelect={setSelected}

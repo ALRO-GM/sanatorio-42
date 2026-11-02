@@ -7,7 +7,9 @@
  * toca nada.
  */
 import { cleanup } from '@testing-library/react'
-import { afterAll, vi } from 'vitest'
+import { afterAll, beforeEach, vi } from 'vitest'
+
+import { forgetKept } from '../../src/shared/hooks/useAsync'
 
 /** Pone `value` en `target[name]` solo si no lo trae ya. */
 function fill(target: object, name: string, value: unknown): void {
@@ -24,6 +26,12 @@ const noop = (): void => undefined
  * cadena de dos.
  */
 const SETTLE_MS = 1000
+
+// Lo recordado de una sección (`useAsync` con `keep`) es de cada test: si no,
+// el siguiente la vería ya cargada y no probaría la carga.
+beforeEach(() => {
+  forgetKept()
+})
 
 if (typeof window !== 'undefined') {
   vi.stubEnv('VITE_USE_MOCK', 'true')

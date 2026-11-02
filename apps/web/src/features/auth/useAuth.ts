@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react'
 import type { CurrentUser } from '@sanatorio/contracts'
 
 import { api, ApiError } from '../../shared/api'
+import { forgetKept } from '../../shared/hooks/useAsync'
 
 /**
  * Quién hay en sesión, con la distinción que importa.
@@ -48,6 +49,8 @@ export function useAuth() {
 
   const logout = useCallback(async () => {
     await api.logout()
+    // Lo recordado de las secciones es de quien se va: la siguiente sesión empieza de cero.
+    forgetKept()
     setMe(null)
   }, [])
 

@@ -12,10 +12,10 @@ Cómo se trabaja con ellas: [docs/textos.md](../textos.md).
 | [calendario](calendario.md) | 105 | 0 | 0 | 0 | 0 |
 | [clusters](clusters.md) | 82 | 0 | 0 | 0 | 0 |
 | [code-clicker](code-clicker.md) | 27 | 0 | 0 | 0 | 0 |
-| [comun](comun.md) | 442 | 0 | 0 | 0 | 0 |
+| [comun](comun.md) | 444 | 0 | 0 | 0 | 0 |
 | [curso-shell](curso-shell.md) | 66 | 0 | 0 | 0 | 0 |
 | [demos](demos.md) | 252 | 0 | 0 | 0 | 0 |
-| [estadisticas](estadisticas.md) | 175 | 0 | 0 | 0 | 0 |
+| [estadisticas](estadisticas.md) | 182 | 0 | 0 | 0 | 0 |
 | [examenes](examenes.md) | 71 | 0 | 0 | 0 | 0 |
 | [expediente](expediente.md) | 146 | 0 | 0 | 0 | 0 |
 | [gestion](gestion.md) | 705 | 0 | 71 | 71 | 71 |
@@ -23,7 +23,7 @@ Cómo se trabaja con ellas: [docs/textos.md](../textos.md).
 | [legal](legal.md) | 86 | 0 | 0 | 0 | 0 |
 | [notgames](notgames.md) | 251 | 0 | 0 | 0 | 0 |
 | [pizarras](pizarras.md) | 38 | 0 | 0 | 0 | 0 |
-| [red](red.md) | 208 | 0 | 0 | 0 | 0 |
+| [red](red.md) | 227 | 0 | 0 | 0 | 0 |
 | [sala-de-espera](sala-de-espera.md) | 47 | 0 | 0 | 0 | 0 |
 | [tablon](tablon.md) | 146 | 0 | 0 | 0 | 0 |
 | [terapia](terapia.md) | 61 | 0 | 0 | 0 | 0 |

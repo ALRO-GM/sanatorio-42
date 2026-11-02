@@ -89,7 +89,9 @@ export async function wholeCampus(): Promise<void> {
   // En la Red, la × de la persona elegida; en Amigos, vaciar el buscador.
   const found = await waitFor(
     () => {
-      const clear = screen.queryByRole('button', { name: es['net.person.clear'] ?? '' })
+      // Con el grafo recordado de antes, la ficha y el buscador pueden salir a la vez.
+      const clear =
+        screen.queryAllByRole('button', { name: es['net.person.clear'] ?? '' })[0] ?? null
       const search = screen.queryByRole('combobox', { name: es['common.person'] ?? '' })
 
       if (clear === null && search === null) throw new Error('sin persona elegida que quitar')

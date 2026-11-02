@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 
 import type { AsyncState } from '../hooks/useAsync'
@@ -31,7 +32,7 @@ export function Async<T>({ state, children, empty, emptyText, loadingText }: Asy
 
   if (data === undefined) {
     return loading ? (
-      <p className="estado">{loadingText ?? t('app.loading')}</p>
+      <Waiting text={loadingText ?? t('app.loading')} />
     ) : (
       <ErrorNote error={error} retry />
     )
@@ -42,4 +43,43 @@ export function Async<T>({ state, children, empty, emptyText, loadingText }: Asy
   }
 
   return <>{children(data)}</>
+}
+
+/** A partir de cuándo se dice que sigue en marcha, y que ya casi está. */
+const SLOW_MS = 2_500
+const ALMOST_MS = 8_000
+
+/**
+ * «Cargando…» y, si tarda, una segunda línea que cambia: así no parece que la
+ * web se ha quedado colgada (pedido por Alberto, 2026-11-02).
+ */
+function Waiting({ text }: { text: string }) {
+  const { t } = useI18n()
+  const [more, setMore] = useState<string | null>(null)
+
+  useEffect(() => {
+    const slow = window.setTimeout(() => {
+      setMore('app.loadingSlow')
+    }, SLOW_MS)
+    const almost = window.setTimeout(() => {
+      setMore('app.loadingAlmost')
+    }, ALMOST_MS)
+
+    return () => {
+      window.clearTimeout(slow)
+      window.clearTimeout(almost)
+    }
+  }, [])
+
+  return (
+    <p className="estado">
+      {text}
+      {more !== null && (
+        <>
+          <br />
+          <small>{t(more)}</small>
+        </>
+      )}
+    </p>
+  )
 }

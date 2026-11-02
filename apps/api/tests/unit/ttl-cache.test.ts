@@ -49,4 +49,72 @@ describe('memoria con caducidad', () => {
     await expect(cache.get('x', () => Promise.reject(new Error('boom')))).rejects.toThrow('boom')
     expect(await cache.get('x', load('ok'))).toBe('ok')
   })
+
+  it('con «staleMs», lo caducado se sigue dando mientras se rehace de fondo, una sola vez', async () => {
+    let clock = 0
+    let loads = 0
+    let release: (() => void) | undefined
+    const cache = createTtlCache<number>({
+      ttlMs: 100,
+      staleMs: 1_000,
+      maxEntries: 5,
+      now: () => clock,
+    })
+    const slow = (): Promise<number> => {
+      loads += 1
+
+      const value = loads
+
+      return new Promise((resolve) => {
+        release = () => {
+          resolve(value)
+        }
+      })
+    }
+
+    const first = cache.get('a', slow)
+    release?.()
+    expect(await first).toBe(1)
+
+    // Caducado: sale el 1 al momento, aunque el 2 aún no esté.
+    clock = 150
+    expect(await cache.get('a', slow)).toBe(1)
+    expect(await cache.get('a', slow)).toBe(1)
+    expect(loads).toBe(2)
+
+    release?.()
+    await Promise.resolve()
+    await Promise.resolve()
+    expect(await cache.get('a', slow)).toBe(2)
+
+    // Pasado también el margen, se espera al cálculo como siempre.
+    clock = 5_000
+    const late = cache.get('a', slow)
+    release?.()
+    expect(await late).toBe(3)
+  })
+
+  it('si rehacer de fondo falla o el tope salta, se sigue dando lo de antes', async () => {
+    let clock = 0
+    const cache = createTtlCache<string>({
+      ttlMs: 100,
+      staleMs: 1_000,
+      maxEntries: 5,
+      now: () => clock,
+    })
+
+    expect(await cache.get('a', () => Promise.resolve('viejo'))).toBe('viejo')
+    clock = 150
+    expect(await cache.get('a', () => Promise.reject(new Error('boom')))).toBe('viejo')
+    await Promise.resolve()
+    expect(
+      await cache.get('a', () => {
+        throw new Error('tope')
+      }),
+    ).toBe('viejo')
+    expect(await cache.get('a', () => Promise.resolve('nuevo'))).toBe('viejo')
+    await Promise.resolve()
+    await Promise.resolve()
+    expect(await cache.get('a', () => Promise.resolve('otro'))).toBe('nuevo')
+  })
 })

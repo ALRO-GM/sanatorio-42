@@ -11,6 +11,29 @@ export type AsyncState<T> = {
   setData: Dispatch<SetStateAction<T | undefined>>
 }
 
+/** Lo último que llegó de cada `keep`: al volver a una sección se ve al momento. */
+const kept = new Map<string, unknown>()
+
+/** Las respuestas que se recuerdan, como mucho: las secciones pesadas y sus periodos. */
+const KEPT = 24
+
+/** Lo último que llegó de `key`, para pantallas que cargan a su manera (la Red). */
+export function keptValue(key: string): unknown {
+  return kept.get(key)
+}
+
+/** Recuerda `value` en `key`, como hace `useAsync` con `keep`. */
+export function keepValue(key: string, value: unknown): void {
+  kept.delete(key)
+  kept.set(key, value)
+  if (kept.size > KEPT) kept.delete(kept.keys().next().value ?? '')
+}
+
+/** Olvida lo recordado (al cerrar la sesión, y entre tests). */
+export function forgetKept(): void {
+  kept.clear()
+}
+
 /**
  * Carga de datos con sus tres estados: cargando, error y datos.
  *
@@ -18,10 +41,19 @@ export type AsyncState<T> = {
  * es `true` la primera vez): una lista que parpadea cada vez que se refresca
  * cansa más que una que tarda un segundo en ponerse al día.
  *
+ * Con `keep`, la última respuesta de esa clave se recuerda mientras la web
+ * sigue abierta: al volver a la sección (o al mismo periodo) sale al momento y
+ * se pone al día por detrás, en vez de esperar otra vez a la red entera.
+ *
  * @param fn   Función que devuelve la promesa. Se vuelve a llamar si cambia `deps`.
  * @param deps Dependencias, como en `useEffect`.
  */
-export function useAsync<T>(fn: () => Promise<T>, deps: DependencyList): AsyncState<T> {
+export function useAsync<T>(
+  fn: () => Promise<T>,
+  deps: DependencyList,
+  options: { keep?: string } = {},
+): AsyncState<T> {
+  const { keep } = options
   const [data, setData] = useState<T | undefined>(undefined)
   const [error, setError] = useState<unknown>(null)
   const [loading, setLoading] = useState(true)
@@ -39,23 +71,26 @@ export function useAsync<T>(fn: () => Promise<T>, deps: DependencyList): AsyncSt
 
     try {
       const result = await load()
+      if (keep !== undefined) keepValue(keep, result)
       if (mine === turn.current) setData(result)
     } catch (err) {
       if (mine === turn.current) setError(err)
     } finally {
       if (mine === turn.current) setLoading(false)
     }
-  }, [load])
+  }, [load, keep])
 
   useEffect(() => {
-    setLoading(true)
-    setData(undefined)
+    const remembered = keep === undefined ? undefined : (kept.get(keep) as T | undefined)
+
+    setLoading(remembered === undefined)
+    setData(remembered)
     void reload()
 
     return () => {
       turn.current += 1
     }
-  }, [reload])
+  }, [reload, keep])
 
   return { data, error, loading, reload, setData }
 }
