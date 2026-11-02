@@ -191,12 +191,14 @@ recompilar la realidad, según el prestigio que se lleve (1, 5, 25 y 100): cada
 una más desmedida que la anterior.
 
 La gente que sale en las noticias es la de cada jugador: sus 10 amistades más
-cercanas, las mismas que el grupo «Amigos» de la colección de cromos. Son las
-personas con las que más se ha corregido (le corrigieron o las corrigió), de más
-a menos, y en la piscina con las correcciones de la piscina. Quien no se puede
-ver (del otro mundo u oculta a su grupo) se salta antes de contar, así que no
-deja hueco. Si no llegan a 10, se completa con quienes más corrigen en su campus
-(`namesFor` en `clicker.service.ts`).
+cercanas, las personas con las que más cerca y más tiempo se ha sentado en los
+clústeres. Es la cercanía de la red de asientos (pestaña Amigos,
+[asientos.md](asientos.md)) con todo el historial: horas sentados a la vez por
+el peso de los puestos, de más a menos. Quien no se puede ver (del otro mundo u
+oculta a su grupo) no cuenta, así que no deja hueco. Si no llegan a 10 (en la
+piscina, por ejemplo, que no tiene historial de puestos), se completa con
+quienes más corrigen en su campus (`namesFor` en `clicker.service.ts`,
+`friendsOf` en `network/seating.service.ts`).
 
 El café del fondo es líquido de verdad: tres olas que se cruzan, burbujas y, de
 vez en cuando, un chorro que cae y salpica. Cada patito de goma comprado flota

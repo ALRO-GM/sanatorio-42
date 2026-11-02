@@ -852,8 +852,8 @@ GET /clicker → por dónde vas y tu partida:
 `{ plus, pill, save, rev, caught, saleDue, names }`.
 
 - `names` son, para las noticias del juego, tus 10 amistades más cercanas (con
-  quien más te has corregido, en los dos sentidos); si no llegan, se completa
-  con quienes más corrigen en tu campus. Solo viene con la pastilla roja.
+  quien más cerca y más tiempo te has sentado, la red de asientos); si no
+  llegan, se completa con quienes más corrigen en tu campus. Solo viene con la pastilla roja.
 - `caught` son las veces que te han pillado haciendo trampas, y `saleDue` dice
   que te toca vender todos los edificios antes de poder guardar.
 

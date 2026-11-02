@@ -63,7 +63,7 @@ const MAX_PLUS_PER_SEND = 25
 /** Lo que puede pesar una partida guardada. */
 const MAX_SAVE_BYTES = 80_000
 const BOARD_SIZE = 25
-/** Las amistades que salen en las noticias del juego: las 10 más cercanas, como en la colección. */
+/** Las amistades que salen en las noticias del juego: las 10 más cercanas. */
 const FRIENDS = 10
 
 const plusSchema = z.object({ count: z.number().int().min(1).max(MAX_PLUS_PER_SEND) })
@@ -141,11 +141,8 @@ export type ClickerServiceOptions = {
   audience?: Audience
   /** Quién corrige más en un campus, para las noticias del juego. */
   topCorrectors?: (campusId: number, limit: number) => Promise<string[]>
-  /**
-   * Con quién se ha corregido alguien, en los dos sentidos, los que más
-   * primero: en la piscina, las correcciones de la piscina.
-   */
-  partnersOf?: (campusId: number, login: string, pool: boolean) => Promise<string[]>
+  /** Las amistades más cercanas de alguien: con quien más se ha sentado cerca y más tiempo. */
+  friendsOf?: (actor: Actor, limit: number) => Promise<string[]>
   /** El tiempo que cada quien ha tenido abierta una sección: lo sabe `usage`. */
   timeOn?: (
     key: string,
@@ -292,9 +289,10 @@ export function createClickerService(options: ClickerServiceOptions) {
 
   /**
    * Los nombres de las noticias del juego: las 10 amistades más cercanas de
-   * quien juega, las personas con las que más se ha corregido (le corrigieron
-   * o las corrigió), para que las noticias hablen de gente que conoce. Si no
-   * llegan a 10, se completa con quienes más corrigen en su campus.
+   * quien juega, las personas con las que más cerca y más tiempo se ha sentado
+   * (la red de asientos, `docs/asientos.md`), para que las noticias hablen de
+   * gente que conoce. Si no llegan a 10, se completa con quienes más corrigen
+   * en su campus.
    */
   async function namesFor(actor: Actor): Promise<string[]> {
     // Solo gente que quien juega puede ver: ni del otro mundo ni oculta a su grupo.
@@ -310,13 +308,7 @@ export function createClickerService(options: ClickerServiceOptions) {
       }
     }
 
-    add(
-      (
-        (await options
-          .partnersOf?.(actor.campusId, actor.login, actor.pool === true)
-          .catch(() => [])) ?? []
-      ).map((login) => login.toLowerCase()),
-    )
+    add((await options.friendsOf?.(actor, FRIENDS * 2).catch(() => [])) ?? [])
     if (chosen.length < FRIENDS) {
       add((await options.topCorrectors?.(actor.campusId, FRIENDS * 3).catch(() => [])) ?? [])
     }

@@ -64,12 +64,36 @@ describe('code clicker', () => {
     spent: 0,
   }
 
-  it('las noticias hablan de quien más te ha corregido y has corregido, y luego del campus', async () => {
+  let seatId = 1
+  /** `login` se sienta en `host` `hours` horas, empezando hace `daysAgo` días. */
+  const sit = async (
+    login: string,
+    host: string,
+    daysAgo: number,
+    hours: number,
+  ): Promise<void> => {
+    const begin = new Date(clock.now() - daysAgo * 24 * HOUR).toISOString()
+    const end = new Date(clock.now() - daysAgo * 24 * HOUR + hours * HOUR).toISOString()
+
+    await db.execute({
+      sql: `INSERT INTO seat_sessions
+              (location_id, campus_id, user_id, login, host, begin_at, first_seen_at, seen_at)
+            VALUES (?, 22, ?, ?, ?, ?, ?, ?)`,
+      args: [seatId, seatId, login, host, begin, begin, end],
+    })
+    seatId += 1
+  }
+
+  it('las noticias hablan de con quién más te sientas cerca, y luego del campus', async () => {
     const { clicker } = services
-    await correct('leo', 'ana', 3)
-    await correct('ana', 'uma', 2)
-    await correct('zoe', 'bob', 20)
-    await correct('ana', 'ana', 5)
+
+    // Con «leo» al lado 4 horas y con «uma» en diagonal 2; «bob» está lejos.
+    await sit('ana', 'c1r1s3', 1, 6)
+    await sit('leo', 'c1r1s1', 1, 4)
+    await sit('uma', 'c1r1s4', 1, 2)
+    await sit('bob', 'c1r5s9', 1, 6)
+    // Corregir mucho con alguien no le hace amistad: solo completa la lista.
+    await correct('zoe', 'ana', 20)
 
     // Sin la roja no hacen falta.
     expect((await clicker.state(actor('ana'))).names).toEqual([])
@@ -79,9 +103,10 @@ describe('code clicker', () => {
 
     const { names } = await clicker.state(actor('ana'))
 
-    // Primero con quién se ha corregido (más veces antes), sin repetir ni salir ella.
+    // Primero las amistades (más cercanía antes), sin repetir ni salir ella.
     expect(names.slice(0, 2)).toEqual(['leo', 'uma'])
     expect(names).toContain('zoe')
+    expect(names).not.toContain('bob')
     expect(names).not.toContain('ana')
     expect(new Set(names).size).toBe(names.length)
     expect(names.length).toBeLessThanOrEqual(10)
@@ -89,10 +114,13 @@ describe('code clicker', () => {
 
   it('con diez amistades o más, las noticias solo hablan de las diez más cercanas', async () => {
     const { clicker } = services
-    // Doce amistades: «p01» es la más cercana (doce correcciones) y «p12» la que menos.
+    // Doce amistades, cada una un día al lado: «p01» doce horas, «p12» una.
     const friends = Array.from({ length: 12 }, (_, i) => `p${String(i + 1).padStart(2, '0')}`)
 
-    for (const [i, friend] of friends.entries()) await correct(friend, 'ana', 12 - i)
+    for (const [i, friend] of friends.entries()) {
+      await sit('ana', 'c1r1s3', i + 1, 12)
+      await sit(friend, 'c1r1s1', i + 1, 12 - i)
+    }
     // Quien más corrige del campus no es amistad suya: no entra.
     await correct('zoe', 'bob', 40)
     await press('ana', 42)

@@ -113,7 +113,7 @@ con el commit donde volver a verlo, está en
 
 | Fecha      | Dónde                  | Qué cambió                                                                                                   |
 | ---------- | ---------------------- | ------------------------------------------------------------------------------------------------------------ |
-| 2026-11-02 | Code Clicker           | Las noticias hablan de tus 10 amistades más cercanas (con quien más te has corregido), sin huecos por gente oculta y, en la piscina, con sus correcciones ([docs/code-clicker.md](docs/code-clicker.md)) |
+| 2026-11-02 | Code Clicker | Las noticias hablan de tus 10 amistades más cercanas: con quien más cerca y más tiempo te has sentado, según la red de asientos ([docs/code-clicker.md](docs/code-clicker.md)) |
 | 2026-11-02 | Buscadores             | Portada pública por idioma (`/es/`, `/en/`…) en HTML sin JavaScript, `robots.txt`, `sitemap.xml`, datos estructurados y vista previa al compartir ([docs/seo.md](docs/seo.md)); la pantalla de entrada enlaza a ella y su pie ya enlaza a albrodri |
 | 2026-11-02 | Bienvenida             | Sale sola solo la primera vez que entras: la API lo apunta por persona (`welcomed`), y ya no vuelve en otro navegador, en una ventana privada ni al volver a entrar con 42 |
 | 2026-11-01 | Privacidad             | Texto nuevo (versión 2026-11-01, se vuelve a aceptar): correo de contacto, interés legítimo para los datos de quien no entra y cómo no salir, proveedores (Oracle, Slack del staff), plazos, seguridad y normas de no sacar datos de la red de 42; el pie dice «Hecho para albrodri» |

@@ -466,7 +466,7 @@ todo; la roja abre el juego. Para quien no eligió la roja, la sección no exist
 
 | Funcionalidad | Quién |
 | --- | --- |
-| Juego incremental: escribir código, comprar lo que lo escribe solo, mejoras y noticias que hablan de tus 10 amistades más cercanas | Pastilla roja `[clicker]` |
+| Juego incremental: escribir código, comprar lo que lo escribe solo, mejoras y noticias que hablan de tus 10 amistades más cercanas (con quien más te sientas) | Pastilla roja `[clicker]` |
 | Sigue en toda la web con su ventanita (no en el Pomodoro) | Pastilla roja |
 | Estadísticas con historial de capital (hoy, semana, mes, todo, fechas, zoom), logros y clasificación | Pastilla roja |
 | Tope de 30 min al día si tu pace está en riesgo | Pastilla roja |

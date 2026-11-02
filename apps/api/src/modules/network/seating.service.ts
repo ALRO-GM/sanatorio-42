@@ -52,12 +52,24 @@ export type SeatingService = {
    * que separan en grupos comparado con los que están en uso.
    */
   preview: (actor: Actor, input: unknown) => Promise<SeatWeightsPreview>
+  /**
+   * Las amistades más cercanas de alguien: con quien más cercanía tiene en la
+   * red de asientos de todo el historial (horas sentados a la vez por el peso
+   * de los puestos), de más a menos, como mucho `limit`. Solo gente que puede ver.
+   */
+  friendsOf: (actor: Actor, limit: number) => Promise<string[]>
 }
 
 const DAY_MS = 86_400_000
 
 /** La foto de los puestos se repite cada pocos minutos: no hace falta más fresco. */
 const CACHE_TTL_MS = 5 * 60_000
+
+/** Las amistades de cada cual cambian despacio: se rehacen cada hora. */
+const FRIENDS_TTL_MS = 60 * 60_000
+
+/** «Todo» el historial, como el periodo de entrada de la red de asientos. */
+const ALL_DAYS = 3650
 
 /** Por debajo de esto (una hora al lado, más o menos) dos personas no se unen. */
 const MIN_CLOSENESS = 2
@@ -111,6 +123,12 @@ export function createSeatingService(options: SeatingOptions): SeatingService {
     options.weights?.grid() ?? Promise.resolve(DEFAULT_SEAT_WEIGHTS)
   const cache = createTtlCache<SeatGraph>({ ttlMs: CACHE_TTL_MS, maxEntries: 12, now })
   const heatCache = createTtlCache<SeatHeat>({ ttlMs: CACHE_TTL_MS, maxEntries: 12, now })
+  // Por campus, mundo y quién se ve: de cada persona, sus más cercanas.
+  const friendsCache = createTtlCache<Map<string, string[]>>({
+    ttlMs: FRIENDS_TTL_MS,
+    maxEntries: 12,
+    now,
+  })
   const fresh = createRateLimit({ max: FRESH_PER_MINUTE, windowMs: 60_000, now })
   const limited = (actor: Actor): void => {
     if (!fresh.hit(actor.login)) {
@@ -204,6 +222,35 @@ export function createSeatingService(options: SeatingOptions): SeatingService {
     return seatSessionsIn(db, actor.campusId, since, until, await seesFor(audience, actor))
   }
 
+  /** De cada persona, quienes tienen con ella al menos la cercanía mínima, de más a menos. */
+  async function loadFriends(actor: Actor, grid: SeatWeights): Promise<Map<string, string[]>> {
+    const until = now()
+    const { sessions } = await sessionsOf(actor, {
+      since: until - ALL_DAYS * DAY_MS,
+      until,
+      days: ALL_DAYS,
+    })
+    const near = new Map<string, { login: string; closeness: number }[]>()
+    const add = (login: string, other: string, closeness: number): void => {
+      near.set(login, [...(near.get(login) ?? []), { login: other, closeness }])
+    }
+
+    for (const pair of seatingOf(sessions, grid).pairs) {
+      if (pair.closeness < MIN_CLOSENESS) continue
+      add(pair.a, pair.b, pair.closeness)
+      add(pair.b, pair.a, pair.closeness)
+    }
+
+    return new Map(
+      [...near].map(([login, list]) => [
+        login,
+        list
+          .sort((x, y) => y.closeness - x.closeness || x.login.localeCompare(y.login))
+          .map((entry) => entry.login),
+      ]),
+    )
+  }
+
   async function load(actor: Actor, span: Span, grid: SeatWeights): Promise<SeatGraph> {
     const { sessions, images } = await sessionsOf(actor, span)
 
@@ -239,6 +286,14 @@ export function createSeatingService(options: SeatingOptions): SeatingService {
         proposed: proposed.quality,
         current: build(sessions, images, span.days, grid).quality,
       }
+    },
+
+    async friendsOf(actor, limit) {
+      const grid = await gridOf()
+      const key = `${await keyOf(actor, { days: ALL_DAYS })}|${weightsKey(grid)}`
+      const friends = await friendsCache.get(key, () => loadFriends(actor, grid))
+
+      return (friends.get(actor.login.toLowerCase()) ?? []).slice(0, limit)
     },
 
     async heat(actor, query) {

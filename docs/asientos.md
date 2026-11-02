@@ -110,6 +110,13 @@ cuántas se ha sentado cerca, la parte de sus horas **sin nadie cerca**
 (aislamiento) y sus tres puestos más usados. Las comunidades (grupos de
 amigos) salen con el mismo Louvain que la red de correcciones.
 
+**Amistades más cercanas** (2026-11-02, pedido por Alberto: «tus amigos son
+las 10 personas con las que más cerca y más tiempo te has sentado»). De cada
+persona, quienes tienen con ella al menos la cercanía mínima, de más a menos,
+con todo el historial (`friendsOf` en `seating.service.ts`). Se calcula para
+todo el campus de una vez y se guarda una hora por campus, mundo y quién se ve.
+Lo usan las noticias de Code Clicker (`docs/code-clicker.md`).
+
 ## Dónde se ve
 
 `GET /network/seats?days=` (`docs/api.md`), en la web `features/network/SeatsPage.tsx`
