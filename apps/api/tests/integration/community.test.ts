@@ -617,6 +617,7 @@ describe('un solo proceso para la web y la API', () => {
     writeFileSync(join(folder, 'index.html'), '<!doctype html><title>Peer4U</title>')
     writeFileSync(join(folder, 'en', 'index.html'), '<!doctype html><title>About</title>')
     writeFileSync(join(folder, 'robots.txt'), 'User-agent: *')
+    writeFileSync(join(folder, 'sitemap.xml'), '<urlset></urlset>')
 
     const built = await app({ STATIC_DIR: folder })
     const get = (url: string) => built.app.inject({ method: 'GET', url })
@@ -635,6 +636,7 @@ describe('un solo proceso para la web y la API', () => {
     expect(bare.headers.location).toBe('/en/?utm=x')
 
     expect((await get('/robots.txt')).headers['content-type']).toContain('text/plain')
+    expect((await get('/sitemap.xml')).headers['content-type']).toContain('application/xml')
     // Lo demás sigue siendo la web, y lo que no es una carpeta no se redirige.
     expect((await get('/')).body).toContain('<title>Peer4U</title>')
     expect((await get('/fr/')).body).toContain('<title>Peer4U</title>')
