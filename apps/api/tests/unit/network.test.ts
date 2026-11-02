@@ -66,10 +66,10 @@ describe('red de correcciones', () => {
       ])
     })
 
-    it('la endogamia sube con la repetición y con las correcciones devueltas', () => {
+    it('la endogamia sube con la repetición y con las correcciones devueltas', async () => {
       // `ana` y `eva` se corrigen entre sí cinco veces; `leo` y `sol`, una sola
       // y en un sentido.
-      const { people, totals } = analyse(
+      const { people, totals } = await analyse(
         mergePairs([pair('ana', 'eva', 3), pair('eva', 'ana', 2), pair('leo', 'sol')], members),
         members,
       )
@@ -89,8 +89,8 @@ describe('red de correcciones', () => {
       expect(totals.endogamy).toBe(67)
     })
 
-    it('quien es de fuera sale marcado y no cuenta en la media del campus', () => {
-      const { people, totals } = analyse(
+    it('quien es de fuera sale marcado y no cuenta en la media del campus', async () => {
+      const { people, totals } = await analyse(
         mergePairs([pair('ana', 'x1', 4), pair('x1', 'ana', 4)], members),
         members,
       )
@@ -100,14 +100,14 @@ describe('red de correcciones', () => {
       expect(totals.endogamy).toBe(94)
     })
 
-    it('separa en comunidades los grupos que no se cruzan', () => {
+    it('separa en comunidades los grupos que no se cruzan', async () => {
       const rows = [
         pair('ana', 'eva', 4),
         pair('eva', 'leo', 4),
         pair('leo', 'ana', 4),
         pair('sol', 'x1', 2),
       ]
-      const { people, totals } = analyse(mergePairs(rows, members), members)
+      const { people, totals } = await analyse(mergePairs(rows, members), members)
 
       expect(totals.communities).toBe(2)
       expect(new Set(['ana', 'eva', 'leo'].map((login) => people.get(login)?.community))).toEqual(
@@ -116,12 +116,12 @@ describe('red de correcciones', () => {
       expect(people.get('sol')?.community).toBe(1)
     })
 
-    it('encuentra los grupos aunque estén unidos por algún puente', () => {
+    it('encuentra los grupos aunque estén unidos por algún puente', async () => {
       // Dos pandillas de cuatro que se corrigen mucho, y un cruce suelto entre ellas.
       const gang = (names: string[]) =>
         names.flatMap((a, index) => names.slice(index + 1).map((b) => pair(a, b, 5)))
       const everyone = new Set(['a1', 'a2', 'a3', 'a4', 'b1', 'b2', 'b3', 'b4'])
-      const { people, totals } = analyse(
+      const { people, totals } = await analyse(
         mergePairs(
           [...gang(['a1', 'a2', 'a3', 'a4']), ...gang(['b1', 'b2', 'b3', 'b4']), pair('a1', 'b1')],
           everyone,
@@ -155,8 +155,8 @@ describe('red de correcciones', () => {
       expect(passMarkOf([], marks([0, 3]))).toBeNull()
     })
 
-    it('elige qué pintar: los más activos, o una persona y su entorno', () => {
-      const analysis = analyse(
+    it('elige qué pintar: los más activos, o una persona y su entorno', async () => {
+      const analysis = await analyse(
         mergePairs(
           [pair('ana', 'eva', 5), pair('eva', 'leo', 2), pair('leo', 'sol'), pair('sol', 'ana')],
           members,
@@ -179,12 +179,12 @@ describe('red de correcciones', () => {
       expect(select(analysis, { focus: 'nadie', min: 1, limit: 10 }).logins).toEqual([])
     })
 
-    it('centrado en alguien, sus uniones salen todas aunque el tope recorte las demás', () => {
+    it('centrado en alguien, sus uniones salen todas aunque el tope recorte las demás', async () => {
       // `foco` se ha cruzado una vez con 80 personas, que se corrigen mucho entre sí:
       // más uniones de las que caben. Pasaba con masenjo y smarin-s (2026-10-27).
       const crowd = Array.from({ length: 80 }, (_, index) => `q${String(index)}`)
       const everyone = new Set(['foco', ...crowd])
-      const analysis = analyse(
+      const analysis = await analyse(
         mergePairs(
           [
             ...crowd.map((login) => pair(login, 'foco', 1)),
@@ -203,13 +203,13 @@ describe('red de correcciones', () => {
       expect(around.hidden?.links).toBeGreaterThan(0)
     })
 
-    it('con un campus enorme se pintan las personas pedidas y seis uniones por cabeza', () => {
+    it('con un campus enorme se pintan las personas pedidas y seis uniones por cabeza', async () => {
       // 2 000 personas en fila y una piña de 150 que se corrigen todas entre sí:
       // más de 12 000 uniones.
       const crowd = Array.from({ length: 2000 }, (_, index) => `p${String(index)}`)
       const knot = crowd.slice(0, 150)
       const everyone = new Set(crowd)
-      const analysis = analyse(
+      const analysis = await analyse(
         mergePairs(
           [
             ...crowd.slice(1).map((login, index) => pair(crowd[index] ?? '', login, 3)),

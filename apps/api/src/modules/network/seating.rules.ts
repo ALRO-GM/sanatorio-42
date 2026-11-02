@@ -84,8 +84,8 @@ type PersonSeating = {
   partners: number
   /** Horas sin nadie cerca. */
   aloneHours: number
-  /** Horas en cada puesto. */
-  hosts: Map<string, number>
+  /** Sus puestos de siempre: los tres con más horas, de más a menos. */
+  usual: string[]
 }
 
 type PairSeating = { a: string; b: string; closeness: number; hours: number }
@@ -96,6 +96,15 @@ const HOUR_MS = 3_600_000
 
 /** Sesiones que se miran seguidas antes de dejar pasar a las demás peticiones. */
 const BATCH = 20_000
+
+/** Los puestos de siempre que se cuentan de cada persona. */
+const USUAL = 3
+
+/**
+ * Para la clave numérica de una pareja (`a · PAIR_KEY + b`): más personas que
+ * esto no tiene ningún campus, y el producto sigue siendo un entero exacto.
+ */
+const PAIR_KEY = 2 ** 21
 
 /** Lo que mide una lista de tramos, contando una vez lo que se pisa. */
 function covered(spans: [number, number][]): number {
@@ -118,112 +127,184 @@ function covered(spans: [number, number][]): number {
   return total + end - start
 }
 
+/** Los `USUAL` puestos con más horas, de más a menos. */
+function usualOf(hosts: ReadonlyMap<string, number>): string[] {
+  return [...hosts]
+    .sort((x, y) => y[1] - x[1])
+    .slice(0, USUAL)
+    .map(([host]) => host)
+}
+
 /**
  * Las cuentas de un historial de sesiones: por persona y por pareja. Las
  * sesiones en un puesto que no sigue el patrón de nombre cuentan como horas,
  * pero sin vecinos.
+ *
+ * Con todo el historial de un campus grande son millones de sesiones y cientos
+ * de miles de parejas: cada persona y cada pareja se guardan con un número, y
+ * de cada sesión solo se recuerda con quién coincidió mientras sigue abierta.
+ * Copiarlas todas con esa lista dejaba sin memoria al servidor con París.
  */
 export async function seatingOf(
   sessions: readonly SeatSession[],
   weights: SeatWeights = DEFAULT_SEAT_WEIGHTS,
 ): Promise<Seating> {
-  type Placed = SeatSession & { position: SeatPosition | null; near: [number, number][] }
   // Hay cientos de puestos y cientos de miles de sesiones: cada puesto se lee una vez.
-  const hosts = new Map<string, SeatPosition | null>()
+  const positions = new Map<string, SeatPosition | null>()
   const positionOf = (host: string): SeatPosition | null => {
-    let position = hosts.get(host)
+    let position = positions.get(host)
 
     if (position === undefined) {
       position = parseHost(host)
-      hosts.set(host, position)
+      positions.set(host, position)
     }
 
     return position
   }
-  const placed: Placed[] = []
+  const logins: string[] = []
+  const ids = new Map<string, number>()
+  const idOf = (login: string): number => {
+    let id = ids.get(login)
 
-  for (const [index, session] of sessions.entries()) {
-    if (index % BATCH === BATCH - 1) await breathe()
-    if (session.end > session.begin) {
-      placed.push({ ...session, position: positionOf(session.host), near: [] })
+    if (id === undefined) {
+      id = logins.length
+      logins.push(login)
+      ids.set(login, id)
     }
+
+    return id
   }
-  placed.sort((x, y) => x.begin - y.begin)
+  const hours: number[] = []
+  const aloneHours: number[] = []
+  const hostsOf: Map<string, number>[] = []
+  /** Lo que queda de una sesión: sus horas, su puesto y sus horas solas. */
+  const close = (person: number, session: SeatSession, near: [number, number][]): void => {
+    const spent = (session.end - session.begin) / HOUR_MS
+    const hosts = (hostsOf[person] ??= new Map())
+
+    hours[person] = (hours[person] ?? 0) + spent
+    aloneHours[person] = (aloneHours[person] ?? 0) + spent - covered(near) / HOUR_MS
+    hosts.set(session.host, (hosts.get(session.host) ?? 0) + spent)
+  }
+
+  const sorted = sessions.filter((session) => session.end > session.begin)
+
+  sorted.sort((x, y) => x.begin - y.begin)
   await breathe()
-  const pairs = new Map<string, PairSeating>()
+
+  type Open = {
+    session: SeatSession
+    person: number
+    position: SeatPosition
+    near: [number, number][]
+  }
+  // Cada pareja, por su clave: en qué sitio de las listas de abajo están sus cuentas.
+  const pairAt = new Map<number, number>()
+  const pairA: number[] = []
+  const pairB: number[] = []
+  const pairHours: number[] = []
+  const pairCloseness: number[] = []
   // Las sesiones abiertas a la vez, por clúster: solo esas pueden ser vecinas.
-  const open = new Map<string, Placed[]>()
+  const open = new Map<string, Open[]>()
 
-  for (const [index, session] of placed.entries()) {
-    const { position } = session
-
+  for (const [index, session] of sorted.entries()) {
     // Con todo el historial son cientos de miles: se deja pasar al resto de la web.
     if (index % BATCH === BATCH - 1) await breathe()
-    if (position === null) continue
+
+    const person = idOf(session.login)
+    const position = positionOf(session.host)
+
+    if (position === null) {
+      close(person, session, [])
+      continue
+    }
 
     const room = `${position.cluster}|${position.separator}`
-    const still = (open.get(room) ?? []).filter((other) => other.end > session.begin)
+    const still: Open[] = []
+    const mine: Open = { session, person, position, near: [] }
 
-    for (const other of still) {
-      if (other.login === session.login || other.position === null) continue
+    for (const other of open.get(room) ?? []) {
+      // Ya acabó: ninguna de las que faltan (empiezan más tarde) puede pisarla.
+      if (other.session.end <= session.begin) {
+        close(other.person, other.session, other.near)
+        continue
+      }
+
+      still.push(other)
+
+      if (other.person === person) continue
 
       const weight = seatWeight(position, other.position, weights)
 
       if (weight === 0) continue
 
       const from = session.begin
-      const to = Math.min(session.end, other.end)
+      const to = Math.min(session.end, other.session.end)
 
-      session.near.push([from, to])
+      mine.near.push([from, to])
       other.near.push([from, to])
 
       const [a, b] =
-        session.login < other.login ? [session.login, other.login] : [other.login, session.login]
-      const key = `${a}|${b}`
-      const pair = pairs.get(key) ?? { a, b, closeness: 0, hours: 0 }
+        session.login < other.session.login ? [person, other.person] : [other.person, person]
+      const key = a * PAIR_KEY + b
+      let at = pairAt.get(key)
 
-      pair.hours += (to - from) / HOUR_MS
-      pair.closeness += (weight * (to - from)) / HOUR_MS
-      pairs.set(key, pair)
+      if (at === undefined) {
+        at = pairA.length
+        pairAt.set(key, at)
+        pairA.push(a)
+        pairB.push(b)
+        pairHours.push(0)
+        pairCloseness.push(0)
+      }
+
+      pairHours[at] = (pairHours[at] ?? 0) + (to - from) / HOUR_MS
+      pairCloseness[at] = (pairCloseness[at] ?? 0) + (weight * (to - from)) / HOUR_MS
     }
 
-    still.push(session)
+    still.push(mine)
     open.set(room, still)
   }
 
+  for (const still of open.values()) {
+    for (const other of still) close(other.person, other.session, other.near)
+  }
+
+  await breathe()
+
+  const closeness = new Array<number>(logins.length).fill(0)
+  const partners = new Array<number>(logins.length).fill(0)
+  const pairs: PairSeating[] = []
+
+  for (const [at, a] of pairA.entries()) {
+    const b = pairB[at] ?? 0
+    const value = pairCloseness[at] ?? 0
+
+    closeness[a] = (closeness[a] ?? 0) + value
+    closeness[b] = (closeness[b] ?? 0) + value
+    partners[a] = (partners[a] ?? 0) + 1
+    partners[b] = (partners[b] ?? 0) + 1
+    pairs.push({
+      a: logins[a] ?? '',
+      b: logins[b] ?? '',
+      closeness: value,
+      hours: pairHours[at] ?? 0,
+    })
+  }
+
   const people = new Map<string, PersonSeating>()
-  const person = (login: string): PersonSeating => {
-    let entry = people.get(login)
 
-    if (entry === undefined) {
-      entry = { hours: 0, closeness: 0, partners: 0, aloneHours: 0, hosts: new Map() }
-      people.set(login, entry)
-    }
-
-    return entry
+  for (const [person, login] of logins.entries()) {
+    people.set(login, {
+      hours: hours[person] ?? 0,
+      closeness: closeness[person] ?? 0,
+      partners: partners[person] ?? 0,
+      aloneHours: aloneHours[person] ?? 0,
+      usual: usualOf(hostsOf[person] ?? new Map()),
+    })
   }
 
-  for (const [index, session] of placed.entries()) {
-    if (index % BATCH === BATCH - 1) await breathe()
-
-    const entry = person(session.login)
-    const hours = (session.end - session.begin) / HOUR_MS
-
-    entry.hours += hours
-    entry.aloneHours += hours - covered(session.near) / HOUR_MS
-    entry.hosts.set(session.host, (entry.hosts.get(session.host) ?? 0) + hours)
-  }
-
-  for (const pair of pairs.values()) {
-    for (const login of [pair.a, pair.b]) {
-      const entry = person(login)
-
-      entry.closeness += pair.closeness
-      entry.partners += 1
-    }
-  }
-
-  return { people, pairs: [...pairs.values()] }
+  return { people, pairs }
 }
 
 /**

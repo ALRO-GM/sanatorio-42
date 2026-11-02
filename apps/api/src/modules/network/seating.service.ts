@@ -128,6 +128,12 @@ function spanOf(query: z.infer<typeof querySchema>, now: number): Span {
 
 const round1 = (value: number): number => Math.round(value * 10) / 10
 
+/**
+ * Las amistades que se guardan de cada persona, de más cercanía a menos: con
+ * todo el historial de un campus grande, guardarlas todas eran millones.
+ */
+const FRIENDS_KEPT = 50
+
 /** Lo que sale de calcular un periodo: el grafo y, de cada persona, sus amistades. */
 type Built = { graph: SeatGraph; friends: Map<string, string[]> }
 
@@ -151,6 +157,7 @@ function friendsIn(pairs: readonly { a: string; b: string; closeness: number }[]
       login,
       list
         .sort((x, y) => y.closeness - x.closeness || x.login.localeCompare(y.login))
+        .slice(0, FRIENDS_KEPT)
         .map((entry) => entry.login),
     ]),
   )
@@ -173,6 +180,17 @@ export function createSeatingService(options: SeatingOptions): SeatingService {
     maxEntries: 12,
     now,
   })
+  // Un cálculo a la vez: con todo el historial de un campus grande cada uno
+  // ocupa cientos de MB, y varios juntos (la web, el precálculo, el Code
+  // Clicker) dejaban al servidor sin memoria.
+  let turn: Promise<unknown> = Promise.resolve()
+  const inTurn = <T>(work: () => Promise<T>): Promise<T> => {
+    const next = turn.then(work, work)
+
+    turn = next.catch(() => undefined)
+
+    return next
+  }
   const fresh = createRateLimit({ max: FRESH_PER_MINUTE, windowMs: 60_000, now })
   const limited = (actor: Actor): void => {
     if (!fresh.hit(actor.login)) {
@@ -221,7 +239,7 @@ export function createSeatingService(options: SeatingOptions): SeatingService {
     const seating = await seatingOf(sessions, grid)
     const pairs = seating.pairs.filter((pair) => pair.closeness >= MIN_CLOSENESS)
     const logins = [...seating.people.keys()]
-    const community = communitiesOf(
+    const community = await communitiesOf(
       pairs.map((pair) => ({ a: pair.a, b: pair.b, ab: pair.closeness, ba: 0 })),
       logins,
     )
@@ -233,10 +251,7 @@ export function createSeatingService(options: SeatingOptions): SeatingService {
       partners: entry.partners,
       alone: entry.hours === 0 ? 0 : Math.round((100 * entry.aloneHours) / entry.hours) / 100,
       community: community.get(login) ?? 0,
-      usual: [...entry.hosts]
-        .sort((x, y) => y[1] - x[1])
-        .slice(0, 3)
-        .map(([host]) => host),
+      usual: entry.usual,
     }))
 
     // El tope del grafo, como en la red de correcciones. Los totales siguen
@@ -299,7 +314,9 @@ export function createSeatingService(options: SeatingOptions): SeatingService {
     return cache.get(`${await keyOf(actor, query)}|${weightsKey(grid)}`, () => {
       if (check) limited(actor)
 
-      return load(actor, spanOf(query, now()), grid)
+      const span = spanOf(query, now())
+
+      return inTurn(() => load(actor, span, grid))
     })
   }
 
@@ -316,14 +333,16 @@ export function createSeatingService(options: SeatingOptions): SeatingService {
 
       limited(actor)
 
-      const [{ sessions, images }, grid] = await Promise.all([sessionsOf(actor, span), gridOf()])
-      const proposed = await build(sessions, images, span.days, parsed.grid)
+      return inTurn(async () => {
+        const [{ sessions, images }, grid] = await Promise.all([sessionsOf(actor, span), gridOf()])
+        const proposed = await build(sessions, images, span.days, parsed.grid)
 
-      return {
-        graph: proposed.graph,
-        proposed: proposed.quality,
-        current: (await build(sessions, images, span.days, grid)).quality,
-      }
+        return {
+          graph: proposed.graph,
+          proposed: proposed.quality,
+          current: (await build(sessions, images, span.days, grid)).quality,
+        }
+      })
     },
 
     async friendsOf(actor, limit) {
@@ -347,7 +366,9 @@ export function createSeatingService(options: SeatingOptions): SeatingService {
       return heatCache.get(await keyOf(actor, parsed), () => {
         limited(actor)
 
-        return loadHeat(actor, spanOf(parsed, now()))
+        const span = spanOf(parsed, now())
+
+        return inTurn(() => loadHeat(actor, span))
       })
     },
   }

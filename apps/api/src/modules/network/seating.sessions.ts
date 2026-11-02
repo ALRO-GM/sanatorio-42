@@ -65,6 +65,17 @@ export async function seatSessionsIn(
 ): Promise<{ sessions: SeatSession[]; images: Map<string, string | null> }> {
   const images = new Map<string, string | null>()
   const sessions: SeatSession[] = []
+  // Cada fila trae su propia copia del login y del puesto: con millones de
+  // sesiones de unos miles de personas, guardar una sola de cada ahorra cientos de MB.
+  const texts = new Map<string, string>()
+  const shared = (text: string): string => {
+    const known = texts.get(text)
+
+    if (known !== undefined) return known
+    texts.set(text, text)
+
+    return text
+  }
   // Por dónde va la lectura: la última `seen_at` y su `rowid`.
   let after = { seen: isoAt(since), id: -1 }
 
@@ -80,7 +91,7 @@ export async function seatSessionsIn(
     })
 
     for (const row of result.rows) {
-      const login = toText(row.login)
+      const login = shared(toText(row.login))
 
       if (!sees(login)) continue
 
@@ -88,7 +99,7 @@ export async function seatSessionsIn(
 
       const span = countedSpan(row, since, until)
 
-      if (span !== null) sessions.push({ login, host: toText(row.host), ...span })
+      if (span !== null) sessions.push({ login, host: shared(toText(row.host)), ...span })
     }
 
     const last = result.rows.at(-1)

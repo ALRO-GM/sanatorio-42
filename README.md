@@ -42,7 +42,7 @@ Es un proyecto personal de [Alberto](https://github.com/ALRO-GM) (`albrodri` en
 | **Qué es**      | Aplicación web completa: API, web, base de datos y despliegue                                                                                        |
 | **Tecnología**  | TypeScript de punta a punta · Node 22 y Fastify 5 · React 19 y Vite · SQLite (libSQL) · Docker y Caddy                                               |
 | **Tamaño**      | 35 módulos de API con 256 rutas, 84 migraciones, 6 paquetes compartidos; 4 categorías con 17 secciones, 3 modos de interfaz, 7 estilos y 5 idiomas    |
-| **Calidad**     | 7 116 tests en 256 ficheros (6 186 de la API y 930 de la web, con 71 ficheros de pantallas; medido el 2026-11-02), cobertura mínima que solo sube, sin código muerto ni duplicado, y un despliegue que no sale sin la CI en verde |
+| **Calidad**     | 7 117 tests en 256 ficheros (6 187 de la API y 930 de la web, con 71 ficheros de pantallas; medido el 2026-11-02), cobertura mínima que solo sube, sin código muerto ni duplicado, y un despliegue que no sale sin la CI en verde |
 | **Seguridad**   | Revisión completa documentada: permisos con doble cerradura, segundo factor en el panel, topes de intentos y un test que recorre todas las rutas con entradas imposibles |
 | **Datos**       | Réplica propia de 5 campus de 42 (Madrid, Málaga, Urduliz, Barcelona y París) copiada con 1 200 peticiones por hora                                   |
 | **Coste**       | 0 € al mes. La web y la máquina se cortan solas antes de pasar de la capa gratuita                                                                   |
@@ -113,6 +113,7 @@ con el commit donde volver a verlo, está en
 
 | Fecha      | Dónde                  | Qué cambió                                                                                                   |
 | ---------- | ---------------------- | ------------------------------------------------------------------------------------------------------------ |
+| 2026-11-02 | Servidor | Ya no se queda sin memoria cada 7 minutos: la red de asientos de un campus grande (París) ocupa un tercio, se calcula de una en una y los grupos dejan pasar al resto de la web ([docs/rendimiento.md](docs/rendimiento.md)) |
 | 2026-11-02 | Cargas largas | Amigos ya no deja la web esperando: se calcula por tandas y de fondo, y se sirve lo último mientras se rehace. Mientras carga se ve tu burbuja, la fase y cifras que suben; los grafos aparecen desde ti; Amigos, Red y Avance salen al momento al volver ([docs/rendimiento.md](docs/rendimiento.md)) |
 | 2026-11-02 | Amistades | Tus 10 amistades más cercanas son con quien más cerca y más tiempo te has sentado (red de asientos): las usan las noticias de Code Clicker y el grupo «Amigos» del álbum de correcciones ([docs/asientos.md](docs/asientos.md)) |
 | 2026-11-02 | Buscadores             | Portada pública por idioma (`/es/`, `/en/`…) en HTML sin JavaScript, `robots.txt`, `sitemap.xml`, datos estructurados y vista previa al compartir ([docs/seo.md](docs/seo.md)); la pantalla de entrada enlaza a ella y su pie ya enlaza a albrodri |

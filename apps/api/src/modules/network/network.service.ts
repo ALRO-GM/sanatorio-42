@@ -281,7 +281,7 @@ export function createNetworkService(options: NetworkServiceOptions) {
               : new Set([...members.keys(), ...everyone.filter(isAnonymised)])
 
           return {
-            analysis: analyse(mergePairs(rows, inside), inside),
+            analysis: await analyse(mergePairs(rows, inside), inside),
             members,
             homes,
             given,

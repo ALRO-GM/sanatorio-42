@@ -20,6 +20,7 @@
 
 import type { NetworkLink, NetworkNode, NetworkTotals } from '@sanatorio/contracts'
 
+import { breathe } from '../../core/breathe.js'
 import type { PairRow } from './network.repository.js'
 
 /** Una pareja sin dirección, con los dos sentidos dentro. `a < b` siempre. */
@@ -40,6 +41,9 @@ export type Analysis = {
 /** Niveles de agrupación y pasadas por nivel de Louvain. Converge mucho antes casi siempre. */
 const LOUVAIN_LEVELS = 12
 const LOUVAIN_PASSES = 24
+
+/** Pasos de Louvain seguidos antes de dejar pasar a las demás peticiones. */
+const STEP = 50_000
 
 /** Por debajo de esto dos ganancias se consideran iguales (errores de coma flotante). */
 const EPSILON = 1e-9
@@ -95,11 +99,19 @@ export function mergePairs(rows: readonly PairRow[], members: ReadonlySet<string
  *
  * Sin azar: el orden es siempre el alfabético y los empates los gana el número
  * menor, así que el mismo grafo da siempre las mismas comunidades.
+ *
+ * Con todo el historial de asientos de un campus grande son cientos de miles
+ * de uniones: cada `STEP` pasos deja pasar al resto de la web.
  */
-export function communitiesOf(
+export async function communitiesOf(
   pairs: readonly Pair[],
   logins: readonly string[],
-): Map<string, number> {
+): Promise<Map<string, number>> {
+  let steps = 0
+  const step = async (): Promise<void> => {
+    steps += 1
+    if (steps % STEP === 0) await breathe()
+  }
   const order = [...logins].sort()
   const indexOf = new Map(order.map((login, index) => [login, index]))
   // A qué burbuja del nivel actual pertenece cada persona.
@@ -109,6 +121,8 @@ export function communitiesOf(
   const key = (a: number, b: number): number => (a < b ? a * size + b : b * size + a)
 
   for (const pair of pairs) {
+    await step()
+
     const a = indexOf.get(pair.a)
     const b = indexOf.get(pair.b)
 
@@ -124,6 +138,8 @@ export function communitiesOf(
     let total = 0
 
     for (const [code, weight] of edges) {
+      await step()
+
       const a = Math.floor(code / size)
       const b = code % size
 
@@ -151,6 +167,8 @@ export function communitiesOf(
       let changes = 0
 
       for (let node = 0; node < size; node += 1) {
+        await step()
+
         const own = community[node] ?? node
         const mine = degree[node] ?? 0
         const towards = new Map<number, number>()
@@ -211,6 +229,8 @@ export function communitiesOf(
     const next = new Map<number, number>()
 
     for (const [code, weight] of edges) {
+      await step()
+
       const a = renumber.get(community[Math.floor(code / size)] ?? 0) ?? 0
       const b = renumber.get(community[code % size] ?? 0) ?? 0
       const merged = a < b ? a * nextSize + b : b * nextSize + a
@@ -306,7 +326,10 @@ export function passMarkOf(
 }
 
 /** Todas las cuentas de un conjunto de parejas. */
-export function analyse(pairs: readonly Pair[], members: ReadonlySet<string>): Analysis {
+export async function analyse(
+  pairs: readonly Pair[],
+  members: ReadonlySet<string>,
+): Promise<Analysis> {
   type Tally = { given: number; received: number; partners: number; mutual: number }
   const tallies = new Map<string, Tally>()
   const tally = (login: string): Tally => {
@@ -343,7 +366,7 @@ export function analyse(pairs: readonly Pair[], members: ReadonlySet<string>): A
     }
   }
 
-  const community = communitiesOf(pairs, [...tallies.keys()])
+  const community = await communitiesOf(pairs, [...tallies.keys()])
   const people = new Map<string, PersonStats>()
   let weight = 0
   let repetitionSum = 0

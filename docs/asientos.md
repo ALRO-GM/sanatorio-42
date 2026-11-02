@@ -124,11 +124,14 @@ entera esperaba, porque Node atiende todo en un solo hilo. Ahora:
 - La lectura va por tandas de 10 000 filas en el orden del índice, y el cálculo
   deja pasar a las demás peticiones cada 20 000 sesiones (`core/breathe.ts`).
 - El trabajo `red de asientos precalculada` rehace «todo» de cada campus cada
-  15 minutos, de fondo (los cuatro, unos 30 s). Lo caducado se sigue dando hasta 6 horas mientras se
+  15 minutos, de fondo (todos los de `SYNC_CAMPUS_IDS`). Lo caducado se sigue dando hasta 6 horas mientras se
   rehace (`staleMs` de `core/ttl-cache.ts`): nadie espera al cálculo entero.
 - Lo que pase de un segundo sale en el registro como `[lento] red de asientos…`,
   con las sesiones y lo que tardó, para medirlo en producción. Madrid, con
   479 453 sesiones: 15,1 s (2026-11-02), ya de fondo.
+- Los cálculos van de uno en uno y sin copiar las sesiones: con París (campus
+  1, también en `SYNC_CAMPUS_IDS`) varios a la vez dejaban al servidor sin
+  memoria cada 7 minutos (`docs/rendimiento.md` §9).
 Lo usan las noticias de Code Clicker (`docs/code-clicker.md`) y el grupo
 «Amigos» del álbum de correcciones (`docs/correcciones-coleccion.md`).
 

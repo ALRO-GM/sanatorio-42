@@ -206,6 +206,28 @@ red no enseñaba nada, ni siquiera «Cargando…»; el Avance, tampoco.
   para unos cientos de puestos) y el repaso final por persona: ahora cada
   puesto se lee una vez, los dos van por tandas, la lectura va de 10 000 en
   10 000 y el precalculado pasa a cada 15 minutos.
+- **Sin memoria cada 7 minutos.** El registro del contenedor tenía 10 reinicios
+  en una hora: `JavaScript heap out of memory` al llegar a 1,5 GB, y los parones
+  de 10 a 20 s eran el recolector peleando antes de cada caída. El precálculo
+  recorre los campus de `SYNC_CAMPUS_IDS`, que incluye París (el 1), y su
+  «todo» no acababa nunca (por eso no dejaba línea `[lento]`). Además, desde que
+  el cálculo va por tandas, varios podían ir a la vez. Un despliegue se quedó a
+  medias porque la app se cayó en plena copia de seguridad. En local, con 1,5
+  millones de sesiones el cálculo llegaba a 800 MB y con 3 millones se quedaba
+  sin memoria. Ahora:
+  - `seatingOf` no copia las sesiones: de cada una solo recuerda con quién
+    coincidió mientras sigue abierta, y la cierra al salir de la sala. Las
+    personas y las parejas van con números, y de cada persona salen ya sus tres
+    puestos de siempre.
+  - Al leer, cada login y cada puesto se guardan una sola vez (cada fila traía
+    su copia).
+  - Los cálculos de la red de asientos (grafo, mapa de calor, vista previa de
+    los pesos) van de uno en uno (`inTurn`).
+  - De cada persona se guardan sus 50 amistades más cercanas, no todas.
+  - Louvain (`communitiesOf`) también va por tandas: eran 0,9 s seguidos en
+    local con 400 000 uniones.
+  - Medido en local: 1,5 millones de sesiones, 240 MB y 285 ms de bloqueo como
+    mucho (ordenar las sesiones); 3 millones, 640 MB.
 
 **En la web:**
 

@@ -64,6 +64,19 @@ describe('cercanía entre personas', () => {
     expect(seating.people.get('sol')).toMatchObject({ hours: 1, aloneHours: 1, partners: 0 })
   })
 
+  it('de cada persona guarda sus tres puestos con más horas, de más a menos', async () => {
+    const seating = await seatingOf(
+      ['c1r1s1', 'c1r1s2', 'c1r1s2', 'c1r1s3', 'c1r1s3', 'c1r1s3', 'c1r1s4', 'mac'].map(
+        (host, index) => ({ login: 'ana', host, begin: index * HOUR, end: (index + 1) * HOUR }),
+      ),
+    )
+
+    expect(seating.people.get('ana')).toMatchObject({
+      hours: 8,
+      usual: ['c1r1s3', 'c1r1s2', 'c1r1s1'],
+    })
+  })
+
   it('con muchas sesiones va por tandas y cuenta lo mismo que de una vez', async () => {
     // 50 000 sesiones de una hora, de dos en dos y al lado: 25 000 h juntas.
     const sessions = Array.from({ length: 50_000 }, (_, index) => ({
