@@ -3,6 +3,7 @@ import { Logo } from '../../shared/ui/Logo'
 import { LangSelect } from '../../shared/ui/LangSelect'
 import { ThemeSelect } from '../../shared/ui/ThemeSelect'
 import { Icon } from '../../shared/ui/Icon'
+import { MadeFor } from '../../shared/ui/MadeFor'
 import type { IconName } from '../../shared/ui/Icon'
 
 type LoginProps = {
@@ -18,7 +19,7 @@ const STEPS: readonly { icon: IconName; title: string; text: string }[] = [
 ] as const
 
 export function Login({ onLogin, notice }: LoginProps) {
-  const { t } = useI18n()
+  const { t, lang } = useI18n()
 
   return (
     <main className="center">
@@ -52,13 +53,19 @@ export function Login({ onLogin, notice }: LoginProps) {
       <footer className="footer">
         <LangSelect />
         <ThemeSelect />
+        {/* La portada pública de su idioma: qué es Peer4U, para quien no lo sabe. */}
+        <a className="link" href={`/${lang}/`}>
+          {t('login.about')}
+        </a>
         <a className="link" href="#/validar">
           {t('login.staff')}
         </a>
         <a className="link" href="#/privacidad">
           {t('legal.link')}
         </a>
-        <p>{t('app.footer')}</p>
+        <p>
+          <MadeFor />
+        </p>
       </footer>
     </main>
   )

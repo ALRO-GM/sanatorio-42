@@ -40,6 +40,38 @@ describe('idioma inicial', () => {
     }
   })
 
+  it('el que pide la dirección (`/?lang=en`, desde las portadas) manda y se guarda', () => {
+    const saved: string[] = []
+
+    vi.stubGlobal('localStorage', {
+      getItem: () => 'eu',
+      setItem: (_key: string, value: string) => saved.push(value),
+    })
+    vi.stubGlobal('navigator', { language: 'fr-FR' })
+    vi.stubGlobal('window', { location: { search: '?lang=en' } })
+    expect(initialLang()).toBe('en')
+    expect(saved).toEqual(['en'])
+
+    // Uno que no es un idioma no cuenta ni se guarda.
+    for (const search of ['?lang=xx', '?lang=constructor', '?lang=', '?idioma=en', '']) {
+      vi.stubGlobal('window', { location: { search } })
+      expect(initialLang(), search).toBe('eu')
+    }
+    expect(saved).toEqual(['en'])
+  })
+
+  it('el de la dirección vale aunque no se pueda guardar', () => {
+    vi.stubGlobal('localStorage', {
+      getItem: () => null,
+      setItem: () => {
+        throw new DOMException('bloqueado', 'SecurityError')
+      },
+    })
+    vi.stubGlobal('navigator', { language: 'es-ES' })
+    vi.stubGlobal('window', { location: { search: '?lang=ca' } })
+    expect(initialLang()).toBe('ca')
+  })
+
   it('con el almacenamiento bloqueado, arranca con el del navegador', () => {
     vi.stubGlobal('localStorage', {
       getItem: () => {

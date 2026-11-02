@@ -610,6 +610,38 @@ describe('un solo proceso para la web y la API', () => {
     expect((await get('/demo/api/me/projects')).body).toContain('<title>Demo</title>')
   })
 
+  it('las portadas públicas se sirven en su carpeta, con la barra final', async () => {
+    const folder = mkdtempSync(join(tmpdir(), 'sanatorio-web-'))
+    folders.push(folder)
+    mkdirSync(join(folder, 'en'), { recursive: true })
+    writeFileSync(join(folder, 'index.html'), '<!doctype html><title>Peer4U</title>')
+    writeFileSync(join(folder, 'en', 'index.html'), '<!doctype html><title>About</title>')
+    writeFileSync(join(folder, 'robots.txt'), 'User-agent: *')
+
+    const built = await app({ STATIC_DIR: folder })
+    const get = (url: string) => built.app.inject({ method: 'GET', url })
+
+    for (const url of ['/en/', '/en/?utm=x', '/en/index.html']) {
+      const page = await get(url)
+
+      expect(page.statusCode, url).toBe(200)
+      expect(page.body, url).toContain('<title>About</title>')
+      expect(page.headers['cache-control'], url).toBe('no-cache')
+    }
+
+    // Sin la barra, a la dirección buena, sin perder la consulta.
+    const bare = await get('/en?utm=x')
+    expect(bare.statusCode).toBe(308)
+    expect(bare.headers.location).toBe('/en/?utm=x')
+
+    expect((await get('/robots.txt')).headers['content-type']).toContain('text/plain')
+    // Lo demás sigue siendo la web, y lo que no es una carpeta no se redirige.
+    expect((await get('/')).body).toContain('<title>Peer4U</title>')
+    expect((await get('/fr/')).body).toContain('<title>Peer4U</title>')
+    expect((await get('/english')).body).toContain('<title>Peer4U</title>')
+    expect((await built.app.inject({ method: 'POST', url: '/en' })).statusCode).toBe(404)
+  })
+
   it('sin demostración compilada, /demo es un 404 y lo demás sigue igual', async () => {
     const folder = mkdtempSync(join(tmpdir(), 'sanatorio-web-'))
     folders.push(folder)

@@ -1,9 +1,6 @@
 import { Settings } from '../features/settings/Settings'
 import { useI18n } from '../shared/i18n'
-import { intraHref } from '../shared/links'
-
-/** Quien hace la web: el pie lleva a su perfil de la intra. */
-const AUTHOR = 'albrodri'
+import { MadeFor } from '../shared/ui/MadeFor'
 
 type FooterProps = {
   campusId: number | undefined
@@ -16,18 +13,12 @@ type FooterProps = {
  */
 export function Footer({ campusId, onCampusChange }: FooterProps) {
   const { t } = useI18n()
-  // El login va enlazado dentro de la frase, donde cada idioma lo pone.
-  const [before, after = ''] = t('app.footer').split('{author}')
 
   return (
     <footer className="footer" data-feedback="pie">
       <Settings campusId={campusId} onCampusChange={onCampusChange} />
       <p>
-        {before}
-        <a className="link" href={intraHref(AUTHOR)} target="_blank" rel="noreferrer">
-          {AUTHOR}
-        </a>
-        {after} ·{' '}
+        <MadeFor /> ·{' '}
         <a className="link" href="#/privacidad">
           {t('legal.link')}
         </a>

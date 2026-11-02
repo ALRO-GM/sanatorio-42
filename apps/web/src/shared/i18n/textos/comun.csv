@@ -182,6 +182,7 @@ until.month.many,Tiempo: varios meses,{n} meses,{n} months,{n} mesos,{n} hilabet
 nav.clicker,Sección secreta: el juego Code Clicker,Code Clicker,Code Clicker,Code Clicker,Code Clicker,Code Clicker
 login.staff,Pantalla de entrada: enlace para el personal de 42,Soy del staff: validar un documento,I'm staff: verify a document,Soc de l'staff: validar un document,Staffekoa naiz: dokumentu bat balidatu,Je fais partie du staff : vérifier un document
 login.demo,Pantalla de entrada: enlace a la demostración,Ver una demostración sin cuenta,See a demo without an account,Mira una demostració sense compte,Ikusi erakustaldi bat konturik gabe,Voir une démo sans compte
+login.about,Pantalla de entrada: enlace a la portada pública que cuenta qué es la web,Qué es Peer4U,What is Peer4U,Què és Peer4U,Zer da Peer4U,Qu'est-ce que Peer4U
 demo.title,Etiqueta de la demostración pública,Demostración,Demo,Demostració,Erakustaldia,Démo
 demo.about,Explicación de la demostración,Datos inventados. Nada de lo que hagas aquí se guarda.,Made-up data. Nothing you do here is saved.,Dades inventades. Res del que facis aquí es desa.,Asmatutako datuak. Hemen egiten duzun ezer ez da gordetzen.,Données inventées. Rien de ce que tu fais ici n'est enregistré.
 demo.real,Enlace de la demostración a la web real,Ir a la web de verdad,Go to the real site,Ves al web de veritat,Joan benetako webgunera,Aller sur le vrai site

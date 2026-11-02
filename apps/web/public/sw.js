@@ -8,7 +8,7 @@
 // - `assets/`: llevan un hash en el nombre (si cambian, cambia el nombre), así
 //   que lo guardado vale para siempre. Se quedan los `MAX_ASSETS` más recientes.
 // - La portada: siempre de la red, para estrenar cada despliegue al momento;
-//   sin red, la última guardada.
+//   sin red, la última guardada. Las portadas públicas (`/es/`…) no se tocan.
 // - La API, los sonidos (que van por trozos, `Range`) y lo de otros sitios: ni
 //   se tocan, van como siempre.
 
@@ -94,7 +94,9 @@ self.addEventListener('fetch', (event) => {
 
   if (/^\/(demo\/)?assets\//.test(url.pathname)) {
     event.respondWith(asset(request))
-  } else if (request.mode === 'navigate') {
+  } else if (request.mode === 'navigate' && /^\/(demo(\/.*)?)?$/.test(url.pathname)) {
+    // Solo la web y la demo: las portadas públicas (`/es/`…) son otras páginas
+    // y no pueden quedarse guardadas como si fueran la web.
     event.respondWith(page(request).catch(() => Response.error()))
   }
 })

@@ -12,7 +12,7 @@ Cómo se trabaja con ellas: [docs/textos.md](../textos.md).
 | [calendario](calendario.md) | 105 | 0 | 0 | 0 | 0 |
 | [clusters](clusters.md) | 82 | 0 | 0 | 0 | 0 |
 | [code-clicker](code-clicker.md) | 27 | 0 | 0 | 0 | 0 |
-| [comun](comun.md) | 441 | 0 | 0 | 0 | 0 |
+| [comun](comun.md) | 442 | 0 | 0 | 0 | 0 |
 | [curso-shell](curso-shell.md) | 66 | 0 | 0 | 0 | 0 |
 | [demos](demos.md) | 252 | 0 | 0 | 0 | 0 |
 | [estadisticas](estadisticas.md) | 175 | 0 | 0 | 0 | 0 |
@@ -28,6 +28,7 @@ Cómo se trabaja con ellas: [docs/textos.md](../textos.md).
 | [tablon](tablon.md) | 146 | 0 | 0 | 0 | 0 |
 | [terapia](terapia.md) | 61 | 0 | 0 | 0 | 0 |
 | [juego](juego.md) | 504 | 0 | 0 | 0 | 0 |
+| [portada](portada.md) | 23 | 0 | 0 | 0 | 0 |
 
 El panel de gestión (`admin.*`, `quota.*`, `staff.*`) solo lo ve quien
 administra y se deja en español a propósito.

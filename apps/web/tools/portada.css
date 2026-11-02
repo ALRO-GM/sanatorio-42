@@ -1,0 +1,172 @@
+/* La portada pública (`tools/portada.ts`). Va sola, sin las hojas de la web:
+   es HTML sin JavaScript y tiene que pesar poco. Los colores, los de la web. */
+
+:root {
+  color-scheme: light dark;
+  --bg: #faf8f3;
+  --surface: #ffffff;
+  --text: #1d2b2f;
+  --muted: #4b5b60;
+  --border: #e3e0d8;
+  --accent: #00babc;
+  --accent-text: #007a7c;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #12191b;
+    --surface: #1a2427;
+    --text: #e8eeef;
+    --muted: #a9b7ba;
+    --border: #2c393c;
+    --accent-text: #4fd6d8;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family:
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+}
+
+a {
+  color: var(--accent-text);
+}
+
+header,
+main,
+footer {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 20px;
+}
+
+.brand {
+  display: inline-flex;
+  gap: 10px;
+  align-items: center;
+  color: var(--text);
+  font-size: 1.25rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+header nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  font-size: 0.9rem;
+}
+
+header nav a[aria-current] {
+  color: var(--text);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.hero {
+  padding: 56px 0 40px;
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(2.5rem, 8vw, 4rem);
+  line-height: 1.1;
+}
+
+.lead {
+  max-width: 40em;
+  font-size: 1.2rem;
+  color: var(--muted);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 24px;
+  align-items: center;
+  margin-top: 28px;
+}
+
+.primary {
+  padding: 12px 24px;
+  border-radius: 10px;
+  background: var(--accent);
+  color: #ffffff;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.primary:hover,
+.primary:focus-visible {
+  filter: brightness(0.92);
+}
+
+h2 {
+  margin: 40px 0 16px;
+  font-size: 1.5rem;
+}
+
+.features {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.features li {
+  padding: 18px 20px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.features h3 {
+  margin: 0 0 6px;
+  font-size: 1.05rem;
+}
+
+.features p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.faq h3 {
+  margin: 24px 0 4px;
+  font-size: 1.05rem;
+}
+
+.faq p {
+  margin: 0;
+  max-width: 44em;
+  color: var(--muted);
+}
+
+footer {
+  margin-top: 56px;
+  padding-bottom: 32px;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 0.9rem;
+}

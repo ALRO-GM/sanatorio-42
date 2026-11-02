@@ -180,8 +180,37 @@ function storedLang(): string | null {
   }
 }
 
-/** Idioma inicial: el que eligió la última vez, o el del navegador si lo tenemos. */
+/**
+ * El idioma que pide la dirección (`/?lang=en`): con él llegan las portadas
+ * públicas (`/en/`…). Se guarda como elegido, para que siga al volver de 42.
+ */
+function askedLang(): Lang | null {
+  // Fuera del navegador (los tests en Node) no hay dirección.
+  const search = typeof window === 'undefined' ? '' : window.location.search
+  const asked = new URLSearchParams(search).get('lang')
+
+  if (!isLang(asked)) return null
+
+  try {
+    localStorage.setItem(STORAGE_KEY, asked)
+  } catch {
+    // Con el almacenamiento bloqueado, vale para esta visita.
+  }
+
+  return asked
+}
+
+/**
+ * Idioma inicial: el que pide la dirección, el que eligió la última vez, o el
+ * del navegador si lo tenemos.
+ */
 export function initialLang(): Lang {
+  const asked = askedLang()
+
+  if (asked !== null) {
+    return asked
+  }
+
   const stored = storedLang()
 
   if (isLang(stored)) {

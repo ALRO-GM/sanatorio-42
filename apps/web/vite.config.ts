@@ -1,13 +1,14 @@
 import react from '@vitejs/plugin-react'
 import { defaultClientConditions, defineConfig, loadEnv } from 'vite'
 
+import { portadaPlugin } from './tools/portada.ts'
 import { textosPlugin } from './tools/textos.ts'
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
 
   return {
-    plugins: [react(), textosPlugin()],
+    plugins: [react(), textosPlugin(), portadaPlugin()],
     // Los paquetes del monorepo con código (gitsim) se usan desde su fuente.
     resolve: { conditions: ['source', ...defaultClientConditions] },
     build: {

@@ -162,7 +162,8 @@ se baje cuando se usa y se quede en el PC.
 - **La portada** (`index.html`, `sw.js`, el manifiesto): se revalida siempre,
   con `ETag`. Si no ha cambiado, `304` sin cuerpo. El service worker la pide a
   la red (así cada despliegue se estrena al momento) y, sin red, sirve la
-  última guardada.
+  última guardada. Las portadas públicas (`/es/`…, [seo.md](seo.md)) también
+  se revalidan con `ETag`, pero el service worker no las toca: no son la web.
 - **Sonidos del Pomodoro** (`sounds/`): un año, con `Range` (el navegador los
   pide por trozos y vuelve al principio sin bajarlos otra vez). El service worker
   no los toca. Un sonido que cambie tiene que cambiar de nombre.

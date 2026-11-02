@@ -92,7 +92,9 @@ function usageIn(rows: readonly TextRow[]): Usage {
     used.set(key, files)
   }
 
-  for (const path of sourceFiles(SRC)) {
+  // La portada pública se genera al compilar (`tools/portada.ts`): sus textos
+  // también cuentan como usados.
+  for (const path of [...sourceFiles(SRC), join(WEB, 'tools/portada.ts')]) {
     const file = relative(WEB, path)
     const code = readFileSync(path, 'utf8')
 

@@ -14,8 +14,9 @@
  * - `sounds/` (los del Pomodoro) también un año: un sonido que cambie cambia de
  *   nombre. Responden a `Range`, que el navegador usa para ir al principio de
  *   un audio sin bajarlo otra vez.
- * - Lo demás (la portada, `sw.js`, el manifiesto) se revalida cada vez, pero con
- *   `ETag`: si no ha cambiado, la respuesta es un `304` sin cuerpo.
+ * - Lo demás (la portada, `sw.js`, el manifiesto, las portadas públicas) se
+ *   revalida cada vez, pero con `ETag`: si no ha cambiado, la respuesta es un
+ *   `304` sin cuerpo.
  */
 
 import { createHash } from 'node:crypto'
@@ -100,7 +101,20 @@ export function registerStatic(app: FastifyInstance, root: string): number {
   app.setNotFoundHandler((request, reply) => {
     const path = request.url.split('?')[0] ?? '/'
     const wantsPage = request.method === 'GET' || request.method === 'HEAD'
-    const file = wantsPage ? files.get(path) : undefined
+
+    // Una carpeta con su `index.html` (las portadas públicas, `/es/`…) se
+    // sirve con la barra final; sin ella, se redirige, para que cada página
+    // tenga una sola dirección y sus enlaces relativos funcionen.
+    if (wantsPage && path !== '/' && path !== DEMO && files.has(`${path}/index.html`)) {
+      const query = request.url.slice(path.length)
+
+      return reply.code(308).header('Location', `${path}/${query}`).send()
+    }
+
+    const file = wantsPage
+      ? (files.get(path) ??
+        (path.endsWith('/') && path !== '/' ? files.get(`${path}index.html`) : undefined))
+      : undefined
 
     if (file !== undefined) {
       void reply

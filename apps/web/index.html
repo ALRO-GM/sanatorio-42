@@ -12,7 +12,35 @@
       name="description"
       content="¿Te has atascado en un proyecto de 42? Encuentra a tu peer: mira quién está disponible, únete a un sprint o publica tu duda en el proyecto."
     />
-    <title>Peer4U</title>
+    <title>Peer4U · Encuentra un peer en 42 para desatascarte</title>
+    <!-- Para buscadores y enlaces compartidos (docs/seo.md). Lo que cuenta qué
+         es la web está en las portadas públicas, /es/, /en/…, que genera
+         tools/portada.ts al compilar. -->
+    <link rel="canonical" href="https://peer4u.app/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Peer4U" />
+    <meta property="og:title" content="Peer4U · Encuentra un peer en 42 para desatascarte" />
+    <meta
+      property="og:description"
+      content="Mira quién está disponible y ya ha hecho tu proyecto, dónde se sienta, y ve a pedirle ayuda."
+    />
+    <meta property="og:url" content="https://peer4u.app/" />
+    <meta property="og:image" content="https://peer4u.app/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Peer4U: encuentra a tu peer en 42" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <!-- Datos, no código: la política de contenido no lo bloquea. Le dice a
+         Google cómo se llama la web en los resultados. -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Peer4U",
+        "alternateName": ["Peer 4 U", "Peer for you"],
+        "url": "https://peer4u.app/"
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

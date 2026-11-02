@@ -330,7 +330,7 @@ En este orden (`app/Header.tsx`, `app/UserMenu.tsx`):
 | Campus que se mira (los que no se copian, marcados) | N | Todos |
 | De cuándo son los datos de 42 | D | Todos |
 | Privacidad | S | Todos |
-| Quién la hace: «Hecho para albrodri», con enlace a su perfil de la intra | S | Todos |
+| Quién la hace: «Hecho para albrodri», con enlace a su perfil de la intra (también en la pantalla de entrada) | S | Todos |
 
 ## En toda la web
 
@@ -387,6 +387,7 @@ En este orden (`app/Header.tsx`, `app/UserMenu.tsx`):
 | Funcionalidad | Quién | Dónde |
 | --- | --- | --- |
 | Entrar con la cuenta de 42 y el motivo de un rechazo (cancelado, no eres estudiante, piscina cerrada con el aviso de quien administra) | Sin sesión | `features/auth/Login.tsx` |
+| Portada pública por idioma (`/es/`, `/en/`, `/ca/`, `/eu/`, `/fr/`): qué es Peer4U, qué ofrece y preguntas frecuentes, en HTML sin JavaScript para los buscadores; lleva a entrar en su idioma (`/?lang=…`). La pantalla de entrada enlaza a la de su idioma («Qué es Peer4U»). Con `robots.txt` y `sitemap.xml` ([seo.md](seo.md)) | Todos | `tools/portada.ts` |
 | Servidor caído, con reintentar | Todos | `app/App.tsx` |
 | Pantalla de mantenimiento con cuenta atrás y entrada discreta para admins | Quien no administra | `features/maintenance/MaintenanceScreen.tsx` |
 | Privacidad y condiciones (`#/privacidad`), también sin sesión: responsable y correo de contacto, quién puede entrar, datos de 42 y de aquí, base legal (consentimiento e interés legítimo), quién lo ve y proveedores, plazos, seguridad, derechos, cómo no salir en la web y normas | Todos | `features/legal/LegalPage.tsx` |
