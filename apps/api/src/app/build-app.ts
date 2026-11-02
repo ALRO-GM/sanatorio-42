@@ -11,6 +11,7 @@
 import { randomBytes } from 'node:crypto'
 import { readFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
+import { monitorEventLoopDelay } from 'node:perf_hooks'
 
 import Fastify, { LogController } from 'fastify'
 import type { FastifyInstance } from 'fastify'
@@ -258,6 +259,17 @@ export async function buildApp(options: BuildOptions = {}): Promise<BuiltApp> {
     registerStatic(app, env.STATIC_DIR)
   }
 
+  // Lo que tarda más de la cuenta se apunta, con la forma de la ruta y sin la
+  // dirección de verdad (que puede llevar un login): así se sabe qué sección
+  // pesa en producción (`docs/rendimiento.md`, cargas largas).
+  app.addHook('onResponse', async (request, reply) => {
+    if (reply.elapsedTime >= SLOW_REQUEST_MS) {
+      process.stderr.write(
+        `[lento] ${request.method} ${request.routeOptions.url ?? 'sin ruta'}: ${String(Math.round(reply.elapsedTime))} ms\n`,
+      )
+    }
+  })
+
   return {
     app,
     env,
@@ -265,6 +277,21 @@ export async function buildApp(options: BuildOptions = {}): Promise<BuiltApp> {
     services,
     routes,
     start: () => {
+      // Lo que ha corrido de fondo en el último minuto, para decir quién paraba el servidor.
+      const running = new Set<string>()
+      const lately = new Set<string>()
+
+      timers.push(
+        watchStalls(() => {
+          const jobs = [...lately]
+
+          lately.clear()
+          for (const name of running) lately.add(name)
+
+          return jobs
+        }),
+      )
+
       for (const module of modules) {
         module.start?.()
 
@@ -282,6 +309,8 @@ export async function buildApp(options: BuildOptions = {}): Promise<BuiltApp> {
               if (busy || (module.name !== 'admin' && services.admin.halted())) return
 
               busy = true
+              running.add(job.name)
+              lately.add(job.name)
               withApiUse({ feature: `job:${job.usage ?? module.name}`, login: null }, () =>
                 job.run(),
               )
@@ -291,6 +320,7 @@ export async function buildApp(options: BuildOptions = {}): Promise<BuiltApp> {
                 })
                 .finally(() => {
                   busy = false
+                  running.delete(job.name)
                 })
             }, job.everyMs),
           )
@@ -353,4 +383,41 @@ export function guardLevelFrom(text: string): 'ok' | 'admin_only' | 'stopped' {
   const percent = Number(text.trim())
 
   return percent >= 95 ? 'stopped' : percent >= 90 ? 'admin_only' : 'ok'
+}
+
+/** Una petición que tarda esto o más se apunta en el registro. */
+const SLOW_REQUEST_MS = 2_000
+
+/** Cada cuánto se mira si el servidor se ha quedado parado, y desde cuánto se apunta. */
+const STALL_CHECK_MS = 60_000
+const STALL_MS = 1_000
+
+/**
+ * Apunta en el registro cuándo el servidor se queda parado más de un segundo
+ * seguido (un cálculo largo de una vez: mientras, nadie recibe respuesta) y qué
+ * trabajos de fondo corrieron en ese minuto (`active`, que se vacía al mirar).
+ * Es la forma de medir en producción lo que en local no se ve
+ * (`docs/rendimiento.md`, cargas largas).
+ */
+function watchStalls(active: () => string[]): NodeJS.Timeout {
+  const delay = monitorEventLoopDelay({ resolution: 20 })
+
+  delay.enable()
+
+  const timer = setInterval(() => {
+    const worst = Math.round(delay.max / 1e6)
+    const jobs = active()
+
+    if (worst >= STALL_MS) {
+      process.stderr.write(
+        `[parón] el servidor estuvo parado ${String(worst)} ms; de fondo: ${jobs.join(', ') || 'nada'}\n`,
+      )
+    }
+
+    delay.reset()
+  }, STALL_CHECK_MS)
+
+  timer.unref()
+
+  return timer
 }

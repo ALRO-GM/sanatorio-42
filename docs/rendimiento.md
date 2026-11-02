@@ -193,6 +193,13 @@ red no enseñaba nada, ni siquiera «Cargando…»; el Avance, tampoco.
   cada 5 minutos, y las amistades (Code Clicker, álbum) salen de ese mismo
   cálculo en vez de repetirlo.
 - Lo que pase de un segundo se apunta (`[lento] …`) para medirlo en producción.
+  Primera medida (2026-11-02): Madrid, 479 453 sesiones, **15,1 s** de fondo.
+- En el registro salen también las peticiones de 2 s o más (`[lento] GET
+  /ruta: N ms`, con la forma de la ruta, sin logins) y cada minuto en que el
+  servidor se quedó parado un segundo o más seguido, con los trabajos de fondo
+  que corrieron (`[parón] …`, `watchStalls` en `app/build-app.ts`). Tras el
+  despliegue, la salud tardó 4,8 s en contestar una vez mientras se
+  precalculaba: esto dirá qué lo causó.
 
 **En la web:**
 

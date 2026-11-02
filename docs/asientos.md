@@ -127,7 +127,8 @@ entera esperaba, porque Node atiende todo en un solo hilo. Ahora:
   5 minutos, de fondo. Lo caducado se sigue dando hasta 6 horas mientras se
   rehace (`staleMs` de `core/ttl-cache.ts`): nadie espera al cálculo entero.
 - Lo que pase de un segundo sale en el registro como `[lento] red de asientos…`,
-  con las sesiones y lo que tardó, para medirlo en producción.
+  con las sesiones y lo que tardó, para medirlo en producción. Madrid, con
+  479 453 sesiones: 15,1 s (2026-11-02), ya de fondo.
 Lo usan las noticias de Code Clicker (`docs/code-clicker.md`) y el grupo
 «Amigos» del álbum de correcciones (`docs/correcciones-coleccion.md`).
 
