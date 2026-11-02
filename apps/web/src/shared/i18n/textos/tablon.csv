@@ -97,7 +97,7 @@ cgraph.goal.level.many,Objetivo: subir de nivel un cromo; {level} es el nivel (v
 cgraph.goal.done,Objetivo cuando el álbum está completo,"¡Álbum completo! Ahora, a subir de nivel cada cromo",Album complete! Now level up each card,"Àlbum complet! Ara, a pujar de nivell cada cromo","Albuma osatuta! Orain, igo kromo bakoitzaren maila","Album complet ! Maintenant, fais monter chaque carte de niveau"
 cgraph.goal.open,Botón de un objetivo: abre ese proyecto en el tablón,Abrir el proyecto,Open project,Obrir el projecte,Ireki proiektua,Ouvrir le projet
 cgraph.compare,Bloque: tu puesto en cada grupo con el que te comparas,Cómo vas,How you're doing,Com vas,Nola zoazen,Où tu en es
-cgraph.group.friends,Grupo: las 10 personas con las que más te has corregido,Tu gente cercana,Your closest peers,La teva gent propera,Zure jende hurbila,Tes proches
+cgraph.group.friends,Grupo: las 10 personas con las que más cerca y más tiempo te has sentado,Tu gente cercana,Your closest peers,La teva gent propera,Zure jende hurbila,Tes proches
 cgraph.group.kickoff,Grupo: quien empezó cuando tú,Tu kickoff,Your kickoff,La teva kickoff,Zure kickoff-a,Ta kick-off
 cgraph.group.kickoffOf,Grupo: tu kickoff; {month} es su mes (AAAA-MM),Kickoff {month},Kickoff {month},Kickoff {month},{month} kickoff-a,Kick-off {month}
 cgraph.group.circle,Grupo: quien va por tu círculo,Tu círculo,Your circle,El teu cercle,Zure zirkulua,Ton cercle

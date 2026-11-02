@@ -145,6 +145,7 @@ describe('servicio del álbum', () => {
   beforeEach(async () => {
     db = await openDatabase({ url: 'file::memory:' })
     hidden = []
+    seated = {}
 
     // Gente de Madrid: `yo` y cuatro más; `zoe` es oculta a los estudiantes y
     // `pisci`/`pisca`, piscineros en curso. Proyectos 1, 2 y 3 del common core
@@ -256,6 +257,9 @@ describe('servicio del álbum', () => {
     closeDatabase(db)
   })
 
+  /** Con quién se sienta cada cual, de más cerca a menos (la red de asientos). */
+  let seated: Record<string, string[]> = {}
+
   const build = () =>
     createCollectionModule({
       db,
@@ -289,6 +293,7 @@ describe('servicio del álbum', () => {
             ),
           ),
         ),
+      friendsOf: (who, limit) => Promise.resolve((seated[who.login] ?? []).slice(0, limit)),
       now: () => NOW,
     })
 
@@ -356,10 +361,9 @@ describe('servicio del álbum', () => {
     expect(circle.rows.map((row) => row.login)).toEqual(['yo', 'leo'])
   })
 
-  it('el kickoff es el real del campus, como en el Avance: quien entra a destiempo va con el anterior', async () => {
-    // Nueve personas entran el 1 de septiembre (una kickoff real) y leo llega
-    // en noviembre de otro campus: va con la de septiembre, no con «2025-11».
-    await db.batch(
+  /** Nueve personas («nuevo0»…«nuevo8») que entran el 1 de septiembre, con el proyecto 1 aprobado. */
+  const newcomers = (): Promise<unknown> =>
+    db.batch(
       [
         ...Array.from({ length: 9 }, (_, index) => [
           {
@@ -372,21 +376,44 @@ describe('servicio del álbum', () => {
           },
           {
             sql: `INSERT INTO project_users (id, user_id, project_id, status, validated, synced_at)
-                  VALUES (?, ?, 1, 'finished', 1, ?)`,
+                VALUES (?, ?, 1, 'finished', 1, ?)`,
             args: [300 + index, 200 + index, ago(0)],
           },
           {
             sql: `INSERT INTO core_cursus (user_id, login, campus_id, begin_at, updated_at)
-                  VALUES (?, ?, ?, '2025-09-01T08:00:00.000Z', ?)`,
+                VALUES (?, ?, ?, '2025-09-01T08:00:00.000Z', ?)`,
             args: [200 + index, `nuevo${String(index)}`, MADRID, ago(0)],
           },
         ]).flat(),
-        {
-          sql: "UPDATE core_cursus SET begin_at = '2025-11-20T08:00:00.000Z' WHERE login = 'leo'",
-          args: [],
-        },
       ],
       'write',
+    )
+
+  it('tus amistades son primero con quien más te sientas; las correcciones solo completan', async () => {
+    // Se sienta sobre todo con eva y luego con leo; «nadie» no tiene álbum y no cuenta.
+    seated = { yo: ['nadie', 'eva', 'leo'] }
+
+    const result = await ask('yo', {})
+
+    expect(result.rows.map((row) => row.login).sort()).toEqual(['ana', 'eva', 'leo', 'yo', 'zoe'])
+
+    // Con diez de los asientos que tienen álbum, las correcciones ya no entran.
+    await newcomers()
+    seated = { yo: ['eva', ...Array.from({ length: 9 }, (_, i) => `nuevo${String(i)}`)] }
+
+    const only = await ask('yo', {})
+
+    expect(only.rows).toHaveLength(11)
+    expect(only.rows.map((row) => row.login)).not.toContain('ana')
+    expect(only.rows.map((row) => row.login)).toContain('eva')
+  })
+
+  it('el kickoff es el real del campus, como en el Avance: quien entra a destiempo va con el anterior', async () => {
+    // Nueve personas entran el 1 de septiembre (una kickoff real) y leo llega
+    // en noviembre de otro campus: va con la de septiembre, no con «2025-11».
+    await newcomers()
+    await db.execute(
+      "UPDATE core_cursus SET begin_at = '2025-11-20T08:00:00.000Z' WHERE login = 'leo'",
     )
 
     const result = await ask('yo', { group: 'kickoff' })

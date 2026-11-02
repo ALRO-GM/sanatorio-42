@@ -17,7 +17,7 @@ cada proyecto que puede corregir** y que le pique encontrar las que le faltan.
 | **Rareza de logros** (Steam, Xbox, PlayStation) | Enseñar qué % de jugadores lo tiene hace valioso lo difícil y da un objetivo a quien ya tiene lo fácil | Rareza por proyecto: de quien lo puede corregir (lo aprobó), qué % lo ha corregido alguna vez. Común, poco común, raro, legendario; sin etiqueta con menos de 5 personas |
 | **Niveles de insignia** (Duolingo, Strava) | Una insignia que sube de nivel sigue motivando después de conseguirla | Los niveles de siempre (1, 3, 5, 10 correcciones): bronce, plata, oro y maestría, en el borde, los puntos y el brillo del cromo |
 | **Recompensa al completar** | El cierre de un set merece un momento propio | Al completar una colección, un aviso y los cromos dan un salto; una sola vez (se recuerda en el navegador) y sin animación con movimiento reducido |
-| **Comparación social** (Festinger) | Compararse con gente parecida motiva; con gente lejana, desanima | Puesto entre tu gente cercana (las 10 con las que más te has corregido, como en la Red), tu kickoff, tu círculo y todo el campus |
+| **Comparación social** (Festinger) | Compararse con gente parecida motiva; con gente lejana, desanima | Puesto entre tu gente cercana (las 10 con las que más cerca y más tiempo te has sentado, como en Amigos; si faltan, con las que más te has corregido), tu kickoff, tu círculo y todo el campus |
 
 ## Lo que se evita (y por qué)
 

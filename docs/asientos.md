@@ -115,7 +115,8 @@ las 10 personas con las que más cerca y más tiempo te has sentado»). De cada
 persona, quienes tienen con ella al menos la cercanía mínima, de más a menos,
 con todo el historial (`friendsOf` en `seating.service.ts`). Se calcula para
 todo el campus de una vez y se guarda una hora por campus, mundo y quién se ve.
-Lo usan las noticias de Code Clicker (`docs/code-clicker.md`).
+Lo usan las noticias de Code Clicker (`docs/code-clicker.md`) y el grupo
+«Amigos» del álbum de correcciones (`docs/correcciones-coleccion.md`).
 
 ## Dónde se ve
 

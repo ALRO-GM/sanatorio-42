@@ -590,6 +590,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
       audience,
       circles: (track) => replica.curriculum.circles(track),
       circlesOf,
+      friendsOf: (actor, limit) => network.friendsOf(actor, limit),
       ...clock,
     }),
     createClientErrorsModule(),

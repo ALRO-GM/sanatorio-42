@@ -116,7 +116,7 @@ Detalle: [agenda.md](agenda.md).
 | --- | --- | --- | --- |
 | Grafo de tu plan en perspectiva para elegir proyecto (al piscinero, el de la piscina) | S | Todos `[tablon.graph]` | `features/doubts/HolyGraph.tsx`, `PiscineGraph.tsx` |
 | Cambiar entre el grafo de avance y el de correcciones | N | Todos | `DoubtBoard.tsx` |
-| Álbum de correcciones: cada proyecto que puedes corregir es un cromo y cada círculo una colección; niveles 1, 3, 5 y 10, siguiente objetivo, rareza y clasificación de completitud entre tu gente, tu kickoff, tu círculo y el campus (más cifras cuanto más alto el modo) | N | Todos `[tablon.corrections]` | `CorrectionGraph.tsx`, `corrections.ts` ([correcciones-coleccion.md](correcciones-coleccion.md)) |
+| Álbum de correcciones: cada proyecto que puedes corregir es un cromo y cada círculo una colección; niveles 1, 3, 5 y 10, siguiente objetivo, rareza y clasificación de completitud entre tu gente (con quien más te sientas), tu kickoff, tu círculo y el campus (más cifras cuanto más alto el modo) | N | Todos `[tablon.corrections]` | `CorrectionGraph.tsx`, `corrections.ts` ([correcciones-coleccion.md](correcciones-coleccion.md)) |
 | Guía del proyecto: leerla, proponer cambios, aceptar o rechazar propuestas, marcar un cambio; editarla directamente | S | Todos; editar, seniors | `GuidePanel.tsx` |
 | Corcho de dudas: crear, responder, marcar resuelta, editar, borrar, denunciar | S | Todos | `DoubtForm.tsx`, `DoubtDetailCard.tsx` |
 | Demostración | S | Todos | `BoardTour.tsx` |

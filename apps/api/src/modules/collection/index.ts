@@ -35,7 +35,10 @@ const GROUPS = ['friends', 'kickoff', 'circle', 'world'] as const satisfies Coll
 
 const querySchema = z.object({ group: z.enum(GROUPS).optional() })
 
-/** Las amistades con las que te comparas: las 10 con las que más te has corregido. */
+/**
+ * Las amistades con las que te comparas: las 10 con las que más cerca y más
+ * tiempo te has sentado (la red de asientos).
+ */
 const FRIENDS = 10
 /** Filas de la clasificación, como mucho (la tuya llega aparte). */
 const ROWS = 50
@@ -57,6 +60,11 @@ type CollectionDeps = {
   circles: (track: 'classic' | 'next') => Promise<Map<number, number>>
   /** El círculo en que va cada persona, sin preguntar a 42. */
   circlesOf: (logins: readonly string[]) => Promise<Map<string, number>>
+  /**
+   * Con quién más cerca y más tiempo se ha sentado alguien, de más a menos
+   * (`friendsOf` de la red de asientos). Sin ella, solo las correcciones.
+   */
+  friendsOf?: (actor: Actor, limit: number) => Promise<string[]>
   now?: () => number
 }
 
@@ -160,6 +168,8 @@ export function createCollectionModule(deps: CollectionDeps) {
       repository.correctedBy(actor.login, cursus),
       repository.partnersOf(actor.campusId, cursus, actor.login),
     ])
+    // Quien se sienta cerca, aunque no tenga álbum; por eso se piden de sobra.
+    const seated = (await deps.friendsOf?.(actor, FRIENDS * 5).catch(() => [])) ?? []
 
     // Quien no se ve no sale ni cuenta: ni en los puestos ni en la rareza.
     const people: Collector[] = [...world.people.values()]
@@ -185,7 +195,14 @@ export function createCollectionModule(deps: CollectionDeps) {
     const myCircle = world.circleOf.get(self) ?? null
     const friends = new Set([
       self,
-      ...closestOf(partners, self, (login) => sees(login) && tallies.has(login), FRIENDS),
+      // Primero con quien te sientas; si no llegan a 10 (en la piscina no hay
+      // historial de puestos), se completa con quien más te has corregido.
+      ...closestOf(
+        [...seated, ...partners],
+        self,
+        (login) => sees(login) && tallies.has(login),
+        FRIENDS,
+      ),
     ])
     const members: Partial<Record<CollectionGroup, (login: string) => boolean>> = {
       friends: (login) => friends.has(login),
