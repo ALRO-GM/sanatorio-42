@@ -450,6 +450,77 @@ describe('el examen en vivo', () => {
     expect(calls.pages.sort()).toEqual([1320, 1321, 1400])
   })
 
+  it('el progreso en vivo es la nota del equipo abierto, aunque se creara días antes', async () => {
+    // Así lo da 42 (examen del 2026-11-03): el equipo se crea y bloquea al
+    // apuntarse, días antes; abierto ya dice `validated?: false`, y su nota
+    // sube mientras se hace. Uno de 2022 que nunca se cerró no es de hoy.
+    await createReplicaRepository(db).ingestProjectUsers(
+      [
+        {
+          ...projectUser('leo', {
+            ...RANK_03,
+            status: 'in_progress',
+            updatedAt: '2026-10-22T07:50:00.000Z',
+          }),
+          teams: [
+            {
+              id: 9201,
+              final_mark: null,
+              'validated?': null,
+              'locked?': true,
+              'closed?': false,
+              created_at: '2022-06-03T13:46:31.374Z',
+              locked_at: '2022-06-03T13:46:31.414Z',
+              updated_at: '2022-06-03T13:46:31.490Z',
+            },
+            {
+              id: 9202,
+              final_mark: 48,
+              'validated?': false,
+              'locked?': true,
+              'closed?': false,
+              created_at: '2026-10-19T23:00:00.131Z',
+              locked_at: '2026-10-19T23:00:00.175Z',
+              updated_at: '2026-10-22T07:50:00.000Z',
+            },
+          ],
+        },
+        // `eva` se ha apuntado al 03 del plan nuevo, pero su equipo no está bloqueado.
+        {
+          ...projectUser('eva', {
+            ...NEXT_03,
+            status: 'in_progress',
+            updatedAt: '2026-10-22T06:00:00.000Z',
+          }),
+          teams: [
+            {
+              id: 9301,
+              final_mark: null,
+              'validated?': null,
+              'locked?': false,
+              'closed?': false,
+              created_at: '2026-10-22T06:00:00.000Z',
+              updated_at: '2026-10-22T06:00:00.000Z',
+            },
+          ],
+        },
+      ],
+      MADRID,
+    )
+
+    const live = await build().live(actor('eva'))
+    const leo = live.groups
+      .flatMap((group) => group.people)
+      .find((person) => person.login === 'leo')
+
+    // Dentro, con su 48 de ahora: no suspendido por el `validated?: false` de 42.
+    expect(leo).toMatchObject({ status: 'inProgress', mark: 48 })
+    // `eva` no ha entrado: no sale.
+    expect(summary(live).flatMap(([, people]) => people)).not.toContainEqual(
+      expect.stringMatching(/^eva:/),
+    )
+  })
+
   it('si 42 no da la lista de apuntados, sale quien se sabe por la agenda y por sus filas', async () => {
     examUsers = new Error('42 dice 500')
 

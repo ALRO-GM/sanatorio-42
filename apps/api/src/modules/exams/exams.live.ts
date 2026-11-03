@@ -300,8 +300,8 @@ export function createExamsLive(options: ExamsLiveOptions) {
         image: images.get(login) ?? fromFortyTwo.get(login) ?? null,
         track,
         circle,
-        // Solo la del intento de esta sesión: hasta que se cierra, 42 no da nota
-        // (ni del equipo ni de sus ejercicios), y la del proyecto es la mejor de todas.
+        // Solo la del intento de esta sesión: la del equipo abierto, que 42 sube
+        // con cada ejercicio aprobado. La del proyecto es la mejor de todas.
         mark,
         // La mejor de todas en ese examen, contando la de hoy si ya la hay.
         bestMark: before === undefined ? mark : Math.max(before, mark ?? 0),

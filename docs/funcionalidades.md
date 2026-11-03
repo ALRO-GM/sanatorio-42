@@ -279,7 +279,7 @@ Detalle: [blackhole.md](blackhole.md).
 
 | Funcionalidad | Modo | Quién | Dónde |
 | --- | --- | --- | --- |
-| Examen en vivo del campus: quién ha entrado, qué examen, barra con la nota de hoy y mejor nota; refrescar | N | Todos `[examenes.live]` | `features/exams/ExamPeople.tsx` |
+| Examen en vivo del campus: quién ha entrado, qué examen, barra con la nota de hoy (la que 42 va subiendo mientras siguen dentro) y mejor nota; refrescar | N | Todos `[examenes.live]` | `features/exams/ExamPeople.tsx` |
 | Último examen acabado con sus resultados | N | Todos `[examenes.live]` | `ExamsPage.tsx` |
 | «En vivo» en la pestaña Campus y en Exámenes mientras hay examen | S | Todos | `app/Nav.tsx` |
 | Estadísticas de cada Exam Rank, con filtros de plan, exámenes y kickoffs | N | Todos `[examenes.stats]` | `ExamStatsPanel.tsx` |

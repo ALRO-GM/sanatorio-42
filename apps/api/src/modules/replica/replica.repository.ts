@@ -215,7 +215,17 @@ export function createReplicaRepository(db: Db) {
         // Los intentos de un examen, con su nota: para sus estadísticas.
         if (isExam(project) && Array.isArray(row.teams)) {
           for (const team of row.teams) {
-            if (!isId(team.id)) continue
+            // Sin bloquear no ha empezado: está apuntado, pero aún no es un intento.
+            if (!isId(team.id) || team['locked?'] === false) continue
+
+            // Abierto, 42 ya dice `validated?: false`: solo vale una vez cerrado.
+            // Y su fecha es lo último que pasó (entrar, o que suba la nota),
+            // no cuándo se creó el equipo, que en un examen es días antes.
+            const closed =
+              team['closed?'] ?? (team.closed_at !== null && team.closed_at !== undefined)
+            const at = closed
+              ? (team.closed_at ?? team.updated_at)
+              : (team.updated_at ?? team.locked_at ?? team.created_at)
 
             statements.push({
               sql: `INSERT OR REPLACE INTO exam_attempts
@@ -227,8 +237,8 @@ export function createReplicaRepository(db: Db) {
                 user.id,
                 project.id,
                 typeof team.final_mark === 'number' ? Math.round(team.final_mark) : null,
-                triState(team['validated?']),
-                team.closed_at ?? team.created_at ?? null,
+                closed ? triState(team['validated?']) : null,
+                at ?? null,
               ],
             })
           }

@@ -2243,11 +2243,16 @@ POST /exams/live/refresh  → LiveExam. Lo mismo, pidiendo antes lo nuevo a 42 s
   círculo N es `exam-rank-0N`, o `42next-exam-rank-0N` en el plan nuevo.
 - Solo gente del campus de quien mira: se quita a quien consta en otro campus y
   no en este (quien no consta en ninguno se queda: puede no estar copiado aún).
-- `mark`: la del intento de esta sesión, solo cuando se cierra. Mientras sigue
-  dentro es `null`: 42 no da nota hasta cerrar (comprobado el 2026-10-22 con
-  `GET /v2/teams`: equipos en curso sin `final_mark`, `teams_uploads` ni
-  `scale_teams`). Nunca la del proyecto: mientras está en curso, 42 deja ahí la
-  mejor de los intentos anteriores, no la de ahora.
+- `mark`: la del intento de esta sesión, el equipo de 42 de ese examen. 42 la
+  sube mientras se hace, con cada ejercicio aprobado (comprobado el 2026-11-03:
+  equipos abiertos con 25, 48 y 75). `null` hasta la primera nota. Nunca la del
+  proyecto: mientras está en curso, 42 deja ahí la mejor de los intentos
+  anteriores, no la de ahora.
+- El intento de la sesión: un equipo bloqueado (`locked?`) tocado desde que
+  empezó el examen (`updated_at`; cerrado, `closed_at`). En los exámenes, 42
+  crea y bloquea el equipo días antes, al apuntarse, así que ni `created_at` ni
+  `locked_at` sirven de fecha. Cerrado es `closed?`: abierto, 42 ya dice
+  `validated?: false`. Un equipo sin bloquear aún no es un intento.
 - `bestMark`: la mejor de sus intentos cerrados de ese examen, contando el de
   esta sesión si ya está cerrado; `null` si nunca lo ha cerrado. La web la pone
   pequeña en una esquina; la grande es `mark`, con su barra sobre 100.

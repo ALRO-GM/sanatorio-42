@@ -275,10 +275,21 @@ export type ApiCorrectionPoint = {
 /** Un intento de un proyecto (un «equipo»), tal como viene dentro de su fila. */
 export type ApiProjectTeam = {
   id: number
+  /** En un examen, sube mientras se hace: es el progreso en vivo. */
   final_mark?: number | null
+  /** Ojo: en un examen abierto ya vale `false`. Solo dice algo con `closed?`. */
   'validated?'?: boolean | null
+  /**
+   * En los exámenes, 42 crea y bloquea el equipo días antes, al apuntarse: ni
+   * `created_at` ni `locked_at` dicen cuándo se hizo el intento.
+   */
   created_at?: string | null
+  'locked?'?: boolean | null
+  locked_at?: string | null
+  'closed?'?: boolean | null
   closed_at?: string | null
+  /** Con el intento abierto, lo último que pasó: entrar, o que suba la nota. */
+  updated_at?: string | null
 }
 
 /** Una inscripción a un examen (`/exams/:id/exams_users`), con la persona anidada. */

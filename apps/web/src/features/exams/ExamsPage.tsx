@@ -315,7 +315,7 @@ function ExamGroups({
               )}
               end={(person) =>
                 person.mark === null && person.status === 'inProgress' ? (
-                  // 42 no da nota hasta que se cierra el examen: un guion, que la
+                  // 42 aún no ha puesto nota a este intento: un guion, que la
                   // barra vacía con su brillo ya dice que sigue dentro.
                   <strong
                     className="exam-mark pending"
