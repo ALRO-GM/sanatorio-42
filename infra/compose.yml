@@ -66,6 +66,8 @@ services:
       DOMAIN: ${DOMAIN:?Pon DOMAIN en infra/.env}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      # Los bloques de las otras webs de la máquina (ver el final del Caddyfile).
+      - /opt/caddy-sitios:/etc/caddy/sitios:ro
       - caddy_data:/data
       - caddy_config:/config
     logging:

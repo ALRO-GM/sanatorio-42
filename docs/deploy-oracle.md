@@ -238,6 +238,29 @@ pizarras). La réplica de 42 se puede volver a bajar.
 
 Si se cambia `SESSION_SECRET`, todas las sesiones abiertas dejan de valer.
 
+## Otras webs en la misma máquina
+
+Desde el 2026-11-03 la máquina sirve también otros proyectos (el primero,
+WebAR: `https://webar.peer4u.app`, repo `ALRO-GM/WebAR`, en `/opt/webar`).
+Peer4U no cambia por ellos:
+
+- **Caddy es el de Peer4U** y es el único con los puertos 80 y 443. Al final
+  del `Caddyfile` importa `/etc/caddy/sitios/*.caddy`, que es la carpeta
+  `/opt/caddy-sitios` de la máquina (de solo lectura para Caddy). Cada
+  proyecto deja ahí su bloque con su subdominio, lo valida con
+  `docker exec sanatorio-caddy-1 caddy validate --config /etc/caddy/Caddyfile`
+  y, solo si pasa, recarga con `caddy reload`. Si no pasa, deja el bloque de
+  antes: un fichero roto tumbaría Peer4U en el siguiente arranque de Caddy.
+- **Cada proyecto tiene su compose** (`name:` propio) y une su contenedor a la
+  red externa `sanatorio_default` con un alias (`webar`), para que Caddy le
+  hable por dentro. No publica puertos.
+- **Con topes**: memoria, CPU y procesos limitados en su compose, para que no
+  le quite a Peer4U lo que necesita.
+- **La guardia de límites** (`limits-guard.sh`) solo para Peer4U al 95 %; el
+  tráfico de las otras webs sí cuenta en su contador.
+- Para quitar una web: `docker compose down` en su carpeta, borrar su bloque
+  de `/opt/caddy-sitios` y `caddy reload`.
+
 ## Otra máquina
 
 Nada de esto es específico de Oracle salvo los pasos 1 y 2. En cualquier

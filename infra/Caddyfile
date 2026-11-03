@@ -50,3 +50,10 @@
 www.{$DOMAIN}, sanatorio42.duckdns.org {
 	redir https://{$DOMAIN}{uri} permanent
 }
+
+# Otras webs de esta misma máquina (2026-11-03), cada una en su subdominio y con
+# su contenedor en la red `sanatorio_default`. Cada proyecto deja aquí su bloque
+# (`/opt/caddy-sitios/<proyecto>.caddy`), lo valida y recarga Caddy desde su
+# propio despliegue: Peer4U no se toca. Sin ficheros, no importa nada. Ver
+# docs/deploy-oracle.md § «Otras webs en la misma máquina».
+import /etc/caddy/sitios/*.caddy
