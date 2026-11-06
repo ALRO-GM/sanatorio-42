@@ -43,6 +43,9 @@ export const SECTIONS = [
   { id: 'asientos', icon: 'persona', inNav: true, category: 'campus', from: 'normal' },
   // Avance en el common core frente a la media y los paces (#87).
   { id: 'avance', icon: 'despegue', inNav: true, category: 'campus', from: 'normal' },
+  // Abandono de la piscina (`docs/abandono.md`): solo quien administra y, si el
+  // panel lo permite, los piscineros.
+  { id: 'abandono', icon: 'ausente', inNav: true, category: 'campus', from: 'normal' },
   { id: 'red', icon: 'red', inNav: true, category: 'campus', from: 'normal' },
   // Exámenes: el de ahora (en vivo), el último y sus estadísticas.
   { id: 'examenes', icon: 'medalla', inNav: true, category: 'campus', from: 'normal' },
@@ -131,6 +134,7 @@ const POOL_KEY: Record<Section, PoolKey | null> = {
   calendario: 'calendario',
   red: 'red',
   avance: 'avance',
+  abandono: 'abandono',
   clusters: 'clusters',
   asientos: 'red.seats',
   examenes: 'examenes',
@@ -149,6 +153,21 @@ export function blockedForPool(section: Section, access: PoolAccess): boolean {
   const key = POOL_KEY[section]
 
   return section !== HOME && key !== null && !poolAllows(key, access)
+}
+
+/**
+ * Las secciones que no son de los estudiantes: solo las ve quien administra
+ * y, si el panel lo permite, un piscinero (eso ya lo mira `blockedForPool`).
+ */
+const NOT_FOR_STUDENTS: ReadonlySet<Section> = new Set(['abandono'])
+
+/**
+ * Si un estudiante que no administra no puede abrir esta sección. Un
+ * piscinero (también quien administra en la vista de piscinero) pasa por
+ * `blockedForPool`.
+ */
+export function blockedForStudent(section: Section, access: PoolAccess, admin: boolean): boolean {
+  return NOT_FOR_STUDENTS.has(section) && !admin && !access.pool
 }
 
 /**
@@ -181,6 +200,7 @@ const WIDE: ReadonlySet<string> = new Set([
   'clusters',
   'asientos',
   'avance',
+  'abandono',
   'red',
   'examenes',
   'estadisticas',

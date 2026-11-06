@@ -162,3 +162,33 @@ describe('un piscinero ve la piscina', () => {
     expect((await get(built, '/stats/progress/piscine', cookie)).statusCode).toBe(403)
   })
 })
+
+describe('el abandono de la piscina (docs/abandono.md)', () => {
+  it('lo ve quien administra; un estudiante no', async () => {
+    const built = await makeApp({ ADMIN_LOGINS: 'albrodri' })
+
+    apps.push(built)
+
+    const admin = await built.adminLogin()
+    const report = await get(built, '/stats/dropout', admin)
+
+    expect(report.statusCode).toBe(200)
+    expect(report.headers['cache-control']).toBe('private, no-store')
+    expect(json(report)).toMatchObject({ people: [], start: null })
+
+    const student = await makeApp()
+
+    apps.push(student)
+    expect((await get(student, '/stats/dropout', await student.login())).statusCode).toBe(403)
+  })
+
+  it('un piscinero, solo con el permiso «abandono» (de entrada, cerrado)', async () => {
+    const closed = await piscinero(['avance'])
+
+    expect((await get(closed.built, '/stats/dropout', closed.cookie)).statusCode).toBe(403)
+
+    const open = await piscinero(['avance', 'abandono'])
+
+    expect((await get(open.built, '/stats/dropout', open.cookie)).statusCode).toBe(200)
+  })
+})

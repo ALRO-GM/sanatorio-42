@@ -61,6 +61,9 @@ const FocusPage = lazy(() =>
 const ExamsPage = lazy(() =>
   import('../features/exams/ExamsPage').then((m) => ({ default: m.ExamsPage })),
 )
+const DropoutPage = lazy(() =>
+  import('../features/dropout/DropoutPage').then((m) => ({ default: m.DropoutPage })),
+)
 const ProgressPage = lazy(() =>
   import('../features/stats/ProgressPage').then((m) => ({ default: m.ProgressPage })),
 )
@@ -228,6 +231,7 @@ export function SectionView({
       )}
       {section === 'clusters' && <ClustersPage me={me.login} />}
       {section === 'examenes' && <ExamsPage />}
+      {section === 'abandono' && <DropoutPage />}
       {section === 'privacidad' && <LegalPage signedIn />}
       {section === 'gestion' &&
         (profile.data?.admin === true ? (

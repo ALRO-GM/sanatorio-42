@@ -148,3 +148,6 @@ export function createNetworkModule(deps: NetworkModuleDeps): NetworkModule {
 export type { NetworkService } from './network.service.js'
 export type { CorrectionSync } from './network.sync.js'
 export { PISCINE_CURSUS } from './network.sync.js'
+// El abandono de la piscina (`stats/dropout.service.ts`) mide el aislamiento como la red de asientos.
+export { seatingOf } from './seating.rules.js'
+export { seatSessionsIn } from './seating.sessions.js'

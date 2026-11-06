@@ -26,6 +26,7 @@ export const NAV_DEFAULT = [
   'clusters',
   'asientos',
   'avance',
+  'abandono',
   'red',
   'examenes',
   'estadisticas',

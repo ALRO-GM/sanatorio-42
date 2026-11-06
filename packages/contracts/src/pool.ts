@@ -47,6 +47,8 @@ export type PoolKey =
   | 'examenes'
   | 'examenes.live'
   | 'examenes.stats'
+  // El abandono de la piscina (`docs/abandono.md`): de entrada, cerrado.
+  | 'abandono'
   // Lo que no es una pestaña
   | 'clicker'
   | 'focus'

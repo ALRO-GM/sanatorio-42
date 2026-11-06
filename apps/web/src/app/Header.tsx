@@ -255,7 +255,7 @@ export function Header({
           </div>
         </header>
 
-        <Nav section={section} onGo={onGo} examLive={examLive} />
+        <Nav section={section} onGo={onGo} examLive={examLive} admin={admin} />
       </div>
     </div>
   )

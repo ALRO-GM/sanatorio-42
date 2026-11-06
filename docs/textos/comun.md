@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/comun.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-444 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
+445 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera | Francés |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -103,6 +103,7 @@ Generado desde `apps/web/src/shared/i18n/textos/comun.csv` con
 | `edit.save` | Botón para guardar lo editado | features/boards/BoardForm, features/doubts/DoubtDetailCard | Guardar cambios | Save changes | Desa els canvis | Gorde aldaketak | Enregistrer les modifications |
 | `nav.red` | Pestaña: red de correcciones entre estudiantes | app/Nav, app/studio/Miniature, features/admin/ClickMap, features/admin/FlowsPanel, features/admin/Inbox, features/admin/InboxTab, features/admin/StatsPanel, features/admin/UsageHeatmap, features/calendar/EventDialog, features/exams/ExamsTour, features/focus/FocusPage, features/network/NetworkTour, features/stats/HelpStatsPage, features/stats/HelpStatsTour, features/suggest/SuggestPanel, features/suggest/detect, shared/layout/store | Red | Network | Xarxa | Sarea | Réseau |
 | `nav.avance` | Pestaña de Campus: avance en el common core frente a la media y los paces | app/Nav, app/studio/Miniature, features/admin/ClickMap, features/admin/FlowsPanel, features/admin/Inbox, features/admin/InboxTab, features/admin/StatsPanel, features/admin/UsageHeatmap, features/calendar/EventDialog, features/exams/ExamsTour, features/focus/FocusPage, features/profile/RecordTour, features/stats/HelpStatsPage, features/stats/HelpStatsTour, features/stats/ProgressTour, features/suggest/SuggestPanel, features/suggest/detect, shared/layout/store | Avance | Progress | Avenç | Aurrerapena | Progression |
+| `nav.abandono` | Pestaña de Campus: abandono de los piscineros (solo quien administra o con permiso) | app/Nav, app/studio/Miniature, features/admin/ClickMap, features/admin/FlowsPanel, features/admin/Inbox, features/admin/InboxTab, features/admin/StatsPanel, features/admin/UsageHeatmap, features/calendar/EventDialog, features/exams/ExamsTour, features/focus/FocusPage, features/stats/HelpStatsPage, features/stats/HelpStatsTour, features/suggest/SuggestPanel, features/suggest/detect, shared/layout/store | Abandono | Dropout | Abandonament | Uztea | Abandon |
 | `app.loadingSection` | Mientras se descarga una sección | app/SectionView | Abriendo… | Opening… | Obrint… | Irekitzen… | Ouverture… |
 | `layout.open` | Menú de la cuenta: abrir la personalización | app/Header, app/studio/Miniature, features/admin/StatsPanel, features/admin/UsageHeatmap, shared/layout/Blocks | Personalizar la web | Customise the site | Personalitza la web | Pertsonalizatu weba | Personnaliser le site |
 | `layout.title` | Título de la ventana de personalización | app/studio/Miniature, app/studio/Studio, features/admin/StatsPanel, features/admin/UsageHeatmap, features/profile/RecordTour, features/settings/StudioTour, shared/layout/Blocks | Personalizar | Customise | Personalitza | Pertsonalizatu | Personnaliser |

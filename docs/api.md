@@ -1984,6 +1984,10 @@ GET /stats/progress/piscine?with=login,login → PiscineProgress. El Avance de u
                   un estudiante): lo aprobado de la piscina día a día, con la media de su
                   piscina y de las anteriores de su campus. En la vista sin límites
                   del dueño trae además `everyone`: la línea de cada uno de la piscina.
+GET /stats/dropout?start=AAAA-MM-DD → DropoutReport. El abandono de una piscina del campus
+                  (`docs/abandono.md`): horas de cada día, probabilidad y estado de cada
+                  piscinero, correlaciones y factores comunes. Quien administra, la vista sin
+                  límites y un piscinero con el permiso `abandono`; un estudiante, 403.
 GET /stats/ranking?by=circle|circles|hours&plan=all|classic|next&kickoff=AAAA-MM&cohort=only|since
                   &circleMin=0&circleMax=7&pctMin=0&pctMax=100&offset=0&limit=50 → StatsRanking.
 ```
@@ -2057,6 +2061,14 @@ GET /stats/ranking?by=circle|circles|hours&plan=all|classic|next&kickoff=AAAA-MM
   gente de tu piscina que ves. Los rushes, BSQ y exámenes no
   suman. Se calcula por campus y se guarda 10 minutos. Es del permiso
   `avance`.
+- `GET /stats/dropout` (`dropout.service.ts`, reglas en `dropout.rules.ts`):
+  sin `start`, la piscina del día en que empezó más gente; `pools` dice las que
+  se pueden elegir. `days` va del primer día de piscina a hoy (como mucho el
+  día 32); `people[].hours`, las horas de cada uno de esos días (`null` antes
+  de su propio inicio o después de hoy). `correlations`, `pairs` y `groups` se
+  hacen con la gente que ha venido alguna vez (`sample`), también la que no ves
+  (son cifras de todos); la lista de personas, sin quien no ves. `no-store`.
+  Las reglas, en `docs/abandono.md`.
 - **Plan** de quien 42 no lo ha dicho (`user_tracks`): el de la mayoría de sus
   pistas. Del nuevo, un `python-module…`, un proyecto que solo tiene el plan
   nuevo o una versión `42next-` que no sea examen; del clásico, un proyecto que

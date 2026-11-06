@@ -54,6 +54,7 @@
 @import './shellcourse.css';
 /* Estadísticas de Ayuda. */
 @import './stats.css';
+@import './dropout.css';
 /* Mantenimiento y la ventanita de avisos con cuenta atrás. */
 @import './countdowns.css';
 /* Las ventanitas flotantes de la esquina: la pila que las ordena sin taparse. */

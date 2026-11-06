@@ -126,6 +126,7 @@ import type {
   StatsFastest,
   StatsProgress,
   PiscineProgress,
+  DropoutReport,
   StatsRanking,
   RankingBy,
   Leaderboard,
@@ -569,6 +570,11 @@ export type Api = {
   ) => Promise<StatsProgress>
   /** El Avance de un piscinero: lo aprobado de la piscina día a día y con quién se compara (hasta 5). */
   getPiscineProgress: (others: readonly string[]) => Promise<PiscineProgress>
+  /**
+   * El abandono de una piscina (`docs/abandono.md`): de entrada, la que está en
+   * curso; `start`, otra de las de `pools`. Quien administra o un piscinero con permiso.
+   */
+  getDropout: (start?: string) => Promise<DropoutReport>
   /** Quien terminó el common core más deprisa, por plan: en tu campus y el primero de cada campus. */
   getStatsFastest: () => Promise<StatsFastest>
   /** Quién va más rápido en el campus, con esos filtros, por páginas. */

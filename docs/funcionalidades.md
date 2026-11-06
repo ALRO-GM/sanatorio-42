@@ -287,6 +287,20 @@ Detalle: [blackhole.md](blackhole.md).
 | Elegir exámenes de estudiantes o de piscineros | N | Solo la vista sin límites del dueño | `ExamsPage.tsx` |
 | Demostración | N | Todos | `ExamsTour.tsx` |
 
+### Abandono (`#/abandono`) · N · `[abandono]`
+
+Pedido por Alberto el 2026-11-06 ([abandono.md](abandono.md)). Solo quien administra, la vista sin límites y piscineros con el permiso (cerrado de entrada).
+
+| Funcionalidad | Modo | Quién | Dónde |
+| --- | --- | --- | --- |
+| Tabla de cada piscinero con su probabilidad de abandono, estado, último día, días sin venir, horas, asistencia, aislamiento, correcciones y aprobados; filtros: más probables, todos por probabilidad, seguro que siguen, no vinieron nunca | N | Admins `[abandono]` | `features/dropout/` |
+| Ficha de una persona: horas de cada día (fines de semana y viernes de examen marcados), razones y cuándo lo dejó («del jueves al viernes») | N | Admins `[abandono]` | `features/dropout/` |
+| Abandonos por día o por semana de piscina con el acumulado, y por día de la semana del cambio; solo confirmados o también probables | N | Admins `[abandono]` | `features/dropout/` |
+| Cifras: confirmados, probables, % de la piscina, horas de media antes de abandonar frente a quien sigue, semana y día con más abandonos | N | Admins `[abandono]` | `features/dropout/` |
+| Tabla de correlaciones (0–100) entre factores que se pueden quitar y poner, y dispersión de dos factores elegidos | N | Admins `[abandono]` | `features/dropout/` |
+| Factores comunes: parejas juntas frente al abandono y grupos de factores que van juntos | N | Admins `[abandono]` | `features/dropout/` |
+| Elegir piscina, si hay más de una | N | Admins `[abandono]` | `features/dropout/` |
+
 ### Clasificaciones (`#/estadisticas`) · N · `[estadisticas]`
 
 | Funcionalidad | Modo | Quién | Dónde |

@@ -8,6 +8,7 @@ import { focusing, useFocus } from '../shared/focus'
 import { usePoolAccess } from '../shared/pool'
 import {
   blockedForPool,
+  blockedForStudent,
   CATEGORIES,
   categoryOf,
   hiddenInFocus,
@@ -20,6 +21,8 @@ type NavProps = {
   onGo: (next: Section) => void
   /** `true` si hay un examen en marcha en el campus: su pestaña lo dice. */
   examLive?: boolean
+  /** Si administra la web: ve también lo que no es de los estudiantes (el abandono). */
+  admin?: boolean
 }
 
 /** La última sección que se miró de cada categoría: se vuelve a ella. */
@@ -31,7 +34,7 @@ const lastOf = new Map<Category, Section>()
  * abierta tiene varias secciones, una segunda fila con ellas, en el orden que
  * la persona ha elegido (o el automático). Solo sale lo que toca en el modo de la interfaz.
  */
-export function Nav({ section, onGo, examLive = false }: NavProps) {
+export function Nav({ section, onGo, examLive = false, admin = false }: NavProps) {
   const { t } = useI18n()
   const order = useNavOrder()
   const categoryOrder = useOrder('categories')
@@ -68,6 +71,8 @@ export function Nav({ section, onGo, examLive = false }: NavProps) {
         .filter((entry) => shows(detail, entry.from ?? 'simple'))
         // Un piscinero, solo lo que permite el panel (el expediente, siempre).
         .filter((entry) => !blockedForPool(entry.id, pool))
+        // Lo de quien administra (el abandono), no para los estudiantes.
+        .filter((entry) => !blockedForStudent(entry.id, pool, admin))
         // En Pomodoro, solo lo elegido (y el expediente).
         .filter(
           (entry) => !focusing(focus) || !hiddenInFocus(entry.id, focus?.settings.sections ?? []),

@@ -47,6 +47,7 @@ const TREE: Record<PoolKey, Group> = {
   examenes: 'campus',
   'examenes.live': 'campus',
   'examenes.stats': 'campus',
+  abandono: 'campus',
   clicker: 'extra',
   focus: 'aprender',
   'focus.stats': 'aprender',

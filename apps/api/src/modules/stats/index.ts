@@ -12,6 +12,7 @@ import type { Audience } from '../../core/audience.js'
 import type { Db } from '../../core/db/database.js'
 import type { AppModule } from '../../core/module.js'
 import { MAX_OTHERS, createProgressService } from './progress.service.js'
+import { createDropoutService } from './dropout.service.js'
 import { createPiscineProgressService } from './piscine.service.js'
 import {
   createPiscineRepository,
@@ -23,6 +24,14 @@ import type { StatsService } from './stats.service.js'
 import { domainError } from '../../core/errors.js'
 import { given } from '../../core/options.js'
 import { parse } from '../../core/validation.js'
+
+/** `GET /stats/dropout`: qué piscina, por su primer día. */
+const dropoutQuery = z.object({
+  start: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional(),
+})
 
 /** Los filtros de `GET /stats/ranking`. */
 const rankingQuery = z
@@ -114,6 +123,11 @@ export function createStatsModule(deps: {
   })
 
   const piscine = createPiscineProgressService({
+    piscine: createPiscineRepository(deps.db),
+    ...given({ now: deps.now }),
+  })
+  const dropout = createDropoutService({
+    db: deps.db,
     piscine: createPiscineRepository(deps.db),
     ...given({ now: deps.now }),
   })
@@ -246,6 +260,26 @@ export function createStatsModule(deps: {
             preview: user.preview === true,
           }),
         )
+      })
+
+      /**
+       * `GET /stats/dropout?start=YYYY-MM-DD` → el abandono de una piscina del
+       * campus (`docs/abandono.md`). Lo ve quien administra y un piscinero si
+       * el panel lo permite (`abandono`, que corta la ruta antes); la vista
+       * sin límites del dueño lo tiene todo permitido. Un estudiante, no.
+       */
+      app.get('/stats/dropout', async (request, reply) => {
+        reply.header('Cache-Control', 'private, no-store')
+
+        const query = parse(dropoutQuery, request.query)
+        const actor = await session.actor(request)
+
+        if (!actor.admin && actor.pool !== true) {
+          throw domainError('forbidden', 'El abandono de la piscina es de quien administra')
+        }
+        const sees = await seesFor(deps.audience ?? NO_POOL, actor)
+
+        return reply.send(await dropout.report(homeOf(request), query.start ?? null, sees))
       })
 
       /**

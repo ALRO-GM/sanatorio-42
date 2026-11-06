@@ -291,6 +291,8 @@ export const realApi: Api = {
     return getJson(`/stats/progress${query === '' ? '' : `?${query}`}`)
   },
   getStatsFastest: () => getJson('/stats/progress/fastest'),
+  getDropout: (start) =>
+    getJson(`/stats/dropout${start === undefined ? '' : `?start=${encodeURIComponent(start)}`}`),
   getPiscineProgress: (others) =>
     getJson(
       `/stats/progress/piscine${others.length === 0 ? '' : `?with=${encodeURIComponent(others.join(','))}`}`,

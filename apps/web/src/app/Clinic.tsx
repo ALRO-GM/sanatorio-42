@@ -36,7 +36,14 @@ import { PoolPreviewBar } from './PoolPreviewBar'
 import { SectionView } from './SectionView'
 import { loadPoolAccess, resetPoolAccess, usePoolAccess } from '../shared/pool'
 import { PoolOnly } from '../shared/ui/PoolOnly'
-import { blockedForPool, HOME, SECTIONS, hiddenInFocus, isWide } from './sections'
+import {
+  blockedForPool,
+  blockedForStudent,
+  HOME,
+  SECTIONS,
+  hiddenInFocus,
+  isWide,
+} from './sections'
 import type { Section } from './sections'
 import { useRoute } from './useRoute'
 
@@ -141,6 +148,12 @@ export function Clinic({ me, onLogout }: ClinicProps) {
   const projects = useAsync(() => api.getMyProjects(true), [])
   const profile = useAsync(() => api.getProfile(), [campusVersion])
   const [style, setStyle] = useStyle()
+  const admin = profile.data?.admin
+
+  // Lo que no es de los estudiantes (el abandono): sin administrar, al expediente.
+  useEffect(() => {
+    if (admin !== undefined && blockedForStudent(section, pool, admin)) go(HOME)
+  }, [admin, pool, section, go])
 
   // Un estilo hecho para otra persona no se queda puesto aunque esté guardado
   // en el navegador (a mano, o de otra cuenta en el mismo equipo).

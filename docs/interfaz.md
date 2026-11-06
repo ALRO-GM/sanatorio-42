@@ -19,7 +19,7 @@ abajo).
 | **Yo** | Lo tuyo | Expediente (la portada) · Agenda · Calendario | `app/sections.ts` |
 | **Ayuda** | Pedir y dar ayuda, quedar con gente | Sala de espera · Tablón · Terapia · Pizarras · Guardia | |
 | **Aprender** | Practicar y concentrarse | Curso de git · Curso de shell · Not-games · Pomodoro | |
-| **Campus** | Cómo va el campus y cómo vas tú | Clústeres · Asientos · Avance · Red · Exámenes · Clasificaciones | |
+| **Campus** | Cómo va el campus y cómo vas tú | Clústeres · Asientos · Avance · Red · Exámenes · Abandono · Clasificaciones | Abandono, solo quien administra, la vista sin límites y piscineros con permiso (`docs/abandono.md`) |
 
 Los cursos eran pestañas de Not-games (sus direcciones viejas,
 `#/notgames/git` y `#/notgames/shell`, llevan a las nuevas: `useRoute.ts`), el

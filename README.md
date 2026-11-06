@@ -42,7 +42,7 @@ Es un proyecto personal de [Alberto](https://github.com/ALRO-GM) (`albrodri` en
 | **Qué es**      | Aplicación web completa: API, web, base de datos y despliegue                                                                                        |
 | **Tecnología**  | TypeScript de punta a punta · Node 22 y Fastify 5 · React 19 y Vite · SQLite (libSQL) · Docker y Caddy                                               |
 | **Tamaño**      | 35 módulos de API con 256 rutas, 84 migraciones, 6 paquetes compartidos; 4 categorías con 17 secciones, 3 modos de interfaz, 7 estilos y 5 idiomas    |
-| **Calidad**     | 7 118 tests en 256 ficheros (6 188 de la API y 930 de la web, con 71 ficheros de pantallas; medido el 2026-11-02), cobertura mínima que solo sube, sin código muerto ni duplicado, y un despliegue que no sale sin la CI en verde |
+| **Calidad**     | 7 138 tests en 258 ficheros (6 202 de la API y 936 de la web, con 72 ficheros de pantallas; medido el 2026-11-06), cobertura mínima que solo sube, sin código muerto ni duplicado, y un despliegue que no sale sin la CI en verde |
 | **Seguridad**   | Revisión completa documentada: permisos con doble cerradura, segundo factor en el panel, topes de intentos y un test que recorre todas las rutas con entradas imposibles |
 | **Datos**       | Réplica propia de 5 campus de 42 (Madrid, Málaga, Urduliz, Barcelona y París) copiada con 1 200 peticiones por hora                                   |
 | **Coste**       | 0 € al mes. La web y la máquina se cortan solas antes de pasar de la capa gratuita                                                                   |
@@ -113,6 +113,7 @@ con el commit donde volver a verlo, está en
 
 | Fecha      | Dónde                  | Qué cambió                                                                                                   |
 | ---------- | ---------------------- | ------------------------------------------------------------------------------------------------------------ |
+| 2026-11-06 | Abandono | Pestaña nueva para quien administra (y piscineros si se permite): probabilidad de abandono de cada piscinero por sus horas en los ordenadores (el fin de semana no cuenta; faltar de viernes de examen a lunes, sí), cuándo lo dejó, abandonos por día, semana y día de la semana, correlaciones entre horas, aislamiento, correcciones y aprobados, y factores comunes ([docs/abandono.md](docs/abandono.md)) |
 | 2026-11-06 | Ver como piscinero | El Avance ya no cuenta tu perfil: lo ves como el piscinero que va más avanzado, con su línea y su piscina entera (quien se apuntó días tarde ya no deja fuera al resto) ([docs/piscineros.md](docs/piscineros.md)) |
 | 2026-11-03 | Servidor | La máquina sirve también otras webs (la primera, WebAR en `webar.peer4u.app`): Caddy importa sus bloques de `/opt/caddy-sitios` y cada una va en su contenedor con topes ([docs/deploy-oracle.md](docs/deploy-oracle.md)) |
 | 2026-11-03 | Exámenes | En vivo se ve la nota de quien sigue dentro, la que 42 sube con cada ejercicio, y ya no sale como suspenso: el intento es el equipo bloqueado y tocado durante el examen, no el creado días antes al apuntarse ([docs/api.md](docs/api.md)) |

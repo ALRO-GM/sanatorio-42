@@ -143,6 +143,13 @@ la ficha se lee «C 06» o «Shell». Lo calcula `curriculum.piscineLevelsOf` co
 la réplica, sin preguntar a 42; `composition.ts` lo usa para quien está en la
 piscina.
 
+## El abandono
+
+Pestaña **Abandono** (pedido por Alberto el 2026-11-06): quién de la piscina lo
+ha dejado, con qué probabilidad y con qué se relaciona. Permiso `abandono`,
+cerrado de entrada; quien administra y la vista sin límites la ven siempre.
+Detalle en [abandono.md](abandono.md).
+
 ## Ver como piscinero
 
 Pedido por Alberto el 2026-10-25. En la pestaña **Piscina** del panel, **Ver

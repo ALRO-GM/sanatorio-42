@@ -95,6 +95,7 @@ edit.edit,Botón para editar algo propio,Editar,Edit,Edita,Editatu,Modifier
 edit.save,Botón para guardar lo editado,Guardar cambios,Save changes,Desa els canvis,Gorde aldaketak,Enregistrer les modifications
 nav.red,Pestaña: red de correcciones entre estudiantes,Red,Network,Xarxa,Sarea,Réseau
 nav.avance,Pestaña de Campus: avance en el common core frente a la media y los paces,Avance,Progress,Avenç,Aurrerapena,Progression
+nav.abandono,Pestaña de Campus: abandono de los piscineros (solo quien administra o con permiso),Abandono,Dropout,Abandonament,Uztea,Abandon
 app.loadingSection,Mientras se descarga una sección,Abriendo…,Opening…,Obrint…,Irekitzen…,Ouverture…
 layout.open,Menú de la cuenta: abrir la personalización,Personalizar la web,Customise the site,Personalitza la web,Pertsonalizatu weba,Personnaliser le site
 layout.title,Título de la ventana de personalización,Personalizar,Customise,Personalitza,Pertsonalizatu,Personnaliser

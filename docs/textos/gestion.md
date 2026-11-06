@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/gestion.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-705 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
+706 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera | Francés |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -579,6 +579,7 @@ Generado desde `apps/web/src/shared/i18n/textos/gestion.csv` con
 | `pool.key.red.seats` | Panel, Piscina: permiso «red.seats» | features/admin/PoolPanel | Red de asientos: con quién se sienta cada cual | Seating network: who sits with whom | Xarxa de seients: amb qui seu cadascú | Eserlekuen sarea: nor norekin esertzen den | Réseau des postes : qui s'assoit à côté de qui |
 | `pool.key.avance` | Panel, Piscina: permiso «avance» | features/admin/PoolPanel | Avance en el common core | Common core progress | Avenç al common core | Common core-ko aurrerapena | Progression dans le tronc commun |
 | `pool.key.avance.compare` | Panel, Piscina: permiso «avance.compare» | features/admin/PoolPanel | Compararse con otra persona | Compare with someone | Comparar-se amb una altra persona | Beste pertsona batekin alderatu | Se comparer à une autre personne |
+| `pool.key.abandono` | Panel, Piscina: permiso «abandono» | features/admin/PoolPanel | Abandono de la piscina (quién lo deja y por qué) | Pool dropout (who leaves and why) | Abandonament de la piscina (qui ho deixa i per què) | Igerilekuaren uztea (nork uzten duen eta zergatik) | Abandon de la piscine (qui part et pourquoi) |
 | `pool.key.examenes` | Panel, Piscina: permiso «examenes» | features/admin/PoolPanel | Exámenes | Exams | Exàmens | Azterketak | Examens |
 | `pool.key.examenes.live` | Panel, Piscina: permiso «examenes.live» | features/admin/PoolPanel | Examen en vivo | Live exam | Examen en directe | Zuzeneko azterketa | Examen en direct |
 | `pool.key.examenes.stats` | Panel, Piscina: permiso «examenes.stats» | features/admin/PoolPanel | Estadísticas de cada examen | Statistics of each exam | Estadístiques de cada examen | Azterketa bakoitzaren estatistikak | Statistiques de chaque examen |

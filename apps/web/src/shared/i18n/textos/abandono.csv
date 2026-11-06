@@ -1,0 +1,119 @@
+clave,contexto,es,en,ca,eu,fr
+dropout.title,Abandono de la piscina: título de la pestaña,Abandono de la piscina,Pool dropout,Abandonament de la piscina,Igerilekuaren uztea,Abandon de la piscine
+dropout.info,Abandono de la piscina: explicación del título,"Quién ha dejado de venir a los ordenadores, con qué probabilidad y cuándo, y con qué se relaciona.","Who has stopped coming to the computers, how likely it is and when, and what it relates to.","Qui ha deixat de venir als ordinadors, amb quina probabilitat i quan, i amb què es relaciona.","Nork utzi dion ordenagailuetara etortzeari, zer probabilitaterekin eta noiz, eta zerekin lotzen den.","Qui a cessé de venir aux ordinateurs, avec quelle probabilité et quand, et à quoi c’est lié."
+dropout.infoRules,Abandono de la piscina: cómo se calcula,Faltar el fin de semana no cuenta. Faltar de viernes (examen) a lunes es abandono. Quien venía muchas horas y deja de venir tiene más riesgo que quien venía poco.,Missing the weekend does not count. Missing from Friday (exam) to Monday is a dropout. Someone who came many hours and stops coming is at higher risk than someone who came little.,Faltar el cap de setmana no compta. Faltar de divendres (examen) a dilluns és abandonament. Qui venia moltes hores i deixa de venir té més risc que qui venia poc.,"Asteburuan ez etortzeak ez du balio. Ostiraletik (azterketa) astelehenera ez etortzea uztea da. Ordu asko etortzen zenak uzten badu, gutxi etortzen zenak baino arrisku handiagoa du.","Manquer le week-end ne compte pas. Manquer du vendredi (examen) au lundi, c’est un abandon. Qui venait beaucoup d’heures et ne vient plus a plus de risque que qui venait peu."
+dropout.pool,Abandono de la piscina: selector de piscina,Piscina,Pool,Piscina,Igerilekua,Piscine
+dropout.poolOption,Abandono de la piscina: opción del selector: primer día y gente,Desde el {start} · {people} piscineros,From {start} · {people} pool students,Des del {start} · {people} piscinaires,{start}(e)tik · {people} igerilari,Depuis le {start} · {people} piscineux
+dropout.empty,Abandono de la piscina: sin piscineros,No hay piscineros de esta piscina.,There are no students in this pool.,No hi ha piscinaires d’aquesta piscina.,Ez dago igerileku honetako igerilaririk.,Aucun piscineux dans cette piscine.
+dropout.hoursValue,Abandono de la piscina: horas con una cifra,{hours} h,{hours} h,{hours} h,{hours} h,{hours} h
+dropout.percent,Abandono de la piscina: porcentaje,{n} %,{n}%,{n} %,% {n},{n} %
+dropout.summary.label,Abandono de la piscina: nombre de las cifras de arriba,Resumen del abandono,Dropout summary,Resum de l’abandonament,Uztearen laburpena,Résumé de l’abandon
+dropout.summary.gone,Abandono de la piscina: cifra: abandonos confirmados,abandonos confirmados,confirmed dropouts,abandonaments confirmats,uzte baieztatuak,abandons confirmés
+dropout.summary.likely,Abandono de la piscina: cifra: abandonos probables,probables,likely,probables,litekeenak,probables
+dropout.summary.share,Abandono de la piscina: cifra: qué parte de la piscina lo ha dejado,de la piscina lo ha dejado (de {people}),of the pool has left (of {people}),de la piscina ho ha deixat (de {people}),igerilekutik utzi du ({people}(e)tik),de la piscine a abandonné (sur {people})
+dropout.summary.avgLeavers,Abandono de la piscina: cifra: horas al día de quien lo dejó,al día antes de dejarlo,a day before leaving,al dia abans de deixar-ho,"egunean, utzi aurretik",par jour avant d’abandonner
+dropout.summary.avgStaying,Abandono de la piscina: cifra: horas al día de quien sigue,al día de quien sigue,a day for those staying,al dia de qui continua,"egunean, jarraitzen dutenek",par jour pour ceux qui restent
+dropout.summary.totalLeavers,Abandono de la piscina: cifra: horas totales antes de dejarlo,en total antes de dejarlo,in total before leaving,en total abans de deixar-ho,"guztira, utzi aurretik",au total avant d’abandonner
+dropout.summary.topWeek,Abandono de la piscina: cifra: semana con más abandonos,la semana con más abandonos,the week with most dropouts,la setmana amb més abandonaments,uzte gehien dituen astea,la semaine avec le plus d’abandons
+dropout.summary.topWeekday,Abandono de la piscina: cifra: cambio de día con más abandonos,el cambio de día con más abandonos,the day change with most dropouts,el canvi de dia amb més abandonaments,uzte gehien dituen egun-aldaketa,le changement de jour avec le plus d’abandons
+dropout.chart.title,Abandono de la piscina: título de la gráfica de abandonos,Abandonos,Dropouts,Abandonaments,Uzteak,Abandons
+dropout.chart.options,Abandono de la piscina: nombre del panel de opciones,Opciones de la gráfica,Chart options,Opcions del gràfic,Grafikoaren aukerak,Options du graphique
+dropout.chart.grouping,Abandono de la piscina: agrupar por día o semana,Agrupar,Group by,Agrupar,Taldekatu,Regrouper
+dropout.chart.include,Abandono de la piscina: qué abandonos cuentan,Qué cuenta,What counts,Què compta,Zer zenbatzen den,Ce qui compte
+dropout.chart.weekShort,Abandono de la piscina: semana de piscina abreviada,S{n},W{n},S{n},A{n},S{n}
+dropout.chart.departuresLabel,Abandono de la piscina: descripción de la gráfica para quien no la ve,Gráfica de abandonos: {total} en total,Dropout chart: {total} in total,Gràfic d’abandonaments: {total} en total,Uzteen grafikoa: {total} guztira,Graphique des abandons : {total} au total
+dropout.chart.barTitle,Abandono de la piscina: al pasar por una barra,{when}: {count} (total {total}),{when}: {count} (total {total}),{when}: {count} (total {total}),{when}: {count} (guztira {total}),{when} : {count} (total {total})
+dropout.chart.perDay,Abandono de la piscina: leyenda: barras por día,Abandonos de ese día,Dropouts that day,Abandonaments d’aquell dia,Egun horretako uzteak,Abandons ce jour-là
+dropout.chart.perWeek,Abandono de la piscina: leyenda: barras por semana,Abandonos de esa semana,Dropouts that week,Abandonaments d’aquella setmana,Aste horretako uzteak,Abandons cette semaine-là
+dropout.chart.total,Abandono de la piscina: leyenda: línea del acumulado,Total acumulado,Running total,Total acumulat,Guztira metatuta,Total cumulé
+dropout.grouping.day,Abandono de la piscina: agrupar por día,Por día,By day,Per dia,Egunka,Par jour
+dropout.grouping.week,Abandono de la piscina: agrupar por semana de piscina,Por semana,By week,Per setmana,Asteka,Par semaine
+dropout.include.gone,Abandono de la piscina: contar solo confirmados,Confirmados,Confirmed,Confirmats,Baieztatuak,Confirmés
+dropout.include.likely,Abandono de la piscina: contar confirmados y probables,Con probables,With likely,Amb probables,Litekeenekin,Avec probables
+dropout.transitions.title,Abandono de la piscina: abandonos por cambio de día de la semana,Entre qué días lo dejan,Between which days they leave,Entre quins dies ho deixen,Zein egunen artean uzten duten,Entre quels jours ils abandonnent
+dropout.transitions.item,Abandono de la piscina: cambio de un día al siguiente,{from} → {to},{from} → {to},{from} → {to},{from} → {to},{from} → {to}
+dropout.weekday.short.1,Abandono de la piscina: día de la semana abreviado,lun,Mon,dl.,al.,lun.
+dropout.weekday.short.2,Abandono de la piscina: día de la semana abreviado,mar,Tue,dt.,ar.,mar.
+dropout.weekday.short.3,Abandono de la piscina: día de la semana abreviado,mié,Wed,dc.,az.,mer.
+dropout.weekday.short.4,Abandono de la piscina: día de la semana abreviado,jue,Thu,dj.,og.,jeu.
+dropout.weekday.short.5,Abandono de la piscina: día de la semana abreviado,vie,Fri,dv.,or.,ven.
+dropout.weekday.short.6,Abandono de la piscina: día de la semana abreviado,sáb,Sat,ds.,lr.,sam.
+dropout.weekday.short.7,Abandono de la piscina: día de la semana abreviado,dom,Sun,dg.,ig.,dim.
+dropout.weekday.long.1,Abandono de la piscina: día de la semana,lunes,Monday,dilluns,astelehena,lundi
+dropout.weekday.long.2,Abandono de la piscina: día de la semana,martes,Tuesday,dimarts,asteartea,mardi
+dropout.weekday.long.3,Abandono de la piscina: día de la semana,miércoles,Wednesday,dimecres,asteazkena,mercredi
+dropout.weekday.long.4,Abandono de la piscina: día de la semana,jueves,Thursday,dijous,osteguna,jeudi
+dropout.weekday.long.5,Abandono de la piscina: día de la semana,viernes,Friday,divendres,ostirala,vendredi
+dropout.weekday.long.6,Abandono de la piscina: día de la semana,sábado,Saturday,dissabte,larunbata,samedi
+dropout.weekday.long.7,Abandono de la piscina: día de la semana,domingo,Sunday,diumenge,igandea,dimanche
+dropout.people.title,Abandono de la piscina: título de la tabla de piscineros,Cada piscinero,Each pool student,Cada piscinaire,Igerilari bakoitza,Chaque piscineux
+dropout.people.filter,Abandono de la piscina: nombre del filtro de la tabla,A quién ver,Who to show,A qui veure,Nor ikusi,Qui afficher
+dropout.people.none,Abandono de la piscina: filtro sin nadie,Nadie con este filtro.,Nobody with this filter.,Ningú amb aquest filtre.,Inor ez iragazki honekin.,Personne avec ce filtre.
+dropout.filter.likely,Abandono de la piscina: filtro: confirmados y probables,Más probables,Most likely,Més probables,Litekeenenak,Les plus probables
+dropout.filter.all,"Abandono de la piscina: filtro: todos, por probabilidad",Todos por probabilidad,All by likelihood,Tots per probabilitat,Denak probabilitatez,Tous par probabilité
+dropout.filter.staying,Abandono de la piscina: filtro: los que siguen seguro,Seguro que siguen,Surely staying,Segur que continuen,Ziur jarraitzen dutenak,Restent à coup sûr
+dropout.filter.never,Abandono de la piscina: filtro: no vinieron nunca,No vinieron nunca,Never came,No van venir mai,Ez ziren inoiz etorri,Ne sont jamais venus
+dropout.col.person,Abandono de la piscina: columna: persona,Piscinero,Pool student,Piscinaire,Igerilaria,Piscineux
+dropout.col.risk,Abandono de la piscina: columna: probabilidad de abandono,Probabilidad,Likelihood,Probabilitat,Probabilitatea,Probabilité
+dropout.col.status,Abandono de la piscina: columna: estado,Estado,Status,Estat,Egoera,État
+dropout.col.lastSeen,Abandono de la piscina: columna: último día que vino,Último día,Last day,Últim dia,Azken eguna,Dernier jour
+dropout.col.missed,Abandono de la piscina: columna: días seguidos sin venir,Sin venir,Away,Sense venir,Etorri gabe,Absent
+dropout.status.gone,Abandono de la piscina: estado: abandono confirmado,Abandonó,Left,Ho va deixar,Utzi zuen,A abandonné
+dropout.status.likely,Abandono de la piscina: estado: abandono probable,Probable,Likely,Probable,Litekeena,Probable
+dropout.status.doubt,Abandono de la piscina: estado: en duda,En duda,Unsure,En dubte,Zalantzan,Incertain
+dropout.status.active,Abandono de la piscina: estado: sigue viniendo,Sigue,Staying,Continua,Jarraitzen du,Reste
+dropout.status.never,Abandono de la piscina: estado: no vino nunca,Nunca vino,Never came,No va venir mai,Ez zen inoiz etorri,Jamais venu
+dropout.never,Abandono de la piscina: último día: nunca,Nunca,Never,Mai,Inoiz ez,Jamais
+dropout.dayShort,Abandono de la piscina: día abreviado con su número,{day} {date},{day} {date},{day} {date},{day} {date},{day} {date}
+dropout.dayLong,Abandono de la piscina: día con su número,{day} {date},{day} {date},{day} {date},{day} {date},{day} {date}
+dropout.missed,Abandono de la piscina: días seguidos sin venir y cuántos entre semana,{days} d ({weekdays} lab.),{days} d ({weekdays} wkd.),{days} d ({weekdays} lab.),{days} e ({weekdays} lan.),{days} j ({weekdays} ouvr.)
+dropout.factor.risk,Abandono de la piscina: factor: probabilidad de abandono,Probabilidad de abandono,Dropout likelihood,Probabilitat d’abandonament,Uzteko probabilitatea,Probabilité d’abandon
+dropout.factor.gone,Abandono de la piscina: factor: abandono confirmado,Abandono,Dropout,Abandonament,Uztea,Abandon
+dropout.factor.totalHours,Abandono de la piscina: factor: horas totales en los ordenadores,Horas totales,Total hours,Hores totals,Ordu guztiak,Heures totales
+dropout.factor.avgHours,Abandono de la piscina: factor: horas de media los días que vino,Horas al día,Hours a day,Hores al dia,Orduak egunean,Heures par jour
+dropout.factor.firstWeekHours,Abandono de la piscina: factor: horas de la primera semana,Horas 1.ª semana,Week 1 hours,Hores 1a setmana,1. asteko orduak,Heures 1re semaine
+dropout.factor.attendance,Abandono de la piscina: factor: días entre semana que vino,Asistencia,Attendance,Assistència,Asistentzia,Présence
+dropout.factor.weekendShare,Abandono de la piscina: factor: parte de sus horas en fin de semana,Fin de semana,Weekends,Cap de setmana,Asteburua,Week-end
+dropout.factor.isolation,Abandono de la piscina: factor: parte de sus horas sin nadie cerca,Aislamiento,Isolation,Aïllament,Isolamendua,Isolement
+dropout.factor.partners,Abandono de la piscina: factor: con cuánta gente se sentó cerca,Gente cerca,People nearby,Gent a prop,Jendea ondoan,Voisins
+dropout.factor.given,Abandono de la piscina: factor: correcciones que hizo,Correcciones hechas,Evaluations given,Correccions fetes,Egindako zuzenketak,Corrections faites
+dropout.factor.received,Abandono de la piscina: factor: correcciones que recibió,Correcciones recibidas,Evaluations received,Correccions rebudes,Jasotako zuzenketak,Corrections reçues
+dropout.factor.passed,Abandono de la piscina: factor: proyectos aprobados,Aprobados,Passed,Aprovats,Gaindituak,Validés
+dropout.person.close,Abandono de la piscina: cerrar la ficha de una persona,Cerrar,Close,Tancar,Itxi,Fermer
+dropout.person.risk,Abandono de la piscina: probabilidad de abandono de una persona,{n} % de probabilidad de abandono,{n}% dropout likelihood,{n} % de probabilitat d’abandonament,% {n}eko uzte-probabilitatea,{n} % de probabilité d’abandon
+dropout.person.left,Abandono de la piscina: cuándo lo dejó (confirmado): entre dos días,Lo dejó del {from} al {to} (semana {week}),Left between {from} and {to} (week {week}),Ho va deixar del {from} al {to} (setmana {week}),{from} eta {to} artean utzi zuen ({week}. astea),A abandonné du {from} au {to} (semaine {week})
+dropout.person.maybeLeft,Abandono de la piscina: cuándo lo pudo dejar (probable): entre dos días,Pudo dejarlo del {from} al {to} (semana {week}),May have left between {from} and {to} (week {week}),Ho podria haver deixat del {from} al {to} (setmana {week}),{from} eta {to} artean utzi zezakeen ({week}. astea),A pu abandonner du {from} au {to} (semaine {week})
+dropout.person.chartLabel,Abandono de la piscina: descripción de la gráfica de una persona,Horas de {login} cada día: {hours} h en total,{login}’s hours each day: {hours} h in total,Hores de {login} cada dia: {hours} h en total,{login}(r)en orduak egunero: {hours} h guztira,Heures de {login} chaque jour : {hours} h au total
+dropout.person.dayTitle,Abandono de la piscina: al pasar por un día,{day} {date}: {hours} h,{day} {date}: {hours} h,{day} {date}: {hours} h,{day} {date}: {hours} h,{day} {date} : {hours} h
+dropout.person.hours,Abandono de la piscina: leyenda: horas de ese día,Horas en los ordenadores,Hours at the computers,Hores als ordinadors,Orduak ordenagailuetan,Heures aux ordinateurs
+dropout.person.friday,Abandono de la piscina: leyenda: viernes de examen,Viernes (examen),Friday (exam),Divendres (examen),Ostirala (azterketa),Vendredi (examen)
+dropout.person.weekend,Abandono de la piscina: leyenda: fin de semana,Fin de semana,Weekend,Cap de setmana,Asteburua,Week-end
+dropout.reason.missedFriday,Abandono de la piscina: por qué: faltó al examen,Faltó al viernes de examen.,Missed the Friday exam.,Va faltar al divendres d’examen.,Ostiraleko azterketara ez zen etorri.,A manqué le vendredi d’examen.
+dropout.reason.missedWeekend,Abandono de la piscina: por qué: faltó de viernes a lunes,Faltó de viernes a lunes: abandono confirmado.,Missed Friday to Monday: confirmed dropout.,Va faltar de divendres a dilluns: abandonament confirmat.,Ostiraletik astelehenera ez zen etorri: uztea baieztatuta.,Absent du vendredi au lundi : abandon confirmé.
+dropout.reason.missedWeek,Abandono de la piscina: por qué: faltó cinco días laborables,Faltó cinco días entre semana seguidos: abandono confirmado.,Missed five weekdays in a row: confirmed dropout.,Va faltar cinc dies feiners seguits: abandonament confirmat.,Bost lanegun jarraian ez zen etorri: uztea baieztatuta.,Absent cinq jours de semaine d’affilée : abandon confirmé.
+dropout.reason.heavyUser,Abandono de la piscina: por qué: venía muchas horas,Venía muchas horas: que deje de venir dice más.,Used to come many hours: stopping says more.,Venia moltes hores: que deixi de venir diu més.,Ordu asko etortzen zen: etortzeari uzteak gehiago esaten du.,Venait beaucoup d’heures : qu’il ne vienne plus en dit plus.
+dropout.reason.lightUser,Abandono de la piscina: por qué: venía poco,Venía poco y a ratos: un día sin venir dice poco.,Came little and on and off: one day away says little.,Venia poc i a estones: un dia sense venir diu poc.,Gutxi eta tarteka etortzen zen: egun bat ez etortzeak gutxi esaten du.,Venait peu et par moments : un jour d’absence en dit peu.
+dropout.reason.weekendOnly,Abandono de la piscina: por qué: solo faltó el fin de semana,Solo ha faltado el fin de semana: no cuenta.,Only missed the weekend: it does not count.,Només ha faltat el cap de setmana: no compta.,Asteburuan bakarrik ez da etorri: ez du balio.,Absent seulement le week-end : ça ne compte pas.
+dropout.reason.recent,Abandono de la piscina: por qué: vino hoy o ayer,Vino hoy o ayer.,Came today or yesterday.,Va venir avui o ahir.,Gaur edo atzo etorri zen.,Venu aujourd’hui ou hier.
+dropout.reason.finished,Abandono de la piscina: por qué: llegó al examen final,Llegó hasta el examen final: terminó la piscina.,Made it to the final exam: finished the pool.,Va arribar fins a l’examen final: va acabar la piscina.,Azken azterketara iritsi zen: igerilekua amaitu zuen.,Est allé jusqu’à l’examen final : a terminé la piscine.
+dropout.scatter.label,Abandono de la piscina: descripción de la dispersión,{x} frente a {y}: relación {r},{x} versus {y}: correlation {r},{x} davant de {y}: relació {r},{x} {y}(r)en aurrean: erlazioa {r},{x} face à {y} : corrélation {r}
+dropout.scatter.point,Abandono de la piscina: al pasar por un punto,{login}: {x} · {y},{login}: {x} · {y},{login}: {x} · {y},{login}: {x} · {y},{login} : {x} · {y}
+dropout.scatter.y,Abandono de la piscina: qué va en el eje vertical,En vertical: {y},Vertical: {y},En vertical: {y},Bertikalean: {y},En vertical : {y}
+dropout.scatter.x,Abandono de la piscina: elegir el factor del eje horizontal,Eje horizontal,Horizontal axis,Eix horitzontal,Ardatz horizontala,Axe horizontal
+dropout.scatter.yPick,Abandono de la piscina: elegir el factor del eje vertical,Eje vertical,Vertical axis,Eix vertical,Ardatz bertikala,Axe vertical
+dropout.scatter.reading,Abandono de la piscina: cómo leer la relación,"Relación: {r} (0 nada, 100 total; ↑ suben juntos, ↓ uno baja si el otro sube)","Correlation: {r} (0 none, 100 total; ↑ rise together, ↓ one falls as the other rises)","Relació: {r} (0 gens, 100 total; ↑ pugen junts, ↓ un baixa si l’altre puja)","Erlazioa: {r} (0 ezer ez, 100 osoa; ↑ elkarrekin igotzen dira, ↓ bata jaisten da bestea igotzean)","Corrélation : {r} (0 aucune, 100 totale ; ↑ montent ensemble, ↓ l’un baisse quand l’autre monte)"
+dropout.correlations.title,Abandono de la piscina: título de la tabla de correlaciones,Qué se relaciona con qué,What relates to what,Què es relaciona amb què,Zer lotzen den zerekin,Ce qui est lié à quoi
+dropout.correlations.hint,Abandono de la piscina: cómo leer la tabla,"De 0 (nada) a 100 (del todo), con {people} piscineros que vinieron alguna vez. Pulsa una casilla para ver los dos frente a frente.","From 0 (none) to 100 (total), with {people} pool students who came at least once. Click a cell to see the two side by side.","De 0 (gens) a 100 (del tot), amb {people} piscinaires que van venir alguna vegada. Prem una casella per veure’ls cara a cara.","0tik (ezer ez) 100era (guztiz), behin edo behin etorri ziren {people} igerilarirekin. Sakatu gelaxka bat biak aurrez aurre ikusteko.","De 0 (aucune) à 100 (totale), avec {people} piscineux venus au moins une fois. Clique sur une case pour voir les deux face à face."
+dropout.correlations.cell,Abandono de la piscina: botón de una casilla,{a} y {b}: {r},{a} and {b}: {r},{a} i {b}: {r},{a} eta {b}: {r},{a} et {b} : {r}
+dropout.correlations.options,Abandono de la piscina: opciones de la dispersión,Opciones de la relación,Correlation options,Opcions de la relació,Erlazioaren aukerak,Options de la corrélation
+dropout.correlations.factors,Abandono de la piscina: qué factores salen en la tabla,Factores en la tabla,Factors in the table,Factors a la taula,Taulako faktoreak,Facteurs dans le tableau
+dropout.factors.title,Abandono de la piscina: título de los factores comunes,Factores comunes,Common factors,Factors comuns,Faktore komunak,Facteurs communs
+dropout.factors.hint,Abandono de la piscina: explicación de los factores comunes,Dos factores que se parecen pueden explicar juntos el abandono mejor que cada uno solo. «Juntos» es la media de los dos; «gana» es cuánto mejora sobre el mejor de los dos.,Two similar factors may explain dropout better together than each alone. “Together” is the average of both; “gain” is how much it improves on the better one.,Dos factors que s’assemblen poden explicar junts l’abandonament millor que cadascun sol. «Junts» és la mitjana dels dos; «guany» és quant millora sobre el millor dels dos.,"Antzeko bi faktorek elkarrekin uztea hobeto azal dezakete bakoitzak bere aldetik baino. «Elkarrekin» bien batez bestekoa da; «irabazia», bietan onena zenbat hobetzen duen.",Deux facteurs semblables peuvent expliquer l’abandon mieux ensemble que chacun seul. « Ensemble » est la moyenne des deux ; « gain » est l’amélioration sur le meilleur des deux.
+dropout.factors.groups,Abandono de la piscina: grupos de factores que van juntos,Grupos que van juntos,Groups that go together,Grups que van junts,Elkarrekin doazen taldeak,Groupes qui vont ensemble
+dropout.factors.group,Abandono de la piscina: un grupo y su relación con el abandono,{factors}: {r} con el abandono,{factors}: {r} with dropout,{factors}: {r} amb l’abandonament,{factors}: {r} uztearekin,{factors} : {r} avec l’abandon
+dropout.factors.pairs,Abandono de la piscina: parejas de factores,Parejas de factores,Pairs of factors,Parelles de factors,Faktore-bikoteak,Paires de facteurs
+dropout.factors.pair,Abandono de la piscina: columna: la pareja,Pareja,Pair,Parella,Bikotea,Paire
+dropout.factors.between,Abandono de la piscina: columna: cuánto se parecen,Entre ellos,Between them,Entre ells,Euren artean,Entre eux
+dropout.factors.alone,Abandono de la piscina: columna: cada uno con el abandono,Cada uno,Each,Cadascun,Bakoitza,Chacun
+dropout.factors.together,Abandono de la piscina: columna: los dos juntos con el abandono,Juntos,Together,Junts,Elkarrekin,Ensemble
+dropout.factors.gain,Abandono de la piscina: columna: cuánto gana juntarlos,Gana,Gain,Guany,Irabazia,Gain
