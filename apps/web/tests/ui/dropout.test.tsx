@@ -1,4 +1,4 @@
-import { cleanup, screen, within } from '@testing-library/react'
+import { cleanup, fireEvent, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import es from 'virtual:textos/es'
 import { afterEach, describe, expect, it } from 'vitest'
@@ -95,6 +95,71 @@ describe('el abandono de la piscina (docs/abandono.md)', () => {
       within(matrix).queryByRole('columnheader', { name: text('dropout.factor.partners') }),
     ).toBeNull()
     expect(screen.getByRole('heading', { name: text('dropout.factors.title') })).toBeTruthy()
+  }, 20_000)
+
+  it('arriba, los totales de la API: cuadran con la piscina y cada uno filtra la tabla', async () => {
+    const user = userEvent.setup()
+
+    await openApp('#/abandono')
+
+    const totals = await screen.findByRole('list', { name: text('dropout.counts.label') }, WAIT)
+    const value = (key: string): number =>
+      Number(
+        within(totals)
+          .getByRole('button', { name: new RegExp(`${text(`dropout.counts.${key}`)}$`) })
+          .querySelector('b')?.textContent,
+      )
+
+    expect(value('people')).toBe(40)
+    expect(
+      value('gone') + value('likely') + value('doubt') + value('active') + value('never'),
+    ).toBe(40)
+    expect(value('inExam')).toBe(2)
+
+    // «En el examen» deja en la tabla solo a quien está en él.
+    await user.click(
+      within(totals).getByRole('button', { name: new RegExp(`${text('dropout.counts.inExam')}$`) }),
+    )
+    const table = must(
+      screen
+        .getAllByRole('table')
+        .find((each) => within(each).queryByText(text('dropout.col.risk')) !== null),
+      'la tabla de piscineros',
+    )
+
+    expect(within(table).getAllByRole('row')).toHaveLength(3)
+  }, 20_000)
+
+  it('mover un ajuste lo recalcula todo, y «Volver a lo de fábrica» lo deshace', async () => {
+    const user = userEvent.setup()
+
+    await openApp('#/abandono')
+
+    const totals = await screen.findByRole('list', { name: text('dropout.counts.label') }, WAIT)
+    const likely = (): string =>
+      within(totals)
+        .getByRole('button', { name: new RegExp(`${text('dropout.counts.likely')}$`) })
+        .querySelector('b')?.textContent ?? ''
+    const before = likely()
+
+    await user.click(screen.getByText(text('dropout.tuning.title')))
+    // Con «probable» desde un 1 % de riesgo, casi todo el que falta algo es probable.
+    fireEvent.change(
+      screen.getByRole('slider', { name: new RegExp(`^${text('dropout.tuning.likely')}`) }),
+      {
+        target: { value: '1' },
+      },
+    )
+    await waitFor(() => {
+      expect(likely()).not.toBe(before)
+    }, WAIT)
+    expect(screen.getByText(text('dropout.tuning.changed'))).toBeTruthy()
+
+    await user.click(screen.getByRole('button', { name: text('dropout.tuning.reset') }))
+    await waitFor(() => {
+      expect(likely()).toBe(before)
+    }, WAIT)
+    expect(screen.queryByText(text('dropout.tuning.changed'))).toBeNull()
   }, 20_000)
 
   it('un piscinero sin el permiso no la ve, y un estudiante que no administra tampoco', async () => {

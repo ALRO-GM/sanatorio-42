@@ -24,6 +24,8 @@ import type {
   DropoutPair,
   DropoutReason,
   DropoutStatus,
+  DropoutTuning,
+  DropoutWeightKey,
 } from '@sanatorio/contracts'
 
 /** El día de piscina del examen final: el cuarto viernes, si empezó en lunes. */
@@ -35,29 +37,58 @@ export const LAST_SHOWN_DAY = 32
 
 /** Un día que se considera venido: algo más que entrar y salir. */
 const PRESENT_HOURS = 0.25
-/** Horas al día de quien viene «mucho» (para el peso de una falta). */
-const FULL_DAY_HOURS = 8
+/** Para las razones: quien venía mucho o poco entre semana. */
 const HEAVY_HOURS = 6
 const LIGHT_HOURS = 2
 
-/** Lo que pesa faltar un día entre semana: lo mínimo y lo que añade venir mucho. */
-const WEEKDAY_BASE = 0.35
-const WEEKDAY_BY_HOURS = 0.5
-/** Lo que añade faltar al viernes de examen. */
-const FRIDAY_EXTRA = 1
-/** Lo que pesa faltar un día de fin de semana, por lo que se venía en fin de semana. */
-const WEEKEND_WEIGHT = 0.4
-/** Días entre semana seguidos sin venir que ya son abandono. */
-const WEEK_MISSED = 5
-
-const LIKELY_RISK = 70
-const DOUBT_RISK = 35
+/**
+ * Los ajustes de fábrica (`DropoutTuning`, se pueden cambiar en la web):
+ *
+ * - faltar un día entre semana pesa 0,35, y hasta 0,5 más según las horas que
+ *   venía (entero con 8 h o más);
+ * - el viernes de examen, 1 más;
+ * - un día de fin de semana, 0,4 por la parte de fines de semana que venía;
+ * - cinco días entre semana seguidos, o de viernes a lunes, es abandono;
+ * - del 70 % es probable y del 35 %, en duda;
+ * - ningún factor suma ni resta de entrada.
+ */
+export const DEFAULT_TUNING: DropoutTuning = {
+  weekdayBase: 0.35,
+  weekdayHours: 0.5,
+  fullDayHours: 8,
+  fridayExtra: 1,
+  weekendWeight: 0.4,
+  weekMissed: 5,
+  fridayToMonday: true,
+  likely: 70,
+  doubt: 35,
+  weights: {
+    totalHours: 0,
+    avgHours: 0,
+    firstWeekHours: 0,
+    attendance: 0,
+    weekendShare: 0,
+    isolation: 0,
+    partners: 0,
+    given: 0,
+    received: 0,
+    passed: 0,
+  },
+}
 
 const isWeekend = (weekday: number): boolean => weekday >= 6
 
 /** Una persona para evaluar: sus horas de cada día de `days` (`null`, aún no era de la piscina). */
 type Attendance = {
   hours: readonly (number | null)[]
+  /**
+   * Días (índices) en que vino aunque los puestos no lo digan: un examen o
+   * una corrección. Los puestos de los piscineros solo se ven en la copia en
+   * vivo, y en el examen no siempre.
+   */
+  present?: ReadonlySet<number>
+  /** Si está en el examen de hoy (o lo ha hecho): no ha abandonado (2026-11-06). */
+  inExam?: boolean
 }
 
 type Assessment = {
@@ -76,11 +107,19 @@ type Assessment = {
 
 /**
  * Cómo va una persona hoy (`today`, índice en `days`; el día de hoy no cuenta
- * como falta porque aún no ha acabado).
+ * como falta porque aún no ha acabado). `profile`: lo que suman o restan a λ
+ * sus factores (`profileLambda`), además de las faltas.
  */
-export function assess(person: Attendance, days: readonly DropoutDay[], today: number): Assessment {
+export function assess(
+  person: Attendance,
+  days: readonly DropoutDay[],
+  today: number,
+  tuning: DropoutTuning = DEFAULT_TUNING,
+  profile = 0,
+): Assessment {
   const lastCounted = Math.min(today - 1, LAST_COUNTED_DAY, days.length - 1)
-  const came = (index: number): boolean => (person.hours[index] ?? 0) >= PRESENT_HOURS
+  const came = (index: number): boolean =>
+    (person.hours[index] ?? 0) >= PRESENT_HOURS || person.present?.has(index) === true
   const known = (index: number): boolean =>
     person.hours[index] !== null && person.hours[index] !== undefined
 
@@ -127,6 +166,20 @@ export function assess(person: Attendance, days: readonly DropoutDay[], today: n
   const missedWeekdays = missed.filter((day) => !isWeekend(day.weekday)).length
   const reasons: DropoutReason[] = []
 
+  if (person.inExam === true) {
+    return {
+      status: 'active',
+      risk: 0,
+      lastSeen,
+      missedDays: 0,
+      missedWeekdays: 0,
+      leftBetween: null,
+      leftWeek: null,
+      reasons: ['inExam'],
+      attendance,
+    }
+  }
+
   if (lastSeen !== null && lastSeen >= FINAL_EXAM_DAY) {
     return {
       status: 'active',
@@ -165,24 +218,27 @@ export function assess(person: Attendance, days: readonly DropoutDay[], today: n
       missed[offset + 3] !== undefined &&
       missed[offset + 3]?.index === day.index + 3,
   )
-  const missedWeek = missedWeekdays >= WEEK_MISSED
-  let lambda = 0
+  const byFriday = tuning.fridayToMonday && missedWeekend
+  const missedWeek = missedWeekdays >= tuning.weekMissed
+  let lambda = profile
 
   for (const day of missed) {
     if (isWeekend(day.weekday)) {
-      lambda += WEEKEND_WEIGHT * weekendRate
+      lambda += tuning.weekendWeight * weekendRate
     } else {
-      lambda += WEEKDAY_BASE + WEEKDAY_BY_HOURS * Math.min(1, perWeekday / FULL_DAY_HOURS)
-      if (day.weekday === 5) lambda += FRIDAY_EXTRA
+      lambda +=
+        tuning.weekdayBase +
+        tuning.weekdayHours * Math.min(1, perWeekday / Math.max(1, tuning.fullDayHours))
+      if (day.weekday === 5) lambda += tuning.fridayExtra
     }
   }
 
-  const gone = missedWeekend || missedWeek
-  const risk = gone ? 100 : Math.round(100 * (1 - Math.exp(-lambda)))
+  const gone = byFriday || missedWeek
+  const risk = gone ? 100 : Math.round(100 * (1 - Math.exp(-Math.max(0, lambda))))
 
-  if (missedWeekend) reasons.push('missedWeekend')
+  if (byFriday) reasons.push('missedWeekend')
   if (missedWeek) reasons.push('missedWeek')
-  if (!missedWeekend && missed.some((day) => day.weekday === 5)) reasons.push('missedFriday')
+  if (!byFriday && missed.some((day) => day.weekday === 5)) reasons.push('missedFriday')
   if (missed.length > 0 && missedWeekdays === 0) reasons.push('weekendOnly')
   if (missed.length > 0 && perWeekday >= HEAVY_HOURS) reasons.push('heavyUser')
   if (missed.length > 0 && perWeekday <= LIGHT_HOURS) reasons.push('lightUser')
@@ -190,12 +246,13 @@ export function assess(person: Attendance, days: readonly DropoutDay[], today: n
 
   const status: DropoutStatus = gone
     ? 'gone'
-    : risk >= LIKELY_RISK
+    : risk >= tuning.likely
       ? 'likely'
-      : risk >= DOUBT_RISK
+      : risk >= tuning.doubt
         ? 'doubt'
         : 'active'
-  const left = status === 'gone' || status === 'likely'
+  // Sin ningún día sin venir no hay cuándo lo dejó, aunque su perfil dé riesgo.
+  const left = (status === 'gone' || status === 'likely') && missed.length > 0
 
   return {
     status,
@@ -367,4 +424,21 @@ export function factorAnalysis(
     .sort((x, y) => Math.abs(y.together) - Math.abs(x.together))
 
   return { pairs, groups }
+}
+
+/**
+ * Lo que suman a λ los factores de cada persona (`tuning.weights`): su peso
+ * por lo que se aparta de la media de la piscina, en desviaciones. Quien no
+ * ha venido nunca no entra en la media.
+ */
+export function profileLambda(
+  rows: readonly Pick<DropoutFactors, DropoutWeightKey>[],
+  weights: Readonly<Record<DropoutWeightKey, number>>,
+): number[] {
+  const keys = (Object.keys(weights) as DropoutWeightKey[]).filter((key) => weights[key] !== 0)
+  const scores = keys.map((key) => zScores(rows.map((row) => row[key])))
+
+  return rows.map((_, index) =>
+    keys.reduce((sum, key, at) => sum + weights[key] * (scores[at]?.[index] ?? 0), 0),
+  )
 }

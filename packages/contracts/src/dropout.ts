@@ -81,6 +81,8 @@ export type DropoutReason =
   | 'recent'
   /** Llegó hasta el examen final: terminó la piscina. */
   | 'finished'
+  /** Está en el examen de hoy o lo ha hecho: no ha abandonado. */
+  | 'inExam'
 
 export type DropoutPerson = {
   login: string
@@ -88,7 +90,10 @@ export type DropoutPerson = {
   status: DropoutStatus
   /** Horas de cada día de `DropoutReport.days`; `null` los que aún no han llegado. */
   hours: (number | null)[]
-  /** El último día que vino (`YYYY-MM-DD`), o `null` si nunca. */
+  /**
+   * El último día que vino (`YYYY-MM-DD`), o `null` si nunca. Vino = 15 min en
+   * un puesto, un examen o una corrección ese día.
+   */
   lastSeen: string | null
   /** Días seguidos sin venir hasta ayer (todos, también fines de semana). */
   missedDays: number
@@ -134,7 +139,66 @@ export type DropoutGroup = {
   together: number
 }
 
+/** Los factores que pueden sumar o restar al riesgo (`DropoutTuning.weights`). */
+export type DropoutWeightKey =
+  | 'totalHours'
+  | 'avgHours'
+  | 'firstWeekHours'
+  | 'attendance'
+  | 'weekendShare'
+  | 'isolation'
+  | 'partners'
+  | 'given'
+  | 'received'
+  | 'passed'
+
+/**
+ * Cómo se calcula el riesgo, para ajustarlo a mano y ver al momento cómo
+ * cambia todo (pedido por Alberto el 2026-11-06). Va en la consulta de
+ * `GET /stats/dropout`; lo que no se manda, de fábrica (`defaults`).
+ *
+ * El riesgo es `1 − e^(−λ)`. Cada día sin venir suma a λ: entre semana,
+ * `weekdayBase` más `weekdayHours` por las horas que venía (entero con
+ * `fullDayHours` o más); el viernes, además `fridayExtra`; en fin de semana,
+ * `weekendWeight` por la parte de fines de semana que venía. Cada factor de
+ * `weights` suma su peso por lo que se aparta esa persona de la media de su
+ * piscina (en desviaciones): con peso positivo, tener más sube el riesgo; con
+ * negativo, lo baja.
+ */
+export type DropoutTuning = {
+  weekdayBase: number
+  weekdayHours: number
+  fullDayHours: number
+  fridayExtra: number
+  weekendWeight: number
+  /** Días entre semana seguidos sin venir que ya son abandono confirmado. */
+  weekMissed: number
+  /** Si faltar de viernes a lunes es abandono confirmado. */
+  fridayToMonday: boolean
+  /** Desde qué riesgo es probable (`likely`) y desde cuál en duda (`doubt`), 0–100. */
+  likely: number
+  doubt: number
+  weights: Record<DropoutWeightKey, number>
+}
+
+/** Cuánta gente hay en cada estado (con los ajustes de ahora). */
+export type DropoutCounts = {
+  people: number
+  gone: number
+  likely: number
+  doubt: number
+  active: number
+  never: number
+  /** En el examen hoy (dentro de `active`). */
+  inExam: number
+}
+
 export type DropoutReport = {
+  /** Los ajustes con que se ha calculado y los de fábrica. */
+  tuning: DropoutTuning
+  defaults: DropoutTuning
+  /** Los totales, con la gente que ves. */
+  counts: DropoutCounts
   campus: string | null
   /** El primer día de la piscina que se mira (`YYYY-MM-DD`), o `null` sin piscina. */
   start: string | null

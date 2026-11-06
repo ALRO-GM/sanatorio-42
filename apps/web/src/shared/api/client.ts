@@ -5,7 +5,7 @@
 import type { AvailabilityResponse, Peer } from '@sanatorio/contracts'
 
 import { apiUrl, fetchApi, getJson, intHeader, send, sendJson } from './http'
-import type { Api, ExamWorld, SeatDates } from './types'
+import type { Api, DropoutTweaks, ExamWorld, SeatDates } from './types'
 
 /** Los parámetros de una dirección, sin los que no vengan. */
 const search = (query: Record<string, string | number | undefined>): string =>
@@ -24,6 +24,21 @@ const seatQuery = (days: number, dates?: SeatDates): string =>
 /** De qué mundo es el examen en vivo (solo la vista sin límites del dueño lo elige). */
 const worldQuery = (world?: ExamWorld): string =>
   world === undefined ? '' : `?${search({ world })}`
+
+/**
+ * Los ajustes del abandono como consulta (`docs/abandono.md`): cada parámetro
+ * con su nombre, el sí o no como 1 o 0 y los pesos de los factores con `w.`.
+ */
+function dropoutQuery(tweaks: DropoutTweaks): string[] {
+  const { weights = {}, ...params } = tweaks
+
+  return [
+    ...Object.entries(params).map(
+      ([key, value]) => `${key}=${typeof value === 'boolean' ? Number(value) : value}`,
+    ),
+    ...Object.entries(weights).map(([key, value]) => `w.${key}=${value}`),
+  ]
+}
 
 export const realApi: Api = {
   getMe: () => getJson('/auth/me'),
@@ -291,8 +306,14 @@ export const realApi: Api = {
     return getJson(`/stats/progress${query === '' ? '' : `?${query}`}`)
   },
   getStatsFastest: () => getJson('/stats/progress/fastest'),
-  getDropout: (start) =>
-    getJson(`/stats/dropout${start === undefined ? '' : `?start=${encodeURIComponent(start)}`}`),
+  getDropout: (start, tweaks = {}) => {
+    const query = [
+      ...(start === undefined ? [] : [`start=${encodeURIComponent(start)}`]),
+      ...dropoutQuery(tweaks),
+    ].join('&')
+
+    return getJson(`/stats/dropout${query === '' ? '' : `?${query}`}`)
+  },
   getPiscineProgress: (others) =>
     getJson(
       `/stats/progress/piscine${others.length === 0 ? '' : `?with=${encodeURIComponent(others.join(','))}`}`,

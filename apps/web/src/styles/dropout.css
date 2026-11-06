@@ -293,3 +293,105 @@
   color: var(--ok);
   font-weight: 700;
 }
+
+/* Los totales de arriba: cada uno filtra la tabla. */
+.dropout-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0 0 0.6rem;
+  padding: 0;
+  list-style: none;
+}
+.dropout-count {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid var(--border);
+  border-left-width: 4px;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text-2);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.dropout-count b {
+  color: var(--text);
+  font-size: 1.15rem;
+  font-variant-numeric: tabular-nums;
+}
+.dropout-count[aria-pressed='true'] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.dropout-count.gone {
+  border-left-color: var(--danger);
+}
+.dropout-count.likely {
+  border-left-color: var(--warn);
+}
+.dropout-count.doubt {
+  border-left-color: var(--gold);
+}
+.dropout-count.active,
+.dropout-count.inExam {
+  border-left-color: var(--ok);
+}
+.dropout-count.never {
+  border-left-color: var(--text-4);
+}
+
+/* Ajustar el cálculo: plegado; dentro, los deslizadores en dos columnas. */
+.dropout-tuning > summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem 0.8rem;
+  cursor: pointer;
+}
+.dropout-tuning > summary h3 {
+  display: inline;
+  margin: 0;
+}
+.dropout-tuned {
+  padding: 0.05rem 0.45rem;
+  border-radius: 999px;
+  background: var(--warn-soft);
+  color: var(--warn);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+.dropout-tune-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  gap: 0.8rem 1.4rem;
+  margin: 0.6rem 0;
+}
+.dropout-tune-grid fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.dropout-tune {
+  margin: 0.5rem 0;
+}
+.dropout-tune label {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-weight: 600;
+}
+.dropout-tune output {
+  font-variant-numeric: tabular-nums;
+}
+.dropout-tune input[type='range'] {
+  width: 100%;
+  accent-color: var(--accent);
+}
+.dropout-tune .hint {
+  margin: 0.1rem 0 0;
+  font-size: 0.8rem;
+}

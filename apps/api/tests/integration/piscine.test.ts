@@ -176,6 +176,19 @@ describe('el abandono de la piscina (docs/abandono.md)', () => {
     expect(report.headers['cache-control']).toBe('private, no-store')
     expect(json(report)).toMatchObject({ people: [], start: null })
 
+    // Los ajustes van en la consulta; fuera de rango, 400.
+    const tuned = await get(
+      built,
+      '/stats/dropout?likely=50&fridayToMonday=0&w.isolation=1.5',
+      admin,
+    )
+
+    expect(json(tuned)).toMatchObject({
+      tuning: { likely: 50, fridayToMonday: false, weights: { isolation: 1.5 } },
+      defaults: { likely: 70, fridayToMonday: true },
+    })
+    expect((await get(built, '/stats/dropout?w.isolation=9', admin)).statusCode).toBe(400)
+
     const student = await makeApp()
 
     apps.push(student)

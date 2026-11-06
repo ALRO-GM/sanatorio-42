@@ -7,11 +7,14 @@
 import type { FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
+import type { DropoutTuning, DropoutWeightKey } from '@sanatorio/contracts'
+
 import { NO_POOL, seesFor, worldOf } from '../../core/audience.js'
 import type { Audience } from '../../core/audience.js'
 import type { Db } from '../../core/db/database.js'
 import type { AppModule } from '../../core/module.js'
 import { MAX_OTHERS, createProgressService } from './progress.service.js'
+import { DEFAULT_TUNING } from './dropout.rules.js'
 import { createDropoutService } from './dropout.service.js'
 import { createPiscineProgressService } from './piscine.service.js'
 import {
@@ -23,15 +26,63 @@ import { createStatsService } from './stats.service.js'
 import type { StatsService } from './stats.service.js'
 import { domainError } from '../../core/errors.js'
 import { given } from '../../core/options.js'
-import { parse } from '../../core/validation.js'
+import { day, parse } from '../../core/validation.js'
 
-/** `GET /stats/dropout`: qué piscina, por su primer día. */
+/** Un ajuste del abandono: un número entre `min` y `max`, o nada (el de fábrica). */
+const tune = (min: number, max: number) => z.coerce.number().min(min).max(max).optional()
+const weight = tune(-2, 2)
+
+/**
+ * `GET /stats/dropout`: qué piscina, por su primer día, y los ajustes del
+ * cálculo (`DropoutTuning`); los pesos van con `w.` delante.
+ */
 const dropoutQuery = z.object({
-  start: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/)
-    .optional(),
+  start: day.optional(),
+  weekdayBase: tune(0, 3),
+  weekdayHours: tune(0, 3),
+  fullDayHours: tune(1, 16),
+  fridayExtra: tune(0, 5),
+  weekendWeight: tune(0, 3),
+  weekMissed: z.coerce.number().int().min(2).max(15).optional(),
+  fridayToMonday: z.enum(['0', '1']).optional(),
+  likely: z.coerce.number().int().min(1).max(100).optional(),
+  doubt: z.coerce.number().int().min(1).max(100).optional(),
+  'w.totalHours': weight,
+  'w.avgHours': weight,
+  'w.firstWeekHours': weight,
+  'w.attendance': weight,
+  'w.weekendShare': weight,
+  'w.isolation': weight,
+  'w.partners': weight,
+  'w.given': weight,
+  'w.received': weight,
+  'w.passed': weight,
 })
+
+/** Los ajustes de la consulta sobre los de fábrica. */
+function tuningOf(query: z.infer<typeof dropoutQuery>): DropoutTuning {
+  const weights = { ...DEFAULT_TUNING.weights }
+
+  for (const key of Object.keys(weights) as DropoutWeightKey[]) {
+    weights[key] = query[`w.${key}`] ?? weights[key]
+  }
+
+  return {
+    weekdayBase: query.weekdayBase ?? DEFAULT_TUNING.weekdayBase,
+    weekdayHours: query.weekdayHours ?? DEFAULT_TUNING.weekdayHours,
+    fullDayHours: query.fullDayHours ?? DEFAULT_TUNING.fullDayHours,
+    fridayExtra: query.fridayExtra ?? DEFAULT_TUNING.fridayExtra,
+    weekendWeight: query.weekendWeight ?? DEFAULT_TUNING.weekendWeight,
+    weekMissed: query.weekMissed ?? DEFAULT_TUNING.weekMissed,
+    fridayToMonday:
+      query.fridayToMonday === undefined
+        ? DEFAULT_TUNING.fridayToMonday
+        : query.fridayToMonday === '1',
+    likely: query.likely ?? DEFAULT_TUNING.likely,
+    doubt: query.doubt ?? DEFAULT_TUNING.doubt,
+    weights,
+  }
+}
 
 /** Los filtros de `GET /stats/ranking`. */
 const rankingQuery = z
@@ -279,7 +330,9 @@ export function createStatsModule(deps: {
         }
         const sees = await seesFor(deps.audience ?? NO_POOL, actor)
 
-        return reply.send(await dropout.report(homeOf(request), query.start ?? null, sees))
+        return reply.send(
+          await dropout.report(homeOf(request), query.start ?? null, sees, tuningOf(query)),
+        )
       })
 
       /**

@@ -127,6 +127,8 @@ import type {
   StatsProgress,
   PiscineProgress,
   DropoutReport,
+  DropoutTuning,
+  DropoutWeightKey,
   StatsRanking,
   RankingBy,
   Leaderboard,
@@ -241,6 +243,14 @@ export type UsageQuery = SegmentQuery & { from?: string; to?: string; login?: st
 
 /** Estadísticas del Pomodoro: días locales (sin `from`, el total) y minutos sobre UTC. */
 export type FocusStatsQuery = SegmentQuery & { from?: string; to: string; offset: number }
+
+/**
+ * Un ajuste del cálculo del abandono a medias: solo lo que se ha cambiado
+ * respecto a lo de fábrica (`DropoutReport.defaults`), que es lo que se manda.
+ */
+export type DropoutTweaks = Partial<Omit<DropoutTuning, 'weights'>> & {
+  weights?: Partial<Record<DropoutWeightKey, number>>
+}
 
 export type Api = {
   // --- Sesión
@@ -574,7 +584,7 @@ export type Api = {
    * El abandono de una piscina (`docs/abandono.md`): de entrada, la que está en
    * curso; `start`, otra de las de `pools`. Quien administra o un piscinero con permiso.
    */
-  getDropout: (start?: string) => Promise<DropoutReport>
+  getDropout: (start?: string, tweaks?: DropoutTweaks) => Promise<DropoutReport>
   /** Quien terminó el common core más deprisa, por plan: en tu campus y el primero de cada campus. */
   getStatsFastest: () => Promise<StatsFastest>
   /** Quién va más rápido en el campus, con esos filtros, por páginas. */

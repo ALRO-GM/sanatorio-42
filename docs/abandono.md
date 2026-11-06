@@ -30,15 +30,27 @@ personas o más.
 
 ## Cuándo se da por abandonado
 
-Un día cuenta como venido con 15 minutos o más en un ordenador. El día de hoy
-no cuenta como falta: aún no ha acabado. Se miran los días seguidos sin venir
+Un día cuenta como venido con 15 minutos o más en un ordenador, **o con un
+examen o una corrección ese día** (2026-11-06). Hacen falta las dos cosas
+porque de los piscineros no hay historial de puestos: el historial copiado
+hacia atrás es solo de alumnos del 42cursus, así que solo está lo que ve la
+copia en vivo de cada 2 minutos. Los puestos de examen no siempre salen ahí.
+- **Examen**: los intentos de los exámenes de la piscina (`exam_attempts`) y
+  sus filas de proyecto, por la fecha de su último cambio.
+- **Corrección**: en la piscina se corrige en persona, así que cuentan las
+  hechas y las recibidas.
+
+Quien está hoy en el examen de la piscina (o lo ha hecho) sale con riesgo 0 y
+la razón `inExam`. El día de hoy no cuenta como falta: aún no ha acabado. Se miran los días seguidos sin venir
 desde el último que vino hasta ayer.
 
 - **Confirmado** (`gone`, 100 %):
   - falta el viernes, el sábado, el domingo y el lunes siguiente. El viernes
     es el examen y casi todo el mundo entra;
   - o falta cinco días entre semana seguidos.
-- **Probabilidad**, si no está confirmado: `1 − e^(−λ)`. Cada día que falta suma a λ:
+- **Probabilidad**, si no está confirmado: `1 − e^(−λ)`. Estos son los valores
+  de fábrica; todos se pueden cambiar en la web (ver «Ajustar el cálculo»).
+  Cada día que falta suma a λ:
   - **entre semana**: 0,35 más hasta 0,5 según las horas que venía de media
     entre semana (8 h o más, el 0,5 entero). Quien venía una hora al día y
     falta un día puede volver mañana; quien venía diez, es más raro;
@@ -68,7 +80,49 @@ desde el último que vino hasta ayer.
   - `heavyUser` y `lightUser`: venía 6 h o más, o 2 h o menos;
   - `weekendOnly`: solo ha faltado el fin de semana;
   - `recent`: vino hoy o ayer;
-  - `finished`: llegó al examen final.
+  - `finished`: llegó al examen final;
+  - `inExam`: está hoy en el examen.
+
+## Ajustar el cálculo
+
+Pedido por Alberto el 2026-11-06: poder cambiar todo lo que se tiene en
+cuenta y ver al momento cómo se reorganiza. En la página, el bloque **Ajustar
+el cálculo** tiene un deslizador por ajuste (`DropoutTuning`):
+- lo que pesa faltar entre semana: `weekdayBase` y `weekdayHours`, con
+  `fullDayHours` como lo que cuenta como día entero;
+- lo que pesa faltar el viernes (`fridayExtra`) y el fin de semana
+  (`weekendWeight`);
+- cuándo se confirma: `weekMissed` (días entre semana seguidos) y
+  `fridayToMonday`;
+- los umbrales: `likely` y `doubt`.
+
+Además, un **peso por factor**, de −2 a 2:
+- horas totales, horas al día y horas de la primera semana;
+- asistencia y parte en fin de semana;
+- aislamiento y gente cerca;
+- correcciones hechas y recibidas;
+- aprobados.
+
+Cada peso suma a λ lo que la persona se aparta de la media de su piscina, en
+desviaciones (`profileLambda`). Con peso positivo, tener más sube el riesgo; con
+negativo, lo baja. Por ejemplo, aislamiento a +1 sube el riesgo a quien se
+sienta solo, y aprobados a −1 se lo baja a quien va adelantado. Con
+pesos, alguien que viene cada día puede tener riesgo, pero no «cuándo lo
+dejó»: eso solo sale con algún día sin venir. De fábrica, todos a 0.
+
+Los ajustes van en la consulta (solo los que cambian) y se guardan en el
+navegador. Las horas y los factores se guardan 10 minutos en el servidor:
+mover un deslizador solo rehace el riesgo, los estados, los totales y las
+correlaciones, y la web lo pide 250 ms después de soltarlo.
+
+## Totales
+
+Arriba, de la gente que ves (`counts`):
+- piscineros;
+- abandonaron, probables y en duda;
+- siguen, no vinieron nunca y en el examen.
+
+Cada cifra filtra la tabla. Con los ajustes cambian al momento.
 
 ## Factores y correlaciones
 

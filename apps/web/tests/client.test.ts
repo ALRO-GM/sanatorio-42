@@ -175,6 +175,20 @@ describe('cliente de la API', () => {
     expect(last()).toMatchObject({ url: '/api/admin/countdowns/6', method: 'DELETE' })
   })
 
+  it('el abandono manda la piscina y solo los ajustes cambiados, los pesos con «w.»', async () => {
+    await realApi.getDropout()
+    expect(last().url).toBe('/api/stats/dropout')
+
+    await realApi.getDropout('2026-10-13', {
+      likely: 60,
+      fridayToMonday: false,
+      weights: { isolation: 0.5, totalHours: -1 },
+    })
+    expect(last().url).toBe(
+      '/api/stats/dropout?start=2026-10-13&likely=60&fridayToMonday=0&w.isolation=0.5&w.totalHours=-1',
+    )
+  })
+
   it('sin cuerpo legible se queda el código; sin respuesta es de red', async () => {
     reply = () => new Response('<html>', { status: 503 })
     await expect(realApi.getMe()).rejects.toMatchObject({ status: 503, serverMessage: undefined })

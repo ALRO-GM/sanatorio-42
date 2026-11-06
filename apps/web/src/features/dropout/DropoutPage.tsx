@@ -1,8 +1,14 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
-import type { DropoutPerson, DropoutReport } from '@sanatorio/contracts'
+import type {
+  DropoutCounts,
+  DropoutPerson,
+  DropoutReport,
+  DropoutTuning,
+} from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
+import type { DropoutTweaks } from '../../shared/api/types'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { Avatar } from '../../shared/ui/Avatar'
@@ -13,6 +19,7 @@ import { PersonLink } from '../../shared/ui/PersonLink'
 import { PillGroup } from '../../shared/ui/PillGroup'
 import { SectionTitle } from '../../shared/ui/SectionTitle'
 import {
+  COUNTS,
   dateOf,
   departures,
   FILTERS,
@@ -21,11 +28,38 @@ import {
   INCLUDES,
   summaryOf,
   transitions,
+  tuningOf,
+  tweaksOf,
   weekdayOf,
 } from './dropout'
 import type { DropoutFilter, DropoutGrouping, DropoutInclude } from './dropout'
 import { DeparturesChart, PersonHoursChart, STATUS_COLOR, TransitionsChart } from './DropoutCharts'
 import { DropoutCorrelations, DropoutFactorsPanel } from './DropoutCorrelations'
+import { DropoutTuningPanel } from './DropoutTuningPanel'
+
+/** Dónde se guarda el ajuste en este navegador: no se pierde al cambiar de piscina ni al volver. */
+const STORAGE = 'sanatorio_dropout_tuning'
+/** Cuánto se espera a que se deje de mover un deslizador antes de pedir el cálculo. */
+const DEBOUNCE_MS = 250
+
+function storedTweaks(): DropoutTweaks {
+  try {
+    const raw = JSON.parse(localStorage.getItem(STORAGE) ?? '{}') as unknown
+
+    return typeof raw === 'object' && raw !== null && !Array.isArray(raw) ? raw : {}
+  } catch {
+    return {}
+  }
+}
+
+function storeTweaks(tweaks: DropoutTweaks): void {
+  try {
+    if (Object.keys(tweaks).length === 0) localStorage.removeItem(STORAGE)
+    else localStorage.setItem(STORAGE, JSON.stringify(tweaks))
+  } catch {
+    // Sin almacenamiento, el ajuste dura lo que la página.
+  }
+}
 
 /**
  * El abandono de la piscina (pedido por Alberto el 2026-11-06,
@@ -37,11 +71,33 @@ import { DropoutCorrelations, DropoutFactorsPanel } from './DropoutCorrelations'
 export function DropoutPage() {
   const { t } = useI18n()
   const [start, setStart] = useState<string | undefined>(undefined)
-  const fetched = useAsync(() => api.getDropout(start), [start])
+  // Lo que se ha movido (lo que difiere de lo de fábrica) y lo que se pide:
+  // lo mismo, pero cuando se deja de mover un rato.
+  const [tweaks, setTweaks] = useState<DropoutTweaks>(storedTweaks)
+  const [asked, setAsked] = useState<DropoutTweaks>(tweaks)
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setAsked(tweaks)
+    }, DEBOUNCE_MS)
+
+    return () => {
+      window.clearTimeout(timer)
+    }
+  }, [tweaks])
+
+  const fetched = useAsync(() => api.getDropout(start, asked), [start, JSON.stringify(asked)])
+  // Mientras llega lo nuevo (otro ajuste, otra piscina), se queda lo de antes: no parpadea.
   const [kept, setKept] = useState<DropoutReport | undefined>(undefined)
 
   if (fetched.data !== undefined && fetched.data !== kept) setKept(fetched.data)
   const data = fetched.data ?? kept
+  const change = (next: DropoutTuning, defaults: DropoutTuning): void => {
+    const changed = tweaksOf(next, defaults)
+
+    setTweaks(changed)
+    storeTweaks(changed)
+  }
 
   return (
     <section className="progress-page dropout-page" aria-labelledby="dropout-title">
@@ -73,7 +129,19 @@ export function DropoutPage() {
       ) : data.people.length === 0 ? (
         <p className="empty">{t('dropout.empty')}</p>
       ) : (
-        <DropoutBody report={data} />
+        <>
+          <DropoutTuningPanel
+            tuning={tuningOf(data.defaults, tweaks)}
+            defaults={data.defaults}
+            updating={
+              fetched.data === undefined || JSON.stringify(asked) !== JSON.stringify(tweaks)
+            }
+            onChange={(next) => {
+              change(next, data.defaults)
+            }}
+          />
+          <DropoutBody report={data} />
+        </>
       )}
     </section>
   )
@@ -93,16 +161,17 @@ function DropoutBody({ report }: { report: DropoutReport }) {
 
   return (
     <>
+      <CountsRow
+        counts={report.counts}
+        filter={filter}
+        onFilter={(next) => {
+          setFilter(next)
+        }}
+      />
       <ul className="dropout-summary" aria-label={t('dropout.summary.label')}>
         <li>
-          <b>{summary.gone}</b> {t('dropout.summary.gone')}
-        </li>
-        <li>
-          <b>{summary.likely}</b> {t('dropout.summary.likely')}
-        </li>
-        <li>
           <b>{t('dropout.percent', { n: summary.share })}</b>{' '}
-          {t('dropout.summary.share', { people: summary.people })}
+          {t('dropout.summary.share', { people: report.counts.people })}
         </li>
         <li>
           <b>{hours(summary.avgLeavers)}</b> {t('dropout.summary.avgLeavers')}
@@ -170,7 +239,8 @@ function DropoutBody({ report }: { report: DropoutReport }) {
         <PillGroup
           label={t('dropout.people.filter')}
           options={FILTERS}
-          value={filter}
+          // Un filtro de los totales de arriba no es ninguna de estas pastillas.
+          value={FILTERS.find((each) => each === filter) ?? null}
           onChange={setFilter}
           text={(option) => t(`dropout.filter.${option}`)}
         />
@@ -307,6 +377,42 @@ function DropoutBody({ report }: { report: DropoutReport }) {
       <DropoutCorrelations report={report} />
       <DropoutFactorsPanel report={report} />
     </>
+  )
+}
+
+/**
+ * Los totales de la piscina con los ajustes de ahora, como los cuenta la API:
+ * cada uno filtra la tabla de debajo.
+ */
+function CountsRow({
+  counts,
+  filter,
+  onFilter,
+}: {
+  counts: DropoutCounts
+  filter: DropoutFilter
+  onFilter: (next: DropoutFilter) => void
+}) {
+  const { t } = useI18n()
+
+  return (
+    <ul className="dropout-counts" aria-label={t('dropout.counts.label')}>
+      {COUNTS.map(({ key, filter: target }) => (
+        <li key={key}>
+          <button
+            type="button"
+            className={`dropout-count ${key}`}
+            aria-pressed={filter === target}
+            onClick={() => {
+              onFilter(target)
+            }}
+          >
+            <b>{counts[key]}</b>
+            <span>{t(`dropout.counts.${key}`)}</span>
+          </button>
+        </li>
+      ))}
+    </ul>
   )
 }
 

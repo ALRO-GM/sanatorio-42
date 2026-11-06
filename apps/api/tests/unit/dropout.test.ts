@@ -10,11 +10,13 @@ import type { DropoutDay, DropoutFactors } from '@sanatorio/contracts'
 import { closeDatabase, openDatabase } from '../../src/core/db/database.js'
 import type { Db } from '../../src/core/db/database.js'
 import {
+  DEFAULT_TUNING,
   assess,
   correlationsOf,
   factorAnalysis,
   hoursOf,
   pearson,
+  profileLambda,
 } from '../../src/modules/stats/dropout.rules.js'
 import { createDropoutService } from '../../src/modules/stats/dropout.service.js'
 import { createPiscineRepository } from '../../src/modules/stats/stats.repository.js'
@@ -104,6 +106,62 @@ describe('si alguien ha dejado la piscina', () => {
     )
 
     expect(assess({ hours }, days, 10).status).toBe('active')
+  })
+})
+
+describe('el examen, las correcciones y los ajustes', () => {
+  it('quien está en el examen hoy no ha abandonado, aunque los puestos no lo vean desde el miércoles', () => {
+    const days = axis(14)
+    // Vino de lunes a miércoles (días 0–2); hoy es viernes (día 4), día de examen.
+    const hours = weekdays(14, 7, 2)
+    const without = assess({ hours }, days, 4)
+    const result = assess({ hours, inExam: true }, days, 4)
+
+    expect(without.risk).toBeGreaterThan(0)
+    expect(result).toMatchObject({ status: 'active', risk: 0, reasons: ['inExam'] })
+  })
+
+  it('una corrección o un examen cuentan como venir, aunque el puesto no salga', () => {
+    const days = axis(14)
+    // Los puestos dicen de lunes a jueves; el viernes y el lunes corrigió.
+    const result = assess({ hours: weekdays(14, 6, 3), present: new Set([4, 7]) }, days, 8)
+
+    expect(result.status).toBe('active')
+    expect(result.lastSeen).toBe(7)
+  })
+
+  it('los ajustes cambian el estado: sin viernes a lunes y con más días para confirmar', () => {
+    const days = axis(14)
+    const hours = weekdays(14, 6, 3)
+    const lenient = {
+      ...DEFAULT_TUNING,
+      fridayToMonday: false,
+      weekMissed: 10,
+      fridayExtra: 0,
+      likely: 95,
+      doubt: 90,
+    }
+
+    expect(assess({ hours }, days, 8).status).toBe('gone')
+    expect(assess({ hours }, days, 8, lenient).status).toBe('active')
+  })
+
+  it('los pesos de los factores suben el riesgo a quien se aparta de la media en ese sentido', () => {
+    const rows = [0, 50, 100].map((isolation) => ({ ...DEFAULT_TUNING.weights, isolation }))
+    const profile = profileLambda(rows, { ...DEFAULT_TUNING.weights, isolation: 1 })
+
+    expect(profile[0]).toBeLessThan(0)
+    expect(profile[1]).toBeCloseTo(0)
+    expect(profile[2]).toBeGreaterThan(0)
+    // Sin pesos, nada.
+    expect(profileLambda(rows, DEFAULT_TUNING.weights)).toEqual([0, 0, 0])
+
+    // Con perfil, alguien que viene cada día puede tener riesgo, pero no «cuándo lo dejó».
+    const days = axis(7)
+    const result = assess({ hours: weekdays(7, 8, 3) }, days, 3, DEFAULT_TUNING, 3)
+
+    expect(result.status).toBe('likely')
+    expect(result.leftBetween).toBeNull()
   })
 })
 
@@ -244,9 +302,83 @@ describe('el informe de una piscina', () => {
     // Lo primero, quien tiene más riesgo.
     expect(report.people[0]?.login).toBe('ana')
     expect(report.sample).toBe(6)
+    expect(report.counts).toEqual({
+      people: 5,
+      gone: 1,
+      likely: 0,
+      doubt: 0,
+      active: 4,
+      never: 0,
+      inExam: 0,
+    })
+    expect(report.tuning).toEqual(report.defaults)
+
+    // Con viernes a lunes apagado y más días para confirmar, «ana» ya no está confirmada.
+    const lenient = await service.report(22, null, () => true, {
+      ...DEFAULT_TUNING,
+      fridayToMonday: false,
+      weekMissed: 10,
+    })
+
+    expect(lenient.people.find((person) => person.login === 'ana')?.status).not.toBe('gone')
+    expect(lenient.counts.gone).toBe(0)
     expect(report.correlations.length).toBe(
       (report.factors.length * (report.factors.length - 1)) / 2,
     )
+  })
+
+  it('quien está hoy en el examen de la piscina sale sin riesgo, aunque no salga en los puestos', async () => {
+    const iso = (ms: number) => new Date(ms).toISOString()
+    const now = START + 4 * DAY + 11 * 3_600_000
+
+    await db.batch(
+      [
+        ...['jose', 'luz'].map((login, n) => ({
+          sql: `INSERT INTO pool_members (campus_id, user_id, login, image, begin_at, updated_at)
+                VALUES (22, ?, ?, NULL, ?, ?)`,
+          args: [n + 1, login, iso(START + 8 * 3_600_000), iso(START)],
+        })),
+        {
+          sql: `INSERT INTO projects (id, name, slug) VALUES (900, 'Exam 00', 'c-piscine-exam-00')`,
+        },
+        // «jose» empezó el examen del viernes a las 9.
+        {
+          sql: `INSERT INTO exam_attempts (team_id, project_user_id, user_id, project_id, mark, validated, at)
+                VALUES (1, 1, 1, 900, 40, NULL, ?)`,
+          args: [iso(START + 4 * DAY + 9 * 3_600_000)],
+        },
+        // Los dos vinieron solo el lunes y el martes.
+        ...['jose', 'luz'].flatMap((login, n) =>
+          [0, 1].map((index) => ({
+            sql: `INSERT INTO seat_sessions (location_id, campus_id, user_id, login, host, begin_at, seen_at, first_seen_at)
+                  VALUES (?, 22, ?, ?, 'c1r1s1', ?, ?, ?)`,
+            args: [
+              10 * (n + 1) + index,
+              n + 1,
+              login,
+              iso(START + index * DAY + 9 * 3_600_000),
+              iso(START + index * DAY + 17 * 3_600_000),
+              iso(START + index * DAY + 9 * 3_600_000),
+            ],
+          })),
+        ),
+      ],
+      'write',
+    )
+
+    const service = createDropoutService({
+      db,
+      piscine: createPiscineRepository(db),
+      now: () => now,
+    })
+    const report = await service.report(22, null, () => true)
+    const jose = report.people.find((person) => person.login === 'jose')
+    const luz = report.people.find((person) => person.login === 'luz')
+
+    expect(jose).toMatchObject({ status: 'active', reasons: ['inExam'], lastSeen: '2026-10-09' })
+    expect(jose?.factors.risk).toBe(0)
+    expect(luz?.factors.risk).toBeGreaterThan(0)
+    expect(report.counts.inExam).toBe(1)
   })
 
   it('sin piscineros, vacío y sin fallar', async () => {

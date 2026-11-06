@@ -5,11 +5,94 @@
  * dispersión. Sin React, para probarlas sueltas.
  */
 
-import type { DropoutFactorKey, DropoutPerson, DropoutReport } from '@sanatorio/contracts'
+import type {
+  DropoutCounts,
+  DropoutFactorKey,
+  DropoutPerson,
+  DropoutReport,
+  DropoutTuning,
+  DropoutWeightKey,
+} from '@sanatorio/contracts'
 
-/** Los filtros de la tabla. */
+import type { DropoutTweaks } from '../../shared/api/types'
+
+/** Los filtros de la tabla, en sus pastillas. */
 export const FILTERS = ['likely', 'all', 'staying', 'never'] as const
-export type DropoutFilter = (typeof FILTERS)[number]
+/**
+ * Lo que puede filtrar la tabla: sus pastillas y, desde los totales de
+ * arriba, cada estado (`gone`, `probable`, `doubt`, `active`) y quien está en
+ * el examen (`inExam`).
+ */
+export type DropoutFilter =
+  (typeof FILTERS)[number] | 'gone' | 'probable' | 'doubt' | 'active' | 'inExam'
+
+/** Los totales de arriba, en orden, y el filtro de la tabla que abre cada uno. */
+export const COUNTS: readonly { key: keyof DropoutCounts; filter: DropoutFilter }[] = [
+  { key: 'people', filter: 'all' },
+  { key: 'gone', filter: 'gone' },
+  { key: 'likely', filter: 'probable' },
+  { key: 'doubt', filter: 'doubt' },
+  { key: 'active', filter: 'active' },
+  { key: 'never', filter: 'never' },
+  { key: 'inExam', filter: 'inExam' },
+]
+
+/** Los parámetros del cálculo que se ajustan con un deslizador. */
+export type DropoutParam = Exclude<keyof DropoutTuning, 'weights' | 'fridayToMonday'>
+
+/** Lo que va y viene de cada deslizador (los mismos límites que valida la API). */
+export const PARAM_RANGES: Record<DropoutParam, { min: number; max: number; step: number }> = {
+  weekdayBase: { min: 0, max: 3, step: 0.05 },
+  weekdayHours: { min: 0, max: 3, step: 0.05 },
+  fullDayHours: { min: 1, max: 16, step: 0.5 },
+  fridayExtra: { min: 0, max: 5, step: 0.1 },
+  weekendWeight: { min: 0, max: 3, step: 0.05 },
+  weekMissed: { min: 2, max: 15, step: 1 },
+  likely: { min: 1, max: 100, step: 1 },
+  doubt: { min: 1, max: 100, step: 1 },
+}
+
+export const PARAMS = Object.keys(PARAM_RANGES) as DropoutParam[]
+
+/** Los pesos de los factores: de −2 (tener más baja el riesgo) a 2 (lo sube). */
+export const WEIGHT_RANGE = { min: -2, max: 2, step: 0.1 }
+
+export const WEIGHT_KEYS: readonly DropoutWeightKey[] = [
+  'totalHours',
+  'avgHours',
+  'firstWeekHours',
+  'attendance',
+  'weekendShare',
+  'isolation',
+  'partners',
+  'given',
+  'received',
+  'passed',
+]
+
+/** Los ajustes completos: lo de fábrica con lo cambiado encima. */
+export function tuningOf(defaults: DropoutTuning, tweaks: DropoutTweaks): DropoutTuning {
+  return { ...defaults, ...tweaks, weights: { ...defaults.weights, ...tweaks.weights } }
+}
+
+/** Lo que difiere de lo de fábrica: es lo que se manda a la API y se guarda. */
+export function tweaksOf(tuning: DropoutTuning, defaults: DropoutTuning): DropoutTweaks {
+  const tweaks: DropoutTweaks = {}
+  const weights: Partial<Record<DropoutWeightKey, number>> = {}
+
+  for (const key of PARAMS) {
+    if (tuning[key] !== defaults[key]) tweaks[key] = tuning[key]
+  }
+  if (tuning.fridayToMonday !== defaults.fridayToMonday) {
+    tweaks.fridayToMonday = tuning.fridayToMonday
+  }
+  for (const key of WEIGHT_KEYS) {
+    if (tuning.weights[key] !== defaults.weights[key]) weights[key] = tuning.weights[key]
+  }
+  if (Object.keys(weights).length > 0) tweaks.weights = weights
+
+  return tweaks
+}
 
 /** Qué abandonos cuentan en las gráficas: solo los confirmados o también los probables. */
 export const INCLUDES = ['gone', 'likely'] as const
@@ -36,10 +119,19 @@ export function filterPeople(
           person.status === 'active' &&
           (person.factors.risk < SAFE_RISK ||
             person.reasons.includes('recent') ||
+            person.reasons.includes('inExam') ||
             person.reasons.includes('finished'))
         )
       case 'never':
         return person.status === 'never'
+      case 'gone':
+      case 'doubt':
+      case 'active':
+        return person.status === filter
+      case 'probable':
+        return person.status === 'likely'
+      case 'inExam':
+        return person.reasons.includes('inExam')
       case 'all':
         return true
     }
@@ -138,12 +230,11 @@ export function transitions(
 const mean = (values: readonly number[]): number | null =>
   values.length === 0 ? null : values.reduce((sum, value) => sum + value, 0) / values.length
 
-/** Las cifras de arriba de la pestaña. */
+/**
+ * Lo que la web saca de la gente para las cifras de arriba. Los totales por
+ * estado no: los trae la API (`counts`), con la gente que ve quien mira.
+ */
 type DropoutSummary = {
-  gone: number
-  likely: number
-  never: number
-  people: number
   /** Qué parte de la piscina lo ha dejado (confirmados), de 0 a 100. */
   share: number
   /** Horas de media al día, los días que vino, de quien lo dejó y de quien sigue. */
@@ -157,22 +248,16 @@ type DropoutSummary = {
 }
 
 export function summaryOf(report: DropoutReport, include: DropoutInclude): DropoutSummary {
-  const count = (status: DropoutPerson['status']): number =>
-    report.people.filter((person) => person.status === status).length
   const leavers = leaversOf(report.people, include)
   const staying = report.people.filter((person) => person.status === 'active')
   const weeks = departures(report, include, 'week')
   const days = transitions(report.people, include)
   const top = <T extends { count: number }>(list: readonly T[]): T | null =>
     list.reduce<T | null>((best, each) => (each.count > (best?.count ?? 0) ? each : best), null)
+  const { gone, people } = report.counts
 
   return {
-    gone: count('gone'),
-    likely: count('likely'),
-    never: count('never'),
-    people: report.people.length,
-    share:
-      report.people.length === 0 ? 0 : Math.round((100 * count('gone')) / report.people.length),
+    share: people === 0 ? 0 : Math.round((100 * gone) / people),
     avgLeavers: mean(leavers.map((person) => person.factors.avgHours)),
     avgStaying: mean(staying.map((person) => person.factors.avgHours)),
     totalLeavers: mean(leavers.map((person) => person.factors.totalHours)),

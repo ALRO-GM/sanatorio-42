@@ -1984,7 +1984,7 @@ GET /stats/progress/piscine?with=login,login → PiscineProgress. El Avance de u
                   un estudiante): lo aprobado de la piscina día a día, con la media de su
                   piscina y de las anteriores de su campus. En la vista sin límites
                   del dueño trae además `everyone`: la línea de cada uno de la piscina.
-GET /stats/dropout?start=AAAA-MM-DD → DropoutReport. El abandono de una piscina del campus
+GET /stats/dropout?start=AAAA-MM-DD&likely=70&w.isolation=1… → DropoutReport. El abandono de una piscina del campus
                   (`docs/abandono.md`): horas de cada día, probabilidad y estado de cada
                   piscinero, correlaciones y factores comunes. Quien administra, la vista sin
                   límites y un piscinero con el permiso `abandono`; un estudiante, 403.
@@ -2068,7 +2068,20 @@ GET /stats/ranking?by=circle|circles|hours&plan=all|classic|next&kickoff=AAAA-MM
   de su propio inicio o después de hoy). `correlations`, `pairs` y `groups` se
   hacen con la gente que ha venido alguna vez (`sample`), también la que no ves
   (son cifras de todos); la lista de personas, sin quien no ves. `no-store`.
-  Las reglas, en `docs/abandono.md`.
+  Los ajustes (`DropoutTuning`) van en la consulta, cada uno opcional y con su
+  rango (fuera, 400):
+  - `weekdayBase`, `weekdayHours` y `weekendWeight`: 0–3;
+  - `fridayExtra`: 0–5;
+  - `fullDayHours`: 1–16;
+  - `weekMissed`: 2–15, entero;
+  - `fridayToMonday`: 0 o 1;
+  - `likely` y `doubt`: 1–100, enteros;
+  - los pesos `w.<factor>`: −2…2.
+
+  Responde con `tuning` (lo usado), `defaults` y `counts` (los totales de la
+  gente que ves). Las horas y los factores se guardan 10 minutos; los ajustes
+  solo rehacen el riesgo. Un día cuenta como venido con 15 minutos en un
+  puesto, o con un examen o una corrección. Las reglas, en `docs/abandono.md`.
 - **Plan** de quien 42 no lo ha dicho (`user_tracks`): el de la mayoría de sus
   pistas. Del nuevo, un `python-module…`, un proyecto que solo tiene el plan
   nuevo o una versión `42next-` que no sea examen; del clásico, un proyecto que
