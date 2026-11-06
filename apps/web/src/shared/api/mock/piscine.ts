@@ -14,7 +14,7 @@ import type {
 } from '@sanatorio/contracts'
 
 import { ME, PISCINE_PROJECTS } from './data'
-import { poolUnrestricted } from './pool'
+import { poolPreviewing, poolUnrestricted } from './pool'
 import { portrait } from './portrait'
 import { state } from './state'
 
@@ -137,6 +137,10 @@ const everyone = (): NonNullable<PiscineProgress['everyone']> =>
 
 /** El Avance de un piscinero: su línea, la de su piscina y con quien se compara. */
 export function piscineProgress(others: readonly string[]): PiscineProgress {
+  // Quien administra, en la vista de piscinero, lo ve como el más avanzado
+  // (el primero de `everyone`, que aprueba algo cada día y medio).
+  const standIn = poolPreviewing() ? 'pisci01' : null
+
   return {
     days: DAYS,
     steps: COUNTED.map((project) => ({
@@ -144,7 +148,7 @@ export function piscineProgress(others: readonly string[]): PiscineProgress {
       group: project.group === 'shell' ? 'shell' : 'c',
     })),
     startedAt: new Date(Date.now() - ELAPSED * DAY).toISOString(),
-    me: swim(2.6, 0, ELAPSED),
+    me: standIn === null ? swim(2.6, 0, ELAPSED) : swim(1.5, 0, ELAPSED),
     cohort: average(73, 3, ELAPSED, ELAPSED),
     others: others.flatMap((login) => {
       const mate = MATES[login]
@@ -154,5 +158,6 @@ export function piscineProgress(others: readonly string[]): PiscineProgress {
     minPeople: 10,
     campus: 'Madrid',
     ...(poolUnrestricted() ? { everyone: everyone() } : {}),
+    ...(standIn === null ? {} : { standIn: { login: standIn, image: portrait(standIn) } }),
   }
 }

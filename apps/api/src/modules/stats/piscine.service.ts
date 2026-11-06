@@ -18,7 +18,7 @@ import type { PiscineAverage, PiscineProgress } from '@sanatorio/contracts'
 import type { Actor } from '../../core/actor.js'
 import { createTtlCache } from '../../core/ttl-cache.js'
 import { PISCINE_PROGRESS } from '../replica/index.js'
-import { POOL_AXIS, meanLine, samePool, swimOf } from './piscine.rules.js'
+import { POOL_AXIS, leaderOf, meanLine, poolAnchorOf, samePool, swimOf } from './piscine.rules.js'
 import type { Swimmer } from './piscine.rules.js'
 import type { PiscineRepository } from './stats.repository.js'
 import { isoAt } from '../../core/time.js'
@@ -87,34 +87,45 @@ export function createPiscineProgressService(options: {
      * campus con quien compararse (`others`). `sees` quita a quien no se ve
      * (personas ocultas) de las líneas con nombre. `everyone`: la vista sin
      * límites del dueño, que trae además la línea de cada uno de la piscina.
+     * `preview`: quien administra viéndolo como piscinero, que no es de la
+     * piscina: lo ve como el piscinero que va más avanzado (`standIn`).
      */
     async progress(
       actor: Actor,
       home: number,
       others: readonly string[],
       sees: (login: string) => boolean,
-      everyone = false,
+      view: { everyone?: boolean; preview?: boolean } = {},
     ): Promise<PiscineProgress> {
       const pool = await pools.get(String(home), () => load(home))
       const t = now()
-      const mine = pool.people.get(actor.login.toLowerCase())
+      const people = [...pool.people.values()]
+      const own = pool.people.get(actor.login.toLowerCase())
       // Tu piscina empezó cuando tú; sin saberlo (quien administra viéndola),
-      // la última que ha empezado en el campus.
+      // el día en que empezó más gente, para coger la piscina entera.
       const anchor =
-        mine !== undefined
-          ? mine.start
-          : Math.max(
-              -Infinity,
-              ...[...pool.people.values()]
-                .filter((person) => person.start <= t)
-                .map((person) => person.start),
+        own?.start ??
+        poolAnchorOf(
+          people.map((person) => person.start),
+          t,
+        )
+      const inPool =
+        anchor === null ? [] : people.filter((person) => samePool(person.start, anchor))
+      // En la vista de piscinero de quien administra (pedido por Alberto el
+      // 2026-11-06): no cuenta su perfil, sino el del piscinero más avanzado
+      // de entre los que ve. Un piscinero de verdad que aún no se ha copiado
+      // no tiene `preview`: no se le enseña nunca la línea de otro.
+      const standIn =
+        own === undefined && view.preview === true
+          ? leaderOf(
+              inPool.filter((person) => sees(person.login)),
+              t,
             )
-      const cohort = Number.isFinite(anchor)
-        ? [...pool.people.values()].filter(
-            (person) =>
-              samePool(person.start, anchor) && person.login !== actor.login.toLowerCase(),
-          )
-        : []
+          : null
+      const mine = own ?? standIn ?? undefined
+      const cohort = inPool.filter(
+        (person) => person.login !== actor.login.toLowerCase() && person !== mine,
+      )
 
       const trace = (person: Swimmer) => swimOf(person, t, pool.names)
       const averageOf = (list: readonly Swimmer[]): PiscineAverage => {
@@ -144,20 +155,24 @@ export function createPiscineProgressService(options: {
         cohort: averageOf(cohort),
         // Solo piscineros de tu piscina.
         others: [...new Set(others.map((login) => login.toLowerCase()))]
-          .filter((login) => login !== actor.login.toLowerCase() && sees(login))
+          .filter(
+            (login) => login !== actor.login.toLowerCase() && login !== mine?.login && sees(login),
+          )
           .flatMap((login) => {
             const person = pool.people.get(login)
 
-            return person !== undefined && samePool(person.start, anchor)
+            return person !== undefined && anchor !== null && samePool(person.start, anchor)
               ? [{ login, ...trace(person) }]
               : []
           })
           .slice(0, MAX_OTHERS),
         minPeople: MIN_PEOPLE,
         campus: pool.campus,
-        ...(everyone
+        ...(standIn === null ? {} : { standIn: { login: standIn.login, image: standIn.image } }),
+        ...(view.everyone === true
           ? {
-              everyone: cohort
+              // La piscina entera: también quien hace de ti en la vista previa.
+              everyone: (standIn === null ? cohort : [standIn, ...cohort])
                 .filter((person) => sees(person.login))
                 .map((person) => ({ login: person.login, image: person.image, ...trace(person) })),
             }

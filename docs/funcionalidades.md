@@ -366,6 +366,7 @@ Detalle: [rendimiento.md](rendimiento.md#9-cargas-largas-2026-11-02).
 | Aviso de que tu campus aún no se copia | S | Quien entra desde otro campus | `features/campus/OtherCampusNotice.tsx` |
 | Franja de mantenimiento con enlace al panel | S | Admins durante el mantenimiento | `features/maintenance/MaintenanceBanner.tsx` |
 | Franja «ver como piscinero» con «Volver» | S | Admins en esa vista | `app/PoolPreviewBar.tsx` |
+| En esa vista, el Avance es el del piscinero que va más avanzado (tu perfil no cuenta), con su piscina entera | S | Admins en esa vista | `PiscineProgressPage.tsx`, `stats/piscine.service.ts` |
 
 ### Ventanas que hay que contestar
 

@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/tablon.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-146 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
+147 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera | Francés |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -146,6 +146,7 @@ Generado desde `apps/web/src/shared/i18n/textos/tablon.csv` con
 | `piscine.title` | Grafo de un piscinero: su etiqueta de arriba | features/doubts/PiscineGraph | Tu piscina | Your piscine | La teva piscina | Zure piscina | Ta piscine |
 | `piscine.day` | Grafo de un piscinero: qué día de piscina es hoy (el primero es el 1) | features/doubts/PiscineGraph | Día {n} de piscina | Piscine day {n} | Dia {n} de piscina | Piscinako {n}. eguna | Jour {n} de piscine |
 | `piscine.done` | Piscina: proyectos de shell y C aprobados de todos los que cuentan | features/doubts/PiscineGraph, features/stats/PiscineProgressPage | Aprobados: {done} de {total} | Passed: {done} of {total} | Aprovats: {done} de {total} | Gaindituta: {done}/{total} | Validés : {done} sur {total} |
+| `piscine.standIn` | Avance en la vista de piscinero de quien administra: la línea es la del piscinero que va más avanzado | features/stats/PiscineProgressPage | Lo ves como {login}, quien va más avanzado de la piscina: tu perfil no cuenta. | You see it as {login}, the furthest ahead in the pool: your profile doesn't count. | Ho veus com {login}, qui va més avançat de la piscina: el teu perfil no compta. | {login} bezala ikusten duzu, igerilekuan aurreratuena: zure profilak ez du balio. | Tu le vois comme {login}, le plus avancé de la piscine : ton profil ne compte pas. |
 | `piscine.progress` | Piscina: los proyectos que cuentan para el avance (shell y C) | features/doubts/CorrectionGraph, features/doubts/PiscineGraph, features/peers/ProjectSelect | Lo que cuenta para tu avance | What counts towards your progress | El que compta per al teu avenç | Zure aurrerapenerako kontatzen dena | Ce qui compte pour ta progression |
 | `piscine.apart` | Piscina: los proyectos de aparte, que no cuentan para el avance | features/doubts/CorrectionGraph, features/doubts/PiscineGraph, features/peers/ProjectSelect | Rushes, BSQ y exámenes | Rushes, BSQ and exams | Rushes, BSQ i exàmens | Rushak, BSQ eta azterketak | Rushs, BSQ et examens |
 | `piscine.apartHint` | Piscina: por qué los rushes, BSQ y exámenes van aparte | features/doubts/PiscineGraph | No suman a tu avance, pero puedes pedir y dar ayuda con ellos. | They don't add to your progress, but you can ask for and give help with them. | No sumen al teu avenç, però pots demanar i donar ajuda amb ells. | Ez dute zure aurrerapenean gehitzen, baina haiekin laguntza eskatu eta eman dezakezu. | Ils ne comptent pas dans ta progression, mais tu peux demander et donner de l'aide dessus. |

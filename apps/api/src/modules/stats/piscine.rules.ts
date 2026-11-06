@@ -93,3 +93,54 @@ const SAME_POOL_MS = 7 * DAY_MS
 export function samePool(start: number, anchor: number): boolean {
   return Math.abs(start - anchor) < SAME_POOL_MS
 }
+
+/**
+ * La piscina en curso de un campus, para quien la mira sin ser de ella (quien
+ * administra en la vista de piscinero): el día en que empezó más gente de los
+ * que ya han empezado, y de los empates el más reciente. Con la última fecha a
+ * secas, alguien que se apuntó días tarde dejaba fuera a casi toda la piscina.
+ * `null` sin nadie.
+ */
+export function poolAnchorOf(starts: readonly number[], now: number): number | null {
+  const byDay = new Map<number, number>()
+
+  for (const start of starts) {
+    if (start > now) continue
+    const day = Math.floor(start / DAY_MS)
+
+    byDay.set(day, (byDay.get(day) ?? 0) + 1)
+  }
+
+  let best: [day: number, people: number] | null = null
+
+  for (const [day, people] of byDay) {
+    if (best === null || people > best[1] || (people === best[1] && day > best[0])) {
+      best = [day, people]
+    }
+  }
+  if (best === null) return null
+
+  const day = best[0]
+
+  // El inicio de verdad de quien empezó ese día (no la medianoche).
+  return Math.min(...starts.filter((start) => Math.floor(start / DAY_MS) === day))
+}
+
+/**
+ * El piscinero que va más avanzado: más proyectos aprobados y, a igualdad,
+ * quien aprobó antes el último (como la lista de los más avanzados de la web);
+ * luego, por login, para que no cambie de una visita a otra. `null` sin nadie.
+ */
+export function leaderOf<T extends Swimmer>(swimmers: readonly T[], now: number): T | null {
+  const scored = swimmers.map((swimmer) => {
+    const passed = [...swimmer.done.values()].filter((at) => at <= now)
+
+    return { swimmer, done: passed.length, last: Math.max(-Infinity, ...passed) }
+  })
+
+  scored.sort(
+    (a, b) => b.done - a.done || a.last - b.last || a.swimmer.login.localeCompare(b.swimmer.login),
+  )
+
+  return scored[0]?.swimmer ?? null
+}

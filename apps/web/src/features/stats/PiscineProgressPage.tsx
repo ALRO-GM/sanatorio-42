@@ -42,7 +42,13 @@ export function PiscineProgressPage({ me }: { me: string }) {
   const add = (raw: string): void => {
     const login = raw.trim().toLowerCase()
 
-    if (login !== '' && login !== me && !others.includes(login) && !full) {
+    if (
+      login !== '' &&
+      login !== me &&
+      login !== data?.standIn?.login &&
+      !others.includes(login) &&
+      !full
+    ) {
       setOthers([...others, login])
     }
     setTyped('')
@@ -84,6 +90,10 @@ export function PiscineProgressPage({ me }: { me: string }) {
               <p className="piscine-summary">
                 {t('piscine.done', { done: data.me?.done ?? 0, total: data.steps.length })}
               </p>
+              {/* Quien administra, en la vista de piscinero: la línea es de otro. */}
+              {data.standIn !== undefined && (
+                <p className="hint">{t('piscine.standIn', { login: data.standIn.login })}</p>
+              )}
               <PiscineProgressChart data={data} shown={shown} others={others} extra={extra} />
             </>
           )
@@ -107,7 +117,11 @@ export function PiscineProgressPage({ me }: { me: string }) {
                 value={typed}
                 label={t('stats.progress.compare')}
                 placeholder={t('stats.progress.comparePlaceholder')}
-                exclude={[...others, me]}
+                exclude={[
+                  ...others,
+                  me,
+                  ...(data?.standIn === undefined ? [] : [data.standIn.login]),
+                ]}
                 onChange={setTyped}
                 onPick={add}
               />

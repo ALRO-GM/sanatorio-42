@@ -25,7 +25,7 @@ Cómo se trabaja con ellas: [docs/textos.md](../textos.md).
 | [pizarras](pizarras.md) | 38 | 0 | 0 | 0 | 0 |
 | [red](red.md) | 227 | 0 | 0 | 0 | 0 |
 | [sala-de-espera](sala-de-espera.md) | 47 | 0 | 0 | 0 | 0 |
-| [tablon](tablon.md) | 146 | 0 | 0 | 0 | 0 |
+| [tablon](tablon.md) | 147 | 0 | 0 | 0 | 0 |
 | [terapia](terapia.md) | 61 | 0 | 0 | 0 | 0 |
 | [juego](juego.md) | 504 | 0 | 0 | 0 | 0 |
 | [portada](portada.md) | 23 | 0 | 0 | 0 | 0 |

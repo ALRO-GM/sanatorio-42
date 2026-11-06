@@ -113,6 +113,7 @@ con el commit donde volver a verlo, está en
 
 | Fecha      | Dónde                  | Qué cambió                                                                                                   |
 | ---------- | ---------------------- | ------------------------------------------------------------------------------------------------------------ |
+| 2026-11-06 | Ver como piscinero | El Avance ya no cuenta tu perfil: lo ves como el piscinero que va más avanzado, con su línea y su piscina entera (quien se apuntó días tarde ya no deja fuera al resto) ([docs/piscineros.md](docs/piscineros.md)) |
 | 2026-11-03 | Servidor | La máquina sirve también otras webs (la primera, WebAR en `webar.peer4u.app`): Caddy importa sus bloques de `/opt/caddy-sitios` y cada una va en su contenedor con topes ([docs/deploy-oracle.md](docs/deploy-oracle.md)) |
 | 2026-11-03 | Exámenes | En vivo se ve la nota de quien sigue dentro, la que 42 sube con cada ejercicio, y ya no sale como suspenso: el intento es el equipo bloqueado y tocado durante el examen, no el creado días antes al apuntarse ([docs/api.md](docs/api.md)) |
 | 2026-11-02 | Servidor | Ya no se queda sin memoria cada 7 minutos: la red de asientos de un campus grande (París) ocupa un tercio, se calcula de una en una y los grupos dejan pasar al resto de la web ([docs/rendimiento.md](docs/rendimiento.md)) |

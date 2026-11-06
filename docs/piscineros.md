@@ -103,8 +103,16 @@ su valor en claro y en oscuro y su color de texto encima, `--on-piscine-*`).
   anteriores). Con menos de 10 personas no hay media: van las líneas de cada
   cual.
   Comparar con alguien (`?with=`, permiso `avance.compare`): solo gente de
-  tu piscina que ves. Quien administra viéndolo como piscinero no
-  tiene línea propia y su «piscina» es la última que ha empezado en su campus.
+  tu piscina que ves.
+  Quien administra viéndolo como piscinero (pedido por Alberto el
+  2026-11-06) no es de la piscina, así que su perfil no cuenta: lo ve como
+  **el piscinero que va más avanzado** de entre los que ve (más aprobados
+  y, a igualdad, quien aprobó antes el último), con su línea, su inicio y su
+  piscina, sin él. La web lo dice bajo los aprobados (`standIn` en la
+  respuesta). La piscina es la del día en que empezó más gente
+  (`poolAnchorOf`): con la última fecha a secas, quien se apuntaba días tarde
+  dejaba fuera a casi todos. Un piscinero de verdad que aún no se ha copiado
+  no tiene la marca de la vista previa y nunca ve la línea de otro.
 - **Tablón** (`GET /doubts/graph` con `kind: 'piscine'`, `PiscineGraph.tsx`):
   el camino de los 16 que cuentan, en orden y con sus colores, y aparte, bajo
   una raya, los rushes, BSQ y exámenes. Relleno = aprobado, con aro = en curso,

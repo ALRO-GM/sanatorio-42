@@ -275,13 +275,91 @@ describe('el avance de la piscina', () => {
       22,
       [],
       (login) => login !== 'oculto',
-      true,
+      { everyone: true },
     )
 
     expect(data.everyone?.map((each) => [each.login, each.done]).sort()).toEqual([
       ['lento', 1],
       ['rapido', 2],
     ])
+  })
+
+  it('en la vista de piscinero de quien administra lo ve como el más avanzado, con la piscina entera', async () => {
+    const ids = await seedProjects()
+
+    // La piscina: doce que empezaron el mismo día y una que se apuntó ocho días
+    // tarde. Antes, la última fecha dejaba fuera a los doce.
+    await person(
+      10,
+      'rapido',
+      START,
+      { 'c-piscine-shell-00': 0, 'c-piscine-shell-01': 1, 'c-piscine-c-00': 2 },
+      ids,
+      true,
+    )
+    await person(
+      11,
+      'oculto',
+      START,
+      {
+        'c-piscine-shell-00': 0,
+        'c-piscine-shell-01': 0,
+        'c-piscine-c-00': 0,
+        'c-piscine-c-01': 1,
+      },
+      ids,
+      true,
+    )
+    // Empata con «rapido» en aprobados, pero llegó al último más tarde.
+    await person(
+      12,
+      'empate',
+      START,
+      { 'c-piscine-shell-00': 0, 'c-piscine-shell-01': 1, 'c-piscine-c-00': 3 },
+      ids,
+      true,
+    )
+    for (let n = 0; n < 9; n++) {
+      await person(20 + n, `mate${n}`, START, { 'c-piscine-shell-00': 1 }, ids, true)
+    }
+    await person(40, 'tarde', START + 8 * DAY, {}, ids, true)
+
+    const service = createPiscineProgressService({
+      piscine: createPiscineRepository(db),
+      now: () => START + 9 * DAY,
+    })
+    const sees = (login: string) => login !== 'oculto'
+    const data = await service.progress(
+      actor('albrodri', { pool: true }),
+      22,
+      ['rapido', 'mate0'],
+      sees,
+      { preview: true },
+    )
+
+    // Quien no se ve no hace de ti.
+    expect(data.standIn).toEqual({ login: 'rapido', image: null })
+    expect(data.me?.done).toBe(3)
+    expect(data.startedAt).toBe(new Date(START).toISOString())
+    // La piscina entera, sin «rapido» (que eres tú) ni quien se apuntó tarde.
+    expect(data.cohort.people).toBe(11)
+    expect(data.others.map((each) => each.login)).toEqual(['mate0'])
+
+    // La vista sin límites trae también a quien hace de ti.
+    const full = await service.progress(actor('albrodri', { pool: true }), 22, [], sees, {
+      preview: true,
+      everyone: true,
+    })
+
+    expect(full.everyone?.map((each) => each.login)).toContain('rapido')
+    expect(full.everyone).toHaveLength(11)
+
+    // Un piscinero de verdad que aún no se ha copiado nunca ve la línea de otro.
+    const fresh = await service.progress(actor('nuevo', { pool: true }), 22, [], sees)
+
+    expect(fresh.me).toBeNull()
+    expect(fresh).not.toHaveProperty('standIn')
+    expect(fresh.cohort.people).toBe(12)
   })
 
   it('un campus sin nadie: todo vacío, sin fallar', async () => {

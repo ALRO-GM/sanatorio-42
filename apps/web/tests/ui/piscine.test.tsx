@@ -74,6 +74,16 @@ describe('un piscinero ve la piscina (docs/piscineros.md)', () => {
     expect(screen.queryByRole('heading', { name: text('piscine.top.listTitle') })).toBeNull()
   }, 20_000)
 
+  it('quien administra, en la vista de piscinero, lo ve como el más avanzado', async () => {
+    await openApp('#/avance', { preview: 'full' })
+
+    expect(
+      await screen.findByText(/^Lo ves como pisci01, quien va más avanzado/, undefined, WAIT),
+    ).toBeTruthy()
+    // Su línea, no la de quien mira.
+    expect(screen.getByText(/^Aprobados: \d+ de 16$/)).toBeTruthy()
+  }, 20_000)
+
   it('sin límites: los más avanzados, la media de los mejores y quien cae entre dos percentiles', async () => {
     const user = userEvent.setup()
 

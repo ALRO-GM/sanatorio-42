@@ -272,4 +272,10 @@ export type PiscineProgress = {
    * avanzados, la media de los mejores y quién cae entre dos percentiles.
    */
   everyone?: (PiscineTrace & { login: string; image: string | null })[]
+  /**
+   * Solo en la vista de piscinero de quien administra (`docs/piscineros.md`):
+   * no es de la piscina, así que `me`, `startedAt` y la piscina son los del
+   * piscinero que va más avanzado, que es este. Sin él, no viene.
+   */
+  standIn?: { login: string; image: string | null }
 }

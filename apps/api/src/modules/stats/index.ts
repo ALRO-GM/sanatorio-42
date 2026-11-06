@@ -221,11 +221,16 @@ export function createStatsModule(deps: {
        * para piscineros: un estudiante tiene el suyo en `/stats/progress`.
        */
       app.get('/stats/progress/piscine', async (request, reply) => {
-        // La vista sin límites del dueño trae a toda la piscina (`docs/piscineros.md`);
+        // La vista sin límites del dueño trae a toda la piscina y la vista de
+        // piscinero de quien administra, al más avanzado (`docs/piscineros.md`);
         // la misma dirección cambia con la cookie, así que no se guarda.
-        const everyone = session.user(request).unrestricted === true
+        const user = session.user(request)
+        const everyone = user.unrestricted === true
 
-        reply.header('Cache-Control', everyone ? 'private, no-store' : 'private, max-age=300')
+        reply.header(
+          'Cache-Control',
+          everyone || user.preview === true ? 'private, no-store' : 'private, max-age=300',
+        )
 
         const query = parse(progressQuery, request.query)
         const actor = await session.actor(request)
@@ -236,7 +241,10 @@ export function createStatsModule(deps: {
         const sees = await seesFor(deps.audience ?? NO_POOL, actor)
 
         return reply.send(
-          await piscine.progress(actor, homeOf(request), query.with, sees, everyone),
+          await piscine.progress(actor, homeOf(request), query.with, sees, {
+            everyone,
+            preview: user.preview === true,
+          }),
         )
       })
 
