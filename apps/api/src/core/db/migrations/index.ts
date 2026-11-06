@@ -90,6 +90,7 @@ import { apiUsageSchema } from './0081-api-usage.js'
 import { startupSchema } from './0082-startup.js'
 import { goalTimeSchema } from './0083-goal-time.js'
 import { welcomedSchema } from './0084-welcomed.js'
+import { piscineHistorySchema } from './0085-piscine-history.js'
 import type { Migration } from './types.js'
 
 export const MIGRATIONS: readonly Migration[] = [
@@ -177,6 +178,7 @@ export const MIGRATIONS: readonly Migration[] = [
   startupSchema,
   goalTimeSchema,
   welcomedSchema,
+  piscineHistorySchema,
 ]
 
 /** Versión más alta que existe en el código. */

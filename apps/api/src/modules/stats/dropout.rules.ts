@@ -24,6 +24,10 @@ import type {
   DropoutPair,
   DropoutReason,
   DropoutStatus,
+  DropoutAverages,
+  DropoutCounts,
+  DropoutPerson,
+  DropoutPoolSummary,
   DropoutTuning,
   DropoutWeightKey,
 } from '@sanatorio/contracts'
@@ -31,7 +35,7 @@ import type {
 /** El día de piscina del examen final: el cuarto viernes, si empezó en lunes. */
 const FINAL_EXAM_DAY = 25
 /** Hasta qué día se miran las faltas: el lunes después del examen final. */
-const LAST_COUNTED_DAY = 28
+export const LAST_COUNTED_DAY = 28
 /** Hasta qué día se dibuja: una semana después del examen final. */
 export const LAST_SHOWN_DAY = 32
 
@@ -441,4 +445,119 @@ export function profileLambda(
   return rows.map((_, index) =>
     keys.reduce((sum, key, at) => sum + weights[key] * (scores[at]?.[index] ?? 0), 0),
   )
+}
+
+/** Una piscina para resumir: su gente (con los ajustes ya aplicados) y sus días. */
+type PoolPeople = { people: readonly DropoutPerson[]; days: readonly DropoutDay[] }
+
+const mean = (values: readonly number[]): number | null =>
+  values.length === 0
+    ? null
+    : Math.round((values.reduce((a, b) => a + b, 0) / values.length) * 10) / 10
+
+/** El día de piscina en que dejó de venir (el siguiente al último), o `null`. */
+function leftDayOf(person: DropoutPerson, days: readonly DropoutDay[]): number | null {
+  if (person.status === 'never') return 0
+  if (person.leftBetween === null) return null
+
+  const last = days.findIndex((day) => day.day === person.leftBetween?.[0])
+
+  return last === -1 ? null : last + 1
+}
+
+function averagesOf(
+  list: readonly { person: DropoutPerson; left: number | null }[],
+): DropoutAverages {
+  const of = (pick: (person: DropoutPerson) => number) =>
+    mean(list.map(({ person }) => pick(person)))
+
+  return {
+    people: list.length,
+    avgHours: of((person) => person.factors.avgHours),
+    totalHours: of((person) => person.factors.totalHours),
+    firstWeekHours: of((person) => person.factors.firstWeekHours),
+    attendance: of((person) => person.factors.attendance),
+    isolation: of((person) => person.factors.isolation),
+    given: of((person) => person.factors.given),
+    received: of((person) => person.factors.received),
+    passed: of((person) => person.factors.passed),
+    leftDay: mean(list.flatMap(({ left }) => (left === null ? [] : [left]))),
+  }
+}
+
+/**
+ * Las cifras de una o varias piscinas juntas (`DropoutPoolSummary`), por día
+ * de piscina: cuánta gente sigue cada día, cuándo lo dejan (semana y cambio de
+ * día) y cómo eran quienes lo dejaron frente a quienes siguen. Quien no vino
+ * nunca cuenta como que lo dejó el día 0.
+ */
+export function summarize(pools: readonly PoolPeople[], start: string | null): DropoutPoolSummary {
+  const all = pools.flatMap(({ people, days }) =>
+    people.map((person) => ({ person, days, left: leftDayOf(person, days) })),
+  )
+  const count = (status: DropoutPerson['status']) =>
+    all.filter(({ person }) => person.status === status).length
+  const counts: DropoutCounts = {
+    people: all.length,
+    gone: count('gone'),
+    likely: count('likely'),
+    doubt: count('doubt'),
+    active: count('active'),
+    never: count('never'),
+    inExam: all.filter(({ person }) => person.reasons.includes('inExam')).length,
+  }
+  const curve = (gone: (status: DropoutPerson['status']) => boolean) =>
+    Array.from({ length: LAST_COUNTED_DAY + 1 }, (_, day) => {
+      // Solo las piscinas que ya han vivido ese día.
+      const lived = all.filter(({ days }) => day < days.length)
+
+      if (lived.length === 0) return null
+
+      const left = lived.filter(
+        ({ person, left }) => gone(person.status) && left !== null && left <= day,
+      ).length
+
+      return Math.round((1000 * (lived.length - left)) / lived.length) / 10
+    })
+  const tally = (
+    status: DropoutPerson['status'],
+    slot: (entry: (typeof all)[number]) => number | null,
+    size: number,
+  ) => {
+    const counts = Array.from({ length: size }, () => 0)
+
+    for (const entry of all) {
+      if (entry.person.status !== status) continue
+      const at = slot(entry)
+
+      if (at !== null && at >= 0 && at < size) counts[at] = (counts[at] ?? 0) + 1
+    }
+
+    return counts
+  }
+  const week = ({ left }: (typeof all)[number]) =>
+    left === null ? null : Math.min(3, Math.floor(left / 7))
+  const weekday = ({ person, days }: (typeof all)[number]) => {
+    const last = days.find((day) => day.day === person.leftBetween?.[0])
+
+    return last === undefined ? null : last.weekday - 1
+  }
+  const leaving = all.filter(({ person }) => person.status === 'gone' || person.status === 'likely')
+  const remaining = all.filter(
+    ({ person }) => person.status === 'active' || person.status === 'doubt',
+  )
+
+  return {
+    start,
+    counts,
+    staying: curve((status) => status === 'gone' || status === 'never'),
+    stayingLikely: curve(
+      (status) => status === 'gone' || status === 'never' || status === 'likely',
+    ),
+    byWeek: { gone: tally('gone', week, 4), likely: tally('likely', week, 4) },
+    byWeekday: { gone: tally('gone', weekday, 7), likely: tally('likely', weekday, 7) },
+    leaving: averagesOf(leaving),
+    remaining: averagesOf(remaining),
+    sessionHours: Math.round(all.reduce((sum, { person }) => sum + person.factors.totalHours, 0)),
+  }
 }

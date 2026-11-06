@@ -10,6 +10,7 @@
  */
 
 import type {
+  DropoutComparison,
   DropoutTuning,
   DropoutDay,
   DropoutFactorKey,
@@ -19,27 +20,34 @@ import type {
 } from '@sanatorio/contracts'
 
 import type { Db } from '../../core/db/database.js'
-import { toText } from '../../core/db/rows.js'
+import { toNumber, toText } from '../../core/db/rows.js'
 import { inList, listArg } from '../../core/db/sql.js'
 import { createTtlCache } from '../../core/ttl-cache.js'
 import { localMoment, zonedInstant } from '../../core/time.js'
 import { seatSessionsIn, seatingOf } from '../network/index.js'
+import type { SeatSession } from '../network/index.js'
 import { PISCINE, PISCINE_PROGRESS } from '../replica/index.js'
 import {
   DEFAULT_TUNING,
+  LAST_COUNTED_DAY,
   LAST_SHOWN_DAY,
   assess,
   correlationsOf,
   factorAnalysis,
   hoursOf,
   profileLambda,
+  summarize,
 } from './dropout.rules.js'
 import { poolAnchorOf, samePool } from './piscine.rules.js'
 import type { PiscineRepository } from './stats.repository.js'
 
 const CACHE_MS = 10 * 60_000
-/** Un día de piscina con estas personas o más se ofrece como piscina para elegir. */
-const MIN_POOL = 5
+/** Las piscinas que se pueden elegir: las últimas. */
+const MAX_POOLS = 10
+/** Como en la red de asientos: más de 12 h seguidas en un puesto no es estar sentado. */
+const MAX_SESSION_MS = 12 * 3_600_000
+/** Un día con estas personas empezando o más es una piscina (no quien repite o llega tarde). */
+const MIN_POOL = 20
 
 /** Los factores de la tabla de correlaciones, en su orden. */
 const DROPOUT_FACTORS: readonly DropoutFactorKey[] = [
@@ -99,7 +107,8 @@ export function createDropoutService(options: {
   }
   const bases = createTtlCache<Base>({
     ttlMs: CACHE_MS,
-    maxEntries: 20,
+    // Las 10 piscinas de un campus y la de entrada, de varios campus.
+    maxEntries: 40,
     now,
   })
 
@@ -116,26 +125,114 @@ export function createDropoutService(options: {
     received: Map<string, number>
     seen: { login: string; at: number }[]
   }> {
-    const result = await options.db.execute({
-      sql: `SELECT corrector, corrected, begin_at FROM corrections
-            WHERE campus_id = ? AND begin_at >= ? AND begin_at < ?`,
-      args: [campusId, new Date(since).toISOString(), new Date(until).toISOString()],
-    })
-    const given = new Map<string, number>()
-    const received = new Map<string, number>()
+    const range = [new Date(since).toISOString(), new Date(until).toISOString()]
+    // Las de la copia de correcciones y las del historial de piscinas, sin repetir
+    // (las dos llevan el id de la corrección de 42).
+    const [copied, history] = await Promise.all([
+      options.db.execute({
+        sql: `SELECT id, corrector, corrected, begin_at FROM corrections
+              WHERE campus_id = ? AND begin_at >= ? AND begin_at < ?`,
+        args: [campusId, ...range],
+      }),
+      options.db.execute({
+        sql: `SELECT ref, login, kind, at FROM piscine_activity
+              WHERE campus_id = ? AND kind IN ('given', 'received') AND at >= ? AND at < ?`,
+        args: [campusId, ...range],
+      }),
+    ])
+    const given = new Map<string, Set<number>>()
+    const received = new Map<string, Set<number>>()
     const seen: { login: string; at: number }[] = []
-
-    for (const row of result.rows) {
-      const corrector = toText(row.corrector).toLowerCase()
-      const corrected = toText(row.corrected).toLowerCase()
-      const at = Date.parse(toText(row.begin_at))
-
-      given.set(corrector, (given.get(corrector) ?? 0) + 1)
-      received.set(corrected, (received.get(corrected) ?? 0) + 1)
-      seen.push({ login: corrector, at }, { login: corrected, at })
+    const add = (into: Map<string, Set<number>>, login: string, id: number, at: number) => {
+      into.set(login, (into.get(login) ?? new Set()).add(id))
+      seen.push({ login, at })
     }
 
-    return { given, received, seen }
+    for (const row of copied.rows) {
+      const at = Date.parse(toText(row.begin_at))
+      const id = toNumber(row.id)
+
+      add(given, toText(row.corrector).toLowerCase(), id, at)
+      add(received, toText(row.corrected).toLowerCase(), id, at)
+    }
+    for (const row of history.rows) {
+      const into = toText(row.kind) === 'given' ? given : received
+
+      add(into, toText(row.login), toNumber(row.ref), Date.parse(toText(row.at)))
+    }
+
+    const sizes = (map: Map<string, Set<number>>) =>
+      new Map([...map].map(([login, ids]) => [login, ids.size]))
+
+    return { given: sizes(given), received: sizes(received), seen }
+  }
+
+  /**
+   * Los piscineros del campus: los de ahora (`pool_members`) y los de las
+   * piscinas pasadas que ha copiado el historial (`piscine_members`).
+   */
+  async function membersOf(
+    campusId: number,
+  ): Promise<{ login: string; begin: number; image: string | null }[]> {
+    const result = await options.db.execute({
+      sql: `SELECT login, begin_at, image FROM pool_members WHERE campus_id = ?
+            UNION ALL
+            SELECT login, begin_at, image FROM piscine_members WHERE campus_id = ?`,
+      args: [campusId, campusId],
+    })
+    const seen = new Map<string, { login: string; begin: number; image: string | null }>()
+
+    for (const row of result.rows) {
+      const login = toText(row.login).toLowerCase()
+      const begin = Date.parse(toText(row.begin_at))
+
+      if (seen.has(login) || Number.isNaN(begin)) continue
+      seen.set(login, { login, begin, image: row.image === null ? null : toText(row.image) })
+    }
+
+    return [...seen.values()]
+  }
+
+  /**
+   * Las sesiones del historial de piscinas en `[since, until)` que no estén ya
+   * en la copia de puestos, recortadas como allí (como mucho 12 h seguidas).
+   */
+  async function historySessions(
+    campusId: number,
+    since: number,
+    until: number,
+  ): Promise<SeatSession[]> {
+    const result = await options.db.execute({
+      sql: `SELECT login, host, begin_at, end_at FROM piscine_sessions p
+            WHERE campus_id = ? AND begin_at < ? AND end_at > ?
+              AND NOT EXISTS (SELECT 1 FROM seat_sessions s WHERE s.location_id = p.location_id)`,
+      args: [campusId, new Date(until).toISOString(), new Date(since).toISOString()],
+    })
+
+    return result.rows.flatMap((row) => {
+      const begin = Math.max(since, Date.parse(toText(row.begin_at)))
+      const end = Math.min(until, Date.parse(toText(row.end_at)), begin + MAX_SESSION_MS)
+
+      return end > begin ? [{ login: toText(row.login), host: toText(row.host), begin, end }] : []
+    })
+  }
+
+  /** Lo aprobado de la piscina según el historial: login → ids de proyecto. */
+  async function historyPassed(campusId: number, until: number): Promise<Map<string, Set<number>>> {
+    const result = await options.db.execute({
+      sql: `SELECT login, ref FROM piscine_activity
+            WHERE campus_id = ? AND kind = 'passed' AND at <= ?`,
+      args: [campusId, new Date(until).toISOString()],
+    })
+    const passed = new Map<string, Set<number>>()
+
+    for (const row of result.rows) {
+      const login = toText(row.login)
+
+      passed.set(login, (passed.get(login) ?? new Set()).add(toNumber(row.ref)))
+    }
+
+    return passed
   }
 
   /**
@@ -164,8 +261,11 @@ export function createDropoutService(options: {
             UNION ALL
             SELECT pm.login, pu.updated_at_42 FROM project_users pu
             JOIN pool_members pm ON pm.user_id = pu.user_id AND pm.campus_id = ?
-            WHERE ${inList('pu.project_id')} AND pu.updated_at_42 >= ? AND pu.updated_at_42 < ?`,
-      args: [campusId, list, ...range, campusId, list, ...range],
+            WHERE ${inList('pu.project_id')} AND pu.updated_at_42 >= ? AND pu.updated_at_42 < ?
+            UNION ALL
+            SELECT login, at FROM piscine_activity
+            WHERE campus_id = ? AND kind = 'exam' AND at >= ? AND at < ?`,
+      args: [campusId, list, ...range, campusId, list, ...range, campusId, ...range],
     })
 
     return result.rows.map((row) => ({
@@ -177,7 +277,7 @@ export function createDropoutService(options: {
   async function build(campusId: number, wanted: string | null): Promise<Base> {
     const t = now()
     const zone = await timeZoneOf(campusId)
-    const members = await options.piscine.members(campusId)
+    const members = await membersOf(campusId)
     const dayOfStart = (start: number) => localMoment(start, zone).day
     // Las piscinas para elegir: los días en que empezó bastante gente.
     const byDay = new Map<string, number>()
@@ -190,6 +290,7 @@ export function createDropoutService(options: {
     const pools = [...byDay]
       .filter(([, people]) => people >= MIN_POOL)
       .sort((a, b) => b[0].localeCompare(a[0]))
+      .slice(0, MAX_POOLS)
       .map(([start, people]) => ({ start, people }))
     const chosen = members.find((member) => wanted !== null && dayOfStart(member.begin) === wanted)
     const anchor =
@@ -239,7 +340,11 @@ export function createDropoutService(options: {
     const todayIndex = days.findIndex((day) => day.day === today)
     const logins = new Set(swimmers.map((member) => member.login))
     // Todo el campus, para saber quién se sentó cerca de quién (el aislamiento).
-    const { sessions } = await seatSessionsIn(options.db, campusId, firstMs, until, () => true)
+    const [{ sessions: seen }, history] = await Promise.all([
+      seatSessionsIn(options.db, campusId, firstMs, until, () => true),
+      historySessions(campusId, firstMs, until),
+    ])
+    const sessions = [...seen, ...history]
     const seating = await seatingOf(sessions)
     const hours = new Map<string, number[]>()
 
@@ -259,10 +364,11 @@ export function createDropoutService(options: {
     }
 
     const ids = await options.piscine.idsOf(PISCINE_PROGRESS.map((project) => project.slug))
-    const [rows, corrections, exams] = await Promise.all([
+    const [rows, corrections, exams, archived] = await Promise.all([
       options.piscine.rows(campusId, [...ids.values()]),
       correctionsOf(campusId, firstMs, until),
       examsOf(campusId, firstMs, until),
+      historyPassed(campusId, t),
     ])
     // Los días en que vino sin que lo digan los puestos: una corrección o un examen.
     const dayIndexOf = (at: number): number =>
@@ -281,12 +387,20 @@ export function createDropoutService(options: {
       mark(present, each.login, each.at)
       mark(examDays, each.login, each.at)
     }
-    const passed = new Map<string, number>()
+    // Lo aprobado de la réplica y lo del historial, sin repetir proyecto.
+    const counted = new Set(ids.values())
+    const passedIds = new Map<string, Set<number>>()
 
     for (const row of rows) {
       if (row.doneAt !== null && row.doneAt <= t)
-        passed.set(row.login, (passed.get(row.login) ?? 0) + 1)
+        passedIds.set(row.login, (passedIds.get(row.login) ?? new Set()).add(row.projectId))
     }
+    for (const [login, projects] of archived) {
+      for (const id of projects) {
+        if (counted.has(id)) passedIds.set(login, (passedIds.get(login) ?? new Set()).add(id))
+      }
+    }
+    const passed = new Map([...passedIds].map(([login, projects]) => [login, projects.size]))
 
     const current = todayIndex === -1 ? days.length : todayIndex
     const people: BasePerson[] = swimmers.map((member) => {
@@ -435,6 +549,40 @@ export function createDropoutService(options: {
       const base = await bases.get(`${campusId}:${start ?? ''}`, () => build(campusId, start))
 
       return apply(base, tuning, sees)
+    },
+
+    /**
+     * Varias piscinas del campus en cifras, cada una y todas juntas
+     * (`starts`; vacío, todas las que se pueden elegir). Se rehacen de una en
+     * una: cada una lee los puestos de todo el campus de su mes.
+     */
+    async compare(
+      campusId: number,
+      starts: readonly string[],
+      sees: (login: string) => boolean,
+      tuning: DropoutTuning = DEFAULT_TUNING,
+    ): Promise<DropoutComparison> {
+      const latest = await bases.get(`${campusId}:`, () => build(campusId, null))
+      const available = latest.pools
+      const chosen = available
+        .map((pool) => pool.start)
+        .filter((start) => starts.length === 0 || starts.includes(start))
+      const pools: { start: string; people: DropoutPerson[]; days: DropoutDay[] }[] = []
+
+      for (const start of chosen) {
+        const base = await bases.get(`${campusId}:${start}`, () => build(campusId, start))
+        const report = apply(base, tuning, sees)
+
+        pools.push({ start, people: report.people, days: report.days })
+      }
+
+      return {
+        pools: pools.map((pool) => summarize([pool], pool.start)),
+        overall: summarize(pools, null),
+        available,
+        lastDay: LAST_COUNTED_DAY,
+        tuning,
+      }
     },
   }
 }

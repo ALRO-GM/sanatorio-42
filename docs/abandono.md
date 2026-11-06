@@ -14,19 +14,65 @@ ordenadores, aislamiento, correcciones, proyectos aprobados).
 
 ## De dónde salen los datos
 
-Todo de la réplica, sin pedir nada a 42:
+Todo de la réplica: la página no pide nada a 42. Lo de las piscinas pasadas
+lo copia de fondo el historial de piscinas (abajo).
 
 | Dato | De dónde |
 | --- | --- |
-| Quién es de la piscina y cuándo empezó | `pool_members`, en la piscina elegida (`samePool`: a menos de una semana del primer día) |
-| Horas de cada día en los ordenadores | `seat_sessions` (el historial de los puestos), por día en la hora del campus. Cada sesión cuenta desde que se vio y como mucho 12 h, como en la red de asientos |
-| Aislamiento y con cuánta gente se sentó cerca | La red de asientos (`seatingOf`) de todo el campus en la piscina: la parte de sus horas sin nadie cerca |
-| Correcciones hechas y recibidas | `corrections` del campus en la piscina |
-| Proyectos aprobados | Los 16 que cuentan para el Avance de la piscina (Shell 00 … C 13) |
+| Quién es de la piscina y cuándo empezó | `pool_members` (los de ahora) y `piscine_members` (el historial), en la piscina elegida (`samePool`: a menos de una semana del primer día) |
+| Horas de cada día en los ordenadores | `seat_sessions` (la copia de puestos en vivo) y `piscine_sessions` (el historial), sin repetir sesión, por día en la hora del campus. Cada sesión cuenta como mucho 12 h, como en la red de asientos |
+| Aislamiento y con cuánta gente se sentó cerca | La red de asientos (`seatingOf`) de todo el campus en la piscina, con las dos fuentes: la parte de sus horas sin nadie cerca |
+| Correcciones hechas y recibidas | `corrections` del campus y `piscine_activity` (`given`, `received`), sin repetir corrección |
+| Exámenes | `exam_attempts` y las filas de los exámenes de la piscina, y `piscine_activity` (`exam`) |
+| Proyectos aprobados | Los 16 que cuentan para el Avance de la piscina (Shell 00 … C 13), de la réplica y de `piscine_activity` (`passed`) |
 
 La piscina, sin elegirla, es la del día en que empezó más gente
-(`poolAnchorOf`). Se puede elegir otra entre los días en que empezaron 5
-personas o más.
+(`poolAnchorOf`). Se puede elegir otra entre las 10 últimas: los días en que
+empezaron 20 personas o más.
+
+## El historial de piscinas
+
+Pedido por Alberto el 2026-11-06 para ver y comparar las últimas 10 piscinas
+de Madrid. De las piscinas pasadas no había nada:
+- `pool_members` guarda 60 días (y decide quién ve a quién);
+- el historial de puestos es solo de alumnos del 42cursus;
+- las correcciones de la piscina se copian de 90 días.
+
+Lo copia `replica/piscine-history.ts`, solo para Madrid. Es un trabajo de
+volumen (`piscines` en `BULK_ORDER`, detrás de las correcciones y antes del
+historial de asientos), con el sitio guardado en `sync_state`
+(`piscine-history:22`):
+
+1. **Quién**: quién empezó la C Piscine en los últimos tres años
+   (`cursus/9/cursus_users`). Luego, cada día, los de los últimos 60. Las
+   piscinas son los días con 20 personas o más empezando; se miran las 10 últimas.
+2. **Cada piscina**, de la más nueva a la más vieja:
+   - sus sesiones cerradas en los puestos (`campus/22/locations` del mes),
+     solo de sus piscineros;
+   - sus correcciones (`scale_teams` de la C Piscine).
+
+   La que está en curso se completa cada día hasta 6 h antes de ahora.
+3. **Lo aprobado y los intentos de examen** de cada proyecto de la piscina
+   (`projects_users`); luego, cada día, lo que ha cambiado.
+
+Va en tablas propias (`piscine_members`, `piscine_sessions`,
+`piscine_activity`, migración 85), para no cambiar la red de asientos ni quién
+ve a quién. La primera vez son unas 2 000 peticiones, con la cuota que sobra:
+hasta que acaba, las piscinas viejas salen sin horas (la comparación lo
+avisa).
+
+## Comparar piscinas
+
+`GET /stats/dropout/compare?starts=…` con los mismos ajustes: cada piscina
+elegida y todas juntas (`summarize`, por día de piscina y no por fecha):
+- **cuánta gente sigue** al acabar cada día, de 0 a 28, sin los confirmados
+  (y, aparte, sin los probables). Quien no vino nunca cuenta como que lo dejó
+  el día 0;
+- **abandonos** por semana de piscina y por cambio de día de la semana;
+- **cómo eran** quienes lo dejaron (confirmados y probables) frente a quienes
+  siguen: medias de horas, asistencia, aislamiento, correcciones, aprobados y
+  día medio en que lo dejaron;
+- las **horas copiadas** de cada una (`sessionHours`): con 0, aún faltan datos.
 
 ## Cuándo se da por abandonado
 
@@ -157,6 +203,5 @@ poco; la web enseña con cuánta gente se han hecho.
 - No avisa a nadie ni cambia nada: solo mide.
 - No sabe de quien trabaja con su portátil fuera de los ordenadores del
   campus: para la piscina, venir es sentarse en un puesto.
-- No mira piscinas de antes de que existiera el historial de puestos
-  (`seat_sessions`, desde octubre de 2026).
+- Solo mira las 10 últimas piscinas, y el historial solo se copia de Madrid.
 - Se calcula por campus y piscina y se guarda 10 minutos.

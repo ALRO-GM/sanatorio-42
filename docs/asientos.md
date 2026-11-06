@@ -35,7 +35,7 @@ día en que se empezó a mirar. 42 guarda cada sesión de cada puesto
 unas 850 000 desde 2019 y unas 8 500 peticiones.
 
 - `replica/seat-history.ts`, trabajo de volumen `seats` (detrás de las
-  correcciones, `BULK_ORDER`): un mes cada vez, de hoy hacia atrás, página a
+  correcciones y del historial de piscinas, `BULK_ORDER`): un mes cada vez, de hoy hacia atrás, página a
   página, con el sitio guardado en `sync_state` (`seats-history:<campus>`). Un
   campus detrás de otro, por el orden de `SYNC_CAMPUS_IDS`: **Madrid primero**.
   Acaba al llegar al primer alumno del 42cursus del campus.

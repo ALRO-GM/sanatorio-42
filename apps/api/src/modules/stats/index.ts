@@ -59,8 +59,16 @@ const dropoutQuery = z.object({
   'w.passed': weight,
 })
 
+/** `GET /stats/dropout/compare`: las piscinas, por su primer día, separadas por comas. */
+const compareQuery = dropoutQuery.omit({ start: true }).extend({
+  starts: z
+    .string()
+    .regex(/^(\d{4}-\d{2}-\d{2})(,\d{4}-\d{2}-\d{2}){0,19}$/)
+    .optional(),
+})
+
 /** Los ajustes de la consulta sobre los de fábrica. */
-function tuningOf(query: z.infer<typeof dropoutQuery>): DropoutTuning {
+function tuningOf(query: z.infer<typeof compareQuery>): DropoutTuning {
   const weights = { ...DEFAULT_TUNING.weights }
 
   for (const key of Object.keys(weights) as DropoutWeightKey[]) {
@@ -333,6 +341,26 @@ export function createStatsModule(deps: {
         return reply.send(
           await dropout.report(homeOf(request), query.start ?? null, sees, tuningOf(query)),
         )
+      })
+
+      /**
+       * `GET /stats/dropout/compare?starts=a,b` → varias piscinas del campus
+       * en cifras, cada una y todas juntas, con los mismos ajustes y permisos
+       * que `/stats/dropout` (`docs/abandono.md`).
+       */
+      app.get('/stats/dropout/compare', async (request, reply) => {
+        reply.header('Cache-Control', 'private, no-store')
+
+        const query = parse(compareQuery, request.query)
+        const actor = await session.actor(request)
+
+        if (!actor.admin && actor.pool !== true) {
+          throw domainError('forbidden', 'El abandono de la piscina es de quien administra')
+        }
+        const sees = await seesFor(deps.audience ?? NO_POOL, actor)
+        const starts = (query.starts ?? '').split(',').filter((start) => start !== '')
+
+        return reply.send(await dropout.compare(homeOf(request), starts, sees, tuningOf(query)))
       })
 
       /**

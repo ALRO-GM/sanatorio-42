@@ -1988,6 +1988,9 @@ GET /stats/dropout?start=AAAA-MM-DD&likely=70&w.isolation=1… → DropoutReport
                   (`docs/abandono.md`): horas de cada día, probabilidad y estado de cada
                   piscinero, correlaciones y factores comunes. Quien administra, la vista sin
                   límites y un piscinero con el permiso `abandono`; un estudiante, 403.
+GET /stats/dropout/compare?starts=AAAA-MM-DD,AAAA-MM-DD&likely=70… → DropoutComparison. Varias
+                  piscinas (de las 10 últimas; sin `starts`, todas) en cifras, cada una y todas
+                  juntas, con los mismos ajustes y permisos que `/stats/dropout`.
 GET /stats/ranking?by=circle|circles|hours&plan=all|classic|next&kickoff=AAAA-MM&cohort=only|since
                   &circleMin=0&circleMax=7&pctMin=0&pctMax=100&offset=0&limit=50 → StatsRanking.
 ```

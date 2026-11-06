@@ -160,7 +160,7 @@ export const POOL_ROUTES: Record<PoolKey, readonly string[]> = {
   'examenes.live': ['/exams/live', '/exams/live/refresh'],
   'examenes.stats': ['/exams/stats'],
   // El abandono de la piscina (`docs/abandono.md`): de entrada, cerrado.
-  abandono: ['/stats/dropout'],
+  abandono: ['/stats/dropout', '/stats/dropout/compare'],
   clicker: [
     '/clicker',
     '/clicker/board',

@@ -285,7 +285,8 @@ describe('el informe de una piscina', () => {
     const report = await service.report(22, null, (login) => login !== 'fran')
 
     expect(report.start).toBe('2026-10-05')
-    expect(report.pools).toEqual([{ start: '2026-10-05', people: 6 }])
+    // Con seis no es una piscina que elegir (hacen falta 20), pero se mira igual.
+    expect(report.pools).toEqual([])
     expect(report.days).toHaveLength(9)
     // Quien no se ve no sale en la lista.
     expect(report.people.map((person) => person.login)).not.toContain('fran')
@@ -379,6 +380,78 @@ describe('el informe de una piscina', () => {
     expect(jose?.factors.risk).toBe(0)
     expect(luz?.factors.risk).toBeGreaterThan(0)
     expect(report.counts.inExam).toBe(1)
+  })
+
+  it('una piscina pasada sale del historial de piscinas, y se compara con las demás', async () => {
+    const iso = (ms: number) => new Date(ms).toISOString()
+    const logins = Array.from({ length: 20 }, (_, n) => `p${String(n)}`)
+
+    await db.batch(
+      [
+        ...logins.map((login, n) => ({
+          sql: `INSERT INTO piscine_members (campus_id, user_id, login, image, begin_at)
+                VALUES (22, ?, ?, NULL, ?)`,
+          args: [n + 1, login, iso(START + 8 * 3_600_000)],
+        })),
+        // Todos vienen de 9 a 17 entre semana las dos primeras semanas; «p0» solo el lunes.
+        ...logins.flatMap((login, n) =>
+          Array.from({ length: 12 }, (_, index) => index)
+            .filter((index) => index % 7 < 5 && (login !== 'p0' || index === 0))
+            .map((index) => ({
+              sql: `INSERT INTO piscine_sessions (location_id, campus_id, user_id, login, host, begin_at, end_at)
+                    VALUES (?, 22, ?, ?, 'c1r1s1', ?, ?)`,
+              args: [
+                1000 * (n + 1) + index,
+                n + 1,
+                login,
+                iso(START + index * DAY + 9 * 3_600_000),
+                iso(START + index * DAY + 17 * 3_600_000),
+              ],
+            })),
+        ),
+        // «p1» corrigió a «p2»: cuenta en los dos.
+        {
+          sql: `INSERT INTO piscine_activity (campus_id, user_id, login, kind, ref, at)
+                VALUES (22, 2, 'p1', 'given', 9, ?), (22, 3, 'p2', 'received', 9, ?)`,
+          args: [iso(START + DAY), iso(START + DAY)],
+        },
+      ],
+      'write',
+    )
+
+    // Dos meses después: la piscina ya acabó.
+    const service = createDropoutService({
+      db,
+      piscine: createPiscineRepository(db),
+      now: () => START + 60 * DAY,
+    })
+    const report = await service.report(22, null, () => true)
+
+    expect(report.pools).toEqual([{ start: '2026-10-05', people: 20 }])
+    expect(report.days).toHaveLength(33)
+    expect(report.people.find((person) => person.login === 'p0')).toMatchObject({
+      status: 'gone',
+      leftBetween: ['2026-10-05', '2026-10-06'],
+    })
+    expect(report.people.find((person) => person.login === 'p1')?.factors.given).toBe(1)
+    expect(report.people.find((person) => person.login === 'p2')?.factors.received).toBe(1)
+
+    const comparison = await service.compare(22, [], () => true)
+
+    expect(comparison.available).toEqual([{ start: '2026-10-05', people: 20 }])
+    expect(comparison.pools).toHaveLength(1)
+    expect(comparison.overall.counts.people).toBe(20)
+    expect(comparison.overall.counts.gone).toBeGreaterThanOrEqual(1)
+    // El día 0 siguen todos; «p0» lo dejó el día 1.
+    expect(comparison.overall.staying[0]).toBe(100)
+    expect(comparison.overall.staying[1]).toBe(95)
+    expect(comparison.overall.byWeek.gone[0]).toBeGreaterThanOrEqual(1)
+    // Lunes → martes.
+    expect(comparison.overall.byWeekday.gone[0]).toBe(1)
+    expect(comparison.overall.leaving.leftDay).not.toBeNull()
+    expect(comparison.overall.sessionHours).toBeGreaterThan(0)
+    // Una piscina que no existe no entra.
+    expect((await service.compare(22, ['2020-01-01'], () => true)).pools).toEqual([])
   })
 
   it('sin piscineros, vacío y sin fallar', async () => {

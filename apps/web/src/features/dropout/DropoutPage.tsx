@@ -34,6 +34,7 @@ import {
 } from './dropout'
 import type { DropoutFilter, DropoutGrouping, DropoutInclude } from './dropout'
 import { DeparturesChart, PersonHoursChart, STATUS_COLOR, TransitionsChart } from './DropoutCharts'
+import { DropoutCompare } from './DropoutCompare'
 import { DropoutCorrelations, DropoutFactorsPanel } from './DropoutCorrelations'
 import { DropoutTuningPanel } from './DropoutTuningPanel'
 
@@ -41,6 +42,8 @@ import { DropoutTuningPanel } from './DropoutTuningPanel'
 const STORAGE = 'sanatorio_dropout_tuning'
 /** Cuánto se espera a que se deje de mover un deslizador antes de pedir el cálculo. */
 const DEBOUNCE_MS = 250
+/** Las dos vistas de la pestaña: una piscina a fondo o varias frente a frente. */
+const VIEWS = ['pool', 'compare'] as const
 
 function storedTweaks(): DropoutTweaks {
   try {
@@ -71,6 +74,7 @@ function storeTweaks(tweaks: DropoutTweaks): void {
 export function DropoutPage() {
   const { t } = useI18n()
   const [start, setStart] = useState<string | undefined>(undefined)
+  const [view, setView] = useState<(typeof VIEWS)[number]>('pool')
   // Lo que se ha movido (lo que difiere de lo de fábrica) y lo que se pide:
   // lo mismo, pero cuando se deja de mover un rato.
   const [tweaks, setTweaks] = useState<DropoutTweaks>(storedTweaks)
@@ -106,7 +110,7 @@ export function DropoutPage() {
           <p>{t('dropout.info')}</p>
           <p>{t('dropout.infoRules')}</p>
         </SectionTitle>
-        {data !== undefined && data.pools.length > 1 && (
+        {view === 'pool' && data !== undefined && data.pools.length > 1 && (
           <label className="dropout-select">
             <span className="eyebrow">{t('dropout.pool')}</span>
             <select
@@ -124,6 +128,16 @@ export function DropoutPage() {
           </label>
         )}
       </div>
+      <PillGroup
+        kind="tabs"
+        className="dropout-views"
+        id="dropout-view"
+        label={t('dropout.view.label')}
+        options={VIEWS}
+        value={view}
+        onChange={setView}
+        text={(option) => t(`dropout.view.${option}`)}
+      />
       {data === undefined ? (
         <ErrorNote error={fetched.error} retry />
       ) : data.people.length === 0 ? (
@@ -140,7 +154,13 @@ export function DropoutPage() {
               change(next, data.defaults)
             }}
           />
-          <DropoutBody report={data} />
+          <div
+            id={`dropout-view-panel-${view}`}
+            role="tabpanel"
+            aria-labelledby={`dropout-view-tab-${view}`}
+          >
+            {view === 'pool' ? <DropoutBody report={data} /> : <DropoutCompare tweaks={asked} />}
+          </div>
         </>
       )}
     </section>

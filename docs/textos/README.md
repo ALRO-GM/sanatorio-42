@@ -5,7 +5,7 @@ Cómo se trabaja con ellas: [docs/textos.md](../textos.md).
 
 | Tema | Textos | Falta en Inglés | Falta en Catalán | Falta en Euskera | Falta en Francés |
 | --- | --- | --- | --- | --- | --- |
-| [abandono](abandono.md) | 152 | 0 | 0 | 0 | 0 |
+| [abandono](abandono.md) | 184 | 0 | 0 | 0 | 0 |
 | [agenda](agenda.md) | 145 | 0 | 0 | 0 | 0 |
 | [animos](animos.md) | 100 | 0 | 0 | 0 | 0 |
 | [avisos](avisos.md) | 44 | 0 | 0 | 0 | 0 |

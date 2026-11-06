@@ -127,6 +127,7 @@ import type {
   StatsProgress,
   PiscineProgress,
   DropoutReport,
+  DropoutComparison,
   DropoutTuning,
   DropoutWeightKey,
   StatsRanking,
@@ -585,6 +586,14 @@ export type Api = {
    * curso; `start`, otra de las de `pools`. Quien administra o un piscinero con permiso.
    */
   getDropout: (start?: string, tweaks?: DropoutTweaks) => Promise<DropoutReport>
+  /**
+   * Varias piscinas frente a frente (`docs/abandono.md`): cada una de `starts`
+   * y todas juntas, con los mismos ajustes. Sin `starts`, las últimas 10.
+   */
+  getDropoutComparison: (
+    starts: readonly string[],
+    tweaks?: DropoutTweaks,
+  ) => Promise<DropoutComparison>
   /** Quien terminó el common core más deprisa, por plan: en tu campus y el primero de cada campus. */
   getStatsFastest: () => Promise<StatsFastest>
   /** Quién va más rápido en el campus, con esos filtros, por páginas. */

@@ -189,6 +189,14 @@ describe('cliente de la API', () => {
     )
   })
 
+  it('comparar piscinas manda las elegidas y los mismos ajustes', async () => {
+    await realApi.getDropoutComparison([])
+    expect(last().url).toBe('/api/stats/dropout/compare')
+
+    await realApi.getDropoutComparison(['2026-10-05', '2026-09-07'], { weights: { isolation: 1 } })
+    expect(last().url).toBe('/api/stats/dropout/compare?starts=2026-10-05,2026-09-07&w.isolation=1')
+  })
+
   it('sin cuerpo legible se queda el código; sin respuesta es de red', async () => {
     reply = () => new Response('<html>', { status: 503 })
     await expect(realApi.getMe()).rejects.toMatchObject({ status: 503, serverMessage: undefined })

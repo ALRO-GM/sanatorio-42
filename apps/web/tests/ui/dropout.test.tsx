@@ -162,6 +162,37 @@ describe('el abandono de la piscina (docs/abandono.md)', () => {
     expect(screen.queryByText(text('dropout.tuning.changed'))).toBeNull()
   }, 20_000)
 
+  it('comparar piscinas: dos elegidas dan dos líneas y el total, la fila «Todas» y el aviso de datos', async () => {
+    const user = userEvent.setup()
+
+    await openApp('#/abandono')
+    await user.click(await screen.findByRole('tab', { name: text('dropout.view.compare') }, WAIT))
+
+    // De entrada, las diez; las dos más viejas aún sin horas de puestos.
+    const pools = await screen.findByRole('group', { name: text('dropout.compare.pools') }, WAIT)
+
+    expect(within(pools).getAllByRole('checkbox')).toHaveLength(10)
+    expect(await screen.findAllByText(/aún copiando de 42/, undefined, WAIT)).toHaveLength(2)
+
+    await user.click(within(pools).getByRole('button', { name: text('dropout.compare.none') }))
+    expect(screen.getByText(text('dropout.compare.pickOne'))).toBeTruthy()
+
+    const [first, second] = within(pools).getAllByRole('checkbox')
+
+    await user.click(must(first, 'la primera piscina'))
+    await user.click(must(second, 'la segunda piscina'))
+
+    const survival = await screen.findByRole(
+      'img',
+      { name: /^Gráfica del % que sigue cada día de piscina: 2 piscinas y el total/ },
+      WAIT,
+    )
+
+    expect(survival.querySelectorAll('.dropout-survival path')).toHaveLength(3)
+    expect(screen.queryByText(/aún copiando de 42/)).toBeNull()
+    expect(screen.getByRole('rowheader', { name: text('dropout.compare.overall') })).toBeTruthy()
+  }, 20_000)
+
   it('un piscinero sin el permiso no la ve, y un estudiante que no administra tampoco', async () => {
     await api.updatePoolSettings({ allow: ['avance', 'red'] })
     await openApp('#/avance', { pool: true })

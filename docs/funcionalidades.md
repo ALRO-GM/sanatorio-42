@@ -299,7 +299,8 @@ Pedido por Alberto el 2026-11-06 ([abandono.md](abandono.md)). Solo quien admini
 | Cifras: confirmados, probables, % de la piscina, horas de media antes de abandonar frente a quien sigue, semana y día con más abandonos | N | Admins `[abandono]` | `features/dropout/` |
 | Tabla de correlaciones (0–100) entre factores que se pueden quitar y poner, y dispersión de dos factores elegidos | N | Admins `[abandono]` | `features/dropout/` |
 | Factores comunes: parejas juntas frente al abandono y grupos de factores que van juntos | N | Admins `[abandono]` | `features/dropout/` |
-| Elegir piscina, si hay más de una | N | Admins `[abandono]` | `features/dropout/` |
+| Elegir piscina entre las 10 últimas de Madrid (copiadas de fondo por el historial de piscinas) | N | Admins `[abandono]` | `features/dropout/`, `replica/piscine-history.ts` |
+| Comparar piscinas: elegir varias de las 10 últimas y ver cuánta gente sigue cada día, abandonos por semana y día de la semana, y cómo eran quienes lo dejaron frente a quienes siguen, de cada una y de todas juntas | N | Admins `[abandono]` | `features/dropout/` |
 | Ajustar el cálculo en vivo: deslizadores para lo que pesa faltar entre semana, el viernes y el fin de semana, cuándo se confirma, los umbrales y un peso por factor (horas, asistencia, aislamiento, correcciones, aprobados); «Volver a lo de fábrica» | N | Admins `[abandono]` | `DropoutTuningPanel.tsx` |
 | Totales arriba: piscineros, abandonaron, probables, en duda, siguen, no vinieron nunca y en el examen; cada uno filtra la tabla | N | Admins `[abandono]` | `DropoutPage.tsx` |
 | Quien está en el examen o corrige ese día cuenta como venido (los puestos de los piscineros solo se ven en vivo) | N | Admins `[abandono]` | `stats/dropout.service.ts` |

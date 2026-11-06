@@ -395,3 +395,70 @@
   margin: 0.1rem 0 0;
   font-size: 0.8rem;
 }
+
+/* Comparar piscinas. Un color por piscina, el mismo en claro y en oscuro
+   (tonos medios que se leen sobre los dos), por su sitio en la lista: no
+   cambia al elegir otras. El total va en el color del texto, más grueso. */
+.dropout-page {
+  --pool-1: #1c7ed6;
+  --pool-2: #f08c00;
+  --pool-3: #0ca678;
+  --pool-4: #e64980;
+  --pool-5: #7950f2;
+  --pool-6: #82c91e;
+  --pool-7: #15aabf;
+  --pool-8: #d9480f;
+  --pool-9: #ae3ec9;
+  --pool-10: #868e96;
+}
+:root[data-cvd='on'] .dropout-page {
+  --pool-1: #0072b2;
+  --pool-2: #e69f00;
+  --pool-3: #009e73;
+  --pool-4: #cc79a7;
+  --pool-5: #56b4e9;
+  --pool-6: #d55e00;
+  --pool-7: #f0e442;
+}
+.dropout-views {
+  margin: 0 0 0.8rem;
+}
+.dropout-pools {
+  margin-top: 0;
+}
+.dropout-pool-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
+  gap: 0.2rem 1rem;
+  margin: 0.3rem 0 0.5rem;
+}
+.dropout-pool-dot {
+  display: inline-block;
+  width: 0.7rem;
+  height: 0.7rem;
+  margin-right: 0.35rem;
+  border-radius: 50%;
+  vertical-align: middle;
+}
+.dropout-pool-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.dropout-missing {
+  margin: 0.8rem 0 0;
+  padding: 0.6rem 0.8rem 0.6rem 2rem;
+  border: 1px solid var(--warn);
+  border-radius: var(--radius-sm);
+  background: var(--warn-soft);
+  color: var(--text);
+}
+.dropout-survival.overall circle {
+  stroke: var(--surface);
+  stroke-width: 1;
+}
+.dropout-overall th,
+.dropout-overall td {
+  font-weight: 700;
+  border-top: 2px solid var(--border-strong);
+}

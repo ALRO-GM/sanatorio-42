@@ -219,3 +219,60 @@ export type DropoutReport = {
   /** Con cuánta gente se han hecho las correlaciones. */
   sample: number
 }
+
+/**
+ * El abandono de una piscina en cifras, para compararla con otras
+ * (`GET /stats/dropout/compare`). El eje es el día de piscina (0 el primero),
+ * no la fecha: así se pueden poner varias juntas.
+ */
+export type DropoutPoolSummary = {
+  /** Su primer día (`YYYY-MM-DD`); `null` en el total de las elegidas. */
+  start: string | null
+  counts: DropoutCounts
+  /**
+   * El % de la piscina que sigue al acabar cada día de piscina (0…28): sin
+   * contar a quien lo dejó (confirmado) antes. `null` los días que aún no han pasado.
+   */
+  staying: (number | null)[]
+  /** Lo mismo, quitando también a los probables. */
+  stayingLikely: (number | null)[]
+  /** Abandonos confirmados y probables por semana de piscina (1–4: índices 0–3). */
+  byWeek: { gone: number[]; likely: number[] }
+  /** Por cambio de día: 0 = lunes → martes … 6 = domingo → lunes. */
+  byWeekday: { gone: number[]; likely: number[] }
+  /** Medias de quien lo dejó (confirmado o probable) y de quien sigue. */
+  leaving: DropoutAverages
+  remaining: DropoutAverages
+  /** Cuántas horas de puestos hay copiadas de esta piscina: con 0, faltan datos. */
+  sessionHours: number
+}
+
+/** Medias de un grupo de piscineros. */
+export type DropoutAverages = {
+  people: number
+  avgHours: number | null
+  totalHours: number | null
+  firstWeekHours: number | null
+  attendance: number | null
+  isolation: number | null
+  given: number | null
+  received: number | null
+  passed: number | null
+  /** Día de piscina medio en que lo dejaron (solo de quien lo dejó). */
+  leftDay: number | null
+}
+
+/**
+ * `GET /stats/dropout/compare?starts=a,b,…` (con los mismos ajustes que
+ * `/stats/dropout`): cada piscina elegida y todas juntas.
+ */
+export type DropoutComparison = {
+  pools: DropoutPoolSummary[]
+  /** Todas las elegidas juntas. */
+  overall: DropoutPoolSummary
+  /** Las piscinas que se pueden elegir (las últimas 10). */
+  available: { start: string; people: number }[]
+  /** Hasta qué día de piscina va el eje de `staying`. */
+  lastDay: number
+  tuning: DropoutTuning
+}

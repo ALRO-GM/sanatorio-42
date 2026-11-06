@@ -189,10 +189,19 @@ describe('el abandono de la piscina (docs/abandono.md)', () => {
     })
     expect((await get(built, '/stats/dropout?w.isolation=9', admin)).statusCode).toBe(400)
 
+    const compare = await get(built, '/stats/dropout/compare?starts=2026-10-05,2026-09-07', admin)
+
+    expect(compare.statusCode).toBe(200)
+    expect(json(compare)).toMatchObject({ pools: [], available: [], lastDay: 28 })
+    expect((await get(built, '/stats/dropout/compare?starts=ayer', admin)).statusCode).toBe(400)
+
     const student = await makeApp()
 
     apps.push(student)
     expect((await get(student, '/stats/dropout', await student.login())).statusCode).toBe(403)
+    expect((await get(student, '/stats/dropout/compare', await student.login())).statusCode).toBe(
+      403,
+    )
   })
 
   it('un piscinero, solo con el permiso «abandono» (de entrada, cerrado)', async () => {

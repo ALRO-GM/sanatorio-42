@@ -23,6 +23,7 @@ import type {
 
 import type { DropoutTweaks } from '../types'
 
+import { dropoutComparison } from './dropout-compare'
 import { portrait } from './portrait'
 import { delay } from './state'
 
@@ -304,7 +305,7 @@ function dropoutReport(tweaks: DropoutTweaks = {}, now = Date.now()): DropoutRep
     ...tweaks,
     weights: { ...DEFAULTS.weights, ...tweaks.weights },
   }
-  const { start, today, days, raws } = poolOf(now)
+  const { today, days, raws } = poolOf(now)
   const came = raws.filter((raw) => !raw.never)
   const zs = new Map(
     (Object.keys(DEFAULTS.weights) as DropoutWeightKey[]).map((key) => {
@@ -372,10 +373,8 @@ function dropoutReport(tweaks: DropoutTweaks = {}, now = Date.now()): DropoutRep
     },
     campus: 'Madrid',
     start: days[0]?.day ?? null,
-    pools: [
-      { start: days[0]?.day ?? '', people: PEOPLE },
-      { start: isoDay(start - 63 * DAY), people: 52 },
-    ],
+    // Las mismas piscinas que se pueden comparar; la primera es esta.
+    pools: dropoutComparison([], {}, DEFAULTS, now).available,
     days,
     today: isoDay(today),
     people,
@@ -392,5 +391,10 @@ export const dropoutMock = {
     await delay(150)
 
     return dropoutReport(tweaks)
+  },
+  async getDropoutComparison(starts: readonly string[], tweaks: DropoutTweaks = {}) {
+    await delay(150)
+
+    return dropoutComparison(starts, tweaks, DEFAULTS)
   },
 }

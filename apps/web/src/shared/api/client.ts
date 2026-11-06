@@ -314,6 +314,14 @@ export const realApi: Api = {
 
     return getJson(`/stats/dropout${query === '' ? '' : `?${query}`}`)
   },
+  getDropoutComparison: (starts, tweaks = {}) => {
+    const query = [
+      ...(starts.length === 0 ? [] : [`starts=${starts.map(encodeURIComponent).join(',')}`]),
+      ...dropoutQuery(tweaks),
+    ].join('&')
+
+    return getJson(`/stats/dropout/compare${query === '' ? '' : `?${query}`}`)
+  },
   getPiscineProgress: (others) =>
     getJson(
       `/stats/progress/piscine${others.length === 0 ? '' : `?with=${encodeURIComponent(others.join(','))}`}`,
