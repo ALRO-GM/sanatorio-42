@@ -51,7 +51,9 @@ historial de asientos), con el sitio guardado en `sync_state`
      solo de sus piscineros;
    - sus correcciones (`scale_teams` de la C Piscine).
 
-   La que está en curso se completa cada día hasta 6 h antes de ahora.
+   La que está en curso se completa una vez al día, hasta 6 h antes de ahora.
+   Hasta el 2026-11-07 se repasaba cada minuto (su final se movía con el
+   reloj): gastó 7 300 peticiones en un día sin pasar a las piscinas viejas.
 3. **Lo aprobado y los intentos de examen** de cada proyecto de la piscina
    (`projects_users`); luego, cada día, lo que ha cambiado.
 

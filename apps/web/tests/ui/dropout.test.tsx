@@ -143,11 +143,19 @@ describe('el abandono de la piscina (docs/abandono.md)', () => {
     const before = likely()
 
     await user.click(screen.getByText(text('dropout.tuning.title')))
-    // Con «probable» desde un 1 % de riesgo, casi todo el que falta algo es probable.
+    // Con «probable» desde un 1 % de riesgo y el aislamiento pesando, quien se
+    // sienta solo pasa a probable. Solo el umbral no basta: un sábado, quien
+    // faltó el viernes ya es probable y quien vino no tiene riesgo.
     fireEvent.change(
       screen.getByRole('slider', { name: new RegExp(`^${text('dropout.tuning.likely')}`) }),
       {
         target: { value: '1' },
+      },
+    )
+    fireEvent.change(
+      screen.getByRole('slider', { name: new RegExp(`^${text('dropout.factor.isolation')}`) }),
+      {
+        target: { value: '2' },
       },
     )
     await waitFor(() => {

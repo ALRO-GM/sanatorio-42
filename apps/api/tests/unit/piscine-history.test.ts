@@ -54,6 +54,7 @@ describe('historial de piscinas', () => {
   let db: Db
   let allowed: boolean
   let calls: string[]
+  let clock: number
 
   const people = (start: number, prefix: string, from: number): ApiCursusMember[] =>
     Array.from({ length: 20 }, (_, n) => ({
@@ -178,13 +179,14 @@ describe('historial de piscinas', () => {
       campusIds: [MADRID],
       quota: { allowsBulk: () => allowed } as unknown as QuotaGate,
       hourlyReserve: 300,
-      now: () => NOW,
+      now: () => clock,
     })
 
   beforeEach(async () => {
     db = await openDatabase({ url: 'file::memory:' })
     allowed = true
     calls = []
+    clock = NOW
     await db.batch(
       [
         `INSERT INTO projects (id, name, slug) VALUES (500, 'Shell 00', 'c-piscine-shell-00')`,
@@ -232,5 +234,20 @@ describe('historial de piscinas', () => {
     // Al día siguiente solo repasa lo reciente: nada que ya esté copiado.
     await build().step()
     expect(calls).toEqual([])
+  })
+
+  it('la que está en curso no se vuelve a pedir cada minuto: se repasa al día siguiente', async () => {
+    await build().step()
+    calls = []
+    // Un rato después el final de la de octubre (ahora − 6 h) se ha movido unos minutos.
+    for (let minute = 1; minute <= 5; minute += 1) {
+      clock = NOW + minute * 60_000
+      await build().step()
+    }
+    expect(calls).toEqual([])
+
+    clock = NOW + DAY + 60_000
+    await build().step()
+    expect(calls).toContain('locations 2026-11-06')
   })
 })

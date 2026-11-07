@@ -51,6 +51,16 @@ const POOL_SPAN = 33 * DAY
 const CORRECTIONS_SPAN = 45 * DAY
 /** Lo de las últimas horas aún puede estar abierto: se deja para mañana. */
 const SETTLE = 6 * 60 * 60_000
+/**
+ * La que está en curso se completa una vez al día: si no, su final (`ahora − 6 h`)
+ * se mueve cada minuto, siempre queda un tramo por pedir y las demás no llegan
+ * nunca (pasó el 2026-11-07: 7 300 peticiones en un día, todas a la de octubre).
+ */
+const REFRESH = DAY
+
+/** `true` si toca pedir de `from` a `end`: lo cerrado, entero; lo que sigue abierto, una vez al día. */
+const due = (from: number, end: number, closes: number): boolean =>
+  from < end && (end >= closes || end - from >= REFRESH)
 const STEP_BUDGET_MS = 16_000
 const MARGIN = 60
 /** Quien empezó a menos de esto del primer día es de esa piscina. */
@@ -399,7 +409,7 @@ export function createPiscineHistory(options: PiscineHistoryOptions) {
       const sessionsEnd = Math.min(start + POOL_SPAN, t - SETTLE)
       const sessionsFrom = pool.sessionsTo === null ? start - DAY : Date.parse(pool.sessionsTo)
 
-      if (sessionsFrom < sessionsEnd) {
+      if (due(sessionsFrom, sessionsEnd, start + POOL_SPAN)) {
         const page = await client.getLocationsHistoryPage({
           campusId,
           from: isoAt(sessionsFrom),
@@ -421,7 +431,7 @@ export function createPiscineHistory(options: PiscineHistoryOptions) {
       const correctionsEnd = Math.min(start + CORRECTIONS_SPAN, t - SETTLE)
       const correctionsFrom = pool.correctionsTo === null ? start : Date.parse(pool.correctionsTo)
 
-      if (correctionsFrom < correctionsEnd) {
+      if (due(correctionsFrom, correctionsEnd, start + CORRECTIONS_SPAN)) {
         const page = await client.getCampusScaleTeamsPage({
           campusId,
           cursusId: 9,
