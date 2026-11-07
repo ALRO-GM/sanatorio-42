@@ -292,7 +292,12 @@ export function createDropoutService(options: {
       .sort((a, b) => b[0].localeCompare(a[0]))
       .slice(0, MAX_POOLS)
       .map(([start, people]) => ({ start, people }))
-    const chosen = members.find((member) => wanted !== null && dayOfStart(member.begin) === wanted)
+    // Sin elegir, la más reciente. No la de más gente: con el historial de tres
+    // años esa era una de 2024, fuera de las 10 y sin nada copiado (2026-11-07).
+    const day = wanted ?? pools[0]?.start ?? null
+    const chosen = members
+      .filter((member) => day !== null && dayOfStart(member.begin) === day)
+      .sort((a, b) => a.begin - b.begin)[0]
     const anchor =
       chosen?.begin ??
       poolAnchorOf(

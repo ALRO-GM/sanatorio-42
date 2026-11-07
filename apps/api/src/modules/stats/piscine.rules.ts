@@ -6,7 +6,12 @@
  * llama solo pasa los que cuentan.
  */
 
-import type { PiscineMilestone, PiscineTrace, ProgressLine } from '@sanatorio/contracts'
+import type {
+  PiscineMilestone,
+  PiscinePoolLine,
+  PiscineTrace,
+  ProgressLine,
+} from '@sanatorio/contracts'
 
 const DAY_MS = 86_400_000
 
@@ -143,4 +148,54 @@ export function leaderOf<T extends Swimmer>(swimmers: readonly T[], now: number)
   )
 
   return scored[0]?.swimmer ?? null
+}
+
+/** Un día con esta gente empezando o más es una piscina, no alguien que repite. */
+const MIN_POOL = 20
+/** Las piscinas que se comparan: las últimas. */
+const MAX_POOLS = 10
+
+/**
+ * Las últimas piscinas de un campus para compararlas en el Avance (pedido por
+ * Alberto el 2026-11-07): los días en que empezaron `MIN_POOL` personas o más,
+ * de la más nueva a la más vieja, cada una con la media de lo aprobado cada
+ * día de piscina (`minPeople` como en `meanLine`). Sin nada aprobado aún
+ * (el historial no la ha copiado), `copied: false`.
+ */
+export function poolLinesOf(
+  swimmers: readonly Swimmer[],
+  now: number,
+  names: ReadonlyMap<number, string>,
+  minPeople: number,
+): PiscinePoolLine[] {
+  const firstOf = new Map<number, number>()
+  const count = new Map<number, number>()
+
+  for (const swimmer of swimmers) {
+    if (swimmer.start > now) continue
+    const day = Math.floor(swimmer.start / DAY_MS)
+
+    count.set(day, (count.get(day) ?? 0) + 1)
+    firstOf.set(day, Math.min(firstOf.get(day) ?? Infinity, swimmer.start))
+  }
+
+  return [...count]
+    .filter(([, people]) => people >= MIN_POOL)
+    .sort((a, b) => b[0] - a[0])
+    .slice(0, MAX_POOLS)
+    .map(([day]) => {
+      const first = firstOf.get(day) ?? day * DAY_MS
+      const members = swimmers.filter((swimmer) => samePool(swimmer.start, first))
+
+      return {
+        start: new Date(first).toISOString().slice(0, 10),
+        people: members.length,
+        line: meanLine(
+          members.map((swimmer) => swimOf(swimmer, now, names).line),
+          POOL_AXIS.length,
+          minPeople,
+        ),
+        copied: members.some((swimmer) => swimmer.done.size > 0),
+      }
+    })
 }

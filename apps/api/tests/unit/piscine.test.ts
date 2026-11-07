@@ -9,7 +9,13 @@ import { closeDatabase, openDatabase } from '../../src/core/db/database.js'
 import type { Db } from '../../src/core/db/database.js'
 import { actor } from '../helpers/community.js'
 import { PISCINE, PISCINE_PROGRESS } from '../../src/modules/replica/index.js'
-import { meanLine, samePool, swimOf, POOL_DAYS } from '../../src/modules/stats/piscine.rules.js'
+import {
+  meanLine,
+  poolLinesOf,
+  samePool,
+  swimOf,
+  POOL_DAYS,
+} from '../../src/modules/stats/piscine.rules.js'
 import { createPiscineProgressService } from '../../src/modules/stats/piscine.service.js'
 import { createPiscineRepository } from '../../src/modules/stats/stats.repository.js'
 
@@ -96,6 +102,45 @@ describe('la línea de un piscinero', () => {
     expect(samePool(START - 2 * DAY, START)).toBe(true)
     expect(samePool(START - 40 * DAY, START)).toBe(false)
     expect(samePool(START + 40 * DAY, START)).toBe(false)
+  })
+})
+
+describe('las últimas piscinas, para compararlas', () => {
+  const swimmers = (start: number, count: number, done: Map<number, number>) =>
+    Array.from({ length: count }, (_, n) => ({
+      login: `p${String(start)}-${String(n)}`,
+      start,
+      done,
+    }))
+
+  it('los días con 20 o más empezando, de la más nueva a la más vieja, con su media', () => {
+    const old = START - 120 * DAY
+    const lines = poolLinesOf(
+      [
+        ...swimmers(START, 20, new Map()),
+        // La vieja: todos aprobaron Shell 00 el día 1.
+        ...swimmers(old, 25, new Map([[1, old + DAY + 3_600_000]])),
+        // Quien repite un día suelto no es una piscina.
+        ...swimmers(START - 60 * DAY, 3, new Map()),
+        // La que aún no ha empezado, tampoco.
+        ...swimmers(START + 30 * DAY, 30, new Map()),
+      ],
+      START + 2 * DAY,
+      NAMES,
+      10,
+    )
+
+    expect(lines.map((pool) => [pool.start, pool.people, pool.copied])).toEqual([
+      ['2026-10-05', 20, false],
+      ['2026-06-07', 25, true],
+    ])
+    expect(lines[1]?.line.slice(0, 3)).toEqual([0, 1, 1])
+    // La que está en curso: lo que no ha vivido, sin dato.
+    expect(lines[0]?.line.slice(0, 4)).toEqual([0, 0, 0, null])
+  })
+
+  it('sin nadie, ninguna', () => {
+    expect(poolLinesOf([], START, NAMES, 10)).toEqual([])
   })
 })
 
@@ -221,6 +266,7 @@ describe('el avance de la piscina', () => {
     expect(data.cohort.since).toBe(new Date(START).toISOString())
     // Nada de otras piscinas: ni en la respuesta ni para compararse.
     expect(data).not.toHaveProperty('past')
+    expect(data).not.toHaveProperty('pools')
     expect(data.others.map((each) => each.login)).toEqual(['mate1'])
   })
 
@@ -282,6 +328,50 @@ describe('el avance de la piscina', () => {
       ['lento', 1],
       ['rapido', 2],
     ])
+  })
+
+  it('la vista sin límites compara las últimas piscinas, también las del historial', async () => {
+    const ids = await seedProjects()
+    const old = START - 91 * DAY
+    const shell = ids.get('c-piscine-shell-00') ?? 0
+
+    // La piscina de hace tres meses solo está en el historial: veinte, y la mitad
+    // aprobó Shell 00 el día 2.
+    await db.batch(
+      Array.from({ length: 20 }, (_, n) => [
+        {
+          sql: `INSERT INTO piscine_members (campus_id, user_id, login, image, begin_at)
+                VALUES (22, ?, ?, NULL, ?)`,
+          args: [500 + n, `old${String(n)}`, new Date(old).toISOString()],
+        },
+        ...(n < 10
+          ? [
+              {
+                sql: `INSERT INTO piscine_activity (campus_id, user_id, login, kind, ref, at)
+                      VALUES (22, ?, ?, 'passed', ?, ?)`,
+                args: [
+                  500 + n,
+                  `old${String(n)}`,
+                  shell,
+                  new Date(old + 2 * DAY + 3_600_000).toISOString(),
+                ],
+              },
+            ]
+          : []),
+      ]).flat(),
+      'write',
+    )
+    const service = createPiscineProgressService({
+      piscine: createPiscineRepository(db),
+      now: () => START + 3 * DAY,
+    })
+    const data = await service.progress(actor('albrodri', { pool: true }), 22, [], () => true, {
+      everyone: true,
+    })
+
+    expect(data.pools).toHaveLength(1)
+    expect(data.pools?.[0]).toMatchObject({ start: '2026-07-06', people: 20, copied: true })
+    expect(data.pools?.[0]?.line.slice(0, 4)).toEqual([0, 0, 0.5, 0.5])
   })
 
   it('en la vista de piscinero de quien administra lo ve como el más avanzado, con la piscina entera', async () => {

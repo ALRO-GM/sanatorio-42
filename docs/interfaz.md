@@ -132,6 +132,7 @@ de datos.
 | Tablón | De un piscinero: el grafo de la piscina (azul claro shell, azul oscuro C y, aparte, rushes, BSQ y exámenes) en vez del common core | S | Pedido por Alberto (2026-10-26): es su grafo |
 | Avance | «Los más rápidos» (dentro de comparar): quien terminó antes, de tu campus y el primero de cada campus, para añadirlo con un clic | N | Es la misma comparación, para quien no tiene a nadie en mente |
 | Avance | Quién va más rápido (bloque bajo la gráfica, antes en Ayuda → Estadísticas): por círculo o %, con plan, kickoff y rangos; tu fila fija | N | Ranking, pero del curso: es lo que se viene a mirar al Avance |
+| Avance | Otras piscinas (2026-11-07): en la vista sin límites de la piscina, un bloque en el panel de opciones con las últimas 10 piscinas del campus y la media de todas (`docs/piscineros.md`) | N | Un bloque, no una sección: es la misma gráfica con más líneas, y solo para el dueño |
 | Clústeres | Mapa, opciones de vista, resaltar | N | La sección en sí |
 | Clústeres | Tamaño del plano: «Ajustar» (de fábrica) o «100 %», solo si el clúster no cabe a lo ancho; ajustado, con caras, iniciales o puntos según el sitio (`features/map/fit.ts`, `docs/asientos.md`, «Clústeres grandes») | N | Pedido por Alberto (2026-10-26) al ver París: los clústeres gigantes había que deslizarlos de lado. Va en la fila de los resaltados, a la derecha; también al elegir puestos de un sprint |
 | Clústeres | «N de M personas tienen Sanatorio abierto» | D | Cifra |

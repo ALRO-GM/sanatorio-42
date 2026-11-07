@@ -247,6 +247,20 @@ export type PiscineAverage = {
 }
 
 /**
+ * Una de las últimas piscinas del campus, para compararlas en el Avance
+ * (`PiscineProgress.pools`): la media de lo aprobado cada día de piscina.
+ */
+export type PiscinePoolLine = {
+  /** Su primer día (`YYYY-MM-DD`). */
+  start: string
+  people: number
+  /** Proyectos aprobados de media; `null` los días que aún no ha vivido. */
+  line: ProgressLine
+  /** `false` si aún no hay nada aprobado copiado de ella: su línea aún no dice nada. */
+  copied: boolean
+}
+
+/**
  * `GET /stats/progress/piscine?with=a,b`: el Avance de un piscinero
  * (`docs/piscineros.md`). El eje es el día de piscina; lo que cuenta son los
  * proyectos Shell 00 … C 13 aprobados. Los rushes, BSQ y los exámenes no suman.
@@ -278,4 +292,10 @@ export type PiscineProgress = {
    * piscinero que va más avanzado, que es este. Sin él, no viene.
    */
   standIn?: { login: string; image: string | null }
+  /**
+   * Solo en la vista sin límites del dueño (pedido por Alberto el 2026-11-07):
+   * las últimas 10 piscinas del campus, de la más nueva a la más vieja, para
+   * compararlas entre ellas y con la media de todas.
+   */
+  pools?: PiscinePoolLine[]
 }

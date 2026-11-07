@@ -72,6 +72,8 @@ describe('un piscinero ve la piscina (docs/piscineros.md)', () => {
     expect(screen.queryByText(text('stats.progress.paces'))).toBeNull()
     // Sin la vista sin límites, ni la lista de los más avanzados ni los percentiles.
     expect(screen.queryByRole('heading', { name: text('piscine.top.listTitle') })).toBeNull()
+    // Ni otras piscinas: un piscinero se compara solo con la suya.
+    expect(screen.queryByRole('group', { name: text('piscine.pools.title') })).toBeNull()
   }, 20_000)
 
   it('quien administra, en la vista de piscinero, lo ve como el más avanzado', async () => {
@@ -111,5 +113,31 @@ describe('un piscinero ve la piscina (docs/piscineros.md)', () => {
     expect(document.querySelectorAll('.piscine-chart path.progress-line').length).toBeGreaterThan(
       before,
     )
+  }, 20_000)
+
+  it('sin límites: las últimas piscinas, cada una y la media de todas', async () => {
+    const user = userEvent.setup()
+
+    await openApp('#/avance', { preview: 'full' })
+
+    const pools = await screen.findByRole('group', { name: text('piscine.pools.title') }, WAIT)
+    const legend = must(document.querySelector('.piscine-chart-legend'), 'la leyenda')
+
+    // De entrada, la media de todas: sin la que aún se está copiando.
+    expect(within(pools).getAllByRole('checkbox')).toHaveLength(11)
+    expect(legend.textContent).toContain(text('piscine.pools.overall'))
+    expect(within(pools).getByText(new RegExp(text('piscine.pools.copying')))).toBeTruthy()
+
+    // Al encender dos piscinas, dos líneas más.
+    const before = document.querySelectorAll('.piscine-chart path.progress-line').length
+    const [first, second] = within(pools).getAllByRole('checkbox', { name: /^Piscina del / })
+
+    await user.click(must(first, 'la primera piscina'))
+    await user.click(must(second, 'la segunda piscina'))
+    expect(document.querySelectorAll('.piscine-chart path.progress-line')).toHaveLength(before + 2)
+
+    // Y sin la media, una menos.
+    await user.click(within(pools).getByRole('checkbox', { name: /^Media de todas/ }))
+    expect(document.querySelectorAll('.piscine-chart path.progress-line')).toHaveLength(before + 1)
   }, 20_000)
 })

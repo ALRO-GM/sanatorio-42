@@ -42,7 +42,7 @@ Es un proyecto personal de [Alberto](https://github.com/ALRO-GM) (`albrodri` en
 | **Qué es**      | Aplicación web completa: API, web, base de datos y despliegue                                                                                        |
 | **Tecnología**  | TypeScript de punta a punta · Node 22 y Fastify 5 · React 19 y Vite · SQLite (libSQL) · Docker y Caddy                                               |
 | **Tamaño**      | 35 módulos de API con 258 rutas, 85 migraciones, 6 paquetes compartidos; 4 categorías con 18 secciones, 3 modos de interfaz, 7 estilos y 5 idiomas    |
-| **Calidad**     | 7 153 tests en 259 ficheros (6 212 de la API y 941 de la web, con 72 ficheros de pantallas; medido el 2026-11-07), cobertura mínima que solo sube, sin código muerto ni duplicado, y un despliegue que no sale sin la CI en verde |
+| **Calidad**     | 7 158 tests en 259 ficheros (6 216 de la API y 942 de la web, con 72 ficheros de pantallas; medido el 2026-11-07), cobertura mínima que solo sube, sin código muerto ni duplicado, y un despliegue que no sale sin la CI en verde |
 | **Seguridad**   | Revisión completa documentada: permisos con doble cerradura, segundo factor en el panel, topes de intentos y un test que recorre todas las rutas con entradas imposibles |
 | **Datos**       | Réplica propia de 5 campus de 42 (Madrid, Málaga, Urduliz, Barcelona y París) copiada con 1 200 peticiones por hora                                   |
 | **Coste**       | 0 € al mes. La web y la máquina se cortan solas antes de pasar de la capa gratuita                                                                   |
@@ -113,6 +113,8 @@ con el commit donde volver a verlo, está en
 
 | Fecha      | Dónde                  | Qué cambió                                                                                                   |
 | ---------- | ---------------------- | ------------------------------------------------------------------------------------------------------------ |
+| 2026-11-07 | Avance | En la vista sin límites de la piscina, las últimas 10 piscinas del campus para compararlas, cada una y la media de todas ([docs/piscineros.md](docs/piscineros.md)) |
+| 2026-11-07 | Abandono | Arreglo: la pestaña salía vacía; sin elegir piscina, ahora sale la más reciente y no la de más gente de los tres años de historial ([docs/abandono.md](docs/abandono.md)) |
 | 2026-11-07 | Abandono | Arreglo: la copia de las piscinas viejas se quedaba repasando cada minuto la que está en curso y nunca llegaba a las demás; ahora la repasa una vez al día ([docs/abandono.md](docs/abandono.md)) |
 | 2026-11-06 | Abandono | Las 10 últimas piscinas de Madrid: se copian de fondo (quién la hizo, sus horas en los puestos, correcciones, exámenes y aprobados) y se pueden elegir una o varias para ver sus cifras y compararlas, cada una y todas juntas ([docs/abandono.md](docs/abandono.md)) |
 | 2026-11-06 | Abandono | El cálculo se ajusta en vivo (lo que pesa cada falta, cuándo se confirma, umbrales y un peso por factor) y arriba van los totales; quien está en el examen o corrige ese día cuenta como venido, y en el examen sale sin riesgo ([docs/abandono.md](docs/abandono.md)) |

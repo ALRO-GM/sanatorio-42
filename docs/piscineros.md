@@ -222,6 +222,15 @@ restricción, con exámenes y todo lo de un estudiante, y que solo él pueda.
     línea dorada a trazos con la media de esa gente.
   - **Piscineros entre dos percentiles** (deslizador doble, P75–P90 de
     entrada, apagada): la línea fina de cada uno.
+  - **Otras piscinas** (pedido por Alberto el 2026-11-07; `pools`,
+    `PiscinePools.tsx`, regla `poolLinesOf`): las últimas 10 piscinas del
+    campus (los días con 20 o más empezando), cada una con la media de lo
+    aprobado cada día de piscina, para encender las que quieras, y la **media
+    de todas** (por persona, encendida de entrada). Las pasadas salen del
+    historial de piscinas (`piscine_members` y los `passed` de
+    `piscine_activity`, `docs/abandono.md`); la que aún no tiene nada aprobado
+    copiado dice «aún copiando de 42» y no entra en la media. Es la única
+    excepción a «nada de otras piscinas»: un piscinero no la ve nunca.
 - API de mentira: `localStorage.mock_pool_preview = 'full'` (con cuarenta
   piscineros inventados en el Avance).
 

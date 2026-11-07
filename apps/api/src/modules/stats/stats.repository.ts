@@ -465,6 +465,47 @@ export function createPiscineRepository(db: Db) {
       })
     },
 
+    /**
+     * Lo que ha copiado el historial de piscinas (`replica/piscine-history.ts`):
+     * quién hizo cada una de las pasadas y cuándo aprobó esos proyectos.
+     */
+    async history(
+      campusId: number,
+      ids: readonly number[],
+    ): Promise<{
+      members: { login: string; begin: number }[]
+      passed: { login: string; projectId: number; at: number }[]
+    }> {
+      const [members, passed] = await Promise.all([
+        db.execute({
+          sql: 'SELECT login, begin_at FROM piscine_members WHERE campus_id = ?',
+          args: [campusId],
+        }),
+        ids.length === 0
+          ? Promise.resolve({ rows: [] })
+          : db.execute({
+              sql: `SELECT login, ref, at FROM piscine_activity
+                    WHERE campus_id = ? AND kind = 'passed' AND ${inList('ref')}`,
+              args: [campusId, listArg(ids)],
+            }),
+      ])
+
+      return {
+        members: members.rows.flatMap((row) => {
+          const begin = msOf(row.begin_at)
+
+          return begin === null ? [] : [{ login: toText(row.login).toLowerCase(), begin }]
+        }),
+        passed: passed.rows.flatMap((row) => {
+          const at = msOf(row.at)
+
+          return at === null
+            ? []
+            : [{ login: toText(row.login).toLowerCase(), projectId: toNumber(row.ref), at }]
+        }),
+      }
+    },
+
     /** El id de cada uno de esos slugs que esté en la réplica. */
     async idsOf(slugs: readonly string[]): Promise<Map<string, number>> {
       return createProgressRepository(db).idsOf(slugs)

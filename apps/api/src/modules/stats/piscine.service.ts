@@ -7,7 +7,9 @@
  * rushes, BSQ y exámenes no suman. Las reglas, en `piscine.rules.ts`.
  *
  * Nada de otras piscinas (pedido por Alberto el 2026-10-26): quien está en la
- * piscina se compara solo con la suya, no con las de antes.
+ * piscina se compara solo con la suya, no con las de antes. La excepción es la
+ * vista sin límites del dueño (2026-11-07): las últimas 10 piscinas del campus,
+ * con lo que ha copiado el historial de piscinas, para compararlas (`pools`).
  *
  * Una media con menos de `MIN_PEOPLE` personas no dice nada: en su lugar va la
  * línea de cada cual. Todo es de tu campus: un piscinero solo ve el suyo.
@@ -18,7 +20,15 @@ import type { PiscineAverage, PiscineProgress } from '@sanatorio/contracts'
 import type { Actor } from '../../core/actor.js'
 import { createTtlCache } from '../../core/ttl-cache.js'
 import { PISCINE_PROGRESS } from '../replica/index.js'
-import { POOL_AXIS, leaderOf, meanLine, poolAnchorOf, samePool, swimOf } from './piscine.rules.js'
+import {
+  POOL_AXIS,
+  leaderOf,
+  meanLine,
+  poolAnchorOf,
+  poolLinesOf,
+  samePool,
+  swimOf,
+} from './piscine.rules.js'
 import type { Swimmer } from './piscine.rules.js'
 import type { PiscineRepository } from './stats.repository.js'
 import { isoAt } from '../../core/time.js'
@@ -32,6 +42,8 @@ const CACHE_MS = 10 * 60_000
 /** Lo que se sabe de los piscineros en curso de un campus para el avance. */
 type Pool = {
   people: Map<string, Swimmer & { image: string | null }>
+  /** Los de ahora y los de las piscinas pasadas, para comparar piscinas. */
+  everybody: Swimmer[]
   names: Map<number, string>
   campus: string | null
 }
@@ -53,10 +65,11 @@ export function createPiscineProgressService(options: {
         return id === undefined ? [] : [[id, project.short] as const]
       }),
     )
-    const [rows, members, campus] = await Promise.all([
+    const [rows, members, campus, history] = await Promise.all([
       options.piscine.rows(campusId, [...names.keys()]),
       options.piscine.members(campusId),
       options.piscine.campusName(campusId),
+      options.piscine.history(campusId, [...names.keys()]),
     ])
     const people = new Map<string, Swimmer & { done: Map<number, number>; image: string | null }>()
 
@@ -77,7 +90,29 @@ export function createPiscineProgressService(options: {
       if (row.doneAt !== null) people.get(row.login)?.done.set(row.projectId, row.doneAt)
     }
 
-    return { people, names, campus }
+    // Las piscinas pasadas: los de ahora, más quien solo está en el historial.
+    // Con sus propias listas de aprobados: lo del historial no toca la línea de nadie de ahora.
+    const past = new Map<string, Swimmer & { done: Map<number, number> }>(
+      [...people].map(([login, person]) => [
+        login,
+        { login, start: person.start, done: new Map(person.done) },
+      ]),
+    )
+
+    for (const member of history.members) {
+      if (!past.has(member.login)) {
+        past.set(member.login, { login: member.login, start: member.begin, done: new Map() })
+      }
+    }
+    for (const row of history.passed) {
+      const done = past.get(row.login)?.done
+
+      if (done !== undefined && row.at < (done.get(row.projectId) ?? Infinity)) {
+        done.set(row.projectId, row.at)
+      }
+    }
+
+    return { people, everybody: [...past.values()], names, campus }
   }
 
   return {
@@ -175,6 +210,8 @@ export function createPiscineProgressService(options: {
               everyone: (standIn === null ? cohort : [standIn, ...cohort])
                 .filter((person) => sees(person.login))
                 .map((person) => ({ login: person.login, image: person.image, ...trace(person) })),
+              // Medias de cada piscina: sin nombres, así que entra todo el mundo.
+              pools: poolLinesOf(pool.everybody, t, pool.names, MIN_PEOPLE),
             }
           : {}),
       }

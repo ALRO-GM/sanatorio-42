@@ -26,9 +26,10 @@ lo copia de fondo el historial de piscinas (abajo).
 | Exámenes | `exam_attempts` y las filas de los exámenes de la piscina, y `piscine_activity` (`exam`) |
 | Proyectos aprobados | Los 16 que cuentan para el Avance de la piscina (Shell 00 … C 13), de la réplica y de `piscine_activity` (`passed`) |
 
-La piscina, sin elegirla, es la del día en que empezó más gente
-(`poolAnchorOf`). Se puede elegir otra entre las 10 últimas: los días en que
-empezaron 20 personas o más.
+La piscina, sin elegirla, es la más reciente de las 10 últimas: los días en
+que empezaron 20 personas o más. Se puede elegir otra. Hasta el 2026-11-07 era
+la del día en que empezó más gente; con los tres años del historial esa era
+una de 2024, sin nada copiado, y la pestaña salía vacía.
 
 ## El historial de piscinas
 

@@ -254,7 +254,7 @@ Detalle: [asientos.md](asientos.md).
 | «Ver a fondo»: quién cuenta, campus, todos juntos (abierto de fábrica en datos) | N | Estudiantes | `ProgressPage.tsx` |
 | Comparar con hasta 5 personas y «los más rápidos» | N | Todos `[avance.compare]` | `ProgressCompare.tsx` |
 | Quién va más rápido: por círculo o %, plan, kickoff, rangos; tu fila fija. Las kickoffs son las reales de cada campus (los días con muchas entradas); quien entró a destiempo va con la anterior a su entrada | N | Estudiantes | `ProgressRanking.tsx` |
-| Avance de la piscina: aprobado por día frente a la media de su piscina y los más avanzados | N | Piscineros | `PiscineProgressPage.tsx`, `PiscineTop.tsx` |
+| Avance de la piscina: aprobado por día frente a la media de su piscina y los más avanzados; en la vista sin límites, las últimas 10 piscinas y la media de todas | N | Piscineros | `PiscineProgressPage.tsx`, `PiscineTop.tsx`, `PiscinePools.tsx` |
 | Demostración | N | Todos | `ProgressTour.tsx` |
 
 Detalle: [blackhole.md](blackhole.md).

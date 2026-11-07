@@ -13,6 +13,7 @@ import { PersonInput } from '../../shared/ui/PersonInput'
 import { PoolOnly } from '../../shared/ui/PoolOnly'
 import { PiscineProgressChart } from './PiscineProgressChart'
 import type { Line, PiscineShown } from './PiscineProgressChart'
+import { usePoolLines } from './PiscinePools'
 import { PiscineTop, useTopLines } from './PiscineTop'
 import { MAX_OTHERS, PERSON_COLORS } from './progressSeries'
 
@@ -20,7 +21,8 @@ import { MAX_OTHERS, PERSON_COLORS } from './progressSeries'
  * El Avance de un piscinero (`docs/piscineros.md`), en vez del del common
  * core: cuántos de los dieciséis proyectos que cuentan (Shell 00 … C 13) lleva
  * aprobados cada día de piscina, con la media de su piscina (nada de otras
- * piscinas) y hasta cinco piscineros con quien compararse. Los
+ * piscinas, salvo en la vista sin límites del dueño: `PiscinePools.tsx`) y
+ * hasta cinco piscineros con quien compararse. Los
  * rushes, BSQ y exámenes no suman. Sin pace, plan, black hole ni horas: en la
  * piscina no hay nada de eso.
  *
@@ -58,7 +60,9 @@ export function PiscineProgressPage({ me }: { me: string }) {
   // La vista sin límites del dueño: los más avanzados, la media de los mejores
   // y quien cae entre dos percentiles (`docs/piscineros.md`).
   const top = useTopLines(data)
-  const extra: Line[] = top?.lines ?? []
+  // Y las últimas piscinas del campus, cada una y todas juntas (2026-11-07).
+  const pools = usePoolLines(data)
+  const extra: Line[] = [...(pools?.lines ?? []), ...(top?.lines ?? [])]
   const toggle = (key: keyof PiscineShown) => (
     <label className="progress-toggle">
       <input
@@ -104,6 +108,7 @@ export function PiscineProgressPage({ me }: { me: string }) {
           {toggle('cohort')}
         </div>
         {top?.options}
+        {pools?.options}
         <PoolOnly k="avance.compare">
           <div className="progress-option">
             <form

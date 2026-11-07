@@ -454,6 +454,33 @@ describe('el informe de una piscina', () => {
     expect((await service.compare(22, ['2020-01-01'], () => true)).pools).toEqual([])
   })
 
+  it('sin elegir, sale la piscina más reciente, aunque una vieja tuviera más gente', async () => {
+    const iso = (ms: number) => new Date(ms).toISOString()
+    const pool = (from: number, count: number, begin: number) =>
+      Array.from({ length: count }, (_, n) => ({
+        sql: `INSERT INTO piscine_members (campus_id, user_id, login, image, begin_at)
+              VALUES (22, ?, ?, NULL, ?)`,
+        args: [from + n, `u${String(from + n)}`, iso(begin)],
+      }))
+
+    await db.batch(
+      [...pool(1, 20, START + 8 * 3_600_000), ...pool(100, 40, START - 365 * DAY)],
+      'write',
+    )
+    const service = createDropoutService({
+      db,
+      piscine: createPiscineRepository(db),
+      now: () => START + 10 * DAY,
+    })
+    const report = await service.report(22, null, () => true)
+
+    expect(report.start).toBe('2026-10-05')
+    expect(report.people).toHaveLength(20)
+    expect(
+      (await service.report(22, report.pools[1]?.start ?? '', () => true)).people,
+    ).toHaveLength(40)
+  })
+
   it('sin piscineros, vacío y sin fallar', async () => {
     const service = createDropoutService({ db, piscine: createPiscineRepository(db) })
     const report = await service.report(99, null, () => true)

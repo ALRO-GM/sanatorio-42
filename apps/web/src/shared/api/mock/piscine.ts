@@ -135,6 +135,36 @@ const everyone = (): NonNullable<PiscineProgress['everyone']> =>
     }
   })
 
+/**
+ * Las últimas diez piscinas inventadas, para compararlas en la vista sin
+ * límites: la de ahora y nueve pasadas, cada una a su ritmo. La más vieja aún
+ * no está copiada.
+ */
+const POOLS: [back: number, people: number, every: number][] = [
+  [0, 73, 3],
+  [88, 129, 2.6],
+  [116, 201, 2.9],
+  [207, 96, 2.4],
+  [284, 181, 3.2],
+  [369, 144, 2.8],
+  [452, 204, 3.4],
+  [487, 216, 2.7],
+  [515, 195, 3.1],
+  [628, 303, 3],
+]
+
+const pools = (): NonNullable<PiscineProgress['pools']> =>
+  POOLS.map(([back, people, every], index) => {
+    const copied = index < POOLS.length - 1
+
+    return {
+      start: new Date(Date.now() - (ELAPSED + back) * DAY).toISOString().slice(0, 10),
+      people,
+      line: copied ? swim(every, 0, back === 0 ? ELAPSED : DAYS.length).line : DAYS.map(() => 0),
+      copied,
+    }
+  })
+
 /** El Avance de un piscinero: su línea, la de su piscina y con quien se compara. */
 export function piscineProgress(others: readonly string[]): PiscineProgress {
   // Quien administra, en la vista de piscinero, lo ve como el más avanzado
@@ -157,7 +187,7 @@ export function piscineProgress(others: readonly string[]): PiscineProgress {
     }),
     minPeople: 10,
     campus: 'Madrid',
-    ...(poolUnrestricted() ? { everyone: everyone() } : {}),
+    ...(poolUnrestricted() ? { everyone: everyone(), pools: pools() } : {}),
     ...(standIn === null ? {} : { standIn: { login: standIn, image: portrait(standIn) } }),
   }
 }
